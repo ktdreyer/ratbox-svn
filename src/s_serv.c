@@ -143,7 +143,7 @@ const char* my_name_for_link(const char* name, struct ConfItem* aconf)
  *
  *      returns: (see #defines)
  */
-int hunt_server(struct Client *client_p, struct Client *server_p, char *command,
+int hunt_server(struct Client *client_p, struct Client *source_p, char *command,
                 int server, int parc, char *parv[])
 {
   struct Client *aclient_p;
@@ -162,10 +162,10 @@ int hunt_server(struct Client *client_p, struct Client *server_p, char *command,
    * non-matching lookups.
    */
   if ((aclient_p = find_client(parv[server], NULL)))
-    if (aclient_p->from == server_p->from && !MyConnect(aclient_p))
+    if (aclient_p->from == source_p->from && !MyConnect(aclient_p))
       aclient_p = NULL;
   if (!aclient_p && (aclient_p = find_server(parv[server])))
-    if (aclient_p->from == server_p->from && !MyConnect(aclient_p))
+    if (aclient_p->from == source_p->from && !MyConnect(aclient_p))
       aclient_p = NULL;
 
   collapse(parv[server]);
@@ -181,7 +181,7 @@ int hunt_server(struct Client *client_p, struct Client *server_p, char *command,
         {
           if (!(aclient_p = find_server(parv[server])))
             {
-              sendto_one(server_p, form_str(ERR_NOSUCHSERVER), me.name,
+              sendto_one(source_p, form_str(ERR_NOSUCHSERVER), me.name,
                          parv[0], parv[server]);
               return(HUNTED_NOSUCH);
             }
@@ -192,7 +192,7 @@ int hunt_server(struct Client *client_p, struct Client *server_p, char *command,
                (aclient_p = next_client(aclient_p, parv[server]));
                aclient_p = aclient_p->next)
             {
-              if (aclient_p->from == server_p->from && !MyConnect(aclient_p))
+              if (aclient_p->from == source_p->from && !MyConnect(aclient_p))
                 continue;
               /*
                * Fix to prevent looping in case the parameter for
@@ -213,13 +213,13 @@ int hunt_server(struct Client *client_p, struct Client *server_p, char *command,
         parv[server] = aclient_p->name;
 
       /* Deal with lazylinks */
-      client_burst_if_needed(aclient_p, server_p);
+      client_burst_if_needed(aclient_p, source_p);
       sendto_one(aclient_p, command, parv[0],
                  parv[1], parv[2], parv[3], parv[4],
                  parv[5], parv[6], parv[7], parv[8]);
       return(HUNTED_PASS);
     } 
-  sendto_one(server_p, form_str(ERR_NOSUCHSERVER), me.name,
+  sendto_one(source_p, form_str(ERR_NOSUCHSERVER), me.name,
              parv[0], parv[server]);
   return(HUNTED_NOSUCH);
 }
@@ -1173,24 +1173,24 @@ add_lazylinkchannel(struct Client *client_p, struct Channel *chptr)
  * inputs       - pointer to server being introduced to this hub
  *              - pointer to client being introduced
  * output       - NONE
- * side effects - The client pointed to by server_p is now known
+ * side effects - The client pointed to by source_p is now known
  *                to be on lazyleaf server given by client_p.
  *                mark that in the bit map and add to the list
  *                of clients to examine after this newly introduced
  *                server is squit off.
  */
 void
-add_lazylinkclient(struct Client *client_p, struct Client *server_p)
+add_lazylinkclient(struct Client *client_p, struct Client *source_p)
 {
   dlink_node *m;
 
   assert(client_p->localClient != NULL);
 
-  server_p->lazyLinkClientExists |= client_p->localClient->serverMask;
+  source_p->lazyLinkClientExists |= client_p->localClient->serverMask;
 
   m = make_dlink_node();
 
-  dlinkAdd(server_p, m, &lazylink_nicks);
+  dlinkAdd(source_p, m, &lazylink_nicks);
 }
 
 /*
@@ -1320,7 +1320,7 @@ void burst_ll_members(struct Client *client_p, dlink_list *list)
  * output       - none
  * side effects -
  */
-void set_autoconn(struct Client *server_p,char *parv0,char *name,int newval)
+void set_autoconn(struct Client *source_p,char *parv0,char *name,int newval)
 {
   struct ConfItem *aconf;
 
@@ -1334,19 +1334,19 @@ void set_autoconn(struct Client *server_p,char *parv0,char *name,int newval)
       sendto_realops_flags(FLAGS_ALL,
 			   "%s has changed AUTOCONN for %s to %i",
 			   parv0, name, newval);
-      sendto_one(server_p,
+      sendto_one(source_p,
                  ":%s NOTICE %s :AUTOCONN for %s is now set to %i",
                  me.name, parv0, name, newval);
     }
   else if (name)
     {
-      sendto_one(server_p,
+      sendto_one(source_p,
                  ":%s NOTICE %s :Can't find %s",
                  me.name, parv0, name);
     }
   else
     {
-      sendto_one(server_p,
+      sendto_one(source_p,
                  ":%s NOTICE %s :Please specify a server name!",
                  me.name, parv0);
     }

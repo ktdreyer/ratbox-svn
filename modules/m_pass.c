@@ -62,7 +62,7 @@ char *_version = "20001122";
  *      parv[1] = password
  *      parv[2] = optional extra version information
  */
-static void mr_pass(struct Client *client_p, struct Client *server_p,
+static void mr_pass(struct Client *client_p, struct Client *source_p,
                    int parc, char *parv[])
 {
   const char *password = parv[1];

@@ -77,7 +77,7 @@ char *_version = "20001122";
 **      parv[0] = sender prefix
 **      parv[1] = nickname
 */
-static void mr_nick(struct Client *client_p, struct Client *server_p, int parc,
+static void mr_nick(struct Client *client_p, struct Client *source_p, int parc,
                    char *parv[])
 {
   struct   Client *aclient_p, *uclient_p;
@@ -88,7 +88,7 @@ static void mr_nick(struct Client *client_p, struct Client *server_p, int parc,
 
   if (parc < 2)
     {
-      sendto_one(server_p, form_str(ERR_NONICKNAMEGIVEN),
+      sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
                  me.name, BadPtr(parv[0]) ? "*" : parv[0]);
       return;
     }
@@ -117,17 +117,17 @@ static void mr_nick(struct Client *client_p, struct Client *server_p, int parc,
    */
   if (clean_nick_name(nick) == 0)
     {
-      sendto_one(server_p, form_str(ERR_ERRONEUSNICKNAME),
+      sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME),
                  me.name, BadPtr(parv[0]) ? "*" : parv[0], parv[1]);
       return;
     }
 
-  if(find_q_conf(nick, server_p->username, server_p->host)) 
+  if(find_q_conf(nick, source_p->username, source_p->host)) 
     {
       sendto_realops_flags(FLAGS_REJ,
 			   "Quarantined nick [%s] from user %s",
 			   nick, get_client_name(client_p, HIDE_IP));
-      sendto_one(server_p, form_str(ERR_UNAVAILRESOURCE),
+      sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
 		 me.name, BadPtr(parv[0]) ? "*" : parv[0], nick);
       return;
     }
@@ -145,12 +145,12 @@ static void mr_nick(struct Client *client_p, struct Client *server_p, int parc,
         {
           /* We're already waiting for a reply about this nick
            * for someone else. */
-          sendto_one(server_p, form_str(ERR_NICKNAMEINUSE), me.name, "*", nick);
+          sendto_one(source_p, form_str(ERR_NICKNAMEINUSE), me.name, "*", nick);
           return;
         }
       }
       /* Set their llname so we can find them later */
-      strcpy(server_p->llname, nick);
+      strcpy(source_p->llname, nick);
 
       /* Ask the hub about their requested name */
       sendto_one(uplink, ":%s NBURST %s %s !%s", me.name, nick,
@@ -160,13 +160,13 @@ static void mr_nick(struct Client *client_p, struct Client *server_p, int parc,
     }
     else
       {
-        set_initial_nick(client_p, server_p, nick);
+        set_initial_nick(client_p, source_p, nick);
         return;
       }
    }
   else
    {
-     sendto_one(server_p, form_str(ERR_NICKNAMEINUSE), me.name, "*", nick);
+     sendto_one(source_p, form_str(ERR_NICKNAMEINUSE), me.name, "*", nick);
    }
 
   /* NICK message ignored */
@@ -180,7 +180,7 @@ static void mr_nick(struct Client *client_p, struct Client *server_p, int parc,
  * Any client seen here is guaranteed to be MyConnect()
  */
 
-static void m_nick(struct Client *client_p, struct Client *server_p,
+static void m_nick(struct Client *client_p, struct Client *source_p,
                   int parc, char *parv[])
 {
   char     nick[NICKLEN + 2];
@@ -188,7 +188,7 @@ static void m_nick(struct Client *client_p, struct Client *server_p,
 
   if (parc < 2)
     {
-      sendto_one(server_p, form_str(ERR_NONICKNAMEGIVEN),
+      sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
                  me.name, parv[0]);
       return;
     }
@@ -212,17 +212,17 @@ static void m_nick(struct Client *client_p, struct Client *server_p,
    */
   if (clean_nick_name(nick) == 0)
     {
-      sendto_one(server_p, form_str(ERR_ERRONEUSNICKNAME),
+      sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME),
                  me.name, parv[0], nick);
       return;
     }
 
-  if (!IsOper(server_p) && find_q_conf(nick, server_p->username, server_p->host))
+  if (!IsOper(source_p) && find_q_conf(nick, source_p->username, source_p->host))
     {
       sendto_realops_flags(FLAGS_REJ,
 			   "Quarantined nick [%s] from user %s",
 			   nick, get_client_name(client_p, HIDE_IP));
-      sendto_one(server_p, form_str(ERR_UNAVAILRESOURCE),
+      sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
 		 me.name, parv[0], nick);
       return;
     }
@@ -230,12 +230,12 @@ static void m_nick(struct Client *client_p, struct Client *server_p,
   if ((aclient_p = find_client(nick, NULL)))
     {
       /*
-      ** If aclient_p == server_p, then we have a client doing a nick
+      ** If aclient_p == source_p, then we have a client doing a nick
       ** change between *equivalent* nicknames as far as server
       ** is concerned (user is changing the case of his/her
       ** nickname or somesuch)
       */
-      if (aclient_p == server_p)
+      if (aclient_p == source_p)
 	{
 	  if (strcmp(aclient_p->name, nick) != 0)
             {
@@ -243,7 +243,7 @@ static void m_nick(struct Client *client_p, struct Client *server_p,
                * Allows change of case in his/her nick
                * -- go and process change
                */
-              change_local_nick(client_p,server_p,nick);
+              change_local_nick(client_p,source_p,nick);
               return;
             }
 	  else
@@ -270,19 +270,19 @@ static void m_nick(struct Client *client_p, struct Client *server_p,
 	  if (MyConnect(aclient_p))
 	    {
 	      exit_client(NULL, aclient_p, &me, "Overridden");
-	      change_local_nick(client_p,server_p,nick);
+	      change_local_nick(client_p,source_p,nick);
               return;
 	    }
 	  else
 	    {
-	      sendto_one(server_p, form_str(ERR_NICKNAMEINUSE),
+	      sendto_one(source_p, form_str(ERR_NICKNAMEINUSE),
 			 me.name, parv[0], nick);
 	    }
 	}
       else
 	{
-	  if (MyConnect(server_p))
-	    sendto_one(server_p, form_str(ERR_NICKNAMEINUSE), me.name,
+	  if (MyConnect(source_p))
+	    sendto_one(source_p, form_str(ERR_NICKNAMEINUSE), me.name,
 		       parv[0], nick);
 	}
     }
@@ -292,11 +292,11 @@ static void m_nick(struct Client *client_p, struct Client *server_p,
       {
         /* The uplink might know someone by this name already. */
         sendto_one(uplink, ":%s NBURST %s %s %s", me.name, nick,
-                   nick, server_p->name);
+                   nick, source_p->name);
       }
       else
       {
-        change_local_nick(client_p,server_p,nick);
+        change_local_nick(client_p,source_p,nick);
         return;
       }
     }
@@ -322,7 +322,7 @@ static void m_nick(struct Client *client_p, struct Client *server_p,
 **      parv[7] = server
 **      parv[8] = ircname
 */
-static void ms_nick(struct Client *client_p, struct Client *server_p,
+static void ms_nick(struct Client *client_p, struct Client *source_p,
                    int parc, char *parv[])
 {
   struct Client* aclient_p;
@@ -333,7 +333,7 @@ static void ms_nick(struct Client *client_p, struct Client *server_p,
 
   if (parc < 2)
     {
-      sendto_one(server_p, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
+      sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
       return;
     }
 
@@ -360,7 +360,7 @@ static void ms_nick(struct Client *client_p, struct Client *server_p,
    */
   if (clean_nick_name(nick) == 0 || strcmp(nick, parv[1]) )
     {
-      sendto_one(server_p, form_str(ERR_ERRONEUSNICKNAME),
+      sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME),
                  me.name, BadPtr(parv[0]) ? "*" : parv[0], parv[1]);
       
       if (IsServer(client_p))
@@ -375,28 +375,28 @@ static void ms_nick(struct Client *client_p, struct Client *server_p,
           sendto_one(client_p, ":%s KILL %s :%s (%s <- %s[%s])",
                      me.name, parv[1], me.name, parv[1],
                      nick, client_p->name);
-          if (server_p != client_p) /* bad nick change */
+          if (source_p != client_p) /* bad nick change */
             {
-              kill_client_ll_serv_butone(client_p, server_p,
+              kill_client_ll_serv_butone(client_p, source_p,
 					 "%s (%s <- %s!%s@%s)",
 					 me.name,
 					 get_client_name(client_p, HIDE_IP),
 					 parv[0],
-					 server_p->username,
-					 server_p->user ?
-					 server_p->user->server : client_p->name);
+					 source_p->username,
+					 source_p->user ?
+					 source_p->user->server : client_p->name);
 #if 0
-              sendto_ll_serv_butone(client_p, server_p, 0,
+              sendto_ll_serv_butone(client_p, source_p, 0,
                                  ":%s KILL %s :%s (%s <- %s!%s@%s)",
                                  me.name, parv[0], me.name,
                                  get_client_name(client_p, HIDE_IP),
                                  parv[0],
-                                 server_p->username,
-                                 server_p->user ? server_p->user->server :
+                                 source_p->username,
+                                 source_p->user ? source_p->user->server :
                                  client_p->name);
 #endif
-              server_p->flags |= FLAGS_KILLED;
-              exit_client(client_p,server_p,&me,"BadNick");
+              source_p->flags |= FLAGS_KILLED;
+              exit_client(client_p,source_p,&me,"BadNick");
               return;
             }
         }
@@ -423,30 +423,30 @@ static void ms_nick(struct Client *client_p, struct Client *server_p,
                 parv[0], parv[1]);
      parv[8][REALLEN] = 0;
     }
-  if (!IsServer(server_p) && parc > 2)
+  if (!IsServer(source_p) && parc > 2)
     newts = atol(parv[2]);
-  else if (IsServer(server_p) && parc > 3)
+  else if (IsServer(source_p) && parc > 3)
     newts = atol(parv[3]);
 
   fromTS = (parc > 6);
 
   if (!(aclient_p = find_client(nick, NULL)))
   {
-    nick_from_server(client_p,server_p,parc,parv,newts,nick);
+    nick_from_server(client_p,source_p,parc,parv,newts,nick);
     return;
   }
 
   /*
-  ** If aclient_p == server_p, then we have a client doing a nick
+  ** If aclient_p == source_p, then we have a client doing a nick
   ** change between *equivalent* nicknames as far as server
   ** is concerned (user is changing the case of his/her
   ** nickname or somesuch)
   */
-  if (aclient_p == server_p)
+  if (aclient_p == source_p)
    {
     if (strcmp(aclient_p->name, nick) != 0)
       {
-        nick_from_server(client_p,server_p,parc,parv,newts,nick);
+        nick_from_server(client_p,source_p,parc,parv,newts,nick);
         return;
       }
     else
@@ -457,7 +457,7 @@ static void ms_nick(struct Client *client_p, struct Client *server_p,
 
   /*
   ** Note: From this point forward it can be assumed that
-  ** aclient_p != server_p (point to different client structures).
+  ** aclient_p != source_p (point to different client structures).
   */
 
   /*
@@ -471,7 +471,7 @@ static void ms_nick(struct Client *client_p, struct Client *server_p,
     if (MyConnect(aclient_p))
       {
         exit_client(NULL, aclient_p, &me, "Overridden");
-        nick_from_server(client_p,server_p,parc,parv,newts,nick);
+        nick_from_server(client_p,source_p,parc,parv,newts,nick);
         return;
       }
     else
@@ -528,23 +528,23 @@ static void ms_nick(struct Client *client_p, struct Client *server_p,
   ** same nick--purge this NICK from the system with a KILL... >;)
   */
   /*
-  ** This seemingly obscure test (server_p == client_p) differentiates
+  ** This seemingly obscure test (source_p == client_p) differentiates
   ** between "NICK new" (TRUE) and ":old NICK new" (FALSE) forms.
   */
   /* 
-  ** Changed to something reasonable like IsServer(server_p)
+  ** Changed to something reasonable like IsServer(source_p)
   ** (true if "NICK new", false if ":old NICK new") -orabidoo
   */
 
-  if (IsServer(server_p))
+  if (IsServer(source_p))
     {
 #ifdef LOCAL_NICK_COLLIDE
       /* XXX what does this code do?
        * This is a new nick that's being introduced, not a nickchange
        */
       /* just propogate it through */
-      sendto_ll_serv_butone(client_p, server_p, 0, ":%s NICK %s :%lu",
-                         parv[0], nick, server_p->tsinfo);
+      sendto_ll_serv_butone(client_p, source_p, 0, ":%s NICK %s :%lu",
+                         parv[0], nick, source_p->tsinfo);
 #endif
       /*
       ** A new NICK being introduced by a neighbouring
@@ -618,17 +618,17 @@ static void ms_nick(struct Client *client_p, struct Client *server_p,
                          me.name, aclient_p->name, aclient_p->name);
 
 #ifndef LOCAL_NICK_COLLIDE
-              /* If it came from a LL server, it'd have been server_p,
+              /* If it came from a LL server, it'd have been source_p,
                * so we don't need to mark aclient_p as known
 	       */
 
-	      kill_client_ll_serv_butone(server_p, aclient_p,
+	      kill_client_ll_serv_butone(source_p, aclient_p,
 					 "%s (%s <- %s)",
 					 me.name,
 					 aclient_p->from->name,
 					 get_client_name(client_p, HIDE_IP));
 #if 0
-	      sendto_ll_serv_butone(server_p, aclient_p, 0, /* all servers but server_p */
+	      sendto_ll_serv_butone(source_p, aclient_p, 0, /* all servers but source_p */
 				 ":%s KILL %s :%s (%s <- %s)",
 				 me.name, aclient_p->name, me.name,
 				 aclient_p->from->name,
@@ -638,7 +638,7 @@ static void ms_nick(struct Client *client_p, struct Client *server_p,
 
               aclient_p->flags |= FLAGS_KILLED;
               (void)exit_client(client_p, aclient_p, &me, "Nick collision");
-              nick_from_server(client_p,server_p,parc,parv,newts,nick);
+              nick_from_server(client_p,source_p,parc,parv,newts,nick);
               return;
             }
         }
@@ -651,11 +651,11 @@ static void ms_nick(struct Client *client_p, struct Client *server_p,
   ** be purged from all outgoing connections.
   */
   if ( !newts || !aclient_p->tsinfo || (newts == aclient_p->tsinfo) ||
-      !server_p->user)
+      !source_p->user)
     {
       sendto_realops_flags(FLAGS_ALL,
 	   "Nick change collision from %s to %s(%s <- %s)(both killed)",
-           server_p->name, aclient_p->name, aclient_p->from->name,
+           source_p->name, aclient_p->name, aclient_p->from->name,
 	   get_client_name(client_p, HIDE_IP));
       ServerStats->is_kill++;
       sendto_one(aclient_p, form_str(ERR_NICKCOLLISION),
@@ -663,18 +663,18 @@ static void ms_nick(struct Client *client_p, struct Client *server_p,
 
 #ifndef LOCAL_NICK_COLLIDE
       /* If we got the message from a LL, it would know
-         about server_p already */
+         about source_p already */
 
-      kill_client_ll_serv_butone(NULL, server_p,
+      kill_client_ll_serv_butone(NULL, source_p,
 				 "%s (%s(%s) <- %s)",
 				 me.name,
 				 aclient_p->from->name,
 				 aclient_p->name,
 				 get_client_name(client_p, HIDE_IP));
 #if 0
-      sendto_ll_serv_butone(NULL, server_p, 0, /* KILL old from outgoing servers */
+      sendto_ll_serv_butone(NULL, source_p, 0, /* KILL old from outgoing servers */
 			 ":%s KILL %s :%s (%s(%s) <- %s)",
-			 me.name, server_p->name, me.name, aclient_p->from->name,
+			 me.name, source_p->name, me.name, aclient_p->from->name,
 			 aclient_p->name, get_client_name(client_p, HIDE_IP));
 #endif
 #endif
@@ -691,37 +691,37 @@ static void ms_nick(struct Client *client_p, struct Client *server_p,
 				 me.name, 
 				 aclient_p->from->name,
 				 get_client_name(client_p, HIDE_IP),
-				 server_p->name);
+				 source_p->name);
 #if 0
       sendto_ll_serv_butone(NULL, aclient_p, 0, /* Kill new from incoming link */
 			 ":%s KILL %s :%s (%s <- %s(%s))",
 			 me.name, aclient_p->name, me.name, aclient_p->from->name,
-			 get_client_name(client_p, HIDE_IP), server_p->name);
+			 get_client_name(client_p, HIDE_IP), source_p->name);
 #endif
 #endif
 
       aclient_p->flags |= FLAGS_KILLED;
       exit_client(NULL, aclient_p, &me, "Nick collision(new)");
-      server_p->flags |= FLAGS_KILLED;
-      exit_client(client_p, server_p, &me, "Nick collision(old)");
+      source_p->flags |= FLAGS_KILLED;
+      exit_client(client_p, source_p, &me, "Nick collision(old)");
       return;
     }
   else
     {
-      sameuser = irccmp(aclient_p->username, server_p->username) == 0 &&
-                 irccmp(aclient_p->host, server_p->host) == 0;
+      sameuser = irccmp(aclient_p->username, source_p->username) == 0 &&
+                 irccmp(aclient_p->host, source_p->host) == 0;
       if ((sameuser && newts < aclient_p->tsinfo) ||
           (!sameuser && newts > aclient_p->tsinfo))
         {
           if (sameuser)
             sendto_realops_flags(FLAGS_ALL,
                  "Nick change collision from %s to %s(%s <- %s)(older killed)",
-                 server_p->name, aclient_p->name, aclient_p->from->name,
+                 source_p->name, aclient_p->name, aclient_p->from->name,
                  get_client_name(client_p, HIDE_IP));
           else
             sendto_realops_flags(FLAGS_ALL,
                  "Nick change collision from %s to %s(%s <- %s)(newer killed)",
-                 server_p->name, aclient_p->name, aclient_p->from->name,
+                 source_p->name, aclient_p->name, aclient_p->from->name,
                  get_client_name(client_p, HIDE_IP));
 
           ServerStats->is_kill++;
@@ -730,7 +730,7 @@ static void ms_nick(struct Client *client_p, struct Client *server_p,
           /* this won't go back to the incoming link, so it doesn't
            * matter if it is an LL */
 
-	  kill_client_ll_serv_butone(client_p, server_p,
+	  kill_client_ll_serv_butone(client_p, source_p,
 				     /* KILL old from outgoing servers */
 				     "%s (%s(%s) <- %s)",
 				     me.name, aclient_p->from->name,
@@ -738,18 +738,18 @@ static void ms_nick(struct Client *client_p, struct Client *server_p,
 				     get_client_name(client_p, HIDE_IP));
 #if 0
 
-	  sendto_ll_serv_butone(client_p, server_p, 0, /* KILL old from outgoing servers */
+	  sendto_ll_serv_butone(client_p, source_p, 0, /* KILL old from outgoing servers */
 			     ":%s KILL %s :%s (%s(%s) <- %s)",
-			     me.name, server_p->name, me.name, aclient_p->from->name,
+			     me.name, source_p->name, me.name, aclient_p->from->name,
 			     aclient_p->name, get_client_name(client_p, HIDE_IP));
 #endif
 #endif
 
-          server_p->flags |= FLAGS_KILLED;
+          source_p->flags |= FLAGS_KILLED;
           if (sameuser)
-            exit_client(client_p, server_p, &me, "Nick collision(old)");
+            exit_client(client_p, source_p, &me, "Nick collision(old)");
           else
-            exit_client(client_p, server_p, &me, "Nick collision(new)");
+            exit_client(client_p, source_p, &me, "Nick collision(new)");
           return;
         }
       else
@@ -769,13 +769,13 @@ static void ms_nick(struct Client *client_p, struct Client *server_p,
           /* this won't go back to the incoming link, so it doesn't
            * matter if it's an LL
 	   */
-	  kill_client_ll_serv_butone(server_p, aclient_p,
+	  kill_client_ll_serv_butone(source_p, aclient_p,
 				     "%s (%s <- %s)",
 				     me.name,
 				     aclient_p->from->name,
 				     get_client_name(client_p, HIDE_IP));
 #if 0
-	  sendto_ll_serv_butone(server_p, aclient_p, 0, /* all servers but server_p */
+	  sendto_ll_serv_butone(source_p, aclient_p, 0, /* all servers but source_p */
 			     ":%s KILL %s :%s (%s <- %s)",
 			     me.name, aclient_p->name, me.name,
 			     aclient_p->from->name,
@@ -790,7 +790,7 @@ static void ms_nick(struct Client *client_p, struct Client *server_p,
           (void)exit_client(client_p, aclient_p, &me, "Nick collision");
         }
     }
-  nick_from_server(client_p,server_p,parc,parv,newts,nick);
+  nick_from_server(client_p,source_p,parc,parv,newts,nick);
 }
 
 /*
@@ -806,32 +806,32 @@ static void ms_nick(struct Client *client_p, struct Client *server_p,
  * side effects -
  */
 static int
-nick_from_server(struct Client *client_p, struct Client *server_p, int parc,
+nick_from_server(struct Client *client_p, struct Client *source_p, int parc,
                  char *parv[], time_t newts,char *nick)
 {
-  if (IsServer(server_p))
+  if (IsServer(source_p))
     {
       /* A server introducing a new client, change source */
       
-      server_p = make_client(client_p);
-      add_client_to_list(server_p);         /* double linked list */
+      source_p = make_client(client_p);
+      add_client_to_list(source_p);         /* double linked list */
 
       /* We don't need to introduce leafs clients back to them! */
       if (ConfigFileEntry.hub && IsCapable(client_p, CAP_LL))
-        add_lazylinkclient(client_p, server_p);
+        add_lazylinkclient(client_p, source_p);
           
       if (parc > 2)
-        server_p->hopcount = atoi(parv[2]);
+        source_p->hopcount = atoi(parv[2]);
       if (newts)
-        server_p->tsinfo = newts;
+        source_p->tsinfo = newts;
       else
         {
-          newts = server_p->tsinfo = CurrentTime;
+          newts = source_p->tsinfo = CurrentTime;
           ts_warn("Remote nick %s (%s) introduced without a TS", nick, parv[0]);
         }
       /* copy the nick in place */
-      (void)strcpy(server_p->name, nick);
-      (void)add_to_client_hash_table(nick, server_p);
+      (void)strcpy(source_p->name, nick);
+      (void)add_to_client_hash_table(nick, source_p);
       if (parc > 8)
         {
           int   flag;
@@ -852,15 +852,15 @@ nick_from_server(struct Client *client_p, struct Client *server_p, int parc,
                 {
                   Count.oper++;
                 }
-              server_p->umodes |= flag & SEND_UMODES;
+              source_p->umodes |= flag & SEND_UMODES;
               m++;
             }
 
-          return do_remote_user(nick, client_p, server_p, parv[5], parv[6],
+          return do_remote_user(nick, client_p, source_p, parv[5], parv[6],
 				parv[7], parv[8], NULL);
         }
     }
-  else if (server_p->name[0])
+  else if (source_p->name[0])
     {
       /*
       ** Client just changing his/her nick. If he/she is
@@ -868,32 +868,32 @@ nick_from_server(struct Client *client_p, struct Client *server_p, int parc,
       ** on that channel. Propagate notice to other servers.
       */
       if (irccmp(parv[0], nick))
-        server_p->tsinfo = newts ? newts : CurrentTime;
+        source_p->tsinfo = newts ? newts : CurrentTime;
 
-          sendto_common_channels_local(server_p, ":%s!%s@%s NICK :%s",
-				       server_p->name,server_p->username,server_p->host,
+          sendto_common_channels_local(source_p, ":%s!%s@%s NICK :%s",
+				       source_p->name,source_p->username,source_p->host,
 				       nick);
-          if (server_p->user)
+          if (source_p->user)
             {
-              add_history(server_p,1);
-              sendto_ll_serv_butone(client_p, server_p, 0, ":%s NICK %s :%lu",
-                                    parv[0], nick, server_p->tsinfo);
+              add_history(source_p,1);
+              sendto_ll_serv_butone(client_p, source_p, 0, ":%s NICK %s :%lu",
+                                    parv[0], nick, source_p->tsinfo);
             }
     }
 
   /*
   **  Finally set new nick name.
   */
-  if (server_p->name[0])
-    del_from_client_hash_table(server_p->name, server_p);
-  strcpy(server_p->name, nick);
-  add_to_client_hash_table(nick, server_p);
+  if (source_p->name[0])
+    del_from_client_hash_table(source_p->name, source_p);
+  strcpy(source_p->name, nick);
+  add_to_client_hash_table(nick, source_p);
 
   /* Make sure everyone that has this client on its accept list
    * loses that reference. 
    */
 
-  del_all_accepts(server_p);
+  del_all_accepts(source_p);
   return 0;
 }
 

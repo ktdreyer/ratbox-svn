@@ -36,7 +36,7 @@
 static void m_admin(struct Client*, struct Client*, int, char**);
 static void mr_admin(struct Client*, struct Client*, int, char**);
 static void ms_admin(struct Client*, struct Client*, int, char**);
-static void do_admin( struct Client *server_p );
+static void do_admin( struct Client *source_p );
 
 struct Message admin_msgtab = {
   "ADMIN", 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0, 
@@ -62,20 +62,20 @@ char *_version = "20001202";
  *      parv[0] = sender prefix   
  *      parv[1] = servername   
  */
-static void mr_admin(struct Client *client_p, struct Client *server_p,
+static void mr_admin(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
   static time_t last_used=0L;
  
   if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
     {
-      sendto_one(server_p,form_str(RPL_LOAD2HI),me.name,parv[0]);
+      sendto_one(source_p,form_str(RPL_LOAD2HI),me.name,parv[0]);
       return;
     }
   else
     last_used = CurrentTime;
 
-  do_admin(server_p);
+  do_admin(source_p);
 }
 
 /*
@@ -83,23 +83,23 @@ static void mr_admin(struct Client *client_p, struct Client *server_p,
  *      parv[0] = sender prefix
  *      parv[1] = servername
  */
-static void m_admin(struct Client *client_p, struct Client *server_p, int parc,
+static void m_admin(struct Client *client_p, struct Client *source_p, int parc,
                    char *parv[])
 {
   static time_t last_used=0L;
 
   if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
     {
-      sendto_one(server_p,form_str(RPL_LOAD2HI),me.name,parv[0]);
+      sendto_one(source_p,form_str(RPL_LOAD2HI),me.name,parv[0]);
       return;
     }
   else
     last_used = CurrentTime;
 
-  if (hunt_server(client_p,server_p,":%s ADMIN :%s",1,parc,parv) != HUNTED_ISME)
+  if (hunt_server(client_p,source_p,":%s ADMIN :%s",1,parc,parv) != HUNTED_ISME)
     return;
 
-  do_admin(server_p);
+  do_admin(source_p);
 }
 
 
@@ -108,13 +108,13 @@ static void m_admin(struct Client *client_p, struct Client *server_p, int parc,
  *      parv[0] = sender prefix
  *      parv[1] = servername
  */
-static void ms_admin(struct Client *client_p, struct Client *server_p,
+static void ms_admin(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
-  if (hunt_server(client_p,server_p,":%s ADMIN :%s",1,parc,parv) != HUNTED_ISME)
+  if (hunt_server(client_p,source_p,":%s ADMIN :%s",1,parc,parv) != HUNTED_ISME)
     return;
 
-  do_admin( server_p );
+  do_admin( source_p );
 }
 
 
@@ -125,24 +125,24 @@ static void ms_admin(struct Client *client_p, struct Client *server_p,
  * output	- none
  * side effects	- admin info is sent to client given
  */
-static void do_admin( struct Client *server_p )
+static void do_admin( struct Client *source_p )
 {
-  if (IsPerson(server_p))
+  if (IsPerson(source_p))
     sendto_realops_flags(FLAGS_SPY,
-                         "ADMIN requested by %s (%s@%s) [%s]", server_p->name,
-                         server_p->username, server_p->host, server_p->user->server);
+                         "ADMIN requested by %s (%s@%s) [%s]", source_p->name,
+                         source_p->username, source_p->host, source_p->user->server);
 
-  sendto_one(server_p, form_str(RPL_ADMINME),
-	     me.name, server_p->name, me.name);
+  sendto_one(source_p, form_str(RPL_ADMINME),
+	     me.name, source_p->name, me.name);
 
   if (AdminInfo.name != NULL)
-    sendto_one(server_p, form_str(RPL_ADMINLOC1),
-	       me.name, server_p->name, AdminInfo.name);
+    sendto_one(source_p, form_str(RPL_ADMINLOC1),
+	       me.name, source_p->name, AdminInfo.name);
   if (AdminInfo.description != NULL)
-    sendto_one(server_p, form_str(RPL_ADMINLOC2),
-	       me.name, server_p->name, AdminInfo.description);
+    sendto_one(source_p, form_str(RPL_ADMINLOC2),
+	       me.name, source_p->name, AdminInfo.description);
 
   if (AdminInfo.email != NULL)
-    sendto_one(server_p, form_str(RPL_ADMINEMAIL),
-	       me.name, server_p->name, AdminInfo.email);
+    sendto_one(source_p, form_str(RPL_ADMINEMAIL),
+	       me.name, source_p->name, AdminInfo.email);
 }

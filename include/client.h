@@ -274,7 +274,7 @@ struct LocalUser
 
 
 #define HasID(x) (!IsServer(x) && (x)->user->id[0] != '\0')
-#define ID(server_p) (HasID(server_p) ? server_p->user->id : server_p->name)
+#define ID(source_p) (HasID(source_p) ? source_p->user->id : source_p->name)
 
 #define ID_or_name(x,client_p) (IsCapable(client_p,CAP_UID)?(x)->user->id:(x)->name)
 
@@ -552,12 +552,12 @@ extern int accept_message(struct Client *source, struct Client *target);
 extern void add_to_accept(struct Client *source, struct Client *target);
 extern void del_from_accept(struct Client *source, struct Client *target);
 extern void del_all_accepts(struct Client *client_p);
-extern void list_all_accepts(struct Client *server_p);
+extern void list_all_accepts(struct Client *source_p);
 
 extern void free_exited_clients(void);
-extern int set_initial_nick(struct Client *client_p, struct Client *server_p,
+extern int set_initial_nick(struct Client *client_p, struct Client *source_p,
                             char *nick);
-extern int change_local_nick(struct Client *client_p, struct Client *server_p,
+extern int change_local_nick(struct Client *client_p, struct Client *source_p,
                              char *nick);
 extern int clean_nick_name(char* nick);
 

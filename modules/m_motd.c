@@ -66,7 +66,7 @@ char *_version = "20001122";
 **      parv[0] = sender prefix
 **      parv[1] = servername
 */
-static void m_motd(struct Client *client_p, struct Client *server_p,
+static void m_motd(struct Client *client_p, struct Client *source_p,
                   int parc, char *parv[])
 {
   static time_t last_used = 0;
@@ -74,25 +74,25 @@ static void m_motd(struct Client *client_p, struct Client *server_p,
   /* This is safe enough to use during non hidden server mode */
   if(!GlobalSetOptions.hide_server)
     {
-      if (hunt_server(client_p, server_p, ":%s MOTD :%s", 1,parc,parv)!=HUNTED_ISME)
+      if (hunt_server(client_p, source_p, ":%s MOTD :%s", 1,parc,parv)!=HUNTED_ISME)
 	return;
     }
 
   if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
     {
       /* safe enough to give this on a local connect only */
-      if(MyClient(server_p))
-	sendto_one(server_p,form_str(RPL_LOAD2HI),me.name,server_p->name);
+      if(MyClient(source_p))
+	sendto_one(source_p,form_str(RPL_LOAD2HI),me.name,source_p->name);
       return;
     }
   else
     last_used = CurrentTime;
 
   sendto_realops_flags(FLAGS_SPY, "motd requested by %s (%s@%s) [%s]",
-                     server_p->name, server_p->username, server_p->host,
-                     server_p->user->server);
+                     source_p->name, source_p->username, source_p->host,
+                     source_p->user->server);
 
-  SendMessageFile(server_p,&ConfigFileEntry.motd);
+  SendMessageFile(source_p,&ConfigFileEntry.motd);
 }
 
 /*
@@ -100,16 +100,16 @@ static void m_motd(struct Client *client_p, struct Client *server_p,
 **      parv[0] = sender prefix
 **      parv[1] = servername
 */
-static void mo_motd(struct Client *client_p, struct Client *server_p,
+static void mo_motd(struct Client *client_p, struct Client *source_p,
                    int parc, char *parv[])
 {
-  if (hunt_server(client_p, server_p, ":%s MOTD :%s", 1,parc,parv)!=HUNTED_ISME)
+  if (hunt_server(client_p, source_p, ":%s MOTD :%s", 1,parc,parv)!=HUNTED_ISME)
     return;
 
   sendto_realops_flags(FLAGS_SPY, "motd requested by %s (%s@%s) [%s]",
-                     server_p->name, server_p->username, server_p->host,
-                     server_p->user->server);
+                     source_p->name, source_p->username, source_p->host,
+                     source_p->user->server);
 
-  SendMessageFile(server_p,&ConfigFileEntry.motd);
+  SendMessageFile(source_p,&ConfigFileEntry.motd);
 }
 

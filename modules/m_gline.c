@@ -77,7 +77,7 @@ static void log_gline(struct Client *,struct gline_pending *,
                       const char *,const char *,const char *);
 
 
-static void check_majority_gline(struct Client *server_p,
+static void check_majority_gline(struct Client *source_p,
                                  const char *oper_nick,
                                  const char *oper_user,
                                  const char *oper_host,
@@ -85,7 +85,7 @@ static void check_majority_gline(struct Client *server_p,
                                  const char *user, const char *host,
                                  const char *reason);
 
-static int majority_gline(struct Client *server_p,
+static int majority_gline(struct Client *source_p,
                           const char *oper_nick, const char *oper_username,
                           const char *oper_host, 
                           const char *oper_server,
@@ -134,7 +134,7 @@ char *_version = "20001122";
  */
 
 static void mo_gline(struct Client *client_p,
-                    struct Client *server_p,
+                    struct Client *source_p,
                     int parc,
                     char *parv[])
 {
@@ -149,9 +149,9 @@ static void mo_gline(struct Client *client_p,
 
   if (ConfigFileEntry.glines)
     {
-      if (!IsSetOperGline(server_p))
+      if (!IsSetOperGline(source_p))
 	{
-	  sendto_one(server_p,":%s NOTICE %s :You have no G flag",me.name,parv[0]);
+	  sendto_one(source_p,":%s NOTICE %s :You have no G flag",me.name,parv[0]);
 	  return;
 	}
 			
@@ -182,7 +182,7 @@ static void mo_gline(struct Client *client_p,
 	}
       else
 	{
-	  sendto_one(server_p, ":%s NOTICE %s :Can't G-Line a nick use user@host",
+	  sendto_one(source_p, ":%s NOTICE %s :Can't G-Line a nick use user@host",
 		     me.name,
 		     parv[0]);
 	  return;
@@ -190,7 +190,7 @@ static void mo_gline(struct Client *client_p,
 			
       if(strchr(parv[2], ':'))
 	{
-	  sendto_one(server_p,
+	  sendto_one(source_p,
 		     ":%s NOTICE %s :Invalid character ':' in comment",
 		     me.name, parv[2]);
 	  return;
@@ -244,8 +244,8 @@ static void mo_gline(struct Client *client_p,
 	   * Not enough non-wild characters were found, assume
 	   * they are trying to gline *@*.
 	   */
-	  if (MyClient(server_p))
-	    sendto_one(server_p,
+	  if (MyClient(source_p))
+	    sendto_one(source_p,
 		       ":%s NOTICE %s :Please include at least %d non-wildcard characters with the user@host",
 		       me.name,
 		       parv[0],
@@ -258,10 +258,10 @@ static void mo_gline(struct Client *client_p,
 
       /* If at least 3 opers agree this user should be G lined then do it */
 
-      check_majority_gline(server_p,
-			   server_p->name,
-			   (const char *)server_p->username,
-			   server_p->host,
+      check_majority_gline(source_p,
+			   source_p->name,
+			   (const char *)source_p->username,
+			   source_p->host,
 			   me.name,
 			   user,
 			   host,
@@ -270,26 +270,26 @@ static void mo_gline(struct Client *client_p,
       sendto_cap_serv_butone(CAP_GLN,
 			     NULL, ":%s GLINE %s %s %s :%s",
 			     me.name,
-			     server_p->name,
+			     source_p->name,
 			     user,
 			     host,
 			     reason);
 
       sendto_realops_flags(FLAGS_ALL,
 			"%s!%s@%s on %s is requesting gline for [%s@%s] [%s]",
-			server_p->name,
-			server_p->username,
-			server_p->host,
+			source_p->name,
+			source_p->username,
+			source_p->host,
 			me.name,
 			user,
 			host,
 			reason);
-      log_gline_request(server_p->name,(const char *)server_p->username,server_p->host,me.name,
+      log_gline_request(source_p->name,(const char *)source_p->username,source_p->host,me.name,
                         user,host,reason);
     }
   else
     {
-      sendto_one(server_p,":%s NOTICE %s :GLINE disabled",me.name,parv[0]);  
+      sendto_one(source_p,":%s NOTICE %s :GLINE disabled",me.name,parv[0]);  
     }
 }
 
@@ -308,7 +308,7 @@ static void mo_gline(struct Client *client_p,
  */
 
 static void ms_gline(struct Client *client_p,
-                    struct Client *server_p,
+                    struct Client *source_p,
                     int parc,
                     char *parv[])
 {
@@ -322,7 +322,7 @@ static void ms_gline(struct Client *client_p,
   const char *reason = NULL;           /* reason for "victims" demise */
 
 
-  if(!IsServer(server_p))
+  if(!IsServer(source_p))
     return;
 
   /* Always good to be paranoid about arguments */
@@ -353,8 +353,8 @@ static void ms_gline(struct Client *client_p,
   else
     return;
 
-  sendto_serv_butone(server_p, ":%s GLINE %s %s %s :%s",
-		     server_p->name,
+  sendto_serv_butone(source_p, ":%s GLINE %s %s %s :%s",
+		     source_p->name,
 		     oper_nick,
 		     user,
 		     host,
@@ -376,7 +376,7 @@ static void ms_gline(struct Client *client_p,
 			   reason);
 
       /* If at least 3 opers agree this user should be G lined then do it */
-      check_majority_gline(server_p,
+      check_majority_gline(source_p,
 			   oper_nick,
 			   oper_user,
 			   oper_host,
@@ -395,7 +395,7 @@ static void ms_gline(struct Client *client_p,
  * side effects	- if a majority agree, place the gline locally
  */
 static void
-check_majority_gline(struct Client *server_p,
+check_majority_gline(struct Client *source_p,
 		     const char *oper_nick,
 		     const char *oper_user,
 		     const char *oper_host,
@@ -404,7 +404,7 @@ check_majority_gline(struct Client *server_p,
 		     const char *host,
 		     const char *reason)
 {
-  if(majority_gline(server_p,oper_nick,oper_user, oper_host,
+  if(majority_gline(source_p,oper_nick,oper_user, oper_host,
 		    oper_server, user, host, reason))
     set_local_gline(oper_nick,oper_user,oper_host,oper_server,
 		    user,host,reason);
@@ -519,7 +519,7 @@ log_gline_request(
  *
  */
 static void
-log_gline(struct Client *server_p,
+log_gline(struct Client *source_p,
 	  struct gline_pending *gline_pending_ptr,
 	  const char *oper_nick,
 	  const char *oper_user,
@@ -676,7 +676,7 @@ add_new_majority_gline(const char* oper_nick,
  *
  */
 static int
-majority_gline(struct Client *server_p,
+majority_gline(struct Client *source_p,
 	       const char *oper_nick,
 	       const char *oper_user,
 	       const char *oper_host,
@@ -735,7 +735,7 @@ majority_gline(struct Client *server_p,
               if(find_is_klined(host, user, 0))
                 return NO;
 
-              log_gline(server_p,gline_pending_ptr,
+              log_gline(source_p,gline_pending_ptr,
                         oper_nick,oper_user,oper_host,oper_server,
                         user,host,reason);
               return YES;

@@ -74,7 +74,7 @@ char *_version = "20001122";
  *      parv[2] = port number
  *      parv[3] = remote server
  */
-static void mo_connect(struct Client* client_p, struct Client* server_p,
+static void mo_connect(struct Client* client_p, struct Client* source_p,
                       int parc, char* parv[])
 {
   int              port;
@@ -84,13 +84,13 @@ static void mo_connect(struct Client* client_p, struct Client* server_p,
 
   /* always privileged with handlers */
 
-  if (MyConnect(server_p) && !IsOperRemote(server_p) && parc > 3)
+  if (MyConnect(source_p) && !IsOperRemote(source_p) && parc > 3)
     {
-      sendto_one(server_p,":%s NOTICE %s :You have no R flag", me.name, parv[0]);
+      sendto_one(source_p,":%s NOTICE %s :You have no R flag", me.name, parv[0]);
       return;
     }
 
-  if (hunt_server(client_p, server_p,
+  if (hunt_server(client_p, source_p,
                   ":%s CONNECT %s %s :%s", 3, parc, parv) != HUNTED_ISME)
     {
       return;
@@ -98,14 +98,14 @@ static void mo_connect(struct Client* client_p, struct Client* server_p,
 
   if (*parv[1] == '\0')
     {
-      sendto_one(server_p, form_str(ERR_NEEDMOREPARAMS),
+      sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "CONNECT");
       return;
     }
 
   if ((aclient_p = find_server(parv[1])))
     {
-      sendto_one(server_p, ":%s NOTICE %s :Connect: Server %s %s %s.",
+      sendto_one(source_p, ":%s NOTICE %s :Connect: Server %s %s %s.",
                  me.name, parv[0], parv[1], "already exists from",
                  aclient_p->from->name);
       return;
@@ -118,7 +118,7 @@ static void mo_connect(struct Client* client_p, struct Client* server_p,
     {
       if (!(aconf = find_conf_by_host(parv[1], CONF_SERVER)))
 	{
-	  sendto_one(server_p,
+	  sendto_one(source_p,
 		     "NOTICE %s :Connect: Host %s not listed in ircd.conf",
 		     parv[0], parv[1]);
 	  return;
@@ -135,14 +135,14 @@ static void mo_connect(struct Client* client_p, struct Client* server_p,
     {
       if ((port = atoi(parv[2])) <= 0)
         {
-          sendto_one(server_p, "NOTICE %s :Connect: Illegal port number",
+          sendto_one(source_p, "NOTICE %s :Connect: Illegal port number",
                      parv[0]);
           return;
         }
     }
   else if (port <= 0 && (port = PORTNUM) <= 0)
     {
-      sendto_one(server_p, ":%s NOTICE %s :Connect: missing port number",
+      sendto_one(source_p, ":%s NOTICE %s :Connect: missing port number",
                  me.name, parv[0]);
       return;
     }
@@ -158,19 +158,19 @@ static void mo_connect(struct Client* client_p, struct Client* server_p,
    * at this point we should be calling connect_server with a valid
    * C:line and a valid port in the C:line
    */
-  if (serv_connect(aconf, server_p))
+  if (serv_connect(aconf, source_p))
     {
-      if (IsSetOperAdmin(server_p))
-	sendto_one(server_p, ":%s NOTICE %s :*** Connecting to %s[%s].%d",
+      if (IsSetOperAdmin(source_p))
+	sendto_one(source_p, ":%s NOTICE %s :*** Connecting to %s[%s].%d",
 		   me.name, parv[0], aconf->host, aconf->name, aconf->port);
       else
-	sendto_one(server_p, ":%s NOTICE %s :*** Connecting to %s.%d",
+	sendto_one(source_p, ":%s NOTICE %s :*** Connecting to %s.%d",
 		   me.name, parv[0], aconf->name, aconf->port);
 
     }
   else
     {
-      sendto_one(server_p, ":%s NOTICE %s :*** Couldn't connect to %s.%d",
+      sendto_one(source_p, ":%s NOTICE %s :*** Couldn't connect to %s.%d",
 		 me.name, parv[0], aconf->name,aconf->port);
 
     }
@@ -192,7 +192,7 @@ static void mo_connect(struct Client* client_p, struct Client* server_p,
  *      parv[2] = port number
  *      parv[3] = remote server
  */
-static void ms_connect(struct Client* client_p, struct Client* server_p,
+static void ms_connect(struct Client* client_p, struct Client* source_p,
                       int parc, char* parv[])
 {
   int              port;
@@ -200,7 +200,7 @@ static void ms_connect(struct Client* client_p, struct Client* server_p,
   struct ConfItem* aconf;
   struct Client*   aclient_p;
 
-  if (hunt_server(client_p, server_p,
+  if (hunt_server(client_p, source_p,
                   ":%s CONNECT %s %s :%s", 3, parc, parv) != HUNTED_ISME)
     {
       return;
@@ -208,14 +208,14 @@ static void ms_connect(struct Client* client_p, struct Client* server_p,
 
   if (*parv[1] == '\0')
     {
-      sendto_one(server_p, form_str(ERR_NEEDMOREPARAMS),
+      sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "CONNECT");
       return;
     }
 
   if ((aclient_p = find_server(parv[1])))
     {
-      sendto_one(server_p, ":%s NOTICE %s :Connect: Server %s %s %s.",
+      sendto_one(source_p, ":%s NOTICE %s :Connect: Server %s %s %s.",
                  me.name, parv[0], parv[1], "already exists from",
                  aclient_p->from->name);
       return;
@@ -226,7 +226,7 @@ static void ms_connect(struct Client* client_p, struct Client* server_p,
    */
   if (!(aconf = find_conf_by_name(parv[1], CONF_SERVER))) {
     if (!(aconf = find_conf_by_host(parv[1], CONF_SERVER))) {
-      sendto_one(server_p,
+      sendto_one(source_p,
                  ":%s NOTICE %s :Connect: Host %s not listed in ircd.conf",
                  me.name, parv[0], parv[1]);
       return;
@@ -243,14 +243,14 @@ static void ms_connect(struct Client* client_p, struct Client* server_p,
     {
       if ((port = atoi(parv[2])) <= 0)
         {
-          sendto_one(server_p, ":%s NOTICE %s :Connect: Illegal port number",
+          sendto_one(source_p, ":%s NOTICE %s :Connect: Illegal port number",
                      me.name, parv[0]);
           return;
         }
     }
   else if (port <= 0 && (port = PORTNUM) <= 0)
     {
-      sendto_one(server_p, ":%s NOTICE %s :Connect: missing port number",
+      sendto_one(source_p, ":%s NOTICE %s :Connect: missing port number",
                  me.name, parv[0]);
       return;
     }
@@ -260,11 +260,11 @@ static void ms_connect(struct Client* client_p, struct Client* server_p,
   sendto_wallops_flags(FLAGS_WALLOP, &me,
 			  "Remote CONNECT %s %s from %s",
 			  parv[1], parv[2] ? parv[2] : "",
-			  get_client_name(server_p, MASK_IP));
+			  get_client_name(source_p, MASK_IP));
   sendto_serv_butone(&me,
 		     ":%s WALLOPS :Remote CONNECT %s %s from %s",
 		     me.name, parv[1], parv[2] ? parv[2] : "",
-		     get_client_name(server_p, MASK_IP));
+		     get_client_name(source_p, MASK_IP));
 
 
   log(L_TRACE, "CONNECT From %s : %s %s", 
@@ -275,11 +275,11 @@ static void ms_connect(struct Client* client_p, struct Client* server_p,
    * at this point we should be calling connect_server with a valid
    * C:line and a valid port in the C:line
    */
-  if (serv_connect(aconf, server_p))
-    sendto_one(server_p, ":%s NOTICE %s :*** Connecting to %s.%d",
+  if (serv_connect(aconf, source_p))
+    sendto_one(source_p, ":%s NOTICE %s :*** Connecting to %s.%d",
 		 me.name, parv[0], aconf->name, aconf->port);
   else
-      sendto_one(server_p, ":%s NOTICE %s :*** Couldn't connect to %s.%d",
+      sendto_one(source_p, ":%s NOTICE %s :*** Couldn't connect to %s.%d",
                  me.name, parv[0], aconf->name,aconf->port);
   /*
    * client is either connecting with all the data it needs or has been

@@ -59,7 +59,7 @@ char *_version = "20001122";
  * mo_close - CLOSE message handler
  *  - added by Darren Reed Jul 13 1992.
  */
-static void mo_close(struct Client *client_p, struct Client *server_p,
+static void mo_close(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
   struct Client  *aclient_p;
@@ -78,11 +78,11 @@ static void mo_close(struct Client *client_p, struct Client *server_p,
           !IsHandshake(aclient_p))
         continue;
 #endif
-      sendto_one(server_p, form_str(RPL_CLOSING), me.name, parv[0],
+      sendto_one(source_p, form_str(RPL_CLOSING), me.name, parv[0],
                  get_client_name(aclient_p, SHOW_IP), aclient_p->status);
       (void)exit_client(aclient_p, aclient_p, aclient_p, "Oper Closing");
       closed++;
     }
-  sendto_one(server_p, form_str(RPL_CLOSEEND), me.name, parv[0], closed);
+  sendto_one(source_p, form_str(RPL_CLOSEEND), me.name, parv[0], closed);
 }
 

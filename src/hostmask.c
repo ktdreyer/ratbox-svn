@@ -367,7 +367,7 @@ void clear_conf(void)
  * side effects - NONE
  */
 char *
-show_iline_prefix(struct Client *server_p,struct ConfItem *aconf,char *name)
+show_iline_prefix(struct Client *source_p,struct ConfItem *aconf,char *name)
 {
   static char prefix_of_host[MAXPREFIX];
   char *prefix_ptr;
@@ -387,15 +387,15 @@ show_iline_prefix(struct Client *server_p,struct ConfItem *aconf,char *name)
   if (IsConfDoSpoofIp(aconf))
     *prefix_ptr++ = '=';
 
-  if (IsOper(server_p))
+  if (IsOper(source_p))
     if (IsConfElined(aconf))
       *prefix_ptr++ = '^';
 
-  if (IsOper(server_p))
+  if (IsOper(source_p))
     if (IsConfFlined(aconf))
       *prefix_ptr++ = '>';
 
-  if (IsOper(server_p)) 
+  if (IsOper(source_p)) 
     if (IsConfIdlelined(aconf))
       *prefix_ptr++ = '<';
 
@@ -405,14 +405,14 @@ show_iline_prefix(struct Client *server_p,struct ConfItem *aconf,char *name)
   return prefix_of_host;
 }
 
-/* void report_hostmask_conf_links(struct Client *server_p, int flags)
+/* void report_hostmask_conf_links(struct Client *source_p, int flags)
  * Input: Client to send report to, flags on whether to report I/K lines.
  * Output: -
  * Side-effects: The client is sent a list of all ConfItems they are
  *               entitled to see of the type specified.
  */
 void
-report_hostmask_conf_links(struct Client *server_p, int flags)
+report_hostmask_conf_links(struct Client *source_p, int flags)
 {
   struct HostMaskEntry *mask;
   struct ConfItem *aconf;
@@ -428,24 +428,24 @@ report_hostmask_conf_links(struct Client *server_p, int flags)
 	  aconf = (struct ConfItem*)mask->data;
 	  if (!(aconf->status & CONF_CLIENT))
 	    continue;
-	  if (!(MyConnect(server_p) && IsOper(server_p)) &&
+	  if (!(MyConnect(source_p) && IsOper(source_p)) &&
 	      IsConfDoSpoofIp(aconf))
 	    continue;
 	  get_printable_conf(aconf, &name, &host, &pass, &user, &port,
 			     &classname);
-	  sendto_one(server_p, form_str(RPL_STATSILINE), me.name, server_p->name,
+	  sendto_one(source_p, form_str(RPL_STATSILINE), me.name, source_p->name,
 		     'I', name,
-		     show_iline_prefix(server_p,aconf,user),
+		     show_iline_prefix(source_p,aconf,user),
 		     host, port, classname
 		     );
 	}
       /* I-lines next... */
-      report_ip_Ilines(server_p);
+      report_ip_Ilines(source_p);
     }
   else /* Show K-lines... */
     {
       /* IP K-lines first... */
-      report_ip_Klines(server_p);
+      report_ip_Klines(source_p);
       for (mask = first_mask; mask; mask = mask->next)
 	{
 	  if (mask->type != HOST_CONFITEM)
@@ -455,7 +455,7 @@ report_hostmask_conf_links(struct Client *server_p, int flags)
 	    continue;
 	  get_printable_conf(aconf, &name, &host, &pass, &user, &port,
 			     &classname);
-	  sendto_one(server_p, form_str(RPL_STATSKLINE), me.name, server_p->name,
+	  sendto_one(source_p, form_str(RPL_STATSKLINE), me.name, source_p->name,
 		     'K', host, user, pass
 		     );
 	}

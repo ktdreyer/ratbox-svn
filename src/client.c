@@ -868,7 +868,7 @@ struct Client *find_person(char *name, struct Client *client_p)
  *      an error message (NO SUCH NICK) is generated. If the client was found
  *      through the history, chasing will be 1 and otherwise 0.
  */
-struct Client *find_chasing(struct Client *server_p, char *user, int *chasing)
+struct Client *find_chasing(struct Client *source_p, char *user, int *chasing)
 {
   struct Client *who = find_client(user, (struct Client *)NULL);
   
@@ -878,8 +878,8 @@ struct Client *find_chasing(struct Client *server_p, char *user, int *chasing)
     return who;
   if (!(who = get_history(user, (long)KILLCHASETIMELIMIT)))
     {
-      sendto_one(server_p, form_str(ERR_NOSUCHNICK),
-                 me.name, server_p->name, user);
+      sendto_one(source_p, form_str(ERR_NOSUCHNICK),
+                 me.name, source_p->name, user);
       return ((struct Client *)NULL);
     }
   if (chasing)
@@ -893,7 +893,7 @@ struct Client *find_chasing(struct Client *server_p, char *user, int *chasing)
  * check_registered_user - is used to cancel message, if the
  * originator is a server or not registered yet. In other
  * words, passing this test, *MUST* guarantee that the
- * server_p->user exists (not checked after this--let there
+ * source_p->user exists (not checked after this--let there
  * be coredumps to catch bugs... this is intentional --msa ;)
  *
  * There is this nagging feeling... should this NOT_REGISTERED
@@ -952,12 +952,12 @@ void release_client_dns_reply(struct Client* client)
  *        But, this can be used to any client structure.
  *
  * NOTE 1:
- *        Watch out the allocation of "nbuf", if either server_p->name
- *        or server_p->sockhost gets changed into pointers instead of
+ *        Watch out the allocation of "nbuf", if either source_p->name
+ *        or source_p->sockhost gets changed into pointers instead of
  *        directly allocated within the structure...
  *
  * NOTE 2:
- *        Function return either a pointer to the structure (server_p) or
+ *        Function return either a pointer to the structure (source_p) or
  *        to internal buffer (nbuf). *NEVER* use the returned pointer
  *        to modify what it points!!!
  */
@@ -1057,36 +1057,36 @@ void free_exited_clients( void )
 ** been already removed, and socket closed for local client.
 */
 static void exit_one_client(struct Client *client_p, struct 
-			    Client *server_p, struct Client *from,
+			    Client *source_p, struct Client *from,
                             const char* comment)
 {
   struct Client* aclient_p;
   dlink_node *lp;
   dlink_node *next_lp;
 
-  if (IsServer(server_p))
+  if (IsServer(source_p))
     {
-      if (server_p->servptr && server_p->servptr->serv)
-        del_client_from_llist(&(server_p->servptr->serv->servers),
-                                    server_p);
+      if (source_p->servptr && source_p->servptr->serv)
+        del_client_from_llist(&(source_p->servptr->serv->servers),
+                                    source_p);
       else
-        ts_warn("server %s without servptr!", server_p->name);
+        ts_warn("server %s without servptr!", source_p->name);
     }
-  else if (server_p->servptr && server_p->servptr->serv)
-      del_client_from_llist(&(server_p->servptr->serv->users), server_p);
+  else if (source_p->servptr && source_p->servptr->serv)
+      del_client_from_llist(&(source_p->servptr->serv->users), source_p);
   /* there are clients w/o a servptr: unregistered ones */
 
   /*
   **  For a server or user quitting, propogate the information to
   **  other servers (except to the one where is came from (client_p))
   */
-  if (IsMe(server_p))
+  if (IsMe(source_p))
     {
       sendto_realops_flags(FLAGS_ALL,
 			   "ERROR: tried to exit me! : %s", comment);
       return;        /* ...must *never* exit self!! */
     }
-  else if (IsServer(server_p))
+  else if (IsServer(source_p))
     {
       /*
       ** Old sendto_serv_but_one() call removed because we now
@@ -1097,28 +1097,28 @@ static void exit_one_client(struct Client *client_p, struct
       ** The bulk of this is done in remove_dependents now, all
       ** we have left to do is send the SQUIT upstream.  -orabidoo
       */
-      aclient_p = server_p->from;
+      aclient_p = source_p->from;
       if (aclient_p && IsServer(aclient_p) && aclient_p != client_p && !IsMe(aclient_p) &&
-          (server_p->flags & FLAGS_KILLED) == 0)
-        sendto_one(aclient_p, ":%s SQUIT %s :%s", from->name, server_p->name, comment);
+          (source_p->flags & FLAGS_KILLED) == 0)
+        sendto_one(aclient_p, ":%s SQUIT %s :%s", from->name, source_p->name, comment);
     }
-  else if (!(IsPerson(server_p)))
+  else if (!(IsPerson(source_p)))
       /* ...this test is *dubious*, would need
       ** some thought.. but for now it plugs a
       ** nasty hole in the server... --msa
       */
       ; /* Nothing */
-  else if (server_p->name[0]) /* ...just clean all others with QUIT... */
+  else if (source_p->name[0]) /* ...just clean all others with QUIT... */
     {
       /*
       ** If this exit is generated from "m_kill", then there
       ** is no sense in sending the QUIT--KILL's have been
       ** sent instead.
       */
-      if ((server_p->flags & FLAGS_KILLED) == 0)
+      if ((source_p->flags & FLAGS_KILLED) == 0)
         {
-          sendto_ll_serv_butone(client_p,server_p,0,":%s QUIT :%s",
-                             server_p->name, comment);
+          sendto_ll_serv_butone(client_p,source_p,0,":%s QUIT :%s",
+                             source_p->name, comment);
         }
       /*
       ** If a person is on a channel, send a QUIT notice
@@ -1126,60 +1126,60 @@ static void exit_one_client(struct Client *client_p, struct
       ** that the client can show the "**signoff" message).
       ** (Note: The notice is to the local clients *only*)
       */
-      if (server_p->user)
+      if (source_p->user)
         {
-          sendto_common_channels_local(server_p, ":%s!%s@%s QUIT :%s",
-				       server_p->name,
-				       server_p->username,
-				       server_p->host,
+          sendto_common_channels_local(source_p, ":%s!%s@%s QUIT :%s",
+				       source_p->name,
+				       source_p->username,
+				       source_p->host,
 				       comment);
 
-          for (lp = server_p->user->channel.head; lp; lp = next_lp)
+          for (lp = source_p->user->channel.head; lp; lp = next_lp)
 	    {
 	      next_lp = lp->next;
-	      remove_user_from_channel(lp->data,server_p);
+	      remove_user_from_channel(lp->data,source_p);
 	    }
           
           /* Clean up invitefield */
-          for (lp = server_p->user->invited.head; lp; lp = next_lp)
+          for (lp = source_p->user->invited.head; lp; lp = next_lp)
            {
               next_lp = lp->next;
-              del_invite(lp->data, server_p);
+              del_invite(lp->data, source_p);
            }
 
           /* Clean up allow lists */
-          del_all_accepts(server_p);
+          del_all_accepts(source_p);
 
-	  if (HasID(server_p))
-	    del_from_id_hash_table(server_p->user->id, server_p);
+	  if (HasID(source_p))
+	    del_from_id_hash_table(source_p->user->id, source_p);
   
           /* again, this is all that is needed */
         }
     }
   
   /* 
-   * Remove server_p from the client lists
+   * Remove source_p from the client lists
    */
-  del_from_client_hash_table(server_p->name, server_p);
+  del_from_client_hash_table(source_p->name, source_p);
 
   /* remove from global client list */
-  remove_client_from_list(server_p);
+  remove_client_from_list(source_p);
 
-  SetDead(server_p);
+  SetDead(source_p);
   /* add to dead client dlist */
   lp = make_dlink_node();
-  dlinkAdd(server_p, lp, &dead_list);
+  dlinkAdd(source_p, lp, &dead_list);
 }
 
 /*
-** Recursively send QUITs and SQUITs for server_p and all its dependent clients
+** Recursively send QUITs and SQUITs for source_p and all its dependent clients
 ** and servers to those servers that need them.  A server needs the client
 ** QUITs if it can't figure them out from the SQUIT (ie pre-TS4) or if it
 ** isn't getting the SQUIT because of @#(*&@)# hostmasking.  With TS4, once
 ** a link gets a SQUIT, it doesn't need any QUIT/SQUITs for clients depending
 ** on that one -orabidoo
 */
-static void recurse_send_quits(struct Client *client_p, struct Client *server_p, struct Client *to,
+static void recurse_send_quits(struct Client *client_p, struct Client *source_p, struct Client *to,
                                 const char* comment,  /* for servers */
                                 const char* myname)
 {
@@ -1191,47 +1191,47 @@ static void recurse_send_quits(struct Client *client_p, struct Client *server_p,
 
   if (IsCapable(to,CAP_QS))
     {
-      if (match(myname, server_p->name))
+      if (match(myname, source_p->name))
         {
-          for (aclient_p = server_p->serv->users; aclient_p; aclient_p = aclient_p->lnext)
+          for (aclient_p = source_p->serv->users; aclient_p; aclient_p = aclient_p->lnext)
             sendto_one(to, ":%s QUIT :%s", aclient_p->name, comment);
-          for (aclient_p = server_p->serv->servers; aclient_p; aclient_p = aclient_p->lnext)
+          for (aclient_p = source_p->serv->servers; aclient_p; aclient_p = aclient_p->lnext)
             recurse_send_quits(client_p, aclient_p, to, comment, myname);
         }
       else
-        sendto_one(to, "SQUIT %s :%s", server_p->name, me.name);
+        sendto_one(to, "SQUIT %s :%s", source_p->name, me.name);
     }
   else
     {
-      for (aclient_p = server_p->serv->users; aclient_p; aclient_p = aclient_p->lnext)
+      for (aclient_p = source_p->serv->users; aclient_p; aclient_p = aclient_p->lnext)
         sendto_one(to, ":%s QUIT :%s", aclient_p->name, comment);
-      for (aclient_p = server_p->serv->servers; aclient_p; aclient_p = aclient_p->lnext)
+      for (aclient_p = source_p->serv->servers; aclient_p; aclient_p = aclient_p->lnext)
         recurse_send_quits(client_p, aclient_p, to, comment, myname);
-      if (!match(myname, server_p->name))
-        sendto_one(to, "SQUIT %s :%s", server_p->name, me.name);
+      if (!match(myname, source_p->name))
+        sendto_one(to, "SQUIT %s :%s", source_p->name, me.name);
     }
 }
 
 /* 
-** Remove all clients that depend on server_p; assumes all (S)QUITs have
+** Remove all clients that depend on source_p; assumes all (S)QUITs have
 ** already been sent.  we make sure to exit a server's dependent clients 
 ** and servers before the server itself; exit_one_client takes care of 
 ** actually removing things off llists.   tweaked from +CSr31  -orabidoo
 */
 /*
- * added sanity test code.... server_p->serv might be NULL...
+ * added sanity test code.... source_p->serv might be NULL...
  */
-static void recurse_remove_clients(struct Client* server_p, const char* comment)
+static void recurse_remove_clients(struct Client* source_p, const char* comment)
 {
   struct Client *aclient_p;
 
-  if (IsMe(server_p))
+  if (IsMe(source_p))
     return;
 
-  if (!server_p->serv)        /* oooops. uh this is actually a major bug */
+  if (!source_p->serv)        /* oooops. uh this is actually a major bug */
     return;
 
-  while ( (aclient_p = server_p->serv->servers) )
+  while ( (aclient_p = source_p->serv->servers) )
     {
       recurse_remove_clients(aclient_p, comment);
       /*
@@ -1242,7 +1242,7 @@ static void recurse_remove_clients(struct Client* server_p, const char* comment)
       exit_one_client(NULL, aclient_p, &me, me.name);
     }
 
-  while ( (aclient_p = server_p->serv->users) )
+  while ( (aclient_p = source_p->serv->users) )
     {
       aclient_p->flags |= FLAGS_KILLED;
       exit_one_client(NULL, aclient_p, &me, comment);
@@ -1250,12 +1250,12 @@ static void recurse_remove_clients(struct Client* server_p, const char* comment)
 }
 
 /*
-** Remove *everything* that depends on server_p, from all lists, and sending
-** all necessary QUITs and SQUITs.  server_p itself is still on the lists,
+** Remove *everything* that depends on source_p, from all lists, and sending
+** all necessary QUITs and SQUITs.  source_p itself is still on the lists,
 ** and its SQUITs have been sent except for the upstream one  -orabidoo
 */
 static void remove_dependents(struct Client* client_p, 
-                               struct Client* server_p,
+                               struct Client* source_p,
                                struct Client* from,
                                const char* comment,
                                const char* comment1)
@@ -1269,10 +1269,10 @@ static void remove_dependents(struct Client* client_p,
     {
       to = ptr->data;
 
-      if (IsMe(to) ||to == server_p->from || (to == client_p && IsCapable(to,CAP_QS)))
+      if (IsMe(to) ||to == source_p->from || (to == client_p && IsCapable(to,CAP_QS)))
         continue;
 
-      /* MyConnect(server_p) is rotten at this point: if server_p
+      /* MyConnect(source_p) is rotten at this point: if source_p
        * was mine, ->from is NULL. 
        */
       /* The WALLOPS isn't needed here as pointed out by
@@ -1283,10 +1283,10 @@ static void remove_dependents(struct Client* client_p,
         strncpy_irc(myname, my_name_for_link(me.name, aconf), HOSTLEN);
       else
         strncpy_irc(myname, me.name, HOSTLEN);
-      recurse_send_quits(client_p, server_p, to, comment1, myname);
+      recurse_send_quits(client_p, source_p, to, comment1, myname);
     }
 
-  recurse_remove_clients(server_p, comment1);
+  recurse_remove_clients(source_p, comment1);
 }
 
 
@@ -1307,8 +1307,8 @@ static void remove_dependents(struct Client* client_p,
 ** For convenience, this function returns a suitable value for
 ** m_function return value:
 **
-**        CLIENT_EXITED        if (client_p == server_p)
-**        0                if (client_p != server_p)
+**        CLIENT_EXITED        if (client_p == source_p)
+**        0                if (client_p != source_p)
 */
 int exit_client(
 struct Client* client_p, /*
@@ -1316,7 +1316,7 @@ struct Client* client_p, /*
                      ** exit is generated by this server for internal reasons.
                      ** This will not get any of the generated messages.
                      */
-struct Client* server_p,        /* Client exiting */
+struct Client* source_p,        /* Client exiting */
 struct Client* from,        /* Client firing off this Exit, never NULL! */
 const char* comment         /* Reason for the exit */
                    )
@@ -1326,49 +1326,49 @@ const char* comment         /* Reason for the exit */
   char comment1[HOSTLEN + HOSTLEN + 2];
   dlink_node *m;
 
-  /* server_p->flags |= FLAGS_DEADSOCKET; */
+  /* source_p->flags |= FLAGS_DEADSOCKET; */
 
-  if (MyConnect(server_p))
+  if (MyConnect(source_p))
     {
-      if (server_p->flags & FLAGS_IPHASH)
-        remove_one_ip(&server_p->localClient->ip);
+      if (source_p->flags & FLAGS_IPHASH)
+        remove_one_ip(&source_p->localClient->ip);
       
-      delete_adns_queries(server_p->localClient->dns_query);
-      delete_identd_queries(server_p);
+      delete_adns_queries(source_p->localClient->dns_query);
+      delete_identd_queries(source_p);
 
-      client_flush_input(server_p);
+      client_flush_input(source_p);
 
-      /* This server_p could have status of one of STAT_UNKNOWN, STAT_CONNECTING
+      /* This source_p could have status of one of STAT_UNKNOWN, STAT_CONNECTING
        * STAT_HANDSHAKE or STAT_UNKNOWN
        * all of which are lumped together into unknown_list
        *
        * In all above cases IsRegistered() will not be true.
        */
-      if (!IsRegistered(server_p))
+      if (!IsRegistered(source_p))
 	{
-	  m = dlinkFind(&unknown_list,server_p);
+	  m = dlinkFind(&unknown_list,source_p);
 	  if( m != NULL )
 	    {
 	      dlinkDelete(m, &unknown_list);
 	      free_dlink_node(m);
 	    }
 	}
-      if (IsOper(server_p))
+      if (IsOper(source_p))
         {
-	  m = dlinkFind(&oper_list,server_p);
+	  m = dlinkFind(&oper_list,source_p);
 	  if( m != NULL )
 	    {
 	      dlinkDelete(m, &oper_list);
 	      free_dlink_node(m);
 	    }
         }
-      if (IsClient(server_p))
+      if (IsClient(source_p))
         {
           Count.local--;
 
-          if(IsPerson(server_p))        /* a little extra paranoia */
+          if(IsPerson(source_p))        /* a little extra paranoia */
             {
-	      m = dlinkFind(&lclient_list,server_p);
+	      m = dlinkFind(&lclient_list,source_p);
 	      if( m != NULL )
 		{
 		  dlinkDelete(m,&lclient_list);
@@ -1381,9 +1381,9 @@ const char* comment         /* Reason for the exit */
        * it has to be put on the serv_list, or SJOIN's to this new server
        * from the connect burst will not be seen.
        */
-      if (IsServer(server_p) || IsConnecting(server_p) || IsHandshake(server_p))
+      if (IsServer(source_p) || IsConnecting(source_p) || IsHandshake(source_p))
 	{
-	  m = dlinkFind(&serv_list,server_p);
+	  m = dlinkFind(&serv_list,source_p);
 	  if( m != NULL )
 	    {
 	      dlinkDelete(m,&serv_list);
@@ -1391,34 +1391,34 @@ const char* comment         /* Reason for the exit */
 	    }
 	}
 
-      if (IsServer(server_p))
+      if (IsServer(source_p))
         {
           Count.myserver--;
 
 	  if(ServerInfo.hub)
-	    remove_lazylink_flags(server_p->localClient->serverMask);
+	    remove_lazylink_flags(source_p->localClient->serverMask);
 	  else
 	    uplink = NULL;
         }
 
-      server_p->flags |= FLAGS_CLOSING;
+      source_p->flags |= FLAGS_CLOSING;
 
-      if (IsPerson(server_p))
+      if (IsPerson(source_p))
         sendto_realops_flags(FLAGS_CCONN,
                              "Client exiting: %s (%s@%s) [%s] [%s]",
-                             server_p->name, server_p->username, server_p->host,
-                             comment, server_p->localClient->sockhost);
+                             source_p->name, source_p->username, source_p->host,
+                             comment, source_p->localClient->sockhost);
 
-      log_user_exit(server_p);
+      log_user_exit(source_p);
 
-      if (server_p->fd >= 0)
+      if (source_p->fd >= 0)
 	{
-	  if (client_p != NULL && server_p != client_p)
-	    sendto_one(server_p, "ERROR :Closing Link: %s %s (%s)",
-		       server_p->host, server_p->name, comment);
+	  if (client_p != NULL && source_p != client_p)
+	    sendto_one(source_p, "ERROR :Closing Link: %s %s (%s)",
+		       source_p->host, source_p->name, comment);
 	  else
-	    sendto_one(server_p, "ERROR :Closing Link: %s (%s)",
-		       server_p->host, comment);
+	    sendto_one(source_p, "ERROR :Closing Link: %s (%s)",
+		       source_p->host, comment);
 	}
       /*
       ** Currently only server connections can have
@@ -1429,15 +1429,15 @@ const char* comment         /* Reason for the exit */
       **
       ** Close the Client connection first and mark it
       ** so that no messages are attempted to send to it.
-      ** (The following *must* make MyConnect(server_p) == FALSE!).
-      ** It also makes server_p->from == NULL, thus it's unnecessary
-      ** to test whether "server_p != aclient_p" in the following loops.
+      ** (The following *must* make MyConnect(source_p) == FALSE!).
+      ** It also makes source_p->from == NULL, thus it's unnecessary
+      ** to test whether "source_p != aclient_p" in the following loops.
       */
       
-      close_connection(server_p);
+      close_connection(source_p);
     }
 
-  if(IsServer(server_p))
+  if(IsServer(source_p))
     {        
       if( GlobalSetOptions.hide_server )
 	{
@@ -1451,37 +1451,37 @@ const char* comment         /* Reason for the exit */
 	}
       else
 	{
-	  if((server_p->serv) && (server_p->serv->up))
-	    strcpy(comment1, server_p->serv->up);
+	  if((source_p->serv) && (source_p->serv->up))
+	    strcpy(comment1, source_p->serv->up);
 	  else
 	    strcpy(comment1, "<Unknown>" );
 
 	  strcat(comment1," ");
-	  strcat(comment1, server_p->name);
+	  strcat(comment1, source_p->name);
 	}
 
-      remove_dependents(client_p, server_p, from, comment, comment1);
+      remove_dependents(client_p, source_p, from, comment, comment1);
 
-      if (server_p->servptr == &me)
+      if (source_p->servptr == &me)
         {
           sendto_realops_flags(FLAGS_ALL,
 		       "%s was connected for %d seconds.  %d/%d sendK/recvK.",
-			       server_p->name, (int)(CurrentTime - server_p->firsttime),
-			       server_p->localClient->sendK,
-			       server_p->localClient->receiveK);
+			       source_p->name, (int)(CurrentTime - source_p->firsttime),
+			       source_p->localClient->sendK,
+			       source_p->localClient->receiveK);
           log(L_NOTICE, "%s was connected for %d seconds.  %d/%d sendK/recvK.",
-              server_p->name, CurrentTime - server_p->firsttime, 
-              server_p->localClient->sendK, server_p->localClient->receiveK);
+              source_p->name, CurrentTime - source_p->firsttime, 
+              source_p->localClient->sendK, source_p->localClient->receiveK);
 
               /* Just for paranoia... this shouldn't be necessary if the
               ** remove_dependents() stuff works, but it's still good
-              ** to do it.    MyConnect(server_p) has been set to false,
+              ** to do it.    MyConnect(source_p) has been set to false,
               ** so we look at servptr, which should be ok  -orabidoo
               */
               for (aclient_p = GlobalClientList; aclient_p; aclient_p = next)
                 {
                   next = aclient_p->next;
-                  if (!IsServer(aclient_p) && aclient_p->from == server_p)
+                  if (!IsServer(aclient_p) && aclient_p->from == source_p)
                     {
                       ts_warn("Dependent client %s not on llist!?",
                               aclient_p->name);
@@ -1494,7 +1494,7 @@ const char* comment         /* Reason for the exit */
               for (aclient_p = GlobalClientList; aclient_p; aclient_p = next)
                 {
                   next = aclient_p->next;
-                  if (IsServer(aclient_p) && aclient_p->from == server_p)
+                  if (IsServer(aclient_p) && aclient_p->from == source_p)
                     {
                       ts_warn("Dependent server %s not on llist!?", 
                                      aclient_p->name);
@@ -1504,8 +1504,8 @@ const char* comment         /* Reason for the exit */
             }
         }
 
-  exit_one_client(client_p, server_p, from, comment);
-  return client_p == server_p ? CLIENT_EXITED : 0;
+  exit_one_client(client_p, source_p, from, comment);
+  return client_p == source_p ? CLIENT_EXITED : 0;
 }
 
 /*
@@ -1692,7 +1692,7 @@ void del_all_accepts(struct Client *client_p)
  * output	- NONE
  * side effects - list allow list
  */
-void list_all_accepts(struct Client *server_p)
+void list_all_accepts(struct Client *source_p)
 {
   dlink_node *ptr;
   struct Client *aclient_p;
@@ -1702,10 +1702,10 @@ void list_all_accepts(struct Client *server_p)
   nicks[0] = nicks[1] = nicks[2] = nicks[3] = nicks[4] = nicks[5]
     = nicks[6] = nicks[7] = "";
 
-  sendto_one(server_p,":%s NOTICE %s :*** Current accept list",
-	     me.name, server_p->name);
+  sendto_one(source_p,":%s NOTICE %s :*** Current accept list",
+	     me.name, source_p->name);
 
-  for (ptr = server_p->allow_list.head; ptr; ptr = ptr->next)
+  for (ptr = source_p->allow_list.head; ptr; ptr = ptr->next)
     {
       aclient_p = ptr->data;
 
@@ -1716,8 +1716,8 @@ void list_all_accepts(struct Client *server_p)
 
       if(j > 7)
 	{
-	  sendto_one(server_p,":%s NOTICE %s :%s %s %s %s %s %s %s %s",
-		     me.name, server_p->name,
+	  sendto_one(source_p,":%s NOTICE %s :%s %s %s %s %s %s %s %s",
+		     me.name, source_p->name,
 		     nicks[0], nicks[1], nicks[2], nicks[3],
 		     nicks[4], nicks[5], nicks[6], nicks[7] );
 	  j = 0;
@@ -1728,8 +1728,8 @@ void list_all_accepts(struct Client *server_p)
     }
 
   if(j)
-    sendto_one(server_p,":%s NOTICE %s :%s %s %s %s %s %s %s %s",
-	       me.name, server_p->name,
+    sendto_one(source_p,":%s NOTICE %s :%s %s %s %s %s %s %s %s",
+	       me.name, source_p->name,
 	       nicks[0], nicks[1], nicks[2], nicks[3],
 	       nicks[4], nicks[5], nicks[6], nicks[7] );
 }
@@ -1744,7 +1744,7 @@ void list_all_accepts(struct Client *server_p)
  * client. 
  */
 int
-set_initial_nick(struct Client *client_p, struct Client *server_p,
+set_initial_nick(struct Client *client_p, struct Client *source_p,
                  char *nick)
 {
   char buf[USERLEN + 1];
@@ -1752,11 +1752,11 @@ set_initial_nick(struct Client *client_p, struct Client *server_p,
   /* Client setting NICK the first time */
 
   /* This had to be copied here to avoid problems.. */
-  strcpy(server_p->name, nick);
-  server_p->tsinfo = CurrentTime;
-  if (server_p->user)
+  strcpy(source_p->name, nick);
+  source_p->tsinfo = CurrentTime;
+  if (source_p->user)
     {
-      strncpy_irc(buf, server_p->username, USERLEN);
+      strncpy_irc(buf, source_p->username, USERLEN);
       buf[USERLEN] = '\0';
       /*
       ** USER already received, now we have NICK.
@@ -1770,9 +1770,9 @@ set_initial_nick(struct Client *client_p, struct Client *server_p,
       /*
        * Send the client to the iauth module for verification
        */
-      BeginAuthorization(server_p);
+      BeginAuthorization(source_p);
 #else
-      if (register_local_user(client_p, server_p, nick, buf) == CLIENT_EXITED)
+      if (register_local_user(client_p, source_p, nick, buf) == CLIENT_EXITED)
 	return CLIENT_EXITED;
 #endif
     }
@@ -1780,10 +1780,10 @@ set_initial_nick(struct Client *client_p, struct Client *server_p,
   /*
   **  Finally set new nick name.
   */
-  if (server_p->name[0])
-    del_from_client_hash_table(server_p->name, server_p);
-  strcpy(server_p->name, nick);
-  add_to_client_hash_table(nick, server_p);
+  if (source_p->name[0])
+    del_from_client_hash_table(source_p->name, source_p);
+  strcpy(source_p->name, nick);
+  add_to_client_hash_table(nick, source_p);
 
   /*
    * .. and update the new nick in the fd note.
@@ -1808,7 +1808,7 @@ set_initial_nick(struct Client *client_p, struct Client *server_p,
  * side effects	- changes nick of a LOCAL user
  *
  */
-int change_local_nick(struct Client *client_p, struct Client *server_p,
+int change_local_nick(struct Client *client_p, struct Client *source_p,
                       char *nick)
 {
   char nickbuf[NICKLEN + 10];
@@ -1819,28 +1819,28 @@ int change_local_nick(struct Client *client_p, struct Client *server_p,
   ** on that channel. Propagate notice to other servers.
   */
 
-  if( (server_p->localClient->last_nick_change +
+  if( (source_p->localClient->last_nick_change +
        ConfigFileEntry.max_nick_time) < CurrentTime)
-    server_p->localClient->number_of_nick_changes = 0;
-  server_p->localClient->last_nick_change = CurrentTime;
-  server_p->localClient->number_of_nick_changes++;
+    source_p->localClient->number_of_nick_changes = 0;
+  source_p->localClient->last_nick_change = CurrentTime;
+  source_p->localClient->number_of_nick_changes++;
 
   if((ConfigFileEntry.anti_nick_flood && 
-      (server_p->localClient->number_of_nick_changes
+      (source_p->localClient->number_of_nick_changes
        <= ConfigFileEntry.max_nick_changes)) ||
      !ConfigFileEntry.anti_nick_flood)
     {
       sendto_realops_flags(FLAGS_NCHANGE,
 			   "Nick change: From %s to %s [%s@%s]",
-			   server_p->name, nick, server_p->username,
-			   server_p->host);
+			   source_p->name, nick, source_p->username,
+			   source_p->host);
 
-      sendto_common_channels_local(server_p, ":%s!%s@%s NICK :%s",
-				   server_p->name, server_p->username, server_p->host,
+      sendto_common_channels_local(source_p, ":%s!%s@%s NICK :%s",
+				   source_p->name, source_p->username, source_p->host,
 				   nick);
-      if (server_p->user)
+      if (source_p->user)
 	{
-	  add_history(server_p,1);
+	  add_history(source_p,1);
 	  
 	  /* Only hubs care about lazy link nicks not being sent on yet
 	   * lazylink leafs/leafs always send their nicks up to hub,
@@ -1848,30 +1848,30 @@ int change_local_nick(struct Client *client_p, struct Client *server_p,
 	   * hubs might not propogate a nick change, if the leaf
 	   * does not know about that client yet.
 	   */
-          sendto_ll_serv_butone(client_p, server_p, 0, ":%s NICK %s :%lu",
-                                server_p->name, nick, server_p->tsinfo);
+          sendto_ll_serv_butone(client_p, source_p, 0, ":%s NICK %s :%lu",
+                                source_p->name, nick, source_p->tsinfo);
 	}
     }
   else
     {
-      sendto_one(server_p,
+      sendto_one(source_p,
 		 ":%s NOTICE %s :*** Notice -- Too many nick changes wait %d seconds before trying to change it again.",
 		 me.name,
-		 server_p->name,
+		 source_p->name,
 		 ConfigFileEntry.max_nick_time);
       return 0;
     }
 
   /* Finally, add to hash */
-  del_from_client_hash_table(server_p->name, server_p);
-  strcpy(server_p->name, nick);
-  add_to_client_hash_table(nick, server_p);
+  del_from_client_hash_table(source_p->name, source_p);
+  strcpy(source_p->name, nick);
+  add_to_client_hash_table(nick, source_p);
 
   /* Make sure everyone that has this client on its accept list
    * loses that reference. 
    */
 
-  del_all_accepts(server_p);
+  del_all_accepts(source_p);
 
   /*
    * .. and update the new nick in the fd note.

@@ -496,7 +496,7 @@ hash(char *p)
  * output	- NONE
  * side effects	- NONE
  */
-void report_messages(struct Client *server_p)
+void report_messages(struct Client *source_p)
 {
   int i;
   struct MessageHash *ptr;
@@ -508,8 +508,8 @@ void report_messages(struct Client *server_p)
 	  assert(ptr->msg != NULL);
 	  assert(ptr->cmd != NULL);
 	  
-	  sendto_one(server_p, form_str(RPL_STATSCOMMANDS),
-		     me.name, server_p->name, ptr->cmd,
+	  sendto_one(source_p, form_str(RPL_STATSCOMMANDS),
+		     me.name, source_p->name, ptr->cmd,
 		     ptr->msg->count, ptr->msg->bytes);
 	}
     }
@@ -523,7 +523,7 @@ void report_messages(struct Client *server_p)
  * side effects	- 
  */
 static  int     cancel_clients(struct Client *client_p,
-                               struct Client *server_p,
+                               struct Client *source_p,
                                char *cmd)
 {
   /*
@@ -549,16 +549,16 @@ static  int     cancel_clients(struct Client *client_p,
    * client trying to be annoying, just QUIT them, if it is a server
    * then the same deal.
    */
-  if (IsServer(server_p) || IsMe(server_p))
+  if (IsServer(source_p) || IsMe(source_p))
     {
       sendto_realops_flags(FLAGS_DEBUG, "Message for %s[%s] from %s",
-                         server_p->name, server_p->from->name,
+                         source_p->name, source_p->from->name,
                          get_client_name(client_p, SHOW_IP));
       if (IsServer(client_p))
         {
           sendto_realops_flags(FLAGS_DEBUG,
                              "Not dropping server %s (%s) for Fake Direction",
-                             client_p->name, server_p->name);
+                             client_p->name, source_p->name);
           return -1;
         }
 
@@ -586,11 +586,11 @@ static  int     cancel_clients(struct Client *client_p,
     **
     ** all servers must be TS these days --is
     */
-	   if (server_p->user)
+	   if (source_p->user)
 		   sendto_realops_flags(FLAGS_DEBUG,
 			"Message for %s[%s@%s!%s] from %s (TS, ignored)",
-			server_p->name, server_p->username, server_p->host,
-			server_p->from->name, get_client_name(client_p, SHOW_IP));
+			source_p->name, source_p->username, source_p->host,
+			source_p->from->name, get_client_name(client_p, SHOW_IP));
 	   return 0;
    }
   return exit_client(client_p, client_p, &me, "Fake prefix");
@@ -665,14 +665,14 @@ static  void    remove_unknown(struct Client *client_p,
 */
 static void do_numeric(char numeric[],
                        struct Client *client_p,
-                       struct Client *server_p,
+                       struct Client *source_p,
                        int parc,
                        char *parv[])
 {
   struct Client *aclient_p;
   struct Channel *chptr;
 
-  if (parc < 1 || !IsServer(server_p))
+  if (parc < 1 || !IsServer(source_p))
     return;
 
   /* Remap low number numerics. */
@@ -708,7 +708,7 @@ static void do_numeric(char numeric[],
            */
           sendto_realops_flags(FLAGS_ALL,
                                "*** %s(via %s) sent a %s numeric to me?!?",
-                               server_p->name, client_p->name, numeric);
+                               source_p->name, client_p->name, numeric);
           return;
         }
       else if (aclient_p->from == client_p) 
@@ -722,13 +722,13 @@ static void do_numeric(char numeric[],
       if(GlobalSetOptions.hide_server && MyClient(aclient_p) && !IsOper(aclient_p))
 	sendto_one(aclient_p, ":%s %s %s%s", me.name, numeric, parv[1], buffer);
       else
-        sendto_one(aclient_p, ":%s %s %s%s", server_p->name, numeric, parv[1], buffer);
+        sendto_one(aclient_p, ":%s %s %s%s", source_p->name, numeric, parv[1], buffer);
       return;
       }
       else if ((chptr = hash_find_channel(parv[1], (struct Channel *)NULL)))
         sendto_channel_local(ALL_MEMBERS, chptr,
                              ":%s %s %s %s",
-                              server_p->name,
+                              source_p->name,
                               numeric, RootChan(chptr)->chname, buffer);
 }
 
@@ -739,13 +739,13 @@ static void do_numeric(char numeric[],
  * output	-
  * side effects	- just returns a nastyogram to given user
  */
-void m_not_oper(struct Client* client_p, struct Client* server_p,
+void m_not_oper(struct Client* client_p, struct Client* source_p,
                 int parc, char* parv[])
 {
-  sendto_one(server_p, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
+  sendto_one(source_p, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
 }
 
-void m_unregistered(struct Client* client_p, struct Client* server_p,
+void m_unregistered(struct Client* client_p, struct Client* source_p,
                     int parc, char* parv[])
 {
   /* bit of a hack.
@@ -762,14 +762,14 @@ void m_unregistered(struct Client* client_p, struct Client* server_p,
     }
 }
 
-void m_registered(struct Client* client_p, struct Client* server_p,
+void m_registered(struct Client* client_p, struct Client* source_p,
                   int parc, char* parv[])
 {
   sendto_one(client_p, form_str(ERR_ALREADYREGISTRED),   
              me.name, parv[0]); 
 }
 
-void m_ignore(struct Client* client_p, struct Client* server_p,
+void m_ignore(struct Client* client_p, struct Client* source_p,
               int parc, char* parv[])
 {
   return;

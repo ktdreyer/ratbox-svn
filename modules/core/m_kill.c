@@ -70,7 +70,7 @@ char *_version = "20001122";
 **      parv[1] = kill victim
 **      parv[2] = kill path
 */
-static void mo_kill(struct Client *client_p, struct Client *server_p,
+static void mo_kill(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
   struct Client*    aclient_p;
@@ -81,9 +81,9 @@ static void mo_kill(struct Client *client_p, struct Client *server_p,
   user = parv[1];
   reason = parv[2]; /* Either defined or NULL (parc >= 2!!) */
 
-  if (!IsSetOperK(server_p))
+  if (!IsSetOperK(source_p))
     {
-      sendto_one(server_p,":%s NOTICE %s :You have no K flag",me.name,parv[0]);
+      sendto_one(source_p,":%s NOTICE %s :You have no K flag",me.name,parv[0]);
       return;
     }
 
@@ -104,23 +104,23 @@ static void mo_kill(struct Client *client_p, struct Client *server_p,
       */
       if (!(aclient_p = get_history(user, (long)KILLCHASETIMELIMIT)))
         {
-          sendto_one(server_p, form_str(ERR_NOSUCHNICK),
+          sendto_one(source_p, form_str(ERR_NOSUCHNICK),
                      me.name, parv[0], user);
           return;
         }
-      sendto_one(server_p,":%s NOTICE %s :KILL changed from %s to %s",
+      sendto_one(source_p,":%s NOTICE %s :KILL changed from %s to %s",
                  me.name, parv[0], user, aclient_p->name);
     }
   if (IsServer(aclient_p) || IsMe(aclient_p))
     {
-      sendto_one(server_p, form_str(ERR_CANTKILLSERVER),
+      sendto_one(source_p, form_str(ERR_CANTKILLSERVER),
                  me.name, parv[0]);
       return;
     }
 
-  if (!MyConnect(aclient_p) && (!IsOperGlobalKill(server_p)))
+  if (!MyConnect(aclient_p) && (!IsOperGlobalKill(source_p)))
     {
-      sendto_one(server_p, ":%s NOTICE %s :Nick %s isnt on your server",
+      sendto_one(source_p, ":%s NOTICE %s :Nick %s isnt on your server",
                  me.name, parv[0], aclient_p->name);
       return;
     }
@@ -148,7 +148,7 @@ static void mo_kill(struct Client *client_p, struct Client *server_p,
   */
   if (!MyConnect(aclient_p))
     {
-      relay_kill(client_p, server_p, aclient_p, inpath, reason);
+      relay_kill(client_p, source_p, aclient_p, inpath, reason);
       /*
       ** Set FLAGS_KILLED. This prevents exit_one_client from sending
       ** the unnecessary QUIT for this. (This flag should never be
@@ -157,7 +157,7 @@ static void mo_kill(struct Client *client_p, struct Client *server_p,
       aclient_p->flags |= FLAGS_KILLED;
     }
 
-  exit_client(client_p, aclient_p, server_p, reason);
+  exit_client(client_p, aclient_p, source_p, reason);
 }
 
 /*
@@ -166,7 +166,7 @@ static void mo_kill(struct Client *client_p, struct Client *server_p,
 **      parv[1] = kill victim
 **      parv[2] = kill path
 */
-static void ms_kill(struct Client *client_p, struct Client *server_p,
+static void ms_kill(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
   struct Client*    aclient_p;
@@ -178,7 +178,7 @@ static void ms_kill(struct Client *client_p, struct Client *server_p,
 
   if (*parv[1] == '\0')
     {
-      sendto_one(server_p, form_str(ERR_NEEDMOREPARAMS),
+      sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "KILL");
       return;
     }
@@ -196,17 +196,17 @@ static void ms_kill(struct Client *client_p, struct Client *server_p,
       if( (*user == '.')  ||
 	  (!(aclient_p = get_history(user, (long)KILLCHASETIMELIMIT))))
         {
-          sendto_one(server_p, form_str(ERR_NOSUCHNICK),
+          sendto_one(source_p, form_str(ERR_NOSUCHNICK),
                      me.name, parv[0], user);
           return;
         }
-      sendto_one(server_p,":%s NOTICE %s :KILL changed from %s to %s",
+      sendto_one(source_p,":%s NOTICE %s :KILL changed from %s to %s",
                  me.name, parv[0], user, aclient_p->name);
       chasing = 1;
     }
   if (IsServer(aclient_p) || IsMe(aclient_p))
     {
-      sendto_one(server_p, form_str(ERR_CANTKILLSERVER),
+      sendto_one(source_p, form_str(ERR_CANTKILLSERVER),
                  me.name, parv[0]);
       return;
     }
@@ -233,11 +233,11 @@ static void ms_kill(struct Client *client_p, struct Client *server_p,
         reason = parv[2];
     }
 
-  if (IsOper(server_p)) /* send it normally */
+  if (IsOper(source_p)) /* send it normally */
     {
       sendto_realops_flags(FLAGS_ALL,
 			   "Received KILL message for %s. From %s Path: %s %s",
-			   aclient_p->name, parv[0], server_p->user->server, reason);
+			   aclient_p->name, parv[0], source_p->user->server, reason);
     }
   else
     {
@@ -255,9 +255,9 @@ static void ms_kill(struct Client *client_p, struct Client *server_p,
   ** Suicide kills are NOT passed on --SRB
   */
 
-  if (!MyConnect(aclient_p) || !MyConnect(server_p) || !IsOper(server_p))
+  if (!MyConnect(aclient_p) || !MyConnect(source_p) || !IsOper(source_p))
     {
-      relay_kill(client_p, server_p, aclient_p, inpath, reason);
+      relay_kill(client_p, source_p, aclient_p, inpath, reason);
 
       /*
       ** Set FLAGS_KILLED. This prevents exit_one_client from sending
@@ -267,10 +267,10 @@ static void ms_kill(struct Client *client_p, struct Client *server_p,
       aclient_p->flags |= FLAGS_KILLED;
     }
 
-  exit_client(client_p, aclient_p, server_p, reason );
+  exit_client(client_p, aclient_p, source_p, reason );
 }
 
-static void relay_kill(struct Client *one, struct Client *server_p,
+static void relay_kill(struct Client *one, struct Client *source_p,
                        struct Client *aclient_p,
                        const char *inpath,
 		       const char *reason)
@@ -282,19 +282,19 @@ static void relay_kill(struct Client *one, struct Client *server_p,
   
   /* LazyLinks:
    * Check if each lazylink knows about aclient_p.
-   *   If it does, send the kill, introducing server_p if required.
+   *   If it does, send the kill, introducing source_p if required.
    *   If it doesn't either:
    *     a) don't send the kill (risk ghosts)
-   *     b) introduce the client (and server_p, if required)
+   *     b) introduce the client (and source_p, if required)
    *        [rather redundant]
    *
-   * Use a) if IsServer(server_p), but if an oper kills someone,
+   * Use a) if IsServer(source_p), but if an oper kills someone,
    * ensure we blow away any ghosts.
    *
    * -davidt
    */
 
-  if(IsServer(server_p))
+  if(IsServer(source_p))
     introduce_killed_client = 0;
   else
     introduce_killed_client = 1;
@@ -324,7 +324,7 @@ static void relay_kill(struct Client *one, struct Client *server_p,
       client_burst_if_needed(client_p, aclient_p);
 
     /* introduce source of kill */
-    client_burst_if_needed(client_p, server_p);
+    client_burst_if_needed(client_p, source_p);
 
     /* check the server supports UID */
     if (IsCapable(client_p, CAP_UID))
@@ -332,17 +332,17 @@ static void relay_kill(struct Client *one, struct Client *server_p,
     else
       user = aclient_p->name;
 
-    if(MyConnect(server_p))
+    if(MyConnect(source_p))
     {
       sendto_one(client_p, ":%s KILL %s :%s!%s!%s!%s %s",
-                 server_p->name, user,
-                 me.name, server_p->host, server_p->username,
-                 server_p->name, reason);
+                 source_p->name, user,
+                 me.name, source_p->host, source_p->username,
+                 source_p->name, reason);
     }
     else
     {
       sendto_one(client_p, ":%s KILL %s :%s!%s %s",
-                 server_p->name, user, me.name,
+                 source_p->name, user, me.name,
                  inpath, reason);
     }
   }

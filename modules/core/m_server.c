@@ -80,7 +80,7 @@ static int       refresh_user_links=0;
  *      parv[2] = serverinfo/hopcount
  *      parv[3] = serverinfo
  */
-static void mr_server(struct Client *client_p, struct Client *server_p,
+static void mr_server(struct Client *client_p, struct Client *source_p,
                       int parc, char *parv[])
 {
   char             info[REALLEN + 1];
@@ -231,7 +231,7 @@ static void mr_server(struct Client *client_p, struct Client *server_p,
  *      parv[2] = serverinfo/hopcount
  *      parv[3] = serverinfo
  */
-static void ms_server(struct Client *client_p, struct Client *server_p,
+static void ms_server(struct Client *client_p, struct Client *source_p,
                       int parc, char *parv[])
 {
   char             info[REALLEN + 1];
@@ -273,8 +273,8 @@ static void ms_server(struct Client *client_p, struct Client *server_p,
       
       sendto_realops_flags(FLAGS_ALL,
                            "Server %s(via %s) introduced an existing server %s.",
-                           server_p->name, client_p->name, name);
-      exit_client(NULL, server_p, &me, "Server Exists");
+                           source_p->name, client_p->name, name);
+      exit_client(NULL, source_p, &me, "Server Exists");
       return;
     }
 
@@ -368,14 +368,14 @@ static void ms_server(struct Client *client_p, struct Client *server_p,
       /* If it is new, we are probably misconfigured, so split the
        * non-hub server introducing this. Otherwise, split the new
        * server. -A1kmm. */
-      if ((CurrentTime - server_p->firsttime) < 20)
+      if ((CurrentTime - source_p->firsttime) < 20)
         {
-          exit_client(NULL, server_p, &me, "No H-line.");
+          exit_client(NULL, source_p, &me, "No H-line.");
           return;
         }
       else
         {
-          sendto_one(server_p, ":%s SQUIT %s :Sorry, no H-line.",
+          sendto_one(source_p, ":%s SQUIT %s :Sorry, no H-line.",
                      me.name, name);
           return;
         }
@@ -390,14 +390,14 @@ static void ms_server(struct Client *client_p, struct Client *server_p,
       /* If it is new, we are probably misconfigured, so split the
        * non-hub server introducing this. Otherwise, split the new
        * server. -A1kmm. */
-      if ((CurrentTime - server_p->firsttime) < 20)
+      if ((CurrentTime - source_p->firsttime) < 20)
         {
-          exit_client(NULL, server_p, &me, "Leafed Server.");
+          exit_client(NULL, source_p, &me, "Leafed Server.");
           return;
         }
       else
         {
-          sendto_one(server_p, ":%s SQUIT %s :Sorry, Leafed server.",
+          sendto_one(source_p, ":%s SQUIT %s :Sorry, Leafed server.",
                      me.name, name);
           return;
         }
@@ -409,7 +409,7 @@ static void ms_server(struct Client *client_p, struct Client *server_p,
   strncpy_irc(aclient_p->name, name, HOSTLEN);
   strncpy_irc(aclient_p->info, info, REALLEN);
   aclient_p->serv->up = find_or_add(parv[0]);
-  aclient_p->servptr = server_p;
+  aclient_p->servptr = source_p;
 
   SetServer(aclient_p);
 
@@ -447,7 +447,7 @@ static void ms_server(struct Client *client_p, struct Client *server_p,
     }
       
   sendto_realops_flags(FLAGS_EXTERNAL, "Server %s being introduced by %s",
-		       aclient_p->name, server_p->name);
+		       aclient_p->name, source_p->name);
 
   if (!refresh_user_links)
     {

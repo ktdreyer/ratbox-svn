@@ -81,7 +81,7 @@ char *_version = "20001122";
  *
  */
 static void ms_lljoin(struct Client *client_p,
-                     struct Client *server_p,
+                     struct Client *source_p,
                      int parc,
                      char *parv[])
 {

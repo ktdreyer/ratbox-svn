@@ -262,7 +262,7 @@ static struct LinkReport {
  * output	- NONE
  * side effects	-
  */
-void report_configured_links(struct Client* server_p, int mask)
+void report_configured_links(struct Client* source_p, int mask)
 {
   struct ConfItem*   tmp;
   struct LinkReport* p;
@@ -292,17 +292,17 @@ void report_configured_links(struct Client* server_p, int mask)
               c = 'c';
 
             /* Allow admins to see actual ips */
-            if(IsSetOperAdmin(server_p))
-              sendto_one(server_p, form_str(p->rpl_stats), me.name,
-                         server_p->name, c,
+            if(IsSetOperAdmin(source_p))
+              sendto_one(source_p, form_str(p->rpl_stats), me.name,
+                         source_p->name, c,
                          host,
                          name,
                          port,
                          classname,
                          oper_flags_as_string((int)tmp->hold));
             else
-              sendto_one(server_p, form_str(p->rpl_stats), me.name,
-                         server_p->name, c,
+              sendto_one(source_p, form_str(p->rpl_stats), me.name,
+                         source_p->name, c,
                          "*@127.0.0.1",
                          name,
                          port,
@@ -312,25 +312,25 @@ void report_configured_links(struct Client* server_p, int mask)
         else if(mask & (CONF_OPERATOR))
           {
             /* Don't allow non opers to see oper privs */
-            if(IsOper(server_p))
-              sendto_one(server_p, form_str(p->rpl_stats), me.name,
-                         server_p->name,
+            if(IsOper(source_p))
+              sendto_one(source_p, form_str(p->rpl_stats), me.name,
+                         source_p->name,
                          p->conf_char,
                          user, host, name,
                          oper_privs_as_string((struct Client *)NULL,port),
                          classname,
                          oper_flags_as_string((int)tmp->hold));
             else
-              sendto_one(server_p, form_str(p->rpl_stats), me.name,
-                         server_p->name, p->conf_char,
+              sendto_one(source_p, form_str(p->rpl_stats), me.name,
+                         source_p->name, p->conf_char,
                          user, host, name,
                          "0",
                          classname,
                          "");
           }
         else
-          sendto_one(server_p, form_str(p->rpl_stats), me.name,
-                     server_p->name, p->conf_char,
+          sendto_one(source_p, form_str(p->rpl_stats), me.name,
+                     source_p->name, p->conf_char,
                      host, name, port,
                      classname);
       }
@@ -346,7 +346,7 @@ void report_configured_links(struct Client* server_p, int mask)
  * output       - none
  * side effects -
  */
-void report_specials(struct Client* server_p, int flags, int numeric)
+void report_specials(struct Client* source_p, int flags, int numeric)
 {
   struct ConfItem* this_conf;
   struct ConfItem* aconf;
@@ -368,9 +368,9 @@ void report_specials(struct Client* server_p, int flags, int numeric)
       {
         get_printable_conf(aconf, &name, &host, &pass, &user, &port, &classname);
 
-        sendto_one(server_p, form_str(numeric),
+        sendto_one(source_p, form_str(numeric),
                    me.name,
-                   server_p->name,
+                   source_p->name,
                    name,
                    pass);
       }
@@ -390,41 +390,41 @@ void report_specials(struct Client* server_p, int flags, int numeric)
  *		  Look for conf lines which have the same
  * 		  status as the flags passed.
  */
-int check_client(struct Client *client_p, struct Client *server_p, char *username)
+int check_client(struct Client *client_p, struct Client *source_p, char *username)
 {
   static char     sockname[HOSTLEN + 1];
   int             i;
  
-  ClearAccess(server_p);
+  ClearAccess(source_p);
 
-  if ((i = attach_Iline(server_p, username)))
+  if ((i = attach_Iline(source_p, username)))
     {
-      log(L_INFO, "Access denied: %s[%s]", server_p->name, sockname);
+      log(L_INFO, "Access denied: %s[%s]", source_p->name, sockname);
     }
 
   switch( i )
     {
     case SOCKET_ERROR:
-      (void)exit_client(client_p, server_p, &me, "Socket Error");
+      (void)exit_client(client_p, source_p, &me, "Socket Error");
       break;
 
     case TOO_MANY:
       sendto_realops_flags(FLAGS_FULL, "%s for %s (%s).",
-			   "Too many on IP", get_client_host(server_p),
-			   server_p->localClient->sockhost);
-      log(L_INFO,"Too many connections on IP from %s.", get_client_host(server_p));
+			   "Too many on IP", get_client_host(source_p),
+			   source_p->localClient->sockhost);
+      log(L_INFO,"Too many connections on IP from %s.", get_client_host(source_p));
       ServerStats->is_ref++;
-      (void)exit_client(client_p, server_p, &me, 
+      (void)exit_client(client_p, source_p, &me, 
 			"No more connections allowed on that IP" );
       break;
 
     case I_LINE_FULL:
       sendto_realops_flags(FLAGS_FULL, "%s for %s (%s).",
-			   "I-line is full", get_client_host(server_p),
-			   server_p->localClient->sockhost);
-      log(L_INFO,"Too many connections from %s.", get_client_host(server_p));
+			   "I-line is full", get_client_host(source_p),
+			   source_p->localClient->sockhost);
+      log(L_INFO,"Too many connections from %s.", get_client_host(source_p));
       ServerStats->is_ref++;
-      (void)exit_client(client_p, server_p, &me, 
+      (void)exit_client(client_p, source_p, &me, 
 		"No more connections allowed in your connection class" );
       break;
 
@@ -434,23 +434,23 @@ int check_client(struct Client *client_p, struct Client *server_p, char *usernam
       ServerStats->is_ref++;
       /* jdc - lists server name & port connections are on */
       /*       a purely cosmetical change */
-      inetntop(server_p->localClient->aftype, &IN_ADDR(server_p->localClient->ip), ipaddr, HOSTIPLEN);
+      inetntop(source_p->localClient->aftype, &IN_ADDR(source_p->localClient->ip), ipaddr, HOSTIPLEN);
       sendto_realops_flags(FLAGS_UNAUTH,
 			   "%s from %s [%s] on [%s/%u].",
 			   "Unauthorized client connection",
-			   get_client_host(server_p),
+			   get_client_host(source_p),
 			   ipaddr,
-			   server_p->localClient->listener->name,
-			   server_p->localClient->listener->port
+			   source_p->localClient->listener->name,
+			   source_p->localClient->listener->port
 			   );
       log(L_INFO,
 	  "Unauthorized client connection from %s on [%s/%u].",
-	  get_client_host(server_p),
-	  server_p->localClient->listener->name,
-	  server_p->localClient->listener->port
+	  get_client_host(source_p),
+	  source_p->localClient->listener->name,
+	  source_p->localClient->listener->port
 	  );
 	  
-      (void)exit_client(client_p, server_p, &me,
+      (void)exit_client(client_p, source_p, &me,
 			"You are not authorized to use this server");
       break;
     }
@@ -843,7 +843,7 @@ void count_ip_hash(int *number_ips_stored,u_long *mem_ips_stored)
  * output        -
  * side effects        -
  */
-void iphash_stats(struct Client *client_p, struct Client *server_p,
+void iphash_stats(struct Client *client_p, struct Client *source_p,
 		  int parc, char *parv[],FBFILE* out)
 {
   IP_ENTRY *ip_hash_ptr;
@@ -852,7 +852,7 @@ void iphash_stats(struct Client *client_p, struct Client *server_p,
   char result_buf[256];
 
   if(out == NULL)
-    sendto_one(server_p,":%s NOTICE %s :*** hash stats for iphash",
+    sendto_one(source_p,":%s NOTICE %s :*** hash stats for iphash",
                me.name,client_p->name);
   else
     {
@@ -874,7 +874,7 @@ void iphash_stats(struct Client *client_p, struct Client *server_p,
         {
           if(out == NULL)
             {
-              sendto_one(server_p,":%s NOTICE %s :Entry %d (0x%X) Collisions %d",
+              sendto_one(source_p,":%s NOTICE %s :Entry %d (0x%X) Collisions %d",
                          me.name,client_p->name,i,i,collision_count);
             }
           else
@@ -1335,7 +1335,7 @@ int find_q_conf(char *nickToFind,char *user,char *host)
  * side effects - all Q lines are listed to client 
  */
 
-void report_qlines(struct Client *server_p)
+void report_qlines(struct Client *source_p)
 {
   struct ConfItem *aconf;
   char *host;
@@ -1349,8 +1349,8 @@ void report_qlines(struct Client *server_p)
     {
       get_printable_conf(aconf, &name, &host, &pass, &user, &port,&classname);
           
-      sendto_one(server_p, form_str(RPL_STATSQLINE),
-		 me.name, server_p->name, name, pass, user, host);
+      sendto_one(source_p, form_str(RPL_STATSQLINE),
+		 me.name, source_p->name, name, pass, user, host);
     }
 }
 
@@ -1382,7 +1382,7 @@ static void clear_special_conf(struct ConfItem **this_conf)
  * as a result of an operator issuing this command, else assume it has been
  * called as a result of the server receiving a HUP signal.
  */
-int rehash(struct Client *client_p,struct Client *server_p, int sig)
+int rehash(struct Client *client_p,struct Client *source_p, int sig)
 {
   if (sig)
   {
@@ -1705,10 +1705,10 @@ void add_temp_kline(struct ConfItem *aconf)
  * side effects  - NONE
  *                  
  */
-void report_temp_klines(struct Client *server_p)
+void report_temp_klines(struct Client *source_p)
 {
-  show_temp_klines(server_p, &temporary_klines);
-  show_temp_klines(server_p, &temporary_ip_klines);
+  show_temp_klines(source_p, &temporary_klines);
+  show_temp_klines(source_p, &temporary_ip_klines);
 }
 
 /* show_temp_klines
@@ -1719,7 +1719,7 @@ void report_temp_klines(struct Client *server_p)
  * side effects   - NONE
  */
 void
-show_temp_klines(struct Client *server_p, dlink_list *tklist)
+show_temp_klines(struct Client *source_p, dlink_list *tklist)
 {
   dlink_node *kill_node;
   struct ConfItem *kill_list_ptr;
@@ -1746,8 +1746,8 @@ show_temp_klines(struct Client *server_p, dlink_list *tklist)
       else
         reason = "No Reason";
 
-      sendto_one(server_p, form_str(RPL_STATSKLINE), me.name,
-                 server_p->name, 'k', host, user, reason);
+      sendto_one(source_p, form_str(RPL_STATSKLINE), me.name,
+                 source_p->name, 'k', host, user, reason);
     }
 }
 
@@ -2321,7 +2321,7 @@ static void flush_deleted_I_P(void)
  *                
  */
 void WriteKlineOrDline( KlineType type,
-			struct Client *server_p,
+			struct Client *source_p,
 			char *user,
 			char *host,
 			const char *reason,
@@ -2337,22 +2337,22 @@ void WriteKlineOrDline( KlineType type,
     {
       sendto_realops_flags(FLAGS_ALL,
 			   "%s added D-Line for [%s] [%s]",
-			   server_p->name, host, reason);
-      sendto_one(server_p, ":%s NOTICE %s :Added D-Line [%s] to %s",
-		 me.name, server_p->name, host, filename);
+			   source_p->name, host, reason);
+      sendto_one(source_p, ":%s NOTICE %s :Added D-Line [%s] to %s",
+		 me.name, source_p->name, host, filename);
 
       log(L_TRACE, "%s added D-Line for [%s] [%s]", 
-	  server_p->name, host, reason);
+	  source_p->name, host, reason);
     }
   else
     {
       sendto_realops_flags(FLAGS_ALL,
 			   "%s added K-Line for [%s@%s] [%s]",
-			   server_p->name, user, host, reason);
-      sendto_one(server_p, ":%s NOTICE %s :Added K-Line [%s@%s]",
-		 me.name, server_p->name, user, host);
+			   source_p->name, user, host, reason);
+      sendto_one(source_p, ":%s NOTICE %s :Added K-Line [%s@%s]",
+		 me.name, source_p->name, user, host);
       log(L_TRACE, "%s added K-Line for [%s] [%s@%s]", 
-	  server_p->name, user, host, reason);
+	  source_p->name, user, host, reason);
     }
 
   if ( (out = fbopen(filename, "a")) == NULL )
@@ -2364,23 +2364,23 @@ void WriteKlineOrDline( KlineType type,
 
   if(type==KLINE_TYPE)
     {
-      if (MyClient(server_p))
+      if (MyClient(source_p))
 	{
 	  ircsprintf(buffer, "#%s!%s@%s K'd: %s@%s:%s\n",
-		     server_p->name, server_p->username, server_p->host,
+		     source_p->name, source_p->username, source_p->host,
 		     user, host, reason);
 	}
       else
 	{
 	  ircsprintf(buffer, "#%s!%s@%s on %s K'd: %s@%s:%s\n",
-		     server_p->name, server_p->username, server_p->host,
-		     server_p->servptr?server_p->servptr->name:"<Unknown>",
+		     source_p->name, source_p->username, source_p->host,
+		     source_p->servptr?source_p->servptr->name:"<Unknown>",
 		     user, host, reason);
 	}
     }
   else
     ircsprintf(buffer, "#%s!%s@%s D'd: %s:%s\n",
-	       server_p->name, server_p->username, server_p->host,
+	       source_p->name, source_p->username, source_p->host,
 	       host, reason);
   
   if (fbputs(buffer,out) == -1)
@@ -2414,10 +2414,10 @@ void WriteKlineOrDline( KlineType type,
 
   if(type==KLINE_TYPE)
     log(L_TRACE, "%s added K-Line for [%s@%s] [%s]",
-        server_p->name, user, host, reason);
+        source_p->name, user, host, reason);
   else
     log(L_TRACE, "%s added D-Line for [%s] [%s]",
-           server_p->name, host, reason);
+           source_p->name, host, reason);
 }
 
 /* get_conf_name

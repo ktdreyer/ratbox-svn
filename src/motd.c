@@ -65,7 +65,7 @@ void InitMessageFile(MotdType motdType, char *fileName, MessageFile *motd)
 ** user requested motd, but not on each connecting client.
 */
 
-int SendMessageFile(struct Client *server_p, MessageFile *motdToPrint)
+int SendMessageFile(struct Client *source_p, MessageFile *motdToPrint)
 {
   MessageFileLine *linePointer;
   MotdType motdType;
@@ -81,20 +81,20 @@ int SendMessageFile(struct Client *server_p, MessageFile *motdToPrint)
 
       if (motdToPrint->contentsOfFile == (MessageFileLine *)NULL)
         {
-          sendto_one(server_p, form_str(ERR_NOMOTD), me.name, server_p->name);
+          sendto_one(source_p, form_str(ERR_NOMOTD), me.name, source_p->name);
           return 0;
         }
 
-      sendto_one(server_p, form_str(RPL_MOTDSTART), me.name, server_p->name, me.name);
+      sendto_one(source_p, form_str(RPL_MOTDSTART), me.name, source_p->name, me.name);
 
       for(linePointer = motdToPrint->contentsOfFile;linePointer;
           linePointer = linePointer->next)
         {
-          sendto_one(server_p,
+          sendto_one(source_p,
                      form_str(RPL_MOTD),
-                     me.name, server_p->name, linePointer->line);
+                     me.name, source_p->name, linePointer->line);
         }
-      sendto_one(server_p, form_str(RPL_ENDOFMOTD), me.name, server_p->name);
+      sendto_one(source_p, form_str(RPL_ENDOFMOTD), me.name, source_p->name);
       return 0;
       /* NOT REACHED */
       break;
@@ -106,8 +106,8 @@ int SendMessageFile(struct Client *server_p, MessageFile *motdToPrint)
       for(linePointer = motdToPrint->contentsOfFile;linePointer;
           linePointer = linePointer->next)
         {
-          sendto_one(server_p, ":%s 364 %s %s",
-		     me.name, server_p->name, linePointer->line);
+          sendto_one(source_p, ":%s 364 %s %s",
+		     me.name, source_p->name, linePointer->line);
         }
       /* NOT REACHED */
       return 0;
@@ -116,10 +116,10 @@ int SendMessageFile(struct Client *server_p, MessageFile *motdToPrint)
     case OPER_MOTD:
       if (motdToPrint->contentsOfFile == (MessageFileLine *)NULL)
         {
-          sendto_one(server_p, ":%s NOTICE %s :No OPER MOTD", me.name, server_p->name);
+          sendto_one(source_p, ":%s NOTICE %s :No OPER MOTD", me.name, source_p->name);
           return -1;
         }
-      sendto_one(server_p,":%s NOTICE %s :Start of OPER MOTD",me.name,server_p->name);
+      sendto_one(source_p,":%s NOTICE %s :Start of OPER MOTD",me.name,source_p->name);
       break;
 
     case HELP_MOTD:
@@ -130,18 +130,18 @@ int SendMessageFile(struct Client *server_p, MessageFile *motdToPrint)
       /* NOT REACHED */
     }
 
-  sendto_one(server_p,":%s NOTICE %s :%s",me.name,server_p->name,
+  sendto_one(source_p,":%s NOTICE %s :%s",me.name,source_p->name,
              motdToPrint->lastChangedDate);
 
 
   for(linePointer = motdToPrint->contentsOfFile;linePointer;
       linePointer = linePointer->next)
     {
-      sendto_one(server_p,
+      sendto_one(source_p,
                  ":%s NOTICE %s :%s",
-                 me.name, server_p->name, linePointer->line);
+                 me.name, source_p->name, linePointer->line);
     }
-  sendto_one(server_p, ":%s NOTICE %s :End", me.name, server_p->name);
+  sendto_one(source_p, ":%s NOTICE %s :End", me.name, source_p->name);
   return 0;
 }
 

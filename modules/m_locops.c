@@ -62,7 +62,7 @@ char *_version = "20001122";
  *      parv[0] = sender prefix
  *      parv[1] = message text
  */
-static void m_locops(struct Client *client_p, struct Client *server_p,
+static void m_locops(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
   char *message = NULL;
@@ -71,12 +71,12 @@ static void m_locops(struct Client *client_p, struct Client *server_p,
 
   if (EmptyString(message))
     {
-      sendto_one(server_p, form_str(ERR_NEEDMOREPARAMS),
+      sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "LOCOPS");
       return;
     }
 
-  sendto_wallops_flags(FLAGS_LOCOPS, server_p, "LOCOPS - %s", message);
+  sendto_wallops_flags(FLAGS_LOCOPS, source_p, "LOCOPS - %s", message);
 }
 
 

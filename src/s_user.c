@@ -66,11 +66,11 @@
 static int valid_hostname(const char* hostname);
 static int valid_username(const char* username);
 static void report_and_set_user_flags( struct Client *, struct ConfItem * );
-static int check_X_line(struct Client *client_p, struct Client *server_p);
-static void user_welcome(struct Client *server_p);
-static int introduce_client(struct Client *client_p, struct Client *server_p,
+static int check_X_line(struct Client *client_p, struct Client *source_p);
+static void user_welcome(struct Client *source_p);
+static int introduce_client(struct Client *client_p, struct Client *source_p,
 			    struct User *user, char *nick);
-int oper_up( struct Client *server_p, struct ConfItem *aconf );
+int oper_up( struct Client *source_p, struct ConfItem *aconf );
 
 
 /* table of ascii char letters to corresponding bitmask */
@@ -235,39 +235,39 @@ void show_opers(struct Client *client_p)
  * output	-
  * side effects	- display to client user counts etc.
  */
-int show_lusers(struct Client *server_p) 
+int show_lusers(struct Client *source_p) 
 {
-  if(!GlobalSetOptions.hide_server || IsOper(server_p))
-    sendto_one(server_p, form_str(RPL_LUSERCLIENT), me.name, server_p->name,
+  if(!GlobalSetOptions.hide_server || IsOper(source_p))
+    sendto_one(source_p, form_str(RPL_LUSERCLIENT), me.name, source_p->name,
               (Count.total-Count.invisi), Count.invisi, Count.server);
   else
-    sendto_one(server_p, form_str(RPL_LUSERCLIENT), me.name, server_p->name,
+    sendto_one(source_p, form_str(RPL_LUSERCLIENT), me.name, source_p->name,
               (Count.total-Count.invisi), Count.invisi, 1);
   if (Count.oper > 0)
-    sendto_one(server_p, form_str(RPL_LUSEROP), me.name, server_p->name,
+    sendto_one(source_p, form_str(RPL_LUSEROP), me.name, source_p->name,
                Count.oper);
 
   if (Count.unknown > 0)
-    sendto_one(server_p, form_str(RPL_LUSERUNKNOWN), me.name, server_p->name,
+    sendto_one(source_p, form_str(RPL_LUSERUNKNOWN), me.name, source_p->name,
                Count.unknown);
 
   if (Count.chan > 0)
-    sendto_one(server_p, form_str(RPL_LUSERCHANNELS),
-               me.name, server_p->name, Count.chan);
+    sendto_one(source_p, form_str(RPL_LUSERCHANNELS),
+               me.name, source_p->name, Count.chan);
 
-  if(!GlobalSetOptions.hide_server || IsOper(server_p))
+  if(!GlobalSetOptions.hide_server || IsOper(source_p))
     {
-      sendto_one(server_p, form_str(RPL_LUSERME),
-                 me.name, server_p->name, Count.local, Count.myserver);
-      sendto_one(server_p, form_str(RPL_LOCALUSERS), me.name, server_p->name,
+      sendto_one(source_p, form_str(RPL_LUSERME),
+                 me.name, source_p->name, Count.local, Count.myserver);
+      sendto_one(source_p, form_str(RPL_LOCALUSERS), me.name, source_p->name,
                  Count.local, Count.max_loc);
     }
 
-  sendto_one(server_p, form_str(RPL_GLOBALUSERS), me.name, server_p->name,
+  sendto_one(source_p, form_str(RPL_GLOBALUSERS), me.name, source_p->name,
              Count.total, Count.max_tot);
 
-  if(!GlobalSetOptions.hide_server || IsOper(server_p))
-    sendto_one(server_p, form_str(RPL_STATSCONN), me.name, server_p->name,
+  if(!GlobalSetOptions.hide_server || IsOper(source_p))
+    sendto_one(source_p, form_str(RPL_STATSCONN), me.name, source_p->name,
                MaxConnectionCount, MaxClientCount, Count.totalrestartcount);
 
   if (Count.local > MaxClientCount)
@@ -286,12 +286,12 @@ int show_lusers(struct Client *server_p)
  * output	- 
  * side effects	- display to client what we support (for them)
  */
-int show_isupport(struct Client *server_p) 
+int show_isupport(struct Client *source_p) 
 {
   char isupportbuffer[512];
   
   ircsprintf(isupportbuffer,FEATURES,FEATURESVALUES);
-  sendto_one(server_p, form_str(RPL_ISUPPORT), me.name, server_p->name, 
+  sendto_one(source_p, form_str(RPL_ISUPPORT), me.name, source_p->name, 
   	     isupportbuffer);
   	     
   return 0;	     
@@ -322,19 +322,19 @@ int show_isupport(struct Client *server_p)
 **         nick from local user or kill him/her...
 */
 
-int register_local_user(struct Client *client_p, struct Client *server_p, 
+int register_local_user(struct Client *client_p, struct Client *source_p, 
 			char *nick, char *username)
 {
   struct ConfItem*  aconf;
-  struct User*     user = server_p->user;
+  struct User*     user = source_p->user;
   char        tmpstr2[IRCD_BUFSIZE];
   char	      ipaddr[HOSTIPLEN];
   int  status;
   dlink_node *ptr;
   dlink_node *m;
   char *id;
-  assert(0 != server_p);
-  assert(server_p->username != username);
+  assert(0 != source_p);
+  assert(source_p->username != username);
 
   user->last = CurrentTime;
 
@@ -342,66 +342,66 @@ int register_local_user(struct Client *client_p, struct Client *server_p,
   if(strlen(username) > USERLEN)
     username[USERLEN] = '\0';
 
-  if( ( status = check_client(client_p, server_p, username )) < 0 )
+  if( ( status = check_client(client_p, source_p, username )) < 0 )
     return(CLIENT_EXITED);
 
-  if(!valid_hostname(server_p->host))
+  if(!valid_hostname(source_p->host))
     {
-      sendto_one(server_p,":%s NOTICE %s :*** Notice -- You have an illegal character in your hostname", 
-		 me.name, server_p->name );
+      sendto_one(source_p,":%s NOTICE %s :*** Notice -- You have an illegal character in your hostname", 
+		 me.name, source_p->name );
 
-      strncpy(server_p->host,server_p->localClient->sockhost,HOSTIPLEN+1);
+      strncpy(source_p->host,source_p->localClient->sockhost,HOSTIPLEN+1);
     }
 
-  ptr = server_p->localClient->confs.head;
+  ptr = source_p->localClient->confs.head;
   aconf = ptr->data;
 
   if (aconf == NULL)
     {
-      (void)exit_client(client_p, server_p, &me, "*** Not Authorized");
+      (void)exit_client(client_p, source_p, &me, "*** Not Authorized");
       return(CLIENT_EXITED);
     }
 
-  if (!IsGotId(server_p))
+  if (!IsGotId(source_p))
     {
       if (IsNeedIdentd(aconf))
 	{
 	  ServerStats->is_ref++;
-	  sendto_one(server_p,
+	  sendto_one(source_p,
 		     ":%s NOTICE %s :*** Notice -- You need to install identd to use this server",
 		     me.name, client_p->name);
-	  (void)exit_client(client_p, server_p, &me, "Install identd");
+	  (void)exit_client(client_p, source_p, &me, "Install identd");
 	  return(CLIENT_EXITED);
 	}
       else
-	strncpy_irc(server_p->username, username, USERLEN);
+	strncpy_irc(source_p->username, username, USERLEN);
 
       if (IsNoTilde(aconf))
 	{
-	  strncpy_irc(server_p->username, username, USERLEN);
+	  strncpy_irc(source_p->username, username, USERLEN);
 	}
       else
 	{
-	  *server_p->username = '~';
-	  strncpy_irc(&server_p->username[1], username, USERLEN - 1);
+	  *source_p->username = '~';
+	  strncpy_irc(&source_p->username[1], username, USERLEN - 1);
 	}
-      server_p->username[USERLEN] = '\0';
+      source_p->username[USERLEN] = '\0';
     }
 
   /* password check */
   if (!BadPtr(aconf->passwd) &&
-      strcmp(server_p->localClient->passwd, aconf->passwd))
+      strcmp(source_p->localClient->passwd, aconf->passwd))
     {
       ServerStats->is_ref++;
-      sendto_one(server_p, form_str(ERR_PASSWDMISMATCH),
-		 me.name, server_p->name);
-      (void)exit_client(client_p, server_p, &me, "Bad Password");
+      sendto_one(source_p, form_str(ERR_PASSWDMISMATCH),
+		 me.name, source_p->name);
+      (void)exit_client(client_p, source_p, &me, "Bad Password");
       return(CLIENT_EXITED);
     }
-  memset(server_p->localClient->passwd,0, sizeof(server_p->localClient->passwd));
+  memset(source_p->localClient->passwd,0, sizeof(source_p->localClient->passwd));
 
-  /* report if user has &^>= etc. and set flags as needed in server_p */
-  report_and_set_user_flags(server_p, aconf);
+  /* report if user has &^>= etc. and set flags as needed in source_p */
+  report_and_set_user_flags(source_p, aconf);
   
   /* Limit clients */
   /*
@@ -416,57 +416,57 @@ int register_local_user(struct Client *client_p, struct Client *server_p,
 	 ||
 	 (Count.local +1) >= (GlobalSetOptions.maxclients - 5) )
        &&
-       !(IsFlined(server_p)) )
+       !(IsFlined(source_p)) )
     {
       sendto_realops_flags(FLAGS_FULL,
 			   "Too many clients, rejecting %s[%s].",
-			   nick, server_p->host);
+			   nick, source_p->host);
       ServerStats->is_ref++;
-      (void)exit_client(client_p, server_p, &me,
+      (void)exit_client(client_p, source_p, &me,
 			"Sorry, server is full - try later");
       return(CLIENT_EXITED);
     }
 
   /* valid user name check */
 
-  if (!valid_username(server_p->username))
+  if (!valid_username(source_p->username))
     {
       sendto_realops_flags(FLAGS_REJ,"Invalid username: %s (%s@%s)",
-			   nick, server_p->username, server_p->host);
+			   nick, source_p->username, source_p->host);
       ServerStats->is_ref++;
-      ircsprintf(tmpstr2, "Invalid username [%s]", server_p->username);
-      (void)exit_client(client_p, server_p, &me, tmpstr2);
+      ircsprintf(tmpstr2, "Invalid username [%s]", source_p->username);
+      (void)exit_client(client_p, source_p, &me, tmpstr2);
       return(CLIENT_EXITED);
     }
 
   /* end of valid user name check */
   
-  if( (status = check_X_line(client_p,server_p)) < 0 )
+  if( (status = check_X_line(client_p,source_p)) < 0 )
     return(status);
 
-  if (server_p->user->id[0] == '\0') 
+  if (source_p->user->id[0] == '\0') 
     {
       do {
 	id = id_get();
       } while (hash_find_id(id, NULL));
       
-      strcpy(server_p->user->id, id);
-      add_to_id_hash_table(server_p->user->id, server_p);
+      strcpy(source_p->user->id, id);
+      add_to_id_hash_table(source_p->user->id, source_p);
     }
 
-  inetntop(server_p->localClient->aftype, &IN_ADDR(server_p->localClient->ip), 
+  inetntop(source_p->localClient->aftype, &IN_ADDR(source_p->localClient->ip), 
   				ipaddr, HOSTIPLEN);
   sendto_realops_flags(FLAGS_CCONN,
 		       "Client connecting: %s (%s@%s) [%s] {%s}",
-		       nick, server_p->username, server_p->host,
+		       nick, source_p->username, source_p->host,
 		       ipaddr,
-		       get_client_class(server_p));
+		       get_client_class(source_p));
   
   sendto_realops_flags(FLAGS_DRONE,
 		       "Cn: %s (%s@%s) [%s] [%s]",
-		       nick, server_p->username, server_p->host,
+		       nick, source_p->username, source_p->host,
 		       ipaddr,
-		       server_p->info);
+		       source_p->info);
   
   if ((++Count.local) > Count.max_loc)
     {
@@ -476,26 +476,26 @@ int register_local_user(struct Client *client_p, struct Client *server_p,
 			     Count.max_loc);
     }
 
-  SetClient(server_p);
+  SetClient(source_p);
 
-  /* XXX server_p->servptr is &me, since local client */
-  server_p->servptr = find_server(user->server);
-  add_client_to_llist(&(server_p->servptr->serv->users), server_p);
+  /* XXX source_p->servptr is &me, since local client */
+  source_p->servptr = find_server(user->server);
+  add_client_to_llist(&(source_p->servptr->serv->users), source_p);
 
   /* Increment our total user count here */
   if (++Count.total > Count.max_tot)
     Count.max_tot = Count.total;
 
   Count.totalrestartcount++;
-  user_welcome(server_p);
+  user_welcome(source_p);
 
-  m = dlinkFind(&unknown_list, server_p);
+  m = dlinkFind(&unknown_list, source_p);
 
   assert(m != NULL);
   dlinkDelete(m, &unknown_list);
-  dlinkAdd(server_p, m, &lclient_list);
+  dlinkAdd(source_p, m, &lclient_list);
 
-  return (introduce_client(client_p, server_p, user, nick));
+  return (introduce_client(client_p, source_p, user, nick));
 }
 
 /*
@@ -506,14 +506,14 @@ int register_local_user(struct Client *client_p, struct Client *server_p,
  * side effects	- This function is called when a remote client
  *		  is introduced by a server.
  */
-int register_remote_user(struct Client *client_p, struct Client *server_p, 
+int register_remote_user(struct Client *client_p, struct Client *source_p, 
 			 char *nick, char *username)
 {
-  struct User*     user = server_p->user;
+  struct User*     user = source_p->user;
   struct Client *aclient_p;
   
-  assert(0 != server_p);
-  assert(server_p->username != username);
+  assert(0 != source_p);
+  assert(source_p->username != username);
 
   user->last = CurrentTime;
 
@@ -521,42 +521,42 @@ int register_remote_user(struct Client *client_p, struct Client *server_p,
   if(strlen(username) > USERLEN)
     username[USERLEN] = '\0';
 
-  strncpy_irc(server_p->username, username, USERLEN);
+  strncpy_irc(source_p->username, username, USERLEN);
 
-  SetClient(server_p);
+  SetClient(source_p);
 
   /* Increment our total user count here */
   if (++Count.total > Count.max_tot)
     Count.max_tot = Count.total;
 
-  server_p->servptr = find_server(user->server);
+  source_p->servptr = find_server(user->server);
 
-  if (server_p->servptr == NULL)
+  if (source_p->servptr == NULL)
     {
       sendto_realops_flags(FLAGS_ALL,"Ghost killed: %s on invalid server %s",
-			   server_p->name, server_p->user->server);
+			   source_p->name, source_p->user->server);
 
-      kill_client(client_p, server_p, "%s (Ghosted %s doesn't exist)",
+      kill_client(client_p, source_p, "%s (Ghosted %s doesn't exist)",
 		  me.name, user->server);
 
 #if 0
       sendto_one(client_p,":%s KILL %s :%s (Ghosted, %s doesn't exist)",
-                 me.name, server_p->name, me.name, user->server);
+                 me.name, source_p->name, me.name, user->server);
 #endif
-      server_p->flags |= FLAGS_KILLED;
-      return exit_client(NULL, server_p, &me, "Ghost");
+      source_p->flags |= FLAGS_KILLED;
+      return exit_client(NULL, source_p, &me, "Ghost");
     }
 
-  add_client_to_llist(&(server_p->servptr->serv->users), server_p);
+  add_client_to_llist(&(source_p->servptr->serv->users), source_p);
 
-  if ((aclient_p = find_server(user->server)) && aclient_p->from != server_p->from)
+  if ((aclient_p = find_server(user->server)) && aclient_p->from != source_p->from)
     {
       sendto_realops_flags(FLAGS_DEBUG, 
 			   "Bad User [%s] :%s USER %s@%s %s, != %s[%s]",
-			   client_p->name, nick, server_p->username,
-			   server_p->host, user->server,
+			   client_p->name, nick, source_p->username,
+			   source_p->host, user->server,
 			   aclient_p->name, aclient_p->from->name);
-      kill_client(client_p, server_p,
+      kill_client(client_p, source_p,
 		 ":%s (%s != %s[%s] USER from wrong direction)",
 		  me.name,
 		  user->server,
@@ -565,12 +565,12 @@ int register_remote_user(struct Client *client_p, struct Client *server_p,
 #if 0
       sendto_one(client_p,
 		 ":%s KILL %s :%s (%s != %s[%s] USER from wrong direction)",
-		 me.name, server_p->name, me.name, user->server,
+		 me.name, source_p->name, me.name, user->server,
 		 aclient_p->from->name, aclient_p->from->host);
 
 #endif
-      server_p->flags |= FLAGS_KILLED;
-      return exit_client(server_p, server_p, &me,
+      source_p->flags |= FLAGS_KILLED;
+      return exit_client(source_p, source_p, &me,
 			 "USER server wrong direction");
       
     }
@@ -581,23 +581,23 @@ int register_remote_user(struct Client *client_p, struct Client *server_p,
    */
   if (!aclient_p)
     {
-      kill_client(client_p, server_p,
+      kill_client(client_p, source_p,
 		  "%s GHOST (no server %s on the net)",		  
 		  me.name, user->server);
 #if 0
       sendto_one(client_p,
 		 ":%s KILL %s :%s GHOST (no server %s on the net)",
 		 me.name,
-		 server_p->name, me.name, user->server);
+		 source_p->name, me.name, user->server);
 #endif
       sendto_realops_flags(FLAGS_ALL,"No server %s for user %s[%s@%s] from %s",
-			   user->server, server_p->name, server_p->username,
-			   server_p->host, server_p->from->name);
-      server_p->flags |= FLAGS_KILLED;
-      return exit_client(server_p, server_p, &me, "Ghosted Client");
+			   user->server, source_p->name, source_p->username,
+			   source_p->host, source_p->from->name);
+      source_p->flags |= FLAGS_KILLED;
+      return exit_client(source_p, source_p, &me, "Ghosted Client");
     }
 
-  return (introduce_client(client_p, server_p, user, nick));
+  return (introduce_client(client_p, source_p, user, nick));
 }
 
 /*
@@ -610,14 +610,14 @@ int register_remote_user(struct Client *client_p, struct Client *server_p,
  *		  from a remote connect.
  */
 static int
-introduce_client(struct Client *client_p, struct Client *server_p,
+introduce_client(struct Client *client_p, struct Client *source_p,
 		 struct User *user, char *nick)
 {
   dlink_node *server_node;
   struct Client *server;
   static char ubuf[12];
 
-  send_umode(NULL, server_p, 0, SEND_UMODES, ubuf);
+  send_umode(NULL, source_p, 0, SEND_UMODES, ubuf);
 
   if (!*ubuf)
     {
@@ -646,19 +646,19 @@ introduce_client(struct Client *client_p, struct Client *server_p,
   if (!ServerInfo.hub && uplink && IsCapable(uplink,CAP_LL)
       && client_p != uplink) 
     {
-      if (IsCapable(uplink, CAP_UID) && HasID(server_p))
+      if (IsCapable(uplink, CAP_UID) && HasID(source_p))
 	{
 	  sendto_one(uplink, "CLIENT %s %d %lu %s %s %s %s %s :%s",
-		     nick, server_p->hopcount+1, server_p->tsinfo,
-		     ubuf, server_p->username, server_p->host, user->server,
-		     user->id, server_p->info);
+		     nick, source_p->hopcount+1, source_p->tsinfo,
+		     ubuf, source_p->username, source_p->host, user->server,
+		     user->id, source_p->info);
 	}
       else
 	{
 	  sendto_one(uplink, "NICK %s %d %lu %s %s %s %s :%s",
-		     nick, server_p->hopcount+1, server_p->tsinfo,
-		     ubuf, server_p->username, server_p->host, user->server,
-		     server_p->info);
+		     nick, source_p->hopcount+1, source_p->tsinfo,
+		     ubuf, source_p->username, source_p->host, user->server,
+		     source_p->info);
 	}
     }
   else
@@ -670,21 +670,21 @@ introduce_client(struct Client *client_p, struct Client *server_p,
 	  if (IsCapable(server, CAP_LL) || server == client_p)
 	    continue;
 		  
-	  if (IsCapable(server, CAP_UID) && HasID(server_p))
+	  if (IsCapable(server, CAP_UID) && HasID(source_p))
 	    sendto_one(server, "CLIENT %s %d %lu %s %s %s %s %s :%s",
-		       nick, server_p->hopcount+1, server_p->tsinfo,
-		       ubuf, server_p->username, server_p->host, user->server,
-		       user->id, server_p->info);
+		       nick, source_p->hopcount+1, source_p->tsinfo,
+		       ubuf, source_p->username, source_p->host, user->server,
+		       user->id, source_p->info);
 	  else
 	    sendto_one(server, "NICK %s %d %lu %s %s %s %s :%s",
-		       nick, server_p->hopcount+1, server_p->tsinfo,
-		       ubuf, server_p->username, server_p->host, user->server,
-		       server_p->info);
+		       nick, source_p->hopcount+1, source_p->tsinfo,
+		       ubuf, source_p->username, source_p->host, user->server,
+		       source_p->info);
 	}
     }
   
   if (ubuf[1])
-    send_umode_out(client_p, server_p, 0);
+    send_umode_out(client_p, source_p, 0);
   return 0;
 }
 
@@ -775,7 +775,7 @@ static int valid_username(const char* username)
 
 /* report_and_set_user_flags
  *
- * Inputs       - pointer to server_p
+ * Inputs       - pointer to source_p
  *              - pointer to aconf for this user
  * Output       - NONE
  * Side effects -
@@ -783,41 +783,41 @@ static int valid_username(const char* username)
  */
 
 static void 
-report_and_set_user_flags(struct Client *server_p,struct ConfItem *aconf)
+report_and_set_user_flags(struct Client *source_p,struct ConfItem *aconf)
 {
   /* If this user is being spoofed, tell them so */
   if(IsConfDoSpoofIp(aconf))
     {
-      sendto_one(server_p,
+      sendto_one(source_p,
                  ":%s NOTICE %s :*** Spoofing your IP. congrats.",
-                 me.name,server_p->name);
+                 me.name,source_p->name);
     }
 
   /* If this user is in the exception class, Set it "E lined" */
   if(IsConfElined(aconf))
     {
-      SetElined(server_p);
-      sendto_one(server_p,
+      SetElined(source_p);
+      sendto_one(source_p,
          ":%s NOTICE %s :*** You are exempt from K/D/G lines. congrats.",
-                 me.name,server_p->name);
+                 me.name,source_p->name);
     }
 
   /* If this user is exempt from user limits set it F lined" */
   if(IsConfFlined(aconf))
     {
-      SetFlined(server_p);
-      sendto_one(server_p,
+      SetFlined(source_p);
+      sendto_one(source_p,
                  ":%s NOTICE %s :*** You are exempt from user limits. congrats.",
-                 me.name,server_p->name);
+                 me.name,source_p->name);
     }
 
   /* If this user is exempt from idle time outs */
   if(IsConfIdlelined(aconf))
     {
-      SetIdlelined(server_p);
-      sendto_one(server_p,
+      SetIdlelined(source_p);
+      sendto_one(source_p,
          ":%s NOTICE %s :*** You are exempt from idle limits. congrats.",
-                 me.name,server_p->name);
+                 me.name,source_p->name);
     }
 }
 
@@ -829,27 +829,27 @@ report_and_set_user_flags(struct Client *server_p,struct ConfItem *aconf)
  * output	-
  * side effects -
  */
-int do_local_user(char* nick, struct Client* client_p, struct Client* server_p,
+int do_local_user(char* nick, struct Client* client_p, struct Client* source_p,
 		  char* username, char *host, char *server, char *realname)
 {
   unsigned int oflags;
   struct User* user;
 
-  assert(0 != server_p);
-  assert(server_p->username != username);
+  assert(0 != source_p);
+  assert(source_p->username != username);
 
-  user = make_user(server_p);
+  user = make_user(source_p);
 
-  oflags = server_p->flags;
+  oflags = source_p->flags;
 
-  if (!IsUnknown(server_p))
+  if (!IsUnknown(source_p))
     {
-      sendto_one(server_p, form_str(ERR_ALREADYREGISTRED), me.name, nick);
+      sendto_one(source_p, form_str(ERR_ALREADYREGISTRED), me.name, nick);
       return 0;
     }
-  server_p->flags |= FLAGS_INVISIBLE;
+  source_p->flags |= FLAGS_INVISIBLE;
 
-  if (!(oflags & FLAGS_INVISIBLE) && IsInvisible(server_p))
+  if (!(oflags & FLAGS_INVISIBLE) && IsInvisible(source_p))
     Count.invisi++;
   /*
    * don't take the clients word for it, ever
@@ -857,19 +857,19 @@ int do_local_user(char* nick, struct Client* client_p, struct Client* server_p,
    */
   user->server = me.name;
 
-  strncpy_irc(server_p->info, realname, REALLEN);
+  strncpy_irc(source_p->info, realname, REALLEN);
   
-  if (server_p->name[0])
+  if (source_p->name[0])
     /* NICK already received, now I have USER... */
-    return register_local_user(client_p, server_p, server_p->name, username);
+    return register_local_user(client_p, source_p, source_p->name, username);
   else
     {
-      if (!IsGotId(server_p)) 
+      if (!IsGotId(source_p)) 
         {
           /*
            * save the username in the client
            */
-          strncpy_irc(server_p->username, username, USERLEN);
+          strncpy_irc(source_p->username, username, USERLEN);
         }
     }
   return 0;
@@ -882,37 +882,37 @@ int do_local_user(char* nick, struct Client* client_p, struct Client* server_p,
  * output	-
  * side effects -
  */
-int do_remote_user(char* nick, struct Client* client_p, struct Client* server_p,
+int do_remote_user(char* nick, struct Client* client_p, struct Client* source_p,
 		   char* username, char *host, char *server, char *realname,
 		   char *id)
 {
   unsigned int oflags;
   struct User* user;
 
-  assert(0 != server_p);
-  assert(server_p->username != username);
+  assert(0 != source_p);
+  assert(source_p->username != username);
 
-  user = make_user(server_p);
+  user = make_user(source_p);
 
-  oflags = server_p->flags;
+  oflags = source_p->flags;
 
   /*
    * coming from another server, take the servers word for it
    */
   user->server = find_or_add(server);
-  strncpy_irc(server_p->host, host, HOSTLEN); 
-  strncpy_irc(server_p->info, realname, REALLEN);
+  strncpy_irc(source_p->host, host, HOSTLEN); 
+  strncpy_irc(source_p->info, realname, REALLEN);
   if (id)
-	  strcpy(server_p->user->id, id);
+	  strcpy(source_p->user->id, id);
   
 #if 0
   /* XXX dont do this (talk to is-) */
   /* if it has no ID, set the ID to the nick just in case */
   if (!id)
-	  strcpy(server_p->user->id, nick);
+	  strcpy(source_p->user->id, nick);
 #endif
 
-  return register_remote_user(client_p, server_p, server_p->name, username);
+  return register_remote_user(client_p, source_p, source_p->name, username);
 }
 
 /*
@@ -923,7 +923,7 @@ int do_remote_user(char* nick, struct Client* client_p, struct Client* server_p,
  * parv[1] - username to change mode for
  * parv[2] - modes to change
  */
-int user_mode(struct Client *client_p, struct Client *server_p, int parc, char *parv[])
+int user_mode(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
   int   flag;
   int   i;
@@ -939,30 +939,30 @@ int user_mode(struct Client *client_p, struct Client *server_p, int parc, char *
 
   if (parc < 2)
     {
-      sendto_one(server_p, form_str(ERR_NEEDMOREPARAMS),
+      sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "MODE");
       return 0;
     }
 
   if (!(aclient_p = find_person(parv[1], NULL)))
     {
-      if (MyConnect(server_p))
-        sendto_one(server_p, form_str(ERR_NOSUCHCHANNEL),
+      if (MyConnect(source_p))
+        sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
                    me.name, parv[0], parv[1]);
       return 0;
     }
 
   /* Dont know why these were commented out.. put them back using new sendto() funcs */
-  if (IsServer(server_p))
+  if (IsServer(source_p))
     {
        sendto_realops_flags(FLAGS_ADMIN, "*** Mode for User %s from %s",
-                            parv[1], server_p->name);
+                            parv[1], source_p->name);
        return 0;
     }
 
-  if (server_p != aclient_p || aclient_p->from != server_p->from)
+  if (source_p != aclient_p || aclient_p->from != source_p->from)
     {
-       sendto_one(server_p, form_str(ERR_USERSDONTMATCH), me.name, parv[0]);
+       sendto_one(source_p, form_str(ERR_USERSDONTMATCH), me.name, parv[0]);
        return 0;
     }
 
@@ -973,15 +973,15 @@ int user_mode(struct Client *client_p, struct Client *server_p, int parc, char *
       *m++ = '+';
 
       for (i = 0; user_modes[i].letter && (m - buf < BUFSIZE - 4);i++)
-        if (server_p->umodes & user_modes[i].mode)
+        if (source_p->umodes & user_modes[i].mode)
           *m++ = user_modes[i].letter;
       *m = '\0';
-      sendto_one(server_p, form_str(RPL_UMODEIS), me.name, parv[0], buf);
+      sendto_one(source_p, form_str(RPL_UMODEIS), me.name, parv[0], buf);
       return 0;
     }
 
   /* find flags already set for user */
-  setflags = server_p->umodes;
+  setflags = source_p->umodes;
   
   /*
    * parse mode change string(s)
@@ -1000,10 +1000,10 @@ int user_mode(struct Client *client_p, struct Client *server_p, int parc, char *
         case 'o' :
           if(what == MODE_ADD)
             {
-              if(IsServer(client_p) && !IsOper(server_p))
+              if(IsServer(client_p) && !IsOper(source_p))
                 {
                   ++Count.oper;
-                  SetOper(server_p);
+                  SetOper(source_p);
                 }
             }
           else
@@ -1012,23 +1012,23 @@ int user_mode(struct Client *client_p, struct Client *server_p, int parc, char *
                * found by Pat Szuta, Perly , perly@xnet.com 
                */
 
-              if(!IsOper(server_p))
+              if(!IsOper(source_p))
                 break;
 
-              ClearOper(server_p);
-	      server_p->umodes &= ~ConfigFileEntry.oper_only_umodes;
+              ClearOper(source_p);
+	      source_p->umodes &= ~ConfigFileEntry.oper_only_umodes;
 			  
               Count.oper--;
 
-              if (MyConnect(server_p))
+              if (MyConnect(source_p))
                 {
                   dlink_node *dm;
 
-		  ptr = server_p->localClient->confs.head;
+		  ptr = source_p->localClient->confs.head;
 		  aconf = ptr->data;
-                  detach_conf(server_p,aconf);
+                  detach_conf(source_p,aconf);
 
-                  server_p->flags2 &= ~(FLAGS2_OPER_GLOBAL_KILL|
+                  source_p->flags2 &= ~(FLAGS2_OPER_GLOBAL_KILL|
                                     FLAGS2_OPER_REMOTE|
                                     FLAGS2_OPER_UNKLINE|
                                     FLAGS2_OPER_GLINE|
@@ -1036,7 +1036,7 @@ int user_mode(struct Client *client_p, struct Client *server_p, int parc, char *
                                     FLAGS2_OPER_K|
                                     FLAGS2_OPER_ADMIN);
 
-		  dm = dlinkFind(&oper_list,server_p);
+		  dm = dlinkFind(&oper_list,source_p);
 		  if(dm != NULL)
 		    {
 		      dlinkDelete(dm,&oper_list);
@@ -1048,8 +1048,8 @@ int user_mode(struct Client *client_p, struct Client *server_p, int parc, char *
 		    reattach to "old" iline
 		    - einride
 		  */
-		  remove_one_ip(&server_p->localClient->ip);
-		  check_client(server_p->servptr, server_p, server_p->username);
+		  remove_one_ip(&source_p->localClient->ip);
+		  check_client(source_p->servptr, source_p, source_p->username);
                 }
             }
           break;
@@ -1066,7 +1066,7 @@ int user_mode(struct Client *client_p, struct Client *server_p, int parc, char *
         default :
           if( (flag = user_modes_from_c_to_bitmask[(unsigned char)*m]))
             {
-              if (MyConnect(server_p) && !IsOper(server_p) &&
+              if (MyConnect(source_p) && !IsOper(source_p) &&
                  (ConfigFileEntry.oper_only_umodes & flag))
                 {
                   badflag = YES;
@@ -1074,46 +1074,46 @@ int user_mode(struct Client *client_p, struct Client *server_p, int parc, char *
               else
                 {
                   if (what == MODE_ADD)
-                    server_p->umodes |= flag;
+                    source_p->umodes |= flag;
                   else
-                    server_p->umodes &= ~flag;  
+                    source_p->umodes &= ~flag;  
                 }
             }
           else
             {
-              if (MyConnect(server_p))
+              if (MyConnect(source_p))
                 badflag = YES;
             }
           break;
         }
 
   if(badflag)
-    sendto_one(server_p, form_str(ERR_UMODEUNKNOWNFLAG), me.name, parv[0]);
+    sendto_one(source_p, form_str(ERR_UMODEUNKNOWNFLAG), me.name, parv[0]);
 
-  if ((server_p->umodes & FLAGS_NCHANGE) && !IsSetOperN(server_p))
+  if ((source_p->umodes & FLAGS_NCHANGE) && !IsSetOperN(source_p))
     {
-      sendto_one(server_p,":%s NOTICE %s :*** You need oper and N flag for +n",
+      sendto_one(source_p,":%s NOTICE %s :*** You need oper and N flag for +n",
                  me.name,parv[0]);
-      server_p->umodes &= ~FLAGS_NCHANGE; /* only tcm's really need this */
+      source_p->umodes &= ~FLAGS_NCHANGE; /* only tcm's really need this */
     }
 
-  if (MyConnect(server_p) && (server_p->umodes & FLAGS_ADMIN) && !IsSetOperAdmin(server_p))
+  if (MyConnect(source_p) && (source_p->umodes & FLAGS_ADMIN) && !IsSetOperAdmin(source_p))
     {
-      sendto_one(server_p,":%s NOTICE %s :*** You need oper and A flag for +a",
+      sendto_one(source_p,":%s NOTICE %s :*** You need oper and A flag for +a",
                  me.name, parv[0]);
-      server_p->umodes &= ~FLAGS_ADMIN;
+      source_p->umodes &= ~FLAGS_ADMIN;
     }
 
 
-  if (!(setflags & FLAGS_INVISIBLE) && IsInvisible(server_p))
+  if (!(setflags & FLAGS_INVISIBLE) && IsInvisible(source_p))
     ++Count.invisi;
-  if ((setflags & FLAGS_INVISIBLE) && !IsInvisible(server_p))
+  if ((setflags & FLAGS_INVISIBLE) && !IsInvisible(source_p))
     --Count.invisi;
   /*
    * compare new flags with old flags and send string which
    * will cause servers to update correctly.
    */
-  send_umode_out(client_p, server_p, setflags);
+  send_umode_out(client_p, source_p, setflags);
 
   return 0;
 }
@@ -1122,7 +1122,7 @@ int user_mode(struct Client *client_p, struct Client *server_p, int parc, char *
  * send the MODE string for user (user) to connection client_p
  * -avalon
  */
-void send_umode(struct Client *client_p, struct Client *server_p, int old, 
+void send_umode(struct Client *client_p, struct Client *source_p, int old, 
 		int sendmask,  char *umode_buf)
 {
   int   i;
@@ -1132,7 +1132,7 @@ void send_umode(struct Client *client_p, struct Client *server_p, int old,
 
   /*
    * build a string in umode_buf to represent the change in the user's
-   * mode between the new (server_p->flag) and 'old'.
+   * mode between the new (source_p->flag) and 'old'.
    */
   m = umode_buf;
   *m = '\0';
@@ -1141,9 +1141,9 @@ void send_umode(struct Client *client_p, struct Client *server_p, int old,
     {
       flag = user_modes[i].mode;
 
-      if (MyClient(server_p) && !(flag & sendmask))
+      if (MyClient(source_p) && !(flag & sendmask))
         continue;
-      if ((flag & old) && !(server_p->umodes & flag))
+      if ((flag & old) && !(source_p->umodes & flag))
         {
           if (what == MODE_DEL)
             *m++ = user_modes[i].letter;
@@ -1154,7 +1154,7 @@ void send_umode(struct Client *client_p, struct Client *server_p, int old,
               *m++ = user_modes[i].letter;
             }
         }
-      else if (!(flag & old) && (server_p->umodes & flag))
+      else if (!(flag & old) && (source_p->umodes & flag))
         {
           if (what == MODE_ADD)
             *m++ = user_modes[i].letter;
@@ -1169,7 +1169,7 @@ void send_umode(struct Client *client_p, struct Client *server_p, int old,
   *m = '\0';
   if (*umode_buf && client_p)
     sendto_one(client_p, ":%s MODE %s :%s",
-               server_p->name, server_p->name, umode_buf);
+               source_p->name, source_p->name, umode_buf);
 }
 
 /*
@@ -1180,31 +1180,31 @@ void send_umode(struct Client *client_p, struct Client *server_p, int old,
  * side effects - Only send ubuf out to servers that know about this client
  */
 void send_umode_out(struct Client *client_p,
-		    struct Client *server_p,
+		    struct Client *source_p,
 		    int old)
 {
   struct Client *aclient_p;
   char buf[BUFSIZE];
   dlink_node *ptr;
 
-  send_umode(NULL, server_p, old, SEND_UMODES, buf);
+  send_umode(NULL, source_p, old, SEND_UMODES, buf);
 
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
       aclient_p = ptr->data;
 
-      if((aclient_p != client_p) && (aclient_p != server_p) && (*buf))
+      if((aclient_p != client_p) && (aclient_p != source_p) && (*buf))
         {
           if((!(ServerInfo.hub && IsCapable(aclient_p, CAP_LL)))
              || (aclient_p->localClient->serverMask &
-                 server_p->lazyLinkClientExists))
+                 source_p->lazyLinkClientExists))
             sendto_one(aclient_p, ":%s MODE %s :%s",
-                       server_p->name, server_p->name, buf);
+                       source_p->name, source_p->name, buf);
         }
     }
 
   if (client_p && MyClient(client_p))
-    send_umode(client_p, server_p, old, ALL_UMODES, buf);
+    send_umode(client_p, source_p, old, ALL_UMODES, buf);
 }
 
 /* 
@@ -1214,58 +1214,58 @@ void send_umode_out(struct Client *client_p,
  * output	- NONE
  * side effects	-
  */
-static void user_welcome(struct Client *server_p)
+static void user_welcome(struct Client *source_p)
 {
-  sendto_one(server_p, form_str(RPL_WELCOME), me.name, server_p->name, server_p->name );
+  sendto_one(source_p, form_str(RPL_WELCOME), me.name, source_p->name, source_p->name );
   /* This is a duplicate of the NOTICE but see below...*/
-  sendto_one(server_p, form_str(RPL_YOURHOST), me.name, server_p->name,
-	     get_listener_name(server_p->localClient->listener), version);
+  sendto_one(source_p, form_str(RPL_YOURHOST), me.name, source_p->name,
+	     get_listener_name(source_p->localClient->listener), version);
   
   /*
   ** Don't mess with this one - IRCII needs it! -Avalon
   */
-  sendto_one(server_p,
+  sendto_one(source_p,
 	     "NOTICE %s :*** Your host is %s, running version %s",
-	     server_p->name, get_listener_name(server_p->localClient->listener),
+	     source_p->name, get_listener_name(source_p->localClient->listener),
 	     version);
   
-  sendto_one(server_p, form_str(RPL_CREATED),me.name,server_p->name,creation);
-  sendto_one(server_p, form_str(RPL_MYINFO), me.name, server_p->name,
+  sendto_one(source_p, form_str(RPL_CREATED),me.name,source_p->name,creation);
+  sendto_one(source_p, form_str(RPL_MYINFO), me.name, source_p->name,
 	     me.name, version);
 
-  show_isupport(server_p);
+  show_isupport(source_p);
   
-  show_lusers(server_p);
+  show_lusers(source_p);
 
   if (ConfigFileEntry.short_motd)
     {
-      sendto_one(server_p,"NOTICE %s :*** Notice -- motd was last changed at %s",
-		 server_p->name,
+      sendto_one(source_p,"NOTICE %s :*** Notice -- motd was last changed at %s",
+		 source_p->name,
 		 ConfigFileEntry.motd.lastChangedDate);
       
-      sendto_one(server_p,
+      sendto_one(source_p,
 		 "NOTICE %s :*** Notice -- Please read the motd if you haven't read it",
-		 server_p->name);
+		 source_p->name);
     
-      sendto_one(server_p, form_str(RPL_MOTDSTART),
-		 me.name, server_p->name, me.name);
+      sendto_one(source_p, form_str(RPL_MOTDSTART),
+		 me.name, source_p->name, me.name);
     
-      sendto_one(server_p,
+      sendto_one(source_p,
 		 form_str(RPL_MOTD),
-		 me.name, server_p->name,
+		 me.name, source_p->name,
 		 "*** This is the short motd ***"
 		 );
 
-      sendto_one(server_p, form_str(RPL_ENDOFMOTD),
-		 me.name, server_p->name);
+      sendto_one(source_p, form_str(RPL_ENDOFMOTD),
+		 me.name, source_p->name);
     }
   else  
-    SendMessageFile(server_p, &ConfigFileEntry.motd);
+    SendMessageFile(source_p, &ConfigFileEntry.motd);
 
-  if (IsRestricted(server_p))
+  if (IsRestricted(source_p))
     {
-      sendto_one(server_p,form_str(ERR_RESTRICTED),
-		 me.name, server_p->name);
+      sendto_one(source_p,form_str(ERR_RESTRICTED),
+		 me.name, source_p->name);
     }
 }
 
@@ -1275,15 +1275,15 @@ static void user_welcome(struct Client *server_p)
  * outupt	- -1 if exiting 0 if ok
  * side effects	-
  */
-static int check_X_line(struct Client *client_p, struct Client *server_p)
+static int check_X_line(struct Client *client_p, struct Client *source_p)
 {
   struct ConfItem *aconf;
   char *reason;
 
-  if(IsOper(server_p))
+  if(IsOper(source_p))
     return 0;
 
-  if ((aconf = find_x_conf(server_p->info)))
+  if ((aconf = find_x_conf(source_p->info)))
     {
       if(aconf->passwd)
 	reason = aconf->passwd;
@@ -1296,18 +1296,18 @@ static int check_X_line(struct Client *client_p, struct Client *server_p)
 	    {
 	      sendto_realops_flags(FLAGS_REJ,
 				   "X-line Rejecting [%s] [%s], user %s",
-				   server_p->info,
+				   source_p->info,
 				   reason,
 				   get_client_name(client_p, HIDE_IP));
 	    }
 	  ServerStats->is_ref++;      
-	  (void)exit_client(client_p, server_p, &me, "Bad user info");
+	  (void)exit_client(client_p, source_p, &me, "Bad user info");
 	  return (CLIENT_EXITED);
 	}
       else
 	sendto_realops_flags(FLAGS_REJ,
 			     "X-line Warning [%s] [%s], user %s",
-			     server_p->info,
+			     source_p->info,
 			     reason,
 			     get_client_name(client_p, HIDE_IP));
     }
@@ -1322,67 +1322,67 @@ static int check_X_line(struct Client *client_p, struct Client *server_p)
  *		- pointer to ConfItem to use
  * output	- none
  * side effects	-
- * Blindly opers up given server_p, using aconf info
+ * Blindly opers up given source_p, using aconf info
  * all checks on passwords have already been done.
  * This could also be used by rsa oper routines. 
  */
 
-int oper_up( struct Client *server_p,
+int oper_up( struct Client *source_p,
                     struct ConfItem *aconf )
 {
-  int old = (server_p->umodes & ALL_UMODES);
+  int old = (source_p->umodes & ALL_UMODES);
   char *operprivs=NULL;
   dlink_node *ptr;
   struct ConfItem *found_aconf;
   dlink_node *m;
 
-  SetOper(server_p);
+  SetOper(source_p);
   if((int)aconf->hold)
     {
-      server_p->umodes |= ((int)aconf->hold & ALL_UMODES); 
-      if( !IsSetOperN(server_p) )
-	server_p->umodes &= ~FLAGS_NCHANGE;
+      source_p->umodes |= ((int)aconf->hold & ALL_UMODES); 
+      if( !IsSetOperN(source_p) )
+	source_p->umodes &= ~FLAGS_NCHANGE;
       
-      sendto_one(server_p, ":%s NOTICE %s :*** Oper flags set from conf",
-		 me.name,server_p->name);
+      sendto_one(source_p, ":%s NOTICE %s :*** Oper flags set from conf",
+		 me.name,source_p->name);
     }
   else
     {
-      server_p->umodes |= (OPER_UMODES);
+      source_p->umodes |= (OPER_UMODES);
     }
 	
-  SetIPHidden(server_p);
+  SetIPHidden(source_p);
   Count.oper++;
 
-  SetElined(server_p);
+  SetElined(source_p);
       
   m = make_dlink_node();
-  dlinkAdd(server_p,m,&oper_list);
+  dlinkAdd(source_p,m,&oper_list);
 
-  if(server_p->localClient->confs.head)
+  if(source_p->localClient->confs.head)
     {
-      ptr = server_p->localClient->confs.head;
+      ptr = source_p->localClient->confs.head;
       if(ptr)
 	{
 	  found_aconf = ptr->data;
 	  if(found_aconf)
-	    operprivs = oper_privs_as_string(server_p,found_aconf->port);
+	    operprivs = oper_privs_as_string(source_p,found_aconf->port);
 	}
     }
   else
     operprivs = "";
 
-  if (IsSetOperAdmin(server_p))
-    server_p->umodes |= FLAGS_ADMIN;
+  if (IsSetOperAdmin(source_p))
+    source_p->umodes |= FLAGS_ADMIN;
 
   sendto_realops_flags(FLAGS_ALL,
-		       "%s (%s@%s) is now an operator", server_p->name,
-		       server_p->username, server_p->host);
-  send_umode_out(server_p, server_p, old);
-  sendto_one(server_p, form_str(RPL_YOUREOPER), me.name, server_p->name);
-  sendto_one(server_p, ":%s NOTICE %s :*** Oper privs are %s", me.name,
-             server_p->name, operprivs);
-  SendMessageFile(server_p, &ConfigFileEntry.opermotd);
+		       "%s (%s@%s) is now an operator", source_p->name,
+		       source_p->username, source_p->host);
+  send_umode_out(source_p, source_p, old);
+  sendto_one(source_p, form_str(RPL_YOUREOPER), me.name, source_p->name);
+  sendto_one(source_p, ":%s NOTICE %s :*** Oper privs are %s", me.name,
+             source_p->name, operprivs);
+  SendMessageFile(source_p, &ConfigFileEntry.opermotd);
   
   return 1;
 }

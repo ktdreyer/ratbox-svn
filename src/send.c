@@ -635,7 +635,7 @@ sendto_serv_butone(struct Client *one, const char *pattern, ...)
  *		  client being unknown to leaf, as in lazylink...
  */
 void
-sendto_ll_serv_butone(struct Client *one, struct Client *server_p, int add,
+sendto_ll_serv_butone(struct Client *one, struct Client *source_p, int add,
 		      const char *pattern, ...)
 {
   int len;
@@ -657,12 +657,12 @@ sendto_ll_serv_butone(struct Client *one, struct Client *server_p, int add,
       
       if (IsCapable(client_p,CAP_LL) && ServerInfo.hub)
 	{
-	  if( ( server_p->lazyLinkClientExists &
+	  if( ( source_p->lazyLinkClientExists &
 		client_p->localClient->serverMask) == 0)
 	    {
 	      if(add)
 		{
-                  client_burst_if_needed(client_p,server_p);
+                  client_burst_if_needed(client_p,source_p);
 		  send_message(client_p, (char *)sendbuf, len);
 		}
 	    }
@@ -1002,12 +1002,12 @@ sendto_channel_remote_prefix(struct Channel *chptr,
  * output       - NONE
  * side effects - send to all servers the channel given, except for "from"
  *		  This code is only used in m_join.c,m_sjoin.c
- *		  It will introduce the client 'server_p' if it is unknown
+ *		  It will introduce the client 'source_p' if it is unknown
  *		  to the leaf.
  */
 void
 sendto_ll_channel_remote(struct Channel *chptr,
-			 struct Client *from, struct Client *server_p,
+			 struct Client *from, struct Client *source_p,
 			 const char *pattern, ...)
 {
   int len;
@@ -1045,12 +1045,12 @@ sendto_ll_channel_remote(struct Channel *chptr,
               {
                 continue;
               }
-	      if (server_p &&
-                  ((server_p->lazyLinkClientExists &
+	      if (source_p &&
+                  ((source_p->lazyLinkClientExists &
                    client_p->localClient->serverMask) == 0))
               {
-                sendnick_TS(client_p,server_p);
-                add_lazylinkclient(client_p,server_p);
+                sendnick_TS(client_p,source_p);
+                add_lazylinkclient(client_p,source_p);
               }
 	    }
 	}
@@ -1426,7 +1426,7 @@ sendto_realops_flags(int flags, const char *pattern, ...)
  */
 
 void
-sendto_wallops_flags(int flags, struct Client *server_p,
+sendto_wallops_flags(int flags, struct Client *source_p,
                            const char *pattern, ...)
 {
   char prefix[NICKLEN + USERLEN + HOSTLEN + 5];
@@ -1441,11 +1441,11 @@ sendto_wallops_flags(int flags, struct Client *server_p,
   len = send_format(nbuf, pattern, args);
   va_end(args);
 
-  if(IsPerson(server_p))
+  if(IsPerson(source_p))
     (void)ircsprintf(prefix, ":%s!%s@%s",
-                     server_p->name, server_p->username, server_p->host);
+                     source_p->name, source_p->username, source_p->host);
   else
-    (void)ircsprintf(prefix, ":%s", server_p->name);
+    (void)ircsprintf(prefix, ":%s", source_p->name);
 
   for (ptr = oper_list.head; ptr; ptr = ptr->next)
     {
@@ -1625,7 +1625,7 @@ kill_client(struct Client *client_p,
  *		  client being unknown to leaf, as in lazylink...
  */
 void
-kill_client_ll_serv_butone(struct Client *one, struct Client *server_p,
+kill_client_ll_serv_butone(struct Client *one, struct Client *source_p,
 			   const char *pattern, ...)
 {
   va_list args;
@@ -1644,17 +1644,17 @@ kill_client_ll_serv_butone(struct Client *one, struct Client *server_p,
   va_end(args);
   
   have_uid = 0;
-  if(HasID(server_p))
+  if(HasID(source_p))
     {
       len_uid = ircsprintf(sendbuf_uid,":%s KILL %s :%s",
-			    me.name, ID(server_p), reason);
+			    me.name, ID(source_p), reason);
       len_uid = send_trim(sendbuf_uid, len_uid);
       have_uid = 1;
     }		    
   else
     {
       len_nick  = ircsprintf(sendbuf_nick,":%s KILL %s :%s",
-			    me.name, server_p->name, reason);
+			    me.name, source_p->name, reason);
       len_nick  = send_trim(sendbuf_nick, len_nick);
     }
   
@@ -1667,7 +1667,7 @@ kill_client_ll_serv_butone(struct Client *one, struct Client *server_p,
       
       if (IsCapable(client_p,CAP_LL) && ServerInfo.hub)
 	{
-	  if( ( server_p->lazyLinkClientExists &
+	  if( ( source_p->lazyLinkClientExists &
 		client_p->localClient->serverMask) != 0)
 	    {
 	      if (have_uid && IsCapable(client_p, CAP_UID))

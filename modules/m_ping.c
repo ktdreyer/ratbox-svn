@@ -61,7 +61,7 @@ char *_version = "20001122";
 **      parv[2] = destination
 */
 static void m_ping(struct Client *client_p,
-                  struct Client *server_p,
+                  struct Client *source_p,
                   int parc,
                   char *parv[])
 {
@@ -70,7 +70,7 @@ static void m_ping(struct Client *client_p,
 
   if (parc < 2 || *parv[1] == '\0')
     {
-      sendto_one(server_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
+      sendto_one(source_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
       return;
     }
   origin = parv[1];
@@ -79,7 +79,7 @@ static void m_ping(struct Client *client_p,
   aclient_p = find_client(origin, NULL);
   if (!aclient_p)
     aclient_p = find_server(origin);
-  if (aclient_p && aclient_p != server_p)
+  if (aclient_p && aclient_p != source_p)
     origin = client_p->name;
   if (!EmptyString(destination) && irccmp(destination, me.name) != 0)
     {
@@ -88,18 +88,18 @@ static void m_ping(struct Client *client_p,
                    origin, destination);
       else
         {
-          sendto_one(server_p, form_str(ERR_NOSUCHSERVER),
+          sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
                      me.name, parv[0], destination);
           return;
         }
     }
   else
-    sendto_one(server_p,":%s PONG %s :%s", me.name,
+    sendto_one(source_p,":%s PONG %s :%s", me.name,
                (destination) ? destination : me.name, origin);
 }
 
 static void ms_ping(struct Client *client_p,
-                   struct Client *server_p,
+                   struct Client *source_p,
                    int parc,
                    char *parv[])
 {
@@ -108,7 +108,7 @@ static void ms_ping(struct Client *client_p,
 
   if (parc < 2 || *parv[1] == '\0')
     {
-      sendto_one(server_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
+      sendto_one(source_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
       return;
     }
   origin = parv[1];
@@ -117,7 +117,7 @@ static void ms_ping(struct Client *client_p,
   aclient_p = find_client(origin, NULL);
   if (!aclient_p)
     aclient_p = find_server(origin);
-  if (aclient_p && aclient_p != server_p)
+  if (aclient_p && aclient_p != source_p)
     origin = client_p->name;
   if (!EmptyString(destination) && irccmp(destination, me.name) != 0)
     {
@@ -126,13 +126,13 @@ static void ms_ping(struct Client *client_p,
                    origin, destination);
       else
         {
-          sendto_one(server_p, form_str(ERR_NOSUCHSERVER),
+          sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
                      me.name, parv[0], destination);
           return;
         }
     }
   else
-    sendto_one(server_p,":%s PONG %s :%s", me.name,
+    sendto_one(source_p,":%s PONG %s :%s", me.name,
                (destination) ? destination : me.name, origin);
 }
 

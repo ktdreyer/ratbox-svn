@@ -61,41 +61,41 @@ char *_version = "20001122";
  *
  */
 static void mo_restart(struct Client *client_p,
-                      struct Client *server_p,
+                      struct Client *source_p,
                       int parc,
                       char *parv[])
 {
   char buf[BUFSIZE]; 
-  if (!MyClient(server_p) || !IsOper(server_p))
+  if (!MyClient(source_p) || !IsOper(source_p))
     {
-      sendto_one(server_p, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
+      sendto_one(source_p, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
       return;
     }
 
-  if ( !IsOperDie(server_p) )
+  if ( !IsOperDie(source_p) )
     {
-      sendto_one(server_p,":%s NOTICE %s :You have no D flag", me.name, parv[0]);
+      sendto_one(source_p,":%s NOTICE %s :You have no D flag", me.name, parv[0]);
       return;
     }
 
   if (parc < 2)
   {
-	  sendto_one(server_p, ":%s NOTICE %s :Need server name /restart %s",
-				 me.name, server_p->name, me.name);
+	  sendto_one(source_p, ":%s NOTICE %s :Need server name /restart %s",
+				 me.name, source_p->name, me.name);
 	  return;
   }
   else
   {
 	  if (irccmp(parv[1], me.name))
 	  {
-		  sendto_one(server_p, ":%s NOTICE %s :Mismatch on /restart %s",
-					 me.name, server_p->name, me.name);
+		  sendto_one(source_p, ":%s NOTICE %s :Mismatch on /restart %s",
+					 me.name, source_p->name, me.name);
 		  return;
 	  }
   }
   
-  log(L_WARN, "Server RESTART by %s\n", get_client_name(server_p, SHOW_IP));
-  ircsprintf(buf, "Server RESTART by %s", get_client_name(server_p, SHOW_IP));
+  log(L_WARN, "Server RESTART by %s\n", get_client_name(source_p, SHOW_IP));
+  ircsprintf(buf, "Server RESTART by %s", get_client_name(source_p, SHOW_IP));
   restart(buf);
 }
 

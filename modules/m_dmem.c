@@ -69,12 +69,12 @@ void ReportAllocated(struct Client*);
  *
  */
 static void
-mo_dmem(struct Client *client_p, struct Client *server_p, int parc, char *parv[])
+mo_dmem(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 #ifdef MEMDEBUG
-  ReportAllocated(server_p);
+  ReportAllocated(source_p);
 #else
-  sendto_one(server_p, ":%s NOTICE %s :Compiled without memory debugging",
-    me.name, server_p->name);
+  sendto_one(source_p, ":%s NOTICE %s :Compiled without memory debugging",
+    me.name, source_p->name);
 #endif
 }

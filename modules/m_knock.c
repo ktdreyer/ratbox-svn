@@ -86,13 +86,13 @@ char *_version = "20010105";
 **/
 
 static void m_knock(struct Client *client_p,
-                   struct Client *server_p,
+                   struct Client *source_p,
                    int parc,
                    char *parv[])
 {
   struct Channel      *chptr;
 
-  chptr = parse_knock_args(client_p, server_p, parc, parv);
+  chptr = parse_knock_args(client_p, source_p, parc, parv);
   
   if (!chptr)
     return;
@@ -111,32 +111,32 @@ static void m_knock(struct Client *client_p,
 
   if((chptr->last_knock + ConfigFileEntry.knock_delay) > CurrentTime)
     {
-      sendto_one(server_p, ":%s NOTICE %s :*** Notice -- Wait %d seconds before another knock to %s",
-                 me.name, server_p->name,
+      sendto_one(source_p, ":%s NOTICE %s :*** Notice -- Wait %d seconds before another knock to %s",
+                 me.name, source_p->name,
                  (int)(ConfigFileEntry.knock_delay - (CurrentTime - chptr->last_knock)),
                  parv[1]);
       return;
     }
 
-  send_knock(client_p, server_p, chptr, parv[1]);
+  send_knock(client_p, source_p, chptr, parv[1]);
 }
 
 /*
  * parse_knock_args
  *
  * input        - pointer to physical struct client_p
- *              - pointer to source struct server_p
+ *              - pointer to source struct source_p
  *              - number of args
  *              - pointer to array of args
  *              
  * output       - returns pointer to channel specified by name/key
  * 
  * side effects - sets name to name of base channel
- *                or sends failure message to server_p
+ *                or sends failure message to source_p
  */
 
 static struct Channel *parse_knock_args(struct Client *client_p,
-                                        struct Client *server_p,
+                                        struct Client *source_p,
                                         int parc, char *parv[])
 {
   /* We will cut at the first comma reached, however we will not *
@@ -153,7 +153,7 @@ static struct Channel *parse_knock_args(struct Client *client_p,
 
   if (!IsChannelName(name) || !(chptr = hash_find_channel(name, NullChn)))
     {
-      sendto_one(server_p, form_str(ERR_NOSUCHCHANNEL), me.name, parv[0],
+      sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL), me.name, parv[0],
                  name);
       return NullChn;
     }
@@ -161,10 +161,10 @@ static struct Channel *parse_knock_args(struct Client *client_p,
   if (IsVchanTop(chptr))
     {
       /* They specified a vchan basename */
-      if(on_sub_vchan(chptr,server_p))
+      if(on_sub_vchan(chptr,source_p))
         {
-          sendto_one(server_p,":%s NOTICE %s :*** Notice -- You are on channel already!",
-                     me.name, server_p->name);
+          sendto_one(source_p,":%s NOTICE %s :*** Notice -- You are on channel already!",
+                     me.name, source_p->name);
           return NullChn;
         }
       if (key && key[0] == '!')
@@ -172,7 +172,7 @@ static struct Channel *parse_knock_args(struct Client *client_p,
           /* Make "KNOCK #channel !" work like JOIN */
           if (!key[1])
             {
-              show_vchans(client_p, server_p, chptr, "knock");
+              show_vchans(client_p, source_p, chptr, "knock");
               return NullChn;
             }
 
@@ -183,7 +183,7 @@ static struct Channel *parse_knock_args(struct Client *client_p,
             }
           else
             {
-              sendto_one(server_p, form_str(ERR_NOSUCHCHANNEL),
+              sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
               me.name, parv[0], name);
               return NullChn;
             }
@@ -191,24 +191,24 @@ static struct Channel *parse_knock_args(struct Client *client_p,
       else
         {
           /* No key specified */
-          show_vchans(client_p, server_p, chptr, "knock");
+          show_vchans(client_p, source_p, chptr, "knock");
           return NullChn;
         }
     }
   else if (IsVchan(chptr))
     {
       /* Don't allow KNOCK'ing a vchans 'real' name */
-      sendto_one(server_p, form_str(ERR_BADCHANNAME), me.name, parv[0],
+      sendto_one(source_p, form_str(ERR_BADCHANNAME), me.name, parv[0],
                  name);
       return NullChn;
     }
   else
     {
       /* Normal channel, just be sure they aren't on it */
-      if (IsMember(server_p, chptr))
+      if (IsMember(source_p, chptr))
         {
-          sendto_one(server_p,":%s NOTICE %s :*** Notice -- You are on channel already!",
-                     me.name, server_p->name);
+          sendto_one(source_p,":%s NOTICE %s :*** Notice -- You are on channel already!",
+                     me.name, source_p->name);
           return NullChn;
         }
     }
@@ -218,17 +218,17 @@ static struct Channel *parse_knock_args(struct Client *client_p,
        (chptr->mode.limit && chptr->users >= chptr->mode.limit )
        ))
     {
-      sendto_one(server_p,":%s NOTICE %s :*** Notice -- Channel is open!",
+      sendto_one(source_p,":%s NOTICE %s :*** Notice -- Channel is open!",
                  me.name,
-                 server_p->name);
+                 source_p->name);
       return NullChn;
     }
 
   /* don't allow a knock if the user is banned, or the channel is paranoid */
   if ((chptr->mode.mode & MODE_PRIVATE) ||
-      (is_banned(chptr,server_p) == CHFL_BAN) )
+      (is_banned(chptr,source_p) == CHFL_BAN) )
     {
-      sendto_one(server_p, form_str(ERR_CANNOTSENDTOCHAN), me.name, parv[0],
+      sendto_one(source_p, form_str(ERR_CANNOTSENDTOCHAN), me.name, parv[0],
                  name);
       return NullChn;
     }
@@ -240,22 +240,22 @@ static struct Channel *parse_knock_args(struct Client *client_p,
  * send_knock
  *
  * input        - pointer to physical struct client_p
- *              - pointer to source struct server_p
+ *              - pointer to source struct source_p
  *              - pointer to channel struct chptr
  *              - pointer to base channel name
  * output       -
  * side effects -
  */
 
-static void send_knock(struct Client *client_p, struct Client *server_p,
+static void send_knock(struct Client *client_p, struct Client *source_p,
                        struct Channel *chptr, char *name)
 {
   char message[NICKLEN*2+CHANNELLEN+USERLEN+HOSTLEN+30];
 
   chptr->last_knock = CurrentTime;
 
-  sendto_one(server_p, ":%s NOTICE %s :*** Notice -- Your KNOCK has been delivered",
-             me.name, server_p->name);
+  sendto_one(source_p, ":%s NOTICE %s :*** Notice -- Your KNOCK has been delivered",
+             me.name, source_p->name);
 
   /* using &me and me.name won't deliver to clients not on this server
    * so, the notice will have to appear from the "knocker" ick.
@@ -269,17 +269,17 @@ static void send_knock(struct Client *client_p, struct Client *server_p,
    */
 
   /* bit of paranoid, be a shame if it cored for this -Dianora */
-  if(server_p->user)
+  if(source_p->user)
     {
       ircsprintf(message,"KNOCK: %s (%s [%s@%s] has asked for an invite)",
-                 name, server_p->name, server_p->username, server_p->host);
+                 name, source_p->name, source_p->username, source_p->host);
 
       sendto_channel_local(ONLY_CHANOPS_HALFOPS,
                           chptr,
                           ":%s!%s@%s NOTICE %s :%s",
-                          server_p->name,
-                          server_p->username,
-                          server_p->host,
+                          source_p->name,
+                          source_p->username,
+                          source_p->host,
                           name,
                           message);
 

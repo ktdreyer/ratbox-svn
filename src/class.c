@@ -285,12 +285,12 @@ void    initclass()
  * output	- NONE
  * side effects	- class report is done to this client
  */
-void    report_classes(struct Client *server_p)
+void    report_classes(struct Client *source_p)
 {
   struct Class *cltmp;
 
   for (cltmp = ClassList; cltmp; cltmp = cltmp->next)
-    sendto_one(server_p, form_str(RPL_STATSYLINE), me.name, server_p->name,
+    sendto_one(source_p, form_str(RPL_STATSYLINE), me.name, source_p->name,
                'Y', ClassName(cltmp), PingFreq(cltmp), ConFreq(cltmp),
                MaxLinks(cltmp), MaxSendq(cltmp));
 }

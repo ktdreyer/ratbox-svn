@@ -58,7 +58,7 @@ char *_version = "20001122";
  *      parv[1] = space-separated list of capabilities
  *
  */
-static void mr_capab(struct Client *client_p, struct Client *server_p,
+static void mr_capab(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
   struct Capability *cap;

@@ -119,14 +119,14 @@ static struct SetStruct set_cmd_table[] =
  * list_quote_commands() sends the client all the available commands.
  * Four to a line for now.
  */
-static void list_quote_commands(struct Client *server_p)
+static void list_quote_commands(struct Client *source_p)
 {
   int i;
   int j=0;
   char *names[4];
 
-  sendto_one(server_p, ":%s NOTICE %s :Available QUOTE SET commands:",
-             me.name, server_p->name);
+  sendto_one(source_p, ":%s NOTICE %s :Available QUOTE SET commands:",
+             me.name, source_p->name);
 
   names[0] = names[1] = names[2] = names[3] = "";
 
@@ -136,8 +136,8 @@ static void list_quote_commands(struct Client *server_p)
 
     if(j > 3)
     {
-      sendto_one(server_p, ":%s NOTICE %s :%s %s %s %s",
-                 me.name, server_p->name,
+      sendto_one(source_p, ":%s NOTICE %s :%s %s %s %s",
+                 me.name, source_p->name,
                  names[0], names[1], 
                  names[2],names[3]);
       j = 0;
@@ -146,55 +146,55 @@ static void list_quote_commands(struct Client *server_p)
 
   }
   if(j)
-    sendto_one(server_p, ":%s NOTICE %s :%s %s %s %s",
-               me.name, server_p->name,
+    sendto_one(source_p, ":%s NOTICE %s :%s %s %s %s",
+               me.name, source_p->name,
                names[0], names[1], 
                names[2],names[3]);
 }
 
 /* SET AUTOCONN */
-static void quote_autoconn( struct Client *server_p, char *arg, int newval)
+static void quote_autoconn( struct Client *source_p, char *arg, int newval)
 {
-  set_autoconn(server_p, server_p->name, arg, newval);
+  set_autoconn(source_p, source_p->name, arg, newval);
 }
 
 /* SET AUTOCONNALL */
-static void quote_autoconnall( struct Client *server_p, int newval)
+static void quote_autoconnall( struct Client *source_p, int newval)
 {
   if(newval >= 0)
   {
     sendto_realops_flags(FLAGS_ALL,"%s has changed AUTOCONNALL to %i",
-                         server_p->name, newval);
+                         source_p->name, newval);
 
     GlobalSetOptions.autoconn = newval;
   }
   else
   {
-    sendto_one(server_p, ":%s NOTICE %s :AUTOCONNALL is currently %i",
-               me.name, server_p->name, GlobalSetOptions.autoconn);
+    sendto_one(source_p, ":%s NOTICE %s :AUTOCONNALL is currently %i",
+               me.name, source_p->name, GlobalSetOptions.autoconn);
   }
 }
 
 
 /* SET FLOODCOUNT */
-static void quote_floodcount( struct Client *server_p, int newval)
+static void quote_floodcount( struct Client *source_p, int newval)
 {
   if(newval >= 0)
   {
     GlobalSetOptions.floodcount = newval;
     sendto_realops_flags(FLAGS_ALL,
-                         "%s has changed FLOODCOUNT to %i", server_p->name,
+                         "%s has changed FLOODCOUNT to %i", source_p->name,
                          GlobalSetOptions.floodcount);
   }
   else
   {
-    sendto_one(server_p, ":%s NOTICE %s :FLOODCOUNT is currently %i",
-               me.name, server_p->name, GlobalSetOptions.floodcount);
+    sendto_one(source_p, ":%s NOTICE %s :FLOODCOUNT is currently %i",
+               me.name, source_p->name, GlobalSetOptions.floodcount);
   }
 }
 
 /* SET IDLETIME */
-static void quote_idletime( struct Client *server_p, int newval )
+static void quote_idletime( struct Client *source_p, int newval )
 {
   if(newval >= 0)
   {
@@ -202,26 +202,26 @@ static void quote_idletime( struct Client *server_p, int newval )
     {
       sendto_realops_flags(FLAGS_ALL,
                            "%s has disabled idletime checking",
-                           server_p->name);
+                           source_p->name);
       GlobalSetOptions.idletime = 0;
     }
     else
     {
       sendto_realops_flags(FLAGS_ALL,
                            "%s has changed IDLETIME to %i",
-                           server_p->name, newval);
+                           source_p->name, newval);
       GlobalSetOptions.idletime = (newval*60);
     }
   }
   else
   {
-    sendto_one(server_p, ":%s NOTICE %s :IDLETIME is currently %i",
-               me.name, server_p->name, GlobalSetOptions.idletime/60);
+    sendto_one(source_p, ":%s NOTICE %s :IDLETIME is currently %i",
+               me.name, source_p->name, GlobalSetOptions.idletime/60);
   }
 }
 
 /* SET LOG */
-static void quote_log( struct Client *server_p, int newval )
+static void quote_log( struct Client *source_p, int newval )
 {
   const char *log_level_as_string;
 
@@ -229,8 +229,8 @@ static void quote_log( struct Client *server_p, int newval )
   {
     if (newval < L_WARN)
     {
-      sendto_one(server_p, ":%s NOTICE %s :LOG must be > %d (L_WARN)",
-                 me.name, server_p->name, L_WARN);
+      sendto_one(source_p, ":%s NOTICE %s :LOG must be > %d (L_WARN)",
+                 me.name, source_p->name, L_WARN);
       return;
     }
 
@@ -242,34 +242,34 @@ static void quote_log( struct Client *server_p, int newval )
     set_log_level(newval);
     log_level_as_string = get_log_level_as_string(newval);
     sendto_realops_flags(FLAGS_ALL,"%s has changed LOG level to %i (%s)",
-                         server_p->name, newval, log_level_as_string);
+                         source_p->name, newval, log_level_as_string);
   }
   else
   {
-    sendto_one(server_p, ":%s NOTICE %s :LOG level is currently %i (%s)",
-               me.name, server_p->name, get_log_level(),
+    sendto_one(source_p, ":%s NOTICE %s :LOG level is currently %i (%s)",
+               me.name, source_p->name, get_log_level(),
                get_log_level_as_string(get_log_level()));
   }
 }
 
 /* SET MAX */
-static void quote_max( struct Client *server_p, int newval )
+static void quote_max( struct Client *source_p, int newval )
 {
   if (newval > 0)
   {
     if (newval > MASTER_MAX)
     {
-      sendto_one(server_p,
+      sendto_one(source_p,
 	":%s NOTICE %s :You cannot set MAXCLIENTS to > MASTER_MAX (%d)",
-	me.name, server_p->name, MASTER_MAX);
+	me.name, source_p->name, MASTER_MAX);
       return;
     }
 
     if (newval < 32)
     {
-      sendto_one(server_p,
+      sendto_one(source_p,
 	":%s NOTICE %s :You cannot set MAXCLIENTS to < 32 (%d:%d)",
-	me.name, server_p->name, GlobalSetOptions.maxclients, highest_fd);
+	me.name, source_p->name, GlobalSetOptions.maxclients, highest_fd);
       return;
     }
 
@@ -277,21 +277,21 @@ static void quote_max( struct Client *server_p, int newval )
 
     sendto_realops_flags(FLAGS_ALL,
 	"%s!%s@%s set new MAXCLIENTS to %d (%d current)",
-	server_p->name, server_p->username, server_p->host,
+	source_p->name, source_p->username, source_p->host,
 	GlobalSetOptions.maxclients, Count.local);
 
     return;
   }
   else
   {
-    sendto_one(server_p, ":%s NOTICE %s :Current Maxclients = %d (%d)",
-	me.name, server_p->name,
+    sendto_one(source_p, ":%s NOTICE %s :Current Maxclients = %d (%d)",
+	me.name, source_p->name,
 	GlobalSetOptions.maxclients, Count.local);
   }
 }
 
 /* SET MSGLOCALE */
-static void quote_msglocale( struct Client *server_p, char *locale )
+static void quote_msglocale( struct Client *source_p, char *locale )
 {
 #ifdef USE_GETTEXT
   if(locale)
@@ -300,31 +300,31 @@ static void quote_msglocale( struct Client *server_p, char *locale )
     ircsprintf(langenv,"LANGUAGE=%s",locale);
     putenv(langenv);
 
-    sendto_one(server_p, ":%s NOTICE %s :Set MSGLOCALE to '%s'",
-	me.name, server_p->name,
+    sendto_one(source_p, ":%s NOTICE %s :Set MSGLOCALE to '%s'",
+	me.name, source_p->name,
 	getenv("LANGUAGE") ? getenv("LANGUAGE") : "<unset>");
   }
   else
   {
-    sendto_one(server_p, ":%s NOTICE %s :MSGLOCALE is currently '%s'",
-	me.name, server_p->name,
+    sendto_one(source_p, ":%s NOTICE %s :MSGLOCALE is currently '%s'",
+	me.name, source_p->name,
 	(getenv("LANGUAGE")) ? getenv("LANGUAGE") : "<unset>");
   }
 #else
-  sendto_one(server_p, ":%s NOTICE %s :No gettext() support available.",
-	me.name, server_p->name);
+  sendto_one(source_p, ":%s NOTICE %s :No gettext() support available.",
+	me.name, source_p->name);
 #endif
 }
 
 /* SET SPAMNUM */
-static void quote_spamnum( struct Client *server_p, int newval )
+static void quote_spamnum( struct Client *source_p, int newval )
 {
   if (newval > 0)
   {
     if (newval == 0)
     {
       sendto_realops_flags(FLAGS_ALL,
-                           "%s has disabled ANTI_SPAMBOT", server_p->name);
+                           "%s has disabled ANTI_SPAMBOT", source_p->name);
       GlobalSetOptions.spam_num = newval;
       return;
     }
@@ -337,18 +337,18 @@ static void quote_spamnum( struct Client *server_p, int newval )
       GlobalSetOptions.spam_num = newval;
     }
     sendto_realops_flags(FLAGS_ALL,"%s has changed SPAMNUM to %i",
-		server_p->name, GlobalSetOptions.spam_num);
+		source_p->name, GlobalSetOptions.spam_num);
   }
   else
   {
-    sendto_one(server_p, ":%s NOTICE %s :SPAMNUM is currently %i",
+    sendto_one(source_p, ":%s NOTICE %s :SPAMNUM is currently %i",
 		me.name,
-		server_p->name, GlobalSetOptions.spam_num);
+		source_p->name, GlobalSetOptions.spam_num);
   }
 }
 
 /* SET SPAMTIME */
-static void quote_spamtime( struct Client *server_p, int newval )
+static void quote_spamtime( struct Client *source_p, int newval )
 {
   if (newval > 0)
   {
@@ -361,17 +361,17 @@ static void quote_spamtime( struct Client *server_p, int newval )
       GlobalSetOptions.spam_time = newval;
     }
     sendto_realops_flags(FLAGS_ALL,"%s has changed SPAMTIME to %i",
-		server_p->name, GlobalSetOptions.spam_time);
+		source_p->name, GlobalSetOptions.spam_time);
   }
   else
   {
-    sendto_one(server_p, ":%s NOTICE %s :SPAMTIME is currently %i",
+    sendto_one(source_p, ":%s NOTICE %s :SPAMTIME is currently %i",
 		me.name,
-		server_p->name, GlobalSetOptions.spam_time);
+		source_p->name, GlobalSetOptions.spam_time);
   }
 }
 
-static void quote_shide( struct Client *server_p, int newval )
+static void quote_shide( struct Client *source_p, int newval )
 {
   if(newval >= 0)
   {
@@ -381,12 +381,12 @@ static void quote_shide( struct Client *server_p, int newval )
       GlobalSetOptions.hide_server = 0;
 
     sendto_realops_flags(FLAGS_ALL,"%s has changed SHIDE to %i",
-                         server_p->name, GlobalSetOptions.hide_server);
+                         source_p->name, GlobalSetOptions.hide_server);
   }
   else
   {
-    sendto_one(server_p, ":%s NOTICE %s :SHIDE is currently %i",
-               me.name, server_p->name, GlobalSetOptions.hide_server);
+    sendto_one(source_p, ":%s NOTICE %s :SHIDE is currently %i",
+               me.name, source_p->name, GlobalSetOptions.hide_server);
   }
 }
 
@@ -394,7 +394,7 @@ static void quote_shide( struct Client *server_p, int newval )
  * mo_set - SET command handler
  * set options while running
  */
-static void mo_set(struct Client *client_p, struct Client *server_p,
+static void mo_set(struct Client *client_p, struct Client *source_p,
                   int parc, char *parv[])
 {
   int newval;
@@ -432,9 +432,9 @@ static void mo_set(struct Client *client_p, struct Client *server_p,
         if( (n - 1) > parc )
         {
           if(parc > 2)
-            sendto_one(server_p,
+            sendto_one(source_p,
                        ":%s NOTICE %s :SET %s expects (\"%s%s\") args",
-                       me.name, server_p->name, set_cmd_table[i].name,
+                       me.name, source_p->name, set_cmd_table[i].name,
                        (set_cmd_table[i].wants_char ? "string, " : ""),
                        (set_cmd_table[i].wants_char ? "int" : "")
                       );
@@ -464,9 +464,9 @@ static void mo_set(struct Client *client_p, struct Client *server_p,
 
           if(newval < 0)
           {
-            sendto_one(server_p,
+            sendto_one(source_p,
                        ":%s NOTICE %s :Value less than 0 illegal for %s",
-                       me.name, server_p->name,
+                       me.name, source_p->name,
                        set_cmd_table[i].name);
 
             return;
@@ -478,19 +478,19 @@ static void mo_set(struct Client *client_p, struct Client *server_p,
         if(set_cmd_table[i].wants_char)
         {
           if(set_cmd_table[i].wants_int)
-            set_cmd_table[i].handler( server_p, arg, newval );
+            set_cmd_table[i].handler( source_p, arg, newval );
           else
-            set_cmd_table[i].handler( server_p, arg );
+            set_cmd_table[i].handler( source_p, arg );
           return;
         }
         else
         {
           if(set_cmd_table[i].wants_int)
-            set_cmd_table[i].handler( server_p, newval );
+            set_cmd_table[i].handler( source_p, newval );
           else
             /* Just in case someone actually wants a
              * set function that takes no args.. *shrug* */
-            set_cmd_table[i].handler( server_p );
+            set_cmd_table[i].handler( source_p );
           return;
         }
       }
@@ -500,10 +500,10 @@ static void mo_set(struct Client *client_p, struct Client *server_p,
      * Code here will be executed when a /QUOTE SET command is not
      * found within set_cmd_table.
      */
-    sendto_one(server_p, ":%s NOTICE %s :Variable not found.", me.name, parv[0]);
+    sendto_one(source_p, ":%s NOTICE %s :Variable not found.", me.name, parv[0]);
     return;
   }
 
-  list_quote_commands(server_p);
+  list_quote_commands(source_p);
 }
 

@@ -114,7 +114,7 @@ static void do_normal_stats(struct Client *, char *, char *, char, int, int);
 static void do_non_priv_stats(struct Client *, char *, char *, char, int, int);
 static void do_priv_stats(struct Client *, char *, char *, char, int, int);
 
-static void m_stats(struct Client *client_p, struct Client *server_p,
+static void m_stats(struct Client *client_p, struct Client *source_p,
                    int parc, char *parv[])
 {
   char            statchar = parc > 1 ? parv[1][0] : '\0';
@@ -127,8 +127,8 @@ static void m_stats(struct Client *client_p, struct Client *server_p,
   if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
     {
       /* safe enough to give this on a local connect only */
-      if(MyClient(server_p))
-	sendto_one(server_p,form_str(RPL_LOAD2HI),me.name,parv[0]);
+      if(MyClient(source_p))
+	sendto_one(source_p,form_str(RPL_LOAD2HI),me.name,parv[0]);
       return;
     }
   else
@@ -136,7 +136,7 @@ static void m_stats(struct Client *client_p, struct Client *server_p,
       last_used = CurrentTime;
     }
 
-  if (hunt_server(client_p,server_p,":%s STATS %s :%s",2,parc,parv)!=HUNTED_ISME)
+  if (hunt_server(client_p,source_p,":%s STATS %s :%s",2,parc,parv)!=HUNTED_ISME)
     return;
 
   name = parse_stats_args(parc,parv,&doall,&wilds);
@@ -144,9 +144,9 @@ static void m_stats(struct Client *client_p, struct Client *server_p,
   if (parc > 3)
     target = parv[3];
 
-  do_normal_stats(server_p, name, target, statchar, doall, wilds);
-  do_non_priv_stats(server_p, name, target, statchar, doall, wilds);
-  sendto_one(server_p, form_str(RPL_ENDOFSTATS), me.name, parv[0], statchar);
+  do_normal_stats(source_p, name, target, statchar, doall, wilds);
+  do_non_priv_stats(source_p, name, target, statchar, doall, wilds);
+  sendto_one(source_p, form_str(RPL_ENDOFSTATS), me.name, parv[0], statchar);
 }
 
 /*
@@ -171,7 +171,7 @@ static void m_stats(struct Client *client_p, struct Client *server_p,
  *            it--not reversed as in ircd.conf!
  */
 
-static void mo_stats(struct Client *client_p, struct Client *server_p,
+static void mo_stats(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
   char            statchar = parc > 1 ? parv[1][0] : '\0';
@@ -180,7 +180,7 @@ static void mo_stats(struct Client *client_p, struct Client *server_p,
   char            *name=NULL;
   char            *target=NULL;
 
-  if (hunt_server(client_p,server_p,":%s STATS %s :%s",2,parc,parv)!=HUNTED_ISME)
+  if (hunt_server(client_p,source_p,":%s STATS %s :%s",2,parc,parv)!=HUNTED_ISME)
     return;
 
   name = parse_stats_args(parc,parv,&doall,&wilds);
@@ -188,9 +188,9 @@ static void mo_stats(struct Client *client_p, struct Client *server_p,
   if (parc > 3)
     target = parv[3];
   
-  do_normal_stats(server_p, name, target, statchar, doall, wilds);
-  do_priv_stats(server_p, name, target, statchar, doall, wilds);
-  sendto_one(server_p, form_str(RPL_ENDOFSTATS), me.name, parv[0], statchar);
+  do_normal_stats(source_p, name, target, statchar, doall, wilds);
+  do_priv_stats(source_p, name, target, statchar, doall, wilds);
+  sendto_one(source_p, form_str(RPL_ENDOFSTATS), me.name, parv[0], statchar);
 }
 
 /*
@@ -215,16 +215,16 @@ static void mo_stats(struct Client *client_p, struct Client *server_p,
  *            it--not reversed as in ircd.conf!
  */
 
-static void ms_stats(struct Client *client_p, struct Client *server_p,
+static void ms_stats(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
-  if (hunt_server(client_p,server_p,":%s STATS %s :%s",2,parc,parv)!=HUNTED_ISME)
+  if (hunt_server(client_p,source_p,":%s STATS %s :%s",2,parc,parv)!=HUNTED_ISME)
     return;
 
-  if (IsOper(server_p))
-    mo_stats(client_p,server_p,parc,parv);
+  if (IsOper(source_p))
+    mo_stats(client_p,source_p,parc,parv);
   else
-    m_stats(client_p,server_p,parc,parv);
+    m_stats(client_p,source_p,parc,parv);
 }
 
 /*
@@ -239,15 +239,15 @@ static void ms_stats(struct Client *client_p, struct Client *server_p,
  * output	- NONE
  * side effects - stats that either opers or non opers can see
  */
-static void do_normal_stats(struct Client *server_p,
+static void do_normal_stats(struct Client *source_p,
 			    char *name, char *target,
 			    char statchar, int doall, int wilds)
 {
   switch (statchar)
     {
     case 'L' : case 'l' :
-      stats_L(server_p,name,doall,wilds,statchar);
-      stats_L_spy(server_p,statchar,name);
+      stats_L(source_p,name,doall,wilds,statchar);
+      stats_L_spy(source_p,statchar,name);
       break;
 
     case 'u' :
@@ -255,12 +255,12 @@ static void do_normal_stats(struct Client *server_p,
         time_t now;
         
         now = CurrentTime - me.since;
-        sendto_one(server_p, form_str(RPL_STATSUPTIME), me.name, server_p->name,
+        sendto_one(source_p, form_str(RPL_STATSUPTIME), me.name, source_p->name,
                    now/86400, (now/3600)%24, (now/60)%60, now%60);
-        if(!GlobalSetOptions.hide_server || IsOper(server_p))
-          sendto_one(server_p, form_str(RPL_STATSCONN), me.name, server_p->name,
+        if(!GlobalSetOptions.hide_server || IsOper(source_p))
+          sendto_one(source_p, form_str(RPL_STATSCONN), me.name, source_p->name,
                      MaxConnectionCount, MaxClientCount, Count.totalrestartcount);
-	stats_spy(server_p,statchar);
+	stats_spy(source_p,statchar);
         break;
       }
     default :
@@ -280,21 +280,21 @@ static void do_normal_stats(struct Client *server_p,
  * output	- NONE
  * side effects - only stats that are allowed for non-opers etc. are done here
  */
-static void do_non_priv_stats(struct Client *server_p, char *name, char *target,
+static void do_non_priv_stats(struct Client *source_p, char *name, char *target,
 			      char statchar, int doall, int wilds)
 {
   switch (statchar)
     {
     case 'K' :
-      stats_spy(server_p,statchar);
+      stats_spy(source_p,statchar);
       break;
 
     case 'o' : case 'O' :
       if (ConfigFileEntry.o_lines_oper_only)
-	      sendto_one(server_p, form_str(ERR_NOPRIVILEGES),me.name,server_p->name);
+	      sendto_one(source_p, form_str(ERR_NOPRIVILEGES),me.name,source_p->name);
       else
-	  report_configured_links(server_p, CONF_OPERATOR);
-      stats_spy(server_p,statchar);
+	  report_configured_links(source_p, CONF_OPERATOR);
+      stats_spy(source_p,statchar);
       break;
 
     case 'p' :
@@ -302,8 +302,8 @@ static void do_non_priv_stats(struct Client *server_p, char *name, char *target,
        * than the alternatives of noticing the opers which could
        * get really annoying --fl
        */
-      stats_spy(server_p,statchar);
-      show_opers(server_p);
+      stats_spy(source_p,statchar);
+      show_opers(source_p);
       break;
 
     case 'U' :
@@ -324,8 +324,8 @@ static void do_non_priv_stats(struct Client *server_p, char *name, char *target,
     case 'S' : case 's' :
     case 'T' : case 't' :
     case 'Z' : case 'z' :
-      sendto_one(server_p, form_str(ERR_NOPRIVILEGES), me.name, server_p->name);
-      stats_spy(server_p,statchar);
+      sendto_one(source_p, form_str(ERR_NOPRIVILEGES), me.name, source_p->name);
+      stats_spy(source_p,statchar);
       break;
     }
 }
@@ -340,135 +340,135 @@ static void do_non_priv_stats(struct Client *server_p, char *name, char *target,
  * output	- NONE
  * side effects - only stats that are allowed for opers etc. are done here
  */
-static void do_priv_stats(struct Client *server_p, char *name, char *target,
+static void do_priv_stats(struct Client *source_p, char *name, char *target,
 			    char statchar, int doall, int wilds)
 { 
  switch (statchar)
     {
     case 'A' : case 'a' :
-      report_adns_servers(server_p);
-      stats_spy(server_p,statchar);
+      report_adns_servers(source_p);
+      stats_spy(source_p,statchar);
       break;
 
     case 'C' : case 'c' :
-      report_configured_links(server_p, CONF_SERVER);
-      stats_spy(server_p,statchar);
+      report_configured_links(source_p, CONF_SERVER);
+      stats_spy(source_p,statchar);
       break;
  
     case 'D': case 'd':
-      report_dlines(server_p);
-      stats_spy(server_p,statchar);
+      report_dlines(source_p);
+      stats_spy(source_p,statchar);
       break;
 
     case 'E' : case 'e' :
-      show_events(server_p);
-      stats_spy(server_p,statchar);
+      show_events(source_p);
+      stats_spy(source_p,statchar);
       break;
 
     case 'F' : case 'f' :
-      fd_dump(server_p);
-      stats_spy(server_p,statchar);
+      fd_dump(source_p);
+      stats_spy(source_p,statchar);
       break;
 
     case 'G': case 'g' :
       if (ConfigFileEntry.glines)
 	{
-	  report_glines(server_p);
-	  stats_spy(server_p,statchar);
+	  report_glines(source_p);
+	  stats_spy(source_p,statchar);
 	}
       else
-        sendto_one(server_p,":%s NOTICE %s :This server does not support G lines",
-                   me.name, server_p->name);
+        sendto_one(source_p,":%s NOTICE %s :This server does not support G lines",
+                   me.name, source_p->name);
       break;
 
     case 'H' : case 'h' :
-      report_configured_links(server_p, CONF_HUB|CONF_LEAF);
-      stats_spy(server_p,statchar);
+      report_configured_links(source_p, CONF_HUB|CONF_LEAF);
+      stats_spy(source_p,statchar);
       break;
 
     case 'I' : case 'i' :
-      report_hostmask_conf_links(server_p, CONF_CLIENT);
-      stats_spy(server_p,statchar);
+      report_hostmask_conf_links(source_p, CONF_CLIENT);
+      stats_spy(source_p,statchar);
       break;
 
     case 'K' :
-      report_hostmask_conf_links(server_p, CONF_KILL);
-      stats_spy(server_p,statchar);
+      report_hostmask_conf_links(source_p, CONF_KILL);
+      stats_spy(source_p,statchar);
       break;
 
     case 'k' :
-      report_temp_klines(server_p);
-      stats_spy(server_p,statchar);
+      report_temp_klines(source_p);
+      stats_spy(source_p,statchar);
       break;
 
     case 'M' : case 'm' :
-      report_messages(server_p);
-      stats_spy(server_p,statchar);
+      report_messages(source_p);
+      stats_spy(source_p,statchar);
       break;
 
     case 'o' : case 'O' :
-      report_configured_links(server_p, CONF_OPERATOR);
-      stats_spy(server_p,statchar);
+      report_configured_links(source_p, CONF_OPERATOR);
+      stats_spy(source_p,statchar);
       break;
 
     case 'P' :
-      show_ports(server_p);
-      stats_spy(server_p,statchar);
+      show_ports(source_p);
+      stats_spy(source_p,statchar);
       break;
 
     case 'Q' : case 'q' :
-      report_qlines(server_p);
-      stats_spy(server_p,statchar);
+      report_qlines(source_p);
+      stats_spy(source_p,statchar);
       break;
 
     case 'R' : case 'r' :
-      send_usage(server_p);
-      stats_spy(server_p,statchar);
+      send_usage(source_p);
+      stats_spy(source_p,statchar);
       break;
 
     case 'S' : case 's':
-      list_scache(server_p);
-      stats_spy(server_p,statchar);
+      list_scache(source_p);
+      stats_spy(source_p,statchar);
       break;
 
     case 'T' : case 't' :
-      tstats(server_p);
-      stats_spy(server_p,statchar);
+      tstats(source_p);
+      stats_spy(source_p,statchar);
       break;
 
     case 'U' :
-      report_specials(server_p,CONF_ULINE,RPL_STATSULINE);
-      stats_spy(server_p,statchar);
+      report_specials(source_p,CONF_ULINE,RPL_STATSULINE);
+      stats_spy(source_p,statchar);
       break;
 
     case 'p' :
-      stats_spy(server_p,statchar);
-      show_opers(server_p);
+      stats_spy(source_p,statchar);
+      show_opers(source_p);
       break;
 
     case 'v' : case 'V' :
-      show_servers(server_p);
-      stats_spy(server_p,statchar);
+      show_servers(source_p);
+      stats_spy(source_p,statchar);
       break;
 
     case 'X' : case 'x' :
-      report_specials(server_p,CONF_XLINE,RPL_STATSXLINE);
-      stats_spy(server_p,statchar);
+      report_specials(source_p,CONF_XLINE,RPL_STATSXLINE);
+      stats_spy(source_p,statchar);
       break;
 
     case 'Y' : case 'y' :
-      report_classes(server_p);
-      stats_spy(server_p,statchar);
+      report_classes(source_p);
+      stats_spy(source_p,statchar);
       break;
 
     case 'Z' : case 'z' :
-      count_memory(server_p);
-      stats_spy(server_p,statchar);
+      count_memory(source_p);
+      stats_spy(source_p,statchar);
       break;
 
     case '?':
-      serv_info(server_p);
-      stats_spy(server_p,statchar);
+      serv_info(source_p);
+      stats_spy(source_p,statchar);
       break;
 
     }
@@ -483,15 +483,15 @@ static void do_priv_stats(struct Client *server_p, char *name, char *target,
  * output	- NONE
  * side effects	-
  */
-static void stats_L(struct Client *server_p,char *name,int doall,
+static void stats_L(struct Client *source_p,char *name,int doall,
                     int wilds,char statchar)
 {
-  stats_L_list(server_p, name, doall, wilds, &unknown_list, statchar);
-  stats_L_list(server_p, name, doall, wilds, &lclient_list, statchar);
-  stats_L_list(server_p, name, doall, wilds, &serv_list, statchar);
+  stats_L_list(source_p, name, doall, wilds, &unknown_list, statchar);
+  stats_L_list(source_p, name, doall, wilds, &lclient_list, statchar);
+  stats_L_list(source_p, name, doall, wilds, &serv_list, statchar);
 }
 
-static void stats_L_list(struct Client *server_p,char *name, int doall, int wilds,
+static void stats_L_list(struct Client *source_p,char *name, int doall, int wilds,
                          dlink_list *list,char statchar)
 {
   dlink_node *ptr;
@@ -508,18 +508,18 @@ static void stats_L_list(struct Client *server_p,char *name, int doall, int wild
       aclient_p = ptr->data;
 
       if (IsInvisible(aclient_p) && (doall || wilds) &&
-	  !(MyConnect(server_p) && IsOper(server_p)) &&
-	  !IsOper(aclient_p) && (aclient_p != server_p))
+	  !(MyConnect(source_p) && IsOper(source_p)) &&
+	  !IsOper(aclient_p) && (aclient_p != source_p))
 	continue;
       if (!doall && wilds && !match(name, aclient_p->name))
 	continue;
       if (!(doall || wilds) && irccmp(name, aclient_p->name))
 	continue;
 
-      if(MyClient(server_p) && IsOper(server_p))
+      if(MyClient(source_p) && IsOper(source_p))
 	{
-	  sendto_one(server_p, Lformat, me.name,
-                     RPL_STATSLINKINFO, server_p->name,
+	  sendto_one(source_p, Lformat, me.name,
+                     RPL_STATSLINKINFO, source_p->name,
                      (IsUpper(statchar)) ?
                      get_client_name(aclient_p, SHOW_IP) :
                      get_client_name(aclient_p, HIDE_IP),
@@ -535,8 +535,8 @@ static void stats_L_list(struct Client *server_p,char *name, int doall, int wild
       else
 	{
 	  if(IsIPHidden(aclient_p) || IsServer(aclient_p))
-	    sendto_one(server_p, Lformat, me.name,
-		       RPL_STATSLINKINFO, server_p->name,
+	    sendto_one(source_p, Lformat, me.name,
+		       RPL_STATSLINKINFO, source_p->name,
 		       get_client_name(aclient_p, MASK_IP),
 		       (int)linebuf_len(&aclient_p->localClient->buf_sendq),
 		       (int)aclient_p->localClient->sendM,
@@ -547,8 +547,8 @@ static void stats_L_list(struct Client *server_p,char *name, int doall, int wild
 		       (CurrentTime > aclient_p->since) ? (CurrentTime - aclient_p->since):0,
 		       IsServer(aclient_p) ? show_capabilities(aclient_p) : "-");
 	  else
-	    sendto_one(server_p, Lformat, me.name,
-		       RPL_STATSLINKINFO, server_p->name,
+	    sendto_one(source_p, Lformat, me.name,
+		       RPL_STATSLINKINFO, source_p->name,
 		       (IsUpper(statchar)) ?
 		       get_client_name(aclient_p, SHOW_IP) :
 		       get_client_name(aclient_p, HIDE_IP),
@@ -582,11 +582,11 @@ static void stats_L_list(struct Client *server_p,char *name, int doall, int wild
  *
  * done --is
  */
-static void stats_spy(struct Client *server_p,char statchar)
+static void stats_spy(struct Client *source_p,char statchar)
 {
   struct hook_stats_data data;
 
-  data.server_p = server_p;
+  data.source_p = source_p;
   data.statchar = statchar;
   data.name = NULL;
 
@@ -596,18 +596,18 @@ static void stats_spy(struct Client *server_p,char statchar)
 /* 
  * stats_L_spy
  * 
- * inputs	- pointer to server_p, client doing stats L
+ * inputs	- pointer to source_p, client doing stats L
  *		- stat that they are doing 'L' 'l'
  * 		- any name argument they have given
  * output	- NONE
  * side effects	- a notice is sent to opers, IF spy mode is configured
  * 		  in the conf file.
  */
-static void stats_L_spy(struct Client *server_p, char statchar, char *name)
+static void stats_L_spy(struct Client *source_p, char statchar, char *name)
 {
   struct hook_stats_data data;
 
-  data.server_p = server_p;
+  data.source_p = source_p;
   data.statchar = statchar;
   data.name = name;
 

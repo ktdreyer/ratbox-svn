@@ -59,7 +59,7 @@ _moddeinit(void)
   mod_del_cmd(&whowas_msgtab);
 }
 
-static int whowas_do(struct Client *client_p, struct Client *server_p,
+static int whowas_do(struct Client *client_p, struct Client *source_p,
                      int parc, char *parv[]);
 
 char *_version = "20001122";
@@ -70,7 +70,7 @@ char *_version = "20001122";
 **      parv[1] = nickname queried
 */
 static void m_whowas(struct Client *client_p,
-                    struct Client *server_p,
+                    struct Client *source_p,
                     int parc,
                     char *parv[])
 {
@@ -78,7 +78,7 @@ static void m_whowas(struct Client *client_p,
 
   if (parc < 2)
     {
-      sendto_one(server_p, form_str(ERR_NONICKNAMEGIVEN),
+      sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
                  me.name, parv[0]);
       return;
     }
@@ -92,25 +92,25 @@ static void m_whowas(struct Client *client_p,
       last_used = CurrentTime;
     }
 
-  whowas_do(client_p,server_p,parc,parv);
+  whowas_do(client_p,source_p,parc,parv);
 }
 
 static void mo_whowas(struct Client *client_p,
-                     struct Client *server_p,
+                     struct Client *source_p,
                      int parc,
                      char *parv[])
 {
   if (parc < 2)
     {
-      sendto_one(server_p, form_str(ERR_NONICKNAMEGIVEN),
+      sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
                  me.name, parv[0]);
       return;
     }
 
-  whowas_do(client_p,server_p,parc,parv);
+  whowas_do(client_p,source_p,parc,parv);
 }
 
-static int whowas_do(struct Client *client_p, struct Client *server_p,
+static int whowas_do(struct Client *client_p, struct Client *source_p,
                      int parc, char *parv[])
 {
   struct Whowas *temp;
@@ -120,14 +120,14 @@ static int whowas_do(struct Client *client_p, struct Client *server_p,
 
   if (parc < 2)
     {
-      sendto_one(server_p, form_str(ERR_NONICKNAMEGIVEN),
+      sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
                  me.name, parv[0]);
       return 0;
     }
   if (parc > 2)
     max = atoi(parv[2]);
   if (parc > 3)
-    if (hunt_server(client_p,server_p,":%s WHOWAS %s %s :%s", 3,parc,parv))
+    if (hunt_server(client_p,source_p,":%s WHOWAS %s %s :%s", 3,parc,parv))
       return 0;
 
 
@@ -142,18 +142,18 @@ static int whowas_do(struct Client *client_p, struct Client *server_p,
     {
       if (!irccmp(nick, temp->name))
         {
-          sendto_one(server_p, form_str(RPL_WHOWASUSER),
+          sendto_one(source_p, form_str(RPL_WHOWASUSER),
                      me.name, parv[0], temp->name,
                      temp->username,
                      temp->hostname,
                      temp->realname);
 
-          if (GlobalSetOptions.hide_server && !IsOper(server_p))
-            sendto_one(server_p, form_str(RPL_WHOISSERVER),
+          if (GlobalSetOptions.hide_server && !IsOper(source_p))
+            sendto_one(source_p, form_str(RPL_WHOISSERVER),
                        me.name, parv[0], temp->name,
                        ServerInfo.network_name, myctime(temp->logoff));
           else
-	    sendto_one(server_p, form_str(RPL_WHOISSERVER),
+	    sendto_one(source_p, form_str(RPL_WHOISSERVER),
                        me.name, parv[0], temp->name,
                        temp->servername, myctime(temp->logoff));
           cur++;
@@ -163,9 +163,9 @@ static int whowas_do(struct Client *client_p, struct Client *server_p,
         break;
     }
   if (!found)
-    sendto_one(server_p, form_str(ERR_WASNOSUCHNICK),
+    sendto_one(source_p, form_str(ERR_WASNOSUCHNICK),
                me.name, parv[0], nick);
 
-  sendto_one(server_p, form_str(RPL_ENDOFWHOWAS), me.name, parv[0], parv[1]);
+  sendto_one(source_p, form_str(RPL_ENDOFWHOWAS), me.name, parv[0], parv[1]);
   return 0;
 }

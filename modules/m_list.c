@@ -63,8 +63,8 @@ _moddeinit(void)
   mod_del_cmd(&list_msgtab);
 }
 
-static int list_all_channels(struct Client *server_p);
-static int list_named_channel(struct Client *server_p,char *name);
+static int list_all_channels(struct Client *source_p);
+static int list_named_channel(struct Client *source_p,char *name);
 
 char *_version = "20001122";
 
@@ -74,7 +74,7 @@ char *_version = "20001122";
 **      parv[1] = channel
 */
 static void m_list(struct Client *client_p,
-                  struct Client *server_p,
+                  struct Client *source_p,
                   int parc,
                   char *parv[])
 {
@@ -85,9 +85,9 @@ static void m_list(struct Client *client_p,
   if( uplink && IsCapable(uplink,CAP_LL) )
     {
       if(parc < 2)
-	sendto_one( uplink, ":%s LIST", server_p->name );
+	sendto_one( uplink, ":%s LIST", source_p->name );
       else
-	sendto_one( uplink, ":%s LIST %s", server_p->name, parv[1] );
+	sendto_one( uplink, ":%s LIST %s", source_p->name, parv[1] );
       return;
     }
 
@@ -95,7 +95,7 @@ static void m_list(struct Client *client_p,
 
   if( ( (last_used + ConfigFileEntry.pace_wait) > CurrentTime) )
     {
-      sendto_one(server_p,form_str(RPL_LOAD2HI),me.name,parv[0]);
+      sendto_one(source_p,form_str(RPL_LOAD2HI),me.name,parv[0]);
       return;
     }
   else
@@ -104,11 +104,11 @@ static void m_list(struct Client *client_p,
   /* If no arg, do all channels *whee*, else just one channel */
   if (parc < 2 || BadPtr(parv[1]))
     {
-      list_all_channels(server_p);
+      list_all_channels(source_p);
     }
   else
     {
-      list_named_channel(server_p,parv[1]);
+      list_named_channel(source_p,parv[1]);
     }
 }
 
@@ -119,7 +119,7 @@ static void m_list(struct Client *client_p,
 **      parv[1] = channel
 */
 static void mo_list(struct Client *client_p,
-                   struct Client *server_p,
+                   struct Client *source_p,
                    int parc,
                    char *parv[])
 {
@@ -132,20 +132,20 @@ static void mo_list(struct Client *client_p,
   if( uplink && IsCapable( uplink, CAP_LL) )
     {
       if(parc < 2)
-	sendto_one( uplink, ":%s LIST", server_p->name );
+	sendto_one( uplink, ":%s LIST", source_p->name );
       else
-	sendto_one( uplink, ":%s LIST %s", server_p->name, parv[1] );
+	sendto_one( uplink, ":%s LIST %s", source_p->name, parv[1] );
       return;
     }
 
   /* If no arg, do all channels *whee*, else just one channel */
   if (parc < 2 || BadPtr(parv[1]))
     {
-      list_all_channels(server_p);
+      list_all_channels(source_p);
     }
   else
     {
-      list_named_channel(server_p,parv[1]);
+      list_named_channel(source_p,parv[1]);
     }
 }
 
@@ -155,7 +155,7 @@ static void mo_list(struct Client *client_p,
 **      parv[1] = channel
 */
 static void ms_list(struct Client *client_p,
-                   struct Client *server_p,
+                   struct Client *source_p,
                    int parc,
                    char *parv[])
 {
@@ -163,16 +163,16 @@ static void ms_list(struct Client *client_p,
 
   if( ServerInfo.hub )
     {
-      if(!IsCapable(client_p->from,CAP_LL) && !MyConnect(server_p))
+      if(!IsCapable(client_p->from,CAP_LL) && !MyConnect(source_p))
 	return;
 
       if (parc < 2 || BadPtr(parv[1]))
 	{
-	  list_all_channels(server_p);
+	  list_all_channels(source_p);
 	}
       else
 	{
-	  list_named_channel(server_p,parv[1]);
+	  list_named_channel(source_p,parv[1]);
 	}
     }
 }
@@ -181,21 +181,21 @@ static void ms_list(struct Client *client_p,
  * list_all_channels
  * inputs	- pointer to client requesting list
  * output	- 0/1
- * side effects	- list all channels to server_p
+ * side effects	- list all channels to source_p
  */
-static int list_all_channels(struct Client *server_p)
+static int list_all_channels(struct Client *source_p)
 {
   struct Channel *chptr;
 
   for ( chptr = GlobalChannelList; chptr; chptr = chptr->nextch )
     {
-      if ( !server_p->user ||
-	   (SecretChannel(chptr) && !IsMember(server_p, chptr)))
+      if ( !source_p->user ||
+	   (SecretChannel(chptr) && !IsMember(source_p, chptr)))
 	continue;
-      list_one_channel(server_p,chptr);
+      list_one_channel(source_p,chptr);
     }
 
-  sendto_one(server_p, form_str(RPL_LISTEND), me.name, server_p->name);
+  sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
   return 0;
 }   
           
@@ -203,9 +203,9 @@ static int list_all_channels(struct Client *server_p)
  * list_named_channel
  * inputs       - pointer to client requesting list
  * output       - 0/1
- * side effects	- list all channels to server_p
+ * side effects	- list all channels to source_p
  */
-static int list_named_channel(struct Client *server_p,char *name)
+static int list_named_channel(struct Client *source_p,char *name)
 {
   char  vname[CHANNELLEN+NICKLEN+4];
   dlink_node *ptr;
@@ -224,8 +224,8 @@ static int list_named_channel(struct Client *server_p,char *name)
 
   if (chptr == NULL)
     {
-      sendto_one(server_p,form_str(ERR_NOSUCHNICK),me.name, server_p->name, name);
-      sendto_one(server_p, form_str(RPL_LISTEND), me.name, server_p->name);
+      sendto_one(source_p,form_str(ERR_NOSUCHNICK),me.name, source_p->name, name);
+      sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
       return 0;
     }
 
@@ -235,8 +235,8 @@ static int list_named_channel(struct Client *server_p,char *name)
   else
     ircsprintf(vname, "%s", chptr->chname);
                
-  if (ShowChannel(server_p, chptr))
-    sendto_one(server_p, form_str(RPL_LIST), me.name, server_p->name,
+  if (ShowChannel(source_p, chptr))
+    sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
                vname, chptr->users, chptr->topic);
       
   /* Deal with subvchans */
@@ -245,18 +245,18 @@ static int list_named_channel(struct Client *server_p,char *name)
     {
       tmpchptr = ptr->data;
 
-      if (ShowChannel(server_p, tmpchptr))
+      if (ShowChannel(source_p, tmpchptr))
 	{
           root_chptr = find_bchan(tmpchptr);
           if(root_chptr != NULL)
             ircsprintf(vname, "%s<!%s>", root_chptr->chname,
                        pick_vchan_id(tmpchptr));
-          sendto_one(server_p, form_str(RPL_LIST), me.name, server_p->name,
+          sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
                      vname, tmpchptr->users, tmpchptr->topic);
         }
     }
   
-  sendto_one(server_p, form_str(RPL_LISTEND), me.name, server_p->name);
+  sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
   return 0;
 }
 
@@ -268,7 +268,7 @@ static int list_named_channel(struct Client *server_p,char *name)
  * ouput	- none
  * side effects -
  */
-static void list_one_channel(struct Client *server_p,struct Channel *chptr)
+static void list_one_channel(struct Client *source_p,struct Channel *chptr)
 {
   struct Channel *root_chptr;
   char  vname[CHANNELLEN+NICKLEN+5]; /* <!!>, and null */
@@ -288,7 +288,7 @@ static void list_one_channel(struct Client *server_p,struct Channel *chptr)
     ircsprintf(vname, "%s", chptr->chname);
 
 
-  sendto_one(server_p, form_str(RPL_LIST), me.name, server_p->name,
+  sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
 	     vname, chptr->users, chptr->topic);
 }
 

@@ -62,21 +62,21 @@ char *_version = "20010130";
  *      parv[1] = message text
  */
 
-static void mo_operwall(struct Client *client_p, struct Client *server_p,
+static void mo_operwall(struct Client *client_p, struct Client *source_p,
                        int parc, char *parv[])
 {
   char *message = parv[1];
 
   if (EmptyString(message))
     {
-      sendto_one(server_p, form_str(ERR_NEEDMOREPARAMS),
+      sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "OPERWALL");
       return;
     }
 
-  sendto_ll_serv_butone(NULL, server_p, 1,
+  sendto_ll_serv_butone(NULL, source_p, 1,
                         ":%s OPERWALL :%s", parv[0], message);
-  sendto_wallops_flags(FLAGS_OPERWALL, server_p, "%s", message);
+  sendto_wallops_flags(FLAGS_OPERWALL, source_p, "%s", message);
 }
 
 /*
@@ -86,22 +86,22 @@ static void mo_operwall(struct Client *client_p, struct Client *server_p,
  *      parv[1] = message text
  */
 
-static void ms_operwall(struct Client *client_p, struct Client *server_p,
+static void ms_operwall(struct Client *client_p, struct Client *source_p,
                        int parc, char *parv[])
 {
   char *message = parv[1];
 
   if (EmptyString(message))
     {
-      if (MyClient(server_p))
-        sendto_one(server_p, form_str(ERR_NEEDMOREPARAMS),
+      if (MyClient(source_p))
+        sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                    me.name, parv[0], "OPERWALL");
       return;
     }
 
-  sendto_ll_serv_butone(client_p, server_p, 1, ":%s OPERWALL :%s",
+  sendto_ll_serv_butone(client_p, source_p, 1, ":%s OPERWALL :%s",
                      parv[0], message);
-  sendto_wallops_flags(FLAGS_OPERWALL, server_p, "%s", message);
+  sendto_wallops_flags(FLAGS_OPERWALL, source_p, "%s", message);
 }
 
 

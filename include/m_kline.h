@@ -26,7 +26,7 @@ struct Client;
 struct PKDlines
 {
   struct PKDlines* next;
-  struct Client*   server_p;
+  struct Client*   source_p;
   struct Client*   rclient_p;
   char*            user; /* username of K/D lined user */
   char*            host; /* hostname of K/D lined user */

@@ -125,7 +125,7 @@ find_is_glined(const char* host, const char* name)
  * report pending glines, and placed glines.
  */
 void
-report_glines(struct Client *server_p)
+report_glines(struct Client *source_p)
 {
   dlink_node *pending_node;
   dlink_node *gline_node;
@@ -138,8 +138,8 @@ report_glines(struct Client *server_p)
   char *reason;
 
   if (dlink_list_length(&pending_glines) > 0)
-    sendto_one(server_p,":%s NOTICE %s :Pending G-lines",
-               me.name, server_p->name);
+    sendto_one(source_p,":%s NOTICE %s :Pending G-lines",
+               me.name, source_p->name);
 
   for(pending_node = pending_glines.head; pending_node; pending_node = pending_node->next)
     {
@@ -147,9 +147,9 @@ report_glines(struct Client *server_p)
       tmptr = localtime(&glp_ptr->time_request1);
       strftime(timebuffer, MAX_DATE_STRING, "%Y/%m/%d %H:%M:%S", tmptr);
 
-      sendto_one(server_p,
+      sendto_one(source_p,
        ":%s NOTICE %s :1) %s!%s@%s on %s requested gline at %s for %s@%s [%s]",
-		 me.name,server_p->name,
+		 me.name,source_p->name,
 		 glp_ptr->oper_nick1,
 		 glp_ptr->oper_user1,
 		 glp_ptr->oper_host1,
@@ -163,9 +163,9 @@ report_glines(struct Client *server_p)
 	{
 	  tmptr = localtime(&glp_ptr->time_request2);
 	  strftime(timebuffer, MAX_DATE_STRING, "%Y/%m/%d %H:%M:%S", tmptr);
-	  sendto_one(server_p,
+	  sendto_one(source_p,
      ":%s NOTICE %s :2) %s!%s@%s on %s requested gline at %s for %s@%s [%s]",
-		     me.name,server_p->name,
+		     me.name,source_p->name,
 		     glp_ptr->oper_nick2,
 		     glp_ptr->oper_user2,
 		     glp_ptr->oper_host2,
@@ -178,8 +178,8 @@ report_glines(struct Client *server_p)
     }
 
   if (dlink_list_length(&pending_glines) > 0)
-    sendto_one(server_p,":%s NOTICE %s :End of Pending G-lines",
-               me.name, server_p->name);
+    sendto_one(source_p,":%s NOTICE %s :End of Pending G-lines",
+               me.name, source_p->name);
 
   for(gline_node = glines.head; gline_node; gline_node = gline_node->next)
     {
@@ -199,8 +199,8 @@ report_glines(struct Client *server_p)
       else
 	reason = "No Reason";
 
-      sendto_one(server_p,form_str(RPL_STATSKLINE), me.name,
-		 server_p->name, 'G' , host, name, reason);
+      sendto_one(source_p,form_str(RPL_STATSKLINE), me.name,
+		 source_p->name, 'G' , host, name, reason);
     }
 }
 

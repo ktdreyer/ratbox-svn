@@ -65,7 +65,7 @@ struct squit_parms
 };
 
 static struct squit_parms *find_squit(struct Client *client_p,
-                                      struct Client *server_p,
+                                      struct Client *source_p,
                                       char *server);
 
 char *_version = "20001122";
@@ -76,38 +76,38 @@ char *_version = "20001122";
  *      parv[1] = server name
  *      parv[2] = comment
  */
-static void mo_squit(struct Client *client_p, struct Client *server_p,
+static void mo_squit(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
   struct squit_parms *found_squit;
   char  *comment = (parc > 2 && parv[2]) ? parv[2] : client_p->name;
 
-  if (!IsOperRemote(server_p))
+  if (!IsOperRemote(source_p))
     {
-      sendto_one(server_p,":%s NOTICE %s :You have no R flag",me.name,parv[0]);
+      sendto_one(source_p,":%s NOTICE %s :You have no R flag",me.name,parv[0]);
       return;
     }
 
   if(parc < 2)
     {
-      sendto_one(server_p, form_str(ERR_NEEDMOREPARAMS),
+      sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "SQUIT");
       return;
     }
 
-  if( (found_squit = find_squit(client_p,server_p,parv[1])) )
+  if( (found_squit = find_squit(client_p,source_p,parv[1])) )
     {
       if(MyConnect(found_squit->aclient_p))
 	{
 	  sendto_realops_flags(FLAGS_ALL,
 			       "Received SQUIT %s from %s (%s)",
 			       found_squit->aclient_p->name,
-			       get_client_name(server_p, HIDE_IP), comment);
+			       get_client_name(source_p, HIDE_IP), comment);
           log(L_NOTICE, "Received SQUIT %s from %s (%s)",
-              found_squit->aclient_p->name, get_client_name(server_p, HIDE_IP),
+              found_squit->aclient_p->name, get_client_name(source_p, HIDE_IP),
               comment);
 	}
-      exit_client(client_p, found_squit->aclient_p, server_p, comment);
+      exit_client(client_p, found_squit->aclient_p, source_p, comment);
       return;
     }
 }
@@ -118,7 +118,7 @@ static void mo_squit(struct Client *client_p, struct Client *server_p,
  *      parv[1] = server name
  *      parv[2] = comment
  */
-static void ms_squit(struct Client *client_p, struct Client *server_p,
+static void ms_squit(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
   struct squit_parms *found_squit;
@@ -127,7 +127,7 @@ static void ms_squit(struct Client *client_p, struct Client *server_p,
   if(parc < 2)
     return;
 
-  if( (found_squit = find_squit(client_p, server_p, parv[1])) )
+  if( (found_squit = find_squit(client_p, source_p, parv[1])) )
     {
       /*
       **  Notify all opers, if my local link is remotely squitted
@@ -137,18 +137,18 @@ static void ms_squit(struct Client *client_p, struct Client *server_p,
 	  sendto_wallops_flags(FLAGS_WALLOP, &me,
 				 "Remote SQUIT %s from %s (%s)",
 				 found_squit->server_name,
-				 get_client_name(server_p, HIDE_IP), comment);
+				 get_client_name(source_p, HIDE_IP), comment);
 
           sendto_serv_butone(&me,
 			     ":%s WALLOPS :Remote SQUIT %s from %s (%s)",
 			     me.name, found_squit->server_name,
-			     get_client_name(server_p, HIDE_IP),comment);
+			     get_client_name(source_p, HIDE_IP),comment);
 
 	  log(L_TRACE, "SQUIT From %s : %s (%s)", parv[0],
 	      found_squit->server_name, comment);
 
 	}
-      exit_client(client_p, found_squit->aclient_p, server_p, comment);
+      exit_client(client_p, found_squit->aclient_p, source_p, comment);
       return;
     }
 }
@@ -163,7 +163,7 @@ static void ms_squit(struct Client *client_p, struct Client *server_p,
  * side effects	-
  */
 static struct squit_parms *find_squit(struct Client *client_p,
-                                      struct Client *server_p,
+                                      struct Client *source_p,
                                       char *server)
 {
   static struct squit_parms found_squit;

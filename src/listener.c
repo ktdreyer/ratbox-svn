@@ -108,15 +108,15 @@ const char* get_listener_name(const struct Listener* listener)
  * output       - none
  * side effects - show ports
  */
-void show_ports(struct Client* server_p)
+void show_ports(struct Client* source_p)
 {
   struct Listener* listener = 0;
 
   for (listener = ListenerPollList; listener; listener = listener->next)
     {
-      sendto_one(server_p, form_str(RPL_STATSPLINE),
+      sendto_one(source_p, form_str(RPL_STATSPLINE),
                  me.name,
-                 server_p->name,
+                 source_p->name,
                  'P',
                  listener->port,
                  listener->name,

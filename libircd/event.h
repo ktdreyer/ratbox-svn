@@ -25,6 +25,6 @@ extern void eventInit(void);
 extern void eventFreeMemory(void);
 extern int eventFind(EVH *, void *);
 
-extern int show_events( struct Client *server_p );
+extern int show_events( struct Client *source_p );
 
 #endif

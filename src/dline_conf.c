@@ -88,7 +88,7 @@ struct ConfItem *match_ip_Kline(struct irc_inaddr *ip, const char *name)
  * output	- none
  * side effects - 
  */
-void report_ip_Klines(struct Client *server_p)
+void report_ip_Klines(struct Client *source_p)
 {
   patricia_node_t *node;
   char *name, *host, *pass, *user, *classname;
@@ -99,7 +99,7 @@ void report_ip_Klines(struct Client *server_p)
     {
       get_printable_conf(node->data, &name, &host, &pass, &user,
 			 &port, &classname);
-      sendto_one(server_p, form_str(RPL_STATSKLINE), me.name, server_p->name,
+      sendto_one(source_p, form_str(RPL_STATSKLINE), me.name, source_p->name,
 		 conftype, host, user, pass);	
     } PATRICIA_WALK_END;
 }
@@ -164,7 +164,7 @@ int add_ip_Kline(struct ConfItem *conf_ptr)
   return -1;
 }
 
-void report_dlines(struct Client *server_p)
+void report_dlines(struct Client *source_p)
 {
   patricia_node_t *node;
   char *name, *host, *pass, *user, *classname, conftype;
@@ -177,7 +177,7 @@ void report_dlines(struct Client *server_p)
 	conftype = 'D';
       get_printable_conf(node->data, &name, &host, &pass, &user, &port,
 			 &classname);
-      sendto_one(server_p, form_str(RPL_STATSDLINE), me.name, server_p->name,
+      sendto_one(source_p, form_str(RPL_STATSDLINE), me.name, source_p->name,
 		 conftype, host, pass);	
     } PATRICIA_WALK_END;
 }
@@ -223,9 +223,9 @@ int add_ip_Iline(struct ConfItem *conf_ptr)
  *
  * inputs	- pointer to client to report to
  * output	- none
- * side effects - report all ip I lines to server_p
+ * side effects - report all ip I lines to source_p
  */
-void report_ip_Ilines(struct Client *server_p)
+void report_ip_Ilines(struct Client *source_p)
 {
   patricia_node_t *node;
   char *name, *host, *pass, *user, *classname;
@@ -234,7 +234,7 @@ void report_ip_Ilines(struct Client *server_p)
     {
       get_printable_conf(node->data, &name, &host, &pass, &user, &port,
 			 &classname);
-      sendto_one(server_p, form_str(RPL_STATSDLINE), me.name, server_p->name, 'I',
+      sendto_one(source_p, form_str(RPL_STATSDLINE), me.name, source_p->name, 'I',
 		 host, pass);	
     } PATRICIA_WALK_END;
 }

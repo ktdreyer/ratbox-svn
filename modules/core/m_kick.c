@@ -67,7 +67,7 @@ char *_version = "20010121";
 **      parv[3] = kick comment
 */
 static void m_kick(struct Client *client_p,
-                  struct Client *server_p,
+                  struct Client *source_p,
                   int parc,
                   char *parv[])
 {
@@ -83,7 +83,7 @@ static void m_kick(struct Client *client_p,
 
   if (*parv[2] == '\0')
     {
-      sendto_one(server_p, form_str(ERR_NEEDMOREPARAMS),
+      sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "KICK");
       return;
     }
@@ -98,32 +98,32 @@ static void m_kick(struct Client *client_p,
 
   name = parv[1];
 
-  chptr = get_channel(server_p, name, !CREATE);
+  chptr = get_channel(source_p, name, !CREATE);
   if (!chptr)
     {
-      sendto_one(server_p, form_str(ERR_NOSUCHCHANNEL),
+      sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
                  me.name, parv[0], name);
       return;
     }
 
   if (HasVchans(chptr))
     {
-      vchan = map_vchan(chptr,server_p);
+      vchan = map_vchan(chptr,source_p);
       if(vchan != 0)
 	{
 	  chptr = vchan;
 	}
     }
 
-  if (!IsServer(server_p) && !is_any_op(chptr, server_p) ) 
+  if (!IsServer(source_p) && !is_any_op(chptr, source_p) ) 
     { 
       /* was a user, not a server, and user isn't seen as a chanop here */
       
-      if(MyConnect(server_p))
+      if(MyConnect(source_p))
         {
           /* user on _my_ server, with no chanops.. so go away */
           
-          sendto_one(server_p, form_str(ERR_CHANOPRIVSNEEDED),
+          sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
                      me.name, parv[0], name);
           return;
         }
@@ -132,7 +132,7 @@ static void m_kick(struct Client *client_p,
         {
           /* If its a TS 0 channel, do it the old way */
           
-          sendto_one(server_p, form_str(ERR_CHANOPRIVSNEEDED),
+          sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
                      me.name, parv[0], name);
           return;
         }
@@ -164,7 +164,7 @@ static void m_kick(struct Client *client_p,
 
   user = parv[2]; /* strtoken(&p2, parv[2], ","); */
 
-  if (!(who = find_chasing(server_p, user, &chasing)))
+  if (!(who = find_chasing(source_p, user, &chasing)))
     {
       return;
     }
@@ -172,16 +172,16 @@ static void m_kick(struct Client *client_p,
   if (IsMember(who, chptr))
     {
       /* half ops cannot kick full chanops */
-      if (is_half_op(chptr,server_p) && is_chan_op(chptr,who))
+      if (is_half_op(chptr,source_p) && is_chan_op(chptr,who))
 	{
 	  sendto_one(who, ":%s NOTICE %s :half-op %s tried to kick you",
-		     me.name, who->name, server_p->name);
+		     me.name, who->name, source_p->name);
 
-          sendto_one(server_p, form_str(ERR_CHANOPRIVSNEEDED),
+          sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
                      me.name, parv[0], name);
 	  return;
 	}
-      if (IsServer(server_p))
+      if (IsServer(source_p))
     {
       sendto_channel_local(ALL_MEMBERS, chptr, ":%s KICK %s %s :%s",
         who->name, name, who->name, comment);
@@ -195,9 +195,9 @@ static void m_kick(struct Client *client_p,
 
 	  sendto_channel_local(ONLY_CHANOPS_HALFOPS, chptr,
 			       ":%s!%s@%s KICK %s %s :%s",
-			       server_p->name,
-			       server_p->username,
-			       server_p->host,
+			       source_p->name,
+			       source_p->username,
+			       source_p->host,
 			       name,
 			       who->name, comment);
 	}
@@ -205,9 +205,9 @@ static void m_kick(struct Client *client_p,
 	{
 	  sendto_channel_local(ALL_MEMBERS, chptr,
 			       ":%s!%s@%s KICK %s %s :%s",
-			       server_p->name,
-			       server_p->username,
-			       server_p->host,
+			       source_p->name,
+			       source_p->username,
+			       source_p->host,
 			       name, who->name, comment);
 	}
 
@@ -218,21 +218,21 @@ static void m_kick(struct Client *client_p,
       remove_user_from_channel(chptr, who);
     }
   else
-    sendto_one(server_p, form_str(ERR_USERNOTINCHANNEL),
+    sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL),
                me.name, parv[0], user, name);
 }
 
 static void ms_kick(struct Client *client_p,
-                   struct Client *server_p,
+                   struct Client *source_p,
                    int parc,
                    char *parv[])
 {
   if (*parv[2] == '\0')
     {
-      sendto_one(server_p, form_str(ERR_NEEDMOREPARAMS),
+      sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "KICK");
       return;
     }
 
-  m_kick(client_p, server_p, parc, parv);
+  m_kick(client_p, source_p, parc, parv);
 }

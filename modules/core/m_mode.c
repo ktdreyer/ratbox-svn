@@ -66,7 +66,7 @@ char *_version = "20001122";
  * parv[0] - sender
  * parv[1] - channel
  */
-static void m_mode(struct Client *client_p, struct Client *server_p,
+static void m_mode(struct Client *client_p, struct Client *source_p,
               int parc, char *parv[])
 {
   struct Channel* chptr=NULL;
@@ -80,13 +80,13 @@ static void m_mode(struct Client *client_p, struct Client *server_p,
   if( !IsChanPrefix(parv[1][0]) )
     {
       /* if here, it has to be a non-channel name */
-      user_mode(client_p, server_p, parc, parv);
+      user_mode(client_p, source_p, parc, parv);
       return;
     }
 
   if (!check_channel_name(parv[1]))
     { 
-      sendto_one(server_p, form_str(ERR_BADCHANNAME),
+      sendto_one(source_p, form_str(ERR_BADCHANNAME),
 		 me.name, parv[0], (unsigned char *)parv[1]);
       return;
     }
@@ -106,7 +106,7 @@ static void m_mode(struct Client *client_p, struct Client *server_p,
       /* only send a mode upstream if a local client sent this request
        * -davidt
        */
-      if ( MyClient(server_p) && !ServerInfo.hub && uplink &&
+      if ( MyClient(source_p) && !ServerInfo.hub && uplink &&
 	   IsCapable(uplink, CAP_LL))
 	{
 	  /* cache the channel if it exists on uplink
@@ -117,12 +117,12 @@ static void m_mode(struct Client *client_p, struct Client *server_p,
                      me.name, parv[1]);
 	  
 	  sendto_one(uplink, ":%s MODE %s %s",
-		     server_p->name, parv[1], (parv[2] ? parv[2] : ""));
+		     source_p->name, parv[1], (parv[2] ? parv[2] : ""));
 	  return;
 	}
       else
 	{
-	  sendto_one(server_p, form_str(ERR_NOSUCHCHANNEL),
+	  sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
 		     me.name, parv[0], parv[1]);
 	  return;
 	}
@@ -137,13 +137,13 @@ static void m_mode(struct Client *client_p, struct Client *server_p,
      struct Client *aclient_p;
      if (!(aclient_p = find_client(++parv[2], NULL)))
        {
-        sendto_one(server_p, form_str(ERR_NOSUCHCHANNEL), me.name,
+        sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL), me.name,
                    parv[0], root->chname);
         return;
        }
      if (!(chptr = map_vchan(root, aclient_p)))
        {
-        sendto_one(server_p, form_str(ERR_NOSUCHCHANNEL), me.name,
+        sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL), me.name,
                    parv[0], root->chname);
         return;
        }
@@ -154,7 +154,7 @@ static void m_mode(struct Client *client_p, struct Client *server_p,
     {
       if (HasVchans(chptr))
         {
-          if ((vchan = map_vchan(chptr,server_p)) != NULL)
+          if ((vchan = map_vchan(chptr,source_p)) != NULL)
             chptr = vchan; /* root = chptr, chptr = vchan */
 
           /* XXX - else? the user isn't on any vchan, so we
@@ -176,25 +176,25 @@ static void m_mode(struct Client *client_p, struct Client *server_p,
 
   if(parc < n+1)
     {
-      channel_modes(chptr, server_p, modebuf, parabuf);
-      sendto_one(server_p, form_str(RPL_CHANNELMODEIS),
+      channel_modes(chptr, source_p, modebuf, parabuf);
+      sendto_one(source_p, form_str(RPL_CHANNELMODEIS),
 		 me.name, parv[0], parv[1],
 		 modebuf, parabuf);
       
       /* Let opers see the "true" TS everyone else see's
        * the top root chan TS
        */
-      if (!IsOper(server_p))
-	sendto_one(server_p, form_str(RPL_CREATIONTIME),
+      if (!IsOper(source_p))
+	sendto_one(source_p, form_str(RPL_CREATIONTIME),
 		   me.name, parv[0],
 		   parv[1], root->channelts);
       else
-	sendto_one(server_p, form_str(RPL_CREATIONTIME),
+	sendto_one(source_p, form_str(RPL_CREATIONTIME),
 		   me.name, parv[0],
 		   parv[1], chptr->channelts);
     }
   else
-    set_channel_mode(client_p, server_p, chptr, parc - n, parv + n, 
+    set_channel_mode(client_p, source_p, chptr, parc - n, parv + n, 
                      root->chname);
 }
 

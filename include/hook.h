@@ -19,14 +19,14 @@ typedef int (*hookfn)(void *data);
 struct hook_mfunc_data 
 {
 	struct Client *client_p;
-	struct Client *server_p;
+	struct Client *source_p;
 	int parc;
 	char **parv;
 };
 
 struct hook_stats_data 
 {
-	struct Client *server_p;
+	struct Client *source_p;
 	char statchar;
 	char *name;
 };
@@ -34,7 +34,7 @@ struct hook_stats_data
 struct hook_links_data
 {
 	struct Client *client_p;
-	struct Client *server_p;
+	struct Client *source_p;
 	int parc;
 	char **parv;
 	char statchar;

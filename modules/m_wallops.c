@@ -62,7 +62,7 @@ char *_version = "20001122";
  *      parv[0] = sender prefix
  *      parv[1] = message text
  */
-static void mo_wallops(struct Client *client_p, struct Client *server_p,
+static void mo_wallops(struct Client *client_p, struct Client *source_p,
                       int parc, char *parv[])
 { 
   char* message;
@@ -71,13 +71,13 @@ static void mo_wallops(struct Client *client_p, struct Client *server_p,
   
   if (EmptyString(message))
     {
-      sendto_one(server_p, form_str(ERR_NEEDMOREPARAMS),
+      sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "WALLOPS");
       return;
     }
 
-  sendto_wallops_flags(FLAGS_OPERWALL, server_p, "%s", message);
-  sendto_ll_serv_butone(NULL, server_p, 1,
+  sendto_wallops_flags(FLAGS_OPERWALL, source_p, "%s", message);
+  sendto_ll_serv_butone(NULL, source_p, 1,
                         ":%s WALLOPS :%s", parv[0], message);
 }
 
@@ -86,7 +86,7 @@ static void mo_wallops(struct Client *client_p, struct Client *server_p,
  *      parv[0] = sender prefix
  *      parv[1] = message text
  */
-static void ms_wallops(struct Client *client_p, struct Client *server_p,
+static void ms_wallops(struct Client *client_p, struct Client *source_p,
                       int parc, char *parv[])
 { 
   char* message;
@@ -95,17 +95,17 @@ static void ms_wallops(struct Client *client_p, struct Client *server_p,
   
   if (EmptyString(message))
     {
-      sendto_one(server_p, form_str(ERR_NEEDMOREPARAMS),
+      sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "WALLOPS");
       return;
     }
 
-  if(IsClient(server_p))
-    sendto_wallops_flags(FLAGS_OPERWALL, server_p, "%s", message);
+  if(IsClient(source_p))
+    sendto_wallops_flags(FLAGS_OPERWALL, source_p, "%s", message);
   else
-    sendto_wallops_flags(FLAGS_WALLOP, server_p, "%s", message); 
+    sendto_wallops_flags(FLAGS_WALLOP, source_p, "%s", message); 
 
-  sendto_ll_serv_butone(client_p, server_p, 1,
+  sendto_ll_serv_butone(client_p, source_p, 1,
                         ":%s WALLOPS :%s", parv[0], message);
 }
 

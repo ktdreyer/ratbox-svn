@@ -69,7 +69,7 @@ char *_version = "20001122";
 **      "drop" a channel from consideration on a lazy link
 */
 static void ms_drop(struct Client *client_p,
-                   struct Client *server_p,
+                   struct Client *source_p,
                   int parc,
                   char *parv[])
 {

@@ -87,15 +87,15 @@ static int     pargs;
 static void set_final_mode(struct Mode *mode,struct Mode *oldmode);
 static void remove_our_modes(int type,
 		      struct Channel *chptr, struct Channel *top_chptr,
-		      struct Client *server_p);
+		      struct Client *source_p);
 
 static void remove_a_mode(int hide_or_not,
                           struct Channel *chptr, struct Channel *top_chptr,
-                          struct Client *server_p, dlink_list *list, char flag);
+                          struct Client *source_p, dlink_list *list, char flag);
 
 
 static void ms_sjoin(struct Client *client_p,
-                    struct Client *server_p,
+                    struct Client *source_p,
                     int parc,
                     char *parv[])
 {
@@ -128,7 +128,7 @@ static void ms_sjoin(struct Client *client_p,
   *sjbuf = '\0';
   *sjbuf_nh = '\0';
   
-  if (IsClient(server_p) || parc < 5)
+  if (IsClient(source_p) || parc < 5)
     return;
   if (!IsChannelName(parv[2]))
     return;
@@ -190,7 +190,7 @@ static void ms_sjoin(struct Client *client_p,
   *parabuf = '\0';
 
   isnew = ChannelExists(parv[2]) ? 0 : 1;
-  chptr = get_channel(server_p, parv[2], CREATE);
+  chptr = get_channel(source_p, parv[2], CREATE);
 
   /* XXX vchan cruft */
   /* vchans are encoded as "##mainchanname_timestamp" */
@@ -235,7 +235,7 @@ static void ms_sjoin(struct Client *client_p,
           /* check TS before creating a root channel */
 	  else if(newts == vc_ts)
 	    {
-	      top_chptr = get_channel(server_p, (parv[2] + 1), CREATE);
+	      top_chptr = get_channel(source_p, (parv[2] + 1), CREATE);
 	      m = make_dlink_node();
 	      dlinkAdd(chptr, m, &top_chptr->vchan_list);
 	      chptr->root_chptr=top_chptr;
@@ -353,7 +353,7 @@ static void ms_sjoin(struct Client *client_p,
   /* Lost the TS, other side wins, so remove modes on this side */
   if (!keep_our_modes)
     {
-      remove_our_modes(hide_or_not, chptr, top_chptr, server_p);
+      remove_our_modes(hide_or_not, chptr, top_chptr, source_p);
     }
 
   if(*modebuf != '\0')
@@ -374,7 +374,7 @@ static void ms_sjoin(struct Client *client_p,
 
   *modebuf = *parabuf = '\0';
   if (parv[3][0] != '0' && keep_new_modes)
-    channel_modes(chptr, server_p, modebuf, parabuf);
+    channel_modes(chptr, source_p, modebuf, parabuf);
   else
     {
       modebuf[0] = '0';
@@ -437,7 +437,7 @@ static void ms_sjoin(struct Client *client_p,
           }
        }
 
-      if (!(aclient_p = find_chasing(server_p, s, NULL)))
+      if (!(aclient_p = find_chasing(source_p, s, NULL)))
         continue;
       if (aclient_p->from != client_p)
         continue;
@@ -703,11 +703,11 @@ static void set_final_mode(struct Mode *mode,struct Mode *oldmode)
  */
 static void remove_our_modes( int hide_or_not,
                               struct Channel *chptr, struct Channel *top_chptr,
-                              struct Client *server_p)
+                              struct Client *source_p)
 {
-  remove_a_mode(hide_or_not, chptr, top_chptr, server_p, &chptr->chanops, 'o');
-  remove_a_mode(hide_or_not, chptr, top_chptr, server_p, &chptr->halfops, 'h');
-  remove_a_mode(hide_or_not, chptr, top_chptr, server_p, &chptr->voiced, 'v');
+  remove_a_mode(hide_or_not, chptr, top_chptr, source_p, &chptr->chanops, 'o');
+  remove_a_mode(hide_or_not, chptr, top_chptr, source_p, &chptr->halfops, 'h');
+  remove_a_mode(hide_or_not, chptr, top_chptr, source_p, &chptr->voiced, 'v');
 
   /* Move all voice/ops etc. to non opped list */
   dlinkMoveList(&chptr->chanops, &chptr->peons);
@@ -727,7 +727,7 @@ static void remove_our_modes( int hide_or_not,
  */
 static void remove_a_mode( int hide_or_not,
                            struct Channel *chptr, struct Channel *top_chptr,
-                           struct Client *server_p, dlink_list *list, char flag)
+                           struct Client *source_p, dlink_list *list, char flag)
 {
   dlink_node *ptr;
   struct Client *aclient_p;

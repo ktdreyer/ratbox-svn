@@ -67,7 +67,7 @@ char *_version = "20001122";
 **      parv[3] = server host name (used only from other servers)
 **      parv[4] = users real name info
 */
-static void mr_user(struct Client* client_p, struct Client* server_p,
+static void mr_user(struct Client* client_p, struct Client* source_p,
 		   int parc, char *parv[])
 {
   char* p;
@@ -77,12 +77,12 @@ static void mr_user(struct Client* client_p, struct Client* server_p,
 
   if (*parv[4] == '\0')
     {
-      sendto_one(server_p, form_str(ERR_NEEDMOREPARAMS),
+      sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                  me.name, BadPtr(parv[0]) ? "*" : parv[0], "USER");
       return;
     }
 
-  do_local_user(parv[0], client_p, server_p,
+  do_local_user(parv[0], client_p, source_p,
                 parv[1],	/* username */
                 parv[2],	/* host */
                 parv[3],	/* server */

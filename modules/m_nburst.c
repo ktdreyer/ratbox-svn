@@ -75,7 +75,7 @@ char *_version = "20010104";
  */
 
 static void ms_nburst(struct Client *client_p,
-                     struct Client *server_p,
+                     struct Client *source_p,
                      int parc,
                      char *parv[])
 {

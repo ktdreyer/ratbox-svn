@@ -36,7 +36,7 @@
 
 #include <string.h>
 
-static int do_ison(struct Client *up, struct Client *server_p,
+static int do_ison(struct Client *up, struct Client *source_p,
                    int parc, char *parv[]);
 
 static void m_ison(struct Client*, struct Client*, int, char**);
@@ -73,7 +73,7 @@ char *_version = "20001122";
  * format:
  * ISON :nicklist
  */
-static void m_ison(struct Client *client_p, struct Client *server_p,
+static void m_ison(struct Client *client_p, struct Client *source_p,
                   int parc, char *parv[])
 {
   struct Client *up = NULL;
@@ -81,7 +81,7 @@ static void m_ison(struct Client *client_p, struct Client *server_p,
   if (!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
     up = uplink;
 
-  do_ison(up, server_p, parc, parv);
+  do_ison(up, source_p, parc, parv);
 }
 
 /*
@@ -92,14 +92,14 @@ static void m_ison(struct Client *client_p, struct Client *server_p,
  * exists...
  * ISON :nicklist
  */
-static void ms_ison(struct Client *client_p, struct Client *server_p,
+static void ms_ison(struct Client *client_p, struct Client *source_p,
                    int parc, char *parv[])
 {
   if (ServerInfo.hub && IsCapable(client_p, CAP_LL))
-    do_ison(NULL, server_p, parc, parv);
+    do_ison(NULL, source_p, parc, parv);
 }
 
-static int do_ison(struct Client *up, struct Client *server_p,
+static int do_ison(struct Client *up, struct Client *source_p,
                    int parc, char *parv[])
 {
   struct Client *aclient_p;
@@ -180,9 +180,9 @@ static int do_ison(struct Client *up, struct Client *server_p,
   *current_insert_point2 = '\0'; 
   
   if (relay_to_hub)
-    sendto_one(up, ":%s ISON :%s", server_p->name, buf2);
+    sendto_one(up, ":%s ISON :%s", source_p->name, buf2);
   else
-    sendto_one(server_p, "%s", buf);
+    sendto_one(source_p, "%s", buf);
 
   return 0;
 }

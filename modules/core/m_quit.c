@@ -61,14 +61,14 @@ char *_version = "20001122";
 **      parv[1] = comment
 */
 static void m_quit(struct Client *client_p,
-                  struct Client *server_p,
+                  struct Client *source_p,
                   int parc,
                   char *parv[])
 {
   char *comment = (parc > 1 && parv[1]) ? parv[1] : client_p->name;
   char reason [TOPICLEN + 1];
 
-  server_p->flags |= FLAGS_NORMALEX;
+  source_p->flags |= FLAGS_NORMALEX;
   if (strlen(comment) > (size_t) TOPICLEN)
     comment[TOPICLEN] = '\0';
 
@@ -78,11 +78,11 @@ static void m_quit(struct Client *client_p,
       comment = reason;
     }
   
-  if( !IsServer(server_p) && MyConnect(server_p) && !IsOper(server_p) && 
-     (server_p->firsttime + ANTI_SPAM_EXIT_MESSAGE_TIME) > CurrentTime)
+  if( !IsServer(source_p) && MyConnect(source_p) && !IsOper(source_p) && 
+     (source_p->firsttime + ANTI_SPAM_EXIT_MESSAGE_TIME) > CurrentTime)
     comment = "Client Quit";
 
-  exit_client(client_p, server_p, server_p, comment);
+  exit_client(client_p, source_p, source_p, comment);
 }
 /*
 ** ms_quit
@@ -90,16 +90,16 @@ static void m_quit(struct Client *client_p,
 **      parv[1] = comment
 */
 static void ms_quit(struct Client *client_p,
-                   struct Client *server_p,
+                   struct Client *source_p,
                    int parc,
                    char *parv[])
 {
   char *comment = (parc > 1 && parv[1]) ? parv[1] : client_p->name;
 
-  server_p->flags |= FLAGS_NORMALEX;
+  source_p->flags |= FLAGS_NORMALEX;
   if (strlen(comment) > (size_t) TOPICLEN)
     comment[TOPICLEN] = '\0';
 
-  exit_client(client_p, server_p, server_p, comment);
+  exit_client(client_p, source_p, source_p, comment);
 }
 

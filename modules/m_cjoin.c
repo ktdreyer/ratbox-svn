@@ -72,7 +72,7 @@ char *_version = "20001122";
 **      parv[2] = channel password (key)
 */
 static void m_cjoin(struct Client *client_p,
-                   struct Client *server_p,
+                   struct Client *source_p,
                    int parc,
                    char *parv[])
 {
@@ -83,22 +83,22 @@ static void m_cjoin(struct Client *client_p,
   char  *name;
   char  *p = NULL;
 
-  if (!(server_p->user))
+  if (!(source_p->user))
     {
       /* something is *fucked* - bail */
       return;
     }
 
-  if (ConfigFileEntry.vchans_oper_only && !IsOper(server_p))
+  if (ConfigFileEntry.vchans_oper_only && !IsOper(source_p))
     {
-      sendto_one(server_p, form_str(ERR_NOPRIVILEGES),
+      sendto_one(source_p, form_str(ERR_NOPRIVILEGES),
                  me.name, parv[0]);
       return;
     }
 
   if (*parv[1] == '\0')
     {
-      sendto_one(server_p, form_str(ERR_NEEDMOREPARAMS),
+      sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "CJOIN");
       return;
     }
@@ -116,21 +116,21 @@ static void m_cjoin(struct Client *client_p,
 
   if (!check_channel_name(name))
     {
-      sendto_one(server_p, form_str(ERR_BADCHANNAME),
+      sendto_one(source_p, form_str(ERR_BADCHANNAME),
 		 me.name, parv[0], (unsigned char*) name);
       return;
     }
 
   if (*name == '&')
     {
-      sendto_one(server_p, form_str(ERR_BADCHANNAME),
+      sendto_one(source_p, form_str(ERR_BADCHANNAME),
 		 me.name, parv[0], (unsigned char*) name);
       return;
     }
 
   if (!IsChannelName(name))
     {
-      sendto_one(server_p, form_str(ERR_NOSUCHCHANNEL),
+      sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
 		 me.name, parv[0], name);
       return;
     }
@@ -150,19 +150,19 @@ static void m_cjoin(struct Client *client_p,
            * the uplink will have to SJOIN all of those.
            */
           sendto_one(uplink, ":%s CBURST %s !%s",
-                     me.name, parv[1], server_p->name);
+                     me.name, parv[1], source_p->name);
 
           return;
         }
       else
         {
-          sendto_one(server_p, form_str(ERR_NOSUCHCHANNEL),
-                     me.name, server_p->name, name);
+          sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
+                     me.name, source_p->name, name);
         }
       return;
     }
 
-  if (! (vchan_chptr = cjoin_channel(chptr, server_p, name)) )
+  if (! (vchan_chptr = cjoin_channel(chptr, source_p, name)) )
     return;
 
   root_vchan = chptr;
@@ -171,20 +171,20 @@ static void m_cjoin(struct Client *client_p,
   /*
   **  Complete user entry to the new channel
   */
-  add_user_to_channel(chptr, server_p, CHFL_CHANOP);
+  add_user_to_channel(chptr, source_p, CHFL_CHANOP);
 
   sendto_channel_local(ALL_MEMBERS, chptr,
                        ":%s!%s@%s JOIN :%s",
-                       server_p->name,
-                       server_p->username,
-                       server_p->host,
+                       source_p->name,
+                       source_p->username,
+                       source_p->host,
                        root_vchan->chname);
 
   sendto_channel_remote(chptr, client_p,
 			":%s SJOIN %lu %s + :@%s", me.name,
 			chptr->channelts,
 			chptr->chname,
-			server_p->name);
+			source_p->name);
 
   vchan_chptr->mode.mode |= MODE_TOPICLIMIT;
   vchan_chptr->mode.mode |= MODE_NOPRIVMSGS;
@@ -193,11 +193,11 @@ static void m_cjoin(struct Client *client_p,
                        ":%s MODE %s +nt",
                        me.name, root_vchan->chname);
 
-  sendto_channel_remote(vchan_chptr, server_p, 
+  sendto_channel_remote(vchan_chptr, source_p, 
 			":%s MODE %s +nt",
 			me.name,
 			vchan_chptr->chname);
 
-  del_invite(vchan_chptr, server_p);
-  (void)channel_member_names(server_p, vchan_chptr, root_vchan->chname);
+  del_invite(vchan_chptr, source_p);
+  (void)channel_member_names(source_p, vchan_chptr, root_vchan->chname);
 }

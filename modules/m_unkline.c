@@ -93,7 +93,7 @@ char *_version = "20001122";
 *
 *
 */
-static void mo_unkline (struct Client *client_p,struct Client *server_p,
+static void mo_unkline (struct Client *client_p,struct Client *source_p,
                        int parc,char *parv[])
 {
   FBFILE* in;
@@ -112,9 +112,9 @@ static void mo_unkline (struct Client *client_p,struct Client *server_p,
 
   ircsprintf(temppath, "%s.tmp", ConfigFileEntry.klinefile);
   
-  if (!IsSetOperUnkline(server_p))
+  if (!IsSetOperUnkline(source_p))
     {
-      sendto_one(server_p,":%s NOTICE %s :You have no U flag",me.name,parv[0]);
+      sendto_one(source_p,":%s NOTICE %s :You have no U flag",me.name,parv[0]);
       return;
     }
 
@@ -135,7 +135,7 @@ static void mo_unkline (struct Client *client_p,struct Client *server_p,
     }
   else
     {
-      sendto_one(server_p, ":%s NOTICE %s :Invalid parameters",
+      sendto_one(source_p, ":%s NOTICE %s :Invalid parameters",
                  me.name, parv[0]);
       return;
     }
@@ -143,14 +143,14 @@ static void mo_unkline (struct Client *client_p,struct Client *server_p,
   if( (user[0] == '*') && (user[1] == '\0')
       && (host[0] == '*') && (host[1] == '\0') )
     {
-      sendto_one(server_p, ":%s NOTICE %s :Cannot UNK-Line everyone",
+      sendto_one(source_p, ":%s NOTICE %s :Cannot UNK-Line everyone",
                  me.name, parv[0]);
       return;
     }
 
   if(remove_tkline_match(host,user))
     {
-      sendto_one(server_p, ":%s NOTICE %s :Un-klined [%s@%s] from temporary k-lines",
+      sendto_one(source_p, ":%s NOTICE %s :Un-klined [%s@%s] from temporary k-lines",
                  me.name, parv[0],user, host);
       sendto_realops_flags(FLAGS_ALL,
 			   "%s has removed the temporary K-Line for: [%s@%s]",
@@ -165,7 +165,7 @@ static void mo_unkline (struct Client *client_p,struct Client *server_p,
 
   if( (in = fbopen(filename, "r")) == 0)
     {
-      sendto_one(server_p, ":%s NOTICE %s :Cannot open %s",
+      sendto_one(source_p, ":%s NOTICE %s :Cannot open %s",
         me.name,parv[0],filename);
       return;
     }
@@ -173,7 +173,7 @@ static void mo_unkline (struct Client *client_p,struct Client *server_p,
   oldumask = umask(0);                  /* ircd is normally too paranoid */
   if( (out = fbopen(temppath, "w")) == 0)
     {
-      sendto_one(server_p, ":%s NOTICE %s :Cannot open %s",
+      sendto_one(source_p, ":%s NOTICE %s :Cannot open %s",
         me.name,parv[0],temppath);
       fbclose(in);
       umask(oldumask);                  /* Restore the old umask */
@@ -205,13 +205,13 @@ K:bar:No reason (1997/08/30 14.56):foo
           p = strchr(found_host,':');
           if(p == (char *)NULL)
             {
-              sendto_one(server_p, ":%s NOTICE %s :K-Line file corrupted",
+              sendto_one(source_p, ":%s NOTICE %s :K-Line file corrupted",
                          me.name, parv[0]);
-              sendto_one(server_p, ":%s NOTICE %s :Couldn't find host",
+              sendto_one(source_p, ":%s NOTICE %s :Couldn't find host",
                          me.name, parv[0]);
 	      log(L_ERROR, "K-Line file corrupted (couldn't find host)");
               if(!error_on_write)
-                error_on_write = flush_write(server_p, out, buf, temppath);
+                error_on_write = flush_write(source_p, out, buf, temppath);
               continue;         /* This K line is corrupted ignore */
             }
           *p = '\0';
@@ -221,13 +221,13 @@ K:bar:No reason (1997/08/30 14.56):foo
           p = strchr(found_comment,':');
           if(p == (char *)NULL)
             {
-              sendto_one(server_p, ":%s NOTICE %s :K-Line file corrupted",
+              sendto_one(source_p, ":%s NOTICE %s :K-Line file corrupted",
                          me.name, parv[0]);
-              sendto_one(server_p, ":%s NOTICE %s :Couldn't find comment",
+              sendto_one(source_p, ":%s NOTICE %s :Couldn't find comment",
                          me.name, parv[0]);
 	      log(L_ERROR, "K-Line file corrupted (couldn't find comment)");
               if(!error_on_write)
-                error_on_write = flush_write(server_p, out, buf, temppath);
+                error_on_write = flush_write(source_p, out, buf, temppath);
               continue;         /* This K line is corrupted ignore */
             }
           *p = '\0';
@@ -242,7 +242,7 @@ K:bar:No reason (1997/08/30 14.56):foo
           if(irccmp(host,found_host) || irccmp(user,found_user))
             {
               if(!error_on_write)
-                error_on_write = flush_write(server_p, out, buf, temppath);
+                error_on_write = flush_write(source_p, out, buf, temppath);
             }
           else
             pairme++;
@@ -267,7 +267,7 @@ Then just ignore the line
           if(p == (char *)NULL)
             {
               if(!error_on_write)
-                error_on_write = flush_write(server_p, out, buf, temppath);
+                error_on_write = flush_write(source_p, out, buf, temppath);
               continue;
             }
           *p = '\0';
@@ -279,7 +279,7 @@ Then just ignore the line
           if(p == (char *)NULL)
             {
               if(!error_on_write)
-                error_on_write = flush_write(server_p, out, buf, temppath);
+                error_on_write = flush_write(source_p, out, buf, temppath);
               continue;
             }
           *p = '\0';
@@ -292,7 +292,7 @@ Then just ignore the line
           if(p == (char *)NULL)
             {
               if(!error_on_write)
-                error_on_write = flush_write(server_p, out, buf, temppath);
+                error_on_write = flush_write(source_p, out, buf, temppath);
               continue;
             }
           *p = '\0';
@@ -302,13 +302,13 @@ Then just ignore the line
           if( (irccmp(found_host,host)) || (irccmp(found_user,user)) )
             {
               if(!error_on_write)
-                error_on_write = flush_write(server_p, out, buf, temppath);
+                error_on_write = flush_write(source_p, out, buf, temppath);
             }
         }
       else      /* its the ircd.conf file, and not a K line or comment */
         {
           if(!error_on_write)
-            error_on_write = flush_write(server_p, out, buf, temppath);
+            error_on_write = flush_write(source_p, out, buf, temppath);
         }
     }
 
@@ -323,22 +323,22 @@ Then just ignore the line
     {
       fbclose(out);
       (void)rename(temppath, filename);
-      rehash(client_p,server_p,0);
+      rehash(client_p,source_p,0);
     }
   else
     {
-      sendto_one(server_p,":%s NOTICE %s :Couldn't write temp kline file, aborted",
+      sendto_one(source_p,":%s NOTICE %s :Couldn't write temp kline file, aborted",
         me.name,parv[0]);
       return;
     }
 
   if(!pairme)
     {
-      sendto_one(server_p, ":%s NOTICE %s :No K-Line for %s@%s",
+      sendto_one(source_p, ":%s NOTICE %s :No K-Line for %s@%s",
                  me.name, parv[0],user,host);
       return;
     }
-  sendto_one(server_p, ":%s NOTICE %s :K-Line for [%s@%s] is removed", 
+  sendto_one(source_p, ":%s NOTICE %s :K-Line for [%s@%s] is removed", 
              me.name, parv[0], user,host);
   sendto_realops_flags(FLAGS_ALL,
 		       "%s has removed the K-Line for: [%s@%s]",
@@ -368,14 +368,14 @@ Then just ignore the line
  * -Dianora
  */
 
-static int flush_write(struct Client *server_p, FBFILE* out, char *buf, char *temppath)
+static int flush_write(struct Client *source_p, FBFILE* out, char *buf, char *temppath)
 {
   int error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
 
   if (error_on_write)
     {
-      sendto_one(server_p,":%s NOTICE %s :Unable to write to %s",
-        me.name, server_p->name, temppath );
+      sendto_one(source_p,":%s NOTICE %s :Unable to write to %s",
+        me.name, source_p->name, temppath );
       fbclose(out);
       if(temppath != (char *)NULL)
         (void)unlink(temppath);
@@ -432,7 +432,7 @@ static int remove_tkline_match(char *host, char *user)
 **      parv[0] = sender nick
 **      parv[1] = dline to remove
 */
-static void mo_undline (struct Client *client_p, struct Client *server_p,
+static void mo_undline (struct Client *client_p, struct Client *source_p,
                        int parc,char *parv[])
 {
   FBFILE* in;
@@ -453,9 +453,9 @@ static void mo_undline (struct Client *client_p, struct Client *server_p,
 
   ircsprintf(temppath, "%s.tmp", ConfigFileEntry.dlinefile);
 
-  if (!IsSetOperUnkline(server_p))
+  if (!IsSetOperUnkline(source_p))
     {
-      sendto_one(server_p,":%s NOTICE %s :You have no U flag",me.name,
+      sendto_one(source_p,":%s NOTICE %s :You have no U flag",me.name,
                  parv[0]);
       return;
     }
@@ -464,7 +464,7 @@ static void mo_undline (struct Client *client_p, struct Client *server_p,
 
   if (!is_address(cidr,&ip_host,&ip_mask))
     {
-      sendto_one(server_p, ":%s NOTICE %s :Invalid parameters",
+      sendto_one(source_p, ":%s NOTICE %s :Invalid parameters",
                  me.name, parv[0]);
       return;
     }
@@ -473,7 +473,7 @@ static void mo_undline (struct Client *client_p, struct Client *server_p,
 
   if( (in = fbopen(filename, "r")) == 0)
     {
-      sendto_one(server_p, ":%s NOTICE %s :Cannot open %s",
+      sendto_one(source_p, ":%s NOTICE %s :Cannot open %s",
         me.name,parv[0],filename);
       return;
     }
@@ -481,7 +481,7 @@ static void mo_undline (struct Client *client_p, struct Client *server_p,
   oldumask = umask(0);                  /* ircd is normally too paranoid */
   if( (out = fbopen(temppath, "w")) == 0)
     {
-      sendto_one(server_p, ":%s NOTICE %s :Cannot open %s",
+      sendto_one(source_p, ":%s NOTICE %s :Cannot open %s",
         me.name,parv[0],temppath);
       fbclose(in);
       umask(oldumask);                  /* Restore the old umask */
@@ -512,12 +512,12 @@ D:123.4.5.0/24:test (2000/05/28 12.48)
           p = strchr(found_cidr,':');
           if(p == (char *)NULL)
             {
-              sendto_one(server_p, ":%s NOTICE %s :D-Line file corrupted",
+              sendto_one(source_p, ":%s NOTICE %s :D-Line file corrupted",
                          me.name, parv[0]);
-              sendto_one(server_p, ":%s NOTICE %s :Couldn't find CIDR",
+              sendto_one(source_p, ":%s NOTICE %s :Couldn't find CIDR",
                          me.name, parv[0]);
               if(!error_on_write)
-                error_on_write = flush_write(server_p, out, buf, temppath);
+                error_on_write = flush_write(source_p, out, buf, temppath);
               continue;         /* This D line is corrupted ignore */
             }
          *p = '\0';   
@@ -525,7 +525,7 @@ D:123.4.5.0/24:test (2000/05/28 12.48)
          if(irccmp(cidr,found_cidr))
             {
               if(!error_on_write)
-                error_on_write = flush_write(server_p, out, buf, temppath);
+                error_on_write = flush_write(source_p, out, buf, temppath);
             }
           else
             pairme++;
@@ -550,7 +550,7 @@ Then just ignore the line
           if(p == (char *)NULL)
             {
               if(!error_on_write)
-                error_on_write = flush_write(server_p, out, buf, temppath);
+                error_on_write = flush_write(source_p, out, buf, temppath);
               continue;
             }
           *p = '\0';
@@ -562,7 +562,7 @@ Then just ignore the line
           if(p == (char *)NULL)
             {
               if(!error_on_write)
-                error_on_write = flush_write(server_p, out, buf, temppath);
+                error_on_write = flush_write(source_p, out, buf, temppath);
               continue;
             }
           *p = '\0';
@@ -574,14 +574,14 @@ Then just ignore the line
           if( (irccmp(found_cidr,cidr)))
             {
               if(!error_on_write)
-                error_on_write = flush_write(server_p, out, buf, temppath);
+                error_on_write = flush_write(source_p, out, buf, temppath);
             }
         }
 
       else      /* its the ircd.conf file, and not a D line or comment */
         {
           if(!error_on_write)
-            error_on_write = flush_write(server_p, out, buf, temppath);
+            error_on_write = flush_write(source_p, out, buf, temppath);
         }
     }
 
@@ -592,23 +592,23 @@ Then just ignore the line
     {
       fbclose(out);
       (void)rename(temppath, filename);
-      rehash(client_p,server_p,0);
+      rehash(client_p,source_p,0);
     }
   else
     {
-      sendto_one(server_p,":%s NOTICE %s :Couldn't write D-line file, aborted",
+      sendto_one(source_p,":%s NOTICE %s :Couldn't write D-line file, aborted",
         me.name,parv[0]);
       return;
     }
 
   if(!pairme)
     {
-      sendto_one(server_p, ":%s NOTICE %s :No D-Line for %s",
+      sendto_one(source_p, ":%s NOTICE %s :No D-Line for %s",
                  me.name, parv[0],cidr);
       return;
     }
 
-  sendto_one(server_p, ":%s NOTICE %s :D-Line for [%s] is removed",
+  sendto_one(source_p, ":%s NOTICE %s :D-Line for [%s] is removed",
              me.name, parv[0], cidr);
   sendto_realops_flags(FLAGS_ALL,
 		       "%s has removed the D-Line for: [%s]",
@@ -626,20 +626,20 @@ Then just ignore the line
 **      parv[1] = gline to remove
 */
 
-static void mo_ungline(struct Client *client_p, struct Client *server_p,
+static void mo_ungline(struct Client *client_p, struct Client *source_p,
                       int parc,char *parv[])
 {
   char  *user,*host;
 
   if (!ConfigFileEntry.glines)
     {
-      sendto_one(server_p,":%s NOTICE %s :UNGLINE disabled",me.name,parv[0]);
+      sendto_one(source_p,":%s NOTICE %s :UNGLINE disabled",me.name,parv[0]);
       return;
     }
 
-  if (!IsSetOperUnkline(server_p) || !IsSetOperGline(server_p))
+  if (!IsSetOperUnkline(source_p) || !IsSetOperGline(source_p))
     {
-      sendto_one(server_p,":%s NOTICE %s :You have no U and G flags",
+      sendto_one(source_p,":%s NOTICE %s :You have no U and G flags",
                  me.name,parv[0]);
       return;
     }
@@ -661,14 +661,14 @@ static void mo_ungline(struct Client *client_p, struct Client *server_p,
     }
   else
     {
-      sendto_one(server_p, ":%s NOTICE %s :Invalid parameters",
+      sendto_one(source_p, ":%s NOTICE %s :Invalid parameters",
                  me.name, parv[0]);
       return;
     }
 
   if(remove_gline_match(user, host))
     {
-      sendto_one(server_p, ":%s NOTICE %s :Un-glined [%s@%s]",
+      sendto_one(source_p, ":%s NOTICE %s :Un-glined [%s@%s]",
                  me.name, parv[0],user, host);
       sendto_realops_flags(FLAGS_ALL,
 			   "%s has removed the G-Line for: [%s@%s]",
@@ -679,7 +679,7 @@ static void mo_ungline(struct Client *client_p, struct Client *server_p,
     }
   else
     {
-      sendto_one(server_p, ":%s NOTICE %s :No G-Line for %s@%s",
+      sendto_one(source_p, ":%s NOTICE %s :No G-Line for %s@%s",
                  me.name, parv[0],user,host);
       return;
     }

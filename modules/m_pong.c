@@ -57,7 +57,7 @@ _moddeinit(void)
 char *_version = "20001122";
 
 static void ms_pong(struct Client *client_p,
-                   struct Client *server_p,
+                   struct Client *source_p,
                    int parc,
                    char *parv[])
 {
@@ -66,14 +66,14 @@ static void ms_pong(struct Client *client_p,
 
   if (parc < 2 || *parv[1] == '\0')
     {
-      sendto_one(server_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
+      sendto_one(source_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
       return;
     }
 
   origin = parv[1];
   destination = parv[2];
   client_p->flags &= ~FLAGS_PINGSENT;
-  server_p->flags &= ~FLAGS_PINGSENT;
+  source_p->flags &= ~FLAGS_PINGSENT;
 
   /* Now attempt to route the PONG, comstud pointed out routable PING
    * is used for SPING.  routable PING should also probably be left in
@@ -82,7 +82,7 @@ static void ms_pong(struct Client *client_p,
    * case can be made to allow them only from servers). -Shadowfax
    */
   if (!EmptyString(destination) && irccmp(destination, me.name) != 0
-                && IsRegistered(server_p))
+                && IsRegistered(source_p))
     {
       if ((aclient_p = find_client(destination, NULL)) ||
           (aclient_p = find_server(destination)))
@@ -90,7 +90,7 @@ static void ms_pong(struct Client *client_p,
                    parv[0], origin, destination);
       else
         {
-          sendto_one(server_p, form_str(ERR_NOSUCHSERVER),
+          sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
                      me.name, parv[0], destination);
           return;
         }
@@ -105,7 +105,7 @@ static void ms_pong(struct Client *client_p,
 }
 
 static void mr_pong(struct Client *client_p,
-                    struct Client *server_p,
+                    struct Client *source_p,
                     int parc,
                     char *parv[])
 {
@@ -114,14 +114,14 @@ static void mr_pong(struct Client *client_p,
 
   if (parc < 2 || *parv[1] == '\0')
     {
-      sendto_one(server_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
+      sendto_one(source_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
       return;
     }
 
   origin = parv[1];
   destination = parv[2];
   client_p->flags &= ~FLAGS_PINGSENT;
-  server_p->flags &= ~FLAGS_PINGSENT;
+  source_p->flags &= ~FLAGS_PINGSENT;
 
   /* Now attempt to route the PONG, comstud pointed out routable PING
    * is used for SPING.  routable PING should also probably be left in
@@ -130,7 +130,7 @@ static void mr_pong(struct Client *client_p,
    * case can be made to allow them only from servers). -Shadowfax
    */
   if (!EmptyString(destination) && irccmp(destination, me.name) != 0
-                && IsRegistered(server_p))
+                && IsRegistered(source_p))
     {
       if ((aclient_p = find_client(destination, NULL)) ||
           (aclient_p = find_server(destination)))
@@ -138,7 +138,7 @@ static void mr_pong(struct Client *client_p,
                    parv[0], origin, destination);
       else
         {
-          sendto_one(server_p, form_str(ERR_NOSUCHSERVER),
+          sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
                      me.name, parv[0], destination);
           return;
         }

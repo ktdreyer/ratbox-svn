@@ -51,7 +51,7 @@ struct  Message
   unsigned long bytes;  /* bytes received for this message */
   /*
    * client_p = Connected client ptr
-   * server_p = Source client ptr
+   * source_p = Source client ptr
    * parc = parameter count
    * parv = parameter variable array
    */

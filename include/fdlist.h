@@ -122,7 +122,7 @@ void fdlist_init(void);
 
 extern void  fd_open(int, unsigned int, const char *);
 extern void  fd_close(int);
-extern void  fd_dump(struct Client *server_p);
+extern void  fd_dump(struct Client *source_p);
 extern void  fd_note(int fd, const char *desc);
 
 

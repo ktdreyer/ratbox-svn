@@ -35,7 +35,7 @@ extern  void sendto_channel_butone(struct Client *one, struct Client *from,
 extern  void sendto_one_prefix(struct Client *, struct Client *,
 			       const char *, ...);
 extern  void sendto_serv_butone(struct Client *, const char *, ...);
-extern  void sendto_ll_serv_butone(struct Client *, struct Client *server_p, int,
+extern  void sendto_ll_serv_butone(struct Client *, struct Client *source_p, int,
 				   const char *, ...);
 extern  void sendto_cap_serv_butone(int, struct Client *, const char *, ...);
 extern  void sendto_nocap_serv_butone(int, struct Client *, const char *, ...);
@@ -59,7 +59,7 @@ extern  void sendto_one_prefix(struct Client *, struct Client *,
 	    __attribute__((format (printf, 3, 4)));
 extern  void sendto_serv_butone(struct Client *, const char *, ...)
 	    __attribute__((format (printf, 2, 3)));
-extern  void sendto_ll_serv_butone(struct Client *, struct Client *server_p, int,
+extern  void sendto_ll_serv_butone(struct Client *, struct Client *source_p, int,
 				   const char *, ...)
 	    __attribute__((format (printf, 4, 5)));
 				   
@@ -88,7 +88,7 @@ extern  void sendto_channel_remote_prefix(struct Channel *, struct Client *clien
 										  struct Client *prefix, const char *, ...);
 
 extern  void sendto_ll_channel_remote(struct Channel *, struct Client *client_p, 
-				      struct Client *server_p,
+				      struct Client *source_p,
 				      const char *, ...);
 extern  void sendto_match_cap_servs(struct Channel *, struct Client *, 
                                     int, const char *, ...);
@@ -123,7 +123,7 @@ extern  void sendto_channel_remote_prefix(struct Channel *, struct Client *clien
 	    __attribute__((format (printf, 4, 5)));
 				   
 extern  void sendto_ll_channel_remote(struct Channel *, struct Client *client_p, 
-				      struct Client *server_p,
+				      struct Client *source_p,
 				      const char *, ...)
 	    __attribute__((format (printf, 4, 5)));
 				      
@@ -168,7 +168,7 @@ kill_client(struct Client *client_p, struct Client *diedie,
 	    const char *pattern, ... );
 
 void
-kill_client_ll_serv_butone(struct Client *one, struct Client *server_p,
+kill_client_ll_serv_butone(struct Client *one, struct Client *source_p,
 			   const char *pattern, ...);
 
 /* used when sending to #mask or $mask */

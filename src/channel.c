@@ -65,7 +65,7 @@ static void send_members(struct Client *client_p,
 			 dlink_list *list,
 			 char *op_flag );
 
-void channel_member_list(struct Client *server_p,
+void channel_member_list(struct Client *source_p,
                          struct Channel *chptr,
 			 dlink_list *list,
 			 char *show_flag,
@@ -570,7 +570,7 @@ static int change_channel_membership(struct Channel *chptr,
  * output	- 
  * side effects - NONE
  */
-int can_join(struct Client *server_p, struct Channel *chptr, char *key)
+int can_join(struct Client *source_p, struct Channel *chptr, char *key)
 {
   dlink_node *lp;
   dlink_node *ptr;
@@ -578,18 +578,18 @@ int can_join(struct Client *server_p, struct Channel *chptr, char *key)
   char  s[NICKLEN+USERLEN+HOSTLEN+6];
   char  s2[NICKLEN+USERLEN+HOSTLEN+6];
 
-  assert(server_p->localClient != NULL);
+  assert(source_p->localClient != NULL);
 
-  make_nick_user_host(s,server_p->name, server_p->username, server_p->host);
-  make_nick_user_host(s2,server_p->name, server_p->username,
-		      server_p->localClient->sockhost);
+  make_nick_user_host(s,source_p->name, source_p->username, source_p->host);
+  make_nick_user_host(s2,source_p->name, source_p->username,
+		      source_p->localClient->sockhost);
 
-  if ((check_banned(chptr,server_p,s,s2)) == CHFL_BAN)
+  if ((check_banned(chptr,source_p,s,s2)) == CHFL_BAN)
     return (ERR_BANNEDFROMCHAN);
 
   if (chptr->mode.mode & MODE_INVITEONLY)
     {
-      for (lp = server_p->user->invited.head; lp; lp = lp->next)
+      for (lp = source_p->user->invited.head; lp; lp = lp->next)
         if (lp->data == chptr)
          break;
       if (!lp)
@@ -706,23 +706,23 @@ int is_voiced(struct Channel *chptr, struct Client *who)
  *		  Just means they can send to channel.
  * side effects	- NONE
  */
-int can_send(struct Channel *chptr, struct Client *server_p)
+int can_send(struct Channel *chptr, struct Client *source_p)
 {
-  if (is_any_op(chptr,server_p))
+  if (is_any_op(chptr,source_p))
     return CAN_SEND_OPV;
-  if (is_voiced(chptr,server_p))
+  if (is_voiced(chptr,source_p))
     return CAN_SEND_OPV;
 
   if (chptr->mode.mode & MODE_MODERATED)
     return CAN_SEND_NO;
   
-  if (ConfigFileEntry.quiet_on_ban && MyClient(server_p) &&
-     (is_banned(chptr, server_p) == CHFL_BAN))
+  if (ConfigFileEntry.quiet_on_ban && MyClient(source_p) &&
+     (is_banned(chptr, source_p) == CHFL_BAN))
     {
       return (CAN_SEND_NO);
     }
 
-  if (chptr->mode.mode & MODE_NOPRIVMSGS && !IsMember(server_p,chptr))
+  if (chptr->mode.mode & MODE_NOPRIVMSGS && !IsMember(source_p,chptr))
     return (CAN_SEND_NO);
 
   return CAN_SEND_NONOP;
@@ -1095,7 +1095,7 @@ static  int     errsent(int err, int *errs)
 ** one pass, in a desperate attempt to keep the code sane.  -orabidoo
 */
 void set_channel_mode(struct Client *client_p,
-                      struct Client *server_p,
+                      struct Client *source_p,
                       struct Channel *chptr,
                       int parc,
                       char *parv[],
@@ -1166,16 +1166,16 @@ void set_channel_mode(struct Client *client_p,
   dlink_list *to_list=NULL;
   struct Ban *banptr;
 
-  chan_op = is_chan_op(chptr,server_p);
+  chan_op = is_chan_op(chptr,source_p);
 
   /* has ops or is a server */
-  ischop = IsServer(server_p) || chan_op;
+  ischop = IsServer(source_p) || chan_op;
 
   isdeop = 0;
 
   /* is an op or server or remote user on a TS channel */
   isok = ischop || (!isdeop && IsServer(client_p) && chptr->channelts);
-  isok_c = isok || is_half_op(chptr,server_p);
+  isok_c = isok || is_half_op(chptr,source_p);
 
   /* parc is the number of _remaining_ args (where <0 means 0);
   ** parv points to the first remaining argument
@@ -1226,13 +1226,13 @@ void set_channel_mode(struct Client *client_p,
 	case 'h':
         case 'o' :
         case 'v' :
-          if (MyClient(server_p))
+          if (MyClient(source_p))
             {
-              if(!IsMember(server_p, chptr))
+              if(!IsMember(source_p, chptr))
                 {
                   if(!errsent(SM_ERR_NOTONCHANNEL, &errors_sent))
-                    sendto_one(server_p, form_str(ERR_NOTONCHANNEL),
-                               me.name, server_p->name, chname);
+                    sendto_one(source_p, form_str(ERR_NOTONCHANNEL),
+                               me.name, source_p->name, chname);
                   /* eat the parameter */
                   parc--;
                   parv++;
@@ -1240,11 +1240,11 @@ void set_channel_mode(struct Client *client_p,
                 }
 	      else
 		{
-		  if(IsRestricted(server_p) && (whatt == MODE_ADD))
+		  if(IsRestricted(source_p) && (whatt == MODE_ADD))
 		    {
-		      sendto_one(server_p,":%s NOTICE %s :*** NOTICE -- You are restricted and cannot chanop others",
+		      sendto_one(source_p,":%s NOTICE %s :*** NOTICE -- You are restricted and cannot chanop others",
 				 me.name,
-				 server_p->name);
+				 source_p->name);
 		      parc--;
 		      parv++;
 		      break;
@@ -1257,10 +1257,10 @@ void set_channel_mode(struct Client *client_p,
             break;
           arg = check_string(*parv++);
 
-          if (MyClient(server_p) && opcnt >= MAXMODEPARAMS)
+          if (MyClient(source_p) && opcnt >= MAXMODEPARAMS)
             break;
 
-          if (!(who = find_chasing(server_p, arg, NULL)))
+          if (!(who = find_chasing(source_p, arg, NULL)))
             break;
 
           if (!who->user)
@@ -1269,19 +1269,19 @@ void set_channel_mode(struct Client *client_p,
           /* no more of that mode bouncing crap */
           if (!IsMember(who, chptr))
             {
-              if (MyClient(server_p))
-                sendto_one(server_p, form_str(ERR_USERNOTINCHANNEL), me.name, 
-                           server_p->name, arg, chname);
+              if (MyClient(source_p))
+                sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL), me.name, 
+                           source_p->name, arg, chname);
               break;
             }
 
           /* ignore server-generated MODE +-ovh */
 	  /* naw, allow it but still flag it */
-          if (IsServer(server_p))
+          if (IsServer(source_p))
             {
               ts_warn( "MODE %c%c on %s for %s from server %s", 
                        (whatt == MODE_ADD ? '+' : '-'), c, chname, 
-                       who->name,server_p->name);
+                       who->name,source_p->name);
             }
 
           target_was_chop = is_chan_op(chptr, who);
@@ -1333,16 +1333,16 @@ void set_channel_mode(struct Client *client_p,
 
           /* Allow users to -h themselves */
           if (whatt == MODE_DEL && target_was_hop && (c == 'h') &&
-              (who == server_p))
+              (who == source_p))
           {
             halfop_deop_self = 1;
           }
 
           if (!isok && !halfop_deop_self)
             {
-              if (MyClient(server_p) && !errsent(SM_ERR_NOOPS, &errors_sent))
-                sendto_one(server_p, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
-                           server_p->name, chname);
+              if (MyClient(source_p) && !errsent(SM_ERR_NOOPS, &errors_sent))
+                sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
+                           source_p->name, chname);
               break;
             }
 
@@ -1352,7 +1352,7 @@ void set_channel_mode(struct Client *client_p,
 			&& whatt == MODE_DEL)
 		if (MyClient(who))
 		  sendto_one(who,":%s!%s@%s MODE %s -%c %s",
-			     server_p->name,server_p->username, server_p->host,
+			     source_p->name,source_p->username, source_p->host,
 			     chname,c,who->name);
 	    }
         
@@ -1468,7 +1468,7 @@ void set_channel_mode(struct Client *client_p,
                 }
               else
                 {
-                  if MyClient(server_p)
+                  if MyClient(source_p)
                     arg = fix_key(check_string(*parv++));
                   else
                     arg = fix_key_old(check_string(*parv++));
@@ -1483,9 +1483,9 @@ void set_channel_mode(struct Client *client_p,
 
           if (!isok)
             {
-              if (!errsent(SM_ERR_NOOPS, &errors_sent) && MyClient(server_p))
-                sendto_one(server_p, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
-                           server_p->name, chname);
+              if (!errsent(SM_ERR_NOOPS, &errors_sent) && MyClient(source_p))
+                sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
+                           source_p->name, chname);
               break;
             }
 
@@ -1511,49 +1511,49 @@ void set_channel_mode(struct Client *client_p,
 
 	      if(chptr->mode.mode & MODE_HIDEOPS)
 		{
-		  if (IsServer(server_p)) 
+		  if (IsServer(source_p)) 
 		  sendto_channel_local(ONLY_CHANOPS_HALFOPS,
 				       chptr,
 				       ":%s!%s@%s MODE %s -k %s", 
 				       me.name,
-				       server_p->username,
-				       server_p->host,
+				       source_p->username,
+				       source_p->host,
 				       chname,
 				       chptr->mode.key);
 		  else
 		     sendto_channel_local(ONLY_CHANOPS_HALFOPS, 
                                        chptr,
                                        ":%s!%s@%s MODE %s -k %s",
-                                       server_p->name,   
-                                       server_p->username,
-                                       server_p->host,
+                                       source_p->name,   
+                                       source_p->username,
+                                       source_p->host,
                                        chname,
                                        chptr->mode.key);
 		}
 	      else
 		{
-		  if (IsServer(server_p)) 
+		  if (IsServer(source_p)) 
 		  sendto_channel_local(ALL_MEMBERS,
 				       chptr,
 				       ":%s!%s@%s MODE %s -k %s", 
 				       me.name,
-				       server_p->username,
-				       server_p->host,
+				       source_p->username,
+				       source_p->host,
 				       chname,
 				       chptr->mode.key);
 		  else
      	 	     sendto_channel_local(ALL_MEMBERS,
                                        chptr,
                                        ":%s!%s@%s MODE %s -k %s",
-                                       server_p->name,
-                                       server_p->username,
-                                       server_p->host,
+                                       source_p->name,
+                                       source_p->username,
+                                       source_p->host,
                                        chname,
                                        chptr->mode.key);
 		}
 
               sendto_channel_remote(chptr, client_p, ":%s MODE %s -k %s",
-                                 server_p->name, chname,
+                                 source_p->name, chname,
                                  chptr->mode.key);
             }
 
@@ -1592,7 +1592,7 @@ void set_channel_mode(struct Client *client_p,
         case 'I':
           if (whatt == MODE_QUERY || parc-- <= 0)
             {
-              if (!MyClient(server_p))
+              if (!MyClient(source_p))
                 break;
               if (errsent(SM_ERR_RPL_I, &errors_sent))
                 break;
@@ -1612,27 +1612,27 @@ void set_channel_mode(struct Client *client_p,
 				 banptr->when);
 		    }
 
-                  sendto_one(server_p, form_str(RPL_ENDOFINVITELIST),
-                             me.name, server_p->name, 
+                  sendto_one(source_p, form_str(RPL_ENDOFINVITELIST),
+                             me.name, source_p->name, 
                              chname);
                 }
 		  else
 		{
-		   sendto_one(server_p, form_str(ERR_CHANOPRIVSNEEDED),
-			     me.name, server_p->name, chname);
+		   sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
+			     me.name, source_p->name, chname);
 		}
               break;
             }
           arg = check_string(*parv++);
 
-          if (MyClient(server_p) && opcnt >= MAXMODEPARAMS)
+          if (MyClient(source_p) && opcnt >= MAXMODEPARAMS)
             break;
 
           if (!isok)
             {
-              if (!errsent(SM_ERR_NOOPS, &errors_sent) && MyClient(server_p))
-                sendto_one(server_p, form_str(ERR_CHANOPRIVSNEEDED),
-                           me.name, server_p->name, 
+              if (!errsent(SM_ERR_NOOPS, &errors_sent) && MyClient(source_p))
+                sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
+                           me.name, source_p->name, 
                            chname);
               break;
             }
@@ -1640,7 +1640,7 @@ void set_channel_mode(struct Client *client_p,
           /* user-friendly ban mask generation, taken
           ** from Undernet's ircd  -orabidoo
           */
-          if (MyClient(server_p))
+          if (MyClient(source_p))
             arg = collapse(pretty_mask(arg));
 
           if(*arg == ':')
@@ -1654,7 +1654,7 @@ void set_channel_mode(struct Client *client_p,
           if (len + tmp + 2 >= MODEBUFLEN)
             break;
 
-          if (!(((whatt & MODE_ADD) && !add_id(server_p, chptr, arg, CHFL_INVEX))
+          if (!(((whatt & MODE_ADD) && !add_id(source_p, chptr, arg, CHFL_INVEX))
 		||
                 ((whatt & MODE_DEL) && !del_id(chptr, arg, CHFL_INVEX))))
             break;
@@ -1677,7 +1677,7 @@ void set_channel_mode(struct Client *client_p,
         case 'e':
           if (whatt == MODE_QUERY || parc-- <= 0)
             {
-              if (!MyClient(server_p))
+              if (!MyClient(source_p))
                 break;
               if (errsent(SM_ERR_RPL_E, &errors_sent))
                 break;
@@ -1697,27 +1697,27 @@ void set_channel_mode(struct Client *client_p,
 				 banptr->when);
 		    }
 
-                  sendto_one(server_p, form_str(RPL_ENDOFEXCEPTLIST),
-                             me.name, server_p->name, 
+                  sendto_one(source_p, form_str(RPL_ENDOFEXCEPTLIST),
+                             me.name, source_p->name, 
                              chname);
                 }
               else
                 {
-                  sendto_one(server_p, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
-                               server_p->name, chname);
+                  sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
+                               source_p->name, chname);
                 }
               break;
             }
           arg = check_string(*parv++);
 
-          if (MyClient(server_p) && opcnt >= MAXMODEPARAMS)
+          if (MyClient(source_p) && opcnt >= MAXMODEPARAMS)
             break;
 
           if (!isok)
             {
-              if (!errsent(SM_ERR_NOOPS, &errors_sent) && MyClient(server_p))
-                sendto_one(server_p, form_str(ERR_CHANOPRIVSNEEDED),
-                           me.name, server_p->name, 
+              if (!errsent(SM_ERR_NOOPS, &errors_sent) && MyClient(source_p))
+                sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
+                           me.name, source_p->name, 
                            chname);
               break;
             }
@@ -1725,7 +1725,7 @@ void set_channel_mode(struct Client *client_p,
           /* user-friendly ban mask generation, taken
           ** from Undernet's ircd  -orabidoo
           */
-          if (MyClient(server_p))
+          if (MyClient(source_p))
             arg = collapse(pretty_mask(arg));
 
           if(*arg == ':')
@@ -1739,7 +1739,7 @@ void set_channel_mode(struct Client *client_p,
           if (len + tmp + 2 >= MODEBUFLEN)
             break;
 
-          if (!(((whatt & MODE_ADD) && !add_id(server_p, chptr, arg, CHFL_EXCEPTION)) ||
+          if (!(((whatt & MODE_ADD) && !add_id(source_p, chptr, arg, CHFL_EXCEPTION)) ||
                 ((whatt & MODE_DEL) && !del_id(chptr, arg, CHFL_EXCEPTION))))
             break;
 
@@ -1761,7 +1761,7 @@ void set_channel_mode(struct Client *client_p,
         case 'b':
           if (whatt == MODE_QUERY || parc-- <= 0)
             {
-              if (!MyClient(server_p))
+              if (!MyClient(source_p))
                 break;
 
               if (errsent(SM_ERR_RPL_B, &errors_sent))
@@ -1794,23 +1794,23 @@ void set_channel_mode(struct Client *client_p,
 		    }
 		}
 
-              sendto_one(server_p, form_str(RPL_ENDOFBANLIST),
-                         me.name, server_p->name, 
+              sendto_one(source_p, form_str(RPL_ENDOFBANLIST),
+                         me.name, source_p->name, 
                          chname);
               break;
             }
 
           arg = check_string(*parv++);
 
-          if (MyClient(server_p) && opcnt >= MAXMODEPARAMS)
+          if (MyClient(source_p) && opcnt >= MAXMODEPARAMS)
             break;
 
 	  /* allow ops and halfops to set bans */
           if (!isok_c)
             {
-              if (!errsent(SM_ERR_NOOPS, &errors_sent) && MyClient(server_p))
-                sendto_one(server_p, form_str(ERR_CHANOPRIVSNEEDED),
-                           me.name, server_p->name, 
+              if (!errsent(SM_ERR_NOOPS, &errors_sent) && MyClient(source_p))
+                sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
+                           me.name, source_p->name, 
                            chname);
               break;
             }
@@ -1818,7 +1818,7 @@ void set_channel_mode(struct Client *client_p,
           /* user-friendly ban mask generation, taken
           ** from Undernet's ircd  -orabidoo
           */
-          if (MyClient(server_p))
+          if (MyClient(source_p))
             {
               if( (*arg == ':') && (whatt & MODE_ADD) )
                 {
@@ -1833,7 +1833,7 @@ void set_channel_mode(struct Client *client_p,
           if (len + tmp + 2 >= MODEBUFLEN)
             break;
 
-         if (!(((whatt & MODE_ADD) && !add_id(server_p, chptr, arg, CHFL_BAN)) ||
+         if (!(((whatt & MODE_ADD) && !add_id(source_p, chptr, arg, CHFL_BAN)) ||
                ((whatt & MODE_DEL) && !del_id(chptr, arg, CHFL_BAN))))
           break;
 
@@ -1853,9 +1853,9 @@ void set_channel_mode(struct Client *client_p,
 	  /* allow ops and halfops to set limits */
           if (!isok_c)
             {
-              if (!errsent(SM_ERR_NOOPS, &errors_sent) && MyClient(server_p))
-                sendto_one(server_p, form_str(ERR_CHANOPRIVSNEEDED),
-                           me.name, server_p->name, 
+              if (!errsent(SM_ERR_NOOPS, &errors_sent) && MyClient(source_p))
+                sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
+                           me.name, source_p->name, 
                            chname);
 
               if (whatt == MODE_ADD && parc-- > 0)
@@ -1875,9 +1875,9 @@ void set_channel_mode(struct Client *client_p,
             {
               if (parc-- <= 0)
                 {
-                  if (MyClient(server_p))
-                    sendto_one(server_p, form_str(ERR_NEEDMOREPARAMS),
-                               me.name, server_p->name, "MODE +l");
+                  if (MyClient(source_p))
+                    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+                               me.name, source_p->name, "MODE +l");
                   break;
                 }
               
@@ -1929,13 +1929,13 @@ void set_channel_mode(struct Client *client_p,
             break;
           if (!isok_c)
             {
-              if (MyClient(server_p) && !errsent(SM_ERR_NOOPS, &errors_sent))
-                sendto_one(server_p, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
-                           server_p->name, chname);
+              if (MyClient(source_p) && !errsent(SM_ERR_NOOPS, &errors_sent))
+                sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
+                           source_p->name, chname);
               break;
             }
 
-          if(MyClient(server_p))
+          if(MyClient(source_p))
             {
               if(done_i)
                 break;
@@ -1970,13 +1970,13 @@ void set_channel_mode(struct Client *client_p,
         case 'm' :
           if (!isok_c)
             {
-              if (MyClient(server_p) && !errsent(SM_ERR_NOOPS, &errors_sent))
-                sendto_one(server_p, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
-                           server_p->name, chname);
+              if (MyClient(source_p) && !errsent(SM_ERR_NOOPS, &errors_sent))
+                sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
+                           source_p->name, chname);
               break;
             }
 
-          if(MyClient(server_p))
+          if(MyClient(source_p))
             {
               if(done_m)
                 break;
@@ -2009,13 +2009,13 @@ void set_channel_mode(struct Client *client_p,
         case 'n' :
           if (!isok_c)
             {
-              if (MyClient(server_p) && !errsent(SM_ERR_NOOPS, &errors_sent))
-                sendto_one(server_p, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
-                           server_p->name, chname);
+              if (MyClient(source_p) && !errsent(SM_ERR_NOOPS, &errors_sent))
+                sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
+                           source_p->name, chname);
               break;
             }
 
-          if(MyClient(server_p))
+          if(MyClient(source_p))
             {
               if(done_n)
                 break;
@@ -2047,13 +2047,13 @@ void set_channel_mode(struct Client *client_p,
 	case 'a':
 	  if (!isok_c)
 	    {
-	      if (MyClient(server_p) && !errsent(SM_ERR_NOOPS, &errors_sent))
-		sendto_one(server_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
-			   server_p->name, chname);
+	      if (MyClient(source_p) && !errsent(SM_ERR_NOOPS, &errors_sent))
+		sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
+			   source_p->name, chname);
 	      break;
 	    }
 
-	  if(MyClient(server_p))
+	  if(MyClient(source_p))
 	    {
 	      if(done_z)
 		break;
@@ -2088,13 +2088,13 @@ void set_channel_mode(struct Client *client_p,
         case 'p' :
           if (!isok_c)
             {
-              if (MyClient(server_p) && !errsent(SM_ERR_NOOPS, &errors_sent))
-                sendto_one(server_p, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
-                           server_p->name, chname);
+              if (MyClient(source_p) && !errsent(SM_ERR_NOOPS, &errors_sent))
+                sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
+                           source_p->name, chname);
               break;
             }
 
-          if(MyClient(server_p))
+          if(MyClient(source_p))
             {
               if(done_p)
                 break;
@@ -2126,13 +2126,13 @@ void set_channel_mode(struct Client *client_p,
         case 's' :
           if (!isok_c)
             {
-              if (MyClient(server_p) && !errsent(SM_ERR_NOOPS, &errors_sent))
-                sendto_one(server_p, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
-                           server_p->name, chname);
+              if (MyClient(source_p) && !errsent(SM_ERR_NOOPS, &errors_sent))
+                sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
+                           source_p->name, chname);
               break;
             }
 
-          if(MyClient(server_p))
+          if(MyClient(source_p))
             {
               if(done_s)
                 break;
@@ -2165,13 +2165,13 @@ void set_channel_mode(struct Client *client_p,
         case 't' :
           if (!isok_c)
             {
-              if (MyClient(server_p) && !errsent(SM_ERR_NOOPS, &errors_sent))
-                sendto_one(server_p, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
-                           server_p->name, chname);
+              if (MyClient(source_p) && !errsent(SM_ERR_NOOPS, &errors_sent))
+                sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
+                           source_p->name, chname);
               break;
             }
 
-          if(MyClient(server_p))
+          if(MyClient(source_p))
             {
               if(done_t)
                 break;
@@ -2209,8 +2209,8 @@ void set_channel_mode(struct Client *client_p,
           ** to generate a storm, even if it's just to a 
           ** local client  -orabidoo
           */
-          if (MyClient(server_p) && !errsent(SM_ERR_UNKNOWN, &errors_sent))
-            sendto_one(server_p, form_str(ERR_UNKNOWNMODE), me.name, server_p->name, c);
+          if (MyClient(source_p) && !errsent(SM_ERR_UNKNOWN, &errors_sent))
+            sendto_one(source_p, form_str(ERR_UNKNOWNMODE), me.name, source_p->name, c);
           break;
         }
     }
@@ -2242,7 +2242,7 @@ void set_channel_mode(struct Client *client_p,
    */
   if(*modebuf)
     {
-      if(IsServer(server_p))
+      if(IsServer(source_p))
 	sendto_channel_local(ALL_MEMBERS,
 			     chptr,
 			     ":%s MODE %s %s %s", 
@@ -2254,9 +2254,9 @@ void set_channel_mode(struct Client *client_p,
 	sendto_channel_local(type,
 			     chptr,
 			     ":%s!%s@%s MODE %s %s %s", 
-			     server_p->name,
-			     server_p->username,
-			     server_p->host,
+			     source_p->name,
+			     source_p->username,
+			     source_p->host,
 			     chname,
 			     modebuf, parabuf);
         if(chptr->mode.mode & MODE_HIDEOPS)
@@ -2269,11 +2269,11 @@ void set_channel_mode(struct Client *client_p,
       }
 
       sendto_match_nocap_servs(chptr, client_p, CAP_UID, ":%s MODE %s %s %s",
-			       server_p->name, chptr->chname,
+			       source_p->name, chptr->chname,
 			       modebuf, parabuf);
 	  
       sendto_match_cap_servs(chptr, client_p, CAP_UID, ":%s MODE %s %s %s",
-			     HasID(server_p) ? server_p->user->id : server_p->name,
+			     HasID(source_p) ? source_p->user->id : source_p->name,
 			     chptr->chname,
 			     modebuf, parabuf);
     }
@@ -2285,7 +2285,7 @@ void set_channel_mode(struct Client *client_p,
    */
   if(*modebuf2)
     {
-      if(IsServer(server_p)) 
+      if(IsServer(source_p)) 
         sendto_channel_local(type,
                              chptr,
                              ":%s MODE %s %s %s",
@@ -2296,18 +2296,18 @@ void set_channel_mode(struct Client *client_p,
         sendto_channel_local(type,
                              chptr,
                              ":%s!%s@%s MODE %s %s %s",
-                             server_p->name,
-                             server_p->username,
-                             server_p->host,
+                             source_p->name,
+                             source_p->username,
+                             source_p->host,
                              chname,
                              modebuf2, parabuf2);
       
         sendto_match_nocap_servs(chptr, client_p, CAP_UID, ":%s MODE %s %s %s",
-                              server_p->name, chptr->chname,
+                              source_p->name, chptr->chname,
                               modebuf2, parabuf2);
 
 	sendto_match_cap_servs(chptr, client_p, CAP_UID, ":%s MODE %s %s %s",
-			       HasID(server_p) ? server_p->user->id : server_p->name, 
+			       HasID(source_p) ? source_p->user->id : source_p->name, 
 			       chptr->chname,
 			       modebuf2, parabuf2_id);
     }
@@ -2319,7 +2319,7 @@ void set_channel_mode(struct Client *client_p,
    */
   if(*modebuf_ex)
     {
-      if(IsServer(server_p))
+      if(IsServer(source_p))
 	sendto_channel_local(ONLY_CHANOPS_HALFOPS,
 			     chptr,
 			     ":%s MODE %s %s %s", 
@@ -2331,21 +2331,21 @@ void set_channel_mode(struct Client *client_p,
         sendto_channel_local(ONLY_CHANOPS_HALFOPS,
                              chptr,
                              ":%s!%s@%s MODE %s %s %s",
-                             server_p->name,
-                             server_p->username,
-                             server_p->host,
+                             source_p->name,
+                             source_p->username,
+                             source_p->host,
                              chname,
                              modebuf_ex, parabuf_ex);
       }
 
       sendto_match_cap_servs_nocap(chptr, client_p, CAP_EX, CAP_UID,
 				   ":%s MODE %s %s %s",
-				   server_p->name, chptr->chname,
+				   source_p->name, chptr->chname,
 				   modebuf_ex, parabuf_ex);
 
       sendto_match_cap_servs(chptr, client_p, CAP_EX | CAP_UID,
 			     ":%s MODE %s %s %s",
-			     HasID(server_p) ? server_p->user->id : server_p->name,
+			     HasID(source_p) ? source_p->user->id : source_p->name,
 			     chptr->chname,
 			     modebuf_ex, parabuf_ex);
     }
@@ -2356,7 +2356,7 @@ void set_channel_mode(struct Client *client_p,
    */
   if(*modebuf_invex)
     {
-      if(IsServer(server_p))
+      if(IsServer(source_p))
 	sendto_channel_local(ONLY_CHANOPS_HALFOPS,
 			     chptr,
 			     ":%s MODE %s %s %s",
@@ -2367,19 +2367,19 @@ void set_channel_mode(struct Client *client_p,
         sendto_channel_local(ONLY_CHANOPS_HALFOPS,
                              chptr,
                              ":%s!%s@%s MODE %s %s %s",
-                             server_p->name,
-                             server_p->username,
-                             server_p->host,
+                             source_p->name,
+                             source_p->username,
+                             source_p->host,
                              chname,
                              modebuf_invex, parabuf_invex);
 
       sendto_match_cap_servs_nocap(chptr, client_p, CAP_IE, CAP_UID, 
 				   ":%s MODE %s %s %s",
-				   server_p->name, chptr->chname,
+				   source_p->name, chptr->chname,
 				   modebuf_invex, parabuf_invex);
       sendto_match_cap_servs(chptr, client_p, CAP_IE | CAP_UID,
 			     ":%s MODE %s %s %s",
-			     HasID(server_p) ? server_p->user->id : server_p->name,
+			     HasID(source_p) ? source_p->user->id : source_p->name,
 			     chptr->chname,
 			     modebuf_invex, parabuf_invex);
     }	
@@ -2390,7 +2390,7 @@ void set_channel_mode(struct Client *client_p,
    */
   if(*modebuf_hops)
     {
-      if(IsServer(server_p))
+      if(IsServer(source_p))
 	sendto_channel_local(type,
 			     chptr,
 			     ":%s MODE %s %s %s",
@@ -2401,20 +2401,20 @@ void set_channel_mode(struct Client *client_p,
 	sendto_channel_local(type,
 			     chptr,
 			     ":%s!%s@%s MODE %s %s %s",
-			     server_p->name,
-			     server_p->username,
-			     server_p->host,
+			     source_p->name,
+			     source_p->username,
+			     source_p->host,
 			     chname,
 			     modebuf_hops, parabuf_hops);
 
       sendto_match_cap_servs_nocap(chptr, client_p, CAP_HOPS, CAP_UID,
 				   ":%s MODE %s %s %s",
-				   server_p->name, chptr->chname,
+				   source_p->name, chptr->chname,
 				   modebuf_hops, parabuf_hops);
 	  
       sendto_match_cap_servs(chptr, client_p, CAP_HOPS | CAP_UID,
 			     ":%s MODE %s %s %s",
-			     HasID(server_p) ? server_p->user->id : server_p->name,
+			     HasID(source_p) ? source_p->user->id : source_p->name,
 			     chptr->chname,
 			     modebuf_hops, parabuf_hops_id);
     }	
@@ -2426,7 +2426,7 @@ void set_channel_mode(struct Client *client_p,
    */
   if(*modebuf_aops)
     {
-      if(IsServer(server_p))
+      if(IsServer(source_p))
         sendto_channel_local(ALL_MEMBERS,
                              chptr,
                              ":%s MODE %s %s",
@@ -2438,9 +2438,9 @@ void set_channel_mode(struct Client *client_p,
         sendto_channel_local(type,
                              chptr,
                              ":%s!%s@%s MODE %s %s",
-                             server_p->name,
-                             server_p->username,
-                             server_p->host,
+                             source_p->name,
+                             source_p->username,
+                             source_p->host,
                              chname,
                              modebuf_aops);
         if(chptr->mode.mode & MODE_HIDEOPS)
@@ -2454,12 +2454,12 @@ void set_channel_mode(struct Client *client_p,
 
       sendto_match_cap_servs_nocap(chptr, client_p, CAP_AOPS, CAP_UID,
 				   ":%s MODE %s %s",
-				   server_p->name, chptr->chname,
+				   source_p->name, chptr->chname,
 				   modebuf_aops);
 
       sendto_match_cap_servs(chptr, client_p, CAP_AOPS | CAP_UID,
                              ":%s MODE %s %s",
-                             HasID(server_p) ? server_p->user->id : server_p->name,
+                             HasID(source_p) ? source_p->user->id : source_p->name,
 			     chptr->chname,
                              modebuf_aops);
     }
@@ -2776,7 +2776,7 @@ static void delete_members(struct Channel * chptr, dlink_list *list)
  * output	- none
  * side effects	- lists all names on given channel
  */
-void channel_member_names( struct Client *server_p,
+void channel_member_names( struct Client *source_p,
 			   struct Channel *chptr,
 			   char *name_of_channel)
 {
@@ -2790,17 +2790,17 @@ void channel_member_names( struct Client *server_p,
 
   /* Find users on same channel (defined by chptr) */
 
-  if (ShowChannel(server_p, chptr))
+  if (ShowChannel(source_p, chptr))
     {
       ircsprintf(lbuf, form_str(RPL_NAMREPLY),
-                 me.name, server_p->name,
+                 me.name, source_p->name,
                  channel_pub_or_secret(chptr));
       mlen = strlen(lbuf);
       ircsprintf(lbuf + mlen, " %s :", name_of_channel);
       mlen = strlen(lbuf);
       cur_len = mlen;
 
-      if(chptr->mode.mode & MODE_HIDEOPS && !is_any_op(chptr,server_p))
+      if(chptr->mode.mode & MODE_HIDEOPS && !is_any_op(chptr,source_p))
         {
           show_ops_flag = "";
           show_halfops_flag = "";
@@ -2813,27 +2813,27 @@ void channel_member_names( struct Client *server_p,
           show_voiced_flag = "+";
         }
 
-      channel_member_list(server_p, chptr,
+      channel_member_list(source_p, chptr,
                           &chptr->chanops, show_ops_flag,  
                           lbuf, mlen, &cur_len, &reply_to_send);
 
-      channel_member_list(server_p, chptr,
+      channel_member_list(source_p, chptr,
                           &chptr->voiced, show_voiced_flag,
                           lbuf, mlen, &cur_len, &reply_to_send);
 
-      channel_member_list(server_p, chptr,
+      channel_member_list(source_p, chptr,
                           &chptr->halfops, show_halfops_flag,
                           lbuf, mlen, &cur_len, &reply_to_send);
 
-      channel_member_list(server_p, chptr, &chptr->peons, "",
+      channel_member_list(source_p, chptr, &chptr->peons, "",
                           lbuf, mlen, &cur_len, &reply_to_send);
 
       if(reply_to_send)
-        sendto_one(server_p, "%s", lbuf);
+        sendto_one(source_p, "%s", lbuf);
     }
 
-  sendto_one(server_p, form_str(RPL_ENDOFNAMES),
-             me.name, server_p->name, name_of_channel);
+  sendto_one(source_p, form_str(RPL_ENDOFNAMES),
+             me.name, source_p->name, name_of_channel);
 }
 
 /*
@@ -2851,7 +2851,7 @@ void channel_member_names( struct Client *server_p,
  * side effects	- lists all names on given list of channel
  */
 void
-channel_member_list(struct Client *server_p,
+channel_member_list(struct Client *source_p,
                     struct Channel *chptr,
 			 dlink_list *list,
 			 char *show_flag,
@@ -2872,10 +2872,10 @@ channel_member_list(struct Client *server_p,
       who = ptr->data;
 
       /* skip +invis peeps if requestee is not a member */
-      if (IsInvisible(who) && !IsMember(server_p, chptr))
+      if (IsInvisible(who) && !IsMember(source_p, chptr))
         continue;
 
-      if(who == server_p && is_voiced(chptr, who) && chptr->mode.mode & MODE_HIDEOPS)
+      if(who == source_p && is_voiced(chptr, who) && chptr->mode.mode & MODE_HIDEOPS)
         ircsprintf(t, "+%s ", who->name);
       else
         ircsprintf(t, "%s%s ", show_flag, who->name);
@@ -2886,7 +2886,7 @@ channel_member_list(struct Client *server_p,
 
       if ((*cur_len + NICKLEN) > (BUFSIZE - 3))
 	{
-	  sendto_one(server_p, "%s", lbuf);
+	  sendto_one(source_p, "%s", lbuf);
 	  *reply_to_send = NO;
 	  *cur_len = mlen;
 	  t = lbuf + mlen;

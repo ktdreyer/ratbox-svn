@@ -74,16 +74,16 @@ char *_version = "20001122";
  *      parv[2] = servername mask
  */
 
-static void m_links(struct Client *client_p, struct Client *server_p,
+static void m_links(struct Client *client_p, struct Client *source_p,
                    int parc, char *parv[])
 {
 
   if (!GlobalSetOptions.hide_server)
     {
-     mo_links(client_p, server_p, parc, parv);
+     mo_links(client_p, source_p, parc, parv);
      return;
     }
-  SendMessageFile(server_p, &ConfigFileEntry.linksfile);
+  SendMessageFile(source_p, &ConfigFileEntry.linksfile);
 
     
 /*
@@ -91,14 +91,14 @@ static void m_links(struct Client *client_p, struct Client *server_p,
  * then print out the file (which may or may not be empty)
  */
   
-  sendto_one(server_p, form_str(RPL_LINKS),
+  sendto_one(source_p, form_str(RPL_LINKS),
                            me.name, parv[0], me.name, me.name,
                            0, me.info);
       
-  sendto_one(server_p, form_str(RPL_ENDOFLINKS), me.name, parv[0], "*");
+  sendto_one(source_p, form_str(RPL_ENDOFLINKS), me.name, parv[0], "*");
 }
 
-static void mo_links(struct Client *client_p, struct Client *server_p,
+static void mo_links(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
   char*    mask = "";
@@ -109,7 +109,7 @@ static void mo_links(struct Client *client_p, struct Client *server_p,
   
   if (parc > 2)
     {
-      if (hunt_server(client_p, server_p, ":%s LINKS %s :%s", 1, parc, parv)
+      if (hunt_server(client_p, source_p, ":%s LINKS %s :%s", 1, parc, parv)
           != HUNTED_ISME)
         return;
       mask = parv[2];
@@ -123,7 +123,7 @@ static void mo_links(struct Client *client_p, struct Client *server_p,
     mask = collapse(clean_string(clean_mask, (const unsigned char*) mask, 2 * HOSTLEN));
 
   hd.client_p = client_p;
-  hd.server_p = server_p;
+  hd.source_p = source_p;
   hd.mask = mask;
   hd.parc = parc;
   hd.parv = parv;
@@ -150,12 +150,12 @@ static void mo_links(struct Client *client_p, struct Client *server_p,
      /* We just send the reply, as if theyre here theres either no SHIDE,
       * or theyre an oper..  
       */
-      sendto_one(server_p, form_str(RPL_LINKS),
+      sendto_one(source_p, form_str(RPL_LINKS),
 		      me.name, parv[0], aclient_p->name, aclient_p->serv->up,
                       aclient_p->hopcount, p);
     }
   
-  sendto_one(server_p, form_str(RPL_ENDOFLINKS), me.name, parv[0],
+  sendto_one(source_p, form_str(RPL_ENDOFLINKS), me.name, parv[0],
              EmptyString(mask) ? "*" : mask);
 }
 
@@ -168,14 +168,14 @@ static void mo_links(struct Client *client_p, struct Client *server_p,
  *      parv[1] = server to query 
  *      parv[2] = servername mask
  */
-static void ms_links(struct Client *client_p, struct Client *server_p,
+static void ms_links(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
-  if (hunt_server(client_p, server_p, ":%s LINKS %s :%s", 1, parc, parv)
+  if (hunt_server(client_p, source_p, ":%s LINKS %s :%s", 1, parc, parv)
       != HUNTED_ISME)
     return;
 
-  if(IsOper(server_p))
-    m_links(client_p,server_p,parc,parv);
+  if(IsOper(source_p))
+    m_links(client_p,source_p,parc,parv);
 }
 
