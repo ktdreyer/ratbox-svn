@@ -21,6 +21,7 @@ struct _config_file
 
 	int reconnect_time;
 	int ping_time;
+	int ratbox;
 
 	char *admin1;
 	char *admin2;

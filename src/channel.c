@@ -307,10 +307,21 @@ part_service(struct client *service_p, const char *chname)
 }
 
 void
-rejoin_service(struct client *service_p, struct channel *chptr, int part)
+rejoin_service(struct client *service_p, struct channel *chptr, int reop)
 {
-	if(part)
+	/* we are only doing this because we need a reop */
+	if(reop)
+	{
+		/* can do this rather more simply */
+		if(config_file.ratbox)
+		{
+			sendto_server(":%s MODE %s +o %s",
+					MYNAME, chptr->name, service_p->name);
+			return;
+		}
+
 		sendto_server(":%s PART %s", service_p->name, chptr->name);
+	}
 
 	sendto_server(":%s SJOIN %lu %s %s :@%s",
 			MYNAME, (unsigned long) chptr->tsinfo, chptr->name, 
@@ -679,6 +690,15 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 	{
 		chptr->tsinfo = newts;
 		remove_our_modes(chptr);
+
+		/* services is in there.. rejoin */
+		if(finished_bursting)
+		{
+			DLINK_FOREACH(ptr, chptr->services.head)
+			{
+				rejoin_service(ptr->data, chptr, 1);
+			}
+		}
 	}
 
 	if(keep_new_modes)
@@ -753,21 +773,11 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 		}
 	}
 
-	hook_call(HOOK_JOIN_CHANNEL, &joined_members, &keep_old_modes);
+	hook_call(HOOK_JOIN_CHANNEL, &joined_members, NULL);
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, joined_members.head)
 	{
 		free_dlink_node(ptr);
-	}
-
-	/* services in the channel, not keeping it as opped.. */
-	if(finished_bursting && !keep_old_modes &&
-	   dlink_list_length(&chptr->services))
-	{
-		DLINK_FOREACH(ptr, chptr->services.head)
-		{
-			rejoin_service(ptr->data, chptr, 1);
-		}
 	}
 
 	/* didnt join any members, nuke it */

@@ -695,6 +695,7 @@ static struct ConfEntry conf_serverinfo_table[] =
 	{ "dcc_high_port",	CF_INT,     NULL, 0, &config_file.dcc_high_port },
 	{ "reconnect_time",	CF_TIME,    NULL, 0, &config_file.reconnect_time },
 	{ "ping_time",		CF_TIME,    NULL, 0, &config_file.ping_time	},
+	{ "ratbox",		CF_YESNO,   NULL, 0, &config_file.ratbox	},
 	{ "name",		CF_QSTRING, conf_set_serverinfo_name, 0, NULL	},
 	{ "\0", 0, NULL, 0, NULL }
 };
