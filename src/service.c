@@ -101,7 +101,7 @@ add_service(struct service_handler *service)
         }
 
         if(service->ucommand != NULL)
-                add_ucommands(service->ucommand, service->id);
+                add_ucommands(client_p, service->ucommand, service->id);
 
 	return client_p;
 }

@@ -261,7 +261,7 @@ main(int argc, char *argv[])
 	add_scommand_handler(&mode_command);
 	add_scommand_handler(&privmsg_command);
 
-        add_ucommand_handler(&stats_ucommand, NULL);
+        add_ucommand_handler(NULL, &stats_ucommand, NULL);
 
 	/* load our services.. */
 #ifdef ENABLE_ALIS

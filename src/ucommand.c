@@ -60,7 +60,7 @@ static struct ucommand_handler ucommands[] =
 void
 init_ucommand(void)
 {
-        add_ucommands(ucommands, NULL);
+        add_ucommands(NULL, ucommands, NULL);
 }
 
 static int
@@ -128,7 +128,8 @@ handle_ucommand(struct connection_entry *conn_p, const char *command,
 }
 
 void
-add_ucommand_handler(struct ucommand_handler *chandler, const char *servicename)
+add_ucommand_handler(struct client *service_p, 
+		struct ucommand_handler *chandler, const char *servicename)
 {
         static char def_servicename[] = "main";
         char filename[PATH_MAX];
@@ -141,10 +142,12 @@ add_ucommand_handler(struct ucommand_handler *chandler, const char *servicename)
 	dlink_add_alloc(chandler, &ucommand_table[hashv]);
 
         if(servicename == NULL)
-        {
-                dlink_add_tail_alloc(chandler, &ucommand_list);
+	{
+		dlink_add_tail_alloc(chandler, &ucommand_list);
                 servicename = def_servicename;
-        }
+	}
+	else
+		dlink_add_tail_alloc(chandler, &service_p->service->ucommand_list);
 
         /* now see if we can load a helpfile.. */
         snprintf(filename, sizeof(filename), "%s%s/u-",
@@ -155,13 +158,14 @@ add_ucommand_handler(struct ucommand_handler *chandler, const char *servicename)
 }
 
 void
-add_ucommands(struct ucommand_handler *handler, const char *servicename)
+add_ucommands(struct client *service_p, 
+		struct ucommand_handler *handler, const char *servicename)
 {
         int i;
 
         for(i = 0; handler[i].cmd[0] != '\0'; i++)
         {
-                add_ucommand_handler(&handler[i], servicename);
+                add_ucommand_handler(service_p, &handler[i], servicename);
         }
 }
 
@@ -343,53 +347,74 @@ u_status(struct connection_entry *conn_p, char *parv[], int parc)
 }
 
 static void
+dump_commands(struct connection_entry *conn_p, struct client *service_p, dlink_list *list)
+{
+	struct ucommand_handler *handler;
+	const char *hparv[MAX_HELP_ROW];
+	dlink_node *ptr;
+	int j = 0;
+	int header = 0;
+
+	DLINK_FOREACH(ptr, list->head)
+	{
+		handler = ptr->data;
+
+		if(handler->flags && !(conn_p->privs & handler->flags))
+			continue;
+
+		if(!header)
+		{
+			header++;
+			sendto_one(conn_p, "%s commands:",
+					service_p ? ucase(service_p->name) : "Available");
+		}
+
+		hparv[j] = handler->cmd;
+		j++;
+
+		if(j >= MAX_HELP_ROW)
+		{
+			sendto_one(conn_p,
+				"   %-8s %-8s %-8s %-8s %-8s %-8s %-8s %-8s",
+				hparv[0], hparv[1], hparv[2], hparv[3],
+				hparv[4], hparv[5], hparv[6], hparv[7]);
+			j = 0;
+		}
+	}
+
+	if(j)
+	{
+		char buf[BUFSIZE];
+		char *p = buf;
+		int i;
+
+		for(i = 0; i < j; i++)
+		{
+			p += sprintf(p, "%-8s ", hparv[i]);
+		}
+
+		sendto_one(conn_p, "   %s", buf);
+	}
+}
+
+static void
 u_help(struct connection_entry *conn_p, char *parv[], int parc)
 {
         struct ucommand_handler *handler;
-        dlink_node *ptr;
+	dlink_node *ptr;
 
         if(parc < 2 || EmptyString(parv[1]))
         {
-                const char *hparv[MAX_HELP_ROW];
-                int j = 0;
+		struct client *service_p;
 
-                sendto_one(conn_p, "Available commands:");
+		dump_commands(conn_p, NULL, &ucommand_list);
 
-                DLINK_FOREACH(ptr, ucommand_list.head)
-                {
-                        handler = ptr->data;
+		DLINK_FOREACH(ptr, service_list.head)
+		{
+			service_p = ptr->data;
 
-			if(handler->flags && !(conn_p->privs & handler->flags))
-				continue;
-
-                        hparv[j] = handler->cmd;
-                        j++;
-
-                        if(j >= MAX_HELP_ROW)
-                        {
-                                sendto_one(conn_p,
-                                           "   %-8s %-8s %-8s %-8s "
-                                           "%-8s %-8s %-8s %-8s",
-                                           hparv[0], hparv[1], hparv[2],
-                                           hparv[3], hparv[4], hparv[5],
-                                           hparv[6], hparv[7]);
-                                j = 0;
-                        }
-                }
-
-                if(j)
-                {
-                        char buf[BUFSIZE];
-                        char *p = buf;
-                        int i;
-
-                        for(i = 0; i < j; i++)
-                        {
-                                p += sprintf(p, "%-8s ", hparv[i]);
-                        }
-
-                        sendto_one(conn_p, "   %s", buf);
-                }
+			dump_commands(conn_p, service_p, &service_p->service->ucommand_list);
+		}
 
                 sendto_one(conn_p, "For more information see .help <command>");
                 return;

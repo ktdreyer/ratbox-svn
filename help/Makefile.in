@@ -13,18 +13,11 @@ install:
 
 	@for i in $(SUBDIRS); do \
 		$(INSTALL) -m 750 -d $(PREFIX)/help/$$i; \
-	done
-
-	@for help in alis/*; do \
-	if [ -f $$help ] ; then \
-		$(INSTALL_DATA) $$help $(PREFIX)/help/alis/$$i; \
-	fi \
-	done
-
-	@for help in main/*; do \
-	if [ -f $$help ] ; then \
-		$(INSTALL_DATA) $$help $(PREFIX)/help/main/$$i; \
-	fi \
+		for j in $$i/*; do \
+			if [ -f $$j ]; then \
+				$(INSTALL_DATA) $$j $(PREFIX)/help/$$i; \
+			fi \
+		done \
 	done
 
 build:

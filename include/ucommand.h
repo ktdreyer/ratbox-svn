@@ -6,6 +6,7 @@
 
 struct connection_entry;
 struct cachefile;
+struct client;
 
 extern dlink_list ucommand_list;
 
@@ -21,8 +22,8 @@ struct ucommand_handler
 extern void init_ucommand(void);
 extern void handle_ucommand(struct connection_entry *, const char *command, 
 				char *parv[], int parc);
-extern void add_ucommand_handler(struct ucommand_handler *, const char *);
-extern void add_ucommands(struct ucommand_handler *, const char *);
+extern void add_ucommand_handler(struct client *, struct ucommand_handler *, const char *);
+extern void add_ucommands(struct client *, struct ucommand_handler *, const char *);
 
 extern struct ucommand_handler *find_ucommand(const char *command);
 

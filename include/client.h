@@ -94,6 +94,8 @@ struct service
         unsigned long paced_count;
         unsigned long ignored_count;
 
+	dlink_list ucommand_list;
+
         void (*stats)(struct connection_entry *, char *parv[], int parc);
 };
 
