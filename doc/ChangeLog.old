@@ -1,3 +1,15 @@
+androsyn    2002/03/09 18:40:18 EST	(20020309_8)
+
+  Modified files:
+    include              patchlevel.h 
+  Log:
+  Changed the relname a bit :P
+  
+  Revision  Changes    Path
+  7.23      +1 -1      ircd-hybrid-7/include/patchlevel.h
+
+
+
 androsyn    2002/03/09 18:37:59 EST	(20020309_7)
 
   Modified files:
