@@ -1,5 +1,5 @@
 *** 20001228_1 by lusky
-fixed scoklen_t check
+fixed socklen_t check
 
 
 *** 20001227_38 by wcampbel
@@ -15,7 +15,7 @@ fixed scoklen_t check
 
 
 *** 20001227_36 by ejb
-- make ocnifugre should run conifgure as well as building it
+- make configure should run conifgure as well as building it
 - make /restart require server name
 
 
