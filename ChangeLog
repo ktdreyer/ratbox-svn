@@ -1,3 +1,31 @@
+leeh        2004/03/19 15:14:37 EST	(20040319_4)
+
+  Modified files:
+    include              client.h irc_string.h memory.h 
+    modules              m_pass.c 
+    src                  client.c hook.c memory.c s_serv.c 
+                         s_user.c 
+  Log:
+  - raised PASSWDLEN to 128.
+  - MyFree() is now a macro instead of a function
+  - DupString() is now a macro when strdup() is not found
+  - added DupNString() macro, uses strndup() if available, otherwise copies
+    manually.
+  - made localClient->passwd dynamically allocated
+  
+  Revision  Changes    Path
+  7.236     +2 -2      ircd-ratbox/include/client.h
+  7.57      +12 -0     ircd-ratbox/include/irc_string.h
+  7.46      +1 -26     ircd-ratbox/include/memory.h
+  1.47      +9 -3      ircd-ratbox/modules/m_pass.c
+  7.441     +7 -1      ircd-ratbox/src/client.c
+  7.29      +2 -1      ircd-ratbox/src/hook.c
+  7.47      +0 -16     ircd-ratbox/src/memory.c
+  7.389     +5 -1      ircd-ratbox/src/s_serv.c
+  7.311     +5 -1      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2004/03/19 12:36:04 EST	(20040319_3)
 
   Modified files:
