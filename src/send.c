@@ -73,11 +73,75 @@ sendto_list_anywhere(struct Client *one, struct Client *from,
                      dlink_list *list, buf_head_t *local_linebuf,
                      buf_head_t *remote_linebuf);
 
-static inline int
-send_format(char *lsendbuf, const char *pattern, va_list args);
 
+/*
+ * send_trim
+ *
+ * inputs	- pointer to buffer to trim
+ *		- length of buffer
+ * output	- new length of buffer if modified otherwise original len
+ * side effects	- input buffer is trimmed if needed
+ */
 static inline int
-send_trim(char *lsendbuf, int len );
+send_trim(char *lsendbuf,int len)
+{
+  /*
+   * from rfc1459
+   *
+   * IRC messages are always lines of characters terminated with a CR-LF
+   * (Carriage Return - Line Feed) pair, and these messages shall not
+   * exceed 512 characters in length,  counting all characters 
+   * including the trailing CR-LF.
+   * Thus, there are 510 characters maximum allowed
+   * for the command and its parameters.  There is no provision for
+   * continuation message lines.  See section 7 for more details about
+   * current implementations.
+   */
+
+  /*
+   * We have to get a \r\n\0 onto sendbuf[] somehow to satisfy
+   * the rfc. We must assume sendbuf[] is defined to be 513
+   * bytes - a maximum of 510 characters, the CR-LF pair, and
+   * a trailing \0, as stated in the rfc. Now, if len is greater
+   * than the third-to-last slot in the buffer, an overflow will
+   * occur if we try to add three more bytes, if it has not
+   * already occured. In that case, simply set the last three
+   * bytes of the buffer to \r\n\0. Otherwise, we're ok. My goal
+   * is to get some sort of vsnprintf() function operational
+   * for this routine, so we never again have a possibility
+   * of an overflow.
+   * -wnder
+   */
+
+  if(len > 510)
+  {
+    lsendbuf[IRCD_BUFSIZE-2] = '\r';
+    lsendbuf[IRCD_BUFSIZE-1] = '\n';
+    lsendbuf[IRCD_BUFSIZE] = '\0';
+    return(IRCD_BUFSIZE);
+  }
+  return len;
+}
+
+/*
+ * send_format
+ *
+ * inputs	- buffer to format into
+ *		- format pattern to use
+ *		- var args
+ * output	- number of bytes formatted output
+ * side effects	- modifies sendbuf
+ */
+static inline int
+send_format(char *lsendbuf, const char *pattern, va_list args)
+{
+  int len; /* used for the length of the current message */
+
+  len = vsprintf_irc(lsendbuf, pattern, args);
+
+  return (send_trim(lsendbuf,len));
+}
+
 
 /*
  ** send_linebuf
@@ -1170,73 +1234,7 @@ ts_warn(const char *pattern, ...)
 } /* ts_warn() */
 
 
-/*
- * send_format
- *
- * inputs	- buffer to format into
- *		- format pattern to use
- *		- var args
- * output	- number of bytes formatted output
- * side effects	- modifies sendbuf
- */
-static inline int
-send_format(char *lsendbuf, const char *pattern, va_list args)
-{
-  int len; /* used for the length of the current message */
 
-  len = vsprintf_irc(lsendbuf, pattern, args);
-
-  return (send_trim(lsendbuf,len));
-}
-
-/*
- * send_trim
- *
- * inputs	- pointer to buffer to trim
- *		- length of buffer
- * output	- new length of buffer if modified otherwise original len
- * side effects	- input buffer is trimmed if needed
- */
-static inline int
-send_trim(char *lsendbuf,int len)
-{
-  /*
-   * from rfc1459
-   *
-   * IRC messages are always lines of characters terminated with a CR-LF
-   * (Carriage Return - Line Feed) pair, and these messages shall not
-   * exceed 512 characters in length,  counting all characters 
-   * including the trailing CR-LF.
-   * Thus, there are 510 characters maximum allowed
-   * for the command and its parameters.  There is no provision for
-   * continuation message lines.  See section 7 for more details about
-   * current implementations.
-   */
-
-  /*
-   * We have to get a \r\n\0 onto sendbuf[] somehow to satisfy
-   * the rfc. We must assume sendbuf[] is defined to be 513
-   * bytes - a maximum of 510 characters, the CR-LF pair, and
-   * a trailing \0, as stated in the rfc. Now, if len is greater
-   * than the third-to-last slot in the buffer, an overflow will
-   * occur if we try to add three more bytes, if it has not
-   * already occured. In that case, simply set the last three
-   * bytes of the buffer to \r\n\0. Otherwise, we're ok. My goal
-   * is to get some sort of vsnprintf() function operational
-   * for this routine, so we never again have a possibility
-   * of an overflow.
-   * -wnder
-   */
-
-  if(len > 510)
-  {
-    lsendbuf[IRCD_BUFSIZE-2] = '\r';
-    lsendbuf[IRCD_BUFSIZE-1] = '\n';
-    lsendbuf[IRCD_BUFSIZE] = '\0';
-    return(IRCD_BUFSIZE);
-  }
-  return len;
-}
 
 /*
  * kill_client
