@@ -221,9 +221,15 @@ get_randomness(unsigned char *buf, int length)
 	}
 
 	if(RAND_status())
-		return RAND_bytes(buf, length);
-	else			/* XXX - abort? */
-		return RAND_pseudo_bytes(buf, length);
+	{
+	 	if(RAND_bytes(buf, length) > 0)
+	 	        return 1;
+	}
+	else {
+	        if(RAND_pseudo_bytes(buf, length) >= 0)
+	                return 1;
+	}
+	return 0;
 }
 
 int
@@ -231,38 +237,37 @@ generate_challenge(char **r_challenge, char **r_response, RSA * rsa)
 {
 	unsigned char secret[32], *tmp;
 	unsigned long length;
+	unsigned long e = 0;
+	unsigned long cnt = 0;
 	int ret;
 
 	if(!rsa)
 		return -1;
-	get_randomness(secret, 32);
-	*r_response = MyMalloc(65);
-	binary_to_hex(secret, *r_response, 32);
+	if(get_randomness(secret, 32))
+	{
+		*r_response = MyMalloc(65);
+		binary_to_hex(secret, *r_response, 32);
 
-	length = RSA_size(rsa);
-	tmp = MyMalloc(length);
-	ret = RSA_public_encrypt(32, secret, tmp, rsa, RSA_PKCS1_PADDING);
-
-	*r_challenge = MyMalloc((length << 1) + 1);
-	binary_to_hex(tmp, *r_challenge, length);
-	(*r_challenge)[length << 1] = 0;
-	MyFree(tmp);
-
-	if(ret < 0)
-	{	
-		unsigned long e = 0;
-		unsigned long cnt = 0;
-
-		ERR_load_crypto_strings();
-		while ((cnt < 100) && (e = ERR_get_error()))
-		{
-			ilog(L_MAIN, "SSL error: %s", ERR_error_string(e, 0));
-			cnt++;
-		}
-
-		return (-1);
+		length = RSA_size(rsa);
+		tmp = MyMalloc(length);
+		ret = RSA_public_encrypt(32, secret, tmp, rsa, RSA_PKCS1_PADDING);
+	
+		*r_challenge = MyMalloc((length << 1) + 1);
+		binary_to_hex(tmp, *r_challenge, length);
+		(*r_challenge)[length << 1] = 0;
+		MyFree(tmp);
+		if(ret >= 0)
+			return 0;
 	}
-	return (0);
+
+	ERR_load_crypto_strings();
+	while ((cnt < 100) && (e = ERR_get_error()))
+	{
+		ilog(L_MAIN, "SSL error: %s", ERR_error_string(e, 0));
+		cnt++;
+	}
+
+	return (-1);
 }
 
 #endif /* HAVE_LIBCRYPTO */
