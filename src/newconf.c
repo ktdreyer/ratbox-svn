@@ -970,6 +970,7 @@ int	conf_begin_oper(struct TopConf* tc)
 	yy_achead = yy_aconf = make_conf();
 	yy_aconf->status = CONF_OPERATOR;
         yy_aconf->flags |= CONF_FLAGS_ENCRYPTED;
+        yy_achead->port |= OPER_OPERWALL;
 	return 0;
 }
 
