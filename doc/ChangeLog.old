@@ -1,3 +1,15 @@
+leeh        2001/12/20 13:22:45 EST	(20011220_1)
+
+  Modified files:
+    modules              m_info.c 
+  Log:
+  - removed a pointless IsOper()
+  
+  Revision  Changes    Path
+  1.49      +1 -1      ircd-hybrid-7/modules/m_info.c
+
+
+
 leeh        2001/12/20 05:05:33 EST	(20011220_0)
 
   Modified files:
