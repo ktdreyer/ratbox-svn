@@ -10,4 +10,5 @@ struct entity {
 int build_target_list(struct Client *sptr,
 		      char *nicks_channels, struct entity target_table[]);
 
+int drone_attack(struct Client *sptr, struct Client *acptr);
 #endif

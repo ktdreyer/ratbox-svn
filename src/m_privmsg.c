@@ -228,16 +228,14 @@ int build_target_list(struct Client *sptr,
       ** plain old channel msg ?
       */
 
-      if( IsChanPrefix(*nick) && (chptr = hash_find_channel(nick, NullChn)))
+      if( IsChanPrefix(*nick) && (chptr = hash_find_channel(nick, NullChn))
+	  && !duplicate_ptr(chptr, target_table, i) )
 	{
-	  if ( !duplicate_ptr(chptr, target_table, i ))
-	    {
-	      target_table[i].ptr = (void *)chptr;
-	      target_table[i++].type = ENTITY_CHANNEL;
-
-	      if( i >= MAX_MULTI_MESSAGES)
-		return(i);
-	    }
+	  target_table[i].ptr = (void *)chptr;
+	  target_table[i++].type = ENTITY_CHANNEL;
+	  
+	  if( i >= MAX_MULTI_MESSAGES)
+	    return(i);
 	  continue;
 	}
 
@@ -271,33 +269,30 @@ int build_target_list(struct Client *sptr,
 	   * if the channel is found, fine, if not report an error
 	   */
 
-	  if ( (chptr = hash_find_channel(nick+1, NullChn)) )
+	  if ( (chptr = hash_find_channel(nick+1, NullChn)) &&
+	       !duplicate_ptr(chptr, target_table,i) )
 	    {
-	      if (!duplicate_ptr(chptr, target_table,i))
-		{
-		  target_table[i].ptr = (void *)chptr;
-		  target_table[i].type = ENTITY_CHANOPS_ON_CHANNEL;
-		  target_table[i++].flags = type;
+	      target_table[i].ptr = (void *)chptr;
+	      target_table[i].type = ENTITY_CHANOPS_ON_CHANNEL;
+	      target_table[i++].flags = type;
 
-		  if( i >= MAX_MULTI_MESSAGES)
-		    return(i);
-		}
+	      if( i >= MAX_MULTI_MESSAGES)
+		return(i);
 	    }
 	  continue;
 	}
       /* At this point, its likely its another client */
 
-      if ((acptr = find_person(nick, NULL)))
+      if ( (acptr = find_person(nick, NULL)) &&
+	   !duplicate_ptr(acptr, target_table, i) &&
+	   !drone_attack(sptr, acptr) )
 	{
-	  if (!duplicate_ptr(acptr, target_table, i))
-	    {
-	      target_table[i].ptr = (void *)acptr;
-	      target_table[i].type = ENTITY_CLIENT;
-	      target_table[i++].flags = 0;
-
-	      if( i >= MAX_MULTI_MESSAGES)
-		return(i);
-	    }
+	  target_table[i].ptr = (void *)acptr;
+	  target_table[i].type = ENTITY_CLIENT;
+	  target_table[i++].flags = 0;
+	      
+	  if( i >= MAX_MULTI_MESSAGES)
+	    return(i);
 	}
     }
   return i;
@@ -606,3 +601,79 @@ int     ms_privmsg(struct Client *cptr,
   return 0;
 }
 
+/*
+ * drone_attack
+ * inputs	- pointer to source Client 
+ *		- pointer to target Client
+ * output	- 1 if target is under drone attack
+ * side effects	- check for drone attack on target acptr
+ */
+
+int drone_attack(struct Client *sptr,struct Client *acptr)
+{
+  if(MyConnect(acptr) && IsClient(sptr) &&
+     GlobalSetOptions.dronetime)
+    {
+      if((acptr->first_received_message_time+GlobalSetOptions.dronetime)
+	 < CurrentTime)
+	{
+	  acptr->received_number_of_privmsgs=1;
+	  acptr->first_received_message_time = CurrentTime;
+	  acptr->drone_noticed = 0;
+	}
+      else
+	{
+	  if(acptr->received_number_of_privmsgs > 
+	     GlobalSetOptions.dronecount)
+	    {
+	      if(acptr->drone_noticed == 0) /* tiny FSM */
+		{
+		  sendto_ops_flags(FLAGS_BOTS,
+		   "Possible Drone Flooder %s [%s@%s] on %s target: %s",
+				   sptr->name, sptr->username,
+				   sptr->host,
+				   sptr->user->server, acptr->name);
+		  acptr->drone_noticed = 1;
+		}
+	      /* heuristic here, if target has been getting a lot
+	       * of privmsgs from clients, and sendq is above halfway up
+	       * its allowed sendq, then throw away the privmsg, otherwise
+	       * let it through. This adds some protection, yet doesn't
+	       * DoS the client.
+	       * -Dianora
+	       */
+	      if(DBufLength(&acptr->sendQ) > (get_sendq(acptr)/2L))
+		{
+		  if(acptr->drone_noticed == 1) /* tiny FSM */
+		    {
+		      sendto_ops_flags(FLAGS_BOTS,
+		       "anti_drone_flood SendQ protection activated for %s",
+				       acptr->name);
+
+		      sendto_one(acptr,     
+ ":%s NOTICE %s :*** Notice -- Server drone flood protection activated for %s",
+				 me.name, acptr->name, acptr->name);
+		      acptr->drone_noticed = 2;
+		    }
+		}
+
+	      if(DBufLength(&acptr->sendQ) <= (get_sendq(acptr)/4L))
+		{
+		  if(acptr->drone_noticed == 2)
+		    {
+		      sendto_one(acptr,     
+				 ":%s NOTICE %s :*** Notice -- Server drone flood protection de-activated for %s",
+				 me.name, acptr->name, acptr->name);
+		      acptr->drone_noticed = 1;
+		    }
+		}
+	      if(acptr->drone_noticed > 1)
+		return 1;
+	    }
+	  else
+	    acptr->received_number_of_privmsgs++;
+	}
+    }
+
+  return 0;
+}
