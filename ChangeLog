@@ -1,3 +1,32 @@
+leeh        2002/11/19 23:02:52 UTC	(20021119_0)
+
+  Modified files:
+    contrib              m_owhois.c spy_whois_notice.c 
+    include              channel.h 
+    modules              m_whois.c 
+    src                  channel.c client.c 
+  Added files:
+    contrib              spy_whois_notice_global.c 
+  Log:
+  - quitstorm users are now exited via qs_user() instead of exit_one_client()
+  - ... which calls instead qs_user_from_channel() to remove users from chans
+  - ... which means channels can only now persist on a QS, never via a
+    user /quit'ing or /part'ing.
+  
+  - added spy_whois_notice_global.c to contrib/, for global whois spy
+    notices
+  
+  Revision  Changes    Path
+  1.9       +7 -3      ircd-ratbox/contrib/m_owhois.c
+  1.12      +3 -3      ircd-ratbox/contrib/spy_whois_notice.c
+  1.1       +63 -0     ircd-ratbox/contrib/spy_whois_notice_global.c (new)
+  7.128     +1 -0      ircd-ratbox/include/channel.h
+  1.96      +9 -4      ircd-ratbox/modules/m_whois.c
+  7.358     +105 -45   ircd-ratbox/src/channel.c
+  7.328     +68 -1     ircd-ratbox/src/client.c
+
+
+
 leeh        2002/11/17 02:32:54 UTC	(20021117_0)
 
   Modified files:
