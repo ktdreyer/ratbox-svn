@@ -160,12 +160,12 @@ extern void check_splitmode();
 
 #define IsChannelName(name) ((name) && (*(name) == '#' || *(name) == '&'))
 
-typedef struct Ban      /* also used for exceptions -orabidoo */
+struct Ban          /* also used for exceptions -orabidoo */
 {
   char *banstr;
   char *who;
   time_t when;
-} aBan;
+};
 
 #define CLEANUP_CHANNELS_TIME (30*60)
 #define MAX_VCHAN_TIME (60*60)
