@@ -1,3 +1,15 @@
+androsyn    2002/12/03 20:46:02 UTC	(20021203_2)
+
+  Modified files:
+    src                  s_serv.c 
+  Log:
+  Commit hwy's patch to make the connect error messages slightly more useful..
+  
+  Revision  Changes    Path
+  7.306     +6 -4      ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2002/12/03 11:03:33 UTC	(20021203_1)
 
   Modified files:
