@@ -1,3 +1,8 @@
+*** 20001231_31 by wcampbel
+1. Added A1kmm's match.c patch (to fix gecos blocks)
+2. Fix compiler error in m_part.c (chname -> name)
+
+
 *** 20001231_30 by davidt
 Uhmm.. or should part be the top chan name between servers?
 argh. see bug #15
