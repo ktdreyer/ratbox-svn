@@ -1,3 +1,15 @@
+androsyn    2002/02/10 03:49:58 EST	(20020210_1)
+
+  Modified files:
+    src                  ircd.c 
+  Log:
+  Tweaks for the delay on the ioloop.
+  
+  Revision  Changes    Path
+  7.218     +11 -5     ircd-hybrid-7/src/ircd.c
+
+
+
 wcampbel    2002/02/09 22:35:11 EST	(20020210_0)
 
   Modified files:
