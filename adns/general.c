@@ -40,6 +40,9 @@
 
 void adns__vdiag(adns_state ads, const char *pfx, adns_initflags prevent,
 		 int serv, adns_query qu, const char *fmt, va_list al) {
+
+/* Fix this to log to the ircd log interface */
+#if 0
   const char *bef, *aft;
   vbuf vb;
   
@@ -77,6 +80,7 @@ void adns__vdiag(adns_state ads, const char *pfx, adns_initflags prevent,
   }
 
   fputs(aft,ads->diagfile);
+#endif
 }
 
 void adns__debug(adns_state ads, int serv, adns_query qu, const char *fmt, ...) {
