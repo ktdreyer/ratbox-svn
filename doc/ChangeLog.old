@@ -1,3 +1,16 @@
+*** 20001205_1 by db
+- added rest of accept code.
+  client puts themselves into +u mode, this disallows casual messages
+  to that client. The source gets a "am on server side ignore" from the
+  target, the target gets a message saying source has messaged them, 
+  but paced to once a minute.
+  a client in +u mode (or any other mode actually) can add clients
+  it will accept messages from using /quote accept nick
+  delete them using /quote accept -nick (perhaps /quote delete nick would
+  make more sense?) a list with /quote accept *
+
+
+
 *** 20001204_17 by db
 - found the cause of the blalloc bit already cleared error..
   dlink_node was already been cleared in remove_user_from_channel
