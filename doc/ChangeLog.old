@@ -1,3 +1,9 @@
+*** 20001229_3 by db
+- increased MessageFileLine length this should be malloced ;-/
+- added server info to user seen /links
+
+
+
 *** 20001229_2 by db
 - fixed another bug in s_conf.c
   recheck_class() had the bad side effect of moving opers from oper
