@@ -1,3 +1,9 @@
+*** 20001121_1 by db
+- general cleanups continue, just a few this time
+- ltrace removed for now, it can go back in later
+
+
+
 *** 20001119_2 by davidt
 modularised m_motd, so /MOTD works once again.
 motd.c still contains various file reading/sending commands, which are
