@@ -101,9 +101,7 @@ typedef struct ip_entry
   struct irc_inaddr ip;
 #endif
   int        count;
-#ifdef PACE_CONNECT
   time_t last_attempt;
-#endif
   struct ip_entry *next;
 } IP_ENTRY;
 
@@ -706,9 +704,7 @@ find_or_add_ip(struct irc_inaddr *ip_in)
 
       memcpy(&newptr->ip, ip_in, sizeof(struct irc_inaddr));
       newptr->count = 0;
-#ifdef PACE_CONNECT
       newptr->last_attempt = 0;
-#endif      
       newptr->next = ptr;
       return(newptr);
     }
@@ -755,14 +751,9 @@ remove_one_ip(struct irc_inaddr *ip_in)
 #endif
   if (ptr->count != 0)
    ptr->count--;
-#ifndef PACE_CONNECT
-  if (ptr->count != 0)
-   continue;
-#else
   if (ptr->count != 0 ||
       (CurrentTime-ptr->last_attempt)<=ConfigFileEntry.throttle_time)
    continue;
-#endif
   *lptr = ptr->next;
   ptr->next = free_ip_entries;
   free_ip_entries = ptr;
@@ -1601,9 +1592,7 @@ lookup_confhost(struct ConfItem* aconf)
 int 
 conf_connect_allowed(struct irc_inaddr *addr, int aftype)
 {
-#ifdef PACE_CONNECT
   IP_ENTRY *ip_found;
-#endif
   struct ConfItem *aconf = find_dline(addr, aftype);
  
   /* DLINE exempt also gets you out of static limits/pacing... */
@@ -1613,7 +1602,6 @@ conf_connect_allowed(struct irc_inaddr *addr, int aftype)
   if (aconf)
     return BANNED_CLIENT;
 
-#ifdef PACE_CONNECT
   ip_found = find_or_add_ip(addr);
   if ((CurrentTime - ip_found->last_attempt) <
       ConfigFileEntry.throttle_time)
@@ -1623,7 +1611,6 @@ conf_connect_allowed(struct irc_inaddr *addr, int aftype)
       return TOO_FAST;
     }
   ip_found->last_attempt = CurrentTime;
-#endif
   return 0;
 }
 
@@ -2502,7 +2489,6 @@ conf_yy_fatal_error(char *msg)
   return 0;
 }
 
-#ifdef PACE_CONNECT
 
 /* void flush_expired_ips(void *unused)
  *
@@ -2533,4 +2519,3 @@ flush_expired_ips(void *unused)
       *iee = NULL;
     }
 }
-#endif

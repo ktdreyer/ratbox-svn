@@ -439,11 +439,9 @@ accept_connection(int pfd, void *data)
     case BANNED_CLIENT:
      send(fd, DLINE_WARNING, sizeof(DLINE_WARNING)-1, 0);
      break;
-#ifdef PACE_CONNECT
     case TOO_FAST:
      send(fd, TOOFAST_WARNING, sizeof(TOOFAST_WARNING)-1, 0);
      break;
-#endif
    }
    fd_close(fd);
    /* Re-register a new IO request for the next accept .. */

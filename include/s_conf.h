@@ -27,7 +27,6 @@
 #include "setup.h"
 
 
-#define PACE_CONNECT
 
 #ifdef HAVE_LIBCRYPTO
 #include <openssl/rsa.h>
@@ -395,9 +394,7 @@ extern void conf_add_x_conf(struct ConfItem *);
 extern void conf_add_u_conf(struct ConfItem *);
 extern void conf_add_fields(struct ConfItem*, char*, char *, char*, char *,char *);
 extern void conf_add_conf(struct ConfItem *);
-#ifdef PACE_CONNECT
 extern void flush_expired_ips(void *);
-#endif
 
 /* XXX consider moving these into kdparse.h */
 extern void parse_k_file(FBFILE *fb);

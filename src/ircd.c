@@ -753,12 +753,10 @@ int main(int argc, char *argv[])
 
   eventAddIsh("cleanup_zombies", cleanup_zombies, NULL, 30); 
   
-#ifdef PACE_CONNECT
  if (ConfigFileEntry.throttle_time > 0)
    eventAddIsh("flush_expired_ips", flush_expired_ips, NULL, ConfigFileEntry.throttle_time);
  else
    eventAddIsh("flush_expired_ips", flush_expired_ips, NULL, 300);
-#endif
 
   if(ConfigServerHide.links_delay > 0)
     eventAddIsh("write_links_file", write_links_file, NULL, ConfigServerHide.links_delay);
