@@ -1,3 +1,24 @@
+db          2002/06/29 00:34:53 EDT	(20020629_0)
+
+  Modified files:
+    include              client.h 
+    modules              m_trace.c 
+    modules/core         m_message.c 
+    src                  client.c 
+  Log:
+  - in fixing m_privmsg.c I noticed a function it used was only used by m_privmsg.c
+    moved it from client.c into m_privmsg.c (I bad, I couldn't help it)
+    I also noticed a function used in m_trace.c only used in m_trace.c, so
+    moved that as well.
+  
+  Revision  Changes    Path
+  7.150     +1 -5      ircd-hybrid-7/include/client.h
+  1.95      +47 -15    ircd-hybrid-7/modules/core/m_message.c
+  1.49      +38 -1     ircd-hybrid-7/modules/m_trace.c
+  7.287     +3 -67     ircd-hybrid-7/src/client.c
+
+
+
 db          2002/06/28 14:48:07 EDT	(20020628_1)
 
   Modified files:
