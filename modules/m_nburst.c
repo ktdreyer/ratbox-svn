@@ -28,13 +28,14 @@
 #include "ircd.h"
 #include "list.h"
 #include "numeric.h"
-#include "s_serv.h"       /* captab, send_channel_burst */
+#include "s_serv.h"
 #include "s_user.h"
 #include "send.h"
 #include "msg.h"
 #include "handlers.h"
 #include "parse.h"
 #include "modules.h"
+#include "s_conf.h"
 
 #include <assert.h>
 #include <string.h>
@@ -42,10 +43,8 @@
 
 static int ms_nburst(struct Client*, struct Client*, int, char**);
 
-#define MSG_NBURST "NBURST"
-
 struct Message nburst_msgtab = {
-  MSG_NBURST, 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0L,
+  "NBURST", 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0L,
   {m_unregistered, m_ignore, ms_nburst, m_ignore}
 };
 
@@ -61,7 +60,7 @@ _moddeinit(void)
   mod_del_cmd(&nburst_msgtab);
 }
 
-char *_version = "20001122";
+char *_version = "20010104";
 
 /*
 ** m_nburst
@@ -81,19 +80,45 @@ static int ms_nburst(struct Client *cptr,
                      char *parv[])
 {
   char *nick;
+  char *nick_new = NULL;
+  char *nick_old = NULL;
+  struct Client *acptr;
+  char status;
 
   if( parc < 2 || *parv[1] == '\0' )
      return 0;
 
   nick = parv[1];
 
-  /* XXX more to come obviously */
+  if( parc > 2 )
+    nick_new = parv[2];
+
+  if( parc > 3 )
+    nick_old = parv[3];
+
+  if (!ConfigFileEntry.hub && IsCapable(cptr, CAP_LL))
+    return 0;
 
 #ifdef DEBUGLL
-  sendto_realops_flags(FLAGS_ALL, "NBURST called by %s for %s",
-		       cptr->name,
-		       nick ? nick : "");
+  sendto_realops_flags(FLAGS_ALL, "NBURST called by %s for %s %s %s",
+    cptr->name,
+    nick,
+    nick_new ? nick_new : "",
+    nick_old ? nick_old : "" );
 #endif
+
+  status = 'N';
+  if ( (acptr = find_client(nick, NULL)) != NULL )
+  {
+    /* nick exists.  burst nick back to leaf */
+    status = 'Y';
+    client_burst_if_needed(cptr, acptr);
+  }
+
+  /* Send back LLNICK, if wanted */
+  if (parc > 2)
+    sendto_one(cptr, ":%s LLNICK %c %s %s", me.name, status, nick_new,
+               (nick_old ? nick_old : ""));
 
   return 0;
 }

@@ -369,6 +369,8 @@ mo_modload (struct Client *cptr, struct Client *sptr, int parc, char **parv)
   }
 
   (void)load_one_module (parv[1]);
+
+  MyFree(m_bn);
   return 0;
 }
 

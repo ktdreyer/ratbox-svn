@@ -49,6 +49,8 @@
 
 static int nick_from_server(struct Client *, struct Client *, int, char **,
                             time_t, char *);
+static int nick_equal_server(struct Client *cptr, struct Client *sptr,
+                             char *nick);
 static int clean_nick_name(char* nick);
 
 static int ms_client(struct Client*, struct Client*, int, char**);
@@ -501,43 +503,4 @@ nick_from_server(struct Client *cptr, struct Client *sptr, int parc,
   return do_remote_user(nick, cptr, sptr, parv[5], parv[6],
 			parv[7], name, id);
 }
-
-/*
- * clean_nick_name - ensures that the given parameter (nick) is
- * really a proper string for a nickname (note, the 'nick'
- * may be modified in the process...)
- *
- *      RETURNS the length of the final NICKNAME (0, if
- *      nickname is illegal)
- *
- *  Nickname characters are in range
- *      'A'..'}', '_', '-', '0'..'9'
- *  anything outside the above set will terminate nickname.
- *  In addition, the first character cannot be '-'
- *  or a Digit.
- *
- *  Note:
- *      '~'-character should be NOT be allowed.
- */
-static int clean_nick_name(char* nick)
-{
-  char* ch   = nick;
-  char* endp = ch + NICKLEN;
-  assert(0 != nick);
-
-  if (*nick == '-' || IsDigit(*nick)) /* first character in [0..9-] */
-    return 0;
-  
-  for ( ; ch < endp && *ch; ++ch)
-    {
-      if (!IsNickChar(*ch))
-	break;
-    }
-  *ch = '\0';
-
-  return (ch - nick);
-}
-
-
-
 

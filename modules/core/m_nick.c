@@ -52,12 +52,6 @@ static int ms_nick(struct Client*, struct Client*, int, char**);
 
 static int nick_from_server(struct Client *, struct Client *, int, char **,
                             time_t, char *);
-static int set_initial_nick(struct Client *cptr, struct Client *sptr,
-                            char *nick);
-static int change_local_nick(struct Client *cptr, struct Client *sptr,
-                             char *nick);
-static int clean_nick_name(char* nick);
-
 
 struct Message nick_msgtab = {
   MSG_NICK, 0, 1, 0, MFLG_SLOW, 0,
@@ -109,6 +103,7 @@ static int mr_nick(struct Client *cptr, struct Client *sptr, int parc,
    */
   if ((s = strchr(parv[1], '~')))
     *s = '\0';
+
   /*
    * nick is an auto, need to terminate the string
    */
@@ -136,14 +131,11 @@ static int mr_nick(struct Client *cptr, struct Client *sptr, int parc,
     }
 
   if ( (acptr = find_client(nick, NULL)) == NULL )
-    if (ConfigFileEntry.hub && uplink && IsCapable(uplink, CAP_LL))
+    if (!ConfigFileEntry.hub && uplink && IsCapable(uplink, CAP_LL))
     {
-      /* Argh, the uplink might know someone by this name already.
-       * If we don't ask, everything will work out OK, but it'll
-       * involve killing someone, instead of just sending a
-       * NICKNAMEINUSE error
-       */
-      sendto_one(sptr, ":%s NBURST %s", me.name, nick);
+      /* XXX !!! XXX !!! XXX !!! */
+      /* What if hub already knows someone called nick?!? */
+      return(set_initial_nick(cptr, sptr, nick));
     }
     else
       return(set_initial_nick(cptr, sptr, nick));
@@ -266,7 +258,14 @@ static int m_nick(struct Client *cptr, struct Client *sptr,
     }
   else
     {
-      return(change_local_nick(cptr,sptr,nick));
+      if (!ConfigFileEntry.hub && uplink && IsCapable(uplink, CAP_LL))
+      {
+        /* The uplink might know someone by this name already. */
+        sendto_one(uplink, ":%s NBURST %s %s %s", me.name, nick,
+                   nick, sptr->name);
+      }
+      else
+        return(change_local_nick(cptr,sptr,nick));
     }
 
   return 1;
@@ -768,184 +767,5 @@ nick_from_server(struct Client *cptr, struct Client *sptr, int parc,
   add_to_client_hash_table(nick, sptr);
 
   return 0;
-}
-
-/*
- * set_initial_nick
- * inputs	- pointer to client
- *		- pointer to client
- *		- new nick
- * output
- * side effects	-
- *
- * This function is only called to set up an initially registering
- * client. 
- */
-static int
-set_initial_nick(struct Client *cptr, struct Client *sptr,
-                 char *nick)
-{
-  char buf[USERLEN + 1];
-  char nickbuf[NICKLEN + 10];
-  /* Client setting NICK the first time */
-
-  /* This had to be copied here to avoid problems.. */
-  strcpy(sptr->name, nick);
-  sptr->tsinfo = CurrentTime;
-  if (sptr->user)
-    {
-      strncpy_irc(buf, sptr->username, USERLEN);
-      buf[USERLEN] = '\0';
-      /*
-      ** USER already received, now we have NICK.
-      ** *NOTE* For servers "NICK" *must* precede the
-      ** user message (giving USER before NICK is possible
-      ** only for local client connection!). register_user
-      ** may reject the client and call exit_client for it
-      ** --must test this and exit m_nick too!!!
-      */
-#ifdef USE_IAUTH
-      /*
-       * Send the client to the iauth module for verification
-       */
-      BeginAuthorization(sptr);
-#else
-      if (register_local_user(cptr, sptr, nick, buf) == CLIENT_EXITED)
-	return CLIENT_EXITED;
-#endif
-    }
-
-  /*
-  **  Finally set new nick name.
-  */
-  if (sptr->name[0])
-    del_from_client_hash_table(sptr->name, sptr);
-  strcpy(sptr->name, nick);
-  add_to_client_hash_table(nick, sptr);
-
-  /*
-   * .. and update the new nick in the fd note.
-   */
-
-  strcpy(nickbuf, "Nick: ");
-  /* nick better be the right length! -- adrian */
-  strncat(nickbuf, nick, NICKLEN);
-  fd_note(cptr->fd, nickbuf);
-
-  return 0;
-}
-
-/*
- * change_local_nick
- * inputs	- pointer to server
- *		- pointer to client
- * output	- 
- * side effects	- changes nick of a LOCAL user
- *
- */
-static int change_local_nick(struct Client *cptr, struct Client *sptr,
-                             char *nick)
-{
-  char nickbuf[NICKLEN + 10];
-
-  /*
-  ** Client just changing his/her nick. If he/she is
-  ** on a channel, send note of change to all clients
-  ** on that channel. Propagate notice to other servers.
-  */
-
-  if( (sptr->localClient->last_nick_change +
-       ConfigFileEntry.max_nick_time) < CurrentTime)
-    sptr->localClient->number_of_nick_changes = 0;
-  sptr->localClient->last_nick_change = CurrentTime;
-  sptr->localClient->number_of_nick_changes++;
-
-  if((ConfigFileEntry.anti_nick_flood && 
-      (sptr->localClient->number_of_nick_changes
-       <= ConfigFileEntry.max_nick_changes)) ||
-     !ConfigFileEntry.anti_nick_flood)
-    {
-      sendto_realops_flags(FLAGS_NCHANGE,
-			   "Nick change: From %s to %s [%s@%s]",
-			   sptr->name, nick, sptr->username,
-			   sptr->host);
-
-      sendto_common_channels_local(sptr, ":%s!%s@%s NICK :%s",
-				   sptr->name, sptr->username, sptr->host,
-				   nick);
-      if (sptr->user)
-	{
-	  add_history(sptr,1);
-	  
-	  /* Only hubs care about lazy link nicks not being sent on yet
-	   * lazylink leafs/leafs always send their nicks up to hub,
-	   * hence must always propogate nick changes.
-	   * hubs might not propogate a nick change, if the leaf
-	   * does not know about that client yet.
-	   */
-          sendto_ll_serv_butone(cptr, sptr, 0, ":%s NICK %s :%lu",
-                                sptr->name, nick, sptr->tsinfo);
-	}
-    }
-  else
-    {
-      sendto_one(sptr,
-		 ":%s NOTICE %s :*** Notice -- Too many nick changes wait %d seconds before trying to change it again.",
-		 me.name,
-		 sptr->name,
-		 ConfigFileEntry.max_nick_time);
-      return 0;
-    }
-
-  /* Finally, add to hash */
-  del_from_client_hash_table(sptr->name, sptr);
-  strcpy(sptr->name, nick);
-  add_to_client_hash_table(nick, sptr);
-
-  /*
-   * .. and update the new nick in the fd note.
-   */
-  strcpy(nickbuf, "Nick: ");
-  /* nick better be the right length! -- adrian */
-  strncat(nickbuf, nick, NICKLEN);
-  fd_note(cptr->fd, nickbuf);
-
-  return 1;
-}
-
-/*
- * clean_nick_name - ensures that the given parameter (nick) is
- * really a proper string for a nickname (note, the 'nick'
- * may be modified in the process...)
- *
- *      RETURNS the length of the final NICKNAME (0, if
- *      nickname is illegal)
- *
- *  Nickname characters are in range
- *      'A'..'}', '_', '-', '0'..'9'
- *  anything outside the above set will terminate nickname.
- *  In addition, the first character cannot be '-'
- *  or a Digit.
- *
- *  Note:
- *      '~'-character should be NOT be allowed.
- */
-static int clean_nick_name(char* nick)
-{
-  char* ch   = nick;
-  char* endp = ch + NICKLEN;
-  assert(0 != nick);
-
-  if (*nick == '-' || IsDigit(*nick)) /* first character in [0..9-] */
-    return 0;
-  
-  for ( ; ch < endp && *ch; ++ch)
-    {
-      if (!IsNickChar(*ch))
-	break;
-    }
-  *ch = '\0';
-
-  return (ch - nick);
 }
 

@@ -543,6 +543,13 @@ extern int add_to_accept(struct Client *source, struct Client *target);
 extern int del_from_accept(struct Client *source, struct Client *target);
 extern int del_all_accepts(struct Client *dying);
 extern int list_all_accepts(struct Client *sptr);
+
 extern void free_exited_clients(void);
+extern int set_initial_nick(struct Client *cptr, struct Client *sptr,
+                            char *nick);
+extern int change_local_nick(struct Client *cptr, struct Client *sptr,
+                             char *nick);
+extern int clean_nick_name(char* nick);
+
 #endif /* INCLUDED_client_h */
 

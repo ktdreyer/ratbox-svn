@@ -1,5 +1,5 @@
 /************************************************************************
- *   IRC - Internet Relay Chat, modules/m_lljoin.c
+ *   IRC - Internet Relay Chat, modules/m_llnick.c
  *   Copyright (C) 1990 Jarkko Oikarinen and
  *                      University of Oulu, Co Center
  *
@@ -20,8 +20,6 @@
  * $Id$
  */
 #include "tools.h"
-#include "channel.h"
-#include "vchannel.h"
 #include "client.h"
 #include "common.h"
 #include "hash.h"
@@ -42,30 +40,31 @@
 
 static int ms_llnick(struct Client*, struct Client*, int, char**);
 
-struct Message lljoin_msgtab = {
-  MSG_LLJOIN, 0, 3, 0, MFLG_SLOW | MFLG_UNREG, 0L,
+struct Message llnick_msgtab = {
+  "LLNICK", 0, 3, 0, MFLG_SLOW | MFLG_UNREG, 0L,
   {m_unregistered, m_ignore, ms_llnick, m_ignore}
 };
 
 void
 _modinit(void)
 {
-  mod_add_cmd(&lljoin_msgtab);
+  mod_add_cmd(&llnick_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(&lljoin_msgtab);
+  mod_del_cmd(&llnick_msgtab);
 }
 
 char *_version = "20001122";
 
 /*
- * m_lljoin
+ * m_llnick
  *      parv[0] = sender prefix
- *      parv[1] = new nick
- *      parv[2] = old nick (optional)
+ *      parv[1] = status 
+ *      parv[2] = nick
+ *      parv[3] = old nick
  *
  */
 static int  ms_llnick(struct Client *cptr,
@@ -73,179 +72,41 @@ static int  ms_llnick(struct Client *cptr,
                       int parc,
                       char *parv[])
 {
-  char *chname = NULL;
-  char *nick = NULL;
-  char *key = NULL;
-  char *vkey = NULL;
-  int  flags;
-  int  i;
+  char *nick;
+  char *nick_old = NULL;
   struct Client *acptr;
-  struct Channel *chptr, *vchan_chptr, *root_vchan;
-  int cjoin = 0;
+  int exists = 0;
 
-  if(uplink && !IsCapable(uplink,CAP_LL))
+  if(!IsCapable(cptr,CAP_LL))
     {
       sendto_realops_flags(FLAGS_ALL,
-			   "*** LLJOIN requested from non LL server %s",
+			   "*** LLNICK requested from non LL server %s",
 			   cptr->name);
       return 0;
     }
 
-  chname = parv[1];
-  if(chname == NULL)
+  if (parc < 4)
     return 0;
 
+  if (*parv[1] == 'Y')
+    exists = 1;
+  
   nick = parv[2];
-  if(nick == NULL)
-    return 0;
+  nick_old = parv[3];
 
-  if (nick[0] == '!')
-  {
-    cjoin = 1;
-    nick++;
-  }
- 
-  if(parc > 4)
-  {
-    key = parv[4];
-    vkey = parv[3];
-  }
-  else if(parc >3)
-  {
-    key = vkey = parv[3];
-  }
-
-  flags = 0;
-
-  acptr = hash_find_client(nick,(struct Client *)NULL);
-
-  if( !acptr || !acptr->user )
-    return 0;
-
-  if( !MyClient(acptr) )
-    return 0;
-
-  chptr = hash_find_channel(chname, NullChn);
-
-  if (cjoin)
-  {
-    if(!chptr) /* Uhm, bad! */
-    {
-      sendto_realops_flags(FLAGS_ALL,
-        "LLJOIN %s %s called by %s, but root chan doesn't exist!",
-        chname, nick, cptr->name);
-      return 0;
-    }
-    flags = CHFL_CHANOP;
-
-    if(! (vchan_chptr = cjoin_channel(chptr, acptr, chname)))
-      return 0;
-
-    root_vchan = chptr;
-    chptr = vchan_chptr;
-  }
-  else
-  {
-    if (chptr)
-    {
-      vchan_chptr = select_vchan(chptr, cptr, acptr, vkey, chname);
-    }
-    else
-    {
-      chptr = vchan_chptr = get_channel( acptr, chname, CREATE );
-      flags = CHFL_CHANOP;
-    }
-    
-    if (vchan_chptr != chptr)
-    {
-      root_vchan = chptr;
-      chptr = vchan_chptr;
-    }
-    else
-      root_vchan = chptr;
-
-    if(!chptr || !root_vchan)
-      return 0;
-
-    if (chptr->users == 0)
-      flags = CHFL_CHANOP;
-    else
-      flags = 0;
-
-    /* XXX in m_join.c :( */
-    /* check_spambot_warning(acptr, chname); */
-
-    /* They _could_ join a channel twice due to lag */
-    if(chptr)
-    {
-      if (IsMember(acptr, chptr))    /* already a member, ignore this */
-        return 0;
-    }
-    else
-    {
-      sendto_one(acptr, form_str(ERR_UNAVAILRESOURCE),
-                 me.name, nick, root_vchan->chname);
-      return 0;
-    }
-
-    if( (i = can_join(acptr, chptr, key)) )
-    {
-      sendto_one(acptr,
-                 form_str(i), me.name, nick, root_vchan->chname);
-      return 0;
-    }
-  }
-
-  if ((acptr->user->joined >= MAXCHANNELSPERUSER) &&
-      (!IsOper(acptr) || (acptr->user->joined >= MAXCHANNELSPERUSER*3)))
-    {
-      sendto_one(acptr, form_str(ERR_TOOMANYCHANNELS),
-		 me.name, nick, root_vchan->chname );
-      return 0;
-    }
+  /* Existing user changing nickname */
+  acptr = hash_find_client(nick_old,(struct Client *)NULL);
   
-  if(flags == CHFL_CHANOP)
-    {
-      sendto_one(uplink,
-		 ":%s SJOIN %lu %s + :@%s", me.name,
-		 chptr->channelts, chptr->chname, nick);
-    }
-  else if ((flags == CHFL_HALFOP) && (IsCapable(uplink, CAP_HOPS)))
-    {
-      sendto_one(uplink,
-		 ":%s SJOIN %lu %s + :%%%s", me.name,
-		 chptr->channelts, chptr->chname, nick);      
-    }
-  else
-    {
-      sendto_one(uplink,
-		 ":%s SJOIN %lu %s + :%s", me.name,
-		 chptr->channelts, chptr->chname, nick);
-    }
-
-  add_user_to_channel(chptr, acptr, flags);
- 
-  sendto_channel_local(ALL_MEMBERS, chptr,
-		       ":%s!%s@%s JOIN :%s",
-		       acptr->name,
-		       acptr->username,
-		       acptr->host,
-		       root_vchan->chname);
+  if (!acptr)
+    return 0;
   
-  if( flags & CHFL_CHANOP )
+  if(hash_find_client(nick,(struct Client *)NULL) || exists)
   {
-    chptr->mode.mode |= MODE_TOPICLIMIT;
-    chptr->mode.mode |= MODE_NOPRIVMSGS;
-      
-    sendto_channel_local(ALL_MEMBERS,chptr,
-                         ":%s MODE %s +nt",
-                         me.name, root_vchan->chname);
-    sendto_one(uplink, 
-               ":%s MODE %s +nt",
-               me.name, chptr->chname);
+    sendto_one(acptr, form_str(ERR_NICKNAMEINUSE), me.name, nick_old, nick);
+    return 0;
   }
 
-  (void)channel_member_names(acptr, chptr, chname);
+  change_local_nick(acptr, acptr, nick);
 
   return 0;
 }
