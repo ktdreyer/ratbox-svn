@@ -1,3 +1,15 @@
+androsyn    2002/09/06 00:39:31 UTC	(20020906_0)
+
+  Modified files:
+    .                    INSTALL 
+  Log:
+  There..the date in the logs *should* be UTC now..
+  
+  Revision  Changes    Path
+  7.33      +0 -0      ircd-ratbox/INSTALL
+
+
+
 androsyn    2002/09/04 22:26:09 EDT	(20020905_3)
 
   Modified files:
