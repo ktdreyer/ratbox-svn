@@ -82,10 +82,6 @@ typedef unsigned long time_t;
 typedef unsigned int u_int;
 typedef unsigned long u_long;
 
-#ifndef PATH_MAX
-# define PATH_MAX 1024
-#endif
-
 #define MAXPATHLEN PATH_MAX
 
 #define STATIC_MODULES
