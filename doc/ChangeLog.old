@@ -1,3 +1,7 @@
+*** 20010606_1 by leeh
+- them cores arent fixed in hyb7.. "oops"
+
+
 *** 20010605_15 by toot
 moved knock_delay, max_chans_per_user, and quiet_on_ban to
 the channel block in ircd.conf
