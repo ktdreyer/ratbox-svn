@@ -48,7 +48,9 @@
 #define TOPICLEN        120     /* old value 90, truncated on other servers */
 #define KILLLEN         90      
 #define CHANNELLEN      200
-#define KEYLEN          23
+
+/* 23+1 for \0 */
+#define KEYLEN          24
 #define BUFSIZE         512     /* WARNING: *DONT* CHANGE THIS!!!! */
 #define MAXRECIPIENTS   20
 #define MAXBANLENGTH    1024

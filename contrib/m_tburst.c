@@ -105,6 +105,10 @@ static void ms_tburst(struct Client *client_p, struct Client *source_p,
 
   if((chptr = hash_find_channel(parv[2])))
   {
+
+    sendto_realops_flags(FLAGS_ALL, L_ALL,
+		    "channel: %s ts: %ld topicts: %ld, tburst channelts: %ld topicts: %ld",
+		    chptr->chname, chptr->channelts, chptr->topic_time, newchannelts, newtopicts);
     if(chptr->channelts < newchannelts)
       return;
 

@@ -47,7 +47,7 @@ struct Mode
 {
   unsigned int  mode;
   int   limit;
-  char  key[KEYLEN + 1];
+  char  key[KEYLEN];
 };
 
 /* channel structure */
