@@ -117,7 +117,7 @@ struct EncCapability
 #define CAP_ENC_ALL     0xFFFFFFFF                                              
 
 /* Blowfish */                        
-#ifdef HAVE_BF_CFB64_ENCRYPT
+#ifdef HAVE_EVP_BF_CFB
 #define USE_CIPHER_BF       1
 /* Check for bug handling variable length blowfish keys */
 #if OPENSSL_VERSION_NUMBER >= 0x00000000L
@@ -130,31 +130,31 @@ struct EncCapability
 #define USE_CIPHER_BF       0
 #endif
 /* Cast */
-#ifdef HAVE_CAST_CFB64_ENCRYPT
+#ifdef HAVE_EVP_CAST5_CFB
 #define USE_CIPHER_CAST     1
 #else
 #define USE_CIPHER_CAST     0
 #endif
 /* DES */
-#ifdef HAVE_DES_CFB64_ENCRYPT
+#ifdef HAVE_EVP_DES_CFB
 #define USE_CIPHER_DES      1
 #else
 #define USE_CIPHER_DES      0
 #endif
 /* 3DES */
-#ifdef HAVE_DES_EDE3_CFB64_ENCRYPT
+#ifdef HAVE_EVP_DES_EDE3_CFB
 #define USE_CIPHER_3DES     1
 #else
 #define USE_CIPHER_3DES     0
 #endif
 /* IDEA */
-#ifdef HAVE_IDEA_CFB64_ENCRYPT
+#ifdef HAVE_EVP_IDEA_CFB
 #define USE_CIPHER_IDEA     1
 #else
 #define USE_CIPHER_IDEA     0
 #endif
 /* RC5 */
-#ifdef HAVE_RC5_32_CFB64_ENCRYPT
+#ifdef HAVE_EVP_RC5_32_12_16_CFB
 #define USE_CIPHER_RC5      1
 #else
 #define USE_CIPHER_RC5      0
@@ -190,23 +190,19 @@ struct EncCapability
 #define SetCapable(x, cap)      ((x)->localClient->caps |=  (cap))
 #define ClearCap(x, cap)        ((x)->localClient->caps &= ~(cap))
 
-#define SLINKCMD_SET_ZIP_OUT_LEVEL           1
+#define SLINKCMD_SET_ZIP_OUT_LEVEL           1       /* data */
 #define SLINKCMD_START_ZIP_OUT               2
-/*#define SLINKCMD_END_ZIP_OUT                 3*/
-#define SLINKCMD_START_ZIP_IN                4
-/*#define SLINKCMD_END_ZIP_IN                  5*/
-#define SLINKCMD_SET_CRYPT_IN_CIPHER         6       /* data */
-#define SLINKCMD_SET_CRYPT_IN_KEY            7       /* data */
-#define SLINKCMD_START_CRYPT_IN              8
-/*#define SLINKCMD_END_CRYPT_IN                9*/
-#define SLINKCMD_SET_CRYPT_OUT_CIPHER        10      /* data */
-#define SLINKCMD_SET_CRYPT_OUT_KEY           11      /* data */
-#define SLINKCMD_START_CRYPT_OUT             12
-/*#define SLINKCMD_END_CRYPT_OUT               13*/
-#define SLINKCMD_INJECT_RECVQ                14
-#define SLINKCMD_INJECT_SENDQ                15
-#define SLINKCMD_INIT                        16
-#define SLINKCMD_ZIPSTATS                    17
+#define SLINKCMD_START_ZIP_IN                3
+#define SLINKCMD_SET_CRYPT_IN_CIPHER         4       /* data */
+#define SLINKCMD_SET_CRYPT_IN_KEY            5       /* data */
+#define SLINKCMD_START_CRYPT_IN              6
+#define SLINKCMD_SET_CRYPT_OUT_CIPHER        7       /* data */
+#define SLINKCMD_SET_CRYPT_OUT_KEY           8       /* data */
+#define SLINKCMD_START_CRYPT_OUT             9
+#define SLINKCMD_INJECT_RECVQ                10      /* data */
+#define SLINKCMD_INJECT_SENDQ                11      /* data */
+#define SLINKCMD_INIT                        12
+#define SLINKCMD_ZIPSTATS                    13
 
 #ifdef MISSING_SOCKPAIR
 #define LAST_SLINK_FD   7
@@ -220,8 +216,8 @@ struct EncCapability
 
 #define MAX_SLINKRPL            2
 
-typedef void SlinkRplHnd(unsigned int, unsigned int, unsigned char *,
-                         struct Client *);
+typedef void SlinkRplHnd(unsigned int replyid, unsigned int datalen,
+                         unsigned char *data, struct Client *client_p);
 struct SlinkRplDef
 {
   unsigned int  replyid;

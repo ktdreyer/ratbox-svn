@@ -18,7 +18,17 @@
  *   $Id$
  */
 
-#include <stdio.h>
+#ifndef INCLUDED_servlink_servlink_h
+#define INCLUDED_servlink_servlink_h
+
+#include "../include/setup.h"
+
+#ifdef HAVE_LIBCRYPTO
+#include <openssl/evp.h>
+#endif
+#ifdef HAVE_LIBZ
+#include <zlib.h>
+#endif
 
 /* do not use stdin/out/err, as it seems to break on solaris */
 #define CONTROL_FD_R            3
@@ -38,16 +48,7 @@
 #define NUM_FDS                 6       /* nfds for select */
 #endif
 
-#define IO_READ                 0
-#define IO_WRITE                1
-#define IO_SELECT               2
-
-#define IO_TYPE(io)     (((io==2)?"select":((io==1)?"write":"read")))
-
-#define FD_NAME(fd)     (fd_name[fd-3])
-extern char *fd_name[NUM_FDS];
-
-/* #define SERVLINK_DEBUG */
+#define SERVLINK_DEBUG /* */
 
 #define READLEN                  2048
 
@@ -110,8 +111,6 @@ struct slink_state
 };
 
 
-extern int checkError(int, int, int);
-
 typedef void (io_callback)(void);
 
 struct fd_table
@@ -119,3 +118,4 @@ struct fd_table
   io_callback   *read_cb;
   io_callback   *write_cb;
 };
+#endif /* INCLUDED_servlink_servlink_h */

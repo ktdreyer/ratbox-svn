@@ -18,14 +18,30 @@
  *   $Id$
  */
 
+#ifndef INCLUDED_servlink_io_h
+#define INCLUDED_servlink_io_h
+
+#include "control.h"
+
+#define IO_READ                 0
+#define IO_WRITE                1
+#define IO_SELECT               2
+
+#define IO_TYPE(io)     ((io==IO_SELECT)?"select": \
+                         ((io==IO_WRITE)?"write":"read"))
+
+#define FD_NAME(fd)     (fd_name[fd-3])
+
 extern void write_data(void);
 extern void read_data(void);
 extern void write_ctrl(void);
 extern void read_ctrl(void);
 extern void write_net(void);
 extern void read_net(void);
-extern void process_recvq(unsigned char *, unsigned int);
-extern void process_sendq(unsigned char *, unsigned int);
-extern void send_zipstats(void);
 extern void send_error(unsigned char *, ...);
 extern void send_data_blocking(int fd, unsigned char *data, int datalen);
+extern cmd_handler process_recvq;
+extern cmd_handler process_sendq;
+extern cmd_handler send_zipstats;
+
+#endif /* INCLUDED_servlink_io_h */

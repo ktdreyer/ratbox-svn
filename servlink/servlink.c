@@ -25,8 +25,6 @@
 
 #include <sys/socket.h>
 
-#include <assert.h>
-#include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -64,16 +62,6 @@ struct fd_table          fds[NUM_FDS] =
         };
 
 
-char *fd_name[NUM_FDS] =
-#ifdef MISSING_SOCKPAIR
-  {
-    "control read", "data read", "net read",
-    "control write", "data write"
-  };
-#else
-  { "control", "data", "net" };
-#endif
-
 /* usage();
  *
  * Display usage message
@@ -101,13 +89,15 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef HAVE_LIBCRYPTO
+  /* load error strings */
   ERR_load_crypto_strings();
 #endif
 
   /* Make sure we are running under hybrid.. */
   if (argc != 1 || strcmp(argv[0], "-slink"))
     usage(); /* exits */
-  
+ 
+  /* set file descriptors to nonblocking mode */
   for (i = 0; i < 3; i++)
   {
     fcntl(i, F_SETFL, O_NONBLOCK);
@@ -150,6 +140,7 @@ int main(int argc, char *argv[])
     /* we have <=6 fds ever, so I don't think select is too painful */
     if (select(NUM_FDS, &rfds, &wfds, NULL, NULL))
     {
+      /* call any callbacks */
       for (i = 0; i < NUM_FDS; i++)
       {
         if (FD_ISSET(i, &rfds) && fds[i].read_cb)
@@ -163,334 +154,3 @@ int main(int argc, char *argv[])
   /* NOTREACHED */
   exit(0);
 } /* main() */
-
-void process_command(struct ctrl_command *cmd)
-{
-  int ret;
-
-  switch (cmd->command)
-  {
-#ifdef HAVE_LIBCRYPTO
-    case CMD_SET_CRYPT_IN_CIPHER:
-    {
-      unsigned int cipher = *cmd->data;
-      
-      assert(!in_state.crypt_state.cipher);
-      
-      switch (cipher)
-      {
-#ifdef HAVE_BF_CFB64_ENCRYPT
-        case CIPHER_BF:
-          in_state.crypt_state.cipher = EVP_bf_cfb();
-          break;
-#endif
-#ifdef HAVE_CAST_CFB64_ENCRYPT
-        case CIPHER_CAST:
-          in_state.crypt_state.cipher = EVP_cast5_cfb();
-          break;
-#endif
-#ifdef HAVE_DES_CFB64_ENCRYPT
-        case CIPHER_DES:
-          in_state.crypt_state.cipher = EVP_des_cfb();
-          break;
-#endif
-#ifdef HAVE_DES_EDE3_CFB64_ENCRYPT
-        case CIPHER_3DES:
-          in_state.crypt_state.cipher = EVP_des_ede3_cfb();
-          break;
-#endif
-#ifdef HAVE_IDEA_CFB64_ENCRYPT
-        case CIPHER_IDEA:
-          in_state.crypt_state.cipher = EVP_idea_cfb();
-          break;
-#endif
-#ifdef HAVE_RC5_32_CFB64_ENCRYPT
-        case CIPHER_RC5_8:
-          in_state.crypt_state.cipher = EVP_rc5_32_12_16_cfb();
-          in_state.crypt_state.rounds = 8;
-          break;
-        case CIPHER_RC5_12:
-          in_state.crypt_state.cipher = EVP_rc5_32_12_16_cfb();
-          in_state.crypt_state.rounds = 12;
-          break;
-        case CIPHER_RC5_16:
-          in_state.crypt_state.cipher = EVP_rc5_32_12_16_cfb();
-          in_state.crypt_state.rounds = 16;
-          break;
-#endif
-        default:
-            send_error("Invalid cipher (servlink/ircd out of sync?): %d",
-                       cipher); /* invalid cipher */
-            break;
-        }
-        break;
-      }
-      case CMD_SET_CRYPT_IN_KEY:
-      {
-        assert(!in_state.crypt_state.key);
-
-        in_state.crypt_state.keylen = cmd->datalen;
-        in_state.crypt_state.key = malloc(cmd->datalen);
-
-        memcpy(in_state.crypt_state.key, cmd->data, cmd->datalen);
-        break;
-      }
-      case CMD_SET_CRYPT_OUT_CIPHER:
-      {
-        unsigned int cipher = *cmd->data;
-
-        assert(!out_state.crypt_state.cipher);
-
-        switch (cipher)
-        {
-#ifdef HAVE_BF_CFB64_ENCRYPT
-          case CIPHER_BF:
-            out_state.crypt_state.cipher = EVP_bf_cfb();
-            break;
-#endif
-#ifdef HAVE_CAST_CFB64_ENCRYPT
-          case CIPHER_CAST:
-            out_state.crypt_state.cipher = EVP_cast5_cfb();
-            break;
-#endif
-#ifdef HAVE_DES_CFB64_ENCRYPT
-          case CIPHER_DES:
-            out_state.crypt_state.cipher = EVP_des_cfb();
-            break;
-#endif
-#ifdef HAVE_DES_EDE3_CFB64_ENCRYPT
-          case CIPHER_3DES:
-            out_state.crypt_state.cipher = EVP_des_ede3_cfb();
-            break;
-#endif
-#ifdef HAVE_IDEA_CFB64_ENCRYPT
-          case CIPHER_IDEA:
-            out_state.crypt_state.cipher = EVP_idea_cfb();
-            break;
-#endif
-#ifdef HAVE_RC5_32_CFB64_ENCRYPT
-          case CIPHER_RC5_8:
-            out_state.crypt_state.cipher = EVP_rc5_32_12_16_cfb();
-            out_state.crypt_state.rounds = 8;
-            break;
-          case CIPHER_RC5_12:
-            out_state.crypt_state.cipher = EVP_rc5_32_12_16_cfb();
-            out_state.crypt_state.rounds = 12;
-            break;
-          case CIPHER_RC5_16:
-            out_state.crypt_state.cipher = EVP_rc5_32_12_16_cfb();
-            out_state.crypt_state.rounds = 16;
-            break;
-#endif
-          default:
-            send_error("Invalid cipher (servlink/ircd out of sync?): %d",
-                       cipher); /* invalid cipher */
-          break;
-      }
-      break;
-    }
-    case CMD_SET_CRYPT_OUT_KEY:
-    {
-      assert(!out_state.crypt_state.key);
-
-      out_state.crypt_state.keylen = cmd->datalen;
-      out_state.crypt_state.key = malloc(cmd->datalen);
-
-      memcpy(out_state.crypt_state.key, cmd->data, cmd->datalen);
-      break;
-    }
-    case CMD_START_CRYPT_IN:
-      if (in_state.crypt ||
-          !(in_state.crypt_state.cipher && in_state.crypt_state.key))
-        send_error("START_CRYPT_IN sent twice or before setting cipher/key");
-
-      in_state.crypt = 1;
-      if (!EVP_DecryptInit(&in_state.crypt_state.ctx,
-                           in_state.crypt_state.cipher, NULL, NULL))
-        send_error("DecryptInit failed: %s",
-                   ERR_error_string(ERR_get_error(), NULL));
-
-      /*
-       * XXX - ugly hack to work around OpenSSL bug
-       *       if/when OpenSSL fix it, or give proper workaround
-       *       use that, and force minimum OpenSSL version
-       *
-       * Without this hack, BF/256 will fail.
-       */
-      /* cast to avoid warning */
-      *(unsigned int *)( &in_state.crypt_state.ctx.cipher->flags)
-        |= EVP_CIPH_VARIABLE_LENGTH;
-
-      if (!EVP_CIPHER_CTX_set_key_length(&in_state.crypt_state.ctx,
-                                         in_state.crypt_state.keylen))
-        send_error("set_key_length failed: %s",
-                   ERR_error_string(ERR_get_error(), NULL));
-      
-      in_state.crypt_state.ivlen =
-        EVP_CIPHER_CTX_iv_length(&in_state.crypt_state.ctx);
-
-      if (in_state.crypt_state.ivlen)
-         in_state.crypt_state.iv = calloc(in_state.crypt_state.ivlen, 1);
-
-      if (in_state.crypt_state.rounds)
-      {
-         if (!EVP_CIPHER_CTX_ctrl(&in_state.crypt_state.ctx,
-                                  EVP_CTRL_SET_RC5_ROUNDS,
-                                  in_state.crypt_state.rounds,
-                                  NULL))
-           send_error("SET_RC5_ROUNDS failed: %s",
-                      ERR_error_string(ERR_get_error(), NULL));
-      }
-
-      if (!EVP_DecryptInit(&in_state.crypt_state.ctx,
-                           NULL,
-                           in_state.crypt_state.key,
-                           in_state.crypt_state.iv))
-        send_error("DecryptInit failed: %s",
-                   ERR_error_string(ERR_get_error(), NULL));
-      break;
-    case CMD_START_CRYPT_OUT:
-      if (out_state.crypt ||
-          !(out_state.crypt_state.cipher && out_state.crypt_state.key))
-        send_error("START_CRYPT_OUT called twice/before setting key/cipher");
-
-      out_state.crypt = 1;
-      if (!EVP_EncryptInit(&out_state.crypt_state.ctx,
-                           out_state.crypt_state.cipher, NULL, NULL))
-        send_error("EncryptInit failed: %s",
-                   ERR_error_string(ERR_get_error(), NULL));
-
-      /*
-       * XXX - ugly hack to work around OpenSSL bug
-       *       if/when OpenSSL fix it, or give proper workaround
-       *       use that, and force minimum OpenSSL version
-       *
-       * Without this hack, BF/256 will fail.
-       */
-      /* cast to avoid warning */
-      *(unsigned int *)(&out_state.crypt_state.ctx.cipher->flags)
-        |= EVP_CIPH_VARIABLE_LENGTH;
-
-      if (!EVP_CIPHER_CTX_set_key_length(&out_state.crypt_state.ctx,
-                                         out_state.crypt_state.keylen))
-        send_error("set_key_length failed: %s",
-                   ERR_error_string(ERR_get_error(), NULL));
-
-      out_state.crypt_state.ivlen =
-        EVP_CIPHER_CTX_iv_length(&out_state.crypt_state.ctx);   
-
-      if (out_state.crypt_state.ivlen)
-        out_state.crypt_state.iv = calloc(out_state.crypt_state.ivlen, 1);
-
-      if (out_state.crypt_state.rounds)
-      {
-         if (!EVP_CIPHER_CTX_ctrl(&out_state.crypt_state.ctx,
-                                  EVP_CTRL_SET_RC5_ROUNDS,
-                                  out_state.crypt_state.rounds, NULL))
-           send_error("SET_RC5_ROUNDS failed: %s",
-                      ERR_error_string(ERR_get_error(), NULL));
-      }
-
-      if (!EVP_EncryptInit(&out_state.crypt_state.ctx,
-                           NULL,
-                           out_state.crypt_state.key,
-                           out_state.crypt_state.iv))
-        send_error("EncryptInit failed: %s",
-                   ERR_error_string(ERR_get_error(), NULL));
-      break;
-#endif
-#ifdef HAVE_LIBZ
-    case CMD_START_ZIP_IN:
-      assert(!in_state.zip);
-      
-      in_state.zip_state.z_stream.total_in = 0;
-      in_state.zip_state.z_stream.total_out = 0;
-      in_state.zip_state.z_stream.zalloc = (alloc_func)0;
-      in_state.zip_state.z_stream.zfree = (free_func)0;
-      in_state.zip_state.z_stream.data_type = Z_ASCII;
-      if ((ret = inflateInit(&in_state.zip_state.z_stream)) != Z_OK)
-        send_error("inflateInit failed: %d", ret);
-      in_state.zip = 1;
-      break;
-    case CMD_SET_ZIP_OUT_LEVEL:
-      out_state.zip_state.level = *cmd->data;
-      if ((out_state.zip_state.level < -1) ||
-          (out_state.zip_state.level > 9))
-        send_error("invalid compression level %d",
-                   out_state.zip_state.level);
-      break;
-    case CMD_START_ZIP_OUT:
-      assert(!out_state.zip);
-      
-      out_state.zip_state.z_stream.total_in = 0;
-      out_state.zip_state.z_stream.total_out = 0;
-      out_state.zip_state.z_stream.zalloc = (alloc_func)0;
-      out_state.zip_state.z_stream.zfree = (free_func)0;
-      out_state.zip_state.z_stream.data_type = Z_ASCII;
-
-      if (out_state.zip_state.level <= 0)
-        out_state.zip_state.level = Z_DEFAULT_COMPRESSION;
-
-      if ((ret = deflateInit(&out_state.zip_state.z_stream,
-                             out_state.zip_state.level)) != Z_OK)
-        send_error("deflateInit failed: %d", ret);
-      out_state.zip = 1;
-      break;
-    case CMD_ZIPSTATS:
-      send_zipstats();
-      break;
-#endif
-    case CMD_INJECT_RECVQ:
-      process_recvq(cmd->data, cmd->datalen);
-      break;
-    case CMD_INJECT_SENDQ:
-      process_sendq(cmd->data, cmd->datalen);
-      break;
-    case CMD_INIT:
-      assert(!(in_state.active || out_state.active));
-      in_state.active = 1;
-      out_state.active = 1;
-      fds[CONTROL_FD_R].read_cb = read_ctrl;
-      fds[CONTROL_FD_W].write_cb = NULL;
-      fds[LOCAL_FD_R].read_cb = read_data;
-      fds[LOCAL_FD_W].write_cb = NULL;
-      fds[REMOTE_FD_R].read_cb = read_net;
-      fds[REMOTE_FD_W].write_cb = NULL;
-      break;
-    default:
-      /* invalid command */
-      send_error("Invalid command (servlink/ircd out of sync?): %d",
-                 cmd->command);
-      break;
-  }
-}
-
-int checkError(int ret, int io, int fd)
-{
-  if (ret > 0) /* no error */
-    return ret;
-  if (ret == 0) /* EOF */
-    exit(1);
-  
-  /* ret == -1.. */
-  switch (errno) {
-    case EINPROGRESS:
-    case EWOULDBLOCK:
-#if EAGAIN != EWOULDBLOCK
-    case EAGAIN:
-#endif
-    case EALREADY:
-    case EINTR:
-#ifdef ERESTART
-    case ERESTART:
-#endif
-      /* non-fatal error, 0 bytes read */
-      return 0;
-  }
-
-  /* fatal error */
-  send_error("%s failed on %s: %s",
-             IO_TYPE(io),
-             FD_NAME(fd),
-             strerror(errno));
-}

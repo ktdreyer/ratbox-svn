@@ -68,9 +68,6 @@
 /* Define if you have the dl library (-ldl).  */
 #undef HAVE_LIBDL
 
-/* Define if you have the intl library (-lintl).  */
-#undef HAVE_LIBINTL
-
 /* Define if you have the nsl library (-lnsl).  */
 #undef HAVE_LIBNSL
 

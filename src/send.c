@@ -73,10 +73,8 @@ sendto_list_local(dlink_list *list, buf_head_t *linebuf);
 
 static void
 sendto_list_anywhere(struct Client *one, struct Client *from,
-		     dlink_list *list,
-		     const char *llocal_sendbuf, int llocal_len,
-		     const char *lremote_sendbuf, int lremote_len
-		     );
+		     dlink_list *list, buf_head_t *local_linebuf,
+                     buf_head_t *remote_linebuf);
 
 static int
 send_format(char *lsendbuf, const char *pattern, va_list args);
@@ -404,6 +402,10 @@ sendto_one(struct Client *to, const char *pattern, ...)
   va_list args;
   buf_head_t linebuf;
 
+  va_start(args, pattern);
+  len = send_format(sendbuf, pattern, args);
+  va_end(args);
+
   /* send remote if to->from non NULL */
   if (to->from)
     to = to->from;
@@ -422,10 +424,6 @@ sendto_one(struct Client *to, const char *pattern, ...)
       return;
     }
 #endif
-
-  va_start(args, pattern);
-  len = send_format(sendbuf, pattern, args);
-  va_end(args);
 
   linebuf_newbuf(&linebuf);
   linebuf_put(&linebuf, sendbuf, len);
@@ -526,6 +524,8 @@ sendto_channel_butone(struct Client *one, struct Client *from,
   int remote_len;
   int local_len;
   va_list    args;
+  buf_head_t local_linebuf;
+  buf_head_t remote_linebuf;
 
   va_start(args, pattern);
   send_format(buf,pattern,args);
@@ -556,24 +556,28 @@ sendto_channel_butone(struct Client *one, struct Client *from,
   local_len = ircsprintf(local_sendbuf, "%s%s",local_prefix,buf);
   local_len = send_trim(local_sendbuf, local_len);
 
+
+  linebuf_newbuf(&local_linebuf);
+  linebuf_put(&local_linebuf, (char *)local_sendbuf, local_len);
+  linebuf_newbuf(&remote_linebuf);
+  linebuf_put(&remote_linebuf, (char *)remote_sendbuf, remote_len);
+
   ++current_serial;
   
   sendto_list_anywhere(one, from, &chptr->chanops,
-		       (const char *)local_sendbuf, local_len,
-		       (const char *)remote_sendbuf, remote_len);
+                       &local_linebuf, &remote_linebuf);
 
   sendto_list_anywhere(one, from, &chptr->voiced,
-		       (const char *)local_sendbuf, local_len,
-		       (const char *)remote_sendbuf, remote_len);
+		       &local_linebuf, &remote_linebuf);
 
   sendto_list_anywhere(one, from, &chptr->halfops,
-		       (const char *)local_sendbuf, local_len,
-		       (const char *)remote_sendbuf, remote_len);
+		       &local_linebuf, &remote_linebuf);
 
   sendto_list_anywhere(one, from, &chptr->peons,
-		       (const char *)local_sendbuf, local_len,
-		       (const char *)remote_sendbuf, remote_len);
+		       &local_linebuf, &remote_linebuf);
 
+  linebuf_donebuf(&local_linebuf);
+  linebuf_donebuf(&remote_linebuf);
 } /* sendto_channel_butone() */
 
 /*
@@ -589,20 +593,11 @@ sendto_channel_butone(struct Client *one, struct Client *from,
  */
 void
 sendto_list_anywhere(struct Client *one, struct Client *from,
-		     dlink_list *list,
-		     const char *llocal_sendbuf, int llocal_len,
-		     const char *lremote_sendbuf, int lremote_len
-		     )
+                     dlink_list *list, buf_head_t *local_linebuf,
+                     buf_head_t *remote_linebuf)
 {
   dlink_node *ptr;
   struct Client *target_p;
-  buf_head_t llinebuf;
-  buf_head_t rlinebuf;
-
-  linebuf_newbuf(&llinebuf);
-  linebuf_put(&llinebuf, (char *)llocal_sendbuf, llocal_len);
-  linebuf_newbuf(&rlinebuf);
-  linebuf_put(&rlinebuf, (char *)lremote_sendbuf, lremote_len);
 
   for (ptr = list->head; ptr; ptr = ptr->next)
     {
@@ -615,7 +610,7 @@ sendto_list_anywhere(struct Client *one, struct Client *from,
         {
           if(target_p->serial != current_serial)
 	    {
-	      send_linebuf(target_p, &llinebuf);
+	      send_linebuf(target_p, local_linebuf);
 	      target_p->serial = current_serial;
 	    }
         }
@@ -627,13 +622,11 @@ sendto_list_anywhere(struct Client *one, struct Client *from,
            */
           if(target_p->from->serial != current_serial)
             {
-	      send_linebuf_remote(target_p, from, &rlinebuf);
+	      send_linebuf_remote(target_p, from, remote_linebuf);
               target_p->from->serial = current_serial;
             }
         }
     }
-  linebuf_donebuf(&llinebuf);
-  linebuf_donebuf(&rlinebuf);
 }
 
 /*

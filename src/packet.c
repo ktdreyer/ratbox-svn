@@ -165,11 +165,16 @@ read_ctrl_packet(int fd, void *data)
   struct SlinkRplDef *replydef;
 
   assert(lserver != NULL);
-
   reply = &server->localClient->slinkrpl;
 
+  /* if the server died, kill it off now -davidt */
   if(IsDead(server))
+  {
+    exit_client(server, server, &me,
+                (server->flags & FLAGS_SENDQEX) ?
+                  "SendQ exceeded" : "Dead socket");
     return;
+  }
 
   if (!reply->command)
   {
@@ -274,6 +279,15 @@ read_packet(int fd, void *data)
   int lbuf_len;
   int fd_r = client_p->fd;
 
+  /* if the client is dead, kill it off now -davidt */
+  if(IsDead(client_p))
+  {
+    exit_client(client_p, client_p, &me,
+                (client_p->flags & FLAGS_SENDQEX) ?
+                  "SendQ exceeded" : "Dead socket");
+    return;
+  }
+
 #ifdef MISSING_SOCKPAIR
   if (HasServlink(client_p))
   {
@@ -289,14 +303,6 @@ read_packet(int fd, void *data)
    *     -- adrian
    */
   length = read(fd_r, readBuf, READBUF_SIZE);
-
-  /* XXX If the client is actually dead, read the buffer but throw it out
-   * a suggested more optimum fix will be to mark the fd as -1 and close it in 
-   * dead_link() in send.c  
-   * -Dianora
-   */
- 
-  if(IsDead(client_p))return;
 
   if (length <= 0) {
     if(ignoreErrno(errno)) {

@@ -21,26 +21,26 @@
 /* Define if you have openssl available. */
 #undef HAVE_LIBCRYPTO
 
-/* Define if you have the BF_cfb64_encrypt function.  */
-#undef HAVE_BF_CFB64_ENCRYPT
+/* Define if you have the EVP_bf_cfb function.  */
+#undef HAVE_EVP_BF_CFB
 
-/* Define if you have the CAST_cfb64_encrypt function.  */
-#undef HAVE_CAST_CFB64_ENCRYPT
+/* Define if you have the EVP_cast5_cfb function.  */
+#undef HAVE_EVP_CAST5_CFB
 
-/* Define if you have the RC5_32_cfb64_encrypt function.  */
-#undef HAVE_RC5_32_CFB64_ENCRYPT
+/* Define if you have the EVP_rc5_32_12_16_cfb function.  */
+#undef HAVE_EVP_RC5_32_12_16_CFB
 
-/* Define if you have the des_cfb64_encrypt function.  */
-#undef HAVE_DES_CFB64_ENCRYPT
+/* Define if you have the EVP_des_cfb function.  */
+#undef HAVE_EVP_DES_CFB
 
-/* Define if you have the des_ede3_cfb64_encrypt function.  */
-#undef HAVE_DES_EDE3_CFB64_ENCRYPT
+/* Define if you have the EVP_des_ede3_cfb function.  */
+#undef HAVE_EVP_DES_EDE3_CFB
+
+/* Define if you have the EVP_idea_cfb function.  */
+#undef HAVE_EVP_IDEA_CFB
 
 /* Define if you have the gettext function.  */
 #undef HAVE_GETTEXT
-
-/* Define if you have the idea_cfb64_encrypt function.  */
-#undef HAVE_IDEA_CFB64_ENCRYPT
 
 /* Define if you have the strlcat function.  */
 #undef HAVE_STRLCAT
@@ -80,9 +80,6 @@
 
 /* Define if you have the dl library (-ldl).  */
 #undef HAVE_LIBDL
-
-/* Define if you have the intl library (-lintl).  */
-#undef HAVE_LIBINTL
 
 /* Define if you have the socket library (-lsocket).  */
 #undef HAVE_LIBSOCKET

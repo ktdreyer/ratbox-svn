@@ -31,24 +31,13 @@ Commands:
 		all data written to the data pipe will be compressed
 		prior to being sent to the remote server.
 
-003 - END_ZIP_OUT - unimplemented
-	data: no
-	description:
-		any compressed data will be flushed
-		all data written will no longer be compressed
-		
-004 - START_ZIP_IN
+003 - START_ZIP_IN
 	data: no
 	description:
 		all data not yet read from the slink program will be
 		decompressed before reading
 
-005 - END_ZIP_IN - unimplemented
-	data: no
-	description:
-		data read will no longer be decompressed
-
-006 - SET_CRYPT_IN_CIPHER
+004 - SET_CRYPT_IN_CIPHER
 	data: <u8 cipher id>
 
 	001 - BLOWFISH
@@ -62,16 +51,14 @@ Commands:
 
 	cannot be called whilst decryption is active.
 
-007 - SET_CRYPT_IN_KEY
+005 - SET_CRYPT_IN_KEY
 	data: <key>
 
 	cannot be called whilst decryption is active.
 	
-008 - START_CRYPT_IN
+006 - START_CRYPT_IN
 
-009 - END_CRYPT_IN - unimplemented
-
-010 - SET_CRYPT_OUT_CIPHER
+007 - SET_CRYPT_OUT_CIPHER
 	data: <u8 cipher id>
 
         001 - BLOWFISH
@@ -85,30 +72,38 @@ Commands:
 
 	cannot be called whilst encryption is active.
 
-011 - SET_CRYPT_OUT_KEY
+008 - SET_CRYPT_OUT_KEY
 	data: <key>
 
 	cannot be called whilst encryption is active.
 
-012 - START_CRYPT_OUT
+009 - START_CRYPT_OUT
 
-013 - END_CRYPT_OUT - unimplemented
-
-014 - INJECT_RECVQ
+010 - INJECT_RECVQ
 	data: recvq
 
 	Used before INIT to inject any data read from the server fd which
 	should be pre-processed by servlink before being sent back
 	to the LOCAL_FD through the data fd.
 
-015 - INJECT_SENDQ
+011 - INJECT_SENDQ
 	data: sendq
 
 	As above, but sent to remote server without processing.
 
-016 - INIT
+012 - INIT
 
-017 - ZIPSTATS
-	data: u32 in/u32 in_wire/u32 out/u32 out_wire
+013 - ZIPSTATS
+	request to send ziplinks statistics reply.
 
-	ziplinks statistics.
+replies
+
+001 - ERROR
+	data: u32 len/char error[len]
+
+	fatal error message.
+
+002 - ZIPSTATS
+        data: u32 in/u32 in_wire/u32 out/u32 out_wire                           
+
+	ziplinks commpression statistics

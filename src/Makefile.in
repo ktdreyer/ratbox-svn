@@ -23,9 +23,6 @@ bindir		= @bindir@
 libexecdir	= @libexecdir@
 sysconfdir	= @sysconfdir@
 localstatedir	= @localstatedir@
-# Change this later! -- adrian
-moduledir	= @prefix@/modules
-automoduledir	= @prefix@/modules/autoload
 
 IRCD_EXE	= ircd
 
@@ -129,14 +126,6 @@ install-mkdirs:
 	-@if test ! -d $(bindir); then \
 		echo "mkdir $(bindir)"; \
 		mkdir $(bindir); \
-	fi
-	-@if test ! -d $(moduledir); then \
-		echo "mkdir $(moduledir)"; \
-		mkdir $(moduledir); \
-	fi
-	-@if test ! -d $(automoduledir); then \
-		echo "mkdir $(automoduledir)"; \
-		mkdir $(automoduledir); \
 	fi
 	-@if test ! -d $(sysconfdir); then \
 		echo "mkdir $(sysconfdir)"; \

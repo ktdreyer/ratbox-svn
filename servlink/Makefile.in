@@ -33,7 +33,8 @@ PROGS		= servlink
 
 SOURCES =     \
   servlink.c  \
-  io.c
+  io.c        \
+  control.c
   
 
 OBJECTS = ${SOURCES:.c=.o}
