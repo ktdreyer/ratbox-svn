@@ -145,7 +145,7 @@ _send_linebuf(struct Client *to, buf_head_t *linebuf)
 #ifdef INVARIANTS
   if (IsMe(to))
     {
-      sendto_realops_flags(FLAGS_ALL, "Trying to send message to myself! [%s]");
+      sendto_realops_flags(FLAGS_ALL, "Trying to send message to myself!");
       return 0;
     }
 #endif
