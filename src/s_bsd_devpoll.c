@@ -80,7 +80,7 @@ static void devpoll_write_update(int, int);
 
 /* static void devpoll_incoming_stats(StoreEntry *); */
 /* Does this do anything?? -AS */
-#define NOTYET 1
+/* #define NOTYET 1 */
 
 /* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
 /* Private functions */
