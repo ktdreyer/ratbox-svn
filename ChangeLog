@@ -1,3 +1,18 @@
+androsyn    2003/02/04 21:42:12 UTC	(20030204_19)
+
+  Modified files:
+    include              hook.h modules.h 
+    src                  hook.c 
+  Log:
+  Minor hook cleanups
+  
+  Revision  Changes    Path
+  1.21      +2 -2      ircd-ratbox/include/hook.h
+  7.46      +1 -1      ircd-ratbox/include/modules.h
+  7.27      +2 -2      ircd-ratbox/src/hook.c
+
+
+
 androsyn    2003/02/04 21:36:26 UTC	(20030204_18)
 
   Modified files:
