@@ -1,3 +1,15 @@
+androsyn    2003/02/13 21:17:39 UTC	(20030213_1)
+
+  Modified files:
+    modules/core         m_server.c 
+  Log:
+  Pointers are our friends
+  
+  Revision  Changes    Path
+  1.107     +2 -2      ircd-ratbox/modules/core/m_server.c
+
+
+
 androsyn    2003/02/13 21:16:16 UTC	(20030213_0)
 
   Modified files:
