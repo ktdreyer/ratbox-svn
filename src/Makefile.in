@@ -15,6 +15,12 @@ IRCDLIBS = @LIBS@ @SSL_LIBS@ ../zlib/libz.a
 INCLUDES = -I../include -I../zlib
 CPPFLAGS = ${INCLUDES} @SSL_DEFINE@ @CPPFLAGS@
  
+# Yes, these go up the top! -- adrian
+
+all: ircd
+
+build: all
+
 y.tab.o:	y.tab.c ircd_parser.y
 	gcc -g -I ../include -I. -c y.tab.c
 
@@ -132,10 +138,6 @@ SRCS =                          \
   whowas.c
 
 OBJS = ${SRCS:.c=.o}
-
-all: ircd
-
-build: all
 
 ircd: ${OBJS} y.tab.o lex.yy.o version.o
 	${CC} ${LDFLAGS} -o $@ ${OBJS} lex.yy.o y.tab.o version.o ${IRCDLIBS} ${LEXLIB}
