@@ -1,3 +1,8 @@
+*** 20001126_9 by db
+- re-enabled send_operwall
+
+
+
 *** 20001126_8 by db
 - .depend included references to in6.h which ltnx didn't have oops.
 - committed bysin's whois fix
