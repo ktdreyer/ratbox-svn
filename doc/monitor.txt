@@ -26,6 +26,11 @@ In commands and numerics where multiple nicknames may occur, the length of
 the nickname list is limited only by the buffer size of 512 chars, as
 defined in RFC1459.
 
+Support of this specification is indicated by the MONITOR token in
+RPL_ISUPPORT (005).  This token takes an optional parameter, of the maximum
+amount of nicknames a client may have in their monitor list.  If no
+parameter is specified, there is no limit.  A typical token would be:
+MONITOR=100
 
 MONITOR + nick[,nick2]*
 -----------------------
@@ -96,5 +101,14 @@ in their monitor list.
 :<server> 733 <nick> :End of MONITOR LIST
 
 This numeric is used to indicate to a client the end of a monitor list.
+
+734 - RPL_MONLISTFULL
+---------------------
+:<server> 734 <nick> <limit> <nicks> :Monitor list is full.
+
+This numeric is used to indicate to a client that their monitor list is
+full, so the .  The <limit> parameter is the maximum number of 
+nicknames a client may have in their list, the <nicks> parameter is the list
+of nicknames, as the client sent them, that cannot be added.
 
 

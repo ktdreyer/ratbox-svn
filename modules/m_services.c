@@ -118,9 +118,6 @@ me_login(struct Client *client_p, struct Client *source_p,
 static void
 h_svc_burst_client(hook_data_client *hdata)
 {
-	struct Client *client_p;
-	dlink_node *ptr;
-
 	if(EmptyString(hdata->target->user->suser))
 		return;
 
