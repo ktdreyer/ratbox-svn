@@ -1,3 +1,15 @@
+androsyn    2005/03/25 19:29:51 UTC	(20050325_4)
+
+  Added files:
+    adns                 resolver.c 
+  Log:
+  add the initial version of the resolver daemon
+  
+  Revision  Changes    Path
+  1.1       +789 -0    ircd-ratbox/adns/resolver.c (new)
+
+
+
 leeh        2005/03/25 19:23:53 UTC	(20050325_3)
 
   Modified files:
