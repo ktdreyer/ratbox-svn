@@ -383,8 +383,8 @@ extern void conf_add_fields(struct ConfItem*, char*, char *, char*, char *,char 
 extern void conf_add_conf(struct ConfItem *);
 
 /* XXX consider moving these into kdparse.h */
-extern void KParseFile(FBFILE *fb);
-extern void DParseFile(FBFILE *fb);
+extern void parse_k_file(FBFILE *fb);
+extern void parse_d_file(FBFILE *fb);
 extern char *getfield(char *newline);
 
 extern int yylex(void);

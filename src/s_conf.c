@@ -1993,7 +1993,7 @@ void read_conf_files(int cold)
 	}
       else
 	{
-	  KParseFile(file);
+	  parse_k_file(file);
 	  fbclose(file);
 	}
     }
@@ -2012,7 +2012,7 @@ void read_conf_files(int cold)
 	}
       else
 	{
-	  DParseFile(file);
+	  parse_d_file(file);
 	  fbclose(file);
 	}
     }

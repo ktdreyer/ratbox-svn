@@ -36,13 +36,13 @@
 #include "memory.h"
 
 /*
- * KParseFile
+ * parse_k_file
  * Inputs       - pointer to line to parse
  * Output       - NONE
  * Side Effects - Parse one new style K line
  */
 
-void KParseFile(FBFILE *file)
+void parse_k_file(FBFILE *file)
 {
   struct ConfItem *aconf;
   char* user_field=(char *)NULL;
@@ -76,13 +76,13 @@ void KParseFile(FBFILE *file)
 }
 
 /*
- * DParseFile
+ * parse_d_file
  * Inputs       - pointer to line to parse
  * Output       - NONE
  * Side Effects - Parse one new style D line
  */
 
-void DParseFile(FBFILE *file)
+void parse_d_file(FBFILE *file)
 {
   struct ConfItem *aconf;
   char* reason_field=(char *)NULL;
