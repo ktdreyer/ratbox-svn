@@ -1,3 +1,14 @@
+*** 20011024_8 by wcampbel
+Massive documentation update:
+Corrected some missed items in the CHALLENGE changes
+Removed the incomplete cookies proposal
+Updated version references to 7b8
+Minor changes in other documents
+Correct make rsa_respond (generate rsa_respond.tar.gz)
+Add rsa_respond.tar.gz to .cvsignore
+Fixed make clean in tools/rsa_respond.
+
+
 *** 20011024_7 by db
 - make_nick_user_host was just too stupid for words
 
