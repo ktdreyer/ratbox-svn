@@ -1,3 +1,10 @@
+*** 19990811_2 by lusky
+throttle accept errors in listener.c
+oper motd rehash bug fix from perly
+ensure that SERVER must come before SVINFO (jl)
+neglected to detach_conf for umode -o (jl)
+
+
 *** 19990811_1 by tomh
 fake direction bug fix
 
