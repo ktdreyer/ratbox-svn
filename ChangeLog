@@ -1,3 +1,15 @@
+androsyn    2003/02/08 07:09:43 UTC	(20030208_3)
+
+  Modified files:
+    modules              Makefile.in 
+  Log:
+  Fix that a bit
+  
+  Revision  Changes    Path
+  1.79      +1 -1      ircd-ratbox/modules/Makefile.in
+
+
+
 androsyn    2003/02/08 07:09:03 UTC	(20030208_2)
 
   Modified files:
