@@ -1715,9 +1715,6 @@ int del_all_accepts(struct Client *dying)
  * inputs	- pointer to exiting client
  * output	- 
  * side effects - list allow list
- *
- * Walk through the target's accept list, remove if source is found,
- * Then walk through the source's on_accept_list remove target if found.
  */
 int list_all_accepts(struct Client *sptr)
 {

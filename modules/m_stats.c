@@ -541,6 +541,8 @@ void stats_L_list(struct Client *sptr,char *name, int doall, int wilds,
    */
   for(ptr = list->head;ptr;ptr = ptr->next)
     {
+      acptr = ptr->data;
+
       if (IsPerson(acptr) &&
 	  !IsAnyOper(acptr) && !IsAnyOper(sptr) &&
 	  (acptr != sptr))
