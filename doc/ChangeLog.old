@@ -1,3 +1,7 @@
+*** 20010605_14 by toot
+fixed some little compile errors
+
+
 *** 20010605_13 by db
 - ok, moved channel {} block related stuff into ConfigChannel struct
   this was all over the place
