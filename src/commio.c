@@ -344,10 +344,12 @@ comm_connect_tcp(int fd, const char *host, u_short port,
 	F->connect.callback = callback;
 	F->connect.data = data;
 
+	memset(&F->connect.hostaddr, 0, sizeof(F->connect.hostaddr));
 #ifdef IPV6
 	if(aftype == AF_INET6)
 	{
 		struct sockaddr_in6 *in6 = (struct sockaddr_in6 *)&F->connect.hostaddr;
+		SET_SS_LEN(F->connect.hostaddr, sizeof(struct sockaddr_in6));
 		in6->sin6_port = htons(port);
 		in6->sin6_family = AF_INET6;
 		ipptr = &in6->sin6_addr;
@@ -355,6 +357,7 @@ comm_connect_tcp(int fd, const char *host, u_short port,
 #endif
 	{
 		struct sockaddr_in *in = (struct sockaddr_in *)&F->connect.hostaddr;
+		SET_SS_LEN(F->connect.hostaddr, sizeof(struct sockaddr_in));
 		in->sin_port = htons(port);
 		in->sin_family = AF_INET;
 		ipptr = &in->sin_addr;
@@ -391,8 +394,7 @@ comm_connect_tcp(int fd, const char *host, u_short port,
 		/* We have a valid IP, so we just call tryconnect */
 		/* Make sure we actually set the timeout here .. */
 		comm_settimeout(F->fd, timeout * 1000, comm_connect_timeout, NULL);
-		comm_setselect(F->fd, FDLIST_SERVER, COMM_SELECT_WRITE,
-		               comm_connect_tryconnect, NULL, 0);
+		comm_connect_tryconnect(F->fd, NULL);
 	}
 }
 
@@ -508,7 +510,7 @@ comm_connect_tryconnect(int fd, void *notused)
 	/* Try the connect() */
 	retval = connect(fd,
 			 (struct sockaddr *) &fd_table[fd].connect.hostaddr, 
-						       sizeof(struct sockaddr_storage));
+						       GET_SS_LEN(fd_table[fd].connect.hostaddr));
 	/* Error? */
 	if(retval < 0)
 	{
