@@ -45,11 +45,8 @@
  */
 int client_dopacket(struct Client *cptr, char *buffer, size_t length)
 {
-  assert(0 != cptr);
-  assert(0 != buffer);
-
-  strncpy_irc(cptr->buffer, buffer, BUFSIZE);
-  length = strlen(cptr->buffer); 
+  assert(cptr != NULL);
+  assert(buffer != NULL);
 
   /* 
    * Update messages received
@@ -74,8 +71,7 @@ int client_dopacket(struct Client *cptr, char *buffer, size_t length)
     me.receiveB &= 0x03ff;
   }
 
-  cptr->count = 0;    /* ...just in case parse returns with */
-  if (CLIENT_EXITED == parse(cptr, cptr->buffer, cptr->buffer + length)) {
+  if (CLIENT_EXITED == parse(cptr, buffer, buffer + length)) {
     /*
      * CLIENT_EXITED means actually that cptr
      * structure *does* not exist anymore!!! --msa

@@ -197,7 +197,7 @@ struct Client
    * to which the allocation is tied to! *Never* refer to
    * these fields, if (from != self).
    */
-  int               count;       /* Amount of data in buffer */
+  int               count;       /* Amount of data in buffer, not used! */
   time_t            last_join_time;   /* when this client last 
                                          joined a channel */
   time_t            last_leave_time;  /* when this client last 
@@ -210,7 +210,6 @@ struct Client
   time_t            first_received_message_time;
   int               received_number_of_privmsgs;
   int               drone_noticed;
-  char  buffer[CLIENT_BUFSIZE]; /* Incoming message buffer */
   short             lastsq;     /* # of 2k blocks when sendqueued called last*/
 
   /* Send and recieve linebuf queues .. */
