@@ -1,3 +1,9 @@
+*** 20011111_3 by leeh
+- removed the start notice from modlist
+- changed a strstr() in modules-dld -> match, as per modules.c
+- use RPL_ENDOFMODLIST
+
+
 *** 20011111_2 by leeh
 - bumped ERR_LASTERRMSG upto 999
 - added 506 -> 999 into messages.tab
