@@ -1,3 +1,9 @@
+*** 20001028_6 by db
+- typo in s_serv.c in vchan handling
+  oopsies
+
+
+
 *** 20001028_5 by db
 - most of the work is done in m_sjoin, it =should= send the mode
   join messages etc. to the right vchan names now.
