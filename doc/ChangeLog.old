@@ -1,3 +1,24 @@
+leeh        2002/05/01 12:36:08 EDT	(20020501_0)
+
+  Modified files:
+    doc                  convertconf-example.conf example.conf 
+                         example.conf.efnet 
+    tools                convertconf.c 
+  Log:
+  - rewrote nearly all of the config.  ugh.  its still horribly horribly
+    long tho.. altho I shaved about 200 lines off.
+  - added a '-b' (basic) option to convertconf that wont pull in the other
+    blocks.
+  - DAMNATION TO THE BRITISH.
+  
+  Revision  Changes    Path
+  7.4       +209 -308  ircd-hybrid-7/doc/convertconf-example.conf
+  7.158     +387 -612  ircd-hybrid-7/doc/example.conf
+  7.11      +413 -615  ircd-hybrid-7/doc/example.conf.efnet
+  1.33      +28 -9     ircd-hybrid-7/tools/convertconf.c
+
+
+
 leeh        2002/04/30 13:43:20 EDT	(20020430_8)
 
   Modified files:
