@@ -1,3 +1,7 @@
+*** 20010115_10 by fl_
+- removed an unneeded if()
+
+
 *** 20010115_9 by fl_
 - fixes to not show server IPs in /links to opers
 
