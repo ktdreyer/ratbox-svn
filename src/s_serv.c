@@ -73,6 +73,7 @@ struct Capability captab[] = {
   { "CHW",      CAP_CHW },
   { "DE",       CAP_DE },
   { "LL",       CAP_LL },
+  { "IE",       CAP_IE },
   { 0,   0 }
 };
 

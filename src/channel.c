@@ -72,12 +72,8 @@ void remove_empty_channels();
 
 struct Channel *GlobalChannelList = NullChn;
 
-static  int     add_banid (struct Client *, struct Channel *, char *);
-static  int     add_exceptid(struct Client *, struct Channel *, char *);
-static  int     add_denyid(struct Client *, struct Channel *, char *);
-static  int     del_banid (struct Channel *, char *);
-static  int     del_exceptid (struct Channel *, char *);
-static  int     del_denyid (struct Channel *, char *);
+static  int     add_id (struct Client *, struct Channel *, char *, int);
+static  int     del_id (struct Channel *, char *, int);
 static  void    free_bans_exceptions_denies(struct Channel *);
 static  void    sub1_from_channel (struct Channel *);
 
@@ -163,13 +159,16 @@ static char* make_nick_user_host(const char* nick,
 }
 
 /*
- * Ban functions to work with mode +b
+ * Ban functions to work with mode +b/e/d/I
  */
-/* add_banid - add an id to be banned to the channel  (belongs to cptr) */
+/* add the specified ID to the channel.. 
+   -is 8/9/00 */
 
-static  int     add_banid(struct Client *cptr, struct Channel *chptr, char *banid)
+static  int     add_id(struct Client *cptr, struct Channel *chptr, 
+			  char *banid, int type)
 {
   struct SLink  *ban;
+  struct SLink  **list;
 
   /* dont let local clients overflow the banlist */
   if ((!IsServer(cptr)) && (chptr->num_bed >= MAXBANS))
@@ -184,15 +183,34 @@ static  int     add_banid(struct Client *cptr, struct Channel *chptr, char *bani
   if (MyClient(cptr))
     collapse(banid);
 
-  for (ban = chptr->banlist; ban; ban = ban->next)
+  switch(type) 
+    {
+    case CHFL_BAN:
+      list = &chptr->banlist;
+      break;
+    case CHFL_EXCEPTION:
+      list = &chptr->exceptlist;
+      break;
+    case CHFL_DENY:
+      list = &chptr->denylist;
+      break;
+    case CHFL_INVEX:
+      list = &chptr->invexlist;
+      break;
+    default:
+      sendto_realops("add_id() called with unknown ban type %d!", type);
+      return -1;
+    }
+
+  for (ban = *list; ban; ban = ban->next)
 	  if (match(BANSTR(ban), banid))
 	    return -1;
-
+  
   ban = make_link();
   memset(ban, 0, sizeof(struct SLink));
-  ban->flags = CHFL_BAN;
-  ban->next = chptr->banlist;
-
+  ban->flags = type;
+  ban->next = *list;
+  
   ban->value.banptr = (aBan *)MyMalloc(sizeof(aBan));
   ban->value.banptr->banstr = (char *)MyMalloc(strlen(banid)+1);
   (void)strcpy(ban->value.banptr->banstr, banid);
@@ -214,222 +232,58 @@ static  int     add_banid(struct Client *cptr, struct Channel *chptr, char *bani
 
   ban->value.banptr->when = CurrentTime;
 
-  chptr->banlist = ban;
+  *list = ban;
   chptr->num_bed++;
   return 0;
 }
-
-/* add_exceptid - add an id to the exception list for the channel  
- * (belongs to cptr) 
- */
-
-static  int     add_exceptid(struct Client *cptr, struct Channel *chptr, char *eid)
-{
-  struct SLink  *ex, *ban;
-
-  /* dont let local clients overflow the banlist */
-  if ((!IsServer(cptr)) && (chptr->num_bed >= MAXBANS))
-    if (MyClient(cptr))
-      {
-        sendto_one(cptr, form_str(ERR_BANLISTFULL),
-                   me.name, cptr->name,
-                   chptr->chname, eid);
-        return -1;
-      }
-
-  if (MyClient(cptr))
-    (void)collapse(eid);
-
-  for (ban = chptr->exceptlist; ban; ban = ban->next)
-	  if (match(BANSTR(ban), eid))
-	    return -1;
-  
-
-  ex = make_link();
-  memset(ex, 0, sizeof(struct SLink));
-  ex->flags = CHFL_EXCEPTION;
-  ex->next = chptr->exceptlist;
-
-  ex->value.banptr = (aBan *)MyMalloc(sizeof(aBan));
-  ex->value.banptr->banstr = (char *)MyMalloc(strlen(eid)+1);
-  (void)strcpy(ex->value.banptr->banstr, eid);
-
-  if (IsPerson(cptr))
-    {
-      ex->value.banptr->who =
-        (char *)MyMalloc(strlen(cptr->name)+
-                         strlen(cptr->username)+
-                         strlen(cptr->host)+3);
-      ircsprintf(ex->value.banptr->who, "%s!%s@%s",
-                 cptr->name, cptr->username, cptr->host);
-    }
-  else
-    {
-      ex->value.banptr->who = (char *)MyMalloc(strlen(cptr->name)+1);
-      (void)strcpy(ex->value.banptr->who, cptr->name);
-    }
-
-  ex->value.banptr->when = CurrentTime;
-
-  chptr->exceptlist = ex;
-  chptr->num_bed++;
-  return 0;
-}
-
 
 /*
- * add_denyid - add an id to be denied to the channel  (belongs to cptr) 
- * works like an Xline, but for channels.
- * -sean
- */  
-static  int     add_denyid(struct Client *cptr, struct Channel *chptr, char *banid)
+ *
+ * "del_id - delete an id belonging to cptr
+ * if banid is null, deleteall banids belonging to cptr."
+ *
+ * from orabidoo
+ * modified 8/9/00 by is: now we handle add ban types here
+ * (invex/excemp/deny/etc)
+ */
+static  int     del_id(struct Channel *chptr, char *banid, int type)
 {
-  struct SLink  *ban;
+  register struct SLink *ban;
+  register struct SLink *tmp;
+  register struct SLink **list;
 
-  /* truncate to REALLEN */
-  banid[REALLEN]='\0';
+  if (!banid)
+    return -1;
 
-  if ((!IsServer(cptr)) && (chptr->num_bed >= MAXBANS))
-    if (MyClient(cptr))
-      {
-        sendto_one(cptr, form_str(ERR_BANLISTFULL),
-                   me.name, cptr->name,
-                   chptr->chname, banid);
-        return -1;
-      }
-
-  if (MyClient(cptr))
-    (void)collapse(banid);
-
-  for (ban = chptr->denylist; ban; ban = ban->next)
-    if (strcasecmp(BANSTR(ban), banid)==0) 
+  switch(type)
+    {
+    case CHFL_BAN:
+      list = &chptr->banlist;
+      break;
+    case CHFL_EXCEPTION:
+      list = &chptr->exceptlist;
+      break;
+    case CHFL_DENY:
+      list = &chptr->denylist;
+      break;
+    case CHFL_INVEX:
+      list = &chptr->invexlist;
+      break;
+    default:
+      sendto_realops("del_id() called with unknown ban type %d!", type);
       return -1;
-  
-  ban = make_link();
-  memset(ban, 0, sizeof(struct SLink));
-  ban->flags = CHFL_DENY;
-  ban->next = chptr->denylist;
-
-  ban->value.banptr = (aBan *)MyMalloc(sizeof(aBan));
-  ban->value.banptr->banstr = (char *)MyMalloc(strlen(banid)+1);
-  (void)strcpy(ban->value.banptr->banstr, banid);
-
-  if (IsPerson(cptr))
-    {
-      ban->value.banptr->who =
-        (char *)MyMalloc(strlen(cptr->name)+
-                         strlen(cptr->username)+
-                         strlen(cptr->host)+3);
-      ircsprintf(ban->value.banptr->who, "%s!%s@%s",
-                 cptr->name, cptr->username, cptr->host);
-    }
-   else
-    {
-      ban->value.banptr->who = (char *)MyMalloc(strlen(cptr->name)+1);
-      (void)strcpy(ban->value.banptr->who, cptr->name);
     }
 
-  ban->value.banptr->when = CurrentTime;
-
-  chptr->denylist = ban;
-  chptr->num_bed++;
-  return 0;
-}
-
-
-
-/*
- *
- * "del_banid - delete an id belonging to cptr
- * if banid is null, deleteall banids belonging to cptr."
- *
- * from orabidoo
- */
-static  int     del_banid(struct Channel *chptr, char *banid)
-{
-  register struct SLink **ban;
-  register struct SLink *tmp;
-
-  if (!banid)
-    return -1;
-
-  for (ban = &(chptr->banlist); *ban; ban = &((*ban)->next))
+  for (ban = *list; ban; ban = ban->next)
     {
-      if (irccmp(banid, (*ban)->value.banptr->banstr)==0)
+      if (irccmp(banid, ban->value.banptr->banstr)==0)
         {
-          tmp = *ban;
-          *ban = tmp->next;
+          tmp = ban;
+          *list = tmp->next;
           MyFree(tmp->value.banptr->banstr);
           MyFree(tmp->value.banptr->who);
           MyFree(tmp->value.banptr);
           free_link(tmp);
-	  /* num_bed should never be < 0 */
-	  if(chptr->num_bed > 0)
-	    chptr->num_bed--;
-	  else
-	    chptr->num_bed = 0;
-          break;
-        }
-    }
-  return 0;
-}
-
-/*
- * del_exceptid - delete an id belonging to cptr
- *
- * from orabidoo
- */
-static  int     del_exceptid(struct Channel *chptr, char *eid)
-{
-  register struct SLink **ex;
-  register struct SLink *tmp;
-
-  if (!eid)
-    return -1;
-  for (ex = &(chptr->exceptlist); *ex; ex = &((*ex)->next))
-    if (irccmp(eid, BANSTR(*ex)) == 0)
-      {
-        tmp = *ex;
-        *ex = tmp->next;
-        MyFree(tmp->value.banptr->banstr);
-        MyFree(tmp->value.banptr->who);
-        MyFree(tmp->value.banptr);
-        free_link(tmp);
-	/* num_bed should never be < 0 */
-	if(chptr->num_bed > 0)
-	  chptr->num_bed--;
-	else
-	  chptr->num_bed = 0;
-        break;
-      }
-  return 0;
-}
-
-/*
- *
- * "del_denyid - delete an id belonging to cptr
- * if banid is null, deleteall banids belonging to cptr."
- *
- * -sean
- */
-static  int     del_denyid(struct Channel *chptr, char *banid)
-{
-  register struct SLink **ban;
-  register struct SLink *tmp;
-
-  if (!banid)
-    return -1;
-  for (ban = &(chptr->denylist); *ban; ban = &((*ban)->next))
-    {
-      if (strcasecmp(banid, (*ban)->value.banptr->banstr)==0) 
-        {
-          tmp = *ban;
-          *ban = tmp->next;
-          MyFree(tmp->value.banptr->banstr);
-          MyFree(tmp->value.banptr->who);
-          MyFree(tmp->value.banptr);
-          free_link(tmp);
-
 	  /* num_bed should never be < 0 */
 	  if(chptr->num_bed > 0)
 	    chptr->num_bed--;
@@ -977,6 +831,17 @@ void send_channel_modes(struct Client *cptr, struct Channel *chptr)
   if (modebuf[1] || *parabuf)
     sendto_one(cptr, ":%s MODE %s %s %s",
                me.name, chptr->chname, modebuf, parabuf);
+
+  if (!IsCapable(cptr,CAP_IE))
+		return;
+	*parabuf = '\0';
+	*modebuf = '+';
+	modebuf[1] = '\0';
+	send_mode_list(cptr, chptr->chname, chptr->invexlist, CHFL_INVEX, 'I');
+
+  if (modebuf[1] || *parabuf)
+    sendto_one(cptr, ":%s MODE %s %s %s",
+               me.name, chptr->chname, modebuf, parabuf);
 }
 
 /* stolen from Undernet's ircd  -orabidoo
@@ -1074,6 +939,8 @@ static  int     errsent(int err, int *errs)
 #define SM_ERR_RPL_E            0x00000020
 #define SM_ERR_NOTONCHANNEL     0x00000040      /* Not on channel */
 #define SM_ERR_RESTRICTED       0x00000080      /* Restricted chanop */
+#define SM_ERR_RPL_I						0x00000100
+#define SM_ERR_RPL_D            0x00000200
 
 /*
 ** Apply the mode changes passed in parv to chptr, sending any error
@@ -1126,7 +993,11 @@ void set_channel_mode(struct Client *cptr,
    * lets stick mode/params that only the newer servers will understand
    * into modebuf_new/parabuf_new 
    * even worse!  nodebuf_newer/parabuf_newer <-- for CAP_DE       
+	 * "£$"£*(!!! <-- CAP_IE
    */
+
+  char  modebuf_invex[MODEBUFLEN];
+  char  parabuf_invex[MODEBUFLEN];
 
   char  modebuf_newer[MODEBUFLEN];
   char  parabuf_newer[MODEBUFLEN];
@@ -1142,6 +1013,9 @@ void set_channel_mode(struct Client *cptr,
 
   char  *mbufw_newer = modebuf_newer;
   char  *pbufw_newer = parabuf_newer;
+
+  char  *mbufw_invex = modebuf_invex;
+  char  *pbufw_invex = parabuf_invex;
 
   int   ischop;
   int   isok;
@@ -1443,6 +1317,108 @@ void set_channel_mode(struct Client *cptr,
           break;
 
           /* There is a nasty here... I'm supposed to have
+           * CAP_IE before I can send exceptions to bans to a server.
+           * But that would mean I'd have to keep two strings
+           * one for local clients, and one for remote servers,
+           * one with the 'I' strings, one without.
+           * I added another parameter buf and mode buf for "new"
+           * capabilities.
+           *
+           * -Dianora
+           */
+
+        case 'I':
+          if (whatt == MODE_QUERY || parc-- <= 0)
+            {
+              if (!MyClient(sptr))
+                break;
+              if (errsent(SM_ERR_RPL_I, &errors_sent))
+                break;
+              /* don't allow a non chanop to see the invex list
+               */
+              if(isok)
+                {
+                  for (lp = chptr->invexlist; lp; lp = lp->next)
+                    sendto_one(cptr, form_str(RPL_INVITELIST),
+                               me.name, cptr->name,
+                               chptr->chname,
+                               lp->value.banptr->banstr,
+                               lp->value.banptr->who,
+                               lp->value.banptr->when);
+
+                  sendto_one(sptr, form_str(RPL_ENDOFINVITELIST),
+                             me.name, sptr->name, 
+                             chptr->chname);
+                }
+              break;
+            }
+          arg = check_string(*parv++);
+
+          if (MyClient(sptr) && opcnt >= MAXMODEPARAMS)
+            break;
+
+          if (!isok)
+            {
+              if (!errsent(SM_ERR_NOOPS, &errors_sent) && MyClient(sptr))
+                sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED),
+                           me.name, sptr->name, 
+                           chptr->chname);
+              break;
+            }
+          
+          if(MyClient(sptr))
+            chptr->keep_their_modes = YES;
+          else if(!chptr->keep_their_modes)
+            {
+              parc--;
+              parv++;
+              break;
+            }
+
+          /* user-friendly ban mask generation, taken
+          ** from Undernet's ircd  -orabidoo
+          */
+          if (MyClient(sptr))
+            arg = collapse(pretty_mask(arg));
+
+          if(*arg == ':')
+            {
+              parc--;
+              parv++;
+              break;
+            }
+
+          tmp = strlen(arg);
+          if (len + tmp + 2 >= MODEBUFLEN)
+            break;
+
+          if (!(((whatt & MODE_ADD) && !add_id(sptr, chptr, arg, CHFL_INVEX)) ||
+                ((whatt & MODE_DEL) && !del_id(chptr, arg, CHFL_INVEX))))
+            break;
+
+          /* This stuff can go back in when all servers understand +e 
+           * with the pbufw_new nonsense removed -Dianora
+           */
+
+          /*
+          *mbufw++ = plus;
+          *mbufw++ = 'I';
+          strcpy(pbufw, arg);
+          pbufw += strlen(pbufw);
+          *pbufw++ = ' ';
+          */
+          len += tmp + 1;
+          opcnt++;
+
+          *mbufw_invex++ = plus;
+          *mbufw_invex++ = 'I';
+          strcpy(pbufw_invex, arg);
+          pbufw_invex += strlen(pbufw_invex);
+          *pbufw_invex++ = ' ';
+
+          break;
+
+          /* There is a nasty here... I'm supposed to have
            * CAP_EX before I can send exceptions to bans to a server.
            * But that would mean I'd have to keep two strings
            * one for local clients, and one for remote servers,
@@ -1519,8 +1495,8 @@ void set_channel_mode(struct Client *cptr,
           if (len + tmp + 2 >= MODEBUFLEN)
             break;
 
-          if (!(((whatt & MODE_ADD) && !add_exceptid(sptr, chptr, arg)) ||
-                ((whatt & MODE_DEL) && !del_exceptid(chptr, arg))))
+          if (!(((whatt & MODE_ADD) && !add_id(sptr, chptr, arg, CHFL_EXCEPTION)) ||
+                ((whatt & MODE_DEL) && !del_id(chptr, arg, CHFL_EXCEPTION))))
             break;
 
           /* This stuff can go back in when all servers understand +e 
@@ -1550,7 +1526,7 @@ void set_channel_mode(struct Client *cptr,
            * CAP_DE before I can send exceptions to bans to a server.
            * But that would mean I'd have to keep two strings
            * one for local clients, and one for remote servers,
-           * one with the 'e' strings, one without.
+           * one with the 'd' strings, one without.
            * I added another parameter buf and mode buf for "new"
            * capabilities.
            *
@@ -1562,7 +1538,7 @@ void set_channel_mode(struct Client *cptr,
             {
               if (!MyClient(sptr))
                 break;
-              if (errsent(SM_ERR_RPL_E, &errors_sent))
+              if (errsent(SM_ERR_RPL_D, &errors_sent))
                 break;
                   for (lp = chptr->denylist; lp; lp = lp->next)
                     sendto_one(cptr, form_str(RPL_BANLIST),
@@ -1610,8 +1586,8 @@ void set_channel_mode(struct Client *cptr,
           if (len + tmp + 2 >= MODEBUFLEN)
             break;
 
-          if (!(((whatt & MODE_ADD) && !add_denyid(sptr, chptr, arg)) ||
-                ((whatt & MODE_DEL) && !del_denyid(chptr, arg))))
+          if (!(((whatt & MODE_ADD) && !add_id(sptr, chptr, arg, CHFL_DENY)) ||
+                ((whatt & MODE_DEL) && !del_id(chptr, arg, CHFL_DENY))))
             break;
 
           /* This stuff can go back in when all servers understand +e 
@@ -1716,8 +1692,8 @@ void set_channel_mode(struct Client *cptr,
           if (len + tmp + 2 >= MODEBUFLEN)
             break;
 
-          if (!(((whatt & MODE_ADD) && !add_banid(sptr, chptr, arg)) ||
-                ((whatt & MODE_DEL) && !del_banid(chptr, arg))))
+          if (!(((whatt & MODE_ADD) && !add_id(sptr, chptr, arg, CHFL_BAN)) ||
+                ((whatt & MODE_DEL) && !del_id(chptr, arg, CHFL_BAN))))
             break;
 
           *mbufw++ = plus;
@@ -2191,7 +2167,7 @@ void set_channel_mode(struct Client *cptr,
   */
 
   *mbufw = *mbuf2w = *pbufw = *pbuf2w = *mbufw_new = *pbufw_new = 
-  *mbufw_newer = *pbufw_newer = '\0';
+  *mbufw_newer = *pbufw_newer = *mbufw_invex = *pbufw_invex = '\0';
 
   collapse_signs(modebuf);
 /*  collapse_signs(modebuf2); */
@@ -2228,7 +2204,15 @@ void set_channel_mode(struct Client *cptr,
                              sptr->name, chptr->chname,
                              modebuf_newer, parabuf_newer);
     }
-
+  if(*modebuf_invex)
+    {
+      sendto_channel_butserv(chptr, sptr, ":%s MODE %s %s %s",
+			     sptr->name, chptr->chname,
+			     modebuf_invex, parabuf_invex);
+      sendto_match_cap_servs(chptr, cptr, CAP_IE, ":%s MODE %s %s %s",
+			     sptr->name, chptr->chname,
+			     modebuf_invex, parabuf_invex);
+    }	
                      
   return;
 }
@@ -2697,7 +2681,8 @@ static void free_bans_exceptions_denies(struct Channel *chptr)
       free_link(ban);
     }
 
-  chptr->banlist = chptr->exceptlist = chptr->denylist = NULL;
+  chptr->banlist = chptr->exceptlist = chptr->denylist = chptr->invexlist = 
+    NULL;
   chptr->num_bed = 0;
 }
 

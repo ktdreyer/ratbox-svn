@@ -68,6 +68,7 @@ struct Channel
   struct SLink*   banlist;
   struct SLink*   exceptlist;
   struct SLink*   denylist;
+  struct SLink*   invexlist;
   int             num_bed;          /* number of bans+exceptions+denies */
   time_t          channelts;
   char            locally_created;  /* used to flag a locally created channel*/
@@ -142,6 +143,7 @@ extern void    clear_bans_exceptions_denies(struct Client *,struct Channel *);
 #define CHFL_BAN        0x0008 /* ban channel flag */
 #define CHFL_EXCEPTION  0x0010 /* exception to ban channel flag */
 #define CHFL_DENY       0x0020 /* regular expression deny flag */
+#define CHFL_INVEX	0x0040 /* invite exception */
 
 /* Channel Visibility macros */
 
@@ -158,14 +160,15 @@ extern void    clear_bans_exceptions_denies(struct Client *,struct Channel *);
 #define MODE_BAN        0x0400
 #define MODE_EXCEPTION  0x0800
 #define MODE_DENY       0x1000
+#define MODE_INVEX	0x2000
 
-#define MODE_LIMIT      0x2000  /* was 0x1000 */
-#define MODE_FLAGS      0x2fff  /* was 0x1fff */
+#define MODE_LIMIT      0x4000  /* was 0x2000 */
+#define MODE_FLAGS      0x4fff  /* was 0x2fff */
 
 #ifdef NEED_SPLITCODE
 
 #if defined(PRESERVE_CHANNEL_ON_SPLIT) || defined(NO_JOIN_ON_SPLIT)
-#define MODE_SPLIT      0x1000
+#define MODE_SPLIT      0x3000
 extern void remove_empty_channels();
 #endif
 
@@ -186,7 +189,7 @@ extern int got_server_pong;
  * mode flags which take another parameter (With PARAmeterS)
  */
 #define MODE_WPARAS (MODE_CHANOP|MODE_VOICE|MODE_BAN|\
-                     MODE_EXCEPTION|MODE_DENY|MODE_KEY|MODE_LIMIT)
+                     MODE_EXCEPTION|MODE_DENY|MODE_KEY|MODE_LIMIT|MODE_INVEX)
 
 /*
  * Undefined here, these are used in conjunction with the above modes in

@@ -70,6 +70,7 @@ char *infotext[] =
   "Bleep               Thomas Helvey       tomh@inxpress.net",
   "Dianora             Diane Bruce         db@db.net",
   "FlashMan            Craig A. Huegen     chuegen@quadrunner.com",
+  "is-                 Edward Brocklesby   ejb@klamath.demon.co.uk",
   "Neph|l|m            Adel Mezibra        adel@cybercable.fr",
   "Pie-Man             Ben Maizels         ben@cpshome.com",
   "Rodder              Jon Lusky           lusky@blown.net",

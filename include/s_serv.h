@@ -46,7 +46,8 @@ struct Capability
 #define CAP_CHW         0x00000010      /* Can do channel wall @# */
 #define CAP_DE          0x00000020      /* Can do channel +d (regex deny) */
 #define CAP_LL          0x00000040      /* Can do lazy links */
-#define CAP_MASK        CAP_QS|CAP_EX|CAP_CHW|CAP_DE
+#define CAP_IE          0x00000080      /* Can do invite exceptions */
+#define CAP_MASK        CAP_QS|CAP_EX|CAP_CHW|CAP_DE|CAP_IE
 
 #define DoesCAP(x)      ((x)->caps)
 
