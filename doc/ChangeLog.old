@@ -1,3 +1,13 @@
+*** 20010625_3 by jdc
+- include/rsa.h  -- Changed verify_private_key() to return int.
+  modules/m_cryptlink.c  -- Updated use of verify_private_key().
+  src/rsa.c  -- Madness regarding OpenSSL.  I'm going to murder
+                whoever wrote openssl/pem.h.  If things no longer
+                work past this point, it's probably due to the
+                typecast on line 110.  *sigh*
+
+
+
 *** 20010625_2 by jdc
 - src/rsa.c
     * Changed the assignment for PEM_read_bio_RSAPrivateKey().  There
