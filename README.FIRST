@@ -13,6 +13,10 @@ If you don't read this first, we won't help you.
   * will be installed with your ircd!					  *
   *************************************************************************
 
+  ALSO, IF YOU ARE UPGRADING YOUR CURRENT SOURCE TREE, AND YOU TRY TO BUILD
+  IN IT WITHOUT PERFORMING AT LEAST 'make clean', THINGS _WILL_ BREAK.  IT IS
+  RECOMMENDED THAT YOU RUN 'make distclean' AND THEN RERUN './configure'!
+
 ******************************* REQUIREMENTS **********************************
 
 Necessary Requirements:
