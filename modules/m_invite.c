@@ -204,7 +204,7 @@ add_invite(struct Channel *chptr, struct Client *who)
 	if((int)dlink_list_length(&who->user->invited) >= 
 	   ConfigChannel.max_chans_per_user)
 	{
-		dlink_node *ptr = who->user->invited.tail;
+		ptr = who->user->invited.tail;
 		del_invite(ptr->data, who);
 	}
 
