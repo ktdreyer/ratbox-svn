@@ -1,3 +1,15 @@
+androsyn    2002/08/20 23:42:55 EDT	(20020821_10)
+
+  Modified files:
+    src                  s_user.c 
+  Log:
+  Thats a node not a list :)
+  
+  Revision  Changes    Path
+  7.221     +1 -1      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2002/08/20 23:41:23 EDT	(20020821_9)
 
   Modified files:
