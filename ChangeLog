@@ -1,3 +1,15 @@
+androsyn    2004/10/08 10:50:24 EDT	(20041008_1)
+
+  Modified files:
+    src                  parse.c 
+  Log:
+  Add a check for msg handlers being null
+  
+  Revision  Changes    Path
+  7.186     +10 -1     ircd-ratbox/src/parse.c
+
+
+
 androsyn    2004/10/08 10:34:34 EDT	(20041008_0)
 
   Modified files:
