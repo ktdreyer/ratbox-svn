@@ -1,3 +1,15 @@
+leeh        2003/06/29 08:17:32 EDT	(20030629_0)
+
+  Modified files:
+    modules              m_info.c 
+  Log:
+  - remove persist_time from /info
+  
+  Revision  Changes    Path
+  1.89      +1 -7      ircd-ratbox/modules/m_info.c
+
+
+
 leeh        2003/06/28 14:51:44 EDT	(20030628_5)
 
   Modified files:
