@@ -1,3 +1,15 @@
+androsyn    2002/07/12 12:02:44 EDT	(20020712_9)
+
+  Modified files:
+    include              tools.h 
+  Log:
+  GCC called, it wanted its inline's back
+  
+  Revision  Changes    Path
+  1.14      +4 -4      ircd-hybrid-7/include/tools.h
+
+
+
 joant       2002/07/11 23:30:09 EDT	(20020712_8)
 
   Modified files:
