@@ -283,8 +283,13 @@ build_target_list(int p_or_n, const char *command, struct Client *client_p,
 			continue;
 		}
 
+		if(MyClient(source_p))
+			target_p = find_named_person(nick);
+		else
+			target_p = find_person(nick);
+
 		/* look for a privmsg to another client */
-		if((target_p = find_person(nick)) != NULL)
+		if(target_p)
 		{
 			if(!duplicate_ptr(target_p))
 			{
@@ -375,7 +380,10 @@ build_target_list(int p_or_n, const char *command, struct Client *client_p,
 		/* no matching anything found - error if not NOTICE */
 		if(p_or_n != NOTICE)
 		{
-			if(IsDigit(*nick))
+			/* dont give this out when source is local, because
+			 * its misleading --anfl
+			 */
+			if(!MyClient(source_p) && IsDigit(*nick))
 				sendto_one(source_p, ":%s %d %s * :Target left IRC. "
 						"Failed to deliver: [%.20s]",
 						get_id(&me, source_p), ERR_NOSUCHNICK,
