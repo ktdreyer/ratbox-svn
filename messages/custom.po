@@ -5,7 +5,7 @@
 #, fuzzy
 msgid	""
 msgstr	"Project-Id-Version: ircd-hybrid-7\n"
-	"POT-Creation-Date: 2000-12-22 19:19+0000\n"
+	"POT-Creation-Date: 2000-12-29 18:22-0500\n"
 	"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 	"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 	"Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,10 +33,15 @@ msgstr	""
 msgid	":%s 004 %s %s %s oiwszcrkfydnxbaug biklmnopstvedIha bklovedIh"
 msgstr	""
 
+#: ../src/messages.tab:30
+#, c-format
+msgid	":%s 005 %s %s :are supported by this server"
+msgstr	""
+
 #: ../src/messages.tab:35
-#, fuzzy, c-format
+#, c-format
 msgid	":%s 010 %s %s %d :Please use this Server/Port instead"
-msgstr ""
+msgstr	""
 
 #: ../src/messages.tab:225
 #, c-format
@@ -175,7 +180,8 @@ msgstr	""
 
 #: ../src/messages.tab:277
 #, c-format
-msgid	":%s 250 %s :Highest connection count: %d (%d clients) (%d connections recieved)"
+msgid	":%s 250 %s :Highest connection count: %d (%d clients) (%d "
+	"connections recieved)"
 msgstr	""
 
 #: ../src/messages.tab:279
@@ -728,8 +734,8 @@ msgid	":%s 479 %s %s :Illegal channel name"
 msgstr	""
 
 #: ../src/messages.tab:513
-#, c-format
-msgid	":%s 481 %s :Permission Denied- You're not an IRC operator"
+#, fuzzy, c-format
+msgid	":%s 481 %s :Permission Denied - You're not an IRC operator"
 msgstr	":%s 481 %s :I don't THINK so, homez... you ain't got what it takes. "
 	"(IRC operator)"
 
