@@ -1,3 +1,26 @@
+leeh        2005/01/25 19:47:38 EST	(20050126_0)
+
+  Modified files:
+    include              channel.h 
+    modules/core         m_join.c m_mode.c m_sjoin.c 
+    src                  channel.c messages.tab s_serv.c 
+  Log:
+  - remove loc_channel_modes(), made channel_modes() handle IsMe() and make
+    an operspy call with &me
+  - remove modebuf/parabuf params from channel_modes(), we now generate a
+    buffer internally which we return.
+  
+  Revision  Changes    Path
+  7.163     +1 -1      ircd-ratbox/include/channel.h
+  1.163     +12 -14    ircd-ratbox/modules/core/m_join.c
+  1.119     +4 -47     ircd-ratbox/modules/core/m_mode.c
+  1.204     +9 -12     ircd-ratbox/modules/core/m_sjoin.c
+  7.431     +25 -18    ircd-ratbox/src/channel.c
+  7.121     +1 -1      ircd-ratbox/src/messages.tab
+  7.424     +6 -14     ircd-ratbox/src/s_serv.c
+
+
+
 alz         2005/01/25 18:09:18 EST	(20050125_5)
 
   Modified files:
