@@ -101,7 +101,6 @@ extern const char *serno;
 extern const char *ircd_version;
 extern const char *logFileName;
 extern const char *pidFileName;
-extern int cold_start;
 extern int dorehash;
 extern int dorehashban;
 extern int doremotd;
@@ -134,8 +133,6 @@ extern dlink_list global_serv_list;
 extern dlink_list oper_list;
 extern dlink_list dead_list;
 extern dlink_list abort_list;
-
-extern void get_current_bandwidth(struct Client *source_p, struct Client *target_p);
 
 extern unsigned long get_maxrss(void);
 extern void set_time(void);

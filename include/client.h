@@ -345,10 +345,8 @@ struct exit_client_hook
 #define FLAGS_DEAD	   0x0002	/* Local socket is dead--Exiting soon */
 #define FLAGS_KILLED       0x0004	/* Prevents "QUIT" from being sent for this */
 #define FLAGS_CLOSING      0x0020	/* set when closing to suppress errors */
-#define FLAGS_CHKACCESS    0x0040	/* ok to check clients access if set */
 #define FLAGS_GOTID        0x0080	/* successful ident lookup achieved */
 #define FLAGS_NEEDID       0x0100	/* I-lines say must use ident return */
-#define FLAGS_NORMALEX     0x0400	/* Client exited normally */
 #define FLAGS_SENDQEX      0x0800	/* Sendq exceeded */
 #define FLAGS_SERVLINK     0x10000	/* servlink has servlink process */
 #define FLAGS_MARK	   0x20000	/* marked client */
@@ -412,9 +410,6 @@ struct exit_client_hook
  * flags macros.
  */
 #define IsPerson(x)             (IsClient(x) && (x)->user)
-#define DoAccess(x)             ((x)->flags & FLAGS_CHKACCESS)
-#define SetAccess(x)            ((x)->flags |= FLAGS_CHKACCESS)
-#define ClearAccess(x)          ((x)->flags &= ~FLAGS_CHKACCESS)
 #define HasServlink(x)          ((x)->flags &  FLAGS_SERVLINK)
 #define SetServlink(x)          ((x)->flags |= FLAGS_SERVLINK)
 #define MyConnect(x)		((x)->flags & FLAGS_MYCONNECT)
@@ -534,7 +529,6 @@ extern void count_remote_client_memory(size_t * count, size_t * memory);
 extern struct Client *find_chasing(struct Client *, const char *, int *);
 extern struct Client *find_person(const char *);
 extern struct Client *find_named_person(const char *);
-extern struct Client *next_client(struct Client *, const char *);
 extern int accept_message(struct Client *source, struct Client *target);
 extern void del_from_accept(struct Client *source, struct Client *target);
 extern void del_all_accepts(struct Client *client_p);

@@ -101,11 +101,8 @@ struct ConfItem
 /* Generic flags... */
 /* access flags... */
 #define CONF_FLAGS_DO_IDENTD            0x00000001
-#define CONF_FLAGS_LIMIT_IP             0x00000002
 #define CONF_FLAGS_NO_TILDE             0x00000004
 #define CONF_FLAGS_NEED_IDENTD          0x00000008
-#define CONF_FLAGS_PASS_IDENTD          0x00000010
-#define CONF_FLAGS_NOMATCH_IP           0x00000020
 #define CONF_FLAGS_EXEMPTKLINE          0x00000040
 #define CONF_FLAGS_NOLIMIT              0x00000080
 #define CONF_FLAGS_IDLE_LINED           0x00000100
@@ -118,7 +115,6 @@ struct ConfItem
 #define CONF_FLAGS_EXEMPTSHIDE		0x00010000
 /* server flags */
 #define CONF_FLAGS_ALLOW_AUTO_CONN      0x00040000
-#define CONF_FLAGS_LAZY_LINK            0x00080000
 #define CONF_FLAGS_ENCRYPTED            0x00100000
 #define CONF_FLAGS_COMPRESSED           0x00200000
 #define CONF_FLAGS_TEMPORARY            0x00400000
@@ -127,11 +123,8 @@ struct ConfItem
 
 
 /* Macros for struct ConfItem */
-#define IsLimitIp(x)            ((x)->flags & CONF_FLAGS_LIMIT_IP)
 #define IsNoTilde(x)            ((x)->flags & CONF_FLAGS_NO_TILDE)
 #define IsNeedIdentd(x)         ((x)->flags & CONF_FLAGS_NEED_IDENTD)
-#define IsPassIdentd(x)         ((x)->flags & CONF_FLAGS_PASS_IDENTD)
-#define IsNoMatchIp(x)          ((x)->flags & CONF_FLAGS_NOMATCH_IP)
 #define IsConfExemptKline(x)    ((x)->flags & CONF_FLAGS_EXEMPTKLINE)
 #define IsConfExemptLimits(x)   ((x)->flags & CONF_FLAGS_NOLIMIT)
 #define IsConfExemptGline(x)    ((x)->flags & CONF_FLAGS_EXEMPTGLINE)
@@ -312,7 +305,6 @@ extern int detach_conf(struct Client *);
 
 extern int conf_connect_allowed(struct sockaddr *addr, int);
 
-extern struct ConfItem *find_tkline(const char *, const char *, struct sockaddr *);
 extern char *show_iline_prefix(struct Client *, struct ConfItem *, char *);
 
 extern void yyerror(const char *);
@@ -337,8 +329,6 @@ extern int rehash_ban(int);
 
 extern void conf_add_class_to_conf(struct ConfItem *);
 extern void conf_add_class(struct ConfItem *, int);
-extern void flush_expired_ips(void *);
-
 
 /* XXX consider moving these into kdparse.h */
 extern void parse_k_file(FILE * fb);
@@ -350,8 +340,6 @@ extern char *getfield(char *newline);
 extern char *get_oper_name(struct Client *client_p);
 
 extern int yylex(void);
-
-extern unsigned long cidr_to_bitmask[];
 
 extern char conffilebuf[IRCD_BUFSIZE + 1];
 extern int lineno;
