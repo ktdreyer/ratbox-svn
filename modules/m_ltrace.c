@@ -129,7 +129,7 @@ int     m_ltrace(struct Client *cptr,
       name = get_client_name(acptr, FALSE);
       ip = inetntoa((char*) &acptr->ip);
 
-      c_class = get_client_class(acptr);
+      c_class = (int)get_client_class(acptr);
 
       if (IsAnyOper(acptr))
         { 
@@ -185,7 +185,7 @@ int     m_ltrace(struct Client *cptr,
       name = get_client_name(acptr, FALSE);
       ip = inetntoa((const char*) &acptr->ip);
 
-      c_class = get_client_class(acptr);
+      c_class = (int)get_client_class(acptr);
       
       switch(acptr->status)
         {

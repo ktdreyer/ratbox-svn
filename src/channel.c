@@ -2794,6 +2794,9 @@ void channel_member_names( struct Client *sptr,
 
   if(reply_to_send)
     sendto_one(sptr, form_str(RPL_NAMREPLY), me.name, sptr->name, buf);
+
+  sendto_one(sptr, form_str(RPL_ENDOFNAMES),
+             me.name, sptr->name, name_of_channel);
 }
 
 /*
