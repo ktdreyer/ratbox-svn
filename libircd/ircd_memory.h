@@ -31,6 +31,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* Needed to use uintptr_t for some pointer manipulation. */
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#else
+#ifndef HAVE_UINTPTR_T
+typedef unsigned long uintptr_t;
+#endif
+#endif
+
 extern void outofmemory(void);
 #ifndef WE_ARE_MEMORY_C
 #undef strdup
