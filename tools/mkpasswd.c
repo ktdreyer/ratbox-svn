@@ -5,6 +5,9 @@
 ** md5 patch by W. Campbell <wcampbel@botbay.net>
 ** Modernization, getopt, etc for the Hybrid IRCD team
 ** by W. Campbell
+** 
+** /dev/random for salt generation added by 
+** Aaron Sethman <androsyn@ratbox.org>
 **
 ** $Id$
 */
@@ -13,6 +16,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #define FLAG_MD5     0x00000001
 #define FLAG_DES     0x00000002
@@ -34,6 +38,8 @@ char *make_md5_salt_para(char *);
 char *make_bf_salt(int, int);
 char *make_bf_salt_para(int, char *);
 char *int_to_base64(int);
+char *generate_random_salt(char *, int);
+char *generate_poor_salt(char *, int);
 
 void full_usage();
 void brief_usage();
@@ -56,9 +62,6 @@ int main(int argc, char *argv[])
                   ** type parameter must be specified before the rounds
                   ** parameter.
                   */
-
-  /* Not the best salt, but... */
-  srandom(time(NULL));
 
   while( (c=getopt(argc, argv, "mdber:h?l:s:p:")) != -1)
   {
@@ -183,8 +186,7 @@ int main(int argc, char *argv[])
 char *make_des_salt()
 {
   static char salt[3];
-  salt[0] = saltChars[random() % 64];
-  salt[1] = saltChars[random() % 64];
+  generate_random_salt(salt, 2);
   salt[2] = '\0';
   return salt;
 }
@@ -209,11 +211,9 @@ char *int_to_base64(int value)
 char *make_ext_salt(int rounds)
 {
   static char salt[10];
-  int i;
 
   sprintf(salt, "_%s", int_to_base64(rounds));
-  for (i=5; i<9; i++)
-    salt[i] = saltChars[random() % 64];
+  generate_random_salt(&salt[5], 4);
   salt[9] = '\0';
   return salt;
 }
@@ -247,7 +247,6 @@ char *make_md5_salt_para(char *saltpara)
 char *make_md5_salt(int length)
 {
   static char salt[21];
-  int i;
   if (length > 16)
   {
     printf("MD5 salt length too long\n");
@@ -256,8 +255,7 @@ char *make_md5_salt(int length)
   salt[0] = '$';
   salt[1] = '1';
   salt[2] = '$';
-  for (i=3; i<(length+3); i++)
-    salt[i] = saltChars[random() % 64];
+  generate_random_salt(&salt[3], length);
   salt[length+3] = '$';
   salt[length+4] = '\0';
   return salt;
@@ -287,7 +285,6 @@ char *make_bf_salt(int rounds, int length)
 {
   static char salt[31];
   char tbuf[3];
-  int i;
   if (length > 22)
   {
     printf("BlowFish salt length too long\n");
@@ -295,13 +292,45 @@ char *make_bf_salt(int rounds, int length)
   }
   sprintf(tbuf, "%02d", rounds);
   sprintf(salt, "$2a$%s$", tbuf);
-  for (i=7; i<(length+7); i++)
-    salt[i] = saltChars[random() % 64];
+  generate_random_salt(&salt[7], length);
   salt[length+7] = '$';
   salt[length+8] = '\0';
   return salt;
 }
 
+char *generate_poor_salt(char *salt, int length)
+{
+  int i;
+  srandom(time(NULL));
+  for(i = 0; i < length; i++)
+  {
+    salt[i] = saltChars[random() % 64];
+  }
+  return(salt);
+}
+
+char *generate_random_salt(char *salt, int length)
+{
+  char *buf;
+  int fd, i;
+  if((fd = open("/dev/random", O_RDONLY)) < 0)
+  {
+    return(generate_poor_salt(salt, length));	
+  }
+  buf = calloc(1, length);
+  if(read(fd, buf, length) != length)
+  {
+    free(buf);
+    return(generate_poor_salt(salt, length));
+  }
+	
+  for(i = 0; i < length; i++)
+  {
+    salt[i] = saltChars[abs(buf[i]) % 64];
+  }
+  free(buf);
+  return(salt);
+}
 
 void full_usage()
 {
