@@ -111,7 +111,7 @@ struct Client
   struct Client*    next;
   struct Client*    prev;
   struct Client*    hnext;
-	struct Client*  idhnext;
+  struct Client*    idhnext;
 	
   struct Client*    lnext;      /* Used for Server->servers/users */
   struct Client*    lprev;      /* Used for Server->servers/users */

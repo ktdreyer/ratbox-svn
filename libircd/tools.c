@@ -22,7 +22,8 @@
 void
 mem_frob(void *data, int len)
 {
-    unsigned char b[4] = { 0xde, 0xad, 0xbe, 0xef };
+  /* correct for Intel only! little endian */
+    unsigned char b[4] = { 0xef, 0xbe, 0xad, 0xde };
     int i;
     char *cdata = data;
     for (i = 0; i < len; i++) {
