@@ -1,3 +1,8 @@
+*** 20001221_8 by db
+- some casts to keep the compiler whining down
+
+
+
 *** 20001221_7 by db
 - updated blalloc.c from einride
 
