@@ -1,3 +1,17 @@
+androsyn    2002/01/03 23:20:41 EST	(20020104_0)
+
+  Modified files:
+    adns                 check.c dlist.h 
+  Log:
+  Fixed brokeness of OS X C compiler.  Thanks a lot for managing to screw up
+  something else..
+  
+  Revision  Changes    Path
+  1.4       +11 -5     ircd-hybrid-7/adns/check.c
+  1.4       +10 -4     ircd-hybrid-7/adns/dlist.h
+
+
+
 leeh        2002/01/03 18:46:18 EST	(20020103_1)
 
   Modified files:
