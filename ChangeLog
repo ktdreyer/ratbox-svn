@@ -1,3 +1,21 @@
+leeh        2004/03/03 14:30:59 EST	(20040303_10)
+
+  Modified files:
+    include              client.h s_serv.h 
+    modules              m_capab.c 
+    src                  s_serv.c 
+  Log:
+  - global capabilities, done over encap.  syntax is:
+    :<source> ENCAP * GCAP :<capabilities>
+  
+  Revision  Changes    Path
+  7.233     +1 -0      ircd-ratbox/include/client.h
+  7.92      +0 -3      ircd-ratbox/include/s_serv.h
+  1.44      +31 -2     ircd-ratbox/modules/m_capab.c
+  7.381     +28 -2     ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2004/03/03 13:45:16 EST	(20040303_9)
 
   Modified files:
