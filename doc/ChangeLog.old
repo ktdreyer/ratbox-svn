@@ -1,3 +1,8 @@
+*** 20010924_3 by jdc
+- src/s_bsd_kqueue: Error checking on some kevent() calls.  ktrace is
+  your friend.
+
+
 *** 20010924_2 by jdc
 - Fixes for Andrew's recent configure additions.
 
