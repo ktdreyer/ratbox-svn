@@ -474,7 +474,7 @@ int
 BlockHeapGarbageCollect(BlockHeap * bh)
 {
 	Block *walker, *last;
-
+	int freed_count = 0;
 	if(bh == NULL)
 	{
 		return (1);
@@ -489,11 +489,12 @@ BlockHeapGarbageCollect(BlockHeap * bh)
 	last = NULL;
 	walker = bh->base;
 
-	while (walker != NULL)
+	while (walker != NULL && free_count < 5)
 	{
 		if((dlink_list_length(&walker->free_list) == bh->elemsPerBlock) != 0)
 		{
 			free_block(walker->elems, walker->alloc_size);
+			free_count++;
 			if(last != NULL)
 			{
 				last->next = walker->next;
