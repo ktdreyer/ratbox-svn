@@ -30,9 +30,11 @@
  * match - returns 1 on successful match, 0 otherwise
  *
  * match_esc - compare with support for escaping chars
+ * match_cidr - compares u!h@addr with u!h@addr/cidr
  */
 extern int match(const char *mask, const char *name);
 extern int match_esc(const char *mask, const char *name);
+extern int match_cidr(const char *mask, const char *name);
 
 /*
  * collapse - collapse a string in place, converts multiple adjacent *'s 
