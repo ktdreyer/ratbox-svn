@@ -143,10 +143,6 @@ COMMAND         - USAGE and DESCRIPTION
 + HASH          - HASH
                   Shows some stats about ircd's internal hashes.
 
-+ DNS           - DNS
-                  Shows some stats about ircd's asynchronous resolving
-                  code
-
 + KLINE         - KLINE <nick|user@host> :[reason]
                   Adds a KLINE to the ircd.conf or klines.conf file which
                   will ban the specified user from using that server.
@@ -178,29 +174,6 @@ COMMAND         - USAGE and DESCRIPTION
 + UNDLINE       - UNDLINE <ip>
                   Will attempt to undline the given <ip>
 
-+ HTM           - HTM [option]
-                  When no [option] is given, HTM shows the current 
-                  High Traffic Mode rate and whether HTM is on or off.
-
-                  [option] can be one of the following:
-                    ON        - Forces High Traffic Mode to be on.  With
-                                this on, ircd is more efficient in
-                                reading server-to-server traffic and
-                                oper traffic, but will be less efficient
-                                than normal with normal client traffic.
-                    OFF       - Forces High Traffic Mode to be off.
-                                (see above)
-                    TO <rate> - Sets the High Traffic Mode rate to
-                                <rate>.  Ircd will automatically go
-                                into High Traffic Mode when <rate>
-                                is reached, and will automatically turn
-                                it off when things calm down.
-                    QUIET     - When set, ircd will not notify opers
-                                when it goes into and out of High
-                                Traffic Mode.
-                    NOISY     - When set, ircd will notify opers
-                                when it goes into and out of High
-                                Traffic Mode.
 + SET           - SET <option> <value>
                   <option> can be one of the following:
                     AUTOCONN    - Sets autoconnect on or off for a particular
@@ -240,6 +213,10 @@ COMMAND         - USAGE and DESCRIPTION
                    -- Looks up given user@host or user@ip 
                    returns info on any found I line or K line for that user,
                    or D-line on ip.
+
++ CJOIN          - CJOIN <channel>
+                   -- Creates a new vchan
+                   Note: this command is usable by users as well as opers.
 
 + MODLOAD        - MODLOAD <path/module.so>
                    -- Load a module into the ircd
