@@ -1,3 +1,7 @@
+*** 20010104_27 by davidt
+Another LazyLinks nick collide fix, this time for new nicks...
+
+
 *** 20010104_26 by toot
 -pedantic
 fixed header in m_clearchan to say contrib
