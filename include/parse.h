@@ -29,17 +29,17 @@
 struct Message;
 struct Client;
 
-struct MessageTree
+struct MessageHash
 {
-  char*               final;
-  struct Message*     msg;
-  struct MessageTree* pointers[26];
+  char   *cmd;
+  struct Message      *msg;
+  struct MessageHash  *next;
 }; 
 
-typedef struct MessageTree MESSAGE_TREE;
+#define MAX_MSG_HASH  387
 
 extern  int     parse (struct Client *, char *, char *);
-extern  void    init_tree_parse (struct Message *);
+extern  void    clear_hash_parse (void);
 extern  int     mod_del_cmd(char *cmd);
 
 #endif /* INCLUDED_parse_h_h */

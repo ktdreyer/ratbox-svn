@@ -54,22 +54,13 @@ static  void    remove_unknown (struct Client *, char *, char *);
 static int do_numeric (char [], struct Client *,
                          struct Client *, int, char **);
 
-static struct Message *do_msg_tree(struct MessageTree *,
-				   char *, struct Message *);
-static struct Message *tree_parse(char *);
+static int hash(char *p);
+static struct Message *hash_parse(char *);
 
-struct MessageTree *msg_tree_root;
-struct Message *msgtab;
-int num_msgs=0;
-int max_msgs=0;
+struct MessageHash *msg_tree_root[MAX_MSG_HASH];
 
-/* allow room for 10 messages at a time */
-#define MESSAGES_INCREMENT 10
-static void increase_msgtab();
-static void clear_msg_tree();
-static void clear_sub_msg_tree(struct MessageTree *mtree);
 
-static char buffer[1024];  /* ZZZ must this be so big? must it be here? */
+static char buffer[1024];
 
 /*
  * parse a buffer.
@@ -200,7 +191,7 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
       s = strchr(ch, ' ');      /* moved from above,now need it here */
       if (s)
         *s++ = '\0';
-      mptr = tree_parse(ch);
+      mptr = hash_parse(ch);
 
       if (!mptr || !mptr->cmd)
         {
@@ -344,171 +335,55 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
   return (*handler)(cptr, from, i, para);
 }
 
-/* for qsort'ing the msgtab in place -orabidoo */
-static int mcmp(struct Message *m1, struct Message *m2)
-{
-  return strcmp(m1->cmd, m2->cmd);
-}
 
 /*
- * init_tree_parse()
+ * init_hash_parse()
  *
- * inputs               - pointer to msg_table defined in msg.h 
+ * inputs       -
  * output       - NONE
  * side effects - MUST MUST be called at startup ONCE before
  *                any other keyword hash routine is used.
  *
- * Initialize the msgtab parsing tree -orabidoo
  */
-void init_tree_parse(struct Message *mptr)
+void clear_hash_parse()
 {
-  msg_tree_root = (struct MessageTree *)MyMalloc(sizeof(struct MessageTree));
-  msgtab = (struct Message *)MyMalloc(
-				      sizeof(struct Message) * 
-				      MESSAGES_INCREMENT);
-
-  max_msgs = MESSAGES_INCREMENT;
-#if 0
-  if (mpt->cmd)
-    {
-      log(L_CRIT, "bad msgtab entry: ``%s''\n", mpt->cmd);
-      exit(1);
-    }
-#endif
+  memset(msg_tree_root,0,sizeof(msg_tree_root));
 }
 
-/*  Recursively make a prefix tree out of the msgtab -orabidoo
- */
-static struct Message *do_msg_tree(struct MessageTree *mtree, char *prefix,
-                                struct Message *mptr)
-{
-  char newpref[64];  /* must be longer than any command */
-  int c, c2, lp;
-  struct MessageTree *mtree1;
-
-  lp = strlen(prefix);
-  if (!lp || !strncmp(mptr->cmd, prefix, lp))
-    {
-      if (!mptr[1].cmd || (lp && strncmp(mptr[1].cmd, prefix, lp)))
-        {
-          /* non ambiguous -> make a final case */
-          mtree->final = mptr->cmd + lp;
-          mtree->msg = mptr;
-          for (c=0; c<=25; c++)
-            mtree->pointers[c] = NULL;
-          return mptr+1;
-        }
-      else
-        {
-          /* ambigous -> make new entries for each of the letters that match */
-          if (!irccmp(mptr->cmd, prefix))
-            {
-              /* fucking OPERWALL blows me */
-              mtree->final = (void *)1;
-              mtree->msg = mptr;
-              mptr++;
-            }
-          else
-            mtree->final = NULL;
-
-      for (c='A'; c<='Z'; c++)
-        {
-          if (mptr->cmd[lp] == c)
-            {
-              mtree1 = (struct MessageTree *)
-		MyMalloc(sizeof(struct MessageTree));
-
-              mtree1->final = NULL;
-              mtree->pointers[c-'A'] = mtree1;
-              strcpy(newpref, prefix);
-              newpref[lp] = c;
-              newpref[lp+1] = '\0';
-              mptr = do_msg_tree(mtree1, newpref, mptr);
-              if (!mptr->cmd || strncmp(mptr->cmd, prefix, lp))
-                {
-                  for (c2=c+1-'A'; c2<=25; c2++)
-                    mtree->pointers[c2] = NULL;
-                  return mptr;
-                }
-            } 
-          else
-            {
-              mtree->pointers[c-'A'] = NULL;
-            }
-        }
-      return mptr;
-        }
-    } 
-  else
-    {
-      assert(0);
-      exit(1);
-    }
-  return (0); 
-}
-
-/*
- * tree_parse()
- * 
- * inputs       - pointer to command in upper case
- * output       - NULL pointer if not found
- *                struct Message pointer to command entry if found
- * side effects - NONE
+/* mod_add_cmd
  *
- *      -orabidoo 
+ * inputs	- command name
+ *		- pointer to struct Message
+ * output	- none
+ * side effects - load this one command name
  */
-
-static struct Message *tree_parse(char *cmd)
-{
-  char r;
-  struct MessageTree *mtree = msg_tree_root;
-
-  while ((r = *cmd++))
-    {
-      r &= 0xdf;  /* some touppers have trouble w/ lowercase, says Dianora */
-      if (r < 'A' || r > 'Z')
-        return NULL;
-      mtree = mtree->pointers[r - 'A'];
-      if (!mtree)
-        return NULL;
-      if (mtree->final == (void *)1)
-        {
-          if (!*cmd)
-            return mtree->msg;
-        }
-      else
-        if (mtree->final && !irccmp(mtree->final, cmd))
-          return mtree->msg;
-    }
-  return ((struct Message *)NULL);
-}
-
 void
 mod_add_cmd(char *cmd, struct Message *msg)
 {
-  int i; 
+  struct MessageHash *ptr;
+  struct MessageHash *last_ptr = NULL;
+  struct MessageHash *new_ptr;
+  int    index;
 
-  clear_msg_tree();
+  index = hash(cmd);
 
-  for (i = 0; i < num_msgs && msgtab[i].cmd; i++)
+  for(ptr = msg_tree_root[index]; ptr; ptr = ptr->next )
     {
-      if (!irccmp(msgtab[i].cmd, cmd))
-	{
-	  /* already in msgtab, so replace it */
-	  memcpy( &msgtab[i], msg, sizeof(struct Message));
-	  qsort((void *)msgtab, num_msgs, sizeof(struct Message), 
-		(int (*)(const void *, const void *)) mcmp);
-	  do_msg_tree(msg_tree_root, "", msgtab);
-	  return;
-	}
+      if (strcasecmp(cmd,ptr->cmd) == 0)
+	return;				/* Its already added */
+      last_ptr = ptr;
     }
 
-  increase_msgtab();
-  memcpy(&msgtab[num_msgs], msg, sizeof(struct Message));
-  num_msgs++;
-  qsort((void *)msgtab, num_msgs, sizeof(struct Message), 
-                (int (*)(const void *, const void *)) mcmp);
-  do_msg_tree(msg_tree_root, "", msgtab);
+  new_ptr = (struct MessageHash *)MyMalloc(sizeof(struct MessageHash));
+
+  new_ptr->next = NULL;
+  DupString(new_ptr->cmd,cmd);
+  new_ptr->msg = msg;
+
+  if(last_ptr == NULL)
+    msg_tree_root[index] = new_ptr;
+  else
+    last_ptr->next = new_ptr;
 }
 
 /* mod_del_cmd
@@ -519,105 +394,73 @@ mod_add_cmd(char *cmd, struct Message *msg)
  */
 int mod_del_cmd(char *cmd)
 {
-  int i; 
+  struct MessageHash *ptr;
+  struct MessageHash *last_ptr = NULL;
+  int    index;
 
-  for (i = 0; i < num_msgs && msgtab[i].cmd; i++)
+  index = hash(cmd);
+
+  for(ptr = msg_tree_root[index]; ptr; ptr = ptr->next )
     {
-      if (!irccmp(msgtab[i].cmd, cmd))
+      if(strcasecmp(cmd,ptr->cmd) == 0)
 	{
-	  memcpy( &msgtab[i], &msgtab[i+1],
-		  sizeof(struct Message) * ((num_msgs-1) - i) );
-
-	  if(num_msgs != 0)
-	    num_msgs--;
-
-	  clear_msg_tree();
-	  qsort((void *)msgtab, num_msgs, sizeof(struct Message), 
-		(int (*)(const void *, const void *)) mcmp);
-	  do_msg_tree(msg_tree_root, "", msgtab);
-	  return 0;
+	  MyFree(ptr->cmd);
+	  if(last_ptr != NULL)
+	    last_ptr->next = ptr->next;
+	  else
+	    msg_tree_root[index] = ptr->next;
+	  MyFree(ptr);
+	  return;
 	}
     }
-  return -1;
 }
 
-/*
- * increase_msgtab
+/* hash_parse
  *
- * inputs	- NONE
- * output	- NONE
- * side effects	- expand the size of msgtab if necessary
+ * inputs	- command name
+ * output	- pointer to struct Message
+ * side effects - 
  */
-static void increase_msgtab()
+struct Message *hash_parse(char *cmd)
 {
-  struct Message *new_msgtab;
+  struct MessageHash *ptr;
+  int    index;
 
-  if( (num_msgs + 1) < max_msgs )
-    return;
+  index = hash(cmd);
 
-  new_msgtab = (struct Message *)MyMalloc(
-					  sizeof(struct Message) * 
-					  (max_msgs + MESSAGES_INCREMENT));
-
-  memcpy((void *)new_msgtab,
-	 (void *)msgtab, sizeof(struct Message) * num_msgs);
-
-  MyFree(msgtab);
-  msgtab = new_msgtab;
-  max_msgs += MESSAGES_INCREMENT;
-}
-
-
-/*
- * clear_msg_tree
- * inputs	- NONE
- * output	- NONE
- * side effects	- msg_tree is cleared out, all memory allocated is freed
- */
-static void clear_msg_tree()
-{
-  struct MessageTree *mtree = msg_tree_root;
-  int c;
-
-  for (c=0; c<=25; c++)
+  for(ptr = msg_tree_root[index]; ptr; ptr = ptr->next )
     {
-      clear_sub_msg_tree(mtree->pointers[c]);
-    }
-
-  mtree = msg_tree_root;
-
-  for (c=0; c<=25; c++)
-    {
-      mtree->pointers[c] = NULL;
-    }
-
-  memset(msg_tree_root,0,sizeof(struct MessageTree));
-  return; 
-}
-
-/*
- * clear_sub_msg_tree
- * inputs	- pointer to current level of MessageTree to clear
- * output	- NONE
- * side effects	- msg_tree is cleared out, all memory allocated is freed
- */
-static void clear_sub_msg_tree(struct MessageTree *mtree)
-{
-  int c;
-
-  if( mtree == NULL )
-    return;
-
-  for (c=0; c<=25; c++)
-    {
-      if(mtree->pointers[c] != NULL)
+      if(strcasecmp(cmd,ptr->cmd) == 0)
 	{
-	  clear_sub_msg_tree(mtree->pointers[c]);
-	  MyFree(mtree->pointers[c]);
+	  return(ptr->msg);
 	}
     }
-  return; 
+  return NULL;
 }
+
+/*
+ * hash
+ *
+ * inputs	- char string
+ * output	- hash index
+ * side effects - NONE
+ *
+ * BUGS		- This a HORRIBLE hash function
+ */
+static int
+hash(char *p)
+{
+  int hash_val=0;
+
+  while(*p)
+    {
+      hash_val += ((int)(*p)&0xDF);
+      p++;
+    }
+
+  return(hash_val % MAX_MSG_HASH);
+}
+
 
 /*
  * cancel_clients

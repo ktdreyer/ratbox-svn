@@ -614,11 +614,12 @@ int main(int argc, char *argv[])
   clear_scache_hash_table();    /* server cache name table */
   clear_ip_hash_table();        /* client host ip hash table */
   clear_Dline_table();          /* d line tree */
+  clear_hash_parse();
+
   initlists();
   initclass();
   initwhowas();
   init_stats();
-  init_tree_parse(msgtab);      /* tree parse code (orabidoo) */
 
   load_all_modules();
 
