@@ -1,3 +1,10 @@
+*** 20010315_2 by fl_
+- made jupe use exit_client()
+- added a hack for the long reason core.. I made into into a topiclen,
+  until someone wants to change it to something that wont core like
+  ircnsprintf when its >reallen
+
+
 *** 20010315_1 by fl_
 - tidied up whats-new a lot.. split the stuff into sections etc :)
 
