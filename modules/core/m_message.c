@@ -231,6 +231,7 @@ static int m_message(int p_or_n,
                command,
                parv[1],
                parv[2]);
+    return 0;
   }
   for(i = 0; i < ntargets ; i++)
     {
@@ -260,7 +261,7 @@ static int m_message(int p_or_n,
     }
 
   free_target_table();
-  return 1;
+  return 0;
 }
 
 /*
@@ -305,7 +306,7 @@ static int build_target_list(int p_or_n,
     target_list = ncbuf;
   }
   else
-    target_list = nicks_channels;
+    target_list = nicks_channels; /* skip strcpy for non-lazyleafs */
   
   for (nick = strtoken(&p, target_list, ","); nick; 
        nick = strtoken(&p, (char *)NULL, ","))
@@ -335,7 +336,11 @@ static int build_target_list(int p_or_n,
 	  else
 	    {
               if(!ConfigFileEntry.hub && uplink && IsCapable(uplink, CAP_LL))
+              {
+                target_table_size = i;
+                free_target_table();
                 return -1;
+              }
               else if(p_or_n != NOTICE)
 		sendto_one(sptr, form_str(ERR_NOSUCHNICK), me.name,
 			   sptr->name, nick );
@@ -393,7 +398,11 @@ static int build_target_list(int p_or_n,
 	  else
 	    {
               if(!ConfigFileEntry.hub && uplink && IsCapable(uplink, CAP_LL))
+              {
+                target_table_size = i;
+                free_target_table();
                 return -1;
+              }
               else if(p_or_n != NOTICE)
 		sendto_one(sptr, form_str(ERR_NOSUCHNICK), me.name,
 			   sptr->name, nick );

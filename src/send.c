@@ -53,26 +53,12 @@
 
 #define LOG_BUFSIZE 2048
 
-/* As incoming buffers are limited to 512 bytes by linebuf
- * The maximum needed here is 2 * 512
- */
-static  char sendbuf[IRCD_BUFSIZE*2];
-static  char sendbuf2[IRCD_BUFSIZE*2];
-static  char buf[IRCD_BUFSIZE*2];
-static  char local_prefix[NICKLEN+HOSTLEN+USERLEN+5];
-static  char local_sendbuf[IRCD_BUFSIZE*2];
-static  char remote_prefix[NICKLEN+HOSTLEN+USERLEN+5];
-static  char remote_sendbuf[IRCD_BUFSIZE*2];
-static  int local_len;
-static  int remote_len;
-
 static  int
 send_message (struct Client *, char *, int);
 
 static void
 send_message_remote(struct Client *to, struct Client *from,
 		    const char *lsendbuf, int len);
-
 
 /* global for now *sigh* */
 unsigned long current_serial=0L;
@@ -109,9 +95,14 @@ send_trim(char *lsendbuf, int len );
 **      like Persons and yet unknown connections...
 */
 
+/*
+ * XXX - we should do something about this function now..
+ *       It's not needed any more, since exit_client() won't free
+ *       the client until the next io_loop
+ */
+
 static int
 dead_link(struct Client *to, char *notice)
-
 {
   to->flags |= FLAGS_DEADSOCKET;
 
@@ -373,6 +364,7 @@ void
 sendto_one(struct Client *to, const char *pattern, ...)
 
 {
+  char sendbuf[IRCD_BUFSIZE*2];
   int len;
   va_list args;
 
@@ -419,6 +411,7 @@ sendto_one_prefix(struct Client *to, struct Client *prefix,
 {
   int ilen, llen;
   va_list args;
+  char sendbuf[IRCD_BUFSIZE*2];
   char ibuf[IRCD_BUFSIZE + 1];
   char lbuf[IRCD_BUFSIZE + 1];
   struct Client *to_sendto;
@@ -475,6 +468,13 @@ sendto_channel_butone(struct Client *one, struct Client *from,
 		      struct Channel *chptr, char *command,
                       const char *pattern, ...)
 {
+  char buf[IRCD_BUFSIZE*2];
+  char local_prefix[NICKLEN+HOSTLEN+USERLEN+5];
+  char local_sendbuf[IRCD_BUFSIZE*2];
+  char remote_prefix[NICKLEN+HOSTLEN+USERLEN+5];
+  char remote_sendbuf[IRCD_BUFSIZE*2];
+  int remote_len;
+  int local_len;
   va_list    args;
 
   va_start(args, pattern);
@@ -592,6 +592,7 @@ sendto_serv_butone(struct Client *one, const char *pattern, ...)
 {
   int len;
   va_list args;
+  char sendbuf[IRCD_BUFSIZE*2];
   struct Client *cptr;
   dlink_node *ptr;
 
@@ -626,11 +627,12 @@ sendto_ll_serv_butone(struct Client *one, struct Client *sptr, int add,
 {
   int len;
   va_list args;
+  char sendbuf[IRCD_BUFSIZE*2];
   struct Client *cptr;
   dlink_node *ptr;
 
   va_start(args, pattern);
-  len = send_format(sendbuf2,pattern,args);
+  len = send_format(sendbuf,pattern,args);
   va_end(args);
   
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
@@ -648,14 +650,14 @@ sendto_ll_serv_butone(struct Client *one, struct Client *sptr, int add,
 	      if(add)
 		{
                   client_burst_if_needed(cptr,sptr);
-		  send_message(cptr, (char *)sendbuf2, len);
+		  send_message(cptr, (char *)sendbuf, len);
 		}
 	    }
 	  else
-	    send_message(cptr, (char *)sendbuf2, len);
+	    send_message(cptr, (char *)sendbuf, len);
 	}
       else
-	send_message(cptr, (char *)sendbuf2, len);
+	send_message(cptr, (char *)sendbuf, len);
     }
 } /* sendto_ll_serv_butone() */
 
@@ -674,6 +676,7 @@ sendto_cap_serv_butone(int cap, struct Client *one, const char *pattern, ...)
 {
   int len;
   va_list args;
+  char sendbuf[IRCD_BUFSIZE*2];
   struct Client *cptr;
   dlink_node *ptr;
 
@@ -708,6 +711,7 @@ sendto_nocap_serv_butone(int cap, struct Client *one, const char *pattern, ...)
 {
   int len;
   va_list args;
+  char sendbuf[IRCD_BUFSIZE*2];
   struct Client *cptr;
   dlink_node *ptr;
 
@@ -743,6 +747,7 @@ sendto_common_channels_local(struct Client *user, const char *pattern, ...)
 {
   int len;
   va_list args;
+  char sendbuf[IRCD_BUFSIZE*2];
   dlink_node *ptr;
   struct Channel *chptr;
 
@@ -786,6 +791,7 @@ sendto_channel_local(int type,
 		     const char *pattern, ...)
 {
   int len;
+  char sendbuf[IRCD_BUFSIZE*2];
   va_list args;
 
   va_start(args, pattern);
@@ -806,7 +812,7 @@ sendto_channel_local(int type,
       break;
 
     case NON_CHANOPS:
-      sendto_list_local(&chptr->voiced,   sendbuf, len);
+      sendto_list_local(&chptr->voiced,  sendbuf, len);
       sendto_list_local(&chptr->peons,   sendbuf, len);
       break;
 
@@ -877,6 +883,7 @@ sendto_channel_remote(struct Channel *chptr,
 		      const char *pattern, ...)
 {
   int len;
+  char sendbuf[IRCD_BUFSIZE*2];
   va_list args;
   struct Client *cptr;
   dlink_node *ptr;
@@ -924,13 +931,14 @@ sendto_channel_remote(struct Channel *chptr,
 void
 sendto_channel_remote_prefix(struct Channel *chptr,
 		      struct Client *from,
-							 struct Client *prefix,
+                      struct Client *prefix,
 		      const char *pattern, ...)
 {
   int ilen, llen;
   va_list args;
   struct Client *cptr;
   dlink_node *ptr;
+  char sendbuf[IRCD_BUFSIZE*2];
   char lbuf[IRCD_BUFSIZE + 1];
   char ibuf[IRCD_BUFSIZE + 1];
   
@@ -991,6 +999,7 @@ sendto_ll_channel_remote(struct Channel *chptr,
 {
   int len;
   va_list args;
+  char sendbuf[IRCD_BUFSIZE*2];
   struct Client *cptr;
   dlink_node *ptr;
 
@@ -1003,7 +1012,7 @@ sendto_ll_channel_remote(struct Channel *chptr,
     return;
 
   va_start(args, pattern);
-  len = send_format(sendbuf2,pattern,args);
+  len = send_format(sendbuf,pattern,args);
   va_end(args);
 
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
@@ -1033,7 +1042,7 @@ sendto_ll_channel_remote(struct Channel *chptr,
 	    }
 	}
 
-      send_message (cptr, (char *)sendbuf2, len);
+      send_message (cptr, (char *)sendbuf, len);
     }
 } /* sendto_channel_remote() */
 
@@ -1055,6 +1064,7 @@ sendto_match_cap_servs(struct Channel *chptr, struct Client *from, int cap,
                        const char *pattern, ...)
 {
   int len;
+  char sendbuf[IRCD_BUFSIZE*2];
   va_list args;
   struct Client *cptr;
   dlink_node *ptr;
@@ -1103,10 +1113,11 @@ sendto_match_cap_servs(struct Channel *chptr, struct Client *from, int cap,
  */
 
 void
-sendto_match_cap_servs_nocap(struct Channel *chptr, struct Client *from, int cap, int nocap,
-                       const char *pattern, ...)
+sendto_match_cap_servs_nocap(struct Channel *chptr, struct Client *from,
+                             int cap, int nocap, const char *pattern, ...)
 {
   int len;
+  char sendbuf[IRCD_BUFSIZE*2];
   va_list args;
   struct Client *cptr;
   dlink_node *ptr;
@@ -1144,10 +1155,11 @@ sendto_match_cap_servs_nocap(struct Channel *chptr, struct Client *from, int cap
 
 void
 sendto_match_nocap_servs(struct Channel *chptr, struct Client *from, int cap,
-                       const char *pattern, ...)
+                         const char *pattern, ...)
 {
   int len;
   va_list args;
+  char sendbuf[IRCD_BUFSIZE*2];
   struct Client *cptr;
   dlink_node *ptr;
 
@@ -1228,6 +1240,7 @@ sendto_match_butone(struct Client *one, struct Client *from,
   va_list args;
   struct Client *cptr;
   dlink_node *ptr;
+  char sendbuf[IRCD_BUFSIZE*2];
   char lbuf[IRCD_BUFSIZE*2];
 
   va_start(args, pattern);
@@ -1309,6 +1322,7 @@ sendto_anywhere(struct Client *to, struct Client *from,
 {
   int len;
   va_list args;
+  char sendbuf[IRCD_BUFSIZE*2];
   char prefix[NICKLEN+HOSTLEN+USERLEN+5];	/* same as USERHOST_REPLYLEN */
   char lbuf[IRCD_BUFSIZE*2];
 
@@ -1360,6 +1374,7 @@ sendto_realops_flags(int flags, const char *pattern, ...)
 {
   int len;
   struct Client *cptr;
+  char sendbuf[IRCD_BUFSIZE*2];
   char nbuf[IRCD_BUFSIZE*2];
   dlink_node *ptr;
   va_list args;
@@ -1417,13 +1432,14 @@ sendto_realops_flags(int flags, const char *pattern, ...)
  */
 
 void
-sendto_realops_flags_opers(int flags, struct Client *sptr, const char *pattern, ...)
-
+sendto_realops_flags_opers(int flags, struct Client *sptr,
+                           const char *pattern, ...)
 {
   char prefix[NICKLEN + USERLEN + HOSTLEN + 5];
   int len;
   struct Client *cptr;
   char nbuf[IRCD_BUFSIZE*2];
+  char sendbuf[IRCD_BUFSIZE*2];
   dlink_node *ptr;
   va_list args;
 
@@ -1464,7 +1480,6 @@ sendto_realops_flags_opers(int flags, struct Client *sptr, const char *pattern, 
  
 void
 ts_warn(const char *pattern, ...)
-
 {
   va_list args;
   char lbuf[LOG_BUFSIZE];
