@@ -1,3 +1,18 @@
+*** 20001210_13 by db
+- CAP_CHW works again between compatible CAP_CHW servers..
+  Thats the /quote privmsg @#channel :message
+  functionality borrowed from dalnet/ircnet?
+
+Pending BUGS;
+  - /msg $#hostmask is still broken across servers
+  - /squit of a remote server appears to be broken
+
+Pending re-work:
+  - check_pings()/check_kline() should be reworked so as not to use a
+    fixed size array...
+
+
+
 *** 20001210_12 by db
 - This fixes prefix on a nick change sent to local server.
 
