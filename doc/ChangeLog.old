@@ -1,3 +1,16 @@
+leeh        2002/04/30 08:45:03 EDT	(20020430_4)
+
+  Modified files:
+    tools                README convertilines.c 
+  Log:
+  - added a license and updated readme
+  
+  Revision  Changes    Path
+  7.10      +2 -1      ircd-hybrid-7/tools/README
+  7.2       +25 -1     ircd-hybrid-7/tools/convertilines.c
+
+
+
 leeh        2002/04/30 07:35:02 EDT	(20020430_3)
 
   Modified files:
