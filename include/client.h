@@ -4,17 +4,11 @@
 #define REALLEN 50
 #define REASONLEN 50
 
-#include "config.h"
-
-/* XXX UGLY */
-#ifdef USER_SERVICE
-#include "s_userserv.h"
-#endif
-
 #define USERHOSTLEN (USERLEN + HOSTLEN + 1)
 #define NICKUSERHOSTLEN	(NICKLEN + USERLEN + HOSTLEN + 2)
 
 #define MAX_NAME_HASH 65536
+#define MAX_HOST_HASH 65536
 
 extern dlink_list user_list;
 extern dlink_list oper_list;
@@ -103,6 +97,18 @@ struct service
         void (*stats)(struct connection_entry *, char *parv[], int parc);
 };
 
+struct host_entry
+{
+	char *name;
+	int flood;
+	time_t flood_expire;
+	int cregister;
+	time_t cregister_expire;
+	int uregister;
+	time_t uregister_expire;
+	dlink_node node;
+};
+
 #define IsServer(x) ((x)->server != NULL)
 #define IsUser(x) ((x)->user != NULL)
 #define IsService(x) ((x)->service != NULL)
@@ -158,6 +164,7 @@ extern struct client *find_client(const char *name);
 extern struct client *find_user(const char *name);
 extern struct client *find_server(const char *name);
 extern struct client *find_service(const char *name);
+struct host_entry *find_host(const char *name);
 
 extern void exit_client(struct client *target_p);
 extern void free_client(struct client *target_p);

@@ -21,6 +21,7 @@
 #include "conf.h"
 
 static dlink_list name_table[MAX_NAME_HASH];
+static dlink_list host_table[MAX_HOST_HASH];
 
 dlink_list user_list;
 dlink_list oper_list;
@@ -30,6 +31,9 @@ dlink_list exited_list;
 static BlockHeap *client_heap;
 static BlockHeap *user_heap;
 static BlockHeap *server_heap;
+static BlockHeap *host_heap;
+
+static void cleanup_host_table(void *);
 
 static void c_kill(struct client *, const char *parv[], int parc);
 static void c_nick(struct client *, const char *parv[], int parc);
@@ -52,6 +56,9 @@ init_client(void)
         client_heap = BlockHeapCreate(sizeof(struct client), HEAP_CLIENT);
         user_heap = BlockHeapCreate(sizeof(struct user), HEAP_USER);
         server_heap = BlockHeapCreate(sizeof(struct server), HEAP_SERVER);
+	host_heap = BlockHeapCreate(sizeof(struct host_entry), HEAP_HOST);
+
+	eventAdd("cleanup_host_table", cleanup_host_table, NULL, 3600);
 
 	add_scommand_handler(&kill_command);
 	add_scommand_handler(&nick_command);
@@ -77,6 +84,19 @@ hash_name(const char *p)
 	}
 
 	return(h & (MAX_NAME_HASH-1));
+}
+
+static unsigned int
+hash_host(const char *p)
+{
+	unsigned int h = 0;
+
+	while(*p)
+	{
+		h = (h << 4) - (h + (unsigned char) ToLower(*p++));
+	}
+
+	return (h & (MAX_HOST_HASH - 1));
 }
 
 /* add_client()
@@ -178,6 +198,63 @@ find_service(const char *name)
 		return target_p;
 
 	return NULL;
+}
+
+/* cleanup_host_table()
+ *   Walks the hostname hash, cleaning out any entries that have expired
+ *
+ * inputs	- 
+ * outputs	- 
+ */
+static void
+cleanup_host_table(void *unused)
+{
+	struct host_entry *hent;
+	dlink_node *ptr, *next_ptr;
+	int i;
+
+	HASH_WALK_SAFE(i, MAX_HOST_HASH, ptr, next_ptr, host_table)
+	{
+		hent = ptr->data;
+
+		if(hent->flood_expire < CURRENT_TIME &&
+		   hent->cregister_expire < CURRENT_TIME &&
+		   hent->uregister_expire < CURRENT_TIME)
+		{
+			dlink_delete(&hent->node, &host_table[i]);
+			my_free(hent->name);
+			BlockHeapFree(host_heap, hent);
+		}
+	}
+	HASH_WALK_END
+}
+
+/* find_host()
+ *   finds a host entry from the hashtable, adding it if not found
+ *
+ * inputs	- name of host to find
+ * outputs	- host entry for this host
+ */
+struct host_entry *
+find_host(const char *name)
+{
+	struct host_entry *hent;
+	dlink_node *ptr;
+	unsigned int hashv = hash_host(name);
+
+	DLINK_FOREACH(ptr, name_table[hashv].head)
+	{
+		hent = ptr->data;
+
+		if(!irccmp(hent->name, name))
+			return hent;
+	}
+
+	hent = BlockHeapAlloc(host_heap);
+	hent->name = my_strdup(name);
+	dlink_add(hent, &hent->node, &host_table[hashv]);
+
+	return hent;
 }
 
 /* exit_user()

@@ -36,12 +36,14 @@
 #define HEAP_CLIENT     128
 #define HEAP_USER       128
 #define HEAP_SERVER     16
+#define HEAP_HOST	128
 #define HEAP_DLINKNODE	128
 #else
 #define HEAP_CHANNEL    1024
 #define HEAP_CHMEMBER   1024
 #define HEAP_CLIENT     1024
 #define HEAP_USER       1024
+#define HEAP_HOST	1024
 #define HEAP_SERVER     32
 #define HEAP_DLINKNODE	1024
 #endif
@@ -52,10 +54,6 @@
 #define HEAP_CHANNEL_REG	128
 #define HEAP_MEMBER_REG	256
 #define HEAP_BAN_REG	512
-
-#if defined(CHANNEL_SERVICE) && !defined(USER_SERVICE)
-# error CHANNEL_SERVICE requires USER_SERVICE
-#endif
 
 #endif
 /* $Id$ */
