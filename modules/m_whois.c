@@ -92,9 +92,10 @@ int     m_whois(struct Client *cptr,
   if ((acptr = hash_find_client(parv[1], (struct Client*)NULL)) &&
       !MyConnect(acptr) && IsClient(acptr) && parc > 2)
     {
-     sendto_one(acptr->from, ":%s WHOIS %s :%s", parv[0], parv[1],
-                parv[1]);
-     return 0;
+      client_burst_if_needed(acptr->from, sptr);
+      sendto_one(acptr->from, ":%s WHOIS %s :%s", parv[0], parv[1],
+                 parv[1]);
+      return 0;
     }
   
 
