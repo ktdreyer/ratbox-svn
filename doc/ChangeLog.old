@@ -1,3 +1,12 @@
+*** 20000105_12 by db
+- HUB removed, server determines if its HUB or LEAF by looking
+  at (Now unused) port line in M line. If its a 1, its a HUB, if
+  its missing or anything else, its a LEAF.
+  Can be queried from /admin
+  Yes, its a hack for now.
+
+
+
 *** 20000105_11 by db
 - removed HUB from config.h etc. now in a config entry
 
