@@ -611,10 +611,8 @@ int adns_init(adns_state *ads_r, adns_initflags flags, FBFILE *diagfile) {
     return r;
   }
 
-  ilog(L_CRIT, "About to pass 2");
   r= init_finish(ads);
   if (r) return r;
-  ilog(L_CRIT, "Reached 2");
 
   adns__consistency(ads,0,cc_entex);
   *ads_r= ads;
@@ -701,6 +699,7 @@ adns_query adns_forallqueries_next(adns_state ads, void **context_r) {
 
 int adns__rereadconfig(adns_state ads)
 {
+  struct in_addr ia;
   adns__consistency(ads,0,cc_entex);
   ads->nservers = 0;	
 #ifndef VMS
@@ -708,6 +707,11 @@ int adns__rereadconfig(adns_state ads)
 #else
   readconfig(ads,"[]resolv.conf",0);
 #endif
+  if (!ads->nservers)
+  {
+      ia.s_addr= htonl(INADDR_LOOPBACK);
+      addserver(ads,ia);
+  }
   adns__consistency(ads,0,cc_entex);
   return 0;
 }
