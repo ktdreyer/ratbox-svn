@@ -1,3 +1,9 @@
+*** 20011025_3 by wcampbel
+Updated whats-new.txt to not reference removed items and to be technically
+  accurate with the current operation of ircd.
+Corrected an unclear commit comment.
+
+
 *** 20011025_2 by androsyn
 Fixed problem that was causing /mode Nick to fail
 
