@@ -1,3 +1,6 @@
+*** 20001229_25 by davidt
+oops.  Stay compatable with ircd-hybrid-6...
+
 *** 20001229_24 by davidt
 Fix $$/$# -- still problems with LL, just like everything else..
 I'll look into that [again] later..
