@@ -4317,7 +4317,7 @@ cat >>confdefs.h <<\_ACEOF
 _ACEOF
 
 else
-	$enable_static="no"
+	enable_static="no"
 fi
 
   case $enable_ltdl_convenience in
