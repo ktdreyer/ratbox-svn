@@ -709,6 +709,22 @@ oper_entry:     OPERATOR
       if (yy_achead->passwd)
         DupString(yy_tmp->passwd, yy_achead->passwd);
       yy_tmp->port = yy_achead->port;
+
+#ifdef HAVE_LIBCRYPTO
+      if(yy_achead->rsa_public_key_file)
+        DupString(yy_tmp->rsa_public_key_file, yy_achead->rsa_public_key_file);
+
+      if(yy_achead->rsa_public_key)
+      {
+        BIO *file;
+
+	file = BIO_new_file(yy_achead->rsa_public_key_file);
+	yy_tmp->rsa_public_key = (RSA *)PEM_read_bio_RSA_PUBKEY(file,
+	                                           NULL, 0, NULL);
+        BIO_set_close(file, BIO_CLOSE);
+	BIO_free(file);
+      }
+#endif
     }
 
     for( yy_tmp = yy_achead; yy_tmp; yy_tmp = yy_next )
@@ -798,19 +814,19 @@ oper_rsa_public_key_file: RSA_PUBLIC_KEY_FILE '=' QSTRING ';'
 #ifdef HAVE_LIBCRYPTO
     BIO *file;
 
-    if (yy_aconf->rsa_public_key)
+    if (yy_achead->rsa_public_key)
     {
-      RSA_free(yy_aconf->rsa_public_key);
-      yy_aconf->rsa_public_key = NULL;
+      RSA_free(yy_achead->rsa_public_key);
+      yy_achead->rsa_public_key = NULL;
     }
 
-    if (yy_aconf->rsa_public_key_file)
+    if (yy_achead->rsa_public_key_file)
     {
-      MyFree(yy_aconf->rsa_public_key_file);
-      yy_aconf->rsa_public_key_file = NULL;
+      MyFree(yy_achead->rsa_public_key_file);
+      yy_achead->rsa_public_key_file = NULL;
     }
 
-    DupString(yy_aconf->rsa_public_key_file, yylval.string);
+    DupString(yy_achead->rsa_public_key_file, yylval.string);
 
     file = BIO_new_file(yylval.string, "r");
 
@@ -821,10 +837,10 @@ oper_rsa_public_key_file: RSA_PUBLIC_KEY_FILE '=' QSTRING ';'
       break;
     }
 
-    yy_aconf->rsa_public_key = (RSA *) PEM_read_bio_RSA_PUBKEY(file,
+    yy_achead->rsa_public_key = (RSA *) PEM_read_bio_RSA_PUBKEY(file,
                                                     NULL, 0, NULL );
 
-    if (yy_aconf->rsa_public_key == NULL)
+    if (yy_achead->rsa_public_key == NULL)
     {
       sendto_realops_flags(FLAGS_ALL, L_ALL,
         "Ignoring rsa_public_key_file -- Key invalid; check key syntax.");
@@ -1363,7 +1379,9 @@ connect_entry:  CONNECT
     yy_aconf->status = CONF_SERVER;
 
     /* defaults */
+#ifdef HAVE_LIBZ
     yy_aconf->flags |= CONF_FLAGS_COMPRESSED;
+#endif
     yy_aconf->port = PORTNUM;
   }
   '{' connect_items '}' ';'
@@ -1455,7 +1473,6 @@ connect_item:   connect_name | connect_host | connect_send_password |
 		connect_leaf_mask | connect_class | connect_auto | 
 		connect_encrypted | connect_compressed | connect_cryptlink |
 		connect_rsa_public_key_file | connect_cipher_preference |
-		connect_vhost |
                 error;
 
 connect_name:   NAME '=' QSTRING ';'
@@ -1531,11 +1548,6 @@ connect_encrypted:       ENCRYPTED '=' TYES ';'
                         ENCRYPTED '=' TNO ';'
   {
     yy_aconf->flags &= ~CONF_FLAGS_ENCRYPTED;
-  };
-
-connect_vhost: VHOST '=' QSTRING ';'
-  {
-    yy_aconf->aftype = parse_netmask(yylval.string, &yy_aconf->my_ipnum, NULL);
   };
 
 connect_rsa_public_key_file: RSA_PUBLIC_KEY_FILE '=' QSTRING ';'
