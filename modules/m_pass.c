@@ -65,7 +65,7 @@ char *_version = "20001122";
 static int mr_pass(struct Client *cptr, struct Client *sptr,
                    int parc, char *parv[])
 {
-  char* password = parv[1];
+  const char *password = parv[1];
 
   if (EmptyString(password))
     {
