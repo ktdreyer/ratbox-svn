@@ -25,13 +25,12 @@
  *  $Id$
  */
 
-#include "config.h"
 #include "stdinc.h"
 #include <sys/event.h>
-#include "tools.h"
-#include "commio.h"
+
 #include "class.h"
 #include "client.h"
+#include "common.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "listener.h"
@@ -43,6 +42,7 @@
 #include "s_conf.h"
 #include "s_log.h"
 #include "s_serv.h"
+#include "s_stats.h"
 #include "send.h"
 #include "commio.h"
 #include "memory.h"
@@ -107,8 +107,8 @@ kq_update_events(fde_t * F, short filter, PF * handler)
 				kep_flags = (EV_ADD | EV_ONESHOT);
 			else
 				kep_flags = EV_ADD;
-		}
-		else
+		} 
+		else		
 		{
 			kep_flags = EV_DELETE;
 		}
@@ -153,10 +153,9 @@ init_netio(void)
 	kq = kqueue();
 	if(kq < 0)
 	{
-		fprintf(stderr, "init_netio: Couldn't open kqueue fd!\n");
+		ilog(L_IOERROR, "init_netio: Couldn't open kqueue fd!\n");
 		exit(115);	/* Whee! */
 	}
-	comm_note(kq, "kqueue file descriptor");
 	kqmax = getdtablesize();
 	kqlst = MyMalloc(sizeof(struct kevent) * kqmax);
 	zero_timespec.tv_sec = 0;
@@ -219,67 +218,79 @@ comm_select(unsigned long delay)
 	static struct kevent ke[KE_LENGTH];
 	struct timespec poll_time;
 
-	do
+	/*
+	 * remember we are doing NANOseconds here, not micro/milli. God knows
+	 * why jlemon used a timespec, but hey, he wrote the interface, not I
+	 *   -- Adrian
+	 */
+
+	poll_time.tv_sec = delay / 1000;
+
+	poll_time.tv_nsec = (delay % 1000) * 1000000;
+
+	for (;;)
 	{
-		/*
-		 * remember we are doing NANOseconds here, not micro/milli. God knows
-		 * why jlemon used a timespec, but hey, he wrote the interface, not I
-		 *   -- Adrian
-		 */
-		poll_time.tv_sec = 0;
-		poll_time.tv_nsec = delay * 1000000;
-		for (;;)
-		{
-			num = kevent(kq, kqlst, kqoff, ke, KE_LENGTH, &poll_time);
-			kqoff = 0;
-			if(num >= 0)
-				break;
-			if(ignoreErrno(errno))
-				break;
-			set_time();
-			return COMM_ERROR;
-			/* NOTREACHED */
-		}
+		num = kevent(kq, kqlst, kqoff, ke, KE_LENGTH, &poll_time);
+		kqoff = 0;
+
+		if(num >= 0)
+			break;
+
+		if(ignoreErrno(errno))
+			break;
 
 		set_time();
-		if(num == 0)
-			continue;
 
-		for (i = 0; i < num; i++)
-		{
-			PF *hdl = NULL;
-			fde_t *F = ke[i].udata;
+		return COMM_ERROR;
 
-			if(ke[i].flags & EV_ERROR)
-			{
-				errno = ke[i].data;
-				/* XXX error == bad! -- adrian */
-				continue;	/* XXX! */
-			}
-
-			switch (ke[i].filter)
-			{
-			case EVFILT_READ:
-				if((hdl = F->read_handler) != NULL)
-				{
-					F->read_handler = NULL;
-					hdl(F->fd, F->read_data);
-				}
-			case EVFILT_WRITE:
-				if((hdl = F->write_handler) != NULL)
-				{
-					F->write_handler = NULL;
-					hdl(F->fd, F->write_data);
-				}
-			default:
-				/* Bad! -- adrian */
-				break;
-			}
-		}
-		return COMM_OK;
+		/* NOTREACHED */
 	}
-	while (0);		/* XXX should rip this out! -- adrian */
-	/* XXX Get here, we broke! */
-	return 0;
+
+	set_time();
+
+	if(num == 0)
+		return COMM_OK;	/* No error.. */
+
+	for (i = 0; i < num; i++)
+	{
+		int fd = (int) ke[i].ident;
+		PF *hdl = NULL;
+		fde_t *F = &fd_table[fd];
+
+		if(ke[i].flags & EV_ERROR)
+		{
+			errno = ke[i].data;
+			/* XXX error == bad! -- adrian */
+			continue;	/* XXX! */
+		}
+
+		switch (ke[i].filter)
+		{
+
+		case EVFILT_READ:
+
+			if((hdl = F->read_handler) != NULL)
+			{
+				F->read_handler = NULL;
+				hdl(fd, F->read_data);
+			}
+
+			break;
+
+		case EVFILT_WRITE:
+
+			if((hdl = F->write_handler) != NULL)
+			{
+				F->write_handler = NULL;
+				hdl(fd, F->write_data);
+			}
+			break;
+
+		default:
+			/* Bad! -- adrian */
+			break;
+		}
+	}
+	return COMM_OK;
 }
 
