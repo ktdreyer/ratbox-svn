@@ -1,3 +1,15 @@
+androsyn    2002/02/16 23:38:37 EST	(20020217_10)
+
+  Modified files:
+    src                  s_serv.c 
+  Log:
+  Fixed a minor compile warning with an #ifdef
+  
+  Revision  Changes    Path
+  7.242     +1 -1      ircd-hybrid-7/src/s_serv.c
+
+
+
 jmallett    2002/02/16 23:30:48 EST	(20020217_9)
 
   Modified files:
