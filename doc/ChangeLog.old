@@ -1,3 +1,12 @@
+*** 20010508_1 by fl_
+- this:
+Try setting the delay rate for the poll idleclient to 0 like the rest of 
+the poll() stuff is...
+
+seemed to make ircd spin out of control.. it was stuck on 100% cpu..
+so its reverted, dunno what this actually did though..
+
+
 *** 20010507_3 by androsyn
 Fixed various minor issues with autoconf...
 
