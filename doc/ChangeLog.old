@@ -1,3 +1,8 @@
+*** 20010131_1 by db
+- fixed tiny bug that broke /msg $#host.mask messages for opers
+
+
+
 *** 20010130_8 by jdc
 - Fixed valid_comment() usage (didn't see line 691).  Now #ifndef IPV6 is
   used to get rid of the -Wunused warning.  Someone should fix this
