@@ -1,3 +1,8 @@
+*** 20001215_10 by db
+- added GLINE_PATH gline.log missing from config.h ircd.c
+
+
+
 *** 20001215_9 by db
 - missing parc check in m_ungline
 
