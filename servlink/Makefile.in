@@ -76,7 +76,7 @@ clean:
 	${RM} -f *.o *~ *.core core servlink
 
 lint:
-	lint -aacgprxhH $(CPPFLAGS) $(SOURCES) >>../lint.out
+	lint -aacgprxhH $(CPPFLAGS) -DIRCD_PREFIX=\"@prefix@\" $(SOURCES) >>../lint.out
 
 distclean: clean
 	${RM} -f Makefile setup.h

@@ -206,7 +206,7 @@ clean:
 	${RM} -f core/*.so core/*.sl core/*~ core/*.o
 
 lint:
-	lint -aacgprxhH ${CFLAGS} $(ALL_SRCS) >../lint.out
+	lint -aacgprxhH ${CPPFLAGS} -DIRCD_PREFIX=\"@prefix@\" $(ALL_SRCS) >../lint.out
 
 distclean: clean
 	${RM} -f Makefile

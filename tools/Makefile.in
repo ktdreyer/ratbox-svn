@@ -83,7 +83,7 @@ distclean: clean
 	$(RM) -f Makefile
 
 lint:
-	lint -aacgprxhH $(CPPFLAGS) $(convertconf_SOURCES) $(convertklines_SOURCES) $(mkpasswd_SOURCES) $(viconf_SOURCES) $(fixklines_SOURCES) $(encspeed_SOURCES) >>../lint.out
+	lint -aacgprxhH $(CPPFLAGS) -DIRCD_PREFIX=\"@prefix@\" $(convertconf_SOURCES) $(convertklines_SOURCES) $(mkpasswd_SOURCES) $(viconf_SOURCES) $(fixklines_SOURCES) $(encspeed_SOURCES) >>../lint.out
 
 depend:
 
