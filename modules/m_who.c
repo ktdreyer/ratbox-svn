@@ -437,12 +437,6 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
   chanops_voiced_ptr = chanops_voiced_list->head;
 #endif
 
-#ifdef REQUIRE_OANDV
-#define NUMLISTS 5
-#else
-#define NUMLISTS 4
-#endif
-
   while (done != NUMLISTS)
     {
       done = 0;
