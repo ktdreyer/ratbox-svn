@@ -106,7 +106,7 @@ int     ms_cburst(struct Client *cptr,
     key ? key : "" );
 #endif
 
-  if(!(chptr=hash_find_channel(name, NullChn)))
+  if((chptr=hash_find_channel(name, NullChn)) == NULL)
     {
      /* I don't know about this channel here, let leaf deal with it */
      if(nick)
@@ -117,19 +117,7 @@ int     ms_cburst(struct Client *cptr,
 
   if(IsCapable(cptr,CAP_LL))
     {
-      /* serial counter borrowed from send.c */
-      current_serial++;
-
-      burst_members(cptr,&chptr->chanops);
-      burst_members(cptr,&chptr->voiced);
-      burst_members(cptr,&chptr->halfops);
-      burst_members(cptr,&chptr->peons);
-
-      send_channel_modes(cptr, chptr);
-      chptr->lazyLinkChannelExists |= cptr->localClient->serverMask;
-       /* Send the topic */
-      sendto_one(cptr, ":%s TOPIC %s :%s",
-         me.name, chptr->chname, chptr->topic);
+      sjoin_channel(cptr,chptr);
     }
   else
     {

@@ -81,18 +81,13 @@ extern char*          infotext[];
 extern char*          serno;
 extern char*          version;
 extern const char     serveropts[];
-extern int            LRV;
 extern int            cold_start;
-extern int            dline_in_progress;
 extern int            dorehash;
-extern int            rehashed;
-extern float          currlife;
 extern struct Client  me;
 extern struct Client* GlobalClientList;
 extern struct Client* local[];
 extern struct Counter Count;
 extern time_t         CurrentTime;
-extern time_t         LCF;
 extern time_t         nextconnect;
 
 extern dlink_list unknown_list;

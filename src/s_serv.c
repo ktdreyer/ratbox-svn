@@ -87,6 +87,12 @@ struct Capability captab[] = {
 static unsigned long nextFreeMask();
 static unsigned long freeMask;
 static void server_burst(struct Client *cptr);
+static void burst_all(struct Client *cptr);
+static void do_lazy_link_burst(struct Client *cptr);
+static void cjoin_all(struct Client *cptr);
+static void sjoin_members(struct Client *cptr, struct Channel *chptr,
+			  dlink_list *list, char *op_flag);
+
 static CNCB serv_connect_callback;
 
 
@@ -864,10 +870,6 @@ int server_estab(struct Client *cptr)
  */
 static void server_burst(struct Client *cptr)
 {
-  struct Client*    acptr;
-  struct Channel*   chptr;
-  struct Channel*   vchan; 
-  dlink_node *ptr;
   time_t StartBurst=CurrentTime;
   /*
   ** Send it in the shortened format with the TS, if
@@ -880,31 +882,51 @@ static void server_burst(struct Client *cptr)
   ** -orabidoo
   */
 
-  /* On a "lazy link" (version 1 at least) only send the nicks
+  /* On a "lazy link" (version 1 at least) hubs only send the nicks.
    * Leafs always have to send nicks plus channels
    */
-  if(IsCapable(cptr, CAP_LL))
+  if( IsCapable(cptr, CAP_LL) )
     {
-      if (ConfigFileEntry.hub)
+      if(ConfigFileEntry.hub)
 	{
-	  for (acptr = &me; acptr; acptr = acptr->prev)
-	    if (acptr->from != cptr)
-	      sendnick_TS(cptr, acptr);
+	  do_lazy_link_burst(cptr);
 	}
-      else 
+      else
 	{
-	  for (acptr = &me; acptr; acptr = acptr->prev)
-	    if (acptr->from != cptr)
-	      sendnick_TS(cptr, acptr);
-
-	  for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
-	    {
-	      sendto_one(cptr,":%s CBURST %s",
-			 me.name, chptr->chname );
-	    }
+	  /* burst all our info */
+	  burst_all(cptr);
+	  /* Now, ask for channel info on all our current channels */
+	  cjoin_all(cptr);
 	}
-      return;
     }
+  else
+    {
+      burst_all(cptr);
+    }
+  cptr->flags2 &= ~FLAGS2_CBURST;
+
+  /* Always send a PING after connect burst is done */
+  sendto_one(cptr, "PING :%s", me.name);
+
+  /* XXX maybe `EOB %d %d` where we send length of burst and time? */
+  if(IsCapable(cptr, CAP_EOB))
+    sendto_one(cptr, ":%s EOB %lu", me.name, CurrentTime - StartBurst ); 
+}
+
+/*
+ * burst_all
+ *
+ * inputs	- pointer to server to send burst to 
+ * output	- NONE
+ * side effects - complete burst of channels/nicks is sent to cptr
+ */
+static void
+burst_all(struct Client *cptr)
+{
+  struct Client*    acptr;
+  struct Channel*   chptr;
+  struct Channel*   vchan; 
+  dlink_node *ptr;
 
   /* serial counter borrowed from send.c */
   current_serial++;
@@ -951,19 +973,111 @@ static void server_burst(struct Client *cptr)
 	    sendnick_TS(cptr, acptr);
 	}
     }
+}
 
-  cptr->flags2 &= ~FLAGS2_CBURST;
+/*
+ * do_lazy_link_burst
+ *
+ * inputs	- pointer to server to send burst to 
+ * output	- NONE
+ * side effects - shortened burst from LazyLink capable hub
+ */
+static  void
+do_lazy_link_burst(struct Client *cptr)
+{
+  struct Client *acptr;
 
-  /* Always send a PING after connect burst is done */
-  sendto_one(cptr, "PING :%s", me.name);
+  for (acptr = &me; acptr; acptr = acptr->prev)
+    if (acptr->from != cptr)
+      sendnick_TS(cptr, acptr);
+}
 
-  /* XXX maybe `EOB %d %d` where we send length of burst and time? */
-  if(IsCapable(cptr, CAP_EOB))
-    sendto_one(cptr, ":%s EOB %lu", me.name, CurrentTime - StartBurst ); 
+/*
+ * cjoin_all
+ *
+ * inputs	- server to ask for channel info from
+ * output	- NONE
+ * side effects	- CJOINS for all the leafs known channels is sent
+ */
+static void
+cjoin_all(struct Client *cptr)
+{
+  struct Channel *chptr;
+
+  for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
+    {
+      sendto_one(cptr, ":%s CBURST %s",
+		 me.name, chptr->chname);
+    }
+}
+
+/*
+ * sjoin_channel
+ *
+ * inputs	- pointer to server to send sjoins to
+ * 		- channel pointer
+ * output	- none
+ * side effects	- All sjoins for channel(s) given by chptr are sent
+ *		  for all channel members.
+ */
+void
+sjoin_channel(struct Client *cptr, struct Channel *chptr)
+{
+
+  /* serial counter borrowed from send.c */
+  current_serial++;
+
+  sjoin_members(cptr, chptr, &chptr->chanops, "@");
+  sjoin_members(cptr, chptr, &chptr->voiced, "+");
+  sjoin_members(cptr, chptr, &chptr->halfops, "");
+  sjoin_members(cptr, chptr, &chptr->peons, "");
+
+  send_channel_modes(cptr, chptr);
+  chptr->lazyLinkChannelExists |= cptr->localClient->serverMask;
+  /* Send the topic */
+  sendto_one(cptr, ":%s TOPIC %s :%s",
+	     me.name, chptr->chname, chptr->topic);
+}
+
+/*
+ * sjoin_members
+ *
+ * inputs	- pointer to server to sjoin members to
+ * 		- dlink_list pointer to membership list to send
+ * output	- NONE
+ * side effects	-
+ */
+static void
+sjoin_members(struct Client *cptr, struct Channel *chptr,
+	      dlink_list *list, char *op_flag)
+{
+  struct Client *acptr;
+  dlink_node *ptr;
+
+  for (ptr = list->head; ptr; ptr = ptr->next)
+    {
+      acptr = ptr->data;
+
+      if (acptr->serial != current_serial)
+	{
+	  acptr->serial = current_serial;
+	  if (acptr->from != cptr)
+	    {
+	      sendto_channel_remote(chptr, cptr,
+				    ":%s SJOIN %lu %s + :%s%s",
+				    me.name,
+				    chptr->channelts,
+				    chptr->chname,
+				    op_flag,
+				    acptr->name);
+	    }
+	}
+    }
 }
 
 /*
  * burst_members
+ *
  * inputs	- pointer to server to send members to
  * 		- dlink_list pointer to membership list to send
  * output	- NONE

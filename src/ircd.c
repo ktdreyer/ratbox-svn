@@ -132,10 +132,10 @@ struct LocalUser meLocalUser;	/* That's also part of me */
 struct Client* GlobalClientList = 0; /* Pointer to beginning of Client list */
 
 /* unknown/client pointer lists */ 
-dlink_list unknown_list;
-dlink_list lclient_list;
-dlink_list serv_list;
-dlink_list oper_list;
+dlink_list unknown_list;        /* unknown clients ON this server only */
+dlink_list lclient_list;        /* local clients only ON this server */
+dlink_list serv_list;           /* local servers know to this server ONLY */
+dlink_list oper_list;           /* our opers, duplicated in lclient_list */
 
 static size_t      initialVMTop = 0;   /* top of virtual memory at init */
 static const char* logFileName = LPATH;
@@ -176,6 +176,10 @@ size_t get_maxrss(void)
 
 /*
  * init_sys
+ *
+ * inputs	- boot_daemon flag
+ * output	- none
+ * side effects	- if boot_daemon flag is not set, don't daemonize
  */
 static void init_sys(int boot_daemon)
 {
@@ -391,7 +395,6 @@ static time_t io_loop(time_t delay)
  * output       - none
  * side effects - This sets all global set options needed 
  */
-
 static void initialize_global_set_options(void)
 {
   memset( &GlobalSetOptions, 0, sizeof(GlobalSetOptions));
@@ -415,7 +418,6 @@ static void initialize_global_set_options(void)
  * output       - none
  * side effects - Set up all message files needed, motd etc.
  */
-
 static void initialize_message_files(void)
   {
     InitMessageFile( HELP_MOTD, HPATH, &ConfigFileEntry.helpfile );
@@ -489,16 +491,10 @@ int main(int argc, char *argv[])
 
   initialize_global_set_options();
 
-/* this code by mika@cs.caltech.edu */
-/* 
- * it is intended to keep the ircd from being swapped out. BSD swapping
- * criteria do not match the requirements of ircd 
- */
 #ifdef SETUID_ROOT
   if (setuid(IRCD_UID) < 0)
     exit(-1); /* blah.. this should be done better */
 #endif
-
 
   uid = getuid();
   euid = geteuid();
