@@ -842,6 +842,12 @@ conf_set_class_sendq(void *data)
 	yy_class->max_sendq = *(unsigned int *) data;
 }
 
+static void
+conf_set_class_sendq_eob(void *data)
+{
+	yy_class->max_sendq_eob = *(unsigned int *) data;
+}
+
 static char *listener_address;
 
 static int
@@ -2629,6 +2635,7 @@ newconf_init()
 	add_conf_item("class", "connectfreq", CF_TIME, conf_set_class_connectfreq);
 	add_conf_item("class", "max_number", CF_INT, conf_set_class_max_number);
 	add_conf_item("class", "sendq", CF_TIME, conf_set_class_sendq);
+	add_conf_item("class", "sendq_eob", CF_TIME, conf_set_class_sendq_eob);
 
 	add_top_conf("listen", conf_begin_listen, conf_end_listen);
 	add_conf_item("listen", "port", CF_INT | CF_FLIST, conf_set_listen_port);
