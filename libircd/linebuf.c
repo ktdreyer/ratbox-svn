@@ -624,52 +624,81 @@ int
 linebuf_flush(int fd, buf_head_t * bufhead)
 {
 	buf_line_t *bufline;
-	int retval;
+	dlink_node *ptr;
+	int gather_count = 100; /* This is abitrary */
+	int x, y;
+	int retval, xret;
+	static struct msghdr mhdr;
+	static struct iovec vec[100];
 
+	mhdr.msg_name = NULL;
+	mhdr.msg_namelen = 0;
+	mhdr.msg_iov = vec;
+	mhdr.msg_control = NULL;
+	mhdr.msg_controllen = 0;
+	mhdr.msg_flags = 0;
+	
 	/* Check we actually have a first buffer */
+
+
 	if(bufhead->list.head == NULL)
 	{
 		/* nope, so we return none .. */
 		errno = EWOULDBLOCK;
 		return -1;
 	}
+	
+	ptr = bufhead->list.head;
 
-	bufline = bufhead->list.head->data;
+	for(x = 0; x < gather_count; x++)
+	{
+		if(ptr == NULL)
+			break;
+		bufline = ptr->data;
+		if(!bufline->terminated)
+			break;
 
-	/* And that its actually full .. */
-	if(!bufline->terminated)
+		if(bufline->flushing)
+		{
+			vec[x].iov_base = bufline->buf + bufhead->writeofs;
+			vec[x].iov_len = bufline->len - bufhead->writeofs;
+		}
+		else {
+			vec[x].iov_base = bufline->buf;
+			vec[x].iov_len = bufline->len;
+		}
+		ptr = ptr->next;
+	}
+
+	if(x == 0)
 	{
 		errno = EWOULDBLOCK;
 		return -1;
 	}
-
-	/* Check we're flushing the first buffer */
-	if(!bufline->flushing)
-	{
-		bufline->flushing = 1;
-		bufhead->writeofs = 0;
-	}
-
-	/* Now, try writing data */
-	retval = send(fd, bufline->buf + bufhead->writeofs, bufline->len - bufhead->writeofs, SEND_FLAGS);
-
+	
+	mhdr.msg_iovlen = x;
+	xret = retval = sendmsg(fd, &mhdr, SEND_FLAGS);	
+	
 	if(retval <= 0)
 		return retval;
-
-	/* we've got data, so update the write offset */
-	bufhead->writeofs += retval;
-
-	/* if we've written everything *and* the CRLF, deallocate and update
-	   bufhead */
-	if(bufhead->writeofs == bufline->len)
+	
+	ptr = bufhead->list.head;
+	for(y = 0; y < x; y++)
 	{
-		bufhead->writeofs = 0;
-		s_assert(bufhead->len >= 0);
-		linebuf_done_line(bufhead, bufline, bufhead->list.head);
-	}
-
-	/* Return line length */
-	return retval;
+		bufline = ptr->data;
+		if(xret >= bufline->len)
+		{
+			xret -= bufline->len;
+			ptr = ptr->next;
+			s_assert(bufhead->len >= 0);
+			linebuf_done_line(bufhead, bufline, bufhead->list.head);
+		} else {
+			bufline->flushing = 1;
+			bufhead->writeofs += xret;
+			break;
+		}
+	} 
+	return(retval);
 }
 
 /*

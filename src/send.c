@@ -111,7 +111,12 @@ _send_linebuf(struct Client *to, buf_head_t *linebuf)
 	to->localClient->sendM += 1;
 	me.localClient->sendM += 1;
 
-	send_queued_write(to->localClient->fd, to);
+#ifdef USE_SIGIO
+	if(to->localClient->buf_sendq.writeofs == 0)
+		send_queued_write(to->localClient->fd, to);
+	else
+#endif
+	comm_setselect(to->localClient->fd, FDLIST_IDLECLIENT, COMM_SELECT_WRITE, send_queued_write, to, 0);
 	return 0;
 }
 
