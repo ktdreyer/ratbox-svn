@@ -461,7 +461,7 @@ void do_join_0(struct Client *cptr, struct Client *sptr)
   struct Channel *chptr=NULL;
   dlink_node   *lp;
 
-  sendto_ll_serv_butone(cptr, sptr, ":%s JOIN 0", sptr->name);
+  sendto_ll_serv_butone(cptr, sptr, 0, ":%s JOIN 0", sptr->name);
 
   while ((lp = sptr->user->channel.head))
     {

@@ -572,7 +572,7 @@ void client_burst_if_needed(struct Client *cptr, struct Client *acptr)
   if((acptr->lazyLinkClientExists & cptr->localClient->serverMask) == 0)
     {
       sendnick_TS( cptr, acptr );
-      acptr->lazyLinkClientExists |= cptr->localClient->serverMask;
+      add_lazylinkclient(cptr,acptr);
     }
 }
 
@@ -1041,11 +1041,13 @@ burst_channel(struct Client *cptr, struct Channel *chptr)
   burst_ll_members(cptr,&chptr->halfops);
   burst_ll_members(cptr,&chptr->peons);
   send_channel_modes(cptr, chptr);
+  add_lazylinkchannel(cptr,chptr);
+  sendto_one(cptr, ":%s TOPIC %s :%s",
+	     me.name, chptr->chname, chptr->topic);
 
   if(IsVchanTop(chptr))
     {
-      for ( ptr = chptr->vchan_list.head; ptr;
-	    ptr = ptr->next)
+      for ( ptr = chptr->vchan_list.head; ptr; ptr = ptr->next)
 	{
 	  vchan = ptr->data;
 	  burst_ll_members(cptr,&vchan->chanops);
@@ -1053,27 +1055,9 @@ burst_channel(struct Client *cptr, struct Channel *chptr)
 	  burst_ll_members(cptr,&vchan->halfops);
 	  burst_ll_members(cptr,&vchan->peons);
 	  send_channel_modes(cptr, vchan);
-	}
-    }
-
-  send_channel_modes(cptr, chptr);
-  add_lazylinkchannel(cptr,chptr);
-
-  sendto_one(cptr, ":%s TOPIC %s :%s",
-	     me.name, chptr->chname, chptr->topic);
-
-  if (HasVchans(chptr))
-    {
-      for (ptr = chptr->vchan_list.head; ptr; ptr->next)
-	{
-          vchan = ptr->data;
-
-	  send_channel_modes(cptr, vchan);
-	  add_lazylinkchannel(cptr, vchan);
-
-          sendto_one(cptr, ":%s TOPIC %s :%s",
-	     me.name, vchan->chname, vchan->topic);
-
+	  add_lazylinkchannel(cptr,vchan);
+	  sendto_one(cptr, ":%s TOPIC %s :%s",
+		     me.name, vchan->chname, vchan->topic);
 	}
     }
 }
@@ -1102,6 +1086,32 @@ add_lazylinkchannel(struct Client *cptr, struct Channel *chptr)
   m = make_dlink_node();
 
   dlinkAdd(chptr, m, &lazylink_channels);
+}
+
+/*
+ * add_lazylinkclient
+ *
+ * inputs       - pointer to server being introduced to this hub
+ *              - pointer to client being introduced
+ * output       - NONE
+ * side effects - The client pointed to by sptr is now known
+ *                to be on lazyleaf server given by cptr.
+ *                mark that in the bit map and add to the list
+ *                of clients to examine after this newly introduced
+ *                server is squit off.
+ */
+void
+add_lazylinkclient(struct Client *cptr, struct Client *sptr)
+{
+  dlink_node *m;
+
+  assert(cptr->localClient != NULL);
+
+  sptr->lazyLinkClientExists |= cptr->localClient->serverMask;
+
+  m = make_dlink_node();
+
+  dlinkAdd(sptr, m, &lazylink_nicks);
 }
 
 /*
@@ -1156,7 +1166,6 @@ remove_lazylink_flags(unsigned long mask)
 	}
     }
 
-#if 0
   for (ptr = lazylink_nicks.head; ptr; ptr = next_ptr)
     {
       next_ptr = ptr->next;
@@ -1165,12 +1174,11 @@ remove_lazylink_flags(unsigned long mask)
       acptr->lazyLinkClientExists &= clear_mask;
 
       if ( acptr->lazyLinkClientExists == 0 )
-	{
-	  dlinkDelete(ptr, &lazylink_nicks);
-	  free_dlink_node(ptr);
-	}
+        {
+          dlinkDelete(ptr, &lazylink_nicks);
+          free_dlink_node(ptr);
+        }
     }
-#endif
 }
 
 /*
@@ -1218,7 +1226,7 @@ void burst_ll_members(struct Client *cptr, dlink_list *list)
         {
           if (acptr->from != cptr)
 	    {
-	      acptr->lazyLinkClientExists |= cptr->localClient->serverMask;
+	      add_lazylinkclient(cptr,acptr);
 	      sendnick_TS(cptr, acptr);
 	    }
         }

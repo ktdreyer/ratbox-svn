@@ -199,7 +199,10 @@ CompleteIAuthConnection(int fd, void *notused)
     return;
 	}
 
+	/* XXX THIS IS A STATIC */
+#if 0
   comm_connect_callback(fd, COMM_OK);
+#endif
 
   comm_setselect(fd, FDLIST_SERVER, COMM_SELECT_READ,
                  ParseIAuth, NULL, 0);

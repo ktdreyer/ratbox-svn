@@ -47,7 +47,6 @@ struct IrcdAuthentication
 
 int ConnectToIAuth();
 void IAuthQuery(struct Client *client);
-int ParseIAuth();
 
 /*
  * External declarations

@@ -1082,7 +1082,9 @@ static void exit_one_client(struct Client *cptr, struct
 	    {
 	      next_lp = lp->next;
 	      del_invite(lp->data, sptr);
+#if 0
 	      free_dlink_node(lp);
+#endif
 	    }
 
 	  /* Clean up allow lists */

@@ -687,7 +687,7 @@ nick_from_server(struct Client *cptr, struct Client *sptr, int parc,
           if (sptr->user)
             {
               add_history(sptr,1);
-              sendto_ll_serv_butone(cptr, sptr,  ":%s NICK %s :%lu",
+              sendto_serv_butone(cptr, ":%s NICK %s :%lu",
 				    parv[0], nick, sptr->tsinfo);
             }
     }
@@ -809,7 +809,7 @@ int change_local_nick(struct Client *cptr, struct Client *sptr,
 	{
 	  add_history(sptr,1);
 	  
-	  sendto_ll_serv_butone(cptr, sptr, ":%s NICK %s :%lu",
+	  sendto_serv_butone(cptr, ":%s NICK %s :%lu",
 				sptr->name, nick, sptr->tsinfo);
 	}
     }
