@@ -1,3 +1,15 @@
+leeh        2002/10/16 20:09:20 UTC	(20021016_0)
+
+  Modified files:
+    modules              m_ping.c 
+  Log:
+  - that needs to be irccmp(), not !irccmp()
+  
+  Revision  Changes    Path
+  1.32      +3 -14     ircd-ratbox/modules/m_ping.c
+
+
+
 leeh        2002/10/15 13:50:17 UTC	(20021015_1)
 
   Modified files:
