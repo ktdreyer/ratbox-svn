@@ -100,8 +100,8 @@ msgstr	":%s 212 %s %s %u %u"
 
 #: ../../src/messages.tab:236
 #, c-format
-msgid	":%s 213 %s %c %s * %s %d %s"
-msgstr	":%s 213 %s %c %s * %s %d %s"
+msgid	":%s 213 %s %c %s %s %s %d %s"
+msgstr	":%s 213 %s %c %s %s %s %d %s"
 
 #: ../../src/messages.tab:237
 #, c-format

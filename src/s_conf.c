@@ -293,16 +293,31 @@ void report_configured_links(struct Client* source_p, int mask)
         if(mask & CONF_SERVER)
           {
             char c;
-
+	    char buf[20];
+	    char *s = buf;
+	    
+	    buf[0] = 0;
             c = p->conf_char;
-            if(tmp->flags & CONF_FLAGS_LAZY_LINK)
-              c = 'c';
-
+	    
+	    if (tmp->flags & CONF_FLAGS_ALLOW_AUTO_CONN)
+	      *s++ = 'A';
+	    if (tmp->flags & CONF_FLAGS_LAZY_LINK)
+	      *s++ = 'L';
+	    if (tmp->flags & CONF_FLAGS_COMPRESSED)
+	      *s++ = 'Z';
+	    if (tmp->fakename)
+	      *s++ = 'M';
+	    
+	    if (!buf[0])
+              *s++ = '*';
+	      
+	    *s++ = 0;
             /* Allow admins to see actual ips */
             if(IsSetOperAdmin(source_p))
               sendto_one(source_p, form_str(p->rpl_stats), me.name,
                          source_p->name, c,
                          host,
+			 buf,
                          name,
                          port,
                          classname,
@@ -311,6 +326,7 @@ void report_configured_links(struct Client* source_p, int mask)
               sendto_one(source_p, form_str(p->rpl_stats), me.name,
                          source_p->name, c,
                          "*@127.0.0.1",
+			 buf,
                          name,
                          port,
                          classname);

@@ -1583,7 +1583,7 @@ connect_compressed:       COMPRESSED '=' TYES ';'
   {
 #ifndef HAVE_LIBZ
     sendto_realops_flags(FLAGS_ALL,
-      "Ignoring compressed = no; -- no zlib support");
+      "Ignoring compressed = yes; -- no zlib support");
 #else
     yy_aconf->flags |= CONF_FLAGS_COMPRESSED;
 #endif
@@ -1591,12 +1591,7 @@ connect_compressed:       COMPRESSED '=' TYES ';'
                         |
                         COMPRESSED '=' TNO ';'
   {
-#ifndef HAVE_LIBZ
-    sendto_realops_flags(FLAGS_ALL,
-      "Ignoring compressed = yes; -- no zlib support");
-#else
     yy_aconf->flags &= ~CONF_FLAGS_COMPRESSED;
-#endif
   };
 
 connect_auto:           AUTOCONN '=' TYES ';'

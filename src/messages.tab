@@ -233,7 +233,7 @@ static  char *  replies[] = {
 /* 210 */       (char *)NULL,
 /* 211 RPL_STATSLINKINFO, */    (char *)NULL,
 /* 212 RPL_STATSCOMMANDS, */    ":%s 212 %s %s %u %u",
-/* 213 RPL_STATSCLINE, */       ":%s 213 %s %c %s * %s %d %s",
+/* 213 RPL_STATSCLINE, */       ":%s 213 %s %c %s %s %s %d %s",
 /* 214 RPL_STATSNLINE, */       ":%s 214 %s %c %s * %s %d %s",
 /* 215 RPL_STATSILINE, */       ":%s 215 %s %c %s * %s@%s %d %s",
 /* 216 RPL_STATSKLINE, */       ":%s 216 %s %c %s * %s %s",
