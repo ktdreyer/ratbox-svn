@@ -1,3 +1,16 @@
+leeh        2004/06/06 16:39:49 EDT	(20040606_0)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+  Log:
+  - add killlog to example confs
+  
+  Revision  Changes    Path
+  7.239     +2 -0      ircd-ratbox/doc/example.conf
+  7.74      +2 -0      ircd-ratbox/doc/example.efnet.conf
+
+
+
 androsyn    2004/06/02 22:16:37 EDT	(20040603_0)
 
   Modified files:
