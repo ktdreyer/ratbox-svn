@@ -117,20 +117,20 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
            "servername %s.", get_client_name(cptr, TRUE), host);
         }
       return exit_client(cptr, cptr, cptr,
-                "Invalid servername.");
+                "Invalid servername/host/password.");
      case -2:
       sendto_realops_flags(FLAGS_ALL,
         "Unauthorised server connection attempt from %s: Bad password "
         "for server %s.", get_client_name(cptr, TRUE), host);
       return exit_client(cptr, cptr, cptr,
-                 "Invalid password.");
+                 "Invalid servername/host/password.");
       break;
      case -3:
       sendto_realops_flags(FLAGS_ALL,
         "Unauthorised server connection attempt from %s: Invalid host "
         "for server %s.", get_client_name(cptr, TRUE), host);
       return exit_client(cptr, cptr, cptr,
-                 "Invalid host.");
+                 "Invalid servername/host/password.");
     }
     
   if ((acptr = find_server(host)))
@@ -213,6 +213,7 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   struct ConfItem* aconf;
   int              hop;
   int              hlined = 0;
+  int              llined = 0;
   dlink_node	   *ptr;
 
   if ( (host = parse_server_args(parv, parc, info, &hop)) == NULL )
@@ -220,11 +221,6 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       sendto_one(cptr,"ERROR :No servername");
       return 0;
     }
-
-  /* 
-   * *WHEN* can it be that "cptr != sptr" ????? --msa
-   * When SERVER command (like now) has prefix. -avalon
-   */
 
   if ((acptr = find_server(host)))
     {
@@ -284,37 +280,11 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   /*
    * See if the newly found server is behind a guaranteed
    * leaf. If so, close the link.
+   *
    */
-  /* We also check for hubs here now. Notice that if we are leafed and
-   * hub-masked, the leaf{} over-rules - A1kmm.
-   */
+
   for (aconf = ConfigItemList; aconf; aconf=aconf->next)
     {
-     if (!(aconf->status == CONF_LEAF || aconf->status == CONF_HUB))
-       continue;
-     if (!match(aconf->host, host))
-       continue;
-     if (aconf->status == CONF_HUB && match(aconf->name, cptr->name))
-       hlined++;
-     else if (aconf->status == CONF_LEAF)
-       {
-        /* We have to check every server between us and the new server 
-         * to see if the server_mask matches them -A1kmm. */
-        for (acptr = cptr; acptr && !IsMe(acptr);
-             acptr=find_server(acptr->serv->up)
-            )
-          if (match(aconf->name, acptr->name))
-            {
-             sendto_realops_flags(FLAGS_ALL,
-               "Dropping leafed server %s introduced by %s via %s"
-               "(%s leafed): %s",
-               host, sptr->name, sptr->name, acptr->name, aconf->user);
-             sendto_one(sptr, ":%s SQUIT %s :Leafed(behind %s): %s",
-                        me.name, host, acptr->name, aconf->user);
-             return 0;
-            }
-       }
-#if 0
      if (!(aconf->status == CONF_LEAF || aconf->status == CONF_HUB))
        continue;
 
@@ -325,17 +295,41 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	    if(match(aconf->host, host))
 	      hlined++;
 	  }
-        else if (acptr->status == CONF_LEAF)
+        else if (aconf->status == CONF_LEAF)
 	  {
 	    if(match(aconf->host, host))
 	      llined++;
 	  }
        }
-#endif
     }
 
+  /* Ok, this way this works is
+   *
+   * A server can have a CONF_HUB allowing it to introduce servers
+   * behind it.
+   *
+   * connect {
+   *            name = "irc.bighub.net";
+   *            host_mask="*";
+   *            ...
+   * 
+   * That would allow "irc.bighub.net" to introduce anything it wanted..
+   *
+   * However
+   *
+   * connect {
+   *            name = "irc.somehub.fi";
+   *		host_mask="*";
+   *		leaf_mask="*.edu";
+   *...
+   * Would allow this server in finland to hub anything but
+   * .edu's
+   */
+
+  /* Ok, check for this server allowed to HUB */
   if (!hlined)
     {
+      /* OOOPs nope can't HUB */
       sendto_realops_flags(FLAGS_ALL,"Non-Hub link %s introduced %s.",
                 get_client_name(cptr,  TRUE), host);
       /* If it is new, we are probably misconfigured, so split the
@@ -346,6 +340,25 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       else
         {
           sendto_one(sptr, ":%s SQUIT %s :Sorry, no H-line.",
+                     me.name, host);
+          return 0;
+        }
+    }
+
+  /* Check for the new server being leafed behind this HUB */
+  if (llined)
+    {
+      /* OOOPs nope can't HUB this leaf */
+      sendto_realops_flags(FLAGS_ALL,"link %s introduced leafed %s.",
+                get_client_name(cptr,  TRUE), host);
+      /* If it is new, we are probably misconfigured, so split the
+       * non-hub server introducing this. Otherwise, split the new
+       * server. -A1kmm. */
+      if ((CurrentTime - sptr->firsttime) < 20)
+        return exit_client(NULL, sptr, &me, "Leafed Server.");
+      else
+        {
+          sendto_one(sptr, ":%s SQUIT %s :Sorry, Leafed server.",
                      me.name, host);
           return 0;
         }

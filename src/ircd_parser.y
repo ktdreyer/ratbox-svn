@@ -47,6 +47,7 @@ static struct ConfItem *yy_hconf;
 static struct ConfItem *yy_lconf;
 
 static struct ConfItem *hub_confs;
+static struct ConfItem *leaf_confs;
 static struct ConfItem *yy_aconf;
 static struct ConfItem *yy_aconf_next;
 
@@ -105,7 +106,6 @@ int   class_redirport_var;
 %token  KLINE
 %token  KLINE_EXEMPT
 %token  LAZYLINK
-%token  LEAF
 %token  LEAF_MASK
 %token  LISTEN
 %token  LOGGING
@@ -959,11 +959,21 @@ connect_entry:  CONNECT
         free_conf(yy_aconf);
         yy_aconf = NULL;
       }
-        
-    for (yy_hconf=hub_confs;yy_hconf;yy_hconf=yy_aconf_next)
+
+    /*
+     * yy_aconf is still pointing at the server that is having
+     * a connect block built for. This means, y_aconf->name 
+     * points to the actual irc name this server will be known as.
+     * Now this new server has a set or even just one H line
+     * given in the link list at yy_hconf. Fill in the HUB confs
+     * from this link list now.
+     */        
+    for (yy_hconf = hub_confs; yy_hconf; yy_hconf = yy_aconf_next)
       {
 	yy_aconf_next = yy_hconf->next;
-	if (yy_aconf)
+
+	/* yy_aconf == NULL is a fatal error for this connect block! */
+	if (yy_aconf != NULL)
 	  {
 	    DupString(yy_hconf->name, yy_aconf->name);
 	    conf_add_conf(yy_hconf);
@@ -972,10 +982,26 @@ connect_entry:  CONNECT
 	  free_conf(yy_hconf);
       }
 
-    hub_confs = (struct ConfItem*)NULL;
+    /* Ditto for the LEAF confs */
 
-    yy_aconf = (struct ConfItem *)NULL;
-    yy_hconf = (struct ConfItem *)NULL;
+    for (yy_lconf = leaf_confs; yy_lconf; yy_lconf = yy_aconf_next)
+      {
+	yy_aconf_next = yy_lconf->next;
+	if (yy_aconf != NULL)
+	  {
+	    DupString(yy_lconf->name, yy_aconf->name);
+	    conf_add_conf(yy_lconf);
+	  }
+	else
+	  free_conf(yy_lconf);
+      }
+
+    hub_confs = NULL;
+    leaf_confs = NULL;
+
+    yy_aconf = NULL;
+    yy_hconf = NULL;
+    yy_lconf = NULL;
   };
 
 connect_items:  connect_items connect_item |
@@ -983,7 +1009,7 @@ connect_items:  connect_items connect_item |
 
 connect_item:   connect_name | connect_host | connect_send_password |
                 connect_accept_password | connect_port |
-                connect_lazylink | connect_hub_mask |
+                connect_lazylink | connect_hub_mask | connect_leaf_mask |
                 connect_class | connect_auto |
                 error
 
@@ -1067,6 +1093,29 @@ connect_hub_mask:       HUB_MASK '=' QSTRING ';'
       }
   };
 
+connect_leaf_mask:       LEAF_MASK '=' QSTRING ';' 
+  {
+    if(yylval.string != NULL)
+      {
+	if(leaf_confs == NULL)
+	  {
+	    leaf_confs = make_conf();
+	    leaf_confs->status = CONF_LEAF;
+	    DupString(leaf_confs->host,yylval.string);
+	    DupString(leaf_confs->user, "*");
+	  }
+	else
+	  {
+	    yy_lconf = make_conf();
+	    yy_lconf->status = CONF_LEAF;
+	    DupString(yy_lconf->host, yylval.string);
+	    DupString(yy_lconf->user, "*");
+	    yy_lconf->next = leaf_confs;
+	    leaf_confs = yy_lconf;
+	  }
+      }
+  };
+
 connect_class:  CLASS '=' QSTRING ';'
   {
     if(yylval.string != NULL)
@@ -1074,52 +1123,6 @@ connect_class:  CLASS '=' QSTRING ';'
 	DupString(yy_aconf->className,yylval.string);
       }
   };
-
-/***************************************************************************
- *  section leaf
- ***************************************************************************/
- 
-leaf_entry: LEAF
-  {
-   if (yy_aconf)
-     {
-      free_conf(yy_aconf);
-      yy_aconf = (struct ConfItem *)NULL;
-     }
-   yy_aconf = make_conf();
-   yy_aconf->status = CONF_LEAF;
-  };
- '{' leaf_items '}' ';'
-  {
-   if (yy_aconf->name && yy_aconf->host && yy_aconf->user)
-     {
-      conf_add_conf(yy_aconf);
-     }
-   else
-     free_conf(yy_aconf);
-   yy_aconf = (struct ConfItem *)NULL;
-  };
-
-leaf_items: leaf_items leaf_item | leaf_item
-leaf_item:  leaf_server_mask | leaf_leaf_mask | leaf_reason | error
-leaf_server_mask: SERVER_MASK '=' QSTRING ';'
-{
- if (yy_aconf->name)
-   MyFree(yy_aconf->name);
- yy_aconf->name = yylval.string;
-}
-leaf_leaf_mask: LEAF_MASK '=' QSTRING ';'
-{
- if (yy_aconf->host)
-   MyFree(yy_aconf->host);
- yy_aconf->host = yylval.string;
-}
-leaf_reason: REASON '=' QSTRING ';'
-{
- if (yy_aconf->user)
-   MyFree(yy_aconf->user);
- yy_aconf->user = yylval.string;
-}
 
 /***************************************************************************
  *  section kill

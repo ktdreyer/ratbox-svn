@@ -125,7 +125,6 @@ l_notice 	{ return T_L_NOTICE; }
 l_trace		{ return T_L_TRACE; }
 l_warn		{ return T_L_WARN; }
 lazylink	{ return LAZYLINK; }
-leaf		{ return LEAF; }
 leaf_mask	{ return LEAF_MASK; }
 listen		{ return LISTEN; }
 links_notice    { return LINKS_NOTICE; }
