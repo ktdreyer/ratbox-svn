@@ -382,6 +382,8 @@ static void accept_connection(int pfd, void *data)
 
   if (fd < 0)
     {
+      if(!ignoreErrno(errno))
+      {
       /*
        * slow down the whining to opers bit
        */
@@ -391,6 +393,7 @@ static void accept_connection(int pfd, void *data)
 		       listener->name, errno);
 	  last_oper_notice = CurrentTime;
 	}
+      }
       /* Re-register a new IO request for the next accept .. */
       comm_setselect(listener->fd, FDLIST_SERVICE, COMM_SELECT_READ,
                      accept_connection, listener, 0);
