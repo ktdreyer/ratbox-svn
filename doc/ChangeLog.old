@@ -1,3 +1,8 @@
+*** 20001223_24 by toot
+made tkline expiry into an event, and fixed some bugs with temp-klines..
+there's still more bugs with them though
+
+
 *** 20001223_23 by madmax
 Fixes for operwall/locops (flame)
 
