@@ -1,3 +1,19 @@
+androsyn    2003/09/09 16:57:38 EDT	(20030909_5)
+
+  Modified files:
+    src                  Makefile.in modules.c 
+  Removed files:
+    src                  dynlink.c 
+  Log:
+  Moved the dlopen shims back into modules.c, I'm not even sure they work
+  
+  Revision  Changes    Path
+  7.138     +0 -1      ircd-ratbox/src/Makefile.in
+  7.24      +0 -424    ircd-ratbox/src/dynlink.c (dead)
+  7.134     +382 -0    ircd-ratbox/src/modules.c
+
+
+
 androsyn    2003/09/09 15:46:44 EDT	(20030909_4)
 
   Modified files:
