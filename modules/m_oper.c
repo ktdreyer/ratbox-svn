@@ -55,7 +55,6 @@
 #include "cache.h"
 
 static int m_oper(struct Client *, struct Client *, int, const char **);
-static int m_challenge(struct Client *, struct Client *, int, const char **);
 
 struct Message oper_msgtab = {
 	"OPER", 0, 0, 0, MFLG_SLOW,
@@ -63,6 +62,8 @@ struct Message oper_msgtab = {
 };
 
 #ifdef HAVE_LIBCRYPTO
+static int m_challenge(struct Client *, struct Client *, int, const char **);
+
 struct Message challenge_msgtab = {
         "CHALLENGE", 0, 0, 0, MFLG_SLOW,
 	{mg_unreg, {m_challenge, 2}, mg_ignore, mg_ignore, mg_ignore, {m_challenge, 2}}
