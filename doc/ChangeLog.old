@@ -1,3 +1,11 @@
+*** 20001228_21 by adrian
+
+
+* Check to make sure a SIGHUP actually causes a rehash. The last time I tried
+  it, the server stayed running, but the ircd stopped listening on ports.
+
+
+
 *** 20001228_20 by adrian
 
 
