@@ -48,8 +48,10 @@
 #define INADDRSZ sizeof(struct in_addr)
 #endif
 
+#ifdef IPV6
 #ifndef IN6ADDRSZ
 #define IN6ADDRSZ sizeof(struct in6_addr)
+#endif
 #endif
 /*
  * myctime - This is like standard ctime()-function, but it zaps away
