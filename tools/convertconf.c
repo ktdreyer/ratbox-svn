@@ -494,11 +494,12 @@ static void oldParseOneLine(FILE *out,char* line)
       if(host_field && (*host_field != '#'))
         {
           fprintf(out,"resv {\n");
-          fprintf(out,"\tname=\"%s\";\n", host_field);
+          fprintf(out,"\tnick=\"%s\";\n", host_field);
         }
       else
         {
-          puts("Cannot convert a channel quarantine, skipping");
+          fprintf(out,"resv {\n");
+          fprintf(out,"\tchannel=\"%s\";\n", host_field);
           break;
         } 
      if(passwd_field)
