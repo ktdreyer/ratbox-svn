@@ -335,10 +335,10 @@ comm_select_fdlist(fdlist_t fdlist, unsigned long delay)
 int
 comm_select(unsigned long delay)
 {
-    comm_select_fdlist(FDLIST_SERVICE, 0);
-    comm_select_fdlist(FDLIST_SERVER, 0);
-    /* comm_select_fdlist(FDLIST_BUSYCLIENT, 0); */
-    comm_select_fdlist(FDLIST_IDLECLIENT, delay);
-    return 0;
+  comm_select_fdlist(FDLIST_IDLECLIENT, 0);
+  /* comm_select_fdlist(BUSYCLIENT, 0); */
+  comm_select_fdlist(FDLIST_SERVICE, 0);
+  comm_select_fdlist(FDLIST_SERVER, delay);
+  return 0;
 }
 #endif
