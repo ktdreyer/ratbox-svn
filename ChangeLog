@@ -1,3 +1,15 @@
+leeh        2005/03/20 00:32:37 UTC	(20050320_0)
+
+  Modified files:
+    include              stdinc.h 
+  Log:
+  - remove some vms includes
+  
+  Revision  Changes    Path
+  1.20      +0 -46     ircd-ratbox/include/stdinc.h
+
+
+
 leeh        2005/03/18 17:01:11 UTC	(20050318_1)
 
   Modified files:
