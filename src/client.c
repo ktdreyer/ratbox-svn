@@ -436,7 +436,7 @@ check_klines(void)
   struct ConfItem     *aconf = (struct ConfItem *)NULL;
   char          *reason;                /* pointer to reason string */
   dlink_node    *ptr, *next_ptr;
-  
+ 
   for (ptr = lclient_list.head; ptr; ptr = next_ptr)
     {
       next_ptr = ptr->next;
@@ -578,6 +578,24 @@ check_klines(void)
 	    }
 	}
     }
+ 
+  /* also check the unknowns list for new dlines */
+  for (ptr = unknown_list.head; ptr; ptr = next_ptr)
+  {
+    next_ptr = ptr->next;
+    client_p = ptr->data;
+
+    if((aconf = find_dline(&client_p->localClient->ip,
+                           client_p->localClient->aftype)))
+    {
+      if(aconf->status & CONF_EXEMPTDLINE)
+        continue;
+
+      sendto_one(client_p, "NOTICE DLINE :*** You have been D-lined");
+      exit_client(client_p, client_p, &me, "D-lined");
+    }
+  }
+
 }
 
 /*
