@@ -1,3 +1,9 @@
+*** 20001129_2 by db
+- removed more #define's
+- cleaned up client.c/client.h some more
+
+
+
 *** 20001129_1 by db
 - I removed isbot tests. those are quite obsolete and were BLOAT
 - I added skeleton for server side ignore new user mode +u
