@@ -1,3 +1,7 @@
+*** 20010403_4 by ejb
+- fixed getopt.
+
+
 *** 20010403_3 by ejb
 - changed getopt.h to ircd_getopt.h.
 
