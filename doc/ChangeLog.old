@@ -1,3 +1,9 @@
+*** 20001211_6 by db
+- unknown clients should be removed from the unknown_list on exit!
+  or you get duplicates on the unknown_list and neat things like that.
+
+
+
 *** 20001211_5 by db
 - this gets rid of local[] 
   unknown clients are now placed into unknown_list, moved to
