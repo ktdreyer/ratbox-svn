@@ -17,6 +17,7 @@
 #include <string.h>
 
 #include "tools.h"
+#include "client.h"
 #include "linebuf.h"
 #include "blalloc.h"
 #include "memory.h"
@@ -161,6 +162,24 @@ linebuf_newbuf(buf_head_t *bufhead)
 {
     /* not much to do right now :) */
     bzero(bufhead, sizeof(buf_head_t));
+}
+
+/*
+ * client_flush_input
+ *
+ * inputs	- pointer to client
+ * output	- none
+ * side effects - all input line bufs are flushed 
+ */
+void
+client_flush_input(struct Client *cptr)
+{
+  /* This way, it can be called for remote client as well */
+
+  if(cptr->localClient == NULL)
+    return;
+
+  linebuf_donebuf(&cptr->localClient->buf_recvq);
 }
 
 

@@ -48,6 +48,7 @@
 #include "whowas.h"
 #include "s_debug.h"
 #include "s_user.h"
+#include "linebuf.h"
 #include "hash.h"
 #include "memory.h"
 
@@ -1323,6 +1324,8 @@ const char* comment         /* Reason for the exit */
       if(sptr->localClient->dns_query.query != NULL)
 	      adns_cancel(sptr->localClient->dns_query.query);
       delete_identd_queries(sptr);
+
+      client_flush_input(sptr);
 
       /* This sptr could have status of one of STAT_UNKNOWN, STAT_CONNECTING
        * STAT_HANDSHAKE or STAT_UNKNOWN
