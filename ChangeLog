@@ -1,3 +1,19 @@
+leeh        2004/03/06 14:18:12 EST	(20040306_1)
+
+  Modified files:
+    contrib              m_opme.c 
+    modules              m_whois.c 
+    src                  client.c 
+  Log:
+  - s/_local//
+  
+  Revision  Changes    Path
+  1.39      +77 -113   ircd-ratbox/contrib/m_opme.c
+  1.137     +2 -2      ircd-ratbox/modules/m_whois.c
+  7.433     +13 -31    ircd-ratbox/src/client.c
+
+
+
 leeh        2004/03/06 08:09:41 EST	(20040306_0)
 
   Modified files:
