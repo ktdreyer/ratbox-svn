@@ -1,3 +1,8 @@
+*** 20010328_6 by db
+- more cleanups
+
+
+
 *** 20010328_5 by androsyn
 Fixed adns core.  Somebody accidently forgot to set the callback for
 auth_dns_callback().  -Wall caught this rather easily. BTW -Wall should
