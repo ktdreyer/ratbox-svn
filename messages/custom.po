@@ -120,7 +120,7 @@ msgstr	""
 
 #: ../src/messages.tab:240
 #, c-format
-msgid	":%s 217 %s %s %s %s@%s"
+msgid	":%s 217 %s %c %s %s %s@%s"
 msgstr	""
 
 #: ../src/messages.tab:241
