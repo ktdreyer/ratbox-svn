@@ -1,3 +1,16 @@
+androsyn    2002/08/11 09:44:44 EDT	(20020811_7)
+
+  Removed files:
+    doc                  ChangeLog.old 
+  Log:
+  Remove ChangeLog.old from the tree..If anybody needs it..it'll be in the
+  cvs attic.
+  
+  Revision  Changes    Path
+  7.3958    +0 -30913  ircd-ratbox/doc/ChangeLog.old (dead)
+
+
+
 androsyn    2002/08/11 09:34:39 EDT	(20020811_6)
 
   Modified files:
