@@ -1,3 +1,29 @@
+leeh        2004/03/29 07:17:02 EST	(20040329_0)
+
+  Modified files:
+    .                    RELNOTES 
+    include              client.h 
+    modules              m_connect.c m_stats.c m_trace.c 
+    modules/core         m_error.c 
+    src                  client.c s_serv.c 
+  Log:
+  - added get_server_name(), to get the name[user@host] of a server and takes
+    account of HIDE_SERVERS_IPS
+  - clean up uses of HIDE_SERVERS_IPS, replacing them with simple calls to
+    get_server_name()
+  
+  Revision  Changes    Path
+  1.91      +4 -0      ircd-ratbox/RELNOTES
+  7.239     +1 -0      ircd-ratbox/include/client.h
+  1.9       +19 -32    ircd-ratbox/modules/core/m_error.c
+  1.71      +3 -4      ircd-ratbox/modules/m_connect.c
+  1.212     +25 -30    ircd-ratbox/modules/m_stats.c
+  1.97      +11 -22    ircd-ratbox/modules/m_trace.c
+  7.447     +46 -11    ircd-ratbox/src/client.c
+  7.394     +22 -58    ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2004/03/28 14:24:01 EST	(20040328_3)
 
   Modified files:
