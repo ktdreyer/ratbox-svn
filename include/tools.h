@@ -43,6 +43,7 @@ extern const unsigned int CharAttrs[];
 #define SERV_C	  0x080
 #define CHAN_C    0x100
 #define CHANPFX_C 0x200
+#define BAN_C	  0x400
 #define NONEOS_C 0x1000
 #define EOL_C    0x4000
 
@@ -57,6 +58,7 @@ extern const unsigned int CharAttrs[];
 #define IsServChar(c)   (CharAttrs[(unsigned char)(c)] & (NICK_C | SERV_C))
 #define IsChanChar(c)   (CharAttrs[(unsigned char)(c)] & CHAN_C)
 #define IsChanPrefix(c) (CharAttrs[(unsigned char)(c)] & CHANPFX_C)
+#define IsBanChar(c)	(CharAttrs[(unsigned char)(c)] & BAN_C)
 #define IsNonEOS(c) (CharAttrs[(unsigned char)(c)] & NONEOS_C)
 #define IsEol(c) (CharAttrs[(unsigned char)(c)] & EOL_C)
 
@@ -64,6 +66,7 @@ extern int match(const char *mask, const char *name);
 extern int irccmp(const char *s1, const char *s2);
 extern int ircncmp(const char *s1, const char *s2, int n);
 
+void collapse(char *);
 extern char *strip_tabs(char *dest, const unsigned char *src, size_t len);
 
 typedef struct _dlink_node dlink_node;

@@ -19,6 +19,7 @@
 #include "c_init.h"
 #include "balloc.h"
 #include "conf.h"
+#include "modebuild.h"
 
 #define S_C_OWNER	200
 #define S_C_MANAGER	190
@@ -44,13 +45,20 @@ static int s_chanserv_register(struct client *, char *parv[], int parc);
 static int s_chanserv_adduser(struct client *, char *parv[], int parc);
 static int s_chanserv_deluser(struct client *, char *parv[], int parc);
 static int s_chanserv_moduser(struct client *, char *parv[], int parc);
+static int s_chanserv_listusers(struct client *, char *parv[], int parc);
 static int s_chanserv_suspend(struct client *, char *parv[], int parc);
 static int s_chanserv_unsuspend(struct client *, char *parv[], int parc);
+static int s_chanserv_clearmodes(struct client *, char *parv[], int parc);
+static int s_chanserv_clearops(struct client *, char *parv[], int parc);
+static int s_chanserv_clearallops(struct client *, char *parv[], int parc);
+static int s_chanserv_clearbans(struct client *, char *parv[], int parc);
 static int s_chanserv_invite(struct client *, char *parv[], int parc);
 static int s_chanserv_op(struct client *, char *parv[], int parc);
 static int s_chanserv_voice(struct client *, char *parv[], int parc);
 static int s_chanserv_addban(struct client *, char *parv[], int parc);
 static int s_chanserv_delban(struct client *, char *parv[], int parc);
+static int s_chanserv_listbans(struct client *, char *parv[], int parc);
+static int s_chanserv_unban(struct client *, char *parv[], int parc);
 
 static struct service_command chanserv_command[] =
 {
@@ -58,13 +66,20 @@ static struct service_command chanserv_command[] =
 	{ "ADDUSER",	&s_chanserv_adduser,	3, NULL, 0, 1, 1, 0L },
 	{ "DELUSER",	&s_chanserv_deluser,	2, NULL, 0, 1, 1, 0L },
 	{ "MODUSER",	&s_chanserv_moduser,	3, NULL, 0, 1, 1, 0L },
+	{ "LISTUSERS",	&s_chanserv_listusers,	1, NULL, 0, 1, 1, 0L },
 	{ "SUSPEND",	&s_chanserv_suspend,	3, NULL, 0, 1, 1, 0L },
 	{ "UNSUSPEND",	&s_chanserv_unsuspend,	2, NULL, 0, 1, 1, 0L },
+	{ "CLEARMODES",	&s_chanserv_clearmodes,	1, NULL, 0, 1, 1, 0L },
+	{ "CLEAROPS",	&s_chanserv_clearops,	1, NULL, 0, 1, 1, 0L },
+	{ "CLEARALLOPS",&s_chanserv_clearallops,1, NULL, 0, 1, 1, 0L },
+	{ "CLEARBANS",	&s_chanserv_clearbans,	1, NULL, 0, 1, 1, 0L },
 	{ "INVITE",	&s_chanserv_invite,	1, NULL, 0, 1, 1, 0L },
 	{ "OP",		&s_chanserv_op,		1, NULL, 0, 1, 1, 0L },
 	{ "VOICE",	&s_chanserv_voice,	1, NULL, 0, 1, 1, 0L },
 	{ "ADDBAN",	&s_chanserv_addban,	4, NULL, 0, 1, 1, 0L },
 	{ "DELBAN",	&s_chanserv_delban,	2, NULL, 0, 1, 1, 0L },
+	{ "LISTBANS",	&s_chanserv_listbans,	1, NULL, 0, 1, 1, 0L },
+	{ "UNBAN",	&s_chanserv_unban,	1, NULL, 0, 1, 1, 0L },
 	{ "\0", NULL, 0, NULL, 0, 0, 0, 0L }
 };
 
@@ -257,9 +272,7 @@ make_ban_reg(struct chan_reg *chreg_p, const char *mask, const char *reason,
 	banreg_p->level = level;
 	banreg_p->hold = hold;
 
-#if 0
 	collapse(banreg_p->mask);
-#endif
 
 	dlink_add(banreg_p, &banreg_p->channode, &chreg_p->bans);
 	return banreg_p;
@@ -508,6 +521,33 @@ s_chanserv_moduser(struct client *client_p, char *parv[], int parc)
 }
 
 static int
+s_chanserv_listusers(struct client *client_p, char *parv[], int parc)
+{
+	struct member_reg *mreg_p;
+	struct member_reg *mreg_tp;
+	dlink_node *ptr;
+
+	if((mreg_p = verify_member_reg_name(client_p, NULL, parv[0], S_C_SUSPEND)) == NULL)
+		return 1;
+
+	service_error(chanserv_p, client_p, "Channel %s access list:",
+			mreg_p->channel_reg->name);
+
+	DLINK_FOREACH(ptr, mreg_p->channel_reg->users.head)
+	{
+		mreg_tp = ptr->data;
+
+		service_error(chanserv_p, client_p, "  %-10s %3d (%d) [mod: %s]",
+				mreg_tp->user_reg->name, mreg_tp->level,
+				mreg_tp->suspend, mreg_tp->lastmod);
+	}
+
+	service_error(chanserv_p, client_p, "End of access list");
+
+	return 3;
+}
+
+static int
 s_chanserv_suspend(struct client *client_p, char *parv[], int parc)
 {
 	struct user_reg *ureg_p;
@@ -605,6 +645,140 @@ s_chanserv_unsuspend(struct client *client_p, char *parv[], int parc)
 			mreg_tp->channel_reg->name, mreg_tp->user_reg->name);
 
 	return 1;
+}
+
+static int
+s_chanserv_clearmodes(struct client *client_p, char *parv[], int parc)
+{
+	struct member_reg *mreg_p;
+	struct channel *chptr;
+
+	if((mreg_p = verify_member_reg_name(client_p, &chptr, parv[0], S_C_CLEAR)) == NULL)
+		return 1;
+
+	if(!chptr->mode.key[0] && !chptr->mode.limit &&
+	   !(chptr->mode.mode & MODE_INVITEONLY))
+	{
+		service_error(chanserv_p, client_p, "Channel %s has no modes to clear",
+				chptr->name);
+		return 1;
+	}
+
+	sendto_server(":%s MODE %s -%s%s%s%s",
+			chanserv_p->name, chptr->name,
+			(chptr->mode.mode & MODE_INVITEONLY) ? "i" : "",
+			chptr->mode.limit ? "l" : "",
+			chptr->mode.key ? "k " : "",
+			chptr->mode.key ? chptr->mode.key : "");
+
+	service_error(chanserv_p, client_p, "Channel %s modes cleared",
+			chptr->name);
+
+	return 1;
+}
+
+static void
+s_chanserv_clearops_loc(struct client *client_p, struct channel *chptr,
+			struct member_reg *mreg_p, int level)
+{
+	struct member_reg *mreg_tp;
+	struct chmember *msptr;
+	dlink_node *ptr;
+
+	modebuild_start(chanserv_p, chptr);
+
+	DLINK_FOREACH(ptr, chptr->users.head)
+	{
+		msptr = ptr->data;
+
+		if(!is_opped(msptr))
+			continue;
+
+		if(msptr->client_p->user->user_reg &&
+		   (mreg_tp = find_member_reg(msptr->client_p->user->user_reg, mreg_p->channel_reg)))
+		{
+			if(mreg_tp->level >= level || mreg_tp->suspend)
+				continue;
+		}
+
+		modebuild_add(DIR_DEL, "o", msptr->client_p->name);
+		msptr->flags &= ~MODE_OPPED;
+	}
+
+	modebuild_finish();
+
+	service_error(chanserv_p, client_p, "Channel %s ops cleared", chptr->name);
+}
+
+static int
+s_chanserv_clearops(struct client *client_p, char *parv[], int parc)
+{
+	struct member_reg *mreg_p;
+	struct channel *chptr;
+
+	if((mreg_p = verify_member_reg_name(client_p, &chptr, parv[0], S_C_CLEAR)) == NULL)
+		return 1;
+
+	s_chanserv_clearops_loc(client_p, chptr, mreg_p, 0);
+	return 3;
+}
+
+static int
+s_chanserv_clearallops(struct client *client_p, char *parv[], int parc)
+{
+	struct member_reg *mreg_p;
+	struct channel *chptr;
+
+	if((mreg_p = verify_member_reg_name(client_p, &chptr, parv[0], S_C_CLEAR)) == NULL)
+		return 1;
+
+	s_chanserv_clearops_loc(client_p, chptr, mreg_p, mreg_p->level);
+	return 3;
+}
+
+static int
+s_chanserv_clearbans(struct client *client_p, char *parv[], int parc)
+{
+	struct channel *chptr;
+	struct member_reg *mreg_p;
+	struct ban_reg *banreg_p;
+	dlink_node *ptr, *next_ptr;
+	dlink_node *bptr;
+	int found;
+
+	if((mreg_p = verify_member_reg_name(client_p, &chptr, parv[0], S_C_CLEAR)) == NULL)
+		return 1;
+
+	modebuild_start(chanserv_p, chptr);
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->bans.head)
+	{
+		found = 0;
+
+		DLINK_FOREACH(bptr, mreg_p->channel_reg->bans.head)
+		{
+			banreg_p = bptr->data;
+
+			if(!irccmp((const char *) ptr->data, banreg_p->mask))
+			{
+				found++;
+				break;
+			}
+		}
+
+		if(!found)
+		{
+			modebuild_add(DIR_DEL, "b", ptr->data);
+			my_free(ptr->data);
+			dlink_destroy(ptr, &chptr->bans);
+		}
+	}
+
+	modebuild_finish();
+
+	service_error(chanserv_p, client_p, "Channel %s bans cleared", chptr->name);
+
+	return 3;
 }
 
 #if 0
@@ -734,6 +908,7 @@ s_chanserv_addban(struct client *client_p, char *parv[], int parc)
 	struct ban_reg *banreg_p;
 	dlink_node *ptr, *next_ptr;
 	const char *mask;
+	const char *p;
 	char *endptr;
 	int duration;
 	int level;
@@ -751,6 +926,20 @@ s_chanserv_addban(struct client *client_p, char *parv[], int parc)
 		duration = 0;
 
 	mask = parv[loc++];
+
+	p = mask;
+
+	while(*p)
+	{
+		if(!IsBanChar(*p))
+		{
+			service_error(chanserv_p, client_p, "Ban %s invalid",
+					mask);
+			return 1;
+		}
+
+		p++;
+	}
 
 	DLINK_FOREACH(ptr, mreg_p->channel_reg->bans.head)
 	{
@@ -805,6 +994,13 @@ s_chanserv_addban(struct client *client_p, char *parv[], int parc)
 
 	if(chptr == NULL)
 		return 1;
+
+	/* already +b'd */
+	DLINK_FOREACH(ptr, chptr->bans.head)
+	{
+		if(!irccmp((const char *) ptr->data, mask))
+			return 1;
+	}
 
 	loc = 0;
 
@@ -911,4 +1107,83 @@ s_chanserv_delban(struct client *client_p, char *parv[], int parc)
 	}
 
 	return 1;
+}
+
+static int
+s_chanserv_listbans(struct client *client_p, char *parv[], int parc)
+{
+	struct member_reg *mreg_p;
+	struct ban_reg *banreg_p;
+	dlink_node *ptr;
+
+	if((mreg_p = verify_member_reg_name(client_p, NULL, parv[0], S_C_REGULAR)) == NULL)
+		return 1;
+
+	service_error(chanserv_p, client_p, "Channel %s ban list:",
+			mreg_p->channel_reg->name);
+
+	DLINK_FOREACH(ptr, mreg_p->channel_reg->bans.head)
+	{
+		banreg_p = ptr->data;
+
+		service_error(chanserv_p, client_p, "  %s %d (%lu) [mod: %s] :%s",
+				banreg_p->mask, banreg_p->level, 
+				(unsigned long) banreg_p->hold, banreg_p->username,
+				banreg_p->reason);
+	}
+
+	service_error(chanserv_p, client_p, "End of ban list");
+
+	return 3;
+}
+
+static int
+s_chanserv_unban(struct client *client_p, char *parv[], int parc)
+{
+	struct channel *chptr;
+	struct member_reg *mreg_p;
+	struct ban_reg *banreg_p;
+	dlink_node *ptr, *next_ptr;
+	dlink_node *bptr;
+	int found;
+
+	if((mreg_p = verify_member_reg_name(client_p, &chptr, parv[0], S_C_REGULAR)) == NULL)
+		return 1;
+
+	if(find_exempt(chptr, client_p))
+	{
+		service_error(chanserv_p, client_p, "Channel %s has a +e for your mask",
+				chptr->name);
+		return 1;
+	}
+
+	modebuild_start(chanserv_p, chptr);
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->bans.head)
+	{
+		if(match((const char *) ptr->data, client_p->user->mask))
+		{
+			DLINK_FOREACH(bptr, mreg_p->channel_reg->bans.head)
+			{
+				banreg_p = bptr->data;
+
+				if(!irccmp(banreg_p->mask, (const char *) ptr->data))
+				{
+					service_error(chanserv_p, client_p,
+						"Ban %s on %s higher level",
+						banreg_p->mask, chptr->name);
+					return 2;
+				}
+			}
+
+			modebuild_add(DIR_DEL, "b", (const char *) ptr->data);
+			found++;
+		}
+	}
+
+	modebuild_finish();
+
+	service_error(chanserv_p, client_p, "Channel %s matching bans cleared", chptr->name);
+
+	return 3;
 }

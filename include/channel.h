@@ -6,6 +6,8 @@
 #define TOPICLEN	120
 #define KEYLEN		24
 
+#define MAX_MODES	10
+
 #define MAX_CHANNEL_TABLE	16384
 
 extern dlink_list channel_list;

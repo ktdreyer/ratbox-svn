@@ -33,17 +33,16 @@ BSRCS = 		\
 	io.c		\
 	log.c		\
 	match.c		\
+	modebuild.c	\
         newconf.c       \
 	rserv.c		\
-	s_alis.c	\
-	s_operbot.c	\
 	scommand.c	\
 	service.c	\
 	tools.c		\
         u_stats.c       \
 	ucommand.c
 
-SRCS = ${BSRCS} s_userserv.c s_chanserv.c
+SRCS = ${BSRCS} s_userserv.c s_chanserv.c s_alis.c s_operbot.c
 
 OBJS=$(SRCS:.c=.o)
 
