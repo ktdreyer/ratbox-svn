@@ -1,3 +1,8 @@
+*** 20010529_2 by jdc
+* Added max_chans_per_user to /INFO output.
+
+
+
 *** 20010529_1 by jdc
 * Support for a new general {} variable, 'max_chans_per_user'.  This
   replaces the previous (statically defined) MAXCHANNELSPERUSER.
