@@ -1,3 +1,8 @@
+*** 20010529_9 by leeh
+- eob has a problem with negative deltas.. just use the time connected
+  (its only a rough gauge anyway)
+
+
 *** 20010529_8 by davidt
 - This fixes the compile for --enable-ipv6, and IPv6 should work as
   before... However, iauth certainly wont work for IPv6, but it didn't
