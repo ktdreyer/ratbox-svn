@@ -1,3 +1,8 @@
+*** 20010612_1 by androsyn
+Disable iauth and libnsl/libresolv checks, as we really don't need, or want
+these libraries.
+
+
 *** 20010611_7 by toot
 slight cosmetic fix to the TSdelta notice to admins.
 
