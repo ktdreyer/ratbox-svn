@@ -1,3 +1,6 @@
+*** 20010127_13 by davidt
+oops, check if sptr can send to the channel, not cptr
+
 *** 20010127_12 by fl_
 - only reset idle on privmsg, not notice
 
