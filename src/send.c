@@ -705,16 +705,18 @@ sendto_remove_channels_local(struct Client *user, const char *pattern, ...)
     {
       ptr_next = ptr->next;
       chptr = ptr->data;
-      remove_user_from_channel(chptr, user);
-      sendto_list_local(&chptr->locchanops, &linebuf);
+      if(remove_user_from_channel(chptr, user) == 0)
+      {
+        sendto_list_local(&chptr->locchanops, &linebuf);
 #ifdef REQUIRE_OANDV
-      sendto_list_local(&chptr->locchanops_voiced, &linebuf);
+        sendto_list_local(&chptr->locchanops_voiced, &linebuf);
 #endif
 #ifdef HALFOPS
-      sendto_list_local(&chptr->lochalfops, &linebuf);
+        sendto_list_local(&chptr->lochalfops, &linebuf);
 #endif
-      sendto_list_local(&chptr->locvoiced, &linebuf);
-      sendto_list_local(&chptr->locpeons, &linebuf);
+        sendto_list_local(&chptr->locvoiced, &linebuf);
+        sendto_list_local(&chptr->locpeons, &linebuf);
+      }
     }
 
     if (MyConnect(user) && (user->serial != current_serial))
