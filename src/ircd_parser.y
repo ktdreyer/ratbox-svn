@@ -2552,7 +2552,7 @@ serverhide_links_delay: LINKS_DELAY '=' timespec ';'
 serverhide_hidden: HIDDEN '=' TYES ';'
   {
     ConfigServerHide.hidden = 1;
-  };
+  }
     |
     HIDDEN '=' TNO ';'
   {
