@@ -105,7 +105,11 @@ static void clear_special_conf(struct ConfItem **);
 
 typedef struct ip_entry
 {
+#ifndef IPV6
+  unsigned long ip;
+#else
   struct irc_inaddr ip;
+#endif
   int        count;
   struct ip_entry *next;
 }IP_ENTRY;
@@ -661,7 +665,7 @@ find_or_add_ip(struct Client *cptr)
 
   for(ptr = ip_hash_table[hash_index = hash_ip(&ip_in)]; ptr; ptr = ptr->next )
     {
-      if(!memcpy(&ptr->ip, &ip_in, sizeof(ip_in)))
+      if(!memcmp(&ptr->ip, &ip_in, sizeof(ip_in)))
         {
           return(ptr);
         }
@@ -715,7 +719,11 @@ void remove_one_ip(struct irc_inaddr *ip_in)
   while(ptr)
     {
       /* XXX - XXX - XXX - XXX */
-      if(!memcmp(IN_ADDR(ptr->ip), PIN_ADDR(ip_in), sizeof(struct irc_inaddr)))
+#ifndef IPV6
+      if(ptr->ip == PIN_ADDR(ip_in))
+#else
+      if(!memcmp(&IN_ADDR(ptr->ip), &PIN_ADDR(ip_in), sizeof(struct irc_inaddr)))
+#endif
         {
           if(ptr->count != 0)
             ptr->count--;

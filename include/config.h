@@ -245,7 +245,7 @@
  * developed, and is not guaranteed to work properly..
  */
 
-#define IPV6
+#undef IPV6
 
 /*   STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP  */
 

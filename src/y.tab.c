@@ -1,5 +1,6 @@
 #ifndef lint
-static char const yysccsid[] = "@(#)yaccpar	1.9 (Berkeley) 02/21/93";
+static char const 
+yyrcsid[] = "$FreeBSD: src/usr.bin/yacc/skeleton.c,v 1.28 2000/01/17 02:04:06 bde Exp $";
 #endif
 #include <stdlib.h>
 #define YYBYACC 1
@@ -9,13 +10,7 @@ static char const yysccsid[] = "@(#)yaccpar	1.9 (Berkeley) 02/21/93";
 #define YYEMPTY -1
 #define yyclearin (yychar=(YYEMPTY))
 #define yyerrok (yyerrflag=0)
-#define YYRECOVERING (yyerrflag!=0)
-#if defined(c_plusplus) || defined(__cplusplus)
-#include <stdlib.h>
-#else
-extern char *getenv();
-extern void *realloc();
-#endif
+#define YYRECOVERING() (yyerrflag!=0)
 static int yygrowstack();
 #define YYPREFIX "yy"
 #line 25 "ircd_parser.y"
@@ -70,7 +65,8 @@ typedef union {
         char *string;
         struct ip_value ip_entry;
 } YYSTYPE;
-#line 74 "y.tab.c"
+#line 69 "y.tab.c"
+#define YYERRCODE 256
 #define ACCEPT 257
 #define ACCEPT_PASSWORD 258
 #define ACTION 259
@@ -213,7 +209,6 @@ typedef union {
 #define LINKS_NOTICE 396
 #define LINKS_DELAY 397
 #define VCHANS_OPER_ONLY 398
-#define YYERRCODE 256
 const short yylhs[] = {                                        -1,
     0,    0,    1,    1,    1,    1,    1,    1,    1,    1,
     1,    1,    1,    1,    1,    1,    1,    1,    1,   16,
@@ -759,8 +754,6 @@ const short yycheck[] = {                                     125,
 #define YYFINAL 1
 #ifndef YYDEBUG
 #define YYDEBUG 0
-#elif YYDEBUG
-#include <stdio.h>
 #endif
 #define YYMAXTOKEN 398
 #if YYDEBUG
@@ -1170,6 +1163,9 @@ const char * const yyrule[] = {
 "general_vchans_oper_only : VCHANS_OPER_ONLY '=' TNO ';'",
 };
 #endif
+#if YYDEBUG
+#include <stdio.h>
+#endif
 #ifdef YYSTACKSIZE
 #undef YYMAXDEPTH
 #define YYMAXDEPTH YYSTACKSIZE
@@ -1208,11 +1204,15 @@ static int yygrowstack()
     else if ((newsize *= 2) > YYMAXDEPTH)
         newsize = YYMAXDEPTH;
     i = yyssp - yyss;
-    if ((newss = (short *)realloc(yyss, newsize * sizeof *newss)) == NULL)
+    newss = yyss ? (short *)realloc(yyss, newsize * sizeof *newss) :
+      (short *)malloc(newsize * sizeof *newss);
+    if (newss == NULL)
         return -1;
     yyss = newss;
     yyssp = newss + i;
-    if ((newvs = (YYSTYPE *)realloc(yyvs, newsize * sizeof *newvs)) == NULL)
+    newvs = yyvs ? (YYSTYPE *)realloc(yyvs, newsize * sizeof *newvs) :
+      (YYSTYPE *)malloc(newsize * sizeof *newvs);
+    if (newvs == NULL)
         return -1;
     yyvs = newvs;
     yyvsp = newvs + i;
@@ -1226,8 +1226,30 @@ static int yygrowstack()
 #define YYACCEPT goto yyaccept
 #define YYERROR goto yyerrlab
 
+#ifndef YYPARSE_PARAM
+#if defined(__cplusplus) || __STDC__
+#define YYPARSE_PARAM_ARG void
+#define YYPARSE_PARAM_DECL
+#else	/* ! ANSI-C/C++ */
+#define YYPARSE_PARAM_ARG
+#define YYPARSE_PARAM_DECL
+#endif	/* ANSI-C/C++ */
+#else	/* YYPARSE_PARAM */
+#ifndef YYPARSE_PARAM_TYPE
+#define YYPARSE_PARAM_TYPE void *
+#endif
+#if defined(__cplusplus) || __STDC__
+#define YYPARSE_PARAM_ARG YYPARSE_PARAM_TYPE YYPARSE_PARAM
+#define YYPARSE_PARAM_DECL
+#else	/* ! ANSI-C/C++ */
+#define YYPARSE_PARAM_ARG YYPARSE_PARAM
+#define YYPARSE_PARAM_DECL YYPARSE_PARAM_TYPE YYPARSE_PARAM;
+#endif	/* ANSI-C/C++ */
+#endif	/* ! YYPARSE_PARAM */
+
 int
-yyparse()
+yyparse (YYPARSE_PARAM_ARG)
+    YYPARSE_PARAM_DECL
 {
     register int yym, yyn, yystate;
 #if YYDEBUG
@@ -2840,7 +2862,7 @@ case 369:
     ConfigFileEntry.vchans_oper_only = 0;
   }
 break;
-#line 2842 "y.tab.c"
+#line 2866 "y.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
