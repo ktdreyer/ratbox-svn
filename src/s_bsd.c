@@ -358,11 +358,9 @@ void close_connection(struct Client *cptr)
     cptr->dns_reply = 0;
   }
   if (-1 < cptr->fd) {
-    /*
-     * XXX send_queued() was called here. We should flush any dbufs
-     * attached to a FD in the close handlers, when they arrive.
-     *     -- adrian
-     */
+    /* attempt to flush any pending dbufs. Evil, but .. -- adrian */
+    if (!IsDead(cptr))
+        send_queued_write(cptr->fd, cptr);
     local[cptr->fd] = NULL;
     fdlist_delete(cptr->fd, FDL_ALL);
     fd_close(cptr->fd);

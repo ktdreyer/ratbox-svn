@@ -54,7 +54,6 @@ static  int     send_message (struct Client *, char *, int);
 static  void vsendto_prefix_one(register struct Client *, register struct Client *, const char *, va_list);
 static  void vsendto_one(struct Client *, const char *, va_list);
 static  void vsendto_realops(const char *, va_list);
-static PF send_queued_write;
 
 static  unsigned long sentalong[MAXCONNECTIONS];
 static unsigned long current_serial=0L;
@@ -182,7 +181,7 @@ send_message(struct Client *to, char *msg, int len)
 **      be possible. This attempts to empty the send queue as far as
 **      possible, and then if any data is left, a write is rescheduled.
 */
-static void
+void
 send_queued_write(int fd, void *data)
 {
   struct Client *to = data;
