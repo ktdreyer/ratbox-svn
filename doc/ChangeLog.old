@@ -1,3 +1,8 @@
+*** 20001215_11 by db
+- missing clean: target in Makefile.in for doc
+
+
+
 *** 20001215_10 by db
 - added GLINE_PATH gline.log missing from config.h ircd.c
 
