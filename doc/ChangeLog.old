@@ -1,3 +1,8 @@
+*** 20010101_29 by fl_
+- dont show how many local users we have if shide is on
+  instead make the local user reply the same as the global one
+
+
 *** 20010101_28 by db
 - setting autoconnall to 0, should not affect the ability of others
   to connect to your server, or you to connect outgoing. If we want the
