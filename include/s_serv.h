@@ -133,8 +133,6 @@ extern struct Capability captab[];
 extern int MaxClientCount;	/* GLOBAL - highest number of clients */
 extern int MaxConnectionCount;	/* GLOBAL - highest number of connections */
 
-extern int refresh_user_links;
-
 /*
  * return values for hunt_server() 
  */
@@ -152,9 +150,9 @@ extern void try_connections(void *unused);
 extern void start_collect_zipstats(void);
 extern void collect_zipstats(void *unused);
 
-extern int check_server(const char *name, struct Client *server);
-extern int server_estab(struct Client *client_p);
-
 extern int serv_connect(struct server_conf *, struct Client *);
+
+extern void start_io(struct Client *server);
+extern int fork_server(struct Client *client_p);
 
 #endif /* INCLUDED_s_serv_h */
