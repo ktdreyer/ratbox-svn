@@ -1,3 +1,24 @@
+a1kmm       2002/02/23 00:29:17 EST	(20020223_0)
+
+  Modified files:
+    src                  client.c s_auth.c s_user.c 
+  Log:
+  - Fixed the bug where we were leaving clients on the auth list until after
+    we parsed any commands waiting on their buffer(which meant that if they
+    got exited then, they would try to be removed from the list they were
+    already being removed from). I cannot get ircd to core using any connection
+    flooding or cloning test now.
+  - Left in my asserts() I wrote about a week ago. These are more extensive
+    and expensive than Androsyn's asserts, and we definitely want them out
+    before we release.
+  
+  Revision  Changes    Path
+  7.233     +17 -0     ircd-hybrid-7/src/client.c
+  7.83      +3 -2      ircd-hybrid-7/src/s_auth.c
+  7.187     +5 -1      ircd-hybrid-7/src/s_user.c
+
+
+
 androsyn    2002/02/22 10:24:15 EST	(20020222_0)
 
   Modified files:
