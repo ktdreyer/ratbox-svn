@@ -217,3 +217,12 @@ Little things to be done given enough time and initiative -Hwy
   flood messages on a channel in t seconds.. This log would be available
   to hand to authorities if requested.
 
+* Need to fix server masking for incoming connectings
+  Cleanest would be to have an optional 'hostmask="";'
+  in the connect block, instead of the port number meaning number
+  of bits to the left of the '.' to chop off. Thats dumb.
+  i.e. from the original example.conf
+  # For example, to make hayes.ims.alaska.edu present itself to the world as
+  # *.alaska.edu, I would use a 2 (to strip off the first two parts).  If you
+
+  We'd have hostmask="*.alaska.edu";
