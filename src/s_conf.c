@@ -2259,8 +2259,7 @@ static void clear_out_old_conf(void)
       MaxLinks(cltmp) = -1;
 
     clear_conf();
-    
-    zap_Dlines();
+    clear_Dline_table();
     clear_special_conf(&x_conf);
     clear_special_conf(&u_conf);
     clear_special_conf(&q_conf);

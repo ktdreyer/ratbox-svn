@@ -51,15 +51,18 @@ struct ConfItem *match_Dline(struct irc_inaddr *ip)
 		return(NULL);
 }
 
-void clear_Dline_table(void)
+void
+clear_Dline_table(void)
 {
-	if(dline != NULL)
-		Destroy_Patricia(dline, NULL);
-	if(dline != NULL)
-	Destroy_Patricia(eline, NULL);
-	if(dline != NULL)
-		Destroy_Patricia(kline, NULL);
-	zap_Dlines();
+ if (dline != NULL)
+   Destroy_Patricia(dline, free_conf);
+ if (eline != NULL)
+   Destroy_Patricia(eline, free_conf);
+ if (kline != NULL)
+   Destroy_Patricia(kline, free_conf);
+ if (iline != NULL)
+   Destroy_Patricia(iline, free_conf);
+ zap_Dlines();
 }
 struct ConfItem *match_ip_Kline(struct irc_inaddr *ip, const char *name)
 {

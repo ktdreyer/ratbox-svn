@@ -288,7 +288,7 @@ void Clear_Patricia(patricia_tree_t * patricia, void_fn_t func)
 void Destroy_Patricia(patricia_tree_t * patricia, void_fn_t func)
 {
 	Clear_Patricia(patricia, func);
-	MyFree(patricia);
+	/* MyFree(patricia); */
 	num_active_patricia--;
 }
 
