@@ -113,7 +113,7 @@ static void
 rehash_glines(struct Client *source_p)
 {
 	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is clearing G-lines",
-			     source_p->name);
+				get_oper_name(source_p));
 	clear_temps(&glines);
 }
 
@@ -125,7 +125,7 @@ rehash_pglines(struct Client *source_p)
 	dlink_node *next_ptr;
 
 	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is clearing pending glines",
-			     source_p->name);
+				get_oper_name(source_p));
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, pending_glines.head)
 	{
@@ -141,7 +141,8 @@ rehash_pglines(struct Client *source_p)
 static void
 rehash_tklines(struct Client *source_p)
 {
-	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is clearing temp klines", source_p->name);
+	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is clearing temp klines",
+				get_oper_name(source_p));
 	clear_temps(&tkline_min);
 	clear_temps(&tkline_hour);
 	clear_temps(&tkline_day);
@@ -151,7 +152,8 @@ rehash_tklines(struct Client *source_p)
 static void
 rehash_tdlines(struct Client *source_p)
 {
-	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is clearing temp dlines", source_p->name);
+	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is clearing temp dlines",
+				get_oper_name(source_p));
 	clear_temps(&tdline_min);
 	clear_temps(&tdline_hour);
 	clear_temps(&tdline_day);
@@ -218,7 +220,8 @@ rehash_tresvs(struct Client *source_p)
 static void
 rehash_rejectcache(struct Client *source_p)
 {
-	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is clearing reject cache", source_p->name);
+	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is clearing reject cache",
+				get_oper_name(source_p));
 	flush_reject();
 
 }
