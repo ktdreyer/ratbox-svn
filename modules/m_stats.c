@@ -91,33 +91,35 @@ struct StatsStruct
 static void stats_adns_servers (struct Client *);
 static void stats_delay(struct Client *);
 static void stats_hash(struct Client *);
-static void stats_connect (struct Client *);
-static void stats_tdeny (struct Client *);
-static void stats_deny (struct Client *);
-static void stats_exempt (struct Client *);
-static void stats_events (struct Client *);
-static void stats_glines (struct Client *);
-static void stats_pending_glines (struct Client *);
-static void stats_hubleaf (struct Client *);
-static void stats_auth (struct Client *);
-static void stats_tklines (struct Client *);
-static void stats_klines (struct Client *);
-static void stats_messages (struct Client *);
-static void stats_oper (struct Client *);
-static void stats_operedup (struct Client *);
-static void stats_ports (struct Client *);
-static void stats_resv (struct Client *);
-static void stats_usage (struct Client *);
-static void stats_tstats (struct Client *);
-static void stats_uptime (struct Client *);
-static void stats_shared (struct Client *);
-static void stats_servers (struct Client *);
-static void stats_gecos (struct Client *);
-static void stats_class (struct Client *);
-static void stats_memory (struct Client *);
-static void stats_servlinks (struct Client *);
-static void stats_ltrace (struct Client *, int, const char **);
-static void stats_ziplinks (struct Client *);
+static void stats_connect(struct Client *);
+static void stats_tdeny(struct Client *);
+static void stats_deny(struct Client *);
+static void stats_exempt(struct Client *);
+static void stats_events(struct Client *);
+static void stats_glines(struct Client *);
+static void stats_pending_glines(struct Client *);
+static void stats_hubleaf(struct Client *);
+static void stats_auth(struct Client *);
+static void stats_tklines(struct Client *);
+static void stats_klines(struct Client *);
+static void stats_messages(struct Client *);
+static void stats_oper(struct Client *);
+static void stats_operedup(struct Client *);
+static void stats_ports(struct Client *);
+static void stats_tresv(struct Client *);
+static void stats_resv(struct Client *);
+static void stats_usage(struct Client *);
+static void stats_tstats(struct Client *);
+static void stats_uptime(struct Client *);
+static void stats_shared(struct Client *);
+static void stats_servers(struct Client *);
+static void stats_tgecos(struct Client *);
+static void stats_gecos(struct Client *);
+static void stats_class(struct Client *);
+static void stats_memory(struct Client *);
+static void stats_servlinks(struct Client *);
+static void stats_ltrace(struct Client *, int, const char **);
+static void stats_ziplinks(struct Client *);
 
 static void report_tklines (struct Client *, dlink_list *);
 
@@ -155,7 +157,7 @@ static struct StatsStruct stats_cmd_table[] = {
 	{'O', stats_oper,		0, 0, },
 	{'p', stats_operedup,		0, 0, },
 	{'P', stats_ports,		0, 0, },
-	{'q', stats_resv,		1, 0, },
+	{'q', stats_tresv,		1, 0, },
 	{'Q', stats_resv,		1, 0, },
 	{'r', stats_usage,		1, 0, },
 	{'R', stats_usage,		1, 0, },
@@ -165,7 +167,7 @@ static struct StatsStruct stats_cmd_table[] = {
 	{'U', stats_shared,		1, 0, },
 	{'v', stats_servers,		0, 0, },
 	{'V', stats_servers,		0, 0, },
-	{'x', stats_gecos,		1, 0, },
+	{'x', stats_tgecos,		1, 0, },
 	{'X', stats_gecos,		1, 0, },
 	{'y', stats_class,		0, 0, },
 	{'Y', stats_class,		0, 0, },
@@ -809,21 +811,58 @@ stats_ports (struct Client *source_p)
 }
 
 static void
-stats_resv(struct Client *source_p)
+stats_tresv(struct Client *source_p)
 {
 	struct ConfItem *aconf;
 	dlink_node *ptr;
+	int i;
 
 	DLINK_FOREACH(ptr, resv_conf_list.head)
 	{
 		aconf = ptr->data;
-		sendto_one_numeric(source_p, RPL_STATSQLINE,
-				   form_str(RPL_STATSQLINE),
-				   aconf->hold ? 'q' : 'Q',
-				   aconf->name, aconf->passwd);
+		if(aconf->hold)
+			sendto_one_numeric(source_p, RPL_STATSQLINE, 
+					form_str(RPL_STATSQLINE),
+					'q', aconf->name, aconf->passwd);
 	}
 
-	print_resv_hash(source_p);
+	HASH_WALK(i, R_MAX, ptr, resvTable)
+	{
+		aconf = ptr->data;
+		if(aconf->hold)
+			sendto_one_numeric(source_p, RPL_STATSQLINE, 
+					form_str(RPL_STATSQLINE),
+					'q', aconf->name, aconf->passwd);
+	}
+	HASH_WALK_END
+}
+
+
+static void
+stats_resv(struct Client *source_p)
+{
+	struct ConfItem *aconf;
+	dlink_node *ptr;
+	int i;
+
+	DLINK_FOREACH(ptr, resv_conf_list.head)
+	{
+		aconf = ptr->data;
+		if(!aconf->hold)
+			sendto_one_numeric(source_p, RPL_STATSQLINE, 
+					form_str(RPL_STATSQLINE),
+					'Q', aconf->name, aconf->passwd);
+	}
+
+	HASH_WALK(i, R_MAX, ptr, resvTable)
+	{
+		aconf = ptr->data;
+		if(!aconf->hold)
+			sendto_one_numeric(source_p, RPL_STATSQLINE, 
+					form_str(RPL_STATSQLINE),
+					'Q', aconf->name, aconf->passwd);
+	}
+	HASH_WALK_END
 }
 
 static void
@@ -1042,6 +1081,24 @@ stats_servers (struct Client *source_p)
 }
 
 static void
+stats_tgecos(struct Client *source_p)
+{
+	struct ConfItem *aconf;
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, xline_conf_list.head)
+	{
+		aconf = ptr->data;
+
+		if(aconf->hold)
+			sendto_one_numeric(source_p, RPL_STATSXLINE,
+					form_str(RPL_STATSXLINE),
+					'x', aconf->port, aconf->name,
+					aconf->passwd);
+	}
+}
+
+static void
 stats_gecos(struct Client *source_p)
 {
 	struct ConfItem *aconf;
@@ -1051,10 +1108,11 @@ stats_gecos(struct Client *source_p)
 	{
 		aconf = ptr->data;
 
-		sendto_one_numeric(source_p, RPL_STATSXLINE,
-				form_str(RPL_STATSXLINE),
-				aconf->hold ? 'x' : 'X', aconf->port,
-				aconf->name, aconf->passwd);
+		if(!aconf->hold)
+			sendto_one_numeric(source_p, RPL_STATSXLINE,
+					form_str(RPL_STATSXLINE),
+					'X', aconf->port, aconf->name, 
+					aconf->passwd);
 	}
 }
 

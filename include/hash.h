@@ -91,7 +91,6 @@ extern dlink_node *find_hostname(const char *);
 extern void add_to_resv_hash(const char *name, struct ConfItem *aconf);
 extern void del_from_resv_hash(const char *name, struct ConfItem *aconf);
 extern struct ConfItem *hash_find_resv(const char *name);
-extern void print_resv_hash(struct Client *source_p);
 extern void clear_resv_hash(void);
 
 extern void add_to_help_hash(const char *name, struct cachefile *hptr);

@@ -814,27 +814,6 @@ hash_find_help(const char *name, int flags)
 }
 
 void
-print_resv_hash(struct Client *source_p)
-{
-	struct ConfItem *aconf;
-	dlink_node *ptr;
-	int i;
-
-	for(i = 0; i < R_MAX; i++)
-	{
-		DLINK_FOREACH(ptr, resvTable[i].head)
-		{
-			aconf = ptr->data;
-
-			sendto_one_numeric(source_p, RPL_STATSQLINE,
-					form_str(RPL_STATSQLINE),
-					aconf->hold ? 'q' : 'Q',
-					aconf->name, aconf->passwd);
-		}
-	}
-}
-
-void
 clear_resv_hash(void)
 {
 	struct ConfItem *aconf;
