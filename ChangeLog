@@ -1,3 +1,40 @@
+androsyn    2004/06/17 19:19:02 EDT	(20040617_8)
+
+  Modified files:
+    .                    Makefile.in configure configure.ac 
+    contrib              Makefile.in 
+    doc                  Makefile.in 
+    help                 Makefile.in 
+    include              config.h setup.h.in 
+    modules              Makefile.in 
+    servlink             Makefile.in 
+    src                  Makefile.in ircd.c 
+    tools                Makefile.in 
+  Added files:
+    .                    aclocal.m4 
+  Log:
+  Merge in Mike's second patch.  This one seems to play nice with the
+  exception of needing AC_SUBST_DIR and AC_DEFINE_DIR macros to deal with
+  ${prefix} fixups.  Added aclocal.m4 to define these macros.
+  
+  Revision  Changes    Path
+  7.49      +20 -12    ircd-ratbox/Makefile.in
+  7.1       +22 -0     ircd-ratbox/aclocal.m4 (new)
+  7.227     +269 -3    ircd-ratbox/configure
+  7.41      +81 -2     ircd-ratbox/configure.ac
+  1.44      +6 -3      ircd-ratbox/contrib/Makefile.in
+  7.26      +20 -20    ircd-ratbox/doc/Makefile.in
+  1.22      +15 -14    ircd-ratbox/help/Makefile.in
+  7.175     +7 -7      ircd-ratbox/include/config.h
+  7.89      +12 -0     ircd-ratbox/include/setup.h.in
+  1.98      +14 -14    ircd-ratbox/modules/Makefile.in
+  1.21      +4 -4      ircd-ratbox/servlink/Makefile.in
+  7.148     +10 -10    ircd-ratbox/src/Makefile.in
+  7.343     +2 -2      ircd-ratbox/src/ircd.c
+  7.39      +16 -16    ircd-ratbox/tools/Makefile.in
+
+
+
 androsyn    2004/06/17 07:35:18 EDT	(20040617_7)
 
   Modified files:
