@@ -1,3 +1,15 @@
+leeh        2003/05/15 19:10:16 UTC	(20030515_9)
+
+  Modified files:
+    modules              m_join.c 
+  Log:
+  - another one here for the key too..
+  
+  Revision  Changes    Path
+  1.122     +5 -2      ircd-ratbox/modules/m_join.c
+
+
+
 leeh        2003/05/15 15:30:17 UTC	(20030515_8)
 
   Modified files:
