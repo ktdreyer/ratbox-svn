@@ -36,7 +36,8 @@
 #include "parse.h"
 #include "modules.h"
 #include "hook.h"
-#include "cache.h"
+#include "event.h"
+#include "sprintf_irc.h"
 
 static int m_links(struct Client *, struct Client *, int, const char **);
 static int mo_links(struct Client *, struct Client *, int, const char **);
