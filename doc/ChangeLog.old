@@ -1,3 +1,10 @@
+*** 20010929_2 by davidt
+- Fix Count.invisi and Count.oper so they are only incremented once per
+  user.
+- Use BlockHeapFree() not MyFree() to free bans, since they use the block
+  allocator..
+
+
 *** 20010929_1 by wcampbel
 Fix for STATS r showing long values in a %d, found by jv, aproved by Diane
 
