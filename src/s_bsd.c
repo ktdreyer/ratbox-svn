@@ -914,6 +914,12 @@ void error_exit_client(struct Client* cptr, int error)
   exit_client(cptr, cptr, &me, errmsg);
 }
 
+/*
+ * stolen from squid - its a neat (but overused! :) routine which we
+ * can use to see whether we can ignore this errno or not. It is
+ * generally useful for non-blocking network IO related errnos.
+ *     -- adrian
+ */
 int
 ignoreErrno(int ierrno)
 {
