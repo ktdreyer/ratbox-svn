@@ -11,6 +11,7 @@ it is important you read this file before upgrading.
 -- ircd-ratbox-2.0rc8
 - fix silly autoconf issues
 - fix an old reject cache bug
+- fix a getopt bug
 
 -- ircd-ratbox-2.0rc7
 - try to autoconnect on startup
