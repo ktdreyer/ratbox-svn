@@ -55,7 +55,7 @@
 #endif
 
 #ifndef INT16SZ
-#define INT16SZ sizeof(unsigned int)
+#define INT16SZ 2
 #endif
 /*
  * myctime - This is like standard ctime()-function, but it zaps away
