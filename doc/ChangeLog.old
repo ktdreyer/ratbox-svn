@@ -1,3 +1,7 @@
+*** 20010608_9 by leeh
+- added convertklines to convert klines from old format -> new format
+
+
 *** 20010608_8 by a1kmm
 - Improved logging of oper activities to include opernick or operserver.
 
