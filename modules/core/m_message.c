@@ -233,9 +233,9 @@ int     m_message(int p_or_n,
  *		  pointers to channels or clients
  *		  if source client is an oper
  *		  all the classic old bizzare oper privmsg tricks
- *		  are parsed and sent as is...
+ *		  are parsed and sent as is, if prefixed with $
+ *		  to disambiguate.
  *
- * This function will be also used in m_notice.c
  */
 
 int build_target_list(int p_or_n,

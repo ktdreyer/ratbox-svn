@@ -225,6 +225,18 @@ int ms_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   return 0;
 }
 
+/*
+ * do_normal_stats
+ *
+ * inputs	- source pointer to client
+ *		- name for stats L
+ *		- target pointer
+ *		- stat char
+ *		- doall
+ *		- wilds or not
+ * output	- NONE
+ * side effects - stats that either opers or non opers can see
+ */
 void do_normal_stats(struct Client *sptr,
 			    char *name, char *target,
 			    char stat, int doall, int wilds)
@@ -264,6 +276,18 @@ void do_normal_stats(struct Client *sptr,
     }
 }
 
+/*
+ * do_non_priv_stats
+ *
+ * inputs	- source pointer to client
+ *		- name for stats L
+ *		- target pointer
+ *		- stat char
+ *		- doall
+ *		- wilds or not
+ * output	- NONE
+ * side effects - only stats that are allowed for non-opers etc. are done here
+ */
 void do_non_priv_stats(struct Client *sptr, char *name, char *target,
 			      char stat, int doall, int wilds)
 {
@@ -271,7 +295,7 @@ void do_non_priv_stats(struct Client *sptr, char *name, char *target,
     {
     case 'E' : case 'e' :
     case 'F' : case 'f' :
-      sendto_one(sptr,":%s NOTICE %s :Use stats I instead", me.name, sptr->name);
+      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, sptr->name);
       stats_spy(sptr,stat);
       break;
 
@@ -341,6 +365,16 @@ void do_non_priv_stats(struct Client *sptr, char *name, char *target,
     }
 }
 
+/*
+ * do_priv_stats
+ *
+ * inputs	- source pointer to client
+ *		- name for stats L
+ *		- target pointer
+ *		- stat char
+ * output	- NONE
+ * side effects - only stats that are allowed for opers etc. are done here
+ */
 void do_priv_stats(struct Client *sptr, char *name, char *target,
 			    char stat, int doall, int wilds)
 {
@@ -482,6 +516,15 @@ void do_priv_stats(struct Client *sptr, char *name, char *target,
     }
 }
 
+/*
+ * stats_L
+ *
+ * inputs	- pointer to client to report to
+ *		- doall flag
+ *		- wild card or not
+ * output	- NONE
+ * side effects	-
+ */
 void stats_L(struct Client *sptr,char *name,int doall, int wilds)
 {
   int i;
@@ -571,7 +614,15 @@ void stats_L(struct Client *sptr,char *name,int doall, int wilds)
     }
 }
 
-/* personally, I don't see why opers need to see stats requests
+/*
+ * stats_spy
+ *
+ * inputs	- pointer to client doing the /stats
+ *		- char letter they are doing /stats on
+ * output	- none
+ * side effects -
+ * This little helper function reports to opers if configured.
+ * personally, I don't see why opers need to see stats requests
  * at all. They are just "noise" to an oper, and users can't do
  * any damage with stats requests now anyway. So, why show them?
  * -Dianora
@@ -581,7 +632,6 @@ void stats_L(struct Client *sptr,char *name,int doall, int wilds)
  *
  * done --is
  */
-
 void stats_spy(struct Client *sptr,char stat)
 {
   if (ConfigFileEntry.stats_notice)
@@ -631,6 +681,14 @@ void stats_p_spy(struct Client *sptr)
 }
 
 /*
+ * parse_stats_args
+ *
+ * inputs	- arg count
+ *		- args
+ *		- doall flag
+ *		- wild card or not
+ * output	- pointer to name to use
+ * side effects	-
  * common parse routine for m_stats args
  * 
  */
