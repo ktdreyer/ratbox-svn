@@ -452,6 +452,24 @@ static void check_pidfile(const char *filename)
   }
 }
 
+/*
+ * setup_corefile
+ *
+ * inputs       - nothing
+ * output       - nothing
+ * side effects - setups corefile to system limits.
+ * -kre
+ */
+static void setup_corefile(void)
+{
+  struct rlimit rlim; /* resource limits */
+
+  /* Set corefilesize to maximum */
+  getrlimit(RLIMIT_CORE, &rlim);
+  rlim.rlim_cur = rlim.rlim_max;
+  setrlimit(RLIMIT_CORE, &rlim);
+}
+
 int main(int argc, char *argv[])
 {
   time_t      delay = 0;
@@ -460,6 +478,12 @@ int main(int argc, char *argv[])
   * save server boot time right away, so getrusage works correctly
   */
  set_time();
+
+ /*
+  * Setup corefile size immediately after boot -kre
+  */
+ setup_corefile();
+ 
  /* 
   * set initialVMTop before we allocate any memory
   */
