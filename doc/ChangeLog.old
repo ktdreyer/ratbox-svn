@@ -1,3 +1,15 @@
+leeh        2002/06/23 05:22:02 EDT	(20020623_0)
+
+  Modified files:
+    help/opers           rehash 
+  Log:
+  - there is no rehash help (Hwy)
+  
+  Revision  Changes    Path
+  1.2       +0 -1      ircd-hybrid-7/help/opers/rehash
+
+
+
 db          2002/06/22 18:39:09 EDT	(20020622_2)
 
   Modified files:
