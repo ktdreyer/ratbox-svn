@@ -718,7 +718,7 @@ report_Ilines(struct Client *client_p, int mask)
         }
 
         sendto_one(client_p, form_str(RPL_STATSILINE), me.name,
-                   client_p->name, 'I', name,
+                   client_p->name, (IsConfRestricted(aconf)) ? 'i' : 'I', name,
                    show_iline_prefix(client_p, aconf, user),
                    host, port, classname);
       }
