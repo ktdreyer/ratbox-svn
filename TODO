@@ -181,6 +181,14 @@ Little things to be done given enough time and initiative
 .  Do we still need start_ircd.c and ircd_start.c?
 .  Look to see what other STATS commands can be made optionally oper-only
 .  2 pass conf parser (grab classes before anything that uses them)
+.  Use scrypt or just plain 'crypt' libs on FreeBSD, we support both types
+   of passwords without any effort currently, why should we restrict ourselves
+   on some systems?
+.  m_map.so in contrib
+.  m_mkpasswd.so in contrib
+.  Do we still need ircd_start.c and start_ircd.c?
+
+-- Rodder's list
 .  Add scaleable database-based authentication.  Probably part of Iauth.
    Also add support for server-side notify with the list stored in the
    auth database.  This would make ircd an awesome instant messaging
