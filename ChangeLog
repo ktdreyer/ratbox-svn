@@ -1,3 +1,27 @@
+leeh        2004/01/16 13:33:31 EST	(20040116_9)
+
+  Modified files:
+    help                 Makefile.in 
+    help/alis            list 
+    help/hoststat        clones host testmask 
+    help/operbot         invite op 
+    include              s_chanserv.h 
+  Log:
+  - updated the help stuff some more
+  - fleshed out the chanserv structure a bit
+  
+  Revision  Changes    Path
+  1.2       +2 -2      rserv/help/Makefile.in
+  1.2       +1 -0      rserv/help/alis/list
+  1.2       +1 -2      rserv/help/hoststat/clones
+  1.2       +1 -2      rserv/help/hoststat/host
+  1.2       +1 -2      rserv/help/hoststat/testmask
+  1.2       +1 -0      rserv/help/operbot/invite
+  1.2       +1 -0      rserv/help/operbot/op
+  1.4       +13 -0     rserv/include/s_chanserv.h
+
+
+
 leeh        2004/01/16 12:40:51 EST	(20040116_8)
 
   Modified files:
