@@ -1,3 +1,73 @@
+leeh        2003/08/09 11:21:08 EDT	(20030809_4)
+
+  Modified files:
+    contrib              m_ltrace.c 
+    doc                  server-version-info 
+    include              config.h config.h.dist defaults.h ircd.h 
+                         m_info.h s_stats.h 
+    modules              .depend m_pong.c m_stats.c m_trace.c 
+                         m_version.c 
+    src                  .depend Makefile.in class.c client.c 
+                         fdlist.c hash.c ircd.c linebuf.c 
+                         m_error.c messages.tab parse.c restart.c 
+                         s_bsd.c s_bsd_devpoll.c s_bsd_epoll.c 
+                         s_bsd_kqueue.c s_bsd_poll.c s_bsd_qio.c 
+                         s_bsd_select.c s_bsd_sigio.c s_conf.c 
+                         s_serv.c s_stats.c send.c 
+  Removed files:
+    doc/technical        debug_api.txt 
+    include              s_debug.h 
+    src                  s_debug.c 
+  Log:
+  - got rid of serveropts, its easier to just shove the TS_VERSION into
+    form_str(RPL_VERSION)
+  - got rid of DEBUGMODE and the debugging api - its never used.
+  - merged the remaining stats bits of s_debug.c -> s_stats.c
+  
+  Revision  Changes    Path
+  1.10      +3 -3      ircd-ratbox/contrib/m_ltrace.c
+  7.15      +0 -2      ircd-ratbox/doc/server-version-info
+  1.2       +0 -40     ircd-ratbox/doc/technical/debug_api.txt (dead)
+  7.164     +0 -6      ircd-ratbox/include/config.h
+  7.68      +0 -6      ircd-ratbox/include/config.h.dist
+  7.12      +0 -7      ircd-ratbox/include/defaults.h
+  7.71      +0 -4      ircd-ratbox/include/ircd.h
+  7.50      +0 -6      ircd-ratbox/include/m_info.h
+  7.9       +0 -53     ircd-ratbox/include/s_debug.h (dead)
+  7.14      +3 -0      ircd-ratbox/include/s_stats.h
+  1.30      +661 -662  ircd-ratbox/modules/.depend
+  1.44      +1 -6      ircd-ratbox/modules/m_pong.c
+  1.172     +1 -2      ircd-ratbox/modules/m_stats.c
+  1.82      +3 -3      ircd-ratbox/modules/m_trace.c
+  1.57      +10 -13    ircd-ratbox/modules/m_version.c
+  7.30      +23 -35    ircd-ratbox/src/.depend
+  7.134     +0 -1      ircd-ratbox/src/Makefile.in
+  7.52      +0 -6      ircd-ratbox/src/class.c
+  7.394     +0 -1      ircd-ratbox/src/client.c
+  7.40      +0 -9      ircd-ratbox/src/fdlist.c
+  7.80      +1 -12     ircd-ratbox/src/hash.c
+  7.303     +0 -3      ircd-ratbox/src/ircd.c
+  7.111     +1 -1      ircd-ratbox/src/linebuf.c
+  7.36      +0 -2      ircd-ratbox/src/m_error.c
+  7.91      +2 -2      ircd-ratbox/src/messages.tab
+  7.162     +0 -14     ircd-ratbox/src/parse.c
+  7.29      +0 -3      ircd-ratbox/src/restart.c
+  7.206     +0 -3      ircd-ratbox/src/s_bsd.c
+  7.26      +0 -1      ircd-ratbox/src/s_bsd_devpoll.c
+  1.13      +0 -1      ircd-ratbox/src/s_bsd_epoll.c
+  1.39      +0 -1      ircd-ratbox/src/s_bsd_kqueue.c
+  7.70      +0 -1      ircd-ratbox/src/s_bsd_poll.c
+  7.2       +0 -1      ircd-ratbox/src/s_bsd_qio.c
+  7.37      +0 -4      ircd-ratbox/src/s_bsd_select.c
+  7.39      +0 -1      ircd-ratbox/src/s_bsd_sigio.c
+  7.424     +0 -1      ircd-ratbox/src/s_conf.c
+  7.97      +0 -393    ircd-ratbox/src/s_debug.c (dead)
+  7.341     +0 -4      ircd-ratbox/src/s_serv.c
+  7.28      +315 -0    ircd-ratbox/src/s_stats.c
+  7.247     +0 -1      ircd-ratbox/src/send.c
+
+
+
 leeh        2003/08/09 10:23:24 EDT	(20030809_3)
 
   Modified files:
