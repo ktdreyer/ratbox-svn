@@ -1,3 +1,7 @@
+*** 20010525_5 by davidt
+- Add missing #include and #ifdef.. argh.
+
+
 *** 20010525_4 by davidt
 - change servlink to avoid using stdin/stdout/stderr, and start from fd 3,
   in an attempt to make solaris happy.
