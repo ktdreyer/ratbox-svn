@@ -959,7 +959,7 @@ chm_ban(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  if (MyClient(source_p) && mode_limit++ > 4)
+  if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
     return;
 
   raw_mask = parv[(*parn)++];
@@ -1066,7 +1066,7 @@ chm_except(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  if (MyClient(source_p) && mode_limit++ > 4)
+  if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
     return;
 
   raw_mask = parv[(*parn)++];
@@ -1171,7 +1171,7 @@ chm_invex(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  if (MyClient(source_p) && mode_limit++ > 4)
+  if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
     return;
 
   raw_mask = parv[(*parn)++];
@@ -1308,7 +1308,7 @@ chm_op(struct Client *client_p, struct Client *source_p,
       ((dir == MODE_DEL) && !t_op))
     return;
 
-  if (MyClient(source_p) && (mode_limit++ > 4))
+  if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
     return;
 
   /* Cancel mode changes... */
@@ -1539,7 +1539,8 @@ chm_halfop(struct Client *client_p, struct Client *source_p,
   if ((dir == MODE_QUERY) || parc <= *parn)
     return;
 
-  if (MyClient(source_p) && alev < CHACCESS_CHANOP && mode_limit++ > 4)
+  if (MyClient(source_p) && alev < CHACCESS_CHANOP && 
+     (++mode_limit > MAXMODEPARAMS))
     return;
 
   opnick = parv[(*parn)++];
@@ -1792,10 +1793,8 @@ chm_voice(struct Client *client_p, struct Client *source_p,
   /* Ignore +/-v on op... Now we need not worry about limiting the
    * number of +/-v...
    */
-#if 0
-  if (MyClient(source_p) && mode_limit++ > 4)
+  if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
     return;
-#endif
 
   if (
 #ifndef REQUIRE_OANDV
