@@ -1,3 +1,19 @@
+leeh        2005/01/28 15:31:40 EST	(20050128_1)
+
+  Modified files:
+    modules              m_kline.c 
+    src                  s_conf.c 
+  Log:
+  - mo_kline() needs minpara of 3, not 2
+  - drop ms_kline() minpara to 5, to counter a bug in 1.5-3
+  - require me.info is never blank
+  
+  Revision  Changes    Path
+  1.197     +9 -2      ircd-ratbox/modules/m_kline.c
+  7.501     +2 -2      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2005/01/28 15:26:28 EST	(20050128_0)
 
   Modified files:
