@@ -708,7 +708,8 @@ static void
 finish_splitmode(void *unused)
 {
 	/* dropped back into a netsplit during split_delay --fl */
-	if(Count.server < split_servers || Count.total < split_users)
+	if(dlink_list_length(&global_serv_list) < (unsigned long) split_servers ||
+	   Count.total < split_users)
 	{
 		eventAddIsh("check_splitmode", check_splitmode, NULL, 10);
 		return;
