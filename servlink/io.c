@@ -47,8 +47,6 @@ static int check_error(int, int, int);
 
 static char *fd_name(int fd)
 {
-  int i;
-  
   if (fd == CONTROL_R.fd)
     return "control read";
   if (fd == CONTROL_W.fd)
@@ -59,6 +57,9 @@ static char *fd_name(int fd)
     return "data write";
   if (fd == REMOTE_R.fd)
     return "network";
+
+  /* uh oh... */
+  return "unknown";
 }
 
 #if defined( HAVE_LIBCRYPTO ) || defined( HAVE_LIBZ )
@@ -71,6 +72,47 @@ static unsigned char tmp2_buf[BUFLEN];
 static unsigned char ctrl_buf[256] = "";
 static unsigned int  ctrl_len = 0;
 static unsigned int  ctrl_ofs = 0;
+
+void io_loop(int nfds)
+{
+  fd_set rfds;
+  fd_set wfds;
+  int i, ret;
+
+  /* loop forever */
+  for (;;)
+  {
+    FD_ZERO(&rfds);
+    FD_ZERO(&wfds);
+
+    for (i = 0; i < 5; i++)
+    {
+      if (fds[i].read_cb)
+        FD_SET(fds[i].fd, &rfds);
+      if (fds[i].write_cb)
+        FD_SET(fds[i].fd, &wfds);
+    }
+
+    /* we have <6 fds ever, so I don't think select is too painful */
+    ret = select(nfds, &rfds, &wfds, NULL, NULL);
+
+    if (ret < 0)
+    {
+      check_error(ret, IO_SELECT, -1); /* exit on fatal errors */             
+    }
+    else if (ret > 0)
+    {
+      /* call any callbacks */
+      for (i = 0; i < 5; i++)
+      {
+        if (FD_ISSET(fds[i].fd, &rfds) && fds[i].read_cb)
+          (*fds[i].read_cb)();
+        if (FD_ISSET(fds[i].fd, &wfds) && fds[i].write_cb)
+          (*fds[i].write_cb)();
+      }
+    }
+  }
+}
 
 void send_data_blocking(int fd, unsigned char *data, int datalen)
 {

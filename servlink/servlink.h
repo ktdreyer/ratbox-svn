@@ -38,9 +38,9 @@
 #define REMOTE_R                fds[4]
 #define REMOTE_W                REMOTE_R
 
-#undef SERVLINK_DEBUG
+#undef  SERVLINK_DEBUG
 
-#define READLEN                  2048
+#define READLEN                  16384
 
 #ifdef HAVE_LIBZ
 #define BUFLEN                   READLEN * 6 /* allow for decompression */

@@ -56,15 +56,14 @@ struct fd_table          fds[5] =
           { 0,       NULL, NULL }
         };
 
-
 /* usage();
  *
  * Display usage message
  */
 static void usage(void)
 {
-  fprintf(stderr, "ircd-hybrid server link v1.0-beta\n");
-  fprintf(stderr, "2001-05-23\n");
+  fprintf(stderr, "ircd-hybrid server link v1.0\n");
+  fprintf(stderr, "2001-06-04\n");
   fprintf(stderr, "\n");
   fprintf(stderr, "This program is called by the ircd-hybrid ircd.\n");
   fprintf(stderr, "It cannot be used on its own.\n");
@@ -73,8 +72,6 @@ static void usage(void)
 
 int main(int argc, char *argv[])
 {
-  fd_set rfds;
-  fd_set wfds;
   int max_fd = 0;
   int i;
 #ifdef SERVLINK_DEBUG
@@ -108,43 +105,8 @@ int main(int argc, char *argv[])
     fcntl(fds[i].fd, F_SETFL, O_NONBLOCK);
   }
 
-  /* The following FDs should be open:
-   *
-   * 3 - bi/uni-directional pipe for control commands
-   * 4 - bi/uni-directional pipe for data
-   * 5 - bi-directional socket connected to remote server
-   * maybe:
-   * 6 - uni-directional (write) pipe for control commands
-   * 7 - uni-directional (write) pipe for data
-   */
-
-  /* loop forever */
-  while (1)
-  {
-    FD_ZERO(&rfds);
-    FD_ZERO(&wfds);
-    
-    for (i = 0; i < 5; i++)
-    {
-      if (fds[i].read_cb)
-        FD_SET(i, &rfds);
-      if (fds[i].write_cb)
-        FD_SET(i, &wfds);
-    }
-      
-    /* we have <6 fds ever, so I don't think select is too painful */
-    if (select((max_fd + 1), &rfds, &wfds, NULL, NULL))
-    {
-     /* call any callbacks */
-      for (i = 0; i <= max_fd; i++)
-      {
-        if (FD_ISSET(i, &rfds) && fds[i].read_cb)
-          (*fds[i].read_cb)();
-        if (FD_ISSET(i, &wfds) && fds[i].write_cb)
-          (*fds[i].write_cb)();
-      }
-    }
-  }
+  /* enter io loop */
+  io_loop(max_fd + 1);
 
   /* NOTREACHED */
   exit(0);

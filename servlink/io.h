@@ -32,6 +32,7 @@
 
 #define FD_NAME(fd)     (fd_name(fd))
 
+extern void io_loop(int nfds);
 extern void write_data(void);
 extern void read_data(void);
 extern void write_ctrl(void);
