@@ -1,3 +1,11 @@
+*** 20010107_7 by db
+- auth poll list did not need to be global... 
+  ircdauth.c references it atm, #if 0 for now... we'll have to rethink
+  how to do this.
+- struct AuthRequest had a now unused index 
+
+
+
 *** 20010107_6 by db
 - removed unused variable in m_kill.c
 - resolved global shadowing in send.c
