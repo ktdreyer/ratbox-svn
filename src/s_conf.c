@@ -1104,6 +1104,23 @@ get_printable_kline(struct Client *source_p, struct ConfItem *aconf,
 		*oper_reason = aconf->spasswd;
 }
 
+static struct banconf_entry
+{
+	const char **filename;
+	void (*func) (FILE *);
+	int perm;
+} banconfs[] = {
+	{ &ConfigFileEntry.klinefile,	parse_k_file,	0 },
+	{ &ConfigFileEntry.klinefile,	parse_k_file,	1 },
+	{ &ConfigFileEntry.dlinefile,	parse_d_file,	0 },
+	{ &ConfigFileEntry.dlinefile,	parse_d_file,	1 },
+	{ &ConfigFileEntry.xlinefile,	parse_x_file,	0 },
+	{ &ConfigFileEntry.xlinefile,	parse_x_file,	1 },
+	{ &ConfigFileEntry.resvfile,	parse_resv_file,0 },
+	{ &ConfigFileEntry.resvfile,	parse_resv_file,1 },
+	{ NULL,				NULL,		0 }
+};
+	
 /*
  * read_conf_files
  *
@@ -1115,9 +1132,9 @@ void
 read_conf_files(int cold)
 {
 	FILE *file;
-	const char *filename, *kfilename, *dfilename;	/* kline or conf filename */
-	const char *xfilename;
-	const char *resvfilename;
+	const char *filename;
+	char buf[MAXPATHLEN];
+	int i;
 
 	conf_fbfile_in = NULL;
 
@@ -1154,82 +1171,31 @@ read_conf_files(int cold)
 	read_conf(conf_fbfile_in);
 	fclose(conf_fbfile_in);
 
-	kfilename = get_conf_name(KLINE_TYPE);
-	if(irccmp(filename, kfilename))
+	for(i = 0; banconfs[i].filename; i++)
 	{
-		if((file = fopen(kfilename, "r")) == NULL)
+		if(banconfs[i].perm)
+			snprintf(buf, sizeof(buf), "%s.perm", *banconfs[i].filename);
+		else
+			snprintf(buf, sizeof(buf), "%s", *banconfs[i].filename);
+
+		if((file = fopen(buf, "r")) == NULL)
 		{
-			if(cold)
-				ilog(L_MAIN, "Failed reading kline file %s", filename);
+			if(banconfs[i].perm)
+				continue;
+			else if(cold)
+				ilog(L_MAIN, "Failed reading ban file %s",
+					*banconfs[i].filename);
 			else
 				sendto_realops_flags(UMODE_ALL, L_ALL,
-						     "Can't open %s file klines could be missing!",
-						     kfilename);
+						"Can't open %s file bans could be missing!",
+						*banconfs[i].filename);
 		}
 		else
 		{
-			parse_k_file(file);
+			(banconfs[i].func)(file);
 			fclose(file);
 		}
-	}
 
-	dfilename = get_conf_name(DLINE_TYPE);
-	if(irccmp(filename, dfilename) && irccmp(kfilename, dfilename))
-	{
-		if((file = fopen(dfilename, "r")) == NULL)
-		{
-			if(cold)
-				ilog(L_MAIN, "Failed reading dline file %s", dfilename);
-			else
-				sendto_realops_flags(UMODE_ALL, L_ALL,
-						     "Can't open %s file dlines could be missing!",
-						     dfilename);
-		}
-		else
-		{
-			parse_d_file(file);
-			fclose(file);
-		}
-	}
-
-	xfilename = ConfigFileEntry.xlinefile;
-
-	if(irccmp(filename, xfilename) && irccmp(kfilename, xfilename) &&
-	   irccmp(dfilename, xfilename))
-	{
-		if((file = fopen(xfilename, "r")) == NULL)
-		{
-			if(cold)
-				ilog(L_MAIN, "Failed reading xline file %s", xfilename);
-			else
-				sendto_realops_flags(UMODE_ALL, L_ALL,
-						     "Can't open %s file xlines could be missing!",
-						     xfilename);
-		}
-		else
-		{
-			parse_x_file(file);
-			fclose(file);
-		}
-	}
-
-	resvfilename = get_conf_name(RESV_TYPE);
-	if(irccmp(filename, resvfilename))
-	{
-		if((file = fopen(resvfilename, "r")) == NULL)
-		{
-			if(cold)
-				ilog(L_MAIN, "Failed reading resv file %s", resvfilename);
-			else
-				sendto_realops_flags(UMODE_ALL, L_ALL,
-						     "Can't open %s file resvs could be missing!",
-						     resvfilename);
-		}
-		else
-		{
-			parse_resv_file(file);
-			fclose(file);
-		}
 	}
 }
 
