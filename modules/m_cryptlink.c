@@ -222,6 +222,9 @@ static void mr_cryptserv(struct Client *client_p, struct Client *source_p,
   char            *encrypted;
   int              enc_len;
 
+  if (cptr->name[0] != 0)
+   return;
+
   if ( (name = parse_cryptserv_args(client_p, parv, parc, info, key)) == NULL )
     {
       sendto_one(client_p,"ERROR :Invalid parameters");
