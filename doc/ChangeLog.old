@@ -1,3 +1,8 @@
+*** 20011002_4 by db
+- reformatting this makes it understandable now.
+
+
+
 *** 20011002_3 by androsyn
 Changed SHARED to T_SHARED as SHARED clashed with a #define from sys/mman.h on solaris
 
