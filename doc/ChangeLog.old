@@ -1,3 +1,27 @@
+*** 20010626_1 by jdc
+- doc/cryptlink.txt
+    * Fixed up "CAPAB <stuff>" -- should be "CAPAB :<stuff>".
+- include/s_conf.h
+  src/ircd_lexer.l
+  src/ircd_parser.y
+  src/rsa.c
+  src/s_conf.c
+  src/s_serv.c
+    * rsa_private_key  -->  rsa_private_key_file
+    * rsa_public_key   -->  rsa_public_key_file
+      (No more sticking keys in the actual conf; finally actual files!)
+      Who wrote the original rsa_public_key code anyways?  It was totally
+      wacky (ascii!?!).
+    * Fixed a few issues with some buffers not getting cleared (regarding
+      RSA keys) on /REHASH.
+    * Fixed up some of the error checking code for public keys.
+    * Fixed up some code which was doing error checking at the wrong
+      time/wrong order.
+- doc/example.conf
+    * Changed examples to be precise with the above.
+
+
+
 *** 20010625_4 by jdc
 - src/rsa.c  -- Looks like the RSA_free() prior to the PEM_ function
                 results in a segfault.  I had a feeling about this;
