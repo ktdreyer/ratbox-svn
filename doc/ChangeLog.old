@@ -1,3 +1,15 @@
+*** 20001101_6 by adrian
+
+
+.. and remember that a retried connect() can return EISCONN which
+means the socket is already connect()ed, and its not actually an
+error.
+
+This makes the auth code work again. Yay. :)
+
+
+
+
 *** 20001101_5 by adrian
 
 
