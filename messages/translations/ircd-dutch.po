@@ -739,7 +739,7 @@ msgstr ":%s 479 %s %s :Foutief kanaal-naam"
 #: ../src/messages.tab:511
 #, c-format
 msgid ":%s 481 %s :Permission Denied - You're not an IRC operator"
-msgstr ":%s 481 %s :Toestemming gewijgerd - Je bent geen IRC operator"
+msgstr ":%s 481 %s :Toestemming geweigerd - Je bent geen IRC operator"
 
 #: ../src/messages.tab:512
 #, c-format
