@@ -42,7 +42,7 @@ static void mo_map(struct Client *client_p, struct Client *source_p,
 static void dump_map(struct Client *client_p,struct Client *root, char *pbuf);
 
 struct Message map_msgtab = {
-  "MAP", 0, 1, 0, MFLG_SLOW, 0,
+  "MAP", 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_map, m_ignore, mo_map}
 };
 
