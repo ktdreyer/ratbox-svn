@@ -2815,7 +2815,6 @@ static void check_still_split()
 void remove_empty_channels()
 {
   struct SLink *tmp;
-  struct SLink  *obtmp;
   struct Channel *next_empty_channel;
 
   for(;empty_channel_list;
@@ -2851,11 +2850,11 @@ void remove_empty_channels()
       if (empty_channel_list->prevch)
         empty_channel_list->prevch->nextch = empty_channel_list->nextch;
       else
-        channel = empty_channel_list->nextch;
+        GlobalChannelList = empty_channel_list->nextch;
       if (empty_channel_list->nextch)
         empty_channel_list->nextch->prevch = empty_channel_list->prevch;
 
-      MyFree(chptr->topic_info);
+      MyFree(empty_channel_list->topic_info);
 
 #ifdef FLUD
       free_fluders(NULL, empty_channel_list);
