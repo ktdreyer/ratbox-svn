@@ -228,10 +228,10 @@ static int inetport(struct Listener* listener)
 #else
   if (INADDR_ANY != listener->addr.sins.sin.s_addr) {
 #endif
-    static struct DNSQuery query;	
-    query.callback = listener_dns_callback;
-    query.ptr = listener;
-    adns_getaddr(&listener->addr, DEF_FAM, (void *)&query);
+    struct DNSQuery *query = MyMalloc(sizeof(struct DNSQuery));	
+    query->callback = listener_dns_callback;
+    query->ptr = listener;
+    adns_getaddr(&listener->addr, DEF_FAM, query);
   }
   return 1;
 }

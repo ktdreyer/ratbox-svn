@@ -232,7 +232,8 @@ static void auth_dns_callback(void* vptr, adns_answer* reply)
     }
 
   MyFree(reply);
-
+  MyFree(auth->query);
+  auth->query = NULL;
   if (!IsDoingAuth(auth))
     {
       release_auth_client(auth->client);
@@ -424,12 +425,13 @@ void start_auth(struct Client* client)
 	/* IAuthQuery(client); */
 #endif /* 0 */
 
-  client->localClient->dns_query.ptr = auth;
-  client->localClient->dns_query.callback = auth_dns_callback;
+  client->localClient->dns_query = MyMalloc(sizeof(struct DNSQuery));
+  client->localClient->dns_query->ptr = auth;
+  client->localClient->dns_query->callback = auth_dns_callback;
   sendheader(client, REPORT_DO_DNS);
 
   /* No DNS cache now, remember? -- adrian */
-  adns_getaddr(&client->localClient->ip, client->localClient->aftype, &client->localClient->dns_query);
+  adns_getaddr(&client->localClient->ip, client->localClient->aftype, client->localClient->dns_query);
   SetDNSPending(auth);
 #if 1
   start_auth_query(auth);
@@ -462,8 +464,8 @@ timeout_auth_queries_event(void *notused)
 	    sendheader(auth->client, REPORT_FAIL_ID);
 	  if (IsDNSPending(auth))
 	    {
-	      delete_adns_queries(&auth->client->localClient->dns_query);
-	      auth->client->localClient->dns_query.query = NULL;
+	      delete_adns_queries(auth->client->localClient->dns_query);
+	      auth->client->localClient->dns_query->query = NULL;
 	      sendheader(auth->client, REPORT_FAIL_DNS);
 	    }
 	  log(L_INFO, "DNS/AUTH timeout %s",
