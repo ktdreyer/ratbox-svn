@@ -1,3 +1,9 @@
+*** 20001130_18 by db
+- removed CUSTOM_ERR define no longer needed
+- removed offsetof no longer needed
+
+
+
 *** 20001130_17 by davidt
 Removed CUSTOM_ERR, and changed it to use gettext(), which allows the
 message files to be changed at run time, currently using
