@@ -80,9 +80,11 @@ CFLAGS		= @CFLAGS@
 
 
 SHELL=/bin/sh
-SUBDIRS=src tools iauth
+SUBDIRS=src tools modules
+# XXX removed `iauth' from the build since it doesn't compile currently
+# SUBDIRS=src tools iauth
 
-MAKE = make ${MFLAGS} 'CFLAGS=${CFLAGS}' 'INSTALL=${INSTALL}' 'LDFLAGS=${LDFLAGS}'
+MAKE = make ${MFLAGS} 
 
 all:	build
 
@@ -93,7 +95,7 @@ build:
 		sh configure; \
 	fi
 	@for i in $(SUBDIRS); do \
-		echo "Building $$i";\
+		echo "build ==> $$i";\
 		cd $$i;\
 		${MAKE} build; cd ..;\
 	done
@@ -101,7 +103,7 @@ build:
 clean:
 	${RM} -f *~ core
 	@for i in $(SUBDIRS); do \
-		echo "Cleaning $$i";\
+		echo "clean ==> $$i";\
 		cd $$i;\
 		${MAKE} clean; cd ..;\
 	done
@@ -114,7 +116,7 @@ distclean:
 	${RM} -f config.status config.cache config.log
 	cd include; ${RM} -f setup.h *~ *.rej *.orig ; cd ..
 	@for i in $(SUBDIRS); do \
-		echo "Cleaning $$i";\
+		echo "distclean ==> $$i";\
 		cd $$i;\
 		${MAKE} distclean; cd ..;\
 	done

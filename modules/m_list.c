@@ -178,9 +178,6 @@ int list_all_channels(struct Client *sptr)
   int i;
   int j;
 
-  SetDoingList(sptr);     /* only set if its a full list */
-  ClearSendqPop(sptr);    /* just to make sure */
-
   /* we'll do this by looking through each hash table bucket */
   for (i=0; i<CH_MAX; i++)
     {
@@ -199,27 +196,11 @@ int list_all_channels(struct Client *sptr)
 	   */
 
 	  list_one_channel(sptr,chptr);
-
-	  if (IsSendqPopped(sptr))
-	    {
-	      /* GAAH!  We popped our sendq. 
-	       * Mark our location in the /list
-	       */
-	      sptr->listprogress=i;
-	      sptr->listprogress2=j;
-	      return 0;
-	    }
 	}
       
     }
 
   sendto_one(sptr, form_str(RPL_LISTEND), me.name, sptr->name);
-  if (IsSendqPopped(sptr))
-    {
-      sptr->listprogress=-1;
-      return 0;
-    }
-  ClearDoingList(sptr);   /* yupo, its over */
   return 0;
 }   
           
@@ -264,64 +245,6 @@ int list_named_channel(struct Client *sptr,char *name)
   return 0;
 }
 
-#if 0
-
-/* XXX I think this still belongs here but its going to have
- * to be done differently with module support, for now, you'll
- * find this code in channel.c -db
- */
-
-/*
- * list_continue
- *
- * inputs	- client pointer 
- * ouput	- 
- * side effects -
- */
-int list_continue(struct Client *sptr)
-{
-  struct Channel *chptr;
-  int i;
-  int j;
-
-  if (sptr->listprogress != -1)
-    {
-      for (i=sptr->listprogress; i<CH_MAX; i++)
-	{
-	  int progress2 = sptr->listprogress2;
-	  for (j=0, chptr=(struct Channel*)(hash_get_channel_block(i).list);
-	       (chptr) && (j<hash_get_channel_block(i).links);
-	       chptr=chptr->hnextch, j++)
-	    {
-	      if (j<progress2)
-		continue;  /* wind up to listprogress2 */
-	      if (!chptr->members || !sptr->user ||
-		  (SecretChannel(chptr) && !IsMember(sptr, chptr)))
-		continue;
-
-	      list_one_channel(sptr,chptr);
-
-	      if (IsSendqPopped(sptr))
-		{
-		  /* we popped again! : P */
-		  sptr->listprogress=i;
-		  sptr->listprogress2=j;
-		  return 0;
-		}
-	    }
-	  sptr->listprogress2 = 0;
-	}
-    }
-  sendto_one(sptr, form_str(RPL_LISTEND), me.name, sptr->name);
-  if (IsSendqPopped(sptr))
-    { /* popped with the RPL_LISTEND code. d0h */
-      sptr->listprogress = -1;
-      return 0;
-    }
-  ClearDoingList(sptr);   /* yupo, its over */
-  return 0;
-}
-
 /*
  * list_one_channel
  *
@@ -334,7 +257,6 @@ void list_one_channel(struct Client *sptr,struct Channel *chptr)
 {
   struct Channel *root_chptr;
   char  vname[CHANNELLEN+NICKLEN+4];
-  struct Channel *root_chptr;
 
   root_chptr = find_bchan(chptr);
 
@@ -351,7 +273,3 @@ void list_one_channel(struct Client *sptr,struct Channel *chptr)
 	     vname, chptr->users, chptr->topic);
 
 }
-
-#endif
-
-

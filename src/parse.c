@@ -342,13 +342,6 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
 #endif
 #endif
   
-  /* don't allow other commands while a list is blocked. since we treat
-     them specially with respect to sendq. */
-#if 0
-  if ((IsDoingList(cptr)) && (*mptr->func != m_list))
-      return -1;
-#endif
-
   /* Determine the class of this connection and assign it one of four handler types to
       fit in with the handler table - Pie-Man 07/24/2000 */
   switch (cptr->status)

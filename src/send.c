@@ -127,20 +127,9 @@ send_message(struct Client *to, char *msg, int len)
           get_client_name(to, FALSE),
           DBufLength(&to->sendQ), get_sendq(to));
 
-      if (IsDoingList(to))
-        {
-          /* Pop the sendq for this message */
-          /*if (!IsAnyOper(to))
-          sendto_ops("LIST blocked for %s", get_client_name(to, FALSE)); */
-          SetSendqPop(to);
-          return 0;
-        }
-      else
-        {
-          if (IsClient(to))
-            to->flags |= FLAGS_SENDQEX;
-          return dead_link(to, "Max Sendq exceeded");
-        }
+      if (IsClient(to))
+        to->flags |= FLAGS_SENDQEX;
+      return dead_link(to, "Max Sendq exceeded");
     }
   else
     {
@@ -204,13 +193,6 @@ send_queued_write(int fd, void *data)
 
     dbuf_delete(&to->sendQ, rlen);
     to->lastsq = DBufLength(&to->sendQ) / 1024;
-    /* 
-     * sendq is now empty.. if there a blocked list?
-     */
-    if (IsSendqPopped(to) && (DBufLength(&to->sendQ) == 0)) {
-      ClearSendqPop(to);
-      list_continue(to);
-    }
     if (rlen < len) {    
       /* ..or should I continue until rlen==0? */
       /* no... rlen==0 means the send returned EWOULDBLOCK... */

@@ -160,8 +160,6 @@ struct Client
   unsigned char     handler;    /* Handler index */
   char              nicksent;
   unsigned char     local_flag; /* if this is 1 this client is local */
-  short    listprogress;        /* where were we when the /list blocked? */
-  int      listprogress2;       /* where in the current bucket were we? */
 
   /*
    * client->name is the unique name for a client nick or host
@@ -390,14 +388,11 @@ struct Client
 
 #define FLAGS2_CBURST       0x10000  /* connection burst being sent */
 
-#define FLAGS2_DOINGLIST    0x20000  /* client is doing a list */
 #define FLAGS2_IDLE_LINED   0x40000
 #define FLAGS2_ALREADY_EXITED   0x80000         /* kludge grrrr */
 #define FLAGS2_IP_SPOOFING      0x100000        /* client IP is spoofed */
 #define FLAGS2_IP_HIDDEN        0x200000        /* client IP should be hidden
                                                    from non opers */
-#define FLAGS2_SENDQ_POP  0x400000  /* sendq exceeded (during list) */
-
 #define SEND_UMODES  (FLAGS_INVISIBLE | FLAGS_OPER | FLAGS_WALLOP)
 #define ALL_UMODES   (SEND_UMODES | FLAGS_SERVNOTICE | FLAGS_CCONN | \
                       FLAGS_REJ | FLAGS_SKILL | FLAGS_FULL | FLAGS_SPY | \
@@ -406,7 +401,7 @@ struct Client
 
 #ifndef OPER_UMODES
 #define OPER_UMODES  (FLAGS_OPER | FLAGS_WALLOP | FLAGS_SERVNOTICE | \
-                      FLAGS_SPY | FLAGS_OPERWALL | FLAGS_DEBUG | FLAGS_BOTS |
+                      FLAGS_SPY | FLAGS_OPERWALL | FLAGS_DEBUG | FLAGS_BOTS | \
 	                  FLAGS_ADMIN)
 #endif /* OPER_UMODES */
 
@@ -485,12 +480,6 @@ struct Client
  */
 #define IsRestricted(x)         ((x)->flags2 & FLAGS2_RESTRICTED)
 #define SetRestricted(x)        ((x)->flags2 |= FLAGS2_RESTRICTED)
-#define ClearDoingList(x)       ((x)->flags2 &= ~FLAGS2_DOINGLIST)
-#define SetDoingList(x)         ((x)->flags2 |= FLAGS2_DOINGLIST)
-#define IsDoingList(x)          ((x)->flags2 & FLAGS2_DOINGLIST)
-#define ClearSendqPop(x)        ((x)->flags2 &= ~FLAGS2_SENDQ_POP)
-#define SetSendqPop(x)          ((x)->flags2 |= FLAGS2_SENDQ_POP)
-#define IsSendqPopped(x)        ((x)->flags2 & FLAGS2_SENDQ_POP)
 #define IsElined(x)             ((x)->flags2 & FLAGS2_E_LINED)
 #define SetElined(x)            ((x)->flags2 |= FLAGS2_E_LINED)
 #define IsBlined(x)             ((x)->flags2 & FLAGS2_B_LINED)

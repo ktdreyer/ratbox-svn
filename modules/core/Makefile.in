@@ -78,7 +78,8 @@ SRCS =                          \
 
 OBJS = ${SRCS:.c=.so}
 
-default:	all
+default:	build
+build: all
 all: $(OBJS)
 
 install: all

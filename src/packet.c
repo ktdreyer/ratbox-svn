@@ -112,9 +112,7 @@ int dopacket(struct Client *cptr, char *buffer, size_t length)
               */
               if (cptr->flags & FLAGS_DEADSOCKET)
                 return exit_client(cptr, cptr, &me, (cptr->flags & FLAGS_SENDQEX) ?
-                                   ((IsDoingList(cptr)) ?
-                                    "Local kill by /list (so many channels!)" :
-                                   "SendQ exceeded") : "Dead socket");
+                                   "SendQ exceeded" : "Dead socket");
 
               ch1 = cptrbuf;
             }

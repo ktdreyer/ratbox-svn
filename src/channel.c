@@ -38,7 +38,6 @@
  */
 #include "channel.h"
 #include "client.h"
-#include "m_invite.h"
 #include "common.h"
 #include "hash.h"
 #include "irc_string.h"
@@ -2897,88 +2896,4 @@ int     list_length(struct SLink *lp)
   for (; lp; lp = lp->next)
     count++;
   return count;
-}
-
-/* XXX I still don't think this code belongs here, but is-
- * can sort it out later -db
- */
-
-/*
- * list_continue
- *
- * inputs	- client pointer 
- * ouput	- 
- * side effects -
- */
-int list_continue(struct Client *sptr)
-{
-  struct Channel *chptr;
-  int i;
-  int j;
-
-  if (sptr->listprogress != -1)
-    {
-      for (i=sptr->listprogress; i<CH_MAX; i++)
-	{
-	  int progress2 = sptr->listprogress2;
-	  for (j=0, chptr=(struct Channel*)(hash_get_channel_block(i).list);
-	       (chptr) && (j<hash_get_channel_block(i).links);
-	       chptr=chptr->hnextch, j++)
-	    {
-	      if (j<progress2)
-		continue;  /* wind up to listprogress2 */
-	      if (!chptr->members || !sptr->user ||
-		  (SecretChannel(chptr) && !IsMember(sptr, chptr)))
-		continue;
-
-	      list_one_channel(sptr,chptr);
-
-	      if (IsSendqPopped(sptr))
-		{
-		  /* we popped again! : P */
-		  sptr->listprogress=i;
-		  sptr->listprogress2=j;
-		  return 0;
-		}
-	    }
-	  sptr->listprogress2 = 0;
-	}
-    }
-  sendto_one(sptr, form_str(RPL_LISTEND), me.name, sptr->name);
-  if (IsSendqPopped(sptr))
-    { /* popped with the RPL_LISTEND code. d0h */
-      sptr->listprogress = -1;
-      return 0;
-    }
-  ClearDoingList(sptr);   /* yupo, its over */
-  return 0;
-}
-
-/*
- * list_one_channel
- *
- * inputs	- client pointer to return result to
- *		- pointer to channel to list
- * ouput	- none
- * side effects -
- */
-void list_one_channel(struct Client *sptr,struct Channel *chptr)
-{
-  struct Channel *root_chptr;
-  char  vname[CHANNELLEN+NICKLEN+4];
-
-  root_chptr = find_bchan(chptr);
-
-  if( (IsVchan(chptr) || HasVchans(chptr)) && 
-      (root_chptr->members || root_chptr->next_vchan->next_vchan) )
-    {
-      ircsprintf(vname, "%s<!%s>", root_chptr->chname,
-		 pick_vchan_id(chptr));
-    }
-  else
-    ircsprintf(vname, "%s", root_chptr->chname);
-
-  sendto_one(sptr, form_str(RPL_LIST), me.name, sptr->name,
-	     vname, chptr->users, chptr->topic);
-
 }

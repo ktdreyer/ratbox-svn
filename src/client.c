@@ -26,7 +26,6 @@
 #include "class.h"
 #include "blalloc.h"
 #include "channel.h"
-#include "m_invite.h"
 #include "common.h"
 #include "dline_conf.h"
 #include "fdlist.h"
