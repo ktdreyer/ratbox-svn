@@ -66,6 +66,9 @@ static int exit_local_client(struct Client *, struct Client *, struct Client *,c
 static int exit_unknown_client(struct Client *, struct Client *, struct Client *,const char *);
 static int exit_local_server(struct Client *, struct Client *, struct Client *,const char *);
 
+static int h_local_exit_client;
+static int h_unknown_exit_client;
+
 static EVH check_pings;
 
 static BlockHeap *client_heap = NULL;
@@ -117,7 +120,10 @@ init_client(void)
 	eventAddIsh("check_pings", check_pings, NULL, 30);
 	eventAddIsh("free_exited_clients", &free_exited_clients, NULL, 4);
 	eventAddIsh("client_heap_gc", client_heap_gc, NULL, 30);
+	hook_add_hook("local_exit_client", &h_local_exit_client);
+	hook_add_hook("unknown_exit_client", &h_unknown_exit_client);
 }
+
 
 /*
  * make_client - create a new Client struct and set it to initial state.
@@ -1062,6 +1068,23 @@ remove_dependents(struct Client *client_p,
 	recurse_remove_clients(source_p, comment1);
 }
 
+static inline void
+call_local_exit_hook(struct Client *client_p, const char *comment)
+{
+	struct exit_client_hook e_hook;
+	e_hook.client_p = client_p;
+	strlcpy(e_hook.comment, comment, sizeof(e_hook.comment));
+	hook_call_event(&h_local_exit_client, &e_hook);
+}
+
+static inline void
+call_unknown_exit_hook(struct Client *client_p, const char *comment)
+{
+	struct exit_client_hook e_hook;
+	e_hook.client_p = client_p;
+	strlcpy(e_hook.comment, comment, sizeof(e_hook.comment));
+	hook_call_event(&h_unknown_exit_client, &e_hook);
+}
 
 
 /*
@@ -1125,7 +1148,7 @@ exit_generic_client(struct Client *client_p, struct Client *source_p, struct Cli
 	del_from_client_hash_table(source_p->name, source_p);
 	remove_client_from_list(source_p);
 	assert(dlinkFind(&dead_list, source_p) == NULL);
-
+	
 	dlinkAddAlloc(source_p, &dead_list);
 
 }
@@ -1165,6 +1188,8 @@ exit_unknown_client(struct Client *client_p, struct Client *source_p, struct Cli
 	log_user_exit(source_p);
 	if(source_p->localClient->fd >= 0)
 		sendto_one(source_p, "ERROR :Closing Link: %s (%s)", source_p->host, comment);
+	call_unknown_exit_local(source_p, comment);
+	
 	close_connection(source_p);
 
 	if((source_p->flags & FLAGS_KILLED) == 0)
@@ -1317,7 +1342,6 @@ exit_local_client(struct Client *client_p, struct Client *source_p, struct Clien
 	client_flush_input(source_p);
 	Count.local--;
 	SetDeadLocal(source_p);
-	
 	dlinkDelete(&source_p->localClient->tnode, &lclient_list);
 	if(IsOper(source_p))
 		dlinkFindDestroy(&oper_list, source_p);
@@ -1333,6 +1357,7 @@ exit_local_client(struct Client *client_p, struct Client *source_p, struct Clien
 			     source_p->localClient->sockhost);
 
 	log_user_exit(source_p);
+	call_local_exit_hook(source_p, comment);	
 	sendto_one(source_p, "ERROR :Closing Link: %s (%s)", source_p->host, comment);
 	close_connection(source_p);
 
@@ -1341,7 +1366,6 @@ exit_local_client(struct Client *client_p, struct Client *source_p, struct Clien
 		sendto_server(client_p, NULL, NOCAPS, NOCAPS, ":%s QUIT :%s",
 			      source_p->name, comment)	;
 	}
-	
 	exit_generic_client(client_p, source_p, from, comment);
 	return(CLIENT_EXITED);
 }
