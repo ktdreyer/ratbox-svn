@@ -190,9 +190,14 @@ int     m_message(int p_or_n,
   int i;
   int ntargets;
 
+#if 0  /* Allow servers to send notices to individual people */
   if (!IsPerson(sptr))
     return 0;
+#endif
 
+  if (!IsPerson(sptr) && p_or_n != NOTICE)
+    return 0;
+       
   if (parc < 2 || *parv[1] == '\0')
     {
       if(p_or_n != NOTICE)
@@ -217,6 +222,8 @@ int     m_message(int p_or_n,
       switch (target_table[i]->type)
 	{
 	case ENTITY_CHANNEL:
+          if(!IsPerson(sptr))
+            continue;
 	  msg_channel(p_or_n,command,
 		      cptr,sptr,
 		      (struct Channel *)target_table[i]->ptr,
