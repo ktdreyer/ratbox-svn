@@ -94,15 +94,9 @@ static int already_placed_kline(struct Client*, char*, char*);
 
 static void apply_kline(struct Client *source_p, struct ConfItem *aconf,
                         const char *reason, const char *oper_reason,
-			const char *current_date, time_t cur_time);
-static void apply_dline(struct Client *source_p, struct ConfItem *aconf,
-		        const char *reason, const char *oper_reason,
-			const char *current_date, time_t cur_time);
+			const char *current_date);
 static void apply_tkline(struct Client *source_p, struct ConfItem *aconf,
                          const char *current_date, int temporary_kline_time);
-static void apply_tdline(struct Client *source_p, struct ConfItem *aconf,
-		         const char *current_date, int temporary_kline_time);
-
 
 char buffer[IRCD_BUFSIZE];
 char user[USERLEN+2];
@@ -132,7 +126,6 @@ mo_kline(struct Client *client_p, struct Client *source_p,
   const char* target_server=NULL;
   struct ConfItem *aconf;
   time_t tkline_time=0;
-  time_t cur_time;
 
   if (!IsOperK(source_p))
     {
@@ -202,9 +195,8 @@ mo_kline(struct Client *client_p, struct Client *source_p,
   if (!valid_comment(source_p, reason))
     return;
 
-  set_time();  
-  cur_time = CurrentTime;
-  current_date = smalldate(cur_time);
+  set_time();
+  current_date = smalldate(CurrentTime);
   aconf = make_conf();
   aconf->status = CONF_KILL;
   DupString(aconf->host, host);
@@ -254,10 +246,11 @@ mo_kline(struct Client *client_p, struct Client *source_p,
 		 reason,
 		 current_date);
       DupString(aconf->passwd, buffer);
-      apply_kline(source_p, aconf, reason, oper_reason,
-		  current_date, cur_time);
+      apply_kline(source_p, aconf, reason, oper_reason, current_date);
     }
-} /* mo_kline() */
+
+  check_klines();
+}
 
 /*
  * ms_kline()
@@ -271,7 +264,6 @@ ms_kline(struct Client *client_p, struct Client *source_p,
   const char *current_date;
   struct ConfItem *aconf=NULL;
   int    tkline_time;
-  time_t cur_time;
 
   char *kuser;
   char *khost;
@@ -322,7 +314,7 @@ ms_kline(struct Client *client_p, struct Client *source_p,
 
   if (find_u_conf((char *)source_p->user->server,
 		  source_p->username, source_p->host, OPER_K))
-    {
+  {
       sendto_realops_flags(UMODE_ALL, L_ALL,
 			   "*** Received K-Line for [%s@%s] [%s], from %s!%s@%s on %s",
 			   kuser, khost, kreason,
@@ -341,18 +333,17 @@ ms_kline(struct Client *client_p, struct Client *source_p,
       DupString(aconf->user, kuser);
       DupString(aconf->host, khost);
       DupString(aconf->passwd, kreason);
-      current_date = smalldate((time_t) 0);
-      set_time();
-      cur_time = CurrentTime;
+      current_date = smalldate(CurrentTime);
 
       if (tkline_time)
 	apply_tkline(source_p, aconf, current_date, tkline_time);
       else
-	apply_kline(source_p, aconf, aconf->passwd, NULL,
-		    current_date, cur_time);
+	apply_kline(source_p, aconf, aconf->passwd, NULL, current_date);
 
-      }
-} /* ms_kline() */
+  }
+
+  check_klines();
+}
 
 /*
  * apply_kline
@@ -365,13 +356,11 @@ ms_kline(struct Client *client_p, struct Client *source_p,
 static void 
 apply_kline(struct Client *source_p, struct ConfItem *aconf,
 	    const char *reason, const char *oper_reason,
-	    const char *current_date, time_t cur_time)
+	    const char *current_date)
 {
   add_conf_by_address(aconf->host, CONF_KILL, aconf->user, aconf);
-  WriteKlineOrDline(KLINE_TYPE, source_p, aconf->user, aconf->host,
-		    reason, oper_reason, current_date, cur_time);
-  /* Now, activate kline against current online clients */
-  check_klines();
+  write_confitem(KLINE_TYPE, source_p, aconf->user, aconf->host,
+		 reason, oper_reason, current_date, 0);
 }
 
 /*
@@ -398,44 +387,6 @@ apply_tkline(struct Client *source_p, struct ConfItem *aconf,
   ilog(L_TRACE, "%s added temporary %d min. K-Line for [%s@%s] [%s]",
        source_p->name, tkline_time/60,
        aconf->user, aconf->host, aconf->passwd);
-  check_klines();
-}
-
-/* apply_dline
- *
- * input	- dline info
- * output	- none
- * side effects - dline is added to hashtable
- */
-static void apply_dline(struct Client *source_p, struct ConfItem *aconf,
-		        const char *reason, const char *oper_reason,
-			const char *current_date, time_t cur_time)
-{
-  add_conf_by_address(aconf->host, CONF_DLINE, NULL, aconf);
-  WriteKlineOrDline(DLINE_TYPE, source_p, NULL, aconf->host, reason,
-		    oper_reason, current_date, cur_time);
-}
-
-/* apply_tdline
- *
- * input	- dline info
- * output	- none
- * side effects - tdline is added
- */
-static void apply_tdline(struct Client *source_p, struct ConfItem *aconf,
-		         const char *current_date, int tdline_time)
-{
-  aconf->hold = CurrentTime + tdline_time;
-  add_temp_dline(aconf);
-  sendto_realops_flags(UMODE_ALL, L_ALL,
-		       "%s added temporary %d min. D-Line for [%s] [%s]",
-		       source_p->name, tdline_time/60, 
-		       aconf->host, aconf->passwd);
-
-  sendto_one(source_p, ":%s NOTICE %s :Added temporary %d min. D-Line for [%s]",
-             me.name, source_p->name, tdline_time/60, aconf->host);
-  ilog(L_TRACE, "%s added temporary %d min. D-Line for [%s] [%s]",
-       source_p->name, tdline_time/60, aconf->host, aconf->passwd);
 }
 
 /*
@@ -617,7 +568,6 @@ mo_dline(struct Client *client_p, struct Client *source_p,
   int bits, t;
   char dlbuffer[1024];
   const char* current_date;
-  time_t cur_time;
   time_t tdline_time = 0;
   int loc = 0;
 
@@ -784,8 +734,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
     }
 
   set_time();
-  cur_time = CurrentTime;
-  current_date = smalldate(cur_time);
+  current_date = smalldate(CurrentTime);
 
   aconf = make_conf();
 
@@ -804,17 +753,29 @@ mo_dline(struct Client *client_p, struct Client *source_p,
     ircsprintf(dlbuffer, "Temporary D-line %d min. - %s (%s)",
 	       (int)(tdline_time/60), reason, current_date);
     DupString(aconf->passwd, dlbuffer);
-    apply_tdline(source_p, aconf, current_date, tdline_time);
+    aconf->hold = CurrentTime + tdline_time;
+    add_temp_dline(aconf);
+    sendto_realops_flags(UMODE_ALL, L_ALL,
+		         "%s added temporary %d min. D-Line for [%s] [%s]",
+		         source_p->name, tdline_time/60, 
+		         aconf->host, aconf->passwd);
+
+    sendto_one(source_p, ":%s NOTICE %s :Added temporary %d min. D-Line for [%s]",
+               me.name, source_p->name, tdline_time/60, aconf->host);
+    ilog(L_TRACE, "%s added temporary %d min. D-Line for [%s] [%s]",
+         source_p->name, tdline_time/60, aconf->host, aconf->passwd);
   }
   else
   {
     ircsprintf(dlbuffer, "%s (%s)",reason, current_date);
     DupString(aconf->passwd, dlbuffer);
-    apply_dline(source_p, aconf, reason, oper_reason, current_date, cur_time);
+    add_conf_by_address(aconf->host, CONF_DLINE, NULL, aconf);
+    write_confitem(DLINE_TYPE, source_p, NULL, aconf->host, reason,
+                   oper_reason, current_date, 0);
   }
 
   check_klines();
-} /* m_dline() */
+}
 
 /*
  * find_user_host

@@ -389,7 +389,8 @@ report_specials(struct Client* source_p, int flags, int numeric)
     this_conf = x_conf;
   else if (flags & CONF_ULINE)
     this_conf = u_conf;
-  else return;
+  else
+    return;
 
   for (aconf = this_conf; aconf; aconf = aconf->next)
     if (aconf->status & flags)
@@ -2139,8 +2140,9 @@ read_conf_files(int cold)
 	}
     }
 
-  xfilename = ConfigFileEntry.xlinefile;
-  if(irccmp(filename, xfilename) && irccmp(kfilename, xfilename))
+  xfilename = get_conf_name(XLINE_TYPE);
+  if(irccmp(filename, xfilename) && irccmp(kfilename, xfilename) &&
+     irccmp(dfilename, xfilename))
   {
     if((file = fbopen(xfilename, "r")) == NULL)
     {
@@ -2301,33 +2303,24 @@ void flush_deleted_I_P(void)
     }
 }
 
-/*
- * WriteKlineOrDline
+/* write_confitem()
  *
- * inputs       - kline or dline type flag
+ * inputs       - kline, dline or xline type flag
  *              - client pointer to report to
  *              - user name of target
  *              - host name of target
  *              - reason for target
- *              - time_t cur_time
+ *              - time string
+ *              - type of xline
  * output       - NONE
- * side effects - This function takes care of
- *                finding right kline or dline conf file, writing
- *                the right lines to this file, 
- *                notifying the oper that their kline/dline is in place
- *                notifying the opers on the server about the k/d line
- *                forwarding the kline onto the next U lined server
- *                
+ * side effects - This function takes care of finding the right conf
+ *                file and adding the line to it, as well as notifying
+ *                opers and the user.
  */
 void 
-WriteKlineOrDline( KlineType type,
-		   struct Client *source_p,
-		   char *user,
-		   char *host,
-		   const char *reason,
-		   const char *oper_reason,
-		   const char *current_date,
-		   time_t cur_time)
+write_confitem(KlineType type, struct Client *source_p, char *user, char *host,
+               const char *reason, const char *oper_reason,
+               const char *current_date, int xtype)
 {
   char buffer[1024];
   FBFILE *out;
@@ -2335,7 +2328,15 @@ WriteKlineOrDline( KlineType type,
 
   filename = get_conf_name(type);
 
-  if(type == DLINE_TYPE)
+  if(type == KLINE_TYPE)
+    {
+      sendto_realops_flags(UMODE_ALL, L_ALL,
+			   "%s added K-Line for [%s@%s] [%s]",
+			   get_oper_name(source_p), user, host, reason);
+      sendto_one(source_p, ":%s NOTICE %s :Added K-Line [%s@%s]",
+		 me.name, source_p->name, user, host);
+    }
+  else if(type == DLINE_TYPE)
     {
       sendto_realops_flags(UMODE_ALL, L_ALL,
 			   "%s added D-Line for [%s] [%s]",
@@ -2344,60 +2345,66 @@ WriteKlineOrDline( KlineType type,
 		 me.name, source_p->name, host, filename);
 
     }
-  else
-    {
-      sendto_realops_flags(UMODE_ALL, L_ALL,
-			   "%s added K-Line for [%s@%s] [%s]",
-			   get_oper_name(source_p), user, host, reason);
-      sendto_one(source_p, ":%s NOTICE %s :Added K-Line [%s@%s]",
-		 me.name, source_p->name, user, host);
-    }
+  else if(type == XLINE_TYPE)
+  {
+    sendto_realops_flags(UMODE_ALL, L_ALL,  "%s added X-line for [%s] [%s]",
+                         get_oper_name(source_p), host, reason);
+    sendto_one(source_p, ":%s NOTICE %s :Added X-line for [%s] [%s]",
+               me.name, source_p->name, host, reason);
+  }
 
-  if ( (out = fbopen(filename, "a")) == NULL )
-    {
-      sendto_realops_flags(UMODE_ALL, L_ALL,
-			   "*** Problem opening %s ", filename);
-      return;
-    }
+  if ((out = fbopen(filename, "a")) == NULL)
+  {
+    sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem opening %s ", filename);
+    return;
+  }
 
   if (oper_reason == NULL)
     oper_reason = "";
 
-  if(type==KLINE_TYPE)
+  if(type == KLINE_TYPE)
+  {
     ircsprintf(buffer, "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%ld\n",
-               user,
-	       host,
-               reason,
-	       oper_reason,
-	       current_date,
-	       get_oper_name(source_p),
-               (long) cur_time);
-  else
+               user, host, reason, oper_reason, current_date,
+               get_oper_name(source_p), CurrentTime);
+  }
+  else if(type == DLINE_TYPE)
+  {
     ircsprintf(buffer, "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%ld\n",
-               host,
-               reason,
-	       oper_reason,
-	       current_date,
-	       get_oper_name(source_p),
-               (long) cur_time);
+               host, reason, oper_reason, current_date,
+               get_oper_name(source_p), CurrentTime);
+  }
+  else if(type == XLINE_TYPE)
+  {
+    ircsprintf(buffer, "\"%s\",\"%d\",\"%s\",\"%s\",%lu\n",
+               host, xtype, reason, get_oper_name(source_p), CurrentTime);
+  }
 
-
-  if (fbputs(buffer,out) == -1)
-    {
-      sendto_realops_flags(UMODE_ALL, L_ALL,
-			   "*** Problem writing to %s",filename);
-      fbclose(out);
-      return;
-    }
+  if (fbputs(buffer, out) == -1)
+  {
+    sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem writing to %s", 
+                         filename);
+    fbclose(out);
+    return;
+  }
       
   fbclose(out);
 
-  if(type==KLINE_TYPE)
+  if(type == KLINE_TYPE)
+  {
     ilog(L_TRACE, "%s added K-Line for [%s@%s] [%s]",
-        source_p->name, user, host, reason);
-  else
+         source_p->name, user, host, reason);
+  }
+  else if(type == DLINE_TYPE)
+  {
     ilog(L_TRACE, "%s added D-Line for [%s] [%s]",
-           get_oper_name(source_p), host, reason);
+         get_oper_name(source_p), host, reason);
+  }
+  else if(type == XLINE_TYPE)
+  {
+    ilog(L_TRACE, "%s added X-line for [%s] [%s]",
+         source_p->name, host, reason);
+  }
 }
 
 /* get_conf_name
@@ -2410,15 +2417,19 @@ const char *
 get_conf_name(KlineType type)
 {
   if(type == CONF_TYPE)
-    {
+  {
       return(ConfigFileEntry.configfile);
-    }
-  else if(type == KLINE_TYPE)
-    {
-      return(ConfigFileEntry.klinefile);
-    }
+  }
+  else if(type == DLINE_TYPE)
+  {
+    return(ConfigFileEntry.dlinefile);
+  }
+  else if(type == XLINE_TYPE)
+  {
+    return(ConfigFileEntry.xlinefile);
+  }
 
-  return(ConfigFileEntry.dlinefile);
+  return ConfigFileEntry.klinefile;
 }
 
 /*
@@ -2553,7 +2564,7 @@ conf_add_x_conf(struct ConfItem *aconf)
   MyFree(aconf->user);
   aconf->user = NULL;
   aconf->name = aconf->host;
-  aconf->host = (char *)NULL;
+  aconf->host = NULL;
   aconf->next = x_conf;
   x_conf = aconf;
 }

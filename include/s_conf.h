@@ -374,13 +374,12 @@ extern int conf_fbgets(char *, int, FBFILE *);
 typedef enum {
   CONF_TYPE,
   KLINE_TYPE,
-  DLINE_TYPE
+  DLINE_TYPE,
+  XLINE_TYPE
 } KlineType;
 
-extern void WriteKlineOrDline( KlineType, struct Client *,
-			       char *user, char *host, const char *reason,
-			       const char *oper_reason,
-			       const char *current_date, time_t cur_time );
+extern void write_confitem(KlineType, struct Client *, char *, char *,
+                           const char *, const char *, const char *, int);
 extern  void    add_temp_kline(struct ConfItem *);
 extern void	add_temp_dline(struct ConfItem *);
 extern  void    report_temp_klines(struct Client *);

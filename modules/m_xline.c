@@ -112,14 +112,6 @@ mo_xline(struct Client *client_p, struct Client *source_p,
       reason = parv[2];
   }
 
-  sendto_realops_flags(UMODE_ALL, L_ALL,
-		       "%s added X-line for [%s] [%s]",
-		       get_oper_name(source_p), parv[1], reason);
-  sendto_one(source_p, ":%s NOTICE %s :Added X-line for [%s] [%s]",
-             me.name, source_p->name, parv[1], reason);
-  ilog(L_TRACE, "%s added X-line for [%s] [%s]",
-       source_p->name, parv[1], reason);
-  
   aconf = make_conf();
   aconf->status = CONF_XLINE;
   DupString(aconf->host, parv[1]);
@@ -127,21 +119,11 @@ mo_xline(struct Client *client_p, struct Client *source_p,
   aconf->port = xtype;
 
   collapse(aconf->host);
+
+  /* conf_add_x_conf must be done last, due to it messing about
+   * with aconf --fl
+   */
+  write_confitem(XLINE_TYPE, source_p, NULL, aconf->host, reason,
+                 NULL, NULL, aconf->port);
   conf_add_x_conf(aconf);
-
-  if((out = fbopen(ConfigFileEntry.xlinefile, "a")) == NULL)
-  {
-    sendto_realops_flags(UMODE_ALL, L_ALL,
-		         "*** Problem opening %s", ConfigFileEntry.xlinefile);
-    return;
-  }
-
-  ircsprintf(buffer, "\"%s\",\"%d\",\"%s\",\"%s\",%lu\n",
-             parv[1], xtype, reason, get_oper_name(source_p), CurrentTime);
-
-  if(fbputs(buffer, out) == -1)
-    sendto_realops_flags(UMODE_ALL, L_ALL,
-		         "*** Problem writing to %s", ConfigFileEntry.xlinefile);
-
-  fbclose(out);
 }
