@@ -162,6 +162,10 @@ collapse(char *pattern)
  char *p = pattern, *po = pattern;
  char c;
  int f = 0;
+
+ if (!p)
+   return NULL;
+ 
  while ((c = *p++))
    {
     if (!(f & 2) && c == '*')
