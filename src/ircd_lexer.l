@@ -120,6 +120,7 @@ no_tilde	{ return NO_TILDE; }
 have_ident	{ return HAVE_IDENT; }
 reason		{ return REASON; }
 spoof		{ return SPOOF; }
+vhost		{ return VHOST; }
 .		{ return yytext[0]; }
 
 %%

@@ -3330,6 +3330,9 @@ void conf_add_me(struct ConfItem *aconf)
   ** if previously defined. Note, that "info"-field can be
   ** changed by "/rehash".
   ** Can't change vhost mode/address either 
+  **
+  ** host ip to connect is given either from IP field as filled in
+  ** or from passwd field as string...
   */
   /*  if (aconf->status == CONF_ME) */
 
@@ -3338,7 +3341,15 @@ void conf_add_me(struct ConfItem *aconf)
   if (me.name[0] == '\0' && aconf->host[0])
     {
       strncpy_irc(me.name, aconf->host, HOSTLEN);
-      if ((aconf->passwd[0] != '\0') && (aconf->passwd[0] != '*'))
+      if(aconf->ip)
+	{
+	  memset(&vserv,0, sizeof(vserv));
+	  vserv.sin_family = AF_INET;
+	  vserv.sin_addr.s_addr = aconf->ip;
+	  specific_virtual_host = 1;
+	}
+      else if (aconf->passwd && 
+	       (aconf->passwd[0] != '\0') && (aconf->passwd[0] != '*'))
 	{
 	  memset(&vserv,0, sizeof(vserv));
 	  vserv.sin_family = AF_INET;

@@ -108,6 +108,7 @@ int   class_sendq_var;
 %token  PORT
 %token  SPOOF
 %token  QUARANTINE
+%token  VHOST
 
 %%
 conf:
@@ -123,35 +124,67 @@ conf_item:	admin_entry  |
 		quarantine_entry |
 		connect_entry |
 		kill_entry |
-		deny_entry
+		deny_entry 
 	;
 
 /***************************************************************************
- *  section server
+ *  section serverinfo
  ***************************************************************************/
 
-serverinfo_entry:	SERVERINFO '{' serverinfo_items '}' ';'
+serverinfo_entry:	SERVERINFO
+  {
+    if(yy_aconf)
+      {
+	free_conf(yy_aconf);
+	yy_aconf = NULL;
+      }
+    yy_aconf=make_conf();
+    yy_aconf->status = CONF_ME;
+  }
+  '{' serverinfo_items '}' ';'
+  {
+    if(yy_aconf->user)
+      {
+	conf_add_me(yy_aconf);
+	conf_add_conf(yy_aconf);
+      }
+    else
+      free_conf(yy_aconf);
+    yy_aconf = NULL;
+  } ;
+
 
 serverinfo_items:	serverinfo_items serverinfo_item |
-		serverinfo_item
+		serverinfo_item 
 
-serverinfo_item:	serverinfo_name | serverinfo_description |
-		serverinfo_email | serverinfo_hub
+serverinfo_item:	serverinfo_name | serverinfo_vhost |
+		        serverinfo_hub | serverinfo_description 
 
-serverinfo_name:	NAME '=' QSTRING ';'  { sendto_realops("server.name [%s]",yylval.string); };
+serverinfo_name:	NAME '=' QSTRING ';'  {
+    DupString(yy_aconf->host,yylval.string);
+  };
 
-serverinfo_email:	EMAIL '=' QSTRING ';'  { sendto_realops("server.email [%s]",yylval.string); };
+serverinfo_description: DESCRIPTION '=' QSTRING ';' {
+    DupString(yy_aconf->user,yylval.string);
+  };
 
-serverinfo_description:	DESCRIPTION '=' QSTRING ';'  { sendto_realops("server.description [%s]",yylval.string); };
+serverinfo_vhost:	VHOST '=' IP_TYPE ';'  {
+    yy_aconf->ip = yylval.ip_entry.ip; };
 
-serverinfo_hub:	HUB '=' YES ';'  { sendto_realops("server is hub"); } |
-		HUB '=' NO ';'   { sendto_realops("server is leaf"); } ;
+serverinfo_hub:	HUB '=' YES ';' 
+  {
+    ConfigFileEntry.hub = 1;
+  } |
+  HUB '=' NO ';'
+  {
+    ConfigFileEntry.hub = 0;
+  } ;
 
 /***************************************************************************
  * admin section
  ***************************************************************************/
 
-admin_entry:	ADMIN '{' admin_items '}' ';'
+admin_entry:	ADMIN '{' admin_items '}' ';' 
 
 admin_items:	admin_items admin_item |
 		admin_item
@@ -188,7 +221,7 @@ oper_entry:	OPERATOR
       free_conf(yy_aconf);
     }
   yy_aconf = NULL;
-};
+}; 
 
 oper_items:	oper_items oper_item |
 		oper_item
@@ -330,7 +363,7 @@ listen_entry:	LISTEN
   conf_add_port(yy_aconf);
   free_conf(yy_aconf);
   yy_aconf = NULL;
- };
+ }; 
 
 listen_items:	listen_items listen_item |
 		listen_item
@@ -353,7 +386,7 @@ listen_address:	IP '=' QSTRING ';' {
  *  section client
  ***************************************************************************/
 
-client_entry:	CLIENT '{' client_items '}' ';'
+client_entry:	CLIENT '{' client_items '}' ';' 
 
 client_items:	client_items client_item |
 		client_item
@@ -396,7 +429,7 @@ quarantine_entry:	QUARANTINE
  '{' quarantine_items '}' ';' {
   conf_add_q_line(yy_aconf);
   yy_aconf = NULL;
- };
+ }; 
 
 quarantine_items:	quarantine_items quarantine_item |
 		quarantine_item
@@ -554,7 +587,7 @@ kill_entry:	KILL
       free_conf(yy_aconf);
     }
   yy_aconf = NULL;
-  };
+  }; 
 
 kill_items:	kill_items kill_item |
 		kill_item
