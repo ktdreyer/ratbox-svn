@@ -441,12 +441,12 @@ void error_exit_client(struct Client* client_p, int error)
       if (error == 0)
         {
 	  /* Admins get the real IP */
-	  sendto_realops_flags(FLAGS_ADMIN,
+	  sendto_realops_flags(FLAGS_SERVADMIN,
 				"Server %s closed the connection",
 				get_client_name(client_p, SHOW_IP));
 
 	  /* Opers get a masked IP */
-	  sendto_realops_flags(FLAGS_NOTADMIN,
+	  sendto_realops_flags(FLAGS_SERVOPER,
 				"Server %s closed the connection",
 				get_client_name(client_p, MASK_IP));
 

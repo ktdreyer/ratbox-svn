@@ -138,10 +138,10 @@ static void mr_cryptauth(struct Client *client_p, struct Client *source_p,
 
   if (!client_p->localClient->in_cipher)
   {
-    sendto_realops_flags(FLAGS_ADMIN,
+    sendto_realops_flags(FLAGS_SERVADMIN,
           "Unauthorized server connection attempt from %s: invalid cipher",
           get_client_name(client_p, HIDE_IP));
-    sendto_realops_flags(FLAGS_NOTADMIN,
+    sendto_realops_flags(FLAGS_SERVOPER,
           "Unauthorized server connection attempt from %s: invalid cipher",
           get_client_name(client_p, MASK_IP));
     exit_client(client_p, client_p, &me, "Invalid cipher");
@@ -150,11 +150,11 @@ static void mr_cryptauth(struct Client *client_p, struct Client *source_p,
 
   if (!(enc_len = unbase64_block(&enc, parv[2], strlen(parv[2]))))
   {
-    sendto_realops_flags(FLAGS_ADMIN,
+    sendto_realops_flags(FLAGS_SERVADMIN,
           "Unauthorized server connection attempt from %s: malformed CRYPTAUTH "
           "response from server %s", get_client_name(client_p, HIDE_IP),
           client_p->name);
-    sendto_realops_flags(FLAGS_NOTADMIN,
+    sendto_realops_flags(FLAGS_SERVOPER,
           "Unauthorized server connection attempt from %s: malformed CRYPTAUTH "
           "response from server %s", get_client_name(client_p, MASK_IP),
           client_p->name);
@@ -170,11 +170,11 @@ static void mr_cryptauth(struct Client *client_p, struct Client *source_p,
 
   if ( len < client_p->localClient->in_cipher->keylen )
   {
-    sendto_realops_flags(FLAGS_ADMIN,
+    sendto_realops_flags(FLAGS_SERVADMIN,
           "Unauthorized server connection attempt from %s: %s",
           get_client_name(client_p, HIDE_IP),
           (len < 0) ? "decryption failed" : "not enough random data sent");
-    sendto_realops_flags(FLAGS_NOTADMIN,
+    sendto_realops_flags(FLAGS_SERVOPER,
           "Unauthorized server connection attempt from %s: %s",
           get_client_name(client_p, MASK_IP),
           (len < 0) ? "decryption failed" : "not enough random data sent");
@@ -187,11 +187,11 @@ static void mr_cryptauth(struct Client *client_p, struct Client *source_p,
   if (memcmp(key, client_p->localClient->in_key,
              client_p->localClient->in_cipher->keylen) != 0)
   {
-    sendto_realops_flags(FLAGS_ADMIN,
+    sendto_realops_flags(FLAGS_SERVADMIN,
           "Unauthorized server connection attempt from %s: incorrect CRYPTAUTH "
           "response from server %s", get_client_name(client_p, HIDE_IP),
           client_p->name);
-    sendto_realops_flags(FLAGS_NOTADMIN,
+    sendto_realops_flags(FLAGS_SERVOPER,
           "Unauthorized server connection attempt from %s: incorrect CRYPTAUTH "
           "response from server %s", get_client_name(client_p, MASK_IP),
           client_p->name);
@@ -272,10 +272,10 @@ static void mr_cryptserv(struct Client *client_p, struct Client *source_p,
      case -1:
       if (ConfigFileEntry.warn_no_nline)
         {
-         sendto_realops_flags(FLAGS_ADMIN,
+         sendto_realops_flags(FLAGS_SERVADMIN,
            "Unauthorized server connection attempt from %s: No entry for "
            "servername %s", get_client_name(client_p, HIDE_IP), name);
-         sendto_realops_flags(FLAGS_NOTADMIN,
+         sendto_realops_flags(FLAGS_SERVOPER,
            "Unauthorized server connection attempt from %s: No entry for "
            "servername %s", get_client_name(client_p, MASK_IP), name);
         }
@@ -283,20 +283,20 @@ static void mr_cryptserv(struct Client *client_p, struct Client *source_p,
       return;
       break;
      case -2:
-      sendto_realops_flags(FLAGS_ADMIN,
+      sendto_realops_flags(FLAGS_SERVADMIN,
         "Unauthorized server connection attempt from %s: CRYPTLINK not "
         "enabled for server %s", get_client_name(client_p, HIDE_IP), name);
-      sendto_realops_flags(FLAGS_NOTADMIN,
+      sendto_realops_flags(FLAGS_SERVOPER,
         "Unauthorized server connection attempt from %s: CRYPTLINK not "
         "enabled for server %s", get_client_name(client_p, MASK_IP), name);
       exit_client(client_p, client_p, &me, "CRYPTLINK not enabled.");
       return;
       break;
      case -3:
-      sendto_realops_flags(FLAGS_ADMIN,
+      sendto_realops_flags(FLAGS_SERVADMIN,
         "Unauthorized server connection attempt from %s: Invalid host "
         "for server %s", get_client_name(client_p, HIDE_IP), name);
-      sendto_realops_flags(FLAGS_NOTADMIN,
+      sendto_realops_flags(FLAGS_SERVOPER,
         "Unauthorized server connection attempt from %s: Invalid host "
         "for server %s", get_client_name(client_p, MASK_IP), name);
 
@@ -318,10 +318,10 @@ static void mr_cryptserv(struct Client *client_p, struct Client *source_p,
        * Definitely don't do that here. This is from an unregistered
        * connect - A1kmm.
        */
-      sendto_realops_flags(FLAGS_ADMIN,
+      sendto_realops_flags(FLAGS_SERVADMIN,
          "Attempt to re-introduce server %s from %s", name,
          get_client_name(client_p, HIDE_IP));
-      sendto_realops_flags(FLAGS_NOTADMIN,
+      sendto_realops_flags(FLAGS_SERVOPER,
          "Attempt to re-introduce server %s from %s", name,
          get_client_name(client_p, MASK_IP));
 

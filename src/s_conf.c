@@ -539,7 +539,7 @@ int attach_Iline(struct Client* client_p, const char* username)
 	    {
 	      if (IsConfSpoofNotice(aconf))
 		{
-		  sendto_realops_flags(FLAGS_ADMIN,
+		  sendto_realops_flags(FLAGS_SERVADMIN,
 				       "%s spoofing: %s as %s", client_p->name,
 				       client_p->host, aconf->name);
 		}

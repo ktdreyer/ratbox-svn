@@ -310,10 +310,10 @@ check_pings_list(dlink_list *list)
               if (IsServer(client_p) || IsConnecting(client_p) ||
                   IsHandshake(client_p))
                 {
-                  sendto_realops_flags(FLAGS_ADMIN,
+                  sendto_realops_flags(FLAGS_SERVADMIN,
 				       "No response from %s, closing link",
 				       get_client_name(client_p, HIDE_IP));
-                  sendto_realops_flags(FLAGS_NOTADMIN,
+                  sendto_realops_flags(FLAGS_SERVOPER,
                                        "No response from %s, closing link",
                                        get_client_name(client_p, MASK_IP));
                   ilog(L_NOTICE, "No response from %s, closing link",

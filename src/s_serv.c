@@ -1040,11 +1040,11 @@ int server_estab(struct Client *client_p)
     {
       if (fork_server(client_p) < 0 )
       {
-        sendto_realops_flags(FLAGS_ADMIN,
+        sendto_realops_flags(FLAGS_SERVADMIN,
 	      "Warning: fork failed for server %s -- check servlink_path (%s)",
 	      get_client_name(client_p, HIDE_IP),
 	      ConfigFileEntry.servlink_path);
-        sendto_realops_flags(FLAGS_NOTADMIN, "Warning: fork failed for server "
+        sendto_realops_flags(FLAGS_SERVOPER, "Warning: fork failed for server "
           "%s -- check servlink_path (%s)",
            get_client_name(client_p, MASK_IP),
            ConfigFileEntry.servlink_path);
@@ -1089,12 +1089,12 @@ int server_estab(struct Client *client_p)
   Count.myserver++;
 
   /* Show the real host/IP to admins */
-  sendto_realops_flags(FLAGS_ADMIN,
+  sendto_realops_flags(FLAGS_SERVADMIN,
 			"Link with %s established: (%s) link",
 			inpath_ip,show_capabilities(client_p));
 
   /* Now show the masked hostname/IP to opers */
-  sendto_realops_flags(FLAGS_NOTADMIN,
+  sendto_realops_flags(FLAGS_SERVOPER,
 			"Link with %s established: (%s) link",
 			inpath,show_capabilities(client_p));
 
@@ -1989,10 +1989,10 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
      */
     if ((client_p = find_server(aconf->name)))
       { 
-        sendto_realops_flags(FLAGS_ADMIN,
+        sendto_realops_flags(FLAGS_SERVADMIN,
 	      "Server %s already present from %s",
 	      aconf->name, get_client_name(client_p, SHOW_IP));
-        sendto_realops_flags(FLAGS_ALL,
+        sendto_realops_flags(FLAGS_SERVOPER,
 			     "Server %s already present from %s",
 			     aconf->name, get_client_name(client_p, MASK_IP));
         if (by && IsPerson(by) && !MyClient(by))
@@ -2148,10 +2148,10 @@ serv_connect_callback(int fd, int status, void *data)
         /* We have an error, so report it and quit */
 	/* Admins get to see any IP, mere opers don't *sigh*
 	 */
-        sendto_realops_flags(FLAGS_ADMIN,
+        sendto_realops_flags(FLAGS_SERVADMIN,
 			     "Error connecting to %s[%s]: %s", client_p->name,
 			     client_p->host, comm_errstr(status));
-	sendto_realops_flags(FLAGS_NOTADMIN,
+	sendto_realops_flags(FLAGS_SERVOPER,
 			     "Error connecting to %s: %s",
 			     client_p->name, comm_errstr(status));
 	client_p->flags |= FLAGS_DEADSOCKET;
@@ -2165,9 +2165,9 @@ serv_connect_callback(int fd, int status, void *data)
 			    client_p->name, CONF_SERVER); 
     if (!aconf)
       {
-        sendto_realops_flags(FLAGS_ADMIN,
+        sendto_realops_flags(FLAGS_SERVADMIN,
 	             "Lost C-Line for %s", get_client_name(client_p, HIDE_IP));
-        sendto_realops_flags(FLAGS_NOTADMIN,
+        sendto_realops_flags(FLAGS_SERVOPER,
 		     "Lost C-Line for %s", get_client_name(client_p, MASK_IP));
         exit_client(client_p, client_p, &me, "Lost C-line");
         return;
@@ -2213,7 +2213,7 @@ serv_connect_callback(int fd, int status, void *data)
      * here now and save everyone the trouble of us ever existing.
      */
     if (IsDead(client_p)) {
-        sendto_realops_flags(FLAGS_ADMIN,
+        sendto_realops_flags(FLAGS_SERVADMIN,
 			     "%s[%s] went dead during handshake",
                              client_p->name,
 			     client_p->host);
@@ -2321,7 +2321,7 @@ void cryptlink_init(struct Client *client_p,
 
 void cryptlink_error(struct Client *client_p, char *reason)
 {
-    sendto_realops_flags(FLAGS_ADMIN,
+    sendto_realops_flags(FLAGS_SERVADMIN,
                          reason,
                          client_p->name,
                          client_p->host);

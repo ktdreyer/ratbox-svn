@@ -711,7 +711,7 @@ static void do_numeric(char numeric[],
            * We shouldn't get numerics sent to us,
            * any numerics we do get indicate a bug somewhere..
            */
-          sendto_realops_flags(FLAGS_ADMIN,
+          sendto_realops_flags(FLAGS_SERVADMIN,
                                "*** %s(via %s) sent a %s numeric to me: %s",
                                source_p->name, client_p->name, numeric, buffer);
           return;
