@@ -174,7 +174,8 @@ struct Channel *allocate_channel(const char *chname);
 void free_channel(struct Channel *chptr);
 struct Ban *allocate_ban(const char *, const char *);
 void free_ban(struct Ban *bptr);
-
+struct membership *allocate_membership(void);
+void free_membership(struct membership *);
 void free_topic(struct Channel *chptr);
 
 extern void destroy_channel(struct Channel *);
@@ -186,8 +187,6 @@ extern int is_banned(struct Channel *chptr, struct Client *who,
 
 extern struct membership *find_channel_membership(struct Channel *, struct Client *);
 extern const char *find_channel_status(struct membership *msptr, int combine);
-extern void add_user_to_channel(struct Channel *, struct Client *, int flags);
-extern void remove_user_from_channel(struct membership *);
 extern void remove_user_from_channels(struct Client *);
 
 extern void free_channel_list(dlink_list *);

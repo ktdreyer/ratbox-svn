@@ -113,6 +113,17 @@ free_ban(struct Ban *bptr)
 	BlockHeapFree(ban_heap, bptr);
 }
 
+struct membership *
+allocate_membership(void)
+{
+	return(BlockHeapAlloc(member_heap));
+}
+
+void
+free_membership(struct membership *member)
+{
+	BlockHeapFree(member_heap, member);
+}
 
 /* find_channel_membership()
  *
@@ -167,109 +178,7 @@ find_channel_status(struct membership *msptr, int combine)
 	return buffer;
 }
 
-/* add_user_to_channel()
- *
- * input	- channel to add client to, client to add, channel flags
- * output	- 
- * side effects - user is added to channel
- */
-void
-add_user_to_channel(struct Channel *chptr, struct Client *client_p, int flags)
-{
-	struct membership *msptr;
 
-	s_assert(client_p->user != NULL);
-	if(client_p->user == NULL)
-		return;
-
-	msptr = BlockHeapAlloc(member_heap);
-
-	msptr->chptr = chptr;
-	msptr->client_p = client_p;
-	msptr->flags = flags;
-
-	dlinkAdd(msptr, &msptr->usernode, &client_p->user->channel);
-	dlinkAdd(msptr, &msptr->channode, &chptr->members);
-
-	if(MyClient(client_p))
-		dlinkAdd(msptr, &msptr->locchannode, &chptr->locmembers);
-}
-
-/* remove_user_from_channel()
- *
- * input	- membership pointer to remove from channel
- * output	-
- * side effects - membership (thus user) is removed from channel
- */
-void
-remove_user_from_channel(struct membership *msptr)
-{
-	struct Client *client_p;
-	struct Channel *chptr;
-	s_assert(msptr != NULL);
-	if(msptr == NULL)
-		return;
-
-	client_p = msptr->client_p;
-	chptr = msptr->chptr;
-
-	dlinkDelete(&msptr->usernode, &client_p->user->channel);
-	dlinkDelete(&msptr->channode, &chptr->members);
-
-	if(client_p->servptr == &me)
-		dlinkDelete(&msptr->locchannode, &chptr->locmembers);
-
-	chptr->users_last = CurrentTime;
-
-	if(dlink_list_length(&chptr->members) <= 0)
-	{
-		destroy_channel(chptr);
-		return;
-	}
-
-	BlockHeapFree(member_heap, msptr);
-
-	return;
-}
-
-/* remove_user_from_channels()
- *
- * input        - user to remove from all channels
- * output       -
- * side effects - user is removed from all channels
- */
-void
-remove_user_from_channels(struct Client *client_p)
-{
-	struct Channel *chptr;
-	struct membership *msptr;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
-
-	if(client_p == NULL)
-		return;
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, client_p->user->channel.head)
-	{
-		msptr = ptr->data;
-		chptr = msptr->chptr;
-
-		dlinkDelete(&msptr->channode, &chptr->members);
-
-		if(client_p->servptr == &me)
-			dlinkDelete(&msptr->locchannode, &chptr->locmembers);
-
-		chptr->users_last = CurrentTime;
-
-		if(dlink_list_length(&chptr->members) <= 0)
-			destroy_channel(chptr);
-
-		BlockHeapFree(member_heap, msptr);
-	}
-
-	client_p->user->channel.head = client_p->user->channel.tail = NULL;
-	client_p->user->channel.length = 0;
-}
 
 /* check_channel_name()
  *
@@ -1002,3 +911,43 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 			sendto_server(client_p, chptr, cap, nocap, "%s %s", modebuf, parabuf);
 	}
 }
+
+/* remove_user_from_channels()
+ *
+ * input        - user to remove from all channels
+ * output       -
+ * side effects - user is removed from all channels
+ */
+void
+remove_user_from_channels(struct Client *client_p)
+{
+	struct Channel *chptr;
+	struct membership *msptr;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+
+	if(client_p == NULL)
+		return;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, client_p->user->channel.head)
+	{
+		msptr = ptr->data;
+		chptr = msptr->chptr;
+
+		dlinkDelete(&msptr->channode, &chptr->members);
+
+		if(client_p->servptr == &me)
+			dlinkDelete(&msptr->locchannode, &chptr->locmembers);
+
+		chptr->users_last = CurrentTime;
+
+		if(dlink_list_length(&chptr->members) <= 0)
+			destroy_channel(chptr);
+
+		free_membership(msptr);
+	}
+
+	client_p->user->channel.head = client_p->user->channel.tail = NULL;
+	client_p->user->channel.length = 0;
+}
+

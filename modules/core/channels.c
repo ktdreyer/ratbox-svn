@@ -46,10 +46,19 @@
 static int m_join(struct Client *, struct Client *, int, const char **);
 static int ms_join(struct Client *, struct Client *, int, const char **);
 static int ms_sjoin(struct Client *, struct Client *, int, const char **);
+static int m_kick(struct Client *, struct Client *, int, const char **);
+static int m_part(struct Client *, struct Client *, int, const char **);
+
+#define mg_kick { m_kick, 3 }
 
 struct Message join_msgtab = {
 	"JOIN", 0, 0, 0, MFLG_SLOW,
 	{mg_unreg, {m_join, 2}, {ms_join, 2}, mg_ignore, mg_ignore, {m_join, 2}}
+};
+
+struct Message part_msgtab = {
+	"PART", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_part, 2}, {m_part, 2}, mg_ignore, mg_ignore, {m_part, 2}}
 };
 
 struct Message sjoin_msgtab = {
@@ -57,8 +66,13 @@ struct Message sjoin_msgtab = {
 	{mg_unreg, mg_ignore, mg_ignore, {ms_sjoin, 0}, mg_ignore, mg_ignore}
 };
 
-mapi_clist_av1 join_clist[] = { &join_msgtab, &sjoin_msgtab, NULL };
-DECLARE_MODULE_AV1(join, NULL, NULL, join_clist, NULL, NULL, "$Revision$");
+struct Message kick_msgtab = {
+	"KICK", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_kick, mg_kick, mg_kick, mg_ignore, mg_kick}
+};
+
+mapi_clist_av1 channels_clist[] = { &join_msgtab, &sjoin_msgtab, &kick_msgtab, &part_msgtab, NULL };
+DECLARE_MODULE_AV1(channels, NULL, NULL, channels_clist, NULL, NULL, "$Revision$");
 
 static void do_join_0(struct Client *client_p, struct Client *source_p);
 static int check_channel_name_loc(struct Client *source_p, const char *name);
@@ -69,6 +83,9 @@ static void set_final_mode(struct Mode *mode, struct Mode *oldmode);
 static void remove_our_modes(struct Channel *chptr, struct Client *source_p);
 static void remove_ban_list(struct Channel *chptr, struct Client *source_p,
 				dlink_list *list, char c, int cap);
+static void add_user_to_channel(struct Channel *chptr, struct Client *client_p, int flags);
+static void remove_user_from_channel(struct membership *msptr);
+static void part_one_client(struct Client *client_p, struct Client *source_p, char *name, char *reason);
 
 static char modebuf[MODEBUFLEN];
 static char parabuf[MODEBUFLEN];
@@ -879,6 +896,246 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 }
 
 /*
+** m_kick
+**      parv[0] = sender prefix
+**      parv[1] = channel
+**      parv[2] = client to kick
+**      parv[3] = kick comment
+*/
+static int
+m_kick(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	struct membership *msptr;
+	struct Client *who;
+	struct Channel *chptr;
+	int chasing = 0;
+	char *comment;
+	const char *name;
+	char *p = NULL;
+	const char *user;
+	static char buf[BUFSIZE];
+
+	if(MyClient(source_p) && !IsFloodDone(source_p))
+		flood_endgrace(source_p);
+
+	comment = LOCAL_COPY((EmptyString(parv[3])) ? parv[2] : parv[3]);
+	if(strlen(comment) > (size_t) REASONLEN)
+		comment[REASONLEN] = '\0';
+
+	*buf = '\0';
+	if((p = strchr(parv[1], ',')))
+		*p = '\0';
+
+	name = parv[1];
+
+	chptr = find_channel(name);
+	if(chptr == NULL)
+	{
+		sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
+				   form_str(ERR_NOSUCHCHANNEL), name);
+		return 0;
+	}
+
+	if(!IsServer(source_p))
+	{
+		msptr = find_channel_membership(chptr, source_p);
+
+		if((msptr == NULL) && MyConnect(source_p))
+		{
+			sendto_one_numeric(source_p, ERR_NOTONCHANNEL,
+					   form_str(ERR_NOTONCHANNEL), name);
+			return 0;
+		}
+
+		if(!is_chanop(msptr))
+		{
+			if(MyConnect(source_p))
+			{
+				sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
+					   me.name, source_p->name, name);
+				return 0;
+			}
+
+			/* If its a TS 0 channel, do it the old way */
+			if(chptr->channelts == 0)
+			{
+				sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
+					   get_id(&me, source_p), 
+					   get_id(source_p, source_p), name);
+				return 0;
+			}
+		}
+
+		/* Its a user doing a kick, but is not showing as chanop locally
+		 * its also not a user ON -my- server, and the channel has a TS.
+		 * There are two cases we can get to this point then...
+		 *
+		 *     1) connect burst is happening, and for some reason a legit
+		 *        op has sent a KICK, but the SJOIN hasn't happened yet or 
+		 *        been seen. (who knows.. due to lag...)
+		 *
+		 *     2) The channel is desynced. That can STILL happen with TS
+		 *        
+		 *     Now, the old code roger wrote, would allow the KICK to 
+		 *     go through. Thats quite legit, but lets weird things like
+		 *     KICKS by users who appear not to be chanopped happen,
+		 *     or even neater, they appear not to be on the channel.
+		 *     This fits every definition of a desync, doesn't it? ;-)
+		 *     So I will allow the KICK, otherwise, things are MUCH worse.
+		 *     But I will warn it as a possible desync.
+		 *
+		 *     -Dianora
+		 */
+	}
+
+	if((p = strchr(parv[2], ',')))
+		*p = '\0';
+
+	user = parv[2];		/* strtoken(&p2, parv[2], ","); */
+
+	if(!(who = find_chasing(source_p, user, &chasing)))
+	{
+		return 0;
+	}
+
+	msptr = find_channel_membership(chptr, who);
+
+	if(msptr != NULL)
+	{
+		/* jdc
+		 * - In the case of a server kicking a user (i.e. CLEARCHAN),
+		 *   the kick should show up as coming from the server which did
+		 *   the kick.
+		 * - Personally, flame and I believe that server kicks shouldn't
+		 *   be sent anyways.  Just waiting for some oper to abuse it...
+		 */
+		if(IsServer(source_p))
+			sendto_channel_local(ALL_MEMBERS, chptr, ":%s KICK %s %s :%s",
+					     source_p->name, name, who->name, comment);
+		else
+			sendto_channel_local(ALL_MEMBERS, chptr,
+					     ":%s!%s@%s KICK %s %s :%s",
+					     source_p->name, source_p->username,
+					     source_p->host, name, who->name, comment);
+
+		sendto_server(client_p, chptr, CAP_TS6, NOCAPS,
+			      ":%s KICK %s %s :%s", 
+			      use_id(source_p), chptr->chname, 
+			      use_id(who), comment);
+		sendto_server(client_p, chptr, NOCAPS, CAP_TS6,
+			      ":%s KICK %s %s :%s", 
+			      source_p->name, chptr->chname, who->name, comment);
+		remove_user_from_channel(msptr);
+	}
+	else
+		sendto_one_numeric(source_p, ERR_USERNOTINCHANNEL,
+				   form_str(ERR_USERNOTINCHANNEL), user, name);
+
+	return 0;
+}
+
+/*
+** m_part
+**      parv[0] = sender prefix
+**      parv[1] = channel
+**      parv[2] = reason
+*/
+static int
+m_part(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	char *p, *name;
+	char reason[REASONLEN + 1];
+	char *s = LOCAL_COPY(parv[1]);
+
+	reason[0] = '\0';
+
+	if(parc > 2)
+		strlcpy(reason, parv[2], sizeof(reason));
+
+	name = strtoken(&p, s, ",");
+
+	/* Finish the flood grace period... */
+	if(MyClient(source_p) && !IsFloodDone(source_p))
+		flood_endgrace(source_p);
+
+	while (name)
+	{
+		part_one_client(client_p, source_p, name, reason);
+		name = strtoken(&p, NULL, ",");
+	}
+	return 0;
+}
+
+/*
+ * part_one_client
+ *
+ * inputs	- pointer to server
+ * 		- pointer to source client to remove
+ *		- char pointer of name of channel to remove from
+ * output	- none
+ * side effects	- remove ONE client given the channel name 
+ */
+static void
+part_one_client(struct Client *client_p, struct Client *source_p, char *name, char *reason)
+{
+	struct Channel *chptr;
+	struct membership *msptr;
+
+	if((chptr = find_channel(name)) == NULL)
+	{
+		sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
+				   form_str(ERR_NOSUCHCHANNEL), name);
+		return;
+	}
+
+	msptr = find_channel_membership(chptr, source_p);
+	if(msptr == NULL)
+	{
+		sendto_one_numeric(source_p, ERR_NOTONCHANNEL,
+				   form_str(ERR_NOTONCHANNEL), name);
+		return;
+	}
+
+	if(MyConnect(source_p) && !IsOper(source_p) && !IsExemptSpambot(source_p))
+		check_spambot_warning(source_p, NULL);
+
+	/*
+	 *  Remove user from the old channel (if any)
+	 *  only allow /part reasons in -m chans
+	 */
+	if(reason[0] && (is_chanop(msptr) || !MyConnect(source_p) ||
+			 ((can_send(chptr, source_p, msptr) > 0 &&
+			   (source_p->localClient->firsttime + ConfigFileEntry.anti_spam_exit_message_time)
+			   < CurrentTime))))
+	{
+		sendto_server(client_p, chptr, CAP_TS6, NOCAPS,
+				":%s PART %s :%s",
+				use_id(source_p), chptr->chname, reason);
+		sendto_server(client_p, chptr, NOCAPS, CAP_TS6,
+				":%s PART %s :%s",
+				source_p->name, chptr->chname, reason);
+		sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s PART %s :%s",
+					source_p->name, source_p->username,
+					source_p->host, chptr->chname, reason);
+	}
+	else
+	{
+		sendto_server(client_p, chptr, CAP_TS6, NOCAPS,
+				":%s PART %s",
+				use_id(source_p), chptr->chname);
+		sendto_server(client_p, chptr, NOCAPS, CAP_TS6,
+				":%s PART %s",
+				source_p->name, chptr->chname);
+		sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s PART %s",
+					source_p->name, source_p->username,
+					source_p->host, chptr->chname);
+	}
+	remove_user_from_channel(msptr);
+}
+
+
+
+/*
  * do_join_0
  *
  * inputs	- pointer to client doing join 0
@@ -1263,3 +1520,69 @@ remove_ban_list(struct Channel *chptr, struct Client *source_p,
 	list->head = list->tail = NULL;
 	list->length = 0;
 }
+
+/* add_user_to_channel()
+ *
+ * input	- channel to add client to, client to add, channel flags
+ * output	- 
+ * side effects - user is added to channel
+ */
+static void
+add_user_to_channel(struct Channel *chptr, struct Client *client_p, int flags)
+{
+	struct membership *msptr;
+
+	s_assert(client_p->user != NULL);
+	if(client_p->user == NULL)
+		return;
+
+	msptr = allocate_membership();
+
+	msptr->chptr = chptr;
+	msptr->client_p = client_p;
+	msptr->flags = flags;
+
+	dlinkAdd(msptr, &msptr->usernode, &client_p->user->channel);
+	dlinkAdd(msptr, &msptr->channode, &chptr->members);
+
+	if(MyClient(client_p))
+		dlinkAdd(msptr, &msptr->locchannode, &chptr->locmembers);
+}
+
+/* remove_user_from_channel()
+ *
+ * input	- membership pointer to remove from channel
+ * output	-
+ * side effects - membership (thus user) is removed from channel
+ */
+static void
+remove_user_from_channel(struct membership *msptr)
+{
+	struct Client *client_p;
+	struct Channel *chptr;
+	s_assert(msptr != NULL);
+	if(msptr == NULL)
+		return;
+
+	client_p = msptr->client_p;
+	chptr = msptr->chptr;
+
+	dlinkDelete(&msptr->usernode, &client_p->user->channel);
+	dlinkDelete(&msptr->channode, &chptr->members);
+
+	if(client_p->servptr == &me)
+		dlinkDelete(&msptr->locchannode, &chptr->locmembers);
+
+	chptr->users_last = CurrentTime;
+
+	if(dlink_list_length(&chptr->members) <= 0)
+	{
+		destroy_channel(chptr);
+		return;
+	}
+
+	free_membership(msptr);
+
+	return;
+}
+
