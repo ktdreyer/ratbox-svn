@@ -708,6 +708,7 @@ static char *listener_address;
 static int
 conf_begin_listen(struct TopConf *tc)
 {
+	MyFree(listener_address);
 	listener_address = NULL;
 	return 0;
 }
@@ -1604,7 +1605,7 @@ static struct ConfEntry conf_serverinfo_table[] =
 	{ "vhost", 		CF_QSTRING, conf_set_serverinfo_vhost,	0, NULL },
 	{ "vhost6", 		CF_QSTRING, conf_set_serverinfo_vhost6,	0, NULL },
 
-	{ "\0",	0, NULL, 0, NULL },
+	{ "\0",	0, NULL, 0, NULL }
 };
 
 static struct ConfEntry conf_admin_table[] =
@@ -1612,7 +1613,7 @@ static struct ConfEntry conf_admin_table[] =
 	{ "name",	CF_QSTRING, NULL, 200, &AdminInfo.name		},
 	{ "description",CF_QSTRING, NULL, 200, &AdminInfo.description	},
 	{ "email",	CF_QSTRING, NULL, 200, &AdminInfo.email		},
-	{ "\0",	0, NULL, 0, NULL },
+	{ "\0",	0, NULL, 0, NULL }
 };
 
 static struct ConfEntry conf_log_table[] =
@@ -1627,7 +1628,61 @@ static struct ConfEntry conf_log_table[] =
 	{ "fname_klinelog", 	CF_QSTRING, NULL, MAXPATHLEN, &ConfigFileEntry.fname_klinelog	},
 	{ "fname_operspylog", 	CF_QSTRING, NULL, MAXPATHLEN, &ConfigFileEntry.fname_operspylog	},
 	{ "fname_ioerrorlog", 	CF_QSTRING, NULL, MAXPATHLEN, &ConfigFileEntry.fname_ioerrorlog },
-	{ "\0",			0,	    NULL, 0,          NULL },
+	{ "\0",			0,	    NULL, 0,          NULL }
+};
+
+static struct ConfEntry conf_operator_table[] =
+{
+	{ "rsa_public_key_file",  CF_QSTRING, conf_set_oper_rsa_public_key_file, 0, NULL },
+	{ "flags",	CF_STRING | CF_FLIST, conf_set_oper_flags,	0, NULL },
+	{ "umodes",	CF_STRING | CF_FLIST, conf_set_oper_umodes,	0, NULL },
+	{ "user",	CF_QSTRING, conf_set_oper_user,		0, NULL },
+	{ "password",	CF_QSTRING, conf_set_oper_password,	0, NULL },
+	{ "encrypted",	CF_YESNO,   conf_set_oper_encrypted,	0, NULL },
+	{ "\0",	0, NULL, 0, NULL }
+};
+
+static struct ConfEntry conf_class_table[] =
+{
+	{ "ping_time", 		CF_TIME, conf_set_class_ping_time,		0, NULL },
+	{ "cidr_bitlen",	CF_INT,  conf_set_class_cidr_bitlen,		0, NULL },
+	{ "number_per_cidr",	CF_INT,  conf_set_class_number_per_cidr,	0, NULL },
+	{ "number_per_ip",	CF_INT,  conf_set_class_number_per_ip,		0, NULL },
+	{ "number_per_ip_global", CF_INT,conf_set_class_number_per_ip_global,	0, NULL },
+	{ "number_per_ident", 	CF_INT,  conf_set_class_number_per_ident,	0, NULL },
+	{ "connectfreq", 	CF_TIME, conf_set_class_connectfreq,		0, NULL },
+	{ "max_number", 	CF_INT,  conf_set_class_max_number,		0, NULL },
+	{ "sendq", 		CF_TIME, conf_set_class_sendq,			0, NULL },
+	{ "sendq_eob", 		CF_TIME, conf_set_class_sendq_eob,		0, NULL },
+	{ "\0",	0, NULL, 0, NULL }
+};
+
+static struct ConfEntry conf_auth_table[] =
+{
+	{ "user",	CF_QSTRING, conf_set_auth_user,		0, NULL },
+	{ "password",	CF_QSTRING, conf_set_auth_passwd,	0, NULL },
+	{ "encrypted",	CF_YESNO,   conf_set_auth_encrypted,	0, NULL },
+	{ "class",	CF_QSTRING, conf_set_auth_class,	0, NULL },
+	{ "spoof",	CF_QSTRING, conf_set_auth_spoof,	0, NULL },
+	{ "redirserv",	CF_QSTRING, conf_set_auth_redir_serv,	0, NULL },
+	{ "redirport",	CF_INT,     conf_set_auth_redir_port,	0, NULL },
+	{ "flags",	CF_STRING | CF_FLIST, conf_set_auth_flags,	0, NULL },
+	{ "\0",	0, NULL, 0, NULL }
+};
+
+static struct ConfEntry conf_connect_table[] =
+{
+	{ "send_password",	CF_QSTRING,   conf_set_connect_send_password,	0, NULL },
+	{ "accept_password",	CF_QSTRING,   conf_set_connect_accept_password,	0, NULL },
+	{ "flags",	CF_STRING | CF_FLIST, conf_set_connect_flags,	0, NULL },
+	{ "host",	CF_QSTRING, conf_set_connect_host,	0, NULL },
+	{ "vhost",	CF_QSTRING, conf_set_connect_vhost,	0, NULL },
+	{ "port",	CF_INT,     conf_set_connect_port,	0, NULL },
+	{ "aftype",	CF_STRING,  conf_set_connect_aftype,	0, NULL },
+	{ "hub_mask",	CF_QSTRING, conf_set_connect_hub_mask,	0, NULL },
+	{ "leaf_mask",	CF_QSTRING, conf_set_connect_leaf_mask,	0, NULL },
+	{ "class",	CF_QSTRING, conf_set_connect_class,	0, NULL },
+	{ "\0",	0, NULL, 0, NULL }
 };
 
 static struct ConfEntry conf_general_table[] =
@@ -1742,60 +1797,22 @@ newconf_init()
 	add_top_conf("serverinfo", NULL, NULL, conf_serverinfo_table);
 	add_top_conf("admin", NULL, NULL, conf_admin_table);
 	add_top_conf("log", NULL, NULL, conf_log_table);
-
-	add_top_conf("operator", conf_begin_oper, conf_end_oper, NULL);
-	add_conf_item("operator", "user", CF_QSTRING, conf_set_oper_user);
-	add_conf_item("operator", "password", CF_QSTRING, conf_set_oper_password);
-	add_conf_item("operator", "encrypted", CF_YESNO, conf_set_oper_encrypted);
-	add_conf_item("operator", "rsa_public_key_file", CF_QSTRING,
-		      conf_set_oper_rsa_public_key_file);
-	add_conf_item("operator", "flags", CF_STRING | CF_FLIST, conf_set_oper_flags);
-	add_conf_item("operator", "umodes", CF_STRING | CF_FLIST, conf_set_oper_umodes);
-
-	add_top_conf("class", conf_begin_class, conf_end_class, NULL);
-	add_conf_item("class", "ping_time", CF_TIME, conf_set_class_ping_time);
-	add_conf_item("class", "cidr_bitlen", CF_INT, conf_set_class_cidr_bitlen);
-	add_conf_item("class", "number_per_cidr", CF_INT, conf_set_class_number_per_cidr);
-	add_conf_item("class", "number_per_ip", CF_INT, conf_set_class_number_per_ip);
-	add_conf_item("class", "number_per_ip_global", CF_INT, conf_set_class_number_per_ip_global);
-	add_conf_item("class", "number_per_ident", CF_INT, conf_set_class_number_per_ident);
-	add_conf_item("class", "connectfreq", CF_TIME, conf_set_class_connectfreq);
-	add_conf_item("class", "max_number", CF_INT, conf_set_class_max_number);
-	add_conf_item("class", "sendq", CF_TIME, conf_set_class_sendq);
-	add_conf_item("class", "sendq_eob", CF_TIME, conf_set_class_sendq_eob);
+	add_top_conf("operator", conf_begin_oper, conf_end_oper, conf_operator_table);
+	add_top_conf("class", conf_begin_class, conf_end_class, conf_class_table);
 
 	add_top_conf("listen", conf_begin_listen, conf_end_listen, NULL);
 	add_conf_item("listen", "port", CF_INT | CF_FLIST, conf_set_listen_port);
 	add_conf_item("listen", "ip", CF_QSTRING, conf_set_listen_address);
 	add_conf_item("listen", "host", CF_QSTRING, conf_set_listen_address);
 
-	add_top_conf("auth", conf_begin_auth, conf_end_auth, NULL);
-	add_conf_item("auth", "user", CF_QSTRING, conf_set_auth_user);
-	add_conf_item("auth", "password", CF_QSTRING, conf_set_auth_passwd);
-	add_conf_item("auth", "encrypted", CF_YESNO, conf_set_auth_encrypted);
-	add_conf_item("auth", "class", CF_QSTRING, conf_set_auth_class);
-	add_conf_item("auth", "spoof", CF_QSTRING, conf_set_auth_spoof);
-	add_conf_item("auth", "redirserv", CF_QSTRING, conf_set_auth_redir_serv);
-	add_conf_item("auth", "redirport", CF_INT, conf_set_auth_redir_port);
-	add_conf_item("auth", "flags", CF_STRING | CF_FLIST, conf_set_auth_flags);
+	add_top_conf("auth", conf_begin_auth, conf_end_auth, conf_auth_table);
 
 	add_top_conf("shared", conf_begin_shared, conf_end_shared, NULL);
 	add_conf_item("shared", "name", CF_QSTRING, conf_set_shared_name);
 	add_conf_item("shared", "user", CF_QSTRING, conf_set_shared_user);
 	add_conf_item("shared", "type", CF_STRING | CF_FLIST, conf_set_shared_type);
 
-	add_top_conf("connect", conf_begin_connect, conf_end_connect, NULL);
-	add_conf_item("connect", "host", CF_QSTRING, conf_set_connect_host);
-	add_conf_item("connect", "vhost", CF_QSTRING, conf_set_connect_vhost);
-	add_conf_item("connect", "send_password", CF_QSTRING, conf_set_connect_send_password);
-	add_conf_item("connect", "accept_password", CF_QSTRING, conf_set_connect_accept_password);
-	add_conf_item("connect", "port", CF_INT, conf_set_connect_port);
-	add_conf_item("connect", "aftype", CF_STRING, conf_set_connect_aftype);
-	add_conf_item("connect", "hub_mask", CF_QSTRING, conf_set_connect_hub_mask);
-	add_conf_item("connect", "leaf_mask", CF_QSTRING, conf_set_connect_leaf_mask);
-	add_conf_item("connect", "class", CF_QSTRING, conf_set_connect_class);
-	add_conf_item("connect", "flags", CF_STRING | CF_FLIST,
-			conf_set_connect_flags);
+	add_top_conf("connect", conf_begin_connect, conf_end_connect, conf_connect_table);
 
 	add_top_conf("exempt", NULL, NULL, NULL);
 	add_conf_item("exempt", "ip", CF_QSTRING, conf_set_exempt_ip);
