@@ -1,3 +1,9 @@
+*** 20011112_2 by kreator
+- fix find_conf_by_address() issue which resulted in auth{} (and other)
+  blocks to malfunction, ie. issue when admins had to add wildcards after
+  '@' to get them working
+
+
 *** 20011112_1 by leeh
 - dont allow capab from registered servers - it breaks the capab mon code
 
