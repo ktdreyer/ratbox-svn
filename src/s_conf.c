@@ -1642,7 +1642,6 @@ static void initconf(FBFILE* file)
 
   GlobalSetOptions.idletime = (ConfigFileEntry.idletime * 60);
   GlobalSetOptions.hide_server = ConfigFileEntry.hide_server;
-  GlobalSetOptions.hide_chanops = ConfigFileEntry.hide_chanops;
 
   if(me.name[0] == '\0')
     {

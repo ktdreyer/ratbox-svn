@@ -172,7 +172,6 @@ int   class_sendq_var;
 %token  INVITE_PLUS_I_ONLY
 %token  MODULE
 %token  MODULES
-%token  HIDECHANOPS
 %token  HIDESERVER
 %token  CLIENT_EXIT
 
@@ -1257,7 +1256,7 @@ general_item:       general_failed_oper_notice | general_show_failed_oper_id |
                     general_iauth_port | general_stats_p_notice |
                     general_glines | general_gline_time |
 		    general_idletime |
-		    general_hide_server | general_hide_chanops |
+		    general_hide_server | 
                     general_message_locale | general_client_exit
 
 
@@ -1479,12 +1478,5 @@ general_hide_server: HIDESERVER '=' TYES ';'
         ConfigFileEntry.hide_server = 0;
 } ;
 
-general_hide_chanops: HIDECHANOPS '=' TYES ';'
-{
-        ConfigFileEntry.hide_chanops = 1;
-} | HIDECHANOPS '=' TNO ';'
-{
-        ConfigFileEntry.hide_chanops = 0;
-} ;
 
 

@@ -24,6 +24,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.45  2000/12/21 02:05:48  ejb
+ * - removed hide_chanops from config since its not used anymore.
+ *
  * Revision 7.44  2000/12/20 22:00:43  db
  * - shared {} can now have user/host for user@host of oper allowed
  *   to place a remote kline from server given by name.
@@ -623,7 +626,6 @@ typedef struct
   int         gline_time;
   int         idletime;
   int	      hide_server;
-  int	      hide_chanops;
 	int         client_exit;
 } ConfigFileEntryType;
 
