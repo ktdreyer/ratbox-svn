@@ -381,8 +381,12 @@ extern void conf_add_u_conf(struct ConfItem *);
 extern void conf_add_q_conf(struct ConfItem *);
 extern void conf_add_fields(struct ConfItem*, char*, char *, char*, char *,char *);
 extern void conf_add_conf(struct ConfItem *);
+
+/* XXX consider moving these into kdparse.h */
 extern void KParseFile(FBFILE *fb);
 extern void DParseFile(FBFILE *fb);
+extern char *getfield(char *newline);
+
 extern int yylex(void);
 
 extern unsigned long cidr_to_bitmask[];

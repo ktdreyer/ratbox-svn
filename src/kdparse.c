@@ -35,8 +35,6 @@
 #include "irc_string.h"
 #include "memory.h"
 
-static char *getfield(char *newline);
-
 /*
  * KParseFile
  * Inputs       - pointer to line to parse
@@ -58,7 +56,7 @@ void KParseFile(FBFILE *file)
       if ((p = strchr(line, '\n')))
         *p = '\0';
 
-      if (!*line || line[0] == '#')
+      if ((*line == '\0') || (*line == '#'))
         continue;
 
       if ((user_field = getfield(line)) == NULL)
@@ -97,7 +95,7 @@ void DParseFile(FBFILE *file)
       if ((p = strchr(line, '\n')))
         *p = '\0';
 
-      if (!*line || line[0] == '#')
+      if ((*line == '\0') || (line[0] == '#'))
         continue;
 
       if ((host_field = getfield(line)) == NULL)
@@ -120,7 +118,7 @@ void DParseFile(FBFILE *file)
  * output	- next field
  * side effects	- field breakup for ircd.conf file.
  */
-static char *getfield(char *newline)
+char *getfield(char *newline)
 {
   static char *line = (char *)NULL;
   char  *end, *field;
