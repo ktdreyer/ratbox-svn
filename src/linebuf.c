@@ -664,11 +664,8 @@ linebuf_flush(int fd, buf_head_t *bufhead)
   retval = send(fd, bufline->buf + bufhead->writeofs, bufline->len
 		 - bufhead->writeofs, 0);
    
-  /* Deal with return code */
-  if (retval < 0)
+  if (retval <= 0)
     return retval;
-  if (retval == 0)
-    return 0;
 
   /* we've got data, so update the write offset */
   bufhead->writeofs += retval;
