@@ -74,8 +74,8 @@ mo_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 
 	if(MyConnect(source_p) && !IsOperRemote(source_p) && parc > 3)
 	{
-		sendto_one(source_p, ":%s NOTICE %s :You need remote = yes;", 
-			   me.name, source_p->name);
+		sendto_one(source_p, form_str(ERR_NOPRIVS),
+			   me.name, source_p->name, "remote");
 		return 0;
 	}
 

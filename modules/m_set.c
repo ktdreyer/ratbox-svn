@@ -198,7 +198,8 @@ quote_identtimeout(struct Client *source_p, int newval)
 {
 	if(!IsOperAdmin(source_p))
 	{
-		sendto_one(source_p, ":%s NOTICE %s :You have no A flag", me.name, source_p->name);
+		sendto_one(source_p, form_str(ERR_NOPRIVS),
+			   me.name, source_p->name, "admin");
 		return;
 	}
 

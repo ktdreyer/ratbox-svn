@@ -348,7 +348,8 @@ mo_modload(struct Client *client_p, struct Client *source_p, int parc, const cha
 
 	if(!IsOperAdmin(source_p))
 	{
-		sendto_one(source_p, ":%s NOTICE %s :You have no A flag", me.name, parv[0]);
+		sendto_one(source_p, form_str(ERR_NOPRIVS),
+			   me.name, source_p->name, "admin");
 		return 0;
 	}
 
@@ -380,7 +381,8 @@ mo_modunload(struct Client *client_p, struct Client *source_p, int parc, const c
 
 	if(!IsOperAdmin(source_p))
 	{
-		sendto_one(source_p, ":%s NOTICE %s :You have no A flag", me.name, parv[0]);
+		sendto_one(source_p, form_str(ERR_NOPRIVS),
+			   me.name, source_p->name, "admin");
 		return 0;
 	}
 
@@ -422,7 +424,8 @@ mo_modreload(struct Client *client_p, struct Client *source_p, int parc, const c
 
 	if(!IsOperAdmin(source_p))
 	{
-		sendto_one(source_p, ":%s NOTICE %s :You have no A flag", me.name, parv[0]);
+		sendto_one(source_p, form_str(ERR_NOPRIVS),
+			   me.name, source_p->name, "admin");
 		return 0;
 	}
 
@@ -466,7 +469,8 @@ mo_modlist(struct Client *client_p, struct Client *source_p, int parc, const cha
 
 	if(!IsOperAdmin(source_p))
 	{
-		sendto_one(source_p, ":%s NOTICE %s :You have no A flag", me.name, parv[0]);
+		sendto_one(source_p, form_str(ERR_NOPRIVS),
+			   me.name, source_p->name, "admin");
 		return 0;
 	}
 
@@ -504,7 +508,8 @@ mo_modrestart(struct Client *client_p, struct Client *source_p, int parc, const 
 
 	if(!IsOperAdmin(source_p))
 	{
-		sendto_one(source_p, ":%s NOTICE %s :You have no A flag", me.name, parv[0]);
+		sendto_one(source_p, form_str(ERR_NOPRIVS),
+			   me.name, source_p->name, "admin");
 		return 0;
 	}
 

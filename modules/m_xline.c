@@ -96,8 +96,8 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if(!IsOperXline(source_p))
 	{
-		sendto_one(source_p, ":%s NOTICE %s :You need xline = yes;",
-			   me.name, source_p->name);
+		sendto_one(source_p, form_str(ERR_NOPRIVS),
+			   me.name, source_p->name, "xline");
 		return 0;
 	}
 
@@ -324,8 +324,8 @@ mo_unxline(struct Client *client_p, struct Client *source_p, int parc, const cha
 {
 	if(!IsOperXline(source_p))
 	{
-		sendto_one(source_p, ":%s NOTICE %s :You need xline = yes;",
-			   me.name, source_p->name);
+		sendto_one(source_p, form_str(ERR_NOPRIVS),
+			   me.name, source_p->name, "xline");
 		return 0;
 	}
 

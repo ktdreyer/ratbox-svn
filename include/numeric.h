@@ -312,6 +312,8 @@ extern const char *form_str(int);
 #define RPL_OMOTD	     721
 #define RPL_ENDOFOMOTD       722
 
+#define ERR_NOPRIVS		723
+
 #define ERR_LAST_ERR_MSG     999
 
 #endif /* INCLUDED_numeric_h */

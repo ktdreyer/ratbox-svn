@@ -60,7 +60,8 @@ mo_die(struct Client *client_p __unused, struct Client *source_p, int parc, cons
 
 	if(!IsOperDie(source_p))
 	{
-		sendto_one(source_p, ":%s NOTICE %s :You need die = yes;", me.name, parv[0]);
+		sendto_one(source_p, form_str(ERR_NOPRIVS),
+			   me.name, source_p->name, "die");
 		return 0;
 	}
 

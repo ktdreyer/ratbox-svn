@@ -100,8 +100,8 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if(!IsOperGline(source_p))
 	{
-		sendto_one(source_p, ":%s NOTICE %s :You need gline = yes;", 
-			   me.name, source_p->name);
+		sendto_one(source_p, form_str(ERR_NOPRIVS),
+			   me.name, source_p->name, "gline");
 		return 0;
 	}
 
@@ -400,7 +400,8 @@ mo_ungline(struct Client *client_p, struct Client *source_p, int parc, const cha
 
 	if(!IsOperUnkline(source_p) || !IsOperGline(source_p))
 	{
-		sendto_one(source_p, ":%s NOTICE %s :You need unkline = yes;", me.name, parv[0]);
+		sendto_one(source_p, form_str(ERR_NOPRIVS),
+			   me.name, source_p->name, "unkline");
 		return 0;
 	}
 
