@@ -1,3 +1,15 @@
+androsyn    2002/11/30 13:38:58 UTC	(20021130_1)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Check and make sure it is our client, and then use source_p, not client_p
+  
+  Revision  Changes    Path
+  7.337     +6 -3      ircd-ratbox/src/client.c
+
+
+
 androsyn    2002/11/30 13:34:45 UTC	(20021130_0)
 
   Modified files:
