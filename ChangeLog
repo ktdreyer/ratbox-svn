@@ -1,3 +1,15 @@
+leeh        2005/01/11 17:50:25 EST	(20050111_1)
+
+  Modified files:
+    src                  scommand.c 
+  Log:
+  - s/SERVICE/SERVICES in capab test
+  
+  Revision  Changes    Path
+  1.25      +1 -1      rserv/src/scommand.c
+
+
+
 leeh        2005/01/10 19:42:10 EST	(20050111_0)
 
   Modified files:
