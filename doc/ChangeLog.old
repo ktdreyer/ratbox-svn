@@ -1,3 +1,10 @@
+*** 20001224_3 by ejb
+- fixed bug whereby a module was not actually dlclose()d in unload_one_module,
+  hence trying to reload a module would actually reload the old one
+- fixed paramcount in accept
+- added mo_version to version_msgtab
+
+
 *** 20001224_2 by isomer
 Changed the way mo_version works with respect to hunt_server
 
