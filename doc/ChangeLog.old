@@ -1,3 +1,7 @@
+*** 20010110_4 by wcampbel
+Removed a reference to md5mkpasswd
+
+
 *** 20010110_3 by db
 - first pass at cleaning up mtrie_conf.c
 
