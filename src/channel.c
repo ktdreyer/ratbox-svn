@@ -61,7 +61,7 @@ static void destroy_channel(struct Channel *);
 static void delete_members(struct Channel *chptr, dlink_list * list);
 
 static void send_mode_list(struct Client *client_p, char *chname,
-                           dlink_list *top, char flag, int clear);
+                           dlink_list *top, char flag);
 static int check_banned(struct Channel *chptr, struct Client *who,
                                                 char *s, char *s2);
 
@@ -320,13 +320,13 @@ send_channel_modes(struct Client *client_p, struct Channel *chptr)
   send_members(client_p, modebuf, parabuf, chptr, &chptr->voiced, "+");
   send_members(client_p, modebuf, parabuf, chptr, &chptr->peons, "");
 
-  send_mode_list(client_p, chptr->chname, &chptr->banlist, 'b', 0);
+  send_mode_list(client_p, chptr->chname, &chptr->banlist, 'b');
 
   if (IsCapable(client_p, CAP_EX))
-    send_mode_list(client_p, chptr->chname, &chptr->exceptlist, 'e', 0);
+    send_mode_list(client_p, chptr->chname, &chptr->exceptlist, 'e');
 
   if (IsCapable(client_p, CAP_IE))
-    send_mode_list(client_p, chptr->chname, &chptr->invexlist, 'I', 0);
+    send_mode_list(client_p, chptr->chname, &chptr->invexlist, 'I');
 }
 
 /*
@@ -335,14 +335,13 @@ send_channel_modes(struct Client *client_p, struct Channel *chptr)
  *              - pointer to channel
  *              - pointer to top of mode link list to send
  *              - char flag flagging type of mode i.e. 'b' 'e' etc.
- *              - clear (remove all current modes, for ophiding, etc)
  * output       - NONE
  * side effects - sends +b/+e/+I
  *
  */
 static void
-send_mode_list(struct Client *client_p,
-               char *chname, dlink_list * top, char flag, int clear)
+send_mode_list(struct Client *client_p, char *chname, 
+               dlink_list *top, char flag)
 {
   dlink_node *lp;
   struct Ban *banptr;
@@ -353,28 +352,28 @@ send_mode_list(struct Client *client_p,
   int cur_len;
   char *mp;
   char *pp;
-  int count;
+  int count = 0;
 
-  ircsprintf(buf, ":%s MODE %s ", me.name, chname);
-  cur_len = mlen = (strlen(buf) + 2);
-  count = 0;
+  mlen = ircsprintf(buf, ":%s MODE %s +", me.name, chname);
+  cur_len = mlen;
+
   mp = mbuf;
-  *mp++ = (clear ? '-' : '+');
-  *mp = '\0';
   pp = pbuf;
 
   DLINK_FOREACH(lp, top->head)
   {
     banptr = lp->data;
-    tlen = strlen(banptr->banstr);
-    tlen++;
+    tlen = strlen(banptr->banstr) + 1;
 
-    if ((count >= MAXMODEPARAMS) || ((cur_len + tlen + 2) > MODEBUFLEN))
+    /* uh oh */
+    if(tlen > MODEBUFLEN)
+      continue;
+
+    if ((count >= MAXMODEPARAMS) || ((cur_len + tlen + 2) > BUFSIZE))
     {
       sendto_one(client_p, "%s%s %s", buf, mbuf, pbuf);
+
       mp = mbuf;
-      *mp++ = (clear ? '-' : '+');
-      *mp = '\0';
       pp = pbuf;
       cur_len = mlen;
       count = 0;
@@ -382,8 +381,7 @@ send_mode_list(struct Client *client_p,
 
     *mp++ = flag;
     *mp = '\0';
-    ircsprintf(pp, "%s ", banptr->banstr);
-    pp += tlen;
+    pp += ircsprintf(pp, "%s ", banptr->banstr);
     cur_len += tlen;
     count++;
   }
