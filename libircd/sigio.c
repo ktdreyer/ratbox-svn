@@ -253,19 +253,20 @@ int
 comm_select(unsigned long delay)
 {
  int num = 0;
+ int revents = 0;
  static int loop_count = 0;
  int sig;
  int fd;
  int ci;
  PF *hdl;
+ fde_t *F;
  struct siginfo si;
  struct timespec timeout;
  timeout.tv_sec = 0;
- timeout.tv_nsec = delay * 1000 * 1000; 
-  
+ timeout.tv_nsec = 50000000; 
  for (;;)
  {
-  if(!sigio_is_screwed && ++loop_count <= 5 )
+  if(!sigio_is_screwed && ++loop_count <= 3 )
   {
   	if((sig = sigtimedwait(&our_sigset, &si, &timeout)) > 0)
   	{
@@ -276,29 +277,52 @@ comm_select(unsigned long delay)
   		}
   		fd = si.si_fd;
   		pollfd_list.pollfds[fd].revents |= si.si_band; 
-  		num++;	
-  	} else {
+  		revents = pollfd_list.pollfds[fd].revents;
+  		num++;
+  		callbacks_called++;
+  		F = &fd_table[fd];
+  	        if (revents & (POLLRDNORM | POLLIN | POLLHUP | POLLERR))
+  	        {
+  	      		hdl = F->read_handler;
+			F->read_handler = NULL;
+			poll_update_pollfds(fd, POLLRDNORM, NULL);
+			if (hdl)
+				hdl(fd, F->read_data);
+		}
+		if (revents & (POLLWRNORM | POLLOUT | POLLHUP | POLLERR))
+		{
+			hdl = F->write_handler;
+			F->write_handler = NULL;
+			poll_update_pollfds(fd, POLLWRNORM, NULL);
+			if (hdl)
+				hdl(fd, F->write_data);
+		}
+  	} else 
   		break;
+  	
+  }  else
+  	break;
+ }
+ if(!sigio_is_screwed && loop_count < 3) /* We don't need to proceed */
+ 	return 0;
+ for(;;)
+ {
+ 	if(sigio_is_screwed)
+  	{
+    		signal(sigio_signal, SIG_IGN);
+    		signal(sigio_signal, SIG_DFL);
+		sigio_is_screwed = 0;
   	}
-  } else
-  {
-    if(sigio_is_screwed)
-    {
-    	signal(sigio_signal, SIG_IGN);
-    	signal(sigio_signal, SIG_DFL);
-	sigio_is_screwed = 0;
-    }
-    num = poll(pollfd_list.pollfds, pollfd_list.maxindex + 1, 0);
-    loop_count = 0;
-    if (num >= 0)
-      break;
-    if (ignoreErrno(errno))
-      continue;
-    /* error! */
-    set_time();
-    return -1;
-    /* NOTREACHED */
-  }
+  		num = poll(pollfd_list.pollfds, pollfd_list.maxindex + 1, 0);
+  		loop_count = 0;
+  		if (num >= 0)
+    			break;
+  		if (ignoreErrno(errno))
+    			continue;
+  		/* error! */
+  		set_time();
+  		return -1;
+ 		/* NOTREACHED */
  } 
   
  /* update current time again, eww.. */
@@ -310,8 +334,6 @@ comm_select(unsigned long delay)
  /* XXX we *could* optimise by falling out after doing num fds ... */
  for (ci = 0; ci < pollfd_list.maxindex + 1; ci++)
  {
-  fde_t *F;
-  int revents;
   if (((revents = pollfd_list.pollfds[ci].revents) == 0) ||
       (pollfd_list.pollfds[ci].fd) == -1)
    continue;
