@@ -1,3 +1,19 @@
+androsyn    2003/04/06 20:56:51 UTC	(20030406_0)
+
+  Modified files:
+    include              res.h 
+    src                  adns.c s_auth.c 
+  Log:
+  Fix a bug that would cause us to set an auth as having dns pending but not
+  actually checking to see if adns had submitted the request.
+  
+  Revision  Changes    Path
+  7.27      +2 -2      ircd-ratbox/include/res.h
+  7.56      +13 -10    ircd-ratbox/src/adns.c
+  7.143     +7 -6      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2003/03/20 02:00:14 UTC	(20030320_1)
 
   Modified files:
