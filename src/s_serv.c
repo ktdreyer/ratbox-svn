@@ -492,17 +492,21 @@ void send_capabilities(struct Client* cptr, int can_send)
 {
   struct Capability* cap;
   char  msgbuf[BUFSIZE];
+  char  *t;
+  int   tl;
 
-  msgbuf[0] = '\0';
+  t = msgbuf;
 
   for (cap = captab; cap->name; ++cap)
     {
       if (cap->cap & can_send)
         {
-          strcat(msgbuf, cap->name);
-          strcat(msgbuf, " ");
+          tl = ircsprintf(t, "%s ", cap->name);
+	  t += tl;
         }
     }
+  t--;
+  *t = '\0';
   sendto_one(cptr, "CAPAB :%s", msgbuf);
 }
 
