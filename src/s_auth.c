@@ -499,7 +499,7 @@ auth_connect_callback(int fd, int error, void *data)
 		auth_error(auth);
 		return;
 	}
-	ircsprintf(authbuf, "%u , %u\r\n",
+	ircsnprintf(authbuf, sizeof(authbuf), "%u , %u\r\n",
 		   (unsigned int) ntohs(them.sin_port), (unsigned int) ntohs(us.sin_port));
 
 	if(send(auth->fd, authbuf, strlen(authbuf), SEND_FLAGS) == -1)

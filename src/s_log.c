@@ -272,7 +272,7 @@ log_user_exit(struct Client *source_p)
 
 			if(user_log_fb != NULL)
 			{
-				ircsprintf(linebuf,
+				ircsnprintf(linebuf, sizeof(linebuf),
 					   "%s (%3ld:%02ld:%02ld): %s!%s@%s %d/%d\n",
 					   myctime(source_p->firsttime),
 					   (signed long) on_for / 3600,
@@ -340,7 +340,7 @@ log_oper(struct Client *source_p, const char *name)
 
 		if(oper_fb != NULL)
 		{
-			ircsprintf(linebuf, "%s OPER (%s) by (%s!%s@%s)\n",
+			ircsnprintf(linebuf, sizeof(linebuf), "%s OPER (%s) by (%s!%s@%s)\n",
 				   myctime(CurrentTime), name,
 				   source_p->name, source_p->username, source_p->host);
 
@@ -378,7 +378,7 @@ log_foper(struct Client *source_p, const char *name)
 
 		if(oper_fb != NULL)
 		{
-			ircsprintf(linebuf,
+			ircsnprintf(linebuf, sizeof(linebuf),
 				   "%s FAILED OPER (%s) by (%s!%s@%s)\n",
 				   myctime(CurrentTime), name,
 				   source_p->name, source_p->username, source_p->host);
@@ -452,7 +452,7 @@ smalldate(void)
 	lclock = CurrentTime;
 	lt = localtime(&lclock);
 
-	ircsprintf(buf, "%d/%d/%d %02d.%02d",
+	ircsnprintf(buf, sizeof(buf), "%d/%d/%d %02d.%02d",
 		   lt->tm_year + 1900, lt->tm_mon + 1, lt->tm_mday, lt->tm_hour, lt->tm_min);
 
 	return buf;

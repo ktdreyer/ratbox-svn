@@ -312,7 +312,7 @@ check_pings_list(dlink_list * list)
 					     "No response from %s, closing link",
 					     log_client_name(client_p, HIDE_IP));
 				}
-				(void) ircsprintf(scratch,
+				(void) ircsnprintf(scratch, sizeof(scratch),
 						  "Ping timeout: %d seconds",
 						  (int) (CurrentTime - client_p->lasttime));
 
@@ -916,16 +916,16 @@ get_client_name(struct Client *client, int showip)
 		switch (showip)
 		{
 		case SHOW_IP:
-			ircsprintf(nbuf, "%s[%s@%s]", 
+			ircsnprintf(nbuf, sizeof(nbuf), "%s[%s@%s]", 
 				   client->name, client->username, 
 				   client->sockhost);
 			break;
 		case MASK_IP:
-			ircsprintf(nbuf, "%s[%s@255.255.255.255]",
+			ircsnprintf(nbuf, sizeof(nbuf), "%s[%s@255.255.255.255]",
 				   client->name, client->username);
 			break;
 		default:
-			ircsprintf(nbuf, "%s[%s@%s]",
+			ircsnprintf(nbuf, sizeof(nbuf), "%s[%s@%s]",
 				   client->name, client->username, client->host);
 		}
 		return nbuf;
@@ -958,16 +958,16 @@ log_client_name(struct Client *target_p, int showip)
 		switch (showip)
 		{
 		case SHOW_IP:
-			ircsprintf(nbuf, "%s[%s@%s]", target_p->name,
+			ircsnprintf(nbuf, sizeof(nbuf), "%s[%s@%s]", target_p->name,
 				   target_p->username, target_p->sockhost);
 			break;
 
 		case MASK_IP:
-			ircsprintf(nbuf, "%s[%s@255.255.255.255]",
+			ircsnprintf(nbuf, sizeof(nbuf), "%s[%s@255.255.255.255]",
 				   target_p->name, target_p->username);
 
 		default:
-			ircsprintf(nbuf, "%s[%s@%s]", target_p->name,
+			ircsnprintf(nbuf, sizeof(nbuf), "%s[%s@%s]", target_p->name,
 				   target_p->username, target_p->host);
 		}
 
@@ -1184,10 +1184,10 @@ dead_link(struct Client *client_p)
 
 	abt = (struct abort_client *) MyMalloc(sizeof(struct abort_client));
 	if(client_p->flags & FLAGS_SENDQEX)
-		strcpy(abt->notice, "Max SendQ exceeded");
+		strlcpy(abt->notice, "Max SendQ exceeded", sizeof(abt->notice));
 	else
 	{
-		ircsprintf(abt->notice, "Write error: %s", strerror(errno));
+		ircsnprintf(abt->notice, sizeof(abt->notice), "Write error: %s", strerror(errno));
 	}
 
     	abt->client = client_p;

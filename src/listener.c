@@ -119,7 +119,7 @@ get_listener_name(const struct Listener *listener)
 #endif
 		port = ntohs(((struct sockaddr_in *)&listener->addr)->sin_port);	
 
-	ircsprintf(buf, "%s[%s/%u]", me.name, listener->name, port);
+	ircsnprintf(buf, sizeof(buf), "%s[%s/%u]", me.name, listener->name, port);
 	return buf;
 }
 

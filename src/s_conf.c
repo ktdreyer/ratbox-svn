@@ -1586,7 +1586,7 @@ get_oper_name(struct Client *client_p)
 
 		if(aconf->status & CONF_OPERATOR)
 		{
-			ircsprintf(buffer, "%s!%s@%s{%s}",
+			ircsnprintf(buffer, sizeof(buffer), "%s!%s@%s{%s}",
 				   client_p->name, client_p->username, client_p->host, aconf->name);
 			return buffer;
 		}
@@ -1594,7 +1594,7 @@ get_oper_name(struct Client *client_p)
 		s_assert(0);
 	}
 
-	ircsprintf(buffer, "%s!%s@%s{%s}",
+	ircsnprintf(buffer, "%s!%s@%s{%s}", sizeof(buffer),
 		   client_p->name, client_p->username, client_p->host, client_p->servptr->name);
 	return buffer;
 }
@@ -1941,20 +1941,20 @@ write_confitem(KlineType type, struct Client *source_p, char *user,
 
 	if(type == KLINE_TYPE)
 	{
-		ircsprintf(buffer,
+		ircsnprintf(buffer, sizeof(buffer),
 			   "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%ld\n",
 			   user, host, reason, oper_reason, current_date,
 			   get_oper_name(source_p), CurrentTime);
 	}
 	else if(type == DLINE_TYPE)
 	{
-		ircsprintf(buffer,
+		ircsnprintf(buffer, sizeof(buffer),
 			   "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%ld\n", host,
 			   reason, oper_reason, current_date, get_oper_name(source_p), CurrentTime);
 	}
 	else if(type == RESV_TYPE)
 	{
-		ircsprintf(buffer, "\"%s\",\"%s\",\"%s\",%lu\n",
+		ircsnprintf(buffer, sizeof(buffer), "\"%s\",\"%s\",\"%s\",%lu\n",
 			   host, reason, get_oper_name(source_p), CurrentTime);
 	}
 

@@ -276,7 +276,7 @@ set_time(void)
 	}
 	if(newtime.tv_sec < CurrentTime)
 	{
-		ircsprintf(to_send,
+		ircsnprintf(to_send, sizeof(to_send), 
 			   "System clock is running backwards - (%lu < %lu)",
 			   (unsigned long) newtime.tv_sec, (unsigned long) CurrentTime);
 		report_error(L_ALL, to_send, me.name, 0);
@@ -476,7 +476,7 @@ write_pidfile(const char *filename)
 	{
 		unsigned int pid = (unsigned int) getpid();
 
-		ircsprintf(buff, "%u\n", pid);
+		ircsnprintf(buff, sizeof(buff), "%u\n", pid);
 		if((fbputs(buff, fb) == -1))
 		{
 			ilog(L_ERROR, "Error writing %u to pid file %s (%s)",

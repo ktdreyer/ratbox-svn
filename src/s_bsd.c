@@ -429,11 +429,11 @@ error_exit_client(struct Client *client_p, int error)
 	}
 	if(error == 0)
 	{
-		strcpy(errmsg, "Remote host closed the connection");
+		strlcpy(errmsg, "Remote host closed the connection", sizeof(errmsg));
 	}
 	else
 	{
-		ircsprintf(errmsg, "Read error: %s", strerror(current_error));
+		ircsnprintf(errmsg, sizeof(errmsg), "Read error: %s", strerror(current_error));
 	}
 	fd_close(client_p->localClient->fd);
 	client_p->localClient->fd = -1;

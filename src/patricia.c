@@ -87,7 +87,7 @@ prefix_toa2x(prefix_t * prefix, char *buf, int buf_len, int with_len)
 	inet_ntop(prefix->family, &prefix->add.sin, buf, buf_len);
 	if(with_len)
 	{
-		ircsprintf(tmp, "/%d", prefix->bitlen);
+		ircsnprintf(tmp, sizeof(tmp), "/%d", prefix->bitlen);
 		strcat(buf, tmp);
 	}
 	return (buf);
