@@ -134,9 +134,9 @@ int m_locops(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
             }
           else
             return 0;
-#ifdef HUB
-          sendto_slaves(sptr,"LOCOPS",slave_oper,parc,parv);
-#endif
+
+          if(ConfigFileEntry.hub)
+            sendto_slaves(sptr,"LOCOPS",slave_oper,parc,parv);
           return 0;
         }
     }

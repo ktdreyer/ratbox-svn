@@ -73,9 +73,6 @@ const char serveropts[] = {
 #ifdef  OPER_REHASH
   'E',
 #endif
-#ifdef  HUB
-  'H',
-#endif
 #ifdef  SHOW_INVISIBLE_LUSERS
   'i',
 #endif

@@ -57,14 +57,11 @@ struct Channel
   time_t          topic_time;
   int             users;      /* user count */
   int             opcount;    /* number of chanops */
-#ifdef HUB
   /* Only needed for lazy links and hubs */
   unsigned long   lazyLinkChannelExists;
-#else
   /* Only needed for lazy links and leafs */
   int             locusers;
   time_t          locusers_last;
-#endif
   struct SLink*   channels;         /* Link list of sub channels */
   struct SLink*   members;
   struct SLink*   invites;
@@ -90,9 +87,7 @@ typedef struct  Channel aChannel;
 
 extern  struct  Channel *GlobalChannelList;
 
-#ifndef HUB
 void cleanup_channels(void);
-#endif
 
 #define CREATE 1        /* whether a channel should be
                            created or just tested for existance */

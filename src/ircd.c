@@ -110,10 +110,8 @@
 int reject_held_fds = 0;
 #endif
 
-#ifndef HUB
 /* LazyLinks code */
 time_t lastCleanup;
-#endif
 
 #ifdef NEED_SPLITCODE
 extern time_t server_split_time;
@@ -383,13 +381,14 @@ static time_t io_loop(time_t delay)
       restart("Clock Failure");
     }
 
-#ifndef HUB
-  if(CurrentTime - lastCleanup >= CLEANUP_CHANNELS_TIME)
+  if(!ConfigFileEntry.hub)
     {
-      lastCleanup = CurrentTime;
-      cleanup_channels();
+      if(CurrentTime - lastCleanup >= CLEANUP_CHANNELS_TIME)
+        {
+          lastCleanup = CurrentTime;
+          cleanup_channels();
+        }
     }
-#endif
 
   /*
    * This chunk of code determines whether or not
@@ -622,13 +621,13 @@ static void initialize_global_set_options(void)
 
 static void initialize_message_files(void)
   {
-  InitMessageFile( HELP_MOTD, HPATH, &ConfigFileEntry.helpfile );
-  InitMessageFile( USER_MOTD, MPATH, &ConfigFileEntry.motd );
-  InitMessageFile( OPER_MOTD, OPATH, &ConfigFileEntry.opermotd );
+    InitMessageFile( HELP_MOTD, HPATH, &ConfigFileEntry.helpfile );
+    InitMessageFile( USER_MOTD, MPATH, &ConfigFileEntry.motd );
+    InitMessageFile( OPER_MOTD, OPATH, &ConfigFileEntry.opermotd );
 
-  ReadMessageFile( &ConfigFileEntry.helpfile );
-  ReadMessageFile( &ConfigFileEntry.motd );
-  ReadMessageFile( &ConfigFileEntry.opermotd );
+    ReadMessageFile( &ConfigFileEntry.helpfile );
+    ReadMessageFile( &ConfigFileEntry.motd );
+    ReadMessageFile( &ConfigFileEntry.opermotd );
   }
 
 /*
@@ -835,9 +834,8 @@ int main(int argc, char *argv[])
   init_stats();
   init_tree_parse(msgtab);      /* tree parse code (orabidoo) */
 
-#ifdef HUB
-  initServerMask();
-#endif
+  if(ConfigFileEntry.hub)
+    initServerMask();
 
   fdlist_init();
   init_netio();

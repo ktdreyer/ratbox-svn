@@ -350,14 +350,6 @@
  */
 #define MAXIMUM_LINKS 1
 
-/* HUB - enable server-server routing
- * If your server is running as a a HUB Server then define this.
- * A HUB Server has many servers connect to it at the same as opposed
- * to a leaf which just has 1 server (typically the uplink). Define this
- * correctly for performance reasons.
- */
-#undef  HUB
-
 /* CMDLINE_CONFIG - allow conf-file to be specified on command line
  * NOTE: defining CMDLINE_CONFIG and installing ircd SUID or SGID is a MAJOR
  * security problem - they can use the "-f" option to read any files

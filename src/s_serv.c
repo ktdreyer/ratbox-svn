@@ -78,10 +78,8 @@ struct Capability captab[] = {
   { 0,   0 }
 };
 
-#ifdef HUB
 static unsigned long nextFreeMask();
 static unsigned long freeMask;
-#endif
 
 /*
  * my_name_for_link - return wildcard name of my server name 
@@ -427,16 +425,16 @@ int check_server(struct Client* cptr)
   if( !(c_conf->flags & CONF_FLAGS_ZIP_LINK) )
     ClearCap(cptr,CAP_ZIP);
 
-#ifdef HUB
-  if( n_conf->flags & CONF_FLAGS_LAZY_LINK )
+  if(ConfigFileEntry.hub)
     {
-      if(find_conf_by_name(n_conf->name, CONF_HUB))
+      if( n_conf->flags & CONF_FLAGS_LAZY_LINK )
         {
-          /* n line with an H line, must be a typo */
-          ClearCap(cptr,CAP_LL);
-#ifdef DEBUGLL
-          sendto_realops("s_serv.c: Clearing CAP_LL" );
-#endif
+          if(find_conf_by_name(n_conf->name, CONF_HUB))
+            {
+              /* n line with an H line, must be a typo */
+              ClearCap(cptr,CAP_LL);
+              sendto_realops("s_serv.c: Clearing CAP_LL" );
+            }
         }
 
       cptr->serverMask = nextFreeMask();
@@ -450,11 +448,8 @@ int check_server(struct Client* cptr)
 	  /* try and negotiate a non LL connect */
 	  ClearCap(cptr,CAP_LL);
 	}
-#ifdef DEBUGLL
-      sendto_realops("s_serv.c: Adding serverMask %X", cptr->serverMask );
-#endif
     }
-#endif
+
 
   /*
    * if the C:line doesn't have an IP address assigned put the one from
@@ -611,19 +606,21 @@ int server_estab(struct Client *cptr)
   /* Its got identd , since its a server */
   SetGotId(cptr);
 
-#ifndef HUB
-  /* Its easy now, if there is a server in my link list
-   * and I'm not a HUB, I can't grow the linklist more than 1
-   *
-   * -Dianora
-   */
-  if (serv_cptr_list)   
+  if(!ConfigFileEntry.hub)
     {
-      ServerStats->is_ref++;
-      sendto_one(cptr, "ERROR :I'm a leaf not a hub");
-      return exit_client(cptr, cptr, cptr, "I'm a leaf");
+      /* Its easy now, if there is a server in my link list
+       * and I'm not a HUB, I can't grow the linklist more than 1
+       *
+       * -Dianora
+       */
+      if (serv_cptr_list)   
+        {
+          ServerStats->is_ref++;
+          sendto_one(cptr, "ERROR :I'm a leaf not a hub");
+          return exit_client(cptr, cptr, cptr, "I'm a leaf");
+        }
     }
-#endif
+
   if (IsUnknown(cptr))
     {
       if (c_conf->passwd[0])
@@ -821,24 +818,22 @@ int server_estab(struct Client *cptr)
       ** -orabidoo
       */
 
-#ifdef HUB
   /* On a "lazy link" (version 1 at least) only send the nicks
    * Leafs always have to send nicks plus channels
    */
-  if (IsCapable(cptr, CAP_LL) && (n_conf->flags & CONF_FLAGS_LAZY_LINK))
+  if (ConfigFileEntry.hub &&
+        IsCapable(cptr, CAP_LL) && (n_conf->flags & CONF_FLAGS_LAZY_LINK))
     {
       for (acptr = &me; acptr; acptr = acptr->prev)
         if (acptr->from != cptr)
           sendnick_TS(cptr, acptr);
     }
   else
-#endif
     {
       struct SLink* l;
       static char   nickissent = 1;
 
-#ifndef HUB
-      if (IsCapable(cptr, CAP_LL))
+      if (!ConfigFileEntry.hub && IsCapable(cptr, CAP_LL))
         {
           for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
             {
@@ -846,7 +841,6 @@ int server_estab(struct Client *cptr)
                 me.name, chptr->chname );
             }
         }
-#endif
 
       nickissent = 3 - nickissent;
       /* flag used for each nick to check if we've sent it
@@ -982,7 +976,6 @@ void show_servers(struct Client *cptr)
              cptr->name, j, (j==1) ? "" : "s");
 }
 
-#ifdef HUB
 void initServerMask(void)
 {
   freeMask = 0xFFFFFFFFL;
@@ -992,10 +985,6 @@ void restoreUnusedServerMask(unsigned long mask)
 {
   struct Channel*   chptr;
   unsigned long clear_mask;
-
-#ifdef DEBUGLL
-  sendto_realops("restoreUnusedServerMask: Returning mask %X", mask);
-#endif
 
   if(!mask) /* On 0 mask, don't do anything */
     return;
@@ -1022,9 +1011,6 @@ static unsigned long nextFreeMask()
       if( mask & freeMask )
         {
           freeMask &= ~mask;
-#ifdef DEBUGLL
-          sendto_realops("nextFreeMask: Returning mask %X", mask);
-#endif
           return(mask);
         }
       mask <<= 1;
@@ -1032,4 +1018,3 @@ static unsigned long nextFreeMask()
   return 0L; /* watch this special case ... */
 }
 
-#endif

@@ -54,9 +54,7 @@
 #include <stdlib.h>
 
 /* LazyLinks */
-#ifndef HUB
 static void destroy_channel(struct Channel *);
-#endif
 
 #ifdef NEED_SPLITCODE
 
@@ -599,14 +597,13 @@ void    add_user_to_channel(struct Channel *chptr, struct Client *who, int flags
       if(flags & MODE_CHANOP)
         chptr->opcount++;
 
-#ifndef HUB
       /* LazyLink code */
       if(MyClient(who))
         {
           chptr->locusers++;
           chptr->locusers_last = CurrentTime;
         }
-#endif
+
       ptr = make_link();
       ptr->value.chptr = chptr;
       ptr->next = who->user->channel;
@@ -626,14 +623,12 @@ void    remove_user_from_channel(struct Client *sptr,struct Channel *chptr,int w
         if((tmp->flags & MODE_CHANOP) && chptr->opcount)
           chptr->opcount--;
 
-#ifndef HUB
         /* LazyLink code */
         if(MyClient(sptr) && chptr->locusers)
           {
             chptr->locusers--;
             chptr->locusers_last = CurrentTime;
 	  }
-#endif
         /* User was kicked, but had an exception.
          * so, to reduce chatter I'll remove any
          * matching exception now.
@@ -2832,7 +2827,6 @@ int     count_channels(struct Client *sptr)
   return (count);
 }
 
-#ifndef HUB
 /* Only leaves need to remove channels that have no local members */
 
 void cleanup_channels(void)
@@ -2941,4 +2935,3 @@ static void destroy_channel(struct Channel *chptr)
   /* Wheee */
 }
 
-#endif

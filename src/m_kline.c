@@ -414,10 +414,8 @@ m_kline(struct Client *cptr,
           sendto_realops("received kline from %s", sptr->name);
         }
 
-#ifdef HUB
-      sendto_slaves(sptr,"KLINE",slave_oper,parc,parv);
-#endif
-
+      if(ConfigFileEntry.hub)
+        sendto_slaves(sptr,"KLINE",slave_oper,parc,parv);
     }
   else
 #endif

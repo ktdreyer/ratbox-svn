@@ -34,7 +34,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#ifndef HUB
 /* Only leaves need lljoin */
 /*
 ** m_lljoin
@@ -167,4 +166,3 @@ int     m_lljoin(struct Client *cptr,
     }
   return 0;
 }
-#endif

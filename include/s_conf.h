@@ -24,6 +24,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.5  2000/01/06 03:19:32  db
+ * - removed HUB from config.h etc. now in a config entry
+ *
  * Revision 7.4  2000/01/02 05:34:53  db
  * - Preliminary rough cut at Lazy Links, still a lot of mopping up to do
  *   'n' in c/n's means try lazy link, 'N' means do normal.
@@ -342,6 +345,7 @@ typedef struct
   MessageFile helpfile;
   MessageFile motd;
   MessageFile opermotd;
+  int         hub; /* YES or NO */
 } ConfigFileEntryType;
 
 /* aConfItems */

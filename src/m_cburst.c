@@ -36,7 +36,6 @@
 #include <stdlib.h>
 
 
-#ifdef HUB
 /*
 ** m_cburst
 **      parv[0] = sender prefix
@@ -171,4 +170,3 @@ int     m_cburst(struct Client *cptr,
                   me.name, name, nick);
   return 0;
 }
-#endif

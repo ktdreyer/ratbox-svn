@@ -35,7 +35,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#ifdef HUB
 /* Only HUB's need drop */
 
 /*
@@ -75,4 +74,3 @@ int     m_drop(struct Client *cptr,
     chptr->lazyLinkChannelExists &= ~cptr->serverMask;
   return 0;
 }
-#endif

@@ -34,6 +34,7 @@
 #include "numeric.h"
 #include "send.h"
 #include "s_serv.h"
+#include "s_conf.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -289,17 +290,18 @@ int     m_join(struct Client *cptr,
            else
              {
                flags = CHFL_CHANOP;
-#ifndef HUB
-               /* LazyLinks */
-               if( (*name != '&') && serv_cptr_list
-                     && IsCapable( serv_cptr_list, CAP_LL) )
+               if(!ConfigFileEntry.hub)
                  {
-                   sendto_one(serv_cptr_list,":%s CBURST %s %s %s",
-                     me.name,name,sptr->name, key ? key: "" );
-                   /* And wait for LLJOIN */
-                   return 0;
+                   /* LazyLinks */
+                   if( (*name != '&') && serv_cptr_list
+                       && IsCapable( serv_cptr_list, CAP_LL) )
+                     {
+                       sendto_one(serv_cptr_list,":%s CBURST %s %s %s",
+                         me.name,name,sptr->name, key ? key: "" );
+                       /* And wait for LLJOIN */
+                       return 0;
+                     }
                  }
-#endif
              }
 
            /* if its not a local channel, or isn't an oper
