@@ -1,3 +1,16 @@
+leeh        2002/06/26 08:16:22 EDT	(20020626_3)
+
+  Modified files:
+    modules              m_unkline.c 
+  Log:
+  - consistency with hyb6 and /kline, only use sptr->name in the notice, not
+    n!u@h{o}
+  
+  Revision  Changes    Path
+  1.46      +3 -3      ircd-hybrid-7/modules/m_unkline.c
+
+
+
 androsyn    2002/06/25 23:05:48 EDT	(20020626_2)
 
   Modified files:
