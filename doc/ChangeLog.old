@@ -1,3 +1,7 @@
+*** 20010124_10 by wcampbel
+Diane's fix for the connect {} in the conf
+
+
 *** 20010124_9 by wcampbel
 Added an updated operguide.txt from Riedel and added Riedel's auth specific
 motd suggestion to TODO
