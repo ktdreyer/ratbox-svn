@@ -1,3 +1,9 @@
+*** 20001124_5 by bill
+
+ - changed DPATH and the like from "/usr/ejb/ircd/" to "/usr/local/ircd/"
+   maybe ejb could just ln -sf /usr/ejb /usr/local?
+
+
 *** 20001124_4 by db
 - removed more unused junk
 
