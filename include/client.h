@@ -573,7 +573,7 @@ extern void           free_client(struct Client* client);
  * extern void           add_client_to_list(struct Client* client);
  * This used to be a function..but now it is a macro
  */
-#define add_client_to_list(client) dlinkAdd(client, &client->node, &GlobalClientList)
+#define add_client_to_list(client) dlinkAddTail(client, &client->node, &GlobalClientList)
 
 extern void           remove_client_from_list(struct Client *);
 extern int            exit_client(struct Client*, struct Client*, 

@@ -570,7 +570,7 @@ int main(int argc, char *argv[])
   memset(&global_serv_list, 0, sizeof(global_serv_list));
   memset(&oper_list, 0, sizeof(oper_list));
 
-  dlinkAdd(&me, &me.node,&GlobalClientList);
+  dlinkAddTail(&me, &me.node,&GlobalClientList);
 
   memset((void *)&Count, 0, sizeof(Count));
   memset((void *)&server_state, 0, sizeof(server_state));

@@ -1021,7 +1021,7 @@ int server_estab(struct Client *client_p)
   if(m != NULL)
     {
       dlinkDelete(m, &unknown_list);
-      dlinkAdd(client_p, m, &serv_list);
+      dlinkAddTail(client_p, m, &serv_list);
     } else {
       sendto_realops_flags(FLAGS_ALL, L_ADMIN, "Tried to register (%s) server but it was already registered!?!", host);
       exit_client(client_p, client_p, client_p, "Tried to register server but it was already registered?!?"); 
