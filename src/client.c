@@ -281,7 +281,9 @@ check_pings_list(dlink_list *list)
   char         scratch[32];	/* way too generous but... */
   struct Client *cptr;          /* current local cptr being examined */
   int           ping = 0;       /* ping time value from client */
+#if 0
   time_t        timeout;        /* found necessary ping time */
+#endif
   char          *reason;
   dlink_node    *ptr;
 
