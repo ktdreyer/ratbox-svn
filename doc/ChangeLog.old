@@ -1,3 +1,7 @@
+*** 20010101_51 by wcampbel
+gline.log.<date> should be in LOGPATH, not ETCPATH
+
+
 *** 20010101_50 by a1kmm
 Don't reload modules if they are already loaded and we see a module= in the config file.
 
