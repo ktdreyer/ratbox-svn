@@ -1,3 +1,9 @@
+*** 20001220_16 by ejb
+- added umode +z, hides ops on channel (replaces hide_chanops=yes)
+- changed format of 004 numeric
+
+
+
 *** 20001220_15 by wcampbel
 example.conf is now correct for the current state of the parser.
 All that is needed now is more documentation on the options
