@@ -1,3 +1,8 @@
+*** 20010925_4 by db
+- remove unused function
+
+
+
 *** 20010925_3 by jdc
 - modules/m_stats.c: #if 0'd out stats_fd() to fix unused warning.
 
