@@ -1,3 +1,7 @@
+*** 19990909_2 by wnder
+more #ifdef USE_IAUTH stuff
+
+
 *** 19990909_1 by wnder
 Ok, sorry for the broken compile - I put all the iauth code
 in the ircd tree under #ifdef USE_IAUTH so hopefully nothing
