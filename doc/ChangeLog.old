@@ -1,3 +1,13 @@
+*** 20010702_6 by jdc
+- include/linebuf.h
+  src/linebuf.c
+    * Missing declarations for functions; resulted in warnings.
+    * Some functions lacked void in function definition; just being picky.
+- src/resv.c
+    * Lacked include for hash.h.
+
+
+
 *** 20010702_5 by jdc
 - modules/m_resv.c
     * Missing include for "hash.h" -- warnings...
