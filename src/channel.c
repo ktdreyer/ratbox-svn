@@ -2354,6 +2354,13 @@ get_channel_access(struct Client *source_p, struct Channel *chptr)
  *        the channel to send mode changes for(chptr)
  * Output: None.
  * Side-effects: Sends the appropriate mode changes to capable servers.
+ *
+ * send_cap_mode_changes() will loop the server list itself, because
+ * at this point in time we have 4 capabs for channels, CAP_IE, CAP_EX,
+ * CAP_AOPS, CAP_HOPS, and a server could support any number of these..
+ * so we make the modebufs per server, tailoring them to each servers
+ * specific demand.  Its not very pretty, but its one of the few realistic
+ * ways to handle having this many capabs for channel modes.. --fl_
  */
 static void
 send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
@@ -2368,10 +2375,14 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
   ircsprintf(modebuf, ":%s MODE %s ", source_p->name, chptr->chname);
   mbl = strlen(modebuf);
 
+  /* loop our connected server list */
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
   {
     target_p = ptr->data;
 
+    /* check we dont send back to the origin.. modes can come from clients
+     * too! :P
+     */
     if((IsServer(source_p) && (target_p == source_p)) ||
        (IsClient(source_p) && (target_p == source_p->servptr)))
       continue;
@@ -2393,8 +2404,13 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
       modebuf[mbl] = 0;
     }
 
+    /* loop the list of - modes we have */
     for (i = 0; i < mode_count_minus; i++)
     {
+      /* if they dont support the cap we need, or they do support a cap they
+       * cant have, then dont add it to the modebuf.. that way they wont see
+       * the mode
+       */
       if (mode_changes_minus[i].letter == 0 ||
           (mode_changes_minus[i].caps && !IsCapable(target_p, mode_changes_minus[i].caps)) ||
 	  (mode_changes_minus[i].nocaps && IsCapable(target_p, mode_changes_minus[i].nocaps)))
@@ -2402,6 +2418,9 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 
       nc++;
 
+      /* if we're creeping past the buf size, we need to send it and make
+       * another line for the other modes
+       */
       if (mode_changes_minus[i].arg != NULL &&
           strlen(mode_changes_minus[i].arg) + mbl + pbl + 2 > BUFSIZE)
       {
@@ -2434,8 +2453,12 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
       modebuf[mbl] = 0;
     }
 
+    /* loop the + modes */
     for (i = 0; i < mode_count_plus; i++)
     {
+      /* same as above, check they support needed capabs, and dont have
+       * capabs we dont want..
+       */
       if (mode_changes_plus[i].letter == 0 ||
           (mode_changes_plus[i].caps && !IsCapable(target_p, mode_changes_plus[i].caps)) ||
 	  (mode_changes_plus[i].nocaps && IsCapable(target_p, mode_changes_plus[i].nocaps)))
