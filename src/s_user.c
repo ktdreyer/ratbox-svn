@@ -245,15 +245,12 @@ int show_lusers(struct Client *sptr)
                me.name, sptr->name, Count.chan);
 
   if(!GlobalSetOptions.hide_server || IsOper(sptr))
+    {
       sendto_one(sptr, form_str(RPL_LUSERME),
                  me.name, sptr->name, Count.local, Count.myserver);
-
-  if(!GlobalSetOptions.hide_server || IsOper(sptr))
-    sendto_one(sptr, form_str(RPL_LOCALUSERS), me.name, sptr->name,
-                 Count.local, Count.max_loc);
-  else
-    sendto_one(sptr, form_str(RPL_LOCALUSERS), me.name, sptr->name,
-                 Count.total, Count.max_tot);
+      sendto_one(sptr, form_str(RPL_LOCALUSERS), me.name, sptr->name,
+                   Count.local, Count.max_loc);
+    }
 
   sendto_one(sptr, form_str(RPL_GLOBALUSERS), me.name, sptr->name,
              Count.total, Count.max_tot);

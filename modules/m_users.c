@@ -65,12 +65,10 @@ static int m_users(struct Client *cptr, struct Client *sptr,
     {
       /* No one uses this any more... so lets remap it..   -Taner */
       
-      if (IsOper(sptr) || !GlobalSetOptions.hide_server)
+      if (!GlobalSetOptions.hide_server || IsOper(sptr))
         sendto_one(sptr, form_str(RPL_LOCALUSERS), me.name, parv[0],
-                 Count.local, Count.max_loc);
-      else
-        sendto_one(sptr, form_str(RPL_LOCALUSERS), me.name, parv[0],
-                 Count.total, Count.max_tot);
+                   Count.local, Count.max_loc);
+
       sendto_one(sptr, form_str(RPL_GLOBALUSERS), me.name, parv[0],
                  Count.total, Count.max_tot);
     }
