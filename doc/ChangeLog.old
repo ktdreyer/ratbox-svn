@@ -1,3 +1,8 @@
+*** 20010127_1 by lusky
+- removed lex/yacc output
+- put socklen_t's back in
+
+
 *** 20010126_20 by wcampbel
 Oops, <dollar>Id:<dollar> in the ChangeLog
 
