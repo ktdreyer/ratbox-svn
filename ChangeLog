@@ -1,3 +1,18 @@
+leeh        2003/06/22 09:20:27 UTC	(20030622_0)
+
+  Modified files:
+    src                  help.c 
+  Log:
+  - fix \n in first line of help
+  - when loading the user help files, work on the presumption if its a
+    symlink, and an oper help exists of that name, its a symlink to the oper
+    help
+  
+  Revision  Changes    Path
+  1.4       +29 -2     ircd-ratbox/src/help.c
+
+
+
 leeh        2003/06/20 16:35:00 UTC	(20030620_7)
 
   Modified files:
