@@ -279,7 +279,7 @@ void show_isupport(struct Client *source_p)
 **         "foobar" (quite legal, as this server didn't propagate
 **         it).
 **      3) now this server gets nick "foobar" from outside, but
-**         has already the same defined locally. Current server
+**         has alread the same defined locally. Current server
 **         would just issue "KILL foobar" to clean out dups. But,
 **         this is not fair. It should actually request another
 **         nick from local user or kill him/her...
@@ -300,18 +300,21 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
   assert(NULL != source_p->localClient);
   assert(source_p->username != username);
 
-  if(ConfigFileEntry.ping_cookie && source_p->flags & FLAGS_PINGSENT && !(source_p->flags2 & FLAGS2_PING_COOKIE) )
+  if(ConfigFileEntry.ping_cookie)
   {
- 	return 0;
+  	if(!(source_p->flags & FLAGS_PINGSENT) && source_p->random_ping == 0)
+  	{
+           source_p->random_ping = (unsigned long)random();
+           sendto_one(source_p, "PING :%lu", (unsigned long)source_p->random_ping);
+           source_p->flags |= FLAGS_PINGSENT;
+  	   return -1;
+  	} 
+  	if(!(source_p->flags2 & FLAGS2_PING_COOKIE))
+  	{
+  	   return -1;
+  	}
   }
-
-  if(ConfigFileEntry.ping_cookie && !(source_p->flags2 & FLAGS2_PING_COOKIE) && !source_p->random_ping)
-  {
-    source_p->random_ping = (unsigned long)random();
-    sendto_one(source_p, "PING :%lu", (unsigned long)source_p->random_ping);
-    source_p->flags |= FLAGS_PINGSENT;
-    return 0;
-  } 
+ 
  
   user->last = CurrentTime;
   /* Straight up the maximum rate of flooding... */
