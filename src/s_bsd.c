@@ -614,9 +614,6 @@ comm_connect_tcp(int fd, const char *host, u_short port,
 {
  fd_table[fd].flags.called_connect = 1;
  assert(callback);
-#ifndef NDEBUG
- memset(&fd_table[fd].connect, 0, sizeof(fd_table[fd].connect));
-#endif
  fd_table[fd].connect.callback = callback;
  fd_table[fd].connect.data = data;
 

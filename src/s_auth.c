@@ -125,8 +125,6 @@ static struct AuthRequest* make_auth_request(struct Client* client)
 {
   struct AuthRequest* request = 
     (struct AuthRequest *)MyMalloc(sizeof(struct AuthRequest));
-  assert(0 != request);
-  memset(request, 0, sizeof(struct AuthRequest));
   request->fd      = -1;
   request->client  = client;
   request->timeout = CurrentTime + CONNECTTIMEOUT;

@@ -104,7 +104,7 @@ struct Client* make_client(struct Client* from)
   dlink_node *m;
 
   client_p = (struct Client *)MyMalloc(sizeof(struct Client));
-      
+         
   if (from == NULL)
     {
       client_p->from  = client_p; /* 'from' of local client is self! */
@@ -134,8 +134,6 @@ struct Client* make_client(struct Client* from)
   client_p->fd_r = -1;
 #endif
   strcpy(client_p->username, "unknown");
-
-#if 0
   client_p->next    = NULL;
   client_p->prev    = NULL;
   client_p->hnext   = NULL;
@@ -145,8 +143,6 @@ struct Client* make_client(struct Client* from)
   client_p->serv    = NULL;
   client_p->servptr = NULL;
   client_p->whowas  = NULL;
-#endif
-
   return client_p;
 }
 
