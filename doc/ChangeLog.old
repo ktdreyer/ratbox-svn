@@ -1,3 +1,10 @@
+*** 20001202_2 by db
+- connect bursts are still broken, but it works enough to 
+  be usable. More debugging to do.
+- cleaned up m_nick.c a tiny bit more. what a steeeninkng mess
+
+
+
 *** 20001202_1 by db
 - change_channel_membership was screwing up, since dlinkDelete does
   not zero the dlink_list->head pointer in all cases. *sigh* dunno
