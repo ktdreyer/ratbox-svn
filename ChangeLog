@@ -1,3 +1,32 @@
+leeh        2003/08/12 21:02:32 EDT	(20030813_0)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              s_conf.h s_serv.h 
+    modules              m_cryptlink.c 
+    modules/core         m_server.c m_squit.c 
+    servlink             io.c 
+    src                  client.c newconf.c s_conf.c s_serv.c 
+  Log:
+  - removed support for faking our servername to directly connected links.
+    I really dont think this is needed nowadays..
+  
+  Revision  Changes    Path
+  7.219     +0 -3      ircd-ratbox/doc/example.conf
+  7.55      +0 -3      ircd-ratbox/doc/example.efnet.conf
+  7.250     +0 -1      ircd-ratbox/include/s_conf.h
+  7.84      +0 -1      ircd-ratbox/include/s_serv.h
+  1.119     +2 -4      ircd-ratbox/modules/core/m_server.c
+  1.69      +1 -21     ircd-ratbox/modules/core/m_squit.c
+  1.60      +3 -3      ircd-ratbox/modules/m_cryptlink.c
+  1.35      +1 -2      ircd-ratbox/servlink/io.c
+  7.399     +1 -5      ircd-ratbox/src/client.c
+  7.105     +0 -8      ircd-ratbox/src/newconf.c
+  7.426     +0 -3      ircd-ratbox/src/s_conf.c
+  7.347     +3 -24     ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2003/08/12 17:34:23 EDT	(20030812_4)
 
   Modified files:
