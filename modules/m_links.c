@@ -41,6 +41,22 @@
 static int m_links(struct Client *, struct Client *, int, const char **);
 static int mo_links(struct Client *, struct Client *, int, const char **);
 
+static void cache_links(void *unused);
+
+static int
+modinit(void)
+{
+	eventAddIsh("cache_links", cache_links, NULL, 300);
+	cache_links(NULL);
+	return 0;
+}
+
+static void
+moddeinit(void)
+{
+	eventDelete(cache_links, NULL);
+}
+
 struct Message links_msgtab = {
 	"LINKS", 0, 0, 0, MFLG_SLOW,
 	{mg_unreg, {m_links, 0}, {mo_links, 0}, mg_ignore, mg_ignore, {mo_links, 0}}
@@ -54,7 +70,9 @@ mapi_hlist_av1 links_hlist[] = {
 	{ NULL, NULL }
 };
 
-DECLARE_MODULE_AV1(links, NULL, NULL, links_clist, links_hlist, NULL, "$Revision$");
+DECLARE_MODULE_AV1(links, modinit, moddeinit, links_clist, links_hlist, NULL, "$Revision$");
+
+static dlink_list links_cache_list;
 
 static void send_links_cache(struct Client *source_p);
 
@@ -153,4 +171,42 @@ send_links_cache(struct Client *source_p)
 
 	sendto_one_numeric(source_p, RPL_ENDOFLINKS, form_str(RPL_ENDOFLINKS), "*");
 }
+
+static void
+cache_links(void *unused)
+{
+	static char buf[BUFSIZE];
+	struct Client *target_p;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+	char *links_line;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, links_cache_list.head)
+	{
+		MyFree(ptr->data);
+		free_dlink_node(ptr);
+	}
+
+	links_cache_list.head = links_cache_list.tail = NULL;
+	links_cache_list.length = 0;
+
+	DLINK_FOREACH(ptr, global_serv_list.head)
+	{
+		target_p = ptr->data;
+
+		/* skip ourselves (done in /links) and hidden servers */
+		if(IsMe(target_p) ||
+		   (IsHidden(target_p) && !ConfigServerHide.disable_hidden))
+			continue;
+
+		ircsnprintf(buf, sizeof(buf), "%s %s :1 %s",
+				target_p->name, me.name,
+				EmptyString(target_p->info) ? "(Unknown Location)" :
+				 target_p->info);
+		DupString(links_line, buf);
+
+		dlinkAddTailAlloc(links_line, &links_cache_list);
+	}
+}
+
 
