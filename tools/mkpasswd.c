@@ -75,7 +75,12 @@ char *argv[];
       salt = make_md5_salt();
   } else {
     if (flag & FLAG_SALT)
-      salt = saltpara;
+      if ((strlen(saltpara) == 2))
+        salt = saltpara;
+      else {
+        printf("Invalid salt, please enter 2 alphanumeric characters\n");
+        exit(1);
+      }
     else
       salt = make_des_salt();
   }
@@ -103,28 +108,28 @@ char *make_des_salt()
 
 char *make_md5_salt_para(char *saltpara)
 {
-  static char salt[8];
+  static char salt[21];
   char* saltptr=salt;
-  if (saltpara) {
+  if (saltpara && (strlen(saltpara) <= 16)) {
     sprintf(salt, "$1$%s$", saltpara);
     return saltptr;
   }
-  printf("Invalid Salt, please use 3 random alphanumeric characters\n");
+  printf("Invalid Salt, please use up to 16 random alphanumeric characters\n");
   exit(1);
 }
   
 char *make_md5_salt()
 {
-  static char salt[8];
+  static char salt[13];
+  int i;
   char* saltptr=salt;
   salt[0] = '$';
   salt[1] = '1';
   salt[2] = '$';
-  salt[3] = saltChars[random() % 64];
-  salt[4] = saltChars[random() % 64];
-  salt[5] = saltChars[random() % 64];
-  salt[6] = '$';
-  salt[7] = '\0';
+  for (i=3; i<=10; i++)
+    salt[i] = saltChars[random() % 64];
+  salt[11] = '$';
+  salt[12] = '\0';
   return saltptr;
 }
 
@@ -133,7 +138,7 @@ void usage()
   printf("mkpasswd [-m|-d] [-s salt] [-p plaintext]\n");
   printf("-m Generate an MD5 password\n");
   printf("-d Generate a DES password\n");
-  printf("-s Specify a salt, 2 alphanumeric characters for DES, 3 for MD5\n");
+  printf("-s Specify a salt, 2 alphanumeric characters for DES, up to 16 for MD5\n");
   printf("-p Specify a plaintext password to use\n");
   printf("Example: mkpasswd -m -s 3dr -p test\n");
   exit(0);
