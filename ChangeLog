@@ -1,3 +1,16 @@
+androsyn    2002/08/27 13:18:57 EDT	(20020827_5)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+  Log:
+  Added client_flood_grace examples
+  
+  Revision  Changes    Path
+  7.178     +8 -0      ircd-ratbox/doc/example.conf
+  7.13      +6 -0      ircd-ratbox/doc/example.efnet.conf
+
+
+
 androsyn    2002/08/27 13:15:58 EDT	(20020827_4)
 
   Modified files:
