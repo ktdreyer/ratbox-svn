@@ -167,8 +167,6 @@ static void mo_clearchan(struct Client *client_p, struct Client *source_p,
 
   add_user_to_channel(chptr, source_p, CHFL_CHANOP);
 
-  /* XXX - check this isn't too big above... */
-  source_p->user->joined++;
   /* Take the TS down by 1, so we don't see the channel taken over
    * again. */
   if (chptr->channelts)
