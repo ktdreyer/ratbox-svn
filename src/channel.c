@@ -19,12 +19,14 @@ static void c_join(struct client *, char *parv[], int parc);
 static void c_kick(struct client *, char *parv[], int parc);
 static void c_part(struct client *, char *parv[], int parc);
 static void c_sjoin(struct client *, char *parv[], int parc);
+static void c_tb(struct client *, char *parv[], int parc);
 static void c_topic(struct client *, char *parv[], int parc);
 
 static struct scommand_handler join_command = { "JOIN", c_join, 0 };
 static struct scommand_handler kick_command = { "KICK", c_kick, 0 };
 static struct scommand_handler part_command = { "PART", c_part, 0 };
 static struct scommand_handler sjoin_command = { "SJOIN", c_sjoin, 0 };
+static struct scommand_handler tb_command = { "TB", c_tb, 0 };
 static struct scommand_handler topic_command = { "TOPIC", c_topic, 0 };
 
 void
@@ -34,6 +36,7 @@ init_channel(void)
 	add_scommand_handler(&kick_command);
 	add_scommand_handler(&part_command);
 	add_scommand_handler(&sjoin_command);
+	add_scommand_handler(&tb_command);
 	add_scommand_handler(&topic_command);
 }
 
@@ -243,6 +246,35 @@ c_topic(struct client *client_p, char *parv[], int parc)
 				 client_p->user->host);
 		else
 			strlcpy(chptr->topicwho, client_p->name, sizeof(chptr->topicwho));
+	}
+}
+
+static void
+c_tb(struct client *client_p, char *parv[], int parc)
+{
+	struct channel *chptr;
+
+	if(parc < 4 || !IsServer(client_p))
+		return;
+
+	if((chptr = find_channel(parv[1])) == NULL)
+		return;
+
+	if(parc == 5)
+	{
+		if(EmptyString(parv[4]))
+			return;
+
+		strlcpy(chptr->topic, parv[4], sizeof(chptr->topic));
+		strlcpy(chptr->topicwho, parv[3], sizeof(chptr->topicwho));
+	}
+	else
+	{
+		if(EmptyString(parv[3]))
+			return;
+
+		strlcpy(chptr->topic, parv[3], sizeof(chptr->topic));
+		strlcpy(chptr->topicwho, client_p->name, sizeof(chptr->topicwho));
 	}
 }
 

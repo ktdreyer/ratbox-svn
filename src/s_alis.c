@@ -39,6 +39,7 @@ static const char *help_list[] =
 	":%s NOTICE %s :    -min <n>: minimum users in channel",
 	":%s NOTICE %s :    -max <n>: maximum users in channel",
 	":%s NOTICE %s :    -mode <+|-|=><iklmnt>: modes set/unset/equal on channel",
+	":%s NOTICE %s :    -show [m][t]: show modes/topicwho",
 	NULL
 };
 
@@ -171,6 +172,8 @@ s_alis(struct client *client_p, char *text)
 	int x = 0;
 	int s_min = 0;
 	int s_max = 0;
+	int s_show_mode = 0;
+	int s_show_topicwho = 0;
 	int s_mode = 0;
 	int s_mode_dir;
 	int s_mode_key = 0;
@@ -252,6 +255,29 @@ s_alis(struct client *client_p, char *text)
 					}
 
 					s_max = atoi(aparv[x]);
+				}
+				else if(!strcasecmp(aparv[x], "-show"))
+				{
+					if(++x >= aparc)
+					{
+						alis_error(client_p, ERROR_PARAM);
+						return;
+					}
+
+					if(aparv[x][0] == 'm')
+					{
+						s_show_mode = 1;
+
+						if(aparv[x][1] == 't')
+							s_show_topicwho = 1;
+					}
+					else if(aparv[x][0] == 't')
+					{
+						s_show_topicwho = 1;
+
+						if(aparv[x][1] == 'm')
+							s_show_mode = 1;
+					}
 				}
 				else if(!strcasecmp(aparv[x], "-mode"))
 				{
@@ -344,12 +370,35 @@ s_alis(struct client *client_p, char *text)
 				}
 			}
 
+			/* cant show a topicwho, when a channel has no topic. */
+			if(chptr->topic[0] == '\0')
+				s_show_topicwho = 0;
+
 			if(!match(mask, chptr->name))
 				continue;
 
-			sendto_server(":%s NOTICE %s :%-50s %3d :",
-					MYNAME, client_p->name, chptr->name,
-					dlink_list_length(&chptr->users));
+			if(s_show_mode && s_show_topicwho)
+				sendto_server(":%s NOTICE %s :%-50s %-8s %3d :%s (%s)",
+						MYNAME, client_p->name, chptr->name,
+						chmode_to_string(chptr),
+						dlink_list_length(&chptr->users),
+						chptr->topic, chptr->topicwho);
+			else if(s_show_mode)
+				sendto_server(":%s NOTICE %s :%-50s %-8s %3d :%s",
+						MYNAME, client_p->name, chptr->name,
+						chmode_to_string(chptr),
+						dlink_list_length(&chptr->users),
+						chptr->topic);
+			else if(s_show_topicwho)
+				sendto_server(":%s NOTICE %s :%-50s %3d :%s (%s)",
+						MYNAME, client_p->name, chptr->name,
+						dlink_list_length(&chptr->users),
+						chptr->topic, chptr->topicwho);
+			else
+				sendto_server(":%s NOTICE %s :%-50s %3d :%s",
+						MYNAME, client_p->name, chptr->name,
+						dlink_list_length(&chptr->users),
+						chptr->topic);
 
 			if(--maxmatch == 0)
 			{

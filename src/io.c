@@ -212,7 +212,7 @@ signon_server(struct connection_entry *conn_p)
 	conn_p->io_read = read_server;
 
 	sendto_server("PASS test TS");
-	sendto_server("CAPAB :QS");
+	sendto_server("CAPAB :QS TB");
 	sendto_server("SERVER %s 1 :%s", MYNAME, config_file.my_gecos);
 
 	introduce_services();
