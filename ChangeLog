@@ -1,3 +1,15 @@
+androsyn    2004/09/13 11:34:24 EDT	(20040913_4)
+
+  Modified files:
+    src                  event.c 
+  Log:
+  Lets see if this eventAddIsh algorithm works better..
+  
+  Revision  Changes    Path
+  7.43      +4 -9      ircd-ratbox/src/event.c
+
+
+
 androsyn    2004/09/13 10:40:56 EDT	(20040913_3)
 
   Modified files:
