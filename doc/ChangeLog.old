@@ -1,3 +1,7 @@
+*** 20010524_25 by ejb
+- add the version.c stuff also.
+
+
 *** 20010524_24 by ejb
 - ok, i think this is the last VMS commit for a while.
   it should work fine .. updated the docs (README.VMS) too.
