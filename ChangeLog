@@ -1,3 +1,16 @@
+androsyn    2003/03/19 08:35:19 UTC	(20030319_2)
+
+  Modified files:
+    src                  balloc.c client.c 
+  Log:
+  Clear up some other issues I believe
+  
+  Revision  Changes    Path
+  7.59      +1 -1      ircd-ratbox/src/balloc.c
+  7.378     +11 -4     ircd-ratbox/src/client.c
+
+
+
 androsyn    2003/03/19 08:08:24 UTC	(20030319_1)
 
   Modified files:
