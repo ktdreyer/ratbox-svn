@@ -454,11 +454,12 @@ void start_auth(struct Client* client)
 
   /* No DNS cache now, remember? -- adrian */
 #ifdef IPV6
-  gethost_byaddr((const char*) &client->localClient->ip.sin6_addr.s6_addr, &query);
+/* XXX no ipv6 dns for now 
+  gethost_byaddr((const char*) &client->localClient->ip.sin6_addr.s6_addr, &query); */
 #else
   gethost_byaddr((const char*) &client->localClient->ip.sin_addr.s_addr, &query);
-#endif
   SetDNSPending(auth);
+#endif
   start_auth_query(auth);
   link_auth_request(auth, &auth_poll_list);
 }

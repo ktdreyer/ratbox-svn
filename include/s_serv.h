@@ -94,19 +94,6 @@ extern struct Capability captab[];
 extern int MaxClientCount;     /* GLOBAL - highest number of clients */
 extern int MaxConnectionCount; /* GLOBAL - highest number of connections */
 
-/* 
- * allow DEFAULT_SERVER_SPLIT_RECOVERY_TIME minutes after server rejoins
- * the network before allowing chanops new channels,
- *  but allow it to be set to a maximum of MAX_SERVER_SPLIT_RECOVERY_TIME 
- */
-#if defined(NO_CHANOPS_WHEN_SPLIT) || defined(PRESERVE_CHANNEL_ON_SPLIT) || \
-        defined(NO_JOIN_ON_SPLIT) || defined(NO_JOIN_ON_SPLIT_SIMPLE)
-#define MAX_SERVER_SPLIT_RECOVERY_TIME 30
-#ifndef DEFAULT_SERVER_SPLIT_RECOVERY_TIME
-#define DEFAULT_SERVER_SPLIT_RECOVERY_TIME 15
-#endif /* DEFAULT_SERVER_SPLIT_RECOVERY_TIME */
-#endif
-
 /*
  * return values for hunt_server() 
  */
