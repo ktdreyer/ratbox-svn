@@ -1,3 +1,17 @@
+androsyn    2003/06/17 21:02:36 UTC	(20030617_4)
+
+  Modified files:
+    servlink             io.c 
+  Log:
+  Make servlink use poll() instead of select().  On all of the supported
+  servlink platforms poll() works AND select() isn't going to work on Solaris
+  if we get passed an fd > 256.
+  
+  Revision  Changes    Path
+  1.33      +15 -14    ircd-ratbox/servlink/io.c
+
+
+
 androsyn    2003/06/17 19:47:46 UTC	(20030617_3)
 
   Modified files:
