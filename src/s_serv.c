@@ -597,8 +597,6 @@ void sendnick_TS(struct Client *cptr, struct Client *acptr)
 	  ubuf[1] = '\0';
   }
  
-  sendto_realops_flags(FLAGS_ALL, "Server %s: sending %sUID NICK, ID %s", cptr->name, IsCapable(cptr, CAP_UID) ? "" : "non-", acptr->user->id);
-  
   if (HasID(acptr) && IsCapable(cptr, CAP_UID))
 	  sendto_one(cptr, "CLIENT %s %d %lu %s %s %s %s %s :%s",
 				 acptr->name, acptr->hopcount + 1, acptr->tsinfo, ubuf,

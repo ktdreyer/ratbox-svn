@@ -446,8 +446,6 @@ int register_user(struct Client *cptr, struct Client *sptr,
 		  add_to_id_hash_table(sptr->user->id, sptr);
 	  }
 	  
-	  sendto_one(sptr, ":%s NOTICE %s :You have client ID %s", me.name, sptr->name, sptr->user->id);
-	  
       sendto_realops_flags(FLAGS_CCONN,
 			   "Client connecting: %s (%s@%s) [%s] {%s}",
 			   nick, sptr->username, sptr->host,

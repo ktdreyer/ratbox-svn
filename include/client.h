@@ -273,6 +273,7 @@ struct LocalUser
 
 
 #define HasID(x) ((x)->user->id[0] != '\0')
+#define ID_or_name(x,cptr) (IsCapable(cptr,CAP_UID)?(x)->user->id:(x)->name)
 
 #define IsRegisteredUser(x)     ((x)->status == STAT_CLIENT)
 #define IsRegistered(x)         ((x)->status  > STAT_UNKNOWN)
