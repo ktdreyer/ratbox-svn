@@ -1,3 +1,16 @@
+wcampbel    2002/02/25 18:05:02 EST	(20020225_8)
+
+  Modified files:
+    contrib              m_flags.c m_mkpasswd.c 
+  Log:
+  I gave NO ONE permission to put m_flags.c and m_mkpasswd.c under the GPL.
+  
+  Revision  Changes    Path
+  1.7       +23 -15    ircd-hybrid-7/contrib/m_flags.c
+  1.7       +5 -18     ircd-hybrid-7/contrib/m_mkpasswd.c
+
+
+
 leeh        2002/02/25 17:52:17 EST	(20020225_7)
 
   Modified files:
