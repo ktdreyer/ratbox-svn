@@ -73,6 +73,8 @@ void* MyMalloc(size_t x)
 
   if (!ret)
     outofmemory();
+  else
+    bzero(ret, x); 
   return ret;
 }
 
