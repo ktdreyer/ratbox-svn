@@ -1,3 +1,32 @@
+leeh        2004/08/05 17:08:57 EDT	(20040805_0)
+
+  Modified files:
+    include              client.h ircd.h 
+    modules              m_info.c m_stats.c m_trace.c m_whois.c 
+    modules/core         m_part.c m_quit.c m_server.c 
+                         registration.c 
+    src                  client.c ircd.c packet.c s_auth.c 
+  Log:
+  - move firsttime/lasttime struct Client -> struct LocalUser
+  
+  Revision  Changes    Path
+  7.252     +3 -2      ircd-ratbox/include/client.h
+  7.76      +2 -0      ircd-ratbox/include/ircd.h
+  1.92      +2 -2      ircd-ratbox/modules/core/m_part.c
+  1.47      +2 -2      ircd-ratbox/modules/core/m_quit.c
+  1.139     +2 -2      ircd-ratbox/modules/core/m_server.c
+  1.4       +2 -2      ircd-ratbox/modules/core/registration.c
+  1.112     +2 -2      ircd-ratbox/modules/m_info.c
+  1.229     +21 -19    ircd-ratbox/modules/m_stats.c
+  1.101     +6 -5      ircd-ratbox/modules/m_trace.c
+  1.142     +2 -2      ircd-ratbox/modules/m_whois.c
+  7.472     +14 -13    ircd-ratbox/src/client.c
+  7.356     +3 -1      ircd-ratbox/src/ircd.c
+  7.133     +2 -2      ircd-ratbox/src/packet.c
+  7.173     +1 -1      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2004/08/04 16:32:40 EDT	(20040804_1)
 
   Modified files:
