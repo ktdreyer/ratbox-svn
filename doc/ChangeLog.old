@@ -1,3 +1,23 @@
+leeh        2002/04/26 11:27:34 EDT	(20020426_5)
+
+  Modified files:
+    modules/core         m_nick.c 
+    src                  parse.c 
+  Log:
+  - added an ID collision check, which nukes both clients.
+  - ignore ERR_UNKNOWNNICK directed at us from servers.  until we can
+    guarantee both servers will do the "right thing" on a nick collision,
+    we have to kill both clients, ours and theirs.  unfortunately if BOTH
+    servers do this, we get ERR_UNKNOWNNICK.
+  
+    ugh.
+  
+  Revision  Changes    Path
+  1.88      +26 -2     ircd-hybrid-7/modules/core/m_nick.c
+  7.126     +14 -3     ircd-hybrid-7/src/parse.c
+
+
+
 leeh        2002/04/26 09:26:30 EDT	(20020426_4)
 
   Modified files:
