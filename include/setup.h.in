@@ -1,4 +1,4 @@
-/* include/setup.h.in.  Generated automatically from autoconf/configure.in by autoheader.  */
+/* include/setup.h.in.  Generated automatically from configure.in by autoheader 2.13.  */
 
 /* Define if you have the strftime function.  */
 #undef HAVE_STRFTIME
@@ -56,3 +56,19 @@
 
 /* Define if you have the crypt library (-lcrypt).  */
 #undef HAVE_LIBCRYPT
+
+/* Channel Service */
+#undef ENABLE_CHANSERV
+
+/* User Service */
+#undef ENABLE_USERSERV
+
+/* List Service */
+#undef ENABLE_ALIS
+
+/* Jupe Service */
+#undef ENABLE_JUPESERV
+
+/* Operbot Service */
+#undef ENABLE_OPERBOT
+

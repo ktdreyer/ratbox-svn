@@ -255,20 +255,21 @@ main(int argc, char *argv[])
         add_ucommand_handler(&stats_ucommand, NULL);
 
 	/* load our services.. */
-#ifdef ALIS_SERVICE
+#ifdef ENABLE_ALIS
 	init_s_alis();
 #endif
-#ifdef OPERBOT_SERVICE
+#ifdef ENABLE_OPERBOT
 	init_s_operbot();
 #endif
-#ifdef USER_SERVICE
+#ifdef ENABLE_USERSERV
 	init_s_userserv();
-#endif
-#ifdef CHANNEL_SERVICE
+#ifdef ENABLE_CHANSERV
 	init_s_chanserv();
 #endif
-
+#endif
+#ifdef ENABLE_JUPESERV
 	init_s_jupeserv();
+#endif
 
 	first_time = CURRENT_TIME;
 

@@ -17,32 +17,6 @@
  */
 #define SMALL_NETWORK
 
-/* ALIS_SERVICE
- * Controls whether the ALIS (Advanced List Service) is enabled
- */
-#define ALIS_SERVICE
-
-/* OPERBOT_SERVICE
- * Controls whether the oper bot service is enabled
- */
-#define OPERBOT_SERVICE
-
-/* USER_SERVICE
- * Enables/disables the service for registration/login of usernames.
- * This service is required for CHANNEL_SERVICE
- */
-#define USER_SERVICE
-
-/* CHANNEL_SERVICE
- * Enables/disables the channel service.
- */
-#define CHANNEL_SERVICE
-
-/* JUPE_SERVICE
- * Enables/disables the jupe service.
- */
-#define JUPE_SERVICE
-
 /*              ---------------------------             */
 /*              END OF CONFIGURABLE OPTIONS             */
 /*              ---------------------------             */

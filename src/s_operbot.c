@@ -8,7 +8,7 @@
  */
 #include "stdinc.h"
 
-#ifdef OPERBOT_SERVICE
+#ifdef ENABLE_OPERBOT
 #include "service.h"
 #include "client.h"
 #include "channel.h"

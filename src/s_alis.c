@@ -8,7 +8,7 @@
  */
 #include "stdinc.h"
 
-#ifdef ALIS_SERVICE
+#ifdef ENABLE_ALIS
 #include "service.h"
 #include "client.h"
 #include "channel.h"

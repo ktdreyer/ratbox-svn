@@ -8,6 +8,7 @@
  */
 #include "stdinc.h"
 
+#ifdef ENABLE_JUPESERV
 #include "service.h"
 #include "client.h"
 #include "channel.h"
@@ -184,3 +185,5 @@ s_jupeserv_callunjupe(struct client *client_p, char *parv[], int parc)
 
 	return 0;
 }
+
+#endif

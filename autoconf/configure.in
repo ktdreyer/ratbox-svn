@@ -28,6 +28,91 @@ AC_TYPE_SIGNAL
 AC_FUNC_STRFTIME
 AC_CHECK_FUNCS(select strlcpy strlcat gethostbyname mmap getaddrinfo)
 
+AC_MSG_CHECKING(Channel Service)
+AC_ARG_ENABLE(chanserv,
+[ --enable-chanserv         Enable Channel Service
+ --disable-chanserv        Disable Channel Service],
+[ cf_enable_chanserv=$enableval ],[ cf_enable_chanserv=yes ])
+
+if test "X$cf_enable_chanserv" = "Xyes"; then
+	S_CHANSERV="s_chanserv.c"
+	AC_DEFINE(ENABLE_CHANSERV, 1, Channel Service)
+	AC_MSG_RESULT(yes)
+else
+	S_CHANSERV=""
+	AC_MSG_RESULT(no)
+fi
+
+AC_MSG_CHECKING(User Service)
+AC_ARG_ENABLE(userserv,
+[ --enable-userserv         Enable User Service
+ --disable-userserv        Disable User Service],
+[ cf_enable_userserv=$enableval ],[ cf_enable_userserv=yes ])
+
+if test "X$cf_enable_chanserv" = "Xyes"; then
+	$cf_enable_userserv=yes
+fi
+
+if test "X$cf_enable_userserv" = "Xyes"; then
+	S_USERSERV="s_userserv.c"
+	AC_DEFINE(ENABLE_USERSERV, 1, User Service)
+	AC_MSG_RESULT(yes)
+else
+	S_USERSERV=""
+	AC_MSG_RESULT(no)
+fi
+
+AC_MSG_CHECKING(List Service)
+AC_ARG_ENABLE(alis,
+[ --enable-alis             Enable ALIS (List Service)
+ --disable-alis            Disable (List Service)],
+[ cf_enable_alis=$enableval ],[ cf_enable_alis=yes ])
+
+if test "X$cf_enable_alis" = "Xyes"; then
+	S_ALIS="s_alis.c"
+	AC_DEFINE(ENABLE_ALIS, 1, List Service)
+	AC_MSG_RESULT(yes)
+else
+	S_ALIS=""
+	AC_MSG_RESULT(no)
+fi
+
+AC_MSG_CHECKING(Jupe Service)
+AC_ARG_ENABLE(jupeserv,
+[ --enable-jupeserv         Enable Jupe Service
+ --disable-jupeserv        Disable Jupe Service],
+[ cf_enable_jupe=$enableval ],[ cf_enable_jupe=yes ])
+
+if test "X$cf_enable_jupe" = "Xyes"; then
+	S_JUPESERV="s_jupeserv.c"
+	AC_DEFINE(ENABLE_JUPESERV, 1, Jupe Service)
+	AC_MSG_RESULT(yes)
+else
+	S_JUPESERV=""
+	AC_MSG_RESULT(no)
+fi
+
+AC_MSG_CHECKING(Operbot Service)
+AC_ARG_ENABLE(operbot,
+[ --enable-operbot         Enable Operbot Service
+ --disable-operbot        Disable Operbot Service],
+ [ cf_enable_operbot=$enableval ],[ cf_enable_operbot=yes ])
+
+if test "X$cf_enable_operbot" = "Xyes"; then
+	S_OPERBOT="s_operbot.c"
+	AC_DEFINE(ENABLE_OPERBOT, 1, Operbot Service)
+	AC_MSG_RESULT(yes)
+else
+	S_OPERBOT=""
+	AC_MSG_RESULT(no)
+fi
+
+AC_SUBST(S_CHANSERV)
+AC_SUBST(S_USERSERV)
+AC_SUBST(S_ALIS)
+AC_SUBST(S_JUPESERV)
+AC_SUBST(S_OPERBOT)
+
 AC_OUTPUT(			\
 	Makefile		\
         help/Makefile   	\
