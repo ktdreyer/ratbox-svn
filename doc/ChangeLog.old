@@ -1,3 +1,9 @@
+*** 20011011_3 by db
+- updated with current EFNet requirements, note that HOPS (half ops)
+  is not presently accepted on EFNet.
+
+
+
 *** 20011011_2 by jdc
 * Make use_halfops adjust sending HOPS capability.
 * Added default_server_capabs to ircd.c; this contains the default
