@@ -1,3 +1,19 @@
+leeh        2003/06/10 12:05:53 UTC	(20030610_1)
+
+  Modified files:
+    include              s_newconf.h 
+    modules              m_encap.c 
+    src                  s_newconf.c 
+  Log:
+  - get rid of handle_encap(), just contain the code in m_encap.c
+  
+  Revision  Changes    Path
+  7.8       +1 -2      ircd-ratbox/include/s_newconf.h
+  1.6       +15 -3     ircd-ratbox/modules/m_encap.c
+  7.8       +14 -37    ircd-ratbox/src/s_newconf.c
+
+
+
 leeh        2003/06/10 11:57:00 UTC	(20030610_0)
 
   Modified files:
