@@ -1,3 +1,25 @@
+leeh        2003/08/27 15:17:20 EDT	(20030827_1)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              class.h config.h 
+    modules              m_pong.c 
+    src                  class.c s_auth.c 
+  Log:
+  - added emulated EOB via ping/pong for our local links
+  - added sendq_eob - the sendq of a server "after" burst
+  
+  Revision  Changes    Path
+  7.223     +3 -0      ircd-ratbox/doc/example.conf
+  7.59      +3 -0      ircd-ratbox/doc/example.efnet.conf
+  7.20      +3 -0      ircd-ratbox/include/class.h
+  7.167     +1 -1      ircd-ratbox/include/config.h
+  1.48      +11 -1     ircd-ratbox/modules/m_pong.c
+  7.54      +10 -3     ircd-ratbox/src/class.c
+  7.158     +0 -2      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2003/08/27 10:16:25 EDT	(20030827_0)
 
   Modified files:
