@@ -1,3 +1,17 @@
+jmallett    2002/02/17 21:32:53 EST	(20020218_1)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Fix the bug reported by me and Wendy where we try to access the localClient
+  structure which may be NULL, outside of a check for MyConnect.  This fixes
+  the NULL dereference by putting it inside the if(MyConnect()).
+  
+  Revision  Changes    Path
+  7.231     +12 -12    ircd-hybrid-7/src/client.c
+
+
+
 jmallett    2002/02/17 20:30:30 EST	(20020218_0)
 
   Modified files:
