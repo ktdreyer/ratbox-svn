@@ -1,3 +1,6 @@
+*** 20011120_3 by davidt
+fix /quote help to display index
+
 *** 20011120_2 by db
 - This considerably simplifies m_server. No more support for 2.6(?) protocol
 
