@@ -1,3 +1,17 @@
+jmallett    2002/01/08 11:23:27 EST	(20020108_0)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Add an assertion to make sure the head of the list of channels a user
+  being exited is in is really NULL. This is manifesting itself in strange
+  ways later on and we need to head it off here.
+  
+  Revision  Changes    Path
+  7.218     +2 -0      ircd-hybrid-7/src/client.c
+
+
+
 jmallett    2002/01/07 15:32:50 EST	(20020107_4)
 
   Modified files:
