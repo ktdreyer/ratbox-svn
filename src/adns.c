@@ -292,5 +292,5 @@ adns_getaddr(struct sockaddr_storage *addr, int aftype, struct DNSQuery *req, in
 				    adns_qf_owner | adns_qf_cname_loose |
 				    adns_qf_quoteok_anshost, req, &req->query);
 	}
-	return result
+	return result;
 }
