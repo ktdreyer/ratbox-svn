@@ -1,3 +1,7 @@
+*** 20010626_10 by androsyn
+Next time profile a function first before you go and replace it :P
+
+
 *** 20010626_9 by androsyn
 Needed an #undef for on certain platforms..
 
