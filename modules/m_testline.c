@@ -134,9 +134,11 @@ mo_testline(struct Client *client_p, struct Client *source_p, int parc, char *pa
 		given_host = p;
 		if((t = parse_netmask(given_host, &ip, &host_mask)) != HM_HOST)
 		{
+#ifdef IPV6
 			if(t == HM_IPV6)
 				t = AF_INET6;
 			else
+#endif
 				t = AF_INET;
 				
 			aconf = find_address_conf(given_host, given_name, &ip,t);
