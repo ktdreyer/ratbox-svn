@@ -81,7 +81,6 @@ int quote_max(struct Client *, int);
 int quote_spamnum(struct Client *, int);
 int quote_spamtime(struct Client *, int);
 int quote_shide(struct Client *, int);
-int quote_chide(struct Client *, int);
 int list_quote_commands(struct Client *);
 
 

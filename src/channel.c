@@ -1887,48 +1887,47 @@ void set_channel_mode(struct Client *cptr,
             }
           break;
 
-			case 'z':
-				if (!isok_c)
-				{
-					if (MyClient(sptr) && !errsent(SM_ERR_NOOPS, &errors_sent))
-						sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED), me.name,
-								   sptr->name, chname);
-					break;
-					
-				}
+	case 'z':
+	  if (!isok_c)
+	    {
+	      if (MyClient(sptr) && !errsent(SM_ERR_NOOPS, &errors_sent))
+		sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED), me.name,
+			   sptr->name, chname);
+	      break;
+	      
+	    }
 
-				if(MyClient(sptr))
-				{
-					if(done_z)
-						break;
-					else
-						done_z = YES;
-					
-					/*              if ( opcnt >= MAXMODEPARAMS)
-									break; */
-				}
-				
-				if(whatt == MODE_ADD)
-				{
+	  if(MyClient(sptr))
+	    {
+	      if(done_z)
+		break;
+	      else
+		done_z = YES;
+	      
+	      /*              if ( opcnt >= MAXMODEPARAMS)
+			      break; */
+	    }
+	  
+	  if(whatt == MODE_ADD)
+	    {
               if (len + 2 >= MODEBUFLEN)
-				  break;
+		break;
               chptr->mode.mode |= MODE_HIDEOPS;
               *mbufw++ = '+';
               *mbufw++ = 'z';
               len += 2;
-				}
-				else
-				{
-					if (len + 2 >= MODEBUFLEN)
-						break;
-					
-					chptr->mode.mode &= ~MODE_HIDEOPS;
-					*mbufw++ = '-';
-					*mbufw++ = 'z';
-					len += 2;
-				}
-				break;
-				
+	    }
+	  else
+	    {
+	      if (len + 2 >= MODEBUFLEN)
+		break;
+	      
+	      chptr->mode.mode &= ~MODE_HIDEOPS;
+	      *mbufw++ = '-';
+	      *mbufw++ = 'z';
+	      len += 2;
+	    }
+	  break;
 				
         case 'p' :
           if (!isok_c)

@@ -1071,10 +1071,6 @@ static void exit_one_client(struct Client *cptr, struct
 	    {
 	      next_lp = lp->next;
 	      remove_user_from_channel(lp->data,sptr);
-
-	      /* this dlink_node (lp) is freed
-	       * in remove_user_from_channel already.
-	       */
 	    }
           
           /* Clean up invitefield */
