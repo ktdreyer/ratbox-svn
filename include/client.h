@@ -259,7 +259,11 @@ struct LocalUser
 	struct AuthRequest	*auth_request;
         /* watch list */
         dlink_list watchlist;   
-	                
+
+	/* target change stuff */
+	void *targets[10];		/* targets were aware of */
+	unsigned int targinfo[2];	/* cyclic array, no in use */
+	time_t target_last;		/* last time we cleared a slot */
 };
 
 struct exit_client_hook

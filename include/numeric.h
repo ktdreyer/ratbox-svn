@@ -307,6 +307,8 @@ extern const char *form_str(int);
 #define RPL_HELPTXT          705
 #define RPL_ENDOFHELP        706
 
+#define ERR_TARGCHANGE		707
+
 #define RPL_ETRACEFULL	     708
 #define RPL_ETRACE	     709
 
