@@ -457,8 +457,7 @@ comm_connect_dns_callback(void *vptr, adns_answer * reply)
 
 	/* Now, call the tryconnect() routine to try a connect() */
 	MyFree(reply);
-	comm_setselect(F->fd, FDLIST_SERVER, COMM_SELECT_WRITE,
-		       comm_connect_tryconnect, NULL, 0);
+	comm_connect_tryconnect(F->fd, NULL);
 }
 
 
