@@ -1,3 +1,17 @@
+leeh        2002/10/23 22:18:03 UTC	(20021023_0)
+
+  Modified files:
+    modules              m_kline.c 
+  Log:
+  - fixed oper reasons for temp klines/dlines.
+    these really need to be stored in aconf->spasswd or smth, so theyre
+    available on stats k.
+  
+  Revision  Changes    Path
+  1.123     +61 -20    ircd-ratbox/modules/m_kline.c
+
+
+
 androsyn    2002/10/22 20:02:33 UTC	(20021022_0)
 
   Modified files:
