@@ -37,12 +37,15 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "cluster.h"
+#include "s_serv.h"
 
 static void m_locops(struct Client *,struct Client *,int,char **);
+static void ms_locops(struct Client *,struct Client *,int,char **);
 
 struct Message locops_msgtab = {
   "LOCOPS", 0, 0, 2, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_not_oper, m_ignore, m_locops}
+  {m_unregistered, m_not_oper, ms_locops, m_locops}
 };
 #ifndef STATIC_MODULES
 
@@ -60,6 +63,7 @@ _moddeinit(void)
 
 const char *_version = "$Revision$";
 #endif
+
 /*
  * m_locops - LOCOPS message handler
  * (write to *all* local opers currently online)
@@ -69,18 +73,40 @@ const char *_version = "$Revision$";
 static void m_locops(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
-  char *message = NULL;
+  if (EmptyString(parv[1]))
+  {
+    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+               me.name, parv[0], "LOCOPS");
+    return;
+  }
 
-  message = parv[1];
+  sendto_wallops_flags(UMODE_LOCOPS, source_p, "LOCOPS - %s", parv[1]);
 
-  if (EmptyString(message))
-    {
-      sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-                 me.name, parv[0], "LOCOPS");
-      return;
-    }
-
-  sendto_wallops_flags(UMODE_LOCOPS, source_p, "LOCOPS - %s", message);
+  if(dlink_list_length(&cluster_list) > 0)
+    cluster_locops(source_p, parv[1]);
 }
 
+static void
+ms_locops(struct Client *client_p, struct Client *source_p,
+          int parc, char *parv[])
+{
+  if(parc != 3 || BadPtr(parv[2]))
+    return;
+  
+  /* parv[0]  parv[1]      parv[2]
+   * oper     target serv  message
+   */
+  sendto_match_servs(client_p, parv[1], CAP_CLUSTER,
+                     "LOCOPS %s :%s",
+                     parv[1], parv[2]);
+
+  if(!match(parv[1], me.name))
+    return;
+
+  if(!IsPerson(source_p))
+    return;
+
+  if(find_cluster(source_p->user->server, CLUSTER_LOCOPS))
+    sendto_wallops_flags(UMODE_LOCOPS, source_p, "SLOCOPS - %s", parv[2]);
+}
 

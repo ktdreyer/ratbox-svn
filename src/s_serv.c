@@ -98,6 +98,7 @@ struct Capability captab[] = {
   { "TBURST", CAP_TBURST },
   { "PARA",  CAP_PARA },
   { "UNKLN", CAP_UNKLN },
+  { "CLUSTER", CAP_CLUSTER },
   { 0,           0 }
 };
 

@@ -61,6 +61,7 @@ extern void cluster_kline(struct Client *source_p, int tkline_time,
                           const char *reason);
 extern void cluster_unkline(struct Client *source_p,
                             const char *user, const char *host);
+extern void cluster_locops(struct Client *source_p, const char *message);
 
 #endif
 

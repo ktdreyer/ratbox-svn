@@ -129,3 +129,20 @@ cluster_unkline(struct Client *source_p, const char *user, const char *host)
   }
 }
 
+void
+cluster_locops(struct Client *source_p, const char *message)
+{
+  struct cluster *clptr;
+  dlink_node *ptr;
+
+  DLINK_FOREACH(ptr, cluster_list.head)
+  {
+    clptr = ptr->data;
+
+    if(clptr->type & CLUSTER_LOCOPS)
+      sendto_match_servs(source_p, clptr->name, CAP_CLUSTER,
+                         "LOCOPS %s :%s",
+                         clptr->name, message);
+  }
+}
+

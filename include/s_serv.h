@@ -73,10 +73,11 @@ struct Capability
 #define CAP_TBURST	0x00040000   /* supports TBURST */
 #define CAP_PARA	0x00080000   /* supports invite broadcasting for +p */
 #define CAP_UNKLN       0x00100000   /* supports remote unkline */
+#define CAP_CLUSTER     0x00200000   /* supports cluster stuff */
 
 #define CAP_MASK        (CAP_QS  | CAP_EX   | CAP_CHW  | \
                          CAP_IE  | CAP_EOB  | CAP_KLN  | \
-                         CAP_GLN | \
+                         CAP_GLN | CAP_CLUSTER | \
                          CAP_UID | CAP_ZIP  | CAP_ENC | \
                          CAP_KNOCK  | CAP_PARA | CAP_UNKLN)
 
