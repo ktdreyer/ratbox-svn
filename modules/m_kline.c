@@ -685,21 +685,8 @@ mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   if (parc > 2) /* host :reason */
     {
-      if(strchr(parv[2], ':'))
-        {
-          sendto_one(sptr,
-                     ":%s NOTICE %s :Invalid character ':' in comment",
-                     me.name, parv[0]);
-          return 0;
-        }
-
-      if(strchr(parv[2], '#'))
-        {
-          sendto_one(sptr,
-                     ":%s NOTICE %s :Invalid character '#' in comment",
-                     me.name, parv[0]);
-          return 0;
-        }
+      if ( valid_comment(sptr,parv[2]) == 0 )
+	return 0;
 
       if(*parv[2])
         reason = parv[2];
@@ -755,66 +742,66 @@ mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   add_Dline(aconf);
 
-        sendto_realops("%s added D-Line for [%s] [%s]",
-                sptr->name,
-                host,
-                reason);
+  sendto_realops("%s added D-Line for [%s] [%s]",
+		 sptr->name,
+		 host,
+		 reason);
 
-        log(L_TRACE, "%s added D-Line for [%s] [%s]", 
-            sptr->name, host, reason);
+  log(L_TRACE, "%s added D-Line for [%s] [%s]", 
+      sptr->name, host, reason);
 
-        dconf = get_conf_name(DLINE_TYPE);
+  dconf = get_conf_name(DLINE_TYPE);
 
-        /*
-         * Check if the conf file is locked - if so, add the dline
-         * to our pending dline list, to be written later, if not,
-         * allow this dline to be written, and write out all other
-         * pending lines as well
-         */
-        if (LockedFile(dconf))
-        {
-                aPendingLine *pptr;
+  /*
+   * Check if the conf file is locked - if so, add the dline
+   * to our pending dline list, to be written later, if not,
+   * allow this dline to be written, and write out all other
+   * pending lines as well
+   */
+  if (LockedFile(dconf))
+    {
+      aPendingLine *pptr;
 
-                pptr = AddPending();
+      pptr = AddPending();
 
-                /*
-                 * Now fill in the fields
-                 */
-                pptr->type = DLINE_TYPE;
-                pptr->sptr = sptr;
-                pptr->rcptr = (struct Client *) NULL;
-                pptr->user = (char *) NULL;
-                pptr->host = strdup(host);
-                pptr->reason = strdup(reason);
-                pptr->when = strdup(current_date);
+      /*
+       * Now fill in the fields
+       */
+      pptr->type = DLINE_TYPE;
+      pptr->sptr = sptr;
+      pptr->rcptr = (struct Client *) NULL;
+      pptr->user = (char *) NULL;
+      pptr->host = strdup(host);
+      pptr->reason = strdup(reason);
+      pptr->when = strdup(current_date);
 
-                sendto_one(sptr,
-                        ":%s NOTICE %s :Added D-Line [%s] (config file write delayed)",
-                        me.name,
-                        sptr->name,
-                        host);
+      sendto_one(sptr,
+		 ":%s NOTICE %s :Added D-Line [%s] (config file write delayed)",
+		 me.name,
+		 sptr->name,
+		 host);
 
-		check_klines();
-                return 0;
-        }
-        else if (PendingLines)
-                WritePendingLines(dconf);
+      check_klines();
+      return 0;
+    }
+  else if (PendingLines)
+    WritePendingLines(dconf);
 
-        sendto_one(sptr,
-                ":%s NOTICE %s :Added D-Line [%s] to %s",
-                me.name,
-                sptr->name,
-                host,
-                dconf ? dconf : "configuration file");
+  sendto_one(sptr,
+	     ":%s NOTICE %s :Added D-Line [%s] to %s",
+	     me.name,
+	     sptr->name,
+	     host,
+	     dconf ? dconf : "configuration file");
 
-        /*
-         * Write dline to configuration file
-         */
-        WriteDline(dconf,
-                sptr,
-                host,
-                reason,
-                current_date);
+  /*
+   * Write dline to configuration file
+   */
+  WriteDline(dconf,
+	     sptr,
+	     host,
+	     reason,
+	     current_date);
 
   check_klines();
   return 0;
