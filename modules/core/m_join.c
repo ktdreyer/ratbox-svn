@@ -75,6 +75,7 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	char *key = NULL;
 	int i, flags = 0;
 	char *p = NULL, *p2 = NULL;
+	char *chanlist;
 	int successful_join_count = 0;	/* Number of channels successfully joined */
 
 	if(EmptyString(parv[1]))
@@ -88,8 +89,9 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	/* rebuild the list of channels theyre supposed to be joining.
 	 * this code has a side effect of losing keys, but..
 	 */
-	for(i = 0, name = strtoken(&p, LOCAL_COPY(parv[1]), ","); name;
-	    name = strtoken(&p, (char *)NULL, ","))
+	chanlist = LOCAL_COPY(parv[1]);
+	for(i = 0, name = strtoken(&p, chanlist, ","); name;
+	    name = strtoken(&p, NULL, ","))
 	{
 
 		/* check the length and name of channel is ok */
