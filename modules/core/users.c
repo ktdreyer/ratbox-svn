@@ -193,7 +193,7 @@ mr_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 		}
 		strcpy(source_p->name, nick);
 		add_to_client_hash(nick, source_p);
-
+		
 		/* fd_desc is long enough */
 		comm_note(client_p->localClient->fd, "Nick: %s", nick);
 
@@ -1781,6 +1781,7 @@ register_local_user(struct Client *client_p, struct Client *source_p)
 					     "New Max Local Clients: %d", Count.max_loc);
 	}
 
+	hash_check_watch(source_p, RPL_LOGON);
 	user_welcome(source_p);
 	return (introduce_client(client_p, source_p, user, nick));
 }
@@ -2226,7 +2227,8 @@ register_client(struct Client *client_p, struct Client *server,
 
 	add_to_client_hash(nick, source_p);
 	add_to_hostname_hash(source_p->host, source_p);
-
+	hash_check_watch(source_p, RPL_LOGON);
+	
 	m = &parv[4][1];
 	while(*m)
 	{
