@@ -1,3 +1,8 @@
+*** 20010328_3 by fl_
+- we were potentially joining a user to a channel more than once.. not
+  a good thing..
+
+
 *** 20010328_2 by db
 - removed blalloc.c and blalloc.h
 
