@@ -217,7 +217,7 @@ static void ms_sjoin(struct Client *client_p,
     sendto_channel_local(ALL_MEMBERS, chptr,
  		":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to 0",
 		me.name, chptr->chname, chptr->chname, oldts);
-    sendto_realops_flags(FLAGS_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL,
 		         "Server %s changing TS on %s from %lu to 0",
 			 source_p->name, chptr->chname, oldts);
   }
@@ -334,7 +334,7 @@ static void ms_sjoin(struct Client *client_p,
    */
   if (buflen >= (BUFSIZE - 6 - NICKLEN))
     {
-      sendto_realops_flags(FLAGS_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL,
 			   "Long SJOIN from server: %s(via %s) (ignored)",
 			   source_p->name, client_p->name);
       return;

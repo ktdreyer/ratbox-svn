@@ -262,7 +262,7 @@ static void ms_connect(struct Client* client_p, struct Client* source_p,
   /*
    * Notify all operators about remote connect requests
    */
-  sendto_wallops_flags(FLAGS_WALLOP, &me,
+  sendto_wallops_flags(UMODE_WALLOP, &me,
 			  "Remote CONNECT %s %d from %s",
 			  parv[1], port,
 			  get_client_name(source_p, MASK_IP));

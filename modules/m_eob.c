@@ -64,7 +64,7 @@ const char *_version = "$Revision$";
 static void ms_eob(struct Client *client_p, struct Client *source_p,
                   int parc, char *parv[])
 {
-   sendto_realops_flags(FLAGS_ALL, L_ALL,
+   sendto_realops_flags(UMODE_ALL, L_ALL,
                         "End of burst from %s (%d seconds)",
                         source_p->name, 
 			(signed int)(CurrentTime - source_p->firsttime));

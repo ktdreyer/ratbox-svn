@@ -111,7 +111,7 @@ static void m_oper(struct Client *client_p, struct Client *source_p,
       sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
       if (ConfigFileEntry.failed_oper_notice)
         {
-          sendto_realops_flags(FLAGS_ALL, L_ALL,
+          sendto_realops_flags(UMODE_ALL, L_ALL,
                                "Failed OPER attempt - host mismatch by %s (%s@%s)",
                                source_p->name, source_p->username, source_p->host);
         }
@@ -137,7 +137,7 @@ static void m_oper(struct Client *client_p, struct Client *source_p,
         {
           sendto_one(source_p,":%s NOTICE %s :Can't attach conf!",
                      me.name,source_p->name);
-          sendto_realops_flags(FLAGS_ALL, L_ALL,
+          sendto_realops_flags(UMODE_ALL, L_ALL,
                                "Failed OPER attempt by %s (%s@%s) can't attach conf!",
                                source_p->name, source_p->username, source_p->host);
           /* 
@@ -161,7 +161,7 @@ static void m_oper(struct Client *client_p, struct Client *source_p,
       sendto_one(source_p,form_str(ERR_PASSWDMISMATCH),me.name, parv[0]);
       if (ConfigFileEntry.failed_oper_notice)
         {
-          sendto_realops_flags(FLAGS_ALL, L_ALL,
+          sendto_realops_flags(UMODE_ALL, L_ALL,
                                "Failed OPER attempt by %s (%s@%s)",
                                source_p->name, source_p->username, source_p->host);
         }
@@ -197,8 +197,7 @@ static void ms_oper(struct Client *client_p, struct Client *source_p,
     {
       if (source_p->status == STAT_CLIENT)
         source_p->handler = OPER_HANDLER;
-      
-      source_p->flags |= FLAGS_OPER;
+      source_p->umodes |= UMODE_OPER;
       Count.oper++;
       sendto_server(client_p, source_p, NULL, NOCAPS, NOCAPS, 
                     ":%s MODE %s :+o", parv[0], parv[0]);

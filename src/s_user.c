@@ -74,24 +74,24 @@ struct flag_item
 
 static struct flag_item user_modes[] =
 {
-  {FLAGS_ADMIN, 'a'},
-  {FLAGS_BOTS,  'b'},
-  {FLAGS_CCONN, 'c'},
-  {FLAGS_DEBUG, 'd'},
-  {FLAGS_FULL,  'f'},
-  {FLAGS_CALLERID, 'g'},
-  {FLAGS_INVISIBLE, 'i'},
-  {FLAGS_SKILL, 'k'},
-  {FLAGS_LOCOPS, 'l'},
-  {FLAGS_NCHANGE, 'n'},
-  {FLAGS_OPER, 'o'},
-  {FLAGS_REJ, 'r'},
-  {FLAGS_SERVNOTICE, 's'},
-  {FLAGS_UNAUTH, 'u'},
-  {FLAGS_WALLOP, 'w'},
-  {FLAGS_EXTERNAL, 'x'},
-  {FLAGS_SPY, 'y'},
-  {FLAGS_OPERWALL, 'z'},
+  {UMODE_ADMIN, 'a'},
+  {UMODE_BOTS,  'b'},
+  {UMODE_CCONN, 'c'},
+  {UMODE_DEBUG, 'd'},
+  {UMODE_FULL,  'f'},
+  {UMODE_CALLERID, 'g'},
+  {UMODE_INVISIBLE, 'i'},
+  {UMODE_SKILL, 'k'},
+  {UMODE_LOCOPS, 'l'},
+  {UMODE_NCHANGE, 'n'},
+  {UMODE_OPER, 'o'},
+  {UMODE_REJ, 'r'},
+  {UMODE_SERVNOTICE, 's'},
+  {UMODE_UNAUTH, 'u'},
+  {UMODE_WALLOP, 'w'},
+  {UMODE_EXTERNAL, 'x'},
+  {UMODE_SPY, 'y'},
+  {UMODE_OPERWALL, 'z'},
   {0, 0}
 };
 
@@ -132,32 +132,32 @@ int user_modes_from_c_to_bitmask[] =
   0,            /* Z 0x5A */
   0, 0, 0, 0, 0, /* 0x5F */ 
   /* 0x60 */       0,
-  FLAGS_ADMIN,  /* a */
-  FLAGS_BOTS,   /* b */
-  FLAGS_CCONN,  /* c */
-  FLAGS_DEBUG,  /* d */
+  UMODE_ADMIN,  /* a */
+  UMODE_BOTS,   /* b */
+  UMODE_CCONN,  /* c */
+  UMODE_DEBUG,  /* d */
   0,            /* e */
-  FLAGS_FULL,   /* f */
-  FLAGS_CALLERID,  /* g */
+  UMODE_FULL,   /* f */
+  UMODE_CALLERID,  /* g */
   0,            /* h */
-  FLAGS_INVISIBLE, /* i */
+  UMODE_INVISIBLE, /* i */
   0,            /* j */
-  FLAGS_SKILL,  /* k */
-  FLAGS_LOCOPS, /* l */
+  UMODE_SKILL,  /* k */
+  UMODE_LOCOPS, /* l */
   0,            /* m */
-  FLAGS_NCHANGE, /* n */
-  FLAGS_OPER,   /* o */
+  UMODE_NCHANGE, /* n */
+  UMODE_OPER,   /* o */
   0,               /* p */
   0,            /* q */
-  FLAGS_REJ,    /* r */
-  FLAGS_SERVNOTICE, /* s */
+  UMODE_REJ,    /* r */
+  UMODE_SERVNOTICE, /* s */
   0,            /* t */
-  FLAGS_UNAUTH, /* u */
+  UMODE_UNAUTH, /* u */
   0,            /* v */
-  FLAGS_WALLOP, /* w */
-  FLAGS_EXTERNAL, /* x */
-  FLAGS_SPY,    /* y */
-  FLAGS_OPERWALL, /* z 0x7A */
+  UMODE_WALLOP, /* w */
+  UMODE_EXTERNAL, /* x */
+  UMODE_SPY,    /* y */
+  UMODE_OPERWALL, /* z 0x7A */
   0,0,0,0,0,     /* 0x7B - 0x7F */
 
   /* 0x80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0x9F */
@@ -400,7 +400,7 @@ register_local_user(struct Client *client_p, struct Client *source_p,
        &&
        !(IsExemptLimits(source_p)) )
     {
-      sendto_realops_flags(FLAGS_FULL, L_ALL,
+      sendto_realops_flags(UMODE_FULL, L_ALL,
 			   "Too many clients, rejecting %s[%s].",
 			   nick, source_p->host);
 			   
@@ -414,7 +414,7 @@ register_local_user(struct Client *client_p, struct Client *source_p,
 
   if (!valid_username(source_p->username))
     {
-      sendto_realops_flags(FLAGS_REJ, L_ALL,
+      sendto_realops_flags(UMODE_REJ, L_ALL,
                            "Invalid username: %s (%s@%s)",
 			   nick, source_p->username, source_p->host);
       ServerStats->is_ref++;
@@ -443,7 +443,7 @@ register_local_user(struct Client *client_p, struct Client *source_p,
 
   inetntop(source_p->localClient->aftype, &IN_ADDR(source_p->localClient->ip), 
   				ipaddr, HOSTIPLEN);
-  sendto_realops_flags(FLAGS_CCONN, L_ALL,
+  sendto_realops_flags(UMODE_CCONN, L_ALL,
 		       "Client connecting: %s (%s@%s) [%s] {%s} [%s]",
 		       nick, source_p->username, source_p->host,
 		       ipaddr,
@@ -456,7 +456,7 @@ register_local_user(struct Client *client_p, struct Client *source_p,
   if(ConfigFileEntry.use_global_limits)
     add_to_hostname_hash_table(source_p->host, source_p);
 
-  source_p->umodes |= FLAGS_INVISIBLE;
+  source_p->umodes |= UMODE_INVISIBLE;
 
   Count.invisi++;
 
@@ -464,7 +464,7 @@ register_local_user(struct Client *client_p, struct Client *source_p,
     {
       Count.max_loc = Count.local;
       if (!(Count.max_loc % 10))
-	sendto_realops_flags(FLAGS_ALL, L_ALL,
+	sendto_realops_flags(UMODE_ALL, L_ALL,
 	                     "New Max Local Clients: %d",
 			     Count.max_loc);
     }
@@ -490,7 +490,7 @@ register_local_user(struct Client *client_p, struct Client *source_p,
     dlinkDelete(m, &unknown_list);
     dlinkAdd(source_p, m, &lclient_list);
   } else {
-     sendto_realops_flags(FLAGS_ALL, L_ADMIN, "Tried to register %s (%s@%s) but I couldn't find it?!?", 
+     sendto_realops_flags(UMODE_ALL, L_ADMIN, "Tried to register %s (%s@%s) but I couldn't find it?!?", 
      			  nick, source_p->username, source_p->host);
      exit_client(client_p, source_p, &me, "Client exited");
      return CLIENT_EXITED;
@@ -538,7 +538,7 @@ register_remote_user(struct Client *client_p, struct Client *source_p,
 
   if (source_p->servptr == NULL)
     {
-      sendto_realops_flags(FLAGS_ALL, L_ALL,"Ghost killed: %s on invalid server %s",
+      sendto_realops_flags(UMODE_ALL, L_ALL,"Ghost killed: %s on invalid server %s",
 			   source_p->name, source_p->user->server);
 
       kill_client(client_p, source_p, "%s (Server doesn't exist)",
@@ -552,7 +552,7 @@ register_remote_user(struct Client *client_p, struct Client *source_p,
   source_p->servptr->serv->usercnt++;
   if ((target_p = find_server(user->server)) && target_p->from != source_p->from)
     {
-      sendto_realops_flags(FLAGS_DEBUG, L_ALL,
+      sendto_realops_flags(UMODE_DEBUG, L_ALL,
 			   "Bad User [%s] :%s USER %s@%s %s, != %s[%s]",
 			   client_p->name, nick, source_p->username,
 			   source_p->host, user->server,
@@ -577,7 +577,7 @@ register_remote_user(struct Client *client_p, struct Client *source_p,
     {
       kill_client(client_p, source_p, "%s GHOST (no server found)",
                   me.name);
-      sendto_realops_flags(FLAGS_ALL, L_ALL, "No server %s for user %s[%s@%s] from %s",
+      sendto_realops_flags(UMODE_ALL, L_ALL, "No server %s for user %s[%s@%s] from %s",
 			   user->server, source_p->name, source_p->username,
 			   source_p->host, source_p->from->name);
       source_p->flags |= FLAGS_KILLED;
@@ -936,7 +936,7 @@ user_mode(struct Client *client_p, struct Client *source_p, int parc, char *parv
 
   if (IsServer(source_p))
     {
-       sendto_realops_flags(FLAGS_ALL, L_ADMIN, "*** Mode for User %s from %s",
+       sendto_realops_flags(UMODE_ALL, L_ADMIN, "*** Mode for User %s from %s",
                             parv[1], source_p->name);
        return 0;
     }
@@ -1052,24 +1052,24 @@ user_mode(struct Client *client_p, struct Client *source_p, int parc, char *parv
   if(badflag)
     sendto_one(source_p, form_str(ERR_UMODEUNKNOWNFLAG), me.name, parv[0]);
 
-  if ((source_p->umodes & FLAGS_NCHANGE) && !IsOperN(source_p))
+  if ((source_p->umodes & UMODE_NCHANGE) && !IsOperN(source_p))
     {
       sendto_one(source_p,":%s NOTICE %s :*** You need oper and N flag for +n",
                  me.name,parv[0]);
-      source_p->umodes &= ~FLAGS_NCHANGE; /* only tcm's really need this */
+      source_p->umodes &= ~UMODE_NCHANGE; /* only tcm's really need this */
     }
 
-  if (MyConnect(source_p) && (source_p->umodes & FLAGS_ADMIN) && !IsOperAdmin(source_p))
+  if (MyConnect(source_p) && (source_p->umodes & UMODE_ADMIN) && !IsOperAdmin(source_p))
     {
       sendto_one(source_p,":%s NOTICE %s :*** You need oper and A flag for +a",
                  me.name, parv[0]);
-      source_p->umodes &= ~FLAGS_ADMIN;
+      source_p->umodes &= ~UMODE_ADMIN;
     }
 
 
-  if (!(setflags & FLAGS_INVISIBLE) && IsInvisible(source_p))
+  if (!(setflags & UMODE_INVISIBLE) && IsInvisible(source_p))
     ++Count.invisi;
-  if ((setflags & FLAGS_INVISIBLE) && !IsInvisible(source_p))
+  if ((setflags & UMODE_INVISIBLE) && !IsInvisible(source_p))
     --Count.invisi;
   /*
    * compare new flags with old flags and send string which
@@ -1249,7 +1249,7 @@ check_X_line(struct Client *client_p, struct Client *source_p)
 	{
 	  if (aconf->port == 1)
 	    {
-	      sendto_realops_flags(FLAGS_REJ, L_ALL,
+	      sendto_realops_flags(UMODE_REJ, L_ALL,
 				   "X-line Rejecting [%s] [%s], user %s",
 				   source_p->info,
 				   reason,
@@ -1260,7 +1260,7 @@ check_X_line(struct Client *client_p, struct Client *source_p)
 	  return (CLIENT_EXITED);
 	}
       else
-	sendto_realops_flags(FLAGS_REJ, L_ALL,
+	sendto_realops_flags(UMODE_REJ, L_ALL,
 			     "X-line Warning [%s] [%s], user %s",
 			     source_p->info,
 			     reason,
@@ -1296,7 +1296,7 @@ oper_up( struct Client *source_p, struct ConfItem *aconf )
     {
       source_p->umodes |= ((int)aconf->hold & ALL_UMODES); 
       if (!IsOperN(source_p))
-	source_p->umodes &= ~FLAGS_NCHANGE;
+	source_p->umodes &= ~UMODE_NCHANGE;
       
       sendto_one(source_p, ":%s NOTICE %s :*** Oper flags set from conf",
 		 me.name,source_p->name);
@@ -1309,7 +1309,7 @@ oper_up( struct Client *source_p, struct ConfItem *aconf )
         }
       else
         {
-          source_p->umodes |= (FLAGS_SERVNOTICE|FLAGS_OPERWALL|FLAGS_WALLOP|FLAGS_LOCOPS) & ALL_UMODES;
+          source_p->umodes |= (UMODE_SERVNOTICE|UMODE_OPERWALL|UMODE_WALLOP|UMODE_LOCOPS) & ALL_UMODES;
         }
     }
 	
@@ -1334,9 +1334,9 @@ oper_up( struct Client *source_p, struct ConfItem *aconf )
     operprivs = "";
 
   if (IsOperAdmin(source_p))
-    source_p->umodes |= FLAGS_ADMIN;
+    source_p->umodes |= UMODE_ADMIN;
 
-  sendto_realops_flags(FLAGS_ALL, L_ALL,
+  sendto_realops_flags(UMODE_ALL, L_ALL,
 		       "%s (%s@%s) is now an operator", source_p->name,
 		       source_p->username, source_p->host);
   send_umode_out(source_p, source_p, old);

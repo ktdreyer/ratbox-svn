@@ -52,7 +52,7 @@ show_notice(struct hook_mfunc_data *data)
 {
   if (MyConnect(data->source_p) && MyConnect(data->client_p) &&
       IsOper(data->client_p) && (data->client_p != data->source_p) 
-      && data->client_p->umodes & FLAGS_SPY) 
+      && data->client_p->umodes & UMODE_SPY) 
     {
       sendto_one(data->client_p, ":%s NOTICE %s :*** Notice -- %s (%s@%s) is doing a whois on you",
                  me.name, data->client_p->name, data->source_p->name, data->source_p->username,

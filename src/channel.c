@@ -1155,12 +1155,12 @@ check_spambot_warning(struct Client *source_p, const char *name)
     {
       /* Its already known as a possible spambot */
       if (name != NULL)
-        sendto_realops_flags(FLAGS_BOTS, L_ALL,
+        sendto_realops_flags(UMODE_BOTS, L_ALL,
                              "User %s (%s@%s) trying to join %s is a possible spambot",
                              source_p->name, source_p->username,
                              source_p->host, name);
       else
-        sendto_realops_flags(FLAGS_BOTS, L_ALL,
+        sendto_realops_flags(UMODE_BOTS, L_ALL,
                              "User %s (%s@%s) is a possible spambot",
                              source_p->name, source_p->username,
                              source_p->host);
@@ -1213,7 +1213,7 @@ void check_splitmode(void *unused)
       {
         splitmode = 1;
 
-        sendto_realops_flags(FLAGS_ALL,L_ALL,
+        sendto_realops_flags(UMODE_ALL,L_ALL,
                            "Network split, activating splitmode");
         eventAddIsh("check_splitmode", check_splitmode, NULL, 60);
       }
@@ -1222,7 +1222,7 @@ void check_splitmode(void *unused)
     {
       splitmode = 0;
     
-      sendto_realops_flags(FLAGS_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL,
                            "Network rejoined, deactivating splitmode");
       eventDelete(check_splitmode, NULL);
     }

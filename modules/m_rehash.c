@@ -83,7 +83,7 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
     {
       if (irccmp(parv[1],"CHANNELS") == 0)
         {
-          sendto_realops_flags(FLAGS_ALL, L_ALL,
+          sendto_realops_flags(UMODE_ALL, L_ALL,
                        "%s is forcing cleanup of channels",parv[0]);
 	  cleanup_channels(NULL);
           found = YES;
@@ -91,7 +91,7 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
       else if(irccmp(parv[1],"DNS") == 0)
         {
           sendto_one(source_p, form_str(RPL_REHASHING), me.name, parv[0], "DNS");
-          sendto_realops_flags(FLAGS_ALL, L_ALL,"%s is rehashing DNS",
+          sendto_realops_flags(UMODE_ALL, L_ALL,"%s is rehashing DNS",
                                get_oper_name(source_p));
           restart_resolver();   /* re-read /etc/resolv.conf AGAIN?
                                    and close/re-open res socket */
@@ -99,7 +99,7 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
         }
       else if(irccmp(parv[1],"MOTD") == 0)
         {
-          sendto_realops_flags(FLAGS_ALL, L_ALL,
+          sendto_realops_flags(UMODE_ALL, L_ALL,
 		       "%s is forcing re-reading of MOTD file",
 		       get_oper_name(source_p));
           ReadMessageFile( &ConfigFileEntry.motd );
@@ -107,7 +107,7 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
         }
       else if(irccmp(parv[1],"OMOTD") == 0)
         {
-          sendto_realops_flags(FLAGS_ALL, L_ALL,
+          sendto_realops_flags(UMODE_ALL, L_ALL,
 		       "%s is forcing re-reading of OPER MOTD file",
 		       get_oper_name(source_p));
           ReadMessageFile( &ConfigFileEntry.opermotd );
@@ -115,7 +115,7 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
         }
       else if(irccmp(parv[1], "GLINES") == 0)
       {
-        sendto_realops_flags(FLAGS_ALL, L_ALL,
+        sendto_realops_flags(UMODE_ALL, L_ALL,
                              "%s is clearing G-lines",
                              source_p->name);
         clear_temps(&glines);
@@ -123,7 +123,7 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
       }
       else if(irccmp(parv[1], "TKLINES") == 0)
       {
-        sendto_realops_flags(FLAGS_ALL, L_ALL,
+        sendto_realops_flags(UMODE_ALL, L_ALL,
                              "%s is clearing temp klines",
                              source_p->name);
         clear_temps(&temporary_min);
@@ -151,7 +151,7 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
     {
       sendto_one(source_p, form_str(RPL_REHASHING), me.name, parv[0],
                  ConfigFileEntry.configfile);
-      sendto_realops_flags(FLAGS_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL,
 			   "%s is rehashing server config file",
 			   get_oper_name(source_p));
       ilog(L_NOTICE, "REHASH From %s[%s]", get_oper_name(source_p),

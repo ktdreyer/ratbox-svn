@@ -118,7 +118,7 @@ static void mo_clearchan(struct Client *client_p, struct Client *source_p,
 
   if (!on_vchan)
     {
-     sendto_wallops_flags(FLAGS_WALLOP, &me, 
+     sendto_wallops_flags(UMODE_WALLOP, &me, 
               "CLEARCHAN called for [%s] by %s!%s@%s",
               parv[1], source_p->name, source_p->username, source_p->host);
      sendto_server(NULL, source_p, NULL, NOCAPS, NOCAPS, 
@@ -130,7 +130,7 @@ static void mo_clearchan(struct Client *client_p, struct Client *source_p,
     }
   else
     {
-     sendto_wallops_flags(FLAGS_WALLOP, &me,
+     sendto_wallops_flags(UMODE_WALLOP, &me,
               "CLEARCHAN called for [%s %s] by %s!%s@%s",
               parv[1], parv[2], source_p->name, source_p->username,
               source_p->host);

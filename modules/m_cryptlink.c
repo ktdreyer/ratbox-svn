@@ -205,7 +205,7 @@ static void cryptlink_auth(struct Client *client_p, struct Client *source_p,
 
   if ( verify_private_key() == -1 )
   {
-    sendto_realops_flags(FLAGS_ALL, L_ADMIN,
+    sendto_realops_flags(UMODE_ALL, L_ADMIN,
       "verify_private_key() returned -1.  Check log for information.");
   }
 
@@ -484,7 +484,7 @@ static char *parse_cryptserv_args(struct Client *client_p,
 
   if (verify_private_key() == -1)
   {
-    sendto_realops_flags(FLAGS_ALL, L_ADMIN,
+    sendto_realops_flags(UMODE_ALL, L_ADMIN,
       "verify_private_key() returned -1.  Check log for information.");
   }
 

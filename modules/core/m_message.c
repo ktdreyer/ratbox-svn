@@ -626,7 +626,7 @@ flood_attack_client(int p_or_n, struct Client *source_p,
     {
       if (target_p->localClient->flood_noticed == 0)
       {
-        sendto_realops_flags(FLAGS_BOTS, L_ALL,
+        sendto_realops_flags(UMODE_BOTS, L_ALL,
                              "Possible Flooder %s [%s@%s] on %s target: %s",
                              source_p->name, source_p->username,
                              source_p->host,
@@ -682,7 +682,7 @@ flood_attack_channel(int p_or_n, struct Client *source_p,
     {
       if (chptr->flood_noticed == 0)
       {
-        sendto_realops_flags(FLAGS_BOTS, L_ALL,
+        sendto_realops_flags(UMODE_BOTS, L_ALL,
                              "Possible Flooder %s [%s@%s] on %s target: %s",
                              source_p->name, source_p->username,
                              source_p->host,
@@ -799,7 +799,7 @@ handle_opers(int p_or_n, char *command, struct Client *client_p,
     /* Check if someones msg'ing opers@our.server */
     if (strcmp(nick, "opers") == 0)
     {
-      sendto_realops_flags(FLAGS_ALL, L_ALL, "To opers: From: %s: %s",
+      sendto_realops_flags(UMODE_ALL, L_ALL, "To opers: From: %s: %s",
                            source_p->name, text);
       return;
     }

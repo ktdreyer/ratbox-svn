@@ -287,7 +287,7 @@ set_time(void)
   if(gettimeofday(&newtime, NULL) == -1)
     {
       ilog(L_ERROR, "Clock Failure (%d)", errno);
-      sendto_realops_flags(FLAGS_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL,
 			   "Clock Failure (%d), TS can be corrupted", errno);
    
       restart("Clock Failure");
@@ -529,7 +529,10 @@ static void cleanup_zombies(void *unused)
 
 int main(int argc, char *argv[])
 {
+  char buf[2048];
   /* Check to see if the user is running us as root, which is a nono */
+  ircsprintf(buf, "%d*foobar*", 0);
+  fprintf(stderr, "%s\n", buf);
   
   if(geteuid() == 0)
   {

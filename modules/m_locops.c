@@ -78,7 +78,7 @@ static void m_locops(struct Client *client_p, struct Client *source_p,
       return;
     }
 
-  sendto_wallops_flags(FLAGS_LOCOPS, source_p, "LOCOPS - %s", message);
+  sendto_wallops_flags(UMODE_LOCOPS, source_p, "LOCOPS - %s", message);
 }
 
 

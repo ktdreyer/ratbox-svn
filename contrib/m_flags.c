@@ -98,50 +98,50 @@ struct FlagTable
 static struct FlagTable flag_table[] =
 {
   /* name		mode it represents	oper only? */
-  { "OWALLOPS",		FLAGS_OPERWALL,		1 },
-  { "SWALLOPS",		FLAGS_WALLOP,		0 },
-  { "STATSNOTICES",	FLAGS_SPY,		1 },
+  { "OWALLOPS",		UMODE_OPERWALL,		1 },
+  { "SWALLOPS",		UMODE_WALLOP,		0 },
+  { "STATSNOTICES",	UMODE_SPY,		1 },
     /* We don't have a separate OKILL and SKILL modes */
-  { "OKILLS",		FLAGS_SKILL,		0 },
-  { "SKILLS",		FLAGS_SKILL,		0 },
-  { "SNOTICES",		FLAGS_SERVNOTICE,	0 },
+  { "OKILLS",		UMODE_SKILL,		0 },
+  { "SKILLS",		UMODE_SKILL,		0 },
+  { "SNOTICES",		UMODE_SERVNOTICE,	0 },
     /* We don't have separate client connect and disconnect modes */
-  { "CLICONNECTS",	FLAGS_CCONN,		1 },
-  { "CLIDISCONNECTS",	FLAGS_CCONN,		1 },
+  { "CLICONNECTS",	UMODE_CCONN,		1 },
+  { "CLIDISCONNECTS",	UMODE_CCONN,		1 },
     /* I'm taking a wild guess here... */
-  { "THROTTLES",	FLAGS_REJ,		1 },
+  { "THROTTLES",	UMODE_REJ,		1 },
 #if 0
     /* This one is special...controlled via an oper block option */
-  { "NICKCHANGES",	FLAGS_NCHANGE,		1 },
+  { "NICKCHANGES",	UMODE_NCHANGE,		1 },
     /* NICKCHANGES must be checked for separately */
 #endif
     /* I'm assuming this is correct... */
-  { "IPMISMATCHES",	FLAGS_UNAUTH,		1 },
-  { "LWALLOPS",		FLAGS_LOCOPS,		1 },
+  { "IPMISMATCHES",	UMODE_UNAUTH,		1 },
+  { "LWALLOPS",		UMODE_LOCOPS,		1 },
     /* These aren't separate on Hybrid */
-  { "CONNECTS",		FLAGS_EXTERNAL,		1 },
-  { "SQUITS",		FLAGS_EXTERNAL,		1 },
+  { "CONNECTS",		UMODE_EXTERNAL,		1 },
+  { "SQUITS",		UMODE_EXTERNAL,		1 },
     /* Now we have our Hybrid specific flags */
-  { "FULL",		FLAGS_FULL,		1 },
+  { "FULL",		UMODE_FULL,		1 },
     /* Not in CS, but we might as well put it here */
-  { "INVISIBLE",	FLAGS_INVISIBLE,	0 },
-  { "BOTS",		FLAGS_BOTS,		1 },
-  { "CALLERID",		FLAGS_CALLERID,		0 },
-  { "UNAUTH",		FLAGS_UNAUTH,		1 },
-  { "DEBUG",		FLAGS_DEBUG,		1 },
+  { "INVISIBLE",	UMODE_INVISIBLE,	0 },
+  { "BOTS",		UMODE_BOTS,		1 },
+  { "CALLERID",		UMODE_CALLERID,		0 },
+  { "UNAUTH",		UMODE_UNAUTH,		1 },
+  { "DEBUG",		UMODE_DEBUG,		1 },
   { NULL,		0,			0 }
 };
 
 /* We won't control CALLERID or INVISIBLE in here */
 
-#define FL_ALL_USER_FLAGS (FLAGS_WALLOP | FLAGS_SKILL | FLAGS_SERVNOTICE )
+#define FL_ALL_USER_FLAGS (UMODE_WALLOP | UMODE_SKILL | UMODE_SERVNOTICE )
 
 /* and we don't control NCHANGES here either */
 
-#define FL_ALL_OPER_FLAGS (FL_ALL_USER_FLAGS | FLAGS_CCONN | FLAGS_REJ |\
-                           FLAGS_FULL | FLAGS_SPY | FLAGS_DEBUG |\
-                           FLAGS_OPERWALL | FLAGS_BOTS | FLAGS_EXTERNAL |\
-                           FLAGS_UNAUTH | FLAGS_LOCOPS )
+#define FL_ALL_OPER_FLAGS (FL_ALL_USER_FLAGS | UMODE_CCONN | UMODE_REJ |\
+                           UMODE_FULL | UMODE_SPY | UMODE_DEBUG |\
+                           UMODE_OPERWALL | UMODE_BOTS | UMODE_EXTERNAL |\
+                           UMODE_UNAUTH | UMODE_LOCOPS )
 
 /*
 ** m_flags
@@ -320,9 +320,9 @@ static void mo_flags(struct Client *client_p, struct Client *source_p,
           continue;
         }
         if (isadd)
-          source_p->umodes |= FLAGS_NCHANGE;
+          source_p->umodes |= UMODE_NCHANGE;
         else
-          source_p->umodes &= ~FLAGS_NCHANGE;
+          source_p->umodes &= ~UMODE_NCHANGE;
         isgood = 1;
         continue;
       }
@@ -388,7 +388,7 @@ static char *set_flags_to_string(struct Client *client_p)
     /* You can only be set +NICKCHANGES if you are an oper and
     ** IsOperN(client_p) is true
     */
-    if (client_p->umodes & FLAGS_NCHANGE)
+    if (client_p->umodes & UMODE_NCHANGE)
     {
       ircsprintf(setflags, "%s %s", setflags, "NICKCHANGES");
     }
@@ -426,7 +426,7 @@ static char *unset_flags_to_string(struct Client *client_p)
 
   if (IsOper(client_p) && IsOperN(client_p))
   {
-    if ( !(client_p->umodes & FLAGS_NCHANGE))
+    if ( !(client_p->umodes & UMODE_NCHANGE))
     {
       ircsprintf(setflags, "%s %s", setflags, "NICKCHANGES");
     }

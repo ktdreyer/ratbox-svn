@@ -149,7 +149,7 @@ _send_linebuf(struct Client *to, buf_head_t *linebuf)
 #ifdef INVARIANTS
   if (IsMe(to))
   {
-    sendto_realops_flags(FLAGS_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL,
                          "Trying to send message to myself!");
     return 0;
   }
@@ -160,7 +160,7 @@ _send_linebuf(struct Client *to, buf_head_t *linebuf)
   if (linebuf_len(&to->localClient->buf_sendq) > get_sendq(to))
   {
     if (IsServer(to))
-      sendto_realops_flags(FLAGS_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL,
                            "Max SendQ limit exceeded for %s: %u > %lu",
                            get_client_name(to, HIDE_IP),
                            linebuf_len(&to->localClient->buf_sendq),
@@ -206,13 +206,13 @@ send_linebuf_remote(struct Client *to, struct Client *from,
   {
     if (IsServer(from))
     {
-      sendto_realops_flags(FLAGS_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL,
                            "Send message to %s[%s] dropped from %s(Fake Dir)",
                            to->name, to->from->name, from->name);
       return;
     }
 
-    sendto_realops_flags(FLAGS_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL,
                          "Ghosted: %s[%s@%s] from %s[%s@%s] (%s)",
                          to->name, to->username, to->host,
                          from->name, from->username, from->host,
@@ -455,7 +455,7 @@ sendto_one_prefix(struct Client *to, struct Client *prefix,
 #ifdef INVARIANTS
   if (IsMe(to))
   {
-    sendto_realops_flags(FLAGS_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL,
                          "Trying to send to myself!");
     return;
   }
@@ -1143,7 +1143,7 @@ ts_warn(const char *pattern, ...)
   (void)send_format(lbuf, pattern, args);
   va_end(args);
 
-  sendto_realops_flags(FLAGS_ALL, L_ALL,"%s",lbuf);
+  sendto_realops_flags(UMODE_ALL, L_ALL,"%s",lbuf);
   ilog(L_CRIT, "%s", lbuf);
 } /* ts_warn() */
 

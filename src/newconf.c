@@ -64,7 +64,7 @@ void	conf_report_error(char *fmt, ...)
 	ilog(L_ERROR, "\"%s\", line %d: %s", 
 		conffilebuf, lineno + 1, msg);
 
-	sendto_realops_flags(FLAGS_ALL, L_ALL, "\"%s\", line %d: %s", 
+	sendto_realops_flags(UMODE_ALL, L_ALL, "\"%s\", line %d: %s", 
 				conffilebuf, lineno + 1, msg);
 }
 
@@ -832,22 +832,22 @@ struct mode_table
 };
 
 struct mode_table umode_table[] = {
-	{"bots",	FLAGS_BOTS},
-	{"cconn",	FLAGS_CCONN},
-	{"debug",	FLAGS_DEBUG},
-	{"full",	FLAGS_FULL},
-	{"callerid",	FLAGS_CALLERID},
-	{"invisible",	FLAGS_INVISIBLE},
-	{"skill",	FLAGS_SKILL},
-	{"locops",	FLAGS_LOCOPS},
-	{"nchange",	FLAGS_NCHANGE},
-	{"rej",		FLAGS_REJ},
-	{"servnotice",	FLAGS_SERVNOTICE},
-	{"unauth",	FLAGS_UNAUTH},
-	{"wallop",	FLAGS_WALLOP},
-	{"external",	FLAGS_EXTERNAL},
-	{"spy",		FLAGS_SPY},
-	{"operwall",	FLAGS_OPERWALL},
+	{"bots",	UMODE_BOTS},
+	{"cconn",	UMODE_CCONN},
+	{"debug",	UMODE_DEBUG},
+	{"full",	UMODE_FULL},
+	{"callerid",	UMODE_CALLERID},
+	{"invisible",	UMODE_INVISIBLE},
+	{"skill",	UMODE_SKILL},
+	{"locops",	UMODE_LOCOPS},
+	{"nchange",	UMODE_NCHANGE},
+	{"rej",		UMODE_REJ},
+	{"servnotice",	UMODE_SERVNOTICE},
+	{"unauth",	UMODE_UNAUTH},
+	{"wallop",	UMODE_WALLOP},
+	{"external",	UMODE_EXTERNAL},
+	{"spy",		UMODE_SPY},
+	{"operwall",	UMODE_OPERWALL},
 	{NULL}
 };
 

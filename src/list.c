@@ -138,7 +138,7 @@ void free_user(struct User* user, struct Client* client_p)
       if (user->joined || user->refcnt < 0 ||
           user->invited.head || user->channel.head)
       {
-        sendto_realops_flags(FLAGS_ALL, L_ALL,
+        sendto_realops_flags(UMODE_ALL, L_ALL,
 			     "* %#lx user (%s!%s@%s) %#lx %#lx %#lx %d %d *",
 			     (unsigned long)client_p, client_p ? client_p->name : "<noname>",
 			     client_p->username, client_p->host, (unsigned long)user,

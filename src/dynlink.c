@@ -85,7 +85,7 @@ static char *myErrorTable[] =
 
 void undefinedErrorHandler(const char *symbolName)
 {
-  sendto_realops_flags(FLAGS_ALL, L_ALL, "Undefined symbol: %s", symbolName);
+  sendto_realops_flags(UMODE_ALL, L_ALL, "Undefined symbol: %s", symbolName);
   ilog(L_WARN, "Undefined symbol: %s", symbolName);
   return;
 }
@@ -96,7 +96,7 @@ NSModule multipleErrorHandler(NSSymbol s, NSModule old, NSModule new)
   ** This results in substantial leaking of memory... Should free one
   ** module, maybe?
   */
-  sendto_realops_flags(FLAGS_ALL, L_ALL, "Symbol `%s' found in `%s' and `%s'",
+  sendto_realops_flags(UMODE_ALL, L_ALL, "Symbol `%s' found in `%s' and `%s'",
                        NSNameOfSymbol(s), NSNameOfModule(old), NSNameOfModule(new));
   ilog(L_WARN, "Symbol `%s' found in `%s' and `%s'", NSNameOfSymbol(s),
        NSNameOfModule(old), NSNameOfModule(new));
@@ -107,7 +107,7 @@ NSModule multipleErrorHandler(NSSymbol s, NSModule old, NSModule new)
 void linkEditErrorHandler(NSLinkEditErrors errorClass, int errnum,
                           const char *fileName, const char *errorString)
 {
-  sendto_realops_flags(FLAGS_ALL, L_ALL, "Link editor error: %s for %s",
+  sendto_realops_flags(UMODE_ALL, L_ALL, "Link editor error: %s for %s",
                        errorString, fileName);
   ilog(L_WARN, "Link editor error: %s for %s", errorString, fileName);
   return;
@@ -226,7 +226,7 @@ int unload_one_module (char *name, int warn)
   if(warn == 1)
     {
       ilog (L_INFO, "Module %s unloaded", name);
-      sendto_realops_flags(FLAGS_ALL, L_ALL,"Module %s unloaded", name);
+      sendto_realops_flags(UMODE_ALL, L_ALL,"Module %s unloaded", name);
     }
 
   return 0;
@@ -258,7 +258,7 @@ load_a_module (char *path, int warn, int core)
   {
       const char *err = dlerror();
 
-      sendto_realops_flags(FLAGS_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL,
                             "Error loading module %s: %s",
                             mod_basename, err);
       ilog (L_WARN, "Error loading module %s: %s", mod_basename, err);
@@ -270,7 +270,7 @@ load_a_module (char *path, int warn, int core)
   if (initfunc == NULL 
 		  && (initfunc = (void (*)(void))(uintptr_t)dlsym(tmpptr, "__modinit")) == NULL)
   {
-    sendto_realops_flags(FLAGS_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL,
                           "Module %s has no _modinit() function",
                           mod_basename);
     ilog (L_WARN, "Module %s has no _modinit() function", mod_basename);
@@ -299,7 +299,7 @@ load_a_module (char *path, int warn, int core)
 
   if(warn == 1)
     {
-      sendto_realops_flags(FLAGS_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL,
                         "Module %s [version: %s] loaded at 0x%lx",
                         mod_basename, ver, (unsigned long)tmpptr);
        ilog (L_WARN, "Module %s [version: %s] loaded at 0x%x",

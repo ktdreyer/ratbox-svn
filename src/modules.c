@@ -350,7 +350,7 @@ load_one_module (char *path)
 	 }
     }
    
-  sendto_realops_flags(FLAGS_ALL, L_ALL,
+  sendto_realops_flags(UMODE_ALL, L_ALL,
                        "Cannot locate module %s", path);
   ilog(L_WARN, "Cannot locate module %s", path);
   return -1;
@@ -462,7 +462,7 @@ mo_modreload (struct Client *client_p, struct Client *source_p, int parc, char *
 
   if((load_one_module(parv[1]) == -1) && check_core)
   {
-    sendto_realops_flags(FLAGS_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL,
                          "Error reloading core module: %s: terminating ircd",
 			 parv[1]);
     ilog(L_CRIT, "Error loading core module %s: terminating ircd", parv[1]);
@@ -532,7 +532,7 @@ mo_modrestart (struct Client *client_p, struct Client *source_p, int parc, char 
   load_core_modules(0);
   rehash(0);
   
-  sendto_realops_flags(FLAGS_ALL, L_ALL,
+  sendto_realops_flags(UMODE_ALL, L_ALL,
               "Module Restart: %d modules unloaded, %d modules loaded",
 			modnum, num_mods);
   ilog(L_WARN, "Module Restart: %d modules unloaded, %d modules loaded",

@@ -77,7 +77,7 @@ static void mr_dumb_proxy(struct Client *client_p,
                   int parc,
                   char *parv[])
 {
-  sendto_realops_flags(FLAGS_REJ, L_ALL,
+  sendto_realops_flags(UMODE_REJ, L_ALL,
                        "HTTP Proxy disconnected: [%s@%s]",
                        client_p->username, client_p->host);
   exit_client(client_p, source_p, source_p, "Client Exit");

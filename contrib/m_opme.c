@@ -138,7 +138,7 @@ static void mo_opme(struct Client *client_p, struct Client *source_p,
   dlinkAdd(source_p, ptr, &chptr->chanops);
   dlinkAdd(source_p, locptr, &chptr->locchanops);
 
-  sendto_wallops_flags(FLAGS_WALLOP, &me,
+  sendto_wallops_flags(UMODE_WALLOP, &me,
                        "OPME called for [%s] by %s!%s@%s",
                        parv[1], source_p->name, source_p->username,
                        source_p->host);

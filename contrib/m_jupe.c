@@ -113,7 +113,7 @@ static void mo_jupe(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  sendto_wallops_flags(FLAGS_WALLOP, &me,
+  sendto_wallops_flags(UMODE_WALLOP, &me,
                        "JUPE for %s requested by %s: %s",
 			 parv[1], get_oper_name(source_p), parv[2]);
 
@@ -133,7 +133,7 @@ static void mo_jupe(struct Client *client_p, struct Client *source_p,
                 ":%s SERVER %s 1 :JUPED: %s",
                 me.name, parv[1], parv[2]);
 
-  sendto_realops_flags(FLAGS_ALL, L_ALL,
+  sendto_realops_flags(UMODE_ALL, L_ALL,
                        "Link with %s established: (JUPED) link",
 		       parv[1]);
 

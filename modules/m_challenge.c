@@ -132,7 +132,7 @@ static void m_challenge( struct Client *client_p, struct Client *source_p,
       {
 	sendto_one(source_p,":%s NOTICE %s :Can't attach conf!",
                    me.name,source_p->name);   
-	sendto_realops_flags(FLAGS_ALL, L_ALL,
+	sendto_realops_flags(UMODE_ALL, L_ALL,
 	                     "Failed OPER attempt by %s (%s@%s) can't attach conf!",
 	                     source_p->name, source_p->username, source_p->host);
 	attach_conf(source_p, oconf);

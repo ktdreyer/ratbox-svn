@@ -135,7 +135,7 @@ static void mo_kill(struct Client *client_p, struct Client *source_p,
 
   /* Do not change the format of this message.  There's no point in changing messages
    * that have been around for ever, for no reason.. */
-  sendto_realops_flags(FLAGS_ALL, L_ALL,
+  sendto_realops_flags(UMODE_ALL, L_ALL,
 		       "Received KILL message for %s. From %s Path: %s (%s)", 
 		       target_p->name, parv[0], me.name, reason);
 
@@ -264,14 +264,14 @@ static void ms_kill(struct Client *client_p, struct Client *source_p,
    */
   if (IsOper(source_p)) /* send it normally */
     {
-      sendto_realops_flags(FLAGS_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL,
 		"Received KILL message for %s. From %s Path: %s!%s!%s!%s %s",
 		target_p->name, parv[0], source_p->user->server, 
                 source_p->host, source_p->username, source_p->name, reason);
     }
   else
     {
-      sendto_realops_flags(FLAGS_SKILL, L_ALL,
+      sendto_realops_flags(UMODE_SKILL, L_ALL,
 			   "Received KILL message for %s. From %s %s",
 			   target_p->name, parv[0], reason);
     }

@@ -100,7 +100,7 @@ static void mo_squit(struct Client *client_p, struct Client *source_p,
     {
       if(MyConnect(found_squit->target_p))
 	{
-	  sendto_realops_flags(FLAGS_ALL, L_ALL,
+	  sendto_realops_flags(UMODE_ALL, L_ALL,
 			       "Received SQUIT %s from %s (%s)",
 			       found_squit->target_p->name,
 			       get_client_name(source_p, HIDE_IP), comment);
@@ -143,7 +143,7 @@ static void ms_squit(struct Client *client_p, struct Client *source_p,
       */
       if (MyConnect(found_squit->target_p))
 	{
-	  sendto_wallops_flags(FLAGS_WALLOP, &me,
+	  sendto_wallops_flags(UMODE_WALLOP, &me,
 				 "Remote SQUIT %s from %s (%s)",
 				 found_squit->server_name,
 				 source_p->name, comment);

@@ -312,8 +312,8 @@ struct LocalUser
 #define IsServer(x)             ((x)->status == STAT_SERVER)
 #define IsClient(x)             ((x)->status == STAT_CLIENT)
 
-#define IsOper(x)		((x)->umodes & FLAGS_OPER)
-#define IsAdmin(x)		((x)->umodes & FLAGS_ADMIN)
+#define IsOper(x)		((x)->umodes & UMODE_OPER)
+#define IsAdmin(x)		((x)->umodes & UMODE_ADMIN)
 
 #define SetConnecting(x)        {(x)->status = STAT_CONNECTING; \
 				 (x)->handler = UNREGISTERED_HANDLER; }
@@ -375,28 +375,28 @@ struct LocalUser
 #define FLAGS_MARK	   0x20000 /* marked client */
 /* umodes, settable flags */
 
-#define FLAGS_SERVNOTICE   0x0001 /* server notices such as kill */
-#define FLAGS_CCONN        0x0002 /* Client Connections */
-#define FLAGS_REJ          0x0004 /* Bot Rejections */
-#define FLAGS_SKILL        0x0008 /* Server Killed */
-#define FLAGS_FULL         0x0010 /* Full messages */
-#define FLAGS_SPY          0x0020 /* see STATS / LINKS */
-#define FLAGS_DEBUG        0x0040 /* 'debugging' info */
-#define FLAGS_NCHANGE      0x0080 /* Nick change notice */
-#define FLAGS_WALLOP       0x0100 /* send wallops to them */
-#define FLAGS_OPERWALL     0x0200 /* Operwalls */
-#define FLAGS_INVISIBLE    0x0400 /* makes user invisible */
-#define FLAGS_BOTS         0x0800 /* shows bots */
-#define FLAGS_EXTERNAL     0x1000 /* show servers introduced and splitting */
-#define FLAGS_CALLERID     0x4000 /* block unless caller id's */
-#define FLAGS_UNAUTH       0x8000 /* show unauth connects here */
-#define FLAGS_LOCOPS       0x10000 /* show locops */
+#define UMODE_SERVNOTICE   0x0001 /* server notices such as kill */
+#define UMODE_CCONN        0x0002 /* Client Connections */
+#define UMODE_REJ          0x0004 /* Bot Rejections */
+#define UMODE_SKILL        0x0008 /* Server Killed */
+#define UMODE_FULL         0x0010 /* Full messages */
+#define UMODE_SPY          0x0020 /* see STATS / LINKS */
+#define UMODE_DEBUG        0x0040 /* 'debugging' info */
+#define UMODE_NCHANGE      0x0080 /* Nick change notice */
+#define UMODE_WALLOP       0x0100 /* send wallops to them */
+#define UMODE_OPERWALL     0x0200 /* Operwalls */
+#define UMODE_INVISIBLE    0x0400 /* makes user invisible */
+#define UMODE_BOTS         0x0800 /* shows bots */
+#define UMODE_EXTERNAL     0x1000 /* show servers introduced and splitting */
+#define UMODE_CALLERID     0x4000 /* block unless caller id's */
+#define UMODE_UNAUTH       0x8000 /* show unauth connects here */
+#define UMODE_LOCOPS       0x10000 /* show locops */
 
 /* user information flags, only settable by remote mode or local oper */
-#define FLAGS_OPER         0x20000 /* Operator */
-#define FLAGS_ADMIN        0x40000 /* Admin on server */
+#define UMODE_OPER         0x20000 /* Operator */
+#define UMODE_ADMIN        0x40000 /* Admin on server */
 
-#define FLAGS_ALL	   FLAGS_SERVNOTICE
+#define UMODE_ALL	   UMODE_SERVNOTICE
 
 
 /* overflow flags */
@@ -428,13 +428,13 @@ struct LocalUser
 #define FLAGS2_IP_SPOOFING      0x100000
 #define FLAGS2_FLOODDONE        0x200000
 
-#define SEND_UMODES  (FLAGS_INVISIBLE | FLAGS_OPER | FLAGS_WALLOP | \
-                      FLAGS_ADMIN)
-#define ALL_UMODES   (SEND_UMODES | FLAGS_SERVNOTICE | FLAGS_CCONN | \
-                      FLAGS_REJ | FLAGS_SKILL | FLAGS_FULL | FLAGS_SPY | \
-                      FLAGS_NCHANGE | FLAGS_OPERWALL | FLAGS_DEBUG | \
-                      FLAGS_BOTS | FLAGS_EXTERNAL | FLAGS_LOCOPS | \
- 		      FLAGS_ADMIN | FLAGS_UNAUTH | FLAGS_CALLERID)
+#define SEND_UMODES  (UMODE_INVISIBLE | UMODE_OPER | UMODE_WALLOP | \
+                      UMODE_ADMIN)
+#define ALL_UMODES   (SEND_UMODES | UMODE_SERVNOTICE | UMODE_CCONN | \
+                      UMODE_REJ | UMODE_SKILL | UMODE_FULL | UMODE_SPY | \
+                      UMODE_NCHANGE | UMODE_OPERWALL | UMODE_DEBUG | \
+                      UMODE_BOTS | UMODE_EXTERNAL | UMODE_LOCOPS | \
+ 		      UMODE_ADMIN | UMODE_UNAUTH | UMODE_CALLERID)
 
 #define FLAGS_ID     (FLAGS_NEEDID | FLAGS_GOTID)
 
@@ -467,34 +467,34 @@ struct LocalUser
 /* oper flags */
 #define MyOper(x)               (MyConnect(x) && IsOper(x))
 
-#define SetOper(x)              {(x)->umodes |= FLAGS_OPER; \
+#define SetOper(x)              {(x)->umodes |= UMODE_OPER; \
 				 if (!IsServer((x))) (x)->handler = OPER_HANDLER;}
 
-#define ClearOper(x)            {(x)->umodes &= ~(FLAGS_OPER|FLAGS_ADMIN); \
+#define ClearOper(x)            {(x)->umodes &= ~(UMODE_OPER|UMODE_ADMIN); \
 				 if (!IsOper((x)) && !IsServer((x))) \
 				  (x)->handler = CLIENT_HANDLER; }
 
 #define IsPrivileged(x)         (IsOper(x) || IsServer(x))
 
 /* umode flags */
-#define IsInvisible(x)          ((x)->umodes & FLAGS_INVISIBLE)
-#define SetInvisible(x)         ((x)->umodes |= FLAGS_INVISIBLE)
-#define ClearInvisible(x)       ((x)->umodes &= ~FLAGS_INVISIBLE)
-#define SendWallops(x)          ((x)->umodes & FLAGS_WALLOP)
-#define ClearWallops(x)         ((x)->umodes &= ~FLAGS_WALLOP)
-#define SendLocops(x)           ((x)->umodes & FLAGS_LOCOPS)
-#define SendServNotice(x)       ((x)->umodes & FLAGS_SERVNOTICE)
-#define SendOperwall(x)         ((x)->umodes & FLAGS_OPERWALL)
-#define SendCConnNotice(x)      ((x)->umodes & FLAGS_CCONN)
-#define SendRejNotice(x)        ((x)->umodes & FLAGS_REJ)
-#define SendSkillNotice(x)      ((x)->umodes & FLAGS_SKILL)
-#define SendFullNotice(x)       ((x)->umodes & FLAGS_FULL)
-#define SendSpyNotice(x)        ((x)->umodes & FLAGS_SPY)
-#define SendDebugNotice(x)      ((x)->umodes & FLAGS_DEBUG)
-#define SendNickChange(x)       ((x)->umodes & FLAGS_NCHANGE)
-#define SetWallops(x)           ((x)->umodes |= FLAGS_WALLOP)
-#define SetCallerId(x)		((x)->umodes |= FLAGS_CALLERID)
-#define IsSetCallerId(x)	((x)->umodes & FLAGS_CALLERID)
+#define IsInvisible(x)          ((x)->umodes & UMODE_INVISIBLE)
+#define SetInvisible(x)         ((x)->umodes |= UMODE_INVISIBLE)
+#define ClearInvisible(x)       ((x)->umodes &= ~UMODE_INVISIBLE)
+#define SendWallops(x)          ((x)->umodes & UMODE_WALLOP)
+#define ClearWallops(x)         ((x)->umodes &= ~UMODE_WALLOP)
+#define SendLocops(x)           ((x)->umodes & UMODE_LOCOPS)
+#define SendServNotice(x)       ((x)->umodes & UMODE_SERVNOTICE)
+#define SendOperwall(x)         ((x)->umodes & UMODE_OPERWALL)
+#define SendCConnNotice(x)      ((x)->umodes & UMODE_CCONN)
+#define SendRejNotice(x)        ((x)->umodes & UMODE_REJ)
+#define SendSkillNotice(x)      ((x)->umodes & UMODE_SKILL)
+#define SendFullNotice(x)       ((x)->umodes & UMODE_FULL)
+#define SendSpyNotice(x)        ((x)->umodes & UMODE_SPY)
+#define SendDebugNotice(x)      ((x)->umodes & UMODE_DEBUG)
+#define SendNickChange(x)       ((x)->umodes & UMODE_NCHANGE)
+#define SetWallops(x)           ((x)->umodes |= UMODE_WALLOP)
+#define SetCallerId(x)		((x)->umodes |= UMODE_CALLERID)
+#define IsSetCallerId(x)	((x)->umodes & UMODE_CALLERID)
 
 #define SetIpHash(x)            ((x)->flags |= FLAGS_IPHASH)
 #define ClearIpHash(x)          ((x)->flags &= ~FLAGS_IPHASH)

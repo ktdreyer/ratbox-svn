@@ -112,7 +112,7 @@ mo_xline(struct Client *client_p, struct Client *source_p,
       reason = parv[2];
   }
 
-  sendto_realops_flags(FLAGS_ALL, L_ALL,
+  sendto_realops_flags(UMODE_ALL, L_ALL,
 		       "%s added X-line for [%s] [%s]",
 		       get_oper_name(source_p), parv[1], reason);
   sendto_one(source_p, ":%s NOTICE %s :Added X-line for [%s] [%s]",
@@ -131,7 +131,7 @@ mo_xline(struct Client *client_p, struct Client *source_p,
 
   if((out = fbopen(ConfigFileEntry.xlinefile, "a")) == NULL)
   {
-    sendto_realops_flags(FLAGS_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL,
 		         "*** Problem opening %s", ConfigFileEntry.xlinefile);
     return;
   }
@@ -140,7 +140,7 @@ mo_xline(struct Client *client_p, struct Client *source_p,
              parv[1], xtype, reason, get_oper_name(source_p), CurrentTime);
 
   if(fbputs(buffer, out) == -1)
-    sendto_realops_flags(FLAGS_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL,
 		         "*** Problem writing to %s", ConfigFileEntry.xlinefile);
 
   fbclose(out);
