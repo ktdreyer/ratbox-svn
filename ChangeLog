@@ -1,3 +1,30 @@
+leeh        2004/11/19 16:54:55 EST	(20041119_5)
+
+  Modified files:
+    doc                  example.conf 
+    include              client.h log.h 
+    src                  log.c newconf.c s_alis.c s_chanserv.c 
+                         s_jupeserv.c s_operbot.c s_userserv.c 
+  Log:
+  - implement loglevel to service {};
+  - added logging of services commands
+  - fix a bug with .cregister using the wrong param
+  - fix wrong parameter count on udrop
+  
+  Revision  Changes    Path
+  1.18      +36 -0     rserv/doc/example.conf
+  1.28      +2 -0      rserv/include/client.h
+  1.6       +1 -1      rserv/include/log.h
+  1.7       +4 -1      rserv/src/log.c
+  1.27      +6 -0      rserv/src/newconf.c
+  1.24      +2 -0      rserv/src/s_alis.c
+  1.17      +92 -1     rserv/src/s_chanserv.c
+  1.15      +26 -0     rserv/src/s_jupeserv.c
+  1.16      +10 -0     rserv/src/s_operbot.c
+  1.12      +18 -1     rserv/src/s_userserv.c
+
+
+
 leeh        2004/11/19 09:08:20 EST	(20041119_4)
 
   Modified files:
