@@ -1,3 +1,8 @@
+*** 20010524_18 by davidt
+- hmm, forgot to commit this... remove outdated @SSL_*@ stuff from
+  contrib/Makefile.in
+
+
 *** 20010524_17 by davidt
 - Remove some of the evil debugging stuff...
 - Tidy up the code
