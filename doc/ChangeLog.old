@@ -1,3 +1,13 @@
+*** 20010101_21 by davidt
+Massive attempt to cleanup vchans, and some problems with vchan+LL.
+- change cjoin on LL to ask the hub
+- change cburst to support cjoin as well as join (minor change)
+- change lljoin to support cjoin
+- change lljoin to support joining vchans
+- fix opsyncing to use the correct channame in vchans
+- various other things I've forgotten
+
+
 *** 20010101_20 by a1kmm
 Fixed whois to always route.
 Now show idle times even when SHIDE=1.
