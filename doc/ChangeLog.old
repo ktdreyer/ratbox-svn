@@ -1,3 +1,8 @@
+*** 20001229_27 by lusky
+- hack to make the developer CFLAGS the default.  You can still set CFLAGS in
+  your environment before running configure if you want to override them.
+
+
 *** 20001229_26 by lusky
 added my IM pipedream to TODO
 
