@@ -1,3 +1,8 @@
+*** 20010430_6 by jdc
+* Previous changes to message.tab applied to these two .pos.
+
+
+
 *** 20010430_5 by jdc
 * RPL_ENDOFSTATS was returning the requested STATS character/word as
   a %c, while the argument passed in m_stats() was a string.  All
