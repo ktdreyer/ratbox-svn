@@ -89,6 +89,7 @@ static void stats_L(struct Client *, char *, int, int, char);
 static void stats_L_list(struct Client *s, char *, int, int,
                          dlink_list *, char);
 static void stats_spy(struct Client *, char);
+static void stats_p_spy(struct Client *);
 static void stats_L_spy(struct Client *, char, char *);
 
 /* Heres our struct for the stats table */
@@ -595,6 +596,8 @@ static void stats_operedup(struct Client *source_p)
 
   sendto_one(source_p, ":%s %d %s :%d OPER(s)", me.name, RPL_STATSDEBUG,
              source_p->name, j);
+
+  stats_p_spy(source_p);
 }
 
 static void stats_ports(struct Client *source_p)
@@ -918,11 +921,6 @@ static void stats_L_list(struct Client *source_p,char *name, int doall, int wild
  * at all. They are just "noise" to an oper, and users can't do
  * any damage with stats requests now anyway. So, why show them?
  * -Dianora
- *
- * so they can see stats p requests .. should probably add an
- * option so only stats p is shown..  --is
- *
- * done --is
  */
 static void stats_spy(struct Client *source_p, char statchar)
 {
@@ -933,6 +931,23 @@ static void stats_spy(struct Client *source_p, char statchar)
   data.name = NULL;
 
   hook_call_event("doing_stats", &data);
+}
+
+/* stats_p_spy()
+ *
+ * input	- pointer to client doing stats
+ * ouput	-
+ * side effects - call hook doing_stats_p
+ */
+static void stats_p_spy(struct Client *source_p)
+{
+  struct hook_stats_data data;
+
+  data.source_p = source_p;
+  data.name = NULL;
+  data.statchar = 'p';
+
+  hook_call_event("doing_stats_p", &data);
 }
 
 /* 
