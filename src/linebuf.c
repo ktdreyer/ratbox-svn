@@ -235,29 +235,22 @@ linebuf_donebuf(buf_head_t *bufhead)
 /*
  * linebuf_copy_line
  *
- * copy data into the given line. Return the number of bytes copied.
- * It will try to squeeze what it can into the given buffer.
- * If it hits an end-of-buffer before it hits a CRLF, it will flag
- * an overflow, and skip to the next CRLF. If it hits a CRLF before
- * filling the buffer, it will flag it terminated, and skip past
- * the CRLF.
+ * Okay..this functions comments made absolutely no sense.
+ * 
+ * Basically what we do is this.  Find the first chunk of text
+ * and then scan for a CRLF.  If we didn't find it, but we didn't
+ * overflow our buffer..we wait for some more data.
+ * If we found a CRLF, we replace them with a \0 character.
+ * If we overflowed, we copy the most our buffer can handle, terminate
+ * it with a \0 and return.
  *
- * Just remember these:
+ * The return value is the amount of data we consumed.  This could
+ * be different than the size of the linebuffer, as when we discard
+ * the overflow, we don't want to process it again.
  *
- * - we will *always* return skipped past a CRLF.
- * - if we hit an end-of-buffer before a CRLF is reached, we tag it as
- *   overflowed.
- * - if we hit a CRLF before an end-of-buffer, we terminate it and
- *   skip the CRLF
- * - we *always* null-terminate the buffer! 
- * - My definition of a CRLF is one of CR, LF, CRLF, LFCR. Hrm.
- *   We will attempt to skip multiple CRLFs in a row ..
+ * This still sucks in my opinion, but it seems to work.
  *
- * This routine probably isn't as optimal as it could be, but hey .. :)
- *   -- adrian
- *
- * if binary is non-zero assume the data may be compressed,
- * so simply split up (keeping as many [\r\n]*'s in the first buffer)
+ * -Aaron
  */
 static int
 linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
@@ -266,28 +259,44 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
   register int cpylen = 0;	/* how many bytes we've copied */
   register char *ch = data;	/* Pointer to where we are in the read data */
   register char *bufch = &bufline->buf[bufline->len];
-  
+  int clen = 0;
   /* If its full or terminated, ignore it */
   if ((bufline->len == BUF_DATA_SIZE) || (bufline->terminated == 1))
     return 0;
+  clen = cpylen = linebuf_skip_crlf(ch, len);
 
-  cpylen = linebuf_skip_crlf(ch, len);
-  memcpy(bufch, ch, BUF_DATA_SIZE - bufline->len);
-  bufline->len += cpylen;
-  bufch += cpylen;
-  bufch--;
-  if(*bufch == '\r' || *bufch == '\n')
-  {
-  	while(*bufch == '\r' || *bufch == '\n')
-  	{
-  		bufline->len--;
-  		*bufch = '\0';
-  		bufch--;
-  	}
-  	bufline->terminated = 1;
+  /* This is the ~overflow case..This doesn't happen often.. */
+  if(cpylen > BUF_DATA_SIZE - bufline->len) {
+  	cpylen = BUF_DATA_SIZE - bufline->len;
+  	memcpy(bufch, ch, cpylen);
+  	bufch += cpylen;
+  	*bufch = '\0';
+  	bufline->overflow = 1;
+	bufline->terminated = 1;
+	bufline->len = cpylen;
+  	bufhead->len += bufline->len;
+  	return clen;
   }
-  bufhead->len += bufline->len;
-  return cpylen;
+  memcpy(bufch, ch, cpylen);
+  bufch += cpylen-1;
+  
+  if(*bufch != '\r' && *bufch != '\n') /* No linefeed..so we bail for the next time */
+  { 
+	bufhead->len += bufline->len += cpylen;
+  	bufline->terminated = 0;
+	return clen;
+  }
+
+  /* Yank the CRLF off this, replace with a \0 */
+  while(*bufch == '\r' || *bufch == '\n')
+  {
+  	*bufch = '\0';
+  	cpylen--;
+  	bufch--;
+  }
+  bufline->terminated = 1;
+  bufhead->len += bufline->len += cpylen;
+  return clen;
 }
 
 
