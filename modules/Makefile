@@ -74,7 +74,7 @@ SRCS =                          \
   m_version.c \
   m_wallops.c \
   m_who.c \
-  m_whois.c \
+  m_whois.c
 
 OBJS = ${SRCS:.c=.so}
 
@@ -84,7 +84,7 @@ all: $(OBJS)
 install: all
 	@echo "Please do a make install from the top level directory"
 
-.SUFFIXES: .so
+.SUFFIXES: .c .so
 
 .c.so:
 	${CC} -DPIC -fPIC -shared ${CFLAGS} $(CPPFLAGS) -c ${.IMPSRC} -o ${.TARGET}
