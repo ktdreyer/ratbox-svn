@@ -19,10 +19,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *  $Id$
  */
-
-
-
 #include <openssl/rsa.h>
+#include <openssl/md5.h>
 #include <unistd.h>
 
 static void
@@ -70,10 +68,10 @@ int
 main(int argc, char **argv)
 {
  FILE *kfile;
+ MD5_CTX ctx;
  RSA *rsa;
- BIGNUM *bnd, *bnn;
- char ndata[257], ddata[257], *dds, *pass;
- int l, a=0;
+ char ndata[257], ddata[257], *dds, *pass, dbdata[128], md5[16];
+ int l;
  /* respond privatefile challenge */
  if (argc < 3)
    {
@@ -102,34 +100,19 @@ main(int argc, char **argv)
  } while (!l);
  ndata[256] = 0;
  ddata[256] = 0;
- while (*dds)
-   {
-     *dds ^= pass[a++%l];
-     if (!((*dds>='0' && *dds <= '9') || (*dds >= 'A' && *dds <= 'F')))
-       {
-        puts("Malformed private keyfile(or bad keyphrase).");
-        return -1;
-       }
-    dds++;
-   }
- dds = ndata;
- while (*dds)
-   {
-     if (!((*dds>='0' && *dds <= '9') || (*dds >= 'A' && *dds <= 'F')))
-       {
-        puts("Malformed private keyfile.");
-        return -1;
-       }
-     dds++;
-   }
  fclose(kfile);
  ndata[256] = 0;
  ddata[256] = 0;
- bnd = BN_new();
- bnn = BN_new();
+ hex_to_binary(ddata, dbdata, 128);
+ MD5_Init(&ctx);
+ MD5_Update(&ctx, pass, l);
+ MD5_Final((unsigned char*)md5, &ctx);
+ for (l = 0; l < 128; l++)
+   dbdata[l] ^= md5[l % 16];
  rsa = RSA_new();
- BN_hex2bn(&rsa->d, ddata);
- BN_hex2bn(&rsa->n, ndata); 
+ rsa->d = BN_new();
+ BN_bin2bn((unsigned char*)dbdata, 128, rsa->d);
+ BN_hex2bn(&rsa->n, ndata);
  if (hex_to_binary(argv[2], ndata, 128) != 128)
    {
     puts("Bad challenge.");

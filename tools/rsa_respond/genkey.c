@@ -23,15 +23,31 @@
 
 #include <openssl/rsa.h>
 #include <openssl/rand.h>
+#include <openssl/md5.h>
 #include <stdio.h>
 #include <unistd.h>
+
+static void
+binary_to_hex( unsigned char * bin, char * hex, int length )
+{
+  char * trans = "0123456789ABCDEF";
+  int i;
+
+  for( i = 0; i < length; i++ )
+  {
+    hex[i<<1]     = trans[bin[i] >> 4];
+    hex[(i<<1)+1] = trans[bin[i] & 0xf];
+  }
+  hex[i<<1] = '\0';
+}
 
 int
 main(int argc, char **argv)
 {
  RSA *rsa;
- char *pass, *bnn, *bnd, *bnds;
- int a=0, l;
+ MD5_CTX ctx;
+ char *pass, bndt[128], bnd[256], *bnn, md5[16];
+ int l;
  FILE *kfile;
  /* genkey publicfile privatefile */
  if (argc < 3)
@@ -44,16 +60,19 @@ main(int argc, char **argv)
    pass = getpass("Keyphrase: ");
    l = strlen(pass);
  } while (!l);
- bnn = BN_bn2hex(rsa->n);
- bnd = BN_bn2hex(rsa->d);
- bnds = bnd;
- while (*bnds)
-   *bnds++ ^= pass[a++%l];
+ BN_bn2bin(rsa->d, (unsigned char*)bndt);
+ MD5_Init(&ctx);
+ MD5_Update(&ctx, pass, l);
+ MD5_Final((unsigned char*)md5, &ctx);
+ for (l = 0; l < 128; l++)
+   bndt[l] ^= md5[l%16];
+ binary_to_hex((unsigned char*)bndt, bnd, 128);
  if (!(kfile = fopen(argv[2], "w")))
    {
     puts("Could not open the private key file.");
     exit(-1);
    }
+ bnn = BN_bn2hex(rsa->n);
  fwrite(bnn, 256, 1, kfile);
  fwrite(bnd, 256, 1, kfile);
  fclose(kfile);
