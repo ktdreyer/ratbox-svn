@@ -14,12 +14,6 @@
 
 #ifndef _PATRICIA_H
 #define _PATRICIA_H
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <assert.h>
 
 #ifndef FALSE
 #define FALSE 0
@@ -36,9 +30,6 @@ typedef void (*void_fn_t) ();
 #define prefix_touchar(prefix) ((u_char *)&(prefix)->add.sin)
 #define MAXLINE 1024
 #define BIT_TEST(f, b)  ((f) & (b))
-
-#include <netinet/in.h>
-#include <sys/socket.h>
 
 typedef struct _prefix_t
 {
