@@ -645,7 +645,6 @@ comm_connect_callback(int fd, int status)
   
  /* Clear the connect flag + handler */
  hdl = fd_table[fd].connect.callback;
- assert(hdl);
  fd_table[fd].connect.callback = NULL;
  fd_table[fd].flags.called_connect = 0;
   
