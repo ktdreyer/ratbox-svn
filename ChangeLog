@@ -1,3 +1,23 @@
+leeh        2003/05/02 16:42:11 UTC	(20030502_0)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    modules              m_join.c 
+    src                  s_debug.c 
+  Log:
+  - ports from stable:
+    - doc update to stats_P_oper_only
+    - VMS bug fix in s_debug.c
+    - fix +beI desync bug on persistent chans.
+  
+  Revision  Changes    Path
+  7.205     +4 -1      ircd-ratbox/doc/example.conf
+  7.40      +4 -1      ircd-ratbox/doc/example.efnet.conf
+  1.120     +2 -1      ircd-ratbox/modules/m_join.c
+  7.89      +3 -1      ircd-ratbox/src/s_debug.c
+
+
+
 leeh        2003/04/27 16:22:07 UTC	(20030427_2)
 
   Modified files:
