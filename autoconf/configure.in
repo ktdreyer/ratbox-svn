@@ -33,4 +33,5 @@ AC_OUTPUT(			\
         help/Makefile   	\
 	src/Makefile		\
 	src/s_userserv/Makefile	\
+	src/s_chanserv/Makefile \
 )

@@ -15,8 +15,8 @@ LIBS=@LIBS@
 CFLAGS=-g -O0 -Wall -Werror -Wunused -Wshadow -DPREFIX=\"$(PREFIX)\"
 MAKE = make
 
-SERVICEDIRS=s_userserv
-SERVICELIBS=s_userserv.a
+SERVICEDIRS=s_userserv s_chanserv
+SERVICELIBS=s_userserv.a s_chanserv.a
 
 SRCS = 			\
         balloc.c        \

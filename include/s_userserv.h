@@ -14,6 +14,7 @@ struct user_reg
 	time_t last_used;
 
 	dlink_node node;
+	dlink_list channels;
 };
 
 extern dlink_list user_reg_table[MAX_USER_REG_HASH];
