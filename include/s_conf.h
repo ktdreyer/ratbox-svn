@@ -24,6 +24,12 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.8  2000/01/16 04:35:06  db
+ * - first very rough working lex/yacc under ircd-hybrid..
+ *   parser doesn't actually do anything.... yet...
+ *   Tom, we could use a fileio pushback, to push back a line thats
+ *   "not for us"
+ *
  * Revision 7.7  2000/01/15 22:46:22  db
  * - more cleanups to parse code
  *
@@ -221,6 +227,15 @@ struct Client;
 struct SLink;
 struct DNSReply;
 struct hostent;
+
+/* used by new parser */
+struct ip_value {
+  unsigned long ip;
+  unsigned long ip_mask;
+};
+
+extern FBFILE* conf_fbfile_in;
+extern char conf_line_in[256];
 
 struct ConfItem
 {

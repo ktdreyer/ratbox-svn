@@ -17,6 +17,20 @@ CPPFLAGS = ${INCLUDES} @CPPFLAGS@
 # CFLAGS= -g -O2 -Wall 
 #
 
+nparse:	y.tab.o lex.yy.o
+
+y.tab.o:	y.tab.c ircd_parser.y
+	gcc -g -I ../include -c y.tab.c
+
+y.tab.c:	ircd_parser.y
+	yacc -d ircd_parser.y
+
+lex.yy.o:	lex.yy.c ircd_lexer.l
+	gcc -g -I ../include -c lex.yy.c
+
+lex.yy.c:	ircd_lexer.l
+	lex ircd_lexer.l
+
 SRCS =                          \
   blalloc.c                     \
   channel.c                     \
@@ -202,14 +216,15 @@ SRCS =                          \
 #	support.o \
 #	whowas.o
 
+
 OBJS = ${SRCS:.c=.o}
 
 all: ircd
 
 build: all
 
-ircd: ${OBJS} version.o
-	${CC} ${LDFLAGS} -o $@ ${OBJS} version.o ${IRCDLIBS}
+ircd: ${OBJS} nparse version.o
+	${CC} ${LDFLAGS} -o $@ ${OBJS} lex.yy.o y.tab.o version.o ${IRCDLIBS}
 	mv version.c version.c.last
 
 install: build
@@ -217,6 +232,7 @@ install: build
 
 version.c: version.c.SH
 	/bin/sh ./version.c.SH
+
 
 # this is really the default rule for c files
 .c.o:

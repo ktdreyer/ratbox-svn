@@ -71,8 +71,15 @@ static void ReplaceQuotes(char* quotedLine,char* line);
 
 static FBFILE*  openconf(const char* filename);
 static void     initconf(FBFILE*);
+static void     initnewconf(FBFILE*);
 static void     clear_out_old_conf(void);
 static void     flush_deleted_I_P(void);
+
+/* ick.. yacc/lex likes globals don't it? */
+
+FBFILE* conf_fbfile_in;
+char    conf_line_in[256];
+
 
 /* address of class 0 conf */
 static struct   Class* class0;
@@ -1746,8 +1753,7 @@ static void initconf(FBFILE* file)
 
       ReplaceQuotes(quotedLine,line);
 
-      if (!*quotedLine || quotedLine[0] == '#' || quotedLine[0] == '\n' ||
-          quotedLine[0] == ' ' || quotedLine[0] == '\t')
+      if (!*quotedLine || quotedLine[0] == '#')
         continue;
 
       if(quotedLine[0] == '.')
@@ -1780,7 +1786,10 @@ static void initconf(FBFILE* file)
                   continue;
 		}
 	      else
-		initconf(includeFile);
+		{
+		  initconf(includeFile);
+		  continue;
+		}
 	    }
 	}
 
@@ -1789,18 +1798,41 @@ static void initconf(FBFILE* file)
       /* Could we test if it's conf line at all?        -Vesa */
       if (quotedLine[1] == ':')
         oldParseOneLine(quotedLine,aconf,&ccount,&ncount);
-
     }
 
   fbclose(file);
   check_class();
   nextping = nextconnect = time(NULL);
-
+#if 0
   if(me.name[0] == '\0')
     {
       log(L_CRIT, "Server has no M: line");
       exit(-1);
     }
+#endif
+}
+
+/*
+** initnewconf() 
+**    Read configuration file.
+**
+*
+* Inputs        - file descriptor pointing to config file to use
+*
+**    returns -1, if file cannot be opened
+**             0, if file opened
+*/
+
+#define MAXCONFLINKS 150
+
+static void initnewconf(FBFILE* file)
+{
+#if 0
+  class0 = find_class(0);       /* which one is class 0 ? */
+#endif
+
+  yyparse(); /* wheee! */
+  fbclose(file);
 }
 
 /*
@@ -2484,11 +2516,12 @@ int        is_address(char *host,
 ** parv is the sender prefix
 ** filename is the file that is to be output to the K lined client
 */
+
 int     m_killcomment(sptr, parv, filename)
 struct Client *sptr;
 char    *parv, *filename;
 {
-  FBFILE* file;
+  FBFILE  *file;
   char    line[256];
   char    *tmp;
   struct  stat        sb;
@@ -2665,12 +2698,14 @@ void get_printable_conf(struct ConfItem *aconf, char **name, char **host,
 
 void read_conf_files(int cold)
 {
-  FBFILE* file = 0;     /* initconf */
+  FBFILE *file;
   const char *filename; /* kline or conf filename */
+
+  conf_fbfile_in = NULL;
 
   filename = get_conf_name(CONF_TYPE);
 
-  if ((file = openconf(filename)) == 0)
+  if ((conf_fbfile_in = openconf(filename)) == 0)
     {
       if(cold)
         {
@@ -2687,7 +2722,15 @@ void read_conf_files(int cold)
   if(!cold)
     clear_out_old_conf();
 
-  initconf(file);
+  initconf(conf_fbfile_in);
+
+  if ((conf_fbfile_in = openconf("ircd.conf.new")) == 0)
+    {
+      sendto_ops("Can't open %s file aborting rehash!", "ircd.conf.new" );
+      return;
+    }
+
+  initnewconf(conf_fbfile_in);
 
 #ifdef KPATH
   filename = get_conf_name(KLINE_TYPE);
@@ -3465,4 +3508,26 @@ void conf_add_fields(struct ConfItem *aconf,
     DupString(aconf->user, user_field);
   if(port_field)
     aconf->port = atoi(port_field);
+}
+
+void yyerror(char *msg)
+{
+  sendto_realops("Parser error %s", msg);
+}
+
+int conf_fbgets(char *buf,int max_size, FBFILE *fb)
+{
+  char* buff;
+  int result;
+
+  buff = fbgets(buf,max_size,fb);
+  if(!buff)
+    return 0;
+  else
+    return(strlen(buf));
+}
+
+int conf_yy_fatal_error(char *msg)
+{
+  sendto_realops("lexer barfed. lets leave it at that for now");
 }
