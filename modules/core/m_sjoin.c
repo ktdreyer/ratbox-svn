@@ -572,15 +572,16 @@ static void ms_sjoin(struct Client *client_p,
           continue;
       }
 
-      if (chptr->users == 0 && !IsCapable(target_p, CAP_VCHAN))
-        continue;
+      /* Its a blank sjoin, only forward to those with CAP_VCHAN */
+      if (!parv[4+args][0] && !IsCapable(target_p, CAP_VCHAN))
+          continue;
 
       /* XXX - ids ? */
       if (IsCapable(target_p,CAP_HOPS))
         sendto_one(target_p, "%s %s", buf, sjbuf);
       else
         sendto_one(target_p, "%s %s", buf, sjbuf_nh);
-    }
+   }
 }
 
 /*
