@@ -1,3 +1,9 @@
+*** 20010424_10 by db
+- committed Alfred Perlsteins (zb^3) changes to s_bsd_kqueue.c
+  tested.. 
+
+
+
 *** 20010424_9 by androsyn
 The ::1 bug is fixed by mapping it to its ipv4 counterpart..
 
