@@ -1,3 +1,15 @@
+leeh        2005/01/22 11:36:54 EST	(20050122_0)
+
+  Modified files:
+    modules              m_cap.c 
+  Log:
+  - updated my clicap implementation to match the spec so far..
+  
+  Revision  Changes    Path
+  1.2       +84 -11    ircd-ratbox/modules/m_cap.c
+
+
+
 leeh        2005/01/21 07:14:43 EST	(20050121_2)
 
   Modified files:
