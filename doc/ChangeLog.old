@@ -1,3 +1,7 @@
+*** 19990815_3 by tomh
+more memory count bug fixes, fix SYSLOG_USERS bug
+
+
 *** 19990815_2 by tomh
 cleanup memory counting code, still more to do
 
