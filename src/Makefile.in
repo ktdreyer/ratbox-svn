@@ -44,6 +44,7 @@ SRCS = \
 	m_htm.c \
 	m_info.c \
 	m_ison.c \
+	m_join.c \
 	m_help.c \
 	m_kill.c \
 	m_kline.c \
@@ -130,6 +131,8 @@ SRCS = \
 #	m_help.o \
 #	m_htm.o \
 #	m_info.o \
+#	m_ison.o \
+#	m_join.o \
 #	m_kline.o \
 #	m_links.o \
 #	m_locops.o \
