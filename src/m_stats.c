@@ -130,6 +130,9 @@
 static const char* Lformat = ":%s %d %s %s %u %u %u %u %u :%u %u %s";
 
 static void stats_L(struct Client *sptr,char *name,int doall, int wilds);
+static void stats_spy(struct Client *sptr,char stat);
+static void stats_L_spy(struct Client *sptr, char stat, char *name);
+static void stats_p_spy(struct Client *sptr);
 
 int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
@@ -137,8 +140,7 @@ int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   char            stat = parc > 1 ? parv[1][0] : '\0';
   int             doall = 0;
   int             wilds = 0;
-  int             valid_stats = 0;
-  char*           name;
+  char*           name=NULL;
   static time_t   last_used = 0;
 
   if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
@@ -173,12 +175,12 @@ int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     {
     case 'L' : case 'l' :
       stats_L(sptr,name,doall,wilds);
-      valid_stats++;
+      stats_L_spy(sptr,stat,name);
       break;
 
     case 'C' : case 'c' :
       report_configured_links(sptr, CONF_CONNECT_SERVER|CONF_NOCONNECT_SERVER);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
  
     case 'B' : case 'b' :
@@ -187,28 +189,33 @@ int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
     case 'D': case 'd':
       sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
+      stats_spy(sptr,stat);
       break;
 
     case 'E' : case 'e' :
       sendto_one(sptr,":%s NOTICE %s :Use stats I instead", me.name, parv[0]);
+      stats_spy(sptr,stat);
       break;
 
     case 'F' : case 'f' :
       sendto_one(sptr,":%s NOTICE %s :Use stats I instead", me.name, parv[0]);
+      stats_spy(sptr,stat);
       break;
 
     case 'G': case 'g' :
-      if (ConfigFileEntry.glines) {
-        report_glines(sptr);
-        valid_stats++;
-      } else
+      if (ConfigFileEntry.glines)
+	{
+	  report_glines(sptr);
+	  stats_spy(sptr,stat);
+	}
+      else
         sendto_one(sptr,":%s NOTICE %s :This server does not support G lines",
                    me.name, parv[0]);
       break;
 
     case 'H' : case 'h' :
       report_configured_links(sptr, CONF_HUB|CONF_LEAF);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case 'I' : case 'i' :
@@ -216,12 +223,12 @@ int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 #ifndef I_LINES_OPER_ONLY
       report_mtrie_conf_links(sptr, CONF_CLIENT);
 #endif
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case 'k' :
       report_temp_klines(sptr);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case 'K' :
@@ -230,7 +237,7 @@ int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         report_matching_host_klines(sptr,parv[3]);
       else
 	report_matching_host_klines(sptr,sptr->host);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case 'M' : case 'm' :
@@ -238,22 +245,22 @@ int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           sendto_one(sptr, form_str(RPL_STATSCOMMANDS),
                      me.name, parv[0], mptr->cmd,
                      mptr->count, mptr->bytes);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case 'o' : case 'O' :
       report_configured_links(sptr, CONF_OPS);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case 'P' :
       show_ports(sptr);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case 'p' :
       show_opers(sptr);
-      valid_stats++;
+      stats_p_spy(sptr);
       break;
 
     case 'Q' : case 'q' :
@@ -263,22 +270,22 @@ int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
     case 'R' : case 'r' :
       send_usage(sptr,parv[0]);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case 'S' : case 's':
       sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case 'T' : case 't' :
       sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case 'U' :
       report_specials(sptr,CONF_ULINE,RPL_STATSULINE);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case 'u' :
@@ -290,13 +297,13 @@ int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                    now/86400, (now/3600)%24, (now/60)%60, now%60);
         sendto_one(sptr, form_str(RPL_STATSCONN), me.name, parv[0],
                    MaxConnectionCount, MaxClientCount);
-        valid_stats++;
+	stats_spy(sptr,stat);
         break;
       }
 
     case 'v' : case 'V' :
       show_servers(sptr);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case 'x' : case 'X' :
@@ -307,12 +314,12 @@ int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
     case 'Z' : case 'z' :
       sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case '?':
       serv_info(sptr, parv[0]);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     default :
@@ -321,50 +328,6 @@ int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     }
   sendto_one(sptr, form_str(RPL_ENDOFSTATS), me.name, parv[0], stat);
 
-  /* personally, I don't see why opers need to see stats requests
-   * at all. They are just "noise" to an oper, and users can't do
-   * any damage with stats requests now anyway. So, why show them?
-   * -Dianora
-   *
-   * so they can see stats p requests .. should probably add an
-   * option so only stats p is shown..  --is
-   *
-   * done --is
-   */
-
-  if (ConfigFileEntry.stats_notice && valid_stats)
-    {
-      if ( (stat == 'L') || (stat == 'l') )
-        {
-          sendto_realops_flags(FLAGS_SPY,
-               "STATS %c requested by %s (%s@%s) [%s] on %s",
-               stat,
-               sptr->name,
-               sptr->username,
-               sptr->host,
-               sptr->user->server,
-               parc > 2 ? parv[2] : "\0" );
-        }
-      else
-        {
-          sendto_realops_flags(FLAGS_SPY,
-               "STATS %c requested by %s (%s@%s) [%s]",
-               stat,
-               sptr->name,
-               sptr->username,
-               sptr->host,
-               sptr->user->server );
-        }
-    }
-  else
-    {
-      if (ConfigFileEntry.stats_p_notice && !ConfigFileEntry.stats_notice 
-          && valid_stats && stat == 'p')
-        sendto_realops_flags(FLAGS_SPY,
-                             "STATS p requested by %s (%s@%s) [%s]",
-                             sptr->name, sptr->username, sptr->host,
-                             sptr->user->server);
-    }
   return 0;
 }
 
@@ -397,7 +360,6 @@ int mo_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   char            stat = parc > 1 ? parv[1][0] : '\0';
   int             doall = 0;
   int             wilds = 0;
-  int             valid_stats = 0;
   char*           name;
 
   if (hunt_server(cptr,sptr,":%s STATS %s :%s",2,parc,parv)!=HUNTED_ISME)
@@ -420,12 +382,12 @@ int mo_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     {
     case 'L' : case 'l' :
       stats_L(sptr,name,doall,wilds);
-      valid_stats++;
+      stats_L_spy(sptr,stat,name);
       break;
 
     case 'C' : case 'c' :
       report_configured_links(sptr, CONF_CONNECT_SERVER|CONF_NOCONNECT_SERVER);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
  
     case 'B' : case 'b' :
@@ -434,7 +396,7 @@ int mo_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
     case 'D': case 'd':
       report_dlines(sptr);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case 'E' : case 'e' :
@@ -446,27 +408,29 @@ int mo_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       break;
 
     case 'G': case 'g' :
-      if(ConfigFileEntry.glines) {
-        report_glines(sptr);
-        valid_stats++;
-      } else
+      if(ConfigFileEntry.glines)
+	{
+	  report_glines(sptr);
+	  stats_spy(sptr,stat);
+	}
+      else
         sendto_one(sptr,":%s NOTICE %s :This server does not support G lines",
                    me.name, parv[0]);
       break;
 
     case 'H' : case 'h' :
       report_configured_links(sptr, CONF_HUB|CONF_LEAF);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case 'I' : case 'i' :
       report_mtrie_conf_links(sptr, CONF_CLIENT);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case 'k' :
       report_temp_klines(sptr);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case 'K' :
@@ -478,7 +442,7 @@ int mo_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           report_mtrie_conf_links(sptr, CONF_KILL);
         else
           report_matching_host_klines(sptr,sptr->host);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case 'M' : case 'm' :
@@ -486,47 +450,47 @@ int mo_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           sendto_one(sptr, form_str(RPL_STATSCOMMANDS),
                      me.name, parv[0], mptr->cmd,
                      mptr->count, mptr->bytes);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case 'o' : case 'O' :
       report_configured_links(sptr, CONF_OPS);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case 'P' :
       show_ports(sptr);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case 'p' :
       show_opers(sptr);
-      valid_stats++;
+      stats_p_spy(sptr);
       break;
 
     case 'Q' : case 'q' :
       report_qlines(sptr);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case 'R' : case 'r' :
       send_usage(sptr,parv[0]);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case 'S' : case 's':
       list_scache(cptr,sptr,parc,parv);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case 'T' : case 't' :
       tstats(sptr, parv[0]);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case 'U' :
       report_specials(sptr,CONF_ULINE,RPL_STATSULINE);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case 'u' :
@@ -538,33 +502,33 @@ int mo_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                    now/86400, (now/3600)%24, (now/60)%60, now%60);
         sendto_one(sptr, form_str(RPL_STATSCONN), me.name, parv[0],
                    MaxConnectionCount, MaxClientCount);
-        valid_stats++;
+	stats_spy(sptr,stat);
         break;
       }
 
     case 'v' : case 'V' :
       show_servers(sptr);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case 'x' : case 'X' :
       report_specials(sptr,CONF_XLINE,RPL_STATSXLINE);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;;
 
     case 'Y' : case 'y' :
       report_classes(sptr);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case 'Z' : case 'z' :
       count_memory(sptr, parv[0]);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     case '?':
       serv_info(sptr, parv[0]);
-      valid_stats++;
+      stats_spy(sptr,stat);
       break;
 
     default :
@@ -573,44 +537,6 @@ int mo_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     }
   sendto_one(sptr, form_str(RPL_ENDOFSTATS), me.name, parv[0], stat);
 
-  /* personally, I don't see why opers need to see stats requests
-   * at all. They are just "noise" to an oper, and users can't do
-   * any damage with stats requests now anyway. So, why show them?
-   * -Dianora
-   * see m_stats --is
-   */
-
-  if (ConfigFileEntry.stats_notice && valid_stats)
-    {
-      if ( (stat == 'L') || (stat == 'l') )
-        {
-          sendto_realops_flags(FLAGS_SPY,
-               "STATS %c requested by %s (%s@%s) [%s] on %s",
-               stat,
-               sptr->name,
-               sptr->username,
-               sptr->host,
-               sptr->user->server,
-               parc > 2 ? parv[2] : "\0" );
-        }
-      else
-        {
-          sendto_realops_flags(FLAGS_SPY,
-               "STATS %c requested by %s (%s@%s) [%s]",
-               stat,
-               sptr->name,
-               sptr->username,
-               sptr->host,
-               sptr->user->server );
-        }
-    }
-  else
-	  if (ConfigFileEntry.stats_p_notice && valid_stats &&
-		  !ConfigFileEntry.stats_notice && stat == 'p')
-		  sendto_realops_flags(FLAGS_SPY,
-							   "STATS p requested by %s (%s@%s) [%s]", stat,
-							   sptr->name, sptr->username, sptr->host,
-							   sptr->user->server);
   return 0;
 }
 
@@ -732,4 +658,64 @@ static void stats_L(struct Client *sptr,char *name,int doall, int wilds)
 		       IsServer(acptr) ? show_capabilities(acptr) : "-");
 	}
     }
+}
+
+/* personally, I don't see why opers need to see stats requests
+ * at all. They are just "noise" to an oper, and users can't do
+ * any damage with stats requests now anyway. So, why show them?
+ * -Dianora
+ *
+ * so they can see stats p requests .. should probably add an
+ * option so only stats p is shown..  --is
+ *
+ * done --is
+ */
+
+static void stats_spy(struct Client *sptr,char stat)
+{
+  if (ConfigFileEntry.stats_notice)
+    {
+      sendto_realops_flags(FLAGS_SPY,
+			   "STATS %c requested by %s (%s@%s) [%s]",
+			   stat,
+			   sptr->name,
+			   sptr->username,
+			   sptr->host,
+			   sptr->user->server );
+    }
+}
+
+static void stats_L_spy(struct Client *sptr, char stat, char *name)
+{
+  if (ConfigFileEntry.stats_notice)
+    {
+      if(name != NULL)
+	sendto_realops_flags(FLAGS_SPY,
+			     "STATS %c requested by %s (%s@%s) [%s] on %s",
+			     stat,
+			     sptr->name,
+			     sptr->username,
+			     sptr->host,
+			     sptr->user->server,
+			     name );
+      else
+	sendto_realops_flags(FLAGS_SPY,
+			     "STATS %c requested by %s (%s@%s) [%s]",
+			     stat,
+			     sptr->name,
+			     sptr->username,
+
+			     sptr->host,
+			     sptr->user->server);
+	
+    }
+}
+
+static void stats_p_spy(struct Client *sptr)
+{
+  if (ConfigFileEntry.stats_p_notice && !ConfigFileEntry.stats_notice )
+    sendto_realops_flags(FLAGS_SPY,
+			 "STATS p requested by %s (%s@%s) [%s]",
+			 sptr->name, sptr->username, sptr->host,
+			 sptr->user->server);
 }
