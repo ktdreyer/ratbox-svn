@@ -1,3 +1,7 @@
+*** 20010103_20 by ejb
+- better linked list handling in modules.c
+
+
 *** 20010103_19 by davidt
 Added some more info about problems with gettext.
 
