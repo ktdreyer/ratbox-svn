@@ -123,11 +123,17 @@ Little things to be done given enough time and initiative -Hwy
 
 
 -- jdc's list
-*  Re-write m_stats.c to be table-based, similar to m_set.  Also change
-   to support funtion exit code values (int), so that STATS output can
-   be "successful" or "unsuccessful" (eg. "STATS i requested by <nick>
-   [unsuccessful]" vs. "STATS i requested by <nick>").
-   --> Table part I know is done, what about the success status?
+  *  Re-write m_stats.c to be table-based, similar to m_set.  Also change
+     to support funtion exit code values (int), so that STATS output can
+     be "successful" or "unsuccessful" (eg. "STATS i requested by <nick>
+     [unsuccessful]" vs. "STATS i requested by <nick>").
+     --> Table part I know is done, what about the success status?
+  *  Re-write proper startup procedure for daemon; procedure should be
+     done in stages, similar to boot0/1/2 stages in FreeBSD.
+  *  Write secure cryptlink protocol with help from Sean.
+  *  Add byacc checking; if user is using old byacc (small table size),
+     force user to install bison, or make them upgrade byacc.
+
 
 -- Diane's list
 
