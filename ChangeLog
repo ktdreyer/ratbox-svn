@@ -1,3 +1,19 @@
+leeh        2004/07/20 15:51:06 EDT	(20040720_3)
+
+  Modified files:
+    include              balloc.h 
+    src                  client.c s_serv.c 
+  Log:
+  - fix a memleak with storing capabilities
+  - disable balloc debug code
+  
+  Revision  Changes    Path
+  1.31      +1 -1      ircd-ratbox/include/balloc.h
+  7.460     +3 -0      ircd-ratbox/src/client.c
+  7.406     +1 -0      ircd-ratbox/src/s_serv.c
+
+
+
 androsyn    2004/07/20 15:29:48 EDT	(20040720_2)
 
   Modified files:
