@@ -1,3 +1,9 @@
+*** 20010130_7 by jdc
+- Removed aconf->ip = IN_ADDR(ip); warnings (force unsigned long).
+- Commented out valid_comment function (unused so far?).
+
+
+
 *** 20010130_6 by davidt
 oops, fix core caused by previous change
 
