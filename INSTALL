@@ -97,16 +97,27 @@
             Reduces startup memory footprint.  This should really only
             be used for *small* networks, as this tends to be a performance
             hit on larger networks.
+
+          * 
+            --with-nicklen - Sets the maximum NICK length.  Note that this
+            should be consistant across your entire network.
+
+          *
+            --with-maxclients - Sets the maximum number of clients support
+            by the server. Note that this also twiddles the HARD_FDLIMIT_
+            so it is no longer necessary to modify include/config.h for this.
+            If HARD_FDLIMIT_ ends up being larger that FD_SETSIZE when using
+            select() for your I/O loop, s_bsd_select.c will refuse to 
+            compile(and tell you to use poll instead).  Take this errors
+            advice and use --enable-poll or something a bit more efficient.
+            You'll be happier at the end of the day for it.
+
    3. 
 
        Look over the "include/config.h" file. This allows you to change the
        few remaining hard coded options of how the ircd will operate. Most
-       admins will only have to change a few settings. HARD_FDLIMIT_ and
-       INIT_MAXCLIENTS are two that must be changed to the proper values for
-       your operating system. Note that these two settings must be <=
-       FD_SETSIZE (usually defined in the system includes, but may need to
-       overridden in the Makefile). USE_SYSLOG is the final one that most
-       admins will need to edit.
+       admins will only have to change a few settings. USE_SYSLOG is the 
+       one that most admins will need to edit.
 
          Note: Note that you must have permission by the sysadmin to send
          messages to the system log files.
