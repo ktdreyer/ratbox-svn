@@ -1,3 +1,24 @@
+androsyn    2004/05/23 17:29:28 EDT	(20040523_1)
+
+  Modified files:
+    .                    configure configure.ac 
+    include              m_info.h setup.h.in 
+    src                  packet.c send.c 
+  Log:
+  Add back the io debug send hooks.  Make this configurable with
+  --enable-iodebug, defaults to off.  /INFO will also spit out if the daemon
+  is compiled with support for it.
+  
+  Revision  Changes    Path
+  7.223     +28 -2     ircd-ratbox/configure
+  7.36      +16 -2     ircd-ratbox/configure.ac
+  7.53      +5 -0      ircd-ratbox/include/m_info.h
+  7.85      +3 -0      ircd-ratbox/include/setup.h.in
+  7.128     +4 -4      ircd-ratbox/src/packet.c
+  7.279     +20 -0     ircd-ratbox/src/send.c
+
+
+
 androsyn    2004/05/23 17:01:30 EDT	(20040523_0)
 
   Modified files:
