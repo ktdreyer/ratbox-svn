@@ -1,3 +1,14 @@
+*** 20001204_1 by db
+- fixed m_kline.c code
+- removed all traces of restricted I line code, thats better handled
+  using half ops anyway.
+- removed horrible '|' oper only messages in mtrie_conf.c
+- fixed /stats K in m_stats.c for opers
+- redid send_mode_list in channel.c to account for possible buffer overflow
+  even with 3 bans per channel..
+
+
+
 *** 20001203_13 by db
 - fixed bug in m_names.c removed redundant/duplicate code in m_names.c
   which was already in channel.c
