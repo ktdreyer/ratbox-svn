@@ -1,3 +1,7 @@
+*** 20001230_18 by lusky
+- have autoconf detect whether -export-dynamic is needed for ld
+
+
 *** 20001230_17 by db
 - I hate broken tree's resolved a conflict.. weird conflict too
   looked identical the two sections
