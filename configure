@@ -594,8 +594,8 @@ ac_configure=$ac_aux_dir/configure # This should be Cygnus configure.
 
 
 
-PACKAGE=ircd-hybrid
-VERSION=7.0
+PACKAGE=ircd-ratbox
+VERSION=1.0
 
 
 
@@ -885,15 +885,15 @@ fi
 
 if test "x$GCC" = "xyes"; then
 #  Use this for development..
-  IRC_CFLAGS="-O2 -g -ggdb -Wunused -Wall -Wshadow -Wmissing-declarations"
-#   IRC_CFLAGS="-O2 -g -ggdb"
+#  IRC_CFLAGS="-O2 -g -ggdb -Wunused -Wall -Wshadow -Wmissing-declarations"
+   IRC_CFLAGS="-O2 -g -ggdb"
 else
   if test "x$TenDRA" = "xyes"; then
             IRC_CFLAGS=""
     CPPFLAGS="$CPPFLAGS -Ylonglong -Yansi -I/usr/include"
   else
     if test "x$SunWorkShop" = "xyes"; then
-      IRC_CFLAGS="-fast -g -xinline=dlinkAdd,dlinkAddBefore,dlinkAddTail,dlinkDelete,dlink_list_length,dlink_node,dlinkMoveList,_MyMalloc,_MyRealloc,_MyFree,_DupString"
+      IRC_CFLAGS="-fast -g -xinline=dlinkAdd,dlinkAddBefore,dlinkAddTail,dlinkDelete,dlinkFind,dlinkFindDelete,dlinkFindDestroy,dlinkMoveList,dlinkMoveNode,free_dlink_node,make_dlink_node,_MyMalloc,_MyRealloc,_MyFree,_DupString"
     else
       if test "x$MIPSpro" = "xyes"; then
         IRC_CFLAGS="-g"
