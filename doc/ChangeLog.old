@@ -1,3 +1,6 @@
+*** 20010102_23 by davidt
+*sigh*, fix sjoins _from_ lazylink leafs
+
 *** 20010102_22 by davidt
 Make SJOIN burst nicks where appropriate..
 
