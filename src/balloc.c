@@ -221,7 +221,7 @@ newblock(BlockHeap * bh)
 		void *data;
 		newblk = (void *) offset;
 		newblk->block = b;
-#ifdef BALLOC_DEBUG
+#ifdef DEBUG_BALLOC
 		newblk->magic = BALLOC_MAGIC;
 #endif
 		data = (void *) ((size_t) offset + sizeof(MemBlock));
@@ -397,7 +397,7 @@ BlockHeapFree(BlockHeap * bh, void *ptr)
 	}
 
 	memblock = (void *) ((size_t) ptr - sizeof(MemBlock));
-#ifdef BALLOC_DEBUG
+#ifdef DEBUG_BALLOC
 	if(memblock->magic != BALLOC_MAGIC)
 	{
 		blockheap_fail("memblock->magic != BALLOC_MAGIC, got %lx", memblock->magic);
