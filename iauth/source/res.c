@@ -311,7 +311,7 @@ static void start_resolver(void)
    */
   spare_fd = open("/dev/null",O_RDONLY,0);
   if ((spare_fd < 0) || (spare_fd > 255)) {
-  	return;
+    return;
   }
 
   if (!_res.nscount) {
@@ -934,7 +934,7 @@ static int proc_answer(struct ResRequest* request, HEADER* header,
       hostbuf[HOSTLEN] = '\0';
       current += (size_t) n;
 
-		#ifdef bingo
+    #ifdef bingo
       Debug((DEBUG_INFO,"got host %s",hostbuf));
     #endif
       /*

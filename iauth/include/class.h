@@ -23,11 +23,11 @@
 
 struct Class
 {
-	struct Class *next, *prev;
+  struct Class *next, *prev;
 
-	int classnum; /* number that identifies this class */
-	int maxLinks; /* maximum clients that may use this class */
-	int links;    /* current clients using this class */
+  int classnum; /* number that identifies this class */
+  int maxLinks; /* maximum clients that may use this class */
+  int links;    /* current clients using this class */
 };
 
 /*

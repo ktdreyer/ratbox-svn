@@ -48,33 +48,33 @@ struct Iline;
 
 struct Level
 {
-	struct Level *nextpiece; /* pointer to next piece (in this level) */
-	struct Level *nextlevel, /* pointer to next level (below this one) */
-	             *prevlevel; /* pointer to parent level (above this one) */
+  struct Level *nextpiece; /* pointer to next piece (in this level) */
+  struct Level *nextlevel, /* pointer to next level (below this one) */
+               *prevlevel; /* pointer to parent level (above this one) */
 
-	char *name;              /* name of piece on this level */
+  char *name;              /* name of piece on this level */
 
-	int SubNodes;            /* # of nodes immediately below this one */
+  int SubNodes;            /* # of nodes immediately below this one */
 
-	/*
-	 * This is the number of unsearched nodes immediately below
-	 * this node. This number can never exceed SubNodes.
-	 */
-	int UnsearchedSubNodes;
+  /*
+   * This is the number of unsearched nodes immediately below
+   * this node. This number can never exceed SubNodes.
+   */
+  int UnsearchedSubNodes;
 
-	/*
-	 * This is an array of pointers to the corresponding
-	 * I/K line structure(s). The reason there may be more than
-	 * one, is if the hostnames are the same, but the usernames
-	 * differ.
-	 * It is only set for the very last piece of the I/K line -
-	 * (ie: the very bottom of the tree). Every piece up until
-	 * the last piece has a NULL typeptrs.
-	 */
-	void **typeptrs;
-	int numptrs;             /* number of pointers in typeptrs */
+  /*
+   * This is an array of pointers to the corresponding
+   * I/K line structure(s). The reason there may be more than
+   * one, is if the hostnames are the same, but the usernames
+   * differ.
+   * It is only set for the very last piece of the I/K line -
+   * (ie: the very bottom of the tree). Every piece up until
+   * the last piece has a NULL typeptrs.
+   */
+  void **typeptrs;
+  int numptrs;             /* number of pointers in typeptrs */
 
-	unsigned int flags;
+  unsigned int flags;
 };
 
 /*

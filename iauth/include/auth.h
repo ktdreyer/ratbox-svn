@@ -45,26 +45,26 @@ struct Server;
 
 struct AuthRequest
 {
-	struct AuthRequest *next, *prev;
+  struct AuthRequest *next, *prev;
 
-	unsigned int flags;                /* current state of request */
-	time_t       timeout;              /* time when query expires */
-	int          identfd;              /* ident query socket descriptor */
-	char         clientid[IDLEN + 1];  /* unique client ID */
+  unsigned int flags;                /* current state of request */
+  time_t       timeout;              /* time when query expires */
+  int          identfd;              /* ident query socket descriptor */
+  char         clientid[IDLEN + 1];  /* unique client ID */
 
-	struct Server *server;      /* server where request came from */
+  struct Server *server;      /* server where request came from */
 
-	struct in_addr ip;          /* ip address of client */
+  struct in_addr ip;          /* ip address of client */
 
-	struct DNSReply *dns_reply; /* result from resolver query */
+  struct DNSReply *dns_reply; /* result from resolver query */
 
-	unsigned int remoteport;    /* client's remote port */
-	unsigned int localport;     /* server's local port */
+  unsigned int remoteport;    /* client's remote port */
+  unsigned int localport;     /* server's local port */
 
-	char         nickname[NICKLEN + 1]; /* user's nickname */
-	char         username[USERLEN + 1]; /* user's ident */
-	char         hostname[HOSTLEN + 1]; /* user's hostname */
-	char         password[PASSLEN + 1]; /* user's password */
+  char         nickname[NICKLEN + 1]; /* user's nickname */
+  char         username[USERLEN + 1]; /* user's ident */
+  char         hostname[HOSTLEN + 1]; /* user's hostname */
+  char         password[PASSLEN + 1]; /* user's password */
 };
 
 /* auth.c prototypes */

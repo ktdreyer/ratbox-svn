@@ -23,8 +23,8 @@
 
 struct CommandTable
 {
-	char *name;      /* name of command */
-	void (* func)(); /* function to call */
+  char *name;      /* name of command */
+  void (* func)(); /* function to call */
 };
 
 /*

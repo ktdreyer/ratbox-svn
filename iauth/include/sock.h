@@ -49,18 +49,18 @@ extern struct Server   *ServerList;
 
 struct Port
 {
-	struct Port *next;
+  struct Port *next;
 
-	int port;   /* port to listen on */
-	int sockfd; /* socket file descriptor */
+  int port;   /* port to listen on */
+  int sockfd; /* socket file descriptor */
 };
 
 struct Server
 {
-	struct Server *next, *prev;
+  struct Server *next, *prev;
 
-	int sockfd;    /* socket descriptor for their connection */
-	char *name;    /* server name */
+  int sockfd;    /* socket descriptor for their connection */
+  char *name;    /* server name */
 };
 
 #endif /* INCLUDED_sock_h */

@@ -64,17 +64,17 @@ char *
 MyStrdup(char *str)
 
 {
-	char *final;
+  char *final;
 
-	final = (char *) MyMalloc(strlen(str) + 1);
-	strcpy(final, str);
+  final = (char *) MyMalloc(strlen(str) + 1);
+  strcpy(final, str);
 
-	return (final);
+  return (final);
 } /* MyStrdup() */
 
 /*
 MyRealloc()
-	calls realloc() with 'oldptr' and 'newsize'; returns pointer to
+  calls realloc() with 'oldptr' and 'newsize'; returns pointer to
 allocated memory if successful, otherwise calls outofmemory()
 */
 
@@ -82,13 +82,13 @@ void *
 MyRealloc(void *oldptr, size_t newsize)
 
 {
-	void	*ptr;
+  void  *ptr;
 
-	ptr = (void *) realloc(oldptr, newsize);
-	if (!ptr)
-		outofmemory();
+  ptr = (void *) realloc(oldptr, newsize);
+  if (!ptr)
+    outofmemory();
 
-	return (ptr);
+  return (ptr);
 } /* MyRealloc() */
 
 /*
@@ -100,17 +100,17 @@ void
 MyFree(void *ptr)
 
 {
-	if (ptr)
-	{
-		free(ptr);
-		ptr = NULL;
-	}
+  if (ptr)
+  {
+    free(ptr);
+    ptr = NULL;
+  }
 } /* MyFree() */
 
 static void
 outofmemory()
 
 {
-	log(L_INFO, "Out of memory, exiting");
-	exit (-1);
+  log(L_INFO, "Out of memory, exiting");
+  exit (-1);
 } /* outofmemory() */

@@ -48,19 +48,19 @@ struct Class *
 AddClass(int classnum, int maxLinks)
 
 {
-	struct Class *ptr;
+  struct Class *ptr;
 
-	ptr = (struct Class *) MyMalloc(sizeof(struct Class));
-	memset(ptr, 0, sizeof(struct Class));
+  ptr = (struct Class *) MyMalloc(sizeof(struct Class));
+  memset(ptr, 0, sizeof(struct Class));
 
-	ptr->classnum = classnum;
-	ptr->maxLinks = maxLinks;
+  ptr->classnum = classnum;
+  ptr->maxLinks = maxLinks;
 
-	ptr->prev = NULL;
-	ptr->next = ClassList;
-	ClassList = ptr;
+  ptr->prev = NULL;
+  ptr->next = ClassList;
+  ClassList = ptr;
 
-	return (ptr);
+  return (ptr);
 } /* AddClass() */
 
 /*
@@ -72,15 +72,15 @@ void
 DeleteClass(struct Class *clptr)
 
 {
-	if (clptr->next)
-		clptr->next->prev = clptr->prev;
+  if (clptr->next)
+    clptr->next->prev = clptr->prev;
 
-	if (clptr->prev)
-		clptr->prev->next = clptr->next;
-	else
-		ClassList = clptr->next;
+  if (clptr->prev)
+    clptr->prev->next = clptr->next;
+  else
+    ClassList = clptr->next;
 
-	FreeClass(clptr);
+  FreeClass(clptr);
 } /* DeleteClass() */
 
 /*
@@ -92,7 +92,7 @@ static void
 FreeClass(struct Class *clptr)
 
 {
-	MyFree(clptr);
+  MyFree(clptr);
 } /* FreeClass() */
 
 /*
@@ -104,13 +104,13 @@ struct Class *
 FindClass(int classnum)
 
 {
-	struct Class *clptr;
+  struct Class *clptr;
 
-	clptr = ClassList;
-	while (clptr && !(clptr->classnum == classnum))
-		clptr = clptr->next;
+  clptr = ClassList;
+  while (clptr && !(clptr->classnum == classnum))
+    clptr = clptr->next;
 
-	return (clptr);
+  return (clptr);
 } /* FindClass() */
 
 /*
@@ -122,12 +122,12 @@ void
 ClearClasses()
 
 {
-	struct Class *next;
+  struct Class *next;
 
-	while (ClassList)
-	{
-		next = ClassList->next;
-		FreeClass(ClassList);
-		ClassList = next;
-	}
+  while (ClassList)
+  {
+    next = ClassList->next;
+    FreeClass(ClassList);
+    ClassList = next;
+  }
 } /* ClearClasses() */

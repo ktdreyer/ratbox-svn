@@ -77,76 +77,76 @@ void
 StartAuth(struct Server *sptr, int parc, char **parv)
 
 {
-	struct AuthRequest *auth;
+  struct AuthRequest *auth;
 
-	if (parc < 6)
-		return; /* paranoia */
+  if (parc < 6)
+    return; /* paranoia */
 
-	auth = CreateAuthRequest();
+  auth = CreateAuthRequest();
 
-	auth->ip.s_addr = (unsigned int) atol(parv[2]);
+  auth->ip.s_addr = (unsigned int) atol(parv[2]);
 
-	/*
-	 * If the DNS query fails, we will use the client's
-	 * ip address
-	 * bingo - the dns routine should do this when it fails
-	 */
-	strcpy(auth->hostname, inet_ntoa(auth->ip));
+  /*
+   * If the DNS query fails, we will use the client's
+   * ip address
+   * bingo - the dns routine should do this when it fails
+   */
+  strcpy(auth->hostname, inet_ntoa(auth->ip));
 
-	auth->server = sptr;
+  auth->server = sptr;
 
-	if (strlen(parv[1]) > IDLEN)
-	{
-		/*
-		 * This should never happen, but just to be paranoid,
-		 * cancel the auth request
-		 */
-		tosock(auth->server->sockfd,
-			"DoneAuth %s ~ %s\n",
-			parv[1],
-			auth->hostname);
+  if (strlen(parv[1]) > IDLEN)
+  {
+    /*
+     * This should never happen, but just to be paranoid,
+     * cancel the auth request
+     */
+    tosock(auth->server->sockfd,
+      "DoneAuth %s ~ %s\n",
+      parv[1],
+      auth->hostname);
 
-		FreeAuthRequest(auth);
-		return;
-	}
+    FreeAuthRequest(auth);
+    return;
+  }
 
-	strcpy(auth->clientid, parv[1]);
+  strcpy(auth->clientid, parv[1]);
 
 #if 0
-	auth->remoteport = (unsigned int) atoi(parv[3]);
-	auth->localport = (unsigned int) atoi(parv[4]);
+  auth->remoteport = (unsigned int) atoi(parv[3]);
+  auth->localport = (unsigned int) atoi(parv[4]);
 #endif /* 0 */
 
 #if 0
-	/*
-	 * Begin dns query
-	 */
-	BeginDNSQuery(auth);
+  /*
+   * Begin dns query
+   */
+  BeginDNSQuery(auth);
 #endif /* 0 */
 
 #if 0
-	/*
-	 * Begin ident query
-	 */
-	if (BeginIdentQuery(auth))
-		LinkAuthRequest(auth, &AuthPollList);
-	else if (IsDNSPending(auth))
-		LinkAuthRequest(auth, &AuthIncompleteList);
-	else
-	{
-		CompleteAuthRequest(auth);
-		FreeAuthRequest(auth);
-	}
+  /*
+   * Begin ident query
+   */
+  if (BeginIdentQuery(auth))
+    LinkAuthRequest(auth, &AuthPollList);
+  else if (IsDNSPending(auth))
+    LinkAuthRequest(auth, &AuthIncompleteList);
+  else
+  {
+    CompleteAuthRequest(auth);
+    FreeAuthRequest(auth);
+  }
 #endif /* 0 */
 
-	strncpy_irc(auth->nickname, parv[2], NICKLEN);
-	strncpy_irc(auth->username, parv[3], USERLEN);
-	strncpy_irc(auth->hostname, parv[4], HOSTLEN);
+  strncpy_irc(auth->nickname, parv[2], NICKLEN);
+  strncpy_irc(auth->username, parv[3], USERLEN);
+  strncpy_irc(auth->hostname, parv[4], HOSTLEN);
 
-	if (parc >= 7)
-		strncpy_irc(auth->password, parv[6], PASSLEN);
+  if (parc >= 7)
+    strncpy_irc(auth->password, parv[6], PASSLEN);
 
-	CompleteAuthRequest(auth);
+  CompleteAuthRequest(auth);
 } /* StartAuth() */
 
 /*
@@ -159,16 +159,16 @@ static struct AuthRequest *
 CreateAuthRequest()
 
 {
-	struct AuthRequest *request;
+  struct AuthRequest *request;
 
-	request = (struct AuthRequest *) MyMalloc(sizeof(struct AuthRequest));
+  request = (struct AuthRequest *) MyMalloc(sizeof(struct AuthRequest));
 
-	memset(request, 0, sizeof(struct AuthRequest));
+  memset(request, 0, sizeof(struct AuthRequest));
 
-	request->identfd = NOSOCK;
-	request->timeout = time(NULL) + CONNECTTIMEOUT;
+  request->identfd = NOSOCK;
+  request->timeout = time(NULL) + CONNECTTIMEOUT;
 
-	return (request);
+  return (request);
 } /* CreateAuthRequest() */
 
 /*
@@ -180,7 +180,7 @@ static void
 FreeAuthRequest(struct AuthRequest *request)
 
 {
-	MyFree(request);
+  MyFree(request);
 } /* FreeAuthRequest() */
 
 /*
@@ -192,12 +192,12 @@ static void
 LinkAuthRequest(struct AuthRequest *request, struct AuthRequest **list)
 
 {
-	request->prev = NULL;
-	request->next = *list;
+  request->prev = NULL;
+  request->next = *list;
 
-	if (*list)
-		(*list)->prev = request;
-	*list = request;
+  if (*list)
+    (*list)->prev = request;
+  *list = request;
 } /* LinkAuthRequest() */
 
 /*
@@ -209,13 +209,13 @@ static void
 UnlinkAuthRequest(struct AuthRequest *request, struct AuthRequest **list)
 
 {
-	if (request->next)
-		request->next->prev = request->prev;
+  if (request->next)
+    request->next->prev = request->prev;
 
-	if (request->prev)
-		request->prev->next = request->next;
-	else
-		*list = request->next;
+  if (request->prev)
+    request->prev->next = request->next;
+  else
+    *list = request->next;
 } /* UnlinkAuthRequest() */
 
 /*
@@ -227,69 +227,69 @@ static int
 BeginIdentQuery(struct AuthRequest *auth)
 
 {
-	struct sockaddr_in remoteaddr,
-	                   localaddr;
-	int length;
-	int fd;
+  struct sockaddr_in remoteaddr,
+                     localaddr;
+  int length;
+  int fd;
 
-	assert(auth != 0);
+  assert(auth != 0);
 
-	if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-	{
-		log(L_ERROR,
-			"BeginIdentQuery(): Unable to open stream socket: %s",
-			strerror(errno));
-		return 0;
-	}
+  if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+  {
+    log(L_ERROR,
+      "BeginIdentQuery(): Unable to open stream socket: %s",
+      strerror(errno));
+    return 0;
+  }
 
-	if (!SetNonBlocking(fd))
-	{
-		log(L_ERROR,
-			"BeginIdentQuery(): Unable to set socket [%d] non-blocking",
-			fd);
-		close(fd);
-		return 0;
-	}
+  if (!SetNonBlocking(fd))
+  {
+    log(L_ERROR,
+      "BeginIdentQuery(): Unable to set socket [%d] non-blocking",
+      fd);
+    close(fd);
+    return 0;
+  }
 
-	length = sizeof(struct sockaddr_in);
-	memset((void *) &localaddr, 0, length);
+  length = sizeof(struct sockaddr_in);
+  memset((void *) &localaddr, 0, length);
 
-	localaddr.sin_port = htons(0);
+  localaddr.sin_port = htons(0);
 
-	if (bind(fd, (struct sockaddr *) &localaddr, sizeof(localaddr)) < 0)
-	{
-		log(L_ERROR,
-			"BeginIdentQuery(): Unable to bind socket [%d]: %s",
-			fd,
-			strerror(errno));
-		close(fd);
-		return 0;
-	}
+  if (bind(fd, (struct sockaddr *) &localaddr, sizeof(localaddr)) < 0)
+  {
+    log(L_ERROR,
+      "BeginIdentQuery(): Unable to bind socket [%d]: %s",
+      fd,
+      strerror(errno));
+    close(fd);
+    return 0;
+  }
 
-	memcpy(&remoteaddr.sin_addr, &auth->ip, sizeof(struct in_addr));
+  memcpy(&remoteaddr.sin_addr, &auth->ip, sizeof(struct in_addr));
 
-	remoteaddr.sin_port = htons(113);
-	remoteaddr.sin_family = AF_INET;
+  remoteaddr.sin_port = htons(113);
+  remoteaddr.sin_family = AF_INET;
 
-	/*
-	 * Now, attempt the connection
-	 */
-	if ((connect(fd, (struct sockaddr *) &remoteaddr, sizeof(remoteaddr)) == (-1)) &&
-			(errno != EINPROGRESS))
-	{
-		log(L_ERROR,
-			"BeginIdentQuery(): Unable to connect to ident port of %s: %s",
-			inet_ntoa(auth->ip),
-			strerror(errno));
-		close(fd);
-		return 0;
-	}
+  /*
+   * Now, attempt the connection
+   */
+  if ((connect(fd, (struct sockaddr *) &remoteaddr, sizeof(remoteaddr)) == (-1)) &&
+      (errno != EINPROGRESS))
+  {
+    log(L_ERROR,
+      "BeginIdentQuery(): Unable to connect to ident port of %s: %s",
+      inet_ntoa(auth->ip),
+      strerror(errno));
+    close(fd);
+    return 0;
+  }
 
-	auth->identfd = fd;
+  auth->identfd = fd;
 
-	SetIdentConnect(auth);
+  SetIdentConnect(auth);
 
-	return 1;
+  return 1;
 } /* BeginIdentQuery() */
 
 /*
@@ -301,22 +301,22 @@ static void
 IdentError(struct AuthRequest *auth)
 
 {
-	assert(auth != 0);
+  assert(auth != 0);
 
-	close(auth->identfd);
-	auth->identfd = NOSOCK;
+  close(auth->identfd);
+  auth->identfd = NOSOCK;
 
-	ClearAuth(auth);
+  ClearAuth(auth);
 
-	UnlinkAuthRequest(auth, &AuthPollList);
+  UnlinkAuthRequest(auth, &AuthPollList);
 
-	if (IsDNSPending(auth))
-		LinkAuthRequest(auth, &AuthIncompleteList);
-	else
-	{
-		CompleteAuthRequest(auth);
-		FreeAuthRequest(auth);
-	}
+  if (IsDNSPending(auth))
+    LinkAuthRequest(auth, &AuthIncompleteList);
+  else
+  {
+    CompleteAuthRequest(auth);
+    FreeAuthRequest(auth);
+  }
 } /* IdentError() */
 
 /*
@@ -328,25 +328,25 @@ void
 SendIdentQuery(struct AuthRequest *auth)
 
 {
-	char authbuf[32];
+  char authbuf[32];
 
-	assert(auth != 0);
+  assert(auth != 0);
 
-	sprintf(authbuf, "%u , %u\r\n",
-		auth->remoteport,
-		auth->localport);
+  sprintf(authbuf, "%u , %u\r\n",
+    auth->remoteport,
+    auth->localport);
 
-	if (send(auth->identfd, authbuf, strlen(authbuf), 0) == (-1))
-	{
-		log(L_ERROR,
-			"SendIdentQuery(): Error sending ident request: %s",
-			strerror(errno));
-		IdentError(auth);
-		return;
-	}
+  if (send(auth->identfd, authbuf, strlen(authbuf), 0) == (-1))
+  {
+    log(L_ERROR,
+      "SendIdentQuery(): Error sending ident request: %s",
+      strerror(errno));
+    IdentError(auth);
+    return;
+  }
 
-	ClearIdentConnect(auth);
-	SetIdentPending(auth);
+  ClearIdentConnect(auth);
+  SetIdentPending(auth);
 } /* SendIdentQuery() */
 
 /*
@@ -359,52 +359,52 @@ void
 ReadIdentReply(struct AuthRequest *auth)
 
 {
-	char buf[ID_BUFSIZE + 1];
-	int len;
-	char *s = NULL,
-	     *t;
-	int count;
+  char buf[ID_BUFSIZE + 1];
+  int len;
+  char *s = NULL,
+       *t;
+  int count;
 
-	len = recv(auth->identfd, buf, ID_BUFSIZE, 0);
+  len = recv(auth->identfd, buf, ID_BUFSIZE, 0);
 
-	if (len > 0)
-	{
-		buf[len] = '\0';
+  if (len > 0)
+  {
+    buf[len] = '\0';
 
-		if ((s = GetValidIdent(buf)))
-		{
-			t = auth->username;
-			for (count = USERLEN; *s && count; s++)
-			{
-				if (*s == '@')
-					break;
+    if ((s = GetValidIdent(buf)))
+    {
+      t = auth->username;
+      for (count = USERLEN; *s && count; s++)
+      {
+        if (*s == '@')
+          break;
 
-				if ( !isspace(*s) && *s != ':' )
-				{
-					*t++ = *s;
-					--count;
-				}
-			}
-			*t = '\0';
-		}
-	}
+        if ( !isspace(*s) && *s != ':' )
+        {
+          *t++ = *s;
+          --count;
+        }
+      }
+      *t = '\0';
+    }
+  }
 
-	close(auth->identfd);
-	auth->identfd = NOSOCK;
-	ClearAuth(auth);
+  close(auth->identfd);
+  auth->identfd = NOSOCK;
+  ClearAuth(auth);
   
-	if (!s)
-		strcpy(auth->username, "unknown");
+  if (!s)
+    strcpy(auth->username, "unknown");
 
-	UnlinkAuthRequest(auth, &AuthPollList);
+  UnlinkAuthRequest(auth, &AuthPollList);
 
-	if (IsDNSPending(auth))
-		LinkAuthRequest(auth, &AuthIncompleteList);
-	else
-	{
-		CompleteAuthRequest(auth);
-		FreeAuthRequest(auth);
-	}
+  if (IsDNSPending(auth))
+    LinkAuthRequest(auth, &AuthIncompleteList);
+  else
+  {
+    CompleteAuthRequest(auth);
+    FreeAuthRequest(auth);
+  }
 } /* ReadIdentReply() */
 
 /*
@@ -480,23 +480,23 @@ static void
 BeginDNSQuery(struct AuthRequest *auth)
 
 {
-	struct DNSQuery query;
+  struct DNSQuery query;
 
-	assert(auth != 0);
+  assert(auth != 0);
 
-	query.vptr = auth;
-	query.callback = AuthDNSCallback;
+  query.vptr = auth;
+  query.callback = AuthDNSCallback;
 
-	auth->dns_reply = gethost_byaddr((char *) &auth->ip, &query);
-	if (auth->dns_reply)
-	{
-		/*
-		 * The client's ip was cached
-		 */
-		strncpy_irc(auth->hostname, auth->dns_reply->hp->h_name, HOSTLEN);
-	}
-	else
-		SetDNSPending(auth);
+  auth->dns_reply = gethost_byaddr((char *) &auth->ip, &query);
+  if (auth->dns_reply)
+  {
+    /*
+     * The client's ip was cached
+     */
+    strncpy_irc(auth->hostname, auth->dns_reply->hp->h_name, HOSTLEN);
+  }
+  else
+    SetDNSPending(auth);
 } /* BeginDNSQuery() */
 
 /*
@@ -579,138 +579,138 @@ static void
 CompleteAuthRequest(struct AuthRequest *auth)
 
 {
-	int badauth = 0;
-	int len;
-	char buf[BUFSIZE],
-	     reason[BUFSIZE];
-	struct ServerBan *kptr;
-	struct Quarantine *qptr;
-	struct Iline *iptr = NULL;
+  int badauth = 0;
+  int len;
+  char buf[BUFSIZE],
+       reason[BUFSIZE];
+  struct ServerBan *kptr;
+  struct Quarantine *qptr;
+  struct Iline *iptr = NULL;
 
-	*reason = '\0';
+  *reason = '\0';
 
-	switch (CheckIline(auth->username, auth->hostname, auth->password, &iptr))
-	{
-		/*
-		 * There was no I-line found for this client
-		 */
-		case IL_ERR_NOTAUTHORIZED:
-		{
-			badauth = 1;
-			sprintf(reason,
-				"*** You are not authorized to use this server");
+  switch (CheckIline(auth->username, auth->hostname, auth->password, &iptr))
+  {
+    /*
+     * There was no I-line found for this client
+     */
+    case IL_ERR_NOTAUTHORIZED:
+    {
+      badauth = 1;
+      sprintf(reason,
+        "*** You are not authorized to use this server");
 
-			break;
-		} /* case IL_ERR_NOTAUTHORIZED */
+      break;
+    } /* case IL_ERR_NOTAUTHORIZED */
 
-		/*
-		 * The I-line is full - the number of users specified
-		 * in the corresponding Y: line has been reached.
-		 */
-		case IL_ERR_FULL:
-		{
-			badauth = 1;
-			sprintf(reason,
-				"*** No more clients allowed in your connection class");
+    /*
+     * The I-line is full - the number of users specified
+     * in the corresponding Y: line has been reached.
+     */
+    case IL_ERR_FULL:
+    {
+      badauth = 1;
+      sprintf(reason,
+        "*** No more clients allowed in your connection class");
 
-			break;
-		} /* case IL_ERR_FULL */
+      break;
+    } /* case IL_ERR_FULL */
 
-		case IL_ERR_NEEDIDENT:
-		{
-			badauth = 1;
-			sprintf(reason,
-				"*** You need to install identd to use this server");
+    case IL_ERR_NEEDIDENT:
+    {
+      badauth = 1;
+      sprintf(reason,
+        "*** You need to install identd to use this server");
 
-			break;
-		} /* case IL_ERR_NOIDENT */
+      break;
+    } /* case IL_ERR_NOIDENT */
 
-		case IL_ERR_BADPASS:
-		{
-			badauth = 1;
-			sprintf(reason,
-				"*** Bad Password");
+    case IL_ERR_BADPASS:
+    {
+      badauth = 1;
+      sprintf(reason,
+        "*** Bad Password");
 
-			break;
-		} /* case IL_ERR_BADPASS */
+      break;
+    } /* case IL_ERR_BADPASS */
 
-		/*
-		 * They have an acceptable I-line
-		 */
-		default:
-			break;
-	}
+    /*
+     * They have an acceptable I-line
+     */
+    default:
+      break;
+  }
 
 
-	if (iptr)
-	{
-		if (!IsIlineExempt(iptr) &&
-				(kptr = FindServerBan(auth->username, auth->hostname)))
-		{
-			/*
-			 * They are K-lined
-			 */
-			badauth = 1;
-			sprintf(reason,
-				"*** Banned: %s",
-				kptr->reason);
-		}
-		else if ((qptr = FindQuarantine(auth->nickname, auth->username, auth->hostname)))
-		{
-			badauth = 1;
-			sprintf(reason,
-				"*** Quarantined Nickname: %s",
-				qptr->reason);
-		}
-	} /* if (iptr) */
+  if (iptr)
+  {
+    if (!IsIlineExempt(iptr) &&
+        (kptr = FindServerBan(auth->username, auth->hostname)))
+    {
+      /*
+       * They are K-lined
+       */
+      badauth = 1;
+      sprintf(reason,
+        "*** Banned: %s",
+        kptr->reason);
+    }
+    else if ((qptr = FindQuarantine(auth->nickname, auth->username, auth->hostname)))
+    {
+      badauth = 1;
+      sprintf(reason,
+        "*** Quarantined Nickname: %s",
+        qptr->reason);
+    }
+  } /* if (iptr) */
 
-	if (badauth)
-	{
-		len = sprintf(buf, "BadAuth %s :%s\n",
-			auth->clientid,
-			reason);
-	}
-	else
-	{
-		assert(iptr != 0);
+  if (badauth)
+  {
+    len = sprintf(buf, "BadAuth %s :%s\n",
+      auth->clientid,
+      reason);
+  }
+  else
+  {
+    assert(iptr != 0);
 
-		/*
-		 * If the ident query failed, make their username "~",
-		 * which will tell the ircd server to use the given
-		 * ident in the USER statement.
-		 */
-		if (!*auth->username)
-			strcpy(auth->username, "~");
+    /*
+     * If the ident query failed, make their username "~",
+     * which will tell the ircd server to use the given
+     * ident in the USER statement.
+     */
+    if (!*auth->username)
+      strcpy(auth->username, "~");
 
-	#ifdef SPOOF_FREEFORM
+  #ifdef SPOOF_FREEFORM
 
-		if (iptr->spoofhost && IsIlineSpoof(iptr))
-		{
-			strncpy_irc(auth->hostname, iptr->spoofhost, HOSTLEN);
-			auth->hostname[HOSTLEN] = '\0';
-		}
+    if (iptr->spoofhost && IsIlineSpoof(iptr))
+    {
+      strncpy_irc(auth->hostname, iptr->spoofhost, HOSTLEN);
+      auth->hostname[HOSTLEN] = '\0';
+    }
 
-	#else
+  #else
 
-		if (auth->server->name)
-		{
-			/*
-			 * They have the spoof flag in their I: line, but
-			 * SPOOF_FREEFORM is not defined - make their
-			 * hostname: oper.server
-			 */
-			strcpy(auth->hostname, "oper.");
-			strncpy_irc(&auth->hostname[5], auth->server->name, HOSTLEN - 5);
-		}
+    if (auth->server->name)
+    {
+      /*
+       * They have the spoof flag in their I: line, but
+       * SPOOF_FREEFORM is not defined - make their
+       * hostname: oper.server
+       */
+      strcpy(auth->hostname, "oper.");
+      strncpy_irc(&auth->hostname[5], auth->server->name, HOSTLEN - 5);
+    }
 
-	#endif /* SPOOF_FREEFORM */
+  #endif /* SPOOF_FREEFORM */
 
-		len = sprintf(buf, "DoneAuth %s %s %s %d\n",
-			auth->clientid,
-			auth->username,
-			auth->hostname,
-			iptr ? iptr->classnum : 0);
-	}
+    len = sprintf(buf, "DoneAuth %s %s %s %d\n",
+      auth->clientid,
+      auth->username,
+      auth->hostname,
+      iptr ? iptr->classnum : 0);
+  }
 
-	send(auth->server->sockfd, buf, len, 0);
+  send(auth->server->sockfd, buf, len, 0);
 } /* CompleteAuthRequest() */

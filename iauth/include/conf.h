@@ -36,12 +36,12 @@ struct Class;
  */
 struct ServerBan
 {
-	struct ServerBan *next, *prev;
+  struct ServerBan *next, *prev;
 
-	char *username; /* banned username */
-	char *hostname; /* banned hostname */
-	char *reason;   /* reason for ban */
-	time_t expires; /* ts of when kline expires (0 if permanent) */
+  char *username; /* banned username */
+  char *hostname; /* banned hostname */
+  char *reason;   /* reason for ban */
+  time_t expires; /* ts of when kline expires (0 if permanent) */
 };
 
 /*
@@ -92,16 +92,16 @@ struct ServerBan
 
 struct Iline
 {
-	struct Iline *next, *prev;
+  struct Iline *next, *prev;
 
-	char *username;       /* username of client */
-	char *hostname;       /* hostname of client */
-	char *spoofhost;      /* hostname to use if IL_IPSPOOF */
-	char *password;       /* password client needs (NULL if none) */
+  char *username;       /* username of client */
+  char *hostname;       /* hostname of client */
+  char *spoofhost;      /* hostname to use if IL_IPSPOOF */
+  char *password;       /* password client needs (NULL if none) */
 
-	struct Class *class;  /* pointer to class */
-	int classnum;         /* class number */
-	unsigned int flags;   /* flags for client (IL_*) */
+  struct Class *class;  /* pointer to class */
+  int classnum;         /* class number */
+  unsigned int flags;   /* flags for client (IL_*) */
 };
 
 /*
@@ -110,17 +110,17 @@ struct Iline
  */
 struct Quarantine
 {
-	struct Quarantine *next;
+  struct Quarantine *next;
 
-	char *nickname;  /* quarantined nickname */
-	char *reason;    /* reason it is quarantined */
+  char *nickname;  /* quarantined nickname */
+  char *reason;    /* reason it is quarantined */
 
   /*
    * Allow users matching username and hostname to use
    * the nickname
    */
-	char *username;
-	char *hostname;
+  char *username;
+  char *hostname;
 };
 
 /*

@@ -86,160 +86,160 @@ static int
 ParseConfig(char *filename)
 
 {
-	FILE *fp;
-	char buffer[BUFSIZE];
-	char *key;
-	int linenum;
+  FILE *fp;
+  char buffer[BUFSIZE];
+  char *key;
+  int linenum;
 
-	if (!(fp = fopen(filename, "r")))
-	{
-		log(L_ERROR,
-			"ParseConfig(): Unable to open configuration file: %s",
-			filename);
-		return 0;
-	}
+  if (!(fp = fopen(filename, "r")))
+  {
+    log(L_ERROR,
+      "ParseConfig(): Unable to open configuration file: %s",
+      filename);
+    return 0;
+  }
 
-	linenum = 0;
-	while (fgets(buffer, sizeof(buffer) - 1, fp) && ++linenum)
-	{
-		if (*buffer == '#')
-			continue; /* comment */
+  linenum = 0;
+  while (fgets(buffer, sizeof(buffer) - 1, fp) && ++linenum)
+  {
+    if (*buffer == '#')
+      continue; /* comment */
 
-		if (!(key = getfield(buffer)))
-			continue;
+    if (!(key = getfield(buffer)))
+      continue;
 
-		switch (*key)
-		{
-			/*
-			 * K-lines (bans)
-			 */
-			case 'k':
-			case 'K':
-			{
-				char *user,
-				     *host,
-				     *reason;
+    switch (*key)
+    {
+      /*
+       * K-lines (bans)
+       */
+      case 'k':
+      case 'K':
+      {
+        char *user,
+             *host,
+             *reason;
 
-				user = getfield(NULL);
-				reason = getfield(NULL);
+        user = getfield(NULL);
+        reason = getfield(NULL);
 
-				if (!user || !reason)
-				{
-					log(L_ERROR,
-						"%s:%d Invalid configuration line",
-						filename,
-						linenum);
-					continue;
-				}
+        if (!user || !reason)
+        {
+          log(L_ERROR,
+            "%s:%d Invalid configuration line",
+            filename,
+            linenum);
+          continue;
+        }
 
-				GetUserAndHost(&user, &host);
+        GetUserAndHost(&user, &host);
 
-				AddServerBan(user, host, reason, 0);
+        AddServerBan(user, host, reason, 0);
 
-				break;
-			} /* case 'K' */
+        break;
+      } /* case 'K' */
 
-			/*
-			 * I-lines (authorization)
-			 */
-			case 'i':
-			case 'I':
-			{
-				char *spoofhost,
-				     *password,
-				     *user,
-				     *host,
-				     *class;
+      /*
+       * I-lines (authorization)
+       */
+      case 'i':
+      case 'I':
+      {
+        char *spoofhost,
+             *password,
+             *user,
+             *host,
+             *class;
 
-				spoofhost = getfield(NULL);
-				password = getfield(NULL);
-				user = getfield(NULL);
-				(void) getfield(NULL); /* unused field */
-				class = getfield(NULL);
+        spoofhost = getfield(NULL);
+        password = getfield(NULL);
+        user = getfield(NULL);
+        (void) getfield(NULL); /* unused field */
+        class = getfield(NULL);
 
-				if (!user || !class)
-				{
-					log(L_ERROR,
-						"%s:%d Invalid configuration line",
-						filename,
-						linenum);
-					continue;
-				}
+        if (!user || !class)
+        {
+          log(L_ERROR,
+            "%s:%d Invalid configuration line",
+            filename,
+            linenum);
+          continue;
+        }
 
-				GetUserAndHost(&user, &host);
+        GetUserAndHost(&user, &host);
 
-				AddIline(spoofhost, password, user, host, atoi(class));
+        AddIline(spoofhost, password, user, host, atoi(class));
 
-				break;
-			} /* case 'I' */
+        break;
+      } /* case 'I' */
 
-			/*
-			 * Y-lines (class lines)
-			 */
-			case 'y':
-			case 'Y':
-			{
-				break;
-			} /* case 'Y' */
+      /*
+       * Y-lines (class lines)
+       */
+      case 'y':
+      case 'Y':
+      {
+        break;
+      } /* case 'Y' */
 
-			/*
-			 * P-lines (listen ports)
-			 */
-			case 'p':
-			case 'P':
-			{
-				char *port;
+      /*
+       * P-lines (listen ports)
+       */
+      case 'p':
+      case 'P':
+      {
+        char *port;
 
-				port = getfield(NULL);
-				if (!port)
-				{
-					log(L_ERROR,
-						"%s:%d Invalid configuration line",
-						filename,
-						linenum);
-					continue;
-				}
+        port = getfield(NULL);
+        if (!port)
+        {
+          log(L_ERROR,
+            "%s:%d Invalid configuration line",
+            filename,
+            linenum);
+          continue;
+        }
 
-				AddPort(atoi(port));
+        AddPort(atoi(port));
 
-				break;
-			} /* case 'P' */
+        break;
+      } /* case 'P' */
 
-			/*
-			 * Nickname quarantine lines
-			 */
-			case 'q':
-			case 'Q':
-			{
-				char *nick,
-				     *reason,
-				     *user,
-				     *host;
+      /*
+       * Nickname quarantine lines
+       */
+      case 'q':
+      case 'Q':
+      {
+        char *nick,
+             *reason,
+             *user,
+             *host;
 
-				nick = getfield(NULL);
-				reason = getfield(NULL);
-				user = getfield(NULL);
+        nick = getfield(NULL);
+        reason = getfield(NULL);
+        user = getfield(NULL);
 
-				if (!nick)
-				{
-					log(L_ERROR,
-						"%s:%d Invalid configuration line",
-						filename,
-						linenum);
-					continue;
-				}
+        if (!nick)
+        {
+          log(L_ERROR,
+            "%s:%d Invalid configuration line",
+            filename,
+            linenum);
+          continue;
+        }
 
-				if (user)
-					GetUserAndHost(&user, &host);
+        if (user)
+          GetUserAndHost(&user, &host);
 
-				AddQuarantine(nick, reason, user, host);
-			} /* case 'Q' */
-		} /* switch (*key) */
-	}
+        AddQuarantine(nick, reason, user, host);
+      } /* case 'Q' */
+    } /* switch (*key) */
+  }
 
-	fclose(fp);
+  fclose(fp);
 
-	return 1;
+  return 1;
 } /* ParseConfig() */
 
 /*
@@ -251,13 +251,13 @@ void
 LoadConfig()
 
 {
-	if (!ParseConfig(ConfigFile))
-	{
-		fprintf(stderr,
-			"Unable to parse configuration file: %s\n",
-			ConfigFile);
-		exit (-1);
-	}
+  if (!ParseConfig(ConfigFile))
+  {
+    fprintf(stderr,
+      "Unable to parse configuration file: %s\n",
+      ConfigFile);
+    exit (-1);
+  }
 } /* LoadConfig() */
 
 /*
@@ -269,30 +269,30 @@ static char *
 getfield (char *newline)
 
 {
-	static char *line = NULL;
-	char *end, *field;
-	
-	if (newline)
-		line = newline;
+  static char *line = NULL;
+  char *end, *field;
+  
+  if (newline)
+    line = newline;
 
-	if (!line)
-		return (NULL);
+  if (!line)
+    return (NULL);
 
-	field = line;
-	if ((end = strchr(line, ':')) == NULL)
-	{
-		line = NULL;
-		if ((end = strchr(field, '\n')) == NULL)
-			end = field + strlen(field);
-	}
-	else
-		line = end + 1;
+  field = line;
+  if ((end = strchr(line, ':')) == NULL)
+  {
+    line = NULL;
+    if ((end = strchr(field, '\n')) == NULL)
+      end = field + strlen(field);
+  }
+  else
+    line = end + 1;
 
-	*end = '\0';
-	if (strlen(field))
-		return (field);
-	else
-		return (NULL);
+  *end = '\0';
+  if (strlen(field))
+    return (field);
+  else
+    return (NULL);
 } /* getfield() */
 
 /*
@@ -307,18 +307,18 @@ static void
 GetUserAndHost(char **user, char **host)
 
 {
-	char *ch;
+  char *ch;
 
-	if ((ch = strchr(*user, '@')))
-	{
-		*ch++ = '\0';
-		*host = ch;
-	}
-	else
-	{
-		*host = *user;
-		*user = NULL;
-	}
+  if ((ch = strchr(*user, '@')))
+  {
+    *ch++ = '\0';
+    *host = ch;
+  }
+  else
+  {
+    *host = *user;
+    *user = NULL;
+  }
 } /* GetUserAndHost() */
 
 /*
@@ -331,34 +331,34 @@ static struct ServerBan *
 AddServerBan(char *user, char *host, char *reason, time_t expires)
 
 {
-	struct ServerBan *ptr;
+  struct ServerBan *ptr;
 
-	ptr = (struct ServerBan *) MyMalloc(sizeof(struct ServerBan));
-	memset(ptr, 0, sizeof(struct ServerBan));
+  ptr = (struct ServerBan *) MyMalloc(sizeof(struct ServerBan));
+  memset(ptr, 0, sizeof(struct ServerBan));
 
-	if (user)
-		ptr->username = MyStrdup(user);
-	else
-		ptr->username = MyStrdup("*");
+  if (user)
+    ptr->username = MyStrdup(user);
+  else
+    ptr->username = MyStrdup("*");
 
-	ptr->hostname = MyStrdup(host);
+  ptr->hostname = MyStrdup(host);
 
-	if (reason)
-		ptr->reason = MyStrdup(reason);
-	else
-		ptr->reason = MyStrdup("No reason");
+  if (reason)
+    ptr->reason = MyStrdup(reason);
+  else
+    ptr->reason = MyStrdup("No reason");
 
-	ptr->expires = expires;
+  ptr->expires = expires;
 
-	ptr->prev = NULL;
-	ptr->next = ServerBanList;
-	if (ptr->next)
-		ptr->next->prev = ptr;
-	ServerBanList = ptr;
+  ptr->prev = NULL;
+  ptr->next = ServerBanList;
+  if (ptr->next)
+    ptr->next->prev = ptr;
+  ServerBanList = ptr;
 
-	TreeAddKline(ptr);
+  TreeAddKline(ptr);
 
-	return (ptr);
+  return (ptr);
 } /* AddServerBan() */
 
 /*
@@ -382,21 +382,21 @@ struct ServerBan *
 FindServerBan(char *user, char *host)
 
 {
-	struct ServerBan *tmp;
+  struct ServerBan *tmp;
 
-	tmp = (struct ServerBan *) SearchKlineTree(user, host);
-	if (tmp)
-		fprintf(stderr, "FOUND KLINE: [%s@%s]\n", tmp->username, tmp->hostname);
-	return (tmp);
+  tmp = (struct ServerBan *) SearchKlineTree(user, host);
+  if (tmp)
+    fprintf(stderr, "FOUND KLINE: [%s@%s]\n", tmp->username, tmp->hostname);
+  return (tmp);
 
 #if 0
-	for (tmp = ServerBanList; tmp; tmp = tmp->next)
-	{
-		if (match(tmp->username, user) && match(tmp->hostname, host))
-			return (tmp);
-	}
+  for (tmp = ServerBanList; tmp; tmp = tmp->next)
+  {
+    if (match(tmp->username, user) && match(tmp->hostname, host))
+      return (tmp);
+  }
 
-	return (NULL);
+  return (NULL);
 #endif /* 0 */
 } /* FindServerBan() */
 
@@ -420,53 +420,53 @@ static char *
 ParseIlineFlags(struct Iline *iptr, char *user)
 
 {
-	while (*user)
-	{
-		switch (*user)
-		{
-			case '=':
-				SetIlineSpoof(iptr);
-				break;
+  while (*user)
+  {
+    switch (*user)
+    {
+      case '=':
+        SetIlineSpoof(iptr);
+        break;
 
-			case '!':
-				SetIlineLimit(iptr);
-				break;
+      case '!':
+        SetIlineLimit(iptr);
+        break;
 
-			case '-':
-				SetIlineNoTilde(iptr);
-				break;
+      case '-':
+        SetIlineNoTilde(iptr);
+        break;
 
-			case '+':
-				SetIlineForceId(iptr);
-				break;
+      case '+':
+        SetIlineForceId(iptr);
+        break;
 
 #ifdef bingo
-			case '$':
-				SetIlinePassIdent(iptr);
-				break;
+      case '$':
+        SetIlinePassIdent(iptr);
+        break;
 
-			case '%':
-				SetIlineNoMatch(iptr);
-				break;
+      case '%':
+        SetIlineNoMatch(iptr);
+        break;
 #endif /* bingo */
 
-			case '^':
-				SetIlineExempt(iptr);
-				break;
+      case '^':
+        SetIlineExempt(iptr);
+        break;
 
-			case '>':
-				SetIlineExempt(iptr);
-				SetIlineSuperExempt(iptr);
-				break;
+      case '>':
+        SetIlineExempt(iptr);
+        SetIlineSuperExempt(iptr);
+        break;
 
-			default:
-				return (user);
-		}
+      default:
+        return (user);
+    }
 
-		++user;
-	}
+    ++user;
+  }
 
-	return (user);
+  return (user);
 } /* ParseIlineFlags() */
 
 /*
@@ -482,48 +482,48 @@ static struct Iline *
 AddIline(char *spoofhost, char *password, char *user, char *host, int class)
 
 {
-	struct Iline *ptr;
-	char *tmpuser;
+  struct Iline *ptr;
+  char *tmpuser;
 
-	ptr = (struct Iline *) MyMalloc(sizeof(struct Iline));
-	memset(ptr, 0, sizeof(struct Iline));
+  ptr = (struct Iline *) MyMalloc(sizeof(struct Iline));
+  memset(ptr, 0, sizeof(struct Iline));
 
-	if (password)
-		ptr->password = MyStrdup(password);
+  if (password)
+    ptr->password = MyStrdup(password);
 
-	if (user)
-	{
-		/*
-		 * If this Iline has any special flags, they would
-		 * be in the user field - parse them
-		 */
-		tmpuser = ParseIlineFlags(ptr, user);
+  if (user)
+  {
+    /*
+     * If this Iline has any special flags, they would
+     * be in the user field - parse them
+     */
+    tmpuser = ParseIlineFlags(ptr, user);
 
-		ptr->username = MyStrdup(tmpuser);
-	}
-	else
-		ptr->username = MyStrdup("*");
+    ptr->username = MyStrdup(tmpuser);
+  }
+  else
+    ptr->username = MyStrdup("*");
 
-	if (spoofhost && IsIlineSpoof(ptr))
-		ptr->spoofhost = MyStrdup(spoofhost);
+  if (spoofhost && IsIlineSpoof(ptr))
+    ptr->spoofhost = MyStrdup(spoofhost);
 
-	ptr->hostname = MyStrdup(host);
+  ptr->hostname = MyStrdup(host);
 
-	ptr->class = FindClass(class);
-	ptr->classnum = class;
+  ptr->class = FindClass(class);
+  ptr->classnum = class;
 
-	ptr->prev = NULL;
-	ptr->next = IlineList;
-	if (ptr->next)
-		ptr->next->prev = ptr;
-	IlineList = ptr;
+  ptr->prev = NULL;
+  ptr->next = IlineList;
+  if (ptr->next)
+    ptr->next->prev = ptr;
+  IlineList = ptr;
 
-	/*
-	 * Add ptr to the Iline tree
-	 */
-	TreeAddIline(ptr);
+  /*
+   * Add ptr to the Iline tree
+   */
+  TreeAddIline(ptr);
 
-	return (ptr);
+  return (ptr);
 } /* AddIline() */
 
 /*
@@ -536,15 +536,15 @@ struct Iline *
 FindIline(char *user, char *host)
 
 {
-	struct Iline *iptr;
+  struct Iline *iptr;
 
-	for (iptr = IlineList; iptr; iptr = iptr->next)
-	{
-		if (match(iptr->username, user) && match(iptr->hostname, host))
-			return (iptr);
-	}
+  for (iptr = IlineList; iptr; iptr = iptr->next)
+  {
+    if (match(iptr->username, user) && match(iptr->hostname, host))
+      return (iptr);
+  }
 
-	return (NULL);
+  return (NULL);
 } /* FindIline() */
 
 /*
@@ -577,33 +577,33 @@ int
 CheckIline(char *user, char *host, char *pass, struct Iline **imatch)
 
 {
-	struct Iline *iptr;
+  struct Iline *iptr;
 
-	iptr = (struct Iline *) SearchIlineTree(user, host);
-	if (iptr)
-		fprintf(stderr, "FOUND IN TREE: [%s@%s]\n", iptr->username, iptr->hostname);
+  iptr = (struct Iline *) SearchIlineTree(user, host);
+  if (iptr)
+    fprintf(stderr, "FOUND IN TREE: [%s@%s]\n", iptr->username, iptr->hostname);
 
-	if (!iptr)
-		return (IL_ERR_NOTAUTHORIZED);
+  if (!iptr)
+    return (IL_ERR_NOTAUTHORIZED);
 
-	if (iptr->class)
-	{
-		if ((iptr->class->links >= iptr->class->maxLinks) &&
-				!IsIlineSuperExempt(iptr))
-			return (IL_ERR_FULL);
+  if (iptr->class)
+  {
+    if ((iptr->class->links >= iptr->class->maxLinks) &&
+        !IsIlineSuperExempt(iptr))
+      return (IL_ERR_FULL);
 
-		++iptr->class->links;
-	}
+    ++iptr->class->links;
+  }
 
-	if (IsIlineForceId(iptr) && (*user == '~'))
-		return (IL_ERR_NEEDIDENT);
+  if (IsIlineForceId(iptr) && (*user == '~'))
+    return (IL_ERR_NEEDIDENT);
 
-	if (iptr->password && (strcmp(iptr->password, pass) != 0))
-		return (IL_ERR_BADPASS);
+  if (iptr->password && (strcmp(iptr->password, pass) != 0))
+    return (IL_ERR_BADPASS);
 
-	*imatch = iptr;
+  *imatch = iptr;
 
-	return (IL_ERR_GOODMATCH);
+  return (IL_ERR_GOODMATCH);
 } /* CheckIline() */
 
 /*
@@ -615,16 +615,16 @@ static void
 AddPort(int portnum)
 
 {
-	struct Port *ptr;
+  struct Port *ptr;
 
-	ptr = (struct Port *) MyMalloc(sizeof(struct Port));
-	memset(ptr, 0, sizeof(struct Port));
+  ptr = (struct Port *) MyMalloc(sizeof(struct Port));
+  memset(ptr, 0, sizeof(struct Port));
 
-	ptr->port = portnum;
-	ptr->sockfd = NOSOCK;
+  ptr->port = portnum;
+  ptr->sockfd = NOSOCK;
 
-	ptr->next = PortList;
-	PortList = ptr;
+  ptr->next = PortList;
+  PortList = ptr;
 } /* AddPort() */
 
 /*
@@ -636,28 +636,28 @@ static void
 AddQuarantine(char *nick, char *reason, char *user, char *host)
 
 {
-	struct Quarantine *ptr;
+  struct Quarantine *ptr;
 
-	ptr = (struct Quarantine *) MyMalloc(sizeof(struct Quarantine));
-	memset(ptr, 0, sizeof(struct Quarantine));
+  ptr = (struct Quarantine *) MyMalloc(sizeof(struct Quarantine));
+  memset(ptr, 0, sizeof(struct Quarantine));
 
-	ptr->nickname = MyStrdup(nick);
-	if (reason)
-		ptr->reason = MyStrdup(reason);
-	else
-		ptr->reason = MyStrdup("No reason");
+  ptr->nickname = MyStrdup(nick);
+  if (reason)
+    ptr->reason = MyStrdup(reason);
+  else
+    ptr->reason = MyStrdup("No reason");
 
-	if (host)
-	{
-		ptr->hostname = MyStrdup(host);
-		if (user)
-			ptr->username = MyStrdup(user);
-		else
-			ptr->username = MyStrdup("*");
-	}
+  if (host)
+  {
+    ptr->hostname = MyStrdup(host);
+    if (user)
+      ptr->username = MyStrdup(user);
+    else
+      ptr->username = MyStrdup("*");
+  }
 
-	ptr->next = QuarantineList;
-	QuarantineList = ptr;
+  ptr->next = QuarantineList;
+  QuarantineList = ptr;
 } /* AddQuarantine() */
 
 /*
@@ -670,25 +670,25 @@ struct Quarantine *
 FindQuarantine(char *nick, char *user, char *host)
 
 {
-	struct Quarantine *qptr;
+  struct Quarantine *qptr;
 
-	for (qptr = QuarantineList; qptr; qptr = qptr->next)
-	{
-		if (match(qptr->nickname, nick))
-		{
-			/*
-			 * The user may be exempt from this quarantine if
-			 * their username and hostname match qptr's
-			 */
-			if (qptr->username && qptr->hostname)
-			{
-				if (match(qptr->username, user) && match(qptr->hostname, host))
-					continue;
-			}
+  for (qptr = QuarantineList; qptr; qptr = qptr->next)
+  {
+    if (match(qptr->nickname, nick))
+    {
+      /*
+       * The user may be exempt from this quarantine if
+       * their username and hostname match qptr's
+       */
+      if (qptr->username && qptr->hostname)
+      {
+        if (match(qptr->username, user) && match(qptr->hostname, host))
+          continue;
+      }
 
-			return (qptr);
-		}
-	}
+      return (qptr);
+    }
+  }
 
-	return (NULL);
+  return (NULL);
 } /* FindQuarantine() */

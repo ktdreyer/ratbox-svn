@@ -43,7 +43,7 @@ static void
 SetupSignals()
 
 {
-	signal(SIGPIPE, SIG_IGN);
+  signal(SIGPIPE, SIG_IGN);
 } /* SetupSignals() */
 
 int
@@ -51,59 +51,59 @@ main()
 
 {
 #ifndef DEBUGMODE
-	int pid;
+  int pid;
 #endif
 
-	LoadConfig(ICONF);
+  LoadConfig(ICONF);
 
-	InitLog(LOGFILE);
+  InitLog(LOGFILE);
 
 #ifndef DEBUGMODE
 
-	pid = fork();
-	switch (pid)
-	{
-		case -1:
-		{
-			fprintf(stderr, "Unable to fork, exiting\n");
-			exit (-1);
-		}
+  pid = fork();
+  switch (pid)
+  {
+    case -1:
+    {
+      fprintf(stderr, "Unable to fork, exiting\n");
+      exit (-1);
+    }
 
-		/*
-		 * Child: do nothing
-		 */
-		case 0:
-		{
-			break;
-		}
+    /*
+     * Child: do nothing
+     */
+    case 0:
+    {
+      break;
+    }
 
-		/*
-		 * Parent: exit
-		 */
-		default:
-		{
-			exit (0);
-		}
-	} /* switch (pid) */
+    /*
+     * Parent: exit
+     */
+    default:
+    {
+      exit (0);
+    }
+  } /* switch (pid) */
 
 #endif /* !DEBUGMODE */
 
-	log(L_INFO, "IAuth Loaded");
+  log(L_INFO, "IAuth Loaded");
 
-	/* Initialize signals */
-	SetupSignals();
+  /* Initialize signals */
+  SetupSignals();
 
-	/* Initialize listening ports */
-	InitListenPorts();
+  /* Initialize listening ports */
+  InitListenPorts();
 
-	init_resolver();
+  init_resolver();
 
-	/*
-	 * Enter this loop constantly waiting for incoming data
-	 * or connections
-	 */
-	while (1)
-	{
-		CheckConnections();
-	}
+  /*
+   * Enter this loop constantly waiting for incoming data
+   * or connections
+   */
+  while (1)
+  {
+    CheckConnections();
+  }
 } /* main() */

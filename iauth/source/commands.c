@@ -43,19 +43,19 @@ static void c_class_add(struct Server *sptr, int ac, char **av);
 static void c_class_clear(struct Server *sptr, int ac, char **av);
 
 struct CommandTable Commands[] = {
-	{ "Server", c_server },
-	{ "DoAuth", c_doauth },
-	{ "Class", c_class },
+  { "Server", c_server },
+  { "DoAuth", c_doauth },
+  { "Class", c_class },
 
-	{ 0, 0 }
+  { 0, 0 }
 };
 
 /*
  * sub-commands for c_class()
  */
 struct CommandTable classcmds[] = {
-	{ "Add", c_class_add },
-	{ "Clear", c_class_clear },
+  { "Add", c_class_add },
+  { "Clear", c_class_clear },
 };
 
 /*
@@ -70,48 +70,48 @@ static struct CommandTable *
 GetCommand(struct CommandTable *cmdlist, char *name)
 
 {
-	struct CommandTable *cmdptr, *tmp;
-	int matches, /* number of matches we've had so far */
+  struct CommandTable *cmdptr, *tmp;
+  int matches, /* number of matches we've had so far */
       clength;
 
-	if (!cmdlist || !name)
-		return (NULL);
+  if (!cmdlist || !name)
+    return (NULL);
 
-	tmp = NULL;
-	matches = 0;
-	clength = strlen(name);
-	for (cmdptr = cmdlist; cmdptr->name; cmdptr++)
-	{
-		if (!strncasecmp(name, cmdptr->name, clength))
-		{
-			if (clength == strlen(cmdptr->name))
-			{
-				/*
-				 * name and cmdptr->name are the same length, so it
-				 * must be an exact match, don't search any further
-				 */
-				matches = 0;
-				break;
-			}
-			tmp = cmdptr;
-			++matches;
-		}
-	}
+  tmp = NULL;
+  matches = 0;
+  clength = strlen(name);
+  for (cmdptr = cmdlist; cmdptr->name; cmdptr++)
+  {
+    if (!strncasecmp(name, cmdptr->name, clength))
+    {
+      if (clength == strlen(cmdptr->name))
+      {
+        /*
+         * name and cmdptr->name are the same length, so it
+         * must be an exact match, don't search any further
+         */
+        matches = 0;
+        break;
+      }
+      tmp = cmdptr;
+      ++matches;
+    }
+  }
 
-	/*
-	 * If matches > 1, name is an ambiguous command, so the
-	 * user needs to be more specific
-	 */
-	if ((matches == 1) && (tmp))
-		cmdptr = tmp;
+  /*
+   * If matches > 1, name is an ambiguous command, so the
+   * user needs to be more specific
+   */
+  if ((matches == 1) && (tmp))
+    cmdptr = tmp;
 
-	if (cmdptr->name)
-		return (cmdptr);
+  if (cmdptr->name)
+    return (cmdptr);
 
-	if (matches == 0)
-		return (NULL); /* no matches found */
-	else
-		return ((struct CommandTable *) -1); /* multiple matches found */
+  if (matches == 0)
+    return (NULL); /* no matches found */
+  else
+    return ((struct CommandTable *) -1); /* multiple matches found */
 } /* GetCommand() */
 
 /*
@@ -127,10 +127,10 @@ static void
 c_server(struct Server *sptr, int ac, char **av)
 
 {
-	if (ac < 2)
-		return;
+  if (ac < 2)
+    return;
 
-	sptr->name = MyStrdup(av[1]);
+  sptr->name = MyStrdup(av[1]);
 } /* c_server() */
 
 /*
@@ -142,7 +142,7 @@ static void
 c_doauth(struct Server *sptr, int ac, char **av)
 
 {
-	StartAuth(sptr, ac, av);
+  StartAuth(sptr, ac, av);
 } /* c_doauth() */
 
 /*
@@ -159,14 +159,14 @@ static void
 c_class(struct Server *sptr, int ac, char **av)
 
 {
-	struct CommandTable *cmdptr;
+  struct CommandTable *cmdptr;
 
-	if (ac < 2)
-		return;
+  if (ac < 2)
+    return;
 
-	cmdptr = GetCommand(classcmds, av[1]);
-	if (cmdptr && (cmdptr != (struct CommandTable *) -1))
-		(*cmdptr->func)(sptr, ac, av);
+  cmdptr = GetCommand(classcmds, av[1]);
+  if (cmdptr && (cmdptr != (struct CommandTable *) -1))
+    (*cmdptr->func)(sptr, ac, av);
 } /* c_class() */
 
 /*
@@ -183,27 +183,27 @@ static void
 c_class_add(struct Server *sptr, int ac, char **av)
 
 {
-	struct Class *clptr;
-	struct Iline *iptr;
-	int classnum;
+  struct Class *clptr;
+  struct Iline *iptr;
+  int classnum;
 
-	if (ac < 4)
-		return;
+  if (ac < 4)
+    return;
 
-	fprintf(stderr, "IN CLASS ADD\n");
+  fprintf(stderr, "IN CLASS ADD\n");
 
-	classnum = atoi(av[2]);
-	clptr = AddClass(classnum, atoi(av[3]));
+  classnum = atoi(av[2]);
+  clptr = AddClass(classnum, atoi(av[3]));
 
-	/*
-	 * Now go through the Iline list and set all Ilines
-	 * with the given class number to the new class
-	 */
-	for (iptr = IlineList; iptr; iptr = iptr->next)
-	{
-		if (iptr->classnum == classnum)
-			iptr->class = clptr;
-	}
+  /*
+   * Now go through the Iline list and set all Ilines
+   * with the given class number to the new class
+   */
+  for (iptr = IlineList; iptr; iptr = iptr->next)
+  {
+    if (iptr->classnum == classnum)
+      iptr->class = clptr;
+  }
 } /* c_class_add() */
 
 /*
@@ -220,13 +220,13 @@ static void
 c_class_clear(struct Server *sptr, int ac, char **av)
 
 {
-	struct Class *clptr;
+  struct Class *clptr;
 
-	if (ac >= 3)
-	{
-		if ((clptr = FindClass(atoi(av[2]))))
-			DeleteClass(clptr);
-	}
-	else
-		ClearClasses();
+  if (ac >= 3)
+  {
+    if ((clptr = FindClass(atoi(av[2]))))
+      DeleteClass(clptr);
+  }
+  else
+    ClearClasses();
 } /* c_class_clear() */
