@@ -1,3 +1,15 @@
+leeh        2004/03/06 08:09:41 EST	(20040306_0)
+
+  Modified files:
+    modules              m_stats.c 
+  Log:
+  - fix the prototype of stats_spy()
+  
+  Revision  Changes    Path
+  1.204     +2 -2      ircd-ratbox/modules/m_stats.c
+
+
+
 leeh        2004/03/05 12:34:27 EST	(20040305_5)
 
   Removed files:
