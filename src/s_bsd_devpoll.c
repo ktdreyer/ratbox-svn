@@ -97,7 +97,7 @@ devpoll_write_update(int fd, int events)
     struct pollfd pollfds[1]; /* Just to be careful */
     int retval;
 #ifdef NOTYET
-    log(L_NOTICE, "devpoll_write_update: FD %d: called with %d\n", fd, events);
+    ilog(L_NOTICE, "devpoll_write_update: FD %d: called with %d\n", fd, events);
 #endif
     /* Build the pollfd entry */
     pollfds[0].revents = 0;
@@ -108,7 +108,7 @@ devpoll_write_update(int fd, int events)
     retval = write(dpfd, &pollfds[0], sizeof(struct pollfd));
 #ifdef NOTYET
     if (retval < 0)
-        log(L_NOTICE, "devpoll_write_update: dpfd write failed %d: %s\n", errno, strerror(errno));
+        ilog(L_NOTICE, "devpoll_write_update: dpfd write failed %d: %s\n", errno, strerror(errno));
 #endif
     /* Done! */
 }
@@ -137,7 +137,7 @@ devpoll_update_events(int fd, short filter, PF * handler)
         break;
     default:
 #ifdef NOTYET
-        log(L_NOTICE,"devpoll_update_events called with unknown filter: %hd\n",
+        ilog(L_NOTICE,"devpoll_update_events called with unknown filter: %hd\n",
             filter);
 #endif
         return;
@@ -180,7 +180,7 @@ void init_netio(void)
 {
     dpfd = open("/dev/poll", O_RDWR);
     if (dpfd < 0) {
-        log(L_CRIT, "init_netio: Couldn't open /dev/poll - %d: %s\n", errno,
+        ilog(L_CRIT, "init_netio: Couldn't open /dev/poll - %d: %s\n", errno,
 	    strerror(errno));
         exit(115); /* Whee! */
     }

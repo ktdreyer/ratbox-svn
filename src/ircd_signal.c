@@ -47,7 +47,7 @@ static void sigterm_handler(int sig)
    * connections and flush data. read server_reboot() for my explanation.
    *     -- adrian
    */
-  log(L_CRIT, "Server killed By SIGTERM");
+  ilog(L_CRIT, "Server killed By SIGTERM");
   exit(-1);
 }
   
@@ -68,12 +68,12 @@ static void sigint_handler(int sig)
 
   if (server_state.foreground) 
     {
-      log(L_WARN, "Server exiting on SIGINT");
+      ilog(L_WARN, "Server exiting on SIGINT");
       exit(0);
     }
   else
     {
-      log(L_WARN, "Server Restarting on SIGINT");
+      ilog(L_WARN, "Server Restarting on SIGINT");
       if (restarting == 0) 
         {
           restarting = 1;

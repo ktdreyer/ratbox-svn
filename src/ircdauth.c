@@ -118,11 +118,11 @@ ConnectToIAuth()
   /*
    * bingo - this is blocking :(
    */
-  log(L_ERROR, "looking up: %s\n", iAuth.hostname);
+  ilog(L_ERROR, "looking up: %s\n", iAuth.hostname);
 	if ((hostptr = gethostbyname(iAuth.hostname)) == NULL)
 	{
-    log(L_ERROR, "unsuccessful lookup\n");
-		log(L_ERROR,
+    ilog(L_ERROR, "unsuccessful lookup\n");
+		ilog(L_ERROR,
 			"Unable to connect to IAuth server: Unknown host");
 
 		fd_close(iAuth.socket);
@@ -140,7 +140,7 @@ ConnectToIAuth()
 
 	if (!set_non_blocking(iAuth.socket))
 	{
-		log(L_ERROR,
+		ilog(L_ERROR,
 			"ConnectToIAuth(): set_non_blocking() failed");
 		fd_close(iAuth.socket);
 		iAuth.socket = NOSOCK;
@@ -151,7 +151,7 @@ ConnectToIAuth()
 	{
 		if (errno != EINPROGRESS)
 		{
-			log(L_ERROR,
+			ilog(L_ERROR,
 				"Unable to connect to IAuth server: %s",
 				strerror(errno));
 			fd_close(iAuth.socket);
@@ -188,7 +188,7 @@ CompleteIAuthConnection(int fd, void *notused)
 	errlen = sizeof(errval);
 	if (getsockopt(fd, SOL_SOCKET, SO_ERROR, (void *)&errval, &errlen) < 0)
 	{
-		log(L_ERROR,
+		ilog(L_ERROR,
 			"CompleteIAuthConnection(): getsockopt(SO_ERROR) failed: %s",
 			strerror(errno));
 /*		return 0; */
@@ -197,7 +197,7 @@ CompleteIAuthConnection(int fd, void *notused)
 
 	if (errval > 0)
 	{
-		log(L_ERROR,
+		ilog(L_ERROR,
 			"Connect to IAuth server (%s:%d) failed: %s",
 			iAuth.hostname,
 			iAuth.port,
@@ -329,7 +329,7 @@ ParseIAuth(int fd, void *notused)
 
 	if (length <= 0)
 	{
-		log(L_ERROR, "Read error from server: %s",
+		ilog(L_ERROR, "Read error from server: %s",
 			strerror(errno));
     return;
   #if 0

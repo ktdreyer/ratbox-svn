@@ -193,7 +193,7 @@ int unload_one_module (char *name, int check)
   if(shl_findsym(modlist[modindex]->address, "_moddeinit", TYPE_UNDEFINED, &deinitfunc) == 0)
     deinitfunc ();
   else
-    if(shl_findsym(modlist[modindex]->address, "__moddeinit, TYPE_UNDEFINED. &deinitfunc) == 0)
+    if(shl_findsym(modlist[modindex]->address, "__moddeinit", TYPE_UNDEFINED. &deinitfunc) == 0)
     	deinitfunc ();	
 
   shl_unload(modlist[modindex]->address);
@@ -207,7 +207,7 @@ int unload_one_module (char *name, int check)
 
   if(check == 1)
     {
-      log (L_INFO, "Module %s unloaded", name);
+      ilog (L_INFO, "Module %s unloaded", name);
       sendto_realops_flags(FLAGS_ALL,"Module %s unloaded", name);
     }
 
@@ -233,7 +233,7 @@ load_all_modules (int check)
 
   if (system_module_dir == NULL)
   {
-    log (L_WARN, "Could not load modules from %s: %s",
+    ilog (L_WARN, "Could not load modules from %s: %s",
          MODPATH, strerror (errno));
     return;
   }
@@ -275,7 +275,7 @@ load_one_module (char *path)
 	}
 	
 	sendto_realops_flags (FLAGS_ALL, "Cannot locate module %s", path);
-	log(L_WARN, "Cannot locate module %s", path);
+	ilog(L_WARN, "Cannot locate module %s", path);
 	return -1;
 }
 		
@@ -309,7 +309,7 @@ load_a_module (char *path, int check)
       sendto_realops_flags (FLAGS_ALL,
                             "Error loading module %s: %s",
                             mod_basename, err);
-      log (L_WARN, "Error loading module %s: %s", mod_basename, err);
+      ilog (L_WARN, "Error loading module %s: %s", mod_basename, err);
       MyFree (mod_basename);
       return -1;
   }
@@ -321,7 +321,7 @@ load_a_module (char *path, int check)
     	sendto_realops_flags (FLAGS_ALL,
         	                  "Module %s has no _modinit() function",
         	                  mod_basename);
-    	log (L_WARN, "Module %s has no _modinit() function", mod_basename);
+    	ilog (L_WARN, "Module %s has no _modinit() function", mod_basename);
     	shl_unload (tmpptr);
     	MyFree (mod_basename);
     	return -1;
@@ -351,7 +351,7 @@ load_a_module (char *path, int check)
     {
       sendto_realops_flags (FLAGS_ALL, "Module %s [version: %s] loaded at 0x%lx",
                         mod_basename, ver, (unsigned long)tmpptr);
-       log (L_WARN, "Module %s [version: %s] loaded at 0x%x",
+       ilog (L_WARN, "Module %s [version: %s] loaded at 0x%x",
             mod_basename, ver, tmpptr);
     }
   MyFree (mod_basename);
@@ -545,6 +545,6 @@ mo_modrestart (struct Client *client_p, struct Client *source_p, int parc, char 
 
   sendto_realops_flags (FLAGS_ALL, "Module Restart: %d modules unloaded, %d modules loaded",
 			modnum, num_mods);
-  log(L_WARN, "Module Restart: %d modules unloaded, %d modules loaded",
+  ilog(L_WARN, "Module Restart: %d modules unloaded, %d modules loaded",
       modnum, num_mods);
 }

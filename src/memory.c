@@ -224,7 +224,7 @@ void outofmemory()
 
   was_here = 1;
 
-  log(L_CRIT, "Out of memory: restarting server...");
+  ilog(L_CRIT, "Out of memory: restarting server...");
 #ifdef MEMDEBUG
   log_memory();
 #endif

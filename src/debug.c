@@ -77,7 +77,7 @@ deprintf(char *what, char *fmt, ...)
 
 
   vsnprintf(buffer, sizeof(buffer) - 1, fmt, ap);
-  log(L_DEBUG, "%s", buffer);
+  ilog(L_DEBUG, "%s", buffer);
   fflush(stdout);
 #endif
 }

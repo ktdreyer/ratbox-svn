@@ -29,7 +29,7 @@ void restart(char *mesg)
     abort();
   was_here = YES;
 
-  log(L_NOTICE, "Restarting Server because: %s, memory data limit: %ld",
+  ilog(L_NOTICE, "Restarting Server because: %s, memory data limit: %ld",
          mesg, get_maxrss());
 
   server_reboot();
@@ -43,7 +43,7 @@ void server_reboot(void)
 		       "Aieeeee!!!  Restarting server... memory: %d",
 		       get_maxrss());
 
-  log(L_NOTICE, "Restarting server...");
+  ilog(L_NOTICE, "Restarting server...");
   /*
    * XXX we used to call flush_connections() here. But since this routine
    * doesn't exist anymore, we won't be flushing. This is ok, since 

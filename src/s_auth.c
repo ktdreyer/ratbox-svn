@@ -238,7 +238,7 @@ static void auth_dns_callback(void* vptr, adns_answer* reply)
       release_auth_client(auth->client);
       unlink_auth_request(auth, &auth_poll_list);
 #ifdef USE_IAUTH
-      log(L_ERROR, "Linking to auth client list");
+      ilog(L_ERROR, "Linking to auth client list");
       link_auth_request(auth, &auth_client_list);
 #else
       free_auth_request(auth);
@@ -264,7 +264,7 @@ static void auth_error(struct AuthRequest* auth)
     unlink_auth_request(auth, &auth_poll_list);
     release_auth_client(auth->client);
 #ifdef USE_IAUTH
-    log(L_ERROR, "linking to auth client list 2");
+    ilog(L_ERROR, "linking to auth client list 2");
     link_auth_request(auth, &auth_client_list);
 #else
     free_auth_request(auth);
@@ -291,7 +291,7 @@ static int start_auth_query(struct AuthRequest* auth)
     {
       report_error("creating auth stream socket %s:%s", 
 		   get_client_name(auth->client, SHOW_IP), errno);
-      log(L_ERROR, "Unable to create auth socket for %s:%m",
+      ilog(L_ERROR, "Unable to create auth socket for %s:%m",
 	  get_client_name(auth->client, SHOW_IP));
       ++ServerStats->is_abad;
       return 0;
@@ -444,7 +444,7 @@ timeout_auth_queries_event(void *notused)
 	      auth->client->localClient->dns_query->query = NULL;
 	      sendheader(auth->client, REPORT_FAIL_DNS);
 	    }
-	  log(L_INFO, "DNS/AUTH timeout %s",
+	  ilog(L_INFO, "DNS/AUTH timeout %s",
 	      get_client_name(auth->client, SHOW_IP));
 
 	  auth->client->since = CurrentTime;
@@ -452,7 +452,7 @@ timeout_auth_queries_event(void *notused)
 	  dlinkDelete(ptr, &auth_poll_list);
 	  free_dlink_node(ptr);
 #ifdef USE_IAUTH
-    log(L_ERROR, "linking to auth client list 3");
+    ilog(L_ERROR, "linking to auth client list 3");
 	  link_auth_request(auth, &auth_client_list);
 #else
 	  free_auth_request(auth);
@@ -501,7 +501,7 @@ void auth_connect_callback(int fd, int error, void *data)
   if (getsockname(auth->client->fd, (struct sockaddr *)&us,   (unsigned int*)&ulen) ||
       getpeername(auth->client->fd, (struct sockaddr *)&them, (unsigned int*)&tlen))
     {
-      log(L_INFO, "auth get{sock,peer}name error for %s:%m",
+      ilog(L_INFO, "auth get{sock,peer}name error for %s:%m",
         get_client_name(auth->client, SHOW_IP));
       auth_error(auth);
       return;
@@ -587,7 +587,7 @@ read_auth_reply(int fd, void *data)
       unlink_auth_request(auth, &auth_poll_list);
       release_auth_client(auth->client);
 #ifdef USE_IAUTH
-    log(L_ERROR, "linking to auth client list 4");
+    ilog(L_ERROR, "linking to auth client list 4");
       link_auth_request(auth, &auth_client_list);
 #else
       free_auth_request(auth);

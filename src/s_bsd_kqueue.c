@@ -162,7 +162,7 @@ void init_netio(void)
 {
     kq = kqueue();
     if (kq < 0) {
-        log(L_CRIT, "init_netio: Couldn't open kqueue fd!\n");
+        ilog(L_CRIT, "init_netio: Couldn't open kqueue fd!\n");
         exit(115); /* Whee! */
     }
     kqmax = getdtablesize();

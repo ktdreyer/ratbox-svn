@@ -409,7 +409,7 @@ int check_client(struct Client *client_p, struct Client *source_p, char *usernam
 
   if ((i = attach_Iline(source_p, username)))
     {
-      log(L_INFO, "Access denied: %s[%s]", source_p->name, sockname);
+      ilog(L_INFO, "Access denied: %s[%s]", source_p->name, sockname);
     }
 
   switch( i )
@@ -422,7 +422,7 @@ int check_client(struct Client *client_p, struct Client *source_p, char *usernam
       sendto_realops_flags(FLAGS_FULL, "%s for %s (%s).",
 			   "Too many on IP", get_client_host(source_p),
 			   source_p->localClient->sockhost);
-      log(L_INFO,"Too many connections on IP from %s.", get_client_host(source_p));
+      ilog(L_INFO,"Too many connections on IP from %s.", get_client_host(source_p));
       ServerStats->is_ref++;
       (void)exit_client(client_p, source_p, &me, 
 			"No more connections allowed on that IP" );
@@ -432,7 +432,7 @@ int check_client(struct Client *client_p, struct Client *source_p, char *usernam
       sendto_realops_flags(FLAGS_FULL, "%s for %s (%s).",
 			   "I-line is full", get_client_host(source_p),
 			   source_p->localClient->sockhost);
-      log(L_INFO,"Too many connections from %s.", get_client_host(source_p));
+      ilog(L_INFO,"Too many connections from %s.", get_client_host(source_p));
       ServerStats->is_ref++;
       (void)exit_client(client_p, source_p, &me, 
 		"No more connections allowed in your connection class" );
@@ -453,7 +453,7 @@ int check_client(struct Client *client_p, struct Client *source_p, char *usernam
 			   source_p->localClient->listener->name,
 			   source_p->localClient->listener->port
 			   );
-      log(L_INFO,
+      ilog(L_INFO,
 	  "Unauthorized client connection from %s on [%s/%u].",
 	  get_client_host(source_p),
 	  source_p->localClient->listener->name,
@@ -1648,7 +1648,7 @@ static void lookup_confhost(struct ConfItem* aconf)
 {
   if (BadPtr(aconf->host) || BadPtr(aconf->name))
     {
-      log(L_ERROR, "Host/server name error: (%s) (%s)",
+      ilog(L_ERROR, "Host/server name error: (%s) (%s)",
           aconf->host, aconf->name);
       return;
     }
@@ -1971,7 +1971,7 @@ void read_conf_files(int cold)
     {
       if(cold)
         {
-          log(L_CRIT, "Failed in reading configuration file %s", filename);
+          ilog(L_CRIT, "Failed in reading configuration file %s", filename);
           exit(-1);
         }
       else
@@ -1997,7 +1997,7 @@ void read_conf_files(int cold)
       if((file = fbopen(kfilename,"r")) == NULL)
         {
 	  if (cold)
-	    log(L_ERROR, "Failed reading kline file %s", filename);
+	    ilog(L_ERROR, "Failed reading kline file %s", filename);
 	  else
 	    sendto_realops_flags(FLAGS_ALL,
 				 "Can't open %s file klines could be missing!",
@@ -2016,7 +2016,7 @@ void read_conf_files(int cold)
       if ((file = fbopen(dfilename,"r")) == NULL)
 	{
 	  if(cold)
-	    log(L_ERROR, "Failed reading dline file %s", dfilename);
+	    ilog(L_ERROR, "Failed reading dline file %s", dfilename);
 	  else
 	    sendto_realops_flags(FLAGS_ALL,
 				 "Can't open %s file dlines could be missing!",
@@ -2270,10 +2270,10 @@ void WriteKlineOrDline( KlineType type,
   fbclose(out);
 
   if(type==KLINE_TYPE)
-    log(L_TRACE, "%s added K-Line for [%s@%s] [%s]",
+    ilog(L_TRACE, "%s added K-Line for [%s@%s] [%s]",
         source_p->name, user, host, reason);
   else
-    log(L_TRACE, "%s added D-Line for [%s] [%s]",
+    ilog(L_TRACE, "%s added D-Line for [%s] [%s]",
            source_p->name, host, reason);
 }
 
@@ -2404,7 +2404,7 @@ int conf_add_server(struct ConfItem *aconf, int lcount)
   if (lcount > MAXCONFLINKS || !aconf->host || !aconf->name)
     {
       sendto_realops_flags(FLAGS_ALL,"Bad connect block");
-      log(L_WARN, "Bad connect block");
+      ilog(L_WARN, "Bad connect block");
       return -1;
     }
 
@@ -2412,7 +2412,7 @@ int conf_add_server(struct ConfItem *aconf, int lcount)
     {
       sendto_realops_flags(FLAGS_ALL,"Bad connect block, name %s",
 			   aconf->name);
-      log(L_WARN, "Bad connect block, host %s",aconf->name);
+      ilog(L_WARN, "Bad connect block, host %s",aconf->name);
       return -1;
     }
           
@@ -2420,7 +2420,7 @@ int conf_add_server(struct ConfItem *aconf, int lcount)
     {
       sendto_realops_flags(FLAGS_ALL,"Bad connect block, name %s",
 			   aconf->name);
-      log(L_WARN, "Bad connect block, name %s",aconf->name);
+      ilog(L_WARN, "Bad connect block, name %s",aconf->name);
       return -1;
     }
   lookup_confhost(aconf);
@@ -2458,7 +2458,7 @@ conf_add_d_conf(struct ConfItem *aconf)
   *       need this anyway, so I will disable it for now... -A1kmm */
  if (parse_netmask(aconf->host, NULL, NULL) == HM_HOST)
  {
-  log(L_WARN,"Invalid Dline %s ignored",aconf->host);
+  ilog(L_WARN,"Invalid Dline %s ignored",aconf->host);
       free_conf(aconf);
   return;
  }
@@ -2558,7 +2558,7 @@ void yyerror(char *msg)
   sendto_realops_flags(FLAGS_ALL,"%d: %s on line: %s",
 		       lineno + 1, msg, newlinebuf);
 
-  log(L_WARN, "%d: %s on line: %s",
+  ilog(L_WARN, "%d: %s on line: %s",
       lineno + 1, msg, newlinebuf);
 }
 

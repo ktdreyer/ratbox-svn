@@ -164,7 +164,7 @@ void report_error(const char* text, const char* who, int error)
 
   sendto_realops_flags(FLAGS_DEBUG, text, who, strerror(error));
 
-  log(L_ERROR, text, who, strerror(error));
+  ilog(L_ERROR, text, who, strerror(error));
 }
 
 /*
@@ -446,7 +446,7 @@ void error_exit_client(struct Client* client_p, int error)
 				"Server %s closed the connection",
 				get_client_name(client_p, MASK_IP));
 
-	  log(L_NOTICE, "Server %s closed the connection",
+	  ilog(L_NOTICE, "Server %s closed the connection",
 		get_client_name(client_p, SHOW_IP));
         }
       else
@@ -827,7 +827,7 @@ comm_open(int family, int sock_type, int proto, const char *note)
   /* Set the socket non-blocking, and other wonderful bits */
   if (!set_non_blocking(fd))
     {
-      log(L_CRIT, "comm_open: Couldn't set FD %d non blocking: %s", fd, strerror(errno));
+      ilog(L_CRIT, "comm_open: Couldn't set FD %d non blocking: %s", fd, strerror(errno));
     /* if VMS, we might be opening a file (ircd.conf, resolv.conf).
        VMS doesn't let us set non-blocking on a file, so it might fail. */
 #ifndef VMS
@@ -871,7 +871,7 @@ comm_accept(int fd, struct irc_sockaddr *pn)
   /* Set the socket non-blocking, and other wonderful bits */
   if (!set_non_blocking(newfd))
     {
-      log(L_CRIT, "comm_accept: Couldn't set FD %d non blocking!", newfd);
+      ilog(L_CRIT, "comm_accept: Couldn't set FD %d non blocking!", newfd);
       close(newfd);
       return -1;
     }

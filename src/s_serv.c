@@ -975,7 +975,7 @@ int server_estab(struct Client *client_p)
                  inpath);
       sendto_realops_flags(FLAGS_ALL,
 			   "Access denied (passwd mismatch) %s", inpath);
-      log(L_NOTICE, "Access denied (passwd mismatch) %s", inpath_ip);
+      ilog(L_NOTICE, "Access denied (passwd mismatch) %s", inpath_ip);
       return exit_client(client_p, client_p, client_p, "Bad Password");
     }
 #endif
@@ -1093,7 +1093,7 @@ int server_estab(struct Client *client_p)
 			"Link with %s established: (%s) link",
 			inpath,show_capabilities(client_p));
 
-  log(L_NOTICE, "Link with %s established: (%s) link",
+  ilog(L_NOTICE, "Link with %s established: (%s) link",
       inpath_ip, show_capabilities(client_p));
 
   add_to_client_hash_table(client_p->name, client_p);
@@ -1975,7 +1975,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 
     /* log */
     inetntop(DEF_FAM, &IN_ADDR(aconf->ipnum), buf, HOSTIPLEN);
-    log(L_NOTICE, "Connect to %s[%s] @%s", aconf->user, aconf->host,
+    ilog(L_NOTICE, "Connect to %s[%s] @%s", aconf->user, aconf->host,
          buf);
 
     /*

@@ -125,7 +125,7 @@ void oldParseOneLine(char* line)
       
     default:
       free_conf(aconf);
-      log(L_ERROR, "Error in config file: %s", line);
+      ilog(L_ERROR, "Error in config file: %s", line);
       break;
     }
 }

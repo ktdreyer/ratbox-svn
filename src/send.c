@@ -1184,7 +1184,7 @@ ts_warn(const char *pattern, ...)
   va_end(args);
 
   sendto_realops_flags(FLAGS_ALL,"%s",lbuf);
-  log(L_CRIT, "%s", lbuf);
+  ilog(L_CRIT, "%s", lbuf);
 } /* ts_warn() */
 
 
