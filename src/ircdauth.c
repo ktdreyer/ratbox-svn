@@ -267,7 +267,7 @@ BeginAuthorization(struct Client *client)
 		client->username,
 		client->host,
 #ifdef IPV6
-		0,
+		(long unsigned int)0,
 /*                (unsigned int) client->localClient->ip6.s6_addr, */
 #else
 		(unsigned int) client->localClient->ip.sins.sin.s_addr,
@@ -596,7 +596,7 @@ GreetUser(struct Client *client)
 		       client->host,
                        /* XXX - the IPv6 code is very broken */
 #ifdef IPV6
-		       0,
+		       "",
                        /*inetntoa((char *)&client->localClient->ip6),*/
 #else
 		       inetntoa((char *)&client->localClient->ip),
@@ -742,14 +742,15 @@ GreetUser(struct Client *client)
   }
   else
   {
-    sendto_nocap_serv_butone(CAP_LL, NULL,
-				"NICK %s %d %lu %s %s %s %s :%s",
-				client->name,
-				client->hopcount+1,
-				(unsigned long) client->tsinfo,
-				ubuf,
-				client->username, client->host,
-				client->user->server, client->info);
+    /* send to all servers, except LL servers */
+    sendto_server(NULL, NULL, NULL, NOCAPS, CAP_LL,
+                  NOFLAGS, "NICK %s %d %lu %s %s %s %s :%s",
+                  client->name,
+                  client->hopcount+1,
+                  (unsigned long) client->tsinfo,
+                  ubuf,
+                  client->username, client->host,
+                  client->user->server, client->info);
   }
   if (ubuf[1])
   {

@@ -218,10 +218,10 @@ static void m_kick(struct Client *client_p,
 			       name, who->name, comment);
 	}
 
-      sendto_channel_remote(chptr, client_p,
-			    ":%s KICK %s %s :%s",
-			    parv[0], chptr->chname,
-			    who->name, comment);
+      sendto_server(client_p, NULL, chptr, NOCAPS, NOCAPS, NOFLAGS,
+                    ":%s KICK %s %s :%s",
+                    parv[0], chptr->chname,
+                    who->name, comment);
       remove_user_from_channel(chptr, who, 0);
     }
   else

@@ -1620,9 +1620,11 @@ void set_channel_mode(struct Client *client_p,
                                        chptr->mode.key);
 		}
 
-              sendto_channel_remote(chptr, client_p, ":%s MODE %s -k %s",
-                                 source_p->name, chname,
-                                 chptr->mode.key);
+              sendto_server(client_p, source_p, chptr, NOCAPS, NOCAPS,
+                            LL_ICLIENT, /* but not channel */
+                            ":%s MODE %s -k %s",
+                            source_p->name, chname,
+                            chptr->mode.key);
             }
 
           if (whatt == MODE_DEL)
@@ -2336,14 +2338,17 @@ void set_channel_mode(struct Client *client_p,
                                modebuf, parabuf);
       }
 
-      sendto_match_nocap_servs(chptr, source_p, CAP_UID, ":%s MODE %s %s %s",
-			       source_p->name, chptr->chname,
-			       modebuf, parabuf);
-	  
-      sendto_match_cap_servs(chptr, source_p, CAP_UID, ":%s MODE %s %s %s",
-			     HasID(source_p) ? source_p->user->id : source_p->name,
-			     chptr->chname,
-			     modebuf, parabuf);
+      sendto_server(client_p, source_p, chptr, NOCAPS, CAP_UID,
+                    LL_ICLIENT, /* but not channel */
+                    ":%s MODE %s %s %s",
+                    source_p->name, chptr->chname,
+                    modebuf, parabuf);
+
+      sendto_server(client_p, source_p, chptr, CAP_UID, NOCAPS,
+                    LL_ICLIENT, /* but not server */
+                    ":%s MODE %s %s %s",
+                    ID(source_p), chptr->chname,
+                    modebuf, parabuf);
     }
 
   /*
@@ -2370,14 +2375,17 @@ void set_channel_mode(struct Client *client_p,
                              chname,
                              modebuf2, parabuf2);
       
-        sendto_match_nocap_servs(chptr, client_p, CAP_UID, ":%s MODE %s %s %s",
-                              source_p->name, chptr->chname,
-                              modebuf2, parabuf2);
+        sendto_server(client_p, source_p, chptr, NOCAPS, CAP_UID,
+                      LL_ICLIENT, /* but not channel */
+                      ":%s MODE %s %s %s",
+                      source_p->name, chptr->chname,
+                      modebuf2, parabuf2);
 
-	sendto_match_cap_servs(chptr, client_p, CAP_UID, ":%s MODE %s %s %s",
-			       HasID(source_p) ? source_p->user->id : source_p->name, 
-			       chptr->chname,
-			       modebuf2, parabuf2_id);
+	sendto_server(client_p, source_p, chptr, CAP_UID, NOCAPS,
+                      LL_ICLIENT, /* but not channel */
+                      ":%s MODE %s %s %s",
+                      ID(source_p), chptr->chname,
+                      modebuf2, parabuf2_id);
     }
 
   /*
@@ -2406,16 +2414,17 @@ void set_channel_mode(struct Client *client_p,
                              modebuf_ex, parabuf_ex);
       }
 
-      sendto_match_cap_servs_nocap(chptr, client_p, CAP_EX, CAP_UID,
-				   ":%s MODE %s %s %s",
-				   source_p->name, chptr->chname,
-				   modebuf_ex, parabuf_ex);
+      sendto_server(client_p, source_p, chptr, CAP_EX, CAP_UID,
+                    LL_ICLIENT, /* but not channel */
+                    ":%s MODE %s %s %s",
+                    source_p->name, chptr->chname,
+                    modebuf_ex, parabuf_ex);
 
-      sendto_match_vacap_servs(chptr, client_p, CAP_EX, CAP_UID, 0,
-			     ":%s MODE %s %s %s",
-			     HasID(source_p) ? source_p->user->id : source_p->name,
-			     chptr->chname,
-			     modebuf_ex, parabuf_ex);
+      sendto_server(client_p, source_p, chptr, CAP_EX | CAP_UID, NOCAPS,
+                    LL_ICLIENT, /* but not channel */
+                    ":%s MODE %s %s %s",
+                    ID(source_p), chptr->chname,
+                    modebuf_ex, parabuf_ex);
     }
 
   /*
@@ -2441,15 +2450,16 @@ void set_channel_mode(struct Client *client_p,
                              chname,
                              modebuf_invex, parabuf_invex);
 
-      sendto_match_cap_servs_nocap(chptr, client_p, CAP_IE, CAP_UID, 
-				   ":%s MODE %s %s %s",
-				   source_p->name, chptr->chname,
-				   modebuf_invex, parabuf_invex);
-      sendto_match_vacap_servs(chptr, client_p, CAP_IE, CAP_UID, 0,
-			     ":%s MODE %s %s %s",
-			     HasID(source_p) ? source_p->user->id : source_p->name,
-			     chptr->chname,
-			     modebuf_invex, parabuf_invex);
+      sendto_server(client_p, source_p, chptr, CAP_IE, CAP_UID, 
+                    LL_ICLIENT, /* but not channel */
+                    ":%s MODE %s %s %s",
+                    source_p->name, chptr->chname,
+                    modebuf_invex, parabuf_invex);
+      sendto_server(client_p, source_p, chptr, CAP_IE | CAP_UID, NOCAPS,
+                    LL_ICLIENT, /* but not channel */
+                    ":%s MODE %s %s %s",
+                    ID(source_p), chptr->chname,
+                    modebuf_invex, parabuf_invex);
     }	
 
   /*
@@ -2475,16 +2485,17 @@ void set_channel_mode(struct Client *client_p,
 			     chname,
 			     modebuf_hops, parabuf_hops);
 
-      sendto_match_cap_servs_nocap(chptr, client_p, CAP_HOPS, CAP_UID,
-				   ":%s MODE %s %s %s",
-				   source_p->name, chptr->chname,
-				   modebuf_hops, parabuf_hops);
+      sendto_server(client_p, source_p, chptr, CAP_HOPS, CAP_UID,
+                    LL_ICLIENT, /* but not channel */
+                    ":%s MODE %s %s %s",
+                    source_p->name, chptr->chname,
+                    modebuf_hops, parabuf_hops);
 	  
-      sendto_match_vacap_servs(chptr, client_p, CAP_HOPS, CAP_UID, 0,
-			     ":%s MODE %s %s %s",
-			     HasID(source_p) ? source_p->user->id : source_p->name,
-			     chptr->chname,
-			     modebuf_hops, parabuf_hops_id);
+      sendto_server(client_p, source_p, chptr, CAP_HOPS | CAP_UID, NOCAPS,
+                    LL_ICLIENT, /* but not channel */
+                    ":%s MODE %s %s %s",
+                    ID(source_p), chptr->chname,
+                    modebuf_hops, parabuf_hops_id);
     }	
 
   /*
@@ -2520,16 +2531,17 @@ void set_channel_mode(struct Client *client_p,
                                modebuf_aops);
       }
 
-      sendto_match_cap_servs_nocap(chptr, client_p, CAP_AOPS, CAP_UID,
-				   ":%s MODE %s %s",
-				   source_p->name, chptr->chname,
-				   modebuf_aops);
+      sendto_server(client_p, source_p, chptr, CAP_AOPS, CAP_UID,
+                    LL_ICLIENT, /* but not channel */
+                    ":%s MODE %s %s",
+                    source_p->name, chptr->chname,
+                    modebuf_aops);
 
-      sendto_match_vacap_servs(chptr, client_p, CAP_AOPS, CAP_UID, 0,
-                             ":%s MODE %s %s",
-                             HasID(source_p) ? source_p->user->id : source_p->name,
-			     chptr->chname,
-                             modebuf_aops);
+      sendto_server(client_p, source_p, chptr, CAP_AOPS | CAP_UID, NOCAPS,
+                    LL_ICLIENT, /* but not channel */
+                    ":%s MODE %s %s",
+                    ID(source_p), chptr->chname,
+                    modebuf_aops);
     }
 
   return;

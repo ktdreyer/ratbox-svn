@@ -144,14 +144,14 @@ static void ms_client(struct Client *client_p, struct Client *source_p,
                      nick, client_p->name);
           if (source_p != client_p) /* bad nick change */
             {
-              sendto_ll_serv_butone(client_p, source_p, 0,
-                                 ":%s KILL %s :%s (%s <- %s!%s@%s)",
-                                 me.name, parv[0], me.name,
-                                 get_client_name(client_p, HIDE_IP),
-                                 parv[0],
-                                 source_p->username,
-                                 source_p->user ? source_p->user->server :
-                                 client_p->name);
+              sendto_server(client_p, source_p, NULL, NOCAPS, NOCAPS,
+                            NOFLAGS, ":%s KILL %s :%s (%s <- %s!%s@%s)",
+                            me.name, parv[0], me.name,
+                            get_client_name(client_p, HIDE_IP),
+                            parv[0],
+                            source_p->username,
+                            (source_p->user ? source_p->user->server :
+                             client_p->name));
               source_p->flags |= FLAGS_KILLED;
               exit_client(client_p,source_p,&me,"BadNick");
               return;
@@ -222,16 +222,16 @@ static void ms_client(struct Client *client_p, struct Client *source_p,
             if (ServerInfo.hub && IsCapable(client_p,CAP_LL))
               add_lazylinkclient(client_p, target_p);
             
-	    sendto_ll_serv_butone(NULL, target_p, 0, /* all servers */
-		       ":%s KILL %s :%s (%s(NOUSER) <- %s!%s@%s)(TS:%s)",
-			       me.name,
-			       target_p->name,
-			       me.name,
-			       target_p->from->name,
-			       parv[1],
-			       parv[5],
-			       parv[6],
-			       client_p->name);
+	    sendto_server(NULL, target_p, NULL, NOCAPS, NOCAPS, NOFLAGS,
+                          ":%s KILL %s :%s (%s(NOUSER) <- %s!%s@%s)(TS:%s)",
+                          me.name,
+                          target_p->name,
+                          me.name,
+                          target_p->from->name,
+                          parv[1],
+                          parv[5],
+                          parv[6],
+                          client_p->name);
 #endif
 
             target_p->flags |= FLAGS_KILLED;
@@ -285,15 +285,15 @@ static void ms_client(struct Client *client_p, struct Client *source_p,
           if (ServerInfo.hub && IsCapable(client_p,CAP_LL))
 			  add_lazylinkclient(client_p, target_p);
 
-          sendto_ll_serv_butone(NULL, target_p, 0,/* all servers */
-								":%s KILL %s :%s (%s <- %s)",
-								me.name, target_p->name, me.name,
-								target_p->from->name,
-								/* NOTE: Cannot use get_client_name twice
-								** here, it returns static string pointer:
-								** the other info would be lost
-								*/
-								get_client_name(client_p, HIDE_IP));
+          sendto_server(NULL, target_p, NULL, NOCAPS, NOCAPS, NOFLAGS,
+                        ":%s KILL %s :%s (%s <- %s)",
+                        me.name, target_p->name, me.name,
+                        target_p->from->name,
+                        /* NOTE: Cannot use get_client_name twice
+                         ** here, it returns static string pointer:
+                         ** the other info would be lost
+                         */
+                        get_client_name(client_p, HIDE_IP));
 #endif
           ServerStats->is_kill++;
           sendto_one(target_p, form_str(ERR_NICKCOLLISION),
@@ -335,11 +335,11 @@ static void ms_client(struct Client *client_p, struct Client *source_p,
 #ifndef LOCAL_NICK_COLLIDE
               /* If it came from a LL server, it'd have been source_p,
                * so we don't need to mark target_p as known */
-	      sendto_ll_serv_butone(source_p, target_p, 0, /* all servers but source_p */
-				 ":%s KILL %s :%s (%s <- %s)",
-				 me.name, target_p->name, me.name,
-				 target_p->from->name,
-				 get_client_name(client_p, HIDE_IP));
+	      sendto_server(source_p, target_p, NULL, NOCAPS, NOCAPS, NOFLAGS,
+                            ":%s KILL %s :%s (%s <- %s)",
+                            me.name, target_p->name, me.name,
+                            target_p->from->name,
+                            get_client_name(client_p, HIDE_IP));
 #endif
 
               target_p->flags |= FLAGS_KILLED;
@@ -369,10 +369,10 @@ static void ms_client(struct Client *client_p, struct Client *source_p,
 #ifndef LOCAL_NICK_COLLIDE
       /* If we got the message from a LL, it would know
          about source_p already */
-      sendto_ll_serv_butone(NULL, source_p, 0, /* KILL old from outgoing servers */
-			 ":%s KILL %s :%s (%s(%s) <- %s)",
-			 me.name, source_p->name, me.name, target_p->from->name,
-			 target_p->name, get_client_name(client_p, HIDE_IP));
+      sendto_server(NULL, source_p, NULL, NOCAPS, NOCAPS, NOFLAGS,
+                    ":%s KILL %s :%s (%s(%s) <- %s)",
+                    me.name, source_p->name, me.name, target_p->from->name,
+                    target_p->name, get_client_name(client_p, HIDE_IP));
 #endif
 
       ServerStats->is_kill++;
@@ -382,10 +382,10 @@ static void ms_client(struct Client *client_p, struct Client *source_p,
       if (ServerInfo.hub && IsCapable(client_p,CAP_LL))
         add_lazylinkclient(client_p, target_p);
 
-      sendto_ll_serv_butone(NULL, target_p, 0, /* Kill new from incoming link */
-			 ":%s KILL %s :%s (%s <- %s(%s))",
-			 me.name, target_p->name, me.name, target_p->from->name,
-			 get_client_name(client_p, HIDE_IP), source_p->name);
+      sendto_server(NULL, target_p, NULL, NOCAPS, NOCAPS, NOFLAGS,
+                    ":%s KILL %s :%s (%s <- %s(%s))",
+                    me.name, target_p->name, me.name, target_p->from->name,
+                    get_client_name(client_p, HIDE_IP), source_p->name);
 #endif
 
       target_p->flags |= FLAGS_KILLED;
@@ -417,10 +417,11 @@ static void ms_client(struct Client *client_p, struct Client *source_p,
 #ifndef LOCAL_NICK_COLLIDE
           /* this won't go back to the incoming link, so it doesn't
            * matter if it is an LL */
-	  sendto_ll_serv_butone(client_p, source_p, 0, /* KILL old from outgoing servers */
-			     ":%s KILL %s :%s (%s(%s) <- %s)",
-			     me.name, source_p->name, me.name, target_p->from->name,
-			     target_p->name, get_client_name(client_p, HIDE_IP));
+          /* KILL old from outgoing servers */
+	  sendto_server(client_p, source_p, NULL, NOCAPS, NOCAPS, NOFLAGS,
+                        ":%s KILL %s :%s (%s(%s) <- %s)",
+                        me.name, source_p->name, me.name, target_p->from->name,
+                        target_p->name, get_client_name(client_p, HIDE_IP));
 #endif
 
           source_p->flags |= FLAGS_KILLED;
@@ -446,11 +447,11 @@ static void ms_client(struct Client *client_p, struct Client *source_p,
 #ifndef LOCAL_NICK_COLLIDE
           /* this won't go back to the incoming link, so it doesn't
            * matter if it's an LL */
-	  sendto_ll_serv_butone(source_p, target_p, 0, /* all servers but source_p */
-			     ":%s KILL %s :%s (%s <- %s)",
-			     me.name, target_p->name, me.name,
-			     target_p->from->name,
-			     get_client_name(client_p, HIDE_IP));
+	  sendto_server(source_p, target_p, NULL, NOCAPS, NOCAPS, NOFLAGS,
+                        ":%s KILL %s :%s (%s <- %s)",
+                        me.name, target_p->name, me.name,
+                        target_p->from->name,
+                        get_client_name(client_p, HIDE_IP));
 #endif
 
           ServerStats->is_kill++;

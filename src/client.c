@@ -1033,8 +1033,8 @@ static void exit_one_client(struct Client *client_p, struct
       */
       if ((source_p->flags & FLAGS_KILLED) == 0)
         {
-          sendto_ll_serv_butone(client_p,source_p,0,":%s QUIT :%s",
-                             source_p->name, comment);
+          sendto_server(client_p, source_p, NULL, NOCAPS, NOCAPS,
+                        NOFLAGS, ":%s QUIT :%s", source_p->name, comment);
         }
       /*
       ** If a person is on a channel, send a QUIT notice
@@ -1789,10 +1789,9 @@ int change_local_nick(struct Client *client_p, struct Client *source_p,
 	   * hubs might not propogate a nick change, if the leaf
 	   * does not know about that client yet.
 	   */
-          sendto_ll_serv_butone(client_p, source_p, 0, ":%s NICK %s :%lu",
-				source_p->name,
-				nick,
-				(unsigned long) source_p->tsinfo);
+          sendto_server(client_p, source_p, NULL, NOCAPS, NOCAPS,
+                        NOFLAGS, ":%s NICK %s :%lu", source_p->name,
+                        nick, (unsigned long) source_p->tsinfo);
 	}
     }
   else

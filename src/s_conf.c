@@ -53,6 +53,7 @@
 #include "list.h"
 #include "listener.h"
 #include "hostmask.h"
+#include "modules.h"
 #include "numeric.h"
 #include "fdlist.h"
 #include "s_bsd.h"
@@ -62,7 +63,6 @@
 #include "s_debug.h"
 #include "fileio.h"
 #include "memory.h"
-#include "modules.h"
 
 extern int yyparse(); /* defined in y.tab.c */
 extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */
@@ -1490,7 +1490,7 @@ static void read_conf(FBFILE* file)
 {
   scount = lineno = 0;
 
-  set_default_conf(); /* set our defaults */
+  set_default_conf(); /* preset defaults */
   yyparse(); /* wheee! */
   check_conf();  /* make sure config items are valid */
   check_class(); /* make sure classes are valid */

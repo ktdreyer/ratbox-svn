@@ -234,18 +234,19 @@ static void mo_gline(struct Client *client_p,
 			   reason);
 
       /* 4 param version for hyb-7 servers */
-      sendto_cap_serv_butone(CAP_GLN,
-			     NULL, ":%s GLINE %s %s :%s",
-			     source_p->name,
-			     user,
-			     host,
-			     reason);
+      sendto_server(NULL, source_p, NULL, CAP_GLN, NOCAPS, LL_ICLIENT,
+                    ":%s GLINE %s %s :%s",
+                    source_p->name,
+                    user,
+                    host,
+                    reason);
 
       /* 8 param for hyb-6 */
-      sendto_nocap_serv_butone(CAP_GLN,
-                               NULL, ":%s GLINE %s %s %s %s %s %s :%s",
-                               me.name, source_p->name, source_p->username, source_p->host,
-                               source_p->user->server, user, host, reason);
+      sendto_server(NULL, NULL, NULL, NOCAPS, CAP_GLN, NOFLAGS,
+                    ":%s GLINE %s %s %s %s %s %s :%s",
+                    me.name, source_p->name, source_p->username,
+                    source_p->host, source_p->user->server, user, host,
+                    reason);
 
       sendto_realops_flags(FLAGS_ALL,
 			"%s!%s@%s on %s is requesting gline for [%s@%s] [%s]",
@@ -256,7 +257,9 @@ static void mo_gline(struct Client *client_p,
 			user,
 			host,
 			reason);
-      log_gline_request(source_p->name,(const char *)source_p->username,source_p->host,me.name,
+      log_gline_request(source_p->name,
+                        (const char *)source_p->username,
+                        source_p->host,me.name,
                         user,host,reason);
     }
   else
@@ -294,6 +297,7 @@ static void ms_gline(struct Client *client_p,
   char *user = NULL;
   char *host = NULL;             /* user and host of GLINE "victim" */
   const char *reason = NULL;           /* reason for "victims" demise */
+  struct Client *acptr;
 
   /* hyb-7 style gline (post beta3) */
   if(parc == 4 && IsPerson(source_p))
@@ -309,8 +313,6 @@ static void ms_gline(struct Client *client_p,
   /* or it's a hyb-6 style */
   else if(parc == 8 && IsServer(source_p))
     {
-      struct Client *acptr;
-
       oper_nick = parv[1];
       oper_user = parv[2];
       oper_host = parv[3];
@@ -318,38 +320,41 @@ static void ms_gline(struct Client *client_p,
       user = parv[5];
       host = parv[6];
       reason = parv[7];      
-
-      /* Its plausible that the server and/or client dont actually exist, and its
-       * faked, as the oper isnt sending the gline.. check theyre real --fl_ */
-      if((acptr = find_server(oper_server)))
-        {
-          if(!(acptr = find_client(oper_user, NULL)))
-            return;
-        }
-      else
-        return;
     }
   /* none of the above */
   else
     return;
 
+  /* Its plausible that the server and/or client dont actually exist,
+   * and its faked, as the oper isnt sending the gline..
+   * check they're real --fl_ */
+  /* we need acptr for LL introduction anyway -davidt */
+  if((acptr = find_server(oper_server)))
+  {
+    if(!(acptr = find_client(oper_nick, NULL)))
+      return;
+  }
+  else
+    return;
+
   /* send in hyb-7 to compatable servers */
-  sendto_cap_serv_butone(CAP_GLN,
-                         source_p, ":%s GLINE %s %s :%s",
-		         oper_nick,
-		         user,
-		         host,
-		         reason);
+  sendto_server(client_p, acptr, NULL, CAP_GLN, NOCAPS, LL_ICLIENT,
+                ":%s GLINE %s %s :%s",
+                oper_nick,
+                user,
+                host,
+                reason);
   /* hyb-6 version to the rest */
-  sendto_nocap_serv_butone(CAP_GLN,
-                           source_p, ":%s GLINE %s %s %s %s %s %s :%s",
-                           source_p->name, oper_nick, oper_user, oper_host,
-                           oper_server, user, host, reason);
+  sendto_server(client_p, NULL, NULL, NOCAPS, CAP_GLN, NOFLAGS,
+                ":%s GLINE %s %s %s %s %s %s :%s",
+                source_p->name, oper_nick, oper_user, oper_host,
+                oper_server, user, host, reason);
 
   if (ConfigFileEntry.glines)
     {
-     /* I dont like the idea of checking for x non-wildcard chars in a gline.. it could lead to
-      * a desync... but we have to stop people glining *@*..   -- fl */
+     /* I dont like the idea of checking for x non-wildcard chars in a
+      * gline.. it could lead to a desync... but we have to stop people
+      * glining *@*..   -- fl */
      if (check_wild_gline(user, host))
         {
           sendto_realops_flags(FLAGS_ALL, 

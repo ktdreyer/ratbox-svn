@@ -236,10 +236,10 @@ send_linebuf_remote(struct Client *to, struct Client *from,
 			   from->name, from->username, from->host,
 			   to->from->name);
       
-      sendto_ll_serv_butone(NULL, to, 0,
-                            ":%s KILL %s :%s (%s[%s@%s] Ghosted %s)",
-                            me.name, to->name, me.name, to->name,
-                            to->username, to->host, to->from->name);
+      sendto_server(NULL, to, NULL, NOCAPS, NOCAPS, NOFLAGS,
+                    ":%s KILL %s :%s (%s[%s@%s] Ghosted %s)",
+                    me.name, to->name, me.name, to->name,
+                    to->username, to->host, to->from->name);
 
       to->flags |= FLAGS_KILLED;
 
@@ -395,7 +395,6 @@ send_queued_slink_write(int fd, void *data)
  */
 void
 sendto_one(struct Client *to, const char *pattern, ...)
-
 {
   char sendbuf[IRCD_BUFSIZE*2];
   int len;
@@ -447,7 +446,6 @@ sendto_one(struct Client *to, const char *pattern, ...)
 void
 sendto_one_prefix(struct Client *to, struct Client *prefix,
 		  const char *pattern, ...)
-
 {
   int len;
   va_list args;
@@ -629,151 +627,39 @@ sendto_list_anywhere(struct Client *one, struct Client *from,
     }
 }
 
-/*
- * sendto_serv_butone
- *
- * inputs	- pointer to client to not send to
- *		- var arg pattern to send
- * output	- NONE
- * side effects	- Send a message to all connected servers
- *                except the client 'one'.
- */
-void
-sendto_serv_butone(struct Client *one, const char *pattern, ...)
-{
-  int len;
-  va_list args;
-  char sendbuf[IRCD_BUFSIZE*2];
-  struct Client *client_p;
-  dlink_node *ptr;
-  buf_head_t linebuf;
-
-  va_start(args, pattern);
-  len = send_format(sendbuf,pattern,args);
-  va_end(args);
- 
-  linebuf_newbuf(&linebuf);
-  linebuf_put(&linebuf, sendbuf, len);
- 
-  for(ptr = serv_list.head; ptr; ptr = ptr->next)
-    {
-      client_p = ptr->data;
-
-      if (one && (client_p == one->from))
-        continue;
-      
-      send_linebuf(client_p, &linebuf);
-    }
-  linebuf_donebuf(&linebuf);
-} /* sendto_serv_butone() */
 
 /*
- * sendto_ll_serv_butone
- *
- * inputs	- pointer to client to not send to
- *		- var arg pattern to send
- * output	- NONE
- * side effects	- Send a message to all connected servers
- *                except the client 'one'. Also deal with
- *		  client being unknown to leaf, as in lazylink...
- */
-void
-sendto_ll_serv_butone(struct Client *one, struct Client *source_p, int add,
-		      const char *pattern, ...)
-{
-  int len;
-  va_list args;
-  char sendbuf[IRCD_BUFSIZE*2];
-  struct Client *client_p;
-  dlink_node *ptr;
-  buf_head_t linebuf;
-
-  va_start(args, pattern);
-  len = send_format(sendbuf,pattern,args);
-  va_end(args);
-
-  linebuf_newbuf(&linebuf);
-  linebuf_put(&linebuf, sendbuf, len);
-  
-  for(ptr = serv_list.head; ptr; ptr = ptr->next)
-    {
-      client_p = ptr->data;
-
-      if (one && (client_p == one->from))
-        continue;
-      
-      if (IsCapable(client_p,CAP_LL) && ServerInfo.hub)
-	{
-	  if( ( source_p->lazyLinkClientExists &
-		client_p->localClient->serverMask) == 0)
-	    {
-	      if(add)
-		{
-                  client_burst_if_needed(client_p,source_p);
-		  send_linebuf(client_p, &linebuf);
-		}
-	    }
-	  else
-	    send_linebuf(client_p, &linebuf);
-	}
-      else
-	send_linebuf(client_p, &linebuf);
-    }
-  linebuf_donebuf(&linebuf);
-} /* sendto_ll_serv_butone() */
-
-/*
- * sendto_cap_serv_butone
+ * sendto_server
  * 
- * inputs       - int capability mask
- *              - pointer to client NOT to send to or NULL
- *		- var args pattern of message to send
- * output	- NONE
- * side effects - Send a message to all connected servers
- *                except the client 'one'.
- */
-void
-sendto_cap_serv_butone(int cap, struct Client *one, const char *pattern, ...)
-{
-  int len;
-  va_list args;
-  char sendbuf[IRCD_BUFSIZE*2];
-  struct Client *client_p;
-  dlink_node *ptr;
-  buf_head_t linebuf;
-
-  va_start(args, pattern);
-  len = send_format(sendbuf,pattern,args);
-  va_end(args);
-
-  linebuf_newbuf(&linebuf);
-  linebuf_put(&linebuf, sendbuf, len);
-  
-  for(ptr = serv_list.head; ptr; ptr = ptr->next)
-    {
-      client_p = ptr->data;
-
-      if (one && (client_p == one->from))
-        continue;
-      
-      if (IsCapable(client_p,cap))
-	send_linebuf(client_p, &linebuf);
-    }
-  linebuf_donebuf(&linebuf);
-} /* sendto_cap_serv_butone() */
-
-/*
- * sendto_nocap_serv_butone
- *
- * inputs       - int capability mask NOT to send to.
- *              - pointer to client NOT to send to or NULL
- *              - var args pattern of message to send
+ * inputs       - pointer to client to NOT send to
+ *              - pointer to source client required by LL (if any)
+ *              - pointer to channel required by LL (if any)
+ *              - caps or'd together which must ALL be present
+ *              - caps or'd together which must ALL NOT be present
+ *              - LL flags: LL_ICLIENT | LL_ICHAN
+ *              - printf style format string
+ *              - args to format string
  * output       - NONE
- * side effects - Send a message to all connected servers
- *                except the client 'one'.
+ * side effects - Send a message to all connected servers, except the
+ *                client 'one' (if non-NULL), as long as the servers
+ *                support ALL capabs in 'caps', and NO capabs in 'nocaps'.
+ *                If the server is a lazylink client, then it must know
+ *                about source_p if non-NULL (unless LL_ICLIENT is specified,
+ *                when source_p will be introduced where required) and
+ *                chptr if non-NULL (unless LL_ICHANNEL is specified, when
+ *                chptr will be introduced where required).
+ *                Note: nothing will be introduced to a LazyLeaf unless
+ *                the message is actually sent.
+ *            
+ * This function was written in an attempt to merge together the other
+ * billion sendto_*serv*() functions, which sprung up with capabs,
+ * lazylinks, uids, etc.
+ * -davidt
  */
-void
-sendto_nocap_serv_butone(int cap, struct Client *one, const char *pattern, ...)
+void sendto_server(struct Client *one, struct Client *source_p,
+                   struct Channel *chptr, unsigned long caps,
+                   unsigned long nocaps, unsigned long llflags,
+                   char *format, ...)
 {
   int len;
   va_list args;
@@ -782,25 +668,64 @@ sendto_nocap_serv_butone(int cap, struct Client *one, const char *pattern, ...)
   dlink_node *ptr;
   buf_head_t linebuf;
 
-  va_start(args, pattern);
-  len = send_format(sendbuf,pattern,args);
+  if (chptr != NULL)
+    if (*chptr->chname == '&')
+      return;
+
+  va_start(args, format);
+  len = send_format(sendbuf,format,args);
   va_end(args);
 
   linebuf_newbuf(&linebuf);
   linebuf_put(&linebuf, sendbuf, len);
 
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
+  {
+    client_p = ptr->data;
+
+    /* check against 'one' */
+    if (one && (client_p == one->from))
+      continue;
+    /* check we have required capabs */
+    if ((client_p->localClient->caps & caps) != caps)
+      continue;
+    /* check we don't have any forbidden capabs */
+    if ((client_p->localClient->caps & nocaps) != 0)
+      continue;
+
+    if (ServerInfo.hub && IsCapable(client_p, CAP_LL))
     {
-      client_p = ptr->data;
+      /* check LL channel */
+      if (chptr &&
+          ((chptr->lazyLinkChannelExists &
+           client_p->localClient->serverMask) == 0))
+      {
+        /* Only introduce the channel if we really will send this message */
+        if (!(llflags & LL_ICLIENT) && source_p &&
+            ((source_p->lazyLinkClientExists &
+             client_p->localClient->serverMask) == 0))
+          continue; /* we can't introduce the unknown source_p, skip */
 
-      if (one && (client_p == one->from))
-        continue;
-
-      if (!IsCapable(client_p,cap))
-        send_linebuf(client_p, &linebuf);
+        if (llflags & LL_ICHAN)
+          burst_channel(client_p, chptr);
+        else
+          continue; /* we can't introduce the unknown chptr, skip */
+      }
+      /* check LL client */
+      if (source_p &&
+          ((source_p->lazyLinkClientExists &
+           client_p->localClient->serverMask) == 0))
+      {
+        if (llflags & LL_ICLIENT)
+          client_burst_if_needed(client_p,source_p);
+        else
+          continue; /* we can't introduce the unknown source_p, skip */
+      }
     }
+    send_linebuf(client_p, &linebuf);
+  }
   linebuf_donebuf(&linebuf);
-} /* sendto_cap_serv_butone() */
+}
 
 /*
  * sendto_common_channels_local()
@@ -814,7 +739,6 @@ sendto_nocap_serv_butone(int cap, struct Client *one, const char *pattern, ...)
  */
 void
 sendto_common_channels_local(struct Client *user, const char *pattern, ...)
-
 {
   int len;
   va_list args;
@@ -949,455 +873,6 @@ sendto_list_local(dlink_list *list, buf_head_t *linebuf_ptr)
 	send_linebuf(target_p, linebuf_ptr);
     } 
 } /* sendto_list_local() */
-
-/*
- * sendto_channel_remote
- *
- * inputs	- pointer to channel
- *              - from pointer
- *              - var args pattern
- * output       - NONE
- * side effects - send to all servers the channel given, except for "from"
- */
-void
-sendto_channel_remote(struct Channel *chptr,
-		      struct Client *from,
-		      const char *pattern, ...)
-{
-  int len;
-  char sendbuf[IRCD_BUFSIZE*2];
-  va_list args;
-  struct Client *client_p;
-  dlink_node *ptr;
-  buf_head_t linebuf;
-
-  if (chptr != NULL)
-    {
-      if (*chptr->chname == '&')
-        return;
-    }
-  else
-    return;
-
-  va_start(args, pattern);
-  len = send_format(sendbuf,pattern,args);
-  va_end(args);
-
-  linebuf_newbuf(&linebuf);
-  linebuf_put(&linebuf, sendbuf, len);
-
-  for(ptr = serv_list.head; ptr; ptr = ptr->next)
-    {
-      client_p = ptr->data;
-
-      if (client_p == from)
-        continue;
-
-      if (ServerInfo.hub && IsCapable(client_p,CAP_LL))
-	{
-	  if( !(RootChan(chptr)->lazyLinkChannelExists &
-		client_p->localClient->serverMask) )
-	    continue;
-	}
-
-      send_linebuf(client_p, &linebuf);
-    }
-  linebuf_donebuf(&linebuf);
-} /* sendto_channel_remote() */
-
-/*
- * sendto_channel_remote
- *
- * inputs	- pointer to channel
- *              - from pointer
- *              - var args pattern
- * output       - NONE
- * side effects - send to all servers the channel given, except for "from"
- *		  This code is only used in m_join.c,m_sjoin.c
- */
-void
-sendto_channel_remote_prefix(struct Channel *chptr,
-		      struct Client *from,
-                      struct Client *prefix,
-		      const char *pattern, ...)
-{
-  int ilen, llen;
-  va_list args;
-  struct Client *client_p;
-  dlink_node *ptr;
-  char sendbuf[IRCD_BUFSIZE*2];
-  char lbuf[IRCD_BUFSIZE + 1];
-  char ibuf[IRCD_BUFSIZE + 1];
-  buf_head_t ilinebuf;
-  buf_head_t llinebuf;
-  
-  if (chptr != NULL)
-    {
-      if (*chptr->chname == '&')
-        return;
-    }
-  else
-    return;
-
-  va_start(args, pattern);
-  send_format(sendbuf,pattern,args);
-  va_end(args);
-
-  /* with ID */
-  ilen = ircsprintf(ibuf, ":%s %s", ID(prefix), sendbuf);
-  /* without ID */
-  llen = sprintf(lbuf, ":%s %s", prefix->name, sendbuf);
-
-  linebuf_newbuf(&ilinebuf);
-  linebuf_put(&ilinebuf, ibuf, ilen);
-  linebuf_newbuf(&llinebuf);
-  linebuf_put(&llinebuf, lbuf, llen);
-  
-  for(ptr = serv_list.head; ptr; ptr = ptr->next)
-    {
-      client_p = ptr->data;
-
-      if (client_p == from)
-        continue;
-
-      if (ServerInfo.hub && IsCapable(client_p,CAP_LL))
-	{
-	  if( !(RootChan(chptr)->lazyLinkChannelExists &
-		client_p->localClient->serverMask) )
-	    continue;
-	}
-      if (IsCapable(client_p, CAP_UID)) 
-        send_linebuf(client_p, &ilinebuf);
-      else
-        send_linebuf(client_p, &llinebuf);
-    }
-  linebuf_donebuf(&ilinebuf);
-  linebuf_donebuf(&llinebuf);
-} /* sendto_channel_remote() */
-
-/*
- * sendto_ll_channel_remote
- *
- * inputs	- pointer to channel
- *              - from pointer
- *              - var args pattern
- * output       - NONE
- * side effects - send to all servers the channel given, except for "from"
- *		  This code is only used in m_join.c,m_sjoin.c
- *		  It will introduce the client 'source_p' if it is unknown
- *		  to the leaf.
- */
-void
-sendto_ll_channel_remote(struct Channel *chptr,
-			 struct Client *from, struct Client *source_p,
-			 const char *pattern, ...)
-{
-  int len;
-  va_list args;
-  char sendbuf[IRCD_BUFSIZE*2];
-  struct Client *client_p;
-  dlink_node *ptr;
-  buf_head_t linebuf;
-
-  if (chptr != NULL)
-    {
-      if (*chptr->chname == '&')
-        return;
-    }
-  else
-    return;
-
-  va_start(args, pattern);
-  len = send_format(sendbuf,pattern,args);
-  va_end(args);
-
-  linebuf_newbuf(&linebuf);
-  linebuf_put(&linebuf, sendbuf, len);
-
-  for(ptr = serv_list.head; ptr; ptr = ptr->next)
-    {
-      client_p = ptr->data;
-
-      if (client_p == from)
-        continue;
-
-      if (IsCapable(client_p,CAP_LL))
-	{
-	  if(ServerInfo.hub)
-	    {
-              /* Only tell leafs that already know about the channel */
-              if ((RootChan(chptr)->lazyLinkChannelExists &
-                   client_p->localClient->serverMask) == 0)
-              {
-                continue;
-              }
-	      if (source_p &&
-                  ((source_p->lazyLinkClientExists &
-                   client_p->localClient->serverMask) == 0))
-              {
-                sendnick_TS(client_p,source_p);
-                add_lazylinkclient(client_p,source_p);
-              }
-	    }
-	}
-
-      send_linebuf(client_p, &linebuf);
-    }
-  linebuf_donebuf(&linebuf);
-} /* sendto_channel_remote() */
-
-/*
- * sendto_match_cap_servs
- *
- * inputs	- channel pointer
- * 		- client to not send back towards (often a server)
- *		- integer capability
- *		- var args message
- * output	- NONE
- * side effects - send to all servers but 'from',
- *                to the given channel only if
- *                they match the capability, the given message.
- */
-
-void
-sendto_match_cap_servs(struct Channel *chptr, struct Client *source_p,
-                       int cap,  const char *pattern, ...)
-{
-  int len;
-  char sendbuf[IRCD_BUFSIZE*2];
-  va_list args;
-  struct Client *client_p;
-  struct Client *from;
-  dlink_node *ptr;
-  buf_head_t linebuf;
-  
-  from = source_p ? source_p->from : NULL;
-  if (chptr)
-    {
-      if (*chptr->chname == '&')
-        return;
-    }
-
-  va_start(args, pattern);
-  len = send_format(sendbuf,pattern,args);
-  va_end(args);
-
-  linebuf_newbuf(&linebuf);
-  linebuf_put(&linebuf, sendbuf, len);
-
-  for(ptr = serv_list.head; ptr; ptr = ptr->next)
-    {
-      client_p = ptr->data;
-
-      if (client_p == from)
-        continue;
-      
-      if(!IsCapable(client_p, cap))
-        continue;
-      if (ServerInfo.hub && IsCapable(client_p,CAP_LL))
-        {
-          if( !(RootChan(chptr)->lazyLinkChannelExists &
-                client_p->localClient->serverMask) )
-            continue;
-        }
-      client_burst_if_needed(client_p, source_p);
-      send_linebuf(client_p, &linebuf);
-    }
-  linebuf_donebuf(&linebuf);
-} /* sendto_match_cap_servs() */
-
-#define MAX_CAPS 12
-
-/* eww. */
-void
-sendto_match_vacap_servs(struct Channel *chptr, struct Client *source_p,
-                         ...)
-{
-  va_list args;
-  int len;
-  char sendbuf[IRCD_BUFSIZE*2];
-  struct Client *client_p, *from;
-  dlink_node *ptr;
-  char *pattern;
-  int caps[MAX_CAPS];
-  int ncaps;
-  int cap;
-  buf_head_t linebuf;
-
-  from = source_p ? source_p->from : NULL;
-  if (chptr)
-  {
-    if (*chptr->chname == '&')
-      return;
-  }
-
-  va_start(args, source_p);
-
-  /* at this point, we have a list of CAPs followed by a terminating 0 */
-  for (ncaps = 0; (cap = va_arg(args, int)); ncaps++)
-  {
-    /* for each cap, add it to the caps list */
-    if (ncaps > MAX_CAPS)
-    {
-      sendto_realops_flags(FLAGS_ALL, "Warning: too many caps passed to sendto_match_vacap_servs!");
-      return;
-    }
-
-    caps[ncaps] = cap;
-  }
-
-  /* now, we should be pointer to the format pointer */
-  pattern = va_arg(args, char *);
-  len = send_format(sendbuf, pattern, args);
-  va_end(args);
-
-  linebuf_newbuf(&linebuf);
-  linebuf_put(&linebuf, sendbuf, len);
-
-  /* whew.. now we have a list of caps in caps[],
-     and sendbuf contains the data to send.. */
-
-  for (ptr = serv_list.head; ptr; ptr = ptr->next)
-  {
-    int i, hascaps = 1;
-
-    client_p = ptr->data;
-
-    if (client_p == from)
-      continue;
-
-    /* check it supports *all* the caps.. */
-    for (i = 0; i < ncaps && hascaps; i++)
-    {
-      if (!IsCapable(client_p, caps[i])) {
-        hascaps = 0;
-        break;
-      }
-    }
-
-    if (!hascaps)
-      continue;
-
-    if (ServerInfo.hub && IsCapable(client_p, CAP_LL))
-    {
-      if (!(RootChan(chptr)->lazyLinkChannelExists &
-            client_p->localClient->serverMask))
-        continue;
-    }
-    client_burst_if_needed(client_p, source_p);
-
-    send_linebuf(client_p, &linebuf);
-  }
-  linebuf_donebuf(&linebuf);
-}
-
-
-/*
- * sendto_match_cap_servs
- *
- * inputs	- channel pointer
- * 		- client to not send back towards (often a server)
- *		- integer capability
- *		- var args message
- * output	- NONE
- * side effects - send to all servers but 'from',
- *                to the given channel only if
- *                they match the capability, the given message.
- */
-
-void
-sendto_match_cap_servs_nocap(struct Channel *chptr, struct Client *source_p,
-                             int cap, int nocap, const char *pattern, ...)
-{
-  int len;
-  char sendbuf[IRCD_BUFSIZE*2];
-  va_list args;
-  struct Client *client_p, *from;
-  dlink_node *ptr;
-  buf_head_t linebuf;
-
-  from = source_p ? source_p->from : NULL;
-  if (chptr)
-    {
-      if (*chptr->chname == '&')
-        return;
-    }
-
-  va_start(args, pattern);
-  len = send_format(sendbuf,pattern,args);
-  va_end(args);
-
-  linebuf_newbuf(&linebuf);
-  linebuf_put(&linebuf, sendbuf, len);
-
-  for(ptr = serv_list.head; ptr; ptr = ptr->next)
-    {
-      client_p = ptr->data;
-
-      if (client_p == from)
-        continue;
-      
-      if(!IsCapable(client_p, cap) || IsCapable(client_p, nocap))
-        continue;
-      if (ServerInfo.hub && IsCapable(client_p,CAP_LL))
-        {
-          if( !(RootChan(chptr)->lazyLinkChannelExists &
-                client_p->localClient->serverMask) )
-            continue;
-        }
-      client_burst_if_needed(client_p, source_p);
-      send_linebuf(client_p, &linebuf);
-    }
-  linebuf_donebuf(&linebuf);
-} /* sendto_match_cap_servs() */
-
-void
-sendto_match_nocap_servs(struct Channel *chptr, struct Client *source_p, int cap,
-                         const char *pattern, ...)
-{
-  int len;
-  va_list args;
-  char sendbuf[IRCD_BUFSIZE*2];
-  struct Client *client_p, *from;
-  dlink_node *ptr;
-  buf_head_t linebuf;
-
-  from = source_p ? source_p->from : NULL;
-  if (chptr)
-    {
-      if (*chptr->chname == '&')
-        return;
-    }
-
-  va_start(args, pattern);
-  len = send_format(sendbuf,pattern,args);
-  va_end(args);
-
-  linebuf_newbuf(&linebuf);
-  linebuf_put(&linebuf, sendbuf, len);
-
-  for(ptr = serv_list.head; ptr; ptr = ptr->next)
-    {
-      client_p = ptr->data;
-
-      if (client_p == from)
-        continue;
-      
-      if(IsCapable(client_p, cap))
-        continue;
-
-      if (ServerInfo.hub && IsCapable(client_p,CAP_LL))
-        {
-          if( !(RootChan(chptr)->lazyLinkChannelExists &
-                client_p->localClient->serverMask) )
-            continue;
-        }
-      client_burst_if_needed(client_p, source_p);
-      send_linebuf(client_p, &linebuf);
-    }
-  linebuf_donebuf(&linebuf);
-} /* sendto_match_cap_servs() */
-
 
 /*
 ** match_it() and sendto_match_butone() ARE only used

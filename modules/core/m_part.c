@@ -173,9 +173,12 @@ static void part_one_client(struct Client *client_p,
       (source_p->firsttime + ConfigFileEntry.anti_spam_exit_message_time)
       < CurrentTime))))
     {
-      sendto_channel_remote_prefix(chptr, client_p, source_p, "PART %s :%s",
-                              chptr->chname,
-                              reason);
+      sendto_server(client_p, NULL, chptr, CAP_UID, NOCAPS, NOFLAGS,
+                    ":%s PART %s :%s", ID(source_p), chptr->chname,
+                    reason);
+      sendto_server(client_p, NULL, chptr, NOCAPS, CAP_UID, NOFLAGS,
+                    "%s PART %s  :%s", source_p->name, chptr->chname,
+                    reason);
       sendto_channel_local(ALL_MEMBERS,
                            chptr, ":%s!%s@%s PART %s :%s",
                            source_p->name,
@@ -186,8 +189,10 @@ static void part_one_client(struct Client *client_p,
     }
   else
     {
-      sendto_channel_remote_prefix(chptr, client_p, source_p, "PART %s",
-                                   chptr->chname);
+      sendto_server(client_p, NULL, chptr, CAP_UID, NOCAPS, NOFLAGS,
+                    ":%s PART %s", ID(source_p), chptr->chname);
+      sendto_server(client_p, NULL, chptr, NOCAPS, CAP_UID, NOFLAGS,
+                    ":%s PART %s", source_p->name, chptr->chname);
       sendto_channel_local(ALL_MEMBERS,
                            chptr, ":%s!%s@%s PART %s",
                            source_p->name,

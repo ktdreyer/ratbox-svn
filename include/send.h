@@ -25,7 +25,13 @@ unsigned long current_serial;
 
 extern void send_queued_write(int fd, void *data);
 extern void send_queued_slink_write(int fd, void *data);
-  
+
+#define NOCAPS          0               /* no caps */
+#define NOFLAGS         0               /* no flags */
+
+#define LL_ICLIENT      0x00000001      /* introduce unknown clients */
+#define LL_ICHAN        0x00000002      /* introduce unknown chans */
+
 #ifndef __GNUC__
 extern  void sendto_one(struct Client *, const char *, ...);
 extern  void sendto_channel_butone(struct Client *one, struct Client *from,
@@ -33,15 +39,14 @@ extern  void sendto_channel_butone(struct Client *one, struct Client *from,
                                    const char *pattern, ...);
 extern  void sendto_one_prefix(struct Client *, struct Client *,
 			       const char *, ...);
-extern  void sendto_serv_butone(struct Client *, const char *, ...);
-extern  void sendto_ll_serv_butone(struct Client *, struct Client *source_p, int,
-				   const char *, ...);
-extern  void sendto_cap_serv_butone(int, struct Client *, const char *, ...);
-extern  void sendto_nocap_serv_butone(int, struct Client *, const char *, ...);
 extern  void sendto_common_channels_local(struct Client *, const char *, ...);
 extern  void sendto_channel_local(int type,
 				  struct Channel *,
 				  const char *, ...);
+extern void sendto_server(struct Client *one, struct Client *source_p,
+                          struct Channel *chptr, unsigned long caps,
+                          unsigned long nocaps, unsigned long llflags,
+                          char *format, ...);
 #else /* !__GNUC__*/
 extern  void sendto_one(struct Client *, const char *, ...)
 	    __attribute__((format (printf, 2, 3)));
@@ -53,22 +58,17 @@ extern  void sendto_channel_butone(struct Client *one, struct Client *from,
 extern  void sendto_one_prefix(struct Client *, struct Client *,
 			       const char *, ...)
 	    __attribute__((format (printf, 3, 4)));
-extern  void sendto_serv_butone(struct Client *, const char *, ...)
-	    __attribute__((format (printf, 2, 3)));
-extern  void sendto_ll_serv_butone(struct Client *, struct Client *source_p, int,
-				   const char *, ...)
-	    __attribute__((format (printf, 4, 5)));
-				   
-extern  void sendto_cap_serv_butone(int, struct Client *, const char *, ...)
-	    __attribute__((format (printf, 3, 4)));
-extern  void sendto_nocap_serv_butone(int, struct Client *, const char *, ...)
-	    __attribute__((format (printf, 3, 4)));
 extern  void sendto_common_channels_local(struct Client *, const char *, ...)
 	    __attribute__((format (printf, 2, 3)));
 extern  void sendto_channel_local(int type,
 				  struct Channel *,
 				  const char *, ...)
 	    __attribute__((format (printf, 3, 4)));
+extern void sendto_server(struct Client *one, struct Client *source_p,
+                          struct Channel *chptr, unsigned long caps,
+                          unsigned long nocaps, unsigned long llflags,
+                          char *format, ...)
+            __attribute__((format (printf, 7, 8)));
 #endif /* __GNUC__*/
 
 #define ALL_MEMBERS  0
@@ -113,28 +113,28 @@ extern  void ts_warn(const char *, ...);
 extern  void sendto_anywhere(struct Client *, struct Client *, 
 			     const char *, ...);
 #else /* ! __GNUC__ */
-extern  void sendto_channel_remote(struct Channel *, struct Client *client_p, 
+extern  void xsendto_channel_remote(struct Channel *, struct Client *client_p, 
 				   const char *, ...)
 	    __attribute__((format (printf, 3, 4)));
-extern  void sendto_channel_remote_prefix(struct Channel *, struct Client *client_p, 
+extern  void xsendto_channel_remote_prefix(struct Channel *, struct Client *client_p, 
 				   struct Client *prefix, const char *, ...)
 	    __attribute__((format (printf, 4, 5)));
 				   
-extern  void sendto_ll_channel_remote(struct Channel *, struct Client *client_p, 
+extern  void xsendto_ll_channel_remote(struct Channel *, struct Client *client_p, 
 				      struct Client *source_p,
 				      const char *, ...)
 	    __attribute__((format (printf, 4, 5)));
 				      
-extern  void sendto_match_cap_servs(struct Channel *, struct Client *, 
+extern  void xsendto_match_cap_servs(struct Channel *, struct Client *, 
                                     int, const char *, ...)
 	    __attribute__((format (printf, 4, 5)));
 
-extern  void sendto_match_vacap_servs(struct Channel *, struct Client *, ...);
+extern  void xsendto_match_vacap_servs(struct Channel *, struct Client *, ...);
 		
-extern void sendto_match_cap_servs_nocap(struct Channel *, struct Client *, int, int, const char *, ...)
+extern void xsendto_match_cap_servs_nocap(struct Channel *, struct Client *, int, int, const char *, ...)
 	__attribute__((format (printf, 5, 6)));
 
-	extern void sendto_match_nocap_servs(struct Channel *, struct Client *, int, const char *, ...)
+extern void xsendto_match_nocap_servs(struct Channel *, struct Client *, int, const char *, ...)
 	__attribute__((format (printf, 4, 5)));
 	
 extern  void sendto_match_butone(struct Client *, struct Client *, 

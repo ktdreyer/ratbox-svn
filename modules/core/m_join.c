@@ -284,12 +284,13 @@ static void m_join(struct Client *client_p,
                 }
             }
                   
-	  sendto_ll_channel_remote(chptr, client_p, source_p,
-				   ":%s SJOIN %lu %s + :@%s",
-				   me.name,
-				   (unsigned long) chptr->channelts,
-				   chptr->chname,
-				   parv[0]);
+	  sendto_server(client_p, source_p, chptr, NOCAPS, NOCAPS,
+                        LL_ICLIENT,
+                        ":%s SJOIN %lu %s + :@%s",
+                        me.name,
+                        (unsigned long) chptr->channelts,
+                        chptr->chname,
+                        parv[0]);
 	}
 #if 0
       /*
@@ -316,13 +317,14 @@ static void m_join(struct Client *client_p,
 #endif
       else
 	{
-	  sendto_ll_channel_remote(chptr, client_p, source_p,
-				   ":%s SJOIN %lu %s + :%s",
-				   me.name,
-				   (unsigned long) chptr->channelts,
-				   chptr->chname,
-				   parv[0]);
-	}
+	  sendto_server(client_p, source_p, chptr, NOCAPS, NOCAPS,
+                        LL_ICLIENT,
+                        ":%s SJOIN %lu %s + :%s",
+                        me.name,
+                        (unsigned long) chptr->channelts,
+                        chptr->chname,
+                        parv[0]);
+        }
 
       /*
       ** notify all other users on the new channel
@@ -343,10 +345,11 @@ static void m_join(struct Client *client_p,
 			       me.name,
 			       root_chptr->chname);
 	  
-	  sendto_ll_channel_remote(chptr, client_p, source_p,
-				   ":%s MODE %s +nt",
-				   me.name,
-				   chptr->chname);
+	  sendto_server(client_p, source_p, chptr, NOCAPS, NOCAPS,
+                        LL_ICLIENT,
+                        ":%s MODE %s +nt",
+                        me.name,
+                        chptr->chname);
 	}
 
       del_invite(chptr, source_p);
@@ -481,7 +484,8 @@ static void do_join_0(struct Client *client_p, struct Client *source_p)
   struct Channel *chptr=NULL;
   dlink_node   *lp;
 
-  sendto_ll_serv_butone(client_p, source_p, 0, ":%s JOIN 0", source_p->name);
+  sendto_server(client_p, source_p, NULL, NOCAPS, NOCAPS, NOFLAGS,
+                ":%s JOIN 0", source_p->name);
 
   if (source_p->user->channel.head &&
       MyConnect(source_p) && !IsOper(source_p))

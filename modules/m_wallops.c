@@ -78,8 +78,8 @@ static void mo_wallops(struct Client *client_p, struct Client *source_p,
     }
 
   sendto_wallops_flags(FLAGS_OPERWALL, source_p, "%s", message);
-  sendto_ll_serv_butone(NULL, source_p, 1,
-                        ":%s WALLOPS :%s", parv[0], message);
+  sendto_server(NULL, source_p, NULL, NOCAPS, NOCAPS, LL_ICLIENT,
+                ":%s WALLOPS :%s", parv[0], message);
 }
 
 /*
@@ -106,7 +106,7 @@ static void ms_wallops(struct Client *client_p, struct Client *source_p,
   else
     sendto_wallops_flags(FLAGS_WALLOP, source_p, "%s", message); 
 
-  sendto_ll_serv_butone(client_p, source_p, 1,
-                        ":%s WALLOPS :%s", parv[0], message);
+  sendto_server(client_p, source_p, NULL, NOCAPS, NOCAPS, LL_ICLIENT,
+                ":%s WALLOPS :%s", parv[0], message);
 }
 

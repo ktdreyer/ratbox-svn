@@ -163,9 +163,10 @@ static void m_topic(struct Client *client_p,
 
 	      chptr->topic_time = CurrentTime;
 	      
-	      sendto_channel_remote(chptr, client_p,":%s TOPIC %s :%s",
-				 parv[0], chptr->chname,
-				 chptr->topic);
+	      sendto_server(client_p, NULL, chptr, NOCAPS, NOCAPS, NOFLAGS,
+                            ":%s TOPIC %s :%s",
+                            parv[0], chptr->chname,
+                            chptr->topic);
 	      if(chptr->mode.mode & MODE_HIDEOPS)
 		{
 		  sendto_channel_local(ONLY_CHANOPS_HALFOPS,

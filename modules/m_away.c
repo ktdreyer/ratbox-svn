@@ -95,7 +95,8 @@ static void m_away(struct Client *client_p,
       if (away)
         {
           /* we now send this only if they were away before --is */
-          sendto_ll_serv_butone(client_p, source_p, 0, ":%s AWAY", parv[0]);
+          sendto_server(client_p, source_p, NULL, NOCAPS, NOCAPS,
+                        NOFLAGS, ":%s AWAY", parv[0]);
 
           MyFree(away);
           source_p->user->away = NULL;
@@ -122,7 +123,8 @@ static void m_away(struct Client *client_p,
 
   /* we now send this only if they weren't away already --is */
   if (!away)
-    sendto_ll_serv_butone(client_p, source_p, 0, ":%s AWAY :%s", parv[0], awy2); 
+    sendto_server(client_p, source_p, NULL, NOCAPS, NOCAPS,
+                  NOFLAGS, ":%s AWAY :%s", parv[0], awy2); 
   else
     MyFree(away);
 
