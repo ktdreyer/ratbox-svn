@@ -1,3 +1,16 @@
+ejb         2002/02/05 16:46:00 EST	(20020205_8)
+
+  Modified files:
+    .                    README.FIRST README.PLATFORMS 
+  Log:
+  - Added VMS to list of supported platforms.
+  
+  Revision  Changes    Path
+  7.26      +1 -0      ircd-hybrid-7/README.FIRST
+  7.7       +13 -12    ircd-hybrid-7/README.PLATFORMS
+
+
+
 jmallett    2002/02/05 16:38:53 EST	(20020205_7)
 
   Modified files:
