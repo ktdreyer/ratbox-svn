@@ -477,6 +477,7 @@ pretty_mask(char *mask)
   int old_mask_pos;
   char *nick = "*", *user = "*", *host = "*";
   char *t, *at, *ex;
+  char ne = 0, ue = 0, he = 0; /* save values at nick[NICKLEN], et all */
   mask = check_string(mask);
 
   if (BUFSIZE - mask_pos < strlen(mask) + 5)
@@ -513,23 +514,37 @@ pretty_mask(char *mask)
   else
     nick = mask;
 
-  /* chop off at NICKLEN, USERLEN and HOSTLEN */
-  if(strlen(host) > HOSTLEN)
-    host[HOSTLEN] = '\0';
-
-  if(strlen(user) > USERLEN)
-    user[USERLEN] = '\0';
-
-  if(strlen(nick) > NICKLEN)
+  /* truncate values to max lengths */
+  if (strlen(nick) > NICKLEN)
+  {
+    ne = nick[NICKLEN];
     nick[NICKLEN] = '\0';
+  }
+  if (strlen(user) > USERLEN)
+  {
+    ue = user[USERLEN];
+    user[USERLEN] = '\0';
+  }
+  if (strlen(host) > HOSTLEN)
+  {
+    he = host[HOSTLEN];
+    host[HOSTLEN] = '\0';
+  }
     
   mask_pos += ircsprintf(mask_buf + mask_pos, "%s!%s@%s", nick, user, host)
     + 1;
 
+  /* restore mask, since we may need to use it again later */
   if (at)
     *at = '@';
   if (ex)
     *ex = '!';
+  if (ne)
+    nick[NICKLEN] = ne;
+  if (ue)
+    user[USERLEN] = ue;
+  if (he)
+    host[HOSTLEN] = he;
 
   return mask_buf + old_mask_pos;
 }
