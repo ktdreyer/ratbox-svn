@@ -400,7 +400,7 @@ check_klines(void)
                               client_p->localClient->aftype)))
 	/* if there is a returned struct ConfItem then kill it */
 	{
-	  if(IsConfExemptKline(aconf))
+	  if(aconf->status & CONF_EXEMPTDLINE)
 	    {
 	      sendto_realops_flags(FLAGS_ALL,
 			   "DLINE over-ruled for %s, client is kline_exempt",

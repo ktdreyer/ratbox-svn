@@ -1546,7 +1546,7 @@ int conf_connect_allowed(struct irc_inaddr *addr, int aftype)
 {
   struct ConfItem *aconf = find_dline(addr, aftype);
 
-  if (aconf && !IsConfExemptKline(aconf))
+  if (aconf && !(aconf->status & CONF_EXEMPTDLINE))
     return 0;
   return 1;
 }

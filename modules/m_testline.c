@@ -102,9 +102,16 @@ static void mo_testline(struct Client *client_p, struct Client *source_p,
         if (aconf)
         {
          get_printable_conf(aconf, &name, &host, &pass, &user, &port,&classname);
-         sendto_one(source_p,
-                    ":%s NOTICE %s :D-line host [%s] pass [%s]", me.name,
-                    parv[0], host, pass);
+         if (aconf->status & CONF_EXEMPTDLINE)
+         {
+          sendto_one(source_p,
+                     ":%s NOTICE %s :Exempt D-line host [%s] pass [%s]",
+                     me.name, parv[0], host, pass);
+         } else {
+          sendto_one(source_p,
+                     ":%s NOTICE %s :D-line host [%s] pass [%s]", me.name,
+                     parv[0], host, pass);
+         }
         } else
          sendto_one(source_p, ":%s NOTICE %s :No D-line found",
                     me.name, parv[0]);

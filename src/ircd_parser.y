@@ -1685,6 +1685,7 @@ exempt_entry:     EXEMPT
         yy_aconf = (struct ConfItem *)NULL;
       }
     yy_aconf=make_conf();
+    DupString(yy_aconf->passwd, "*");
     yy_aconf->status = CONF_EXEMPTDLINE;
   }
 '{' exempt_items '}' ';'
@@ -1692,10 +1693,6 @@ exempt_entry:     EXEMPT
    if (yy_aconf->host &&
       parse_netmask(yy_aconf->host, NULL, NULL) != HM_HOST)
    {
-    if (yy_aconf->passwd == NULL)
-        {
-         DupString(yy_aconf->passwd,"NO REASON");
-        }
     add_conf_by_address(yy_aconf->host, CONF_EXEMPTDLINE, NULL, yy_aconf);
    } else
    {
@@ -1707,18 +1704,12 @@ exempt_entry:     EXEMPT
 exempt_items:     exempt_items exempt_item |
                 exempt_item
 
-exempt_item:      exempt_ip | exempt_reason | error
+exempt_item:      exempt_ip | error
 
 exempt_ip:        IP '=' QSTRING ';'
   {
     char *p;
     DupString(yy_aconf->host, yylval.string);
-  };
-
-exempt_reason:    REASON '=' QSTRING ';'
-  {
-    MyFree(yy_aconf->passwd);
-    DupString(yy_aconf->passwd, yylval.string);
   };
 
 
