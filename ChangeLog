@@ -1,3 +1,22 @@
+leeh        2004/08/13 22:05:33 EDT	(20040814_0)
+
+  Modified files:
+    include              channel.h 
+    modules/core         channels.c m_mode.c m_server.c 
+    src                  channel.c messages.tab 
+  Log:
+  - make channel_modes() build its own buffer internally
+  
+  Revision  Changes    Path
+  7.159     +1 -1      ircd-ratbox/include/channel.h
+  1.6       +20 -36    ircd-ratbox/modules/core/channels.c
+  1.116     +6 -42     ircd-ratbox/modules/core/m_mode.c
+  1.143     +6 -15     ircd-ratbox/modules/core/m_server.c
+  7.425     +25 -15    ircd-ratbox/src/channel.c
+  7.117     +1 -1      ircd-ratbox/src/messages.tab
+
+
+
 leeh        2004/08/13 19:22:42 EDT	(20040813_5)
 
   Modified files:
