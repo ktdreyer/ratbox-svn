@@ -642,7 +642,7 @@ if test "$ac_cv_ipv6" = "yes" ; then
 	echo "Using IPv6 support"
 fi
 
-ac_cv_assert="-DNDEBUG"
+ac_cv_assert="-DNDEBUG -DSOFT_ASSERT"
 
 dnl assert?
 AC_ARG_ENABLE(assert,

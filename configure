@@ -3865,7 +3865,7 @@ EOF
 	echo "Using IPv6 support"
 fi
 
-ac_cv_assert="-DNDEBUG"
+ac_cv_assert="-DNDEBUG -DSOFT_ASSERT"
 
 # Check whether --enable-assert or --disable-assert was given.
 if test "${enable_assert+set}" = set; then
