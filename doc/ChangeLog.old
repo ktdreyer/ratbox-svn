@@ -1,3 +1,7 @@
+*** 20011107_3 by wcampbel
+Apparently EFnet opers can't take a joke
+
+
 *** 20011107_2 by davidt
 - fix pretty_mask to not damage the passed in string, so we can
   use it afterwards.
