@@ -1,3 +1,7 @@
+*** 20011017_4 by db
+- bug fix by |Rain| fixes handling of EOF 
+
+
 *** 20011017_3 by leeh
 - IsSetOper* -> IsOper* for consistency, half were IsOper, half were
   IsSetOper..
