@@ -707,7 +707,7 @@ auth_spoof:   SPOOF '=' QSTRING ';'
 auth_exceed_limit:    EXCEED_LIMIT '=' TYES ';'
   {
     yy_aconf->flags |= CONF_FLAGS_F_LINED;
-  };
+  }
                       |
                       EXCEED_LIMIT '=' TNO ';'
   {
@@ -717,21 +717,31 @@ auth_exceed_limit:    EXCEED_LIMIT '=' TYES ';'
 auth_kline_exempt:    KLINE_EXEMPT '=' TYES ';'
   {
     yy_aconf->flags |= CONF_FLAGS_E_LINED;
-  };
+  }
                       |
                       KLINE_EXEMPT '=' TNO ';'
   {
     yy_aconf->flags &= ~CONF_FLAGS_E_LINED;
   };
 
-auth_have_ident:      HAVE_IDENT ';'
+auth_have_ident:      HAVE_IDENT '=' TYES ';'
   {
     yy_aconf->flags |= CONF_FLAGS_NEED_IDENTD;
+  }
+                      |
+                      HAVE_IDENT '=' TNO ';'
+  {
+    yy_aconf->flags &= ~CONF_FLAGS_NEED_IDENTD;
   };
 
-auth_no_tilde:        NO_TILDE ';' 
+auth_no_tilde:        NO_TILDE '=' TYES ';' 
   {
     yy_aconf->flags |= CONF_FLAGS_NO_TILDE;
+  }
+                      |
+                      NO_TILDE '=' TNO ';'
+  {
+    yy_aconf->flags &= ~CONF_FLAGS_NO_TILDE;
   };
 
 auth_class:   CLASS '=' QSTRING ';'

@@ -278,6 +278,15 @@ int mo_gline(struct Client *cptr,
 			     user,
 			     host,
 			     reason);
+      sendto_realops_flags(FLAGS_ALL,
+			"%s on %s is requesting gline for [%s@%s] [%s]",
+			sptr->name,
+			me.name,
+			user,
+			host,
+			reason);
+      log_gline_request(sptr->name,(const char *)sptr->user,sptr->host,me.name,
+                        user,host,reason);
     }
   else
     {
