@@ -81,7 +81,6 @@ int   class_redirport_var;
         struct ip_value ip_entry;
 }
 
-%token  ACCEPT
 %token  ACCEPT_PASSWORD
 %token  ACTION
 %token  ADMIN
@@ -116,7 +115,6 @@ int   class_redirport_var;
 %token  HUB
 %token  HUB_MASK
 %token  IDLETIME
-%token  INCLUDE
 %token  IP
 %token  IP_TYPE
 %token  IPV6_TYPE
@@ -159,7 +157,6 @@ int   class_redirport_var;
 %token  SENDQ
 %token  SEND_PASSWORD
 %token  SERVERINFO
-%token  SERVER_MASK
 %token  SHARED
 %token  SPOOF
 %token  SPOOF_NOTICE
@@ -193,10 +190,7 @@ int   class_redirport_var;
 %token  KLINE_WITH_CONNECTION_CLOSED
 %token  WARN_NO_NLINE
 %token  NON_REDUNDANT_KLINES
-%token  E_LINES_OPER_ONLY
-%token  F_LINES_OPER_ONLY
 %token  O_LINES_OPER_ONLY
-%token  STATS_NOTICE
 %token  WHOIS_WAIT
 %token  PACE_WAIT
 %token  CALLER_ID_WAIT
@@ -205,8 +199,6 @@ int   class_redirport_var;
 %token  NO_OPER_FLOOD
 %token  IAUTH_SERVER
 %token  IAUTH_PORT
-%token  STATS_P_NOTICE
-%token  INVITE_PLUS_I_ONLY
 %token  MODULE
 %token  MODULES
 %token  HIDESERVER
@@ -233,7 +225,6 @@ int   class_redirport_var;
 %token  PERSISTANT_EXPIRE_TIME
 %token  MAX_TARGETS
 %token  T_MAX_CLIENTS
-%token  LINKS_NOTICE
 %token  LINKS_DELAY
 %token  VCHANS_OPER_ONLY
 %token  MIN_NONWILDCARD
