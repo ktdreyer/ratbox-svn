@@ -1,3 +1,17 @@
+leeh        2002/05/13 19:34:06 EDT	(20020514_0)
+
+  Modified files:
+    src                  channel_mode.c 
+  Log:
+  - splitting if()'s up is BAD.
+  
+    hotfuq as punishment..?
+  
+  Revision  Changes    Path
+  7.38      +6 -7      ircd-hybrid-7/src/channel_mode.c
+
+
+
 androsyn    2002/05/13 00:21:19 EDT	(20020513_1)
 
   Modified files:
