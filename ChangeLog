@@ -1,3 +1,29 @@
+androsyn    2004/08/10 12:42:19 EDT	(20040810_3)
+
+  Modified files:
+    include              channel.h 
+    modules              Makefile.in 
+    src                  channel.c modules.c 
+  Added files:
+    modules/core         channels.c 
+  Removed files:
+    modules/core         m_join.c m_kick.c m_part.c 
+  Log:
+  Merge m_join, m_kick and m_part into channels.c and remove some functions
+  out of src/channel.c
+  
+  Revision  Changes    Path
+  7.157     +2 -3      ircd-ratbox/include/channel.h
+  1.106     +1 -3      ircd-ratbox/modules/Makefile.in
+  1.1       +1588 -0   ircd-ratbox/modules/core/channels.c (new)
+  1.160     +0 -1265   ircd-ratbox/modules/core/m_join.c (dead)
+  1.80      +0 -191    ircd-ratbox/modules/core/m_kick.c (dead)
+  1.93      +0 -155    ircd-ratbox/modules/core/m_part.c (dead)
+  7.423     +51 -102   ircd-ratbox/src/channel.c
+  7.147     +1 -3      ircd-ratbox/src/modules.c
+
+
+
 androsyn    2004/08/10 12:17:29 EDT	(20040810_2)
 
   Modified files:
