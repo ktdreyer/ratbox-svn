@@ -94,13 +94,10 @@ mo_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 	 */
 	if(!(aconf = find_conf_by_name(parv[1], CONF_SERVER)))
 	{
-		if(!(aconf = find_conf_by_host(parv[1], CONF_SERVER)))
-		{
-			sendto_one(source_p,
-				   "NOTICE %s :Connect: Host %s not listed in ircd.conf",
-				   parv[0], parv[1]);
+		sendto_one(source_p,
+			   "NOTICE %s :Connect: Host %s not listed in ircd.conf",
+			   parv[0], parv[1]);
 			return 0;
-		}
 	}
 
 	/*
@@ -194,12 +191,9 @@ ms_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 	 */
 	if(!(aconf = find_conf_by_name(parv[1], CONF_SERVER)))
 	{
-		if(!(aconf = find_conf_by_host(parv[1], CONF_SERVER)))
-		{
-			sendto_one_notice(source_p, ":Connect: Host %s not listed in ircd.conf",
-					  parv[1]);
-			return 0;
-		}
+		sendto_one_notice(source_p, ":Connect: Host %s not listed in ircd.conf",
+				  parv[1]);
+		return 0;
 	}
 
 	/*

@@ -224,8 +224,6 @@ static struct LinkReport
 report_array[] =
 {
 	{ CONF_SERVER,	 RPL_STATSCLINE, 'C'},
-	{ CONF_LEAF,	 RPL_STATSLLINE, 'L'},
-	{ CONF_HUB,	 RPL_STATSHLINE, 'H'},
 	{ 0, 0, '\0'}
 };
 /* *INDENT-ON* */
@@ -860,31 +858,6 @@ find_conf_by_name(const char *name, int status)
 	for (conf = ConfigItemList; conf; conf = conf->next)
 	{
 		if((int)conf->status == status && conf->name && match(name, conf->name))
-			return (conf);
-	}
-	return (NULL);
-}
-
-/*
- * find_conf_by_host
- *
- * inputs	- pointer to hostname to match on
- *		- int mask of type of conf to find
- * output	- NULL or pointer to conf found
- * side effects	- find a conf entry which matches the host
- *		  and has the given mask.
- *
- */
-struct ConfItem *
-find_conf_by_host(const char *host, int status)
-{
-	struct ConfItem *conf;
-	s_assert(host != NULL);
-	if(host == NULL)
-		return (NULL);
-	for (conf = ConfigItemList; conf; conf = conf->next)
-	{
-		if((int)conf->status == status && conf->host && match(host, conf->host))
 			return (conf);
 	}
 	return (NULL);
@@ -1666,7 +1639,7 @@ clear_out_old_conf(void)
 	clear_out_address_conf();
 	clear_resvs();
 	clear_xlines();
-	clear_shared_conf();
+	clear_remote_conf();
 	clear_oper_conf();
 
 	/* clean out module paths */

@@ -47,43 +47,51 @@
 dlink_list shared_conf_list;
 dlink_list cluster_conf_list;
 dlink_list oper_conf_list;
+dlink_list hubleaf_conf_list;
 
-struct shared_conf *
-make_shared_conf(void)
+struct remote_conf *
+make_remote_conf(void)
 {
-	struct shared_conf *shared_p = MyMalloc(sizeof(struct shared_conf));
-	return shared_p;
+	struct remote_conf *remote_p = MyMalloc(sizeof(struct remote_conf));
+	return remote_p;
 }
 
 void
-free_shared_conf(struct shared_conf *shared_p)
+free_remote_conf(struct remote_conf *remote_p)
 {
-	s_assert(shared_p != NULL);
-	if(shared_p == NULL)
+	s_assert(remote_p != NULL);
+	if(remote_p == NULL)
 		return;
 
-	MyFree(shared_p->username);
-	MyFree(shared_p->host);
-	MyFree(shared_p->server);
-	MyFree(shared_p);
+	MyFree(remote_p->username);
+	MyFree(remote_p->host);
+	MyFree(remote_p->server);
+	MyFree(remote_p);
 }
 
 void
-clear_shared_conf(void)
+clear_remote_conf(void)
 {
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, shared_conf_list.head)
 	{
-		free_shared_conf(ptr->data);
-		dlinkDestroy(ptr, &shared_conf_list);
+		/* ptr here is ptr->data->node */
+		dlinkDelete(ptr, &shared_conf_list);
+		free_remote_conf(ptr->data);
 	}
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, cluster_conf_list.head)
 	{
-		free_shared_conf(ptr->data);
-		dlinkDestroy(ptr, &cluster_conf_list);
+		dlinkDelete(ptr, &cluster_conf_list);
+		free_remote_conf(ptr->data);
+	}
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, hubleaf_conf_list.head)
+	{
+		dlinkDelete(ptr, &hubleaf_conf_list);
+		free_remote_conf(ptr->data);
 	}
 }
 
@@ -91,7 +99,7 @@ int
 find_shared_conf(const char *username, const char *host, 
 		const char *server, int flags)
 {
-	struct shared_conf *shared_p;
+	struct remote_conf *shared_p;
 	dlink_node *ptr;
 
 	DLINK_FOREACH(ptr, shared_conf_list.head)

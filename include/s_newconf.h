@@ -35,13 +35,24 @@
 #ifndef INCLUDED_s_newconf_h
 #define INCLUDED_s_newconf_h
 
-#include "tools.h"
 #include "setup.h"
+#include "tools.h"
 
 #ifdef HAVE_LIBCRYPTO
 #include <openssl/rsa.h>
 #endif
 
+/* shared/cluster/hub/leaf confs */
+struct remote_conf
+{
+	char *username;
+	char *host;
+	char *server;
+	int flags;
+	dlink_node node;
+};
+
+/* flags used in shared/cluster */
 #define SHARED_KLINE	0x0001
 #define SHARED_UNKLINE	0x0002
 #define SHARED_LOCOPS	0x0004
@@ -54,12 +65,23 @@
 			SHARED_UNXLINE | SHARED_RESV | SHARED_UNRESV)
 #define CLUSTER_ALL	(SHARED_ALL | SHARED_LOCOPS)
 
-struct shared_conf
+/* flags used in hub/leaf */
+#define CONF_HUB	0x0001
+#define CONF_LEAF	0x0002
+
+struct oper_conf
 {
+	char *name;
 	char *username;
 	char *host;
-	char *server;
+	char *passwd;
+
 	int flags;
+
+#ifdef HAVE_LIBCRYPTO
+	char *rsa_pubkey_file;
+	RSA *rsa_pubkey;
+#endif
 };
 
 #define OPER_ENCRYPTED	0x00001
@@ -107,28 +129,14 @@ struct shared_conf
 #define IsOperSpy(x)            ((x)->flags2 & OPER_SPY)
 #define IsOperInvis(x)          ((x)->flags2 & OPER_INVIS)
 
-struct oper_conf
-{
-	char *name;
-	char *username;
-	char *host;
-	char *passwd;
-
-	int flags;
-
-#ifdef HAVE_LIBCRYPTO
-	char *rsa_pubkey_file;
-	RSA *rsa_pubkey;
-#endif
-};
-
 extern dlink_list cluster_conf_list;
 extern dlink_list shared_conf_list;
 extern dlink_list oper_conf_list;
+extern dlink_list hubleaf_conf_list;
 
-extern struct shared_conf *make_shared_conf(void);
-extern void free_shared_conf(struct shared_conf *);
-extern void clear_shared_conf(void);
+extern struct remote_conf *make_remote_conf(void);
+extern void free_remote_conf(struct remote_conf *);
+extern void clear_remote_conf(void);
 
 extern int find_shared_conf(const char *username, const char *host,
 			const char *server, int flags);

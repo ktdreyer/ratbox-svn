@@ -465,13 +465,31 @@ stats_glines (struct Client *source_p)
 static void
 stats_hubleaf (struct Client *source_p)
 {
+	struct remote_conf *hub_p;
+	dlink_node *ptr;
+
 	if((ConfigFileEntry.stats_h_oper_only || 
 	    (ConfigServerHide.flatten_links && !IsExemptShide(source_p))) &&
 	    !IsOper(source_p))
+	{
 		sendto_one_numeric(source_p, ERR_NOPRIVILEGES,
 				   form_str (ERR_NOPRIVILEGES));
-	else
-		report_configured_links (source_p, CONF_HUB | CONF_LEAF);
+		return;
+	}
+
+	DLINK_FOREACH(ptr, hubleaf_conf_list.head)
+	{
+		hub_p = ptr->data;
+
+		if(hub_p->flags & CONF_HUB)
+			sendto_one_numeric(source_p, RPL_STATSHLINE,
+					form_str(RPL_STATSHLINE),
+					hub_p->host, hub_p->server);
+		else
+			sendto_one_numeric(source_p, RPL_STATSLLINE,
+					form_str(RPL_STATSLLINE),
+					hub_p->host, hub_p->server);
+	}
 }
 
 
@@ -658,8 +676,7 @@ stats_oper(struct Client *source_p)
 		sendto_one_numeric(source_p, RPL_STATSOLINE, 
 				form_str(RPL_STATSOLINE),
 				oper_p->username, oper_p->host, oper_p->name,
-				IsOper(source_p) ? get_oper_privs(oper_p->flags) : "0", 
-				"opers");
+				IsOper(source_p) ? get_oper_privs(oper_p->flags) : "0", "-1");
 	}
 }
 
@@ -853,7 +870,7 @@ static struct shared_flags shared_flagtable[] =
 static void
 stats_shared (struct Client *source_p)
 {
-	struct shared_conf *shared_p;
+	struct remote_conf *shared_p;
 	dlink_node *ptr;
 	char buf[9];
 	char *p;

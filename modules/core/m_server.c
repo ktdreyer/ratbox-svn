@@ -34,6 +34,7 @@
 #include "ircd.h"		/* me */
 #include "numeric.h"		/* ERR_xxx */
 #include "s_conf.h"		/* struct ConfItem */
+#include "s_newconf.h"
 #include "s_log.h"		/* log level defines */
 #include "s_serv.h"		/* server_estab, check_server */
 #include "s_stats.h"		/* ServerStats */
@@ -249,6 +250,7 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 	struct Client *target_p;
 	struct Client *bclient_p;
 	struct ConfItem *aconf;
+	struct remote_conf *hub_p;
 	int hop;
 	int hlined = 0;
 	int llined = 0;
@@ -336,24 +338,17 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 	 * leaf. If so, close the link.
 	 *
 	 */
-
-	for (aconf = ConfigItemList; aconf; aconf = aconf->next)
+	DLINK_FOREACH(ptr, hubleaf_conf_list.head)
 	{
-		if((aconf->status & (CONF_LEAF | CONF_HUB)) == 0)
-			continue;
+		hub_p = ptr->data;
 
-		if(match(aconf->name, client_p->name))
+		if(match(hub_p->server, client_p->name) &&
+		   match(hub_p->host, name))
 		{
-			if(aconf->status == CONF_HUB)
-			{
-				if(match(aconf->host, name))
-					hlined++;
-			}
-			else if(aconf->status == CONF_LEAF)
-			{
-				if(match(aconf->host, name))
-					llined++;
-			}
+			if(hub_p->flags & CONF_HUB)
+				hlined++;
+			else
+				llined++;
 		}
 	}
 
@@ -485,7 +480,8 @@ static int
 ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
-	struct ConfItem *aconf;
+	struct remote_conf *hub_p;
+	dlink_node *ptr;
 	int hop;
 	int hlined = 0;
 	int llined = 0;
@@ -551,20 +547,17 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	 * H: allows it to introduce a server matching that mask
 	 * L: disallows it introducing a server matching that mask
 	 */
-	for(aconf = ConfigItemList; aconf; aconf = aconf->next)
+	DLINK_FOREACH(ptr, hubleaf_conf_list.head)
 	{
-		if((aconf->status & (CONF_LEAF | CONF_HUB)) == 0)
-			continue;
+		hub_p = ptr->data;
 
-		if(match(aconf->name, client_p->name))
+		if(match(hub_p->server, client_p->name) &&
+		   match(hub_p->host, parv[1]))
 		{
-			if(match(aconf->host, parv[1]))
-			{
-				if(aconf->status == CONF_HUB)
-					hlined++;
-				else
-					llined++;
-			}
+			if(hub_p->flags & CONF_HUB)
+				hlined++;
+			else
+				llined++;
 		}
 	}
 

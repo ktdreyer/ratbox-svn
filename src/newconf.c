@@ -43,18 +43,12 @@ static struct ConfItem *yy_achead = NULL;
 static struct ConfItem *yy_aconf = NULL;
 static struct ConfItem *yy_aprev = NULL;
 static int yy_acount = 0;
-static struct ConfItem *yy_hconf;
-static struct ConfItem *yy_lconf;
-
-static struct ConfItem *hub_confs;
-static struct ConfItem *leaf_confs;
-static struct ConfItem *yy_aconf_next;
 
 static struct Class *yy_class = NULL;
 
 static struct rxconf *yy_rxconf = NULL;
 
-static struct shared_conf *yy_shared = NULL;
+static struct remote_conf *yy_shared = NULL;
 
 static dlink_list yy_oper_list;
 static struct oper_conf *yy_oper = NULL;
@@ -1147,9 +1141,9 @@ static int
 conf_begin_shared(struct TopConf *tc)
 {
 	if(yy_shared != NULL)
-		free_shared_conf(yy_shared);
+		free_remote_conf(yy_shared);
 
-	yy_shared = make_shared_conf();
+	yy_shared = make_remote_conf();
 	return 0;
 }
 
@@ -1165,7 +1159,7 @@ conf_end_shared(struct TopConf *tc)
 	if(EmptyString(yy_shared->host))
 		DupString(yy_shared->host, "*");
 
-	dlinkAddAlloc(yy_shared, &shared_conf_list);
+	dlinkAdd(yy_shared, &yy_shared->node, &shared_conf_list);
 	yy_shared = NULL;
 
 	return 0;
@@ -1207,41 +1201,32 @@ conf_set_shared_type(void *data)
 static int
 conf_begin_connect(struct TopConf *tc)
 {
-	hub_confs = NULL;
-
 	if(yy_aconf)
 	{
 		free_conf(yy_aconf);
 		yy_aconf = NULL;
 	}
 
-	if(yy_hconf)
-	{
-		free_conf(yy_hconf);
-		yy_hconf = NULL;
-	}
-
-	if(yy_lconf)
-	{
-		free_conf(yy_lconf);
-		yy_lconf = NULL;
-	}
-
 	yy_aconf = make_conf();
 	yy_aconf->passwd = NULL;
 	yy_aconf->status = CONF_SERVER;
 	yy_aconf->port = PORTNUM;
+
+	if(conf_cur_block_name != NULL)
+		DupString(yy_aconf->name, conf_cur_block_name);
+
 	return 0;
 }
 
 static int
 conf_end_connect(struct TopConf *tc)
 {
-	if(conf_cur_block_name != NULL)
+	if(EmptyString(yy_aconf->name))
 	{
-		MyFree(yy_aconf->name);
-		DupString(yy_aconf->name, conf_cur_block_name);
+		conf_report_error("Ignoring connect block -- missing name.");
+		return 0;
 	}
+
 	if(yy_aconf->host && yy_aconf->passwd && yy_aconf->spasswd)
 	{
 		if(conf_add_server(yy_aconf, scount) >= 0)
@@ -1273,61 +1258,8 @@ conf_end_connect(struct TopConf *tc)
 		yy_aconf = NULL;
 	}
 
-	/*
-	 * yy_aconf is still pointing at the server that is having
-	 * a connect block built for it. This means, y_aconf->name 
-	 * points to the actual irc name this server will be known as.
-	 * Now this new server has a set or even just one hub_mask (or leaf_mask)
-	 * given in the link list at yy_hconf. Fill in the HUB confs
-	 * from this link list now.
-	 */
-
-	for (yy_hconf = hub_confs; yy_hconf; yy_hconf = yy_aconf_next)
-	{
-		yy_aconf_next = yy_hconf->next;
-		MyFree(yy_hconf->name);
-		yy_hconf->name = NULL;
-
-		/* yy_aconf == NULL is a fatal error for this connect block! */
-		if(yy_aconf != NULL)
-		{
-			DupString(yy_hconf->name, yy_aconf->name);
-			conf_add_conf(yy_hconf);
-		}
-		else
-			free_conf(yy_hconf);
-	}
-
-	for (yy_lconf = leaf_confs; yy_lconf; yy_lconf = yy_aconf_next)
-	{
-		yy_aconf_next = yy_lconf->next;
-		if(yy_aconf != NULL)
-		{
-			DupString(yy_lconf->name, yy_aconf->name);
-			conf_add_conf(yy_lconf);
-		}
-		else
-			free_conf(yy_lconf);
-	}
-
-	hub_confs = NULL;
-	leaf_confs = NULL;
 	yy_aconf = NULL;
-	yy_hconf = NULL;
-	yy_lconf = NULL;
 	return 0;
-}
-
-static void
-conf_set_connect_name(void *data)
-{
-	if(yy_aconf->name != NULL)
-	{
-		conf_report_error("Warning -- connect::name specified multiple times.");
-	}
-
-	MyFree(yy_aconf->name);
-	DupString(yy_aconf->name, data);
 }
 
 static void
@@ -1486,43 +1418,33 @@ conf_set_connect_auto(void *data)
 static void
 conf_set_connect_hub_mask(void *data)
 {
-	if(hub_confs == NULL)
-	{
-		hub_confs = make_conf();
-		hub_confs->status = CONF_HUB;
-		DupString(hub_confs->host, data);
-		DupString(hub_confs->user, "*");
-	}
-	else
-	{
-		yy_hconf = make_conf();
-		yy_hconf->status = CONF_HUB;
-		DupString(yy_hconf->host, data);
-		DupString(yy_hconf->user, "*");
-		yy_hconf->next = hub_confs;
-		hub_confs = yy_hconf;
-	}
+	struct remote_conf *yy_hub;
+
+	if(EmptyString(yy_aconf->name))
+		return;
+
+	yy_hub = make_remote_conf();
+	yy_hub->flags = CONF_HUB;
+
+	DupString(yy_hub->host, data);
+	DupString(yy_hub->server, yy_aconf->name);
+	dlinkAdd(yy_hub, &yy_hub->node, &hubleaf_conf_list);
 }
 
 static void
 conf_set_connect_leaf_mask(void *data)
 {
-	if(leaf_confs == NULL)
-	{
-		leaf_confs = make_conf();
-		leaf_confs->status = CONF_LEAF;
-		DupString(leaf_confs->host, data);
-		DupString(leaf_confs->user, "*");
-	}
-	else
-	{
-		yy_lconf = make_conf();
-		yy_lconf->status = CONF_LEAF;
-		DupString(yy_lconf->host, data);
-		DupString(yy_lconf->user, "*");
-		yy_lconf->next = leaf_confs;
-		leaf_confs = yy_lconf;
-	}
+	struct remote_conf *yy_leaf;
+
+	if(EmptyString(yy_aconf->name))
+		return;
+
+	yy_leaf = make_remote_conf();
+	yy_leaf->flags = CONF_LEAF;
+
+	DupString(yy_leaf->host, data);
+	DupString(yy_leaf->server, yy_aconf->name);
+	dlinkAdd(yy_leaf, &yy_leaf->node, &hubleaf_conf_list);
 }
 
 static void
@@ -1752,9 +1674,9 @@ static int
 conf_begin_cluster(struct TopConf *tc)
 {
 	if(yy_shared != NULL)
-		free_shared_conf(yy_shared);
+		free_remote_conf(yy_shared);
 
-	yy_shared = make_shared_conf();
+	yy_shared = make_remote_conf();
 	return 0;
 }
 
@@ -1764,10 +1686,10 @@ conf_end_cluster(struct TopConf *tc)
 	if(EmptyString(yy_shared->server))
 	{
 		conf_report_error("Ignoring cluster -- invalid cluster::server");
-		free_shared_conf(yy_shared);
+		free_remote_conf(yy_shared);
 	}
 	else
-		dlinkAddAlloc(yy_shared, &cluster_conf_list);
+		dlinkAdd(yy_shared, &yy_shared->node, &cluster_conf_list);
 
 	yy_shared = NULL;
 	return 0;
@@ -2629,7 +2551,6 @@ newconf_init()
 	add_conf_item("shared", "type", CF_STRING | CF_FLIST, conf_set_shared_type);
 
 	add_top_conf("connect", conf_begin_connect, conf_end_connect);
-	add_conf_item("connect", "name", CF_QSTRING, conf_set_connect_name);
 	add_conf_item("connect", "host", CF_QSTRING, conf_set_connect_host);
 	add_conf_item("connect", "vhost", CF_QSTRING, conf_set_connect_vhost);
 	add_conf_item("connect", "send_password", CF_QSTRING, conf_set_connect_send_password);

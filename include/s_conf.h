@@ -91,9 +91,7 @@ struct ConfItem
 #define CONF_KILL               0x0040
 
 #define CONF_CLASS              0x0400
-#define CONF_LEAF               0x0800
 #define CONF_LISTEN_PORT        0x1000
-#define CONF_HUB                0x2000
 #define CONF_EXEMPTKLINE        0x4000
 #define CONF_NOLIMIT            0x8000
 #define CONF_GLINE             0x10000
@@ -349,7 +347,6 @@ extern int detach_conf(struct Client *);
 extern struct ConfItem *find_conf_exact(const char *name, const char *user,
 					const char *host, int statmask);
 extern struct ConfItem *find_conf_by_name(const char *name, int status);
-extern struct ConfItem *find_conf_by_host(const char *host, int status);
 extern struct ConfItem *find_kill(struct Client *);
 extern int conf_connect_allowed(struct sockaddr_storage *addr, int);
 
