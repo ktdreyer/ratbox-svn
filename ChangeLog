@@ -1,3 +1,15 @@
+androsyn    2003/06/26 12:52:41 EDT	(20030626_6)
+
+  Modified files:
+    .                    ChangeLog 
+  Log:
+  Remove STABLE changes from here..cvs scripts were borked
+  
+  Revision  Changes    Path
+  1.778     +0 -430    ircd-ratbox/ChangeLog
+
+
+
 androsyn    2003/06/26 11:09:01 EDT	(20030626_5)
 
   Modified files:
