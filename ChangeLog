@@ -1,3 +1,16 @@
+leeh        2002/09/13 12:31:36 UTC	(20020913_0)
+
+  Modified files:
+    servlink             control.c io.c 
+  Log:
+  - patch from Hwy to change the error codes in slink errors to strings
+  
+  Revision  Changes    Path
+  1.5       +3 -3      ircd-ratbox/servlink/control.c
+  1.29      +5 -5      ircd-ratbox/servlink/io.c
+
+
+
 leeh        2002/09/11 23:08:43 UTC	(20020911_2)
 
   Modified files:
