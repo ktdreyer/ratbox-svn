@@ -1,3 +1,14 @@
+*** 20001102_10 by adrian
+
+
+when serv_connect_callback() isn't COMM_OK: 
+
+Log to opers the actual error, rather than it going as a wallop or
+something. This makes it appear with the connect messages to opers,
+which IMHO is where it *should* be going.
+
+
+
 *** 20001102_9 by adrian
 
 
