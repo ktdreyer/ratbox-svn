@@ -85,8 +85,11 @@ string_to_array(char *string, char *parv[MAXPARA])
     if (*buf == ':') /* Last parameter */
     {
       buf++;
-      parv[x++] = buf;
-      parv[x] = NULL;
+      if(buf != '\0')
+      {
+         parv[x++] = buf;
+         parv[x] = NULL;
+      }
       return x;
     }
     else
