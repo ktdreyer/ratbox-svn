@@ -536,8 +536,11 @@ int main(int argc, char *argv[])
    *    Env variable "LANGUAGE"
    *    Default of "" (so don't overwrite LANGUAGE here)
    */
-  
-  setenv("LANGUAGE", "", 0);
+ 
+  if (!getenv("LANGUAGE"))
+    { 
+      putenv("LANGUAGE=");
+    }
 
   textdomain("ircd-hybrid");
   bindtextdomain("ircd-hybrid" , MSGPATH);
