@@ -30,17 +30,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#undef strcpy
-extern inline 
-char *strcpy(char * s1, const char *s2)
-{
-  register char *x = s1;
-  register const char *y = s2;
-  while(y != 0 && (*x++ = *y++))
-    ;     
-  return s1;
-}       
-              	      	        	          
 
 /*
  * match - compare name with mask, mask may contain * and ? as wildcards
