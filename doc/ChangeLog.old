@@ -1,3 +1,7 @@
+*** 20010112_1 by a1kmm
+- Made some minor modifications to help catch bugs like frobbing the blockalloced stuff.
+
+
 *** 20010111_13 by ejb
 - possible fix for uint32_t problem
 
