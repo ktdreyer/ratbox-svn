@@ -114,7 +114,6 @@ struct _fde {
         void *data;
         /* We'd also add the retry count here when we get to that -- adrian */
     } connect;
-    int tried_write_io;
 };
 
 

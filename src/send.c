@@ -190,23 +190,7 @@ _send_linebuf(struct Client *to, buf_head_t *linebuf)
   to->localClient->sendM += 1;
   me.localClient->sendM += 1;
 
-  /*
-   * Now we register a write callback. We *could* try to write some
-   * data to the FD, it'd be an optimisation, and we can deal with it
-   * later.
-   *     -- adrian
-   * So I took adrian's comments to heart..whether it works or not remains
-   * to been seen...This seems to be a bad idea as other connections die
-   * of starvation..
-   * -- Aaron
-   */
-#if 0
   send_queued_write(to->fd, to);	
-#endif
-#if 1
-  comm_setselect(to->fd, FDLIST_IDLECLIENT, COMM_SELECT_WRITE,
-                 send_queued_write, to, 0);
-#endif
   return 0;
 } /* send_linebuf() */
 
