@@ -1432,8 +1432,11 @@ const char* comment         /* Reason for the exit */
 	    restoreUnusedServerMask(sptr->localClient->serverMask);
           {
 	    m = dlinkFind(&serv_list,sptr);
-	    dlinkDelete(m,&serv_list);
-	    free_dlink_node(m);
+	    if( m != NULL )
+	      {
+		dlinkDelete(m,&serv_list);
+		free_dlink_node(m);
+	      }
           }
         }
       sptr->flags |= FLAGS_CLOSING;
