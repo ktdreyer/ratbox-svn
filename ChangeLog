@@ -1,3 +1,32 @@
+androsyn    2003/04/21 16:47:26 UTC	(20030421_0)
+
+  Modified files:
+    adns                 general.c query.c reply.c setup.c types.c 
+    modules              m_cryptlink.c m_help.c 
+    modules/core         m_sjoin.c 
+    src                  adns.c channel_mode.c ircd.c packet.c 
+                         patricia.c s_conf.c 
+  Log:
+  Fix a bunch of gcc-3.3 related warnings
+  
+  Revision  Changes    Path
+  1.12      +1 -1      ircd-ratbox/adns/general.c
+  1.17      +2 -1      ircd-ratbox/adns/query.c
+  1.9       +2 -2      ircd-ratbox/adns/reply.c
+  1.28      +4 -4      ircd-ratbox/adns/setup.c
+  1.11      +1 -1      ircd-ratbox/adns/types.c
+  1.166     +2 -2      ircd-ratbox/modules/core/m_sjoin.c
+  1.52      +4 -3      ircd-ratbox/modules/m_cryptlink.c
+  1.46      +2 -2      ircd-ratbox/modules/m_help.c
+  7.60      +4 -3      ircd-ratbox/src/adns.c
+  7.100     +1 -1      ircd-ratbox/src/channel_mode.c
+  7.282     +2 -1      ircd-ratbox/src/ircd.c
+  7.117     +1 -1      ircd-ratbox/src/packet.c
+  7.18      +1 -1      ircd-ratbox/src/patricia.c
+  7.402     +4 -4      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2003/04/19 13:42:05 UTC	(20030419_0)
 
   Modified files:
