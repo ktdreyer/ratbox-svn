@@ -438,8 +438,14 @@ int write_links_file(void* notused)
             p = "(Unknown Location)";
 
 	  newMessageLine = (MessageFileLine*) MyMalloc(sizeof(MessageFileLine));
-	  ircsprintf(newMessageLine->line,"%s %s %s",
-		     acptr->name,ConfigFileEntry.network_name,p);
+
+/* Attempt to format the file in such a way it follows the usual links output
+ * ie  "servername uplink :hops info"
+ * Mostly for aesthetic reasons - makes it look pretty in mIRC ;)
+ * - madmax
+*/
+	  ircsprintf(newMessageLine->line,"%s %s :1 %s",
+		     acptr->name,me.name,p);
 	  newMessageLine->next = (MessageFileLine *)NULL;
 
 	  if (MessageFileptr->contentsOfFile)
@@ -453,8 +459,8 @@ int write_links_file(void* notused)
 	      MessageFileptr->contentsOfFile = newMessageLine;
 	      currentMessageLine = newMessageLine;
 	    }
-	  ircsprintf(buff,"%s %s %s\n",
-		     acptr->name,ConfigFileEntry.network_name,p);
+	  ircsprintf(buff,"%s %s :1 %s\n",
+		     acptr->name,me.name,p);
 	  fbputs(buff,file);
 	}
     }

@@ -69,7 +69,20 @@ char *_version = "20001122";
 
 int m_links(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
+
+
   SendMessageFile(sptr, &ConfigFileEntry.linksfile);
+
+    
+/*
+ * Print our own info so at least it looks like a normal links
+ * then print out the file (which may or may not be empty)
+ */
+  
+  sendto_one(sptr, form_str(RPL_LINKS),
+                           me.name, parv[0], me.name, me.name,
+                           0, me.info);
+      
   sendto_one(sptr, form_str(RPL_ENDOFLINKS), me.name, parv[0], "*");
   return 0;
 }
