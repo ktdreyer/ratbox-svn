@@ -1,3 +1,28 @@
+leeh        2002/08/18 07:11:48 EDT	(20020818_3)
+
+  Modified files:
+    .                    BUGS README.FIRST RELNOTES 
+    doc                  example.conf 
+    modules              m_whois.c 
+  Removed files:
+    .                    README.PLATFORMS TODO 
+  Log:
+  - got rid of README.PLATFORMS and TODO, former is useless now, latter is
+    overgrown beyond all belief.
+  - dont send RPL_WHOISACTUALLY for spoofed users
+  - updated RELNOTES and misc docs.
+  
+  Revision  Changes    Path
+  7.51      +3 -3      ircd-ratbox/BUGS
+  7.35      +3 -3      ircd-ratbox/README.FIRST
+  7.15      +0 -36     ircd-ratbox/README.PLATFORMS (dead)
+  1.40      +52 -48    ircd-ratbox/RELNOTES
+  7.77      +0 -122    ircd-ratbox/TODO (dead)
+  7.175     +45 -15    ircd-ratbox/doc/example.conf
+  1.89      +3 -4      ircd-ratbox/modules/m_whois.c
+
+
+
 leeh        2002/08/18 06:15:00 EDT	(20020818_2)
 
   Modified files:
