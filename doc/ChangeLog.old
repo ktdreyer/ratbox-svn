@@ -1,3 +1,7 @@
+*** 20010329_3 by fl_
+- never do testing in BitchX..
+
+
 *** 20010329_2 by fl_
 - transferred the masking from channel.c for /names to m_who.c for
   /who..  we now randomly poll /who lists too.. 
