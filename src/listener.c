@@ -64,16 +64,6 @@ make_listener(struct sockaddr_storage *addr)
 	listener->name = me.name;
 	listener->fd = -1;
 	memcpy(&listener->addr, addr, sizeof(struct sockaddr_storage));
-	if(listener->addr.ss_family == AF_INET)
-	{
-		SET_SS_LEN(listener->addr, sizeof(struct sockaddr_in));
-	}
-#ifdef IPV6
-	 else if(listener->addr.ss_family == AF_INET6)
-	{
-		SET_SS_LEN(listener->addr, sizeof(struct sockaddr_in6));
-	}
-#endif
 	listener->next = NULL;
 	return listener;
 }
@@ -376,10 +366,12 @@ add_listener(int port, const char *vhost_ip, int family)
 	switch(family)
 	{
 		case AF_INET:
+			SET_SS_LEN(vaddr, sizeof(struct sockaddr_in));
 			((struct sockaddr_in *)&vaddr)->sin_port = htons(port);
 			break;
 #ifdef IPV6
 		case AF_INET6:
+			SET_SS_LEN(vaddr, sizeof(struct sockaddr_in6));
 			((struct sockaddr_in6 *)&vaddr)->sin6_port = htons(port);
 			break;
 #endif
