@@ -1,3 +1,15 @@
+leeh        2004/08/12 16:51:32 EDT	(20040812_0)
+
+  Modified files:
+    src                  s_serv.c 
+  Log:
+  - set servers name properly on an outbound connect
+  
+  Revision  Changes    Path
+  7.413     +1 -1      ircd-ratbox/src/s_serv.c
+
+
+
 androsyn    2004/08/11 10:29:38 EDT	(20040811_0)
 
   Modified files:
