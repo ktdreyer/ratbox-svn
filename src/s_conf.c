@@ -2087,7 +2087,9 @@ static void clear_out_old_conf(void)
   clear_special_conf(&q_conf);
 
   /* clean out module paths */
+#ifndef STATIC_MODULES
   mod_clear_paths();
+#endif
 
   /* clean out ServerInfo */
 #ifdef HAVE_LIBCRYPTO
