@@ -1,3 +1,17 @@
+*** 20001104_2 by adrian
+
+
+* set the socket to non-blocking in comm_open(), and fail the socket
+  creation if this fails. All network sockets should be non-blocking
+  in this ircd!
+
+* add comm_accept() - a mirror of accept() but enforcing non-blockingness
+  and FD limits also
+
+* modify listener.c to use comm_accept() instead of accept() and fd_open() .
+
+
+
 *** 20001104_1 by db
 - some cleanups
 - Still need to add back in lazy link support
