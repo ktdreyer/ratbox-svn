@@ -91,7 +91,7 @@ else
     CPPFLAGS="$CPPFLAGS -Ylonglong -Yansi -I/usr/include"
   else
     if test "x$SunWorkShop" = "xyes"; then
-      IRC_CFLAGS="-fast -g -xinline=dlinkAdd,dlinkAddBefore,dlinkAddTail,dlinkDelete,dlinkFind,dlinkFindDelete,dlinkFindDestroy,dlinkMoveList,dlinkMoveNode,free_dlink_node,make_dlink_node,_MyMalloc,_MyRealloc,_MyFree,_DupString"
+      IRC_CFLAGS="-xO5 -fast -g -I/usr/local/include -xinline=dlinkAdd,dlinkAddBefore,dlinkAddTail,dlinkDelete,dlinkFind,dlinkFindDelete,dlinkFindDestroy,dlinkMoveList,dlinkMoveNode,free_dlink_node,make_dlink_node,_MyMalloc,_MyRealloc,_MyFree,_DupString"
     else
       if test "x$MIPSpro" = "xyes"; then
         IRC_CFLAGS="-g"
