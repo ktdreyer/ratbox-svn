@@ -319,12 +319,6 @@ Info MyInformation[] = {
   { "NO_OPER_FLOOD", "OFF", 0, "Disable Flood Control for Operators" },
 #endif /* NO_OPER_FLOOD */
 
-#ifdef NO_PRIORITY
-  { "NO_PRIORITY", "ON", 0, "Do not Prioritize Socket File Descriptors" },
-#else
-  { "NO_PRIORITY", "OFF", 0, "Do not Prioritize Socket File Descriptors" },
-#endif /* NO_PRIORITY */
-
 #ifdef NOISY_HTM
   { "NOISY_HTM", "ON", 0, "Notify Operators of HTM (De)activation" },
 #else

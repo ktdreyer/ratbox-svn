@@ -70,63 +70,6 @@ void fdlist_delete(int fd, unsigned char mask)
   fd_table[fd].mask &= ~mask;
 }
 
-#ifndef NO_PRIORITY
-#ifdef CLIENT_SERVER
-#define BUSY_CLIENT(x) \
-    (((x)->priority < 55) || (!GlobalSetOptions.lifesux && ((x)->priority < 75)))
-#else
-#define BUSY_CLIENT(x) \
-    (((x)->priority < 40) || (!GlobalSetOptions.lifesux && ((x)->priority < 60)))
-#endif
-#define FDLISTCHKFREQ  2
-
-/*
- * This is a pretty expensive routine -- it loops through
- * all the fd's, and finds the active clients (and servers
- * and opers) and places them on the "busy client" list
- */
-void fdlist_check(time_t now)
-{
-  struct Client* cptr;
-  int            i;
-
-  for (i = highest_fd; i >= 0; --i)
-    {
-
-      if (!(cptr = local[i])) 
-        continue;
-      if (IsServer(cptr) || IsAnOper(cptr))
-          continue;
-
-      fd_table[i].mask &= ~FDL_BUSY;
-      if (cptr->receiveM == cptr->lastrecvM)
-        {
-          cptr->priority += 2;  /* lower a bit */
-          if (90 < cptr->priority) 
-            cptr->priority = 90;
-          else if (BUSY_CLIENT(cptr))
-            {
-              fd_table[i].mask |= FDL_BUSY;
-            }
-          continue;
-        }
-      else
-        {
-          cptr->lastrecvM = cptr->receiveM;
-          cptr->priority -= 30; /* active client */
-          if (cptr->priority < 0)
-            {
-              cptr->priority = 0;
-              fd_table[i].mask |= FDL_BUSY;
-            }
-          else if (BUSY_CLIENT(cptr))
-            {
-              fd_table[i].mask |= FDL_BUSY;
-            }
-        }
-    }
-}
-#endif
 
 /* Called to open a given filedescriptor */
 void

@@ -341,9 +341,6 @@ static void parse_command_line(int argc, char* argv[])
 static time_t io_loop(time_t delay)
 {
   static char   to_send[200];
-  static time_t lasttime  = 0;
-  static long   lastrecvK = 0;
-  static int    lrv       = 0;
   time_t        lasttimeofday;
 
   lasttimeofday = CurrentTime;
@@ -374,65 +371,7 @@ static time_t io_loop(time_t delay)
 
   /* Do new-style pending events */
   /* Once the crap has been stripped out, we can make this use delay .. */
-  comm_select(0);
-
-  /*
-   * This chunk of code determines whether or not
-   * "life sucks", that is to say if the traffic
-   * level is so high that standard server
-   * commands should be restricted
-   *
-   * Changed by Taner so that it tells you what's going on
-   * as well as allows forced on (long LCF), etc...
-   */
-  
-  if ((CurrentTime - lasttime) >= LCF)
-    {
-      lrv = LRV * LCF;
-      lasttime = CurrentTime;
-      currlife = (float)((long)me.receiveK - lastrecvK)/(float)LCF;
-      if (((long)me.receiveK - lrv) > lastrecvK )
-        {
-          if (!GlobalSetOptions.lifesux)
-            {
-              GlobalSetOptions.lifesux = 1;
-
-              if (GlobalSetOptions.noisy_htm)
-                {
-                  sprintf(to_send, 
-                        "Entering high-traffic mode - (%.1fk/s > %dk/s)",
-                                (float)currlife, LRV);
-                  sendto_ops(to_send);
-                }
-            }
-          else
-            {
-              GlobalSetOptions.lifesux++; /* Ok, life really sucks! */
-              LCF += 2;                   /* Wait even longer */
-              if (GlobalSetOptions.noisy_htm) 
-                {
-                  sprintf(to_send,
-                        "Still high-traffic mode %d%s (%d delay): %.1fk/s",
-                                GlobalSetOptions.lifesux,
-                                (GlobalSetOptions.lifesux & 0x04) ?
-			          " (TURBO)" : "",
-                                (int)LCF, (float)currlife);
-                  sendto_ops(to_send);
-                }
-            }
-        }
-      else
-        {
-          LCF = LOADCFREQ;
-          if (GlobalSetOptions.lifesux)
-            {
-              GlobalSetOptions.lifesux = 0;
-              if (GlobalSetOptions.noisy_htm)
-                sendto_ops("Resuming standard operation . . . .");
-            }
-        }
-      lastrecvK = (long)me.receiveK;
-    }
+  comm_select(delay);
 
   /*
   ** We only want to connect if a connection is due,
@@ -470,58 +409,14 @@ static time_t io_loop(time_t delay)
    *    -Taner
    */
 
-#ifndef NO_PRIORITY
-  read_message(0, FDL_SERVER);
-  read_message(1, FDL_BUSY);
-  if (GlobalSetOptions.lifesux)
-    {
-      read_message(1, FDL_SERVER);
-      if (GlobalSetOptions.lifesux & 0x4)
-        {       /* life really sucks */
-          read_message(1, FDL_BUSY);
-          read_message(1, FDL_SERVER);
-        }
-    }
-
-  /*
-   * CLIENT_SERVER = TRUE:
-   *    If we're in normal mode, or if "lifesux" and a few
-   *    seconds have passed, then read everything.
-   * CLIENT_SERVER = FALSE:
-   *    If it's been more than lifesux*2 seconds (that is, 
-   *    at most 1 second, or at least 2s when lifesux is
-   *    != 0) check everything.
-   *    -Taner
-   */
-  {
-    static time_t lasttime=0;
-#ifdef CLIENT_SERVER
-    if (!GlobalSetOptions.lifesux ||
-	(lasttime + GlobalSetOptions.lifesux) < CurrentTime)
-      {
-#else
-    if ((lasttime + (GlobalSetOptions.lifesux + 1)) < CurrentTime)
-      {
-#endif
-        read_message(delay, FDL_ALL); /*  check everything! */
-        lasttime = CurrentTime;
-      }
-   }
-#else
-  read_message(delay, FDL_ALL); /*  check everything! */
-#endif
+  read_message(0, FDL_ALL); /*  check everything! */
 
   if (dorehash && !GlobalSetOptions.lifesux)
     {
       rehash(&me, &me, 1);
       dorehash = 0;
     }
-#ifndef NO_PRIORITY
-  fdlist_check(CurrentTime);
-#endif
-
   return delay;
-
 }
 
 /*
