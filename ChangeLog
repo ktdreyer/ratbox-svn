@@ -1,3 +1,33 @@
+leeh        2005/02/15 18:53:32 EST	(20050215_0)
+
+  Modified files:
+    include              hostmask.h ircd.h s_conf.h s_newconf.h 
+    modules              m_dline.c m_kline.c m_rehash.c m_resv.c 
+                         m_xline.c 
+    src                  hostmask.c ircd.c ircd_signal.c s_conf.c 
+                         s_newconf.c 
+  Log:
+  - we now no longer rehash kline.conf etc on rehash, only ircd.conf
+  - SIGUSR2 or /rehash bans will now reread kline.conf etc.
+  
+  Revision  Changes    Path
+  1.42      +1 -0      ircd-ratbox/include/hostmask.h
+  7.81      +1 -0      ircd-ratbox/include/ircd.h
+  7.312     +1 -0      ircd-ratbox/include/s_conf.h
+  7.46      +1 -0      ircd-ratbox/include/s_newconf.h
+  1.48      +2 -2      ircd-ratbox/modules/m_dline.c
+  1.200     +2 -2      ircd-ratbox/modules/m_kline.c
+  1.89      +11 -1     ircd-ratbox/modules/m_rehash.c
+  1.74      +2 -2      ircd-ratbox/modules/m_resv.c
+  1.67      +2 -2      ircd-ratbox/modules/m_xline.c
+  7.106     +35 -1     ircd-ratbox/src/hostmask.c
+  7.370     +7 -0      ircd-ratbox/src/ircd.c
+  7.26      +10 -0     ircd-ratbox/src/ircd_signal.c
+  7.506     +59 -47    ircd-ratbox/src/s_conf.c
+  7.66      +7 -0      ircd-ratbox/src/s_newconf.c
+
+
+
 leeh        2005/02/13 10:21:41 EST	(20050213_4)
 
   Modified files:
