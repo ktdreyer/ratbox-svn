@@ -1,3 +1,18 @@
+leeh        2003/05/15 13:26:25 UTC	(20030515_1)
+
+  Modified files:
+    modules              m_stats.c 
+    src                  balloc.c rsa.c 
+  Log:
+  - fix some compile warnings.
+  
+  Revision  Changes    Path
+  1.155     +2 -2      ircd-ratbox/modules/m_stats.c
+  7.63      +1 -1      ircd-ratbox/src/balloc.c
+  7.32      +2 -1      ircd-ratbox/src/rsa.c
+
+
+
 leeh        2003/05/15 13:18:17 UTC	(20030515_0)
 
   Modified files:
