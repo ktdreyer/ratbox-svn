@@ -1,3 +1,15 @@
+androsyn    2002/06/15 03:24:50 EDT	(20020615_1)
+
+  Modified files:
+    src                  memory.c 
+  Log:
+  Silly kids, realloc returns a void * not a char *.
+  
+  Revision  Changes    Path
+  7.36      +1 -1      ircd-hybrid-7/src/memory.c
+
+
+
 androsyn    2002/06/15 03:20:00 EDT	(20020615_0)
 
   Modified files:
