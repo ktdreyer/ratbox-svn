@@ -626,7 +626,7 @@ rehash(int sig)
 	}
 
 	check_banned_lines();
-	sync_logfiles();
+	open_logfiles();
 	return (0);
 }
 

@@ -79,31 +79,28 @@ init_main_logfile(void)
 }
 
 void
-sync_logfiles(void)
+open_logfiles(void)
 {
 	int i;
 
-	if(log_main == NULL)
-		log_main = fbopen(LPATH, "a");
+	if(log_main != NULL)
+		fbclose(log_main);
+
+	log_main = fbopen(LPATH, "a");
 
 	/* log_main is handled above, so just do the rest */
 	for(i = 1; i < LAST_LOGFILE; i++)
 	{
-		/* unspecified and open, close it */
-		if(log_table[i].name[0] == '\0')
+		/* close open logfiles */
+		if(*log_table[i].logfile != NULL)
 		{
-			if(*log_table[i].logfile != NULL)
-			{
-				fbclose(*log_table[i].logfile);
-				*log_table[i].logfile = NULL;
-			}
+			fbclose(*log_table[i].logfile);
+			*log_table[i].logfile = NULL;
 		}
-		/* specified and closed, attempt to open */
-		else
-		{
-			if(*log_table[i].logfile == NULL)
-				*log_table[i].logfile = fbopen(log_table[i].name, "a");
-		}
+
+		/* reopen those with paths */
+		if(!EmptyString(log_table[i].name))
+			*log_table[i].logfile = fbopen(log_table[i].name, "a");
 	}
 }			
 
@@ -123,7 +120,12 @@ ilog(ilogfile dest, const char *format, ...)
 	va_end(args);
 
 	ircsnprintf(buf2, sizeof(buf2), "%s %s\n", smalldate(), buf);
-	fbputs(buf2, logfile);
+
+	if(fbputs(buf2, logfile) < 0)
+	{
+		fbclose(logfile);
+		*log_table[dest].logfile = NULL;
+	}
 }
 
 void
