@@ -199,6 +199,7 @@ struct config_file_entry
 	int kline_delay;
 	int warn_no_nline;
 	int non_redundant_klines;
+	int stats_e_disabled;
 	int stats_c_oper_only;
 	int stats_y_oper_only;
 	int stats_h_oper_only;

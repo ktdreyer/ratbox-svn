@@ -386,12 +386,19 @@ stats_deny (struct Client *source_p)
  * side effects - client is given list of exempt blocks
  */
 static void
-stats_exempt (struct Client *source_p)
+stats_exempt(struct Client *source_p)
 {
 	char *name, *host, *pass, *user, *classname;
 	struct AddressRec *arec;
 	struct ConfItem *aconf;
 	int i, port;
+
+	if(ConfigFileEntry.stats_e_disabled)
+	{
+		sendto_one_numeric(source_p, ERR_NOPRIVILEGES,
+				   form_str (ERR_NOPRIVILEGES));
+		return;
+	}
 
 	for (i = 0; i < ATABLE_SIZE; i++)
 	{

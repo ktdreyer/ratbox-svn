@@ -1869,6 +1869,12 @@ conf_set_general_non_redundant_klines(void *data)
 }
 
 static void
+conf_set_general_stats_e_disabled(void *data)
+{
+	ConfigFileEntry.stats_e_disabled = *(unsigned int *) data;
+}
+
+static void
 conf_set_general_stats_c_oper_only(void *data)
 {
 	ConfigFileEntry.stats_c_oper_only = *(unsigned int *) data;
@@ -2620,6 +2626,8 @@ newconf_init()
 	add_conf_item("general", "non_redundant_klines", CF_YESNO,
 		      conf_set_general_non_redundant_klines);
 	add_conf_item("general", "dots_in_ident", CF_INT, conf_set_general_dots_in_ident);
+	add_conf_item("general", "stats_e_disabled", CF_YESNO,
+			conf_set_general_stats_e_disabled);
 	add_conf_item("general", "stats_c_oper_only", CF_YESNO, conf_set_general_stats_c_oper_only);
 	add_conf_item("general", "stats_y_oper_only", CF_YESNO, conf_set_general_stats_y_oper_only);
 	add_conf_item("general", "stats_h_oper_only", CF_YESNO, conf_set_general_stats_h_oper_only);

@@ -354,6 +354,12 @@ static struct InfoStruct info_table[] = {
 		"Do not show MOTD; only tell clients they should read it"
 	},
 	{
+		"stats_e_disabled",
+		OUTPUT_BOOLEAN_YN,
+		&ConfigFileEntry.stats_e_disabled,
+		"STATS e output is disabled",
+	},
+	{
 		"stats_c_oper_only",
 		OUTPUT_BOOLEAN_YN,
 		&ConfigFileEntry.stats_c_oper_only,
