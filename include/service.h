@@ -11,8 +11,6 @@ struct cachefile;
 				for(i = 0; i < m; i++)
 #define SCMD_END		} while(0)
 
-#define OPER_NAME(conn_p, client_p) ((conn_p) ? (conn_p)->name : (client_p)->user->oper->name)
-
 struct service_command
 {
         const char *cmd;
@@ -47,6 +45,8 @@ struct service_handler
 
 extern dlink_list service_list;
 
+#define OPER_NAME(conn_p, client_p) ((conn_p) ? (conn_p)->name : (client_p)->user->oper->name)
+
 extern struct client *add_service();
 extern struct client *find_service_id(const char *name);
 extern void introduce_service(struct client *client_p);
@@ -62,6 +62,10 @@ extern void handle_service(struct client *service_p, struct client *client_p,
                            char *text);
 extern void service_error(struct client *service_p, struct client *client_p,
                           const char *, ...);
+
+void service_send(struct client *, struct client *, struct lconn *,
+		const char *, ...);
+			
 
 extern void service_stats(struct client *service_p, struct lconn *);
 

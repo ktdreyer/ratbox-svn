@@ -210,7 +210,12 @@ add_channel_reg(struct chan_reg *reg_p)
 static void
 init_channel_reg(struct chan_reg *chreg_p, const char *name)
 {
+	struct channel *chptr;
+
+	chptr = find_channel(name);
+
 	chreg_p->name = my_strdup(name);
+	chreg_p->tsinfo = chptr != NULL ? chptr->tsinfo : CURRENT_TIME;
 	chreg_p->reg_time = chreg_p->last_time = CURRENT_TIME;
 	chreg_p->cmode.mode = MODE_TOPIC|MODE_NOEXTERNAL;
 
@@ -218,9 +223,10 @@ init_channel_reg(struct chan_reg *chreg_p, const char *name)
 
 	loc_sqlite_exec(NULL, 
 		"INSERT INTO channels "
-		"(chname, reg_time, last_time, flags, createmodes) "
-		"VALUES(%Q, %lu, %lu, 0, %Q)",
-		chreg_p->name, chreg_p->reg_time, chreg_p->last_time, "+nt");
+		"(chname, tsinfo, reg_time, last_time, flags, createmodes) "
+		"VALUES(%Q, %lu, %lu, %lu, 0, %Q)",
+		chreg_p->name, chreg_p->tsinfo, chreg_p->reg_time,
+		chreg_p->last_time, "+nt");
 }
 
 static struct chan_reg *
@@ -407,7 +413,7 @@ channel_db_callback(void *db, int argc, char **argv, char **colnames)
 	char *modev[MAXPARA + 1];
 	int modec;
 
-	if(argc < 9)
+	if(argc < 10)
 		return 0;
 
 	if(EmptyString(argv[0]))
@@ -448,17 +454,18 @@ channel_db_callback(void *db, int argc, char **argv, char **colnames)
 				sizeof(reg_p->emode.key));
 	}
 
-	reg_p->reg_time = atol(argv[5]);
-	reg_p->last_time = atol(argv[6]);
-	reg_p->flags = atoi(argv[7]);
+	reg_p->tsinfo = atol(argv[5]);
+	reg_p->reg_time = atol(argv[6]);
+	reg_p->last_time = atol(argv[7]);
+	reg_p->flags = atoi(argv[8]);
 
-	if(!EmptyString(argv[8]))
-		reg_p->suspender = my_strdup(argv[8]);
+	if(!EmptyString(argv[9]))
+		reg_p->suspender = my_strdup(argv[9]);
 
 	add_channel_reg(reg_p);
 
 	if(reg_p->flags & CS_FLAGS_AUTOJOIN)
-		join_service(chanserv_p, reg_p->name, 
+		join_service(chanserv_p, reg_p->name, reg_p->tsinfo,
 			reg_p->emode.mode ? &reg_p->emode : &reg_p->cmode);
 
 	return 0;
@@ -571,6 +578,30 @@ update_chreg_flags(struct chan_reg *chreg_p)
 	loc_sqlite_exec(NULL, "UPDATE channels SET flags = %d "
 			"WHERE chname = %Q",
 			chreg_p->flags, chreg_p->name);
+}
+
+static void
+enable_autojoin(struct chan_reg *chreg_p)
+{
+	struct channel *chptr;
+
+	chreg_p->flags |= CS_FLAGS_AUTOJOIN;
+
+	/* Store the TS, so we will join with the correct
+	 * TS in future -- jilles
+	 */
+	chptr = find_channel(chreg_p->name);
+	if (chptr != NULL)
+		chreg_p->tsinfo = chptr->tsinfo;
+
+	/* Join with stored TS */
+	join_service(chanserv_p, chreg_p->name, chreg_p->tsinfo,
+			chreg_p->emode.mode ? &chreg_p->emode :
+			&chreg_p->cmode);
+
+	loc_sqlite_exec(NULL, "UPDATE channels SET tsinfo = %lu, flags = %d "
+			"WHERE chname = %Q",
+			chreg_p->tsinfo, chreg_p->flags, chreg_p->name);
 }
 
 static void
@@ -702,6 +733,12 @@ h_chanserv_sjoin_lowerts(void *v_chptr, void *unused)
 	if((chreg_p = find_channel_reg(NULL, chptr->name)) == NULL)
 		return 0;
 
+	/* Save the new TS for later -- jilles */
+	chreg_p->tsinfo = chptr->tsinfo;
+	loc_sqlite_exec(NULL, "UPDATE channels SET tsinfo = %lu "
+			"WHERE chname = %Q",
+			chreg_p->tsinfo, chreg_p->name);
+
 	if(!chreg_p->emode.mode || 
 	   (chptr->mode.mode & chreg_p->emode.mode) == chreg_p->emode.mode)
 		return 0;
@@ -710,7 +747,7 @@ h_chanserv_sjoin_lowerts(void *v_chptr, void *unused)
 	 * we will eventually send an sjoin, which will contain the updated
 	 * modes..
 	 */
-	if(!finished_bursting && dlink_list_length(&chptr->services))
+	if(!sent_burst && dlink_list_length(&chptr->services))
 	{
 		int i;
 
@@ -902,9 +939,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 			if(dlink_list_length(&chptr->users) == 1 &&
 			   !dlink_find(chanserv_p, &chptr->services))
 			{
-				chreg_p->flags |= CS_FLAGS_AUTOJOIN;
-				join_service(chanserv_p, chptr->name, NULL);
-				update_chreg_flags(chreg_p);
+				enable_autojoin(chreg_p);
 			}
 
 			if(is_opped(member_p))
@@ -941,9 +976,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 				if(dlink_list_length(&chptr->users) == 1 &&
 				   !dlink_find(chanserv_p, &chptr->services))
 				{
-					chreg_p->flags |= CS_FLAGS_AUTOJOIN;
-					join_service(chanserv_p, chptr->name, NULL);
-					update_chreg_flags(chreg_p);
+					enable_autojoin(chreg_p);
 				}
 
 				sendto_server(":%s MODE %s -o %s",
@@ -1972,6 +2005,7 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 {
 	struct chan_reg *chreg_p;
 	struct member_reg *mreg_p;
+	struct channel *chptr;
 	static const char dummy[] = "\0";
 	const char *arg;
 
@@ -1987,8 +2021,6 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 	{
 		if(!strcasecmp(arg, "ON"))
 		{
-			struct channel *chptr;
-
 			chreg_p->flags |= CS_FLAGS_NOOPS;
 
 			if(!(chptr = find_channel(chreg_p->name)))
@@ -2026,8 +2058,6 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 	{
 		if(!strcasecmp(arg, "ON"))
 		{
-			struct channel *chptr;
-
 			chreg_p->flags |= CS_FLAGS_RESTRICTOPS;
 
 			if(!(chptr = find_channel(chreg_p->name)))
@@ -2065,11 +2095,7 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 	{
 		if(!strcasecmp(arg, "ON"))
 		{
-			chreg_p->flags |= CS_FLAGS_AUTOJOIN;
-
-			join_service(chanserv_p, chreg_p->name,
-					chreg_p->emode.mode ? &chreg_p->emode : 
-					 &chreg_p->cmode);
+			enable_autojoin(chreg_p);
 		}
 		else if(!strcasecmp(arg, "OFF"))
 		{
@@ -2167,7 +2193,6 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 	}
 	else if(!strcasecmp(parv[1], "ENFORCEMODES"))
 	{
-		struct channel *chptr;
 		struct chmode mode;
 		const char *modestring;
 

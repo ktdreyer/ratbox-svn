@@ -32,6 +32,7 @@ struct chan_reg
 
 	int flags;
 
+	time_t tsinfo;
 	time_t reg_time;
 	time_t last_time;
 	unsigned long bants;

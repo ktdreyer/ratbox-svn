@@ -332,7 +332,6 @@ c_pong(struct client *client_p, const char *parv[], int parc)
                            server_p->name);
                 SetConnEOB(server_p);
 
-		introduce_services_channels();
 		hook_call(HOOK_FINISHED_BURSTING, NULL, NULL);
         }
 

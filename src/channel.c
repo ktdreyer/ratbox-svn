@@ -255,8 +255,11 @@ count_topics(void)
         return topic_count;
 }
 
+/* join service to chname, create channel with TS tsinfo, using mode in the
+ * SJOIN. if channel already exists, don't use tsinfo -- jilles */
 void
-join_service(struct client *service_p, const char *chname, struct chmode *mode)
+join_service(struct client *service_p, const char *chname, time_t tsinfo,
+		struct chmode *mode)
 {
 	struct channel *chptr;
 
@@ -266,7 +269,7 @@ join_service(struct client *service_p, const char *chname, struct chmode *mode)
 		chptr = BlockHeapAlloc(channel_heap);
 
 		strlcpy(chptr->name, chname, sizeof(chptr->name));
-		chptr->tsinfo = CURRENT_TIME;
+		chptr->tsinfo = tsinfo;
 
 		if(mode != NULL)
 		{
@@ -289,7 +292,7 @@ join_service(struct client *service_p, const char *chname, struct chmode *mode)
 	dlink_add_alloc(service_p, &chptr->services);
 	dlink_add_alloc(chptr, &service_p->service->channels);
 
-	if(finished_bursting)
+	if(sent_burst)
 		sendto_server(":%s SJOIN %lu %s %s :@%s",
 				MYNAME, (unsigned long) chptr->tsinfo, 
 				chptr->name, chmode_to_string(&chptr->mode), 
@@ -310,7 +313,7 @@ part_service(struct client *service_p, const char *chname)
 	dlink_find_destroy(service_p, &chptr->services);
 	dlink_find_destroy(chptr, &service_p->service->channels);
 
-	if(finished_bursting)
+	if(sent_burst)
 		sendto_server(":%s PART %s", service_p->name, chptr->name);
 
 	if(dlink_list_length(&chptr->users) == 0 &&
@@ -713,7 +716,7 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 		remove_our_modes(chptr);
 
 		/* services is in there.. rejoin */
-		if(finished_bursting)
+		if(sent_burst)
 		{
 			DLINK_FOREACH(ptr, chptr->services.head)
 			{

@@ -17,6 +17,7 @@
 #include "c_init.h"
 #include "log.h"
 #include "conf.h"
+#include "hook.h"
 #include "ucommand.h"
 #include "newconf.h"
 
@@ -29,6 +30,8 @@ static int s_operbot_objoin(struct client *, struct lconn *, const char **, int)
 static int s_operbot_obpart(struct client *, struct lconn *, const char **, int);
 static int s_operbot_invite(struct client *, struct lconn *, const char **, int);
 static int s_operbot_op(struct client *, struct lconn *, const char **, int);
+
+static int h_operbot_sjoin_lowerts(void *chptr, void *unused);
 
 static struct service_command operbot_command[] =
 {
@@ -59,19 +62,38 @@ init_s_operbot(void)
 	operbot_p = add_service(&operbot_service);
 
 	loc_sqlite_exec(operbot_db_callback, "SELECT * FROM operbot");
+
+	hook_add(h_operbot_sjoin_lowerts, HOOK_SJOIN_LOWERTS);
 }
 
 static int
 operbot_db_callback(void *db, int argc, char **argv, char **colnames)
 {
-	join_service(operbot_p, argv[0], NULL);
+	join_service(operbot_p, argv[0], atol(argv[1]), NULL);
 	return 0;
 }
+
+static int
+h_operbot_sjoin_lowerts(void *v_chptr, void *unused)
+{
+	struct channel *chptr = v_chptr;
+
+	if (dlink_find(operbot_p, &chptr->services) == NULL)
+		return 0;
+
+	/* Save the new TS for later -- jilles */
+	loc_sqlite_exec(NULL, "UPDATE operbot SET tsinfo = %lu "
+			"WHERE chname = %Q",
+			chptr->tsinfo, chptr->name);
+	return 0;
+}
+
 
 static int
 u_operbot_objoin(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
+	time_t tsinfo;
 
 	if((chptr = find_channel(parv[0])) && 
 	   dlink_find(operbot_p, &chptr->services))
@@ -82,10 +104,12 @@ u_operbot_objoin(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	slog(operbot_p, 1, "%s - OBJOIN %s", conn_p->name, parv[0]);
 
-	loc_sqlite_exec(NULL, "INSERT INTO operbot VALUES(%Q, %Q)",
-			parv[0], conn_p->name);
+	tsinfo = chptr != NULL ? chptr->tsinfo : CURRENT_TIME;
 
-	join_service(operbot_p, parv[0], NULL);
+	loc_sqlite_exec(NULL, "INSERT INTO operbot VALUES(%Q, %lu, %Q)",
+			parv[0], tsinfo, conn_p->name);
+
+	join_service(operbot_p, parv[0], tsinfo, NULL);
 	sendto_one(conn_p, "%s joined to %s", operbot_p->name, parv[0]);
 	return 0;
 }
@@ -111,6 +135,7 @@ static int
 s_operbot_objoin(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
+	time_t tsinfo;
 
 	if((chptr = find_channel(parv[0])) && 
 	   dlink_find(operbot_p, &chptr->services))
@@ -123,10 +148,12 @@ s_operbot_objoin(struct client *client_p, struct lconn *conn_p, const char *parv
 	slog(operbot_p, 1, "%s - OBJOIN %s",
 		client_p->user->oper->name, parv[0]);
 
-	loc_sqlite_exec(NULL, "INSERT INTO operbot VALUES(%Q, %Q)",
-			parv[0], client_p->user->oper->name);
+	tsinfo = chptr != NULL ? chptr->tsinfo : CURRENT_TIME;
+
+	loc_sqlite_exec(NULL, "INSERT INTO operbot VALUES(%Q, %lu, %Q)",
+			parv[0], tsinfo, client_p->user->oper->name);
 			
-	join_service(operbot_p, parv[0], NULL);
+	join_service(operbot_p, parv[0], tsinfo, NULL);
 	service_error(operbot_p, client_p, 
 			"%s joined to %s", operbot_p->name, parv[0]);
 	return 1;

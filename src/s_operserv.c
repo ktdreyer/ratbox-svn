@@ -16,6 +16,7 @@
 #include "rserv.h"
 #include "c_init.h"
 #include "conf.h"
+#include "hook.h"
 #include "ucommand.h"
 #include "modebuild.h"
 #include "log.h"
@@ -31,6 +32,8 @@ static int s_oper_takeover(struct client *, struct lconn *, const char **, int);
 static int s_oper_osjoin(struct client *, struct lconn *, const char **, int);
 static int s_oper_ospart(struct client *, struct lconn *, const char **, int);
 static int s_oper_omode(struct client *, struct lconn *, const char **, int);
+
+static int h_operserv_sjoin_lowerts(void *chptr, void *unused);
 
 static struct service_command operserv_command[] =
 {
@@ -62,15 +65,33 @@ init_s_operserv(void)
 	operserv_p = add_service(&operserv_service);
 
 	loc_sqlite_exec(operserv_db_callback, "SELECT * FROM operserv");
+
+	hook_add(h_operserv_sjoin_lowerts, HOOK_SJOIN_LOWERTS);
 }
 
 static int
 operserv_db_callback(void *db, int argc, char **argv, char **colnames)
 {
-	join_service(operserv_p, argv[0], NULL);
+	join_service(operserv_p, argv[0], atol(argv[1]), NULL);
 	return 0;
 }
 
+static int
+h_operserv_sjoin_lowerts(void *v_chptr, void *unused)
+{
+	struct channel *chptr = v_chptr;
+
+	if (dlink_find(operserv_p, &chptr->services) == NULL)
+		return 0;
+
+	/* Save the new TS for later -- jilles */
+	loc_sqlite_exec(NULL, "UPDATE operserv SET tsinfo = %lu "
+			"WHERE chname = %Q",
+			chptr->tsinfo, chptr->name);
+	return 0;
+}
+
+/* preconditions: TS >= 2 and there is at least one user in the channel */
 static void
 otakeover(struct channel *chptr, int invite)
 {
@@ -85,7 +106,7 @@ otakeover(struct channel *chptr, int invite)
 
 	chptr->tsinfo--;
 
-	join_service(operserv_p, chptr->name, NULL);
+	join_service(operserv_p, chptr->name, chptr->tsinfo, NULL);
 }
 
 static void
@@ -165,6 +186,14 @@ u_oper_takeover(struct client *client_p, struct lconn *conn_p, const char *parv[
 		return 0;
 	}
 
+	if(dlink_list_length(&chptr->users) == 0)
+	{
+		/* Taking over a channel without users would lead to segfaults
+		 * and is pointless anyway -- jilles */
+		sendto_one(conn_p, "Channel %s has no users", parv[0]);
+		return 0;
+	}
+
 	if(parc > 1 && !EmptyString(parv[1]))
 	{
 		if(!irccmp(parv[1], "-clearall"))
@@ -215,6 +244,16 @@ s_oper_takeover(struct client *client_p, struct lconn *conn_p, const char *parv[
 				chptr->name);
 		return 0;
 	}
+
+	if(dlink_list_length(&chptr->users) == 0)
+	{
+		/* Taking over a channel without users would lead to segfaults
+		 * and is pointless anyway -- jilles */
+		service_error(operserv_p, client_p, "Channel %s has no users",
+				chptr->name);
+		return 0;
+	}
+
 	if(parc > 1 && !EmptyString(parv[1]))
 	{
 		if(!irccmp(parv[1], "-clearall"))
@@ -248,6 +287,7 @@ static int
 u_oper_osjoin(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
+	time_t tsinfo;
 
 	if((chptr = find_channel(parv[0])) &&
 	   dlink_find(operserv_p, &chptr->services))
@@ -259,10 +299,12 @@ u_oper_osjoin(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 	slog(operserv_p, 1, "%s - OSJOIN %s", conn_p->name, parv[0]);
 
-	loc_sqlite_exec(NULL, "INSERT INTO operserv VALUES(%Q, %Q)",
-			parv[0], conn_p->name);
+	tsinfo = chptr != NULL ? chptr->tsinfo : CURRENT_TIME;
 
-	join_service(operserv_p, parv[0], NULL);
+	loc_sqlite_exec(NULL, "INSERT INTO operserv VALUES(%Q, %lu, %Q)",
+			parv[0], tsinfo, conn_p->name);
+
+	join_service(operserv_p, parv[0], tsinfo, NULL);
 	sendto_one(conn_p, "%s joined to %s", operserv_p->name, parv[0]);
 	return 0;
 }
@@ -290,6 +332,7 @@ static int
 s_oper_osjoin(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
+	time_t tsinfo;
 
 	if((chptr = find_channel(parv[0])) &&
 	   dlink_find(operserv_p, &chptr->services))
@@ -302,10 +345,12 @@ s_oper_osjoin(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	slog(operserv_p, 1, "%s - OSJOIN %s", 
 		client_p->user->oper->name, parv[0]);
 
-	loc_sqlite_exec(NULL, "INSERT INTO operserv VALUES(%Q, %Q)",
-			parv[0], client_p->user->oper->name);
+	tsinfo = chptr != NULL ? chptr->tsinfo : CURRENT_TIME;
 
-	join_service(operserv_p, parv[0], NULL);
+	loc_sqlite_exec(NULL, "INSERT INTO operserv VALUES(%Q, %lu, %Q)",
+			parv[0], tsinfo, client_p->user->oper->name);
+
+	join_service(operserv_p, parv[0], tsinfo, NULL);
 	service_error(operserv_p, client_p,
 			"%s joined to %s", operserv_p->name, parv[0]);
 
