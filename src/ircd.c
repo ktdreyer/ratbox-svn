@@ -548,6 +548,13 @@ static void cleanup_zombies(void *unused)
 
 int main(int argc, char *argv[])
 {
+  /* Check to see if the user is running us as root, which is a nono */
+  
+  if(geteuid() == 0)
+  {
+    fprintf(stderr, "Don't run ircd as root!!!\n");
+    return -1;
+  }
 
   /*
    * save server boot time right away, so getrusage works correctly
