@@ -56,7 +56,7 @@
 	ENC capability, which also indictes the supported symmetric
 	ciphers, as shown:
 	
-	CAPAB <other supported capabilities> ENC:c1/k1,c2/k2,k3
+	CAPAB :<other supported capabilities> ENC:c1/k1,c2/k2,k3
 
 	Where c1,c2,c3 are supported ciphers, and k1,k2,k3 are the key
 	lengths required by ciphers c1,c2,c3 respectively.

@@ -225,10 +225,9 @@ void free_conf(struct ConfItem* aconf)
   MyFree(aconf->className);
   MyFree(aconf->user);
 #ifdef HAVE_LIBCRYPTO
-  if (aconf->rsa_public_key)
-    RSA_free(aconf->rsa_public_key);
-  if (aconf->cipher_preference)
-    MyFree(aconf->cipher_preference);
+  if (aconf->rsa_public_key)        { RSA_free(aconf->rsa_public_key); }
+  if (aconf->rsa_public_key_file)   { MyFree(aconf->rsa_public_key_file); }
+  if (aconf->cipher_preference)     { MyFree(aconf->cipher_preference); }
 #endif
   MyFree((char*) aconf);
 }
@@ -1379,6 +1378,7 @@ static void set_default_conf(void)
   
 #ifdef HAVE_LIBCRYPTO
   ServerInfo.rsa_private_key = NULL;
+  ServerInfo.rsa_private_key_file = NULL;
 #endif
   ServerInfo.no_hack_ops = YES;
   /* ServerInfo.name is not rehashable */
@@ -1390,8 +1390,8 @@ static void set_default_conf(void)
   ServerInfo.specific_ipv4_vhost = 0;
   memset(&ServerInfo.ip6, 0, sizeof(ServerInfo.ip6));
   ServerInfo.specific_ipv6_vhost = 0;
-  ServerInfo.max_clients = MAX_CLIENTS;  /* XXX - these don't seem to
-  ServerInfo.max_buffer = MAX_BUFFER;     *       actually do anything! */
+  ServerInfo.max_clients = MAX_CLIENTS;  /* XXX - these don't seem to */
+  ServerInfo.max_buffer = MAX_BUFFER;    /*       actually do anything! */
   /* Don't reset hub, as that will break lazylinks */
   /* ServerInfo.hub = NO; */
   
@@ -2113,19 +2113,24 @@ static void clear_out_old_conf(void)
 #endif
 
   /* clean out ServerInfo */
-#ifdef HAVE_LIBCRYPTO
-  if (ServerInfo.rsa_private_key)
-  {
-    RSA_free(ServerInfo.rsa_private_key);
-    ServerInfo.rsa_private_key = NULL;
-  }
-#endif
   MyFree(ServerInfo.description);
   ServerInfo.description = NULL;
   MyFree(ServerInfo.network_name);
   ServerInfo.network_name = NULL;
   MyFree(ServerInfo.network_desc);
   ServerInfo.network_desc = NULL;
+#ifdef HAVE_LIBCRYPTO
+  if (ServerInfo.rsa_private_key != NULL)
+  {
+    RSA_free(ServerInfo.rsa_private_key);
+    ServerInfo.rsa_private_key = NULL;
+  }
+  if (ServerInfo.rsa_private_key_file != NULL)
+  {
+    MyFree(ServerInfo.rsa_private_key_file);
+    ServerInfo.rsa_private_key_file = NULL;
+  }
+#endif
 
   /* clean out AdminInfo */
   MyFree(AdminInfo.name);
@@ -2149,7 +2154,7 @@ static void clear_out_old_conf(void)
 #ifdef HAVE_LIBCRYPTO
   MyFree(ConfigFileEntry.default_cipher_preference);
   ConfigFileEntry.default_cipher_preference = NULL;
-#endif
+#endif /* HAVE_LIBCRYPTO */
 
   /* OK, that should be everything... */
 }

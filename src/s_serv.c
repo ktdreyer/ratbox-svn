@@ -2223,12 +2223,18 @@ void cryptlink_init(struct Client *client_p,
   int enc_len;
 
   /* get key */
-  if (!ServerInfo.rsa_private_key ||
-      !RSA_check_key(ServerInfo.rsa_private_key) ||
-      !aconf->rsa_public_key)
+  if ( (!ServerInfo.rsa_private_key) ||
+       (!RSA_check_key(ServerInfo.rsa_private_key)) )
   {
     cryptlink_error(client_p,
-                    "%s[%s]: CRYPTLINK failed - invalid RSA key(s)");
+                    "%s[%s]: CRYPTLINK failed - invalid RSA private key");
+    return;
+  }
+
+  if (!aconf->rsa_public_key)
+  {
+    cryptlink_error(client_p,
+                    "%s[%s]: CRYPTLINK failed - invalid RSA public key");
     return;
   }
 

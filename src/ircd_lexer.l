@@ -199,8 +199,8 @@ rehash		{ return REHASH; }
 reject		{ return TREJECT; }
 remote		{ return REMOTE; }
 restricted      { return RESTRICTED; }
-rsa_private_key { return RSA_PRIVATE_KEY; }
-rsa_public_key	{ return RSA_PUBLIC_KEY; }
+rsa_private_key_file		{ return RSA_PRIVATE_KEY_FILE; }
+rsa_public_key_file		{ return RSA_PUBLIC_KEY_FILE; }
 send_password	{ return SEND_PASSWORD; }
 sendq		{ return SENDQ; }
 serverinfo	{ return SERVERINFO; }

@@ -80,11 +80,6 @@ int   class_number_per_ip_var;
 int   class_max_number_var;
 int   class_sendq_var;
 
-#ifdef HAVE_LIBCRYPTO
-int   rsa_keylen = 0;
-char* rsa_pub_ascii = NULL;
-#endif
-
 static char  *listener_address;
 
 char  *class_redirserv_var;
@@ -205,8 +200,8 @@ int   class_redirport_var;
 %token  REHASH
 %token  REMOTE
 %token  RESTRICTED
-%token  RSA_PRIVATE_KEY
-%token  RSA_PUBLIC_KEY
+%token  RSA_PRIVATE_KEY_FILE
+%token  RSA_PUBLIC_KEY_FILE
 %token  SECONDS MINUTES HOURS DAYS WEEKS MONTHS YEARS DECADES CENTURIES MILLENNIA
 %token  SENDQ
 %token  SEND_PASSWORD
@@ -472,11 +467,11 @@ serverinfo_item:        serverinfo_name | serverinfo_vhost |
                         serverinfo_hub | serverinfo_description |
                         serverinfo_network_name | serverinfo_network_desc |
                         serverinfo_max_clients | serverinfo_no_hack_ops |
-                        serverinfo_rsa_private_key | serverinfo_vhost6 |
+                        serverinfo_rsa_private_key_file | serverinfo_vhost6 |
                         serverinfo_max_buffer |
 			error
 
-serverinfo_rsa_private_key: RSA_PRIVATE_KEY '=' QSTRING ';'
+serverinfo_rsa_private_key_file: RSA_PRIVATE_KEY_FILE '=' QSTRING ';'
   {
 #ifdef HAVE_LIBCRYPTO
   BIO *file;
@@ -487,16 +482,17 @@ serverinfo_rsa_private_key: RSA_PRIVATE_KEY '=' QSTRING ';'
     ServerInfo.rsa_private_key = NULL;
   }
 
-  if (ServerInfo.rsa_private_key_filename)
+  if (ServerInfo.rsa_private_key_file)
   {
-    free(ServerInfo.rsa_private_key_filename);
+    MyFree(ServerInfo.rsa_private_key_file);
+    ServerInfo.rsa_private_key_file = NULL;
   }
 
-  ServerInfo.rsa_private_key_filename = strdup(yylval.string);
+  ServerInfo.rsa_private_key_file = strdup(yylval.string);
 
   file = BIO_new_file( yylval.string, "r" );
 
-  if (!file)
+  if (file == NULL)
   {
     sendto_realops_flags(FLAGS_ALL,
       "Ignoring config file entry rsa_private_key -- file open failed"
@@ -504,9 +500,9 @@ serverinfo_rsa_private_key: RSA_PRIVATE_KEY '=' QSTRING ';'
     break;
   }
 
-  PEM_read_bio_RSAPrivateKey( file, &ServerInfo.rsa_private_key,
-                              NULL, NULL );
-  if (!ServerInfo.rsa_private_key)
+  ServerInfo.rsa_private_key = (RSA *) PEM_read_bio_RSAPrivateKey(file,
+                                                            NULL, 0, NULL);
+  if (ServerInfo.rsa_private_key == NULL)
   {
     sendto_realops_flags(FLAGS_ALL,
       "Ignoring config file entry rsa_private_key -- couldn't extract key");
@@ -521,7 +517,7 @@ serverinfo_rsa_private_key: RSA_PRIVATE_KEY '=' QSTRING ';'
   }
 
   /* require 2048 bit (256 byte) key */
-  if (RSA_size( ServerInfo.rsa_private_key ) != 256)
+  if ( RSA_size(ServerInfo.rsa_private_key) != 256 )
   {
     sendto_realops_flags(FLAGS_ALL,
       "Ignoring config file entry rsa_private_key -- not 2048 bit");
@@ -530,9 +526,6 @@ serverinfo_rsa_private_key: RSA_PRIVATE_KEY '=' QSTRING ';'
 
   BIO_set_close(file, BIO_CLOSE);
   BIO_free(file);
-#else
-  sendto_realops_flags(FLAGS_ALL,
-      "Ignoring config file entry rsa_private_key -- no OpenSSL support");
 #endif
   }
 
@@ -1433,7 +1426,7 @@ connect_item:   connect_name | connect_host | connect_send_password |
  		connect_fakename | connect_lazylink | connect_hub_mask | 
 		connect_leaf_mask | connect_class | connect_auto | 
 		connect_encrypted | connect_compressed | connect_cryptlink |
-		connect_pubkey | connect_cipher_preference |
+		connect_rsa_public_key_file | connect_cipher_preference |
                 error
 
 connect_name:   NAME '=' QSTRING ';'
@@ -1511,28 +1504,10 @@ connect_encrypted:       ENCRYPTED '=' TYES ';'
     yy_aconf->flags &= ~CONF_FLAGS_ENCRYPTED;
   };
 
-connect_pubkey:
+connect_rsa_public_key_file: RSA_PUBLIC_KEY_FILE '=' QSTRING ';'
   {
 #ifdef HAVE_LIBCRYPTO
-    rsa_keylen = 0;
-    if (rsa_pub_ascii)
-      MyFree(rsa_pub_ascii);
-    rsa_pub_ascii = 0;
-#endif
-  }
-		RSA_PUBLIC_KEY '=' '{' connect_pubkey_lines '}' ';'
-  {
-#ifdef HAVE_LIBCRYPTO
-    BIO *mem;
-
-    mem = BIO_new_mem_buf( rsa_pub_ascii, rsa_keylen +5 );
-
-    if (!mem)
-    {
-      sendto_realops_flags(FLAGS_ALL,
-        "Ignoring config file entry rsa_public_key -- BIO open failed");
-      break;
-    }
+    BIO *file;
 
     if (yy_aconf->rsa_public_key)
     {
@@ -1540,45 +1515,37 @@ connect_pubkey:
       yy_aconf->rsa_public_key = NULL;
     }
 
-    yy_aconf->rsa_public_key = PEM_read_bio_RSA_PUBKEY( mem, NULL, NULL, NULL );
+    if (yy_aconf->rsa_public_key_file)
+    {
+      MyFree(yy_aconf->rsa_public_key_file);
+      yy_aconf->rsa_public_key_file = NULL;
+    }
 
-    if (!yy_aconf->rsa_public_key)
+    yy_aconf->rsa_public_key_file = strdup(yylval.string);
+
+    file = BIO_new_file(yylval.string, "r");
+
+    if (file == NULL)
+    {
+      sendto_realops_flags(FLAGS_ALL,
+        "Ignoring config file entry rsa_public_key -- BIO open failed"
+        " (%s)", yylval.string);
+      break;
+    }
+
+    yy_aconf->rsa_public_key = (RSA *) PEM_read_bio_RSA_PUBKEY(file,
+                                                    NULL, 0, NULL );
+
+    if (yy_aconf->rsa_public_key == NULL)
     {
       sendto_realops_flags(FLAGS_ALL,
         "Ignoring config file entry rsa_public_key -- couldn't extract key");
       break;
     }
 
-    BIO_set_close(mem, BIO_CLOSE);
-    BIO_free(mem);
-
-    rsa_keylen = 0;
-    MyFree(rsa_pub_ascii);
-    rsa_pub_ascii = 0;
+    BIO_set_close(file, BIO_CLOSE);
+    BIO_free(file);
 #endif /* HAVE_LIBCRYPTO */
-  };
-
-connect_pubkey_lines:	connect_pubkey_line connect_pubkey_lines |
-			connect_pubkey_line | error ;
-
-connect_pubkey_line:	QSTRING
-  {
-#ifdef HAVE_LIBCRYPTO
-    if (rsa_keylen == 0)
-    {
-      rsa_keylen += strlen(yylval.string) + 2; /* '\0' */
-      rsa_pub_ascii = MyMalloc(rsa_keylen);
-      strcpy(rsa_pub_ascii, yylval.string);
-      strcat(rsa_pub_ascii, "\n");                                    
-    }
-    else
-    {
-      rsa_keylen += strlen(yylval.string) + 1;
-      rsa_pub_ascii = MyRealloc(rsa_pub_ascii, rsa_keylen);
-      strcat(rsa_pub_ascii, yylval.string);
-      strcat(rsa_pub_ascii, "\n");
-    }
-#endif
   };
 
 connect_cryptlink:	CRYPTLINK '=' TYES ';'
