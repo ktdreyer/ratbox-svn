@@ -1,3 +1,24 @@
+leeh        2002/04/16 21:02:22 EDT	(20020417_1)
+
+  Modified files:
+    contrib              m_tburst.c 
+    include              channel.h ircd_defs.h 
+    src                  channel_mode.c 
+  Log:
+  - added a strcmp() to tburst, to take account of deltas
+  - bumped KEYLEN to 24 (23+1), resolving the problem with the strlcpy()
+    only copying 22 chars
+  - send chptr->mode.key out (the truncated key) instead of key
+    (what was sent in the mode)
+  
+  Revision  Changes    Path
+  1.6       +5 -1      ircd-hybrid-7/contrib/m_tburst.c
+  7.106     +1 -1      ircd-hybrid-7/include/channel.h
+  7.27      +3 -1      ircd-hybrid-7/include/ircd_defs.h
+  7.29      +2 -2      ircd-hybrid-7/src/channel_mode.c
+
+
+
 leeh        2002/04/16 20:05:13 EDT	(20020417_0)
 
   Modified files:
