@@ -1,3 +1,18 @@
+leeh        2004/03/10 16:56:44 EST	(20040310_3)
+
+  Modified files:
+    modules              m_info.c m_who.c 
+  Log:
+  - kline_reason shouldve been using OUTPUT_STRING_PTR, not OUTPUT_STRING in
+    /info, causing a core
+  - as pointed out by newnet, flattened links was giving away hopcount in who
+  
+  Revision  Changes    Path
+  1.107     +2 -2      ircd-ratbox/modules/m_info.c
+  1.107     +4 -2      ircd-ratbox/modules/m_who.c
+
+
+
 androsyn    2004/03/10 15:57:06 EST	(20040310_2)
 
   Modified files:
