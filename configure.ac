@@ -636,11 +636,33 @@ fi
 
 haveepoll=no
 AC_CHECK_FUNCS(epoll_ctl, [haveepoll=yes], )
-if test "x$haveepoll" = "xyes" ; then
-	AC_DEFINE(HAVE_EPOLL, 1,
-		[Define if your system supports the epoll system calls])
-	SELECT_TYPE="epoll"
+
+if test "x$ac_cv_header_sys_epoll_h" = "xyes"; then
+	if test "x$haveepoll" = "xyes" ; then
+                AC_MSG_CHECKING(for epoll support in kernel)
+                AC_TRY_RUN(
+#include <stdint.h>
+#include <sys/param.h>
+#include <sys/types.h>
+#include <sys/epoll.h>
+#include <sys/syscall.h>
+#include <unistd.h>     
+
+int
+main(int argc, char **argv)
+{
+        int epfd;
+
+        epfd = epoll_create(256);
+        exit (epfd == -1 ? 1 : 0);
+}, [AC_MSG_RESULT(yes)
+    AC_DEFINE(HAVE_EPOLL, 1,
+        [Define if your system supports the epoll system calls])
+    SELECT_TYPE="epoll"], 
+    AC_MSG_RESULT(no), AC_MSG_RESULT(no))
+	fi
 fi
+
 
 havedevpoll=no
 AC_MSG_CHECKING(for /dev/poll)
