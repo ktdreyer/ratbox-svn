@@ -1,3 +1,7 @@
+*** 20010103_13 by ejb
+- rewrote load_*_module to make it work.
+
+
 *** 20010103_12 by fl_
 - fixes for whois:
 - all "whois nick" replies look the same, same for "whois nick nick"
