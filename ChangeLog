@@ -1,3 +1,15 @@
+leeh        2003/09/03 12:50:31 EDT	(20030903_4)
+
+  Modified files:
+    src                  parse.c 
+  Log:
+  - dont test EmptyString() if min_para is 0.
+  
+  Revision  Changes    Path
+  7.171     +6 -5      ircd-ratbox/src/parse.c
+
+
+
 leeh        2003/09/03 12:34:22 EDT	(20030903_3)
 
   Modified files:
