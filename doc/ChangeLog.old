@@ -1,3 +1,11 @@
+*** 20010328_1 by db
+- Massive commit to remove blalloc.c code, first pass through
+  When we first did blalloc, systems did not use block allocators for
+  malloc, now they all do. blalloc.c/blalloc.h have now outlived their
+  usefulness. 
+
+
+
 *** 20010327_1 by androsyn
 Fixed stupid connect bug...the block heap doesn't memset() our
 blocks..grr...
