@@ -21,6 +21,12 @@ it is important you read this file before upgrading.
 - remote servers can now introduce nicks beginning with a digit
 - fix a core with invalid nicks
 - added SIDs to /map
+- support for remote commands (kline, unkline etc) over ENCAP
+- proper encap handlers in struct Message.  This breaks any modules designed
+  for 2.0b1 -- to fix add "mg_ignore," after the server handler.
+- fix various problems with connect blocks that are marked for removal being
+  used/shown
+- UIDs from a remote server are now validated
 
 -- ircd-ratbox-2.0b1
 No release notes, please see whats-new.txt

@@ -13,7 +13,8 @@ Config File
 - logging {}; is gone, replaced with more advanced log system - see
   example.conf log {}; for more info.
 - kline = yes; etc is no longer supported, please use 
-  flags = kline, gline; etc.
+  flags = kline, gline; etc.  As a side effect of this, an oper is not
+  given any default flags, including operwall.
 - support for a specific opers initial umodes on /oper, by umodes = ...;
   in operator {};
 - added stats_e_disabled = yes|no; to general {};, controlling whether stats
