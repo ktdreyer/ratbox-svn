@@ -1,3 +1,9 @@
+*** 20010130_3 by fl_
+- changed sendto_realops_flags_opers() -> sendto_wallops_flags()
+  it makes much more sense like that :)
+- removed an unneeded if() from sendto_wallops_flags()
+
+
 *** 20010130_2 by wcampbel
 Removed "OPERWALL - " from in front of the OPERWALL message...
 This may be exerting my opinion...but the two commands do the same damn 
