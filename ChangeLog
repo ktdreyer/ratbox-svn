@@ -1,3 +1,16 @@
+leeh        2002/11/30 16:42:46 UTC	(20021130_2)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  - helps if I commit to the right tree:
+    fixed a chcap usage problem.
+  
+  Revision  Changes    Path
+  7.338     +1 -1      ircd-ratbox/src/client.c
+
+
+
 androsyn    2002/11/30 13:38:58 UTC	(20021130_1)
 
   Modified files:
