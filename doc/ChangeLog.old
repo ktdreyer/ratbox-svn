@@ -1,3 +1,17 @@
+androsyn    2002/03/18 15:06:56 EST	(20020318_0)
+
+  Modified files:
+    src                  balloc.c 
+  Log:
+  Add an assert() for double frees.  This doesn't really help situations where
+  the whole heap has been corrupted.  Perhaps I should add something silly
+  like a magic number to identify blocks or something?
+  
+  Revision  Changes    Path
+  7.26      +3 -1      ircd-hybrid-7/src/balloc.c
+
+
+
 db          2002/03/17 13:10:35 EST	(20020317_0)
 
   Modified files:
