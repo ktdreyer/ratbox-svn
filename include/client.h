@@ -455,8 +455,8 @@ struct LocalUser
 #define ClearEob(x)		((x)->flags &= ~FLAGS_EOB)
 #define SetEob(x)		((x)->flags |= FLAGS_EOB)
 #define HasSentEob(x)		((x)->flags & FLAGS_EOB)
-#define IsDead(x)           	((x)->flags &  FLAGS_DEADLOCAL)
-#define SetDead(x)          	((x)->flags |= FLAGS_DEADLOCAL)
+#define IsDeadLocal(x)           	((x)->flags &  FLAGS_DEADLOCAL)
+#define SetDeadLocal(x)          	((x)->flags |= FLAGS_DEADLOCAL)
 
 
 /* oper flags */
