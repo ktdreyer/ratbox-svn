@@ -113,6 +113,7 @@ static void ms_sjoin(struct Client *client_p,
   int            doesop = 0;
   int            fl;
   int            people = 0;
+  int		 num_prefix=0;
   int            vc_ts = 0;
   int            isnew;
   register       char *s, *hops, *nhops;
@@ -390,6 +391,7 @@ static void ms_sjoin(struct Client *client_p,
   while (s)
     {
       fl = 0;
+      num_prefix = 0;
 
       for (i = 0; i < 2; i++)
 	{
@@ -400,6 +402,7 @@ static void ms_sjoin(struct Client *client_p,
 	      {
 	        *hops++ = *s;
 		*nhops++ = *s;
+		num_prefix++;
               }
 	      
 	      s++;
@@ -411,6 +414,7 @@ static void ms_sjoin(struct Client *client_p,
 	      {
 	        *hops++ = *s;
 		*nhops++ = *s;
+		num_prefix++;
 	      }
 	      
 	      s++;
@@ -422,12 +426,32 @@ static void ms_sjoin(struct Client *client_p,
 	      {
 	        *hops++ = *s;
 		*nhops++ = '@';
+		num_prefix++;
 	      }
 	      
 	      s++;
 	    }
 	}
 
+      /* if the client doesnt exist, backtrack over the prefix (@%+) that we
+       * just added and skip to the next nick
+       */
+      if(!(target_p = find_client(s, NULL)))
+      {
+        sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name,
+	           source_p->name, s);
+
+        hops -= num_prefix;
+	*hops = '\0';
+
+	nhops -= num_prefix;
+	*nhops = '\0';
+
+        goto nextnick;
+      }
+
+      target_p = NULL;
+      
       /* copy the nick to the two buffers */
       hops += ircsprintf(hops, "%s ", s);
       nhops += ircsprintf(nhops, "%s ", s);
@@ -559,18 +583,6 @@ nextnick:
       {
         *p++ = '\0';
       }
-	
-      /* nah, the while will exit if theres nothing left.. and its
-       * possible we still need to parse one final nick which doesnthave a
-       * space at the end.. therefore p will become null.. so s will too
-       * and the loop will exit
-       */
-#if 0	
-      else
-	{
-	  s = NULL;
-	}
-#endif	
     }
   
   *mbuf = '\0';
@@ -583,6 +595,9 @@ nextnick:
                            modebuf,
                            para[0], para[1], para[2], para[3]);
     }
+
+  if(!people)
+    return;
 
   /* relay the SJOIN to other servers */
   for(m = serv_list.head; m; m = m->next)
