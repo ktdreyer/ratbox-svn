@@ -50,13 +50,31 @@
 #include "modules.h"
 #include "s_log.h"
 
-/* internal functions */
+static int ms_gline(struct Client *, struct Client *, int, const char **);
+static int mo_gline(struct Client *, struct Client *, int, const char **);
+
+static int mo_ungline(struct Client *, struct Client *, int, const char **);
+
+struct Message ungline_msgtab = {
+	"UNGLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
+	{m_unregistered, m_not_oper, m_error, mo_ungline}
+};
+
+struct Message gline_msgtab = {
+	"GLINE", 0, 0, 3, 0, MFLG_SLOW, 0,
+	{m_unregistered, m_not_oper, ms_gline, mo_gline}
+};
+
+mapi_clist_av1 gline_clist[] = { &gline_msgtab, &ungline_msgtab, NULL };
+DECLARE_MODULE_AV1(gline, NULL, NULL, gline_clist, NULL, NULL, NULL, "$Revision$");
+
 static void set_local_gline(const char *oper_nick, const char *oper_user,
 			    const char *oper_host, const char *oper_server,
 			    const char *user, const char *host, const char *reason);
 
 static void log_gline_request(const char *, const char *, const char *,
-			      const char *oper_server, const char *, const char *, const char *);
+			      const char *, const char *, const char *, 
+			      const char *);
 
 static void log_gline(struct Client *, struct gline_pending *,
 		      const char *, const char *, const char *,
@@ -70,19 +88,10 @@ static int majority_gline(struct Client *source_p,
 
 static int check_wild_gline(const char *, const char *);
 static int invalid_gline(struct Client *, const char *, const char *, char *);
-
 static char *small_file_date(void);
 
-static int ms_gline(struct Client *, struct Client *, int, const char **);
-static int mo_gline(struct Client *, struct Client *, int, const char **);
+static int remove_temp_gline(const char *, const char *);
 
-struct Message gline_msgtab = {
-	"GLINE", 0, 0, 3, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_not_oper, ms_gline, mo_gline}
-};
-
-mapi_clist_av1 gline_clist[] = { &gline_msgtab, NULL };
-DECLARE_MODULE_AV1(gline, NULL, NULL, gline_clist, NULL, NULL, NULL, "$Revision$");
 
 /* mo_gline()
  *
@@ -295,6 +304,71 @@ ms_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	majority_gline(source_p,
 			oper_nick,
 			oper_user, oper_host, oper_server, user, host, reason);
+	return 0;
+}
+
+/* mo_ungline()
+ *
+ *      parv[0] = sender nick
+ *      parv[1] = gline to remove
+ */
+static int
+mo_ungline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	const char *user;
+	char *h = LOCAL_COPY(parv[1]);
+	char *host;
+	char splat[] = "*";
+
+	if(!ConfigFileEntry.glines)
+	{
+		sendto_one(source_p, ":%s NOTICE %s :UNGLINE disabled", me.name, parv[0]);
+		return 0;
+	}
+
+	if(!IsOperUnkline(source_p) || !IsOperGline(source_p))
+	{
+		sendto_one(source_p, ":%s NOTICE %s :You need unkline = yes;", me.name, parv[0]);
+		return 0;
+	}
+
+	if((host = strchr(h, '@')) || *h == '*')
+	{
+		/* Explicit user@host mask given */
+
+		if(host)	/* Found user@host */
+		{
+			user = parv[1];	/* here is user part */
+			*(host++) = '\0';	/* and now here is host */
+		}
+		else
+		{
+			user = splat;	/* no @ found, assume its *@somehost */
+			host = h;
+		}
+	}
+	else
+	{
+		sendto_one(source_p, ":%s NOTICE %s :Invalid parameters", me.name, parv[0]);
+		return 0;
+	}
+
+	if(remove_temp_gline(user, host))
+	{
+		sendto_one(source_p, ":%s NOTICE %s :Un-glined [%s@%s]",
+			   me.name, parv[0], user, host);
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+				     "%s has removed the G-Line for: [%s@%s]",
+				     get_oper_name(source_p), user, host);
+		ilog(L_NOTICE, "%s removed G-Line for [%s@%s]",
+		     get_oper_name(source_p), user, host);
+	}
+	else
+	{
+		sendto_one(source_p, ":%s NOTICE %s :No G-Line for %s@%s",
+			   me.name, parv[0], user, host);
+	}
+
 	return 0;
 }
 
@@ -689,4 +763,41 @@ small_file_date(void)
 	tmptr = localtime(&lclock);
 	strftime(tbuffer, MAX_DATE_STRING, "%Y%m%d", tmptr);
 	return tbuffer;
+}
+
+/* remove_temp_gline()
+ *
+ * inputs       - username, hostname to ungline
+ * outputs      -
+ * side effects - tries to ungline anything that matches
+ */
+static int
+remove_temp_gline(const char *user, const char *host)
+{
+	struct ConfItem *aconf;
+	dlink_node *ptr;
+	struct sockaddr_storage addr, caddr;
+	int bits, cbits;
+
+	parse_netmask(host, &addr, &bits);
+
+	DLINK_FOREACH(ptr, glines.head)
+	{
+		aconf = (struct ConfItem *) ptr->data;
+
+		parse_netmask(aconf->host, &caddr, &cbits);
+
+		if(user && irccmp(user, aconf->user))
+			continue;
+
+		if(!irccmp(aconf->host, host) && bits == cbits &&
+		   comp_with_mask_sock(&addr, &caddr, bits))
+		{
+			dlinkDestroy(ptr, &glines);
+			delete_one_address_conf(aconf->host, aconf);
+			return YES;
+		}
+	}
+
+	return NO;
 }

@@ -1,6 +1,6 @@
 /*
  *  ircd-ratbox: A slightly useful ircd.
- *  m_kline.c: Bans a user.
+ *  m_kline.c: Bans/unbans a user.
  *
  *  Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center
  *  Copyright (C) 1996-2002 Hybrid Development Team
@@ -52,52 +52,54 @@
 
 static int mo_kline(struct Client *, struct Client *, int, const char **);
 static int ms_kline(struct Client *, struct Client *, int, const char **);
+static int mo_unkline(struct Client *, struct Client *, int, const char **);
+static int ms_unkline(struct Client *, struct Client *, int, const char **);
 
 struct Message kline_msgtab = {
 	"KLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
 	{m_unregistered, m_not_oper, ms_kline, mo_kline}
 };
 
-mapi_clist_av1 kline_clist[] = { &kline_msgtab, NULL };
+struct Message unkline_msgtab = {
+	"UNKLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
+	{m_unregistered, m_not_oper, ms_unkline, mo_unkline}
+};
+
+mapi_clist_av1 kline_clist[] = { &kline_msgtab, &unkline_msgtab, NULL };
 DECLARE_MODULE_AV1(kline, NULL, NULL, kline_clist, NULL, NULL, NULL, "$Revision$");
 
 /* Local function prototypes */
-
 static time_t valid_tkline(struct Client *source_p, const char *string);
-static char *format_kline(char *);
-static int find_user_host(struct Client *source_p, const char *user_host_or_nick, char *user, char *host);
-
+static int find_user_host(struct Client *source_p, const char *userhost, char *user, char *host);
 static int valid_comment(char *comment);
 static int valid_user_host(const char *user, const char *host);
 static int valid_wild_card(const char *user, const char *host);
-
-static int already_placed_kline(struct Client *, const char *, const char *, int);
 
 static void apply_kline(struct Client *source_p, struct ConfItem *aconf,
 			const char *reason, const char *oper_reason, const char *current_date);
 static void apply_tkline(struct Client *source_p, struct ConfItem *aconf,
 			 const char *, const char *, const char *, int);
+static int already_placed_kline(struct Client *, const char *, const char *, int);
+
+static void remove_permkline_match(struct Client *, const char *, const char *, int);
+static int flush_write(struct Client *, FBFILE *, const char *, const char *);
+static int remove_temp_kline(const char *, const char *);
 
 char buffer[IRCD_BUFSIZE];
 char user[USERLEN + 2];
 char host[HOSTLEN + 2];
 
-#define MAX_EXT_REASON 100
-
-
-/*
- * mo_kline
+/* mo_kline()
  *
- * inputs	- pointer to server
- *		- pointer to client
- *		- parameter count
- *		- parameter list
- * output	-
- * side effects - k line is added
- *
+ *   parv[1] - temp time or user@host
+ *   parv[2] - user@host, "ON", or reason
+ *   parv[3] - "ON", reason, or server to target
+ *   parv[4] - server to target, or reason
+ *   parv[5] - reason
  */
 static int
-mo_kline(struct Client *client_p, struct Client *source_p, int parc, const char **parv)
+mo_kline(struct Client *client_p, struct Client *source_p,
+	 int parc, const char **parv)
 {
 	char def[] = "No Reason";
 	char *reason = def;
@@ -161,8 +163,8 @@ mo_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if(!valid_user_host(user, host))
 	{
-		sendto_one(source_p,
-			   ":%s NOTICE %s :Invalid character in comment", me.name, source_p->name);
+		sendto_one(source_p, ":%s NOTICE %s :Invalid K-Line",
+			   me.name, source_p->name);
 		return 0;
 	}
 
@@ -249,10 +251,13 @@ mo_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	return 0;
 }
 
-/*
- * ms_kline()
+/* ms_kline()
  *
- *
+ *   parv[1] - server targeted at
+ *   parv[2] - tkline time (0 if perm)
+ *   parv[3] - user
+ *   parv[4] - host
+ *   parv[5] - reason
  */
 static int
 ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
@@ -269,8 +274,6 @@ ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(parc != 6)
 		return 0;
 
-	/* parv[0]  parv[1]        parv[2]      parv[3]  parv[4]  parv[5] */
-	/* oper     target_server  tkline_time  user     host     reason */
 	sendto_match_servs(source_p, parv[1], CAP_KLN,
 			   "KLINE %s %s %s %s :%s", parv[1], parv[2], parv[3], parv[4], parv[5]);
 
@@ -388,10 +391,155 @@ ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	return 0;
 }
 
-/*
- * apply_kline
+/* mo_unkline()
  *
- * inputs	-
+ *   parv[1] - kline to remove
+ *   parv[2] - optional "ON"
+ *   parv[3] - optional target server
+ */
+static int
+mo_unkline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	const char *user;
+	char *host;
+	char splat[] = "*";
+	char *h = LOCAL_COPY(parv[1]);
+
+	if(!IsOperUnkline(source_p))
+	{
+		sendto_one(source_p, ":%s NOTICE %s :You need unkline = yes;", me.name, parv[0]);
+		return 0;
+	}
+
+	if(parc < 2 || EmptyString(parv[1]))
+	{
+		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+			   me.name, source_p->name, "UNKLINE");
+		return 0;
+	}
+
+	if((host = strchr(h, '@')) || *h == '*')
+	{
+		/* Explicit user@host mask given */
+
+		if(host)	/* Found user@host */
+		{
+			user = parv[1];	/* here is user part */
+			*(host++) = '\0';	/* and now here is host */
+		}
+		else
+		{
+			user = splat;	/* no @ found, assume its *@somehost */
+			host = h;
+		}
+	}
+	else
+	{
+		sendto_one(source_p, ":%s NOTICE %s :Invalid parameters", me.name, source_p->name);
+		return 0;
+	}
+
+	/* possible remote kline.. */
+	if((parc > 3) && (irccmp(parv[2], "ON") == 0))
+	{
+		sendto_match_servs(source_p, parv[3], CAP_UNKLN,
+				   "UNKLINE %s %s %s", parv[3], user, host);
+
+		if(match(parv[3], me.name) == 0)
+			return 0;
+	}
+	else if(dlink_list_length(&cluster_list) > 0)
+	{
+		cluster_unkline(source_p, user, host);
+	}
+
+	if(remove_temp_kline(user, host))
+	{
+		sendto_one(source_p,
+			   ":%s NOTICE %s :Un-klined [%s@%s] from temporary k-lines",
+			   me.name, parv[0], user, host);
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+				     "%s has removed the temporary K-Line for: [%s@%s]",
+				     get_oper_name(source_p), user, host);
+		ilog(L_NOTICE, "%s removed temporary K-Line for [%s@%s]", parv[0], user, host);
+		return 0;
+	}
+
+	remove_permkline_match(source_p, host, user, 0);
+
+	return 0;
+}
+
+/* ms_unkline()
+ *
+ *   parv[1] - target server
+ *   parv[2] - user to unkline
+ *   parv[3] - host to unkline
+ */
+static int
+ms_unkline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	const char *kuser;
+	const char *khost;
+
+	if(parc != 4)
+		return 0;
+
+	/* parv[0]  parv[1]        parv[2]  parv[3]
+	 * oper     target server  user     host    */
+	sendto_match_servs(source_p, parv[1], CAP_UNKLN,
+			   "UNKLINE %s %s %s", parv[1], parv[2], parv[3]);
+
+	kuser = parv[2];
+	khost = parv[3];
+
+	if(!match(parv[1], me.name))
+		return 0;
+
+	if(!IsPerson(source_p))
+		return 0;
+
+	if(find_cluster(source_p->user->server, CLUSTER_UNKLINE))
+	{
+		if(remove_temp_kline(kuser, khost))
+		{
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					     "%s has removed the temporary K-Line for: [%s@%s]",
+					     get_oper_name(source_p), kuser, khost);
+			ilog(L_NOTICE, "%s removed temporary K-Line for [%s@%s]",
+			     source_p->name, kuser, khost);
+			return 0;
+		}
+
+		remove_permkline_match(source_p, khost, kuser, 1);
+	}
+	else if(find_shared(source_p->username, source_p->host,
+			    source_p->user->server, OPER_UNKLINE))
+	{
+		if(remove_temp_kline(kuser, khost))
+		{
+			sendto_one(source_p,
+				   ":%s NOTICE %s :Un-klined [%s@%s] from temporary k-lines",
+				   me.name, parv[0], kuser, khost);
+
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					     "%s has removed the temporary K-Line for: [%s@%s]",
+					     get_oper_name(source_p), kuser, khost);
+
+			ilog(L_NOTICE, "%s removed temporary K-Line for [%s@%s]",
+			     source_p->name, kuser, khost);
+			return 0;
+		}
+
+		remove_permkline_match(source_p, khost, kuser, 0);
+	}
+
+	return 0;
+}
+
+/* apply_kline()
+ *
+ * inputs	- 
  * output	- NONE
  * side effects	- kline as given, is added to the hashtable
  *		  and conf file
@@ -405,8 +553,7 @@ apply_kline(struct Client *source_p, struct ConfItem *aconf,
 		       reason, oper_reason, current_date, 0);
 }
 
-/*
- * apply_tkline
+/* apply_tkline()
  *
  * inputs	-
  * output	- NONE
@@ -444,22 +591,18 @@ apply_tkline(struct Client *source_p, struct ConfItem *aconf,
 		   me.name, source_p->name, tkline_time / 60, aconf->user, aconf->host);
 }
 
-/*
- * valid_tkline()
+/* valid_tkline()
  * 
- * inputs       - pointer to client requesting kline
- *              - argument count
- *              - pointer to ascii string in
- * output       - -1 not enough parameters
- *              - 0 if not an integer number, else the number
- * side effects - none
+ * inputs	- client requesting kline, kline time
+ * outputs	- 0 if not an integer number, else the number
+ * side effects -
  */
 static time_t
 valid_tkline(struct Client *source_p, const char *p)
 {
 	time_t result = 0;
 
-	while (*p)
+	while(*p)
 	{
 		if(IsDigit(*p))
 		{
@@ -470,220 +613,67 @@ valid_tkline(struct Client *source_p, const char *p)
 		else
 			return (0);
 	}
-	/* in the degenerate case where oper does a /quote kline 0 user@host :reason 
-	 * i.e. they specifically use 0, I am going to return 1 instead
-	 * as a return value of non-zero is used to flag it as a temporary kline
-	 */
 
+	/* if they /quote kline 0 user@host :reason, set it to one minute */
 	if(result == 0)
 		result = 1;
 
-	if(result > (24 * 60 * 7 * 4))
-		result = (24 * 60 * 7 * 4);	/* Max it at 4 weeks */
+	/* max at 4 weeks */
+	if(result > (60 * 24 * 7 * 4))
+		result = (24 * 60 * 7 * 4);
 
-	result = (time_t) result *(time_t) 60;	/* turn it into seconds */
-
-	return (result);
-}
-
-/*
- * format_kline()
- *
- * inputs       - pointer to a hostname
- * output       - pointer to a static of the hostname masked
- *                for use in a kline.
- * side effects - NONE
- *
- */
-static char *
-format_kline(char *hostname)
-{
-	static char result[HOSTLEN + 1];	/* result to return */
-	char temphost[HOSTLEN + 1];	/* work place */
-	char *ipp;		/* used to find if host is ip # only */
-	char *host_mask;	/* used to find host mask portion to '*' */
-	char *zap_point = NULL;	/* used to zap last nnn portion of an ip # */
-	char *tld;		/* Top Level Domain */
-	int is_ip_number;	/* flag if its an ip # */
-	int number_of_dots;	/* count number of dots for both ip# and
-				   domain klines */
-	if(!hostname)
-		return NULL;	/* EEK! */
-
-	/* If a '@' is found in the hostname, this is bogus
-	 * and must have been introduced by server that doesn't
-	 * check for bogus domains (dns spoof) very well. *sigh* just return it...
-	 * I could also legitimately return NULL as above.
-	 */
-
-	if(strchr(hostname, '@'))
-	{
-		strlcpy(result, hostname, sizeof(result));
-		return (result);
-	}
-
-	strlcpy(temphost, hostname, sizeof(temphost));
-
-	is_ip_number = YES;	/* assume its an IP# */
-	ipp = temphost;
-	number_of_dots = 0;
-
-	while (*ipp)
-	{
-		if(*ipp == '.')
-		{
-			number_of_dots++;
-
-			if(number_of_dots == 3)
-				zap_point = ipp;
-			ipp++;
-		}
-		else if(!IsDigit(*ipp))
-		{
-			is_ip_number = NO;
-			break;
-		}
-		ipp++;
-	}
-
-	if(is_ip_number && (number_of_dots == 3))
-	{
-		zap_point++;
-		*zap_point++ = '*';	/* turn 111.222.333.444 into */
-		*zap_point = '\0';	/*      111.222.333.*        */
-		strlcpy(result, temphost, sizeof(result));
-		return (result);
-	}
-	else
-	{
-		tld = strrchr(temphost, '.');
-		if(tld)
-		{
-			number_of_dots = 2;
-			if(tld[3])	/* its at least a 3 letter tld
-					   i.e. ".com" tld[3] = 'm' not 
-					   '\0' */
-				/* 4 letter tld's are coming */
-				number_of_dots = 1;
-
-			if(tld != temphost)	/* in these days of dns spoofers ... */
-				host_mask = tld - 1;	/* Look for host portion to '*' */
-			else
-				host_mask = tld;	/* degenerate case hostname is
-							   '.com' etc. */
-
-			while (host_mask != temphost)
-			{
-				if(*host_mask == '.')
-					number_of_dots--;
-				if(number_of_dots == 0)
-				{
-					strlcpy(result, "*", sizeof(result));
-					strlcat(result, host_mask, sizeof(result));
-					return (result);
-				}
-				host_mask--;
-			}
-			strlcpy(result, "*", sizeof(result));
-			strlcat(result, temphost, sizeof(result));
-		}
-		else		/* no tld found oops. just return it as is */
-		{
-			strlcpy(result, temphost, sizeof(result));
-			return (result);
-		}
-	}
+	/* turn into seconds.. */
+	result *= 60;
 
 	return (result);
 }
 
-/*
- * find_user_host
- * inputs	- pointer to client placing kline
- *              - pointer to user_host_or_nick
- *              - pointer to user buffer
- *              - pointer to host buffer
+/* find_user_host()
+ * 
+ * inputs	- client placing kline, user@host, user buffer, host buffer
  * output	- 0 if not ok to kline, 1 to kline i.e. if valid user host
  * side effects -
  */
 static int
-find_user_host(struct Client *source_p, const char *user_host_or_nick, char *luser, char *lhost)
+find_user_host(struct Client *source_p, const char *userhost, char *luser, char *lhost)
 {
 	struct Client *target_p;
 	char *hostp;
 
-	if((hostp = strchr(user_host_or_nick, '@')) || *user_host_or_nick == '*')
+	hostp = strchr(userhost, '@');
+	
+	if(hostp != NULL)	/* I'm a little user@host */
 	{
-		/* Explicit user@host mask given */
-
-		if(hostp != NULL)	/* I'm a little user@host */
-		{
-			*(hostp++) = '\0';	/* short and squat */
-			if(*user_host_or_nick)
-				strlcpy(luser, user_host_or_nick, USERLEN + 1);	/* here is my user */
-			else
-				strcpy(luser, "*");
-			if(*hostp)
-				strlcpy(lhost, hostp, HOSTLEN + 1);	/* here is my host */
-			else
-				strcpy(lhost, "*");
-		}
+		*(hostp++) = '\0';	/* short and squat */
+		if(*userhost)
+			strlcpy(luser, userhost, USERLEN + 1);	/* here is my user */
 		else
-		{
-			luser[0] = '*';	/* no @ found, assume its *@somehost */
-			luser[1] = '\0';
-			strlcpy(lhost, user_host_or_nick, HOSTLEN + 1);
+			strcpy(luser, "*");
+		if(*hostp)
+			strlcpy(lhost, hostp, HOSTLEN + 1);	/* here is my host */
+		else
+			strcpy(lhost, "*");
 		}
-
-		return 1;
-	}
 	else
 	{
-		/* Try to find user@host mask from nick */
-
-		if(!(target_p = find_chasing(source_p, user_host_or_nick, NULL)))
-			return 0;
-
-		if(!target_p->user)
-			return 0;
-
-		if(IsServer(target_p))
-		{
-			sendto_one(source_p,
-				   ":%s NOTICE %s :Can't KLINE a server, use @'s where appropriate",
-				   me.name, source_p->name);
-			return 0;
-		}
-
-		if(IsExemptKline(target_p))
-		{
-			if(!IsServer(source_p))
-				sendto_one(source_p,
-					   ":%s NOTICE %s :%s is E-lined", me.name, source_p->name,
-					   target_p->name);
-			return 0;
-		}
-
-		/* turn the "user" bit into "*user", blow away '~'
-		 * if found in original user name (non-idented)
+		/* no '@', no '.', so its not a user@host or host, therefore
+		 * its a nick, which support was removed for.
 		 */
+		if(strchr(userhost, '.') == NULL)
+			return 0;
 
-		strlcpy(luser, target_p->username, USERLEN + 1);
-		if(*target_p->username == '~')
-			luser[0] = '*';
-
-		strlcpy(lhost, format_kline(target_p->host), HOSTLEN + 1);
+		luser[0] = '*';	/* no @ found, assume its *@somehost */
+		luser[1] = '\0';
+		strlcpy(lhost, userhost, HOSTLEN + 1);
 	}
 
 	return 1;
 }
 
-/*
- * valid_user_host
- * inputs       - pointer to source
- *              - pointer to user buffer
- *              - pointer to host buffer
- * output	- 1 if not valid user or host, 0 if valid
+/* valid_user_host()
+ *
+ * inputs       - user buffer, host buffer
+ * output	- 0 if invalid, 1 if valid
  * side effects -
  */
 static int
@@ -696,12 +686,10 @@ valid_user_host(const char *luser, const char *lhost)
 	return 1;
 }
 
-/*
- * valid_wild_card
- * input        - pointer to client
- *              - pointer to user to check
- *              - pointer to host to check
- * output       - 0 if not valid, 1 if valid
+/* valid_wild_card()
+ * 
+ * input        - user buffer, host buffer
+ * output       - 0 if invalid, 1 if valid
  * side effects -
  */
 static int
@@ -709,21 +697,9 @@ valid_wild_card(const char *luser, const char *lhost)
 {
 	const char *p;
 	char tmpch;
-	int nonwild;
+	int nonwild = 0;
 
-	/*
-	 * Now we must check the user and host to make sure there
-	 * are at least NONWILDCHARS non-wildcard characters in
-	 * them, otherwise assume they are attempting to kline
-	 * *@* or some variant of that. This code will also catch
-	 * people attempting to kline *@*.tld, as long as NONWILDCHARS
-	 * is greater than 3. In that case, there are only 3 non-wild
-	 * characters (tld), so if NONWILDCHARS is 4, the kline will
-	 * be disallowed.
-	 * -wnder
-	 */
-
-	nonwild = 0;
+	/* check there are enough non wildcard chars */
 	p = luser;
 	while ((tmpch = *p++))
 	{
@@ -738,19 +714,13 @@ valid_wild_card(const char *luser, const char *lhost)
 		}
 	}
 
-	if(nonwild < ConfigFileEntry.min_nonwildcard)
+	/* try host, as user didnt contain enough */
+	p = lhost;
+	while ((tmpch = *p++))
 	{
-		/*
-		 * The user portion did not contain enough non-wild
-		 * characters, try the host.
-		 */
-		p = lhost;
-		while ((tmpch = *p++))
-		{
-			if(!IsKWildChar(tmpch))
-				if(++nonwild >= ConfigFileEntry.min_nonwildcard)
-					break;
-		}
+		if(!IsKWildChar(tmpch))
+			if(++nonwild >= ConfigFileEntry.min_nonwildcard)
+				break;
 	}
 
 	if(nonwild < ConfigFileEntry.min_nonwildcard)
@@ -829,4 +799,217 @@ already_placed_kline(struct Client *source_p, const char *luser, const char *lho
 	}
 
 	return 0;
+}
+
+/* remove_permkline_match()
+ *
+ * hunts for a permanent kline, and removes it.
+ */
+static void
+remove_permkline_match(struct Client *source_p, const char *host, const char *user, int cluster)
+{
+	FBFILE *in, *out;
+	int pairme = 0;
+	int error_on_write = NO;
+	char buf[BUFSIZE];
+	char buff[BUFSIZE];
+	char temppath[BUFSIZE];
+	const char *filename;
+	mode_t oldumask;
+	char *p;
+
+	snprintf(temppath, sizeof(temppath),
+		 "%s.tmp", ConfigFileEntry.klinefile);
+
+	filename = get_conf_name(KLINE_TYPE);
+
+	if((in = fbopen(filename, "r")) == 0)
+	{
+		sendto_one(source_p, ":%s NOTICE %s :Cannot open %s", me.name, source_p->name,
+			   filename);
+		return;
+	}
+
+	oldumask = umask(0);
+	if((out = fbopen(temppath, "w")) == 0)
+	{
+		sendto_one(source_p, ":%s NOTICE %s :Cannot open %s",
+			   me.name, source_p->name, temppath);
+		fbclose(in);
+		umask(oldumask);
+		return;
+	}
+	umask(oldumask);
+
+	while (fbgets(buf, sizeof(buf), in))
+	{
+		char *found_host, *found_user;
+
+		strlcpy(buff, buf, sizeof(buff));
+
+		if((p = strchr(buff, '\n')) != NULL)
+			*p = '\0';
+
+		if((*buff == '\0') || (*buff == '#'))
+		{
+			if(!error_on_write)
+				flush_write(source_p, out, buf, temppath);
+			continue;
+		}
+
+		if((found_user = getfield(buff)) == NULL)
+		{
+			if(!error_on_write)
+				flush_write(source_p, out, buf, temppath);
+			continue;
+		}
+
+		if((found_host = getfield(NULL)) == NULL)
+		{
+			if(!error_on_write)
+				flush_write(source_p, out, buf, temppath);
+			continue;
+		}
+
+		if((irccmp(host, found_host) == 0) && (irccmp(user, found_user) == 0))
+		{
+			pairme++;
+		}
+		else
+		{
+			if(!error_on_write)
+				flush_write(source_p, out, buf, temppath);
+		}
+	}
+	fbclose(in);
+	fbclose(out);
+
+/* The result of the rename should be checked too... oh well */
+/* If there was an error on a write above, then its been reported
+ * and I am not going to trash the original kline /conf file
+ */
+	if(!error_on_write)
+	{
+		(void) rename(temppath, filename);
+		rehash(0);
+	}
+	else
+	{
+		sendto_one(source_p,
+			   ":%s NOTICE %s :Couldn't write temp kline file, aborted",
+			   me.name, source_p->name);
+		return;
+	}
+
+	if(!pairme)
+	{
+		if(!cluster)
+			sendto_one(source_p, ":%s NOTICE %s :No K-Line for %s@%s",
+				   me.name, source_p->name, user, host);
+		return;
+	}
+
+	if(!cluster)
+	{
+		sendto_one(source_p, ":%s NOTICE %s :K-Line for [%s@%s] is removed",
+			   me.name, source_p->name, user, host);
+	}
+
+	sendto_realops_flags(UMODE_ALL, L_ALL,
+			     "%s has removed the K-Line for: [%s@%s]",
+			     get_oper_name(source_p), user, host);
+
+	ilog(L_NOTICE, "%s removed K-Line for [%s@%s]", source_p->name, user, host);
+	return;
+}
+
+
+
+/*
+ * flush_write()
+ *
+ * inputs       - pointer to client structure of oper requesting unkline
+ *              - out is the file descriptor
+ *              - buf is the buffer to write
+ *              - ntowrite is the expected number of character to be written
+ *              - temppath is the temporary file name to be written
+ * output       - YES for error on write
+ *              - NO for success
+ * side effects - if successful, the buf is written to output file
+ *                if a write failure happesn, and the file pointed to
+ *                by temppath, if its non NULL, is removed.
+ *
+ * The idea here is, to be as robust as possible when writing to the 
+ * kline file.
+ *
+ * -Dianora
+ */
+
+static int
+flush_write(struct Client *source_p, FBFILE * out, const char *buf, const char *temppath)
+{
+	int error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
+
+	if(error_on_write)
+	{
+		sendto_one(source_p, ":%s NOTICE %s :Unable to write to %s",
+			   me.name, source_p->name, temppath);
+		fbclose(out);
+		if(temppath != NULL)
+			(void) unlink(temppath);
+	}
+	return (error_on_write);
+}
+
+static dlink_list *tkline_list[] = {
+	&tkline_hour,
+	&tkline_day,
+	&tkline_min,
+	&tkline_week,
+	NULL
+};
+
+/* remove_temp_kline()
+ *
+ * inputs       - username, hostname to unkline
+ * outputs      -
+ * side effects - tries to unkline anything that matches
+ */
+static int
+remove_temp_kline(const char *user, const char *host)
+{
+	dlink_list *tklist;
+	struct ConfItem *aconf;
+	dlink_node *ptr;
+	struct sockaddr_storage addr, caddr;
+	int bits, cbits;
+	int i;
+
+	parse_netmask(host, &addr, &bits);
+
+	for (i = 0; tkline_list[i] != NULL; i++)
+	{
+		tklist = tkline_list[i];
+
+		DLINK_FOREACH(ptr, tklist->head)
+		{
+			aconf = (struct ConfItem *) ptr->data;
+
+			parse_netmask(aconf->host, &caddr, &cbits);
+
+			if(user && irccmp(user, aconf->user))
+				continue;
+
+			if(!irccmp(aconf->host, host) || (bits == cbits
+							  && comp_with_mask_sock(&addr,
+									    &caddr, bits)))
+			{
+				dlinkDestroy(ptr, tklist);
+				delete_one_address_conf(aconf->host, aconf);
+				return YES;
+			}
+		}
+	}
+
+	return NO;
 }
