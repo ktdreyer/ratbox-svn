@@ -1,3 +1,15 @@
+a1kmm       2001/12/27 20:21:49 EST	(20011228_1)
+
+  Modified files:
+    modules              m_llnick.c 
+  Log:
+  - Also don't allow llnick on a non-local nick.
+  
+  Revision  Changes    Path
+  1.17      +5 -1      ircd-hybrid-7/modules/m_llnick.c
+
+
+
 a1kmm       2001/12/27 20:10:21 EST	(20011228_0)
 
   Modified files:
