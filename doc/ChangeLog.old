@@ -1,3 +1,9 @@
+*** 20001023_7 by ryan
+
+changed around order things are done to prevent non-base channel pointer
+from being used where base channel pointer should be
+
+
 *** 20001023_6 by db
 - modified cjoin to use the ##channel_name as given in original spec
   this should help us slightly in m_sjoin.c
