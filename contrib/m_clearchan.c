@@ -79,14 +79,11 @@ int mo_clearchan(struct Client *cptr, struct Client *sptr, int parc, char *parv[
   struct Channel *chptr, *root_chptr;
   int on_vchan = 0;
 
-  /* Local opers only... */
-  if (!MyConnect(sptr))
-    return 0;
-
-  if( parc < 2 )
+  /* admins only */
+  if (!IsAdmin(sptr))
     {
-      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-		 me.name, sptr->name, "CLEARCHAN");
+      sendto_one(sptr, ":%s NOTICE %s :You must be an admin to use this command",
+                 me.name, parv[0]);
       return 0;
     }
 
