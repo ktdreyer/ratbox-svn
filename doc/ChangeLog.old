@@ -1,3 +1,47 @@
+db          2002/04/08 20:04:32 EDT	(20020409_0)
+
+  Modified files:
+    .                    RELNOTES 
+    doc                  whats-new.txt 
+    include              channel.h supported.h 
+    modules              m_join.c 
+    modules/core         m_kick.c m_part.c 
+    src                  channel.c client.c 
+  Log:
+  Sent in by Lee
+  Approved by db
+  
+  The patch does the following:
+  - fixes persistent channels to actually persist, we fixed them too far and
+  broke them
+  - removes the perm crap from persistent channels.  we should always
+  persist, no matter whether a user parts, quits or falls down a rabbit hole
+  into wonderland
+  - adds ircd-hybrid-7b14 stuff to RELNOTES
+  - adds docs about the $$ and $# stuff to whats-new, as well as updates
+  - adds the CHARSET=rfc1459 to 005
+  
+  Theres still issues with persistent channels, but im too tired atm to do
+  anything.  Basically - the event system/cleanup_channels() doesnt cope with
+  the fact a channel should persist for at least persist_time.  It uses the
+  TS of the channel - so if a user parts a 1 year old channel, itll
+  persist.  If the cleanup_channels() event is called 10s later, itll be
+  destroyed in that event - we need to add a chptr->ts_persist to mark when
+  we started persisting, and use that instead of TS in cleanup_channels().
+  
+  Revision  Changes    Path
+  1.19      +17 -0     ircd-hybrid-7/RELNOTES
+  7.34      +28 -21    ircd-hybrid-7/doc/whats-new.txt
+  7.105     +1 -1      ircd-hybrid-7/include/channel.h
+  1.20      +2 -1      ircd-hybrid-7/include/supported.h
+  1.40      +2 -2      ircd-hybrid-7/modules/core/m_kick.c
+  1.53      +2 -2      ircd-hybrid-7/modules/core/m_part.c
+  1.83      +2 -2      ircd-hybrid-7/modules/m_join.c
+  7.305     +5 -7      ircd-hybrid-7/src/channel.c
+  7.247     +1 -1      ircd-hybrid-7/src/client.c
+
+
+
 androsyn    2002/04/08 00:13:45 EDT	(20020408_0)
 
   Modified files:
