@@ -219,15 +219,10 @@ static void auth_dns_callback(void* vptr, struct DNSReply* reply)
        */
       for (i = 0; hp->h_addr_list[i]; ++i)
 	{
-#ifdef IPV6
+
 	  if (0 == memcmp(hp->h_addr_list[i],
-			  (char*) &auth->client->localClient->ip.sin6_addr.s6_addr,
-			  sizeof(struct in6_addr)))
-#else
-	  if (0 == memcmp(hp->h_addr_list[i],
-			  (char*) &auth->client->localClient->ip.sin_addr.s_addr,
-			  sizeof(struct in_addr)))
-#endif
+			  IN_ADDR(&auth->client->localClient->ip),
+			  sizeof(struct irc_inaddr)))
 	    break;
 	}
       if (!hp->h_addr_list[i])
@@ -296,8 +291,14 @@ static int start_auth_query(struct AuthRequest* auth)
   struct sockaddr_in localaddr;
   unsigned int          locallen = sizeof(struct sockaddr_in);
   int                fd;
+#ifndef IPV6
+  unsigned long ip;
+#endif
+#ifdef IPV6
+	return 1;
+#endif
 
-  if ((fd = comm_open(AF_INET, SOCK_STREAM, 0, "ident")) == -1)
+  if ((fd = comm_open(DEF_FAM, SOCK_STREAM, 0, "ident")) == -1)
     {
       report_error("creating auth stream socket %s:%s", 
 		   get_client_name(auth->client, TRUE), errno);
@@ -340,7 +341,8 @@ static int start_auth_query(struct AuthRequest* auth)
 #ifdef IPV6
   /* XXX: Write auth checking for IPv6 */
 #else
-  comm_connect_tcp(fd, inetntoa((char *)&auth->client->localClient->ip.sin_addr.s_addr), 113, 
+  ip = ntohl(IN_ADDR(auth->client->localClient->ip));
+  comm_connect_tcp(fd, (char *)&ip, 113, 
     (struct sockaddr *)&localaddr, locallen, auth_connect_callback, auth);
 #endif
   return 1; /* We suceed here for now */
@@ -453,13 +455,8 @@ void start_auth(struct Client* client)
   sendheader(client, REPORT_DO_DNS);
 
   /* No DNS cache now, remember? -- adrian */
-#ifdef IPV6
-/* XXX no ipv6 dns for now 
-  gethost_byaddr((const char*) &client->localClient->ip.sin6_addr.s6_addr, &query); */
-#else
-  gethost_byaddr((const char*) &client->localClient->ip.sin_addr.s_addr, &query);
+  gethost_byaddr(&client->localClient->ip, &query);
   SetDNSPending(auth);
-#endif
   start_auth_query(auth);
   link_auth_request(auth, &auth_poll_list);
 }

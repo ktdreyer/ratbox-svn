@@ -11,8 +11,10 @@
 #endif
 #ifndef INCLUDED_sys_socket_h
 #define INCLUDED_sys_socket_h
+#include "ircd_defs.h"
 #include <sys/socket.h>		/* Socket structs */
 #include <netinet/in.h>
+
 #endif
 
 #include "config.h"
@@ -106,13 +108,8 @@ struct _fde {
     } flags;
     struct {
         /* We don't need the host here ? */
-#ifdef IPV6
-	struct sockaddr_in6 S;
-	struct sockaddr_in6 hostaddr;
-#else
-        struct sockaddr_in S;		/* What we're bound to */
-	struct sockaddr_in hostaddr;
-#endif
+	struct irc_sockaddr S;
+	struct irc_sockaddr hostaddr;
         CNCB *callback;
         void *data;
         /* We'd also add the retry count here when we get to that -- adrian */

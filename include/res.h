@@ -26,7 +26,7 @@ struct DNSQuery {
 
 extern void get_res(void);
 extern void gethost_byname(const char* name, const struct DNSQuery* req);
-extern void gethost_byaddr(const char* name, const struct DNSQuery* req);
+extern void gethost_byaddr(struct irc_inaddr *in, const struct DNSQuery* req);
 extern int             init_resolver(void);
 extern void            restart_resolver(void);
 extern void            timeout_resolver(void *);

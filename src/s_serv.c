@@ -424,17 +424,15 @@ int check_server(const char *name, struct Client* cptr)
    * it only indicates if the server thinks it's lazylinks are
    * leafs or not.. if you unset it, bad things will happen
    */
-
+  if(aconf != NULL)
+  {
 #ifdef IPV6
-  if (IN6_IS_ADDR_UNSPECIFIED(&aconf->ipnum))
-    memcpy(&server_aconf->ipnum.s6_addr, 
-	   &cptr->localClient->ip.sin6_addr.s6_addr,
-	   sizeof(aconf->ipnum.s6_addr));
+	  if (IN6_IS_ADDR_UNSPECIFIED(&IN_ADDR(aconf->ipnum)))
 #else
-  if (server_aconf->ipnum.s_addr == INADDR_NONE)
-    server_aconf->ipnum.s_addr = cptr->localClient->ip.sin_addr.s_addr;
+	  if (IN_ADDR(aconf->ipnum) == INADDR_NONE)
 #endif
-
+	  copy_s_addr(IN_ADDR(aconf->ipnum), IN_ADDR(cptr->localClient->ip)); 
+  }
   return 0;
 }
 
@@ -1457,13 +1455,14 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
     int fd;
     char servname[HOSTLEN + 1];
     char serv_desc[HOSTLEN + 15];
-
+    char buf[HOSTIPLEN];
     /* Make sure aconf is useful */
     assert(aconf != NULL);
 
     /* log */
+    inetntop(DEF_FAM, &IN_ADDR(aconf->ipnum), buf, HOSTIPLEN);
     log(L_NOTICE, "Connect to %s[%s] @%s", aconf->user, aconf->host,
-        inetntoa((char *)&aconf->ipnum));
+         buf);
 
     /*
      * Make sure this server isn't already connected
@@ -1487,7 +1486,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
     serv_desc[FD_DESC_SZ-1] = '\0';
 
     /* create a socket for the server connection */ 
-    if ((fd = comm_open(AF_INET, SOCK_STREAM, 0, servname)) < 0)
+    if ((fd = comm_open(DEF_FAM, SOCK_STREAM, 0, servname)) < 0)
       {
         /* Eek, failure to create the socket */
         report_error("opening stream socket to %s: %s", aconf->name, errno);
@@ -1500,8 +1499,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
     /* Copy in the server, hostname, fd */
     strncpy_irc(cptr->name, aconf->name, HOSTLEN);
     strncpy_irc(cptr->host, aconf->host, HOSTLEN);
-    strncpy_irc(cptr->localClient->sockhost, inetntoa((char *)&aconf->ipnum),
-						     HOSTIPLEN);
+    inetntop(DEF_FAM, &IN_ADDR(aconf->ipnum), cptr->localClient->sockhost, HOSTIPLEN);
     cptr->fd = fd;
 
     /*
@@ -1599,11 +1597,7 @@ serv_connect_callback(int fd, int status, void *data)
     assert(cptr->fd == fd);
 
     /* Next, for backward purposes, record the ip of the server */
-#ifdef IPV6
-    memcpy(&cptr->localClient->ip, &fd_table[fd].connect.hostaddr, sizeof(struct sockaddr_in6));
-#else
-    memcpy(&cptr->localClient->ip, &fd_table[fd].connect.hostaddr, sizeof(struct sockaddr_in));
-#endif
+    copy_s_addr(IN_ADDR(cptr->localClient->ip), S_ADDR(&fd_table[fd].connect.hostaddr));
     /* Check the status */
     if (status != COMM_OK)
       {

@@ -164,7 +164,7 @@ typedef struct reslist {
   char            resend;            /* send flag. 0 == dont resend */
   time_t          sentat;
   time_t          timeout;
-  struct in_addr  addr;
+  struct irc_inaddr addr;
   char*           name;
   struct DNSQuery query;             /* query callback for this request */
   aHostent        he;
@@ -197,7 +197,7 @@ static void     do_query_name(const struct DNSQuery* query,
                               const char* name, 
                               ResRQ* request);
 static void     do_query_number(const struct DNSQuery* query,
-                                const struct in_addr*, 
+                                const struct irc_inaddr*, 
                                 ResRQ* request);
 static void     query_name(const char* name, 
                            int query_class, 
@@ -416,9 +416,15 @@ static ResRQ* make_request(const struct DNSQuery* query)
   request->retries = 3;
   request->resend  = 1;
   request->timeout = 4;    /* start at 4 and exponential inc. */
-  request->addr.s_addr      = INADDR_NONE;
+#ifdef IPV6
+  memset(IN_ADDR(request->addr), 0, sizeof(struct in6_addr));
+  request->he.h.h_addrtype  = AF_INET6;
+  request->he.h.h_length    = sizeof(struct in6_addr);
+#else
+  IN_ADDR(request->addr)      = INADDR_NONE;
   request->he.h.h_addrtype  = AF_INET;
   request->he.h.h_length    = sizeof(struct in_addr);
+#endif
   request->query.vptr       = query->vptr;
   request->query.callback   = query->callback;
 
@@ -597,13 +603,13 @@ void gethost_byname(const char* name, const struct DNSQuery* query)
 /*
  * gethost_byaddr - get host name from address
  */
-void gethost_byaddr(const char* addr, const struct DNSQuery* query)
+void gethost_byaddr(struct irc_inaddr *addr, const struct DNSQuery* query)
 {
-  assert(0 != addr);
+  assert(addr != NULL);
 
   ++reinfo.re_nu_look;
 
-  do_query_number(query, (const struct in_addr*) addr, NULL);
+  do_query_number(query, addr, NULL);
 }
 
 /*
@@ -633,23 +639,47 @@ static void do_query_name(const struct DNSQuery* query,
  * do_query_number - Use this to do reverse IP# lookups.
  */
 static void do_query_number(const struct DNSQuery* query, 
-                            const struct in_addr* addr,
+                            const struct irc_inaddr* addr,
                             ResRQ* request)
 {
-  char  ipbuf[32];
-  const unsigned char* cp;
+  char  ipbuf[MAXDNAME+1];
+  unsigned char *cp;
+  assert(addr != NULL);
 
-  assert(0 != addr);
-  cp = (const unsigned char*) &addr->s_addr;
-  ircsprintf(ipbuf, "%u.%u.%u.%u.in-addr.arpa.",
-             (unsigned int)(cp[3]), (unsigned int)(cp[2]),
-             (unsigned int)(cp[1]), (unsigned int)(cp[0]));
-
+#ifdef IPV6
+  if(!IN6_IS_ADDR_V4MAPPED(PIN_ADDR(addr)) && !IN6_IS_ADDR_V4COMPAT(PIN_ADDR(addr)))
+  {
+	unsigned char *qp;
+	int n, c;
+	/* Real IPv6 address */
+	cp = (unsigned char *)&PIN_ADDR(addr);
+	qp = ipbuf;
+	for (n = IN6ADDRSZ - 1; n >= 0; n--) 
+	{
+		c = ircsprintf(qp, "%x.%x.", cp[n] & 0xf, (cp[n] >> 4) & 0xf);
+		qp += c;
+	}
+	strcpy(qp, "ip6.int");
+	
+  } else
+  {
+	/* IPv4 in IPv6 addresses..we want to resolve them correctly too */
+	  cp = (unsigned char *)&addr->sins.sin6.s6_addr32[3];
+	  ircsprintf(ipbuf, "%u.%u.%u.%u.in-addr.arpa.",
+        	     (unsigned int)(cp[3]), (unsigned int)(cp[2]),
+	             (unsigned int)(cp[1]), (unsigned int)(cp[0]));
+  }
+#else
+	  cp = (unsigned char *)&PIN_ADDR(addr);
+	  ircsprintf(ipbuf, "%u.%u.%u.%u.in-addr.arpa.",
+        	     (unsigned int)(cp[3]), (unsigned int)(cp[2]),
+	             (unsigned int)(cp[1]), (unsigned int)(cp[0]));
+#endif
   if (!request)
     {
       request              = make_request(query);
       request->type        = T_PTR;
-      request->addr.s_addr = addr->s_addr;
+      copy_s_addr(IN_ADDR(request->addr), PIN_ADDR(addr));	
     }
   query_name(ipbuf, C_IN, T_PTR, request);
 }
@@ -702,15 +732,19 @@ static void query_name(const char* name, int query_class,
 
 static void resend_query(ResRQ* request)
 {
-  assert(0 != request);
+  struct irc_inaddr in;
 
+  assert(0 != request);
+/* Temp */
+  request->resend = 0;  
   if (request->resend == 0)
     return;
   ++reinfo.re_resends;
   switch(request->type)
     {
     case T_PTR:
-      do_query_number(NULL, &request->addr, request);
+      copy_s_addr(IN_ADDR(in), IN_ADDR(request->addr));
+      do_query_number(NULL, &in, request);
       break;
     case T_A:
       do_query_name(NULL, request->name, request);

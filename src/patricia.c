@@ -868,37 +868,25 @@ void lookup_then_remove(patricia_tree_t * tree, char *string)
 }
 #endif
 
-patricia_node_t *match_ip(patricia_tree_t *tree, struct sockaddr *ip)
+patricia_node_t *match_ip(patricia_tree_t *tree, struct irc_inaddr *ip)
 {
 	prefix_t *prefix;
 	patricia_node_t *node;
 	unsigned int len;
-	
-	if(ip->sa_family == AF_INET)
-		len = 32;
-	else
-		len = 128;  // Assume ipv6 in this case	
-
-	if(ip->sa_family == AF_INET) {
-		if((prefix = New_Prefix(ip->sa_family, &((struct sockaddr_in *)ip)->sin_addr, len)) != NULL)
-		{		
-			node = patricia_search_best(tree, prefix);
-			Deref_Prefix(prefix);
-			return(node);
-		}
-		return NULL;		
-	} else
-#ifdef IPV6
-	if(ip->sa_family == AF_INET6) {
-		if((prefix = New_Prefix(ip->sa_family, &((struct sockaddr_in6 *)ip)->sin6_addr, len)) != NULL)		
-		{
-			node = patricia_search_best(tree, prefix);
-			Deref_Prefix(prefix);
-			return(node);
-		}
-			return NULL;
-	} else
+	int family;	
+#ifndef IPV6
+	len = 32;
+	family = AF_INET;
+#else
+	len = 128;
+	family = AF_INET6;
 #endif
+	if((prefix = New_Prefix(family, PIN_ADDR(&ip), len)) != NULL)
+	{		
+		node = patricia_search_best(tree, prefix);
+		Deref_Prefix(prefix);
+		return(node);
+	}
 	return NULL;
 }
 

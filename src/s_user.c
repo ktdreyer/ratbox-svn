@@ -1024,7 +1024,7 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 		    reattach to "old" iline
 		    - einride
 		  */
-		  remove_one_ip((struct sockaddr *)&sptr->localClient->ip);
+		  remove_one_ip(&sptr->localClient->ip);
 		  check_client(sptr->servptr, sptr, sptr->username);
                 }
             }

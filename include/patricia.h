@@ -82,7 +82,7 @@ typedef struct _patricia_tree_t {
 } patricia_tree_t;
 
 
-patricia_node_t *match_ip(patricia_tree_t *tree, struct sockaddr *ip);
+patricia_node_t *match_ip(patricia_tree_t *tree, struct irc_inaddr *ip);
 patricia_node_t *match_string(patricia_tree_t *tree, const char *string);
 patricia_node_t *match_exact_string(patricia_tree_t *tree, const char *string);
 patricia_node_t *patricia_search_exact (patricia_tree_t *patricia, prefix_t *prefix);

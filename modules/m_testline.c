@@ -27,6 +27,7 @@
 #include "dline_conf.h"
 #include "common.h"
 #include "irc_string.h"
+#include "ircd_defs.h"
 #include "ircd.h"
 #include "restart.h"
 #include "s_conf.h"
@@ -79,21 +80,23 @@ static int mo_testline(struct Client *cptr, struct Client *sptr,
                        int parc, char *parv[])
 {
   struct ConfItem *aconf;
-  struct sockaddr_in ip;
+  struct irc_inaddr ip;
   unsigned long host_mask;
   char *host, *pass, *user, *name, *classname, *given_host, *given_name, *p;
   int port;
-  ip.sin_family = AF_INET;
   
   if (parc > 1)
     {
       given_name = parv[1];
       if(!(p = (char*)strchr(given_name,'@')))
         {
-          ip.sin_addr.s_addr = 0L;
-          if(is_address(given_name,(unsigned long *)&ip.sin_addr.s_addr,&host_mask))
+#ifndef IPV6 
+	  /* XXX: ipv6 doesn't work here */
+          IN_ADDR(ip) = 0L;
+#endif
+          if(is_address(given_name,(unsigned long *)&IN_ADDR(ip),&host_mask))
             {
-              aconf = match_Dline((struct sockaddr *)&ip);    
+              aconf = match_Dline(&ip);    
               if( aconf )
                 {
                   get_printable_conf(aconf, &name, &host, &pass, &user, &port,&classname);
@@ -117,12 +120,14 @@ static int mo_testline(struct Client *cptr, struct Client *sptr,
       *p = '\0';
       p++;
       given_host = p;
-      ip.sin_addr.s_addr = 0L;
-      (void)is_address(given_host,(unsigned long *)&ip.sin_addr.s_addr,&host_mask);
+#ifndef IPV6
+      IN_ADDR(ip) = 0L;
+#endif
+      (void)is_address(given_host,(unsigned long *)&IN_ADDR(ip),&host_mask);
       
       aconf = find_matching_mtrie_conf(given_host,
                                        given_name,
-                                       (struct sockaddr *)&ip);
+                                       &ip);
           
       if(aconf)
         {

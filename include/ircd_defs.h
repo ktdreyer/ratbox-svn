@@ -93,10 +93,78 @@ extern int         BH_CurrentLine;
 #define free_dlink_node(x) _free_dlink_node((x))
 #endif
 
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+
+
+struct irc_inaddr
+{
+	union {
+		struct in_addr sin;
 #ifdef IPV6
-#define INADDR_IRC in6_addr *
-#else
-#define INADDR_IRC in_addr *
+		struct in6_addr sin6;	
 #endif
+	} sins;
+};
+
+struct irc_sockaddr
+{
+	union {
+		struct sockaddr_in sin;
+#ifdef IPV6
+		struct sockaddr_in6 sin6;
+#endif			
+	} sins;
+};
+
+
+#ifdef IPV6
+#define copy_s_addr(a, b)  \
+do { \
+((uint32_t *)a)[0] = ((uint32_t *)b)[0]; \
+((uint32_t *)a)[1] = ((uint32_t *)b)[1]; \
+((uint32_t *)a)[2] = ((uint32_t *)b)[2]; \
+((uint32_t *)a)[3] = ((uint32_t *)b)[3]; \
+} while(0)
+
+
+/* irc_sockaddr macros */
+#define PS_ADDR(x) x->sins.sin6.sin6_addr.s6_addr  	/* s6_addr for pointer */
+#define S_ADDR(x) x.sins.sin6.sin6_addr.s6_addr 	/* s6_addr for non pointer */
+#define S_PORT(x) x.sins.sin6.sin6_port			/* s6_port */
+#define S_FAM(x) x.sins.sin6.sin6_family		/* sin6_family */
+#define SOCKADDR(x) x.sins.sin6				/* struct sockaddr_in6 for nonpointer */
+#define PSOCKADDR(x) x->sins.sin6			/* struct sockaddr_in6 for pointer */
+
+
+/* irc_inaddr macros */
+#define IN_ADDR(x) x.sins.sin6.s6_addr
+#define IPV4_MAPPED(x) ((uint32_t *)x.sins.sin6.s6_addr32)[3]
+#define PIN_ADDR(x) x->sins.sin6.s6_addr /* For Pointers */
+
+#define DEF_FAM AF_INET6
+
+#else
+#define copy_s_addr(a, b) a = b
+
+
+#define PS_ADDR(x)	x->sins.sin.sin_addr.s_addr	/* s_addr for pointer */
+#define S_ADDR(x)	x.sins.sin.sin_addr.s_addr	/* s_addr for nonpointer */
+#define S_PORT(x)	x.sins.sin.sin_port		/* sin_port   */
+#define S_FAM(x)	x.sins.sin.sin_family		/* sin_family */
+#define SOCKADDR(x)	x.sins.sin			/* struct sockaddr_in */
+#define PSOCKADDR(x)	x->sins.sin			/* struct sockaddr_in */
+
+
+#define PIN_ADDR(x) x->sins.sin.s_addr 
+#define IN_ADDR(x) x.sins.sin.s_addr
+
+
+#define DEF_FAM AF_INET
+
+#endif
+
 
 #endif /* INCLUDED_ircd_defs_h */

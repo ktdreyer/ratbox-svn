@@ -20,8 +20,8 @@ extern void add_ip_Kline(struct ConfItem *conf_ptr);
 
 extern void add_Eline(struct ConfItem *conf_ptr);
 
-extern struct ConfItem *match_Dline(struct sockaddr *ip);
-extern struct ConfItem* match_ip_Kline(struct sockaddr *ip, const char* name);
+extern struct ConfItem *match_Dline(struct irc_inaddr *ip);
+extern struct ConfItem* match_ip_Kline(struct irc_inaddr *ip, const char* name);
 
 extern void report_dlines(struct Client *sptr);
 extern void report_ip_Klines(struct Client *sptr);

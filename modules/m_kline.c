@@ -92,18 +92,18 @@ static int valid_comment(struct Client *sptr, char *comment);
 static int valid_user_host(struct Client *sptr, char *user, char *host);
 static int valid_wild_card(struct Client *sptr, char *user, char *host);
 static int already_placed_kline(struct Client *sptr, char *user, char *host,
-                                time_t tkline_time, struct sockaddr *);
+                                time_t tkline_time, struct irc_inaddr *);
 
-static int is_ip_kline(char *host,unsigned long *ip,
+static int is_ip_kline(char *host,struct irc_inaddr *ip,
                        unsigned long *ip_mask);
 static void apply_kline(struct Client *sptr, struct ConfItem *aconf,
                         const char *reason, const char *current_date,
-                        int ip_kline, unsigned long ip,
+                        int ip_kline, struct irc_inaddr *ip,
                         unsigned long ip_mask);
 
 static void apply_tkline(struct Client *sptr, struct ConfItem *aconf,
                          const char *current_date, int temporary_kline_time,
-                         int ip_kline, unsigned long ip,
+                         int ip_kline, struct irc_inaddr *ip,
                          unsigned long ip_mask);
 
 char *_version = "20001122";
@@ -136,7 +136,7 @@ static int mo_kline(struct Client *cptr,
   int  ip_kline = NO;
   struct ConfItem *aconf;
   time_t tkline_time=0;
-  struct sockaddr_in ip;
+  struct irc_inaddr ip;
   unsigned long ip_mask;
 
   if(!IsSetOperK(sptr))
@@ -198,7 +198,7 @@ static int mo_kline(struct Client *cptr,
   if( valid_wild_card(sptr,user,host) == 0 )
     return 0;
 
-  ip_kline = is_ip_kline(host,(unsigned long *)&ip.sin_addr.s_addr,&ip_mask);
+  ip_kline = is_ip_kline(host,&ip,&ip_mask);
   current_date = smalldate((time_t) 0);
 
   aconf = make_conf();
@@ -223,12 +223,12 @@ static int mo_kline(struct Client *cptr,
 	return 0;
     }
 
-  if ( already_placed_kline(sptr, user, host, tkline_time, (struct sockaddr *)&ip))
+  if ( already_placed_kline(sptr, user, host, tkline_time, &ip))
     return 0;
 
   if (ip_kline)
    { 
-     aconf->ip = ip.sin_addr.s_addr;
+     aconf->ip = IN_ADDR(ip);
      aconf->ip_mask = ip_mask;
    }
 
@@ -241,7 +241,7 @@ static int mo_kline(struct Client *cptr,
 		 current_date);
       DupString(aconf->passwd, buffer );
       apply_tkline(sptr, aconf, current_date, tkline_time,
-		   ip_kline, ip.sin_addr.s_addr, ip_mask);
+		   ip_kline, &ip, ip_mask);
     }
   else
     {
@@ -249,7 +249,7 @@ static int mo_kline(struct Client *cptr,
 		 reason,
 		 current_date);
       DupString(aconf->passwd, buffer );
-      apply_kline(sptr, aconf, reason, current_date, ip_kline, ip.sin_addr.s_addr, ip_mask);
+      apply_kline(sptr, aconf, reason, current_date, ip_kline, &ip, ip_mask);
     }
 
   return 0;
@@ -270,9 +270,8 @@ static int ms_kline(struct Client *cptr,
   struct ConfItem *aconf=NULL;
   int    tkline_time;
   int ip_kline = NO;
-  struct sockaddr_in ip;
+  struct irc_inaddr ip;
   unsigned long ip_mask;
-  ip.sin_family = AF_INET;
   if(parc < 7)
     return 0;
 
@@ -303,7 +302,7 @@ static int ms_kline(struct Client *cptr,
   if( rcptr->host == NULL )
     return 0;
 
-  ip_kline = is_ip_kline(parv[5],(unsigned long *)&ip.sin_addr.s_addr,&ip_mask);
+  ip_kline = is_ip_kline(parv[5],&ip,&ip_mask);
   tkline_time = atoi(parv[3]);
 
   if(find_u_conf(sptr->name,rcptr->username,rcptr->host))
@@ -320,7 +319,7 @@ static int ms_kline(struct Client *cptr,
       /* We check if the kline already exists after we've announced its 
        * arrived, to avoid confusing opers - fl
        */
-      if ( already_placed_kline(sptr, parv[4], parv[5], (int)parv[3], (struct sockaddr *)&ip) )
+      if ( already_placed_kline(sptr, parv[4], parv[5], (int)parv[3], &ip) )
         return 0;
 
       aconf = make_conf();
@@ -333,16 +332,16 @@ static int ms_kline(struct Client *cptr,
 
       if(ip_kline)
         {
-          aconf->ip = ip.sin_addr.s_addr;
+          aconf->ip = IN_ADDR(ip);
           aconf->ip_mask = ip_mask;
         }
 
       if(tkline_time)
           apply_tkline(rcptr, aconf, current_date, tkline_time,
-                       ip_kline, ip.sin_addr.s_addr, ip_mask);
+                       ip_kline, &ip, ip_mask);
       else
 	apply_kline(rcptr, aconf, aconf->passwd, current_date,
-                       ip_kline, ip.sin_addr.s_addr, ip_mask);	
+                       ip_kline, &ip, ip_mask);	
 
       }
   return 0;
@@ -358,11 +357,11 @@ static int ms_kline(struct Client *cptr,
  */
 static void apply_kline(struct Client *sptr, struct ConfItem *aconf,
                         const char *reason, const char *current_date,
-                        int ip_kline, unsigned long ip, unsigned long ip_mask)
+                        int ip_kline, struct irc_inaddr *ip, unsigned long ip_mask)
 {
   if(ip_kline)
     {
-      aconf->ip = ip;
+      aconf->ip = PIN_ADDR(ip);
       aconf->ip_mask = ip_mask;
       add_ip_Kline(aconf);
     }
@@ -389,7 +388,7 @@ static void apply_kline(struct Client *sptr, struct ConfItem *aconf,
  */
 static void apply_tkline(struct Client *sptr, struct ConfItem *aconf,
                          const char *current_date, int tkline_time,
-                         int ip_kline, unsigned long ip, unsigned long ip_mask)
+                         int ip_kline, struct irc_inaddr * ip, unsigned long ip_mask)
 {
   aconf->hold = CurrentTime + tkline_time;
   add_temp_kline(aconf);
@@ -584,7 +583,7 @@ static int mo_dline(struct Client *cptr, struct Client *sptr,
   char cidr_form_host[HOSTLEN + 1];
   unsigned long ip_host;
   unsigned long ip_mask;
-  struct sockaddr_in ipn;
+  struct irc_inaddr ipn;
   struct ConfItem *aconf;
   char dlbuffer[1024];
   const char* current_date;
@@ -677,7 +676,7 @@ static int mo_dline(struct Client *cptr, struct Client *sptr,
 
       ip_mask = 0xFFFFFF00L;
 /* XXX: Fix me for IPV6 */
-      ip_host = ntohl(acptr->localClient->ip.sin_addr.s_addr);
+      ip_host = ntohl(IN_ADDR(acptr->localClient->ip));
     }
 
 
@@ -705,9 +704,8 @@ static int mo_dline(struct Client *cptr, struct Client *sptr,
           return 0;
         }
     }
-  ipn.sin_addr.s_addr = ip_host;
-  ipn.sin_family = AF_INET;
-  if( ConfigFileEntry.non_redundant_klines && (aconf = match_Dline((struct sockaddr *)&ipn)) )
+  IN_ADDR(ipn) = ip_host;
+  if( ConfigFileEntry.non_redundant_klines && (aconf = match_Dline(&ipn)) )
      {
        char *creason;
        creason = aconf->passwd ? aconf->passwd : "<No Reason>";
@@ -978,7 +976,7 @@ static int valid_comment(struct Client *sptr, char *comment)
  * side effects - NONE
  */
 static int already_placed_kline(struct Client *sptr, char *luser, char *lhost,
-                                time_t tkline_time, struct sockaddr *ip)
+                                time_t tkline_time, struct irc_inaddr *ip)
 {
   char *reason;
   struct ConfItem *aconf;
@@ -1031,7 +1029,7 @@ static int already_placed_kline(struct Client *sptr, char *luser, char *lhost,
  * output	- YES if valid ip_kline NO if not
  * side effects	- NONE
  */
-static int is_ip_kline(char *lhost,unsigned long *ip, unsigned long *ip_mask)
+static int is_ip_kline(char *lhost,struct irc_inaddr *ip, unsigned long *ip_mask)
 {
   char *p;
 
@@ -1045,7 +1043,7 @@ static int is_ip_kline(char *lhost,unsigned long *ip, unsigned long *ip_mask)
   **
   */
 
-  if((is_address(lhost, ip, ip_mask)))
+  if((is_address(lhost, (unsigned long *)&PIN_ADDR(ip), ip_mask)))
      {
        if( (p = strchr(lhost,'*')) )
          {

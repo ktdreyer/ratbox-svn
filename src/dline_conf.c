@@ -35,7 +35,7 @@ void zap_Dlines(void)
 #endif
 }
 
-struct ConfItem *match_Dline(struct sockaddr *ip)
+struct ConfItem *match_Dline(struct irc_inaddr *ip)
 {
 	patricia_node_t *node;
 	node = match_ip(eline, ip);
@@ -59,7 +59,7 @@ void clear_Dline_table(void)
 		Destroy_Patricia(kline, NULL);
 	zap_Dlines();
 }
-struct ConfItem *match_ip_Kline(struct sockaddr *ip, const char *name)
+struct ConfItem *match_ip_Kline(struct irc_inaddr *ip, const char *name)
 {
 	patricia_node_t *node;
 	node = match_ip(kline, ip);

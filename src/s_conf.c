@@ -112,10 +112,7 @@ typedef struct ip_entry
 
 static IP_ENTRY *ip_hash_table[IP_HASH_SIZE];
 
-static int hash_ip(unsigned long);
-#ifdef IPV6
-static int hash_ip6(struct in6_addr *);
-#endif
+static int hash_ip(struct irc_inaddr *);
 
 static IP_ENTRY *find_or_add_ip(struct Client *);
 
@@ -142,7 +139,8 @@ static void conf_dns_callback(void* vptr, struct DNSReply* reply)
   struct ConfItem* aconf = (struct ConfItem*) vptr;
   aconf->dns_pending = 0;
   if (reply)
-    memcpy(&aconf->ipnum, reply->hp->h_addr, sizeof(struct in_addr));
+	    
+    memcpy(&IN_ADDR(aconf->ipnum), reply->hp->h_addr, sizeof(struct irc_inaddr));
 }
 
 /*
@@ -468,12 +466,12 @@ int attach_Iline(struct Client* cptr, const char* username)
   if (IsGotId(cptr))
     {
       aconf = find_matching_mtrie_conf(cptr->host,cptr->username,
-                                       (struct sockaddr *)&cptr->localClient->ip);
+                                       &cptr->localClient->ip);
       if(aconf && !IsConfElined(aconf))
         {
           if( (tkline_conf = find_tkline(cptr->host,
 					 cptr->username,
-					 (struct sockaddr *)&cptr->localClient->ip)))
+					 &cptr->localClient->ip)))
             aconf = tkline_conf;
         }
     }
@@ -483,12 +481,12 @@ int attach_Iline(struct Client* cptr, const char* username)
       strncpy_irc(&non_ident[1],username, USERLEN - 1);
       non_ident[USERLEN] = '\0';
       aconf = find_matching_mtrie_conf(cptr->host,non_ident,
-                                       (struct sockaddr *)&cptr->localClient->ip);
+                                       &cptr->localClient->ip);
       if(aconf && !IsConfElined(aconf))
         {
           if((tkline_conf = find_tkline(cptr->host,
 					non_ident,
-					(struct sockaddr *)&cptr->localClient->ip)))
+					&cptr->localClient->ip)))
             aconf = tkline_conf;
         }
     }
@@ -651,24 +649,15 @@ void clear_ip_hash_table()
 static IP_ENTRY *
 find_or_add_ip(struct Client *cptr)
 {
-#ifdef IPV6
-  struct in6_addr ip_in;
-#else
-  unsigned long ip_in=cptr->localClient->ip.sin_addr.s_addr;
-#endif
+  struct irc_inaddr ip_in;
+  
   int hash_index;
   IP_ENTRY *ptr, *newptr;
 
-#ifdef IPV6
-  memcpy(&ip_in, &cptr->localClient->ip.sin6_addr.s6_addr, sizeof(ip_in));
-#endif
+  
+  copy_s_addr(IN_ADDR(ip_in), IN_ADDR(cptr->localClient->ip));
 
-  newptr = (IP_ENTRY *)NULL;
-#ifdef IPV6
-  for(ptr = ip_hash_table[hash_index = hash_ip6(&ip_in)]; ptr; ptr = ptr->next )
-#else
-  for(ptr = ip_hash_table[hash_index = hash_ip(ip_in)]; ptr; ptr = ptr->next )
-#endif
+  for(ptr = ip_hash_table[hash_index = hash_ip(&ip_in)]; ptr; ptr = ptr->next )
     {
       if(!memcpy(&ptr->ip, &ip_in, sizeof(ip_in)))
         {
@@ -713,17 +702,17 @@ find_or_add_ip(struct Client *cptr)
  * XXX: Broken for IPV6
  */
 
-void remove_one_ip(struct sockaddr *ip_in)
+void remove_one_ip(struct irc_inaddr *ip_in)
 {
   int hash_index;
   IP_ENTRY *last_ptr;
   IP_ENTRY *ptr;
   IP_ENTRY *old_free_ip_entries;
 
-  last_ptr = ptr = ip_hash_table[hash_index = hash_ip(((struct sockaddr_in *)ip_in)->sin_addr.s_addr)];
+  last_ptr = ptr = ip_hash_table[hash_index = hash_ip(ip_in)];
   while(ptr)
     {
-      if(ptr->ip == ((struct sockaddr_in *)ip_in)->sin_addr.s_addr)
+      if(ptr->ip == PIN_ADDR(ip_in))
         {
           if(ptr->count != 0)
             ptr->count--;
@@ -766,19 +755,17 @@ void remove_one_ip(struct sockaddr *ip_in)
  * side effects - hopefully, none
  */
 
-static int hash_ip(unsigned long ip)
+static int hash_ip(struct irc_inaddr *addr)
 {
   int hash;
-  ip = ntohl(ip);
+  unsigned long ip;
+#ifdef IPV6
+  return 0;  
+#else
+  ip = ntohl(PIN_ADDR(addr));
   hash = ((ip >> 12) + ip) & (IP_HASH_SIZE-1);
+#endif
   return(hash);
-}
-
-static int
-hash_ip6(struct in6_addr *ip)
-{
-  /* XXX */
-  return 0;
 }
 
 /*
@@ -1139,8 +1126,8 @@ struct ConfItem *find_conf_ip(dlink_list *list, char *ip, char *user,
         {
           continue;
         }
-
-      if (!memcmp((void *)&aconf->ipnum, (void *)ip, sizeof(struct in_addr)))
+/* XXX: broken for IPv6 */
+      if (!memcmp((void *)&IN_ADDR(aconf->ipnum), (void *)ip, sizeof(struct in_addr)))
         return aconf;
     }
   return ((struct ConfItem *)NULL);
@@ -1559,7 +1546,7 @@ static void lookup_confhost(struct ConfItem* aconf)
 /*
  * conf_connect_allowed (untested)
  */
-int conf_connect_allowed(struct sockaddr *addr)
+int conf_connect_allowed(struct irc_inaddr *addr)
 {
   struct ConfItem *aconf = match_Dline(addr);
 
@@ -1584,7 +1571,7 @@ struct ConfItem *find_kill(struct Client* cptr)
   /* opers get that flag automatically, normal users do not */
   return (IsElined(cptr)) ? 0 : find_is_klined(cptr->host, 
                                                cptr->username, 
-                                               (struct sockaddr *)&cptr->localClient->ip);
+                                               &cptr->localClient->ip);
 }
 
 /*
@@ -1601,11 +1588,12 @@ struct ConfItem *find_kill(struct Client* cptr)
  * XXX: Broken for IPV6
  */
 
-struct ConfItem* find_tkline(const char* host, const char* user, struct sockaddr *ip)
+struct ConfItem* find_tkline(const char* host, const char* user, struct irc_inaddr *ipn)
 {
   dlink_node *kill_node;
   struct ConfItem *kill_ptr;
-
+  struct irc_inaddr ip;
+  copy_s_addr(IN_ADDR(ip), PIN_ADDR(ipn));  
   for (kill_node = temporary_klines.head; kill_node; kill_node = kill_node->next)
     {
       kill_ptr = kill_node->data;
@@ -1620,7 +1608,7 @@ struct ConfItem* find_tkline(const char* host, const char* user, struct sockaddr
     {
       kill_ptr = kill_node->data;
       if ((kill_ptr->user && (!user || match(kill_ptr->user, user)))
-           && (kill_ptr->ip && (( ((struct sockaddr_in *)ip)->sin_addr.s_addr & kill_ptr->ip_mask) == ((struct sockaddr_in *)ip)->sin_addr.s_addr)))
+           && (kill_ptr->ip && (((unsigned long)IN_ADDR(&ip) & kill_ptr->ip_mask) == (unsigned long)IN_ADDR(&ip))))
         {
           return(kill_ptr);
         }
@@ -1642,7 +1630,7 @@ struct ConfItem* find_tkline(const char* host, const char* user, struct sockaddr
  * thats expected to be done by caller.... 
  */
 struct ConfItem *find_is_klined(const char* host, const char* name,
-				struct sockaddr *ip)
+				struct irc_inaddr *ip)
 {
   struct ConfItem *found_aconf;
 

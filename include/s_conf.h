@@ -57,11 +57,7 @@ struct ConfItem
   unsigned int     status;   /* If CONF_ILLEGAL, delete when no clients */
   unsigned int     flags;
   int              clients;  /* Number of *LOCAL* clients using this */
-#ifdef IPV6
-  struct in6_addr   ipnum;    /* ip number of host field */
-#else
-  struct in_addr  ipnum;
-#endif
+  struct irc_inaddr ipnum;
   unsigned long    ip;       /* only used for I D lines etc. */
   unsigned long    ip_mask;
   char*            name;     /* IRC name, nick, server name, or original u@h */
@@ -254,7 +250,7 @@ extern void iphash_stats(struct Client *,struct Client *,int,char **,FBFILE*);
 extern void count_ip_hash(int *, u_long *);
 
 
-void remove_one_ip(struct sockaddr *ip);
+void remove_one_ip(struct irc_inaddr *ip);
 
 extern struct ConfItem* make_conf(void);
 extern void             free_conf(struct ConfItem*);
@@ -286,7 +282,7 @@ extern struct ConfItem* find_conf_ip(dlink_list *list, char* ip, char* name,
 extern struct ConfItem* find_conf_by_name(const char* name, int status);
 extern struct ConfItem* find_conf_by_host(const char* host, int status);
 extern struct ConfItem* find_kill (struct Client *);
-extern int conf_connect_allowed(struct sockaddr * addr);
+extern int conf_connect_allowed(struct irc_inaddr *addr);
 extern char *oper_flags_as_string(int);
 extern char *oper_privs_as_string(struct Client *, int);
 
@@ -296,8 +292,8 @@ extern struct ConfItem *find_x_conf(char*);
 
 extern struct ConfItem* find_is_klined(const char* host, 
                                        const char* name,
-                                       struct sockaddr *ip);
-extern struct ConfItem* find_tkline(const char*, const char*, struct sockaddr *); 
+                                       struct irc_inaddr *ip);
+extern struct ConfItem* find_tkline(const char*, const char*, struct irc_inaddr *); 
 extern char* show_iline_prefix(struct Client *,struct ConfItem *,char *);
 extern void get_printable_conf(struct ConfItem *,
                                     char **, char **, char **,
