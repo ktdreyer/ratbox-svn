@@ -66,6 +66,12 @@ struct Counter {
 
 extern struct SetOptions GlobalSetOptions;  /* defined in ircd.c */
 
+struct ServerState_t {
+  int     foreground;
+};
+
+extern struct ServerState_t server_state;
+
 extern char*          debugmode;
 extern int            debuglevel;
 extern int            debugtty;

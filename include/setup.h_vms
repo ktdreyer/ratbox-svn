@@ -95,7 +95,6 @@ typedef unsigned long u_long;
 
 #define STATIC_MODULES
 #define SELECT_TYPE "select"
-#define MISSING_SOCKPAIR
 #define USE_SELECT
 
 #endif

@@ -225,14 +225,11 @@ int set_non_blocking(int fd)
   int val = 1;
   int res;
 
-  log(L_CRIT, "Using ioctl to set FD %d non-blocking", fd);
-  printf("Using ioctl to set FD %d non-blocking\n", fd);
   res = ioctl(fd, FIONBIO, &val);
   if (res == -1)
     return 0;
 
   fd_table[fd].flags.nonblocking = 1;
-  log(L_CRIT, "Succeeded.");
   return 1;
 #endif
 }

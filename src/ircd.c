@@ -112,6 +112,7 @@ struct server_info ServerInfo;
 struct admin_info AdminInfo;
 
 struct  Counter Count;
+struct  ServerState_t server_state;
 
 time_t  CurrentTime;            /* GLOBAL - current system timestamp */
 int     ServerRunning;          /* GLOBAL - server execution state */
@@ -136,7 +137,6 @@ int callbacks_called;          /* A measure of server load... */
 static size_t       initialVMTop = 0;   /* top of virtual memory at init */
 static const char * logFileName = LPATH;
 static const char * pidFileName = PPATH;
-static int          noDetach  = 0;
 
 char**  myargv;
 int     dorehash   = 0;
@@ -183,7 +183,7 @@ print_startup(void)
 {
   printf("ircd: version %s\n", version);
   printf("ircd: pid %d\n", (int)getpid());
-  printf("ircd: running in %s mode from %s\n", !noDetach ? "background"
+  printf("ircd: running in %s mode from %s\n", !server_state.foreground ? "background"
          : "foreground", ConfigFileEntry.dpath);
 }
 
@@ -262,7 +262,7 @@ struct lgetopt myopts[] = {
    STRING, "File to use for ircd.log"},
   {"pidfile",    &pidFileName,
    STRING, "File to use for process ID"},
-  {"foreground", &noDetach, 
+  {"foreground", &server_state.foreground, 
    YESNO, "Run in foreground (don't detach)"},
   {"version",    &printVersion, 
    YESNO, "Print version and exit"},
@@ -481,6 +481,8 @@ int main(int argc, char *argv[])
  
  GlobalClientList = &me;       /* Pointer to beginning of Client list */
  memset((void *)&Count, 0, sizeof(Count));
+ memset((void *)&server_state, 0, sizeof(server_state));
+
  Count.server = 1;     /* us */
  memset((void *)&ServerInfo, 0, sizeof(ServerInfo));
  memset((void *)&AdminInfo, 0, sizeof(AdminInfo));
@@ -508,7 +510,7 @@ int main(int argc, char *argv[])
   exit(EXIT_FAILURE);
  }
  
- if (!noDetach)
+ if (!server_state.foreground)
    make_daemon();
  else
    print_startup();
@@ -520,7 +522,8 @@ int main(int argc, char *argv[])
  /* Init the event subsystem */
  eventInit();
  init_sys();
- close_all_connections();
+ if (!server_state.foreground)
+   close_all_connections();
  init_log(logFileName);
  init_netio();		/* This needs to be setup early ! -- adrian */
  init_resolver();	/* Needs to be setup before the io loop */

@@ -134,7 +134,9 @@ struct EncCapability enccaptab[] = {
 unsigned long nextFreeMask();
 static unsigned long freeMask;
 static void server_burst(struct Client *client_p);
+#ifndef VMS
 static int fork_server(struct Client *client_p);
+#endif
 static void burst_all(struct Client *client_p);
 static void cjoin_all(struct Client *client_p);
 
@@ -922,11 +924,15 @@ int server_estab(struct Client *client_p)
     report_error(SETBUF_ERROR_MSG, get_client_name(client_p, SHOW_IP), errno);
 
   /* Hand the server off to servlink now */
-  if (fork_server(client_p) < 0 )
-    return exit_client(client_p, client_p, client_p, "Fork failed");
 
-  start_io(client_p);
- 
+#ifndef VMS
+  if (IsCapable(client_p, CAP_ENC) || IsCapable(client_p, CAP_ZIP))
+    {
+      if (fork_server(client_p) < 0 )
+        return exit_client(client_p, client_p, client_p, "Fork failed");
+      start_io(client_p);
+    }
+#endif
   sendto_one(client_p,"SVINFO %d %d 0 :%lu", TS_CURRENT, TS_MIN, CurrentTime);
   
   det_confs_butmask(client_p, CONF_LEAF|CONF_HUB|CONF_SERVER);
@@ -981,27 +987,30 @@ int server_estab(struct Client *client_p)
   client_p->serv->sconf = aconf;
   client_p->flags2 |= FLAGS2_CBURST;
 
+  if (IsCapable(client_p, CAP_ENC) || IsCapable(client_p, CAP_ZIP))
+    {
 #ifndef MISSING_SOCKPAIR
-  ircsprintf(serv_desc, "slink data: %s", client_p->name);
-  serv_desc[FD_DESC_SZ-1] = '\0';
-  fd_note (client_p->fd, serv_desc);
-  ircsprintf(serv_desc, "slink ctrl: %s", client_p->name);
-  serv_desc[FD_DESC_SZ-1] = '\0';
-  fd_note (client_p->localClient->ctrlfd, serv_desc);
+      ircsprintf(serv_desc, "slink data: %s", client_p->name);
+      serv_desc[FD_DESC_SZ-1] = '\0';
+      fd_note (client_p->fd, serv_desc);
+      ircsprintf(serv_desc, "slink ctrl: %s", client_p->name);
+      serv_desc[FD_DESC_SZ-1] = '\0';
+      fd_note (client_p->localClient->ctrlfd, serv_desc);
 #else
-  ircsprintf(serv_desc, "slink data (out): %s", client_p->name);
-  serv_desc[FD_DESC_SZ-1] = '\0';
-  fd_note (client_p->fd, serv_desc);
-  ircsprintf(serv_desc, "slink ctrl (out): %s", client_p->name);
-  serv_desc[FD_DESC_SZ-1] = '\0';
-  fd_note (client_p->localClient->ctrlfd, serv_desc);
-  ircsprintf(serv_desc, "slink data  (in): %s", client_p->name);
-  serv_desc[FD_DESC_SZ-1] = '\0';
-  fd_note (client_p->fd_r, serv_desc);
-  ircsprintf(serv_desc, "slink ctrl  (in): %s", client_p->name);
-  serv_desc[FD_DESC_SZ-1] = '\0';
-  fd_note (client_p->localClient->ctrlfd_r, serv_desc);
+      ircsprintf(serv_desc, "slink data (out): %s", client_p->name);
+      serv_desc[FD_DESC_SZ-1] = '\0';
+      fd_note (client_p->fd, serv_desc);
+      ircsprintf(serv_desc, "slink ctrl (out): %s", client_p->name);
+      serv_desc[FD_DESC_SZ-1] = '\0';
+      fd_note (client_p->localClient->ctrlfd, serv_desc);
+      ircsprintf(serv_desc, "slink data  (in): %s", client_p->name);
+      serv_desc[FD_DESC_SZ-1] = '\0';
+      fd_note (client_p->fd_r, serv_desc);
+      ircsprintf(serv_desc, "slink ctrl  (in): %s", client_p->name);
+      serv_desc[FD_DESC_SZ-1] = '\0';
+      fd_note (client_p->localClient->ctrlfd_r, serv_desc);
 #endif
+    }
   /*
   ** Old sendto_serv_but_one() call removed because we now
   ** need to send different names to different servers
@@ -1171,6 +1180,7 @@ static void start_io(struct Client *server)
                  server, 0);
 }
 
+#ifndef VMS
 /*
  * fork_server
  *
@@ -1229,7 +1239,6 @@ int fork_server(struct Client *server)
     for(i = 0; i <= LAST_SLINK_FD; i++)
       if(!set_non_blocking(i))
         exit(1);
-    
     for(i = (LAST_SLINK_FD + 1); i < MAXCONNECTIONS; i++)
       close(i);
 
@@ -1288,6 +1297,7 @@ int fork_server(struct Client *server)
     return 0;
   }
 }
+#endif
 
 /*
  * server_burst

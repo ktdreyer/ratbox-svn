@@ -66,11 +66,20 @@ static void sigint_handler(int sig)
 {
   static int restarting = 0;
 
-  log(L_WARN, "Server Restarting on SIGINT");
-  if (restarting == 0) {
-    restarting = 1;
-    server_reboot();
-  }
+  if (server_state.foreground) 
+    {
+      log(L_WARN, "Server exiting on SIGINT");
+      exit(0);
+    }
+  else
+    {
+      log(L_WARN, "Server Restarting on SIGINT");
+      if (restarting == 0) 
+        {
+          restarting = 1;
+          server_reboot();
+        }
+    }
 }
 
 /*
