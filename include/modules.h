@@ -77,7 +77,7 @@ typedef struct
 typedef struct
 {
 	const char * 	hapi_name;
-	hookfn		fn;
+	hookfn *		fn;
 } mapi_hfn_list_av1;
 
 struct mapi_mheader_av1
