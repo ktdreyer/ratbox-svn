@@ -3518,7 +3518,6 @@ void yyerror(char *msg)
 int conf_fbgets(char *buf,int max_size, FBFILE *fb)
 {
   char* buff;
-  int result;
 
   buff = fbgets(buf,max_size,fb);
   if(!buff)
@@ -3530,4 +3529,5 @@ int conf_fbgets(char *buf,int max_size, FBFILE *fb)
 int conf_yy_fatal_error(char *msg)
 {
   sendto_realops("lexer barfed. lets leave it at that for now");
+  return 0;
 }

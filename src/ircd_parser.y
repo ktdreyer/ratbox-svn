@@ -1,5 +1,8 @@
 /************************************************************************
  *   IRC - Internet Relay Chat, src/ircd_parser.y
+ *   Copyright (C) 2000 Diane Bruce <db@db.net>
+ *   Copyright (C) 1990 Jarkko Oikarinen and
+ *                      University of Oulu, Computing Center
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -121,14 +124,14 @@ serverinfo_items:	serverinfo_items serverinfo_item |
 serverinfo_item:	serverinfo_name | serverinfo_description |
 		serverinfo_email | serverinfo_hub
 
-serverinfo_name:	NAME '=' QSTRING ';'  { sendto_realops("server.name [%s]\n",yylval.string); };
+serverinfo_name:	NAME '=' QSTRING ';'  { sendto_realops("server.name [%s]",yylval.string); };
 
-serverinfo_email:	EMAIL '=' QSTRING ';'  { sendto_realops("server.email [%s]\n",yylval.string); };
+serverinfo_email:	EMAIL '=' QSTRING ';'  { sendto_realops("server.email [%s]",yylval.string); };
 
-serverinfo_description:	DESCRIPTION '=' QSTRING ';'  { sendto_realops("server.description [%s]\n",yylval.string); };
+serverinfo_description:	DESCRIPTION '=' QSTRING ';'  { sendto_realops("server.description [%s]",yylval.string); };
 
-serverinfo_hub:	HUB '=' YES ';'  { sendto_realops("server is hub\n"); } |
-		HUB '=' NO ';'   { sendto_realops("server is leaf\n"); } ;
+serverinfo_hub:	HUB '=' YES ';'  { sendto_realops("server is hub"); } |
+		HUB '=' NO ';'   { sendto_realops("server is leaf"); } ;
 
 /***************************************************************************
  * admin section
@@ -142,9 +145,9 @@ admin_items:	admin_items admin_item |
 admin_item:	admin_name |
 		admin_email 
 
-admin_name:	NAME '=' QSTRING ';'  { sendto_realops("admin.name [%s]\n",yylval.string); };
+admin_name:	NAME '=' QSTRING ';'  { sendto_realops("admin.name [%s]",yylval.string); };
 
-admin_email:	EMAIL '=' QSTRING ';' { sendto_realops("admin_email [%s]\n",yylval.string); };
+admin_email:	EMAIL '=' QSTRING ';' { sendto_realops("admin_email [%s]",yylval.string); };
 
 /***************************************************************************
  * oper section
@@ -159,34 +162,34 @@ oper_item:	oper_name | oper_host | oper_password | oper_class |
 		oper_global_kill | oper_remote | oper_unkline | oper_gline |
 		oper_nick_changes | oper_die | oper_rehash
 
-oper_name:	NAME '=' QSTRING ';' { sendto_realops("oper.name [%s]\n", yylval.string); };
+oper_name:	NAME '=' QSTRING ';' { sendto_realops("oper.name [%s]", yylval.string); };
 
-oper_host:	HOST '=' QSTRING ';' { sendto_realops("oper.host [%s]\n", yylval.string); };
+oper_host:	HOST '=' QSTRING ';' { sendto_realops("oper.host [%s]", yylval.string); };
 
-oper_password:	PASSWORD '=' QSTRING ';' { sendto_realops("oper.host [%s]\n", yylval.string); };
+oper_password:	PASSWORD '=' QSTRING ';' { sendto_realops("oper.host [%s]", yylval.string); };
 
-oper_global_kill: GLOBAL_KILL '=' YES ';' {sendto_realops("oper can global kill\n");}|
-	GLOBAL_KILL '=' NO ';' {sendto_realops("oper can't global kill\n"); } ;
+oper_global_kill: GLOBAL_KILL '=' YES ';' {sendto_realops("oper can global kill");}|
+	GLOBAL_KILL '=' NO ';' {sendto_realops("oper can't global kill"); } ;
 
-oper_remote: REMOTE '=' YES ';' {sendto_realops("oper can do remote ops\n");}|
-	REMOTE '=' NO ';' {sendto_realops("oper can't do remote ops\n"); } ;
+oper_remote: REMOTE '=' YES ';' {sendto_realops("oper can do remote ops");}|
+	REMOTE '=' NO ';' {sendto_realops("oper can't do remote ops"); } ;
 
-oper_unkline: UNKLINE '=' YES ';' {sendto_realops("oper can unkline\n");}|
-	UNKLINE '=' NO ';' {sendto_realops("oper can't unkline\n"); } ;
+oper_unkline: UNKLINE '=' YES ';' {sendto_realops("oper can unkline");}|
+	UNKLINE '=' NO ';' {sendto_realops("oper can't unkline"); } ;
 
-oper_gline: GLINE '=' YES ';' {sendto_realops("oper can gline\n");}|
-	GLINE '=' NO ';' {sendto_realops("oper can't gline\n"); } ;
+oper_gline: GLINE '=' YES ';' {sendto_realops("oper can gline");}|
+	GLINE '=' NO ';' {sendto_realops("oper can't gline"); } ;
 
-oper_nick_changes: NICK_CHANGES '=' YES ';' {sendto_realops("oper can see nick changes\n");}|
-	NICK_CHANGES '=' NO ';' {sendto_realops("oper can't see nick changes\n"); } ;
+oper_nick_changes: NICK_CHANGES '=' YES ';' {sendto_realops("oper can see nick changes");}|
+	NICK_CHANGES '=' NO ';' {sendto_realops("oper can't see nick changes"); } ;
 
-oper_die: DIE '=' YES ';' {sendto_realops("oper can die\n");}|
-	DIE '=' NO ';' {sendto_realops("oper can't die\n"); } ;
+oper_die: DIE '=' YES ';' {sendto_realops("oper can die");}|
+	DIE '=' NO ';' {sendto_realops("oper can't die"); } ;
 
-oper_rehash: REHASH '=' YES ';' {sendto_realops("oper can rehash\n");}|
-	REHASH '=' NO ';' {sendto_realops("oper can't rehash\n"); } ;
+oper_rehash: REHASH '=' YES ';' {sendto_realops("oper can rehash");}|
+	REHASH '=' NO ';' {sendto_realops("oper can't rehash"); } ;
 
-oper_class:	CLASS '=' QSTRING ';' {sendto_realops("oper.class [%s]\n", yylval.string); };
+oper_class:	CLASS '=' QSTRING ';' {sendto_realops("oper.class [%s]", yylval.string); };
 
 
 /***************************************************************************
@@ -204,15 +207,15 @@ class_item:	class_name |
 		class_max_number |
 		class_sendq
 
-class_name:	NAME '=' QSTRING ';'  { sendto_realops("class.name [%s]\n",yylval.string); };
+class_name:	NAME '=' QSTRING ';'  { sendto_realops("class.name [%s]",yylval.string); };
 
-class_ping_time:	PING_TIME '=' NUMBER ';' { sendto_realops("ping_time %d\n",yylval.number); };
+class_ping_time:	PING_TIME '=' NUMBER ';' { sendto_realops("ping_time %d",yylval.number); };
 
-class_number_per_ip:	NUMBER_PER_IP '=' NUMBER ';' { sendto_realops("number_per_ip [%d]\n",yylval.number); };
+class_number_per_ip:	NUMBER_PER_IP '=' NUMBER ';' { sendto_realops("number_per_ip [%d]",yylval.number); };
 
-class_max_number:	MAX_NUMBER '=' NUMBER ';' { sendto_realops("max_number [%d]\n",yylval.number); };
+class_max_number:	MAX_NUMBER '=' NUMBER ';' { sendto_realops("max_number [%d]",yylval.number); };
 
-class_sendq:	SENDQ '=' NUMBER ';' { sendto_realops("sendq [%d]\n",yylval.number); };
+class_sendq:	SENDQ '=' NUMBER ';' { sendto_realops("sendq [%d]",yylval.number); };
 
 /***************************************************************************
  *  section listen
@@ -223,11 +226,11 @@ listen_entry:	LISTEN '{' listen_items '}' ';'
 listen_items:	listen_items listen_item |
 		listen_item
 
-listen_item:	listen_name | listen_port
+listen_item:	listen_name | listen_port 
 
-listen_name:	NAME '=' QSTRING ';'  { sendto_realops("listen.name [%s]\n",yylval.string); };
+listen_name:	NAME '=' QSTRING ';'  { sendto_realops("listen.name [%s]",yylval.string); };
 
-listen_port:	PORT '=' NUMBER ';'  { sendto_realops("listen.port [%d]\n",yylval.number); };
+listen_port:	PORT '=' NUMBER ';'  { sendto_realops("listen.port [%d]",yylval.number); };
 
 /***************************************************************************
  *  section client
@@ -242,22 +245,22 @@ client_item:	client_allow | client_passwd | client_class |
 		client_kline_exempt | client_allow_bots | client_have_ident |
 		client_no_tilde | client_spoof
 
-client_allow:	ALLOW '=' QSTRING ';' { sendto_realops("client.allow [%s]\n",yylval.string); } | ALLOW '=' IP_TYPE ';' {sendto_realops("client.allow IP_TYPE [%X] [%X]\n", yylval.ip_entry.ip, yylval.ip_entry.ip_mask); } ;
+client_allow:	ALLOW '=' QSTRING ';' { sendto_realops("client.allow [%s]",yylval.string); } | ALLOW '=' IP_TYPE ';' {sendto_realops("client.allow IP_TYPE [%X] [%X]", yylval.ip_entry.ip, yylval.ip_entry.ip_mask); } ;
 
-client_passwd:	PASSWORD '=' QSTRING ';'  { sendto_realops("client.password [%s]\n",yylval.string); };
+client_passwd:	PASSWORD '=' QSTRING ';'  { sendto_realops("client.password [%s]",yylval.string); };
 
-client_spoof:	SPOOF '=' QSTRING ';'  { sendto_realops("client.spoof [%s]\n",yylval.string); };
+client_spoof:	SPOOF '=' QSTRING ';'  { sendto_realops("client.spoof [%s]",yylval.string); };
 
-client_kline_exempt:	KLINE_EXEMPT '=' YES ';'  { sendto_realops("client is exempt from klines\n"); } |
-  KLINE_EXEMPT '=' NO ';' {sendto_realops("client is not exempt from klines\n"); } ;
+client_kline_exempt:	KLINE_EXEMPT '=' YES ';'  { sendto_realops("client is exempt from klines"); } |
+  KLINE_EXEMPT '=' NO ';' {sendto_realops("client is not exempt from klines"); } ;
 
-client_allow_bots:	ALLOW_BOTS '=' YES ';'  { sendto_realops("client is allowed to run bots\n"); } |
-  ALLOW_BOTS '=' NO ';' {sendto_realops("client is not allowed to run bots\n"); } ;
+client_allow_bots:	ALLOW_BOTS '=' YES ';'  { sendto_realops("client is allowed to run bots"); } |
+  ALLOW_BOTS '=' NO ';' {sendto_realops("client is not allowed to run bots"); } ;
 
-client_have_ident:	HAVE_IDENT ';'  { sendto_realops("client must have identd\n"); };
+client_have_ident:	HAVE_IDENT ';'  { sendto_realops("client must have identd"); };
 
-client_no_tilde:	NO_TILDE ';'  { sendto_realops("client never has tilde\n"); };
-client_class:	CLASS '=' QSTRING ';'  { sendto_realops("client.name [%s]\n",yylval.string); };
+client_no_tilde:	NO_TILDE ';'  { sendto_realops("client never has tilde"); };
+client_class:	CLASS '=' QSTRING ';'  { sendto_realops("client.name [%s]",yylval.string); };
 
 /***************************************************************************
  *  section quarantine
@@ -270,9 +273,9 @@ quarantine_items:	quarantine_items quarantine_item |
 
 quarantine_item:	quarantine_name | quarantine_reason
 
-quarantine_name:	NAME '=' QSTRING ';'  { sendto_realops("quarantine.name [%s]\n",yylval.string); };
+quarantine_name:	NAME '=' QSTRING ';'  { sendto_realops("quarantine.name [%s]",yylval.string); };
 
-quarantine_reason:	REASON '=' QSTRING ';'  { sendto_realops("quarantine.reason [%s]\n",yylval.string); };
+quarantine_reason:	REASON '=' QSTRING ';'  { sendto_realops("quarantine.reason [%s]",yylval.string); };
 
 /***************************************************************************
  *  section connect
@@ -288,27 +291,27 @@ connect_item:	connect_name | connect_host | connect_send_password |
 		connect_compressed | connect_lazylink |
 		connect_hub_mask | connect_class
 
-connect_name:	NAME '=' QSTRING ';'  { sendto_realops("connect.name [%s]\n",yylval.string); };
+connect_name:	NAME '=' QSTRING ';'  { sendto_realops("connect.name [%s]",yylval.string); };
 
-connect_host:	HOST '=' QSTRING ';'  { sendto_realops("connect.host [%s]\n",yylval.string); };
+connect_host:	HOST '=' QSTRING ';'  { sendto_realops("connect.host [%s]",yylval.string); };
 
-connect_send_password:	SEND_PASSWORD '=' QSTRING ';'  { sendto_realops("connect.send_password [%s]\n",yylval.string); };
+connect_send_password:	SEND_PASSWORD '=' QSTRING ';'  { sendto_realops("connect.send_password [%s]",yylval.string); };
 
-connect_accept_password:	ACCEPT_PASSWORD '=' QSTRING ';'  { sendto_realops("connect.accept_password [%s]\n",yylval.string); };
+connect_accept_password:	ACCEPT_PASSWORD '=' QSTRING ';'  { sendto_realops("connect.accept_password [%s]",yylval.string); };
 
-connect_port:	PORT '=' NUMBER ';'  { sendto_realops("connect.port [%d]\n",yylval.number); };
+connect_port:	PORT '=' NUMBER ';'  { sendto_realops("connect.port [%d]",yylval.number); };
 
-connect_compressed:	COMPRESSED '=' YES ';'  { sendto_realops("connect compressed YES\n"); } |
-		COMPRESSED '=' NO ';'   { sendto_realops("connect compressed NO\n"); } ;
+connect_compressed:	COMPRESSED '=' YES ';'  { sendto_realops("connect compressed YES"); } |
+		COMPRESSED '=' NO ';'   { sendto_realops("connect compressed NO"); } ;
 
-connect_lazylink:	LAZYLINK '=' YES ';'  { sendto_realops("connect lazylink YES\n"); } |
-		LAZYLINK '=' NO ';'   { sendto_realops("connect lazylink NO\n"); } ;
+connect_lazylink:	LAZYLINK '=' YES ';'  { sendto_realops("connect lazylink YES"); } |
+		LAZYLINK '=' NO ';'   { sendto_realops("connect lazylink NO"); } ;
 
 /* connect_hub.masks:	HUB_MASKS  '{' QSTRING ';' '}' */
 
-connect_hub_mask:	HUB_MASK '=' QSTRING ';'  { sendto_realops("connect.hub_mask [%s]\n",yylval.string); };
+connect_hub_mask:	HUB_MASK '=' QSTRING ';'  { sendto_realops("connect.hub_mask [%s]",yylval.string); };
 
-connect_class:	CLASS '=' QSTRING ';'  { sendto_realops("connect.class [%s]\n",yylval.string); };
+connect_class:	CLASS '=' QSTRING ';'  { sendto_realops("connect.class [%s]",yylval.string); };
 
 
 /***************************************************************************
@@ -323,9 +326,9 @@ kill_items:	kill_items kill_item |
 kill_item:	kill_name | kill_reason
 
 
-kill_name:	NAME '=' QSTRING ';'  { sendto_realops("kill.name [%s]\n",yylval.string); };
+kill_name:	NAME '=' QSTRING ';'  { sendto_realops("kill.name [%s]",yylval.string); };
 
-kill_reason:	REASON '=' QSTRING ';'  { sendto_realops("kill.name [%s]\n",yylval.string); };
+kill_reason:	REASON '=' QSTRING ';'  { sendto_realops("kill.name [%s]",yylval.string); };
 
 /***************************************************************************
  *  section deny
@@ -339,9 +342,9 @@ deny_items:	deny_items deny_item |
 deny_item:	deny_ip | deny_reason
 
 
-deny_ip:	IP '=' IP_TYPE ';'  { sendto_realops("deny.ip IP_TYPE [%X] [%X]\n",yylval.ip_entry.ip, yylval.ip_entry.ip_mask); };
+deny_ip:	IP '=' IP_TYPE ';'  { sendto_realops("deny.ip IP_TYPE [%X] [%X]",yylval.ip_entry.ip, yylval.ip_entry.ip_mask); };
 
-deny_reason:	REASON '=' QSTRING ';'  { sendto_realops("deny.reason [%s]\n",yylval.string); };
+deny_reason:	REASON '=' QSTRING ';'  { sendto_realops("deny.reason [%s]",yylval.string); };
 
 
 
