@@ -1,3 +1,12 @@
+*** 20010529_1 by jdc
+* Support for a new general {} variable, 'max_chans_per_user'.  This
+  replaces the previous (statically defined) MAXCHANNELSPERUSER.
+  After adding this feature, I realised it should probably go into a
+  class {} block.  However, the general {} method keeps with the
+  historical aspect (being globally defined).
+
+
+
 *** 20010528_14 by toot
 reset some defaults in config.h that got changed.
 
