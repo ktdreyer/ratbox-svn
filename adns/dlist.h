@@ -30,8 +30,14 @@
 #ifndef ADNS_DLIST_H_INCLUDED
 #define ADNS_DLIST_H_INCLUDED
 
+/* More strange shit for OS X and its b0rked C compiler */
+
+#define unused_arg /**/
+
 #define ADNS_LIST_INIT(flist) ((flist).head= (flist).tail= 0)
 #define LINK_INIT(flink) ((flink).next= (flink).back= 0)
+
+
 
 #define LIST_UNLINK_PART(flist,node,part) \
   do { \
@@ -49,7 +55,7 @@
     (flist).tail= (node); \
   } while(0)
 
-#define LIST_UNLINK(flist,node) LIST_UNLINK_PART(flist,node,)
-#define LIST_LINK_TAIL(flist,node) LIST_LINK_TAIL_PART(flist,node,)
-
+#define LIST_UNLINK(flist,node) LIST_UNLINK_PART(flist,node,unused_arg)
+#define LIST_LINK_TAIL(flist,node) LIST_LINK_TAIL_PART(flist,node, unused_arg)
+#undef unused_arg
 #endif
