@@ -1,3 +1,23 @@
+leeh        2002/09/16 18:46:46 UTC	(20020916_1)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    modules              m_kline.c m_resv.c 
+    src                  s_conf.c 
+  Log:
+  - fixed an implicit declaration in m_resv.c
+  - cleaned up language around number_per_ip_global in example confs
+  - fixed a memleak setting klines that already exist
+  
+  Revision  Changes    Path
+  7.183     +3 -1      ircd-ratbox/doc/example.conf
+  7.21      +2 -1      ircd-ratbox/doc/example.efnet.conf
+  1.120     +14 -21    ircd-ratbox/modules/m_kline.c
+  1.21      +2 -1      ircd-ratbox/modules/m_resv.c
+  7.355     +6 -3      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2002/09/16 18:11:03 UTC	(20020916_0)
 
   Modified files:
