@@ -1,3 +1,12 @@
+*** 20001028_4 by db
+- ok, did preliminary mods on sjoin to support vchans.
+  This function is a pile of festering pus..
+  Anyway, it should more or less work but its untested. Still to be
+  done is the mods to the sendto_channel etc. so they all send the right
+  join messages to the vchans as appropriate.
+
+
+
 *** 20001028_3 by db
 - rewrote burst code, added new function to do the actual burst. 'bout time.
   rewrote the burst code to send vchans as sub chans of top level channels.
