@@ -1,3 +1,15 @@
+androsyn    2004/03/15 15:20:42 EST	(20040315_2)
+
+  Modified files:
+    tools/rsa_respond    challenge.irc 
+  Log:
+  Update of challenge.irc from blackjac
+  
+  Revision  Changes    Path
+  1.2       +113 -75   ircd-ratbox/tools/rsa_respond/challenge.irc
+
+
+
 leeh        2004/03/15 12:58:11 EST	(20040315_1)
 
   Modified files:
