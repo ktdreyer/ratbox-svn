@@ -1,3 +1,20 @@
+*** 20010312_2 by a1kmm
+- Fixed fl_'s revert and fixed the klines bug.
+- Please not that persistant clients are temporarily back in, but please don't try and remove them by reverting
+  because I can guarantee it will break more stuff than it fixes, like last time. These things are best
+  removed manually, as it is silly to revert days of work for a little thing like a "hme" to should be a
+  "hmc" as one done last time. However, this being an open source project, we probably don't want to actually
+  hide our code from the public - how about if we go for:
+#ifdef PERSISTANT_CLIENTS
+#error Persistant clients aren't finished yet.
+...
+#endif
+ which should stop people defining but not block people from seeing it. Furthermore, we should not so much
+ as put a #undef PERSISTANT_CLIENTS or /* #define PERSISTANT_CLIENTS */ in config.h or anything, as that is
+ just asking people to define it. Or we could just manually delete them(which will be easy as they are all
+ wrapped in #ifdef PERSISTANT_CLIENTS except a few harmless things in the lexer/parser.
+
+
 *** 20010312_1 by androsyn
 Removed remains of release_dns_client_reply()
 
