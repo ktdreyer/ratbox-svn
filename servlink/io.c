@@ -220,7 +220,7 @@ send_zipstats(struct ctrl_command *unused)
 #ifdef HAVE_LIBZ
 	int i = 0;
 	int ret;
-
+	u_int32_t len;
 	if(!in_state.active || !out_state.active)
 		send_error("Error processing CMD_ZIPSTATS - link is not active!");
 	if(!in_state.zip || !out_state.zip)
@@ -229,25 +229,30 @@ send_zipstats(struct ctrl_command *unused)
 	ctrl_buf[i++] = RPL_ZIPSTATS;
 	ctrl_buf[i++] = 0;
 	ctrl_buf[i++] = 16;
-	ctrl_buf[i++] = ((in_state.zip_state.z_stream.total_out >> 24) & 0xFF);
-	ctrl_buf[i++] = ((in_state.zip_state.z_stream.total_out >> 16) & 0xFF);
-	ctrl_buf[i++] = ((in_state.zip_state.z_stream.total_out >> 8) & 0xFF);
-	ctrl_buf[i++] = ((in_state.zip_state.z_stream.total_out) & 0xFF);
 
-	ctrl_buf[i++] = ((in_state.zip_state.z_stream.total_in >> 24) & 0xFF);
-	ctrl_buf[i++] = ((in_state.zip_state.z_stream.total_in >> 16) & 0xFF);
-	ctrl_buf[i++] = ((in_state.zip_state.z_stream.total_in >> 8) & 0xFF);
-	ctrl_buf[i++] = ((in_state.zip_state.z_stream.total_in) & 0xFF);
+	len = (u_int32_t) in_state.zip_state.z_stream.total_out;
+	ctrl_buf[i++] = ((len >> 24) & 0xFF);
+	ctrl_buf[i++] = ((len >> 16) & 0xFF);
+	ctrl_buf[i++] = ((len >> 8) & 0xFF);
+	ctrl_buf[i++] = ((len) & 0xFF);
 
-	ctrl_buf[i++] = ((out_state.zip_state.z_stream.total_in >> 24) & 0xFF);
-	ctrl_buf[i++] = ((out_state.zip_state.z_stream.total_in >> 16) & 0xFF);
-	ctrl_buf[i++] = ((out_state.zip_state.z_stream.total_in >> 8) & 0xFF);
-	ctrl_buf[i++] = ((out_state.zip_state.z_stream.total_in) & 0xFF);
+	len = (u_int32_t) in_state.zip_state.z_stream.total_in;
+	ctrl_buf[i++] = ((len >> 24) & 0xFF);
+	ctrl_buf[i++] = ((len >> 16) & 0xFF);
+	ctrl_buf[i++] = ((len >> 8) & 0xFF);
+	ctrl_buf[i++] = ((len) & 0xFF);
 
-	ctrl_buf[i++] = ((out_state.zip_state.z_stream.total_out >> 24) & 0xFF);
-	ctrl_buf[i++] = ((out_state.zip_state.z_stream.total_out >> 16) & 0xFF);
-	ctrl_buf[i++] = ((out_state.zip_state.z_stream.total_out >> 8) & 0xFF);
-	ctrl_buf[i++] = ((out_state.zip_state.z_stream.total_out) & 0xFF);
+	len = (u_int32_t) out_state.zip_state.z_stream.total_in;
+	ctrl_buf[i++] = ((len >> 24) & 0xFF);
+	ctrl_buf[i++] = ((len >> 16) & 0xFF);
+	ctrl_buf[i++] = ((len >> 8) & 0xFF);
+	ctrl_buf[i++] = ((len) & 0xFF);
+
+	len = (u_int32_t) out_state.zip_state.z_stream.total_out;
+	ctrl_buf[i++] = ((len >> 24) & 0xFF);
+	ctrl_buf[i++] = ((len >> 16) & 0xFF);
+	ctrl_buf[i++] = ((len >> 8) & 0xFF);
+	ctrl_buf[i++] = ((len) & 0xFF);
 
 	in_state.zip_state.z_stream.total_in = 0;
 	in_state.zip_state.z_stream.total_out = 0;
