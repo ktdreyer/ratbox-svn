@@ -1,3 +1,11 @@
+*** 20010109_6 by db
+- removed unneeded space in parse.c, do_numeric() this caused
+  remote numerics to show up with an obvious extra space.
+
+  due to this -> ircsprintf(t," :%s", parv[parc-1]);
+
+
+
 *** 20010109_5 by wcampbel
 We now show incomplete (unknown) connections in TRACE to opers
 
