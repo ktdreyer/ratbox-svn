@@ -1,3 +1,26 @@
+leeh        2004/08/07 10:38:40 EDT	(20040807_4)
+
+  Modified files:
+    include              class.h client.h irc_string.h ircd.h 
+                         s_conf.h 
+    modules/core         m_quit.c m_server.c registration.c 
+    src                  hostmask.c 
+  Log:
+  - remove some unused prototypes and some unused bitmasks..
+  
+  Revision  Changes    Path
+  7.22      +0 -1      ircd-ratbox/include/class.h
+  7.253     +0 -6      ircd-ratbox/include/client.h
+  7.60      +1 -7      ircd-ratbox/include/irc_string.h
+  7.78      +0 -3      ircd-ratbox/include/ircd.h
+  7.290     +0 -12     ircd-ratbox/include/s_conf.h
+  1.48      +1 -4      ircd-ratbox/modules/core/m_quit.c
+  1.140     +1 -2      ircd-ratbox/modules/core/m_server.c
+  1.7       +1 -3      ircd-ratbox/modules/core/registration.c
+  7.103     +0 -6      ircd-ratbox/src/hostmask.c
+
+
+
 androsyn    2004/08/07 10:16:10 EDT	(20040807_3)
 
   Modified files:
