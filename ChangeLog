@@ -1,3 +1,55 @@
+leeh        2003/07/22 11:42:39 EDT	(20030722_2)
+
+  Modified files:
+    doc                  Makefile.in 
+    include              cache.h channel.h config.h config.h.dist 
+                         s_conf.h 
+    modules              .depend m_cryptlink.c m_help.c m_knock.c 
+                         m_links.c m_motd.c 
+    modules/core         m_mode.c m_server.c 
+    src                  .depend Makefile.in cache.c channel.c 
+                         ircd.c newconf.c s_serv.c s_user.c 
+  Removed files:
+    include              motd.h 
+    src                  motd.c 
+  Log:
+  - rewrote the links cache, dont bother writing it to a file, simply store
+    it in memory.  on startup, they can cope with not having the full
+    output until it updates.
+  - removed all the MessageFile stuff, its all been rewritten now
+  - add a ban cache to can_send(), a serial in the channel, a serial in
+    the membership.  if they match we test can_send_banned() instead
+    of is_banned()
+  - s/return/continue in burst_users, this meant we didnt burst any users.
+  
+  Revision  Changes    Path
+  7.21      +4 -0      ircd-ratbox/doc/Makefile.in
+  1.3       +7 -0      ircd-ratbox/include/cache.h
+  7.147     +6 -1      ircd-ratbox/include/channel.h
+  7.162     +0 -2      ircd-ratbox/include/config.h
+  7.66      +0 -2      ircd-ratbox/include/config.h.dist
+  7.17      +0 -65     ircd-ratbox/include/motd.h (dead)
+  7.247     +0 -3      ircd-ratbox/include/s_conf.h
+  1.28      +196 -214  ircd-ratbox/modules/.depend
+  1.81      +15 -6     ircd-ratbox/modules/core/m_mode.c
+  1.116     +1 -3      ircd-ratbox/modules/core/m_server.c
+  1.57      +2 -3      ircd-ratbox/modules/m_cryptlink.c
+  1.61      +1 -2      ircd-ratbox/modules/m_help.c
+  1.81      +2 -2      ircd-ratbox/modules/m_knock.c
+  1.53      +32 -18    ircd-ratbox/modules/m_links.c
+  1.46      +1 -2      ircd-ratbox/modules/m_motd.c
+  7.29      +121 -139  ircd-ratbox/src/.depend
+  7.133     +0 -1      ircd-ratbox/src/Makefile.in
+  1.3       +40 -1     ircd-ratbox/src/cache.c
+  7.390     +36 -5     ircd-ratbox/src/channel.c
+  7.302     +1 -17     ircd-ratbox/src/ircd.c
+  7.36      +0 -162    ircd-ratbox/src/motd.c (dead)
+  7.101     +2 -1      ircd-ratbox/src/newconf.c
+  7.340     +9 -92     ircd-ratbox/src/s_serv.c
+  7.274     +0 -1      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2003/07/22 10:51:40 EDT	(20030722_1)
 
   Removed files:
