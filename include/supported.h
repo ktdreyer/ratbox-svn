@@ -45,7 +45,7 @@
         ConfigChannel.use_invex ? " INVEX" : "", \
         MAXMODEPARAMS,ConfigChannel.max_chans_per_user, \
         ConfigChannel.max_bans, \
-        ConfigFileEntry.max_targets,NICKLEN,TOPICLEN,TOPICLEN
+        ConfigFileEntry.max_targets,NICKLEN-1,TOPICLEN,TOPICLEN
 
 #define FEATURES2 "CHANTYPES=%s" \
                   " PREFIX=%s" \

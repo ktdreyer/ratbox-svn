@@ -74,11 +74,6 @@ const char* inetntoa(const char* in_addr);
 const char *inetntop(int af, const void *src, char *dst, unsigned int size);
 int inetpton(int af, const char *src, void *dst);
                                 
-/*
- * strncpy_irc - optimized strncpy
- */
-char* strncpy_irc(char* s1, const char* s2, size_t n);
-
 
 #ifndef HAVE_STRLCPY
 size_t strlcpy(char *dst, const char *src, size_t siz);

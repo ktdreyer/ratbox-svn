@@ -174,7 +174,7 @@ static void mo_unkline (struct Client *client_p,struct Client *source_p,
     {
       char *found_host, *found_user;
 
-      strncpy_irc(buff, buf, BUFSIZE-1)[BUFSIZE-1] = 0;
+      strlcpy(buff, buf, BUFSIZE);
 
       if ((p = strchr(buff,'\n')) != NULL)
 	*p = '\0';
@@ -382,7 +382,7 @@ mo_undline (struct Client *client_p, struct Client *source_p,
 
   while(fbgets(buf, sizeof(buf), in))
     {
-      strncpy_irc(buff, buf, BUFSIZE-1)[BUFSIZE-1] = 0;
+      strlcpy(buff, buf, BUFSIZE);
 
       if ((p = strchr(buff,'\n')) != NULL)
 	*p = '\0';

@@ -2028,7 +2028,7 @@ chm_key(struct Client *client_p, struct Client *source_p,
       fix_key_old(key);
 
     assert(key[0] != ' ');
-    strncpy_irc(chptr->mode.key, key, KEYLEN - 1)[KEYLEN - 1] = 0;
+    strlcpy(chptr->mode.key, key, KEYLEN);;
 
     for (i = 0; i < mode_count_minus; i++)
     {

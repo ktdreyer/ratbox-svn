@@ -177,7 +177,7 @@ static void ms_sjoin(struct Client *client_p,
         mode.mode |= MODE_HIDEOPS;
         break;
       case 'k':
-        strncpy_irc(mode.key, parv[4 + args], KEYLEN);
+        strlcpy(mode.key, parv[4 + args], KEYLEN);
         args++;
         if (parc < 5+args)
           return;

@@ -97,7 +97,7 @@ static void m_part(struct Client *client_p,
   reason[0] = '\0';
 
   if (parc > 2)
-    strncpy_irc(reason, parv[2], TOPICLEN);
+    strlcpy(reason, parv[2], TOPICLEN);
 
   name = strtoken( &p, parv[1], ",");
 

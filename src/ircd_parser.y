@@ -2159,20 +2159,20 @@ general_iauth_port: IAUTH_PORT '=' NUMBER ';'
 
 general_fname_userlog: FNAME_USERLOG '=' QSTRING ';'
 {
-  strncpy_irc(ConfigFileEntry.fname_userlog, yylval.string,
-	      MAXPATHLEN-1)[MAXPATHLEN-1] = 0;
+  strlcpy(ConfigFileEntry.fname_userlog, yylval.string,
+	      MAXPATHLEN);
 } ;
 
 general_fname_foperlog: FNAME_FOPERLOG '=' QSTRING ';'
 {
-  strncpy_irc(ConfigFileEntry.fname_foperlog, yylval.string,
-	      MAXPATHLEN-1)[MAXPATHLEN-1] = 0;
+  strlcpy(ConfigFileEntry.fname_foperlog, yylval.string,
+	      MAXPATHLEN);
 };
 
 general_fname_operlog: FNAME_OPERLOG '=' QSTRING ';'
 {
-  strncpy_irc(ConfigFileEntry.fname_operlog, yylval.string,
-	      MAXPATHLEN-1)[MAXPATHLEN-1] = 0;
+  strlcpy(ConfigFileEntry.fname_operlog, yylval.string,
+	      MAXPATHLEN);
 };
 
 general_glines: GLINES '=' TYES ';'

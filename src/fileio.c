@@ -199,7 +199,7 @@ char* fbgets(char* buf, size_t len, FBFILE* fb)
 
   if(fb->pbptr)
   {
-    strncpy_irc(buf,fb->pbptr,len);
+    strlcpy(buf,fb->pbptr,len);
     fb->pbptr = NULL;
     return(buf);
   }

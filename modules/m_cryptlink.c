@@ -417,7 +417,7 @@ static void cryptlink_serv(struct Client *client_p, struct Client *source_p,
    * if we are connecting (Handshake), we already have the name from the
    * C:line in client_p->name
    */
-  strncpy_irc(client_p->name, name, HOSTLEN);
+  strlcpy(client_p->name, name, HOSTLEN);
 
   p = info;
 
@@ -435,7 +435,7 @@ static void cryptlink_serv(struct Client *client_p, struct Client *source_p,
       p = "(Unknown Location)";
   }
 
-  strncpy_irc(client_p->info, p, REALLEN);
+  strlcpy(client_p->info, p, REALLEN);
   client_p->hopcount = 0;
 
   if (!(client_p->localClient->out_cipher ||
@@ -547,8 +547,7 @@ static char *parse_cryptserv_args(struct Client *client_p,
   memcpy(key, out, CIPHERKEYLEN);
   MyFree(out);
 
-  strncpy_irc(info, parv[4], REALLEN);
-  info[REALLEN] = '\0';
+  strlcpy(info, parv[4], REALLEN);
 
   if (strlen(name) > HOSTLEN)
   {

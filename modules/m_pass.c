@@ -24,7 +24,7 @@
 
 #include "handlers.h"  /* m_pass prototype */
 #include "client.h"      /* client struct */
-#include "irc_string.h"  /* strncpy_irc */
+#include "irc_string.h" 
 #include "send.h"        /* sendto_one */
 #include "numeric.h"     /* ERR_xxx */
 #include "ircd.h"        /* me */
@@ -75,7 +75,7 @@ static void mr_pass(struct Client *client_p, struct Client *source_p,
       return;
     }
 
-  strncpy_irc(client_p->localClient->passwd, password, PASSWDLEN);
+  strlcpy(client_p->localClient->passwd, password, PASSWDLEN);
 
   if (parc > 2)
     {

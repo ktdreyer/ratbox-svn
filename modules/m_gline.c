@@ -176,10 +176,8 @@ static void mo_gline(struct Client *client_p,
 	  if (!*host)           /* duh. no host found, assume its '*' host */
 	    host = "*";
 	      
-	  strncpy_irc(tempuser, user, USERLEN + 1);     /* allow for '*' */
-	  tempuser[USERLEN + 1] = '\0';
-	  strncpy_irc(temphost, host, HOSTLEN);
-	  temphost[HOSTLEN] = '\0';
+	  strlcpy(tempuser, user, USERLEN);     /* allow for '*' */
+	  strlcpy(temphost, host, HOSTLEN);
 	  user = tempuser;
 	  host = temphost;
 	}
@@ -751,14 +749,14 @@ add_new_majority_gline(const char* oper_nick,
   struct gline_pending *pending = (struct gline_pending*)
     MyMalloc(sizeof(struct gline_pending));
 
-  strncpy_irc(pending->oper_nick1, oper_nick, NICKLEN);
-  strncpy_irc(pending->oper_user1, oper_user, USERLEN);
-  strncpy_irc(pending->oper_host1, oper_host, HOSTLEN);
+  strlcpy(pending->oper_nick1, oper_nick, NICKLEN);
+  strlcpy(pending->oper_user1, oper_user, USERLEN);
+  strlcpy(pending->oper_host1, oper_host, HOSTLEN);
 
   pending->oper_server1 = find_or_add(oper_server);
 
-  strncpy_irc(pending->user, user, USERLEN);
-  strncpy_irc(pending->host, host, HOSTLEN);
+  strlcpy(pending->user, user, USERLEN);
+  strlcpy(pending->host, host, HOSTLEN);
   DupString(pending->reason1, reason);
   pending->reason2 = NULL;
 
@@ -847,9 +845,9 @@ majority_gline(struct Client *source_p,
             }
           else
             {
-              strncpy_irc(gline_pending_ptr->oper_nick2, oper_nick, NICKLEN);
-              strncpy_irc(gline_pending_ptr->oper_user2, oper_user, USERLEN);
-              strncpy_irc(gline_pending_ptr->oper_host2, oper_host, HOSTLEN);
+              strlcpy(gline_pending_ptr->oper_nick2, oper_nick, NICKLEN);
+              strlcpy(gline_pending_ptr->oper_user2, oper_user, USERLEN);
+              strlcpy(gline_pending_ptr->oper_host2, oper_host, HOSTLEN);
               DupString(gline_pending_ptr->reason2, reason);
               gline_pending_ptr->oper_server2 = find_or_add(oper_server);
               gline_pending_ptr->last_gline_time = CurrentTime;

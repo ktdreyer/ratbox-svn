@@ -355,18 +355,17 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
 	  return(CLIENT_EXITED);
 	}
       else
-	strncpy_irc(source_p->username, username, USERLEN);
+	strlcpy(source_p->username, username, USERLEN);
 
       if (IsNoTilde(aconf))
 	{
-	  strncpy_irc(source_p->username, username, USERLEN);
+	  strlcpy(source_p->username, username, USERLEN);
 	}
       else
 	{
 	  *source_p->username = '~';
-	  strncpy_irc(&source_p->username[1], username, USERLEN - 1);
+	  strlcpy(&source_p->username[1], username, USERLEN);
 	}
-      source_p->username[USERLEN] = '\0';
     }
 
   /* password check */
@@ -512,7 +511,7 @@ int register_remote_user(struct Client *client_p, struct Client *source_p,
   if(strlen(username) > USERLEN)
     username[USERLEN] = '\0';
 
-  strncpy_irc(source_p->username, username, USERLEN);
+  strlcpy(source_p->username, username, USERLEN);
 
   SetClient(source_p);
 
@@ -820,11 +819,10 @@ int do_local_user(char* nick, struct Client* client_p, struct Client* source_p,
     
   /*
    * don't take the clients word for it, ever
-   *  strncpy_irc(user->host, host, HOSTLEN); 
    */
   user->server = me.name;
 
-  strncpy_irc(source_p->info, realname, REALLEN);
+  strlcpy(source_p->info, realname, REALLEN);
  
   if (source_p->name[0])
   { 
@@ -838,7 +836,7 @@ int do_local_user(char* nick, struct Client* client_p, struct Client* source_p,
           /*
            * save the username in the client
            */
-          strncpy_irc(source_p->username, username, USERLEN);
+          strlcpy(source_p->username, username, USERLEN);
         }
     }
   return 0;
@@ -869,8 +867,8 @@ int do_remote_user(char* nick, struct Client* client_p, struct Client* source_p,
    * coming from another server, take the servers word for it
    */
   user->server = find_or_add(server);
-  strncpy_irc(source_p->host, host, HOSTLEN); 
-  strncpy_irc(source_p->info, realname, REALLEN);
+  strlcpy(source_p->host, host, HOSTLEN); 
+  strlcpy(source_p->info, realname, REALLEN);
   if (id)
 	  strcpy(source_p->user->id, id);
   

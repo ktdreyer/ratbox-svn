@@ -100,7 +100,7 @@ struct Server
 {
   struct User*     user;        /* who activated this connection */
   const char*      up;          /* Pointer to scache name */
-  char             by[NICKLEN + 1];
+  char             by[NICKLEN];
   struct ConfItem* sconf;       /* connect{} pointer for this server */
   struct Client*   servers;     /* Servers on this server */
   struct Client*   users;       /* Users on this server */
@@ -177,7 +177,7 @@ struct Client
    * client->llname is used to store the clients requested nick
    * temporarily for new connections.
    */
-  char              llname[NICKLEN + 1];
+  char              llname[NICKLEN];
   /* 
    * client->username is the username from ident or the USER message, 
    * If the client is idented the USER message is ignored, otherwise 

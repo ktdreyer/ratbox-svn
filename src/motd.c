@@ -48,8 +48,7 @@
 */
 void InitMessageFile(MotdType motdType, char *fileName, MessageFile *motd)
   {
-    strncpy_irc(motd->fileName, fileName, PATH_MAX);
-    motd->fileName[PATH_MAX] = '\0';
+    strlcpy(motd->fileName, fileName, PATH_MAX);
     motd->motdType = motdType;
     motd->contentsOfFile = NULL;
     motd->lastChangedDate[0] = '\0';
@@ -199,8 +198,7 @@ int ReadMessageFile(MessageFile *MessageFileptr)
         *p = '\0';
       newMessageLine = (MessageFileLine*) MyMalloc(sizeof(MessageFileLine));
 
-      strncpy_irc(newMessageLine->line, buffer, MESSAGELINELEN);
-      newMessageLine->line[MESSAGELINELEN] = '\0';
+      strlcpy(newMessageLine->line, buffer, MESSAGELINELEN);
       newMessageLine->next = (MessageFileLine *)NULL;
 
       if (MessageFileptr->contentsOfFile)

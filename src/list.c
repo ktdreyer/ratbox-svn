@@ -202,7 +202,7 @@ _make_dlink_node(const char *file, int line)
  dlink_node *lp;
  #define DLINK_DBG_PREFIX "DLINK:"
  strcpy(nambuf, DLINK_DBG_PREFIX);
- strncpy_irc(nambuf+sizeof(DLINK_DBG_PREFIX)-1, file,
+ strlcpy(nambuf+sizeof(DLINK_DBG_PREFIX)-1, file,
              sizeof(nambuf)-sizeof(DLINK_DBG_PREFIX));
 #ifdef NOBALLOC
  lp = _MyMalloc(sizeof(*lp), nambuf, line);

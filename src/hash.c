@@ -585,8 +585,7 @@ hash_find_masked_server(const char* name)
   /*
    * copy the damn thing and be done with it
    */
-  strncpy_irc(buf, name, HOSTLEN);
-  buf[HOSTLEN] = '\0';
+  strlcpy(buf, name, HOSTLEN);
 
   while ((s = strchr(p, '.')) != 0)
     {

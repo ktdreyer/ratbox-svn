@@ -478,13 +478,11 @@ static char *cluster(char *hostname)
 
   if(strchr(hostname,'@'))      
     {
-      strncpy_irc(result, hostname, HOSTLEN);
-      result[HOSTLEN] = '\0';
+      strlcpy(result, hostname, HOSTLEN);
       return(result);
     }
 
-  strncpy_irc(temphost, hostname, HOSTLEN);
-  temphost[HOSTLEN] = '\0';
+  strlcpy(temphost, hostname, HOSTLEN);
 
   is_ip_number = YES;   /* assume its an IP# */
   ipp = temphost;
@@ -513,8 +511,7 @@ static char *cluster(char *hostname)
       zap_point++;
       *zap_point++ = '*';               /* turn 111.222.333.444 into */
       *zap_point = '\0';                /*      111.222.333.*        */
-      strncpy_irc(result, temphost, HOSTLEN);
-      result[HOSTLEN] = '\0';
+      strlcpy(result, temphost, HOSTLEN);
       return(result);
     }
   else
@@ -542,20 +539,17 @@ static char *cluster(char *hostname)
               if(number_of_dots == 0)
                 {
                   result[0] = '*';
-                  strncpy_irc(result + 1, host_mask, HOSTLEN - 1);
-                  result[HOSTLEN] = '\0';
+                  strlcpy(result + 1, host_mask, HOSTLEN);
                   return(result);
                 }
               host_mask--;
             }
           result[0] = '*';                      /* foo.com => *foo.com */
-          strncpy_irc(result + 1, temphost, HOSTLEN - 1);
-          result[HOSTLEN] = '\0';
+          strlcpy(result + 1, temphost, HOSTLEN);
         }
       else      /* no tld found oops. just return it as is */
         {
-          strncpy_irc(result, temphost, HOSTLEN);
-          result[HOSTLEN] = '\0';
+          strlcpy(result, temphost, HOSTLEN);
           return(result);
         }
     }
@@ -597,7 +591,7 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
     }
 
   dlhost = parv[1];
-  strncpy_irc(cidr_form_host, dlhost, HOSTLEN);
+  strlcpy(cidr_form_host, dlhost, HOSTLEN);
   cidr_form_host[HOSTLEN] = '\0';
 
   if ((t=parse_netmask(dlhost, NULL, &bits)) == HM_HOST)
@@ -821,11 +815,11 @@ static int find_user_host(struct Client *source_p,
        * if found in original user name (non-idented)
        */
 
-      strncpy_irc(luser, target_p->username, USERLEN);
+      strlcpy(luser, target_p->username, USERLEN);
       if (*target_p->username == '~')
         luser[0] = '*';
 
-      strncpy_irc(lhost,cluster(target_p->host),HOSTLEN);
+      strlcpy(lhost,cluster(target_p->host),HOSTLEN);
     }
 
   return 1;

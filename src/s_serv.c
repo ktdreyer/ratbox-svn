@@ -2008,8 +2008,8 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
     client_p = make_client(NULL);
 
     /* Copy in the server, hostname, fd */
-    strncpy_irc(client_p->name, aconf->name, HOSTLEN);
-    strncpy_irc(client_p->host, aconf->host, HOSTLEN);
+    strlcpy(client_p->name, aconf->name, HOSTLEN);
+    strlcpy(client_p->host, aconf->host, HOSTLEN);
     inetntop(DEF_FAM, &IN_ADDR(aconf->ipnum), client_p->localClient->sockhost, HOSTIPLEN);
     client_p->localClient->fd = fd;
 

@@ -550,12 +550,12 @@ GoodAuth(int parc, char **parv)
        * if ident failed, but the client's I: line specified
        * no tilde character
        */
-      strncpy_irc(auth->client->username, parv[2], USERLEN);
+      strlcpy(auth->client->username, parv[2], USERLEN);
 
       /*
        * Also use IAuth's hostname in case of SPOOF_FREEFORM
        */
-      strncpy_irc(auth->client->host, parv[3], HOSTLEN);
+      strlcpy(auth->client->host, parv[3], HOSTLEN);
 
       /*
        * Register them

@@ -38,11 +38,7 @@
 #define HOSTLEN         63      /* Length of hostname.  Updated to         */
                                 /* comply with RFC1123                     */
 
-#define NICKLEN         9       /* Necessary to put 9 here instead of 10
-                                 * if s_msg.c/m_nick has been corrected.
-                                 * This preserves compatibility with old
-                                 * servers --msa
-                                 */
+#define NICKLEN         10       /* Nicklen + 1 for the NUL character */
 #define USERLEN         10
 #define REALLEN         50
 #define TOPICLEN        120     /* old value 90, truncated on other servers */

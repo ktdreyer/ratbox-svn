@@ -134,7 +134,7 @@ static void m_topic(struct Client *client_p,
 	      /*
 	       * chptr zeroed
 	       */
-	      strncpy_irc(chptr->topic, parv[2], TOPICLEN);
+	      strlcpy(chptr->topic, parv[2], TOPICLEN);
 	      
 	      
 	      ircsprintf(chptr->topic_info, "%s!%s@%s",
@@ -261,9 +261,9 @@ static void ms_topic(struct Client *client_p,
       if ((chptr = hash_find_channel(parv[1])) == NULL)
 	return;
 
-      strncpy_irc(chptr->topic, parv[4], TOPICLEN);
+      strlcpy(chptr->topic, parv[4], TOPICLEN);
 	      
-      strncpy_irc(chptr->topic_info, parv[2], USERHOST_REPLYLEN);	      
+      strlcpy(chptr->topic_info, parv[2], USERHOST_REPLYLEN);	      
 
       chptr->topic_time = atoi(parv[3]);
 
