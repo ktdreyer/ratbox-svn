@@ -1,3 +1,11 @@
+*** 20001106_17 by db
+- rewrote m_privmsg.c more or less completely.
+  Still TODO re-add the additional privileged things opers get
+  copy this code in m_notice.c
+  TEST TEST TEST I think it works...
+
+
+
 *** 20001106_16 by db
 - split m_sjoin.c up a bit more, added vchan support for remote clients
   I want to revisit this code. The problem is, remote servers can have
