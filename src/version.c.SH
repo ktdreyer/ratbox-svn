@@ -58,7 +58,7 @@ const char *platform = "$uname";
 const char *ircd_version = PATCHLEVEL;
 const char *serno = SERIALNUM;
 
-char *infotext[] =
+const char *infotext[] =
 {
   "$package --",
   "Based on the original code written by Jarkko Oikarinen",
