@@ -1,3 +1,9 @@
+*** 20010214_7 by wcampbel
+Add +l (locops) to the default oper umodes
+Fix a typo in example.conf
+Document fakename (server hostmasking nonsense) in example.conf
+
+
 *** 20010214_6 by fl_
 - fixes msg $irc.server.. the docs need updating..
   $$irc.server has been reverted to $irc.server to keep compatability
