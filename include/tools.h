@@ -12,6 +12,7 @@ extern void my_free(void *);
 extern char *my_strdup(const char *s);
 
 extern const char *get_duration(time_t seconds);
+extern const char *get_time(time_t when);
 
 extern const char *lcase(const char *);
 

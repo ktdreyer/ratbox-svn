@@ -15,6 +15,7 @@
 #include "log.h"
 #include "service.h"
 #include "balloc.h"
+#include "event.h"
 
 static dlink_list name_table[MAX_NAME_HASH];
 dlink_list host_table[MAX_NAME_HASH];
@@ -41,6 +42,8 @@ static struct scommand_handler quit_command = { "QUIT", c_quit, 0, DLINK_EMPTY }
 static struct scommand_handler server_command = { "SERVER", c_server, FLAGS_UNKNOWN, DLINK_EMPTY};
 static struct scommand_handler squit_command = { "SQUIT", c_squit, 0, DLINK_EMPTY };
 
+static void cleanup_hosts(void *unused);
+
 /* init_client()
  *   initialises various things
  */
@@ -58,6 +61,10 @@ init_client(void)
 	add_scommand_handler(&quit_command);
 	add_scommand_handler(&server_command);
 	add_scommand_handler(&squit_command);
+
+#ifdef EXTENDED_HOSTHASH
+	eventAdd("cleanup_hosts", cleanup_hosts, NULL, 21600);
+#endif
 }
 
 /* hash_nick()
@@ -130,12 +137,25 @@ add_host(struct client *target_p)
 		hptr = BlockHeapAlloc(host_heap);
 		memset(hptr, 0, sizeof(struct host_entry));
 
+#ifdef EXTENDED_HOSTHASH
+		strlcpy(hptr->host, target_p->user->host, sizeof(hptr->host));
+#else
 		hptr->host = target_p->user->host;
+#endif
+
 		dlink_add(hptr, &hptr->hashptr, &host_table[hashv]);
 	}
 
 	dlink_add(target_p, &target_p->user->hostptr, &hptr->users);
 
+#ifdef EXTENDED_HOSTHASH
+	if(dlink_list_length(&hptr->users) > hptr->max_clients)
+	{
+		hptr->max_clients = dlink_list_length(&hptr->users);
+		hptr->maxc_time = CURRENT_TIME;
+	}
+#endif
+	
 	found = 0;
 
 	DLINK_FOREACH(ptr, hptr->uhosts.head)
@@ -159,6 +179,14 @@ add_host(struct client *target_p)
 	}
 
 	dlink_add(target_p, &target_p->user->uhostptr, &uhost_p->users);
+
+#ifdef EXTENDED_HOSTHASH
+	if(dlink_list_length(&hptr->uhosts) > hptr->max_unique)
+	{
+		hptr->max_unique = dlink_list_length(&hptr->uhosts);
+		hptr->maxu_time = CURRENT_TIME;
+	}
+#endif
 }
 
 static void
@@ -205,6 +233,7 @@ del_host(struct client *target_p)
 
 		dlink_delete(&target_p->user->hostptr, &hptr->users);
 
+#ifndef EXTENDED_HOSTHASH
 		if(dlink_list_length(&hptr->users))
 		{
 			struct client *client_p;
@@ -217,8 +246,36 @@ del_host(struct client *target_p)
 			dlink_delete(&hptr->hashptr, &host_table[hashv]);
 			BlockHeapFree(host_heap, hptr);
 		}
+#else
+		hptr->last_used = CURRENT_TIME;
+#endif
 
 		break;
+	}
+}
+
+void
+cleanup_hosts(void *unused)
+{
+	struct host_entry *host_p;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+	int i;
+
+	for(i = 0; i < MAX_NAME_HASH; i++)
+	{
+		DLINK_FOREACH_SAFE(ptr, next_ptr, host_table[i].head)
+		{
+			host_p = ptr->data;
+
+			/* not used atm, hasnt been used in a week.. */
+			if(!dlink_list_length(&host_p->users) &&
+			   (host_p->last_used + 604800) <= CURRENT_TIME)
+			{
+				dlink_delete(&host_p->hashptr, &host_table[i]);
+				BlockHeapFree(host_heap, host_p);
+			}
+		}
 	}
 }
 

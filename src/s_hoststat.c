@@ -152,8 +152,20 @@ s_hoststat_host(struct client *client_p, char *parv[], int parc)
 			MYNAME, client_p->name, 
 			dlink_list_length(&host_p->users),
 			dlink_list_length(&host_p->uhosts));
-	sendto_server(":%s NOTICE %s :  Cur. opers  : %d",
-			MYNAME, client_p->name, oper_count);
+
+	if(oper_count)
+		sendto_server(":%s NOTICE %s :  Cur. opers  : %d",
+				MYNAME, client_p->name, oper_count);
+
+#ifdef EXTENDED_HOSTHASH
+	sendto_server(":%s NOTICE %s :  Max. clients: %d at %s",
+			MYNAME, client_p->name, host_p->max_clients,
+			get_time(host_p->maxc_time));
+
+	sendto_server(":%s NOTICE %s :  Max. unique : %d at %s",
+			MYNAME, client_p->name, host_p->max_unique,
+			get_time(host_p->maxu_time));
+#endif
 
 	return 1;
 }

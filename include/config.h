@@ -31,6 +31,12 @@
  */
 #define OPERBOT_SERVICE
 
+/* EXTENDED_HOSTHASH
+ * Extends the host hash to keep entries around so they can be seen even if
+ * a host has no current clients, and track maximums.
+ * Only useful if HOSTSTAT_SERVICE is enabled.
+ */
+#define EXTENDED_HOSTHASH
 
 /*              ---------------------------             */
 /*              END OF CONFIGURABLE OPTIONS             */
@@ -59,6 +65,10 @@
 
 #define HEAP_CACHEFILE  16
 #define HEAP_CACHELINE  128
+
+#ifndef HOSTSTAT_SERVICE
+#undef EXTENDED_HOSTHASH
+#endif
 
 #endif
 /* $Id$ */

@@ -78,6 +78,20 @@ get_duration(time_t seconds)
 }
 
 const char *
+get_time(time_t when)
+{
+	static char timebuffer[BUFSIZE];
+	struct tm *tmptr;
+
+	if(!when)
+		when = CURRENT_TIME;
+
+	tmptr = localtime(&when);
+	strftime(timebuffer, MAX_DATE_STRING, "%d/%m/%Y %H:%M %Z", tmptr);
+	return timebuffer;
+}
+
+const char *
 lcase(const char *text)
 {
         static char buf[BUFSIZE+1];

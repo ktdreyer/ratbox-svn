@@ -4,6 +4,8 @@
 #define HOSTLEN 63
 #define REALLEN 50
 
+#include "config.h"
+
 #define USERHOSTLEN (USERLEN + HOSTLEN + 1)
 #define NICKUSERHOSTLEN	(NICKLEN + USERLEN + HOSTLEN + 2)
 
@@ -94,10 +96,21 @@ struct uhost_entry
 
 struct host_entry
 {
-	char *host;
-	dlink_node hashptr;
-	dlink_list users;
+#ifdef EXTENDED_HOSTHASH
+	char host[HOSTLEN+1];
+	int max_clients;
+	time_t maxc_time;
+	int max_unique;
+	time_t maxu_time;
 
+	time_t last_used;	/* last time a client was online */
+#else
+	char *host;
+#endif
+
+	dlink_node hashptr;
+
+	dlink_list users;
 	dlink_list uhosts;
 };
 

@@ -91,8 +91,8 @@ find_oper(struct connection_entry *conn_p, const char *name)
         {
                 oper_p = ptr->data;
 
-                if(!strcasecmp(conn_p->username, oper_p->username) &&
-                   !strcasecmp(conn_p->host, oper_p->host) &&
+                if(match(oper_p->username, conn_p->username) &&
+                   match(oper_p->host, conn_p->host) &&
                    !strcasecmp(name, oper_p->name))
                         return oper_p;
         }
@@ -110,8 +110,8 @@ find_conf_oper(const char *username, const char *host)
         {
                 oper_p = ptr->data;
 
-                if(!strcasecmp(username, oper_p->username) &&
-                   !strcasecmp(host, oper_p->host))
+                if(match(oper_p->username, username) &&
+                   match(oper_p->host, host))
                         return oper_p;
         }
 
