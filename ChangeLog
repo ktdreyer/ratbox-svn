@@ -1,3 +1,15 @@
+androsyn    2005/04/06 04:00:34 UTC	(20050406_0)
+
+  Modified files:
+    src                  dns.c 
+  Log:
+  make that IDTABLE-1, clobbering your dns_fd with an overflow is bad
+  
+  Revision  Changes    Path
+  7.7       +10 -1     ircd-ratbox/src/dns.c
+
+
+
 leeh        2005/04/05 12:18:40 UTC	(20050405_1)
 
   Modified files:
