@@ -152,12 +152,6 @@ _send_linebuf(struct Client *to, buf_head_t *linebuf)
       return 0;
     }
 #endif
-  if (IsModuleOwned(to))
-  {
-   //module_read(to, );
-   return 0;
-  }
-
   if (to->fd < 0)
     return 0; /* Thou shalt not write to closed descriptors */
 
