@@ -234,6 +234,9 @@ main(int argc, char *argv[])
 #ifdef OPERBOT_SERVICE
 	init_s_operbot();
 #endif
+#ifdef USER_SERVICE
+	init_s_userserv();
+#endif
 
 	first_time = CURRENT_TIME;
 

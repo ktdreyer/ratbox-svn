@@ -13,8 +13,10 @@ INCLUDES=-I ../include/
 LDFLAGS=
 LIBS=@LIBS@
 CFLAGS=-g -O0 -Wall -Werror -Wunused -Wshadow -DPREFIX=\"$(PREFIX)\"
-
 MAKE = make
+
+SERVICEDIRS=s_userserv
+SERVICELIBS=s_userserv.a
 
 SRCS = 			\
         balloc.c        \
@@ -46,7 +48,13 @@ OBJS=$(SRCS:.c=.o)
 all: $(BIN)
 
 $(BIN): $(OBJS) y.tab.o lex.yy.o
-	${CC} ${CFLAGS} ${LDFLAGS} -o $@ ${OBJS} y.tab.o lex.yy.o $(LIBS) $(LEXLIB)
+	@for i in $(SERVICEDIRS); do \
+		echo "build -> $$i"; \
+		cd $$i; \
+		$(MAKE) build || exit; cd ..; \
+	done
+
+	${CC} ${CFLAGS} ${LDFLAGS} -o $@ ${OBJS} y.tab.o lex.yy.o -L . $(SERVICELIBS) $(LIBS) $(LEXLIB)
 
 .c.o:
 	${CC} $(INCLUDES) ${CFLAGS} -c $<
@@ -66,9 +74,19 @@ lex.yy.c:	lexer.l
 build: $(BIN)
 
 clean:
+	@for i in $(SERVICEDIRS); do \
+		cd $$i; \
+		$(MAKE) clean || exit; cd ..; \
+	done
+
 	$(RM) -f $(BIN) *.o y.tab.* lex.yy.c
 
 distclean: clean
+	@for i in $(SERVICEDIRS); do \
+		cd $$i; \
+		$(MAKE) distclean || exit; cd ..; \
+	done
+
 	$(RM) Makefile
 
 depend:

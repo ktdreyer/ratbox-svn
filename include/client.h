@@ -6,6 +6,11 @@
 
 #include "config.h"
 
+/* XXX UGLY */
+#ifdef USER_SERVICE
+#include "../src/s_userserv/s_userserv.h"
+#endif
+
 #define USERHOSTLEN (USERLEN + HOSTLEN + 1)
 #define NICKUSERHOSTLEN	(NICKLEN + USERLEN + HOSTLEN + 2)
 
@@ -46,6 +51,10 @@ struct user
 
 	int umode;			/* usermodes this client has */
 	time_t tsinfo;
+
+#ifdef USER_SERVICE
+	struct user_reg *user_reg;
+#endif
 
 	dlink_list channels;
 
@@ -133,6 +142,8 @@ struct host_entry
 #define ClientAdmin(x)	 ((x)->user && (x)->user->umode & CLIENT_ADMIN)
 
 extern void init_client(void);
+
+unsigned int hash_name(const char *p);
 
 extern void add_client(struct client *target_p);
 extern void del_client(struct client *target_p);

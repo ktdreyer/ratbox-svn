@@ -178,7 +178,7 @@ string_to_array(char *string, char *parv[])
                 return x;
 
         while(*buf == ' ')
-                *buf++;
+		buf++;
 
         if(*buf == '\0')
                 return x;
@@ -197,7 +197,7 @@ string_to_array(char *string, char *parv[])
                         return x;
 
                 while(*buf == ' ')
-                        *buf++;
+			buf++;
                 if(*buf == '\0')
                         return x;
         }

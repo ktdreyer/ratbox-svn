@@ -31,6 +31,22 @@
  */
 #define OPERBOT_SERVICE
 
+/* USER_SERVICE
+ * Enables/disables the service for registration/login of usernames.
+ * This service is required for CHANNEL_SERVICE
+ */
+#define USER_SERVICE
+
+/* CHANNEL_SERVICE
+ * Enables/disables the channel service.
+ */
+#define CHANNEL_SERVICE
+
+/* JUPE_SERVICE
+ * Enables/disables the jupe service.
+ */
+#define JUPE_SERVICE
+
 /* EXTENDED_HOSTHASH
  * Extends the host hash to keep entries around so they can be seen even if
  * a host has no current clients, and track maximums.
@@ -67,9 +83,14 @@
 
 #define HEAP_CACHEFILE  16
 #define HEAP_CACHELINE  128
+#define HEAP_USER_REG	128
 
 #ifndef HOSTSTAT_SERVICE
 #undef EXTENDED_HOSTHASH
+#endif
+
+#if defined(CHANNEL_SERVICE) && !defined(USER_SERVICE)
+# error CHANNEL_SERVICE requires USER_SERVICE
 #endif
 
 #endif

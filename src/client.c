@@ -67,14 +67,14 @@ init_client(void)
 #endif
 }
 
-/* hash_nick()
+/* hash_name()
  *   hashes a nickname
  *
  * inputs       - nickname to hash
  * outputs      - hash value of nickname
  */
-static unsigned int
-hash_nick(const char *p)
+unsigned int
+hash_name(const char *p)
 {
 	unsigned int h = 0;
 
@@ -95,7 +95,7 @@ hash_nick(const char *p)
 void
 add_client(struct client *target_p)
 {
-	unsigned int hashv = hash_nick(target_p->name);
+	unsigned int hashv = hash_name(target_p->name);
 	dlink_add(target_p, &target_p->nameptr, &name_table[hashv]);
 }
 
@@ -108,7 +108,7 @@ add_client(struct client *target_p)
 void
 del_client(struct client *target_p)
 {
-	unsigned int hashv = hash_nick(target_p->name);
+	unsigned int hashv = hash_name(target_p->name);
 	dlink_delete(&target_p->nameptr, &name_table[hashv]);
 }
 
@@ -117,7 +117,7 @@ add_host(struct client *target_p)
 {
 	struct host_entry *hptr;
 	struct uhost_entry *uhost_p;
-	unsigned int hashv = hash_nick(target_p->user->host);
+	unsigned int hashv = hash_name(target_p->user->host);
 	dlink_node *ptr;
 	int found = 0;
 
@@ -194,7 +194,7 @@ del_host(struct client *target_p)
 {
 	struct host_entry *hptr;
 	struct uhost_entry *uhost_p;
-	unsigned int hashv = hash_nick(target_p->user->host);
+	unsigned int hashv = hash_name(target_p->user->host);
 	dlink_node *ptr;
 	dlink_node *uptr;
 
@@ -283,7 +283,7 @@ struct host_entry *
 find_host(const char *host)
 {
 	struct host_entry *host_p;
-	unsigned int hashv = hash_nick(host);
+	unsigned int hashv = hash_name(host);
 	dlink_node *ptr;
 
 	DLINK_FOREACH(ptr, host_table[hashv].head)
@@ -308,7 +308,7 @@ find_client(const char *name)
 {
 	struct client *target_p;
 	dlink_node *ptr;
-	unsigned int hashv = hash_nick(name);
+	unsigned int hashv = hash_name(name);
 
 	DLINK_FOREACH(ptr, name_table[hashv].head)
 	{

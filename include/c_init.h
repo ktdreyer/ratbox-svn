@@ -20,6 +20,9 @@ extern void init_s_hoststat(void);
 /* s_operbot.c */
 extern void init_s_operbot(void);
 
+/* s_userserv.c */
+extern void init_s_userserv(void);
+
 /* u_stats.c */
 extern struct ucommand_handler stats_ucommand;
 

@@ -3,71 +3,89 @@ balloc.o: balloc.c ../include/stdinc.h ../include/setup.h \
   ../include/rserv.h ../include/log.h ../include/event.h ../include/io.h
 c_error.o: c_error.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/c_init.h \
-  ../include/scommand.h ../include/client.h ../include/log.h \
-  ../include/io.h
+  ../include/scommand.h ../include/client.h \
+  ../src/s_userserv/s_userserv.h ../include/log.h ../include/io.h
 c_message.o: c_message.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/service.h \
-  ../include/client.h ../include/conf.h ../include/scommand.h \
-  ../include/c_init.h ../include/log.h ../include/io.h
+  ../include/client.h ../src/s_userserv/s_userserv.h ../include/conf.h \
+  ../include/scommand.h ../include/c_init.h ../include/log.h \
+  ../include/io.h
 c_mode.o: c_mode.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/c_init.h \
-  ../include/client.h ../include/channel.h ../include/scommand.h \
-  ../include/log.h
+  ../include/client.h ../src/s_userserv/s_userserv.h ../include/channel.h \
+  ../include/scommand.h ../include/log.h
 cache.o: cache.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/rserv.h \
   ../include/balloc.h ../include/cache.h ../include/fileio.h \
   ../include/io.h
 channel.o: channel.c ../include/stdinc.h ../include/setup.h \
-  ../include/config.h ../include/tools.h ../include/client.h \
+  ../include/config.h ../include/tools.h ../include/rserv.h \
+  ../include/client.h ../src/s_userserv/s_userserv.h ../include/conf.h \
   ../include/channel.h ../include/scommand.h ../include/log.h \
-  ../include/balloc.h
+  ../include/balloc.h ../include/io.h
 client.o: client.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/rserv.h \
-  ../include/client.h ../include/channel.h ../include/scommand.h \
-  ../include/io.h ../include/log.h ../include/service.h \
-  ../include/balloc.h
+  ../include/client.h ../src/s_userserv/s_userserv.h ../include/channel.h \
+  ../include/scommand.h ../include/io.h ../include/log.h \
+  ../include/service.h ../include/balloc.h ../include/event.h
 conf.o: conf.c ../include/stdinc.h ../include/setup.h ../include/config.h \
   ../include/tools.h ../include/rserv.h ../include/conf.h \
-  ../include/fileio.h ../include/client.h ../include/service.h \
-  ../include/io.h
+  ../include/fileio.h ../include/client.h ../src/s_userserv/s_userserv.h \
+  ../include/service.h ../include/io.h ../include/log.h
 event.o: event.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/rserv.h \
   ../include/event.h ../include/io.h
 fileio.o: fileio.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/fileio.h
+io.o: io.c ../include/stdinc.h ../include/setup.h ../include/config.h \
+  ../include/tools.h ../include/scommand.h ../include/ucommand.h \
+  ../include/rserv.h ../include/io.h ../include/event.h ../include/conf.h \
+  ../include/client.h ../src/s_userserv/s_userserv.h ../include/log.h \
+  ../include/service.h ../include/serno.h
 log.o: log.c ../include/stdinc.h ../include/setup.h ../include/config.h \
   ../include/tools.h ../include/rserv.h ../include/fileio.h \
   ../include/log.h ../include/io.h
 match.o: match.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h
-io.o: io.c ../include/stdinc.h ../include/setup.h ../include/config.h \
-  ../include/tools.h ../include/scommand.h ../include/ucommand.h \
-  ../include/rserv.h ../include/io.h ../include/event.h ../include/conf.h \
-  ../include/client.h ../include/log.h ../include/service.h \
-  ../include/serno.h
+newconf.o: newconf.c ../include/stdinc.h ../include/setup.h \
+  ../include/config.h ../include/tools.h ../include/newconf.h \
+  ../include/rserv.h ../include/client.h ../src/s_userserv/s_userserv.h \
+  ../include/log.h ../include/conf.h ../include/service.h
 rserv.o: rserv.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/rserv.h \
   ../include/conf.h ../include/io.h ../include/event.h \
   ../include/scommand.h ../include/ucommand.h ../include/client.h \
-  ../include/channel.h ../include/log.h ../include/c_init.h \
-  ../include/service.h ../include/fileio.h ../include/balloc.h \
-  ../include/cache.h ../include/serno.h
+  ../src/s_userserv/s_userserv.h ../include/channel.h ../include/log.h \
+  ../include/c_init.h ../include/service.h ../include/fileio.h \
+  ../include/balloc.h ../include/cache.h ../include/newconf.h \
+  ../include/serno.h
 s_alis.o: s_alis.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/service.h \
-  ../include/client.h ../include/channel.h ../include/io.h \
-  ../include/c_init.h ../include/log.h ../include/conf.h
+  ../include/client.h ../src/s_userserv/s_userserv.h ../include/channel.h \
+  ../include/io.h ../include/c_init.h ../include/log.h ../include/conf.h
+s_hoststat.o: s_hoststat.c ../include/stdinc.h ../include/setup.h \
+  ../include/config.h ../include/tools.h ../include/service.h \
+  ../include/client.h ../src/s_userserv/s_userserv.h ../include/channel.h \
+  ../include/io.h ../include/c_init.h ../include/log.h ../include/conf.h
+s_operbot.o: s_operbot.c ../include/stdinc.h ../include/setup.h \
+  ../include/config.h ../include/tools.h ../include/service.h \
+  ../include/client.h ../src/s_userserv/s_userserv.h ../include/channel.h \
+  ../include/io.h ../include/c_init.h ../include/log.h ../include/conf.h \
+  ../include/ucommand.h ../include/newconf.h
 scommand.o: scommand.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/scommand.h \
   ../include/rserv.h ../include/io.h ../include/conf.h \
-  ../include/client.h ../include/serno.h ../include/service.h \
-  ../include/log.h
+  ../include/client.h ../src/s_userserv/s_userserv.h ../include/serno.h \
+  ../include/service.h ../include/log.h
 service.o: service.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/service.h \
-  ../include/client.h ../include/scommand.h ../include/rserv.h \
-  ../include/conf.h ../include/io.h ../include/log.h \
-  ../include/ucommand.h ../include/cache.h
+  ../include/client.h ../src/s_userserv/s_userserv.h \
+  ../include/scommand.h ../include/rserv.h ../include/conf.h \
+  ../include/io.h ../include/log.h ../include/ucommand.h \
+  ../include/cache.h ../include/channel.h
 tools.o: tools.c ../include/stdinc.h ../include/setup.h \
-  ../include/config.h ../include/tools.h ../include/rserv.h
+  ../include/config.h ../include/tools.h ../include/rserv.h \
+  ../include/balloc.h
 u_stats.o: u_stats.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/c_init.h \
   ../include/rserv.h ../include/conf.h ../include/ucommand.h \
@@ -76,4 +94,5 @@ ucommand.o: ucommand.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/ucommand.h \
   ../include/rserv.h ../include/io.h ../include/log.h ../include/conf.h \
   ../include/event.h ../include/service.h ../include/client.h \
-  ../include/channel.h ../include/serno.h ../include/cache.h
+  ../src/s_userserv/s_userserv.h ../include/channel.h ../include/serno.h \
+  ../include/cache.h
