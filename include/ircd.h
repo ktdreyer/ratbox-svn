@@ -104,6 +104,6 @@ extern int callbacks_called;
 
 extern int make_daemon(void);
 extern size_t get_maxrss(void);
-extern void set_time();
+extern void set_time(void);
 
 #endif

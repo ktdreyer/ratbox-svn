@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-extern void outofmemory();
+extern void outofmemory(void);
 
 #ifndef WE_ARE_MEMORY_C
 #undef strdup
