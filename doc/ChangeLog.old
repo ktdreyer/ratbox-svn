@@ -1,3 +1,12 @@
+*** 20001216_7 by db
+- ok did some more clean up on LazyLinks connect works fine more or less
+  The nicks are SJOIN'ed one nick at a time to the leaf, That should be
+  fixed.
+- new channel creation has a glitch somewhere, the LLJOIn isn't
+  being seen by the client, and it has to do a double join. hrmmmpf
+
+
+
 *** 20001216_6 by db
 - remote lazy link /list was broken, missing ms_link in handler
 
