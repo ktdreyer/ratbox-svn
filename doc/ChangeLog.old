@@ -1,3 +1,13 @@
+*** 20001231_3 by db
+- this is some very old fugly hacked code we had in hybrid-6 to 
+  allow multiple Q lined nicks ... never mind it was a hack, its
+  gone. 
+
+- also moved the %type block back in ircd_parser.y until debugged
+  the set locale code. 
+
+
+
 *** 20001231_2 by db
 - fixed logic in m_stats.c pertaining to o_lines_oper_only
 
