@@ -1,3 +1,15 @@
+a1kmm       2002/01/12 18:06:07 EST	(20020112_3)
+
+  Modified files:
+    src                  channel.c 
+  Log:
+  - chanops != chanops_voiced
+  
+  Revision  Changes    Path
+  7.293     +1 -1      ircd-hybrid-7/src/channel.c
+
+
+
 leeh        2002/01/12 15:08:08 EST	(20020112_2)
 
   Modified files:
