@@ -1,3 +1,28 @@
+*** 20010522_6 by davidt
+Big commit of cryptlinks_ng-pre6b.diff.
+
+There's only two remaining known issues with the servlink/cryptlink/ziplink
+code, and maintaining patch sets is becoming lots of work, so I'm committing
+this.  I think everyone agrees this should be in before 7.0 anyway, so it
+should get as much testing as possible in the tree...
+
+Various things done:
+- Added servlink, external process for server<->server links.
+	Known issue: decompression buffer can be filled, and the servlink
+		process will abort.  Need to flush the output then start
+		decompressing again, as increasing the size of the output
+		buffer beyond *6 is getting silly.
+- Added hooks to configure.in to detect zlib.
+- Fixed configure.in to detect openssl more sanely.
+- Added cryptlinks support to ircd/servlink
+	Known bug: DES/56 and 3DES/168 doesn't work between hybrid-7 and
+		hybrid-6 servers.  This should be fixed by an update to
+		the hybrid-6 patch.
+- Updated example.conf
+- A few other bugfixes I can't remember, no doubt.
+
+
+
 *** 20010522_5 by davidt
 Directory /cvsroot/ircd-hybrid-7/servlink added to the repository
 
