@@ -602,7 +602,12 @@ can_send(struct Channel *chptr, struct Client *source_p,
 
 		if(msptr == NULL)
 		{
-			if(chptr->mode.mode & MODE_NOPRIVMSGS)
+			/* if its +m or +n and theyre not in the channel,
+			 * they cant send.  we dont check bans here because
+			 * theres no possibility of caching them --fl
+			 */
+			if(chptr->mode.mode & MODE_NOPRIVMSGS ||
+			   chptr->mode.mode & MODE_MODERATED)
 				return CAN_SEND_NO;
 			else
 				return CAN_SEND_NONOP;
