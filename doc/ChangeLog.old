@@ -1,3 +1,7 @@
+*** 20010611_7 by toot
+slight cosmetic fix to the TSdelta notice to admins.
+
+
 *** 20010611_6 by leeh
 - FLAGS_ADMIN -> FLAGS_SERVADMIN
   this means the notices goes to admins who are +s, and not all admins..
