@@ -99,7 +99,7 @@ _DupString(char **x, const char *y)
 #endif /* __APPLE__ */
 
 #ifdef HAVE_STRDUP
-#define DupString(x,y) do { (*x) = strdup(y); if(x == NULL) outofmemory(); } while(0)
+#define DupString(x,y) do { x = strdup(y); if(x == NULL) outofmemory(); } while(0)
 #else
 #define DupString(x,y) _DupString(&x, y)
 #endif
