@@ -1,3 +1,15 @@
+androsyn    2003/02/11 18:29:15 UTC	(20030211_0)
+
+  Modified files:
+    src                  s_serv.c 
+  Log:
+  Fix a NULL pointer reference.
+  
+  Revision  Changes    Path
+  7.323     +5 -3      ircd-ratbox/src/s_serv.c
+
+
+
 androsyn    2003/02/08 23:56:31 UTC	(20030208_15)
 
   Modified files:
