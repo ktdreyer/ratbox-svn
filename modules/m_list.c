@@ -1,6 +1,6 @@
 /*
  *  ircd-ratbox: A slightly useful ircd.
- *  m_links.c: Shows what servers are currently connected.
+ *  m_list.c: Shows what servers are currently connected.
  *
  *  Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center
  *  Copyright (C) 1996-2002 Hybrid Development Team
