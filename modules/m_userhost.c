@@ -69,13 +69,13 @@ int     m_userhost(struct Client *cptr,
   char  *p;            /* scratch end pointer */
   char  *cn;           /* current name */
   struct Client *acptr;
-  char response[5][NICKLEN*2+USERLEN+HOSTLEN+30];
+  char response[4][NICKLEN*2+USERLEN+HOSTLEN+30];
   int i;               /* loop counter */
 
   response[0][0] = response[1][0] = response[2][0] = 
-    response[3][0] = response[4][0] = '\0';
+    response[3][0] = '\0';
 
-  for(cn = strtoken(&p, parv[1], ","), i=0; (i < 5) && cn; 
+  for(cn = strtoken(&p, parv[1], ","), i=0; (i < 4) && cn; 
       cn = strtoken(&p, (char *)NULL, ","), i++ )
     {
       if ((acptr = find_person(cn, NULL)))
@@ -99,7 +99,7 @@ int     m_userhost(struct Client *cptr,
     }
 
   ircsprintf(buf, "%s %s %s %s %s",
-    response[0], response[1], response[2], response[3], response[4] );
+    response[0], response[1], response[2], response[3] );
   sendto_one(sptr, form_str(RPL_USERHOST), me.name, parv[0], buf);
 
   return 0;
