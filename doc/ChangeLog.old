@@ -1,3 +1,7 @@
+*** 20010120_16 by wcampbel
+Bug 1 is partially fixed and shouldn't be publicized
+
+
 *** 20010120_15 by davidt
 - Change "%s: %s" to "%s :%s" to fix remote klines
 
