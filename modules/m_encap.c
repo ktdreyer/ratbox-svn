@@ -45,6 +45,7 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "s_newconf.h"
 
 static int ms_encap(struct Client *client_p, struct Client *source_p,
 		     int parc, const char *parv[]);
@@ -103,6 +104,10 @@ ms_encap(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	sendto_match_servs(source_p, parv[1], CAP_ENCAP,
 			   "ENCAP %s", buffer);
+
+	if(match(parv[1], me.name))
+		handle_encap(client_p, source_p, parc, parv);
+
 	return 0;
 }
 

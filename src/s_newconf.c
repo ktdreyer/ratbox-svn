@@ -35,6 +35,7 @@
 #include "stdinc.h"
 #include "ircd_defs.h"
 #include "common.h"
+#include "s_conf.h"
 #include "s_newconf.h"
 #include "tools.h"
 #include "client.h"
@@ -45,12 +46,15 @@
 #include "event.h"
 #include "hash.h"
 
+static void ms_encap_foo(struct Client *, struct Client *, int, const char **);
+
 static BlockHeap *xline_heap = NULL;
 static BlockHeap *shared_heap = NULL;
 
 dlink_list xline_list;
 dlink_list xline_hash_list;
 dlink_list shared_list;
+dlink_list encap_list;
 
 /* conf_heap_gc()
  *
@@ -77,6 +81,7 @@ init_conf(void)
 	xline_heap = BlockHeapCreate(sizeof(struct xline), XLINE_HEAP_SIZE);
 	shared_heap = BlockHeapCreate(sizeof(struct shared), SHARED_HEAP_SIZE);
 	eventAddIsh("conf_heap_gc", conf_heap_gc, NULL, 600);
+	add_encap("FOO", ms_encap_foo, 0);
 }
 
 /* make_xline()
@@ -145,6 +150,7 @@ free_xline(struct xline *xconf)
 
 	MyFree(xconf->gecos);
 	MyFree(xconf->reason);
+
 	BlockHeapFree(xline_heap, xconf);
 }
 
@@ -302,3 +308,102 @@ find_shared(const char *username, const char *host, const char *servername, int 
 
 	return NO;
 }
+
+/* find_encap()
+ *
+ * inputs	- token to find
+ * outputs	- 0 on failure, 1 if found
+ * side effects -
+ */
+static struct encap *
+find_encap(const char *name)
+{
+	struct encap *enptr;
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, encap_list.head)
+	{
+		enptr = ptr->data;
+
+		if(irccmp(enptr->name, name) == 0)
+			return enptr;
+	}
+
+	return NULL;
+}
+
+/* add_encap()
+ *
+ * inputs	- token, handler, flags
+ * outputs	- 0 on failure, 1 success
+ * side effects - adds an encap entry for the token to the list
+ */
+int
+add_encap(const char *name, void *handler, int flags)
+{
+	struct encap *enptr;
+
+	if(find_encap(name) != NULL)
+		return 0;
+
+	enptr = (struct encap *) MyMalloc(sizeof(struct encap));
+
+	DupString(enptr->name, name);
+	enptr->handler = handler;
+	enptr->flags = flags;
+
+	dlinkAddAlloc(enptr, &encap_list);
+	return 1;
+}
+
+/* del_encap()
+ *
+ * inputs	- token
+ * outputs	- 0 on failure, 1 success
+ * side effects - remove the given entry from the encap list
+ */
+int
+del_encap(const char *name)
+{
+	struct encap *enptr;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, encap_list.head)
+	{
+		enptr = ptr->data;
+
+		if(irccmp(enptr->name, name) == 0)
+		{
+			if(enptr->flags & ENCAP_PERM)
+				return 0;
+
+			MyFree(enptr->name);
+			MyFree(enptr);
+			dlinkDestroy(ptr, &encap_list);
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+void
+handle_encap(struct Client *client_p, struct Client *source_p,
+	     int parc, const char *parv[])
+{
+	MessageHandler handler = 0;
+	struct encap *enptr;
+
+	enptr = find_encap(parv[2]);
+
+	if(enptr != NULL)
+	{
+		handler = enptr->handler;
+
+		(*handler) (client_p, source_p, parc, parv);
+	}
+
+	return;
+}
+

@@ -35,11 +35,14 @@
 #ifndef INCLUDED_newconf_h
 #define INCLUDED_newconf_h
 
+#include "ircd_handler.h"
 #include "tools.h"
 
 /* how to store the xline (hash/dlink) */
 #define XLINE_PLAIN	0x010
 #define XLINE_WILD	0x020
+
+#define ENCAP_PERM	0x001
 
 struct xline
 {
@@ -54,6 +57,13 @@ struct shared
 	char *username;
 	char *host;
 	char *servername;
+	int flags;
+};
+
+struct encap
+{
+	char *name;
+	MessageHandler handler;
 	int flags;
 };
 
@@ -74,6 +84,12 @@ extern void free_shared(struct shared *);
 extern void clear_shared(void);
 extern int find_shared(const char *username, const char *host, 
 			const char *servername, int type);
+
+extern dlink_list encap_list;
+extern int add_encap(const char *name, void *handler, int flags);
+extern int del_encap(const char *name);
+extern void handle_encap(struct Client *client_p, struct Client *source_p, 
+			 int parc, const char *parv[]);
 
 #endif
 
