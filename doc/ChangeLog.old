@@ -1,3 +1,7 @@
+*** 20010616_5 by a1kmm
+- Cleaned up remove_one_ip a little.
+
+
 *** 20010616_4 by a1kmm
 - Ripped out the last remnants of the TOO_MANY code I was going to commit but
   then decided was pointless so ripped most of it before...
