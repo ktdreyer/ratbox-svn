@@ -1,3 +1,17 @@
+leeh        2002/01/13 18:22:03 EST	(20020113_10)
+
+  Modified files:
+    src                  s_user.c 
+  Log:
+  - fixed a stupid: wed mixed FLAGS_INVISIBLE into both sptr->umodes and
+    sptr->flags, so a user being invisible, was never told it unless they
+    forced the mode themselves ;)
+  
+  Revision  Changes    Path
+  7.179     +2 -2      ircd-hybrid-7/src/s_user.c
+
+
+
 wcampbel    2002/01/13 13:54:47 EST	(20020113_9)
 
   Modified files:
