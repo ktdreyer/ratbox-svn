@@ -77,7 +77,7 @@ char *infotext[] =
   "Neph|l|m            Adel Mezibra        adel@cybercable.fr",
   "pro                 Bill Jonus          proggy@earthling.net",
   "Rodder              Jon Lusky           lusky@blown.net",
-  "toot                Toby Verral         to7@antipope.fsnet.co.uk",
+  "toot                Toby Verrall        to7@antipope.fsnet.co.uk",
   "Wohali              Joan Touzet         jolo@cadence.com",
   "",
   "The following people have contributed to this release of hybrid",
