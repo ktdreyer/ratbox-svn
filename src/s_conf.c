@@ -1488,12 +1488,9 @@ set_default_conf(void)
   ConfigFileEntry.oper_only_umodes = FLAGS_DEBUG;
   ConfigFileEntry.throttle_time = 10;
 
-  ConfigChannel.vchans_oper_only = NO;
-
   ConfigChannel.use_except  = YES;
   ConfigChannel.use_invex   = YES;
   ConfigChannel.use_knock   = YES;
-  ConfigChannel.use_vchans = NO;
   ConfigChannel.knock_delay = 300;
   ConfigChannel.knock_delay_channel = 60;
   ConfigChannel.max_chans_per_user = 15;

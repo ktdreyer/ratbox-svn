@@ -70,8 +70,7 @@ const char *_version = "$Revision$";
  *      parv[0] = sender prefix
  *      parv[1] = channel
  *      parv[2] = nick ("!nick" == cjoin)
- *      parv[3] = vchan/key (optional)
- *      parv[4] = key (optional)
+ *      parv[3] = key
  *
  * If a lljoin is received, from our uplink, join
  * the requested client to the given channel, or ignore it

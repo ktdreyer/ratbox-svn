@@ -75,8 +75,7 @@ void check_spambot_warning(struct Client *source_p, const char *name);
  * m_join
  *      parv[0] = sender prefix
  *      parv[1] = channel
- *      parv[2] = channel password (key) (or vkey for vchans)
- *      parv[3] = vkey
+ *      parv[2] = channel password (key)
  */
 static void
 m_join(struct Client *client_p,
@@ -85,10 +84,9 @@ m_join(struct Client *client_p,
        char *parv[])
 {
   struct Channel *chptr = NULL;
-  struct Channel *root_chptr = NULL;
   char  *name, *key = NULL;
   int   i, flags = 0;
-  char  *p = NULL, *p2 = NULL, *p3 = NULL;
+  char  *p = NULL, *p2 = NULL;
   int   successful_join_count = 0; /* Number of channels successfully joined */
   
   if (*parv[1] == '\0')
@@ -228,7 +226,6 @@ m_join(struct Client *client_p,
       if(chptr == NULL)     /* If I already have a chptr, no point doing this */
 	{
 	  chptr = get_or_create_channel(source_p, name, NULL);
-	  chptr = chptr;
 	}
       
       if(chptr == NULL)
@@ -271,13 +268,6 @@ m_join(struct Client *client_p,
 	{
 	  chptr->channelts = CurrentTime;
 
-          /*
-           * XXX - this is a rather ugly hack.
-           *
-           * Unfortunately, there's no way to pass
-           * the fact that it is a vchan through SJOIN...
-           */
-                  
 	  sendto_server(client_p, source_p, chptr, NOCAPS, NOCAPS,
                         LL_ICLIENT,
                         ":%s SJOIN %lu %s + :@%s",

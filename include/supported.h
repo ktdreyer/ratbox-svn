@@ -36,7 +36,7 @@
 #endif
 
 #define FEATURES "WALLCHOPS"\
-                "%s%s%s%s" \
+                "%s%s%s" \
                 " MODES=%i" \
                 " MAXCHANNELS=%i" \
                 " MAXBANS=%i" \
@@ -46,7 +46,6 @@
                 " KICKLEN=%i"
 
 #define FEATURESVALUES ConfigChannel.use_knock ? " KNOCK" : "", \
-        ConfigChannel.use_vchans ? " VCHANS" : "", \
         ConfigChannel.use_except ? " EXCEPTS" : "", \
         ConfigChannel.use_invex ? " INVEX" : "", \
         MAXMODEPARAMS,ConfigChannel.max_chans_per_user, \

@@ -427,18 +427,6 @@ static struct InfoStruct info_table[] =
     "Enable /KNOCK",
   },
   {
-    "use_vchans",
-    OUTPUT_BOOLEAN_YN,
-    &ConfigChannel.use_vchans,
-    "Enabled vchans",
-  },
-  {
-    "vchans_oper_only",
-    OUTPUT_BOOLEAN_YN,
-    &ConfigChannel.vchans_oper_only,
-    "Restrict use of /CJOIN to opers"
-  },
-  {
     "disable_hidden",
     OUTPUT_BOOLEAN_YN,
     &ConfigServerHide.disable_hidden,

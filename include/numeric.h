@@ -114,10 +114,6 @@ extern const char* form_str(int);
 #define RPL_LOCALUSERS       265
 #define RPL_GLOBALUSERS      266
 
-#define RPL_VCHANEXIST       276
-#define RPL_VCHANLIST        277
-#define RPL_VCHANHELP        278
-
 #define RPL_ACCEPTLIST	     281
 #define RPL_ENDOFACCEPT      282
 
@@ -281,9 +277,6 @@ extern const char* form_str(int);
 /* #define ERR_LAST_ERR_MSG 505 
  * moved to 999
  */
-
-#define ERR_VCHANDISABLED    506
-#define ERR_ALREADYONVCHAN   507
 
 #define ERR_WRONGPONG	     513
 

@@ -317,7 +317,6 @@
 
 /* disable them for efnet */
 #ifdef EFNET
-#undef VCHANS
 #undef ANONOPS
 #undef HALFOPS
 #ifndef HIDE_SERVERS_IPS

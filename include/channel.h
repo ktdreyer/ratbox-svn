@@ -54,18 +54,11 @@ struct Channel
   char            *topic;
   char            *topic_info;
   time_t          topic_time;
-#ifdef VCHANS
-  char            vchan_id[NICKLEN*2];   /* use this for empty vchans */
-#endif
   int             users;      /* user count */
   int             locusers;   /* local user count */
   unsigned long   lazyLinkChannelExists;
   time_t          users_last;		/* when last user was in channel */
   time_t          last_knock;           /* don't allow knock to flood */
-#ifdef VCHANS
-  struct Channel  *root_chptr;		/* pointer back to root if vchan */
-  dlink_list	  vchan_list;	        /* vchan sublist */
-#endif
 
   dlink_list      chanops;		/* lists of chanops etc. */
 #ifdef REQUIRE_OANDV
@@ -168,7 +161,6 @@ struct Ban          /* also used for exceptions -orabidoo */
 };
 
 #define CLEANUP_CHANNELS_TIME (30*60)
-#define MAX_VCHAN_TIME (60*60)
 /* Number of chanops, peon, voiced, halfops sublists */
 #ifdef REQUIRE_OANDV
 #define NUMLISTS 5
