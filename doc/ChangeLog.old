@@ -1,3 +1,9 @@
+*** 20001217_9 by db
+- rewrote m_gline.c to use fbopen and friends consistently
+  removed "safe_write()" entirely. BLOAT
+
+
+
 *** 20001217_8 by db
 - massive change but its really quite simple..
   mod_add_cmd was taking two params, when only one was really necessary.
