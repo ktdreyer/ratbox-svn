@@ -14,7 +14,7 @@
     - There is an issue here with unloading a different module to that what
       is loaded.  For example, you have m_vanity.so as a loaded module, and
       you add 4 new commands to it, replace the module, then try to unload it.
-      
+
       If you have made the module correctly, when unloading the module, you
       would have also coded it to remove the 4 new commands, which it cant do
       as they dont exist.  This could cause the server to core.  It also cannot
@@ -53,11 +53,18 @@
 6.  /etc/resolv.conf MUST be readable to the user that the ircd runs under.
     Currently if it is not readable, it will core on startup.
 
-7. When updating a message file, in certain unknown situations it will core
-   if the file in use is being accessed.  To prevent this from happening,
-   use '/quote SET MSGLOCALE standard' BEFORE issuing make install.  When
-   the file is installed, you can SET MSGLOCALE back to the language that
-   was just updated.
+7.  When updating a message file, in certain unknown situations it will core
+    if the file in use is being accessed.  To prevent this from happening,
+    use '/quote SET MSGLOCALE standard' BEFORE issuing make install.  When
+    the file is installed, you can SET MSGLOCALE back to the language that
+    was just updated.
+
+8.  kqueue seems to be break on some FreeBSD systems; this bug was confirmed
+    by Adrian Chadd, and will be fixed in the future (I hope!).
+
+9.  While on a LL server, doing a /TOPIC or /MODE against a channel which
+    doesn't exist results in the channel being shown as existing, and
+    with a timestamp of 'Mon Jan 18 19:14:07 2038'.
 
 For more information see http://bugs.efnow.net
 
