@@ -1,3 +1,15 @@
+androsyn    2002/08/14 14:08:12 EDT	(20020814_9)
+
+  Modified files:
+    include              client.h 
+  Log:
+  Change SetEob to use flags.
+  
+  Revision  Changes    Path
+  7.167     +4 -3      ircd-ratbox/include/client.h
+
+
+
 androsyn    2002/08/14 13:59:22 EDT	(20020814_8)
 
   Modified files:
