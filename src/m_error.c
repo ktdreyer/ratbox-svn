@@ -75,7 +75,9 @@ void m_error(struct Client *client_p, struct Client *source_p,
 			   source_p->name,
 			   get_client_name(client_p, HIDE_IP), para);
     }
-  exit_client(client_p, source_p, source_p, "ERROR");
+
+  if(MyClient(source_p))
+    exit_client(client_p, source_p, source_p, "ERROR");
 }
 
 void ms_error(struct Client *client_p, struct Client *source_p,
