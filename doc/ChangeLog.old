@@ -1,3 +1,8 @@
+*** 20010604_2 by db
+- oops forgot a node = next in the for
+
+
+
 *** 20010604_1 by db
 - fixed core on /rehash
 
