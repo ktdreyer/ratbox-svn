@@ -1,3 +1,15 @@
+leeh        2005/03/27 02:19:49 UTC	(20050327_3)
+
+  Added files:
+    doc                  tgchange.txt 
+  Log:
+  - add tgchange documentation
+  
+  Revision  Changes    Path
+  1.2       +38 -0     ircd-ratbox/doc/tgchange.txt (new)
+
+
+
 leeh        2005/03/27 01:09:17 UTC	(20050327_2)
 
   Modified files:
