@@ -1,3 +1,15 @@
+androsyn    2004/04/12 12:03:28 EDT	(20040412_7)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Check for client_p->localClient not !MyConnect() when freeing clients
+  
+  Revision  Changes    Path
+  7.454     +1 -1      ircd-ratbox/src/client.c
+
+
+
 leeh        2004/04/12 11:01:48 EDT	(20040412_6)
 
   Modified files:
