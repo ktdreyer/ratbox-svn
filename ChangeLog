@@ -1,3 +1,67 @@
+androsyn    2002/12/10 09:13:24 UTC	(20021210_3)
+
+  Modified files:
+    include              client.h patricia.h s_conf.h 
+    modules              m_dline.c m_gline.c m_kline.c m_rehash.c 
+                         m_stats.c m_testline.c m_undline.c 
+                         m_ungline.c m_unkline.c 
+    modules/core         m_quit.c 
+    src                  .depend Makefile.in client.c ircd.c 
+                         kdparse.c listener.c match.c newconf.c 
+                         packet.c parse.c patricia.c s_bsd.c 
+                         s_bsd_sigio.c s_conf.c s_gline.c 
+  Added files:
+    include              confmatch.h iplines.h 
+    src                  confmatch.c iplines.c 
+  Removed files:
+    include              hostmask.h 
+    src                  hostmask.c 
+  Log:
+  Okay..its a fairly large change.  But I just killed hostmask.{c,h}.  Also
+  I've cleaned up the mess of the leaking linebufs..oh..and btw I found the
+  *real* reason for the multiple exit_client()'s too..ask me for details, its
+  too hard to explain..i think..way too much stuff in here.  I broke a number
+  of things in m_stats.c, but i'll fix that later.  Same thing with the
+  breakage in other modules..deal.
+  
+  Revision  Changes    Path
+  7.186     +1 -1      ircd-ratbox/include/client.h
+  7.1       +50 -0     ircd-ratbox/include/confmatch.h (new)
+  1.28      +0 -105    ircd-ratbox/include/hostmask.h (dead)
+  7.1       +44 -0     ircd-ratbox/include/iplines.h (new)
+  7.12      +0 -1      ircd-ratbox/include/patricia.h
+  7.222     +3 -1      ircd-ratbox/include/s_conf.h
+  1.30      +2 -1      ircd-ratbox/modules/core/m_quit.c
+  1.3       +20 -53    ircd-ratbox/modules/m_dline.c
+  1.102     +2 -2      ircd-ratbox/modules/m_gline.c
+  1.139     +4 -17     ircd-ratbox/modules/m_kline.c
+  1.53      +3 -3      ircd-ratbox/modules/m_rehash.c
+  1.135     +20 -8     ircd-ratbox/modules/m_stats.c
+  1.28      +11 -20    ircd-ratbox/modules/m_testline.c
+  1.3       +7 -17     ircd-ratbox/modules/m_undline.c
+  1.3       +9 -15     ircd-ratbox/modules/m_ungline.c
+  1.73      +9 -15     ircd-ratbox/modules/m_unkline.c
+  7.19      +97 -77    ircd-ratbox/src/.depend
+  7.123     +2 -1      ircd-ratbox/src/Makefile.in
+  7.345     +9 -13     ircd-ratbox/src/client.c
+  7.1       +274 -0    ircd-ratbox/src/confmatch.c (new)
+  7.81      +0 -783    ircd-ratbox/src/hostmask.c (dead)
+  7.1       +200 -0    ircd-ratbox/src/iplines.c (new)
+  7.270     +4 -2      ircd-ratbox/src/ircd.c
+  7.17      +1 -1      ircd-ratbox/src/kdparse.c
+  7.76      +1 -1      ircd-ratbox/src/listener.c
+  7.26      +2 -0      ircd-ratbox/src/match.c
+  7.66      +3 -3      ircd-ratbox/src/newconf.c
+  7.105     +15 -7     ircd-ratbox/src/packet.c
+  7.148     +4 -1      ircd-ratbox/src/parse.c
+  7.13      +4 -1      ircd-ratbox/src/patricia.c
+  7.186     +3 -0      ircd-ratbox/src/s_bsd.c
+  7.34      +5 -1      ircd-ratbox/src/s_bsd_sigio.c
+  7.382     +9 -11     ircd-ratbox/src/s_conf.c
+  1.34      +2 -2      ircd-ratbox/src/s_gline.c
+
+
+
 androsyn    2002/12/10 07:43:03 UTC	(20021210_2)
 
   Modified files:
