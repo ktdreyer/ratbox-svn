@@ -1,3 +1,18 @@
+androsyn    2004/09/16 15:17:53 EDT	(20040916_0)
+
+  Modified files:
+    adns                 adns.h internal.h query.c types.c 
+  Log:
+  add back the ip6.int code..
+  
+  Revision  Changes    Path
+  1.14      +3 -2      ircd-ratbox/adns/adns.h
+  1.15      +2 -1      ircd-ratbox/adns/internal.h
+  1.22      +6 -3      ircd-ratbox/adns/query.c
+  1.16      +19 -3     ircd-ratbox/adns/types.c
+
+
+
 androsyn    2004/09/15 14:52:50 EDT	(20040915_3)
 
   Modified files:
