@@ -187,6 +187,8 @@ int   class_redirport_var;
 %token	NICK
 %token  NICK_CHANGES
 %token  NON_REDUNDANT_KLINES
+%token  NO_CREATE_ON_SPLIT
+%token  NO_JOIN_ON_SPLIT
 %token  NO_OPER_FLOOD
 %token  NO_TILDE
 %token  NUMBER
@@ -221,6 +223,8 @@ int   class_redirport_var;
 %token  T_SHARED
 %token  SHORT_MOTD
 %token  SILENT
+%token  SPLIT_SERVER_COUNT
+%token  SPLIT_USER_COUNT
 %token  SPOOF
 %token  SPOOF_NOTICE
 %token  STATS_I_OPER_ONLY
@@ -2464,6 +2468,9 @@ channel_item:       channel_use_except |
                     channel_max_chans_per_user |
                     channel_quiet_on_ban |
 		    channel_persist_time |
+		    channel_split_user_count | channel_split_server_count |
+		    channel_no_create_on_split | 
+		    channel_no_join_on_split |
                     error
 
 channel_use_except:   USE_EXCEPT '=' TYES ';'
@@ -2577,6 +2584,36 @@ channel_persist_time: PERSIST_TIME '=' timespec ';'
     ConfigChannel.persist_time = $3;
   } ;
 
+channel_split_user_count: SPLIT_USER_COUNT '=' NUMBER ';'
+  {
+    ConfigChannel.split_user_count = $3;
+  } ;
+
+channel_split_server_count: SPLIT_SERVER_COUNT '=' NUMBER ';'
+  {
+    ConfigChannel.split_server_count = $3;
+  } ;
+
+channel_no_create_on_split: NO_CREATE_ON_SPLIT '=' TYES ';'
+  {
+    ConfigChannel.no_create_on_split = 1;
+  }
+    |
+    NO_CREATE_ON_SPLIT '=' TNO ';'
+  {
+    ConfigChannel.no_create_on_split = 0;
+  } ;
+
+channel_no_join_on_split: NO_JOIN_ON_SPLIT '=' TYES ';'
+  {
+    ConfigChannel.no_join_on_split = 1;
+  }
+    |
+    NO_JOIN_ON_SPLIT '=' TNO ';'
+  {
+    ConfigChannel.no_join_on_split = 0;
+  } ;
+  
 
 /***************************************************************************
  *  section serverhide

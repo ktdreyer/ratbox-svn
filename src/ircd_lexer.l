@@ -190,6 +190,8 @@ network_name    { return NETWORK_NAME; }
 nick		{ return NICK; }
 nick_changes	{ return NICK_CHANGES; }
 no		{ return TNO; }
+no_create_on_split { return NO_CREATE_ON_SPLIT; }
+no_join_on_split   { return NO_JOIN_ON_SPLIT; }
 no_oper_flood   { return NO_OPER_FLOOD; }
 no_tilde	{ return NO_TILDE; }
 number_per_ip	{ return NUMBER_PER_IP; }
@@ -220,6 +222,8 @@ servlink_path   { return SERVLINK_PATH; }
 shared          { return T_SHARED; }
 short_motd      { return SHORT_MOTD; }
 silent          { return SILENT; }
+split_server_count { return SPLIT_SERVER_COUNT; }
+split_user_count   { return SPLIT_USER_COUNT; }
 spoof		{ return SPOOF; }
 spoof_notice	{ return SPOOF_NOTICE; }
 unkline		{ return UNKLINE; }

@@ -244,18 +244,22 @@ struct config_file_entry
 
 struct config_channel_entry
 {
-  int           use_except;
-  int           use_halfops;
-  int           use_invex;
-  int           use_knock;
-  int           use_vchans;
-  int           knock_delay;
-  int		knock_delay_channel;
-  int           vchans_oper_only;
-  int           maxbans;
-  int           max_chans_per_user;
-  int           quiet_on_ban;
-  int		persist_time;
+  int   use_except;
+  int   use_halfops;
+  int   use_invex;
+  int   use_knock;
+  int   use_vchans;
+  int   knock_delay;
+  int	knock_delay_channel;
+  int   vchans_oper_only;
+  int   maxbans;
+  int   max_chans_per_user;
+  int   quiet_on_ban;
+  int	persist_time;
+  int   split_server_count;
+  int   split_user_count;
+  int   no_create_on_split;
+  int   no_join_on_split;
 };
 
 struct config_server_hide
