@@ -14,7 +14,8 @@ Installation instructions are contained in INSTALL.
 Support
 -------
 Support is available via IRC on #ratbox@EFNet or via email to
-ircd-ratbox@lists.ratbox.org.
+ircd-ratbox@lists.ratbox.org.  Please note, if you encounter problems with
+ratbox-services, you should *first* look at your logfiles.
 
 
 Bugs

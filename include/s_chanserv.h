@@ -25,6 +25,7 @@ struct chan_reg
 {
 	char *name;
 	char *topic;
+	char *url;
 	char *suspender;
 	struct chmode cmode;
 	struct chmode emode;

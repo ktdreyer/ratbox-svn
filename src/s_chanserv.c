@@ -418,6 +418,9 @@ channel_db_callback(void *db, int argc, char **argv, char **colnames)
 	if(!EmptyString(argv[1]))
 		reg_p->topic = my_strdup(argv[1]);
 
+	if(!EmptyString(argv[2]))
+		reg_p->url = my_strdup(argv[2]);
+
 	memset(&mode, 0, sizeof(struct chmode));
 	modec = string_to_array(argv[2], modev);
 
@@ -2188,6 +2191,47 @@ s_chan_set(struct client *client_p, char *parv[], int parc)
 				chreg_p->name, data);
 		return 1;
 	}
+	else if(!strcasecmp(parv[1], "URL"))
+	{
+		if(EmptyString(arg))
+		{
+			service_error(chanserv_p, client_p,
+				"Channel %s URL is '%s'",
+				chreg_p->name, EmptyString(chreg_p->url) ?
+				 "<none>" : chreg_p->url);
+			return 1;
+		}
+
+		if(!irccmp(arg, "-none"))
+		{
+			my_free(chreg_p->topic);
+			chreg_p->topic = NULL;
+
+			loc_sqlite_exec(NULL, "UPDATE channels SET "
+					"url = NULL WHERE chname = %Q",
+					chreg_p->name);
+
+			service_error(chanserv_p, client_p,
+					"Channel %s URL unset",
+					chreg_p->name);
+			return 1;
+		}
+
+		my_free(chreg_p->url);
+#if 0
+		chreg_p->url = my_strndup(arg, TOPICLEN);
+#endif
+
+		loc_sqlite_exec(NULL, "UPDATE channels SET url=%Q "
+				"WHERE chname=%Q",
+				arg, chreg_p->name);
+
+		service_error(chanserv_p, client_p,
+				"Channel %s URL set '%s'",
+				chreg_p->name, arg);
+		return 1;
+	}
+
 
 	service_error(chanserv_p, client_p, "Set option invalid");
 	return 1;

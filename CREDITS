@@ -7,6 +7,7 @@ has been (mainly) coded from scratch by:
 Thanks also go to
 	AndroSyn, Aaron Sethman <androsyn -at- ratbox.org>
 	Hwy, W. Campbell <wcampbel -at- botbay.net>
+	jills, Jilles Tjoelker <jilles -at- stack.nl>
 	larne, Edward Brocklesby <ejf -at- lythe.org.uk>
 
 As well as the developers whose code in ircd-ratbox has been used here.

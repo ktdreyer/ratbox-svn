@@ -14,6 +14,7 @@ CREATE TABLE users (
 CREATE TABLE channels (
 	chname TEXT,
 	topic TEXT,
+	url TEXT,
 	createmodes TEXT,
 	enforcemodes TEXT,
 	reg_time TIMESTAMP,
