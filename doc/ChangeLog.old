@@ -1,3 +1,19 @@
+leeh        2002/06/16 10:55:20 EDT	(20020616_1)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+  Log:
+  - from hwy:
+    The enclosed patch fixes the detection of nanosleep(), when it's
+    non-existant, it'll actually enable select for the delay loop.
+  
+  Revision  Changes    Path
+  7.135     +1 -1      ircd-hybrid-7/autoconf/configure.in
+  7.138     +1 -1      ircd-hybrid-7/configure
+
+
+
 leeh        2002/06/15 19:07:53 EDT	(20020616_0)
 
   Modified files:
