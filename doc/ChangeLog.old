@@ -1,3 +1,15 @@
+leeh        2002/07/17 12:29:08 EDT	(20020717_1)
+
+  Modified files:
+    contrib              lmh.diff 
+  Log:
+  - fixed my patch to work with current tree
+  
+  Revision  Changes    Path
+  1.9       +114 -297  ircd-hybrid-7/contrib/lmh.diff
+
+
+
 leeh        2002/07/17 09:59:01 EDT	(20020717_0)
 
   Modified files:
