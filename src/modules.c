@@ -188,7 +188,7 @@ void linkEditErrorHandler(NSLinkEditErrors errorClass, int errnum,
 
 char *dlerror(void)
 {
-  return myDlError == NSObjectFileImageSuccess ? NULL : myErrorTable[myDlError % 6];
+  return myDlError == NSObjectFileImageSuccess ? NULL : myErrorTable[myDlError % 7];
 }
 
 void *dlopen(char *filename, int unused)
