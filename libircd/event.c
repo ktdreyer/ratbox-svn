@@ -80,7 +80,7 @@ eventAdd(const char *name, EVH * func, void *arg, time_t when, int weight)
 {
   struct ev_entry *new_event = (struct ev_entry *)MyMalloc(sizeof(struct ev_entry));
   struct ev_entry *cur_event;
-  struct ev_entry *last_event=NULL;
+  struct ev_entry *last_event = NULL;
 
   new_event->func = func;
   new_event->arg = arg;
@@ -95,8 +95,11 @@ eventAdd(const char *name, EVH * func, void *arg, time_t when, int weight)
     {
       if (cur_event->when > new_event->when)
         {
-          new_event->next = last_event->next;
-          last_event->next = new_event;
+          new_event->next = cur_event;
+          if (last_event == NULL)
+            tasks = new_event;
+          else
+            last_event->next = new_event;
           return;
         }
       last_event = cur_event;
@@ -104,10 +107,7 @@ eventAdd(const char *name, EVH * func, void *arg, time_t when, int weight)
   if (last_event == NULL)
     tasks = new_event;
   else
-    {
-      new_event->next = last_event->next;
-      last_event->next = new_event;
-    }
+    last_event->next = new_event;
 }
 
 /* same as eventAdd but adds a random offset within +-1/3 of delta_ish */
@@ -160,7 +160,8 @@ eventRun(void)
   EVH *func;
   void *arg;
   int weight = 0;
-  if (NULL == tasks)
+
+  if (tasks == NULL)
     return;
   if (tasks->when > CurrentTime)
     return;
@@ -214,14 +215,13 @@ eventFreeMemory(void)
       tasks = event->next;
       MyFree(event);
     }
-  tasks = NULL;
 }
 
 int
 eventFind(EVH * func, void *arg)
 {
   struct ev_entry *event;
-  for (event = tasks; event != NULL; event = event->next)
+  for (event = tasks; event; event = event->next)
     {
       if (event->func == func && event->arg == arg)
         return 1;
@@ -234,23 +234,23 @@ show_events(struct Client *source_p)
 {
   struct ev_entry *e = tasks;
   if (last_event_ran)
-    sendto_one(source_p,":%s NOTICE %s :*** Last event to run: %s",
-               me.name,source_p->name,
+    sendto_one(source_p, ":%s NOTICE %s :*** Last event to run: %s",
+               me.name, source_p->name,
                last_event_ran);
 
   sendto_one(source_p,
      ":%s NOTICE %s :*** Operation            Next Execution  Weight",
-     me.name,source_p->name);
+     me.name, source_p->name);
 
   while (e != NULL)
     {
       sendto_one(source_p,
                  ":%s NOTICE %s :*** %-20s %-3d seconds     %d",
-                 me.name,source_p->name,
+                 me.name, source_p->name,
                  e->name, (int)(e->when - CurrentTime), e->weight);
       e = e->next;
     }
-  sendto_one(source_p,":%s NOTICE %s :*** Finished",me.name,source_p->name);
+  sendto_one(source_p, ":%s NOTICE %s :*** Finished", me.name, source_p->name);
   return 0;
 }
 
@@ -263,7 +263,7 @@ void
 set_back_events(time_t by)
 {
   struct ev_entry *e;
-  for (e = tasks; e; e=e->next)
+  for (e = tasks; e; e = e->next)
     if (e->when > by)
       e->when -= by;
     else
