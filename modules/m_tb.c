@@ -48,7 +48,7 @@ static int ms_tb(struct Client *client_p, struct Client *source_p, int parc, con
 
 struct Message tb_msgtab = {
 	"TB", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_ignore, mg_ignore, {ms_tb, 4}, mg_ignore}
+	{mg_unreg, mg_ignore, mg_ignore, {ms_tb, 4}, mg_ignore, mg_ignore}
 };
 
 mapi_clist_av1 tb_clist[] =  { &tb_msgtab, NULL };

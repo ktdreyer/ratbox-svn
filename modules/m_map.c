@@ -37,7 +37,7 @@ static int mo_map(struct Client *client_p, struct Client *source_p, int parc, co
 
 struct Message map_msgtab = {
 	"MAP", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, {m_map, 0}, mg_ignore, mg_ignore, {mo_map, 0}}
+	{mg_unreg, {m_map, 0}, mg_ignore, mg_ignore, mg_ignore, {mo_map, 0}}
 };
 
 mapi_clist_av1 map_clist[] = { &map_msgtab, NULL };

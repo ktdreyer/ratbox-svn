@@ -60,11 +60,11 @@ static int ms_unxline(struct Client *client_p, struct Client *source_p, int parc
 
 struct Message xline_msgtab = {
 	"XLINE", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, {ms_xline, 5}, {ms_xline, 5}, {mo_xline, 3}}
+	{mg_unreg, mg_not_oper, {ms_xline, 5}, {ms_xline, 5}, mg_ignore, {mo_xline, 3}}
 };
 struct Message unxline_msgtab = {
 	"UNXLINE", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, {ms_unxline, 3}, {ms_unxline, 3}, {mo_unxline, 2}}
+	{mg_unreg, mg_not_oper, {ms_unxline, 3}, {ms_unxline, 3}, mg_ignore, {mo_unxline, 2}}
 };
 
 mapi_clist_av1 xline_clist[] =  { &xline_msgtab, &unxline_msgtab, NULL };

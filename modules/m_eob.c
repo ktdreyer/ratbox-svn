@@ -40,7 +40,7 @@ static int ms_eob(struct Client *, struct Client *, int, const char **);
 
 struct Message eob_msgtab = {
 	"EOB", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
-	{mg_unreg, mg_ignore, mg_ignore, {ms_eob, 0}, mg_ignore}
+	{mg_unreg, mg_ignore, mg_ignore, {ms_eob, 0}, mg_ignore, mg_ignore}
 };
 mapi_clist_av1 eob_clist[] = { &eob_msgtab, NULL };
 DECLARE_MODULE_AV1(eob, NULL, NULL, eob_clist, NULL, NULL, "$Revision$");

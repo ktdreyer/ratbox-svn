@@ -42,7 +42,7 @@ static int ms_ping(struct Client *, struct Client *, int, const char **);
 
 struct Message ping_msgtab = {
 	"PING", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, {m_ping, 2}, {ms_ping, 2}, {ms_ping, 2}, {m_ping, 2}}
+	{mg_unreg, {m_ping, 2}, {ms_ping, 2}, {ms_ping, 2}, mg_ignore, {m_ping, 2}}
 };
 
 mapi_clist_av1 ping_clist[] = { &ping_msgtab, NULL };

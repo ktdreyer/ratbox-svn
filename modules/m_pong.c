@@ -44,7 +44,7 @@ static int ms_pong(struct Client *, struct Client *, int, const char **);
 
 struct Message pong_msgtab = {
 	"PONG", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
-	{{mr_pong, 0}, mg_ignore, mg_ignore, {ms_pong, 2}, mg_ignore}
+	{{mr_pong, 0}, mg_ignore, mg_ignore, {ms_pong, 2}, mg_ignore, mg_ignore}
 };
 
 mapi_clist_av1 pong_clist[] = { &pong_msgtab, NULL };

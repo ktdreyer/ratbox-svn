@@ -50,11 +50,11 @@ static int ms_sid(struct Client *, struct Client *, int, const char **);
 
 struct Message server_msgtab = {
 	"SERVER", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
-	{{mr_server, 4}, mg_reg, mg_ignore, {ms_server, 4}, mg_reg}
+	{{mr_server, 4}, mg_reg, mg_ignore, {ms_server, 4}, mg_ignore, mg_reg}
 };
 struct Message sid_msgtab = {
 	"SID", 0, 0, 0, MFLG_SLOW,
-	{mg_ignore, mg_reg, mg_ignore, {ms_sid, 5}, mg_reg}
+	{mg_ignore, mg_reg, mg_ignore, {ms_sid, 5}, mg_ignore, mg_reg}
 };
 
 mapi_clist_av1 server_clist[] = { &server_msgtab, &sid_msgtab, NULL };

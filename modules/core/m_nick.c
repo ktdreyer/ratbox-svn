@@ -55,7 +55,7 @@ static int ms_uid(struct Client *, struct Client *, int, const char **);
 
 struct Message nick_msgtab = {
 	"NICK", 0, 0, 0, MFLG_SLOW,
-	{{mr_nick, 0}, {m_nick, 0}, {mc_nick, 3}, {ms_nick, 9}, {m_nick, 0}}
+	{{mr_nick, 0}, {m_nick, 0}, {mc_nick, 3}, {ms_nick, 9}, mg_ignore, {m_nick, 0}}
 };
 struct Message uid_msgtab = {
 	"UID", 0, 0, 0, MFLG_SLOW,

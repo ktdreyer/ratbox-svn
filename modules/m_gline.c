@@ -55,11 +55,11 @@ static int mo_ungline(struct Client *, struct Client *, int, const char **);
 
 struct Message gline_msgtab = {
 	"GLINE", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, {mc_gline, 4}, {ms_gline, 8}, {mo_gline, 3}}
+	{mg_unreg, mg_not_oper, {mc_gline, 4}, {ms_gline, 8}, mg_ignore, {mo_gline, 3}}
 };
 struct Message ungline_msgtab = {
 	"UNGLINE", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, {mo_ungline, 2}}
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, mg_ignore, {mo_ungline, 2}}
 };
 
 mapi_clist_av1 gline_clist[] = { &gline_msgtab, &ungline_msgtab, NULL };

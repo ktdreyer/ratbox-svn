@@ -48,7 +48,7 @@ static int ms_join(struct Client *, struct Client *, int, const char **);
 
 struct Message join_msgtab = {
 	"JOIN", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, {m_join, 2}, {ms_join, 2}, mg_ignore, {m_join, 2}}
+	{mg_unreg, {m_join, 2}, {ms_join, 2}, mg_ignore, mg_ignore, {m_join, 2}}
 };
 
 mapi_clist_av1 join_clist[] = { &join_msgtab, NULL };

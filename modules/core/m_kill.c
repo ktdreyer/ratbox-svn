@@ -50,7 +50,7 @@ static void relay_kill(struct Client *, struct Client *, struct Client *,
 
 struct Message kill_msgtab = {
 	"KILL", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, {ms_kill, 2}, {ms_kill, 2}, {mo_kill, 2}}
+	{mg_unreg, mg_not_oper, {ms_kill, 2}, {ms_kill, 2}, mg_ignore, {mo_kill, 2}}
 };
 
 mapi_clist_av1 kill_clist[] = { &kill_msgtab, NULL };

@@ -54,7 +54,7 @@ static int m_etrace(struct Client *, struct Client *, int, const char **);
 
 struct Message etrace_msgtab = {
 	"ETRACE", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, {m_etrace, 0}}
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, mg_ignore, {m_etrace, 0}}
 };
 
 mapi_clist_av1 etrace_clist[] =  { &etrace_msgtab, NULL };

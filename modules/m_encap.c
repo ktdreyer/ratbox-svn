@@ -51,7 +51,7 @@ static int ms_encap(struct Client *client_p, struct Client *source_p,
 
 struct Message encap_msgtab = {
 	"ENCAP", 0, 0, 0, MFLG_SLOW,
-	{mg_ignore, mg_ignore, {ms_encap, 3}, {ms_encap, 3}, mg_ignore}
+	{mg_ignore, mg_ignore, {ms_encap, 3}, {ms_encap, 3}, mg_ignore, mg_ignore}
 };
 
 mapi_clist_av1 encap_clist[] = { &encap_msgtab, NULL };

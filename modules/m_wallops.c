@@ -44,11 +44,11 @@ static int ms_wallops(struct Client *, struct Client *, int, const char **);
 
 struct Message wallops_msgtab = {
 	"WALLOPS", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, {ms_wallops, 2}, {ms_wallops, 2}, {mo_operwall, 2}}
+	{mg_unreg, mg_not_oper, {ms_wallops, 2}, {ms_wallops, 2}, mg_ignore, {mo_operwall, 2}}
 };
 struct Message operwall_msgtab = {
 	"OPERWALL", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, {ms_operwall, 2}, mg_ignore, {mo_operwall, 2}}
+	{mg_unreg, mg_not_oper, {ms_operwall, 2}, mg_ignore, mg_ignore, {mo_operwall, 2}}
 };
 
 mapi_clist_av1 wallops_clist[] = { &wallops_msgtab, &operwall_msgtab, NULL };

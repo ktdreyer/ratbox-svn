@@ -44,7 +44,7 @@ static int ms_locops(struct Client *, struct Client *, int, const char **);
 
 struct Message locops_msgtab = {
 	"LOCOPS", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, {ms_locops, 3}, mg_ignore, {m_locops, 2}}
+	{mg_unreg, mg_not_oper, {ms_locops, 3}, mg_ignore, mg_ignore, {m_locops, 2}}
 };
 
 mapi_clist_av1 locops_clist[] = { &locops_msgtab, NULL };

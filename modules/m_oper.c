@@ -47,7 +47,7 @@ static int m_oper(struct Client *, struct Client *, int, const char **);
 
 struct Message oper_msgtab = {
 	"OPER", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, {m_oper, 3}, mg_ignore, mg_ignore, {m_oper, 3}}
+	{mg_unreg, {m_oper, 3}, mg_ignore, mg_ignore, mg_ignore, {m_oper, 3}}
 };
 
 mapi_clist_av1 oper_clist[] = { &oper_msgtab, NULL };

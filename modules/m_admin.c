@@ -45,7 +45,7 @@ static void admin_spy(struct Client *);
 
 struct Message admin_msgtab = {
 	"ADMIN", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
-	{{mr_admin, 0}, {m_admin, 0}, {ms_admin, 0}, mg_ignore, {ms_admin, 0}}
+	{{mr_admin, 0}, {m_admin, 0}, {ms_admin, 0}, mg_ignore, mg_ignore, {ms_admin, 0}}
 };
 
 int doing_admin_hook;

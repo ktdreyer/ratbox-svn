@@ -40,7 +40,7 @@ static int ms_svinfo(struct Client *, struct Client *, int, const char **);
 
 struct Message svinfo_msgtab = {
 	"SVINFO", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_ignore, mg_ignore, {ms_svinfo, 5}, mg_ignore}
+	{mg_unreg, mg_ignore, mg_ignore, {ms_svinfo, 5}, mg_ignore, mg_ignore}
 };
 
 mapi_clist_av1 svinfo_clist[] = { &svinfo_msgtab, NULL };

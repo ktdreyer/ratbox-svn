@@ -42,7 +42,7 @@ static int mr_user(struct Client *, struct Client *, int, const char **);
 
 struct Message user_msgtab = {
 	"USER", 0, 0, 0, MFLG_SLOW,
-	{{mr_user, 5}, mg_reg, mg_ignore, mg_ignore, mg_reg}
+	{{mr_user, 5}, mg_reg, mg_ignore, mg_ignore, mg_ignore, mg_reg}
 };
 
 mapi_clist_av1 user_clist[] = { &user_msgtab, NULL };

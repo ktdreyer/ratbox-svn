@@ -50,15 +50,15 @@ static int ms_bmask(struct Client *, struct Client *, int, const char **);
 
 struct Message mode_msgtab = {
 	"MODE", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, {m_mode, 2}, {m_mode, 3}, {ms_mode, 3}, {m_mode, 2}}
+	{mg_unreg, {m_mode, 2}, {m_mode, 3}, {ms_mode, 3}, mg_ignore, {m_mode, 2}}
 };
 struct Message tmode_msgtab = {
 	"TMODE", 0, 0, 0, MFLG_SLOW,
-	{mg_ignore, mg_ignore, {ms_tmode, 4}, {ms_tmode, 4}, mg_ignore}
+	{mg_ignore, mg_ignore, {ms_tmode, 4}, {ms_tmode, 4}, mg_ignore, mg_ignore}
 };
 struct Message bmask_msgtab = {
 	"BMASK", 0, 0, 0, MFLG_SLOW,
-	{mg_ignore, mg_ignore, mg_ignore, {ms_bmask, 5}, mg_ignore}
+	{mg_ignore, mg_ignore, mg_ignore, {ms_bmask, 5}, mg_ignore, mg_ignore}
 };
 
 mapi_clist_av1 mode_clist[] = { &mode_msgtab, &tmode_msgtab, &bmask_msgtab, NULL };

@@ -43,7 +43,7 @@ static int mo_die(struct Client *, struct Client *, int, const char **);
 
 static struct Message die_msgtab = {
 	"DIE", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg,  mg_not_oper, mg_ignore, mg_ignore, {mo_die, 0}}
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, mg_ignore, {mo_die, 0}}
 };
 
 mapi_clist_av1 die_clist[] = { &die_msgtab, NULL };

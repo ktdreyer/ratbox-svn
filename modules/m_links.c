@@ -43,7 +43,7 @@ static int mo_links(struct Client *, struct Client *, int, const char **);
 
 struct Message links_msgtab = {
 	"LINKS", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, {m_links, 0}, {mo_links, 0}, mg_ignore, {mo_links, 0}}
+	{mg_unreg, {m_links, 0}, {mo_links, 0}, mg_ignore, mg_ignore, {mo_links, 0}}
 };
 
 int doing_links_hook;

@@ -46,11 +46,11 @@ static int ms_unresv(struct Client *, struct Client *, int, const char **);
 
 struct Message resv_msgtab = {
 	"RESV", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
-	{mg_ignore, mg_not_oper, {ms_resv, 4}, {ms_resv, 4}, {mo_resv, 3}}
+	{mg_ignore, mg_not_oper, {ms_resv, 4}, {ms_resv, 4}, mg_ignore, {mo_resv, 3}}
 };
 struct Message unresv_msgtab = {
 	"UNRESV", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
-	{mg_ignore, mg_not_oper, {ms_unresv, 3}, {ms_unresv, 3}, {mo_unresv, 2}}
+	{mg_ignore, mg_not_oper, {ms_unresv, 3}, {ms_unresv, 3}, mg_ignore, {mo_unresv, 2}}
 };
 
 mapi_clist_av1 resv_clist[] = {	&resv_msgtab, &unresv_msgtab, NULL };

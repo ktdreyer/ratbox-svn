@@ -44,11 +44,11 @@ static void dohelp(struct Client *, int, const char *);
 
 struct Message help_msgtab = {
 	"HELP", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, {m_help, 0}, mg_ignore, mg_ignore, {mo_help, 0}}
+	{mg_unreg, {m_help, 0}, mg_ignore, mg_ignore, mg_ignore, {mo_help, 0}}
 };
 struct Message uhelp_msgtab = {
 	"UHELP", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, {m_help, 0}, mg_ignore, mg_ignore, {mo_uhelp, 0}}
+	{mg_unreg, {m_help, 0}, mg_ignore, mg_ignore, mg_ignore, {mo_uhelp, 0}}
 };
 
 mapi_clist_av1 help_clist[] = { &help_msgtab, &uhelp_msgtab, NULL };

@@ -43,7 +43,7 @@ static int mo_version(struct Client *, struct Client *, int, const char **);
 
 struct Message version_msgtab = {
 	"VERSION", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, {m_version, 0}, {mo_version, 0}, mg_ignore, {mo_version, 0}}
+	{mg_unreg, {m_version, 0}, {mo_version, 0}, mg_ignore, mg_ignore, {mo_version, 0}}
 };
 
 mapi_clist_av1 version_clist[] = { &version_msgtab, NULL };

@@ -45,7 +45,7 @@ static int ms_connect(struct Client *, struct Client *, int, const char **);
 
 struct Message connect_msgtab = {
 	"CONNECT", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, {ms_connect, 4}, {ms_connect, 4}, {mo_connect, 2}}
+	{mg_unreg, mg_not_oper, {ms_connect, 4}, {ms_connect, 4}, mg_ignore, {mo_connect, 2}}
 };
 
 mapi_clist_av1 connect_clist[] = { &connect_msgtab, NULL };

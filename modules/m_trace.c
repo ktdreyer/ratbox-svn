@@ -49,7 +49,7 @@ static void trace_spy(struct Client *);
 
 struct Message trace_msgtab = {
 	"TRACE", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, {m_trace, 0}, {m_trace, 0}, mg_ignore, {m_trace, 0}}
+	{mg_unreg, {m_trace, 0}, {m_trace, 0}, mg_ignore, mg_ignore, {m_trace, 0}}
 };
 
 int doing_trace_hook;

@@ -48,7 +48,7 @@ static int mo_set(struct Client *, struct Client *, int, const char **);
 
 struct Message set_msgtab = {
 	"SET", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, {mo_set, 0}}
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, mg_ignore, {mo_set, 0}}
 };
 
 mapi_clist_av1 set_clist[] = { &set_msgtab, NULL };

@@ -41,7 +41,7 @@ static int ms_error(struct Client *, struct Client *, int, const char **);
 
 struct Message error_msgtab = {
 	"ERROR", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
-	{{m_error, 0}, mg_ignore, mg_ignore, {ms_error, 0}, mg_ignore}
+	{{m_error, 0}, mg_ignore, mg_ignore, {ms_error, 0}, mg_ignore, mg_ignore}
 };
 
 mapi_clist_av1 error_clist[] = {

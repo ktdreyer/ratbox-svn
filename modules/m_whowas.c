@@ -45,7 +45,7 @@ static int m_whowas(struct Client *, struct Client *, int, const char **);
 
 struct Message whowas_msgtab = {
 	"WHOWAS", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, {m_whowas, 2}, mg_ignore, mg_ignore, {m_whowas, 2}}
+	{mg_unreg, {m_whowas, 2}, mg_ignore, mg_ignore, mg_ignore, {m_whowas, 2}}
 };
 
 mapi_clist_av1 whowas_clist[] = { &whowas_msgtab, NULL };

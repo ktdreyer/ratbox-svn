@@ -54,12 +54,12 @@ static int ms_unkline(struct Client *, struct Client *, int, const char **);
 
 struct Message kline_msgtab = {
 	"KLINE", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, {ms_kline, 6}, {ms_kline, 6}, {mo_kline, 2}}
+	{mg_unreg, mg_not_oper, {ms_kline, 6}, {ms_kline, 6}, mg_ignore, {mo_kline, 2}}
 };
 
 struct Message unkline_msgtab = {
 	"UNKLINE", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, {ms_unkline, 4}, {ms_unkline, 4}, {mo_unkline, 2}}
+	{mg_unreg, mg_not_oper, {ms_unkline, 4}, {ms_unkline, 4}, mg_ignore, {mo_unkline, 2}}
 };
 
 mapi_clist_av1 kline_clist[] = { &kline_msgtab, &unkline_msgtab, NULL };

@@ -45,7 +45,7 @@ static int m_invite(struct Client *, struct Client *, int, const char **);
 
 struct Message invite_msgtab = {
 	"INVITE", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, {m_invite, 3}, {m_invite, 3}, mg_ignore, {m_invite, 3}}
+	{mg_unreg, {m_invite, 3}, {m_invite, 3}, mg_ignore, mg_ignore, {m_invite, 3}}
 };
 mapi_clist_av1 invite_clist[] = { &invite_msgtab, NULL };
 DECLARE_MODULE_AV1(invite, NULL, NULL, invite_clist, NULL, NULL, "$Revision$");

@@ -44,7 +44,7 @@ static int m_kick(struct Client *, struct Client *, int, const char **);
 
 struct Message kick_msgtab = {
 	"KICK", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_kick, mg_kick, mg_kick, mg_kick}
+	{mg_unreg, mg_kick, mg_kick, mg_kick, mg_ignore, mg_kick}
 };
 
 mapi_clist_av1 kick_clist[] = { &kick_msgtab, NULL };

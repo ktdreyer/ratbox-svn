@@ -45,7 +45,7 @@ static int ms_sjoin(struct Client *, struct Client *, int, const char **);
 
 struct Message sjoin_msgtab = {
 	"SJOIN", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_ignore, mg_ignore, {ms_sjoin, 0}, mg_ignore}
+	{mg_unreg, mg_ignore, mg_ignore, {ms_sjoin, 0}, mg_ignore, mg_ignore}
 };
 
 mapi_clist_av1 sjoin_clist[] = { &sjoin_msgtab, NULL };

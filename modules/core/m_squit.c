@@ -45,7 +45,7 @@ static int mo_squit(struct Client *, struct Client *, int, const char **);
 
 struct Message squit_msgtab = {
 	"SQUIT", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, {ms_squit, 0}, {ms_squit, 0}, {mo_squit, 2}}
+	{mg_unreg, mg_not_oper, {ms_squit, 0}, {ms_squit, 0}, mg_ignore, {mo_squit, 2}}
 };
 
 mapi_clist_av1 squit_clist[] = { &squit_msgtab, NULL };

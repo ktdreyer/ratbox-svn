@@ -45,7 +45,7 @@ static int mo_list(struct Client *, struct Client *, int, const char **);
 
 struct Message list_msgtab = {
 	"LIST", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, {m_list, 0}, mg_ignore, mg_ignore, {mo_list, 0}}
+	{mg_unreg, {m_list, 0}, mg_ignore, mg_ignore, mg_ignore, {mo_list, 0}}
 };
 
 mapi_clist_av1 list_clist[] = { &list_msgtab, NULL };

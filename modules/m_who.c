@@ -45,7 +45,7 @@ static int m_who(struct Client *, struct Client *, int, const char **);
 
 struct Message who_msgtab = {
 	"WHO", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, {m_who, 2}, mg_ignore, mg_ignore, {m_who, 2}}
+	{mg_unreg, {m_who, 2}, mg_ignore, mg_ignore, mg_ignore, {m_who, 2}}
 };
 
 mapi_clist_av1 who_clist[] = { &who_msgtab, NULL };

@@ -74,7 +74,7 @@ static int m_challenge(struct Client *, struct Client *, int, const char **);
 /* We have openssl support, so include /CHALLENGE */
 struct Message challenge_msgtab = {
 	"CHALLENGE", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, {m_challenge, 2}, mg_ignore, mg_ignore, {m_challenge, 2}}
+	{mg_unreg, {m_challenge, 2}, mg_ignore, mg_ignore, mg_ignore, {m_challenge, 2}}
 };
 
 mapi_clist_av1 challenge_clist[] = { &challenge_msgtab, NULL };

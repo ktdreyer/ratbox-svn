@@ -44,7 +44,7 @@ static int mo_restart(struct Client *, struct Client *, int, const char **);
 
 struct Message restart_msgtab = {
 	"RESTART", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, {mo_restart, 0}}
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, mg_ignore, {mo_restart, 0}}
 };
 
 mapi_clist_av1 restart_clist[] = { &restart_msgtab, NULL };

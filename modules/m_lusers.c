@@ -41,7 +41,7 @@ static int ms_lusers(struct Client *, struct Client *, int, const char **);
 
 struct Message lusers_msgtab = {
 	"LUSERS", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, {m_lusers, 0}, {ms_lusers, 0}, mg_ignore, {ms_lusers, 0}}
+	{mg_unreg, {m_lusers, 0}, {ms_lusers, 0}, mg_ignore, mg_ignore, {ms_lusers, 0}}
 };
 
 mapi_clist_av1 lusers_clist[] = { &lusers_msgtab, NULL };

@@ -41,7 +41,7 @@ static int m_htm(struct Client *, struct Client *, int, const char **);
 
 struct Message htm_msgtab = {
 	"HTM", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_ignore, mg_ignore, mg_ignore, {m_htm, 0}}
+	{mg_unreg, mg_ignore, mg_ignore, mg_ignore, mg_ignore, {m_htm, 0}}
 };
 
 mapi_clist_av1 htm_clist[] = { &htm_msgtab, NULL };

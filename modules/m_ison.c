@@ -44,7 +44,7 @@ static int m_ison(struct Client *, struct Client *, int, const char **);
 
 struct Message ison_msgtab = {
 	"ISON", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, {m_ison, 2}, mg_ignore, mg_ignore, {m_ison, 2}}
+	{mg_unreg, {m_ison, 2}, mg_ignore, mg_ignore, mg_ignore, {m_ison, 2}}
 };
 
 mapi_clist_av1 ison_clist[] = { &ison_msgtab, NULL };

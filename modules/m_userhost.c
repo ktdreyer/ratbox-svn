@@ -43,7 +43,7 @@ static int m_userhost(struct Client *, struct Client *, int, const char **);
 
 struct Message userhost_msgtab = {
 	"USERHOST", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, {m_userhost, 2}, mg_ignore, mg_ignore, {m_userhost, 2}}
+	{mg_unreg, {m_userhost, 2}, mg_ignore, mg_ignore, mg_ignore, {m_userhost, 2}}
 };
 
 mapi_clist_av1 userhost_clist[] = { &userhost_msgtab, NULL };

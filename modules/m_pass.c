@@ -41,7 +41,7 @@ static int mr_pass(struct Client *, struct Client *, int, const char **);
 
 struct Message pass_msgtab = {
 	"PASS", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
-	{{mr_pass, 2}, mg_reg, mg_ignore, mg_ignore, mg_reg}
+	{{mr_pass, 2}, mg_reg, mg_ignore, mg_ignore, mg_ignore, mg_reg}
 };
 
 mapi_clist_av1 pass_clist[] = { &pass_msgtab, NULL };

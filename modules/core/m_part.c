@@ -45,7 +45,7 @@ static int m_part(struct Client *, struct Client *, int, const char **);
 
 struct Message part_msgtab = {
 	"PART", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, {m_part, 2}, {m_part, 2}, mg_ignore, {m_part, 2}}
+	{mg_unreg, {m_part, 2}, {m_part, 2}, mg_ignore, mg_ignore, {m_part, 2}}
 };
 
 mapi_clist_av1 part_clist[] = { &part_msgtab, NULL };
