@@ -1,3 +1,11 @@
+*** 20001222_11 by db
+- Ok, ALL the old support for old style confs is gone now, except for K/D lines
+  That means IF YOU HAVEN'T CONVERTED FORMAT YET, DO IT NOW,
+  OR IT WILL NOT RUN. capiche?
+  I'll be able to simplify the parser in a bit a little more.
+
+
+
 *** 20001222_10 by db
 - ok. attach_cn_lines() was just plain wrong.
   The code was matching on hostname(ip) instead of servername
