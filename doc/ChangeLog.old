@@ -1,3 +1,22 @@
+db          2002/07/20 09:07:56 EDT	(20020720_1)
+
+  Modified files:
+    src                  s_user.c 
+  Log:
+  - This fixes the deop of oper causing an oper to be tossed off the server
+    if they don't have a matching auth{} for their deopered client.
+    Note that we have attached a new conf to the client already, so this
+    has to be removed in case they re-oper, else we could end up with a link
+    list of new confs. (unlikely an oper would be rude but still)
+  
+  - cleaned up some style() return should always have a ()
+    function names should start at the left most char
+  
+  Revision  Changes    Path
+  7.202     +34 -37    ircd-hybrid-7/src/s_user.c
+
+
+
 leeh        2002/07/20 06:07:43 EDT	(20020720_0)
 
   Modified files:
