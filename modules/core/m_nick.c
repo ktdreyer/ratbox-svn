@@ -275,6 +275,7 @@ mc_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 					"%s (Bad Nickname)", me.name);
 		source_p->flags |= FLAGS_KILLED;
 		exit_client(client_p, source_p, &me, "Bad Nickname");
+		return 0;
 	}
 			      
 	newts = atol(parv[2]);
@@ -321,7 +322,7 @@ ms_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 				     client_p->name);
 		sendto_one(client_p, ":%s KILL %s :%s (Bad Nickname)",
 			   me.name, parv[1], me.name);
-
+		return 0;
 	}
 			      
 	if(parc == 9)
@@ -336,6 +337,7 @@ ms_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 					     client_p->name);
 			sendto_one(client_p, ":%s KILL %s :%s (Bad user@host)",
 				   me.name, parv[1], me.name);
+			return 0;
 		}
 
 		/* check the length of the clients gecos */
@@ -406,11 +408,11 @@ ms_uid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		ServerStats->is_kill++;
 		sendto_realops_flags(UMODE_DEBUG, L_ALL,
 				     "Bad Nick: %s From: %s(via %s)",
-				     parv[1], parc == 9 ? parv[7] : 
-				      source_p->user->server,
+				     parv[1], source_p->name,
 				     client_p->name);
 		sendto_one(client_p, ":%s KILL %s :%s (Bad Nickname)",
 			   me.name, parv[8], me.name);
+		return 0;
 	}
 
 	if(!clean_username(parv[5]) || !clean_host(parv[6]))
@@ -422,6 +424,7 @@ ms_uid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 				     client_p->name);
 		sendto_one(client_p, ":%s KILL %s :%s (Bad user@host)",
 			   me.name, parv[8], me.name);
+		return 0;
 	}
 
 	/* check length of clients gecos */
