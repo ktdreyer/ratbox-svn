@@ -1,3 +1,27 @@
+androsyn    2004/07/29 14:10:54 EDT	(20040729_6)
+
+  Modified files:
+    adns                 setup.c 
+    modules              m_dline.c m_kline.c m_resv.c m_xline.c 
+    src                  cache.c ircd.c ircd_lexer.l s_conf.c 
+                         s_log.c 
+  Log:
+  missed the damn fbopens...
+  
+  Revision  Changes    Path
+  1.35      +1 -1      ircd-ratbox/adns/setup.c
+  1.39      +3 -3      ircd-ratbox/modules/m_dline.c
+  1.186     +3 -3      ircd-ratbox/modules/m_kline.c
+  1.64      +3 -3      ircd-ratbox/modules/m_resv.c
+  1.55      +4 -4      ircd-ratbox/modules/m_xline.c
+  1.16      +1 -1      ircd-ratbox/src/cache.c
+  7.347     +1 -1      ircd-ratbox/src/ircd.c
+  1.161     +2 -2      ircd-ratbox/src/ircd_lexer.l
+  7.474     +6 -6      ircd-ratbox/src/s_conf.c
+  7.72      +3 -3      ircd-ratbox/src/s_log.c
+
+
+
 androsyn    2004/07/29 14:07:49 EDT	(20040729_5)
 
   Modified files:
