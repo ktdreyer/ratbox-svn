@@ -1,3 +1,19 @@
+androsyn    2004/04/12 13:19:45 EDT	(20040412_9)
+
+  Modified files:
+    include              tools.h 
+    src                  reject.c tools.c 
+  Log:
+  If you're going to use ordered lists for the reject cache, move the most
+  recently updated node to the end of the list
+  
+  Revision  Changes    Path
+  1.50      +23 -0     ircd-ratbox/include/tools.h
+  1.16      +1 -0      ircd-ratbox/src/reject.c
+  7.44      +1 -7      ircd-ratbox/src/tools.c
+
+
+
 leeh        2004/04/12 12:22:20 EDT	(20040412_8)
 
   Modified files:
