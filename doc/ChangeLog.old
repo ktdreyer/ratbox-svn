@@ -1,3 +1,14 @@
+*** 20010929_4 by a1kmm
+1) Fixed a bug where we were not properly terminating long lines sent to
+   the parser.
+2) Fixed several bugs in linebuf_copyline where we were not correctly
+   stripping \r\n or there was a possibility of a buffer underflow.
+3) Left in two of the less expensive asserts which I used to catch these
+   bugs.
+Commit approved by db on IRC.
+
+
+
 *** 20010929_3 by davidt
 - Zero pointers after they are freed, before this commit doing
   /challenge foo
