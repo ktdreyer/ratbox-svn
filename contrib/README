@@ -1,8 +1,13 @@
 $Id$
 
-This directory contains modules that have been contributed
+This directory contains modules and patches that have been contributed
 by other people, or aren't suitable for including into the 
-hybrid tree.
+hybrid tree.  The coding team do not officially support the contrib/ 
+modules, or guarantee any of them will actually work.
+
+
+Modules
+-------
 
 m_clearchan.c  - CLEARCHAN - clears all users out of a channel and joins person
                              issuing command
@@ -44,6 +49,9 @@ example_module.c - An example module to be used for creating your own.
                    Syntax: TEST
 
 
+Spy Modules
+-----------
+
 The following are the 'spy' parts, accessible via the +y usermode
 
 spy_admin_notice.c   - Spy on clients doing ADMIN
@@ -58,4 +66,28 @@ spy_whois_notice.c   - Spy on local clients who WHOIS you.
 Note: if you have both spy_stats_notice.c and spy_stats_p_notice.c loaded
 you will get two messages.
 
+
+VMS Files
+---------
+
 vms_*.c        - Misc files needed for VMS support.
+
+
+Patches
+-------
+
+The following are the patches contained in contrib.  A short description
+of the patch is contained here, if you want to apply the patch, you 
+should read the the patch itself which contains information you will
+need.
+
+To apply a patch, first change to the ircd-hybrid-7 root directory, 
+the directory one level above contrib/.  If you have already compiled 
+the ircd, run 'make clean'.  Then for example to patch 
+remote-unkline.diff type:
+    patch -p0 < contrib/remote-unkline.diff
+
+You must then run 'make' and 'make install' again, and restart your ircd.
+The following patches are included:
+
+remote-unkline.diff: This patch adds support for remote unklines.
