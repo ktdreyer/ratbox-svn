@@ -1,3 +1,16 @@
+a1kmm       2002/02/23 23:44:50 EST	(20020224_0)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  - Added a #if 0 around the expensive asserts for now. Perhaps we want a
+    better define system later.
+  
+  Revision  Changes    Path
+  7.237     +2 -0      ircd-hybrid-7/src/client.c
+
+
+
 leeh        2002/02/23 16:20:41 EST	(20020223_6)
 
   Modified files:
