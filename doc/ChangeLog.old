@@ -1,3 +1,7 @@
+*** 20011017_1 by jdc
+* CONF CHANGE: channel {} "disable_vchans"  renamed to  "use_vchans".
+
+
 *** 20011016_1 by db
 - zero out config structs in case they are full of garbage
 
