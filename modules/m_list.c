@@ -52,6 +52,7 @@ mapi_clist_av1 list_clist[] = { &list_msgtab, NULL };
 DECLARE_MODULE_AV1(list, NULL, NULL, list_clist, NULL, NULL, "$Revision$");
 
 static void list_all_channels(struct Client *source_p);
+static void list_limit_channels(struct Client *source_p, const char *param);
 static void list_named_channel(struct Client *source_p, const char *name);
 
 /* m_list()
@@ -77,8 +78,10 @@ m_list(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	/* If no arg, do all channels *whee*, else just one channel */
 	if(parc < 2 || EmptyString(parv[1]))
 		list_all_channels(source_p);
-	else
+	else if(IsChannelName(parv[1]))
 		list_named_channel(source_p, parv[1]);
+	else
+		list_limit_channels(source_p, parv[1]);
 
 	return 0;
 }
@@ -93,8 +96,10 @@ mo_list(struct Client *client_p, struct Client *source_p, int parc, const char *
 	/* If no arg, do all channels *whee*, else just one channel */
 	if(parc < 2 || EmptyString(parv[1]))
 		list_all_channels(source_p);
-	else
+	else if(IsChannelName(parv[1]))
 		list_named_channel(source_p, parv[1]);
+	else
+		list_limit_channels(source_p, parv[1]);
 
 	return 0;
 }
@@ -143,6 +148,81 @@ list_all_channels(struct Client *source_p)
 	sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
 	return;
 }
+
+static void
+list_limit_channels(struct Client *source_p, const char *param)
+{
+	struct Channel *chptr;
+	char *args;
+	char *p;
+	dlink_node *ptr;
+	unsigned int sendq_limit;
+	int max = INT_MAX;
+	int min = 0;
+	int i;
+
+	args = LOCAL_COPY(param);
+
+	for(i = 0; i < 2; i++)
+	{
+		if((p = strchr(args, ',')) != NULL)
+			*p++ = '\0';
+
+		if(*args == '<')
+		{
+			args++;
+			if((max = atoi(args)) <= 0)
+				max = INT_MAX;
+		}
+		else if(*args == '>')
+		{
+			args++;
+			if((min = atoi(args)) < 0)
+				min = 0;
+		}
+
+		if(EmptyString(p))
+			break;
+		else
+			args = p;
+	}
+
+	/* give them an output limit of 90% of their sendq. --fl */
+	sendq_limit = (unsigned int) get_sendq(source_p);
+	sendq_limit /= 10;
+	sendq_limit *= 9;
+
+	sendto_one(source_p, form_str(RPL_LISTSTART), me.name, source_p->name);
+
+	DLINK_FOREACH(ptr, global_channel_list.head)
+	{
+		chptr = ptr->data;
+
+		/* if theyre overflowing their sendq, stop. --fl */
+		if(linebuf_len(&source_p->localClient->buf_sendq) > sendq_limit)
+		{
+			sendto_one(source_p, form_str(ERR_TOOMANYMATCHES),
+				   me.name, source_p->name, "LIST");
+			break;
+		}
+
+		if(dlink_list_length(&chptr->members) >= max ||
+		   dlink_list_length(&chptr->members) <= min)
+			continue;
+
+		if(SecretChannel(chptr) && !IsMember(source_p, chptr))
+			continue;
+
+		sendto_one(source_p, form_str(RPL_LIST), 
+			   me.name, source_p->name, chptr->chname, 
+			   dlink_list_length(&chptr->members), 
+			   chptr->topic == NULL ? "" : chptr->topic);
+	}
+
+	sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
+	return;
+}
+
 
 /* list_named_channel()
  * 
