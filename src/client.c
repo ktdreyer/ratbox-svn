@@ -59,7 +59,6 @@
 static void check_pings_list(dlink_list * list);
 static void check_unknowns_list(dlink_list * list);
 static void free_exited_clients(void *unused);
-static void exit_aborted_clients(void *unused);
 
 static int exit_remote_client(struct Client *, struct Client *, struct Client *,const char *);
 static int exit_remote_server(struct Client *, struct Client *, struct Client *,const char *);
@@ -118,7 +117,6 @@ init_client(void)
 	eventAddIsh("check_pings", check_pings, NULL, 30);
 	eventAddIsh("free_exited_clients", &free_exited_clients, NULL, 4);
 	eventAddIsh("client_heap_gc", client_heap_gc, NULL, 30);
-	eventAddIsh("exit_aborted_clients", exit_aborted_clients, NULL, 1);
 }
 
 /*
@@ -1067,37 +1065,6 @@ remove_dependents(struct Client *client_p,
 
 
 
-struct abort_client
-{
-	dlink_node node;
-	struct Client *client;
-	char notice[TOPICLEN];
-};
-
-static dlink_list abort_list;
-
-void
-exit_aborted_clients(void *unused)
-{
-	dlink_node *ptr, *next;
-	DLINK_FOREACH_SAFE(ptr, next, abort_list.head)
-	{
-		struct abort_client *abt = ptr->data;
-		dlinkDelete(ptr, &abort_list);
-		if(!IsPerson(abt->client) && !IsUnknown(abt->client))
-		{
-			sendto_realops_flags(UMODE_ALL, L_ADMIN,
-					     "Closing link to %s: %s",
-					     get_client_name(abt->client, HIDE_IP), abt->notice);
-			sendto_realops_flags(UMODE_ALL, L_OPER,
-					     "Closing link to %s: %s",
-					     get_client_name(abt->client, MASK_IP), abt->notice);
-		}
-		exit_client(abt->client, abt->client, &me, abt->notice);
-		MyFree(abt);
-	}
-}
-
 /*
  * dead_link - Adds client to a list of clients that need an exit_client()
  *
@@ -1105,28 +1072,19 @@ exit_aborted_clients(void *unused)
 void
 dead_link(struct Client *client_p)
 {
-	struct abort_client *abt;
+	char notice[TOPICLEN]; 
 	if(!MyConnect(client_p)|| IsMe(client_p))
 		return;
 
-	abt = MyMalloc(sizeof(struct abort_client));
-	abt->client = client_p;
-
 	if(client_p->flags & FLAGS_SENDQEX)
-		strcpy(abt->notice, "Max SendQ exceeded");
+		strcpy(notice, "Max SendQ exceeded");
 	else
 	{
-		ircsprintf(abt->notice, "Write error: %s", strerror(errno));
+		ircsprintf(notice, "Write error: %s", strerror(errno));
 	}
 
-	if(client_p->localClient->fd >= 0)
-	{
-		/* We are as good as useless anyways */
-		fd_close(client_p->localClient->fd);
-		client_p->localClient->fd = -1;
-	}
 	Debug((DEBUG_ERROR, "Closing link to %s: %s", get_client_name(client_p, HIDE_IP), notice));
-	dlinkAdd(abt, &abt->node, &abort_list);
+	exit_client(client_p, client_p, &me, notice);
 }
 
 
