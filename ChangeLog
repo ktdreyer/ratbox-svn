@@ -1,3 +1,26 @@
+androsyn    2003/03/17 18:28:29 UTC	(20030317_1)
+
+  Modified files:
+    include              client.h 
+    src                  adns.c client.c packet.c parse.c s_auth.c 
+                         s_bsd.c s_serv.c s_user.c send.c 
+  Log:
+  Working towards stabilizing things a bit more :)
+  
+  Revision  Changes    Path
+  7.201     +7 -4      ircd-ratbox/include/client.h
+  7.55      +3 -0      ircd-ratbox/src/adns.c
+  7.377     +28 -17    ircd-ratbox/src/client.c
+  7.116     +8 -9      ircd-ratbox/src/packet.c
+  7.154     +3 -3      ircd-ratbox/src/parse.c
+  7.141     +4 -30     ircd-ratbox/src/s_auth.c
+  7.202     +1 -1      ircd-ratbox/src/s_bsd.c
+  7.325     +3 -3      ircd-ratbox/src/s_serv.c
+  7.257     +5 -6      ircd-ratbox/src/s_user.c
+  7.239     +7 -7      ircd-ratbox/src/send.c
+
+
+
 leeh        2003/03/17 00:55:40 UTC	(20030317_0)
 
   Modified files:
