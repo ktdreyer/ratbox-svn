@@ -1,3 +1,7 @@
+*** 20001225_16 by ejb
+- allow remote whois.
+
+
 *** 20001225_15 by toot
 replaced some ConfigFileEntry.hide_server with GlobalSetOptions.hide_server
 
