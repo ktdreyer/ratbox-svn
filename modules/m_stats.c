@@ -194,12 +194,14 @@ static struct StatsStructLetter stats_let_table[] =
  * Format is same as above.  This table is checked case insensitively,
  * so "auth" and "AUTH" are the same, and if we have full words.. there
  * should be no stats the same.. -- fl_ */
+#if 0
 static struct StatsStructWord stats_cmd_table[] =
 {
   /* name		function	*/
   { "AUTH",		stats_auth,	},
   { (char *) 0, 	(void (*)()) 0, }
 };
+#endif
 
 /*
  * m_stats by fl_
@@ -215,7 +217,7 @@ static struct StatsStructWord stats_cmd_table[] =
 static void m_stats(struct Client *client_p, struct Client *source_p,
                    int parc, char *parv[])
 {
-  int i, n;
+  int i;
   static time_t  last_used = 0;
   char statchar;
 
