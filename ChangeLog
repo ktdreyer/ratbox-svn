@@ -1,3 +1,22 @@
+androsyn    2002/09/07 06:08:13 UTC	(20020907_0)
+
+  Modified files:
+    doc                  example.efnet.conf 
+    include              newconf.h s_conf.h 
+    src                  newconf.c 
+  Log:
+  Fix parser so that need_identd and no_spoof_notice match the docs...
+  This does break compat with hybrid-7..If somebody wants to fix it to
+  support the hybrid-7 options again..feel free :P
+  
+  Revision  Changes    Path
+  7.15      +1 -1      ircd-ratbox/doc/example.efnet.conf
+  7.14      +2 -2      ircd-ratbox/include/newconf.h
+  7.201     +2 -2      ircd-ratbox/include/s_conf.h
+  7.33      +11 -11    ircd-ratbox/src/newconf.c
+
+
+
 androsyn    2002/09/06 00:52:43 UTC	(20020906_1)
 
   Modified files:
