@@ -1116,8 +1116,11 @@ int server_estab(struct Client *client_p)
   */
   SetServer(client_p);
   client_p->servptr = &me;
-  /* Update the capability combination usage counts. -A1kmm */
+
+ /* Update the capability combination usage counts. -A1kmm */
+#ifdef USE_TABLE_MODE 
   set_chcap_usage_counts(client_p);
+#endif  
 
   /* Some day, all these lists will be consolidated *sigh* */
   add_client_to_llist(&(me.serv->servers), client_p);

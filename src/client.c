@@ -1309,7 +1309,9 @@ const char* comment         /* Reason for the exit */
       if (IsServer(source_p))
         {
           Count.myserver--;
+#ifdef USE_TABLE_MODE	  
           unset_chcap_usage_counts(source_p);
+#endif	  
 	  if(ServerInfo.hub)
 	    remove_lazylink_flags(source_p->localClient->serverMask);
 	  else
