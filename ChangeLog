@@ -1,3 +1,28 @@
+leeh        2004/01/25 18:12:47 EST	(20040125_1)
+
+  Modified files:
+    include              hook.h 
+    src                  .depend c_mode.c hook.c 
+    src/s_chanserv       .depend s_c_local.h s_c_set.c 
+                         s_chanserv.c 
+    src/s_userserv       .depend 
+  Log:
+  - added a hook for mode +o's, so STRICTOP/NOOP are complete
+  - added another hook for joins, to handle autoop/autovoice
+  
+  Revision  Changes    Path
+  1.2       +1 -0      rserv/include/hook.h
+  1.5       +4 -2      rserv/src/.depend
+  1.14      +16 -3     rserv/src/c_mode.c
+  1.2       +1 -1      rserv/src/hook.c
+  1.2       +26 -4     rserv/src/s_chanserv/.depend
+  1.6       +1 -0      rserv/src/s_chanserv/s_c_local.h
+  1.2       +36 -4     rserv/src/s_chanserv/s_c_set.c
+  1.9       +170 -3    rserv/src/s_chanserv/s_chanserv.c
+  1.3       +3 -2      rserv/src/s_userserv/.depend
+
+
+
 leeh        2004/01/25 17:11:50 EST	(20040125_0)
 
   Modified files:
