@@ -1049,8 +1049,12 @@ auth_spoof_notice:   SPOOF_NOTICE '=' TNO ';'
 auth_spoof:   SPOOF '=' QSTRING ';' 
   {
     MyFree(yy_achead->name);
-    DupString(yy_achead->name, yylval.string);
-    yy_achead->flags |= CONF_FLAGS_SPOOF_IP;
+    if(strlen(yylval.string) < HOSTLEN)
+    {    
+	DupString(yy_achead->name, yylval.string);
+    	yy_achead->flags |= CONF_FLAGS_SPOOF_IP;
+    } else
+	log(L_ERROR, "Spoofs must be less than %d..ignoring it", HOSTLEN);
   };
 
 auth_exceed_limit:    EXCEED_LIMIT '=' TYES ';'
