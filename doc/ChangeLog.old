@@ -1,3 +1,8 @@
+*** 20001220_17 by ejb
+- removed hide_chanops from config since its not used anymore.
+
+
+
 *** 20001220_16 by ejb
 - added umode +z, hides ops on channel (replaces hide_chanops=yes)
 - changed format of 004 numeric
