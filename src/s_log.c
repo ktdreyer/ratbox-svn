@@ -141,7 +141,7 @@ report_operspy(struct Client *source_p, const char *token, const char *arg)
 			     get_oper_name(source_p), token,
 			     arg ? arg : "");
 
-	ilog(L_OPERSPY, "OPERSPY %s %s %s\n",
+	ilog(L_OPERSPY, "OPERSPY %s %s %s",
 	     get_oper_name(source_p), token, arg ? arg : "");
 }
 

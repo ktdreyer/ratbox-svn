@@ -86,7 +86,7 @@ devpoll_write_update(int fd, int events)
 	retval = write(dpfd, &pollfds[0], sizeof(struct pollfd));
 	if(retval != sizeof(struct pollfd))
 		ilog(L_IOERROR,
-		     "devpoll_write_update: dpfd write failed %d: %s\n", errno, strerror(errno));
+		     "devpoll_write_update: dpfd write failed %d: %s", errno, strerror(errno));
 	/* Done! */
 }
 
@@ -119,7 +119,7 @@ devpoll_update_events(int fd, short filter, PF * handler)
 		break;
 	default:
 #ifdef NOTYET
-		ilog(L_IOERROR, "devpoll_update_events called with unknown filter: %hd\n", filter);
+		ilog(L_IOERROR, "devpoll_update_events called with unknown filter: %hd", filter);
 #endif
 		return;
 		break;
@@ -276,7 +276,7 @@ comm_select(unsigned long delay)
 				}
 				else
 					ilog(L_IOERROR,
-					     "comm_select: Unhandled read event: fdmask: %x\n",
+					     "comm_select: Unhandled read event: fdmask: %x",
 					     fdmask[fd]);
 			}
 
@@ -297,13 +297,13 @@ comm_select(unsigned long delay)
 				}
 				else
 					ilog(L_IOERROR,
-					     "comm_select: Unhandled write event: fdmask: %x\n",
+					     "comm_select: Unhandled write event: fdmask: %x",
 					     fdmask[fd]);
 
 			}
 			if(dopoll.dp_fds[i].revents & POLLNVAL)
 			{
-				ilog(L_IOERROR, "revents was Invalid for %d\n", fd);
+				ilog(L_IOERROR, "revents was Invalid for %d", fd);
 			}
 		}
 		return COMM_OK;
