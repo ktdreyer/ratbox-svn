@@ -1,3 +1,16 @@
+androsyn    2003/02/13 21:16:16 UTC	(20030213_0)
+
+  Modified files:
+    modules/core         m_nick.c m_server.c 
+  Log:
+  Forgot a few add_client_to_list calls
+  
+  Revision  Changes    Path
+  1.114     +3 -3      ircd-ratbox/modules/core/m_nick.c
+  1.106     +2 -2      ircd-ratbox/modules/core/m_server.c
+
+
+
 androsyn    2003/02/12 19:52:32 UTC	(20030212_2)
 
   Modified files:
