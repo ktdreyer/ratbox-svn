@@ -110,7 +110,7 @@ typedef enum
 }
 ReportType;
 
-#define sendheader(c, r) send(c->localClient->fd, HeaderMessages[(r)].message, HeaderMessages[(r)].length)
+#define sendheader(c, r) send(c->localClient->fd, HeaderMessages[(r)].message, HeaderMessages[(r)].length, 0)
 
 /*
  */
