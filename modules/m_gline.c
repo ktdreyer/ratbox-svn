@@ -370,8 +370,8 @@ ms_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 			acptr->user->server, user, host, reason);
 
 	ilog(L_GLINE, "R %s %s %s %s %s %s %s",
-	     source_p->name, source_p->username, source_p->host, 
-	     source_p->user->server, user, host, reason);
+	     acptr->name, acptr->username, acptr->host, 
+	     acptr->user->server, user, host, reason);
 
 	/* If at least 3 opers agree this user should be G lined then do it */
 	majority_gline(acptr, user, host, reason);
