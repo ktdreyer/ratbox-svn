@@ -74,7 +74,7 @@ m_error(struct Client *client_p, struct Client *source_p, int parc, const char *
 	ilog(L_SERVER, "Received ERROR message from %s: %s", 
 	     log_client_name(source_p, SHOW_IP), para);
 
-	if(IsHandshake(client_p) || IsConnecting(client_p))
+	if(IsAnyServer(client_p))
 	{
 		if(ConfigFileEntry.hide_error_messages < 2)
 		{
