@@ -1,3 +1,12 @@
+*** 19990912_1 by wnder
+IAuth updates:
+ * bug fix in iauth connection code
+ * register_user() has been replaced with:
+   GreetUser()            - for local clients
+   register_remote_user() - for remote clients
+   (all under #ifdef USE_IAUTH)
+
+
 *** 19990911_1 by tomh
 add fd check to other #ifdef SENDQALWAYS
 
