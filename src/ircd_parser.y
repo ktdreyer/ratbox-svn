@@ -38,6 +38,7 @@
 #include "ircd.h"
 #include "tools.h"
 #include "s_conf.h"
+#include "event.h"
 #include "s_log.h"
 #include "client.h"	/* for FLAGS_ALL only */
 #include "irc_string.h"
@@ -2618,7 +2619,14 @@ serverhide_disable_remote_commands: DISABLE_REMOTE_COMMANDS '=' TYES ';'
   
 serverhide_links_delay: LINKS_DELAY '=' timespec ';'
   {
+    if(($3 > 0) && ConfigServerHide.links_disabled == 1)
+    {
+      eventAdd("write_links_file", write_links_file, NULL, $3);
+      ConfigServerHide.links_disabled = 0;
+    }
+	
     ConfigServerHide.links_delay = $3;
+
   };
 
 serverhide_hidden: HIDDEN '=' TYES ';'

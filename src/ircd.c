@@ -735,8 +735,10 @@ int main(int argc, char *argv[])
    eventAdd("flush_expired_ips", flush_expired_ips, NULL, 300);
 #endif
 
-  if(ConfigFileEntry.links_delay > 0)
+  if(ConfigServerHide.links_delay > 0)
     eventAdd("write_links_file", write_links_file, NULL, ConfigServerHide.links_delay);
+  else
+    ConfigServerHide.links_disabled = 1;
 
   ServerRunning = 1;
   io_loop();

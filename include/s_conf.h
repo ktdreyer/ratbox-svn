@@ -262,6 +262,7 @@ struct config_server_hide
   int	hide_servers;
   int	disable_remote;
   int	links_delay;
+  int   links_disabled;
   int	hidden;
   int	allow_hidden;
 };
