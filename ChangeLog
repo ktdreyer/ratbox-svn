@@ -1,3 +1,31 @@
+leeh        2003/05/15 14:48:49 UTC	(20030515_5)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              client.h cluster.h 
+    modules              m_resv.c m_stats.c m_unkline.c 
+    src                  cluster.c newconf.c 
+  Removed files:
+    doc                  whats-new.txt 
+  Log:
+  - removed whats-new.txt, its outdated.
+  - ported remote resv/unresv from -stable.  this *finally* brings the
+    trees into sync.
+  
+  Revision  Changes    Path
+  7.208     +13 -5     ircd-ratbox/doc/example.conf
+  7.43      +13 -5     ircd-ratbox/doc/example.efnet.conf
+  7.40      +0 -247    ircd-ratbox/doc/whats-new.txt (dead)
+  7.203     +1 -1      ircd-ratbox/include/client.h
+  7.7       +8 -1      ircd-ratbox/include/cluster.h
+  1.33      +199 -41   ircd-ratbox/modules/m_resv.c
+  1.157     +6 -1      ircd-ratbox/modules/m_stats.c
+  1.85      +5 -4      ircd-ratbox/modules/m_unkline.c
+  7.8       +34 -0     ircd-ratbox/src/cluster.c
+  7.83      +3 -0      ircd-ratbox/src/newconf.c
+
+
+
 leeh        2003/05/15 14:13:57 UTC	(20030515_4)
 
   Modified files:
