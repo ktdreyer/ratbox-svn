@@ -1,3 +1,17 @@
+leeh        2003/06/10 19:28:19 UTC	(20030610_6)
+
+  Modified files:
+    modules              m_dline.c m_stats.c 
+  Log:
+  - make mo_dline() store the oper_reason
+  - 'D' is perm, 'd' is temp in stats output.
+  
+  Revision  Changes    Path
+  1.19      +4 -1      ircd-ratbox/modules/m_dline.c
+  1.163     +3 -3      ircd-ratbox/modules/m_stats.c
+
+
+
 leeh        2003/06/10 19:11:30 UTC	(20030610_5)
 
   Modified files:
