@@ -462,9 +462,11 @@ static void oldParseOneLine(FILE *out,char* line)
     case 'o':
     case 'O':
       /* defaults */
-      fprintf(out,"operator {\n");
-      if(user_field)
-	fprintf(out,"\tname=\"%s\";\n", user_field);
+      if(user_field == NULL)
+        fprintf(out,"operator {\n");
+      else
+        fprintf(out, "operator \"%s\" {\n", user_field);
+
       if(host_field)
 	{
 	  fprintf(out,"\tuser=\"%s\";\n", host_field);
@@ -540,9 +542,10 @@ static void oldParseOneLine(FILE *out,char* line)
 
     case 'Y':
     case 'y':
-      fprintf(out,"class {\n");
-      if(host_field)
-	fprintf(out,"\tname=\"%s\";\n", host_field);
+      if(host_field == NULL)
+         fprintf(out,"class {\n");
+      else
+	fprintf(out,"class \"%s\" {\n", host_field);
       if(passwd_field)
 	{
 	  int ping_time;
@@ -592,22 +595,15 @@ static void PrintOutServers(FILE* out)
     {
       if(p->name && p->c_passwd && p->n_passwd && p->host)
 	{
-	  fprintf(out,"connect {\n");
+	  fprintf(out,"connect \"%s\" {\n", p->name);
 	  fprintf(out,"\thost=\"%s\";\n", p->host);
-	  fprintf(out,"\tname=\"%s\";\n", p->name);
 	  fprintf(out,"\tsend_password=\"%s\";\n", p->c_passwd);
 	  fprintf(out,"\taccept_password=\"%s\";\n", p->n_passwd);
 	  fprintf(out,"\tport=%d;\n", p->port );
 
-#if 0
-          /* ZIP links are gone */
 	  if(p->compressed)
 	    fprintf(out,"\tcompressed=yes;\n");
-#endif
-#if 0
-	  if(p->lazylink)
-	    fprintf(out,"\tlazylink=yes;\n");
-#endif
+
 	  if(p->hub_mask)
 	    {
 	      fprintf(out,"\thub_mask=\"%s\";\n",p->hub_mask);
