@@ -1,3 +1,15 @@
+androsyn    2002/07/12 12:14:05 EDT	(20020712_10)
+
+  Modified files:
+    include              balloc.h 
+  Log:
+  Removed redudant #ifdefs
+  
+  Revision  Changes    Path
+  1.12      +0 -2      ircd-hybrid-7/include/balloc.h
+
+
+
 androsyn    2002/07/12 12:02:44 EDT	(20020712_9)
 
   Modified files:
