@@ -1,3 +1,11 @@
+*** 20001030_4 by db
+- more cleanups to m_stats.c code 
+  both handlers call do_normal_stats
+  oper handler calls do_priv_stats normal handler calls do_non_priv_stats
+  This should make it way easier to assign appropriate privs
+
+
+
 *** 20001030_3 by db
 - moved events reporting from /quote events to /stats E
   I think it belongs there since /stats z is memory report
