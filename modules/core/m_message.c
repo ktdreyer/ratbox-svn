@@ -54,8 +54,8 @@ static int build_target_list(int p_or_n, char *command,
                              char *nicks_channels, struct entity ***targets,
                              char *text);
 
-static int flood_attack_client(struct Client *sptr, struct Client *acptr);
-static int flood_attack_channel(struct Client *sptr, struct Channel *chptr,
+static int flood_attack_client(int p_or_n, struct Client *sptr, struct Client *acptr);
+static int flood_attack_channel(int p_or_n, struct Client *sptr, struct Channel *chptr,
                                 char *chname);
 
 #define ENTITY_NONE    0
@@ -539,7 +539,7 @@ static void msg_channel( int p_or_n, char *command,
   if( (result = can_send(vchan,sptr)) )
     {
       if (result == CAN_SEND_OPV || 
-          !flood_attack_channel(sptr, vchan, chname))
+          !flood_attack_channel(p_or_n, sptr, vchan, chname))
 	{
           sendto_channel_butone(cptr, sptr, vchan,
                                 command, ":%s", text);
@@ -700,18 +700,22 @@ static void msg_client(int p_or_n, char *command,
 		  
 		}
 	      /* Only so opers can watch for floods */
-	      (void)flood_attack_client(sptr,acptr);
+	      (void)flood_attack_client(p_or_n,sptr,acptr);
 	    }
 	}
       else
 	{
-	  if(!flood_attack_client(sptr,acptr))
+          /* If the client is remote, we dont perform a special check for flooding.. as we wouldnt
+           * block their message anyway.. this means we dont give warnings.. we then check if theyre opered 
+           * (to avoid flood warnings), lastly if theyre our client and flooding    -- fl */
+          if(!MyClient(sptr) || IsOper(sptr) || (MyClient(sptr) && !flood_attack_client(p_or_n,sptr,acptr)))
 	    sendto_anywhere(acptr, sptr, "%s %s :%s",
 			    command, acptr->name, text);
 	}
     }
   else
-    if(!flood_attack_client(sptr,acptr))
+    /* The target is a remote user.. same things apply  -- fl */
+    if(!MyClient(sptr) || IsOper(sptr) || (MyClient(sptr) && !flood_attack_client(p_or_n,sptr,acptr)))
       sendto_anywhere(acptr, sptr, "%s %s :%s",
 		      command, acptr->name, text);
   return;
@@ -719,12 +723,14 @@ static void msg_client(int p_or_n, char *command,
       
 /*
  * flood_attack_client
- * inputs	- pointer to source Client 
+ * inputs       - flag 0 if PRIVMSG 1 if NOTICE. RFC
+ *                say NOTICE must not auto reply
+ *              - pointer to source Client 
  *		- pointer to target Client
  * output	- 1 if target is under flood attack
  * side effects	- check for flood attack on target acptr
  */
-static int flood_attack_client(struct Client *sptr,struct Client *acptr)
+static int flood_attack_client(int p_or_n, struct Client *sptr,struct Client *acptr)
 {
   int delta;
 
@@ -757,7 +763,7 @@ static int flood_attack_client(struct Client *sptr,struct Client *acptr)
 	      /* add a bit of penalty */
 	      acptr->localClient->received_number_of_privmsgs += 2;
 	    }
-	  if(MyClient(sptr))
+	  if(MyClient(sptr) && (p_or_n != NOTICE))
 	    sendto_one(sptr, ":%s NOTICE %s :*** Message to %s throttled due to flooding",
 		       me.name, sptr->name, acptr->name);
 	  return 1;
@@ -771,12 +777,14 @@ static int flood_attack_client(struct Client *sptr,struct Client *acptr)
 
 /*
  * flood_attack_channel
- * inputs	- pointer to source Client 
+ * inputs       - flag 0 if PRIVMSG 1 if NOTICE. RFC
+ *                says NOTICE must not auto reply
+ *              - pointer to source Client 
  *		- pointer to target channel
  * output	- 1 if target is under flood attack
  * side effects	- check for flood attack on target chptr
  */
-static int flood_attack_channel(struct Client *sptr,struct Channel *chptr,
+static int flood_attack_channel(int p_or_n,struct Client *sptr,struct Channel *chptr,
                                 char *chname)
 {
   int delta;
@@ -810,7 +818,7 @@ static int flood_attack_channel(struct Client *sptr,struct Channel *chptr,
 	      /* Add a bit of penalty */
 	      chptr->received_number_of_privmsgs += 2;
 	    }
-	  if(MyClient(sptr))
+	  if(MyClient(sptr) && (p_or_n != NOTICE))
 	    sendto_one(sptr, ":%s NOTICE %s :*** Message to %s throttled due to flooding",
 		       me.name, sptr->name, chname);
 	  return 1;
