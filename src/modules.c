@@ -39,6 +39,10 @@
 #include "irc_string.h"
 #include "memdebug.h"
 
+#ifndef RTLD_NOW
+#define RTLD_NOW RTLD_LAZY /* openbsd deficiency */
+#endif
+
 static char unknown_ver[] = "<unknown>";
 
 struct module **modlist = NULL;
