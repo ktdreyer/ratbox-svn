@@ -1,3 +1,7 @@
+*** 20010608_7 by leeh
+- extended valid_comment() to be in mo_kline() and ms_kline()
+
+
 *** 20010608_6 by db
 - can't have a " inside a " duh
 
