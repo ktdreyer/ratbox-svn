@@ -1,3 +1,9 @@
+*** 20001015_2 by db
+- slightly rewrote m_names. its still a stinking mess but getting there
+- added function call to make vchan names listing easier
+
+
+
 *** 20001015_1 by toot
 some more fixes to join/cjoin
 
