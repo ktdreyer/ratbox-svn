@@ -8,7 +8,8 @@ SRCS = \
   ircd-croatian.po \
   ircd-german.po \
   ircd-danish.po \
-  ircd-spanish.po
+  ircd-spanish.po \
+  ircd-dutch.po
 
 OBJS = ${SRCS:.po=.mo}
 
