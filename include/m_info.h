@@ -449,8 +449,8 @@ Info MyInformation[] = {
 
   { "TOPIC_INFO", "ON", 0, "Show Who Set a Topic and When" },
 
-  { "TS_MAX_DELTA", "", TS_MAX_DELTA, "Maximum Allowed TS Delta from another Server" },
-  { "TS_WARN_DELTA", "", TS_WARN_DELTA, "Maximum TS Delta before Sending Warning" },
+  { "TS_MAX_DELTA_DEFAULT", "", TS_MAX_DELTA_DEFAULT, "Maximum Allowed TS Delta from another Server" },
+  { "TS_WARN_DELTA_DEFAULT", "", TS_WARN_DELTA_DEFAULT, "Maximum TS Delta before Sending Warning" },
 
 #ifdef USE_IP_I_LINE_FIRST
   { "USE_IP_I_LINE_FIRST", "ON", 0, "Search IP Ilines First" },

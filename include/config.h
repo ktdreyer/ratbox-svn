@@ -102,8 +102,8 @@
 #define OPATH   "opers.motd"
 
 
-/* TS_MAX_DELTA and TS_WARN_DELTA -  allowed delta for TS when another
- * server connects.
+/* TS_MAX_DELTA_DEFAULT and TS_WARN_DELTA_DEFAULT -
+ * allowed delta for TS when another server connects.
  *
  * If the difference between my clock and the other server's clock is
  * greater than TS_MAX_DELTA, I send out a warning and drop the links.
@@ -111,12 +111,14 @@
  * If the difference is less than TS_MAX_DELTA, I just sends out a warning
  * but don't drop the link.
  *
- * TS_MAX_DELTA currently set to 30 minutes to deal with older timedelta
- * implementation.  Once pre-hybrid5.2 servers are eradicated, we can drop this
- * down to 90 seconds or so. --Rodder
+ * TS_MAX_DELTA_DEFAULT currently set to 30 minutes to deal with older
+ * timedelta implementation.  Once pre-hybrid5.2 servers are eradicated, 
+ * we can drop this down to 90 seconds or so. --Rodder
  */
-#define TS_MAX_DELTA 600        /* seconds */
-#define TS_WARN_DELTA 30        /* seconds */
+#define TS_MAX_DELTA_MIN      10
+#define TS_MAX_DELTA_DEFAULT  600
+#define TS_WARN_DELTA_MIN     10
+#define TS_WARN_DELTA_DEFAULT 30
 
 /* SLAVE_SERVERS - Use this to send LOCOPS and KLINES to servers you define
  * uses U: lines in ircd.conf, each server defined in an U: line
@@ -153,13 +155,6 @@
  */
 #define RFC1035_ANAL
 
-/* WARN_NO_NLINE
- * Define this if you want ops to get noticed about "things" trying to
- * connect as servers that don't have N: lines.  Twits with misconfigured
- * servers can get really annoying with enabled.
- */
-#define WARN_NO_NLINE
-
 /* CUSTOM_ERR - colorful notice/error/messages
  * Defining this will use custom notice/error/messages from include/s_err.h
  * instead of stock ones in ircd/s_err.c.  If you prefer the "colorful"
@@ -182,24 +177,6 @@
  * ircd to do ident lookup even if you define this.
  */
 #define DO_IDENTD
-
-/*
- * If KLINE_WITH_CONNECTION_CLOSED is defined and KLINE_WITH_REASON
- * above is undefined then the signoff reason will be "Connection
- * closed". This prevents other users seeing the client disconnect
- * from harassing the IRCops.
- * However, the client will still see the real reason upon connect attempts.
- */
-#define KLINE_WITH_CONNECTION_CLOSED
-
-/* NON_REDUNDANT_KLINES - If you want the server to flag and not apply
- * redundant klines
- */
-#define NON_REDUNDANT_KLINES
-
-/* BOTCHECK - rudimentary bot checking
- */
-#define BOTCHECK
 
 /* WHOIS_NOTICE - Shows a notice to an oper when a user does a
  * /whois on them

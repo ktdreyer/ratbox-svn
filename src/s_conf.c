@@ -1837,14 +1837,14 @@ static void initconf(FBFILE* file)
   check_class();
   nextping = nextconnect = time(NULL);
 
-  if( ConfigFileEntry.ts_warn_delta < 60 )
+  if( ConfigFileEntry.ts_warn_delta < TS_WARN_DELTA_MIN )
     {
-      ConfigFileEntry.ts_warn_delta = 60;
+      ConfigFileEntry.ts_warn_delta = TS_WARN_DELTA_DEFAULT;
     }
 
-  if( ConfigFileEntry.ts_max_delta < 300 )
+  if( ConfigFileEntry.ts_max_delta < TS_MAX_DELTA_MIN )
     {
-      ConfigFileEntry.ts_max_delta = 300;
+      ConfigFileEntry.ts_max_delta = TS_MAX_DELTA_DEFAULT;
     }
 
   if(me.name[0] == '\0')
