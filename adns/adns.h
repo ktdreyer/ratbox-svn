@@ -118,6 +118,7 @@ typedef enum {
   adns__qtf_deref=     0x10000, /* dereference domains and perhaps produce extra data */
   adns__qtf_mail822=   0x20000, /* make mailboxes be in RFC822 rcpt field format */
   adns__qtf_in6=       0x40000, /* ptr is IPv6 -- This is a hack but it works damnit. If you don't like it fix it yourself */  
+  adns__qtf_in6_old=   0x80000, /* ptr is IPv6 -- This is a hack but it works damnit. If you don't like it fix it yourself */  
 
   adns_r_none=               0,
   
@@ -134,6 +135,7 @@ typedef enum {
   adns_r_ptr_raw=           12,
   adns_r_ptr=                   adns_r_ptr_raw|adns__qtf_deref,
   adns_r_ptr_ip6=		adns_r_ptr_raw|adns__qtf_deref|adns__qtf_in6,
+  adns_r_ptr_ip6_old=		adns_r_ptr_raw|adns__qtf_deref|adns__qtf_in6_old,
   adns_r_hinfo=             13,  
   
   adns_r_mx_raw=            15,
@@ -541,7 +543,7 @@ int adns_submit_reverse(adns_state ads,
  * addr->sa_family must be AF_INET or AF_INET6 or you get ENOSYS.
  */
 
-
+/* For ip6.arpa/int style reverse zones */
 int adns_submit_reverse_ip6(adns_state ads,
 			    const struct sockaddr *addr,
 			    const char *rzone,
@@ -549,7 +551,6 @@ int adns_submit_reverse_ip6(adns_state ads,
 			    adns_queryflags flags,
 			    void *context,
 			    adns_query *query_r);
-/* For ip6.int style reverse zones */
 
 int adns_submit_reverse_any(adns_state ads,
 			    const struct sockaddr *addr,

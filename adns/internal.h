@@ -76,7 +76,8 @@ typedef unsigned char byte;
 #define DNS_CLASS_IN 1
 #define IP6STRLEN 47
 #define DNS_INADDR_ARPA "in-addr", "arpa"
-#define DNS_IP6_INT	"ip6",	"arpa"
+#define DNS_IP6_ARPA	"ip6",	"arpa"
+#define DNS_IP6_INT	"ip6", 	"int"
 
 #define MAX_POLLFDS  ADNS_POLLFDS_RECOMMENDED
 

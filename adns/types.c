@@ -763,9 +763,9 @@ static void icb_ptr(adns_query parent, adns_query child) {
   adns__query_fail(parent,adns_s_inconsistent);
 }
 #ifdef IPV6
-static adns_status pa_ptr6(const parseinfo *pai, int dmstart, int max, void *datap) {
-  static const char *(expectdomain[])= { DNS_IP6_INT };
-  
+
+static adns_status pa_ptr6_all(const parseinfo *pai, int dmstart, int max, void *datap, const char **expectdomain)
+{
   char **rrp= datap;
   adns_status st;
   adns_rr_addr *ap;
@@ -836,6 +836,21 @@ static adns_status pa_ptr6(const parseinfo *pai, int dmstart, int max, void *dat
   LIST_LINK_TAIL_PART(pai->qu->children,nqu,siblings.);
   return adns_s_ok;
 }
+
+static adns_status pa_ptr6(const parseinfo *pai, int dmstart, int max, void *datap) 
+{
+  static const char *(expectdomain[])= { DNS_IP6_ARPA };
+  return(pa_ptr6_all(pai, dmstart, max, datap, expectdomain));
+}
+
+
+static adns_status pa_ptr6_old(const parseinfo *pai, int dmstart, int max, void *datap) 
+{
+  static const char *(expectdomain[])= { DNS_IP6_INT };
+  return(pa_ptr6_all(pai, dmstart, max, datap, expectdomain));
+}
+
+
 #endif
 static adns_status pa_ptr(const parseinfo *pai, int dmstart, int max, void *datap) {
   static const char *(expectdomain[])= { DNS_INADDR_ARPA };
@@ -1147,6 +1162,7 @@ DEEP_TYPE(soa,    "SOA","822",    soa,        pa_soa,     0,          cs_soa    
 DEEP_TYPE(rp,     "RP", "822",    strpair,    pa_rp,      0,          cs_rp         ),
 #ifdef IPV6
 DEEP_TYPE(ptr_ip6,"PTR","checked",str,        pa_ptr6,	  0,	      cs_domain	    ),
+DEEP_TYPE(ptr_ip6_old,"PTR","checked",str,    pa_ptr6_old,0,	      cs_domain	    ),
 #endif
 };
 
