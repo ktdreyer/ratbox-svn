@@ -372,9 +372,16 @@ int check_server(const char *name, struct Client* cptr)
      if (!(match(aconf->host, cptr->host) ||
          cptr->localClient->ip.s_addr == aconf->ipnum.s_addr))
        continue;
+#ifdef CRYPT_LINK_PASSWORD
+     if (aconf->status & CONF_NOCONNECT_SERVER &&
+         strcmp(aconf->passwd, crypt(cptr->localClient->passwd,
+                aconf->passwd)))
+       return -2;
+#else
      if (aconf->status & CONF_NOCONNECT_SERVER &&
          strcmp(aconf->passwd, cptr->localClient->passwd))
        return -2;
+#endif
      if (aconf->status & CONF_CONNECT_SERVER)
        cline = aconf;
      if (aconf->status & CONF_NOCONNECT_SERVER)
