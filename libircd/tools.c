@@ -23,10 +23,6 @@
 void
 dlinkAdd(void *data, dlink_node * m, dlink_list * list)
 {
-#ifdef DEBUG_DLINK
-assert(m->ref_count < 2);
-m->ref_count++;
-#endif
     m->data = data;
     m->prev = NULL;
     m->next = list->head;
@@ -40,10 +36,6 @@ m->ref_count++;
 void
 dlinkAddBefore(dlink_node *b, void *data, dlink_node *m, dlink_list *list)
 {
-#ifdef DEBUG_DLINK
-assert(m->ref_count < 2);
-m->ref_count++;
-#endif
     /* Shortcut - if its the first one, call dlinkAdd only */
     if (b == list->head)
         dlinkAdd(data, m, list);
@@ -59,10 +51,6 @@ m->ref_count++;
 void
 dlinkAddTail(void *data, dlink_node *m, dlink_list *list)
 {
-#ifdef DEBUG_DLINK
-assert(m->ref_count < 2);
-m->ref_count++;
-#endif
     m->data = data;
     m->next = NULL;
     m->prev = list->tail;
@@ -76,10 +64,6 @@ m->ref_count++;
 void
 dlinkDelete(dlink_node *m, dlink_list *list)
 {
-#ifdef DEBUG_DLINK
-assert(m->ref_count > 0);
-m->ref_count++;
-#endif
     if (m->next)
         m->next->prev = m->prev;
     if (m->prev)
@@ -91,11 +75,6 @@ m->ref_count++;
         list->tail = m->prev;
         
     m->next = m->prev = NULL;
-
-#ifdef DEBUG_DLINK
-if(m->ref_count > 0)
-    m->ref_count--;
-#endif
 }
 
 
