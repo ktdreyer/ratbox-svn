@@ -1,15 +1,24 @@
-/*
+/* src/balloc.c
+ *   Block allocator for memory management.
+ *
+ * Copyright (C) 2003-2004 Lee Hardy <leeh@leeh.co.uk>
+ * Copyright (C) 2003-2004 ircd-ratbox development team
+ *
+ * $Id$
+ */
+/* Taken from ircd-ratbox.  Original header:
+ *
  *  ircd-ratbox: A slightly useful ircd.
  *  balloc.c: A block allocator.
  *
- * Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center
- * Copyright (C) 1996-2002 Hybrid Development Team
- * Copyright (C) 2002-2003 ircd-ratbox development team
+ *   Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center
+ *   Copyright (C) 1996-2002 Hybrid Development Team
+ *   Copyright (C) 2002-2003 ircd-ratbox development team
  *
- *  File:   blalloc.c
- *  Owner:  Wohali (Joan Touzet)
+ *    File:   blalloc.c
+ *    Owner:  Wohali (Joan Touzet)
  *  
- *  Modified 2001/11/29 for mmap() support by Aaron Sethman <androsyn@ratbox.org>
+ *    Modified 2001/11/29 for mmap() support by Aaron Sethman <androsyn@ratbox.org>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,18 +52,16 @@
  * return the pages back to the operating system, thus reducing the size 
  * of the process as the memory is unused.  malloc() on many systems just keeps
  * a heap of memory to itself, which never gets given back to the OS, except on
- * exit.  This of course is bad, if say we have an event that causes us to allocate
- * say, 200MB of memory, while our normal memory consumption would be 15MB.  In the
- * malloc() case, the amount of memory allocated to our process never goes down, as
- * malloc() has it locked up in its heap.  With the mmap() method, we can munmap()
- * the block and return it back to the OS, thus causing our memory consumption to go
- * down after we no longer need it.
+ * exit.  This of course is bad, if say we have an event that causes us to 
+ * allocate say, 200MB of memory, while our normal memory consumption would be 
+ * 15MB.  In the malloc() case, the amount of memory allocated to our process 
+ * never goes down, as malloc() has it locked up in its heap.  With the mmap() 
+ * method, we can munmap() the block and return it back to the OS, thus causing
+ * our memory consumption to go down after we no longer need it.
  * 
  * Of course it is up to the caller to make sure BlockHeapGarbageCollect() gets
- * called periodically to do this cleanup, otherwise you'll keep the memory in the
- * process.
- *
- *
+ * called periodically to do this cleanup, otherwise you'll keep the memory in 
+ * the process.
  */
 
 #include "stdinc.h"
@@ -78,8 +85,6 @@
 #endif
 #endif
 
-
-static int newblock(BlockHeap * bh);
 static void block_heap_gc(void *unused);
 static dlink_list heap_lists;
 static int BlockHeapGarbageCollect(BlockHeap *);
@@ -96,7 +101,21 @@ _blockheap_fail(const char *reason, const char *file, int line)
 	slog("Blockheap failure: %s (%s:%d)", reason, file, line);
         die("out of memory");
 }
-                
+
+void
+init_balloc(void)
+{
+#if defined(HAVE_MMAP) && !defined(MAP_ANON)
+	zero_fd = open("/dev/zero", O_RDWR);
+
+	if(zero_fd < 0)
+		blockheap_fail("Failed opening /dev/zero");
+	fd_open(zero_fd, FD_FILE, "Anonymous mmap()");
+#endif
+	eventAdd("block_heap_gc", block_heap_gc, NULL, 30);
+}
+
+               
 #ifndef NDEBUG
 /*
  * frob some memory. debugging time.
@@ -136,27 +155,6 @@ free_block(void *ptr, size_t size)
 #endif
 }
 
-
-/*
- * void initBlockHeap(void)
- * 
- * Inputs: None
- * Outputs: None
- * Side Effects: Initializes the block heap
- */
-
-void
-init_blockheap(void)
-{
-#if defined(HAVE_MMAP) && !defined(MAP_ANON)
-	zero_fd = open("/dev/zero", O_RDWR);
-
-	if(zero_fd < 0)
-		blockheap_fail("Failed opening /dev/zero");
-	fd_open(zero_fd, FD_FILE, "Anonymous mmap()");
-#endif
-	eventAdd("block_heap_gc", block_heap_gc, NULL, 30);
-}
 
 /*
  * static inline void *get_block(size_t size)

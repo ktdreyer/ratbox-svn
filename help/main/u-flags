@@ -1,0 +1,5 @@
+Usage: .flags [[+|-]flag]
+              Lists current flags, or alters flag status:
+              chat      - 'partyline' messages
+              auth      - Oper connections/disconnections from services
+              server    - Server connections/disconnections

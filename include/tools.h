@@ -13,6 +13,8 @@ extern char *my_strdup(const char *s);
 
 extern const char *get_duration(time_t seconds);
 
+extern const char *lcase(const char *);
+
 #ifndef HAVE_STRLCAT
 extern size_t strlcat(char *dst, const char *src, size_t siz);
 #endif

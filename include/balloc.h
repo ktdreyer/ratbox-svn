@@ -24,8 +24,8 @@
  *  $Id$
  */
 
-#ifndef INCLUDED_blalloc_h
-#define INCLUDED_blalloc_h
+#ifndef INCLUDED_balloc_h
+#define INCLUDED_balloc_h
 
 /* 
  * Block contains status information for an allocated block in our
@@ -63,13 +63,14 @@ struct BlockHeap
 };
 typedef struct BlockHeap BlockHeap;
 
+extern void init_balloc(void);
+
 extern int BlockHeapFree(BlockHeap * bh, void *ptr);
 extern void *BlockHeapAlloc(BlockHeap * bh);
 
 extern BlockHeap *BlockHeapCreate(size_t elemsize, int elemsperblock);
 extern int BlockHeapDestroy(BlockHeap * bh);
 
-extern void init_blockheap(void);
 extern void BlockHeapUsage(BlockHeap * bh, size_t * bused, size_t * bfree, size_t * bmemusage);
 
 #endif /* INCLUDED_blalloc_h */

@@ -1,11 +1,11 @@
 /* src/c_mode.c
- *  Contains code for handling "MODE" command.
+ *   Contains code for handling "MODE" command.
  *
- *  Copyright (C) 2003 ircd-ratbox development team
+ * Copyright (C) 2003-2004 Lee Hardy <leeh@leeh.co.uk>
+ * Copyright (C) 2003-2004 ircd-ratbox development team
  *
- *  $Id$
+ * $Id$
  */
-
 #include "stdinc.h"
 #include "c_init.h"
 #include "client.h"
@@ -88,7 +88,7 @@ c_mode(struct client *client_p, char *parv[], int parc)
 		return;
 	}
 
-	/* channel mode */
+	/* channel mode, need 3 params */
 	if(parc < 3 || EmptyString(parv[2]))
 		return;
 

@@ -1,9 +1,10 @@
 /* src/service.c
- *  Contains code for handling interaction with our services.
+ *   Contains code for handling interaction with our services.
  *  
- *  Copyright (C) 2003 ircd-ratbox development team.
+ * Copyright (C) 2003-2004 Lee Hardy <leeh@leeh.co.uk>
+ * Copyright (C) 2003-2004 ircd-ratbox development team
  *
- *  $Id$
+ * $Id$
  */
 #include "stdinc.h"
 #include "service.h"
@@ -13,6 +14,8 @@
 #include "conf.h"
 #include "io.h"
 #include "log.h"
+#include "ucommand.h"
+#include "cache.h"
 
 dlink_list service_list;
 
@@ -61,6 +64,7 @@ add_service(struct service_handler *service)
 	strlcpy(client_p->service->id, service->id, sizeof(client_p->service->id));
 	client_p->service->command = service->command;
         client_p->service->error = service->error;
+        client_p->service->ucommand = service->ucommand;
         client_p->service->stats = service->stats;
 
         client_p->service->flood_max = service->flood_max;
@@ -68,6 +72,29 @@ add_service(struct service_handler *service)
 
 	dlink_add(client_p, &client_p->listnode, &service_list);
 	add_client(client_p);
+
+        /* try and cache any help stuff */
+        if(service->command != NULL)
+        {
+                struct service_command *scommand = service->command;
+                char filename[MAXPATHLEN];
+                int i;
+
+                for(i = 0; scommand[i].cmd[0] != '\0'; i++)
+                {
+                        snprintf(filename, sizeof(filename), "%s%s/",
+                                 HELP_PATH, lcase(service->id));
+
+                        /* we cant lcase() twice in one function call */
+                        strlcat(filename, lcase(scommand[i].cmd),
+                                sizeof(filename));
+
+                        scommand->helpfile = cache_file(filename, scommand[i].cmd);
+                }
+        }
+
+        if(service->ucommand != NULL)
+                add_ucommands(service->ucommand, service->id);
 
 	return client_p;
 }
@@ -137,8 +164,17 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
         if(!IsUser(client_p))
                 return;
 
-        if(service_p->service->flood > service_p->service->flood_max_ignore)
+        cmd_table = service_p->service->command;
+
+        /* this service doesnt handle commands via privmsg */
+        if(cmd_table == NULL)
                 return;
+
+        if(service_p->service->flood > service_p->service->flood_max_ignore)
+        {
+                service_p->service->ignored_count++;
+                return;
+        }
 
         if(service_p->service->flood > service_p->service->flood_max)
         {
@@ -146,13 +182,12 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
                               "query. Please try again shortly.",
                               MYNAME, client_p->name);
                 service_p->service->flood++;
+                service_p->service->paced_count++;
                 return;
         }
 
         if((p = strchr(text, ' ')) != NULL)
                 *p++ = '\0';
-
-        cmd_table = service_p->service->command;
 
         if(!strcasecmp(text, "HELP"))
         {
@@ -171,37 +206,56 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 
                         for(i = 0; cmd_table[i].cmd[0] != '\0'; i++)
                         {
+                                if(cmd_table[i].operonly && !is_oper(client_p))
+                                        continue;
+
                                 strlcat(buf, cmd_table[i].cmd, sizeof(buf));
                                 strlcat(buf, " ", sizeof(buf));
                         }
 
                         sendto_server(":%s NOTICE %s :Topics: %s",
                                       MYNAME, client_p->name, buf);
+                        service_p->service->help_count++;
                         return;
                 }
 
                 for(i = 0; cmd_table[i].cmd[0] != '\0'; i++)
                 {
-                        if(!strcasecmp(text, cmd_table[i].cmd))
+                        if(!strcasecmp(p, cmd_table[i].cmd))
                         {
-                                int x = 0;
+                                struct cachefile *fileptr;
+                                struct cacheline *lineptr;
+                                dlink_node *ptr;
 
-                                while(cmd_table[i].help[x] != NULL)
+                                if(cmd_table[i].helpfile == NULL ||
+                                   (cmd_table[i].operonly && !is_oper(client_p)))
                                 {
+                                        sendto_server(":%s NOTICE %s :"
+                                                      "No help available on %s",
+                                                      MYNAME, client_p->name,
+                                                      p);
+                                        return;
+                                }
+
+                                fileptr = cmd_table[i].helpfile;
+
+                                DLINK_FOREACH(ptr, fileptr->contents.head)
+                                {
+                                        lineptr = ptr->data;
                                         sendto_server(":%s NOTICE %s :%s",
                                                       MYNAME, client_p->name,
-                                                      cmd_table[i].help[x]);
+                                                      lineptr->data);
                                 }
 
                                 service_p->service->flood += cmd_table[i].help_penalty;
-                                cmd_table[i].help_use++;
+                                service_p->service->ehelp_count++;
 
                                 return;
                         }
                 }
 
                 sendto_server(":%s NOTICE %s :Unknown topic '%s'",
-                              MYNAME, client_p->name, text);
+                              MYNAME, client_p->name, p);
                 return;
         }
 
@@ -209,6 +263,14 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
         {
                 if(!strcasecmp(text, cmd_table[i].cmd))
                 {
+                        if(cmd_table[i].operonly && !is_oper(client_p))
+                        {
+                                sendto_server(":%s NOTICE %s :No access.",
+                                              MYNAME, client_p->name);
+                                service_p->service->flood++;
+                                return;
+                        }
+
                         retval = (cmd_table[i].func)(client_p, p);
 
                         service_p->service->flood += retval;
@@ -220,6 +282,7 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 
         sendto_server(":%s NOTICE %s :Unknown command.",
                       MYNAME, client_p->name);
+        service_p->service->flood++;
 }
 
 void
@@ -229,6 +292,10 @@ service_error(struct client *service_p, struct client *client_p, int error)
         int i;
 
         error_table = service_p->service->error;
+
+        s_assert(error_table != NULL);
+        if(error_table == NULL)
+                return;
 
         for(i = 0; error_table[i].error; i++)
         {
@@ -240,4 +307,55 @@ service_error(struct client *service_p, struct client *client_p, int error)
                         return;
                 }
         }
+}
+
+void
+service_stats(struct client *service_p, struct connection_entry *conn_p)
+{
+        struct service_command *cmd_table;
+        char buf[BUFSIZE];
+        char buf2[20];
+        int i;
+        int j = 0;
+
+        sendto_one(conn_p, "%s Service:", service_p->service->id);
+        sendto_one(conn_p, " Online as %s!%s@%s [%s]",
+                   service_p->name, service_p->service->username,
+                   service_p->service->host, service_p->info);
+
+        if(service_p->service->command == NULL)
+                return;
+
+        sendto_one(conn_p, " Current load: %d/%d [%d] Paced: %lu [%lu]",
+                   service_p->service->flood, service_p->service->flood_max,
+                   service_p->service->flood_max_ignore,
+                   service_p->service->paced_count,
+                   service_p->service->ignored_count);
+
+        sendto_one(conn_p, " Help usage: %lu Extended: %lu",
+                   service_p->service->help_count,
+                   service_p->service->ehelp_count);
+
+        cmd_table = service_p->service->command;
+
+        sprintf(buf, " Command usage: ");
+
+        for(i = 0; cmd_table[i].cmd[0] != '\0'; i++)
+        {
+                snprintf(buf2, sizeof(buf2), "%s:%lu ",
+                         cmd_table[i].cmd, cmd_table[i].cmd_use);
+                strlcat(buf, buf2, sizeof(buf));
+
+                j++;
+
+                if(j > 8)
+                {
+                        sendto_one(conn_p, "%s", buf);
+                        sprintf(buf, "                ");
+                        j = 0;
+                }
+        }
+
+        if(j)
+                sendto_one(conn_p, "%s", buf);
 }

@@ -1,11 +1,12 @@
 /* src/event.c
- *  Contains code for calling events.
+ *   Contains code for calling/managing events.
  *
- *  Copyright (C) 2003 ircd-ratbox development team
+ * Copyright (C) 2003-2004 Lee Hardy <leeh@leeh.co.uk>
+ * Copyright (C) 2003-2004 ircd-ratbox development team
  *
- *  $Id$
+ * $Id$
  */
-/* Original header:
+/* Taken from ircd-ratbox.  Original header:
  *
  *  Copyright (C) 1998-2000 Regents of the University of California
  *  Copyright (C) 2001-2002 Hybrid Development Team

@@ -16,6 +16,7 @@ extern dlink_list exited_list;
 struct connection_entry;
 struct service_command;
 struct service_error;
+struct ucommand_handler;
 
 struct client
 {
@@ -68,6 +69,12 @@ struct service
 
 	struct service_command *command;
         struct service_error *error;
+        struct ucommand_handler *ucommand;
+
+        unsigned long help_count;
+        unsigned long ehelp_count;
+        unsigned long paced_count;
+        unsigned long ignored_count;
 
         void (*stats)(struct connection_entry *, char *parv[], int parc);
 };
@@ -87,6 +94,7 @@ struct service
 
 #define ClientInvis(x)	 ((x)->user && (x)->user->umode & CLIENT_INVIS)
 #define ClientOper(x)	 ((x)->user && (x)->user->umode & CLIENT_OPER)
+#define is_oper(x)       ((x)->user && (x)->user->umode & CLIENT_OPER)
 #define ClientAdmin(x)	 ((x)->user && (x)->user->umode & CLIENT_ADMIN)
 
 extern void init_client(void);

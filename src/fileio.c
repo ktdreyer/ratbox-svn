@@ -1,11 +1,12 @@
 /* src/fileio.c
- *  Contains code for handling file input/output.
+ *   Contains code for handling file input/output.
  *
- *  Copyright (C) 2003 ircd-ratbox development team
+ * Copyright (C) 2003-2004 Lee Hardy <leeh@leeh.co.uk>
+ * Copyright (C) 2003-2004 ircd-ratbox development team
  *
- *  $Id$
+ * $Id$
  */
-/* Original header:
+/* Taken from ircd-ratbox, original header:
  *
  *  Copyright (C) 1996-2002 Hybrid Development Team
  *  Copyright (C) 2002 ircd-ratbox development team

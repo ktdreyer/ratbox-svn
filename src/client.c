@@ -1,9 +1,10 @@
 /* src/client.c
- *  Contains code for handling remote clients.
+ *   Contains code for handling remote clients.
  *
- *  Copyright (C) 2003 ircd-ratbox development team
+ * Copyright (C) 2003-2004 Lee Hardy <leeh@leeh.co.uk>
+ * Copyright (C) 2003-2004 ircd-ratbox development team
  *
- *  $Id$
+ * $Id$
  */
 #include "stdinc.h"
 #include "rserv.h"
@@ -37,6 +38,9 @@ static struct scommand_handler quit_command = { "QUIT", c_quit, 0 };
 static struct scommand_handler server_command = { "SERVER", c_server, FLAGS_UNKNOWN };
 static struct scommand_handler squit_command = { "SQUIT", c_squit, 0 };
 
+/* init_client()
+ *   initialises various things
+ */
 void
 init_client(void)
 {
@@ -51,6 +55,12 @@ init_client(void)
 	add_scommand_handler(&squit_command);
 }
 
+/* hash_nick()
+ *   hashes a nickname
+ *
+ * inputs       - nickname to hash
+ * outputs      - hash value of nickname
+ */
 static unsigned int
 hash_nick(const char *p)
 {
@@ -64,6 +74,12 @@ hash_nick(const char *p)
 	return(h & (MAX_NAME_HASH-1));
 }
 
+/* add_client()
+ *   adds a client to the hashtable
+ *
+ * inputs       - client to add
+ * outputs      -
+ */
 void
 add_client(struct client *target_p)
 {
@@ -71,6 +87,12 @@ add_client(struct client *target_p)
 	dlink_add(target_p, &target_p->nameptr, &name_table[hashv]);
 }
 
+/* del_client()
+ *   removes a client from the hashtable
+ *
+ * inputs       - client to remove
+ * outputs      -
+ */
 void
 del_client(struct client *target_p)
 {
@@ -78,6 +100,12 @@ del_client(struct client *target_p)
 	dlink_delete(&target_p->nameptr, &name_table[hashv]);
 }
 
+/* find_client()
+ *   finds a client [user/server/service] from the hashtable
+ *
+ * inputs       - name of client to find
+ * outputs      - struct of client, or NULL if not found
+ */
 struct client *
 find_client(const char *name)
 {
@@ -96,6 +124,12 @@ find_client(const char *name)
 	return NULL;
 }
 
+/* find_user()
+ *   finds a user from the hashtable
+ *
+ * inputs       - name of user to find
+ * outputs      - struct client of user, or NULL if not found
+ */
 struct client *
 find_user(const char *name)
 {
@@ -107,6 +141,12 @@ find_user(const char *name)
 	return NULL;
 }
 
+/* find_server()
+ *   finds a server from the hashtable
+ *
+ * inputs       - name of server to find
+ * outputs      - struct client of server, or NULL if not found
+ */
 struct client *
 find_server(const char *name)
 {
@@ -118,6 +158,12 @@ find_server(const char *name)
 	return NULL;
 }
 
+/* find_service()
+ *   finds a service from the hashtable
+ *
+ * inputs       - name of service to find
+ * outputs      - struct client of service, or NULL if not found
+ */
 struct client *
 find_service(const char *name)
 {
@@ -129,6 +175,12 @@ find_service(const char *name)
 	return NULL;
 }
 
+/* exit_user()
+ *   exits a user, removing them from channels and lists
+ *
+ * inputs       - client to exit
+ * outputs      -
+ */
 static void
 exit_user(struct client *target_p)
 {
@@ -149,6 +201,12 @@ exit_user(struct client *target_p)
 	dlink_delete(&target_p->upnode, &target_p->uplink->server->users);
 }
 
+/* exit_server()
+ *   exits a server, removing their dependencies
+ *
+ * inputs       - client to exit
+ * outputs      -
+ */
 static void
 exit_server(struct client *target_p)
 {
@@ -160,11 +218,13 @@ exit_server(struct client *target_p)
 
 	SetDead(target_p);
 
+        /* first exit each of this servers users */
 	DLINK_FOREACH_SAFE(ptr, next_ptr, target_p->server->users.head)
 	{
 		exit_client(ptr->data);
 	}
 
+        /* then exit each of their servers.. */
 	DLINK_FOREACH_SAFE(ptr, next_ptr, target_p->server->servers.head)
 	{
 		exit_client(ptr->data);
@@ -177,6 +237,12 @@ exit_server(struct client *target_p)
 		dlink_delete(&target_p->upnode, &target_p->uplink->server->servers);
 }
 
+/* exit_client()
+ *   exits a generic client, calling functions specific for that client
+ *
+ * inputs       - client to exit
+ * outputs      -
+ */
 void
 exit_client(struct client *target_p)
 {
@@ -193,6 +259,12 @@ exit_client(struct client *target_p)
 	del_client(target_p);
 }
 
+/* free_client()
+ *   frees the memory in use by a client
+ *
+ * inputs       - client to free
+ * outputs      -
+ */
 void
 free_client(struct client *target_p)
 {
@@ -205,6 +277,12 @@ free_client(struct client *target_p)
 	BlockHeapFree(client_heap, target_p);
 };
 
+/* string_to_umode()
+ *   Converts a given string into a usermode
+ *
+ * inputs       - string to convert, current usermodes
+ * outputs      - new usermode
+ */
 int
 string_to_umode(const char *p, int current_umode)
 {
@@ -254,6 +332,12 @@ string_to_umode(const char *p, int current_umode)
 	return umode;
 }
 
+/* umode_to_string()
+ *   converts a usermode into string form
+ *
+ * inputs       - usermode to convert
+ * outputs      - usermode in string form
+ */
 const char *
 umode_to_string(int umode)
 {
@@ -275,6 +359,9 @@ umode_to_string(int umode)
 	return buf;
 }
 
+/* c_nick()
+ *   the NICK handler
+ */
 void
 c_nick(struct client *client_p, char *parv[], int parc)
 {
@@ -287,12 +374,14 @@ c_nick(struct client *client_p, char *parv[], int parc)
         if(parc != 9 && parc != 3)
                 return;
 
+        /* new client being introduced */
 	if(parc == 9)
 	{
 		target_p = find_client(parv[1]);
 		uplink_p = find_server(parv[7]);
 		newts = atol(parv[2]);
 
+                /* something already exists with this nick */
 		if(target_p != NULL)
 		{
                         s_assert(!IsServer(target_p));
@@ -302,6 +391,7 @@ c_nick(struct client *client_p, char *parv[], int parc)
 
 			if(IsUser(target_p))
 			{
+                                /* our uplink shouldve dealt with this. */
 				if(target_p->user->tsinfo < newts)
 				{
 					slog("PROTO: NICK %s with higher TS introduced causing collision.",
@@ -319,10 +409,7 @@ c_nick(struct client *client_p, char *parv[], int parc)
 				 * service.  we go byebye.
 				 */
 				if(newts <= 1)
-				{
-					sendto_server(":%s WALLOPS :Detected a services fight, im gone!");
 					die("service fight");
-				}
 
 				return;
 			}
@@ -348,6 +435,8 @@ c_nick(struct client *client_p, char *parv[], int parc)
 		dlink_add(target_p, &target_p->listnode, &user_list);
 		dlink_add(target_p, &target_p->upnode, &uplink_p->server->users);
 	}
+
+        /* client changing nicks */
 	else if(parc == 3)
 	{
 		s_assert(IsUser(client_p));
@@ -363,6 +452,9 @@ c_nick(struct client *client_p, char *parv[], int parc)
 	}
 }
 
+/* c_quit()
+ *   the QUIT handler
+ */
 void
 c_quit(struct client *client_p, char *parv[], int parc)
 {
@@ -375,6 +467,9 @@ c_quit(struct client *client_p, char *parv[], int parc)
 	exit_client(client_p);
 }
 
+/* c_kill()
+ *   the KILL handler
+ */
 void
 c_kill(struct client *client_p, char *parv[], int parc)
 {
@@ -398,21 +493,22 @@ c_kill(struct client *client_p, char *parv[], int parc)
 	if(IsService(target_p))
 	{
 		if(IsUser(client_p))
-			slog("SERVICE: service %s killed by %s!%s@%s{%s}",
+			slog("service %s killed by %s!%s@%s{%s}",
 				target_p->name, client_p->name, 
 				client_p->user->username, client_p->user->host,
 				client_p->user->servername);
 		else
-			slog("SERVICE: service %s killed by %s",
+			slog("service %s killed by %s",
 				target_p->name, client_p->name);
 
-		/* no kill in the last 30 seconds, reset. */
+		/* no kill in the last 20 seconds, reset. */
 		if((first_kill + 20) < CURRENT_TIME)
 		{
 			first_kill = CURRENT_TIME;
 			num_kill = 1;
 		}
-		else if(num_kill > 10)
+                /* 20 kills in 20 seconds.. service fight. */
+		else if(num_kill > 20)
 			die("service kill fight!");
 
 		num_kill++;
@@ -420,9 +516,13 @@ c_kill(struct client *client_p, char *parv[], int parc)
 		return;
 	}
 
+        /* its a user, just exit them */
 	exit_client(target_p);
 }
 
+/* c_server()
+ *   the SERVER handler
+ */
 void
 c_server(struct client *client_p, char *parv[], int parc)
 {
@@ -432,6 +532,7 @@ c_server(struct client *client_p, char *parv[], int parc)
 	if(parc < 4)
 		return;
 
+        /* our uplink introducing themselves */
         if(client_p == NULL)
         {
                 if(irccmp(server_p->name, parv[1]))
@@ -471,6 +572,9 @@ c_server(struct client *client_p, char *parv[], int parc)
 	dlink_add(target_p, &target_p->listnode, &server_list);
 }
 
+/* c_squit()
+ *   the SQUIT handler
+ */
 void
 c_squit(struct client *client_p, char *parv[], int parc)
 {

@@ -1,9 +1,10 @@
 /* src/rserv.c
- *  Contains generic functions for services.
+ *   Contains initialisation stuff for ratbox-services.
  *
- *  Copyright (C) 2003 ircd-ratbox development team
+ * Copyright (C) 2003-2004 Lee Hardy <leeh@leeh.co.uk>
+ * Copyright (C) 2003-2004 ircd-ratbox development team
  *
- *  $Id$
+ * $Id$
  */
 #include <stdio.h>
 #include <string.h>
@@ -34,6 +35,7 @@
 #include "service.h"
 #include "fileio.h"
 #include "balloc.h"
+#include "cache.h"
 #include "serno.h"
 
 struct timeval system_time;
@@ -196,7 +198,10 @@ main(int argc, char *argv[])
 	slog("ratbox-services started");
 
 	init_events();
-        init_blockheap();
+        init_balloc();
+
+        /* must be done before loading commands. */
+        init_cache();
 	init_scommand();
 	init_ucommand();
 	init_client();
@@ -207,9 +212,7 @@ main(int argc, char *argv[])
 	add_scommand_handler(&mode_command);
 	add_scommand_handler(&privmsg_command);
 
-        add_ucommand_handler(&flags_ucommand);
-        add_ucommand_handler(&help_ucommand);
-        add_ucommand_handler(&stats_ucommand);
+        add_ucommand_handler(&stats_ucommand, NULL);
 
 	/* load our services.. */
 	init_s_alis();

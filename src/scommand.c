@@ -1,9 +1,10 @@
-/* src/command.c
- *  Contains code for handling of commands received.
+/* src/scommand.c
+ *   Contains code for handling of commands received from server.
  *
- *  Copyright (C) 2003 ircd-ratbox development team
+ * Copyright (C) 2003-2004 Lee Hardy <leeh@leeh.co.uk>
+ * Copyright (C) 2003-2004 ircd-ratbox development team
  *
- *  $Id$
+ * $Id$
  */
 #include "stdinc.h"
 #include "scommand.h"

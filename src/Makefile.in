@@ -18,6 +18,7 @@ SRCS = 			\
         c_error.c       \
 	c_message.c	\
 	c_mode.c	\
+        cache.c         \
 	channel.c	\
 	client.c	\
 	conf.c		\
@@ -31,8 +32,6 @@ SRCS = 			\
 	scommand.c	\
 	service.c	\
 	tools.c		\
-	u_flags.c	\
-        u_help.c        \
         u_stats.c       \
 	ucommand.c
 

@@ -6,20 +6,10 @@
  *            you must create those paths yourself.
  */
 
-/* CONF_PATH
- * Path to config file
- */
 #define CONF_PATH	PREFIX "/rserv.conf"
-
-/* PID_PATH
- * Path to pid file
- */
 #define PID_PATH	PREFIX "/rserv.pid"
-
-/* LOG_PATH
- * Path to logfile
- */
 #define LOG_PATH	PREFIX "/zlogfile"
+#define HELP_PATH       PREFIX "/help/"
 
 
 /* CRYPT_PASSWORDS
@@ -69,6 +59,9 @@
 #define HEAP_USER       1024
 #define HEAP_SERVER     32
 #endif
+
+#define HEAP_CACHEFILE  16
+#define HEAP_CACHELINE  128
 
 #endif
 /* $Id$ */

@@ -1,9 +1,10 @@
 /* src/channel.c
- *  Contains code for handling channels.
+ *   Contains code for handling changes within channels.
  *
- *  Copyright (C) 2003 ircd-ratbox development team
+ * Copyright (C) 2003-2004 Lee Hardy <leeh@leeh.co.uk>
+ * Copyright (C) 2003-2004 ircd-ratbox development team
  *
- *  $Id$
+ * $Id$
  */
 #include "stdinc.h"
 #include "client.h"
@@ -33,6 +34,9 @@ static struct scommand_handler sjoin_command = { "SJOIN", c_sjoin, 0 };
 static struct scommand_handler tb_command = { "TB", c_tb, 0 };
 static struct scommand_handler topic_command = { "TOPIC", c_topic, 0 };
 
+/* init_channel()
+ *   initialises various things
+ */
 void
 init_channel(void)
 {
@@ -120,9 +124,9 @@ find_channel(const char *name)
 }
 
 /* free_channel()
- *   removes a channel from hash, and free()'s the memory its using
+ *   removes a channel from hash, and free's the memory its using
  *
- * inputs	- channel to free()
+ * inputs	- channel to free
  * outputs	-
  */
 void
@@ -532,6 +536,7 @@ c_sjoin(struct client *client_p, char *parv[], int parc)
 	if(EmptyString(parv[4+args]))
 		return;
 
+        /* now parse the nicklist */
 	for(s = parv[4+args]; !EmptyString(s); s = p)
 	{
 		flags = 0;

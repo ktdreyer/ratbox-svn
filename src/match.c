@@ -1,11 +1,12 @@
 /* src/match.c
- *  Contains functions for comparing strings.
+ *   Contains functions for comparing strings.
  *
- *  Copyright (C) 2003 ircd-ratbox development team
+ * Copyright (C) 2003-2004 Lee Hardy <leeh@leeh.co.uk>
+ * Copyright (C) 2003-2004 ircd-ratbox development team
  *
- *  $Id$
+ * $Id$
  */
-/* Original header:
+/* Taken from ircd-ratbox.  Original header:
  *   Copyright (C) 1990 Jarkko Oikarinen
  *
  *   This program is free software; you can redistribute it and/or modify

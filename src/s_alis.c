@@ -1,9 +1,10 @@
 /* src/s_alis.c
- *  Contains the code for ALIS, the Advanced List Service
+ *   Contains the code for ALIS, the Advanced List Service
  *
- *  Copyright (C) 2003 ircd-ratbox development team
+ * Copyright (C) 2003-2004 Lee Hardy <leeh@leeh.co.uk>
+ * Copyright (C) 2003-2004 ircd-ratbox development team
  *
- *  $Id$
+ * $Id$
  */
 #include "stdinc.h"
 #include "service.h"
@@ -32,24 +33,10 @@ static struct client *alis_p;
 
 static int s_alis_list(struct client *, char *text);
 
-static const char *alis_help_list[] =
-{
-	":%s NOTICE %s :LIST <mask> [options]",
-	":%s NOTICE %s :  <mask>   : mask to search for (accepts wildcard '*')",
-	":%s NOTICE %s :  [options]:",
-	":%s NOTICE %s :    -min <n>: minimum users in channel",
-	":%s NOTICE %s :    -max <n>: maximum users in channel",
-	":%s NOTICE %s :    -skip <n>: skip first n matches",
-	":%s NOTICE %s :    -show [m][t]: show modes/topicwho",
-	":%s NOTICE %s :    -mode <+|-|=><iklmnt>: modes set/unset/equal on channel",
-	":%s NOTICE %s :    -topic <string>: require topic to contain string",
-	NULL
-};
-
 static struct service_command alis_command[] =
 {
-        { "LIST",       &s_alis_list,   alis_help_list, 1, 0, 0  },
-        { "\0",         NULL,           NULL,           0, 0, 0  }
+        { "LIST",       &s_alis_list,   NULL, 0, 1, 0L },
+        { "\0",         NULL,           NULL, 0, 0, 0 }
 };
 
 static struct service_error alis_error[] =
@@ -63,11 +50,9 @@ static struct service_error alis_error[] =
         { 0,                    NULL                    }
 };
 
-static void s_alis_stats(struct connection_entry *conn_p, char *parv[], int parc);
-
 static struct service_handler alis_service = {
 	"ALIS", "ALIS", "alis", "services.alis", "Advanced List Service", 0,
-        40, 55, alis_command, alis_error, &s_alis_stats
+        60, 80, alis_command, alis_error, NULL, NULL
 };
 
 void
@@ -265,7 +250,7 @@ parse_alis(struct client *client_p, struct alis_query *query, char *text)
 }
 
 static void
-show_channel(struct client *client_p, struct channel *chptr,
+print_channel(struct client *client_p, struct channel *chptr,
 	     struct alis_query *query)
 {
 	if(query->show_mode && query->show_topicwho)
@@ -290,6 +275,61 @@ show_channel(struct client *client_p, struct channel *chptr,
 				MYNAME, client_p->name, chptr->name,
 				dlink_list_length(&chptr->users),
 				chptr->topic);
+}
+
+static int
+show_channel(struct channel *chptr, struct alis_query *query)
+{
+        /* skip +p/+s channels */
+        if(chptr->mode.mode & MODE_SECRET || chptr->mode.mode & MODE_PRIVATE)
+                return 0;
+
+        if(dlink_list_length(&chptr->users) < query->min ||
+           (query->max && dlink_list_length(&chptr->users) > query->max))
+                return 0;
+
+        if(query->mode)
+        {
+                if(query->mode_dir == DIR_SET)
+                {
+                        if(((chptr->mode.mode & query->mode) == 0) ||
+                           (query->mode_key && chptr->mode.key[0] == '\0') ||
+                           (query->mode_limit && !chptr->mode.limit))
+                                return 0;
+                }
+                else if(query->mode_dir == DIR_UNSET)
+                {
+                        if((chptr->mode.mode & query->mode) ||
+                           (query->mode_key && chptr->mode.key[0] != '\0') ||
+                           (query->mode_limit && chptr->mode.limit))
+                                return 0;
+                }
+                else if(query->mode_dir == DIR_EQUAL)
+                {
+                        if((chptr->mode.mode != query->mode) ||
+                           (query->mode_key && chptr->mode.key[0] == '\0') ||
+                           (query->mode_limit && !chptr->mode.limit))
+                                return 0;
+                }
+        }
+
+        /* cant show a topicwho, when a channel has no topic. */
+        if(chptr->topic[0] == '\0')
+                query->show_topicwho = 0;
+
+        if(!match(query->mask, chptr->name))
+                return 0;
+
+        if(query->topic != NULL && !match(query->topic, chptr->topic))
+                return 0;
+
+        if(query->skip)
+        {
+                query->skip--;
+                return 0;
+        }
+
+        return 1;
 }
 
 /* s_alis()
@@ -342,7 +382,7 @@ s_alis_list(struct client *client_p, char *text)
 
                         if(!(chptr->mode.mode & MODE_SECRET) &&
                                         !(chptr->mode.mode & MODE_PRIVATE))
-                                show_channel(client_p, chptr, &query);
+                                print_channel(client_p, chptr, &query);
                 }
 
                 sendto_server(":%s NOTICE %s :End of output.",
@@ -354,58 +394,9 @@ s_alis_list(struct client *client_p, char *text)
         {
                 chptr = ptr->data;
 
-                /* skip +p/+s channels */
-                if(chptr->mode.mode & MODE_SECRET ||
-                                chptr->mode.mode & MODE_PRIVATE)
-                        continue;
-
-                if(dlink_list_length(&chptr->users) < query.min ||
-                                (query.max && dlink_list_length(&chptr->users) > query.max))
-                        continue;
-
-                if(query.mode)
-                {
-                        if(query.mode_dir == DIR_SET)
-                        {
-                                if(((chptr->mode.mode & query.mode) == 0) ||
-                                                (query.mode_key && chptr->mode.key[0] == '\0') ||
-                                                (query.mode_limit && !chptr->mode.limit))
-                                        continue;
-                        }
-                        else if(query.mode_dir == DIR_UNSET)
-                        {
-                                if((chptr->mode.mode & query.mode) ||
-                                                (query.mode_key && chptr->mode.key[0] != '\0') ||
-                                                (query.mode_limit && chptr->mode.limit))
-                                        continue;
-                        }
-                        else if(query.mode_dir == DIR_EQUAL)
-                        {
-                                if((chptr->mode.mode != query.mode) ||
-                                                (query.mode_key && chptr->mode.key[0] == '\0') ||
-                                                (query.mode_limit && !chptr->mode.limit))
-                                        continue;
-                        }
-                }
-
-                /* cant show a topicwho, when a channel has no topic. */
-                if(chptr->topic[0] == '\0')
-                        query.show_topicwho = 0;
-
-                if(!match(query.mask, chptr->name))
-                        continue;
-
-                if(query.topic != NULL && !match(query.topic, chptr->topic))
-                        continue;
-
-                if(query.skip)
-                {
-                        query.skip--;
-                        continue;
-                }
-
                 /* matches, so show it */
-                show_channel(client_p, chptr, &query);
+                if(show_channel(chptr, &query))
+                        print_channel(client_p, chptr, &query);
 
                 if(--maxmatch == 0)
                 {
@@ -417,22 +408,4 @@ s_alis_list(struct client *client_p, char *text)
 
         sendto_server(":%s NOTICE %s :End of output.", MYNAME, client_p->name);
         return 3;
-}
-
-void
-s_alis_stats(struct connection_entry *conn_p, char *parv[], int parc)
-{
-#if 0
-        sendto_one(conn_p, "ALIS Service:");
-        sendto_one(conn_p, "  Online as %s!%s@%s [%s]",
-                   alis_p->name, alis_p->service->username,
-                   alis_p->service->host, alis_p->info);
-
-        sendto_one(conn_p, "  Command usage: HELP:%d EHELP:%d LIST:%d",
-                   alis_stats.help, alis_stats.ehelp, alis_stats.list);
-        sendto_one(conn_p, "  Missing parameters: %d Parse errors: %d",
-                   alis_stats.error_param, alis_stats.error_parse);
-        sendto_one(conn_p, "  Flood protection: Paced:%d Ignored: %d",
-                   alis_stats.flood, alis_stats.flood_ignore);
-#endif
 }

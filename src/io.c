@@ -1,9 +1,10 @@
 /* src/io.c
- *  Contains code for handling input and output to sockets.
+ *   Contains code for handling input and output to sockets.
  *
- *  Copyright (C) 2003 ircd-ratbox development team
+ * Copyright (C) 2003-2004 Lee Hardy <leeh@leeh.co.uk>
+ * Copyright (C) 2003-2004 ircd-ratbox development team
  *
- *  $Id$
+ * $Id$
  */
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -345,6 +346,12 @@ read_io(void)
 	}
 }
 
+/* next_autoconn()
+ *   finds the next entry to autoconnect to
+ *
+ * inputs       -
+ * outputs      - struct conf_server to connect to, or NULL
+ */
 static struct conf_server *
 next_autoconn(void)
 {
@@ -393,6 +400,7 @@ connect_to_server(void *target_server)
 	if(server_p != NULL)
 		return;
 
+        /* no specific server, so try autoconn */
         if(target_server == NULL)
         {
                 /* no autoconnect? */
@@ -426,6 +434,12 @@ connect_to_server(void *target_server)
 	server_p = conn_p;
 }
 
+/* connect_to_client()
+ *   connects to a client
+ *
+ * inputs       - client requesting dcc, host/port to connect to
+ * outputs      -
+ */
 void
 connect_to_client(struct client *client_p, const char *host, int port)
 {
@@ -453,6 +467,12 @@ connect_to_client(struct client *client_p, const char *host, int port)
 	dlink_add_alloc(conn_p, &connection_list);
 }
 
+/* signon_server()
+ *   sends our connection information to a server
+ *
+ * inputs       - connection entry to send to
+ * outputs      - 1 on success, -1 on failure
+ */
 static int
 signon_server(struct connection_entry *conn_p)
 {
@@ -483,6 +503,12 @@ signon_server(struct connection_entry *conn_p)
 	return 1;
 }
 
+/* signon_client()
+ *   sends the initial connection info to a new client of ours
+ *
+ * inputs       - connection entry to send to
+ * outputs      - 1 on success, -1 on failure
+ */
 static int
 signon_client(struct connection_entry *conn_p)
 {
@@ -502,6 +528,12 @@ signon_client(struct connection_entry *conn_p)
 	return 1;
 }
 
+/* read_server()
+ *   reads some data from the server, exiting it on read error
+ *
+ * inputs       - connection entry to read from [unused]
+ * outputs      -
+ */
 static void
 read_server(struct connection_entry *conn_p)
 {
@@ -510,35 +542,38 @@ read_server(struct connection_entry *conn_p)
 
 	if((n = get_line(server_p, buf, sizeof(buf))) > 0)
 		parse_server(buf, n);
+
+        /* we had a fatal error.. close the socket */
 	else if(n < 0)
 	{
-		if(conn_p == server_p)
-		{
-			if(ignore_errno(errno))
-                        {
-				slog("Connection to server %s lost",
-                                     conn_p->name);
-				sendto_all(UMODE_SERVER,
-                                           "Connection to server %s lost",
-				  	   conn_p->name);
-                        }
-			else
-                        {
-				slog("Connection to server %s lost: "
-                                     "(Read error: %s)",
-				     conn_p->name, strerror(errno));
-				sendto_all(UMODE_SERVER,
-                                           "Connection to server %s lost: "
-                                           "(Read error: %s)",
-					   conn_p->name, strerror(errno));
-                        }
-		}
+                if(ignore_errno(errno))
+                {
+                        slog("Connection to server %s lost", conn_p->name);
+                        sendto_all(UMODE_SERVER,
+                                   "Connection to server %s lost", 
+                                   conn_p->name);
+                }
+                else
+                {
+                        slog("Connection to server %s lost: (Read error: %s)",
+                             conn_p->name, strerror(errno));
+                        sendto_all(UMODE_SERVER,
+                                   "Connection to server %s lost: "
+                                   "(Read error: %s)",
+                                   conn_p->name, strerror(errno));
+                }
 
 		(conn_p->io_close)(conn_p);
 	}
 	/* n == 0 we can safely ignore */
 }
 
+/* read_client()
+ *   reads some data from a client, exiting it on read errors
+ *
+ * inputs       - connection entry to read from
+ * outputs      -
+ */
 static void
 read_client(struct connection_entry *conn_p)
 {
@@ -547,6 +582,8 @@ read_client(struct connection_entry *conn_p)
 
 	if((n = get_line(conn_p, buf, sizeof(buf))) > 0)
 		parse_client(conn_p, buf, n);
+
+        /* fatal error */
 	else if(n < 0)
 		(conn_p->io_close)(conn_p);
 	/* n == 0 we can safely ignore */
@@ -679,6 +716,12 @@ parse_server(char *buf, int len)
 	handle_scommand(command, parv, parc);
 }
 
+/* parse_client()
+ *   parses a given buffer and calls command handlers
+ *
+ * inputs       - connection who sent data, buffer to parse, length of buffer
+ * outputs      -
+ */
 void
 parse_client(struct connection_entry *conn_p, char *buf, int len)
 {
@@ -703,6 +746,7 @@ parse_client(struct connection_entry *conn_p, char *buf, int len)
 
 	parv[0] = conn_p->name;
 
+        /* partyline */
 	if(*ch != '.')
         {
                 if(conn_p->oper == NULL)
@@ -744,6 +788,7 @@ parse_client(struct connection_entry *conn_p, char *buf, int len)
 
 	parc = string_to_array(ch, parv);
 
+        /* pass it off to the handler */
 	handle_ucommand(conn_p, command, parv, parc);
 }
 
@@ -779,6 +824,12 @@ sendto_server(const char *format, ...)
 	}
 }
 
+/* sendto_one()
+ *   attempts to send the given data to a given connection
+ *
+ * inputs       - connection to send to, data to send
+ * outputs      -
+ */
 void
 sendto_one(struct connection_entry *conn_p, const char *format, ...)
 {
@@ -798,6 +849,12 @@ sendto_one(struct connection_entry *conn_p, const char *format, ...)
 		(conn_p->io_close)(conn_p);
 }
 
+/* sendto_all()
+ *   attempts to send the given data to all clients connected
+ *
+ * inputs       - umode required [0 for none], data to send
+ * outputs      -
+ */
 void
 sendto_all(int umode, const char *format, ...)
 {
@@ -824,6 +881,12 @@ sendto_all(int umode, const char *format, ...)
         }
 }
 
+/* sendto_all_butone()
+ *   attempts to send the given data to all clients connected but one
+ *
+ * inputs       - client not to send to, umode required [0 for none], data
+ * outputs      -
+ */
 void
 sendto_all_butone(struct connection_entry *one, int umode,
                   const char *format, ...)
@@ -844,6 +907,7 @@ sendto_all_butone(struct connection_entry *one, int umode,
                 if(conn_p->oper == NULL)
                         continue;
 
+                /* the one we shouldnt be sending to.. */
                 if(conn_p == one)
                         continue;
 
@@ -854,6 +918,12 @@ sendto_all_butone(struct connection_entry *one, int umode,
         }
 }
 
+/* get_sendq()
+ *   gets the sendq of a given connection
+ *
+ * inputs       - connection entry to get sendq for
+ * outputs      - sendq
+ */
 unsigned long
 get_sendq(struct connection_entry *conn_p)
 {

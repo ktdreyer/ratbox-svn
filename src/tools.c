@@ -1,8 +1,19 @@
-/* $Id$ */
+/* src/tools.c
+ *   Contains various useful functions.
+ *
+ * Copyright (C) 2003-2004 Lee Hardy <leeh@leeh.co.uk>
+ * Copyright (C) 2003-2004 ircd-ratbox development team
+ *
+ * $Id$
+ */
 #include "stdinc.h"
 #include "rserv.h"
 
-void *my_calloc(int nmemb, size_t size)
+/* my_calloc()
+ *   wrapper for calloc() to detect out of memory
+ */
+void *
+my_calloc(int nmemb, size_t size)
 {
     void *p;
 
@@ -14,13 +25,21 @@ void *my_calloc(int nmemb, size_t size)
     return p;
 }
 
-void my_free(void *p)
+/* my_free()
+ *   wrapper for free() that checks what we're freeing exists
+ */
+void
+my_free(void *p)
 {
     if(p != NULL)
 	    free(p);
 }
 
-char *my_strdup(const char *s)
+/* my_strdup()
+ *   wrapper for strdup() to detect out of memory
+ */
+char *
+my_strdup(const char *s)
 {
     char *n;
 
@@ -32,6 +51,12 @@ char *my_strdup(const char *s)
     return n;
 }
 
+/* get_duration()
+ *   converts duration in seconds to a string form
+ *
+ * inputs       - duration in seconds
+ * outputs      - string form of duration, "n day(s), h:mm:ss"
+ */
 const char *
 get_duration(time_t seconds)
 {
@@ -48,6 +73,25 @@ get_duration(time_t seconds)
         snprintf(buf, sizeof(buf), "%d day%s, %d:%02d:%02ld",
                  days, (days == 1) ? "" : "s", hours,
                  minutes, seconds);
+
+        return buf;
+}
+
+const char *
+lcase(const char *text)
+{
+        static char buf[BUFSIZE+1];
+        int i = 0;
+
+        buf[0] = '\0';
+
+        while(text[i] != '\0' && i < BUFSIZE-1)
+        {
+                buf[i] = tolower(text[i]);
+                i++;
+        }
+
+        buf[i] = '\0';
 
         return buf;
 }
@@ -82,8 +126,6 @@ get_duration(time_t seconds)
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-
 
 #ifndef HAVE_STRLCAT
 size_t
@@ -336,4 +378,3 @@ make_dlink_node(void)
 	dlink_node *lp = my_calloc(1, sizeof(dlink_node));
 	return lp;
 }
-

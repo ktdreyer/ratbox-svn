@@ -1,9 +1,10 @@
 /* src/c_error.c
- *  Contains code for handling "ERROR" command
+ *   Contains code for handling "ERROR" command
  *
- *  Copyright (C) 2003 ircd-ratbox development team
+ * Copyright (C) 2003-2004 Lee Hardy <leeh@leeh.co.uk>
+ * Copyright (C) 2003-2004 ircd-ratbox development team
  *
- *  $Id$
+ * $Id$
  */
 #include "stdinc.h"
 #include "c_init.h"

@@ -1,4 +1,11 @@
-/* $Id$ */
+/* src/u_stats.c
+ *   Contains code for handling the 'stats' user command
+ *
+ * Copyright (C) 2003-2004 Lee Hardy <leeh@leeh.co.uk>
+ * Copyright (C) 2003-2004 ircd-ratbox development team
+ *
+ * $Id$
+ */
 #include "stdinc.h"
 #include "c_init.h"
 #include "rserv.h"
@@ -7,7 +14,7 @@
 #include "io.h"
 
 static void u_stats(struct connection_entry *, char *parv[], int parc);
-struct ucommand_handler stats_ucommand = { "stats", u_stats, 0 };
+struct ucommand_handler stats_ucommand = { "stats", u_stats, 0, NULL };
 
 struct _stats_table
 {

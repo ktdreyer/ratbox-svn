@@ -38,6 +38,7 @@ extern int errno;
 
 #include <string.h>
 #include <strings.h>
+#include <ctype.h>
 
 #include <time.h>
 #include <sys/time.h>
