@@ -1,3 +1,15 @@
+leeh        2005/02/22 14:38:38 EST	(20050222_0)
+
+  Modified files:
+    help/chanserv        set 
+  Log:
+  - remove some tabs from set help
+  
+  Revision  Changes    Path
+  1.4       +1 -1      rserv/help/chanserv/set
+
+
+
 leeh        2005/02/16 19:05:53 EST	(20050217_0)
 
   Modified files:
