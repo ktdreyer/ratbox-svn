@@ -1244,7 +1244,7 @@ void set_channel_mode(struct Client *cptr,
 
 	  if(chptr->mode.mode & MODE_HIDEOPS)
 	    {
-	      if(the_mode == MODE_CHANOP || the_mode == MODE_HALFOP
+	      if((the_mode == MODE_CHANOP || the_mode == MODE_HALFOP) 
 			&& whatt == MODE_DEL)
 		if (MyClient(who))
 		  sendto_one(who,":%s!%s@%s MODE %s -%c %s",
