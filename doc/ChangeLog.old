@@ -1,3 +1,18 @@
+lusky       2002/02/07 23:55:56 EST	(20020208_1)
+
+  Modified files:
+    include              patchlevel.h 
+    src                  adns.c 
+  Log:
+  - removed unusued dns_cancel_all function
+  - revved patchlevel to 7b10
+  
+  Revision  Changes    Path
+  7.19      +1 -1      ircd-hybrid-7/include/patchlevel.h
+  7.38      +0 -32     ircd-hybrid-7/src/adns.c
+
+
+
 jmallett    2002/02/07 22:26:34 EST	(20020208_0)
 
   Modified files:
