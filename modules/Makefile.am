@@ -130,14 +130,12 @@ endif
 clean-generic:
 	$(LIBTOOL) --mode=clean $(RM) -f $(S_OBJS) $(S_CORE_OBJS)  $(ST_OBJS) static_modules.lo
 	
-	
 		
 install_core: $(S_CORE_OBJS)
-	$(LIBTOOL) --mode=install $(INSTALL_DATA) $(S_CORE_OBJS) $(DESTDIR)$(moduledir);
+	for i in $(S_CORE_OBJS); do $(SH) ./instdso.sh SH_LIBTOOL='$(LIBTOOL)' $$i  $(DESTDIR)$(moduledir); done
 
 install_modules: $(S_OBJS)
-	$(LIBTOOL) --mode=install $(INSTALL_DATA) $(S_OBJS) $(DESTDIR)$(automoduledir);
-
+	for i in $(S_OBJS); do $(SH) ./instdso.sh SH_LIBTOOL='$(LIBTOOL)' $$i  $(DESTDIR)$(automoduledir); done
 
 install-mkdirs:
 	@echo "ircd: setting up modular directory structure"
