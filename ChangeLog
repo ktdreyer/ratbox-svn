@@ -1,3 +1,26 @@
+leeh        2002/11/23 17:40:52 UTC	(20021123_1)
+
+  Modified files:
+    .                    RELNOTES 
+    doc                  example.conf example.efnet.conf 
+    help/opers           unresv 
+    modules              m_xline.c 
+  Added files:
+    help/opers           unxline 
+  Log:
+  - added check for xline=yes; to UNXLINE
+  - made docs reflect this
+  
+  Revision  Changes    Path
+  1.70      +1 -0      ircd-ratbox/RELNOTES
+  7.189     +1 -1      ircd-ratbox/doc/example.conf
+  7.27      +1 -1      ircd-ratbox/doc/example.efnet.conf
+  1.2       +2 -2      ircd-ratbox/help/opers/unresv
+  1.1       +5 -0      ircd-ratbox/help/opers/unxline (new)
+  1.8       +8 -1      ircd-ratbox/modules/m_xline.c
+
+
+
 leeh        2002/11/23 17:29:12 UTC	(20021123_0)
 
   Modified files:
