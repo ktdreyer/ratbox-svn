@@ -52,12 +52,6 @@ int mo_close(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   int            i;
   int            closed = 0;
 
-  if (!MyOper(sptr))
-    {
-      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-      return 0;
-    }
-
   for (i = highest_fd; i; i--)
     {
       if (!(acptr = local[i]))
