@@ -1,3 +1,15 @@
+leeh        2003/08/16 10:08:22 EDT	(20030816_1)
+
+  Removed files:
+    contrib              m_jupe.c 
+  Log:
+  - removed contrib/m_jupe.c, its broken and not worth fixing.
+  
+  Revision  Changes    Path
+  1.46      +0 -204    ircd-ratbox/contrib/m_jupe.c (dead)
+
+
+
 leeh        2003/08/16 09:57:47 EDT	(20030816_0)
 
   Modified files:
