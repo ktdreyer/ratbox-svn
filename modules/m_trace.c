@@ -80,7 +80,6 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 	int doall, link_s[MAXCONNECTIONS], link_u[MAXCONNECTIONS];
 	int cnt = 0, wilds, dow;
 	dlink_node *ptr;
-	const char *looking_for = parv[0];
 
 	if(!IsClient(source_p))
 		return 0;
@@ -131,16 +130,10 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 			 * object --fl
 			 */
 			if(IsOper(source_p) || !ConfigServerHide.flatten_links)
-			{
-				if(ac2ptr)
-					sendto_one(source_p, form_str(RPL_TRACELINK), me.name,
-						   looking_for, ircd_version, tname,
-						   ac2ptr->from->name);
-				else
-					sendto_one(source_p, form_str(RPL_TRACELINK), me.name,
-						   looking_for, ircd_version, tname,
-						   "ac2ptr_is_NULL!!");
-			}
+				sendto_one_numeric(source_p, RPL_TRACELINK, 
+						   form_str(RPL_TRACELINK),
+						   ircd_version, tname,
+						   ac2ptr ? ac2ptr->from->name : "EEK!");
 
 			return 0;
 		}
@@ -277,9 +270,10 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 		 * left here in case that should ever change --fl
 		 */
 		if(!cnt)
-			sendto_one(source_p, form_str(RPL_TRACESERVER),
-				   me.name, parv[0], 0, link_s[me.localClient->fd],
-				   link_u[me.localClient->fd], me.name, "*", "*", me.name);
+			sendto_one_numeric(source_p, RPL_TRACESERVER, 
+					   form_str(RPL_TRACESERVER),
+					   0, link_s[me.localClient->fd],
+					   link_u[me.localClient->fd], me.name, "*", "*", me.name);
 
 		/* let the user have some idea that its at the end of the
 		 * trace
@@ -295,9 +289,9 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 			cltmp = ptr->data;
 
 			if(CurrUsers(cltmp) > 0)
-				sendto_one(source_p, form_str(RPL_TRACECLASS), 
-					   me.name, parv[0], 
-					   ClassName(cltmp), CurrUsers(cltmp));
+				sendto_one_numeric(source_p, RPL_TRACECLASS,
+						   form_str(RPL_TRACECLASS), 
+						   ClassName(cltmp), CurrUsers(cltmp));
 		}
 	}
 
@@ -336,23 +330,23 @@ report_this_status(struct Client *source_p, struct Client *target_p,
 	switch (target_p->status)
 	{
 	case STAT_CONNECTING:
-		sendto_one(source_p, form_str(RPL_TRACECONNECTING), me.name,
-			   source_p->name, class_name,
+		sendto_one_numeric(source_p, RPL_TRACECONNECTING,
+				   form_str(RPL_TRACECONNECTING), class_name,
 #ifndef HIDE_SERVERS_IPS
-			   IsOperAdmin(source_p) ? name :
+				   IsOperAdmin(source_p) ? name :
 #endif
-			   target_p->name);
+				   target_p->name);
 
 		cnt++;
 		break;
 
 	case STAT_HANDSHAKE:
-		sendto_one(source_p, form_str(RPL_TRACEHANDSHAKE), me.name,
-			   source_p->name, class_name,
+		sendto_one_numeric(source_p, RPL_TRACEHANDSHAKE,
+				   form_str(RPL_TRACEHANDSHAKE), class_name,
 #ifndef HIDE_SERVERS_IPS
-			   IsOperAdmin(source_p) ? name :
+				   IsOperAdmin(source_p) ? name :
 #endif
-			   target_p->name);
+				   target_p->name);
 
 		cnt++;
 		break;
@@ -362,9 +356,10 @@ report_this_status(struct Client *source_p, struct Client *target_p,
 
 	case STAT_UNKNOWN:
 		/* added time -Taner */
-		sendto_one(source_p, form_str(RPL_TRACEUNKNOWN),
-			   me.name, source_p->name, class_name, name, ip,
-			   target_p->firsttime ? CurrentTime - target_p->firsttime : -1);
+		sendto_one_numeric(source_p, RPL_TRACEUNKNOWN,
+				   form_str(RPL_TRACEUNKNOWN),
+				   class_name, name, ip,
+				   target_p->firsttime ? CurrentTime - target_p->firsttime : -1);
 		cnt++;
 		break;
 	case STAT_CLIENT:
@@ -375,56 +370,49 @@ report_this_status(struct Client *source_p, struct Client *target_p,
 		    (MyClient(source_p) || !(dow && IsInvisible(target_p))))
 		   || !dow || IsOper(target_p) || (source_p == target_p))
 		{
-#ifndef HIDE_SPOOF_IPS
-			if(IsAdmin(target_p))
-				sendto_one(source_p, form_str(RPL_TRACEOPERATOR),
-					   me.name, source_p->name, class_name, name,
-					   IsOperAdmin(source_p) ? ip : "255.255.255.255",
-					   CurrentTime - target_p->lasttime,
-					   (target_p->user) ? (CurrentTime -
-							       target_p->user->last) : 0);
-
-			else
-#endif
 			if(IsOper(target_p))
-				sendto_one(source_p, form_str(RPL_TRACEOPERATOR),
-					   me.name, source_p->name, class_name, name,
+				sendto_one_numeric(source_p, RPL_TRACEOPERATOR,
+						   form_str(RPL_TRACEOPERATOR),
+						   class_name, name,
 #ifndef HIDE_SPOOF_IPS
-					   MyOper(source_p) ? ip :
+						   MyOper(source_p) ? ip :
 #endif
-					   (IsIPSpoof(target_p) ? "255.255.255.255" : ip),
-					   CurrentTime - target_p->lasttime,
-					   (target_p->user) ? (CurrentTime -
-							       target_p->user->last) : 0);
+						   (IsIPSpoof(target_p) ? "255.255.255.255" : ip),
+						   CurrentTime - target_p->lasttime,
+						   (target_p->user) ? 
+						    (CurrentTime - target_p->user->last) : 0);
 
 			else
-				sendto_one(source_p, form_str(RPL_TRACEUSER),
-					   me.name, source_p->name, class_name, name,
+				sendto_one_numeric(source_p, RPL_TRACEUSER, 
+						   form_str(RPL_TRACEUSER),
+						   class_name, name,
 #ifndef HIDE_SPOOF_IPS
-					   MyOper(source_p) ? ip :
+						   MyOper(source_p) ? ip :
 #endif
-					   (IsIPSpoof(target_p) ? "255.255.255.255" : ip),
-					   CurrentTime - target_p->lasttime,
-					   (target_p->user) ? (CurrentTime -
-							       target_p->user->last) : 0);
+						   (IsIPSpoof(target_p) ? "255.255.255.255" : ip),
+						   CurrentTime - target_p->lasttime,
+						   (target_p->user) ? 
+						    (CurrentTime - target_p->user->last) : 0);
 			cnt++;
 		}
 		break;
 
 	case STAT_SERVER:
-		sendto_one(source_p, form_str(RPL_TRACESERVER),
-			   me.name, source_p->name, class_name, link_s_p, link_u_p,
+		sendto_one_numeric(source_p, RPL_TRACESERVER, form_str(RPL_TRACESERVER),
+				   class_name, link_s_p, link_u_p,
 #ifndef HIDE_SERVERS_IPS
-			   IsOperAdmin(source_p) ? name :
+				   IsOperAdmin(source_p) ? name :
 #endif
-			   target_p->name,
-			   *(target_p->serv->by) ? target_p->serv->by : "*", "*",
-			   me.name, CurrentTime - target_p->lasttime);
+				   target_p->name,
+				   *(target_p->serv->by) ? target_p->serv->by : "*", "*",
+				   me.name, CurrentTime - target_p->lasttime);
 		cnt++;
 		break;
 
 	default:		/* ...we actually shouldn't come here... --msa */
-		sendto_one(source_p, form_str(RPL_TRACENEWTYPE), me.name, source_p->name, name);
+		sendto_one_numeric(source_p, RPL_TRACENEWTYPE, 
+				   form_str(RPL_TRACENEWTYPE), 
+				   me.name, source_p->name, name);
 		cnt++;
 		break;
 	}

@@ -136,10 +136,8 @@ show_ports(struct Client *source_p)
 
 	for (listener = ListenerPollList; listener; listener = listener->next)
 	{
-		sendto_one(source_p, form_str(RPL_STATSPLINE),
-			   me.name,
-			   source_p->name,
-			   'P',
+		sendto_one_numeric(source_p, RPL_STATSPLINE, 
+				   form_str(RPL_STATSPLINE), 'P',
 #ifdef IPV6
 			   ntohs(listener->addr.ss_family == AF_INET ? ((struct sockaddr_in *)&listener->addr)->sin_port :
 			   	 ((struct sockaddr_in6 *)&listener->addr)->sin6_port),

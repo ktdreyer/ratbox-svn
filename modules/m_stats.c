@@ -245,7 +245,8 @@ m_stats(struct Client *client_p, struct Client *source_p, int parc, const char *
 	}
 
 	/* Send the end of stats notice, and the stats_spy */
-	sendto_one (source_p, form_str (RPL_ENDOFSTATS), me.name, parv[0], statchar);
+	sendto_one_numeric(source_p, RPL_ENDOFSTATS, 
+			   form_str(RPL_ENDOFSTATS), statchar);
 
 	if((statchar != 'L') && (statchar != 'l'))
 		stats_spy (source_p, statchar);
@@ -305,7 +306,8 @@ mo_stats(struct Client *client_p, struct Client *source_p, int parc, const char 
 	}
 
 	/* Send the end of stats notice, and the stats_spy */
-	sendto_one (source_p, form_str (RPL_ENDOFSTATS), me.name, parv[0], statchar);
+	sendto_one_numeric(source_p, RPL_ENDOFSTATS, 
+			   form_str(RPL_ENDOFSTATS), statchar);
 
 	if((statchar != 'L') && (statchar != 'l'))
 		stats_spy (source_p, statchar);
@@ -530,13 +532,13 @@ stats_glines (struct Client *source_p)
 		{
 			kill_ptr = gline_node->data;
 
-			sendto_one (source_p, form_str (RPL_STATSKLINE), me.name,
-				    source_p->name, 'G',
-				    kill_ptr->host ? kill_ptr->host : "*",
-				    kill_ptr->user ? kill_ptr->user : "*",
-				    kill_ptr->passwd ? kill_ptr->passwd : "No Reason",
-				    kill_ptr->spasswd ? "|" : "",
-				    kill_ptr->spasswd ? kill_ptr->spasswd : "");
+			sendto_one_numeric(source_p, RPL_STATSKLINE, 
+					   form_str(RPL_STATSKLINE), 'G',
+					    kill_ptr->host ? kill_ptr->host : "*",
+					    kill_ptr->user ? kill_ptr->user : "*",
+					    kill_ptr->passwd ? kill_ptr->passwd : "No Reason",
+					    kill_ptr->spasswd ? "|" : "",
+					    kill_ptr->spasswd ? kill_ptr->spasswd : "");
 		}
 	}
 	else
@@ -586,9 +588,10 @@ stats_auth (struct Client *source_p)
 
 		get_printable_conf (aconf, &name, &host, &pass, &user, &port, &classname);
 
-		sendto_one (source_p, form_str (RPL_STATSILINE), me.name,
-			    source_p->name, (IsConfRestricted (aconf)) ? 'i' : 'I',
-			    name, show_iline_prefix (source_p, aconf, user), host, port, classname);
+		sendto_one_numeric(source_p, RPL_STATSILINE, form_str(RPL_STATSILINE),
+				   (IsConfRestricted (aconf)) ? 'i' : 'I',
+				   name, show_iline_prefix(source_p, aconf, user),
+				   host, port, classname);
 	}
 
 	/* Theyre opered, or allowed to see all auth blocks */
@@ -629,10 +632,10 @@ stats_tklines (struct Client *source_p)
 
 		get_printable_kline(source_p, aconf, &host, &pass, &user, &oper_reason);
 
-		sendto_one (source_p, form_str (RPL_STATSKLINE), me.name,
-			    source_p->name, 'k', host, user, pass,
-			    oper_reason ? "|" : "",
-			    oper_reason ? oper_reason : "");
+		sendto_one_numeric(source_p, RPL_STATSKLINE, 
+				   form_str(RPL_STATSKLINE), 'k',
+				   user, pass, oper_reason ? "|" : "",
+				   oper_reason ? oper_reason : "");
 	}
 	/* Theyre opered, or allowed to see all klines */
 	else
@@ -660,10 +663,11 @@ report_tklines (struct Client *source_p, dlink_list * tkline_list)
 
 		get_printable_kline(source_p, aconf, &host, &pass, &user, &oper_reason);
 
-		sendto_one (source_p, form_str (RPL_STATSKLINE), me.name, source_p->name,
-			    'k', host, user, pass,
-			    oper_reason ? "|" : "",
-			    oper_reason ? oper_reason : "");
+		sendto_one_numeric(source_p, RPL_STATSKLINE,
+				   form_str (RPL_STATSKLINE),
+				   'k', host, user, pass,
+				   oper_reason ? "|" : "",
+				   oper_reason ? oper_reason : "");
 	}
 }
 
@@ -700,10 +704,9 @@ stats_klines (struct Client *source_p)
 
 		get_printable_kline(source_p, aconf, &host, &pass, &user, &oper_reason);
 
-		sendto_one (source_p, form_str (RPL_STATSKLINE), me.name,
-			    source_p->name, 'K', host, user, pass,
-			    oper_reason ? "|" : "",
-			    oper_reason ? oper_reason : "");
+		sendto_one_numeric(source_p, RPL_STATSKLINE, form_str(RPL_STATSKLINE),
+				   'K', host, user, pass, oper_reason ? "|" : "",
+				   oper_reason ? oper_reason : "");
 	}
 	/* Theyre opered, or allowed to see all klines */
 	else
@@ -788,17 +791,17 @@ stats_resv (struct Client *source_p)
 	DLINK_FOREACH(ptr, resv_list.head)
 	{
 		resv_p = ptr->data;
-		sendto_one(source_p, form_str(RPL_STATSQLINE),
-			   me.name, source_p->name, 
-			   resv_p->name, resv_p->reason);
+		sendto_one_numeric(source_p, RPL_STATSQLINE,
+				   form_str(RPL_STATSQLINE),
+				   resv_p->name, resv_p->reason);
 	}
 
 	DLINK_FOREACH(ptr, resv_hash_list.head)
 	{
 		resv_p = ptr->data;
-		sendto_one(source_p, form_str(RPL_STATSQLINE),
-			   me.name, source_p->name,
-			   resv_p->name, resv_p->reason);
+		sendto_one_numeric(source_p, RPL_STATSQLINE,
+				   form_str(RPL_STATSQLINE),
+				   resv_p->name, resv_p->reason);
 	}	
 }
 

@@ -549,9 +549,10 @@ report_messages(struct Client *source_p)
 			s_assert(ptr->msg != NULL);
 			s_assert(ptr->cmd != NULL);
 
-			sendto_one(source_p, form_str(RPL_STATSCOMMANDS),
-				   me.name, source_p->name, ptr->cmd,
-				   ptr->msg->count, ptr->msg->bytes, ptr->msg->rcount);
+			sendto_one_numeric(source_p, RPL_STATSCOMMANDS, 
+					   form_str(RPL_STATSCOMMANDS),
+					   ptr->cmd, ptr->msg->count, 
+					   ptr->msg->bytes, ptr->msg->rcount);
 		}
 	}
 }

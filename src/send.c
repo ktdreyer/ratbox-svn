@@ -348,13 +348,12 @@ sendto_one_prefix(struct Client *target_p, struct Client *source_p,
 
 /* sendto_one_numeric()
  *
- * inputs	- client to send to, source, va_args
+ * inputs	- client to send to, va_args
  * outputs	- client has message put into its queue
  * side effects - source/target is chosen based on TS6 capability
  */
 void
-sendto_one_numeric(struct Client *target_p, struct Client *source_p,
-		   int numeric, const char *pattern, ...)
+sendto_one_numeric(struct Client *target_p, int numeric, const char *pattern, ...)
 {
 	struct Client *dest_p;
 	va_list args;
@@ -379,7 +378,7 @@ sendto_one_numeric(struct Client *target_p, struct Client *source_p,
 	va_start(args, pattern);
 	linebuf_putmsg(&linebuf, pattern, &args,
 		       ":%s %03d %s ",
-		       get_id(source_p, target_p),
+		       get_id(&me, target_p),
 		       numeric, get_id(target_p, target_p));
 	va_end(args);
 

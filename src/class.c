@@ -284,20 +284,22 @@ report_classes(struct Client *source_p)
 	{
 		cltmp = ptr->data;
 
-		sendto_one(source_p, form_str(RPL_STATSYLINE), me.name,
-			   source_p->name, 'Y', ClassName(cltmp),
-			   PingFreq(cltmp), ConFreq(cltmp),
-			   MaxUsers(cltmp), MaxSendq(cltmp),
-			   MaxLocal(cltmp), MaxIdent(cltmp), MaxGlobal(cltmp), MaxIdent(cltmp));
+		sendto_one_numeric(source_p, RPL_STATSYLINE, 
+				   form_str(RPL_STATSYLINE),
+				   'Y', ClassName(cltmp),
+				   PingFreq(cltmp), ConFreq(cltmp),
+				   MaxUsers(cltmp), MaxSendq(cltmp),
+				   MaxLocal(cltmp), MaxIdent(cltmp),
+				   MaxGlobal(cltmp), MaxIdent(cltmp));
 	}
 
 	/* also output the default class */
-	sendto_one(source_p, form_str(RPL_STATSYLINE),
-		   me.name, source_p->name, 'Y', ClassName(default_class),
-		   PingFreq(default_class), ConFreq(default_class),
-		   MaxUsers(default_class), MaxSendq(default_class),
-		   MaxLocal(default_class), MaxIdent(default_class),
-		   MaxGlobal(default_class), MaxIdent(default_class));
+	sendto_one_numeric(source_p, RPL_STATSYLINE, form_str(RPL_STATSYLINE),
+			   'Y', ClassName(default_class),
+			   PingFreq(default_class), ConFreq(default_class),
+			   MaxUsers(default_class), MaxSendq(default_class),
+			   MaxLocal(default_class), MaxIdent(default_class),
+			   MaxGlobal(default_class), MaxIdent(default_class));
 }
 
 /*

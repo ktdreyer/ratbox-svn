@@ -589,13 +589,14 @@ report_auth(struct Client *client_p)
 				get_printable_conf(aconf, &name, &host, &pass, &user, &port,
 						   &classname);
 
-				sendto_one(client_p, form_str(RPL_STATSILINE), me.name,
-					   client_p->name, (IsConfRestricted(aconf)) ? 'i' : 'I',
-					   name, show_iline_prefix(client_p, aconf, user),
+				sendto_one_numeric(client_p, RPL_STATSILINE, 
+						   form_str(RPL_STATSILINE),
+						   (IsConfRestricted(aconf)) ? 'i' : 'I',
+						   name, show_iline_prefix(client_p, aconf, user),
 #ifdef HIDE_SPOOF_IPS
-					   IsConfDoSpoofIp(aconf) ? "255.255.255.255" :
+						   IsConfDoSpoofIp(aconf) ? "255.255.255.255" :
 #endif
-					   host, port, classname);
+						   host, port, classname);
 			}
 }
 
@@ -626,10 +627,11 @@ report_Klines(struct Client *source_p)
 					continue;
 
 				get_printable_kline(source_p, aconf, &host, &pass, &user, &oper_reason);
-				sendto_one(source_p, form_str(RPL_STATSKLINE), me.name,
-					   source_p->name, 'K', host, user, pass,
-					   oper_reason ? "|" : "",
-					   oper_reason ? oper_reason : "");
+				sendto_one_numeric(source_p, RPL_STATSKLINE,
+						   form_str(RPL_STATSKLINE),
+						   'K', host, user, pass,
+						   oper_reason ? "|" : "",
+						   oper_reason ? oper_reason : "");
 			}
 		}
 	}
