@@ -1,3 +1,8 @@
+*** 20000101_4 by db
+- implemented DROP, not tested, not used yet.
+
+
+
 *** 20000101_3 by db
 - Preliminary rough cut at Lazy Links, still a lot of mopping up to do
   'n' in c/n's means try lazy link, 'N' means do normal.
