@@ -1,3 +1,15 @@
+androsyn    2004/04/14 12:17:01 EDT	(20040414_2)
+
+  Modified files:
+    src                  irc_string.c 
+  Log:
+  Use a literal zero in inet_ntop6 instead of a ASCII zero..oops
+  
+  Revision  Changes    Path
+  7.72      +1 -1      ircd-ratbox/src/irc_string.c
+
+
+
 leeh        2004/04/14 11:25:19 EDT	(20040414_1)
 
   Modified files:
