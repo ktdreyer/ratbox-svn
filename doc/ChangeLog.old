@@ -1,3 +1,7 @@
+*** 20010105_38 by ejb
+- fix parse.c format error
+
+
 *** 20010105_37 by ejb
 - finally fixed bug with IDs killing remote users.
 
