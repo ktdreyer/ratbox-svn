@@ -1,3 +1,15 @@
+androsyn    2003/08/12 15:07:56 EDT	(20030812_3)
+
+  Modified files:
+    servlink             io.c 
+  Log:
+  Should be using poll() in both loops
+  
+  Revision  Changes    Path
+  1.34      +7 -10     ircd-ratbox/servlink/io.c
+
+
+
 leeh        2003/08/12 11:54:29 EDT	(20030812_2)
 
   Modified files:
