@@ -1,3 +1,15 @@
+leeh        2005/03/25 14:18:18 UTC	(20050325_0)
+
+  Modified files:
+    src                  parse.c 
+  Log:
+  - fix a parser bug causing us to be one parameter short of the allowed limit
+  
+  Revision  Changes    Path
+  7.196     +7 -4      ircd-ratbox/src/parse.c
+
+
+
 leeh        2005/03/24 17:09:42 UTC	(20050324_0)
 
   Modified files:
