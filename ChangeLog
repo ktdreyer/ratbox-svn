@@ -1,3 +1,28 @@
+leeh        2003/06/10 19:11:30 UTC	(20030610_5)
+
+  Modified files:
+    include              s_conf.h 
+    modules              m_kline.c m_stats.c m_testline.c 
+    src                  hostmask.c kdparse.c messages.tab 
+                         s_conf.c 
+  Log:
+  - add get_printable_kline(), specifically for getting the params of a k/d
+    line, including oper_reason.
+  - hash in the oper reason when reading kline.conf/dline.conf so we can
+    output it in stats K/D
+  
+  Revision  Changes    Path
+  7.237     +3 -1      ircd-ratbox/include/s_conf.h
+  1.158     +7 -1      ircd-ratbox/modules/m_kline.c
+  1.162     +31 -27    ircd-ratbox/modules/m_stats.c
+  1.42      +4 -4      ircd-ratbox/modules/m_testline.c
+  7.88      +8 -7      ircd-ratbox/src/hostmask.c
+  7.25      +9 -2      ircd-ratbox/src/kdparse.c
+  7.86      +2 -2      ircd-ratbox/src/messages.tab
+  7.409     +21 -6     ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2003/06/10 17:30:55 UTC	(20030610_4)
 
   Modified files:
