@@ -2156,7 +2156,7 @@ serv_connect_callback(int fd, int status, void *data)
 	sendto_realops_flags(FLAGS_ALL, L_OPER,
 			     "Error connecting to %s: %s",
 			     client_p->name, comm_errstr(status));
-	client_p->flags |= FLAGS_DEADSOCKET;
+	SetDead(client_p);
         exit_client(client_p, client_p, &me, comm_errstr(status));
         return;
       }

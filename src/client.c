@@ -244,7 +244,7 @@ check_pings(void *notused)
 }
 
 /*
- * check_pings_list()
+ * Check_pings_list()
  *
  * inputs	- pointer to list to check
  * output	- NONE
@@ -269,21 +269,24 @@ check_pings_list(dlink_list *list)
       */
       if (client_p->flags & FLAGS_DEADSOCKET)
         {
+#if 0
          if (client_p->flags & FLAGS_SENDQEX)
            {
             exit_client(client_p, client_p, &me, "SendQ exceeded");
             continue;
            }
           exit_client(client_p, client_p, &me, "Dead socket");
+#endif
+	  /* Ignore it, its been exited already */
           continue; 
         }
       if (IsPerson(client_p))
         {
-          if( !IsExemptKline(client_p) &&
-              GlobalSetOptions.idletime && 
-              !IsOper(client_p) &&
-              !IsIdlelined(client_p) && 
-              ((CurrentTime - client_p->user->last) > GlobalSetOptions.idletime))
+          if(!IsExemptKline(client_p) &&
+             GlobalSetOptions.idletime && 
+             !IsOper(client_p) &&
+             !IsIdlelined(client_p) && 
+             ((CurrentTime - client_p->user->last) > GlobalSetOptions.idletime))
             {
               struct ConfItem *aconf;
 
@@ -291,7 +294,7 @@ check_pings_list(dlink_list *list)
               aconf->status = CONF_KILL;
 
               DupString(aconf->host, client_p->host);
-              DupString(aconf->passwd, "idle exceeder" );
+              DupString(aconf->passwd, "idle exceeder");
               DupString(aconf->name, client_p->username);
               aconf->port = 0;
               aconf->hold = CurrentTime + 60;
@@ -448,7 +451,7 @@ check_klines(void)
 	      sendto_one(client_p, "NOTICE DLINE :*** You have been D-lined");
 	  }
 	    
-	  (void)exit_client(client_p, client_p, &me, reason );
+	  (void)exit_client(client_p, client_p, &me, reason);
 	  continue; /* and go examine next fd/client_p */
 	}
 
@@ -1092,7 +1095,6 @@ static void exit_one_client(struct Client *client_p,
 
   /* remove from global client list */
   remove_client_from_list(source_p);
-  SetDead(source_p);
 
   /* Check to see if the client isn't already on the dead list */
   assert(dlinkFind(&dead_list, source_p) == NULL);
@@ -1162,10 +1164,21 @@ static void recurse_remove_clients(struct Client* source_p, const char* comment)
   if (IsMe(source_p))
     return;
 
-  if (!source_p->serv)        /* oooops. uh this is actually a major bug */
+  if (source_p->serv == NULL)     /* oooops. uh this is actually a major bug */
     return;
 
-  while ( (target_p = source_p->serv->servers) )
+  while ((target_p = source_p->serv->users))
+    {
+      target_p->flags |= FLAGS_KILLED;
+#ifdef DUPFREEDEBUG
+      exit_one_client(NULL, target_p, &me, comment,
+                      __FILE__, __LINE__);
+#else
+      exit_one_client(NULL, target_p, &me, comment);
+#endif
+    }
+
+  while ((target_p = source_p->serv->servers))
     {
       recurse_remove_clients(target_p, comment);
       /*
@@ -1178,17 +1191,6 @@ static void recurse_remove_clients(struct Client* source_p, const char* comment)
                       __FILE__, __LINE__);
 #else
       exit_one_client(NULL, target_p, &me, me.name);
-#endif
-    }
-
-  while ( (target_p = source_p->serv->users) )
-    {
-      target_p->flags |= FLAGS_KILLED;
-#ifdef DUPFREEDEBUG
-      exit_one_client(NULL, target_p, &me, comment,
-                      __FILE__, __LINE__);
-#else
-      exit_one_client(NULL, target_p, &me, comment);
 #endif
     }
 }
@@ -1284,12 +1286,8 @@ int exit_client(
                )
 #endif
 {
-  struct Client        *target_p;
-  struct Client        *next;
   char comment1[HOSTLEN + HOSTLEN + 2];
   dlink_node *m;
-
-  /* source_p->flags |= FLAGS_DEADSOCKET; */
 
   if (MyConnect(source_p))
     {
@@ -1312,7 +1310,7 @@ int exit_client(
       if (!IsRegistered(source_p))
 	{
 	  m = dlinkFind(&unknown_list,source_p);
-	  if( m != NULL )
+	  if(m != NULL)
 	    {
 	      dlinkDelete(m, &unknown_list);
 	      free_dlink_node(m);
@@ -1321,7 +1319,7 @@ int exit_client(
       if (IsOper(source_p))
         {
 	  m = dlinkFind(&oper_list,source_p);
-	  if( m != NULL )
+	  if(m != NULL)
 	    {
 	      dlinkDelete(m, &oper_list);
 	      free_dlink_node(m);
@@ -1334,7 +1332,7 @@ int exit_client(
           if(IsPerson(source_p))        /* a little extra paranoia */
             {
 	      m = dlinkFind(&lclient_list,source_p);
-	      if( m != NULL )
+	      if(m != NULL)
 		{
 		  dlinkDelete(m,&lclient_list);
 		  free_dlink_node(m);
@@ -1350,7 +1348,7 @@ int exit_client(
           IsHandshake(source_p))
 	{
 	  m = dlinkFind(&serv_list,source_p);
-	  if( m != NULL )
+	  if(m != NULL)
 	    {
 	      dlinkDelete(m,&serv_list);
 	      free_dlink_node(m);
@@ -1399,6 +1397,7 @@ int exit_client(
       ** It also makes source_p->from == NULL, thus it's unnecessary
       ** to test whether "source_p != target_p" in the following loops.
       */
+     SetDead(source_p);
      close_connection(source_p);
     }
 
@@ -1419,7 +1418,7 @@ int exit_client(
 	  if((source_p->serv) && (source_p->serv->up))
 	    strcpy(comment1, source_p->serv->up);
 	  else
-	    strcpy(comment1, "<Unknown>" );
+	    strcpy(comment1, "<Unknown>");
 
 	  strcat(comment1," ");
 	  strcat(comment1, source_p->name);
@@ -1437,49 +1436,8 @@ int exit_client(
           ilog(L_NOTICE, "%s was connected for %d seconds.  %d/%d sendK/recvK.",
               source_p->name, CurrentTime - source_p->firsttime, 
               source_p->localClient->sendK, source_p->localClient->receiveK);
-
-              /* Just for paranoia... this shouldn't be necessary if the
-              ** remove_dependents() stuff works, but it's still good
-              ** to do it.    MyConnect(source_p) has been set to false,
-              ** so we look at servptr, which should be ok  -orabidoo
-              */
-              for (target_p = GlobalClientList; target_p; target_p = next)
-                {
-                  next = target_p->next;
-                  if (!IsServer(target_p) && target_p->from == source_p)
-                    {
-                      ts_warn("Dependent client %s not on llist!?",
-                              target_p->name);
-#ifdef DUPFREEDEBUG
-                      exit_one_client(NULL, target_p, &me, comment1,
-                                      file, lineno);
-#else
-                      exit_one_client(NULL, target_p, &me, comment1,
-                                      file, lineno);
-#endif
-                    }
-                }
-              /*
-              ** Second SQUIT all servers behind this link
-              */
-              for (target_p = GlobalClientList; target_p; target_p = next)
-                {
-                  next = target_p->next;
-                  if (IsServer(target_p) && target_p->from == source_p)
-                    {
-                      ts_warn("Dependent server %s not on llist!?", 
-                                     target_p->name);
-#ifdef DUPFREEDEBUG
-                      exit_one_client(NULL, target_p, &me, me.name,
-                                      file, lineno);
-#else
-                      exit_one_client(NULL, target_p, &me, me.name);
-#endif
-                    }
-                }
-            }
         }
-
+    }
 #ifdef DUPFREEDEBUG
   exit_one_client(client_p, source_p, from, comment,
                   file, lineno);
@@ -1544,12 +1502,12 @@ int accept_message(struct Client *source, struct Client *target)
   dlink_node *ptr;
   struct Client *target_p;
 
-  for(ptr = target->allow_list.head; ptr; ptr = ptr->next )
-    {
-      target_p = ptr->data;
-      if(source == target_p)
-	return 1;
-    }
+  for(ptr = target->allow_list.head; ptr; ptr = ptr->next)
+  {
+    target_p = ptr->data;
+    if(source == target_p)
+    return 1;
+  }
   return 0;
 }
 
@@ -1703,7 +1661,7 @@ int change_local_nick(struct Client *client_p, struct Client *source_p,
 
   source_p->tsinfo = CurrentTime;
 
-  if( (source_p->localClient->last_nick_change +
+  if((source_p->localClient->last_nick_change +
        ConfigFileEntry.max_nick_time) < CurrentTime)
     source_p->localClient->number_of_nick_changes = 0;
   source_p->localClient->last_nick_change = CurrentTime;
