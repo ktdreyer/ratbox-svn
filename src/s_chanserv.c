@@ -649,7 +649,7 @@ e_chanserv_expireban(void *unused)
 		{
 			banreg_p = ptr->data;
 
-			if(banreg_p->hold > CURRENT_TIME)
+			if(!banreg_p->hold || banreg_p->hold > CURRENT_TIME)
 				continue;
 
 			loc_sqlite_exec(NULL, "DELETE FROM bans "
@@ -2575,7 +2575,7 @@ s_chan_addban(struct client *client_p, const char *parv[], int parc)
 
 	banreg_p = make_ban_reg(mreg_p->channel_reg, mask, reason, 
 			mreg_p->user_reg->name, level, 
-			CURRENT_TIME + (duration*60));
+			duration ? CURRENT_TIME + (duration*60) : 0);
 	write_ban_db_entry(banreg_p, mreg_p->channel_reg->name);
 
 	service_error(chanserv_p, client_p, "Ban %s on %s added",
@@ -2784,9 +2784,16 @@ s_chan_listbans(struct client *client_p, const char *parv[], int parc)
 	{
 		banreg_p = ptr->data;
 
-		service_error(chanserv_p, client_p, "  %s %d (%d min) [mod: %s] :%s",
+		if(banreg_p->hold)
+			service_error(chanserv_p, client_p, 
+				"  %s %d (%d min) [mod: %s] :%s",
 				banreg_p->mask, banreg_p->level,
 				(int) ((banreg_p->hold - CURRENT_TIME) / 60),
+				banreg_p->username, banreg_p->reason);
+		else
+			service_error(chanserv_p, client_p, 
+				"  %s %d (perm) [mod: %s] :%s",
+				banreg_p->mask, banreg_p->level,
 				banreg_p->username, banreg_p->reason);
 	}
 
