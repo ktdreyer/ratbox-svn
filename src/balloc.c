@@ -400,7 +400,7 @@ BlockHeapFree(BlockHeap * bh, void *ptr)
 #ifdef DEBUG_BALLOC
 	if(memblock->magic != BALLOC_MAGIC)
 	{
-		blockheap_fail("memblock->magic != BALLOC_MAGIC, got %lx", memblock->magic);
+		blockheap_fail("memblock->magic != BALLOC_MAGIC");
 		outofmemory();
 	}
 #endif
