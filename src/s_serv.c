@@ -348,10 +348,12 @@ finish:
 int check_server(const char *name, struct Client* cptr)
 {
   struct ConfItem *aconf;
-  int i = -1, h = 0;
+  int i = -1, hub = 0;
   assert(0 != cptr);
+
   if (!(cptr->localClient->passwd))
     return -2;
+
   for (aconf = ConfigItemList; aconf; aconf = aconf->next)
     {
      if (!(aconf->status & CONF_SERVER ||
@@ -366,10 +368,11 @@ int check_server(const char *name, struct Client* cptr)
      if (aconf->status & CONF_HUB || aconf->status & CONF_LEAF)
        {
         if (aconf->status & CONF_HUB)
-          h++;
+          hub = 1;
         attach_conf(cptr, aconf);
         continue;
        }
+
      i = -3;
      if (!(match(aconf->host, cptr->host) ||
          cptr->localClient->ip.s_addr == aconf->ipnum.s_addr))
@@ -384,15 +387,43 @@ int check_server(const char *name, struct Client* cptr)
 #endif
      break;
     }
+
   if (!aconf)
     return i;
+
   attach_conf(cptr, aconf);
-  if (!(aconf->flags & CONF_FLAGS_LAZY_LINK))
-    ClearCap(cptr, CAP_LL);
-  if (!h)
-    ClearCap(cptr, CAP_HUB);
+
+  if( !(aconf->flags & CONF_FLAGS_LAZY_LINK) )
+    ClearCap(cptr,CAP_LL);
+
+  if(ConfigFileEntry.hub)
+    {
+      if(IsCapable(cptr, CAP_LL))
+        {
+          if(hub || IsCapable(cptr, CAP_HUB))
+            {
+              ClearCap(cptr,CAP_LL);
+              sendto_realops_flags(FLAGS_ALL,
+		   "*** LazyLinks to a hub from a hub, thats a no-no.");
+            }
+          else
+            {
+              cptr->localClient->serverMask = nextFreeMask();
+
+              if(!cptr->localClient->serverMask)
+                {
+                  sendto_realops_flags(FLAGS_ALL,
+				       "serverMask is full!");
+                  /* try and negotiate a non LL connect */
+                  ClearCap(cptr,CAP_LL);
+                }
+            }
+       }
+    }
+
   if (aconf->ipnum.s_addr == INADDR_NONE)
     aconf->ipnum.s_addr = cptr->localClient->ip.s_addr;
+
   return 0;
 }
 
