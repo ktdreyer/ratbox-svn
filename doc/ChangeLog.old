@@ -1,3 +1,7 @@
+*** 20011112_1 by leeh
+- dont allow capab from registered servers - it breaks the capab mon code
+
+
 *** 20011111_10 by ejb
 - added help/ directory; added a few sample help files, this will need
   to be completed before release.
