@@ -75,6 +75,7 @@ int mo_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   int   doall, link_s[MAXCONNECTIONS], link_u[MAXCONNECTIONS];
   int   cnt = 0, wilds, dow;
   static time_t now;
+  dlink_node *ptr;
 
   if (parc > 2)
     if (hunt_server(cptr, sptr, ":%s TRACE %s :%s", 2, parc, parv))
@@ -176,20 +177,33 @@ int mo_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         {
           link_u[acptr->from->fd]++;
         }
-      else
-        {
-          if (IsServer(acptr))
-            {
-              link_s[acptr->from->fd]++;
-            }
-        }
+      else if (IsServer(acptr))
+	{
+	  link_s[acptr->from->fd]++;
+	}
      }
    }
   /* report all direct connections */
-  for (i = 0; i <= highest_fd; i++)
+  for ( i = 0, ptr = lclient_list.head; ptr; ptr = ptr->next)
     {
-      if (!(acptr = local[i])) /* Local Connection? */
+      acptr = ptr->data;
+
+      if (IsInvisible(acptr) && dow &&
+          !(MyConnect(sptr) && IsAnyOper(sptr)) &&
+          !IsAnyOper(acptr) && (acptr != sptr))
         continue;
+      if (!doall && wilds && !match(tname, acptr->name))
+        continue;
+      if (!dow && irccmp(tname, acptr->name))
+        continue;
+
+      cnt = report_this_status(sptr,acptr,dow,link_u[i],link_s[i]);
+    }
+
+  for ( i = 0, ptr = serv_list.head; ptr; ptr = ptr->next)
+    {
+      acptr = ptr->data;
+
       if (IsInvisible(acptr) && dow &&
           !(MyConnect(sptr) && IsAnyOper(sptr)) &&
           !IsAnyOper(acptr) && (acptr != sptr))
