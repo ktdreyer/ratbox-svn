@@ -399,6 +399,8 @@ static void apply_tkline(struct Client *sptr, struct ConfItem *aconf,
                        "%s added temporary %d min. K-Line for [%s@%s] [%s]",
                        sptr->name, tkline_time/60, aconf->user, aconf->host,
                        aconf->passwd);
+  sendto_one(sptr, ":%s NOTICE %s :Added temporary %d min. K-Line for [%s@%s]",
+             me.name, sptr->name, tkline_time/60, aconf->user, aconf->host);
   log(L_TRACE, "%s added temporary %d min. K-Line for [%s@%s] [%s]",
       sptr->name, tkline_time/60, aconf->user, aconf->host, aconf->passwd);
   check_klines();

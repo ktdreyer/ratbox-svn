@@ -2308,8 +2308,8 @@ void WriteKlineOrDline( KlineType type,
       sendto_realops_flags(FLAGS_ALL,
 			   "%s added K-Line for [%s@%s] [%s]",
 			   sptr->name, user, host, reason);
-      sendto_one(sptr, ":%s NOTICE %s :Added K-Line [%s@%s] to %s",
-		 me.name, sptr->name, user, host, filename);
+      sendto_one(sptr, ":%s NOTICE %s :Added K-Line [%s@%s]",
+		 me.name, sptr->name, user, host);
       log(L_TRACE, "%s added K-Line for [%s] [%s@%s]", 
 	  sptr->name, user, host, reason);
     }
