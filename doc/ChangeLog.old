@@ -1,3 +1,7 @@
+*** 20010708_3 by androsyn
+Forgot the msgtab stuff in modules.h for static builds..
+
+
 *** 20010708_2 by androsyn
 When adding new modules, you really need to update modules.c so that the
 having thoses modules compiled statically works right.
