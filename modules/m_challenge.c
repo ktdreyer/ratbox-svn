@@ -36,15 +36,16 @@
 #ifndef OPENSSL
 
 /* Maybe this should be an error or something? -davidt */
+
 void
 _modinit(void)
 {
   return;
 }
 
-#else
-
 char *_version = "20001122";
+
+#else
 
 /* We have openssl support, so include /CHALLENGE */
 struct Message challenge_msgtab = {
