@@ -297,7 +297,7 @@ inet_ntop4(const unsigned char *src, char *dst, unsigned int size)
 {
 	if(size < 16)
 		return NULL;
-	return strcpy(dst, inetntoa(src));
+	return strcpy(dst, inetntoa((const char *)src));
 }
 
 /* const char *

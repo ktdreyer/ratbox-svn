@@ -76,7 +76,7 @@ $ WRITE FILE ""
 $ WRITE FILE "char *generation = """, GENERATION, """;
 $ WRITE FILE "char *creation = """, CREATION_DATE, """;
 $ WRITE FILE "char *platform = ""OpenVMS ",NODE_NAME," ",VERSION_NUMBER,HARDWARE_TYPE,""";
-$ WRITE FILE "char *version = PATCHLEVEL;
+$ WRITE FILE "char *ircd_version = PATCHLEVEL;
 $ WRITE FILE "char *serno = SERIALNUM;
 $ WRITE FILE ""
 $ WRITE FILE "char *infotext[] ="

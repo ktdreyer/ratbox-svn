@@ -92,6 +92,7 @@ int inetpton(int af, const char *src, void *dst);
 char* strncpy_irc(char* s1, const char* s2, size_t n);
 #define strncpy_irc(x, y, z) ((char *)memcpy(x, y, z))
 #else
+#ifndef VMS
 extern inline char* strncpy_irc(char* s1, const char* s2, size_t n)
 {
 	register char* endp = s1 + n;
@@ -100,6 +101,9 @@ extern inline char* strncpy_irc(char* s1, const char* s2, size_t n)
 		; 
 	return s1;
 }
+#else
+char *strncpy_irc(char *s1, const char *s2, size_t n);
+#endif
 #endif /* #ifdef __GNUC__ */
 
 
