@@ -382,12 +382,28 @@ set_local_gline(const char *oper_nick, const char *oper_user,
 	char buffer[IRCD_BUFSIZE];
 	struct ConfItem *aconf;
 	const char *current_date;
+	char *my_reason;
+	char *oper_reason;
 
 	current_date = smalldate();
+
+	my_reason = LOCAL_COPY(reason);
 
 	aconf = make_conf();
 	aconf->status = CONF_GLINE;
 	aconf->flags |= CONF_FLAGS_TEMPORARY;
+
+	if(strlen(my_reason) > REASONLEN)
+		my_reason[REASONLEN-1] = '\0';
+
+	if((oper_reason = strchr(my_reason, '|')) != NULL)
+	{
+		*oper_reason = '\0';
+		oper_reason++;
+
+		if(!EmptyString(oper_reason))
+			DupString(aconf->spasswd, oper_reason);
+	}
 
 	snprintf(buffer, sizeof(buffer), "%s (%s)", reason, current_date);
 

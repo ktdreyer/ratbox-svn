@@ -539,7 +539,8 @@ stats_glines (struct Client *source_p)
 				    kill_ptr->host ? kill_ptr->host : "*",
 				    kill_ptr->user ? kill_ptr->user : "*",
 				    kill_ptr->passwd ? kill_ptr->passwd : "No Reason",
-				    "", "");
+				    kill_ptr->spasswd ? "|" : "",
+				    kill_ptr->spasswd ? kill_ptr->spasswd : "");
 		}
 	}
 	else
