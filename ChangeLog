@@ -1,3 +1,15 @@
+androsyn    2002/11/28 22:27:13 UTC	(20021128_7)
+
+  Modified files:
+    modules              m_rehash.c 
+  Log:
+  Reworked REHASH to use a table, instead of the maze of if()'s
+  
+  Revision  Changes    Path
+  1.51      +143 -103  ircd-ratbox/modules/m_rehash.c
+
+
+
 androsyn    2002/11/28 21:13:02 UTC	(20021128_6)
 
   Modified files:
