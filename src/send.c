@@ -1055,7 +1055,7 @@ sendto_match_cap_servs(struct Channel *chptr, struct Client *source_p,
   struct Client *from;
   dlink_node *ptr;
   
-  from = source_p->from;
+  from = source_p ? source_p->from : NULL;
   if (chptr)
     {
       if (*chptr->chname == '&')
@@ -1075,17 +1075,13 @@ sendto_match_cap_servs(struct Channel *chptr, struct Client *source_p,
       
       if(!IsCapable(client_p, cap))
         continue;
-
       if (ServerInfo.hub && IsCapable(client_p,CAP_LL))
         {
           if( !(RootChan(chptr)->lazyLinkChannelExists &
                 client_p->localClient->serverMask) )
             continue;
-          if (!(source_p->lazyLinkClientExists &
-                client_p->localClient->serverMask))
-           continue;
         }
-      
+      client_burst_if_needed(client_p, source_p);
       send_message (client_p, (char *)sendbuf, len);
     }
 } /* sendto_match_cap_servs() */
@@ -1094,25 +1090,27 @@ sendto_match_cap_servs(struct Channel *chptr, struct Client *source_p,
 
 /* eww. */
 void
-sendto_match_vacap_servs(struct Channel *chptr, struct Client *from, ...)
+sendto_match_vacap_servs(struct Channel *chptr, struct Client *source_p,
+                         ...)
 {
 	va_list args;
 	int len;
 	char sendbuf[IRCD_BUFSIZE*2];
-	struct Client *client_p;
+	struct Client *client_p, *from;
 	dlink_node *ptr;
 	char *pattern;
 	int caps[MAX_CAPS];
 	int ncaps;
 	int cap;
 	
+	from = source_p ? source_p->from : NULL;
 	if (chptr)
 	{
 		if (*chptr->chname == '&')
 			return;
 	}
 	
-	va_start(args, from);
+	va_start(args, source_p);
 	
 	/* at this point, we have a list of CAPs followed by a terminating 0 */
 	for (ncaps = 0; (cap = va_arg(args, int)); ncaps++)
@@ -1162,6 +1160,7 @@ sendto_match_vacap_servs(struct Channel *chptr, struct Client *from, ...)
 				  client_p->localClient->serverMask))
 				continue;
 		}
+       client_burst_if_needed(client_p, source_p);
 		
 		send_message(client_p, sendbuf, len);
 	}
@@ -1191,7 +1190,7 @@ sendto_match_cap_servs_nocap(struct Channel *chptr, struct Client *source_p,
   struct Client *client_p, *from;
   dlink_node *ptr;
 
-  from = source_p->from;
+  from = source_p ? source_p->from : NULL;
   if (chptr)
     {
       if (*chptr->chname == '&')
@@ -1211,31 +1210,28 @@ sendto_match_cap_servs_nocap(struct Channel *chptr, struct Client *source_p,
       
       if(!IsCapable(client_p, cap) || IsCapable(client_p, nocap))
         continue;
-
       if (ServerInfo.hub && IsCapable(client_p,CAP_LL))
         {
           if( !(RootChan(chptr)->lazyLinkChannelExists &
                 client_p->localClient->serverMask) )
             continue;
-          if (!(source_p->lazyLinkClientExists &
-                client_p->localClient->serverMask))
-           continue;
         }
-      
+      client_burst_if_needed(client_p, source_p);
       send_message (client_p, (char *)sendbuf, len);
     }
 } /* sendto_match_cap_servs() */
 
 void
-sendto_match_nocap_servs(struct Channel *chptr, struct Client *from, int cap,
+sendto_match_nocap_servs(struct Channel *chptr, struct Client *source_p, int cap,
                          const char *pattern, ...)
 {
   int len;
   va_list args;
   char sendbuf[IRCD_BUFSIZE*2];
-  struct Client *client_p;
+  struct Client *client_p, *from;
   dlink_node *ptr;
 
+  from = source_p ? source_p->from : NULL;
   if (chptr)
     {
       if (*chptr->chname == '&')
@@ -1262,7 +1258,7 @@ sendto_match_nocap_servs(struct Channel *chptr, struct Client *from, int cap,
                 client_p->localClient->serverMask) )
             continue;
         }
-      
+      client_burst_if_needed(client_p, source_p);
       send_message (client_p, (char *)sendbuf, len);
     }
 } /* sendto_match_cap_servs() */
