@@ -1,3 +1,17 @@
+*** 20001222_10 by db
+- ok. attach_cn_lines() was just plain wrong.
+  The code was matching on hostname(ip) instead of servername
+  One needs to look up by servername, then check if the hostname/ip matches..
+  This explains why I had problem with multi servers on same host but different
+  names.
+
+  I think I got this right... but I am NOT sure if it works for hostmasked
+  servers properly. that has to be verified asap. Might need a match()
+  in the code.. 
+
+
+
+
 *** 20001222_9 by wcampbel
 1. Cleaned up a comment and trailing blank lines from m_oper.c
 2. Added an md5 based mkpasswd.c, which works on FreeBSD 3.x/4.x and Linux
