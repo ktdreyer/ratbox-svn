@@ -1,3 +1,18 @@
+leeh        2003/12/11 10:05:56 EST	(20031211_2)
+
+  Modified files:
+    src                  command.c rserv.c s_alis.c 
+  Log:
+  - implemented ALIS -skip to skip first n matches
+  - implemented ALIS -topic to search for topics
+  
+  Revision  Changes    Path
+  1.4       +1 -1      rserv/src/command.c
+  1.4       +1 -2      rserv/src/rserv.c
+  1.5       +69 -3     rserv/src/s_alis.c
+
+
+
 leeh        2003/12/11 09:13:46 EST	(20031211_1)
 
   Modified files:
