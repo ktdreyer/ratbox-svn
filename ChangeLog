@@ -1,3 +1,32 @@
+leeh        2004/11/24 20:26:09 EST	(20041125_0)
+
+  Modified files:
+    help/main            u-flags 
+    include              io.h service.h 
+    src                  rserv.c s_alis.c s_chanserv.c 
+                         s_jupeserv.c s_operbot.c s_userserv.c 
+                         service.c ucommand.c 
+  Log:
+  - fix rebuild_params() not adding spaces
+  - added a generic spying flag to the service handlers, which will send a
+    notice to the users with that flag in dcc when the command is used.
+  - implement command spying for register, oper jupes and alis
+  
+  Revision  Changes    Path
+  1.3       +3 -0      rserv/help/main/u-flags
+  1.16      +5 -1      rserv/include/io.h
+  1.17      +1 -0      rserv/include/service.h
+  1.38      +2 -0      rserv/src/rserv.c
+  1.26      +2 -2      rserv/src/s_alis.c
+  1.24      +24 -24    rserv/src/s_chanserv.c
+  1.17      +8 -8      rserv/src/s_jupeserv.c
+  1.18      +5 -5      rserv/src/s_operbot.c
+  1.19      +16 -10    rserv/src/s_userserv.c
+  1.32      +7 -0      rserv/src/service.c
+  1.19      +9 -0      rserv/src/ucommand.c
+
+
+
 leeh        2004/11/24 16:24:54 EST	(20041124_2)
 
   Modified files:
