@@ -50,6 +50,8 @@
 #include "linebuf.h"
 #include "parse.h"
 #include "modules.h"
+#include "hook.h"
+
 #include <string.h>
 
 static int m_stats(struct Client*, struct Client*, int, char**);
@@ -315,14 +317,7 @@ static void do_non_priv_stats(struct Client *sptr, char *name, char *target,
     case 'p' :
       if (GlobalSetOptions.hide_server)
         {
-           if (ConfigFileEntry.stats_p_notice)
-             {
-               stats_p_spy(sptr);
-             }
-           else
-             {
                stats_spy(sptr,statchar);
-             }
            /* Should we send a notice to the user saying we have paged the
            ** opers?  Also, should we ALWAYS stats_p_spy even if neither
            ** stats_p_spy or stats_spy is on...Otherwise...no one will
@@ -331,14 +326,7 @@ static void do_non_priv_stats(struct Client *sptr, char *name, char *target,
         }
       else
         {
-          if (ConfigFileEntry.stats_p_notice)
-            {
-              stats_p_spy(sptr);
-            }
-          else
-            {
-              stats_spy(sptr,statchar);
-            }
+			stats_spy(sptr,statchar);
           show_opers(sptr);
         }
       break;
@@ -474,14 +462,7 @@ static void do_priv_stats(struct Client *sptr, char *name, char *target,
       break;
 
     case 'p' :
-      if (ConfigFileEntry.stats_p_notice)
-	{
-	  stats_p_spy(sptr);
-	}
-      else
-	{
-          stats_spy(sptr,statchar);
-	}
+		stats_spy(sptr,statchar);
       show_opers(sptr);
       break;
 
@@ -627,16 +608,13 @@ static void stats_L_list(struct Client *sptr,char *name, int doall, int wilds,
  */
 static void stats_spy(struct Client *sptr,char statchar)
 {
-  if (ConfigFileEntry.stats_notice)
-    {
-      sendto_realops_flags(FLAGS_SPY,
-			   "STATS %c requested by %s (%s@%s) [%s]",
-			   statchar,
-			   sptr->name,
-			   sptr->username,
-			   sptr->host,
-			   sptr->user->server );
-    }
+	struct hook_stats_data data;
+	
+	data.sptr = sptr;
+	data.statchar = statchar;
+	data.name = NULL;
+	
+	hook_call_event("doing_stats", &data);
 }
 
 /* 
@@ -673,22 +651,6 @@ static void stats_L_spy(struct Client *sptr, char statchar, char *name)
 			     sptr->user->server);
 	
     }
-}
-
-/* 
- * stats_p_spy
- * 
- * inputs	- pointer to sptr, client doing stats p
- * output	- NONE
- * side effects	- a notice is sent to opers, IF spy mode is configured
- * 		  in the conf file.
- */
-static void stats_p_spy(struct Client *sptr)
-{
-  sendto_realops_flags(FLAGS_SPY,
-		       "STATS p requested by %s (%s@%s) [%s]",
-		       sptr->name, sptr->username, sptr->host,
-		       sptr->user->server);
 }
 
 /*

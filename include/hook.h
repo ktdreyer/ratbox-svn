@@ -24,6 +24,13 @@ struct hook_mfunc_data
 	char **parv;
 };
 
+struct hook_stats_data 
+{
+	struct Client *sptr;
+	char statchar;
+	char *name;
+};
+
 int hook_add_event(char *);
 int hook_add_hook(char *, hookfn *);
 int hook_call_event(char *, void *);
