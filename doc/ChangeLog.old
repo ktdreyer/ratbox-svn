@@ -1,3 +1,8 @@
+*** 20001225_14 by ejb
+- split out some of parse() into a couple of new functions,
+  handle_command() and string_to_array().
+
+
 *** 20001225_13 by toot
 . don't want it to say its listing pending_glines if there aren't any
 . param counts should al be correct now
