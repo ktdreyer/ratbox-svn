@@ -1,3 +1,8 @@
+*** 20001226_8 by db
+- missing DupString() on cconf classname
+
+
+
 *** 20001226_7 by bill
 
 - fixed typos
