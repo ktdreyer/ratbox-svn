@@ -1,3 +1,9 @@
+*** 20010524_6 by davidt
+- Fix buffer overflow in s_serv.c setting fd_note stuff
+- Tidy up servlink code more in an attempt to find the weird and
+  evil bug which is in there somewhere...
+
+
 *** 20010524_5 by kreator
 - fix self-referencing in README.FIRST :-)
 
