@@ -56,11 +56,14 @@
 
 int lineno=1;
 char linebuf[IRCD_BUFSIZE];
+char conffilebuf[IRCD_BUFSIZE];
 int include_stack_ptr=0;
 YY_BUFFER_STATE include_stack[MAX_INCLUDE_DEPTH];
 int lineno_stack[MAX_INCLUDE_DEPTH];
 FBFILE* inc_fbfile_in[MAX_INCLUDE_DEPTH];
+char conffile_stack[MAX_INCLUDE_DEPTH][IRCD_BUFSIZE];
 void ccomment(void);
+void hashcomment(void);
 void cinclude(void);
 int ieof(void);
 %}
@@ -78,7 +81,7 @@ include   \.include{ws}(\<.*\>|\".*\")
 \n.*	        { strcpy(linebuf, yytext+1); lineno++; yyless(1); }
 
 {ws}            ;
-{comment}       ;
+{comment}       { hashcomment(); }
 
 {digit}+        { yylval.number = atoi(yytext); return NUMBER; }
 
@@ -360,6 +363,17 @@ void ccomment(void)
   }
 }
 
+/* #-comment style, look for #include */
+#define INCLUDE "#include"
+void hashcomment(void) 
+{
+  if (strlen(yytext) < strlen(INCLUDE))
+    return;
+
+  if ( !strncasecmp(yytext, INCLUDE, strlen(INCLUDE)) ) 
+      yyerror("You probably meant '.include', skipping");
+}
+
 /* C-style .includes. This function will properly swap input conf buffers,
  * and lineno -kre */
 void cinclude(void)
@@ -395,8 +409,10 @@ void cinclude(void)
     lineno_stack[include_stack_ptr] = lineno;
     lineno = 1;
     inc_fbfile_in[include_stack_ptr] = conf_fbfile_in;
+    strlcpy(conffile_stack[include_stack_ptr], conffilebuf, IRCD_BUFSIZE);
     include_stack[include_stack_ptr++] = YY_CURRENT_BUFFER;
     conf_fbfile_in = tmp_fbfile_in;
+    sprintf(conffilebuf, "%s", c);
     yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
   }
 }
@@ -423,6 +439,7 @@ int ieof(void)
   yy_delete_buffer(YY_CURRENT_BUFFER);
   lineno = lineno_stack[include_stack_ptr];
   conf_fbfile_in = inc_fbfile_in[include_stack_ptr];
+  strlcpy(conffilebuf, conffile_stack[include_stack_ptr], IRCD_BUFSIZE); 
   yy_switch_to_buffer(include_stack[include_stack_ptr]);
   return 0;
 }
