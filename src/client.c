@@ -202,7 +202,6 @@ void _free_client(struct Client* client_p)
 
       if (client_p->localClient->fd >= 0)
 	fd_close(client_p->localClient->fd);
-
 #ifndef NDEBUG
       mem_frob(client_p->localClient, sizeof(struct LocalUser));
 #endif
@@ -1095,6 +1094,7 @@ static void exit_one_client(struct Client *client_p,
 #endif
   /* add to dead client dlist */
   lp = make_dlink_node();
+  SetDead(source_p);
   dlinkAdd(source_p, lp, &dead_list);
 }
 
