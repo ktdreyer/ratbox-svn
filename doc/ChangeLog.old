@@ -1,3 +1,9 @@
+*** 20010105_32 by db
+- This finally fixes host server masks.. though the match loop in here
+  probably should move into s_conf.c
+
+
+
 *** 20010105_31 by wcampbel
 Updated .depend's WITHOUT -DOPENSSL
 
