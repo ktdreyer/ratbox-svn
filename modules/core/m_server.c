@@ -307,7 +307,8 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
        * we propagate to). -A1kmm */
       if (irccmp(target_p->name, name) && target_p->from==client_p)
         return;
-      
+
+#if 0
       if(client_p->firsttime > target_p->from->firsttime)
       {
         sendto_one(client_p, "ERROR :Server %s already exists", name);
@@ -323,6 +324,7 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
 	return;
       }
       else
+#endif
       {
         sendto_one(target_p->from, "ERROR :Server %s already exists", name);
         sendto_realops_flags(FLAGS_ALL, L_ADMIN,
@@ -452,15 +454,19 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
     {
       /* OOOPs nope can't HUB this leaf */
       sendto_realops_flags(FLAGS_ALL, L_ADMIN,
-            "link %s introduced leafed %s.",
+            "Link %s introduced leafed server %s.",
 	    get_client_name(client_p, HIDE_IP), name);
       sendto_realops_flags(FLAGS_ALL, L_OPER, 
-            "link %s introduced leafed %s.",
-            get_client_name(client_p, MASK_IP), name);
+            "Link %s introduced leafed server %s.",
+            client_p->name, name);
       /* If it is new, we are probably misconfigured, so split the
        * non-hub server introducing this. Otherwise, split the new
        * server. -A1kmm.
        */
+      /* wastes too much bandwidth, generates too many errors on
+       * larger networks, dont bother. --fl_
+       */
+#if 0
       if ((CurrentTime - source_p->firsttime) < 20)
         {
           exit_client(NULL, source_p, &me, "Leafed Server.");
@@ -472,7 +478,12 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
                      me.name, name);
           return;
         }
+#endif
+
+      exit_client(NULL, client_p, &me, "Leafed Server.");
+      return;
     }
+  
 
   target_p = make_client(client_p);
   make_server(target_p);
