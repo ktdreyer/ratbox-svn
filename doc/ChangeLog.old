@@ -1,3 +1,9 @@
+*** 20001214_9 by db
+- missing show_opers in m_stats.c found by Walter Campbell
+- duplicate end of stats in gline pointed out by toot
+
+
+
 *** 20001214_8 by toot
 undid accidental config.h change :P
 
