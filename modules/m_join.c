@@ -146,7 +146,7 @@ static void m_join(struct Client *client_p,
 	  continue;
 	}
 	
-      if(find_resv(name, RESV_CHANNEL))
+      if(find_channel_resv(name))
       {
         sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
 	           me.name, source_p->name, name);

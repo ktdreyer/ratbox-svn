@@ -49,6 +49,9 @@ _moddeinit(void)
 char *_version = "20010626";
 #endif
 
+#define RESV_CHANNEL 0
+#define RESV_NICK 1
+
 /*
  * mo_resv()
  *      parv[0] = sender prefix
@@ -58,58 +61,68 @@ char *_version = "20010626";
 static void mo_resv(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
-  struct Resv *resv_p;
-  char ctype[BUFSIZE];
-  int type;
-
   if(BadPtr(parv[1]))
     return;
 
-  /* someone is creating a resv on a channel */
   if(IsChannelName(parv[1]))
   {
-    type = RESV_CHANNEL;
-    ircsprintf(ctype, "channel");
-  }
-  
-  /* someone is creating a resv on a nick */
-  else if(clean_nick_name(parv[1]))
-  {
-    type = RESV_NICK;
-    ircsprintf(ctype, "nick");
-  }
-  
-  /* neither of the above, tell them */
-  else
-  {
-    sendto_one(source_p, ":%s NOTICE %s :You have specified an invalid resv: [%s]",
-               me.name, source_p->name, parv[1]);
-    return;
-  }
+    struct ResvChannel *resv_p;
     
-  /* create_resv() makes the resv, and adds it to the hash table */
-  resv_p = create_resv(parv[1], parv[2], type, 0);
+    resv_p = create_channel_resv(parv[1], parv[2], 0);
   
-  /* create_resv() returns NULL if the resv already exists.. */
-  if(!(resv_p))
-  {
+    if(!(resv_p))
+    {
+      sendto_one(source_p,
+                 ":%s NOTICE %s :A RESV has already been placed on channel: %s",
+                 me.name, source_p->name, parv[1]);
+      return;
+    }
+    
     sendto_one(source_p,
-               ":%s NOTICE %s :A RESV has already been placed on %s: %s",
-               me.name, source_p->name, ctype, parv[1]);
-    return;
+               ":%s NOTICE %s :A local RESV has been placed on channel: %s [%s]",
+               me.name, source_p->name, resv_p->name, resv_p->reason);
+	       
+    sendto_realops_flags(FLAGS_ALL,
+                         "%s has placed a local RESV on channel: %s [%s]",
+             	         get_oper_name(source_p),
+		         resv_p->name, resv_p->reason);
   }
-    
-  /* it doesnt exist.. it returns resv_p which contains our info */
-  sendto_one(source_p,
-             ":%s NOTICE %s :A local RESV has been placed on %s: %s [%s]",
-             me.name, source_p->name, ctype,
-             resv_p->name, resv_p->reason);
+  else if(clean_resv_nick(parv[1]))
+  {
+    struct ResvNick *resv_p;
 
-  sendto_realops_flags(FLAGS_ALL,
-                       "%s has placed a local RESV on %s: %s [%s]",
-         	       get_oper_name(source_p), ctype, 
-		       resv_p->name, resv_p->reason);
-             
+    if((strchr(parv[1], '*') || strchr(parv[1], '?')) && !IsAdmin(source_p))
+    {
+      sendto_one(source_p,
+                 ":%s NOTICE %s :You must be an admin to perform a wildcard RESV",
+		 me.name, source_p->name);
+      return;
+    }
+
+    resv_p = create_nick_resv(parv[1], parv[2], 0);
+
+    if(!(resv_p))
+    {
+      sendto_one(source_p,
+                 ":%s NOTICE %s :A RESV has already been placed on nick: %s",
+		 me.name, source_p->name, parv[1]);
+      return;
+    }
+
+    sendto_one(source_p,
+               ":%s NOTICE %s :A local RESV has been placed on nick: %s [%s]",
+	       me.name, source_p->name,
+	       resv_p->name, resv_p->reason);
+
+    sendto_realops_flags(FLAGS_ALL,
+                         "%s has placed a local RESV on nick: %s [%s]",
+			 get_oper_name(source_p),
+			 resv_p->name, resv_p->reason);
+  }			 
+  else
+    sendto_one(source_p, 
+              ":%s NOTICE %s :You have specified an invalid resv: [%s]",
+	      me.name, source_p->name, parv[1]);
 }
 
 /*
@@ -121,50 +134,72 @@ static void mo_resv(struct Client *client_p, struct Client *source_p,
 static void mo_unresv(struct Client *client_p, struct Client *source_p,
                       int parc, char *parv[])
 {
-  struct Resv *resv_p;
-  char ctype[BUFSIZE];
-  int type;
-
   if(IsChannelName(parv[1]))
   {
-    type = RESV_CHANNEL;
-    ircsprintf(ctype, "channel");
-  }
-  else if(clean_nick_name(parv[1]))
-  {
-    type = RESV_NICK;
-    ircsprintf(ctype, "nick");
-  }
-  else
-    return;
-						
-  /* if theres no list of resv's, or we cant find the resv.. tell them */						
-  if(!ResvList || !(resv_p = (struct Resv *)hash_find_resv(parv[1], (struct Resv *)NULL, type)))
-  {
-    sendto_one(source_p, 
-               ":%s NOTICE %s :A RESV does not exist for %s: %s",
-	       me.name, source_p->name, ctype, parv[1]);
-    return;
-  }
-  /* if resv_p->conf, then it was added from ircd.conf, so we cant remove it.. */
-  else if(resv_p->conf)
-  {
-    sendto_one(source_p,
-       ":%s NOTICE %s :The RESV for %s: %s is in the config file and must be removed by hand.",
-               me.name, source_p->name, ctype, parv[1]);
-    return;	       
-  }
-  /* otherwise, delete it */
-  else
-  {
-    delete_resv(resv_p);
+    struct ResvChannel *resv_p;
+    
+    if(!ResvChannelList || 
+    !(resv_p = (struct ResvChannel *)hash_find_resv(parv[1], (struct ResvChannel *)NULL)))
+    {
+      sendto_one(source_p, 
+                 ":%s NOTICE %s :A RESV does not exist for channel: %s",
+	         me.name, source_p->name, parv[1]);
+      return;
+    }
+  
+    else if(resv_p->conf)
+    {
+      sendto_one(source_p,
+         ":%s NOTICE %s :The RESV for channel: %s is in the config file and must be removed by hand.",
+                 me.name, source_p->name, parv[1]);
+      return;	       
+    }
+    /* otherwise, delete it */
+    else
+    {
+      delete_channel_resv(resv_p);
 
-    sendto_one(source_p,
-               ":%s NOTICE %s :The local RESV has been removed on %s: %s",
-	       me.name, source_p->name, ctype, parv[1]);
-    sendto_realops_flags(FLAGS_ALL,
-                         "%s has removed the local RESV for %s: %s",
-			 get_oper_name(source_p), ctype, parv[1]);
+      sendto_one(source_p,
+                 ":%s NOTICE %s :The local RESV has been removed on channel: %s",
+  	         me.name, source_p->name, parv[1]);
+		 
+      sendto_realops_flags(FLAGS_ALL,
+                           "%s has removed the local RESV for channel: %s",
+	  		   get_oper_name(source_p), parv[1]);
 	      
+    }
+  }
+  else if(clean_resv_nick(parv[1]))
+  {
+    struct ResvNick *resv_p;
+
+    if(!ResvNickList || !(resv_p = return_nick_resv(parv[1])))
+    {
+      sendto_one(source_p,
+                 ":%s NOTICE %s :A RESV does not exist for nick: %s",
+		 me.name, source_p->name, parv[1]);
+      return;
+    }
+
+    else if(resv_p->conf)
+    {
+      sendto_one(source_p,
+         ":%s NOTICE %s :The RESV for nick: %s is in the config file and must be removed by hand.",
+	         me.name, source_p->name, parv[1]);
+      return;
+    }
+
+    else
+    {
+      delete_nick_resv(resv_p);
+
+      sendto_one(source_p,
+                 ":%s NOTICE %s :The local RESV has been removed on nick: %s",
+		 me.name, source_p->name, parv[1]);
+
+      sendto_realops_flags(FLAGS_ALL,
+                           "%s has removed the local RESV for nick: %s",
+			   get_oper_name(source_p), parv[1]);
+    }
   }
 }

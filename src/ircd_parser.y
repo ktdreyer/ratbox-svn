@@ -1257,9 +1257,9 @@ resv_channel:	CHANNEL '=' QSTRING ';'
   if(IsChannelName(yylval.string))
   {
     if(resv_reason)
-      create_resv(yylval.string, resv_reason, RESV_CHANNEL, 1);
+      create_channel_resv(yylval.string, resv_reason, 1);
     else
-      create_resv(yylval.string, "No Reason", RESV_CHANNEL, 1);
+      create_channel_resv(yylval.string, "No Reason", 1);
   }
   /* ignore it for now.. but we really should make a warning if
    * its an erroneous name --fl_ */
@@ -1267,12 +1267,12 @@ resv_channel:	CHANNEL '=' QSTRING ';'
 
 resv_nick:	NICK '=' QSTRING ';'
 {
-  if(clean_nick_name(yylval.string))
+  if(clean_resv_nick(yylval.string))
   {
     if(resv_reason)
-      create_resv(yylval.string, resv_reason, RESV_NICK, 1);
+      create_nick_resv(yylval.string, resv_reason, 1);
     else
-      create_resv(yylval.string, "No Reason", RESV_NICK, 1);
+      create_nick_resv(yylval.string, "No Reason", 1);
   }
 
   /* otherwise its erroneous, but ignore it for now */

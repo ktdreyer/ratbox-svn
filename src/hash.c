@@ -52,7 +52,6 @@
  * Contributed by James L. Davis
  */
 
-static unsigned int hash_nick_name(const char* name);
 static unsigned int hash_channel_name(const char* name);
 
 #ifdef  DEBUGMODE
@@ -178,23 +177,6 @@ int hash_channel_name(const char* name)
   return (h & (CH_MAX - 1));
 }
 
-/*
- * hash_resv_nick()
- *
- * calculate a hash value of a nickname
- */
-static unsigned
-int hash_resv_nick(const char *name)
-{
-  unsigned int h = 0;
-
-  while (*name)
-  {
-    h = (h << 4) - (h + (unsigned char)ToLower(*name++));
-  }
-
-  return (h & (R_MAX - 1));
-}
 
 /*
  * hash_resv_channel()
@@ -333,19 +315,16 @@ void add_to_channel_hash_table(const char* name, struct Channel* chptr)
 /*
  * add_to_resv_hash_table
  */
-void add_to_resv_hash_table(const char *name, struct Resv *rptr)
+void add_to_resv_hash_table(const char *name, struct ResvChannel *resv_p)
 {
   unsigned int hashv;
   assert(0 != name);
-  assert(0 != rptr);
+  assert(0 != resv_p);
 
-  if(rptr->type == RESV_CHANNEL)
-    hashv = hash_resv_channel(name);
-  else if(rptr->type == RESV_NICK)
-    hashv = hash_resv_nick(name);
+  hashv = hash_resv_channel(name);
 
-  rptr->hnext = (struct Resv*) resvTable[hashv].list;
-  resvTable[hashv].list = (void*)rptr;
+  resv_p->hnext = (struct ResvChannel *) resvTable[hashv].list;
+  resvTable[hashv].list = (void*)resv_p;
   ++resvTable[hashv].links;
   ++resvTable[hashv].hits;
 }
@@ -464,23 +443,18 @@ void del_from_channel_hash_table(const char* name, struct Channel* chptr)
 /*
  * del_from_resv_hash_table()
  */
-void del_from_resv_hash_table(const char *name, struct Resv *rptr, int type)
+void del_from_resv_hash_table(const char *name, struct ResvChannel *rptr)
 {
-  struct Resv *tmp;
-  struct Resv *prev=NULL;
+  struct ResvChannel *tmp;
+  struct ResvChannel *prev=NULL;
   unsigned int hashv;
 
   assert(name != 0);
   assert(rptr != 0);
 
-  if(type == RESV_NICK)
-    hashv = hash_resv_nick(name);
-  else if(type == RESV_CHANNEL)
-    hashv = hash_resv_channel(name);
-  else
-    return;
+  hashv = hash_resv_channel(name);
 
-  tmp = (struct Resv*) resvTable[hashv].list;
+  tmp = (struct ResvChannel *) resvTable[hashv].list;
 
   for( ; tmp; tmp = tmp->hnext)
   {
@@ -683,23 +657,20 @@ struct Channel* hash_find_channel(const char* name, struct Channel* chptr)
 /*
  * hash_find_resv()
  */
-struct Resv *hash_find_resv(const char *name, struct Resv *rptr, int type)
+struct ResvChannel *hash_find_resv(const char *name, struct ResvChannel *rptr)
 {
-  struct Resv *tmp;
+  struct ResvChannel *tmp;
   unsigned int hashv;
 
   assert(name != 0);
   
-  if(type == RESV_CHANNEL)
-    hashv = hash_resv_channel(name);
-  else if(type == RESV_NICK)
-    hashv = hash_resv_nick(name);
+  hashv = hash_resv_channel(name);
 
-  tmp= (struct Resv*) resvTable[hashv].list;
+  tmp= (struct ResvChannel *) resvTable[hashv].list;
 
   for( ; tmp; tmp = tmp->hnext)
   {
-    if(!irccmp(name, tmp->name) && (tmp->type == type))
+    if(!irccmp(name, tmp->name))
     {
 #ifdef DEBUGMODE
       ++rhits;
