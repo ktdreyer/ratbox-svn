@@ -1,3 +1,15 @@
+androsyn    2004/02/12 13:49:58 EST	(20040212_0)
+
+  Modified files:
+    src                  adns.c 
+  Log:
+  Updated the global system failure code for adns
+  
+  Revision  Changes    Path
+  7.68      +9 -6      ircd-ratbox/src/adns.c
+
+
+
 androsyn    2004/02/08 11:22:23 EST	(20040208_0)
 
   Modified files:
