@@ -94,7 +94,7 @@ int already_placed_kline(struct Client *sptr, char *user, char *host,
 
 int is_ip_kline(char *host,unsigned long *ip, unsigned long *ip_mask);
 void apply_kline(struct Client *sptr, struct ConfItem *aconf,
-		 const char *current_date,
+		 const char *reason, const char *current_date,
 		 int ip_kline, unsigned long ip, unsigned long ip_mask);
 
 void apply_tkline(struct Client *sptr, struct ConfItem *aconf,
@@ -237,7 +237,7 @@ int mo_kline(struct Client *cptr,
 		 current_date);
       DupString(aconf->passwd, buffer );
 
-      apply_kline(sptr, aconf, current_date, ip_kline, ip, ip_mask);
+      apply_kline(sptr, aconf, reason, current_date, ip_kline, ip, ip_mask);
     }
 
   if(target_server != NULL)
@@ -314,7 +314,7 @@ int ms_kline(struct Client *cptr,
       if(tkline_time)
 	apply_tkline(rcptr, aconf, current_date, tkline_time, 0, 0, 0);
       else
-	apply_kline(rcptr, aconf, current_date, 0, 0, 0);	
+	apply_kline(rcptr, aconf, aconf->passwd, current_date, 0, 0, 0);	
     }
 
   return 0;
@@ -329,7 +329,7 @@ int ms_kline(struct Client *cptr,
  *		  and conf file
  */
 void apply_kline(struct Client *sptr, struct ConfItem *aconf,
-		 const char *current_date,
+                 const char *reason, const char *current_date,
 		 int ip_kline, unsigned long ip, unsigned long ip_mask)
 {
   if(ip_kline)
@@ -345,7 +345,7 @@ void apply_kline(struct Client *sptr, struct ConfItem *aconf,
 		     sptr,
 		     aconf->user,
 		     aconf->host,
-		     aconf->passwd,
+		     reason,
 		     current_date);
 
   /* Now, activate kline against current online clients */

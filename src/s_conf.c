@@ -2594,7 +2594,7 @@ void WriteKlineOrDline( KlineType type,
 			struct Client *sptr,
 			char *user,
 			char *host,
-			char *reason,
+			const char *reason,
 			const char *current_date)
 {
   char buffer[1024];
