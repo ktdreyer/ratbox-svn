@@ -1,3 +1,6 @@
+*** 20010102_13 by davidt
+Added back send_noncap_serv_butone
+
 *** 20010102_12 by davidt
 Don't ignore server notices in +g mode
 
