@@ -1,3 +1,8 @@
+*** 19990924_2 by db
+- yet another ->name instead of ->user this one in report_tklines
+
+
+
 *** 19990924_1 by db
 - This patch corrects a case where a normal user can oper themselves. oops.
 - It also corrects a possible core due to a bogus H or L line. (neph)
