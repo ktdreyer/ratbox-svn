@@ -30,7 +30,6 @@
 #include "tools.h"
 #include "list.h"
 #include "s_auth.h"
-#include "blalloc.h"
 #include "client.h"
 #include "common.h"
 #include "event.h"
@@ -101,7 +100,6 @@ dlink_list auth_client_list;
 dlink_list auth_poll_list;
 
 static EVH timeout_auth_queries_event;
-static BlockHeap *auth_bl = NULL;
 
 static PF read_auth_reply;
 static CNCB auth_connect_callback;
@@ -118,7 +116,6 @@ init_auth(void)
   memset(&auth_poll_list, 0, sizeof(auth_poll_list));
   eventAdd("timeout_auth_queries_event", timeout_auth_queries_event, NULL,
     1, 0);
-  auth_bl = BlockHeapCreate(sizeof(struct AuthRequest), AUTH_BLOCK_SIZE);
 }
 
 /*
@@ -126,7 +123,8 @@ init_auth(void)
  */
 static struct AuthRequest* make_auth_request(struct Client* client)
 {
-  struct AuthRequest* request = (struct AuthRequest *)BlockHeapAlloc(auth_bl);
+  struct AuthRequest* request = 
+    (struct AuthRequest *)MyMalloc(sizeof(struct AuthRequest));
   assert(0 != request);
   memset(request, 0, sizeof(struct AuthRequest));
   request->fd      = -1;
@@ -140,7 +138,7 @@ static struct AuthRequest* make_auth_request(struct Client* client)
  */
 void free_auth_request(struct AuthRequest* request)
 {
-  BlockHeapFree(auth_bl, request);
+  MyFree(request);
 }
 
 /*
@@ -232,7 +230,8 @@ static void auth_dns_callback(void* vptr, adns_answer* reply)
     }
 
   MyFree(reply);
-  BlockHeapFree(dns_blk, auth->client->localClient->dns_query);
+  MyFree(auth->client->localClient->dns_query);
+
   auth->client->localClient->dns_query = NULL;
   if (!IsDoingAuth(auth))
     {
@@ -427,9 +426,6 @@ void start_auth(struct Client* client)
 
   client->localClient->dns_query = MyMalloc(sizeof(struct DNSQuery));
   client->localClient->dns_query->ptr = auth;
-  client->localClient->dns_query->callback = auth_dns_callback;
-  sendheader(client, REPORT_DO_DNS);
-
   /* No DNS cache now, remember? -- adrian */
   adns_getaddr(&client->localClient->ip, client->localClient->aftype, client->localClient->dns_query);
   SetDNSPending(auth);

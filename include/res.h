@@ -11,7 +11,6 @@
 #include "ircd_defs.h"
 /* I hate this *blah* db */
 #include "fileio.h"
-#include "blalloc.h"
 #include "../adns/adns.h"
 
 #define DNS_BLOCK_SIZE 64
@@ -34,5 +33,4 @@ void adns_gethost (const char *name , int aftype , struct DNSQuery *req );
 void adns_getaddr (struct irc_inaddr *addr , int aftype , struct DNSQuery *req );
 void delete_adns_queries(struct DNSQuery *q);
 void report_adns_servers(struct Client *);
-extern BlockHeap *dns_blk;
 #endif

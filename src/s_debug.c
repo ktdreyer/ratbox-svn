@@ -39,7 +39,6 @@
 #include "tools.h"
 #include "s_debug.h"
 #include "channel.h"
-#include "blalloc.h"
 #include "class.h"
 #include "client.h"
 #include "common.h"

@@ -22,7 +22,6 @@
  * $Id$
  */
 #include "tools.h"
-#include "blalloc.h"
 #include "channel.h"
 #include "class.h"
 #include "client.h"
@@ -51,23 +50,10 @@
 
 void    outofmemory();
 
-/* for Wohali's block allocator */
-BlockHeap *free_dlink_nodes;
-BlockHeap *free_anUsers;
-
 void initlists()
 {
   init_client_heap();
-  free_dlink_nodes =
-    BlockHeapCreate((size_t)sizeof(dlink_node),LINK_PREALLOCATE);
-
-  /* struct User structs are used by both local struct Clients, and remote struct Clients */
-
-  free_anUsers = BlockHeapCreate(sizeof(struct User),
-                                 USERS_PREALLOCATE + MAXCONNECTIONS);
 }
-
-
         
 /*
  * make_user
@@ -84,7 +70,7 @@ struct User* make_user(struct Client *client_p)
   user = client_p->user;
   if (!user)
     {
-      user = BlockHeapALLOC(free_anUsers,struct User);
+      user = (struct User *)MyMalloc(sizeof (struct User));
       if( user == (struct User *)NULL)
         outofmemory();
 
@@ -176,20 +162,7 @@ void _free_user(struct User* user, struct Client* client_p)
         assert(0);
       }
 
-      if(BlockHeapFree(free_anUsers,user))
-        {
-          sendto_realops_flags(FLAGS_ALL,
-	       "list.c couldn't BlockHeapFree(free_anUsers,user) user = %lX",
-			       (unsigned long)user );
-          sendto_realops_flags(FLAGS_ALL,
-       "Please report to the hybrid team! ircd-hybrid@the-project.org");
-
-#ifdef SYSLOG_BLOCK_ALLOCATOR 
-          log(L_DEBUG,"list.c couldn't BlockHeapFree(free_anUsers,user) user = %lX", (long unsigned int) user);
-#endif
-        }
-
-
+      MyFree(user);
     }
 }
 
@@ -204,7 +177,7 @@ dlink_node *make_dlink_node()
 {
   dlink_node *lp;
 
-  lp = BlockHeapALLOC(free_dlink_nodes,dlink_node);
+  lp = (struct dlink_node *)MyMalloc(sizeof(dlink_node));
   if (lp == NULL)
     outofmemory();
 
@@ -219,17 +192,11 @@ dlink_node *make_dlink_node()
  *
  * inputs	- pointer to dlink_node
  * output	- NONE
- * side effects	- free given pointer, put back on block allocator
- *		  for dlink_node's
+ * side effects	- free given dlink_node 
  */
 void _free_dlink_node(dlink_node *ptr)
 {
-  if(BlockHeapFree(free_dlink_nodes,ptr))
-    {
-      sendto_realops_flags(FLAGS_ALL,
-	   "list.c couldn't BlockHeapFree(free_dlink_nodes,ptr) ptr = %lX",
-			   (unsigned long)ptr );
-    }
+  MyFree(ptr);
 }
 
 
@@ -244,9 +211,6 @@ void _free_dlink_node(dlink_node *ptr)
  */
 void block_garbage_collect()
 {
-  BlockHeapGarbageCollect(free_dlink_nodes);
-  BlockHeapGarbageCollect(free_anUsers);
-  clean_client_heap();
 }
 
 /*
@@ -260,9 +224,6 @@ void block_garbage_collect()
 void count_user_memory(int *user_memory_used,
                        int *user_memory_allocated )
 {
-  BlockHeapCountMemory( free_anUsers,
-                        user_memory_used,
-                        user_memory_allocated);
 }
 
 /*
@@ -276,9 +237,6 @@ void count_user_memory(int *user_memory_used,
 void count_links_memory(int *links_memory_used,
                        int *links_memory_allocated )
 {
-  BlockHeapCountMemory( free_dlink_nodes,
-                        links_memory_used,
-                        links_memory_allocated);
 }
 
 

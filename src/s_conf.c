@@ -150,8 +150,8 @@ static void conf_dns_callback(void* vptr, adns_answer *reply)
 #endif
 	MyFree(reply);
   } 
+
   MyFree(aconf->dns_query);
-  aconf->dns_query = NULL;
 }
 
 /*

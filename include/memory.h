@@ -6,7 +6,6 @@
 /* #define MEMDEBUG */
 
 #include "ircd_defs.h"
-#include "blalloc.h"
 #include <stdlib.h>
 #include <string.h>
 

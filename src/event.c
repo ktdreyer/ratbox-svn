@@ -54,7 +54,6 @@
 #include <stdlib.h>
 
 #include "ircd.h"
-#include "blalloc.h"
 #include "event.h"
 #include "client.h"
 #include "send.h"
@@ -75,12 +74,11 @@ struct ev_entry
 static struct ev_entry *tasks = NULL;
 static int run_id = 0;
 static const char *last_event_ran = NULL;
-static BlockHeap *event_bl = NULL;
 
 void
 eventAdd(const char *name, EVH * func, void *arg, time_t when, int weight)
 {
-  struct ev_entry *event = (struct ev_entry *)BlockHeapAlloc(event_bl);
+  struct ev_entry *event = (struct ev_entry *)MyMalloc(sizeof(struct ev_entry));
   struct ev_entry **E;
   event->func = func;
   event->arg = arg;
@@ -129,7 +127,7 @@ eventDelete(EVH * func, void *arg)
       if (event->arg != arg)
         continue;
       *E = event->next;
-      BlockHeapFree(event_bl, event);
+      MyFree(event);
       return;
     }
 #ifdef SQUID
@@ -177,7 +175,7 @@ eventRun(void)
 #endif
           func(arg);
         }
-      BlockHeapFree(event_bl, event);
+      MyFree(event);
     }
 }
 
@@ -192,7 +190,7 @@ eventNextTime(void)
 void
 eventInit(void)
 {
-  event_bl = BlockHeapCreate(sizeof(struct ev_entry), EVENT_BLOCK_SIZE);
+ 
 }
 
 #if SQUID
@@ -225,7 +223,7 @@ eventFreeMemory(void)
   while ((event = tasks))
     {
       tasks = event->next;
-      BlockHeapFree(event_bl, event);
+      MyFree(event);
     }
   tasks = NULL;
 }

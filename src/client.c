@@ -25,7 +25,6 @@
 #include "tools.h"
 #include "client.h"
 #include "class.h"
-#include "blalloc.h"
 #include "channel.h"
 #include "common.h"
 #include "dline_conf.h"
@@ -60,25 +59,6 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
-
-/* 
- * Number of struct Client structures to preallocate at a time
- * for Efnet 1024 is reasonable 
- * for smaller nets who knows?
- *
- * This means you call MyMalloc 30 some odd times,
- * rather than 30k times 
- */
-#define CLIENTS_PREALLOCATE 1024
-
-/* 
- * for Wohali's block allocator 
- */
-BlockHeap*        ClientFreeList;
-BlockHeap*        localUserFreeList;
-static const char* const BH_FREE_ERROR_MESSAGE = \
-        "client.c BlockHeapFree failed for client_p = %p";
-
 static void check_pings_list(dlink_list *list);
 static void check_unknowns_list(dlink_list *list);
 
@@ -93,12 +73,6 @@ static EVH check_pings;
  */
 void init_client_heap(void)
 {
-  ClientFreeList =
-    BlockHeapCreate((size_t) sizeof(struct Client), CLIENTS_PREALLOCATE);
-
-  localUserFreeList = 
-    BlockHeapCreate((size_t) sizeof(struct LocalUser), MAXCONNECTIONS);
-
   /*
    * start off the check ping event ..  -- adrian
    *
@@ -116,8 +90,6 @@ void init_client_heap(void)
  */
 void clean_client_heap(void)
 {
-  BlockHeapGarbageCollect(ClientFreeList);
-  BlockHeapGarbageCollect(localUserFreeList);
 }
 
 /*
@@ -136,24 +108,23 @@ struct Client* make_client(struct Client* from)
   struct LocalUser *localClient;
   dlink_node *m;
 
-  if (!from)
+  client_p = (struct Client *)MyMalloc(sizeof(struct Client));
+  if (client_p == NULL)
+    outofmemory();
+
+  memset(client_p, 0, sizeof(struct Client));
+      
+  if (from == NULL)
     {
-      client_p = BlockHeapALLOC(ClientFreeList, struct Client);
-      if (client_p == NULL)
-        outofmemory();
-      assert(0 != client_p);
-
-      memset(client_p, 0, sizeof(struct Client));
-
       client_p->from  = client_p; /* 'from' of local client is self! */
       client_p->since = client_p->lasttime = client_p->firsttime = CurrentTime;
 
-      localClient = BlockHeapALLOC(localUserFreeList, struct LocalUser);
+      localClient = (struct LocalUser *)MyMalloc(sizeof(struct LocalUser));
       memset(localClient, 0, sizeof(struct LocalUser));
 
       if (localClient == NULL)
         outofmemory();
-      assert(0 != localClient);
+
       client_p->localClient = localClient;
 
       /* as good a place as any... */
@@ -162,13 +133,6 @@ struct Client* make_client(struct Client* from)
     }
   else
     { /* from is not NULL */
-      client_p = BlockHeapALLOC(ClientFreeList, struct Client);
-      if(client_p == NULL)
-        outofmemory();
-      assert(0 != client_p);
-
-      memset(client_p, 0, sizeof(struct Client));
-
       client_p->from = from; /* 'from' of local client is self! */
     }
 
@@ -200,46 +164,22 @@ void _free_client(struct Client* client_p)
   assert(0 == client_p->next);
 
   /* If localClient is non NULL, its a local client */
-  if (client_p->localClient)
+  if (client_p->localClient != NULL)
     {
       if (-1 < client_p->fd)
 	fd_close(client_p->fd);
 
-
-/*      if (client_p->localClient->dns_reply)
-	--client_p->localClient->dns_reply->ref_count; */
-
 #ifndef NDEBUG
       mem_frob(client_p->localClient, sizeof(struct LocalUser));
 #endif
-      if(BlockHeapFree(localUserFreeList, client_p->localClient))
-        result = 1;
+
+      MyFree(client_p->localClient);
+    }
 
 #ifndef NDEBUG
       mem_frob(client_p, sizeof(struct Client));
 #endif
-      if(BlockHeapFree(ClientFreeList, client_p))
-        result = 1;
-    }
-  else {
-#ifndef NDEBUG
-    mem_frob(client_p, sizeof(struct Client));
-#endif
-    if(BlockHeapFree(ClientFreeList, client_p))
-      result = 1;
-  }
-
-  assert(0 == result);
-  if (result)
-    {
-      sendto_realops_flags(FLAGS_ALL,
-			   BH_FREE_ERROR_MESSAGE, client_p);
-      sendto_realops_flags(FLAGS_ALL,
-			   "Please report to the hybrid team!" \
-			   "ircd-hybrid@the-project.org");
-
-      log(L_WARN, BH_FREE_ERROR_MESSAGE, client_p);
-    }
+      MyFree(client_p);
 }
 
 /*
@@ -1292,31 +1232,27 @@ int
 detach_client(struct Client *cptr, const char *reason)
 {
 #ifdef PERSISTANT_CLIENTS
- if (cptr->user==NULL || !MyConnect(cptr) || !IsPersistant(cptr))
-   return exit_client(NULL, cptr, &me, reason);
- if (IsPersisting(cptr))
-   return 0;
- cptr->flags2 |= FLAGS2_PERSISTING;
- if (cptr->fd >= 0)
-   fd_close(cptr->fd);
- cptr->fd = -1;
- dlinkAdd((void*)cptr, make_dlink_node(), &persist_list);
- cptr->user->last_detach_time = CurrentTime;
-#if 0 /* No we can actually keep this... */
- if (cptr->localClient != NULL)
-   BlockHeapFree(localUserFreeList, cptr->localClient);
- cptr->localClient = NULL;
-#endif
- if (cptr->user->away == NULL)
-   {
-    DupString(cptr->user->away, reason);
-    cptr->user->last_away = CurrentTime;
-    sendto_ll_serv_butone(NULL, NULL, 0, ":%s AWAY :%s", cptr->name,
-                          cptr->user->away);
-   }
- return 0;
+  if (cptr->user==NULL || !MyConnect(cptr) || !IsPersistant(cptr))
+    return exit_client(NULL, cptr, &me, reason);
+  if (IsPersisting(cptr))
+    return 0;
+  cptr->flags2 |= FLAGS2_PERSISTING;
+  if (cptr->fd >= 0)
+    fd_close(cptr->fd);
+  cptr->fd = -1;
+  dlinkAdd((void*)cptr, make_dlink_node(), &persist_list);
+  cptr->user->last_detach_time = CurrentTime;
+
+  if (cptr->user->away == NULL)
+    {
+      DupString(cptr->user->away, reason);
+      cptr->user->last_away = CurrentTime;
+      sendto_ll_serv_butone(NULL, NULL, 0, ":%s AWAY :%s", cptr->name,
+			    cptr->user->away);
+    }
+  return 0;
 #else
- return exit_client(NULL, cptr, &me, reason);
+  return exit_client(NULL, cptr, &me, reason);
 #endif
 }
 
@@ -1554,9 +1490,6 @@ const char* comment         /* Reason for the exit */
 void count_local_client_memory(int *local_client_memory_used,
                                int *local_client_memory_allocated )
 {
-  BlockHeapCountMemory( localUserFreeList,
-                        local_client_memory_used,
-                        local_client_memory_allocated);
 }
 
 /*
@@ -1565,9 +1498,6 @@ void count_local_client_memory(int *local_client_memory_used,
 void count_remote_client_memory(int *remote_client_memory_used,
                                int *remote_client_memory_allocated )
 {
-  BlockHeapCountMemory( ClientFreeList,
-                        remote_client_memory_used,
-                        remote_client_memory_allocated);
 }
 
 

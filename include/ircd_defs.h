@@ -69,29 +69,10 @@
 /*
 #define MyFree(x)       if ((x)) free((x))
 */
-#define DEBUG_BLOCK_ALLOCATOR
-#ifdef DEBUG_BLOCK_ALLOCATOR
-extern const char* BH_CurrentFile;
-extern int         BH_CurrentLine;
-
-#define free_client(x)  { BH_CurrentFile = __FILE__; \
-                          BH_CurrentLine = __LINE__;\
-                          _free_client((x)); }
-
-#define free_user(x,y)  { BH_CurrentFile = __FILE__; \
-                          BH_CurrentLine = __LINE__;\
-                          _free_user((x), (y)); }
-
-#define free_dlink_node(x) { BH_CurrentFile = __FILE__; \
-                             BH_CurrentLine = __LINE__;\
-                             _free_dlink_node((x)); }
-
-#else
 #define free_client(x) _free_client((x))
 #define free_link(x)   _free_link((x))
 #define free_user(x,y) _free_user((x), (y))
 #define free_dlink_node(x) _free_dlink_node((x))
-#endif
 
 
 #include <sys/types.h>
