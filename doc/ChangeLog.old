@@ -1,3 +1,6 @@
+*** 20010102_12 by davidt
+Don't ignore server notices in +g mode
+
 *** 20010102_11 by davidt
 Send halfops as @ not % in SJOIN to a non-CAP_HOPS server
 
