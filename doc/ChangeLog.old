@@ -1,3 +1,9 @@
+*** 20001209_1 by db
+- added server greet message (# since restart)
+- fixed stupid in m_sjoin, you can have more than 4 ops/nicks per sjoin *oops*
+
+
+
 *** 20001208_17 by db
 - m_who is less broken for single nick who, but it looks broken to me
   still... checked on efnet, it looks broken.
