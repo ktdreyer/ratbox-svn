@@ -267,27 +267,20 @@ void
 comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
                void *client_data, time_t timeout)
 {
-    int new_hdl;
     fde_t *F = &fd_table[fd];
     assert(fd >= 0);
     assert(F->flags.open);
     if (type & COMM_SELECT_READ)
     {
-        new_hdl = (F->read_handler == NULL);
         F->read_handler = handler;
         F->read_data = client_data;
         poll_update_pollfds(fd, POLLIN, handler);
-        if (new_hdl && handler != NULL)
-            handler(fd, client_data);
     }
     if (type & COMM_SELECT_WRITE)
     {
-        new_hdl = (F->write_handler == NULL);
         F->write_handler = handler;
         F->write_data = client_data;
         poll_update_pollfds(fd, POLLOUT, handler);
-        if (new_hdl && handler != NULL)
-            handler(fd, client_data);
     }
     if (timeout)
         F->timeout = CurrentTime + (timeout / 1000);
