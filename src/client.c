@@ -1370,7 +1370,13 @@ const char* comment         /* Reason for the exit */
     {        
       if( GlobalSetOptions.hide_server )
 	{
-	  strcpy(comment1, "<server split>");
+          /* 
+          ** Replaces the name of the splitting server with net.split
+          ** when a client exits from a split, in an attempt to 
+          ** hide topology without breaking too many clients..
+          */
+          strcpy(comment1, me.name);         
+          strcat(comment1, " net.split");
 	}
       else
 	{
