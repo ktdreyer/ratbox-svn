@@ -1646,7 +1646,6 @@ int rehash(struct Client *cptr,struct Client *sptr, int sig)
   read_conf_files(NO);
   close_listeners();
   flush_deleted_I_P();
-  rehashed = 1;
   return 0;
 }
 

@@ -146,25 +146,7 @@ char**  myargv;
 int     dorehash   = 0;
 int     debuglevel = -1;        /* Server debug level */
 char*   debugmode  = "";        /*  -"-    -"-   -"-  */
-
-
-int     rehashed = YES;
-int     dline_in_progress = NO; /* killing off matching D lines ? */
 time_t  nextconnect = 1;        /* time for next try_connections call */
-
-/* code added by mika nystrom (mnystrom@mit.edu) */
-/* this flag is used to signal globally that the server is heavily loaded,
-   something which can be taken into account when processing e.g. user commands
-   and scheduling ping checks */
-/* Changed by Taner Halicioglu (taner@CERF.NET) */
-
-#define LOADCFREQ 5     /* every 5s */
-#define LOADRECV 40     /* 40k/s */
-
-int    LRV = LOADRECV;
-time_t LCF = LOADCFREQ;
-float currlife = 0.0;
-
 
 /*
  * get_vm_top - get the operating systems notion of the resident set size
@@ -393,7 +375,7 @@ static time_t io_loop(time_t delay)
   else
     delay = IRCD_MIN(delay, TIMESEC);
 
-  if (dorehash && !GlobalSetOptions.lifesux)
+  if (dorehash)
     {
       rehash(&me, &me, 1);
       dorehash = 0;
