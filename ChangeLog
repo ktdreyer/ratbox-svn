@@ -1,3 +1,15 @@
+androsyn    2002/08/10 17:28:42 EDT	(20020810_36)
+
+  Modified files:
+    src                  send.c 
+  Log:
+  Remove a completely useless comment
+  
+  Revision  Changes    Path
+  7.208     +0 -25     ircd-ratbox/src/send.c
+
+
+
 androsyn    2002/08/10 17:11:04 EDT	(20020810_35)
 
   Modified files:
