@@ -344,7 +344,7 @@ check_pings_list(dlink_list *list)
                 }
 
               cptr->flags2 |= FLAGS2_PING_TIMEOUT;
-	      (void)exit_client(cptr, cptr, &me, "ping timeout" );
+	      (void)exit_client(cptr, cptr, &me, "Ping timeout:");
               continue;
             }
           else if ((cptr->flags & FLAGS_PINGSENT) == 0)
