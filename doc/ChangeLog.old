@@ -1,3 +1,7 @@
+*** 20010129_4 by wcampbel
+Removed CAPAB DE from the docs
+
+
 *** 20010129_3 by db
 - removed all reference to CAP_DE its GONE GONE GONE yay
   removed modebuf_de pbuf_de etc.
