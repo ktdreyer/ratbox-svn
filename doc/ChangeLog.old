@@ -1,3 +1,11 @@
+*** 20001014_5 by toot
+. don't allow CJOIN to a non-base channel
+. don't list sub-channels if they try to /join a sub-channel's
+  'long' name
+. added an extra arg to m_names so it works after a CJOIN
+  (there might be a better way to do this)
+
+
 *** 20001014_4 by db
 - moved show_vchans and find_vchan into vchannel.c
 
