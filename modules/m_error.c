@@ -126,7 +126,7 @@ int ms_error(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     return 0;
   if (cptr == sptr)
     sendto_realops_flags(FLAGS_ALL,"ERROR :from %s -- %s",
-			 get_cnlient_name(cptr, FALSE), para);
+			 get_client_name(cptr, FALSE), para);
   else
     sendto_realops_flags(FLAGS_ALL,"ERROR :from %s via %s -- %s", sptr->name,
 			 get_client_name(cptr,FALSE), para);

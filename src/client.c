@@ -35,7 +35,7 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "list.h"
-#include "m_gline.h"
+#include "s_gline.h"
 #include "numeric.h"
 #include "packet.h"
 #include "res.h"

@@ -33,7 +33,7 @@
 #include "ircdauth.h"
 #include "ircd_signal.h"
 #include "list.h"
-#include "m_gline.h"
+#include "s_gline.h"
 #include "motd.h"
 #include "ircd_handler.h"
 #include "msg.h"         /* msgtab */

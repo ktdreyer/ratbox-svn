@@ -188,7 +188,7 @@ load_one_module (char *path)
   mod_basename = basename(path);
 
   errno = 0;
-  tmpptr = dlopen (path, RTLD_LAZY);
+  tmpptr = dlopen (path, RTLD_NOW);
 
   if (tmpptr == NULL)
     {

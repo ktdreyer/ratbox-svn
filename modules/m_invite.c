@@ -70,7 +70,8 @@ int     m_invite(struct Client *cptr,
   struct Client *acptr;
   struct Channel *chptr;
   struct Channel *vchan;
-  int need_invite=NO;
+  char   *chname;
+  int    chop;			/* Is channel op */
 
   /* A little sanity test here */
   if(!sptr->user)
@@ -103,11 +104,14 @@ int     m_invite(struct Client *cptr,
    */
   /* Possibly should be an error sent to sptr */
   /* done .. there should be no problem because MyConnect(sptr) should
-	 always be true if parse() and such is working correctly --is */
-  if (!MyConnect(acptr) && (parv[2][0] == '&')) {
-	  sendto_one(sptr, form_str(ERR_USERNOTONSERV),
-				 me.name, parv[0], parv[1]);
-	  return 0;
+   * always be true if parse() and such is working correctly --is
+   */
+
+  if (!MyConnect(acptr) && (parv[2][0] == '&'))
+    {
+      sendto_one(sptr, form_str(ERR_USERNOTONSERV),
+		 me.name, parv[0], parv[1]);
+      return 0;
   }
 	  
   if (!(chptr = hash_find_channel(parv[2], NullChn)))
@@ -134,6 +138,8 @@ int     m_invite(struct Client *cptr,
 	chptr = vchan;
     }
 
+  chname = chptr->chname;
+
   if (!IsMember(sptr, chptr))
     {
       if (MyClient(sptr))
@@ -150,11 +156,11 @@ int     m_invite(struct Client *cptr,
       return 0;
     }
 
+  chop = is_chan_op(chptr, sptr);
+
   if (chptr && (chptr->mode.mode & MODE_INVITEONLY))
     {
-      need_invite = YES;
-
-      if (!is_chan_op(chptr, sptr))
+      if (!chop)
         {
           if (MyClient(sptr))
             sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED),
@@ -163,71 +169,23 @@ int     m_invite(struct Client *cptr,
         }
     }
 
-  /*
-   * due to some whining I've taken out the need for the channel
-   * being +i before sending an INVITE. It was intentionally done this
-   * way, it makes no sense (to me at least) letting the server send
-   * an unnecessary invite when a channel isn't +i !
-   * bah. I can't be bothered arguing it
-   * -Dianora
-   * this is now settable in the config file  --is 
-   */
-  if (MyConnect(sptr) && (ConfigFileEntry.invite_plus_i_only && need_invite))
+  if (MyConnect(sptr))
     {
       sendto_one(sptr, form_str(RPL_INVITING), me.name, parv[0],
-                 acptr->name, ((chptr) ? (chptr->chname) : parv[2]));
+                 acptr->name, ((chname) ? (chname) : parv[2]));
       if (acptr->user->away)
         sendto_one(sptr, form_str(RPL_AWAY), me.name, parv[0],
                    acptr->name, acptr->user->away);
-      
-      if( need_invite )
-        {
-          /* Send a NOTICE to all channel operators concerning chanops who  *
-           * INVITE other users to the channel when it is invite-only (+i). *
-           * The NOTICE is sent from the local server.                      */
-
-          /* Only allow this invite notice if the channel is +p
-           * i.e. "paranoid"
-           * -Dianora
-           */
-
-          if (chptr && (chptr->mode.mode & MODE_PRIVATE))
-            { 
-              char message[NICKLEN*2+CHANNELLEN+USERLEN+HOSTLEN+30];
-
-              /* bit of paranoia, be a shame if it cored for this -Dianora */
-              if(acptr->user)
-                {
-                  ircsprintf(message,
-                             "INVITE: %s (%s invited %s [%s@%s])",
-                             chptr->chname,
-                             sptr->name,
-                             acptr->name,
-                             acptr->username,
-                             acptr->host);
-
-		  /* XXX bchan needed for vchans */
-                  sendto_channel_type(cptr, sptr,
-				      &chptr->chanops,
-                                      '@',
-                                      chptr->chname,
-                                      "PRIVMSG",
-                                      message);
-                }
-            }
-        }
     }
 
-  if(MyConnect(acptr) && need_invite)
+  if(MyConnect(acptr) && chop)
     add_invite(chptr, acptr);
 
-  if (!ConfigFileEntry.invite_plus_i_only || 
-	  (ConfigFileEntry.invite_plus_i_only && need_invite)) 
-	  sendto_anywhere(acptr, sptr, ":%s!%s@%s INVITE %s :%s",
-			  sptr->name,
-			  sptr->username,
-			  sptr->host,
-			  acptr->name, parv[2]);
+  sendto_anywhere(acptr, sptr, ":%s!%s@%s INVITE %s :%s",
+		  sptr->name,
+		  sptr->username,
+		  sptr->host,
+		  acptr->name, parv[2]);
   return 0;
 }
 

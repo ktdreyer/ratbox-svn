@@ -44,6 +44,8 @@ _modinit(void)
 
 #else
 
+char *_version = "20001122";
+
 /* We have openssl support, so include /CHALLENGE */
 struct Message challenge_msgtab = {
   MSG_CHALLENGE, 0, 0, MFLG_SLOW, 0,

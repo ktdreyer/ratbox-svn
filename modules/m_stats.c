@@ -34,7 +34,7 @@
 #include "ircd_handler.h"
 #include "msg.h"         /* Message */
 #include "mtrie_conf.h"  /* report_mtrie_conf_links */
-#include "m_gline.h"     /* report_glines */
+#include "s_gline.h"     /* report_glines */
 #include "numeric.h"     /* ERR_xxx */
 #include "scache.h"      /* list_scache */
 #include "send.h"        /* sendto_one */

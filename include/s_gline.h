@@ -1,5 +1,5 @@
 /************************************************************************
- *   IRC - Internet Relay Chat, include/gline.h
+ *   IRC - Internet Relay Chat, include/s_gline.h
  *   Copyright (C) 1992 Darren Reed
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -23,8 +23,8 @@
  *
  */
 
-#ifndef INCLUDED_m_gline_h
-#define INCLUDED_m_gline_h
+#ifndef INCLUDED_s_gline_h
+#define INCLUDED_s_gline_h
 #ifndef INCLUDED_config_h
 #include "config.h"
 #endif
@@ -44,6 +44,8 @@ extern struct ConfItem* find_is_glined(const char* host, const char* name);
 extern void   flush_glines(void);             
 extern void   report_glines(struct Client *); 
 extern int    remove_gline_match(const char *user, const char *host);
+extern void   expire_pending_glines();
+extern void   expire_glines();
 
 typedef struct gline_pending
 {
@@ -66,7 +68,7 @@ typedef struct gline_pending
   char host[HOSTLEN + 1];
 
   struct gline_pending *next;
-}GLINE_PENDING;
+}gline_pending_t;
 
 /* how long a pending G line can be around
  *   10 minutes should be plenty
@@ -74,5 +76,6 @@ typedef struct gline_pending
 
 #define GLINE_PENDING_EXPIRE 600
 
+extern gline_pending_t *pending_glines;
 
 #endif

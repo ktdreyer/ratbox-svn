@@ -427,7 +427,7 @@ int mo_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 		  newval = atoi(intarg);
 		  if(newval < 0)
 		    {
-		      sento_one(sptr,
+		      sendto_one(sptr,
 				":%s NOTICE %s :Value less than 0 illegal for %s",
 				me.name, sptr->name,
 				set_cmd_table[i].name);
