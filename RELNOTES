@@ -5,7 +5,9 @@ o) Removal of various dead functions
 o) Drop servers that try to introduce servers with names > HOSTLEN
 o) Fixed issue where ircd would crash upon detaching gdb on FreeBSD
 o) Fixed minor issue with /knock
-
+o) Added --enable-small-net to configure.  This tunes the code to use less
+   memory, which should be fine on small networks, but a performance hit
+   on larger servers.
 --------------------------------------------------------------------------------
 
 This is the current beta version of ircd-hybrid-7.

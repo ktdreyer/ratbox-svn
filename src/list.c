@@ -58,7 +58,7 @@ int user_count=0;
 static BlockHeap *user_heap;
 void initUser(void)
 {
-  user_heap = BlockHeapCreate(sizeof(struct User), 1024);
+  user_heap = BlockHeapCreate(sizeof(struct User), USER_HEAP_SIZE);
   if(!user_heap)
      outofmemory();	
 }
@@ -169,7 +169,7 @@ void _free_user(struct User* user, struct Client* client_p)
 static BlockHeap *dnode_heap;
 void init_dlink_nodes(void)
 {
-  dnode_heap = BlockHeapCreate(sizeof(dlink_node), 1024);
+  dnode_heap = BlockHeapCreate(sizeof(dlink_node), DNODE_HEAP_SIZE);
   if(dnode_heap == NULL)
      outofmemory();
 }

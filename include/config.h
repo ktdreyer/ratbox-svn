@@ -234,8 +234,11 @@
  *       resident and running - it hardly ever gets swapped to disk!  Memory
  *       will be preallocated for the entire whowas array when ircd is started.
  */
+#ifndef SMALL_NET
 #define NICKNAMEHISTORYLENGTH 15000
-
+#else
+#define NICKNAMEHISTORYLENGTH 1500
+#endif
 /* HANGONGOODLINK and HANGONGOODLINK
  * Often net breaks for a short time and it's useful to try to
  * establishing the same connection again faster than CONNECTFREQUENCY
@@ -270,6 +273,27 @@
  * try 5 or 25. 5 for AIX and SUNOS, 25 should work better for other OS's
 */
 #define HYBRID_SOMAXCONN 25
+
+/* 
+ * Default pre-allocations for various things...
+ */  
+#ifndef SMALL_NET  /* Normal net */
+#define CHANNEL_HEAP_SIZE	1024
+#define BAN_HEAP_SIZE		1024
+#define CLIENT_HEAP_SIZE	1024
+#define LCLIENT_HEAP_SIZE	512
+#define LINEBUF_HEAP_SIZE	1024
+#define	USER_HEAP_SIZE		1024
+#define	DNODE_HEAP_SIZE		2048
+#else  /* Small Net */
+#define CHANNEL_HEAP_SIZE	256
+#define BAN_HEAP_SIZE		128
+#define CLIENT_HEAP_SIZE	256
+#define LCLIENT_HEAP_SIZE	128
+#define LINEBUF_HEAP_SIZE	128
+#define	USER_HEAP_SIZE		128
+#define	DNODE_HEAP_SIZE		256
+#endif
 
 /* DEBUGMODE is used mostly for internal development, it is likely
  * to make your client server very sluggish.

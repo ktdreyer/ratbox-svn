@@ -1,4 +1,4 @@
-/* include/setup.h.in.  Generated automatically from autoconf/configure.in by autoheader.  */
+/* include/setup.h.in.  Generated automatically from autoconf/configure.in by autoheader 2.13.  */
 /* $Id$ */
 /* Define as __inline if that's what the C compiler calls it.  */
 #undef inline
@@ -131,6 +131,9 @@
 /* Define if you have the vsnprintf function.  */
 #undef HAVE_VSNPRINTF
 
+/* Define if you have the <dlfcn.h> header file.  */
+#undef HAVE_DLFCN_H
+
 /* Define if you have the <errno.h> header file.  */
 #undef HAVE_ERRNO_H
 
@@ -142,9 +145,6 @@
 
 /* Define if you have the <mach-o/dyld.h> header file.  */
 #undef HAVE_MACH_O_DYLD_H
-
-/* Define if you have the <dlfcn.h> header file.  */
-#undef HAVE_DLFCN_H
 
 /* Define if you have the <stddef.h> header file.  */
 #undef HAVE_STDDEF_H

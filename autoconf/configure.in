@@ -719,6 +719,23 @@ AC_DEFUN(CHECK_DLOPEN_DL,
                 ]))
 ])
 
+dnl small-net
+AC_ARG_ENABLE(small-net,
+[  --enable-small-net           Enable small network support.
+  --disable-small-net          Disable small network support. ],
+[
+  case "$enableval" in
+  yes)
+    echo "Enabling small net code."
+    IRC_CFLAGS="$IRC_CFLAGS -DSMALL_NET=1"
+    ;;
+  no)
+    echo "Disabling small net code."
+    IRC_CFLAGS="$IRC_CFLAGS"
+    ;;
+  esac
+])
+
 dnl shared-modules
 AC_ARG_ENABLE(shared-modules,
 [  --enable-shared-modules      Enable shared modules.
