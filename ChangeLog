@@ -1,3 +1,22 @@
+leeh        2004/09/25 11:21:56 EDT	(20040925_0)
+
+  Modified files:
+    include              client.h config.h 
+    src                  Makefile.in client.c 
+  Removed files:
+    src                  s_hoststat.c 
+  Log:
+  - remove host statistics service
+  
+  Revision  Changes    Path
+  1.17      +1 -34     rserv/include/client.h
+  1.16      +0 -16     rserv/include/config.h
+  1.20      +0 -1      rserv/src/Makefile.in
+  1.19      +0 -199    rserv/src/client.c
+  1.7       +0 -189    rserv/src/s_hoststat.c (dead)
+
+
+
 leeh        2004/01/26 07:35:02 EST	(20040126_0)
 
   Modified files:
