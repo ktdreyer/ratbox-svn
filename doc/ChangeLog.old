@@ -1,3 +1,7 @@
+*** 20010115_9 by fl_
+- fixes to not show server IPs in /links to opers
+
+
 *** 20010115_8 by db
 - This fixes one of the nasty assert errors. comm_open() and comm_accept()
   were both returning ENFILE instead of -1, which happens to be 23.. This
