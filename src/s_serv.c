@@ -661,8 +661,8 @@ int server_estab(struct Client *cptr)
 
   nextping = CurrentTime;
   /* ircd-hybrid-6 can do TS links, and  zipped links*/
-  sendto_ops("Link with %s established: (%s) link",
-             inpath,show_capabilities(cptr));
+  sendto_ops("Link with %s established: (%s)", inpath, 
+             show_capabilities(cptr));
 
   add_to_client_hash_table(cptr->name, cptr);
   /* doesnt duplicate cptr->serv if allocated this struct already */
