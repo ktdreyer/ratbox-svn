@@ -49,6 +49,7 @@ struct Message cjoin_msgtab = {
   {m_unregistered, m_cjoin, m_error, m_cjoin}
 };
 
+
 void
 _modinit(void)
 {
@@ -84,6 +85,13 @@ int     m_cjoin(struct Client *cptr,
   if (!(sptr->user))
     {
       /* something is *fucked* - bail */
+      return 0;
+    }
+
+  if (ConfigFileEntry.vchans_oper_only && !IsOper(sptr))
+    {
+      sendto_one(sptr, form_str(ERR_NOPRIVILEGES),
+                 me.name, parv[0]);
       return 0;
     }
 

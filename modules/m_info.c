@@ -234,7 +234,6 @@ void send_conf_options(struct Client *sptr)
                 ConfigFileEntry.network_name :
                 NETWORK_NAME_DEFAULT,
               "Name of the Network");
-
    sendto_one(sptr,
               ":%s %d %s :%-30s %-5s [%-30s]",
               me.name,
@@ -245,7 +244,6 @@ void send_conf_options(struct Client *sptr)
                 ConfigFileEntry.network_desc :
                 NETWORK_DESC_DEFAULT,
               "Description of the network");
-
    sendto_one(sptr,
               ":%s %d %s :%-30s %-5s [%-30s]",
               me.name,
@@ -254,7 +252,6 @@ void send_conf_options(struct Client *sptr)
               "hub",
               ConfigFileEntry.hub ? "ON" : "OFF",
               "Server can connect to more than one server");
-
    sendto_one(sptr,
               ":%s %d %s :%-30s %-5s [%-30s]",
               me.name,
@@ -263,7 +260,6 @@ void send_conf_options(struct Client *sptr)
               "failed_oper_notice",
               ConfigFileEntry.failed_oper_notice ? "ON" : "OFF",
               "Show opers a notice if someone uses oper with the wrong password");
-
    sendto_one(sptr,
               ":%s %d %s :%-30s %-5s [%-30s]",
               me.name,
@@ -272,17 +268,14 @@ void send_conf_options(struct Client *sptr)
               "show_failed_oper_id",
               ConfigFileEntry.show_failed_oper_id ? "ON" : "OFF",
               "Also show a notice if the oper has the wrong user@host");
-
    sendto_one(sptr,
               ":%s %d %s :%-30s %-5d [%-30s]",
               me.name,
               RPL_INFO,
               sptr->name,
               "dots_in_ident",
-              ConfigFileEntry.dots_in_ident ?
-                ConfigFileEntry.dots_in_ident : 0,
+              ConfigFileEntry.dots_in_ident,
               "How many dots are allowed in idents");
-
    sendto_one(sptr,
               ":%s %d %s :%-30s %-5s [%-30s]",
               me.name,
@@ -291,25 +284,21 @@ void send_conf_options(struct Client *sptr)
               "anti_nick_flood",
               ConfigFileEntry.anti_nick_flood ? "ON" : "OFF",
               "Enable anti nick flood code");
-
    sendto_one(sptr,
               ":%s %d %s :%-30s %-5d [%-30s]",
               me.name,
               RPL_INFO,
               sptr->name,
               "max_nick_time",
-              ConfigFileEntry.max_nick_time ?
-                ConfigFileEntry.max_nick_time : 0,
+              ConfigFileEntry.max_nick_time,
               "Anti nick flood time setting");
-
     sendto_one(sptr,
               ":%s %d %s :%-30s %-5d [%-30s]",
               me.name,
               RPL_INFO,
               sptr->name,
               "links_delay",
-              ConfigFileEntry.links_delay ?
-                ConfigFileEntry.links_delay : 0,
+              ConfigFileEntry.links_delay,
               "How often the links file is rehashed");
    sendto_one(sptr,
               ":%s %d %s :%-30s %-5d [%-30s]",
@@ -317,9 +306,16 @@ void send_conf_options(struct Client *sptr)
               RPL_INFO,
               sptr->name,
               "max_nick_changes",
-              ConfigFileEntry.max_nick_changes ?
-                ConfigFileEntry.max_nick_changes : 0,
+              ConfigFileEntry.max_nick_changes,
               "How many nick changes to allow");
+   sendto_one(sptr,
+              ":%s %d %s :%-30s %-5s [%-30s]",
+              me.name,
+              RPL_INFO,
+              sptr->name,
+              "vchans_oper_only",
+              ConfigFileEntry.vchans_oper_only ? "YES" : "NO",
+              "Restrict use of /CJOIN to opers");
 
   sendto_one(sptr,
 	     ":%s %d %s :Compiled on [%s]",

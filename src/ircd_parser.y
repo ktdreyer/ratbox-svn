@@ -198,6 +198,7 @@ int   class_redirport_var;
 %token  MAX_TARGETS
 %token  LINKS_NOTICE
 %token  LINKS_DELAY
+%token  VCHANS_OPER_ONLY
 
 %type   <ip_value> IP_TYPE
 %type   <string>   QSTRING
@@ -1276,8 +1277,8 @@ general_item:       general_failed_oper_notice | general_show_failed_oper_id |
                     general_fname_foperlog | general_oper_only_umodes |
                     general_max_targets | general_links_notice |
                     general_links_delay |
+                    general_vchans_oper_only |
                     error
-
 
 general_failed_oper_notice:   FAILED_OPER_NOTICE '=' TYES ';'
   {
@@ -1623,4 +1624,14 @@ general_links_notice: LINKS_NOTICE '=' TYES ';'
     LINKS_NOTICE '=' TNO ';'
   {
     ConfigFileEntry.links_notice = 0;
+  };
+
+general_vchans_oper_only: VCHANS_OPER_ONLY '=' TYES ';'
+  {
+    ConfigFileEntry.vchans_oper_only = 1;
+  }
+    |
+    VCHANS_OPER_ONLY '=' TNO ';'
+  {
+    ConfigFileEntry.vchans_oper_only = 0;
   };

@@ -165,6 +165,7 @@ short_motd      { return SHORT_MOTD; }
 spoof		{ return SPOOF; }
 unkline		{ return UNKLINE; }
 user		{ return USER;} 
+vchans_oper_only { return VCHANS_OPER_ONLY; }
 vhost		{ return VHOST; }
 warn		{ return WARN; }
 yes		{ return TYES; }

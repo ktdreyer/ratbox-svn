@@ -222,6 +222,7 @@ typedef struct
   int         max_targets;
   int         links_notice;
   int         links_delay;
+  int         vchans_oper_only;
 } ConfigFileEntryType;
 
 /* bleh. have to become global. */

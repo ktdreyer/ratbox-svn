@@ -54,6 +54,9 @@ vchan and get all of the old users over to the new vchan.  The takeover
 people will then be sitting opped by themselves in a vchan while the original
 users are back the way they were before in another vchan.  
 
+CJOIN can be disabled for non-opers by setting vchans_oper_only=yes; in
+the ircd.conf file.
+
 Channels that have existed for at least 30 minutes are now preserved for 30
 minutes if they are empty or split.  If a channel was +i before a split, it
 will remain that way for 30 minutes.  All bans will still exist, preventing
