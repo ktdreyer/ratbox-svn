@@ -1,3 +1,27 @@
+leeh        2003/07/17 18:39:31 EDT	(20030717_0)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              client.h s_conf.h 
+    modules              m_join.c 
+    modules/core         m_part.c 
+    src                  newconf.c s_user.c 
+  Log:
+  - added spambot_exempt to auth {};, giving a user exemption from
+    possible spambot notices [requested by powuh]
+  
+  Revision  Changes    Path
+  7.216     +1 -0      ircd-ratbox/doc/example.conf
+  7.51      +1 -0      ircd-ratbox/doc/example.efnet.conf
+  7.208     +4 -1      ircd-ratbox/include/client.h
+  7.245     +10 -7     ircd-ratbox/include/s_conf.h
+  1.82      +2 -2      ircd-ratbox/modules/core/m_part.c
+  1.132     +4 -3      ircd-ratbox/modules/m_join.c
+  7.100     +1 -0      ircd-ratbox/src/newconf.c
+  7.272     +8 -0      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2003/07/08 12:47:03 EDT	(20030708_5)
 
   Modified files:
