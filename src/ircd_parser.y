@@ -34,6 +34,8 @@
 #include "irc_string.h"
 #include "ircdauth.h"
 
+extern char *ip_string;
+
 int yyparse();
         
 static struct ConfItem *yy_aconf;
@@ -680,8 +682,13 @@ auth_user:   USER '=' QSTRING ';'
              |
              IP '=' IP_TYPE ';'
   {
+    char *p;
+
     yy_aconf->ip = yylval.ip_entry.ip;
     yy_aconf->ip_mask = yylval.ip_entry.ip_mask;
+    DupString(yy_aconf->host,ip_string);
+    if((p = strchr(yy_aconf->host, ';')))
+      *p = '\0';
   };
 
 auth_passwd:  PASSWORD '=' QSTRING ';' 
@@ -1095,8 +1102,13 @@ deny_item:      deny_ip | deny_reason
 
 deny_ip:        IP '=' IP_TYPE ';'
   {
-    yy_aconf->ip=yylval.ip_entry.ip;
-    yy_aconf->ip_mask=yylval.ip_entry.ip_mask;
+    char *p;
+
+    yy_aconf->ip = yylval.ip_entry.ip;
+    yy_aconf->ip_mask = yylval.ip_entry.ip_mask;
+    DupString(yy_aconf->host,ip_string);
+    if((p = strchr(yy_aconf->host, ';')))
+      *p = '\0';
   };
 
 deny_reason:    REASON '=' QSTRING ';' 

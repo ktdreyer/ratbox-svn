@@ -35,6 +35,8 @@
 #include "s_conf.h"
 #include "y.tab.h"
 
+char *ip_string;
+
 #undef YY_INPUT
 #define YY_FATAL_ERROR(msg) conf_yy_fatal_error( msg )
 #define YY_INPUT(buf,result,max_size) \
@@ -63,7 +65,10 @@ qstring		\"[^\"\n]*[\"\n]
 ([0-9]{1,3}\.){1,3}[0-9]{1,3}(\/[0-3][0-9])?  {
 
 	if(is_address(yytext,&yylval.ip_entry.ip,&yylval.ip_entry.ip_mask))
-	  return( IP_TYPE );
+          {
+            ip_string = yytext;
+	    return( IP_TYPE );
+          }
 	 }
 
 {qstring}	{ DupString(yylval.string,strdup(yytext+1));
