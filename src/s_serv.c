@@ -712,10 +712,15 @@ int server_estab(struct Client *cptr)
   if (!set_sock_buffers(cptr->fd, READBUF_SIZE))
     report_error(SETBUF_ERROR_MSG, get_client_name(cptr, TRUE), errno);
 
+  /* cptr might not be in unknown_list because connection
+   * was originated from this side
+   */
   m = dlinkFind(&unknown_list, cptr);
-  assert(m != NULL);
-  dlinkDelete(m, &unknown_list);
-  dlinkAdd(cptr, m, &serv_list);
+  if( m != NULL)
+    {
+      dlinkDelete(m, &unknown_list);
+      dlinkAdd(cptr, m, &serv_list);
+    }
   
   sendto_realops_flags(FLAGS_ALL,
 		       "Link with %s established: (%s) link",
@@ -1091,6 +1096,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
     int fd;
     char servname[HOSTLEN + 1];
     char serv_desc[HOSTLEN + 15];
+    dlink_node *m;
 
     /* Make sure aconf is useful */
     assert(aconf != NULL);
@@ -1179,6 +1185,12 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
      * The socket has been connected or connect is in progress.
      */
     make_server(cptr);
+    m = dlinkFind(&unknown_list, cptr);
+    if(m != NULL)
+      {
+	dlinkDelete(m, &unknown_list);
+      }
+
     if (by && IsPerson(by))
       {
         strcpy(cptr->serv->by, by->name);
