@@ -1,3 +1,30 @@
+leeh        2002/04/14 20:05:49 EDT	(20020415_1)
+
+  Modified files:
+    modules              m_post.c m_resv.c 
+    src                  event.c hook.c linebuf.c resv.c 
+                         s_bsd_devpoll.c s_bsd_kqueue.c 
+                         s_bsd_poll.c s_bsd_select.c s_bsd_sigio.c 
+  Log:
+  - added more credits back
+  
+  Approved by: diane
+  
+  Revision  Changes    Path
+  1.9       +2 -2      ircd-hybrid-7/modules/m_post.c
+  1.15      +2 -2      ircd-hybrid-7/modules/m_resv.c
+  7.26      +20 -1     ircd-hybrid-7/src/event.c
+  7.14      +1 -1      ircd-hybrid-7/src/hook.c
+  7.79      +2 -1      ircd-hybrid-7/src/linebuf.c
+  7.14      +1 -1      ircd-hybrid-7/src/resv.c
+  7.13      +2 -1      ircd-hybrid-7/src/s_bsd_devpoll.c
+  1.25      +2 -1      ircd-hybrid-7/src/s_bsd_kqueue.c
+  7.53      +2 -1      ircd-hybrid-7/src/s_bsd_poll.c
+  7.24      +2 -1      ircd-hybrid-7/src/s_bsd_select.c
+  7.19      +3 -1      ircd-hybrid-7/src/s_bsd_sigio.c
+
+
+
 leeh        2002/04/14 19:46:48 EDT	(20020415_0)
 
   Modified files:
