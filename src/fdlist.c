@@ -127,5 +127,7 @@ fd_close(int fd)
 #endif
     memset(F, '\0', sizeof(fde_t));
     F->timeout = 0;
+    /* Unlike squid, we're actually closing the FD here! -- adrian */
+    close(fd);
 }
 
