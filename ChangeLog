@@ -1,3 +1,17 @@
+androsyn    2003/02/04 19:39:25 UTC	(20030204_13)
+
+  Modified files:
+    include              modules.h 
+    src                  dynlink.c 
+  Log:
+  First bit of adding hook_add_hook into the module init code..
+  
+  Revision  Changes    Path
+  7.43      +8 -1      ircd-ratbox/include/modules.h
+  7.15      +7 -0      ircd-ratbox/src/dynlink.c
+
+
+
 ejb         2003/02/04 19:33:54 UTC	(20030204_12)
 
   Modified files:
