@@ -797,7 +797,6 @@ chm_simple(struct Client *client_p, struct Client *source_p,
            const char *chname)
 {
   long mode_type;
-  int i;
 
   mode_type = (long)d;
 
@@ -850,8 +849,6 @@ chm_hideops(struct Client *client_p, struct Client *source_p,
             char **parv, int *errors, int alev, int dir, char c, void *d,
             const char *chname)
 {
-  int i;
-
   /* if we dont support it, dont send it anywhere.  well only
    * have the capab if we support it, so we should never get
    * here for a remote server if we dont support it..
@@ -901,7 +898,6 @@ chm_ban(struct Client *client_p, struct Client *source_p,
         char **parv, int *errors, int alev, int dir, char c, void *d,
         const char *chname)
 {
-  int i;
   char *mask;
   char *raw_mask;
   dlink_node *ptr;
@@ -1002,7 +998,6 @@ chm_except(struct Client *client_p, struct Client *source_p,
            char **parv, int *errors, int alev, int dir, char c, void *d,
            const char *chname)
 {
-  int i;
   dlink_node *ptr;
   struct Ban *banptr;
   char *mask, *raw_mask;
@@ -1102,7 +1097,6 @@ chm_invex(struct Client *client_p, struct Client *source_p,
           char **parv, int *errors, int alev, int dir, char c, void *d,
           const char *chname)
 {
-  int i;
   char *mask, *raw_mask;
   dlink_node *ptr;
   struct Ban *banptr;
@@ -1376,7 +1370,7 @@ chm_op(struct Client *client_p, struct Client *source_p,
       if (!wasnt_hopped)
       {
         mode_changes[mode_count].letter = 'h';
-        mode_changes[mode_count].dir == MODE_DEL;
+        mode_changes[mode_count].dir = MODE_DEL;
         mode_changes[mode_count].caps = CAP_HOPS;
         mode_changes[mode_count].nocaps = 0;
         mode_changes[mode_count].mems = ONLY_CHANOPS_HALFOPS;
