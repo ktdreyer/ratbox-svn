@@ -340,7 +340,20 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         }
       return 0;
     }
-
+  /* Okay, we should be safe to cut off the username... -A1kmm */
+  if (parc > 8 && strlen(parv[5]) > USERLEN)
+    {
+     sendto_realops_flags(FLAGS_ALL, "Long username from server %s for %s",
+                parv[0], parv[1]);
+     parv[5][USERLEN] = 0;
+    }
+  /* Okay, we should be safe to cut off the hostname... -A1kmm */
+  if (parc > 8 && strlen(parv[8]) > HOSTLEN)
+    {
+     sendto_realops_flags(FLAGS_ALL, "Long hostname from server %s for %s",
+                parv[0], parv[1]);
+     parv[8][HOSTLEN] = 0;
+    }
   if (!IsServer(sptr) && parc > 2)
     newts = atol(parv[2]);
   else if (IsServer(sptr) && parc > 3)
