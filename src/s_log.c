@@ -264,6 +264,7 @@ void log_user_exit(struct Client *source_p)
 #endif
 }
 
+#ifndef SYSLOG_USERS
 /*
  * user_log_resync
  *
@@ -280,6 +281,7 @@ user_log_resync(void *notused)
       user_log_fb = NULL;
     }
 }
+#endif
 
 /*
  * log_oper
