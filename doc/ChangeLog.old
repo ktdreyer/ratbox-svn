@@ -1,3 +1,17 @@
+db          2002/01/09 12:09:42 EST	(20020109_4)
+
+  Modified files:
+    modules              m_gline.c 
+    src                  match.c 
+  Log:
+  - style cleanups, also removed dead code marked as such
+  
+  Revision  Changes    Path
+  1.75      +5 -5      ircd-hybrid-7/modules/m_gline.c
+  7.16      +46 -58    ircd-hybrid-7/src/match.c
+
+
+
 leeh        2002/01/09 11:19:18 EST	(20020109_3)
 
   Modified files:
