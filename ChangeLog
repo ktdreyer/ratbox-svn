@@ -1,3 +1,17 @@
+leeh        2004/04/12 23:15:39 EDT	(20040413_4)
+
+  Modified files:
+    .                    RELNOTES 
+    src                  s_conf.c 
+  Log:
+  - remove a bogus assert in free_conf()
+  
+  Revision  Changes    Path
+  1.99      +20 -0     ircd-ratbox/RELNOTES
+  7.462     +0 -3      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2004/04/12 23:04:41 EDT	(20040413_3)
 
   Modified files:
