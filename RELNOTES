@@ -1,4 +1,12 @@
- ircd-hybrid-7b10 Release Notes
+-- ircd-hybrid-7beta12 RELNOTES
+
+o) The config option whois_wait was renamed to pace_wait_simple
+o) The convertklines script was updated to reflect the kline format change
+   done a few beta's ago.  The script will also now keep oper reasons given
+   in a kline/dline away from the normal reason.
+o) The ircd will now check D-Lines against unknown connections, as well as
+   clients who are connecting and clients who already exist.
+
 --------------------------------------------------------------------------------
 
 This is the current beta version of ircd-hybrid-7.
@@ -37,14 +45,6 @@ TESTING: This code is under active development, and a lot changes from beta
           loadable modules do on most UNIX systems.  Feeding it bad or
           duplicate modules to find bugs would be appriciated.
 
--- ircd-hybrid-7beta12 RELNOTES
-
-o) The config option whois_wait was renamed to pace_wait_simple
-o) The convertklines script was updated to reflect the kline format change
-   done a few beta's ago.  The script will also now keep oper reasons given
-   in a kline/dline away from the normal reason.
-o) The ircd will now check D-Lines against unknown connections, as well as
-   clients who are connecting and clients who already exist.
 
 Questions/comments directed to ircd-hybrid@the-project.org
 
