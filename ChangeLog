@@ -1,3 +1,19 @@
+leeh        2003/07/29 20:59:53 EDT	(20030730_0)
+
+  Modified files:
+    modules              m_list.c 
+  Log:
+  - removed a vchan remnant
+  Submitted by:
+  Reviewed by:
+  Approved by:
+  Obtained from:
+  
+  Revision  Changes    Path
+  1.69      +23 -41    ircd-ratbox/modules/m_list.c
+
+
+
 leeh        2003/07/27 15:38:50 EDT	(20030727_1)
 
   Modified files:
