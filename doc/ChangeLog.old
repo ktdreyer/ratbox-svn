@@ -1,3 +1,8 @@
+*** 20010418_1 by jdc
+* Added display of pid to startup output.
+
+
+
 *** 20010417_2 by fl_
 - Eline -> ExemptKline
 - Fline -> ExemptLimits
