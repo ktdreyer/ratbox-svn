@@ -127,7 +127,7 @@ struct Server *make_server(struct Client *client_p)
  * side effects - Decrease user reference count by one and release block,
  *                if count reaches 0
  */
-void _free_user(struct User* user, struct Client* client_p)
+void free_user(struct User* user, struct Client* client_p)
 {
   if (--user->refcnt <= 0)
     {
@@ -178,9 +178,8 @@ void init_dlink_nodes(void)
  * output	- pointer to new dlink_node
  * side effects	- NONE
  */
-#ifndef MEMDEBUG
 dlink_node*
-_make_dlink_node(void)
+make_dlink_node(void)
 {
   dlink_node *lp;
 
@@ -191,42 +190,17 @@ _make_dlink_node(void)
   lp->prev = NULL;
   return lp;
 }
-#else
-dlink_node*
-_make_dlink_node(const char *file, int line)
-{
- char nambuf[50];
- dlink_node *lp;
- #define DLINK_DBG_PREFIX "DLINK:"
- strcpy(nambuf, DLINK_DBG_PREFIX);
- strlcpy(nambuf+sizeof(DLINK_DBG_PREFIX)-1, file,
-             sizeof(nambuf)-sizeof(DLINK_DBG_PREFIX));
-#ifdef NOBALLOC
- lp = _MyMalloc(sizeof(dlink_node), nambuf, line);
-#else
- lp = memlog(_BlockHeapAlloc(dnode_heap), sizeof(dlink_node), nambuf, line);
-#endif
- lp->next = NULL;
- lp->prev = NULL;
- ++links_count;
- return lp;
-}
-#endif
 
 /*
- * _free_dlink_node
+ * free_dlink_node
  *
  * inputs	- pointer to dlink_node
  * output	- NONE
  * side effects	- free given dlink_node 
  */
-void _free_dlink_node(dlink_node *ptr)
+void free_dlink_node(dlink_node *ptr)
 {
-#ifdef NOBALLOC
-  MyFree(ptr);
-#else
   BlockHeapFree(dnode_heap, ptr);
-#endif
   --links_count;
   assert(links_count >= 0);
 }

@@ -44,54 +44,17 @@ typedef unsigned long uintptr_t;
 
 extern void outofmemory(void);
 
-#ifdef MEMDEBUG
-void *memlog(void *m, int s, char *f, int l);
-void memulog(void *m);
 
-extern void*       _MyMalloc(size_t size, char *file, int line);
-extern void*       _MyRealloc(void* p, size_t size, char * file, int line);
-extern void        _MyFree(void* p, char * file, int line);
-extern void        _DupString(char**, const char*, char*, int);
-extern int         _BlockHeapFree(BlockHeap *bh, void *ptr);
-extern void *	  _BlockHeapAlloc(BlockHeap *bh);
-#define MyMalloc(x) _MyMalloc(x, __FILE__, __LINE__)
-#define MyRealloc(x,y) _MyRealloc(x, y, __FILE__, __LINE__)
-#define MyFree(x) _MyFree(x, __FILE__, __LINE__)
-#define DupString(x,y) _DupString(&x, y, __FILE__, __LINE__)
-#ifndef NOBALLOC
-#define BlockHeapAlloc(x) memlog(_BlockHeapAlloc(x), \
-                                 x->elemSize-sizeof(MemoryEntry), \
-                                 __FILE__, __LINE__)
-#define BlockHeapFree(x, y) memulog(y); \
-                            _BlockHeapFree(x, \
-                            ((char*)y)-sizeof(MemoryEntry))
-#endif
-void log_memory(void);
-
-
-typedef struct _MemEntry
-{
-  size_t size;
-  time_t ts;
-  char file[50];
-  int line;
-  struct _MemEntry *next, *last;
-  /* Data follows... */
-} MemoryEntry;
-extern MemoryEntry *first_mem_entry;
-
-#else /* MEMDEBUG */
-
-extern void *_MyMalloc(size_t size);
-extern void *_MyRealloc(void *x, size_t y);
-extern void _MyFree(void *x);
+extern void *MyMalloc(size_t size);
+extern void *MyRealloc(void *x, size_t y);
+extern void MyFree(void *x);
 extern void _DupString(char **x, const char *y);
 
 /* forte (and maybe others) dont like double declarations, 
  * so we dont declare the inlines unless GNUC
  */
 #ifdef __GNUC__
-extern inline void * _MyMalloc(size_t size)
+extern inline void * MyMalloc(size_t size)
 {
   void *ret = calloc(1, size);
   if(ret == NULL)
@@ -99,7 +62,7 @@ extern inline void * _MyMalloc(size_t size)
   return(ret);
 }
 
-extern inline void* _MyRealloc(void* x, size_t y)
+extern inline void* MyRealloc(void* x, size_t y)
 {
   void *ret = realloc(x, y);
   
@@ -108,7 +71,7 @@ extern inline void* _MyRealloc(void* x, size_t y)
   return(ret);    
 }
 
-extern inline void _MyFree(void *x)
+extern inline void MyFree(void *x)
 {
   if(x != NULL)
     free(x);
@@ -123,23 +86,8 @@ extern inline void _DupString(char **x, const char *y)
 }
 #endif __GNUC__
 
-extern int         _BlockHeapFree(BlockHeap *bh, void *ptr);
-extern void *	  _BlockHeapAlloc(BlockHeap *bh);
-
-#define MyMalloc(x) _MyMalloc(x)
-#define MyRealloc(x,y) _MyRealloc(x, y)
-#define MyFree(x) _MyFree(x)
 #define DupString(x,y) _DupString(&x, y)
-#ifndef NOBALLOC
-#define BlockHeapAlloc(x) _BlockHeapAlloc(x)
-#define BlockHeapFree(x, y) _BlockHeapFree(x, y)
-#endif
-#endif /* !MEMDEBUG */
 
-#ifdef NOBALLOC
-#define BlockHeapAlloc(x) MyMalloc((int)x)
-#define BlockHeapFree(x,y) MyFree(y)
-#endif
 
 #ifndef WE_ARE_MEMORY_C
 #undef strdup

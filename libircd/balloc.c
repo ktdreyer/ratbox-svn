@@ -320,9 +320,6 @@ BlockHeapCreate(size_t elemsize, int elemsperblock)
         outofmemory();          /* die.. out of memory */
       }
 
-#ifdef MEMDEBUG
-    elemsize += sizeof(MemoryEntry);
-#endif
     if((elemsize % sizeof(void *)) != 0)
       {
 	/* Pad to even pointer boundary */
@@ -365,7 +362,7 @@ BlockHeapCreate(size_t elemsize, int elemsperblock)
 /* ************************************************************************ */
 
 void *
-_BlockHeapAlloc(BlockHeap * bh)
+BlockHeapAlloc(BlockHeap * bh)
 {
     Block *walker;
     dlink_node *new_node;
@@ -424,7 +421,7 @@ _BlockHeapAlloc(BlockHeap * bh)
 /*    0 if successful, 1 if element not contained within BlockHeap.         */
 /* ************************************************************************ */
 int
-_BlockHeapFree(BlockHeap * bh, void *ptr)
+BlockHeapFree(BlockHeap * bh, void *ptr)
 {
     Block *block;
     struct MemBlock *memblock;

@@ -72,6 +72,9 @@ struct BlockHeap {
 typedef struct BlockHeap BlockHeap;
 
 
+extern int         BlockHeapFree(BlockHeap *bh, void *ptr);
+extern void *     BlockHeapAlloc(BlockHeap *bh);
+
 extern BlockHeap* BlockHeapCreate(size_t elemsize, int elemsperblock);
 extern int        BlockHeapDestroy(BlockHeap *bh);
 
@@ -86,6 +89,11 @@ typedef struct BlockHeap BlockHeap;
 /* This is really kludgy, passing ints as pointers is always bad. */
 #define BlockHeapCreate(es, epb) ((BlockHeap*)(es))
 #define BlockHeapDestroy(x)
+#ifdef NOBALLOC
+#define BlockHeapAlloc(x) MyMalloc((int)x)
+#define BlockHeapFree(x,y) MyFree(y)
+#endif
+
 
 #endif /* NOBALLOC */
 

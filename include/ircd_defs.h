@@ -67,19 +67,6 @@
 #define CLIENT_PARSE_ERROR -1
 #define CLIENT_OK	1
 
-/* 
- * Macros everyone uses :/ moved here from sys.h
- */
-/*
-#define MyFree(x)       if ((x)) free((x))
-*/
-#define free_client(x) _free_client((x))
-#define free_link(x)   _free_link((x))
-#define free_user(x,y) _free_user((x), (y))
-#define free_dlink_node(x) _free_dlink_node((x))
-
-
-
 
 struct irc_inaddr
 {

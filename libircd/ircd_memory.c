@@ -38,135 +38,10 @@
 #include "restart.h"
 
 
-#ifdef MEMDEBUG
-/* Hopefully this debugger will work better than the existing one...
- * -A1kmm. */
-
-#define DATA(me) (void*)(((char*)me)+sizeof(MemoryEntry))
-
-void *memlog(void *d, int s, char *f, int l)
-{
-    MemoryEntry *mme;
-    mme = (MemoryEntry *) d;
-    d += sizeof(MemoryEntry);
-    mme->next = first_mem_entry;
-    mme->last = NULL;
-    if (first_mem_entry != NULL)
-	first_mem_entry->last = mme;
-    first_mem_entry = mme;
-    if (l > 0)
-	mme->line = l;
-    else
-	*mme->file = 0;
-    if (f != NULL)
-	strncpy(mme->file, f,
-		sizeof(mme->file) - 1)[sizeof(mme->file) - 1] = 0;
-    else
-	*mme->file = 0;
-    mme->ts = CurrentTime;
-    mme->size = s;
-    return d;
-}
-
-void memulog(void *m)
-{
-    MemoryEntry *mme;
-    m -= sizeof(MemoryEntry);
-    mme = (MemoryEntry *) m;
-    if (mme->last != NULL)
-	mme->last->next = mme->next;
-    if (mme->next != NULL)
-	mme->next->last = mme->last;
-    if (first_mem_entry == mme)
-	first_mem_entry = mme->next;
-}
-
-MemoryEntry *first_mem_entry = NULL;
-
-void *_MyMalloc(size_t size, char *file, int line)
-{
-    void *what = malloc(size + sizeof(MemoryEntry));
-    if (what == NULL)
-	outofmemory();
-#ifndef	NDEBUG
-    mem_frob(what, sizeof(MemoryEntry) + size);
-#endif
-    return memlog(what, size, file, line);
-}
-
-void _MyFree(void *what, char *file, int line)
-{
-    if(what != NULL) {
-    	memulog(what);
-    	free(what - sizeof(MemoryEntry));
-    }
-}
-
-void *_MyRealloc(void *what, size_t size, char *file, int line)
-{
-    MemoryEntry *mme;
-    if (!what)
-	return _MyMalloc(size, file, line);
-    if (!size) {
-	_MyFree(what, file, line);
-	return NULL;
-    }
-    mme = (MemoryEntry *) ((char *) what - sizeof(MemoryEntry));
-    mme = realloc(mme, size + sizeof(MemoryEntry));
-    mme->size = size;
-    if (mme->next != NULL)
-	mme->next->last = mme;
-    if (mme->last != NULL)
-	mme->last->next = mme;
-    else
-	first_mem_entry = mme;
-    return DATA(mme);
-}
-
-void _DupString(char **x, const char *y, char *file, int line)
-{
-    *x = _MyMalloc(strlen(y) + 1, file, line);
-    strcpy(*x, y);
-}
-
-void ReportAllocated(struct Client *);
-
-void ReportAllocated(struct Client *client_p)
-{
-    int i = 2000;
-    MemoryEntry *mme;
-    sendto_one(client_p, ":%s NOTICE %s :*** -- Memory Allocation Report",
-	       me.name, client_p->name);
-    for (i = 0, mme = first_mem_entry; i < 1000 && mme;
-	 mme = mme->next, i++)
-	sendto_one(client_p,
-		   ":%s NOTICE %s :*** -- %u bytes allocated for %lus at %s:%d",
-		   me.name, client_p->name, mme->size,
-		   CurrentTime - mme->ts, mme->file, mme->line);
-    sendto_one(client_p,
-	       ":%s NOTICE %s :*** -- End Memory Allocation Report",
-	       me.name, client_p->name);
-}
-
-void log_memory(void)
-{
-    MemoryEntry *mme;
-    int fd;
-    char buffer[200];
-    fd = open("memory.log", O_CREAT | O_WRONLY);
-    for (mme = first_mem_entry; mme; mme = mme->next) {
-	sprintf(buffer, "%u bytes allocated for %lus at %s:%d\n",
-		mme->size, CurrentTime - mme->ts, mme->file, mme->line);
-	write(fd, buffer, strlen(buffer));
-    }
-    close(fd);
-}
-
-#else				/* MEMDEBUG */
 /*
  * MyMalloc - allocate memory, call outofmemory on failure
  */
-void *_MyMalloc(size_t size)
+void *MyMalloc(size_t size)
 {
     void *ret = calloc(1, size);
     if (ret == NULL)
@@ -177,7 +52,7 @@ void *_MyMalloc(size_t size)
 /*
  * MyRealloc - reallocate memory, call outofmemory on failure
  */
-void *_MyRealloc(void *x, size_t y)
+void *MyRealloc(void *x, size_t y)
 {
     void *ret = realloc(x, y);
 
@@ -186,7 +61,7 @@ void *_MyRealloc(void *x, size_t y)
     return ret;
 }
 
-void _MyFree(void *x)
+void MyFree(void *x)
 {
      if(x)
      	free((x));
@@ -198,8 +73,6 @@ void _DupString(char **x, const char *y)
     strcpy((*x), y);
 }
 
-
-#endif				/* !MEMDEBUG */
 
 /*
  * outofmemory()
@@ -218,8 +91,5 @@ void outofmemory()
     was_here = 1;
 
     ilog(L_CRIT, "Out of memory: restarting server...");
-#ifdef MEMDEBUG
-    log_memory();
-#endif
     restart("Out of Memory");
 }
