@@ -1,3 +1,8 @@
+*** 20010427_1 by fl_
+- you cant add brackets if the kill isnt yours :)
+  if you do your gunna end up with a reason like ((((((ghost)))))) ;P
+
+
 *** 20010426_6 by jdc
 * Fixed unused retval variable in kq_update_events() via #if 0.
 * In kq_update_events(), kqoff was never set to 0 correctly (typo;
