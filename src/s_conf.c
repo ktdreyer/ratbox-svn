@@ -1444,6 +1444,7 @@ static void set_default_conf(void)
   ConfigFileEntry.fname_foperlog[0] = '\0';
   ConfigFileEntry.fname_operlog[0] = '\0';
   ConfigFileEntry.glines = NO;
+  ConfigFileEntry.use_egd = NO;
   /* don't reset msglocale setting -- we'd overwrite then env string */
   ConfigFileEntry.gline_time = 12 * 3600;
   ConfigFileEntry.idletime = 0;
@@ -1452,6 +1453,7 @@ static void set_default_conf(void)
   ConfigFileEntry.hide_server = 0;
   ConfigFileEntry.max_targets = MAX_TARGETS_DEFAULT;
   DupString(ConfigFileEntry.servlink_path, SLPATH);
+  ConfigFileEntry.egdpool_path = NULL;
 #ifdef HAVE_LIBCRYPTO
   ConfigFileEntry.default_cipher_preference = NULL;
 #endif

@@ -102,94 +102,144 @@ int   class_redirport_var;
 %token  ACTION
 %token  ADMIN
 %token  AFTYPE
+%token  ANTI_NICK_FLOOD
+%token  ANTI_SPAM_EXIT_MESSAGE_TIME
 %token  AUTH
 %token  AUTOCONN
+%token  BYTES KBYTES MBYTES GBYTES TBYTES
+%token  CALLER_ID_WAIT
+%token  CHANNEL
 %token  CIPHER_PREFERENCE
 %token  CLASS
+%token  CLIENT_EXIT
 %token  COMPRESSED
 %token  COMPRESSION_LEVEL
 %token  CONNECT
 %token  CONNECTFREQ
-%token  DEFAULT_FLOODCOUNT
+%token  CRYPTLINK
 %token  DEFAULT_CIPHER_PREFERENCE
+%token  DEFAULT_FLOODCOUNT
 %token  DENY
 %token  DESCRIPTION
 %token  DIE
+%token  DISABLE_VCHANS
 %token  DOTS_IN_IDENT
+%token  EGDPOOL_PATH
 %token  EMAIL
 %token  ENCRYPTED
 %token  EXCEED_LIMIT
 %token  EXEMPT
-%token	FAKENAME
-%token  FNAME_USERLOG
-%token  FNAME_OPERLOG
+%token  FAILED_OPER_NOTICE
+%token  FAKENAME
 %token  FNAME_FOPERLOG
+%token  FNAME_OPERLOG
+%token  FNAME_USERLOG
 %token  GECOS
+%token  GENERAL
 %token  GLINE
 %token  GLINES
 %token  GLINE_EXEMPT
-%token  GLINE_TIME
 %token  GLINE_LOG
+%token  GLINE_TIME
 %token  GLOBAL_KILL
 %token  HAVE_IDENT
+%token  HIDESERVER
 %token  HOST
 %token  HUB
 %token  HUB_MASK
+%token  IAUTH_PORT
+%token  IAUTH_SERVER
 %token  IDLETIME
 %token  IP
 %token  KILL
 %token  KLINE
 %token  KLINE_EXEMPT
-%token  CRYPTLINK
+%token  KLINE_WITH_CONNECTION_CLOSED
+%token  KLINE_WITH_REASON
+%token  KNOCK_DELAY
 %token  LAZYLINK
 %token  LEAF_MASK
+%token  LINKS_DELAY
 %token  LISTEN
 %token  LOGGING
-%token  T_LOGPATH
 %token  LOG_LEVEL
-%token  T_CLIENT_FLOOD
-%token  MAX_NUMBER
+%token  MAXBANS
 %token  MAXIMUM_LINKS
+%token  MAX_ACCEPT
+%token  MAX_CHANS_PER_USER
+%token  MAX_NICK_CHANGES
+%token  MAX_NICK_TIME
+%token  MAX_NUMBER
+%token  MAX_TARGETS
 %token  MESSAGE_LOCALE
+%token  MIN_NONWILDCARD
+%token  MODULE
+%token  MODULES
 %token  NAME
-%token  NETWORK_NAME
 %token  NETWORK_DESC
+%token  NETWORK_NAME
 %token  NICK_CHANGES
+%token  NON_REDUNDANT_KLINES
 %token  NO_HACK_OPS
+%token  NO_OPER_FLOOD
 %token  NO_TILDE
 %token  NUMBER
 %token  NUMBER_PER_IP
 %token  OPERATOR
 %token  OPER_LOG
+%token  OPER_ONLY_UMODES
 %token  OPER_UMODES
+%token  PACE_WAIT
 %token  PASSWORD
+%token  PATH
 %token  PERSISTANT
+%token  PERSISTANT_EXPIRE_TIME
 %token  PING_TIME
 %token  PORT
 %token  QSTRING
 %token  QUARANTINE
 %token  QUIET_ON_BAN
 %token  REASON
-%token  REDIRSERV
 %token  REDIRPORT
+%token  REDIRSERV
 %token  REHASH
 %token  REMOTE
 %token  RESTRICTED
-%token  RSA_PUBLIC_KEY
 %token  RSA_PRIVATE_KEY
+%token  RSA_PUBLIC_KEY
+%token  SECONDS MINUTES HOURS DAYS WEEKS MONTHS YEARS DECADES CENTURIES MILLENNIA
 %token  SENDQ
 %token  SEND_PASSWORD
 %token  SERVERINFO
 %token  SERVLINK_PATH
 %token  SHARED
+%token  SHORT_MOTD
+%token  SILENT
 %token  SPOOF
 %token  SPOOF_NOTICE
+%token  STATS_I_OPER_ONLY
+%token  STATS_K_OPER_ONLY
+%token  STATS_O_OPER_ONLY
+%token  TMASKED
+%token  TNO
 %token  TREJECT
+%token  TS_MAX_DELTA
+%token  TS_WARN_DELTA
+%token  TWODOTS
+%token  TYES
+%token  T_BOTS
+%token  T_CALLERID
+%token  T_CCONN
+%token  T_CLIENT_FLOOD
+%token  T_DEBUG
+%token  T_DRONE
+%token  T_EXTERNAL
+%token  T_FULL
+%token  T_INVISIBLE
 %token  T_IPV4
 %token  T_IPV6
-%token  TNO
-%token  TYES
-%token	TMASKED
+%token  T_LOCOPS
+%token  T_LOGPATH
 %token  T_L_CRIT
 %token  T_L_DEBUG
 %token  T_L_ERROR
@@ -197,76 +247,28 @@ int   class_redirport_var;
 %token  T_L_NOTICE
 %token  T_L_TRACE
 %token  T_L_WARN
+%token  T_MAX_BUFFER
+%token  T_MAX_CLIENTS
+%token  T_NCHANGE
+%token  T_OPERWALL
+%token  T_REJ
+%token  T_SERVNOTICE
+%token  T_SKILL
+%token  T_SPY
+%token  T_UNAUTH
+%token  T_WALLOP
 %token  UNKLINE
 %token  USER
-%token  VHOST
-%token	VHOST6
-%token  WARN
-%token  SILENT
-%token  GENERAL
-%token  CHANNEL
-%token  FAILED_OPER_NOTICE
-%token  ANTI_NICK_FLOOD
-%token  ANTI_SPAM_EXIT_MESSAGE_TIME
-%token  MAX_ACCEPT
-%token  MAX_NICK_TIME
-%token  MAX_NICK_CHANGES
-%token  MAX_CHANS_PER_USER
-%token  MAXBANS
-%token  TS_MAX_DELTA
-%token  TS_WARN_DELTA
-%token  KLINE_WITH_REASON
-%token  KLINE_WITH_CONNECTION_CLOSED
-%token  WARN_NO_NLINE
-%token  NON_REDUNDANT_KLINES
-%token  STATS_O_OPER_ONLY
-%token	STATS_K_OPER_ONLY
-%token	STATS_I_OPER_ONLY
-%token  WHOIS_WAIT
-%token  PACE_WAIT
-%token  CALLER_ID_WAIT
-%token  KNOCK_DELAY
-%token  SHORT_MOTD
-%token  NO_OPER_FLOOD
-%token  IAUTH_SERVER
-%token  IAUTH_PORT
-%token  MODULE
-%token  MODULES
-%token  HIDESERVER
-%token  CLIENT_EXIT
-%token  T_BOTS
-%token  T_CCONN
-%token  T_DEBUG
-%token  T_DRONE
-%token  T_FULL
-%token  T_SKILL
-%token  T_LOCOPS
-%token  T_NCHANGE
-%token  T_REJ
-%token  T_UNAUTH
-%token  T_SPY
-%token  T_EXTERNAL
-%token  T_OPERWALL
-%token  T_SERVNOTICE
-%token  T_INVISIBLE
-%token  T_CALLERID
-%token  T_WALLOP
-%token  OPER_ONLY_UMODES
-%token  PATH
-%token  PERSISTANT_EXPIRE_TIME
-%token  MAX_TARGETS
-%token  T_MAX_CLIENTS
-%token  T_MAX_BUFFER
-%token  LINKS_DELAY
-%token  VCHANS_OPER_ONLY
-%token  MIN_NONWILDCARD
-%token  DISABLE_VCHANS
-%token  SECONDS MINUTES HOURS DAYS WEEKS MONTHS YEARS DECADES CENTURIES MILLENNIA
-%token  BYTES KBYTES MBYTES GBYTES TBYTES
-%token  TWODOTS
-%token  USE_INVEX
+%token  USE_EGD
 %token  USE_EXCEPT
+%token  USE_INVEX
 %token  USE_KNOCK
+%token  VCHANS_OPER_ONLY
+%token  VHOST
+%token  VHOST6
+%token  WARN
+%token  WARN_NO_NLINE
+%token  WHOIS_WAIT
 
 %left '-' '+'
 %left '*' '/'
@@ -1949,6 +1951,7 @@ general_item:       general_failed_oper_notice |
                     general_fname_userlog | general_fname_operlog |
                     general_fname_foperlog | general_oper_only_umodes |
                     general_max_targets |
+                    general_use_egd | general_egdpool_path |
                     general_links_delay | general_oper_umodes |
                     general_caller_id_wait | general_default_floodcount |
                     general_persistant_expire_time | general_min_nonwildcard |
@@ -2295,6 +2298,22 @@ general_compression_level: COMPRESSION_LEVEL '=' expr ';'
 #endif
   }
 
+general_use_egd: USE_EGD '=' TYES ';'
+  {
+    ConfigFileEntry.use_egd = 1;
+  }
+    |
+    USE_EGD '=' TNO ';'
+  {
+    ConfigFileEntry.use_egd = 0;
+  } ;
+
+general_egdpool_path: EGDPOOL_PATH '=' QSTRING ';'
+  {
+    MyFree(ConfigFileEntry.egdpool_path);
+    DupString(ConfigFileEntry.egdpool_path, yylval.string);
+  } ;
+
 general_oper_umodes: OPER_UMODES
   {
     ConfigFileEntry.oper_umodes = 0;
@@ -2469,7 +2488,6 @@ general_client_flood: T_CLIENT_FLOOD '=' expr ';'
     ConfigFileEntry.client_flood = $3;
   };
 
-
 /***************************************************************************
  *  section channel
  ***************************************************************************/
@@ -2515,7 +2533,7 @@ channel_use_knock:   USE_KNOCK '=' TYES ';'
   {
     ConfigChannel.use_knock = 1;
   }
-                        |
+                     |
                      USE_KNOCK '=' TNO ';'
   {
     ConfigChannel.use_knock = 0;

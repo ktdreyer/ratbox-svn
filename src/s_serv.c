@@ -33,6 +33,7 @@
 #include <time.h>
 #include <netdb.h>
 
+#include "rsa.h"
 #include "config.h"
 
 #ifdef HAVE_LIBCRYPTO
@@ -2252,7 +2253,7 @@ void cryptlink_init(struct Client *client_p,
       return;
     }
 
-  if (RAND_bytes(randkey, CIPHERKEYLEN) != 1)
+  if (get_randomness(randkey, CIPHERKEYLEN) != 1)
     {
       cryptlink_error(client_p,
                       "%s[%s]: CRYPTLINK failed - couldn't generate secret");

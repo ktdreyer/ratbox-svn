@@ -179,6 +179,7 @@ struct config_file_entry
   char *glinelog;
 
   char *servlink_path;
+  char *egdpool_path;
 
   char* network_name;
   char* network_desc;
@@ -229,6 +230,7 @@ struct config_file_entry
   int           min_nonwildcard;
   int           default_floodcount;
   int           client_flood;
+  int           use_egd;
 #ifdef HAVE_LIBCRYPTO
   struct EncPreference *default_cipher_preference;
 #endif

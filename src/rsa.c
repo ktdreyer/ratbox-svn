@@ -24,9 +24,12 @@
 
 #include <assert.h>
 #include <string.h>
+
 #include "memory.h"
 #include "rsa.h"
+#include "s_conf.h"
 #include "client.h" /* CIPHERKEYLEN .. eww */
+
 #ifdef HAVE_LIBCRYPTO
 
 #include <openssl/rand.h>
@@ -36,7 +39,6 @@
 #include <openssl/evp.h>
 
 static void binary_to_hex( unsigned char * bin, char * hex, int length );
-static void get_randomness( unsigned char * buf, int length );
 static int absorb( char ** str, char lowest, char highest );
 static RSA * str_to_RSApublic( char * key );
 
@@ -53,12 +55,20 @@ static void binary_to_hex( unsigned char * bin, char * hex, int length )
   hex[i<<1] = '\0';
 }
 
-static void get_randomness( unsigned char * buf, int length )
+int get_randomness( unsigned char * buf, int length )
 {
+    /* Seed OpenSSL PRNG with EGD enthropy pool -kre */
+    if (ConfigFileEntry.use_egd &&
+        (ConfigFileEntry.egdpool_path != NULL))
+    {
+      if (RAND_egd(ConfigFileEntry.egdpool_path) == -1)
+            return -1;
+    }
+
   if ( RAND_status() )
-    RAND_bytes( buf, length );
+    return RAND_bytes( buf, length );
   else /* XXX - abort? */
-    RAND_pseudo_bytes( buf, length );
+    return RAND_pseudo_bytes( buf, length );
 }
 
 static int absorb( char ** str, char lowest, char highest )

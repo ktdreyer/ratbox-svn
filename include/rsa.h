@@ -25,4 +25,5 @@
 int generate_challenge( char ** r_challenge, char ** r_response, char * key );
 int crypt_data(char **out, char *in, int len, char *key);
 int decrypt_data(char **out, char *in, int len, char *key);
+int get_randomness( unsigned char * buf, int length );
   
