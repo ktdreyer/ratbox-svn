@@ -1,3 +1,16 @@
+db          2002/04/27 16:36:22 EDT	(20020427_4)
+
+  Modified files:
+    src                  client.c packet.c 
+  Log:
+  - ripped out #if 0 code. it looks horrible, and we have copies in cvs repo anyway.
+  
+  Revision  Changes    Path
+  7.253     +0 -20     ircd-hybrid-7/src/client.c
+  7.75      +0 -39     ircd-hybrid-7/src/packet.c
+
+
+
 leeh        2002/04/27 16:34:34 EDT	(20020427_3)
 
   Modified files:
