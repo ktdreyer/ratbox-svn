@@ -182,8 +182,6 @@ void parse(struct Client *client_p, char *pbuffer, char *bufend)
           if (from == NULL)
             from = find_server(sender);
 
-          para[0] = from->name;
-          
           /* Hmm! If the client corresponding to the
            * prefix is not found--what is the correct
            * action??? Now, I will ignore the message
@@ -200,6 +198,9 @@ void parse(struct Client *client_p, char *pbuffer, char *bufend)
 
               return;
             }
+
+          para[0] = from->name;
+          
           if (from->from != client_p)
             {
               ServerStats->is_wrdi++;
