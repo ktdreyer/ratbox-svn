@@ -1,3 +1,8 @@
+*** 20010626_3 by a1kmm
+- Tried to fix the mode code a little more. Still minor problems with the
+  stuff sent to the local client on -o+v
+
+
 *** 20010626_2 by jdc
 - modules/m_whois.c
     * Minor warning fixed up (line 551; if statement vague/ambiguous).
