@@ -1,3 +1,18 @@
+leeh        2004/09/05 18:17:08 EDT	(20040905_3)
+
+  Modified files:
+    modules              m_resv.c m_xline.c 
+  Log:
+  - disable '"' as a valid char in xline/resv reasons
+  - disable "\"," in an xline - it makes it unparsable
+  - add translation of \s in an xline to a space
+  
+  Revision  Changes    Path
+  1.69      +15 -1     ircd-ratbox/modules/m_resv.c
+  1.62      +50 -2     ircd-ratbox/modules/m_xline.c
+
+
+
 leeh        2004/09/05 17:42:51 EDT	(20040905_2)
 
   Modified files:
