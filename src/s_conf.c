@@ -208,7 +208,6 @@ free_conf(struct ConfItem* aconf)
          (aconf->clients == -1));
 
   delete_adns_queries(aconf->dns_query);
-  MyFree(aconf->host);
 
   /* security.. */
   if (aconf->passwd)
@@ -221,9 +220,13 @@ free_conf(struct ConfItem* aconf)
   MyFree(aconf->name);
   MyFree(aconf->className);
   MyFree(aconf->user);
+  MyFree(aconf->host);
+
 #ifdef HAVE_LIBCRYPTO
-  if (aconf->rsa_public_key)        { RSA_free(aconf->rsa_public_key); }
-  if (aconf->rsa_public_key_file)   { MyFree(aconf->rsa_public_key_file); }
+  if(aconf->rsa_public_key)
+    RSA_free(aconf->rsa_public_key);
+
+  MyFree(aconf->rsa_public_key_file);
 #endif
   MyFree((char*) aconf);
 }

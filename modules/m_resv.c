@@ -37,6 +37,7 @@
 #include "resv.h"
 #include "hash.h"
 #include "s_log.h"
+#include "sprintf_irc.h"
 
 static void mo_resv(struct Client *, struct Client *, int, char **);
 static void mo_unresv(struct Client *, struct Client *, int, char **);

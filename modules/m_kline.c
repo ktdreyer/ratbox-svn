@@ -195,14 +195,6 @@ mo_kline(struct Client *client_p, struct Client *source_p,
   if (!valid_comment(source_p, reason))
     return;
 
-  set_time();
-  current_date = smalldate(CurrentTime);
-  aconf = make_conf();
-  aconf->status = CONF_KILL;
-  DupString(aconf->host, host);
-  DupString(aconf->user, user);
-  aconf->port = 0;
-
   if (target_server != NULL)
     {
       sendto_server(NULL, CAP_KLN, NOCAPS, 
@@ -212,16 +204,21 @@ mo_kline(struct Client *client_p, struct Client *source_p,
                     (unsigned long) tkline_time,
                     user, host, reason);
 
-      /* If we are sending it somewhere that doesnt include us, we stop
-       * else we apply it locally too
-       */
-      if (!match(target_server, me.name))
-	   return;
+      /* If we are sending it somewhere that doesnt include us, stop */
+      if(!match(target_server, me.name))
+        return;
     }
 
   if (already_placed_kline(source_p, user, host))
-   return;
+    return;
 
+  set_time();
+  current_date = smalldate(CurrentTime);
+  aconf = make_conf();
+  aconf->status = CONF_KILL;
+  DupString(aconf->host, host);
+  DupString(aconf->user, user);
+  aconf->port = 0;
 
   /* Look for an oper reason */
   if ((oper_reason = strchr(reason, '|')) != NULL)
@@ -234,17 +231,13 @@ mo_kline(struct Client *client_p, struct Client *source_p,
     {
       ircsprintf(buffer,
 		 "Temporary K-line %d min. - %s (%s)",
-		 (int)(tkline_time/60),
-		 reason,
-		 current_date);
+		 (int)(tkline_time/60), reason, current_date);
       DupString(aconf->passwd, buffer);
       apply_tkline(source_p, aconf, current_date, tkline_time);
     }
   else
     {
-      ircsprintf(buffer, "%s (%s)",
-		 reason,
-		 current_date);
+      ircsprintf(buffer, "%s (%s)", reason, current_date);
       DupString(aconf->passwd, buffer);
       apply_kline(source_p, aconf, reason, oper_reason, current_date);
     }
