@@ -1,3 +1,16 @@
+leeh        2004/03/03 16:05:09 EST	(20040303_14)
+
+  Modified files:
+    modules/core         m_nick.c 
+  Log:
+  - fix a core when an invalid nick is introduced over TS6, add various
+    missing returns on bad nickname/username/host.
+  
+  Revision  Changes    Path
+  1.142     +7 -4      ircd-ratbox/modules/core/m_nick.c
+
+
+
 leeh        2004/03/03 15:52:08 EST	(20040303_13)
 
   Modified files:
