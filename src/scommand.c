@@ -48,6 +48,7 @@ init_scommand(void)
 {
 	add_scommand_handler(&admin_command);
 	add_scommand_handler(&capab_command);
+	add_scommand_handler(&encap_command);
 	add_scommand_handler(&pass_command);
 	add_scommand_handler(&ping_command);
 	add_scommand_handler(&pong_command);
@@ -273,7 +274,7 @@ c_encap(struct client *client_p, const char *parv[], int parc)
 		if(EmptyString(parv[3]) || !IsUser(client_p))
 			return;
 
-		hook_call(HOOK_BURST_LOGIN, client_p, parv[3]);
+		hook_call(HOOK_BURST_LOGIN, client_p, (void *) parv[3]);
 	}
 }
 

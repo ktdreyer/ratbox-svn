@@ -22,6 +22,7 @@
 #include "conf.h"
 #include "io.h"
 #include "event.h"
+#include "hook.h"
 
 static struct client *userserv_p;
 static BlockHeap *user_reg_heap;
@@ -237,7 +238,7 @@ h_user_burst_login(void *v_client_p, void *v_username)
 	const char *username = v_username;
 
 	/* XXX - log them out? */
-	if((ureg_p = find_user_reg(username)) == NULL)
+	if((ureg_p = find_user_reg(NULL, username)) == NULL)
 		return 0;
 
 	/* already logged in.. hmm, this shouldnt really happen */
@@ -246,6 +247,8 @@ h_user_burst_login(void *v_client_p, void *v_username)
 
 	client_p->user->user_reg = ureg_p;
 	dlink_add_alloc(client_p, &ureg_p->users);
+
+	return 0;
 }
 
 static void
