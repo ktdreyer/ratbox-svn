@@ -1,3 +1,7 @@
+*** 20010307_5 by fl_
+- changed the numerics warning..
+
+
 *** 20010307_4 by fl_
 - this fixes clearchan.. we do stuff in a certain order which unfortunately
   means the channel is never really destroyed.. the oper can cycle if they
