@@ -191,6 +191,7 @@ free_local_client(struct Client *client_p)
 	MyFree(client_p->localClient->fullcaps);
 	MyFree(client_p->localClient->auth_oper);
 	MyFree(client_p->localClient->response);
+	MyFree(client_p->localClient->opername);
 
 	BlockHeapFree(lclient_heap, client_p->localClient);
 	client_p->localClient = NULL;
