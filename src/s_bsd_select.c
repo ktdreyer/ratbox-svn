@@ -169,8 +169,8 @@ comm_select(unsigned long delay)
     struct timeval to;
 
     /* Copy over the read/write sets so we don't have to rebuild em */
-    bcopy(&select_readfds, &tmpreadfds, sizeof(fd_set));
-    bcopy(&select_writefds, &tmpwritefds, sizeof(fd_set));
+    memcpy(&tmpreadfds, &select_readfds, sizeof(fd_set));
+    memcpy(&tmpwritefds, &select_writefds, sizeof(fd_set));
 
     for (;;) {
         to.tv_sec = 0;
