@@ -1,3 +1,10 @@
+*** 20010318_1 by madmax
+RPL_WELCOME now says:
+Welcome to the NETWORK_NAME Internet Relay Chat Network 
+
+mIRC actually parses this and puts the NETWORK_NAME string into $network
+
+
 *** 20010317_1 by androsyn
 This file was left over from when I merged into the tree.  Its not need for
 anything.
