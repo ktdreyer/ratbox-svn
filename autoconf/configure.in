@@ -671,7 +671,7 @@ if test "$ac_cv_efnet" = "yes"; then
     echo "Building ircd for use with efnet"
 fi
 
-ac_cv_assert="-NDEBUG"
+ac_cv_assert="-DNDEBUG"
 
 dnl assert?
 AC_ARG_ENABLE(assert,
@@ -685,7 +685,7 @@ AC_ARG_ENABLE(assert,
     ;;
   no)
     echo "Disabling assert() code."
-    ac_cv_assert="-NDEBUG"
+    ac_cv_assert="-DNDEBUG"
     ;;
   esac
 ])
