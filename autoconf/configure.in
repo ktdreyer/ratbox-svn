@@ -25,6 +25,8 @@ dnl Replace `main' with a function in -lnsl:
 AC_CHECK_LIB(nsl, gethostbyname)
 AC_CHECK_FUNC(res_mkquery,, AC_CHECK_LIB(resolv, res_mkquery))
 AC_CHECK_LIB(socket, socket)
+AC_CHECK_FUNC(dlopen,, AC_CHECK_LIB(dl, dlopen,,AC_MSG_ERROR(**
+dlopen could not be found - ircd-hybrid will not compile without it **)))
 AC_CHECK_FUNC(crypt,, AC_CHECK_LIB(descrypt, crypt,,AC_CHECK_LIB(crypt, crypt,,)))
 
 dnl Checks for header files.

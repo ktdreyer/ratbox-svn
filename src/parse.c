@@ -43,11 +43,11 @@
 /*
  * NOTE: parse() should not be called recursively by other functions!
  */
+static  char    *sender;
 static  char    *para[MAXPARA+1];
 static  int     cancel_clients (struct Client *, struct Client *, char *);
 static  void    remove_unknown (struct Client *, char *, char *);
 
-static  char    sender[HOSTLEN+1];
 static  int     cancel_clients (struct Client *, struct Client *, char *);
 static  void    remove_unknown (struct Client *, char *, char *);
 
@@ -92,9 +92,6 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
   if (IsDead(cptr))
     return -1;
 
-  s = sender;
-  *s = '\0';
-
   for (ch = buffer; *ch == ' '; ch++)   /* skip spaces */
     /* null statement */ ;
 
@@ -107,13 +104,16 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
       ** Copy the prefix to 'sender' assuming it terminates
       ** with SPACE (or NULL, which is an error, though).
       */
-      for (i = 0; *ch && *ch != ' '; i++ )
+
+      sender = ch;
+
+      if( (s = strchr(ch, ' ')))
 	{
-	  if (i < (sizeof(sender)-1))
-	    *s++ = *ch; /* leave room for NULL */
-	  ch++;
+	  *s = '\0';
+	  s++;
+	  ch = s;
 	}
-      *s = '\0';
+
       i = 0;
 
       /*
@@ -525,14 +525,14 @@ static  int     cancel_clients(struct Client *cptr,
     /*
     ** If the fake prefix is coming from a TS server, discard it
     ** silently -orabidoo
-	**
-	** all servers must be TS these days --is
+    **
+    ** all servers must be TS these days --is
     */
 	   if (sptr->user)
 		   sendto_realops_flags(FLAGS_DEBUG,
-								"Message for %s[%s@%s!%s] from %s (TS, ignored)",
-								sptr->name, sptr->username, sptr->host,
-								sptr->from->name, get_client_name(cptr, TRUE));
+			"Message for %s[%s@%s!%s] from %s (TS, ignored)",
+			sptr->name, sptr->username, sptr->host,
+			sptr->from->name, get_client_name(cptr, TRUE));
 	   return 0;
    }
   return exit_client(cptr, cptr, &me, "Fake prefix");
