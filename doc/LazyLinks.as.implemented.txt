@@ -28,7 +28,7 @@ This was modified to this:
 
 [LLL -> HUB]     :LLL CBURST #channel <LLLuser|LLLuser key>
 
-  The Lazy Link server (LLL), tells the HUB, it wants a channel burst for
+  The Lazy Link Leaf (LLL), tells the HUB, it wants a channel burst for
 "#channel", with optional LLLuser joining. The HUB will send
 a channel burst back for the specified channel in either case. This
 results in the leaf now knowing about the channel. This helps prevent

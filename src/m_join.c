@@ -134,7 +134,6 @@ int     m_join(struct Client *cptr,
       return 0;
     }
 
-
 #ifdef NEED_SPLITCODE
 
   /* Check to see if the timer has timed out, and if so, see if
@@ -173,7 +172,6 @@ int     m_join(struct Client *cptr,
                        me.name, parv[0], name);
           continue;
         }
-
 
 #ifdef NO_JOIN_ON_SPLIT_SIMPLE
       if (server_was_split && MyClient(sptr) && (*name != '&') &&
@@ -292,24 +290,12 @@ int     m_join(struct Client *cptr,
              {
                flags = CHFL_CHANOP;
 #ifndef HUB
+               /* LazyLinks */
                if( (*name != '&') && serv_cptr_list
                      && IsCapable( serv_cptr_list, CAP_LL) )
                  {
-#ifdef DEBUGLL
-                   sendto_realops("This is where we ask for %s %s %s",
-                                   name,
-                                   sptr->name,
-                                   key ? key : "" );
-#endif
-                   if(key)
-                     sendto_one(serv_cptr_list,":%s CBURST %s %s %s",
-                       me.name,name,sptr->name,key);
-                   else
-                     sendto_one(serv_cptr_list,":%s CBURST %s %s",
-                       me.name,name,sptr->name);
-#ifdef DEBUGLL
-                   sendto_realops("Waiting for LLJOIN");
-#endif
+                   sendto_one(serv_cptr_list,":%s CBURST %s %s %s",
+                     me.name,name,sptr->name, key ? key: "" );
                    /* And wait for LLJOIN */
                    return 0;
                  }

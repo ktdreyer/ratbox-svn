@@ -442,8 +442,6 @@ static  int     del_denyid(struct Channel *chptr, char *banid)
   return 0;
 }
 
-
-
 /*
  * del_matching_exception - delete an exception matching this user
  *
