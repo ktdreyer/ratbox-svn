@@ -1,3 +1,16 @@
+androsyn    2002/12/10 14:00:40 UTC	(20021210_16)
+
+  Modified files:
+    src                  confmatch.c iplines.c 
+  Log:
+  Do not code while half asleep
+  
+  Revision  Changes    Path
+  7.11      +10 -10    ircd-ratbox/src/confmatch.c
+  7.6       +2 -2      ircd-ratbox/src/iplines.c
+
+
+
 androsyn    2002/12/10 13:37:38 UTC	(20021210_15)
 
   Modified files:
