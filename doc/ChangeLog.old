@@ -1,3 +1,10 @@
+*** 20001103_5 by adrian
+
+
+Kill fdlist_add and fdlist_delete, since we're not using them anymore.
+
+
+
 *** 20001103_4 by adrian
 
 
