@@ -298,36 +298,25 @@ static void do_non_priv_stats(struct Client *sptr, char *name, char *target,
 
     case 'o' : case 'O' :
       if (ConfigFileEntry.o_lines_oper_only)
-	{
-	  if(IsOper(sptr))
-	    {
-	      report_configured_links(sptr, CONF_OPERATOR);
-	    }
-	  else
-	    {
 	      sendto_one(sptr, form_str(ERR_NOPRIVILEGES),me.name,sptr->name);
-	    }
-	}
       else
-	{
 	  report_configured_links(sptr, CONF_OPERATOR);
-	}
       stats_spy(sptr,statchar);
       break;
 
     case 'p' :
       if (GlobalSetOptions.hide_server)
         {
-               stats_spy(sptr,statchar);
-           /* Should we send a notice to the user saying we have paged the
-           ** opers?  Also, should we ALWAYS stats_p_spy even if neither
-           ** stats_p_spy or stats_spy is on...Otherwise...no one will
-           ** know a STATS p was used
-           */
+           /* showing users the oper list cant hurt.. its better
+            * than the alternatives of noticing the opers which could
+            * get really annoying --fl
+            */
+           stats_spy(sptr,statchar);
+           show_opers(sptr);
         }
       else
         {
-			stats_spy(sptr,statchar);
+          stats_spy(sptr,statchar);
           show_opers(sptr);
         }
       break;

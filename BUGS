@@ -32,21 +32,16 @@
       and then /modload the module.
       - Dont have multiple copies of the same module in your paths.
 
-3.  opers@server and user@server PRIVMSG/NOTICE broken
-    - eg PRIVMSG opers@irc.monkie.org :test
-      PRIVMSG stats@stats.monkie.org :help 
-      - to be fixed in beta2
-
-4.  Problem with msgfmt command building custom msgs using gettext
+3.  Problem with msgfmt command building custom msgs using gettext
     - Please ensure you are using GNU gettext version 0.10.35.
       Other versions are untested, and some are known to be
       incompatible.
 
-5.  When linking servers, you may see warnings about servers being sent
+4.  When linking servers, you may see warnings about servers being sent
     403 numerics.  This is caused by the NOTICE AUTH :*** ... messages,
     and is normal.
 
-6.  Admins receiving multiple notices
+5.  Admins receiving multiple notices
     - Due to the fact we try to hide a servers real IP, we send some 
       notices that have an IP address in them twice.  We send one to
       the admins with the real IP in, and one to all opers (admins inc.)
