@@ -537,8 +537,7 @@ int register_user(struct Client *cptr, struct Client *sptr,
    * nicks just ride on through.
    */
   sendto_ll_serv_butone(cptr,sptr, 1,
-		     ":%s NICK %s %d %lu %s %s %s %s :%s",
-		     me.name,
+		     "NICK %s %d %lu %s %s %s %s :%s",
 		     nick, sptr->hopcount+1, sptr->tsinfo, ubuf,
 		     sptr->username, sptr->host, user->server,
 		     sptr->info);
@@ -562,8 +561,8 @@ int register_user(struct Client *cptr, struct Client *sptr,
    */
 
   sendto_nocap_serv_butone(CAP_LL, cptr,
-                            ":%s NICK %s %d %lu %s %s %s %s :%s",
-                            me.name, nick, sptr->hopcount+1, sptr->tsinfo,
+                            "NICK %s %d %lu %s %s %s %s :%s",
+                            nick, sptr->hopcount+1, sptr->tsinfo,
                             ubuf, sptr->username, sptr->host, user->server,
                             sptr->info);
 #endif
