@@ -1,3 +1,12 @@
+*** 20001203_11 by db
+- removed REJECT_HOLD that should be replaced with IP throttling
+- moved safe_write into fileio.c for now, changed to use fbopen() etc.
+  let caller close the FBFILE 
+- replaced vchan double link list in channel struct with dlink_list
+- Still pending bugs in m_names.c, its displaying channels twice
+
+
+
 *** 20001203_10 by db
 - modified code to use dlink_node/dlink_list for oper_list serv_list
   and lclient_list (local clients) this gets rid of my evil double link
