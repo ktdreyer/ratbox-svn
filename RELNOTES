@@ -1,5 +1,5 @@
 -- ircd-hybrid-7beta16 RELNOTES
-  
+     
 o) added optional defines for VCHANS, HALFOPS and ANONOPS which if undefined
    will compile the ircd without the code for the options.
 o) added configure option --enable-efnet to compile the ircd with the three
