@@ -309,7 +309,7 @@ comm_select_fdlist(fdlist_t fdlist, time_t delay)
    hdl = F->read_handler;
    poll_update_pollfds(fd, fdlist, POLLRDNORM, NULL);
    /* This shouldn't happen... */
-   assert(hdl);
+   /* assert(hdl); */
    if (hdl)
     hdl(fd, F->read_data);
   }
@@ -318,7 +318,7 @@ comm_select_fdlist(fdlist_t fdlist, time_t delay)
    hdl = F->write_handler;
    poll_update_pollfds(fd, fdlist, POLLWRNORM, NULL);
    /* This shouldn't happen... */
-   assert(hdl);
+/*   assert(hdl); */
    if (hdl)
     hdl(fd, F->write_data);
   }
