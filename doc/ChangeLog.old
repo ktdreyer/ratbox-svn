@@ -1,3 +1,8 @@
+*** 20011010_3 by androsyn
+Forgot to commit Makefile.in
+
+
+
 *** 20011010_2 by androsyn
 Added a vsnprintf() stolen from mutt that is necessary on platforms that do 
 not have any native vsnprintf() 
