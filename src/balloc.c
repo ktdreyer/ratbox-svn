@@ -286,7 +286,7 @@ BlockHeapCreate(size_t elemsize, int elemsperblock)
 	{
 		outofmemory();	/* die.. out of memory */
 	}
-	dlinkAddAlloc(bh, &heap_lists);
+	dlinkAdd(bh, &bh->hlist, &heap_lists);
 	return (bh);
 }
 
@@ -486,7 +486,7 @@ BlockHeapDestroy(BlockHeap * bh)
 		if(walker != NULL)
 			free(walker);
 	}
-	dlinkFindDestroy(&heap_lists, bh);
+	dlinkDelete(&bh->hlist, &heap_lists);
 	free(bh);
 	return (0);
 }

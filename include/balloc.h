@@ -65,6 +65,7 @@ typedef struct MemBlock MemBlock;
  */
 struct BlockHeap
 {
+	dlink_node hlist;
 	size_t elemSize;	/* Size of each element to be stored */
 	int elemsPerBlock;	/* Number of elements per block */
 	int blocksAllocated;	/* Number of blocks allocated */
