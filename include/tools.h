@@ -42,4 +42,6 @@ dlinkDelete(dlink_node *m, dlink_list *list);
 void
 dlinkMoveList(dlink_list *from, dlink_list *to);
 
+int
+dlink_list_length(dlink_list *m);
 #endif

@@ -2473,7 +2473,7 @@ void add_invite(struct Channel *chptr, struct Client *who)
   /*
    * delete last link in chain if the list is max length
    */
-  if (list_length(&who->user->invited) >= MAXCHANNELSPERUSER)
+  if (dlink_list_length(&who->user->invited) >= MAXCHANNELSPERUSER)
     {
       del_invite(chptr,who);
     }
@@ -2523,22 +2523,6 @@ void del_invite(struct Channel *chptr, struct Client *who)
 	  break;
 	}
     }
-}
-
-/* 
- * list_length
- * inputs	- pointer to a dlink_list
- * output	- return the length (>=0) of a chain of links.
- * side effects	-
- */
-extern int list_length(dlink_list *list)
-{
-  dlink_node *ptr;
-  int   count = 0;
-
-  for (ptr = list->head; ptr; ptr = ptr->next)
-    count++;
-  return count;
 }
 
 /*
