@@ -125,13 +125,13 @@ static int newblock(BlockHeap * bh)
     /* Setup our blocks now */
     for (i = 0; i < bh->elemsPerBlock; i++) {
         void *data;
-        newblk = offset;
+        newblk = (void *)offset;
         newblk->block = b;
-        data = offset + sizeof(MemBlock);
+        data = (unsigned char *)offset + sizeof(MemBlock);
         newblk->block = b;
         newblk->data = data;
         dlinkAdd(data, &newblk->self, &b->free_list);
-        offset += bh->elemSize + sizeof(MemBlock);
+        offset = (unsigned char *)((unsigned char *)offset + bh->elemSize + sizeof(MemBlock));
     }
 
     ++bh->blocksAllocated;
@@ -262,7 +262,7 @@ int _BlockHeapFree(BlockHeap * bh, void *ptr)
 {
     Block *block;
     struct MemBlock *memblock;
-
+    
     assert(bh != NULL);
     assert(ptr != NULL);
     if (bh == NULL) {
@@ -276,7 +276,7 @@ int _BlockHeapFree(BlockHeap * bh, void *ptr)
         return 1;
     }
 
-    memblock = ptr - sizeof(MemBlock);
+    memblock = (struct MemBlock *)ptr - sizeof(MemBlock);
     assert(memblock->block != NULL);
     /* XXX: Should check that the block is really our block */
     block = memblock->block;
