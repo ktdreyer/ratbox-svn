@@ -1,3 +1,9 @@
+*** 20000109_9 by db
+- first rough outline of conversion program to convert old style
+  to new style conf file format. No Makefile, incomplete still.
+
+
+
 *** 20000109_8 by db
 - more cleanups, made consistent... no need for MSG_PRIVMSG/MSG_NOTICE
   other m_ files don't do that
