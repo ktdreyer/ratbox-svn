@@ -1,3 +1,26 @@
+leeh        2004/07/31 19:03:49 EDT	(20040731_3)
+
+  Modified files:
+    include              s_newconf.h 
+    modules              m_dline.c m_kline.c m_rehash.c m_stats.c 
+    src                  ircd.c s_newconf.c 
+  Log:
+  - moved the temp kline/dline lists into an array
+  - simplified expiry of them, we only expire those marked TEMP_MIN, the
+    others we just reorganise
+  - I broke temp undline, but ill fix it when I do the patricia :p
+  
+  Revision  Changes    Path
+  7.36      +11 -20    ircd-ratbox/include/s_newconf.h
+  1.41      +4 -9      ircd-ratbox/modules/m_dline.c
+  1.188     +4 -15     ircd-ratbox/modules/m_kline.c
+  1.83      +45 -26    ircd-ratbox/modules/m_rehash.c
+  1.221     +18 -28    ircd-ratbox/modules/m_stats.c
+  7.352     +0 -5      ircd-ratbox/src/ircd.c
+  7.49      +76 -113   ircd-ratbox/src/s_newconf.c
+
+
+
 leeh        2004/07/31 17:56:38 EDT	(20040731_2)
 
   Modified files:
