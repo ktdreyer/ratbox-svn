@@ -294,7 +294,6 @@ load_a_module (char *path, int check)
 
   tmpptr = dlopen (path, RTLD_NOW);
 
-sendto_realops_flags(FLAGS_ALL, "%s", path);  
   if (tmpptr == NULL)
   {
       const char *err = dlerror();
