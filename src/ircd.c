@@ -72,11 +72,8 @@
 #include <getopt.h>
 #endif /* HAVE_GETOPT_H */
 
-#ifdef SETUID_ROOT
-#include <sys/lock.h>
-#include <unistd.h>
-#endif /* SETUID_ROOT */
 #include "memdebug.h"
+
 
 /*
  * for getopt
