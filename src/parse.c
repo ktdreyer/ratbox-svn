@@ -256,20 +256,14 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
 		  char *longarg = NULL;
 		  char *ap;
 		  
-		  longarg = s;
-		  
-		  if(strsep(&longarg,":")) /* Tear off short args */
-			  if(longarg)
-				  *(longarg-2) = '\0';
-		  
 		  while((ap = strsep(&s, " ")) != NULL) 
 		  {
 			  if(*ap != '\0') 
 			  {
 				  para[i] = ap;
 					  
-				  if ((mpara > 0) && (i >= mpara)) {
-						  if ( ap < end ) /* more tokens to follow */
+				  if (ap[0] == ':' || (mpara && (i >= mpara))) {
+					  if ( ap < end ) /* more tokens to follow */
 						  ap [ strlen (ap) ] = ' '; 
 					  longarg = ap;
 					  break;
