@@ -287,14 +287,14 @@ const char* my_name_for_link(const char* name, struct ConfItem* aconf)
  * add_server_to_list()
  * input	- pointer to client
  * output	- none
- * side effects - server is added to GlobalServerList
+ * side effects - server is added to global_serv_list
  */
 void add_server_to_list(struct Client *client_p)
 {
-  client_p->servnext = GlobalServerList;
-  GlobalServerList = client_p;
-  if(client_p->servnext)
-    client_p->servnext->servprev = client_p;
+  dlink_node *ptr;
+ 
+  ptr = make_dlink_node();
+  dlinkAdd(client_p, ptr, &global_serv_list);
 
   return;
 }
@@ -308,21 +308,21 @@ void add_server_to_list(struct Client *client_p)
  */
 void remove_server_from_list(struct Client *client_p)
 {
-  if(!client_p->servnext && !client_p->servprev)
-    return;
+  dlink_node *ptr;
+  struct Client *target_p;
 
-  if(client_p->servprev)
-    client_p->servprev->servnext = client_p->servnext;
-  else
+  for (ptr = global_serv_list.head; ptr; ptr = ptr->next)
   {
-    GlobalServerList = client_p->servnext;
-    GlobalServerList->servprev = NULL;
-  }
+    target_p = ptr->data;
 
-  if(client_p->servnext)
-    client_p->servnext->servprev = client_p->servprev;
-
-  client_p->servnext = client_p->servprev = NULL;
+    if (client_p == target_p)
+    {
+      dlinkDelete(ptr,&global_serv_list);
+      free_dlink_node(ptr);
+      break;
+    }
+  }    
+  return; 
 }
   
 /*

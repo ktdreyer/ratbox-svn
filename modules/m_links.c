@@ -108,6 +108,8 @@ static void mo_links(struct Client *client_p, struct Client *source_p,
   char*          p;
   struct hook_links_data hd;
   
+  dlink_node *ptr;
+
   if (parc > 2)
     {
       if (hunt_server(client_p, source_p, ":%s LINKS %s :%s", 1, parc, parv)
@@ -131,8 +133,10 @@ static void mo_links(struct Client *client_p, struct Client *source_p,
   
   hook_call_event("doing_links", &hd);
   
-  for (target_p = GlobalServerList; target_p; target_p = target_p->servnext) 
+  for (ptr = global_serv_list.head; ptr; ptr = ptr->next)
     {
+      target_p = ptr->data;
+
       if (*mask && !match(mask, target_p->name))
         continue;
     

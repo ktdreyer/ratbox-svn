@@ -528,6 +528,7 @@ void write_links_file(void* notused)
   char *p;
   FBFILE* file;
   char buff[512];
+  dlink_node *ptr;
 
   refresh_user_links = 0;
 
@@ -544,8 +545,10 @@ void write_links_file(void* notused)
   MessageFileptr->contentsOfFile = NULL;
   currentMessageLine = NULL;
 
-  for (target_p = GlobalServerList; target_p; target_p = target_p->servnext) 
+  for (ptr = global_serv_list.head; ptr; ptr = ptr->next) 
   {
+    target_p = ptr->data;
+
     if(target_p->info[0])
     {
       if( (p = strchr(target_p->info,']')) )
@@ -679,9 +682,12 @@ int bogus_host(char *host)
 struct Client *server_exists(char *servername)
 {
   struct Client *target_p;
+  dlink_node *ptr;
 
-  for(target_p = GlobalServerList; target_p; target_p = target_p->servnext)
+  for(ptr = global_serv_list.head; ptr; ptr = ptr->next)
   {
+    target_p = ptr->data;
+
     if(match(target_p->name, servername) || 
          match(servername, target_p->name))
       return target_p;

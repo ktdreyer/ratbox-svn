@@ -117,7 +117,6 @@ struct Client me;               /* That's me */
 struct LocalUser meLocalUser;	/* That's also part of me */
 
 struct Client* GlobalClientList = 0; /* Pointer to beginning of Client list */
-struct Client* GlobalServerList = 0; /* Global list of servers */
 
 struct JupedChannel *JupedChannelList = 0;
 
@@ -125,6 +124,7 @@ struct JupedChannel *JupedChannelList = 0;
 dlink_list unknown_list;        /* unknown clients ON this server only */
 dlink_list lclient_list;        /* local clients only ON this server */
 dlink_list serv_list;           /* local servers to this server ONLY */
+dlink_list global_serv_list;    /* global servers on the network */
 dlink_list oper_list;           /* our opers, duplicated in lclient_list */
 dlink_list dead_list;           /* clients that have exited, to be freed */
 
@@ -515,6 +515,7 @@ int main(int argc, char *argv[])
  memset(&unknown_list, 0, sizeof(unknown_list));
  memset(&lclient_list, 0, sizeof(lclient_list));
  memset(&serv_list, 0, sizeof(serv_list));
+ memset(&global_serv_list, 0, sizeof(global_serv_list));
  memset(&oper_list, 0, sizeof(oper_list));
  memset(&lazylink_channels, 0, sizeof(lazylink_channels));
  memset(&lazylink_nicks, 0, sizeof(lazylink_nicks));
@@ -522,9 +523,10 @@ int main(int argc, char *argv[])
  lclient_list.head = lclient_list.tail = NULL;
  oper_list.head = oper_list.tail = NULL;
  serv_list.head = serv_list.tail = NULL;
+ global_serv_list.head = global_serv_list.tail = NULL;
  
  GlobalClientList = &me;       /* Pointer to beginning of Client list */
- GlobalServerList = &me;
+
  memset((void *)&Count, 0, sizeof(Count));
  memset((void *)&server_state, 0, sizeof(server_state));
 
@@ -649,6 +651,8 @@ int main(int argc, char *argv[])
  me.lasttime = me.since = me.firsttime = CurrentTime;
  add_to_client_hash_table(me.name, &me);
   
+ add_server_to_list(&me); /* add ourselves to global_serv_list */
+
  check_class();
  write_pidfile(pidFileName);
   

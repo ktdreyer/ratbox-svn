@@ -169,8 +169,6 @@ struct Client* make_client(struct Client* from)
   client_p->serv    = NULL;
   client_p->servptr = NULL;
   client_p->whowas  = NULL;
-  client_p->servnext = NULL;
-  client_p->servprev = NULL;
   client_p->allow_list.head = NULL;
   client_p->allow_list.tail = NULL;
   client_p->on_allow_list.head = NULL;

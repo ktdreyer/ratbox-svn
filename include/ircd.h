@@ -86,7 +86,6 @@ extern int            cold_start;
 extern int            dorehash;
 extern struct Client  me;
 extern struct Client* GlobalClientList;
-extern struct Client* GlobalServerList;
 extern struct Client* local[];
 extern struct Counter Count;
 extern time_t         CurrentTime;
@@ -95,6 +94,7 @@ extern time_t         nextconnect;
 extern dlink_list unknown_list;
 extern dlink_list lclient_list;
 extern dlink_list serv_list;
+extern dlink_list global_serv_list;
 extern dlink_list oper_list;
 extern dlink_list dead_list;
 
