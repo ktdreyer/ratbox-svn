@@ -335,32 +335,26 @@ stats_connect(struct Client *source_p)
  * side effects - client is given temp dline list.
  */
 static void
-stats_tdeny (struct Client *source_p)
+stats_tdeny(struct Client *source_p)
 {
-	char *host, *pass, *user, *oper_reason;
-	struct AddressRec *arec;
 	struct ConfItem *aconf;
+	char *host, *pass, *user, *oper_reason;
+	dlink_node *ptr;
 	int i;
 
-	for (i = 0; i < ATABLE_SIZE; i++)
+	for(i = 0; i < LAST_TEMP_TYPE; i++)
 	{
-		for (arec = atable[i]; arec; arec = arec->next)
+		DLINK_FOREACH(ptr, temp_dlines[i].head)
 		{
-			if(arec->type == CONF_DLINE)
-			{
-				aconf = arec->aconf;
+			aconf = ptr->data;
 
-				if(!(aconf->flags & CONF_FLAGS_TEMPORARY))
-					continue;
+			get_printable_kline(source_p, aconf, &host, &pass, &user, &oper_reason);
 
-				get_printable_kline(source_p, aconf, &host, &pass, &user, &oper_reason);
-
-				sendto_one_numeric(source_p, RPL_STATSDLINE, 
-						   form_str (RPL_STATSDLINE),
-						   'd', host, pass,
-						   oper_reason ? "|" : "",
-						   oper_reason ? oper_reason : "");
-			}
+			sendto_one_numeric(source_p, RPL_STATSDLINE, 
+					   form_str (RPL_STATSDLINE),
+					   'd', host, pass,
+					   oper_reason ? "|" : "",
+					   oper_reason ? oper_reason : "");
 		}
 	}
 }
