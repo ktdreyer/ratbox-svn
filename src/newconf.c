@@ -780,7 +780,7 @@ int   class_redirport_var;
 int	conf_begin_oper(struct TopConf* tc)
 {
 	struct ConfItem *yy_tmp;
-
+	
 	yy_tmp = yy_achead;
 	while(yy_tmp)
 	{
@@ -799,7 +799,12 @@ int	conf_end_oper(struct TopConf* tc)
 {
 	struct ConfItem *yy_tmp;
 	struct ConfItem *yy_next;
-
+	
+	if(conf_cur_block_name != NULL)
+	{
+		MyFree(yy_achead->name);
+		DupString(yy_achead->name, conf_cur_block_name);
+	}
 	/* copy over settings from first struct */
 	for( yy_tmp = yy_achead->next; yy_tmp; yy_tmp = yy_tmp->next )
 	{
@@ -1512,6 +1517,11 @@ int	conf_begin_connect(struct TopConf *tc)
 
 int	conf_end_connect(struct TopConf *tc)
 {
+	if(conf_cur_block_name != NULL)
+	{
+		MyFree(yy_aconf->name);
+		DupString(yy_aconf->name, conf_cur_block_name);	
+	}
 #ifdef HAVE_LIBCRYPTO
 	if(yy_aconf->host &&
 	   ((yy_aconf->passwd && yy_aconf->spasswd) ||
