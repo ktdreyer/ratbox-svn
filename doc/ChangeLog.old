@@ -1,3 +1,12 @@
+*** 20010719_5 by wcampbel
+Add in /quote HELP for users.  doc/users.txt is the file that's sent
+to the user.  It's also already paced, so that concern of Diane's is taken
+care of.
+
+Someone please test this, as I don't have a server set up and running
+at the moment.
+
+
 *** 20010719_4 by wcampbel
 Fix my commit from before, nameser.h is needed on FreeBSD
 
