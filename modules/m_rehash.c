@@ -72,7 +72,7 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
 
   if ( !IsOperRehash(source_p) )
     {
-      sendto_one(source_p,":%s NOTICE %s :You have no H flag", me.name, parv[0]);
+      sendto_one(source_p,":%s NOTICE %s :You need rehash = yes;", me.name, parv[0]);
       return;
     }
 

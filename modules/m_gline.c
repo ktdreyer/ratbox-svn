@@ -155,7 +155,7 @@ static void mo_gline(struct Client *client_p,
     {
       if (!IsSetOperGline(source_p))
 	{
-	  sendto_one(source_p,":%s NOTICE %s :You have no G flag",me.name,parv[0]);
+	  sendto_one(source_p,":%s NOTICE %s :You need gline = yes;",me.name,parv[0]);
 	  return;
 	}
 			

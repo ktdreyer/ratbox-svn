@@ -87,7 +87,7 @@ static void mo_connect(struct Client* client_p, struct Client* source_p,
 
   if (MyConnect(source_p) && !IsOperRemote(source_p) && parc > 3)
     {
-      sendto_one(source_p,":%s NOTICE %s :You have no R flag", me.name, parv[0]);
+      sendto_one(source_p,":%s NOTICE %s :You need remote = yes;", me.name, parv[0]);
       return;
     }
 

@@ -83,9 +83,9 @@ static void mo_kill(struct Client *client_p, struct Client *source_p,
   user = parv[1];
   reason = parv[2]; /* Either defined or NULL (parc >= 2!!) */
 
-  if (!IsSetOperK(source_p))
+  if (!IsSetOperGlobalKill(source_p))
     {
-      sendto_one(source_p,":%s NOTICE %s :You have no K flag",me.name,parv[0]);
+      sendto_one(source_p,":%s NOTICE %s :You need global_kill = yes;",me.name,parv[0]);
       return;
     }
 

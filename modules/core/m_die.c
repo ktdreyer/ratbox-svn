@@ -68,7 +68,7 @@ static void mo_die(struct Client *client_p, struct Client *source_p,
 
   if (!IsOperDie(source_p))
     {
-      sendto_one(source_p,":%s NOTICE %s :You have no D flag", me.name, parv[0]);
+      sendto_one(source_p,":%s NOTICE %s :You need die = yes;", me.name, parv[0]);
       return;
     }
 

@@ -137,7 +137,7 @@ static void mo_kline(struct Client *client_p,
 
   if (!IsSetOperK(source_p))
     {
-      sendto_one(source_p,":%s NOTICE %s :You have no K flag",
+      sendto_one(source_p,":%s NOTICE %s :You need kline = yes;",
 		 me.name,source_p->name);
       return;
     }
@@ -580,7 +580,7 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
 
   if(!IsSetOperK(source_p))
     {
-      sendto_one(source_p,":%s NOTICE %s :You have no K flag",me.name,parv[0]);
+      sendto_one(source_p,":%s NOTICE %s :You need kline = yes;",me.name,parv[0]);
       return;
     }
 
