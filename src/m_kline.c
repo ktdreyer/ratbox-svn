@@ -1232,6 +1232,7 @@ ms_kline(struct Client *cptr,
         user,
         host,
         reason ? reason : "No reason");
+      check_klines();
       return 0;
     }
   else
@@ -1298,6 +1299,7 @@ ms_kline(struct Client *cptr,
       user,
       host);
 
+    check_klines();
     return 0;
   }
   else if (PendingLines)

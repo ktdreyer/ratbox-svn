@@ -135,12 +135,10 @@ int     m_notice(struct Client *cptr,
 
   if (MyConnect(sptr))
     {
-#ifdef ANTI_SPAMBOT
 #ifndef ANTI_SPAMBOT_WARN_ONLY
       /* if its a spambot, just ignore it */
       if(sptr->join_leave_count >= MAX_JOIN_LEAVE_COUNT)
         return 0;
-#endif
 #endif
       /* As Mortiis points out, if there is only one target,
        * the call to canonize is silly
@@ -165,15 +163,12 @@ int     m_notice(struct Client *cptr,
   if( IsChanPrefix(*nick)
       && (IsPerson(sptr) && (chptr = hash_find_channel(nick, NullChn))))
     {
-#ifdef  IDLE_CHECK
       /* reset idle time for message only if target exists */
       if(MyClient(sptr) && sptr->user)
         sptr->user->last = CurrentTime;
-#endif
-#ifdef FLUD
+
       if(check_for_ctcp(parv[2]))
 	check_for_flud(sptr, NULL, chptr, 1);
-#endif /* FLUD */
 
       if (HasVchans(chptr))
 	{
@@ -239,11 +234,10 @@ int     m_notice(struct Client *cptr,
 
       if ( (chptr = hash_find_channel(nick+1, NullChn)) )
         {
-#ifdef  IDLE_CHECK
           /* reset idle time for message only if target exists */
           if(MyClient(sptr) && sptr->user)
             sptr->user->last = CurrentTime;
-#endif
+
           if (!is_chan_op(sptr,chptr))
             {
               return -1;
@@ -284,12 +278,10 @@ int     m_notice(struct Client *cptr,
 
   if ((acptr = find_person(nick, NULL)))
     {
-#ifdef  IDLE_CHECK
       /* reset idle time for message only if target exists */
       if(MyClient(sptr) && sptr->user)
         sptr->user->last = CurrentTime;
-#endif
-#ifdef ANTI_DRONE_FLOOD
+
       if(MyConnect(acptr) && IsClient(sptr) &&
 	 GlobalSetOptions.dronetime)
         {
@@ -353,18 +345,16 @@ int     m_notice(struct Client *cptr,
                 acptr->received_number_of_privmsgs++;
             }
         }
-#endif
+
       sendto_prefix_one(acptr, sptr, ":%s %s %s :%s",
                         parv[0], "NOTICE", nick, parv[2]);
 
-#ifdef  IDLE_CHECK
       /* reset idle time for message only if its not to self */
       if (sptr != acptr)
         {
           if(sptr->user)
             sptr->user->last = CurrentTime;
         }
-#endif
       return 0;
     }
 
@@ -479,12 +469,10 @@ int     mo_notice(struct Client *cptr,
 
   if (MyConnect(sptr))
     {
-#ifdef ANTI_SPAMBOT
 #ifndef ANTI_SPAMBOT_WARN_ONLY
       /* if its a spambot, just ignore it */
       if(sptr->join_leave_count >= MAX_JOIN_LEAVE_COUNT)
         return 0;
-#endif
 #endif
       /* As Mortiis points out, if there is only one target,
        * the call to canonize is silly
@@ -509,11 +497,10 @@ int     mo_notice(struct Client *cptr,
   if( IsChanPrefix(*nick)
       && (IsPerson(sptr) && (chptr = hash_find_channel(nick, NullChn))))
     {
-#ifdef  IDLE_CHECK
       /* reset idle time for message only if target exists */
       if(MyClient(sptr) && sptr->user)
         sptr->user->last = CurrentTime;
-#endif
+
       if (can_send(sptr, chptr) == 0)
         sendto_channel_butone(cptr, sptr, chptr,
                               ":%s %s %s :%s",
@@ -558,11 +545,10 @@ int     mo_notice(struct Client *cptr,
 
       if ( (chptr = hash_find_channel(nick+1, NullChn)) )
         {
-#ifdef  IDLE_CHECK
           /* reset idle time for message only if target exists */
           if(MyClient(sptr) && sptr->user)
             sptr->user->last = CurrentTime;
-#endif
+
           if (!is_chan_op(sptr,chptr))
             {
               return -1;
@@ -603,22 +589,19 @@ int     mo_notice(struct Client *cptr,
 
   if ((acptr = find_person(nick, NULL)))
     {
-#ifdef  IDLE_CHECK
       /* reset idle time for message only if target exists */
       if(MyClient(sptr) && sptr->user)
         sptr->user->last = CurrentTime;
-#endif
+
       sendto_prefix_one(acptr, sptr, ":%s %s %s :%s",
                         parv[0], "NOTICE", nick, parv[2]);
 
-#ifdef  IDLE_CHECK
       /* reset idle time for message only if its not to self */
       if (sptr != acptr)
         {
           if(sptr->user)
             sptr->user->last = CurrentTime;
         }
-#endif
       return 0;
     }
 
@@ -748,12 +731,10 @@ int     ms_notice(struct Client *cptr,
 
   if (MyConnect(sptr))
     {
-#ifdef ANTI_SPAMBOT
 #ifndef ANTI_SPAMBOT_WARN_ONLY
       /* if its a spambot, just ignore it */
       if(sptr->join_leave_count >= MAX_JOIN_LEAVE_COUNT)
         return 0;
-#endif
 #endif
       /* As Mortiis points out, if there is only one target,
        * the call to canonize is silly
@@ -778,11 +759,10 @@ int     ms_notice(struct Client *cptr,
   if( IsChanPrefix(*nick)
       && (IsPerson(sptr) && (chptr = hash_find_channel(nick, NullChn))))
     {
-#ifdef  IDLE_CHECK
       /* reset idle time for message only if target exists */
       if(MyClient(sptr) && sptr->user)
         sptr->user->last = CurrentTime;
-#endif
+
       if (can_send(sptr, chptr) == 0)
         sendto_channel_butone(cptr, sptr, chptr,
                               ":%s %s %s :%s",
@@ -827,11 +807,10 @@ int     ms_notice(struct Client *cptr,
 
       if ( (chptr = hash_find_channel(nick+1, NullChn)) )
         {
-#ifdef  IDLE_CHECK
           /* reset idle time for message only if target exists */
           if(MyClient(sptr) && sptr->user)
             sptr->user->last = CurrentTime;
-#endif
+
           if (!is_chan_op(sptr,chptr))
             {
               return -1;
@@ -872,12 +851,10 @@ int     ms_notice(struct Client *cptr,
 
   if ((acptr = find_person(nick, NULL)))
     {
-#ifdef  IDLE_CHECK
       /* reset idle time for message only if target exists */
       if(MyClient(sptr) && sptr->user)
         sptr->user->last = CurrentTime;
-#endif
-#ifdef ANTI_DRONE_FLOOD
+
       if(MyConnect(acptr) && IsClient(sptr) && !IsAnOper(sptr) &&
 	 GlobalSetOptions.dronetime)
         {
@@ -941,18 +918,17 @@ int     ms_notice(struct Client *cptr,
                 acptr->received_number_of_privmsgs++;
             }
         }
-#endif
+
       sendto_prefix_one(acptr, sptr, ":%s %s %s :%s",
                         parv[0], "NOTICE", nick, parv[2]);
 
-#ifdef  IDLE_CHECK
       /* reset idle time for message only if its not to self */
       if (sptr != acptr)
         {
           if(sptr->user)
             sptr->user->last = CurrentTime;
         }
-#endif
+
       return 0;
     }
 

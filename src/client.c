@@ -73,12 +73,17 @@ BlockHeap*        remoteClientFreeList;
 static const char* const BH_FREE_ERROR_MESSAGE = \
         "client.c BlockHeapFree failed for cptr = %p";
 
-struct Client* dying_clients[MAXCONNECTIONS]; /* list of dying clients */
-char*          dying_clients_reason[MAXCONNECTIONS];
+/* reworked client kline/ping */
+struct die_client {
+  struct Client *client;
+  char *reason;
+  int  fake_kill;
+};
 
+static struct die_client dying_clients[MAXCONNECTIONS];
 
-static void exit_marked_for_death_clients(struct Client *dying_clients[],
-				   char *dying_clients_reason[]);
+static void exit_marked_for_death_clients(struct die_client dying_clients[]);
+
 /*
  * init_client_heap - initialize client free memory
  */
@@ -131,9 +136,7 @@ struct Client* make_client(struct Client* from)
       cptr->since = cptr->lasttime = cptr->firsttime = CurrentTime;
 
 #ifdef NULL_POINTER_NOT_ZERO
-#ifdef FLUD
       cptr->fluders   = NULL;
-#endif
       cptr->zip       = NULL;
       cptr->listener  = NULL;
       cptr->confs     = NULL;
@@ -179,9 +182,7 @@ struct Client* make_client(struct Client* from)
   cptr->serv    = NULL;
   cptr->servptr = NULL;
   cptr->whowas  = NULL;
-#ifdef FLUD
   cptr->fludees = NULL;
-#endif
 #endif /* NULL_POINTER_NOT_ZERO */
 
   return cptr;
@@ -244,8 +245,8 @@ void _free_client(struct Client* cptr)
  * -Dianora
  */
 
-/* Note, that dying_clients and dying_clients_reason
- * really don't need to be any where near as long as MAXCONNECTIONS
+/* Note, that dying_clients really doesn't need to be
+ * any where near as long as MAXCONNECTIONS
  * but I made it this long for now. If its made shorter,
  * then a limit check is going to have to be added as well
  * -Dianora
@@ -259,7 +260,7 @@ time_t check_pings(time_t currenttime)
   time_t        timeout;                /* found necessary ping time */
   int           die_index=0;            /* index into list */
 
-  dying_clients[0] = (struct Client *)NULL;   /* mark first one empty */
+  dying_clients[0].client = (struct Client *)NULL;   /* mark first one empty */
 
   /*
    * I re-wrote the way klines are handled. Instead of rescanning
@@ -291,11 +292,12 @@ time_t check_pings(time_t currenttime)
            * -Dianora
            */
 	  
-          dying_clients[die_index] = cptr;
-          dying_clients_reason[die_index++] =
+          dying_clients[die_index].client = cptr;
+          dying_clients[die_index].fake_kill = 0;
+          dying_clients[die_index++].reason =
             ((cptr->flags & FLAGS_SENDQEX) ?
              "SendQ exceeded" : "Dead socket");
-          dying_clients[die_index] = (struct Client *)NULL;
+          dying_clients[die_index].client = (struct Client *)NULL;
           continue;             /* and go examine next fd/cptr */
         }
       
@@ -311,9 +313,10 @@ time_t check_pings(time_t currenttime)
             {
               struct ConfItem *aconf;
 
-              dying_clients[die_index] = cptr;
-              dying_clients_reason[die_index++] = "Idle time limit exceeded";
-              dying_clients[die_index] = (struct Client *)NULL;
+              dying_clients[die_index].client = cptr;
+              dying_clients[die_index].fake_kill = 0;
+              dying_clients[die_index++].reason = "Idle time limit exceeded";
+              dying_clients[die_index].client = (struct Client *)NULL;
 
               aconf = make_conf();
               aconf->status = CONF_KILL;
@@ -337,9 +340,10 @@ time_t check_pings(time_t currenttime)
               if( reject_held_fds )
                 reject_held_fds--;
 
-              dying_clients[die_index] = cptr;
-              dying_clients_reason[die_index++] = "reject held client";
-              dying_clients[die_index] = (struct Client *)NULL;
+              dying_clients[die_index].client = cptr;
+              dying_clients[die_index].fake_kill = 0;
+              dying_clients[die_index++].reason = "reject held client";
+              dying_clients[die_index].client = (struct Client *)NULL;
               continue;         /* and go examine next fd/cptr */
             }
         }
@@ -367,18 +371,14 @@ time_t check_pings(time_t currenttime)
                   sendto_ops("No response from %s, closing link",
                              get_client_name(cptr, FALSE));
                 }
-              /*
-               * this is used for KILL lines with time restrictions
-               * on them - send a messgae to the user being killed
-               * first.
-               * *** Moved up above  -taner ***
-               */
+
               cptr->flags2 |= FLAGS2_PING_TIMEOUT;
-              dying_clients[die_index++] = cptr;
+              dying_clients[die_index].fake_kill = 0;
+              dying_clients[die_index++].client = cptr;
               /* the reason is taken care of at exit time */
-      /*      dying_clients_reason[die_index++] = "Ping timeout"; */
-              dying_clients[die_index] = (struct Client *)NULL;
-              
+      /*      dying_clients[die_index++].reason = "Ping timeout"; */
+              dying_clients[die_index].client = (struct Client *)NULL;
+
               /*
                * need to start loop over because the close can
                * affect the ordering of the local[] array.- avalon
@@ -417,17 +417,17 @@ time_t check_pings(time_t currenttime)
         {
           if (cptr->firsttime ? ((CurrentTime - cptr->firsttime) > 100) : 0)
             {
-              dying_clients[die_index] = cptr;
-              dying_clients_reason[die_index++] = "Connection Timed Out";
-              dying_clients[die_index] = (struct Client *)NULL;
+              dying_clients[die_index].client = cptr;
+              dying_clients[die_index].fake_kill = 0;
+              dying_clients[die_index++].reason =
+		"Connection Timed Out";
+              dying_clients[die_index].client = (struct Client *)NULL;
               continue;
             }
         }
     }
 
-  exit_marked_for_death_clients(dying_clients,dying_clients_reason);
-
-  rehashed = 0;
+  exit_marked_for_death_clients(dying_clients);
 
   if (!oldest || oldest < currenttime)
     oldest = currenttime + PINGFREQUENCY;
@@ -439,8 +439,8 @@ time_t check_pings(time_t currenttime)
 
 
 /*
- * Check all connections for a pending kline against the client
- * exit if a kline match.
+ * Check all connections for a pending kline against the client,
+ * exit the client if a kline matches.
  * -Dianora
  */
 
@@ -452,7 +452,7 @@ void check_klines(void)
   char          *reason;                /* pointer to reason string */
   int           die_index=0;            /* index into list */
 
-  dying_clients[0] = (struct Client *)NULL;   /* mark first one empty */
+  dying_clients[0].client = (struct Client *)NULL;   /* mark first one empty */
 
   /*
    * I re-wrote the way klines are handled. Instead of rescanning
@@ -484,11 +484,12 @@ void check_klines(void)
            * -Dianora
            */
 	  
-          dying_clients[die_index] = cptr;
-          dying_clients_reason[die_index++] =
+          dying_clients[die_index].client = cptr;
+          dying_clients[die_index].fake_kill = 0;
+          dying_clients[die_index++].reason =
             ((cptr->flags & FLAGS_SENDQEX) ?
              "SendQ exceeded" : "Dead socket");
-          dying_clients[die_index] = (struct Client *)NULL;
+          dying_clients[die_index].client = (struct Client *)NULL;
           continue;             /* and go examine next fd/cptr */
         }
       
@@ -505,7 +506,8 @@ void check_klines(void)
 	  sendto_realops("D-line active for %s",
 			 get_client_name(cptr, FALSE));
 	      
-	  dying_clients[die_index] = cptr;
+	  dying_clients[die_index].client = cptr;
+	  dying_clients[die_index].fake_kill = 0;
 	  /* Wintrhawk */
 	  if(ConfigFileEntry.kline_with_connection_closed)
 	    {
@@ -529,8 +531,8 @@ void check_klines(void)
 	    }
 	  if (IsPerson(cptr)) 
 	    {
-	      dying_clients_reason[die_index++] = reason;
-	      dying_clients[die_index] = (struct Client *)NULL;
+	      dying_clients[die_index++].reason = reason;
+	      dying_clients[die_index].client = (struct Client *)NULL;
 	      sendto_one(cptr, form_str(ERR_YOUREBANNEDCREEP),
 			 me.name, cptr->name, reason);
 	    }
@@ -558,7 +560,9 @@ void check_klines(void)
 	      sendto_realops("G-line active for %s",
 			     get_client_name(cptr, FALSE));
 		  
-	      dying_clients[die_index] = cptr;
+	      dying_clients[die_index].client = cptr;
+	      dying_clients[die_index].fake_kill = 0;
+
 	      /* Wintrhawk */
 	      if (ConfigFileEntry.kline_with_connection_closed)
 		{
@@ -581,8 +585,8 @@ void check_klines(void)
 		    }
 		}
 		  
-	      dying_clients_reason[die_index++] = reason;
-	      dying_clients[die_index] = (struct Client *)NULL;
+	      dying_clients[die_index++].reason = reason;
+	      dying_clients[die_index].client = (struct Client *)NULL;
 	      sendto_one(cptr, form_str(ERR_YOUREBANNEDCREEP),
 			 me.name, cptr->name, reason);
 	      continue;         /* and go examine next fd/cptr */
@@ -600,7 +604,8 @@ void check_klines(void)
 		    
 		sendto_realops("K-line active for %s",
 			       get_client_name(cptr, FALSE));
-		dying_clients[die_index] = cptr;
+		dying_clients[die_index].client = cptr;
+		dying_clients[die_index].fake_kill = 0;
 		    
 		/* Wintrhawk */
 		if (ConfigFileEntry.kline_with_connection_closed)
@@ -624,8 +629,8 @@ void check_klines(void)
 		      }
 		  }
 
-		dying_clients_reason[die_index++] = reason;
-		dying_clients[die_index] = (struct Client *)NULL;
+		dying_clients[die_index++].reason = reason;
+		dying_clients[die_index].client = (struct Client *)NULL;
 		sendto_one(cptr, form_str(ERR_YOUREBANNEDCREEP),
 			   me.name, cptr->name, reason);
 		continue;         /* and go examine next fd/cptr */
@@ -644,9 +649,11 @@ void check_klines(void)
             {
               struct ConfItem *aconf;
 
-              dying_clients[die_index] = cptr;
-              dying_clients_reason[die_index++] = "Idle time limit exceeded";
-              dying_clients[die_index] = (struct Client *)NULL;
+              dying_clients[die_index].client = cptr;
+              dying_clients[die_index].fake_kill = 0; 
+              dying_clients[die_index++].reason =
+		"Idle time limit exceeded";
+              dying_clients[die_index].client = (struct Client *)NULL;
 
               aconf = make_conf();
               aconf->status = CONF_KILL;
@@ -670,9 +677,10 @@ void check_klines(void)
               if( reject_held_fds )
                 reject_held_fds--;
 
-              dying_clients[die_index] = cptr;
-              dying_clients_reason[die_index++] = "reject held client";
-              dying_clients[die_index] = (struct Client *)NULL;
+              dying_clients[die_index].client = cptr;
+              dying_clients[die_index].fake_kill = 0;
+              dying_clients[die_index++].reason = "reject held client";
+              dying_clients[die_index].client = (struct Client *)NULL;
               continue;         /* and go examine next fd/cptr */
             }
         }
@@ -680,7 +688,7 @@ void check_klines(void)
 
     }
 
-  exit_marked_for_death_clients(dying_clients,dying_clients_reason);
+  exit_marked_for_death_clients(dying_clients);
 }
 
 
@@ -690,14 +698,13 @@ void check_klines(void)
  * -Dianora
  */
 
-static void exit_marked_for_death_clients(struct Client *dying_clients[],
-					  char *dying_clients_reason[])
+static void exit_marked_for_death_clients(struct die_client dying_clients[])
 {
   struct Client *cptr;
   int    die_index;
   char   ping_time_out_buffer[64];   /* blech that should be a define */
 
-  for(die_index = 0; (cptr = dying_clients[die_index]); die_index++)
+  for(die_index = 0; (cptr = dying_clients[die_index].client); die_index++)
     {
       if(cptr->flags2 & FLAGS2_PING_TIMEOUT)
         {
@@ -732,7 +739,7 @@ static void exit_marked_for_death_clients(struct Client *dying_clients[],
               sendto_realops("Client already exited %X",cptr);
             }
           else
-            (void)exit_client(cptr, cptr, &me, dying_clients_reason[die_index]);
+            (void)exit_client(cptr, cptr, &me, dying_clients[die_index].reason);
           cptr->flags2 |= FLAGS2_ALREADY_EXITED;          
 	}
     }
@@ -743,22 +750,6 @@ static void update_client_exit_stats(struct Client* cptr)
   if (IsServer(cptr))
     {
       --Count.server;
-
-#ifdef NEED_SPLITCODE
-      /* Don't bother checking for a split, if split code
-       * is deactivated with server_split_recovery_time == 0
-       */
-      if(GlobalSetOptions.server_split_recovery_time &&
-	 (Count.server < GlobalSetOptions.split_smallnet_size))
-        {
-          if (!server_was_split)
-            {
-              sendto_ops("Netsplit detected, split-mode activated");
-              server_was_split = YES;
-            }
-          server_split_time = CurrentTime;
-        }
-#endif
     }
 
   else if (IsClient(cptr)) {
@@ -786,11 +777,9 @@ static void release_client_state(struct Client* cptr)
       MyFree((char*) cptr->serv);
     }
 
-#ifdef FLUD
   if (MyConnect(cptr))
     free_fluders(cptr, NULL);
   free_fludees(cptr);
-#endif
 }
 
 /*
@@ -1542,9 +1531,10 @@ const char* comment         /* Reason for the exit */
         {
           Count.myserver--;
           fdlist_delete(sptr->fd, FDL_SERVER | FDL_BUSY);
-#ifdef HUB
-          restoreUnusedServerMask(sptr->serverMask);
-#endif
+
+	  if(ConfigFileEntry.hub)
+	    restoreUnusedServerMask(sptr->serverMask);
+
           /* LINKLIST */
           /* oh for in-line functions... */
           {

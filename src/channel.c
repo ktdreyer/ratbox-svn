@@ -59,18 +59,8 @@
 /* LazyLinks */
 static void destroy_channel(struct Channel *);
 
-#ifdef NEED_SPLITCODE
-
-static void check_still_split();
-int server_was_split=YES;
-int got_server_pong;
-time_t server_split_time;
-
-#if defined(PRESERVE_CHANNEL_ON_SPLIT) || defined(NO_JOIN_ON_SPLIT)
 struct Channel *empty_channel_list=(struct Channel*)NULL;
 void remove_empty_channels();
-#endif
-#endif
 
 struct Channel *GlobalChannelList = NullChn;
 
@@ -432,7 +422,7 @@ void    add_user_to_channel(struct Channel *chptr, struct Client *who, int flags
 {
   struct SLink *ptr;
 
-#if defined(PRESERVE_CHANNEL_ON_SPLIT) || defined(NO_JOIN_ON_SPLIT)
+#ifdef PRESERVE_CHANNEL_ON_SPLIT
   if( chptr->mode.mode & MODE_SPLIT )
     {
       /* Unmark the split mode */
@@ -2403,7 +2393,7 @@ static  void    sub1_from_channel(struct Channel *chptr)
                          * It should never happen but...
                          */
 
-#if defined(PRESERVE_CHANNEL_ON_SPLIT) || defined(NO_JOIN_ON_SPLIT)
+#ifdef PRESERVE_CHANNEL_ON_SPLIT
       if(server_was_split && (chptr->chname[0] != '&'))
         {
           /*
@@ -2420,9 +2410,7 @@ static  void    sub1_from_channel(struct Channel *chptr)
           while ((tmp = chptr->invites))
             del_invite(tmp->value.cptr, chptr);
 
-#ifdef FLUD
           free_fluders(NULL, chptr);
-#endif
           /* flag the channel as split */
           chptr->mode.mode |= MODE_SPLIT;
 
@@ -2441,9 +2429,7 @@ static  void    sub1_from_channel(struct Channel *chptr)
             while ((tmp = chptr->invites))
               del_invite(tmp->value.cptr, chptr);
             
-#ifdef FLUD
             free_fluders(NULL, chptr);
-#endif
           }
         else
 #endif
@@ -2460,9 +2446,7 @@ static  void    sub1_from_channel(struct Channel *chptr)
           /* free topic_info */
           MyFree(chptr->topic_info);            
 
-#ifdef FLUD
           free_fluders(NULL, chptr);
-#endif
 
           /* Is this the top level channel? 
 	   * If so, don't remove if it has sub vchans
@@ -2857,9 +2841,7 @@ void remove_empty_channels()
 
       MyFree(empty_channel_list->topic_info);
 
-#ifdef FLUD
       free_fluders(NULL, empty_channel_list);
-#endif
       del_from_channel_hash_table(empty_channel_list->chname, 
                                         empty_channel_list);
       MyFree((char*) empty_channel_list);
@@ -2982,9 +2964,7 @@ static void destroy_channel(struct Channel *chptr)
 
   MyFree(chptr->topic_info);
 
-#ifdef FLUD
   free_fluders(NULL, chptr);
-#endif
 
   del_from_channel_hash_table(chptr->chname, chptr);
   MyFree((char*) chptr);

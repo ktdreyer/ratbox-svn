@@ -861,7 +861,7 @@ int server_estab(struct Client *cptr)
                     sendnick_TS(cptr, acptr);
                 }
             }
-#if defined(PRESERVE_CHANNEL_ON_SPLIT) || defined(NO_JOIN_ON_SPLIT)
+#ifdef PRESERVE_CHANNEL_ON_SPLIT
           /* don't send 0 user channels on rejoin (Mortiis)
            */
           if(chptr->users != 0)
@@ -895,13 +895,6 @@ int server_estab(struct Client *cptr)
 
   /* Always send a PING after connect burst is done */
   sendto_one(cptr, "PING :%s", me.name);
-
-#ifdef NEED_SPLITCODE
-#ifdef SPLIT_PONG
-  if (server_was_split)
-    got_server_pong = NO;
-#endif /* SPLIT_PONG */
-#endif /* NEED_SPLITCODE */
 
   return 0;
 }

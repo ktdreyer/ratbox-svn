@@ -651,14 +651,6 @@ GreetUser(struct Client *client)
 	}
 #endif
 
-#ifdef NEED_SPLITCODE
-	if (server_was_split)
-		sendto_one(client,"NOTICE %s :*** Notice -- server is currently in split-mode",
-			client->name);
-
-	nextping = CurrentTime;
-#endif
-
 	send_umode(NULL, client, 0, SEND_UMODES, ubuf);
 	if (!*ubuf)
 	{

@@ -113,13 +113,6 @@ int     m_pong(struct Client *cptr,
   cptr->flags &= ~FLAGS_PINGSENT;
   sptr->flags &= ~FLAGS_PINGSENT;
 
-#ifdef NEED_SPLITCODE
-#ifdef SPLIT_PONG
-  if (IsServer(cptr))
-    got_server_pong = 1;
-#endif
-#endif
-
   /* Now attempt to route the PONG, comstud pointed out routable PING
    * is used for SPING.  routable PING should also probably be left in
    *        -Dianora
@@ -168,13 +161,6 @@ int     ms_pong(struct Client *cptr,
   cptr->flags &= ~FLAGS_PINGSENT;
   sptr->flags &= ~FLAGS_PINGSENT;
 
-#ifdef NEED_SPLITCODE
-#ifdef SPLIT_PONG
-  if (IsServer(cptr))
-    got_server_pong = 1;
-#endif
-#endif
-
   /* Now attempt to route the PONG, comstud pointed out routable PING
    * is used for SPING.  routable PING should also probably be left in
    *        -Dianora
@@ -222,13 +208,6 @@ int     mr_pong(struct Client *cptr,
   destination = parv[2];
   cptr->flags &= ~FLAGS_PINGSENT;
   sptr->flags &= ~FLAGS_PINGSENT;
-
-#ifdef NEED_SPLITCODE
-#ifdef SPLIT_PONG
-  if (IsServer(cptr))
-    got_server_pong = 1;
-#endif
-#endif
 
   /* Now attempt to route the PONG, comstud pointed out routable PING
    * is used for SPING.  routable PING should also probably be left in
