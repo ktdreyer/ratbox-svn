@@ -182,7 +182,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 #ifdef IGNORE_BOGUS_TS
 	if(newts < 800000000)
 	{
-		sendto_realops_flags(FLAGS_DEBUG, L_ALL,
+		sendto_realops_flags(UMODE_DEBUG, L_ALL,
 				     "*** Bogus TS %lu on %s ignored from %s",
 				     (unsigned long) newts, chptr->chname, client_p->name);
 

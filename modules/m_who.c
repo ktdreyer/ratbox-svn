@@ -53,8 +53,7 @@ struct Message who_msgtab = {
 mapi_clist_av1 who_clist[] = { &who_msgtab, NULL };
 DECLARE_MODULE_AV1(who, NULL, NULL, who_clist, NULL, NULL, NULL, "$Revision$");
 
-static void do_who_on_channel(struct Client *source_p,
-			      struct Channel *chptr, const char *real_name,
+static void do_who_on_channel(struct Client *source_p, struct Channel *chptr,
 			      int server_oper, int member);
 
 static void who_global(struct Client *source_p, const char *mask, int server_oper);
@@ -127,7 +126,7 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 		if((lp = source_p->user->channel.head) != NULL)
 		{
 			msptr = lp->data;
-			do_who_on_channel(source_p, msptr->chptr, "*", server_oper, YES);
+			do_who_on_channel(source_p, msptr->chptr, server_oper, YES);
 		}
 
 		sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], "*");
@@ -142,9 +141,9 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 		if(chptr != NULL)
 		{
 			if(IsMember(source_p, chptr))
-				do_who_on_channel(source_p, chptr, chptr->chname, server_oper, YES);
+				do_who_on_channel(source_p, chptr, server_oper, YES);
 			else if(!SecretChannel(chptr))
-				do_who_on_channel(source_p, chptr, chptr->chname, server_oper, NO);
+				do_who_on_channel(source_p, chptr, server_oper, NO);
 		}
 		sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], mask);
 		return 0;
@@ -349,7 +348,7 @@ who_global(struct Client *source_p, const char *mask, int server_oper)
  */
 static void
 do_who_on_channel(struct Client *source_p, struct Channel *chptr,
-		  const char *chname, int server_oper, int member)
+		  int server_oper, int member)
 {
 	struct Client *target_p;
 	struct membership *msptr;
@@ -364,7 +363,7 @@ do_who_on_channel(struct Client *source_p, struct Channel *chptr,
 			continue;
 
 		if(member || !IsInvisible(target_p))
-			do_who(source_p, target_p, msptr->chptr->chname,
+			do_who(source_p, target_p, chptr->chname,
 			       find_channel_status(msptr, 0));
 	}
 }

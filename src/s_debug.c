@@ -356,7 +356,7 @@ count_memory(struct Client *source_p)
 
 	sendto_one(source_p, ":%s %d %s z :hostname hash %d(%ld)",
 		   me.name, RPL_STATSDEBUG, source_p->name,
-		   HOST_MAX, (long)HOST_MAX * sizeof(struct HashEntry));
+		   HOST_MAX, (long)HOST_MAX * sizeof(dlink_list));
 
 	total_memory = totww + total_channel_memory + conf_memory +
 		class_count * sizeof(struct Class);
