@@ -57,6 +57,7 @@
 #include "whowas.h"
 #include "modules.h"
 #include "memory.h"
+#include "hook.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -528,6 +529,8 @@ int main(int argc, char *argv[])
   init_resolver();
 
   init_auth();			/* Initialise the auth code */
+
+  init_hooks();
 
   read_conf_files(YES);         /* cold start init conf files */
 

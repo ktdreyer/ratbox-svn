@@ -32,6 +32,12 @@
 
 dlink_list hooks;
 
+void
+init_hooks(void)
+{
+	memset(&hooks, 0, sizeof(hooks));
+}
+
 static hook *
 new_hook(char *name)
 {
