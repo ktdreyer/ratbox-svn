@@ -1,3 +1,23 @@
+leeh        2004/11/23 12:04:37 EST	(20041123_0)
+
+  Modified files:
+    doc                  example.conf 
+    include              conf.h tools.h 
+    src                  conf.c newconf.c s_userserv.c service.c 
+  Log:
+  - add expiry of registered usernames.
+  
+  Revision  Changes    Path
+  1.20      +6 -0      rserv/doc/example.conf
+  1.26      +2 -0      rserv/include/conf.h
+  1.16      +4 -0      rserv/include/tools.h
+  1.28      +2 -0      rserv/src/conf.c
+  1.29      +2 -0      rserv/src/newconf.c
+  1.16      +50 -38    rserv/src/s_userserv.c
+  1.30      +10 -3     rserv/src/service.c
+
+
+
 leeh        2004/11/21 12:08:14 EST	(20041121_0)
 
   Modified files:
