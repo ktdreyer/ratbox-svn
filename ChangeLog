@@ -1,3 +1,15 @@
+androsyn    2002/08/14 13:53:34 EDT	(20020814_7)
+
+  Removed files:
+    src                  b_sprintf.c 
+  Log:
+  We'll try this again some other day
+  
+  Revision  Changes    Path
+  7.3       +0 -708    ircd-ratbox/src/b_sprintf.c (dead)
+
+
+
 androsyn    2002/08/14 13:48:11 EDT	(20020814_6)
 
   Modified files:
