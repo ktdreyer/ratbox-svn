@@ -1,3 +1,33 @@
+leeh        2002/01/09 12:16:58 EST	(20020109_5)
+
+  Modified files:
+    doc                  example.conf 
+    include              s_conf.h supported.h 
+    modules              m_info.c 
+    src                  channel_mode.c ircd.c ircd_lexer.l 
+                         ircd_parser.y s_conf.c s_serv.c 
+  Log:
+  - updated /info to cover everything in ircd.conf at current
+  - renamed the following variables for consistency:
+    maxbans -> max_bans
+    allow_hidden -> disable_hidden
+    split_server/user_count -> default_split_server/user_count
+  - added pace_wait to example.conf
+  
+  Revision  Changes    Path
+  7.150     +4 -1      ircd-hybrid-7/doc/example.conf
+  7.175     +6 -6      ircd-hybrid-7/include/s_conf.h
+  1.17      +1 -1      ircd-hybrid-7/include/supported.h
+  1.52      +150 -42   ircd-hybrid-7/modules/m_info.c
+  7.19      +1 -1      ircd-hybrid-7/src/channel_mode.c
+  7.214     +2 -2      ircd-hybrid-7/src/ircd.c
+  1.135     +4 -4      ircd-hybrid-7/src/ircd_lexer.l
+  1.234     +18 -17    ircd-hybrid-7/src/ircd_parser.y
+  7.291     +4 -4      ircd-hybrid-7/src/s_conf.c
+  7.233     +1 -1      ircd-hybrid-7/src/s_serv.c
+
+
+
 db          2002/01/09 12:09:42 EST	(20020109_4)
 
   Modified files:
