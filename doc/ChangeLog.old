@@ -1,3 +1,7 @@
+*** 20010310_1 by a1kmm
+- Wrapped the +p and the detach_client stuff in #ifdef PERSISTANT_CLIENTS
+
+
 *** 20010309_5 by fl_
 - added rejection for the post command from unregged clients
 
