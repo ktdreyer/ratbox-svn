@@ -308,6 +308,7 @@ terabyte		{ return TBYTES; }
 tbytes			{ return TBYTES; }
 tbyte			{ return TBYTES; }
 tb			{ return TBYTES; }
+\.\.                    { return TWODOTS; }
 
 .		        { return yytext[0]; }
 <<EOF>>     { if (ieof()) yyterminate(); }
