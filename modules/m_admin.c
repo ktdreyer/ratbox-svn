@@ -92,7 +92,7 @@ int m_admin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   else
     last_used = CurrentTime;
 
-  if (hunt_server(cptr,sptr,":%s ADMIN :%s",1,parc,parv) != HUNTED_ISME))
+  if (hunt_server(cptr,sptr,":%s ADMIN :%s",1,parc,parv) != HUNTED_ISME)
     return 0;
 
   do_admin(sptr);
@@ -107,7 +107,7 @@ int m_admin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  */
 int mo_admin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  if (hunt_server(cptr,sptr,":%s ADMIN :%s",1,parc,parv) != HUNTED_ISME))
+  if (hunt_server(cptr,sptr,":%s ADMIN :%s",1,parc,parv) != HUNTED_ISME)
     return 0;
 
   do_admin( sptr );
