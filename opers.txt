@@ -23,7 +23,7 @@ Usermodes: (* designates that the umode is oper only)
        * +y     - Can see stats/links/admin requests to name a few.
        * +d     - Can see server debug messages.
        * +n     - Can see client nick changes.
-       * +x     - Can see new server introduction messages.
+       * +x     - Can see new server introduction and split messages.
        * +b     - Can see possible bot warnings.
        * +a     - Is marked as a server admin in whois.
          +g     - "caller id" mode only allow accept clients to message you

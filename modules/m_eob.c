@@ -60,9 +60,9 @@ char *_version = "20001202";
  */
 int ms_eob(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  if (parc == 3)
-    sendto_realops_flags(FLAGS_ALL,"*** End of burst from %s (%ul seconds)",
-			 sptr->name, atol(parv[2]));
+  if (parc > 2)
+    sendto_realops_flags(FLAGS_ALL,"*** End of burst from %s (%s seconds)",
+			 sptr->name, parv[2]);
   else
     sendto_realops_flags(FLAGS_ALL,"*** End of burst from %s",
 			 sptr->name);

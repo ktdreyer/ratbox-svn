@@ -342,7 +342,7 @@ struct LocalUser
 #define FLAGS_OPERWALL     0x0200 /* Operwalls */
 #define FLAGS_INVISIBLE    0x0400 /* makes user invisible */
 #define FLAGS_BOTS         0x0800 /* shows bots */
-#define FLAGS_EXTERNAL     0x1000 /* show servers introduced */
+#define FLAGS_EXTERNAL     0x1000 /* show servers introduced and splitting */
 #define FLAGS_LOCOPS       0x2000 /* show locops */
 #define FLAGS_CALLERID     0x4000 /* block unless caller id's */
 #define FLAGS_UNAUTH       0x8000 /* show unauth connects here */

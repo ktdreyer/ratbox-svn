@@ -2335,9 +2335,8 @@ void cleanup_channels(void *unused)
    else
      uplink = NULL;
 
-   if(!ConfigFileEntry.hub)
-     eventAdd("cleanup_channels", cleanup_channels, NULL,
-	      CLEANUP_CHANNELS_TIME, 0 );
+   eventAdd("cleanup_channels", cleanup_channels, NULL,
+	    CLEANUP_CHANNELS_TIME, 0 );
 
    for(chptr = GlobalChannelList; chptr; chptr = next_chptr)
      {

@@ -700,10 +700,6 @@ auth_kline_exempt:    KLINE_EXEMPT '=' TYES ';'
     yy_aconf->flags &= ~CONF_FLAGS_E_LINED;
   };
 
-  {
-    yy_aconf->flags &= ~CONF_FLAGS_B_LINED;
-  };
-
 auth_have_ident:      HAVE_IDENT ';'
   {
     yy_aconf->flags |= CONF_FLAGS_NEED_IDENTD;

@@ -82,6 +82,7 @@ void log_gline(struct Client *,GLINE_PENDING *,
 
 
 void expire_pending_glines();
+void expire_glines();
 
 void
 check_majority_gline(struct Client *sptr,
@@ -146,6 +147,10 @@ int mo_gline(struct Client *cptr,
 
   if (ConfigFileEntry.glines)
     {
+      /* XXX This should be in an event handler .. */
+      expire_pending_glines();
+      expire_glines();
+
       /* Only globals can apply Glines */
       if (!IsGlobalOper(sptr))
 	{
@@ -321,6 +326,7 @@ int     ms_gline(struct Client *cptr,
   const char *host = NULL;             /* user and host of GLINE "victim" */
   const char *reason = NULL;           /* reason for "victims" demise */
 
+
   if(!IsServer(sptr))
     return(0);
 
@@ -361,6 +367,10 @@ int     ms_gline(struct Client *cptr,
 
   if (ConfigFileEntry.glines)
     {
+      /* XXX This should be in an event handler .. */
+      expire_pending_glines();
+      expire_glines();
+
       log_gline_request(oper_nick,oper_user,oper_host,oper_server,
 			user,host,reason);
 
@@ -589,31 +599,6 @@ log_gline(struct Client *sptr,
   fbclose(out);
 }
 
-/*
- * flush_glines
- * 
- * inputs       - NONE
- * output       - NONE
- * side effects -
- *
- * Get rid of all placed G lines, hopefully to be replaced by gline.log
- * placed k-lines
- */
-void flush_glines()
-{
-  struct ConfItem *kill_list_ptr;
-
-  if((kill_list_ptr = glines))
-    {
-      while(kill_list_ptr)
-        {
-          glines = kill_list_ptr->next;
-          free_conf(kill_list_ptr);
-          kill_list_ptr = glines;
-        }
-    }
-  glines = (struct ConfItem *)NULL;
-}
 
 /* find_gkill
  *
@@ -638,55 +623,19 @@ struct ConfItem *find_gkill(struct Client* cptr, char* username)
 
 struct ConfItem* find_is_glined(const char* host, const char* name)
 {
-  struct ConfItem *kill_list_ptr;     /* used for the link list only */
-  struct ConfItem *last_list_ptr;
-  struct ConfItem *tmp_list_ptr;
+  struct ConfItem *kill_ptr; 
 
-  /* gline handling... exactly like temporary klines 
-   * I expect this list to be very tiny. (crosses fingers) so CPU
-   * time in this, should be minimum.
-   */
-
-  if(glines)
+  for(kill_ptr = glines; kill_ptr; kill_ptr = kill_ptr->next)
     {
-      kill_list_ptr = last_list_ptr = glines;
-
-      while(kill_list_ptr)
-        {
-          if(kill_list_ptr->hold <= CurrentTime)  /* a gline has expired */
-            {
-              if(glines == kill_list_ptr)
-                {
-                  /* Its pointing to first one in link list*/
-                  /* so, bypass this one, remember bad things can happen
-                     if you try to use an already freed pointer.. */
-
-                  glines = last_list_ptr = tmp_list_ptr =
-                    kill_list_ptr->next;
-                }
-              else
-                {
-                  /* its in the middle of the list, so link around it */
-                  tmp_list_ptr = last_list_ptr->next = kill_list_ptr->next;
-                }
-
-              free_conf(kill_list_ptr);
-              kill_list_ptr = tmp_list_ptr;
-            }
-          else
-            {
-              if( (kill_list_ptr->name && (!name || match(kill_list_ptr->name,
-                 name))) && (kill_list_ptr->host &&
-                   (!host || match(kill_list_ptr->host,host))))
-                return(kill_list_ptr);
-              last_list_ptr = kill_list_ptr;
-              kill_list_ptr = kill_list_ptr->next;
-            }
-        }
+      if( (kill_ptr->name && (!name || match(kill_ptr->name,name)))
+	  &&
+	  (kill_ptr->host && (!host || match(kill_ptr->host,host))))
+	return(kill_ptr);
     }
 
   return((struct ConfItem *)NULL);
 }
+
 
 /* report_glines
  *
@@ -698,109 +647,84 @@ struct ConfItem* find_is_glined(const char* host, const char* name)
  */
 void report_glines(struct Client *sptr)
 {
-  GLINE_PENDING *gline_pending_ptr;
-  struct ConfItem *kill_list_ptr;
-  struct ConfItem *last_list_ptr;
-  struct ConfItem *tmp_list_ptr;
+  GLINE_PENDING *glp_ptr;
+  struct ConfItem *kill_ptr;
   char timebuffer[MAX_DATE_STRING];
   struct tm *tmptr;
   char *host;
   char *name;
   char *reason;
 
-  expire_pending_glines();      /* This is not the g line list, but
-                                   the pending possible g line list */
+  /* XXX This should be in an event handler .. */
+  expire_pending_glines();
+  expire_glines();
 
-  if((gline_pending_ptr = pending_glines))
+  sendto_one(sptr,":%s NOTICE %s :Pending G-lines",
+	     me.name, sptr->name);
+
+  for(glp_ptr = pending_glines; glp_ptr; glp_ptr = glp_ptr->next)
     {
-      sendto_one(sptr,":%s NOTICE %s :Pending G-lines", me.name,
-                         sptr->name);
-      while(gline_pending_ptr)
-        {
-          tmptr = localtime(&gline_pending_ptr->time_request1);
-          strftime(timebuffer, MAX_DATE_STRING, "%Y/%m/%d %H:%M:%S", tmptr);
+      tmptr = localtime(&glp_ptr->time_request1);
+      strftime(timebuffer, MAX_DATE_STRING, "%Y/%m/%d %H:%M:%S", tmptr);
 
-          sendto_one(sptr,":%s NOTICE %s :1) %s!%s@%s on %s requested gline at %s for %s@%s [%s]",
-                     me.name,sptr->name,
-                     gline_pending_ptr->oper_nick1,
-                     gline_pending_ptr->oper_user1,
-                     gline_pending_ptr->oper_host1,
-                     gline_pending_ptr->oper_server1,
-                     timebuffer,
-                     gline_pending_ptr->user,
-                     gline_pending_ptr->host,
-                     gline_pending_ptr->reason1);
+      sendto_one(sptr,
+       ":%s NOTICE %s :1) %s!%s@%s on %s requested gline at %s for %s@%s [%s]",
+		 me.name,sptr->name,
+		 glp_ptr->oper_nick1,
+		 glp_ptr->oper_user1,
+		 glp_ptr->oper_host1,
+		 glp_ptr->oper_server1,
+		 timebuffer,
+		 glp_ptr->user,
+		 glp_ptr->host,
+		 glp_ptr->reason1);
 
-          if(gline_pending_ptr->oper_nick2[0])
-            {
-              tmptr = localtime(&gline_pending_ptr->time_request2);
-              strftime(timebuffer, MAX_DATE_STRING, "%Y/%m/%d %H:%M:%S", tmptr);
-              sendto_one(sptr,
-              ":%s NOTICE %s :2) %s!%s@%s on %s requested gline at %s for %s@%s [%s]",
-                         me.name,sptr->name,
-                         gline_pending_ptr->oper_nick2,
-                         gline_pending_ptr->oper_user2,
-                         gline_pending_ptr->oper_host2,
-                         gline_pending_ptr->oper_server2,
-                         timebuffer,
-                         gline_pending_ptr->user,
-                         gline_pending_ptr->host,
-                         gline_pending_ptr->reason2);
-            }
-          gline_pending_ptr = gline_pending_ptr->next;
-        }
-      sendto_one(sptr,":%s NOTICE %s :End of Pending G-lines", me.name,
-                 sptr->name);
+      if(glp_ptr->oper_nick2[0])
+	{
+	  tmptr = localtime(&glp_ptr->time_request2);
+	  strftime(timebuffer, MAX_DATE_STRING, "%Y/%m/%d %H:%M:%S", tmptr);
+	  sendto_one(sptr,
+     ":%s NOTICE %s :2) %s!%s@%s on %s requested gline at %s for %s@%s [%s]",
+		     me.name,sptr->name,
+		     glp_ptr->oper_nick2,
+		     glp_ptr->oper_user2,
+		     glp_ptr->oper_host2,
+		     glp_ptr->oper_server2,
+		     timebuffer,
+		     glp_ptr->user,
+		     glp_ptr->host,
+		     glp_ptr->reason2);
+	}
     }
 
-  if(glines)
+  sendto_one(sptr,":%s NOTICE %s :End of Pending G-lines",
+	     me.name, sptr->name);
+
+  for( kill_ptr = glines; kill_ptr; kill_ptr = kill_ptr->next)
     {
-      kill_list_ptr = last_list_ptr = glines;
+      if(kill_ptr->host != NULL)
+	host = kill_ptr->host;
+      else
+	host = "*";
 
-      while(kill_list_ptr)
-        {
-          if(kill_list_ptr->hold <= CurrentTime)   /* gline has expired */
-            {
-              if(glines == kill_list_ptr)
-                {
-                  glines = last_list_ptr = tmp_list_ptr =
-                    kill_list_ptr->next;
-                }
-              else
-                {
-                  /* its in the middle of the list, so link around it */
-                  tmp_list_ptr = last_list_ptr->next = kill_list_ptr->next;
-                }
+      if(kill_ptr->name != NULL)
+	name = kill_ptr->name;
+      else
+	name = "*";
 
-              free_conf(kill_list_ptr);
-              kill_list_ptr = tmp_list_ptr;
-            }
-          else
-            {
-              if(kill_list_ptr->host)
-                host = kill_list_ptr->host;
-              else
-                host = "*";
+      if(kill_ptr->passwd)
+	reason = kill_ptr->passwd;
+      else
+	reason = "No Reason";
 
-              if(kill_list_ptr->name)
-                name = kill_list_ptr->name;
-              else
-                name = "*";
-
-              if(kill_list_ptr->passwd)
-                reason = kill_list_ptr->passwd;
-              else
-                reason = "No Reason";
-
-              sendto_one(sptr,form_str(RPL_STATSKLINE), me.name,
-                         sptr->name, 'G' , host, name, reason);
-
-              last_list_ptr = kill_list_ptr;
-              kill_list_ptr = kill_list_ptr->next;
-            }
-        }
+      sendto_one(sptr,form_str(RPL_STATSKLINE), me.name,
+		 sptr->name, 'G' , host, name, reason);
     }
+
+  sendto_one(sptr,form_str(RPL_ENDOFSTATS),
+	     me.name, sptr->name, 'G');
 }
+
 
 /*
  * expire_pending_glines
@@ -816,39 +740,74 @@ void report_glines(struct Client *sptr)
 void
 expire_pending_glines()
 {
-  GLINE_PENDING *gline_pending_ptr;
-  GLINE_PENDING *last_gline_pending_ptr;
-  GLINE_PENDING *tmp_pending_ptr;
+  GLINE_PENDING *glp_ptr;
+  GLINE_PENDING *last_glp_ptr = NULL;
+  GLINE_PENDING *next_glp_ptr = NULL;
 
   if(pending_glines == (GLINE_PENDING *)NULL)
     return;
 
-  last_gline_pending_ptr = (GLINE_PENDING *)NULL;
-  gline_pending_ptr = pending_glines;
-
-  while(gline_pending_ptr)
+  for( glp_ptr = pending_glines; glp_ptr; glp_ptr = next_glp_ptr)
     {
-      if( (gline_pending_ptr->last_gline_time + GLINE_PENDING_EXPIRE) <= CurrentTime )
-        {
-          if(last_gline_pending_ptr)
-            last_gline_pending_ptr->next = gline_pending_ptr->next;
-          else
-            pending_glines = gline_pending_ptr->next;
+      next_glp_ptr = glp_ptr->next;
 
-          tmp_pending_ptr = gline_pending_ptr;
-          gline_pending_ptr = gline_pending_ptr->next;
-          MyFree(tmp_pending_ptr->reason1);
-          MyFree(tmp_pending_ptr->reason2);
-          MyFree(tmp_pending_ptr);
+      if( (glp_ptr->last_gline_time + GLINE_PENDING_EXPIRE) <= CurrentTime )
+        {
+          if(last_glp_ptr != NULL)
+            last_glp_ptr->next = next_glp_ptr;
+          else
+            pending_glines = next_glp_ptr;
+
+          MyFree(glp_ptr->reason1);
+          MyFree(glp_ptr->reason2);
+          MyFree(glp_ptr);
         }
       else
-        {
-          last_gline_pending_ptr = gline_pending_ptr;
-          gline_pending_ptr = gline_pending_ptr->next;
-        }
+	last_glp_ptr = glp_ptr;
     }
 }
 
+/*
+ * expire_glines
+ * 
+ * inputs       - NONE
+ * output       - NONE
+ * side effects -
+ *
+ * Go through the gline list, expire any needed.
+ */
+void expire_glines()
+{
+  struct ConfItem *kill_ptr;
+  struct ConfItem *last_ptr = NULL;
+  struct ConfItem *next_ptr;
+
+  for(kill_ptr = glines; kill_ptr; kill_ptr = next_ptr)
+    {
+      next_ptr = kill_ptr->next;
+
+      if(kill_ptr->hold <= CurrentTime)
+	{
+	  if(last_ptr != NULL)
+	    last_ptr->next = next_ptr;
+	  else
+	    glines->next = next_ptr;
+
+	  free_conf(kill_ptr);
+	}
+      else
+	last_ptr = kill_ptr;
+    }
+}
+
+/*
+ * add_new_majority_gline
+ * 
+ * inputs       - 
+ * output       - NONE
+ * side effects -
+ *
+ */
 void
 add_new_majority_gline(const char* oper_nick,
 		       const char* oper_user,
@@ -864,13 +823,8 @@ add_new_majority_gline(const char* oper_nick,
   memset(pending, 0, sizeof(GLINE_PENDING));
 
   strncpy_irc(pending->oper_nick1, oper_nick, NICKLEN);
-  /* pending->oper_nick2[0] = '\0'; */
-
   strncpy_irc(pending->oper_user1, oper_user, USERLEN);
-  /* pending->oper_user2[0] = '\0'; */
-
   strncpy_irc(pending->oper_host1, oper_host, HOSTLEN);
-   /* pending->oper_host2[0] = '\0'; */
 
   pending->oper_server1 = find_or_add(oper_server);
 
@@ -1009,42 +963,24 @@ add_gline(struct ConfItem *aconf)
 int
 remove_gline_match(const char* user, const char* host)
 {
-  struct ConfItem *kill_list_ptr;     /* used for the link list only */
-  struct ConfItem *last_list_ptr;
-  struct ConfItem *tmp_list_ptr;
+  struct ConfItem *kill_ptr;
+  struct ConfItem *last_ptr=NULL;
+  struct ConfItem *tmp_ptr;
 
-  if(glines)
+  for( kill_ptr = glines; kill_ptr; kill_ptr = kill_ptr->next)
     {
-      kill_list_ptr = last_list_ptr = glines;
+      if(!irccmp(kill_ptr->host,host) && !irccmp(kill_ptr->name,user))
+	{
+	  if(last_ptr != NULL)
+	    last_ptr->next = kill_ptr->next;
+	  else
+	    glines = kill_ptr->next;
 
-      while(kill_list_ptr)
-        {
-          if(!irccmp(kill_list_ptr->host,host) &&
-             !irccmp(kill_list_ptr->name,user))  /* this gline matches */
-            {
-              if(glines == kill_list_ptr)
-                {
-                  glines = last_list_ptr = tmp_list_ptr =
-                    kill_list_ptr->next;
-                }
-              else
-                {
-                  /* its in the middle of the list, so link around it */
-                  tmp_list_ptr = last_list_ptr->next = kill_list_ptr->next;
-                }
-              free_conf(kill_list_ptr);
-              kill_list_ptr = tmp_list_ptr;
-              return 1;
-            }
-          else
-            {
-              last_list_ptr = kill_list_ptr;
-              kill_list_ptr = kill_list_ptr->next;
-            }
-        }
-      return 0;
+          free_conf(kill_ptr);
+          return 1;
+	}
+      last_ptr = kill_ptr;
     }
-  else
-    return 0;
+  return 0;
 }
 

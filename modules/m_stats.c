@@ -248,17 +248,6 @@ void do_normal_stats(struct Client *sptr,
       stats_L_spy(sptr,stat,name);
       break;
 
-    case 'G': case 'g' :
-      if (ConfigFileEntry.glines)
-	{
-	  report_glines(sptr);
-	  stats_spy(sptr,stat);
-	}
-      else
-        sendto_one(sptr,":%s NOTICE %s :This server does not support G lines",
-                   me.name, sptr->name);
-      break;
-
     case 'u' :
       {
         time_t now;
