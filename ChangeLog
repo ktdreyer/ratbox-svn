@@ -1,3 +1,25 @@
+leeh        2003/08/12 11:54:29 EDT	(20030812_2)
+
+  Modified files:
+    modules              m_join.c m_svinfo.c 
+    modules/core         m_nick.c m_sjoin.c 
+    src                  s_serv.c s_user.c 
+  Log:
+  - cleaned sjoin up, and made it handle TS6
+  - send local joins to TS6 as "JOIN", added handling of it.
+  - adding a local servers sid to the id hash is useful :P
+  - fixed +beI bursting for TS6 to use BMASK
+  
+  Revision  Changes    Path
+  1.126     +12 -14    ircd-ratbox/modules/core/m_nick.c
+  1.180     +126 -152  ircd-ratbox/modules/core/m_sjoin.c
+  1.135     +371 -44   ircd-ratbox/modules/m_join.c
+  1.52      +13 -1     ircd-ratbox/modules/m_svinfo.c
+  7.346     +74 -17    ircd-ratbox/src/s_serv.c
+  7.283     +2 -1      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2003/08/12 10:19:52 EDT	(20030812_1)
 
   Modified files:
