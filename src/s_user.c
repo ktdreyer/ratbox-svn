@@ -483,6 +483,8 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 
 	Count.invisi++;
 
+	s_assert(!IsClient(source_p));
+	dlinkMoveNode(&source_p->localClient->tnode, &unknown_list, &lclient_list);
 	SetClient(source_p);
 
 	/* XXX source_p->servptr is &me, since local client */
@@ -495,7 +497,6 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 
 	Count.totalrestartcount++;
 
-	dlinkMoveNode(&source_p->localClient->tnode, &unknown_list, &lclient_list);
 	s_assert(source_p->localClient != NULL);
 
 	if(dlink_list_length(&lclient_list) > (unsigned long)Count.max_loc)
