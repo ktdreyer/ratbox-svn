@@ -1,3 +1,17 @@
+db          2001/12/20 23:11:09 EST	(20011221_0)
+
+  Modified files:
+    modules              m_oper.c 
+  Log:
+  - An oper using RSA challenge, does not have a normal password.
+    If they are perverse enough to try to oper using a password, don't
+    let them core the server.
+  
+  Revision  Changes    Path
+  1.41      +4 -1      ircd-hybrid-7/modules/m_oper.c
+
+
+
 leeh        2001/12/20 15:32:04 EST	(20011220_6)
 
   Modified files:
