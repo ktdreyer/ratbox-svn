@@ -153,7 +153,7 @@ void parse(struct Client *client_p, char *pbuffer, char *bufend)
 
       sender = ch;
 
-      if( (s = strchr(ch, ' ')))
+      if((s = strchr(ch, ' ')))
 	{
 	  *s = '\0';
 	  s++;
@@ -178,7 +178,7 @@ void parse(struct Client *client_p, char *pbuffer, char *bufend)
            * (old IRC just let it through as if the
            * prefix just wasn't there...) --msa
            */
-          if (!from)
+          if (from == NULL)
             {
               Debug((DEBUG_ERROR, "Unknown prefix (%s)(%s) from (%s)",
                      sender, pbuffer, client_p->name));

@@ -890,16 +890,16 @@ sendto_match_butone(struct Client *one, struct Client *from,
   va_list args;
   struct Client *client_p;
   dlink_node *ptr;
-  buf_head_t linebuf;
+  buf_head_t local_linebuf;
+  buf_head_t remote_linebuf;
 
-  linebuf_newbuf(&linebuf);
+  linebuf_newbuf(&local_linebuf);
+  linebuf_newbuf(&remote_linebuf);
   va_start(args, pattern);
 
-  if(IsServer(from))
-    linebuf_putmsg(&linebuf, pattern, args, ":%s ", from->name);
-  else
-    linebuf_putmsg(&linebuf, pattern, args, ":%s!%s@%s ", from->name,
-                   from->username, from->host);
+  linebuf_putmsg(&remote_linebuf, pattern, args, ":%s ", from->name);
+  linebuf_putmsg(&local_linebuf, pattern, args, ":%s!%s@%s ", from->name,
+		 from->username, from->host);
 
   va_end(args);
 
@@ -912,7 +912,7 @@ sendto_match_butone(struct Client *one, struct Client *from,
       continue;
 
     if (match_it(client_p, mask, what))
-      send_linebuf(client_p, &linebuf);
+      send_linebuf(client_p, &local_linebuf);
   }
 
   /* Now scan servers */
@@ -948,9 +948,10 @@ sendto_match_butone(struct Client *one, struct Client *from,
      * -wnder
      */
 
-    send_linebuf_remote(client_p, from, &linebuf);
+    send_linebuf_remote(client_p, from, &remote_linebuf);
   }
-  linebuf_donebuf(&linebuf);
+  linebuf_donebuf(&local_linebuf);
+  linebuf_donebuf(&remote_linebuf);
 
 } /* sendto_match_butone() */
 
