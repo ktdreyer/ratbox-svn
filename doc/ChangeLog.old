@@ -1,3 +1,13 @@
+*** 20010203_5 by wcampbel
+. make rsa_respond will create a distributable rsa_respond.tar.gz
+. Rewrote the rsa_respond README file
+. Removed buffer.c and buffer.h from rsa_respond, they were old code,
+  needed for rsa_respond.c.  The new genkey/respond programs do not use
+  these two files.
+. Corrected my spelling in challenge.txt... Do NOT document when you are 
+  tired Hwy!
+
+
 *** 20010203_4 by wcampbel
 Documented that ::1 is not a supported IP (reported by me and poptix)
 
