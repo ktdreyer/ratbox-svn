@@ -123,7 +123,6 @@ _DupString(char **x, const char *y, char *file, int line)
 }
 
 void ReportAllocated(struct Client*);
-void ReportBlockHeap(struct Client*);
 
 void
 ReportAllocated(struct Client *client_p)
@@ -138,7 +137,6 @@ ReportAllocated(struct Client *client_p)
 	       mme->line);
   sendto_one(client_p, ":%s NOTICE %s :*** -- End Memory Allocation Report",
 	     me.name, client_p->name);
-  ReportBlockHeap(client_p);
 }
 #else /* MEMDEBUG */
 /*

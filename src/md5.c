@@ -234,7 +234,7 @@ void	md5_block(u_int32_t *in, u_int32_t *out, u_int32_t *x)
 int base64_block(char **output, char *data, int len)
 {
   unsigned char *out;
-  unsigned char *in = data;
+  unsigned char *in = (unsigned char*)data;
   unsigned long int q_in;
   int i;
   int count = 0;
@@ -276,14 +276,14 @@ int base64_block(char **output, char *data, int len)
   }
 
   out[count] = '\0';
-  *output = out;
+  *output = (char *)out;
   return count;
 }
 
 int unbase64_block(char **output, char *data, int len)
 {
   unsigned char *out;
-  unsigned char *in = data;
+  unsigned char *in = (unsigned char*)data;
   unsigned long int q_in;
   int i;
   int count = 0;
@@ -323,7 +323,7 @@ int unbase64_block(char **output, char *data, int len)
   if (in[i-2] == '=') count--;
 
   out[count] = '\0';
-  *output = out;
+  *output = (char *)out;
   return count;
 }
 
