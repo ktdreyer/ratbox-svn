@@ -126,6 +126,12 @@ modules_init(void)
 	mod_add_cmd(&error_msgtab);
 }
 
+/* mod_find_path()
+ *
+ * input	- path
+ * output	- none
+ * side effects - returns a module path from path
+ */
 static struct module_path *
 mod_find_path(char *path)
 {
@@ -145,6 +151,12 @@ mod_find_path(char *path)
   return NULL;
 }
 
+/* mod_add_path
+ *
+ * input	- path
+ * ouput	- 
+ * side effects - adds path to list
+ */
 void
 mod_add_path(char *path)
 {
@@ -161,6 +173,12 @@ mod_add_path(char *path)
   dlinkAdd(pathst, node, &mod_paths);
 }
 
+/* mod_clear_paths()
+ *
+ * input	-
+ * output	-
+ * side effects - clear the lists of paths
+ */
 void
 mod_clear_paths(void)
 {
@@ -177,6 +195,12 @@ mod_clear_paths(void)
     }
 }
 
+/* irc_basename
+ *
+ * input	-
+ * output	-
+ * side effects -
+ */
 char *
 irc_basename(char *path)
 {
@@ -192,6 +216,12 @@ irc_basename(char *path)
   return mod_basename;
 }
 
+/* findmodule_byname
+ *
+ * input        -
+ * output       -
+ * side effects -
+ */
 
 int 
 findmodule_byname (char *name)
@@ -206,8 +236,7 @@ findmodule_byname (char *name)
   return -1;
 }
 
-/*
- * unload_one_module 
+/* unload_one_module()
  *
  * inputs	- name of module to unload
  *		- 1 to say modules unloaded, 0 to not
@@ -248,7 +277,13 @@ int unload_one_module (char *name, int check)
   return 0;
 }
 
-/* load all modules from MPATH */
+/* load_all_modules()
+ *
+ * input        -
+ * output       -
+ * side effects -
+ */
+
 void
 load_all_modules (int check)
 {
@@ -291,6 +326,12 @@ load_all_modules (int check)
   (void)closedir (system_module_dir);
 }
 
+/* load_core_modules()
+ *
+ * input        -
+ * output       -
+ * side effects -
+ */
 void
 load_core_modules(int check)
 {
@@ -311,6 +352,12 @@ load_core_modules(int check)
   }
 }
 
+/* load_one_module()
+ *
+ * input        -
+ * output       -
+ * side effects -
+ */
 int
 load_one_module (char *path)
 {
@@ -340,7 +387,7 @@ load_one_module (char *path)
 		
 
 /*
- * load_a_module
+ * load_a_module()
  *
  * inputs	- path name of module
  * output	- -1 if error 0 if success
@@ -600,6 +647,12 @@ mo_modrestart (struct Client *client_p, struct Client *source_p, int parc, char 
 
 #else /* STATIC_MODULES */
 
+/* load_all_modules()
+ *
+ * input        -
+ * output       -
+ * side effects -
+ */
 void
 load_all_modules(int check)
 {

@@ -37,6 +37,7 @@ struct module {
   char *name;
   char *version;
   void *address;
+  int core;
 };
 
 struct module_path
