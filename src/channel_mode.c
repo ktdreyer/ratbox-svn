@@ -538,10 +538,10 @@ pretty_mask(char *mask)
     nick = mask;
 
   /* truncate values to max lengths */
-  if (strlen(nick) > NICKLEN)
+  if (strlen(nick) > NICKLEN - 1)
   {
-    ne = nick[NICKLEN];
-    nick[NICKLEN] = '\0';
+    ne = nick[NICKLEN - 1];
+    nick[NICKLEN - 1] = '\0';
   }
   if (strlen(user) > USERLEN)
   {
@@ -563,7 +563,7 @@ pretty_mask(char *mask)
   if (ex)
     *ex = '!';
   if (ne)
-    nick[NICKLEN] = ne;
+    nick[NICKLEN - 1] = ne;
   if (ue)
     user[USERLEN] = ue;
   if (he)
