@@ -1,3 +1,8 @@
+*** 20010205_6 by a1kmm
+- Finally got the code to only hash the new parts of the hostname when we try each token. Thanks to
+Dianora for the idea.
+
+
 *** 20010205_5 by androsyn
 Missing '&'s are bad for your health and your pointers :P 
 
