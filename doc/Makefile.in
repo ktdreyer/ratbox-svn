@@ -13,6 +13,7 @@ MKDEP		= ${CC} -MM
 MV		= @MV@
 RM		= @RM@
 CP		= @CP@
+TOUCH		= @TOUCH@
 
 prefix		= @prefix@
 exec_prefix	= @exec_prefix@
@@ -30,7 +31,8 @@ mandir          = @prefix@/man8
 MANPAGES        = ircd.8
 
 CONFS		= example.conf example.efnet.conf
-DEFAULTCONFS	= ircd.motd kline.conf dline.conf xline.conf
+DEFAULTCONFS	= kline.conf dline.conf xline.conf resv.conf
+DEFAULTCONFSCP  = ircd.motd
 
 SSL_LIBS	= @SSL_LIBS@
 SSL_INCLUDES	= @SSL_INCLUDES@
@@ -62,9 +64,13 @@ install: install-mkdirs build
 	done
 
 	@for i in $(DEFAULTCONFS); do \
-		if test ! -f $$i; then \
-			touch $$i; \
+		if test ! -f $(sysconfdir)/$$i; then \
+			echo ${TOUCH} $(sysconfdir)/$$i; \
+			${TOUCH} $(sysconfdir)/$$i; \
 		fi; \
+	done
+
+	@ for i in $(DEFAULTCONFSCP); do \
 		if test ! -f $(sysconfdir)/$$i; then \
 			echo $(INSTALL_DATA) $$i $(sysconfdir); \
 			$(INSTALL_DATA) $$i $(sysconfdir); \

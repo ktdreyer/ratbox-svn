@@ -54,7 +54,6 @@ static void remove_our_modes(int type,
 static void remove_a_mode(int hide_or_not,
                           struct Channel *chptr, struct Channel *top_chptr,
                           struct Client *source_p, dlink_list *list, char flag);
-static void free_channel_list(dlink_list *list);
 
 static char    *mbuf;
 
