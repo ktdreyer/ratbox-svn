@@ -1,3 +1,8 @@
+*** 20010409_3 by a1kmm
+- GlobalSetOptions != ConfigFileEntries. Always check stuff works before you
+  commit :)
+
+
 *** 20010409_2 by a1kmm
 - Always reply locally when a non-oper tries to use PING to ping a server
   and hide_server is on.
