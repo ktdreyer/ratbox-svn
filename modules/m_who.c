@@ -247,8 +247,7 @@ static void m_who(struct Client *client_p,
 	}
       else
 	{
-	  if (!isinvis)
-	    do_who(source_p, target_p, NULL, "");
+	  do_who(source_p, target_p, NULL, "");
 	}
 
       sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], mask );
