@@ -45,8 +45,7 @@
 static void m_trace(struct Client *, struct Client *, int, char **);
 static void ms_trace(struct Client*, struct Client*, int, char**);
 static void mo_trace(struct Client*, struct Client*, int, char**);
-static struct Client* next_client_double(struct Client *next,
-					 const char* ch);
+static struct Client* next_client_double(struct Client *next, const char* ch);
 
 static void trace_spy(struct Client *);
 
