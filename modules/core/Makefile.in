@@ -105,6 +105,8 @@ SH_OBJS = ${SRCS:.c=.so}
 
 S_OBJS = ${SRCS:.c=.o}
 
+DOLLAR = $$
+
 default:	build
 build: all
 all: @MOD_TARGET@
@@ -163,8 +165,8 @@ install_shared_modules: install-mkdirs
 
 .PHONY: depend clean distclean
 depend:
-	echo "# $Id$" > .depend
-	@${MKDEP} ${CPPFLAGS} ${SRCS} >> .depend
+	echo "# \${DOLLAR}Id: ${DOLLAR}" > .depend
+	${MKDEP} ${CPPFLAGS} ${SRCS} >> .depend
 
 clean:
 	${RM} -f *.so *~ *.o *.a

@@ -24,6 +24,8 @@ libexecdir	= @libexecdir@
 sysconfdir	= @sysconfdir@
 localstatedir	= @localstatedir@
 
+DOLLAR = $$
+
 IRCD_EXE	= ircd
 
 PROGS		= $(IRCD_EXE)
@@ -162,8 +164,8 @@ version.c: version.c.SH
 
 .PHONY: depend clean distclean
 depend:
-	echo "# $Id$" > .depend
-	@${MKDEP} ${CPPFLAGS} ${BASE_SRCS} ${EXTRA_SRCS} >> .depend
+	echo "# \${DOLLAR}Id: ${DOLLAR}" > .depend
+	${MKDEP} ${CPPFLAGS} ${BASE_SRCS} ${EXTRA_SRCS} >> .depend
 
 clean:
 	${RM} -f *.o *.exe *~ y.tab.* lex.yy.c ircd.core core ircd 
