@@ -1,3 +1,7 @@
+*** 20010207_5 by wcampbel
+Replaced bogus C++ // comment
+
+
 *** 20010207_4 by wcampbel
 Updated the TODO list
 kline=yes|no; in the conf controls KILL too
