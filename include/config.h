@@ -298,8 +298,6 @@
  */
 #define SHOW_INVISIBLE_LUSERS
 
-#define ZIP_LINKS               /* compress server-to-server links */
-
 /* NO_DEFAULT_INVISIBLE - clients not +i by default
  * When defined, your users will not automatically be attributed with user
  * mode "i" (i == invisible). Invisibility means people dont showup in

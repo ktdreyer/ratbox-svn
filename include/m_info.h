@@ -579,17 +579,8 @@ Info MyInformation[] = {
   { "WINTRHAWK", "OFF", 0, "Enable Wintrhawk Styling" },
 #endif /* WINTRHAWK */
 
-#ifdef ZIP_LEVEL
   { "ZIP_LEVEL", "", ZIP_LEVEL, "Compression Value for Zipped Links" },
-#else
-  { "ZIP_LEVEL", "NONE", 0, "Compression Value for Zipped Links" },
-#endif /* ZIP_LEVEL */
-
-#ifdef ZIP_LINKS
   { "ZIP_LINKS", "ON", 0, "Compress Server to Server Links" },
-#else
-  { "ZIP_LINKS", "OFF", 0, "Compress Server to Server Links" },
-#endif /* ZIP_LINKS */
 
   /*
    * since we don't want to include the world here, NULL probably

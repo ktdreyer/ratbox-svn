@@ -100,7 +100,6 @@ int   class_sendq_var;
 %token  MAX_NUMBER
 %token  SENDQ
 %token  PASSWORD
-%token  ALLOW_BOTS
 %token  LISTEN
 %token  PORT
 %token  SPOOF

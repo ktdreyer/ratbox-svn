@@ -693,14 +693,13 @@ void close_connection(struct Client *cptr)
     cptr->fd = -1;
   }
 
-#ifdef ZIP_LINKS
     /*
      * the connection might have zip data (even if
      * FLAGS2_ZIP is not set)
      */
   if (IsServer(cptr))
     zip_free(cptr);
-#endif
+
   DBufClear(&cptr->sendQ);
   DBufClear(&cptr->recvQ);
   memset(cptr->passwd, 0, sizeof(cptr->passwd));
@@ -1019,9 +1018,7 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
             }
 
           if (DBufLength(&cptr->sendQ) || IsConnecting(cptr)
-#ifdef ZIP_LINKS
               || ((cptr->flags2 & FLAGS2_ZIP) && (cptr->zip->outcount > 0))
-#endif
               )
             {
                FD_SET(i, write_set);
@@ -1319,9 +1316,7 @@ int read_message(time_t delay, unsigned char mask)
         PFD_SETR(i);
       
       if (DBufLength(&cptr->sendQ) || IsConnecting(cptr)
-#ifdef ZIP_LINKS
           || ((cptr->flags2 & FLAGS2_ZIP) && (cptr->zip->outcount > 0))
-#endif
           )
         PFD_SETW(i);
     }

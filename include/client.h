@@ -207,9 +207,7 @@ struct Client
   int               drone_noticed;
 #endif
   char  buffer[CLIENT_BUFSIZE]; /* Incoming message buffer */
-#ifdef ZIP_LINKS
   struct Zdata*     zip;        /* zip data */
-#endif
   short             lastsq;     /* # of 2k blocks when sendqueued called last*/
   struct DBuf       sendQ;      /* Outgoing message queue--if socket full */
   struct DBuf       recvQ;      /* Hold for data incoming yet to be parsed */
@@ -358,7 +356,6 @@ struct Client
                                  FLAGS2_OPER_K | \
                                  FLAGS2_OPER_DIE | \
                                  FLAGS2_OPER_REHASH)
-/* ZIP_LINKS */
 
 #define FLAGS2_ZIP           0x4000  /* (server) link is zipped */
 #define FLAGS2_ZIPFIRST      0x8000  /* start of zip (ignore any CR/LF) */

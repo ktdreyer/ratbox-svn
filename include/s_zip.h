@@ -1,4 +1,4 @@
-/************************************************************************
+/***********************************************************************
  *   IRC - Internet Relay Chat, include/s_zip.h
  *   Copyright (C) 1992 Darren Reed
  *
@@ -34,9 +34,9 @@
 
 struct Client;
 
-#ifdef ZIP_LINKS
 /* the minimum amount of data needed to trigger compression */
 #define ZIP_MINIMUM     4096
+/* the minimum amount of data needed to trigger compression */
 
 /* the maximum amount of data to be compressed (can actually be a bit more) */
 #define ZIP_MAXIMUM     8192    /* WARNING: *DON'T* CHANGE THIS!!!! */
@@ -49,8 +49,6 @@ struct Zdata {
   int         incount;        /* size of inbuf content */
   int         outcount;       /* size of outbuf content */
 };
-
-#endif /* ZIP_LINKS */
 
 
 extern int     zip_init (struct Client *);

@@ -130,9 +130,7 @@ struct Client* make_client(struct Client* from)
 #ifdef FLUD
       cptr->fluders   = NULL;
 #endif
-#ifdef ZIP_LINKS
       cptr->zip       = NULL;
-#endif
       cptr->listener  = NULL;
       cptr->confs     = NULL;
 
