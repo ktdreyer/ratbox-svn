@@ -289,7 +289,10 @@ ms_kline(struct Client *client_p, struct Client *source_p,
   if (!IsPerson(source_p))
     return;
 
-  if (valid_user_host(source_p, kuser, khost))
+  if (find_u_conf((char *)source_p->user->server,
+		  source_p->username, source_p->host, OPER_K))
+  {
+    if (valid_user_host(source_p, kuser, khost))
     {
       sendto_realops_flags(UMODE_ALL, L_ALL,
              "*** %s!%s@%s on %s is requesting an Invalid K-Line for [%s@%s] [%s]",
@@ -298,51 +301,47 @@ ms_kline(struct Client *client_p, struct Client *source_p,
       return;
     }
 
-  if (valid_wild_card(kuser, khost))
+    if (valid_wild_card(kuser, khost))
     {
        sendto_realops_flags(UMODE_ALL, L_ALL, 
              "*** %s!%s@%s on %s is requesting a K-Line without %d wildcard chars for [%s@%s] [%s]",
              source_p->name, source_p->username, source_p->host, source_p->user->server,
              ConfigFileEntry.min_nonwildcard, kuser, khost, kreason);
        return;
-     }
+    }
 
-  if(!valid_comment(source_p, kreason))
-    return;
+    if(!valid_comment(source_p, kreason))
+      return;
 
-  tkline_time = atoi(parv[2]);
+    tkline_time = atoi(parv[2]);
 
-  if (find_u_conf((char *)source_p->user->server,
-		  source_p->username, source_p->host, OPER_K))
-  {
-      sendto_realops_flags(UMODE_ALL, L_ALL,
-			   "*** Received K-Line for [%s@%s] [%s], from %s!%s@%s on %s",
-			   kuser, khost, kreason,
-			   source_p->name, source_p->username,
-			   source_p->host, source_p->user->server);
+    sendto_realops_flags(UMODE_ALL, L_ALL,
+			 "*** Received K-Line for [%s@%s] [%s], from %s!%s@%s on %s",
+			 kuser, khost, kreason,
+			 source_p->name, source_p->username,
+			 source_p->host, source_p->user->server);
 
-      /* We check if the kline already exists after we've announced its 
-       * arrived, to avoid confusing opers - fl
-       */
-      if (already_placed_kline(source_p, kuser, khost))
-        return;
+    /* We check if the kline already exists after we've announced its 
+     * arrived, to avoid confusing opers - fl
+     */
+    if (already_placed_kline(source_p, kuser, khost))
+      return;
 
-      aconf = make_conf();
+    aconf = make_conf();
 
-      aconf->status = CONF_KILL;
-      DupString(aconf->user, kuser);
-      DupString(aconf->host, khost);
-      DupString(aconf->passwd, kreason);
-      current_date = smalldate(CurrentTime);
+    aconf->status = CONF_KILL;
+    DupString(aconf->user, kuser);
+    DupString(aconf->host, khost);
+    DupString(aconf->passwd, kreason);
+    current_date = smalldate(CurrentTime);
 
-      if (tkline_time)
-	apply_tkline(source_p, aconf, current_date, tkline_time);
-      else
-	apply_kline(source_p, aconf, aconf->passwd, NULL, current_date);
+    if (tkline_time)
+      apply_tkline(source_p, aconf, current_date, tkline_time);
+    else
+      apply_kline(source_p, aconf, aconf->passwd, NULL, current_date);
 
+    check_klines();
   }
-
-  check_klines();
 }
 
 /*
@@ -987,46 +986,41 @@ valid_comment(struct Client *source_p, char *comment)
 static int
 already_placed_kline(struct Client *source_p, char *luser, char *lhost)
 {
- char *reason;
- struct irc_inaddr iphost, *piphost;
- struct ConfItem *aconf;
- int t;
- if (ConfigFileEntry.non_redundant_klines) 
- {
-  if ((t=parse_netmask(lhost, &iphost, &t)) != HM_HOST)
-  {
-#ifdef IPV6
-   if (t == HM_IPV6)
-    t = AF_INET6;
-   else
-#endif
-   t = AF_INET;
-   piphost = &iphost;
-  }
-  else
-  {
-   t = 0;
-   piphost = NULL;
-  }
-  if ((aconf = find_conf_by_address(lhost, piphost, CONF_KILL, t, luser)))
-  {
-   reason = aconf->passwd ? aconf->passwd : "<No Reason>";
+  char *reason;
+  struct irc_inaddr iphost, *piphost;
+  struct ConfItem *aconf;
+  int t;
 
-   /* Remote servers can set klines, so if its a dupe we warn all 
-    * local opers and leave it at that
-    */
-   /* they can?  here was me thinking it was only remote clients :P */
-   if(!MyClient(source_p))
-    sendto_realops_flags(UMODE_ALL, L_ALL, 
-             "*** Remote K-Line [%s@%s] already K-Lined by [%s@%s] - %s",
-             luser, lhost, aconf->user, aconf->host, reason);
-   else
-    sendto_one(source_p,
-             ":%s NOTICE %s :[%s@%s] already K-Lined by [%s@%s] - %s",
-              me.name, source_p->name, luser, lhost, aconf->user,
-              aconf->host, reason);
-     return 1;
+  if (ConfigFileEntry.non_redundant_klines) 
+  {
+    if ((t=parse_netmask(lhost, &iphost, &t)) != HM_HOST)
+    {
+#ifdef IPV6
+      if (t == HM_IPV6)
+        t = AF_INET6;
+      else
+#endif
+        t = AF_INET;
+
+      piphost = &iphost;
+    }
+    else
+    {
+      t = 0;
+      piphost = NULL;
+    }
+
+    if ((aconf = find_conf_by_address(lhost, piphost, CONF_KILL, t, luser)))
+    {
+      reason = aconf->passwd ? aconf->passwd : "<No Reason>";
+
+      sendto_one(source_p,
+                 ":%s NOTICE %s :[%s@%s] already K-Lined by [%s@%s] - %s",
+                 me.name, source_p->name, luser, lhost, aconf->user,
+                 aconf->host, reason);
+      return 1;
+    }
   }
- }
+
  return 0;
 }
