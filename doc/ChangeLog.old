@@ -1,3 +1,11 @@
+*** 20010118_1 by ejb
+- start of VMS port .. doesn't work yet, we need
+  - res.c to use BIND8 (VMS does not support BIND4 compatibility)
+  - s_bsd_select.c to work
+- include the output of yacc/bison in the distribution, for people
+  without yacc/lex (including VMS ..)
+
+
 *** 20010117_14 by db
 - fixed /nick changes so they are removed from accept lists of
   any client that happens to have that nick on its accept list.
