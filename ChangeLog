@@ -1,3 +1,18 @@
+androsyn    2003/06/17 18:27:03 UTC	(20030617_2)
+
+  Modified files:
+    include              newconf.h 
+    src                  newconf.c 
+  Log:
+  Move a few global variables back to locals as the rest of the world doesn't
+  need to see them
+  
+  Revision  Changes    Path
+  7.28      +1 -12     ircd-ratbox/include/newconf.h
+  7.88      +25 -24    ircd-ratbox/src/newconf.c
+
+
+
 androsyn    2003/06/17 17:16:25 UTC	(20030617_1)
 
   Modified files:
