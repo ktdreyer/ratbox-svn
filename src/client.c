@@ -1202,7 +1202,10 @@ exit_unknown_client(struct Client *client_p, struct Client *source_p, struct Cli
 	del_from_hostname_hash_table(source_p->host, source_p);
 	del_from_client_hash_table(source_p->name, source_p);
 	remove_client_from_list(source_p);
+	assert(dlinkFind(&dead_list, source_p) == NULL);
+
 	dlinkAddAlloc(source_p, &dead_list);
+
 	/* Note that we don't need to add unknowns to the dead_list */
 	return(CLIENT_EXITED);
 }
@@ -1244,6 +1247,8 @@ exit_remote_server(struct Client *client_p, struct Client *source_p, struct Clie
 	
 	del_from_client_hash_table(source_p->name, source_p);
 	remove_client_from_list(source_p);  
+	assert(dlinkFind(&dead_list, source_p) == NULL);
+
 	dlinkAddAlloc(source_p, &dead_list);	
 	return 0;
 }
@@ -1313,6 +1318,8 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
         
 	del_from_client_hash_table(source_p->name, source_p);
 	remove_client_from_list(source_p);  
+	assert(dlinkFind(&dead_list, source_p) == NULL);
+
 	dlinkAddAlloc(source_p, &dead_list);
 	return 0;
 }
