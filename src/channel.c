@@ -48,7 +48,7 @@
 #include "s_log.h"
 
 struct config_channel_entry ConfigChannel;
-struct Channel *GlobalChannelList = NULL;
+dlink_list GlobalChannelList;
 BlockHeap *channel_heap;
 BlockHeap *ban_heap;
 BlockHeap *topic_heap;
@@ -514,18 +514,17 @@ free_channel_list(dlink_list * list)
  *
  * inputs       - not used
  * output       - none
- * side effects - persistent channels... vchans get a long long timeout
+ * side effects - persistent channels... 
  */
 void
 cleanup_channels(void *unused)
 {
   struct Channel *chptr;
-  struct Channel *next_chptr;
+  dlink_node *ptr, *next_ptr;
 
-  for (chptr = GlobalChannelList; chptr; chptr = next_chptr)
+  DLINK_FOREACH_SAFE(ptr, next_ptr, GlobalChannelList.head)
   {
-    next_chptr = chptr->nextch;
-
+    chptr = (struct Channel *)ptr->data;
     if(chptr->users == 0)
     {
       if((chptr->users_last + ConfigChannel.persist_time) < CurrentTime)
@@ -593,13 +592,7 @@ destroy_channel(struct Channel *chptr)
 
   chptr->banlist.tail = chptr->exceptlist.tail = chptr->invexlist.tail = NULL;
 
-  if (chptr->prevch)
-    chptr->prevch->nextch = chptr->nextch;
-  else
-    GlobalChannelList = chptr->nextch;
-  if (chptr->nextch)
-    chptr->nextch->prevch = chptr->prevch;
-
+  dlinkDelete(&chptr->node, &GlobalChannelList);
 
   del_from_channel_hash_table(chptr->chname, chptr);
   BlockHeapFree(channel_heap, chptr);

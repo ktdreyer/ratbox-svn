@@ -234,31 +234,24 @@ void count_memory(struct Client *source_p)
     }
 
   /* Count up all channels, ban lists, except lists, Invex lists */
-
-  for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
+  DLINK_FOREACH(ptr, GlobalChannelList.head)
     {
+      chptr = (struct Channel *)ptr->data;
       channel_count++;
       channel_memory += (strlen(chptr->chname) + sizeof(struct Channel));
 
-      for (dlink = chptr->peons.head; dlink; dlink = dlink->next)
-        channel_users++;
-      for (dlink = chptr->chanops.head; dlink; dlink = dlink->next)
-        channel_users++;
+      channel_users += dlink_list_length(&chptr->peons);
+      channel_users += dlink_list_length(&chptr->chanops);
 #ifdef REQUIRE_OANDV
-      for (dlink = chptr->chanops_voiced.head; dlink; dlink = dlink->next)
-        channel_users++;
+      channel_users += dlink_list_length(&chptr->chanops_voiced);
 #endif
-      for (dlink = chptr->voiced.head; dlink; dlink = dlink->next)
-        channel_users++;
+      channel_users += dlink_list_length(&chptr->voiced);
 #ifdef HALFOPS
-      for (dlink = chptr->halfops.head; dlink; dlink = dlink->next)
-        channel_users++;
+      channel_users += dlink_list_length(&chptr->halfops);
 #endif
+      channel_invites += dlink_list_length(&chptr->invites);
 
-      for (dlink = chptr->invites.head; dlink; dlink = dlink->next)
-        channel_invites++;
-
-      for (dlink = chptr->banlist.head; dlink; dlink = dlink->next)
+      DLINK_FOREACH(dlink, chptr->banlist.head)
         {
 	  actualBan = dlink->data;
           channel_bans++;
@@ -271,7 +264,7 @@ void count_memory(struct Client *source_p)
             channel_ban_memory += strlen(actualBan->who);
         }
 
-      for (dlink = chptr->exceptlist.head; dlink; dlink = dlink->next)
+      DLINK_FOREACH(dlink, chptr->exceptlist.head)
         {
 	  actualBan = dlink->data;
           channel_except++;
@@ -284,7 +277,7 @@ void count_memory(struct Client *source_p)
             channel_except_memory += strlen(actualBan->who);
         }
 
-      for (dlink = chptr->invexlist.head; dlink; dlink = dlink->next)
+      DLINK_FOREACH(dlink, chptr->invexlist.head)
         {
 	  actualBan = dlink->data;
           channel_invex++;

@@ -47,8 +47,7 @@ struct Mode
 
 struct Channel
 {
-  struct Channel* nextch;
-  struct Channel* prevch;
+  dlink_node      node;
   struct Channel* hnextch;
   struct Mode     mode;
   char            *topic;
@@ -94,8 +93,7 @@ struct Channel
   char            chname[CHANNELLEN+1];
 };
 
-extern  struct  Channel *GlobalChannelList;
-
+extern  dlink_list GlobalChannelList;
 void init_channels(void);
 void cleanup_channels(void *);
 

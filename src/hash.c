@@ -771,12 +771,8 @@ get_or_create_channel(struct Client *client_p, char *chname, int *isnew)
   memset(chptr, 0, sizeof(struct Channel));
   strlcpy(chptr->chname, chname, CHANNELLEN+1);
 
-  if (GlobalChannelList)
-    GlobalChannelList->prevch = chptr;
+  dlinkAdd(chptr, &chptr->node, &GlobalChannelList);
 
-  chptr->prevch = NULL;
-  chptr->nextch = GlobalChannelList;
-  GlobalChannelList = chptr;
   chptr->channelts = CurrentTime;     /* doesn't hurt to set it here */
 
   ptr = make_dlink_node();

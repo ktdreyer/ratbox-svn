@@ -137,11 +137,12 @@ static void mo_list(struct Client *client_p,
 static int list_all_channels(struct Client *source_p)
 {
   struct Channel *chptr;
-
+  dlink_node *ptr;
   sendto_one(source_p, form_str(RPL_LISTSTART), me.name, source_p->name);
 
-  for ( chptr = GlobalChannelList; chptr; chptr = chptr->nextch )
+  DLINK_FOREACH(ptr, GlobalChannelList.head)
     {
+      chptr = (struct Channel *)ptr->data;
       if ( !source_p->user ||
 	   (SecretChannel(chptr) && !IsMember(source_p, chptr)))
 	continue;

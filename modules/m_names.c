@@ -125,13 +125,15 @@ static void m_names(struct Client *client_p,
 static void names_all_visible_channels(struct Client *source_p)
 {
   struct Channel *chptr;
-
+  dlink_node *ptr;
   /* 
    * First, do all visible channels (public and the one user self is)
    */
-
-  for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
+  DLINK_FOREACH(ptr, GlobalChannelList.head)
+  {
+      chptr = (struct Channel *)ptr->data;
       channel_member_names( source_p, chptr, chptr->chname, 0);
+  }
 }
 
 /*
