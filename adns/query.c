@@ -45,9 +45,7 @@ static adns_query query_alloc(adns_state ads, const typeinfo *typei,
   adns_query qu;
   
   qu= MyMalloc(sizeof(*qu)); 
-  memset((void *)qu,0,sizeof(*qu));
   qu->answer= MyMalloc(sizeof(*qu->answer)); 
-  memset((void *)qu->answer,0,sizeof(*qu->answer));
   
   qu->ads= ads;
   qu->state= query_tosend;
@@ -102,12 +100,6 @@ static void query_submit(adns_state ads, adns_query qu,
   adns__vbuf_init(qumsg_vb);
 
   qu->query_dgram= MyMalloc(qu->vb.used);
-  memset((void *)qu->query_dgram,0,qu->vb.used);
-
-#if 0
-  /* XXX MyMalloc will abort before it gets here if malloc fails. */
-  if (!qu->query_dgram) { adns__query_fail(qu,adns_s_nomemory); return; }
-#endif
   
   qu->id= id;
   qu->query_dglen= qu->vb.used;
