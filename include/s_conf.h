@@ -24,6 +24,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.27  2000/11/26 03:35:35  db
+ * - tempoary check in (still works) of another massive cleanup...
+ *   more to come
+ *
  * Revision 7.26  2000/11/25 17:40:56  toot
  * . moved mo_testline into a module
  * . added idletime setting for use in ircd.conf
@@ -507,8 +511,6 @@ typedef struct
   int         pace_wait;
   int         whois_wait;
   int         knock_delay;
-  int         wallops_wait;
-  int         pace_wallops;
   int         short_motd;
   int         no_oper_flood;
   int         stats_p_notice;

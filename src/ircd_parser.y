@@ -159,8 +159,6 @@ int   class_sendq_var;
 %token  WHOIS_WAIT
 %token  PACE_WAIT
 %token  KNOCK_DELAY
-%token  PACE_WALLOPS
-%token  WALLOPS_WAIT
 %token  SHORT_MOTD
 %token  NO_OPER_FLOOD
 %token  IAUTH_SERVER
@@ -1170,7 +1168,7 @@ general_item:       general_quiet_on_ban | general_moderate_nickchange |
                     general_non_redundant_klines | general_botcheck | general_b_lines_oper_only |
                     general_e_lines_oper_only | general_f_lines_oper_only | general_stats_notice |
                     general_whois_notice | general_pace_wait | general_whois_wait | 
-                    general_knock_delay | general_pace_wallops | general_wallops_wait |
+                    general_knock_delay |
                     general_short_motd | general_no_oper_flood | general_iauth_server |
                     general_iauth_port | general_stats_p_notice | general_invite_plus_i_only |
                     general_glines | general_topic_uh | general_gline_time | general_idletime 
@@ -1359,22 +1357,6 @@ general_whois_wait: WHOIS_WAIT '=' NUMBER ';'
 general_knock_delay: KNOCK_DELAY '=' NUMBER ';'
   {
     ConfigFileEntry.knock_delay = yylval.number;
-  } ;
-
-general_pace_wallops: PACE_WALLOPS '=' TYES ';'
-  {
-    ConfigFileEntry.pace_wallops = 1;
-  }
-    |
-    PACE_WALLOPS '=' TNO ';'
-  {
-    ConfigFileEntry.pace_wallops = 0;
-  } ;
-
-
-general_wallops_wait: WALLOPS_WAIT '=' NUMBER ';'
-  {
-    ConfigFileEntry.wallops_wait = yylval.number;
   } ;
 
 general_short_motd: SHORT_MOTD '=' TYES ';'

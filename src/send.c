@@ -739,100 +739,6 @@ sendto_match_butone(struct Client *one, struct Client *from, char *mask,
 } /* sendto_match_butone() */
 
 /*
-** sendto_ops_butone
-**      Send message to all operators.
-** one - client not to send message to
-** from- client which message is from *NEVER* NULL!!
-*/
-
-void
-sendto_ops_butone(struct Client *one, struct Client *from, const char *pattern, ...)
-
-{
-  va_list args;
-  register int index;
-  register struct Client *cptr;
-
-  va_start(args, pattern);
-
-  ++current_serial;
-
-  for (cptr = GlobalClientList; cptr; cptr = cptr->next)
-    {
-      if (!SendWallops(cptr))
-        continue;
-
-/* we want wallops
-   if (MyClient(cptr) && !(IsServer(from) || IsMe(from)))
-   continue;
-*/
-
-      index = cptr->from->fd; /* find connection oper is on */
-
-      if (sentalong[index] == current_serial)
-        continue;
-      
-      if (cptr->from == one)
-        continue;       /* ...was the one I should skip */
-      
-      sentalong[index] = current_serial;
-      
-      vsendto_prefix_one(cptr->from, from, pattern, args);
-    }
-
-  va_end(args);
-} /* sendto_ops_butone() */
-
-/*
-** sendto_wallops_butone
-**      Send message to all operators.
-** one - client not to send message to
-** from- client which message is from *NEVER* NULL!!
-*/
-
-void
-sendto_wallops_butone(struct Client *one, struct Client *from, const char *pattern, ...)
-
-{
-  va_list args;
-  register int index;
-  register struct Client *cptr;
-
-  va_start(args, pattern);
-
-  ++current_serial;
-
-  for (cptr = GlobalClientList; cptr; cptr = cptr->next)
-    {
-      if (!SendWallops(cptr))
-        continue;
-      
-      if (!(IsServer(from) || IsMe(from)) &&
-          MyClient(cptr) && !IsGlobalOper(cptr))
-        continue;
-
-      if (MyClient(cptr) && !IsAnyOper(cptr) &&
-          !(IsServer(from) || IsMe(from)))
-        continue;
-
-      /* find connection oper is on */
-      index = cptr->from->fd;
-
-      if (sentalong[index] == current_serial)
-        continue;
-
-      if (cptr->from == one)
-        continue; /* ...was the one I should skip */
-
-      sentalong[index] = current_serial;
-      
-      vsendto_prefix_one(cptr->from, from, pattern, args);
-    }
-
-        va_end(args);
-} /* sendto_wallops_butone() */
-
-/*
 ** send_operwall -- Send Wallop to All Opers on this server
 **
 */
@@ -848,30 +754,36 @@ send_operwall(struct Client *from, char *type_message, char *message)
   if (!from || !message)
     return;
 
-  if (!IsPerson(from))
-    return;
-
   user = from->user;
-  (void)strcpy(sender, from->name);
 
-  if (*from->username) 
+  if(IsPerson(from))
     {
-      strcat(sender, "!");
-      strcat(sender, from->username);
+      (void)ircsprintf(sender,"%s!%s@%s",from->name,from->username,from->host);
+    }
+  else
+    {
+      (void)strcpy(sender, from->name);
     }
 
-  if (*from->host)
+  if(type_message != NULL)
     {
-      strcat(sender, "@");
-      strcat(sender, from->host);
+      for (acptr = oper_cptr_list; acptr; acptr = acptr->next_oper_client)
+	{
+	  if (!SendOperwall(acptr))
+	    continue; /* has to be oper if in this linklist */
+	  sendto_one(acptr, ":%s WALLOPS :%s %s", sender,
+		     type_message, message);
+	}
     }
-
-  for (acptr = oper_cptr_list; acptr; acptr = acptr->next_oper_client)
+  else
     {
-      if (!SendOperwall(acptr))
-        continue; /* has to be oper if in this linklist */
+      for (acptr = oper_cptr_list; acptr; acptr = acptr->next_oper_client)
+	{
+	  if (!SendOperwall(acptr))
+	    continue; /* has to be oper if in this linklist */
 
-      sendto_one(acptr, ":%s WALLOPS :%s - %s", sender, type_message, message);
+	  sendto_one(acptr, ":%s WALLOPS :%s", sender, message);
+	}
     }
 } /* send_operwall() */
 
@@ -977,23 +889,6 @@ vsendto_prefix_one(register struct Client *to, register struct Client *from,
       
       par = sender;
     } /* if (user) */
-
-#if 0
-  /*
-   * Assume pattern is of the form: ":%s COMMAND ...",
-   * so jump past the ":%s " after we insert our new
-   * prefix
-   */
-  sprintf(sendbuf, ":%s %s", par, &pattern[4]);
-
-  /*
-   * sendbuf[] is now a modified version of pattern - pattern
-   * used to be: ":%s COMMAND ..."
-   * sendbuf is now: ":nick!user@host COMMAND ..."
-   */
-
-  vsendto_one(to, sendbuf, args);
-#endif
 
   *sendbuf = ':';
   strncpy_irc(sendbuf + 1, par, sizeof(sendbuf) - 2);

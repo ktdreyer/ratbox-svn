@@ -1181,6 +1181,8 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
+/* XXX */
+#if 0
   if (IsServer(sptr) || sptr != acptr || acptr->from != sptr->from)
     {
       if (IsServer(cptr))
@@ -1193,6 +1195,7 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                    me.name, parv[0]);
       return 0;
     }
+#endif
  
   if (parc < 3)
     {

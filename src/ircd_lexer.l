@@ -171,8 +171,6 @@ whois_notice            { return WHOIS_NOTICE; }
 whois_wait              { return WHOIS_WAIT; }
 pace_wait               { return PACE_WAIT; }
 knock_delay             { return KNOCK_DELAY; }
-wallops_wait            { return WALLOPS_WAIT; }
-pace_wallops            { return PACE_WALLOPS; }
 iauth_server            { return IAUTH_SERVER; }
 iauth_port		{ return IAUTH_PORT; }
 stats_p_notice	        { return STATS_P_NOTICE; }
