@@ -844,8 +844,19 @@ static int proc_answer(struct ResRequest* request, HEADER* header,
    * process each answer sent to us blech.
    */
   while (header->ancount-- > 0 && current < eob && name < endp) {
-    if ((n = dn_expand(buf, eob, current, hostbuf, sizeof(hostbuf))) <= 0)
+    n = dn_expand(buf, eob, current, hostbuf, sizeof(hostbuf));
+    if (n < 0) {
+      /*
+       * broken message
+       */
+      return 0;
+    }
+    else if (n == 0) {
+      /*
+       * no more answers left
+       */
       return answer_count;
+    }
     hostbuf[HOSTLEN] = '\0';
     /* 
      * With Address arithmetic you have to be very anal
@@ -902,8 +913,19 @@ static int proc_answer(struct ResRequest* request, HEADER* header,
       ++answer_count;
       break;
     case T_PTR:
-      if ((n = dn_expand(buf, eob, current, hostbuf, sizeof(hostbuf))) < 0)
+      n = dn_expand(buf, eob, current, hostbuf, sizeof(hostbuf));
+      if (n < 0) {
+        /*
+         * broken message
+         */
+        return 0;
+      }
+      else if (n == 0) {
+        /*
+         * no more answers left
+         */
         return answer_count;
+      }
       /*
        * This comment is based on analysis by Shadowfax, Wohali and johan, 
        * not me.  (Dianora) I am only commenting it.
