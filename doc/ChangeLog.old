@@ -1,3 +1,9 @@
+*** 20010311_6 by fl_
+- undefine persistant clients by default.. is there a missing 
+  messages.tab?
+- we need to discuss this before any more commits..
+
+
 *** 20010311_5 by fl_
 - added wildcard checking for remote klines
 - upped the minimum non-wildcard chars from 2 to 4.. 
