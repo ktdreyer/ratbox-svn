@@ -99,15 +99,9 @@ init_s_newconf(void)
 	eventAddIsh("expire_temp_dlines_week", reorganise_temp_kd,
 			&temp_dlines[TEMP_WEEK], 604800);
 
-#ifdef IPV6
-	dline_tree = New_Patricia(128);
-	exempt_tree = New_Patricia(128);
-	tgchange_tree = New_Patricia(128);
-#else
-	dline_tree = New_Patricia(32);
-	exempt_tree = New_Patricia(32);
-	tgchange_tree = New_Patricia(32);
-#endif
+	dline_tree = New_Patricia(BITLEN);
+	exempt_tree = New_Patricia(BITLEN);
+	tgchange_tree = New_Patricia(BITLEN);
 }
 
 

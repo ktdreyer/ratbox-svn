@@ -59,11 +59,8 @@ make_class(void)
 	MaxSendq(tmp) = DEFAULT_SENDQ;
 	MaxSendqEob(tmp) = 0;
 
-#ifdef IPV6
-	tmp->ip_limits = New_Patricia(128);
-#else
-	tmp->ip_limits = New_Patricia(32);
-#endif
+	tmp->ip_limits = New_Patricia(BITLEN);
+
 	return tmp;
 }
 

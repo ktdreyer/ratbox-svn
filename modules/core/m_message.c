@@ -503,6 +503,8 @@ add_tgchange(struct sockaddr *ip, const char *host)
 	tgchange *target;
 
 	target = MyMalloc(sizeof(tgchange));
+
+	/* XXX - this should depend on the aftype */
 #ifdef IPV6
 	pnode = make_and_lookup_ip(tgchange_tree, ip, 128);
 #else

@@ -180,4 +180,10 @@ extern int errno;
 /* Right out of the RFC */
 #define IRCD_BUFSIZE 512
 
+#ifdef IPV6
+#define BITLEN 128
+#else
+#define BITLEN 32
+#endif
+
 #endif
