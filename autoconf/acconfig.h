@@ -76,6 +76,9 @@
 /* max_clients */
 #undef MAX_CLIENTS
 
+/* topiclen */
+#undef TOPICLEN
+
 /* EFNET */
 #undef EFNET
 

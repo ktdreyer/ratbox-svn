@@ -45,7 +45,6 @@
 
 #define USERLEN         10
 #define REALLEN         50
-#define TOPICLEN        120     /* old value 90, truncated on other servers */
 #define KILLLEN         90      
 #define CHANNELLEN      200
 
