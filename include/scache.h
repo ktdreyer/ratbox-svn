@@ -27,7 +27,7 @@
 
 extern void        clear_scache_hash_table(void);
 extern const char* find_or_add(const char* name);
-extern void        count_scache(int *,unsigned long *);
+extern void        count_scache(int* count_out, size_t* mem_size_out);
 extern void        list_scache(struct Client *, struct Client *,int, char **);
 
 #endif

@@ -28,7 +28,7 @@
 #error Incorrect config.h for this revision of ircd.
 #endif
 #ifndef INCLUDED_sys_types_h
-#include <sys/types.h>       /* time_t */
+#include <sys/types.h>       /* size_t, time_t */
 #define INCLUDED_sys_types_h
 #endif
 #ifndef INCLUDED_netinet_in_h
@@ -529,8 +529,8 @@ extern void           del_client_from_llist(struct Client** list,
 extern int            exit_client(struct Client*, struct Client*, 
                                   struct Client*, const char* comment);
 
-extern void     count_local_client_memory(int *, int *);
-extern void     count_remote_client_memory(int *, int *);
+extern void     count_local_client_memory(size_t* used, size_t* allocated);
+extern void     count_remote_client_memory(size_t* used, size_t* allocated);
 extern  int     check_registered (struct Client *);
 extern  int     check_registered_user (struct Client *);
 

@@ -63,7 +63,8 @@ extern void*      BlockHeapAlloc(BlockHeap *bh);
 extern int        BlockHeapFree(BlockHeap *bh, void *ptr);
 extern int        BlockHeapGarbageCollect(BlockHeap *);
 
-extern void       BlockHeapCountMemory(BlockHeap *bh,int *, int *);
+extern void       block_heap_count_memory(BlockHeap* bh, size_t* used, 
+                                          size_t* allocated);
 
 #define BlockHeapALLOC(bh, type)  ((type*) BlockHeapAlloc(bh))
 

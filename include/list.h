@@ -23,9 +23,12 @@
  * $Id$
  *
  */
-
 #ifndef INCLUDED_list_h
 #define INCLUDED_list_h
+#ifndef INCLUDED_sys_types_h
+#include <sys/types.h>       /* size_t */
+#define INCLUDED_sys_types_h
+#endif
 
 struct SLink;
 struct Client;
@@ -53,20 +56,20 @@ struct SLink
   int   flags;
 };
 
-extern void count_user_memory(int *, int *);
-extern void count_links_memory(int *, int *);
-extern void count_flud_memory(int *, int *);
+extern void count_user_memory(size_t* used, size_t* allocated);
+extern void count_links_memory(size_t* used, size_t* allocated);
+extern void count_flud_memory(size_t* used, size_t* allocated);
 extern void     outofmemory(void);
-extern  void    _free_link (struct SLink *);
-extern  void    _free_user (struct User *, struct Client *);
-extern  struct SLink    *make_link (void);
-extern  struct User     *make_user (struct Client *);
-extern  struct Class* make_class(void);
-extern  struct Server   *make_server (struct Client *);
-extern  struct SLink    *find_user_link (struct SLink *, struct Client *);
-extern  void    initlists (void);
-extern  void    block_garbage_collect(void);
-extern  void    block_destroy(void);
+extern void    _free_link (struct SLink *);
+extern void    _free_user (struct User *, struct Client *);
+extern struct SLink    *make_link (void);
+extern struct User     *make_user (struct Client *);
+extern struct Class* make_class(void);
+extern struct Server   *make_server (struct Client *);
+extern struct SLink    *find_user_link (struct SLink *, struct Client *);
+extern void    initlists (void);
+extern void    block_garbage_collect(void);
+extern void    block_destroy(void);
 extern struct SLink *find_channel_link(struct SLink *, struct Channel *);
 
 #endif
