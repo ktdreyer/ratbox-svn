@@ -89,22 +89,14 @@ static void stats_L_list(struct Client *s, char *, int, int,
 static void stats_spy(struct Client *, char *);
 static void stats_L_spy(struct Client *, char *, char *);
 
-/* One is a char, one is a string, thats why theyre seperate.. -- fl_ */
-struct StatsStructLetter
-{
-  char name;
-  void (*handler)();
-  int need_oper;
-  int need_admin;
-  char *description;
-};
-
-struct StatsStructWord
+/* Heres our struct for the stats table */
+struct StatsStruct
 {
   char *name;
   void (*handler)();
-  int need_oper;
-  int need_admin;
+  int  need_oper;
+  int  need_admin;
+  char letter;
 };
 
 static void stats_adns_servers(struct Client *);
@@ -124,7 +116,6 @@ static void stats_operedup(struct Client *);
 static void stats_ports(struct Client *);
 static void stats_quarantine(struct Client *);
 static void stats_usage(struct Client *);
-static void stats_scache(struct Client *);
 static void stats_tstats(struct Client *);
 static void stats_uptime(struct Client *);
 static void stats_shared(struct Client *);
@@ -135,74 +126,57 @@ static void stats_memory(struct Client *);
 static void stats_servlinks(struct Client *);
 static void stats_ltrace(struct Client *, int, char**);
 
-/* This table is for stats LETTERS, and will only allow single chars..
- * The format is (letter) (function to call) (oper only?) (admin only?)
- * operonly/adminonly in here will override anything in the config..
- * so make stats commands wisely! -- fl_ */
-static struct StatsStructLetter stats_let_table[] =
+/* This table contains the possible stats items, in order:
+ * /stats name,  function to call, operonly? adminonly? /stats letter
+ * case only matters in the stats letter column.. -- fl_ */
+static struct StatsStruct stats_cmd_table[] =
 {
-  /* name function	need_oper need_admin	description */
-  { 'A',  stats_adns_servers,	1,	1,	"ADNS DNS servers in use", },
-  { 'a',  stats_adns_servers,	1,	1,	"ADNS DNS servers in use", },
-  { 'C',  stats_connect,	1,	0,	"Show C/N.lines", },
-  { 'c',  stats_connect,	1,	0,	"Show C/N lines", },
-  { 'D',  stats_deny,		1,	0,	"Show D lines", },
-  { 'd',  stats_deny,		1,	0,	"Show D lines", },
-  { 'e',  stats_exempt,		1,	0,	"Show exempt lines", },
-  { 'E',  stats_events,		1,	1,	"Show Events", },
-  { 'f',  stats_fd,		1,	1,	"Show used file descriptors", },
-  { 'F',  stats_fd,		1,	1,	"Show used file descriptors", },
-  { 'g',  stats_glines,		1,	0,	"Show G lines", },
-  { 'G',  stats_glines,		1,	0,	"Show G lines", },
-  { 'h',  stats_hubleaf,	1,	0,	"Show H/L lines", },
-  { 'H',  stats_hubleaf,	1,	0,	"Show H/L lines", },
-  { 'i',  stats_auth,		1,	0,	"Show I lines", },
-  { 'I',  stats_auth,		1,	0,	"Show I lines", },
-  { 'k',  stats_tklines,	1,	0,	"Show temporary K lines", },
-  { 'K',  stats_klines,		1,	0,	"Show K lines", },
-  { 'l',  stats_ltrace,		0,	0,	"Show info about <nick>", },
-  { 'L',  stats_ltrace,		0,	0,	"Show info about <nick>", },
-  { 'm',  stats_messages,	1,	0,	"Show command usage stats", },
-  { 'M',  stats_messages,	1,	0,	"Show command usage stats", },
-  { 'o',  stats_oper,		0,	0,	"Show O lines", },
-  { 'O',  stats_oper,		0,	0,	"Show O lines", },
-  { 'p',  stats_operedup,	0,	0,	"Show 'active' opers", },
-  { 'P',  stats_ports,		1,	0,	"Show listening ports", },
-  { 'q',  stats_quarantine,	1,	0,	"Show quarantines (Q lines)", },
-  { 'Q',  stats_quarantine,	1,	0,	"Show quarantines (Q lines)", },
-  { 'R',  stats_usage,		1,	0,	"Show daemon resource usage", },
-  { 'r',  stats_usage,		1,	0,	"Show daemon resource usage", },
-  { 's',  stats_scache,		1,	1,	"Show server cache", },
-  { 'S',  stats_scache,		1,	1,	"Show server cache", },
-  { 't',  stats_tstats,		1,	0,	"Show generic server stats", },
-  { 'T',  stats_tstats,		1,	0,	"Show generic server stats", },
-  { 'u',  stats_uptime,		0,	0,	"Show server uptime", },
-  { 'U',  stats_shared,		1,	0,	"Show shared blocks (U lines)", },
-  { 'v',  stats_servers,	1,	0,	"Show connected servers + idle times", },
-  { 'V',  stats_servers,	1,	0,	"Show connected servers + idle times", },
-  { 'x',  stats_gecos,		1,	0,	"Show gecos bans (X lines)", },
-  { 'X',  stats_gecos,		1,	0,	"Show gecos bans (X lines)", },
-  { 'y',  stats_class,		1,	0,	"Show classes (Y lines)", },
-  { 'Y',  stats_class,		1,	0,	"Show classes (Y lines)", },
-  { 'z',  stats_memory,		1,	0,	"Show daemon memory stats", },
-  { 'Z',  stats_memory,		1,	0,	"Show daemon memory stats", },
-  { '?',  stats_servlinks,	1,	0,	"Show connected servers + SendQ counts", },
-  { (char) 0, (void (*)()) 0,	0,	0,	(char *) 0, }
+  /* name	function  	need_oper need_admin  letter	*/
+  { "ADNS",	stats_adns_servers, 	1,	1,	'a',	},
+  { "DNS",	stats_adns_servers,	1,	1,	'A',	},
+  { "CONNECT",	stats_connect,		1,	0,	'c',	},
+  { "",		stats_connect,		1,	0,	'C',	},
+  { "DENY",	stats_deny,		1,	0,	'd',	},
+  { "",		stats_deny,		1,	0,	'D',	},
+  { "EXEMPT",	stats_exempt,		1,	0,	'e',	},
+  { "EVENTS",	stats_events,		1,	1,	'E',	},
+  { "FDS",	stats_fd,		1,	1,	'f',	},
+  { "",		stats_fd,		1,	1,	'F',	},
+  { "GLINE",	stats_glines,		1,	0,	'g',	},
+  { "GLINES",	stats_glines,		1,	0,	'G',	},
+  { "HUB",	stats_hubleaf,		1,	0,	'h',	},
+  { "LEAF",	stats_hubleaf,		1,	0,	'H',	},
+  { "AUTH",	stats_auth,		1,	0,	'i',	},
+  { "",		stats_auth,		1,	0,	'I',	},
+  { "TKLINE",	stats_tklines,		1,	0,	'k',	},
+  { "KLINE",	stats_klines,		1,	0,	'K',	},
+  { "LTRACE",	stats_ltrace,		1,	0,	'l',	},
+  { "",		stats_ltrace,		1,	0,	'L',	},
+  { "MESSAGES",	stats_messages,		1,	0,	'm',	},
+  { "",		stats_messages,		1,	0,	'M',	},
+  { "OPERS",	stats_oper,		0,	0,	'o',	},
+  { "OPER",	stats_oper,		0,	0,	'O',	},
+  { "OPERLIST",	stats_operedup,		0,	0,	'p',	},
+  { "PORTS",	stats_ports,		1,	0,	'P',	},
+  { "QUARANTINE", stats_quarantine,	1,	0,	'q',	},
+  { "", 	stats_quarantine,	1,	0,	'Q',	},
+  { "CPU",	stats_usage,		1,	0,	'r',	},
+  { "",		stats_usage,		1,	0,	'R',	},
+  { "TSTATS",	stats_tstats,		1,	0,	't',	},
+  { "",		stats_tstats,		1,	0,	'T',	},
+  { "UPTIME",	stats_uptime,		0,	0,	'u',	},
+  { "SHARED",	stats_shared,		1,	0,	'U',	},
+  { "MYLINKS",	stats_servers,		1,	0,	'v',	},
+  { "",		stats_servers,		1,	0,	'V',	},
+  { "GECOS",	stats_gecos,		1,	0,	'x'	},
+  { "",		stats_gecos,		1,	0,	'X',	},
+  { "CLASS",	stats_class,		1,	0,	'y',	},
+  { "CLASSES",	stats_class,		1,	0,	'Y',	},
+  { "MEMORY",	stats_memory,		1,	0,	'z',	},
+  { "",		stats_memory,		1,	0,	'Z',	},
+  { "SERVERS",	stats_servlinks,	1,	0,	'?',	},
+  { (char *) 0, 	(void (*)()) 0, 0,	0,	(char) 0, }
 };
-
-
-/* This table is for stats words, such as /stats auth..
- * Format is same as above.  This table is checked case insensitively,
- * so "auth" and "AUTH" are the same, and if we have full words.. there
- * should be no stats the same.. -- fl_ */
-#if 0
-static struct StatsStructWord stats_cmd_table[] =
-{
-  /* name		function	*/
-  { "AUTH",		stats_auth,	},
-  { (char *) 0, 	(void (*)()) 0, }
-};
-#endif
 
 /*
  * m_stats by fl_
@@ -220,7 +194,6 @@ static void m_stats(struct Client *client_p, struct Client *source_p,
 {
   int i;
   static time_t last_used = 0;
-  char statchar;
 
   /* Check the user is actually allowed to do /stats, and isnt flooding */
   if(!IsOper(source_p) && (last_used + ConfigFileEntry.pace_wait) > CurrentTime)
@@ -235,55 +208,92 @@ static void m_stats(struct Client *client_p, struct Client *source_p,
       last_used = CurrentTime;
     }
 
+  /* We cannot pass along stats auth to hyb6.. itll just get parsed as stats a..
+   * nor can we format it anywhere but in m_stats.c.. so hunt_server is moved
+   * down a bit.. ideally it should be here though, before we search the tables,
+   * but what can you do? -- fl_ */
+#if 0
   /* Is the stats meant for us? */
   if (IsOper(source_p) || !GlobalSetOptions.hide_server)
     {
       if (hunt_server(client_p,source_p,":%s STATS %s :%s",2,parc,parv) != HUNTED_ISME)
         return;
     }
+#endif
 
-  /* There are two different tables, one for letters, one for strings,
-   * we need to know which we have to search, so check the length -- fl_ */
+  /* If theyre doing a stats ?, then we search the letter column.. else we search
+   * the name column.. letter is case SENSITIVE, name is case INSENSITIVE -- fl_ */
   if(strlen(parv[1]) > 1)
   {
- /* I actually need to add them before I enable this ;) */
-#if 0
-      for (i=0; stats_cmd_table[i].handler; i++)
+    char *statstring;
+    for (i=0; stats_cmd_table[i].handler; i++)
       {
         if (!irccmp(stats_cmd_table[i].name, parv[1]))
+          {
+            /* OK this is a hack for now.. if someones doing stats auth for example,
+             * convert parv[1] to stats I and then call hunt_server(), as we cannot
+             * pass stats auth to anything but hyb7, and if were using hunt_server(),
+             * we have to pass that whatever we're sending.. we cant change it in
+             * huntserver().. -- fl_  */
+            /* XXX FIX THIS!.. find the target and send it ourselves? dunno.. */
+            statstring=parv[1];
+            parv[1][0]=stats_cmd_table[i].letter;             
+            parv[1][1]='\0';
+
+            if (hunt_server(client_p,source_p,":%s STATS %s :%s",2,parc,parv) != HUNTED_ISME)
+              return;
+
+            /* Well it is meant for here.. lets just put parv[1] back.. */
+            parv[1] = statstring;
+
+            /* Check if they have the relevant privs.. */
+            if((stats_cmd_table[i].need_oper && !IsOper(source_p)) ||
+                (stats_cmd_table[i].need_admin && !IsAdmin(source_p)))
+              {
+                sendto_one(source_p, form_str(ERR_NOPRIVILEGES),me.name,source_p->name);
+                break;
+              }
+
+            /* Stats L needs parc and parv passing to it.. nothing else does, so
+             * it can have its own little exception.. -- fl_ */
+            if(!irccmp(stats_cmd_table[i].name, "LTRACE"))
+              stats_cmd_table[i].handler(source_p, parc, parv);
+            else
+              stats_cmd_table[i].handler(source_p);
+          }
       }
-#endif
-    return;
   }
   else
   {
+    char statchar;
     statchar=parv[1][0];
-    for (i=0; stats_let_table[i].handler; i++)
-      {
-        if (stats_let_table[i].name == statchar)
-          {
-            /* The stats table says whether its oper only or not, so check --fl_ */
-            if(stats_let_table[i].need_oper && !IsOper(source_p))
-              {
-                sendto_one(source_p, form_str(ERR_NOPRIVILEGES),me.name,source_p->name);
-                break;
-              }
 
-            /* The stats table says whether its admin only or not, so check --fl_ */
-            if(stats_let_table[i].need_admin && !IsAdmin(source_p))
+    /* Check if the STATS is destined for us.. we're using a letter, so it doesnt
+     * need conversion for compatibility.. */
+    if (IsOper(source_p) || !GlobalSetOptions.hide_server)
+      {
+        if (hunt_server(client_p,source_p,":%s STATS %s :%s",2,parc,parv) != HUNTED_ISME)
+          return;
+      }
+
+    /* Its meant for here, so lets try and find it.. */
+    for (i=0; stats_cmd_table[i].handler; i++)
+      {
+        if (stats_cmd_table[i].letter == statchar)
+          {
+            /* The stats table says what privs are needed, so check --fl_ */
+            if((stats_cmd_table[i].need_oper && !IsOper(source_p)) ||
+                (stats_cmd_table[i].need_admin && !IsAdmin(source_p)))
               {
                 sendto_one(source_p, form_str(ERR_NOPRIVILEGES),me.name,source_p->name);
                 break;
               }
-            
-            /* Theyre allowed to do the stats, so execute it */
 
             /* Blah, stats L needs the parameters, none of the others do.. */
-            /* XXXX - this should be fixed :P */
             if(statchar == 'L' || statchar == 'l')
-              stats_let_table[i].handler(source_p, parc, parv);
+              stats_cmd_table[i].handler(source_p, parc, parv);
             else
-              stats_let_table[i].handler(source_p);
+              stats_cmd_table[i].handler(source_p);
           }
        }
    }
@@ -383,11 +393,6 @@ static void stats_quarantine(struct Client *client_p)
 static void stats_usage(struct Client *client_p)
 {
   send_usage(client_p);
-}
-
-static void stats_scache(struct Client *client_p)
-{
-  list_scache(client_p);
 }
 
 static void stats_tstats(struct Client *client_p)
