@@ -1,3 +1,35 @@
+leeh        2004/11/18 18:34:00 EST	(20041118_5)
+
+  Modified files:
+    help                 genindex.sh 
+    src                  service.c 
+  Added files:
+    help/chanserv        u-cdrop u-cregister u-csuspend 
+                         u-cunsuspend 
+    help/operbot         index-admin ojoin opart u-ojoin u-opart 
+    help/userserv        u-udrop 
+  Log:
+  - updated genindex.sh to ignore help files beginning with "u-", these are
+    for logins over dcc
+  - added operbot documentation
+  - added documentation for commands over dcc
+  
+  Revision  Changes    Path
+  1.1       +3 -0      rserv/help/chanserv/u-cdrop (new)
+  1.1       +4 -0      rserv/help/chanserv/u-cregister (new)
+  1.1       +3 -0      rserv/help/chanserv/u-csuspend (new)
+  1.1       +3 -0      rserv/help/chanserv/u-cunsuspend (new)
+  1.2       +8 -0      rserv/help/genindex.sh
+  1.1       +2 -0      rserv/help/operbot/index-admin (new)
+  1.1       +3 -0      rserv/help/operbot/ojoin (new)
+  1.1       +3 -0      rserv/help/operbot/opart (new)
+  1.1       +3 -0      rserv/help/operbot/u-ojoin (new)
+  1.1       +3 -0      rserv/help/operbot/u-opart (new)
+  1.1       +3 -0      rserv/help/userserv/u-udrop (new)
+  1.26      +8 -8      rserv/src/service.c
+
+
+
 leeh        2004/11/18 17:33:26 EST	(20041118_4)
 
   Modified files:
