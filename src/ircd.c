@@ -153,7 +153,7 @@ dlink_list lazylink_nicks;	/* known about lazylink nicks on HUB */
 
 static size_t      initialVMTop = 0;   /* top of virtual memory at init */
 static const char* logFileName = LPATH;
-static int         bootDaemon  = 1;
+static int         noDetach  = 0;
 
 char**  myargv;
 int     dorehash   = 0;
@@ -252,30 +252,6 @@ daemon(int a, int b)
 }
 #endif
 
-/*
- * bad_command
- *      This is called when the commandline is not acceptable.
- *      Give error message and exit without starting anything.
- */
-static void 
-bad_command(char *name)
-{
-  fprintf(stderr, "Usage: %s [options]\n", name);
-  fprintf(stderr, "Options:\n");
-  fprintf(stderr, "\t-d dlinefile            File to use for dlines.conf\n");
-  fprintf(stderr, "\t-f configfile           File to use for ircd.conf\n");
-  fprintf(stderr, "\t-h servername           Specify server name\n");
-  fprintf(stderr, "\t-k klinefile            File to use for klines.conf\n");
-  fprintf(stderr, "\t-l logfile              File to use for ircd.log\n");
-  fprintf(stderr, "\t-n                      Run in foreground (don't detach)\n");
-  fprintf(stderr, "\t-v                      Printf version and exit\n");
-  fprintf(stderr, "\t-x debuglevel           Specify debug level\n");
-  fprintf(stderr, "\t-D dbg                  Enable debugging for 'dbg'\n");
- 
-  fprintf(stderr, "\nServer not started\n");
-  exit(EXIT_FAILURE);
-}
-
 void
 cmd_enable_debug(char *what)
 {
@@ -296,16 +272,24 @@ cmd_enable_debug(char *what)
 static int printVersion = 0;
 
 struct lgetopt myopts[] = {
-  {"dlinefile", &ConfigFileEntry.dpath, STRING, "File to use for dlines.conf"},
-  {"configfile", &ConfigFileEntry.configfile, STRING, "File to use for ircd.conf"},
-  {"klinefile", &ConfigFileEntry.klinefile, STRING, "File to use for klines.conf"},
-  {"logfile", &logFileName, STRING, "File to use for ircd.log"},
-  {"foreground", &bootDaemon, YESNO, "Run in foreground (don't detach)"},
-  {"version", &printVersion, YESNO, "Print version and exit"},
+  {"dlinefile",  &ConfigFileEntry.dlinefile, 
+   STRING, "File to use for dlines.conf"},
+  {"configfile", &ConfigFileEntry.configfile, 
+   STRING, "File to use for ircd.conf"},
+  {"klinefile",  &ConfigFileEntry.klinefile, 
+   STRING, "File to use for klines.conf"},
+  {"logfile",    &logFileName, 
+   STRING, "File to use for ircd.log"},
+  {"foreground", &noDetach, 
+   YESNO, "Run in foreground (don't detach)"},
+  {"version",    &printVersion, 
+   YESNO, "Print version and exit"},
 #ifdef DEBUGMODE
-  {"debug", cmd_enable_debug, DEBUG, "Enable debugging for a certain value"},
+  {"debug", NULL, 
+   ENDEBUG, "Enable debugging for a certain value"},
 #endif
-  {"help", NULL, USAGE, "Print this text"},
+  {"help", NULL, 
+   USAGE, "Print this text"},
 };
 
 static time_t io_loop(time_t delay)
@@ -494,7 +478,7 @@ int main(int argc, char *argv[])
       exit(EXIT_FAILURE);
     }
 
-  printf("ircd: running in %s mode from %s\n", bootDaemon ? "background" : "foreground",
+  printf("ircd: running in %s mode from %s\n", !noDetach ? "background" : "foreground",
 	 ConfigFileEntry.dpath);
  
   setup_signals();
@@ -599,7 +583,7 @@ int main(int argc, char *argv[])
 
   log(L_NOTICE, "Server Ready");
 
-  if (bootDaemon)
+  if (!noDetach)
     daemon(1,1);
 
   eventAdd("cleanup_channels", cleanup_channels, NULL,

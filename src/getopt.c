@@ -2,6 +2,8 @@
 #include <stdlib.h>
 
 #include "getopt.h"
+#include "debug.h"
+#include "config.h"
 
 void
 parseargs(int *argc, char ***argv, struct lgetopt *opts)
@@ -52,15 +54,36 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
 		    {
 		      fprintf(stderr, "error: option '-%s' requires an argument\n",
 			      opts[i].opt);
-		      usage((*argv)[0]);
+		      usage(progname);
 		    }
 		  
 		  (char *)opts[i].argloc = malloc(strlen((*argv)[1]) + 1);
 		  strcpy((char *)opts[i].argloc, (*argv)[1]);
 		  break;
+
 		case USAGE:
 		  usage(progname);
 		  /*NOTREACHED*/
+
+#ifdef DEBUGMODE
+		case ENDEBUG:
+		  if (*argc < 2)
+		    {
+		      fprintf(stderr, "error: option '-%s' requires an argument\n",
+			      opts[i].opt);
+		      usage(progname);
+		    }
+
+		  if (enable_debug((*argv)[1]) == -1)
+		    {
+		      fprintf(stderr, "error: '%s' unknown for debugging\n",
+			      (*argv)[1]);
+		      fprintf(stderr, "ircd: exiting on error.\n");
+		      exit(EXIT_FAILURE);
+		    }
+		  break;
+#endif
+
 		default:
 		  fprintf(stderr, "Error: internal error in parseargs() at %s:%d\n",
 			  __FILE__, __LINE__);
