@@ -1,3 +1,8 @@
+*** 20000402_7 by db
+- further cleanups to remove #ifdef's 
+
+
+
 *** 20000402_6 by db
 - removed last remnant of cidr_ban (sorry is)
 
