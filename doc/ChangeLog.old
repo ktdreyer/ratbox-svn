@@ -1,3 +1,7 @@
+*** 20010929_1 by wcampbel
+Fix for STATS r showing long values in a %d, found by jv, aproved by Diane
+
+
 *** 20010928_1 by davidt
 - Change 'int zero_fd' to 'static int zero_fd' to cut down on unneeded
   globals.  Approved by Diane on IRC.
