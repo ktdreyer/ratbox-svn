@@ -1,3 +1,7 @@
+*** 20010526_12 by leeh
+- fix trace for ipv6 ips
+
+
 *** 20010526_11 by davidt
 - Fix mode for dlink_list *loc*;
 
