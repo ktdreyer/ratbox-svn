@@ -476,7 +476,7 @@ comm_select(time_t delay)
 	    (pollfds[fd].fd) == -1)
 	    continue;
         F = &fd_table[fd];
-	if (revents & (POLLRDNORM | POLLIN | POLLHUP | POLLERR)) {
+	if (revents & (POLLREADFLAGS | POLLERRORS)) {
 	    hdl = F->read_handler;
 	    poll_update_pollfds(fd, POLLRDNORM, NULL);
 	    if (!hdl) {
@@ -485,7 +485,7 @@ comm_select(time_t delay)
 		hdl(fd, F->read_data);
             }
 	}
-	if (revents & (POLLWRNORM | POLLOUT | POLLHUP | POLLERR)) {
+	if (revents & (POLLWRITEFLAGS | POLLERRORS)) {
 	    hdl = F->write_handler;
 	    poll_update_pollfds(fd, POLLWRNORM, NULL);
 	    if (!hdl) {
