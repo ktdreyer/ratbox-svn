@@ -44,7 +44,7 @@
  * without being so heavily penalised they excess flood.
  */
 #define MAX_FLOOD 5
-#define MAX_FLOOD_BURST MAX_FLOOD * 6
+#define MAX_FLOOD_BURST MAX_FLOOD * 8
 
 extern PF  read_ctrl_packet;
 extern PF  read_packet;

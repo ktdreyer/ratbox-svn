@@ -37,6 +37,7 @@
 #include "modules.h"
 #include "parse.h"
 #include "hash.h"
+#include "packet.h"
 
 
 static void m_kick(struct Client*, struct Client*, int, char**);
@@ -91,6 +92,9 @@ static void m_kick(struct Client *client_p,
                  me.name, parv[0], "KICK");
       return;
     }
+
+  if(MyClient(source_p) && !IsFloodDone(source_p))
+    flood_endgrace(source_p);
 
   comment = (BadPtr(parv[3])) ? parv[2] : parv[3];
   if (strlen(comment) > (size_t) TOPICLEN)

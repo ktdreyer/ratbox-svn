@@ -153,13 +153,7 @@ flood_recalc(int fd, void *data)
   if (!lclient_p)
     return;
 
-  /* Reset the sent-per-second count, decrease opers quicker
-   * than normal users
-   */
-  if(ConfigFileEntry.no_oper_flood && IsOper(client_p))
-    lclient_p->sent_parsed -= 2;
-  else
-    lclient_p->sent_parsed--;
+  lclient_p->sent_parsed -= 2;
   
   if(lclient_p->sent_parsed < 0)
     lclient_p->sent_parsed = 0;

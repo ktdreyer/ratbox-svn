@@ -41,6 +41,7 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "packet.h"
 
 
 static struct ConfItem *find_password_aconf(char *name, struct Client *source_p);
@@ -100,6 +101,10 @@ static void m_oper(struct Client *client_p, struct Client *source_p,
                  me.name, source_p->name, "OPER");
       return;
     }
+
+  /* end the grace period */
+  if(!IsFloodDone(source_p))
+    flood_endgrace(source_p);
 
   if( (aconf = find_password_aconf(name,source_p)) == NULL)
     {

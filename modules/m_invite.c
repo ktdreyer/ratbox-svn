@@ -41,6 +41,7 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "packet.h"
 
 static void m_invite(struct Client *, struct Client *, int, char **);
 
@@ -92,6 +93,9 @@ m_invite(struct Client *client_p,
   /* A little sanity test here */
   if (source_p->user == NULL)
     return;
+
+  if(MyClient(source_p) && !IsFloodDone(source_p))
+    flood_endgrace(source_p);
 
   if ((target_p = find_person(parv[1])) == NULL)
   {

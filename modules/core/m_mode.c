@@ -211,7 +211,12 @@ static void m_mode(struct Client *client_p, struct Client *source_p,
   {
     /* Finish the flood grace period... */
     if(MyClient(source_p) && !IsFloodDone(source_p))
-      flood_endgrace(source_p);
+    {
+      if((parc == n) && (parv[n-1][0] == 'b') && (parv[n-1][0] == '\0'))
+        ;
+      else
+        flood_endgrace(source_p);
+    }
 
     set_channel_mode(client_p, source_p, chptr, parc - n, parv + n, 
                      root->chname);

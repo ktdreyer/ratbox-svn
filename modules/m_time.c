@@ -34,6 +34,7 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "packet.h"
 
 static void m_time(struct Client*, struct Client*, int, char**);
 static void mo_time(struct Client*, struct Client*, int, char**);
@@ -66,6 +67,10 @@ const char *_version = "$Revision$";
 static void m_time(struct Client *client_p, struct Client *source_p,
                   int parc, char *parv[])
 {
+  /* this is not rate limited, so end the grace period */
+  if(MyClient(source_p) && !IsFloodDone(source_p))
+    flood_endgrace(source_p);
+
   /* This is safe enough to use during non hidden server mode */
   if(!ConfigServerHide.disable_remote)
     {
