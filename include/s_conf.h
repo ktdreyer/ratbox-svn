@@ -308,9 +308,6 @@ extern void free_conf(struct ConfItem *);
 extern void read_ircd_conf(int cold);
 extern void read_ban_confs(int cold);
 
-extern int attach_conf(struct Client *, struct ConfItem *);
-extern int check_client(struct Client *client_p, struct Client *source_p, const char *);
-
 extern int detach_conf(struct Client *);
 
 extern int conf_connect_allowed(struct sockaddr *addr, int);

@@ -50,9 +50,9 @@
 #include "sprintf_irc.h"
 #include "listener.h"
 #include "cache.h"
+#include "hostmask.h"
 
 #define UFLAGS  (FLAGS_INVISIBLE|FLAGS_WALLOP|FLAGS_SERVNOTICE)
-
 
 static int mr_nick(struct Client *, struct Client *, int, const char **);
 static int m_nick(struct Client *, struct Client *, int, const char **);
@@ -64,7 +64,6 @@ static int mr_pong(struct Client *, struct Client *, int, const char **);
 static int ms_pong(struct Client *, struct Client *, int, const char **);
 static int m_ping(struct Client *, struct Client *, int, const char **);
 static int ms_ping(struct Client *, struct Client *, int, const char **);
-
 
 struct Message nick_msgtab = {
 	"NICK", 0, 0, 0, MFLG_SLOW,
@@ -94,24 +93,15 @@ struct Message ping_msgtab = {
 mapi_clist_av1 registration_clist[] = { &nick_msgtab, &uid_msgtab, &user_msgtab, &pong_msgtab, &ping_msgtab, NULL };
 DECLARE_MODULE_AV1(registration, NULL, NULL, registration_clist, NULL, NULL, "$Revision$");
 
-
-static int register_local_user(struct Client *client_p, struct Client *source_p, const char *nick, const char *username);
-static int do_local_user(struct Client *client_p, struct Client *source_p,
-			 const char *username, const char *realname);
-static int introduce_client(struct Client *client_p, struct Client *source_p, struct User *user, const char *nick);
-static void user_welcome(struct Client *source_p);
-static void report_and_set_user_flags(struct Client *source_p, struct ConfItem *aconf);
-
-static int change_remote_nick(struct Client *, struct Client *, int, const char **, time_t, const char *);
-
 static int clean_nick(const char *, int loc_client);
 static int clean_username(const char *);
 static int clean_host(const char *);
 static int clean_uid(const char *uid);
 
-
-static void set_initial_nick(struct Client *client_p, struct Client *source_p, char *nick);
 static void change_local_nick(struct Client *client_p, struct Client *source_p, char *nick);
+static int change_remote_nick(struct Client *, struct Client *, int, const char **, time_t, const char *);
+
+static int register_local_user(struct Client *client_p, struct Client *source_p, const char *nick, const char *username);
 static int register_client(struct Client *client_p, struct Client *server, 
 			   const char *nick, time_t newts, int parc, const char *parv[]);
 
@@ -121,522 +111,6 @@ static int perform_nick_collides(struct Client *, struct Client *,
 static int perform_nickchange_collides(struct Client *, struct Client *,
 				       struct Client *, int, const char **, 
 				       time_t, const char *);
-
-
-
-/* report_and_set_user_flags
- *
- * Inputs       - pointer to source_p
- *              - pointer to aconf for this user
- * Output       - NONE
- * Side effects -
- * Report to user any special flags they are getting, and set them.
- */
-
-static void
-report_and_set_user_flags(struct Client *source_p, struct ConfItem *aconf)
-{
-	/* If this user is being spoofed, tell them so */
-	if(IsConfDoSpoofIp(aconf))
-	{
-		sendto_one(source_p,
-			   ":%s NOTICE %s :*** Spoofing your IP. congrats.",
-			   me.name, source_p->name);
-	}
-
-	/* If this user is in the exception class, Set it "E lined" */
-	if(IsConfExemptKline(aconf))
-	{
-		SetExemptKline(source_p);
-		sendto_one(source_p,
-			   ":%s NOTICE %s :*** You are exempt from K/D/G/X lines. congrats.",
-			   me.name, source_p->name);
-	}
-
-	if(IsConfExemptGline(aconf))
-	{
-		SetExemptGline(source_p);
-
-		/* dont send both a kline and gline exempt notice */
-		if(!IsConfExemptKline(aconf))
-			sendto_one(source_p,
-				   ":%s NOTICE %s :*** You are exempt from G lines.",
-				   me.name, source_p->name);
-	}
-
-	/* If this user is exempt from user limits set it F lined" */
-	if(IsConfExemptLimits(aconf))
-	{
-		SetExemptLimits(source_p);
-		sendto_one(source_p,
-			   ":%s NOTICE %s :*** You are exempt from user limits. congrats.",
-			   me.name, source_p->name);
-	}
-
-	/* If this user is exempt from idle time outs */
-	if(IsConfIdlelined(aconf))
-	{
-		SetIdlelined(source_p);
-		sendto_one(source_p,
-			   ":%s NOTICE %s :*** You are exempt from idle limits. congrats.",
-			   me.name, source_p->name);
-	}
-
-	if(IsConfExemptFlood(aconf))
-	{
-		SetExemptFlood(source_p);
-		sendto_one(source_p,
-			   ":%s NOTICE %s :*** You are exempt from flood limits.",
-			   me.name, source_p->name);
-	}
-
-	if(IsConfExemptSpambot(aconf))
-	{
-		SetExemptSpambot(source_p);
-		sendto_one(source_p,
-			   ":%s NOTICE %s :*** You are exempt from spambot checks.",
-			   me.name, source_p->name);
-	}
-
-	if(IsConfExemptShide(aconf))
-	{
-		SetExemptShide(source_p);
-		sendto_one(source_p,
-			   ":%s NOTICE %s :*** You are exempt from serverhiding.",
-			   me.name, source_p->name);
-	}
-}
-
-/*
-** register_local_user
-**      This function is called when both NICK and USER messages
-**      have been accepted for the client, in whatever order. Only
-**      after this, is the USER message propagated.
-**
-**      NICK's must be propagated at once when received, although
-**      it would be better to delay them too until full info is
-**      available. Doing it is not so simple though, would have
-**      to implement the following:
-**
-**      (actually it has been implemented already for a while) -orabidoo
-**
-**      1) user telnets in and gives only "NICK foobar" and waits
-**      2) another user far away logs in normally with the nick
-**         "foobar" (quite legal, as this server didn't propagate
-**         it).
-**      3) now this server gets nick "foobar" from outside, but
-**         has alread the same defined locally. Current server
-**         would just issue "KILL foobar" to clean out dups. But,
-**         this is not fair. It should actually request another
-**         nick from local user or kill him/her...
-*/
-
-static int
-register_local_user(struct Client *client_p, struct Client *source_p, const char *nick, const char *username)
-{
-	struct ConfItem *aconf;
-	struct User *user = source_p->user;
-	char tmpstr2[IRCD_BUFSIZE];
-	char ipaddr[HOSTIPLEN];
-	char myusername[USERLEN+1];
-	int status;
-
-	s_assert(NULL != source_p);
-	s_assert(MyConnect(source_p));
-	s_assert(source_p->username != username);
-
-	if(source_p == NULL)
-		return -1;
-
-	if(IsAnyDead(source_p))
-		return -1;
-
-	if(ConfigFileEntry.ping_cookie)
-	{
-		if(!(source_p->flags & FLAGS_PINGSENT) && source_p->localClient->random_ping == 0)
-		{
-			source_p->localClient->random_ping = (unsigned long) (rand() * rand()) << 1;
-			sendto_one(source_p, "PING :%08lX",
-				   (unsigned long) source_p->localClient->random_ping);
-			source_p->flags |= FLAGS_PINGSENT;
-			return -1;
-		}
-		if(!(source_p->flags2 & FLAGS2_PING_COOKIE))
-		{
-			return -1;
-		}
-	}
-
-
-	client_p->localClient->last = CurrentTime;
-	/* Straight up the maximum rate of flooding... */
-	source_p->localClient->allow_read = MAX_FLOOD_BURST;
-
-	/* XXX - fixme. we shouldnt have to build a users buffer twice.. */
-	if(!IsGotId(source_p) && (strchr(username, '[') != NULL))
-	{
-		const char *p;
-		int i = 0;
-
-		p = username;
-
-		while(*p && i < USERLEN)
-		{
-			if(*p != '[')
-				myusername[i++] = *p;
-			p++;
-		}
-
-		myusername[i] = '\0';
-		username = myusername;
-	}
-
-	if((status = check_client(client_p, source_p, username)) < 0)
-		return (CLIENT_EXITED);
-
-	if(!valid_hostname(source_p->host))
-	{
-		sendto_one(source_p,
-			   ":%s NOTICE %s :*** Notice -- You have an illegal character in your hostname",
-			   me.name, source_p->name);
-
-		strlcpy(source_p->host, source_p->sockhost, sizeof(source_p->host));
-
-#ifdef IPV6
-		if(ConfigFileEntry.dot_in_ip6_addr == 1)
-			strlcat(source_p->host, ".", sizeof(source_p->host));
-#endif
- 	}
- 
-
-	aconf = source_p->localClient->att_conf;
-
-	if(aconf == NULL)
-	{
-		exit_client(client_p, source_p, &me, "*** Not Authorised");
-		return (CLIENT_EXITED);
-	}
-
-	if(!IsGotId(source_p))
-	{
-		const char *p;
-		int i = 0;
-
-		if(IsNeedIdentd(aconf))
-		{
-			ServerStats.is_ref++;
-			sendto_one(source_p,
-				   ":%s NOTICE %s :*** Notice -- You need to install identd to use this server",
-				   me.name, client_p->name);
-			exit_client(client_p, source_p, &me, "Install identd");
-			return (CLIENT_EXITED);
-		}
-
-		/* dont replace username if its supposed to be spoofed --fl */
-		if(!IsConfDoSpoofIp(aconf) || !strchr(aconf->name, '@'))
-		{
-			p = username;
-
-			if(!IsNoTilde(aconf))
-				source_p->username[i++] = '~';
-
-			while (*p && i < USERLEN)
-			{
-				if(*p != '[')
-					source_p->username[i++] = *p;
-				p++;
-			}
-
-			source_p->username[i] = '\0';
-		}
-	}
-
-	/* password check */
-	if(!EmptyString(aconf->passwd))
-	{
-		const char *encr;
-
-		if(EmptyString(source_p->localClient->passwd))
-			encr = "";
-		else if(IsConfEncrypted(aconf))
-			encr = crypt(source_p->localClient->passwd, aconf->passwd);
-		else
-			encr = source_p->localClient->passwd;
-
-		if(strcmp(encr, aconf->passwd))
-		{
-			ServerStats.is_ref++;
-			sendto_one(source_p, form_str(ERR_PASSWDMISMATCH), me.name, source_p->name);
-			exit_client(client_p, source_p, &me, "Bad Password");
-			return (CLIENT_EXITED);
-		}
-	}
-
-	if(source_p->localClient->passwd)
-	{
-		memset(source_p->localClient->passwd, 0, strlen(source_p->localClient->passwd));
-		MyFree(source_p->localClient->passwd);
-		source_p->localClient->passwd = NULL;
-	}
-
-	/* report if user has &^>= etc. and set flags as needed in source_p */
-	report_and_set_user_flags(source_p, aconf);
-
-	/* Limit clients */
-	/*
-	 * We want to be able to have servers and F-line clients
-	 * connect, so save room for "buffer" connections.
-	 * Smaller servers may want to decrease this, and it should
-	 * probably be just a percentage of the MAXCLIENTS...
-	 *   -Taner
-	 */
-	/* Except "F:" clients */
-	if(((dlink_list_length(&lclient_list) + 1) >= 
-	   ((unsigned long)GlobalSetOptions.maxclients + MAX_BUFFER) ||
-           (dlink_list_length(&lclient_list) + 1) >= 
-	    ((unsigned long)GlobalSetOptions.maxclients - 5)) && !(IsExemptLimits(source_p)))
-	{
-		sendto_realops_flags(UMODE_FULL, L_ALL,
-				     "Too many clients, rejecting %s[%s].", nick, source_p->host);
-
-		ServerStats.is_ref++;
-		exit_client(client_p, source_p, &me, "Sorry, server is full - try later");
-		return (CLIENT_EXITED);
-	}
-
-	/* valid user name check */
-
-	if(!valid_username(source_p->username))
-	{
-		sendto_realops_flags(UMODE_REJ, L_ALL,
-				     "Invalid username: %s (%s@%s)",
-				     nick, source_p->username, source_p->host);
-		ServerStats.is_ref++;
-		ircsprintf(tmpstr2, "Invalid username [%s]", source_p->username);
-		exit_client(client_p, source_p, &me, tmpstr2);
-		return (CLIENT_EXITED);
-	}
-
-	/* end of valid user name check */
-
-	/* kline exemption extends to xline too */
-	if(!IsExemptKline(source_p) &&
-	   find_xline(source_p->info, 1) != NULL)
-	{
-		ServerStats.is_ref++;
-		add_reject(source_p);
-		exit_client(client_p, source_p, &me, "Bad user info");
-		return CLIENT_EXITED;
-	}
-
-	/* Any hooks using this event *must* check for the client being dead
-	 * when its called.  If the hook wants to terminate the client, it
-	 * can call exit_client(). --fl
-	 */
-	hook_call_event(h_client_auth_id, client_p);
-
-	if(IsAnyDead(client_p))
-		return CLIENT_EXITED;
-
-	inetntop_sock((struct sockaddr *)&source_p->localClient->ip, ipaddr, sizeof(ipaddr));
-
-	sendto_realops_flags(UMODE_CCONN, L_ALL,
-			     "Client connecting: %s (%s@%s) [%s] {%s} [%s]",
-			     nick, source_p->username, source_p->host,
-#ifdef HIDE_SPOOF_IPS
-			     IsIPSpoof(source_p) ? "255.255.255.255" :
-#endif
-			     ipaddr, get_client_class(source_p), source_p->info);
-
-	/* If they have died in send_* don't do anything. */
-	if(IsAnyDead(source_p))
-		return CLIENT_EXITED;
-
-	add_to_hostname_hash(source_p->host, source_p);
-
-	strcpy(source_p->id, generate_uid());
-	add_to_id_hash(source_p->id, source_p);
-
-	source_p->umodes |= UMODE_INVISIBLE;
-
-	Count.invisi++;
-
-	s_assert(!IsClient(source_p));
-	dlinkMoveNode(&source_p->localClient->tnode, &unknown_list, &lclient_list);
-	SetClient(source_p);
-
-	/* XXX source_p->servptr is &me, since local client */
-	source_p->servptr = find_server(NULL, user->server);
-	dlinkAdd(source_p, &source_p->lnode, &source_p->servptr->serv->users);
-	/* Increment our total user count here */
-	if(++Count.total > Count.max_tot)
-		Count.max_tot = Count.total;
-	source_p->localClient->allow_read = MAX_FLOOD_BURST;
-
-	Count.totalrestartcount++;
-
-	s_assert(source_p->localClient != NULL);
-
-	if(dlink_list_length(&lclient_list) > (unsigned long)Count.max_loc)
-	{
-		Count.max_loc = dlink_list_length(&lclient_list);
-		if(!(Count.max_loc % 10))
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "New Max Local Clients: %d", Count.max_loc);
-	}
-
-	user_welcome(source_p);
-	return (introduce_client(client_p, source_p, user, nick));
-}
-
-
-/* 
- * user_welcome
- *
- * inputs	- client pointer to client to welcome
- * output	- NONE
- * side effects	-
- */
-static void
-user_welcome(struct Client *source_p)
-{
-	sendto_one(source_p, form_str(RPL_WELCOME), me.name, source_p->name,
-		   ServerInfo.network_name, source_p->name);
-	sendto_one(source_p, form_str(RPL_YOURHOST), me.name,
-		   source_p->name,
-		   get_listener_name(source_p->localClient->listener), ircd_version);
-
-	sendto_one(source_p, form_str(RPL_CREATED), me.name, source_p->name, creation);
-	sendto_one(source_p, form_str(RPL_MYINFO), me.name, source_p->name, me.name, ircd_version);
-
-	show_isupport(source_p);
-
-	show_lusers(source_p);
-
-	if(ConfigFileEntry.short_motd)
-	{
-		sendto_one(source_p,
-			   "NOTICE %s :*** Notice -- motd was last changed at %s",
-			   source_p->name, user_motd_changed);
-
-		sendto_one(source_p,
-			   "NOTICE %s :*** Notice -- Please read the motd if you haven't read it",
-			   source_p->name);
-
-		sendto_one(source_p, form_str(RPL_MOTDSTART), 
-			   me.name, source_p->name, me.name);
-
-		sendto_one(source_p, form_str(RPL_MOTD),
-			   me.name, source_p->name, "*** This is the short motd ***");
-
-		sendto_one(source_p, form_str(RPL_ENDOFMOTD), me.name, source_p->name);
-	}
-	else
-		send_user_motd(source_p);
-}
-
-
-
-/*
- * introduce_client
- *
- * inputs	-
- * output	-
- * side effects - This common function introduces a client to the rest
- *		  of the net, either from a local client connect or
- *		  from a remote connect.
- */
-static int
-introduce_client(struct Client *client_p, struct Client *source_p, struct User *user, const char *nick)
-{
-	static char ubuf[12];
-
-	if(MyClient(source_p))
-		send_umode(source_p, source_p, 0, SEND_UMODES, ubuf);
-	else
-		send_umode(NULL, source_p, 0, SEND_UMODES, ubuf);
-
-	if(!*ubuf)
-	{
-		ubuf[0] = '+';
-		ubuf[1] = '\0';
-	}
-
-	/* if it has an ID, introduce it with its id to TS6 servers,
-	 * otherwise introduce it normally to all.
-	 */
-	if(has_id(source_p))
-	{
-		char sockhost[HOSTLEN];
-		if(source_p->sockhost[0] == ':')
-		{
-			sockhost[0] = '0';
-			sockhost[1] = '\0';
-			strlcat(sockhost, source_p->sockhost, sizeof(sockhost));
-		} else
-			strcpy(sockhost, source_p->sockhost);
-		
-		sendto_server(client_p, NULL, CAP_TS6, NOCAPS,
-			      ":%s UID %s %d %ld %s %s %s %s %s :%s",
-			      source_p->servptr->id, nick,
-			      source_p->hopcount + 1,
-			      (long) source_p->tsinfo, ubuf,
-			      source_p->username, source_p->host,
-			      IsIPSpoof(source_p) ? "0" : sockhost,
-			      source_p->id, source_p->info);
-
-		sendto_server(client_p, NULL, NOCAPS, CAP_TS6,
-			      "NICK %s %d %ld %s %s %s %s :%s",
-			      nick, source_p->hopcount + 1,
-			      (long) source_p->tsinfo,
-			      ubuf, source_p->username, source_p->host,
-			      user->server, source_p->info);
-	}
-	else
-		sendto_server(client_p, NULL, NOCAPS, NOCAPS,
-			      "NICK %s %d %ld %s %s %s %s :%s",
-			      nick, source_p->hopcount + 1,
-			      (long) source_p->tsinfo,
-			      ubuf, source_p->username, source_p->host,
-			      user->server, source_p->info);
-
-
-	return 0;
-}
-
-
-static int
-do_local_user(struct Client *client_p, struct Client *source_p,
-	      const char *username, const char *realname)
-{
-	struct User *user;
-
-	s_assert(NULL != source_p);
-	s_assert(source_p->username != username);
-
-	user = make_user(source_p);
-	user->server = me.name;
-
-	strlcpy(source_p->info, realname, sizeof(source_p->info));
-
-	if(!IsGotId(source_p))
-	{
-		/* This is in this location for a reason..If there is no identd
-		 * and ping cookies are enabled..we need to have a copy of this
-		 */
-		strlcpy(source_p->username, username, sizeof(source_p->username));
-	}
-
-	if(!EmptyString(source_p->name))
-	{
-		/* NICK already received, now I have USER... */
-		return register_local_user(client_p, source_p, source_p->name, username);
-	}
-
-	return 0;
-}
-
-
 
 /* mr_nick()
  *       parv[0] = sender prefix
@@ -693,7 +167,23 @@ mr_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 	}
 
 	if((target_p = find_client(nick)) == NULL)
-		set_initial_nick(client_p, source_p, nick);
+	{
+		/* This had to be copied here to avoid problems.. */
+		source_p->tsinfo = CurrentTime;
+
+		if(!EmptyString(source_p->name))
+			del_from_client_hash(source_p->name, source_p);
+
+		strcpy(source_p->name, nick);
+		add_to_client_hash(nick, source_p);
+
+		/* fd_desc is long enough */
+		fd_note(client_p->localClient->fd, "Nick: %s", nick);
+
+		if(source_p->user)
+			register_local_user(client_p, source_p, nick, source_p->username);
+
+	}
 	else if(source_p == target_p)
 		strcpy(source_p->name, nick);
 	else
@@ -1023,6 +513,1060 @@ ms_uid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	return 0;
 }
 
+/* mr_user()
+ *      parv[1] = username (login name, account)
+ *      parv[2] = client host name (ignored)
+ *      parv[3] = server host name (ignored)
+ *      parv[4] = users gecos
+ */
+static int
+mr_user(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	struct User *user;
+	char *p;
+
+	if((p = strchr(parv[1], '@')))
+		*p = '\0';
+
+	if(source_p->user == NULL)
+	{
+		user = make_user(source_p);
+		user->server = me.name;
+	}
+
+	strlcpy(source_p->info, parv[4], sizeof(source_p->info));
+
+	/* This is in this location for a reason..If there is no identd
+	 * and ping cookies are enabled..we need to have a copy of this
+	 */
+	if(!IsGotId(source_p))
+		strlcpy(source_p->username, parv[1], sizeof(source_p->username));
+
+	/* NICK already received, now I have USER... */
+	if(!EmptyString(source_p->name))
+		register_local_user(client_p, source_p, source_p->name, source_p->username);
+
+	return 0;
+}
+
+/*
+** m_ping
+**      parv[0] = sender prefix
+**      parv[1] = origin
+**      parv[2] = destination
+*/
+static int
+m_ping(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	struct Client *target_p;
+	const char *destination;
+
+	destination = parv[2];	/* Will get NULL or pointer (parc >= 2!!) */
+
+	if(!EmptyString(destination) && !match(destination, me.name))
+	{
+		if((target_p = find_server(source_p, destination)))
+		{
+			sendto_one(target_p, ":%s PING %s :%s",
+				   get_id(source_p, target_p),
+				   source_p->name, get_id(target_p, target_p));
+		}
+		else
+		{
+			sendto_one_numeric(source_p, ERR_NOSUCHSERVER,
+					   form_str(ERR_NOSUCHSERVER),
+					   destination);
+			return 0;
+		}
+	}
+	else
+		sendto_one(source_p, ":%s PONG %s :%s", me.name,
+			   (destination) ? destination : me.name, parv[1]);
+
+	return 0;
+}
+
+static int
+ms_ping(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	struct Client *target_p;
+	const char *destination;
+
+	destination = parv[2];	/* Will get NULL or pointer (parc >= 2!!) */
+
+	if(!EmptyString(destination) && irccmp(destination, me.name) &&
+	   irccmp(destination, me.id))
+	{
+		if((target_p = find_client(destination)) && IsServer(target_p))
+			sendto_one(target_p, ":%s PING %s :%s", 
+				   get_id(source_p, target_p), source_p->name,
+				   get_id(target_p, target_p));
+		/* not directed at an id.. */
+		else if(!IsDigit(*destination))
+			sendto_one_numeric(source_p, ERR_NOSUCHSERVER,
+					   form_str(ERR_NOSUCHSERVER),
+					   destination);
+	}
+	else
+		sendto_one(source_p, ":%s PONG %s :%s", 
+			   get_id(&me, source_p), me.name, 
+			   get_id(source_p, source_p));
+
+	return 0;
+}
+
+static int
+ms_pong(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	struct Client *target_p;
+	const char *destination;
+
+	destination = parv[2];
+	source_p->flags &= ~FLAGS_PINGSENT;
+
+	/* Now attempt to route the PONG, comstud pointed out routable PING
+	 * is used for SPING.  routable PING should also probably be left in
+	 *        -Dianora
+	 * That being the case, we will route, but only for registered clients (a
+	 * case can be made to allow them only from servers). -Shadowfax
+	 */
+	if(!EmptyString(destination) && !match(destination, me.name) &&
+	   irccmp(destination, me.id))
+	{
+		if((target_p = find_client(destination)) || 
+		   (target_p = find_server(NULL, destination)))
+			sendto_one(target_p, ":%s PONG %s %s", 
+				   get_id(source_p, target_p), parv[1], 
+				   get_id(target_p, target_p));
+		else
+		{
+			if(!IsDigit(*destination))
+				sendto_one_numeric(source_p, ERR_NOSUCHSERVER,
+						   form_str(ERR_NOSUCHSERVER), destination);
+			return 0;
+		}
+	}
+
+	/* destination is us, emulate EOB */
+	if(IsServer(source_p) && !HasSentEob(source_p))
+	{
+		if(MyConnect(source_p))
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					     "End of burst (emulated) from %s (%d seconds)",
+					     source_p->name,
+					     (signed int) (CurrentTime - source_p->localClient->firsttime));
+		SetEob(source_p);
+	}
+
+	return 0;
+}
+
+static int
+mr_pong(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	if(parc == 2 && !EmptyString(parv[1]))
+	{
+		if(ConfigFileEntry.ping_cookie && source_p->user && !EmptyString(source_p->name))
+		{
+			unsigned long incoming_ping = strtoul(parv[1], NULL, 16);
+			if(incoming_ping)
+			{
+				if(source_p->localClient->random_ping == incoming_ping)
+				{
+					source_p->flags2 |= FLAGS2_PING_COOKIE;
+					register_local_user(client_p, source_p, source_p->name,
+							    source_p->username);
+				}
+				else
+				{
+					sendto_one(source_p, form_str(ERR_WRONGPONG),
+						   me.name, source_p->name,
+						   source_p->localClient->random_ping);
+					return 0;
+				}
+			}
+		}
+
+	}
+	else
+		sendto_one(source_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
+
+	source_p->flags &= ~FLAGS_PINGSENT;
+
+	return 0;
+}
+
+
+
+
+/* report_and_set_user_flags
+ *
+ * Inputs       - pointer to source_p
+ *              - pointer to aconf for this user
+ * Output       - NONE
+ * Side effects -
+ * Report to user any special flags they are getting, and set them.
+ */
+static void
+report_and_set_user_flags(struct Client *source_p, struct ConfItem *aconf)
+{
+	/* If this user is being spoofed, tell them so */
+	if(IsConfDoSpoofIp(aconf))
+	{
+		sendto_one(source_p,
+			   ":%s NOTICE %s :*** Spoofing your IP. congrats.",
+			   me.name, source_p->name);
+	}
+
+	/* If this user is in the exception class, Set it "E lined" */
+	if(IsConfExemptKline(aconf))
+	{
+		SetExemptKline(source_p);
+		sendto_one(source_p,
+			   ":%s NOTICE %s :*** You are exempt from K/D/G/X lines. congrats.",
+			   me.name, source_p->name);
+	}
+
+	if(IsConfExemptGline(aconf))
+	{
+		SetExemptGline(source_p);
+
+		/* dont send both a kline and gline exempt notice */
+		if(!IsConfExemptKline(aconf))
+			sendto_one(source_p,
+				   ":%s NOTICE %s :*** You are exempt from G lines.",
+				   me.name, source_p->name);
+	}
+
+	/* If this user is exempt from user limits set it F lined" */
+	if(IsConfExemptLimits(aconf))
+	{
+		SetExemptLimits(source_p);
+		sendto_one(source_p,
+			   ":%s NOTICE %s :*** You are exempt from user limits. congrats.",
+			   me.name, source_p->name);
+	}
+
+	/* If this user is exempt from idle time outs */
+	if(IsConfIdlelined(aconf))
+	{
+		SetIdlelined(source_p);
+		sendto_one(source_p,
+			   ":%s NOTICE %s :*** You are exempt from idle limits. congrats.",
+			   me.name, source_p->name);
+	}
+
+	if(IsConfExemptFlood(aconf))
+	{
+		SetExemptFlood(source_p);
+		sendto_one(source_p,
+			   ":%s NOTICE %s :*** You are exempt from flood limits.",
+			   me.name, source_p->name);
+	}
+
+	if(IsConfExemptSpambot(aconf))
+	{
+		SetExemptSpambot(source_p);
+		sendto_one(source_p,
+			   ":%s NOTICE %s :*** You are exempt from spambot checks.",
+			   me.name, source_p->name);
+	}
+
+	if(IsConfExemptShide(aconf))
+	{
+		SetExemptShide(source_p);
+		sendto_one(source_p,
+			   ":%s NOTICE %s :*** You are exempt from serverhiding.",
+			   me.name, source_p->name);
+	}
+}
+
+/* 
+ * user_welcome
+ *
+ * inputs	- client pointer to client to welcome
+ * output	- NONE
+ * side effects	-
+ */
+static void
+user_welcome(struct Client *source_p)
+{
+	sendto_one(source_p, form_str(RPL_WELCOME), me.name, source_p->name,
+		   ServerInfo.network_name, source_p->name);
+	sendto_one(source_p, form_str(RPL_YOURHOST), me.name,
+		   source_p->name,
+		   get_listener_name(source_p->localClient->listener), ircd_version);
+
+	sendto_one(source_p, form_str(RPL_CREATED), me.name, source_p->name, creation);
+	sendto_one(source_p, form_str(RPL_MYINFO), me.name, source_p->name, me.name, ircd_version);
+
+	show_isupport(source_p);
+
+	show_lusers(source_p);
+
+	if(ConfigFileEntry.short_motd)
+	{
+		sendto_one(source_p,
+			   "NOTICE %s :*** Notice -- motd was last changed at %s",
+			   source_p->name, user_motd_changed);
+
+		sendto_one(source_p,
+			   "NOTICE %s :*** Notice -- Please read the motd if you haven't read it",
+			   source_p->name);
+
+		sendto_one(source_p, form_str(RPL_MOTDSTART), 
+			   me.name, source_p->name, me.name);
+
+		sendto_one(source_p, form_str(RPL_MOTD),
+			   me.name, source_p->name, "*** This is the short motd ***");
+
+		sendto_one(source_p, form_str(RPL_ENDOFMOTD), me.name, source_p->name);
+	}
+	else
+		send_user_motd(source_p);
+}
+
+/*
+ * introduce_client
+ *
+ * inputs	-
+ * output	-
+ * side effects - This common function introduces a client to the rest
+ *		  of the net, either from a local client connect or
+ *		  from a remote connect.
+ */
+static int
+introduce_client(struct Client *client_p, struct Client *source_p, struct User *user, const char *nick)
+{
+	static char ubuf[12];
+
+	if(MyClient(source_p))
+		send_umode(source_p, source_p, 0, SEND_UMODES, ubuf);
+	else
+		send_umode(NULL, source_p, 0, SEND_UMODES, ubuf);
+
+	if(!*ubuf)
+	{
+		ubuf[0] = '+';
+		ubuf[1] = '\0';
+	}
+
+	/* if it has an ID, introduce it with its id to TS6 servers,
+	 * otherwise introduce it normally to all.
+	 */
+	if(has_id(source_p))
+	{
+		char sockhost[HOSTLEN];
+		if(source_p->sockhost[0] == ':')
+		{
+			sockhost[0] = '0';
+			sockhost[1] = '\0';
+			strlcat(sockhost, source_p->sockhost, sizeof(sockhost));
+		} else
+			strcpy(sockhost, source_p->sockhost);
+		
+		sendto_server(client_p, NULL, CAP_TS6, NOCAPS,
+			      ":%s UID %s %d %ld %s %s %s %s %s :%s",
+			      source_p->servptr->id, nick,
+			      source_p->hopcount + 1,
+			      (long) source_p->tsinfo, ubuf,
+			      source_p->username, source_p->host,
+			      IsIPSpoof(source_p) ? "0" : sockhost,
+			      source_p->id, source_p->info);
+
+		sendto_server(client_p, NULL, NOCAPS, CAP_TS6,
+			      "NICK %s %d %ld %s %s %s %s :%s",
+			      nick, source_p->hopcount + 1,
+			      (long) source_p->tsinfo,
+			      ubuf, source_p->username, source_p->host,
+			      user->server, source_p->info);
+	}
+	else
+		sendto_server(client_p, NULL, NOCAPS, NOCAPS,
+			      "NICK %s %d %ld %s %s %s %s :%s",
+			      nick, source_p->hopcount + 1,
+			      (long) source_p->tsinfo,
+			      ubuf, source_p->username, source_p->host,
+			      user->server, source_p->info);
+
+
+	return 0;
+}
+
+/*
+ * add_ip_limit
+ * 
+ * Returns 1 if successful 0 if not
+ *
+ * This checks if the user has exceed the limits for their class
+ * unless of course they are exempt..
+ */
+
+static int
+add_ip_limit(struct Client *client_p, struct ConfItem *aconf)
+{
+	patricia_node_t *pnode;
+
+	/* If the limits are 0 don't do anything.. */
+	if(ConfCidrAmount(aconf) == 0 || ConfCidrBitlen(aconf) == 0)
+		return -1;
+
+	pnode = match_ip(ConfIpLimits(aconf), (struct sockaddr *)&client_p->localClient->ip);
+
+	if(pnode == NULL)
+		pnode = make_and_lookup_ip(ConfIpLimits(aconf), (struct sockaddr *)&client_p->localClient->ip, ConfCidrBitlen(aconf));
+
+	s_assert(pnode != NULL);
+
+	if(pnode != NULL)
+	{
+		if(((long) pnode->data) >= ConfCidrAmount(aconf)
+		   && !IsConfExemptLimits(aconf))
+		{
+			/* This should only happen if the limits are set to 0 */
+			if((unsigned long) pnode->data == 0)
+			{
+				patricia_remove(ConfIpLimits(aconf), pnode);
+			}
+			return (0);
+		}
+
+		pnode->data++;
+	}
+	return 1;
+}
+
+/*
+ * attach_conf
+ * 
+ * inputs	- client pointer
+ * 		- conf pointer
+ * output	-
+ * side effects - Associate a specific configuration entry to a *local*
+ *                client (this is the one which used in accepting the
+ *                connection). Note, that this automatically changes the
+ *                attachment if there was an old one...
+ */
+static int
+attach_conf(struct Client *client_p, struct ConfItem *aconf)
+{
+	if(IsIllegal(aconf))
+		return (NOT_AUTHORISED);
+
+	if(ClassPtr(aconf))
+	{
+		if(!add_ip_limit(client_p, aconf))
+			return (TOO_MANY_LOCAL);
+	}
+
+	if((aconf->status & CONF_CLIENT) &&
+	   ConfCurrUsers(aconf) >= ConfMaxUsers(aconf) && ConfMaxUsers(aconf) > 0)
+	{
+		if(!IsConfExemptLimits(aconf))
+		{
+			return (I_LINE_FULL);
+		}
+		else
+		{
+			sendto_one(client_p, ":%s NOTICE %s :*** I: line is full, but you have an >I: line!", 
+			                      me.name, client_p->name);
+			SetExemptLimits(client_p);
+		}
+
+	}
+
+	if(client_p->localClient->att_conf != NULL)
+		detach_conf(client_p);
+
+	client_p->localClient->att_conf = aconf;
+
+	aconf->clients++;
+	ConfCurrUsers(aconf)++;
+	return (0);
+}
+
+/*
+ * attach_iline
+ *
+ * inputs	- client pointer
+ *		- conf pointer
+ * output	-
+ * side effects	- do actual attach
+ */
+static int
+attach_iline(struct Client *client_p, struct ConfItem *aconf)
+{
+	struct Client *target_p;
+	dlink_node *ptr;
+	int local_count = 0;
+	int global_count = 0;
+	int ident_count = 0;
+	int unidented = 0;
+
+	if(IsConfExemptLimits(aconf))
+		return (attach_conf(client_p, aconf));
+
+	if(*client_p->username == '~')
+		unidented = 1;
+
+
+	/* find_hostname() returns the head of the list to search */
+	DLINK_FOREACH(ptr, find_hostname(client_p->host))
+	{
+		target_p = ptr->data;
+
+		if(irccmp(client_p->host, target_p->host) != 0)
+			continue;
+
+		if(MyConnect(target_p))
+			local_count++;
+
+		global_count++;
+
+		if(unidented)
+		{
+			if(*target_p->username == '~')
+				ident_count++;
+		}
+		else if(irccmp(target_p->username, client_p->username) == 0)
+			ident_count++;
+
+		if(ConfMaxLocal(aconf) && local_count >= ConfMaxLocal(aconf))
+			return (TOO_MANY_LOCAL);
+		else if(ConfMaxGlobal(aconf) && global_count >= ConfMaxGlobal(aconf))
+			return (TOO_MANY_GLOBAL);
+		else if(ConfMaxIdent(aconf) && ident_count >= ConfMaxIdent(aconf))
+			return (TOO_MANY_IDENT);
+	}
+
+
+	return (attach_conf(client_p, aconf));
+}
+
+/*
+ * verify_access
+ *
+ * inputs	- pointer to client to verify
+ *		- pointer to proposed username
+ * output	- 0 if success -'ve if not
+ * side effect	- find the first (best) I line to attach.
+ */
+static int
+verify_access(struct Client *client_p, const char *username)
+{
+	struct ConfItem *aconf;
+	char non_ident[USERLEN + 1];
+
+	if(IsGotId(client_p))
+	{
+		aconf = find_address_conf(client_p->host, client_p->username,
+					  (struct sockaddr *)&client_p->localClient->ip,client_p->localClient->ip.ss_family);
+	}
+	else
+	{
+		strlcpy(non_ident, "~", sizeof(non_ident));
+		strlcat(non_ident, username, sizeof(non_ident));
+		aconf = find_address_conf(client_p->host, non_ident, (struct sockaddr *)&client_p->localClient->ip,client_p->localClient->ip.ss_family);
+	}
+
+	if(aconf == NULL)
+		return NOT_AUTHORISED;
+
+	if(aconf->status & CONF_CLIENT)
+	{
+		if(aconf->flags & CONF_FLAGS_REDIR)
+		{
+			sendto_one(client_p, form_str(RPL_REDIR),
+					me.name, client_p->name,
+					aconf->name ? aconf->name : "", aconf->port);
+			return (NOT_AUTHORISED);
+		}
+
+
+		if(IsConfDoIdentd(aconf))
+			SetNeedId(client_p);
+
+		/* Thanks for spoof idea amm */
+		if(IsConfDoSpoofIp(aconf))
+		{
+			char *p;
+
+			if(IsConfSpoofNotice(aconf))
+			{
+				sendto_realops_flags(UMODE_ALL, L_ALL,
+						"%s spoofing: %s as %s",
+						client_p->name,
+#ifdef HIDE_SPOOF_IPS
+						aconf->name,
+#else
+						client_p->host,
+#endif
+						aconf->name);
+			}
+
+			/* user@host spoof */
+			if((p = strchr(aconf->name, '@')) != NULL)
+			{
+				char *host = p+1;
+				*p = '\0';
+
+				strlcpy(client_p->username, aconf->name,
+					sizeof(client_p->username));
+				strlcpy(client_p->host, host,
+					sizeof(client_p->host));
+				*p = '@';
+			}
+			else
+				strlcpy(client_p->host, aconf->name, sizeof(client_p->host));
+
+			SetIPSpoof(client_p);
+		}
+		return (attach_iline(client_p, aconf));
+	}
+	else if(aconf->status & CONF_KILL)
+	{
+		if(ConfigFileEntry.kline_with_reason)
+		{
+			sendto_one(client_p,
+					":%s NOTICE %s :*** Banned %s",
+					me.name, client_p->name, aconf->passwd);
+		}
+		return (BANNED_CLIENT);
+	}
+	else if(aconf->status & CONF_GLINE)
+	{
+		sendto_one(client_p, ":%s NOTICE %s :*** G-lined", me.name, client_p->name);
+
+		if(ConfigFileEntry.kline_with_reason)
+			sendto_one(client_p,
+					":%s NOTICE %s :*** Banned %s",
+					me.name, client_p->name, aconf->passwd);
+
+		return (BANNED_CLIENT);
+	}
+
+	return NOT_AUTHORISED;
+}
+
+/*
+ * check_client
+ *
+ * inputs	- pointer to client
+ * output	- 0 = Success
+ * 		  NOT_AUTHORISED (-1) = Access denied (no I line match)
+ * 		  SOCKET_ERROR   (-2) = Bad socket.
+ * 		  I_LINE_FULL    (-3) = I-line is full
+ *		  TOO_MANY       (-4) = Too many connections from hostname
+ * 		  BANNED_CLIENT  (-5) = K-lined
+ * side effects - Ordinary client access check.
+ *		  Look for conf lines which have the same
+ * 		  status as the flags passed.
+ */
+static int
+check_client(struct Client *client_p, struct Client *source_p, const char *username)
+{
+	int i;
+
+	ClearAccess(source_p);
+
+	if((i = verify_access(source_p, username)))
+	{
+		ilog(L_FUSER, "Access denied: %s[%s]", 
+		     source_p->name, source_p->sockhost);
+	}
+	
+	switch (i)
+	{
+	case SOCKET_ERROR:
+		exit_client(client_p, source_p, &me, "Socket Error");
+		break;
+
+	case TOO_MANY_LOCAL:
+		sendto_realops_flags(UMODE_FULL, L_ALL,
+				"Too many local connections for %s!%s%s@%s",
+				source_p->name, IsGotId(source_p) ? "" : "~",
+				source_p->username, source_p->sockhost);
+
+		ilog(L_FUSER, "Too many local connections from %s!%s%s@%s",
+			source_p->name, IsGotId(source_p) ? "" : "~",
+			source_p->username, source_p->sockhost);	
+
+		ServerStats.is_ref++;
+		exit_client(client_p, source_p, &me, "Too many host connections (local)");
+		break;
+
+	case TOO_MANY_GLOBAL:
+		sendto_realops_flags(UMODE_FULL, L_ALL,
+				"Too many global connections for %s!%s%s@%s",
+				source_p->name, IsGotId(source_p) ? "" : "~",
+				source_p->username, source_p->sockhost);
+		ilog(L_FUSER, "Too many global connections from %s!%s%s@%s",
+			source_p->name, IsGotId(source_p) ? "" : "~",
+			source_p->username, source_p->sockhost);
+
+		ServerStats.is_ref++;
+		exit_client(client_p, source_p, &me, "Too many host connections (global)");
+		break;
+
+	case TOO_MANY_IDENT:
+		sendto_realops_flags(UMODE_FULL, L_ALL,
+				"Too many user connections for %s!%s%s@%s",
+				source_p->name, IsGotId(source_p) ? "" : "~",
+				source_p->username, source_p->sockhost);
+		ilog(L_FUSER, "Too many user connections from %s!%s%s@%s",
+			source_p->name, IsGotId(source_p) ? "" : "~",
+			source_p->username, source_p->sockhost);
+
+		ServerStats.is_ref++;
+		exit_client(client_p, source_p, &me, "Too many user connections (global)");
+		break;
+
+	case I_LINE_FULL:
+		sendto_realops_flags(UMODE_FULL, L_ALL,
+				"I-line is full for %s!%s%s@%s (%s).",
+				source_p->name, IsGotId(source_p) ? "" : "~",
+				source_p->username, source_p->host,
+				source_p->sockhost);
+
+		ilog(L_FUSER, "Too many connections from %s!%s%s@%s.", 
+			source_p->name, IsGotId(source_p) ? "" : "~",
+			source_p->username, source_p->sockhost);
+
+		ServerStats.is_ref++;
+		exit_client(client_p, source_p, &me,
+			    "No more connections allowed in your connection class");
+		break;
+
+	case NOT_AUTHORISED:
+		{
+			int port = -1;
+#ifdef IPV6
+			if(source_p->localClient->ip.ss_family == AF_INET6)
+				port = ((struct sockaddr_in6 *)&source_p->localClient->listener)->sin6_port;
+			else
+#endif
+				port = ((struct sockaddr_in *)&source_p->localClient->listener)->sin_port;
+			
+			ServerStats.is_ref++;
+			/* jdc - lists server name & port connections are on */
+			/*       a purely cosmetical change */
+			/* why ipaddr, and not just source_p->sockhost? --fl */
+#if 0
+			static char ipaddr[HOSTIPLEN];
+			inetntop_sock(&source_p->localClient->ip, ipaddr, sizeof(ipaddr));
+#endif
+			sendto_realops_flags(UMODE_UNAUTH, L_ALL,
+					"Unauthorised client connection from "
+					"%s!%s%s@%s [%s] on [%s/%u].",
+					source_p->name, IsGotId(source_p) ? "" : "~",
+					source_p->username, source_p->host,
+					source_p->sockhost,
+					source_p->localClient->listener->name, port);
+
+			ilog(L_FUSER,
+				"Unauthorised client connection from %s!%s%s@%s on [%s/%u].",
+				source_p->name, IsGotId(source_p) ? "" : "~",
+				source_p->username, source_p->sockhost,
+				source_p->localClient->listener->name, port);
+			add_reject(client_p);
+			exit_client(client_p, source_p, &me,
+				    "You are not authorised to use this server");
+			break;
+		}
+	case BANNED_CLIENT:
+		add_reject(client_p);
+		exit_client(client_p, client_p, &me, "*** Banned ");
+		ServerStats.is_ref++;
+		break;
+
+	case 0:
+	default:
+		break;
+	}
+	return (i);
+}
+
+/*
+** register_local_user
+**      This function is called when both NICK and USER messages
+**      have been accepted for the client, in whatever order. Only
+**      after this, is the USER message propagated.
+**
+**      NICK's must be propagated at once when received, although
+**      it would be better to delay them too until full info is
+**      available. Doing it is not so simple though, would have
+**      to implement the following:
+**
+**      (actually it has been implemented already for a while) -orabidoo
+**
+**      1) user telnets in and gives only "NICK foobar" and waits
+**      2) another user far away logs in normally with the nick
+**         "foobar" (quite legal, as this server didn't propagate
+**         it).
+**      3) now this server gets nick "foobar" from outside, but
+**         has alread the same defined locally. Current server
+**         would just issue "KILL foobar" to clean out dups. But,
+**         this is not fair. It should actually request another
+**         nick from local user or kill him/her...
+*/
+
+static int
+register_local_user(struct Client *client_p, struct Client *source_p, const char *nick, const char *username)
+{
+	struct ConfItem *aconf;
+	struct User *user = source_p->user;
+	char tmpstr2[IRCD_BUFSIZE];
+	char ipaddr[HOSTIPLEN];
+	char myusername[USERLEN+1];
+	int status;
+
+	s_assert(NULL != source_p);
+	s_assert(MyConnect(source_p));
+	s_assert(source_p->username != username);
+
+	if(source_p == NULL)
+		return -1;
+
+	if(IsAnyDead(source_p))
+		return -1;
+
+	if(ConfigFileEntry.ping_cookie)
+	{
+		if(!(source_p->flags & FLAGS_PINGSENT) && source_p->localClient->random_ping == 0)
+		{
+			source_p->localClient->random_ping = (unsigned long) (rand() * rand()) << 1;
+			sendto_one(source_p, "PING :%08lX",
+				   (unsigned long) source_p->localClient->random_ping);
+			source_p->flags |= FLAGS_PINGSENT;
+			return -1;
+		}
+		if(!(source_p->flags2 & FLAGS2_PING_COOKIE))
+		{
+			return -1;
+		}
+	}
+
+
+	client_p->localClient->last = CurrentTime;
+	/* Straight up the maximum rate of flooding... */
+	source_p->localClient->allow_read = MAX_FLOOD_BURST;
+
+	/* XXX - fixme. we shouldnt have to build a users buffer twice.. */
+	if(!IsGotId(source_p) && (strchr(username, '[') != NULL))
+	{
+		const char *p;
+		int i = 0;
+
+		p = username;
+
+		while(*p && i < USERLEN)
+		{
+			if(*p != '[')
+				myusername[i++] = *p;
+			p++;
+		}
+
+		myusername[i] = '\0';
+		username = myusername;
+	}
+
+	if((status = check_client(client_p, source_p, username)) < 0)
+		return (CLIENT_EXITED);
+
+	if(!valid_hostname(source_p->host))
+	{
+		sendto_one(source_p,
+			   ":%s NOTICE %s :*** Notice -- You have an illegal character in your hostname",
+			   me.name, source_p->name);
+
+		strlcpy(source_p->host, source_p->sockhost, sizeof(source_p->host));
+
+#ifdef IPV6
+		if(ConfigFileEntry.dot_in_ip6_addr == 1)
+			strlcat(source_p->host, ".", sizeof(source_p->host));
+#endif
+ 	}
+ 
+	aconf = source_p->localClient->att_conf;
+
+	if(aconf == NULL)
+	{
+		exit_client(client_p, source_p, &me, "*** Not Authorised");
+		return (CLIENT_EXITED);
+	}
+
+	if(!IsGotId(source_p))
+	{
+		const char *p;
+		int i = 0;
+
+		if(IsNeedIdentd(aconf))
+		{
+			ServerStats.is_ref++;
+			sendto_one(source_p,
+				   ":%s NOTICE %s :*** Notice -- You need to install identd to use this server",
+				   me.name, client_p->name);
+			exit_client(client_p, source_p, &me, "Install identd");
+			return (CLIENT_EXITED);
+		}
+
+		/* dont replace username if its supposed to be spoofed --fl */
+		if(!IsConfDoSpoofIp(aconf) || !strchr(aconf->name, '@'))
+		{
+			p = username;
+
+			if(!IsNoTilde(aconf))
+				source_p->username[i++] = '~';
+
+			while (*p && i < USERLEN)
+			{
+				if(*p != '[')
+					source_p->username[i++] = *p;
+				p++;
+			}
+
+			source_p->username[i] = '\0';
+		}
+	}
+
+	/* password check */
+	if(!EmptyString(aconf->passwd))
+	{
+		const char *encr;
+
+		if(EmptyString(source_p->localClient->passwd))
+			encr = "";
+		else if(IsConfEncrypted(aconf))
+			encr = crypt(source_p->localClient->passwd, aconf->passwd);
+		else
+			encr = source_p->localClient->passwd;
+
+		if(strcmp(encr, aconf->passwd))
+		{
+			ServerStats.is_ref++;
+			sendto_one(source_p, form_str(ERR_PASSWDMISMATCH), me.name, source_p->name);
+			exit_client(client_p, source_p, &me, "Bad Password");
+			return (CLIENT_EXITED);
+		}
+	}
+
+	if(source_p->localClient->passwd)
+	{
+		memset(source_p->localClient->passwd, 0, strlen(source_p->localClient->passwd));
+		MyFree(source_p->localClient->passwd);
+		source_p->localClient->passwd = NULL;
+	}
+
+	/* report if user has &^>= etc. and set flags as needed in source_p */
+	report_and_set_user_flags(source_p, aconf);
+
+	/* Limit clients */
+	/*
+	 * We want to be able to have servers and F-line clients
+	 * connect, so save room for "buffer" connections.
+	 * Smaller servers may want to decrease this, and it should
+	 * probably be just a percentage of the MAXCLIENTS...
+	 *   -Taner
+	 */
+	/* Except "F:" clients */
+	if(((dlink_list_length(&lclient_list) + 1) >= 
+	   ((unsigned long)GlobalSetOptions.maxclients + MAX_BUFFER) ||
+           (dlink_list_length(&lclient_list) + 1) >= 
+	    ((unsigned long)GlobalSetOptions.maxclients - 5)) && !(IsExemptLimits(source_p)))
+	{
+		sendto_realops_flags(UMODE_FULL, L_ALL,
+				     "Too many clients, rejecting %s[%s].", nick, source_p->host);
+
+		ServerStats.is_ref++;
+		exit_client(client_p, source_p, &me, "Sorry, server is full - try later");
+		return (CLIENT_EXITED);
+	}
+
+	/* valid user name check */
+
+	if(!valid_username(source_p->username))
+	{
+		sendto_realops_flags(UMODE_REJ, L_ALL,
+				     "Invalid username: %s (%s@%s)",
+				     nick, source_p->username, source_p->host);
+		ServerStats.is_ref++;
+		ircsprintf(tmpstr2, "Invalid username [%s]", source_p->username);
+		exit_client(client_p, source_p, &me, tmpstr2);
+		return (CLIENT_EXITED);
+	}
+
+	/* end of valid user name check */
+
+	/* kline exemption extends to xline too */
+	if(!IsExemptKline(source_p) &&
+	   find_xline(source_p->info, 1) != NULL)
+	{
+		ServerStats.is_ref++;
+		add_reject(source_p);
+		exit_client(client_p, source_p, &me, "Bad user info");
+		return CLIENT_EXITED;
+	}
+
+	/* Any hooks using this event *must* check for the client being dead
+	 * when its called.  If the hook wants to terminate the client, it
+	 * can call exit_client(). --fl
+	 */
+	hook_call_event(h_client_auth_id, client_p);
+
+	if(IsAnyDead(client_p))
+		return CLIENT_EXITED;
+
+	inetntop_sock((struct sockaddr *)&source_p->localClient->ip, ipaddr, sizeof(ipaddr));
+
+	sendto_realops_flags(UMODE_CCONN, L_ALL,
+			     "Client connecting: %s (%s@%s) [%s] {%s} [%s]",
+			     nick, source_p->username, source_p->host,
+#ifdef HIDE_SPOOF_IPS
+			     IsIPSpoof(source_p) ? "255.255.255.255" :
+#endif
+			     ipaddr, get_client_class(source_p), source_p->info);
+
+	/* If they have died in send_* don't do anything. */
+	if(IsAnyDead(source_p))
+		return CLIENT_EXITED;
+
+	add_to_hostname_hash(source_p->host, source_p);
+
+	strcpy(source_p->id, generate_uid());
+	add_to_id_hash(source_p->id, source_p);
+
+	source_p->umodes |= UMODE_INVISIBLE;
+
+	Count.invisi++;
+
+	s_assert(!IsClient(source_p));
+	dlinkMoveNode(&source_p->localClient->tnode, &unknown_list, &lclient_list);
+	SetClient(source_p);
+
+	/* XXX source_p->servptr is &me, since local client */
+	source_p->servptr = find_server(NULL, user->server);
+	dlinkAdd(source_p, &source_p->lnode, &source_p->servptr->serv->users);
+	/* Increment our total user count here */
+	if(++Count.total > Count.max_tot)
+		Count.max_tot = Count.total;
+	source_p->localClient->allow_read = MAX_FLOOD_BURST;
+
+	Count.totalrestartcount++;
+
+	s_assert(source_p->localClient != NULL);
+
+	if(dlink_list_length(&lclient_list) > (unsigned long)Count.max_loc)
+	{
+		Count.max_loc = dlink_list_length(&lclient_list);
+		if(!(Count.max_loc % 10))
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					     "New Max Local Clients: %d", Count.max_loc);
+	}
+
+	user_welcome(source_p);
+	return (introduce_client(client_p, source_p, user, nick));
+}
+
 /* clean_nick()
  *
  * input	- nickname to check
@@ -1125,32 +1669,6 @@ clean_uid(const char *uid)
 		return 0;
 
 	return 1;
-}
-
-static void
-set_initial_nick(struct Client *client_p, struct Client *source_p, char *nick)
-{
-	char buf[USERLEN + 1];
-
-	/* This had to be copied here to avoid problems.. */
-	source_p->tsinfo = CurrentTime;
-	if(!EmptyString(source_p->name))
-		del_from_client_hash(source_p->name, source_p);
-
-	strcpy(source_p->name, nick);
-	add_to_client_hash(nick, source_p);
-
-	/* fd_desc is long enough */
-	fd_note(client_p->localClient->fd, "Nick: %s", nick);
-
-	if(source_p->user)
-	{
-		strlcpy(buf, source_p->username, sizeof(buf));
-
-		/* got user, heres nick. */
-		register_local_user(client_p, source_p, nick, buf);
-
-	}
 }
 
 static void
@@ -1538,179 +2056,4 @@ register_client(struct Client *client_p, struct Client *server,
 
 	return (introduce_client(client_p, source_p, user, nick));
 }
-
-
-/* mr_user()
- *      parv[1] = username (login name, account)
- *      parv[2] = client host name (ignored)
- *      parv[3] = server host name (ignored)
- *      parv[4] = users gecos
- */
-static int
-mr_user(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
-{
-	char *p;
-
-	if((p = strchr(parv[1], '@')))
-		*p = '\0';
-
-	do_local_user(client_p, source_p, parv[1], parv[4]);
-	return 0;
-}
-
-
-
-/*
-** m_ping
-**      parv[0] = sender prefix
-**      parv[1] = origin
-**      parv[2] = destination
-*/
-static int
-m_ping(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
-{
-	struct Client *target_p;
-	const char *destination;
-
-	destination = parv[2];	/* Will get NULL or pointer (parc >= 2!!) */
-
-	if(!EmptyString(destination) && !match(destination, me.name))
-	{
-		if((target_p = find_server(source_p, destination)))
-		{
-			sendto_one(target_p, ":%s PING %s :%s",
-				   get_id(source_p, target_p),
-				   source_p->name, get_id(target_p, target_p));
-		}
-		else
-		{
-			sendto_one_numeric(source_p, ERR_NOSUCHSERVER,
-					   form_str(ERR_NOSUCHSERVER),
-					   destination);
-			return 0;
-		}
-	}
-	else
-		sendto_one(source_p, ":%s PONG %s :%s", me.name,
-			   (destination) ? destination : me.name, parv[1]);
-
-	return 0;
-}
-
-static int
-ms_ping(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
-{
-	struct Client *target_p;
-	const char *destination;
-
-	destination = parv[2];	/* Will get NULL or pointer (parc >= 2!!) */
-
-	if(!EmptyString(destination) && irccmp(destination, me.name) &&
-	   irccmp(destination, me.id))
-	{
-		if((target_p = find_client(destination)) && IsServer(target_p))
-			sendto_one(target_p, ":%s PING %s :%s", 
-				   get_id(source_p, target_p), source_p->name,
-				   get_id(target_p, target_p));
-		/* not directed at an id.. */
-		else if(!IsDigit(*destination))
-			sendto_one_numeric(source_p, ERR_NOSUCHSERVER,
-					   form_str(ERR_NOSUCHSERVER),
-					   destination);
-	}
-	else
-		sendto_one(source_p, ":%s PONG %s :%s", 
-			   get_id(&me, source_p), me.name, 
-			   get_id(source_p, source_p));
-
-	return 0;
-}
-
-
-
-static int
-ms_pong(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
-{
-	struct Client *target_p;
-	const char *destination;
-
-	destination = parv[2];
-	source_p->flags &= ~FLAGS_PINGSENT;
-
-	/* Now attempt to route the PONG, comstud pointed out routable PING
-	 * is used for SPING.  routable PING should also probably be left in
-	 *        -Dianora
-	 * That being the case, we will route, but only for registered clients (a
-	 * case can be made to allow them only from servers). -Shadowfax
-	 */
-	if(!EmptyString(destination) && !match(destination, me.name) &&
-	   irccmp(destination, me.id))
-	{
-		if((target_p = find_client(destination)) || 
-		   (target_p = find_server(NULL, destination)))
-			sendto_one(target_p, ":%s PONG %s %s", 
-				   get_id(source_p, target_p), parv[1], 
-				   get_id(target_p, target_p));
-		else
-		{
-			if(!IsDigit(*destination))
-				sendto_one_numeric(source_p, ERR_NOSUCHSERVER,
-						   form_str(ERR_NOSUCHSERVER), destination);
-			return 0;
-		}
-	}
-
-	/* destination is us, emulate EOB */
-	if(IsServer(source_p) && !HasSentEob(source_p))
-	{
-		if(MyConnect(source_p))
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "End of burst (emulated) from %s (%d seconds)",
-					     source_p->name,
-					     (signed int) (CurrentTime - source_p->localClient->firsttime));
-		SetEob(source_p);
-	}
-
-	return 0;
-}
-
-static int
-mr_pong(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
-{
-	if(parc == 2 && !EmptyString(parv[1]))
-	{
-		if(ConfigFileEntry.ping_cookie && source_p->user && !EmptyString(source_p->name))
-		{
-			unsigned long incoming_ping = strtoul(parv[1], NULL, 16);
-			if(incoming_ping)
-			{
-				if(source_p->localClient->random_ping == incoming_ping)
-				{
-					char buf[USERLEN + 1];
-					strlcpy(buf, source_p->username, sizeof(buf));
-					source_p->flags2 |= FLAGS2_PING_COOKIE;
-					register_local_user(client_p, source_p, source_p->name,
-							    buf);
-				}
-				else
-				{
-					sendto_one(source_p, form_str(ERR_WRONGPONG),
-						   me.name, source_p->name,
-						   source_p->localClient->random_ping);
-					return 0;
-				}
-			}
-		}
-
-	}
-	else
-		sendto_one(source_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
-
-	source_p->flags &= ~FLAGS_PINGSENT;
-
-	return 0;
-}
-
-
-
 
