@@ -2362,44 +2362,6 @@ void get_printable_conf(struct ConfItem *aconf, char **name, char **host,
   *port = (int)aconf->port;
 }
 
-
-/*
- * recheck_clients
- *
- * input        - none
- * output       - none
- * side effects - recheck all local clients against new I/Y lines
- */
-void recheck_clients()
-{
-  struct Client *cptr;
-  dlink_node *ptr, *ptr2, *nptr;
-
-  for (ptr=lclient_list.head; ptr; ptr=ptr->next)
-    {
-      cptr = ptr->data;
-      if (IsMe(cptr))
-        continue;
-#ifdef IPV6
-      remove_one_ip(cptr->localClient->ip6);
-#else
-      remove_one_ip(cptr->localClient->ip.s_addr);
-#endif
-
-      /* detach old confs */
-      for( ptr2 = cptr->localClient->confs.head; ptr2; ptr2 = nptr )
-	{
-	  nptr = ptr2->next;
-	  if ( ptr2->data && ( ((struct ConfItem *) ptr2->data)->status & CONF_CLIENT_MASK )) {
-	    detach_conf(cptr, ptr2->data);
-	  }
-	}
-
-      /* attach new */
-      check_client(cptr->servptr, cptr, cptr->username);
-    }
-};
-
 /*
  * read_conf_files
  *
@@ -2474,17 +2436,7 @@ void read_conf_files(int cold)
 	  read_kd_lines(file);
 	  fbclose(file);
 	}
-   }
-  /*
-     20001215:
-     Rescan all clients to make sure any new I/K/Y lines are applied. Also
-     ensures clients refer to a class in ClassList, so limits can be enforced.
-     - einride
-  */
-  if (!cold) {
-    recheck_clients();
-    check_class();
-  }
+    }
 }
 
 /*
