@@ -1,3 +1,16 @@
+jmallett    2002/03/01 02:41:58 EST	(20020301_1)
+
+  Modified files:
+    .                    README.FIRST 
+  Log:
+  NetBSD's compiler team doesn't suck;  Their version of egcs doesn't break
+  on SPARC, unlike newer GCC on OpenBSD and Solaris.
+  
+  Revision  Changes    Path
+  7.30      +2 -1      ircd-hybrid-7/README.FIRST
+
+
+
 jmallett    2002/03/01 02:09:16 EST	(20020301_0)
 
   Modified files:
