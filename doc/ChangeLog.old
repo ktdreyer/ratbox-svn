@@ -1,3 +1,11 @@
+*** 20001209_3 by db
+- removed obsolete #ifdef's in m_info.h
+- removed obsolete comments in m_unkline.c
+- removed SLAVE_SERVER junk fro m_locops.c
+- removed obsolete #ifdef junk in s_debug.c
+
+
+
 *** 20001209_2 by db
 - renamed confusing sendto_channel_butserv to sendto_channel_local
   it reflects better what the stupid function does
