@@ -1,3 +1,19 @@
+androsyn    2002/02/13 13:16:48 EST	(20020213_0)
+
+  Modified files:
+    modules              m_who.c 
+    src                  channel.c channel_mode.c 
+  Log:
+  Fixes the mode bugs we were talking about..
+  Submitted by: svatopluk@gmx.de
+  
+  Revision  Changes    Path
+  1.52      +11 -3     ircd-hybrid-7/modules/m_who.c
+  7.298     +14 -5     ircd-hybrid-7/src/channel.c
+  7.20      +20 -1     ircd-hybrid-7/src/channel_mode.c
+
+
+
 jmallett    2002/02/12 09:27:44 EST	(20020212_4)
 
   Modified files:
