@@ -14,6 +14,11 @@ if [ ! -f $1 ]; then
   exit 2
 fi
 
+if [ ! -f Makefile]; then
+  echo Please run configure first
+  exit 3
+fi
+
 MSGFMT=`grep '^MSGFMT' Makefile | sed 's/MSGFMT//' | sed 's/ = //' | tr -d '\r' | tr -d '\n'`
 BASENAME=`basename $1 | sed 's/\.po//'`
 

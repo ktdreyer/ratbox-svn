@@ -14,6 +14,11 @@ if [ ! -f $1 ]; then
   exit 2
 fi
 
+if [ ! -f Makefile ]; then
+  echo Please run configure first
+  exit 3
+fi
+  
 CC=`grep '^CC' Makefile | sed 's/CC//' | sed 's/= //' | tr -d '\r' | \
     tr -d '\n'`
 CFLAGS=`grep '^CFLAGS' Makefile | sed 's/CFLAGS//' | sed 's/= //' | \
