@@ -1,3 +1,7 @@
+*** 20011108_3 by leeh
+- check links_delay is > 0 before adding the event
+
+
 *** 20011108_2 by leeh
 - removed m_client.c, it was only there while we established m_nick.c was
   ok..
