@@ -1,3 +1,13 @@
+*** 20010104_7 by adrian
+
+
+We shouldn't just blindly return (0) if everything is ok. handle_message()
+might have been telling us something, and in any case, that is what
+CLIENT_EXITED / CLIENT_OK / CLIENT_PARSE_ERROR (or whatever it is) was
+designed for ..
+
+
+
 *** 20010104_6 by ejb
 - oops
 
