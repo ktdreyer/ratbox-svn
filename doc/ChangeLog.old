@@ -1,3 +1,15 @@
+androsyn    2002/04/03 07:21:24 EST	(20020403_2)
+
+  Modified files:
+    .                    INSTALL 
+  Log:
+  Documented the --enable-small-net stuff.
+  
+  Revision  Changes    Path
+  7.26      +6 -1      ircd-hybrid-7/INSTALL
+
+
+
 lusky       2002/04/03 00:35:25 EST	(20020403_1)
 
   Modified files:
