@@ -106,6 +106,8 @@ extern time_t      try_connections(time_t currenttime);
 #ifdef HUB
 extern void        initServerMask(void);
 extern void        restoreUnusedServerMask(unsigned long);
+#else
+#define CLEANUP_CHANNELS_TIME 30
 #endif
 
 #endif /* INCLUDED_s_serv_h */

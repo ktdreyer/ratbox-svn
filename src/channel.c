@@ -53,6 +53,11 @@
 #include <string.h>
 #include <stdlib.h>
 
+/* LazyLinks */
+#ifndef HUB
+static void destroy_channel(struct Channel *);
+#endif
+
 #ifdef NEED_SPLITCODE
 
 static void check_still_split();
@@ -654,10 +659,13 @@ void    add_user_to_channel(struct Channel *chptr, struct Client *who, int flags
       if(flags & MODE_CHANOP)
         chptr->opcount++;
 
-         /* ZZZZ LL */
 #ifndef HUB
+      /* LazyLink code */
       if(MyClient(who))
-        chptr->locusers++;
+        {
+          chptr->locusers++;
+          chptr->locusers_last = CurrentTime;
+        }
 #endif
       ptr = make_link();
       ptr->value.chptr = chptr;
@@ -678,10 +686,13 @@ void    remove_user_from_channel(struct Client *sptr,struct Channel *chptr,int w
         if((tmp->flags & MODE_CHANOP) && chptr->opcount)
           chptr->opcount--;
 
-         /* ZZZZ LL */
 #ifndef HUB
+        /* LazyLink code */
         if(MyClient(sptr) && chptr->locusers)
-          chptr->locusers--;
+          {
+            chptr->locusers--;
+            chptr->locusers_last = CurrentTime;
+	  }
 #endif
         /* User was kicked, but had an exception.
          * so, to reduce chatter I'll remove any
@@ -705,7 +716,6 @@ void    remove_user_from_channel(struct Client *sptr,struct Channel *chptr,int w
   sptr->user->joined--;
 
   sub1_from_channel(chptr);
-
 }
 
 static  void    change_chan_flag(struct Channel *chptr,struct Client *cptr, int flag)
@@ -2437,7 +2447,7 @@ void    add_invite(struct Client *cptr,struct Channel *chptr)
 /*
  * Delete Invite block from channel invite list and client invite list
  */
-void    del_invite(struct Client *cptr,struct Channel *chptr)
+void del_invite(struct Client *cptr,struct Channel *chptr)
 {
   struct SLink  **inv, *tmp;
 
@@ -3002,16 +3012,16 @@ int     m_cburst(struct Client *cptr,
       return 0;
     }
 
-#ifdef DEBUGLL
-   if(chptr->lazyLinkChannelExists & cptr->serverMask )
-     {
-        sendto_realops("CBURST bit already set for %s", name );
-     }
-#endif
-
   if(IsCapable(cptr,CAP_LL))
     {
       chptr->lazyLinkChannelExists = cptr->serverMask;
+
+#ifdef DEBUGLL
+      sendto_realops("cburst: IsCapable(cptr,CAP_LL) ");
+      sendto_realops("cburst: chptr->lazyLinkChannelExists %X cptr->serverMask %X",
+                     chptr->lazyLinkChannelExists,cptr->serverMask );
+#endif
+
       send_channel_modes(cptr, chptr);
        /* Send the topic */
       sendto_one(cptr, ":%s TOPIC %s :%s",
@@ -3111,7 +3121,7 @@ int     m_drop(struct Client *cptr,
   name = parv[1];
 
 #ifdef DEBUGLL
-  sendto_realops("DROP locally called for %s nick %s", name);
+  sendto_realops("DROP locally called for %s", name);
 #endif
 
   if(!(chptr=hash_find_channel(name, NullChn)))
@@ -3123,7 +3133,13 @@ int     m_drop(struct Client *cptr,
 #endif
       return -1;
     }
-  chptr->lazyLinkChannelExists &= ~cptr->serverMask;
+#ifdef DEBUGLL
+      sendto_realops(
+     "DROP about to clear chptr->lazyLinkChannelExists %X cptr->serverMask %X",
+        chptr->lazyLinkChannelExists, cptr->serverMask );
+#endif
+  if(cptr->serverMask) /* JIC */
+    chptr->lazyLinkChannelExists &= ~cptr->serverMask;
   return 0;
 }
 #endif
@@ -3296,7 +3312,114 @@ int     m_lljoin(struct Client *cptr,
     }
   return 0;
 }
+
+/* Only leaves need to remove channels that have no local members */
+
+#define CLEANUP_CHANNELS_TIME 30
+
+void cleanup_channels(void)
+{
+   struct Channel *chptr;
+   struct Channel *next_chptr;
+ 
+   if(!serv_cptr_list)
+     {
+       sendto_ops("Cannot clean channels, waiting to link to my uplink.");
+       return;
+     }
+
+   if(!IsCapable(serv_cptr_list, CAP_LL))
+     {
+       sendto_ops("Uplink is not LL capable.");
+       return;
+     }
+
+#ifdef DEBUGLL
+   sendto_ops("Cleaning up local channels...");
 #endif
+   
+   next_chptr = NULL;
 
+   for(chptr = GlobalChannelList; chptr; chptr = next_chptr)
+     {
+       next_chptr = chptr->nextch;
 
+       if((CurrentTime - chptr->locusers_last >= CLEANUP_CHANNELS_TIME) && !chptr->locusers)
+         {
+#ifdef DEBUGLL
+           sendto_ops("Deleting %s", chptr->chname);
+#endif
+           sendto_one(serv_cptr_list,":%s DROP %s",
+                  me.name, chptr->chname);
+           if(!chptr->locusers)
+             destroy_channel(chptr);
+         }
+     }
+}    
 
+/*
+ * destroy_channel
+ * inputs       - channel pointer
+ * output       - none
+ * side effects - walk through this channel, and destroy it.
+ */
+
+static void destroy_channel(struct Channel *chptr)
+{
+  struct SLink  *tmp;
+  struct SLink  *current;
+  struct SLink  *nextCurrent;
+  struct SLink  *currentMember;
+  struct SLink  *nextCurrentMember;
+  struct SLink  *lastMember;
+  struct Client *sptr;
+
+  /* free all SLink's referenced to by member structure */
+  for (current = chptr->members; current; current = nextCurrent )
+    {
+      nextCurrent = current->next;
+      sptr = current->value.cptr;
+
+      for (lastMember = NULL,currentMember = sptr->user->channel;
+            currentMember;
+              currentMember = nextCurrentMember )
+        {
+          nextCurrentMember = currentMember->next;
+          if( currentMember->value.chptr == chptr)
+            {
+              if(lastMember)
+                lastMember->next = nextCurrentMember;
+              else
+                sptr->user->channel->next = nextCurrentMember;
+
+              free_link(currentMember);
+              break;
+            }
+          lastMember = currentMember;
+        }
+      free_link(current);
+    }
+
+  while ((tmp = chptr->invites))
+    del_invite(tmp->value.cptr, chptr);
+
+  /* free all bans/exceptions/denies */
+  free_bans_exceptions_denies( chptr );
+
+  if (chptr->prevch)
+    chptr->prevch->nextch = chptr->nextch;
+  else
+    GlobalChannelList = chptr->nextch;
+  if (chptr->nextch)
+    chptr->nextch->prevch = chptr->prevch;
+
+#ifdef FLUD
+  free_fluders(NULL, chptr);
+#endif
+  del_from_channel_hash_table(chptr->chname, chptr);
+  MyFree((char*) chptr);
+  Count.chan--;
+  /* Wheee */
+}
+
+#endif

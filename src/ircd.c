@@ -110,6 +110,11 @@
 int reject_held_fds = 0;
 #endif
 
+#ifndef HUB
+/* LazyLinks code */
+time_t lastCleanup;
+#endif
+
 #ifdef NEED_SPLITCODE
 extern time_t server_split_time;
 extern int    server_was_split;
@@ -377,6 +382,14 @@ static time_t io_loop(time_t delay)
         TS_MAX_DELTA);
       restart("Clock Failure");
     }
+
+#ifndef HUB
+  if(CurrentTime - lastCleanup >= CLEANUP_CHANNELS_TIME)
+    {
+      lastCLeanup = CurrentTime;
+      cleanup_channels();
+    }
+#endif
 
   /*
    * This chunk of code determines whether or not

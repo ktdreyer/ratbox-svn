@@ -427,37 +427,34 @@ int check_server(struct Client* cptr)
   if( !(c_conf->flags & CONF_FLAGS_ZIP_LINK) )
     ClearCap(cptr,CAP_ZIP);
 
-  /* n line with an H line, must be a typo */
+#ifdef HUB
   if( n_conf->flags & CONF_FLAGS_LAZY_LINK )
     {
-      if(find_conf_by_name(n_conf->name, CONF_HUB ))
+      if(find_conf_by_name(n_conf->name, CONF_HUB))
         {
+          /* n line with an H line, must be a typo */
           ClearCap(cptr,CAP_LL);
 #ifdef DEBUGLL
           sendto_realops("s_serv.c: Clearing CAP_LL" );
 #endif
-         }
-#ifdef HUB
-       else
-         {
-           cptr->serverMask = nextFreeMask();
-           /* its full folks, 32 leaves? wow. I never thought I'd
-            * see the day. Now this will have to be recoded! -Dianora
-            */
-           if(!cptr->serverMask)
-             {
-               sendto_realops("serverMask is full!");
+        }
 
-               /* try and negotiate a non LL connect */
-               ClearCap(cptr,CAP_LL);
-             }
+      cptr->serverMask = nextFreeMask();
+      /* its full folks, 32 leaves? wow. I never thought I'd
+       * see the day. Now this will have to be recoded! -Dianora
+       */
+      if(!cptr->serverMask)
+	{
+	  sendto_realops("serverMask is full!");
+	  
+	  /* try and negotiate a non LL connect */
+	  ClearCap(cptr,CAP_LL);
+	}
 #ifdef DEBUGLL
-           sendto_realops("s_serv.c: Adding serverMask %X", cptr->serverMask );
-#endif
-         }
+      sendto_realops("s_serv.c: Adding serverMask %X", cptr->serverMask );
 #endif
     }
-
+#endif
 
   /*
    * if the C:line doesn't have an IP address assigned put the one from
@@ -1034,4 +1031,5 @@ static unsigned long nextFreeMask()
     }
   return 0L; /* watch this special case ... */
 }
+
 #endif
