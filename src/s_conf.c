@@ -77,7 +77,6 @@ static void     expire_tklines(dlink_list *);
 static int 	is_attached(struct Client *client_p, struct ConfItem *aconf);
 
 FBFILE* conf_fbfile_in;
-struct ConfItem* yy_aconf;
 extern char yytext[];
 
 /* address of class 0 conf */

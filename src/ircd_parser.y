@@ -58,9 +58,7 @@ extern char *ip_string;
 int yyparse();
 
 static struct ConfItem *yy_achead = NULL;
-#if 0
 static struct ConfItem *yy_aconf = NULL;
-#endif
 static struct ConfItem *yy_aprev = NULL;
 static int              yy_acount = 0;
 static struct ConfItem *yy_hconf;
