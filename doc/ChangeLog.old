@@ -1,3 +1,7 @@
+*** 19990909_20 by tomh
+change return type for get_sendq
+
+
 *** 19990909_19 by tomh
 remove (char*)NULL casts, pointless
 
