@@ -1,3 +1,10 @@
+*** 20010218_2 by wcampbel
+ip="..."; in listen {} is inconsistent, like a connect {} host entry, it
+can accept both IP's and hostnames, so it should be host="...";
+Also we had complaints about needing " " here, while all other ip= lines
+do not use the " "
+
+
 *** 20010218_1 by wcampbel
 1.  Update the TODO list
 2.  Massive update of the docs for the (hopefully soon) beta2 release.
