@@ -29,7 +29,7 @@ automoduledir	= @prefix@/modules/autoload
 mandir          = @prefix@/man8
 MANPAGES        = ircd.8
 
-CONFS		= example.conf
+CONFS		= example.conf example.efnet.conf
 DEFAULTCONFS	= ircd.motd kline.conf dline.conf
 
 SSL_LIBS	= @SSL_LIBS@
