@@ -1,3 +1,7 @@
+*** 20000104_6 by wnder
+Prettied up source files by converting tabs to spaces
+
+
 *** 20000104_5 by db
 - fixed DEBUG error in s_conf.c
 
