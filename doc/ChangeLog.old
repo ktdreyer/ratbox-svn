@@ -1,3 +1,15 @@
+leeh        2001/12/27 06:39:31 EST	(20011227_2)
+
+  Modified files:
+    modules              m_stats.c 
+  Log:
+  - commiting in contrib/ only doesnt work, oops ;p
+  
+  Revision  Changes    Path
+  1.102     +21 -6     ircd-hybrid-7/modules/m_stats.c
+
+
+
 leeh        2001/12/27 06:38:22 EST	(20011227_1)
 
   Modified files:
