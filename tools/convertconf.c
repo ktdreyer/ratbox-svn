@@ -242,10 +242,10 @@ static void AddGeneralBlock(FILE *out)
   fprintf(out, "\t * Use \"standard\" for the compiled in defaults.\n\t*/\n\tmessage_locale = \"custom\";\n\n");
 
   fprintf(out, "\t/* List of user modes that only opers can set, see example.conf for a list. */\n");
-  fprintf(out, "\toper_umodes = locops, servnotice, operwall, wallop\n\n");
+  fprintf(out, "\toper_umodes = locops, servnotice, operwall, wallop;\n\n");
 
   fprintf(out, "\t/* List of usermodes that get set when a user /oper's */\n");
-  fprintf(out, "\toper_umodes = locops, servnotice, operwall, wallop\n\n");
+  fprintf(out, "\toper_umodes = locops, servnotice, operwall, wallop;\n\n");
 
   fprintf(out, "\t/* vchans_oper_only\n\t * dont allow non-opers to use CJOIN?\n\t*/\n");
   fprintf(out, "\tvchans_oper_only = yes;\n\n");
@@ -589,7 +589,7 @@ static void oldParseOneLine(FILE *out,char* line)
       if(host_field)
 	fprintf(out,"\tname=\"%s\";\n", host_field);
       if(passwd_field)
-	fprintf(out,"\tvhost=%s;\n", passwd_field);
+	fprintf(out,"\tvhost=\"%s\";\n", passwd_field);
       if(user_field)
 	fprintf(out,"\tdescription=\"%s\";\n", user_field);
       if(port_field)
