@@ -1,3 +1,19 @@
+leeh        2004/03/03 17:44:56 EST	(20040303_17)
+
+  Modified files:
+    .                    RELNOTES 
+    modules              m_kline.c 
+  Log:
+  - update RELNOTES
+  - commit first part of my encap kline handlers, because of what im about
+    to do next..
+  
+  Revision  Changes    Path
+  1.80      +14 -0     ircd-ratbox/RELNOTES
+  1.177     +25 -14    ircd-ratbox/modules/m_kline.c
+
+
+
 leeh        2004/03/03 17:07:45 EST	(20040303_16)
 
   Modified files:
