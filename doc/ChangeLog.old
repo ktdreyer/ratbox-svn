@@ -1,3 +1,9 @@
+*** 20010208_6 by db
+- anytime we get a socket connect error, the client should be marked
+  with DEAD_SOCKET.. found by vulture.
+
+
+
 *** 20010208_5 by db
 - this at least prevents exit_client from exiting an already dead client twice.
 
