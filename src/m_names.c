@@ -210,8 +210,10 @@ static void names_all_visible_channels(struct Client *sptr)
   struct SLink  *lp;
   struct Client *c2ptr;
   struct Channel *chptr;
+  struct Channel *bchan;
   char buf[BUFSIZE];
   char buf2[2*NICKLEN];
+  char *chname;
 
   mlen = strlen(me.name) + NICKLEN + 7;
   cur_len = mlen;
@@ -225,9 +227,16 @@ static void names_all_visible_channels(struct Client *sptr)
       if (ShowChannel(sptr, chptr))
 	{
 	  /* Find users on same channel (defined by chptr) */
+	  chname = chptr->chname;
 
-	  ircsprintf(buf,"%s %s :",
-		     pub_or_secret(chptr), chptr->chname);
+	  if (IsVchan(chptr))
+	    {
+	      bchan = find_bchan (chptr);
+	      if (bchan != NULL)
+		chname = bchan->chname;
+	    }
+
+	  ircsprintf(buf,"%s %s :", pub_or_secret(chptr), chname);
 	  len = strlen(buf);
 	  cur_len = len + mlen;
 
@@ -248,7 +257,7 @@ static void names_all_visible_channels(struct Client *sptr)
 		  sendto_one(sptr, form_str(RPL_NAMREPLY),
 			     me.name, sptr->name, buf);
 		  ircsprintf(buf,"%s %s :",
-			     pub_or_secret(chptr), chptr->chname);
+			     pub_or_secret(chptr), chname);
 		  reply_to_send = NO;
 		  cur_len = len + mlen;
 		}
@@ -354,7 +363,7 @@ void names_on_this_channel( struct Client *sptr,
 
   /* Find users on same channel (defined by chptr) */
 
-  ircsprintf(buf, "%s %s :", pub_or_secret(chptr), chptr->chname);
+  ircsprintf(buf, "%s %s :", pub_or_secret(chptr), name_of_channel);
   len = strlen(buf);
 
   cur_len = mlen + len;
@@ -371,7 +380,7 @@ void names_on_this_channel( struct Client *sptr,
 	{
 	  sendto_one(sptr, form_str(RPL_NAMREPLY),
 		     me.name, sptr->name, buf);
-	  ircsprintf(buf,"%s %s :", pub_or_secret(chptr), chptr->chname);
+	  ircsprintf(buf,"%s %s :", pub_or_secret(chptr), name_of_channel);
 	  reply_to_send = NO;
 	  cur_len = mlen + len;
 	}
