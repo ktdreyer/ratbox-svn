@@ -1,3 +1,9 @@
+*** 20010101_14 by db
+- delay initial startup of try_connections() to forestall nick collides
+  because of servers that haven't noticed the server restart.
+
+
+
 *** 20010101_13 by bysin
 Oops, fixed buffer overflow again.
 
