@@ -1,3 +1,28 @@
+*** 20001101_5 by adrian
+
+
+Converting the ident auth code over to use comm_connect_tcp().
+Note that this code doesn't entirely work yet, but it doesn't NOT work
+(go on, parse that)
+
+* rip the bind() / connect() code out of s_auth.c and use
+  comm_connect_tcp() instead
+
+* change send_auth_query() into a CNCB - it is called once 
+  comm_connect_tcp() completes in order, and handles errors from
+  it before attempting to write to the socket.
+
+* fix comm_connect_tcp() to actually work ! :
+  + actually *remember* to record the port
+  + don't do DNS lookups on IPs when you want an IP, instead attempt to
+    convert it to a in_addr, and if it fails try to look it up with
+    gethost_byname()
+
+* Remove all the auth descriptor stuff from send_message(), leaving only
+  server connect()s
+
+
+
 *** 20001101_4 by adrian
 
 
