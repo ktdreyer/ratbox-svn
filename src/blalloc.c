@@ -8,6 +8,7 @@
  */
 #include <stdio.h>
 #include <unistd.h>
+#include <assert.h>
 #include "ircd_defs.h"      /* DEBUG_BLOCK_ALLOCATOR */
 #include "ircd.h"
 #include "blalloc.h"
@@ -203,6 +204,8 @@ void * _BlockHeapAlloc (BlockHeap *bh)
 #ifdef MEMDEBUG
        {
          MemoryEntry *mme = (MemoryEntry*)(bh->base->elems);
+         assert (mme->next != mme);
+         mme->last = NULL;
          mme->next = first_block_mem_entry;
          if (first_block_mem_entry)
            first_block_mem_entry->last = mme;
@@ -212,6 +215,7 @@ void * _BlockHeapAlloc (BlockHeap *bh)
          if (line > 0)
            strncpy_irc(mme->file, file, 50)[49] = 0;
          mme->line = line;
+         assert(mme->next != mme);
          return (void*)(((char *)mme)+sizeof(MemoryEntry));
        }
 #else
@@ -256,6 +260,8 @@ void * _BlockHeapAlloc (BlockHeap *bh)
 #ifdef MEMDEBUG
            {
             MemoryEntry *mme = (MemoryEntry*)ret;
+            assert(mme->next != mme);
+            mme->last = NULL;
             mme->next = first_block_mem_entry;
             if (first_block_mem_entry)
               first_block_mem_entry->last = mme;
@@ -265,6 +271,7 @@ void * _BlockHeapAlloc (BlockHeap *bh)
             if (line > 0)
               strncpy_irc(mme->file, file, 50)[49] = 0;
             mme->line = line;
+            assert(mme->next != mme);
             ret += sizeof(MemoryEntry);
            }
 #endif
@@ -315,12 +322,14 @@ int _BlockHeapFree(BlockHeap *bh, void *ptr)
    ptr -= sizeof(MemoryEntry);
    {
     MemoryEntry *mme = (MemoryEntry*)ptr;
+    assert(mme->next != mme);
     if (mme->last)
       mme->last->next = mme->next;
     else
       first_block_mem_entry = mme->next;
     if (mme->next)
       mme->next->last = mme->last;
+    assert(mme->next != mme);
    }
 #endif
    for (walker = bh->base; walker != NULL; walker = walker->next)
