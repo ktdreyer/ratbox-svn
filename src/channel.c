@@ -2020,17 +2020,19 @@ void set_channel_mode(struct Client *cptr,
 	    {
               if (len + 2 >= MODEBUFLEN)
 		break;
+              if (!(chptr->mode.mode & MODE_HIDEOPS))
+                sync_channel_oplists(chptr, 1);
               chptr->mode.mode |= MODE_HIDEOPS;
               *mbufw_aops++ = '+';
               *mbufw_aops++ = 'a';
               len += 2;
-              sync_channel_oplists(chptr, 1);
 	    }
 	  else
 	    {
 	      if (len + 2 >= MODEBUFLEN)
 		break;
-	      
+	      if (chptr->mode.mode & MODE_HIDEOPS)
+                sync_channel_oplists(chptr, 0);
 	      chptr->mode.mode &= ~MODE_HIDEOPS;
 	      *mbufw_aops++ = '-';
 	      *mbufw_aops++ = 'a';
