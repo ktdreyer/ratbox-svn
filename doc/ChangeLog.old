@@ -1,3 +1,19 @@
+leeh        2002/06/09 08:03:28 EDT	(20020609_1)
+
+  Modified files:
+    contrib              README temp-dline.diff 
+  Log:
+  - updates to my temp-dline patch, itll now split tdlines/tklines into
+    four lists, those to check every minute, hour, day, week - which should
+    make them more efficient and help to cope with the demand for longer
+    tklines.
+  
+  Revision  Changes    Path
+  1.19      +2 -1      ircd-hybrid-7/contrib/README
+  1.4       +257 -77   ircd-hybrid-7/contrib/temp-dline.diff
+
+
+
 androsyn    2002/06/08 20:22:30 EDT	(20020609_0)
 
   Modified files:
