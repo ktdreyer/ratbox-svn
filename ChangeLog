@@ -1,3 +1,15 @@
+androsyn    2002/08/22 16:06:41 EDT	(20020822_8)
+
+  Modified files:
+    src                  parse.c 
+  Log:
+  Revert that last change
+  
+  Revision  Changes    Path
+  7.143     +2 -5      ircd-ratbox/src/parse.c
+
+
+
 androsyn    2002/08/22 15:57:38 EDT	(20020822_7)
 
   Modified files:
