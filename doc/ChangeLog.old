@@ -1,3 +1,19 @@
+*** 20011128_6 by jdc
+* include/rsa.h:
+  - Remove #include <openssl/rsa.h>.  #include in include files == yuck.
+* modules/m_cryptlink.c:
+  - Re-order #include statements, particularly rsa.h being included BEFORE
+    <openssl/rsa.h>
+  - Remove #include for <openssl/bio.h> and <openssl/pem.h>.  FYI, the
+    pem.h include breaks a lot of things due to OpenSSL's include structure
+    being a gigantic mess.
+* src/s_serv.c
+  - Same as modules/m_cryptlink.c, for the most part.
+* src/ircd.c
+  - Tinker with the pid file writing stuff.  Made it an unsigned int, vs.
+    just an int.  Little more verbose if fbputs() fails too.
+
+
 *** 20011128_5 by db
 - This re-adds remote KNOCK capability in the same way it was done in h6.
   Its not a good way of doing it. There should be a KNOCK CAPAB for h7 servers
