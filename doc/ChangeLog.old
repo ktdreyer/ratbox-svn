@@ -1,3 +1,23 @@
+androsyn    2002/05/26 17:19:10 EDT	(20020526_9)
+
+  Modified files:        (Branch: WIN32_WIP)
+    include              fdlist.h 
+    src                  io_unix.c io_win32.c linebuf.c listener.c 
+                         s_auth.c s_bsd_select.c 
+  Log:
+  Yet some more IO changes :)
+  
+  Revision  Changes    Path
+  7.25.2.3  +1 -2      ircd-hybrid-7/include/fdlist.h
+  1.1.2.4   +60 -26    ircd-hybrid-7/src/io_unix.c
+  1.1.2.3   +43 -16    ircd-hybrid-7/src/io_win32.c
+  7.81.2.2  +3 -6      ircd-hybrid-7/src/linebuf.c
+  7.67.2.3  +1 -1      ircd-hybrid-7/src/listener.c
+  7.95.2.3  +6 -9      ircd-hybrid-7/src/s_auth.c
+  7.26.2.2  +22 -24    ircd-hybrid-7/src/s_bsd_select.c
+
+
+
 androsyn    2002/05/26 16:13:18 EDT	(20020526_8)
 
   Modified files:        (Branch: WIN32_WIP)
