@@ -1,3 +1,7 @@
+*** 20010505_6 by androsyn
+Try setting the delay rate for the poll idleclient to 0 like the rest of the poll() stuff is...
+
+
 *** 20010505_5 by androsyn
 Added support for statically linked modules within autoconf.  Use
 ./configure --disable-shared-modules to get statically linked ones...
