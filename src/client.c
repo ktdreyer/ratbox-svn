@@ -206,7 +206,6 @@ free_client(struct Client *client_p)
 	assert(NULL != client_p);
 	assert(&me != client_p);
 
-	free_local_client(client_p);
 	BlockHeapFree(client_heap, client_p);
 }
 
