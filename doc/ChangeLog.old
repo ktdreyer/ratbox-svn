@@ -1,3 +1,9 @@
+*** 20001215_12 by db
+- removed unused variables found with -Wunused
+- removed an extra space in parse.c
+
+
+
 *** 20001215_11 by db
 - missing clean: target in Makefile.in for doc
 
