@@ -1,3 +1,9 @@
+*** 20010129_3 by db
+- removed all reference to CAP_DE its GONE GONE GONE yay
+  removed modebuf_de pbuf_de etc.
+
+
+
 *** 20010129_2 by wcampbel
 Minor documentation cleanup
 
