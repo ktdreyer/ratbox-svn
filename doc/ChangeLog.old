@@ -1,3 +1,9 @@
+*** 20010702_8 by androsyn
+Fixes EO's bug with recursive CNAMEs.  And just for the record, I'd like to
+note that this sucks, bad.  Whoever thought up CNAMEs should be shot..dead
+
+
+
 *** 20010702_7 by androsyn
 Fixed buglet where we print the pid before fork() not after fork().
 
