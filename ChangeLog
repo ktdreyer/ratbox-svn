@@ -1,3 +1,15 @@
+androsyn    2003/10/15 14:30:35 EDT	(20031015_0)
+
+  Modified files:
+    src                  messages.tab 
+  Log:
+  Update WRONGPONG numeric
+  
+  Revision  Changes    Path
+  7.101     +1 -1      ircd-ratbox/src/messages.tab
+
+
+
 leeh        2003/10/14 17:22:07 EDT	(20031014_2)
 
   Modified files:
