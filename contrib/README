@@ -5,3 +5,5 @@ hybrid tree.
 m_clearchan.c - CLEARCHAN - clear a channel of all users and lock modes
 m_hash.c - HASH - The old hash table debugging code, look at README.HASH
 m_jupe.c - JUPE - Jupe a server, this is as of yet unfinished
+m_opme.c - OPME - op yourself on an opless channel
+m_nickinfo.c - NICKINFO - provide info on a nick, for debugging purposes.
