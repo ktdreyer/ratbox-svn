@@ -43,7 +43,7 @@ static void ms_cburst(struct Client*, struct Client*, int, char**);
 
 struct Message cburst_msgtab = {
   "CBURST", 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0L,
-  {m_unregistered, m_error, ms_cburst, m_error}
+  {m_unregistered, m_ignore, ms_cburst, m_ignore}
 };
 #ifndef STATIC_MODULES
 void
