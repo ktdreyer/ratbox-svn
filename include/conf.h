@@ -77,7 +77,7 @@ struct conf_oper
 extern struct _config_file config_file;
 extern dlink_list conf_server_list;
 extern dlink_list conf_oper_list;
-extern struct FileBuf *conf_fbfile_in;
+extern FILE *conf_fbfile_in;
 
 extern void conf_parse(int cold);
 

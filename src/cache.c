@@ -11,7 +11,6 @@
 #include "tools.h"
 #include "balloc.h"
 #include "cache.h"
-#include "fileio.h"
 #include "io.h"
 
 static BlockHeap *cachefile_heap = NULL;
@@ -47,13 +46,13 @@ init_cache(void)
 struct cachefile *
 cache_file(const char *filename, const char *shortname)
 {
-	FBFILE *in;
+	FILE *in;
 	struct cachefile *cacheptr;
 	struct cacheline *lineptr;
 	char line[BUFSIZE];
 	char *p;
 
-	if((in = fbopen(filename, "r")) == NULL)
+	if((in = fopen(filename, "r")) == NULL)
 		return NULL;
 
 	cacheptr = BlockHeapAlloc(cachefile_heap);
@@ -62,7 +61,7 @@ cache_file(const char *filename, const char *shortname)
 	strlcpy(cacheptr->name, shortname, sizeof(cacheptr->name));
 
 	/* cache the file... */
-	while(fbgets(line, sizeof(line), in) != NULL)
+	while(fgets(line, sizeof(line), in) != NULL)
 	{
 		if((p = strchr(line, '\n')) != NULL)
 			*p = '\0';
@@ -78,7 +77,7 @@ cache_file(const char *filename, const char *shortname)
 			dlink_add_tail_alloc(emptyline, &cacheptr->contents);
 	}
 
-	fbclose(in);
+	fclose(in);
 	return cacheptr;
 }
 

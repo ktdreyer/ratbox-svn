@@ -9,7 +9,6 @@
 #include "stdinc.h"
 #include "rserv.h"
 #include "conf.h"
-#include "fileio.h"
 #include "tools.h"
 #include "client.h"
 #include "service.h"
@@ -27,7 +26,7 @@ extern char linebuf[];
 extern char conffilebuf[BUFSIZE + 1];
 int scount = 0;                 /* used by yyparse(), etc */
 
-FBFILE *conf_fbfile_in;
+FILE *conf_fbfile_in;
 extern char yytext[];
 
 static void
@@ -83,7 +82,7 @@ conf_parse(int cold)
 	struct client *target_p;
 	dlink_node *ptr;
 
-        if((conf_fbfile_in = fbopen(CONF_PATH, "r")) == NULL)
+        if((conf_fbfile_in = fopen(CONF_PATH, "r")) == NULL)
 	{
 		if(!cold)
 		{
@@ -117,7 +116,7 @@ conf_parse(int cold)
 		}
 	}
 			
-        fbclose(conf_fbfile_in);
+        fclose(conf_fbfile_in);
 }
 
 void
@@ -226,7 +225,7 @@ conf_fbgets(char *lbuf, int max_size)
 {
 	char *buff;
 
-	if((buff = fbgets(lbuf, max_size, conf_fbfile_in)) == NULL)
+	if((buff = fgets(lbuf, max_size, conf_fbfile_in)) == NULL)
 		return (0);
 
 	return (strlen(lbuf));

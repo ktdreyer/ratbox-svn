@@ -28,7 +28,6 @@
 #include "log.h"
 #include "c_init.h"
 #include "service.h"
-#include "fileio.h"
 #include "balloc.h"
 #include "cache.h"
 #include "newconf.h"
@@ -82,13 +81,13 @@ setup_corefile(void)
 static void
 check_pidfile(void)
 {
-	FBFILE *fb;
+	FILE *fb;
 	char buf[32];
 	pid_t filepid;
 
-	if((fb = fbopen(PID_PATH, "r")) != NULL)
+	if((fb = fopen(PID_PATH, "r")) != NULL)
 	{
-		if(fbgets(buf, 20, fb) != NULL && errno != ENOENT)
+		if(fgets(buf, 20, fb) != NULL && errno != ENOENT)
 		{
 			filepid = atoi(buf);
 			if(!kill(filepid, 0))
@@ -98,25 +97,25 @@ check_pidfile(void)
 			}
 		}
 
-		fbclose(fb);
+		fclose(fb);
 	}
 }
 
 static void
 write_pidfile(void)
 {
-	FBFILE *fb;
+	FILE *fb;
 	char buf[32];
 	
-	if((fb = fbopen(PID_PATH, "w")) != NULL)
+	if((fb = fopen(PID_PATH, "w")) != NULL)
 	{
 		snprintf(buf, sizeof(buf), "%u\n", (unsigned int) getpid());
 
-		if(fbputs(buf, fb) == -1)
+		if(fputs(buf, fb) == -1)
 			slog("ERR: Error writing to pid file %s (%s)",
 			     PID_PATH, strerror(errno));
-
-		fbclose(fb);
+		fflush(fb);
+		fclose(fb);
 	}
 	else
 		slog("ERR: Error opening pid file %s", PID_PATH);

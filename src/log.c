@@ -8,11 +8,10 @@
  */
 #include "stdinc.h"
 #include "rserv.h"
-#include "fileio.h"
 #include "log.h"
 #include "io.h"
 
-static FBFILE *logfile;
+static FILE *logfile;
 
 void
 init_log(void)
@@ -23,14 +22,14 @@ init_log(void)
 void
 open_logfile(void)
 {
-	logfile = fbopen(LOG_PATH, "a");
+	logfile = fopen(LOG_PATH, "a");
 }
 
 void
 close_logfile(void)
 {
 	if(logfile != NULL)
-		fbclose(logfile);
+		fclose(logfile);
 }
 
 static const char *
@@ -64,5 +63,6 @@ slog(const char *format, ...)
 	va_end(args);
 
 	snprintf(buf2, sizeof(buf2), "%s %s\n", smalldate(), buf);
-	fbputs(buf2, logfile);
+	fputs(buf2, logfile);
+	fflush(logfile);
 }

@@ -31,7 +31,6 @@ SRCS = 			\
 	client.c	\
 	conf.c		\
 	event.c		\
-	fileio.c	\
 	hook.c		\
 	io.c		\
 	log.c		\

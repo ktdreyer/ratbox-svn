@@ -33,7 +33,6 @@
 #include "config.h"
 #include "rserv.h"
 #include "log.h"
-#include "fileio.h"
 #include "newconf.h"
 #include "conf.h"
 
@@ -69,7 +68,7 @@ char conffile_stack[MAX_INCLUDE_DEPTH][BUFSIZE];
 char conffilebuf[BUFSIZE+1];
 char *current_file = conffilebuf;
 
-FBFILE *inc_fbfile_in[MAX_INCLUDE_DEPTH];
+FILE *inc_fbfile_in[MAX_INCLUDE_DEPTH];
 
 char linebuf[512];
 
@@ -196,9 +195,9 @@ void cinclude(void)
     conf_report_error("Includes nested too deep (max is %d)", MAX_INCLUDE_DEPTH);
   else
   {
-    FBFILE *tmp_fbfile_in;
+    FILE *tmp_fbfile_in;
     
-    tmp_fbfile_in = fbopen(c, "r");
+    tmp_fbfile_in = fopen(c, "r");
     
     if (tmp_fbfile_in == NULL)
     {
@@ -207,7 +206,7 @@ void cinclude(void)
       char fnamebuf[BUFSIZE];
 
       snprintf(fnamebuf, sizeof(fnamebuf), "%s/%s", ETCPATH, c);
-      tmp_fbfile_in = fbopen(fnamebuf, "r");
+      tmp_fbfile_in = fopen(fnamebuf, "r");
 #endif
       /* wasnt found there either.. error. */
       if(tmp_fbfile_in == NULL)
@@ -231,7 +230,7 @@ void cinclude(void)
 int ieof(void)
 {
   if (include_stack_ptr)
-    fbclose(conf_fbfile_in);
+    fclose(conf_fbfile_in);
   if (--include_stack_ptr < 0)
   {
     /* We will now exit the lexer - restore init values if we get /rehash
