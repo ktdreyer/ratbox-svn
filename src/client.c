@@ -137,8 +137,10 @@ struct Client* make_client(struct Client* from)
 
       client_p->localClient = localClient;
        
+      client_p->localClient->fd = -1;
       client_p->localClient->ctrlfd = -1;
 #ifndef HAVE_SOCKETPAIR
+      client_p->localClient->fd_r = -1;
       client_p->localClient->ctrlfd_r = -1;
 #endif      
       /* as good a place as any... */
