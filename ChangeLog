@@ -1,3 +1,21 @@
+leeh        2005/02/24 14:53:04 EST	(20050224_3)
+
+  Modified files:
+    include              monitor.h 
+    modules              m_monitor.c 
+    src                  ircd.c monitor.c 
+  Log:
+  - call init_monitor() on startup
+  - add in support for adding/deleting/listing monitor entries
+  
+  Revision  Changes    Path
+  7.2       +3 -1      ircd-ratbox/include/monitor.h
+  1.2       +155 -1    ircd-ratbox/modules/m_monitor.c
+  7.374     +2 -0      ircd-ratbox/src/ircd.c
+  7.3       +15 -4     ircd-ratbox/src/monitor.c
+
+
+
 leeh        2005/02/23 21:20:10 EST	(20050224_2)
 
   Modified files:
