@@ -1,3 +1,7 @@
+*** 20010925_2 by leeh
+- you cannot check remote servers for capabs
+
+
 *** 20010925_1 by a1kmm
 - Fixed up a few more things with configure.
 - Made some assumptions which should always be valid to optimise linked
