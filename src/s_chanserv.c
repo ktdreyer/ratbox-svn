@@ -562,6 +562,14 @@ load_channel_db(void)
 }
 
 static void
+update_chreg_flags(struct chan_reg *chreg_p)
+{
+	loc_sqlite_exec(NULL, "UPDATE channels SET flags = %d "
+			"WHERE chname = %Q",
+			chreg_p->flags, chreg_p->name);
+}
+
+static void
 write_member_db_entry(struct member_reg *reg_p)
 {
 	loc_sqlite_exec(NULL, "INSERT INTO members VALUES(%Q, %Q, %Q, %u, 0, 0)",
@@ -883,6 +891,18 @@ h_chanserv_join(void *v_chptr, void *v_members)
 			if(mreg_p)
 				mreg_p->bants = chreg_p->bants;
 
+			/* if theyve just created the channel as theyve
+			 * joined.. we need to make sure chanserv is in
+			 * there
+			 */
+			if(dlink_list_length(&chptr->users) == 1 &&
+			   !dlink_find(chanserv_p, &chptr->services))
+			{
+				chreg_p->flags |= CS_FLAGS_AUTOJOIN;
+				join_service(chanserv_p, chptr->name, NULL);
+				update_chreg_flags(chreg_p);
+			}
+
 			if(is_opped(member_p))
 				sendto_server(":%s MODE %s -o+b %s %s",
 					chanserv_p->name, chptr->name,
@@ -913,6 +933,15 @@ h_chanserv_join(void *v_chptr, void *v_members)
 			    (!mreg_p || mreg_p->suspend ||
 			     mreg_p->level < S_C_OP)))
 			{
+				/* put services in if we're deopping only user */
+				if(dlink_list_length(&chptr->users) == 1 &&
+				   !dlink_find(chanserv_p, &chptr->services))
+				{
+					chreg_p->flags |= CS_FLAGS_AUTOJOIN;
+					join_service(chanserv_p, chptr->name, NULL);
+					update_chreg_flags(chreg_p);
+				}
+
 				sendto_server(":%s MODE %s -o %s",
 					chanserv_p->name, chptr->name,
 					member_p->client_p->name);
@@ -1995,9 +2024,7 @@ s_chan_set(struct client *client_p, char *parv[], int parc)
 				(chreg_p->flags & CS_FLAGS_AUTOJOIN) ?
 				 "ON" : "OFF");
 
-		loc_sqlite_exec(NULL, "UPDATE channels SET flags = %d "
-				"WHERE chname = %Q",
-				chreg_p->flags, chreg_p->name);
+		update_chreg_flags(chreg_p);
 		return 1;
 	}
 	else if(!strcasecmp(parv[1], "WARNOVERRIDE"))
@@ -2022,9 +2049,7 @@ s_chan_set(struct client *client_p, char *parv[], int parc)
 				(chreg_p->flags & CS_FLAGS_WARNOVERRIDE) ?
 				  "ON" : "OFF");
 
-		loc_sqlite_exec(NULL, "UPDATE channels SET flags = %d "
-				"WHERE chname = %Q",
-				chreg_p->flags, chreg_p->name);
+		update_chreg_flags(chreg_p);
 		return 1;
 	}
 	else if(!strcasecmp(parv[1], "CREATEMODES"))
