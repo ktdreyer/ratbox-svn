@@ -1,3 +1,15 @@
+db          2001/12/31 07:54:37 EST	(20011231_2)
+
+  Modified files:
+    src                  s_serv.c 
+  Log:
+  - trivial cosmetic change. dumb spacing
+  
+  Revision  Changes    Path
+  7.231     +1 -1      ircd-hybrid-7/src/s_serv.c
+
+
+
 a1kmm       2001/12/31 06:13:42 EST	(20011231_1)
 
   Modified files:
