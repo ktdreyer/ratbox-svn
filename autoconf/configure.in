@@ -182,9 +182,9 @@ dnl check for socketpair
 AC_CHECK_FUNCS(socketpair)
 
 dnl check for snprintf
-AC_CHECK_FUNC(snprintf, have_snprintf=1)
+AC_CHECK_FUNCS(snprintf, [have_snprintf=1])
 dnl check for vsnprintf
-AC_CHECK_FUNC(vsnprintf, have_vsnprintf=1)
+AC_CHECK_FUNCS(vsnprintf, [have_vsnprintf=1])
 dnl Tell src/Makefile.in if we need its snprintf.c
 if test -z "$have_snprintf"; then
 	SNPRINTF_C="snprintf.c"
