@@ -120,11 +120,11 @@ int m_links(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	    {
 	      if(&me == acptr)
 		sendto_one(sptr, form_str(RPL_LINKS),
-			   me.name, parv[0], acptr->name, "",
+			   me.name, parv[0], acptr->name, me.name,
 			   0, p);
 	      else
 		sendto_one(sptr, form_str(RPL_LINKS),
-			   me.name, parv[0], acptr->name, "",
+			   me.name, parv[0], acptr->name, me.name,
 			   1, p);
 	    }
 	  else

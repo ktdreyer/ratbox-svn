@@ -817,7 +817,7 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
               if(!IsOper(sptr))
                 break;
 
-              sptr->umodes &= ~FLAGS_OPER;
+              sptr->umodes &= ~(FLAGS_OPER|FLAGS_ADMIN);
 
               Count.oper--;
 
@@ -878,11 +878,11 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
               if (what == MODE_ADD)
                 sptr->umodes |= flag;
               else
-                sptr->umodes &= ~flag;  
+		sptr->umodes &= ~flag;  
             }
           else
             {
-              if ( MyConnect(sptr))
+              if (MyConnect(sptr))
                 badflag = YES;
             }
           break;
