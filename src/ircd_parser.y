@@ -1275,7 +1275,7 @@ general_item:       general_failed_oper_notice | general_show_failed_oper_id |
                     general_fname_userlog | general_fname_operlog |
                     general_fname_foperlog | general_oper_only_umodes |
                     general_max_targets | general_links_notice |
-                  general_links_delay |
+                    general_links_delay |
                     error
 
 
@@ -1504,31 +1504,31 @@ general_glines: GLINES '=' TYES ';'
   } ;
 
 general_message_locale: MESSAGE_LOCALE '=' QSTRING ';'
-{
-        char langenv[BUFSIZE];
-        ircsprintf(langenv, "LANGUAGE=%s", yyval.string);
-        putenv(langenv);
-} ;
+  {
+    char langenv[BUFSIZE];
+    ircsprintf(langenv, "LANGUAGE=%s", yylval.string);
+    putenv(langenv);
+  } ;
 
 general_gline_time: GLINE_TIME '=' NUMBER ';'
-{
-	ConfigFileEntry.gline_time = yylval.number;
-} ;
+  {
+    ConfigFileEntry.gline_time = yylval.number;
+  } ;
 
 general_idletime: IDLETIME '=' NUMBER ';'
-{
-        ConfigFileEntry.idletime = yylval.number;
-} ;
+  {
+    ConfigFileEntry.idletime = yylval.number;
+  } ;
 
 general_dots_in_ident: DOTS_IN_IDENT '=' NUMBER ';'
-{
-        ConfigFileEntry.dots_in_ident = yylval.number;
-} ;
+  {
+    ConfigFileEntry.dots_in_ident = yylval.number;
+  } ;
 
 general_maximum_links: MAXIMUM_LINKS '=' NUMBER ';'
-{
-  ConfigFileEntry.maximum_links = yylval.number;
-} ;
+  {
+    ConfigFileEntry.maximum_links = yylval.number;
+  } ;
 
 general_hide_server: HIDESERVER '=' TYES ';'
   {
@@ -1541,15 +1541,15 @@ general_hide_server: HIDESERVER '=' TYES ';'
   } ;
 
 general_max_targets: MAX_TARGETS '=' NUMBER ';'
-{
-	ConfigFileEntry.max_targets = yylval.number;
-} ;
+  {
+    ConfigFileEntry.max_targets = yylval.number;
+  } ;
 
 general_oper_only_umodes: OPER_ONLY_UMODES 
   {
     ConfigFileEntry.oper_only_umodes = 0;
   }
-  '='  umode_items ';'
+  '='  umode_items ';' ;
 
 umode_items:	umode_items ',' umode_item |
   umode_item 
@@ -1598,22 +1598,22 @@ umode_item:	T_BOTS
   {
     ConfigFileEntry.oper_only_umodes |= FLAGS_OPERWALL;
   } 
-| T_SERVNOTICE
-{
-	ConfigFileEntry.oper_only_umodes |= FLAGS_SERVNOTICE;
-}
-| T_INVISIBLE
-{
-	ConfigFileEntry.oper_only_umodes |= FLAGS_INVISIBLE;
-}
-| T_WALLOP
-{
-	ConfigFileEntry.oper_only_umodes |= FLAGS_WALLOP;
-}
-| T_CALLERID
-{
-	ConfigFileEntry.oper_only_umodes |= FLAGS_CALLERID;
-} ;
+              | T_SERVNOTICE
+  {
+    ConfigFileEntry.oper_only_umodes |= FLAGS_SERVNOTICE;
+  }
+              | T_INVISIBLE
+  {
+    ConfigFileEntry.oper_only_umodes |= FLAGS_INVISIBLE;
+  }
+              | T_WALLOP
+  {
+    ConfigFileEntry.oper_only_umodes |= FLAGS_WALLOP;
+  }
+              | T_CALLERID
+  {
+    ConfigFileEntry.oper_only_umodes |= FLAGS_CALLERID;
+  } ;
 
 general_links_notice: LINKS_NOTICE '=' TYES ';'
   {

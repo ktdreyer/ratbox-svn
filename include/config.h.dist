@@ -378,6 +378,10 @@
 #define ANTI_SPAM_EXIT_MESSAGE_TIME 300
 
 /*
+ * Links rehash delay
+ */
+#define LINKS_DELAY_DEFAULT 300
+/*
  * If the OS has SOMAXCONN use that value, otherwise
  * Use the value in HYBRID_SOMAXCONN for the listen(); backlog
  * try 5 or 25. 5 for AIX and SUNOS, 25 should work better for other OS's
