@@ -11,6 +11,8 @@ struct cachefile;
 				for(i = 0; i < m; i++)
 #define SCMD_END		} while(0)
 
+#define OPER_NAME(conn_p, client_p) ((conn_p) ? (conn_p)->name : (client_p)->user->oper->name)
+
 struct service_command
 {
         const char *cmd;

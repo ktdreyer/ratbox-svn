@@ -20,17 +20,16 @@
 
 static struct client *global_p;
 
-static int u_global_netmsg(struct client *, struct lconn *, const char **, int);
-static int s_global_netmsg(struct client *, struct lconn *, const char **, int);
+static int o_global_netmsg(struct client *, struct lconn *, const char **, int);
 
 static struct service_command global_command[] =
 {
-	{ "NETMSG",	&s_global_netmsg, 1, NULL, 1, 0L, 0, 0, CONF_OPER_GLOBAL, 0 }
+	{ "NETMSG",	&o_global_netmsg, 1, NULL, 1, 0L, 0, 0, CONF_OPER_GLOBAL, 0 }
 };
 
 static struct ucommand_handler global_ucommand[] =
 {
-	{ "netmsg", u_global_netmsg, CONF_OPER_GLOBAL, 1, 1, NULL },
+	{ "netmsg", o_global_netmsg, CONF_OPER_GLOBAL, 1, 1, NULL },
 	{ "\0", NULL, 0, 0, 0, NULL }
 };
 
@@ -52,7 +51,7 @@ init_s_global(void)
 }
 
 static int
-u_global_netmsg(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+o_global_netmsg(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct client *target_p;
 	dlink_node *ptr;
@@ -68,26 +67,8 @@ u_global_netmsg(struct client *client_p, struct lconn *conn_p, const char *parv[
 				global_p->name, target_p->name, data);
 	}
 
-	slog(global_p, 1, "%s - NETMSG %s", conn_p->name, data);
-	return 0;
-}
-
-static int
-s_global_netmsg(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
-{
-	struct client *target_p;
-	dlink_node *ptr;
-	const char *data;
-
-	data = rebuild_params(parv, parc, 0);
-
-	DLINK_FOREACH(ptr, server_list.head)
-	{
-		target_p = ptr->data;
-
-		sendto_server(":%s NOTICE $$%s :[NETWORK MESSAGE] %s",
-				global_p->name, target_p->name, data);
-	}
+	slog(global_p, 1, "%s - NETMSG %s", 
+		OPER_NAME(conn_p, client_p), data);
 
 	return 0;
 }

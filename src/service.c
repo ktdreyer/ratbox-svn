@@ -92,6 +92,7 @@ add_service(struct service_handler *service)
 	client_p->service->command_size = service->command_size;
         client_p->service->ucommand = service->ucommand;
         client_p->service->stats = service->stats;
+	client_p->service->loglevel = 1;
 
         client_p->service->flood_max = service->flood_max;
         client_p->service->flood_max_ignore = service->flood_max_ignore;
