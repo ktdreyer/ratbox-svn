@@ -1,3 +1,7 @@
+*** 20010831_6 by habeeb
+Small bug fix in eventAdd()
+
+
 *** 20010831_5 by leeh
 - removed some debug stuff from write_links_file()
 - changed stats notice back to a letter.. else you can get some "original"
