@@ -1,3 +1,8 @@
+*** 20010309_1 by a1kmm
+- Some basic support for persistant clients(usermode +p) as well as a few general fixes here and there.
+  It is late here so please forgive my bugs which are most probably there.
+
+
 *** 20010308_3 by toot
 removed some more ugly %lu's
 memory.c needed restart.h
