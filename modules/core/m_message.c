@@ -151,6 +151,12 @@ static void
 m_privmsg(struct Client *client_p,
           struct Client *source_p, int parc, char *parv[])
 {
+  /* servers have no reason to send privmsgs, yet sometimes there is cause
+   * for a notice.. (for example remote kline replies) --fl_
+   */
+  if (!IsPerson(source_p))
+    return;
+
   m_message(PRIVMSG, "PRIVMSG", client_p, source_p, parc, parv);
 }
 
@@ -175,12 +181,6 @@ m_message(int p_or_n,
           struct Client *source_p, int parc, char *parv[])
 {
   int i;
-
-  /* servers have no reason to send privmsgs, yet sometimes there is cause
-   * for a notice.. (for example remote kline replies) --fl_
-   */
-  if (!IsPerson(source_p) && p_or_n != NOTICE)
-    return;
 
   if (parc < 2 || *parv[1] == '\0')
   {
