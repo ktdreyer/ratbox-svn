@@ -1,3 +1,17 @@
+*** 20010225_24 by jdc
+* Here we go again.  ;-) Fixes to make /STATS P not show the same
+  listening port twice after a /REHASH, and make things all clean
+  and happy on BSD:
+
+  listener.c: In function `inetport':
+  listener.c:194: invalid lvalue in assignment
+  listener.c: In function `find_listener':
+  listener.c:247: warning: passing arg 1 of `memcmp' makes pointer from integer without a cast
+  listener.c:247: warning: passing arg 2 of `memcmp' makes pointer from integer without a cast
+
+
+
+
 *** 20010225_23 by androsyn
 Uncommentted fixed code
 
