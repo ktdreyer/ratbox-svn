@@ -178,61 +178,63 @@ add_user_to_channel(struct Channel *chptr, struct Client *who, int flags)
 int
 remove_user_from_channel(struct Channel *chptr, struct Client *who)
 {
+  int x;
   dlink_node *ptr;
-  dlink_node *next_ptr;
-
-  if ((ptr = find_user_link(&chptr->peons, who)))
-    dlinkDelete(ptr, &chptr->peons);
-  else if ((ptr = find_user_link(&chptr->chanops, who)))
-    dlinkDelete(ptr, &chptr->chanops);
+  dlink_list *loclists[] = {
+        &chptr->locpeons,   
+        &chptr->locvoiced,  
+        &chptr->locchanops, 
 #ifdef REQUIRE_OANDV
-  else if ((ptr = find_user_link(&chptr->chanops_voiced, who)))
-    dlinkDelete(ptr, &chptr->chanops_voiced);
+        &chptr->locchanops_voiced,
 #endif
-  else if ((ptr = find_user_link(&chptr->voiced, who)))
-    dlinkDelete(ptr, &chptr->voiced);
-  else 
-  {
-    assert(0 == 1); /* This ain't supposed to happen */
-  }
+        NULL
+  };
 
-  free_dlink_node(ptr);
-
-  if((ptr = find_user_link(&chptr->deopped, who)))
-  {
-    dlinkDelete(ptr, &chptr->deopped);
-    free_dlink_node(ptr);
-  }
-
-  if (MyClient(who))
-  {
-    if ((ptr = find_user_link(&chptr->locpeons, who)))
-      dlinkDelete(ptr, &chptr->locpeons);
-    else if ((ptr = find_user_link(&chptr->locchanops, who)))
-      dlinkDelete(ptr, &chptr->locchanops);
-    else if ((ptr = find_user_link(&chptr->locvoiced, who)))
-      dlinkDelete(ptr, &chptr->locvoiced);
+  dlink_list *lists[] = {
+        &chptr->peons,   
+        &chptr->voiced,  
+        &chptr->chanops,
 #ifdef REQUIRE_OANDV
-    else if ((ptr = find_user_link(&chptr->locchanops_voiced, who)))
-      dlinkDelete(ptr, &chptr->locchanops_voiced);
+        &chptr->chanops_voiced,
 #endif
-    else
-      assert(1 == 0);
-
-    free_dlink_node(ptr);
+        NULL
+  };
+  
+  
+  if(MyClient(who))
+  {
+    for(x = 0; loclists[x] != NULL; x++)
+    {
+       ptr = find_user_link(loclists[x], who);
+       if(ptr != NULL)
+       {
+          dlinkDelete(ptr, loclists[x]);
+          free_dlink_node(ptr);
+          break;
+       }
+    }
   }
+
+  for(x = 0; lists[x] != NULL; x++)
+  {
+     ptr = find_user_link(lists[x], who);
+     if(ptr != NULL)
+     {
+        dlinkDelete(ptr, lists[x]);
+        free_dlink_node(ptr);
+        break;
+     }
+  }
+
+  ptr = dlinkFindDelete(&chptr->deopped, who);
+  if(ptr != NULL)
+    free_dlink_node(ptr);
 
   chptr->users_last = CurrentTime;
 
-  DLINK_FOREACH_SAFE(ptr, next_ptr, who->user->channel.head)
-  {
-    if (ptr->data == chptr)
-    {
-      dlinkDelete(ptr, &who->user->channel);
-      free_dlink_node(ptr);
-      break;
-    }
-  }
+  ptr = dlinkFindDelete(&who->user->channel, chptr);
+  if(ptr != NULL)
+     free_dlink_node(ptr);
 
   who->user->joined--;
 

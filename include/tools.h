@@ -46,6 +46,9 @@ struct _dlink_list {
 };
 
 void
+dlinkMoveNode(dlink_node *m, dlink_list *oldlist, dlink_list *newlist);
+
+void
 dlinkAdd(void *data, dlink_node * m, dlink_list * list);
 
 void
@@ -96,6 +99,7 @@ void mem_frob(void *data, int len);
 
 /* Returns the list length */
 #define dlink_list_length(list) (list)->length
+#define dlink_move_list(oldlist, newlist, node)
 
 /*
  * The functions below are included for the sake of inlining
@@ -112,6 +116,34 @@ void mem_frob(void *data, int len);
  * which is mine.
  *   -- adrian
  */
+
+extern inline void
+dlinkMoveNode(dlink_node *m, dlink_list *oldlist, dlink_list *newlist)
+{
+  /* Assumption: If m->next == NULL, then list->tail == m
+   *      and:   If m->prev == NULL, then list->head == m
+   */
+  if (m->next)
+    m->next->prev = m->prev;
+  else
+    oldlist->tail = m->prev;
+
+  if (m->prev)
+    m->prev->next = m->next;
+  else
+    oldlist->head = m->next;
+  
+  m->next = newlist->head;
+  if (newlist->head != NULL)
+     newlist->head->prev = m; 
+  else if (newlist->tail == NULL)
+     newlist->tail = m;
+  newlist->head = m;
+ 
+  oldlist->length--;
+  newlist->length++;  
+}
+
 extern inline void
 dlinkAdd(void *data, dlink_node * m, dlink_list * list)
 {
