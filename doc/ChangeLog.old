@@ -1,3 +1,9 @@
+*** 20001029_5 by db
+- finally moved check_client from s_bsd.c, where it really never seemed
+  to me to belong, moved into s_conf.c 
+
+
+
 *** 20001029_4 by db
 - viconf.c modified to match hybrid-6 patch, added vimotd check
 
