@@ -1,3 +1,9 @@
+*** 20001220_9 by db
+- fixed wallops so it doesn't add the "WALLOPS" message, uneeded.
+- updated INSTALL and CIDR docs from Walter Campbell
+
+
+
 *** 20001220_8 by db
 - fixed stupid in m_wallops.c it was not showing oper wallops but was
   showing server wallops
