@@ -53,6 +53,10 @@ void report_dlines(struct Client*);
 void report_exemptlines(struct Client*);
 void report_Klines(struct Client*, int);
 void report_Ilines(struct Client*);
+#ifdef IPV6
+int match_ipv6(struct irc_inaddr*, struct irc_inaddr*, int);
+#endif
+int match_ipv4(struct irc_inaddr*, struct irc_inaddr*, int);
 
 /* Hashtable stuff... */
 #define ATABLE_SIZE 0x1000

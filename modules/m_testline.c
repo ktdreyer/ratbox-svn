@@ -160,16 +160,6 @@ static void mo_testline(struct Client *client_p, struct Client *source_p,
                          port,
                          classname);
       
-              aconf = find_tkline(given_host, given_name, 0);
-              if(aconf)
-                {
-                  sendto_one(source_p,
-                     ":%s NOTICE %s :k-line name [%s] host [%s] pass [%s]",
-                             me.name, parv[0],
-                             aconf->user,
-                             aconf->host,
-                             aconf->passwd);
-                }
             }
         }
       else

@@ -1572,59 +1572,6 @@ struct ConfItem *find_kill(struct Client* client_p)
 }
 
 /*
- * find_tkline
- *
- * inputs        - hostname
- *               - username
- * output        - matching struct ConfItem or NULL
- * side effects        -
- *
- * WARNING, no sanity checking on length of name,host etc.
- * thats expected to be done by caller.... 
- *
- * XXX: Broken for IPV6
- */
-
-struct ConfItem* find_tkline(const char* host, const char* user, struct irc_inaddr *ipn)
-{
-  dlink_node *kill_node;
-  struct ConfItem *kill_ptr;
-  struct irc_inaddr ip;
-
-  if ( ipn != NULL )
-    copy_s_addr(IN_ADDR(ip), PIN_ADDR(ipn));  
-
-  for (kill_node = temporary_klines.head; kill_node; kill_node = kill_node->next)
-    {
-      kill_ptr = kill_node->data;
-      if ((kill_ptr->user && (!user || match(kill_ptr->user, user)))
-          && (kill_ptr->host && (!host || match(kill_ptr->host, host))))
-        {
-          return(kill_ptr);
-        }
-    }
-
-  if ( ipn == NULL )
-    return NULL;
-
-  for (kill_node = temporary_ip_klines.head; 
-       kill_node; kill_node = kill_node->next)
-    {
-      kill_ptr = kill_node->data;
-
-      if ((kill_ptr->user && (!user || match(kill_ptr->user, user)))
-	  && (kill_ptr->ip && (((unsigned long)IN_ADDR(&ip) &
-				kill_ptr->ip_mask) ==
-			       (unsigned long)IN_ADDR(&ip))))
-	{
-	  return(kill_ptr);
-	}
-    }
-
-  return NULL;
-}
-
-/*
  * find_is_klined()
  *
  * inputs        - hostname
@@ -1653,58 +1600,6 @@ add_temp_kline(struct ConfItem *aconf)
  dlinkAdd(aconf, kill_node, &temporary_klines);
  aconf->flags |= CONF_FLAGS_TEMPORARY;
  add_conf_by_address(aconf->host, CONF_KILL, aconf->user, aconf);
-}
-
-/* report_temp_klines
- *
- * inputs        - struct Client pointer, client to report to
- * output        - NONE
- * side effects  - NONE
- *                  
- */
-void report_temp_klines(struct Client *source_p)
-{
- show_temp_klines(source_p, &temporary_klines);
-}
-
-/* show_temp_klines
- *
- * inputs         - struct Client pointer, client to report to
- *                - dlink_list pointer, the tkline list to show
- * outputs        - NONE
- * side effects   - NONE
- */
-void
-show_temp_klines(struct Client *source_p, dlink_list *tklist)
-{
-  dlink_node *kill_node;
-  struct ConfItem *kill_list_ptr;
-  char *host;
-  char *user;
-  char *reason;
-
-  for (kill_node = tklist->head; kill_node; kill_node = kill_node->next)
-    {
-      kill_list_ptr = kill_node->data;
-
-      if (kill_list_ptr->host)
-        host = kill_list_ptr->host;
-      else
-        host = "*";
-
-      if (kill_list_ptr->user)
-        user = kill_list_ptr->user;
-      else
-        user = "*";
-
-      if (kill_list_ptr->passwd)
-        reason = kill_list_ptr->passwd;
-      else
-        reason = "No Reason";
-
-      sendto_one(source_p, form_str(RPL_STATSKLINE), me.name,
-                 source_p->name, 'k', host, user, reason);
-    }
 }
 
 /*
