@@ -1,3 +1,8 @@
+*** 20010421_4 by fl_
+- changed an assert to a simple warning.. its a bit too highly sensitive
+  to have an assert there..
+
+
 *** 20010421_3 by fl_
 - habeebs pid fix..
 
