@@ -1,3 +1,9 @@
+*** 20000102_7 by db
+- try to negotiate a non LL connect if serverMask's get all used up
+- report all serverMask's used up. That will mean a recode ;-)
+
+
+
 *** 20000102_6 by db
 - fixed a bug in m_join.c
 - cleaned up LL channel key handling
