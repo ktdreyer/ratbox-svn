@@ -313,14 +313,17 @@ vsendto_one(struct Client *to, const char *pattern, va_list args)
 } /* vsendto_one() */
 
 void
-sendto_channel_butone(struct Client *one, struct Client *from, struct Channel *chptr, 
+sendto_channel_butone(struct Client *one, struct Client *from,
+		      struct Channel *chptr, 
                       const char *pattern, ...)
 
 {
   va_list       args;
   register struct SLink *lp;
   register struct Client *acptr;
-  register int index; /* index of sentalong[] to flag client as having received message */
+  register int index; /* index of sentalong[] to flag client
+		       * as having received message
+		       */
 
   va_start(args, pattern);
 
@@ -450,7 +453,8 @@ sendto_channel_type(struct Client *one, struct Client *from, struct Channel *chp
 ** -good
 */
 void
-sendto_channel_type_notice(struct Client *from, struct Channel *chptr, int type, char *message)
+sendto_channel_type_notice(struct Client *from, struct Channel *chptr,
+			   int type, char *message)
 
 {
         register struct SLink *lp;
