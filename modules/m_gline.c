@@ -233,10 +233,9 @@ static void mo_gline(struct Client *client_p,
 			   host,
 			   reason);
 
-      /* 5 param version for hyb-7 servers */
+      /* 4 param version for hyb-7 servers */
       sendto_cap_serv_butone(CAP_GLN,
-			     NULL, ":%s GLINE %s %s %s :%s",
-			     me.name,
+			     NULL, ":%s GLINE %s %s :%s",
 			     source_p->name,
 			     user,
 			     host,
@@ -285,7 +284,9 @@ static void ms_gline(struct Client *client_p,
                      int parc,
                      char *parv[])
 {
-  struct Client *rclient_p;
+  /* These are needed for hyb6 compatibility.. if its ever removed we can
+   * just use source_p->username etc.. 
+   */
   const char *oper_nick = NULL;        /* nick of oper requesting GLINE */
   const char *oper_user = NULL;        /* username of oper requesting GLINE */
   const char *oper_host = NULL;        /* hostname of oper requesting GLINE */
@@ -294,16 +295,23 @@ static void ms_gline(struct Client *client_p,
   char *host = NULL;             /* user and host of GLINE "victim" */
   const char *reason = NULL;           /* reason for "victims" demise */
 
-  if(!IsServer(source_p))
-    return;
-
-  /* new hyb-7 gline. */ 
-  if(parc == 5)
+  /* hyb-7 style gline (post beta3) */
+  if(parc == 4 && IsPerson(source_p))
     {
+      oper_nick = parv[0];
+      oper_user = source_p->username;
+      oper_host = source_p->host;
+      oper_server = source_p->user->server;
+      user = parv[1];
+      host = parv[2];
+      reason = parv[3];
+    }
+  /* or it's a hyb-6 style */
+  else if(parc == 8)
+    {
+      struct Client *rclient_p;
+
       oper_nick = parv[1];
-      user = parv[2];
-      host = parv[3];
-      reason = parv[4];
 
       if ((rclient_p = hash_find_client(oper_nick,(struct Client *)NULL)))
         {
@@ -320,14 +328,7 @@ static void ms_gline(struct Client *client_p,
         oper_server = rclient_p->user->server;
       else
         return;
-    }
-  /* or it's a hyb-6 style */
-  else if(parc == 8)
-    {
-      oper_nick = parv[1];
-      oper_user = parv[2];
-      oper_host = parv[3];
-      oper_server = parv[4];
+
       user = parv[5];
       host = parv[6];
       reason = parv[7];      
@@ -338,9 +339,8 @@ static void ms_gline(struct Client *client_p,
 
   /* send in hyb-7 to compatable servers */
   sendto_cap_serv_butone(CAP_GLN,
-                         source_p, ":%s GLINE %s %s %s :%s",
+                         source_p, ":%s GLINE %s %s :%s",
 		         source_p->name,
-		         oper_nick,
 		         user,
 		         host,
 		         reason);
@@ -349,7 +349,6 @@ static void ms_gline(struct Client *client_p,
                            source_p, ":%s GLINE %s %s %s %s %s %s :%s",
                            source_p->name, oper_nick, oper_user, oper_host,
                            oper_server, user, host, reason);
-
 
   if (ConfigFileEntry.glines)
     {
