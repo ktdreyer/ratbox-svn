@@ -114,10 +114,9 @@ int     m_notice(struct Client *cptr,
                           int parc,
                           char *parv[])
 {
-  struct Client       *acptr;
-  char  *s;
+  struct Client *acptr;
+  char *s, *nick, *server, *host;
   struct Channel *chptr;
-  char  *nick, *server, *p, *host;
   int type=0;
 
   if (parc < 2 || *parv[1] == '\0')
@@ -151,7 +150,7 @@ int     m_notice(struct Client *cptr,
    */
 
   nick = parv[1];
-  if((p = strchr(nick,',')))
+  if((strchr(nick,',')))
     {
       sendto_one(sptr, form_str(ERR_TOOMANYTARGETS),
                      me.name, parv[0], MSG_NOTICE);
