@@ -21,17 +21,19 @@
 patricia_tree_t *dline;
 patricia_tree_t *eline;
 patricia_tree_t *kline;
-
+patricia_tree_t *iline;
 void zap_Dlines(void)
 {
 #ifdef IPV6
 	dline = New_Patricia(128);
 	eline = New_Patricia(128);	
 	kline = New_Patricia(128);
+	iline = New_Patricia(128);
 #else
 	dline = New_Patricia(32);
 	eline = New_Patricia(32);
 	kline =  New_Patricia(32);
+	iline = New_Patricia(32);
 #endif
 }
 
@@ -124,5 +126,41 @@ void report_dlines(struct Client *sptr)
 			conftype = 'D';
 		get_printable_conf(node->data, &name, &host, &pass, &user, &port, &classname);
 		sendto_one(sptr, form_str(RPL_STATSDLINE), me.name, sptr->name, conftype, host, pass);	
+	} PATRICIA_WALK_END;
+}
+
+
+struct ConfItem *match_ip_Iline(struct irc_inaddr *ip, const char *name)
+{
+	patricia_node_t *node;
+	node = match_ip(iline, ip);
+
+	if(node != NULL)
+	{
+		if(match(node->data->user, name))
+		{
+			return(node->data);
+		}
+	}
+	return(NULL);
+}
+
+
+void add_ip_Iline(struct ConfItem *conf_ptr)
+{
+	patricia_node_t *node;
+	node = make_and_lookup(iline, conf_ptr->host);
+	node->data = conf_ptr;	
+}
+
+void report_Ilines(struct Client *sptr)
+{
+	patricia_node_t *node;
+	char *name, *host, *pass, *user, *classname, conftype;
+	int port;
+	PATRICIA_WALK(iline->head, node) 
+	{
+		get_printable_conf(node->data, &name, &host, &pass, &user, &port, &classname);
+		sendto_one(sptr, form_str(RPL_STATSDLINE), me.name, sptr->name, 'I', host, pass);	
 	} PATRICIA_WALK_END;
 }
