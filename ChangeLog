@@ -1,3 +1,19 @@
+leeh        2003/09/06 09:21:01 EDT	(20030906_1)
+
+  Modified files:
+    modules              m_restart.c m_topic.c 
+    modules/core         m_die.c 
+  Log:
+  - remove an useless EmptyString() from m_topic.c
+  - minor cleanups to restart/die
+  
+  Revision  Changes    Path
+  1.40      +5 -8      ircd-ratbox/modules/core/m_die.c
+  1.40      +9 -3      ircd-ratbox/modules/m_restart.c
+  1.85      +2 -2      ircd-ratbox/modules/m_topic.c
+
+
+
 leeh        2003/09/06 08:05:46 EDT	(20030906_0)
 
   Modified files:
