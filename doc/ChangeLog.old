@@ -1,3 +1,9 @@
+*** 20001222_13 by db
+- converted all use of IsGlobalOper and IsLocalOper to IsOper
+  there is no local oper now
+
+
+
 *** 20001222_12 by db
 - removing local oper references, removing bloat...
 
