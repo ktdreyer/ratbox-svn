@@ -1,3 +1,7 @@
+*** 20010225_11 by androsyn
+Fixed another dependancy of libresolv on solaris
+
+
 *** 20010225_10 by androsyn
 Fixed stupid typo..
 
