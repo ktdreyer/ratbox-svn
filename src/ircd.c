@@ -764,7 +764,7 @@ main(int argc, char *argv[])
 	make_server(&me);
 	me.serv->up = me.name;
 	me.lasttime = me.since = me.firsttime = CurrentTime;
-	add_to_client_hash_table(me.name, &me);
+	add_to_client_hash(me.name, &me);
 
 	add_server_to_list(&me);	/* add ourselves to global_serv_list */
 

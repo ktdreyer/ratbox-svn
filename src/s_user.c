@@ -474,7 +474,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 		for (id = id_get(); find_id(id); id = id_get())
 			;
 		strcpy(source_p->user->id, id);
-		add_to_id_hash_table(id, source_p);
+		add_to_id_hash(id, source_p);
 	}
 
 	inetntop_sock(&source_p->localClient->ip, ipaddr, sizeof(ipaddr));
@@ -491,7 +491,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 	if(IsDeadorAborted(source_p))
 		return CLIENT_EXITED;
 
-	add_to_hostname_hash_table(source_p->host, source_p);
+	add_to_hostname_hash(source_p->host, source_p);
 
 	source_p->umodes |= UMODE_INVISIBLE;
 
@@ -555,7 +555,7 @@ register_remote_user(struct Client *client_p, struct Client *source_p, const cha
 	if(++Count.total > Count.max_tot)
 		Count.max_tot = Count.total;
 
-	add_to_hostname_hash_table(source_p->host, source_p);
+	add_to_hostname_hash(source_p->host, source_p);
 
 	source_p->servptr = find_server(user->server);
 

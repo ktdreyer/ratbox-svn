@@ -150,7 +150,7 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		}
 
 		/* look for the channel */
-		if((chptr = hash_find_channel(name)) != NULL)
+		if((chptr = find_channel(name)) != NULL)
 		{
 			if(IsMember(source_p, chptr))
 				return;

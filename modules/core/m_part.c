@@ -109,7 +109,7 @@ part_one_client(struct Client *client_p, struct Client *source_p, char *name, ch
 {
 	struct Channel *chptr;
 
-	if((chptr = hash_find_channel(name)) == NULL)
+	if((chptr = find_channel(name)) == NULL)
 	{
 		sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL), me.name, source_p->name, name);
 		return;

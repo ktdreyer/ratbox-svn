@@ -84,7 +84,7 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
       move_me = 1;
     }
 
-  chptr= hash_find_channel(parv[1]);
+  chptr= find_channel(parv[1]);
 
 
   if( chptr == NULL )

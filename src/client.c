@@ -1189,10 +1189,10 @@ exit_generic_client(struct Client *client_p, struct Client *source_p, struct Cli
 	off_history(source_p);
 
 	if(HasID(source_p))
-		del_from_id_hash_table(source_p->user->id, source_p);
+		del_from_id_hash(source_p->user->id, source_p);
 
-	del_from_hostname_hash_table(source_p->host, source_p);
-	del_from_client_hash_table(source_p->name, source_p);
+	del_from_hostname_hash(source_p->host, source_p);
+	del_from_client_hash(source_p->name, source_p);
 	remove_client_from_list(source_p);
 	assert(dlinkFind(&dead_list, source_p) == NULL);
 	assert(dlinkFind(&abort_list, source_p) == NULL);
@@ -1249,8 +1249,8 @@ exit_unknown_client(struct Client *client_p, struct Client *source_p, struct Cli
 		sendto_server(client_p, NULL, NOCAPS, NOCAPS, ":%s QUIT :%s",
 			      source_p->name, comment);
 	}
-	del_from_hostname_hash_table(source_p->host, source_p);
-	del_from_client_hash_table(source_p->name, source_p);
+	del_from_hostname_hash(source_p->host, source_p);
+	del_from_client_hash(source_p->name, source_p);
 	remove_client_from_list(source_p);
 	assert(dlinkFind(&dead_list, source_p) == NULL);
 	assert(dlinkFind(&abort_list, source_p) == NULL);
@@ -1301,7 +1301,7 @@ exit_remote_server(struct Client *client_p, struct Client *source_p, struct Clie
 		sendto_one(target_p, ":%s SQUIT %s :%s", from->name, source_p->name, comment);
 	}
 	
-	del_from_client_hash_table(source_p->name, source_p);
+	del_from_client_hash(source_p->name, source_p);
 	remove_client_from_list(source_p);  
 	assert(dlinkFind(&dead_list, source_p) == NULL);
 	assert(dlinkFind(&abort_list, source_p) == NULL);
@@ -1377,7 +1377,7 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 	ilog(L_NOTICE, "%s was connected for %ld seconds.  %d/%d sendK/recvK.", source_p->name, 
 	     CurrentTime - source_p->firsttime, sendk, recvk);
         
-	del_from_client_hash_table(source_p->name, source_p);
+	del_from_client_hash(source_p->name, source_p);
 	remove_client_from_list(source_p);  
 	assert(dlinkFind(&dead_list, source_p) == NULL);
 	assert(dlinkFind(&abort_list, source_p) == NULL);
@@ -1639,10 +1639,10 @@ set_initial_nick(struct Client *client_p, struct Client *source_p, char *nick)
 	/* This had to be copied here to avoid problems.. */
 	source_p->tsinfo = CurrentTime;
 	if(source_p->name[0])
-		del_from_client_hash_table(source_p->name, source_p);
+		del_from_client_hash(source_p->name, source_p);
 
 	strcpy(source_p->name, nick);
-	add_to_client_hash_table(nick, source_p);
+	add_to_client_hash(nick, source_p);
 
 	/* fd_desc is long enough */
 	fd_note(client_p->localClient->fd, "Nick: %s", nick);
@@ -1714,9 +1714,9 @@ change_local_nick(struct Client *client_p, struct Client *source_p, char *nick)
 	}
 
 	/* Finally, add to hash */
-	del_from_client_hash_table(source_p->name, source_p);
+	del_from_client_hash(source_p->name, source_p);
 	strcpy(source_p->name, nick);
-	add_to_client_hash_table(nick, source_p);
+	add_to_client_hash(nick, source_p);
 
 	/* Make sure everyone that has this client on its accept list
 	 * loses that reference. 

@@ -132,7 +132,7 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 		/*
 		 * List all users on a given channel
 		 */
-		chptr = hash_find_channel(mask);
+		chptr = find_channel(mask);
 		if(chptr != NULL)
 		{
 			if(IsMember(source_p, chptr))

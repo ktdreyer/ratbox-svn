@@ -74,7 +74,7 @@ m_topic(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 	if(parv[1] && IsChannelName(parv[1]))
 	{
-		chptr = hash_find_channel(parv[1]);
+		chptr = find_channel(parv[1]);
 
 		if(chptr == NULL)
 		{
@@ -167,7 +167,7 @@ ms_topic(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if(parv[1] && IsChannelName(parv[1]))
 	{
-		if((chptr = hash_find_channel(parv[1])) == NULL)
+		if((chptr = find_channel(parv[1])) == NULL)
 			return;
 
 		set_channel_topic(chptr, parv[4], parv[2], atoi(parv[3]));

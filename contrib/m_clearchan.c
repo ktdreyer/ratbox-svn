@@ -91,7 +91,7 @@ static void mo_clearchan(struct Client *client_p, struct Client *source_p,
       return;
     }
 
-  chptr= hash_find_channel(parv[1]);
+  chptr= find_channel(parv[1]);
 
   if( chptr == NULL )
     {

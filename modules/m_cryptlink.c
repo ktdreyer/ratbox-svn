@@ -52,7 +52,7 @@
 #include "memory.h"
 #include "common.h"		/* TRUE bleah */
 #include "event.h"
-#include "hash.h"		/* add_to_client_hash_table */
+#include "hash.h"		/* add_to_client_hash */
 #include "md5.h"
 #include "s_conf.h"		/* struct ConfItem */
 

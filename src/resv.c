@@ -80,7 +80,7 @@ create_resv(const char *name, const char *reason, int flags)
 	if(flags & RESV_CHANNEL)
 	{
 		dlinkAddAlloc(resv_p, &resv_channel_list);
-		add_to_resv_hash_table(resv_p->name, resv_p);
+		add_to_resv_hash(resv_p->name, resv_p);
 	}
 	else
 	{
@@ -102,7 +102,7 @@ clear_resv(void)
 		resv_p = ptr->data;
 
 		dlinkDestroy(ptr, &resv_channel_list);
-		del_from_resv_hash_table(resv_p->name, resv_p);
+		del_from_resv_hash(resv_p->name, resv_p);
 		MyFree((char *) resv_p);
 	}
 
@@ -123,7 +123,7 @@ delete_resv(struct ResvEntry *resv_p)
 
 	if(resv_p->flags & RESV_CHANNEL)
 	{
-		del_from_resv_hash_table(resv_p->name, resv_p);
+		del_from_resv_hash(resv_p->name, resv_p);
 		dlinkFindDestroy(&resv_channel_list, resv_p);
 		MyFree((char *) resv_p);
 	}

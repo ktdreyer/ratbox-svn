@@ -101,7 +101,7 @@ static void m_okick(struct Client *client_p,
 
   name = parv[1];
 
-  chptr = hash_find_channel(name);
+  chptr = find_channel(name);
   if (!chptr)
     {
       sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),

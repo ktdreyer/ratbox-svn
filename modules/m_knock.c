@@ -143,7 +143,7 @@ parse_knock_local(struct Client *client_p,
 		return;
 	}
 
-	if(!(chptr = hash_find_channel(name)))
+	if(!(chptr = find_channel(name)))
 	{
 		sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL), me.name, parv[0], name);
 		return;
@@ -217,7 +217,7 @@ parse_knock_remote(struct Client *client_p, struct Client *source_p, int parc, c
 	if((p = strchr(name, ',')))
 		*p = '\0';
 
-	if(!IsChannelName(name) || !(chptr = hash_find_channel(name)))
+	if(!IsChannelName(name) || !(chptr = find_channel(name)))
 		return;
 
 	if(IsMember(source_p, chptr))

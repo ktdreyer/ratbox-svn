@@ -253,7 +253,7 @@ build_target_list(int p_or_n, const char *command, struct Client *client_p,
 			if(IsServer(client_p) && *nick == '&')
 				continue;
 
-			if((chptr = hash_find_channel(nick)) != NULL)
+			if((chptr = find_channel(nick)) != NULL)
 			{
 				if(!duplicate_ptr(chptr))
 				{
@@ -326,7 +326,7 @@ build_target_list(int p_or_n, const char *command, struct Client *client_p,
 			 * if the channel is found, fine, if not report an error
 			 */
 
-			if((chptr = hash_find_channel(nick)) != NULL)
+			if((chptr = find_channel(nick)) != NULL)
 			{
 				if(!is_chan_op(chptr, source_p) && !is_voiced(chptr, source_p))
 				{

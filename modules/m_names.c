@@ -87,7 +87,7 @@ m_names(struct Client *client_p, struct Client *source_p, int parc, const char *
 			return;
 		}
 
-		if((ch2ptr = hash_find_channel(para)) != NULL)
+		if((ch2ptr = find_channel(para)) != NULL)
 			channel_member_names(source_p, ch2ptr, ch2ptr->chname, 1);
 		else
 			sendto_one(source_p, form_str(RPL_ENDOFNAMES), me.name, parv[0], p);

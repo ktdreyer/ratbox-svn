@@ -167,7 +167,7 @@ static void mo_jupe(struct Client *client_p, struct Client *source_p,
 
   /* Some day, all these lists will be consolidated *sigh* */
   add_client_to_list(ajupe);
-  add_to_client_hash_table(ajupe->name, ajupe);
+  add_to_client_hash(ajupe->name, ajupe);
   dlinkAdd(ajupe, &ajupe->lnode, &ajupe->servptr->serv->servers);
   add_server_to_list(ajupe);
 }

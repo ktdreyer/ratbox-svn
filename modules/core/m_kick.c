@@ -90,7 +90,7 @@ m_kick(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 	name = parv[1];
 
-	chptr = hash_find_channel(name);
+	chptr = find_channel(name);
 	if(!chptr)
 	{
 		sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL), me.name, parv[0], name);

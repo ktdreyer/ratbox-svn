@@ -57,25 +57,25 @@ extern size_t hash_get_client_table_size(void);
 extern size_t hash_get_channel_table_size(void);
 extern size_t hash_get_resv_table_size(void);
 
-extern void add_to_client_hash_table(const char *name, struct Client *client);
-extern void del_from_client_hash_table(const char *name, struct Client *client);
+extern void add_to_client_hash(const char *name, struct Client *client);
+extern void del_from_client_hash(const char *name, struct Client *client);
 extern struct Client *find_client(const char *name);
 extern struct Client *find_server(const char *name);
 
-extern int add_to_id_hash_table(const char *, struct Client *);
-extern void del_from_id_hash_table(const char *name, struct Client *client);
-struct Client *find_id(const char *name);
+extern void add_to_id_hash(const char *, struct Client *);
+extern void del_from_id_hash(const char *name, struct Client *client);
+extern struct Client *find_id(const char *name);
 
 extern struct Channel *get_or_create_channel(struct Client *client_p, const char *chname, int *isnew);
-extern void del_from_channel_hash_table(const char *name, struct Channel *chan);
-extern struct Channel *hash_find_channel(const char *name);
+extern void del_from_channel_hash(const char *name, struct Channel *chan);
+extern struct Channel *find_channel(const char *name);
 
-void add_to_hostname_hash_table(const char *, struct Client *);
-void del_from_hostname_hash_table(const char *, struct Client *);
-dlink_node *find_hostname(const char *);
+extern void add_to_hostname_hash(const char *, struct Client *);
+extern void del_from_hostname_hash(const char *, struct Client *);
+extern dlink_node *find_hostname(const char *);
 
-extern void add_to_resv_hash_table(const char *name, struct ResvEntry *resv_p);
-extern void del_from_resv_hash_table(const char *name, struct ResvEntry *resv_p);
+extern void add_to_resv_hash(const char *name, struct ResvEntry *resv_p);
+extern void del_from_resv_hash(const char *name, struct ResvEntry *resv_p);
 extern struct ResvEntry *hash_find_resv(const char *name);
 
 extern void add_to_xline_hash(const char *name, struct xline *xconf);

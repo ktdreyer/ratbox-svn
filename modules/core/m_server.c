@@ -30,7 +30,7 @@
 #include "client.h"		/* client struct */
 #include "common.h"		/* TRUE bleah */
 #include "event.h"
-#include "hash.h"		/* add_to_client_hash_table */
+#include "hash.h"		/* add_to_client_hash */
 #include "irc_string.h"
 #include "ircd.h"		/* me */
 #include "numeric.h"		/* ERR_xxx */
@@ -439,7 +439,7 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 
 	dlinkAddTail(target_p, &target_p->node, &global_client_list);
 	add_server_to_list(target_p);
-	add_to_client_hash_table(target_p->name, target_p);
+	add_to_client_hash(target_p->name, target_p);
 	dlinkAdd(target_p, &target_p->lnode, &target_p->servptr->serv->servers);
 
 

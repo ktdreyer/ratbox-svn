@@ -1045,7 +1045,7 @@ server_estab(struct Client *client_p)
 	Count.myserver++;
 
 	add_server_to_list(client_p);
-	add_to_client_hash_table(client_p->name, client_p);
+	add_to_client_hash(client_p->name, client_p);
 	/* doesnt duplicate client_p->serv if allocated this struct already */
 	make_server(client_p);
 	client_p->serv->up = me.name;

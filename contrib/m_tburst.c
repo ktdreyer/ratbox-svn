@@ -103,7 +103,7 @@ static void ms_tburst(struct Client *client_p, struct Client *source_p,
   newchannelts = atol(parv[1]);
   newtopicts = atol(parv[3]);
 
-  if((chptr = hash_find_channel(parv[2])))
+  if((chptr = find_channel(parv[2])))
   {
     if(chptr->channelts < newchannelts)
       return;

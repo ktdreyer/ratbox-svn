@@ -166,7 +166,7 @@ static void m_owho(struct Client *client_p,
       /*
        * List all users on a given channel
        */
-      chptr = hash_find_channel(mask);
+      chptr = find_channel(mask);
       if (chptr != NULL)
 	{
 	  if(IsMember(source_p, chptr))

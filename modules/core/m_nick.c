@@ -638,7 +638,7 @@ nick_from_server(struct Client *client_p, struct Client *source_p, int parc,
 
 		/* copy the nick in place */
 		(void) strcpy(source_p->name, nick);
-		(void) add_to_client_hash_table(nick, source_p);
+		add_to_client_hash(nick, source_p);
 
 		if(parc > 8)
 		{
@@ -685,10 +685,10 @@ nick_from_server(struct Client *client_p, struct Client *source_p, int parc,
 
 	/* set the new nick name */
 	if(source_p->name[0])
-		del_from_client_hash_table(source_p->name, source_p);
+		del_from_client_hash(source_p->name, source_p);
 
 	strcpy(source_p->name, nick);
-	add_to_client_hash_table(nick, source_p);
+	add_to_client_hash(nick, source_p);
 
 	/* remove all accepts pointing to the client */
 	del_all_accepts(source_p);
@@ -720,8 +720,8 @@ client_from_server(struct Client *client_p, struct Client *source_p, int parc,
 
 	/* copy the nick in place */
 	(void) strcpy(source_p->name, nick);
-	(void) add_to_client_hash_table(nick, source_p);
-	add_to_id_hash_table(id, source_p);
+	add_to_client_hash(nick, source_p);
+	add_to_id_hash(id, source_p);
 
 	/* parse usermodes */
 	m = &parv[4][1];

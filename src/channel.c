@@ -569,7 +569,7 @@ destroy_channel(struct Channel *chptr)
 
 	dlinkDelete(&chptr->node, &global_channel_list);
 
-	del_from_channel_hash_table(chptr->chname, chptr);
+	del_from_channel_hash(chptr->chname, chptr);
 	BlockHeapFree(channel_heap, chptr);
 	Count.chan--;
 }
