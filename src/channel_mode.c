@@ -732,7 +732,7 @@ chm_simple(struct Client *client_p, struct Client *source_p,
   long mode_type;
   int i;
 
-  if (alev < CHACCESS_CHANOP)
+  if (alev < CHACCESS_HALFOP)
   {
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
@@ -796,7 +796,7 @@ chm_hideops(struct Client *client_p, struct Client *source_p,
 {
   int i;
 
-  if (alev < CHACCESS_CHANOP)
+  if (alev < CHACCESS_HALFOP)
   {
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
@@ -896,7 +896,7 @@ chm_ban(struct Client *client_p, struct Client *source_p,
       return;
     *errors |= SM_ERR_RPL_B;
 
-    if ((chptr->mode.mode & MODE_HIDEOPS) && (alev < CHACCESS_CHANOP))
+    if ((chptr->mode.mode & MODE_HIDEOPS) && (alev < CHACCESS_HALFOP))
       for (ptr = chptr->banlist.head; ptr; ptr = ptr->next)
       {
         banptr = ptr->data;
@@ -1453,8 +1453,19 @@ chm_halfop(struct Client *client_p, struct Client *source_p,
   char *opnick;
   struct Client *targ_p;
 
+#if 0
   if (alev <
       ((chptr->mode.mode & MODE_PRIVATE) ? CHACCESS_CHANOP : CHACCESS_HALFOP))
+#endif
+
+/* *sigh* - dont allow halfops to set +/-h, they could fully control a
+ * channel if there were no ops - it doesnt solve anything.. MODE_PRIVATE
+ * when used with MODE_SECRET is paranoid - cant use +p
+ *
+ * it needs to be optional per channel - but not via +p, that or remove
+ * paranoid.. -- fl_
+ */
+  if (alev < CHACCESS_CHANOP)
   {
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
