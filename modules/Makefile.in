@@ -183,7 +183,7 @@ depend:
 	@$(RM) -f .depend.tmp-1
 
 clean:
-	${RM} -f *.so *.sl *~ *.o *.a
+	${RM} -f *.so *.sl *~ *.o *.a static_modules.c
 	${RM} -f core/*.so core/*.sl core/*~ core/*.o
 
 lint:
