@@ -17,6 +17,7 @@
 #include "common.h"
 #include "s_log.h"
 #include "s_conf.h"
+#include "s_newconf.h"
 #include "send.h"
 #include "setup.h"
 #include "modules.h"

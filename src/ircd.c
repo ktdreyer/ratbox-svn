@@ -74,7 +74,7 @@
 #include "balloc.h"
 #include "newconf.h"
 #include "patricia.h"
-
+#include "s_newconf.h"
 
 /*
  * Try and find the correct name to use with getrlimit() for setting the max.

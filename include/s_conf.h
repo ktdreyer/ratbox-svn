@@ -89,21 +89,6 @@ struct ConfItem
 #endif
 };
 
-struct xline
-{
-	char *gecos;
-	char *reason;
-	int type;
-};
-
-struct shared
-{
-	char *username;
-	char *host;
-	char *servername;
-	int flags;
-};
-
 #define CONF_ILLEGAL            0x80000000
 #define CONF_QUARANTINED_NICK   0x0001
 #define CONF_CLIENT             0x0002
@@ -320,8 +305,6 @@ struct admin_info
 /* bleh. have to become global. */
 extern int scount;
 
-extern void init_conf(void);
-
 /* All variables are GLOBAL */
 extern struct ConfItem *ConfigItemList;	/* conf list head */
 extern int specific_ipv4_vhost;	/* used in s_bsd.c */
@@ -350,16 +333,6 @@ extern dlink_list tdline_week;
 
 extern struct ConfItem *make_conf(void);
 extern void free_conf(struct ConfItem *);
-
-extern dlink_list xline_list;
-extern struct xline *make_xline(const char *, const char *, int);
-extern void free_xline(struct xline *);
-extern struct xline *find_xline(char *);
-
-extern dlink_list shared_list;
-extern struct shared *make_shared(void);
-extern void free_shared(struct shared *);
-extern int find_shared(const char *username, const char *host, const char *servername, int type);
 
 extern void read_conf_files(int cold);
 

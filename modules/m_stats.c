@@ -54,7 +54,7 @@
 #include "modules.h"
 #include "hook.h"
 #include "resv.h"		/* report_resv */
-
+#include "s_newconf.h"
 
 static void m_stats(struct Client *, struct Client *, int, char **);
 static void mo_stats(struct Client *, struct Client *, int, char **);

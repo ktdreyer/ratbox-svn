@@ -51,6 +51,7 @@
 #include "parse.h"
 #include "modules.h"
 #include "s_conf.h"
+#include "s_newconf.h"
 
 static void mo_xline(struct Client *client_p, struct Client *source_p, int parc, char *parv[]);
 static void mo_unxline(struct Client *client_p, struct Client *source_p, int parc, char *parv[]);

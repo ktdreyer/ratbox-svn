@@ -28,6 +28,7 @@
 #include "ircd_defs.h"
 #include "tools.h"
 #include "s_conf.h"
+#include "s_newconf.h"
 #include "s_serv.h"
 #include "resv.h"
 #include "s_stats.h"
@@ -68,10 +69,6 @@ int scount = 0;			/* used by yyparse(), etc */
 #define INADDR_NONE ((unsigned int) 0xffffffff)
 #endif
 
-static BlockHeap *xline_heap = NULL;
-static BlockHeap *shared_heap = NULL;
-static void conf_heap_gc(void *);
-
 dlink_list tkline_min;
 dlink_list tkline_hour;
 dlink_list tkline_day;
@@ -81,11 +78,6 @@ dlink_list tdline_min;
 dlink_list tdline_hour;
 dlink_list tdline_day;
 dlink_list tdline_week;
-
-dlink_list xline_list;
-
-dlink_list shared_list;
-
 
 /* internally defined functions */
 
@@ -110,38 +102,8 @@ static struct Class *class0;
 static int verify_access(struct Client *client_p, const char *username);
 static int attach_iline(struct Client *, struct ConfItem *);
 
-static void clear_xlines(void);
-static void clear_shared(void);
-
 /* general conf items link list root */
 struct ConfItem *ConfigItemList = NULL;
-
-/* conf_heap_gc()
- *
- * inputs       -
- * outputs      -
- * side effects - garbage collection of various conf heaps
- */
-static void
-conf_heap_gc(void *unused)
-{
-	BlockHeapGarbageCollect(xline_heap);
-	BlockHeapGarbageCollect(shared_heap);
-}
-
-/* init_conf()
- *
- * inputs       -
- * outputs      -
- * side effects - starts some events etc for s_conf.c
- */
-void
-init_conf(void)
-{
-	xline_heap = BlockHeapCreate(sizeof(struct xline), XLINE_HEAP_SIZE);
-	shared_heap = BlockHeapCreate(sizeof(struct shared), SHARED_HEAP_SIZE);
-	eventAddIsh("conf_heap_gc", conf_heap_gc, NULL, 600);
-}
 
 /*
  * conf_dns_callback
@@ -249,181 +211,6 @@ free_conf(struct ConfItem *aconf)
 	MyFree((char *) aconf);
 }
 
-/* make_xline()
- *
- * inputs       - gecos, reason, type
- * outputs      -
- * side effects - creates an xline based on information
- */
-struct xline *
-make_xline(const char *gecos, const char *reason, int type)
-{
-	struct xline *xconf;
-
-	xconf = BlockHeapAlloc(xline_heap);
-	memset(xconf, 0, sizeof(struct xline));
-
-	if(!BadPtr(gecos))
-		DupString(xconf->gecos, gecos);
-
-	if(!BadPtr(reason))
-		DupString(xconf->reason, reason);
-
-	xconf->type = type;
-	return xconf;
-}
-
-/* free_xline()
- *
- * inputs       - pointer to xline to free
- * outputs      -
- * side effects - xline is freed
- */
-void
-free_xline(struct xline *xconf)
-{
-	assert(xconf != NULL);
-	if(xconf == NULL)
-		return;
-
-	MyFree(xconf->gecos);
-	MyFree(xconf->reason);
-	BlockHeapFree(xline_heap, xconf);
-}
-
-/* clear_xlines()
- *
- * inputs       -
- * outputs      -
- * side effects - nukes list of xlines
- */
-static void
-clear_xlines(void)
-{
-	struct xline *xconf;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, xline_list.head)
-	{
-		xconf = ptr->data;
-
-		free_xline(xconf);
-		dlinkDestroy(ptr, &xline_list);
-	}
-}
-
-/*
- * find_xline
- *
- * inputs       - pointer to char string to find
- * output       - NULL or pointer to found xline
- * side effects - looks for a match on name field
- */
-struct xline *
-find_xline(char *gecos)
-{
-	struct xline *xconf;
-	dlink_node *ptr;
-
-	DLINK_FOREACH(ptr, xline_list.head)
-	{
-		xconf = ptr->data;
-
-		if(match_esc(xconf->gecos, gecos))
-			return xconf;
-	}
-
-	return NULL;
-}
-
-/* make_shared()
- *
- * inputs       -
- * outputs      -
- * side effects - creates a shared block
- */
-struct shared *
-make_shared(void)
-{
-	struct shared *uconf;
-
-	uconf = BlockHeapAlloc(shared_heap);
-	memset(uconf, 0, sizeof(struct shared));
-
-	return uconf;
-}
-
-/* free_shared()
- *
- * inputs       - shared block to free
- * outputs      -
- * side effects - shared block is freed.
- */
-void
-free_shared(struct shared *uconf)
-{
-	assert(uconf != NULL);
-	if(uconf == NULL)
-		return;
-
-	MyFree(uconf->username);
-	MyFree(uconf->host);
-	MyFree(uconf->servername);
-	BlockHeapFree(shared_heap, uconf);
-}
-
-/* clear_shared()
- *
- * inputs       -
- * outputs      -
- * side effects - shared blocks are nuked
- */
-static void
-clear_shared(void)
-{
-	struct shared *uconf;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, shared_list.head)
-	{
-		uconf = ptr->data;
-
-		free_shared(uconf);
-		dlinkDestroy(ptr, &shared_list);
-	}
-}
-
-/* find_shared()
- *
- * inputs       - username, hostname, servername, type to find shared for
- * outputs      - YES if one found, else NO
- * side effects -
- */
-int
-find_shared(const char *username, const char *host, const char *servername, int flags)
-{
-	struct shared *uconf;
-	dlink_node *ptr;
-
-	DLINK_FOREACH(ptr, shared_list.head)
-	{
-		uconf = ptr->data;
-
-		if((uconf->flags & flags) == 0)
-			continue;
-
-		if((BadPtr(uconf->servername)
-		    || match(uconf->servername, servername))
-		   && (BadPtr(uconf->username)
-		       || match(uconf->username, username))
-		   && (BadPtr(uconf->host) || match(uconf->host, host)))
-			return YES;
-	}
-
-	return NO;
-}
 
 static struct LinkReport
 {
@@ -2121,7 +1908,7 @@ flush_deleted_I_P(void)
 
 /* write_confitem()
  *
- * inputs       - kline, dline or xline type flag
+ * inputs       - kline, dline or resv type flag
  *              - client pointer to report to
  *              - user name of target
  *              - host name of target
