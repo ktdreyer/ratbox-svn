@@ -35,6 +35,29 @@ static void read_server(struct connection_entry *conn_p);
 static int write_sendq(struct connection_entry *conn_p);
 static void parse_server(char *buf, int len);
 
+/* stolen from squid */
+static int
+ignore_errno(int ierrno)
+{
+	switch(ierrno)
+	{
+		case EINPROGRESS:
+		case EWOULDBLOCK:
+#if EAGAIN != EWOULDBLOCK
+		case EAGAIN:
+#endif
+		case EALREADY:
+		case EINTR:
+#ifdef ERESTART
+		case ERESTART:
+#endif
+			return 1;
+
+		default:
+			return 0;
+	}
+}
+
 /* get_line()
  *   Gets a line of data from a given connection
  *
@@ -50,7 +73,7 @@ get_line(struct connection_entry *conn_p, char *buf, int bufsize)
 	
 	if((n = recv(conn_p->fd, buf, bufsize, MSG_PEEK)) <= 0)
 	{
-		if(errno == EINTR)
+		if(n == -1 && ignore_errno(errno))
 			return 0;
 
 		return -1;
@@ -64,8 +87,13 @@ get_line(struct connection_entry *conn_p, char *buf, int bufsize)
 	else
 		term = 0;
 
-	if((n = read(conn_p->fd, buf, n)) == -1)
+	if((n = read(conn_p->fd, buf, n)) <= 0)
+	{
+		if(n == -1 && ignore_errno(errno))
+			return 0;
+
 		return -1;
+	}
 
 	/* we're allowed to parse this line.. */
 	if((conn_p->flags & FLAGS_UNTERMINATED) == 0)
@@ -117,17 +145,18 @@ read_io(void)
 			{
 				if(server_p->client_p != NULL && 
 				   IsDead(server_p->client_p))
+				{
+					slog("Connection to server %s lost: (Server exited)",
+						server_p->name);
 					(server_p->io_close)(server_p);
+				}
 			}
 
 			if(server_p->flags & CONN_DEAD)
 			{
 				/* connection is dead, uplinks still here. byebye */
 				if(server_p->client_p != NULL && !IsDead(server_p->client_p))
-				{
-					slog("exiting server due to deadness..");
 					exit_client(server_p->client_p);
-				}
 
 				my_free(server_p->name);
 				my_free(server_p);
@@ -201,6 +230,8 @@ connect_to_server(void *unused)
 	ptr = conf_server_list.head;
 	conf_p = ptr->data;
 
+	slog("Connection to server %s activated", conf_p->name);
+
 	serv_fd = sock_open(conf_p->host, conf_p->port, conf_p->vhost);
 
 	if(serv_fd < 0)
@@ -225,6 +256,8 @@ signon_server(struct connection_entry *conn_p)
 	conn_p->flags &= ~CONN_CONNECTING;
 	conn_p->io_read = read_server;
 
+	slog("Connection to server %s completed", conn_p->name);
+
 	sendto_server("PASS test TS");
 	sendto_server("CAPAB :QS TB");
 	sendto_server("SERVER %s 1 :%s", MYNAME, config_file.my_gecos);
@@ -241,7 +274,19 @@ read_server(struct connection_entry *conn_p)
 	if((n = get_line(server_p, buf, sizeof(buf))) > 0)
 		parse_server(buf, n);
 	else if(n < 0)
+	{
+		if(conn_p == server_p)
+		{
+			if(ignore_errno(errno))
+				slog("Connection to server %s lost",
+					conn_p->name);
+			else
+				slog("Connection to server %s lost: (Read error: %s)",
+					conn_p->name, strerror(errno));
+		}
+
 		(conn_p->io_close)(conn_p);
+	}
 	/* n == 0 we can safely ignore */
 }
 
@@ -390,7 +435,11 @@ sendto_server(const char *format, ...)
 	strcat(buf, "\r\n");
 
 	if(sock_write(server_p, buf, strlen(buf)) < 0)
+	{
+		slog("Connection to server %s lost: (Write error: %s)",
+			server_p->name, strerror(errno));
 		(server_p->io_close)(server_p);
+	}
 }
 
 /* write_sendq()
@@ -414,9 +463,10 @@ write_sendq(struct connection_entry *conn_p)
 		/* write, starting at the offset */
 		if((n = write(conn_p->fd, sendq->buf + sendq->pos, sendq->len)) < 0)
 		{
-			if(errno != EAGAIN)
-				return -1;
-			return 0;
+			if(n == -1 && ignore_errno(errno))
+				return 0;
+
+			return -1;
 		}
 
 		/* wrote full sendq? */
@@ -472,7 +522,11 @@ sock_open(const char *host, int port, const char *vhost)
 	fd = socket(AF_INET, SOCK_STREAM, 0);
 
 	if(fd < 0)
+	{
+		slog("Connection to %s/%d failed: (socket(): %s)",
+			host, port, strerror(errno));
 		return -1;
+	}
 
 	setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 
@@ -480,7 +534,11 @@ sock_open(const char *host, int port, const char *vhost)
 	flags |= O_NONBLOCK;
 
 	if(fcntl(fd, F_SETFL, flags) == -1)
+	{
+		slog("Connection to %s/%d failed: (fcntl(): %s)",
+			host, port, strerror(errno));
 		return -1;
+	}
 
 	/* no specific vhost, try default */
 	if(vhost == NULL)
@@ -499,12 +557,20 @@ sock_open(const char *host, int port, const char *vhost)
 			addr.sin_port = 0;
 
 			if(bind(fd, (struct sockaddr *)&addr, sizeof(struct sockaddr)) < 0)
+			{
+				slog("Connection to %s/%d failed: (unable to bind to %s: %s)",
+					host, port, vhost, strerror(errno));
 				return -1;
+			}
 		}
 	}
 
 	if((host_addr = gethostbyname(host)) == NULL)
+	{
+		slog("Connection to %s/%d failed: (unable to resolve: %s)",
+			host, port, host);
 		return -1;
+	}
 
 	memset(&raddr, 0, sizeof(struct sockaddr_in));
 	memcpy(&raddr.sin_addr, host_addr->h_addr, host_addr->h_length);
@@ -530,23 +596,25 @@ sock_write(struct connection_entry *conn_p, const char *buf, int len)
 	{
 		n = (conn_p->io_write)(conn_p);
 
-		if(n == -1)
-		{
-			(conn_p->io_close)(conn_p);
-			return -1;
-		}
 		/* got a partial write, add the new line to the sendq */
-		else if(n == 0)
+		if(n == 0)
 		{
 			sendq_add(conn_p, buf, len, 0);
 			return 0;
 		}
+		else if(n == -1)
+			return -1;
 	}
 
 	if((n = write(conn_p->fd, buf, len)) < 0)
 	{
-		if(errno != EAGAIN)
+		if(!ignore_errno(errno))
 			return -1;
+
+		/* write wouldve blocked so wasnt done, we didnt write
+		 * anything so reset n to zero and carry on.
+		 */
+		n = 0;
 	}
 
 	/* partial write.. add this line to sendq with offset of however
