@@ -1,3 +1,18 @@
+leeh        2002/07/20 11:47:55 EDT	(20020720_2)
+
+  Modified files:
+    src                  s_user.c 
+  Log:
+  - fixed a missing (
+  - you cant just detach an oper conf if you dont put anything back in its
+    place else youre leaving a user with no class whatsoever, so just dont
+    detach the conf at all, as my patch does.
+  
+  Revision  Changes    Path
+  7.203     +1 -6      ircd-hybrid-7/src/s_user.c
+
+
+
 db          2002/07/20 09:07:56 EDT	(20020720_1)
 
   Modified files:
