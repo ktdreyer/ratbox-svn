@@ -166,6 +166,9 @@ void parse(struct Client *client_p, char *pbuffer, char *bufend)
           if (from == NULL)
             from = find_server(sender);
 
+          if(from == NULL)
+	    from = hash_find_id(sender, (struct Client *)NULL);
+
           /* Hmm! If the client corresponding to the
            * prefix is not found--what is the correct
            * action??? Now, I will ignore the message
