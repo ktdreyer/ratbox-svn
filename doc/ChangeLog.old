@@ -1,3 +1,15 @@
+db          2002/06/22 17:23:08 EDT	(20020622_1)
+
+  Modified files:
+    src                  s_serv.c 
+  Log:
+  - duh. make the comments agree with the arguments to the function.
+  
+  Revision  Changes    Path
+  7.263     +2 -2      ircd-hybrid-7/src/s_serv.c
+
+
+
 db          2002/06/22 16:27:45 EDT	(20020622_0)
 
   Modified files:
