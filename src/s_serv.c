@@ -1107,7 +1107,9 @@ int server_estab(struct Client *client_p)
   client_p->serv->up = me.name;
   /* add it to scache */
   find_or_add(client_p->name);
-  
+  client_p->firsttime = CurrentTime;
+  /* fixing eob timings.. -gnp */
+
   client_p->serv->sconf = aconf;
   client_p->flags2 |= FLAGS2_CBURST;
 
