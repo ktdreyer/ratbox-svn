@@ -1,3 +1,40 @@
+leeh        2003/08/21 12:07:30 EDT	(20030821_0)
+
+  Modified files:
+    include              client.h s_user.h 
+    modules              m_operwall.c m_pass.c m_user.c 
+                         m_wallops.c 
+    modules/core         m_nick.c m_server.c m_sjoin.c 
+    src                  client.c s_user.c send.c 
+  Removed files:
+    doc/technical        Persistent_Clients.txt 
+                         message-customisation.txt 
+  Log:
+  - remove two docs that are no longer relevant
+  - fixed operwall/wallops for TS6
+  - set_initial_nick() and change_local_nick() moved client.c ->  m_nick.c
+  - do_local_user() moved s_user.c -> m_user.c
+  - missing include in m_pass.c
+  - added the ban removal code for TS6
+  
+  Revision  Changes    Path
+  1.4       +0 -110    ircd-ratbox/doc/technical/Persistent_Clients.txt (dead)
+  1.4       +0 -56     ircd-ratbox/doc/technical/message-customisation.txt (dead)
+  7.217     +0 -2      ircd-ratbox/include/client.h
+  7.27      +0 -2      ircd-ratbox/include/s_user.h
+  1.129     +93 -2     ircd-ratbox/modules/core/m_nick.c
+  1.121     +2 -2      ircd-ratbox/modules/core/m_server.c
+  1.183     +90 -3     ircd-ratbox/modules/core/m_sjoin.c
+  1.50      +5 -2      ircd-ratbox/modules/m_operwall.c
+  1.42      +2 -1      ircd-ratbox/modules/m_pass.c
+  1.39      +40 -13    ircd-ratbox/modules/m_user.c
+  1.49      +5 -4      ircd-ratbox/modules/m_wallops.c
+  7.406     +0 -114    ircd-ratbox/src/client.c
+  7.290     +0 -52     ircd-ratbox/src/s_user.c
+  7.256     +3 -0      ircd-ratbox/src/send.c
+
+
+
 leeh        2003/08/20 17:43:28 EDT	(20030820_1)
 
   Modified files:
