@@ -1,3 +1,17 @@
+androsyn    2004/08/05 17:20:59 EDT	(20040805_1)
+
+  Modified files:
+    modules              m_whois.c 
+    modules/core         registration.c 
+  Log:
+  Replace a few ->name[0] type checks with EmptyString()
+  
+  Revision  Changes    Path
+  1.5       +4 -4      ircd-ratbox/modules/core/registration.c
+  1.143     +2 -2      ircd-ratbox/modules/m_whois.c
+
+
+
 leeh        2004/08/05 17:08:57 EDT	(20040805_0)
 
   Modified files:
