@@ -66,6 +66,7 @@ struct Message unxline_msgtab = {
 	{m_unregistered, m_not_oper, m_ignore, mo_unxline}
 };
 
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -81,7 +82,7 @@ _moddeinit(void)
 }
 
 const char *_version = "$Revision$";
-
+#endif
 /* m_xline()
  *
  * parv[1] - thing to xline
