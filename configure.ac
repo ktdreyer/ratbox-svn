@@ -745,6 +745,10 @@ fi
 
 fi
 
+if test -z "$SELECT_TYPE"; then
+	AC_MSG_ERROR([Unable to find a usable IO interface],)
+fi
+
 echo "Using $SELECT_TYPE for select loop."
 
 AC_DEFINE_UNQUOTED(SELECT_TYPE, "$SELECT_TYPE", [This is the type of IO loop we are using])

@@ -8581,6 +8581,12 @@ fi
 
 fi
 
+if test -z "$SELECT_TYPE"; then
+	{ { echo "$as_me:$LINENO: error: Unable to find a usable IO interface" >&5
+echo "$as_me: error: Unable to find a usable IO interface" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
 echo "Using $SELECT_TYPE for select loop."
 
 
