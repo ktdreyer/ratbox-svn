@@ -107,6 +107,14 @@ mo_xline(struct Client *client_p, struct Client *source_p,
     return;
   }
 
+  xconf = find_xline(parv[1]);
+  if(xconf != NULL)
+  {
+    sendto_one(source_p, ":%s NOTICE %s :[%s] already X-lined by [%s] - %s",
+               me.name, source_p->name, parv[1], xconf->gecos, xconf->reason);
+    return;
+  }
+
   if(parc > 3)
   {
     xtype = atoi(parv[2]);
