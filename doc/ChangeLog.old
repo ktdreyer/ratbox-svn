@@ -1,3 +1,9 @@
+*** 20010726_4 by leeh
+- fix the +eI cap business
+  we now loop the serv_list in send_cap_mode_changes, stringing modebufs as
+  we go.. 
+
+
 *** 20010726_3 by leeh
 - someone had used client_p->host instead of client_p->name in m_squit.c,
   meaning when a server squit their uplink, their host got broadcast
