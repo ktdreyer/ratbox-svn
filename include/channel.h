@@ -181,4 +181,7 @@ void do_channel_integrity_check(void);
 #endif
 
 void set_channel_topic(struct Channel *chptr, const char *topic, const char *topic_info, time_t topicts); 
+void free_topic(struct Channel *);
+int allocate_topic(struct Channel *);
+
 #endif  /* INCLUDED_channel_h */

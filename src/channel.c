@@ -1433,7 +1433,7 @@ void check_splitmode(void *unused)
  * side effects - Allocates a new topic
  */
 
-static int allocate_topic(struct Channel *chptr)
+int allocate_topic(struct Channel *chptr)
 {
   void *ptr;
   if(chptr == NULL)
@@ -1455,7 +1455,7 @@ static int allocate_topic(struct Channel *chptr)
   return FALSE;
 }
 
-static void free_topic(struct Channel *chptr)
+void free_topic(struct Channel *chptr)
 {
   void *ptr;
   

@@ -110,7 +110,7 @@ static void ms_tburst(struct Client *client_p, struct Client *source_p,
 
     else if(chptr->channelts == newchannelts)
     {
-      if(!chptr->topic[0] || (chptr->topic_time > newtopicts))
+      if(chptr->topic == NULL || (chptr->topic_time > newtopicts))
 	set_topic(source_p, chptr, newtopicts, parv[4], parv[5]);
       else
 	return;
@@ -128,13 +128,13 @@ static void set_topic(struct Client *source_p, struct Channel *chptr,
 
   sendto_channel_local(ALL_MEMBERS, chptr, ":%s TOPIC %s :%s",
 		       ConfigServerHide.hide_servers ? me.name : source_p->name,
-		       chptr->chname, chptr->topic);
+		       chptr->chname, chptr->topic == NULL ? "" : chptr->topic);
 
 #ifdef TBURST_PROPAGATE
   sendto_server(source_p, NULL, chptr, CAP_TBURST, NOCAPS, NOFLAGS,
 		":%s TBURST %ld %s %ld %s :%s",
 		source_p->name, chptr->channelts, chptr->chname,
-		chptr->topic_time, chptr->topic_info, chptr->topic);
+		chptr->topic_time, chptr->topic_info == NULL ? "" : chptr->topic , chptr->topic == NULL ? "" : chptr->topic);
 #endif
 }
 
@@ -150,7 +150,7 @@ static void unset_tburst_capab()
 
 int send_tburst(struct hook_burst_channel *data)
 {
-  if(data->chptr->topic[0] && IsCapable(data->client, CAP_TBURST))
+  if(data->chptr->topic != NULL && IsCapable(data->client, CAP_TBURST))
     sendto_one(data->client, ":%s TBURST %ld %s %ld %s :%s",
                me.name, data->chptr->channelts, data->chptr->chname,
 	       data->chptr->topic_time, data->chptr->topic_info, 
