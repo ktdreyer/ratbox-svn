@@ -1,3 +1,16 @@
+leeh        2004/04/12 09:56:54 EDT	(20040412_5)
+
+  Modified files:
+    modules              m_ping.c 
+  Log:
+  - always use me.name rather than destination when issuing a PONG, otherwise
+    it can spew IDs.
+  
+  Revision  Changes    Path
+  1.56      +2 -2      ircd-ratbox/modules/m_ping.c
+
+
+
 leeh        2004/04/12 09:45:00 EDT	(20040412_4)
 
   Modified files:
