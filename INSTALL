@@ -2,7 +2,7 @@
 
    $Id$
 
-   Copyright (c) 2001 by ircd-hybrid team
+   Copyright (c) 2001-2002 by ircd-hybrid team
 
      ----------------------------------------------------------------------
 
@@ -92,6 +92,11 @@
             should be used on all production servers for maximum speed and to
             prevent cores from things that shouldn't normally happen.
 
+          *
+            --enable-small-net - Tunes the server for smaller networks. 
+            Reduces startup memory footprint.  This should really only
+            be used for *small* networks, as this tends to be a performance
+            hit on larger networks.
    3. 
 
        Look over the "include/config.h" file. This allows you to change the
