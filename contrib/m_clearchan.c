@@ -1,5 +1,5 @@
 /************************************************************************
- *   IRC - Internet Relay Chat, modules/m_clearchan.c
+ *   IRC - Internet Relay Chat, contrib/m_clearchan.c
  *   Copyright (C) 1990 Jarkko Oikarinen and
  *                      University of Oulu, Computing Center
  *
