@@ -1,3 +1,7 @@
+*** 20010617_4 by toot
+renamed some stuff in channel.c so it makes some more sense
+
+
 *** 20010617_3 by toot
 added -ncs to .indent..
 (re)indented channel.c and vchannel.c..
