@@ -93,10 +93,10 @@ create_nick_resv(char *name, char *reason, int conf)
 
   len = strlen(name);
 
-  if(len > NICKLEN)
+  if(len > NICKLEN - 1)
   {
-    len = NICKLEN;
-    name[NICKLEN] = '\0';
+    len = NICKLEN - 1;
+    name[NICKLEN - 1] = '\0';
   }
 
   if(strlen(reason) > TOPICLEN)
