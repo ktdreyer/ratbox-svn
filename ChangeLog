@@ -1,3 +1,15 @@
+androsyn    2003/09/02 17:12:47 EDT	(20030902_1)
+
+  Modified files:
+    src                  s_conf.c 
+  Log:
+  Had arguments swapped around for ircsnprintf()
+  
+  Revision  Changes    Path
+  7.432     +1 -1      ircd-ratbox/src/s_conf.c
+
+
+
 androsyn    2003/09/02 15:35:07 EDT	(20030902_0)
 
   Modified files:
