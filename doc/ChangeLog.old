@@ -1,3 +1,7 @@
+*** 20001220_18 by ejb
+- fixed ircd_lexer (oops)
+
+
 *** 20001220_17 by ejb
 - removed hide_chanops from config since its not used anymore.
 
