@@ -1,3 +1,29 @@
+leeh        2005/01/20 13:38:39 EST	(20050120_1)
+
+  Modified files:
+    .                    configure configure.ac 
+    include              client.h numeric.h patchlevel.h 
+    modules              Makefile.in 
+    src                  messages.tab s_user.c 
+  Added files:
+    modules              m_cap.c 
+  Log:
+  - drop back to -O0, fix patchlevel.h
+  - first stab at client capabilities.. this still needs work.
+  
+  Revision  Changes    Path
+  7.240     +3 -3      ircd-ratbox/configure
+  7.54      +3 -3      ircd-ratbox/configure.ac
+  7.260     +3 -0      ircd-ratbox/include/client.h
+  7.54      +2 -0      ircd-ratbox/include/numeric.h
+  7.70      +1 -3      ircd-ratbox/include/patchlevel.h
+  1.116     +1 -0      ircd-ratbox/modules/Makefile.in
+  1.1       +405 -0    ircd-ratbox/modules/m_cap.c (new)
+  7.120     +1 -1      ircd-ratbox/src/messages.tab
+  7.335     +3 -0      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2005/01/20 06:04:41 EST	(20050120_0)
 
   Modified files:
