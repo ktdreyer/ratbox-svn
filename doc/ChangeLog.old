@@ -1,3 +1,11 @@
+*** 20010619_3 by jdc
+- doc/README.openssl
+    Severe "touch-ups," and added a section pertaining to Solaris and
+    it's lack of /dev/random or /dev/urandom.  Hopefully this will
+    help Solaris users out a little bit.
+
+
+
 *** 20010619_2 by db
 - redid m_gline to write kline.conf compatible files
 
