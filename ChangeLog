@@ -1,3 +1,18 @@
+leeh        2004/04/05 15:46:24 EDT	(20040405_3)
+
+  Modified files:
+    modules              m_who.c m_whois.c 
+    modules/core         m_mode.c 
+  Log:
+  - ported my operspy stuff
+  
+  Revision  Changes    Path
+  1.108     +68 -7     ircd-ratbox/modules/core/m_mode.c
+  1.109     +32 -11    ircd-ratbox/modules/m_who.c
+  1.140     +35 -10    ircd-ratbox/modules/m_whois.c
+
+
+
 leeh        2004/04/04 22:38:06 EDT	(20040405_2)
 
   Modified files:
