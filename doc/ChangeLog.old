@@ -1,3 +1,17 @@
+db          2001/12/12 02:41:33 EST	(20011212_2)
+
+  Modified files:
+    modules              m_server.c 
+  Log:
+  - changed "no H-line" to "no matching hub_mask"
+  - changed comments to match docs host_mask->hub_mask
+  - made an if clearer and a tad more efficient
+  
+  Revision  Changes    Path
+  1.74      +8 -7      ircd-hybrid-7/modules/m_server.c
+
+
+
 db          2001/12/11 23:58:36 EST	(20011212_1)
 
   Modified files:
