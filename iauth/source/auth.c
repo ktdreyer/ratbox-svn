@@ -585,10 +585,11 @@ CompleteAuthRequest(struct AuthRequest *auth)
 	     reason[BUFSIZE];
 	struct ServerBan *kptr;
 	struct Quarantine *qptr;
+	struct Iline *iptr = NULL;
 
 	*reason = '\0';
 
-	switch (CheckIline(auth->username, auth->hostname, auth->password))
+	switch (CheckIline(auth->username, auth->hostname, auth->password, &iptr))
 	{
 		/*
 		 * There was no I-line found for this client
@@ -674,10 +675,11 @@ CompleteAuthRequest(struct AuthRequest *auth)
 		if (!*auth->username)
 			strcpy(auth->username, "~");
 
-		len = sprintf(buf, "DoneAuth %s %s %s\n",
+		len = sprintf(buf, "DoneAuth %s %s %s %d\n",
 			auth->clientid,
 			auth->username,
-			auth->hostname);
+			auth->hostname,
+			iptr ? iptr->classnum : 0);
 	}
 
 	send(auth->server->sockfd, buf, len, 0);

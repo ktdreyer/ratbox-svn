@@ -31,6 +31,7 @@
 #include <sys/ioctl.h>
 
 #include "auth.h"
+#include "commands.h"
 #include "log.h"
 #include "iauth.h"
 #include "match.h"
@@ -43,6 +44,15 @@
  */
 struct Server *ServerList = NULL;
 
+static char               buffer[BUFSIZE + 1];
+
+static char               *paramv[MAXPARAMS + 1];
+static int                paramc = 0;
+static char               *nextparam = NULL;
+
+static char               spill[BUFSIZE + 1];
+static int                offset = 0;
+
 static void DoListen(struct Port *portptr);
 static void SetSocketOptions(int sockfd);
 
@@ -52,16 +62,6 @@ static int EstablishConnection(struct Port *portptr);
 static void AddServer(struct Server *sptr);
 static void DelServer(struct Server *sptr);
 static void DoDNSAsync();
-
-static struct AuthCommandTable
-{
-	char *name; /* name of command */
-	void (* func)(); /* function to call */
-} AuthCommands[] = {
-	{ "DoAuth", StartAuth },
-
-	{ 0, 0 }
-};
 
 /*
 tosock()
@@ -359,6 +359,179 @@ CheckConnections()
 	} /* for (;;) */
 } /* CheckConnections() */
 
+static int
+ReadData(struct Server *sptr)
+
+{
+	int length; /* number of bytes we read */
+	register char *ch;
+	register char *linech;
+
+	/* read in a line */
+	length = recv(sptr->sockfd, buffer, BUFSIZE, 0);
+
+	if ((length == (-1)) && ((errno == EWOULDBLOCK) || (errno == EAGAIN)))
+		return 2; /* no error - there's just nothing to read */
+
+	if (length <= 0)
+	{
+		log(L_ERROR, "Read error from server: %s",
+			strerror(errno));
+		return 0; /* the connection was closed */
+	}
+
+	/*
+	 * buffer may not be big enough to read the whole last line
+	 * so it may contain only part of it
+	 */
+	buffer[length] = '\0';
+
+	fprintf(stderr, "%s", buffer);
+
+	/*
+	 * buffer could possibly contain several lines of info,
+	 * especially if this is the inital connect burst, so go
+	 * through, and record each line (until we hit a \n) and
+	 * process it separately
+	 */
+
+	ch = buffer;
+	linech = spill + offset;
+
+	/*
+	 * The following routine works something like this:
+	 * buffer may contain several full lines, and then
+	 * a partial line. If this is the case, loop through
+	 * buffer, storing each character in 'spill' until
+	 * we hit a \n or \r.  When we do, process the line.
+	 * When we hit the end of buffer, spill will contain
+	 * the partial line that buffer had, and offset will
+	 * contain the index of spill where we left off, so the
+	 * next time we recv() from the hub, the beginning
+	 * characters of buffer will be appended to the end of
+	 * spill, thus forming a complete line.
+	 * If buffer does not contain a partial line, then
+	 * linech will simply point to the first index of 'spill'
+	 * (offset will be zero) after we process all of buffer's
+	 * lines, and we can continue normally from there.
+	 */
+
+	while (*ch)
+	{
+		register char tmp;
+
+		tmp = *ch;
+		if (IsEol(tmp))
+		{
+			*linech = '\0';
+
+			if (nextparam)
+			{
+				/*
+				 * It is possible nextparam will not be NULL here
+				 * if there is a line like:
+				 * BadAuth id :Blah
+				 * where the text after the colon does not have
+				 * any spaces, so we reach the \n and do not
+				 * execute the code below which sets the next
+				 * index of param[] to nextparam. Do it here.
+				 */
+				paramv[paramc++] = nextparam;
+			}
+
+			/*
+			 * Make sure paramc is non-zero, because if the line
+			 * starts with a \n, we will immediately come here,
+			 * without initializing paramv[0]
+			 */
+			if (paramc)
+			{
+				/* process the line */
+				ProcessData(sptr, paramc, paramv);
+			}
+
+			linech = spill;
+			offset = 0;
+			paramc = 0;
+			nextparam = NULL;
+
+			/*
+			 * If the line ends in \r\n, then this algorithm would
+			 * have only picked up the \r. We don't want an entire
+			 * other loop to do the \n, so advance ch here.
+			 */
+			if (IsEol(*(ch + 1)))
+				ch++;
+		}
+		else
+		{
+			/* make sure we don't overflow spill[] */
+			if (linech >= (spill + (sizeof(spill) - 1)))
+			{
+				ch++;
+				continue;
+			}
+
+			*linech++ = tmp;
+			if (tmp == ' ')
+			{
+				/*
+				 * Only set the space character to \0 if this is
+				 * the very first parameter, or if nextparam is
+				 * not NULL. If nextparam is NULL, then we've hit
+				 * a parameter that starts with a colon (:), so
+				 * leave it as a whole parameter.
+				 */
+				if (nextparam || (paramc == 0))
+					*(linech - 1) = '\0';
+
+				if (paramc == 0)
+				{
+					/*
+					 * Its the first parameter - set it to the beginning
+					 * of spill
+					 */
+					paramv[paramc++] = spill;
+					nextparam = linech;
+				}
+				else if (nextparam)
+				{
+					paramv[paramc++] = nextparam;
+					if (*nextparam == ':')
+					{
+						/*
+						 * We've hit a colon, set nextparam to NULL,
+						 * so we know not to set any more spaces to \0
+						 */
+						nextparam = NULL;
+
+						/*
+						 * Unfortunately, the first space has already
+						 * been set to \0 above, so reset to to a
+						 * space character
+						 */
+						*(linech - 1) = ' ';
+					}
+					else
+						nextparam = linech;
+
+					if (paramc >= MAXPARAMS)
+						nextparam = NULL;
+				}
+			}
+			++offset;
+		}
+
+		/*
+		 * Advance ch to go to the next letter in the buffer
+		 */
+		++ch;
+	} /* while (*ch) */
+
+	return 1;
+} /* ReadData() */
+
+#if 0
 /*
 ReadData()
  Read and parse any incoming data from sptr->sockfd
@@ -373,10 +546,7 @@ ReadData(struct Server *sptr)
 
 {
 	int length; /* number of bytes we read */
-	char buffer[BUFSIZE + 1];
 	register char *ch;
-	char *paramv[MAXPARAMS + 1];
-	int paramc;
 
 	length = recv(sptr->sockfd, buffer, sizeof(buffer) - 1, 0);
 
@@ -454,6 +624,7 @@ ReadData(struct Server *sptr)
 
 	return 1;
 } /* ReadData() */
+#endif
 
 /*
 ProcessData()
@@ -472,9 +643,9 @@ static void
 ProcessData(struct Server *sptr, int paramc, char **paramv)
 
 {
-	struct AuthCommandTable *cmdptr;
+	struct CommandTable *cmdptr;
 
-	for (cmdptr = AuthCommands; cmdptr->name; cmdptr++)
+	for (cmdptr = Commands; cmdptr->name; cmdptr++)
 	{
 		if (!strcasecmp(paramv[0], cmdptr->name))
 		{

@@ -26,14 +26,9 @@
 #define INCLUDED_sys_types_h
 #endif
 
+struct Class;
+
 #define PASSLEN      20 /* max length of I: line passwords */
-
-struct Class
-{
-	struct Class *next;
-
-	int classnum; /* number that identifies this class */
-};
 
 /*
  * Server bans (K-lines) disallow specific users from connecting
@@ -104,7 +99,8 @@ struct Iline
 	char *spoofhost;      /* hostname to use if IL_IPSPOOF */
 	char *password;       /* password client needs (NULL if none) */
 
-	struct Class *class;  /* pointer to corresponding class */
+	struct Class *class;  /* pointer to class */
+	int classnum;         /* class number */
 	unsigned int flags;   /* flags for client (IL_*) */
 };
 
@@ -135,7 +131,8 @@ void LoadConfig();
 
 struct ServerBan  *FindServerBan(char *user, char *host);
 struct Iline      *FindIline(char *user, char *host);
-int               CheckIline(char *user, char *host, char *pass);
+int               CheckIline(char *user, char *host, char *pass,
+                             struct Iline **imatch);
 struct Class      *FindClass(int classnum);
 struct Quarantine *FindQuarantine(char *nick, char *user, char *host);
 

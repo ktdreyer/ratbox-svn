@@ -19,6 +19,8 @@ CPPFLAGS = ${INCLUDES} @CPPFLAGS@
 
 SOURCES =     \
   auth.c      \
+  class.c     \
+  commands.c  \
   conf.c      \
   iauth.c     \
   log.c       \

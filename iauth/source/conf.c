@@ -24,6 +24,7 @@
 #include <assert.h>
 
 #include "auth.h"
+#include "class.h"
 #include "conf.h"
 #include "iauth.h"
 #include "log.h"
@@ -498,6 +499,7 @@ AddIline(char *spoofhost, char *password, char *user, char *host, int class)
 	ptr->hostname = MyStrdup(host);
 
 	ptr->class = FindClass(class);
+	ptr->classnum = class;
 
 	ptr->prev = NULL;
 	ptr->next = IlineList;
@@ -531,9 +533,8 @@ FindIline(char *user, char *host)
 
 /*
 CheckIline()
- Determine if the given information matches the given iline.
-Assume the user and host match the Iline, since FindIline()
-has already been called.
+ Called when a client connects to an ircd server to determine
+if they have a valid I: line.
 
 Return values:
 
@@ -551,10 +552,13 @@ IL_ERR_BADPASS       - The given Iline requires a password, which
 
 IL_ERR_GOODMATCH     - Not actually an error - the client is an
                        acceptable match for the given Iline.
+
+  If the client matches an Iline, the Iline structure is stored
+in 'imatch'
 */
 
 int
-CheckIline(char *user, char *host, char *pass)
+CheckIline(char *user, char *host, char *pass, struct Iline **imatch)
 
 {
 	struct Iline *iptr;
@@ -562,26 +566,24 @@ CheckIline(char *user, char *host, char *pass)
 	if (!(iptr = FindIline(user, host)))
 		return (IL_ERR_NOTAUTHORIZED);
 
+	if (iptr->class)
+	{
+		if (iptr->class->links >= iptr->class->maxLinks)
+			return (IL_ERR_FULL);
+
+		++iptr->class->links;
+	}
+
 	if (IsIlineForceId(iptr) && (*user == '~'))
 		return (IL_ERR_NEEDIDENT);
 
 	if (iptr->password && (strcmp(iptr->password, pass) != 0))
 		return (IL_ERR_BADPASS);
 
+	*imatch = iptr;
+
 	return (IL_ERR_GOODMATCH);
 } /* CheckIline() */
-
-/*
-FindClass()
- Return pointer to class represented by 'classnum'
-*/
-
-struct Class *
-FindClass(int classnum)
-
-{
-	return (NULL);
-} /* FindClass() */
 
 /*
 AddPort()
