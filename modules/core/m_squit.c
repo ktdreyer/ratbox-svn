@@ -138,7 +138,7 @@ static void ms_squit(struct Client *client_p, struct Client *source_p,
 	  sendto_wallops_flags(FLAGS_WALLOP, &me,
 				 "Remote SQUIT %s from %s (%s)",
 				 found_squit->server_name,
-				 get_client_name(source_p, HIDE_IP), comment);
+				 source_p->name, comment);
 
           sendto_server(NULL, NULL, NULL, NOCAPS, NOCAPS, NOFLAGS,
                         ":%s WALLOPS :Remote SQUIT %s from %s (%s)",
