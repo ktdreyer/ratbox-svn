@@ -41,11 +41,6 @@
 #include "cache.h"
 #include "s_newconf.h"
 
-/* New hash code */
-/*
- * Contributed by James L. Davis
- */
-
 static dlink_list *clientTable;
 static dlink_list *channelTable;
 static dlink_list *idTable;
@@ -82,6 +77,13 @@ dlink_list *ndTable;
  * A - GOPbot, B - chang, C - hanuaway, D - *.mu.OZ.AU
  *
  * The order shown above is just one instant of the server. 
+ *
+ *
+ * The hash functions currently used are based Fowler/Noll/Vo hashes
+ * which work amazingly well and have a extremely low collision rate
+ * For more info see http://www.isthe.com/chongo/tech/comp/fnv/index.html
+ *
+ * 
  */
 
 /* init_hash()
@@ -107,14 +109,16 @@ init_hash(void)
 static unsigned int
 hash_nick(const char *name)
 {
-	unsigned int h = 0;
+ 	u_int32_t h = FNV1_32_INIT;;
 
 	while (*name)
 	{
-		h = (h << 4) - (h + (unsigned char) ToLower(*name++));
+         	h ^= ToUpper(*name++);
+		h += (h<<1) + (h<<4) + (h<<7) + (h << 8) + (h << 24);
 	}
+        h = (h>>16) ^ (h & U_MAX);
+	return (unsigned int)h;
 
-	return (h & (U_MAX - 1));
 }
 
 /* hash_id()
@@ -124,14 +128,15 @@ hash_nick(const char *name)
 static unsigned int
 hash_id(const char *name)
 {
-	unsigned int h = 0;
+ 	u_int32_t h = FNV1_32_INIT;
 
 	while (*name)
 	{
-		h = (h << 4) - (h + (unsigned char) ToUpper(*name++));
+         	h ^= ToUpper(*name++);
+		h += (h<<1) + (h<<4) + (h<<7) + (h << 8) + (h << 24);
 	}
-
-	return (h & (U_MAX - 1));
+        h = (h >> U_MAX_BITS) ^ (h & (U_MAX-1));
+	return (unsigned int)h;
 }
 
 /* hash_channel()
@@ -142,14 +147,16 @@ static unsigned int
 hash_channel(const char *name)
 {
 	int i = 30;
-	unsigned int h = 0;
+	u_int32_t h = FNV1_32_INIT;;
 
 	while (*name && --i)
 	{
-		h = (h << 4) - (h + (unsigned char) ToLower(*name++));
+         	h ^= ToUpper(*name++);
+		h += (h<<1) + (h<<4) + (h<<7) + (h << 8) + (h << 24);
 	}
-
-	return (h & (CH_MAX - 1));
+	
+	h = (h >> CH_MAX_BITS) ^ (h & (CH_MAX-1));
+	return (unsigned int)h;
 }
 
 /* hash_hostname()
@@ -164,9 +171,13 @@ hash_hostname(const char *name)
 	unsigned int h = 0;
 
 	while (*name && --i)
-		h = (h << 4) - (h + (unsigned char) ToLower(*name++));
+	{
+         	h ^= ToUpper(*name++);
+		h += (h<<1) + (h<<4) + (h<<7) + (h << 8) + (h << 24);
+	}
 
-	return (h & (HOST_MAX - 1));
+	h = (h >> HOST_MAX_BITS) ^ (h & (HOST_MAX-1));
+	return (unsigned int)h;
 }
 
 /* hash_resv()
@@ -177,14 +188,16 @@ static unsigned int
 hash_resv(const char *name)
 {
 	int i = 30;
-	unsigned int h = 0;
+	u_int32_t h = FNV1_32_INIT;;
 
 	while (*name && --i)
 	{
-		h = (h << 4) - (h + (unsigned char) ToLower(*name++));
+         	h ^= ToUpper(*name++);
+		h += (h<<1) + (h<<4) + (h<<7) + (h << 8) + (h << 24);
 	}
-
-	return (h & (R_MAX - 1));
+	
+	h = (h >> R_MAX_BITS) ^ (h & (R_MAX-1));
+	return (unsigned int)h;
 }
 
 static unsigned int

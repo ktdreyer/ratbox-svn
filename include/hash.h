@@ -32,17 +32,25 @@
 extern dlink_list *resvTable;
 extern dlink_list *ndTable;
 
+/* Magic value for FNV hash functions */
+#define FNV1_32_INIT 0x811c9dc5UL
+
 /* Client hash table size, used in hash.c/s_debug.c */
-#define U_MAX 65536
+#define U_MAX_BITS (32-16)
+#define U_MAX 65536 /* 2^16 */
 
 /* Channel hash table size, hash.c/s_debug.c */
-#define CH_MAX 16384
+#define CH_MAX_BITS (32-14)
+#define CH_MAX 16384 /* 2^14 */
 
 /* hostname hash table size */
-#define HOST_MAX 131072
+#define HOST_MAX_BITS (32-17)
+#define HOST_MAX 131072 /* 2^17 */
 
 /* RESV/XLINE hash table size, used in hash.c */
-#define R_MAX 1024
+#define R_MAX_BITS (32-10)
+#define R_MAX 1024 /* 2^10 */
+
 
 #define HASH_WALK(i, max, ptr, table) for (i = 0; i < max; i++) { DLINK_FOREACH(ptr, table[i].head)
 #define HASH_WALK_SAFE(i, max, ptr, nptr, table) for (i = 0; i < max; i++) { DLINK_FOREACH_SAFE(ptr, nptr, table[i].head)

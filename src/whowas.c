@@ -54,13 +54,15 @@ static int whowas_next = 0;
 unsigned int
 hash_whowas_name(const char *name)
 {
-	unsigned int h = 0;
+    	u_int32_t h = FNV1_32_INIT; 
 
-	while (*name)
-	{
-		h = (h << 4) - (h + (unsigned char) ToLower(*name++));
-	}
-	return (h & (WW_MAX - 1));
+ 	while (*name)
+  	{
+  	        h ^= ToUpper(*name++);
+                h += (h<<1) + (h<<4) + (h<<7) + (h << 8) + (h << 24);
+        }
+  	h = (h >> WW_MAX_BITS) ^ (h & (WW_MAX-1));
+  	return (unsigned int)h;
 }
 
 void

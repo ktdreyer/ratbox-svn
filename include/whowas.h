@@ -35,6 +35,7 @@
  * Whowas hash table size
  *
  */
+#define WW_MAX_BITS 16
 #define WW_MAX 65536
 
 struct User;
