@@ -192,32 +192,11 @@ static void auth_dns_callback(void* vptr, adns_answer* reply)
         {
           strlcpy(str, *reply->rrs.str, sizeof(auth->client->host));
           sendheader(auth->client, REPORT_FIN_DNS);
-        }
-      else
-        {
-#ifdef IPV6
-          if(*auth->client->localClient->sockhost == ':')
-          {
-            strlcat(str, "0",HOSTLEN+1);
-	  }
-          if(auth->client->localClient->aftype == AF_INET6 && ConfigFileEntry.dot_in_ip6_addr == 1)
-	  {
-            strlcat(str, auth->client->localClient->sockhost,HOSTLEN+1);
-            strlcat(str, ".",HOSTLEN+1);
-          } else
-#endif
-            strlcat(str, auth->client->localClient->sockhost,HOSTLEN+1);
-          sendheader(auth->client, REPORT_HOST_TOOLONG);
-        }
+        } else
+        sendheader(auth->client, REPORT_HOST_TOOLONG);
     }
   else
     {
-#ifdef IPV6
-	
-      if(*auth->client->localClient->sockhost == ':')
-      {
-	strlcat(str, "0",HOSTLEN);
-      }
       if(auth->client->localClient->aftype == AF_INET6 && ConfigFileEntry.fallback_to_ip6_int == 1 && auth->ip6_int == 0)
       {
         struct Client *client = auth->client;
@@ -226,17 +205,7 @@ static void auth_dns_callback(void* vptr, adns_answer* reply)
 	SetDNSPending(auth);
         adns_getaddr(&client->localClient->ip, client->localClient->aftype, client->localClient->dns_query, 1);
         return;
-      }
-
-      if(auth->client->localClient->aftype == AF_INET6 && ConfigFileEntry.dot_in_ip6_addr == 1)
-      {
-        strlcat(str, auth->client->localClient->sockhost,HOSTLEN+1);
-        strlcat(str, ".",HOSTLEN+1);
-        sendheader(auth->client, REPORT_FAIL_DNS);
-      } else 
-#endif
-      {
-        strlcat(str, auth->client->localClient->sockhost,HOSTLEN+1); 
+      } else {
         sendheader(auth->client, REPORT_FAIL_DNS);
       }
     }
