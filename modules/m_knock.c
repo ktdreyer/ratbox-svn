@@ -278,7 +278,8 @@ void send_knock(struct Client *cptr, struct Client *sptr,
     {
       ircsprintf(message,"KNOCK: %s (%s [%s@%s] has asked for an invite)",
                  name, sptr->name, sptr->username, sptr->host);
-      sendto_channel_type_notice(cptr, chptr, MODE_CHANOP, message);
+      sendto_channel_type(cptr, cptr, chptr, MODE_CHANOP, sptr->name,
+			  "NOTICE", message);
     }
 
   return;
