@@ -1,3 +1,9 @@
+*** 20010526_6 by leeh
+- ok, based on comments ive changed the way we handle local pings:
+  - if the ping isnt cross-server, origin == what they sent
+  - if the ping is cross-server, origin == their nick
+
+
 *** 20010526_5 by cosine
 - fixed memory leak in s_auth.c
 - iauth is now working again (under #define USE_IAUTH)
