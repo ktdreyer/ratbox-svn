@@ -524,7 +524,10 @@ mo_modlist (struct Client *client_p, struct Client *source_p, int parc, char **p
   {
     if(parc>1)
     {
-      if(strstr(modlist[i]->name,parv[1]))
+#if 0
+      if(strstr(modlist[i]->name,parv[1]))  /* why was this non-wildcard matching? */
+#endif
+      if(match(parv[1],modlist[i]->name))
       {
         sendto_one(source_p, form_str(RPL_MODLIST), me.name, parv[0],
                    modlist[i]->name, modlist[i]->address,
