@@ -1,3 +1,18 @@
+jmallett    2002/01/09 07:27:14 EST	(20020109_2)
+
+  Modified files:
+    src                  memory.c 
+  Log:
+  Oops, meant to do cvs ci src/memory.c and did cvs ci -m src/memory.c
+  
+  Anyway, correct usage of mem_frob (instead of memfrob()) and put it inside
+  #ifndef NDEBUG.
+  
+  Revision  Changes    Path
+  7.34      +0 -0      ircd-hybrid-7/src/memory.c
+
+
+
 jmallett    2002/01/08 19:53:50 EST	(20020109_0)
 
   Modified files:
