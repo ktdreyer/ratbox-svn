@@ -1,3 +1,8 @@
+*** 20010528_7 by davidt
+- Fix HAVE_ZLIB vs HAVE_LIBZ #ifdef that resulted in any ziplinks failing
+  every 5 minutes.  bad david.
+
+
 *** 20010528_6 by davidt
 - Fix autoconf to properly disable openssl on detecting a broken version
   of OpenSSL.
