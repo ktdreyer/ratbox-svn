@@ -1,3 +1,30 @@
+leeh        2003/12/26 16:37:46 EST	(20031226_3)
+
+  Modified files:
+    include              c_init.h 
+    src                  client.c rserv.c s_alis.c scommand.c 
+                         stats.c ucommand.c 
+  Log:
+  - renamed .stats to .service, which now lists the services in use
+  - added .stats command to get various statistics, uses a table of commands
+    and functions, currently has:
+      opers, servers, uplink, uptime
+  - c_nick() wasnt setting a clients gecos
+  - cleaned up alis stats a bit
+  - added WHOIS command handling
+  - finished TRACE command handling
+  
+  Revision  Changes    Path
+  1.8       +3 -0      rserv/include/c_init.h
+  1.7       +3 -1      rserv/src/client.c
+  1.12      +1 -0      rserv/src/rserv.c
+  1.10      +8 -6      rserv/src/s_alis.c
+  1.7       +76 -1     rserv/src/scommand.c
+  1.2       +99 -0     rserv/src/stats.c
+  1.5       +27 -15    rserv/src/ucommand.c
+
+
+
 leeh        2003/12/26 16:36:16 EST	(20031226_2)
 
   Modified files:
