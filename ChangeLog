@@ -1,3 +1,15 @@
+androsyn    2003/10/08 10:28:56 EDT	(20031008_1)
+
+  Modified files:
+    include              tools.h 
+  Log:
+  Remove an unnecessary extern
+  
+  Revision  Changes    Path
+  1.48      +0 -1      ircd-ratbox/include/tools.h
+
+
+
 androsyn    2003/10/08 10:27:27 EDT	(20031008_0)
 
   Modified files:
