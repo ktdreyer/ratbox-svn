@@ -110,14 +110,14 @@ static void mo_unkline (struct Client *client_p,struct Client *source_p,
       sendto_one(source_p,":%s NOTICE %s :You need unkline = yes;",me.name,parv[0]);
       return;
     }
-  if ( parc < 2 )
+  if (parc < 2)
     {
       sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                  me.name, source_p->name, "UNKLINE");
       return;
     }
 
-  if ( (host = strchr(parv[1], '@')) || *parv[1] == '*' )
+  if ((host = strchr(parv[1], '@')) || *parv[1] == '*')
     {
       /* Explicit user@host mask given */
 
