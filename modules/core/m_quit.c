@@ -31,10 +31,11 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "s_conf.h"
 
 struct Message quit_msgtab = {
   MSG_QUIT, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
-  {m_quit, m_quit, ms_quit, mo_quit}
+  {m_quit, m_quit, m_error, mo_quit}
 };
 
 void
@@ -62,31 +63,24 @@ int     m_quit(struct Client *cptr,
                char *parv[])
 {
   char *comment = (parc > 1 && parv[1]) ? parv[1] : cptr->name;
+  char reason [TOPICLEN + 1];
 
   sptr->flags |= FLAGS_NORMALEX;
   if (strlen(comment) > (size_t) TOPICLEN)
     comment[TOPICLEN] = '\0';
 
+  if (ConfigFileEntry.client_exit)
+  {
+	  snprintf(reason, TOPICLEN, "Client Exit: %s", comment);
+	  comment = reason;
+  }
+  
 #ifdef ANTI_SPAM_EXIT_MESSAGE
   if( !IsServer(sptr) && MyConnect(sptr) &&
      (sptr->firsttime + ANTI_SPAM_EXIT_MESSAGE_TIME) > CurrentTime)
     comment = "Client Quit";
 #endif
-  return IsServer(sptr) ? 0 : exit_client(cptr, sptr, sptr, comment);
-}
-
-int     ms_quit(struct Client *cptr,
-               struct Client *sptr,
-               int parc,
-               char *parv[])
-{
-  char *comment = (parc > 1 && parv[1]) ? parv[1] : cptr->name;
-
-  sptr->flags |= FLAGS_NORMALEX;
-  if (strlen(comment) > (size_t) TOPICLEN)
-    comment[TOPICLEN] = '\0';
-
-  return IsServer(sptr) ? 0 : exit_client(cptr, sptr, sptr, comment);
+  return exit_client(cptr, sptr, sptr, comment);
 }
 
 int     mo_quit(struct Client *cptr,
@@ -95,10 +89,17 @@ int     mo_quit(struct Client *cptr,
                char *parv[])
 {
   char *comment = (parc > 1 && parv[1]) ? parv[1] : cptr->name;
-
+  char reason [TOPICLEN + 1];
+  
   sptr->flags |= FLAGS_NORMALEX;
   if (strlen(comment) > (size_t) TOPICLEN)
     comment[TOPICLEN] = '\0';
 
-  return IsServer(sptr) ? 0 : exit_client(cptr, sptr, sptr, comment);
+  if (ConfigFileEntry.client_exit)
+  {
+	  snprintf(reason, TOPICLEN, "Client Exit: %s", comment);
+	  comment = reason;
+  }
+
+  return exit_client(cptr, sptr, sptr, comment);
 }

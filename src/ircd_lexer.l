@@ -87,6 +87,7 @@ administrator	{ return ADMIN; }
 auth		{ return AUTH; }
 autoconn	{ return AUTOCONN; }
 class		{ return CLASS; }
+client_exit     { return CLIENT_EXIT; }
 connect		{ return CONNECT; }
 connectfreq     { return CONNECTFREQ; }
 deny		{ return DENY; }
