@@ -200,5 +200,5 @@ static void m_cjoin(struct Client *client_p,
 			vchan_chptr->chname);
 
   del_invite(vchan_chptr, source_p);
-  (void)channel_member_names(source_p, vchan_chptr, root_vchan->chname);
+  channel_member_names(source_p, vchan_chptr, root_vchan->chname, 1);
 }

@@ -123,10 +123,8 @@ extern struct  Channel* get_channel(struct Client *,char*,int );
 
 extern void    channel_member_names( struct Client *source_p,
 				     struct Channel *chptr,
-				     char *name_of_channel);
-extern void    list_one_channel_member_names( struct Client *source_p,
-					      struct Channel *chptr,
-					      char *name_of_channel);
+				     char *name_of_channel,
+                                     int show_eon);
 extern char    *channel_pub_or_secret(struct Channel *chptr);
 extern char    *channel_chanop_or_voice(struct Channel *, struct Client *);
 

@@ -291,5 +291,5 @@ static void ms_lljoin(struct Client *client_p,
                me.name, chptr->chname);
   }
 
-  (void)channel_member_names(target_p, chptr, chname);
+  channel_member_names(target_p, chptr, chname, 1);
 }

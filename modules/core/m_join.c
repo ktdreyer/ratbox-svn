@@ -372,8 +372,8 @@ static void m_join(struct Client *client_p,
             }
 	}
 
-      (void)list_one_channel_member_names(source_p, chptr, root_chptr->chname);
-      
+      channel_member_names(source_p, chptr, root_chptr->chname, 1);
+
       if(successful_join_count)
 	source_p->localClient->last_join_time = CurrentTime;
     }

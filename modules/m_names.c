@@ -125,12 +125,12 @@ static void m_names(struct Client *client_p,
                   if(!vchan)
                     return;
                 }
-              channel_member_names(source_p, vchan, ch2ptr->chname);
+              channel_member_names(source_p, vchan, ch2ptr->chname, 1);
 
             }
           else
             {
-              channel_member_names(source_p, ch2ptr, ch2ptr->chname);
+              channel_member_names(source_p, ch2ptr, ch2ptr->chname, 1);
             }
         }
     }
@@ -138,9 +138,9 @@ static void m_names(struct Client *client_p,
     {
       names_all_visible_channels(source_p);
       names_non_public_non_secret(source_p);
+      sendto_one(source_p, form_str(RPL_ENDOFNAMES), me.name, parv[0],
+                 "*");
     }
-
-  sendto_one(source_p, form_str(RPL_ENDOFNAMES), me.name, parv[0], "*");
 }
 
 /*
@@ -173,8 +173,8 @@ static void names_all_visible_channels(struct Client *source_p)
 	chname = chptr->chname;
 
       /* Find users on same channel (defined by chptr) */
-      
-      channel_member_names( source_p, chptr, chname );
+
+      channel_member_names( source_p, chptr, chname, 0);
     }
 }
 

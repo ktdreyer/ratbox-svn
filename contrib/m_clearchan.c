@@ -212,7 +212,7 @@ void kick_list(struct Client *client_p, struct Client *source_p, struct Channel 
 	     source_p->host,
 	     chname);
 
-  channel_member_names(source_p, chptr, chname);
+  channel_member_names(source_p, chptr, chname, 1);
 
 }
 

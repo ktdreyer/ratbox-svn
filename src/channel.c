@@ -2791,12 +2791,15 @@ set_channel_mode_flags( char flags_ptr[4][2],
  * inputs	- pointer to client struct requesting names
  *		- pointer to channel block
  *		- pointer to name of channel
+ *              - show ENDOFNAMES numeric or not
+ *                (don't want it with /names with no params)
  * output	- none
  * side effects	- lists all names on given channel
  */
 void channel_member_names( struct Client *source_p,
 			   struct Channel *chptr,
-			   char *name_of_channel )
+			   char *name_of_channel,
+                           int show_eon)
 {
   int mlen;
   int sublists_done = 0;
@@ -2873,27 +2876,10 @@ void channel_member_names( struct Client *source_p,
       if (reply_to_send)
 	sendto_one(source_p, "%s", lbuf);
     }
-}
 
-/*
- * list_one_channel_member_names
- *
- * inputs	- pointer to client struct requesting names
- *		- pointer to channel block
- *		- pointer to name of channel
- * output	- none
- * side effects	- lists all names on given channel
- *
- * Used by m_join.c
- */
-void list_one_channel_member_names( struct Client *source_p,
-			   struct Channel *chptr,
-			   char *name_of_channel )
-{
-  channel_member_names(source_p,chptr,name_of_channel);
-
-  sendto_one(source_p, form_str(RPL_ENDOFNAMES), me.name, source_p->name,
-	     name_of_channel);
+  if (show_eon)
+    sendto_one(source_p, form_str(RPL_ENDOFNAMES), me.name, 
+               source_p->name, name_of_channel);
 }
 
 /*

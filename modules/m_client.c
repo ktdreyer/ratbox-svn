@@ -551,7 +551,7 @@ m_client(struct Client *client_p, struct Client *source_p,
     root_chptr = chptr->root_chptr ? chptr->root_chptr : chptr;
     sendto_one(target_p, ":%s!%s@%s JOIN %s", target_p->name,
                target_p->username, target_p->host, root_chptr->chname);
-    channel_member_names(target_p, chptr, root_chptr->chname);               
+    channel_member_names(target_p, chptr, root_chptr->chname, 1);
    }
 }
 #endif
