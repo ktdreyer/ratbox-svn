@@ -92,8 +92,8 @@ static int find_user_host(struct Client *source_p,
 #ifndef IPV6
 static int valid_comment(struct Client *source_p, char *comment);
 #endif
-static int valid_user_host(struct Client *source_p, char *user, char *host);
-static int valid_wild_card(struct Client *source_p, char *user, char *host);
+static int valid_user_host(char *user, char *host);
+static int valid_wild_card(char *user, char *host);
 static int already_placed_kline(struct Client *source_p, char *user, char *host,
                                 time_t tkline_time, struct irc_inaddr *);
 
@@ -195,11 +195,22 @@ static void mo_kline(struct Client *client_p,
   if(0 != parc)
     reason = *parv;
 
-  if( valid_user_host(source_p,user,host) == 0 )
-    return;
+  if(valid_user_host(user,host))
+    {
+       sendto_one(source_p, ":%s NOTICE %s :Invalid character '#' in kline",
+                   me.name, source_p->name);
+       return;
+    }
 
-  if( valid_wild_card(source_p,user,host) == 0 )
-    return;
+  if(valid_wild_card(user,host))
+    {
+       sendto_one(source_p, 
+          ":%s NOTICE %s :Please include at least %d non-wildcard characters with the user@host",
+           me.name,
+           source_p->name,
+           NONWILDCHARS);
+       return;
+    }
 
   ip_kline = is_ip_kline(host,&ip,&ip_mask);
   current_date = smalldate((time_t) 0);
@@ -302,6 +313,24 @@ static void ms_kline(struct Client *client_p,
     return;
   if( rclient_p->host == NULL )
     return;
+
+  if(valid_user_host(parv[4],parv[5]))
+    {
+      sendto_realops_flags(FLAGS_ALL,
+             "*** Received Invalid K-Line for %s@%s, from %s!%s@%s on %s",
+             parv[4], parv[5], rclient_p->name, rclient_p->username,
+             rclient_p->host, source_p->name);
+      return;
+    }
+
+  if(valid_wild_card(parv[4],parv[5]))
+    {
+       sendto_realops_flags(FLAGS_ALL, 
+             "*** Received Wildcard K-Line for %s@%s, from %s!%s@%s on %s",
+             parv[4], parv[5], rclient_p->name, rclient_p->username,
+             rclient_p->host, source_p->name);
+       return;
+     }
 
   ip_kline = is_ip_kline(parv[5],&ip,&ip_mask);
   tkline_time = atoi(parv[3]);
@@ -847,34 +876,21 @@ static int find_user_host(struct Client *source_p,
 
 /*
  * valid_user_host
- * inputs	- pointer to client placing kline
- *              - pointer to user buffer
+ * inputs       - pointer to user buffer
  *              - pointer to host buffer
- * output	- 0 if not valid user or host, 1 if valid
+ * output	- 1 if not valid user or host, 0 if valid
  * side effects -
  */
-static int valid_user_host( struct Client *source_p, char *luser, char *lhost)
+static int valid_user_host(char *luser, char *lhost)
 {
   /*
    * Check for # in user@host
    */
 
-  if(strchr(lhost, '#'))
-    {
-      if(!IsServer(source_p))
-        sendto_one(source_p, ":%s NOTICE %s :Invalid character '#' in hostname",
-                   me.name, source_p->name);
+  if(strchr(lhost, '#') || strchr(luser, '#'))
+      return 1;
+  else
       return 0;
-    }
-  if(strchr(luser, '#'))
-    { 
-      if(!IsServer(source_p))
-        sendto_one(source_p, ":%s NOTICE %s :Invalid character '#' in username",
-                   me.name, source_p->name);
-      return 0;
-    }   
-
-  return 1;
 }
 
 /*
@@ -885,7 +901,7 @@ static int valid_user_host( struct Client *source_p, char *luser, char *lhost)
  * output       - 0 if not valid, 1 if valid
  * side effects -
  */
-static int valid_wild_card(struct Client *source_p, char *luser, char *lhost)
+static int valid_wild_card(char *luser, char *lhost)
 {
   char *p;
   char tmpch;
@@ -934,22 +950,9 @@ static int valid_wild_card(struct Client *source_p, char *luser, char *lhost)
   }
 
   if (nonwild < NONWILDCHARS)
-  {
-    /*
-     * Not enough non-wild characters were found, assume
-     * they are trying to kline *@*.
-     */
-    if (!IsServer(source_p))
-      sendto_one(source_p,
-        ":%s NOTICE %s :Please include at least %d non-wildcard characters with the user@host",
-        me.name,
-        source_p->name,
-        NONWILDCHARS);
-
+    return 1;
+  else
     return 0;
-  }
-
-  return 1;
 }
 
 /*

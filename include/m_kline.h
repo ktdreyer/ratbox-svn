@@ -44,6 +44,6 @@ typedef struct PKDlines aPendingLine;
  * characters for the kline routine.
  */
 
-#define NONWILDCHARS 2
+#define NONWILDCHARS 4
 
 #endif /* INCLUDED_m_kline_h */
