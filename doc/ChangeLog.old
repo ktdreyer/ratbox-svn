@@ -1,3 +1,10 @@
+*** 20001228_15 by toot
+. started adding the ircd.conf options to /info (same order
+  as in example.conf)  got as far as max_nick_changes.
+. put back a "Your are Dlined" notice that had run off 
+. removed a couple of unused settings
+
+
 *** 20001228_14 by bill
 
 - added hyb7 +h modes to hyb6 +o modes
