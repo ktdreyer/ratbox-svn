@@ -262,11 +262,14 @@ static void
 expire_glines()
 {
   dlink_node *gline_node;
+  dlink_node *next_node;
   struct ConfItem *kill_ptr;
 
-  for(gline_node = glines.head; gline_node; gline_node = gline_node->next)
+  for(gline_node = glines.head; gline_node; gline_node = next_node)
     {
       kill_ptr = gline_node->data;
+      next_node = gline_node->next;
+
       if(kill_ptr->hold <= CurrentTime)
 	{
 	  free_conf(kill_ptr);
@@ -290,11 +293,14 @@ static void
 expire_pending_glines()
 {
   dlink_node *pending_node;
+  dlink_node *next_node;
   struct gline_pending *glp_ptr;
 
-  for(pending_node = pending_glines.head; pending_node; pending_node = pending_node->next)
+  for(pending_node = pending_glines.head; pending_node; pending_node = next_node)
     {
       glp_ptr = pending_node->data;
+      next_node = pending_node->next;
+
       if( (glp_ptr->last_gline_time + GLINE_PENDING_EXPIRE) <= CurrentTime )
         {
           MyFree(glp_ptr->reason1);

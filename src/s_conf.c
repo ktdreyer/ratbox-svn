@@ -1761,11 +1761,13 @@ static void
 expire_tklines(dlink_list *tklist)
 {
   dlink_node *kill_node;
+  dlink_node *next_node;
   struct ConfItem *kill_ptr;
 
-  for (kill_node = tklist->head; kill_node; kill_node = kill_node->next)
+  for (kill_node = tklist->head; kill_node; kill_node = next_node)
     {
       kill_ptr = kill_node->data;
+      next_node = kill_node->next;
 
       if (kill_ptr->hold <= CurrentTime)
         {
