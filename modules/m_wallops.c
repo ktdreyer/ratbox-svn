@@ -51,7 +51,6 @@ DECLARE_MODULE_AV1(wallops, NULL, NULL, wallops_clist, NULL, NULL, "$Revision$")
 
 /*
  * mo_wallops (write to *all* opers currently online)
- *      parv[0] = sender prefix
  *      parv[1] = message text
  */
 static int
@@ -69,14 +68,16 @@ mo_wallops(struct Client *client_p, struct Client *source_p, int parc, const cha
 	}
 
 	sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", message);
-	sendto_server(NULL, NULL, NOCAPS, NOCAPS, ":%s WALLOPS :%s", parv[0], message);
+	sendto_server(NULL, NULL, CAP_TS6, NOCAPS, ":%s WALLOPS :%s", 
+		      use_id(source_p), message);
+	sendto_server(NULL, NULL, NOCAPS, CAP_TS6, ":%s WALLOPS :%s", 
+		      source_p->name, message);
 
 	return 0;
 }
 
 /*
  * ms_wallops (write to *all* opers currently online)
- *      parv[0] = sender prefix
  *      parv[1] = message text
  */
 static int

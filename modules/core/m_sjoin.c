@@ -65,6 +65,8 @@ DECLARE_MODULE_AV1(sjoin, NULL, NULL, sjoin_clist, NULL, NULL, "$Revision$");
  * all the specified users while sending JOIN/MODEs to local clients
  */
 
+extern BlockHeap *ban_heap;
+
 static char modebuf[MODEBUFLEN];
 static char parabuf[MODEBUFLEN];
 static const char *para[MAXMODEPARAMS];
@@ -73,7 +75,8 @@ static int pargs;
 
 static void set_final_mode(struct Mode *mode, struct Mode *oldmode);
 static void remove_our_modes(struct Channel *chptr, struct Client *source_p);
-
+static void remove_ban_list(struct Channel *chptr, struct Client *source_p,
+			    dlink_list *list, char c, int cap);
 
 static int
 ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
@@ -170,7 +173,6 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 		newts = (oldts == 0) ? oldts : 800000000;
 	}
 #else
-
 	if(!isnew && !newts && oldts)
 	{
 		sendto_channel_local(ALL_MEMBERS, chptr,
@@ -429,6 +431,26 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 			sendto_one(target_p, "%s", buf_nick);
 	}
 
+	/* if the source does TS6 we have to remove our bans.  Its now safe
+	 * to issue -b's to the non-ts6 servers, as the sjoin we've just
+	 * sent will kill any ops they have.
+	 */
+	if(!keep_our_modes && source_p->id[0] != '\0')
+	{
+		if(dlink_list_length(&chptr->banlist) > 0)
+			remove_ban_list(chptr, source_p, &chptr->banlist,
+					'b', NOCAPS);
+
+		if(dlink_list_length(&chptr->exceptlist) > 0)
+			remove_ban_list(chptr, source_p, &chptr->exceptlist,
+					'e', CAP_EX);
+
+		if(dlink_list_length(&chptr->invexlist) > 0)
+			remove_ban_list(chptr, source_p, &chptr->invexlist,
+					'I', CAP_IE);
+	}
+
+	
 	return 0;
 }
 
@@ -622,4 +644,69 @@ remove_our_modes(struct Channel *chptr, struct Client *source_p)
 				     EmptyString(lpara[3]) ? "" : lpara[3]);
 
 	}
+}
+
+/* remove_ban_list()
+ *
+ * inputs	- channel, source, list to remove, char of mode, caps needed
+ * outputs	-
+ * side effects - given list is removed, with modes issued to local clients
+ * 		  and non-TS6 servers.
+ */
+static void
+remove_ban_list(struct Channel *chptr, struct Client *source_p,
+		dlink_list *list, char c, int cap)
+{
+	static char lmodebuf[MODEBUFLEN];
+	static char lparabuf[BUFSIZE];
+	struct Ban *banptr;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+	char *pbuf;
+	int count = 0;
+	int cur_len, mlen, plen;
+
+	pbuf = lparabuf;
+
+	/* XXX - broken serverhiding */
+	cur_len = mlen = ircsprintf(lmodebuf, ":%s MODE %s +", 
+				    source_p->name, chptr->chname);
+	mbuf = lmodebuf + mlen;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, list->head)
+	{
+		banptr = ptr->data;
+
+		plen = strlen(banptr->banstr) + 1;
+
+		if(count >= MAXMODEPARAMS || (cur_len + plen) > BUFSIZE - 4)
+		{
+			/* remove trailing space */
+			*(pbuf - 1) = '\0';
+
+			sendto_channel_local(ALL_MEMBERS, chptr, "%s%s",
+					     lmodebuf, lparabuf);
+			sendto_server(source_p, chptr, cap, CAP_TS6,
+				      "%s%s", lmodebuf, lparabuf);
+
+			cur_len = mlen;
+			mbuf = lmodebuf + mlen;
+			count = 0;
+		}
+
+		*mbuf++ = c;
+		cur_len += plen;
+		pbuf += ircsprintf(pbuf, "%s ", banptr->banstr);
+		count++;
+
+		BlockHeapFree(ban_heap, banptr);
+	}
+
+	*(pbuf - 1) = '\0';
+	sendto_channel_local(ALL_MEMBERS, chptr, "%s%s", lmodebuf, lparabuf);
+	sendto_server(source_p, chptr, cap, CAP_TS6,
+		      "%s%s", lmodebuf, lparabuf);
+
+	list->head = list->tail = NULL;
+	list->length = 0;
 }

@@ -450,7 +450,7 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 
 	set_server_gecos(target_p, info);
 
-	target_p->serv->up = find_or_add(parv[0]);
+	target_p->serv->up = find_or_add(source_p->name);
 
 	if(has_id(source_p))
 		target_p->serv->upid = source_p->id;

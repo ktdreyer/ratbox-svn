@@ -745,58 +745,6 @@ report_and_set_user_flags(struct Client *source_p, struct ConfItem *aconf)
 	}
 }
 
-
-/*
- * do_local_user
- *
- * inputs	-
- * output	-
- * side effects -
- */
-int
-do_local_user(const char *nick, struct Client *client_p, struct Client *source_p,
-	      const char *username, const char *host, const char *server, const char *realname)
-{
-	struct User *user;
-
-	s_assert(NULL != source_p);
-	s_assert(source_p->username != username);
-
-	if(source_p == NULL)
-		return 0;
-
-	if(!IsUnknown(source_p))
-	{
-		sendto_one(source_p, form_str(ERR_ALREADYREGISTRED), me.name, nick);
-		return 0;
-	}
-
-	user = make_user(source_p);
-
-	/*
-	 * don't take the clients word for it, ever
-	 */
-	user->server = me.name;
-
-	strlcpy(source_p->info, realname, sizeof(source_p->info));
-
-	if(!IsGotId(source_p))
-	{
-		/* This is in this location for a reason..If there is no identd
-		 * and ping cookies are enabled..we need to have a copy of this
-		 */
-		strlcpy(source_p->username, username, sizeof(source_p->username));
-	}
-
-	if(source_p->name[0])
-	{
-		/* NICK already received, now I have USER... */
-		return register_local_user(client_p, source_p, source_p->name, username);
-	}
-
-	return 0;
-}
-
 /*
  * user_mode - set get current users mode
  *

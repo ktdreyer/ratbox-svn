@@ -652,6 +652,9 @@ sendto_common_channels_local(struct Client *user, const char *pattern, ...)
 		}
 	}
 
+	/* this can happen when the user isnt in any channels, but we still
+	 * need to send them the data, ie a nick change
+	 */
 	if(MyConnect(user) && (user->serial != current_serial))
 		send_linebuf(user, &linebuf);
 

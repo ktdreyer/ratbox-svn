@@ -73,6 +73,8 @@ static int clean_nick(const char *);
 static int clean_username(const char *);
 static int clean_host(const char *);
 
+static void set_initial_nick(struct Client *client_p, struct Client *source_p, char *nick);
+static void change_local_nick(struct Client *client_p, struct Client *source_p, char *nick);
 static int register_client(struct Client *client_p, struct Client *server, 
 			   const char *nick, time_t newts, int parc, const char *parv[]);
 
@@ -495,7 +497,96 @@ clean_host(const char *host)
 
 	return 1;
 }
-		
+
+static void
+set_initial_nick(struct Client *client_p, struct Client *source_p, char *nick)
+{
+	char buf[USERLEN + 1];
+
+	/* This had to be copied here to avoid problems.. */
+	source_p->tsinfo = CurrentTime;
+	if(source_p->name[0])
+		del_from_client_hash(source_p->name, source_p);
+
+	strcpy(source_p->name, nick);
+	add_to_client_hash(nick, source_p);
+
+	/* fd_desc is long enough */
+	fd_note(client_p->localClient->fd, "Nick: %s", nick);
+
+	if(source_p->user)
+	{
+		strlcpy(buf, source_p->username, sizeof(buf));
+
+		/* got user, heres nick. */
+		register_local_user(client_p, source_p, nick, buf);
+
+	}
+}
+
+static void
+change_local_nick(struct Client *client_p, struct Client *source_p, char *nick)
+{
+	source_p->tsinfo = CurrentTime;
+
+	if((source_p->localClient->last_nick_change + ConfigFileEntry.max_nick_time) < CurrentTime)
+		source_p->localClient->number_of_nick_changes = 0;
+	source_p->localClient->last_nick_change = CurrentTime;
+	source_p->localClient->number_of_nick_changes++;
+
+	/* check theyre not nick flooding */
+	if((ConfigFileEntry.anti_nick_flood &&
+	    (source_p->localClient->number_of_nick_changes
+	     <= ConfigFileEntry.max_nick_changes)) ||
+	   !ConfigFileEntry.anti_nick_flood || (IsOper(source_p) && ConfigFileEntry.no_oper_flood))
+	{
+		sendto_realops_flags(UMODE_NCHANGE, L_ALL,
+				     "Nick change: From %s to %s [%s@%s]",
+				     source_p->name, nick, source_p->username, source_p->host);
+
+		/* send the nick change to the users channels */
+		sendto_common_channels_local(source_p, ":%s!%s@%s NICK :%s",
+					     source_p->name,
+					     source_p->username, source_p->host, nick);
+
+		/* send the nick change to servers.. */
+		if(source_p->user)
+		{
+			add_history(source_p, 1);
+
+			sendto_server(client_p, NULL, CAP_TS6, NOCAPS,
+				      ":%s NICK %s :%lu",
+				      use_id(source_p), nick, 
+				      (unsigned long) source_p->tsinfo);
+			sendto_server(client_p, NULL, NOCAPS, CAP_TS6,
+				      ":%s NICK %s :%lu", 
+				      source_p->name, nick, 
+				      (unsigned long) source_p->tsinfo);
+		}
+	}
+	else
+	{
+		sendto_one(source_p, form_str(ERR_NICKTOOFAST), 
+			   me.name, source_p->name, source_p->name, 
+			   nick, ConfigFileEntry.max_nick_time);
+		return;
+	}
+
+	/* Finally, add to hash */
+	del_from_client_hash(source_p->name, source_p);
+	strcpy(source_p->name, nick);
+	add_to_client_hash(nick, source_p);
+
+	/* Make sure everyone that has this client on its accept list
+	 * loses that reference. 
+	 */
+	del_all_accepts(source_p);
+
+	/* fd_desc is long enough */
+	fd_note(client_p->localClient->fd, "Nick: %s", nick);
+
+	return;
+}
 
 /*
  * nick_from_server()

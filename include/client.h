@@ -578,8 +578,6 @@ extern int accept_message(struct Client *source, struct Client *target);
 extern void del_from_accept(struct Client *source, struct Client *target);
 extern void del_all_accepts(struct Client *client_p);
 
-extern int set_initial_nick(struct Client *client_p, struct Client *source_p, char *nick);
-extern int change_local_nick(struct Client *client_p, struct Client *source_p, char *nick);
 extern void dead_link(struct Client *client_p);
 extern int show_ip(struct Client *source_p, struct Client *target_p);
 

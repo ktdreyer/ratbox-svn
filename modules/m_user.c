@@ -50,14 +50,14 @@ struct Message user_msgtab = {
 mapi_clist_av1 user_clist[] = { &user_msgtab, NULL };
 DECLARE_MODULE_AV1(user, NULL, NULL, user_clist, NULL, NULL, "$Revision$");
 
-/*
-** mr_user
-**      parv[0] = sender prefix
-**      parv[1] = username (login name, account)
-**      parv[2] = client host name (used only from other servers)
-**      parv[3] = server host name (used only from other servers)
-**      parv[4] = users real name info
-*/
+static int do_local_user(struct Client *client_p, struct Client *source_p,
+			 const char *username, const char *realname)
+/* mr_user()
+ *      parv[1] = username (login name, account)
+ *      parv[2] = client host name (ignored)
+ *      parv[3] = server host name (ignored)
+ *      parv[4] = users gecos
+ */
 static int
 mr_user(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
@@ -75,10 +75,37 @@ mr_user(struct Client *client_p, struct Client *source_p, int parc, const char *
 		return 0;
 	}
 
-	do_local_user(parv[0], client_p, source_p, parv[1],	/* username */
-		      parv[2],	/* host */
-		      parv[3],	/* server */
-		      parv[4] /* users real name */ );
+	do_local_user(client_p, source_p, parv[1], parv[4]);
+	return 0;
+}
+
+static int
+do_local_user(struct Client *client_p, struct Client *source_p,
+	      const char *username, const char *realname)
+{
+	struct User *user;
+
+	s_assert(NULL != source_p);
+	s_assert(source_p->username != username);
+
+	user = make_user(source_p);
+	user->server = me.name;
+
+	strlcpy(source_p->info, realname, sizeof(source_p->info));
+
+	if(!IsGotId(source_p))
+	{
+		/* This is in this location for a reason..If there is no identd
+		 * and ping cookies are enabled..we need to have a copy of this
+		 */
+		strlcpy(source_p->username, username, sizeof(source_p->username));
+	}
+
+	if(source_p->name[0])
+	{
+		/* NICK already received, now I have USER... */
+		return register_local_user(client_p, source_p, source_p->name, username);
+	}
 
 	return 0;
 }

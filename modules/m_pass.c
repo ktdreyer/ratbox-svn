@@ -36,6 +36,7 @@
 #include "modules.h"
 #include "s_serv.h"
 #include "hash.h"
+#include "s_conf.h"
 
 static int mr_pass(struct Client *, struct Client *, int, const char **);
 
