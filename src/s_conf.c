@@ -2858,6 +2858,8 @@ int        is_address(char *host,
       host++;
     }
 
+  if(octet > 255)
+    return( 0 );
   current_ip <<= 8;
   current_ip += octet;
 

@@ -3,12 +3,12 @@
 		description="This is a test conf";
 		email="admin@ircd.db.net";
 		hub=yes;
-	}
+	};
 
 	administrator {
 		name="Diane's ircd";
 		email="<db@db.net>";
-	}
+	};
 
 	class {
 		name="1";
@@ -16,7 +16,7 @@
 		number_per_ip=0;
 		max_number=20;
 		sendq=100000;
-	}
+	};
 
 	class {
 		name="2";
@@ -24,7 +24,7 @@
 		number_per_ip=300;
 		max_number=10;
 		sendq=4000000;
-	}
+	};
 
 	class {
 		name="3";
@@ -32,31 +32,31 @@
 		number_per_ip=1;
 		max_number=100;
 		sendq=100000;
-	}
+	};
 
 	client {
 		passwd="";
 		allow="*";
 		class="1";
-	}
+	};
 
 	client {
 		passwd="";
 		allow="*@*ppp*";
 		class="3";
-	}
+	};
 
 	client {
 		passwd="";
 		allow="*@*slip*";
 		class="3";
-	}
+	};
 
 	client {
 		passwd="";
 		allow="*@*ts*";
 		class="3";
-	}
+	};
 
 	client {
 		passwd="";
@@ -66,7 +66,7 @@
 		no_tilde;
 		allow="db@*db.net";
 		class="3";
-	}
+	};
 
 	client {
 		passwd="";
@@ -77,18 +77,18 @@
 		no_tilde;
 		allow="db@home.db.net";
 		class="3";
-	}
+	};
 
 	client {
 		allow="192.168.0.0/24";
 		passwd="";
 		class="3";
-	}
+	};
 
 	listen {
 		name="*";
 		port=6667;
-	}
+	};
 
 	operator {
 		name="Dianora";
@@ -101,7 +101,7 @@
 		nick_changes=yes;
 		die=yes;
 		class="3";
-	}
+	};
 
 	operator {
 		name="Dianora";
@@ -114,7 +114,7 @@
 		nick_changes=yes;
 		die=yes;
 		class="3";
-	}
+	};
 
 	operator {
 		name="Dianora";
@@ -127,42 +127,42 @@
 		nick_changes=yes;
 		die=yes;
 		class="3            ";
-	}
+	};
 
 	quarantine {
 		name="#madland";
 		reason="lame channel";
-	}
+	};
 
 	quarantine {
 		name="lamestbot";
 		reason="You have to be kidding me";
-	}
+	};
 
 	quarantine {
 		name="lamestbot";
 		reason="You have to be kidding me";
-	}
+	};
 
 	quarantine {
 		name="foobar";
 		reason="test";
-	}
+	};
 
 	quarantine {
 		name="*Serv";
 		reason="Reserved for HybNet services                   ";
-	}
+	};
 
 	kill {
 		name="*foo@*bar.com";
 		reason="test kline";
-	}
+	};
 
 	deny {
 		ip="192.168.0.0/28";
 		reason="test dline";
-	}
+	};
 
 	connect {
 		name="192.168.0.100";
@@ -173,7 +173,7 @@
 		compressed=yes;
 		lazylink=yes;
 		class="3";
-	}
+	};
 
 	connect {
 		name="irc.imyth.com";
@@ -184,5 +184,4 @@
 		compressed=yes;
 		hub_mask="*";
 		class="3";
-	}
-
+	};

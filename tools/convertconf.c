@@ -282,7 +282,7 @@ static void oldParseOneLine(FILE *out,char* line)
 	fprintf(out,"\t\tname=\"%s\";\n", host_field);
       if(user_field)
 	fprintf(out,"\t\temail=\"%s\";\n", user_field);
-      fprintf(out,"\t}\n\n");
+      fprintf(out,"\t};\n\n");
       break;
 
     case 'c':
@@ -324,7 +324,7 @@ static void oldParseOneLine(FILE *out,char* line)
 	fprintf(out,"\t\tip=\"%s\";\n", user_field);
       if(passwd_field)
 	fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
-      fprintf(out,"\t}\n\n");
+      fprintf(out,"\t};\n\n");
       break;
 
     case 'D': /* Deny lines (immediate refusal) */
@@ -333,7 +333,7 @@ static void oldParseOneLine(FILE *out,char* line)
 	fprintf(out,"\t\tip=\"%s\";\n", host_field);
       if(passwd_field)
 	fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
-      fprintf(out,"\t}\n\n");
+      fprintf(out,"\t};\n\n");
       break;
 
     case 'H': /* Hub server line */
@@ -370,7 +370,7 @@ static void oldParseOneLine(FILE *out,char* line)
 	fprintf(out,"\t\tclass=\"%s\";\n", class_field);	
       fprintf(out,"\t\trestricted;\n");	
 
-      fprintf(out,"\t}\n\n");
+      fprintf(out,"\t};\n\n");
       break;
 
     case 'I': 
@@ -408,7 +408,7 @@ static void oldParseOneLine(FILE *out,char* line)
 
       if(class_field)
 	fprintf(out,"\t\tclass=\"%s\";\n", class_field);	
-      fprintf(out,"\t}\n\n");
+      fprintf(out,"\t};\n\n");
       break;
       
     case 'K': /* Kill user line on irc.conf           */
@@ -418,7 +418,7 @@ static void oldParseOneLine(FILE *out,char* line)
 	fprintf(out,"\t\tname=\"%s@%s\";\n", user_field,host_field);
       if(passwd_field)
 	fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
-      fprintf(out,"\t}\n\n");
+      fprintf(out,"\t};\n\n");
       break;
 
     case 'L': /* guaranteed leaf server */
@@ -441,7 +441,7 @@ static void oldParseOneLine(FILE *out,char* line)
 	fprintf(out,"\t\thub=yes;\n");
       else
      	fprintf(out,"\t\thub=no;\n");
-      fprintf(out,"\t}\n\n");
+      fprintf(out,"\t};\n\n");
       break;
 
     case 'n': 
@@ -492,7 +492,7 @@ static void oldParseOneLine(FILE *out,char* line)
 	OperPrivsFromString(out,port_field);
       if(class_field)
 	fprintf(out,"\t\tclass=\"%s\";\n", class_field);	
-      fprintf(out,"\t}\n\n");
+      fprintf(out,"\t};\n\n");
       break;
 
       /* Local Operator, (limited privs --SRB) */
@@ -508,7 +508,7 @@ static void oldParseOneLine(FILE *out,char* line)
 	OperPrivsFromString(out,port_field);
       if(class_field)
 	fprintf(out,"\t\tclass=\"%s\";\n", class_field);	
-      fprintf(out,"\t}\n\n");
+      fprintf(out,"\t};\n\n");
       break;
 
     case 'P': /* listen port line */
@@ -518,7 +518,7 @@ static void oldParseOneLine(FILE *out,char* line)
 	fprintf(out,"\t\tname=\"%s\";\n", host_field);
       if(port_field)
 	fprintf(out,"\t\tport=%d;\n", atoi(port_field));
-      fprintf(out,"\t}\n\n");
+      fprintf(out,"\t};\n\n");
       break;
 
     case 'Q': /* reserved nicks */
@@ -528,7 +528,7 @@ static void oldParseOneLine(FILE *out,char* line)
 	fprintf(out,"\t\tname=\"%s\";\n", host_field);
       if(passwd_field)
 	fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
-      fprintf(out,"\t}\n\n");
+      fprintf(out,"\t};\n\n");
       break;
 
     case 'U': 
@@ -538,7 +538,7 @@ static void oldParseOneLine(FILE *out,char* line)
 	fprintf(out,"\t\tname=\"%s\";\n", host_field);
       if(passwd_field)
 	fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
-      fprintf(out,"\t}\n\n");
+      fprintf(out,"\t};\n\n");
       break;
 
     case 'X': /* rejected gecos */
@@ -548,7 +548,7 @@ static void oldParseOneLine(FILE *out,char* line)
 	fprintf(out,"\t\tname=\"%s\";\n", host_field);
       if(passwd_field)
 	fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
-      fprintf(out,"\t}\n\n");
+      fprintf(out,"\t};\n\n");
       break;
 
     case 'Y':
@@ -577,7 +577,7 @@ static void oldParseOneLine(FILE *out,char* line)
       if(class_field)
 	sendq = atoi(class_field);
       fprintf(out,"\t\tsendq=%d;\n", sendq);
-      fprintf(out,"\t}\n\n");
+      fprintf(out,"\t};\n\n");
       break;
       
     default:
@@ -627,7 +627,7 @@ static void PrintOutServers(FILE* out)
 	  if(p->class)
 	    fprintf(out,"\t\tclass=\"%s\";\n", p->class );
 
-	  fprintf(out,"\t}\n\n");
+	  fprintf(out,"\t};\n\n");
 	}
     }
 }
