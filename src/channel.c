@@ -2717,7 +2717,7 @@ static void clear_channel_list(int type, struct Channel *chptr,
 
       *mp++ = flag;
       *mp = '\0';
-      ircsprintf(pp,"%s ",banptr);
+      ircsprintf(pp,"%s ",banptr->banstr);
       pp += tlen;
       cur_len += tlen;
       count++;

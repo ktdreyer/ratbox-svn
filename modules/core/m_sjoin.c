@@ -38,6 +38,7 @@
 #include "parse.h"
 #include "modules.h"
 #include "s_serv.h"
+#include "s_conf.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -303,16 +304,15 @@ int     ms_sjoin(struct Client *cptr,
       remove_our_modes(hide_or_not, chptr, top_chptr, sptr);
     }
 
-  /* XXX */
-  if(*mbuf != '\0')
+  if(*modebuf != '\0')
     {
       if(top_chptr != NULL)
-	sendto_channel_local(hide_or_not,
+	sendto_channel_local(ALL_MEMBERS,
 			     chptr, ":%s MODE %s %s %s",
 			     me.name,
 			     top_chptr->chname, modebuf, parabuf);
       else
-	sendto_channel_local(hide_or_not,
+	sendto_channel_local(ALL_MEMBERS,
 			     chptr, ":%s MODE %s %s %s",
 			     me.name,
 			     chptr->chname, modebuf, parabuf);
@@ -349,19 +349,22 @@ int     ms_sjoin(struct Client *cptr,
         if (*s == '@')
 	{
 	  fl |= MODE_CHANOP;
-          *sh++ = *s;
+          if (keep_new_modes)
+            *sh++ = *s;
 	  s++;
 	}
         else if (*s == '+')
 	{
 	  fl |= MODE_VOICE;
-          *sh++ = *s;
+          if (keep_new_modes)
+            *sh++ = *s;
 	  s++;
 	}
         else if (*s == '%')
         {
           fl |= MODE_HALFOP;
-          *sh++ = '@';
+          if (keep_new_modes)
+            *sh++ = '@';
           s++;
         }
       }
@@ -509,9 +512,25 @@ int     ms_sjoin(struct Client *cptr,
 	}
     }
 
-  sendto_cap_serv_butone(CAP_HOPS, cptr, "%s %s", buf, sjbuf);
+  for(m = serv_list.head; m; m = m->next)
+    {
+      acptr = m->data;
 
-  sendto_nocap_serv_butone(CAP_HOPS, cptr, "%s %s", buf, sjbuf_nh);
+      if (acptr == cptr->from)
+        continue;
+
+      if (ConfigFileEntry.hub && IsCapable(acptr,CAP_LL))
+      {
+        if( !(RootChan(chptr)->lazyLinkChannelExists &
+              acptr->localClient->serverMask) )
+          continue;
+        }
+
+      if (IsCapable(acptr,CAP_HOPS))
+        sendto_one(acptr, "%s %s", buf, sjbuf);
+      else
+        sendto_one(acptr, "%s %s", buf, sjbuf_nh);
+    }
 
   return 0;
 }
@@ -709,6 +728,7 @@ void set_final_mode(struct Mode *mode,struct Mode *oldmode)
       strcat(parabuf, " ");
       pargs++;
     }
+  *mbuf = '\0';
 }
 
 /*
