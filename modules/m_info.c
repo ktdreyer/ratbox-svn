@@ -551,10 +551,7 @@ static void ms_info(struct Client *client_p, struct Client *source_p,
   {
     info_spy(source_p);
  
-    /* I dont see sending Hybrid-team as anything but a waste of bandwidth..
-     * so its disabled for now. --fl_
-     */
-    /* send_info_text(source_p); */
+    send_info_text(source_p); 
 
     /* I dont see why remote opers need this, but.. */
     if(IsOper(source_p))
