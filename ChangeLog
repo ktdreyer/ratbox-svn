@@ -1,3 +1,15 @@
+androsyn    2003/02/14 06:41:53 UTC	(20030214_8)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Check for IsDeadLocal in dead_link
+  
+  Revision  Changes    Path
+  7.371     +1 -2      ircd-ratbox/src/client.c
+
+
+
 androsyn    2003/02/14 06:16:13 UTC	(20030214_7)
 
   Modified files:
