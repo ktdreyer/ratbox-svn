@@ -54,12 +54,18 @@ static  void    remove_unknown (struct Client *, char *, char *);
 static int do_numeric (char [], struct Client *,
                          struct Client *, int, char **);
 
-static struct Message *do_msg_tree(MESSAGE_TREE *, char *, struct Message *);
+void do_msg_tree(struct Message **);
 static struct Message *tree_parse(char *);
 
 static char buffer[1024];  /* ZZZ must this be so big? must it be here? */
 
-struct MessageTree* msg_tree_root = NULL;
+
+struct mtree_s {
+  int count;
+  struct Message **msgs;
+};
+
+struct mtree_s mtree[26]; /* A - Z */
 
 struct Message **msgtab = NULL; 
 int num_msgs = 0;
@@ -379,112 +385,29 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
   return (*handler)(cptr, from, i, para);
 }
 
-/* for qsort'ing the msgtab in place -orabidoo */
-static int mcmp(struct Message **m1, struct Message **m2)
-{
-  return strcmp((*m1)->cmd, (*m2)->cmd);
-}
-
-/*
- * init_tree_parse()
- *
- * inputs               - pointer to msg_table defined in msg.h 
- * output       - NONE
- * side effects - MUST MUST be called at startup ONCE before
- *                any other keyword hash routine is used.
- *
- *      -Dianora, orabidoo
- */
-/* Initialize the msgtab parsing tree -orabidoo
- */
-void init_tree_parse(struct Message **mptr)
-{
-  struct Message *mpt = *mptr;
-  int i;
-
-  for (i=0; mpt[i].cmd; i++);
-
-  qsort((void *)mptr[0], i, sizeof(struct Message*), 
-                (int (*)(const void *, const void *)) mcmp);
-
-  msg_tree_root = (MESSAGE_TREE *)MyMalloc(sizeof(MESSAGE_TREE));
-  mpt = do_msg_tree(msg_tree_root, "", *mptr);
-
-  /*
-   * this happens if one of the msgtab entries included characters
-   * other than capital letters  -orabidoo
-   */
-  if (mpt->cmd)
-    {
-      log(L_CRIT, "bad msgtab entry: ``%s''\n", mpt->cmd);
-      exit(1);
-    }
-}
 /*  Recursively make a prefix tree out of the msgtab -orabidoo
  */
-static struct Message *do_msg_tree(MESSAGE_TREE *mtree, char *prefix,
-                                struct Message *mptr)
+void
+do_msg_tree(struct Message **mptr)
 {
-  char newpref[64];  /* must be longer than any command */
-  int c, c2, lp;
-  MESSAGE_TREE *mtree1;
+  int i;
+  /* 
+     struct mtree_s *mtptr; */
 
-  lp = strlen(prefix);
-  if (!lp || !strncmp(mptr->cmd, prefix, lp))
-    {
-      if (!mptr[1].cmd || (lp && strncmp(mptr[1].cmd, prefix, lp)))
-        {
-          /* non ambiguous -> make a final case */
-          mtree->final = mptr->cmd + lp;
-          mtree->msg = mptr;
-          for (c=0; c<=25; c++)
-            mtree->pointers[c] = NULL;
-          return mptr+1;
-        }
-      else
-        {
-          /* ambigous -> make new entries for each of the letters that match */
-          if (!irccmp(mptr->cmd, prefix))
-            {
-              /* fucking OPERWALL blows me */
-              mtree->final = (void *)1;
-              mtree->msg = mptr;
-              mptr++;
-            }
-          else
-            mtree->final = NULL;
+  for (i = 0; i < 26; i++) {
+    mtree[i].count = 0;
+    mtree[i].msgs = NULL;
+  }
 
-      for (c='A'; c<='Z'; c++)
-        {
-          if (mptr->cmd[lp] == c)
-            {
-              mtree1 = (MESSAGE_TREE *)MyMalloc(sizeof(MESSAGE_TREE));
-              mtree1->final = NULL;
-              mtree->pointers[c-'A'] = mtree1;
-              strcpy(newpref, prefix);
-              newpref[lp] = c;
-              newpref[lp+1] = '\0';
-              mptr = do_msg_tree(mtree1, newpref, mptr);
-              if (!mptr->cmd || strncmp(mptr->cmd, prefix, lp))
-                {
-                  for (c2=c+1-'A'; c2<=25; c2++)
-                    mtree->pointers[c2] = NULL;
-                  return mptr;
-                }
-            } 
-          else
-            {
-              mtree->pointers[c-'A'] = NULL;
-            }
-        }
-      return mptr;
-        }
-    } 
-  else
-    {
-      assert(0);
-      exit(1);
-    }
+  /* XXX */
+#define MT(i) mtree[mptr[i]->cmd[0] - 'A']
+
+  for(i = 0; i < num_msgs; i++) {
+    /*    mtptr = mtree[mptr[i]->cmd[0] - 'A']; */
+    MT(i).msgs = realloc(MT(i).msgs, sizeof(struct Message*) * (MT(i).count + 1));
+    MT(i).msgs[MT(i).count] = msgtab[i];
+    MT(i).count++;
+  }
 }
 
 void
@@ -496,19 +419,15 @@ mod_add_cmd(char *cmd, struct Message *msg)
     if (!irccmp(msgtab[i]->cmd, cmd)) {
       /* already in msgtab, so replace it */
       msgtab[i] = msg;
-      init_tree_parse(msgtab);
+      do_msg_tree(msgtab);
       return;
     }
   }
 
-  /* we always keep a spare NULL entry at the end .. */
-  msgtab = realloc(msgtab, sizeof(struct Message *) * (num_msgs + 2));
+  msgtab = realloc(msgtab, sizeof(struct Message *) * (num_msgs + 1));
   msgtab[num_msgs] = msg;
   num_msgs++;
-  msgtab[num_msgs] = malloc(sizeof (struct Message));
-  msgtab[num_msgs]->cmd = NULL;
-
-  init_tree_parse(msgtab);
+  do_msg_tree(msgtab);
 }
 
 /*
@@ -520,30 +439,34 @@ mod_add_cmd(char *cmd, struct Message *msg)
  * side effects - NONE
  *
  *      -Dianora, orabidoo
+ * rewritten 9/11/2000 --is
  */
 
 static struct Message *tree_parse(char *cmd)
 {
   char r;
-  MESSAGE_TREE *mtree = msg_tree_root;
+  /*  struct mtree_s *mptr;*/
+  int i;
+  int j;
 
-  while ((r = *cmd++))
-    {
-      r &= 0xdf;  /* some touppers have trouble w/ lowercase, says Dianora */
-      if (r < 'A' || r > 'Z')
-        return NULL;
-      mtree = mtree->pointers[r - 'A'];
-      if (!mtree)
-        return NULL;
-      if (mtree->final == (void *)1)
-        {
-          if (!*cmd)
-            return mtree->msg;
-        }
-      else
-        if (mtree->final && !irccmp(mtree->final, cmd))
-          return mtree->msg;
-    }
+  r = cmd[0];
+  
+  r &= 0xdf;  /* some touppers have trouble w/ lowercase, says Dianora */
+
+  if (r < 'A' || r > 'Z')
+    return NULL;
+
+  /*  mptr = &mtree['A' - r];*/
+#define MPTR mtree[r - 'A']
+
+  if (!mtree)
+    return NULL;
+
+  for (i = 0; i < MPTR.count; i++) {
+    if(!irccmp(MPTR.msgs[i]->cmd, cmd))
+      return MPTR.msgs[i];
+  }
+
   return ((struct Message *)NULL);
 }
 

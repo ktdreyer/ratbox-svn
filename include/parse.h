@@ -30,5 +30,6 @@ struct Message;
 struct Client;
 
 extern  int     parse (struct Client *, char *, char *);
-extern  void    init_tree_parse (struct Message **);
+extern  void    do_msg_tree(struct Message **);
+
 #endif /* INCLUDED_parse_h_h */
