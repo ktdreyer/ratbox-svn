@@ -107,7 +107,9 @@ struct Capability captab[] = {
   { "HUB",      CAP_HUB },
   { "AOPS",     CAP_AOPS },
   { "UID",      CAP_UID },
+#if 0 /* We dont actually have ziplinks anymore.. but they should come back */
   { "ZIP",	CAP_ZIP },
+#endif
   { "CRYPT",    CAP_CRYPT },
 
   { 0,   0 }
