@@ -459,6 +459,8 @@ accept_connection(int pfd, void *data)
 
 	fd = comm_accept(listener->fd, &sai);
 
+	/* This needs to be done here, otherwise we break dlines */
+	mangle_mapped_sockaddr(&sai);
 
 	if(fd < 0)
 	{
@@ -515,8 +517,7 @@ accept_connection(int pfd, void *data)
 	}
 
 	ServerStats->is_ac++;
-
-	add_connection(listener, fd);
+	add_connection(listener, fd, &sai);
 
 	/* Re-register a new IO request for the next accept .. */
 	comm_setselect(listener->fd, FDLIST_SERVICE, COMM_SELECT_READ,

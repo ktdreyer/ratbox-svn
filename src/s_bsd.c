@@ -344,10 +344,9 @@ close_connection(struct Client *client_p)
  * any client list yet.
  */
 void
-add_connection(struct Listener *listener, int fd)
+add_connection(struct Listener *listener, int fd, struct sockaddr_storage *sai)
 {
 	struct Client *new_client;
-	socklen_t len = sizeof(struct sockaddr_storage);
 	assert(NULL != listener);
 
 	/* 
@@ -355,16 +354,8 @@ add_connection(struct Listener *listener, int fd)
 	 * the client has already been checked out in accept_connection
 	 */
 	new_client = make_client(NULL);
-	if(getpeername(fd, (struct sockaddr *)&new_client->localClient->ip, (socklen_t *) & len))
-	{
-		report_error(L_ALL, "Failed in adding new connection %s :%s",
-			     get_listener_name(listener), errno);
-		ServerStats->is_ref++;
-		fd_close(fd);
-		return;
-	}
 
-	mangle_mapped_sockaddr(&new_client->localClient->ip);
+	memcpy(&new_client->localClient->ip, sai, sizeof(struct sockaddr_storage));
 
 	/* 
 	 * copy address to 'sockhost' as a string, copy it to host too
