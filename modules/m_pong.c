@@ -85,9 +85,7 @@ ms_pong(struct Client *client_p, struct Client *source_p, int parc, const char *
 	/* destination is us, emulate EOB */
 	if(IsServer(source_p) && !HasSentEob(source_p))
 	{
-#if 0
-		if(MyConnect(client_p))
-#endif
+		if(MyConnect(source_p))
 			sendto_realops_flags(UMODE_ALL, L_ALL,
 					     "End of burst (emulated) from %s (%d seconds)",
 					     source_p->name,
