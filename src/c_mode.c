@@ -524,7 +524,7 @@ c_mode(struct client *client_p, const char *parv[], int parc)
 		return;
 
 	/* user marked as being deopped, bounce mode changes */
-	if((msptr = find_chmember(chptr, client_p)) &&
+	if(IsUser(client_p) && (msptr = find_chmember(chptr, client_p)) &&
 	   (msptr->flags & MODE_DEOPPED))
 		return;
 
