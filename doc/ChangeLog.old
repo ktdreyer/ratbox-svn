@@ -1,3 +1,10 @@
+*** 20001207_9 by db
+- first cut at cleaning up m_gline.c its still fugly... but cleaner
+- added CAP_GLN for capable of gline servers. I didn't realize this
+  wasn't here before. ugh.
+
+
+
 *** 20001207_8 by db
 - fixed m_stats.c so /stats E,F as non oper gives No permission error
 
