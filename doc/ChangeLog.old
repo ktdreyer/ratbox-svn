@@ -1,3 +1,7 @@
+*** 20010715_1 by leeh
+- added an example ipv6 listen.. some people just dont read comments
+
+
 *** 20010714_2 by leeh
 - dont exit clients on capab either, people will just make newbies abuse
   it (hey! /capab will make you a god!)
