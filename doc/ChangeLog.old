@@ -1,3 +1,7 @@
+*** 19990801_19 by lusky
+testing to see that the serial number isn't jumping
+
+
 *** 19990801_18 by lusky
 ChangeLog should be automated now.  Also the serial number should
 no longer jump more than one because of a commit of multiple subdirs.
