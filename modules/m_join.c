@@ -101,7 +101,6 @@ m_join(struct Client *client_p,
   if (parc > 2)
     {
       key = strtoken(&p2, parv[2], ",");
-      vkey = key;
     }
 
   for (name = strtoken(&p, parv[1], ","); name;
@@ -429,7 +428,7 @@ static void do_join_0(struct Client *client_p, struct Client *source_p)
 			   source_p->name,
 			   source_p->username,
 			   source_p->host,
-			   RootChan(chptr)->chname);
+			   chptr->chname);
       remove_user_from_channel(chptr, source_p);
     }
 }

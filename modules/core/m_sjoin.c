@@ -297,7 +297,7 @@ static void ms_sjoin(struct Client *client_p,
   /* Lost the TS, other side wins, so remove modes on this side */
   if (!keep_our_modes)
     {
-      remove_our_modes(hide_or_not, chptr, top_chptr, source_p);
+      remove_our_modes(hide_or_not, chptr, chptr, source_p);
       sendto_channel_local(ALL_MEMBERS, chptr,
 	    ":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to %lu",
 	    me.name, chptr->chname, chptr->chname, oldts, newts);
@@ -307,11 +307,11 @@ static void ms_sjoin(struct Client *client_p,
     {
       /* This _SHOULD_ be to ALL_MEMBERS
        * It contains only +aimnstlki, etc */
-      if (top_chptr != NULL)
+      if (chptr != NULL)
 	sendto_channel_local(ALL_MEMBERS,
 			     chptr, ":%s MODE %s %s %s",
 			     me.name,
-			     top_chptr->chname, modebuf, parabuf);
+			     chptr->chname, modebuf, parabuf);
       else
 	sendto_channel_local(ALL_MEMBERS,
 			     chptr, ":%s MODE %s %s %s",
@@ -489,7 +489,7 @@ static void ms_sjoin(struct Client *client_p,
 		continue;
 
 	      /* Ignore servers we won't tell anyway */
-	      if (!(RootChan(chptr)->lazyLinkChannelExists &
+	      if (!(chptr->lazyLinkChannelExists &
 		    lclient_p->localClient->serverMask) )
 		continue;
 
@@ -532,7 +532,7 @@ static void ms_sjoin(struct Client *client_p,
 	        *mbuf = '\0';
 		sendto_channel_local(hide_or_not, chptr,
 		                     ":%s MODE %s %s %s %s %s %s",
-				     me.name, RootChan(chptr)->chname,
+				     me.name, chptr->chname,
 				     modebuf,
 				     para[0], para[1], para[2], para[3]);
                 mbuf = modebuf;
@@ -565,7 +565,7 @@ static void ms_sjoin(struct Client *client_p,
           sendto_channel_local(hide_or_not, chptr,
                                ":%s MODE %s %s %s %s %s %s",
                                me.name,
-                               RootChan(chptr)->chname,
+                               chptr->chname,
                                modebuf,
                                para[0],para[1],para[2],para[3]);
           mbuf = modebuf;
@@ -601,7 +601,7 @@ nextnick:
       sendto_channel_local(hide_or_not, chptr,
                            ":%s MODE %s %s %s %s %s %s",
                            me.name,
-                           RootChan(chptr)->chname,
+                           chptr->chname,
                            modebuf,
                            para[0], para[1], para[2], para[3]);
     }
@@ -620,7 +620,7 @@ nextnick:
       /* skip lazylinks that don't know about this server */
       if (ServerInfo.hub && IsCapable(target_p,CAP_LL))
       {
-        if (!(RootChan(chptr)->lazyLinkChannelExists &
+        if (!(chptr->lazyLinkChannelExists &
               target_p->localClient->serverMask) )
           continue;
       }
