@@ -1,3 +1,12 @@
+*** 20010702_10 by jdc
+- modules/m_capab.c
+  modules/m_challenge.c
+  modules/m_cryptlink.c
+  src/ircd_parser.y
+    * Moved all strcasecmp()s to irccmp()s.
+
+
+
 *** 20010702_9 by jdc
 Monster Update(tm) time.  Please read the following disclaimer:
 
