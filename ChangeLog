@@ -1,3 +1,16 @@
+leeh        2004/08/13 19:22:42 EDT	(20040813_5)
+
+  Modified files:
+    modules/core         channels.c 
+  Log:
+  - err, set_final_mode() shouldnt send out anything unless theres something
+    to send..
+  
+  Revision  Changes    Path
+  1.5       +4 -3      ircd-ratbox/modules/core/channels.c
+
+
+
 leeh        2004/08/13 19:19:57 EDT	(20040813_4)
 
   Modified files:
