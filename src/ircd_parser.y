@@ -1496,7 +1496,7 @@ general_client_exit: CLIENT_EXIT '=' TYES ';'
     ConfigFileEntry.client_exit = 1;
   }
     |
-    CLIENT_EXIT '-' TNO ';'
+    CLIENT_EXIT '=' TNO ';'
   {
     ConfigFileEntry.client_exit = 0;
   };
