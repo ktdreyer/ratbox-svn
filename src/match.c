@@ -136,6 +136,10 @@ match_esc(const char *mask, const char *name)
 	if(!mask || !name)
 		return 0;
 
+	/* if the mask is "*", it matches everything */
+	if((*m == '*') && (*(m+1) == '\0'))
+		return 1;
+
 	while (calls++ < MATCH_MAX_CALLS)
 	{
 		if(quote)
