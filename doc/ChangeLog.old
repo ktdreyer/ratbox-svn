@@ -1,3 +1,7 @@
+*** 20001230_15 by lusky
+- oops, forgot an arg to sprintf
+
+
 *** 20001230_14 by lusky
 - missed another setenv()
 
