@@ -1,3 +1,8 @@
+*** 20010221_1 by db
+- flush queues if client is marked dead.
+
+
+
 *** 20010220_9 by wcampbel
 Updates in the messages stuff
 
