@@ -1,3 +1,7 @@
+*** 20010627_2 by a1kmm
+- Better commit this header so my mode code compiles...
+
+
 *** 20010627_1 by a1kmm
 - Fixed channel modes, hopefully they work entirely correctly now.
 
