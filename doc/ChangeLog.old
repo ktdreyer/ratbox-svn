@@ -1,3 +1,8 @@
+*** 20010910_1 by davidt
+- We could occasionally fail to notice we hadn't read the correct amount
+  of data for a servlink command, due to a missing return;.
+
+
 *** 20010908_2 by androsyn
 Resolved the stupid ::1 issue. So we are doing 0::1 now. This is ugly..but
 it works and is still a legal IPv6 address.
