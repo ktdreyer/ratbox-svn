@@ -1,3 +1,15 @@
+androsyn    2002/10/30 00:41:27 UTC	(20021030_2)
+
+  Modified files:
+    src                  s_auth.c 
+  Log:
+  I think I caught that dns bug now..
+  
+  Revision  Changes    Path
+  7.115     +1 -2      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2002/10/30 00:19:52 UTC	(20021030_1)
 
   Modified files:
