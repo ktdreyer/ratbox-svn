@@ -1,3 +1,18 @@
+leeh        2004/04/04 08:27:31 EDT	(20040404_2)
+
+  Modified files:
+    modules              m_kline.c m_resv.c m_xline.c 
+  Log:
+  - inverted the find_shared_conf() check for remote kline and friends, so we
+    return if one is not found, fixing the rehash on remote kline bug
+  
+  Revision  Changes    Path
+  1.182     +43 -45    ircd-ratbox/modules/m_kline.c
+  1.56      +14 -14    ircd-ratbox/modules/m_resv.c
+  1.49      +19 -21    ircd-ratbox/modules/m_xline.c
+
+
+
 androsyn    2004/04/03 20:52:43 EST	(20040404_1)
 
   Modified files:
