@@ -931,6 +931,33 @@ static void send_members(struct Client *cptr,
 }
 
 /*
+ * send_perm_channel
+ *
+ * inputs       - pointer to client cptr
+ *              - pointer to channel pointer
+ * output       - NONE
+ * side effects - send "cptr" a full list of the modes for permanent channel chptr.
+ */
+void send_perm_channel(struct Client *cptr, struct Channel *chptr)
+{
+  *modebuf = *parabuf = '\0';
+  channel_modes(chptr, cptr, modebuf, parabuf);
+
+  /* Send a blank SJOIN */
+  ircsprintf(buf, ":%s SJOIN %lu %s %s %s :", me.name,
+             chptr->channelts, chptr->chname, modebuf, parabuf);
+
+  sendto_one(cptr, "%s", buf);
+  send_mode_list(cptr, chptr->chname, &chptr->banlist, 'b', 0);
+
+  if(IsCapable(cptr, CAP_EX))
+    send_mode_list(cptr, chptr->chname, &chptr->exceptlist, 'e', 0);
+
+  if (IsCapable(cptr, CAP_IE))
+    send_mode_list(cptr, chptr->chname, &chptr->invexlist, 'I', 0);
+}
+
+/*
  * pretty_mask
  * 
  * inputs	- pointer string
