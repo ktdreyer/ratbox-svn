@@ -1,3 +1,14 @@
+*** 20001109_6 by ejb
+ok basic modules support is almost complete now.
+there's a strange bug where some commands make it
+exit(1), when i've fixed that all we need is
+m_modload, and module UNloading support ..
+
+then maybe modularise more stuff, that's all for
+the future though.
+
+
+
 *** 20001109_5 by ejb
 modules appear to be mostly working now, apart from a small problem with
 the mtree that means it won't recognise any commands.
