@@ -1,3 +1,15 @@
+androsyn    2002/05/31 00:44:56 EDT	(20020531_13)
+
+  Modified files:
+    src                  s_user.c 
+  Log:
+  Fixed some inverted if() statements
+  
+  Revision  Changes    Path
+  7.196     +3 -3      ircd-hybrid-7/src/s_user.c
+
+
+
 androsyn    2002/05/31 00:16:22 EDT	(20020531_12)
 
   Modified files:
