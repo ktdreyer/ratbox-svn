@@ -987,7 +987,7 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 {
 	static char modebuf[BUFSIZE];
 	static char parabuf[MODEBUFLEN];
-	int i, mbl, pbl, nc, mc, preflen;
+	int i, mbl, pbl, nc, mc, preflen, len;
 	char *pbuf;
 	const char *arg;
 	int dir;
@@ -1083,8 +1083,9 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 
 			if(arg != NULL)
 			{
-				pbl += ircsprintf(pbuf, "%s ", arg);
-				pbuf += pbl;
+				len = ircsprintf(pbuf, "%s ", arg);
+				pbuf += len;
+				pbl += len;
 				mc++;
 			}
 		}
