@@ -1,3 +1,7 @@
+*** 19990819_1 by tomh
+add new m_command (m_join), sort msg strings
+
+
 *** 19990818_3 by tomh
 call release_client_dns_reply for servers too
 
