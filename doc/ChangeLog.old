@@ -1,3 +1,19 @@
+jmallett    2002/01/13 09:58:27 EST	(20020113_5)
+
+  Modified files:
+    modules/core         m_message.c 
+  Log:
+  As we now check much earlier on to see if a server is trying to PRIVMSG,
+  take out the !IsPerson conditional here, so a server can indeed NOTICE a
+  channel, in the case of, for example, saying someone cannot be opped at
+  this time as the server is in split more (or things like channel flooding
+  even!)
+  
+  Revision  Changes    Path
+  1.86      +1 -3      ircd-hybrid-7/modules/core/m_message.c
+
+
+
 jmallett    2002/01/13 02:26:14 EST	(20020113_4)
 
   Modified files:
