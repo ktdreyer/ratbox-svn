@@ -1,3 +1,22 @@
+db          2002/04/10 08:33:09 EDT	(20020410_1)
+
+  Modified files:
+    modules/core         m_sjoin.c 
+  Log:
+  - Committed bug fix sent in by user
+  
+  WarKnite found out it was caused in
+   <WarKnite> m_sjoin.c:813 &chptr->peons should be &chptr->locpeons
+  
+  Bug found by WarKnite and Stacy. Fix found by WarKnite
+  Stacy Schane stacyschane@cox.net
+  WarKnite warknite@swbell.net
+  
+  Revision  Changes    Path
+  1.131     +2 -2      ircd-hybrid-7/modules/core/m_sjoin.c
+
+
+
 androsyn    2002/04/09 23:01:36 EDT	(20020410_0)
 
   Modified files:
