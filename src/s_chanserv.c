@@ -1887,7 +1887,7 @@ s_chan_clearops(struct client *client_p, const char *parv[], int parc)
 		client_p->user->mask, client_p->user->user_reg->name,
 		parv[0]);
 
-	s_chan_clearops_loc(chptr, mreg_p->channel_reg, 0);
+	s_chan_clearops_loc(chptr, mreg_p->channel_reg, S_C_OP);
 
 	service_error(chanserv_p, client_p, "Channel %s ops cleared", 
 			chptr->name);
