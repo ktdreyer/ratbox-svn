@@ -1,3 +1,8 @@
+*** 19991231_4 by db
+- renamed channel to GLobalChannelList in jupe channel code
+
+
+
 *** 19991231_3 by db
 - more cleanup of s_conf.c
 
