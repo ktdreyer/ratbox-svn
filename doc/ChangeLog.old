@@ -1,3 +1,9 @@
+*** 20001230_6 by lusky
+- more compile warning fixes.  mmmm, socklen_t.  compiles on redhat6.1 now
+  without warnings (if you fix the broken /usr/include/bits/socket.h
+  by hand).
+
+
 *** 20001230_5 by lusky
 - more compile warning fixes, /modules compiles cleanly on freebsd3.4 now
 
