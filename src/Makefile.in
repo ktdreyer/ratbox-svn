@@ -56,4 +56,6 @@ distclean: clean
 depend:
 	$(CC) -MM $(INCLUDES) $(CFLAGS) $(SRCS) > .depend
 
+install:
+
 include .depend
