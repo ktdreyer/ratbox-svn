@@ -153,7 +153,7 @@ static void part_one_client(struct Client *client_p,
                     ":%s PART %s :%s", ID(source_p), chptr->chname,
                     reason);
       sendto_server(client_p, chptr, NOCAPS, CAP_UID, 
-                    ":%s PART %s  :%s", source_p->name, chptr->chname,
+                    ":%s PART %s :%s", source_p->name, chptr->chname,
                     reason);
 
       sendto_channel_local(ALL_MEMBERS,

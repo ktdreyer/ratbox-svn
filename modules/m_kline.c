@@ -641,7 +641,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
       if (!MyConnect(target_p))
         {
           sendto_one(source_p,
-                     ":%s NOTICE :%s :Can't DLINE nick on another server",
+                     ":%s NOTICE %s :Can't DLINE nick on another server",
                      me.name, parv[0]);
           return;
         }
