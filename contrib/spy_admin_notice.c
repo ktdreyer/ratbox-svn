@@ -46,8 +46,7 @@ const char *_version = "$Revision$";
 
 int show_admin(struct hook_spy_data *data)
 {
-  if(MyConnect(data->source_p))
-    sendto_realops_flags(FLAGS_SPY, L_ALL,
+  sendto_realops_flags(FLAGS_SPY, L_ALL,
                          "admin requested by %s (%s@%s) [%s]",
                          data->source_p->name, data->source_p->username,
                          data->source_p->host, data->source_p->user->server);

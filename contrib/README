@@ -18,7 +18,11 @@ m_force.c      - FORCE - forces a user to either part or join a channel with
 
 m_jupe.c       - JUPE - Server juping command
                  Syntax:  JUPE juped.server.name :Reason
-		 
+
+m_ltrace.c     - LTRACE - Limited trace.  Similar to TRACE except only reports
+                          current opers and servers.
+                 Syntax: LTRACE [nick|mask [server]]
+
 m_map.c        - MAP - Display the server routing graph in a visually pleasing
                        format
                  Syntax:  MAP
@@ -48,7 +52,7 @@ spy_links_notice.c   - Spy on clients doing LINKS
 spy_motd_notice.c    - Spy on clients doing MOTD
 spy_stats_notice.c   - Spy on clients doing all STATS
 spy_stats_p_notice.c - Spy on clients doing STATS p only
-spy_trace_notice.c   - Spy on clients doing TRACE
+spy_trace_notice.c   - Spy on clients doing TRACE/LTRACE
 spy_whois_notice.c   - Spy on local clients who WHOIS you.
 
 Note: if you have both spy_stats_notice.c and spy_stats_p_notice.c loaded
