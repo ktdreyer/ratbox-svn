@@ -34,12 +34,6 @@ typedef struct Information
 
 Info MyInformation[] = {
 
-#ifdef ANTI_SPAMBOT_WARN_ONLY
-  { "ANTI_SPAMBOT_WARN_ONLY", "ON", 0, "Warn Operators of Possible Spam Bots" },
-#else
-  { "ANTI_SPAMBOT_WARN_ONLY", "OFF", 0, "Warn Operators of Possible Spam Bots" },
-#endif /* ANTI_SPAMBOT_WARN_ONLY */
-
 #ifdef ANTI_SPAM_EXIT_MESSAGE
   { "ANTI_SPAM_EXIT_MESSAGE", "ON", 0, "Do not broadcast Spam Bots' exit messages" },
 #else
@@ -96,12 +90,6 @@ Info MyInformation[] = {
   { "DEBUGMODE", "OFF", 0, "Debugging Mode" },
 #endif /* DEBUGMODE */
 
-#ifdef DO_IDENTD
-  { "DO_IDENTD", "ON", 0, "Perform identd checks" },
-#else
-  { "DO_IDENTD", "OFF", 0, "Perform identd checks" },
-#endif /* DO_IDENTD */
-
 #ifdef DPATH
   { "DPATH", DPATH, 0, "Directory Containing Configuration Files" },
 #else
@@ -133,12 +121,6 @@ Info MyInformation[] = {
 #else
   { "HYBRID_SOMAXCONN", "", HYBRID_SOMAXCONN, "Maximum Queue Length of Pending Connections" },
 #endif /* SOMAXCONN */
-
-#ifdef IDLE_FROM_MSG
-  { "IDLE_FROM_MSG", "ON", 0, "Reset idle time after a PRIVMSG" },
-#else
-  { "IDLE_FROM_MSG", "OFF", 0, "Reset idle time after a PRIVMSG" },
-#endif /* IDLE_FROM_MSG */
 
   { "INIT_MAXCLIENTS", "", INIT_MAXCLIENTS, "Maximum Clients" },
   { "INITIAL_DBUFS", "", INITIAL_DBUFS, "Number of Dbufs to PreAllocate" },
@@ -176,12 +158,6 @@ Info MyInformation[] = {
 
   { "NICKNAMEHISTORYLENGTH", "", NICKNAMEHISTORYLENGTH, "Size of WHOWAS Array" },
 
-#ifdef NO_DEFAULT_INVISIBLE
-  { "NO_DEFAULT_INVISIBLE", "ON", 0, "Do not Give Clients +i Mode Upon Connection" },
-#else
-  { "NO_DEFAULT_INVISIBLE", "OFF", 0, "Do not Give Clients +i Mode Upon Connection" },
-#endif /* NO_DEFAULT_INVISIBLE */
-
 #ifdef OPATH
   { "OPATH", OPATH, 0, "Path to Operator MOTD File" },
 #else
@@ -201,12 +177,6 @@ Info MyInformation[] = {
 #else
   { "REPORT_DLINE_TO_USER", "OFF", 0, "Inform Clients They are D-lined" },
 #endif /* REPORT_DLINE_TO_USER */
-
-#ifdef SHOW_INVISIBLE_LUSERS
-  { "SHOW_INVISIBLE_LUSERS", "ON", 0, "Show Invisible Clients in LUSERS" },
-#else
-  { "SHOW_INVISIBLE_LUSERS", "OFF", 0, "Show Invisible Clients in LUSERS" },
-#endif /* SHOW_INVISIBLE_LUSERS */
 
 #ifdef SPATH
   { "SPATH", SPATH, 0, "Path to Server Executable" },

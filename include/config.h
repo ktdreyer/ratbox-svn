@@ -151,20 +151,6 @@
  */
 #undef ALLOW_DOT_IN_IDENT
 
-/* DO_IDENTD - check identd
- * if you undefine this, ircd will never check identd regardless of
- * @'s in I:lines.  You must still use @'s in your I: lines to get
- * ircd to do ident lookup even if you define this.
- */
-#define DO_IDENTD
-
-/* NO_DEFAULT_INVISIBLE - clients not +i by default
- * When defined, your users will not automatically be attributed with user
- * mode "i" (i == invisible). Invisibility means people dont showup in
- * WHO or NAMES unless they are on the same channel as you.
- */
-#undef  NO_DEFAULT_INVISIBLE
-
 /*
  * OPER_UMODES LOCOP_UMODES - set these to be the initial umodes when OPER'ing
  * These can be over-ridden in ircd.conf file, with flags in last O field
@@ -263,13 +249,6 @@
  * right password in the opposite line.
  */
 #undef  CRYPT_LINK_PASSWORD
-
-/* IDLE_FROM_MSG - Idle-time reset only from privmsg
- * Idle-time reset only from privmsg, if undefined idle-time
- * is reset from everything except ping/pong.
- * 
- */
-#define IDLE_FROM_MSG
 
 /* MAXSENDQLENGTH - Max amount of internal send buffering
  * Max amount of internal send buffering when socket is stuck (bytes)
@@ -428,14 +407,6 @@
 #define MAX_JOIN_LEAVE_COUNT  25
 #define OPER_SPAM_COUNTDOWN   5 
 #define JOIN_LEAVE_COUNT_EXPIRE_TIME 120
-
-/*
- * If ANTI_SPAMBOT_WARN_ONLY is #define'd 
- * Warn opers about possible spambots only, do not disable
- * JOIN and PRIVMSG if possible spambot is noticed
- * Depends on your policies.
- */
-#undef ANTI_SPAMBOT_WARN_ONLY
 
 /* ANTI_SPAM_EXIT_MESSAGE
  *

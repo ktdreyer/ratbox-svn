@@ -61,26 +61,8 @@ const char serveropts[] = {
 #ifdef  CMDLINE_CONFIG
   'C',
 #endif
-#ifdef  DO_ID
-  'd',
-#endif
 #ifdef  DEBUGMODE
   'D',
-#endif
-#ifdef  LOCOP_REHASH
-  'e',
-#endif
-#ifdef  OPER_REHASH
-  'E',
-#endif
-#ifdef  SHOW_INVISIBLE_LUSERS
-  'i',
-#endif
-#ifdef  OPER_KILL
-  'K',
-#endif
-#ifdef  IDLE_FROM_MSG
-  'M',
 #endif
 #ifdef  CRYPT_OPER_PASSWORD
   'p',
@@ -88,27 +70,17 @@ const char serveropts[] = {
 #ifdef  CRYPT_LINK_PASSWORD
   'P',
 #endif
-#ifdef  LOCOP_RESTART
-  'r',
-#endif
-#ifdef  OPER_RESTART
-  'R',
-#endif
-#ifdef  OPER_REMOTE
-  't',
-#endif
 #ifdef  USE_SYSLOG
   'Y',
 #endif
-  'Z',
   ' ',
   'T',
   'S',
 #ifdef TS_CURRENT
   '0' + TS_CURRENT,
 #endif
-/* th+hybrid servers ONLY do TS */
-/* th+hybrid servers ALWAYS do TS_WARNINGS */
+/* ONLY do TS */
+/* ALWAYS do TS_WARNINGS */
   'o',
   'w',
   '\0'
