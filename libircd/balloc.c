@@ -253,7 +253,6 @@ newblock(BlockHeap * bh)
       {
         return(1);
       }
-    b->freeElems = bh->elemsPerBlock;
     b->free_list.head = b->free_list.tail = NULL;
     b->used_list.head = b->used_list.tail = NULL;
     b->next = bh->base;
@@ -391,10 +390,9 @@ BlockHeapAlloc(BlockHeap * bh)
       
     for (walker = bh->base; walker != NULL; walker = walker->next)
       {
-        if (walker->freeElems > 0)
+        if (dlink_list_length(&walker->free_list) > 0)
 	  {
             bh->freeElems--;
-            walker->freeElems--;
             new_node = walker->free_list.head;
             dlinkMoveNode(new_node, &walker->free_list, &walker->used_list);
             assert(new_node->data != NULL);
@@ -453,7 +451,6 @@ BlockHeapFree(BlockHeap * bh, void *ptr)
 
     block = memblock->block;
     bh->freeElems++;
-    block->freeElems++;
     mem_frob(ptr, bh->elemSize);
     dlinkMoveNode(&memblock->self, &block->used_list, &block->free_list);
     return(0);
@@ -492,7 +489,7 @@ BlockHeapGarbageCollect(BlockHeap * bh)
 
     while (walker != NULL)
       {
-        if ((walker->freeElems == bh->elemsPerBlock) != 0)
+        if ((dlink_list_length(&walker->free_list) == bh->elemsPerBlock) != 0)
 	  {
             free_block(walker->elems, walker->alloc_size);
             if (last != NULL)
