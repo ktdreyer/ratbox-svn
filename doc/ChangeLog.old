@@ -1,3 +1,16 @@
+db          2002/06/12 15:29:39 EDT	(20020612_3)
+
+  Modified files:
+    src                  ircd_parser.y s_conf.c 
+  Log:
+  - moved yy_aconf back into ircd-parser.y, its not needed in s_conf.c at all
+  
+  Revision  Changes    Path
+  1.252     +0 -2      ircd-hybrid-7/src/ircd_parser.y
+  7.305     +0 -1      ircd-hybrid-7/src/s_conf.c
+
+
+
 androsyn    2002/06/12 14:57:53 EDT	(20020612_2)
 
   Modified files:
