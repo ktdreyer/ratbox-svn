@@ -1,3 +1,9 @@
+*** 20010109_3 by wcampbel
+1. Some doc cleanup
+2. Added some more variables to INFO...When I'm done, I will alphabetize 
+   them...right now...they are NOT in any semblence of order
+
+
 *** 20010109_2 by db
 - fixed backwards confusing if's on fd 
 - make sure CLIENT_EXITED is returned in s_user.c
