@@ -21,10 +21,6 @@
  *
  *  $Id$
  */
-
-/*
- * $Id$
- */
 #ifndef INCLUDED_whowas_h
 #define INCLUDED_whowas_h
 
@@ -40,7 +36,7 @@
 #define WW_MAX 65536
 
 struct User;
-struct CLient;
+struct Client;
 
 /*
   lets speed this up...
