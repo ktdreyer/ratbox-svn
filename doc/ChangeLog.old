@@ -1,3 +1,15 @@
+leeh        2002/07/21 12:17:47 EDT	(20020721_2)
+
+  Modified files:
+    modules/core         m_mode.c 
+  Log:
+  - should be checking parv[n-1][1] is \0, not [0]
+  
+  Revision  Changes    Path
+  1.55      +2 -2      ircd-hybrid-7/modules/core/m_mode.c
+
+
+
 a1kmm       2002/07/21 00:55:22 EDT	(20020721_1)
 
   Modified files:
