@@ -1,3 +1,19 @@
+leeh        2003/06/13 12:24:00 UTC	(20030613_0)
+
+  Modified files:
+    modules              m_set.c 
+    src                  ircd.c reject.c s_conf.c 
+  Log:
+  - I really need to take more care cutting/pasting in vim :P
+  
+  Revision  Changes    Path
+  1.64      +1 -9      ircd-ratbox/modules/m_set.c
+  7.293     +0 -20     ircd-ratbox/src/ircd.c
+  1.4       +1 -1      ircd-ratbox/src/reject.c
+  7.413     +2 -5      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2003/06/12 23:05:52 UTC	(20030612_1)
 
   Modified files:
