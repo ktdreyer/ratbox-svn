@@ -111,6 +111,7 @@ int   class_redirport_var;
 %token  EMAIL
 %token  ENCRYPTED
 %token  EXCEED_LIMIT
+%token  EXEMPT
 %token	FAKENAME
 %token  FNAME_USERLOG
 %token  FNAME_OPERLOG
@@ -272,6 +273,7 @@ conf_item:        admin_entry
                 | connect_entry
                 | kill_entry
                 | deny_entry
+		| exempt_entry
 		| general_entry
                 | gecos_entry
                 | modules_entry
@@ -1670,6 +1672,55 @@ deny_reason:    REASON '=' QSTRING ';'
     MyFree(yy_aconf->passwd);
     DupString(yy_aconf->passwd, yylval.string);
   };
+
+/***************************************************************************
+ *  section exempt
+ ***************************************************************************/
+
+exempt_entry:     EXEMPT
+  {
+    if(yy_aconf)
+      {
+        free_conf(yy_aconf);
+        yy_aconf = (struct ConfItem *)NULL;
+      }
+    yy_aconf=make_conf();
+    yy_aconf->status = CONF_EXEMPTDLINE;
+  }
+'{' exempt_items '}' ';'
+  {
+   if (yy_aconf->host &&
+      parse_netmask(yy_aconf->host, NULL, NULL) != HM_HOST)
+   {
+    if (yy_aconf->passwd == NULL)
+        {
+         DupString(yy_aconf->passwd,"NO REASON");
+        }
+    add_conf_by_address(yy_aconf->host, CONF_EXEMPTDLINE, NULL, yy_aconf);
+   } else
+   {
+    free_conf(yy_aconf);
+   }
+   yy_aconf = (struct ConfItem *)NULL;
+  };
+
+exempt_items:     exempt_items exempt_item |
+                exempt_item
+
+exempt_item:      exempt_ip | exempt_reason | error
+
+exempt_ip:        IP '=' QSTRING ';'
+  {
+    char *p;
+    DupString(yy_aconf->host, yylval.string);
+  };
+
+exempt_reason:    REASON '=' QSTRING ';'
+  {
+    MyFree(yy_aconf->passwd);
+    DupString(yy_aconf->passwd, yylval.string);
+  };
+
 
 /***************************************************************************
  *  section gecos

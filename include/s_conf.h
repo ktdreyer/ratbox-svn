@@ -94,14 +94,12 @@ struct ConfItem
 #define CONF_LEAF               0x0800
 #define CONF_LISTEN_PORT        0x1000
 #define CONF_HUB                0x2000
-#define CONF_EXEMPTKLINE            0x4000
-/* define CONF_ELINE              0x4000*/
+#define CONF_EXEMPTKLINE        0x4000
 #define CONF_NOLIMIT            0x8000
-/* define CONF_FLINE              0x8000*/
 #define CONF_DLINE             0x20000
 #define CONF_XLINE             0x40000
 #define CONF_ULINE             0x80000
-
+#define CONF_EXEMPTDLINE      0x100000
 
 #define CONF_SERVER_MASK       CONF_SERVER
 #define CONF_CLIENT_MASK       (CONF_CLIENT | CONF_OPERATOR | CONF_SERVER_MASK)
@@ -119,9 +117,7 @@ struct ConfItem
 #define CONF_FLAGS_PASS_IDENTD          0x00000010
 #define CONF_FLAGS_NOMATCH_IP           0x00000020
 #define CONF_FLAGS_EXEMPTKLINE          0x00000040
-/* #define CONF_FLAGS_E_LINED              0x00000040 */
 #define CONF_FLAGS_NOLIMIT              0x00000080
-/* #define CONF_FLAGS_F_LINED              0x00000080 */
 #define CONF_FLAGS_IDLE_LINED           0x00000100
 #define CONF_FLAGS_SPOOF_IP             0x00000200
 #define CONF_FLAGS_SPOOF_NOTICE         0x00000400

@@ -120,6 +120,7 @@ dots_in_ident   { return DOTS_IN_IDENT; }
 encrypted       { return ENCRYPTED; }
 email		{ return EMAIL; }
 exceed_limit    { return EXCEED_LIMIT; }
+exempt		{ return EXEMPT; }
 fakename	{ return FAKENAME; }
 fname_userlog   { return FNAME_USERLOG; }
 fname_operlog   { return FNAME_OPERLOG; }
