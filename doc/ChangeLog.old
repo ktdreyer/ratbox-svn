@@ -1,3 +1,18 @@
+*** 20010625_2 by jdc
+- src/rsa.c
+    * Changed the assignment for PEM_read_bio_RSAPrivateKey().  There
+      are bugs/caveats for using &ptr in the 2nd argument vs. an
+      actual assignment with a TYPE_free() prior to it.  Don't believe me?
+      Check out http://www.openssl.org/docs/crypto/pem.html#BUGS
+    * Changed the error checking drastically, matching with what the
+      official OpenSSL documentation states we should do.  Now things
+      like specifying an invalid file in serverinfo{}'s "rsa_private_key"
+      should hopefully error out properly and not beat the jig.
+    * Hoping these changes fix some major issues -- the first is a pretty
+      major one.  :-)
+
+
+
 *** 20010625_1 by a1kmm
 - Fixed redundant ops/voices etc... removal
 - Added redundant sync_oplists removal. Note that there is still a bug I am
