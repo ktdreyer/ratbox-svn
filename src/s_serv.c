@@ -1740,26 +1740,24 @@ burst_channel(struct Client *client_p, struct Channel *chptr)
 /*
  * add_lazlinkchannel
  *
- * inputs	- pointer to server being introduced to this hub
+ * inputs	- pointer to directly connected leaf server
+ *		  being introduced to this hub
  *		- pointer to channel structure being introduced
  * output	- NONE
  * side effects	- The channel pointed to by chptr is now known
- *		  to be on lazyleaf server given by client_p.
+ *		  to be on lazyleaf server given by local_server_p.
  *		  mark that in the bit map and add to the list
  *		  of channels to examine after this newly introduced
  *		  server is squit off.
  */
 static void
-add_lazylinkchannel(struct Client *client_p, struct Channel *chptr)
+add_lazylinkchannel(struct Client *local_server_p, struct Channel *chptr)
 {
   dlink_node *m;
 
-  assert(MyConnect(client_p));
- 
-  chptr->lazyLinkChannelExists |= client_p->localClient->serverMask;
-
+  assert(MyConnect(local_server_p));
+  chptr->lazyLinkChannelExists |= local_server_p->localClient->serverMask;
   m = make_dlink_node();
-
   dlinkAdd(chptr, m, &lazylink_channels);
 }
 
