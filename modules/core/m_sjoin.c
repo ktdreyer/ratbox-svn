@@ -288,31 +288,13 @@ static void ms_sjoin(struct Client *client_p,
     tstosend = oldts;
   else if (newts < oldts)
     {
-      if (ServerInfo.no_hack_ops)
-	{
-	  keep_our_modes = NO;
-	  chptr->channelts = tstosend = newts;
-	}
-      else
-	{
-	  if (doesop)
-	    keep_our_modes = NO;
-	  if (chptr->opcount && !doesop)
-	    tstosend = oldts;
-	  else
-	    chptr->channelts = tstosend = newts;
-	}
+      keep_our_modes = NO;
+      chptr->channelts = tstosend = newts;
     }
   else
     {
-      if (chptr->opcount)
-        keep_new_modes = NO;
-      if (doesop && !chptr->opcount)
-        {
-          chptr->channelts = tstosend = newts;
-        }
-      else
-        tstosend = oldts;
+      keep_new_modes = NO;
+      tstosend = oldts;
     }
 
   if (!keep_new_modes)
