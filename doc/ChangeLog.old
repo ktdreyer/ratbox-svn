@@ -1,3 +1,6 @@
+*** 20010524_13 by davidt
+- Fix compiler warnings in servlink
+
 *** 20010524_12 by davidt
 - ick, commit _working_ IO logging support....
 
