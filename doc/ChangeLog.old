@@ -1,3 +1,7 @@
+*** 20010923_2 by leeh
+- dont send ids in cjoin (see email)
+
+
 *** 20010923_1 by a1kmm
 - Got memory debugging going. There seems to be a few leaks already, which
   I will fix soon. There also seems to be a core somewhere when I link with
