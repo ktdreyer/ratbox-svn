@@ -1,3 +1,11 @@
+*** 20001204_6 by db
+- ripped out LIMIT_UH for now. BLOAT BLOAT BLOAT
+  in preparation for doing IP throttling ...
+- ripped out #ifdef for invisible off or on, that should be in  
+  conf anyway. ugh
+
+
+
 *** 20001204_5 by db
 - redid clear_channel_list code to handle possible buffer overflows
   limiting to 3 mode changes isn't sufficient *sigh*
