@@ -1,3 +1,21 @@
+androsyn    2002/09/07 23:00:27 UTC	(20020907_4)
+
+  Modified files:
+    include              s_auth.h s_conf.h 
+    src                  newconf.c s_auth.c s_conf.c 
+  Log:
+  Remove FindAuthClient, as it wasn't used..Also sort out the spoof notice
+  stuff
+  
+  Revision  Changes    Path
+  7.17      +0 -1      ircd-ratbox/include/s_auth.h
+  7.202     +1 -2      ircd-ratbox/include/s_conf.h
+  7.35      +3 -11     ircd-ratbox/src/newconf.c
+  7.110     +0 -21     ircd-ratbox/src/s_auth.c
+  7.350     +1 -1      ircd-ratbox/src/s_conf.c
+
+
+
 androsyn    2002/09/07 06:36:34 UTC	(20020907_3)
 
   Modified files:
