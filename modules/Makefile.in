@@ -197,9 +197,7 @@ install_hpux_shared: install-mkdirs
 
 .PHONY: depend clean distclean
 depend:
-	grep "Id:" .depend > .depend.out
-	${MV} .depend.out .depend
-	${MKDEP} ${INCLUDES} ${ALL_SRCS} >> .depend
+	${MKDEP} ${INCLUDES} ${ALL_SRCS} > .depend
 
 clean:
 	${RM} -f *.so *.sl *~ *.o *.a

@@ -165,10 +165,7 @@ version.c: version.c.SH
 
 .PHONY: depend clean distclean
 depend:
-	grep "Id:" .depend >.depend.out
-	${RM} -f .depend
-	${MV} .depend.out .depend
-	${MKDEP} ${CPPFLAGS} ${BASE_SRCS} ${EXTRA_SRCS} >> .depend
+	${MKDEP} ${CPPFLAGS} ${BASE_SRCS} ${EXTRA_SRCS} > .depend
 
 clean:
 	${RM} -f *.o *.exe *~ y.tab.* lex.yy.c ircd.core core ircd 

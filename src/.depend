@@ -1,4 +1,3 @@
-# $Id$
 adns.o: adns.c ../include/stdinc.h ../include/config.h \
  ../include/setup.h ../include/defaults.h ../include/fileio.h \
  ../include/res.h ../include/ircd_defs.h ../adns/adns.h \
