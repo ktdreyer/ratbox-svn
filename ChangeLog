@@ -1,3 +1,15 @@
+leeh        2004/03/06 14:43:33 EST	(20040306_4)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  - blah, do this properly in 2.1
+  
+  Revision  Changes    Path
+  7.436     +48 -20    ircd-ratbox/src/client.c
+
+
+
 leeh        2004/03/06 14:35:19 EST	(20040306_3)
 
   Modified files:
