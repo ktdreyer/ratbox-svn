@@ -1,3 +1,8 @@
+*** 20000105_10 by db
+- allow single dot in user names to allow for "first.last" user name style
+
+
+
 *** 20000105_9 by db
 - removed unneeded include
 
