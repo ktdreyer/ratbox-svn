@@ -1,3 +1,15 @@
+leeh        2002/07/09 16:49:31 EDT	(20020709_0)
+
+  Modified files:
+    src                  hostmask.c 
+  Log:
+  - dont show spoofed auth {} during HIDE_SPOOF_IPS
+  
+  Revision  Changes    Path
+  7.67      +5 -2      ircd-hybrid-7/src/hostmask.c
+
+
+
 androsyn    2002/07/08 14:45:09 EDT	(20020708_2)
 
   Modified files:        (Branch: WIN32_WIP)
