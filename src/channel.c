@@ -2175,6 +2175,7 @@ chm_limit(struct Client *client_p, struct Client *source_p,
       return;
 
     chptr->mode.mode &= ~MODE_LIMIT;
+    chptr->mode.limit = 0;
 
     for (i = 0; i < mode_count_plus; i++)
       if (mode_changes_plus[i].letter == c)
@@ -2239,6 +2240,7 @@ chm_key(struct Client *client_p, struct Client *source_p,
       return;
 
     chptr->mode.mode &= ~MODE_KEY;
+    *chptr->mode.key = 0;
 
     for (i = 0; i < mode_count_plus; i++)
       if (mode_changes_plus[i].letter == c)
