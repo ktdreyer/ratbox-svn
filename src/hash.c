@@ -671,7 +671,7 @@ find_server(const char* name)
   {
     target_p = ptr->data;
 
-    if(IsServer(target_p))
+    if(IsServer(target_p) || IsMe(target_p))
     {
       if(irccmp(name, target_p->name) == 0)
          return target_p;
