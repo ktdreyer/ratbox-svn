@@ -54,7 +54,7 @@ static int nick_from_server(struct Client *, struct Client *, int, char **,
                             time_t, char *);
 
 struct Message nick_msgtab = {
-  MSG_NICK, 0, 1, 0, MFLG_SLOW, 0,
+  "NICK", 0, 1, 0, MFLG_SLOW, 0,
   {mr_nick, m_nick, ms_nick, m_nick}
 };
 

@@ -46,7 +46,7 @@
 static int m_cjoin(struct Client*, struct Client*, int, char**);
 
 struct Message cjoin_msgtab = {
-  MSG_CJOIN, 0, 2, 0, MFLG_SLOW, 0,
+  "CJOIN", 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_cjoin, m_error, m_cjoin}
 };
 

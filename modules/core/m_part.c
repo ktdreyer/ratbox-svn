@@ -48,7 +48,7 @@ static int ms_part(struct Client*, struct Client*, int, char**);
 static int mo_part(struct Client *, struct Client *, int, char **);
 
 struct Message part_msgtab = {
-  MSG_PART, 1, 2, 0, MFLG_SLOW, 0,
+  "PART", 1, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_part, ms_part, mo_part}
 };
 

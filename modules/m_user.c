@@ -41,7 +41,7 @@
 static int mr_user(struct Client*, struct Client*, int, char**);
 
 struct Message user_msgtab = {
-  MSG_USER, 0, 5, 0, MFLG_SLOW, 0L,
+  "USER", 0, 5, 0, MFLG_SLOW, 0L,
   {mr_user, m_registered, m_ignore, m_registered}
 };
 

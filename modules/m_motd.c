@@ -43,7 +43,7 @@ static int m_motd(struct Client*, struct Client*, int, char**);
 static int mo_motd(struct Client*, struct Client*, int, char**);
 
 struct Message motd_msgtab = {
-  MSG_MOTD, 0, 0, 1, MFLG_SLOW, 0,
+  "MOTD", 0, 0, 1, MFLG_SLOW, 0,
   {m_unregistered, m_motd, mo_motd, mo_motd}
 };
 

@@ -50,7 +50,7 @@ static void send_knock(struct Client *, struct Client *,
                        struct Channel *, char *);
 
 struct Message knock_msgtab = {
-  MSG_KNOCK, 0, 2, 0, MFLG_SLOW, 0,
+  "KNOCK", 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_knock, m_ignore, m_knock}
 };
 

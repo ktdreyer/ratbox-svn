@@ -39,7 +39,7 @@ static int ms_time(struct Client*, struct Client*, int, char**);
 static int mo_time(struct Client*, struct Client*, int, char**);
 
 struct Message time_msgtab = {
-  MSG_TIME, 0, 0, 0, MFLG_SLOW, 0,
+  "TIME", 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_time, ms_time, mo_time}
 };
 

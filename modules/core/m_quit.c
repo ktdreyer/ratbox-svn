@@ -38,7 +38,7 @@ static int ms_quit(struct Client*, struct Client*, int, char**);
 static int mo_quit(struct Client*, struct Client*, int, char**);
 
 struct Message quit_msgtab = {
-  MSG_QUIT, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
+  "QUIT", 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
   {m_quit, m_quit, ms_quit, mo_quit}
 };
 

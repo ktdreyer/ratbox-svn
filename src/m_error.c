@@ -34,14 +34,20 @@
 
 #if 0
 struct Message error_msgtab = {
-  MSG_ERROR, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
+ "ERROR", 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
   {mr_error, m_ignore, ms_error, m_ignore}
 };
 
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_ERROR, &error_msgtab);
+  mod_add_cmd(&error_msgtab);
+}
+
+void
+_moddeinit(void)
+{
+  mod_del_cmd(&error_msgtab);
 }
 #endif
 

@@ -38,7 +38,7 @@ static int ms_wallops(struct Client*, struct Client*, int, char**);
 static int mo_wallops(struct Client*, struct Client*, int, char**);
 
 struct Message wallops_msgtab = {
-  MSG_WALLOPS, 0, 2, 0, MFLG_SLOW, 0,
+  "WALLOPS", 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, ms_wallops, mo_wallops}
 };
 

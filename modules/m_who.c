@@ -45,7 +45,7 @@ static int m_who(struct Client*, struct Client*, int, char**);
 static int ms_who(struct Client*, struct Client*, int, char**);
 
 struct Message who_msgtab = {
-  MSG_WHO, 0, 2, 0, MFLG_SLOW, 0,
+  "WHO", 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_who, ms_who, m_who}
 };
 

@@ -51,7 +51,7 @@ static int ms_info(struct Client*, struct Client*, int, char**);
 static int mo_info(struct Client*, struct Client*, int, char**);
 
 struct Message info_msgtab = {
-  MSG_INFO, 0, 0, 0, MFLG_SLOW, 0,
+  "INFO", 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_info, ms_info, mo_info}
 };
 

@@ -42,7 +42,7 @@
 static int ms_svinfo(struct Client*, struct Client*, int, char**);
 
 struct Message svinfo_msgtab = {
-  MSG_SVINFO, 0, 4, 0, MFLG_SLOW, 0,
+  "SVINFO", 0, 4, 0, MFLG_SLOW, 0,
   {m_unregistered, m_ignore, ms_svinfo, m_ignore}
 };
 

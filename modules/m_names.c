@@ -51,7 +51,7 @@ static int m_names(struct Client*, struct Client*, int, char**);
 static int ms_names(struct Client*, struct Client*, int, char**);
 
 struct Message names_msgtab = {
-  MSG_NAMES, 0, 0, 0, MFLG_SLOW, 0,
+  "NAMES", 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_names, ms_names, m_names}
 };
 

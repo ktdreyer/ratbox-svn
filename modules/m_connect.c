@@ -45,7 +45,7 @@ static int mo_connect(struct Client*, struct Client*, int, char**);
 static int ms_connect(struct Client*, struct Client*, int, char**);
 
 struct Message connect_msgtab = {
-  MSG_CONNECT, 0, 2, 0, MFLG_SLOW, 0,
+  "CONNECT", 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, ms_connect, mo_connect}
 };
 

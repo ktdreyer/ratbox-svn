@@ -47,7 +47,7 @@
 static int ms_sjoin(struct Client*, struct Client*, int, char**);
 
 struct Message sjoin_msgtab = {
-  MSG_SJOIN, 0, 0, 0, MFLG_SLOW, 0,
+  "SJOIN", 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_ignore, ms_sjoin, m_ignore}
 };
 

@@ -35,7 +35,7 @@
 static int m_users(struct Client*, struct Client*, int, char**);
 
 struct Message users_msgtab = {
-  MSG_USERS, 0, 0, 0, MFLG_SLOW, 0,
+  "USERS", 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_users, m_users, m_users}
 };
 

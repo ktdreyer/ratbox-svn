@@ -41,7 +41,7 @@ static int m_kick(struct Client*, struct Client*, int, char**);
 static int ms_kick(struct Client*, struct Client*, int, char**);
 
 struct Message kick_msgtab = {
-  MSG_KICK, 0, 3, 0, MFLG_SLOW, 0,
+  "KICK", 0, 3, 0, MFLG_SLOW, 0,
   {m_unregistered, m_kick, ms_kick, m_kick}
 };
 

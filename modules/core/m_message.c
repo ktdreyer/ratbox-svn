@@ -43,6 +43,9 @@
 
 #include <string.h>
 
+/* XXX Lazylinks */
+/* XXX vchans */
+
 struct entity {
   void *ptr;
   int type;
@@ -100,12 +103,12 @@ static void handle_opers(int p_or_n, char *command,
 static void free_target_table(void);
 
 struct Message privmsg_msgtab = {
-  MSG_PRIVMSG, 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0L,
+  "PRIVMSG", 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0L,
   {m_unregistered, m_privmsg, m_privmsg, m_privmsg}
 };
 
 struct Message notice_msgtab = {
-  MSG_NOTICE, 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0L,
+  "NOTICE", 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0L,
   {m_unregistered, m_notice, m_notice, m_notice}
 };
 

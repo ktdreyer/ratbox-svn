@@ -38,7 +38,7 @@ static int mr_pong(struct Client*, struct Client*, int, char**);
 static int ms_pong(struct Client*, struct Client*, int, char**);
 
 struct Message pong_msgtab = {
-  MSG_PONG, 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0,
+  "PONG", 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0,
   {mr_pong, m_ignore, ms_pong, m_ignore}
 };
 

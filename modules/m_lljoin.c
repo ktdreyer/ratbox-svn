@@ -43,7 +43,7 @@
 static int ms_lljoin(struct Client *,struct Client *,int,char **);
 
 struct Message lljoin_msgtab = {
-  MSG_LLJOIN, 0, 3, 0, MFLG_SLOW | MFLG_UNREG, 0L,
+  "LLJOIN", 0, 3, 0, MFLG_SLOW | MFLG_UNREG, 0L,
   {m_unregistered, m_ignore, ms_lljoin, m_ignore}
 };
 

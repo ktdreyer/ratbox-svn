@@ -44,7 +44,7 @@ static int m_invite(struct Client*, struct Client*, int, char**);
 static int ms_invite(struct Client*, struct Client*, int, char**);
 
 struct Message invite_msgtab = {
-  MSG_INVITE, 0, 3, 0, MFLG_SLOW, 0,
+  "INVITE", 0, 3, 0, MFLG_SLOW, 0,
   {m_unregistered, m_invite, ms_invite, m_invite}
 };
 

@@ -56,7 +56,7 @@ static int clean_nick_name(char* nick);
 static int ms_client(struct Client*, struct Client*, int, char**);
 
 struct Message client_msgtab = {
-  MSG_CLIENT, 0, 1, 0, MFLG_SLOW, 0,
+  "CLIENT", 0, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_ignore, ms_client, m_ignore}
 };
 

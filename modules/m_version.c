@@ -42,7 +42,7 @@ static int ms_version(struct Client*, struct Client*, int, char**);
 static int mo_version(struct Client*, struct Client*, int, char**);
 
 struct Message version_msgtab = {
-  MSG_VERSION, 0, 0, 0, MFLG_SLOW, 0,
+  "VERSION", 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_version, ms_version, mo_version}
 };
 

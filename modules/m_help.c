@@ -38,7 +38,7 @@ static int m_help(struct Client*, struct Client*, int, char**);
 static int mo_help(struct Client*, struct Client*, int, char**);
 
 struct Message help_msgtab = {
-  MSG_HELP, 0, 0, 0, MFLG_SLOW, 0,
+  "HELP", 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_help, m_ignore, mo_help}
 };
 

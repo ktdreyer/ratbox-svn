@@ -42,7 +42,7 @@
 static int mo_testline(struct Client*, struct Client*, int, char**);
 
 struct Message testline_msgtab = {
-  MSG_TESTLINE, 0, 0, 0, MFLG_SLOW, 0,
+  "TESTLINE", 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, m_ignore, mo_testline}
 };
  
