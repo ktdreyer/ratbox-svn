@@ -642,17 +642,17 @@ int server_estab(struct Client *cptr)
   /* Its got identd , since its a server */
   SetGotId(cptr);
 
-  if(!ConfigFileEntry.hub)
+  /* If there is something in the serv_list, it might be this
+   * connecting server..
+   */
+  if(!ConfigFileEntry.hub && serv_list.head)   
     {
-      /* Its easy now, if there is a server in my link list
-       * and I'm not a HUB, I can't grow the linklist more than 1
-       */
-      if (serv_list.head)   
-        {
-          ServerStats->is_ref++;
-          sendto_one(cptr, "ERROR :I'm a leaf not a hub");
-          return exit_client(cptr, cptr, cptr, "I'm a leaf");
-        }
+      if(cptr != serv_list.head->data)
+	{
+	  ServerStats->is_ref++;
+	  sendto_one(cptr, "ERROR :I'm a leaf not a hub");
+	  return exit_client(cptr, cptr, cptr, "I'm a leaf");
+	}
     }
 
   if (IsUnknown(cptr))
@@ -667,7 +667,7 @@ int server_estab(struct Client *cptr)
                       ((n_conf->flags & CONF_FLAGS_LAZY_LINK) ? CAP_LL : 0));
       sendto_one(cptr, "SERVER %s 1 :%s",
                  my_name_for_link(me.name, n_conf), 
-                 (me.info[0]) ? (me.info) : "If you see this, this server is misconfigured");
+                 (me.info[0]) ? (me.info) : "IRCers United");
     }
   else
     {
@@ -703,7 +703,16 @@ int server_estab(struct Client *cptr)
   */
   SetServer(cptr);
   cptr->servptr = &me;
+
+  /* Some day, all these lists will be consolidated *sigh* */
   add_client_to_llist(&(me.serv->servers), cptr);
+
+  m = dlinkFind(&unknown_list, cptr);
+  if(m != NULL)
+    {
+      dlinkDelete(m, &unknown_list);
+      dlinkAdd(cptr, m, &serv_list);
+    }
 
   Count.server++;
   Count.myserver++;
@@ -714,15 +723,6 @@ int server_estab(struct Client *cptr)
   if (!set_sock_buffers(cptr->fd, READBUF_SIZE))
     report_error(SETBUF_ERROR_MSG, get_client_name(cptr, TRUE), errno);
 
-  /* cptr might not be in unknown_list because connection
-   * was originated from this side
-   */
-  m = dlinkFind(&unknown_list, cptr);
-  if( m != NULL)
-    {
-      dlinkDelete(m, &unknown_list);
-      dlinkAdd(cptr, m, &serv_list);
-    }
   
   sendto_realops_flags(FLAGS_ALL,
 		       "Link with %s established: (%s) link",
@@ -1036,6 +1036,13 @@ void initServerMask(void)
   freeMask = 0xFFFFFFFFL;
 }
 
+/*
+ * nextUnusedServerMask
+ *
+ * inputs	- unsigned long mask 
+ * output	- NONE
+ * side effects	-
+ */
 void restoreUnusedServerMask(unsigned long mask)
 {
   struct Channel*   chptr;
@@ -1054,6 +1061,13 @@ void restoreUnusedServerMask(unsigned long mask)
     }
 }
 
+/*
+ * nextFreeMask
+ *
+ * inputs	- NONE
+ * output	- unsigned long next unused mask for use in LL
+ * side effects	-
+ */
 static unsigned long nextFreeMask()
 {
   int i;
@@ -1187,12 +1201,6 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
      * The socket has been connected or connect is in progress.
      */
     make_server(cptr);
-    m = dlinkFind(&unknown_list, cptr);
-    if(m != NULL)
-      {
-	dlinkDelete(m, &unknown_list);
-      }
-
     if (by && IsPerson(by))
       {
         strcpy(cptr->serv->by, by->name);
@@ -1298,12 +1306,13 @@ serv_connect_callback(int fd, int status, void *data)
         return;
     }
 
-    /* cptr has already been pulled off of the unknown_list
-     * now it is known its a server for sure
-     */
-
-    m = make_dlink_node();
-    dlinkAdd(cptr, m, &serv_list);
+    m = dlinkFind(&unknown_list, cptr);
+    if(m != NULL)
+      {
+	dlinkDelete(m, &unknown_list);
+	m = make_dlink_node();
+	dlinkAdd(cptr, m, &serv_list);
+      }
 
     /* If we get here, we're ok, so lets start reading some data */
     comm_setselect(fd, FDLIST_SERVER, COMM_SELECT_READ, read_packet, cptr, 0);

@@ -1389,7 +1389,14 @@ const char* comment         /* Reason for the exit */
 #else
       remove_one_ip(sptr->localClient->ip.s_addr);
 #endif
-      if (IsUnknown(sptr))
+
+      /* This sptr could have status of one of STAT_UNKNOWN, STAT_CONNECTING
+       * STAT_HANDSHAKE or STAT_UNKNOWN
+       * all of which are lumped together into unknown_list
+       *
+       * In all above cases IsRegistered() will not be true.
+       */
+      if (!IsRegistered(sptr))
 	{
 	  m = dlinkFind(&unknown_list,sptr);
 	  if( m != NULL )
@@ -1398,7 +1405,6 @@ const char* comment         /* Reason for the exit */
 	      free_dlink_node(m);
 	    }
 	}
-
       if (IsAnyOper(sptr))
         {
 	  m = dlinkFind(&oper_list,sptr);
@@ -1412,7 +1418,6 @@ const char* comment         /* Reason for the exit */
         {
           Count.local--;
 
-          /* LINKLIST */
           if(IsPerson(sptr))        /* a little extra paranoia */
             {
 	      m = dlinkFind(&lclient_list,sptr);
@@ -1423,20 +1428,27 @@ const char* comment         /* Reason for the exit */
 		}
             }
         }
+
+      /* As soon as a client is known to be a server of some sort
+       * it has to be put on the serv_list, or SJOIN's to this new server
+       * from the connect burst will not be seen.
+       */
+      if (IsServer(sptr) || IsConnecting(sptr) || IsHandshake(sptr))
+	{
+	  m = dlinkFind(&serv_list,sptr);
+	  if( m != NULL )
+	    {
+	      dlinkDelete(m,&serv_list);
+	      free_dlink_node(m);
+	    }
+	}
+
       if (IsServer(sptr))
         {
           Count.myserver--;
 
 	  if(ConfigFileEntry.hub)
 	    restoreUnusedServerMask(sptr->localClient->serverMask);
-          {
-	    m = dlinkFind(&serv_list,sptr);
-	    if( m != NULL )
-	      {
-		dlinkDelete(m,&serv_list);
-		free_dlink_node(m);
-	      }
-          }
         }
       sptr->flags |= FLAGS_CLOSING;
       if (IsPerson(sptr))
