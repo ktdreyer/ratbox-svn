@@ -5,7 +5,7 @@
 #, fuzzy
 msgid	""
 msgstr	"Project-Id-Version: ircd-hybrid-7\n"
-	"POT-Creation-Date: 2001-01-24 09:50-0500\n"
+	"POT-Creation-Date: 2001-02-05 13:57-0500\n"
 	"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 	"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 	"Language-Team: LANGUAGE <LL@li.org>\n"
@@ -170,12 +170,12 @@ msgstr	""
 
 #: ../src/messages.tab:272
 #, c-format
-msgid	":%s 247 %s %s %s * * 0 0"
+msgid	":%s 247 %s X %s %s * * 0 0"
 msgstr	""
 
 #: ../src/messages.tab:274
-#, c-format
-msgid	":%s 248 %s %s %s"
+#, fuzzy, c-format
+msgid	":%s 248 %s U %s %s"
 msgstr	""
 
 #: ../src/messages.tab:277
@@ -749,6 +749,11 @@ msgstr	":%s 482 %s %s :You can't do that thing, when you don't have that "
 #, c-format
 msgid	":%s 483 %s :You can't kill a server!"
 msgstr	":%s 483 %s :Don't be an idiot - you can't kill a SERVER, fool."
+
+#: ../src/messages.tab:516
+#, fuzzy, c-format
+msgid	":%s 484 %s :You are restricted"
+msgstr	""
 
 #: ../src/messages.tab:518
 #, c-format

@@ -269,9 +269,9 @@ static  char *  replies[] = {
 /* 244 RPL_STATSHLINE, */       ":%s 244 %s %c %s * %s %d %s", 
 /* 245 RPL_STATSSLINE, */       (char *)NULL,
 /* 246 */       (char *)NULL,
-/* 247 RPL_STATSXLINE, */       ":%s 247 %s %s %s * * 0 0",
+/* 247 RPL_STATSXLINE, */       ":%s 247 %s X %s %s * * 0 0",
 
-/* 248 RPL_STATSULINE, */       ":%s 248 %s %s %s",
+/* 248 RPL_STATSULINE, */       ":%s 248 %s U %s %s",
 /* 249 */       (char *)NULL,
 /* 250 RPL_STATSCONN, */
                 ":%s 250 %s :Highest connection count: %d (%d clients) (%d connections received)",
