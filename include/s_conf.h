@@ -201,7 +201,6 @@ typedef struct
   int         f_lines_oper_only;
   int         o_lines_oper_only;
   int         stats_notice;
-  int         whois_notice;
   int         pace_wait;
   int         whois_wait;
   int         knock_delay;
@@ -209,7 +208,6 @@ typedef struct
   int         no_oper_flood;
   int         stats_p_notice;
   int         glines;
-  int         topic_uh;
   int         gline_time;
   int         idletime;
   int	      hide_server;
