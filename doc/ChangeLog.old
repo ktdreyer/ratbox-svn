@@ -1,3 +1,21 @@
+db          2002/05/07 08:26:29 EDT	(20020507_0)
+
+  Modified files:
+    modules              m_challenge.c 
+  Log:
+  Hi,
+  
+      The attached diff fixes a bug in the challenge command that will let
+  you oper more than once using PK authentication:
+  submitted by "wiz", Jason Dambrosio
+  
+  approved db
+  
+  Revision  Changes    Path
+  1.34      +11 -7     ircd-hybrid-7/modules/m_challenge.c
+
+
+
 androsyn    2002/05/06 01:48:48 EDT	(20020506_0)
 
   Modified files:
