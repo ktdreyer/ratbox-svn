@@ -1,3 +1,22 @@
+androsyn    2002/04/03 08:10:31 EST	(20020403_3)
+
+  Modified files:
+    .                    configure 
+    autoconf             acconfig.h configure.in 
+    include              config.h ircd_defs.h setup.h.in 
+  Log:
+  Added --with-nicklen=X and --with-maxclients=X to configure
+  
+  Revision  Changes    Path
+  7.21      +7 -0      ircd-hybrid-7/autoconf/acconfig.h
+  7.128     +33 -0     ircd-hybrid-7/autoconf/configure.in
+  7.131     +268 -223  ircd-hybrid-7/configure
+  7.132     +5 -3      ircd-hybrid-7/include/config.h
+  7.26      +5 -1      ircd-hybrid-7/include/ircd_defs.h
+  7.51      +6 -0      ircd-hybrid-7/include/setup.h.in
+
+
+
 androsyn    2002/04/03 07:21:24 EST	(20020403_2)
 
   Modified files:
