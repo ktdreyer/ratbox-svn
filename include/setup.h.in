@@ -162,6 +162,9 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
+/* Define to 1 if you have the `vsnprintf' function. */
+#undef HAVE_VSNPRINTF
+
 /* Define to 1 if you have the <wait.h> header file. */
 #undef HAVE_WAIT_H
 

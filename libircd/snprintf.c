@@ -11,7 +11,10 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdlib.h>
 #include <sys/types.h>
+#include <ctype.h>
+#include "setup.h"
 #include "sprintf_irc.h"
 
 /*
@@ -294,6 +297,7 @@ ircvsnprintf(char *dest, const size_t bytes, const char *format, va_list args)
 			/*
 			 * Put the most common cases first - %s %d etc
 			 */
+
 			if(ch == 's')
 			{
 				const char *str = va_arg(args, const char *);
@@ -499,7 +503,7 @@ ircvsnprintf(char *dest, const size_t bytes, const char *format, va_list args)
 					}
 
 					continue;
-				}	/* if (*format == 'u') */
+				} else	/* if (*format == 'u') */
 
 				if(*format == 'd')
 				{
@@ -551,9 +555,21 @@ ircvsnprintf(char *dest, const size_t bytes, const char *format, va_list args)
 					}
 
 					continue;
-				}	/* if (*format == 'd') */
-
-				continue;
+				} else	/* if (*format == 'd') */
+				{
+					int ret;
+					format -= 2;
+					#ifdef HAVE_VSNPRINTF
+						ret = vsnprintf(dest, maxbytes - written, format, args);
+					#else
+						ret = vsprintf(dest, format, args);
+					#endif
+					dest += ret;
+					written += ret;
+					break;
+				}
+				
+				
 			}	/* if (ch == 'l') */
 
 			if(ch != '%')
@@ -567,7 +583,11 @@ ircvsnprintf(char *dest, const size_t bytes, const char *format, va_list args)
 				 */
 
 				format -= 2;
-				ret = vsprintf(dest, format, args);
+                                #ifdef HAVE_VSNPRINTF
+                                	ret = vsnprintf(dest, maxbytes - written, format, args);
+                                #else
+                                	ret = vsprintf(dest, format, args);
+				#endif
 				dest += ret;
 				written += ret;
 
@@ -623,6 +643,7 @@ ircvsprintf(char *dest, const char *format, va_list args)
 			/*
 			 * Put the most common cases first - %s %d etc
 			 */
+
 			if(ch == 's')
 			{
 				const char *str = va_arg(args, const char *);
@@ -637,7 +658,8 @@ ircvsprintf(char *dest, const char *format, va_list args)
 
 				continue;
 			}	/* if (ch == 's') */
-
+			
+			
 			if(ch == 'd')
 			{
 				int num = va_arg(args, int);

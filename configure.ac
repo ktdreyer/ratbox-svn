@@ -441,7 +441,7 @@ AC_CHECK_TYPE([sa_family_t], [],
 AC_CHECK_TYPES([uintptr_t])
 
 dnl check for various functions...
-AC_CHECK_FUNCS([socketpair mmap writev gettimeofday])
+AC_CHECK_FUNCS([socketpair vsnprintf mmap writev gettimeofday])
 
 AC_FUNC_ALLOCA
 
