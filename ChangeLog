@@ -1,3 +1,15 @@
+androsyn    2005/03/30 01:47:27 UTC	(20050330_0)
+
+  Modified files:
+    src                  s_auth.c 
+  Log:
+  Got to start the auth query before dns...bleh
+  
+  Revision  Changes    Path
+  7.206     +11 -2     ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2005/03/28 21:10:53 UTC	(20050328_9)
 
   Modified files:
