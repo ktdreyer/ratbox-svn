@@ -7,6 +7,11 @@
  * $Id$
  */
 #include "stdinc.h"
+
+#ifdef HAVE_CRYPT_H
+#include <crypt.h>
+#endif
+
 #include "service.h"
 #include "client.h"
 #include "scommand.h"
@@ -17,7 +22,6 @@
 #include "ucommand.h"
 #include "cache.h"
 #include "channel.h"
-#include "crypt.h"
 
 dlink_list service_list;
 
