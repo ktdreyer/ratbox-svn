@@ -1079,7 +1079,7 @@ conf_set_auth_spoof(void *data)
 			return;
 		}
 
-		if(strlen(user) >= USERLEN)
+		if(strlen(user) > USERLEN)
 		{
 			conf_report_error("Warning -- spoof ident length invalid.");
 			return;
@@ -1101,7 +1101,7 @@ conf_set_auth_spoof(void *data)
 		return;
 	}
 
-	if(strlen(host) >= HOSTLEN)
+	if(strlen(host) > HOSTLEN)
 	{
 		conf_report_error("Warning -- spoof host length invalid.");
 		return;

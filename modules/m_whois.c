@@ -295,7 +295,7 @@ single_whois(struct Client *source_p, struct Client *target_p, int glob)
 
 		if(ShowChannel(source_p, chptr))
 		{
-			if((cur_len + strlen(chptr->chname) + 2) > (BUFSIZE - 4))
+			if((cur_len + strlen(chptr->chname) + 3) > (BUFSIZE - 4))
 			{
 				sendto_one(source_p, "%s", buf);
 				cur_len = mlen;
@@ -303,7 +303,7 @@ single_whois(struct Client *source_p, struct Client *target_p, int glob)
 			}
 
 			tlen = ircsprintf(t, "%s%s ", 
-					  find_channel_status(msptr, 0), 
+					  find_channel_status(msptr, 1),
 					  chptr->chname);
 			t += tlen;
 			cur_len += tlen;

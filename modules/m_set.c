@@ -539,7 +539,7 @@ quote_splitdelay(struct Client *source_p, int newval)
 		GlobalSetOptions.split_delay = newval;
 	}
 	else
-		sendto_one(source_p, ":%s NOTICE %s :SPLTIDELAY is currently %i",
+		sendto_one(source_p, ":%s NOTICE %s :SPLITDELAY is currently %i",
 			   me.name, source_p->name,
 			   GlobalSetOptions.split_delay);
 }

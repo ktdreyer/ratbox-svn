@@ -64,18 +64,24 @@ m_error(struct Client *client_p, struct Client *source_p, int parc, const char *
 		sendto_realops_flags(UMODE_ALL, L_ADMIN,
 				     "ERROR :from %s -- %s",
 				     get_client_name(client_p, HIDE_IP), para);
+
+#ifndef HIDE_SERVERS_IPS
 		sendto_realops_flags(UMODE_ALL, L_OPER,
 				     "ERROR :from %s -- %s",
 				     get_client_name(client_p, MASK_IP), para);
+#endif
 	}
 	else
 	{
-		sendto_realops_flags(UMODE_ALL, L_OPER,
-				     "ERROR :from %s via %s -- %s",
-				     source_p->name, get_client_name(client_p, MASK_IP), para);
 		sendto_realops_flags(UMODE_ALL, L_ADMIN,
 				     "ERROR :from %s via %s -- %s",
 				     source_p->name, get_client_name(client_p, HIDE_IP), para);
+
+#ifndef HIDE_SERVERS_IPS
+		sendto_realops_flags(UMODE_ALL, L_OPER,
+				     "ERROR :from %s via %s -- %s",
+				     source_p->name, get_client_name(client_p, MASK_IP), para);
+#endif
 	}
 
 	if(MyClient(source_p))
@@ -94,11 +100,21 @@ ms_error(struct Client *client_p, struct Client *source_p, int parc, const char 
 	ilog(L_ERROR, "Received ERROR message from %s: %s", source_p->name, para);
 
 	if(client_p == source_p)
-		sendto_realops_flags(UMODE_ALL, L_ALL,
+		sendto_realops_flags(UMODE_ALL,
+#ifndef HIDE_SERVERS_IPS
+				     L_ALL,
+#else
+				     L_ADMIN
+#endif
 				     "ERROR :from %s -- %s",
 				     get_client_name(client_p, MASK_IP), para);
 	else
-		sendto_realops_flags(UMODE_ALL, L_ALL,
+		sendto_realops_flags(UMODE_ALL,
+#ifndef HIDE_SERVERS_IPS
+				     L_ALL,
+#else
+				     L_ADMIN,
+#endif
 				     "ERROR :from %s via %s -- %s",
 				     source_p->name, get_client_name(client_p, MASK_IP), para);
 

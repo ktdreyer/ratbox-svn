@@ -127,14 +127,21 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 						ac2ptr = NULL;
 				}
 			}
-			if(ac2ptr)
-				sendto_one(source_p, form_str(RPL_TRACELINK), me.name,
-					   looking_for, ircd_version, debugmode, tname,
-					   ac2ptr->from->name);
-			else
-				sendto_one(source_p, form_str(RPL_TRACELINK), me.name,
-					   looking_for, ircd_version, debugmode, tname,
-					   "ac2ptr_is_NULL!!");
+			/* giving this out with flattened links defeats the
+			 * object --fl
+			 */
+			if(IsOper(source_p) || !ConfigServerHide.flatten_links)
+			{
+				if(ac2ptr)
+					sendto_one(source_p, form_str(RPL_TRACELINK), me.name,
+						   looking_for, ircd_version, debugmode, tname,
+						   ac2ptr->from->name);
+				else
+					sendto_one(source_p, form_str(RPL_TRACELINK), me.name,
+						   looking_for, ircd_version, debugmode, tname,
+						   "ac2ptr_is_NULL!!");
+			}
+
 			return 0;
 		}
 

@@ -89,7 +89,7 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	struct Channel *chptr = NULL;
 	struct membership *msptr;
 	static char modebuf[BUFSIZE];
-	static char parabuf[MODEBUFLEN];
+	static char parabuf[BUFSIZE];
 	int n = 2;
 
 	if(EmptyString(parv[1]))
@@ -1042,7 +1042,7 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
 		 int parc, const char *parv[])
 {
 	static char modebuf[BUFSIZE];
-	static char parabuf[MODEBUFLEN];
+	static char parabuf[BUFSIZE];
 	char *mbuf;
 	int cur_len, mlen, paralen, paracount;
 	int i, j, flags;

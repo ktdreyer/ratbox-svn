@@ -350,6 +350,8 @@ burst_channels(struct Client *client_p)
 
 			if(cur_len + tlen >= BUFSIZE - 3)
 			{
+				t--;
+				*t = '\0';
 				sendto_one(client_p, "%s", buf);
 				cur_len = mlen;
 				t = buf + mlen;

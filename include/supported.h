@@ -42,18 +42,16 @@
                 "%s%s%s" 	\
                 " MODES=%i" 	\
                 " MAXCHANNELS=%i" \
-                " MAXLIST=b%s%s:%i" 	\
+                " MAXBANS=%i" 	\
                 " MAXTARGETS=%i" \
                 " NICKLEN=%i" 	\
                 " TOPICLEN=%i" 	\
                 " KICKLEN=%i"
 
 #define FEATURESVALUES ConfigChannel.use_knock ? " KNOCK" : "", \
-        ConfigChannel.use_except ? " EXCEPTS=e" : "", \
-        ConfigChannel.use_invex ? " INVEX=I" : "", \
+        ConfigChannel.use_except ? " EXCEPTS" : "", \
+        ConfigChannel.use_invex ? " INVEX" : "", \
         MAXMODEPARAMS,ConfigChannel.max_chans_per_user, \
-	ConfigChannel.use_except ? "e" : "", \
-	ConfigChannel.use_invex ? "I" : "", \
         ConfigChannel.max_bans, \
         ConfigFileEntry.max_targets,NICKLEN-1,TOPICLEN,TOPICLEN
 
