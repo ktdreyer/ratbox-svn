@@ -1,3 +1,17 @@
+androsyn    2002/09/07 06:36:34 UTC	(20020907_3)
+
+  Modified files:
+    src                  motd.c newconf.c 
+  Log:
+  Passing macros to strlcpy is kinda bad especially when you are able to use
+  sizeof() on the variable...
+  
+  Revision  Changes    Path
+  7.27      +2 -2      ircd-ratbox/src/motd.c
+  7.34      +3 -3      ircd-ratbox/src/newconf.c
+
+
+
 androsyn    2002/09/07 06:32:11 UTC	(20020907_2)
 
   Modified files:
