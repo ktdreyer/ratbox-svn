@@ -163,6 +163,8 @@ extern int mo_stats(struct Client*, struct Client*, int, char**);
 extern int mo_testline(struct Client *,struct Client *,int,char **);
 extern int mo_trace(struct Client*, struct Client*, int, char**);
 extern int mo_unkline(struct Client *,struct Client *,int,char **);
+extern int mo_undline(struct Client *, struct Client *, int, char **);
+extern int mo_ungline(struct Client *, struct Client *, int, char **);
 extern int mo_wallops(struct Client*, struct Client*, int, char**);
 extern int mo_htm(struct Client *,struct Client *,int,char **);
 extern int mo_quit(struct Client*, struct Client*, int, char**);

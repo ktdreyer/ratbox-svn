@@ -700,6 +700,14 @@ struct Message msgtab[] = {
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_not_oper, m_error, mo_unkline }
   },
+  {MSG_UNDLINE, 0, 1, MFLG_SLOW, 0,
+   /* UNREG, CLIENT, SERVER, OPER */
+   { m_unregistered, m_not_oper, m_error, mo_undline }
+  },
+  {MSG_UNGLINE, 0, 1, MFLG_SLOW, 0,
+   /* UNREG, CLIENT, SERVER, OPER */
+   { m_unregistered, m_not_oper, m_error, mo_ungline }
+  },
   {MSG_DLINE, 0, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_not_oper, m_error, mo_dline }
