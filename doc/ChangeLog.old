@@ -1,3 +1,17 @@
+*** 20010618_3 by db
+- bug in USE_TABLE_MODE set_channel_mode code
+  I've undeffed it for now until this fix is verified... This
+  code should be rather more carefully tested...
+- Basically chptr->chname does not always point at the real name as
+  seen by users when on a vchan. The root channel name is passed to
+  set_channel_mode() for this reason. set_channel_mode is given
+  the chptr corresponding to the mapped channel (#foo_{TS}) but
+  the local users should only see the "#foo" part, which is what chname
+  passed down is (the root channel name)
+- I'm unable to test this fix atm. Someone else will have to ;-(
+
+
+
 *** 20010618_2 by jdc
 - Modifications to support verbose logging for cryptlink problems.
   Patches originally written by einride.  Logging levels are L_NOTICE
