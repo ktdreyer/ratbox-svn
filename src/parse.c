@@ -738,7 +738,7 @@ static void do_numeric(char numeric[],
     }
 
     /* csircd will send out unknown umode flag for +a (admin), drop it here. */
-    if((numeric == ERR_UMODEUNKNOWNFLAG) && MyClient(target_p))
+    if((atoi(numeric) == ERR_UMODEUNKNOWNFLAG) && MyClient(target_p))
       return;
     
     /* Fake it for server hiding, if its our client */
