@@ -1,3 +1,8 @@
+*** 20010502_7 by androsyn
+$5 says this fixes fl_'s cores...I don't think this is the right fix
+though..
+
+
 *** 20010502_6 by androsyn
 Undo my send_queued_write() hack..
 
