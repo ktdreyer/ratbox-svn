@@ -1,3 +1,7 @@
+*** 20010805_2 by leeh
+- made hybrid7 TS5
+
+
 *** 20010805_1 by a1kmm
 - Send "*" on -k, this should fix the key problems with the USE_TABLE_MODE
   code. We really shouldn't enable the old code, because it has issues with
