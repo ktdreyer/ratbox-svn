@@ -1,5 +1,5 @@
 MODUSER <channel> <username> <level>
-ACCESS:150 Modifies a users level on the access list
+{150} Modifies a users level on the access list
   <channel>: Channel to modify user in
   <username>: Username to modify
   <level>   : Level of access to change to

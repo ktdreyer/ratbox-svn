@@ -44,9 +44,13 @@ static dlink_list channel_reg_table[MAX_CHANNEL_TABLE];
 
 static void u_chanserv_cregister(struct connection_entry *, char *parv[], int parc);
 static void u_chanserv_cdrop(struct connection_entry *, char *parv[], int parc);
+static void u_chanserv_csuspend(struct connection_entry *, char *parv[], int parc);
+static void u_chanserv_cunsuspend(struct connection_entry *, char *parv[], int parc);
 
 static int s_chanserv_cregister(struct client *, char *parv[], int parc);
 static int s_chanserv_cdrop(struct client *, char *parv[], int parc);
+static int s_chanserv_csuspend(struct client *, char *parv[], int parc);
+static int s_chanserv_cunsuspend(struct client *, char *parv[], int parc);
 static int s_chanserv_register(struct client *, char *parv[], int parc);
 static int s_chanserv_adduser(struct client *, char *parv[], int parc);
 static int s_chanserv_deluser(struct client *, char *parv[], int parc);
@@ -70,6 +74,8 @@ static struct service_command chanserv_command[] =
 {
 	{ "CREGISTER",	&s_chanserv_cregister,	2, NULL, 1, 0L, 0, 0, CONF_OPER_CS_REGISTER },
 	{ "CDROP",	&s_chanserv_cdrop,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CS_ADMIN },
+	{ "CSUSPEND",	&s_chanserv_csuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CS_ADMIN },
+	{ "CUNSUSPEND",	&s_chanserv_cunsuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CS_ADMIN },
 	{ "REGISTER",	&s_chanserv_register,	1, NULL, 1, 0L, 1, 0, 0 },
 	{ "ADDUSER",	&s_chanserv_adduser,	3, NULL, 1, 0L, 1, 0, 0 },
 	{ "DELUSER",	&s_chanserv_deluser,	2, NULL, 1, 0L, 1, 0, 0 },
@@ -95,6 +101,8 @@ static struct ucommand_handler chanserv_ucommand[] =
 {
 	{ "cregister",	u_chanserv_cregister,	CONF_OPER_CS_REGISTER,	3, NULL },
 	{ "cdrop",	u_chanserv_cdrop,	CONF_OPER_CS_ADMIN,	2, NULL },
+	{ "csuspend",	u_chanserv_csuspend,	CONF_OPER_CS_ADMIN,	2, NULL },
+	{ "cunsuspend",	u_chanserv_cunsuspend,	CONF_OPER_CS_ADMIN,	2, NULL },
 	{ "\0",		NULL,			0,			0, NULL }
 };
 
@@ -248,6 +256,13 @@ verify_member_reg(struct client *client_p, struct channel **chptr,
 	if(chptr && (*chptr = find_channel(chreg_p->name)) == NULL)
 	{
 		service_error(chanserv_p, client_p, "Channel %s does not exist",
+				chreg_p->name);
+		return NULL;
+	}
+
+	if(chreg_p->flags & CS_FLAGS_SUSPENDED)
+	{
+		service_error(chanserv_p, client_p, "Channel %s is suspended",
 				chreg_p->name);
 		return NULL;
 	}
@@ -434,6 +449,9 @@ h_chanserv_join(void *v_chptr, void *v_members)
 	if((chreg_p = find_channel_reg(NULL, chptr->name)) == NULL)
 		return 0;
 
+	if(chreg_p->flags & CS_FLAGS_SUSPENDED)
+		return 0;
+
 	/* if its simply one member joining (ie, not a burst) then attempt
 	 * somewhat to shortcut it..
 	 */
@@ -569,6 +587,50 @@ u_chanserv_cdrop(struct connection_entry *conn_p, char *parv[], int parc)
 	sendto_one(conn_p, "Channel %s registration dropped", parv[1]);
 }
 
+static void
+u_chanserv_csuspend(struct connection_entry *conn_p, char *parv[], int parc)
+{
+	struct chan_reg *reg_p;
+
+	if((reg_p = find_channel_reg(NULL, parv[1])) == NULL)
+	{
+		sendto_one(conn_p, "Channel %s is not registered", parv[1]);
+		return;
+	}
+
+	if(reg_p->flags & CS_FLAGS_SUSPENDED)
+	{
+		sendto_one(conn_p, "Channel %s is already suspended", parv[1]);
+		return;
+	}
+
+	reg_p->flags |= CS_FLAGS_SUSPENDED;
+
+	sendto_one(conn_p, "Channel %s suspended", parv[1]);
+}
+
+static void
+u_chanserv_cunsuspend(struct connection_entry *conn_p, char *parv[], int parc)
+{
+	struct chan_reg *reg_p;
+
+	if((reg_p = find_channel_reg(NULL, parv[1])) == NULL)
+	{
+		sendto_one(conn_p, "Channel %s is not registered", parv[1]);
+		return;
+	}
+
+	if((reg_p->flags & CS_FLAGS_SUSPENDED) == 0)
+	{
+		sendto_one(conn_p, "Channel %s is not suspended", parv[1]);
+		return;
+	}
+
+	reg_p->flags &= ~CS_FLAGS_SUSPENDED;
+
+	sendto_one(conn_p, "Channel %s unsuspended", parv[1]);
+}
+
 static int
 s_chanserv_cregister(struct client *client_p, char *parv[], int parc)
 {
@@ -615,6 +677,48 @@ s_chanserv_cdrop(struct client *client_p, char *parv[], int parc)
 	service_error(chanserv_p, client_p, "Channel %s registration dropped",
 			parv[0]);
 
+	return 0;
+}
+
+static int
+s_chanserv_csuspend(struct client *client_p, char *parv[], int parc)
+{
+	struct chan_reg *reg_p;
+
+	if((reg_p = find_channel_reg(client_p, parv[0])) == NULL)
+		return 0;
+
+	if(reg_p->flags & CS_FLAGS_SUSPENDED)
+	{
+		service_error(chanserv_p, client_p, "Channel %s is already suspended",
+				parv[0]);
+		return 0;
+	}
+
+	reg_p->flags |= CS_FLAGS_SUSPENDED;
+
+	service_error(chanserv_p, client_p, "Channel %s suspended", parv[0]);
+	return 0;
+}
+
+static int
+s_chanserv_cunsuspend(struct client *client_p, char *parv[], int parc)
+{
+	struct chan_reg *reg_p;
+
+	if((reg_p = find_channel_reg(client_p, parv[0])) == NULL)
+		return 0;
+
+	if((reg_p->flags & CS_FLAGS_SUSPENDED) == 0)
+	{
+		service_error(chanserv_p, client_p, "Channel %s is not suspended",
+				parv[0]);
+		return 0;
+	}
+
+	reg_p->flags &= ~CS_FLAGS_SUSPENDED;
+
+	service_error(chanserv_p, client_p, "Channel %s unsuspended", parv[0]);
 	return 0;
 }
 

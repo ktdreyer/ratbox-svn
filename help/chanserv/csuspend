@@ -1,0 +1,3 @@
+CUNSUSPEND <channel>
+[ADMIN] Unsuspends the given channels registration
+  <channel>: Channel to unsuspend 

@@ -5,6 +5,8 @@
 struct user_reg;
 struct chmode;
 
+#define CS_FLAGS_SUSPENDED	0x001
+
 struct chan_reg
 {
 	char *name;
