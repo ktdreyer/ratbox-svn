@@ -81,32 +81,18 @@ int valid_wild_card(struct Client *sptr, char *user, char *host);
 int already_placed_kline( struct Client *sptr, char *user, char *host,
 			  unsigned long ip);
 
-/*
- * Linked list of pending klines that need to be written to
- * the conf
- */
-aPendingLine *PendingLines = (aPendingLine *) NULL;
+int ip_kline(char *host,unsigned long *ip, unsigned long *ip_mask);
 
 #ifdef SLAVE_SERVERS
 extern struct ConfItem *find_special_conf(char *,int); /* defined in s_conf.c */
 #endif
 
-/*
- * LockFile routines
- */
-aPendingLine *AddPending();
-void DelPending(aPendingLine *);
-int LockedFile(const char *);
-void WritePendingLines(const char *);
 void WriteKline(const char *, struct Client *, struct Client *,
                        const char *, const char *, const char *, 
                        const char *);
 
 void WriteDline(const char *, struct Client *,
                 const char *, const char *, const char *);
-
-static void add_to_pending_klines(struct Client *sptr, char *user, char *host,
-                                  char *reason, const char *current_date);
 
 
 /*
@@ -188,36 +174,7 @@ mo_kline(struct Client *cptr,
   if( valid_wild_card(sptr,user,host) == 0 )
     return 0;
 
-  /* 
-  ** At this point, I know the user and the host to place the k-line on
-  ** I also know whether its supposed to be a temporary kline or not
-  ** I also know the reason field is clean
-  ** Now what I want to do, is find out if its a kline of the form
-  **
-  ** /quote kline *@192.168.0.*
-  **
-  */
-  /*
-   * what to do if host is a legal ip, and its a temporary kline ?
-   * Don't do the CIDR conversion for now of course.
-   */
-
-  if((ip_kline = is_address(host, &ip, &ip_mask)))
-     {
-       p = strchr(host,'*');
-       if (p)
-         {
-           *p++ = '0';
-           *p++ = '/';
-           *p++ = '2';
-           *p++ = '4';
-           *p++ = '\0';
-         }
-    }
-  else
-    {
-      ip = 0L;
-    }
+  ip_kline = is_ip_kline(host,&ip,&ip_mask);
 
   if ( already_placed(sptr, user, host, ip) )
     return 0;
@@ -227,8 +184,8 @@ mo_kline(struct Client *cptr,
   aconf = make_conf();
   aconf->status = CONF_KILL;
   DupString(aconf->host, host);
-
   DupString(aconf->user, user);
+
   aconf->port = 0;
 
   if(temporary_kline_time)
@@ -281,23 +238,6 @@ mo_kline(struct Client *cptr,
 
   log(L_TRACE, "%s added K-Line for [%s@%s] [%s]",
       sptr->name, user, host, reason ? reason : "No reason");
-
-  kconf = get_conf_name(KLINE_TYPE);
-
-  /*
-   * Check if the conf file is locked - if so, add the kline
-   * to our pending kline list, to be written later, if not,
-   * allow this kline to be written, and write out all other
-   * pending klines as well
-   */
-  if (LockedFile(kconf))
-    {
-      add_to_pending_klines(sptr,user,host,reason,current_date);
-      check_klines();
-      return 0;
-    }
-  else if (PendingLines)
-    WritePendingLines(kconf);
 
   sendto_one(sptr,
     ":%s NOTICE %s :Added K-Line [%s@%s] to %s",
@@ -726,43 +666,6 @@ mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   log(L_TRACE, "%s added D-Line for [%s] [%s]", 
       sptr->name, host, reason);
 
-  dconf = get_conf_name(DLINE_TYPE);
-
-  /*
-   * Check if the conf file is locked - if so, add the dline
-   * to our pending dline list, to be written later, if not,
-   * allow this dline to be written, and write out all other
-   * pending lines as well
-   */
-  if (LockedFile(dconf))
-    {
-      aPendingLine *pptr;
-
-      pptr = AddPending();
-
-      /*
-       * Now fill in the fields
-       */
-      pptr->type = DLINE_TYPE;
-      pptr->sptr = sptr;
-      pptr->rcptr = (struct Client *) NULL;
-      pptr->user = (char *) NULL;
-      pptr->host = strdup(host);
-      pptr->reason = strdup(reason);
-      pptr->when = strdup(current_date);
-
-      sendto_one(sptr,
-		 ":%s NOTICE %s :Added D-Line [%s] (config file write delayed)",
-		 me.name,
-		 sptr->name,
-		 host);
-
-      check_klines();
-      return 0;
-    }
-  else if (PendingLines)
-    WritePendingLines(dconf);
-
   sendto_one(sptr,
 	     ":%s NOTICE %s :Added D-Line [%s] to %s",
 	     me.name,
@@ -782,190 +685,6 @@ mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   check_klines();
   return 0;
 } /* m_dline() */
-
-/*
- * add_to_pending_klines
- * inputs       - pointer to client adding kline
- *              - pointer to user being klined	
- *              - pointer to host being klined
- *              - reason for kline
- *              - current date
- * output       - NONE
- * side effects - NONE
- */
-static void add_to_pending_klines(struct Client *sptr, char *user, char *host,
-				  char *reason, const char *current_date)
-{
-  aPendingLine *pptr;
-
-  pptr = AddPending();
-
-  /*
-   * Now fill in the fields
-   */
-  pptr->type = KLINE_TYPE;
-  pptr->sptr = sptr;
-  DupString(pptr->user, user);
-  DupString(pptr->host, host);
-  DupString(pptr->reason, reason ? reason : "No reason");
-  DupString(pptr->when, current_date);
-
-#ifdef SLAVE_SERVERS
-  pptr->rcptr = rcptr;
-#else
-  pptr->rcptr = (struct Client *) NULL;
-#endif
-
-  sendto_one(sptr,
-	     ":%s NOTICE %s :Added K-Line [%s@%s] (config file write delayed)",
-	     me.name,
-	     sptr->name,
-	     user,
-	     host);
-
-}
-
-/*
- * AddPending()
- * Add a pending K/D line to our linked list
- */
-
-aPendingLine * AddPending(void)
-{
-  aPendingLine *temp;
-
-  temp = (aPendingLine *) MyMalloc(sizeof(aPendingLine));
-
-  /*
-   * insert the new entry into our list
-   */
-  temp->next = PendingLines;
-  PendingLines = temp;
-
-  return (temp);
-} /* AddPending() */
-
-/*
- * DelPending()
- * Delete pending line entry - assume calling function handles
- * linked list manipulation (setting next field etc)
- */
-
-void DelPending(aPendingLine *pendptr)
-{
-  if (!pendptr)
-    return;
-
-  if (pendptr->user)
-    MyFree(pendptr->user);
-  MyFree(pendptr->host);
-  MyFree(pendptr->reason);
-  MyFree(pendptr->when);
-  MyFree(pendptr);
-} /* DelPending() */
-
-/*
- * LockedFile()
- * Determine if 'filename' is currently locked. If it is locked,
- * there should be a filename.lock file which contains the current
- * pid of the editing process. Make sure the pid is valid before
- * giving up.
- *
- * Return: 1 if locked
- *        0 if not
- */
-int LockedFile(const char *filename)
-
-{
-  char lockpath[PATH_MAX + 1];
-  char buffer[1024];
-  FBFILE *fileptr;
-  int killret;
-
-  if (!filename)
-    return (0);
-
-  ircsprintf(lockpath, "%s.lock", filename);
-
-  if ((fileptr = fbopen(lockpath, "r")) == (FBFILE *) NULL)
-  {
-    /*
-     * lockfile does not exist
-     */
-    return (0);
-  }
-
-  if (fbgets(buffer, sizeof(buffer) - 1, fileptr))
-  {
-    /*
-     * If it is a valid lockfile, 'buffer' should now
-     * contain the pid number of the editing process.
-     * Send the pid a SIGCHLD to see if it is a valid
-     * pid - it could be a remnant left over from a
-     * crashed editor or system reboot etc.
-     */
-    killret = kill(atoi(buffer), SIGCHLD);
-    if (killret == 0)
-    {
-      fbclose(fileptr);
-      return (1);
-    }
-
-    /*
-     * killret must be -1, which indicates an error (most
-     * likely ESRCH - No such process), so it is ok to
-     * proceed writing klines.
-     */
-  }
-
-  fbclose(fileptr);
-
-  /*
-   * Delete the outdated lock file
-   */
-  unlink(lockpath);
-
-  return (0);
-} /* LockedFile() */
-
-void WritePendingLines(const char *filename)
-
-{
-  aPendingLine *ptmp;
-
-  if (!filename)
-    return;
-
-  while (PendingLines)
-  {
-    if (PendingLines->type == KLINE_TYPE)
-    {
-      WriteKline(filename,
-        PendingLines->sptr,
-        PendingLines->rcptr,
-        PendingLines->user,
-        PendingLines->host,
-        PendingLines->reason,
-        PendingLines->when);
-    }
-    else
-    {
-      WriteDline(filename,
-        PendingLines->sptr,
-        PendingLines->host,
-        PendingLines->reason,
-        PendingLines->when);
-    }
-
-    /*
-     * Delete the K/D line from the list after we write
-     * it out to the conf
-     */
-    ptmp = PendingLines->next;
-    DelPending(PendingLines);
-    PendingLines = ptmp;
-  } /* while (PendingLines) */
-} /* WritePendingLines() */
 
 /*
  * WriteKline()
@@ -991,10 +710,6 @@ WriteKline(const char *filename, struct Client *sptr, struct Client *rcptr,
       strerror(errno));
     return;
   }
-
-#ifdef SEPARATE_QUOTE_KLINES_BY_DATE
-  fchmod(out, 0660);
-#endif
 
 #ifdef SLAVE_SERVERS
   if (IsServer(sptr))
@@ -1061,10 +776,6 @@ WriteDline(const char *filename, struct Client *sptr,
       strerror(errno));
     return;
   }
-
-#ifdef SEPARATE_QUOTE_KLINES_BY_DATE
-  fchmod(out, 0660);
-#endif
 
   ircsprintf(buffer,
     "#%s!%s@%s D'd: %s:%s (%s)\n",
@@ -1334,4 +1045,38 @@ int already_placed_kline( struct Client *sptr, char *user, char *host,
      }
 
   return 0;
+}
+
+int ip_kline(char *host,unsigned long *ip, unsigned long *ip_mask)
+{
+  char *p;
+
+  /* 
+  ** At this point, I know the user and the host to place the k-line on
+  ** I also know whether its supposed to be a temporary kline or not
+  ** I also know the reason field is clean
+  ** Now what I want to do, is find out if its a kline of the form
+  **
+  ** /quote kline *@192.168.0.*
+  **
+  */
+  /*
+   * what to do if host is a legal ip, and its a temporary kline ?
+   * Don't do the CIDR conversion for now of course.
+   */
+
+  if((is_address(host, ip, ip_mask)))
+     {
+       if( (p = strchr(host,'*')) )
+         {
+           *p++ = '0';
+           *p++ = '/';
+           *p++ = '2';
+           *p++ = '4';
+           *p++ = '\0';
+         }
+       return(YES);
+    }
+
+  return NO;
 }

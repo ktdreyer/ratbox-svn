@@ -2346,6 +2346,7 @@ char *oper_privs_as_string(struct Client *cptr,int port)
     {
       if(cptr)
         SetOperK(cptr);
+      *privs_ptr++ = 'K';
     }
   else
     *privs_ptr++ = 'k';
@@ -2403,13 +2404,13 @@ char *oper_privs_as_string(struct Client *cptr,int port)
     *privs_ptr++ = 'd';
 
   if (port & CONF_OPER_ADMIN)
-  {
-	  if (cptr)
-		  SetOperAdmin(cptr);
-	  *privs_ptr++ = 'A';
-  }
+    {
+      if (cptr)
+	SetOperAdmin(cptr);
+      *privs_ptr++ = 'A';
+    }
   else
-	  *privs_ptr++ = 'a';
+    *privs_ptr++ = 'a';
   
   *privs_ptr = '\0';
 
@@ -2501,10 +2502,9 @@ unsigned long cidr_to_bitmask[]=
  * is_address
  *
  * inputs        - hostname
- *                - pointer to ip result
- *                - pointer to ip_mask result
+ *               - pointer to ip result
+ *               - pointer to ip_mask result
  * output        - YES if hostname is ip# only NO if its not
- *              - 
  * side effects        - NONE
  * 
  * Thanks Soleil
@@ -2585,43 +2585,6 @@ int        is_address(char *host,
 
   return( 1 );
 }
-
-#ifdef KILL_COMMENT_IS_FILE
-/*
-**  output the reason for being k lined from a file
-** sptr is server
-** parv is the sender prefix
-** filename is the file that is to be output to the K lined client
-*/
-
-int     m_killcomment(sptr, parv, filename)
-struct Client *sptr;
-char    *parv, *filename;
-{
-  FBFILE  *file;
-  char    line[256];
-  char    *tmp;
-  struct  stat        sb;
-  struct  tm        *tm;
-
-  if ((file = fbopen(filename, "r")) == NULL)
-    {
-      sendto_one(sptr, ":%s %d %s :You are not welcome on this server.", me.name, ERR_YOUREBANNEDCREEP, parv);
-      return 0;
-    }
-  (void)fbstat(&sb, file);
-  tm = localtime(&sb.st_mtime);
-  while (fbgets(line, sizeof(line), file))
-    {
-      if ((tmp = strchr(line,'\n')))
-        *tmp = '\0';
-      sendto_one(sptr, ":%s %d %s :%s.", me.name, ERR_YOUREBANNEDCREEP, parv,line);
-    }
-  fbclose(file);
-  return 0;
-}
-#endif /* KILL_COMMENT_IS_FILE */
-
 
 /*
  * mo_testline
