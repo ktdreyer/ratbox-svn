@@ -205,36 +205,47 @@ static void release_auth_client(struct Client* client)
  */
 static void auth_dns_callback(void* vptr, adns_answer* reply)
 {
+  
   struct AuthRequest* auth = (struct AuthRequest*) vptr;
-
+  char *str = auth->client->host;
   ClearDNSPending(auth);
 
   if(reply && (reply->status == adns_s_ok))
     {
       if(strlen(*reply->rrs.str) < HOSTLEN)
         {
-          strcpy(auth->client->host, *reply->rrs.str);
+          strcpy(str, *reply->rrs.str);
           sendheader(auth->client, REPORT_FIN_DNS);
         }
       else
         {
-          if(auth->client->localClient->aftype == AF_INET6 && ConfigFileEntry.dot_in_ip6_addr)
+#ifdef IPV6
+          if(*auth->client->localClient->sockhost == ':')
+            *str++  = '0';
+
+          if(auth->client->localClient->aftype == AF_INET6 && ConfigFileEntry.dot_in_ip6_addr == 1)
 	  {
-            strcpy(auth->client->host, auth->client->localClient->sockhost);
-            strlcat(auth->client->host, ".", HOSTLEN);
+            strcpy(str, auth->client->localClient->sockhost);
+            strcat(str, ".");
           } else
-            strcpy(auth->client->host, auth->client->localClient->sockhost);
+#endif
+            strcpy(str, auth->client->localClient->sockhost);
           sendheader(auth->client, REPORT_HOST_TOOLONG);
         }
     }
   else
     {
-      if(auth->client->localClient->aftype == AF_INET6 && ConfigFileEntry.dot_in_ip6_addr)
+#ifdef IPV6
+      if(*auth->client->localClient->sockhost == ':')
+        *str++ = '0';
+
+      if(auth->client->localClient->aftype == AF_INET6 && ConfigFileEntry.dot_in_ip6_addr == 1)
       {
-        strcpy(auth->client->host, auth->client->localClient->sockhost);
-        strlcat(auth->client->host, ".", HOSTLEN);
-      } else
-        strcpy(auth->client->host, auth->client->localClient->sockhost); 
+        strcpy(str, auth->client->localClient->sockhost);
+        strcat(str, ".");
+      } else 
+#endif
+      strcpy(str, auth->client->localClient->sockhost); 
       sendheader(auth->client, REPORT_FAIL_DNS);
     }
 
