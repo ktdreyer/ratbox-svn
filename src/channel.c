@@ -2152,7 +2152,6 @@ struct Channel* get_channel(struct Client *cptr, char *chname, int flag)
   if (flag == CREATE)
     {
       chptr = (struct Channel*) MyMalloc(sizeof(struct Channel) + len + 1);
-      memset(chptr, 0, sizeof(struct Channel));
       /*
        * NOTE: strcpy ok here, we have allocated strlen + 1
        */
