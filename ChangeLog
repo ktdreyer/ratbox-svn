@@ -1,3 +1,19 @@
+androsyn    2003/08/06 12:01:53 EDT	(20030806_0)
+
+  Modified files:
+    include              reject.h 
+    modules              m_stats.c 
+    src                  reject.c 
+  Log:
+  Add some basic reject stats.
+  
+  Revision  Changes    Path
+  1.3       +1 -1      ircd-ratbox/include/reject.h
+  1.170     +16 -1     ircd-ratbox/modules/m_stats.c
+  1.6       +10 -0     ircd-ratbox/src/reject.c
+
+
+
 androsyn    2003/08/05 18:08:38 EDT	(20030805_0)
 
   Modified files:
