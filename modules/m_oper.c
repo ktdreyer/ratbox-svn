@@ -250,6 +250,9 @@ static int match_oper_password(char *password,
   */
 
   /* passwd may be NULL pointer. Head it off at the pass... */
+  if (aconf->passwd == NULL)
+    return NO;
+
   if (password && *aconf->passwd)
     encr = crypt(password, aconf->passwd);
   else
@@ -258,7 +261,7 @@ static int match_oper_password(char *password,
   encr = password;
 #endif  /* CRYPT_OPER_PASSWORD */
 
-  if( strcmp(encr, aconf->passwd) == 0 )
+  if (strcmp(encr, aconf->passwd) == 0)
     return YES;
   else
     return NO;
