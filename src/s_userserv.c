@@ -25,7 +25,7 @@
 static struct client *userserv_p;
 static BlockHeap *user_reg_heap;
 
-dlink_list user_reg_table[MAX_USER_REG_HASH];
+dlink_list user_reg_table[MAX_NAME_HASH];
 
 static void u_user_userregister(struct connection_entry *, char *parv[], int parc);
 static void u_user_userdrop(struct connection_entry *, char *parv[], int parc);
@@ -236,7 +236,7 @@ e_user_expire(void *unused)
 	dlink_node *ptr, *next_ptr;
 	int i;
 
-	HASH_WALK_SAFE(i, MAX_USER_REG_HASH, ptr, next_ptr, user_reg_table)
+	HASH_WALK_SAFE(i, MAX_NAME_HASH, ptr, next_ptr, user_reg_table)
 	{
 		ureg_p = ptr->data;
 

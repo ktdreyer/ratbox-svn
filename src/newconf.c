@@ -808,6 +808,7 @@ static struct ConfEntry conf_chanserv_table[] =
 	{ "register_amount",	CF_INT,   NULL, 0, &config_file.cregister_amount	},
 	{ "expire_time",	CF_TIME,  NULL, 0, &config_file.cexpire_time		},
 	{ "max_bans",		CF_INT,	  NULL, 0, &config_file.cmax_bans		},
+	{ "banexpire_frequency",CF_TIME,  NULL, 0, &config_file.cbanexpire_frequency	},
 	{ "\0", 0, NULL, 0, NULL }
 };
 

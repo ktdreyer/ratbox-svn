@@ -22,6 +22,7 @@
 #include "conf.h"
 #include "modebuild.h"
 #include "hook.h"
+#include "event.h"
 
 #define S_C_OWNER	200
 #define S_C_MANAGER	190
@@ -39,7 +40,7 @@ static BlockHeap *channel_reg_heap;
 static BlockHeap *member_reg_heap;
 static BlockHeap *ban_reg_heap;
 
-static dlink_list channel_reg_table[MAX_CHANNEL_TABLE];
+static dlink_list chan_reg_table[MAX_CHANNEL_TABLE];
 
 static void u_chan_chanregister(struct connection_entry *, char *parv[], int parc);
 static void u_chan_chandrop(struct connection_entry *, char *parv[], int parc);
@@ -123,6 +124,8 @@ static void free_ban_reg(struct chan_reg *chreg_p, struct ban_reg *banreg_p);
 
 static int h_chanserv_join(void *members, void *unused);
 static int h_chanserv_mode_op(void *members, void *unused);
+static void e_chanserv_expirechan(void *unused);
+static void e_chanserv_expireban(void *unused);
 
 void
 init_s_chanserv(void)
@@ -136,6 +139,10 @@ init_s_chanserv(void)
 
 	hook_add(h_chanserv_join, HOOK_JOIN_CHANNEL);
 	hook_add(h_chanserv_mode_op, HOOK_MODE_OP);
+
+	eventAdd("chanserv_expirechan", e_chanserv_expirechan, NULL, 43200);
+	eventAdd("chanserv_expireban", e_chanserv_expireban, NULL,
+		config_file.cbanexpire_frequency);
 }
 
 void
@@ -153,7 +160,7 @@ free_channel_reg(struct chan_reg *reg_p)
 		free_ban_reg(reg_p, ptr->data);
 	}
 
-	dlink_delete(&reg_p->node, &channel_reg_table[hashv]);
+	dlink_delete(&reg_p->node, &chan_reg_table[hashv]);
 
 	loc_sqlite_exec(NULL, "DELETE FROM channels WHERE chname = %Q",
 			reg_p->name);
@@ -183,7 +190,7 @@ static void
 add_channel_reg(struct chan_reg *reg_p)
 {
 	unsigned int hashv = hash_channel(reg_p->name);
-	dlink_add(reg_p, &reg_p->node, &channel_reg_table[hashv]);
+	dlink_add(reg_p, &reg_p->node, &chan_reg_table[hashv]);
 }
 
 static struct chan_reg *
@@ -193,7 +200,7 @@ find_channel_reg(struct client *client_p, const char *name)
 	unsigned int hashv = hash_channel(name);
 	dlink_node *ptr;
 
-	DLINK_FOREACH(ptr, channel_reg_table[hashv].head)
+	DLINK_FOREACH(ptr, chan_reg_table[hashv].head)
 	{
 		reg_p = ptr->data;
 
@@ -343,6 +350,9 @@ verify_member_reg(struct client *client_p, struct channel **chptr,
 				chreg_p->name);
 		return NULL;
 	}
+
+	/* this is called when someone issues a command.. */
+	mreg_p->channel_reg->last_time = CURRENT_TIME;
 
 	return mreg_p;
 }
@@ -537,6 +547,54 @@ find_owner(struct chan_reg *chreg_p)
 	return NULL;
 }
 
+static void
+e_chanserv_expirechan(void *unused)
+{
+	struct chan_reg *chreg_p;
+	dlink_node *ptr, *next_ptr;
+	int i;
+
+	HASH_WALK_SAFE(i, MAX_CHANNEL_TABLE, ptr, next_ptr, chan_reg_table)
+	{
+		chreg_p = ptr->data;
+
+		if((chreg_p->last_time + config_file.cexpire_time) > CURRENT_TIME)
+			continue;
+
+		destroy_channel_reg(chreg_p);
+	}
+	HASH_WALK_END
+}	
+
+static void
+e_chanserv_expireban(void *unused)
+{
+	struct chan_reg *chreg_p;
+	struct ban_reg *banreg_p;
+	dlink_node *hptr, *hnext_ptr;
+	dlink_node *ptr, *next_ptr;
+	int i;
+
+	HASH_WALK_SAFE(i, MAX_CHANNEL_TABLE, hptr, hnext_ptr, chan_reg_table)
+	{
+		chreg_p = hptr->data;
+
+		DLINK_FOREACH_SAFE(ptr, next_ptr, chreg_p->bans.head)
+		{
+			banreg_p = ptr->data;
+
+			if(banreg_p->hold > CURRENT_TIME)
+				continue;
+
+			loc_sqlite_exec(NULL, "DELETE FROM bans "
+					"WHERE chname=%Q and mask=%Q",
+					chreg_p->name, banreg_p->mask);
+			free_ban_reg(chreg_p, banreg_p);
+		}
+	}
+	HASH_WALK_END
+}
+
 static int
 h_chanserv_mode_op(void *v_chptr, void *v_members)
 {
@@ -657,6 +715,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 					chanserv_p->name, chptr->name,
 					member_p->client_p->name);
 				member_p->flags |= MODE_OPPED;
+				mreg_p->channel_reg->last_time = CURRENT_TIME;
 			}
 			else if(mreg_p->flags & CS_MEMBER_AUTOVOICE &&
 				!is_voiced(member_p))
@@ -665,6 +724,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 					chanserv_p->name, chptr->name,
 					member_p->client_p->name);
 				member_p->flags |= MODE_VOICED;
+				mreg_p->channel_reg->last_time = CURRENT_TIME;
 			}
 		}
 
@@ -734,6 +794,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 				modebuild_add(DIR_ADD, "o", 
 					member_p->client_p->name);
 				member_p->flags |= MODE_OPPED;
+				mreg_p->channel_reg->last_time = CURRENT_TIME;
 			}
 			else if(mreg_p->flags & CS_MEMBER_AUTOVOICE &&
 				!is_voiced(member_p))
@@ -741,6 +802,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 				modebuild_add(DIR_ADD, "v",
 					member_p->client_p->name);
 				member_p->flags |= MODE_VOICED;
+				mreg_p->channel_reg->last_time = CURRENT_TIME;
 			}
 		}
 	}
@@ -1913,7 +1975,8 @@ s_chan_addban(struct client *client_p, char *parv[], int parc)
 		parv[0], mask);
 
 	banreg_p = make_ban_reg(mreg_p->channel_reg, mask, reason, 
-			mreg_p->user_reg->name, level, (duration*60));
+			mreg_p->user_reg->name, level, 
+			CURRENT_TIME + (duration*60));
 	write_ban_db_entry(banreg_p, mreg_p->channel_reg->name);
 
 	service_error(chanserv_p, client_p, "Ban %s on %s added",
@@ -1961,14 +2024,21 @@ s_chan_addban(struct client *client_p, char *parv[], int parc)
 
 			kickbuild_add(msptr->client_p->name, reason);
 			del_chmember(msptr);
+			loc++;
 		}
 	}
 
 	dlink_add_alloc(my_strdup(mask), &chptr->bans);
 
-	modebuild_add(DIR_ADD, "b", mask);
-	modebuild_finish();
-	kickbuild_finish(chanserv_p, chptr);
+	/* only issue the +b if theres someone there it will
+	 * actually match..
+	 */
+	if(loc)
+	{
+		modebuild_add(DIR_ADD, "b", mask);
+		modebuild_finish();
+		kickbuild_finish(chanserv_p, chptr);
+	}
 
 	return 1;
 }
@@ -2100,10 +2170,10 @@ s_chan_listbans(struct client *client_p, char *parv[], int parc)
 	{
 		banreg_p = ptr->data;
 
-		service_error(chanserv_p, client_p, "  %s %d (%lu) [mod: %s] :%s",
-				banreg_p->mask, banreg_p->level, 
-				(unsigned long) banreg_p->hold, banreg_p->username,
-				banreg_p->reason);
+		service_error(chanserv_p, client_p, "  %s %d (%d min) [mod: %s] :%s",
+				banreg_p->mask, banreg_p->level,
+				(int) ((banreg_p->hold - CURRENT_TIME) / 60),
+				banreg_p->username, banreg_p->reason);
 	}
 
 	service_error(chanserv_p, client_p, "End of ban list");
