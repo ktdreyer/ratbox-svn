@@ -673,7 +673,8 @@ find_server(const char* name)
 
     if(IsServer(target_p) && !IsMe(target_p))
     {
-      return target_p;
+      if(irccmp(name, target_p->name) == 0)
+         return target_p;
     }
   }
   
