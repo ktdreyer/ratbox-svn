@@ -1,3 +1,26 @@
+*** 20001102_4 by adrian
+
+
+Initial change over of the server connect() code to use the new world
+order(tm).
+
+* Fix a couple of stupidities in my last commit of comm_strerror
+* Strip the server connection stuff out of s_bsd.c and move it into
+  two functions in s_serv.c - 
+  + serv_connect() - initiate a connection to a server (replacing
+    connect_server()
+  + serv_connect_callback() - completion from comm_connect_tcp() 
+
+Note that there doesn't seem to be checking to see if a /connect server
+is actually in the process of being connect'ed. This should happen!
+
+The code works and connects to the server(s) on startup, but /squit and
+/connect's fail. I've found that clients that /quit dont have their
+sockets closed .. I have to figure that out, which might solve this.
+
+
+
+
 *** 20001102_3 by toot
 . fixed a possible over flow when listing available vchans
 . have it show the nickname of who's been there longest
