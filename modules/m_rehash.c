@@ -159,6 +159,63 @@ rehash_tdlines(struct Client *source_p)
 }
 
 static void
+rehash_txlines(struct Client *source_p)
+{
+	struct ConfItem *aconf;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+
+	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is clearing temp xlines",
+				get_oper_name(source_p));
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, xline_conf_list.head)
+	{
+		aconf = ptr->data;
+
+		if(!aconf->hold)
+			continue;
+
+		free_conf(aconf);
+		dlinkDestroy(ptr, &xline_conf_list);
+	}
+}
+
+static void
+rehash_tresvs(struct Client *source_p)
+{
+	struct ConfItem *aconf;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+	int i;
+
+	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is clearing temp resvs",
+				get_oper_name(source_p));
+
+	HASH_WALK_SAFE(i, R_MAX, ptr, next_ptr, resvTable)
+	{
+		aconf = ptr->data;
+
+		if(!aconf->hold)
+			continue;
+
+		free_conf(aconf);
+		dlinkDestroy(ptr, &resvTable[i]);
+	}
+	HASH_WALK_END
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, resv_conf_list.head)
+	{
+		aconf = ptr->data;
+
+		if(!aconf->hold)
+			continue;
+
+		free_conf(aconf);
+		dlinkDestroy(ptr, &resv_conf_list);
+	}
+}
+
+static void
 rehash_rejectcache(struct Client *source_p)
 {
 	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is clearing reject cache", source_p->name);
@@ -186,6 +243,8 @@ static struct hash_commands rehash_commands[] =
 	{"PGLINES", 	rehash_pglines		},
 	{"TKLINES", 	rehash_tklines		},
 	{"TDLINES", 	rehash_tdlines		},
+	{"TXLINES",	rehash_txlines		},
+	{"TRESVS",	rehash_tresvs		},
 	{"REJECTCACHE",	rehash_rejectcache	},
 	{"HELP", 	rehash_help		},
 	{NULL, 		NULL 			}
