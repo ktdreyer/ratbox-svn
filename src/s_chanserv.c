@@ -206,6 +206,7 @@ static void
 add_channel_reg(struct chan_reg *reg_p)
 {
 	unsigned int hashv = hash_channel(reg_p->name);
+	reg_p->bants = 1L; /* initially allow UNBAN */
 	dlink_add(reg_p, &reg_p->node, &chan_reg_table[hashv]);
 }
 
@@ -1096,6 +1097,8 @@ h_chanserv_user_login(void *v_client_p, void *unused)
 		chptr = member_p->chptr;
 
 		if((chreg_p = find_channel_reg(NULL, chptr->name)) == NULL)
+			continue;
+		if(chreg_p->flags & CS_FLAGS_SUSPENDED)
 			continue;
 
 		/* user has no access to channel */
