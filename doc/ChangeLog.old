@@ -1,3 +1,15 @@
+*** 20001212_5 by db
+- verified the generated prefixes on a number of files
+- umm the big bug was in serv_connect_callback() the newly connected =to=
+  server was not being put on the serv_list... This mean that SJOIN's were
+  not being propogated to a =connected to= server since the connectee
+  had no idea it was supposed to.
+
+  This was sorta obvious when /stats v returned 0 servers, and the 
+  serv_list was 0
+
+
+
 *** 20001212_4 by db
 - fixed stupid bug in m_stats.c, acptr wasn't being set...
 
