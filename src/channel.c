@@ -1269,8 +1269,8 @@ void set_channel_topic(struct Channel *chptr, const char *topic, const char *top
   {
     if(chptr->topic == NULL)
       allocate_topic(chptr);
-    strlcpy(chptr->topic, topic, sizeof(chptr->topic));
-    strlcpy(chptr->topic_info, topic_info,  sizeof(chptr->topic_info));
+    strlcpy(chptr->topic, topic, TOPICLEN);
+    strlcpy(chptr->topic_info, topic_info, USERHOST_REPLYLEN);
     chptr->topic_time = topicts; 
   } else
   {
