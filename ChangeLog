@@ -1,3 +1,21 @@
+leeh        2003/10/12 08:33:59 EDT	(20031012_0)
+
+  Modified files:
+    include              numeric.h 
+    src                  cache.c messages.tab 
+  Log:
+  - made the omotd use numerics
+    RPL_OMOTDSTART 720
+    RPL_OMOTD      721
+    RPL_ENDOFOMOTD 722
+  
+  Revision  Changes    Path
+  7.41      +4 -0      ircd-ratbox/include/numeric.h
+  1.10      +4 -3      ircd-ratbox/src/cache.c
+  7.100     +3 -3      ircd-ratbox/src/messages.tab
+
+
+
 leeh        2003/10/08 12:45:21 EDT	(20031008_7)
 
   Modified files:
