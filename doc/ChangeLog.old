@@ -1,3 +1,9 @@
+*** 20010125_2 by db
+- fixed restricted auth blocks works the same as it does in h6 for now
+- fixed core on /squit *oops*
+
+
+
 *** 20010125_1 by db
   ConfItem->name is what should be used for server names
   fixing that caused a cascade of other bugs to show up.. neato
