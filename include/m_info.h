@@ -179,6 +179,12 @@ Info MyInformation[] = {
   { "TS_MAX_DELTA_DEFAULT", "", TS_MAX_DELTA_DEFAULT, "Maximum Allowed TS Delta from another Server" },
   { "TS_WARN_DELTA_DEFAULT", "", TS_WARN_DELTA_DEFAULT, "Maximum TS Delta before Sending Warning" },
 
+#ifdef USE_GETTEXT
+  { "USE_GETTEXT", "ON", 0, "Use gettext() for message customisation at runtime" },
+#else
+  { "USE_GETTEXT", "OFF", 0, "Use gettext() for message customisation at runtime" },
+#endif /* USE_GETTEXT */
+  
 #ifdef USE_RCS
   { "USE_RCS", "ON", 0, "Use \"ci\" to Keep RCS Control" },
 #else

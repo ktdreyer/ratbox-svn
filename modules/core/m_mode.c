@@ -132,7 +132,7 @@ int m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   if(parc < 3)
     {
-      channel_modes(chptr, sptr, modebuf, parabuf);
+      channel_modes(chptr, sptr, modebuf, parabuf,0);
       sendto_one(sptr, form_str(RPL_CHANNELMODEIS),
 		 me.name, parv[0], parv[1],
 		 modebuf, parabuf);
