@@ -1,3 +1,15 @@
+a1kmm       2001/12/16 05:13:51 EST	(20011216_12)
+
+  Modified files:
+    src                  irc_string.c 
+  Log:
+  - INT16SZ = 2, not sizeof(unsigned int)
+  
+  Revision  Changes    Path
+  7.48      +1 -1      ircd-hybrid-7/src/irc_string.c
+
+
+
 androsyn    2001/12/16 05:11:09 EST	(20011216_11)
 
   Modified files:
