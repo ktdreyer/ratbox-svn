@@ -1,0 +1,3 @@
+cunsuspend <channel>
+Unsuspends the given channels registration
+  <channel>: Channel to unsuspend 

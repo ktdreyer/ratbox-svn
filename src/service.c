@@ -353,20 +353,20 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
                               MYNAME, client_p->name, p);
                 return;
         }
-	else if(!strcasecmp(text, "OPERLOGIN"))
+	else if(!strcasecmp(text, "OPERLOGIN") || !strcasecmp(text, "OLOGIN"))
 	{
 		struct conf_oper *oper_p;
 		char *crpass;
 
 		if(client_p->user->oper)
 		{
-			service_error(service_p, client_p, "You are already logged in");
+			service_error(service_p, client_p, "You are already logged in as an oper");
 			return;
 		}
 
 		if(parc < 2)
 		{
-			service_error(service_p, client_p, "Insufficient parameters to %s::LOGIN",
+			service_error(service_p, client_p, "Insufficient parameters to %s::OLOGIN",
 					service_p->name);
 			service_p->service->flood++;
 			return;
@@ -375,7 +375,7 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 		if((oper_p = find_conf_oper(client_p->user->username, client_p->user->host,
 						client_p->user->servername)) == NULL)
 		{
-			service_error(service_p, client_p, "No access to %s::LOGIN",
+			service_error(service_p, client_p, "No access to %s::OLOGIN",
 					ucase(service_p->name));
 			service_p->service->flood++;
 			return;
@@ -394,17 +394,17 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 
 		sendto_all(UMODE_AUTH, "%s (%s) has logged in [IRC]",
 				client_p->name, oper_p->name);
-		service_error(service_p, client_p, "Login successful");
+		service_error(service_p, client_p, "Oper login successful");
 
 		client_p->user->oper = oper_p;
 		oper_p->refcount++;
 		return;
 	}
-	else if(!strcasecmp(text, "OPERLOGOUT"))
+	else if(!strcasecmp(text, "OPERLOGOUT") || !strcasecmp(text, "OLOGOUT"))
 	{
 		if(client_p->user->oper == NULL)
 		{
-			service_error(service_p, client_p, "You are not logged in");
+			service_error(service_p, client_p, "You are not logged in as an oper");
 			service_p->service->flood++;
 			return;
 		}
@@ -412,7 +412,7 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 		deallocate_conf_oper(client_p->user->oper);
 		client_p->user->oper = NULL;
 
-		service_error(service_p, client_p, "Logout successful");
+		service_error(service_p, client_p, "Oper logout successful");
 		return;
 	}
 

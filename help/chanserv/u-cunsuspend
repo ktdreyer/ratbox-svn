@@ -1,0 +1,3 @@
+csuspend <channel>
+Suspends the given channels registration
+  <channel>: Channel to suspend 

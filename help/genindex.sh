@@ -14,6 +14,14 @@ for i in $SUBDIRS; do
 
 	for j in $i/*; do
 		if [ -f $j ]; then
+			foo=`basename "$j"`;
+
+			# if it starts with "u-" then its ucommand and we
+			# dont care about it
+			if [ $foo != "${foo#u-}" ]; then
+				continue;
+			fi
+
 			arg1=`head -n 1 $j | cut -d ' ' -f 1`;
 			arg2=`head -n 2 $j | tail -n 1`;
 

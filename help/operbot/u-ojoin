@@ -1,0 +1,3 @@
+ojoin <channel>
+Makes operbot join the given channel
+  <channel>: Channel to join
