@@ -146,6 +146,6 @@ list_named_channel(struct Client *source_p, const char *name)
 				form_str(ERR_NOSUCHCHANNEL), n);
 	else
 		sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
-			chptr->chname, chptr->members,
+			chptr->chname, dlink_list_length(&chptr->members),
 			chptr->topic ? chptr->topic : "");
 }
