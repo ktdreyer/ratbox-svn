@@ -1,3 +1,15 @@
+androsyn    2002/01/13 18:34:01 EST	(20020113_11)
+
+  Modified files:
+    src                  balloc.c 
+  Log:
+  Add a check for mmap() failure.
+  
+  Revision  Changes    Path
+  7.22      +10 -2     ircd-hybrid-7/src/balloc.c
+
+
+
 leeh        2002/01/13 18:22:03 EST	(20020113_10)
 
   Modified files:
