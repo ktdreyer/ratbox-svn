@@ -1,3 +1,20 @@
+leeh        2005/01/10 19:42:10 EST	(20050111_0)
+
+  Modified files:
+    include              hook.h 
+    src                  io.c s_userserv.c scommand.c 
+  Log:
+  - added support for ENCAP
+  - add support for receiving the logged in username over encap
+  
+  Revision  Changes    Path
+  1.6       +2 -1      rserv/include/hook.h
+  1.33      +1 -1      rserv/src/io.c
+  1.31      +22 -0     rserv/src/s_userserv.c
+  1.24      +21 -0     rserv/src/scommand.c
+
+
+
 leeh        2005/01/10 16:34:02 EST	(20050110_3)
 
   Modified files:
