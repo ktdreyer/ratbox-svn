@@ -64,7 +64,7 @@ _moddeinit(void)
   mod_del_cmd(&sjoin_msgtab);
 }
 
-char *_version = "20010102";
+char *_version = "20010821";
 #endif
 /*
  * ms_sjoin
@@ -269,14 +269,14 @@ static void ms_sjoin(struct Client *client_p,
    */
   if (isnew)
     chptr->channelts = tstosend = newts;
-  /* Remote is sending users to a permanent channel.. we need to drop our version
-   * and use theirs, to keep compatibility -- fl */
+  /* Remote is sending users to a permanent channel.. we need to drop our
+   * version and use theirs, to keep compatibility -- fl */
   else if (chptr->users == 0 && parv[4+args][0])
     {
        keep_our_modes = NO;
        chptr->channelts = tstosend = newts;
     }
-  /* Theyre not sending users, lets just ignore it and carry on */
+  /* They're not sending users, lets just ignore it and carry on */
   else if (chptr->users == 0 && !parv[4+args][0])
     return;
 
@@ -419,11 +419,11 @@ static void ms_sjoin(struct Client *client_p,
 	}
 
       if (!(target_p = find_chasing(source_p, s, NULL)))
-        goto lazy;
+        goto nextnick;
       if (target_p->from != client_p)
-        goto lazy;
+        goto nextnick;
       if (!IsPerson(target_p))
-        goto lazy;
+        goto nextnick;
       
       people++;
 
@@ -524,7 +524,7 @@ static void ms_sjoin(struct Client *client_p,
           pargs = 0;
         }
 
-lazy:
+nextnick:
       if ((p = strchr(s, ' ')) != NULL)
 	{
 	  *p++ = '\0';
