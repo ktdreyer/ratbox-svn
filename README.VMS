@@ -1,19 +1,39 @@
-(NOTE: ircd doesn't currently build on VMS, a few things are left
-to be done. However, if it did work, this is how you'd do it..)
+To compile ircd on VMS, simply execute the make.com script
+from the top-level ircd directory:
 
-To compile ircd, execute the following commands (this assumes
-you extracted the archive into [.ircd-hybrid-7]:
+  $ SET DEF [.IRCD-HYBRID-7]
+  $ @MAKE
 
-$ SET DEF [.IRCD-HYBRID-7.INCLUDE]
-$ COPY SETUP.H_VMS SETUP.H
-$ EDIT CONFIG.H   <or whatever your preferred editor is>
-Change config.h as appropriate.  Note that the paths have to
-be changed to use VMS-style pathnames, not Unix style.
-$ SET DEF [-]
-$ @make
+This should build [.SRC]IRCD.EXE (servlink is not yet supported
+for VMS). 
 
-This should build [.src]ircd.exe, and the associated modules
-[.modules]*.obj;*. It's not installed automatically yet, you'll
-have to copy it to IRCD_PREFIX by hand.
+You'll probably want to edit [.INCLUDE]SETUP.H_VMS before you build,
+to change the IRCD_PREFIX. NOTE: the ']' is deliberately left off
+the IRCD_PREFIX string - adding one will break it.
+
+You might also want to change some of the paths on [.INCLUDE]CONFIG.H.
+Make sure to change the second set (the first is for Unix systems).
+
+After IRCD.EXE is built, you'll have to install it by hand.  Put it
+in a BIN subdirectory of the IRCD_PREFIX directory. IRCD.CONF
+goes into the ETC subdir.  You should also create LOGS, if you're
+putting logs there.
+
+Known problems on VMS:
+  - Lack of SERVLINK support means that ZIP and SSL aren't yet possible
+    for VMS.
+  - If IRCD.EXE exits immediately after startup, make sure that [.ETC]IRCD.PID
+    doesn't exist.
+  - IRCD *must* be run with -foreground. The suggested way to start it is:
+
+    $ IRCD :== DISK$STUFF:[IRCD.BIN]IRCD.EXE
+    $ IRCD -foreground
+
+    Replace DISK$STUFF:[IRCD] with whereever you set IRCD_PREFIX to.
+
+So far, IRCD is known to work on OpenVMS 7.2/Alpha systems.
+
+If anyone gets ircd working on VMS (or has problems with it), please mail me
+(ejb@leguin.org.uk) with any comments you have.
 
 $Id$
