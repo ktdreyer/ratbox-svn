@@ -91,6 +91,7 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 		tname = me.name;
 
 	/* during shide, allow a non-oper to trace themselves only */
+	/* if this check is ever removed, fix trace for non-opers below */
 	if(!IsOper(source_p) && ConfigServerHide.hide_servers)
 	{
 		if(MyClient(source_p) && irccmp(tname, source_p->name) == 0)
@@ -170,7 +171,7 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 	/* count up the servers behind the server links only if were going
 	 * to be using them --fl
 	 */
-	if(doall && (IsOper(source_p) || !ConfigServerHide.hide_servers))
+	if(doall)
 	{
 		DLINK_FOREACH(ptr, global_serv_list.head)
 		{
@@ -187,7 +188,10 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 	if(!IsOper(source_p))
 	{
 		if(MyClient(source_p))
-			report_this_status(source_p, source_p, 0, 0, 0);
+		{
+			if(doall || (wilds && match(tname, source_p->name)))
+				report_this_status(source_p, source_p, 0, 0, 0);
+		}
 
 		DLINK_FOREACH(ptr, oper_list.head)
 		{
@@ -199,19 +203,16 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 			report_this_status(source_p, target_p, 0, 0, 0);
 		}
 
-		if(!ConfigServerHide.hide_servers)
+		DLINK_FOREACH(ptr, serv_list.head)
 		{
-			DLINK_FOREACH(ptr, serv_list.head)
-			{
-				target_p = ptr->data;
+			target_p = ptr->data;
 
-				if(!doall && wilds && !match(tname, target_p->name))
-					continue;
+			if(!doall && wilds && !match(tname, target_p->name))
+				continue;
 
-				report_this_status(source_p, target_p, 0,
-						   link_u[target_p->localClient->fd],
-						   link_s[target_p->localClient->fd]);
-			}
+			report_this_status(source_p, target_p, 0,
+					link_u[target_p->localClient->fd],
+					link_s[target_p->localClient->fd]);
 		}
 
 		sendto_one(source_p, form_str(RPL_ENDOFTRACE), me.name, parv[0], tname);

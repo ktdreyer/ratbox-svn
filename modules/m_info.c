@@ -283,6 +283,12 @@ static struct InfoStruct info_table[] = {
 	  "STATS C output is only shown to operators",
 	},
 	{
+	  "stats_h_oper_only",
+	  OUTPUT_BOOLEAN_YN,
+	  &ConfigFileEntry.stats_h_oper_only,
+	  "STATS H output is only shown to operators",
+	},
+	{
 	 "stats_i_oper_only",
 	 OUTPUT_BOOLEAN2,
 	 &ConfigFileEntry.stats_i_oper_only,
@@ -306,6 +312,12 @@ static struct InfoStruct info_table[] = {
 	 &ConfigFileEntry.stats_P_oper_only,
 	 "STATS P is only shown to operators",
 	 },
+	{
+	  "stats_y_oper_only",
+	  OUTPUT_BOOLEAN_YN,
+	  &ConfigFileEntry.stats_y_oper_only,
+	  "STATS Y is only shown to operators",
+	},
 	{
 	 "tkline_expire_notices",
 	 OUTPUT_BOOLEAN,

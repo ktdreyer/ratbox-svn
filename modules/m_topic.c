@@ -66,6 +66,13 @@ m_topic(struct Client *client_p, struct Client *source_p, int parc, const char *
 	struct Channel *chptr = NULL;
 	char *p = NULL;
 
+	if(EmptyString(parv[1]))
+	{
+		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+			   me.name, parv[0], "TOPIC");
+		return;
+	}
+
 	if((p = strchr(parv[1], ',')))
 		*p = '\0';
 

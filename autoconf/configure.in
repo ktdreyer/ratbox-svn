@@ -642,22 +642,25 @@ if test "$ac_cv_ipv6" = "yes" ; then
 	echo "Using IPv6 support"
 fi
 
-dnl Put this back when we want to disable asserts
-dnl ac_cv_assert="-DNDEBUG"
+ac_cv_assert="-DNDEBUG"
 
 dnl assert?
 AC_ARG_ENABLE(assert,
-[  --enable-assert              Enable assert().
+[  --enable-assert=type         Enable assert() - soft or hard.
   --disable-assert             Disable assert(). ],
 [
   case "$enableval" in
   yes)
-    echo "Enabling assert() code."
     ac_cv_assert=""
     ;;
   no)
-    echo "Disabling assert() code."
-    ac_cv_assert="-DNDEBUG"
+    ac_cv_assert="-DNDEBUG -DSOFT_ASSERT"
+    ;;
+  soft)
+    ac_cv_assert="-DNDEBUG -DSOFT_ASSERT"
+    ;;
+  hard)
+    ac_cv_assert=""
     ;;
   esac
 ])

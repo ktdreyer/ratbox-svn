@@ -210,8 +210,18 @@ void cinclude(void)
     
     if (tmp_fbfile_in == NULL)
     {
-      conf_report_error("Include %s: %s.", c, strerror(errno));
-      return;
+      /* if its not found in PREFIX, look in ETCPATH */
+      char fnamebuf[IRCD_BUFSIZE];
+
+      snprintf(fnamebuf, sizeof(fnamebuf), "%s/%s", ETCPATH, c);
+      tmp_fbfile_in = fbopen(fnamebuf, "r");
+
+      /* wasnt found there either.. error. */
+      if(tmp_fbfile_in == NULL)
+      {
+        conf_report_error("Include %s: %s.", c, strerror(errno));
+        return;
+      }
     }
     lineno_stack[include_stack_ptr] = lineno;
     lineno = 1;

@@ -84,6 +84,13 @@ m_knock(struct Client *client_p, struct Client *source_p, int parc, const char *
 {
 	char *sockhost = NULL;
 
+	if(EmptyString(parv[1]))
+	{
+		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+			   me.name, parv[0], "KNOCK");
+		return;
+	}
+
 	if((ConfigChannel.use_knock == 0) && MyClient(source_p))
 	{
 		sendto_one(source_p, form_str(ERR_KNOCKDISABLED), me.name, source_p->name);
@@ -104,6 +111,9 @@ m_knock(struct Client *client_p, struct Client *source_p, int parc, const char *
 static void
 ms_knock(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
+	if(EmptyString(parv[1]))
+		return;
+
 	if(IsClient(source_p))
 		parse_knock_remote(client_p, source_p, parc, parv);
 }

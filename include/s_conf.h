@@ -208,6 +208,8 @@ struct config_file_entry
 	int warn_no_nline;
 	int non_redundant_klines;
 	int stats_c_oper_only;
+	int stats_y_oper_only;
+	int stats_h_oper_only;
 	int stats_o_oper_only;
 	int stats_k_oper_only;
 	int stats_i_oper_only;

@@ -111,7 +111,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	*buf = '\0';
 	*sjbuf = '\0';
 
-	if(IsClient(source_p) || parc < 5)
+	if(IsClient(source_p) || parc < 5 || EmptyString(parv[4]))
 		return;
 
 	if(!IsChannelName(parv[2]))

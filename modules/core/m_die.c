@@ -65,7 +65,7 @@ mo_die(struct Client *client_p __unused, struct Client *source_p, int parc, cons
 		return;
 	}
 
-	if(parc < 2)
+	if(parc < 2 || EmptyString(parv[1]))
 	{
 		sendto_one(source_p, ":%s NOTICE %s :Need server name /die %s",
 			   me.name, source_p->name, me.name);

@@ -419,7 +419,6 @@ whois_person(struct Client *source_p, struct Client *target_p, int glob)
 			if(ConfigFileEntry.use_whois_actually && show_ip(source_p, target_p))
 				sendto_one(source_p, form_str(RPL_WHOISACTUALLY),
 					   me.name, source_p->name, target_p->name,
-					   target_p->username, target_p->host,
 					   target_p->localClient->sockhost);
 
 			sendto_one(source_p, form_str(RPL_WHOISIDLE),

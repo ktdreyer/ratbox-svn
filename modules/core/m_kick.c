@@ -71,7 +71,7 @@ m_kick(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	const char *user;
 	static char buf[BUFSIZE];
 
-	if(*parv[2] == '\0')
+	if(EmptyString(parv[2]))
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "KICK");
 		return;

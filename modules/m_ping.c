@@ -61,7 +61,7 @@ m_ping(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	struct Client *target_p;
 	const char *origin, *destination;
 
-	if(parc < 2 || *parv[1] == '\0')
+	if(parc < 2 || EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
 		return;

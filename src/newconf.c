@@ -494,6 +494,7 @@ static struct mode_table auth_table[] = {
 	{"no_tilde", CONF_FLAGS_NO_TILDE},
 	{"restricted", CONF_FLAGS_RESTRICTED},
 	{"need_ident", CONF_FLAGS_NEED_IDENTD},
+	{"have_ident", CONF_FLAGS_NEED_IDENTD},
 	{NULL}
 };
 
@@ -512,6 +513,7 @@ static struct mode_table shared_table[] =
 	{ "kline",	OPER_K		},
 	{ "unkline",	OPER_UNKLINE	},
 	{ "xline",	OPER_XLINE	},
+	{ "all",	OPER_K|OPER_UNKLINE|OPER_XLINE },
 	{NULL}
 };
 
@@ -2184,6 +2186,18 @@ conf_set_general_stats_c_oper_only(void *data)
 }
 
 static void
+conf_set_general_stats_h_oper_only(void *data)
+{
+	ConfigFileEntry.stats_h_oper_only = *(unsigned int *) data;
+}
+
+static void
+conf_set_general_stats_y_oper_only(void *data)
+{
+	ConfigFileEntry.stats_y_oper_only = *(unsigned int *) data;
+}
+
+static void
 conf_set_general_stats_o_oper_only(void *data)
 {
 	ConfigFileEntry.stats_o_oper_only = *(unsigned int *) data;
@@ -2866,6 +2880,7 @@ newconf_init()
 	add_conf_item("auth", "class", CF_QSTRING, conf_set_auth_class);
 	add_conf_item("auth", "kline_exempt", CF_YESNO, conf_set_auth_kline_exempt);
 	add_conf_item("auth", "need_ident", CF_YESNO, conf_set_auth_need_ident);
+	add_conf_item("auth", "have_ident", CF_YESNO, conf_set_auth_need_ident);
 	add_conf_item("auth", "restricted", CF_YESNO, conf_set_auth_is_restricted);
 	add_conf_item("auth", "exceed_limit", CF_YESNO, conf_set_auth_exceed_limit);
 	add_conf_item("auth", "no_tilde", CF_YESNO, conf_set_auth_no_tilde);
@@ -2951,6 +2966,8 @@ newconf_init()
 		      conf_set_general_non_redundant_klines);
 	add_conf_item("general", "dots_in_ident", CF_INT, conf_set_general_dots_in_ident);
 	add_conf_item("general", "stats_c_oper_only", CF_YESNO, conf_set_general_stats_c_oper_only);
+	add_conf_item("general", "stats_y_oper_only", CF_YESNO, conf_set_general_stats_y_oper_only);
+	add_conf_item("general", "stats_h_oper_only", CF_YESNO, conf_set_general_stats_h_oper_only);
 	add_conf_item("general", "stats_P_oper_only", CF_YESNO, conf_set_general_stats_P_oper_only);
 	add_conf_item("general", "stats_o_oper_only", CF_YESNO, conf_set_general_stats_o_oper_only);
 	add_conf_item("general", "stats_k_oper_only", CF_STRING,

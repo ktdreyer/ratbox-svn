@@ -118,6 +118,13 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	char tempuser[USERLEN + 2];
 	char temphost[HOSTLEN + 1];
 
+	if(EmptyString(parv[2]))
+	{
+		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+			   me.name, parv[0], "GLINE");
+		return;
+	}
+
 	if(ConfigFileEntry.glines)
 	{
 		if(!IsOperGline(source_p))

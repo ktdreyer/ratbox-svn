@@ -161,7 +161,7 @@ m_message(int p_or_n,
 {
 	int i;
 
-	if(parc < 2 || *parv[1] == '\0')
+	if(parc < 2 || EmptyString(parv[1]))
 	{
 		if(p_or_n != NOTICE)
 			sendto_one(source_p, form_str(ERR_NORECIPIENT), me.name,
@@ -169,7 +169,7 @@ m_message(int p_or_n,
 		return;
 	}
 
-	if(parc < 3 || *parv[2] == '\0')
+	if(parc < 3 || EmptyString(parv[2]))
 	{
 		if(p_or_n != NOTICE)
 			sendto_one(source_p, form_str(ERR_NOTEXTTOSEND), me.name, source_p->name);
