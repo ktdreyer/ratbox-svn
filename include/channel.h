@@ -101,7 +101,7 @@ extern int     is_chan_op (struct Channel *chptr,struct Client *who);
 extern int     is_voiced (struct Channel *chptr,struct Client *who);
 
 #define find_user_link(list, who)  who != NULL ? dlinkFind(list, who) : NULL 
-      
+#define FIND_AND_DELETE(list, who) who != NULL ? dlinkFindDelete(list, who)      
 extern void    add_user_to_channel(struct Channel *chptr,
 				   struct Client *who, int flags);
 extern int     remove_user_from_channel(struct Channel *chptr,

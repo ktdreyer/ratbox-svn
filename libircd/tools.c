@@ -182,7 +182,7 @@ dlinkMoveList(dlink_list *from, dlink_list *to)
   /* I think I got that right */
 }
 
-int 
+dlink_node *
 dlinkFindDelete(void *data, dlink_list *list)
 {
   dlink_node *m;
@@ -197,7 +197,7 @@ dlinkFindDelete(void *data, dlink_list *list)
      else
          list->head = m->next;
      m->next = m->prev = NULL;
-     return 1;
+     return m;
   }
-  return 0;
+  return NULL;
 }  

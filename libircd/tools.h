@@ -56,7 +56,7 @@ dlinkAddTail(void *data, dlink_node *m, dlink_list *list);
 void
 dlinkDelete(dlink_node *m, dlink_list *list);
 
-int
+dlink_node *
 dlinkFindDelete(void *data, dlink_list *list);
 
 void
@@ -174,7 +174,7 @@ dlinkDelete(dlink_node *m, dlink_list *list)
  m->next = m->prev = NULL;
 }
 
-extern inline int 
+extern inline dlink_node * 
 dlinkFindDelete(void *data, dlink_list *list)
 {
   dlink_node *m;
@@ -189,9 +189,9 @@ dlinkFindDelete(void *data, dlink_list *list)
      else
          list->head = m->next;
      m->next = m->prev = NULL;
-     return 1;
+     return m;
   }
-  return 0;
+  return NULL;
 }  
 
 
