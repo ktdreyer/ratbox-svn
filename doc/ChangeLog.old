@@ -1,3 +1,7 @@
+*** 20010430_7 by toot
+use the parser to do the parc check in m_stats instead..
+
+
 *** 20010430_6 by jdc
 * Previous changes to message.tab applied to these two .pos.
 
