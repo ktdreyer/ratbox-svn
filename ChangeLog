@@ -1,3 +1,15 @@
+leeh        2003/07/02 06:50:07 EDT	(20030702_0)
+
+  Modified files:
+    modules              m_knock.c 
+  Log:
+  - cleaned up m_knock.c
+  
+  Revision  Changes    Path
+  1.79      +65 -205   ircd-ratbox/modules/m_knock.c
+
+
+
 leeh        2003/07/01 11:45:35 EDT	(20030701_4)
 
   Modified files:
