@@ -1,3 +1,43 @@
+leeh        2005/02/01 11:10:56 EST	(20050201_0)
+
+  Modified files:
+    help                 genindex.sh 
+    help/chanserv        addban adduser chansuspend chanunsuspend 
+                         clearallops clearmodes deluser index 
+                         index-admin modauto moduser register set 
+                         suspend u-chansuspend u-chanunsuspend 
+                         unban unsuspend voice 
+  Added files:
+    help/chanserv        getkey info 
+  Log:
+  - patch via jilles to cleanup help files
+  
+  Revision  Changes    Path
+  1.3       +2 -1      rserv/help/chanserv/addban
+  1.4       +1 -1      rserv/help/chanserv/adduser
+  1.2       +3 -3      rserv/help/chanserv/chansuspend
+  1.2       +3 -3      rserv/help/chanserv/chanunsuspend
+  1.3       +1 -1      rserv/help/chanserv/clearallops
+  1.3       +1 -1      rserv/help/chanserv/clearmodes
+  1.4       +3 -1      rserv/help/chanserv/deluser
+  1.1       +3 -0      rserv/help/chanserv/getkey (new)
+  1.6       +8 -7      rserv/help/chanserv/index
+  1.4       +1 -1      rserv/help/chanserv/index-admin
+  1.1       +4 -0      rserv/help/chanserv/info (new)
+  1.4       +1 -1      rserv/help/chanserv/modauto
+  1.4       +2 -2      rserv/help/chanserv/moduser
+  1.4       +1 -0      rserv/help/chanserv/register
+  1.3       +2 -2      rserv/help/chanserv/set
+  1.3       +2 -1      rserv/help/chanserv/suspend
+  1.2       +1 -1      rserv/help/chanserv/u-chansuspend
+  1.2       +1 -1      rserv/help/chanserv/u-chanunsuspend
+  1.3       +3 -0      rserv/help/chanserv/unban
+  1.3       +1 -1      rserv/help/chanserv/unsuspend
+  1.4       +2 -2      rserv/help/chanserv/voice
+  1.5       +5 -5      rserv/help/genindex.sh
+
+
+
 leeh        2005/01/31 10:39:52 EST	(20050131_3)
 
   Modified files:
