@@ -60,14 +60,6 @@
 #include <sys/param.h>    /* NOFILE */
 #include <arpa/inet.h>
 
-/*
- * Stuff for poll()
- */
-#ifdef USE_POLL
-#include <sys/poll.h>
-#define CONNECTFAST
-#endif
-
 #ifndef IN_LOOPBACKNET
 #define IN_LOOPBACKNET        0x7f
 #endif
@@ -89,19 +81,6 @@ int            highest_fd = 0;
 static struct sockaddr_in mysk;
 static char               readBuf[READBUF_SIZE];
 
-#ifndef USE_POLL
-/*
- * Stuff for select()
- */
-
-static fd_set readSet;
-static fd_set writeSet;
-
-fd_set*  read_set  = &readSet;
-fd_set*  write_set = &writeSet;
-
-#endif /* USE_POLL */
-
 void close_all_connections(void)
 {
   int i;
@@ -111,15 +90,6 @@ void close_all_connections(void)
   }
 }
 
-void init_netio(void)
-{
-#ifndef USE_POLL
-  read_set  = &readSet;
-  write_set = &writeSet;
-#endif
-  init_resolver();
-}
- 
 /*
  * get_sockerr - get the error value from the socket or the current errno
  *
@@ -127,7 +97,7 @@ void init_netio(void)
  * This may only work when SO_DEBUG is enabled but its worth the
  * gamble anyway.
  */
-static int get_sockerr(int fd)
+int get_sockerr(int fd)
 {
   int errtmp = errno;
 #ifdef SO_ERROR
@@ -177,7 +147,7 @@ void report_error(const char* text, const char* who, int error)
  * a non-null pointer, otherwise reply will be null.
  * if successful start the connection, otherwise notify opers
  */
-static void connect_dns_callback(void* vptr, struct DNSReply* reply)
+void connect_dns_callback(void* vptr, struct DNSReply* reply)
 {
   struct ConfItem* aconf = (struct ConfItem*) vptr;
   aconf->dns_pending = 0;
@@ -205,7 +175,7 @@ int set_sock_buffers(int fd, int size)
  * disable_sock_options - if remote has any socket options set, disable them 
  * returns true (1) if successful, false (0) otherwise
  */
-static int disable_sock_options(int fd)
+int disable_sock_options(int fd)
 {
 #if defined(IP_OPTIONS) && defined(IPPROTO_IP)
   if (setsockopt(fd, IPPROTO_IP, IP_OPTIONS, NULL, 0))
@@ -351,7 +321,7 @@ int check_client(struct Client *cptr,char *username,char **reason)
  * Return         TRUE, if successfully completed
  *                FALSE, if failed and ClientExit
  */
-static int completed_connection(struct Client* cptr)
+int completed_connection(struct Client* cptr)
 {
   struct ConfItem* c_conf;
   struct ConfItem* n_conf;
@@ -388,7 +358,7 @@ static int completed_connection(struct Client* cptr)
  * connect_inet - open a socket and connect to another server
  * returns true (1) if successful, false (0) otherwise
  */
-static int connect_inet(struct ConfItem *aconf, struct Client *cptr)
+int connect_inet(struct ConfItem *aconf, struct Client *cptr)
 {
   static struct sockaddr_in sin;
   assert(0 != aconf);
@@ -786,7 +756,7 @@ void add_connection(struct Listener* listener, int fd)
 /*
  * parse_client_queued - parse client queued messages
  */
-static int parse_client_queued(struct Client* cptr)
+int parse_client_queued(struct Client* cptr)
 {
   int dolen  = 0;
 
@@ -837,7 +807,7 @@ static int parse_client_queued(struct Client* cptr)
  */
 #define SBSD_MAX_CLIENT 6090
 
-static int read_packet(struct Client *cptr)
+int read_packet(struct Client *cptr)
 {
   int length = 0;
   int done;
@@ -904,7 +874,7 @@ static int read_packet(struct Client *cptr)
   return 1;
 }
 
-static void error_exit_client(struct Client* cptr, int error)
+void error_exit_client(struct Client* cptr, int error)
 {
   /*
    * ...hmm, with non-blocking sockets we might get
@@ -943,504 +913,4 @@ static void error_exit_client(struct Client* cptr, int error)
                current_error, strerror(current_error));
   exit_client(cptr, cptr, &me, errmsg);
 }
-
-/*
- * Check all connections for new connections and input data that is to be
- * processed. Also check for connections with data queued and whether we can
- * write it out.
- */
-#ifndef USE_POLL
-int read_message(time_t delay, unsigned char mask)        /* mika */
-
-     /* Don't ever use ZERO here, unless you mean to poll
-        and then you have to have sleep/wait somewhere 
-        else in the code.--msa
-      */
-{
-  struct Client*      cptr;
-  int                 nfds;
-  struct timeval      wait;
-  time_t              delay2 = delay;
-  time_t              now;
-  u_long              usec = 0;
-  int                 res;
-  int                 length;
-  struct AuthRequest* auth = 0;
-  struct AuthRequest* auth_next = 0;
-  struct Listener*    listener = 0;
-  int                 i;
-
-  now = CurrentTime;
-
-  for (res = 0;;)
-    {
-      FD_ZERO(read_set);
-      FD_ZERO(write_set);
-
-		#ifdef USE_IAUTH
-      if (iAuth.socket != NOSOCK)
-      {
-      	if (IsIAuthConnect(iAuth))
-      		FD_SET(iAuth.socket, write_set);
-      	else
-        	FD_SET(iAuth.socket, read_set);
-      }
-    #endif
-
-      for (auth = AuthPollList; auth; auth = auth->next) {
-        assert(-1 < auth->fd);
-        if (IsAuthConnect(auth))
-          FD_SET(auth->fd, write_set);
-        else /* if(IsAuthPending(auth)) */
-          FD_SET(auth->fd, read_set);
-      }
-      for (listener = ListenerPollList; listener; listener = listener->next) {
-        assert(-1 < listener->fd);
-        FD_SET(listener->fd, read_set);
-      }
-      for (i = 0; i <= highest_fd; i++)
-        {
-          if (!(GlobalFDList[i] & mask) || !(cptr = local[i]))
-            continue;
-
-          /*
-           * anything that IsMe should NEVER be in the local client array
-           */
-          assert(!IsMe(cptr));
-
-          if (DBufLength(&cptr->recvQ) && delay2 > 2)
-            delay2 = 1;
-          if (DBufLength(&cptr->recvQ) < 4088)        
-            {
-               FD_SET(i, read_set);
-            }
-
-          if (DBufLength(&cptr->sendQ) || IsConnecting(cptr)
-              || ((cptr->flags2 & FLAGS2_ZIP) && (cptr->zip->outcount > 0))
-              )
-            {
-               FD_SET(i, write_set);
-            }
-        }
-      
-      if (ResolverFileDescriptor >= 0)
-        {
-          FD_SET(ResolverFileDescriptor, read_set);
-        }
-      wait.tv_sec = IRCD_MIN(delay2, delay);
-      wait.tv_usec = usec;
-
-      nfds = select(MAXCONNECTIONS, read_set, write_set, 0, &wait);
-
-      if ((CurrentTime = time(NULL)) == -1)
-        {
-          log(L_CRIT, "Clock Failure");
-          restart("Clock failure");
-        }   
-
-      if (nfds == -1 && errno == EINTR)
-        {
-          return -1;
-        }
-      else if( nfds >= 0)
-        break;
-
-      res++;
-      if (res > 5)
-        restart("too many select errors");
-      sleep(10);
-    }
-
-  /*
-   * Check the name resolver
-   */
-
-  if (-1 < ResolverFileDescriptor && 
-      FD_ISSET(ResolverFileDescriptor, read_set)) {
-    get_res();
-    --nfds;
-  }
-  /*
-   * Check the auth fd's
-   */
-  for (auth = AuthPollList; auth; auth = auth_next) {
-    auth_next = auth->next;
-    assert(-1 < auth->fd);
-    if (IsAuthConnect(auth) && FD_ISSET(auth->fd, write_set)) {
-      send_auth_query(auth);
-      if (0 == --nfds)
-        break;
-    }
-    else if (FD_ISSET(auth->fd, read_set)) {
-      read_auth_reply(auth);
-      if (0 == --nfds)
-        break;
-    }
-  }
-  for (listener = ListenerPollList; listener; listener = listener->next) {
-    assert(-1 < listener->fd);
-    if (FD_ISSET(listener->fd, read_set))
-      accept_connection(listener);
-  }
-
-#ifdef USE_IAUTH
-  /*
-   * Check IAuth
-   */
-  if (iAuth.socket != NOSOCK)
-  {
-  	if (IsIAuthConnect(iAuth) && FD_ISSET(iAuth.socket, write_set))
-  	{
-  		/*FD_CLR(iAuth.socket, write_set);*/
-
-  		/*
-  		 * Complete the connection to the IAuth server
-  		 */
-  		if (!CompleteIAuthConnection())
-  		{
-  			close(iAuth.socket);
-  			iAuth.socket = NOSOCK;
-  		}
-  	}
-  	else if (FD_ISSET(iAuth.socket, read_set))
-    {
-      if (!ParseIAuth())
-      {
-        /*
-         * IAuth server closed the connection
-         */
-        close(iAuth.socket);
-        iAuth.socket = NOSOCK;
-      }
-    }
-  }
-#endif
-
-  for (i = 0; i <= highest_fd; i++) {
-    if (!(GlobalFDList[i] & mask) || !(cptr = local[i]))
-      continue;
-
-    /*
-     * See if we can write...
-     */
-    if (FD_ISSET(i, write_set)) {
-      --nfds;
-      if (IsConnecting(cptr)) {
-        if (!completed_connection(cptr)) {
-          exit_client(cptr, cptr, &me, "Lost C/N Line");
-          continue;
-        }
-        send_queued(cptr);
-          if (!IsDead(cptr))
-            continue;
-      }
-      else {
-        /*
-         * ...room for writing, empty some queue then...
-         */
-        send_queued(cptr);
-        if (!IsDead(cptr))
-          continue;
-      }
-      exit_client(cptr, cptr, &me, 
-                 (cptr->flags & FLAGS_SENDQEX) ? 
-                 "SendQ Exceeded" : strerror(get_sockerr(cptr->fd)));
-      continue;
-    }
-    length = 1;     /* for fall through case */
-
-    if (FD_ISSET(i, read_set)) {
-      --nfds;
-      length = read_packet(cptr);
-    }
-    else if (PARSE_AS_CLIENT(cptr) && !NoNewLine(cptr))
-      length = parse_client_queued(cptr);
-
-    if (length > 0 || length == CLIENT_EXITED)
-      continue;
-    if (IsDead(cptr)) {
-       exit_client(cptr, cptr, &me,
-                    strerror(get_sockerr(cptr->fd)));
-       continue;
-    }
-    error_exit_client(cptr, length);
-    errno = 0;
-  }
-  return 0;
-}
-  
-#else /* USE_POLL */
-
-#if defined(POLLMSG) && defined(POLLIN) && defined(POLLRDNORM)
-#define POLLREADFLAGS (POLLMSG | POLLIN | POLLRDNORM)
-#else
-
-# if defined(POLLIN) && defined(POLLRDNORM)
-# define POLLREADFLAGS (POLLIN | POLLRDNORM)
-# else
-
-#  if defined(POLLIN)
-#  define POLLREADFLAGS POLLIN
-#  else
-
-#   if defined(POLLRDNORM)
-#    define POLLREADFLAGS POLLRDNORM
-#   endif
-
-#  endif
-
-# endif
-
-#endif
-
-#if defined(POLLOUT) && defined(POLLWRNORM)
-#define POLLWRITEFLAGS (POLLOUT | POLLWRNORM)
-#else
-
-# if defined(POLLOUT)
-# define POLLWRITEFLAGS POLLOUT
-# else
-
-#  if defined(POLLWRNORM)
-#  define POLLWRITEFLAGS POLLWRNORM
-#  endif
-
-# endif
-
-#endif
-
-#if defined(POLLERR) && defined(POLLHUP)
-#define POLLERRORS (POLLERR | POLLHUP)
-#else
-#define POLLERRORS POLLERR
-#endif
-
-#define PFD_SETR(thisfd) do { CHECK_PFD(thisfd) \
-                           pfd->events |= POLLREADFLAGS; } while (0)
-#define PFD_SETW(thisfd) do { CHECK_PFD(thisfd) \
-                           pfd->events |= POLLWRITEFLAGS; } while (0)
-#define CHECK_PFD(thisfd)                     \
-        if (pfd->fd != thisfd) {              \
-                pfd = &poll_fdarray[nbr_pfds++];\
-                poll_fdarray[nbr_pfds].fd = -1; \
-                pfd->fd     = thisfd;           \
-                pfd->events = 0;                \
-        }
-
-int read_message(time_t delay, unsigned char mask)
-{
-  struct Client*       cptr;
-  int                  nfds;
-  struct timeval       wait;
-
-  static struct pollfd poll_fdarray[MAXCONNECTIONS];
-  struct pollfd*       pfd = poll_fdarray;
-  struct pollfd*       res_pfd = NULL;
-  int                  nbr_pfds = 0;
-  time_t               delay2 = delay;
-  u_long               usec = 0;
-  int                  res = 0;
-  int                  length;
-  int                  fd;
-  struct AuthRequest*  auth;
-  struct AuthRequest*  auth_next;
-  struct Listener*     listener;
-  int                  rr;
-  int                  rw;
-  int                  i;
-
-  for ( ; ; ) {
-    nbr_pfds = 0;
-    pfd      = poll_fdarray;
-    pfd->fd  = -1;
-    res_pfd  = NULL;
-    auth = 0;
-
-    /*
-     * set resolver descriptor
-     */
-    if (ResolverFileDescriptor >= 0) {
-      PFD_SETR(ResolverFileDescriptor);
-      res_pfd = pfd;
-    }
-    /*
-     * set auth descriptors
-     */
-    for (auth = AuthPollList; auth; auth = auth->next) {
-      assert(-1 < auth->fd);
-      auth->index = nbr_pfds;
-      if (IsAuthConnect(auth))
-        PFD_SETW(auth->fd);
-      else
-        PFD_SETR(auth->fd);
-    }
-    /*
-     * set listener descriptors
-     */
-    for (listener = ListenerPollList; listener; listener = listener->next) {
-      assert(-1 < listener->fd);
-#ifdef CONNECTFAST
-      listener->index = nbr_pfds;
-      PFD_SETR(listener->fd);
-#else
-     /* 
-      * It is VERY bad if someone tries to send a lot
-      * of clones to the server though, as mbuf's can't
-      * be allocated quickly enough... - Comstud
-      */
-      listener->index = -1;
-      if (CurrentTime > (listener->last_accept + 2)) {
-        listener->index = nbr_pfds;
-        PFD_SETR(listener->fd);
-      }
-      else if (delay2 > 2)
-        delay2 = 2;
-#endif
-    }
-    /*
-     * set client descriptors
-     */
-    for (i = 0; i <= highest_fd; ++i) {
-      if (!(GlobalFDList[i] & mask) || !(cptr = local[i]))
-        continue;
-
-     /*
-      * anything that IsMe should NEVER be in the local client array
-      */
-      assert(!IsMe(cptr));
-      if (DBufLength(&cptr->recvQ) && delay2 > 2)
-        delay2 = 1;
-
-      if (DBufLength(&cptr->recvQ) < 4088)
-        PFD_SETR(i);
-      
-      if (DBufLength(&cptr->sendQ) || IsConnecting(cptr)
-          || ((cptr->flags2 & FLAGS2_ZIP) && (cptr->zip->outcount > 0))
-          )
-        PFD_SETW(i);
-    }
-
-    wait.tv_sec = IRCD_MIN(delay2, delay);
-    wait.tv_usec = usec;
-    nfds = poll(poll_fdarray, nbr_pfds,
-                wait.tv_sec * 1000 + wait.tv_usec / 1000);
-    if ((CurrentTime = time(0)) == -1)
-      {
-        log(L_CRIT, "Clock Failure");
-        restart("Clock failed");
-      }   
-    if (nfds == -1 && ((errno == EINTR) || (errno == EAGAIN)))
-      return -1;
-    else if (nfds >= 0)
-      break;
-    report_error("poll %s:%s", me.name, errno);
-    res++;
-    if (res > 5)
-      restart("too many poll errors");
-    sleep(10);
-  }
-  /*
-   * check resolver descriptor
-   */
-  if (res_pfd && (res_pfd->revents & (POLLREADFLAGS | POLLERRORS))) {
-    get_res();
-    --nfds;
-  }
-  /*
-   * check auth descriptors
-   */
-  for (auth = AuthPollList; auth; auth = auth_next) {
-    auth_next = auth->next;
-    i = auth->index;
-    /*
-     * check for any event, we only ask for one at a time
-     */
-    if (poll_fdarray[i].revents) { 
-      if (IsAuthConnect(auth))
-        send_auth_query(auth);
-      else
-        read_auth_reply(auth);
-      if (0 == --nfds)
-        break;
-    }
-  }
-  /*
-   * check listeners
-   */
-  for (listener = ListenerPollList; listener; listener = listener->next) {
-    if (-1 == listener->index)
-      continue;
-    i = listener->index;
-    if (poll_fdarray[i].revents) {
-      accept_connection(listener);
-      if (0 == --nfds)
-        break;
-    }
-  }
-  /*
-   * i contains the next non-auth/non-listener index, since we put the 
-   * resolver, auth and listener, file descriptors in poll_fdarray first, 
-   * the very next one should be the start of the clients
-   */
-  pfd = &poll_fdarray[++i];
-    
-  for ( ; (i < nbr_pfds); i++, pfd++)
-    {
-      fd = pfd->fd;                   
-      rr = pfd->revents & POLLREADFLAGS;
-      rw = pfd->revents & POLLWRITEFLAGS;
-      if (pfd->revents & POLLERRORS)
-        {
-          if (pfd->events & POLLREADFLAGS)
-            rr++;
-          if (pfd->events & POLLWRITEFLAGS)
-            rw++;
-        }
-      if (!(cptr = local[fd]))
-        continue;
-
-      if (rw)
-        {
-          if (IsConnecting(cptr)) {
-            if (!completed_connection(cptr)) {
-              exit_client(cptr, cptr, &me, "Lost C/N Line");
-              continue;
-            }
-            send_queued(cptr);
-            if (!IsDead(cptr))
-              continue;
-          }
-          else {
-            /*
-             * ...room for writing, empty some queue then...
-             */
-            send_queued(cptr);
-            if (!IsDead(cptr))
-              continue;
-          }
-          exit_client(cptr, cptr, &me, 
-                     (cptr->flags & FLAGS_SENDQEX) ? 
-                     "SendQ Exceeded" : strerror(get_sockerr(cptr->fd)));
-          continue;
-        }
-      length = 1;     /* for fall through case */
-      if (rr)
-        length = read_packet(cptr);
-      else if (PARSE_AS_CLIENT(cptr) && !NoNewLine(cptr))
-        length = parse_client_queued(cptr);
-
-      if (length > 0 || length == CLIENT_EXITED)
-        continue;
-      if (IsDead(cptr)) {
-         exit_client(cptr, cptr, &me,
-                      strerror(get_sockerr(cptr->fd)));
-         continue;
-      }
-      error_exit_client(cptr, length);
-      errno = 0;
-    }
-  return 0;
-}
-
-#endif /* USE_POLL */
 

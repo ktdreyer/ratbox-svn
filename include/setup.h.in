@@ -1,26 +1,19 @@
-/* include/setup.h.in.  Generated automatically from configure.in by autoheader.
- *
- * $Id$ 
- */
+/* include/setup.h.in.  Generated automatically from configure.in by autoheader.  */
 
 /* Define if you need to in order for stat and other things to work.  */
 #undef _POSIX_SOURCE
 
+/* Define to the type of arg1 for select(). */
+#undef SELECT_TYPE_ARG1
+
+/* Define to the type of args 2, 3 and 4 for select(). */
+#undef SELECT_TYPE_ARG234
+
+/* Define to the type of arg5 for select(). */
+#undef SELECT_TYPE_ARG5
+
 /* Define if you have the ANSI C header files.  */
 #undef STDC_HEADERS
-
-/* Define only one of POSIX, BSD, or SYSV signals.  */
-/* Define if your system has reliable POSIX signals.  */
-#undef POSIX_SIGNALS
-
-/* Define if your system has reliable BSD signals.  */
-#undef BSD_RELIABLE_SIGNALS
-
-/* Define if your system has unreliable SYSV signals.  */
-#undef SYSV_UNRELIABLE_SIGNALS
-
-/* Define if you have the poll() system call.  */
-#undef USE_POLL
 
 /* Chose only one of NBLOCK_POSIX, NBLOCK_BSD, and NBLOCK_SYSV */
 /* Define if you have posix non-blocking sockets (O_NONBLOCK) */
@@ -38,8 +31,17 @@
 /* Define if you are running SOLARIS2.  */
 #undef OS_SOLARIS2
 
+/* Define with our select type */
+#undef SELECT_TYPE
+
+/* Define if we are going to use /dev/poll for network IO */
+#undef HAVE_DEVPOLL
+
 /* Define if you have the <errno.h> header file.  */
 #undef HAVE_ERRNO_H
+
+/* Define if you have the <getopt.h> header file.  */
+#undef HAVE_GETOPT_H
 
 /* Define if you have the <stddef.h> header file.  */
 #undef HAVE_STDDEF_H
@@ -53,11 +55,11 @@
 /* Define if you have the <sys/param.h> header file.  */
 #undef HAVE_SYS_PARAM_H
 
+/* Define if you have the <sys/syslog.h> header file.  */
+#undef HAVE_SYS_SYSLOG_H
+
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
-
-/* Define if you have the <getopt.h> header file.  */
-#undef HAVE_GETOPT_H
 
 /* Define if you have the descrypt library (-ldescrypt).  */
 #undef HAVE_LIBDESCRYPT

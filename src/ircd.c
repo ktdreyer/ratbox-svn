@@ -51,6 +51,7 @@
 #include "s_zip.h"
 #include "scache.h"
 #include "send.h"
+#include "setup.h"
 #include "whowas.h"
 
 #include <stdlib.h>
@@ -226,19 +227,6 @@ static void init_sys(int boot_daemon)
                         (long) limit.rlim_cur);
           exit(-1);
         }
-
-#ifndef USE_POLL
-      if( MAXCONNECTIONS > FD_SETSIZE )
-        {
-          fprintf(stderr, "FD_SETSIZE = %d MAXCONNECTIONS = %d\n",
-                  FD_SETSIZE, MAXCONNECTIONS);
-          fprintf(stderr,
-            "Make sure your kernel supports a larger FD_SETSIZE then " \
-            "recompile with -DFD_SETSIZE=%d\n", MAXCONNECTIONS);
-          exit(-1);
-        }
-      printf("Value of FD_SETSIZE is %d\n", FD_SETSIZE);
-#endif /* USE_POLL */
       printf("Value of NOFILE is %d\n", NOFILE);
     }
 #endif        /* RLIMIT_FD_MAX */

@@ -41,3 +41,9 @@
 
 /* Define if you are running SOLARIS2.  */
 #undef OS_SOLARIS2
+
+/* Define with our select type */
+#undef SELECT_TYPE
+
+/* Define if we are going to use /dev/poll for network IO */
+#undef HAVE_DEVPOLL

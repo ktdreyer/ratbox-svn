@@ -114,6 +114,7 @@ SRCS =                          \
   restart.c                     \
   s_auth.c                      \
   s_bsd.c                       \
+  @SELECT_SRC@                  \
   s_conf.c                      \
   s_debug.c                     \
   s_log.c                       \
