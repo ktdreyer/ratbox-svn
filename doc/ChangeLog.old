@@ -1,3 +1,18 @@
+jmallett    2002/02/11 18:06:28 EST	(20020211_0)
+
+  Modified files:
+    .                    README.FIRST 
+  Log:
+  Correct a note about byacc so that people don't feel hopeless when they
+  find out their byacc is dying.
+  
+  Submitted by:   Samuel in Spain (He emailed me about this being unclear)
+  
+  Revision  Changes    Path
+  7.27      +7 -2      ircd-hybrid-7/README.FIRST
+
+
+
 db          2002/02/10 18:47:07 EST	(20020210_4)
 
   Modified files:
