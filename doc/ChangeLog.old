@@ -1,3 +1,7 @@
+*** 20010102_5 by a1kmm
+Added a little extra paranoia to fix_key_old
+
+
 *** 20010102_4 by a1kmm
 Fixed convertconf not to core when not all fields are present.
 
