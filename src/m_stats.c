@@ -129,6 +129,8 @@
 
 static const char* Lformat = ":%s %d %s %s %u %u %u %u %u :%u %u %s";
 
+static char *parse_stats_args(int parc,char *parv[],int *doall,int *wilds);
+
 static void stats_L(struct Client *sptr,char *name,int doall, int wilds);
 static void stats_spy(struct Client *sptr,char stat);
 static void stats_L_spy(struct Client *sptr, char stat, char *name);
@@ -164,18 +166,7 @@ int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (hunt_server(cptr,sptr,":%s STATS %s :%s",2,parc,parv)!=HUNTED_ISME)
     return 0;
 
-  if (parc > 2)
-    {
-      name = parv[2];
-      if (!irccmp(name, me.name))
-        doall = 2;
-      else if (match(name, me.name))
-        doall = 1;
-      if (strchr(name, '*') || strchr(name, '?'))
-        wilds = 1;
-    }
-  else
-    name = me.name;
+  name = parse_stats_args(parc,parv,&doall,&wilds);
 
   if (parc > 3)
     target = parv[3];
@@ -221,18 +212,7 @@ int mo_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (hunt_server(cptr,sptr,":%s STATS %s :%s",2,parc,parv)!=HUNTED_ISME)
     return 0;
 
-  if(parc > 2)
-    {
-      name = parv[2];
-      if (!irccmp(name, me.name))
-        doall = 2;
-      else if (match(name, me.name))
-        doall = 1;
-      if (strchr(name, '*') || strchr(name, '?'))
-        wilds = 1;
-    }
-  else
-    name = me.name;
+  name = parse_stats_args(parc,parv,&doall,&wilds);
 
   if (parc > 3)
     target = parv[3];
@@ -680,4 +660,29 @@ static void stats_p_spy(struct Client *sptr)
 			 "STATS p requested by %s (%s@%s) [%s]",
 			 sptr->name, sptr->username, sptr->host,
 			 sptr->user->server);
+}
+
+/*
+ * common parse routine for m_stats args
+ * 
+ */
+
+static char *parse_stats_args(int parc,char *parv[],int *doall,int *wilds)
+{
+  char *name;
+
+  if(parc > 2)
+    {
+      name = parv[2];
+      if (!irccmp(name, me.name))
+        *doall = 2;
+      else if (match(name, me.name))
+        *doall = 1;
+      if (strchr(name, '*') || strchr(name, '?'))
+        *wilds = 1;
+    }
+  else
+    name = me.name;
+
+  return(name);
 }
