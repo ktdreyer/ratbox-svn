@@ -11,7 +11,7 @@ Modules
 
 m_clearchan.c  - CLEARCHAN - clears all users out of a channel and joins person
                              issuing command
-                 Syntax: CLEARCHAN <channel> [vchanid]
+                 Syntax: CLEARCHAN <channel> 
 
 m_flags.c      - FLAGS - csircd like support of changing usermodes
                  Syntax:  FLAGS :+OWALLOPS -SWALLOPS

@@ -83,7 +83,6 @@ static void mo_clearchan(struct Client *client_p, struct Client *source_p,
                         int parc, char *parv[])
 {
   struct Channel *chptr;
-  int on_vchan = 0;
 
   /* admins only */
   if (!IsOperAdmin(source_p))
@@ -108,31 +107,16 @@ static void mo_clearchan(struct Client *client_p, struct Client *source_p,
       return;
     }
 
-  if (!on_vchan)
-    {
-     sendto_wallops_flags(UMODE_WALLOP, &me, 
-              "CLEARCHAN called for [%s] by %s!%s@%s",
-              parv[1], source_p->name, source_p->username, source_p->host);
-     sendto_server(NULL, NULL, NOCAPS, NOCAPS, 
-                   ":%s WALLOPS :CLEARCHAN called for [%s] by %s!%s@%s",
-                   me.name, parv[1], source_p->name, source_p->username,
-                   source_p->host);
-     ilog(L_NOTICE, "CLEARCHAN called for [%s] by %s!%s@%s",
-         parv[1], source_p->name, source_p->username, source_p->host);
-    }
-  else
-    {
-     sendto_wallops_flags(UMODE_WALLOP, &me,
-              "CLEARCHAN called for [%s %s] by %s!%s@%s",
-              parv[1], parv[2], source_p->name, source_p->username,
-              source_p->host);
-     sendto_server(NULL, NULL, NOCAPS, NOCAPS, 
-                   ":%s WALLOPS :CLEARCHAN called for [%s %s] by %s!%s@%s",
-                   me.name, parv[1], parv[2], source_p->name,
-                   source_p->username, source_p->host);
-     ilog(L_NOTICE, "CLEARCHAN called for [%s %s] by %s!%s@%s",
-         parv[1], parv[2], source_p->name, source_p->username, source_p->host);
-    }
+  sendto_wallops_flags(UMODE_WALLOP, &me, 
+                       "CLEARCHAN called for [%s] by %s!%s@%s",
+                       parv[1], source_p->name, 
+                       source_p->username, source_p->host);
+  sendto_server(NULL, NULL, NOCAPS, NOCAPS, 
+                ":%s WALLOPS :CLEARCHAN called for [%s] by %s!%s@%s",
+                me.name, parv[1], source_p->name, source_p->username,
+                source_p->host);
+  ilog(L_NOTICE, "CLEARCHAN called for [%s] by %s!%s@%s",
+       parv[1], source_p->name, source_p->username, source_p->host);
 
   /* Kill all the modes we have about the channel.. making everyone a peon */  
   remove_our_modes(chptr, source_p);
@@ -206,7 +190,6 @@ void kick_list(struct Client *client_p, struct Client *source_p, struct Channel 
  *
  * inputs       - hide from ops or not int flag
  *              - pointer to channel to remove modes from
- *              - if vchan basechannel pointer
  *              - client pointer
  * output       - NONE
  * side effects - Go through the local members, remove all their

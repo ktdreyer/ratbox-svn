@@ -18,19 +18,6 @@ options that were in config.h, to be changed with a /rehash.
   this is a nick!user@host mask of somebody who can join an invite-only (+i)
   channel without having to be invited first.
 
-- Channel Op Hiding is now included as a channel mode.  By setting the
-  mode +a when a user joins the channel, they will not see who is opped,
-  voiced, or halfopped.  They will see mode changes except +ohv but will
-  see them as: 
-
-       *** irc.server sets mode +b nick!user@host on #channel
-
-  When a user is opped, the user will see a server generated "massmode"
-  showing them the real list of who is opped/voiced to keep
-  clients in sync.
-
-  NOTE: Anonymous ops are optional and disabled by default.
-  
 - Persistent channels are included.  With TS5 the only reason to enable
   no_join_on_split is to prevent people gaining access to +ik channels on
   a netsplit.  Persistent channels in combination with no_create_on_split
@@ -212,8 +199,7 @@ options that were in config.h, to be changed with a /rehash.
     EXCEPTS        - Support ban exceptions (+e)
     INVEX          - Support invite exceptions (+I)
     WALLCHOPS      - /notice @#channel will notice only ops
-                     /notice %#channel will notice only halfops/ops
-		     /notice +#channel will notice only voices/halfops/ops
+		     /notice +#channel will notice only voices/ops
 
 		     privmsg is also supported.
     CALLERID       - Server supports the +g usermode for server-side ignore.
@@ -251,7 +237,6 @@ options that were in config.h, to be changed with a /rehash.
     HOPS    - Support half-ops
     HUB     - Is a hub server (used to prevent two LL hubs from linking in that
               state)
-    AOPS    - Supports anonymous channel ops (channel mode +a)
     UID     - Unique user-ID support
     ZIP     - Ziplink (Link is compressed with zlib compression)
     TBURST  - Supports topic bursting, a contrib/ module.

@@ -28,7 +28,6 @@ resv.txt		- Outline of the RESV command.
 server-version-info     - Overview of the flags shown in /version
 serverhide.txt          - Information about the server hide options
 simple.conf             - A simple ircd.conf useful for beginning admins
-vchans.txt              - The paper describing virtual channels
 whats-new.txt		- What new features are available
 
 Also in the contrib/ directory you will find:
