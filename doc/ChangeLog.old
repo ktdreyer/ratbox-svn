@@ -1,3 +1,7 @@
+*** 20001016_9 by toot
+now it will remove the basechan when there's no vchans left under it
+
+
 *** 20001016_8 by toot
 . this should remove the basechan after deleting its last vchan, but didn't
 . don't bother to show possible vchans if they're already
