@@ -1,3 +1,7 @@
+*** 20001105_9 by toot
+David-T's patch that add vchan support to KNOCK, and fixes the flood control
+
+
 *** 20001105_8 by db
 - clean ups to m_join.c
 - resolved conflict in s_conf.h
