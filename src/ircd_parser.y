@@ -2429,10 +2429,32 @@ channel_use_except:   USE_EXCEPT '=' TYES ';'
 
 
 channel_use_halfops:   USE_HALFOPS '=' TYES ';'
-  { ConfigChannel.use_halfops = 1; }
-    |
+  {
+    /* Set to -1 on boot */
+    if (ConfigChannel.use_halfops == 0)
+    {
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
+        "Ignoring config file entry 'use_halfops = yes' "
+        "-- can only be changed on boot");
+      break;
+    }
+    else
+      ConfigChannel.use_halfops = 1;
+  }
+  |
     USE_HALFOPS '=' TNO ';'
-  { ConfigChannel.use_halfops = 0; };
+  {
+    /* Set to -1 on boot */
+    if (ConfigChannel.use_halfops == 1)
+    {
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
+        "Ignoring config file entry 'use_halfops = no' "
+        "-- can only be changed on boot");
+      break;
+    }
+    else
+      ConfigChannel.use_halfops = 0;
+  };
 
 
 channel_use_invex:   USE_INVEX '=' TYES ';'

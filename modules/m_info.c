@@ -328,6 +328,30 @@ static struct InfoStruct info_table[] =
     "Maximum permitted TS delta from another server"
   },
   {
+    "use_except",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigChannel.use_except,
+    "Enable chanmode +e (ban exceptions)",
+  },
+  {
+    "use_halfops",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigChannel.use_halfops,
+    "Enable chanmode +h (halfops)",
+  },
+  {
+    "use_invex",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigChannel.use_invex,
+    "Enable chanmode +I (invite exceptions)",
+  },
+  {
+    "use_knock",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigChannel.use_knock,
+    "Enable /KNOCK",
+  },
+  {
     "ts_warn_delta",
     OUTPUT_DECIMAL,
     &ConfigFileEntry.ts_warn_delta,
