@@ -1,3 +1,48 @@
+*** 20001126_4 by adrian
+
+
+Adrian's totally massive evil dbuf die and linebuf code.
+
+* dbuf.c and dbuf.h have gone. Byebye.
+* some of the stuff in s_debug.c which reports dbuf stats has been
+  #if 0'ed for the time being
+* linebuf flushing (ie write()ing to a socket) is now done through
+  linebuf_flush() which does the state keeping, saving a whole lot of
+  dbuf map/delete and tracking that existed before
+* dopacket() was killed, since we now handle line-by-line parsing of both
+  server *and* client recvq buffers. dopacket() did some CRLF-type splitting
+  magic because a single buffer when doing ZIPLINKS could possibly be
+  more than on ircd line.
+* deliver_it() was also killed, since we don't need that extra complexity.
+* A lot of linebuf fixes are brought in because well, we needed them!
+
+
+How the linebuf stuff is used (in a nutshell)
+
+* linebuf_put() is called to put a complete line into a buffer. It has
+  to be a line.
+* linebuf_parse() is called to put one or more lines into a buffer.
+  Incomplete lines and multiple lines are handled.
+* When a line is terminated, it is appended with a CR/LF/NUL .
+
+  NOTE that the NUL isn't counted in the length!
+
+
+Ok - this code is very very alpha. It works, and I can link to another
+hybrid server. There are a lot of extras I have to add to this code
+before it can be used in a public network, like:
+
+* fixing flood protection to take into account alloclen rather than len.
+  This is more relevant to memory usage
+* fix the flood protection to only appear in one place (ie after
+  linebuf_parse() ) rather than the 10935083405 places it exists now
+* I should add multiple-size support in the linebuf code, because we might
+  end up wanting to support > 512 line buffers for server connections
+* .. and yes, we should really test this to break it, to make sure I haven't
+  forgotten anything.
+
+
+
 *** 20001126_3 by bill
 
 va'ified send_operwall
