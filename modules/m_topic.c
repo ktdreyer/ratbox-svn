@@ -163,7 +163,7 @@ int     m_topic(struct Client *cptr,
 	      sendto_one(sptr, form_str(ERR_NOTONCHANNEL), me.name, parv[0],
 			 parv[1]);
 	      return 0;
-p	    }
+	    }
           if (chptr->topic[0] == '\0')
 	    sendto_one(sptr, form_str(RPL_NOTOPIC),
 		       me.name, parv[0], parv[1]);
