@@ -1,3 +1,19 @@
+leeh        2002/08/21 15:22:48 EDT	(20020821_20)
+
+  Modified files:
+    include              s_conf.h 
+    modules              m_stats.c 
+    src                  s_conf.c 
+  Log:
+  - ripped report_specials() and moved them to m_stats.c
+  
+  Revision  Changes    Path
+  7.196     +0 -1      ircd-ratbox/include/s_conf.h
+  1.115     +31 -3     ircd-ratbox/modules/m_stats.c
+  7.342     +0 -42     ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2002/08/21 13:41:28 EDT	(20020821_19)
 
   Modified files:
