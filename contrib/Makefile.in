@@ -38,6 +38,7 @@ SRCS =                          \
   m_owhois.c			\
   m_olist.c			\
   m_opme.c			\
+  m_owho.c			\
   m_tburst.c			\
   spy_admin_notice.c		\
   spy_info_notice.c		\

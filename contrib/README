@@ -45,6 +45,8 @@ m_olist.c      - OLIST - Lists channels like LIST, but shows hidden
 m_opme.c       - OPME - Allows an admin to op themselves in an opless channel
                  Syntax: OPME <channel>
 
+m_owho.c       - OWHO -  Just like WHO but doesn't hide things from opers
+
 m_owhois.c     - OWHOIS - Allows an oper to do a whois on any user and see
 		          all channels they are in. The syntax is the same
 			  as WHOIS
