@@ -1,3 +1,15 @@
+androsyn    2003/08/11 10:04:50 EDT	(20030811_3)
+
+  Modified files:
+    modules/core         m_message.c 
+  Log:
+  I think this is the right fix for this...
+  
+  Revision  Changes    Path
+  1.137     +3 -3      ircd-ratbox/modules/core/m_message.c
+
+
+
 leeh        2003/08/10 21:08:42 EDT	(20030811_2)
 
   Modified files:
