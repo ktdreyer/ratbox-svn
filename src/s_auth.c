@@ -325,7 +325,7 @@ start_auth_query(struct AuthRequest *auth)
 	SetAuthConnect(auth);
 
 	comm_connect_tcp(fd, auth->client->localClient->sockhost, 113,
-			 (struct sockaddr *) &localaddr, locallen,
+			 (struct sockaddr *) &localaddr, GET_SS_LEN(localaddr),
 			 auth_connect_callback, auth, localaddr.ss_family, GlobalSetOptions.ident_timeout);
 	return 1;		/* We suceed here for now */
 }

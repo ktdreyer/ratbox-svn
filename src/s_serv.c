@@ -1846,7 +1846,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 			 0,
 			 serv_connect_callback, client_p,
 			 aconf->aftype, ConfigFileEntry.connect_timeout);
-	
+			 return 1;	
 	}
 
 	comm_connect_tcp(client_p->localClient->fd, aconf->host,
