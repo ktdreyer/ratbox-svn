@@ -1,3 +1,7 @@
+*** 20010427_2 by habeeb
+Fix for WHOIS buffer overflow in listing channels pointed out by pasky.
+
+
 *** 20010427_1 by fl_
 - you cant add brackets if the kill isnt yours :)
   if you do your gunna end up with a reason like ((((((ghost)))))) ;P
