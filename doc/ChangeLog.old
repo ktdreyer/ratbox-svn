@@ -1,3 +1,7 @@
+*** 20010207_8 by a1kmm
+- That "bogus //" that Hwy changed to /*  shouldn't be there at all - the code is needed for klines to work.
+
+
 *** 20010207_7 by db
 - This fixes testline... find_tkline can be handed a NULL ip from testline.
 
