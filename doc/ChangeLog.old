@@ -1,3 +1,10 @@
+*** 20010530_9 by davidt
+- Use fork() not vfork().
+- Fix --disable-shared-modules build
+- Add warning flags to compile of y.tab.c, so we see problems in
+  ircd_parser.y...
+
+
 *** 20010530_8 by jdc
 * Apparently the blank lines actually contained spaces.  Oops.
 
