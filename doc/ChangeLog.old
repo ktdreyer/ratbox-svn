@@ -1,3 +1,8 @@
+*** 20010330_1 by androsyn
+Removed a reference to the block allocator in m_rehash.c that prevented it
+from being loaded.
+
+
 *** 20010329_3 by fl_
 - never do testing in BitchX..
 
