@@ -455,7 +455,9 @@ channel_modes(struct Channel *chptr, struct Client *client_p,
   return;
 }
 
-/* static char *pretty_mask(char *mask);
+/* static char *
+ * pretty_mask(char *mask);
+ *
  * Input: A mask.
  * Output: A "user-friendly" version of the mask, in mask_buf.
  * Side-effects: mask_buf is appended to. mask_pos is incremented.
@@ -465,6 +467,9 @@ channel_modes(struct Channel *chptr, struct Client *client_p,
  *  x!y   =>  x!y@*
  *  x     =>  x!*@*
  *  z.d   =>  *!*@z.d
+ *
+ * If either nick/user/host are > than their respective limits, they are
+ * chopped
  */
 static char *
 pretty_mask(char *mask)
@@ -508,6 +513,16 @@ pretty_mask(char *mask)
   else
     nick = mask;
 
+  /* chop off at NICKLEN, USERLEN and HOSTLEN */
+  if(strlen(host) > HOSTLEN)
+    host[HOSTLEN] = '\0';
+
+  if(strlen(user) > USERLEN)
+    user[USERLEN] = '\0';
+
+  if(strlen(nick) > NICKLEN)
+    nick[NICKLEN] = '\0';
+    
   mask_pos += ircsprintf(mask_buf + mask_pos, "%s!%s@%s", nick, user, host)
     + 1;
 
@@ -899,12 +914,18 @@ chm_ban(struct Client *client_p, struct Client *source_p,
     return;
 
   raw_mask = parv[(*parn)++];
+  
   if (IsServer(client_p))
     mask = raw_mask;
   else
     mask = pretty_mask(raw_mask);
-  if (strlen(mask) > HOSTLEN+NICKLEN+USERLEN)
-    return;
+    
+  /* Cant do this - older servers dont.. it WILL cause a desync, but should
+   * be limited by our input buffer anyway --fl_
+   * 
+   * if (strlen(mask) > HOSTLEN+NICKLEN+USERLEN)
+   *   return;
+   */
 
   /* if we're adding a NEW id */
   if ((dir == MODE_ADD) && (add_id(source_p, chptr, mask, CHFL_BAN) == 0))
@@ -1004,8 +1025,12 @@ chm_except(struct Client *client_p, struct Client *source_p,
     mask = raw_mask;
   else
     mask = pretty_mask(raw_mask);
+
+  /* will cause a desync, cant be done */
+#if 0
   if (strlen(mask) > NICKLEN+USERLEN+HOSTLEN)
     return;
+#endif    
 
   /* If we're adding a NEW id */
   if ((dir == MODE_QUERY) && add_id(source_p, chptr, mask, CHFL_EXCEPTION) == 0)
@@ -1106,8 +1131,11 @@ chm_invex(struct Client *client_p, struct Client *source_p,
   else
     mask = pretty_mask(raw_mask);
 
+  /* will cause a desync, cant be done */
+#if 0  
   if (strlen(mask) > NICKLEN+USERLEN+HOSTLEN)
     return;
+#endif    
 
   if ((dir == MODE_ADD) && add_id(source_p, chptr, mask, CHFL_INVEX) == 0)
   {
