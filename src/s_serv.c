@@ -1052,11 +1052,12 @@ int server_estab(struct Client *client_p)
   **    ...a bit tricky, but you have been warned, besides
   **    code is more neat this way...  --msa
   */
-  SetServer(client_p);
   client_p->servptr = &me;
 
   if (IsDead(client_p))
     return CLIENT_EXITED;
+
+  SetServer(client_p);
 
  /* Update the capability combination usage counts. -A1kmm */
   set_chcap_usage_counts(client_p);
