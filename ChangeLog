@@ -1,3 +1,81 @@
+androsyn    2002/10/29 23:51:55 UTC	(20021029_2)
+
+  Modified files:
+    .                    RELNOTES 
+    src                  adns.c balloc.c channel.c channel_mode.c 
+                         class.c client.c crypt.c dynlink.c 
+                         event.c fdlist.c fileio.c getopt.c hash.c 
+                         hook.c hostmask.c irc_string.c ircd.c 
+                         kdparse.c linebuf.c listener.c m_error.c 
+                         md5.c memory.c modules.c motd.c numeric.c 
+                         packet.c parse.c restart.c resv.c rsa.c 
+                         s_auth.c s_bsd.c s_bsd_devpoll.c 
+                         s_bsd_kqueue.c s_bsd_poll.c 
+                         s_bsd_select.c s_bsd_sigio.c s_conf.c 
+                         s_debug.c s_gline.c s_log.c s_misc.c 
+                         s_serv.c s_stats.c s_user.c scache.c 
+                         send.c snprintf.c sprintf_irc.c tools.c 
+                         whowas.c 
+  Log:
+  Merge some things from STABLE_1_0 back into HEAD
+  
+  Revision  Changes    Path
+  1.62      +0 -0      ircd-ratbox/RELNOTES
+  7.48      +3 -2      ircd-ratbox/src/adns.c
+  7.43      +4 -3      ircd-ratbox/src/balloc.c
+  7.357     +4 -2      ircd-ratbox/src/channel.c
+  7.81      +4 -2      ircd-ratbox/src/channel_mode.c
+  7.40      +4 -2      ircd-ratbox/src/class.c
+  7.326     +4 -2      ircd-ratbox/src/client.c
+  7.5       +1 -1      ircd-ratbox/src/crypt.c
+  7.7       +4 -2      ircd-ratbox/src/dynlink.c
+  7.31      +2 -1      ircd-ratbox/src/event.c
+  7.33      +4 -2      ircd-ratbox/src/fdlist.c
+  7.24      +4 -2      ircd-ratbox/src/fileio.c
+  7.15      +4 -2      ircd-ratbox/src/getopt.c
+  7.61      +4 -2      ircd-ratbox/src/hash.c
+  7.21      +1 -1      ircd-ratbox/src/hook.c
+  7.79      +4 -2      ircd-ratbox/src/hostmask.c
+  7.57      +4 -2      ircd-ratbox/src/irc_string.c
+  7.257     +4 -2      ircd-ratbox/src/ircd.c
+  7.12      +4 -2      ircd-ratbox/src/kdparse.c
+  7.98      +2 -1      ircd-ratbox/src/linebuf.c
+  7.73      +4 -2      ircd-ratbox/src/listener.c
+  7.27      +4 -2      ircd-ratbox/src/m_error.c
+  1.15      +4 -2      ircd-ratbox/src/md5.c
+  7.40      +4 -2      ircd-ratbox/src/memory.c
+  7.115     +4 -2      ircd-ratbox/src/modules.c
+  7.28      +4 -2      ircd-ratbox/src/motd.c
+  7.21      +4 -2      ircd-ratbox/src/numeric.c
+  7.100     +4 -2      ircd-ratbox/src/packet.c
+  7.144     +4 -2      ircd-ratbox/src/parse.c
+  7.23      +4 -2      ircd-ratbox/src/restart.c
+  7.21      +2 -1      ircd-ratbox/src/resv.c
+  7.26      +4 -2      ircd-ratbox/src/rsa.c
+  7.113     +4 -2      ircd-ratbox/src/s_auth.c
+  7.178     +4 -2      ircd-ratbox/src/s_bsd.c
+  7.18      +5 -3      ircd-ratbox/src/s_bsd_devpoll.c
+  1.30      +5 -3      ircd-ratbox/src/s_bsd_kqueue.c
+  7.57      +5 -3      ircd-ratbox/src/s_bsd_poll.c
+  7.29      +5 -3      ircd-ratbox/src/s_bsd_select.c
+  7.26      +6 -4      ircd-ratbox/src/s_bsd_sigio.c
+  7.360     +4 -2      ircd-ratbox/src/s_conf.c
+  7.80      +4 -2      ircd-ratbox/src/s_debug.c
+  1.29      +4 -2      ircd-ratbox/src/s_gline.c
+  7.46      +4 -2      ircd-ratbox/src/s_log.c
+  7.31      +4 -2      ircd-ratbox/src/s_misc.c
+  7.296     +4 -2      ircd-ratbox/src/s_serv.c
+  7.23      +4 -2      ircd-ratbox/src/s_stats.c
+  7.230     +4 -2      ircd-ratbox/src/s_user.c
+  7.17      +4 -2      ircd-ratbox/src/scache.c
+  7.225     +4 -2      ircd-ratbox/src/send.c
+  1.7       +6 -2      ircd-ratbox/src/snprintf.c
+  7.19      +5 -3      ircd-ratbox/src/sprintf_irc.c
+  7.33      +8 -2      ircd-ratbox/src/tools.c
+  7.21      +4 -2      ircd-ratbox/src/whowas.c
+
+
+
 androsyn    2002/10/29 22:05:54 UTC	(20021029_1)
 
   Modified files:        (Branch: STABLE_1_0)
