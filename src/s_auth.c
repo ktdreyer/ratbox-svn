@@ -632,11 +632,9 @@ remove_auth_request(struct AuthRequest *auth)
 void
 delete_identd_queries(struct Client *target_p)
 {
-	dlink_node *ptr;
-	dlink_node *next_ptr;
 	struct AuthRequest *auth = target_p->localClient->auth_request;
 	
 	if(auth->fd >= 0)
-		fd_close(fd);
+		fd_close(auth->fd);
 	free_auth_request(auth);
 }
