@@ -1,3 +1,35 @@
+leeh        2003/08/26 11:52:01 EDT	(20030826_1)
+
+  Modified files:
+    include              client.h hash.h 
+    modules              m_accept.c m_ison.c m_ping.c m_pong.c 
+                         m_stats.c m_trace.c m_who.c m_whois.c 
+    modules/core         m_kill.c 
+    src                  client.c hash.c s_serv.c 
+  Log:
+  - added find_named_client() to find a matching user/server using name only
+  - added find_named_person() to find a matching user using name only
+  - used above two functions to stop local clients directing things at a
+    UID/SID.
+  
+  Revision  Changes    Path
+  7.219     +1 -0      ircd-ratbox/include/client.h
+  7.41      +1 -0      ircd-ratbox/include/hash.h
+  1.90      +3 -3      ircd-ratbox/modules/core/m_kill.c
+  1.53      +4 -4      ircd-ratbox/modules/m_accept.c
+  1.48      +2 -5      ircd-ratbox/modules/m_ison.c
+  1.50      +4 -2      ircd-ratbox/modules/m_ping.c
+  1.47      +3 -2      ircd-ratbox/modules/m_pong.c
+  1.180     +3 -5      ircd-ratbox/modules/m_stats.c
+  1.86      +14 -6     ircd-ratbox/modules/m_trace.c
+  1.103     +3 -3      ircd-ratbox/modules/m_who.c
+  1.129     +8 -3      ircd-ratbox/modules/m_whois.c
+  7.409     +14 -1     ircd-ratbox/src/client.c
+  7.84      +25 -17    ircd-ratbox/src/hash.c
+  7.357     +12 -9     ircd-ratbox/src/s_serv.c
+
+
+
 androsyn    2003/08/26 10:31:43 EDT	(20030826_0)
 
   Modified files:
