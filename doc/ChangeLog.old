@@ -1,3 +1,7 @@
+*** 19990911_1 by tomh
+add fd check to other #ifdef SENDQALWAYS
+
+
 *** 19990910_6 by tomh
 types cleanup
 NOTE: the interface in s_zip.c is a little borked, the length field should
