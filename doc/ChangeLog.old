@@ -1,3 +1,15 @@
+db          2001/12/31 09:06:59 EST	(20011231_3)
+
+  Modified files:
+    src                  channel_mode.c 
+  Log:
+  - fixed obvious typo. this resolves assert failure
+  
+  Revision  Changes    Path
+  7.16      +1 -1      ircd-hybrid-7/src/channel_mode.c
+
+
+
 db          2001/12/31 07:54:37 EST	(20011231_2)
 
   Modified files:
