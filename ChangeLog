@@ -1,3 +1,19 @@
+androsyn    2004/08/02 17:11:46 EDT	(20040802_3)
+
+  Modified files:
+    include              channel.h 
+    modules/core         m_mode.c 
+    src                  channel.c 
+  Log:
+  Go back to using dynamically allocated bans
+  
+  Revision  Changes    Path
+  7.156     +4 -4      ircd-ratbox/include/channel.h
+  1.113     +7 -7      ircd-ratbox/modules/core/m_mode.c
+  7.421     +6 -1      ircd-ratbox/src/channel.c
+
+
+
 androsyn    2004/08/02 16:29:27 EDT	(20040802_2)
 
   Modified files:
