@@ -1,3 +1,13 @@
+*** 20010825_2 by a1kmm
+- I can't get RESV to core as fl seemed to think it did with USE_CHANNEL_MODE
+  before. We really need to get this stable so we can get an rc out soon,
+  so I am enabling it so we can pick up any bugs in it sooner rather than
+  later. I suspect that USE_CHANNEL_MODE will be more important on efnet
+  than the RESV as it fixes problems with conflicts between hybrid-7 which
+  has only one of ohv at the same time and other servers, so if we can't
+  fix it we should probably disable RESV.
+
+
 *** 20010825_1 by a1kmm
 - Hopefully this will fix most of the hostmask.c problems we have been
   experiencing. I am not entirely sure the IPv6 code is right but it is
