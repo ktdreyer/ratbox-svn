@@ -83,7 +83,9 @@ static int m_userhost(struct Client *cptr,
     {
       if ((acptr = find_person(parv[i+1], NULL)))
 	{
-	  if (acptr == sptr) /* show real IP for USERHOST on yourself */
+	/* show real IP for USERHOST on yourself */
+	/*
+	  if (acptr == sptr)
             rl = ircsprintf(response, "%s%s=%c%s@%s ",
 			    acptr->name,
 			    IsOper(acptr) ? "*" : "",
@@ -91,6 +93,7 @@ static int m_userhost(struct Client *cptr,
 			    acptr->username,
 			    acptr->localClient->sockhost);
           else
+	*/
             rl = ircsprintf(response, "%s%s=%c%s@%s ",
 			    acptr->name,
 			    IsOper(acptr) ? "*" : "",
