@@ -1,3 +1,18 @@
+leeh        2005/02/13 09:20:37 EST	(20050213_3)
+
+  Modified files:
+    include              supported.h 
+    modules/core         m_message.c 
+  Log:
+  - fix a compile error in m_message.c
+  - update 005 to the spec and add CPRIVMSG/CNOTICE
+  
+  Revision  Changes    Path
+  7.2       +31 -37    ircd-ratbox/include/supported.h
+  1.162     +2 -2      ircd-ratbox/modules/core/m_message.c
+
+
+
 leeh        2005/02/13 09:14:12 EST	(20050213_2)
 
   Modified files:
