@@ -1,3 +1,10 @@
+*** 20010110_1 by db
+- cleanups to client.c and channel.c
+  removed unnecessary function call, reformatted some code blocks
+  removed unused variable 
+
+
+
 *** 20010109_9 by wcampbel
 Make clean and distclean descend into iauth and contrib
 
