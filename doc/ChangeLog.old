@@ -1,3 +1,7 @@
+*** 19990902_6 by wnder
+oops
+
+
 *** 19990902_5 by wnder
 ircd needs these changes to work with iauth - as of right now,
 ircd attempts a connection to 127.0.0.1 port 4444 where it
