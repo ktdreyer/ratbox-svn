@@ -58,7 +58,6 @@ static int m_stats(struct Client*, struct Client*, int, char**);
 static int ms_stats(struct Client*, struct Client*, int, char**);
 static int mo_stats(struct Client*, struct Client*, int, char**);
 
-
 struct Message stats_msgtab = {
   "STATS", 0, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_stats, ms_stats, mo_stats}
@@ -67,18 +66,18 @@ struct Message stats_msgtab = {
 void
 _modinit(void)
 {
-	hook_add_event("doing_stats");
-	mod_add_cmd(&stats_msgtab);
+  hook_add_event("doing_stats");
+  mod_add_cmd(&stats_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-	hook_del_event("doing_stats");
-	mod_del_cmd(&stats_msgtab);
+  hook_del_event("doing_stats");
+  mod_del_cmd(&stats_msgtab);
 }
 
-char *_version = "20001228";
+char *_version = "20010127";
 
 /*
  * m_stats - STATS message handler
@@ -305,20 +304,12 @@ static void do_non_priv_stats(struct Client *sptr, char *name, char *target,
       break;
 
     case 'p' :
-      if (GlobalSetOptions.hide_server)
-        {
-           /* showing users the oper list cant hurt.. its better
-            * than the alternatives of noticing the opers which could
-            * get really annoying --fl
-            */
-           stats_spy(sptr,statchar);
-           show_opers(sptr);
-        }
-      else
-        {
-          stats_spy(sptr,statchar);
-          show_opers(sptr);
-        }
+      /* showing users the oper list cant hurt.. its better
+       * than the alternatives of noticing the opers which could
+       * get really annoying --fl
+       */
+      stats_spy(sptr,statchar);
+      show_opers(sptr);
       break;
 
     case 'U' :
@@ -452,7 +443,7 @@ static void do_priv_stats(struct Client *sptr, char *name, char *target,
       break;
 
     case 'p' :
-		stats_spy(sptr,statchar);
+      stats_spy(sptr,statchar);
       show_opers(sptr);
       break;
 
@@ -594,13 +585,13 @@ static void stats_L_list(struct Client *sptr,char *name, int doall, int wilds,
  */
 static void stats_spy(struct Client *sptr,char statchar)
 {
-	struct hook_stats_data data;
-	
-	data.sptr = sptr;
-	data.statchar = statchar;
-	data.name = NULL;
-	
-	hook_call_event("doing_stats", &data);
+  struct hook_stats_data data;
+
+  data.sptr = sptr;
+  data.statchar = statchar;
+  data.name = NULL;
+
+  hook_call_event("doing_stats", &data);
 }
 
 /* 
@@ -615,13 +606,13 @@ static void stats_spy(struct Client *sptr,char statchar)
  */
 static void stats_L_spy(struct Client *sptr, char statchar, char *name)
 {
-	struct hook_stats_data data;
-	
-	data.sptr = sptr;
-	data.statchar = statchar;
-	data.name = name;
-	
-	hook_call_event("doing_stats", &data);
+  struct hook_stats_data data;
+
+  data.sptr = sptr;
+  data.statchar = statchar;
+  data.name = name;
+
+  hook_call_event("doing_stats", &data);
 }
 
 /*

@@ -259,6 +259,7 @@ struct LocalUser
   int actually_read;    /* how many we've actually read in this second */
   int sent_parsed;      /* how many messages we've parsed in this second */
 
+  u_short aftype;       /* ipv6 or v4 (?) */
 };
 
 /*
