@@ -1,3 +1,15 @@
+androsyn    2002/12/16 10:22:09 UTC	(20021216_25)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Fix a compile error
+  
+  Revision  Changes    Path
+  7.357     +1 -1      ircd-ratbox/src/client.c
+
+
+
 androsyn    2002/12/16 10:21:29 UTC	(20021216_24)
 
   Modified files:
