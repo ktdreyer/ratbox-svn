@@ -41,11 +41,11 @@ static int bitlen = 32;
 #define NUM_TYPES 5
 
 enum {
-	elines,
-	ilines,
-	dlines,
-	klines,
-	glines,
+	elines = 0,
+	ilines = 1,
+	dlines = 2,
+	klines = 3,
+	glines=  4
 };
 
 static patricia_tree_t *iplines[NUM_TYPES];
@@ -120,7 +120,6 @@ add_ipline(struct ConfItem *aconf, int type, struct irc_inaddr *addr, int cidr)
 	
 	if(ourtype == -1)
 		return 0;	
-	
 	pnode = add_line(aconf, ourtype, addr, cidr);
 	if(pnode == NULL)
 		return 0;

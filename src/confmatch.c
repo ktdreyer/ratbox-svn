@@ -195,8 +195,13 @@ add_conf_by_address (const char *address, int type, const char *username, struct
 	if(parse_netmask(address, &addr, &bits))
 	{
 		/* An IP/cidr mask */
-		add_ipline(aconf, type, &addr, bits);
-		return;		
+		if((type & CONF_DLINE || type & CONF_EXEMPTDLINE) || BadPtr(username) ||
+		  (*username == '*' && *(username+1) == '\0')
+		)
+		{
+			add_ipline(aconf, type, &addr, bits);
+			return;		
+		}
 	}
 
 	add_conf_by_host(aconf);
@@ -265,7 +270,27 @@ find_conf_by_address (const char *hostname,
 struct ConfItem *
 find_dline(struct irc_inaddr *ip)
 {
-	return(find_ipdline(ip));
+	struct ConfItem *aconf;
+	
+	aconf = find_ipdline(ip);
+	
+	/* Found a e/D line.maybe exempt..return */
+	if(aconf != NULL)
+		return(aconf);
+	
+	/* Check and see if we match an IP Kline */	
+	aconf = find_ipkline(ip);
+	if(aconf != NULL)
+		return(aconf);
+	
+	/* This is a new one.. IP Glines */
+	if(ConfigFileEntry.glines)
+	{
+		aconf = find_ipgline(ip);
+		if(aconf != NULL)
+			return(aconf);
+	}
+	return NULL;
 }
 
 
