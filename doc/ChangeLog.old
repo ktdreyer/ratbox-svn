@@ -1,3 +1,11 @@
+*** 20001229_17 by fl_
+- removed the sendto_match_noncap_servs(), as its now redundant
+- if a user sets mode +h nick, and hes on a server that doesnt support
+  halfops, he would be opped.  we still pass the +h as far as possible,
+  but do nothing to that user
+
+
+
 *** 20001229_16 by wcampbel
 "Permission Denied-" -> "Permission Denied -"
 This has been driving me crazy
