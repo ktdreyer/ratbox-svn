@@ -51,7 +51,7 @@
 static int add_id(struct Client *, struct Channel *, char *, int);
 static int del_id(struct Channel *, char *, int);
 
-static int change_channel_membership(struct Channel *chptr,
+static void change_channel_membership(struct Channel *chptr,
                                      dlink_list *to_list,
                                      dlink_list *loc_to_list,
                                      struct Client *who);
@@ -321,18 +321,17 @@ del_id(struct Channel *chptr, char *banid, int type)
  *              - pointer to membership list of given channel to modify
  *              - pointer to membership list for local clients to modify 
  *              - pointer to client struct being modified
- * output       - int success 1 or 0 if failure
  * side effects - change given user "who" from whichever membership list
  *                it is on, to the given membership list in to_list.
  *                
  */
-static int
+static void
 change_channel_membership(struct Channel *chptr,
                           dlink_list * to_list,
                           dlink_list * loc_to_list, struct Client *who)
 {
   dlink_node *ptr;
-  int ok = 1, x;
+  int x;
   dlink_list *loclists[] = {
   	&chptr->locpeons,
   	&chptr->locvoiced,
@@ -364,8 +363,6 @@ change_channel_membership(struct Channel *chptr,
     	   break;
     	} 
     }
-    if(loclists[x] == NULL)
-      ok = 0;
   }
 
   for(x = 0; lists[x] != NULL; x++)
@@ -378,16 +375,12 @@ change_channel_membership(struct Channel *chptr,
     }
   }
   
-  if(lists[x] == NULL)
-    ok = 0;
-
   if((ptr = find_user_link(&chptr->deopped, who)))
   {
     dlinkDelete(ptr, &chptr->deopped);
     free_dlink_node(ptr);
   }
 
-  return ok;
 }
 
 /*
