@@ -90,6 +90,9 @@ int     m_who(struct Client *cptr,
   struct Channel *chptr=NULL;
   struct Channel *vchan;
   struct Channel *mychannel = NULL;
+  char  *chanop_flag;
+  char  *halfop_flag;
+  char  *voiced_flag;
   int   oper = parc > 2 ? (*parv[2] == 'o' ): 0; /* Show OPERS only */
   int   member;
 
@@ -201,19 +204,19 @@ int     m_who(struct Client *cptr,
       for (lp = acptr->user->channel.head; lp; lp = lp->next)
 	{
 	  chptr = lp->data;
-	  member = IsMember(sptr, chptr);
-	  if (isinvis && !member)
-	    continue;
-	  if (member || (!isinvis && PubChannel(chptr)))
-	    {
-	      break;
-	    }
+
+          member = IsMember(sptr, chptr);
+          if (isinvis && !member)
+            continue;
+          if (member || (!isinvis && PubChannel(chptr)))
+            {
+              break;
+            }
 	}
 
       if (chptr != NULL)
 	{
 	  chname = chptr->chname;
-	  lp = find_user_link(&chptr->chanops, acptr);
 	  if (IsVchan(chptr))
 	    {
 	      bchan = find_bchan (chptr);
@@ -221,11 +224,30 @@ int     m_who(struct Client *cptr,
 		chname = bchan->chname;
 	    }
 
-	  do_who_list(sptr, chptr, &chptr->chanops, chname, "@");
-	  do_who_list(sptr, chptr, &chptr->halfops, chname, "%");
-	  do_who_list(sptr, chptr, &chptr->voiced,  chname, "+");
-	  do_who_list(sptr, chptr, &chptr->peons,   chname, "");
+	  /* XXX globalize this inside m_who.c ? */
+	  if(GlobalSetOptions.hide_chanops)
+	    {
+	      chanop_flag = "";
+	      halfop_flag = "";
+	      voiced_flag = "";
+	    }
+	  else
+	    {
+	      chanop_flag = "@";
+	      halfop_flag = "%";
+	      voiced_flag = "+";
+	    }
+
+	  if (is_chan_op(chptr,acptr))
+	    do_who(sptr,acptr,chptr,chname,chanop_flag);
+	  else if(is_half_op(chptr,acptr))
+	    do_who(sptr,acptr,chptr,chname,halfop_flag);
+	  else if(is_voiced(chptr,acptr))
+	    do_who(sptr,acptr,chptr,chname,voiced_flag);
+	  else
+	    do_who(sptr,acptr,chptr,chname,"");
 	}
+
       sendto_one(sptr, form_str(RPL_ENDOFWHO), me.name, parv[0], mask );
       return 0;
     }
@@ -399,9 +421,10 @@ void    do_who(struct Client *sptr,
   if(ConfigFileEntry.hide_server)
     {
       sendto_one(sptr, form_str(RPL_WHOREPLY), me.name, sptr->name,
-             chname, acptr->username,
-             acptr->host, IsAnyOper(sptr) ? acptr->user->server : "*", acptr->name,
-             status, acptr->hopcount, acptr->info);
+		 chname, acptr->username,
+		 acptr->host, IsAnyOper(sptr) ? acptr->user->server : "*",
+		 acptr->name,
+		 status, acptr->hopcount, acptr->info);
     }
   else
     {
