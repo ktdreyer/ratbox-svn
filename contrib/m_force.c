@@ -28,6 +28,7 @@
  * $Id$
  */
 
+#include "stdinc.h"
 #include "handlers.h"
 #include "client.h"
 #include "common.h"     /* FALSE bleah */
@@ -47,7 +48,6 @@
 #include "channel.h"
 #include "channel_mode.h"
 
-#include <string.h>
 
 static void mo_forcejoin(struct Client *client_p, struct Client *source_p,
                          int parc, char *parv[]);

@@ -18,6 +18,7 @@
  *
  *   $Id$
  */
+#include "stdinc.h"
 #include "tools.h"
 #include "handlers.h"
 #include "channel.h"
@@ -37,7 +38,6 @@
 #include "vchannel.h"
 #include "list.h"
 
-#include <string.h>
 
 #define MSG_CLEARCHAN "CLEARCHAN"
 

@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "tools.h"
 #include "irc_string.h"
 #include "handlers.h"
@@ -46,7 +47,6 @@
 #include "list.h"
 #include "s_conf.h"
 #include "scache.h"
-#include <string.h>
 
 
 static void mo_jupe(struct Client *client_p, struct Client *source_p,

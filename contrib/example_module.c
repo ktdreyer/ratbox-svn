@@ -20,6 +20,7 @@
  */
 
 /* List of ircd includes from ../include/ */
+#include "stdinc.h"
 #include "handlers.h"
 #include "client.h"
 #include "common.h"     /* FALSE bleah */
@@ -36,8 +37,6 @@
 #include "parse.h"
 #include "modules.h"
 
-/* List of system includes */
-#include <string.h>
 
 /* Declare the void's initially up here, as modules dont have an
  * include file, we will normally have client_p, source_p, parc

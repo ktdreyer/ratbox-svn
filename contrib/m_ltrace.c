@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "handlers.h"
 #include "class.h"
 #include "hook.h"
@@ -40,8 +41,6 @@
 #include "parse.h"
 #include "modules.h"
 
-#include <string.h>
-#include <time.h>
 
 static void m_ltrace(struct Client *, struct Client *, int, char **);
 static void mo_ltrace(struct Client*, struct Client*, int, char**);

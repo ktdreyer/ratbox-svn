@@ -17,6 +17,7 @@
  *
  *   $Id$
  */
+#include "stdinc.h"
 #include "tools.h"
 #include "handlers.h"
 #include "channel.h"
@@ -34,7 +35,6 @@
 #include "modules.h"
 #include "vchannel.h"
 
-#include <string.h>
 
 static void mo_opme(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[]);

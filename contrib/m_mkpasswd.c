@@ -10,6 +10,7 @@
  */
 
 /* List of ircd includes from ../include/ */
+#include "stdinc.h"
 #include "handlers.h"
 #include "client.h"
 #include "common.h"     /* FALSE bleah */

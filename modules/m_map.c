@@ -22,9 +22,7 @@
  *  $Id$
  */
 
-#include <assert.h>
-
-#include "config.h"
+#include "stdinc.h"
 #include "client.h"
 #include "modules.h"
 #include "handlers.h"

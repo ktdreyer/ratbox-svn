@@ -21,7 +21,7 @@
  *
  *  $Id$
  */
-
+#include "stdinc.h"
 #include "modules.h"
 #include "hook.h"
 #include "client.h"

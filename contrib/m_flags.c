@@ -31,6 +31,7 @@
  */
 
 /* List of ircd includes from ../include/ */
+#include "stdinc.h"
 #include "handlers.h"
 #include "client.h"
 #include "common.h"     /* FALSE bleah */
@@ -49,9 +50,6 @@
 
 #include "s_user.h"    /* send_umode_out() */
 
-/* List of system includes */
-#include <string.h>
-#include <ctype.h>
 
 static void m_flags(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[]);
