@@ -1,3 +1,7 @@
+*** 20010812_3 by androsyn
+Please work
+
+
 *** 20010812_2 by androsyn
 Brought back the block heap allocator, with improvments.  Added support in 
 client.c and linebuf.c
