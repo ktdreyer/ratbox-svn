@@ -1167,7 +1167,7 @@ void dead_link(struct Client *client_p)
 		         "Closing link to %s: %s",
                          get_client_name(client_p, MASK_IP), notice);
   }
-  Debug((DEBUG_ERROR, notice, get_client_name(to, HIDE_IP)));
+  Debug((DEBUG_ERROR, "Closing link to %s: %s", get_client_name(to, HIDE_IP), notice));
   assert(dlinkFind(&abort_list, client_p) == NULL);
   m = make_dlink_node();
   dlinkAdd(client_p, m, &abort_list);
