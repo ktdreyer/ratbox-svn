@@ -354,7 +354,7 @@ get_mask_hash(const char *text)
 {
   const char *hp = "", *p;
 
-  for (p = text + strlen(text) - 1; p > text; p--)
+  for (p = text + strlen(text) - 1; p >= text; p--)
     if (*p == '*' || *p == '?')
       return hash_text(hp);
     else if (*p == '.')
@@ -427,7 +427,8 @@ find_conf_by_address(const char *name, struct irc_inaddr *addr, int type,
   if (name != NULL)
   {
     const char *p;
-    for (p = name; p != NULL; p = strchr(p, '.')) {
+    for (p = name; p != NULL; p = strchr(p, '.'))
+    {
       p++;
       for (arec = atable[hash_text(p)]; arec; arec = arec->next)
         if ((arec->type == (type & ~0x1)) &&
