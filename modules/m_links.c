@@ -34,6 +34,7 @@
 #include "motd.h"
 #include "parse.h"
 #include "modules.h"
+#include "hook.h"
 
 #include <assert.h>
 #include <string.h>
@@ -50,12 +51,14 @@ struct Message links_msgtab = {
 void
 _modinit(void)
 {
+	hook_add_event("doing_links");
   mod_add_cmd(&links_msgtab);
 }
 
 void
 _moddeinit(void)
 {
+	hook_del_event("doing_links");
   mod_del_cmd(&links_msgtab);
 }
 
@@ -99,11 +102,12 @@ static int m_links(struct Client *cptr, struct Client *sptr,
 static int mo_links(struct Client *cptr, struct Client *sptr,
                     int parc, char *parv[])
 {
-  const char*    mask = "";
+  char*    mask = "";
   struct Client* acptr;
   char           clean_mask[2 * HOSTLEN + 4];
   char*          p;
-
+  struct hook_links_data hd;
+  
   if (parc > 2)
     {
       if (hunt_server(cptr, sptr, ":%s LINKS %s :%s", 1, parc, parv)
@@ -119,11 +123,13 @@ static int mo_links(struct Client *cptr, struct Client *sptr,
   if (*mask)       /* only necessary if there is a mask */
     mask = collapse(clean_string(clean_mask, (const unsigned char*) mask, 2 * HOSTLEN));
 
-  if (ConfigFileEntry.links_notice && MyConnect(sptr))
-    sendto_realops_flags(FLAGS_SPY,
-                       "LINKS '%s' requested by %s (%s@%s) [%s]",
-                       mask, sptr->name, sptr->username,
-                       sptr->host, sptr->user->server);
+  hd.cptr = cptr;
+  hd.sptr = sptr;
+  hd.mask = mask;
+  hd.parc = parc;
+  hd.parv = parv;
+  
+  hook_call_event("doing_links", &hd);
   
   for (acptr = GlobalClientList; acptr; acptr = acptr->next) 
     {

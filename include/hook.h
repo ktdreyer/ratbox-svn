@@ -31,6 +31,16 @@ struct hook_stats_data
 	char *name;
 };
 
+struct hook_links_data
+{
+	struct Client *cptr;
+	struct Client *sptr;
+	int parc;
+	char **parv;
+	char statchar;
+	char *mask;
+};
+
 int hook_add_event(char *);
 int hook_add_hook(char *, hookfn *);
 int hook_call_event(char *, void *);

@@ -29,7 +29,8 @@ SRCS =                          \
   m_nickinfo.c                  \
   m_opme.c                      \
   whois_notice.c                \
-  stats_notice.c
+  stats_notice.c                \
+  links_notice.c
 
 OBJS = ${SRCS:.c=.so}
 
