@@ -762,6 +762,9 @@ int main(int argc, char *argv[])
   else
     ConfigServerHide.links_disabled = 1;
 
+  if(splitmode)
+    eventAdd("check_splitmode", check_splitmode, NULL, 60);
+
   ServerRunning = 1;
   io_loop();
   return 0;

@@ -1210,4 +1210,31 @@ check_spambot_warning(struct Client *source_p, const char *name)
  * side effects - compares usercount and servercount against their split
  *                values and adjusts splitmode accordingly
  */
+void check_splitmode()
+{
+  if(splitmode)
+  {
+    if((Count.server >= split_servers) &&
+       (Count.total >= split_users))
+    {
+      splitmode = 0;
+      
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
+                           "Network rejoined, deactivating splitmode");
+      eventDelete(check_splitmode, NULL);
+    }
+  }
+  else
+  {
+    if((Count.server < split_servers) &&
+       (Count.total < split_users))
+    {
+      splitmode = 1;
+
+      sendto_realops_flags(FLAGS_ALL,L_ALL,
+                           "Network split, activating splitmode");
+      eventAdd("check_splitmode", check_splitmode, NULL, 60);
+    }
+  }
+}
 

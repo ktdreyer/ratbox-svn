@@ -25,6 +25,7 @@
 
 #include "handlers.h"
 #include "client.h"
+#include "event.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -33,7 +34,7 @@
 #include "s_serv.h"
 #include "send.h"
 #include "common.h"   /* for NO */
-#include "channel.h"  /* for server_was_split */
+#include "channel.h"
 #include "s_log.h"
 #include "s_conf.h"
 #include "msg.h"
@@ -387,7 +388,7 @@ static void quote_splitmode(struct Client *source_p, int newval)
       sendto_realops_flags(FLAGS_ALL, L_ALL, 
                            "%s is manually activating splitmode",
                            get_oper_name(source_p));
-      sendto_one(source_p, ":%s NOTICE %s :splitmode has been activated",
+      sendto_one(source_p, ":%s NOTICE %s :SPLITMODE has been activated",
                  me.name, source_p->name);
       splitmode = 1;
     }
@@ -396,9 +397,13 @@ static void quote_splitmode(struct Client *source_p, int newval)
       sendto_realops_flags(FLAGS_ALL, L_ALL,
                            "%s is manually deactivating splitmode",
 			   get_oper_name(source_p));
-      sendto_one(source_p, ":%s NOTICE %s :splitmode has been deactivated",
+      sendto_one(source_p, ":%s NOTICE %s :SPLITMODE has been deactivated",
                  me.name, source_p->name);
+		 
       splitmode = 0;
+
+      /* we might be deactivating an automatic splitmode, so pull the event */
+      eventDelete(check_splitmode, NULL);
     }
   }
   else

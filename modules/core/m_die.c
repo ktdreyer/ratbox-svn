@@ -31,6 +31,7 @@
 #include "fdlist.h"
 #include "s_bsd.h"
 #include "s_log.h"
+#include "s_conf.h"
 #include "send.h"
 #include "msg.h"
 #include "parse.h"
@@ -95,16 +96,6 @@ static void mo_die(struct Client *client_p, struct Client *source_p,
       sendto_one(target_p,
 		 ":%s NOTICE %s :Server Terminating. %s",
 		 me.name, target_p->name,
-		 get_client_name(source_p, MASK_IP));
-    }
-
-  for(ptr = lclient_list.head; ptr; ptr = ptr->next)
-    {
-      target_p = ptr->data;
-
-      sendto_one(target_p,
-		 ":%s NOTICE %s :Server Terminating. %s",
-		 me.name, target_p->name,
 		 get_client_name(source_p, HIDE_IP));
     }
 
@@ -113,7 +104,7 @@ static void mo_die(struct Client *client_p, struct Client *source_p,
       target_p = ptr->data;
 
       sendto_one(target_p, ":%s ERROR :Terminated by %s",
-		 me.name, get_client_name(source_p, MASK_IP));
+		 me.name, get_client_name(source_p, HIDE_IP));
     }
 
   /*
@@ -121,7 +112,7 @@ static void mo_die(struct Client *client_p, struct Client *source_p,
    * for an explanation as to what we should do.
    *     -- adrian
    */
-  ilog(L_NOTICE, "Server terminated by %s", get_client_name(source_p, HIDE_IP));
+  ilog(L_NOTICE, "Server terminated by %s", get_oper_name(source_p));
   /* 
    * this is a normal exit, tell the os it's ok 
    */
