@@ -253,6 +253,7 @@ extern 	char *		conf_cur_block_name;
 	void	conf_set_general_use_egd			(void *data);
 	void	conf_set_general_egdpool_path			(void *data);
 	void	conf_set_general_ping_cookie			(void *data);
+	void	conf_set_general_disable_auth			(void *data);
 	void	conf_set_general_use_global_limits		(void *data);
 	void	conf_set_general_use_help			(void *data);
 	void	conf_set_general_throttle_time			(void *data);

@@ -478,7 +478,9 @@ void	newconf_init()
 			conf_set_general_dot_in_ip6_addr);
 	add_conf_item("general", "ping_cookie", CF_YESNO,
 			conf_set_general_ping_cookie);
-
+	add_conf_item("general", "disable_auth", CF_YESNO,
+			conf_set_general_disable_auth);
+			
 	add_top_conf("channel", NULL, NULL);
 	add_conf_item("channel", "use_except", CF_YESNO, conf_set_channel_use_except);
 	add_conf_item("channel", "use_halfops", CF_YESNO, conf_set_channel_use_halfops);
@@ -2292,6 +2294,11 @@ void	conf_set_general_egdpool_path(void *data)
 void	conf_set_general_ping_cookie(void *data)
 {
 	ConfigFileEntry.ping_cookie = *(unsigned int*)data;
+}
+
+void	conf_set_general_disable_auth(void *data)
+{
+	ConfigFileEntry.disable_auth = *(unsigned int*)data;
 }
 
 void	conf_set_general_use_global_limits(void *data)

@@ -423,7 +423,9 @@ void start_auth(struct Client* client)
   adns_getaddr(&client->localClient->ip, client->localClient->aftype, client->localClient->dns_query);
   SetDNSPending(auth);
 
-  start_auth_query(auth);
+  if(ConfigFileEntry.disable_auth == 0) 
+    start_auth_query(auth);
+
   link_auth_request(auth, &auth_poll_list);
 }
 

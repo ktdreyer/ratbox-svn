@@ -239,6 +239,7 @@ struct config_file_entry
   int		ping_cookie;
   int           use_global_limits;
   int           use_help;
+  int		disable_auth;
 #ifdef HAVE_LIBCRYPTO
   struct EncCapability *default_cipher_preference;
 #endif
