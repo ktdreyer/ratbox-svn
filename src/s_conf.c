@@ -311,7 +311,9 @@ report_configured_links(struct Client* source_p, int mask)
               *s++ = '*';
 	      
 	    *s++ = '\0';
+
             /* Allow admins to see actual ips */
+#ifndef HIDE_SERVERS_IPS
             if(IsOperAdmin(source_p))
               sendto_one(source_p, form_str(p->rpl_stats), me.name,
                          source_p->name, c,
@@ -322,6 +324,7 @@ report_configured_links(struct Client* source_p, int mask)
                          classname,
                          oper_flags_as_string((int)tmp->hold));
             else
+#endif
               sendto_one(source_p, form_str(p->rpl_stats), me.name,
                          source_p->name, c,
                          "*@127.0.0.1",
