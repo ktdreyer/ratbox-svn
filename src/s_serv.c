@@ -1113,7 +1113,14 @@ server_estab(struct Client *client_p)
 	make_server(client_p);
 	client_p->serv->up = me.name;
 	client_p->serv->upid = me.id;
+
 	client_p->serv->caps = client_p->localClient->caps;
+
+	if(client_p->localClient->fullcaps)
+	{
+		DupString(client_p->serv->fullcaps, client_p->localClient->fullcaps);
+		MyFree(client_p->localClient->fullcaps);
+	}
 
 	/* add it to scache */
 	find_or_add(client_p->name);
@@ -1167,9 +1174,10 @@ server_estab(struct Client *client_p)
 				   me.id, client_p->name, client_p->id,
 				   IsHidden(client_p) ? "(H) " : "", client_p->info);
 
-			if(IsCapable(target_p, CAP_ENCAP))
+			if(IsCapable(target_p, CAP_ENCAP) &&
+			   !EmptyString(client_p->serv->fullcaps))
 				sendto_one(target_p, ":%s ENCAP * GCAP :%s",
-					client_p->id, show_capabilities(client_p));
+					client_p->id, client_p->serv->fullcaps);
 		}
 		else
 		{
@@ -1177,9 +1185,10 @@ server_estab(struct Client *client_p)
 				   me.name, client_p->name,
 				   IsHidden(client_p) ? "(H) " : "", client_p->info);
 
-			if(IsCapable(target_p, CAP_ENCAP))
+			if(IsCapable(target_p, CAP_ENCAP) &&
+			   !EmptyString(client_p->serv->fullcaps))
 				sendto_one(target_p, ":%s ENCAP * GCAP :%s",
-					client_p->name, show_capabilities(client_p));
+					client_p->name, client_p->serv->fullcaps);
 		}
 	}
 
@@ -1221,10 +1230,11 @@ server_estab(struct Client *client_p)
 				   target_p->name, target_p->hopcount + 1,
 				   IsHidden(target_p) ? "(H) " : "", target_p->info);
 
-		if(target_p->serv->caps && IsCapable(client_p, CAP_ENCAP))
+		if(IsCapable(client_p, CAP_ENCAP) && 
+		   !EmptyString(target_p->serv->fullcaps))
 			sendto_one(client_p, ":%s ENCAP * GCAP :%s",
 					get_id(target_p, client_p),
-					show_capabilities(target_p));
+					target_p->serv->fullcaps);
 	}
 
 	if(has_id(client_p))

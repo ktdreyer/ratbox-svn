@@ -75,6 +75,8 @@ mr_capab(struct Client *client_p, struct Client *source_p, int parc, const char 
 	else
 		client_p->localClient->caps |= CAP_CAP;
 
+	DupString(client_p->localClient->fullcaps, parv[1]);
+
 	for (i = 1; i < parc; i++)
 	{
 		char *t = LOCAL_COPY(parv[i]);
@@ -102,6 +104,15 @@ me_gcap(struct Client *client_p, struct Client *source_p,
 	char *t = LOCAL_COPY(parv[1]);
 	char *s;
 	char *p;
+
+	if(!IsServer(source_p))
+		return 0;
+
+	/* already had GCAPAB?! */
+	if(!EmptyString(source_p->serv->fullcaps))
+		return 0;
+
+	DupString(source_p->serv->fullcaps, parv[1]);
 
 	for (s = strtoken(&p, t, " "); s; s = strtoken(&p, NULL, " "))
 	{

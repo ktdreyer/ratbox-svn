@@ -83,6 +83,7 @@ struct Server
 	dlink_list servers;
 	dlink_list users;
 	int caps;		/* capabilities bit-field */
+	char *fullcaps;
 };
 
 struct SlinkRpl
@@ -217,6 +218,7 @@ struct LocalUser
 	 */
 	char *passwd;
 	char *opername;
+	char *fullcaps;
 
 	int caps;		/* capabilities bit-field */
 	int fd;			/* >= 0, for local clients */
