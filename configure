@@ -3941,7 +3941,7 @@ EOF
     echo "Building ircd for use with efnet"
 fi
 
-ac_cv_assert="-NDEBUG"
+ac_cv_assert="-DNDEBUG"
 
 # Check whether --enable-assert or --disable-assert was given.
 if test "${enable_assert+set}" = set; then
@@ -3954,7 +3954,7 @@ if test "${enable_assert+set}" = set; then
     ;;
   no)
     echo "Disabling assert() code."
-    ac_cv_assert="-NDEBUG"
+    ac_cv_assert="-DNDEBUG"
     ;;
   esac
 
