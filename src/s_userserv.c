@@ -34,6 +34,7 @@ static int o_user_userdrop(struct client *, struct lconn *, const char **, int);
 static int o_user_usersuspend(struct client *, struct lconn *, const char **, int);
 static int o_user_userunsuspend(struct client *, struct lconn *, const char **, int);
 static int o_user_userinfo(struct client *, struct lconn *, const char **, int);
+static int o_user_usersetpass(struct client *, struct lconn *, const char **, int);
 
 static int s_user_register(struct client *, struct lconn *, const char **, int);
 static int s_user_login(struct client *, struct lconn *, const char **, int);
@@ -48,6 +49,7 @@ static struct service_command userserv_command[] =
 	{ "USERSUSPEND",	&o_user_usersuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
 	{ "USERUNSUSPEND",	&o_user_userunsuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
 	{ "USERINFO",		&o_user_userinfo,	1, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
+	{ "USERSETPASS",	&o_user_usersetpass,	2, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
 	{ "REGISTER",	&s_user_register,	2, NULL, 1, 0L, 0, 0, 0, 0 },
 	{ "LOGIN",	&s_user_login,		2, NULL, 1, 0L, 0, 0, 0, 0 },
 	{ "LOGOUT",	&s_user_logout,		0, NULL, 1, 0L, 1, 0, 0, 0 },
@@ -62,6 +64,7 @@ static struct ucommand_handler userserv_ucommand[] =
 	{ "usersuspend",	o_user_usersuspend,	CONF_OPER_USERSERV,	1, 1, NULL },
 	{ "userunsuspend",	o_user_userunsuspend,	CONF_OPER_USERSERV,	1, 1, NULL },
 	{ "userinfo",		o_user_userinfo,	CONF_OPER_USERSERV,	1, 1, NULL },
+	{ "usersetpass",	o_user_usersetpass,	CONF_OPER_USERSERV,	2, 1, NULL },
 	{ "\0",			NULL,			0,			0, 0, NULL }
 };
 
@@ -459,6 +462,34 @@ o_user_userinfo(struct client *client_p, struct lconn *conn_p, const char *parv[
 			get_duration((time_t) (CURRENT_TIME - ureg_p->reg_time)));
 
 	dump_user_info(client_p, conn_p, ureg_p);
+	return 0;
+}
+
+static int
+o_user_usersetpass(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	struct user_reg *ureg_p;
+	const char *password;
+
+	if((ureg_p = find_user_reg(NULL, parv[0])) == NULL)
+	{
+		service_send(userserv_p, client_p, conn_p,
+				"Username %s is not registered", parv[0]);
+		return 0;
+	}
+
+	slog(userserv_p, 1, "%s - USERSETPASS %s",
+		OPER_NAME(client_p, conn_p), ureg_p->name);
+
+	password = get_crypt(parv[1], NULL);
+	my_free(ureg_p->password);
+	ureg_p->password = my_strdup(password);
+
+	loc_sqlite_exec(NULL, "UPDATE users SET password=%Q WHERE username=%Q", 
+			password, ureg_p->name);
+
+	service_send(userserv_p, client_p, conn_p,
+			"Username %s password changed", ureg_p->name);
 	return 0;
 }
 
