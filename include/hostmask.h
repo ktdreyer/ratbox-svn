@@ -67,7 +67,8 @@ int match_ipv6(struct sockaddr_storage *, struct sockaddr_storage *, int);
 int match_ipv4(struct sockaddr_storage *, struct sockaddr_storage *, int);
 
 /* Hashtable stuff... */
-#define ATABLE_SIZE 0x1000
+#define ATABLE_SIZE 0x1000 /* 2^12 */
+#define ATABLE_BITS (32-12)
 
 extern struct AddressRec *atable[ATABLE_SIZE];
 

@@ -55,7 +55,7 @@ static void do_numeric(char[], struct Client *, struct Client *, int, char **);
 
 static int handle_command(struct Message *, struct Client *, struct Client *, int, const char**);
 
-static int hash(const char *p);
+static int cmd_hash(const char *p);
 static struct Message *hash_parse(const char *);
 
 struct MessageHash *msg_hash_table[MAX_MSG_HASH];
@@ -421,7 +421,7 @@ mod_add_cmd(struct Message *msg)
 	if(msg == NULL)
 		return;
 
-	msgindex = hash(msg->cmd);
+	msgindex = cmd_hash(msg->cmd);
 
 	for (ptr = msg_hash_table[msgindex]; ptr; ptr = ptr->next)
 	{
@@ -463,7 +463,7 @@ mod_del_cmd(struct Message *msg)
 	if(msg == NULL)
 		return;
 
-	msgindex = hash(msg->cmd);
+	msgindex = cmd_hash(msg->cmd);
 
 	for (ptr = msg_hash_table[msgindex]; ptr; ptr = ptr->next)
 	{
@@ -493,7 +493,7 @@ hash_parse(const char *cmd)
 	struct MessageHash *ptr;
 	int msgindex;
 
-	msgindex = hash(cmd);
+	msgindex = cmd_hash(cmd);
 
 	for (ptr = msg_hash_table[msgindex]; ptr; ptr = ptr->next)
 	{
@@ -514,7 +514,7 @@ hash_parse(const char *cmd)
  * BUGS		- This a HORRIBLE hash function
  */
 static int
-hash(const char *p)
+cmd_hash(const char *p)
 {
 	int hash_val = 0;
 

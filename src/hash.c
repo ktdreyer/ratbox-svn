@@ -102,61 +102,89 @@ init_hash(void)
 	helpTable = MyMalloc(sizeof(dlink_list) * HELP_MAX);
 }
 
+
+u_int32_t
+fnv_hash_upper(const unsigned char *s, int bits)
+{
+ 	u_int32_t h = FNV1_32_INIT;
+
+	while (*s)
+	{
+         	h ^= ToUpper(*s++);
+		h += (h<<1) + (h<<4) + (h<<7) + (h << 8) + (h << 24);
+	}
+        h = (h >> bits) ^ (h & ((2^bits)-1));
+	return h;
+}
+
+u_int32_t
+fnv_hash(const unsigned char *s, int bits)
+{
+ 	u_int32_t h = FNV1_32_INIT;
+
+	while (*s)
+	{
+		h += (h<<1) + (h<<4) + (h<<7) + (h << 8) + (h << 24);
+	}
+        h = (h >> bits) ^ (h & ((2^bits)-1));
+	return h;
+}
+
+u_int32_t
+fnv_hash_len(const unsigned char *s, int bits, int len)
+{
+ 	u_int32_t h = FNV1_32_INIT;
+	const unsigned char *x = s + len;
+	while (s < x)
+	{
+		h += (h<<1) + (h<<4) + (h<<7) + (h << 8) + (h << 24);
+	}
+        h = (h >> bits) ^ (h & ((2^bits)-1));
+	return h;
+}
+
+u_int32_t
+fnv_hash_upper_len(const unsigned char *s, int bits, int len)
+{
+ 	u_int32_t h = FNV1_32_INIT;
+	const unsigned char *x = s + len;
+	while (s < x)
+	{
+         	h ^= ToUpper(*s++);
+		h += (h<<1) + (h<<4) + (h<<7) + (h << 8) + (h << 24);
+	}
+        h = (h >> bits) ^ (h & ((2^bits)-1));
+	return h;
+}
+
 /* hash_nick()
  *
  * hashes a nickname, first converting to lowercase
  */
-static unsigned int
+static u_int32_t
 hash_nick(const char *name)
 {
- 	u_int32_t h = FNV1_32_INIT;
-
-	while (*name)
-	{
-         	h ^= ToUpper(*name++);
-		h += (h<<1) + (h<<4) + (h<<7) + (h << 8) + (h << 24);
-	}
-        h = (h>> U_MAX_BITS) ^ (h & (U_MAX-1));
-	return (unsigned int)h;
-
+	return fnv_hash_upper(name, U_MAX_BITS);
 }
 
 /* hash_id()
  *
  * hashes an id, case is kept
  */
-static unsigned int
+static u_int32_t
 hash_id(const char *name)
 {
- 	u_int32_t h = FNV1_32_INIT;
-
-	while (*name)
-	{
-         	h ^= ToUpper(*name++);
-		h += (h<<1) + (h<<4) + (h<<7) + (h << 8) + (h << 24);
-	}
-        h = (h >> U_MAX_BITS) ^ (h & (U_MAX-1));
-	return (unsigned int)h;
+	return fnv_hash(name, U_MAX_BITS);
 }
 
 /* hash_channel()
  *
  * hashes a channel name, based on first 30 chars only for efficiency
  */
-static unsigned int
+static u_int32_t
 hash_channel(const char *name)
 {
-	int i = 30;
-	u_int32_t h = FNV1_32_INIT;
-
-	while (*name && --i)
-	{
-         	h ^= ToUpper(*name++);
-		h += (h<<1) + (h<<4) + (h<<7) + (h << 8) + (h << 24);
-	}
-	
-	h = (h >> CH_MAX_BITS) ^ (h & (CH_MAX-1));
-	return (unsigned int)h;
+	return fnv_hash_upper_len(name, CH_MAX_BITS, 30);
 }
 
 /* hash_hostname()
@@ -164,40 +192,20 @@ hash_channel(const char *name)
  * hashes a hostname, based on first 30 chars only, as thats likely to
  * be more dynamic than rest.
  */
-static unsigned int
+static u_int32_t
 hash_hostname(const char *name)
 {
-	int i = 30;
-	unsigned int h = 0;
-
-	while (*name && --i)
-	{
-         	h ^= ToUpper(*name++);
-		h += (h<<1) + (h<<4) + (h<<7) + (h << 8) + (h << 24);
-	}
-
-	h = (h >> HOST_MAX_BITS) ^ (h & (HOST_MAX-1));
-	return (unsigned int)h;
+	return fnv_hash_upper_len(name, HOST_MAX_BITS, 30);
 }
 
 /* hash_resv()
  *
  * hashes a resv channel name, based on first 30 chars only
  */
-static unsigned int
+static u_int32_t
 hash_resv(const char *name)
 {
-	int i = 30;
-	u_int32_t h = FNV1_32_INIT;
-
-	while (*name && --i)
-	{
-         	h ^= ToUpper(*name++);
-		h += (h<<1) + (h<<4) + (h<<7) + (h << 8) + (h << 24);
-	}
-	
-	h = (h >> R_MAX_BITS) ^ (h & (R_MAX-1));
-	return (unsigned int)h;
+	return fnv_hash_upper_len(name, R_MAX_BITS, 30);
 }
 
 static unsigned int

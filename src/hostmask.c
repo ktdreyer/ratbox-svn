@@ -32,6 +32,7 @@
 #include "numeric.h"
 #include "send.h"
 #include "irc_string.h"
+#include "hash.h"
 
 #ifdef IPV6
 static unsigned long hash_ipv6(struct sockaddr_storage *, int);
@@ -162,14 +163,7 @@ hash_ipv6(struct sockaddr_storage *saddr, int bits)
 static int
 hash_text(const char *start)
 {
-	const char *p = start;
-	unsigned long h = 0;
-
-	while (*p)
-	{
-		h = (h << 4) - (h + (unsigned char) ToLower(*p++));
-	}
-	return (h & (ATABLE_SIZE - 1));
+	return (int)fnv_hash_upper(start, ATABLE_BITS);
 }
 
 /* unsigned long get_hash_mask(const char *)

@@ -63,16 +63,14 @@ clear_scache_hash_table(void)
 }
 
 static int
-hash(const char *string)
+sc_hash(const char *string)
 {
 	int hash_value;
 
 	hash_value = 0;
 	while (*string)
 	{
-		hash_value += ToLower(*string);
-		/* I don't like auto increments inside macro calls... -db */
-		string++;
+		hash_value += ToLower(*string++);
 	}
 
 	return hash_value % SCACHE_HASH_SIZE;
@@ -92,7 +90,7 @@ find_or_add(const char *name)
 	int hash_index;
 	SCACHE *ptr;
 
-	ptr = scache_hash[hash_index = hash(name)];
+	ptr = scache_hash[hash_index = sc_hash(name)];
 	for (; ptr; ptr = ptr->next)
 	{
 		if(!irccmp(ptr->name, name))
