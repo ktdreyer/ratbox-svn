@@ -26,6 +26,7 @@
 #include "numeric.h"
 #include "s_conf.h"
 #include "send.h"
+#include "s_debug.h"
 
 #define BAD_CONF_CLASS          -1
 #define BAD_PING                -2
@@ -174,7 +175,7 @@ void    check_class()
     {
       Debug((DEBUG_DEBUG,
              "Class %d : CF: %d PF: %d ML: %d LI: %d SQ: %ld",
-             Class(cltmp), ConFreq(cltmp), PingFreq(cltmp),
+             ClassType(cltmp), ConFreq(cltmp), PingFreq(cltmp),
              MaxLinks(cltmp), Links(cltmp), MaxSendq(cltmp)));
       if (MaxLinks(cltmp) < 0)
         {

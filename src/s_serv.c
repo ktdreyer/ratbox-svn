@@ -41,6 +41,7 @@
 #include "s_zip.h"
 #include "scache.h"
 #include "send.h"
+#include "s_debug.h"
 
 #include <assert.h>
 #include <string.h>
@@ -403,8 +404,8 @@ int check_server(struct Client* cptr)
    */
   if (!c_conf || !n_conf)
     {
-      Debug((DEBUG_DNS, "sv_cl: access denied: %s[%s@%s] c %x n %x",
-             name, cptr->name, cptr->host, c_conf, n_conf));
+      Debug((DEBUG_DNS, "sv_cl: access denied: [%s@%s] c %x n %x",
+             cptr->name, cptr->host, c_conf, n_conf));
       return 0;
     }
   /*
@@ -420,7 +421,7 @@ int check_server(struct Client* cptr)
   if (INADDR_NONE == c_conf->ipnum.s_addr)
     c_conf->ipnum.s_addr = cptr->ip.s_addr;
 
-  Debug((DEBUG_DNS,"sv_cl: access ok: %s[%s]", name, cptr->host));
+  Debug((DEBUG_DNS,"sv_cl: access ok: [%s]", cptr->host));
 
   return 1;
 }

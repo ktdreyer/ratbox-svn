@@ -20,6 +20,7 @@
 #include "s_bsd.h"
 #include "s_log.h"
 #include "send.h"
+#include "s_debug.h"
 
 #include <assert.h>
 #include <errno.h>

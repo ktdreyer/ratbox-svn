@@ -30,6 +30,7 @@
 #include "s_log.h"
 #include "s_stats.h"
 #include "send.h"
+#include "s_debug.h"
 
 #define MSGTAB
 #include "msg.h"

@@ -41,6 +41,7 @@
 #include "s_stats.h"
 #include "s_zip.h"
 #include "send.h"
+#include "s_debug.h"
 
 #include <assert.h>
 #include <stdio.h>

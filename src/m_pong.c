@@ -29,6 +29,7 @@
 #include "send.h"
 #include "channel.h"
 #include "irc_string.h"
+#include "s_debug.h"
 
 /*
  * m_functions execute protocol messages on this server:
