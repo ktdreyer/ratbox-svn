@@ -43,3 +43,8 @@ CREATE TABLE operbot (
 	chname TEXT,
 	oper TEXT
 );
+
+CREATE TABLE jupes (
+	servername TEXT,
+	reason TEXT
+);

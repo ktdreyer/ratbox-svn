@@ -16,6 +16,7 @@
 #include "service.h"
 #include "balloc.h"
 #include "event.h"
+#include "hook.h"
 
 static dlink_list name_table[MAX_NAME_HASH];
 
@@ -602,7 +603,10 @@ c_squit(struct client *client_p, const char *parv[], int parc)
 
 	if(target_p == NULL)
 	{
-		slog("PROTO: SQUIT for unknown server %s", parv[1]);
+		/* returns -1 if it handled it */
+		if(hook_call(HOOK_SQUIT_UNKNOWN, (void *) parv[1], NULL) == 0)
+			slog("PROTO: SQUIT for unknown server %s", parv[1]);
+
 		return;
 	}
 

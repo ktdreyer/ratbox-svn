@@ -19,6 +19,7 @@
 #include "conf.h"
 #include "ucommand.h"
 #include "newconf.h"
+#include "hook.h"
 
 struct server_jupe
 {
@@ -52,10 +53,40 @@ static struct service_handler jupe_service = {
 	jupeserv_command, NULL, NULL
 };
 
+static int jupe_db_callback(void *db, int argc, char **argv, char **colnames);
+static int h_jupeserv_squit(void *name, void *unused);
+
 void
 init_s_jupeserv(void)
 {
 	jupeserv_p = add_service(&jupe_service);
+	hook_add(h_jupeserv_squit, HOOK_SQUIT_UNKNOWN);
+	loc_sqlite_exec(jupe_db_callback, "SELECT * FROM jupes");
+}
+
+static struct server_jupe *
+make_jupe(const char *name)
+{
+	struct server_jupe *jupe_p = my_malloc(sizeof(struct server_jupe));
+	jupe_p->name = my_strdup(name);
+	dlink_add(jupe_p, &jupe_p->node, &pending_jupes);
+	return jupe_p;
+}
+
+static void
+add_jupe(struct server_jupe *jupe_p)
+{
+	struct client *target_p;
+
+	if((target_p = find_server(jupe_p->name)))
+	{
+		sendto_server("SQUIT %s :%s", jupe_p->name, jupe_p->reason);
+		exit_client(target_p);
+	}
+
+	sendto_server(":%s SERVER %s 1 :JUPED: %s",
+			MYNAME, jupe_p->name, jupe_p->reason);
+	dlink_move_node(&jupe_p->node, &pending_jupes, &active_jupes);
 }
 
 static void
@@ -92,6 +123,33 @@ find_jupe(const char *name, dlink_list *list)
 }
 
 static int
+jupe_db_callback(void *db, int argc, char **argv, char **colnames)
+{
+	struct server_jupe *jupe_p;
+
+	jupe_p = make_jupe(argv[0]);
+	jupe_p->reason = my_strdup(argv[1]);
+
+	add_jupe(jupe_p);
+	return 0;
+}
+
+static int
+h_jupeserv_squit(void *name, void *unused)
+{
+	struct server_jupe *jupe_p;
+
+	if((jupe_p = find_jupe(name, &active_jupes)))
+	{
+		sendto_server(":%s SERVER %s 2 :JUPED: %s",
+				MYNAME, jupe_p->name, jupe_p->reason);
+		return -1;
+	}
+
+	return 0;
+}
+
+static int
 s_jupeserv_calljupe(struct client *client_p, char *parv[], int parc)
 {
 	struct server_jupe *jupe_p;
@@ -108,8 +166,7 @@ s_jupeserv_calljupe(struct client *client_p, char *parv[], int parc)
 	{
 		const char *reason;
 
-		jupe_p = my_malloc(sizeof(struct server_jupe));
-		jupe_p->name = my_strdup(parv[0]);
+		jupe_p = make_jupe(parv[0]);
 		jupe_p->add = 1;
 
 		reason = rebuild_params((const char **) parv, parc, 1);
@@ -118,8 +175,6 @@ s_jupeserv_calljupe(struct client *client_p, char *parv[], int parc)
 			jupe_p->reason = my_strdup("No Reason");
 		else
 			jupe_p->reason = my_strdup(reason);
-
-		dlink_add(jupe_p, &jupe_p->node, &pending_jupes);
 	}
 
 	DLINK_FOREACH(ptr, jupe_p->servers.head)
@@ -137,17 +192,10 @@ s_jupeserv_calljupe(struct client *client_p, char *parv[], int parc)
 
 	if(jupe_p->points >= config_file.jupe_score)
 	{
-		struct client *target_p;
+		loc_sqlite_exec(NULL, "INSERT INTO jupes VALUES(%Q, %Q)",
+				jupe_p->name, jupe_p->reason);
 
-		if((target_p = find_server(jupe_p->name)))
-		{
-			sendto_server("SQUIT %s :%s", jupe_p->name, jupe_p->reason);
-			exit_client(target_p);
-		}
-
-		sendto_server(":%s SERVER %s 1 :JUPED: %s",
-				MYNAME, jupe_p->name, jupe_p->reason);
-		dlink_move_node(&jupe_p->node, &pending_jupes, &active_jupes);
+		add_jupe(jupe_p);
 	}
 
 	return 0;
@@ -167,8 +215,7 @@ s_jupeserv_callunjupe(struct client *client_p, char *parv[], int parc)
 
 	if((jupe_p = find_jupe(parv[0], &pending_jupes)) == NULL)
 	{
-		jupe_p = my_malloc(sizeof(struct server_jupe));
-		jupe_p->name = my_strdup(ajupe_p->name);
+		jupe_p = make_jupe(ajupe_p->name);
 		jupe_p->points = config_file.unjupe_score;
 	}
 
@@ -176,6 +223,9 @@ s_jupeserv_callunjupe(struct client *client_p, char *parv[], int parc)
 
 	if(jupe_p->points <= 0)
 	{
+		loc_sqlite_exec(NULL, "DELETE FROM jupes WHERE servername = %Q",
+				jupe_p->name);
+
 		sendto_server("SQUIT %s :Unjuped", jupe_p->name);
 		dlink_delete(&jupe_p->node, &pending_jupes);
 		dlink_delete(&ajupe_p->node, &active_jupes);

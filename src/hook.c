@@ -21,18 +21,21 @@ hook_add(hook_func func, int hook)
 	dlink_add_tail_alloc(func, &hooks[hook]);
 }
 
-void
+int
 hook_call(int hook, void *arg, void *arg2)
 {
 	hook_func func;
 	dlink_node *ptr;
 
 	if(hook >= HOOK_LAST_HOOK)
-		return;
+		return 0;
 
 	DLINK_FOREACH(ptr, hooks[hook].head)
 	{
 		func = ptr->data;
-		(*func)(arg, arg2);
+		if((*func)(arg, arg2) < 0)
+			return -1;
 	}
+
+	return 0;
 }
