@@ -1,3 +1,22 @@
+leeh        2002/01/01 11:28:02 EST	(20020101_4)
+
+  Modified files:
+    modules              Makefile.in 
+    src                  channel_mode.c 
+  Log:
+  - allow halfops to set all simple modes except MODE_PRIVATE
+  - that extra -c in Makefile.in was causing:
+    [2002/1/1 16.22] Error loading module m_whowas.so:
+    /home/leeh/ircd-7/modules/autoload//m_whowas.so: unsupported file type
+  
+    reverted.
+  
+  Revision  Changes    Path
+  1.60      +1 -1      ircd-hybrid-7/modules/Makefile.in
+  7.17      +7 -5      ircd-hybrid-7/src/channel_mode.c
+
+
+
 leeh        2002/01/01 10:58:42 EST	(20020101_3)
 
   Modified files:
