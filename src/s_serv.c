@@ -471,7 +471,7 @@ check_server(const char *name, struct Client *client_p)
 		{
 			error = -2;
 
-			if(tmp_p->flags & SERVER_ENCRYPTED)
+			if(ServerConfEncrypted(tmp_p))
 			{
 				if(!strcmp(tmp_p->passwd, crypt(client_p->localClient->passwd,
 								tmp_p->passwd)))
@@ -495,11 +495,11 @@ check_server(const char *name, struct Client *client_p)
 
 	/* clear ZIP/TB if they support but we dont want them */
 #ifdef HAVE_LIBZ
-	if((server_p->flags & SERVER_COMPRESSED) == 0)
+	if(!ServerConfCompressed(server_p))
 #endif
 		ClearCap(client_p, CAP_ZIP);
 
-	if((server_p->flags & SERVER_TB) == 0)
+	if(!ServerConfTb(server_p))
 		ClearCap(client_p, CAP_TB);
 
 #ifdef IPV6
@@ -1561,7 +1561,7 @@ serv_connect(struct server_conf *server_p, struct Client *by)
 	SetConnecting(client_p);
 	dlinkAddTail(client_p, &client_p->node, &global_client_list);
 
-	if(server_p->flags & SERVER_VHOSTED)
+	if(ServerConfVhosted(server_p))
 	{
 		memcpy(&myipnum, &server_p->my_ipnum, sizeof(myipnum));
 		((struct sockaddr_in *)&myipnum)->sin_port = 0;

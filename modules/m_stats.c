@@ -303,13 +303,11 @@ stats_connect(struct Client *source_p)
 
 		if(IsOper(source_p))
 		{
-			if(server_p->flags & SERVER_AUTOCONN)
+			if(ServerConfAutoconn(server_p))
 				*s++ = 'A';
-			if(server_p->flags & SERVER_ENCRYPTED)
-				*s++ = 'E';
-			if(server_p->flags & SERVER_TB)
+			if(ServerConfTb(server_p))
 				*s++ = 'T';
-			if(server_p->flags & SERVER_COMPRESSED)
+			if(ServerConfCompressed(server_p))
 				*s++ = 'Z';
 		}
 

@@ -1267,7 +1267,7 @@ conf_end_connect(struct TopConf *tc)
 	}
 
 #ifndef HAVE_LIBZ
-	if(ServerConfEncrypted(yy_server))
+	if(ServerConfCompressed(yy_server))
 	{
 		conf_report_error("Ignoring connect::flags::compressed -- zlib not available.");
 		yy_server->flags &= ~SERVER_COMPRESSED;
