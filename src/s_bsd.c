@@ -1026,6 +1026,7 @@ comm_connect_tcp(int fd, const char *host, u_short port,
         /* Failure, call the callback with COMM_ERR_BIND */
         comm_connect_callback(fd, COMM_ERR_BIND);
         /* ... and quit */
+        return;
     }
 
     /* If we get here, we're on our way to connecting .. */
