@@ -101,6 +101,7 @@ static EVH timeout_auth_queries_event;
 static BlockHeap *auth_bl = NULL;
 
 static PF read_auth_reply;
+static CNCB auth_connect_callback;
 
 /*
  * init_auth()
@@ -308,34 +309,13 @@ static int start_auth_query(struct AuthRequest* auth)
   getsockname(auth->client->fd, (struct sockaddr*) &localaddr, &locallen);
   localaddr.sin_port = htons(0);
 
-  if (bind(fd, (struct sockaddr*) &localaddr, sizeof(localaddr))) {
-    report_error("binding auth stream socket %s:%s", 
-                 get_client_name(auth->client, TRUE), errno);
-    fd_close(fd);
-    return 0;
-  }
-
   memcpy(&sock.sin_addr, &auth->client->ip, sizeof(struct in_addr));
-  
-  sock.sin_port = htons(113);
-  sock.sin_family = AF_INET;
-
-  if (connect(fd, (struct sockaddr*) &sock, sizeof(sock)) == -1) {
-    if (errno != EINPROGRESS) {
-      ServerStats->is_abad++;
-      /*
-       * No error report from this...
-       */
-      fd_close(fd);
-      sendheader(auth->client, REPORT_FAIL_ID);
-      return 0;
-    }
-  }
-
   auth->fd = fd;
-
   SetAuthConnect(auth);
-  return 1;
+  comm_connect_tcp(fd, inetntoa((char *)&auth->client->ip), 113, 
+    (struct sockaddr *)&localaddr, locallen, auth_connect_callback, auth);
+
+  return 1; /* We suceed here for now */
 }
 
 /*
@@ -530,19 +510,32 @@ timeout_auth_queries_event(void *notused)
 }
 
 /*
- * send_auth_query - send the ident server a query giving "theirport , ourport"
- * The write is only attempted *once* so it is deemed to be a fail if the
- * entire write doesn't write all the data given.  This shouldnt be a
- * problem since the socket should have a write buffer far greater than
- * this message to store it in should problems arise. -avalon
+ * auth_connect_callback() - deal with the result of comm_connect_tcp()
+ *
+ * If the connection failed, we simply close the auth fd and report
+ * a failure. If the connection suceeded send the ident server a query
+ * giving "theirport , ourport". The write is only attempted *once* so
+ * it is deemed to be a fail if the entire write doesn't write all the
+ * data given.  This shouldnt be a problem since the socket should have
+ * a write buffer far greater than this message to store it in should
+ * problems arise. -avalon
  */
-void send_auth_query(struct AuthRequest* auth)
+static
+void auth_connect_callback(int fd, int error, void *data)
 {
+  struct AuthRequest *auth = data;
   struct sockaddr_in us;
   struct sockaddr_in them;
   char            authbuf[32];
   size_t          ulen = sizeof(struct sockaddr_in);
   size_t          tlen = sizeof(struct sockaddr_in);
+
+  /* Check the error */
+  if (error != COMM_OK) {
+    /* We had an error during connection :( */
+    auth_error(auth);
+    return;
+  }
 
   if (getsockname(auth->client->fd, (struct sockaddr *)&us,   &ulen) ||
       getpeername(auth->client->fd, (struct sockaddr *)&them, &tlen)) {

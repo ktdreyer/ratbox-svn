@@ -1028,14 +1028,27 @@ comm_connect_tcp(int fd, const char *host, u_short port,
         /* ... and quit */
     }
 
-    /* Next, send the DNS request, for the next level */
-    query.vptr = &fd_table[fd];
-    query.callback = comm_connect_dns_callback;
-    reply = gethost_byname(host, &query);
-    assert(reply == NULL);	/* We don't have a DNS cache now -- adrian */
-
     /* If we get here, we're on our way to connecting .. */
     fd_table[fd].flags.called_connect = 1;
+    fd_table[fd].connect.callback = callback;
+    fd_table[fd].connect.data = data;
+    fd_table[fd].connect.port = port;
+
+    /*
+     * Next, if we have been given an IP, get the addr and skip the
+     * DNS check (and head direct to comm_connect_tryconnect().
+     */
+    if ((fd_table[fd].connect.hostaddr.s_addr = inet_addr(host))
+       == INADDR_NONE) {
+        /* Send the DNS request, for the next level */
+        query.vptr = &fd_table[fd];
+        query.callback = comm_connect_dns_callback;
+        reply = gethost_byname(host, &query);
+        assert(reply == NULL);	/* We don't have a DNS cache now -- adrian */
+    } else {
+        /* We have a valid IP, so we just call tryconnect */
+        comm_connect_tryconnect(fd, NULL);        
+    }
 }
 
 
