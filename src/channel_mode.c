@@ -1790,9 +1790,6 @@ chm_voice(struct Client *client_p, struct Client *source_p,
 #endif
     t_voice = is_voiced(chptr, targ_p);
 
-  /* Ignore +/-v on op... Now we need not worry about limiting the
-   * number of +/-v...
-   */
   if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
     return;
 
@@ -1874,7 +1871,7 @@ chm_voice(struct Client *client_p, struct Client *source_p,
       }
     }
 
-    if (was_voiced == 0 && MyConnect(targ_p) &&
+    if (was_voiced == 0 && t_op == 0 && MyConnect(targ_p) &&
         chptr->mode.mode & MODE_HIDEOPS)
     {
       resync_ops[resync_count].client_p = targ_p;
@@ -1917,7 +1914,7 @@ chm_voice(struct Client *client_p, struct Client *source_p,
         resync_ops[i].client_p = NULL;
     }
 
-    if (was_voiced == 0 && MyConnect(targ_p) &&
+    if (was_voiced == 0 && t_op == 0 && MyConnect(targ_p) &&
         chptr->mode.mode & MODE_HIDEOPS)
     {
       resync_ops[resync_count].client_p = targ_p;

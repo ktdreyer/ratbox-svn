@@ -775,18 +775,25 @@ channel_member_names(struct Client *source_p,
         if (members_ptr[i] != NULL)
         {
           who = members_ptr[i]->data;
+
           if (IsInvisible(who) && !is_member)
           {
             /* We definitely need this code -A1kmm. */
             members_ptr[i] = members_ptr[i]->next;
             continue;
           }
+
           reply_to_send = YES;
+
           if (who == source_p && is_voiced(chptr, who)
+#ifdef REQUIRE_OANDV
+	      && !is_chan_op(chptr, who)
+#endif
               && chptr->mode.mode & MODE_HIDEOPS)
             ircsprintf(t, "+%s ", who->name);
           else 
             ircsprintf(t, "%s%s ", show_flags[i], who->name);
+
           tlen = strlen(t);
           cur_len += tlen;
           t += tlen;
@@ -797,6 +804,7 @@ channel_member_names(struct Client *source_p,
             cur_len = mlen;
             t = lbuf + mlen;
           }
+
           members_ptr[i] = members_ptr[i]->next;
         }
         else
