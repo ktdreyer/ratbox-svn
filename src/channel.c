@@ -60,7 +60,7 @@ init_channel(void)
  * inputs	- channel name
  * outputs	- hash value
  */
-static unsigned int
+unsigned int
 hash_channel(const char *p)
 {
 	int i = 30;

@@ -59,7 +59,12 @@ struct chmember
 #define MODE_VOICED		0x0200
 #define MODE_DEOPPED		0x0400
 
+#define is_opped(x)	((x)->flags & MODE_OPPED)
+#define is_voiced(x)	((x)->flags & MODE_VOICED)
+
 extern void init_channel(void);
+
+unsigned int hash_channel(const char *p);
 
 extern void add_channel(struct channel *chptr);
 extern void del_channel(struct channel *chptr);

@@ -23,6 +23,9 @@ extern void init_s_operbot(void);
 /* s_userserv.c */
 extern void init_s_userserv(void);
 
+/* s_chanserv.c */
+extern void init_s_chanserv(void);
+
 /* u_stats.c */
 extern struct ucommand_handler stats_ucommand;
 
