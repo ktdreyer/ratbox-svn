@@ -1,3 +1,6 @@
+*** 20010101_54 by davidt
+Refix the core bug so it catches both possible problems, Doh.
+
 *** 20010101_53 by davidt
 Fix possible core bug in lljoin...
 
