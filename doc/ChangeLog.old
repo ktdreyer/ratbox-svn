@@ -1,3 +1,7 @@
+*** 20010718_2 by androsyn
+A stray log() still needed to be converted to ilog()
+
+
 *** 20010718_1 by leeh
 - *********** blat ************
   rewrote m_nick.c to include m_client.c, seperated out all the collide
