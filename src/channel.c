@@ -1607,7 +1607,7 @@ void set_channel_mode(struct Client *cptr,
         case 'l':
           if (whatt == MODE_QUERY)
             break;
-          if (!isok || limitset++)
+          if (!isok_c || limitset++)
             {
               if (whatt == MODE_ADD && parc-- > 0)
                 parv++;
@@ -1669,7 +1669,7 @@ void set_channel_mode(struct Client *cptr,
         case 'i' :
           if (whatt == MODE_QUERY)      /* shouldn't happen. */
             break;
-          if (!isok)
+          if (!isok_c)
             {
               if (MyClient(sptr) && !errsent(SM_ERR_NOOPS, &errors_sent))
                 sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
@@ -1713,7 +1713,7 @@ void set_channel_mode(struct Client *cptr,
           break;
 
         case 'm' :
-          if (!isok)
+          if (!isok_c)
             {
               if (MyClient(sptr) && !errsent(SM_ERR_NOOPS, &errors_sent))
                 sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
@@ -1752,7 +1752,7 @@ void set_channel_mode(struct Client *cptr,
           break;
 
         case 'n' :
-          if (!isok)
+          if (!isok_c)
             {
               if (MyClient(sptr) && !errsent(SM_ERR_NOOPS, &errors_sent))
                 sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
@@ -1793,7 +1793,7 @@ void set_channel_mode(struct Client *cptr,
           break;
 
         case 'p' :
-          if (!isok)
+          if (!isok_c)
             {
               if (MyClient(sptr) && !errsent(SM_ERR_NOOPS, &errors_sent))
                 sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
@@ -1831,7 +1831,7 @@ void set_channel_mode(struct Client *cptr,
           break;
 
         case 's' :
-          if (!isok)
+          if (!isok_c)
             {
               if (MyClient(sptr) && !errsent(SM_ERR_NOOPS, &errors_sent))
                 sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
@@ -1870,7 +1870,7 @@ void set_channel_mode(struct Client *cptr,
           break;
 
         case 't' :
-          if (!isok)
+          if (!isok_c)
             {
               if (MyClient(sptr) && !errsent(SM_ERR_NOOPS, &errors_sent))
                 sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED), me.name, 

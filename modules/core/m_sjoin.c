@@ -200,8 +200,8 @@ int     ms_sjoin(struct Client *cptr,
 	      sendto_realops("Found top_chptr for %s", (parv[2] + 1));
 
 	      m = make_dlink_node();
-	      m->data = chptr;
 	      dlinkAdd(chptr, m, &top_chptr->vchan_list);
+	      chptr->root_chptr=top_chptr;
 	    }
 	  else
 	    {
@@ -210,8 +210,8 @@ int     ms_sjoin(struct Client *cptr,
 	      top_chptr = get_channel(sptr, (parv[2] + 1), CREATE);
 
 	      m = make_dlink_node();
-	      m->data = chptr;
 	      dlinkAdd(chptr, m, &top_chptr->vchan_list);
+	      chptr->root_chptr=top_chptr;
 	    }
 
 	  *p = '_';	/* fugly hack, restore '_' */
