@@ -243,11 +243,16 @@ int   class_redirport_var;
 %token  MEGABYTES MBYTES MB
 %token  GIGABYTES GBYTES GB
 
+%left '-' '+'
+%left '*' '/'
+%left NEG
+
 %type   <ip_value> IP_TYPE
 %type   <string>   QSTRING
 %type   <number>   NUMBER
 %type   <number>   timespec
 %type   <number>   sizespec
+%type   <number>   expr
 
 %%
 conf:   
@@ -274,61 +279,94 @@ conf_item:        admin_entry
         ;
 
 
-timespec:	NUMBER 
+timespec:	expr 
 		= {
 			$$ = $1;
 		}
-		| NUMBER SECONDS
+		| expr SECONDS
 		= {
 			$$ = $1;
 		}
-		| NUMBER MINUTES
+		| expr MINUTES
 		= {
 			$$ = $1 * 60;
 		}
-		| NUMBER HOURS
+		| expr HOURS
 		= {
 			$$ = $1 * 60 * 60;
 		}
-		| NUMBER DAYS
+		| expr DAYS
 		= {
 			$$ = $1 * 60 * 60 * 24;
 		}
-		| NUMBER WEEKS
+		| expr WEEKS
 		= {
 			$$ = $1 * 60 * 60 * 24 * 7;
 		}
-		| NUMBER MONTHS
+		| expr MONTHS
 		= {
 			/* a month has 28 days, or 4 weeks */
 			$$ = $1 * 60 * 60 * 24 * 7 * 4;
 		}
-		| NUMBER YEARS
+		| expr YEARS
 		= {
 			/* a year has 365 days, *not* 12 months */
 			$$ = $1 * 60 * 60 * 24 * 365;
-		};
+		}
+		;
 
-sizespec:	NUMBER
+sizespec:	expr	
 		= {
 			$$ = $1;
 		}
-		| NUMBER BYTES
+		| expr BYTES
 		= { 
 			$$ = $1;
 		}
-		| NUMBER KBYTES
+		| expr KBYTES
 		= {
 			$$ = $1 * 1024;
 		}
-		| NUMBER MBYTES
+		| expr MBYTES
 		= {
 			$$ = $1 * 1024 * 1024;
 		}
-		| NUMBER GBYTES
+		| expr GBYTES
 		= {
 			$$ = $1 * 1024 * 1024 * 1024;
-		};
+		}
+		;
+
+/* this is an arithmatic expression */
+expr:		NUMBER
+		= { 
+			$$ = $1;
+		}
+		| expr '+' expr
+		= { 
+			$$ = $1 + $3;
+		}
+		| expr '-' expr
+		= { 
+			$$ = $1 - $3;
+		}
+		| expr '*' expr
+		= { 
+			$$ = $1 * $3;
+		}
+		| expr '/' expr
+		= { 
+			$$ = $1 / $3;
+		}
+		| '-' expr  %prec NEG
+		= {
+			$$ = -$2;
+		}
+		| '(' expr ')'
+		= {
+			$$ = $2;
+		}
+		;
 
 /***************************************************************************
  *  section modules
@@ -425,9 +463,9 @@ serverinfo_vhost:       VHOST '=' IP_TYPE ';'
 #endif
   };
 
-serverinfo_max_clients: T_MAX_CLIENTS '=' NUMBER ';'
+serverinfo_max_clients: T_MAX_CLIENTS '=' expr ';'
   {
-    ServerInfo.max_clients = yylval.number;
+    ServerInfo.max_clients = $3;
   };
 
 serverinfo_hub:         HUB '=' TYES ';' 
@@ -746,9 +784,9 @@ class_ping_time:        PING_TIME '=' timespec ';'
     class_ping_time_var = $3;
   };
 
-class_number_per_ip:    NUMBER_PER_IP '=' NUMBER ';'
+class_number_per_ip:    NUMBER_PER_IP '=' expr ';'
   {
-    class_number_per_ip_var = yylval.number;
+    class_number_per_ip_var = $3;
   };
 
 class_connectfreq:     CONNECTFREQ '=' timespec ';'
@@ -756,9 +794,9 @@ class_connectfreq:     CONNECTFREQ '=' timespec ';'
     class_number_per_ip_var = $3;
   };
 
-class_max_number:       MAX_NUMBER '=' NUMBER ';'
+class_max_number:       MAX_NUMBER '=' expr ';'
   {
-    class_max_number_var = yylval.number;
+    class_max_number_var = $3;
   };
 
 class_sendq:    SENDQ '=' sizespec ';'
@@ -786,9 +824,9 @@ listen_items:   listen_items listen_item |
 
 listen_item:    listen_port | listen_address | listen_host | error
 
-listen_port:    PORT '=' NUMBER ';'
+listen_port:    PORT '=' expr ';'
   {
-    add_listener(yylval.number, listener_address);
+    add_listener($3, listener_address);
   };
 
 listen_address: IP '=' QSTRING ';'
@@ -1040,10 +1078,10 @@ auth_redir_serv:    REDIRSERV '=' QSTRING ';'
     DupString(yy_achead->name, yylval.string);
   };
 
-auth_redir_port:    REDIRPORT '=' NUMBER ';'
+auth_redir_port:    REDIRPORT '=' expr ';'
   {
     yy_achead->flags |= CONF_FLAGS_REDIR;
-    yy_achead->port = yylval.number;
+    yy_achead->port = $3;
   };
 
 auth_class:   CLASS '=' QSTRING ';'
@@ -1284,7 +1322,7 @@ connect_accept_password: ACCEPT_PASSWORD '=' QSTRING ';'
     DupString(yy_aconf->passwd, yylval.string);
   };
 
-connect_port:   PORT '=' NUMBER ';' { yy_aconf->port = yylval.number; };
+connect_port:   PORT '=' expr ';' { yy_aconf->port = $3; };
 
 
 connect_aftype: 	AFTYPE '=' T_IPV4 ';'
@@ -1649,9 +1687,9 @@ general_max_nick_time:    MAX_NICK_TIME '=' timespec ';'
     ConfigFileEntry.max_nick_time = $3; 
   } ;
 
-general_max_nick_changes:  MAX_NICK_CHANGES '=' NUMBER ';'
+general_max_nick_changes:  MAX_NICK_CHANGES '=' expr ';'
   {
-    ConfigFileEntry.max_nick_changes = yylval.number;
+    ConfigFileEntry.max_nick_changes = $3;
   } ;
 
 general_anti_spam_exit_message_time:  ANTI_SPAM_EXIT_MESSAGE_TIME '=' timespec ';'
@@ -1790,10 +1828,10 @@ general_iauth_server: IAUTH_SERVER '=' QSTRING ';'
 #endif
 } ;
 
-general_iauth_port: IAUTH_PORT '=' NUMBER ';'
+general_iauth_port: IAUTH_PORT '=' expr ';'
 {
 #if 0
-    iAuth.port = yylval.number;
+    iAuth.port = $3;
 #endif
 } ;
 
@@ -1844,14 +1882,14 @@ general_idletime: IDLETIME '=' timespec ';'
     ConfigFileEntry.idletime = $3;
   } ;
 
-general_dots_in_ident: DOTS_IN_IDENT '=' NUMBER ';'
+general_dots_in_ident: DOTS_IN_IDENT '=' expr ';'
   {
-    ConfigFileEntry.dots_in_ident = yylval.number;
+    ConfigFileEntry.dots_in_ident = $3;
   } ;
 
-general_maximum_links: MAXIMUM_LINKS '=' NUMBER ';'
+general_maximum_links: MAXIMUM_LINKS '=' expr ';'
   {
-    ConfigFileEntry.maximum_links = yylval.number;
+    ConfigFileEntry.maximum_links = $3;
   } ;
 
 general_hide_server: HIDESERVER '=' TYES ';'
@@ -1864,9 +1902,9 @@ general_hide_server: HIDESERVER '=' TYES ';'
     ConfigFileEntry.hide_server = 0;
   } ;
 
-general_max_targets: MAX_TARGETS '=' NUMBER ';'
+general_max_targets: MAX_TARGETS '=' expr ';'
   {
-    ConfigFileEntry.max_targets = yylval.number;
+    ConfigFileEntry.max_targets = $3;
   } ;
 
 general_oper_umodes: OPER_UMODES
@@ -2049,12 +2087,12 @@ general_persistant_expire_time:  PERSISTANT_EXPIRE_TIME '=' timespec ';'
   {
     ConfigFileEntry.persist_expire = $3;  
   };
-general_min_nonwildcard:    MIN_NONWILDCARD '=' NUMBER ';'
+general_min_nonwildcard:    MIN_NONWILDCARD '=' expr ';'
   {
-    ConfigFileEntry.min_nonwildcard = yylval.number;
+    ConfigFileEntry.min_nonwildcard = $3;
   };
-general_default_floodcount:    DEFAULT_FLOODCOUNT '=' NUMBER ';'
+general_default_floodcount:    DEFAULT_FLOODCOUNT '=' expr ';'
   {
-    ConfigFileEntry.default_floodcount = yylval.number;
+    ConfigFileEntry.default_floodcount = $3;
   };
 
