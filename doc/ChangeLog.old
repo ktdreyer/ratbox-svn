@@ -1,3 +1,7 @@
+*** 20010813_9 by androsyn
+Put memset() back for struct Client allocations..
+
+
 *** 20010813_8 by jdc
 - modules/m_cryptlink.c: Call verify_private_key() before MyMalloc().
 
