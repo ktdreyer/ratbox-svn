@@ -252,11 +252,13 @@ int     m_who(struct Client *cptr,
 	}
       lp = find_user_link(ch2ptr->members, acptr);
       do_who(sptr, acptr, ch2ptr->chname, lp);
+      sendto_one(sptr, form_str(RPL_ENDOFWHO), me.name, parv[0], mask );
+      return 0;
     }
 
-
-  sendto_one(sptr, form_str(RPL_ENDOFWHO), me.name, parv[0],
-             EmptyString(mask) ?  "*" : mask);
+  /* Wasn't a nick, wasn't a channel, wasn't a '*' so ... */
+  who_global(sptr, mask, oper);
+  sendto_one(sptr, form_str(RPL_ENDOFWHO), me.name, parv[0], mask );
   return 0;
 }
 
