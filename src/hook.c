@@ -138,7 +138,7 @@ find_hook_byid(int id)
 }
 
 int
-hook_del_hook(const char *event, hookfn * fn)
+hook_del_hook(const char *event, hookfn  fn)
 {
 	hook *h;
 	dlink_node *node, *nnode;
@@ -157,7 +157,7 @@ hook_del_hook(const char *event, hookfn * fn)
 }
 
 int
-hook_add_hook(const char *event, hookfn * fn)
+hook_add_hook(const char *event, hookfn fn)
 {
 	hook *h;
 
