@@ -5,6 +5,7 @@
 #
 CC		= @CC@
 RM		= @RM@
+SED             = @SED@
 LEX		= @LEX@
 LEXLIB		= @LEXLIB@
 CFLAGS		= @CFLAGS@ -DIRCD_PREFIX=\"@prefix@\"
@@ -103,7 +104,9 @@ install: all
 
 .PHONY: depend clean distclean
 depend:
-	${MKDEP} ${CPPFLAGS} ${SRCS} > .depend
+	${MKDEP} ${CPPFLAGS} ${SRCS} > .depend.tmp
+	${SED} s/\\\.o/\\\.so/ < .depend.tmp > .depend
+	${RM} -f .depend.tmp
 
 clean:
 	${RM} -f *.so *~ 
