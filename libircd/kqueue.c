@@ -26,7 +26,6 @@
  */
 
 #include "config.h"
-#ifdef USE_KQUEUE
 #include "stdinc.h"
 #include <sys/event.h>
 
@@ -285,4 +284,3 @@ comm_select(unsigned long delay)
 	return 0;
 }
 
-#endif /* USE_KQUEUE */

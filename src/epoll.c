@@ -112,7 +112,7 @@ static _syscall4(int, epoll_wait, int, epfd, struct epoll_event *, pevents,
 void
 init_netio(void)
 {
-	ep = epoll_create(MAX_CLIENTS);
+	ep = epoll_create(getdtablesize());
 	if(ep < 0)
 	{
 		ilog(L_MAIN, "init_netio: Couldn't open epoll fd!\n");
@@ -136,6 +136,7 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
 	fde_t *F = &fd_table[fd];
 	int old_flags = F->pflags;
 	int op = EPOLL_CTL_DEL;
+	
 	s_assert(fd >= 0);
 	s_assert(F->flags.open);
 
@@ -221,7 +222,7 @@ comm_select(unsigned long delay)
 			if(hdl)
 				hdl(F->fd, data);
 			else
-				ilog(L_IOERROR, "s_bsd_epoll.c: NULL read handler called");
+				ilog(L_IOERROR, "epoll.c: NULL read handler called");
 
 		}
 
@@ -241,7 +242,7 @@ comm_select(unsigned long delay)
 			if(hdl)
 				hdl(F->fd, data);
 			else
-				ilog(L_IOERROR, "s_bsd_epoll.c: NULL write handler called");
+				ilog(L_IOERROR, "epoll.c: NULL write handler called");
 		}
 		
 	}
