@@ -38,9 +38,6 @@
  * keyword...
  * doh!!! ya just gotta know how to do it ;-)
  */
-/*
- * DBUF_SIZE must be a power of 2 so we can mask for the offset
- */
 #define DBUF_SIZE 2048
 
 struct DBufBuffer {
@@ -341,7 +338,7 @@ int dbuf_getmsg(struct DBuf* dyn, char* buf, size_t length)
       *buf++ = *start++;
 
     count = start - db->start;
-    if (IsEol(*start)) {
+    if (start < end && IsEol(*start)) {
       *buf = '\0';
       copied += count;
       dbuf_delete(dyn, copied);
