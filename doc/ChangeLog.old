@@ -1,3 +1,15 @@
+androsyn    2002/02/25 14:12:07 EST	(20020225_3)
+
+  Modified files:
+    src                  channel_mode.c 
+  Log:
+  More stupidity related to people using NICKLEN and abusing strings...
+  
+  Revision  Changes    Path
+  7.23      +4 -4      ircd-hybrid-7/src/channel_mode.c
+
+
+
 androsyn    2002/02/25 14:09:40 EST	(20020225_2)
 
   Modified files:
