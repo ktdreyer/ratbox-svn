@@ -265,8 +265,8 @@ int
 adns_getaddr(struct sockaddr *addr, int aftype, struct DNSQuery *req, int arpa_type)
 {
 	int result;
-	assert(dns_state->nservers > 0);
 	int flags = adns_r_ptr; 
+	assert(dns_state->nservers > 0);
 
 #ifdef IPV6
 	if(addr->sa_family == AF_INET6)
