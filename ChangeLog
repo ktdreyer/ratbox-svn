@@ -1,3 +1,47 @@
+leeh        2003/04/17 20:19:18 UTC	(20030417_0)
+
+  Modified files:
+    contrib              m_okick.c 
+    include              ircd.h 
+    modules              m_stats.c m_whois.c 
+    modules/core         m_die.c m_message.c 
+    src                  channel_mode.c ircd.c messages.tab 
+                         restart.c s_serv.c 
+  Added files:
+    tools/rsa_respond    challenge.irc 
+  Log:
+  - some things (back?)ported from stable:
+    - removed 'h' from 004
+    - fixed the logic for showing idles in whois
+    - from hybrid: fixed a race condition with check_pidfile()
+    - slight speedup from a dlinkFind, dlinkDelete, dlinkAdd to a dlinkMoveNode
+      when transferring a user to the lclient_list
+    - fixed some HIDE_SPOOF_IPS that shouldve been HIDE_SERVERS_IPS
+    - changed %s [%s@%s] to %s[%s@%s] in flood notice
+    - 'fixed' stats X to show X <gecos> :<reason>
+      this may break some clients parsing it, but its better overall.
+    - add the type to stats X too, so its now:
+      <server> 247 <nick> <type> <gecos> :<reason>
+    - fix for parameter issues with chanmode -k [via hybrid]
+    - m_okick.c needed okick_msgtab, not kick_msgtab
+    - added BlackJac's challenge.irc
+  
+  Revision  Changes    Path
+  1.8       +4 -4      ircd-ratbox/contrib/m_okick.c
+  7.63      +2 -1      ircd-ratbox/include/ircd.h
+  1.33      +2 -1      ircd-ratbox/modules/core/m_die.c
+  1.124     +3 -3      ircd-ratbox/modules/core/m_message.c
+  1.151     +2 -2      ircd-ratbox/modules/m_stats.c
+  1.109     +18 -11    ircd-ratbox/modules/m_whois.c
+  7.99      +3 -0      ircd-ratbox/src/channel_mode.c
+  7.280     +2 -3      ircd-ratbox/src/ircd.c
+  7.82      +2 -2      ircd-ratbox/src/messages.tab
+  7.28      +2 -0      ircd-ratbox/src/restart.c
+  7.328     +4 -20     ircd-ratbox/src/s_serv.c
+  1.1       +75 -0     ircd-ratbox/tools/rsa_respond/challenge.irc (new)
+
+
+
 leeh        2003/04/10 18:06:30 UTC	(20030410_2)
 
   Modified files:
