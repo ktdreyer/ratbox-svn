@@ -1,3 +1,19 @@
+androsyn    2002/06/10 20:00:11 EDT	(20020611_1)
+
+  Modified files:
+    include              client.h 
+    modules              m_pong.c 
+    src                  s_user.c 
+  Log:
+  Move random_ping into struct LocalUser where it belongs
+  
+  Revision  Changes    Path
+  7.148     +2 -1      ircd-hybrid-7/include/client.h
+  1.27      +3 -3      ircd-hybrid-7/modules/m_pong.c
+  7.197     +2 -2      ircd-hybrid-7/src/s_user.c
+
+
+
 androsyn    2002/06/10 19:56:48 EDT	(20020611_0)
 
   Modified files:
