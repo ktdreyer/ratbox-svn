@@ -1,3 +1,12 @@
+*** 20001229_2 by db
+- fixed another bug in s_conf.c
+  recheck_class() had the bad side effect of moving opers from oper
+  class to their old class on a /rehash... It also had the side effect
+  of dropping already made connections.. not cool Its not necessary
+  to recheck classes as it happens... fixed.
+
+
+
 *** 20001229_1 by db
 - ok. this is the first cut at building an user readable /links
   from doing our own /links and storing in a file for off line use.
