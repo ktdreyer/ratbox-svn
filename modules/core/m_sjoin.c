@@ -392,7 +392,7 @@ static void ms_sjoin(struct Client *client_p,
       modebuf[1] = '\0';
     }
 
-  buflen = ircsprintf(buf, ":%s SJOIN %lu %s %s %s :",
+  buflen = ircsprintf(buf, ":%s SJOIN %lu %s %s %s:",
 		      parv[0],
 		      (unsigned long) tstosend,
 		      parv[2], modebuf, parabuf);
@@ -709,10 +709,10 @@ nextnick:
 
 #ifdef HALFOPS
       if (IsCapable(target_p, CAP_HOPS))
-        sendto_one(target_p, "%s %s", buf, sjbuf_hops);
+        sendto_one(target_p, "%s%s", buf, sjbuf_hops);
       else
 #endif
-        sendto_one(target_p, "%s %s", buf, sjbuf_nhops);
+        sendto_one(target_p, "%s%s", buf, sjbuf_nhops);
    }
 }
 
