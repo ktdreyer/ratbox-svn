@@ -1,3 +1,16 @@
+androsyn    2002/12/08 00:05:53 UTC	(20021208_0)
+
+  Modified files:
+    src                  balloc.c 
+  Log:
+  Remove the freeElems variable from struct Block.  It is just as cheap to use
+  dlink_list_length() now.
+  
+  Revision  Changes    Path
+  7.47      +2 -5      ircd-ratbox/src/balloc.c
+
+
+
 androsyn    2002/12/07 23:59:03 UTC	(20021207_9)
 
   Modified files:
