@@ -128,7 +128,10 @@ hpux_modules: $(HPUX_CORE_OBJS) $(HPUX_OBJS)
 hpux_shared: $(SH_CORE_OBJS) $(SH_OBJS)
 	${MAKE} hpux_modules
 
-libmodules.a: $(S_OBJS)
+static_modules.c: static_modules.c.SH
+	/bin/sh ./static_modules.c.SH $(S_OBJS)
+	
+libmodules.a: $(S_OBJS) static_modules.o
 	$(RM) -f $@
 	$(AR) cqv $@ $(S_OBJS) 
 	$(RANLIB) $@
@@ -186,7 +189,7 @@ install_hpux_shared: install-mkdirs
 .SUFFIXES: .sl .so .o
 
 .c.o:
-	${CC} ${CPPFLAGS} ${CFLAGS} -c $< -o $@
+	${CC} ${CPPFLAGS} ${CFLAGS} -DMODNAME=`basename $< .c` -c $< -o $@
 
 .c.so:
 	${CC} ${PICFLAGS} ${CPPFLAGS} ${CFLAGS} $< -o $@
