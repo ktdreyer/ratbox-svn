@@ -1,3 +1,25 @@
+leeh        2004/04/11 22:26:48 EDT	(20040412_3)
+
+  Modified files:
+    include              s_serv.h 
+    modules              Makefile.in 
+    src                  s_serv.c 
+  Removed files:
+    modules              m_eob.c 
+  Log:
+  - remove CAP_EOB, and the "EOB" command, always use emulated over PING/PONG,
+    otherwise sendq_eob simply doesnt work.
+  
+    I am actually commiting this to the right tree this time.
+  
+  Revision  Changes    Path
+  7.94      +1 -2      ircd-ratbox/include/s_serv.h
+  1.95      +0 -1      ircd-ratbox/modules/Makefile.in
+  1.48      +0 -66     ircd-ratbox/modules/m_eob.c (dead)
+  7.399     +0 -4      ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2004/04/11 22:19:56 EDT	(20040412_2)
 
   Modified files:
