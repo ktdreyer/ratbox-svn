@@ -27,10 +27,14 @@ INCLUDES	= -I../include $(SSL_INCLUDES)
 CPPFLAGS	= ${INCLUDES} @CPPFLAGS@
 
 SRCS =                          \
+  m_clearchan.c			\
+  m_flags.c                     \
+  m_force.c			\
+  m_jupe.c			\
   m_map.c			\
   m_mkpasswd.c                  \
-  m_flags.c                     \
-  m_jupe.c			\
+  m_ojoin.c			\
+  m_opme.c			\
   m_tburst.c			\
   spy_admin_notice.c		\
   spy_info_notice.c		\
