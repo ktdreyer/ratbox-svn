@@ -1,3 +1,25 @@
+leeh        2005/01/13 08:16:38 EST	(20050113_2)
+
+  Modified files:
+    help/main            u-flags 
+    include              io.h 
+    src                  s_chanserv.c s_userserv.c tools.c 
+                         ucommand.c 
+  Log:
+  - added +botfight flag, unused atm
+  - move userserv::info/chanserv::info over to get_duration()
+  - via jilles, fix logic in get_duration()
+  
+  Revision  Changes    Path
+  1.4       +1 -0      rserv/help/main/u-flags
+  1.21      +2 -1      rserv/include/io.h
+  1.41      +2 -14     rserv/src/s_chanserv.c
+  1.37      +3 -14     rserv/src/s_userserv.c
+  1.13      +1 -1      rserv/src/tools.c
+  1.23      +3 -0      rserv/src/ucommand.c
+
+
+
 leeh        2005/01/12 20:58:07 EST	(20050113_1)
 
   Modified files:
