@@ -1,3 +1,7 @@
+*** 20010409_4 by a1kmm
+- Think that this gets the endianness right for the hash.
+
+
 *** 20010409_3 by a1kmm
 - GlobalSetOptions != ConfigFileEntries. Always check stuff works before you
   commit :)
