@@ -131,7 +131,14 @@ kq_update_events(int fd, short filter, PF * handler)
 		kep->flags = EV_DELETE;
 	}
 	if (kqoff == kqmax) {
-		kevent(kq, kqlst, kqoff, NULL, 0, &zero_timespec);
+		int ret;
+		ret = kevent(kq, kqlst, kqoff, NULL, 0, &zero_timespec);
+		/* jdc -- someone needs to do error checking... */
+		if (ret == -1)
+		{
+		  perror("kq_update_events(): kevent()")
+		  break;
+		}
 		kqoff = 0;
 	} else {
 		kqoff++;
