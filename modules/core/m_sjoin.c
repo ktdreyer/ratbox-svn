@@ -354,14 +354,14 @@ int     ms_sjoin(struct Client *cptr,
 	  s++;
 	}
       
-      if ((*s == '%') && IsCapable(sptr, CAP_HOPS))
+      if (*s == '%') 
 	{
 	  fl |= MODE_HALFOP;
 	  s++;
 	}
       else if (*s == '%')
 	{
-	  fl |= MODE_CHANOP;
+	  fl |= MODE_HALFOP;
 	  s++;
 	}
 
