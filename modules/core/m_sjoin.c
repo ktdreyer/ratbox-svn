@@ -81,8 +81,9 @@ char    *mbuf;
 int     pargs;
 
 void set_final_mode(struct Mode *mode,struct Mode *oldmode);
-void remove_our_modes( struct Channel *chptr, struct Channel *top_chptr,
-			      struct Client *sptr);
+void remove_our_modes( int type,
+		       struct Channel *chptr, struct Channel *top_chptr,
+		       struct Client *sptr);
 
 
 int     ms_sjoin(struct Client *cptr,
@@ -103,6 +104,12 @@ int     ms_sjoin(struct Client *cptr,
   static        char sjbuf[BUFSIZE];
   char    *t = sjbuf;
   char    *p;
+  int hide_or_not;
+
+  if(GlobalSetOptions.hide_chanops)
+    hide_or_not = ONLY_CHANOPS;
+  else
+    hide_or_not = ALL_MEMBERS;
 
   if (IsClient(sptr) || parc < 5)
     return 0;
@@ -188,7 +195,7 @@ int     ms_sjoin(struct Client *cptr,
 	  /* + 1 skip the extra '#' in the name */
 	  if((top_chptr = hash_find_channel((parv[2] + 1), NULL)))
 	    {
-sendto_realops("ZZZ Found top_chptr for %s", (parv[2] + 1));
+sendto_realops("Found top_chptr for %s", (parv[2] + 1));
 
 	      if (top_chptr->next_vchan)
 		{
@@ -201,7 +208,7 @@ sendto_realops("ZZZ Found top_chptr for %s", (parv[2] + 1));
 	    }
 	  else
 	    {
-sendto_realops("ZZZ Creating top_chptr for %s", (parv[2] + 1));
+sendto_realops("Creating top_chptr for %s", (parv[2] + 1));
 
 	      top_chptr = get_channel(sptr, (parv[2] + 1), CREATE);
 
@@ -268,7 +275,7 @@ sendto_realops("ZZZ Creating top_chptr for %s", (parv[2] + 1));
   /* Lost the TS, other side wins, so remove modes on this side */
   if (!keep_our_modes)
     {
-      remove_our_modes(chptr,top_chptr,sptr);
+      remove_our_modes(hide_or_not, chptr, top_chptr, sptr);
     }
 
   *modebuf = *parabuf = '\0';
@@ -325,12 +332,12 @@ sendto_realops("ZZZ Creating top_chptr for %s", (parv[2] + 1));
 	  if( top_chptr )
 	    {
 	      add_vchan_to_client_cache(sptr,top_chptr, chptr);
-	      sendto_channel_butserv(chptr, acptr, ":%s JOIN :%s",
+	      sendto_channel_butserv(ALL_MEMBERS,chptr, acptr, ":%s JOIN :%s",
 				     s, top_chptr->chname);
 	    }
 	  else
 	    {
-	      sendto_channel_butserv(chptr, acptr, ":%s JOIN :%s",
+	      sendto_channel_butserv(ALL_MEMBERS,chptr, acptr, ":%s JOIN :%s",
 				     s, parv[2]);
 	    }
         }
@@ -351,13 +358,13 @@ sendto_realops("ZZZ Creating top_chptr for %s", (parv[2] + 1));
               *mbuf = '\0';
 	      if(IsVchan(chptr) && top_chptr)
 		{
-		  sendto_channel_butserv(chptr, sptr,
+		  sendto_channel_butserv(hide_or_not, chptr, sptr,
 					 ":%s MODE %s %s %s", parv[0],
 					 top_chptr->chname, modebuf, parabuf );
 		}
 	      else
 		{
-		  sendto_channel_butserv(chptr, sptr,
+		  sendto_channel_butserv(hide_or_not, chptr, sptr,
 					 ":%s MODE %s %s %s", parv[0],
 					 chptr->chname, modebuf, parabuf );
 		}
@@ -378,13 +385,13 @@ sendto_realops("ZZZ Creating top_chptr for %s", (parv[2] + 1));
               *mbuf = '\0';
 	      if(IsVchan(chptr) && top_chptr)
 		{
-		  sendto_channel_butserv(chptr, sptr,
+		  sendto_channel_butserv(hide_or_not, chptr, sptr,
 					 ":%s MODE %s %s %s", parv[0],
 					 top_chptr->chname, modebuf, parabuf );
 		}
 	      else
 		{
-		  sendto_channel_butserv(chptr, sptr,
+		  sendto_channel_butserv(hide_or_not, chptr, sptr,
 					 ":%s MODE %s %s %s", parv[0],
 					 chptr->chname, modebuf, parabuf );
 		}
@@ -401,13 +408,13 @@ sendto_realops("ZZZ Creating top_chptr for %s", (parv[2] + 1));
     {
       if(IsVchan(chptr) && top_chptr)
 	{
-	  sendto_channel_butserv(chptr, sptr,
+	  sendto_channel_butserv(hide_or_not, chptr, sptr,
 				 ":%s MODE %s %s %s", parv[0],
 				 top_chptr->chname, modebuf, parabuf );
 	}
       else
 	{
-	  sendto_channel_butserv(chptr, sptr,
+	  sendto_channel_butserv(hide_or_not, chptr, sptr,
 				 ":%s MODE %s %s %s", parv[0],
 				 chptr->chname, modebuf, parabuf );
 	}
@@ -608,8 +615,9 @@ void set_final_mode(struct Mode *mode,struct Mode *oldmode)
  *		  chanop modes etc., this side lost the TS.
  */
   
-void remove_our_modes( struct Channel *chptr, struct Channel *top_chptr,
-			      struct Client *sptr)
+void remove_our_modes( int hide_or_not,
+		       struct Channel *chptr, struct Channel *top_chptr,
+		       struct Client *sptr)
 {
   int what;
   struct SLink *l;
@@ -636,7 +644,7 @@ void remove_our_modes( struct Channel *chptr, struct Channel *top_chptr,
 	      *mbuf = '\0';
 	      if(IsVchan(chptr) && top_chptr)
 		{
-		  sendto_channel_butserv(chptr, sptr,
+		  sendto_channel_butserv(hide_or_not, chptr, sptr,
 					 ":%s MODE %s %s %s",
 					 sptr->name,
 					 top_chptr->chname,
@@ -644,7 +652,7 @@ void remove_our_modes( struct Channel *chptr, struct Channel *top_chptr,
 		}
 	      else
 		{
-		  sendto_channel_butserv(chptr, sptr,
+		  sendto_channel_butserv(hide_or_not, chptr, sptr,
 					 ":%s MODE %s %s %s",
 					 sptr->name,
 					 chptr->chname, modebuf, parabuf );
@@ -671,7 +679,7 @@ void remove_our_modes( struct Channel *chptr, struct Channel *top_chptr,
 	      *mbuf = '\0';
 	      if(IsVchan(chptr) && top_chptr)
 		{
-		  sendto_channel_butserv(chptr, sptr,
+		  sendto_channel_butserv(hide_or_not, chptr, sptr,
 					 ":%s MODE %s %s %s",
 					 sptr->name,
 					 top_chptr->chname,
@@ -679,7 +687,7 @@ void remove_our_modes( struct Channel *chptr, struct Channel *top_chptr,
 		}
 	      else
 		{
-		  sendto_channel_butserv(chptr, sptr,
+		  sendto_channel_butserv(hide_or_not, chptr, sptr,
 					 ":%s MODE %s %s %s",
 					 sptr->name,
 					 chptr->chname, modebuf, parabuf );
@@ -697,14 +705,14 @@ void remove_our_modes( struct Channel *chptr, struct Channel *top_chptr,
       *mbuf = '\0';
       if(IsVchan(chptr) && top_chptr)
 	{
-	  sendto_channel_butserv(chptr, sptr,
+	  sendto_channel_butserv(hide_or_not, chptr, sptr,
 				 ":%s MODE %s %s %s",
 				 sptr->name,
 				 top_chptr->chname, modebuf, parabuf );
 	}
       else
 	{
-	  sendto_channel_butserv(chptr, sptr,
+	  sendto_channel_butserv(hide_or_not, chptr, sptr,
 				 ":%s MODE %s %s %s",
 				 sptr->name,
 				 chptr->chname, modebuf, parabuf );

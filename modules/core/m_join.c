@@ -300,7 +300,7 @@ int     m_join(struct Client *cptr,
       /*
       ** notify all other users on the new channel
       */
-      sendto_channel_butserv(chptr, sptr, ":%s JOIN :%s",
+      sendto_channel_butserv(ALL_MEMBERS,chptr, sptr, ":%s JOIN :%s",
 			     parv[0], name);
       
       if( flags & CHFL_CHANOP )
@@ -308,7 +308,7 @@ int     m_join(struct Client *cptr,
 	  chptr->mode.mode |= MODE_TOPICLIMIT;
 	  chptr->mode.mode |= MODE_NOPRIVMSGS;
 
-	  sendto_channel_butserv(chptr, sptr,
+	  sendto_channel_butserv(ONLY_CHANOPS,chptr, sptr,
 				 ":%s MODE %s +nt",
 				 me.name, chptr->chname);
 	  
@@ -448,7 +448,7 @@ void do_join_0(struct Client *cptr, struct Client *sptr)
   while ((lp = sptr->user->channel))
     {
       chptr = lp->value.chptr;
-      sendto_channel_butserv(chptr, sptr, ":%s PART %s",
+      sendto_channel_butserv(ALL_MEMBERS,chptr, sptr, ":%s PART %s",
 			     sptr->name, chptr->chname);
       remove_user_from_channel(chptr, sptr, 0);
     }

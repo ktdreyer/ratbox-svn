@@ -557,6 +557,10 @@ int main(int argc, char *argv[])
   ConfigFileEntry.hide_server = 1;
   GlobalSetOptions.hide_server = 1;
 
+  /* XXX add to lexer/yacc later */
+  /*  ConfigFileEntry.hide_chanops = 1; */
+  GlobalSetOptions.hide_chanops = 1;
+
 #if !defined(CHROOTDIR) || (defined(IRC_UID) && defined(IRC_GID))
 
   setuid(euid);

@@ -63,9 +63,10 @@ void do_who_on_channel(struct Client *sptr,
 void who_global(struct Client *sptr, char *mask, int oper);
 
 void    do_who(struct Client *sptr,
-			     struct Client *acptr,
-			     char *repname,
-			     int flags);
+	       struct Client *acptr,
+	       struct Channel *chptr,
+	       char *repname,
+	       int flags);
 
 char *_version = "20001122";
 
@@ -216,7 +217,7 @@ int     m_who(struct Client *cptr,
 		chname = bchan->chname;
 	    }
 
-	  do_who(sptr, acptr, chname, ((lp)?lp->flags:0) );
+	  do_who(sptr, acptr, chptr, chname, ((lp)?lp->flags:0) );
 	}
       sendto_one(sptr, form_str(RPL_ENDOFWHO), me.name, parv[0], mask );
       return 0;
@@ -301,7 +302,7 @@ void who_global(struct Client *sptr,char *mask, int oper)
 		chname = bchan->chname;
 	    }
 
-	  do_who(sptr, acptr, chname, ((lp)?lp->flags:0) );
+	  do_who(sptr, acptr, chptr, chname, ((lp)?lp->flags:0) );
 
           if (maxmatches > 0)
 	    {
@@ -338,7 +339,7 @@ void do_who_on_channel(struct Client *sptr,
 	continue;
       if (IsInvisible(lp->value.cptr) && !member)
 	continue;
-      do_who(sptr, lp->value.cptr, real_name, lp->flags);
+      do_who(sptr, lp->value.cptr, chptr, real_name, lp->flags);
     }
 }
 
@@ -347,6 +348,7 @@ void do_who_on_channel(struct Client *sptr,
  *
  * inputs	- pointer to client requesting who
  *		- pointer to client to do who on
+ *		- pointer to channel
  *		- The reported name
  *		- channel flags
  * output	- NONE
@@ -354,16 +356,26 @@ void do_who_on_channel(struct Client *sptr,
  */
 
 void    do_who(struct Client *sptr,
-			     struct Client *acptr,
-			     char *repname,
-			     int flags)
+	       struct Client *acptr,
+	       struct Channel *chptr,
+	       char *repname,
+	       int flags)
 {
   char  status[5];
 
-  ircsprintf(status,"%c%s%s", 
-	     acptr->user->away ? 'G' : 'H',
-	     IsAnyOper(acptr) ? "*" : "",
-	     channel_chanop_or_voice(flags));
+  if(GlobalSetOptions.hide_chanops && !is_chan_op(chptr,sptr))
+    {
+      ircsprintf(status,"%c%s", 
+		 acptr->user->away ? 'G' : 'H',
+		 IsAnyOper(acptr) ? "*" : "");
+    }
+  else
+    {
+      ircsprintf(status,"%c%s%s", 
+		 acptr->user->away ? 'G' : 'H',
+		 IsAnyOper(acptr) ? "*" : "",
+		 channel_chanop_or_voice(flags));
+    }
 
   if(ConfigFileEntry.hide_server)
     {

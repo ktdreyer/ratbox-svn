@@ -301,12 +301,26 @@ static void del_matching_exception(struct Client *cptr,struct Channel *chptr)
            * I don't think thats a biggie.
            */
 
-          sendto_channel_butserv(chptr,
-                                 &me,
-                                 ":%s MODE %s -e %s", 
-                                 me.name,
-                                 chptr->chname,
-                                 BANSTR(tmp));
+	  if(GlobalSetOptions.hide_chanops)
+	    {
+	      sendto_channel_butserv(ONLY_CHANOPS,
+				     chptr,
+				     &me,
+				     ":%s MODE %s -e %s", 
+				     me.name,
+				     chptr->chname,
+				     BANSTR(tmp));
+	    }
+	  else
+	    {
+	      sendto_channel_butserv(ALL_MEMBERS,
+				     chptr,
+				     &me,
+				     ":%s MODE %s -e %s", 
+				     me.name,
+				     chptr->chname,
+				     BANSTR(tmp));
+	    }
 
           *ex = tmp->next;
           MyFree(tmp->value.banptr->banstr);
@@ -1061,6 +1075,7 @@ void set_channel_mode(struct Client *cptr,
   int   chan_op;
   int   self_lose_ops;
   int   user_mode;
+  int   type;
 
   self_lose_ops = 0;
 
@@ -1208,6 +1223,13 @@ void set_channel_mode(struct Client *cptr,
 
           if (isdeop && (c == 'o') && whatt == MODE_ADD)
             set_deopped(chptr, who, the_mode);
+	  
+	  if(GlobalSetOptions.hide_chanops)
+	    {
+	      if(the_mode == MODE_CHANOP && whatt == MODE_DEL)
+		sendto_one(who,":%s MODE %s -o %s",
+			   sptr->name,chptr->chname,who->name);
+	    }
 
           if (!isok)
             {
@@ -1298,9 +1320,20 @@ void set_channel_mode(struct Client *cptr,
               if(!strcmp(chptr->mode.key,arg))
                 break;
 
-              sendto_channel_butserv(chptr, sptr, ":%s MODE %s -k %s", 
-                                     sptr->name, real_name,
-                                     chptr->mode.key);
+	      if(GlobalSetOptions.hide_chanops)
+		{
+		  sendto_channel_butserv(ONLY_CHANOPS,
+					 chptr, sptr, ":%s MODE %s -k %s", 
+					 sptr->name, real_name,
+					 chptr->mode.key);
+		}
+	      else
+		{
+		  sendto_channel_butserv(ALL_MEMBERS,
+					 chptr, sptr, ":%s MODE %s -k %s", 
+					 sptr->name, real_name,
+					 chptr->mode.key);
+		}
 
               sendto_match_servs(chptr, cptr, ":%s MODE %s -k %s",
                                  sptr->name, real_name,
@@ -2011,12 +2044,17 @@ void set_channel_mode(struct Client *cptr,
   collapse_signs(modebuf_new);
   collapse_signs(modebuf_newer);
 
+  if(GlobalSetOptions.hide_chanops)
+    type = ONLY_CHANOPS;
+  else
+    type = ALL_MEMBERS;
+
   if(*modebuf)
     {
-      sendto_channel_butserv(chptr, sptr, ":%s MODE %s %s %s", 
-                           sptr->name, real_name,
-                           modebuf, parabuf);
-
+      sendto_channel_butserv(type,
+			     chptr, sptr, ":%s MODE %s %s %s", 
+			     sptr->name, real_name,
+			     modebuf, parabuf);
       sendto_match_servs(chptr, cptr, ":%s MODE %s %s %s",
                          sptr->name, chptr->chname,
                          modebuf, parabuf);
@@ -2024,7 +2062,8 @@ void set_channel_mode(struct Client *cptr,
 
   if(*modebuf_new)
     {
-      sendto_channel_butserv(chptr, sptr, ":%s MODE %s %s %s", 
+      sendto_channel_butserv(type,
+			     chptr, sptr, ":%s MODE %s %s %s", 
                              sptr->name, real_name,
                              modebuf_new, parabuf_new);
 
@@ -2034,7 +2073,7 @@ void set_channel_mode(struct Client *cptr,
     }
   if(*modebuf_newer)
     {
-      sendto_channel_butserv(chptr, sptr, ":%s MODE %s %s %s",
+      sendto_channel_butserv(type, chptr, sptr, ":%s MODE %s %s %s",
                              sptr->name, real_name,
                              modebuf_newer, parabuf_newer);
       sendto_match_cap_servs(chptr, cptr, CAP_DE, ":%s MODE %s %s %s",
@@ -2043,7 +2082,7 @@ void set_channel_mode(struct Client *cptr,
     }
   if(*modebuf_invex)
     {
-      sendto_channel_butserv(chptr, sptr, ":%s MODE %s %s %s",
+      sendto_channel_butserv(type, chptr, sptr, ":%s MODE %s %s %s",
 			     sptr->name, real_name,
 			     modebuf_invex, parabuf_invex);
       sendto_match_cap_servs(chptr, cptr, CAP_IE, ":%s MODE %s %s %s",
@@ -2161,10 +2200,16 @@ static  void    sub1_from_channel(struct Channel *chptr)
  */
 void clear_bans_exceptions_denies(struct Client *sptr, struct Channel *chptr)
 {
+  int type;
   static char modebuf[MODEBUFLEN];
   register struct SLink *ban;
   char *b1,*b2,*b3,*b4;
   char *mp;
+
+  if(GlobalSetOptions.hide_chanops)
+    type = ONLY_CHANOPS;
+  else
+    type = ALL_MEMBERS;
 
   b1="";
   b2="";
@@ -2201,7 +2246,7 @@ void clear_bans_exceptions_denies(struct Client *sptr, struct Channel *chptr)
           *mp++ = 'b';
           *mp = '\0';
 
-          sendto_channel_butserv(chptr, &me,
+          sendto_channel_butserv(type, chptr, &me,
                                  ":%s MODE %s %s %s %s %s %s",
                                  sptr->name,chptr->chname,modebuf,b1,b2,b3,b4);
           b1="";
@@ -2215,7 +2260,7 @@ void clear_bans_exceptions_denies(struct Client *sptr, struct Channel *chptr)
     }
 
   if(*modebuf)
-    sendto_channel_butserv(chptr, &me,
+    sendto_channel_butserv(type, chptr, &me,
                            ":%s MODE %s %s %s %s %s %s",
                            sptr->name,chptr->chname,modebuf,b1,b2,b3,b4);
   b1="";
@@ -2253,7 +2298,7 @@ void clear_bans_exceptions_denies(struct Client *sptr, struct Channel *chptr)
           *mp++ = 'e';
           *mp = '\0';
 
-          sendto_channel_butserv(chptr, &me,
+          sendto_channel_butserv(type, chptr, &me,
                                  ":%s MODE %s %s %s %s %s %s",
                                  sptr->name,chptr->chname,modebuf,b1,b2,b3,b4);
           b1="";
@@ -2266,7 +2311,7 @@ void clear_bans_exceptions_denies(struct Client *sptr, struct Channel *chptr)
     }
 
   if(*modebuf)
-    sendto_channel_butserv(chptr, &me,
+    sendto_channel_butserv(type, chptr, &me,
                            ":%s MODE %s %s %s %s %s %s",
                            sptr->name,chptr->chname,modebuf,b1,b2,b3,b4);
 
@@ -2305,7 +2350,7 @@ void clear_bans_exceptions_denies(struct Client *sptr, struct Channel *chptr)
           *mp++ = 'd';
           *mp = '\0';
 
-          sendto_channel_butserv(chptr, &me,
+          sendto_channel_butserv(type, chptr, &me,
                                  ":%s MODE %s %s %s %s %s %s",
                                  sptr->name,chptr->chname,modebuf,b1,b2,b3,b4);
           b1="";
@@ -2318,7 +2363,7 @@ void clear_bans_exceptions_denies(struct Client *sptr, struct Channel *chptr)
     }
 
   if(*modebuf)
-    sendto_channel_butserv(chptr, &me,
+    sendto_channel_butserv(type, chptr, &me,
                            ":%s MODE %s %s %s %s %s %s",
                            sptr->name,chptr->chname,modebuf,b1,b2,b3,b4);
 
@@ -2561,6 +2606,7 @@ void channel_member_names( struct Client *sptr,
   char buf2[2*NICKLEN];
   struct Client *c2ptr;
   struct SLink  *lp;
+  int show_ops;
 
   mlen = strlen(me.name) + NICKLEN + 7;
 
@@ -2571,10 +2617,21 @@ void channel_member_names( struct Client *sptr,
 
   cur_len = mlen + len;
 
+  show_ops = 1;
+
+  if(GlobalSetOptions.hide_chanops && !is_chan_op(chptr,sptr))
+    show_ops = 0;
+
   for (lp = chptr->members; lp; lp = lp->next)
     {
       c2ptr = lp->value.cptr;
-      ircsprintf(buf2,"%s%s ",channel_chanop_or_voice(lp->flags),c2ptr->name);
+
+      if(show_ops)
+	ircsprintf(buf2, "%s%s ",channel_chanop_or_voice(lp->flags),
+		   c2ptr->name);
+      else
+	ircsprintf(buf2,"%s ",c2ptr->name);
+
       strcat(buf,buf2);
       cur_len += strlen(buf2);
       reply_to_send = YES;

@@ -301,9 +301,17 @@ void whois_person(struct Client *sptr,struct Client *acptr)
 
       if (ShowChannel(sptr, chptr))
 	{
-	  user_flags = user_channel_mode(chptr, acptr);
-	  ircsprintf(buf2,"%s%s ", channel_chanop_or_voice(user_flags),
-		     chname);
+	  if (GlobalSetOptions.hide_chanops && !is_chan_op(chptr,sptr))
+	    {
+	      ircsprintf(buf2,"%s ",chname);
+	    }
+	  else
+	    {
+	      user_flags = user_channel_mode(chptr, acptr);
+	      ircsprintf(buf2,"%s%s ", channel_chanop_or_voice(user_flags),
+			 chname);
+	    }
+
 	  strcat(buf,buf2);
 	  cur_len += strlen(buf2);
 	  reply_to_send = YES;

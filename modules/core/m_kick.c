@@ -165,9 +165,19 @@ int     m_kick(struct Client *cptr,
 
   if (IsMember(who, chptr))
     {
-      sendto_channel_butserv(chptr, sptr,
-                             ":%s KICK %s %s :%s", parv[0],
-                             name, who->name, comment);
+      if(GlobalSetOptions.hide_chanops)
+	{
+	  sendto_channel_butserv(ALL_MEMBERS, chptr, sptr,
+				 ":%s KICK %s %s :%s", parv[0],
+				 who->name, who->name, comment);
+	}
+      else
+	{
+	  sendto_channel_butserv(ONLY_CHANOPS, chptr, sptr,
+				 ":%s KICK %s %s :%s", parv[0],
+				 name, who->name, comment);
+	}
+
       sendto_match_servs(chptr, cptr,
                          ":%s KICK %s %s :%s",
                          parv[0], chptr->chname,

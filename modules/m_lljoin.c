@@ -138,7 +138,7 @@ int     ms_lljoin(struct Client *cptr,
 
           add_user_to_channel(chptr, acptr, flags);
  
-          sendto_channel_butserv(chptr, acptr, ":%s JOIN :%s",
+          sendto_channel_butserv(ALL_MEMBERS,chptr, acptr, ":%s JOIN :%s",
                                  nick, name);
       
           if( flags & CHFL_CHANOP )
@@ -146,9 +146,18 @@ int     ms_lljoin(struct Client *cptr,
               chptr->mode.mode |= MODE_TOPICLIMIT;
               chptr->mode.mode |= MODE_NOPRIVMSGS;
 
-              sendto_channel_butserv(chptr, sptr,
-                                     ":%s MODE %s +nt",
-                                     me.name, chptr->chname);
+	      if(GlobalSetOptions.hide_chanops)
+		{
+		  sendto_channel_butserv(ONLY_CHANOPS,chptr, sptr,
+					 ":%s MODE %s +nt",
+					 me.name, chptr->chname);
+		}
+	      else
+		{
+		  sendto_channel_butserv(ALL_MEMBERS,chptr, sptr,
+					 ":%s MODE %s +nt",
+					 me.name, chptr->chname);
+		}
 
               sendto_one(serv_cptr_list, 
                                  ":%s MODE %s +nt",

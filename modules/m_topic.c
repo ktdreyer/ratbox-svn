@@ -140,9 +140,20 @@ int     m_topic(struct Client *cptr,
 	      sendto_match_servs(chptr, cptr,":%s TOPIC %s :%s",
 				 parv[0], chptr->chname,
 				 chptr->topic);
-	      sendto_channel_butserv(chptr, sptr, ":%s TOPIC %s :%s",
-				     parv[0],
-				     chname, chptr->topic);
+	      if(GlobalSetOptions.hide_chanops)
+		{
+		  sendto_channel_butserv(ONLY_CHANOPS,
+					 chptr, sptr, ":%s TOPIC %s :%s",
+					 parv[0],
+					 chname, chptr->topic);
+		}
+	      else
+		{
+		  sendto_channel_butserv(ALL_MEMBERS,
+					 chptr, sptr, ":%s TOPIC %s :%s",
+					 parv[0],
+					 chname, chptr->topic);
+		}
 	    }
 	  else
             sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED),
@@ -259,9 +270,21 @@ int     ms_topic(struct Client *cptr,
 	      sendto_match_servs(chptr, cptr,":%s TOPIC %s :%s",
 				 parv[0], chptr->chname,
 				 chptr->topic);
-	      sendto_channel_butserv(chptr, sptr, ":%s TOPIC %s :%s",
-				     parv[0],
-				     chptr->chname, chptr->topic);
+	      if(GlobalSetOptions.hide_chanops)
+		{
+		  sendto_channel_butserv(ONLY_CHANOPS,
+					 chptr, sptr, ":%s TOPIC %s :%s",
+					 parv[0],
+					 chptr->chname, chptr->topic);
+		}
+	      else
+		{
+		  sendto_channel_butserv(ALL_MEMBERS,
+					 chptr, sptr, ":%s TOPIC %s :%s",
+					 parv[0],
+					 chptr->chname, chptr->topic);
+		}
+
 	    }
 	  else
             sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED),

@@ -82,7 +82,8 @@ char *_version = "20001122";
 #define TOKEN_SPAMTIME 6
 #define TOKEN_LOG 7
 #define TOKEN_HIDE 8
-#define TOKEN_BAD 9
+#define TOKEN_CHIDE 9
+#define TOKEN_BAD 10
 
 char *set_token_table[] = {
   "MAX",
@@ -94,6 +95,7 @@ char *set_token_table[] = {
   "SPAMTIME",
   "LOG",
   "HIDE",
+  "CHIDE",
   NULL
 };
 
@@ -369,6 +371,28 @@ int mo_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
             {
               sendto_one(sptr, ":%s NOTICE %s :HIDE is currently %i",
                          me.name, parv[0], GlobalSetOptions.hide_server);
+
+            }
+          return 0;
+          break;
+
+        case TOKEN_CHIDE:
+          if(parc > 2)
+            {
+              int newval = atoi(parv[2]);
+
+              if(newval)
+                GlobalSetOptions.hide_chanops = 1;
+	      else
+		GlobalSetOptions.hide_chanops = 0;
+
+              sendto_realops("%s has changed CHIDE to %i",
+                             parv[0], GlobalSetOptions.hide_chanops);
+            }
+          else
+            {
+              sendto_one(sptr, ":%s NOTICE %s :CHIDE is currently %i",
+                         me.name, parv[0], GlobalSetOptions.hide_chanops);
 
             }
           return 0;

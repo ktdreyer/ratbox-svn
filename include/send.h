@@ -37,8 +37,13 @@ extern  void sendto_channel_type(struct Client *,
                                  const char *message);
 extern  void sendto_serv_butone(struct Client *, const char *, ...);
 extern  void sendto_common_channels(struct Client *, const char *, ...);
-extern  void sendto_channel_butserv(struct Channel *, struct Client *, 
+extern  void sendto_channel_butserv(int type,
+				    struct Channel *, struct Client *, 
                                     const char *, ...);
+#define ALL_MEMBERS  0
+#define ONLY_CHANOPS 1
+#define NON_CHANOPS  2
+
 extern  void sendto_match_servs(struct Channel *, struct Client *, 
                                 const char *, ...);
 extern  void sendto_match_cap_servs(struct Channel *, struct Client *, 

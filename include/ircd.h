@@ -48,6 +48,7 @@ struct SetOptions
   int spam_time;
 
   int hide_server;
+  int hide_chanops;
 };
 
 struct Counter {
