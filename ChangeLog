@@ -1,3 +1,20 @@
+androsyn    2004/03/03 13:19:17 EST	(20040303_8)
+
+  Modified files:
+    .                    configure configure.ac 
+  Removed files:
+    src                  sigio.c 
+  Log:
+  Sigio is screwed..and I don't care enough to fix it.  Upgrade to 2.6 for
+  epoll() support or patch your 2.4.x kernel for epoll
+  
+  Revision  Changes    Path
+  7.208     +2 -13     ircd-ratbox/configure
+  7.21      +2 -10     ircd-ratbox/configure.ac
+  7.50      +0 -361    ircd-ratbox/src/sigio.c (dead)
+
+
+
 leeh        2004/03/03 12:59:49 EST	(20040303_7)
 
   Modified files:
