@@ -1,3 +1,9 @@
+*** 20001019_2 by db
+- removed the dns cache built into res.c
+- will have to fill out cres_mem with something more appropriate
+
+
+
 *** 20001019_1 by lusky
 dns cache entries were never fully expiring, stayed in the hashtable forever
 
