@@ -684,16 +684,19 @@ process_request(void)
 		report_error("Server didn't send me the right amount of arguments, I quit");
 	}
 #endif	
-	if(!strcmp(parv[0], "RESIP"))
+	switch(*parv[0])
 	{
-		resolve_ip(parv);	
-	} else
-	if(!strcmp(parv[0], "RESHST"))
-	{
-		resolve_host(parv);
-	}
 	
-
+		case 'I':
+			resolve_ip(parv);
+			break;
+		case 'H':
+			resolve_host(parv);
+			break;
+		default:
+			return;
+			
+	}
 }
 
 static void
