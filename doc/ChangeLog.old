@@ -1,3 +1,11 @@
+*** 20001107_7 by adrian
+
+
+A network code overview. Very brief (only comm_setselect() is covered
+right now), but I'll be adding to it real soon.
+
+
+
 *** 20001107_6 by ejb
 added support for /undline and /ungline (ported from toot's
 patch to -6)
