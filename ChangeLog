@@ -1,3 +1,82 @@
+androsyn    2003/09/10 13:41:52 EDT	(20030910_5)
+
+  Modified files:
+    adns                 adns.h event.c setup.c 
+    include              client.h packet.h s_conf.h s_log.h 
+    modules              .depend m_close.c m_connect.c m_dline.c 
+                         m_etrace.c m_gline.c m_kline.c m_oper.c 
+                         m_set.c m_stats.c m_trace.c 
+    modules/core         m_die.c m_nick.c 
+    src                  .depend Makefile.in adns.c balloc.c 
+                         client.c devpoll.c epoll.c hash.c ircd.c 
+                         ircd_lexer.l ircd_signal.c kqueue.c 
+                         linebuf.c listener.c packet.c poll.c 
+                         qio.c restart.c s_auth.c s_conf.c 
+                         s_gline.c s_log.c s_serv.c s_stats.c 
+                         s_user.c select.c send.c sigio.c 
+  Removed files:
+    include              fdlist.h s_bsd.h 
+    src                  fdlist.c s_bsd.c 
+  Log:
+  Okay..twiddled with things some more.  fdlist.c and s_bsd.c just got merged
+  into commio.c.
+  
+  Revision  Changes    Path
+  1.11      +1 -1      ircd-ratbox/adns/adns.h
+  1.23      +1 -1      ircd-ratbox/adns/event.c
+  1.33      +2 -3      ircd-ratbox/adns/setup.c
+  7.225     +3 -0      ircd-ratbox/include/client.h
+  7.34      +0 -187    ircd-ratbox/include/fdlist.h (dead)
+  7.24      +0 -1      ircd-ratbox/include/packet.h
+  7.47      +0 -102    ircd-ratbox/include/s_bsd.h (dead)
+  7.259     +0 -1      ircd-ratbox/include/s_conf.h
+  7.22      +1 -0      ircd-ratbox/include/s_log.h
+  1.35      +0 -677    ircd-ratbox/modules/.depend
+  1.42      +2 -3      ircd-ratbox/modules/core/m_die.c
+  1.133     +1 -2      ircd-ratbox/modules/core/m_nick.c
+  1.40      +2 -3      ircd-ratbox/modules/m_close.c
+  1.63      +2 -3      ircd-ratbox/modules/m_connect.c
+  1.27      +2 -3      ircd-ratbox/modules/m_dline.c
+  1.8       +2 -3      ircd-ratbox/modules/m_etrace.c
+  1.132     +2 -3      ircd-ratbox/modules/m_gline.c
+  1.168     +2 -3      ircd-ratbox/modules/m_kline.c
+  1.78      +2 -4      ircd-ratbox/modules/m_oper.c
+  1.70      +2 -3      ircd-ratbox/modules/m_set.c
+  1.183     +2 -3      ircd-ratbox/modules/m_stats.c
+  1.89      +2 -3      ircd-ratbox/modules/m_trace.c
+  7.37      +169 -176  ircd-ratbox/src/.depend
+  7.141     +1 -2      ircd-ratbox/src/Makefile.in
+  7.64      +1 -1      ircd-ratbox/src/adns.c
+  7.67      +0 -1      ircd-ratbox/src/balloc.c
+  7.416     +180 -2    ircd-ratbox/src/client.c
+  7.28      +2 -3      ircd-ratbox/src/devpoll.c
+  1.16      +2 -3      ircd-ratbox/src/epoll.c
+  7.45      +0 -453    ircd-ratbox/src/fdlist.c (dead)
+  7.88      +0 -1      ircd-ratbox/src/hash.c
+  7.315     +2 -3      ircd-ratbox/src/ircd.c
+  1.157     +0 -1      ircd-ratbox/src/ircd_lexer.l
+  7.22      +1 -1      ircd-ratbox/src/ircd_signal.c
+  1.42      +2 -3      ircd-ratbox/src/kqueue.c
+  7.115     +1 -1      ircd-ratbox/src/linebuf.c
+  7.97      +3 -7      ircd-ratbox/src/listener.c
+  7.123     +1 -2      ircd-ratbox/src/packet.c
+  7.72      +2 -3      ircd-ratbox/src/poll.c
+  7.4       +2 -3      ircd-ratbox/src/qio.c
+  7.31      +0 -1      ircd-ratbox/src/restart.c
+  7.162     +2 -3      ircd-ratbox/src/s_auth.c
+  7.214     +0 -864    ircd-ratbox/src/s_bsd.c (dead)
+  7.437     +1 -2      ircd-ratbox/src/s_conf.c
+  1.40      +1 -3      ircd-ratbox/src/s_gline.c
+  7.62      +30 -1     ircd-ratbox/src/s_log.c
+  7.371     +7 -11     ircd-ratbox/src/s_serv.c
+  7.31      +1 -2      ircd-ratbox/src/s_stats.c
+  7.294     +1 -2      ircd-ratbox/src/s_user.c
+  7.39      +2 -3      ircd-ratbox/src/select.c
+  7.261     +1 -2      ircd-ratbox/src/send.c
+  7.42      +10 -10    ircd-ratbox/src/sigio.c
+
+
+
 androsyn    2003/09/10 11:39:32 EDT	(20030910_4)
 
   Modified files:
