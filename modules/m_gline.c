@@ -44,11 +44,15 @@
 #include "modules.h"
 #include "s_log.h"
 #include "memory.h"
+#include "event.h"
 
 static int mo_gline(struct Client *, struct Client *, int, const char **);
 static int mc_gline(struct Client *, struct Client *, int, const char **);
 static int ms_gline(struct Client *, struct Client *, int, const char **);
 static int mo_ungline(struct Client *, struct Client *, int, const char **);
+
+static int modinit(void);
+static void moddeinit(void);
 
 struct Message gline_msgtab = {
 	"GLINE", 0, 0, 0, MFLG_SLOW,
@@ -59,19 +63,32 @@ struct Message ungline_msgtab = {
 	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, mg_ignore, {mo_ungline, 2}}
 };
 
+
 mapi_clist_av1 gline_clist[] = { &gline_msgtab, &ungline_msgtab, NULL };
-DECLARE_MODULE_AV1(gline, NULL, NULL, gline_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(gline, modinit, moddeinit, gline_clist, NULL, NULL, "$Revision$");
 
 static int majority_gline(struct Client *source_p, const char *user,
 			  const char *host, const char *reason);
-static void set_local_gline(struct Client *source_p, const char *user,
-			    const char *host, const char *reason);
 
 static int check_wild_gline(const char *, const char *);
 static int invalid_gline(struct Client *, const char *, const char *, char *);
 
 static int remove_temp_gline(const char *, const char *);
+static void expire_pending_glines(void *unused);
 
+static int
+modinit(void)
+{
+	eventAddIsh("expire_pending_glines", expire_pending_glines, NULL, 
+			CLEANUP_GLINES_TIME);
+	return 0;
+}
+
+static void
+moddeinit(void)
+{
+	eventDelete(expire_pending_glines, NULL);
+}
 
 /* mo_gline()
  *
@@ -527,6 +544,29 @@ invalid_gline(struct Client *source_p, const char *luser,
 	return 0;
 }
 
+/* find_is_glined()
+ * 
+ * inputs       - hostname and username to search for
+ * output       - pointer to struct ConfItem if user@host glined
+ * side effects -
+ */
+static struct ConfItem *
+find_is_glined(const char *host, const char *user)
+{
+	struct ConfItem *aconf;
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, glines.head)
+	{
+		aconf = ptr->data;
+		if((!user || irccmp(aconf->user, user) == 0) &&
+		   (!host || irccmp(aconf->host, host) == 0))
+			return aconf;
+	}
+
+	return NULL;
+}
+
 /*
  * set_local_gline
  *
@@ -571,7 +611,9 @@ set_local_gline(struct Client *source_p, const char *user,
 	DupString(aconf->user, user);
 	DupString(aconf->host, host);
 	aconf->hold = CurrentTime + ConfigFileEntry.gline_time;
-	add_gline(aconf);
+
+	dlinkAddTailAlloc(aconf, &glines);
+	add_conf_by_address(aconf->host, CONF_GLINE, aconf->user, aconf);
 
 	sendto_realops_flags(UMODE_ALL, L_ALL,
 			     "%s!%s@%s on %s has triggered gline for [%s@%s] [%s]",
@@ -599,7 +641,7 @@ majority_gline(struct Client *source_p, const char *user,
 	struct gline_pending *pending;
 
 	/* to avoid desync.. --fl */
-	cleanup_glines(NULL);
+	expire_pending_glines(NULL);
 
 	/* if its already glined, why bother? :) -- fl_ */
 	if(find_is_glined(host, user))
@@ -646,7 +688,7 @@ majority_gline(struct Client *source_p, const char *user,
 				set_local_gline(source_p, user, host,
 						pending->reason1);
 
-				cleanup_glines(NULL);
+				expire_pending_glines(NULL);
 				return YES;
 			}
 			else
@@ -735,3 +777,37 @@ remove_temp_gline(const char *user, const char *host)
 
 	return NO;
 }
+
+/*
+ * expire_pending_glines
+ * 
+ * inputs       - NONE
+ * output       - NONE
+ * side effects -
+ *
+ * Go through the pending gline list, expire any that haven't had
+ * enough "votes" in the time period allowed
+ */
+static void
+expire_pending_glines(void *unused)
+{
+	dlink_node *pending_node;
+	dlink_node *next_node;
+	struct gline_pending *glp_ptr;
+
+	DLINK_FOREACH_SAFE(pending_node, next_node, pending_glines.head)
+	{
+		glp_ptr = pending_node->data;
+
+		if(((glp_ptr->last_gline_time + GLINE_PENDING_EXPIRE) <=
+		    CurrentTime) || find_is_glined(glp_ptr->host, glp_ptr->user))
+
+		{
+			MyFree(glp_ptr->reason1);
+			MyFree(glp_ptr->reason2);
+			MyFree(glp_ptr);
+			dlinkDestroy(pending_node, &pending_glines);
+		}
+	}
+}
+

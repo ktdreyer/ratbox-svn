@@ -30,10 +30,7 @@
 struct Client;
 struct ConfItem;
 
-extern struct ConfItem *find_is_glined(const char *host, const char *name);
 extern void cleanup_glines(void *unused);
-extern void add_gline(struct ConfItem *);
-
 
 typedef struct gline_pending
 {

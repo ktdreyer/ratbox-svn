@@ -53,6 +53,7 @@
 #include "class.h"
 #include "adns.h"
 #include "res.h"
+#include "s_gline.h"
 
 dlink_list shared_conf_list;
 dlink_list cluster_conf_list;
@@ -61,6 +62,7 @@ dlink_list hubleaf_conf_list;
 dlink_list server_conf_list;
 dlink_list xline_conf_list;
 dlink_list resv_conf_list;	/* nicks only! */
+dlink_list glines;
 static dlink_list nd_list;	/* nick delay */
 dlink_list tgchange_list;
 
@@ -70,6 +72,7 @@ static BlockHeap *nd_heap = NULL;
 
 static void expire_temp_rxlines(void *unused);
 static void expire_nd_entries(void *unused);
+static void expire_glines(void *unused);
 
 void
 init_s_newconf(void)
@@ -78,6 +81,7 @@ init_s_newconf(void)
 	nd_heap = BlockHeapCreate(sizeof(struct nd_entry), ND_HEAP_SIZE);
 	eventAddIsh("expire_nd_entries", expire_nd_entries, NULL, 30);
 	eventAddIsh("expire_temp_rxlines", expire_temp_rxlines, NULL, 60);
+	eventAddIsh("expire_glines", expire_glines, NULL, CLEANUP_GLINES_TIME);
 }
 
 void
@@ -248,6 +252,25 @@ cluster_generic(struct Client *source_p, const char *command,
 		sendto_match_servs(source_p, shared_p->server, CAP_ENCAP, cap,
 				"ENCAP %s %s %s",
 				shared_p->server, command, buffer);
+	}
+}
+
+static void
+expire_glines(void *unused)
+{
+	struct ConfItem *aconf;
+	dlink_node *ptr, *next_ptr;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, glines.head)
+	{
+		aconf = ptr->data;
+
+		/* if gline_time changes, these could end up out of order */
+		if(aconf->hold > CurrentTime)
+			continue;
+
+		delete_one_address_conf(aconf->host, aconf);
+		dlinkDestroy(ptr, &glines);
 	}
 }
 

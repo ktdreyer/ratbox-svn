@@ -37,7 +37,6 @@
 #include "irc_string.h"
 #include "ircd_signal.h"
 #include "sprintf_irc.h"
-#include "s_gline.h"
 #include "hostmask.h"
 #include "numeric.h"
 #include "parse.h"
@@ -666,8 +665,6 @@ main(int argc, char *argv[])
 	open_logfiles();
 
 	ilog(L_MAIN, "Server Ready");
-
-	eventAddIsh("cleanup_glines", cleanup_glines, NULL, CLEANUP_GLINES_TIME);
 
 	/* We want try_connections to be called as soon as possible now! -- adrian */
 	/* No, 'cause after a restart it would cause all sorts of nick collides */
