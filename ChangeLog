@@ -1,3 +1,21 @@
+leeh        2003/12/10 10:31:27 EST	(20031210_0)
+
+  Modified files:
+    include              c_init.h 
+    src                  c_message.c channel.c rserv.c s_alis.c 
+  Log:
+  - disable notice for now
+  - more work on alis..
+  
+  Revision  Changes    Path
+  1.4       +1 -1      rserv/include/c_init.h
+  1.2       +1 -1      rserv/src/c_message.c
+  1.3       +1 -0      rserv/src/channel.c
+  1.3       +1 -1      rserv/src/rserv.c
+  1.2       +281 -1    rserv/src/s_alis.c
+
+
+
 leeh        2003/12/08 19:23:57 EST	(20031209_0)
 
   Modified files:
