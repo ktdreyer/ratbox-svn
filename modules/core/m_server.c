@@ -465,6 +465,14 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
   make_server(target_p);
   target_p->hopcount = hop;
   strlcpy(target_p->name, name, HOSTLEN);
+  if(name > HOSTLEN)
+  {
+  	sendto_realops_flags(FLAGS_ALL, L_ADMIN,
+  	     	                        "Server %s was introducted with a name greater than HOSTLEN: %d > %d", 
+  	     	                        name, strlen(name), HOSTLEN);
+  }
+
+  
   set_server_gecos(target_p, info);
 
   target_p->serv->up = find_or_add(parv[0]);
