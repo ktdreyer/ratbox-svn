@@ -1,3 +1,25 @@
+leeh        2004/08/12 22:00:03 EDT	(20040813_1)
+
+  Modified files:
+    include              numeric.h 
+    modules              m_info.c 
+    modules/core         m_message.c registration.c 
+    src                  messages.tab 
+  Log:
+  - added ERR_TARGCHANGE (708) to notify a user hes changing targets too fast
+  - typo in m_info.c
+  - fix target_last logic, set on connect and never let USED_TARGETS become
+    negative
+  
+  Revision  Changes    Path
+  7.47      +2 -0      ircd-ratbox/include/numeric.h
+  1.150     +7 -3      ircd-ratbox/modules/core/m_message.c
+  1.13      +2 -1      ircd-ratbox/modules/core/registration.c
+  1.115     +2 -2      ircd-ratbox/modules/m_info.c
+  7.115     +1 -1      ircd-ratbox/src/messages.tab
+
+
+
 leeh        2004/08/12 20:27:02 EDT	(20040813_0)
 
   Modified files:
