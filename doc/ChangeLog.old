@@ -1,3 +1,8 @@
+*** 20001216_6 by db
+- remote lazy link /list was broken, missing ms_link in handler
+
+
+
 *** 20001216_5 by db
         Included here is a patch which adds the function strip_tabs
         to irc_string.c; the function converts all found tabs to
