@@ -11,7 +11,7 @@ INSTALL_SUID	= @INSTALL_PROGRAM@ -o root -m 4755
 RM		= @RM@
 LEX		= @LEX@
 LEXLIB		= @LEXLIB@
-CFLAGS		= @CFLAGS@
+CFLAGS		= @CFLAGS@ -DIRCD_PREFIX=\"@prefix@\"
 LDFLAGS   	= -Wl,-export-dynamic
 MKDEP		= ${CC} -MM
 MV		= @MV@
