@@ -1,3 +1,7 @@
+*** 20010824_3 by leeh
+- moved report_glines() to m_stats.c
+
+
 *** 20010824_2 by leeh
 - moved report_dlines and report_elines -> m_stats.c and merged them with
   the stats function that called them
