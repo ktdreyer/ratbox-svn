@@ -1,3 +1,7 @@
+*** 20010424_9 by androsyn
+The ::1 bug is fixed by mapping it to its ipv4 counterpart..
+
+
 *** 20010424_8 by androsyn
 This hack will map ::1 to 127.0.0.1 along with any other IPv6 addresses that
 have the upper 96bits set to 0.
