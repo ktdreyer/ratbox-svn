@@ -80,7 +80,7 @@ static struct flag_item user_modes[] =
   {FLAGS_BOTS,  'b'},
   {FLAGS_CCONN, 'c'},
   {FLAGS_DEBUG, 'd'},
-  {FLAGS_DRONE, 'e'}
+  {FLAGS_DRONE, 'e'},
   {FLAGS_FULL,  'f'},
   {FLAGS_CALLERID, 'g'},
   {FLAGS_INVISIBLE, 'i'},
