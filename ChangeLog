@@ -1,3 +1,36 @@
+ejb         2003/02/04 14:33:52 UTC	(20030204_11)
+
+  Modified files:
+    include              hook.h modules.h 
+    modules              .depend m_admin.c m_info.c m_links.c 
+                         m_motd.c m_stats.c m_trace.c m_whois.c 
+    src                  .depend dynlink.c hook.c packet.c 
+                         s_serv.c send.c 
+  Log:
+  - new HAPI code to go with MAPI.  Should work but not tested.
+    (rewrote to use numeric ids instead of names when calling,
+     should be noticably faster.)
+  
+  Revision  Changes    Path
+  1.20      +8 -2      ircd-ratbox/include/hook.h
+  7.42      +2 -1      ircd-ratbox/include/modules.h
+  1.23      +648 -646  ircd-ratbox/modules/.depend
+  1.43      +9 -8      ircd-ratbox/modules/m_admin.c
+  1.76      +9 -2      ircd-ratbox/modules/m_info.c
+  1.45      +9 -2      ircd-ratbox/modules/m_links.c
+  1.37      +9 -2      ircd-ratbox/modules/m_motd.c
+  1.146     +15 -4     ircd-ratbox/modules/m_stats.c
+  1.69      +8 -6      ircd-ratbox/modules/m_trace.c
+  1.105     +12 -9     ircd-ratbox/modules/m_whois.c
+  7.24      +267 -1    ircd-ratbox/src/.depend
+  7.13      +7 -1      ircd-ratbox/src/dynlink.c
+  7.26      +46 -12    ircd-ratbox/src/hook.c
+  7.115     +2 -2      ircd-ratbox/src/packet.c
+  7.320     +1 -1      ircd-ratbox/src/s_serv.c
+  7.236     +1 -1      ircd-ratbox/src/send.c
+
+
+
 ejb         2003/02/04 13:55:34 UTC	(20030204_10)
 
   Modified files:
