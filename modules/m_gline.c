@@ -309,6 +309,8 @@ static void ms_gline(struct Client *client_p,
   /* or it's a hyb-6 style */
   else if(parc == 8 && IsServer(source_p))
     {
+      struct Client *acptr;
+
       oper_nick = parv[1];
       oper_user = parv[2];
       oper_host = parv[3];
@@ -316,6 +318,16 @@ static void ms_gline(struct Client *client_p,
       user = parv[5];
       host = parv[6];
       reason = parv[7];      
+
+      /* Its plausible that the server and/or client dont actually exist, and its
+       * faked, as the oper isnt sending the gline.. check theyre real --fl_ */
+      if(acptr = find_server(oper_server))
+        {
+          if(!(acptr = find_client(oper_user, NULL)))
+            return;
+        }
+      else
+        return;
     }
   /* none of the above */
   else
@@ -324,7 +336,7 @@ static void ms_gline(struct Client *client_p,
   /* send in hyb-7 to compatable servers */
   sendto_cap_serv_butone(CAP_GLN,
                          source_p, ":%s GLINE %s %s :%s",
-		         source_p->name,
+		         oper_nick,
 		         user,
 		         host,
 		         reason);
