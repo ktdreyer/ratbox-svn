@@ -1206,7 +1206,7 @@ void dead_link(struct Client *client_p)
 {
   dlink_node *m;
   const char *notice;
-  if(IsClosing(client_p))
+  if(IsClosing(client_p) || IsDead(client_p))
     return;
 
   linebuf_donebuf(&client_p->localClient->buf_recvq);
