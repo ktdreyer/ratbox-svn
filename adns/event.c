@@ -40,7 +40,8 @@
 #include "s_bsd.h"
 #include "internal.h"
 #include "tvarith.h"
-
+#include "irc_string.h"
+#include "memory.h"
 /* TCP connection management. */
 
 static void tcp_close(adns_state ads) {
@@ -667,7 +668,7 @@ int adns__internal_check(adns_state ads,
   *answer= qu->answer;
   if (context_r) *context_r= qu->ctx.ext;
   *query_io= qu;
-  free(qu);
+  MyFree(qu);
   return 0;
 }
 
