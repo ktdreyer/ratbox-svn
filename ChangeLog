@@ -1,3 +1,15 @@
+leeh        2004/03/27 12:29:07 EST	(20040327_1)
+
+  Modified files:
+    modules              m_stats.c 
+  Log:
+  - do *not* hide opers from other opers
+  
+  Revision  Changes    Path
+  1.209     +3 -2      ircd-ratbox/modules/m_stats.c
+
+
+
 leeh        2004/03/27 12:15:49 EST	(20040327_0)
 
   Modified files:
