@@ -1,3 +1,15 @@
+androsyn    2002/11/26 04:57:08 UTC	(20021126_5)
+
+  Modified files:
+    src                  ircd_parser.y 
+  Log:
+  Missed a const char
+  
+  Revision  Changes    Path
+  1.270     +1 -1      ircd-ratbox/src/ircd_parser.y
+
+
+
 androsyn    2002/11/26 04:34:38 UTC	(20021126_4)
 
   Modified files:
