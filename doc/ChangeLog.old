@@ -1,3 +1,23 @@
+androsyn    2002/06/10 21:02:33 EDT	(20020611_3)
+
+  Modified files:
+    include              channel.h config.h 
+    modules              m_join.c m_list.c m_topic.c 
+    src                  channel.c s_serv.c 
+  Log:
+  Allocate topics from the block heap instead of being part of struct Channel
+  
+  Revision  Changes    Path
+  7.115     +5 -2      ircd-hybrid-7/include/channel.h
+  7.134     +2 -0      ircd-hybrid-7/include/config.h
+  1.86      +2 -2      ircd-hybrid-7/modules/m_join.c
+  1.43      +7 -7      ircd-hybrid-7/modules/m_list.c
+  1.53      +43 -23    ircd-hybrid-7/modules/m_topic.c
+  7.318     +45 -0     ircd-hybrid-7/src/channel.c
+  7.261     +2 -2      ircd-hybrid-7/src/s_serv.c
+
+
+
 androsyn    2002/06/10 20:55:13 EDT	(20020611_2)
 
   Modified files:
