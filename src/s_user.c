@@ -176,7 +176,8 @@ int user_modes_from_c_to_bitmask[] =
  * output	-
  * side effects	- display to client user counts etc.
  */
-int show_lusers(struct Client *source_p) 
+int
+show_lusers(struct Client *source_p) 
 {
   if(!ConfigServerHide.hide_servers || IsOper(source_p))
     sendto_one(source_p, form_str(RPL_LUSERCLIENT), me.name, source_p->name,
@@ -234,7 +235,8 @@ int show_lusers(struct Client *source_p)
  * output	- 
  * side effects	- display to client what we support (for them)
  */
-void show_isupport(struct Client *source_p) 
+void
+show_isupport(struct Client *source_p) 
 {
   char isupportbuffer[512];
 
@@ -274,7 +276,8 @@ void show_isupport(struct Client *source_p)
 **         nick from local user or kill him/her...
 */
 
-int register_local_user(struct Client *client_p, struct Client *source_p, 
+int
+register_local_user(struct Client *client_p, struct Client *source_p, 
 			char *nick, char *username)
 {
   struct ConfItem*  aconf;
@@ -501,7 +504,8 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
  * side effects	- This function is called when a remote client
  *		  is introduced by a server.
  */
-int register_remote_user(struct Client *client_p, struct Client *source_p, 
+int
+register_remote_user(struct Client *client_p, struct Client *source_p, 
 			 char *nick, char *username)
 {
   struct User*     user = source_p->user;
@@ -686,7 +690,8 @@ introduce_client(struct Client *client_p, struct Client *source_p,
  * NOTE: this doesn't allow a hostname to begin with a dot and
  * will not allow more dots than chars.
  */
-static int valid_hostname(const char* hostname)
+static int
+valid_hostname(const char* hostname)
 {
   const char* p     = hostname;
 
@@ -719,7 +724,8 @@ static int valid_hostname(const char* hostname)
  * Allow '.' in username to allow for "first.last"
  * style of username
  */
-static int valid_username(const char* username)
+static int
+valid_username(const char* username)
 {
   int dots = 0;
   const char *p = username;
@@ -811,7 +817,8 @@ report_and_set_user_flags(struct Client *source_p,struct ConfItem *aconf)
  * output	-
  * side effects -
  */
-int do_local_user(char* nick, struct Client* client_p, struct Client* source_p,
+int
+do_local_user(char* nick, struct Client* client_p, struct Client* source_p,
 		  char* username, char *host, char *server, char *realname)
 {
   struct User* user;
@@ -862,7 +869,8 @@ int do_local_user(char* nick, struct Client* client_p, struct Client* source_p,
  * output	-
  * side effects -
  */
-int do_remote_user(char* nick, struct Client* client_p, struct Client* source_p,
+int
+do_remote_user(char* nick, struct Client* client_p, struct Client* source_p,
 		   char* username, char *host, char *server, char *realname,
 		   char *id)
 {
@@ -898,7 +906,8 @@ int do_remote_user(char* nick, struct Client* client_p, struct Client* source_p,
  * parv[1] - username to change mode for
  * parv[2] - modes to change
  */
-int user_mode(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+int
+user_mode(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
   int   flag;
   int   i;
@@ -964,7 +973,7 @@ int user_mode(struct Client *client_p, struct Client *source_p, int parc, char *
   /*
    * parse mode change string(s)
    */
-  for (p = &parv[2]; p && *p; p++ )
+  for (p = &parv[2]; p && *p; p++)
     for (m = *p; *m; m++)
       switch(*m)
         {
@@ -1005,29 +1014,13 @@ int user_mode(struct Client *client_p, struct Client *source_p, int parc, char *
 		  ptr = source_p->localClient->confs.head;
 		  aconf = ptr->data;
                   detach_conf(source_p,aconf);
-
-                  source_p->flags2 &= ~(FLAGS2_OPER_GLOBAL_KILL|
-                                    FLAGS2_OPER_REMOTE|
-                                    FLAGS2_OPER_UNKLINE|
-                                    FLAGS2_OPER_GLINE|
-                                    FLAGS2_OPER_N|
-                                    FLAGS2_OPER_K|
-                                    FLAGS2_OPER_ADMIN);
-
+		  source_p->flags2 &= ~FLAGS2_OPER_FLAGS;
 		  dm = dlinkFind(&oper_list,source_p);
 		  if(dm != NULL)
 		    {
 		      dlinkDelete(dm,&oper_list);
 		      free_dlink_node(dm);
 		    }
-
-		  /*
-		    20001216:
-		    reattach to "old" iline
-		    - einride
-		  */
-		  remove_one_ip(&source_p->localClient->ip);
-		  check_client(source_p->servptr, source_p, source_p->username);
                 }
             }
           break;
@@ -1093,14 +1086,15 @@ int user_mode(struct Client *client_p, struct Client *source_p, int parc, char *
    */
   send_umode_out(client_p, source_p, setflags);
 
-  return 0;
+  return(0);
 }
         
 /*
  * send the MODE string for user (user) to connection client_p
  * -avalon
  */
-void send_umode(struct Client *client_p, struct Client *source_p, int old, 
+void
+send_umode(struct Client *client_p, struct Client *source_p, int old, 
 		int sendmask,  char *umode_buf)
 {
   int   i;
@@ -1157,7 +1151,8 @@ void send_umode(struct Client *client_p, struct Client *source_p, int old,
  * output	- NONE
  * side effects - Only send ubuf out to servers that know about this client
  */
-void send_umode_out(struct Client *client_p,
+void
+send_umode_out(struct Client *client_p,
 		    struct Client *source_p,
 		    int old)
 {
@@ -1192,7 +1187,8 @@ void send_umode_out(struct Client *client_p,
  * output	- NONE
  * side effects	-
  */
-void user_welcome(struct Client *source_p)
+void
+user_welcome(struct Client *source_p)
 {
   sendto_one(source_p, form_str(RPL_WELCOME), me.name, source_p->name, 
              ServerInfo.network_name, source_p->name );
@@ -1254,7 +1250,8 @@ void user_welcome(struct Client *source_p)
  * outupt	- -1 if exiting 0 if ok
  * side effects	-
  */
-static int check_X_line(struct Client *client_p, struct Client *source_p)
+static int
+check_X_line(struct Client *client_p, struct Client *source_p)
 {
   struct ConfItem *aconf;
   char *reason;
@@ -1291,7 +1288,7 @@ static int check_X_line(struct Client *client_p, struct Client *source_p)
 			     get_client_name(client_p, HIDE_IP));
     }
 
-  return 0;
+  return 0);
 }
 
 /*
@@ -1306,8 +1303,8 @@ static int check_X_line(struct Client *client_p, struct Client *source_p)
  * This could also be used by rsa oper routines. 
  */
 
-int oper_up( struct Client *source_p,
-                    struct ConfItem *aconf )
+int
+oper_up( struct Client *source_p, struct ConfItem *aconf )
 {
   int old = (source_p->umodes & ALL_UMODES);
   char *operprivs=NULL;
@@ -1319,7 +1316,7 @@ int oper_up( struct Client *source_p,
   if((int)aconf->hold)
     {
       source_p->umodes |= ((int)aconf->hold & ALL_UMODES); 
-      if( !IsOperN(source_p) )
+      if (!IsOperN(source_p))
 	source_p->umodes &= ~FLAGS_NCHANGE;
       
       sendto_one(source_p, ":%s NOTICE %s :*** Oper flags set from conf",
@@ -1369,5 +1366,5 @@ int oper_up( struct Client *source_p,
              source_p->name, operprivs);
   SendMessageFile(source_p, &ConfigFileEntry.opermotd);
   
-  return 1;
+  return(1);
 }
