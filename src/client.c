@@ -1324,16 +1324,10 @@ void count_remote_client_memory(int *count,
  */
 int accept_message(struct Client *source, struct Client *target)
 {
-  dlink_node *ptr;
-  struct Client *target_p;
-
-  DLINK_FOREACH(ptr, target->allow_list.head)
-  {
-    target_p = ptr->data;
-    if(source == target_p)
+  if(dlinkFind(&target->allow_list, source) != NULL)
     return 1;
-  }
-  return 0;
+
+  return 0;   
 }
 
 
