@@ -26,6 +26,7 @@
 #include "s_log.h"
 #include "client.h"
 #include "md5.h"
+#include "setup.h"
 
 /*
 ** how unique ID generation works:

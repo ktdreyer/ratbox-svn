@@ -16,6 +16,11 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  **************************************************************************/
 
+#ifndef __INCLUDE_MD5_H_INCLUDED
+#define __INCLUDE_MD5_H_INCLUDED
+
+#include "setup.h"
+
 #define MD5_HASH_SIZE   4
 #define	MD5_BLOCK_SIZE	16
 
@@ -35,3 +40,4 @@ void id_reseed(char *, int);
 char *id_get(void);
 char *cookie_get(void);
 
+#endif
