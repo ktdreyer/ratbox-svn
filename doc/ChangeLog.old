@@ -1,3 +1,11 @@
+*** 20010107_6 by db
+- removed unused variable in m_kill.c
+- resolved global shadowing in send.c
+- ensure any client being identd' is removed by exit_client()
+- i before e, except after c (spelling mistake in messages.tab)
+
+
+
 *** 20010107_5 by db
 - this fixes an assert() failure if a client exits before DNS has completed
   We forgot to delete_resolver_queries() in exit_client() in client.c
