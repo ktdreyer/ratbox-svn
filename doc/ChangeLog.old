@@ -1,3 +1,12 @@
+*** 20010108_8 by db
+- don't assume a client is only listed once in the request_list,
+  there might be a forward as well as reverse pending in the same list.
+  Hope this fixes the assert() bug
+- rewrote delete_resolver_queries to do the search and removal of
+  clients in one step instead of calling rem_request.
+
+
+
 *** 20010108_7 by wcampbel
 Removed my md5mkpasswd and added in a replacement mkpasswd that can (if
 the system supports it) generate both MD5 and DES based passwords, more docs
