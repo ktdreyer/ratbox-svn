@@ -1,3 +1,12 @@
+*** 20001218_1 by bill
+
+- changed all file_open() and file_close() calls to fbopen() and fbclose()
+- changed all write()s to fbputs()s
+- updated dependancy file
+- added strerror() msgs to failed file i/o logs/server notices
+- moved FBFILE struct from fileio.c to fileio.h
+
+
 *** 20001217_9 by db
 - rewrote m_gline.c to use fbopen and friends consistently
   removed "safe_write()" entirely. BLOAT
