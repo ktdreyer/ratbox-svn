@@ -54,11 +54,6 @@
     the file is installed, you can SET MSGLOCALE back to the language that
     was just updated.
 
-6.  Please ignore any of the following messages during compile time, as
-    they pertain to OpenSSL and are ***NOT*** bugs in hybrid-7:
-      - warning: declaration of `version' shadows global declaration
-      - implicit declaration of function `PEM_read_bio_RSAPrivateKey'
-
 For more information regarding bugs, please visit the following URL:
 
   http://bugs.efnow.net/
