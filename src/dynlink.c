@@ -225,6 +225,13 @@ unload_one_module(char *name, int warn)
 	case 1:
 	{
 		struct mapi_mheader_av1* mheader = modlist[modindex]->mapi_header;
+		if (mheader->mapi_command_list)
+		{
+			struct Message **m;
+			for (m = mheader->mapi_command_list; *m; ++m)
+				mod_del_cmd(*m);
+		}
+		/* XXX implement hook_list		-larne */
 		if (mheader->mapi_unregister)
 			mheader->mapi_unregister();
 		break;
