@@ -1,3 +1,7 @@
+*** 20010906_3 by leeh
+- . is an acceptable ident char
+
+
 *** 20010906_2 by leeh
 - updated links_delay description to say how it actually works
 
