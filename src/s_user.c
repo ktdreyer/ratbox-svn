@@ -365,19 +365,23 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 			return (CLIENT_EXITED);
 		}
 
-		p = username;
-
-		if(!IsNoTilde(aconf))
-			source_p->username[i++] = '~';
-
-		while (*p && i < USERLEN)
+		/* dont replace username if its supposed to be spoofed --fl */
+		if(!IsConfDoSpoofIp(aconf) || !strchr(aconf->name, '@'))
 		{
-			if(*p != '[')
-				source_p->username[i++] = *p;
-			p++;
-		}
+			p = username;
 
-		source_p->username[i] = '\0';
+			if(!IsNoTilde(aconf))
+				source_p->username[i++] = '~';
+
+			while (*p && i < USERLEN)
+			{
+				if(*p != '[')
+					source_p->username[i++] = *p;
+				p++;
+			}
+
+			source_p->username[i] = '\0';
+		}
 	}
 
 	/* password check */
