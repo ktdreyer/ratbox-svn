@@ -1,3 +1,91 @@
+*** 20010702_9 by jdc
+Monster Update(tm) time.  Please read the following disclaimer:
+
+Cryptlinks have been slightly redone in a different format: THE PROTOCOL
+HAS CHANGED.  You will *NOT* be able to connect an older hybrid-7 daemon
+with this and future versions of hybrid-7.  The same goes for present
+hybrid-6 connecting to this hybrid-7 or vice-versa.  The result of trying
+to connect older daemons will be a timeout, or otherwise odd behaviour.
+
+- doc/cryptlink.txt
+    * Updated the protocol; should be cleaner, handled under one command:
+      CRYPTLINK.  Subset commands are AUTH and SERV (eg. CRYPTLINK AUTH,
+      and CRYPTLINK SERV).
+    * Error handling is now documented.
+    * Examples of protocol transactions.
+
+- doc/example.conf
+    * Updated comments regarding how to use "cipher_preference" and
+      "default_cipher_preference" directives.
+
+- include/client.h
+    * Cosmetical changes.
+
+- include/defaults.h
+    * Cosmetical changes.
+
+- include/modules.h
+- src/modules.c
+    * Removed "cryptauth_msgtab" and "cryptserv_msgtab" defs.
+    * Added "cryptlink_msgtab" extern declaration.
+
+- include/s_conf.h
+- src/s_conf.c
+    * Changed "cipher_preference" and "default_cipher_preference" defs from
+      from EncPreference to EncCapability.
+
+- include/s_serv.h
+- src/s_serv.c
+    * Removed EncPreference structure.
+    * Renamed "enccaptab" to "CipherTable".
+    * Changed cryptlink_error() function to take a lot more arguments;
+      the syntax has greatly changed.
+    * cryptlink_error() extended to not only send messages to admins,
+      opers, and call exit_client (dynamically), but also ilog().  About
+      time!
+    * Renamed select_cipher() to check_cipher().
+    * Added #ifdef's around portions of CipherTable to ensure completely
+      that we do not even add the cipher to our list in the case that
+      autoconf does not find it to be a supported cipher.  This is needed
+      for the cipher detection methods which use CipherTable anywhere.
+    * Removed all the silly cipher "priority" garbage.  Good riddance.
+    * Much __MUCH__ better error handling and error descriptions.  Now
+      both ends of the link should get an idea of what's wrong.
+    * Cosmetical changes.
+    * Added some comments.
+
+- modules/m_capab.c
+    * Removed code to support multiple cipher preferences via "," delim.
+      This is silly; pick a cipher and use it.  Autonegotiation is pretty
+      pointless for this kind-of communication medium.  This should also
+      speed up the code a bit; no more strtoken().
+
+- modules/m_cryptlink.c
+    * Renamed mr_cryptserv() to cryptlink_serv().
+    * Renamed mr_cryptauth() to cryptlink_auth().
+    * Added mr_cryptlink().  This function is VERY simple, and uses a
+      table (CryptLinkStruct) to refer to it's commands.  This should be
+      useful for the future, particularly in regards to things like
+      key regeneration and for general expansion.  Someone should probably
+      check mr_cryptlink() out for any problems, though.
+    * Much __MUCH__ better error handling and error descriptions.  Now
+      both ends of the link should get an idea of what's wrong.
+    * cryptlink_serv() and cryptlink_auth() both were doing case-sensitive
+      cipher checks; moved from strcmp() to strcasecmp().
+
+- src/ircd_parser.y
+    * In code pertaining to cipher_preference and default_cipher_preference,
+      __completely__ changed how the cipher mechanism is done.  Before, we
+      were doing some hoky crap with memory allocation and creating a buffer
+      for "cipher priority".  All of this is now gone.  Instead, we use
+      pointers to point into CipherTable.  This is *FAST AND CLEAN*.  Yay.
+    * Fixed bug: /REHASH could possibly corrupt the key on an error.
+    * Fixed minor memory leak (I think; could be wrong on this one).
+    * Changed some error messages to be more clear.
+    * Cosmetical changes.
+
+
+
 *** 20010702_8 by androsyn
 Fixes EO's bug with recursive CNAMEs.  And just for the record, I'd like to
 note that this sucks, bad.  Whoever thought up CNAMEs should be shot..dead
