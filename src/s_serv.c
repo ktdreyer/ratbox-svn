@@ -1233,6 +1233,8 @@ serv_connect_callback(int fd, int status, void *data)
     /* Check the status */
     if (status != COMM_OK) {
         /* We have an error, so report it and quit */
+        sendto_realops("Error connecting to %s[%s]: %s\n", cptr->name,
+          cptr->host, comm_errstr(status));
         exit_client(cptr, cptr, &me, comm_errstr(status));
         return;
     }
