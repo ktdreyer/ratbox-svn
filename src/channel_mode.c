@@ -1033,7 +1033,7 @@ chm_except(struct Client *client_p, struct Client *source_p,
 #endif    
 
   /* If we're adding a NEW id */
-  if ((dir == MODE_QUERY) && add_id(source_p, chptr, mask, CHFL_EXCEPTION) == 0)
+  if ((dir == MODE_ADD) && add_id(source_p, chptr, mask, CHFL_EXCEPTION) == 0)
   {
     for (i = 0; i < mode_count_minus; i++)
     {
