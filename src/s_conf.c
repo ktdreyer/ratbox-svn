@@ -139,12 +139,17 @@ struct ConfItem        *x_conf = ((struct ConfItem *)NULL);
 struct ConfItem        *u_conf = ((struct ConfItem *)NULL);
 
 /*
- * conf_dns_callback - called when resolver query finishes
+ * conf_dns_callback
+ * inputs	- pointer to struct ConfItem
+ *		- pointer to adns reply
+ * output	- none
+ * side effects	- called when resolver query finishes
  * if the query resulted in a successful search, hp will contain
  * a non-null pointer, otherwise hp will be null.
  * if successful save hp in the conf item it was called with
  */
-static void conf_dns_callback(void* vptr, adns_answer *reply)
+static void 
+conf_dns_callback(void* vptr, adns_answer *reply)
 {
   struct ConfItem *aconf = (struct ConfItem *) vptr;
 
@@ -234,9 +239,10 @@ delist_conf(struct ConfItem* aconf)
  *
  * inputs	- pointer to conf to free
  * output	- none
- * side effects	-
+ * side effects	- crucial password fields are zeroed, conf is freed
  */
-void free_conf(struct ConfItem* aconf)
+void 
+free_conf(struct ConfItem* aconf)
 {
   assert(aconf != NULL);
   assert(!(aconf->status & CONF_CLIENT) ||
@@ -247,6 +253,7 @@ void free_conf(struct ConfItem* aconf)
   if (aconf->passwd)
     memset(aconf->passwd, 0, strlen(aconf->passwd));
   MyFree(aconf->passwd);
+  MyFree(aconf->oper_reason);
   if (aconf->spasswd)
     memset(aconf->spasswd, 0, strlen(aconf->spasswd));
   MyFree(aconf->spasswd);
@@ -264,7 +271,8 @@ void free_conf(struct ConfItem* aconf)
  * remove all conf entries from the client except those which match
  * the status field mask.
  */
-void det_confs_butmask(struct Client* client_p, int mask)
+void
+det_confs_butmask(struct Client *client_p, int mask)
 {
   dlink_node *dlink;
   dlink_node *link_next;
@@ -550,7 +558,7 @@ verify_access(struct Client* client_p, const char* username)
   struct ConfItem* aconf;
   struct ConfItem* gkill_conf;
   char       non_ident[USERLEN + 1];
-  char       *oper_reason;
+
   if (IsGotId(client_p))
     {
       aconf = find_address_conf(client_p->host,client_p->username,
@@ -590,21 +598,9 @@ verify_access(struct Client* client_p, const char* username)
 		    {
 		      sendto_one(client_p, ":%s NOTICE %s :*** G-lined", me.name,
 				 client_p->name);
-                      if ((oper_reason=strchr(gkill_conf->passwd, '|')) ==
-                          NULL)
-                        {
-		          sendto_one(client_p, ":%s NOTICE %s :*** Banned %s",
-				     me.name, client_p->name, 
-                                     gkill_conf->passwd);
-                        }
-                      else
-                        {
-			  *oper_reason = '\0';
-		          sendto_one(client_p, ":%s NOTICE %s :*** Banned %s",
-				     me.name, client_p->name, 
-                                     gkill_conf->passwd);
-			  *oper_reason = '|';
-                        }
+		      sendto_one(client_p, ":%s NOTICE %s :*** Banned %s",
+				 me.name, client_p->name, 
+				 gkill_conf->passwd);
 		      return(BANNED_CLIENT);
 		    }
 		}
@@ -632,20 +628,8 @@ verify_access(struct Client* client_p, const char* username)
 	{
 	  if (ConfigFileEntry.kline_with_reason)
 	    {
-	      /* There is probably a better way of doing this,
-               * but does it really matter?  I don't think so. */
-	      if ((oper_reason=strchr(aconf->passwd, '|')) == NULL)
-                {
-	          sendto_one(client_p, ":%s NOTICE %s :*** Banned %s",
-			     me.name,client_p->name,aconf->passwd);
-                }
-              else
-                {
-		  *oper_reason = '\0';
-	          sendto_one(client_p, ":%s NOTICE %s :*** Banned %s",
-			     me.name,client_p->name,aconf->passwd);
-                  *oper_reason = '|';
-                }
+	      sendto_one(client_p, ":%s NOTICE %s :*** Banned %s",
+			 me.name,client_p->name,aconf->passwd);
 	    }
 	  return(BANNED_CLIENT);
 	}
@@ -2341,6 +2325,7 @@ WriteKlineOrDline( KlineType type,
 		   char *user,
 		   char *host,
 		   const char *reason,
+		   const char *oper_reason,
 		   const char *current_date,
 		   time_t cur_time)
 {
@@ -2375,18 +2360,23 @@ WriteKlineOrDline( KlineType type,
       return;
     }
 
+  if (oper_reason == NULL)
+    oper_reason = "";
+
   if(type==KLINE_TYPE)
-    ircsprintf(buffer, "\"%s\",\"%s\",\"%s %s\",\"%s\",%ld\n",
+    ircsprintf(buffer, "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%ld\n",
                user,
 	       host,
                reason,
+	       oper_reason,
 	       current_date,
 	       get_oper_name(source_p),
                (long) cur_time);
   else
-    ircsprintf(buffer, "\"%s\",\"%s %s\",\"%s\",%ld\n",
+    ircsprintf(buffer, "\"%s\",\"%s\",\"%s\",\"%s\",%ld\n",
                host,
                reason,
+	       oper_reason,
 	       current_date,
 	       get_oper_name(source_p),
                (long) cur_time);

@@ -382,6 +382,7 @@ typedef enum {
 
 extern void WriteKlineOrDline( KlineType, struct Client *,
 			       char *user, char *host, const char *reason,
+			       const char *oper_reason,
 			       const char *current_date, time_t cur_time );
 extern  void    add_temp_kline(struct ConfItem *);
 extern  void    report_temp_klines(struct Client *);

@@ -98,8 +98,8 @@ static int valid_user_host(struct Client *source_p, char *user, char *host);
 static int valid_wild_card(char *user, char *host);
 static int already_placed_kline(struct Client*, char*, char*);
 static void apply_kline(struct Client *source_p, struct ConfItem *aconf,
-                        const char *reason, const char *current_date,
-			time_t cur_time);
+                        const char *reason, const char *oper_reason,
+			const char *current_date, time_t cur_time);
 
 static void apply_tkline(struct Client *source_p, struct ConfItem *aconf,
                          const char *current_date, int temporary_kline_time);
@@ -129,6 +129,7 @@ static void mo_kline(struct Client *client_p,
                     char **parv)
 {
   char *reason = "No Reason";
+  char *p;
   const char* current_date;
   const char* target_server=NULL;
   struct ConfItem *aconf;
@@ -162,7 +163,7 @@ static void mo_kline(struct Client *client_p,
       return;
     }
 
-  if ( find_user_host(source_p,*parv,user,host) == 0 )
+  if (find_user_host(source_p, *parv, user, host) == 0)
    return;
   parc--;
   parv++;
@@ -232,6 +233,15 @@ static void mo_kline(struct Client *client_p,
   if (already_placed_kline(source_p, user, host))
    return;
 
+
+  /* Look for an oper reason */
+  if ((p = strchr(reason, '|')) != NULL)
+    {
+      *p = '\0';
+      p++;
+      DupString(aconf->oper_reason, p);
+    }
+
   if(tkline_time)
     {
       ircsprintf(buffer,
@@ -239,7 +249,7 @@ static void mo_kline(struct Client *client_p,
 		 (int)(tkline_time/60),
 		 reason,
 		 current_date);
-      DupString(aconf->passwd, buffer );
+      DupString(aconf->passwd, buffer);
       apply_tkline(source_p, aconf, current_date, tkline_time);
     }
   else
@@ -247,8 +257,9 @@ static void mo_kline(struct Client *client_p,
       ircsprintf(buffer, "%s (%s)",
 		 reason,
 		 current_date);
-      DupString(aconf->passwd, buffer );
-      apply_kline(source_p, aconf, reason, current_date, cur_time);
+      DupString(aconf->passwd, buffer);
+      apply_kline(source_p, aconf, reason, aconf->oper_reason,
+		  current_date, cur_time);
     }
 } /* mo_kline() */
 
@@ -347,7 +358,8 @@ static void ms_kline(struct Client *client_p,
       if(tkline_time)
 	apply_tkline(source_p, aconf, current_date, tkline_time);
       else
-	apply_kline(source_p, aconf, aconf->passwd, current_date, cur_time);
+	apply_kline(source_p, aconf, aconf->passwd, NULL,
+		    current_date, cur_time);
 
       }
 } /* ms_kline() */
@@ -360,13 +372,14 @@ static void ms_kline(struct Client *client_p,
  * side effects	- kline as given, is added to the hashtable
  *		  and conf file
  */
-static void apply_kline(struct Client *source_p, struct ConfItem *aconf,
-                        const char *reason, const char *current_date,
-			time_t cur_time)
+static void 
+apply_kline(struct Client *source_p, struct ConfItem *aconf,
+	    const char *reason, const char *oper_reason,
+	    const char *current_date, time_t cur_time)
 {
   add_conf_by_address(aconf->host, CONF_KILL, aconf->user, aconf);
   WriteKlineOrDline(KLINE_TYPE, source_p, aconf->user, aconf->host,
-		    reason, current_date, cur_time);
+		    reason, oper_reason, current_date, cur_time);
   /* Now, activate kline against current online clients */
   check_klines();
 }
@@ -722,19 +735,28 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
   cur_time = time(0);
   current_date = smalldate(cur_time);
 
-  ircsprintf(dlbuffer, "%s (%s)",reason,current_date);
-
   aconf = make_conf();
+
+  /* Look for an oper reason */
+  if ((p = strchr(reason, '|')) != NULL)
+    {
+      *p = '\0';
+      p++;
+      DupString(aconf->oper_reason, p);
+    }
+
+  ircsprintf(dlbuffer, "%s (%s)",reason, current_date);
+
   aconf->status = CONF_DLINE;
-  DupString(aconf->host,dlhost);
-  DupString(aconf->passwd,dlbuffer);
+  DupString(aconf->host, dlhost);
+  DupString(aconf->passwd, dlbuffer);
 
   add_conf_by_address(aconf->host, CONF_DLINE, NULL, aconf);
   /*
    * Write dline to configuration file
    */
   WriteKlineOrDline(DLINE_TYPE, source_p, NULL, dlhost, reason,
-		    current_date, cur_time);
+		    aconf->oper_reason, current_date, cur_time);
   check_klines();
 } /* m_dline() */
 
