@@ -1,3 +1,7 @@
+*** 20010820_1 by androsyn
+I think this fix is right for linebuf_copy_line() please look at it as it could probably still use work.
+
+
 *** 20010819_2 by leeh
 - not pacing a possible 50k channel list between a HUB <-> LL is slightly
   evil..
