@@ -1,3 +1,8 @@
+*** 20010213_4 by a1kmm
+- Slightly better clear_conf code - there was actually a risk of double free before. Still we have that memory
+  leak however :(
+
+
 *** 20010213_3 by db
 - don't increment scount unless it was successfully added
 
