@@ -1,3 +1,8 @@
+*** 20001207_2 by db
+- fixed m_sjoin.c for vchans finally. They work just fine now.
+
+
+
 *** 20001207_1 by db
 - fixed obvious bug in sjoin code for vchannels. its still broken
   for remote joins, but getting there.
