@@ -1,3 +1,16 @@
+leeh        2002/04/14 21:14:43 EDT	(20020415_2)
+
+  Modified files:
+    src                  client.c s_bsd.c 
+  Log:
+  - my attempt at the ctrlfd core fix
+  
+  Revision  Changes    Path
+  7.249     +16 -2     ircd-hybrid-7/src/client.c
+  7.166     +9 -7      ircd-hybrid-7/src/s_bsd.c
+
+
+
 leeh        2002/04/14 20:05:49 EDT	(20020415_1)
 
   Modified files:
