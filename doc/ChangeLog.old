@@ -1,3 +1,8 @@
+*** 20010405_1 by a1kmm
+- Added a proposed KSERVER protocol which will reduce the risk of password sniffing or connection hijacking
+  attacks against servers.
+
+
 *** 20010404_3 by androsyn
 Additional changes for static modules.  We just need to make the build
 system deal with this now.
