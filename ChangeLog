@@ -1,3 +1,29 @@
+leeh        2003/05/15 14:10:33 UTC	(20030515_3)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              ircd.h s_conf.h 
+    modules              m_info.c m_set.c m_whois.c 
+    src                  ircd.c messages.tab newconf.c s_conf.c 
+  Log:
+  - modified version of alz's <alz@ratbox.org> patch for /quote set
+    operstring.
+  
+  Revision  Changes    Path
+  7.207     +6 -0      ircd-ratbox/doc/example.conf
+  7.42      +6 -0      ircd-ratbox/doc/example.efnet.conf
+  7.65      +2 -0      ircd-ratbox/include/ircd.h
+  7.235     +2 -0      ircd-ratbox/include/s_conf.h
+  1.82      +9 -2      ircd-ratbox/modules/m_info.c
+  1.58      +48 -14    ircd-ratbox/modules/m_set.c
+  1.111     +3 -2      ircd-ratbox/modules/m_whois.c
+  7.284     +1 -0      ircd-ratbox/src/ircd.c
+  7.85      +1 -1      ircd-ratbox/src/messages.tab
+  7.82      +21 -0     ircd-ratbox/src/newconf.c
+  7.407     +5 -0      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2003/05/15 13:36:10 UTC	(20030515_2)
 
   Modified files:
