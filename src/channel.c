@@ -617,7 +617,7 @@ int can_send(struct Channel *chptr, struct Client *who)
   if( lp = find_user_link(chptr->members, who) )
     {
       /* +o/+v can always talk */
-      if (lp->flags & CHFL_CHANOP|CHFL_VOICE)
+      if (lp->flags & (CHFL_CHANOP|CHFL_VOICE))
         return 0;
 
       if (chptr->mode.mode & MODE_MODERATED)

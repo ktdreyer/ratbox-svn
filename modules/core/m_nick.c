@@ -221,16 +221,21 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
-  /* if quiet_on_ban is set, don't allow nick changes if the user
-   * is banned from a channel.
+  /* if moderate_nickchange is set, don't allow nick changes if the user
+   * is banned from a channel, or the channel is +m.
    */
 
-  if (ConfigFileEntry.quiet_on_ban && sptr->user)
+  if (ConfigFileEntry.moderate_nickchange && sptr->user)
     {
-      struct SLink *tmp = sptr->user->channel;
-      while (tmp)
+      struct SLink *tmp;
+      for (tmp = sptr->user->channel; tmp; tmp = tmp->next)
 	{
-	  if (is_banned(tmp->value.chptr,sptr))
+          /* skip if they are opped */
+          if (tmp->flags & (CHFL_CHANOP|CHFL_VOICE))
+            continue;
+
+	  if ( (is_banned(tmp->value.chptr,sptr) == CHFL_BAN) ||
+               (tmp->value.chptr->mode.mode & MODE_MODERATED) )
 	    {
 	      sendto_one(sptr, form_str(ERR_BANNEDNICK),
 			 me.name,
@@ -238,7 +243,6 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 			 tmp->value.chptr->chname);
 	      return 0; /* NICK message ignored */
 	    }
-	  tmp = tmp->next;
 	}
     }
 

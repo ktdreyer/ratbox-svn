@@ -24,6 +24,11 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.24  2000/11/17 18:02:56  toot
+ * . made a separate ircd.conf setting to block nickchanges when banned,
+ *   and block them in +m chans too, unless opped
+ * . fixed a typo i made in can_send() :P
+ *
  * Revision 7.23  2000/11/15 07:51:39  db
  * - removed /rehash dump for one reason... and one reason only BLOAT
  *
@@ -473,6 +478,7 @@ typedef struct
   MessageFile opermotd;
   int         hub; /* YES or NO */
   int         quiet_on_ban; /* YES or NO */
+  int         moderate_nickchange; /* YES or NO */
   int         failed_oper_notice;
   int         show_failed_oper_id;
   int         anti_nick_flood;
