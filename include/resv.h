@@ -30,10 +30,6 @@
 
 struct ResvChannel
 {
-  struct ResvChannel *next;
-  struct ResvChannel *prev;
-  struct ResvChannel *hnext;
-
   /* +1 for \0 */
   char	name[CHANNELLEN + 1];
   char	*reason;
@@ -50,8 +46,8 @@ struct ResvNick
   int	conf;
 };
 
-extern struct ResvChannel *ResvChannelList;
-extern struct ResvNick *ResvNickList;
+extern dlink_list resv_channel_list;
+extern dlink_list resv_nick_list;
 
 extern struct ResvChannel *create_channel_resv(char *, char *, int);
 extern struct ResvNick *create_nick_resv(char *, char *, int);
@@ -59,13 +55,13 @@ extern struct ResvNick *create_nick_resv(char *, char *, int);
 extern int delete_channel_resv(struct ResvChannel *);
 extern int delete_nick_resv(struct ResvNick *);
 
-extern int clear_conf_resv();
+extern void clear_conf_resv();
 
 extern int find_channel_resv(char *);
-extern int find_nick_resv(char *);
+extern struct ResvNick *find_nick_resv(char *);
+extern int is_resvd(char *);
 
 extern void report_resv(struct Client *);
-extern struct ResvNick *return_nick_resv(char *);
 
 extern int clean_resv_nick(char *);
 

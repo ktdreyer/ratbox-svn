@@ -105,7 +105,6 @@ extern dlink_list global_serv_list;
 extern dlink_list oper_list;
 extern dlink_list dead_list;
 extern dlink_list abort_list;
-extern dlink_list lazylink_channels;
 extern int callbacks_called;
 
 extern unsigned long get_maxrss(void);

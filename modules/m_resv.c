@@ -154,15 +154,15 @@ static void mo_unresv(struct Client *client_p, struct Client *source_p,
   {
     struct ResvChannel *resv_p;
     
-    if(!ResvChannelList || 
-       !(resv_p = (struct ResvChannel *)hash_find_resv(parv[1])))
+    resv_p = hash_find_resv(parv[1]);
+
+    if(resv_p == NULL)
     {
       sendto_one(source_p, 
                  ":%s NOTICE %s :A RESV does not exist for channel: %s",
 	         me.name, source_p->name, parv[1]);
       return;
     }
-  
     else if(resv_p->conf)
     {
       sendto_one(source_p,
@@ -189,7 +189,7 @@ static void mo_unresv(struct Client *client_p, struct Client *source_p,
   {
     struct ResvNick *resv_p;
 
-    if(!ResvNickList || !(resv_p = return_nick_resv(parv[1])))
+    if((resv_p = find_nick_resv(parv[1])) == NULL)
     {
       sendto_one(source_p,
                  ":%s NOTICE %s :A RESV does not exist for nick: %s",
