@@ -43,7 +43,7 @@ static void m_htm(struct Client*, struct Client*, int, char**);
 
 struct Message htm_msgtab = {
   "HTM", 0, 0, 0, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_ignore, m_htm, m_ignore}
+  {m_unregistered, m_ignore, m_ignore, m_htm}
 };
 #ifndef STATIC_MODULES
 void
