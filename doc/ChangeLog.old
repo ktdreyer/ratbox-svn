@@ -1,3 +1,9 @@
+*** 20001202_9 by db
+- made list_length a generic function moved into tools.c
+  renamed as dlink_list_length()
+
+
+
 *** 20001202_8 by db
 - add code to move a list from one to the other, this makes
   de-opping an entire channel a simple job of moving lists over from
