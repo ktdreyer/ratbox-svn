@@ -1,3 +1,12 @@
+*** 20010419_3 by a1kmm
+- Re-enabled the anti-flooding code.
+- Give the user a burst for 3s at the start when they can send more stuff
+  like JOINs and WHOs etc...
+- Added a penalty which sets the user back as if they didn't have this extra
+  burst if they try to use MODE on a channel, or PRIVMSG or PART in this
+  period.
+
+
 *** 20010419_2 by a1kmm
 - Adding habeeb's patch to fix the antispambot code.
 - Added a check on part message similar to that for QUIT to decide if the
