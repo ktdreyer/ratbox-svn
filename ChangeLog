@@ -1,3 +1,18 @@
+leeh        2005/02/22 14:55:56 EST	(20050222_1)
+
+  Modified files:
+    doc                  monitor.txt 
+    modules              m_services.c 
+  Log:
+  - remove a couple of unused vars
+  - update monitor.txt
+  
+  Revision  Changes    Path
+  1.2       +14 -0     ircd-ratbox/doc/monitor.txt
+  1.6       +1 -4      ircd-ratbox/modules/m_services.c
+
+
+
 leeh        2005/02/21 19:47:24 EST	(20050222_0)
 
   Added files:
