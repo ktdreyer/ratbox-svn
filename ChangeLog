@@ -1,3 +1,20 @@
+androsyn    2004/08/16 11:50:21 EDT	(20040816_3)
+
+  Modified files:
+    modules              Makefile.in 
+    modules/core         users.c 
+  Removed files:
+    modules              m_pass.c 
+  Log:
+  Merge pass into users.c
+  
+  Revision  Changes    Path
+  1.109     +0 -1      ircd-ratbox/modules/Makefile.in
+  1.14      +64 -2     ircd-ratbox/modules/core/users.c
+  1.48      +0 -101    ircd-ratbox/modules/m_pass.c (dead)
+
+
+
 androsyn    2004/08/16 11:42:57 EDT	(20040816_2)
 
   Modified files:
