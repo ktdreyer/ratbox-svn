@@ -378,6 +378,11 @@ connect {
 
 	/* Set your server to autoconnect */
 	autoconn = yes;
+
+        /* The IP to bind to for an outgoing connection for this server.
+         * This may be IPv4 or IPv6.  Uses default if none exists
+         */
+        vhost = "127.0.0.1";
 };
 
 connect {
