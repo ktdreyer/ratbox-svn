@@ -29,6 +29,11 @@ mrclean:
 
 mrupdate:
 	@for i in $(SRCS); do \
-		echo "Updating $$i"; \
-		xgettext -a -j -LC -o $$i ../src/messages.tab; \
-	done
+                echo -n "Updating $$i"; \
+                xgettext -a -LC -o $$i.tmp$$$$ ../src/messages.tab; \
+                xgettext --keyword=_ -j -LC -o $$i.tmp$$$$ ../include/*.h; \
+                xgettext --keyword=_ -j -LC -o $$i.tmp$$$$ ../src/*.c; \
+                xgettext --keyword=_ -j -LC -o $$i.tmp$$$$ ../modules/*.c; \
+                msgmerge -E -i -o $$i $$i $$i.tmp$$$$; \
+                rm $$i.tmp$$$$; \
+        done

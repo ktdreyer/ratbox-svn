@@ -252,8 +252,8 @@ mk6addrstr(struct in6_addr *addr)
         int le = 0;
 
         /* hehe */
-        sprintf(dest2, "%x%x%x%x:%x%x%x%x:%x%x%x%x:%x%x%x%x:%x%x%x%x:%x%x%x%x:%x
-%x%x%x:%x%x%x%x",
+        sprintf(dest2,
+                        "%x%x%x%x:%x%x%x%x:%x%x%x%x:%x%x%x%x:%x%x%x%x:%x%x%x%x:%x%x%x%x:%x%x%x%x",
                         cp[0]  >> 4, cp[0]  & 0xf, cp[1]  >> 4, cp[1]  & 0xf,
                         cp[2]  >> 4, cp[2]  & 0xf, cp[3]  >> 4, cp[3]  & 0xf,
                         cp[4]  >> 4, cp[4]  & 0xf, cp[5]  >> 4, cp[5]  & 0xf,
