@@ -185,6 +185,7 @@ void dns_select(void)
  */
 void adns_gethost(const char *name, int aftype, struct DNSQuery *req)
 {
+ assert(dns_state->nservers > 0);
 #ifdef IPV6 
  if (aftype == AF_INET6)
   adns_submit(dns_state, name, adns_r_addr6, adns_qf_owner, req,
@@ -207,6 +208,7 @@ void adns_getaddr(struct irc_inaddr *addr, int aftype,
                   struct DNSQuery *req)
 {
  struct irc_sockaddr ipn;
+ assert(dns_state->nserver > 0);
 #ifdef IPV6
  if (aftype == AF_INET6)
   {

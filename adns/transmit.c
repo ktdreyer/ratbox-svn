@@ -237,6 +237,7 @@ void adns__query_send(adns_query qu, struct timeval now) {
   int serv, r;
   adns_state ads;
 
+  assert(qu->ads->nservers > 0);
   assert(qu->state == query_tosend);
   if ((qu->flags & adns_qf_usevc) || (qu->query_dglen > DNS_MAXUDP)) {
     query_usetcp(qu,now);
