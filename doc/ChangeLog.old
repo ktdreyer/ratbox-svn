@@ -1,3 +1,7 @@
+*** 19990816_4 by tomh
+bug fix for reverse dns mismatch
+
+
 *** 19990816_3 by tomh
 clean up dn_expand result checks
 
