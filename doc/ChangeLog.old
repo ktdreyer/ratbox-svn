@@ -1,3 +1,16 @@
+androsyn    2002/08/03 18:42:28 EDT	(20020803_2)
+
+  Modified files:
+    src                  balloc.c 
+  Log:
+  Make BlockHeapAlloc() call outofmemory() instead of returning NULL..we
+  really want to die if we have a failure here like we do with MyMalloc()
+  
+  Revision  Changes    Path
+  7.38      +2 -2      ircd-hybrid-7/src/balloc.c
+
+
+
 androsyn    2002/08/03 18:33:34 EDT	(20020803_1)
 
   Modified files:
