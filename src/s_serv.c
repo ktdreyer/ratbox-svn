@@ -793,7 +793,7 @@ burst_TS5(struct Client *client_p)
 		if(IsCapable(client_p, CAP_IE))
 			burst_modes_TS5(client_p, chptr->chname, &chptr->invexlist, 'I');
 
-		if(IsCapable(client_p, CAP_TB))
+		if(IsCapable(client_p, CAP_TB) && chptr->topic != NULL)
 			sendto_one(client_p, ":%s TB %s %ld %s%s:%s",
 				   me.name, chptr->chname, chptr->topic_time,
 				   ConfigChannel.burst_topicwho ? chptr->topic_info : "",
@@ -927,7 +927,7 @@ burst_TS6(struct Client *client_p)
 		   dlink_list_length(&chptr->invexlist) > 0)
 			burst_modes_TS6(client_p, chptr, &chptr->invexlist, 'I');
 
-		if(IsCapable(client_p, CAP_TB))
+		if(IsCapable(client_p, CAP_TB) && chptr->topic != NULL)
 			sendto_one(client_p, ":%s TB %s %ld %s%s:%s",
 				   me.id, chptr->chname, chptr->topic_time,
 				   ConfigChannel.burst_topicwho ? chptr->topic_info : "",
