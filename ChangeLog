@@ -1,3 +1,15 @@
+leeh        2003/02/05 19:57:25 UTC	(20030205_2)
+
+  Modified files:
+    .                    configure 
+  Log:
+  - rebuilt configure with autoconf2.13
+  
+  Revision  Changes      Path
+  7.175     +2916 -6821  ircd-ratbox/configure
+
+
+
 ejb         2003/02/05 19:21:43 UTC	(20030205_1)
 
   Modified files:
