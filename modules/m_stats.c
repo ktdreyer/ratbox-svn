@@ -456,7 +456,7 @@ void do_priv_stats(struct Client *sptr, char *name, char *target,
       break;
 
     case 'T' : case 't' :
-      tstats(sptr, sptr->name);
+      tstats(sptr);
       stats_spy(sptr,stat);
       break;
 

@@ -74,8 +74,8 @@ unsigned long current_serial=0L;
 static void
 sendto_list_local(dlink_list *list, const char *sendbuf, int len);
 
-void
-send_channel_members(struct Client *one, struct Client *from,
+static void
+sendto_list_anywhere(struct Client *one, struct Client *from,
 		     dlink_list *list,
 		     const char *local_sendbuf, int local_len,
 		     const char *remote_sendbuf, int remote_len
@@ -429,26 +429,26 @@ sendto_channel_butone(struct Client *one, struct Client *from,
 
   ++current_serial;
   
-  send_channel_members(one, from, &chptr->chanops,
+  sendto_list_anywhere(one, from, &chptr->chanops,
 		       (const char *)local_sendbuf, local_len,
 		       (const char *)remote_sendbuf, remote_len);
 
-  send_channel_members(one, from, &chptr->voiced,
+  sendto_list_anywhere(one, from, &chptr->voiced,
 		       (const char *)local_sendbuf, local_len,
 		       (const char *)remote_sendbuf, remote_len);
 
-  send_channel_members(one, from, &chptr->halfops,
+  sendto_list_anywhere(one, from, &chptr->halfops,
 		       (const char *)local_sendbuf, local_len,
 		       (const char *)remote_sendbuf, remote_len);
 
-  send_channel_members(one, from, &chptr->peons,
+  sendto_list_anywhere(one, from, &chptr->peons,
 		       (const char *)local_sendbuf, local_len,
 		       (const char *)remote_sendbuf, remote_len);
 
 } /* sendto_channel_butone() */
 
 /*
- * send_channel_members
+ * sendto_list_anywhere
  *
  * inputs	- pointer to client NOT to send back towards
  *		- pointer to client from where message is coming from
@@ -459,7 +459,7 @@ sendto_channel_butone(struct Client *one, struct Client *from,
  *		- length of remote_sendbuf
  */
 void
-send_channel_members(struct Client *one, struct Client *from,
+sendto_list_anywhere(struct Client *one, struct Client *from,
 		     dlink_list *list,
 		     const char *local_sendbuf, int local_len,
 		     const char *remote_sendbuf, int remote_len

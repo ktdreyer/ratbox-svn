@@ -44,7 +44,14 @@ void init_stats()
   memset(&ircst, 0, sizeof(ircst));
 }
 
-void tstats(struct Client *cptr, const char *name)
+/*
+ * tstats
+ *
+ * inputs	- client to report to
+ * output	- NONE 
+ * side effects	-
+ */
+void tstats(struct Client *sptr)
 {
   struct Client*           acptr;
   struct ServerStatistics* sp;
@@ -99,37 +106,37 @@ void tstats(struct Client *cptr, const char *name)
       
     }
 
-#if 0
-      else if (IsUnknown(acptr))
-        sp->is_ni++;
-#endif
+  for(ptr = unknown_list.head; ptr; ptr = ptr->next)
+    {
+      sp->is_ni++;
+    }
 
-  sendto_one(cptr, ":%s %d %s :accepts %u refused %u",
-             me.name, RPL_STATSDEBUG, name, sp->is_ac, sp->is_ref);
-  sendto_one(cptr, ":%s %d %s :unknown commands %u prefixes %u",
-             me.name, RPL_STATSDEBUG, name, sp->is_unco, sp->is_unpf);
-  sendto_one(cptr, ":%s %d %s :nick collisions %u unknown closes %u",
-             me.name, RPL_STATSDEBUG, name, sp->is_kill, sp->is_ni);
-  sendto_one(cptr, ":%s %d %s :wrong direction %u empty %u",
-             me.name, RPL_STATSDEBUG, name, sp->is_wrdi, sp->is_empt);
-  sendto_one(cptr, ":%s %d %s :numerics seen %u mode fakes %u",
-             me.name, RPL_STATSDEBUG, name, sp->is_num, sp->is_fake);
-  sendto_one(cptr, ":%s %d %s :auth successes %u fails %u",
-             me.name, RPL_STATSDEBUG, name, sp->is_asuc, sp->is_abad);
-  sendto_one(cptr, ":%s %d %s :local connections %u udp packets %u",
-             me.name, RPL_STATSDEBUG, name, sp->is_loc, sp->is_udp);
-  sendto_one(cptr, ":%s %d %s :Client Server",
-             me.name, RPL_STATSDEBUG, name);
-  sendto_one(cptr, ":%s %d %s :connected %u %u",
-             me.name, RPL_STATSDEBUG, name, sp->is_cl, sp->is_sv);
-  sendto_one(cptr, ":%s %d %s :bytes sent %u.%uK %u.%uK",
-             me.name, RPL_STATSDEBUG, name,
+  sendto_one(sptr, ":%s %d %s :accepts %u refused %u",
+             me.name, RPL_STATSDEBUG, sptr->name, sp->is_ac, sp->is_ref);
+  sendto_one(sptr, ":%s %d %s :unknown commands %u prefixes %u",
+             me.name, RPL_STATSDEBUG, sptr->name, sp->is_unco, sp->is_unpf);
+  sendto_one(sptr, ":%s %d %s :nick collisions %u unknown closes %u",
+             me.name, RPL_STATSDEBUG, sptr->name, sp->is_kill, sp->is_ni);
+  sendto_one(sptr, ":%s %d %s :wrong direction %u empty %u",
+             me.name, RPL_STATSDEBUG, sptr->name, sp->is_wrdi, sp->is_empt);
+  sendto_one(sptr, ":%s %d %s :numerics seen %u mode fakes %u",
+             me.name, RPL_STATSDEBUG, sptr->name, sp->is_num, sp->is_fake);
+  sendto_one(sptr, ":%s %d %s :auth successes %u fails %u",
+             me.name, RPL_STATSDEBUG, sptr->name, sp->is_asuc, sp->is_abad);
+  sendto_one(sptr, ":%s %d %s :local connections %u udp packets %u",
+             me.name, RPL_STATSDEBUG, sptr->name, sp->is_loc, sp->is_udp);
+  sendto_one(sptr, ":%s %d %s :Client Server",
+             me.name, RPL_STATSDEBUG, sptr->name);
+  sendto_one(sptr, ":%s %d %s :connected %u %u",
+             me.name, RPL_STATSDEBUG, sptr->name, sp->is_cl, sp->is_sv);
+  sendto_one(sptr, ":%s %d %s :bytes sent %u.%uK %u.%uK",
+             me.name, RPL_STATSDEBUG, sptr->name,
              sp->is_cks, sp->is_cbs, sp->is_sks, sp->is_sbs);
-  sendto_one(cptr, ":%s %d %s :bytes recv %u.%uK %u.%uK",
-             me.name, RPL_STATSDEBUG, name,
+  sendto_one(sptr, ":%s %d %s :bytes recv %u.%uK %u.%uK",
+             me.name, RPL_STATSDEBUG, sptr->name,
              sp->is_ckr, sp->is_cbr, sp->is_skr, sp->is_sbr);
-  sendto_one(cptr, ":%s %d %s :time connected %u %u",
-             me.name, RPL_STATSDEBUG, name, sp->is_cti, sp->is_sti);
+  sendto_one(sptr, ":%s %d %s :time connected %u %u",
+             me.name, RPL_STATSDEBUG, sptr->name, sp->is_cti, sp->is_sti);
 }
 
 

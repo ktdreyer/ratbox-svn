@@ -7,10 +7,7 @@ CC		= @CC@
 RM		= @RM@
 LEX		= @LEX@
 LEXLIB		= @LEXLIB@
-#CFLAGS		= @CFLAGS@
-# umm -O2 was screwing up modules
-CFLAGS		= -g
-
+CFLAGS		= @CFLAGS@
 MKDEP		= ${CC} -MM
 
 IRCDLIBS	= @LIBS@ @SSL_LIBS@

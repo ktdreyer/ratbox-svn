@@ -183,11 +183,15 @@ sendto_anywhere()
                 - Allows the sending of a message to any client on the net
                   without knowing whether its local or remote. The penalty
                   is the calculation of a run-time prefix.
-                  It is less efficient then sendo_one()
+                  It is less efficient then sendto_one()
 
                   usage - sendto_anywhere(struct Client *to,
                                           struct Client *from,
-                                          const char *pattern, ... );
+                                          const char *pattern, ...);
+
+                  e.g.
+                  sendto_anywhere(acptr, sptr,
+                                  "PRIVMSG Larz :Hi, Where ever you are");
 
 sendto_realops_flags()
                 - combines old sendto_realops and sendto_realops_flags
@@ -197,6 +201,10 @@ sendto_realops_flags()
 
                   usage - sendto_realops_flags(int flags,
                                                const char *pattern, ... );
+
+                  e.g.
+                  sendto_realops(FLAGS_ALL,
+                                 "Don't eat the yellow snow");
 
 
 ts_warn()       - Only used to send warning messages to all opers
@@ -216,7 +224,7 @@ sendto_format() - Used to format a varargs buffer into given buffer
                                         const char *pattern, ... );
 
 send_trim()     - This local function simply trims a char string
-                  to fit inside 512 bytes as per rfc1459 adding
+                  to fit inside 512 bytes as per rfc1459, adding
                   a cr/lf pair as needed. It does not check to make
                   sure original string has a cr/lf.
     
@@ -226,7 +234,7 @@ send_trim()     - This local function simply trims a char string
 
 sendto_list_local()
                 - This local function sends given message to given dlink_list
-                  with data == a client. This is used by
+                  with data == a local client. This is used by
                   sendto_common_channels_local() and by
                   sendto_channel_local() 
  
@@ -238,12 +246,16 @@ sendto_list_local()
                                             int len);
 
 
-sendto_channel_members()
-                - This local function sends a message to all channel members
+sendto_list_anywhere()
+                - This local function sends a message to all members
                   as given in a dlink_list, whether they are remote or local
                   clients. It is used by sendto_channel_butone()
+                  It also generates prefixes on the fly as necessary.
 
-                  usage: send_channel_members(struct Client *one,
+                  It could easily be extended to sendto "groups" of
+                  otherwise unrelated users, not just channel groups.
+
+                  usage: sendto_list_anywhere(struct Client *one,
                                               struct Client *from,
                                               dlink_list *list,
                                               const char *local_sendbuf,
