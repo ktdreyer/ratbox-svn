@@ -63,6 +63,8 @@ extern int   ignoreErrno(int ierrno);
 
 extern void  comm_settimeout(int, time_t, PF *, void *);
 extern void  comm_checktimeouts(void *);
+extern void  comm_connect_tcp(int, const char *, u_short,
+                 struct sockaddr *, int, CNCB *, void *);
 
 /* These must be defined in the network IO loop code of your choice */
 extern void  comm_setselect(int fd, unsigned int type, PF *handler, 

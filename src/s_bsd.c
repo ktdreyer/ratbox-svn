@@ -1007,15 +1007,26 @@ comm_checktimeouts(void *notused)
  * a DNS request.
  */
 void
-comm_connect_tcp(int fd, const char *host, u_short port, CNCB *callback,
-    void *data)
+comm_connect_tcp(int fd, const char *host, u_short port, 
+    struct sockaddr *local, int socklen, CNCB *callback, void *data)
 {
     struct DNSReply *reply;
     struct DNSQuery query;
 
     /* First, attempt to bind */
+    /*
+     * Note that we're using a passed sockaddr here. This is because
+     * generally you'll be bind()ing to a sockaddr grabbed from
+     * getsockname(), so this makes things easier.
+     * XXX If NULL is passed as local, we should later on bind() to the
+     * virtual host IP, for completeness.
+     *   -- adrian
+     */
+    if (bind(fd, local, socklen) < 0) { 
         /* Failure, call the callback with COMM_ERR_BIND */
+        comm_connect_callback(fd, COMM_ERR_BIND);
         /* ... and quit */
+    }
 
     /* Next, send the DNS request, for the next level */
     query.vptr = &fd_table[fd];
