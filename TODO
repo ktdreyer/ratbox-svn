@@ -40,7 +40,7 @@ madmax's TODO / New Years Resolutions
 - Get Laid in 2001
 - Do more exercise
 - Fix /links *mask* for non-opers/server_hide output (#4)
-- Make /links from file server_hide only (#6)
+\ Make /links from file server_hide only (#6)
 - Fix remote whois so 'works' but only returns idle time for opers (#1)
 - Make stats p just notice opers, rather than return a list, when
   server_hide is on (#13)
