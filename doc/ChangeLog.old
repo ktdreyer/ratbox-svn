@@ -1,3 +1,8 @@
+*** 20010525_9 by db
+- removed BUF_BLOCK_SIZE no block allocator.
+
+
+
 *** 20010525_8 by davidt
 - Fix problems with >8:1 compression.
 
