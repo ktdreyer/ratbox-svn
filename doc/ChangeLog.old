@@ -1,3 +1,10 @@
+*** 20000104_3 by db
+- changed slightly wording in LazyLinks As Implemented doc
+- removed more DEBUGLL debug cruft
+- simplified m_join CBURST call
+
+
+
 *** 20000104_2 by db
 - added "Lazy Links As Implemented in Hybrid" doc
 
