@@ -1,3 +1,7 @@
+*** 20010512_5 by a1kmm
+- Removed 2 pointless asserts.
+
+
 *** 20010512_4 by db
 - tidied up vchan_show_ids
 - don't show <secret> twice
