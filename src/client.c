@@ -2081,7 +2081,7 @@ error_exit_client(struct Client *client_p, int error)
 	char errmsg[255];
 	int current_error = comm_get_sockerr(client_p->localClient->fd);
 
-	if(IsAnyDead(source_p))
+	if(IsAnyDead(client_p))
 		return;
 
 	SetClosing(client_p);
