@@ -1,3 +1,15 @@
+androsyn    2002/02/25 12:40:46 EST	(20020225_1)
+
+  Modified files:
+    src                  whowas.c 
+  Log:
+  Forgot a NICKLEN+1
+  
+  Revision  Changes    Path
+  7.17      +1 -1      ircd-hybrid-7/src/whowas.c
+
+
+
 androsyn    2002/02/25 12:39:22 EST	(20020225_0)
 
   Modified files:
