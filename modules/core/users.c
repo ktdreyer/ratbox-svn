@@ -1762,7 +1762,7 @@ register_local_user(struct Client *client_p, struct Client *source_p)
 
 	Count.totalrestartcount++;
 
-	if((target = find_tgchange(&source_p->localClient->ip)))
+	if((target = find_tgchange((struct sockaddr *)&source_p->localClient->ip)))
 	{
 		if(target->expiry > CurrentTime)
 			source_p->localClient->targinfo[1] = ConfigFileEntry.tgchange_reconnect;
