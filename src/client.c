@@ -87,6 +87,7 @@ static void client_heap_gc(void *unused)
   BlockHeapGarbageCollect(lclient_heap);
 }
 
+
 /*
  * init_client
  *
@@ -1214,6 +1215,60 @@ static void remove_dependents(struct Client* client_p,
     }
 
   recurse_remove_clients(source_p, comment1);
+}
+
+
+
+
+/*
+ * dead_link - Adds client to a list of clients that need an exit_client()
+ *
+ */
+void dead_link(struct Client *client_p)
+{
+  dlink_node *m;
+  const char *notice;
+  linebuf_donebuf(&client_p->localClient->buf_recvq);
+  linebuf_donebuf(&client_p->localClient->buf_sendq);
+  if(client_p->flags & FLAGS_SENDQEX)
+    notice = "Max SendQ exceeded";
+  else
+    notice = "Dead link";
+    	
+  if (!IsPerson(client_p) && !IsUnknown(client_p) && !IsClosing(client_p))
+  {
+    sendto_realops_flags(FLAGS_ALL, L_ADMIN,
+                         notice, get_client_name(client_p, HIDE_IP));
+    sendto_realops_flags(FLAGS_ALL, L_OPER,
+                         notice, get_client_name(client_p, MASK_IP));
+  }
+  Debug((DEBUG_ERROR, notice, get_client_name(to, HIDE_IP)));
+  m = make_dlink_node();
+  dlinkAdd(client_p, m, &abort_list);
+  SetDead(client_p); /* You are dead my friend */
+}
+
+void exit_aborted_clients(void)
+{
+  dlink_node *ptr, *next;
+  struct Client *target_p;
+  
+  for(ptr = abort_list.head; ptr; ptr = next)
+    {
+      target_p = ptr->data;
+      next = ptr->next;
+      if (ptr->data == NULL)
+        {
+          sendto_realops_flags(FLAGS_ALL, L_ALL,
+                        "Warning: null client on abort_list!");
+          dlinkDelete(ptr, &abort_list);
+          free_dlink_node(ptr);
+          continue;
+        }
+      exit_client(target_p, target_p, &me, "Dead link");  
+      dlinkDelete(ptr, &abort_list);
+      free_dlink_node(ptr);
+    }
 }
 
 

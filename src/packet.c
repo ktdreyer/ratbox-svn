@@ -401,7 +401,9 @@ read_packet(int fd, void *data)
 
   /* Attempt to parse what we have */
   parse_client_queued(client_p);
-
+  /* This is about the only place useful to put it */
+  exit_aborted_clients();
+  
   /* server fd may have changed */
   fd_r = client_p->localClient->fd;
 #ifndef HAVE_SOCKETPAIR
@@ -412,6 +414,7 @@ read_packet(int fd, void *data)
   }
 #endif
 
+  
   if (!IsDead(client_p))
   {
     /* If we get here, we need to register for another COMM_SELECT_READ */

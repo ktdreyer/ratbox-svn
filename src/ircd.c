@@ -132,7 +132,7 @@ dlink_list serv_list;           /* local servers to this server ONLY */
 dlink_list global_serv_list;    /* global servers on the network */
 dlink_list oper_list;           /* our opers, duplicated in lclient_list */
 dlink_list dead_list;           /* clients that have exited, to be freed */
-
+dlink_list abort_list;		/* clients who aren't quite dead yet */
 dlink_list lazylink_channels;   /* known about lazylink channels on HUB */
 
 int callbacks_called;          /* A measure of server load... */

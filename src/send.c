@@ -90,62 +90,6 @@ static inline int
 send_trim(char *lsendbuf, int len );
 
 /*
- * dead_lin
- *
- *      If 'notice' is not NULL, it is assumed to be a format
- *      for a message to local opers. I can contain only one
- *      '%s', which will be replaced by the sockhost field of
- *      the failing link.
- *
- *      Also, the notice is skipped for "uninteresting" cases,
- *      like Persons and yet unknown connections...
- */
-/*
- * Can't call exit_client right away. This client might be in the middle
- * of a /list and sendq's out. exiting the client during that list
- * would thoroughly confuse things (and did). Best we can do, is mark
- * the client as known to be thoroughly dead, treat it like a pariah
- * and exit in the main loop at the earliest opportunity. ugh.
- * - Dianora
- * 
- */
-/*
- * This problem also accounts for the infamous double-free bug we've
- * run into for months.  If the client is still being auth'ed, it'll
- * still attempt to exit the client when the ident lookup times out.
- * Thanks to my anime beta testers for enduring all those cores to 
- * find this one....
- * - Wohali
- */
-
-static int
-dead_link(struct Client *to, char *notice)
-{
-  /*
-   * If because of buffer problem then clean linebuf's now so that
-   * notices don't hurt operators below.
-   */
-  linebuf_donebuf(&to->localClient->buf_recvq);
-  linebuf_donebuf(&to->localClient->buf_sendq);
-  if (!IsPerson(to) && !IsUnknown(to) && !IsClosing(to))
-  {
-    sendto_realops_flags(FLAGS_ALL, L_ADMIN,
-                         notice, get_client_name(to, HIDE_IP));
-    sendto_realops_flags(FLAGS_ALL, L_OPER,
-                         notice, get_client_name(to, MASK_IP));
-  }
-  Debug((DEBUG_ERROR, notice, get_client_name(to, HIDE_IP)));
-  SetDead(to);
-  /* If we're still unknown (being auth'ed) or sendqing out, don't
-   * kill just yet
-   */
-  if (!IsClosing(to) && !IsUnknown(to))
-    exit_client(to, to, &me, "Dead link");
-  return (-1);
-} /* dead_link() */
-
-
-/*
  ** send_linebuf
  **      Internal utility which attaches one linebuf to the sockets
  **      sendq.
@@ -164,9 +108,6 @@ _send_linebuf(struct Client *to, buf_head_t *linebuf)
   if (to->localClient->fd < 0)
     return 0; /* Thou shalt not write to closed descriptors */
 
-  if (IsDead(to))
-    return 0; /* This socket has already been marked as dead */
-
   if (linebuf_len(&to->localClient->buf_sendq) > get_sendq(to))
   {
     if (IsServer(to))
@@ -177,7 +118,8 @@ _send_linebuf(struct Client *to, buf_head_t *linebuf)
                            get_sendq(to));
     if (IsClient(to))
       to->flags |= FLAGS_SENDQEX;
-    return dead_link(to, "Max Sendq exceeded");
+    dead_link(to);
+    return -1;
   }
   else
   {
@@ -295,7 +237,8 @@ send_queued_write(int fd, void *data)
       to->localClient->buf_sendq.writeofs;
 #endif
   
-  if (linebuf_len(&to->localClient->buf_sendq)) {
+  if (linebuf_len(&to->localClient->buf_sendq))
+  {
     while((retlen = linebuf_flush(to->localClient->fd, &to->localClient->buf_sendq)) > 0)
     {
       /* We have some data written .. update counters */
@@ -313,21 +256,27 @@ send_queued_write(int fd, void *data)
       { 
         to->localClient->sendK += (to->localClient->sendB >> 10);
         to->localClient->sendB &= 0x03ff;        /* 2^10 = 1024, 3ff = 1023 */
-      } else if (me.localClient->sendB > 1023)
+      }
+      else if (me.localClient->sendB > 1023)
       { 
         me.localClient->sendK += (me.localClient->sendB >> 10);
         me.localClient->sendB &= 0x03ff;
       }
     }
-    if ((retlen < 0) && (ignoreErrno(errno))) {
+    if ((retlen < 0) && (ignoreErrno(errno)))
+    {
       /* we have a non-fatal error, so just continue */
-    } else if (retlen < 0) {
+    }
+    else if (retlen < 0)
+    {
       /* We have a fatal error */
-      dead_link(to, "Write error to %s, closing link");
+      dead_link(to);
       return;
-    } else if (retlen == 0) {
+    }
+    else if (retlen == 0)
+    {
       /* 0 bytes is an EOF .. */
-      dead_link(to, "EOF during write to %s, closing link");
+      dead_link(to);
       return;
     }
   }
@@ -366,21 +315,28 @@ send_queued_slink_write(int fd, void *data)
 #endif
 
   /* Next, lets try to write some data */
-  if (to->localClient->slinkq) {
+  if (to->localClient->slinkq)
+  {
     retlen = write(to->localClient->ctrlfd,
                    to->localClient->slinkq + to->localClient->slinkq_ofs,
                    to->localClient->slinkq_len);
-    if ((retlen < 0) && (ignoreErrno(errno))) {
-      /* we have a non-fatal error, so just continue */
-    } else if (retlen < 0) {
-      /* We have a fatal error */
-      dead_link(to, "Write error to %s, closing link");
-      return;
-    } else if (retlen == 0) {
+    if (retlen < 0)
+    {
+      /* If we have a fatal error */
+      if (!ignoreErrno(errno))
+      {
+	dead_link(to);
+	return;
+      }
+    }
+    else if (retlen == 0)
+    {
       /* 0 bytes is an EOF .. */
-      dead_link(to, "EOF during write to %s, closing link");
+      dead_link(to);
       return;
-    } else {
+    }
+    else
+    {
       to->localClient->slinkq_len -= retlen;
 
       assert(to->localClient->slinkq_len >= 0);
@@ -415,6 +371,9 @@ sendto_one(struct Client *to, const char *pattern, ...)
 {
   va_list args;
   buf_head_t linebuf;
+
+  if (IsDead(to))
+    return; /* This socket has already been marked as dead */
 
   /* send remote if to->from non NULL */
   if (to->from)
@@ -463,6 +422,9 @@ sendto_one_prefix(struct Client *to, struct Client *prefix,
   va_list args;
   struct Client *to_sendto;
   buf_head_t linebuf;
+
+  if (IsDead(to))
+    return; /* This socket has already been marked as dead */
 
   /* send remote if to->from non NULL */
   if (to->from)
@@ -588,7 +550,7 @@ sendto_list_anywhere(struct Client *one, struct Client *from,
     if (target_p->from == one)
       continue;
 
-    if (MyConnect(target_p) && IsRegisteredUser(target_p))
+    if (MyConnect(target_p) && IsRegisteredUser(target_p) && !IsDead(target_p))
     {
       if(target_p->serial != current_serial)
       {
@@ -639,7 +601,8 @@ sendto_list_anywhere(struct Client *one, struct Client *from,
  * lazylinks, uids, etc.
  * -davidt
  */
-void sendto_server(struct Client *one, struct Client *source_p,
+void 
+sendto_server(struct Client *one, struct Client *source_p,
                    struct Channel *chptr, unsigned long caps,
                    unsigned long nocaps, unsigned long llflags,
                    const char *format, ...)
@@ -900,7 +863,8 @@ sendto_list_local(dlink_list *list, buf_head_t *linebuf_ptr)
       continue;
 
     target_p->serial = current_serial;
-    send_linebuf(target_p, linebuf_ptr);
+    if (!IsDead(target_p))
+      send_linebuf(target_p, linebuf_ptr);
   } 
 } /* sendto_list_local() */
 
@@ -1083,6 +1047,9 @@ sendto_anywhere(struct Client *to, struct Client *from,
 
   linebuf_newbuf(&linebuf);
   va_start(args, pattern);
+
+  if (IsDead(to))
+    return;
 
   if(MyClient(to))
   {
