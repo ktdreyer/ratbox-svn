@@ -768,6 +768,16 @@ AC_ARG_WITH(maxclients,
 AC_MSG_RESULT("Setting MAX_CLIENTS to $ac_cv_maxclients")
 AC_DEFINE_UNQUOTED(MAX_CLIENTS, ${ac_cv_maxclients})
 
+dnl efnet
+AC_ARG_ENABLE(efnet,
+[  --efnet                      For IRCDs running on efnet. ],
+
+[
+  if test "$enablevel" = "yes"
+    AC_DEFINE(EFNET)
+  fi
+]
+
 dnl shared-modules
 AC_ARG_ENABLE(shared-modules,
 [  --enable-shared-modules      Enable shared modules.
