@@ -1,3 +1,12 @@
+*** 20001224_4 by isomer
+* rewrote do_numeric(), it nolonger accepts multiple targets (can't happen)
+and hopefully has bugs removed. on the other hand tho, it's only been tested
+in that it compiles...
+
+
+
+
+
 *** 20001224_3 by ejb
 - fixed bug whereby a module was not actually dlclose()d in unload_one_module,
   hence trying to reload a module would actually reload the old one
