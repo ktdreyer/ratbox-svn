@@ -1,3 +1,15 @@
+androsyn    2004/01/14 14:31:37 EST	(20040114_3)
+
+  Modified files:
+    modules/core         m_error.c 
+  Log:
+  ERROR messages are now only accepted from possible servers
+  
+  Revision  Changes    Path
+  1.6       +2 -2      ircd-ratbox/modules/core/m_error.c
+
+
+
 androsyn    2004/01/14 14:29:12 EST	(20040114_2)
 
   Modified files:
