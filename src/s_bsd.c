@@ -657,11 +657,17 @@ comm_connect_dns_callback(void *vptr, adns_answer *reply)
 {
     fde_t *F = vptr;
 
-    /* Error ? */
+    if(!reply)
+    {
+       comm_connect_callback(F->fd, COMM_ERR_DNS);
+       return;
+    }
+    
     if (reply->status != adns_s_ok)
       {
         /* Yes, callback + return */
         comm_connect_callback(F->fd, COMM_ERR_DNS);
+	MyFree(reply);
         return;
       }
 
@@ -689,6 +695,7 @@ comm_connect_dns_callback(void *vptr, adns_answer *reply)
 	F->connect.hostaddr.sins.sin.sin_addr.s_addr = reply->rrs.addr->addr.inet.sin_addr.s_addr;
 #endif
     /* Now, call the tryconnect() routine to try a connect() */
+    MyFree(reply); 
     comm_connect_tryconnect(F->fd, NULL);
 }
 

@@ -225,7 +225,8 @@ static void auth_dns_callback(void* vptr, adns_answer* reply)
 		strcpy(auth->client->host, auth->client->localClient->sockhost);
 		sendheader(auth->client, REPORT_FAIL_DNS);
 	}
-	
+	if(reply)
+		MyFree(reply);
 	if (!IsDoingAuth(auth))
 	{
 		release_auth_client(auth->client);

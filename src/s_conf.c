@@ -148,6 +148,7 @@ static void conf_dns_callback(void* vptr, adns_answer *reply)
 #else
 	copy_s_addr(IN_ADDR(aconf->ipnum), reply->rrs.inaddr->s_addr);
 #endif
+	MyFree(reply);
   } 
 }
 
