@@ -48,7 +48,6 @@
 #define KEYLEN          23
 #define BUFSIZE         512     /* WARNING: *DONT* CHANGE THIS!!!! */
 #define MAXRECIPIENTS   20
-#define MAXBANS         25      /* bans + exceptions together */
 #define MAXBANLENGTH    1024
 
 #define OPERWALL_LEN    400     /* can be truncated on other servers */

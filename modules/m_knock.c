@@ -118,11 +118,11 @@ static void m_knock(struct Client *client_p,
    * -davidt
    */
 
-  if((chptr->last_knock + ConfigFileEntry.knock_delay) > CurrentTime)
+  if((chptr->last_knock + ConfigChannel.knock_delay) > CurrentTime)
     {
       sendto_one(source_p, ":%s NOTICE %s :*** Notice -- Wait %d seconds before another knock to %s",
                  me.name, source_p->name,
-                 (int)(ConfigFileEntry.knock_delay - (CurrentTime - chptr->last_knock)),
+                 (int)(ConfigChannel.knock_delay - (CurrentTime - chptr->last_knock)),
                  parv[1]);
       return;
     }

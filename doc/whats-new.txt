@@ -178,9 +178,13 @@ options that were in config.h, to be changed with a /rehash.
 
     KNOCK          - Support KNOCK
     VCHANS         - Support Virtual Channels
+    EXCEPTS        - Support ban exceptions
+    INVEX          - Support invite exceptions
+    WALLCHOPS      - /msg @#channel will msg only ops
     MODES=%i       - The number of channel modes accepted per MODE command
-    MAXCHANNELS=%i - The compiled in maximum channels per user
-    MAXBANS=%i     - The compiled in limit on the number of bans per channel
+    MAXCHANNELS=%i - The maximum channels per user
+    MAXBANS=%i     - The limit on the total number of bans, excepts and invite
+                     excepts per channel
     MAXTARGETS=%i  - The number of users that may be chained together in a
                      PRIVMSG or NOTICE (user1,user2,user3...)
     NICKLEN=%i     - The maximum nickname length
@@ -189,6 +193,7 @@ options that were in config.h, to be changed with a /rehash.
     CHANTYPES=%s   - The types of channels supported (currently '#&')
     PREFIX=%s      - The allowed PRIVMSG/NOTICE channel prefixes (server based
                      /onotice, NOTICE @%#channel :message)
+    CHANMODES=%s   - How channel modes are used (see supported.h for details)
 
 - CAPAB List:
 

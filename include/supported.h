@@ -25,9 +25,8 @@
 #include "channel.h"
 #include "ircd_defs.h"
 
-#define FEATURES "KNOCK"\
-                "%s" \
-                " WALLCHOPS" \
+#define FEATURES "WALLCHOPS"\
+                "%s%s%s%s" \
                 " MODES=%i" \
                 " MAXCHANNELS=%i" \
                 " MAXBANS=%i" \
@@ -39,8 +38,12 @@
                 " PREFIX=%s" \
                 " CHANMODES=%s"
                  
-#define FEATURESVALUES ConfigChannel.disable_vchans ? "" : " VCHANS", \
-        MAXMODEPARAMS,ConfigFileEntry.max_chans_per_user,MAXBANS, \
+#define FEATURESVALUES ConfigChannel.use_knock ? " KNOCK" : "", \
+        ConfigChannel.disable_vchans ? "" : " VCHANS", \
+        ConfigChannel.use_except ? " EXCEPTS" : "", \
+        ConfigChannel.use_invex ? " INVEX" : "", \
+        MAXMODEPARAMS,ConfigChannel.max_chans_per_user, \
+        ConfigChannel.maxbans, \
         ConfigFileEntry.max_targets,NICKLEN,TOPICLEN,TOPICLEN,"#&","(ohv)@%+", \
         "beI,k,l,imnpsta"
 

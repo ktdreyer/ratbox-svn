@@ -212,9 +212,9 @@ static void ms_lljoin(struct Client *client_p,
     }
   }
 
-  if ((target_p->user->joined >= ConfigFileEntry.max_chans_per_user) &&
+  if ((target_p->user->joined >= ConfigChannel.max_chans_per_user) &&
       (!IsOper(target_p) || (target_p->user->joined >= 
-                             ConfigFileEntry.max_chans_per_user*3)))
+                             ConfigChannel.max_chans_per_user*3)))
     {
       sendto_one(target_p, form_str(ERR_TOOMANYCHANNELS),
 		 me.name, nick, root_vchan->chname );

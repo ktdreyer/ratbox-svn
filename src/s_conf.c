@@ -1439,7 +1439,6 @@ static void set_default_conf(void)
   ConfigFileEntry.pace_wait = 10;
   ConfigFileEntry.caller_id_wait = 60;
   ConfigFileEntry.whois_wait = 0;
-  ConfigFileEntry.knock_delay = 30;
   ConfigFileEntry.short_motd = NO;
   ConfigFileEntry.no_oper_flood = NO;
   ConfigFileEntry.fname_userlog[0] = '\0';
@@ -1460,8 +1459,6 @@ static void set_default_conf(void)
 #ifdef HAVE_LIBZ
   ConfigFileEntry.compression_level = 0;
 #endif
-  /* XXX might want to put this into a ConfigChannel struct as well */
-  ConfigFileEntry.max_chans_per_user = 10;
 
   ConfigFileEntry.oper_umodes = FLAGS_LOCOPS | FLAGS_SERVNOTICE |
     FLAGS_OPERWALL | FLAGS_WALLOP;
@@ -1476,6 +1473,9 @@ static void set_default_conf(void)
   ConfigChannel.use_invex = NO;
   ConfigChannel.use_except= YES;
   ConfigChannel.use_knock= YES;
+  ConfigChannel.knock_delay = 30;
+  ConfigChannel.max_chans_per_user = 10;
+  ConfigChannel.maxbans = 25;
 
   ConfigFileEntry.persist_expire = 30 * 60;
   ConfigFileEntry.min_nonwildcard = 4;
@@ -1530,8 +1530,8 @@ static void check_conf(void)
   if (!ConfigFileEntry.max_targets)
     ConfigFileEntry.max_targets = MAX_TARGETS_DEFAULT;
 
-  if (!ConfigFileEntry.knock_delay)
-    ConfigFileEntry.knock_delay = 300;
+  if (!ConfigChannel.knock_delay)
+    ConfigChannel.knock_delay = 300;
 
   if (!ConfigFileEntry.caller_id_wait)
     ConfigFileEntry.caller_id_wait = 60;
@@ -1539,8 +1539,11 @@ static void check_conf(void)
   if (!ConfigFileEntry.max_accept)
      ConfigFileEntry.max_accept = 20;
 
-  if (!ConfigFileEntry.max_chans_per_user)
-     ConfigFileEntry.max_chans_per_user = 15;
+  if (!ConfigChannel.max_chans_per_user)
+     ConfigChannel.max_chans_per_user = 15;
+
+  if (!ConfigChannel.maxbans)
+     ConfigChannel.maxbans = 25;
 
   if ((ConfigFileEntry.client_flood < CLIENT_FLOOD_MIN) ||
       (ConfigFileEntry.client_flood > CLIENT_FLOOD_MAX))

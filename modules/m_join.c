@@ -187,9 +187,9 @@ static void m_join(struct Client *client_p,
 	    }
 	}
 
-      if ((source_p->user->joined >= ConfigFileEntry.max_chans_per_user) &&
+      if ((source_p->user->joined >= ConfigChannel.max_chans_per_user) &&
          (!IsOper(source_p) || (source_p->user->joined >=
-	                        ConfigFileEntry.max_chans_per_user*3)))
+	                        ConfigChannel.max_chans_per_user*3)))
 	{
 	  sendto_one(source_p, form_str(ERR_TOOMANYCHANNELS),
 		     me.name, parv[0], name);

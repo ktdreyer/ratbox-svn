@@ -244,6 +244,7 @@ knock_delay             { return KNOCK_DELAY; }
 iauth_server            { return IAUTH_SERVER; }
 iauth_port		{ return IAUTH_PORT; }
 glines                  { return GLINES; }
+maxbans                 { return MAXBANS; }
 modules                 { return MODULES; }
 module                  { return MODULE; }
 path                    { return PATH; }

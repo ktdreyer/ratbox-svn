@@ -211,6 +211,7 @@ int   class_redirport_var;
 %token  MAX_NICK_TIME
 %token  MAX_NICK_CHANGES
 %token  MAX_CHANS_PER_USER
+%token  MAXBANS
 %token  TS_MAX_DELTA
 %token  TS_WARN_DELTA
 %token  KLINE_WITH_REASON
@@ -1934,7 +1935,6 @@ general_item:       general_failed_oper_notice |
                     general_stats_o_oper_only | general_stats_k_oper_only |
                     general_pace_wait | general_stats_i_oper_only |
                     general_whois_wait | 
-                    general_knock_delay | general_quiet_on_ban |
                     general_short_motd | general_no_oper_flood |
                     general_iauth_server |
                     general_iauth_port |
@@ -1951,7 +1951,7 @@ general_item:       general_failed_oper_notice |
                     general_servlink_path |
                     general_default_cipher_preference |
                     general_compression_level | general_client_flood |
-                    general_max_chans_per_user | error
+                    error
 
 general_failed_oper_notice:   FAILED_OPER_NOTICE '=' TYES ';'
   {
@@ -2037,16 +2037,6 @@ general_kline_with_connection_closed: KLINE_WITH_CONNECTION_CLOSED '=' TYES ';'
     ConfigFileEntry.kline_with_connection_closed = 0;
   } ;
 
-general_quiet_on_ban : QUIET_ON_BAN '=' TYES ';'
-  {
-    ConfigFileEntry.quiet_on_ban = 1;
-  }
-    |
-    QUIET_ON_BAN '=' TNO ';'
-  {
-    ConfigFileEntry.quiet_on_ban = 0;
-  } ;
-
 general_warn_no_nline: WARN_NO_NLINE '=' TYES ';'
   {
     ConfigFileEntry.warn_no_nline = 1;
@@ -2120,11 +2110,6 @@ general_caller_id_wait: CALLER_ID_WAIT '=' timespec ';'
 general_whois_wait: WHOIS_WAIT '=' timespec ';'
   {
     ConfigFileEntry.whois_wait = $3;
-  } ;
-
-general_knock_delay: KNOCK_DELAY '=' timespec ';'
-  {
-    ConfigFileEntry.knock_delay = $3;
   } ;
 
 general_short_motd: SHORT_MOTD '=' TYES ';'
@@ -2306,11 +2291,6 @@ general_compression_level: COMPRESSION_LEVEL '=' expr ';'
 #endif
   }
 
-general_max_chans_per_user:  MAX_CHANS_PER_USER '=' expr ';'
-  {
-    ConfigFileEntry.max_chans_per_user = $3;
-  } ;
-
 general_oper_umodes: OPER_UMODES
   {
     ConfigFileEntry.oper_umodes = 0;
@@ -2467,7 +2447,6 @@ umode_item:	T_BOTS
     ConfigFileEntry.oper_only_umodes |= FLAGS_DRONE;
   } ;
 
-
 general_persistant_expire_time:  PERSISTANT_EXPIRE_TIME '=' timespec ';'
   {
     ConfigFileEntry.persist_expire = $3;  
@@ -2501,7 +2480,12 @@ channel_item:       channel_use_invex |
                     channel_use_except|
                     channel_use_knock |
 		    channel_vchans_oper_only |
-		    channel_disable_vchans
+		    channel_disable_vchans |
+                    channel_maxbans |
+                    channel_knock_delay |
+                    channel_max_chans_per_user |
+                    channel_quiet_on_ban |
+                    error
 
 channel_use_invex:   USE_INVEX '=' TYES ';'
   {
@@ -2552,3 +2536,28 @@ channel_disable_vchans: DISABLE_VCHANS '=' TNO ';'
   {
     ConfigChannel.disable_vchans = 1;
   };  
+
+channel_knock_delay: KNOCK_DELAY '=' timespec ';'
+   {
+     ConfigChannel.knock_delay = $3;
+   } ;
+
+channel_max_chans_per_user:  MAX_CHANS_PER_USER '=' expr ';'
+   {
+     ConfigChannel.max_chans_per_user = $3;
+   } ;
+
+channel_quiet_on_ban : QUIET_ON_BAN '=' TYES ';'
+   {
+     ConfigChannel.quiet_on_ban = 1;
+   }
+     |
+     QUIET_ON_BAN '=' TNO ';'
+   {
+     ConfigChannel.quiet_on_ban = 0;
+   } ;
+
+channel_maxbans: MAXBANS '=' expr ';'
+   {
+      ConfigChannel.maxbans = $3;
+   } ;
