@@ -1,3 +1,8 @@
+*** 20011115_1 by androsyn
+Fixed buglet where timeout_adns would get readded to the event list on each
+/rehash
+
+
 *** 20011114_3 by bill
 
 pro is dead, billy-jon took his place
