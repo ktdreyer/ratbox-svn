@@ -1,3 +1,7 @@
+*** 20010826_2 by davidt
+- Tweak /stats Z slightly to be more useful, and handle overflows gracefully
+
+
 *** 20010826_1 by davidt
 - Forgot to commit these changes when I added the hooks for m_iodebug.c
 
