@@ -1,3 +1,83 @@
+leeh        2004/01/03 15:02:57 EST	(20040103_3)
+
+  Modified files:
+    .                    LICENSE 
+    doc                  example.conf 
+    include              balloc.h c_init.h client.h config.h 
+                         service.h stdinc.h tools.h ucommand.h 
+    src                  .depend Makefile.in balloc.c c_error.c 
+                         c_message.c c_mode.c channel.c client.c 
+                         conf.c event.c fileio.c io.c log.c 
+                         match.c rserv.c s_alis.c scommand.c 
+                         service.c tools.c u_stats.c ucommand.c 
+  Added files:
+    help/alis            list 
+    help/main            u-connect u-die u-events u-flags u-quit 
+                         u-service u-stats u-status 
+    include              cache.h 
+    src                  cache.c 
+  Removed files:
+    src                  u_flags.c u_help.c 
+  Log:
+  - put *.c under a standard header
+  - ported my cache.{c|h} from ircd-ratbox
+  - moved the help stuff into files
+  - init_blockheap() -> init_balloc() for consistency
+  - services can now link in ucommand_handlers in their struct
+  - restored statistics for services
+  - u_flags.c,u_help.c -> ucommand.c
+  - added some comments here and there
+  - show_channel() -> print_channel(), added show_channel() to determine whether
+    to display a channel or not (ALIS)
+  
+  Revision  Changes    Path
+  1.3       +3 -2      rserv/LICENSE
+  1.2       +2 -1      rserv/doc/example.conf
+  1.1       +9 -0      rserv/help/alis/list (new)
+  1.1       +2 -0      rserv/help/main/u-connect (new)
+  1.1       +2 -0      rserv/help/main/u-die (new)
+  1.1       +2 -0      rserv/help/main/u-events (new)
+  1.1       +5 -0      rserv/help/main/u-flags (new)
+  1.1       +2 -0      rserv/help/main/u-quit (new)
+  1.1       +3 -0      rserv/help/main/u-service (new)
+  1.1       +7 -0      rserv/help/main/u-stats (new)
+  1.1       +2 -0      rserv/help/main/u-status (new)
+  1.3       +4 -3      rserv/include/balloc.h
+  1.10      +0 -6      rserv/include/c_init.h
+  1.1       +31 -0     rserv/include/cache.h (new)
+  1.10      +8 -0      rserv/include/client.h
+  1.8       +4 -11     rserv/include/config.h
+  1.6       +9 -5      rserv/include/service.h
+  1.6       +1 -0      rserv/include/stdinc.h
+  1.6       +2 -0      rserv/include/tools.h
+  1.4       +8 -1      rserv/include/ucommand.h
+  1.2       +18 -12    rserv/src/.depend
+  1.11      +1 -2      rserv/src/Makefile.in
+  1.3       +39 -41    rserv/src/balloc.c
+  1.3       +4 -3      rserv/src/c_error.c
+  1.9       +4 -3      rserv/src/c_message.c
+  1.7       +5 -5      rserv/src/c_mode.c
+  1.1       +121 -0    rserv/src/cache.c (new)
+  1.12      +10 -5     rserv/src/channel.c
+  1.11      +114 -10   rserv/src/client.c
+  1.11      +4 -3      rserv/src/conf.c
+  1.4       +5 -4      rserv/src/event.c
+  1.2       +6 -5      rserv/src/fileio.c
+  1.16      +94 -24    rserv/src/io.c
+  1.4       +4 -3      rserv/src/log.c
+  1.2       +5 -4      rserv/src/match.c
+  1.16      +10 -7     rserv/src/rserv.c
+  1.14      +66 -93    rserv/src/s_alis.c
+  1.10      +5 -4      rserv/src/scommand.c
+  1.7       +129 -11   rserv/src/service.c
+  1.3       +48 -7     rserv/src/tools.c
+  1.2       +0 -88     rserv/src/u_flags.c (dead)
+  1.4       +0 -154    rserv/src/u_help.c (dead)
+  1.5       +9 -2      rserv/src/u_stats.c
+  1.8       +217 -30   rserv/src/ucommand.c
+
+
+
 leeh        2004/01/03 15:01:02 EST	(20040103_2)
 
   rserv/help/main - New directory
