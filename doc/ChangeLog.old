@@ -1,3 +1,7 @@
+*** 20010507_2 by fl_
+- #if IPV6 -> #ifdef IPV6
+
+
 *** 20010507_1 by toot
 removed show_failed_oper_id cause it was redundant.. failed_oper_notice does
 the same thing
