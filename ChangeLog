@@ -1,3 +1,34 @@
+leeh        2003/06/20 11:24:24 UTC	(20030620_2)
+
+  Modified files:
+    include              channel.h channel_mode.h config.h 
+    modules              m_names.c m_who.c 
+    modules/core         m_mode.c m_sjoin.c 
+    src                  channel.c channel_mode.c messages.tab 
+                         s_debug.c send.c 
+  Log:
+  - commited as far as I got on the struct membership stuff
+    ive done the actual implementation, its just getting the old code to
+    work with it
+  
+    you may want to disable tinderbox for a while :P
+  
+  Revision  Changes    Path
+  7.137     +17 -21    ircd-ratbox/include/channel.h
+  7.21      +6 -0      ircd-ratbox/include/channel_mode.h
+  7.160     +2 -0      ircd-ratbox/include/config.h
+  1.72      +12 -6     ircd-ratbox/modules/core/m_mode.c
+  1.172     +16 -26    ircd-ratbox/modules/core/m_sjoin.c
+  1.67      +2 -2      ircd-ratbox/modules/m_names.c
+  1.89      +14 -45    ircd-ratbox/modules/m_who.c
+  7.377     +152 -366  ircd-ratbox/src/channel.c
+  7.103     +24 -157   ircd-ratbox/src/channel_mode.c
+  7.88      +1 -1      ircd-ratbox/src/messages.tab
+  7.93      +1 -4      ircd-ratbox/src/s_debug.c
+  7.243     +2 -14     ircd-ratbox/src/send.c
+
+
+
 leeh        2003/06/20 09:35:23 UTC	(20030620_1)
 
   Modified files:
