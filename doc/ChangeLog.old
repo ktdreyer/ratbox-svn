@@ -1,3 +1,9 @@
+*** 20010822_2 by leeh
+- *p = '\0';
+  p++;
+  -> *p++ ='\0';
+
+
 *** 20010822_1 by leeh
 - fixed sjoin.. I commented most of it
   someone should probably review this :)
