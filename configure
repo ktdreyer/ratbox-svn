@@ -50,7 +50,7 @@ ac_help="$ac_help
   --enable-ipv6                Enable IPV6 support.
   --disable-ipv6               Disable IPV6 support. "
 ac_help="$ac_help
-  --enable-efnet        For IRCDs running on efnet. "
+  --enable-efnet               For IRCDs running on efnet. "
 ac_help="$ac_help
   --enable-assert              Enable assert().
   --disable-assert             Disable assert(). "
@@ -898,11 +898,11 @@ else
     if test "x$MIPSpro" = "xyes"; then
       IRC_CFLAGS="-g"
     else
-      if test "x$SunWorkShop" = "xyes"; then
-        IRC_CFLAGS="-v -fast -g -xinline=dlinkAdd,dlinkAddBefore,dlinkAddTail,dlinkDelete,dlink_list_length,dlink_node,dlinkMoveList,_MyMalloc,_MyRealloc,_MyFree,_DupString"
+      if test "x$ac_cv_prog_cc_g" = "xyes"; then
+        IRC_CFLAGS="-g"
       else
-        if test "x$ac_cv_prog_cc_g" = "xyes"; then
-          IRC_CFLAGS="-g"
+        if test "x$SunWorkShop" = "xyes"; then
+          IRC_CFLAGS="-fast -g -xinline=dlinkAdd,dlinkAddBefore,dlinkAddTail,dlinkDelete,dlink_list_length,dlink_node,dlinkMoveList,_MyMalloc,_MyRealloc,_MyFree,_DupString"
         else
           IRC_CFLAGS=""
         fi
