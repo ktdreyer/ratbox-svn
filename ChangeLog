@@ -1,3 +1,15 @@
+androsyn    2003/11/27 12:11:07 EST	(20031127_0)
+
+  Added files:
+    modules              m_operwall.c 
+  Log:
+  Readd m_operwall.c
+  
+  Revision  Changes    Path
+  1.53      +91 -0     ircd-ratbox/modules/m_operwall.c (new)
+
+
+
 leeh        2003/11/26 10:49:27 EST	(20031126_2)
 
   Modified files:
