@@ -1,3 +1,15 @@
+androsyn    2002/12/08 00:48:01 UTC	(20021208_1)
+
+  Modified files:
+    src                  s_auth.c 
+  Log:
+  Fixed a case where we didn't return invalid identd response.
+  
+  Revision  Changes    Path
+  7.118     +2 -0      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2002/12/08 00:05:53 UTC	(20021208_0)
 
   Modified files:
