@@ -1,3 +1,16 @@
+androsyn    2003/11/26 09:43:47 EST	(20031126_0)
+
+  Modified files:
+    src                  commio.c 
+  Log:
+  Fix a possible memory leak when closing an fd with pending dns queries(and a
+  possible core dump as well)
+  
+  Revision  Changes    Path
+  1.6       +8 -0      ircd-ratbox/src/commio.c
+
+
+
 androsyn    2003/11/25 13:36:07 EST	(20031125_7)
 
   Modified files:
