@@ -48,7 +48,7 @@
 #define NUM_FDS                 6       /* nfds for select */
 #endif
 
-#define SERVLINK_DEBUG /* */
+/* #define SERVLINK_DEBUG */
 
 #define READLEN                  2048
 
