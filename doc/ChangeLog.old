@@ -1,3 +1,15 @@
+androsyn    2002/05/16 10:45:11 EDT	(20020516_5)
+
+  Modified files:
+    src                  balloc.c 
+  Log:
+  Minor changes to the block heap.
+  
+  Revision  Changes    Path
+  7.29      +12 -7     ircd-hybrid-7/src/balloc.c
+
+
+
 androsyn    2002/05/16 09:57:28 EDT	(20020516_4)
 
   Modified files:
