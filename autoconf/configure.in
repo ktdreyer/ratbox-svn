@@ -23,7 +23,7 @@ fi
 AC_MSG_CHECKING(Checking how to generate dependancy info)
 
 if test "x$GCC" = "xyes"; then
-  MKDEP="$GCC -MM"
+  MKDEP="$CC -MM"
 else
    case `uname -s` in
     SunOS*)
