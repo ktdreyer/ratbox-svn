@@ -130,7 +130,7 @@ remove_top_conf(char *name)
 	if((tc = find_top_conf(name)) == NULL)
 		return -1;
 
-	if((ptr = dlinkFind(&conf_items, tc)) == NULL)
+	if((ptr = dlinkFind(tc, &conf_items)) == NULL)
 		return -1;
 
 	dlinkDestroy(ptr, &conf_items);
@@ -2457,7 +2457,7 @@ remove_conf_item(const char *topconf, const char *name)
 	if((cf = find_conf_item(tc, name)) == NULL)
 		return -1;
 
-	if((ptr = dlinkFind(&tc->tc_items, cf)) == NULL)
+	if((ptr = dlinkFind(cf, &tc->tc_items)) == NULL)
 		return -1;
 
 	dlinkDestroy(ptr, &tc->tc_items);

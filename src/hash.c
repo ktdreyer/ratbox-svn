@@ -327,7 +327,7 @@ del_from_id_hash(const char *id, struct Client *client_p)
 		return;
 
 	hashv = hash_id(id);
-	dlinkFindDestroy(&idTable[hashv], client_p);
+	dlinkFindDestroy(client_p, &idTable[hashv]);
 }
 
 /* del_from_client_hash()
@@ -346,7 +346,7 @@ del_from_client_hash(const char *name, struct Client *client_p)
 		return;
 
 	hashv = hash_nick(name);
-	dlinkFindDestroy(&clientTable[hashv], client_p);
+	dlinkFindDestroy(client_p, &clientTable[hashv]);
 }
 
 /* del_from_channel_hash()
@@ -365,7 +365,7 @@ del_from_channel_hash(const char *name, struct Channel *chptr)
 		return;
 
 	hashv = hash_channel(name);
-	dlinkFindDestroy(&channelTable[hashv], chptr);
+	dlinkFindDestroy(chptr, &channelTable[hashv]);
 }
 
 /* del_from_hostname_hash()
@@ -382,7 +382,7 @@ del_from_hostname_hash(const char *hostname, struct Client *client_p)
 
 	hashv = hash_hostname(hostname);
 
-	dlinkFindDestroy(&hostTable[hashv], client_p);
+	dlinkFindDestroy(client_p, &hostTable[hashv]);
 }
 
 /* del_from_resv_hash()
@@ -401,7 +401,7 @@ del_from_resv_hash(const char *name, struct ConfItem *aconf)
 
 	hashv = hash_resv(name);
 
-	dlinkFindDestroy(&resvTable[hashv], aconf);
+	dlinkFindDestroy(aconf, &resvTable[hashv]);
 }
 
 void

@@ -177,7 +177,7 @@ remove_hook(const char *name, hookfn fn)
 	if((i = find_hook(name)) < 0)
 		return;
 
-	dlinkFindDestroy(&hooks[i].hooks, fn);
+	dlinkFindDestroy(fn, &hooks[i].hooks);
 }
 
 /* call_hook()

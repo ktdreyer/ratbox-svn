@@ -122,9 +122,9 @@ void dlinkAddBefore(dlink_node * b, void *data, dlink_node * m, dlink_list * lis
 void dlinkMoveTail(dlink_node *m, dlink_list *list);
 void dlinkAddTail(void *data, dlink_node * m, dlink_list * list);
 void dlinkDelete(dlink_node * m, dlink_list * list);
-dlink_node *dlinkFindDelete(dlink_list * list, void *data);
-int dlinkFindDestroy(dlink_list * list, void *data);
-dlink_node *dlinkFind(dlink_list * list, void *data);
+dlink_node *dlinkFindDelete(void *data, dlink_list *list);
+int dlinkFindDestroy(void *data, dlink_list *list);
+dlink_node *dlinkFind(void *data, dlink_list *list);
 void dlinkMoveList(dlink_list * from, dlink_list * to);
 
 
@@ -274,7 +274,7 @@ dlinkDelete(dlink_node * m, dlink_list * list)
 }
 
 INLINE_FUNC dlink_node *
-dlinkFindDelete(dlink_list * list, void *data)
+dlinkFindDelete(void *data, dlink_list *list)
 {
 	dlink_node *m;
 	assert(list != NULL);
@@ -304,14 +304,14 @@ dlinkFindDelete(dlink_list * list, void *data)
 }
 
 INLINE_FUNC int
-dlinkFindDestroy(dlink_list * list, void *data)
+dlinkFindDestroy(void *data, dlink_list *list)
 {
 	void *ptr;
 
 	assert(list != NULL);
 	assert(data != NULL);
 
-	ptr = dlinkFindDelete(list, data);
+	ptr = dlinkFindDelete(data, list);
 
 	if(ptr != NULL)
 	{
@@ -329,7 +329,7 @@ dlinkFindDestroy(dlink_list * list, void *data)
  * side effects	- Look for ptr in the linked listed pointed to by link.
  */
 INLINE_FUNC dlink_node *
-dlinkFind(dlink_list * list, void *data)
+dlinkFind(void *data, dlink_list *list)
 {
 	dlink_node *ptr;
 	assert(list != NULL);

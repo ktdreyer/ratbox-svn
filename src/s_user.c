@@ -899,7 +899,7 @@ user_mode(struct Client *client_p, struct Client *source_p, int parc, const char
 						MyFree(source_p->localClient->opername);
 						source_p->localClient->opername = NULL;
 
-						dlinkFindDestroy(&oper_list, source_p);
+						dlinkFindDestroy(source_p, &oper_list);
 					}
 				}
 				break;
