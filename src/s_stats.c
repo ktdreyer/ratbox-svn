@@ -122,7 +122,7 @@ tstats(struct Client *source_p)
 	sendto_one_numeric(source_p, RPL_STATSDEBUG,
 			   "T :accepts %u refused %u", sp->is_ac, sp->is_ref);
 	sendto_one_numeric(source_p, RPL_STATSDEBUG,
-			   "T: rejected %u", sp->is_rej);
+			   "T :rejected %u", sp->is_rej);
 	sendto_one_numeric(source_p, RPL_STATSDEBUG,
 			   "T :unknown commands %u prefixes %u",
 			   sp->is_unco, sp->is_unpf);
