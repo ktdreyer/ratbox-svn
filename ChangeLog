@@ -1,3 +1,137 @@
+ejb         2003/05/26 12:17:25 UTC	(20030526_0)
+
+  Modified files:
+    .                    README.VMS 
+    adns                 event.c setup.c 
+    include              modules.h patchlevel.h setup.h_vms 
+                         stdinc.h 
+    modules              descrip.mms m_accept.c m_admin.c m_away.c 
+                         m_capab.c m_challenge.c m_close.c 
+                         m_connect.c m_cryptlink.c m_dline.c 
+                         m_encap.c m_eob.c m_etrace.c m_gline.c 
+                         m_help.c m_htm.c m_info.c m_invite.c 
+                         m_ison.c m_join.c m_kline.c m_knock.c 
+                         m_links.c m_list.c m_locops.c m_lusers.c 
+                         m_map.c m_motd.c m_names.c m_oper.c 
+                         m_operwall.c m_pass.c m_ping.c m_pong.c 
+                         m_post.c m_rehash.c m_restart.c m_resv.c 
+                         m_set.c m_stats.c m_svinfo.c m_testline.c 
+                         m_time.c m_topic.c m_trace.c m_undline.c 
+                         m_ungline.c m_unkline.c m_user.c 
+                         m_userhost.c m_users.c m_version.c 
+                         m_wallops.c m_who.c m_whois.c m_whowas.c 
+                         m_xline.c 
+    modules/core         descrip.mms m_die.c m_kick.c m_kill.c 
+                         m_message.c m_mode.c m_nick.c m_part.c 
+                         m_quit.c m_server.c m_sjoin.c m_squit.c 
+    src                  descrip.mms getopt.c hook.c ircd.c 
+                         ircd_lexer.l ircd_parser.y ircd_signal.c 
+                         match.c md5.c modules.c s_bsd.c s_debug.c 
+                         s_serv.c version.com 
+    tools                descrip.mms 
+  Added files:
+    modules              static_modules_c.com 
+  Log:
+  - change static modules to the module name is supplied to DECLARE_MODULE() macro,
+    not by the makefile.
+  - make VMS support work, though only with select() for now.
+  
+  Revision  Changes    Path
+  1.12      +3 -4      ircd-ratbox/README.VMS
+  1.18      +1 -1      ircd-ratbox/adns/event.c
+  1.29      +3 -3      ircd-ratbox/adns/setup.c
+  7.52      +3 -5      ircd-ratbox/include/modules.h
+  7.49      +8 -1      ircd-ratbox/include/patchlevel.h
+  7.12      +1 -0      ircd-ratbox/include/setup.h_vms
+  1.9       +5 -1      ircd-ratbox/include/stdinc.h
+  1.2       +7 -1      ircd-ratbox/modules/core/descrip.mms
+  1.36      +1 -1      ircd-ratbox/modules/core/m_die.c
+  1.65      +1 -1      ircd-ratbox/modules/core/m_kick.c
+  1.81      +1 -1      ircd-ratbox/modules/core/m_kill.c
+  1.129     +1 -1      ircd-ratbox/modules/core/m_message.c
+  1.70      +1 -1      ircd-ratbox/modules/core/m_mode.c
+  1.120     +1 -1      ircd-ratbox/modules/core/m_nick.c
+  1.77      +1 -1      ircd-ratbox/modules/core/m_part.c
+  1.38      +1 -1      ircd-ratbox/modules/core/m_quit.c
+  1.112     +1 -1      ircd-ratbox/modules/core/m_server.c
+  1.170     +1 -1      ircd-ratbox/modules/core/m_sjoin.c
+  1.66      +1 -1      ircd-ratbox/modules/core/m_squit.c
+  1.7       +14 -11    ircd-ratbox/modules/descrip.mms
+  1.48      +1 -1      ircd-ratbox/modules/m_accept.c
+  1.48      +1 -1      ircd-ratbox/modules/m_admin.c
+  1.45      +1 -1      ircd-ratbox/modules/m_away.c
+  1.38      +1 -1      ircd-ratbox/modules/m_capab.c
+  1.55      +6 -2      ircd-ratbox/modules/m_challenge.c
+  1.35      +1 -1      ircd-ratbox/modules/m_close.c
+  1.56      +1 -1      ircd-ratbox/modules/m_connect.c
+  1.55      +2 -2      ircd-ratbox/modules/m_cryptlink.c
+  1.15      +1 -1      ircd-ratbox/modules/m_dline.c
+  1.4       +2 -2      ircd-ratbox/modules/m_encap.c
+  1.42      +1 -1      ircd-ratbox/modules/m_eob.c
+  1.3       +1 -1      ircd-ratbox/modules/m_etrace.c
+  1.112     +1 -1      ircd-ratbox/modules/m_gline.c
+  1.49      +1 -1      ircd-ratbox/modules/m_help.c
+  1.14      +1 -1      ircd-ratbox/modules/m_htm.c
+  1.84      +1 -1      ircd-ratbox/modules/m_info.c
+  1.64      +1 -1      ircd-ratbox/modules/m_invite.c
+  1.43      +1 -1      ircd-ratbox/modules/m_ison.c
+  1.125     +1 -1      ircd-ratbox/modules/m_join.c
+  1.154     +1 -1      ircd-ratbox/modules/m_kline.c
+  1.74      +1 -1      ircd-ratbox/modules/m_knock.c
+  1.51      +1 -1      ircd-ratbox/modules/m_links.c
+  1.63      +1 -1      ircd-ratbox/modules/m_list.c
+  1.40      +1 -1      ircd-ratbox/modules/m_locops.c
+  1.35      +1 -1      ircd-ratbox/modules/m_lusers.c
+  1.25      +1 -1      ircd-ratbox/modules/m_map.c
+  1.42      +1 -1      ircd-ratbox/modules/m_motd.c
+  1.65      +1 -1      ircd-ratbox/modules/m_names.c
+  1.69      +1 -1      ircd-ratbox/modules/m_oper.c
+  1.45      +1 -1      ircd-ratbox/modules/m_operwall.c
+  1.35      +1 -1      ircd-ratbox/modules/m_pass.c
+  1.44      +1 -1      ircd-ratbox/modules/m_ping.c
+  1.41      +1 -1      ircd-ratbox/modules/m_pong.c
+  1.23      +1 -1      ircd-ratbox/modules/m_post.c
+  1.62      +1 -1      ircd-ratbox/modules/m_rehash.c
+  1.35      +1 -1      ircd-ratbox/modules/m_restart.c
+  1.35      +1 -1      ircd-ratbox/modules/m_resv.c
+  1.60      +1 -1      ircd-ratbox/modules/m_set.c
+  1.159     +1 -1      ircd-ratbox/modules/m_stats.c
+  1.46      +1 -1      ircd-ratbox/modules/m_svinfo.c
+  1.40      +1 -1      ircd-ratbox/modules/m_testline.c
+  1.38      +1 -1      ircd-ratbox/modules/m_time.c
+  1.75      +1 -1      ircd-ratbox/modules/m_topic.c
+  1.75      +1 -1      ircd-ratbox/modules/m_trace.c
+  1.13      +1 -1      ircd-ratbox/modules/m_undline.c
+  1.14      +1 -1      ircd-ratbox/modules/m_ungline.c
+  1.88      +1 -1      ircd-ratbox/modules/m_unkline.c
+  1.35      +1 -1      ircd-ratbox/modules/m_user.c
+  1.49      +1 -1      ircd-ratbox/modules/m_userhost.c
+  1.35      +1 -1      ircd-ratbox/modules/m_users.c
+  1.53      +1 -1      ircd-ratbox/modules/m_version.c
+  1.44      +1 -1      ircd-ratbox/modules/m_wallops.c
+  1.86      +1 -1      ircd-ratbox/modules/m_who.c
+  1.113     +1 -1      ircd-ratbox/modules/m_whois.c
+  1.39      +1 -1      ircd-ratbox/modules/m_whowas.c
+  1.26      +1 -1      ircd-ratbox/modules/m_xline.c
+  1.1       +125 -0    ircd-ratbox/modules/static_modules_c.com (new)
+  7.11      +10 -7     ircd-ratbox/src/descrip.mms
+  7.19      +1 -1      ircd-ratbox/src/getopt.c
+  7.28      +1 -1      ircd-ratbox/src/hook.c
+  7.285     +6 -6      ircd-ratbox/src/ircd.c
+  1.154     +5 -1      ircd-ratbox/src/ircd_lexer.l
+  1.271     +5 -5      ircd-ratbox/src/ircd_parser.y
+  7.17      +4 -0      ircd-ratbox/src/ircd_signal.c
+  7.31      +1 -1      ircd-ratbox/src/match.c
+  1.20      +1 -1      ircd-ratbox/src/md5.c
+  7.127     +3 -0      ircd-ratbox/src/modules.c
+  7.205     +3 -3      ircd-ratbox/src/s_bsd.c
+  7.91      +4 -2      ircd-ratbox/src/s_debug.c
+  7.332     +4 -4      ircd-ratbox/src/s_serv.c
+  7.5       +4 -4      ircd-ratbox/src/version.com
+  7.6       +3 -3      ircd-ratbox/tools/descrip.mms
+
+
+
 androsyn    2003/05/21 15:18:18 UTC	(20030521_0)
 
   Modified files:
