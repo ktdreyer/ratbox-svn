@@ -102,7 +102,7 @@ static char buf[BUFSIZE], buf2[BUFSIZE];
 int m_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   struct Client*    acptr;
-  const char* inpath = get_client_name(cptr,HIDE_IP);
+  const char* inpath = cptr->name;
   char*       user;
   char*       path;
   char*       killer;
@@ -184,12 +184,12 @@ int m_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       **        ...!operhost!oper
       **        ...!operhost!oper (comment)
       */
-      inpath = cptr->host;
       if (!BadPtr(path))
         {
           ircsprintf(buf, "%s%s (%s)",
                            cptr->name, IsOper(sptr) ? "" : "(L)", path);
           path = buf;
+	  reason = path;
         }
       else
         path = cptr->name;
@@ -229,9 +229,9 @@ int m_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       sendto_realops("Received KILL message for %s. From %s!%s@%s Path: %s!%s",
                  acptr->name, parv[0], sptr->name, sptr->username, sptr->host,
                  inpath, path);
-      sendto_ops("Received KILL message for %s. From %s!%s@%s:%s",
+      sendto_ops("Received KILL message for %s. From %s!%s@%s Path:supressed!%s",
                  acptr->name, sptr->name, sptr->username, sptr->host,
-                 parv[0], reason);
+                 reason);
     }
   else
     sendto_realops_flags(FLAGS_SKILL,
