@@ -1,3 +1,7 @@
+*** 20010812_1 by leeh
+- removed traces of no_hack_ops as its not optional anymore
+
+
 *** 20010811_1 by leeh
 - you cant use a hash table lookup for incoming servers, else you can have
   *.com on one side of the net, and x.com on the other.
