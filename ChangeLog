@@ -1,3 +1,16 @@
+leeh        2004/08/13 22:44:26 EDT	(20040814_1)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  - merge release_client_state() into free_client()
+  - merge update_client_exit_stats() into remove_client_from_list()
+  
+  Revision  Changes    Path
+  7.478     +30 -55    ircd-ratbox/src/client.c
+
+
+
 leeh        2004/08/13 22:05:33 EDT	(20040814_0)
 
   Modified files:
