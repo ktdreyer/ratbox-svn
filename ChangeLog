@@ -1,3 +1,21 @@
+leeh        2005/02/16 12:58:24 EST	(20050216_2)
+
+  Modified files:
+    .                    RELNOTES configure configure.ac 
+    include              patchlevel.h 
+  Log:
+  - update configure to reflect this is 'devel'
+  - update RELNOTES
+  - revved patchlevel to 2.1.0beta1
+  
+  Revision  Changes    Path
+  1.112     +9 -1      ircd-ratbox/RELNOTES
+  7.242     +11 -11    ircd-ratbox/configure
+  7.56      +3 -3      ircd-ratbox/configure.ac
+  7.71      +1 -1      ircd-ratbox/include/patchlevel.h
+
+
+
 leeh        2005/02/16 12:46:30 EST	(20050216_1)
 
   Modified files:
