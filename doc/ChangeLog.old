@@ -1,3 +1,6 @@
+*** 20001130_19 by davidt
+m_error.so wasn't being built.
+
 *** 20001130_18 by db
 - removed CUSTOM_ERR define no longer needed
 - removed offsetof no longer needed
