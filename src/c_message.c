@@ -15,7 +15,7 @@
 static void c_message(struct client *, char *parv[], int parc);
 
 struct scommand_handler privmsg_command = { "PRIVMSG", c_message, 0 };
-struct scommand_handler notice_command = { "NOTICE", c_message, 0 };
+/* struct scommand_handler notice_command = { "NOTICE", c_message, 0 }; */
 
 static void
 c_message(struct client *client_p, char *parv[], int parc)

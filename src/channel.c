@@ -252,6 +252,7 @@ chmode_to_string(struct channel *chptr)
 	*p = '\0';
 	return buf;
 }
+
 static void
 c_sjoin(struct client *client_p, char *parv[], int parc)
 {

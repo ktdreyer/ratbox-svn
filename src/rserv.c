@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
 
 	/* load specific commands */
 	add_scommand_handler(&mode_command);
-	add_scommand_handler(&notice_command);
+/*	add_scommand_handler(&notice_command); */
 	add_scommand_handler(&privmsg_command);
 
 	/* load our services.. */
