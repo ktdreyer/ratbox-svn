@@ -1,3 +1,34 @@
+leeh        2003/12/26 16:34:53 EST	(20031226_1)
+
+  Modified files:
+    include              c_init.h conf.h io.h 
+    src                  Makefile.in conf.c io.c rserv.c 
+                         ucommand.c 
+  Added files:
+    src                  c_error.c 
+  Log:
+  - add "ERROR" command handling
+  - remove the hardcoding of server password, make it use the one in C:
+  - only positive ports in a C: enable autoconn, negative ports are allowed
+    as 'default' ports on .connect
+  - fix the autoconn stuff, we now store when last connect was and use that to
+    decide where to connect to
+  - cleaned the notice in die() up
+  - remove rserv.exe on clean, for cygwin
+  
+  Revision  Changes    Path
+  1.6       +3 -1      rserv/include/c_init.h
+  1.5       +2 -0      rserv/include/conf.h
+  1.5       +1 -0      rserv/include/io.h
+  1.3       +2 -1      rserv/src/Makefile.in
+  1.1       +28 -0     rserv/src/c_error.c (new)
+  1.8       +5 -5      rserv/src/conf.c
+  1.12      +45 -16    rserv/src/io.c
+  1.10      +5 -6      rserv/src/rserv.c
+  1.3       +12 -9     rserv/src/ucommand.c
+
+
+
 leeh        2003/12/26 16:33:57 EST	(20031226_0)
 
   Modified files:
