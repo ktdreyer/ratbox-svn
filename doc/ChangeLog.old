@@ -1,3 +1,8 @@
+*** 20010108_6 by db
+- don't show real ip's of any hosts to non admins in m_server
+
+
+
 *** 20010108_5 by db
 - added FLAGS_DRONE to ALL_UMODES
 
