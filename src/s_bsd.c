@@ -226,6 +226,7 @@ int set_non_blocking(int fd)
   if (-1 == res || fcntl(fd, F_SETFL, res | nonb) == -1)
     return 0;
 #endif /* !NBLOCK_SYSV */
+  fd_table[fd].flags.nonblocking = 1;
   return 1;
 }
 
