@@ -1,3 +1,8 @@
+*** 20010227_2 by db
+- don't try to use a flag on a NULL pointer
+
+
+
 *** 20010227_1 by androsyn
 Made IPv6 a configure option
 
