@@ -38,11 +38,11 @@
 
 #define UFLAGS  (FLAGS_INVISIBLE|FLAGS_WALLOP|FLAGS_SERVNOTICE)
 
-static int m_user(struct Client*, struct Client*, int, char**);
+static int mr_user(struct Client*, struct Client*, int, char**);
 
 struct Message user_msgtab = {
   MSG_USER, 0, 5, 0, MFLG_SLOW, 0L,
-  {m_user, m_registered, m_ignore, m_registered}
+  {mr_user, m_registered, m_ignore, m_registered}
 };
 
 void
@@ -60,23 +60,20 @@ _moddeinit(void)
 char *_version = "20001122";
 
 /*
-** m_user
+** mr_user
 **      parv[0] = sender prefix
 **      parv[1] = username (login name, account)
 **      parv[2] = client host name (used only from other servers)
 **      parv[3] = server host name (used only from other servers)
 **      parv[4] = users real name info
 */
-static int m_user(struct Client* cptr, struct Client* sptr,
-                  int parc, char *parv[])
+static int mr_user(struct Client* cptr, struct Client* sptr,
+		   int parc, char *parv[])
 {
-  char* username;
-  char* host;
-  char* server;
-  char* realname;
+  char* p;
  
-  if ((username = strchr(parv[1],'@')))
-    *username = '\0'; 
+  if ((p = strchr(parv[1],'@')))
+    *p = '\0'; 
 
   if (*parv[4] == '\0')
     {
@@ -85,11 +82,11 @@ static int m_user(struct Client* cptr, struct Client* sptr,
       return 0;
     }
 
-  /* Copy parameters into better documenting variables */
-  username = parv[1];
-  host = parv[2];
-  server = parv[3];
-  realname = parv[4];
-
-  return do_user(parv[0], cptr, sptr, username, host, server, realname, NULL);
+  return do_local_user(parv[0], cptr, sptr,
+		       parv[1],	/* username */
+		       parv[2],	/* host */
+		       parv[3],	/* server */
+		       parv[4]	/* users real name */ );
 }
+
+

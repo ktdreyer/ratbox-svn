@@ -1,5 +1,5 @@
 /************************************************************************
- *   IRC - Internet Relay Chat, modules/m_cburst.c
+ *   IRC - Internet Relay Chat, modules/m_nburst.c
  *   Copyright (C) 1990 Jarkko Oikarinen and
  *                      University of Oulu, Co Center
  *

@@ -63,6 +63,8 @@ static int valid_username(const char* username);
 static void report_and_set_user_flags( struct Client *, struct ConfItem * );
 static int check_X_line(struct Client *cptr, struct Client *sptr);
 static void user_welcome(struct Client *sptr);
+static int introduce_client(struct Client *cptr, struct Client *sptr,
+			    struct User *user, char *nick);
 
 /* table of ascii char letters to corresponding bitmask */
 
@@ -293,7 +295,7 @@ int show_isupport(struct Client *sptr)
 
 
 /*
-** register_user
+** register_local_user
 **      This function is called when both NICK and USER messages
 **      have been accepted for the client, in whatever order. Only
 **      after this, is the USER message propagated.
@@ -316,125 +318,120 @@ int show_isupport(struct Client *sptr)
 **         nick from local user or kill him/her...
 */
 
-int register_user(struct Client *cptr, struct Client *sptr, 
-                         char *nick, char *username)
+int register_local_user(struct Client *cptr, struct Client *sptr, 
+			char *nick, char *username)
 {
   struct ConfItem*  aconf;
-  char*       parv[3];
-  static char ubuf[12];
   struct User*     user = sptr->user;
   char        tmpstr2[IRCD_BUFSIZE];
   int  status;
   dlink_node *ptr;
   dlink_node *m;
-  char *id, *cookie;
-  
+  char *id;
+
   assert(0 != sptr);
   assert(sptr->username != username);
 
   user->last = CurrentTime;
-  parv[0] = sptr->name;
 
   /* pointed out by Mortiis, never be too careful */
   if(strlen(username) > USERLEN)
     username[USERLEN] = '\0';
 
-  if (MyConnect(sptr))
+  if( ( status = check_client(cptr, sptr, username )) < 0 )
+    return(CLIENT_EXITED);
+
+  if(!valid_hostname(sptr->host))
     {
-      if( ( status = check_client(cptr, sptr, username )) < 0 )
-		  return(CLIENT_EXITED);
+      sendto_one(sptr,":%s NOTICE %s :*** Notice -- You have an illegal character in your hostname", 
+		 me.name, sptr->name );
 
-      if(!valid_hostname(sptr->host))
-        {
-          sendto_one(sptr,":%s NOTICE %s :*** Notice -- You have an illegal character in your hostname", 
-                     me.name, sptr->name );
+      strncpy(sptr->host,sptr->localClient->sockhost,HOSTIPLEN+1);
+    }
 
-          strncpy(sptr->host,sptr->localClient->sockhost,HOSTIPLEN+1);
-        }
+  ptr = sptr->localClient->confs.head;
+  aconf = ptr->data;
 
-      ptr = sptr->localClient->confs.head;
-      aconf = ptr->data;
+  if (aconf == NULL)
+    return exit_client(cptr, sptr, &me, "*** Not Authorized");
 
-      if (!aconf)
-        return exit_client(cptr, sptr, &me, "*** Not Authorized");
-
-      if (!IsGotId(sptr))
-        {
-          if (IsNeedIdentd(aconf))
-            {
-              ServerStats->is_ref++;
-              sendto_one(sptr,
-			 ":%s NOTICE %s :*** Notice -- You need to install identd to use this server",
-                         me.name, cptr->name);
-	      return exit_client(cptr, sptr, &me, "Install identd");
-	    }
-	  else
-	    strncpy_irc(sptr->username, username, USERLEN);
-
-	  if (IsNoTilde(aconf))
-	    {
-	      strncpy_irc(sptr->username, username, USERLEN);
-	    }
-	  else
-	    {
-	      *sptr->username = '~';
-	      strncpy_irc(&sptr->username[1], username, USERLEN - 1);
-	    }
-	  sptr->username[USERLEN] = '\0';
-        }
-
-      /* password check */
-      if (!BadPtr(aconf->passwd) &&
-	  !strcmp(sptr->localClient->passwd, aconf->passwd))
+  if (!IsGotId(sptr))
+    {
+      if (IsNeedIdentd(aconf))
 	{
 	  ServerStats->is_ref++;
-	  sendto_one(sptr, form_str(ERR_PASSWDMISMATCH),
-		     me.name, parv[0]);
-	  return exit_client(cptr, sptr, &me, "Bad Password");
+	  sendto_one(sptr,
+		     ":%s NOTICE %s :*** Notice -- You need to install identd to use this server",
+		     me.name, cptr->name);
+	  return exit_client(cptr, sptr, &me, "Install identd");
 	}
-      memset(sptr->localClient->passwd,0, sizeof(sptr->localClient->passwd));
+      else
+	strncpy_irc(sptr->username, username, USERLEN);
 
-      /* report if user has &^>= etc. and set flags as needed in sptr */
-      report_and_set_user_flags(sptr, aconf);
+      if (IsNoTilde(aconf))
+	{
+	  strncpy_irc(sptr->username, username, USERLEN);
+	}
+      else
+	{
+	  *sptr->username = '~';
+	  strncpy_irc(&sptr->username[1], username, USERLEN - 1);
+	}
+      sptr->username[USERLEN] = '\0';
+    }
+
+  /* password check */
+  if (!BadPtr(aconf->passwd) &&
+      !strcmp(sptr->localClient->passwd, aconf->passwd))
+    {
+      ServerStats->is_ref++;
+      sendto_one(sptr, form_str(ERR_PASSWDMISMATCH),
+		 me.name, sptr->name);
+      return exit_client(cptr, sptr, &me, "Bad Password");
+    }
+  memset(sptr->localClient->passwd,0, sizeof(sptr->localClient->passwd));
+
+  /* report if user has &^>= etc. and set flags as needed in sptr */
+  report_and_set_user_flags(sptr, aconf);
   
-      /* Limit clients */
-      /*
-       * We want to be able to have servers and F-line clients
-       * connect, so save room for "buffer" connections.
-       * Smaller servers may want to decrease this, and it should
-       * probably be just a percentage of the MAXCLIENTS...
-       *   -Taner
-       */
-      /* Except "F:" clients */
-      if ( ( (Count.local + 1) >= (GlobalSetOptions.maxclients+MAX_BUFFER)
-	     ||
-	     (Count.local +1) >= (GlobalSetOptions.maxclients - 5) )
-	   &&
-	   !(IsFlined(sptr)) )
-	{
-	  sendto_realops_flags(FLAGS_FULL,
-			       "Too many clients, rejecting %s[%s].",
-			       nick, sptr->host);
-	  ServerStats->is_ref++;
-	  return exit_client(cptr, sptr, &me,
-			     "Sorry, server is full - try later");
-	}
+  /* Limit clients */
+  /*
+   * We want to be able to have servers and F-line clients
+   * connect, so save room for "buffer" connections.
+   * Smaller servers may want to decrease this, and it should
+   * probably be just a percentage of the MAXCLIENTS...
+   *   -Taner
+   */
+  /* Except "F:" clients */
+  if ( ( (Count.local + 1) >= (GlobalSetOptions.maxclients+MAX_BUFFER)
+	 ||
+	 (Count.local +1) >= (GlobalSetOptions.maxclients - 5) )
+       &&
+       !(IsFlined(sptr)) )
+    {
+      sendto_realops_flags(FLAGS_FULL,
+			   "Too many clients, rejecting %s[%s].",
+			   nick, sptr->host);
+      ServerStats->is_ref++;
+      return exit_client(cptr, sptr, &me,
+			 "Sorry, server is full - try later");
+    }
 
-      /* valid user name check */
+  /* valid user name check */
 
-      if (!valid_username(sptr->username))
-	{
-	  sendto_realops_flags(FLAGS_REJ,"Invalid username: %s (%s@%s)",
-			       nick, sptr->username, sptr->host);
-	  ServerStats->is_ref++;
-	  ircsprintf(tmpstr2, "Invalid username [%s]", sptr->username);
-	  return exit_client(cptr, sptr, &me, tmpstr2);
-	}
+  if (!valid_username(sptr->username))
+    {
+      sendto_realops_flags(FLAGS_REJ,"Invalid username: %s (%s@%s)",
+			   nick, sptr->username, sptr->host);
+      ServerStats->is_ref++;
+      ircsprintf(tmpstr2, "Invalid username [%s]", sptr->username);
+      return exit_client(cptr, sptr, &me, tmpstr2);
+    }
 
-      /* end of valid user name check */
-      
-      if( (status = check_X_line(cptr,sptr)) < 0 )
-	return status;
+  /* end of valid user name check */
+  
+  if( (status = check_X_line(cptr,sptr)) < 0 )
+    return status;
 
 /* Put this in #ifdef now, and make sure that we are using openssl or
  * it breaks the build. */
@@ -450,84 +447,130 @@ int register_user(struct Client *cptr, struct Client *sptr,
 	  }
 #endif
 
-      sendto_realops_flags(FLAGS_CCONN,
-			   "Client connecting: %s (%s@%s) [%s] {%s}",
-			   nick, sptr->username, sptr->host,
-			   inetntoa((char *)&sptr->localClient->ip),
-			   get_client_class(sptr));
-      
-      if ((++Count.local) > Count.max_loc)
-	{
-	  Count.max_loc = Count.local;
-	  if (!(Count.max_loc % 10))
-	    sendto_realops_flags(FLAGS_ALL,"New Max Local Clients: %d",
-				 Count.max_loc);
-	}
+      strcpy(sptr->user->id, id);
+      add_to_id_hash_table(sptr->user->id, sptr);
     }
-  else
-    strncpy_irc(sptr->username, username, USERLEN);
+	  
+  sendto_realops_flags(FLAGS_CCONN,
+		       "Client connecting: %s (%s@%s) [%s] {%s}",
+		       nick, sptr->username, sptr->host,
+		       inetntoa((char *)&sptr->localClient->ip),
+		       get_client_class(sptr));
+  
+  if ((++Count.local) > Count.max_loc)
+    {
+      Count.max_loc = Count.local;
+      if (!(Count.max_loc % 10))
+	sendto_realops_flags(FLAGS_ALL,"New Max Local Clients: %d",
+			     Count.max_loc);
+    }
 
   SetClient(sptr);
 
+  /* XXX sptr->servptr is &me, since local client */
   sptr->servptr = find_server(user->server);
-  if (!sptr->servptr)
-    {
-      sendto_realops_flags(FLAGS_ALL,"Ghost killed: %s on invalid server %s",
-			   sptr->name, sptr->user->server);
-      sendto_one(cptr,":%s KILL %s :%s (Ghosted, %s doesn't exist)",
-		 me.name, sptr->name, me.name, user->server);
-      sptr->flags |= FLAGS_KILLED;
-      return exit_client(NULL, sptr, &me, "Ghost");
-    }
   add_client_to_llist(&(sptr->servptr->serv->users), sptr);
 
   /* Increment our total user count here */
   if (++Count.total > Count.max_tot)
     Count.max_tot = Count.total;
 
-  if (MyConnect(sptr))
+  Count.totalrestartcount++;
+  user_welcome(sptr);
+
+  m = dlinkFind(&unknown_list, sptr);
+
+  assert(m != NULL);
+  dlinkDelete(m, &unknown_list);
+  dlinkAdd(sptr, m, &lclient_list);
+
+  return (introduce_client(cptr, sptr, user, nick));
+}
+
+int register_remote_user(struct Client *cptr, struct Client *sptr, 
+			 char *nick, char *username)
+{
+  struct User*     user = sptr->user;
+  struct Client *acptr;
+  
+  assert(0 != sptr);
+  assert(sptr->username != username);
+
+  user->last = CurrentTime;
+
+  /* pointed out by Mortiis, never be too careful */
+  if(strlen(username) > USERLEN)
+    username[USERLEN] = '\0';
+
+  strncpy_irc(sptr->username, username, USERLEN);
+
+  SetClient(sptr);
+
+  sptr->servptr = find_server(user->server);
+
+  if (sptr->servptr == NULL)
     {
-      Count.totalrestartcount++;
-      user_welcome(sptr);
+      sendto_realops_flags(FLAGS_ALL,"Ghost killed: %s on invalid server %s",
+			   sptr->name, sptr->user->server);
+      sendto_one(cptr,":%s KILL %s :%s (Ghosted, %s doesn't exist)",
+                 me.name, sptr->name, me.name, user->server);
+      sptr->flags |= FLAGS_KILLED;
+      return exit_client(NULL, sptr, &me, "Ghost");
     }
-  else if (IsServer(cptr))
+
+  add_client_to_llist(&(sptr->servptr->serv->users), sptr);
+
+  if ((acptr = find_server(user->server)) && acptr->from != sptr->from)
     {
-      struct Client *acptr;
-      if ((acptr = find_server(user->server)) && acptr->from != sptr->from)
-        {
-          sendto_realops_flags(FLAGS_DEBUG, 
-                             "Bad User [%s] :%s USER %s@%s %s, != %s[%s]",
-                             cptr->name, nick, sptr->username,
-                             sptr->host, user->server,
-                             acptr->name, acptr->from->name);
-          sendto_one(cptr,
-                     ":%s KILL %s :%s (%s != %s[%s] USER from wrong direction)",
-                     me.name, sptr->name, me.name, user->server,
-                     acptr->from->name, acptr->from->host);
-          sptr->flags |= FLAGS_KILLED;
-          return exit_client(sptr, sptr, &me,
-                             "USER server wrong direction");
-          
-        }
-      /*
-       * Super GhostDetect:
-       *        If we can't find the server the user is supposed to be on,
-       * then simply blow the user away.        -Taner
-       */
-      if (!acptr)
-        {
-          sendto_one(cptr,
-                     ":%s KILL %s :%s GHOST (no server %s on the net)",
-                     me.name,
-                     sptr->name, me.name, user->server);
-          sendto_realops_flags(FLAGS_ALL,
-			       "No server %s for user %s[%s@%s] from %s",
-			       user->server, sptr->name, sptr->username,
-			       sptr->host, sptr->from->name);
-          sptr->flags |= FLAGS_KILLED;
-          return exit_client(sptr, sptr, &me, "Ghosted Client");
-        }
+      sendto_realops_flags(FLAGS_DEBUG, 
+			   "Bad User [%s] :%s USER %s@%s %s, != %s[%s]",
+			   cptr->name, nick, sptr->username,
+			   sptr->host, user->server,
+			   acptr->name, acptr->from->name);
+      sendto_one(cptr,
+		 ":%s KILL %s :%s (%s != %s[%s] USER from wrong direction)",
+		 me.name, sptr->name, me.name, user->server,
+		 acptr->from->name, acptr->from->host);
+      sptr->flags |= FLAGS_KILLED;
+      return exit_client(sptr, sptr, &me,
+			 "USER server wrong direction");
+      
     }
+  /*
+   * Super GhostDetect:
+   *        If we can't find the server the user is supposed to be on,
+   * then simply blow the user away.        -Taner
+   */
+  if (!acptr)
+    {
+      sendto_one(cptr,
+		 ":%s KILL %s :%s GHOST (no server %s on the net)",
+		 me.name,
+		 sptr->name, me.name, user->server);
+      sendto_realops_flags(FLAGS_ALL,"No server %s for user %s[%s@%s] from %s",
+			   user->server, sptr->name, sptr->username,
+			   sptr->host, sptr->from->name);
+      sptr->flags |= FLAGS_KILLED;
+      return exit_client(sptr, sptr, &me, "Ghosted Client");
+    }
+
+  return (introduce_client(cptr, sptr, user, nick));
+}
+
+/*
+ * introduce_clients
+ *
+ * inputs	-
+ * output	-
+ * side effects -
+ */
+static int
+introduce_client(struct Client *cptr, struct Client *sptr,
+		 struct User *user, char *nick)
+{
+  dlink_node *server_node;
+  struct Client *server;
+  static char ubuf[12];
 
   send_umode(NULL, sptr, 0, SEND_UMODES, ubuf);
 
@@ -537,14 +580,6 @@ int register_user(struct Client *cptr, struct Client *sptr,
       ubuf[1] = '\0';
     }
 
-  if (MyConnect(sptr))
-    {
-      m = dlinkFind(&unknown_list, sptr);
-
-      assert(m != NULL);
-      dlinkDelete(m, &unknown_list);
-      dlinkAdd(sptr, m, &lclient_list);
-    }
 
   /* arghhh one could try not introducing new nicks to ll leafs
    * but then you have to introduce them "on the fly" in SJOIN
@@ -565,46 +600,43 @@ int register_user(struct Client *cptr, struct Client *sptr,
   
   if (!ConfigFileEntry.hub && uplink && IsCapable(uplink,CAP_LL)
       && cptr != uplink) 
-  {
-	  if (IsCapable(uplink, CAP_UID))
-	  {
-		  sendto_one(uplink, "NICK %s %d %lu %s %s %s %s %s :%s",
-					 nick, sptr->hopcount+1, sptr->tsinfo,
-					 ubuf, sptr->username, sptr->host, user->server,
-					 sptr->user->id, sptr->info);
-	  }
-	  else
-	  {
-		  sendto_one(uplink, "NICK %s %d %lu %s %s %s %s :%s",
-					 nick, sptr->hopcount+1, sptr->tsinfo,
-					 ubuf, sptr->username, sptr->host, user->server,
-					 sptr->info);
-	  }
-  }
+    {
+      if (IsCapable(uplink, CAP_UID))
+	{
+	  sendto_one(uplink, "NICK %s %d %lu %s %s %s %s %s :%s",
+		     nick, sptr->hopcount+1, sptr->tsinfo,
+		     ubuf, sptr->username, sptr->host, user->server,
+		     sptr->user->id, sptr->info);
+	}
+      else
+	{
+	  sendto_one(uplink, "NICK %s %d %lu %s %s %s %s :%s",
+		     nick, sptr->hopcount+1, sptr->tsinfo,
+		     ubuf, sptr->username, sptr->host, user->server,
+		     sptr->info);
+	}
+    }
   else
-  {
-	  dlink_node *server_node;
-	  struct Client *server;
-	  
-	  for (server_node = serv_list.head; server_node; server_node = server_node->next)
-	  {
-		  server = (struct Client *) server_node->data;
+    {
+      for (server_node = serv_list.head; server_node; server_node = server_node->next)
+	{
+	  server = (struct Client *) server_node->data;
 		  
-		  if (IsCapable(server, CAP_LL) || server == cptr)
-			  continue;
+	  if (IsCapable(server, CAP_LL) || server == cptr)
+	    continue;
 		  
-		  if (IsCapable(server, CAP_UID))
-			  sendto_one(server, "CLIENT %s %d %lu %s %s %s %s %s :%s",
-						 nick, sptr->hopcount+1, sptr->tsinfo,
-						 ubuf, sptr->username, sptr->host, user->server,
-						 user->id, sptr->info);
-		  else
-			  sendto_one(server, "NICK %s %d %lu %s %s %s %s :%s",
-						 nick, sptr->hopcount+1, sptr->tsinfo,
-						 ubuf, sptr->username, sptr->host, user->server,
-						 sptr->info);
-	  }
-  }
+	  if (IsCapable(server, CAP_UID))
+	    sendto_one(server, "CLIENT %s %d %lu %s %s %s %s %s :%s",
+		       nick, sptr->hopcount+1, sptr->tsinfo,
+		       ubuf, sptr->username, sptr->host, user->server,
+		       user->id, sptr->info);
+	  else
+	    sendto_one(server, "NICK %s %d %lu %s %s %s %s :%s",
+		       nick, sptr->hopcount+1, sptr->tsinfo,
+		       ubuf, sptr->username, sptr->host, user->server,
+		       sptr->info);
+	}
+    }
   
   if (ubuf[1])
     send_umode_out(cptr, sptr, 0);
@@ -746,10 +778,13 @@ report_and_set_user_flags(struct Client *sptr,struct ConfItem *aconf)
 
 
 /*
-** do_user
-*/
-int do_user(char* nick, struct Client* cptr, struct Client* sptr,
-                   char* username, char *host, char *server, char *realname, char *id)
+ * do_local_user
+ *
+ * inputs	-
+ * output	-
+ */
+int do_local_user(char* nick, struct Client* cptr, struct Client* sptr,
+		  char* username, char *host, char *server, char *realname)
 {
   unsigned int oflags;
   struct User* user;
@@ -761,37 +796,25 @@ int do_user(char* nick, struct Client* cptr, struct Client* sptr,
 
   oflags = sptr->flags;
 
-  if (!MyConnect(sptr))
+  if (!IsUnknown(sptr))
     {
-      /*
-       * coming from another server, take the servers word for it
-       */
-      user->server = find_or_add(server);
-      strncpy_irc(sptr->host, host, HOSTLEN); 
+      sendto_one(sptr, form_str(ERR_ALREADYREGISTRED), me.name, nick);
+      return 0;
     }
-  else
-    {
-      if (!IsUnknown(sptr))
-        {
-          sendto_one(sptr, form_str(ERR_ALREADYREGISTRED), me.name, nick);
-          return 0;
-        }
-      sptr->flags |= FLAGS_INVISIBLE;
+  sptr->flags |= FLAGS_INVISIBLE;
 
-      if (!(oflags & FLAGS_INVISIBLE) && IsInvisible(sptr))
-        Count.invisi++;
-      /*
-       * don't take the clients word for it, ever
-       *  strncpy_irc(user->host, host, HOSTLEN); 
-       */
-      user->server = me.name;
-    }
+  if (!(oflags & FLAGS_INVISIBLE) && IsInvisible(sptr))
+    Count.invisi++;
+  /*
+   * don't take the clients word for it, ever
+   *  strncpy_irc(user->host, host, HOSTLEN); 
+   */
+  user->server = me.name;
+
   strncpy_irc(sptr->info, realname, REALLEN);
-  if (id)
-	  strncpy_irc(sptr->user->id, id, IDLEN);
   
   if (sptr->name[0]) /* NICK already received, now I have USER... */
-    return register_user(cptr, sptr, sptr->name, username);
+    return register_local_user(cptr, sptr, sptr->name, username);
   else
     {
       if (!IsGotId(sptr)) 
@@ -803,6 +826,34 @@ int do_user(char* nick, struct Client* cptr, struct Client* sptr,
         }
     }
   return 0;
+}
+
+/*
+ * do_remote_user
+ *
+ * inputs	-
+ * output	-
+ */
+int do_remote_user(char* nick, struct Client* cptr, struct Client* sptr,
+		   char* username, char *host, char *server, char *realname,
+		   char *id)
+{
+  unsigned int oflags;
+  struct User* user;
+
+  assert(0 != sptr);
+  assert(sptr->username != username);
+
+  user = make_user(sptr);
+
+  oflags = sptr->flags;
+
+  /*
+   * coming from another server, take the servers word for it
+   */
+  user->server = find_or_add(server);
+  strncpy_irc(sptr->host, host, HOSTLEN); 
+  return register_remote_user(cptr, sptr, sptr->name, username);
 }
 
 /*

@@ -1,5 +1,5 @@
 /************************************************************************
- *   IRC - Internet Relay Chat, modules/m_nick.c
+ *   IRC - Internet Relay Chat, modules/m_client.c
  *   Copyright (C) 1990 Jarkko Oikarinen and
  *                      University of Oulu, Computing Center
  *
@@ -49,12 +49,6 @@
 
 static int nick_from_server(struct Client *, struct Client *, int, char **,
                             time_t, char *);
-static int set_initial_nick(struct Client *cptr,
-                            struct Client *sptr,char *nick);
-static int change_local_nick(struct Client *cptr, struct Client *sptr,
-                             char *nick);
-static int nick_equal_server(struct Client *cptr, struct Client *sptr,
-                             char *nick);
 static int clean_nick_name(char* nick);
 
 static int ms_client(struct Client*, struct Client*, int, char**);
@@ -466,46 +460,46 @@ static int
 nick_from_server(struct Client *cptr, struct Client *sptr, int parc,
                  char *parv[], time_t newts,char *nick)
 {
-	char *name;
-	char *id;
-	int   flag;
-	char* m;
+  char *name;
+  char *id;
+  int   flag;
+  char* m;
 	
-	id = parv[8];
-	name = parv[9];
+  id = parv[8];
+  name = parv[9];
+  
+  sptr = make_client(cptr);
+  add_client_to_list(sptr);         /* double linked list */
 	
-	sptr = make_client(cptr);
-	add_client_to_list(sptr);         /* double linked list */
-	
-	sptr->hopcount = atoi(parv[2]);
-	sptr->tsinfo = newts;
+  sptr->hopcount = atoi(parv[2]);
+  sptr->tsinfo = newts;
 
-	/* copy the nick in place */
-	(void)strcpy(sptr->name, nick);
-	(void)add_to_client_hash_table(nick, sptr);
-	add_to_id_hash_table(id, sptr);
+  /* copy the nick in place */
+  (void)strcpy(sptr->name, nick);
+  (void)add_to_client_hash_table(nick, sptr);
+  add_to_id_hash_table(id, sptr);
 
-	/*
-	** parse the usermodes -orabidoo
-	*/
-	m = &parv[4][1];
-	while (*m)
+  /*
+  ** parse the usermodes -orabidoo
+  */
+  m = &parv[4][1];
+  while (*m)
+    {
+      flag = user_modes_from_c_to_bitmask[(unsigned char)*m];
+      if( flag & FLAGS_INVISIBLE )
 	{
-		flag = user_modes_from_c_to_bitmask[(unsigned char)*m];
-		if( flag & FLAGS_INVISIBLE )
-		{
-			Count.invisi++;
-		}
-		if( flag & FLAGS_OPER )
-		{
-			Count.oper++;
-		}
-		sptr->umodes |= flag & SEND_UMODES;
-		m++;
+	  Count.invisi++;
 	}
+      if( flag & FLAGS_OPER )
+	{
+	  Count.oper++;
+	}
+      sptr->umodes |= flag & SEND_UMODES;
+      m++;
+    }
 	
-	return do_user(nick, cptr, sptr, parv[5], parv[6],
-				   parv[7], name, id);
+  return do_remote_user(nick, cptr, sptr, parv[5], parv[6],
+			parv[7], name, id);
 }
 
 /*
