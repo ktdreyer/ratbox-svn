@@ -55,6 +55,13 @@
  * hot sun for 2 weeks, coated with flies. -db
  */
 
+static  char    modebuf[MODEBUFLEN];
+static  char    parabuf[MODEBUFLEN];
+static  char    *mbuf;
+static  int     pargs;
+
+void set_final_mode(struct Mode *mode,struct Mode *oldmode);
+
 int     ms_sjoin(struct Client *cptr,
                 struct Client *sptr,
                 int parc,
@@ -69,12 +76,9 @@ int     ms_sjoin(struct Client *cptr,
   static        struct Mode mode, *oldmode;
   struct SLink  *l;
   int   args = 0, keep_our_modes = 1, keep_new_modes = 1;
-  int   doesop = 0, what = 0, pargs = 0, fl, people = 0, isnew;
+  int   doesop = 0, what = 0, fl, people = 0, isnew;
   register      char *s, *s0;
-  static        char numeric[16], sjbuf[BUFSIZE];
-  char    modebuf[MODEBUFLEN];
-  char    parabuf[MODEBUFLEN];
-  char    *mbuf = modebuf;
+  static        char sjbuf[BUFSIZE];
   char    *t = sjbuf;
   char    *p;
 
@@ -95,6 +99,8 @@ int     ms_sjoin(struct Client *cptr,
   if(*parv[2] == '&')
     return 0;
 
+  mbuf = modebuf;
+  pargs = 0;
   newts = atol(parv[1]);
   memset(&mode, 0, sizeof(mode));
 
@@ -292,165 +298,7 @@ int     ms_sjoin(struct Client *cptr,
         strcpy(mode.key, oldmode->key);
     }
 
-  if((MODE_PRIVATE    & mode.mode) && !(MODE_PRIVATE    & oldmode->mode))
-    {
-      if (what != 1)
-        {
-          *mbuf++ = '+';
-          what = 1;
-        }
-      *mbuf++ = 'p';
-    }
-  if((MODE_SECRET     & mode.mode) && !(MODE_SECRET     & oldmode->mode))
-    {
-      if (what != 1)
-        {
-          *mbuf++ = '+';
-          what = 1;
-        }
-      *mbuf++ = 's';
-    }
-  if((MODE_MODERATED  & mode.mode) && !(MODE_MODERATED  & oldmode->mode))
-    {
-      if (what != 1)
-        {
-          *mbuf++ = '+';
-          what = 1;
-        }
-      *mbuf++ = 'm';
-    }
-  if((MODE_NOPRIVMSGS & mode.mode) && !(MODE_NOPRIVMSGS & oldmode->mode))
-    {
-      if (what != 1)
-        {
-          *mbuf++ = '+';
-          what = 1;
-        }
-      *mbuf++ = 'n';
-    }
-  if((MODE_TOPICLIMIT & mode.mode) && !(MODE_TOPICLIMIT & oldmode->mode))
-    {
-      if (what != 1)
-        {
-          *mbuf++ = '+';
-          what = 1;
-        }
-      *mbuf++ = 't';
-    }
-  if((MODE_INVITEONLY & mode.mode) && !(MODE_INVITEONLY & oldmode->mode))
-    {
-      if (what != 1)
-        {
-          *mbuf++ = '+';
-          what = 1;             /* This one is actually redundant now */
-        }
-      *mbuf++ = 'i';
-    }
-
-  if((MODE_PRIVATE    & oldmode->mode) && !(MODE_PRIVATE    & mode.mode))
-    {
-      if (what != -1)
-        {
-          *mbuf++ = '-';
-          what = -1;
-        }
-      *mbuf++ = 'p';
-    }
-  if((MODE_SECRET     & oldmode->mode) && !(MODE_SECRET     & mode.mode))
-    {
-      if (what != -1)
-        {
-          *mbuf++ = '-';
-          what = -1;
-        }
-      *mbuf++ = 's';
-    }
-  if((MODE_MODERATED  & oldmode->mode) && !(MODE_MODERATED  & mode.mode))
-    {
-      if (what != -1)
-        {
-          *mbuf++ = '-';
-          what = -1;
-        }
-      *mbuf++ = 'm';
-    }
-  if((MODE_NOPRIVMSGS & oldmode->mode) && !(MODE_NOPRIVMSGS & mode.mode))
-    {
-      if (what != -1)
-        {
-          *mbuf++ = '-';
-          what = -1;
-        }
-      *mbuf++ = 'n';
-    }
-  if((MODE_TOPICLIMIT & oldmode->mode) && !(MODE_TOPICLIMIT & mode.mode))
-    {
-      if (what != -1)
-        {
-          *mbuf++ = '-';
-          what = -1;
-        }
-      *mbuf++ = 't';
-    }
-  if((MODE_INVITEONLY & oldmode->mode) && !(MODE_INVITEONLY & mode.mode))
-    {
-      if (what != -1)
-        {
-          *mbuf++ = '-';
-          what = -1;
-        }
-      *mbuf++ = 'i';
-    }
-
-  if (oldmode->limit && !mode.limit)
-    {
-      if (what != -1)
-        {
-          *mbuf++ = '-';
-          what = -1;
-        }
-      *mbuf++ = 'l';
-    }
-  if (oldmode->key[0] && !mode.key[0])
-    {
-      if (what != -1)
-        {
-          *mbuf++ = '-';
-          what = -1;
-        }
-      *mbuf++ = 'k';
-      strcat(parabuf, oldmode->key);
-      strcat(parabuf, " ");
-      pargs++;
-    }
-  if (mode.limit && oldmode->limit != mode.limit)
-    {
-      if (what != 1)
-        {
-          *mbuf++ = '+';
-          what = 1;
-        }
-      *mbuf++ = 'l';
-      ircsprintf(numeric, "%d", mode.limit);
-      if ((s = strchr(numeric, ' ')))
-        *s = '\0';
-      strcat(parabuf, numeric);
-      strcat(parabuf, " ");
-      pargs++;
-    }
-  if (mode.key[0] && strcmp(oldmode->key, mode.key))
-    {
-      if (what != 1)
-        {
-          *mbuf++ = '+';
-          what = 1;
-        }
-      *mbuf++ = 'k';
-      strcat(parabuf, mode.key);
-      strcat(parabuf, " ");
-      pargs++;
-    }
-  
+  set_final_mode(&mode,oldmode);
   chptr->mode = mode;
 
   if (!keep_our_modes)
@@ -708,3 +556,172 @@ int     ms_sjoin(struct Client *cptr,
   return 0;
 }
 
+/* ZZZ inline this eventually */
+
+void
+set_final_mode(struct Mode *mode,struct Mode *oldmode)
+{
+  int what = 0;
+  char numeric[16];
+  char *s;
+
+  if((MODE_PRIVATE    & mode->mode) && !(MODE_PRIVATE    & oldmode->mode))
+    {
+      if (what != 1)
+        {
+          *mbuf++ = '+';
+          what = 1;
+        }
+      *mbuf++ = 'p';
+    }
+  if((MODE_SECRET     & mode->mode) && !(MODE_SECRET     & oldmode->mode))
+    {
+      if (what != 1)
+        {
+          *mbuf++ = '+';
+          what = 1;
+        }
+      *mbuf++ = 's';
+    }
+  if((MODE_MODERATED  & mode->mode) && !(MODE_MODERATED  & oldmode->mode))
+    {
+      if (what != 1)
+        {
+          *mbuf++ = '+';
+          what = 1;
+        }
+      *mbuf++ = 'm';
+    }
+  if((MODE_NOPRIVMSGS & mode->mode) && !(MODE_NOPRIVMSGS & oldmode->mode))
+    {
+      if (what != 1)
+        {
+          *mbuf++ = '+';
+          what = 1;
+        }
+      *mbuf++ = 'n';
+    }
+  if((MODE_TOPICLIMIT & mode->mode) && !(MODE_TOPICLIMIT & oldmode->mode))
+    {
+      if (what != 1)
+        {
+          *mbuf++ = '+';
+          what = 1;
+        }
+      *mbuf++ = 't';
+    }
+  if((MODE_INVITEONLY & mode->mode) && !(MODE_INVITEONLY & oldmode->mode))
+    {
+      if (what != 1)
+        {
+          *mbuf++ = '+';
+          what = 1;             /* This one is actually redundant now */
+        }
+      *mbuf++ = 'i';
+    }
+
+  if((MODE_PRIVATE    & oldmode->mode) && !(MODE_PRIVATE    & mode->mode))
+    {
+      if (what != -1)
+        {
+          *mbuf++ = '-';
+          what = -1;
+        }
+      *mbuf++ = 'p';
+    }
+  if((MODE_SECRET     & oldmode->mode) && !(MODE_SECRET     & mode->mode))
+    {
+      if (what != -1)
+        {
+          *mbuf++ = '-';
+          what = -1;
+        }
+      *mbuf++ = 's';
+    }
+  if((MODE_MODERATED  & oldmode->mode) && !(MODE_MODERATED  & mode->mode))
+    {
+      if (what != -1)
+        {
+          *mbuf++ = '-';
+          what = -1;
+        }
+      *mbuf++ = 'm';
+    }
+  if((MODE_NOPRIVMSGS & oldmode->mode) && !(MODE_NOPRIVMSGS & mode->mode))
+    {
+      if (what != -1)
+        {
+          *mbuf++ = '-';
+          what = -1;
+        }
+      *mbuf++ = 'n';
+    }
+  if((MODE_TOPICLIMIT & oldmode->mode) && !(MODE_TOPICLIMIT & mode->mode))
+    {
+      if (what != -1)
+        {
+          *mbuf++ = '-';
+          what = -1;
+        }
+      *mbuf++ = 't';
+    }
+  if((MODE_INVITEONLY & oldmode->mode) && !(MODE_INVITEONLY & mode->mode))
+    {
+      if (what != -1)
+        {
+          *mbuf++ = '-';
+          what = -1;
+        }
+      *mbuf++ = 'i';
+    }
+
+  if (oldmode->limit && !mode->limit)
+    {
+      if (what != -1)
+        {
+          *mbuf++ = '-';
+          what = -1;
+        }
+      *mbuf++ = 'l';
+    }
+  if (oldmode->key[0] && !mode->key[0])
+    {
+      if (what != -1)
+        {
+          *mbuf++ = '-';
+          what = -1;
+        }
+      *mbuf++ = 'k';
+      strcat(parabuf, oldmode->key);
+      strcat(parabuf, " ");
+      pargs++;
+    }
+  if (mode->limit && oldmode->limit != mode->limit)
+    {
+      if (what != 1)
+        {
+          *mbuf++ = '+';
+          what = 1;
+        }
+      *mbuf++ = 'l';
+      ircsprintf(numeric, "%d", mode->limit);
+      if ((s = strchr(numeric, ' ')))
+        *s = '\0';
+      strcat(parabuf, numeric);
+      strcat(parabuf, " ");
+      pargs++;
+    }
+  if (mode->key[0] && strcmp(oldmode->key, mode->key))
+    {
+      if (what != 1)
+        {
+          *mbuf++ = '+';
+          what = 1;
+        }
+      *mbuf++ = 'k';
+      strcat(parabuf, mode->key);
+      strcat(parabuf, " ");
+      pargs++;
+    }
+}
+  
