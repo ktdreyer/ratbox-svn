@@ -152,3 +152,7 @@ Little things to be done given enough time and initiative -Hwy
   flood messages on a channel in t seconds.. This log would be available
   to hand to authorities if requested.
 
+-- AndroSyn's list
+* Add support for my static modules hack.  Basically just add #define
+  STATIC_MODULES in setup.h via autoconf.  Then modules/Makefile compile
+  everything out to modules.a.  src/Makefile just includes this in the link.
