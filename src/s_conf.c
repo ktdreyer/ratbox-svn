@@ -1019,7 +1019,7 @@ int attach_cn_lines(struct Client *client_p, const char* name, const char* host)
        continue;
      if (ptr->status != CONF_SERVER)
        continue;
-     if (irccmp(name, ptr->name)/* || irccmp(host, ptr->host)*/)
+     if ((match(name, ptr->name) == 0) || (irccmp(host, ptr->host) != 0))
        continue;
      attach_conf(client_p, ptr);
      return -1;
