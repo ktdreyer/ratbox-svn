@@ -1,3 +1,16 @@
+leeh        2004/02/29 07:29:47 EST	(20040229_0)
+
+  Modified files:
+    .                    configure configure.ac 
+  Log:
+  - s/rtsigio/sigio
+  
+  Revision  Changes    Path
+  7.200     +3 -5      ircd-ratbox/configure
+  7.14      +3 -5      ircd-ratbox/configure.ac
+
+
+
 leeh        2004/02/28 15:37:19 EST	(20040228_1)
 
   Modified files:
