@@ -62,7 +62,7 @@ reject_exit(void *unused)
 		 * ends up on the dead_list and the abort_list --fl
 		 */
 		SetClosing(client_p);
-		if(client_p->localClient->fd >= 0)
+		if(!IsIOError(client_p))
 			sendto_one(client_p, "ERROR :Closing Link: %s (%s)", client_p->host, "*** Banned (cache)");
  	  	close_connection(client_p);
         	SetDead(client_p);

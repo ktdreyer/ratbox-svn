@@ -66,7 +66,7 @@ _send_linebuf(struct Client *to, buf_head_t *linebuf)
 		return 0;
 	}
 
-	if(!MyConnect(to) || IsIODead(to))
+	if(!MyConnect(to) || IsIOError(to))
 		return 0;
 
 	if(linebuf_len(&to->localClient->buf_sendq) > get_sendq(to))
@@ -168,7 +168,7 @@ send_queued_write(int fd, void *data)
 	struct hook_io_data hdata;
 #endif
 	/* cant write anything to a dead socket. */
-	if(IsIODead(to))
+	if(IsIOError(to))
 		return;
 #ifdef USE_IODEBUG_HOOKS
 	hdata.connection = to;
@@ -238,7 +238,7 @@ send_queued_slink_write(int fd, void *data)
 	 ** Once socket is marked dead, we cannot start writing to it,
 	 ** even if the error is removed...
 	 */
-	if(IsIODead(to))
+	if(IsIOError(to))
 		return;
 
 	/* Next, lets try to write some data */
@@ -301,7 +301,7 @@ sendto_one(struct Client *target_p, const char *pattern, ...)
 	if(target_p->from != NULL)
 		target_p = target_p->from;
 
-	if(IsIODead(target_p))
+	if(IsIOError(target_p))
 		return;
 
 	linebuf_newbuf(&linebuf);
@@ -336,7 +336,7 @@ sendto_one_prefix(struct Client *target_p, struct Client *source_p,
 	else
 		dest_p = target_p;
 
-	if(IsIODead(dest_p))
+	if(IsIOError(dest_p))
 		return;
 
 	if(IsMe(dest_p))
@@ -376,7 +376,7 @@ sendto_one_notice(struct Client *target_p, const char *pattern, ...)
 	else
 		dest_p = target_p;
 
-	if(IsIODead(dest_p))
+	if(IsIOError(dest_p))
 		return;
 
 	if(IsMe(dest_p))
@@ -416,7 +416,7 @@ sendto_one_numeric(struct Client *target_p, int numeric, const char *pattern, ..
 	else
 		dest_p = target_p;
 
-	if(IsIODead(dest_p))
+	if(IsIOError(dest_p))
 		return;
 
 	if(IsMe(dest_p))
@@ -544,7 +544,7 @@ sendto_channel_flags(struct Client *one, int type, struct Client *source_p,
 		msptr = ptr->data;
 		target_p = msptr->client_p;
 
-		if(IsIODead(target_p->from) || target_p->from == one)
+		if(IsIOError(target_p->from) || target_p->from == one)
 			continue;
 
 		if(type && ((msptr->flags & type) == 0))
@@ -605,7 +605,7 @@ sendto_channel_local(int type, struct Channel *chptr, const char *pattern, ...)
 		msptr = ptr->data;
 		target_p = msptr->client_p;
 
-		if(IsIODead(target_p))
+		if(IsIOError(target_p))
 			continue;
 
 		if(type && ((msptr->flags & type) == 0))
@@ -658,7 +658,7 @@ sendto_common_channels_local(struct Client *user, const char *pattern, ...)
 			msptr = uptr->data;
 			target_p = msptr->client_p;
 
-			if(IsIODead(target_p) ||
+			if(IsIOError(target_p) ||
 			   target_p->serial == current_serial)
 				continue;
 

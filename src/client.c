@@ -357,6 +357,9 @@ check_unknowns_list(dlink_list * list)
 	{
 		client_p = ptr->data;
 
+		if(IsDead(client_p) || IsClosing(client_p))
+			continue;
+
 		/*
 		 * Check UNKNOWN connections - if they have been in this state
 		 * for > 30s, close them.
@@ -1086,7 +1089,7 @@ recurse_remove_clients(struct Client *source_p, const char *comment)
 	struct Client *target_p;
 	dlink_node *ptr, *ptr_next;
 
-	if(IsMe(source_p) || IsDead(source_p))
+	if(IsMe(source_p))
 		return;
 
 	if(source_p->serv == NULL)	/* oooops. uh this is actually a major bug */
@@ -1100,7 +1103,9 @@ recurse_remove_clients(struct Client *source_p, const char *comment)
 			target_p = ptr->data;
 			target_p->flags |= FLAGS_KILLED;
 			add_nd_entry(target_p->name);
-			exit_remote_client(NULL, target_p, &me, comment);
+
+			if(!IsDead(target_p) && !IsClosing(target_p))
+				exit_remote_client(NULL, target_p, &me, comment);
 		}
 	}
 	else
@@ -1109,7 +1114,9 @@ recurse_remove_clients(struct Client *source_p, const char *comment)
 		{
 			target_p = ptr->data;
 			target_p->flags |= FLAGS_KILLED;
-			exit_remote_client(NULL, target_p, &me, comment);
+
+			if(!IsDead(target_p) && !IsClosing(target_p))
+				exit_remote_client(NULL, target_p, &me, comment);
 		}
 	}	
 
@@ -1202,7 +1209,6 @@ exit_aborted_clients(void *unused)
    	 	 	                     get_server_name(abt->client, HIDE_IP), abt->notice);
 
 		/* its no longer on abort list */
-		ClearAborted(abt->client);
  	 	exit_client(abt->client, abt->client, &me, abt->notice);
  	 	MyFree(abt);
  	}
@@ -1219,7 +1225,7 @@ dead_link(struct Client *client_p)
 	struct abort_client *abt;
 
 	s_assert(!IsMe(client_p));
-	if(IsAnyDead(client_p) || IsMe(client_p) || !MyConnect(client_p))
+	if(IsDead(client_p) || IsClosing(client_p) || IsMe(client_p))
 		return;
 
 	abt = (struct abort_client *) MyMalloc(sizeof(struct abort_client));
@@ -1231,7 +1237,7 @@ dead_link(struct Client *client_p)
 
     	abt->client = client_p;
 	SetIOError(client_p);
-	SetAborted(client_p);
+	SetDead(client_p);
 	dlinkAdd(abt, &abt->node, &abort_list);
 }
 
@@ -1242,9 +1248,7 @@ exit_generic_client(struct Client *client_p, struct Client *source_p, struct Cli
 		   const char *comment)
 {
 	dlink_node *ptr, *next_ptr;
-	if(IsDead(source_p))
-		return;
-		
+
 	sendto_common_channels_local(source_p, ":%s!%s@%s QUIT :%s",
 				     source_p->name,
 				     source_p->username, source_p->host, comment);
@@ -1285,9 +1289,6 @@ static int
 exit_remote_client(struct Client *client_p, struct Client *source_p, struct Client *from,
 		   const char *comment)
 {
-	if(IsDead(source_p))
-		return -1;
-		
 	if(source_p->servptr && source_p->servptr->serv)
 	{
 		dlinkDelete(&source_p->lnode, &source_p->servptr->serv->users);
@@ -1313,14 +1314,11 @@ static int
 exit_unknown_client(struct Client *client_p, struct Client *source_p, struct Client *from,
 		  const char *comment)
 {
-	if(IsDead(source_p))
-		return -1;
-		
 	delete_auth_queries(source_p);
 	client_flush_input(source_p);
 	dlinkDelete(&source_p->localClient->tnode, &unknown_list);
 
-	if(source_p->localClient->fd >= 0)
+	if(!IsIOError(source_p))
 		sendto_one(source_p, "ERROR :Closing Link: 127.0.0.1 (%s)", comment);
 	call_unknown_exit_hook(source_p, comment);
 	
@@ -1343,9 +1341,6 @@ exit_remote_server(struct Client *client_p, struct Client *source_p, struct Clie
 	static char comment1[(HOSTLEN*2)+2];
 	struct Client *target_p;
 	
-	if(IsDead(source_p))
-		return -1;
-
 	if((source_p->serv) && (source_p->serv->up))
 		 strcpy(comment1, source_p->serv->up);
 	else
@@ -1415,9 +1410,6 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 	static char comment1[(HOSTLEN*2)+2];
 	unsigned int sendk, recvk;
 	
-	if(IsDead(source_p))
-		return -1;
-	
 	dlinkDelete(&source_p->localClient->tnode, &serv_list);
 	dlinkFindDestroy(&global_serv_list, source_p);
 	
@@ -1425,7 +1417,7 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 	sendk = source_p->localClient->sendK;
 	recvk = source_p->localClient->receiveK;
 
-	if(client_p != NULL && source_p != client_p && source_p->localClient->fd >= 0)
+	if(client_p != NULL && source_p != client_p && !IsIOError(source_p))
 	{
 		sendto_one(source_p, "ERROR :Closing Link: 127.0.0.1 %s (%s)",
 			   source_p->name, comment);
@@ -1485,9 +1477,6 @@ exit_local_client(struct Client *client_p, struct Client *source_p, struct Clien
 {
 	unsigned long on_for;
 
-	if(IsDead(source_p))
-		return -1;
-			
 	s_assert(IsPerson(source_p));
 	client_flush_input(source_p);
 	dlinkDelete(&source_p->localClient->tnode, &lclient_list);
@@ -1561,27 +1550,8 @@ exit_client(struct Client *client_p,	/* The local client originating the
 	    const char *comment	/* Reason for the exit */
 	)
 {
-	if(IsDead(source_p) || IsClosing(source_p))
+	if(IsClosing(source_p))
 		return -1;
-
-	/* marked as being on abort list.. need to remove it! */
-	if(IsAborted(source_p))
-	{
-		struct abort_client *abt;
-		dlink_node *ptr;
-
-		DLINK_FOREACH(ptr, abort_list.head)
-		{
-			abt = ptr->data;
-
-			if(abt->client == source_p)
-			{
-				dlinkDelete(ptr, &abort_list);
-				MyFree(abt);
-				break;
-			}
-		}
-	}
 
 	/* note, this HAS to be here, when we exit a client we attempt to
 	 * send them data, if this generates a write error we must *not* add
@@ -2083,7 +2053,9 @@ close_connection(struct Client *client_p)
 	if(-1 < client_p->localClient->fd)
 	{
 		/* attempt to flush any pending dbufs. Evil, but .. -- adrian */
-		send_queued_write(client_p->localClient->fd, client_p);
+		if(!IsIOError(client_p))
+			send_queued_write(client_p->localClient->fd, client_p);
+
 		fd_close(client_p->localClient->fd);
 		client_p->localClient->fd = -1;
 	}
@@ -2125,9 +2097,6 @@ error_exit_client(struct Client *client_p, int error)
 	 */
 	char errmsg[255];
 	int current_error = comm_get_sockerr(client_p->localClient->fd);
-
-	if(IsAnyDead(client_p))
-		return;
 
 	SetIOError(client_p);
 
