@@ -184,6 +184,7 @@ int   class_redirport_var;
 %token  FAILED_OPER_NOTICE
 %token  SHOW_FAILED_OPER_ID
 %token  ANTI_NICK_FLOOD
+%token  ANTI_SPAM_EXIT_MESSAGE_TIME
 %token  MAX_NICK_TIME
 %token  MAX_NICK_CHANGES
 %token  TS_MAX_DELTA
@@ -1524,6 +1525,7 @@ general_items:      general_items general_item |
 general_item:       general_failed_oper_notice | general_show_failed_oper_id |
                     general_anti_nick_flood | general_max_nick_time |
                     general_max_nick_changes |
+                    general_anti_spam_exit_message_time |
                     general_ts_warn_delta | general_ts_max_delta |
                     general_kline_with_reason |
                     general_kline_with_connection_closed |
@@ -1587,6 +1589,11 @@ general_max_nick_time:    MAX_NICK_TIME '=' NUMBER ';'
 general_max_nick_changes:  MAX_NICK_CHANGES '=' NUMBER ';'
   {
     ConfigFileEntry.max_nick_changes = yylval.number;
+  } ;
+
+general_anti_spam_exit_message_time:  ANTI_SPAM_EXIT_MESSAGE_TIME '=' NUMBER ';'
+  {
+    ConfigFileEntry.anti_spam_exit_message_time = yylval.number;
   } ;
 
 general_ts_warn_delta: TS_WARN_DELTA '=' NUMBER ';'

@@ -34,18 +34,6 @@ typedef struct Information
 
 Info MyInformation[] = {
 
-#ifdef ANTI_SPAM_EXIT_MESSAGE
-  { "ANTI_SPAM_EXIT_MESSAGE", "ON", 0, "Do not broadcast Spam Bots' exit messages" },
-#else
-  { "ANTI_SPAM_EXIT_MESSAGE", "OFF", 0, "Do not broadcast Spam Bots' exit messages" },
-#endif /* ANTI_SPAM_EXIT_MESSAGE */
-
-#ifdef ANTI_SPAM_EXIT_MESSAGE_TIME
-  { "ANTI_SPAM_EXIT_MESSAGE_TIME", "", ANTI_SPAM_EXIT_MESSAGE_TIME, "Delay before Allowing Spam Bot Exit Messages" },
-#else
-  { "ANTI_SPAM_EXIT_MESSAGE_TIME", "NONE", 0, "Delay before Allowing Spam Bot Exit Messages" },
-#endif /* ANTI_SPAM_EXIT_MESSAGE_TIME */
-
 #ifdef CLIENT_FLOOD
   { "CLIENT_FLOOD", "", CLIENT_FLOOD, "Client Excess Flood Threshold" },
 #else

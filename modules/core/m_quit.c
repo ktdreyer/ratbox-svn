@@ -72,18 +72,22 @@ static void m_quit(struct Client *client_p,
   if (strlen(comment) > (size_t) TOPICLEN)
     comment[TOPICLEN] = '\0';
 
-  if (ConfigFileEntry.client_exit)
+  if (ConfigFileEntry.client_exit && comment[0])
     {
       snprintf(reason, TOPICLEN, "Client Exit: %s", comment);
       comment = reason;
     }
   
   if( !IsServer(source_p) && MyConnect(source_p) && !IsOper(source_p) && 
-     (source_p->firsttime + ANTI_SPAM_EXIT_MESSAGE_TIME) > CurrentTime)
-    comment = "Client Quit";
+     (source_p->firsttime + ConfigFileEntry.anti_spam_exit_message_time)
+     > CurrentTime)
+    {
+      comment = "Client Quit";
+    }
 
   exit_client(client_p, source_p, source_p, comment);
 }
+
 /*
 ** ms_quit
 **      parv[0] = sender prefix

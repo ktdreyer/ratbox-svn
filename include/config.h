@@ -334,16 +334,6 @@
 #define OPER_SPAM_COUNTDOWN   5 
 #define JOIN_LEAVE_COUNT_EXPIRE_TIME 120
 
-/* Do not allow the clients exit message to be
- * sent to a channel if the client has been on for less than
- * ANTI_SPAM_EXIT_MESSAGE_TIME.
- * The idea is, some spambots exit with their spam, thus advertising
- * this way.
- * (idea due to ThaDragon, I just couldn't find =his= code)
- */
-/* 300 is five minutes, seems reasonable */
-#define ANTI_SPAM_EXIT_MESSAGE_TIME 300
-
 /*
  * Links rehash delay
  */

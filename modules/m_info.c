@@ -339,6 +339,14 @@ static void send_conf_options(struct Client *source_p)
               "How many nick changes to allow");
     sendto_one(source_p,
               ":%s %d %s :%-30s %-5d [%-30s]",
+              me.name, 
+              RPL_INFO,
+              source_p->name,
+              "anti_spam_exit_message_time",
+              ConfigFileEntry.anti_spam_exit_message_time,
+              "How long a client must be connected to have an exit message");
+    sendto_one(source_p,
+              ":%s %d %s :%-30s %-5d [%-30s]",
               me.name,
               RPL_INFO,
               source_p->name,
