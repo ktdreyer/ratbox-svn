@@ -1,3 +1,20 @@
+androsyn    2004/08/16 15:43:09 EDT	(20040816_6)
+
+  Modified files:
+    include              numeric.h 
+    src                  numeric.c 
+  Removed files:
+    src                  messages.tab 
+  Log:
+  Shove messages.tag into numeric.c and make form_str() a macro
+  
+  Revision  Changes    Path
+  7.48      +4 -6      ircd-ratbox/include/numeric.h
+  7.118     +0 -1025   ircd-ratbox/src/messages.tab (dead)
+  7.28      +1003 -28  ircd-ratbox/src/numeric.c
+
+
+
 androsyn    2004/08/16 15:25:14 EDT	(20040816_5)
 
   Modified files:
