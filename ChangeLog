@@ -1,3 +1,25 @@
+leeh        2005/02/14 12:40:15 EST	(20050214_0)
+
+  Modified files:
+    doc                  example.conf 
+    include              client.h conf.h 
+    src                  conf.c newconf.c s_chanserv.c 
+                         s_userserv.c service.c 
+  Log:
+  - added per client flood limiting
+  
+  Revision  Changes    Path
+  1.34      +24 -1     rserv/doc/example.conf
+  1.41      +3 -0      rserv/include/client.h
+  1.39      +5 -0      rserv/include/conf.h
+  1.42      +5 -0      rserv/src/conf.c
+  1.43      +4 -0      rserv/src/newconf.c
+  1.64      +5 -2      rserv/src/s_chanserv.c
+  1.52      +3 -0      rserv/src/s_userserv.c
+  1.48      +38 -17    rserv/src/service.c
+
+
+
 leeh        2005/02/11 11:07:59 EST	(20050211_1)
 
   Modified files:
