@@ -1,3 +1,7 @@
+*** 20010221_3 by androsyn
+Misc adns cleanups.  Half way to getting /dns rehash working again
+
+
 *** 20010221_2 by androsyn
 Minor fix replacing close() with fd_close()
 
