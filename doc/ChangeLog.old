@@ -1,3 +1,38 @@
+db          2002/07/21 13:15:35 EDT	(20020721_4)
+
+  Modified files:
+    src                  ircd_lexer.l s_conf.c 
+  Log:
+  2002-07-21 17:43:31+0200, gozem ->
+  > Included is two patches which makes tracking errors in your ircd.conf a bit
+  > easier. First one adds a print of which .include we are in and formats the
+  > error in yyerror() a little better. Second gives you a warning when using
+  > #include instead of .include so don't have to stratch your head wondering
+  > why your file is ignored.
+  >
+  > Output for the first patch is now:
+  > -server- "opers.conf", line 185: parse error:  admin_is_a_monkey = yes;
+  >
+  > And output from second patch:
+  > -server- "file.conf", line 87: You probably meant '.include', skipping: #inclu
+  de "links.conf"
+  >
+  > There is a drawback on the first patch. Since we only know the full path to
+  > the first file 'ircd.conf' the full patch will be displayed in the error.
+  >
+  >
+  > One more error/miss to report but not fixed. ircd_lexer.l ircd_parser.y
+  > s_conf.c randomly uses ilog() and/or sendto_realops_flags() to report
+  > errors. This means some errors get visable in ircd.log and some gets visable
+  > for the opers online. Sometimes both. A wrapper funtion is needed that
+  > always sends to both.
+  
+  Revision  Changes    Path
+  1.141     +18 -1     ircd-hybrid-7/src/ircd_lexer.l
+  7.314     +13 -4     ircd-hybrid-7/src/s_conf.c
+
+
+
 db          2002/07/21 13:11:21 EDT	(20020721_3)
 
   Modified files:
