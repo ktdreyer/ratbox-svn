@@ -1,3 +1,35 @@
+leeh        2002/11/21 20:16:33 UTC	(20021121_0)
+
+  Modified files:
+    .                    RELNOTES 
+    contrib              m_flags.c m_jupe.c 
+    doc                  example.conf example.efnet.conf 
+    include              newconf.h s_conf.h 
+    modules              m_join.c 
+    src                  channel.c client.c newconf.c s_conf.c 
+  Log:
+  - added no_oper_resvs to channel {};, to allow opers to join/talk through
+    channel resvs.
+  - fixed a problem in contrib/m_jupe.c with chcap stuff.
+  - OKILLS for flags is +s, not +k
+  - cleaned a couple of compile warnings
+  
+  Revision  Changes    Path
+  1.68      +3 -1      ircd-ratbox/RELNOTES
+  1.12      +2 -2      ircd-ratbox/contrib/m_flags.c
+  1.42      +4 -1      ircd-ratbox/contrib/m_jupe.c
+  7.187     +3 -0      ircd-ratbox/doc/example.conf
+  7.25      +3 -0      ircd-ratbox/doc/example.efnet.conf
+  7.21      +1 -0      ircd-ratbox/include/newconf.h
+  7.206     +1 -0      ircd-ratbox/include/s_conf.h
+  1.108     +4 -3      ircd-ratbox/modules/m_join.c
+  7.359     +2 -1      ircd-ratbox/src/channel.c
+  7.330     +0 -1      ircd-ratbox/src/client.c
+  7.50      +7 -0      ircd-ratbox/src/newconf.c
+  7.362     +1 -0      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2002/11/20 00:01:46 UTC	(20021120_0)
 
   Modified files:
