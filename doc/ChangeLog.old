@@ -1,3 +1,15 @@
+androsyn    2002/02/16 23:58:59 EST	(20020217_13)
+
+  Modified files:
+    src                  send.c 
+  Log:
+  Put the SetDead() back in there..
+  
+  Revision  Changes    Path
+  7.177     +2 -8      ircd-hybrid-7/src/send.c
+
+
+
 a1kmm       2002/02/16 23:54:02 EST	(20020217_12)
 
   Modified files:
