@@ -1,3 +1,23 @@
+androsyn    2004/03/30 12:24:11 EST	(20040330_10)
+
+  Modified files:
+    src                  balloc.c cache.c channel.c client.c 
+                         s_auth.c s_conf.c s_newconf.c 
+  Log:
+  Have the block allocator do the memset() rather than the caller.  This fixes
+  a nick delay bug amongst other things...
+  
+  Revision  Changes    Path
+  7.72      +1 -0      ircd-ratbox/src/balloc.c
+  1.13      +0 -1      ircd-ratbox/src/cache.c
+  7.408     +0 -3      ircd-ratbox/src/channel.c
+  7.450     +0 -3      ircd-ratbox/src/client.c
+  7.166     +0 -1      ircd-ratbox/src/s_auth.c
+  7.458     +0 -1      ircd-ratbox/src/s_conf.c
+  7.36      +1 -1      ircd-ratbox/src/s_newconf.c
+
+
+
 leeh        2004/03/30 06:47:46 EST	(20040330_9)
 
   Modified files:
