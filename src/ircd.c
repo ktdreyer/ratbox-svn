@@ -386,7 +386,7 @@ static time_t io_loop(time_t delay)
 #ifndef HUB
   if(CurrentTime - lastCleanup >= CLEANUP_CHANNELS_TIME)
     {
-      lastCLeanup = CurrentTime;
+      lastCleanup = CurrentTime;
       cleanup_channels();
     }
 #endif
