@@ -1,3 +1,9 @@
+*** 20001013_3 by db
+- numeric 247 (uptime) got trashed in table. (HOW?) would cause server
+  to core on /stats u
+
+
+
 *** 20001013_2 by db
 - cleaner sub1 fix for vchans
 
