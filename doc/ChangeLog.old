@@ -1,3 +1,9 @@
+*** 20010126_5 by jdc
+'spoof_notice' variable added to auth {} blocks.  Enables/disables
+notification for when a client's host is changed via 'spoof'.
+
+
+
 *** 20010126_4 by androsyn
 Fixes for identd checking for IPv6.
 
