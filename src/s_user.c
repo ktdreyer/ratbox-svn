@@ -192,7 +192,7 @@ void show_opers(struct Client *cptr)
                      me.name, RPL_STATSDEBUG, cptr->name,
                      IsGlobalOper(cptr2) ? 'O' : 'o',
                      oper_privs_as_string(cptr2,
-                                          cptr2->confs->value.aconf->port),
+  /* weee! */                  cptr2->localClient->confs->value.aconf->port),
                      cptr2->name,
                      cptr2->username, cptr2->host,
                      CurrentTime - cptr2->user->last);
@@ -302,10 +302,10 @@ int register_user(struct Client *cptr, struct Client *sptr,
           sendto_one(sptr,":%s NOTICE %s :*** Notice -- You have an illegal character in your hostname", 
                      me.name, sptr->name );
 
-          strncpy(sptr->host,sptr->sockhost,HOSTIPLEN+1);
+          strncpy(sptr->host,sptr->localClient->sockhost,HOSTIPLEN+1);
         }
 
-      aconf = sptr->confs->value.aconf;
+      aconf = sptr->localClient->confs->value.aconf;
       if (!aconf)
         return exit_client(cptr, sptr, &me, "*** Not Authorized");
 
@@ -332,14 +332,15 @@ int register_user(struct Client *cptr, struct Client *sptr,
         }
 
       /* password check */
-      if (!BadPtr(aconf->passwd) && 0 != strcmp(sptr->passwd, aconf->passwd))
+      if (!BadPtr(aconf->passwd) &&
+	  0 != strcmp(sptr->localClient->passwd, aconf->passwd))
         {
           ServerStats->is_ref++;
           sendto_one(sptr, form_str(ERR_PASSWDMISMATCH),
                      me.name, parv[0]);
           return exit_client(cptr, sptr, &me, "Bad Password");
         }
-      memset(sptr->passwd,0, sizeof(sptr->passwd));
+      memset(sptr->localClient->passwd,0, sizeof(sptr->localClient->passwd));
 
       /* report if user has &^>= etc. and set flags as needed in sptr */
       report_and_set_user_flags(sptr, aconf);
@@ -384,7 +385,7 @@ int register_user(struct Client *cptr, struct Client *sptr,
       sendto_realops_flags(FLAGS_CCONN,
                          "Client connecting: %s (%s@%s) [%s] {%s}",
                          nick, sptr->username, sptr->host,
-                         inetntoa((char *)&sptr->ip),
+                         inetntoa((char *)&sptr->localClient->ip),
                          get_client_class(sptr));
 
       if ((++Count.local) > Count.max_loc)
@@ -785,7 +786,7 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                   struct Client *prev_cptr = (struct Client *)NULL;
                   struct Client *cur_cptr = oper_cptr_list;
 
-                  detach_conf(sptr,sptr->confs->value.aconf);
+                  detach_conf(sptr,sptr->localClient->confs->value.aconf);
                   sptr->flags2 &= ~(FLAGS2_OPER_GLOBAL_KILL|
                                     FLAGS2_OPER_REMOTE|
                                     FLAGS2_OPER_UNKLINE|
@@ -962,14 +963,15 @@ static void user_welcome(struct Client *sptr)
   sendto_one(sptr, form_str(RPL_WELCOME), me.name, sptr->name, sptr->name );
   /* This is a duplicate of the NOTICE but see below...*/
   sendto_one(sptr, form_str(RPL_YOURHOST), me.name, sptr->name,
-	     get_listener_name(sptr->listener), version);
+	     get_listener_name(sptr->localClient->listener), version);
   
   /*
   ** Don't mess with this one - IRCII needs it! -Avalon
   */
   sendto_one(sptr,
 	     "NOTICE %s :*** Your host is %s, running version %s",
-	     sptr->name, get_listener_name(sptr->listener), version);
+	     sptr->name, get_listener_name(sptr->localClient->listener),
+	     version);
   
   sendto_one(sptr, form_str(RPL_CREATED),me.name,sptr->name,creation);
   sendto_one(sptr, form_str(RPL_MYINFO), me.name, sptr->name,
@@ -1001,8 +1003,8 @@ static void user_welcome(struct Client *sptr)
   else  
     SendMessageFile(sptr, &ConfigFileEntry.motd);
       
-  if(sptr->confs && sptr->confs->value.aconf &&
-     (sptr->confs->value.aconf->flags
+  if(sptr->localClient->confs && sptr->localClient->confs->value.aconf &&
+     (sptr->localClient->confs->value.aconf->flags
       & CONF_FLAGS_LITTLE_I_LINE))
     {
       SetRestricted(sptr);

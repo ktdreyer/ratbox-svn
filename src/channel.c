@@ -277,10 +277,10 @@ static void del_matching_exception(struct Client *cptr,struct Channel *chptr)
   strcpy(s, make_nick_user_host(cptr->name, cptr->username, cptr->host));
 #ifdef IPV6
   s2 = make_nick_user_host(cptr->name, cptr->username,
-                           mk6addrstr(&cptr->ip6));
+                           mk6addrstr(&cptr->localClient->ip6));
 #else
   s2 = make_nick_user_host(cptr->name, cptr->username,
-                           inetntoa((char*) &cptr->ip));
+                           inetntoa((char*) &cptr->localClient->ip));
 #endif
 
   for (ex = &(chptr->exceptlist); *ex; ex = &((*ex)->next))
@@ -359,7 +359,7 @@ int is_banned(struct Channel *chptr, struct Client *who)
     return (0);
 
   strcpy(s, make_nick_user_host(who->name, who->username, who->host));
-  s2 = make_nick_user_host(who->name, who->username, who->sockhost);
+  s2 = make_nick_user_host(who->name, who->username, who->localClient->sockhost);
 
   for (tmp = chptr->banlist; tmp; tmp = tmp->next)
     {

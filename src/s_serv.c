@@ -352,7 +352,7 @@ int check_server(struct Client* cptr)
       Debug((DEBUG_DNS,"No C/N lines for %s", cptr->name));
       return 0;
     }
-  lp = cptr->confs;
+  lp = cptr->localClient->confs;
   /*
    * This code is from the old world order. It should eventually be
    * duplicated somewhere else later!
@@ -406,10 +406,10 @@ int check_server(struct Client* cptr)
    * happen when using DNS in the way the irc server does. -avalon
    */
   if (!c_conf)
-    c_conf = find_conf_ip(lp, (char*)& cptr->ip,
+    c_conf = find_conf_ip(lp, (char*)& cptr->localClient->ip,
                           cptr->username, CONF_CONNECT_SERVER);
   if (!n_conf)
-    n_conf = find_conf_ip(lp, (char*)& cptr->ip,
+    n_conf = find_conf_ip(lp, (char*)& cptr->localClient->ip,
                           cptr->username, CONF_NOCONNECT_SERVER);
   /*
    * detach all conf lines that got attached by attach_confs()
@@ -449,9 +449,9 @@ int check_server(struct Client* cptr)
               /* its full folks, 32 leaves? wow. I never thought I'd
                * see the day. Now this will have to be recoded!
                */
-              cptr->serverMask = nextFreeMask();
+              cptr->localClient->serverMask = nextFreeMask();
 
-              if(!cptr->serverMask)
+              if(!cptr->localClient->serverMask)
                 {
                   sendto_realops("serverMask is full!");
                   /* try and negotiate a non LL connect */
@@ -467,7 +467,7 @@ int check_server(struct Client* cptr)
    * the client socket there
    */ 
   if (INADDR_NONE == c_conf->ipnum.s_addr)
-    c_conf->ipnum.s_addr = cptr->ip.s_addr;
+    c_conf->ipnum.s_addr = cptr->localClient->ip.s_addr;
 
   Debug((DEBUG_DNS,"sv_cl: access ok: [%s]", cptr->host));
 
@@ -532,12 +532,12 @@ const char* show_capabilities(struct Client* acptr)
   struct Capability* cap;
 
   strcpy(msgbuf,"TS ");
-  if (!acptr->caps)        /* short circuit if no caps */
+  if (!acptr->localClient->caps)        /* short circuit if no caps */
     return msgbuf;
 
   for (cap = captab; cap->cap; ++cap)
     {
-      if(cap->cap & acptr->caps)
+      if(cap->cap & acptr->localClient->caps)
         {
           strcat(msgbuf, cap->name);
           strcat(msgbuf, " ");
@@ -573,7 +573,8 @@ int server_estab(struct Client *cptr)
   split = irccmp(cptr->name, cptr->host);
   host = cptr->name;
 
-  if (!(n_conf = find_conf_name(cptr->confs, host, CONF_NOCONNECT_SERVER)))
+  if (!(n_conf = find_conf_name(cptr->localClient->confs,
+				host, CONF_NOCONNECT_SERVER)))
     {
       ServerStats->is_ref++;
        sendto_one(cptr,
@@ -582,7 +583,8 @@ int server_estab(struct Client *cptr)
       log(L_NOTICE, "Access denied. No N line for server %s", inpath_ip);
       return exit_client(cptr, cptr, cptr, "No N line for server");
     }
-  if (!(c_conf = find_conf_name(cptr->confs, host, CONF_CONNECT_SERVER )))
+  if (!(c_conf = find_conf_name(cptr->localClient->confs,
+				host, CONF_CONNECT_SERVER )))
     {
       ServerStats->is_ref++;
       sendto_one(cptr, "ERROR :Only N (no C) field for server %s", inpath);
@@ -595,15 +597,15 @@ int server_estab(struct Client *cptr)
   /* use first two chars of the password they send in as salt */
 
   /* passwd may be NULL. Head it off at the pass... */
-  if(*cptr->passwd && *n_conf->passwd)
+  if(*cptr->localClient->passwd && *n_conf->passwd)
     {
       extern  char *crypt();
-      encr = crypt(cptr->passwd, n_conf->passwd);
+      encr = crypt(cptr->localClient->passwd, n_conf->passwd);
     }
   else
     encr = "";
 #else
-  encr = cptr->passwd;
+  encr = cptr->localClient->passwd;
 #endif  /* CRYPT_LINK_PASSWORD */
   if (*n_conf->passwd && 0 != strcmp(n_conf->passwd, encr))
     {
@@ -613,7 +615,7 @@ int server_estab(struct Client *cptr)
       sendto_realops("Access denied (passwd mismatch) %s", inpath);
       return exit_client(cptr, cptr, cptr, "Bad Password");
     }
-  memset((void *)cptr->passwd, 0,sizeof(cptr->passwd));
+  memset((void *)cptr->localClient->passwd, 0,sizeof(cptr->localClient->passwd));
 
   /* Its got identd , since its a server */
   SetGotId(cptr);
@@ -1110,7 +1112,8 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
      * connect_server(), so don't blame me for it being evil.
      *   -- adrian
      */
-    strncpy_irc(cptr->sockhost, inetntoa((const char*) &cptr->ip.s_addr),
+    strncpy_irc(cptr->localClient->sockhost,
+		inetntoa((const char*) &cptr->localClient->ip.s_addr),
       HOSTIPLEN);
 
     if (!set_non_blocking(cptr->fd))
@@ -1190,30 +1193,35 @@ serv_connect_callback(int fd, int status, void *data)
     assert(cptr->fd == fd);
 
     /* Next, for backward purposes, record the ip of the server */
-    cptr->ip = fd_table[fd].connect.hostaddr;
+    cptr->localClient->ip = fd_table[fd].connect.hostaddr;
 
     /* Check the status */
-    if (status != COMM_OK) {
+    if (status != COMM_OK)
+      {
         /* We have an error, so report it and quit */
         sendto_realops("Error connecting to %s[%s]: %s\n", cptr->name,
-          cptr->host, comm_errstr(status));
+		       cptr->host, comm_errstr(status));
         exit_client(cptr, cptr, &me, comm_errstr(status));
         return;
-    }
+      }
 
     /* COMM_OK, so continue the connection procedure */
     /* Get the C/N lines */
-    c_conf = find_conf_name(cptr->confs, cptr->name, CONF_CONNECT_SERVER);
-    if (!c_conf) { 
+    c_conf = find_conf_name(cptr->localClient->confs,
+			    cptr->name, CONF_CONNECT_SERVER);
+    if (!c_conf)
+      { 
         sendto_realops("Lost C-Line for %s", get_client_name(cptr,FALSE));
         exit_client(cptr, cptr, &me, "Lost C-line");
         return;
-    }
-    n_conf = find_conf_name(cptr->confs, cptr->name, CONF_NOCONNECT_SERVER);
-    if (!n_conf) { 
+      }
+    n_conf = find_conf_name(cptr->localClient->confs,
+			    cptr->name, CONF_NOCONNECT_SERVER);
+    if (!n_conf)
+      { 
         sendto_realops("Lost N-Line for %s", get_client_name(cptr,FALSE));
         exit_client(cptr, cptr, &me, "Lost N-Line");
-    }
+      }
 
     /* Next, send the initial handshake */
     SetHandshake(cptr);

@@ -59,10 +59,10 @@ void tstats(struct Client *cptr, const char *name)
         continue;
       if (IsServer(acptr))
         {
-          sp->is_sbs += acptr->sendB;
-          sp->is_sbr += acptr->receiveB;
-          sp->is_sks += acptr->sendK;
-          sp->is_skr += acptr->receiveK;
+          sp->is_sbs += acptr->localClient->sendB;
+          sp->is_sbr += acptr->localClient->receiveB;
+          sp->is_sks += acptr->localClient->sendK;
+          sp->is_skr += acptr->localClient->receiveK;
           sp->is_sti += CurrentTime - acptr->firsttime;
           sp->is_sv++;
           if (sp->is_sbs > 1023)
@@ -79,10 +79,10 @@ void tstats(struct Client *cptr, const char *name)
         }
       else if (IsClient(acptr))
         {
-          sp->is_cbs += acptr->sendB;
-          sp->is_cbr += acptr->receiveB;
-          sp->is_cks += acptr->sendK;
-          sp->is_ckr += acptr->receiveK;
+          sp->is_cbs += acptr->localClient->sendB;
+          sp->is_cbr += acptr->localClient->receiveB;
+          sp->is_cks += acptr->localClient->sendK;
+          sp->is_ckr += acptr->localClient->receiveK;
           sp->is_cti += CurrentTime - acptr->firsttime;
           sp->is_cl++;
           if (sp->is_cbs > 1023)

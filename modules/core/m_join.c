@@ -229,7 +229,7 @@ int     m_join(struct Client *cptr,
 	  sendto_one(sptr, form_str(ERR_TOOMANYCHANNELS),
 		     me.name, parv[0], name);
 	  if(successful_join_count)
-	    sptr->last_join_time = CurrentTime;
+	    sptr->localClient->last_join_time = CurrentTime;
 	  return 0;
 	}
 
@@ -336,7 +336,7 @@ int     m_join(struct Client *cptr,
         (void)channel_member_names(sptr, chptr, name);
       
       if(successful_join_count)
-	sptr->last_join_time = CurrentTime;
+	sptr->localClient->last_join_time = CurrentTime;
     }
   return 0;
 }
@@ -468,16 +468,16 @@ void check_spambot_warning( struct Client *sptr, char *name )
   int decrement_count;
 
   if(GlobalSetOptions.spam_num &&
-     (sptr->join_leave_count >= GlobalSetOptions.spam_num))
+     (sptr->localClient->join_leave_count >= GlobalSetOptions.spam_num))
     {
-      if(sptr->oper_warn_count_down == 0)
+      if(sptr->localClient->oper_warn_count_down == 0)
 	{
 	  /* Its already known as a possible spambot */
 	  
-	  if(sptr->oper_warn_count_down > 0)  /* my general paranoia */
-	    sptr->oper_warn_count_down--;
+	  if(sptr->localClient->oper_warn_count_down > 0) 
+	    sptr->localClient->oper_warn_count_down--;
 	  else
-	    sptr->oper_warn_count_down = 0;
+	    sptr->localClient->oper_warn_count_down = 0;
 
 	  sendto_realops_flags(FLAGS_BOTS,
 	       "User %s (%s@%s) trying to join %s is a possible spambot",
@@ -485,31 +485,31 @@ void check_spambot_warning( struct Client *sptr, char *name )
 			       sptr->username,
 			       sptr->host,
 			       name);     
-	  sptr->oper_warn_count_down = OPER_SPAM_COUNTDOWN;
+	  sptr->localClient->oper_warn_count_down = OPER_SPAM_COUNTDOWN;
 	}
     }
   else
     {
-      if( (t_delta = (CurrentTime - sptr->last_leave_time)) >
+      if( (t_delta = (CurrentTime - sptr->localClient->last_leave_time)) >
 	  JOIN_LEAVE_COUNT_EXPIRE_TIME)
 	{
 	  decrement_count = (t_delta/JOIN_LEAVE_COUNT_EXPIRE_TIME);
 
-	  if(decrement_count > sptr->join_leave_count)
-	    sptr->join_leave_count = 0;
+	  if(decrement_count > sptr->localClient->join_leave_count)
+	    sptr->localClient->join_leave_count = 0;
 	  else
-	    sptr->join_leave_count -= decrement_count;
+	    sptr->localClient->join_leave_count -= decrement_count;
 	}
       else
 	{
-	  if((CurrentTime - (sptr->last_join_time)) < 
+	  if((CurrentTime - (sptr->localClient->last_join_time)) < 
 	     GlobalSetOptions.spam_time)
 	    {
 	      /* oh, its a possible spambot */
-	      sptr->join_leave_count++;
+	      sptr->localClient->join_leave_count++;
 	    }
 	}
-      sptr->last_leave_time = CurrentTime;
+      sptr->localClient->last_leave_time = CurrentTime;
     }
 }
 

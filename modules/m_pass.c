@@ -74,7 +74,7 @@ int m_pass(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                  me.name, parv[0]);
       return 0;
     }
-  strncpy_irc(cptr->passwd, password, PASSWDLEN);
+  strncpy_irc(cptr->localClient->passwd, password, PASSWDLEN);
   if (parc > 2)
     {
       /* 

@@ -135,7 +135,7 @@ int mo_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           return 0;
         }
       name = get_client_name(acptr, FALSE);
-      ip = inetntoa((char*) &acptr->ip);
+      ip = inetntoa((char*) &acptr->localClient->ip);
 
       class_name = get_client_class(acptr);
 
@@ -264,7 +264,7 @@ int report_this_status(struct Client *sptr, struct Client *acptr,
   int cnt;
   static time_t now;
 
-  ip = inetntoa((const char*) &acptr->ip);
+  ip = inetntoa((const char*) &acptr->localClient->ip);
   name = get_client_name(acptr, FALSE);
   class_name = get_client_class(acptr);
 

@@ -98,7 +98,7 @@ int     m_userhost(struct Client *cptr,
 		       IsAnyOper(acptr) ? "*" : "",
 		       (acptr->user->away) ? '-' : '+',
 		       acptr->username,
-		       acptr->sockhost);
+		       acptr->localClient->sockhost);
           else
             ircsprintf(response[i], "%s%s=%c%s@%s",
 		       acptr->name,

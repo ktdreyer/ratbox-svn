@@ -69,8 +69,8 @@ const char*     get_client_class(struct Client *acptr)
   struct Class        *cl;
   const char*   retc = (const char *)NULL;
 
-  if (acptr && !IsMe(acptr)  && (acptr->confs))
-    for (tmp = acptr->confs; tmp; tmp = tmp->next)
+  if (acptr && !IsMe(acptr)  && (acptr->localClient->confs))
+    for (tmp = acptr->localClient->confs; tmp; tmp = tmp->next)
       {
         if (!tmp->value.aconf ||
             !(cl = ClassPtr(tmp->value.aconf)))
@@ -90,7 +90,7 @@ int     get_client_ping(struct Client *acptr)
   struct ConfItem     *aconf;
   struct SLink  *link;
 
-  link = acptr->confs;
+  link = acptr->localClient->confs;
 
   if (link)
     while (link)
@@ -232,8 +232,8 @@ long    get_sendq(struct Client *cptr)
   struct SLink  *tmp;
   struct Class        *cl;
 
-  if (cptr && !IsMe(cptr)  && (cptr->confs))
-    for (tmp = cptr->confs; tmp; tmp = tmp->next)
+  if (cptr && !IsMe(cptr)  && (cptr->localClient->confs))
+    for (tmp = cptr->localClient->confs; tmp; tmp = tmp->next)
       {
         if (!tmp->value.aconf ||
             !(cl = ClassPtr(tmp->value.aconf)))

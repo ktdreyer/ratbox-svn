@@ -55,9 +55,9 @@ struct Capability
 /*
  * Capability macros.
  */
-#define IsCapable(x, cap)       ((x)->caps & (cap))
-#define SetCapable(x, cap)      ((x)->caps |= (cap))
-#define ClearCap(x, cap)        ((x)->caps &= ~(cap))
+#define IsCapable(x, cap)       ((x)->localClient->caps & (cap))
+#define SetCapable(x, cap)      ((x)->localClient->caps |= (cap))
+#define ClearCap(x, cap)        ((x)->localClient->caps &= ~(cap))
 
 /*
  * Globals

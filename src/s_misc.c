@@ -150,8 +150,8 @@ void serv_info(struct Client *cptr,char *name)
 
   for(acptr = serv_cptr_list; acptr; acptr = acptr->next_server_client)
     {
-      sendK += acptr->sendK;
-      receiveK += acptr->receiveK;
+      sendK += acptr->localClient->sendK;
+      receiveK += acptr->localClient->receiveK;
       /* There are no more non TS servers on this network, so that test has
        * been removed. Also, do not allow non opers to see the IP's of servers
        * on stats ?
@@ -159,9 +159,11 @@ void serv_info(struct Client *cptr,char *name)
       if(IsAnyOper(cptr))
         sendto_one(cptr, Lformat, me.name, RPL_STATSLINKINFO,
                    name, get_client_name(acptr, TRUE),
-                   (int)linebuf_len(&acptr->buf_sendq),
-                   (int)acptr->sendM, (int)acptr->sendK,
-                   (int)acptr->receiveM, (int)acptr->receiveK,
+                   (int)linebuf_len(&acptr->localClient->buf_sendq),
+                   (int)acptr->localClient->sendM,
+		   (int)acptr->localClient->sendK,
+                   (int)acptr->localClient->receiveM,
+		   (int)acptr->localClient->receiveK,
                    CurrentTime - acptr->firsttime,
                    (CurrentTime > acptr->since) ? (CurrentTime - acptr->since): 0,
                    IsServer(acptr) ? show_capabilities(acptr) : "-" );
@@ -169,9 +171,11 @@ void serv_info(struct Client *cptr,char *name)
         {
           sendto_one(cptr, Lformat, me.name, RPL_STATSLINKINFO,
                      name, get_client_name(acptr, HIDEME),
-                     (int)linebuf_len(&acptr->buf_sendq),
-                     (int)acptr->sendM, (int)acptr->sendK,
-                     (int)acptr->receiveM, (int)acptr->receiveK,
+                     (int)linebuf_len(&acptr->localClient->buf_sendq),
+                     (int)acptr->localClient->sendM,
+		     (int)acptr->localClient->sendK,
+                     (int)acptr->localClient->receiveM,
+		     (int)acptr->localClient->receiveK,
                      CurrentTime - acptr->firsttime,
                      (CurrentTime > acptr->since)?(CurrentTime - acptr->since): 0,
                      IsServer(acptr) ? show_capabilities(acptr) : "-" );
@@ -189,11 +193,13 @@ void serv_info(struct Client *cptr,char *name)
 
   uptime = (CurrentTime - me.since);
   sendto_one(cptr, ":%s %d %s :Server send: %7.2f %s (%4.1f K/s)",
-             me.name, RPL_STATSDEBUG, name, _GMKv(me.sendK), _GMKs(me.sendK),
-             (float)((float)me.sendK / (float)uptime));
+             me.name, RPL_STATSDEBUG, name, _GMKv(me.localClient->sendK),
+	     _GMKs(me.localClient->sendK),
+             (float)((float)me.localClient->sendK / (float)uptime));
   sendto_one(cptr, ":%s %d %s :Server recv: %7.2f %s (%4.1f K/s)",
-             me.name, RPL_STATSDEBUG, name, _GMKv(me.receiveK), _GMKs(me.receiveK),
-             (float)((float)me.receiveK / (float)uptime));
+             me.name, RPL_STATSDEBUG, name, _GMKv(me.localClient->receiveK),
+	     _GMKs(me.localClient->receiveK),
+             (float)((float)me.localClient->receiveK / (float)uptime));
 }
 
 

@@ -68,8 +68,8 @@
 /* 
  * for Wohali's block allocator 
  */
-BlockHeap*        localClientFreeList;
-BlockHeap*        remoteClientFreeList;
+BlockHeap*        ClientFreeList;
+BlockHeap*        localUserFreeList;
 static const char* const BH_FREE_ERROR_MESSAGE = \
         "client.c BlockHeapFree failed for cptr = %p";
 
@@ -94,17 +94,11 @@ static EVH check_pings;
  */
 void init_client_heap(void)
 {
-  /* 
-   * start off with CLIENTS_PREALLOCATE for now... on typical
-   * efnet these days, it can get up to 35k allocated 
-   */
-  remoteClientFreeList =
-    BlockHeapCreate((size_t) CLIENT_REMOTE_SIZE, CLIENTS_PREALLOCATE);
-  /* 
-   * Can't EVER have more than MAXCONNECTIONS number of local Clients 
-   */
-  localClientFreeList = 
-    BlockHeapCreate((size_t) CLIENT_LOCAL_SIZE, MAXCONNECTIONS);
+  ClientFreeList =
+    BlockHeapCreate((size_t) sizeof(struct Client), CLIENTS_PREALLOCATE);
+
+  localUserFreeList = 
+    BlockHeapCreate((size_t) sizeof(struct LocalUser), MAXCONNECTIONS);
 
   /*
    * start off the check ping event ..  -- adrian
@@ -121,8 +115,8 @@ void init_client_heap(void)
  */
 void clean_client_heap(void)
 {
-  BlockHeapGarbageCollect(localClientFreeList);
-  BlockHeapGarbageCollect(remoteClientFreeList);
+  BlockHeapGarbageCollect(ClientFreeList);
+  BlockHeapGarbageCollect(localUserFreeList);
 }
 
 /*
@@ -138,44 +132,44 @@ void clean_client_heap(void)
 struct Client* make_client(struct Client* from)
 {
   struct Client* cptr = NULL;
+  struct LocalUser *localClient;
 
   if (!from)
     {
-      cptr = BlockHeapALLOC(localClientFreeList, struct Client);
+      cptr = BlockHeapALLOC(ClientFreeList, struct Client);
       if (cptr == NULL)
         outofmemory();
       assert(0 != cptr);
 
-      memset(cptr, 0, CLIENT_LOCAL_SIZE);
+      memset(cptr, 0, sizeof(struct Client));
       cptr->local_flag = 1;
 
       cptr->from  = cptr; /* 'from' of local client is self! */
       cptr->since = cptr->lasttime = cptr->firsttime = CurrentTime;
 
-#ifdef NULL_POINTER_NOT_ZERO
-      cptr->listener  = NULL;
-      cptr->confs     = NULL;
-
-      cptr->dns_reply = NULL;
-#endif /* NULL_POINTER_NOT_ZERO */
+      localClient = BlockHeapALLOC(localUserFreeList, struct LocalUser);
+      if (localClient == NULL)
+        outofmemory();
+      assert(0 != localClient);
+      cptr->localClient = localClient;
     }
   else
     { /* from is not NULL */
-      cptr = BlockHeapALLOC(remoteClientFreeList, struct Client);
+      cptr = BlockHeapALLOC(ClientFreeList, struct Client);
       if(cptr == NULL)
         outofmemory();
       assert(0 != cptr);
 
-      memset(cptr, 0, CLIENT_REMOTE_SIZE);
-      /* cptr->local_flag = 0; */
+      memset(cptr, 0, sizeof(struct Client));
 
       cptr->from = from; /* 'from' of local client is self! */
     }
+
   cptr->status = STAT_UNKNOWN;
   cptr->fd = -1;
   strcpy(cptr->username, "unknown");
 
-#ifdef NULL_POINTER_NOT_ZERO
+#if 0
   cptr->next    = NULL;
   cptr->prev    = NULL;
   cptr->hnext   = NULL;
@@ -190,7 +184,7 @@ struct Client* make_client(struct Client* from)
   cptr->serv    = NULL;
   cptr->servptr = NULL;
   cptr->whowas  = NULL;
-#endif /* NULL_POINTER_NOT_ZERO */
+#endif
 
   return cptr;
 }
@@ -208,13 +202,14 @@ void _free_client(struct Client* cptr)
       if (-1 < cptr->fd)
 	fd_close(cptr->fd);
 
-      if (cptr->dns_reply)
-	--cptr->dns_reply->ref_count;
+      if (cptr->localClient->dns_reply)
+	--cptr->localClient->dns_reply->ref_count;
 
-      result = BlockHeapFree(localClientFreeList, cptr);
+      result = BlockHeapFree(localUserFreeList, cptr->localClient);
+      result = BlockHeapFree(ClientFreeList, cptr);
     }
   else
-    result = BlockHeapFree(remoteClientFreeList, cptr);
+    result = BlockHeapFree(ClientFreeList, cptr);
 
   assert(0 == result);
   if (result)
@@ -461,7 +456,7 @@ void check_klines(void)
         }
       
 #ifndef IPV6 /* XXX No dlines in IPv6 yet */
-      if ( (aconf = match_Dline(ntohl(cptr->ip.s_addr))) )
+      if ( (aconf = match_Dline(ntohl(cptr->localClient->ip.s_addr))) )
 	/* if there is a returned struct ConfItem then kill it */
 	{
 	  if(IsConfElined(aconf))
@@ -1073,10 +1068,10 @@ int check_registered(struct Client* client)
 void release_client_dns_reply(struct Client* client)
 {
   assert(0 != client);
-  if (client->dns_reply)
+  if (client->localClient->dns_reply)
     {
-      --client->dns_reply->ref_count;
-      client->dns_reply = 0;
+      --client->localClient->dns_reply->ref_count;
+      client->localClient->dns_reply = 0;
     }
 }
 
@@ -1115,7 +1110,7 @@ const char* get_client_name(struct Client* client, int showip)
         {
           case SHOW_IP:
             ircsprintf(nbuf, "%s[%s@%s]", client->name, client->username,
-              client->sockhost);
+              client->localClient->sockhost);
             break;
           case MASK_IP:
             ircsprintf(nbuf, "%s[%s@255.255.255.255]", client->name,
@@ -1142,7 +1137,7 @@ const char* get_client_host(struct Client* client)
 
   if (!MyConnect(client))
     return client->name;
-  if (!client->dns_reply)
+  if (!client->localClient->dns_reply)
     return get_client_name(client, FALSE);
   else
     {
@@ -1415,9 +1410,9 @@ const char* comment         /* Reason for the exit */
 #else
       if(sptr->flags & FLAGS_IPHASH)
 #ifdef IPV6
-        remove_one_ip(sptr->ip6.s6_addr);
+        remove_one_ip(sptr->localClient->ip6.s6_addr);
 #else
-        remove_one_ip(sptr->ip.s_addr);
+        remove_one_ip(sptr->localClient->ip.s_addr);
 #endif
 #endif
       if (IsAnyOper(sptr))
@@ -1474,7 +1469,7 @@ const char* comment         /* Reason for the exit */
           Count.myserver--;
 
 	  if(ConfigFileEntry.hub)
-	    restoreUnusedServerMask(sptr->serverMask);
+	    restoreUnusedServerMask(sptr->localClient->serverMask);
           {
             struct Client *prev_cptr = NULL;
             struct Client *cur_cptr = serv_cptr_list;
@@ -1503,7 +1498,7 @@ const char* comment         /* Reason for the exit */
                                "Client exiting: %s (%s@%s) [%s] [%s]",
                                sptr->name, sptr->username, sptr->host,
                (sptr->flags & FLAGS_NORMALEX) ?  "Client Quit" : comment,
-                               sptr->sockhost);
+                               sptr->localClient->sockhost);
         }
 
       log_user_exit(sptr);
@@ -1556,11 +1551,11 @@ const char* comment         /* Reason for the exit */
       if (sptr->servptr == &me)
         {
           sendto_realops("%s was connected for %d seconds.  %d/%d sendK/recvK.",
-                     sptr->name, CurrentTime - sptr->firsttime,
-                     sptr->sendK, sptr->receiveK);
+                     sptr->name,CurrentTime - sptr->firsttime,
+                     sptr->localClient->sendK, sptr->localClient->receiveK);
           log(L_NOTICE, "%s was connected for %d seconds.  %d/%d sendK/recvK.",
               sptr->name, CurrentTime - sptr->firsttime, 
-              sptr->sendK, sptr->receiveK);
+              sptr->localClient->sendK, sptr->localClient->receiveK);
 
               /* Just for paranoia... this shouldn't be necessary if the
               ** remove_dependents() stuff works, but it's still good
@@ -1600,10 +1595,12 @@ const char* comment         /* Reason for the exit */
 /*
  * Count up local client memory
  */
+
+/* XXX one common Client list now */
 void count_local_client_memory(int *local_client_memory_used,
                                int *local_client_memory_allocated )
 {
-  BlockHeapCountMemory( localClientFreeList,
+  BlockHeapCountMemory( localUserFreeList,
                         local_client_memory_used,
                         local_client_memory_allocated);
 }
@@ -1614,7 +1611,7 @@ void count_local_client_memory(int *local_client_memory_used,
 void count_remote_client_memory(int *remote_client_memory_used,
                                int *remote_client_memory_allocated )
 {
-  BlockHeapCountMemory( remoteClientFreeList,
+  BlockHeapCountMemory( ClientFreeList,
                         remote_client_memory_used,
                         remote_client_memory_allocated);
 }

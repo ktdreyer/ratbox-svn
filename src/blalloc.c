@@ -364,69 +364,6 @@ int BlockHeapGarbageCollect(BlockHeap *bh)
 
 /* ************************************************************************ */
 /* FUNCTION DOCUMENTATION:                                                  */
-/*    BlockHeapDump                                                         */
-/* Description:                                                             */
-/*    Dump as a text file to given fd, all the hex values of each           */
-/*    memory location allocated by this heap                                */
-/* Parameters:                                                              */
-/*    bh (IN):  Pointer to the BlockHeap to be dumped out                   */
-/*    fd (IN):  fd to dump on                                               */
-/* Returns:                                                                 */
-/*   Nothing                                                                */
-/* ************************************************************************ */
-void BlockHeapDump(BlockHeap *bh,int fd)
-{
-   Block *walker;
-   int unit;
-   unsigned long mask;
-   unsigned long ctr;
-   unsigned long addr;
-   char buffer[512];
-
-   if (bh == NULL)
-     return;
-
-   for (walker = bh->base; walker != NULL; walker = walker->next)
-     {
-       mask = 0x1L; ctr = 0; unit = 0;
-       while (unit < bh->numlongs)
-	 {
-	   if (mask & walker->allocMap[unit])
-	     {
-	       /* Address arithemtic is always ca-ca 
-		* have to make sure the the bit pattern for the
-		* base address is converted into the same number of
-		* bits in an integer type, that has at least
-		* sizeof(unsigned long) at least == sizeof(void *)
-		*/
-
-                   addr =  ( (unsigned long) (
-                            (unsigned long)walker->elems + 
-                            ( (unit * sizeof(unsigned long) * 8 + ctr)
-                              * (unsigned long )bh->elemSize))
-                            );
-
-		   sprintf(buffer,"%lX\n", (unsigned long)addr );
-		   write(fd, buffer, strlen(buffer) );
-	     }
-	   /* Step up to the next unit */
-	   mask <<= 1;
-	   ctr++;
-	   if (!mask)
-	     {
-	       mask = 0x1L;
-	       unit++;
-	       ctr = 0;
-	     }
-	 }  /* while */
-     }      /* for */
-
-    return; 
-}
-
-
-/* ************************************************************************ */
-/* FUNCTION DOCUMENTATION:                                                  */
 /*    BlockHeapDestroy                                                      */
 /* Description:                                                             */
 /*    Completely free()s a BlockHeap.  Use for cleanup.                     */

@@ -231,7 +231,7 @@ void det_confs_butmask(struct Client* cptr, int mask)
   struct SLink* link;
   struct SLink* link_next;
 
-  for (link = cptr->confs; link; link = link_next)
+  for (link = cptr->localClient->confs; link; link = link_next)
     {
       link_next = link->next;
       if ((link->value.aconf->status & mask) == 0)
@@ -433,15 +433,15 @@ int check_client(struct Client *cptr, struct Client *sptr, char *username)
 			       "%s from %s [%s] on [%s/%u].",
 			       "Unauthorized client connection",
 			       get_client_host(sptr),
-			       inetntoa((char *)&sptr->ip),
-			       sptr->listener->name,
-			       sptr->listener->port
+			       inetntoa((char *)&sptr->localClient->ip),
+			       sptr->localClient->listener->name,
+			       sptr->localClient->listener->port
 			       );
 	  log(L_INFO,
 	      "Unauthorized client connection from %s on [%s/%u].",
 	      get_client_host(sptr),
-	      sptr->listener->name,
-	      sptr->listener->port
+	      sptr->localClient->listener->name,
+	      sptr->localClient->listener->port
 	      );
 	  
 	  return exit_client(cptr, sptr, &me,
@@ -475,12 +475,12 @@ int attach_Iline(struct Client* cptr, const char* username)
   if (IsGotId(cptr))
     {
       aconf = find_matching_mtrie_conf(cptr->host,cptr->username,
-                                       ntohl(cptr->ip.s_addr));
+                                       ntohl(cptr->localClient->ip.s_addr));
       if(aconf && !IsConfElined(aconf))
         {
           if( (tkline_conf = find_tkline(cptr->host,
 					 cptr->username,
-					 ntohl(cptr->ip.s_addr))) )
+					 ntohl(cptr->localClient->ip.s_addr))) )
             aconf = tkline_conf;
         }
     }
@@ -490,12 +490,12 @@ int attach_Iline(struct Client* cptr, const char* username)
       strncpy_irc(&non_ident[1],username, USERLEN - 1);
       non_ident[USERLEN] = '\0';
       aconf = find_matching_mtrie_conf(cptr->host,non_ident,
-                                       ntohl(cptr->ip.s_addr));
+                                       ntohl(cptr->localClient->ip.s_addr));
       if(aconf && !IsConfElined(aconf))
         {
-          if( (tkline_conf = find_tkline(cptr->host,
-					 non_ident,
-					 ntohl(cptr->ip.s_addr))) )
+          if((tkline_conf = find_tkline(cptr->host,
+					non_ident,
+					ntohl(cptr->localClient->ip.s_addr))))
             aconf = tkline_conf;
         }
     }
@@ -675,7 +675,7 @@ static IP_ENTRY *
 find_or_add_ip(struct Client *cptr)
 #endif
 {
-  unsigned long ip_in=cptr->ip.s_addr;        
+  unsigned long ip_in=cptr->localClient->ip.s_addr;
 #ifdef LIMIT_UH
   struct SLink *new_link;
 #endif
@@ -997,7 +997,7 @@ int detach_conf(struct Client* cptr,struct ConfItem* aconf)
   struct SLink** lp;
   struct SLink*  tmp;
 
-  lp = &(cptr->confs);
+  lp = &(cptr->localClient->confs);
 
   while (*lp)
     {
@@ -1038,7 +1038,7 @@ static int is_attached(struct ConfItem *aconf,struct Client *cptr)
 {
   struct SLink* lp;
 
-  for (lp = cptr->confs; lp; lp = lp->next)
+  for (lp = cptr->localClient->confs; lp; lp = lp->next)
     if (lp->value.aconf == aconf)
       break;
   
@@ -1096,9 +1096,9 @@ int attach_conf(struct Client *cptr,struct ConfItem *aconf)
 #endif
 
   lp = make_link();
-  lp->next = cptr->confs;
+  lp->next = cptr->localClient->confs;
   lp->value.aconf = aconf;
-  cptr->confs = lp;
+  cptr->localClient->confs = lp;
   aconf->clients++;
   if (aconf->status & CONF_CLIENT_MASK)
     ConfLinks(aconf)++;
@@ -1995,7 +1995,7 @@ struct ConfItem *find_kill(struct Client* cptr)
   /* opers get that flag automatically, normal users do not */
   return (IsElined(cptr)) ? 0 : find_is_klined(cptr->host, 
                                                cptr->username, 
-                                               cptr->ip.s_addr);
+                                               cptr->localClient->ip.s_addr);
 }
 
 /*

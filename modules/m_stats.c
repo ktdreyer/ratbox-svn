@@ -533,9 +533,11 @@ void stats_L(struct Client *sptr,char *name,int doall, int wilds)
                      (IsUpper(stat)) ?
                      get_client_name(acptr, TRUE) :
                      get_client_name(acptr, FALSE),
-                     (int)linebuf_len(&acptr->buf_sendq),
-                     (int)acptr->sendM, (int)acptr->sendK,
-                     (int)acptr->receiveM, (int)acptr->receiveK,
+                     (int)linebuf_len(&acptr->localClient->buf_sendq),
+                     (int)acptr->localClient->sendM,
+		     (int)acptr->localClient->sendK,
+                     (int)acptr->localClient->receiveM,
+		     (int)acptr->localClient->receiveK,
                      CurrentTime - acptr->firsttime,
                      (CurrentTime > acptr->since) ? (CurrentTime - acptr->since):0,
                      IsServer(acptr) ? show_capabilities(acptr) : "-");
@@ -546,9 +548,11 @@ void stats_L(struct Client *sptr,char *name,int doall, int wilds)
 	    sendto_one(sptr, Lformat, me.name,
 		       RPL_STATSLINKINFO, sptr->name,
 		       get_client_name(acptr, HIDEME),
-		       (int)linebuf_len(&acptr->buf_sendq),
-		       (int)acptr->sendM, (int)acptr->sendK,
-		       (int)acptr->receiveM, (int)acptr->receiveK,
+		       (int)linebuf_len(&acptr->localClient->buf_sendq),
+		       (int)acptr->localClient->sendM,
+		       (int)acptr->localClient->sendK,
+		       (int)acptr->localClient->receiveM,
+		       (int)acptr->localClient->receiveK,
 		       CurrentTime - acptr->firsttime,
 		       (CurrentTime > acptr->since) ? (CurrentTime - acptr->since):0,
 		       IsServer(acptr) ? show_capabilities(acptr) : "-");
@@ -558,9 +562,11 @@ void stats_L(struct Client *sptr,char *name,int doall, int wilds)
 		       (IsUpper(stat)) ?
 		       get_client_name(acptr, TRUE) :
 		       get_client_name(acptr, FALSE),
-		       (int)linebuf_len(&acptr->buf_sendq),
-		       (int)acptr->sendM, (int)acptr->sendK,
-		       (int)acptr->receiveM, (int)acptr->receiveK,
+		       (int)linebuf_len(&acptr->localClient->buf_sendq),
+		       (int)acptr->localClient->sendM,
+		       (int)acptr->localClient->sendK,
+		       (int)acptr->localClient->receiveM,
+		       (int)acptr->localClient->receiveK,
 		       CurrentTime - acptr->firsttime,
 		       (CurrentTime > acptr->since) ? (CurrentTime - acptr->since):0,
 		       IsServer(acptr) ? show_capabilities(acptr) : "-");

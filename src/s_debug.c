@@ -269,7 +269,7 @@ void count_memory(struct Client *cptr,char *nick)
       if (MyConnect(acptr))
         {
           lc++;
-          for (link = acptr->confs; link; link = link->next)
+          for (link = acptr->localClient->confs; link; link = link->next)
             lcc++;
         }
       else
@@ -290,8 +290,12 @@ void count_memory(struct Client *cptr,char *nick)
             }
         }
     }
+
+/* XXX */
+#if 0
   lcm = lc * CLIENT_LOCAL_SIZE;
   rcm = rc * CLIENT_REMOTE_SIZE;
+#endif
 
   for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
     {
@@ -444,52 +448,4 @@ void count_memory(struct Client *cptr,char *nick)
              me.name, RPL_STATSDEBUG, nick, tot, get_maxrss());
 
 #endif
-}
-
-/*
- * debug function
- * 
- * dump the actual client link lists, then the block allocator
- * link lists
- */
-
-/* defined in client.c *blah* */
-
-extern BlockHeap*        localClientFreeList;
-extern BlockHeap*        remoteClientFreeList;
-
-void dump_addresses()
-{
-  struct Client *acptr;
-  int fd_lc_dump;
-  int fd_rc_dump;
-  int fd_lba_dump;
-  int fd_rba_dump;
-  char buffer[512];
-
-  fd_lc_dump = file_open("local_client_list.txt",O_WRONLY|O_TRUNC|O_CREAT,0644);
-  fd_rc_dump = file_open("remote_client_list.txt",O_WRONLY|O_TRUNC|O_CREAT,0644);
-  fd_lba_dump = file_open("local_block_allocator_client_list.txt",O_WRONLY|O_TRUNC|O_CREAT,0644);
-  fd_rba_dump = file_open("remote_block_allocator_client_list.txt",O_WRONLY|O_TRUNC|O_CREAT,0644);
-
-  for (acptr = GlobalClientList; acptr; acptr = acptr->next)
-    {
-      sprintf(buffer,"%lX\n", (unsigned long)acptr );
-      if (MyConnect(acptr))
-        {
-	  write(fd_lc_dump, buffer, strlen(buffer) );
-        }
-      else
-	{
-	  write(fd_rc_dump, buffer, strlen(buffer) );
-	}
-    }
-
-  BlockHeapDump(localClientFreeList,fd_lba_dump);
-  BlockHeapDump(remoteClientFreeList,fd_rba_dump);
-
-  file_close(fd_rc_dump);
-  file_close(fd_lc_dump);
-  file_close(fd_lba_dump);
-  file_close(fd_rba_dump);
 }

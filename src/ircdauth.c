@@ -240,8 +240,8 @@ BeginAuthorization(struct Client *client)
 		client->name,
 		client->username,
 		client->host,
-		(unsigned int) client->ip.s_addr,
-		client->passwd);
+		(unsigned int) client->localClient->ip.s_addr,
+		client->localClient->passwd);
 
 	send(iAuth.socket, buf, len, 0);
 } /* BeginAuthorization() */
@@ -519,177 +519,163 @@ GoodAuth(int parc, char **parv)
 } /* GoodAuth() */
 
 /*
-GreetUser()
- Called after a user passes authorization - register them
-and send them the motd
-*/
+ * GreetUser()
+ * inputs	- pointer to client connecting
+ * output	- NONE
+ * side effects - Called after a user passes authorization
+ *	          register them and send them the motd
+ */
 
 static void
 GreetUser(struct Client *client)
 
 {
-	/* bingo - FIX THIS */
-	char *parv[3];
-	static char ubuf[12];
+  static char ubuf[12];
 
-	sendto_realops_flags(FLAGS_CCONN,
-		"Client connecting: %s (%s@%s) [%s] {%d}",
-		client->name,
-		client->username,
-		client->host,
-		inetntoa((char *)&client->ip),
-		get_client_class(client));
+  sendto_realops_flags(FLAGS_CCONN,
+		       "Client connecting: %s (%s@%s) [%s] {%d}",
+		       client->name,
+		       client->username,
+		       client->host,
+		       inetntoa((char *)&client->localClient->ip),
+		       get_client_class(client));
 
-	if ((++Count.local) > Count.max_loc)
-	{
-		Count.max_loc = Count.local;
-		if (!(Count.max_loc % 10))
-			sendto_realops("New Max Local Clients: %d",
-				       Count.max_loc);
-	}
+  if ((++Count.local) > Count.max_loc)
+    {
+      Count.max_loc = Count.local;
+      if (!(Count.max_loc % 10))
+	sendto_realops("New Max Local Clients: %d",
+		       Count.max_loc);
+    }
 
-	SetClient(client);
+  SetClient(client);
 
-	client->servptr = find_server(client->user->server);
-	if (!client->servptr)
-	{
-		sendto_realops("Ghost killed: %s on invalid server %s",
-			       client->name,
-			       client->user->server);
+  client->servptr = find_server(client->user->server);
+  if (!client->servptr)
+    {
+      sendto_realops("Ghost killed: %s on invalid server %s",
+		     client->name,
+		     client->user->server);
 
-		sendto_one(client, ":%s KILL %s: %s (Ghosted, %s doesn't exist)",
-			me.name,
-			client->name,
-			me.name,
-			client->user->server);
+      sendto_one(client, ":%s KILL %s: %s (Ghosted, %s doesn't exist)",
+		 me.name,
+		 client->name,
+		 me.name,
+		 client->user->server);
 
-		client->flags |= FLAGS_KILLED;
+      client->flags |= FLAGS_KILLED;
 
-		exit_client(NULL, client, &me, "Ghost");
-		return;
-	}
+      exit_client(NULL, client, &me, "Ghost");
+      return;
+    }
+  
+  add_client_to_llist(&(client->servptr->serv->users), client);
 
-	add_client_to_llist(&(client->servptr->serv->users), client);
+  /* Increment our total user count here */
+  if (++Count.total > Count.max_tot)
+    Count.max_tot = Count.total;
+  
+  sendto_one(client, form_str(RPL_WELCOME),
+	     me.name,
+	     client->name,
+	     client->name);
 
-	/* Increment our total user count here */
-	if (++Count.total > Count.max_tot)
-		Count.max_tot = Count.total;
-
-	sendto_one(client, form_str(RPL_WELCOME),
-		me.name,
-		client->name,
-		client->name);
-
-	/* This is a duplicate of the NOTICE but see below...*/
-	sendto_one(client, form_str(RPL_YOURHOST),
-		me.name,
-		client->name,
-		get_listener_name(client->listener), version);
+  /* This is a duplicate of the NOTICE but see below...*/
+  sendto_one(client, form_str(RPL_YOURHOST),
+	     me.name,
+	     client->name,
+	     get_listener_name(client->localClient->listener), version);
       
-	/*
-	** Don't mess with this one - IRCII needs it! -Avalon
-	*/
-	sendto_one(client,
-		"NOTICE %s :*** Your host is %s, running version %s",
-		client->name,
-		get_listener_name(client->listener),
-		version);
+  /*
+  ** Don't mess with this one - IRCII needs it! -Avalon
+  */
+  sendto_one(client,
+	     "NOTICE %s :*** Your host is %s, running version %s",
+	     client->name,
+	     get_listener_name(client->localClient->listener),
+	     version);
 
-	sendto_one(client, form_str(RPL_CREATED),
-		me.name,
-		client->name,
-		creation);
+  sendto_one(client, form_str(RPL_CREATED),
+	     me.name,
+	     client->name,
+	     creation);
 
-	sendto_one(client, form_str(RPL_MYINFO),
-		me.name,
-		client->name,
-		me.name,
-		version);
+  sendto_one(client, form_str(RPL_MYINFO),
+	     me.name,
+	     client->name,
+	     me.name,
+	     version);
 
-	parv[0] = client->name;
-	parv[1] = parv[2] = NULL;
-
-	show_lusers(client);
+  show_lusers(client);
 
   if(ConfigFileEntry.short_motd) {
-  	sendto_one(client,"NOTICE %s :*** Notice -- motd was last changed at %s",
-	  	client->name,
-		  ConfigFileEntry.motd.lastChangedDate);
+    sendto_one(client,"NOTICE %s :*** Notice -- motd was last changed at %s",
+	       client->name,
+	       ConfigFileEntry.motd.lastChangedDate);
+    
+    sendto_one(client,
+	       "NOTICE %s :*** Notice -- Please read the motd if you haven't read it",
+	       client->name);
 
-  	sendto_one(client,
-	  	"NOTICE %s :*** Notice -- Please read the motd if you haven't read it",
-		  client->name);
+    sendto_one(client, form_str(RPL_MOTDSTART),
+	       me.name,
+	       client->name,
+	       me.name);
 
-	  sendto_one(client, form_str(RPL_MOTDSTART),
-		  me.name,
-		  client->name,
-		  me.name);
+    sendto_one(client,
+	       form_str(RPL_MOTD),
+	       me.name,
+	       client->name,
+	       "*** This is the short motd ***");
+    
+    sendto_one(client, form_str(RPL_ENDOFMOTD),
+	       me.name,
+	       client->name);
 
-	  sendto_one(client,
-		  form_str(RPL_MOTD),
-		  me.name,
-		  client->name,
-		  "*** This is the short motd ***");
-
-	  sendto_one(client, form_str(RPL_ENDOFMOTD),
-		  me.name,
-		  client->name);
-
-  } else
-	SendMessageFile(client, &ConfigFileEntry.motd);
+  }
+  else
+    SendMessageFile(client, &ConfigFileEntry.motd);
 
 #ifdef LITTLE_I_LINES
-	if (client->confs && client->confs->value.aconf &&
-			(client->confs->value.aconf->flags & CONF_FLAGS_LITTLE_I_LINE))
-	{
-		SetRestricted(client);
-		sendto_one(client,"NOTICE %s :*** Notice -- You are in a restricted access mode",
-			client->name);
-
-		sendto_one(client,"NOTICE %s :*** Notice -- You can not chanop others",
-			client->name);
-	}
+  if (client->localClient->confs && client->localClient->confs->value.aconf &&
+      (client->localClient->confs->value.aconf->flags & CONF_FLAGS_LITTLE_I_LINE))
+    {
+      SetRestricted(client);
+      sendto_one(client,"NOTICE %s :*** Notice -- You are in a restricted access mode",
+		 client->name);
+      
+      sendto_one(client,"NOTICE %s :*** Notice -- You can not chanop others",
+		 client->name);
+    }
 #endif
 
-	send_umode(NULL, client, 0, SEND_UMODES, ubuf);
-	if (!*ubuf)
-	{
-		ubuf[0] = '+';
-		ubuf[1] = '\0';
-	}
+  send_umode(NULL, client, 0, SEND_UMODES, ubuf);
+  if (!*ubuf)
+    {
+      ubuf[0] = '+';
+      ubuf[1] = '\0';
+    }
   
-  /* LINKLIST 
-   * add to local client link list
-   * I really want to move this add to link list
-   * inside the if (MyConnect(client)) up above
-   * but I also want to make sure its really good and registered
-   * local client
-   *
-   * double link list only for clients, traversing
-   * a small link list for opers/servers isn't a big deal
-   * but it is for clients
-   */
+  if (LocalClientList)
+    LocalClientList->previous_local_client = client;
 
-	if (LocalClientList)
-		LocalClientList->previous_local_client = client;
+  client->previous_local_client = NULL;
+  client->next_local_client = LocalClientList;
+  LocalClientList = client;
 
-	client->previous_local_client = NULL;
-	client->next_local_client = LocalClientList;
-	LocalClientList = client;
-
-	sendto_serv_butone(client,
-		"NICK %s %d %lu %s %s %s %s :%s",
-		client->name,
-		client->hopcount + 1,
-		client->tsinfo,
-		ubuf,
-		client->username,
-		client->host,
-		client->user->server,
-		client->info);
-
-	if (ubuf[1])
-		send_umode_out(client, client, 0);
+  sendto_serv_butone(client,
+		     "NICK %s %d %lu %s %s %s %s :%s",
+		     client->name,
+		     client->hopcount + 1,
+		     client->tsinfo,
+		     ubuf,
+		     client->username,
+		     client->host,
+		     client->user->server,
+		     client->info);
+  
+  if (ubuf[1])
+    send_umode_out(client, client, 0);
 } /* GreetUser() */
 
 /*

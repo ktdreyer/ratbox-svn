@@ -84,7 +84,7 @@ int     ms_drop(struct Client *cptr,
   if(!(chptr=hash_find_channel(name, NullChn)))
     return -1;
 
-  if(cptr->serverMask) /* JIC */
-    chptr->lazyLinkChannelExists &= ~cptr->serverMask;
+  if(cptr->localClient->serverMask) /* JIC */
+    chptr->lazyLinkChannelExists &= ~cptr->localClient->serverMask;
   return 0;
 }

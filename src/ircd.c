@@ -130,7 +130,8 @@ struct  Counter Count;
 
 time_t  CurrentTime;            /* GLOBAL - current system timestamp */
 int     ServerRunning;          /* GLOBAL - server execution state */
-struct Client me;                     /* That's me */
+struct Client me;               /* That's me */
+struct LocalUser meLocalUser;	/* That's also part of me */
 
 struct Client* GlobalClientList = 0; /* Pointer to beginning of Client list */
 /* client pointer lists */ 
@@ -473,7 +474,11 @@ int main(int argc, char *argv[])
   initialVMTop = get_vm_top();
 
   ServerRunning = 0;
+
   memset(&me, 0, sizeof(me));
+  memset(&meLocalUser, 0, sizeof(meLocalUser));
+  me.localClient = &meLocalUser;
+
   GlobalClientList = &me;       /* Pointer to beginning of Client list */
 
   memset(&Count, 0, sizeof(Count));

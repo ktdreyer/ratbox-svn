@@ -197,34 +197,39 @@ static void auth_dns_callback(void* vptr, struct DNSReply* reply)
   struct AuthRequest* auth = (struct AuthRequest*) vptr;
 
   ClearDNSPending(auth);
-  if (reply) {
-    struct hostent* hp = reply->hp;
-    int i;
-    /*
-     * Verify that the host to ip mapping is correct both ways and that
-     * the ip#(s) for the socket is listed for the host.
-     */
-    for (i = 0; hp->h_addr_list[i]; ++i) {
-      if (0 == memcmp(hp->h_addr_list[i], (char*) &auth->client->ip,
-                      sizeof(struct in_addr)))
-         break;
+  if (reply)
+    {
+      struct hostent* hp = reply->hp;
+      int i;
+      /*
+       * Verify that the host to ip mapping is correct both ways and that
+       * the ip#(s) for the socket is listed for the host.
+       */
+      for (i = 0; hp->h_addr_list[i]; ++i)
+	{
+	  if (0 == memcmp(hp->h_addr_list[i],
+			  (char*) &auth->client->localClient->ip,
+			  sizeof(struct in_addr)))
+	    break;
+	}
+      if (!hp->h_addr_list[i])
+	sendheader(auth->client, REPORT_IP_MISMATCH);
+      else
+	{
+	  ++reply->ref_count;
+	  auth->client->localClient->dns_reply = reply;
+	  strncpy_irc(auth->client->host, hp->h_name, HOSTLEN);
+	  sendheader(auth->client, REPORT_FIN_DNS);
+	}
     }
-    if (!hp->h_addr_list[i])
-      sendheader(auth->client, REPORT_IP_MISMATCH);
-    else {
-      ++reply->ref_count;
-      auth->client->dns_reply = reply;
-      strncpy_irc(auth->client->host, hp->h_name, HOSTLEN);
-      sendheader(auth->client, REPORT_FIN_DNS);
+  else
+    {
+      /*
+       * this should have already been done by s_bsd.c in add_connection
+       */
+      strcpy(auth->client->host, auth->client->localClient->sockhost);
+      sendheader(auth->client, REPORT_FAIL_DNS);
     }
-  }
-  else {
-    /*
-     * this should have already been done by s_bsd.c in add_connection
-     */
-    strcpy(auth->client->host, auth->client->sockhost);
-    sendheader(auth->client, REPORT_FAIL_DNS);
-  }
   auth->client->host[HOSTLEN] = '\0';
   if (!IsDoingAuth(auth)) {
     release_auth_client(auth->client);
@@ -307,10 +312,11 @@ static int start_auth_query(struct AuthRequest* auth)
   getsockname(auth->client->fd, (struct sockaddr*) &localaddr, &locallen);
   localaddr.sin_port = htons(0);
 
-  memcpy(&sock.sin_addr, &auth->client->ip, sizeof(struct in_addr));
+  memcpy(&sock.sin_addr, &auth->client->localClient->ip,
+	 sizeof(struct in_addr));
   auth->fd = fd;
   SetAuthConnect(auth);
-  comm_connect_tcp(fd, inetntoa((char *)&auth->client->ip), 113, 
+  comm_connect_tcp(fd, inetntoa((char *)&auth->client->localClient->ip), 113, 
     (struct sockaddr *)&localaddr, locallen, auth_connect_callback, auth);
 
   return 1; /* We suceed here for now */
@@ -424,7 +430,7 @@ void start_auth(struct Client* client)
   sendheader(client, REPORT_DO_DNS);
 
   /* No DNS cache now, remember? -- adrian */
-  gethost_byaddr((const char*) &client->ip, &query);
+  gethost_byaddr((const char*) &client->localClient->ip, &query);
   SetDNSPending(auth);
   start_auth_query(auth);
   link_auth_request(auth, &AuthPollList);

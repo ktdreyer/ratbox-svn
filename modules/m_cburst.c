@@ -127,7 +127,7 @@ int     ms_cburst(struct Client *cptr,
 	    sendnick_TS(cptr, acptr);
 	}
 #endif
-      chptr->lazyLinkChannelExists |= cptr->serverMask;
+      chptr->lazyLinkChannelExists |= cptr->localClient->serverMask;
       send_channel_modes(cptr, chptr);
        /* Send the topic */
       sendto_one(cptr, ":%s TOPIC %s :%s",

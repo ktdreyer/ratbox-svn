@@ -232,10 +232,10 @@ void close_connection(struct Client *cptr)
   if (IsServer(cptr))
     {
       ServerStats->is_sv++;
-      ServerStats->is_sbs += cptr->sendB;
-      ServerStats->is_sbr += cptr->receiveB;
-      ServerStats->is_sks += cptr->sendK;
-      ServerStats->is_skr += cptr->receiveK;
+      ServerStats->is_sbs += cptr->localClient->sendB;
+      ServerStats->is_sbr += cptr->localClient->receiveB;
+      ServerStats->is_sks += cptr->localClient->sendK;
+      ServerStats->is_skr += cptr->localClient->receiveK;
       ServerStats->is_sti += CurrentTime - cptr->firsttime;
       if (ServerStats->is_sbs > 2047)
         {
@@ -271,10 +271,10 @@ void close_connection(struct Client *cptr)
   else if (IsClient(cptr))
     {
       ServerStats->is_cl++;
-      ServerStats->is_cbs += cptr->sendB;
-      ServerStats->is_cbr += cptr->receiveB;
-      ServerStats->is_cks += cptr->sendK;
-      ServerStats->is_ckr += cptr->receiveK;
+      ServerStats->is_cbs += cptr->localClient->sendB;
+      ServerStats->is_cbr += cptr->localClient->receiveB;
+      ServerStats->is_cks += cptr->localClient->sendK;
+      ServerStats->is_ckr += cptr->localClient->receiveK;
       ServerStats->is_cti += CurrentTime - cptr->firsttime;
       if (ServerStats->is_cbs > 2047)
         {
@@ -290,31 +290,35 @@ void close_connection(struct Client *cptr)
   else
     ServerStats->is_ni++;
   
-  if (cptr->dns_reply) {
-    --cptr->dns_reply->ref_count;
-    cptr->dns_reply = 0;
-  }
-  if (-1 < cptr->fd) {
-    /* attempt to flush any pending dbufs. Evil, but .. -- adrian */
-    if (!IsDead(cptr))
+  if (cptr->localClient->dns_reply)
+    {
+      --cptr->localClient->dns_reply->ref_count;
+      cptr->localClient->dns_reply = 0;
+    }
+  if (-1 < cptr->fd)
+    {
+      /* attempt to flush any pending dbufs. Evil, but .. -- adrian */
+      if (!IsDead(cptr))
         send_queued_write(cptr->fd, cptr);
-    local[cptr->fd] = NULL;
-    fd_close(cptr->fd);
-    cptr->fd = -1;
-  }
+      local[cptr->fd] = NULL;
+      fd_close(cptr->fd);
+      cptr->fd = -1;
+    }
 
-  linebuf_donebuf(&cptr->buf_sendq);
-  linebuf_donebuf(&cptr->buf_recvq);
-  memset(cptr->passwd, 0, sizeof(cptr->passwd));
+  linebuf_donebuf(&cptr->localClient->buf_sendq);
+  linebuf_donebuf(&cptr->localClient->buf_recvq);
+  memset(cptr->localClient->passwd, 0, sizeof(cptr->localClient->passwd));
   /*
    * clean up extra sockets from P-lines which have been discarded.
    */
-  if (cptr->listener) {
-    assert(0 < cptr->listener->ref_count);
-    if (0 == --cptr->listener->ref_count && !cptr->listener->active) 
-      close_listener(cptr->listener);
-    cptr->listener = 0;
-  }
+  if (cptr->localClient->listener)
+    {
+      assert(0 < cptr->localClient->listener->ref_count);
+      if (0 == --cptr->localClient->listener->ref_count &&
+	  !cptr->localClient->listener->active) 
+	close_listener(cptr->localClient->listener);
+      cptr->localClient->listener = 0;
+    }
 
   det_confs_butmask(cptr, 0);
   cptr->from = NULL; /* ...this should catch them! >:) --msa */
@@ -350,13 +354,14 @@ void add_connection(struct Listener* listener, int fd)
    * get the client socket name from the socket
    * the client has already been checked out in accept_connection
    */
-  if (getpeername(fd, (struct sockaddr*) &addr, &len)) {
-    report_error("Failed in adding new connection %s :%s", 
-                 get_listener_name(listener), errno);
-    ServerStats->is_ref++;
-    fd_close(fd);
-    return;
-  }
+  if (getpeername(fd, (struct sockaddr*) &addr, &len))
+    {
+      report_error("Failed in adding new connection %s :%s", 
+		   get_listener_name(listener), errno);
+      ServerStats->is_ref++;
+      fd_close(fd);
+      return;
+    }
 
   new_client = make_client(NULL);
 
@@ -364,14 +369,15 @@ void add_connection(struct Listener* listener, int fd)
    * copy address to 'sockhost' as a string, copy it to host too
    * so we have something valid to put into error messages...
    */
-  strncpy_irc(new_client->sockhost, 
+  strncpy_irc(new_client->localClient->sockhost, 
               inetntoa((char*) &addr.sin_addr), HOSTIPLEN);
-  strcpy(new_client->host, new_client->sockhost);
-  new_client->ip.s_addr = addr.sin_addr.s_addr;
-  new_client->port      = ntohs(addr.sin_port);
+
+  strcpy(new_client->host, new_client->localClient->sockhost);
+  new_client->localClient->ip.s_addr = addr.sin_addr.s_addr;
+  new_client->localClient->port      = ntohs(addr.sin_port);
   new_client->fd        = fd;
 
-  new_client->listener  = listener;
+  new_client->localClient->listener  = listener;
   ++listener->ref_count;
 
   if (!set_non_blocking(new_client->fd))
@@ -388,7 +394,8 @@ int parse_client_queued(struct Client* cptr)
 {
   int dolen  = 0;
 
-  while ((dolen = linebuf_get(&cptr->buf_recvq, readBuf, READBUF_SIZE)) > 0) {
+  while ((dolen = linebuf_get(&cptr->localClient->buf_recvq,
+			      readBuf, READBUF_SIZE)) > 0) {
     if (CLIENT_EXITED == client_dopacket(cptr, readBuf, dolen))
       return CLIENT_EXITED;
   }
@@ -463,14 +470,15 @@ read_packet(int fd, void *data)
    * it on the end of the receive queue and do it when its
    * turn comes around.
    */
-  linebuf_parse(&cptr->buf_recvq, readBuf, length);
+  linebuf_parse(&cptr->localClient->buf_recvq, readBuf, length);
    
   if (IsPerson(cptr) &&
       (ConfigFileEntry.no_oper_flood && !IsAnyOper(cptr)) &&
-      linebuf_len(&cptr->buf_recvq) > CLIENT_FLOOD) {
-    exit_client(cptr, cptr, cptr, "Excess Flood");
-    return;
-  }
+      linebuf_len(&cptr->localClient->buf_recvq) > CLIENT_FLOOD)
+    {
+      exit_client(cptr, cptr, cptr, "Excess Flood");
+      return;
+    }
   parse_client_queued(cptr);
 #ifdef REJECT_HOLD
   /* Silence compiler warnings -- adrian */
@@ -707,11 +715,12 @@ comm_connect_dns_callback(void *vptr, struct DNSReply *reply)
     fde_t *F = vptr;
 
     /* Error ? */
-    if (reply == NULL) {
+    if (reply == NULL)
+      {
         /* Yes, callback + return */
         comm_connect_callback(F->fd, COMM_ERR_DNS);
         return;
-    }
+      }
 
     /* No error, set a 10 second timeout */
     comm_settimeout(F->fd, 30, comm_connect_timeout, NULL);

@@ -573,7 +573,7 @@ int mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        * strncpy_irc(cidr_form_host, inetntoa((char *)&acptr->ip), 32);
        * cidr_form_host[32] = '\0';
        */
-       strcpy(cidr_form_host, inetntoa((char*) &acptr->ip));
+       strcpy(cidr_form_host, inetntoa((char*) &acptr->localClient->ip));
       
       p = strchr(cidr_form_host,'.');
       if(!p)
@@ -601,7 +601,7 @@ int mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       host = cidr_form_host;
 
       ip_mask = 0xFFFFFF00L;
-      ip_host = ntohl(acptr->ip.s_addr);
+      ip_host = ntohl(acptr->localClient->ip.s_addr);
     }
 
 

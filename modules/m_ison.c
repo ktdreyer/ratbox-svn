@@ -81,9 +81,6 @@ int m_ison(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   len = strlen(buf);
   current_insert_point = buf + len;
 
-  if (!IsGlobalOper(cptr))
-    cptr->priority +=20; /* this keeps it from moving to 'busy' list */
-
   for (nick = strtoken(&p, parv[1], ","); nick;
        nick = strtoken(&p, NULL, ","))
     {

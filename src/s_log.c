@@ -228,8 +228,8 @@ void log_user_exit(struct Client *sptr)
 		       sptr->name,
 		       sptr->username,
 		       sptr->host,
-		       sptr->sendK,
-		       sptr->receiveK);
+		       sptr->localClient->sendK,
+		       sptr->localClient->receiveK);
 
 	    fbputs(linebuf, user_log_fb);
 

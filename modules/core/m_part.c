@@ -91,36 +91,36 @@ int     m_part(struct Client *cptr,
   if (name)
     {
       if(GlobalSetOptions.spam_num &&
-	 (sptr->join_leave_count >= GlobalSetOptions.spam_num))
+	 (sptr->localClient->join_leave_count >= GlobalSetOptions.spam_num))
 	{
 	  sendto_realops_flags(FLAGS_BOTS,
 			       "User %s (%s@%s) is a possible spambot",
 			       sptr->name,
 			       sptr->username, sptr->host);
-	  sptr->oper_warn_count_down = OPER_SPAM_COUNTDOWN;
+	  sptr->localClient->oper_warn_count_down = OPER_SPAM_COUNTDOWN;
 	}
       else
 	{
-	  if( (t_delta = (CurrentTime - sptr->last_leave_time)) >
+	  if( (t_delta = (CurrentTime - sptr->localClient->last_leave_time)) >
 	      JOIN_LEAVE_COUNT_EXPIRE_TIME)
 	    {
 	      decrement_count = (t_delta/JOIN_LEAVE_COUNT_EXPIRE_TIME);
 	      
-	      if(decrement_count > sptr->join_leave_count)
-		sptr->join_leave_count = 0;
+	      if(decrement_count > sptr->localClient->join_leave_count)
+		sptr->localClient->join_leave_count = 0;
 	      else
-		sptr->join_leave_count -= decrement_count;
+		sptr->localClient->join_leave_count -= decrement_count;
 	    }
 	  else
 	    {
-	      if( (CurrentTime - (sptr->last_join_time)) < 
+	      if( (CurrentTime - (sptr->localClient->last_join_time)) < 
 		  GlobalSetOptions.spam_time)
 		{
 		  /* oh, its a possible spambot */
-		  sptr->join_leave_count++;
+		  sptr->localClient->join_leave_count++;
 		}
 	    }
-	  sptr->last_leave_time = CurrentTime;
+	  sptr->localClient->last_leave_time = CurrentTime;
 	}
      
       while(name)

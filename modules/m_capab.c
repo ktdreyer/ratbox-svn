@@ -64,10 +64,10 @@ int ms_capab(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if ((!IsUnknown(cptr) && !IsHandshake(cptr)) || parc < 2)
     return 0;
 
-  if (cptr->caps)
+  if (cptr->localClient->caps)
     return exit_client(cptr, cptr, cptr, "CAPAB received twice");
   else
-    cptr->caps |= CAP_CAP;
+    cptr->localClient->caps |= CAP_CAP;
 
   for (s = strtoken(&p, parv[1], " "); s; s = strtoken(&p, NULL, " "))
     {
@@ -75,7 +75,7 @@ int ms_capab(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         {
           if (0 == strcmp(cap->name, s))
             {
-              cptr->caps |= cap->cap;
+              cptr->localClient->caps |= cap->cap;
               break;
             }
          }

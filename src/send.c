@@ -84,8 +84,8 @@ dead_link(struct Client *to, char *notice)
    * If because of BUFFERPOOL problem then clean dbuf's now so that
    * notices don't hurt operators below.
    */
-  linebuf_donebuf(&to->buf_recvq);
-  linebuf_donebuf(&to->buf_sendq);
+  linebuf_donebuf(&to->localClient->buf_recvq);
+  linebuf_donebuf(&to->localClient->buf_sendq);
   if (!IsPerson(to) && !IsUnknown(to) && !(to->flags & FLAGS_CLOSING))
     sendto_realops(notice, get_client_name(to, FALSE));
   
@@ -121,12 +121,12 @@ send_message(struct Client *to, char *msg, int len)
   if (IsDead(to))
     return 0; /* This socket has already been marked as dead */
 
-  if (linebuf_len(&to->buf_sendq) > get_sendq(to))
+  if (linebuf_len(&to->localClient->buf_sendq) > get_sendq(to))
     {
       if (IsServer(to))
         sendto_realops("Max SendQ limit exceeded for %s: %d > %d",
           get_client_name(to, FALSE),
-          linebuf_len(&to->buf_sendq), get_sendq(to));
+          linebuf_len(&to->localClient->buf_sendq), get_sendq(to));
       if (IsClient(to))
         to->flags |= FLAGS_SENDQEX;
       return dead_link(to, "Max Sendq exceeded");
@@ -134,15 +134,15 @@ send_message(struct Client *to, char *msg, int len)
   else
     {
       if (len)
-          linebuf_put(&to->buf_sendq, msg, len);
+          linebuf_put(&to->localClient->buf_sendq, msg, len);
     }
     /*
     ** Update statistics. The following is slightly incorrect
     ** because it counts messages even if queued, but bytes
     ** only really sent. Queued bytes get updated in SendQueued.
     */
-    to->sendM += 1;
-    me.sendM += 1;
+    to->localClient->sendM += 1;
+    me.localClient->sendM += 1;
 
     /*
      * Now we register a write callback. We *could* try to write some
@@ -182,8 +182,8 @@ send_queued_write(int fd, void *data)
   } /* if (IsDead(to)) */
 
   /* Next, lets try to write some data */
-  if (linebuf_len(&to->buf_sendq)) {
-    retlen = linebuf_flush(to->fd, &to->buf_sendq);
+  if (linebuf_len(&to->localClient->buf_sendq)) {
+    retlen = linebuf_flush(to->fd, &to->localClient->buf_sendq);
     if ((retlen < 0) && (ignoreErrno(errno))) {
       /* we have a non-fatal error, so just continue */
     } else if (retlen < 0) {
@@ -196,20 +196,20 @@ send_queued_write(int fd, void *data)
       return;
     } else {
       /* We have some data written .. update counters */
-      to->sendB += retlen;
-      me.sendB += retlen;
-      if (to->sendB > 1023) { 
-        to->sendK += (to->sendB >> 10);
-        to->sendB &= 0x03ff;        /* 2^10 = 1024, 3ff = 1023 */
-      } else if (me.sendB > 1023) { 
-        me.sendK += (me.sendB >> 10);
-        me.sendB &= 0x03ff;
+      to->localClient->sendB += retlen;
+      me.localClient->sendB += retlen;
+      if (to->localClient->sendB > 1023) { 
+        to->localClient->sendK += (to->localClient->sendB >> 10);
+        to->localClient->sendB &= 0x03ff;        /* 2^10 = 1024, 3ff = 1023 */
+      } else if (me.localClient->sendB > 1023) { 
+        me.localClient->sendK += (me.localClient->sendB >> 10);
+        me.localClient->sendB &= 0x03ff;
       }
     }
   }
 
   /* Finally, if we have any more data, reschedule a write */
-  if (linebuf_len(&to->buf_sendq))
+  if (linebuf_len(&to->localClient->buf_sendq))
       comm_setselect(fd, FDLIST_IDLECLIENT, COMM_SELECT_WRITE,
         send_queued_write, to, 0);
 } /* send_queued_write() */
@@ -592,7 +592,7 @@ sendto_match_servs(struct Channel *chptr, struct Client *from, const char *patte
 
       if(ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
         {
-          if( !(chptr->lazyLinkChannelExists & cptr->serverMask) )
+          if( !(chptr->lazyLinkChannelExists & cptr->localClient->serverMask) )
              continue;
         }
 

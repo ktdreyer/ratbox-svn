@@ -915,13 +915,15 @@ int change_nick( struct Client *cptr, struct Client *sptr,
   ** on that channel. Propagate notice to other servers.
   */
 
-  if( (sptr->last_nick_change + ConfigFileEntry.max_nick_time) < CurrentTime)
-    sptr->number_of_nick_changes = 0;
-  sptr->last_nick_change = CurrentTime;
-  sptr->number_of_nick_changes++;
+  if( (sptr->localClient->last_nick_change +
+       ConfigFileEntry.max_nick_time) < CurrentTime)
+    sptr->localClient->number_of_nick_changes = 0;
+  sptr->localClient->last_nick_change = CurrentTime;
+  sptr->localClient->number_of_nick_changes++;
 
   if((ConfigFileEntry.anti_nick_flood && 
-      (sptr->number_of_nick_changes <= ConfigFileEntry.max_nick_changes)) ||
+      (sptr->localClient->number_of_nick_changes
+       <= ConfigFileEntry.max_nick_changes)) ||
      !ConfigFileEntry.anti_nick_flood)
     {
       sendto_realops_flags(FLAGS_NCHANGE,
