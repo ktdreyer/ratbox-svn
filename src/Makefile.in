@@ -3,12 +3,14 @@
 CC=@CC@
 RM=@RM@
 MV=@MV@
+INSTALL=@INSTALL@
+PREFIX=@prefix@
+BIN=rserv@EXEEXT@
 INCLUDES=-I ../include/
 LDFLAGS=
-CFLAGS=-g -O0 -Wall -Werror
+CFLAGS=-g -O0 -Wall -Werror -DPREFIX=\"$(PREFIX)\"
 
 MAKE = make
-PROG = rserv
 
 SRCS = 			\
         c_error.c       \
@@ -33,18 +35,18 @@ SRCS = 			\
 
 OBJS=$(SRCS:.c=.o)
 
-all: $(PROG)
+all: $(BIN)
 
-$(PROG): $(OBJS)
+$(BIN): $(OBJS)
 	${CC} ${CFLAGS} ${LDFLAGS} -o $@ ${OBJS}
 
 .c.o:
 	${CC} ${CFLAGS} $(INCLUDES) -c $<
 
-build: $(PROG)
+build: $(BIN)
 
 clean:
-	$(RM) -f $(PROG) $(PROG).exe *.o
+	$(RM) -f $(BIN) *.o
 
 distclean: clean
 	$(RM) Makefile

@@ -93,9 +93,12 @@ conf_error(const char *format, ...)
 void
 conf_parse(void)
 {
-	FBFILE *conffile = fbopen(CONF_PATH, "r");
+	FBFILE *conffile;
 	char line[BUFSIZE];
 	char *p;
+
+        if((conffile = fbopen(CONF_PATH, "r")) == NULL)
+                die("Failed to open config file");
 
 	while(fbgets(line, sizeof(line), conffile))
 	{

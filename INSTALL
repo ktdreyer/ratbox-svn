@@ -1,0 +1,21 @@
+$Id$
+
+ratbox-services installation guide
+----------------------------------
+
+1. Run the configure script.  If you wish to install it to a different 
+   directory than the default /usr/local/ratbox-services, include the
+   --prefix option.
+
+   eg, ./configure --prefix=/home/user/services
+
+2. Edit include/config.h
+
+3. Run make
+
+4. Run make install
+
+5. Change to the directory it installed to, edit example.conf and save it
+   as the filename specified in CONF_PATH in config.h, default rserv.conf
+
+6. Run ./rserv

@@ -1,6 +1,9 @@
 # $Id$
 
 RM=@RM@
+INSTALL=@INSTALL@
+PREFIX=@prefix@
+BIN=rserv@EXEEXT@
 
 SUBDIRS=src
 
@@ -19,6 +22,11 @@ build:
 		cd $$i; \
 		$(MAKE) build || exit; cd ..; \
 	done
+
+install: build
+	$(INSTALL) -m 750 -d $(PREFIX)
+	$(INSTALL) -m 750 src/$(BIN) $(PREFIX)
+	$(INSTALL) -m 640 doc/example.conf $(PREFIX)
 
 clean:
 	@for i in $(SUBDIRS); do \
