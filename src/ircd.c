@@ -626,7 +626,7 @@ main(int argc, char *argv[])
 
 	if(chdir(ConfigFileEntry.dpath))
 	{
-		perror("chdir");
+		fprintf(stderr, "Unable to chdir to %s: %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
