@@ -1,3 +1,19 @@
+androsyn    2002/10/12 19:15:00 UTC	(20021012_1)
+
+  Modified files:
+    modules              m_ping.c 
+  Log:
+  Fix from hybrid-7:
+  
+    - I hate server hostmasking. I really hate it.
+      In any case, the match() in m_ping.c should have been an irccmp()
+      ping is looking for an exact match on "me.name" not a wild card match.
+  
+  Revision  Changes    Path
+  1.31      +3 -3      ircd-ratbox/modules/m_ping.c
+
+
+
 androsyn    2002/10/12 19:10:19 UTC	(20021012_0)
 
   Modified files:
