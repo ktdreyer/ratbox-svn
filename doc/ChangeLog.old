@@ -1,3 +1,9 @@
+*** 20010214_4 by db
+- somehow this fix got blown away accidentally...
+  puts the right ip into the aconf if hostname happens to be an IP
+
+
+
 *** 20010214_3 by a1kmm
 - Use memset instead of bzero in an attempt to reduce the number of deprecated function calls.
 
