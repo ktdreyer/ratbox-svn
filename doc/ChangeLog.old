@@ -1,3 +1,8 @@
+*** 20000105_2 by db
+- fixed missing Y line detection code which got broken in clean up
+
+
+
 *** 20000105_1 by db
 - cleanups to dbuf code. Try to flush connections if dbuf list is
   empty then try to allocate.
