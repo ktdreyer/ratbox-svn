@@ -1,3 +1,27 @@
+leeh        2003/07/26 14:20:56 EDT	(20030726_2)
+
+  Modified files:
+    modules              m_encap.c m_info.c 
+    src                  client.c s_user.c 
+  Log:
+  - added missing +Z to usermode list
+  - added default_adminstring to info, default_operstring shouldve been
+    OUTPUT_STRING_PTR
+  - added operspy encap handler
+  - sending quits for unregistered users isnt a good idea ;)
+  Submitted by:
+  Reviewed by:
+  Approved by:
+  Obtained from:
+  
+  Revision  Changes    Path
+  1.9       +52 -4     ircd-ratbox/modules/m_encap.c
+  1.91      +8 -2      ircd-ratbox/modules/m_info.c
+  7.392     +0 -5      ircd-ratbox/src/client.c
+  7.276     +1 -0      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2003/07/26 13:47:01 EDT	(20030726_1)
 
   Modified files:
