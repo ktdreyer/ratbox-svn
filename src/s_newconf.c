@@ -705,6 +705,36 @@ expire_temp_rxlines(void *unused)
 		}
 	}
 	HASH_WALK_END
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, resv_conf_list.head)
+	{
+		aconf = ptr->data;
+
+		if(aconf->hold && aconf->hold <= CurrentTime)
+		{
+			if(ConfigFileEntry.tkline_expire_notices)
+				sendto_realops_flags(UMODE_ALL, L_ALL,
+						"Temporary RESV for [%s] expired",
+						aconf->name);
+			free_conf(aconf);
+			dlinkDestroy(ptr, &resv_conf_list);
+		}
+	}
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, xline_conf_list.head)
+	{
+		aconf = ptr->data;
+
+		if(aconf->hold && aconf->hold <= CurrentTime)
+		{
+			if(ConfigFileEntry.tkline_expire_notices)
+				sendto_realops_flags(UMODE_ALL, L_ALL,
+						"Temporary X-line for [%s] expired",
+						aconf->name);
+			free_conf(aconf);
+			dlinkDestroy(ptr, &xline_conf_list);
+		}
+	}
 }
 
 void
