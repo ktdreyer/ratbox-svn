@@ -1,3 +1,19 @@
+leeh        2002/10/19 16:58:16 UTC	(20021019_7)
+
+  Modified files:
+    include              event.h 
+    src                  event.c s_user.c send.c 
+  Log:
+  - ported the event table fix from hybrid
+  
+  Revision  Changes    Path
+  1.13      +0 -1      ircd-ratbox/include/event.h
+  7.30      +40 -39    ircd-ratbox/src/event.c
+  7.229     +5 -2      ircd-ratbox/src/s_user.c
+  7.224     +2 -1      ircd-ratbox/src/send.c
+
+
+
 leeh        2002/10/19 16:28:17 UTC	(20021019_6)
 
   Modified files:
