@@ -466,6 +466,7 @@ struct LocalUser
 #define SetEob(x)		((x)->flags |= FLAGS_EOB)
 #define HasSentEob(x)		((x)->flags & FLAGS_EOB)
 
+
 /* oper flags */
 #define MyOper(x)               (MyConnect(x) && IsOper(x))
 
@@ -581,5 +582,7 @@ extern int change_local_nick(struct Client *client_p, struct Client *source_p,
                              char *nick);
 extern void dead_link(struct Client *client_p);
 extern void exit_aborted_clients(void);
+extern int show_ip(struct Client* source_p, struct Client* target_p);
+
 #endif /* INCLUDED_client_h */
 
