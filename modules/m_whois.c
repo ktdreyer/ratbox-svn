@@ -22,7 +22,7 @@
  *
  *   $Id$
  */
-
+#include "tools.h"
 #include "common.h"   /* bleah */
 #include "handlers.h"
 #include "client.h"
@@ -203,7 +203,7 @@ int global_whois(struct Client *sptr, char *nick, int wilds)
  */
 int single_whois(struct Client *sptr,struct Client *acptr,int wilds)
 {
-  struct SLink  *lp;
+  dlink_node *lp;
   struct Channel *chptr;
   char *name;
   int invis;
@@ -226,13 +226,15 @@ int single_whois(struct Client *sptr,struct Client *acptr,int wilds)
       return 0;
     }
 
+  /* XXX */
+#if 0
   invis = IsInvisible(acptr);
   member = (acptr->user->channel) ? 1 : 0;
   showperson = (wilds && !invis && !member) || !wilds;
 
-  for (lp = acptr->user->channel; lp; lp = lp->next)
+  for (lp = acptr->user->channel->next; lp; lp = lp->next)
     {
-      chptr = lp->value.chptr;
+      chptr = lp->data;
       member = IsMember(sptr, chptr);
       if (invis && !member)
 	continue;
@@ -247,6 +249,8 @@ int single_whois(struct Client *sptr,struct Client *acptr,int wilds)
 	  break;
 	}
     }
+#endif
+
   if(showperson)
     whois_person(sptr,acptr);
   return 0;
@@ -266,7 +270,7 @@ void whois_person(struct Client *sptr,struct Client *acptr)
   char buf2[2*NICKLEN];
   char *chname;
   char *server_name;
-  struct SLink  *lp;
+  dlink_node  *lp;
   struct Client *a2cptr;
   struct Channel *chptr;
   struct Channel *bchan;
@@ -287,9 +291,9 @@ void whois_person(struct Client *sptr,struct Client *acptr)
   cur_len = mlen;
   buf[0] = '\0';
 
-  for (lp = acptr->user->channel; lp; lp = lp->next)
+  for (lp = acptr->user->channel.head; lp; lp = lp->next)
     {
-      chptr = lp->value.chptr;
+      chptr = lp->data;
       chname = chptr->chname;
 
       if (IsVchan(chptr))
@@ -307,8 +311,7 @@ void whois_person(struct Client *sptr,struct Client *acptr)
 	    }
 	  else
 	    {
-	      user_flags = user_channel_mode(chptr, acptr);
-	      ircsprintf(buf2,"%s%s ", channel_chanop_or_voice(user_flags),
+	      ircsprintf(buf2,"%s%s ", channel_chanop_or_voice(chptr,acptr),
 			 chname);
 	    }
 

@@ -33,7 +33,6 @@
 #define INCLUDED_sys_types_h
 #endif
 
-struct SLink;
 struct Client;
 
 
@@ -63,14 +62,21 @@ struct Channel
   unsigned long   lazyLinkChannelExists;
   time_t          users_last;		/* when last user was in channel */
   time_t          last_knock;           /* don't allow knock to flood */
+  
   struct Channel* next_vchan;           /* Link list of sub channels */
   struct Channel* prev_vchan;           /* Link list of sub channels */
-  struct SLink*   members;
-  struct SLink*   invites;
-  struct SLink*   banlist;
-  struct SLink*   exceptlist;
-  struct SLink*   denylist;
-  struct SLink*   invexlist;
+
+  dlink_list      chanops;
+  dlink_list      halfops;
+  dlink_list      voiced;
+  dlink_list      peons;	/* non ops, just members */
+
+  dlink_list      invites;
+  dlink_list      banlist;
+  dlink_list      exceptlist;
+  dlink_list      denylist;
+  dlink_list      invexlist;
+
   int             num_bed;          /* number of bans+exceptions+denies */
   time_t          channelts;
   char            chname[1];
@@ -140,19 +146,18 @@ that the buffer isn't being overflowed. I'd rather be comfortable at
 
 #define MAXMODEPARAMS   3
 
-extern struct SLink    *find_user_link (struct SLink *, struct Client *);
-extern struct SLink*   find_channel_link(struct SLink *,
-					 struct Channel *chptr); 
+extern dlink_node *find_user_link (dlink_list *, struct Client *);
+extern dlink_node *find_channel_link(dlink_list *lp,
+				     struct Channel *chptr); 
 extern void    add_user_to_channel(struct Channel *chptr,
 				   struct Client *who, int flags);
 extern void    remove_user_from_channel(struct Channel *chptr,
-					struct Client *who, int flag);
+					struct Client *who);
 
 extern int     can_send (struct Channel *chptr, struct Client *who);
 extern int     is_banned (struct Channel *chptr, struct Client *who);
 
 extern int     is_chan_op (struct Channel *chptr,struct Client *who);
-extern int     user_channel_mode (struct Channel *chptr, struct Client *who);
 
 extern void    send_channel_modes (struct Client *, struct Channel *);
 extern int     check_channel_name(const char* name);
@@ -166,7 +171,7 @@ extern void    clear_bans_exceptions_denies(struct Client *,struct Channel *);
 extern void channel_member_names( struct Client *sptr, struct Channel *chptr,
 				  char *name_of_channel);
 extern char *channel_pub_or_secret(struct Channel *chptr);
-extern char *channel_chanop_or_voice(int flags);
+extern char *channel_chanop_or_voice(struct Channel *, struct Client *);
 
 extern void add_invite(struct Channel *chptr, struct Client *who);
 extern void del_invite(struct Channel *chptr, struct Client *who);
@@ -174,30 +179,31 @@ extern void del_invite(struct Channel *chptr, struct Client *who);
 extern int list_continue(struct Client *sptr);
 extern void list_one_channel(struct Client *sptr,struct Channel *chptr);
 
-/* this should eliminate a lot of ifdef's in the main code... -orabidoo */
-
-#define BANSTR(l)  ((l)->value.banptr->banstr)
-
-
 /*
 ** Channel Related macros follow
 */
 
 /* Channel related flags */
 
+#define CHFL_PEON	0x0000 /* normal member of channel */
 #define CHFL_CHANOP     0x0001 /* Channel operator */
 #define CHFL_VOICE      0x0002 /* the power to speak */
 #define CHFL_DEOPPED    0x0004 /* deopped by us, modes need to be bounced */
-#define CHFL_BAN        0x0008 /* ban channel flag */
-#define CHFL_EXCEPTION  0x0010 /* exception to ban channel flag */
-#define CHFL_DENY       0x0020 /* regular expression deny flag */
-#define CHFL_INVEX	0x0040 /* invite exception */
+#define CHFL_HALFOP     0x0008 /* deopped by us, modes need to be bounced */
+#define CHFL_BAN        0x0010 /* ban channel flag */
+#define CHFL_EXCEPTION  0x0020 /* exception to ban channel flag */
+#define CHFL_DENY       0x0040 /* regular expression deny flag */
+#define CHFL_INVEX      0x0080
 
 /* Channel Visibility macros */
 
+#define MODE_PEON	CHFL_PEON
 #define MODE_CHANOP     CHFL_CHANOP
 #define MODE_VOICE      CHFL_VOICE
-#define MODE_DEOPPED    CHFL_DEOPPED
+#define MODE_HALFOP	CHFL_HALFOP
+#define MODE_DEOPPED	CHFL_DEOPPED
+
+/* channel modes ONLY */
 #define MODE_PRIVATE    0x0008
 #define MODE_SECRET     0x0010
 #define MODE_MODERATED  0x0020
@@ -245,7 +251,7 @@ extern void list_one_channel(struct Client *sptr,struct Channel *chptr);
                                  (MODE_PRIVATE | MODE_SECRET)) == 0)
 
 #define IsMember(blah,chan) ((blah && blah->user && \
-                find_channel_link((blah->user)->channel, chan)) ? 1 : 0)
+                find_channel_link(&blah->user->channel, chan)) ? 1 : 0)
 
 #define IsChannelName(name) ((name) && (*(name) == '#' || *(name) == '&'))
 

@@ -21,6 +21,7 @@
  *
  *  $Id$
  */
+#include "tools.h"
 #include "s_log.h"
 #include "s_conf.h"
 #include "client.h"

@@ -60,7 +60,6 @@
 /*
  * pre declare structs
  */
-struct SLink;
 struct ConfItem;
 struct Whowas;
 struct Zdata;
@@ -74,8 +73,8 @@ struct Client;
 struct User
 {
   struct User*   next;          /* chain of anUser structures */
-  struct SLink*  channel;       /* chain of channel pointer blocks */
-  struct SLink*  invited;       /* chain of invite pointer blocks */
+  dlink_list     channel;       /* chain of channel pointer blocks */
+  dlink_list     invited;       /* chain of invite pointer blocks */
   char*          away;          /* pointer to away message */
   time_t         last;
   int            refcnt;        /* Number of times this block is referenced */
@@ -110,16 +109,8 @@ struct Client
   struct Client*    hnext;
   struct Client*    idhnext;
 
-/* QS */
-
   struct Client*    lnext;      /* Used for Server->servers/users */
   struct Client*    lprev;      /* Used for Server->servers/users */
-
-/* LINKLIST */
-  /* N.B. next_local_client, and previous_local_client
-   * duplicate the link list referenced to by struct Server -> users
-   * someday, we'll rationalize this... -Dianora
-   */
 
   struct Client*    next_local_client;      /* keep track of these */
   struct Client*    previous_local_client;
@@ -223,7 +214,7 @@ struct LocalUser
   unsigned int      lastrecvM;  /* to check for activity --Mika */
   int               priority;
   struct Listener*  listener;   /* listener accepted from */
-  struct SLink*     confs;      /* Configuration record associated */
+  dlink_list        confs;      /* Configuration record associated */
 #ifdef IPV6
   struct in6_addr    ip6;       /* Client's IP*/
 #else

@@ -22,6 +22,7 @@
  *
  *   $Id$
  */
+#include "tools.h"
 #include "handlers.h"  /* m_server prototype */
 #include "client.h"      /* client struct */
 #include "common.h"      /* TRUE bleah */
@@ -274,7 +275,7 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        * See if the newly found server is behind a guaranteed
        * leaf (L-line). If so, close the link.
        */
-      if ((aconf = find_conf_host(cptr->localClient->confs, host, CONF_LEAF)) &&
+      if ((aconf = find_conf_host(&cptr->localClient->confs, host, CONF_LEAF)) &&
           (!aconf->port || (hop > aconf->port)))
         {
           sendto_realops("Leaf-only link %s->%s - Closing",
@@ -284,7 +285,7 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           return exit_client(cptr, cptr, cptr, "Leaf Only");
         }
 
-      if (!(aconf = find_conf_host(cptr->localClient->confs, host, CONF_HUB)) ||
+      if (!(aconf = find_conf_host(&cptr->localClient->confs, host, CONF_HUB)) ||
           (aconf->port && (hop > aconf->port)) )
         {
           sendto_realops("Non-Hub link %s introduced %s(%s).",
@@ -591,7 +592,7 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        * See if the newly found server is behind a guaranteed
        * leaf (L-line). If so, close the link.
        */
-      if ((aconf = find_conf_host(cptr->localClient->confs, host, CONF_LEAF)) &&
+      if ((aconf = find_conf_host(&cptr->localClient->confs, host, CONF_LEAF)) &&
           (!aconf->port || (hop > aconf->port)))
         {
           sendto_realops("Leaf-only link %s->%s - Closing",
@@ -601,7 +602,7 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           return exit_client(cptr, cptr, cptr, "Leaf Only");
         }
 
-      if (!(aconf = find_conf_host(cptr->localClient->confs, host, CONF_HUB)) ||
+      if (!(aconf = find_conf_host(&cptr->localClient->confs, host, CONF_HUB)) ||
           (aconf->port && (hop > aconf->port)) )
         {
           sendto_realops("Non-Hub link %s introduced %s(%s).",

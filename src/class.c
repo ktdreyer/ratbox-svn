@@ -18,6 +18,7 @@
  *
  *   $Id$
  */
+#include "tools.h"
 #include "class.h"
 #include "client.h"
 #include "common.h"
@@ -65,15 +66,14 @@ static  int     get_conf_ping(struct ConfItem *aconf)
 
 const char*     get_client_class(struct Client *acptr)
 {
-  struct SLink  *tmp;
-  struct Class        *cl;
+  dlink_node    *ptr;
+  struct Class  *cl;
   const char*   retc = (const char *)NULL;
 
-  if (acptr && !IsMe(acptr)  && (acptr->localClient->confs))
-    for (tmp = acptr->localClient->confs; tmp; tmp = tmp->next)
+  if (acptr && !IsMe(acptr)  && (acptr->localClient->confs.head))
+    for (ptr = acptr->localClient->confs.head; ptr; ptr = ptr->next)
       {
-        if (!tmp->value.aconf ||
-            !(cl = ClassPtr(tmp->value.aconf)))
+        if ( !(cl = ptr->data))
           continue;
         if (ClassName(cl))
           retc = ClassName(cl);
@@ -86,16 +86,17 @@ const char*     get_client_class(struct Client *acptr)
 
 int     get_client_ping(struct Client *acptr)
 {
-  int   ping = 0, ping2;
-  struct ConfItem     *aconf;
-  struct SLink  *link;
+  int   ping = 0;
+  int   ping2;
+  struct ConfItem       *aconf;
+  dlink_node		*link;
 
-  link = acptr->localClient->confs;
+  link = acptr->localClient->confs.head;
 
   if (link)
     while (link)
       {
-        aconf = link->value.aconf;
+        aconf = link->data;
         if (aconf->status & (CONF_CLIENT|CONF_CONNECT_SERVER|
                              CONF_NOCONNECT_SERVER))
           {
@@ -229,15 +230,20 @@ void    report_classes(struct Client *sptr)
 long    get_sendq(struct Client *cptr)
 {
   int   sendq = MAXSENDQLENGTH, retc = BAD_CLIENT_CLASS;
-  struct SLink  *tmp;
-  struct Class        *cl;
+  dlink_node      *ptr;
+  struct Class    *cl;
+  struct ConfItem *aconf;
 
-  if (cptr && !IsMe(cptr)  && (cptr->localClient->confs))
-    for (tmp = cptr->localClient->confs; tmp; tmp = tmp->next)
+  if (cptr && !IsMe(cptr)  && (cptr->localClient->confs.head))
+    for (ptr = cptr->localClient->confs.head; ptr; ptr = ptr->next)
       {
-        if (!tmp->value.aconf ||
-            !(cl = ClassPtr(tmp->value.aconf)))
+	aconf = ptr->data;
+	if(aconf == NULL)
+	   continue;
+
+        if ( !(cl = aconf->c_class))
           continue;
+
         if (ClassType(cl) > retc)
           sendq = MaxSendq(cl);
       }

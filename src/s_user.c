@@ -22,6 +22,7 @@
  *
  *  $Id$
  */
+#include "tools.h"
 #include "s_user.h"
 #include "channel.h"
 #include "class.h"
@@ -180,19 +181,23 @@ unsigned long my_rand(void);    /* provided by orabidoo */
  */
 void show_opers(struct Client *cptr)
 {
-  register struct Client        *cptr2;
-  register int j=0;
+  struct Client        *cptr2;
+  int j=0;
+  struct ConfItem *aconf;
+  dlink_node *ptr;
 
   for(cptr2 = oper_cptr_list; cptr2; cptr2 = cptr2->next_oper_client)
     {
       ++j;
       if (MyClient(cptr) && IsAnyOper(cptr))
         {
+	  ptr = cptr2->localClient->confs.head;
+	  aconf = ptr->data;
+
           sendto_one(cptr, ":%s %d %s :[%c][%s] %s (%s@%s) Idle: %d",
                      me.name, RPL_STATSDEBUG, cptr->name,
                      IsGlobalOper(cptr2) ? 'O' : 'o',
-                     oper_privs_as_string(cptr2,
-  /* weee! */                  cptr2->localClient->confs->value.aconf->port),
+		     oper_privs_as_string(cptr2, aconf->port),
                      cptr2->name,
                      cptr2->username, cptr2->host,
                      CurrentTime - cptr2->user->last);
@@ -280,6 +285,7 @@ int register_user(struct Client *cptr, struct Client *sptr,
   struct User*     user = sptr->user;
   char        tmpstr2[IRCD_BUFSIZE];
   int  status;
+  dlink_node *ptr;
 
   assert(0 != sptr);
   assert(sptr->username != username);
@@ -305,7 +311,9 @@ int register_user(struct Client *cptr, struct Client *sptr,
           strncpy(sptr->host,sptr->localClient->sockhost,HOSTIPLEN+1);
         }
 
-      aconf = sptr->localClient->confs->value.aconf;
+      ptr = sptr->localClient->confs.head;
+      aconf = ptr->data;
+
       if (!aconf)
         return exit_client(cptr, sptr, &me, "*** Not Authorized");
 
@@ -315,36 +323,39 @@ int register_user(struct Client *cptr, struct Client *sptr,
             {
               ServerStats->is_ref++;
               sendto_one(sptr,
- ":%s NOTICE %s :*** Notice -- You need to install identd to use this server",
+			 ":%s NOTICE %s :*** Notice -- You need to install identd to use this server",
                          me.name, cptr->name);
-               return exit_client(cptr, sptr, &me, "Install identd");
-             }
-           if (IsNoTilde(aconf))
-             {
-                strncpy_irc(sptr->username, username, USERLEN);
-             }
-           else
-             {
-                *sptr->username = '~';
-                strncpy_irc(&sptr->username[1], username, USERLEN - 1);
-             }
-           sptr->username[USERLEN] = '\0';
+	      return exit_client(cptr, sptr, &me, "Install identd");
+	    }
+	  else
+	    strncpy_irc(sptr->username, username, USERLEN);
+
+	  if (IsNoTilde(aconf))
+	    {
+	      strncpy_irc(sptr->username, username, USERLEN);
+	    }
+	  else
+	    {
+	      *sptr->username = '~';
+	      strncpy_irc(&sptr->username[1], username, USERLEN - 1);
+	    }
+	  sptr->username[USERLEN] = '\0';
         }
 
       /* password check */
       if (!BadPtr(aconf->passwd) &&
-	  0 != strcmp(sptr->localClient->passwd, aconf->passwd))
-        {
-          ServerStats->is_ref++;
-          sendto_one(sptr, form_str(ERR_PASSWDMISMATCH),
-                     me.name, parv[0]);
-          return exit_client(cptr, sptr, &me, "Bad Password");
-        }
+	  !strcmp(sptr->localClient->passwd, aconf->passwd))
+	{
+	  ServerStats->is_ref++;
+	  sendto_one(sptr, form_str(ERR_PASSWDMISMATCH),
+		     me.name, parv[0]);
+	  return exit_client(cptr, sptr, &me, "Bad Password");
+	}
       memset(sptr->localClient->passwd,0, sizeof(sptr->localClient->passwd));
 
       /* report if user has &^>= etc. and set flags as needed in sptr */
       report_and_set_user_flags(sptr, aconf);
-
+  
       /* Limit clients */
       /*
        * We want to be able to have servers and F-line clients
@@ -359,67 +370,67 @@ int register_user(struct Client *cptr, struct Client *sptr,
 	     (Count.local +1) >= (GlobalSetOptions.maxclients - 5) )
 	   &&
 	   !(IsFlined(sptr)) )
-        {
-          sendto_realops_flags(FLAGS_FULL,
-                               "Too many clients, rejecting %s[%s].",
-                               nick, sptr->host);
-          ServerStats->is_ref++;
-          return exit_client(cptr, sptr, &me,
-                             "Sorry, server is full - try later");
-        }
+	{
+	  sendto_realops_flags(FLAGS_FULL,
+			       "Too many clients, rejecting %s[%s].",
+			       nick, sptr->host);
+	  ServerStats->is_ref++;
+	  return exit_client(cptr, sptr, &me,
+			     "Sorry, server is full - try later");
+	}
+
       /* valid user name check */
 
       if (!valid_username(sptr->username))
-        {
-          sendto_realops_flags(FLAGS_REJ,"Invalid username: %s (%s@%s)",
-                             nick, sptr->username, sptr->host);
-          ServerStats->is_ref++;
-          ircsprintf(tmpstr2, "Invalid username [%s]", sptr->username);
-          return exit_client(cptr, sptr, &me, tmpstr2);
-        }
-      /* end of valid user name check */
+	{
+	  sendto_realops_flags(FLAGS_REJ,"Invalid username: %s (%s@%s)",
+			       nick, sptr->username, sptr->host);
+	  ServerStats->is_ref++;
+	  ircsprintf(tmpstr2, "Invalid username [%s]", sptr->username);
+	  return exit_client(cptr, sptr, &me, tmpstr2);
+	}
 
+      /* end of valid user name check */
+      
       if( (status = check_X_line(cptr,sptr)) < 0 )
 	return status;
 
       sendto_realops_flags(FLAGS_CCONN,
-                         "Client connecting: %s (%s@%s) [%s] {%s}",
-                         nick, sptr->username, sptr->host,
-                         inetntoa((char *)&sptr->localClient->ip),
-                         get_client_class(sptr));
-
+			   "Client connecting: %s (%s@%s) [%s] {%s}",
+			   nick, sptr->username, sptr->host,
+			   inetntoa((char *)&sptr->localClient->ip),
+			   get_client_class(sptr));
+      
       if ((++Count.local) > Count.max_loc)
-        {
-          Count.max_loc = Count.local;
-          if (!(Count.max_loc % 10))
-            sendto_realops("New Max Local Clients: %d",
+	{
+	  Count.max_loc = Count.local;
+	  if (!(Count.max_loc % 10))
+	    sendto_realops("New Max Local Clients: %d",
 			   Count.max_loc);
-        }
-    }
-  else
-    strncpy_irc(sptr->username, username, USERLEN);
+	}
 
-  SetClient(sptr);
+      SetClient(sptr);
 
-  sptr->servptr = find_server(user->server);
-  if (!sptr->servptr)
-    {
-      sendto_realops("Ghost killed: %s on invalid server %s",
-		     sptr->name, sptr->user->server);
-      sendto_one(cptr,":%s KILL %s :%s (Ghosted, %s doesn't exist)",
-                 me.name, sptr->name, me.name, user->server);
-      sptr->flags |= FLAGS_KILLED;
-      return exit_client(NULL, sptr, &me, "Ghost");
-    }
-  add_client_to_llist(&(sptr->servptr->serv->users), sptr);
+      sptr->servptr = find_server(user->server);
+      if (!sptr->servptr)
+	{
+	  sendto_realops("Ghost killed: %s on invalid server %s",
+			 sptr->name, sptr->user->server);
+	  sendto_one(cptr,":%s KILL %s :%s (Ghosted, %s doesn't exist)",
+		     me.name, sptr->name, me.name, user->server);
+	  sptr->flags |= FLAGS_KILLED;
+	  return exit_client(NULL, sptr, &me, "Ghost");
+	}
+      add_client_to_llist(&(sptr->servptr->serv->users), sptr);
 
-/* Increment our total user count here */
-  if (++Count.total > Count.max_tot)
-    Count.max_tot = Count.total;
+      /* Increment our total user count here */
+      if (++Count.total > Count.max_tot)
+	Count.max_tot = Count.total;
 
-  if (MyConnect(sptr))
-    {
-      user_welcome(sptr);
+      if (MyConnect(sptr))
+	{
+	  user_welcome(sptr);
+	}
     }
   else if (IsServer(cptr))
     {
@@ -695,6 +706,8 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   int   what, setflags;
   int   badflag = NO;		/* Only send one bad flag notice */
   char  buf[BUFSIZE];
+  dlink_node *ptr;
+  struct ConfItem *aconf;
 
   what = MODE_ADD;
 
@@ -786,7 +799,10 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                   struct Client *prev_cptr = (struct Client *)NULL;
                   struct Client *cur_cptr = oper_cptr_list;
 
-                  detach_conf(sptr,sptr->localClient->confs->value.aconf);
+		  ptr = sptr->localClient->confs.head;
+		  aconf = ptr->data;
+                  detach_conf(sptr,aconf);
+
                   sptr->flags2 &= ~(FLAGS2_OPER_GLOBAL_KILL|
                                     FLAGS2_OPER_REMOTE|
                                     FLAGS2_OPER_UNKLINE|
@@ -960,6 +976,9 @@ void send_umode_out(struct Client *cptr,
  */
 static void user_welcome(struct Client *sptr)
 {
+  dlink_node *ptr;
+  struct ConfItem *aconf;
+
   sendto_one(sptr, form_str(RPL_WELCOME), me.name, sptr->name, sptr->name );
   /* This is a duplicate of the NOTICE but see below...*/
   sendto_one(sptr, form_str(RPL_YOURHOST), me.name, sptr->name,
@@ -1003,16 +1022,18 @@ static void user_welcome(struct Client *sptr)
   else  
     SendMessageFile(sptr, &ConfigFileEntry.motd);
       
-  if(sptr->localClient->confs && sptr->localClient->confs->value.aconf &&
-     (sptr->localClient->confs->value.aconf->flags
-      & CONF_FLAGS_LITTLE_I_LINE))
+  if( (ptr = sptr->localClient->confs.head) )
     {
-      SetRestricted(sptr);
-      sendto_one(sptr,
-	 "NOTICE %s :*** Notice -- You are in a restricted access mode",
-		 sptr->name);
-      sendto_one(sptr,"NOTICE %s :*** Notice -- You can not chanop others",
-		 sptr->name);
+      aconf = ptr->data;
+      if(aconf && (aconf->flags & CONF_FLAGS_LITTLE_I_LINE))
+	{
+	  SetRestricted(sptr);
+	  sendto_one(sptr,
+	     "NOTICE %s :*** Notice -- You are in a restricted access mode",
+		     sptr->name);
+	  sendto_one(sptr,"NOTICE %s :*** Notice -- You can not chanop others",
+		     sptr->name);
+	}
     }
 }
 

@@ -27,7 +27,7 @@
 #ifndef INCLUDED_list_h
 #define INCLUDED_list_h
 
-struct SLink;
+struct dlink_node;
 struct Client;
 struct Class;
 struct User;
@@ -35,34 +35,16 @@ struct Channel;
 struct ConfItem;
 struct Ban;
 
-/* general link structure used for chains */
-
-struct SLink
-{
-  struct        SLink   *next;
-  union
-  {
-    struct Client   *cptr;
-    struct Channel  *chptr;
-    struct ConfItem *aconf;
-    struct Ban   *banptr;
-    char      *cp;
-  } value;
-  int   flags;
-};
 
 extern void count_user_memory(int *, int *);
-extern void count_links_memory(int *, int *);
 extern void     outofmemory(void);
-extern  void    _free_link (struct SLink *);
 extern  void    _free_user (struct User *, struct Client *);
-extern  struct SLink    *make_link (void);
+extern  dlink_node *make_dlink_node (void);
+extern  void   free_dlink_node(dlink_node *lp);
 extern  struct User     *make_user (struct Client *);
 extern  struct Server   *make_server (struct Client *);
-extern  struct SLink    *find_user_link (struct SLink *, struct Client *);
 extern  void    initlists (void);
 extern  void    block_garbage_collect(void);
 extern  void    block_destroy(void);
-extern struct SLink *find_channel_link(struct SLink *, struct Channel *);
 
 #endif

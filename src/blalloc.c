@@ -11,6 +11,7 @@
 #include "blalloc.h"
 #include "ircd_defs.h"      /* DEBUG_BLOCK_ALLOCATOR */
 #include "irc_string.h"     /* MyMalloc */
+#include "tools.h"
 #include "s_log.h"
 
 #include <string.h>

@@ -22,7 +22,7 @@
  *
  *   $Id$
  */
-
+#include "tools.h"
 #include "handlers.h"
 #include "channel.h"
 #include "vchannel.h"
@@ -63,7 +63,7 @@ void build_list_of_channels( struct Client *sptr,
                 				    char *jbuf, char *given_names);
 void do_join_0(struct Client *cptr, struct Client *sptr);
 void check_spambot_warning( struct Client *sptr, char *name );
-int can_join (struct Client *, struct Channel *, char *,int *);
+int can_join (struct Client *, struct Channel *, char *);
 
 char *_version = "20001122";
 
@@ -122,7 +122,7 @@ int     m_join(struct Client *cptr,
       */
       if (*name == '0' && !atoi(name))
         {
-          if (sptr->user->channel == NULL)
+          if (sptr->user->channel.head == NULL)
             continue;
 	  do_join_0(cptr,sptr);
 	  check_spambot_warning(sptr,"0");
@@ -169,7 +169,7 @@ int     m_join(struct Client *cptr,
 		   * if there's only one vchan, and the root is empty
 		   * let them join that vchan
 		   */
-		  if( (!chptr->members) && (!chptr->next_vchan->next_vchan) )
+		  if( (!chptr->users) && (!chptr->next_vchan->next_vchan) )
 		    {
 		      root_chptr = chptr;
 		      chptr = chptr->next_vchan;
@@ -202,7 +202,7 @@ int     m_join(struct Client *cptr,
 			 me.name, parv[0], (unsigned char*) name);
 	      continue;
 	    }
-	  if (chptr->members == NULL)
+	  if (chptr->users == 0)
 	    flags = CHFL_CHANOP;
 	  else
 	    flags = 0;
@@ -257,11 +257,9 @@ int     m_join(struct Client *cptr,
       
       /*
        * can_join checks for +i key, bans.
-       * If a ban is found but an exception to the ban was found
-       * flags will have CHFL_EXCEPTION set
        */
 
-      if ( (i = can_join(sptr, chptr, key, &flags)) )
+      if ( (i = can_join(sptr, chptr, key)) )
 	{
 	  sendto_one(sptr,
 		     form_str(i), me.name, parv[0], name);
@@ -441,16 +439,16 @@ void build_list_of_channels( struct Client *sptr,
 void do_join_0(struct Client *cptr, struct Client *sptr)
 {
   struct Channel *chptr=NULL;
-  struct SLink   *lp;
+  dlink_node   *lp;
 
   sendto_match_servs(NULL, cptr, ":%s JOIN 0", sptr->name);
 
-  while ((lp = sptr->user->channel))
+  while ((lp = sptr->user->channel.head))
     {
-      chptr = lp->value.chptr;
+      chptr = lp->data;
       sendto_channel_butserv(ALL_MEMBERS,chptr, sptr, ":%s PART %s",
 			     sptr->name, chptr->chname);
-      remove_user_from_channel(chptr, sptr, 0);
+      remove_user_from_channel(chptr, sptr);
     }
 }
 
@@ -520,21 +518,18 @@ void check_spambot_warning( struct Client *sptr, char *name )
  * output	- 
  * side effects - NONE
  */
-int can_join(struct Client *sptr, struct Channel *chptr,
-		    char *key, int *flags)
+int can_join(struct Client *sptr, struct Channel *chptr, char *key)
 {
-  struct SLink  *lp;
+  dlink_node  *lp;
   int ban_or_exception;
 
   if ( (ban_or_exception = is_banned(chptr,sptr)) == CHFL_BAN)
     return (ERR_BANNEDFROMCHAN);
-  else
-    *flags |= ban_or_exception; /* Mark this client as "charmed" */
 
   if (chptr->mode.mode & MODE_INVITEONLY)
     {
-      for (lp = sptr->user->invited; lp; lp = lp->next)
-        if (lp->value.chptr == chptr)
+      for (lp = sptr->user->invited.head; lp; lp = lp->next)
+        if (lp->data == chptr)
           break;
       if (!lp)
         return (ERR_INVITEONLYCHAN);
@@ -557,7 +552,7 @@ int     m_dbop(struct Client *cptr,
                char *parv[])
 {
   int counted_ops=0;
-  struct SLink  *l;
+  dlink_node  *l;
   char *name;
   struct Channel *chptr;
 
@@ -571,7 +566,7 @@ int     m_dbop(struct Client *cptr,
       return -1;
     }
 
-  for (l = chptr->members; l && l->value.cptr; l = l->next)
+  for (l = chptr->members; l && l->data; l = l->next)
     if (l->flags & MODE_CHANOP)
       {
         counted_ops++;

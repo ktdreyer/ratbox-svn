@@ -75,3 +75,8 @@ dlinkDelete(dlink_node * m, dlink_list * list)
     m->next = m->prev = NULL;
 }
 
+
+void
+dlinkMoveList(dlink_list *from, dlink_list *to)
+{
+}

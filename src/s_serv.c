@@ -22,6 +22,7 @@
  *
  *   $Id$
  */
+#include "tools.h"
 #include "s_serv.h"
 #include "channel.h"
 #include "vchannel.h"
@@ -83,7 +84,9 @@ struct Capability captab[] = {
 static unsigned long nextFreeMask();
 static unsigned long freeMask;
 static void server_burst(struct Client *cptr);
+static void burst_members(struct Client *cptr, dlink_list *list, int nicksent);
 static CNCB serv_connect_callback;
+
 
 /*
  * my_name_for_link - return wildcard name of my server name 
@@ -341,7 +344,7 @@ time_t try_connections(time_t currenttime)
  */
 int check_server(struct Client* cptr)
 {
-  struct SLink*    lp;
+  dlink_list *lp;
   struct ConfItem* c_conf = 0;
   struct ConfItem* n_conf = 0;
 
@@ -353,7 +356,7 @@ int check_server(struct Client* cptr)
       Debug((DEBUG_DNS,"No C/N lines for %s", cptr->name));
       return 0;
     }
-  lp = cptr->localClient->confs;
+  lp = &cptr->localClient->confs;
   /*
    * This code is from the old world order. It should eventually be
    * duplicated somewhere else later!
@@ -574,7 +577,7 @@ int server_estab(struct Client *cptr)
   split = irccmp(cptr->name, cptr->host);
   host = cptr->name;
 
-  if (!(n_conf = find_conf_name(cptr->localClient->confs,
+  if (!(n_conf = find_conf_name(&cptr->localClient->confs,
 				host, CONF_NOCONNECT_SERVER)))
     {
       ServerStats->is_ref++;
@@ -584,7 +587,7 @@ int server_estab(struct Client *cptr)
       log(L_NOTICE, "Access denied. No N line for server %s", inpath_ip);
       return exit_client(cptr, cptr, cptr, "No N line for server");
     }
-  if (!(c_conf = find_conf_name(cptr->localClient->confs,
+  if (!(c_conf = find_conf_name(&cptr->localClient->confs,
 				host, CONF_CONNECT_SERVER )))
     {
       ServerStats->is_ref++;
@@ -818,7 +821,7 @@ int server_estab(struct Client *cptr)
 static void server_burst(struct Client *cptr)
 {
   struct Client*    acptr;
-  struct SLink* l;
+  dlink_node *l;
   static char   nickissent = 1;
   struct Channel*   chptr;
   struct Channel*   vchan; 
@@ -844,82 +847,63 @@ static void server_burst(struct Client *cptr)
         if (acptr->from != cptr)
           sendnick_TS(cptr, acptr);
 #endif
+      return;
     }
-  else
+
+  if (!ConfigFileEntry.hub && IsCapable(cptr, CAP_LL))
     {
-      if (!ConfigFileEntry.hub && IsCapable(cptr, CAP_LL))
-        {
-          for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
-            {
-              sendto_one(cptr,":%s CBURST %s",
-                me.name, chptr->chname );
-            }
-        }
-
-      nickissent = 3 - nickissent;
-      /* flag used for each nick to check if we've sent it
-       * yet - must be different each time and !=0, so we
-       * alternate between 1 and 2 -orabidoo
-       */
       for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
-        {
-	  /* Don't send vchannels twice; vchannels will be
-	   * sent along as subchannels of the top channel
-	   */
+	{
+	  sendto_one(cptr,":%s CBURST %s",
+		     me.name, chptr->chname );
+	}
+    }
 
-	  if(IsVchan(chptr))
-	    continue;
+  nickissent = 3 - nickissent;
+  /* flag used for each nick to check if we've sent it
+   * yet - must be different each time and !=0, so we
+   * alternate between 1 and 2 -orabidoo
+   */
+  for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
+    {
+      /* Don't send vchannels twice; vchannels will be
+       * sent along as subchannels of the top channel
+       */
+      
+      if(IsVchan(chptr))
+	continue;
 	  
-	  for (l = chptr->members; l; l = l->next)
+      burst_members(cptr,&chptr->chanops, nickissent);
+      burst_members(cptr,&chptr->voiced, nickissent);
+      burst_members(cptr,&chptr->halfops, nickissent);
+      burst_members(cptr,&chptr->peons, nickissent);
+      send_channel_modes(cptr, chptr);
+      if(IsVchanTop(chptr))
+	{
+	  for ( vchan = chptr->next_vchan; vchan;
+		vchan = vchan->next_vchan)
 	    {
-	      acptr = l->value.cptr;
-	      if (acptr->nicksent != nickissent)
-		{
-		  acptr->nicksent = nickissent;
-		  if (acptr->from != cptr)
-		    sendnick_TS(cptr, acptr);
-		}
+	      burst_members(cptr,&vchan->chanops, nickissent);
+	      burst_members(cptr,&vchan->voiced, nickissent);
+	      burst_members(cptr,&vchan->halfops, nickissent);
+	      burst_members(cptr,&vchan->peons, nickissent);
+	      send_channel_modes(cptr, vchan);
 	    }
+	}
+    }
 
-          /* don't send 0 user channels on rejoin (Mortiis)
-           */
-
-	  if(IsVchanTop(chptr))
-	    {
-	      send_channel_modes(cptr, chptr);
-
-	      for ( vchan = chptr->next_vchan; vchan;
-		    vchan = vchan->next_vchan)
-		{
-		  for (l = vchan->members; l; l = l->next)
-		    {
-		      acptr = l->value.cptr;
-		      if (acptr->nicksent != nickissent)
-			{
-			  acptr->nicksent = nickissent;
-			  if (acptr->from != cptr)
-			    sendnick_TS(cptr, acptr);
-			}
-		    }
-		  send_channel_modes(cptr, vchan);
-		}
-	    }
-	  else if(chptr->users != 0)
-	    {
-	      send_channel_modes(cptr, chptr);
-	    }
-        }
-      /*
-      ** also send out those that are not on any channel
-      */
-      for (acptr = &me; acptr; acptr = acptr->prev)
-        if (acptr->nicksent != nickissent)
-          {
-            acptr->nicksent = nickissent;
-            if (acptr->from != cptr)
-              sendnick_TS(cptr, acptr);
-          }
-      }
+  /*
+  ** also send out those that are not on any channel
+  */
+  for (acptr = &me; acptr; acptr = acptr->prev)
+    {
+      if (acptr->nicksent != nickissent)
+	{
+	  acptr->nicksent = nickissent;
+	  if (acptr->from != cptr)
+	    sendnick_TS(cptr, acptr);
+	}
+    }
 
   cptr->flags2 &= ~FLAGS2_CBURST;
 
@@ -929,6 +913,31 @@ static void server_burst(struct Client *cptr)
   /* XXX maybe `EOB %d %d` where we send lenght of burst and time? */
   if(IsCapable(cptr, CAP_EOB))
     sendto_one(cptr, "EOB", me.name ); 
+}
+
+/*
+ * burst_members
+ * inputs	- pointer to server to send members to
+ * 		- dlink_list pointer to membership list to send
+ * 		- current nicksent flag
+ * output	- current nicksent flag
+ * side effects	-
+ */
+static void burst_members(struct Client *cptr, dlink_list *list, int nickissent)
+{
+  struct Client *acptr;
+  dlink_node *ptr;
+
+  for (ptr = list->head; ptr; ptr = ptr->next)
+    {
+      acptr = ptr->data;
+      if (acptr->nicksent != nickissent)
+	{
+	  acptr->nicksent = nickissent;
+	  if (acptr->from != cptr)
+	    sendnick_TS(cptr, acptr);
+	}
+    }
 }
 
 /*
@@ -1208,7 +1217,7 @@ serv_connect_callback(int fd, int status, void *data)
 
     /* COMM_OK, so continue the connection procedure */
     /* Get the C/N lines */
-    c_conf = find_conf_name(cptr->localClient->confs,
+    c_conf = find_conf_name(&cptr->localClient->confs,
 			    cptr->name, CONF_CONNECT_SERVER);
     if (!c_conf)
       { 
@@ -1216,7 +1225,7 @@ serv_connect_callback(int fd, int status, void *data)
         exit_client(cptr, cptr, &me, "Lost C-line");
         return;
       }
-    n_conf = find_conf_name(cptr->localClient->confs,
+    n_conf = find_conf_name(&cptr->localClient->confs,
 			    cptr->name, CONF_NOCONNECT_SERVER);
     if (!n_conf)
       { 

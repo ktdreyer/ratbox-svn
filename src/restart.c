@@ -3,6 +3,7 @@
  *
  * $Id$
  */
+#include "tools.h"
 #include "restart.h"
 #include "common.h"
 #include "fdlist.h"

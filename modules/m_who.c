@@ -22,7 +22,7 @@
  *
  *   $Id$
  */
-
+#include "tools.h"
 #include "common.h"   /* bleah */
 #include "handlers.h"
 #include "client.h"
@@ -60,13 +60,16 @@ void do_who_on_channel(struct Client *sptr,
 			      struct Channel *chptr, char *real_name,
 			      int oper, int member);
 
+void do_who_list(struct Client *sptr, struct Channel *chptr,
+		 dlink_list *list, char *chname, char *op_flags);
+
 void who_global(struct Client *sptr, char *mask, int oper);
 
 void    do_who(struct Client *sptr,
 	       struct Client *acptr,
 	       struct Channel *chptr,
 	       char *repname,
-	       int flags);
+	       char *op_flags);
 
 char *_version = "20001122";
 
@@ -83,7 +86,7 @@ int     m_who(struct Client *cptr,
 {
   struct Client *acptr;
   char  *mask = parc > 1 ? parv[1] : NULL;
-  struct SLink  *lp;
+  dlink_node *lp;
   struct Channel *chptr=NULL;
   struct Channel *vchan;
   struct Channel *mychannel = NULL;
@@ -125,8 +128,8 @@ int     m_who(struct Client *cptr,
   if ((*(mask+1) == (char) 0) && (*mask == '*'))
     {
       if (sptr->user)
-	if ((lp = sptr->user->channel))
-	  mychannel = lp->value.chptr;
+	if ((lp = sptr->user->channel.head))
+	  mychannel = lp->data;
 
       if (!mychannel)
         {
@@ -195,9 +198,9 @@ int     m_who(struct Client *cptr,
       int isinvis = 0;
 
       isinvis = IsInvisible(acptr);
-      for (lp = acptr->user->channel; lp; lp = lp->next)
+      for (lp = acptr->user->channel.head; lp; lp = lp->next)
 	{
-	  chptr = lp->value.chptr;
+	  chptr = lp->data;
 	  member = IsMember(sptr, chptr);
 	  if (isinvis && !member)
 	    continue;
@@ -206,10 +209,11 @@ int     m_who(struct Client *cptr,
 	      break;
 	    }
 	}
+
       if (chptr != NULL)
 	{
 	  chname = chptr->chname;
-	  lp = find_user_link(chptr->members, acptr);
+	  lp = find_user_link(&chptr->chanops, acptr);
 	  if (IsVchan(chptr))
 	    {
 	      bchan = find_bchan (chptr);
@@ -217,7 +221,10 @@ int     m_who(struct Client *cptr,
 		chname = bchan->chname;
 	    }
 
-	  do_who(sptr, acptr, chptr, chname, ((lp)?lp->flags:0) );
+	  do_who_list(sptr, chptr, &chptr->chanops, chname, "@");
+	  do_who_list(sptr, chptr, &chptr->halfops, chname, "%");
+	  do_who_list(sptr, chptr, &chptr->chanops, chname, "+");
+	  do_who_list(sptr, chptr, &chptr->chanops, chname, "");
 	}
       sendto_one(sptr, form_str(RPL_ENDOFWHO), me.name, parv[0], mask );
       return 0;
@@ -245,12 +252,13 @@ void who_global(struct Client *sptr,char *mask, int oper)
   struct Channel *chptr=NULL;
   struct Channel *bchan;
   struct Client *acptr;
-  struct SLink  *lp;
+  dlink_node  *lp;
   char  *chname;
   int   showperson;
   int   member;
   int   isinvis;
   int   maxmatches = 500;
+  char  *op_flags;
 
   for (acptr = GlobalClientList; acptr; acptr = acptr->next)
     {
@@ -268,9 +276,9 @@ void who_global(struct Client *sptr,char *mask, int oper)
        * provide better/more shortcuts - avalon
        */
       isinvis = IsInvisible(acptr);
-      for (lp = acptr->user->channel; lp; lp = lp->next)
+      for (lp = acptr->user->channel.head; lp; lp = lp->next)
         {
-          chptr = lp->value.chptr;
+          chptr = lp->data;
           member = IsMember(sptr, chptr);
           if (isinvis && !member)
             continue;
@@ -283,8 +291,10 @@ void who_global(struct Client *sptr,char *mask, int oper)
               !isinvis)
             showperson = YES;
         }
-      if (!acptr->user->channel && !isinvis)
+
+      if (!acptr->user->channel.head && !isinvis)
         showperson = YES;
+
       if (showperson &&
           (!mask ||
            match(mask, acptr->name) ||
@@ -293,8 +303,6 @@ void who_global(struct Client *sptr,char *mask, int oper)
            match(mask, acptr->user->server) ||
            match(mask, acptr->info)))
         {
-	  lp = find_user_link(chptr->members, acptr);
-	  chname = chptr->chname;
 	  if (IsVchan(chptr))
 	    {
 	      bchan = find_bchan (chptr);
@@ -302,17 +310,22 @@ void who_global(struct Client *sptr,char *mask, int oper)
 		chname = bchan->chname;
 	    }
 
-	  do_who(sptr, acptr, chptr, chname, ((lp)?lp->flags:0) );
+	  do_who_list(sptr, chptr, &chptr->chanops, chname, "@");
+	  do_who_list(sptr, chptr, &chptr->halfops, chname, "%");
+	  do_who_list(sptr, chptr, &chptr->chanops, chname, "+");
+	  do_who_list(sptr, chptr, &chptr->chanops, chname, "");
+	}
+      chname = chptr->chname;
 
-          if (maxmatches > 0)
-	    {
-	      --maxmatches;
-	      if( maxmatches == 0 )
-		return;
-	    }
-        }
+      if (maxmatches > 0)
+	{
+	  --maxmatches;
+	  if( maxmatches == 0 )
+	    return;
+	}
     }
 }
+
 
 /*
  * do_who_on_channel
@@ -328,18 +341,25 @@ void who_global(struct Client *sptr,char *mask, int oper)
 
 void do_who_on_channel(struct Client *sptr,
 			      struct Channel *chptr,
-			      char *real_name,
+			      char *chname,
 			      int oper, int member)
 {
-  struct SLink  *lp;
+  do_who_list(sptr, chptr, &chptr->chanops, chname, "@");
+  do_who_list(sptr, chptr, &chptr->halfops, chname, "%");
+  do_who_list(sptr, chptr, &chptr->chanops, chname, "+");
+  do_who_list(sptr, chptr, &chptr->chanops, chname, "");
+}
 
-  for (lp = chptr->members; lp; lp = lp->next)
+void do_who_list(struct Client *sptr, struct Channel *chptr,
+		  dlink_list *list, char *chname, char *op_flags)
+{
+  dlink_node *ptr;
+  struct Client *acptr;
+
+  for(ptr = list->head; ptr; ptr = ptr->next)
     {
-      if (oper && !IsAnyOper(lp->value.cptr))
-	continue;
-      if (IsInvisible(lp->value.cptr) && !member)
-	continue;
-      do_who(sptr, lp->value.cptr, chptr, real_name, lp->flags);
+      acptr = ptr->data;
+      do_who(sptr,acptr,chptr,chname,op_flags);
     }
 }
 
@@ -358,8 +378,8 @@ void do_who_on_channel(struct Client *sptr,
 void    do_who(struct Client *sptr,
 	       struct Client *acptr,
 	       struct Channel *chptr,
-	       char *repname,
-	       int flags)
+	       char *chname,
+	       char *op_flags)
 {
   char  status[5];
 
@@ -373,21 +393,20 @@ void    do_who(struct Client *sptr,
     {
       ircsprintf(status,"%c%s%s", 
 		 acptr->user->away ? 'G' : 'H',
-		 IsAnyOper(acptr) ? "*" : "",
-		 channel_chanop_or_voice(flags));
+		 IsAnyOper(acptr) ? "*" : "", op_flags );
     }
 
   if(ConfigFileEntry.hide_server)
     {
       sendto_one(sptr, form_str(RPL_WHOREPLY), me.name, sptr->name,
-             repname, acptr->username,
+             chname, acptr->username,
              acptr->host, IsAnyOper(sptr) ? acptr->user->server : "*", acptr->name,
              status, acptr->hopcount, acptr->info);
     }
   else
     {
       sendto_one(sptr, form_str(RPL_WHOREPLY), me.name, sptr->name,
-             repname, acptr->username,
+             chname, acptr->username,
              acptr->host,  acptr->user->server, acptr->name,
              status, acptr->hopcount, acptr->info);
     }

@@ -22,6 +22,7 @@
  *
  *   $Id$
  */
+#include "tools.h"
 #include "m_kline.h"
 #include "channel.h"
 #include "class.h"

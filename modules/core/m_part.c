@@ -22,6 +22,7 @@
  *
  *   $Id$
  */
+#include "tools.h"
 #include "handlers.h"
 #include "channel.h"
 #include "vchannel.h"
@@ -177,7 +178,7 @@ static void part_one_client(struct Client *cptr,
 	  
 	  sendto_channel_butserv(ALL_MEMBERS,
 				 chptr, sptr, ":%s PART %s", sptr->name, name);
-	  remove_user_from_channel(chptr, sptr, 0);
+	  remove_user_from_channel(chptr, sptr);
 	}
       else
 	{
@@ -195,7 +196,7 @@ static void part_one_client(struct Client *cptr,
             
 	  sendto_channel_butserv(ALL_MEMBERS,
 				 vchan, sptr, ":%s PART %s", sptr->name, name);
-	  remove_user_from_channel(vchan, sptr, 0);
+	  remove_user_from_channel(vchan, sptr);
 	}
     }
   else
@@ -214,7 +215,7 @@ static void part_one_client(struct Client *cptr,
             
       sendto_channel_butserv(ALL_MEMBERS,
 			     chptr, sptr, ":%s PART %s", sptr->name, name);
-      remove_user_from_channel(chptr, sptr, 0);
+      remove_user_from_channel(chptr, sptr);
     }
 }
 

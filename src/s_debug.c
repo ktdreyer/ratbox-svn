@@ -19,6 +19,7 @@
  *
  *   $Id$
  */
+#include "tools.h"
 #include "s_debug.h"
 #include "channel.h"
 #include "blalloc.h"
@@ -203,10 +204,10 @@ void send_usage(struct Client *cptr, char *nick)
 void count_memory(struct Client *cptr,char *nick)
 {
   struct Client *acptr;
-  struct SLink *link;
-  struct Channel *chptr;
+    struct Channel *chptr;
   struct ConfItem *aconf;
   struct Class *cltmp;
+  dlink_node *link;
 
   int lc = 0;           /* local clients */
   int ch = 0;           /* channels */
@@ -269,7 +270,8 @@ void count_memory(struct Client *cptr,char *nick)
       if (MyConnect(acptr))
         {
           lc++;
-          for (link = acptr->localClient->confs; link; link = link->next)
+          for (link = acptr->localClient->confs.head;
+	       link; link = link->next)
             lcc++;
         }
       else
@@ -277,10 +279,10 @@ void count_memory(struct Client *cptr,char *nick)
       if (acptr->user)
         {
           us++;
-          for (link = acptr->user->invited; link;
+          for (link = acptr->user->invited.head; link;
                link = link->next)
             usi++;
-          for (link = acptr->user->channel; link;
+          for (link = acptr->user->channel.head; link;
                link = link->next)
             usc++;
           if (acptr->user->away)
@@ -301,18 +303,32 @@ void count_memory(struct Client *cptr,char *nick)
     {
       ch++;
       chm += (strlen(chptr->chname) + sizeof(struct Channel));
-      for (link = chptr->members; link; link = link->next)
+
+      for (link = chptr->peons.head; link; link = link->next)
         chu++;
-      for (link = chptr->invites; link; link = link->next)
+      for (link = chptr->chanops.head; link; link = link->next)
+        chu++;
+      for (link = chptr->voiced.head; link; link = link->next)
+        chu++;
+      for (link = chptr->halfops.head; link; link = link->next)
+        chu++;
+
+      for (link = chptr->invites.head; link; link = link->next)
         chi++;
-      for (link = chptr->banlist; link; link = link->next)
+
+      /* XXX invex deny except */
+      for (link = chptr->banlist.head; link; link = link->next)
         {
           chb++;
-          chbm += (strlen(link->value.cp)+1+sizeof(struct SLink));
+
+	  /* XXX */
+#if 0
+          chbm += (strlen(link->data)+1+sizeof(dlink_node));
           if (link->value.banptr->banstr)
             chbm += strlen(link->value.banptr->banstr);
           if (link->value.banptr->who)
             chbm += strlen(link->value.banptr->who);
+#endif
         }
     }
 
@@ -342,15 +358,15 @@ void count_memory(struct Client *cptr,char *nick)
              me.name, RPL_STATSDEBUG, nick, lc, lcm, rc, rcm);
   sendto_one(cptr, ":%s %d %s :Users %d(%d) Invites %d(%d)",
              me.name, RPL_STATSDEBUG, nick, us, us*sizeof(struct User), usi,
-             usi * sizeof(struct SLink));
+             usi * sizeof(dlink_node));
   sendto_one(cptr, ":%s %d %s :User channels %d(%d) Aways %d(%d)",
-             me.name, RPL_STATSDEBUG, nick, usc, usc*sizeof(struct SLink),
+             me.name, RPL_STATSDEBUG, nick, usc, usc*sizeof(dlink_node),
              aw, awm);
   sendto_one(cptr, ":%s %d %s :Attached confs %d(%d)",
-             me.name, RPL_STATSDEBUG, nick, lcc, lcc*sizeof(struct SLink));
+             me.name, RPL_STATSDEBUG, nick, lcc, lcc*sizeof(dlink_node));
 
-  totcl = lcm + rcm + us*sizeof(struct User) + usc*sizeof(struct SLink) + awm;
-  totcl += lcc*sizeof(struct SLink) + usi*sizeof(struct SLink);
+  totcl = lcm + rcm + us*sizeof(struct User) + usc*sizeof(dlink_node) + awm;
+  totcl += lcc*sizeof(dlink_node) + usi*sizeof(dlink_node);
 
   sendto_one(cptr, ":%s %d %s :Conflines %d(%d)",
              me.name, RPL_STATSDEBUG, nick, co, com);
@@ -361,10 +377,10 @@ void count_memory(struct Client *cptr,char *nick)
   sendto_one(cptr, ":%s %d %s :Channels %d(%d) Bans %d(%d)",
              me.name, RPL_STATSDEBUG, nick, ch, chm, chb, chbm);
   sendto_one(cptr, ":%s %d %s :Channel members %d(%d) invite %d(%d)",
-             me.name, RPL_STATSDEBUG, nick, chu, chu*sizeof(struct SLink),
-             chi, chi*sizeof(struct SLink));
+             me.name, RPL_STATSDEBUG, nick, chu, chu*sizeof(dlink_node),
+             chi, chi*sizeof(dlink_node));
 
-  totch = chm + chbm + chu*sizeof(struct SLink) + chi*sizeof(struct SLink);
+  totch = chm + chbm + chu*sizeof(dlink_node) + chi*sizeof(dlink_node);
 
   sendto_one(cptr, ":%s %d %s :Whowas users %d(%d)",
              me.name, RPL_STATSDEBUG, nick, wwu, wwu*sizeof(struct User));

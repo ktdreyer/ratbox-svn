@@ -22,6 +22,7 @@
  *
  *  $Id$
  */
+#include "tools.h"
 #include "handlers.h"
 #include "m_gline.h"
 #include "channel.h"

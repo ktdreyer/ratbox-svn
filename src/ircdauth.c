@@ -636,8 +636,10 @@ GreetUser(struct Client *client)
   else
     SendMessageFile(client, &ConfigFileEntry.motd);
 
-#ifdef LITTLE_I_LINES
-  if (client->localClient->confs && client->localClient->confs->value.aconf &&
+#if 0
+  if (client->localClient->confs.head &&  client->localClient->confs->data)
+    {
+
       (client->localClient->confs->value.aconf->flags & CONF_FLAGS_LITTLE_I_LINE))
     {
       SetRestricted(client);

@@ -19,6 +19,7 @@
  *
  *   $Id$
  */
+#include "tools.h"
 #include "send.h"
 #include "channel.h"
 #include "class.h"
@@ -57,6 +58,15 @@ static  void vsendto_realops(const char *, va_list);
 
 static  unsigned long sentalong[MAXCONNECTIONS];
 static unsigned long current_serial=0L;
+static void sendto_common_channel( dlink_list *list,
+				   struct Client *user,
+				   const char *pattern , va_list args);
+static void sendto_list(dlink_list *list, struct Client *from,
+			const char *pattern, va_list args);
+void
+send_channel_members(struct Client *one, struct Client *from,
+		     dlink_list *list,
+		     const char *pattern, va_list args);
 
 /*
 ** dead_link
@@ -314,22 +324,39 @@ sendto_channel_butone(struct Client *one, struct Client *from,
 
 {
   va_list       args;
-  register struct SLink *lp;
-  register struct Client *acptr;
-  register int index; /* index of sentalong[] to flag client
-		       * as having received message
-		       */
+  dlink_node *lp;
+  struct Client *acptr;
+  int index; /* index of sentalong[] to flag client
+	      * as having received message
+	      */
 
   va_start(args, pattern);
 
   ++current_serial;
   
-  for (lp = chptr->members; lp; lp = lp->next)
+  send_channel_members(one,from,&chptr->chanops, pattern, args);
+  send_channel_members(one,from,&chptr->voiced, pattern, args);
+  send_channel_members(one,from,&chptr->halfops, pattern, args);
+  send_channel_members(one,from,&chptr->peons, pattern, args);
+
+  va_end(args);
+} /* sendto_channel_butone() */
+
+void
+send_channel_members(struct Client *one, struct Client *from,
+		     dlink_list *list,
+		     const char *pattern, va_list args)
+{
+  dlink_node *ptr;
+  struct Client *acptr;
+  int index;
+
+  for (ptr = list->head; ptr; ptr = ptr->next)
     {
-      acptr = lp->value.cptr;
+      acptr = ptr->data;
       
       if (acptr->from == one)
-        continue;       /* ...was the one I should skip */
+        continue;
       
       index = acptr->from->fd;
       if (MyConnect(acptr) && IsRegisteredUser(acptr))
@@ -350,36 +377,27 @@ sendto_channel_butone(struct Client *one, struct Client *from,
             }
         }
     }
-
-        va_end(args);
-} /* sendto_channel_butone() */
+}
 
 void
-sendto_channel_type(struct Client *one, struct Client *from, struct Channel *chptr,
-                    int type,
+sendto_channel_type(struct Client *one, struct Client *from,
+		    dlink_list *list,
+                    char  char_type,
                     const char *nick,
                     const char *cmd,
                     const char *message)
 
 {
-  register struct SLink *lp;
-  register struct Client *acptr;
-  register int i;
-  char char_type;
+  dlink_node *ptr;
+  struct Client *acptr;
+  int i;
 
   ++current_serial;
 
-  if(type&MODE_VOICE)
-    char_type = '+';
-  else
-    char_type = '@';
-
-  for (lp = chptr->members; lp; lp = lp->next)
+  for (ptr = list->head; ptr; ptr = ptr->next)
     {
-      if (!(lp->flags & type))
-        continue;
+      acptr = ptr->data;
 
-      acptr = lp->value.cptr;
       if (acptr->from == one)
         continue;
 
@@ -396,11 +414,6 @@ sendto_channel_type(struct Client *one, struct Client *from, struct Channel *chp
         }
       else
         {
-          /*
-           * If the target's server can do CAP_CHW, only
-           * one send is needed, otherwise, I do a bunch of
-           * send's to each target on that server. (kludge)
-           */
           if(!IsCapable(acptr->from,CAP_CHW))
             {
               /* Send it individually to each opered or voiced
@@ -408,10 +421,11 @@ sendto_channel_type(struct Client *one, struct Client *from, struct Channel *chp
                */
               if (sentalong[i] != current_serial)
                 {
+		  acptr = ptr->data;
                   sendto_prefix_one(acptr, from,
                     ":%s NOTICE %s :%s",
                     from->name,
-                    lp->value.cptr->name, /* target name */
+                    acptr->name, /* target name */
                     message);
                 }
               sentalong[i] = current_serial;
@@ -433,7 +447,7 @@ sendto_channel_type(struct Client *one, struct Client *from, struct Channel *chp
                 }
             }
         }
-      } /* for (lp = chptr->members; lp; lp = lp->next) */
+      }
 
 } /* sendto_channel_type() */
 
@@ -475,9 +489,10 @@ sendto_common_channels(struct Client *user, const char *pattern, ...)
 
 {
   va_list args;
-  register struct SLink *channels;
-  register struct SLink *users;
-  register struct Client *cptr;
+  dlink_node *channels;
+  dlink_node *users;
+  struct Client *cptr;
+  struct Channel *chptr;
 
   va_start(args, pattern);
   
@@ -487,21 +502,16 @@ sendto_common_channels(struct Client *user, const char *pattern, ...)
 
   if (user->user)
     {
-      for (channels = user->user->channel; channels; channels = channels->next)
-        for(users = channels->value.chptr->members; users; users = users->next)
-          {
-            cptr = users->value.cptr;
-          /* "dead" clients i.e. ones with fd == -1 should not be
-           * looked at -db
-           */
-            if (!MyConnect(cptr) || (cptr->fd < 0) ||
-              (sentalong[cptr->fd] == current_serial))
-              continue;
-            
-            sentalong[cptr->fd] = current_serial;
-            
-            vsendto_prefix_one(cptr, user, pattern, args);
-          }
+      for (channels = user->user->channel.head;
+	   channels; channels = channels->next)
+	{
+	  chptr = channels->data;
+
+	  sendto_common_channel(&chptr->chanops,user,pattern,args);
+	  sendto_common_channel(&chptr->halfops,user,pattern,args);
+	  sendto_common_channel(&chptr->voiced,user,pattern,args);
+	  sendto_common_channel(&chptr->peons,user,pattern,args);
+	}
     }
 
   if (MyConnect(user))
@@ -509,6 +519,27 @@ sendto_common_channels(struct Client *user, const char *pattern, ...)
 
   va_end(args);
 } /* sendto_common_channels() */
+
+static void
+sendto_common_channel( dlink_list *list, struct Client *user,
+		       const char *pattern , va_list args)
+{
+  dlink_node *users;
+  struct Client *cptr;
+
+  for(users = list->head; users; users = users->next)
+    {
+      cptr = users->data;
+
+      if (!MyConnect(cptr) || (cptr->fd < 0) ||
+	  (sentalong[cptr->fd] == current_serial))
+	continue;
+            
+      sentalong[cptr->fd] = current_serial;
+      
+      vsendto_prefix_one(cptr, user, pattern, args);
+    }
+}
 
 /*
  * sendto_channel_butserv
@@ -531,18 +562,40 @@ sendto_channel_butserv(int type,
 
   va_start(args, pattern);
 
-  for (lp = chptr->members; lp; lp = lp->next)
-    if (MyConnect(acptr = lp->value.cptr))
-      {
-	if(type == ALL_MEMBERS)
-	  vsendto_prefix_one(acptr, from, pattern, args);
-	else if( (type == ONLY_CHANOPS) && is_chan_op(chptr,acptr))
-	  vsendto_prefix_one(acptr, from, pattern, args);
-	else if( (type == NON_CHANOPS) && !is_chan_op(chptr,acptr))
-	  vsendto_prefix_one(acptr, from, pattern, args);
-      }
-  
+  switch(type)
+    {
+    default:
+    case ALL_MEMBERS:
+      sendto_list(&chptr->peons, from, pattern, args);
+      sendto_list(&chptr->voiced, from, pattern, args);
+    case ONLY_CHANOPS:
+      sendto_list(&chptr->chanops, from, pattern, args);
+      sendto_list(&chptr->halfops, from, pattern, args);
+      break;
+    case NON_CHANOPS:
+      sendto_list(&chptr->peons, from, pattern, args);
+      break;
+    }
+
   va_end(args);
+}
+
+static void sendto_list(dlink_list *list, struct Client *from,
+			const char *pattern, va_list args)
+{
+  dlink_node *ptr;
+  struct Client *acptr;
+
+  for (ptr = list->head; ptr; ptr = ptr->next)
+    {
+      acptr = ptr->data;
+
+      if (MyConnect(acptr))
+	{
+	  vsendto_prefix_one(acptr, from, pattern, args);
+	}
+    }  
+
 } /* sendto_channel_butserv() */
 
 /*

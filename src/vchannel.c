@@ -21,6 +21,7 @@
  *
  * $Id$
  */
+#include "tools.h"
 #include "vchannel.h"
 #include "channel.h"
 #include "client.h"
@@ -165,7 +166,7 @@ void show_vchans(struct Client *cptr,
    *key_list = '\0';
 
    for (chtmp = chptr; chtmp; chtmp = chtmp->next_vchan)
-     if (chtmp->members)
+     if (chtmp->users)
        no_of_vchans++;
 
    sendto_one(sptr, form_str(RPL_VCHANEXIST),
@@ -179,7 +180,8 @@ void show_vchans(struct Client *cptr,
        if(SecretChannel(chtmp))
 	 continue;
 
-       if (chtmp->members)
+       /* XXX */
+       if (chtmp->chanops.head)
 	 {
 	   strcat(key_list, "!");
 	   strcat(key_list, pick_vchan_id(chtmp));
@@ -210,7 +212,7 @@ void show_vchans(struct Client *cptr,
  * otherwise we use who's been there longest according to the server */
 char* pick_vchan_id(struct Channel *chptr)
 {
-  struct SLink *lp;
+  dlink_node *lp;
   struct Client *acptr;
   char *topic_nick, *p;
 
@@ -232,9 +234,33 @@ char* pick_vchan_id(struct Channel *chptr)
         }
     }
 
-  for (lp = chptr->members; lp; lp = lp->next)
+  for (lp = chptr->chanops.head; lp; lp = lp->next)
     if (!lp->next)
-      return lp->value.cptr->name;
+      { 
+	acptr = lp->data;
+	return acptr->name;;
+      }
+
+  for (lp = chptr->halfops.head; lp; lp = lp->next)
+    if (!lp->next)
+      { 
+	acptr = lp->data;
+	return acptr->name;;
+      }
+
+  for (lp = chptr->voiced.head; lp; lp = lp->next)
+    if (!lp->next)
+      { 
+	acptr = lp->data;
+	return acptr->name;;
+      }
+
+  for (lp = chptr->peons.head; lp; lp = lp->next)
+    if (!lp->next)
+      {
+	acptr = lp->data;
+	return acptr->name;
+      }
 
   /* shouldn't get here! */
   return NULL;
@@ -261,14 +287,15 @@ struct Channel* find_vchan(struct Channel *chptr, char *key)
 
 struct Channel* vchan_invites(struct Channel *chptr, struct Client *sptr)
 {
-  struct SLink *lp;
+  dlink_node *lp;
   struct Channel *cp;
 
   /* loop is nested this way to prevent preferencing channels higher
      in the vchan list */
-  for (lp = sptr->user->invited; lp; lp = lp->next)
+
+  for (lp = sptr->user->invited.head; lp; lp = lp->next)
     for (cp = chptr; cp; cp = cp->next_vchan)
-      if (lp->value.chptr == cp)
+      if (lp->data == cp)
         return cp;
 
   return NullChn;

@@ -21,6 +21,7 @@
  *
  *  $Id$
  */
+#include "tools.h"
 #include "s_conf.h"
 #include "s_stats.h"
 #include "channel.h"
@@ -114,7 +115,7 @@ typedef struct ip_entry
   int        count;
   struct ip_entry *next;
 #ifdef LIMIT_UH
-  struct SLink  *ptr_clients_on_this_ip;
+  dlink_node *ptr_clients_on_this_ip;
   int        count_of_idented_users_on_this_ip;
 #endif
 }IP_ENTRY;
@@ -228,14 +229,17 @@ void free_conf(struct ConfItem* aconf)
  */
 void det_confs_butmask(struct Client* cptr, int mask)
 {
-  struct SLink* link;
-  struct SLink* link_next;
+  dlink_node *link;
+  dlink_node *link_next;
+  struct ConfItem *aconf;
 
-  for (link = cptr->localClient->confs; link; link = link_next)
+  for (link = cptr->localClient->confs.head; link; link = link_next)
     {
       link_next = link->next;
-      if ((link->value.aconf->status & mask) == 0)
-        detach_conf(cptr, link->value.aconf);
+      aconf = link->data;
+
+      if ((aconf->status & mask) == 0)
+        detach_conf(cptr, aconf);
     }
 }
 
@@ -677,7 +681,7 @@ find_or_add_ip(struct Client *cptr)
 {
   unsigned long ip_in=cptr->localClient->ip.s_addr;
 #ifdef LIMIT_UH
-  struct SLink *new_link;
+  dlink_node *new_link;
 #endif
 
   int hash_index;
@@ -716,10 +720,14 @@ find_or_add_ip(struct Client *cptr)
       newptr->count = 0;
       newptr->next = ptr;
 #ifdef LIMIT_UH
+      /* XXX */
       newptr->count_of_idented_users_on_this_ip = 0;
-      new_link = make_link();
-      new_link->value.cptr = cptr;
-      new_link->next = (struct SLink *)NULL;
+
+      new_link = make_dlink_node();
+
+      new_link->data = cptr;
+      new_link->next = NULL;
+
       newptr->ptr_clients_on_this_ip = new_link;
 #endif
       return(newptr);
@@ -740,10 +748,12 @@ find_or_add_ip(struct Client *cptr)
       ptr->next = (IP_ENTRY *)NULL;
 #ifdef LIMIT_UH
       ptr->count_of_idented_users_on_this_ip = 0;
-      new_link = make_link();
-      new_link->value.cptr = cptr;
-      new_link->next = (struct SLink *)NULL;
-      ptr->ptr_clients_on_this_ip = new_link;
+
+      new_link = make_dlink_node();
+      new_link->data = cptr;
+      new_link->next = NULL;
+
+      ptr->ptr_clients_on_this_ip->next = new_link;
 #endif
      return (ptr);
     }
@@ -754,23 +764,23 @@ static int count_users_on_this_ip(IP_ENTRY *ip_list,
                            struct Client *this_client,const char *username)
 {
   int count=0;
-  struct SLink *ptr;
+  dlink_node *ptr;
   
-  for( ptr = ip_list->ptr_clients_on_this_ip; ptr; ptr = ptr->next )
+  for( ptr = ip_list->ptr_clients_on_this_ip->next; ptr; ptr = ptr->next )
     {
-      if(ptr->value.cptr->user)
+      if(ptr->data->user)
         {
           if (IsGotId(this_client))
             {
-              if(!irccmp(ptr->value.cptr->username,username))
+              if(!irccmp(ptr->data->username,username))
                   count++;
             }
           else
             {
-              if(this_client == ptr->value.cptr)
+              if(this_client == ptr->data)
                 count++;
               else
-                if(ptr->value.cptr->username[0] == '~')
+                if(ptr->data->username[0] == '~')
                   count++;
             }
         }
@@ -806,8 +816,8 @@ void remove_one_ip(unsigned long ip_in)
   IP_ENTRY *old_free_ip_entries;
 #ifdef LIMIT_UH
   unsigned long ip_in=cptr->ip.s_addr;
-  struct SLink *prev_link;
-  struct SLink *cur_link;
+  dlink_node *prev_link;
+  dlink_node *cur_link;
 #endif
 
   last_ptr = ptr = ip_hash_table[hash_index = hash_ip(ip_in)];
@@ -818,9 +828,10 @@ void remove_one_ip(unsigned long ip_in)
           if(ptr->count != 0)
             ptr->count--;
 #ifdef LIMIT_UH
+	  /* XXX */
 
           /* remove the corresponding pointer to this cptr as well */
-          prev_link = (struct SLink *)NULL;
+          prev_link = NULL;
           cur_link = ptr->ptr_clients_on_this_ip;
 
           while(cur_link)
@@ -973,39 +984,22 @@ void iphash_stats(struct Client *cptr, struct Client *sptr,
 }
 
 /*
- * get_first_nline - return the first N:line in the list
- */
-struct ConfItem* find_first_nline(struct SLink* lp)
-{
-  struct ConfItem* aconf;
-
-  for (; lp; lp = lp->next) {
-    aconf = lp->value.aconf;
-    if (CONF_NOCONNECT_SERVER == aconf->status)
-      return aconf;
-  }
-  return 0;
-}
-
-/*
 ** detach_conf
 **        Disassociate configuration from the client.
 **      Also removes a class from the list if marked for deleting.
 */
 int detach_conf(struct Client* cptr,struct ConfItem* aconf)
 {
-  struct SLink** lp;
-  struct SLink*  tmp;
+  dlink_node *ptr;
+  struct ConfItem *found_conf;
 
-  lp = &(cptr->localClient->confs);
+  if(aconf == NULL)
+    return -1;
 
-  while (*lp)
+  for( ptr = cptr->localClient->confs.head; ptr; ptr = ptr->next )
     {
-      if ((*lp)->value.aconf == aconf)
+      if (ptr->data == aconf)
         {
-          /*
-           * NOTE: this is done in free conf too now
-           */
           if ((aconf) && (ClassPtr(aconf)))
             {
               if (aconf->status & CONF_CLIENT_MASK)
@@ -1023,26 +1017,23 @@ int detach_conf(struct Client* cptr,struct ConfItem* aconf)
             {
               free_conf(aconf);
             }
-          tmp = *lp;
-          *lp = tmp->next;
-          free_link(tmp);
+	  dlinkDelete(ptr, &cptr->localClient->confs);
+          free_dlink_node(ptr);
           return 0;
         }
-      else
-        lp = &((*lp)->next);
     }
   return -1;
 }
 
 static int is_attached(struct ConfItem *aconf,struct Client *cptr)
 {
-  struct SLink* lp;
+  dlink_node *ptr=NULL;
 
-  for (lp = cptr->localClient->confs; lp; lp = lp->next)
-    if (lp->value.aconf == aconf)
+  for (ptr = cptr->localClient->confs.head; ptr; ptr = ptr->next)
+    if (ptr->data == aconf)
       break;
   
-  return (lp) ? 1 : 0;
+  return (ptr) ? 1 : 0;
 }
 
 /*
@@ -1053,7 +1044,7 @@ static int is_attached(struct ConfItem *aconf,struct Client *cptr)
  */
 int attach_conf(struct Client *cptr,struct ConfItem *aconf)
 {
-  struct SLink *lp;
+  dlink_node *lp;
 
   if (is_attached(aconf, cptr))
     {
@@ -1095,10 +1086,11 @@ int attach_conf(struct Client *cptr,struct ConfItem *aconf)
     }
 #endif
 
-  lp = make_link();
-  lp->next = cptr->localClient->confs;
-  lp->value.aconf = aconf;
-  cptr->localClient->confs = lp;
+  lp = make_dlink_node();
+
+  /* XXX */
+  dlinkAdd(aconf, lp, &cptr->localClient->confs);
+
   aconf->clients++;
   if (aconf->status & CONF_CLIENT_MASK)
     ConfLinks(aconf)++;
@@ -1240,17 +1232,18 @@ struct ConfItem* find_conf_exact(const char* name, const char* user,
   return NULL;
 }
 
-struct ConfItem* find_conf_name(struct SLink* lp, const char* name, 
+struct ConfItem* find_conf_name(dlink_list *list, const char* name, 
                                 int statmask)
 {
-  struct ConfItem* tmp;
+  dlink_node *ptr;
+  struct ConfItem* aconf;
   
-  for (; lp; lp = lp->next)
+  for (ptr = list->head; ptr; ptr = ptr->next)
     {
-      tmp = lp->value.aconf;
-      if ((tmp->status & statmask) && tmp->name && 
-          (!irccmp(tmp->name, name) || match(tmp->name, name)))
-        return tmp;
+      aconf = ptr->data;
+      if ((aconf->status & statmask) && aconf->name && 
+          (!irccmp(aconf->name, name) || match(aconf->name, name)))
+        return aconf;
     }
   return NULL;
 }
@@ -1266,16 +1259,17 @@ struct ConfItem* find_conf_name(struct SLink* lp, const char* name,
 /*
  * Added for new access check    meLazy <- no youShithead, your code sucks
  */
-struct ConfItem* find_conf_host(struct SLink* lp, const char* host, 
+struct ConfItem* find_conf_host(dlink_list *list, const char* host, 
                                 int statmask)
 {
-  struct ConfItem *tmp;
+  dlink_node *ptr;
+  struct ConfItem *aconf;
   
-  for (; lp; lp = lp->next)
+  for (ptr = list->head; ptr; ptr = ptr->next)
     {
-      tmp = lp->value.aconf;
-      if (tmp->status & statmask && tmp->host && match(tmp->host, host))
-        return tmp;
+      aconf = ptr->data;
+      if (aconf->status & statmask && aconf->host && match(aconf->host, host))
+        return aconf;
     }
   return NULL;
 }
@@ -1286,24 +1280,26 @@ struct ConfItem* find_conf_host(struct SLink* lp, const char* host,
  * Find a conf line using the IP# stored in it to search upon.
  * Added 1/8/92 by Avalon.
  */
-struct ConfItem *find_conf_ip(struct SLink* lp, char *ip, char *user, 
+struct ConfItem *find_conf_ip(dlink_list *list, char *ip, char *user, 
                               int statmask)
 {
-  struct ConfItem *tmp;
+  dlink_node *ptr;
+  struct ConfItem *aconf;
   
-  for (; lp; lp = lp->next)
+  for (ptr = list->head; ptr; ptr = ptr->next)
     {
-      tmp = lp->value.aconf;
-      if (!(tmp->status & statmask))
+      aconf = ptr->data;
+
+      if (!(aconf->status & statmask))
         continue;
 
-      if (!match(tmp->user, user))
+      if (!match(aconf->user, user))
         {
           continue;
         }
 
-      if (!memcmp((void *)&tmp->ipnum, (void *)ip, sizeof(struct in_addr)))
-        return tmp;
+      if (!memcmp((void *)&aconf->ipnum, (void *)ip, sizeof(struct in_addr)))
+        return aconf;
     }
   return ((struct ConfItem *)NULL);
 }

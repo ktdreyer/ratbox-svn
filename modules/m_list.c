@@ -19,6 +19,7 @@
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+#include "tools.h"
 #include "handlers.h"
 #include "channel.h"
 #include "client.h"
@@ -185,8 +186,8 @@ int list_all_channels(struct Client *sptr)
 
   for ( chptr = GlobalChannelList; chptr; chptr = chptr->nextch )
     {
-      if (!chptr->members || !sptr->user ||
-	  (SecretChannel(chptr) && !IsMember(sptr, chptr)))
+      if ( !sptr->user ||
+	   (SecretChannel(chptr) && !IsMember(sptr, chptr)))
 	continue;
       list_one_channel(sptr,chptr);
     }
@@ -221,7 +222,7 @@ int list_named_channel(struct Client *sptr,char *name)
     if (ShowChannel(sptr, tmpchptr) && sptr->user)
       {
         if( (IsVchan(tmpchptr) || HasVchans(tmpchptr)) &&
-	    (root_chptr->members || root_chptr->next_vchan->next_vchan) )
+	    (root_chptr->users || root_chptr->next_vchan->next_vchan) )
           {
             ircsprintf(vname, "%s<!%s>", root_chptr->chname,
                        pick_vchan_id(tmpchptr));
@@ -252,7 +253,7 @@ void list_one_channel(struct Client *sptr,struct Channel *chptr)
   root_chptr = find_bchan(chptr);
 
   if( (IsVchan(chptr) || HasVchans(chptr)) && 
-      (root_chptr->members || root_chptr->next_vchan->next_vchan) )
+      (root_chptr->users || root_chptr->next_vchan->next_vchan) )
     {
       ircsprintf(vname, "%s<!%s>", root_chptr->chname,
 		 pick_vchan_id(chptr));

@@ -18,6 +18,7 @@
  *
  *  $Id$
  */
+#include "tools.h"
 #include "irc_string.h"
 #include "list.h"
 #include <assert.h>

@@ -22,7 +22,7 @@
  *
  *   $Id$
  */
-
+#include "tools.h"
 #include "handlers.h"
 #include "client.h"
 #include "common.h"
@@ -239,6 +239,8 @@ int oper_up( struct Client *sptr, struct ConfItem *aconf )
 {
   int old = (sptr->umodes & ALL_UMODES);
   char *operprivs;
+  dlink_node *ptr;
+  struct ConfItem *found_aconf;
 
   if (aconf->status == CONF_LOCOP)
     {
@@ -281,11 +283,15 @@ int oper_up( struct Client *sptr, struct ConfItem *aconf )
   sptr->next_oper_client = oper_cptr_list;
   oper_cptr_list = sptr;
 
-  if(sptr->localClient->confs)
+  if(sptr->localClient->confs.head)
     {
-      struct ConfItem *aconf;
-      aconf = sptr->localClient->confs->value.aconf;
-      operprivs = oper_privs_as_string(sptr,aconf->port);
+      ptr = sptr->localClient->confs.head;
+      if(ptr)
+	{
+	  found_aconf = ptr->data;
+	  if(found_aconf)
+	    operprivs = oper_privs_as_string(sptr,found_aconf->port);
+	}
     }
   else
     operprivs = "";

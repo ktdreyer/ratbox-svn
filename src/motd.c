@@ -22,6 +22,7 @@
  *
  *   $Id$
  */
+#include "tools.h"
 #include "motd.h"
 #include "ircd.h"
 #include "fdlist.h"

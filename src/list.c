@@ -21,6 +21,7 @@
  *
  * $Id$
  */
+#include "tools.h"
 #include "blalloc.h"
 #include "channel.h"
 #include "class.h"
@@ -43,38 +44,25 @@
  * block allocator routines. very nicely done Wohali
  */
 
-/* Number of struct SLink's to pre-allocate at a time 
-   for Efnet 1000 seems reasonable, 
-   for smaller nets who knows?
-   */
-
 #define LINK_PREALLOCATE 1024
-
-/* Number of struct Client structures to preallocate at a time
- * for Efnet 1024 is reasonable 
- * for smaller nets who knows?
- * This means you call MyMalloc 30 some odd times,
- * rather than 30k times 
- */
-
 #define USERS_PREALLOCATE 1024
 
 void    outofmemory();
 
 /* for Wohali's block allocator */
-BlockHeap *free_Links;
+BlockHeap *free_dlink_nodes;
 BlockHeap *free_anUsers;
 
 void initlists()
 {
   init_client_heap();
-  free_Links = BlockHeapCreate((size_t)sizeof(struct SLink),LINK_PREALLOCATE);
+  free_dlink_nodes =
+    BlockHeapCreate((size_t)sizeof(dlink_node),LINK_PREALLOCATE);
 
   /* struct User structs are used by both local struct Clients, and remote struct Clients */
 
   free_anUsers = BlockHeapCreate(sizeof(struct User),
                                  USERS_PREALLOCATE + MAXCONNECTIONS);
-
 }
 
 /*
@@ -122,8 +110,10 @@ struct User* make_user(struct Client *cptr)
       user->server = (char *)NULL;      /* scache server name */
       user->refcnt = 1;
       user->joined = 0;
-      user->channel = NULL;
-      user->invited = NULL;
+      user->channel.head = NULL;
+      user->channel.tail = NULL;
+      user->invited.head = NULL;
+      user->invited.tail = NULL;
       cptr->user = user;
     }
   return user;
@@ -168,11 +158,11 @@ void _free_user(struct User* user, struct Client* cptr)
        * sanity check
        */
       if (user->joined || user->refcnt < 0 ||
-          user->invited || user->channel)
+          user->invited.head || user->channel.head)
       sendto_realops("* %#x user (%s!%s@%s) %#x %#x %#x %d %d *",
                  cptr, cptr ? cptr->name : "<noname>",
                  cptr->username, cptr->host, user,
-                 user->invited, user->channel, user->joined,
+                 user->invited.head, user->channel.head, user->joined,
                  user->refcnt);
 
       if(BlockHeapFree(free_anUsers,user))
@@ -189,25 +179,25 @@ void _free_user(struct User* user, struct Client* cptr)
 }
 
 
-struct SLink *make_link()
+dlink_node *make_dlink_node()
 {
-  struct SLink  *lp;
+  dlink_node *lp;
 
-  lp = BlockHeapALLOC(free_Links,struct SLink);
-  if( lp == (struct SLink *)NULL)
+  lp = BlockHeapALLOC(free_dlink_nodes,dlink_node);
+  if (lp == NULL)
     outofmemory();
 
-  lp->next = (struct SLink *)NULL;              /* just to be paranoid... */
+  lp->next = NULL;
+  lp->prev = NULL;
 
   return lp;
 }
 
-void _free_link(struct SLink *lp)
+void free_dlink_node(dlink_node *lp)
 {
-  if(BlockHeapFree(free_Links,lp))
+  if(BlockHeapFree(free_dlink_nodes,lp))
     {
-      sendto_realops("list.c couldn't BlockHeapFree(free_Links,lp) lp = %lX", lp );
-      sendto_realops("Please report to the hybrid team!");
+      sendto_realops("list.c couldn't BlockHeapFree(free_dlink_nodes,lp) lp = %lX", lp );
     }
 }
 
@@ -224,7 +214,7 @@ side effects    - memory is possibly freed up
 
 void block_garbage_collect()
 {
-  BlockHeapGarbageCollect(free_Links);
+  BlockHeapGarbageCollect(free_dlink_nodes);
   BlockHeapGarbageCollect(free_anUsers);
   clean_client_heap();
 }
@@ -244,7 +234,7 @@ void count_user_memory(int *user_memory_used,
 void count_links_memory(int *links_memory_used,
                        int *links_memory_allocated )
 {
-  BlockHeapCountMemory( free_Links,
+  BlockHeapCountMemory( free_dlink_nodes,
                         links_memory_used,
                         links_memory_allocated);
 }

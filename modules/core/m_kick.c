@@ -22,6 +22,7 @@
  *
  *   $Id$
  */
+#include "tools.h"
 #include "handlers.h"
 #include "channel.h"
 #include "vchannel.h"
@@ -187,7 +188,7 @@ int     m_kick(struct Client *cptr,
                          ":%s KICK %s %s :%s",
                          parv[0], chptr->chname,
                          who->name, comment);
-      remove_user_from_channel(chptr, who, 1);
+      remove_user_from_channel(chptr, who);
     }
   else
     sendto_one(sptr, form_str(ERR_USERNOTINCHANNEL),

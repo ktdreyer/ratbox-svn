@@ -22,6 +22,7 @@
  *
  *   $Id$
  */
+#include "tools.h"
 #include "handlers.h"
 #include "common.h"
 #include "channel.h"
@@ -205,8 +206,10 @@ int     m_invite(struct Client *cptr,
                              acptr->username,
                              acptr->host);
 
-                  sendto_channel_type(cptr, sptr, chptr,
-                                      MODE_CHANOP,
+		  /* XXX bchan needed for vchans */
+                  sendto_channel_type(cptr, sptr,
+				      &chptr->chanops,
+                                      '@',
                                       chptr->chname,
                                       "PRIVMSG",
                                       message);

@@ -24,6 +24,11 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.32  2000/12/01 22:17:50  db
+ * - massive commit, this removes ALL SLink's ick
+ *   NOTE that not everything is working yet, notably server link..
+ *   but this doesn't core right away. ;) and appears to run.
+ *
  * Revision 7.31  2000/11/30 22:48:00  davidt
  * Removed CUSTOM_ERR, and changed it to use gettext(), which allows the
  * message files to be changed at run time, currently using
@@ -377,7 +382,6 @@
 #endif
 
 struct Client;
-struct SLink;
 struct DNSReply;
 struct hostent;
 
@@ -595,17 +599,16 @@ extern int              attach_Iline(struct Client* client,
 				     const char* username);
 extern struct ConfItem* find_me(void);
 extern struct ConfItem* find_admin(void);
-extern struct ConfItem* find_first_nline(struct SLink* lp);
 extern void             det_confs_butmask (struct Client *, int);
 extern int              detach_conf (struct Client *, struct ConfItem *);
 extern struct ConfItem* det_confs_butone (struct Client *, struct ConfItem *);
 extern struct ConfItem* find_conf_exact(const char* name, const char* user, 
                                         const char* host, int statmask);
-extern struct ConfItem* find_conf_name(struct SLink* lp, const char* name, 
+extern struct ConfItem* find_conf_name(dlink_list *list, const char* name, 
                                        int statmask);
-extern struct ConfItem* find_conf_host(struct SLink* lp, const char* host, 
+extern struct ConfItem* find_conf_host(dlink_list *list, const char* host, 
                                        int statmask);
-extern struct ConfItem* find_conf_ip(struct SLink* lp, char* ip, char* name, 
+extern struct ConfItem* find_conf_ip(dlink_list *list, char* ip, char* name, 
                                      int);
 extern struct ConfItem* find_conf_by_name(const char* name, int status);
 extern struct ConfItem* find_conf_by_host(const char* host, int status);

@@ -19,6 +19,7 @@
  *
  * $Id$
  */
+#include "tools.h"
 #include "channel.h"
 #include "client.h"
 #include "common.h"
@@ -118,11 +119,11 @@ int     ms_cburst(struct Client *cptr,
     {
       /* for version 2 of LazyLinks, also have to send nicks on channel */
 #ifndef LLVER1
-      struct SLink* l;
+      dlink_node *l;
 
-      for (l = chptr->members; l; l = l->next)
+      for (l = chptr->members->next; l; l = l->next)
 	{
-	  acptr = l->value.cptr;
+	  acptr = l->data;
 	  if (acptr->from != cptr)
 	    sendnick_TS(cptr, acptr);
 	}

@@ -23,6 +23,7 @@
  *
  *   $Id$
  */
+#include "tools.h"
 #include "handlers.h"
 #include "channel.h"
 #include "client.h"

@@ -22,6 +22,7 @@
  *
  *   $Id$
  */
+#include "tools.h"
 #include "handlers.h"
 #include "channel.h"
 #include "vchannel.h"
@@ -622,7 +623,8 @@ void remove_our_modes( int hide_or_not,
 		       struct Client *sptr)
 {
   int count;
-  struct SLink *l;
+  dlink_node *l;
+  struct Client *acptr;
   char *para[MAXMODEPARAMS];
   char modebuf[MODEBUFLEN];
   char *chname;
@@ -640,60 +642,69 @@ void remove_our_modes( int hide_or_not,
   else
     chname = chptr->chname;
 
-  for (l = chptr->members; l && l->value.cptr; l = l->next)
+  for (l = chptr->chanops.head; l && l->data; l = l->next)
     {
-      if (l->flags & MODE_CHANOP)
+      if( chptr->opcount )
+	chptr->opcount--;
+
+      acptr = l->data;
+      para[count++] = acptr->name;
+      *mbuf++ = 'o';
+      *mbuf   = '\0';
+
+      if (count >= MAXMODEPARAMS)
 	{
-	  if( chptr->opcount )
-	    chptr->opcount--;
-
-	  para[count++] = l->value.cptr->name;
-	  *mbuf++ = 'o';
-	  *mbuf   = '\0';
-
-	  if (count >= MAXMODEPARAMS)
-	    {
-	      *mbuf = '\0';
-	      sendto_channel_butserv(hide_or_not, chptr, sptr,
-				     ":%s MODE %s %s %s %s %s",
-				     sptr->name,
-				     chname,
-				     modebuf,
-				     para[0], para[1], para[2]);
-	      mbuf = modebuf;
-	      *mbuf++ = '-';
-	      *mbuf   = '\0';
-	      para[0] = para[1] = para[2] = "";
-	      count = 0;
-	    }
-	  l->flags &= ~MODE_CHANOP;
-	}
-
-      mbuf = modebuf;
-      *mbuf++ = '-';
-      *mbuf = '\0';
-
-      if (l->flags & MODE_VOICE)
-	{
-	  para[count++] = l->value.cptr->name;
-	  *mbuf++ = 'v';
 	  *mbuf = '\0';
+	  sendto_channel_butserv(hide_or_not, chptr, sptr,
+				 ":%s MODE %s %s %s %s %s",
+				 sptr->name,
+				 chname,
+				 modebuf,
+				 para[0], para[1], para[2]);
+	  mbuf = modebuf;
+	  *mbuf++ = '-';
+	  *mbuf   = '\0';
+	  para[0] = para[1] = para[2] = "";
+	  count = 0;
+	}
+    }
 
-	  if (count >= MAXMODEPARAMS)
-	    {
-	      sendto_channel_butserv(hide_or_not, chptr, sptr,
-				     ":%s MODE %s %s %s %s %s",
-				     sptr->name,
-				     chname,
-				     modebuf,
-				     para[0], para[1], para[2]);
-	      mbuf = modebuf;
-	      *mbuf++ = '-';
-	      *mbuf   = '\0';
-	      para[0] = para[1] = para[2] = "";
-	      count = 0;
-	    }
-	  l->flags &= ~MODE_VOICE;
+  if(count != 0)
+    {
+      sendto_channel_butserv(hide_or_not, chptr, sptr,
+			     ":%s MODE %s %s %s %s %s",
+			     sptr->name,
+			     chname,
+			     modebuf,
+			     para[0], para[1], para[2]);
+    }
+
+  mbuf = modebuf;
+  *mbuf++ = '-';
+  *mbuf = '\0';
+  count = 0;
+
+  for (l = chptr->voiced.head; l && l->data; l = l->next)
+    {
+      acptr = l->data;
+      para[count++] = acptr->name;
+      *mbuf++ = 'v';
+      *mbuf   = '\0';
+
+      if (count >= MAXMODEPARAMS)
+	{
+	  *mbuf = '\0';
+	  sendto_channel_butserv(hide_or_not, chptr, sptr,
+				 ":%s MODE %s %s %s %s %s",
+				 sptr->name,
+				 chname,
+				 modebuf,
+				 para[0], para[1], para[2]);
+	  mbuf = modebuf;
+	  *mbuf++ = '-';
+	  *mbuf   = '\0';
+	  para[0] = para[1] = para[2] = "";
+	  count = 0;
 	}
     }
 
