@@ -430,7 +430,7 @@ static struct mode_table flag_table[] = {
 	{"xline",		OPER_XLINE		},
 	{"operwall",		OPER_OPERWALL		},
 	{"oper_spy",		OPER_SPY		},
-	{"invisible",		OPER_INVIS		},
+	{"hidden_oper",		OPER_INVIS		},
 	{NULL, 0}
 };
 
