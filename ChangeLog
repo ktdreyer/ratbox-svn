@@ -1,3 +1,45 @@
+leeh        2003/12/26 16:33:57 EST	(20031226_0)
+
+  Modified files:
+    include              client.h conf.h io.h log.h service.h 
+                         stdinc.h 
+    src                  c_message.c conf.c io.c log.c rserv.c 
+                         s_alis.c service.c ucommand.c 
+  Log:
+  in true blue peter style, here are some commits I prepared earlier..
+  
+  - removed receive passwords from C:, just have a single send password
+  - added O: controlling who can DCC services, and requiring logins for
+    commands
+  - store username/host in connecting clients so we can auth against O:
+  - added sendto_connections() to send to all users
+  - added slog_send() to log and send to users
+  - make a few logging things send to users too
+  - added generic stats handlers for services
+  - fix parser bug on commands with no params
+  - added .login command
+  - added .die command
+  - added .stats command, to use the generic service stats handler
+  - added .connect command, to connect to a specific server
+  
+  Revision  Changes    Path
+  1.8       +4 -0      rserv/include/client.h
+  1.4       +17 -2     rserv/include/conf.h
+  1.4       +8 -1      rserv/include/io.h
+  1.3       +1 -0      rserv/include/log.h
+  1.4       +2 -0      rserv/include/service.h
+  1.4       +1 -0      rserv/include/stdinc.h
+  1.6       +2 -2      rserv/src/c_message.c
+  1.7       +117 -9    rserv/src/conf.c
+  1.11      +80 -40    rserv/src/io.c
+  1.2       +15 -0     rserv/src/log.c
+  1.9       +1 -1      rserv/src/rserv.c
+  1.8       +9 -1      rserv/src/s_alis.c
+  1.5       +1 -0      rserv/src/service.c
+  1.2       +149 -1    rserv/src/ucommand.c
+
+
+
 leeh        2003/12/18 19:29:58 EST	(20031219_0)
 
   Modified files:
