@@ -1,3 +1,9 @@
+*** 20010522_4 by toot
+. changed /list so vchan Id's show just before the topic, instead of 
+  in the channel name
+. renamed a variable in channel.h that was just 'blah' :)
+
+
 *** 20010522_3 by toot
 renamed num_bed to num_mask, there's no +d mode now
 
