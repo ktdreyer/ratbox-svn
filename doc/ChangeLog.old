@@ -1,3 +1,7 @@
+*** 20010228_7 by androsyn
+This should fix the /rehash coredump..
+
+
 *** 20010228_6 by db
 - fixed misc I lines/klines so *@* now works again.
 
