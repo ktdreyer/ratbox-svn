@@ -48,7 +48,8 @@ struct SetOptions
 	int spam_time;
 	int split_delay;
 
-	char *operstring;
+	char operstring[REALLEN];
+	char adminstring[REALLEN];
 };
 
 struct Counter

@@ -182,7 +182,8 @@ struct config_file_entry
 	char *network_name;
 	char *network_desc;
 
-	char *default_operstring;
+	char default_operstring[REALLEN];
+	char default_adminstring[REALLEN];
 
 	char fname_operlog[MAXPATHLEN];
 	char fname_userlog[MAXPATHLEN];

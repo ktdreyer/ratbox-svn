@@ -414,6 +414,7 @@ whois_person(struct Client *source_p, struct Client *target_p, int glob)
 	{
 		sendto_one(source_p, form_str(RPL_WHOISOPERATOR),
 			   me.name, source_p->name, target_p->name,
+			   IsAdmin(target_p) ? GlobalSetOptions.adminstring :
 			   GlobalSetOptions.operstring);
 	}
 

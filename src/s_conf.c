@@ -1008,7 +1008,10 @@ set_default_conf(void)
 
 	set_log_level(L_NOTICE);
 
-	DupString(ConfigFileEntry.default_operstring, "is an IRC Operator");
+	strlcpy(ConfigFileEntry.default_operstring, "is an IRC operator",
+		sizeof(ConfigFileEntry.default_operstring);
+	strlcpy(ConfigFileEntry.default_adminstring, "is a Server Administrator",
+		sizeof(ConfigFileEntry.default_adminstring);
 	
 	ConfigFileEntry.failed_oper_notice = YES;
 	ConfigFileEntry.anti_nick_flood = NO;

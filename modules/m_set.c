@@ -70,6 +70,7 @@ struct SetStruct
 };
 
 
+static void quote_adminstring(struct Client *, const char *);
 static void quote_autoconn(struct Client *, char *, int);
 static void quote_autoconnall(struct Client *, int);
 static void quote_floodcount(struct Client *, int);
@@ -98,6 +99,7 @@ static void list_quote_commands(struct Client *);
 static struct SetStruct set_cmd_table[] = {
 	/* name               function      string arg  int arg */
 	/* -------------------------------------------------------- */
+	{"ADMINSTRING",	quote_adminstring,	1,	0	},
 	{"AUTOCONN", 	quote_autoconn, 	1,	1	},
 	{"AUTOCONNALL", quote_autoconnall, 	0,	1	},
 	{"FLOODCOUNT", 	quote_floodcount, 	0,	1	},
@@ -320,34 +322,50 @@ quote_max(struct Client *source_p, int newval)
 static void
 quote_operstring(struct Client *source_p, const char *arg)
 {
-	if(!EmptyString(arg))
+	if(EmptyString(arg))
 	{
-		if(strlen(arg) > REALLEN)
-		{
-			sendto_one(source_p, 
-				   ":%s NOTICE %s :You cannot set OPERSTRING to"
-				   " longer than %d characters.",
-				   me.name, source_p->name, REALLEN);
-			return;
-		}
-
-		MyFree(GlobalSetOptions.operstring);
-		DupString(GlobalSetOptions.operstring, arg);
-
-		sendto_realops_flags(UMODE_ALL, L_ALL,
-				     "%s has changed OPERSTRING to \"%s\"",
-				     get_oper_name(source_p), arg);
-
-		return;
+		sendto_one(source_p, ":%s NOTICE %s :OPERSTRING is currently '%s'",
+			   me.name, source_p->name, GlobalSetOptions.operstring);
 	}
 	else
 	{
-		sendto_one(source_p, ":%s NOTICE %s :OPERSTRING is currently \"%s\"",
-			   me.name, source_p->name, GlobalSetOptions.operstring);
-		return;
+		strlcpy(GlobalSetOptions.operstring, arg,
+			sizeof(GlobalSetOptions.operstring));
+		
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+				     "%s has changed OPERSTRING to '%s'",
+				     get_oper_name(source_p), arg);
 	}
 }
 
+/* SET ADMINSTRING */
+static void
+quote_adminstring(struct Client *source_p, const char *arg)
+{
+	if(EmptyString(arg))
+	{
+		sendto_one(source_p, ":%s NOTICE %s :ADMINSTRING is currently '%s'",
+			   me.name, source_p->name, GlobalSetOptions.adminstring);
+	}
+	else
+	{
+		strlcpy(GlobalSetOptions.adminstring, arg,
+			sizeof(GlobalSetOptions.adminstring));
+		
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+				     "%s has changed ADMINSTRING to '%s'",
+				     get_oper_name(source_p), arg);
+	}
+}
+
+/* SET SPAMNUM */
+static void
+quote_spamnum(struct Client *source_p, int newval)
+{
+	if(newval > 0)
+	{
+		if(newval == 0)
+		{
 /* SET SPAMNUM */
 static void
 quote_spamnum(struct Client *source_p, int newval)

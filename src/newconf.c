@@ -2084,21 +2084,34 @@ conf_set_cluster_type(void *data)
 static void
 conf_set_general_default_operstring(void *data)
 {
-	if(EmptyString((char *) data) || strlen((char *) data) > REALLEN)
+	if(EmptyString((char *) data))
 	{
-		conf_report_error("Warning -- operstring must exist and be less than"
-				  " %d characters; ignoring this.",
-				  REALLEN);
-		MyFree(ConfigFileEntry.default_operstring);
-		DupString(ConfigFileEntry.default_operstring, "is an IRC Operator");
+		conf_report_error("Warning -- operstring must exist");
+		strlcpy(ConfigFileEntry.default_operstring, "is an IRC operator",
+			sizeof(ConfigFileEntry.default_operstring));
 	}
 	else
 	{
-		MyFree(ConfigFileEntry.default_operstring);
-		DupString(ConfigFileEntry.default_operstring, (char *) data);
+		strlcpy(ConfigFileEntry.default_operstring, data,
+			sizeof(ConfigFileEntry.default_operstring));
 	}
 }
-	
+
+static void
+conf_set_general_default_adminstring(void *data)
+{
+	if(EmptyString((char *) data))
+	{
+		conf_report_error("Warning -- adminstring must exist");
+		strlcpy(ConfigFileEntry.default_adminstring, "is a Server Administrator",
+			sizeof(ConfigFileEntry.default_adminstring));
+	}
+	else
+	{
+		strlcpy(ConfigFileEntry.default_adminstring, data,
+			sizeof(ConfigFileEntry.default_adminstring));
+	}
+}
 
 static void
 conf_set_general_failed_oper_notice(void *data)
@@ -2988,6 +3001,8 @@ newconf_init()
 	add_top_conf("general", NULL, NULL);
 	add_conf_item("general", "default_operstring", CF_QSTRING,
 		      conf_set_general_default_operstring);
+	add_conf_item("general", "default_adminstring", CF_QSTRING,
+		      conf_set_general_default_adminstring);
 	add_conf_item("general", "failed_oper_notice", CF_YESNO,
 		      conf_set_general_failed_oper_notice);
 	add_conf_item("general", "anti_nick_flood", CF_YESNO, conf_set_general_anti_nick_flood);
