@@ -1,3 +1,15 @@
+leeh        2003/11/21 14:13:13 EST	(20031121_0)
+
+  Modified files:
+    modules              m_dline.c 
+  Log:
+  - relax dline rules to allow opers to set upto /16
+  
+  Revision  Changes    Path
+  1.28      +3 -3      ircd-ratbox/modules/m_dline.c
+
+
+
 leeh        2003/11/20 18:18:24 EST	(20031120_2)
 
   Modified files:
