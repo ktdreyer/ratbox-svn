@@ -49,7 +49,7 @@ struct DBuf {
   size_t             length; /* Current number of bytes stored */
 };
 
-extern int DBufCount;
+extern int DBufAllocCount;
 extern int DBufUsedCount;
 
 /*

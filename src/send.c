@@ -101,7 +101,6 @@ dead_link(struct Client *to, char *notice)
  */
 void flush_connections(struct Client* cptr)
 {
-#ifdef SENDQ_ALWAYS
   if (0 == cptr) {
     int i;
     for (i = highest_fd; i >= 0; --i) {
@@ -111,8 +110,23 @@ void flush_connections(struct Client* cptr)
   }
   else if (-1 < cptr->fd && DBufLength(&cptr->sendQ) > 0)
     send_queued(cptr);
+}
 
-#endif /* SENDQ_ALWAYS */
+/*
+ * flush_connections_butone - Used to empty all output buffers
+ * Except for given DBuf pointer
+ */
+void flush_sendq_except(struct DBuf* notThisBuf)
+{
+  int i;
+  struct Client* cptr;
+
+  for (i = highest_fd; i >= 0; --i)
+    {
+      if ((cptr = local[i]) && (DBufLength(&cptr->sendQ) > 0) &&
+          (&cptr->sendQ != notThisBuf ))
+        send_queued(cptr);
+    }
 }
 
 

@@ -16,6 +16,7 @@
  */
 struct Client;
 struct Channel;
+struct DBuf;
 
 /* send.c prototypes */
 
@@ -62,6 +63,7 @@ extern  void sendto_prefix_one(struct Client *, struct Client *,
 
 extern  void    flush_server_connections(void);
 extern void flush_connections(struct Client* cptr);
+extern void flush_sendq_except(struct DBuf*);
 
 /* used when sending to #mask or $mask */
 

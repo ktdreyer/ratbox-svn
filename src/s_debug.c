@@ -345,7 +345,7 @@ void count_memory(struct Client *cptr,char *nick)
    * the count would be wrong if we just used the globals
    */
   count_dbuf_memory(&dbuf_allocated, &dbuf_used);
-  dbuf_alloc_count = DBufCount;
+  dbuf_alloc_count = INITIAL_DBUFS + DBufAllocCount;
   dbuf_used_count  = DBufUsedCount;
 
   sendto_one(cptr, ":%s %d %s :Client Local %d(%d) Remote %d(%d)",

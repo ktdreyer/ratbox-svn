@@ -2942,6 +2942,7 @@ int     count_channels(struct Client *sptr)
 }
 
 /* All the LazyLink code */
+/* It should be moved into m_cburst.c m_lljoin.c m_drop.c */
 
 /* Only HUB's need cburst */
 
@@ -3128,9 +3129,7 @@ int     m_drop(struct Client *cptr,
   if(!(chptr=hash_find_channel(name, NullChn)))
     {
 #ifdef DEBUGLL
-      sendto_realops(
-        "DROP %s does not exist",
-        name );
+      sendto_realops("DROP %s does not exist", name );
 #endif
       return -1;
     }

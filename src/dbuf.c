@@ -27,11 +27,12 @@
 #include "common.h"
 #include "irc_string.h"
 #include "ircd_defs.h"
+#include "send.h"
 
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <string.h>
 
 /*
  * And this 'DBufBuffer' should never be referenced outside the
@@ -52,18 +53,28 @@ struct DBufBuffer {
   struct DBufBuffer* next;             /* Next data buffer, NULL if last */
   char*              start;            /* data starts here */
   char*              end;              /* data ends here */ 
+  char               isMalloc;         /* 1 if malloced */
   char               data[DBUF_SIZE];  /* Actual data stored here */
 };
 
-int                       DBufUsedCount = 0;
-int                       DBufCount = 0;
+int DBufAllocCount = 0;
+int DBufUsedCount  = 0;
+
 static struct DBufBuffer* dbufFreeList = NULL;
 
 void count_dbuf_memory(size_t* allocated, size_t* used)
 {
   assert(0 != allocated);
   assert(0 != used);
-  *allocated = DBufCount     * sizeof(struct DBufBuffer);
+
+  /* Allocated will be the pre-allocated link list plus
+   * any dbufs I've had to malloc
+   */
+
+  *allocated = (INITIAL_DBUFS     * sizeof(struct DBufBuffer)) +
+               (DBufAllocCount    * sizeof(struct DBufBuffer));
+
+  /* Used will be the number of dbufs used times memory */
   *used      = DBufUsedCount * sizeof(struct DBufBuffer);
 }
 
@@ -90,23 +101,24 @@ void dbuf_init()
     (struct DBufBuffer*) MyMalloc(sizeof(struct DBufBuffer));
   assert(0 != dbufFreeList);
 
+  memset((void *)dbufFreeList,0,sizeof(struct DBufBuffer));
+
   current_bp = dbufFreeList;
 
   for (i = 0; i < INITIAL_DBUFS; i++ )
   {
     new_bp = (struct DBufBuffer*) MyMalloc(sizeof(struct DBufBuffer));
+    memset((void *)new_bp,0,sizeof(struct DBufBuffer));
 
     current_bp->next = new_bp;
     current_bp = new_bp;
   }
   current_bp->next = 0;
-
-  DBufCount = INITIAL_DBUFS;
 }
 
 /*
- * dbuf_alloc - allocates a struct DBufBuffer structure either from 
- * dbufFreeList or create a new one.
+ * dbuf_alloc - allocates a struct DBufBuffer structure from 
+ * dbufFreeList
  */
 static struct DBufBuffer* dbuf_alloc()
 {
@@ -114,11 +126,27 @@ static struct DBufBuffer* dbuf_alloc()
 
   if (db)
     dbufFreeList = dbufFreeList->next;
-  else {
-    db = (struct DBufBuffer*) MyMalloc(sizeof(struct DBufBuffer));
-    assert(0 != db);
-    ++DBufCount;
-  }
+  else
+    return NULL;
+
+  ++DBufUsedCount;
+
+  db->next  = 0;
+  db->start = db->end = db->data;
+  return db;
+}
+
+/*
+ * dbuf_malloc - allocates a struct DBufBuffer structure from malloc
+ */
+static struct DBufBuffer* dbuf_malloc()
+{
+  struct DBufBuffer* db;
+
+  db = (struct DBufBuffer*) MyMalloc(sizeof(struct DBufBuffer));
+  db->isMalloc = 1;
+  assert(0 != db);
+  ++DBufAllocCount;
   ++DBufUsedCount;
 
   db->next  = 0;
@@ -134,8 +162,12 @@ static void dbuf_free(struct DBufBuffer* ptr)
   assert(0 != ptr);
   assert(DBufUsedCount > 0);
 
-  if (DBufUsedCount > DBUF_USUAL_MAX_COUNT)
+/* By not freeing memory in the initial dbuf pool
+ * I hopefully keep some locality 
+ */
+  if(ptr->isMalloc)
     {
+      --DBufAllocCount;
       MyFree(ptr);
     }
   else
@@ -193,7 +225,11 @@ int dbuf_put(struct DBuf* dyn, const char* buf, size_t length)
   for ( ; length > 0; h = &(d->next)) {
     if (0 == (d = *h)) {
       if (0 == (d = dbuf_alloc()))
-        return dbuf_malloc_error(dyn);
+        {
+           flush_sendq_except(dyn);
+           if(0 == ( d = dbuf_malloc()))
+             return dbuf_malloc_error(dyn);
+        }
 
       dyn->tail = d;
       *h        = d;        /* prev->next = d */
