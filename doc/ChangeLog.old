@@ -1,3 +1,18 @@
+*** 20001130_13 by adrian
+
+
+* kill client[] buffer in the Client struct. We don't need this at all
+  with the advent of the linebuf
+* Tidy up a couple of assert()s to be more tasteful to me
+* note that the count; entry in the Client struct is now only used to
+  denote local/remote clients with some evil splitting of the client struct
+  and memory allocation. This is evil and should be killed at someone's
+  earliest convienence and replaced with a LocalClient struct which attaches
+  to the end of a struct Client ..
+
+
+
+
 *** 20001130_12 by adrian
 
 
