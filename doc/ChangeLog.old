@@ -1,3 +1,7 @@
+*** 20010224_3 by toot
+fixed a little typo in ircd_parser.y with client_exit option
+
+
 *** 20010224_2 by a1kmm
 - Make sure we get the right version of config.h
 
