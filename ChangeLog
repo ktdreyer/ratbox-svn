@@ -1,3 +1,18 @@
+leeh        2004/10/27 12:43:32 EDT	(20041027_0)
+
+  Modified files:
+    include              conf.h 
+    src                  newconf.c s_jupeserv.c 
+  Log:
+  - added expiry of pending oper jupes, with associated conf option.
+  
+  Revision  Changes    Path
+  1.21      +1 -0      rserv/include/conf.h
+  1.18      +1 -0      rserv/src/newconf.c
+  1.8       +26 -0     rserv/src/s_jupeserv.c
+
+
+
 leeh        2004/10/19 18:45:42 EDT	(20041019_1)
 
   Modified files:
