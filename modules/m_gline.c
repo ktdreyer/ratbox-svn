@@ -147,13 +147,6 @@ int mo_gline(struct Client *cptr,
 
   if (ConfigFileEntry.glines)
     {
-      /* Only globals can apply Glines */
-      if (!IsGlobalOper(sptr))
-	{
-	  sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-	  return 0;
-	}
-
       if (!IsSetOperGline(sptr))
 	{
 	  sendto_one(sptr,":%s NOTICE %s :You have no G flag",me.name,parv[0]);

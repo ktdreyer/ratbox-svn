@@ -99,7 +99,7 @@ int m_links(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         continue;
       if (*mask && !match(mask, acptr->name))
         continue;
-      if(IsAnyOper(sptr))
+      if(IsOper(sptr))
          sendto_one(sptr, form_str(RPL_LINKS),
                     me.name, parv[0], acptr->name, acptr->serv->up,
                     acptr->hopcount, (acptr->info[0] ? acptr->info :
@@ -157,7 +157,7 @@ int ms_links(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       != HUNTED_ISME)
     return 0;
 
-  if(IsAnyOper(sptr))
+  if(IsOper(sptr))
     return(m_links(cptr,sptr,parc,parv));
   return 0;
 }

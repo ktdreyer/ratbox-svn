@@ -73,7 +73,7 @@ int m_locops(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
-  if(MyConnect(sptr) && IsAnyOper(sptr))
+  if(MyConnect(sptr) && IsOper(sptr))
     {
       sendto_all_local_opers(sptr, NULL, "LOCOPS", "%s", message);
     }

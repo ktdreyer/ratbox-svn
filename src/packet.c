@@ -65,7 +65,7 @@ int parse_client_queued(struct Client *cptr)
     else
       {
 	checkflood = 0;
-	if (ConfigFileEntry.no_oper_flood && IsAnyOper(cptr))
+	if (ConfigFileEntry.no_oper_flood && IsOper(cptr))
 	  checkflood = 0;
 
 	/*
@@ -213,7 +213,7 @@ read_packet(int fd, void *data)
   /* Check to make sure we're not flooding */
   if (IsPerson(cptr) &&
      (linebuf_alloclen(&cptr->localClient->buf_recvq) > CLIENT_FLOOD)) {
-      if (!(ConfigFileEntry.no_oper_flood && IsAnyOper(cptr))) {
+      if (!(ConfigFileEntry.no_oper_flood && IsOper(cptr))) {
 
 #if 0
         exit_client(cptr, cptr, cptr, "Excess Flood");

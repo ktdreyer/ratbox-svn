@@ -160,7 +160,7 @@ void serv_info(struct Client *cptr)
        * been removed. Also, do not allow non opers to see the IP's of servers
        * on stats ?
        */
-      if(IsAnyOper(cptr))
+      if(IsOper(cptr))
         sendto_one(cptr, Lformat, me.name, RPL_STATSLINKINFO,
                    cptr->name, get_client_name(acptr, TRUE),
                    (int)linebuf_len(&acptr->localClient->buf_sendq),

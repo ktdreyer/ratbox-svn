@@ -83,13 +83,13 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
-  if (MyClient(sptr) && IsAnyOper(sptr) && !IsSetOperK(sptr))
+  if (MyClient(sptr) && IsOper(sptr) && !IsSetOperK(sptr))
     {
       sendto_one(sptr,":%s NOTICE %s :You have no K flag",me.name,parv[0]);
       return 0;
     }
 
-  if (IsAnyOper(cptr))
+  if (IsOper(cptr))
     {
       if (!BadPtr(path))
         if (strlen(path) > (size_t) KILLLEN)
@@ -142,7 +142,7 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         {
           ircsprintf(buf, "%s!%s%s (%s)",
                      cptr->username, cptr->name,
-                     IsGlobalOper(sptr) ? "" : "(L)", path);
+                     IsOper(sptr) ? "" : "(L)", path);
           path = buf;
           reason = path;
         }
@@ -165,7 +165,7 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     }
   else
     {
-      if(IsAnyOper(cptr))
+      if(IsOper(cptr))
         {
           reason = parv[2];
         }
@@ -179,7 +179,7 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	}
     }
 
-  if (IsAnyOper(sptr)) /* send it normally */
+  if (IsOper(sptr)) /* send it normally */
     {
       sendto_realops_flags(FLAGS_ALL,
 		   "Received KILL message for %s. From %s Path: %s!%s", 
@@ -201,7 +201,7 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   ** back.
   ** Suicide kills are NOT passed on --SRB
   */
-  if (!MyConnect(acptr) || !MyConnect(sptr) || !IsAnyOper(sptr))
+  if (!MyConnect(acptr) || !MyConnect(sptr) || !IsOper(sptr))
     {
       sendto_serv_butone(cptr, ":%s KILL %s :%s!%s",
                          parv[0], acptr->name, inpath, path);
@@ -226,7 +226,7 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   ** the unnecessary QUIT for this. (This flag should never be
   ** set in any other place)
   */
-  if (MyConnect(acptr) && MyConnect(sptr) && IsAnyOper(sptr))
+  if (MyConnect(acptr) && MyConnect(sptr) && IsOper(sptr))
     ircsprintf(buf2, "Killed by %s (%s)", sptr->name,
                      BadPtr(parv[2]) ? sptr->name : parv[2]);
   else
@@ -279,13 +279,13 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
-  if (MyClient(sptr) && IsAnyOper(sptr) && !IsSetOperK(sptr))
+  if (MyClient(sptr) && IsOper(sptr) && !IsSetOperK(sptr))
     {
       sendto_one(sptr,":%s NOTICE %s :You have no K flag",me.name,parv[0]);
       return 0;
     }
 
-  if (IsAnyOper(cptr))
+  if (IsOper(cptr))
     {
       if (!BadPtr(path))
         if (strlen(path) > (size_t) KILLLEN)
@@ -361,7 +361,7 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     }
   else
     {
-      if(IsAnyOper(cptr))
+      if(IsOper(cptr))
         {
           reason = parv[2];
         }
@@ -375,7 +375,7 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	}
     }
 
-  if (IsAnyOper(sptr)) /* send it normally */
+  if (IsOper(sptr)) /* send it normally */
     {
       sendto_realops_flags(FLAGS_ALL,
 		   "Received KILL message for %s. From %s Path: %s!%s", 
@@ -397,7 +397,7 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   ** back.
   ** Suicide kills are NOT passed on --SRB
   */
-  if (!MyConnect(acptr) || !MyConnect(sptr) || !IsAnyOper(sptr))
+  if (!MyConnect(acptr) || !MyConnect(sptr) || !IsOper(sptr))
     {
       sendto_serv_butone(cptr, ":%s KILL %s :%s!%s",
                          parv[0], acptr->name, inpath, path);
@@ -424,7 +424,7 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   ** the unnecessary QUIT for this. (This flag should never be
   ** set in any other place)
   */
-  if (MyConnect(acptr) && MyConnect(sptr) && IsAnyOper(sptr))
+  if (MyConnect(acptr) && MyConnect(sptr) && IsOper(sptr))
     ircsprintf(buf2, "Killed by %s (%s)", sptr->name,
                      BadPtr(parv[2]) ? sptr->name : parv[2]);
   else

@@ -121,7 +121,7 @@ int mo_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   wilds = !parv[1] || strchr(tname, '*') || strchr(tname, '?');
   dow = wilds || doall;
   
-  if(!IsAnyOper(sptr) || !dow) /* non-oper traces must be full nicks */
+  if(!IsOper(sptr) || !dow) /* non-oper traces must be full nicks */
                               /* lets also do this for opers tracing nicks */
     {
       const char* name;
@@ -142,12 +142,12 @@ int mo_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
       class_name = get_client_class(acptr);
 
-      if (IsAnyOper(acptr))
+      if (IsOper(acptr))
         {
           sendto_one(sptr, form_str(RPL_TRACEOPERATOR),
                      me.name, parv[0], class_name,
                      name, 
-                     IsAnyOper(sptr)?ip:(IsIPHidden(acptr)?"127.0.0.1":ip),
+                     IsOper(sptr)?ip:(IsIPHidden(acptr)?"127.0.0.1":ip),
                      now - acptr->lasttime,
                      (acptr->user)?(now - acptr->user->last):0);
         }
@@ -156,7 +156,7 @@ int mo_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           sendto_one(sptr,form_str(RPL_TRACEUSER),
                      me.name, parv[0], class_name,
                      name, 
-                     IsAnyOper(sptr)?ip:(IsIPHidden(acptr)?"127.0.0.1":ip),
+                     IsOper(sptr)?ip:(IsIPHidden(acptr)?"127.0.0.1":ip),
                      now - acptr->lasttime,
                      (acptr->user)?(now - acptr->user->last):0);
         }
@@ -191,8 +191,8 @@ int mo_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       acptr = ptr->data;
 
       if (IsInvisible(acptr) && dow &&
-          !(MyConnect(sptr) && IsAnyOper(sptr)) &&
-          !IsAnyOper(acptr) && (acptr != sptr))
+          !(MyConnect(sptr) && IsOper(sptr)) &&
+          !IsOper(acptr) && (acptr != sptr))
         continue;
       if (!doall && wilds && !match(tname, acptr->name))
         continue;
@@ -207,8 +207,8 @@ int mo_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       acptr = ptr->data;
 
       if (IsInvisible(acptr) && dow &&
-          !(MyConnect(sptr) && IsAnyOper(sptr)) &&
-          !IsAnyOper(acptr) && (acptr != sptr))
+          !(MyConnect(sptr) && IsOper(sptr)) &&
+          !IsOper(acptr) && (acptr != sptr))
         continue;
       if (!doall && wilds && !match(tname, acptr->name))
         continue;
@@ -258,7 +258,7 @@ int ms_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (hunt_server(cptr, sptr, ":%s TRACE %s :%s", 2, parc, parv))
     return 0;
 
-  if( IsAnyOper(sptr) )
+  if( IsOper(sptr) )
     mo_trace(cptr,sptr,parc,parv);
   return 0;
 }
@@ -312,23 +312,23 @@ int report_this_status(struct Client *sptr, struct Client *acptr,
       /* Only opers see users if there is a wildcard
        * but anyone can see all the opers.
        */
-      if ((IsAnyOper(sptr) &&
+      if ((IsOper(sptr) &&
 	   (MyClient(sptr) || !(dow && IsInvisible(acptr))))
-	  || !dow || IsAnyOper(acptr))
+	  || !dow || IsOper(acptr))
 	{
-	  if (IsAnyOper(acptr))
+	  if (IsOper(acptr))
 	    sendto_one(sptr,
 		       form_str(RPL_TRACEOPERATOR),
 		       me.name,
 		       sptr->name, class_name,
-		       name, IsAnyOper(sptr)?ip:(IsIPHidden(acptr)?"127.0.0.1":ip),
+		       name, IsOper(sptr)?ip:(IsIPHidden(acptr)?"127.0.0.1":ip),
 		       now - acptr->lasttime,
 		       (acptr->user)?(now - acptr->user->last):0);
 	  else
 	    sendto_one(sptr,form_str(RPL_TRACEUSER),
 		       me.name, sptr->name, class_name,
 		       name,
-		       IsAnyOper(sptr)?ip:(IsIPHidden(acptr)?"127.0.0.1":ip),
+		       IsOper(sptr)?ip:(IsIPHidden(acptr)?"127.0.0.1":ip),
 		       now - acptr->lasttime,
 		       (acptr->user)?(now - acptr->user->last):0);
 	  cnt++;

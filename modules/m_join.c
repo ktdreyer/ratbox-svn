@@ -232,7 +232,7 @@ int     m_join(struct Client *cptr,
 	}
 
       if ((sptr->user->joined >= MAXCHANNELSPERUSER) &&
-         (!IsAnyOper(sptr) || (sptr->user->joined >= MAXCHANNELSPERUSER*3)))
+         (!IsOper(sptr) || (sptr->user->joined >= MAXCHANNELSPERUSER*3)))
 	{
 	  sendto_one(sptr, form_str(ERR_TOOMANYCHANNELS),
 		     me.name, parv[0], name);

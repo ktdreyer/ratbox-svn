@@ -339,7 +339,7 @@ int build_target_list(int p_or_n,
 	    }
 	}
 
-      if (IsGlobalOper(sptr) && (*nick == '$'))
+      if (IsOper(sptr) && (*nick == '$'))
 	{
 	  handle_opers(p_or_n, command, cptr,sptr,nick+1,text);
 	  continue;

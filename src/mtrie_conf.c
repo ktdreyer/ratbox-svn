@@ -1263,7 +1263,7 @@ void report_mtrie_conf_links(struct Client *sptr, int flags)
           /* Non local opers do not need to know about
            * I lines that do spoofing 
            */
-          if(!(MyConnect(sptr) && IsAnyOper(sptr)) &&
+          if(!(MyConnect(sptr) && IsOper(sptr)) &&
              IsConfDoSpoofIp(found_conf))
             continue;
 
@@ -1363,15 +1363,15 @@ char *show_iline_prefix(struct Client *sptr,struct ConfItem *aconf,char *name)
   if (IsConfDoSpoofIp(aconf))
     *prefix_ptr++ = '=';
 
-  if((ConfigFileEntry.e_lines_oper_only && IsAnyOper(sptr)) || !ConfigFileEntry.e_lines_oper_only)
+  if((ConfigFileEntry.e_lines_oper_only && IsOper(sptr)) || !ConfigFileEntry.e_lines_oper_only)
     if (IsConfElined(aconf))
       *prefix_ptr++ = '^';
 
-  if((ConfigFileEntry.f_lines_oper_only && IsAnyOper(sptr)) || !ConfigFileEntry.f_lines_oper_only)
+  if((ConfigFileEntry.f_lines_oper_only && IsOper(sptr)) || !ConfigFileEntry.f_lines_oper_only)
     if (IsConfFlined(aconf))
       *prefix_ptr++ = '>';
 
-  if((ConfigFileEntry.e_lines_oper_only && IsAnyOper(sptr)) || !ConfigFileEntry.e_lines_oper_only)
+  if((ConfigFileEntry.e_lines_oper_only && IsOper(sptr)) || !ConfigFileEntry.e_lines_oper_only)
     if (IsConfIdlelined(aconf))
       *prefix_ptr++ = '<';
 
@@ -1430,7 +1430,7 @@ static void report_sub_mtrie(struct Client *sptr, int flags, DOMAIN_LEVEL *dl_pt
                       /* Non local opers do not need to know about
                        * I lines that do spoofing
                        */
-                      if(!(MyConnect(sptr) && IsAnyOper(sptr))
+                      if(!(MyConnect(sptr) && IsOper(sptr))
                          && IsConfDoSpoofIp(aconf))
                         continue;
 
@@ -1471,7 +1471,7 @@ static void report_sub_mtrie(struct Client *sptr, int flags, DOMAIN_LEVEL *dl_pt
                       /* Non local opers do not need to know about
                        * I lines that do spoofing
                        */
-                      if(!(MyConnect(sptr) && IsAnyOper(sptr))
+                      if(!(MyConnect(sptr) && IsOper(sptr))
                          && IsConfDoSpoofIp(aconf))
                         continue;
 

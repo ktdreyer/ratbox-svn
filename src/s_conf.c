@@ -302,7 +302,7 @@ void report_configured_links(struct Client* sptr, int mask)
         else if(mask & (CONF_OPERATOR))
           {
             /* Don't allow non opers to see oper privs */
-            if(IsAnyOper(sptr))
+            if(IsOper(sptr))
               sendto_one(sptr, form_str(p->rpl_stats), me.name,
                          sptr->name,
                          p->conf_char,

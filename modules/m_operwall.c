@@ -93,7 +93,7 @@ int ms_operwall(struct Client *cptr, struct Client *sptr, int parc, char *parv[]
   if (check_registered_user(sptr))
     return 0;
 
-  if (!IsAnyOper(sptr) || IsServer(sptr))
+  if (!IsOper(sptr) || IsServer(sptr))
     {
       if (MyClient(sptr) && !IsServer(sptr))
         sendto_one(sptr, form_str(ERR_NOPRIVILEGES),

@@ -133,7 +133,7 @@ int ms_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   if (hunt_server(cptr,sptr,":%s INFO :%s",1,parc,parv) == HUNTED_ISME)
     {
-      if(IsAnyOper(sptr))
+      if(IsOper(sptr))
 	mo_info(cptr,sptr,parc,parv);
       else
 	m_info(cptr,sptr,parc,parv);

@@ -276,9 +276,7 @@ struct LocalUser
 #define IsUnknown(x)            ((x)->status == STAT_UNKNOWN)
 #define IsServer(x)             ((x)->status == STAT_SERVER)
 #define IsClient(x)             ((x)->status == STAT_CLIENT)
-#define IsAnyOper(x)		((x)->umodes & (FLAGS_OPER | FLAGS_LOCOP))
-#define IsGlobalOper(x)		((x)->umodes & FLAGS_OPER)
-#define IsLocalOper(x)		((x)->umodes & FLAGS_LOCOP)
+#define IsOper(x)		((x)->umodes & FLAGS_OPER)
 #define IsAdmin(x)		(IsSetOperAdmin(x))
 
 #define SetConnecting(x)        {(x)->status = STAT_CONNECTING; \
@@ -297,7 +295,7 @@ struct LocalUser
 				 (x)->handler = SERVER_HANDLER; }
 
 #define SetClient(x)            {(x)->status = STAT_CLIENT; \
-				 (x)->handler = IsAnyOper((x)) ? \
+				 (x)->handler = IsOper((x)) ? \
 					OPER_HANDLER : CLIENT_HANDLER; }
 
 #define STAT_CLIENT_PARSE (STAT_UNKNOWN | STAT_CLIENT)
@@ -350,13 +348,11 @@ struct LocalUser
 #define FLAGS_INVISIBLE    0x0400 /* makes user invisible */
 #define FLAGS_BOTS         0x0800 /* shows bots */
 #define FLAGS_EXTERNAL     0x1000 /* show servers introduced and splitting */
-#define FLAGS_LOCOPS       0x2000 /* show locops */
 #define FLAGS_CALLERID     0x4000 /* block unless caller id's */
 #define FLAGS_UNAUTH       0x8000 /* show unauth connects here */
 
 /* user information flags, only settable by remote mode or local oper */
 #define FLAGS_OPER         0x10000 /* Operator */
-#define FLAGS_LOCOP        0x20000 /* Local operator -- SRB */
 #define FLAGS_ADMIN        0x40000 /* Admin on server */
 
 
@@ -396,7 +392,7 @@ struct LocalUser
 #define ALL_UMODES   (SEND_UMODES | FLAGS_SERVNOTICE | FLAGS_CCONN | \
                       FLAGS_REJ | FLAGS_SKILL | FLAGS_FULL | FLAGS_SPY | \
                       FLAGS_NCHANGE | FLAGS_OPERWALL | FLAGS_DEBUG | \
-                      FLAGS_BOTS | FLAGS_EXTERNAL | FLAGS_LOCOP | \
+                      FLAGS_BOTS | FLAGS_EXTERNAL | \
  		      FLAGS_ADMIN | FLAGS_UNAUTH | FLAGS_CALLERID)
 
 #ifndef OPER_UMODES
@@ -404,11 +400,6 @@ struct LocalUser
                       FLAGS_SPY | FLAGS_OPERWALL | FLAGS_DEBUG | FLAGS_BOTS | \
 	                  FLAGS_ADMIN)
 #endif /* OPER_UMODES */
-
-#ifndef LOCOP_UMODES
-#define LOCOP_UMODES (FLAGS_LOCOP | FLAGS_WALLOP | FLAGS_SERVNOTICE | \
-                      FLAGS_SPY | FLAGS_DEBUG | FLAGS_BOTS)
-#endif /* LOCOP_UMODES */
 
 #define FLAGS_ID     (FLAGS_NEEDID | FLAGS_GOTID)
 
@@ -425,23 +416,16 @@ struct LocalUser
 #define MyClient(x)             (MyConnect(x) && IsClient(x))
 
 /* oper flags */
-#define MyOper(x)               (MyConnect(x) && IsAnyOper(x))
+#define MyOper(x)               (MyConnect(x) && IsOper(x))
 
 #define SetOper(x)              {(x)->umodes |= FLAGS_OPER; \
 				 if (!IsServer((x))) (x)->handler = OPER_HANDLER;}
 
-#define SetLocOp(x)             {(x)->umodes |= FLAGS_LOCOP; \
-				 if (!IsServer((x))) (x)->handler = OPER_HANDLER;}
-
 #define ClearOper(x)            {(x)->umodes &= ~FLAGS_OPER; \
-				 if (!IsAnyOper((x)) && !IsServer((x))) \
+				 if (!IsOper((x)) && !IsServer((x))) \
 				  (x)->handler = CLIENT_HANDLER; }
 
-#define ClearLocOp(x)           {(x)->umodes &= ~FLAGS_LOCOP; \
-				 if (!IsAnyOper((x)) && !IsServer((x))) \
-				  (x)->handler = CLIENT_HANDLER; }
-
-#define IsPrivileged(x)         (IsAnyOper(x) || IsServer(x))
+#define IsPrivileged(x)         (IsOper(x) || IsServer(x))
 
 /* umode flags */
 #define IsInvisible(x)          ((x)->umodes & FLAGS_INVISIBLE)

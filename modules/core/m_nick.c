@@ -179,7 +179,7 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
-  if (!IsAnyOper(sptr) && find_q_conf(nick, sptr->username, sptr->host))
+  if (!IsOper(sptr) && find_q_conf(nick, sptr->username, sptr->host))
     {
       sendto_realops_flags(FLAGS_REJ,
 			   "Quarantined nick [%s] from user %s",

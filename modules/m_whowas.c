@@ -131,7 +131,7 @@ int whowas_do(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                      temp->hostname,
                      temp->realname);
 
-          if (GlobalSetOptions.hide_server && !IsAnyOper(sptr))
+          if (GlobalSetOptions.hide_server && !IsOper(sptr))
             sendto_one(sptr, form_str(RPL_WHOISSERVER),
                        me.name, parv[0], temp->name,
                        ConfigFileEntry.network_name, myctime(temp->logoff));

@@ -297,7 +297,7 @@ check_pings_list(dlink_list *list)
         {
           if( !IsElined(cptr) &&
               GlobalSetOptions.idletime && 
-              !IsAnyOper(cptr) &&
+              !IsOper(cptr) &&
               !IsIdlelined(cptr) && 
               ((CurrentTime - cptr->user->last) > GlobalSetOptions.idletime))
             {
@@ -548,7 +548,7 @@ static void update_client_exit_stats(struct Client* cptr)
   else if (IsClient(cptr))
     {
       --Count.total;
-      if (IsAnyOper(cptr))
+      if (IsOper(cptr))
 	--Count.oper;
       if (IsInvisible(cptr)) 
 	--Count.invisi;
@@ -1274,7 +1274,7 @@ const char* comment         /* Reason for the exit */
 	      free_dlink_node(m);
 	    }
 	}
-      if (IsAnyOper(sptr))
+      if (IsOper(sptr))
         {
 	  m = dlinkFind(&oper_list,sptr);
 	  if( m != NULL )

@@ -64,7 +64,7 @@ int     mo_restart(struct Client *cptr,
                   char *parv[])
 {
   char buf[BUFSIZE]; 
-  if (!MyClient(sptr) || !IsAnyOper(sptr))
+  if (!MyClient(sptr) || !IsOper(sptr))
     {
       sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
       return 0;

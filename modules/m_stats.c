@@ -220,7 +220,7 @@ int ms_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (hunt_server(cptr,sptr,":%s STATS %s :%s",2,parc,parv)!=HUNTED_ISME)
     return 0;
 
-  if (IsAnyOper(sptr))
+  if (IsOper(sptr))
     mo_stats(cptr,sptr,parc,parv);
   else
     m_stats(cptr,sptr,parc,parv);
@@ -524,19 +524,19 @@ void stats_L_list(struct Client *sptr,char *name, int doall, int wilds,
       acptr = ptr->data;
 
       if (IsPerson(acptr) &&
-	  !IsAnyOper(acptr) && !IsAnyOper(sptr) &&
+	  !IsOper(acptr) &&
 	  (acptr != sptr))
 	continue;
       if (IsInvisible(acptr) && (doall || wilds) &&
-	  !(MyConnect(sptr) && IsGlobalOper(sptr)) &&
-	  !IsAnyOper(acptr) && (acptr != sptr))
+	  !(MyConnect(sptr) && IsOper(sptr)) &&
+	  !IsOper(acptr) && (acptr != sptr))
 	continue;
       if (!doall && wilds && !match(name, acptr->name))
 	continue;
       if (!(doall || wilds) && irccmp(name, acptr->name))
 	continue;
 
-      if(MyClient(sptr) && IsAnyOper(sptr))
+      if(MyClient(sptr) && IsOper(sptr))
 	{
 	  sendto_one(sptr, Lformat, me.name,
                      RPL_STATSLINKINFO, sptr->name,

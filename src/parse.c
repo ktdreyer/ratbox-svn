@@ -312,7 +312,7 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
        handle_idx = SERVER_HANDLER;
        break;
      case STAT_CLIENT:
-       handle_idx = IsAnyOper(cptr) ? OPER_HANDLER : CLIENT_HANDLER;
+       handle_idx = IsOper(cptr) ? OPER_HANDLER : CLIENT_HANDLER;
        break;
      default:
   /* Todo: An error should be logged here, unable to determine the class of connection.

@@ -87,7 +87,7 @@ int ms_time(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   if (hunt_server(cptr,sptr,":%s TIME :%s",1,parc,parv) == HUNTED_ISME)
     {
-      if(ConfigFileEntry.hide_server && IsAnyOper(sptr))
+      if(ConfigFileEntry.hide_server && IsOper(sptr))
 	sendto_one(sptr, form_str(RPL_TIME), me.name,
 		   parv[0], me.name, date(0));
     }

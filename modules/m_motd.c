@@ -67,7 +67,7 @@ int m_motd(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   static time_t last_used = 0;
 
-  if(!IsAnyOper(sptr))
+  if(!IsOper(sptr))
     {
       if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
         {

@@ -140,7 +140,7 @@ int m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       /* Let opers see the "true" TS everyone else see's
        * the top root chan TS
        */
-      if (!IsAnyOper(sptr))
+      if (!IsOper(sptr))
 	sendto_one(sptr, form_str(RPL_CREATIONTIME),
 		   me.name, parv[0],
 		   parv[1], root->channelts);

@@ -149,7 +149,7 @@ int     ms_lljoin(struct Client *cptr,
     }
 
   if ((acptr->user->joined >= MAXCHANNELSPERUSER) &&
-      (!IsAnyOper(acptr) || (acptr->user->joined >= MAXCHANNELSPERUSER*3)))
+      (!IsOper(acptr) || (acptr->user->joined >= MAXCHANNELSPERUSER*3)))
     {
       sendto_one(acptr, form_str(ERR_TOOMANYCHANNELS),
 		 me.name, parv[0], chname );

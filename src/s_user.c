@@ -187,14 +187,14 @@ void show_opers(struct Client *cptr)
 
       cptr2 = oper_ptr->data;
 
-      if (MyClient(cptr) && IsAnyOper(cptr))
+      if (MyClient(cptr) && IsOper(cptr))
         {
 	  ptr = cptr2->localClient->confs.head;
 	  aconf = ptr->data;
 
           sendto_one(cptr, ":%s %d %s :[%c][%s] %s (%s@%s) Idle: %d",
                      me.name, RPL_STATSDEBUG, cptr->name,
-                     IsGlobalOper(cptr2) ? 'O' : 'o',
+                     IsOper(cptr2) ? 'O' : 'o',
 		     oper_privs_as_string(cptr2, aconf->port),
                      cptr2->name,
                      cptr2->username, cptr2->host,
@@ -204,7 +204,7 @@ void show_opers(struct Client *cptr)
         {
           sendto_one(cptr, ":%s %d %s :[%c] %s (%s@%s) Idle: %d",
                      me.name, RPL_STATSDEBUG, cptr->name,
-                     IsGlobalOper(cptr2) ? 'O' : 'o',
+                     IsOper(cptr2) ? 'O' : 'o',
                      cptr2->name,
                      cptr2->username, cptr2->host,
                      CurrentTime - cptr2->user->last);
@@ -224,7 +224,7 @@ void show_opers(struct Client *cptr)
  */
 int show_lusers(struct Client *sptr) 
 {
-  if (GlobalSetOptions.hide_server && !IsAnyOper(sptr))
+  if (GlobalSetOptions.hide_server && !IsOper(sptr))
     sendto_one(sptr, ":%s %d %s :There are %d users and %d invisible",
                me.name, RPL_LUSERCLIENT, sptr->name,
 	       (Count.total-Count.invisi), Count.invisi);
@@ -244,7 +244,7 @@ int show_lusers(struct Client *sptr)
     sendto_one(sptr, form_str(RPL_LUSERCHANNELS),
                me.name, sptr->name, Count.chan);
 
-  if(!GlobalSetOptions.hide_server && !IsAnyOper(sptr))
+  if(!GlobalSetOptions.hide_server && !IsOper(sptr))
     sendto_one(sptr, form_str(RPL_LUSERME),
                me.name, sptr->name, Count.local, Count.myserver);
 
@@ -802,7 +802,7 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         case 'O': case 'o' :
           if(what == MODE_ADD)
             {
-              if(IsServer(cptr) && !IsGlobalOper(sptr))
+              if(IsServer(cptr) && !IsOper(sptr))
                 {
                   ++Count.oper;
                   SetOper(sptr);
@@ -814,7 +814,7 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                * found by Pat Szuta, Perly , perly@xnet.com 
                */
 
-              if(!IsAnyOper(sptr))
+              if(!IsOper(sptr))
                 break;
 
               sptr->umodes &= ~FLAGS_OPER;
@@ -1064,7 +1064,7 @@ static int check_X_line(struct Client *cptr, struct Client *sptr)
   struct ConfItem *aconf;
   char *reason;
 
-  if(IsAnyOper(sptr))
+  if(IsOper(sptr))
     return 0;
 
   if ((aconf = find_x_conf(sptr->info)))

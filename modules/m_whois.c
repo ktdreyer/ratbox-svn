@@ -368,7 +368,7 @@ void whois_person(struct Client *sptr,struct Client *acptr)
     sendto_one(sptr, form_str(RPL_AWAY), me.name,
 	       sptr->name, acptr->name, acptr->user->away);
 
-  if (IsAnyOper(acptr))
+  if (IsOper(acptr))
     {
       sendto_one(sptr, form_str(RPL_WHOISOPERATOR),
 		 me.name, sptr->name, acptr->name);

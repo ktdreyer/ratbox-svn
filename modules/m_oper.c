@@ -176,7 +176,7 @@ int ms_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   /* if message arrived from server, trust it, and set to oper */
   
-  if (!IsGlobalOper(sptr))
+  if (!IsOper(sptr))
     {
       if (sptr->status == STAT_CLIENT)
 	sptr->handler = OPER_HANDLER;
