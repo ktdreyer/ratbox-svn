@@ -68,9 +68,6 @@ static int m_users(struct Client *cptr, struct Client *sptr,
       if (!GlobalSetOptions.hide_server || IsOper(sptr))
         sendto_one(sptr, form_str(RPL_LOCALUSERS), me.name, parv[0],
                    Count.local, Count.max_loc);
-      else
-        sendto_one(sptr, form_str(RPL_LOCALUSERS), me.name, parv[0],
-                   Count.total, Count.max_tot);
 
       sendto_one(sptr, form_str(RPL_GLOBALUSERS), me.name, parv[0],
                  Count.total, Count.max_tot);
