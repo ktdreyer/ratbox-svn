@@ -51,26 +51,30 @@ COMMAND         - USAGE and DESCRIPTION
                   <letter>.
                   LETTER (* = Oper only.)
                   ------ (^ = Can be configured to be oper only.)
-                    c - Shows C/N lines
-                  ^ d - Shows D lines
-                  ^ e - Shows Events
-                    g - Shows G lines
-                    h - Shows H/L lines
-                    i - Shows I lines
+                  * c - Shows C/N lines
+                  * d - Shows D lines
+                  * e - Shows Events
+                  * f - Shows File Descripters
+                  * g - Shows G lines
+                  * h - Shows H/L lines
+                  * i - Shows I lines
                     K - Shows K lines (or matched klines)
-                    k - Shows temporary K lines (or matched temp klines)
+                  * k - Shows temporary K lines (or matched temp klines)
                     L - Shows IP and generic info about [nick]
                     l - Shows hostname and generic info about [nick]
-                    m - Shows commands and their usage
+                  * m - Shows commands and their usage
                     o - Shows O/o lines
+                  * P - Shows configured ports
                     p - Shows opers connected and their idle times
                   * r - Shows resource usage by ircd
+                  * s - Shows the server cache
                   * t - Shows generic server stats
                     u - Shows server uptime
-                    v - Shows connected servers and their idle times
-                    y - Shows Y lines
+                  * v - Shows connected servers and their idle times
+                  * X - Shows gecos bans (Old X: lines)
+                  * y - Shows Y lines
                   * z - Shows memory stats
-                    ? - Shows connected servers and sendq info about them
+                  * ? - Shows connected servers and sendq info about them
 
   CONNECT       - CONNECT <server_A> [port] [server_B]
                   When [server_B] is used, CONNECT asks [server_B] to
@@ -117,10 +121,10 @@ COMMAND         - USAGE and DESCRIPTION
 
                   [option] can be one of the following:
                     DNS     - Re-read the /etc/resolv.conf file
-                    GLINES  - Clears G lines
                     GC      - Performs garbage collecting of excess
                               memory.
                     MOTD    - Re-reads MOTD file
+                    OMOTD   - Re-reads Oper MOTD file
                     HELP    - Re-reads this HELP file
 
   RESTART       - RESTART
@@ -194,19 +198,23 @@ COMMAND         - USAGE and DESCRIPTION
                                 Traffic Mode.
 + SET           - SET <option> <value>
                   <option> can be one of the following:
-                    LOG       - Sets the Logging level for what is logged
-                                to ircd.log and syslog.
-                    MAX       - Sets the number of max connections
-                                to <value>.  (This number cannot exceed
-                                HARD_FDLIMIT in config.h)
-
-                    FLOODNUM  - How many times a client gets flooded in
-                    FLOODTIME - in seconds before triggering a flood warning
-
-                    SPAMNUM   - Sets how many join/parts to channels
-                                constitutes a possible spambot.
-                    SPAMTIME  - Below this time on a channel
-                                counts as a join/part as above.
+                    AUTOCONN    - Sets autoconnect on or off for a particular
+                                  server
+                    AUTOCONNALL - Sets autoconnect on or off for all servers
+                    LOG         - Sets the Logging level for what is logged
+                                  to ircd.log and syslog.
+                    MAX         - Sets the number of max connections
+                                  to <value>.  (This number cannot exceed
+                                  HARD_FDLIMIT in config.h)
+                    IDLETIME    - The number of seconds a client can be idle
+                                  before disconnecting them
+                    SHIDE       - Turn server hiding on or off on the fly
+                    FLOODCOUNT  - The number of lines allowed before 
+                                  throttling a connection due to flooding
+                    SPAMNUM     - Sets how many join/parts to channels
+                                  constitutes a possible spambot.
+                    SPAMTIME    - Below this time on a channel
+                                  counts as a join/part as above.
 
 + GLINE         - GLINE <user@host> :[reason]
 		   -- if glines are enabled --

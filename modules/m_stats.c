@@ -310,7 +310,7 @@ void do_non_priv_stats(struct Client *sptr, char *name, char *target,
       break;
 
     case 'P' :
-      show_ports(sptr);
+      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, sptr->name);
       stats_spy(sptr,stat);
       break;
 
@@ -333,6 +333,7 @@ void do_non_priv_stats(struct Client *sptr, char *name, char *target,
     case '?':
       break;
 
+    case 'G' : case 'g' :
     case 'D' : case 'd' :
     case 'S' : case 's' :
     case 'T' : case 't' :
@@ -458,6 +459,7 @@ void do_priv_stats(struct Client *sptr, char *name, char *target,
       else
 	{
 	  show_opers(sptr);
+          stats_spy(sptr,stat);
 	}
       break;
 
