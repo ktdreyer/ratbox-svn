@@ -1,3 +1,8 @@
+*** 20010308_2 by androsyn
+Moved outofmemory() to memory.c from list.c.  Also updated a few comments
+regarding outofmemory().
+
+
 *** 20010308_1 by androsyn
 Removed an #if 0'd relic that was pointing to a function in what was res.c
 
