@@ -983,7 +983,7 @@ static void exit_one_client(struct Client *client_p,
       ** The bulk of this is done in remove_dependents now, all
       ** we have left to do is send the SQUIT upstream.  -orabidoo
       */
-      if (source_p->localClient)
+      if (MyConnect(source_p))
       {
 	if(source_p->localClient->ctrlfd > -1)
 	{
@@ -1005,7 +1005,7 @@ static void exit_one_client(struct Client *client_p,
           (source_p->flags & FLAGS_KILLED) == 0)
         sendto_one(target_p, ":%s SQUIT %s :%s", from->name, source_p->name, comment);
     }
-  else if (source_p->name[0]) /* ...just clean all others with QUIT... */
+  else if (IsPerson(source_p)) /* ...just clean all others with QUIT... */
     {
       /*
       ** If this exit is generated from "m_kill", then there
@@ -1023,39 +1023,38 @@ static void exit_one_client(struct Client *client_p,
       ** that the client can show the "**signoff" message).
       ** (Note: The notice is to the local clients *only*)
       */
-      if (source_p->user)
-        {
-          sendto_common_channels_local(source_p, ":%s!%s@%s QUIT :%s",
-				       source_p->name,
-				       source_p->username,
-				       source_p->host,
-				       comment);
+      sendto_common_channels_local(source_p, ":%s!%s@%s QUIT :%s",
+				   source_p->name,
+				   source_p->username,
+				   source_p->host,
+				   comment);
 
-          for (lp = source_p->user->channel.head; lp; lp = next_lp)
-	    {
-	      next_lp = lp->next;
-	      remove_user_from_channel(lp->data, source_p);
-	    }
-          /* Should not be in any channels now */
-          assert(source_p->user->channel.head == NULL);
+      for (lp = source_p->user->channel.head; lp; lp = next_lp)
+	{
+	   next_lp = lp->next;
+	   remove_user_from_channel(lp->data, source_p);
+	}
+        
+        /* Should not be in any channels now */
+        assert(source_p->user->channel.head == NULL);
           
-          /* Clean up invitefield */
-          for (lp = source_p->user->invited.head; lp; lp = next_lp)
-           {
-              next_lp = lp->next;
-              del_invite(lp->data, source_p);
-           }
+        /* Clean up invitefield */
+        for (lp = source_p->user->invited.head; lp; lp = next_lp)
+        {
+           next_lp = lp->next;
+           del_invite(lp->data, source_p);
+        }
 
-          /* Clean up allow lists */
-          del_all_accepts(source_p);
+        /* Clean up allow lists */
+        del_all_accepts(source_p);
 
-	  add_history(source_p, 0);
-	  off_history(source_p);
+	add_history(source_p, 0);
+	off_history(source_p);
 
-	  if (HasID(source_p))
-	    del_from_id_hash_table(source_p->user->id, source_p);
+	if (HasID(source_p))
+	  del_from_id_hash_table(source_p->user->id, source_p);
   
-          /* again, this is all that is needed */
+        /* again, this is all that is needed */
         }
     }
   
