@@ -1,3 +1,15 @@
+androsyn    2002/07/19 11:51:36 EDT	(20020719_5)
+
+  Modified files:
+    src                  s_auth.c 
+  Log:
+  Some extra paranoia in the auth_dns_callback code.
+  
+  Revision  Changes    Path
+  7.98      +10 -10    ircd-hybrid-7/src/s_auth.c
+
+
+
 ejb         2002/07/19 09:22:05 EDT	(20020719_4)
 
   Modified files:
