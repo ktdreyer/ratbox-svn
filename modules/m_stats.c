@@ -175,7 +175,7 @@ static struct StatsStruct stats_cmd_table[] =
   { 'Y',	stats_class,		1,	0,	},
   { 'z',	stats_memory,		1,	0,	},
   { 'Z',	stats_ziplinks,		1,	0,	},
-  { '?',	stats_servlinks,	1,	0,	},
+  { '?',	stats_servlinks,	0,	0,	},
   { (char) 0, 	(void (*)()) 0,		0,	0,	}
 };
 
@@ -686,6 +686,12 @@ static void stats_servlinks(struct Client *client_p)
   dlink_node *ptr;
   int j = 0;
 
+  if(ConfigServerHide.flatten_links && !IsOper(client_p))
+  {
+    sendto_one(client_p, form_str(ERR_NOPRIVILEGES),me.name, client_p->name);
+    return;
+  }
+
   sendK = receiveK = 0;
 
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
@@ -707,7 +713,7 @@ static void stats_servlinks(struct Client *client_p)
                (int)target_p->localClient->receiveK,
                CurrentTime - target_p->firsttime,
                (CurrentTime > target_p->since) ? (CurrentTime - target_p->since): 0,
-               show_capabilities(target_p));
+               IsOper(client_p) ? show_capabilities(target_p) : "TS");
   }
   
   sendto_one(client_p, ":%s %d %s :%u total server(s)",
