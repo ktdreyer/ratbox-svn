@@ -1,3 +1,8 @@
+*** 20010920_2 by wcampbel
+dnl is not REALLY legal in m4 files...gnu m4 seems to accept it but others
+may not.
+
+
 *** 20010920_1 by jdc
 - contrib/m_jupe.c: Cosmetical change ("Juped:" --> "JUPED:").
 
