@@ -31,10 +31,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#ifdef HAVE_LIBCRYPTO
-#include <openssl/evp.h>
-#include <openssl/err.h>
-#endif
 #ifdef HAVE_LIBZ
 #include <zlib.h>
 #endif
@@ -59,10 +55,10 @@ fd_name(int fd)
 	return "unknown";
 }
 
-#if defined( HAVE_LIBCRYPTO ) || defined( HAVE_LIBZ )
+#if defined( HAVE_LIBZ )
 static unsigned char tmp_buf[BUFLEN];
 #endif
-#if defined( HAVE_LIBZ ) && defined( HAVE_LIBZ )
+#if defined( HAVE_LIBZ ) 
 static unsigned char tmp2_buf[BUFLEN];
 #endif
 
@@ -185,15 +181,6 @@ process_recvq(struct ctrl_command *cmd)
 	if(datalen > READLEN)
 		send_error("Error processing INJECT_RECVQ - buffer too long (%d > %d)",
 			   datalen, READLEN);
-
-#ifdef HAVE_LIBCRYPTO
-	if(in_state.crypt)
-	{
-		assert(EVP_DecryptUpdate(&in_state.crypt_state.ctx, tmp_buf, &blen, data, datalen));
-		assert(blen == (int)datalen);
-		buf = tmp_buf;
-	}
-#endif
 
 #ifdef HAVE_LIBZ
 	if(in_state.zip)
@@ -451,7 +438,7 @@ read_data(void)
 	ret2 = -1;
 	assert(!out_state.len);
 
-#if defined(HAVE_LIBZ) || defined(HAVE_LIBCRYPTO)
+#if defined(HAVE_LIBZ) 
 	if(out_state.zip || out_state.crypt)
 		buf = tmp_buf;
 #endif
@@ -466,10 +453,6 @@ read_data(void)
 			out_state.zip_state.z_stream.avail_in = ret;
 
 			buf = out_state.buf;
-#ifdef HAVE_LIB_CRYPTO
-			if(out_state.crypt)
-				buf = tmp2_buf;
-#endif
 			out_state.zip_state.z_stream.next_out = buf;
 			out_state.zip_state.z_stream.avail_out = BUFLEN;
 			if(!(ret2 = deflate(&out_state.zip_state.z_stream,
@@ -486,18 +469,6 @@ read_data(void)
 		}
 #endif
 
-#ifdef HAVE_LIBCRYPTO
-		if(out_state.crypt)
-		{
-			/* encrypt data */
-			ret = blen;
-			if(!EVP_EncryptUpdate(&out_state.crypt_state.ctx,
-					      out_state.buf, &blen, buf, ret))
-				send_error("error encrypting outgoing data: EncryptUpdate: %s",
-					   ERR_error_string(ERR_get_error(), NULL));
-			assert(blen == ret);
-		}
-#endif
 
 		ret = check_error(write(REMOTE.fd, out_state.buf, blen), IO_WRITE, REMOTE.fd);
 		if(ret < blen)
@@ -510,8 +481,8 @@ read_data(void)
 			out_state.len = blen - ret;
 			return;
 		}
-#if defined(HAVE_LIBZ) || defined(HAVE_LIBCRYPTO)
-		if(out_state.zip || out_state.crypt)
+#if defined(HAVE_LIBZ) 
+		if(out_state.zip)
 			buf = tmp_buf;
 #endif
 	}
@@ -554,30 +525,14 @@ read_net(void)
 	ret2 = -1;
 	assert(!in_state.len);
 
-#if defined(HAVE_LIBCRYPTO) || defined(HAVE_LIBZ)
-	if(in_state.crypt || in_state.zip)
+#if defined(HAVE_LIBZ)
+	if(in_state.zip)
 		buf = tmp_buf;
 #endif
 
 	while ((ret = check_error(read(REMOTE.fd, buf, READLEN), IO_READ, REMOTE.fd)))
 	{
 		blen = ret;
-#ifdef HAVE_LIBCRYPTO
-		if(in_state.crypt)
-		{
-			/* decrypt data */
-			buf = in_state.buf;
-#ifdef HAVE_LIBZ
-			if(in_state.zip)
-				buf = tmp2_buf;
-#endif
-			if(!EVP_DecryptUpdate(&in_state.crypt_state.ctx, buf, &blen, tmp_buf, ret))
-				send_error("error decompressing incoming data - DecryptUpdate: %s",
-					   ERR_error_string(ERR_get_error(), NULL));
-			assert(blen == ret);
-		}
-#endif
-
 #ifdef HAVE_LIBZ
 		if(in_state.zip)
 		{
@@ -625,8 +580,8 @@ read_net(void)
 			REMOTE.read_cb = NULL;
 			return;
 		}
-#if defined(HAVE_LIBCRYPTO) || defined(HAVE_LIBZ)
-		if(in_state.crypt || in_state.zip)
+#if defined(HAVE_LIBZ)
+		if(in_state.zip)
 			buf = tmp_buf;
 #endif
 	}

@@ -29,10 +29,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#ifdef HAVE_LIBCRYPTO
-#include <openssl/evp.h>
-#include <openssl/err.h>
-#endif
 #ifdef HAVE_LIBZ
 #include <zlib.h>
 #endif
@@ -77,11 +73,6 @@ main(int argc, char *argv[])
 
 	while (!GDBAttached)
 		sleep(1);
-#endif
-
-#ifdef HAVE_LIBCRYPTO
-	/* load error strings */
-	ERR_load_crypto_strings();
 #endif
 
 	/* Make sure we are running under ircd.. */

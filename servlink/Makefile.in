@@ -24,11 +24,9 @@ libexecdir      = @libexecdir@
 sysconfdir      = @sysconfdir@
 localstatedir   = @localstatedir@
 
-SSL_LIBS	= @SSL_LIBS@
-SSL_INCLUDES	= @SSL_INCLUDES@
 ZIP_LIB		= @ZLIB_LD@
 
-IRCDLIBS        = @LIBS@ $(SSL_LIBS) $(ZIP_LIB)
+IRCDLIBS        = @LIBS@ $(ZIP_LIB)
 
 INCLUDES        = -I. -I../include $(SSL_INCLUDES)
 CPPFLAGS        = ${INCLUDES} @CPPFLAGS@

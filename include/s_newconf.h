@@ -180,9 +180,6 @@ struct server_conf
 	struct DNSQuery *dns_query;
 	dlink_node node;
 
-#ifdef HAVE_LIBCRYPTO
-	RSA *rsa_pubkey;
-#endif
 };
 
 #define SERVER_ILLEGAL		0x0001

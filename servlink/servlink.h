@@ -23,9 +23,6 @@
 
 #include "setup.h"
 
-#ifdef HAVE_LIBCRYPTO
-#include <openssl/evp.h>
-#endif
 #ifdef HAVE_LIBZ
 #include <zlib.h>
 #endif
@@ -46,28 +43,6 @@
 #endif
 
 
-#ifdef HAVE_LIBCRYPTO
-#define CIPHER_BF       1
-#define CIPHER_CAST     2
-#define CIPHER_DES      3
-#define CIPHER_3DES     4
-#define CIPHER_IDEA     5
-#define CIPHER_RC5_8    6
-#define CIPHER_RC5_12   7
-#define CIPHER_RC5_16   8
-
-struct crypt_state
-{
-	EVP_CIPHER_CTX ctx;
-	const EVP_CIPHER *cipher;
-	unsigned int keylen;	/* bytes */
-	unsigned char *key;
-	unsigned int ivlen;	/* bytes */
-	unsigned char *iv;
-	unsigned int rounds;	/* rc5 only */
-};
-#endif
-
 #ifdef HAVE_LIBZ
 struct zip_state
 {
@@ -86,9 +61,6 @@ struct slink_state
 	unsigned int ofs;
 	unsigned int len;
 
-#ifdef HAVE_LIBCRYPTO
-	struct crypt_state crypt_state;
-#endif
 #ifdef HAVE_LIBZ
 	struct zip_state zip_state;
 #endif

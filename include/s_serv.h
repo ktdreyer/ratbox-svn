@@ -95,16 +95,10 @@ struct Capability
 #define SLINKCMD_SET_ZIP_OUT_LEVEL           1	/* data */
 #define SLINKCMD_START_ZIP_OUT               2
 #define SLINKCMD_START_ZIP_IN                3
-#define SLINKCMD_SET_CRYPT_IN_CIPHER         4	/* data */
-#define SLINKCMD_SET_CRYPT_IN_KEY            5	/* data */
-#define SLINKCMD_START_CRYPT_IN              6
-#define SLINKCMD_SET_CRYPT_OUT_CIPHER        7	/* data */
-#define SLINKCMD_SET_CRYPT_OUT_KEY           8	/* data */
-#define SLINKCMD_START_CRYPT_OUT             9
-#define SLINKCMD_INJECT_RECVQ                10	/* data */
-#define SLINKCMD_INJECT_SENDQ                11	/* data */
-#define SLINKCMD_INIT                        12
-#define SLINKCMD_ZIPSTATS                    13
+#define SLINKCMD_INJECT_RECVQ                4	/* data */
+#define SLINKCMD_INJECT_SENDQ                5	/* data */
+#define SLINKCMD_INIT                        6
+#define SLINKCMD_ZIPSTATS                    7
 
 #ifndef HAVE_SOCKETPAIR
 #define LAST_SLINK_FD   7
