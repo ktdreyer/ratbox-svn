@@ -252,12 +252,15 @@ comm_select(time_t delay)
                 break;
             if (ignoreErrno(errno))
                 break;
+            set_time();
             return COMM_ERROR;
             /* NOTREACHED */
         }
-    
+
+        set_time();
         if (num == 0)
             continue;
+        callbacks_called += num;
         
         for (i = 0; i < num; i++) {
             int fd = dopoll.dp_fds[i].fd;

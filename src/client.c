@@ -61,6 +61,7 @@
 
 static void check_pings_list(dlink_list *list);
 static void check_unknowns_list(dlink_list *list);
+static void free_exited_clients(void *unused);
 
 static EVH check_pings;
 
@@ -76,15 +77,14 @@ static int local_client_count=0;
  */
 void init_client(void)
 {
-  remote_client_count = 0;
-  local_client_count = 0;
-
-  /*
-   * start off the check ping event ..  -- adrian
-   *
-   * Every 30 seconds is plenty -- db
-   */
-  eventAdd("check_pings", check_pings, NULL, 30, 0);
+ remote_client_count = 0;
+ local_client_count = 0;
+ /*
+  * start off the check ping event ..  -- adrian
+  * Every 30 seconds is plenty -- db
+  */
+ eventAdd("check_pings", check_pings, NULL, 30, 0);
+ eventAdd("free_exited_clients()", &free_exited_clients, NULL, 4, 0);
 }
 
 /*
@@ -932,29 +932,29 @@ const char* get_client_host(struct Client* client)
 #endif
 }
 
-void free_exited_clients( void )
+static void
+free_exited_clients(void *unused)
 {
-  dlink_node *ptr, *next;
-  struct Client *target_p;
+ dlink_node *ptr, *next;
+ struct Client *target_p;
   
-  for(ptr = dead_list.head; ptr; ptr = next)
+ for(ptr = dead_list.head; ptr; ptr = next)
+ {
+  target_p = ptr->data;
+  next = ptr->next;
+  if (ptr->data == NULL)
   {
-    target_p = ptr->data;
-    next = ptr->next;
-    if (ptr->data == NULL)
-    {
-      sendto_realops_flags(FLAGS_ALL,
-                           "Warning: null client on dead_list!");
-      dlinkDelete(ptr, &dead_list);
-      free_dlink_node(ptr);
-      continue;
-    }
-
-    release_client_state(target_p);
-    free_client(target_p);
-    dlinkDelete(ptr, &dead_list);
-    free_dlink_node(ptr);
+   sendto_realops_flags(FLAGS_ALL,
+                        "Warning: null client on dead_list!");
+   dlinkDelete(ptr, &dead_list);
+   free_dlink_node(ptr);
+   continue;
   }
+  release_client_state(target_p);
+  free_client(target_p);
+  dlinkDelete(ptr, &dead_list);
+  free_dlink_node(ptr);
+ }
 }
 
 /*

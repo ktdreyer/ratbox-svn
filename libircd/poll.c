@@ -273,9 +273,6 @@ comm_select_fdlist(fdlist_t fdlist, time_t delay)
  PF *hdl;
  pollfd_list_t *pf = &pollfd_lists[fdlist];
   
- /* update current time */
- set_time();
-  
  for (;;)
  {
   /* XXX kill that +1 later ! -- adrian */
@@ -284,6 +281,7 @@ comm_select_fdlist(fdlist_t fdlist, time_t delay)
    break;
   if (ignoreErrno(errno))
    continue;
+  set_time();
   /* error! */
   return -1;
   /* NOTREACHED */
@@ -291,6 +289,7 @@ comm_select_fdlist(fdlist_t fdlist, time_t delay)
   
  /* update current time again, eww.. */
  set_time();
+ callbacks_called += num;
  
  if (num == 0)
   return 0;

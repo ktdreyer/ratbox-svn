@@ -66,7 +66,7 @@ char* date(time_t lclock)
   int        minswest;
 
   if (!lclock) 
-    time(&lclock);
+    lclock = CurrentTime;
   gm = gmtime(&lclock);
   memcpy((void *)&gmbuf, (void *)gm, sizeof(gmbuf));
   gm = &gmbuf;
@@ -99,7 +99,7 @@ const char* smalldate(time_t lclock)
   struct  tm      gmbuf;
 
   if (!lclock)
-    time(&lclock);
+    lclock = CurrentTime;
   gm = gmtime(&lclock);
   memcpy((void *)&gmbuf, (void *)gm, sizeof(gmbuf));
   gm = &gmbuf; 

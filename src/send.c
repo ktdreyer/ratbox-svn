@@ -180,7 +180,7 @@ _send_message(struct Client *to, char *msg, int len)
       if (IsCryptOut(to))
       {
         linebuf_flags |= LINEBUF_CRYPT;
-        linebuf_key = to->localClient->out_key;
+        linebuf_key = (char *)to->localClient->out_key;
       }
 #endif
       if (len)
@@ -1525,7 +1525,6 @@ ts_warn(const char *pattern, ...)
   char lbuf[LOG_BUFSIZE];
   static time_t last = 0;
   static int warnings = 0;
-  time_t now;
  
   /*
   ** if we're running with TS_WARNINGS enabled and someone does
@@ -1534,15 +1533,14 @@ ts_warn(const char *pattern, ...)
   ** more than 5 every 5 seconds.  -orabidoo
   */
 
-  now = time(NULL);
-  if (now - last < 5)
+  if (CurrentTime - last < 5)
     {
       if (++warnings > 5)
         return;
     }
   else
     {
-      last = now;
+      last = CurrentTime;
       warnings = 0;
     }
 

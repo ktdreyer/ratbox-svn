@@ -345,14 +345,14 @@ static void m_cryptkey(struct Client *client_p, struct Client *source_p,
                        int parc, char *parv[])
 {
   int decoded_len, len;
-  char *key;
-  char *tmp;
+  unsigned char *key, *tmp;
 
   if (!(parc > 1 && IsCryptOut(client_p) && MyConnect(client_p) &&
         IsCapable(client_p, CAP_CRYPT)))
     return;
 
-  if ( !(decoded_len = unbase64_block(&tmp, parv[1], strlen(parv[1]))) )
+  if ( !(decoded_len = unbase64_block((char **)&tmp, parv[1],
+                                      strlen(parv[1]))) )
   {
     cryptlink_error(client_p, "%s[%s] Key regen failed - couldn't decode key");
     return;
@@ -413,8 +413,7 @@ static char *parse_cryptserv_args(char *parv[], int parc, char *info,
                                   char *key1, char *key2)
 {
   char *name;
-  char *tmp;
-  char *out;
+  unsigned char *tmp, *out;
   int len;
   int decoded_len;
   
@@ -426,7 +425,8 @@ static char *parse_cryptserv_args(char *parv[], int parc, char *info,
   name = parv[1];
 
   /* parv[2] contains encrypted auth data */
-  if ( !(decoded_len = unbase64_block(&tmp, parv[2], strlen(parv[2]))) )
+  if ( !(decoded_len = unbase64_block((char **)&tmp, parv[2],
+                                      strlen(parv[2]))) )
     return NULL;
 
   if ( (out = MyMalloc( RSA_size( ServerInfo.rsa_private_key ) )) == NULL )

@@ -585,7 +585,6 @@ extern void del_from_accept(struct Client *source, struct Client *target);
 extern void del_all_accepts(struct Client *client_p);
 extern void list_all_accepts(struct Client *source_p);
 
-extern void free_exited_clients(void);
 extern int set_initial_nick(struct Client *client_p, struct Client *source_p,
                             char *nick);
 extern int change_local_nick(struct Client *client_p, struct Client *source_p,

@@ -179,9 +179,6 @@ comm_select(time_t delay)
     fde_t *F;
     struct timeval to;
 
-    /* update current time */
-    set_time();
-
     /* Copy over the read/write sets so we don't have to rebuild em */
     bcopy(&select_readfds, &tmpreadfds, sizeof(fd_set));
     bcopy(&select_writefds, &tmpwritefds, sizeof(fd_set));
@@ -194,16 +191,13 @@ comm_select(time_t delay)
             break;
         if (ignoreErrno(errno))
             continue;
+        set_time();
         /* error! */
         return -1;
         /* NOTREACHED */
     }
-
-    /* update current time again, eww.. */
-    if ((CurrentTime = time(0)) == -1) {
-        log(L_CRIT, "Clock Failure");
-        restart("Clock failed");
-    }   
+    callbacks_called += num;
+    set_time();
 
     if (num == 0)
         return 0;
