@@ -385,7 +385,7 @@ int     ms_whois(struct Client *cptr,
                 char *parv[])
 {
   /* If its running as a hub, and linked with lazy links
-   * then allow leaf to use normal client m_names()
+   * then allow leaf to use normal client m_whois()
    * other wise, ignore it.
    */
 

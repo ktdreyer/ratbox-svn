@@ -1322,6 +1322,8 @@ const char* comment         /* Reason for the exit */
 
 	  if(ConfigFileEntry.hub)
 	    restoreUnusedServerMask(sptr->localClient->serverMask);
+	  else
+	    uplink = NULL;
         }
       sptr->flags |= FLAGS_CLOSING;
       if (IsPerson(sptr))

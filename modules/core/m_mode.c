@@ -91,10 +91,6 @@ int m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       /* if chptr isn't found locally, it =could= exist
        * on the uplink. So ask.
        */
-      dlink_node *ptr;
-      struct Client *uplink=NULL;
-      if( ptr = serv_list.head )
-	uplink = ptr->data;
       
       /* LazyLinks */
       /* this was segfaulting if we had no servers linked.

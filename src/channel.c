@@ -2372,16 +2372,6 @@ void cleanup_channels(void *unused)
    struct Channel *chptr;
    struct Channel *next_chptr;
    dlink_node *ptr;
-   struct Client *uplink;
-
-   /* XXX errg for leafs, really need a global uplink struct */
-   if(!ConfigFileEntry.hub && serv_list.head)
-     {
-       ptr = serv_list.head;
-       uplink = ptr->data;
-     }
-   else
-     uplink = NULL;
 
    eventAdd("cleanup_channels", cleanup_channels, NULL,
 	    CLEANUP_CHANNELS_TIME, 0 );

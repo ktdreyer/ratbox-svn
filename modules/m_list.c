@@ -71,11 +71,6 @@ int     m_list(struct Client *cptr,
                char *parv[])
 {
   static time_t last_used=0L;
-  /* XXX global uplink */
-  dlink_node *ptr;
-  struct Client *uplink=NULL;
-  if( ptr = serv_list.head )
-    uplink = ptr->data;
 
   /* If its a LazyLinks connection, let uplink handle the list */
 
@@ -122,12 +117,6 @@ int     mo_list(struct Client *cptr,
                int parc,
                char *parv[])
 {
-  /* XXX global uplink */
-  dlink_node *ptr;
-  struct Client *uplink=NULL;
-  if( ptr = serv_list.head )
-    uplink = ptr->data;
-  
 /* Opers don't get paced */
 
   /* If its a LazyLinks connection, let uplink handle the list

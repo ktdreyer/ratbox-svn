@@ -217,12 +217,6 @@ int     m_join(struct Client *cptr,
 	  flags = CHFL_CHANOP;
 	  if(!ConfigFileEntry.hub)
 	    {
-	      /* XXX global uplink */
-	      dlink_node *ptr;
-	      struct Client *uplink=NULL;
-	      if( ptr = serv_list.head )
-		uplink = ptr->data;
-
 	      /* LazyLinks */
 	      if( (*name != '&') && uplink
 		  && IsCapable(uplink, CAP_LL) )

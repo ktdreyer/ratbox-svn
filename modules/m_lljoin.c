@@ -86,12 +86,6 @@ int     ms_lljoin(struct Client *cptr,
   struct Client *acptr;
   struct Channel *chptr;
 
-  /* XXX global uplink */
-  dlink_node *ptr;
-  struct Client *uplink=NULL;
-  if( ptr = serv_list.head )
-    uplink = ptr->data;
-
   if(uplink && !IsCapable(uplink,CAP_LL))
     {
       sendto_realops_flags(FLAGS_ALL,

@@ -116,6 +116,7 @@ extern void        sjoin_channel(struct Client *cptr, struct Channel *chptr);
 extern void	   sendnick_TS(struct Client*, struct Client* );
 extern int         serv_connect(struct ConfItem *, struct Client *);
 
+extern struct Client *uplink; /* NON NULL if leaf and is this servers uplink */
 #endif /* INCLUDED_s_serv_h */
 
 

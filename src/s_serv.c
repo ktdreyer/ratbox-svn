@@ -66,6 +66,8 @@ extern struct sockaddr_in vserv;               /* defined in s_conf.c */
 int MaxConnectionCount = 1;
 int MaxClientCount     = 1;
 
+struct Client *uplink=NULL;
+
 /*
  * list of recognized server capabilities.  "TS" is not on the list
  * because all servers that we talk to already do TS, and the kludged
@@ -855,6 +857,11 @@ int server_estab(struct Client *cptr)
         }
     }
   
+  if(!ConfigFileEntry.hub)
+    {
+      uplink = cptr;
+    }
+
   server_burst(cptr);
 
   return 0;
