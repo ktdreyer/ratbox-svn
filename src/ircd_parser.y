@@ -605,7 +605,10 @@ serverinfo_hub:         HUB '=' TYES ';'
         uplink->name);
     }
     else
+    {
       ServerInfo.hub = 1;
+      uplink = NULL;
+    }
   }
                         |
                         HUB '=' TNO ';'
