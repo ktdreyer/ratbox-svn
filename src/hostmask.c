@@ -205,7 +205,7 @@ try_parse_v4_netmask(const char *text, struct irc_inaddr *addr, int *b)
   addb[n] = 0;
  if (addr)
   addr->sins.sin.s_addr =
-    htonl(addb[3] | addb[2]<<8 | addb[1]<<16 | addb[0]<<24);
+    htonl(addb[0]<<24 | addb[1]<<16 | addb[2]<<8 | addb[3]);
  if (b)
   *b = bits;
  return HM_IPV4;
