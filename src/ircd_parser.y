@@ -34,6 +34,12 @@ int yyparse();
 	
 static struct ConfItem *yy_aconf;
 
+char* class_name_var;
+int   class_ping_time_var;
+int   class_number_per_ip_var;
+int   class_max_number_var;
+int   class_sendq_var;
+
 %}
 
 %union {
@@ -174,6 +180,10 @@ oper_entry:	OPERATOR
       conf_add_class_to_conf(yy_aconf);
       conf_add_conf(yy_aconf);
     }
+  else
+    {
+      free_conf(yy_aconf);
+    }
   yy_aconf = NULL;
 };
 
@@ -253,7 +263,26 @@ oper_rehash: REHASH '=' YES ';' {
  *  section class
  ***************************************************************************/
 
-class_entry:	CLASS '{' class_items '}' ';'
+class_entry:	CLASS 
+  {
+    if(class_name_var)
+      MyFree(class_name_var);
+
+    class_name_var = (char *)NULL;
+    class_ping_time_var = 0;
+    class_number_per_ip_var = 0;
+    class_max_number_var = 0;
+    class_sendq_var = 0;
+  };
+  '{' class_items '}' ';' {
+
+  add_class(class_name_var,class_ping_time_var,
+	    class_number_per_ip_var, class_max_number_var,
+	    class_sendq_var );
+
+  MyFree(class_name_var);
+  class_name_var = (char *)NULL;
+};
 
 class_items:	class_items class_item |
 		class_item
@@ -264,15 +293,20 @@ class_item:	class_name |
 		class_max_number |
 		class_sendq
 
-class_name:	NAME '=' QSTRING ';'  { sendto_realops("class.name [%s]",yylval.string); };
+class_name:	NAME '=' QSTRING ';'  {
+  DupString(class_name_var,yylval.string); };
 
-class_ping_time:	PING_TIME '=' NUMBER ';' { sendto_realops("ping_time %d",yylval.number); };
+class_ping_time:	PING_TIME '=' NUMBER ';' {
+  class_ping_time_var = yylval.number; };
 
-class_number_per_ip:	NUMBER_PER_IP '=' NUMBER ';' { sendto_realops("number_per_ip [%d]",yylval.number); };
+class_number_per_ip:	NUMBER_PER_IP '=' NUMBER ';' {
+  class_number_per_ip_var = yylval.number; };
 
-class_max_number:	MAX_NUMBER '=' NUMBER ';' { sendto_realops("max_number [%d]",yylval.number); };
+class_max_number:	MAX_NUMBER '=' NUMBER ';' {
+  class_max_number_var = yylval.number; };
 
-class_sendq:	SENDQ '=' NUMBER ';' { sendto_realops("sendq [%d]",yylval.number); };
+class_sendq:	SENDQ '=' NUMBER ';' {
+  class_sendq_var = yylval.number; };
 
 /***************************************************************************
  *  section listen
@@ -291,7 +325,7 @@ listen_entry:	LISTEN
   };
  '{' listen_items '}' ';' {
   conf_add_port(yy_aconf);
-  conf_add_conf(yy_aconf);
+  free_conf(yy_aconf);
   yy_aconf = NULL;
  };
 
@@ -413,17 +447,45 @@ connect_class:	CLASS '=' QSTRING ';'  { sendto_realops("connect.class [%s]",yylv
  *  section kill
  ***************************************************************************/
 
-kill_entry:	KILL '{' kill_items '}' ';'
+kill_entry:	KILL
+  {
+    if(yy_aconf)
+      {
+	free_conf(yy_aconf);
+	yy_aconf = NULL;
+      }
+    yy_aconf=make_conf();
+    yy_aconf->status = CONF_KILL;
+  };
+ '{' kill_items '}' ';' {
+  if(yy_aconf->user && yy_aconf->passwd && yy_aconf->host)
+    {
+      conf_add_k_line(yy_aconf);
+    }
+  else
+    {
+      free_conf(yy_aconf);
+    }
+  yy_aconf = NULL;
+  };
 
 kill_items:	kill_items kill_item |
 		kill_item
 
-kill_item:	kill_name | kill_reason
+kill_item:	kill_user | kill_host | kill_reason
 
 
-kill_name:	NAME '=' QSTRING ';'  { sendto_realops("kill.name [%s]",yylval.string); };
+kill_user:	USER '=' QSTRING ';'  {
+  DupString(yy_aconf->user,yylval.string);
+ };
 
-kill_reason:	REASON '=' QSTRING ';'  { sendto_realops("kill.name [%s]",yylval.string); };
+kill_host:	HOST '=' QSTRING ';'  {
+  DupString(yy_aconf->host,yylval.string);
+ };
+
+kill_reason:	REASON '=' QSTRING ';'  {
+  DupString(yy_aconf->passwd,yylval.string);
+ };
 
 /***************************************************************************
  *  section deny

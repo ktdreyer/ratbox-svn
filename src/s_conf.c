@@ -80,7 +80,7 @@ static void     flush_deleted_I_P(void);
 FBFILE* conf_fbfile_in;
 char    conf_line_in[256];
 struct ConfItem* yy_aconf;
-
+extern char yytext[];
 
 /* address of class 0 conf */
 static struct   Class* class0;
@@ -3355,7 +3355,7 @@ void conf_add_k_line(struct ConfItem *aconf)
   unsigned long    ip;
   unsigned long    ip_mask;
 
-  if (aconf->host) /* && (aconf->status & CONF_KILL)) */
+  if (aconf->host)
     {
       if(is_address(aconf->host,&ip,&ip_mask))
 	{
@@ -3523,7 +3523,7 @@ void conf_add_fields(struct ConfItem *aconf,
 
 void yyerror(char *msg)
 {
-  sendto_realops("Parser error %s", msg);
+  sendto_realops("Parser error %s %s", msg, yytext);
 }
 
 int conf_fbgets(char *buf,int max_size, FBFILE *fb)

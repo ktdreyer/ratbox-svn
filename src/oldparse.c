@@ -253,7 +253,8 @@ void oldParseOneLine(char* line,struct ConfItem* aconf,
       conf_add_fields(aconf,host_field,pass_field,user_field,
 		      port_field,class_field);
       conf_add_port(aconf);
-      conf_add_conf(aconf);
+      free_conf(aconf);
+      aconf=NULL;
       break;
 
     case 'Q': /* reserved nicks */
@@ -288,7 +289,8 @@ void oldParseOneLine(char* line,struct ConfItem* aconf,
       if(class_field)
 	sendq = atoi(class_field);
       conf_add_class(aconf,sendq);
-      conf_add_conf(aconf);
+      free_conf(aconf);
+      aconf = NULL;
       break;
       
     default:
