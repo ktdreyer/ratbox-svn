@@ -1,3 +1,15 @@
+leeh        2004/03/30 06:20:37 EST	(20040330_6)
+
+  Modified files:
+    include              client.h 
+  Log:
+  - ClearOper() shouldnt reset the handler of remote clients..
+  
+  Revision  Changes    Path
+  7.241     +1 -1      ircd-ratbox/include/client.h
+
+
+
 androsyn    2004/03/29 22:13:20 EST	(20040330_5)
 
   Modified files:
