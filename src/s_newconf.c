@@ -55,6 +55,9 @@ dlink_list resv_hash_list;
 dlink_list shared_list;
 dlink_list encap_list;
 
+static int is_wildcard_esc(const char *);
+static char *strip_escapes(const char *);
+
 /* init_conf()
  *
  * inputs       -
@@ -133,9 +136,11 @@ add_rxconf(struct rxconf *rxptr)
 	}
 	else if(IsXline(rxptr))
 	{
-		if((strchr(rxptr->name, '?') == NULL) &&
-		   (strchr(rxptr->name, '*') == NULL))
+		if(!is_wildcard_esc(rxptr->name))
 		{
+			const char *name = strip_escapes(rxptr->name);
+			MyFree(rxptr->name);
+			DupString(rxptr->name, name);
 			add_to_xline_hash(rxptr->name, rxptr);
 			dlinkAddAlloc(rxptr, &xline_hash_list);
 		}
@@ -360,7 +365,14 @@ valid_wild_card_simple(const char *data)
 
 	while((tmpch = *p++))
 	{
-		if(!IsMWildChar(tmpch))
+		/* found an escape, p points to the char after it, so skip
+		 * that and move on.
+		 */
+		if(tmpch == '\\')
+		{
+			p++;
+		}
+		else if(!IsMWildChar(tmpch))
 		{
 			/* if we have enough nonwildchars, return */
 			if(++nonwild >= ConfigFileEntry.min_nonwildcard_simple)
@@ -369,6 +381,61 @@ valid_wild_card_simple(const char *data)
 	}
 
 	return 0;
+}
+
+/* wildcard_esc()
+ *
+ * inputs	- string to test for wildcards (inc escaping)
+ * outputs	- 1 if wildcards, else 0
+ * side effects -
+ */
+static int
+is_wildcard_esc(const char *data)
+{
+	const char *p;
+	char tmpch;
+
+	p = data;
+
+	while((tmpch = *p++))
+	{
+		/* found an escape, so skip the char after */
+		if(tmpch == '\\')
+			p++;
+		else if(IsMWildChar(tmpch))
+			return 1;
+	}
+
+	return 0;
+}
+
+/* strip_escapes()
+ *
+ * inputs	- string to strip escapes from
+ * outputs	- string stripped of escapes
+ * side effects -
+ */
+static char *
+strip_escapes(const char *data)
+{
+	static char buf[BUFSIZE];
+	const char *p;
+	char *s;
+	char tmpch;
+	
+	p = data;
+	s = buf;
+
+	while((tmpch = *p++))
+	{
+		/* found an escape, use the char after */
+		if(tmpch == '\\')
+			tmpch = *p++;
+		*s++ = tmpch;
+	}
+
+	*s = '\0';
+	return buf;
 }
 
 /* make_shared()
