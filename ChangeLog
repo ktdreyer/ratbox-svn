@@ -1,3 +1,15 @@
+androsyn    2002/08/15 20:13:22 EDT	(20020816_1)
+
+  Modified files:
+    contrib              m_owhois.c 
+  Log:
+  Fix a typo
+  
+  Revision  Changes    Path
+  1.5       +2 -2      ircd-ratbox/contrib/m_owhois.c
+
+
+
 androsyn    2002/08/15 20:05:07 EDT	(20020816_0)
 
   Modified files:
