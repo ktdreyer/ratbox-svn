@@ -1214,8 +1214,8 @@ void exit_aborted_clients(void)
           free_dlink_node(ptr);
           continue;
         }
-      exit_client(target_p, target_p, &me, "Dead link");  
       dlinkDelete(ptr, &abort_list);
+      exit_client(target_p, target_p, &me, "Dead link");  
       free_dlink_node(ptr);
     }
 }

@@ -488,6 +488,7 @@ void error_exit_client(struct Client* client_p, int error)
     ircsprintf(errmsg, "Read error: %d (%s)", 
                current_error, strerror(current_error));
   }
+  SetDead(client_p);
   fd_close(client_p->localClient->fd);
   client_p->localClient->fd = -1;
   

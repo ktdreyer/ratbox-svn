@@ -659,7 +659,6 @@ delete_identd_queries(struct Client *target_p)
   dlink_node *ptr;
   dlink_node *next_ptr;
   struct AuthRequest* auth;
-
   for (ptr = auth_poll_list.head; ptr; ptr = next_ptr)
     {
       auth = ptr->data;
