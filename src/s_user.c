@@ -837,8 +837,8 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
               if(!IsOper(sptr))
                 break;
 
-              sptr->umodes &= ~(FLAGS_OPER|FLAGS_ADMIN);
-			  sptr->umodes &= ~ConfigFileEntry.oper_only_umodes;
+              ClearOper(sptr);
+	      sptr->umodes &= ~ConfigFileEntry.oper_only_umodes;
 			  
               Count.oper--;
 

@@ -421,7 +421,7 @@ struct LocalUser
 #define SetOper(x)              {(x)->umodes |= FLAGS_OPER; \
 				 if (!IsServer((x))) (x)->handler = OPER_HANDLER;}
 
-#define ClearOper(x)            {(x)->umodes &= ~FLAGS_OPER; \
+#define ClearOper(x)            {(x)->umodes &= ~(FLAGS_OPER|FLAGS_ADMIN); \
 				 if (!IsOper((x)) && !IsServer((x))) \
 				  (x)->handler = CLIENT_HANDLER; }
 
