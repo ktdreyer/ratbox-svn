@@ -34,7 +34,7 @@
 #include "modules.h"
 #include <stdlib.h>
 
-static int ms_eob(struct Client*, struct Client*, int, char**);
+static void ms_eob(struct Client*, struct Client*, int, char**);
 
 struct Message eob_msgtab = {
   "EOB", 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0, 
@@ -60,7 +60,7 @@ char *_version = "20001202";
  *      parv[0] = sender prefix   
  *      parv[1] = servername   
  */
-static int ms_eob(struct Client *cptr, struct Client *sptr,
+static void ms_eob(struct Client *cptr, struct Client *sptr,
                   int parc, char *parv[])
 {
   if (parc > 1)
@@ -73,5 +73,4 @@ static int ms_eob(struct Client *cptr, struct Client *sptr,
 			 sptr->name);
 
   SetEob(cptr);
-  return 0;
 }

@@ -39,7 +39,7 @@
 #include "parse.h"
 #include "modules.h"
 
-static int m_mode(struct Client*, struct Client*, int, char**);
+static void m_mode(struct Client*, struct Client*, int, char**);
 
 struct Message mode_msgtab = {
   "MODE", 0, 2, 0, MFLG_SLOW, 0,
@@ -66,7 +66,7 @@ char *_version = "20001122";
  * parv[0] - sender
  * parv[1] - channel
  */
-static int m_mode(struct Client *cptr, struct Client *sptr,
+static void m_mode(struct Client *cptr, struct Client *sptr,
               int parc, char *parv[])
 {
   struct Channel* chptr=NULL;
@@ -80,14 +80,14 @@ static int m_mode(struct Client *cptr, struct Client *sptr,
   if( !IsChanPrefix(parv[1][0]) )
     {
       /* if here, it has to be a non-channel name */
-      return user_mode(cptr, sptr, parc, parv);
+      user_mode(cptr, sptr, parc, parv);
     }
 
   if (!check_channel_name(parv[1]))
     { 
       sendto_one(sptr, form_str(ERR_BADCHANNAME),
 		 me.name, parv[0], (unsigned char *)parv[1]);
-      return 0;
+      return;
     }
 	  
   chptr = hash_find_channel(parv[1], NullChn);
@@ -117,13 +117,13 @@ static int m_mode(struct Client *cptr, struct Client *sptr,
 	  
 	  sendto_one(uplink, ":%s MODE %s %s",
 		     sptr->name, parv[1], (parv[2] ? parv[2] : ""));
-	  return 0;
+	  return;
 	}
       else
 	{
 	  sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
 		     me.name, parv[0], parv[1]);
-	  return 0;
+	  return;
 	}
     }
   
@@ -138,13 +138,13 @@ static int m_mode(struct Client *cptr, struct Client *sptr,
        {
         sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL), me.name,
                    parv[0], root->chname);
-        return 0;
+        return;
        }
      if (!(chptr = map_vchan(root, acptr)))
        {
         sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL), me.name,
                    parv[0], root->chname);
-        return 0;
+        return;
        }
      n++;
     }
@@ -194,8 +194,6 @@ static int m_mode(struct Client *cptr, struct Client *sptr,
   else
     set_channel_mode(cptr, sptr, chptr, parc - n, parv + n, 
                      root->chname);
-  
-  return 0;
 }
 
 

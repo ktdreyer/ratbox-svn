@@ -39,8 +39,8 @@
 static int do_ison(struct Client *up, struct Client *sptr,
                    int parc, char *parv[]);
 
-static int m_ison(struct Client*, struct Client*, int, char**);
-static int ms_ison(struct Client*, struct Client*, int, char**);
+static void m_ison(struct Client*, struct Client*, int, char**);
+static void ms_ison(struct Client*, struct Client*, int, char**);
 
 struct Message ison_msgtab = {
   "ISON", 0, 1, 1, MFLG_SLOW, 0,
@@ -73,7 +73,7 @@ char *_version = "20001122";
  * format:
  * ISON :nicklist
  */
-static int m_ison(struct Client *cptr, struct Client *sptr,
+static void m_ison(struct Client *cptr, struct Client *sptr,
                   int parc, char *parv[])
 {
   struct Client *up = NULL;
@@ -81,7 +81,7 @@ static int m_ison(struct Client *cptr, struct Client *sptr,
   if (!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
     up = uplink;
 
-  return(do_ison(up, sptr, parc, parv));
+  do_ison(up, sptr, parc, parv);
 }
 
 /*
@@ -92,17 +92,11 @@ static int m_ison(struct Client *cptr, struct Client *sptr,
  * exists...
  * ISON :nicklist
  */
-static int ms_ison(struct Client *cptr, struct Client *sptr,
+static void ms_ison(struct Client *cptr, struct Client *sptr,
                    int parc, char *parv[])
 {
   if (ServerInfo.hub && IsCapable(cptr, CAP_LL))
-    return(do_ison(NULL, sptr, parc, parv));
-
-  /* XXX - bad, this server isn't a lazylink, it shouldn't send
-   *       us ISON requests!
-   */
-
-  return 0;
+    do_ison(NULL, sptr, parc, parv);
 }
 
 static int do_ison(struct Client *up, struct Client *sptr,

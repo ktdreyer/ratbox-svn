@@ -46,9 +46,9 @@ static void send_conf_options(struct Client *sptr);
 static void send_birthdate_online_time(struct Client *sptr);
 static void send_info_text(struct Client *sptr);
 
-static int m_info(struct Client*, struct Client*, int, char**);
-static int ms_info(struct Client*, struct Client*, int, char**);
-static int mo_info(struct Client*, struct Client*, int, char**);
+static void m_info(struct Client*, struct Client*, int, char**);
+static void ms_info(struct Client*, struct Client*, int, char**);
+static void mo_info(struct Client*, struct Client*, int, char**);
 
 struct Message info_msgtab = {
   "INFO", 0, 0, 0, MFLG_SLOW, 0,
@@ -79,7 +79,7 @@ char *_version = "20010109";
 **  parv[1] = servername
 */
 
-static int m_info(struct Client *cptr, struct Client *sptr,
+static void m_info(struct Client *cptr, struct Client *sptr,
                   int parc, char *parv[])
 {
   static time_t last_used=0L;
@@ -94,7 +94,7 @@ static int m_info(struct Client *cptr, struct Client *sptr,
       {
         /* safe enough to give this on a local connect only */
         sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);
-        return 0;
+        return;
       }
       else
         last_used = CurrentTime;
@@ -104,8 +104,6 @@ static int m_info(struct Client *cptr, struct Client *sptr,
 
     sendto_one(sptr, form_str(RPL_ENDOFINFO), me.name, parv[0]);
   } /* if (hunt_server(cptr,sptr,":%s INFO :%s",1,parc,parv) == HUNTED_ISME) */
-
-  return 0;
 } /* m_info() */
 
 /*
@@ -113,7 +111,7 @@ static int m_info(struct Client *cptr, struct Client *sptr,
 **  parv[0] = sender prefix
 **  parv[1] = servername
 */
-static int mo_info(struct Client *cptr, struct Client *sptr,
+static void mo_info(struct Client *cptr, struct Client *sptr,
                    int parc, char *parv[])
 
 {
@@ -129,8 +127,6 @@ static int mo_info(struct Client *cptr, struct Client *sptr,
 
     sendto_one(sptr, form_str(RPL_ENDOFINFO), me.name, parv[0]);
   } /* if (hunt_server(cptr,sptr,":%s INFO :%s",1,parc,parv) == HUNTED_ISME) */
-
-  return 0;
 } /* mo_info() */
 
 /*
@@ -138,7 +134,7 @@ static int mo_info(struct Client *cptr, struct Client *sptr,
 **  parv[0] = sender prefix
 **  parv[1] = servername
 */
-static int ms_info(struct Client *cptr, struct Client *sptr,
+static void ms_info(struct Client *cptr, struct Client *sptr,
                    int parc, char *parv[])
 
 {
@@ -149,7 +145,6 @@ static int ms_info(struct Client *cptr, struct Client *sptr,
       else
 	m_info(cptr,sptr,parc,parv);
     }
-  return 0;
 } /* ms_info() */
 
 

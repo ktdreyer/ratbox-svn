@@ -43,7 +43,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static int m_cjoin(struct Client*, struct Client*, int, char**);
+static void m_cjoin(struct Client*, struct Client*, int, char**);
 
 struct Message cjoin_msgtab = {
   "CJOIN", 0, 2, 0, MFLG_SLOW, 0,
@@ -71,7 +71,7 @@ char *_version = "20001122";
 **      parv[1] = channel
 **      parv[2] = channel password (key)
 */
-static int m_cjoin(struct Client *cptr,
+static void m_cjoin(struct Client *cptr,
                    struct Client *sptr,
                    int parc,
                    char *parv[])
@@ -86,21 +86,21 @@ static int m_cjoin(struct Client *cptr,
   if (!(sptr->user))
     {
       /* something is *fucked* - bail */
-      return 0;
+      return;
     }
 
   if (ConfigFileEntry.vchans_oper_only && !IsOper(sptr))
     {
       sendto_one(sptr, form_str(ERR_NOPRIVILEGES),
                  me.name, parv[0]);
-      return 0;
+      return;
     }
 
   if (*parv[1] == '\0')
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "CJOIN");
-      return 0;
+      return;
     }
 
 
@@ -118,21 +118,21 @@ static int m_cjoin(struct Client *cptr,
     {
       sendto_one(sptr, form_str(ERR_BADCHANNAME),
 		 me.name, parv[0], (unsigned char*) name);
-      return 0;
+      return;
     }
 
   if (*name == '&')
     {
       sendto_one(sptr, form_str(ERR_BADCHANNAME),
 		 me.name, parv[0], (unsigned char*) name);
-      return 0;
+      return;
     }
 
   if (!IsChannelName(name))
     {
       sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
 		 me.name, parv[0], name);
-      return 0;
+      return;
     }
 
   (void)strncpy(jbuf, name, sizeof(jbuf) - 1);
@@ -152,18 +152,18 @@ static int m_cjoin(struct Client *cptr,
           sendto_one(uplink, ":%s CBURST %s !%s",
                      me.name, parv[1], sptr->name);
 
-          return 0;
+          return;
         }
       else
         {
           sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
                      me.name, sptr->name, name);
         }
-      return 0;
+      return;
     }
 
   if (! (vchan_chptr = cjoin_channel(chptr, sptr, name)) )
-    return 0;
+    return;
 
   root_vchan = chptr;
   chptr = vchan_chptr;
@@ -200,7 +200,4 @@ static int m_cjoin(struct Client *cptr,
 
   del_invite(vchan_chptr, sptr);
   (void)channel_member_names(sptr, vchan_chptr, root_vchan->chname);
-
-  return 0;
 }
-

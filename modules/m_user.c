@@ -38,7 +38,7 @@
 
 #define UFLAGS  (FLAGS_INVISIBLE|FLAGS_WALLOP|FLAGS_SERVNOTICE)
 
-static int mr_user(struct Client*, struct Client*, int, char**);
+static void mr_user(struct Client*, struct Client*, int, char**);
 
 struct Message user_msgtab = {
   "USER", 0, 5, 0, MFLG_SLOW, 0L,
@@ -67,7 +67,7 @@ char *_version = "20001122";
 **      parv[3] = server host name (used only from other servers)
 **      parv[4] = users real name info
 */
-static int mr_user(struct Client* cptr, struct Client* sptr,
+static void mr_user(struct Client* cptr, struct Client* sptr,
 		   int parc, char *parv[])
 {
   char* p;
@@ -79,14 +79,14 @@ static int mr_user(struct Client* cptr, struct Client* sptr,
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
                  me.name, BadPtr(parv[0]) ? "*" : parv[0], "USER");
-      return 0;
+      return;
     }
 
-  return do_local_user(parv[0], cptr, sptr,
-		       parv[1],	/* username */
-		       parv[2],	/* host */
-		       parv[3],	/* server */
-		       parv[4]	/* users real name */ );
+  do_local_user(parv[0], cptr, sptr,
+                parv[1],	/* username */
+                parv[2],	/* host */
+                parv[3],	/* server */
+                parv[4]	/* users real name */ );
 }
 
 

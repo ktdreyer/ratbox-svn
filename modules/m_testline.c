@@ -40,7 +40,7 @@
 
 #include <string.h>
 
-static int mo_testline(struct Client*, struct Client*, int, char**);
+static void mo_testline(struct Client*, struct Client*, int, char**);
 
 struct Message testline_msgtab = {
   "TESTLINE", 0, 0, 0, MFLG_SLOW, 0,
@@ -76,7 +76,7 @@ char *_version = "20001124";
  *
  */  
   
-static int mo_testline(struct Client *cptr, struct Client *sptr,
+static void mo_testline(struct Client *cptr, struct Client *sptr,
                        int parc, char *parv[])
 {
   struct ConfItem *aconf;
@@ -114,7 +114,7 @@ static int mo_testline(struct Client *cptr, struct Client *sptr,
           sendto_one(sptr, ":%s NOTICE %s :usage: user@host|ip",
                      me.name, parv[0]);
   
-          return 0;
+          return;
         }
       
       *p = '\0';
@@ -173,5 +173,4 @@ static int mo_testline(struct Client *cptr, struct Client *sptr,
   else
     sendto_one(sptr, ":%s NOTICE %s :usage: user@host|ip",
                me.name, parv[0]);
-  return 0;
 }

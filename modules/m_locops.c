@@ -35,7 +35,7 @@
 #include "parse.h"
 #include "modules.h"
 
-static int m_locops(struct Client *,struct Client *,int,char **);
+static void m_locops(struct Client *,struct Client *,int,char **);
 
 struct Message locops_msgtab = {
   "LOCOPS", 0, 2, 0, MFLG_SLOW, 0,
@@ -62,7 +62,7 @@ char *_version = "20001122";
  *      parv[0] = sender prefix
  *      parv[1] = message text
  */
-static int m_locops(struct Client *cptr, struct Client *sptr,
+static void m_locops(struct Client *cptr, struct Client *sptr,
                     int parc, char *parv[])
 {
   char *message = NULL;
@@ -73,12 +73,10 @@ static int m_locops(struct Client *cptr, struct Client *sptr,
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "LOCOPS");
-      return 0;
+      return;
     }
 
   sendto_wallops_flags(FLAGS_LOCOPS, sptr, "LOCOPS - %s", message);
-
-  return 0;
 }
 
 

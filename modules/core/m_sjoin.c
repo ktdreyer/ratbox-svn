@@ -44,7 +44,7 @@
 #include <string.h>
 #include <assert.h>
 
-static int ms_sjoin(struct Client*, struct Client*, int, char**);
+static void ms_sjoin(struct Client*, struct Client*, int, char**);
 
 struct Message sjoin_msgtab = {
   "SJOIN", 0, 0, 0, MFLG_SLOW, 0,
@@ -94,7 +94,7 @@ static void remove_a_mode(int hide_or_not,
                           struct Client *sptr, dlink_list *list, char flag);
 
 
-static int ms_sjoin(struct Client *cptr,
+static void ms_sjoin(struct Client *cptr,
                     struct Client *sptr,
                     int parc,
                     char *parv[])
@@ -125,21 +125,18 @@ static int ms_sjoin(struct Client *cptr,
   dlink_node *m;
 
   if (IsClient(sptr) || parc < 5)
-    return 0;
+    return;
   if (!IsChannelName(parv[2]))
-    return 0;
-
+    return;
   if (!check_channel_name(parv[2]))
-     { 
-       return 0;
-     }
+    return;
 
   /* comstud server did this, SJOIN's for
    * local channels can't happen.
    */
 
   if(*parv[2] == '&')
-    return 0;
+    return;
 
   mbuf = modebuf;
   *mbuf = '\0';
@@ -176,13 +173,13 @@ static int ms_sjoin(struct Client *cptr,
         strncpy_irc(mode.key, parv[4 + args], KEYLEN);
         args++;
         if (parc < 5+args)
-          return 0;
+          return;
         break;
       case 'l':
         mode.limit = atoi(parv[4+args]);
         args++;
         if (parc < 5+args)
-          return 0;
+          return;
         break;
       }
 
@@ -554,8 +551,6 @@ static int ms_sjoin(struct Client *cptr,
       else
         sendto_one(acptr, "%s %s", buf, sjbuf_nh);
     }
-
-  return 0;
 }
 
 /*

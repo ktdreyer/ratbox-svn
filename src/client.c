@@ -1154,6 +1154,7 @@ static void exit_one_client(struct Client *cptr, struct
   /* remove from global client list */
   remove_client_from_list(sptr);
 
+  SetDead(sptr);
   /* add to dead client dlist */
   lp = make_dlink_node();
   dlinkAdd(sptr, lp, &dead_list);

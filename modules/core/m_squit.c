@@ -38,8 +38,8 @@
 
 #include <assert.h>
 
-static int ms_squit(struct Client*, struct Client*, int, char**);
-static int mo_squit(struct Client*, struct Client*, int, char**);
+static void ms_squit(struct Client*, struct Client*, int, char**);
+static void mo_squit(struct Client*, struct Client*, int, char**);
 
 struct Message squit_msgtab = {
   "SQUIT", 0, 1, 0, MFLG_SLOW, 0,
@@ -76,7 +76,7 @@ char *_version = "20001122";
  *      parv[1] = server name
  *      parv[2] = comment
  */
-static int mo_squit(struct Client *cptr, struct Client *sptr,
+static void mo_squit(struct Client *cptr, struct Client *sptr,
                     int parc, char *parv[])
 {
   struct squit_parms *found_squit;
@@ -85,14 +85,14 @@ static int mo_squit(struct Client *cptr, struct Client *sptr,
   if (!IsOperRemote(sptr))
     {
       sendto_one(sptr,":%s NOTICE %s :You have no R flag",me.name,parv[0]);
-      return 0;
+      return;
     }
 
   if(parc < 2)
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "SQUIT");
-      return -1;
+      return;
     }
 
   if( (found_squit = find_squit(cptr,sptr,parv[1])) )
@@ -107,9 +107,9 @@ static int mo_squit(struct Client *cptr, struct Client *sptr,
               found_squit->acptr->name, get_client_name(sptr, HIDE_IP),
               comment);
 	}
-      return exit_client(cptr, found_squit->acptr, sptr, comment);
+      exit_client(cptr, found_squit->acptr, sptr, comment);
+      return;
     }
-  return 0;
 }
 
 /*
@@ -118,16 +118,14 @@ static int mo_squit(struct Client *cptr, struct Client *sptr,
  *      parv[1] = server name
  *      parv[2] = comment
  */
-static int ms_squit(struct Client *cptr, struct Client *sptr,
+static void ms_squit(struct Client *cptr, struct Client *sptr,
                     int parc, char *parv[])
 {
   struct squit_parms *found_squit;
   char  *comment = (parc > 2 && parv[2]) ? parv[2] : cptr->name;
 
   if(parc < 2)
-    {
-      return -1;
-    }
+    return;
 
   if( (found_squit = find_squit(cptr, sptr, parv[1])) )
     {
@@ -150,9 +148,9 @@ static int ms_squit(struct Client *cptr, struct Client *sptr,
 	      found_squit->server_name, comment);
 
 	}
-      return exit_client(cptr, found_squit->acptr, sptr, comment);
+      exit_client(cptr, found_squit->acptr, sptr, comment);
+      return;
     }
-  return 0;
 }
 
 

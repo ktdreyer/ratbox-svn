@@ -43,7 +43,7 @@ typedef enum HandlerType {
  * int            parc   - parameter count
  * char*          parv[] - parameter vector
  */
-typedef int (*MessageHandler)(struct Client*, struct Client*, int, char*[]);
+typedef void (*MessageHandler)(struct Client*, struct Client*, int, char*[]);
 
 
 #endif /* INCLUDED_ircd_handler_h */

@@ -70,8 +70,6 @@ extern struct Client* hash_find_client(const char* name,
                                        struct Client* client);
 extern struct Client* hash_find_server(const char* name);
 
-extern int mo_hash(struct Client *, struct Client *, int, char **);
-
 #endif  /* INCLUDED_hash_h */
 
 

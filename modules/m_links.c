@@ -39,9 +39,9 @@
 #include <assert.h>
 #include <string.h>
 
-static int m_links(struct Client*, struct Client*, int, char**);
-static int mo_links(struct Client*, struct Client*, int, char**);
-static int ms_links(struct Client*, struct Client*, int, char**);
+static void m_links(struct Client*, struct Client*, int, char**);
+static void mo_links(struct Client*, struct Client*, int, char**);
+static void ms_links(struct Client*, struct Client*, int, char**);
 
 struct Message links_msgtab = {
   "LINKS", 0, 0, 0, MFLG_SLOW, 0,
@@ -74,14 +74,14 @@ char *_version = "20001122";
  *      parv[2] = servername mask
  */
 
-static int m_links(struct Client *cptr, struct Client *sptr,
+static void m_links(struct Client *cptr, struct Client *sptr,
                    int parc, char *parv[])
 {
 
   if (!GlobalSetOptions.hide_server)
     {
      mo_links(cptr, sptr, parc, parv);
-     return 0;
+     return;
     }
   SendMessageFile(sptr, &ConfigFileEntry.linksfile);
 
@@ -96,10 +96,9 @@ static int m_links(struct Client *cptr, struct Client *sptr,
                            0, me.info);
       
   sendto_one(sptr, form_str(RPL_ENDOFLINKS), me.name, parv[0], "*");
-  return 0;
 }
 
-static int mo_links(struct Client *cptr, struct Client *sptr,
+static void mo_links(struct Client *cptr, struct Client *sptr,
                     int parc, char *parv[])
 {
   char*    mask = "";
@@ -112,7 +111,7 @@ static int mo_links(struct Client *cptr, struct Client *sptr,
     {
       if (hunt_server(cptr, sptr, ":%s LINKS %s :%s", 1, parc, parv)
           != HUNTED_ISME)
-        return 0;
+        return;
       mask = parv[2];
     }
   else if (parc == 2)
@@ -158,7 +157,6 @@ static int mo_links(struct Client *cptr, struct Client *sptr,
   
   sendto_one(sptr, form_str(RPL_ENDOFLINKS), me.name, parv[0],
              EmptyString(mask) ? "*" : mask);
-  return 0;
 }
 
 /*
@@ -170,15 +168,14 @@ static int mo_links(struct Client *cptr, struct Client *sptr,
  *      parv[1] = server to query 
  *      parv[2] = servername mask
  */
-static int ms_links(struct Client *cptr, struct Client *sptr,
+static void ms_links(struct Client *cptr, struct Client *sptr,
                     int parc, char *parv[])
 {
   if (hunt_server(cptr, sptr, ":%s LINKS %s :%s", 1, parc, parv)
       != HUNTED_ISME)
-    return 0;
+    return;
 
   if(IsOper(sptr))
-    return(m_links(cptr,sptr,parc,parv));
-  return 0;
+    m_links(cptr,sptr,parc,parv);
 }
 

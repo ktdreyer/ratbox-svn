@@ -39,7 +39,7 @@
 #include "parse.h"
 #include "modules.h"
 
-static int mo_dmem(struct Client*, struct Client*, int, char**);
+static void mo_dmem(struct Client*, struct Client*, int, char**);
 
 struct Message dmem_msgtab = {
   "DMEM", 0, 0, 0, MFLG_SLOW, 0,
@@ -68,7 +68,7 @@ void ReportAllocated(struct Client*);
  * mo_dmem - DMEM message handler
  *
  */
-static int
+static void
 mo_dmem(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
 #ifdef MEMDEBUG
@@ -77,5 +77,4 @@ mo_dmem(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   sendto_one(sptr, ":%s NOTICE %s :Compiled without memory debugging",
     me.name, sptr->name);
 #endif
-  return 0;
 }

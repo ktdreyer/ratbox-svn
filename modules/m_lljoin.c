@@ -40,7 +40,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-static int ms_lljoin(struct Client *,struct Client *,int,char **);
+static void ms_lljoin(struct Client *,struct Client *,int,char **);
 
 struct Message lljoin_msgtab = {
   "LLJOIN", 0, 3, 0, MFLG_SLOW | MFLG_UNREG, 0L,
@@ -80,7 +80,7 @@ char *_version = "20001122";
  * this is now..
  *
  */
-static int ms_lljoin(struct Client *cptr,
+static void ms_lljoin(struct Client *cptr,
                      struct Client *sptr,
                      int parc,
                      char *parv[])
@@ -102,16 +102,16 @@ static int ms_lljoin(struct Client *cptr,
       sendto_realops_flags(FLAGS_ALL,
 			   "*** LLJOIN requested from non LL server %s",
 			   cptr->name);
-      return 0;
+      return;
     }
 
   chname = parv[1];
   if(chname == NULL)
-    return 0;
+    return;
 
   nick = parv[2];
   if(nick == NULL)
-    return 0;
+    return;
 
   if (nick[0] == '!')
   {
@@ -134,10 +134,10 @@ static int ms_lljoin(struct Client *cptr,
   acptr = hash_find_client(nick,(struct Client *)NULL);
 
   if( !acptr || !acptr->user )
-    return 0;
+    return;
 
   if( !MyClient(acptr) )
-    return 0;
+    return;
 
   chptr = hash_find_channel(chname, NullChn);
 
@@ -148,12 +148,12 @@ static int ms_lljoin(struct Client *cptr,
       sendto_realops_flags(FLAGS_ALL,
         "LLJOIN %s %s called by %s, but root chan doesn't exist!",
         chname, nick, cptr->name);
-      return 0;
+      return;
     }
     flags = CHFL_CHANOP;
 
     if(! (vchan_chptr = cjoin_channel(chptr, acptr, chname)))
-      return 0;
+      return;
 
     root_vchan = chptr;
     chptr = vchan_chptr;
@@ -179,7 +179,7 @@ static int ms_lljoin(struct Client *cptr,
       root_vchan = chptr;
 
     if(!chptr || !root_vchan)
-      return 0;
+      return;
 
     if (chptr->users == 0)
       flags = CHFL_CHANOP;
@@ -193,20 +193,20 @@ static int ms_lljoin(struct Client *cptr,
     if(chptr)
     {
       if (IsMember(acptr, chptr))    /* already a member, ignore this */
-        return 0;
+        return;
     }
     else
     {
       sendto_one(acptr, form_str(ERR_UNAVAILRESOURCE),
                  me.name, nick, root_vchan->chname);
-      return 0;
+      return;
     }
 
     if( (i = can_join(acptr, chptr, key)) )
     {
       sendto_one(acptr,
                  form_str(i), me.name, nick, root_vchan->chname);
-      return 0;
+      return;
     }
   }
 
@@ -215,7 +215,7 @@ static int ms_lljoin(struct Client *cptr,
     {
       sendto_one(acptr, form_str(ERR_TOOMANYCHANNELS),
 		 me.name, nick, root_vchan->chname );
-      return 0;
+      return; 
     }
   
   if(flags == CHFL_CHANOP)
@@ -291,6 +291,4 @@ static int ms_lljoin(struct Client *cptr,
   }
 
   (void)channel_member_names(acptr, chptr, chname);
-
-  return 0;
 }

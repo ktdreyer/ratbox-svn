@@ -84,14 +84,14 @@
 struct Client;
 
 /* generic handlers */
-extern int ms_error(struct Client *,struct Client *,int,char **);
-extern int mr_error(struct Client *,struct Client *,int,char **);
-extern int m_error(struct Client *,struct Client *,int,char **);
-extern int m_ignore(struct Client*, struct Client*, int, char**);
-extern int m_not_oper(struct Client*, struct Client*, int, char**);
-extern int m_registered(struct Client*, struct Client*, int, char**);
-extern int m_unregistered(struct Client*, struct Client*, int, char**);
-extern int m_unsupported(struct Client*, struct Client*, int, char**);
+extern void ms_error(struct Client *,struct Client *,int,char **);
+extern void mr_error(struct Client *,struct Client *,int,char **);
+extern void m_error(struct Client *,struct Client *,int,char **);
+extern void m_ignore(struct Client*, struct Client*, int, char**);
+extern void m_not_oper(struct Client*, struct Client*, int, char**);
+extern void m_registered(struct Client*, struct Client*, int, char**);
+extern void m_unregistered(struct Client*, struct Client*, int, char**);
+extern void m_unsupported(struct Client*, struct Client*, int, char**);
 
 #endif /* INCLUDED_handlers_h */
 

@@ -35,7 +35,7 @@
 #include "parse.h"
 #include "modules.h"
 
-static int mo_restart(struct Client *, struct Client *, int, char **);
+static void mo_restart(struct Client *, struct Client *, int, char **);
 
 struct Message restart_msgtab = {
   "RESTART", 0, 0, 0, MFLG_SLOW, 0,
@@ -60,7 +60,7 @@ char *_version = "20001122";
  * mo_restart
  *
  */
-static int mo_restart(struct Client *cptr,
+static void mo_restart(struct Client *cptr,
                       struct Client *sptr,
                       int parc,
                       char *parv[])
@@ -69,20 +69,20 @@ static int mo_restart(struct Client *cptr,
   if (!MyClient(sptr) || !IsOper(sptr))
     {
       sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-      return 0;
+      return;
     }
 
   if ( !IsOperDie(sptr) )
     {
       sendto_one(sptr,":%s NOTICE %s :You have no D flag", me.name, parv[0]);
-      return 0;
+      return;
     }
 
   if (parc < 2)
   {
 	  sendto_one(sptr, ":%s NOTICE %s :Need server name /restart %s",
 				 me.name, sptr->name, me.name);
-	  return 0;
+	  return;
   }
   else
   {
@@ -90,13 +90,12 @@ static int mo_restart(struct Client *cptr,
 	  {
 		  sendto_one(sptr, ":%s NOTICE %s :Mismatch on /restart %s",
 					 me.name, sptr->name, me.name);
-		  return 0;
+		  return;
 	  }
   }
   
   log(L_WARN, "Server RESTART by %s\n", get_client_name(sptr, SHOW_IP));
   ircsprintf(buf, "Server RESTART by %s", get_client_name(sptr, SHOW_IP));
   restart(buf);
-  return 0; /*NOT REACHED*/
 }
 

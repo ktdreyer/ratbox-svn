@@ -41,9 +41,9 @@
 
 #include <string.h>
 
-int mo_opme(struct Client *cptr, struct Client *sptr,
-		 int parc, char *parv[]);
-int chan_is_opless(struct Channel *chptr);
+static void mo_opme(struct Client *cptr, struct Client *sptr,
+                    int parc, char *parv[]);
+static int chan_is_opless(struct Channel *chptr);
 
 struct Message opme_msgtab = {
   "OPME", 0, 2, 0, MFLG_SLOW, 0,
@@ -64,7 +64,7 @@ _moddeinit(void)
 
 char *_version = "20010104";
 
-int chan_is_opless(struct Channel *chptr)
+static int chan_is_opless(struct Channel *chptr)
 {
   if (chptr->chanops.head)
 	  return 0;
@@ -77,7 +77,8 @@ int chan_is_opless(struct Channel *chptr)
 **      parv[0] = sender prefix
 **      parv[1] = channel
 */
-int mo_opme(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static void mo_opme(struct Client *cptr, struct Client *sptr,
+                    int parc, char *parv[])
 {
   struct Channel *chptr, *root_chptr;
   int on_vchan = 0;
@@ -87,7 +88,7 @@ int mo_opme(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (!IsSetOperAdmin(sptr))
     {
       sendto_one(sptr, ":%s NOTICE %s :You have no A flag", me.name, parv[0]);
-      return 0;
+      return;
     }
 
   /* XXX - we might not have CBURSTed this channel if we are a lazylink
@@ -105,14 +106,14 @@ int mo_opme(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     {
       sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
 		 me.name, parv[0], parv[1]);
-      return 0;
+      return;
     }
 
   if (!chan_is_opless(chptr))
   {
-	  sendto_one(sptr, ":%s NOTICE %s :%s Channel is not opless",
-				 me.name, parv[0], parv[1]);
-	  return 0;
+    sendto_one(sptr, ":%s NOTICE %s :%s Channel is not opless",
+               me.name, parv[0], parv[1]);
+    return;
   }
 
   if ((ptr = find_user_link(&chptr->peons, sptr)))
@@ -126,7 +127,7 @@ int mo_opme(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   else
     {
        /* Theyre not even on the channel, bail. */
-       return 0;      
+       return;      
     }
    
   dlinkAdd(sptr, ptr, &chptr->chanops);
@@ -169,6 +170,5 @@ int mo_opme(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   sendto_channel_remote(chptr, sptr, ":%s MODE %s +o %s",
 						 me.name, parv[1], sptr->name);
 */
-  return 0;
 }
 

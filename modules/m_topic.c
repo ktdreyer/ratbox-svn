@@ -41,8 +41,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-static int m_topic(struct Client*, struct Client*, int, char**);
-static int ms_topic(struct Client*, struct Client*, int, char**);
+static void m_topic(struct Client*, struct Client*, int, char**);
+static void ms_topic(struct Client*, struct Client*, int, char**);
 
 struct Message topic_msgtab = {
   "TOPIC", 0, 2, 0, MFLG_SLOW, 0,
@@ -69,7 +69,7 @@ char *_version = "20001122";
  *      parv[1] = channel name
  *	parv[2] = new topic, if setting topic
  */
-static int m_topic(struct Client *cptr,
+static void m_topic(struct Client *cptr,
                    struct Client *sptr,
                    int parc,
                    char *parv[])
@@ -108,13 +108,13 @@ static int m_topic(struct Client *cptr,
           sendto_one(uplink, ":%s TOPIC %s %s",
                      sptr->name, parv[1],
                      ((parc > 2) ? parv[2] : ""));
-          return 0;
+          return;
         }
         else
         {
           sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
                      me.name, parv[0], parv[1]);
-          return 0;
+          return;
         }
       }
 
@@ -132,7 +132,7 @@ static int m_topic(struct Client *cptr,
 	    {
 	      sendto_one(sptr, form_str(ERR_NOTONCHANNEL), me.name, parv[0],
 			 parv[1]);
-	      return 0;
+	      return;
 	    }
 	  if ((chptr->mode.mode & MODE_TOPICLIMIT) == 0 ||
 	      is_any_op(chptr,sptr))
@@ -193,7 +193,7 @@ static int m_topic(struct Client *cptr,
 	    {
 	      sendto_one(sptr, form_str(ERR_NOTONCHANNEL), me.name, parv[0],
 			 parv[1]);
-	      return 0;
+	      return;
 	    }
           if (chptr->topic[0] == '\0')
 	    sendto_one(sptr, form_str(RPL_NOTOPIC),
@@ -226,8 +226,6 @@ static int m_topic(struct Client *cptr,
       sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
                  me.name, parv[0], parv[1]);
     }
-  
-  return 0;
 }
 
 /*
@@ -240,7 +238,7 @@ static int m_topic(struct Client *cptr,
  *
  * Let servers always set a topic
  */
-static int ms_topic(struct Client *cptr,
+static void ms_topic(struct Client *cptr,
                     struct Client *sptr,
                     int parc,
                     char *parv[])
@@ -248,15 +246,18 @@ static int ms_topic(struct Client *cptr,
   struct Channel *chptr = NULL;
   
   if (!IsServer(sptr))
-    return m_topic(cptr, sptr, parc, parv);
+  {
+    m_topic(cptr, sptr, parc, parv);
+    return;
+  }
 
   if( parc < 5 )
-    return 0;
+    return;
 
   if (parv[1] && IsChannelName(parv[1]))
     {
       if ( (chptr = hash_find_channel(parv[1], NullChn)) == NULL )
-	return 0;
+	return;
 
       strncpy_irc(chptr->topic, parv[4], TOPICLEN);
 	      
@@ -293,6 +294,4 @@ static int ms_topic(struct Client *cptr,
 			       parv[1], chptr->topic);
 	}
     }
-
-  return 0;
 }

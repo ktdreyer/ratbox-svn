@@ -32,8 +32,8 @@
 #include "parse.h"
 #include "modules.h"
 
-static int m_ping(struct Client*, struct Client*, int, char**);
-static int ms_ping(struct Client*, struct Client*, int, char**);
+static void m_ping(struct Client*, struct Client*, int, char**);
+static void ms_ping(struct Client*, struct Client*, int, char**);
 
 struct Message ping_msgtab = {
   "PING", 0, 1, 0, MFLG_SLOW, 0,
@@ -60,7 +60,7 @@ char *_version = "20001122";
 **      parv[1] = origin
 **      parv[2] = destination
 */
-static int m_ping(struct Client *cptr,
+static void m_ping(struct Client *cptr,
                   struct Client *sptr,
                   int parc,
                   char *parv[])
@@ -71,7 +71,7 @@ static int m_ping(struct Client *cptr,
   if (parc < 2 || *parv[1] == '\0')
     {
       sendto_one(sptr, form_str(ERR_NOORIGIN), me.name, parv[0]);
-      return 0;
+      return;
     }
   origin = parv[1];
   destination = parv[2]; /* Will get NULL or pointer (parc >= 2!!) */
@@ -90,16 +90,15 @@ static int m_ping(struct Client *cptr,
         {
           sendto_one(sptr, form_str(ERR_NOSUCHSERVER),
                      me.name, parv[0], destination);
-          return 0;
+          return;
         }
     }
   else
     sendto_one(sptr,":%s PONG %s :%s", me.name,
                (destination) ? destination : me.name, origin);
-  return 0;
 }
 
-static int ms_ping(struct Client *cptr,
+static void ms_ping(struct Client *cptr,
                    struct Client *sptr,
                    int parc,
                    char *parv[])
@@ -110,7 +109,7 @@ static int ms_ping(struct Client *cptr,
   if (parc < 2 || *parv[1] == '\0')
     {
       sendto_one(sptr, form_str(ERR_NOORIGIN), me.name, parv[0]);
-      return 0;
+      return;
     }
   origin = parv[1];
   destination = parv[2]; /* Will get NULL or pointer (parc >= 2!!) */
@@ -129,12 +128,11 @@ static int ms_ping(struct Client *cptr,
         {
           sendto_one(sptr, form_str(ERR_NOSUCHSERVER),
                      me.name, parv[0], destination);
-          return 0;
+          return;
         }
     }
   else
     sendto_one(sptr,":%s PONG %s :%s", me.name,
                (destination) ? destination : me.name, origin);
-  return 0;
 }
 

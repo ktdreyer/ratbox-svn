@@ -54,9 +54,9 @@ static int single_whois(struct Client *sptr, struct Client *acptr,
 static void whois_person(struct Client *sptr,struct Client *acptr,int glob);
 static int global_whois(struct Client *sptr, char *nick, int wilds, int glob);
 
-static int m_whois(struct Client*, struct Client*, int, char**);
-static int ms_whois(struct Client*, struct Client*, int, char**);
-static int mo_whois(struct Client*, struct Client*, int, char**);
+static void m_whois(struct Client*, struct Client*, int, char**);
+static void ms_whois(struct Client*, struct Client*, int, char**);
+static void mo_whois(struct Client*, struct Client*, int, char**);
 
 struct Message whois_msgtab = {
   "WHOIS", 0, 0, 0, MFLG_SLOW, 0L,
@@ -84,7 +84,7 @@ char *_version = "20010105";
 **      parv[0] = sender prefix
 **      parv[1] = nickname masklist
 */
-static int m_whois(struct Client *cptr,
+static void m_whois(struct Client *cptr,
                    struct Client *sptr,
                    int parc,
                    char *parv[])
@@ -95,7 +95,7 @@ static int m_whois(struct Client *cptr,
     {
       sendto_one(sptr, form_str(ERR_NONICKNAMEGIVEN),
                  me.name, parv[0]);
-      return 0;
+      return;
     }
 
   if(parc > 2)
@@ -105,7 +105,7 @@ static int m_whois(struct Client *cptr,
         {             
           if(MyClient(sptr))
             sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,sptr->name);
-          return 0;
+          return;
         }
       else
         last_used = CurrentTime;
@@ -113,13 +113,12 @@ static int m_whois(struct Client *cptr,
       if (hunt_server(cptr,sptr,":%s WHOIS %s :%s", 1, parc, parv) !=
           HUNTED_ISME)
         {
-          return 0;
+          return;
         }
       parv[1] = parv[2];
 
     }
-
- return(do_whois(cptr,sptr,parc,parv));
+  do_whois(cptr,sptr,parc,parv);
 }
 
 /*
@@ -127,7 +126,7 @@ static int m_whois(struct Client *cptr,
 **      parv[0] = sender prefix
 **      parv[1] = nickname masklist
 */
-static int mo_whois(struct Client *cptr,
+static void mo_whois(struct Client *cptr,
                     struct Client *sptr,
                     int parc,
                     char *parv[])
@@ -136,7 +135,7 @@ static int mo_whois(struct Client *cptr,
     {
       sendto_one(sptr, form_str(ERR_NONICKNAMEGIVEN),
                  me.name, parv[0]);
-      return 0;
+      return;
     }
 
   if(parc > 2)
@@ -144,12 +143,12 @@ static int mo_whois(struct Client *cptr,
       if (hunt_server(cptr,sptr,":%s WHOIS %s :%s", 1, parc, parv) !=
           HUNTED_ISME)
         {
-          return 0;
+          return;
         }
       parv[1] = parv[2];
     }
 
-  return(do_whois(cptr,sptr,parc,parv));
+  do_whois(cptr,sptr,parc,parv);
 }
 
 
@@ -470,7 +469,7 @@ static void whois_person(struct Client *sptr,struct Client *acptr, int glob)
 **      parv[0] = sender prefix
 **      parv[1] = nickname masklist
 */
-static int ms_whois(struct Client *cptr,
+static void ms_whois(struct Client *cptr,
                     struct Client *sptr,
                     int parc,
                     char *parv[])
@@ -480,7 +479,7 @@ static int ms_whois(struct Client *cptr,
     {
       sendto_one(sptr, form_str(ERR_NONICKNAMEGIVEN),
                  me.name, parv[0]);
-      return 0;
+      return;
     }
 
   /* We need this to keep compatibility with hyb6 */
@@ -490,8 +489,8 @@ static int ms_whois(struct Client *cptr,
       client_burst_if_needed(acptr->from, sptr);
       sendto_one(acptr->from, ":%s WHOIS %s :%s", parv[0], parv[1],
                  parv[1]);  
-      return 0;
+      return;
     }
 
-  return( do_whois(cptr,sptr,parc,parv) );
+  do_whois(cptr,sptr,parc,parv);
 }

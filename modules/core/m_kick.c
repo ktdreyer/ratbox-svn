@@ -37,8 +37,8 @@
 
 #include <string.h>
 
-static int m_kick(struct Client*, struct Client*, int, char**);
-static int ms_kick(struct Client*, struct Client*, int, char**);
+static void m_kick(struct Client*, struct Client*, int, char**);
+static void ms_kick(struct Client*, struct Client*, int, char**);
 
 struct Message kick_msgtab = {
   "KICK", 0, 3, 0, MFLG_SLOW, 0,
@@ -66,7 +66,7 @@ char *_version = "20010121";
 **      parv[2] = client to kick
 **      parv[3] = kick comment
 */
-static int m_kick(struct Client *cptr,
+static void m_kick(struct Client *cptr,
                   struct Client *sptr,
                   int parc,
                   char *parv[])
@@ -85,7 +85,7 @@ static int m_kick(struct Client *cptr,
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "KICK");
-      return 0;
+      return;
     }
 
   comment = (BadPtr(parv[3])) ? parv[2] : parv[3];
@@ -103,7 +103,7 @@ static int m_kick(struct Client *cptr,
     {
       sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
                  me.name, parv[0], name);
-      return(0);
+      return;
     }
 
   if (HasVchans(chptr))
@@ -125,7 +125,7 @@ static int m_kick(struct Client *cptr,
           
           sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED),
                      me.name, parv[0], name);
-          return(0);
+          return;
         }
 
       if(chptr->channelts == 0)
@@ -134,7 +134,7 @@ static int m_kick(struct Client *cptr,
           
           sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED),
                      me.name, parv[0], name);
-          return(0);
+          return;
         }
 
       /* Its a user doing a kick, but is not showing as chanop locally
@@ -166,7 +166,7 @@ static int m_kick(struct Client *cptr,
 
   if (!(who = find_chasing(sptr, user, &chasing)))
     {
-      return(0);
+      return;
     }
 
   if (IsMember(who, chptr))
@@ -179,7 +179,7 @@ static int m_kick(struct Client *cptr,
 
           sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED),
                      me.name, parv[0], name);
-	  return 0;
+	  return;
 	}
       if (IsServer(sptr))
     {
@@ -220,11 +220,9 @@ static int m_kick(struct Client *cptr,
   else
     sendto_one(sptr, form_str(ERR_USERNOTINCHANNEL),
                me.name, parv[0], user, name);
-
-  return (0);
 }
 
-static int ms_kick(struct Client *cptr,
+static void ms_kick(struct Client *cptr,
                    struct Client *sptr,
                    int parc,
                    char *parv[])
@@ -233,8 +231,8 @@ static int ms_kick(struct Client *cptr,
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "KICK");
-      return 0;
+      return;
     }
 
-  return (m_kick(cptr, sptr, parc, parv));
+  m_kick(cptr, sptr, parc, parv);
 }

@@ -38,7 +38,7 @@ struct MessageHash
 
 #define MAX_MSG_HASH  387
 
-extern  int     parse (struct Client *, char *, char *);
+extern  void    parse (struct Client *, char *, char *);
 extern  void    clear_hash_parse (void);
 extern  void    mod_add_cmd(struct Message *msg);
 extern  void    mod_del_cmd(struct Message *msg);

@@ -33,9 +33,9 @@
 #include "modules.h"
 #include "s_conf.h"
 
-static int m_quit(struct Client*, struct Client*, int, char**);
-static int ms_quit(struct Client*, struct Client*, int, char**);
-static int mo_quit(struct Client*, struct Client*, int, char**);
+static void m_quit(struct Client*, struct Client*, int, char**);
+static void ms_quit(struct Client*, struct Client*, int, char**);
+static void mo_quit(struct Client*, struct Client*, int, char**);
 
 struct Message quit_msgtab = {
   "QUIT", 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
@@ -61,7 +61,7 @@ char *_version = "20001122";
 **      parv[0] = sender prefix
 **      parv[1] = comment
 */
-static int m_quit(struct Client *cptr,
+static void m_quit(struct Client *cptr,
                   struct Client *sptr,
                   int parc,
                   char *parv[])
@@ -83,14 +83,14 @@ static int m_quit(struct Client *cptr,
      (sptr->firsttime + ANTI_SPAM_EXIT_MESSAGE_TIME) > CurrentTime)
     comment = "Client Quit";
 
-  return exit_client(cptr, sptr, sptr, comment);
+  exit_client(cptr, sptr, sptr, comment);
 }
 /*
 ** m_quit
 **      parv[0] = sender prefix
 **      parv[1] = comment
 */
-static int ms_quit(struct Client *cptr,
+static void ms_quit(struct Client *cptr,
                    struct Client *sptr,
                    int parc,
                    char *parv[])
@@ -101,10 +101,10 @@ static int ms_quit(struct Client *cptr,
   if (strlen(comment) > (size_t) TOPICLEN)
     comment[TOPICLEN] = '\0';
 
-  return exit_client(cptr, sptr, sptr, comment);
+  exit_client(cptr, sptr, sptr, comment);
 }
 
-static int mo_quit(struct Client *cptr,
+static void mo_quit(struct Client *cptr,
                    struct Client *sptr,
                    int parc,
                    char *parv[])
@@ -122,5 +122,5 @@ static int mo_quit(struct Client *cptr,
       comment = reason;
     }
 
-  return exit_client(cptr, sptr, sptr, comment);
+  exit_client(cptr, sptr, sptr, comment);
 }

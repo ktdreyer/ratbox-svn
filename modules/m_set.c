@@ -41,7 +41,7 @@
 
 #include <stdlib.h>  /* atoi */
 
-static int mo_set(struct Client*, struct Client*, int, char**);
+static void mo_set(struct Client*, struct Client*, int, char**);
 
 struct Message set_msgtab = {
   "SET", 0, 0, 0, MFLG_SLOW, 0,
@@ -66,7 +66,7 @@ char *_version = "20001122";
 struct SetStruct
 {
   char  *name;
-  int   (*handler)();
+  void  (*handler)();
   int   wants_char; /* 1 if it expects (char *, [int]) */
   int   wants_int;  /* 1 if it expects ([char *], int) */
 
@@ -75,17 +75,17 @@ struct SetStruct
 };
 
 
-static int quote_autoconn(struct Client *, char *, int);
-static int quote_autoconnall(struct Client *, int);
-static int quote_floodcount(struct Client *, int);
-static int quote_idletime(struct Client *, int);
-static int quote_log(struct Client *, int);
-static int quote_max(struct Client *, int);
-static int quote_msglocale(struct Client *, char *);
-static int quote_spamnum(struct Client *, int);
-static int quote_spamtime(struct Client *, int);
-static int quote_shide(struct Client *, int);
-static int list_quote_commands(struct Client *);
+static void quote_autoconn(struct Client *, char *, int);
+static void quote_autoconnall(struct Client *, int);
+static void quote_floodcount(struct Client *, int);
+static void quote_idletime(struct Client *, int);
+static void quote_log(struct Client *, int);
+static void quote_max(struct Client *, int);
+static void quote_msglocale(struct Client *, char *);
+static void quote_spamnum(struct Client *, int);
+static void quote_spamtime(struct Client *, int);
+static void quote_shide(struct Client *, int);
+static void list_quote_commands(struct Client *);
 
 
 /* 
@@ -111,7 +111,7 @@ static struct SetStruct set_cmd_table[] =
   { "SPAMTIME",		quote_spamtime,		0,	1 },
   { "SHIDE",		quote_shide,		0,	1 },
   /* -------------------------------------------------------- */
-  { (char *) 0,		(int (*)()) 0,		0,	0 }
+  { (char *) 0,		(void (*)()) 0,		0,	0 }
 };
 
 
@@ -119,7 +119,7 @@ static struct SetStruct set_cmd_table[] =
  * list_quote_commands() sends the client all the available commands.
  * Four to a line for now.
  */
-static int list_quote_commands(struct Client *sptr)
+static void list_quote_commands(struct Client *sptr)
 {
   int i;
   int j=0;
@@ -150,19 +150,16 @@ static int list_quote_commands(struct Client *sptr)
                me.name, sptr->name,
                names[0], names[1], 
                names[2],names[3]);
-
-  return(0);
 }
 
 /* SET AUTOCONN */
-static int quote_autoconn( struct Client *sptr, char *arg, int newval)
+static void quote_autoconn( struct Client *sptr, char *arg, int newval)
 {
   set_autoconn(sptr, sptr->name, arg, newval);
-  return(0);
 }
 
 /* SET AUTOCONNALL */
-static int quote_autoconnall( struct Client *sptr, int newval)
+static void quote_autoconnall( struct Client *sptr, int newval)
 {
   if(newval >= 0)
   {
@@ -176,12 +173,11 @@ static int quote_autoconnall( struct Client *sptr, int newval)
     sendto_one(sptr, ":%s NOTICE %s :AUTOCONNALL is currently %i",
                me.name, sptr->name, GlobalSetOptions.autoconn);
   }
-  return(0);
 }
 
 
 /* SET FLOODCOUNT */
-static int quote_floodcount( struct Client *sptr, int newval)
+static void quote_floodcount( struct Client *sptr, int newval)
 {
   if(newval >= 0)
   {
@@ -195,11 +191,10 @@ static int quote_floodcount( struct Client *sptr, int newval)
     sendto_one(sptr, ":%s NOTICE %s :FLOODCOUNT is currently %i",
                me.name, sptr->name, GlobalSetOptions.floodcount);
   }
-  return(0);
 }
 
 /* SET IDLETIME */
-static int quote_idletime( struct Client *sptr, int newval )
+static void quote_idletime( struct Client *sptr, int newval )
 {
   if(newval >= 0)
   {
@@ -223,11 +218,10 @@ static int quote_idletime( struct Client *sptr, int newval )
     sendto_one(sptr, ":%s NOTICE %s :IDLETIME is currently %i",
                me.name, sptr->name, GlobalSetOptions.idletime/60);
   }
-  return(0);
 }
 
 /* SET LOG */
-static int quote_log( struct Client *sptr, int newval )
+static void quote_log( struct Client *sptr, int newval )
 {
   const char *log_level_as_string;
 
@@ -237,7 +231,7 @@ static int quote_log( struct Client *sptr, int newval )
     {
       sendto_one(sptr, ":%s NOTICE %s :LOG must be > %d (L_WARN)",
                  me.name, sptr->name, L_WARN);
-      return(0);
+      return;
     }
 
     if (newval > L_DEBUG)
@@ -256,11 +250,10 @@ static int quote_log( struct Client *sptr, int newval )
                me.name, sptr->name, get_log_level(),
                get_log_level_as_string(get_log_level()));
   }
-  return(0);
 }
 
 /* SET MAX */
-static int quote_max( struct Client *sptr, int newval )
+static void quote_max( struct Client *sptr, int newval )
 {
   if (newval > 0)
   {
@@ -269,7 +262,7 @@ static int quote_max( struct Client *sptr, int newval )
       sendto_one(sptr,
 	":%s NOTICE %s :You cannot set MAXCLIENTS to > MASTER_MAX (%d)",
 	me.name, sptr->name, MASTER_MAX);
-      return(0);
+      return;
     }
 
     if (newval < 32)
@@ -277,7 +270,7 @@ static int quote_max( struct Client *sptr, int newval )
       sendto_one(sptr,
 	":%s NOTICE %s :You cannot set MAXCLIENTS to < 32 (%d:%d)",
 	me.name, sptr->name, GlobalSetOptions.maxclients, highest_fd);
-      return(0);
+      return;
     }
 
     GlobalSetOptions.maxclients = newval;
@@ -287,7 +280,7 @@ static int quote_max( struct Client *sptr, int newval )
 	sptr->name, sptr->username, sptr->host,
 	GlobalSetOptions.maxclients, Count.local);
 
-    return(0);
+    return;
   }
   else
   {
@@ -295,12 +288,10 @@ static int quote_max( struct Client *sptr, int newval )
 	me.name, sptr->name,
 	GlobalSetOptions.maxclients, Count.local);
   }
-
-  return(0);
 }
 
 /* SET MSGLOCALE */
-static int quote_msglocale( struct Client *sptr, char *locale )
+static void quote_msglocale( struct Client *sptr, char *locale )
 {
 #ifdef USE_GETTEXT
   if(locale)
@@ -308,10 +299,6 @@ static int quote_msglocale( struct Client *sptr, char *locale )
     char langenv[BUFSIZE];
     ircsprintf(langenv,"LANGUAGE=%s",locale);
     putenv(langenv);
-    { /* XXX ick, this is what gettext.info _recommends_ */
-/*      extern int  _nl_msg_cat_cntr;
-      ++_nl_msg_cat_cntr; */
-    }
 
     sendto_one(sptr, ":%s NOTICE %s :Set MSGLOCALE to '%s'",
 	me.name, sptr->name,
@@ -327,11 +314,10 @@ static int quote_msglocale( struct Client *sptr, char *locale )
   sendto_one(sptr, ":%s NOTICE %s :No gettext() support available.",
 	me.name, sptr->name);
 #endif
-  return 0;
 }
 
 /* SET SPAMNUM */
-static int quote_spamnum( struct Client *sptr, int newval )
+static void quote_spamnum( struct Client *sptr, int newval )
 {
   if (newval > 0)
   {
@@ -340,7 +326,7 @@ static int quote_spamnum( struct Client *sptr, int newval )
       sendto_realops_flags(FLAGS_ALL,
                            "%s has disabled ANTI_SPAMBOT", sptr->name);
       GlobalSetOptions.spam_num = newval;
-      return(0);
+      return;
     }
     if (newval < MIN_SPAM_NUM)
     {
@@ -359,11 +345,10 @@ static int quote_spamnum( struct Client *sptr, int newval )
 		me.name,
 		sptr->name, GlobalSetOptions.spam_num);
   }
-  return(0);
 }
 
 /* SET SPAMTIME */
-static int quote_spamtime( struct Client *sptr, int newval )
+static void quote_spamtime( struct Client *sptr, int newval )
 {
   if (newval > 0)
   {
@@ -384,11 +369,9 @@ static int quote_spamtime( struct Client *sptr, int newval )
 		me.name,
 		sptr->name, GlobalSetOptions.spam_time);
   }
-
-  return(0);
 }
 
-static int quote_shide( struct Client *sptr, int newval )
+static void quote_shide( struct Client *sptr, int newval )
 {
   if(newval >= 0)
   {
@@ -405,15 +388,13 @@ static int quote_shide( struct Client *sptr, int newval )
     sendto_one(sptr, ":%s NOTICE %s :SHIDE is currently %i",
                me.name, sptr->name, GlobalSetOptions.hide_server);
   }
-
-  return 0;
 }
 
 /*
  * mo_set - SET command handler
  * set options while running
  */
-static int mo_set(struct Client *cptr, struct Client *sptr,
+static void mo_set(struct Client *cptr, struct Client *sptr,
                   int parc, char *parv[])
 {
   int newval;
@@ -488,7 +469,7 @@ static int mo_set(struct Client *cptr, struct Client *sptr,
                        me.name, sptr->name,
                        set_cmd_table[i].name);
 
-            return 0;
+            return;
           }
         }
         else
@@ -497,18 +478,20 @@ static int mo_set(struct Client *cptr, struct Client *sptr,
         if(set_cmd_table[i].wants_char)
         {
           if(set_cmd_table[i].wants_int)
-            return(set_cmd_table[i].handler( sptr, arg, newval ));
+            set_cmd_table[i].handler( sptr, arg, newval );
           else
-            return(set_cmd_table[i].handler( sptr, arg ));
+            set_cmd_table[i].handler( sptr, arg );
+          return;
         }
         else
         {
           if(set_cmd_table[i].wants_int)
-            return(set_cmd_table[i].handler( sptr, newval ));
+            set_cmd_table[i].handler( sptr, newval );
           else
             /* Just in case someone actually wants a
              * set function that takes no args.. *shrug* */
-            return(set_cmd_table[i].handler( sptr ));
+            set_cmd_table[i].handler( sptr );
+          return;
         }
       }
     }
@@ -518,10 +501,9 @@ static int mo_set(struct Client *cptr, struct Client *sptr,
      * found within set_cmd_table.
      */
     sendto_one(sptr, ":%s NOTICE %s :Variable not found.", me.name, parv[0]);
-    return(0);
+    return;
   }
 
   list_quote_commands(sptr);
-  return(0);
 }
 

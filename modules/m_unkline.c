@@ -49,9 +49,9 @@
 #include <string.h>
 #include <unistd.h>
 
-static int mo_unkline(struct Client*, struct Client*, int, char**);
-static int mo_undline(struct Client*, struct Client*, int, char**);
-static int mo_ungline(struct Client*, struct Client*, int, char**);
+static void mo_unkline(struct Client*, struct Client*, int, char**);
+static void mo_undline(struct Client*, struct Client*, int, char**);
+static void mo_ungline(struct Client*, struct Client*, int, char**);
 
 struct Message msgtabs[] = {
   {"UNKLINE", 0, 2, 0, MFLG_SLOW, 0,
@@ -93,7 +93,7 @@ char *_version = "20001122";
 *
 *
 */
-static int mo_unkline (struct Client *cptr,struct Client *sptr,
+static void mo_unkline (struct Client *cptr,struct Client *sptr,
                        int parc,char *parv[])
 {
   FBFILE* in;
@@ -115,7 +115,7 @@ static int mo_unkline (struct Client *cptr,struct Client *sptr,
   if (!IsSetOperUnkline(sptr))
     {
       sendto_one(sptr,":%s NOTICE %s :You have no U flag",me.name,parv[0]);
-      return 0;
+      return;
     }
 
   if ( (host = strchr(parv[1], '@')) || *parv[1] == '*' )
@@ -137,7 +137,7 @@ static int mo_unkline (struct Client *cptr,struct Client *sptr,
     {
       sendto_one(sptr, ":%s NOTICE %s :Invalid parameters",
                  me.name, parv[0]);
-      return 0;
+      return;
     }
 
   if( (user[0] == '*') && (user[1] == '\0')
@@ -145,7 +145,7 @@ static int mo_unkline (struct Client *cptr,struct Client *sptr,
     {
       sendto_one(sptr, ":%s NOTICE %s :Cannot UNK-Line everyone",
                  me.name, parv[0]);
-      return 0;
+      return;
     }
 
   if(remove_tkline_match(host,user))
@@ -158,7 +158,7 @@ static int mo_unkline (struct Client *cptr,struct Client *sptr,
 
       log(L_NOTICE, "%s removed temporary K-Line for [%s@%s]",
           parv[0], user, host);
-      return 0;
+      return;
     }
 
   filename = get_conf_name(KLINE_TYPE);
@@ -167,7 +167,7 @@ static int mo_unkline (struct Client *cptr,struct Client *sptr,
     {
       sendto_one(sptr, ":%s NOTICE %s :Cannot open %s",
         me.name,parv[0],filename);
-      return 0;
+      return;
     }
 
   oldumask = umask(0);                  /* ircd is normally too paranoid */
@@ -177,7 +177,7 @@ static int mo_unkline (struct Client *cptr,struct Client *sptr,
         me.name,parv[0],temppath);
       fbclose(in);
       umask(oldumask);                  /* Restore the old umask */
-      return 0;
+      return;
     }
     umask(oldumask);                    /* Restore the old umask */
 
@@ -329,14 +329,14 @@ Then just ignore the line
     {
       sendto_one(sptr,":%s NOTICE %s :Couldn't write temp kline file, aborted",
         me.name,parv[0]);
-      return -1;
+      return;
     }
 
   if(!pairme)
     {
       sendto_one(sptr, ":%s NOTICE %s :No K-Line for %s@%s",
                  me.name, parv[0],user,host);
-      return 0;
+      return;
     }
   sendto_one(sptr, ":%s NOTICE %s :K-Line for [%s@%s] is removed", 
              me.name, parv[0], user,host);
@@ -345,7 +345,7 @@ Then just ignore the line
 		       parv[0], user, host);
 
   log(L_NOTICE, "%s removed K-Line for [%s@%s]", parv[0], user, host);
-  return 0; 
+  return;
 }
 
 /*
@@ -432,7 +432,7 @@ static int remove_tkline_match(char *host, char *user)
 **      parv[0] = sender nick
 **      parv[1] = dline to remove
 */
-static int mo_undline (struct Client *cptr, struct Client *sptr,
+static void mo_undline (struct Client *cptr, struct Client *sptr,
                        int parc,char *parv[])
 {
   FBFILE* in;
@@ -457,7 +457,7 @@ static int mo_undline (struct Client *cptr, struct Client *sptr,
     {
       sendto_one(sptr,":%s NOTICE %s :You have no U flag",me.name,
                  parv[0]);
-      return 0;
+      return;
     }
 
   cidr = parv[1];
@@ -466,7 +466,7 @@ static int mo_undline (struct Client *cptr, struct Client *sptr,
     {
       sendto_one(sptr, ":%s NOTICE %s :Invalid parameters",
                  me.name, parv[0]);
-      return 0;
+      return;
     }
 
   filename = get_conf_name(DLINE_TYPE);
@@ -475,7 +475,7 @@ static int mo_undline (struct Client *cptr, struct Client *sptr,
     {
       sendto_one(sptr, ":%s NOTICE %s :Cannot open %s",
         me.name,parv[0],filename);
-      return 0;
+      return;
     }
 
   oldumask = umask(0);                  /* ircd is normally too paranoid */
@@ -485,7 +485,7 @@ static int mo_undline (struct Client *cptr, struct Client *sptr,
         me.name,parv[0],temppath);
       fbclose(in);
       umask(oldumask);                  /* Restore the old umask */
-      return 0;
+      return;
     }
   umask(oldumask);                    /* Restore the old umask */
 
@@ -598,14 +598,14 @@ Then just ignore the line
     {
       sendto_one(sptr,":%s NOTICE %s :Couldn't write D-line file, aborted",
         me.name,parv[0]);
-      return -1;
+      return;
     }
 
   if(!pairme)
     {
       sendto_one(sptr, ":%s NOTICE %s :No D-Line for %s",
                  me.name, parv[0],cidr);
-      return 0;
+      return;
     }
 
   sendto_one(sptr, ":%s NOTICE %s :D-Line for [%s] is removed",
@@ -615,7 +615,6 @@ Then just ignore the line
 		       parv[0], cidr);
 
   log(L_NOTICE, "%s removed D-Line for [%s]", parv[0], cidr);
-  return 0;
 }
 
 /*
@@ -627,7 +626,7 @@ Then just ignore the line
 **      parv[1] = gline to remove
 */
 
-static int mo_ungline(struct Client *cptr, struct Client *sptr,
+static void mo_ungline(struct Client *cptr, struct Client *sptr,
                       int parc,char *parv[])
 {
   char  *user,*host;
@@ -635,14 +634,14 @@ static int mo_ungline(struct Client *cptr, struct Client *sptr,
   if (!ConfigFileEntry.glines)
     {
       sendto_one(sptr,":%s NOTICE %s :UNGLINE disabled",me.name,parv[0]);
-      return 0;
+      return;
     }
 
   if (!IsSetOperUnkline(sptr) || !IsSetOperGline(sptr))
     {
       sendto_one(sptr,":%s NOTICE %s :You have no U and G flags",
                  me.name,parv[0]);
-      return 0;
+      return;
     }
 
   if ( (host = strchr(parv[1], '@')) || *parv[1] == '*' )
@@ -664,7 +663,7 @@ static int mo_ungline(struct Client *cptr, struct Client *sptr,
     {
       sendto_one(sptr, ":%s NOTICE %s :Invalid parameters",
                  me.name, parv[0]);
-      return 0;
+      return;
     }
 
   if(remove_gline_match(user, host))
@@ -676,13 +675,12 @@ static int mo_ungline(struct Client *cptr, struct Client *sptr,
 			   parv[0], user, host );
       log(L_NOTICE, "%s removed G-Line for [%s@%s]",
           parv[0], user, host);
-      return 0;
+      return;
     }
   else
     {
       sendto_one(sptr, ":%s NOTICE %s :No G-Line for %s@%s",
                  me.name, parv[0],user,host);
-      return 0;
+      return;
     }
-  return 0;
 }

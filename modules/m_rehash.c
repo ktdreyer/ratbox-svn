@@ -40,7 +40,7 @@
 #include "modules.h"
 #include "event.h"
 
-static int mo_rehash(struct Client*, struct Client*, int, char**);
+static void mo_rehash(struct Client*, struct Client*, int, char**);
 
 struct Message rehash_msgtab = {
   "REHASH", 0, 0, 0, MFLG_SLOW, 0,
@@ -65,7 +65,7 @@ char *_version = "20001122";
  * mo_rehash - REHASH message handler
  *
  */
-static int mo_rehash(struct Client *cptr, struct Client *sptr,
+static void mo_rehash(struct Client *cptr, struct Client *sptr,
                      int parc, char *parv[])
 {
   int found = NO;
@@ -73,7 +73,7 @@ static int mo_rehash(struct Client *cptr, struct Client *sptr,
   if ( !IsOperRehash(sptr) )
     {
       sendto_one(sptr,":%s NOTICE %s :You have no H flag", me.name, parv[0]);
-      return 0;
+      return;
     }
 
   if (parc > 1)
@@ -126,12 +126,12 @@ static int mo_rehash(struct Client *cptr, struct Client *sptr,
         {
           log(L_NOTICE, "REHASH %s From %s\n", parv[1], 
               get_client_name(sptr, HIDE_IP));
-          return 0;
+          return;
         }
       else
         {
           sendto_one(sptr,":%s NOTICE %s :rehash one of :CHANNELS DNS GC HELP MOTD OMOTD" ,me.name,sptr->name);
-          return(0);
+          return;
         }
     }
   else
@@ -141,8 +141,8 @@ static int mo_rehash(struct Client *cptr, struct Client *sptr,
       sendto_realops_flags(FLAGS_ALL,
 			   "%s is rehashing server config file", parv[0]);
       log(L_NOTICE, "REHASH From %s", get_client_name(sptr, SHOW_IP));
-      return rehash(cptr, sptr, 0);
+      rehash(cptr, sptr, 0);
+      return;
     }
-  return 0; /* shouldn't ever get here */
 }
 

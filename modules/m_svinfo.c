@@ -39,7 +39,7 @@
 #include <time.h>
 #include <stdlib.h>
 
-static int ms_svinfo(struct Client*, struct Client*, int, char**);
+static void ms_svinfo(struct Client*, struct Client*, int, char**);
 
 struct Message svinfo_msgtab = {
   "SVINFO", 0, 4, 0, MFLG_SLOW, 0,
@@ -68,17 +68,20 @@ char *_version = "20001122";
  *      parv[3] = server is standalone or connected to non-TS only
  *      parv[4] = server's idea of UTC time
  */
-static int ms_svinfo(struct Client *cptr, struct Client *sptr,
+static void ms_svinfo(struct Client *cptr, struct Client *sptr,
                      int parc, char *parv[])
 {
   time_t deltat;
   time_t theirtime;
 
   if (MyConnect(sptr) && IsUnknown(sptr))
-    return exit_client(sptr, sptr, sptr, "Need SERVER before SVINFO");
+  {
+    exit_client(sptr, sptr, sptr, "Need SERVER before SVINFO");
+    return;
+  }
 
   if (!IsServer(sptr) || !MyConnect(sptr) || parc < 5)
-    return 0;
+    return;
 
   if (TS_CURRENT < atoi(parv[2]) || atoi(parv[1]) < TS_MIN)
     {
@@ -90,7 +93,8 @@ static int ms_svinfo(struct Client *cptr, struct Client *sptr,
       sendto_realops_flags(FLAGS_ALL,
 	         "Link %s dropped, wrong TS protocol version (%s,%s)",
                  get_client_name(sptr, SHOW_IP), parv[1], parv[2]);
-      return exit_client(sptr, sptr, sptr, "Incompatible TS version");
+      exit_client(sptr, sptr, sptr, "Incompatible TS version");
+      return;
     }
 
   /*
@@ -111,7 +115,8 @@ static int ms_svinfo(struct Client *cptr, struct Client *sptr,
        "Link %s dropped, excessive TS delta (my TS=%lu, their TS=%lu, delta=%lu)",
                  get_client_name(sptr, SHOW_IP),
                  CurrentTime, theirtime,deltat);
-      return exit_client(sptr, sptr, sptr, "Excessive TS delta");
+      exit_client(sptr, sptr, sptr, "Excessive TS delta");
+      return;
     }
 
   if (deltat > ConfigFileEntry.ts_warn_delta)
@@ -121,7 +126,5 @@ static int ms_svinfo(struct Client *cptr, struct Client *sptr,
 			   get_client_name(sptr, MASK_IP),
 			   CurrentTime, theirtime, deltat);
     }
-
-  return 0;
 }
 

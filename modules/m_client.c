@@ -52,7 +52,7 @@ static int nick_from_server(struct Client *, struct Client *, int, char **,
 
 int clean_nick_name(char* nick);
 
-static int ms_client(struct Client*, struct Client*, int, char**);
+static void ms_client(struct Client*, struct Client*, int, char**);
 
 struct Message client_msgtab = {
   "CLIENT", 0, 10, 0, MFLG_SLOW, 0,
@@ -89,7 +89,7 @@ char *_version = "20001122";
 **      parv[9] = ircname
 */
 
-static int ms_client(struct Client *cptr, struct Client *sptr,
+static void ms_client(struct Client *cptr, struct Client *sptr,
                      int parc, char *parv[])
 {
   struct Client* acptr;
@@ -139,10 +139,11 @@ static int ms_client(struct Client *cptr, struct Client *sptr,
                                  sptr->user ? sptr->user->server :
                                  cptr->name);
               sptr->flags |= FLAGS_KILLED;
-              return exit_client(cptr,sptr,&me,"BadNick");
+              exit_client(cptr,sptr,&me,"BadNick");
+              return;
             }
         }
-      return 0;
+      return;
     }
   /* Okay, we should be safe to cut off the username... -A1kmm */
   if (strlen(parv[5]) > USERLEN)
@@ -169,7 +170,10 @@ static int ms_client(struct Client *cptr, struct Client *sptr,
   newts = atol(parv[3]);
 
   if (!(acptr = find_client(nick, NULL)))
-    return(nick_from_server(cptr,sptr,parc,parv,newts,nick));
+  {
+    nick_from_server(cptr,sptr,parc,parv,newts,nick);
+    return;
+  }
   
   /*
   ** Note: From this point forward it can be assumed that
@@ -187,7 +191,8 @@ static int ms_client(struct Client *cptr, struct Client *sptr,
     if (MyConnect(acptr))
       {
         exit_client(NULL, acptr, &me, "Overridden");
-        return(nick_from_server(cptr,sptr,parc,parv,newts,nick));
+        nick_from_server(cptr,sptr,parc,parv,newts,nick);
+        return;
       }
     else
       {
@@ -217,8 +222,9 @@ static int ms_client(struct Client *cptr, struct Client *sptr,
 
             acptr->flags |= FLAGS_KILLED;
             /* Having no USER struct should be ok... */
-            return exit_client(cptr, acptr, &me,
-                           "Got TS NICK before Non-TS USER");
+            exit_client(cptr, acptr, &me,
+                        "Got TS NICK before Non-TS USER");
+            return;
         }
       }
    }
@@ -280,7 +286,8 @@ static int ms_client(struct Client *cptr, struct Client *sptr,
                      me.name, acptr->name, acptr->name);
 		  
           acptr->flags |= FLAGS_KILLED;
-          return exit_client(cptr, acptr, &me, "Nick collision");
+          exit_client(cptr, acptr, &me, "Nick collision");
+          return;
         }
       else
         {
@@ -292,7 +299,7 @@ static int ms_client(struct Client *cptr, struct Client *sptr,
             {
               /* We don't need to kill the user, the other end does */
               client_burst_if_needed(cptr, acptr);
-              return 0;
+              return;
             }
           else
             {
@@ -323,7 +330,8 @@ static int ms_client(struct Client *cptr, struct Client *sptr,
 
               acptr->flags |= FLAGS_KILLED;
               (void)exit_client(cptr, acptr, &me, "Nick collision");
-              return nick_from_server(cptr,sptr,parc,parv,newts,nick);
+              nick_from_server(cptr,sptr,parc,parv,newts,nick);
+              return;
             }
         }
   /*
@@ -367,9 +375,10 @@ static int ms_client(struct Client *cptr, struct Client *sptr,
 #endif
 
       acptr->flags |= FLAGS_KILLED;
-      (void)exit_client(NULL, acptr, &me, "Nick collision(new)");
+      exit_client(NULL, acptr, &me, "Nick collision(new)");
       sptr->flags |= FLAGS_KILLED;
-      return exit_client(cptr, sptr, &me, "Nick collision(old)");
+      exit_client(cptr, sptr, &me, "Nick collision(old)");
+      return;
     }
   else
     {
@@ -402,9 +411,10 @@ static int ms_client(struct Client *cptr, struct Client *sptr,
 
           sptr->flags |= FLAGS_KILLED;
           if (sameuser)
-            return exit_client(cptr, sptr, &me, "Nick collision(old)");
+            exit_client(cptr, sptr, &me, "Nick collision(old)");
           else
-            return exit_client(cptr, sptr, &me, "Nick collision(new)");
+            exit_client(cptr, sptr, &me, "Nick collision(new)");
+          return;
         }
       else
         {
@@ -436,7 +446,7 @@ static int ms_client(struct Client *cptr, struct Client *sptr,
           (void)exit_client(cptr, acptr, &me, "Nick collision");
         }
     }
-  return(nick_from_server(cptr,sptr,parc,parv,newts,nick));
+  nick_from_server(cptr,sptr,parc,parv,newts,nick);
 }
 
 /*

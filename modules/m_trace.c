@@ -41,8 +41,8 @@
 #include <string.h>
 #include <time.h>
 
-static int ms_trace(struct Client*, struct Client*, int, char**);
-static int mo_trace(struct Client*, struct Client*, int, char**);
+static void ms_trace(struct Client*, struct Client*, int, char**);
+static void mo_trace(struct Client*, struct Client*, int, char**);
 
 struct Message trace_msgtab = {
   "TRACE", 0, 0, 0, MFLG_SLOW, 0,
@@ -71,7 +71,7 @@ char *_version = "20010109";
 **      parv[0] = sender prefix
 **      parv[1] = servername
 */
-static int mo_trace(struct Client *cptr, struct Client *sptr,
+static void mo_trace(struct Client *cptr, struct Client *sptr,
                     int parc, char *parv[])
 {
   int   i;
@@ -85,7 +85,7 @@ static int mo_trace(struct Client *cptr, struct Client *sptr,
 
   if (parc > 2)
     if (hunt_server(cptr, sptr, ":%s TRACE %s :%s", 2, parc, parv))
-      return 0;
+      return;
   
   if (parc > 1)
     tname = parv[1];
@@ -107,12 +107,12 @@ static int mo_trace(struct Client *cptr, struct Client *sptr,
         else
           sendto_one(sptr, form_str(RPL_TRACELINK), me.name, parv[0],
                      version, debugmode, tname, "ac2ptr_is_NULL!!");
-        return 0;
+        return;
       }
     case HUNTED_ISME:
       break;
     default:
-      return 0;
+      return;
     }
 
   if(MyClient(sptr))
@@ -139,7 +139,7 @@ static int mo_trace(struct Client *cptr, struct Client *sptr,
              target is this server */
           sendto_one(sptr, form_str(RPL_ENDOFTRACE),me.name,
                      parv[0], tname);
-          return 0;
+          return;
         }
       name = get_client_name(acptr, HIDE_IP);
       ip = inetntoa((char*) &acptr->localClient->ip);
@@ -166,7 +166,7 @@ static int mo_trace(struct Client *cptr, struct Client *sptr,
         }
       sendto_one(sptr, form_str(RPL_ENDOFTRACE),me.name,
                  parv[0], tname);
-      return 0;
+      return;
     }
 
   memset((void *)link_s,0,sizeof(link_s));
@@ -249,7 +249,7 @@ static int mo_trace(struct Client *cptr, struct Client *sptr,
         {
           sendto_one(sptr, form_str(RPL_ENDOFTRACE),me.name,
                      parv[0],tname);
-          return 0;
+          return;
         }
       /* let the user have some idea that its at the end of the
        * trace
@@ -259,14 +259,13 @@ static int mo_trace(struct Client *cptr, struct Client *sptr,
                  link_u[me.fd], me.name, "*", "*", me.name);
       sendto_one(sptr, form_str(RPL_ENDOFTRACE),me.name,
                  parv[0],tname);
-      return 0;
+      return;
     }
   for (cltmp = ClassList; doall && cltmp; cltmp = cltmp->next)
     if (Links(cltmp) > 0)
       sendto_one(sptr, form_str(RPL_TRACECLASS), me.name,
                  parv[0], ClassName(cltmp), Links(cltmp));
   sendto_one(sptr, form_str(RPL_ENDOFTRACE),me.name, parv[0],tname);
-  return 0;
 }
 
 
@@ -275,15 +274,15 @@ static int mo_trace(struct Client *cptr, struct Client *sptr,
 **      parv[0] = sender prefix
 **      parv[1] = servername
 */
-static int ms_trace(struct Client *cptr, struct Client *sptr,
+static void ms_trace(struct Client *cptr, struct Client *sptr,
                     int parc, char *parv[])
 {
   if (hunt_server(cptr, sptr, ":%s TRACE %s :%s", 2, parc, parv))
-    return 0;
+    return;
 
   if( IsOper(sptr) )
     mo_trace(cptr,sptr,parc,parv);
-  return 0;
+  return;
 }
 
 

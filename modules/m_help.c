@@ -34,8 +34,8 @@
 #include "parse.h"
 #include "modules.h"
 
-static int m_help(struct Client*, struct Client*, int, char**);
-static int mo_help(struct Client*, struct Client*, int, char**);
+static void m_help(struct Client*, struct Client*, int, char**);
+static void mo_help(struct Client*, struct Client*, int, char**);
 
 struct Message help_msgtab = {
   "HELP", 0, 0, 0, MFLG_SLOW, 0,
@@ -60,7 +60,7 @@ char *_version = "20001122";
  * m_help - HELP message handler
  *      parv[0] = sender prefix
  */
-static int m_help(struct Client *cptr, struct Client *sptr,
+static void m_help(struct Client *cptr, struct Client *sptr,
                   int parc, char *parv[])
 {
   static time_t last_used = 0;
@@ -70,7 +70,7 @@ static int m_help(struct Client *cptr, struct Client *sptr,
     {
       /* safe enough to give this on a local connect only */
       sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);
-      return 0;
+      return;
     }
   else
     {
@@ -78,18 +78,15 @@ static int m_help(struct Client *cptr, struct Client *sptr,
     }
 
   report_messages(sptr);
-
-  return 0;
 }
 
 /*
  * mo_help - HELP message handler
  *      parv[0] = sender prefix
  */
-static int mo_help(struct Client *cptr, struct Client *sptr,
+static void mo_help(struct Client *cptr, struct Client *sptr,
                    int parc, char *parv[])
 {
   SendMessageFile(sptr, &ConfigFileEntry.helpfile);
-  return 0;
 }
 

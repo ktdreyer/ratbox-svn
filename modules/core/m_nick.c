@@ -46,9 +46,9 @@
 #include <string.h>
 #include <assert.h>
 
-static int mr_nick(struct Client*, struct Client*, int, char**);
-static int m_nick(struct Client*, struct Client*, int, char**);
-static int ms_nick(struct Client*, struct Client*, int, char**);
+static void mr_nick(struct Client*, struct Client*, int, char**);
+static void m_nick(struct Client*, struct Client*, int, char**);
+static void ms_nick(struct Client*, struct Client*, int, char**);
 
 static int nick_from_server(struct Client *, struct Client *, int, char **,
                             time_t, char *);
@@ -77,7 +77,7 @@ char *_version = "20001122";
 **      parv[0] = sender prefix
 **      parv[1] = nickname
 */
-static int mr_nick(struct Client *cptr, struct Client *sptr, int parc,
+static void mr_nick(struct Client *cptr, struct Client *sptr, int parc,
                    char *parv[])
 {
   struct   Client *acptr, *ucptr;
@@ -90,7 +90,7 @@ static int mr_nick(struct Client *cptr, struct Client *sptr, int parc,
     {
       sendto_one(sptr, form_str(ERR_NONICKNAMEGIVEN),
                  me.name, BadPtr(parv[0]) ? "*" : parv[0]);
-      return 0;
+      return;
     }
 
   /*
@@ -119,7 +119,7 @@ static int mr_nick(struct Client *cptr, struct Client *sptr, int parc,
     {
       sendto_one(sptr, form_str(ERR_ERRONEUSNICKNAME),
                  me.name, BadPtr(parv[0]) ? "*" : parv[0], parv[1]);
-      return 0;
+      return;
     }
 
   if(find_q_conf(nick, sptr->username, sptr->host)) 
@@ -129,7 +129,7 @@ static int mr_nick(struct Client *cptr, struct Client *sptr, int parc,
 			   nick, get_client_name(cptr, HIDE_IP));
       sendto_one(sptr, form_str(ERR_UNAVAILRESOURCE),
 		 me.name, BadPtr(parv[0]) ? "*" : parv[0], nick);
-      return 0;
+      return;
     }
 
   if ( (acptr = find_client(nick, NULL)) == NULL )
@@ -146,7 +146,7 @@ static int mr_nick(struct Client *cptr, struct Client *sptr, int parc,
           /* We're already waiting for a reply about this nick
            * for someone else. */
           sendto_one(sptr, form_str(ERR_NICKNAMEINUSE), me.name, "*", nick);
-          return 0;
+          return;
         }
       }
       /* Set their llname so we can find them later */
@@ -156,11 +156,12 @@ static int mr_nick(struct Client *cptr, struct Client *sptr, int parc,
       sendto_one(uplink, ":%s NBURST %s %s !%s", me.name, nick,
                  nick, nick);
       /* wait for LLNICK... */
-      return 0;
+      return;
     }
     else
       {
-        return(set_initial_nick(cptr, sptr, nick));
+        set_initial_nick(cptr, sptr, nick);
+        return;
       }
    }
   else
@@ -168,7 +169,7 @@ static int mr_nick(struct Client *cptr, struct Client *sptr, int parc,
      sendto_one(sptr, form_str(ERR_NICKNAMEINUSE), me.name, "*", nick);
    }
 
-  return 0; /* NICK message ignored */
+  /* NICK message ignored */
 }
 
 /*
@@ -179,7 +180,7 @@ static int mr_nick(struct Client *cptr, struct Client *sptr, int parc,
  * Any client seen here is guaranteed to be MyConnect()
  */
 
-static int m_nick(struct Client *cptr, struct Client *sptr,
+static void m_nick(struct Client *cptr, struct Client *sptr,
                   int parc, char *parv[])
 {
   char     nick[NICKLEN + 2];
@@ -189,7 +190,7 @@ static int m_nick(struct Client *cptr, struct Client *sptr,
     {
       sendto_one(sptr, form_str(ERR_NONICKNAMEGIVEN),
                  me.name, parv[0]);
-      return 0;
+      return;
     }
 
   /*
@@ -198,7 +199,7 @@ static int m_nick(struct Client *cptr, struct Client *sptr,
    */
 
   if (parc != 2)
-    return 0;
+    return;
 
   /*
    * nick is an auto, need to terminate the string
@@ -213,7 +214,7 @@ static int m_nick(struct Client *cptr, struct Client *sptr,
     {
       sendto_one(sptr, form_str(ERR_ERRONEUSNICKNAME),
                  me.name, parv[0], nick);
-      return 0;
+      return;
     }
 
   if (!IsOper(sptr) && find_q_conf(nick, sptr->username, sptr->host))
@@ -223,7 +224,7 @@ static int m_nick(struct Client *cptr, struct Client *sptr,
 			   nick, get_client_name(cptr, HIDE_IP));
       sendto_one(sptr, form_str(ERR_UNAVAILRESOURCE),
 		 me.name, parv[0], nick);
-      return 0;
+      return;
     }
 
   if ((acptr = find_client(nick, NULL)))
@@ -237,11 +238,14 @@ static int m_nick(struct Client *cptr, struct Client *sptr,
       if (acptr == sptr)
 	{
 	  if (strcmp(acptr->name, nick) != 0)
-	    /*
-	     * Allows change of case in his/her nick
-	     * -- go and process change
-	     */
-	    return(change_local_nick(cptr,sptr,nick));
+            {
+              /*
+               * Allows change of case in his/her nick
+               * -- go and process change
+               */
+              change_local_nick(cptr,sptr,nick);
+              return;
+            }
 	  else
 	    {
 	      /*
@@ -251,7 +255,7 @@ static int m_nick(struct Client *cptr, struct Client *sptr,
 	      ** especially since servers prior to this
 	      ** version would treat it as nick collision.
 	      */
-	      return 0; /* NICK Message ignored */
+	      return; /* NICK Message ignored */
 	    }
 	}
 
@@ -266,7 +270,8 @@ static int m_nick(struct Client *cptr, struct Client *sptr,
 	  if (MyConnect(acptr))
 	    {
 	      exit_client(NULL, acptr, &me, "Overridden");
-	      return(change_local_nick(cptr,sptr,nick));
+	      change_local_nick(cptr,sptr,nick);
+              return;
 	    }
 	  else
 	    {
@@ -290,10 +295,11 @@ static int m_nick(struct Client *cptr, struct Client *sptr,
                    nick, sptr->name);
       }
       else
-        return(change_local_nick(cptr,sptr,nick));
+      {
+        change_local_nick(cptr,sptr,nick);
+        return;
+      }
     }
-
-  return 1;
 }
 
 
@@ -316,7 +322,7 @@ static int m_nick(struct Client *cptr, struct Client *sptr,
 **      parv[7] = server
 **      parv[8] = ircname
 */
-static int ms_nick(struct Client *cptr, struct Client *sptr,
+static void ms_nick(struct Client *cptr, struct Client *sptr,
                    int parc, char *parv[])
 {
   struct Client* acptr;
@@ -328,7 +334,7 @@ static int ms_nick(struct Client *cptr, struct Client *sptr,
   if (parc < 2)
     {
       sendto_one(sptr, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
-      return 0;
+      return;
     }
 
   /*
@@ -338,7 +344,7 @@ static int ms_nick(struct Client *cptr, struct Client *sptr,
    *      introduction
    */
   if( (parc != 3) && (parc != 9) )
-    return 0;
+    return;
 
   /*
    * nick is an auto, need to terminate the string
@@ -390,10 +396,11 @@ static int ms_nick(struct Client *cptr, struct Client *sptr,
                                  cptr->name);
 #endif
               sptr->flags |= FLAGS_KILLED;
-              return exit_client(cptr,sptr,&me,"BadNick");
+              exit_client(cptr,sptr,&me,"BadNick");
+              return;
             }
         }
-      return 0;
+      return;
     }
   /* Okay, we should be safe to cut off the username... -A1kmm */
   if (parc > 8 && strlen(parv[5]) > USERLEN)
@@ -424,7 +431,10 @@ static int ms_nick(struct Client *cptr, struct Client *sptr,
   fromTS = (parc > 6);
 
   if (!(acptr = find_client(nick, NULL)))
-    return(nick_from_server(cptr,sptr,parc,parv,newts,nick));
+  {
+    nick_from_server(cptr,sptr,parc,parv,newts,nick);
+    return;
+  }
 
   /*
   ** If acptr == sptr, then we have a client doing a nick
@@ -435,10 +445,13 @@ static int ms_nick(struct Client *cptr, struct Client *sptr,
   if (acptr == sptr)
    {
     if (strcmp(acptr->name, nick) != 0)
-      return(nick_from_server(cptr,sptr,parc,parv,newts,nick));
+      {
+        nick_from_server(cptr,sptr,parc,parv,newts,nick);
+        return;
+      }
     else
       {
-        return 0; /* NICK Message ignored */
+        return; /* NICK Message ignored */
       }
    }
 
@@ -458,7 +471,8 @@ static int ms_nick(struct Client *cptr, struct Client *sptr,
     if (MyConnect(acptr))
       {
         exit_client(NULL, acptr, &me, "Overridden");
-        return(nick_from_server(cptr,sptr,parc,parv,newts,nick));
+        nick_from_server(cptr,sptr,parc,parv,newts,nick);
+        return;
       }
     else
       {
@@ -498,8 +512,9 @@ static int ms_nick(struct Client *cptr, struct Client *sptr,
 
             acptr->flags |= FLAGS_KILLED;
             /* Having no USER struct should be ok... */
-            return exit_client(cptr, acptr, &me,
+            exit_client(cptr, acptr, &me,
                            "Got TS NICK before Non-TS USER");
+            return;
         }
       }
    }
@@ -570,7 +585,8 @@ static int ms_nick(struct Client *cptr, struct Client *sptr,
                      me.name, acptr->name, acptr->name);
 
           acptr->flags |= FLAGS_KILLED;
-          return exit_client(cptr, acptr, &me, "Nick collision");
+          exit_client(cptr, acptr, &me, "Nick collision");
+          return;
         }
       else
         {
@@ -582,7 +598,7 @@ static int ms_nick(struct Client *cptr, struct Client *sptr,
             {
               /* We don't need to kill the user, the other end does */
               client_burst_if_needed(cptr, acptr);
-              return 0;
+              return;
             }
           else
             {
@@ -622,7 +638,8 @@ static int ms_nick(struct Client *cptr, struct Client *sptr,
 
               acptr->flags |= FLAGS_KILLED;
               (void)exit_client(cptr, acptr, &me, "Nick collision");
-              return nick_from_server(cptr,sptr,parc,parv,newts,nick);
+              nick_from_server(cptr,sptr,parc,parv,newts,nick);
+              return;
             }
         }
     }
@@ -684,9 +701,10 @@ static int ms_nick(struct Client *cptr, struct Client *sptr,
 #endif
 
       acptr->flags |= FLAGS_KILLED;
-      (void)exit_client(NULL, acptr, &me, "Nick collision(new)");
+      exit_client(NULL, acptr, &me, "Nick collision(new)");
       sptr->flags |= FLAGS_KILLED;
-      return exit_client(cptr, sptr, &me, "Nick collision(old)");
+      exit_client(cptr, sptr, &me, "Nick collision(old)");
+      return;
     }
   else
     {
@@ -729,9 +747,10 @@ static int ms_nick(struct Client *cptr, struct Client *sptr,
 
           sptr->flags |= FLAGS_KILLED;
           if (sameuser)
-            return exit_client(cptr, sptr, &me, "Nick collision(old)");
+            exit_client(cptr, sptr, &me, "Nick collision(old)");
           else
-            return exit_client(cptr, sptr, &me, "Nick collision(new)");
+            exit_client(cptr, sptr, &me, "Nick collision(new)");
+          return;
         }
       else
         {
@@ -771,7 +790,7 @@ static int ms_nick(struct Client *cptr, struct Client *sptr,
           (void)exit_client(cptr, acptr, &me, "Nick collision");
         }
     }
-  return(nick_from_server(cptr,sptr,parc,parv,newts,nick));
+  nick_from_server(cptr,sptr,parc,parv,newts,nick);
 }
 
 /*

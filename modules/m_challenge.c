@@ -58,7 +58,7 @@ char *_version = "20001122";
 
 #else
 
-static int m_challenge(struct Client*, struct Client*, int, char**);
+static void m_challenge(struct Client*, struct Client*, int, char**);
 void binary_to_hex( unsigned char * bin, char * hex, int length );
 
 /* We have openssl support, so include /CHALLENGE */
@@ -87,29 +87,33 @@ char *_version = "20001122";
  * parv[1] = operator to challenge for, or +response
  *
  */
-static int m_challenge( struct Client *cptr, struct Client *sptr,
+static void m_challenge( struct Client *cptr, struct Client *sptr,
                         int parc, char *parv[] )
 {
   char * challenge;
   struct ConfItem *aconf;
   if(!(sptr->user) || !sptr->localClient)
-    return 0;
+    return;
+  
   if (*parv[1] == '+')
     {
      /* Ignore it if we aren't expecting this... -A1kmm */
      if (!sptr->user->response)
-       return 0;
+       return;
+     
      if (strcasecmp(sptr->user->response, ++parv[1]))
        {
-        sendto_one(sptr, form_str(ERR_PASSWDMISMATCH), me.name,
-                   sptr->name);
-        return 0;
+         sendto_one(sptr, form_str(ERR_PASSWDMISMATCH), me.name,
+                    sptr->name);
+         return;
        }
+     
      if (!(aconf = find_conf_by_name(sptr->user->auth_oper, CONF_OPERATOR)))
        {
-        sendto_one (sptr, form_str(ERR_NOOPERHOST), me.name, parv[0]);
-        return 0;
+         sendto_one (sptr, form_str(ERR_NOOPERHOST), me.name, parv[0]);
+         return;
        }
+     
      /* Now make them an oper and tell the realops... */
      oper_up(sptr, aconf);
      log(L_TRACE, "OPER %s by %s!%s@%s",
@@ -119,8 +123,9 @@ static int m_challenge( struct Client *cptr, struct Client *sptr,
      MyFree(sptr->user->auth_oper);
      sptr->user->response = NULL;
      sptr->user->auth_oper = NULL;
-     return 0;
+     return;
     }
+  
   if (sptr->user->response)
     MyFree(sptr->user->response);
   if (sptr->user->auth_oper)
@@ -132,14 +137,14 @@ static int m_challenge( struct Client *cptr, struct Client *sptr,
                   sizeof(struct irc_inaddr)))*/)
     {
      sendto_one (sptr, form_str(ERR_NOOPERHOST), me.name, parv[0]);
-     return 0;
+     return;
     }
   if (!strchr(aconf->passwd, ' '))
     {
      sendto_one (sptr, ":%s NOTICE %s :I'm sorry, PK authentication "
                  "is not enabled for your oper{} block.", me.name,
                  parv[0]);
-     return 0;
+     return;
     }
   if (
    !generate_challenge (&challenge, &(sptr->user->response), aconf->passwd)
@@ -150,7 +155,7 @@ static int m_challenge( struct Client *cptr, struct Client *sptr,
     }
   DupString(sptr->user->auth_oper, aconf->name);
   MyFree(challenge);
-  return 0;
+  return;
 }
 
 #endif /* OPENSSL */

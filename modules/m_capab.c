@@ -31,7 +31,7 @@
 #include "parse.h"
 #include "modules.h"
 
-static int mr_capab(struct Client*, struct Client*, int, char**);
+static void mr_capab(struct Client*, struct Client*, int, char**);
 
 struct Message capab_msgtab = {
   "CAPAB", 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
@@ -58,7 +58,7 @@ char *_version = "20001122";
  *      parv[1] = space-separated list of capabilities
  *
  */
-static int mr_capab(struct Client *cptr, struct Client *sptr,
+static void mr_capab(struct Client *cptr, struct Client *sptr,
                     int parc, char *parv[])
 {
   struct Capability *cap;
@@ -67,10 +67,13 @@ static int mr_capab(struct Client *cptr, struct Client *sptr,
 
   /* ummm, this shouldn't happen. Could argue this should be logged etc. */
   if (cptr->localClient == NULL)
-    return 0;
+    return;
 
   if (cptr->localClient->caps)
-    return exit_client(cptr, cptr, cptr, "CAPAB received twice");
+    {
+      exit_client(cptr, cptr, cptr, "CAPAB received twice");
+      return;
+    }
   else
     cptr->localClient->caps |= CAP_CAP;
 
@@ -85,6 +88,5 @@ static int mr_capab(struct Client *cptr, struct Client *sptr,
             }
          }
     }
-  return 0;
 }
 

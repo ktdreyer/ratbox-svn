@@ -51,9 +51,9 @@ int oper_up( struct Client *sptr, struct ConfItem *aconf );
 extern        char *crypt();
 #endif /* CRYPT_OPER_PASSWORD */
 
-static int m_oper(struct Client*, struct Client*, int, char**);
-static int ms_oper(struct Client*, struct Client*, int, char**);
-static int mo_oper(struct Client*, struct Client*, int, char**);
+static void m_oper(struct Client*, struct Client*, int, char**);
+static void ms_oper(struct Client*, struct Client*, int, char**);
+static void mo_oper(struct Client*, struct Client*, int, char**);
 
 
 struct Message oper_msgtab = {
@@ -81,7 +81,7 @@ char *_version = "20001122";
 **      parv[1] = oper name
 **      parv[2] = oper password
 */
-static int m_oper(struct Client *cptr, struct Client *sptr,
+static void m_oper(struct Client *cptr, struct Client *sptr,
                   int parc, char *parv[])
 {
   struct ConfItem *aconf, *oconf;
@@ -96,7 +96,7 @@ static int m_oper(struct Client *cptr, struct Client *sptr,
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
 		 me.name, sptr->name, "OPER");
-      return 0;
+      return;
     }
 
   if( (aconf = find_password_aconf(name,sptr)) == NULL)
@@ -109,7 +109,7 @@ static int m_oper(struct Client *cptr, struct Client *sptr,
 			       "Failed OPER attempt - host mismatch by %s (%s@%s)",
 			       sptr->name, sptr->username, sptr->host);
 	}
-      return 0;
+      return;
     }
 
   if ( match_oper_password(password,aconf) )
@@ -136,15 +136,15 @@ static int m_oper(struct Client *cptr, struct Client *sptr,
 	     -einride
 	  */
 	  attach_conf(sptr, oconf);
-	  return 0;
+	  return;
 	}
 
-      (void)oper_up( sptr, aconf );
+      oper_up( sptr, aconf );
       
       log(L_TRACE, "OPER %s by %s!%s@%s",
 	  name, sptr->name, sptr->username, sptr->host);
       log_oper(sptr, name);
-      return 1;
+      return;
     }
   else
     {
@@ -156,7 +156,6 @@ static int m_oper(struct Client *cptr, struct Client *sptr,
 			       sptr->name, sptr->username, sptr->host);
 	}
     }
-  return 0;
 }
 
 /*
@@ -165,12 +164,12 @@ static int m_oper(struct Client *cptr, struct Client *sptr,
 **      parv[1] = oper name
 **      parv[2] = oper password
 */
-static int mo_oper(struct Client *cptr, struct Client *sptr,
+static void mo_oper(struct Client *cptr, struct Client *sptr,
                    int parc, char *parv[])
 {
 	sendto_one(sptr, form_str(RPL_YOUREOPER), me.name, parv[0]);
 	SendMessageFile(sptr, &ConfigFileEntry.opermotd);
-	return 1;
+	return;
 }
 
 /*
@@ -179,7 +178,7 @@ static int mo_oper(struct Client *cptr, struct Client *sptr,
 **      parv[1] = oper name
 **      parv[2] = oper password
 */
-static int ms_oper(struct Client *cptr, struct Client *sptr,
+static void ms_oper(struct Client *cptr, struct Client *sptr,
                    int parc, char *parv[])
 {
   /* if message arrived from server, trust it, and set to oper */
@@ -194,8 +193,6 @@ static int ms_oper(struct Client *cptr, struct Client *sptr,
       sendto_ll_serv_butone(cptr,  sptr, 0,
                             ":%s MODE %s :+o", parv[0], parv[0]);
     }
-
-  return 1;
 }
 
 /*

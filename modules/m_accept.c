@@ -33,7 +33,7 @@
 #include "parse.h"
 #include "modules.h"
 
-static int m_accept(struct Client*, struct Client*, int, char**);
+static void m_accept(struct Client*, struct Client*, int, char**);
 
 struct Message accept_msgtab = {
   "ACCEPT", 0, 2, 0, MFLG_SLOW | MFLG_UNREG, 0, 
@@ -59,7 +59,7 @@ char *_version = "20001122";
  *      parv[0] = sender prefix
  *      parv[1] = servername
  */
-static int m_accept(struct Client *cptr, struct Client *sptr,
+static void m_accept(struct Client *cptr, struct Client *sptr,
                     int parc, char *parv[])
 {
   char *nick;
@@ -78,19 +78,19 @@ static int m_accept(struct Client *cptr, struct Client *sptr,
   else if(*nick == '*')
     {
       list_all_accepts(sptr);
-      return 0;
+      return;
     }
 
   if ((source = find_client(nick,NULL)) == NULL)
     {
       sendto_one(sptr, form_str(ERR_NOSUCHNICK), me.name, parv[0], nick);
-      return 0;
+      return;
     }
 
   if (!IsPerson(source))
     {
       sendto_one(sptr, form_str(ERR_NOSUCHNICK), me.name, parv[0], nick);
-      return 0;
+      return;
     }
 
   if (add == 1)
@@ -99,7 +99,7 @@ static int m_accept(struct Client *cptr, struct Client *sptr,
 	/* already on list */
 	sendto_one(sptr, ":%s NOTICE %s :%s is already on your accept list",
 		   me.name, parv[0], source->name);
-	return 0;
+	return;
       }
 		
       del_from_accept(source,sptr);
@@ -119,7 +119,5 @@ static int m_accept(struct Client *cptr, struct Client *sptr,
 		      "NOTICE %s :*** I've taken you off my accept list.",
 		      source->name);
     }
-
-  return 0;
 }
 

@@ -97,8 +97,8 @@ static void add_new_majority_gline(const char *, const char *, const char *,
                                    const char *, const char *, const char *,
                                    const char *);
 
-static int ms_gline(struct Client*, struct Client*, int, char**);
-static int mo_gline(struct Client*, struct Client*, int, char**);
+static void ms_gline(struct Client*, struct Client*, int, char**);
+static void mo_gline(struct Client*, struct Client*, int, char**);
 
 struct Message gline_msgtab = {
     "GLINE", 0, 3, 0, MFLG_SLOW, 0,
@@ -133,7 +133,7 @@ char *_version = "20001122";
  *
  */
 
-static int mo_gline(struct Client *cptr,
+static void mo_gline(struct Client *cptr,
                     struct Client *sptr,
                     int parc,
                     char *parv[])
@@ -152,7 +152,7 @@ static int mo_gline(struct Client *cptr,
       if (!IsSetOperGline(sptr))
 	{
 	  sendto_one(sptr,":%s NOTICE %s :You have no G flag",me.name,parv[0]);
-	  return 0;
+	  return;
 	}
 			
       if ( (host = strchr(parv[1], '@')) || *parv[1] == '*' )
@@ -185,7 +185,7 @@ static int mo_gline(struct Client *cptr,
 	  sendto_one(sptr, ":%s NOTICE %s :Can't G-Line a nick use user@host",
 		     me.name,
 		     parv[0]);
-	  return 0;
+	  return;
 	}
 			
       if(strchr(parv[2], ':'))
@@ -193,7 +193,7 @@ static int mo_gline(struct Client *cptr,
 	  sendto_one(sptr,
 		     ":%s NOTICE %s :Invalid character ':' in comment",
 		     me.name, parv[2]);
-	  return 0;
+	  return;
 	}
 	  
       /*
@@ -251,7 +251,7 @@ static int mo_gline(struct Client *cptr,
 		       parv[0],
 		       NONWILDCHARS);
 	  
-	  return 0;
+	  return;
 	}
 			
       reason = parv[2];
@@ -291,8 +291,6 @@ static int mo_gline(struct Client *cptr,
     {
       sendto_one(sptr,":%s NOTICE %s :GLINE disabled",me.name,parv[0]);  
     }
-
-  return 0;
 }
 
 /*
@@ -309,7 +307,7 @@ static int mo_gline(struct Client *cptr,
  * GLINES is not defined.
  */
 
-static int ms_gline(struct Client *cptr,
+static void ms_gline(struct Client *cptr,
                     struct Client *sptr,
                     int parc,
                     char *parv[])
@@ -325,11 +323,11 @@ static int ms_gline(struct Client *cptr,
 
 
   if(!IsServer(sptr))
-    return(0);
+    return;
 
   /* Always good to be paranoid about arguments */
   if(parc < 5)
-    return 0;
+    return;
 
   oper_nick = parv[1];
   user = parv[2];
@@ -339,21 +337,21 @@ static int ms_gline(struct Client *cptr,
   if ((rcptr = hash_find_client(oper_nick,(struct Client *)NULL)))
     {
       if(!IsPerson(rcptr))
-	return 0;
+	return;
     }
   else
-    return 0;
+    return;
 
   if ((oper_user = (const char *)rcptr->username) == NULL)
-    return 0;
+    return;
 
   if ((oper_host = rcptr->host) == NULL)
-    return 0;
+    return;
 
   if (rcptr->user && rcptr->user->server)
     oper_server = rcptr->user->server;
   else
-    return 0;
+    return;
 
   sendto_serv_butone(sptr, ":%s GLINE %s %s %s :%s",
 		     sptr->name,
@@ -387,7 +385,6 @@ static int ms_gline(struct Client *cptr,
 			   host,
 			   reason);
     }
-  return 0;
 }
 
 /*

@@ -47,8 +47,8 @@
 static void names_all_visible_channels(struct Client *sptr);
 static void names_non_public_non_secret(struct Client *sptr);
 
-static int m_names(struct Client*, struct Client*, int, char**);
-static int ms_names(struct Client*, struct Client*, int, char**);
+static void m_names(struct Client*, struct Client*, int, char**);
+static void ms_names(struct Client*, struct Client*, int, char**);
 
 struct Message names_msgtab = {
   "NAMES", 0, 0, 0, MFLG_SLOW, 0,
@@ -80,7 +80,7 @@ char *_version = "20001122";
 **      parv[1] = channel
 **      parv[2] = root name
 */
-static int m_names( struct Client *cptr,
+static void m_names( struct Client *cptr,
                     struct Client *sptr,
                     int parc,
                     char *parv[])
@@ -99,7 +99,7 @@ static int m_names( struct Client *cptr,
         { 
           sendto_one(sptr, form_str(ERR_BADCHANNAME),
                      me.name, parv[0], (unsigned char *)para);
-          return 0;
+          return;
         }
 
       if( (ch2ptr = hash_find_channel(para, NULL)) )
@@ -116,7 +116,7 @@ static int m_names( struct Client *cptr,
 	    {
 	      channel_member_names( sptr, ch2ptr, ch2ptr->chname );
 	    }
-	  return 1;
+	  return;
 	}
     }
   else
@@ -126,7 +126,6 @@ static int m_names( struct Client *cptr,
     }
 
   sendto_one(sptr, form_str(RPL_ENDOFNAMES), me.name, parv[0], "*");
-  return(1);
 }
 
 /*
@@ -298,7 +297,7 @@ static void names_non_public_non_secret(struct Client *sptr)
     sendto_one(sptr, "%s", buf );
 }
 
-static int ms_names( struct Client *cptr,
+static void ms_names( struct Client *cptr,
                      struct Client *sptr,
                      int parc,
                      char *parv[])
@@ -311,10 +310,10 @@ static int ms_names( struct Client *cptr,
   if( ServerInfo.hub )
     {
       if(!IsCapable(cptr->from,CAP_LL))
-	return 0;
+	return;
     }
 
-  return( m_names(cptr,sptr,parc,parv) );
+  m_names(cptr,sptr,parc,parv);
 }
 
 

@@ -44,8 +44,8 @@
 #include <string.h>
 #include <assert.h>
 
-static int m_join(struct Client*, struct Client*, int, char**);
-static int ms_join(struct Client*, struct Client*, int, char**);
+static void m_join(struct Client*, struct Client*, int, char**);
+static void ms_join(struct Client*, struct Client*, int, char**);
 
 struct Message join_msgtab = {
   "JOIN", 0, 2, 0, MFLG_SLOW, 0,
@@ -78,7 +78,7 @@ char *_version = "20001122";
 **      parv[2] = channel password (key) (or vkey for vchans)
 **      parv[3] = vkey
 */
-static int m_join(struct Client *cptr,
+static void m_join(struct Client *cptr,
                   struct Client *sptr,
                   int parc,
                   char *parv[])
@@ -98,14 +98,14 @@ static int m_join(struct Client *cptr,
   if (!(sptr->user) || IsServer(sptr))
     {
       /* something is *fucked* - bail */
-      return 0;
+      return;
     }
 
   if (*parv[1] == '\0')
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "JOIN");
-      return 0;
+      return;
     }
 
   build_list_of_channels( sptr, jbuf , parv[1] );
@@ -182,7 +182,7 @@ static int m_join(struct Client *cptr,
 		  sendto_one(uplink,":%s CBURST %s %s %s",
 			     me.name,name,sptr->name, key ? key: "" );
 		  /* And wait for LLJOIN */
-		  return 0;
+		  return;
 		}
 	    }
 	}
@@ -194,7 +194,7 @@ static int m_join(struct Client *cptr,
 		     me.name, parv[0], name);
 	  if(successful_join_count)
 	    sptr->localClient->last_join_time = CurrentTime;
-	  return 0;
+	  return;
 	}
 
       if(flags == 0)        /* if channel doesn't exist, don't penalize */
@@ -377,10 +377,9 @@ static int m_join(struct Client *cptr,
       if(successful_join_count)
 	sptr->localClient->last_join_time = CurrentTime;
     }
-  return 0;
 }
 
-static int ms_join(struct Client *cptr,
+static void ms_join(struct Client *cptr,
                    struct Client *sptr,
                    int parc,
                    char *parv[])
@@ -388,7 +387,7 @@ static int ms_join(struct Client *cptr,
   char *name;
   
   if (!(sptr->user))
-    return 0;
+    return;
   
   name = parv[1];
 
@@ -407,7 +406,6 @@ static int ms_join(struct Client *cptr,
     }
 
   /* AND ignore it finally. */
-  return 0;
 }
 
 /*

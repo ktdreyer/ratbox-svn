@@ -49,22 +49,18 @@
  */
 static  char    *sender;
 static  char    *para[MAXPARA+1];
-static  int     cancel_clients (struct Client *, struct Client *, char *);
-static  void    remove_unknown (struct Client *, char *, char *);
 
 static  int     cancel_clients (struct Client *, struct Client *, char *);
 static  void    remove_unknown (struct Client *, char *, char *);
 
-static int do_numeric (char [], struct Client *,
-                         struct Client *, int, char **);
+static  void    do_numeric (char [], struct Client *,
+                            struct Client *, int, char **);
 
-static int handle_command(struct Message *, struct Client *, struct Client *, int, char **);
+static  void    handle_command(struct Message *, struct Client *,
+                               struct Client *, int, char **);
 
 static int hash(char *p);
 static struct Message *hash_parse(char *);
-
-/* XXX - jdc: hopefully the fd-walkover bug is gone now... */
-/* struct MessageHash *msg_hash_table[MAX_MSG_HASH+10]; */
 
 struct MessageHash *msg_hash_table[MAX_MSG_HASH];
 
@@ -136,7 +132,7 @@ string_to_array(char *string, int mpara, int paramcount,
  *
  * NOTE: parse() should not be called recusively by any other functions!
  */
-int parse(struct Client *cptr, char *pbuffer, char *bufend)
+void parse(struct Client *cptr, char *pbuffer, char *bufend)
 {
   struct Client*  from = cptr;
   char*           ch;
@@ -146,16 +142,11 @@ int parse(struct Client *cptr, char *pbuffer, char *bufend)
   int             paramcount, mpara=0;
   char*           numeric = 0;
   struct Message* mptr;
-  int status;
 
   Debug((DEBUG_DEBUG, "Parsing %s:", pbuffer));
 
-  if (IsDead(cptr))
-    return (CLIENT_EXITED);
-  
-  /* XXX kludgy test, can it be combined into IsDead() ? */
-  if (cptr->fd < 0)
-    return (CLIENT_EXITED);
+  assert(!IsDead(cptr));
+  assert(cptr->fd >= 0);
 
   for (ch = pbuffer; *ch == ' '; ch++)   /* skip spaces */
     /* null statement */ ;
@@ -203,7 +194,7 @@ int parse(struct Client *cptr, char *pbuffer, char *bufend)
 
               remove_unknown(cptr, sender, pbuffer);
 
-              return (CLIENT_PARSE_ERROR);
+              return;
             }
           if (from->from != cptr)
             {
@@ -211,7 +202,8 @@ int parse(struct Client *cptr, char *pbuffer, char *bufend)
               Debug((DEBUG_ERROR, "Message (%s) coming from (%s)",
                      pbuffer, cptr->name));
 
-              return cancel_clients(cptr, from, pbuffer);
+              cancel_clients(cptr, from, pbuffer);
+              return;
             }
         }
       while (*ch == ' ')
@@ -223,7 +215,7 @@ int parse(struct Client *cptr, char *pbuffer, char *bufend)
       ServerStats->is_empt++;
       Debug((DEBUG_NOTICE, "Empty message from host %s:%s",
              cptr->name, from->name));
-      return (CLIENT_PARSE_ERROR);
+      return;
     }
 
   /*
@@ -281,7 +273,7 @@ int parse(struct Client *cptr, char *pbuffer, char *bufend)
                      ch, get_client_name(cptr, SHOW_IP)));
             }
           ServerStats->is_unco++;
-          return (CLIENT_PARSE_ERROR);
+          return;
         }
 
       paramcount = mptr->parameters;
@@ -303,18 +295,17 @@ int parse(struct Client *cptr, char *pbuffer, char *bufend)
     string_to_array(s, mpara, paramcount, end, &i, para);
    
   if (mptr == (struct Message *)NULL)
-    return do_numeric(numeric, cptr, from, i, para);
+  {
+    do_numeric(numeric, cptr, from, i, para);
+    return;
+  }
 
-  status = handle_command(mptr, cptr, from, i, para);
-
-  if (cptr->fd < 0)
-    return(CLIENT_EXITED);
-
-  return status;
+  handle_command(mptr, cptr, from, i, para);
 }
 
-static int
-handle_command(struct Message *mptr, struct Client *cptr, struct Client *from, int i, char *hpara[MAXPARA])
+static void 
+handle_command(struct Message *mptr, struct Client *cptr,
+               struct Client *from, int i, char *hpara[MAXPARA])
 {
   MessageHandler handler = 0;
 	
@@ -331,7 +322,7 @@ handle_command(struct Message *mptr, struct Client *cptr, struct Client *from, i
 		
       if((IsHandshake(cptr) || IsConnecting(cptr) || IsServer(cptr))
 	 && !(mptr->flags & MFLG_UNREG))
-	return -1;
+	return;
     }
 	
   handler = mptr->handlers[cptr->handler];
@@ -345,10 +336,11 @@ handle_command(struct Message *mptr, struct Client *cptr, struct Client *from, i
                 mptr->cmd, cptr->name, i, mptr->parameters);
        sendto_one(cptr, form_str(ERR_NEEDMOREPARAMS),
                   me.name, BadPtr(hpara[0]) ? "*" : hpara[0], mptr->cmd);
-       return 0;
+       return;
     }
 
-  return (*handler)(cptr, from, i, hpara);
+  (*handler)(cptr, from, i, hpara);
+  return;
 }
 
 
@@ -660,18 +652,17 @@ static  void    remove_unknown(struct Client *cptr,
 **      sending back a neat error message -- big danger of creating
 **      a ping pong error message...
 */
-static int     do_numeric(
-                   char numeric[],
-                   struct Client *cptr,
-                   struct Client *sptr,
-                   int parc,
-                   char *parv[])
+static void do_numeric(char numeric[],
+                       struct Client *cptr,
+                       struct Client *sptr,
+                       int parc,
+                       char *parv[])
 {
   struct Client *acptr;
   struct Channel *chptr;
 
   if (parc < 1 || !IsServer(sptr))
-    return CLIENT_PARSE_ERROR;
+    return;
 
   /* Remap low number numerics. */
   if(numeric[0] == '0')
@@ -707,28 +698,27 @@ static int     do_numeric(
           sendto_realops_flags(FLAGS_ALL,
                                "*** %s(via %s) sent a %s numeric to me?!?",
                                sptr->name, cptr->name, numeric);
-          return 0;
+          return;
         }
       else if (acptr->from == cptr) 
         {
           /* This message changed direction (nick collision?)
            * ignore it.
            */
-          return 0;
+          return;
         }
       /* Fake it for server hiding, if its our client */
       if(GlobalSetOptions.hide_server && MyClient(acptr) && !IsOper(acptr))
 	sendto_one(acptr, ":%s %s %s%s", me.name, numeric, parv[1], buffer);
       else
         sendto_one(acptr, ":%s %s %s%s", sptr->name, numeric, parv[1], buffer);
-      return 0;
+      return;
       }
       else if ((chptr = hash_find_channel(parv[1], (struct Channel *)NULL)))
         sendto_channel_local(ALL_MEMBERS, chptr,
                              ":%s %s %s %s",
                               sptr->name,
                               numeric, RootChan(chptr)->chname, buffer);
-  return 0;
 }
 
 
@@ -738,13 +728,14 @@ static int     do_numeric(
  * output	-
  * side effects	- just returns a nastyogram to given user
  */
-int m_not_oper(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
+void m_not_oper(struct Client* cptr, struct Client* sptr,
+                int parc, char* parv[])
 {
   sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-  return 0;
 }
 
-int m_unregistered(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
+void m_unregistered(struct Client* cptr, struct Client* sptr,
+                    int parc, char* parv[])
 {
   /* bit of a hack.
    * I don't =really= want to waste a bit in a flag
@@ -758,18 +749,18 @@ int m_unregistered(struct Client* cptr, struct Client* sptr, int parc, char* par
 		 me.name, ERR_NOTREGISTERED, parv[0]);
       cptr->localClient->number_of_nick_changes++;
     }
-  return 0;
 }
 
-int m_registered(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
+void m_registered(struct Client* cptr, struct Client* sptr,
+                  int parc, char* parv[])
 {
   sendto_one(cptr, form_str(ERR_ALREADYREGISTRED),   
              me.name, parv[0]); 
-  return 0;
 }
 
-int m_ignore(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
+void m_ignore(struct Client* cptr, struct Client* sptr,
+              int parc, char* parv[])
 {
-  return 0;
+  return;
 }
 

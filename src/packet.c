@@ -45,7 +45,7 @@ static char               readBuf[READBUF_SIZE];
  * parse_client_queued - parse client queued messages
  */
 static
-int parse_client_queued(struct Client *cptr)
+void parse_client_queued(struct Client *cptr)
 { 
     int dolen  = 0;
 #if 0
@@ -58,9 +58,9 @@ int parse_client_queued(struct Client *cptr)
 #endif
       {
 	while ((dolen = linebuf_get(&cptr->localClient->buf_recvq,
-				    readBuf, READBUF_SIZE)) > 0) {
-	  if (CLIENT_EXITED == client_dopacket(cptr, readBuf, dolen))
-	    return CLIENT_EXITED;
+				    readBuf, READBUF_SIZE)) > 0)
+        {
+	  client_dopacket(cptr, readBuf, dolen);
 	}
       }
 #if 0
@@ -84,13 +84,11 @@ int parse_client_queued(struct Client *cptr)
 			      READBUF_SIZE);
 	  if (!dolen)
             break;
-	  if (CLIENT_EXITED == client_dopacket(cptr, readBuf, dolen))
-            return CLIENT_EXITED;
+	  client_dopacket(cptr, readBuf, dolen);
 	  lcptr->sent_parsed++;
 	}
       }
 #endif
-    return CLIENT_OK;
 }
 
 /*
@@ -144,8 +142,10 @@ flood_recalc(int fd, void *data)
     lcptr->sent_parsed = 0;
     lcptr->actually_read = 0;
 
+    parse_client_queued(cptr);
     /* And now, try flushing .. */
-    if (parse_client_queued(cptr) == CLIENT_OK) {
+    if (!IsDead(cptr))
+    {
         /* and finally, reset the flood check */
         comm_setflush(fd, 1, flood_recalc, cptr);
     }
@@ -226,7 +226,9 @@ read_packet(int fd, void *data)
     }
 
   /* Attempt to parse what we have */
-  if (parse_client_queued(cptr) != CLIENT_EXITED) {
+  parse_client_queued(cptr);
+  if (!IsDead(cptr))
+  {
     /* If we get here, we need to register for another COMM_SELECT_READ */
     if (PARSE_AS_SERVER(cptr)) {
       comm_setselect(cptr->fd, FDLIST_SERVER, COMM_SELECT_READ,
@@ -253,7 +255,7 @@ read_packet(int fd, void *data)
  *      with cptr of "local" variation, which contains all the
  *      necessary fields (buffer etc..)
  */
-int client_dopacket(struct Client *cptr, char *buffer, size_t length)
+void client_dopacket(struct Client *cptr, char *buffer, size_t length)
 {
   assert(cptr != NULL);
   assert(buffer != NULL);
@@ -282,22 +284,7 @@ int client_dopacket(struct Client *cptr, char *buffer, size_t length)
       me.localClient->receiveB &= 0x03ff;
     }
 
-  if (CLIENT_EXITED == parse(cptr, buffer, buffer + length)) {
-    /*
-     * CLIENT_EXITED means actually that cptr
-     * structure *does* not exist anymore!!! --msa
-     */
-    return CLIENT_EXITED;
-  }
-  else if (cptr->flags & FLAGS_DEADSOCKET) {
-    /*
-     * Socket is dead so exit (which always returns with
-     * CLIENT_EXITED here).  - avalon
-     */
-    return exit_client(cptr, cptr, &me, 
-            (cptr->flags & FLAGS_SENDQEX) ? "SendQ exceeded" : "Dead socket");
-  }
-  return 1;
+  parse(cptr, buffer, buffer + length);
 }
 
 

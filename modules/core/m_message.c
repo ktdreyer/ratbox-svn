@@ -68,11 +68,11 @@ static int target_table_size = 0;
 
 static int duplicate_ptr( void *, struct entity **, int);
 
-static int m_message(int, char *, struct Client *,
+static void m_message(int, char *, struct Client *,
                      struct Client *, int, char **);
 
-static int m_privmsg(struct Client *, struct Client *, int, char **);
-static int m_notice(struct Client *, struct Client *, int, char **);
+static void m_privmsg(struct Client *, struct Client *, int, char **);
+static void m_notice(struct Client *, struct Client *, int, char **);
 
 static void msg_channel( int p_or_n, char *command,
                          struct Client *cptr,
@@ -163,20 +163,20 @@ free_target_table(void)
 #define PRIVMSG 0
 #define NOTICE  1
 
-static int m_privmsg(struct Client *cptr,
+static void m_privmsg(struct Client *cptr,
                      struct Client *sptr,
                      int parc,
                      char *parv[])
 {
-  return(m_message(PRIVMSG,"PRIVMSG",cptr,sptr,parc,parv));
+  m_message(PRIVMSG,"PRIVMSG",cptr,sptr,parc,parv);
 }
 
-static int m_notice(struct Client *cptr,
+static void m_notice(struct Client *cptr,
                     struct Client *sptr,
                     int parc,
                     char *parv[])
 {
-  return(m_message(NOTICE,"NOTICE",cptr,sptr,parc,parv));
+  m_message(NOTICE,"NOTICE",cptr,sptr,parc,parv);
 }
 
 /*
@@ -186,7 +186,7 @@ static int m_notice(struct Client *cptr,
  *		- pointer to sptr
  *		- pointer to channel
  */
-static int m_message(int p_or_n,
+static void m_message(int p_or_n,
                      char *command,
                      struct Client *cptr,
                      struct Client *sptr,
@@ -198,25 +198,25 @@ static int m_message(int p_or_n,
 
 #if 0  /* Allow servers to send notices to individual people */
   if (!IsPerson(sptr))
-    return 0;
+    return;
 #endif
 
   if (!IsPerson(sptr) && p_or_n != NOTICE)
-   return 0;
+    return;
       
   if (parc < 2 || *parv[1] == '\0')
     {
       if(p_or_n != NOTICE)
 	sendto_one(sptr, form_str(ERR_NORECIPIENT), me.name, sptr->name,
 		   command );
-      return -1;
+      return;
     }
 
   if (parc < 3 || *parv[2] == '\0')
     {
       if(p_or_n != NOTICE)
 	sendto_one(sptr, form_str(ERR_NOTEXTTOSEND), me.name, sptr->name);
-      return -1;
+      return;
     }
 
   ntargets = build_target_list(p_or_n,command,
@@ -231,7 +231,7 @@ static int m_message(int p_or_n,
                command,
                parv[1],
                parv[2]);
-    return 0;
+    return;
   }
 
   for(i = 0; i < ntargets ; i++)
@@ -262,7 +262,6 @@ static int m_message(int p_or_n,
     }
 
   free_target_table();
-  return 0;
 }
 
 /*

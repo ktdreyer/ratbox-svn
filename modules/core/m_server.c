@@ -46,8 +46,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-int mr_server(struct Client*, struct Client*, int, char **);
-int ms_server(struct Client*, struct Client*, int, char **);
+static void mr_server(struct Client*, struct Client*, int, char **);
+static void ms_server(struct Client*, struct Client*, int, char **);
 struct Message server_msgtab = {
   "SERVER", 0, 3, 0, MFLG_SLOW | MFLG_UNREG, 0,
   {mr_server, m_registered, ms_server, m_registered}
@@ -80,7 +80,8 @@ static int       refresh_user_links=0;
  *      parv[2] = serverinfo/hopcount
  *      parv[3] = serverinfo
  */
-int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static void mr_server(struct Client *cptr, struct Client *sptr,
+                      int parc, char *parv[])
 {
   char             info[REALLEN + 1];
   char             *name;
@@ -90,7 +91,7 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if ( (name = parse_server_args(parv, parc, info, &hop)) == NULL )
     {
       sendto_one(cptr,"ERROR :No servername");
-      return 0;
+      return;
     }
   /* 
    * Reject a direct nonTS server connection if we're TS_ONLY -orabidoo
@@ -101,11 +102,15 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 			   get_client_name(cptr, HIDE_IP));
       sendto_realops_flags(FLAGS_NOTADMIN,"Link %s dropped, non-TS server",
 			   get_client_name(cptr, MASK_IP));
-      return exit_client(cptr, cptr, cptr, "Non-TS server");
+      exit_client(cptr, cptr, cptr, "Non-TS server");
+      return;
     }
 
   if (bogus_host(name))
-    return exit_client(cptr, cptr, cptr, "Bogus server name");
+  {
+    exit_client(cptr, cptr, cptr, "Bogus server name");
+    return;
+  }
 
   /* Now we just have to call check_server and everything should be
    * check for us... -A1kmm. */
@@ -122,8 +127,9 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
            "Unauthorized server connection attempt from %s: No entry for "
            "servername %s", get_client_name(cptr, MASK_IP), name);
         }
-      return exit_client(cptr, cptr, cptr,
-                "Invalid servername.");
+      exit_client(cptr, cptr, cptr, "Invalid servername.");
+      return;
+      break;
      case -2:
       sendto_realops_flags(FLAGS_ADMIN,
         "Unauthorized server connection attempt from %s: Bad password "
@@ -133,8 +139,8 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         "Unauthorized server connection attempt from %s: Bad password "
         "for server %s", get_client_name(cptr, MASK_IP), name);
 
-      return exit_client(cptr, cptr, cptr,
-                 "Invalid password.");
+      exit_client(cptr, cptr, cptr, "Invalid password.");
+      return;
       break;
      case -3:
       sendto_realops_flags(FLAGS_ADMIN,
@@ -145,8 +151,9 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         "Unauthorized server connection attempt from %s: Invalid host "
         "for server %s", get_client_name(cptr, MASK_IP), name);
 
-      return exit_client(cptr, cptr, cptr,
-                 "Invalid host.");
+      exit_client(cptr, cptr, cptr, "Invalid host.");
+      return;
+      break;
     }
     
   if ((acptr = find_server(name)))
@@ -171,7 +178,8 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
          get_client_name(cptr, MASK_IP));
 
       sendto_one(cptr, "ERROR :Server already exists.");
-      return exit_client(cptr, cptr, cptr, "Server Exists");
+      exit_client(cptr, cptr, cptr, "Server Exists");
+      return;
     }
 
   if(ServerInfo.hub && IsCapable(cptr, CAP_LL))
@@ -213,7 +221,7 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   strncpy_irc(cptr->info, info[0] ? info : me.name, REALLEN);
   cptr->hopcount = hop;
 
-  return server_estab(cptr);
+  server_estab(cptr);
 }
 
 /*
@@ -223,7 +231,8 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  *      parv[2] = serverinfo/hopcount
  *      parv[3] = serverinfo
  */
-int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static void ms_server(struct Client *cptr, struct Client *sptr,
+                      int parc, char *parv[])
 {
   char             info[REALLEN + 1];
                    /* same size as in s_misc.c */
@@ -239,7 +248,7 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if ( (name = parse_server_args(parv, parc, info, &hop)) == NULL )
     {
       sendto_one(cptr,"ERROR :No servername");
-      return 0;
+      return;
     }
 
   if ((acptr = find_server(name)))
@@ -260,11 +269,13 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        * server message(don't propagate or we will delink from whoever
        * we propagate to). -A1kmm */
       if (irccmp(acptr->name, name) && acptr->from==cptr)
-        return 0;
-	  sendto_realops_flags(FLAGS_ALL,
-			 "Server %s(via %s) introduced an existing server %s.",
-			 sptr->name, cptr->name, name);
-	  return exit_client(NULL, sptr, &me, "Server Exists");
+        return;
+      
+      sendto_realops_flags(FLAGS_ALL,
+                           "Server %s(via %s) introduced an existing server %s.",
+                           sptr->name, cptr->name, name);
+      exit_client(NULL, sptr, &me, "Server Exists");
+      return;
     }
 
   /* 
@@ -283,7 +294,8 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 			   "Link %s cancelled: Server/nick collision on %s",
 		/* inpath */ get_client_name(cptr, HIDE_IP),
 				name);
-      return exit_client(cptr, cptr, cptr, "Nick as Server");
+      exit_client(cptr, cptr, cptr, "Nick as Server");
+      return;
     }
 
   /*
@@ -295,7 +307,7 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (parc == 1 || info[0] == '\0')
     {
       sendto_one(cptr, "ERROR :No server info specified for %s", name);
-      return 0;
+      return;
     }
 
   /*
@@ -357,12 +369,15 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        * non-hub server introducing this. Otherwise, split the new
        * server. -A1kmm. */
       if ((CurrentTime - sptr->firsttime) < 20)
-        return exit_client(NULL, sptr, &me, "No H-line.");
+        {
+          exit_client(NULL, sptr, &me, "No H-line.");
+          return;
+        }
       else
         {
           sendto_one(sptr, ":%s SQUIT %s :Sorry, no H-line.",
                      me.name, name);
-          return 0;
+          return;
         }
     }
 
@@ -376,12 +391,15 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        * non-hub server introducing this. Otherwise, split the new
        * server. -A1kmm. */
       if ((CurrentTime - sptr->firsttime) < 20)
-        return exit_client(NULL, sptr, &me, "Leafed Server.");
+        {
+          exit_client(NULL, sptr, &me, "Leafed Server.");
+          return;
+        }
       else
         {
           sendto_one(sptr, ":%s SQUIT %s :Sorry, Leafed server.",
                      me.name, name);
-          return 0;
+          return;
         }
     }
 
@@ -417,7 +435,8 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	{
 	  sendto_realops_flags(FLAGS_ALL,"Lost N-line for %s on %s. Closing",
 			       get_client_name(cptr, HIDE_IP), name);
-	  return exit_client(cptr, cptr, cptr, "Lost N line");
+	  exit_client(cptr, cptr, cptr, "Lost N line");
+          return;
 	}
       if (match(my_name_for_link(me.name, aconf), acptr->name))
 	continue;
@@ -436,8 +455,6 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       eventAdd("write_links_file", write_links_file, NULL,
 	ConfigFileEntry.links_delay, 0);
     }
-
-  return 0;
 }
 
 /*

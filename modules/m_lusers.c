@@ -36,8 +36,8 @@
 
 /* XXX LazyLinks ? */
 
-static int m_lusers(struct Client*, struct Client*, int, char**);
-static int ms_lusers(struct Client*, struct Client*, int, char**);
+static void m_lusers(struct Client*, struct Client*, int, char**);
+static void ms_lusers(struct Client*, struct Client*, int, char**);
 
 struct Message lusers_msgtab = {
   "LUSERS", 0, 0, 0, MFLG_SLOW, 0,
@@ -67,7 +67,7 @@ char *_version = "20001122";
  * 199970918 JRL hacked to ignore parv[1] completely and require parc > 3
  * to cause a force
  */
-static int m_lusers(struct Client *cptr, struct Client *sptr,
+static void m_lusers(struct Client *cptr, struct Client *sptr,
                     int parc, char *parv[])
 {
   static time_t last_used = 0;
@@ -79,7 +79,7 @@ static int m_lusers(struct Client *cptr, struct Client *sptr,
           /* safe enough to give this on a local connect only */
           if (MyClient(sptr))
             sendto_one(sptr, form_str(RPL_LOAD2HI), me.name, parv[0]);
-          return 0;
+          return;
         }
       else
         {
@@ -92,10 +92,10 @@ static int m_lusers(struct Client *cptr, struct Client *sptr,
       if(hunt_server(cptr, sptr, ":%s LUSERS %s :%s", 2, parc, parv)
        != HUNTED_ISME)
         {
-          return 0;
+          return;
         }
     }
-  return show_lusers(sptr);
+  show_lusers(sptr);
 }
 
 /*
@@ -107,7 +107,7 @@ static int m_lusers(struct Client *cptr, struct Client *sptr,
  * 199970918 JRL hacked to ignore parv[1] completely and require parc > 3
  * to cause a force
  */
-static int ms_lusers(struct Client *cptr, struct Client *sptr,
+static void ms_lusers(struct Client *cptr, struct Client *sptr,
                      int parc, char *parv[])
 {
   if (parc > 2)
@@ -115,9 +115,9 @@ static int ms_lusers(struct Client *cptr, struct Client *sptr,
       if(hunt_server(cptr, sptr, ":%s LUSERS %s :%s", 2, parc, parv)
        != HUNTED_ISME)
         {
-          return 0;
+          return;
         }
     }
-  return show_lusers(sptr);
+  show_lusers(sptr);
 }
 

@@ -54,9 +54,9 @@
 
 #include <string.h>
 
-static int m_stats(struct Client*, struct Client*, int, char**);
-static int ms_stats(struct Client*, struct Client*, int, char**);
-static int mo_stats(struct Client*, struct Client*, int, char**);
+static void m_stats(struct Client*, struct Client*, int, char**);
+static void ms_stats(struct Client*, struct Client*, int, char**);
+static void mo_stats(struct Client*, struct Client*, int, char**);
 
 struct Message stats_msgtab = {
   "STATS", 0, 1, 0, MFLG_SLOW, 0,
@@ -114,7 +114,7 @@ static void do_normal_stats(struct Client *, char *, char *, char, int, int);
 static void do_non_priv_stats(struct Client *, char *, char *, char, int, int);
 static void do_priv_stats(struct Client *, char *, char *, char, int, int);
 
-static int m_stats(struct Client *cptr, struct Client *sptr,
+static void m_stats(struct Client *cptr, struct Client *sptr,
                    int parc, char *parv[])
 {
   char            statchar = parc > 1 ? parv[1][0] : '\0';
@@ -129,7 +129,7 @@ static int m_stats(struct Client *cptr, struct Client *sptr,
       /* safe enough to give this on a local connect only */
       if(MyClient(sptr))
 	sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);
-      return 0;
+      return;
     }
   else
     {
@@ -137,7 +137,7 @@ static int m_stats(struct Client *cptr, struct Client *sptr,
     }
 
   if (hunt_server(cptr,sptr,":%s STATS %s :%s",2,parc,parv)!=HUNTED_ISME)
-    return 0;
+    return;
 
   name = parse_stats_args(parc,parv,&doall,&wilds);
 
@@ -147,8 +147,6 @@ static int m_stats(struct Client *cptr, struct Client *sptr,
   do_normal_stats(sptr, name, target, statchar, doall, wilds);
   do_non_priv_stats(sptr, name, target, statchar, doall, wilds);
   sendto_one(sptr, form_str(RPL_ENDOFSTATS), me.name, parv[0], statchar);
-
-  return 0;
 }
 
 /*
@@ -173,7 +171,7 @@ static int m_stats(struct Client *cptr, struct Client *sptr,
  *            it--not reversed as in ircd.conf!
  */
 
-static int mo_stats(struct Client *cptr, struct Client *sptr,
+static void mo_stats(struct Client *cptr, struct Client *sptr,
                     int parc, char *parv[])
 {
   char            statchar = parc > 1 ? parv[1][0] : '\0';
@@ -183,7 +181,7 @@ static int mo_stats(struct Client *cptr, struct Client *sptr,
   char            *target=NULL;
 
   if (hunt_server(cptr,sptr,":%s STATS %s :%s",2,parc,parv)!=HUNTED_ISME)
-    return 0;
+    return;
 
   name = parse_stats_args(parc,parv,&doall,&wilds);
 
@@ -193,8 +191,6 @@ static int mo_stats(struct Client *cptr, struct Client *sptr,
   do_normal_stats(sptr, name, target, statchar, doall, wilds);
   do_priv_stats(sptr, name, target, statchar, doall, wilds);
   sendto_one(sptr, form_str(RPL_ENDOFSTATS), me.name, parv[0], statchar);
-
-  return 0;
 }
 
 /*
@@ -219,18 +215,16 @@ static int mo_stats(struct Client *cptr, struct Client *sptr,
  *            it--not reversed as in ircd.conf!
  */
 
-static int ms_stats(struct Client *cptr, struct Client *sptr,
+static void ms_stats(struct Client *cptr, struct Client *sptr,
                     int parc, char *parv[])
 {
   if (hunt_server(cptr,sptr,":%s STATS %s :%s",2,parc,parv)!=HUNTED_ISME)
-    return 0;
+    return;
 
   if (IsOper(sptr))
     mo_stats(cptr,sptr,parc,parv);
   else
     m_stats(cptr,sptr,parc,parv);
-
-  return 0;
 }
 
 /*

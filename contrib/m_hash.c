@@ -36,7 +36,8 @@
 #include "parse.h"
 #include "modules.h"
 
-int mo_hash(struct Client *, struct Client *, int, char **);
+static void mo_hash(struct Client *, struct Client *, int, char **);
+
 void _modinit(void);
 void _moddeinit(void);
 
@@ -73,8 +74,8 @@ char *_version = "20001122";
  *       -avalon
  *
  */
-int mo_hash(struct Client* cptr, struct Client* sptr,
-	    int parc, char* parv[])
+static void mo_hash(struct Client* cptr, struct Client* sptr,
+                    int parc, char* parv[])
 {
   struct Channel*  chan;
   struct Client*   client;
@@ -118,7 +119,6 @@ int mo_hash(struct Client* cptr, struct Client* sptr,
   default:
     break;
   }
-  return 0;
 }
 
 

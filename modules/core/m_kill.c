@@ -40,8 +40,8 @@
 
 static char buf[BUFSIZE];
 
-static int ms_kill(struct Client*, struct Client*, int, char**);
-static int mo_kill(struct Client*, struct Client*, int, char**);
+static void ms_kill(struct Client*, struct Client*, int, char**);
+static void mo_kill(struct Client*, struct Client*, int, char**);
 static void relay_kill(struct Client *, struct Client *, struct Client *,
                        const char *, const char *);
 
@@ -70,7 +70,8 @@ char *_version = "20001122";
 **      parv[1] = kill victim
 **      parv[2] = kill path
 */
-int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static void mo_kill(struct Client *cptr, struct Client *sptr,
+                    int parc, char *parv[])
 {
   struct Client*    acptr;
   const char* inpath = cptr->name;
@@ -83,7 +84,7 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (!IsSetOperK(sptr))
     {
       sendto_one(sptr,":%s NOTICE %s :You have no K flag",me.name,parv[0]);
-      return 0;
+      return;
     }
 
   if (!BadPtr(reason))
@@ -105,7 +106,7 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         {
           sendto_one(sptr, form_str(ERR_NOSUCHNICK),
                      me.name, parv[0], user);
-          return 0;
+          return;
         }
       sendto_one(sptr,":%s NOTICE %s :KILL changed from %s to %s",
                  me.name, parv[0], user, acptr->name);
@@ -114,14 +115,14 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     {
       sendto_one(sptr, form_str(ERR_CANTKILLSERVER),
                  me.name, parv[0]);
-      return 0;
+      return;
     }
 
   if (!MyConnect(acptr) && (!IsOperGlobalKill(sptr)))
     {
       sendto_one(sptr, ":%s NOTICE %s :Nick %s isnt on your server",
                  me.name, parv[0], acptr->name);
-      return 0;
+      return;
     }
 
   /*
@@ -156,7 +157,7 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       acptr->flags |= FLAGS_KILLED;
     }
 
-  return exit_client(cptr, acptr, sptr, reason);
+  exit_client(cptr, acptr, sptr, reason);
 }
 
 /*
@@ -165,7 +166,8 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 **      parv[1] = kill victim
 **      parv[2] = kill path
 */
-int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static void ms_kill(struct Client *cptr, struct Client *sptr,
+                    int parc, char *parv[])
 {
   struct Client*    acptr;
   const char* inpath = cptr->name;
@@ -178,7 +180,7 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "KILL");
-      return 0;
+      return;
     }
 
   user = parv[1];
@@ -196,7 +198,7 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         {
           sendto_one(sptr, form_str(ERR_NOSUCHNICK),
                      me.name, parv[0], user);
-          return 0;
+          return;
         }
       sendto_one(sptr,":%s NOTICE %s :KILL changed from %s to %s",
                  me.name, parv[0], user, acptr->name);
@@ -206,7 +208,7 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     {
       sendto_one(sptr, form_str(ERR_CANTKILLSERVER),
                  me.name, parv[0]);
-      return 0;
+      return;
     }
 
   if (BadPtr(path))
@@ -265,7 +267,7 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       acptr->flags |= FLAGS_KILLED;
     }
 
-  return exit_client(cptr, acptr, sptr, reason );
+  exit_client(cptr, acptr, sptr, reason );
 }
 
 static void relay_kill(struct Client *one, struct Client *sptr,

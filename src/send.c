@@ -94,17 +94,20 @@ send_trim(char *lsendbuf, int len );
 **      Also, the notice is skipped for "uninteresting" cases,
 **      like Persons and yet unknown connections...
 */
-
 /*
- * XXX - we should do something about this function now..
- *       It's not needed any more, since exit_client() won't free
- *       the client until the next io_loop
+ * this code now _does_ call exit_client, which disconnects the
+ * client immediately, but doesn't destroy it until the next go
+ * around the main loop.  This solves various problems where
+ * we were actually accessing freed memory.
+ * -davidt
  */
 
 static int
 dead_link(struct Client *to, char *notice)
 {
-  to->flags |= FLAGS_DEADSOCKET;
+  exit_client(to, to, &me,
+              (to->flags & FLAGS_SENDQEX) ?
+              "SendQ exceeded" : "Dead socket");
 
   /*
    * If because of buffer problem then clean linebuf's now so that

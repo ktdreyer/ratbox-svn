@@ -38,7 +38,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-static int ms_llnick(struct Client*, struct Client*, int, char**);
+static void ms_llnick(struct Client*, struct Client*, int, char**);
 
 struct Message llnick_msgtab = {
   "LLNICK", 0, 3, 0, MFLG_SLOW | MFLG_UNREG, 0L,
@@ -67,7 +67,7 @@ char *_version = "20001122";
  *      parv[3] = old nick
  *
  */
-static int  ms_llnick(struct Client *cptr,
+static void ms_llnick(struct Client *cptr,
                       struct Client *sptr,
                       int parc,
                       char *parv[])
@@ -84,11 +84,11 @@ static int  ms_llnick(struct Client *cptr,
       sendto_realops_flags(FLAGS_ALL,
 			   "*** LLNICK requested from non LL server %s",
 			   cptr->name);
-      return 0;
+      return;
     }
 
   if (parc < 4)
-    return 0;
+    return;
 
   if (*parv[1] == 'Y')
     exists = 1;
@@ -113,7 +113,7 @@ static int  ms_llnick(struct Client *cptr,
       }
     }
     if (!acptr) /* Can't find them -- maybe they got a different nick */
-      return 0;
+      return;
   }
   else
   {
@@ -121,7 +121,7 @@ static int  ms_llnick(struct Client *cptr,
     acptr = hash_find_client(nick_old,(struct Client *)NULL);
   
     if (!acptr) /* Can't find them -- maybe they got a different nick */
-      return 0;
+      return;
   }
   
   if(hash_find_client(nick,(struct Client *)NULL) || exists)
@@ -130,13 +130,11 @@ static int  ms_llnick(struct Client *cptr,
     sendto_one(acptr, form_str(ERR_NICKNAMEINUSE), me.name,
                new ? "*" : nick_old,
                nick);
-    return 0;
+    return;
   }
 
   if(new)
-    return(set_initial_nick(acptr, acptr, nick));
+    set_initial_nick(acptr, acptr, nick);
   else
-    return(change_local_nick(acptr, acptr, nick));
-
-  return 0;
+    change_local_nick(acptr, acptr, nick);
 }

@@ -40,8 +40,8 @@
 #include "parse.h"
 #include "modules.h"
 
-static int m_who(struct Client*, struct Client*, int, char**);
-static int ms_who(struct Client*, struct Client*, int, char**);
+static void m_who(struct Client*, struct Client*, int, char**);
+static void ms_who(struct Client*, struct Client*, int, char**);
 
 struct Message who_msgtab = {
   "WHO", 0, 2, 0, MFLG_SLOW, 0,
@@ -82,7 +82,7 @@ char *_version = "20001122";
 **      parv[1] = nickname mask list
 **      parv[2] = additional selection flag, only 'o' for now.
 */
-static int m_who(struct Client *cptr,
+static void m_who(struct Client *cptr,
                  struct Client *sptr,
                  int parc,
                  char *parv[])
@@ -117,14 +117,14 @@ static int m_who(struct Client *cptr,
       if (*mask == '\0')
 	{
 	  sendto_one(sptr, form_str(RPL_ENDOFWHO), me.name, parv[0], "*" );
-	  return 0;
+	  return;
 	}
     }
   else
     {
       who_global(sptr, mask, oper);
       sendto_one(sptr, form_str(RPL_ENDOFWHO), me.name, parv[0], "*" );
-      return 0;
+      return;
     }
 
   /* mask isn't NULL at this point. repeat after me... -db */
@@ -140,7 +140,7 @@ static int m_who(struct Client *cptr,
       if (!mychannel)
         {
           sendto_one(sptr, form_str(RPL_ENDOFWHO), me.name, parv[0], "*");
-          return 0;
+          return;
         }
 
       if (HasVchans(mychannel))
@@ -154,7 +154,7 @@ static int m_who(struct Client *cptr,
       else
 	do_who_on_channel(sptr, mychannel, "*", NO, YES);
       sendto_one(sptr, form_str(RPL_ENDOFWHO), me.name, parv[0], "*");
-      return 0;
+      return;
     }
 
   /* '/who #some_channel' */
@@ -191,7 +191,7 @@ static int m_who(struct Client *cptr,
 	    }
 	}
       sendto_one(sptr, form_str(RPL_ENDOFWHO), me.name, parv[0], mask );
-      return 0;
+      return;
     }
 
   /* '/who nick' */
@@ -260,13 +260,12 @@ static int m_who(struct Client *cptr,
 	}
 
       sendto_one(sptr, form_str(RPL_ENDOFWHO), me.name, parv[0], mask );
-      return 0;
+      return;
     }
 
   /* Wasn't a nick, wasn't a channel, wasn't a '*' so ... */
   who_global(sptr, mask, oper);
   sendto_one(sptr, form_str(RPL_ENDOFWHO), me.name, parv[0], mask );
-  return 0;
 }
 
 /*
@@ -484,7 +483,7 @@ static void do_who(struct Client *sptr,
 **      parv[1] = nickname mask list
 **      parv[2] = additional selection flag, only 'o' for now.
 */
-static int ms_who(struct Client *cptr,
+static void ms_who(struct Client *cptr,
                   struct Client *sptr,
                   int parc,
                   char *parv[])
@@ -497,8 +496,8 @@ static int ms_who(struct Client *cptr,
   if( ServerInfo.hub )
     {
       if(!IsCapable(cptr->from,CAP_LL))
-	return 0;
+	return;
     }
 
-  return( m_who(cptr,sptr,parc,parv) );
+  m_who(cptr,sptr,parc,parv);
 }

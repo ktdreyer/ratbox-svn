@@ -53,9 +53,9 @@
 #include <string.h>
 #include <errno.h>
 
-static int mo_kline(struct Client *,struct Client *,int,char **);
-static int ms_kline(struct Client *,struct Client *,int,char **);
-static int mo_dline(struct Client *,struct Client *,int,char **);
+static void mo_kline(struct Client *,struct Client *,int,char **);
+static void ms_kline(struct Client *,struct Client *,int,char **);
+static void mo_dline(struct Client *,struct Client *,int,char **);
 
 struct Message kline_msgtab = {
   "KLINE", 0, 2, 0, MFLG_SLOW, 0,
@@ -128,7 +128,7 @@ char host[HOSTLEN+2];
  * side effects - k line is added
  *
  */
-static int mo_kline(struct Client *cptr,
+static void mo_kline(struct Client *cptr,
                     struct Client *sptr,
                     int parc,
                     char **parv)
@@ -146,7 +146,7 @@ static int mo_kline(struct Client *cptr,
     {
       sendto_one(sptr,":%s NOTICE %s :You have no K flag",
 		 me.name,sptr->name);
-      return 0;
+      return;
     }
 
   parv++;
@@ -155,7 +155,7 @@ static int mo_kline(struct Client *cptr,
   tkline_time = valid_tkline(sptr,*parv);
 
   if( tkline_time == -1 )
-    return 0;
+    return;
   else if( tkline_time > 0 )
     {
       parv++;
@@ -166,11 +166,11 @@ static int mo_kline(struct Client *cptr,
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
 		 me.name, sptr->name, "KLINE");
-      return -1;
+      return;
     }
 
   if ( find_user_host(sptr,*parv,user,host) == 0 )
-    return 0;
+    return;
   parc--;
   parv++;
 
@@ -184,7 +184,7 @@ static int mo_kline(struct Client *cptr,
 	    {
 	      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
 			 me.name, sptr->name, "KLINE");
-	      return -1;
+	      return;
 	    }
 	  target_server = *parv;
 	  parc--;
@@ -196,10 +196,10 @@ static int mo_kline(struct Client *cptr,
     reason = *parv;
 
   if( valid_user_host(sptr,user,host) == 0 )
-    return 0;
+    return;
 
   if( valid_wild_card(sptr,user,host) == 0 )
-    return 0;
+    return;
 
   ip_kline = is_ip_kline(host,&ip,&ip_mask);
   current_date = smalldate((time_t) 0);
@@ -223,11 +223,11 @@ static int mo_kline(struct Client *cptr,
        * else we apply it locally too
        */
       if(!match(target_server,me.name))
-	return 0;
+	return;
     }
 
   if ( already_placed_kline(sptr, user, host, tkline_time, &ip))
-    return 0;
+    return;
 
   if (ip_kline)
    { 
@@ -254,8 +254,6 @@ static int mo_kline(struct Client *cptr,
       DupString(aconf->passwd, buffer );
       apply_kline(sptr, aconf, reason, current_date, ip_kline, &ip, ip_mask);
     }
-
-  return 0;
 } /* mo_kline() */
 
 /*
@@ -263,7 +261,7 @@ static int mo_kline(struct Client *cptr,
  *
  *
  */
-static int ms_kline(struct Client *cptr,
+static void ms_kline(struct Client *cptr,
                     struct Client *sptr,
                     int parc,
                     char *parv[])
@@ -276,7 +274,7 @@ static int ms_kline(struct Client *cptr,
   struct irc_inaddr ip;
   unsigned long ip_mask;
   if(parc < 7)
-    return 0;
+    return;
 
   /* parv[0] parv[1] parv[2]       parv[3]     parv[4] parv[5] parv[6] */
   /* server  oper    target_server tkline_time user    host    reason */
@@ -287,23 +285,23 @@ static int ms_kline(struct Client *cptr,
 
 
   if(!match(parv[2],me.name))
-    return 0;
+    return;
 
   if ((rcptr = hash_find_client(parv[1],(struct Client *)NULL)))
     {
       if(!IsPerson(rcptr))
-	return 0;
+	return;
     }
   else
-    return 0;
+    return;
 
   /* These should never happen but... */
   if( rcptr->name == NULL )
-    return 0;
+    return;
   if( rcptr->user == NULL )
-    return 0;
+    return;
   if( rcptr->host == NULL )
-    return 0;
+    return;
 
   ip_kline = is_ip_kline(parv[5],&ip,&ip_mask);
   tkline_time = atoi(parv[3]);
@@ -323,7 +321,7 @@ static int ms_kline(struct Client *cptr,
        * arrived, to avoid confusing opers - fl
        */
       if ( already_placed_kline(sptr, parv[4], parv[5], (int)parv[3], &ip) )
-        return 0;
+        return;
 
       aconf = make_conf();
 
@@ -347,7 +345,6 @@ static int ms_kline(struct Client *cptr,
                        ip_kline, &ip, ip_mask);	
 
       }
-  return 0;
 } /* ms_kline() */
 
 /*
@@ -574,13 +571,13 @@ static char *cluster(char *hostname)
  * side effects - D line is added
  *
  */
-static int mo_dline(struct Client *cptr, struct Client *sptr,
+static void mo_dline(struct Client *cptr, struct Client *sptr,
                     int parc, char *parv[])
 {
 #ifdef IPV6
   sendto_one(sptr, ":%s NOTICE %s :Sorry, DLINE is currently not implemented for IPv6",
              me.name, parv[0]);
-  return 0;
+  return;
 #else
   char *dlhost, *reason;
   char *p;
@@ -596,7 +593,7 @@ static int mo_dline(struct Client *cptr, struct Client *sptr,
   if(!IsSetOperK(sptr))
     {
       sendto_one(sptr,":%s NOTICE %s :You have no K flag",me.name,parv[0]);
-      return 0;
+      return;
     }
 
   dlhost = parv[1];
@@ -616,17 +613,17 @@ static int mo_dline(struct Client *cptr, struct Client *sptr,
   if(!is_address(dlhost,&ip_host,&ip_mask))
     {
       if (!(acptr = find_chasing(sptr, parv[1], NULL)))
-        return 0;
+        return;
 
       if(!acptr->user)
-        return 0;
+        return;
 
       if (IsServer(acptr))
         {
           sendto_one(sptr,
                      ":%s NOTICE %s :Can't DLINE a server silly",
                      me.name, parv[0]);
-          return 0;
+          return;
         }
               
       if(!MyConnect(acptr))
@@ -634,7 +631,7 @@ static int mo_dline(struct Client *cptr, struct Client *sptr,
           sendto_one(sptr,
                      ":%s NOTICE :%s :Can't DLINE nick on another server",
                      me.name, parv[0]);
-          return 0;
+          return;
         }
 
       if(IsElined(acptr))
@@ -642,7 +639,7 @@ static int mo_dline(struct Client *cptr, struct Client *sptr,
           sendto_one(sptr,
                      ":%s NOTICE %s :%s is E-lined",me.name,parv[0],
                      acptr->name);
-          return 0;
+          return;
         }
 
       /*
@@ -656,19 +653,19 @@ static int mo_dline(struct Client *cptr, struct Client *sptr,
       
       p = strchr(cidr_form_host,'.');
       if(!p)
-        return 0;
+        return;
       /* 192. <- p */
 
       p++;
       p = strchr(p,'.');
       if(!p)
-        return 0;
+        return;
       /* 192.168. <- p */
 
       p++;
       p = strchr(p,'.');
       if(!p)
-        return 0;
+        return;
       /* 192.168.0. <- p */
 
       p++;
@@ -688,7 +685,7 @@ static int mo_dline(struct Client *cptr, struct Client *sptr,
   if (parc > 2) /* host :reason */
     {
       if ( valid_comment(sptr,parv[2]) == 0 )
-	return 0;
+	return;
 
       if(*parv[2])
         reason = parv[2];
@@ -706,7 +703,7 @@ static int mo_dline(struct Client *cptr, struct Client *sptr,
           sendto_one(sptr, ":%s NOTICE %s :Can't use a mask less than 24 with dline",
                      me.name,
                      parv[0]);
-          return 0;
+          return;
         }
     }
   IN_ADDR(ipn) = ip_host;
@@ -726,8 +723,7 @@ static int mo_dline(struct Client *cptr, struct Client *sptr,
                       parv[0],
                       dlhost,
                       aconf->host,creason);
-      return 0;
-       
+      return;
      }
 
   current_date = smalldate((time_t) 0);
@@ -755,7 +751,6 @@ static int mo_dline(struct Client *cptr, struct Client *sptr,
 		    current_date);
 
   check_klines();
-  return 0;
 #endif
 } /* m_dline() */
 

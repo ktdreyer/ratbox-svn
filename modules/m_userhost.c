@@ -38,7 +38,7 @@
 
 static char buf[BUFSIZE];
 
-static int m_userhost(struct Client*, struct Client*, int, char**);
+static void m_userhost(struct Client*, struct Client*, int, char**);
 
 struct Message userhost_msgtab = {
   "USERHOST", 0, 1, 0, MFLG_SLOW, 0,
@@ -64,7 +64,7 @@ char *_version = "20001122";
  * the need for complicated requests like WHOIS. It returns user/host
  * information only (no spurious AWAY labels or channels).
  */
-static int m_userhost(struct Client *cptr,
+static void m_userhost(struct Client *cptr,
                       struct Client *sptr,
                       int parc,
                       char *parv[])
@@ -142,11 +142,9 @@ static int m_userhost(struct Client *cptr,
           }
           /* Relay upstream, and let hub reply */
           sendto_one(uplink, ":%s USERHOST %s", parv[0], buf );
-          return 0;
+          return;
         }
     }
 
   sendto_one(sptr, "%s", buf);
-
-  return 0;
 }

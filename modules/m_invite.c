@@ -40,8 +40,8 @@
 #include "parse.h"
 #include "modules.h"
 
-static int m_invite(struct Client*, struct Client*, int, char**);
-static int ms_invite(struct Client*, struct Client*, int, char**);
+static void m_invite(struct Client*, struct Client*, int, char**);
+static void ms_invite(struct Client*, struct Client*, int, char**);
 
 struct Message invite_msgtab = {
   "INVITE", 0, 3, 0, MFLG_SLOW, 0,
@@ -68,7 +68,7 @@ char *_version = "20001122";
 **      parv[1] - user to invite
 **      parv[2] - channel number
 */
-static int m_invite(struct Client *cptr,
+static void m_invite(struct Client *cptr,
                     struct Client *sptr,
                     int parc,
                     char *parv[])
@@ -83,25 +83,25 @@ static int m_invite(struct Client *cptr,
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "INVITE");
-      return -1;
+      return;
     }
 
   /* A little sanity test here */
   if(!sptr->user)
-    return 0;
+    return;
 
   if (!(acptr = find_person(parv[1], (struct Client *)NULL)))
     {
       sendto_one(sptr, form_str(ERR_NOSUCHNICK),
                  me.name, parv[0], parv[1]);
-      return 0;
+      return;
     }
 
   if (!check_channel_name(parv[2]))
     { 
       sendto_one(sptr, form_str(ERR_BADCHANNAME),
                  me.name, parv[0], (unsigned char *)parv[2]);
-      return 0;
+      return;
     }
 
   if (!IsChannelName(parv[2]))
@@ -109,7 +109,7 @@ static int m_invite(struct Client *cptr,
       if (MyClient(sptr))
         sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
                    me.name, parv[0], parv[2]);
-      return 0;
+      return;
     }
 
   /* Do not send local channel invites to users if they are not on the
@@ -124,7 +124,7 @@ static int m_invite(struct Client *cptr,
     {
       sendto_one(sptr, form_str(ERR_USERNOTONSERV),
 		 me.name, parv[0], parv[1]);
-      return 0;
+      return;
     }
 	  
   if (!(chptr = hash_find_channel(parv[2], NullChn)))
@@ -132,7 +132,7 @@ static int m_invite(struct Client *cptr,
       if (MyClient(sptr))
         sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
                    me.name, parv[0], parv[2]);
-      return 0;
+      return;
     }
 
   /* By this point, chptr is non NULL */  
@@ -144,7 +144,7 @@ static int m_invite(struct Client *cptr,
 	  if (MyClient(sptr))
 	    sendto_one(sptr, form_str(ERR_USERONCHANNEL),
 		       me.name, parv[0], parv[1], parv[2]);
-	  return 0;
+	  return;
 	}
 
       if ((vchan = map_vchan(chptr,sptr)))
@@ -158,7 +158,7 @@ static int m_invite(struct Client *cptr,
       if (MyClient(sptr))
         sendto_one(sptr, form_str(ERR_NOTONCHANNEL),
                    me.name, parv[0], parv[2]);
-      return 0;
+      return;
     }
 
   if (IsMember(acptr, chptr))
@@ -166,7 +166,7 @@ static int m_invite(struct Client *cptr,
       if (MyClient(sptr))
         sendto_one(sptr, form_str(ERR_USERONCHANNEL),
                    me.name, parv[0], parv[1], parv[2]);
-      return 0;
+      return;
     }
 
   chop = is_chan_op(chptr, sptr);
@@ -178,7 +178,7 @@ static int m_invite(struct Client *cptr,
           if (MyClient(sptr))
             sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED),
                        me.name, parv[0], parv[2]);
-          return -1;
+          return;
         }
     }
 
@@ -209,7 +209,6 @@ static int m_invite(struct Client *cptr,
 
   sendto_anywhere(acptr, sptr, "INVITE %s :%s",
 		  acptr->name, parv[2]);
-  return 0;
 }
 
 /*
@@ -218,12 +217,10 @@ static int m_invite(struct Client *cptr,
 **      parv[1] - user to invite
 **      parv[2] - channel number
 */
-static int ms_invite(struct Client *cptr,
+static void ms_invite(struct Client *cptr,
                      struct Client *sptr,
                      int parc,
                      char *parv[])
 {
-  return (m_invite(cptr,sptr,parc,parv));
-  /* NOT REACHED */
-  return 0;
+  m_invite(cptr,sptr,parc,parv);
 }

@@ -39,8 +39,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-static int m_whowas(struct Client*, struct Client*, int, char**);
-static int mo_whowas(struct Client*, struct Client*, int, char**);
+static void m_whowas(struct Client*, struct Client*, int, char**);
+static void mo_whowas(struct Client*, struct Client*, int, char**);
 
 struct Message whowas_msgtab = {
   "WHOWAS", 0, 0, 0, MFLG_SLOW, 0L,
@@ -69,7 +69,7 @@ char *_version = "20001122";
 **      parv[0] = sender prefix
 **      parv[1] = nickname queried
 */
-static int m_whowas(struct Client *cptr,
+static void m_whowas(struct Client *cptr,
                     struct Client *sptr,
                     int parc,
                     char *parv[])
@@ -80,22 +80,22 @@ static int m_whowas(struct Client *cptr,
     {
       sendto_one(sptr, form_str(ERR_NONICKNAMEGIVEN),
                  me.name, parv[0]);
-      return 0;
+      return;
     }
 
   if((last_used + ConfigFileEntry.whois_wait) > CurrentTime)
     {
-      return 0;
+      return;
     }
   else
     {
       last_used = CurrentTime;
     }
 
-  return(whowas_do(cptr,sptr,parc,parv));
+  whowas_do(cptr,sptr,parc,parv);
 }
 
-static int mo_whowas(struct Client *cptr,
+static void mo_whowas(struct Client *cptr,
                      struct Client *sptr,
                      int parc,
                      char *parv[])
@@ -104,10 +104,10 @@ static int mo_whowas(struct Client *cptr,
     {
       sendto_one(sptr, form_str(ERR_NONICKNAMEGIVEN),
                  me.name, parv[0]);
-      return 0;
+      return;
     }
 
-  return(whowas_do(cptr,sptr,parc,parv));
+  whowas_do(cptr,sptr,parc,parv);
 }
 
 static int whowas_do(struct Client *cptr, struct Client *sptr,

@@ -43,9 +43,9 @@
 #include <string.h>
 #include <assert.h>
 
-static int m_part(struct Client*, struct Client*, int, char**);
-static int ms_part(struct Client*, struct Client*, int, char**);
-static int mo_part(struct Client *, struct Client *, int, char **);
+static void m_part(struct Client*, struct Client*, int, char**);
+static void ms_part(struct Client*, struct Client*, int, char**);
+static void mo_part(struct Client *, struct Client *, int, char **);
 
 struct Message part_msgtab = {
   "PART", 1, 2, 0, MFLG_SLOW, 0,
@@ -76,7 +76,7 @@ char *_version = "20001122";
 **      parv[1] = channel
 **      parv[2] = reason
 */
-static int m_part(struct Client *cptr,
+static void m_part(struct Client *cptr,
                   struct Client *sptr,
                   int parc,
                   char *parv[])
@@ -90,7 +90,7 @@ static int m_part(struct Client *cptr,
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "PART");
-      return 0;
+      return;
     }
 
   reason[0] = '\0';
@@ -141,10 +141,8 @@ static int m_part(struct Client *cptr,
 	  part_one_client(cptr, sptr, name, reason);
 	  name = strtoken(&p, (char *)NULL, ",");
 	}
-      return 1;
+      return;
     }
-
-  return 0;
 }
 
 /*
@@ -235,7 +233,7 @@ static void part_one_client(struct Client *cptr,
  * but no spam checks
  */
 
-static int ms_part(struct Client *cptr,
+static void ms_part(struct Client *cptr,
                    struct Client *sptr,
                    int parc,
                    char *parv[])
@@ -245,7 +243,7 @@ static int ms_part(struct Client *cptr,
 
   if (*parv[1] == '\0')
     {
-      return 0;
+      return;
     }
 
   reason[0] = '\0';
@@ -260,8 +258,6 @@ static int ms_part(struct Client *cptr,
       part_one_client(cptr, sptr, name, reason);
       name = strtoken(&p, (char *)NULL, ",");
     }
-
-  return 0;
 }
 
 /*
@@ -271,7 +267,7 @@ static int ms_part(struct Client *cptr,
  * but no spam checks
  */
 
-static int mo_part(struct Client *cptr,
+static void mo_part(struct Client *cptr,
                    struct Client *sptr,
                    int parc,
                    char *parv[])
@@ -283,7 +279,7 @@ static int mo_part(struct Client *cptr,
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "PART");
-      return 0;
+      return;
     }
 
   reason[0] = '\0';
@@ -298,6 +294,5 @@ static int mo_part(struct Client *cptr,
       part_one_client(cptr, sptr, name, reason);
       name = strtoken(&p, (char *)NULL, ",");
     }
-  return 0;
 }
 

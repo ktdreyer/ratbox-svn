@@ -35,7 +35,7 @@
 
 #include <stdlib.h>
 
-static int m_away(struct Client*, struct Client*, int, char**);
+static void m_away(struct Client*, struct Client*, int, char**);
 
 struct Message away_msgtab = {
   "AWAY", 0, 0, 0, MFLG_SLOW, 0,
@@ -72,7 +72,7 @@ char *_version = "20010128";
 **      parv[0] = sender prefix
 **      parv[1] = away message
 */
-static int m_away(struct Client *cptr,
+static void m_away(struct Client *cptr,
                   struct Client *sptr,
                   int parc,
                   char *parv[])
@@ -86,7 +86,7 @@ static int m_away(struct Client *cptr,
       sendto_realops_flags(FLAGS_DEBUG,
                            "Got AWAY from nil user, from %s (%s)\n",
 			   cptr->name,sptr->name);
-      return 0;
+      return;
     }
   away = sptr->user->away;
 
@@ -105,7 +105,7 @@ static int m_away(struct Client *cptr,
       if (MyConnect(sptr))
         sendto_one(sptr, form_str(RPL_UNAWAY),
                    me.name, parv[0]);
-      return 0;
+      return;
     }
 
   /* Marking as away */
@@ -115,7 +115,7 @@ static int m_away(struct Client *cptr,
        (CurrentTime-sptr->user->last_away)<ConfigFileEntry.pace_wait))
     {
      sendto_one(sptr, form_str(RPL_LOAD2HI), me.name, parv[0]);
-     return 0;
+     return;
     }
 
   last_away = CurrentTime;
@@ -138,6 +138,5 @@ static int m_away(struct Client *cptr,
 
   if (MyConnect(sptr))
     sendto_one(sptr, form_str(RPL_NOWAWAY), me.name, parv[0]);
-  return 0;
 }
 

@@ -40,9 +40,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-static int m_list(struct Client*, struct Client*, int, char**);
-static int ms_list(struct Client*, struct Client*, int, char**);
-static int mo_list(struct Client*, struct Client*, int, char**);
+static void m_list(struct Client*, struct Client*, int, char**);
+static void ms_list(struct Client*, struct Client*, int, char**);
+static void mo_list(struct Client*, struct Client*, int, char**);
 static int list_all_channels(struct Client *);
 static void list_one_channel(struct Client *,struct Channel *);
 
@@ -73,7 +73,7 @@ char *_version = "20001122";
 **      parv[0] = sender prefix
 **      parv[1] = channel
 */
-static int m_list(struct Client *cptr,
+static void m_list(struct Client *cptr,
                   struct Client *sptr,
                   int parc,
                   char *parv[])
@@ -88,7 +88,7 @@ static int m_list(struct Client *cptr,
 	sendto_one( uplink, ":%s LIST", sptr->name );
       else
 	sendto_one( uplink, ":%s LIST %s", sptr->name, parv[1] );
-      return 0;
+      return;
     }
 
   /* If not a LazyLink connection, see if its still paced */
@@ -96,7 +96,7 @@ static int m_list(struct Client *cptr,
   if( ( (last_used + ConfigFileEntry.pace_wait) > CurrentTime) )
     {
       sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);
-      return 0;
+      return;
     }
   else
     last_used = CurrentTime;
@@ -110,8 +110,6 @@ static int m_list(struct Client *cptr,
     {
       list_named_channel(sptr,parv[1]);
     }
-
-  return 0;
 }
 
 
@@ -120,7 +118,7 @@ static int m_list(struct Client *cptr,
 **      parv[0] = sender prefix
 **      parv[1] = channel
 */
-static int mo_list(struct Client *cptr,
+static void mo_list(struct Client *cptr,
                    struct Client *sptr,
                    int parc,
                    char *parv[])
@@ -137,7 +135,7 @@ static int mo_list(struct Client *cptr,
 	sendto_one( uplink, ":%s LIST", sptr->name );
       else
 	sendto_one( uplink, ":%s LIST %s", sptr->name, parv[1] );
-      return 0;
+      return;
     }
 
   /* If no arg, do all channels *whee*, else just one channel */
@@ -149,8 +147,6 @@ static int mo_list(struct Client *cptr,
     {
       list_named_channel(sptr,parv[1]);
     }
-
-  return 0;
 }
 
 /*
@@ -158,7 +154,7 @@ static int mo_list(struct Client *cptr,
 **      parv[0] = sender prefix
 **      parv[1] = channel
 */
-static int ms_list(struct Client *cptr,
+static void ms_list(struct Client *cptr,
                    struct Client *sptr,
                    int parc,
                    char *parv[])
@@ -168,7 +164,7 @@ static int ms_list(struct Client *cptr,
   if( ServerInfo.hub )
     {
       if(!IsCapable(cptr->from,CAP_LL) && !MyConnect(sptr))
-	return 0;
+	return;
 
       if (parc < 2 || BadPtr(parv[1]))
 	{
@@ -179,7 +175,6 @@ static int ms_list(struct Client *cptr,
 	  list_named_channel(sptr,parv[1]);
 	}
     }
-  return 0;
 }
 
 /*

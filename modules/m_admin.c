@@ -33,9 +33,9 @@
 #include "parse.h"
 #include "modules.h"
 
-static int m_admin(struct Client*, struct Client*, int, char**);
-static int mr_admin(struct Client*, struct Client*, int, char**);
-static int ms_admin(struct Client*, struct Client*, int, char**);
+static void m_admin(struct Client*, struct Client*, int, char**);
+static void mr_admin(struct Client*, struct Client*, int, char**);
+static void ms_admin(struct Client*, struct Client*, int, char**);
 static void do_admin( struct Client *sptr );
 
 struct Message admin_msgtab = {
@@ -62,7 +62,7 @@ char *_version = "20001202";
  *      parv[0] = sender prefix   
  *      parv[1] = servername   
  */
-static int mr_admin(struct Client *cptr, struct Client *sptr,
+static void mr_admin(struct Client *cptr, struct Client *sptr,
                     int parc, char *parv[])
 {
   static time_t last_used=0L;
@@ -70,14 +70,12 @@ static int mr_admin(struct Client *cptr, struct Client *sptr,
   if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
     {
       sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);
-      return 0;
+      return;
     }
   else
     last_used = CurrentTime;
 
   do_admin(sptr);
-
-  return 0;
 }
 
 /*
@@ -85,7 +83,7 @@ static int mr_admin(struct Client *cptr, struct Client *sptr,
  *      parv[0] = sender prefix
  *      parv[1] = servername
  */
-static int m_admin(struct Client *cptr, struct Client *sptr, int parc,
+static void m_admin(struct Client *cptr, struct Client *sptr, int parc,
                    char *parv[])
 {
   static time_t last_used=0L;
@@ -93,17 +91,15 @@ static int m_admin(struct Client *cptr, struct Client *sptr, int parc,
   if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
     {
       sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);
-      return 0;
+      return;
     }
   else
     last_used = CurrentTime;
 
   if (hunt_server(cptr,sptr,":%s ADMIN :%s",1,parc,parv) != HUNTED_ISME)
-    return 0;
+    return;
 
   do_admin(sptr);
-
-  return 0;
 }
 
 
@@ -112,15 +108,13 @@ static int m_admin(struct Client *cptr, struct Client *sptr, int parc,
  *      parv[0] = sender prefix
  *      parv[1] = servername
  */
-static int ms_admin(struct Client *cptr, struct Client *sptr,
+static void ms_admin(struct Client *cptr, struct Client *sptr,
                     int parc, char *parv[])
 {
   if (hunt_server(cptr,sptr,":%s ADMIN :%s",1,parc,parv) != HUNTED_ISME)
-    return 0;
+    return;
 
   do_admin( sptr );
-
-  return 0;
 }
 
 

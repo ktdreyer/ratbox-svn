@@ -44,11 +44,11 @@
 #define MSG_CLEARCHAN "CLEARCHAN"
 
 
-int mo_clearchan(struct Client *cptr, struct Client *sptr,
-		 int parc, char *parv[]);
+static void mo_clearchan(struct Client *cptr, struct Client *sptr,
+                         int parc, char *parv[]);
 
-void kick_list(struct Client *cptr, struct Channel *chptr,
-	       dlink_list *list,char *chname);
+static void kick_list(struct Client *cptr, struct Channel *chptr,
+                      dlink_list *list,char *chname);
 
 struct Message clearchan_msgtab = {
   MSG_CLEARCHAN, 0, 2, 0, MFLG_SLOW, 0,
@@ -74,7 +74,8 @@ char *_version = "20010104";
 **      parv[0] = sender prefix
 **      parv[1] = channel
 */
-int mo_clearchan(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static void mo_clearchan(struct Client *cptr, struct Client *sptr,
+                        int parc, char *parv[])
 {
   struct Channel *chptr, *root_chptr;
   int on_vchan = 0;
@@ -83,7 +84,7 @@ int mo_clearchan(struct Client *cptr, struct Client *sptr, int parc, char *parv[
   if (!IsSetOperAdmin(sptr))
     {
       sendto_one(sptr, ":%s NOTICE %s :You have no A flag", me.name, parv[0]);
-      return 0;
+      return;
     }
 
   /* XXX - we might not have CBURSTed this channel if we are a lazylink
@@ -101,7 +102,7 @@ int mo_clearchan(struct Client *cptr, struct Client *sptr, int parc, char *parv[
     {
       sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
 		 me.name, parv[0], parv[1]);
-      return 0;
+      return;
     }
 
   if (!on_vchan)
@@ -159,9 +160,6 @@ int mo_clearchan(struct Client *cptr, struct Client *sptr, int parc, char *parv[
 	     sptr->host,
 	     root_chptr->chname);
   channel_member_names(sptr, chptr, root_chptr->chname);
-
-
-  return 0;
 }
 
 void kick_list(struct Client *cptr, struct Channel *chptr,

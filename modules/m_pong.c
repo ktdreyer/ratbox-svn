@@ -34,8 +34,8 @@
 #include "parse.h"
 #include "modules.h"
 
-static int mr_pong(struct Client*, struct Client*, int, char**);
-static int ms_pong(struct Client*, struct Client*, int, char**);
+static void mr_pong(struct Client*, struct Client*, int, char**);
+static void ms_pong(struct Client*, struct Client*, int, char**);
 
 struct Message pong_msgtab = {
   "PONG", 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0,
@@ -56,7 +56,7 @@ _moddeinit(void)
 
 char *_version = "20001122";
 
-static int ms_pong(struct Client *cptr,
+static void ms_pong(struct Client *cptr,
                    struct Client *sptr,
                    int parc,
                    char *parv[])
@@ -67,7 +67,7 @@ static int ms_pong(struct Client *cptr,
   if (parc < 2 || *parv[1] == '\0')
     {
       sendto_one(sptr, form_str(ERR_NOORIGIN), me.name, parv[0]);
-      return 0;
+      return;
     }
 
   origin = parv[1];
@@ -92,7 +92,7 @@ static int ms_pong(struct Client *cptr,
         {
           sendto_one(sptr, form_str(ERR_NOSUCHSERVER),
                      me.name, parv[0], destination);
-          return 0;
+          return;
         }
     }
 
@@ -101,10 +101,10 @@ static int ms_pong(struct Client *cptr,
     Debug((DEBUG_NOTICE, "PONG: %s %s", origin,
            destination ? destination : "*"));
 #endif
-  return 0;
+  return;
 }
 
-static int mr_pong(struct Client *cptr,
+static void mr_pong(struct Client *cptr,
                     struct Client *sptr,
                     int parc,
                     char *parv[])
@@ -115,7 +115,7 @@ static int mr_pong(struct Client *cptr,
   if (parc < 2 || *parv[1] == '\0')
     {
       sendto_one(sptr, form_str(ERR_NOORIGIN), me.name, parv[0]);
-      return 0;
+      return;
     }
 
   origin = parv[1];
@@ -140,7 +140,7 @@ static int mr_pong(struct Client *cptr,
         {
           sendto_one(sptr, form_str(ERR_NOSUCHSERVER),
                      me.name, parv[0], destination);
-          return 0;
+          return;
         }
     }
 
@@ -149,6 +149,6 @@ static int mr_pong(struct Client *cptr,
     Debug((DEBUG_NOTICE, "PONG: %s %s", origin,
            destination ? destination : "*"));
 #endif
-  return 0;
+  return;
 }
 

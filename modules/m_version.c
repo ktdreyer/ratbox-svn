@@ -37,9 +37,9 @@
 
 static char* confopts(struct Client *sptr);
 
-static int m_version(struct Client*, struct Client*, int, char**);
-static int ms_version(struct Client*, struct Client*, int, char**);
-static int mo_version(struct Client*, struct Client*, int, char**);
+static void m_version(struct Client*, struct Client*, int, char**);
+static void ms_version(struct Client*, struct Client*, int, char**);
+static void mo_version(struct Client*, struct Client*, int, char**);
 
 struct Message version_msgtab = {
   "VERSION", 0, 0, 0, MFLG_SLOW, 0,
@@ -65,7 +65,7 @@ char *_version = "20001223";
  *      parv[0] = sender prefix
  *      parv[1] = remote server
  */
-static int m_version(struct Client* cptr, struct Client* sptr,
+static void m_version(struct Client* cptr, struct Client* sptr,
                       int parc, char* parv[])
 {
   sendto_one(sptr, form_str(RPL_VERSION), me.name,
@@ -73,8 +73,6 @@ static int m_version(struct Client* cptr, struct Client* sptr,
                 me.name, confopts(sptr), serveropts);
                 
   show_isupport(sptr);
-  
-  return 0;
 }
 
 /*
@@ -82,19 +80,19 @@ static int m_version(struct Client* cptr, struct Client* sptr,
  *      parv[0] = sender prefix
  *      parv[1] = remote server
  */
-static int mo_version(struct Client* cptr, struct Client* sptr,
+static void mo_version(struct Client* cptr, struct Client* sptr,
                       int parc, char* parv[])
 {
   if (hunt_server(cptr, sptr, ":%s VERSION :%s", 
 		  1, parc, parv) != HUNTED_ISME)
-    return 0;
+    return;
     
   sendto_one(sptr, form_str(RPL_VERSION), me.name, parv[0], version, 
   	     serno, debugmode, me.name, confopts(sptr), serveropts);
 	       
   show_isupport(sptr);
   
-  return 0;
+  return;
 }
 
 /*
@@ -102,7 +100,7 @@ static int mo_version(struct Client* cptr, struct Client* sptr,
  *      parv[0] = sender prefix
  *      parv[1] = remote server
  */
-static int ms_version(struct Client* cptr, struct Client* sptr,
+static void ms_version(struct Client* cptr, struct Client* sptr,
                       int parc, char* parv[])
 {
   if (IsOper(sptr))
@@ -117,8 +115,6 @@ static int ms_version(struct Client* cptr, struct Client* sptr,
      sendto_one(sptr, form_str(RPL_VERSION), me.name,
                 parv[0], version, serno, debugmode,
                 me.name, confopts(sptr), serveropts);
-
-  return 0;
 }
 
 /* confopts()
