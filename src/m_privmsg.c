@@ -190,7 +190,7 @@ int     m_privmsg(struct Client *cptr,
 	      return 0;
 	    }
 	}
-
+#if 0
       if (can_send(sptr, chptr) == 0)
 	sendto_channel_butone(cptr, sptr, chptr,
 			      ":%s %s %s :%s",
@@ -199,6 +199,7 @@ int     m_privmsg(struct Client *cptr,
       else
 	sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN),
 		   me.name, parv[0], nick);
+#endif
       return 0;
     }
       
