@@ -1,3 +1,8 @@
+*** 20010911_2 by jdc
+- Removed "hide_server" command; use serverhide {} instead.
+
+
+
 *** 20010911_1 by leeh
 - missing |
 
