@@ -1,3 +1,7 @@
+*** 20010524_16 by ejb
+- SERVLINK support for VMS.
+
+
 *** 20010524_15 by davidt
 - EVIL EVIL EVIL EVIL EVIL EVIL bug. I'm stupid.
 - I'll tidy up the mess i made of this code in a minute, but I can barely
