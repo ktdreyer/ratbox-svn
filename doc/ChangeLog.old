@@ -1,3 +1,7 @@
+*** 20010703_5 by leeh
+- removed traces of q_conf, I think its gone forever now :)
+
+
 *** 20010703_4 by leeh
 - quarantine{}; no longer exists.  its been replaced by:
   
