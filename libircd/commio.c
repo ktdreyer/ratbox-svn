@@ -782,10 +782,10 @@ comm_close(int fd)
 
 
 /*
- * fd_dump() - dump the list of active filedescriptors
+ * comm_dump() - dump the list of active filedescriptors
  */
 void
-fd_dump(struct Client *source_p)
+comm_dump(struct Client *source_p)
 {
 	int i;
 
