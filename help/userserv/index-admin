@@ -1,4 +1,5 @@
  USERDROP      - Drops registration of the given username
+ USERINFO      - Gives extended information about a username
  USERREGISTER  - Registers the given username
  USERSUSPEND   - Suspends the given usernames registration
  USERUNSUSPEND - Unsuspends the given usernames registration
