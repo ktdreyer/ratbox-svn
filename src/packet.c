@@ -88,7 +88,7 @@ parse_client_queued(struct Client *client_p)
 
 	if(IsAnyServer(client_p) || IsExemptFlood(client_p))
 	{
-		while (MyConnect(client_p) && (dolen = linebuf_get(&client_p->localClient->buf_recvq,
+		while (!IsAnyDead(client_p) && (dolen = linebuf_get(&client_p->localClient->buf_recvq,
 					   readBuf, READBUF_SIZE, LINEBUF_COMPLETE,
 					   LINEBUF_PARSED)) > 0)
 		{
@@ -140,7 +140,7 @@ parse_client_queued(struct Client *client_p)
 				break;
 
 			client_dopacket(client_p, readBuf, dolen);
-			if(!MyClient(client_p))
+			if(IsAnyDead(client_p))
 				return;
 			client_p->localClient->sent_parsed++;
 		}
@@ -196,6 +196,9 @@ flood_recalc(int fd, void *data)
 		lclient_p->actually_read = 0;
 
 	parse_client_queued(client_p);
+
+	if(IsAnyDead(client_p))
+		return;
 
 	/* and finally, reset the flood check */
 	comm_setflush(fd, 1000, flood_recalc, client_p);
