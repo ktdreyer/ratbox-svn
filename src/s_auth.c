@@ -643,6 +643,5 @@ delete_identd_queries(struct Client *target_p)
 
 	if(auth->fd >= 0)
 		fd_close(auth->fd);
-	target_p->localClient->auth_request = NULL;
 	free_auth_request(auth);
 }
