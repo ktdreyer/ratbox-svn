@@ -1356,7 +1356,7 @@ int fork_server(struct Client *server)
     return -1;
 #endif
 
-  if ((ret = vfork()) < 0)
+  if ((ret = fork()) < 0)
     return -1;
   else if (ret == 0)
   {

@@ -72,6 +72,8 @@ extern struct Message capab_msgtab;
 extern struct Message cburst_msgtab;
 #ifdef HAVE_LIBCRYPTO
 extern struct Message challenge_msgtab;
+extern struct Message cryptserv_msgtab;
+extern struct Message cryptauth_msgtab;
 #endif
 extern struct Message cjoin_msgtab;
 extern struct Message client_msgtab;

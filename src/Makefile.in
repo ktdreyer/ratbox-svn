@@ -37,14 +37,14 @@ CPPFLAGS	= ${INCLUDES} @CPPFLAGS@
 default:	all
 
 y.tab.o:	y.tab.c ircd_parser.y
-	${CC} ${CPPFLAGS} -g -I ../include -I. -c y.tab.c
+	${CC} ${CPPFLAGS} ${CFLAGS} -I. -c y.tab.c
 
 # Note GNU bison uses <file>.tab.c not y.tab.c
 y.tab.c:	ircd_parser.y
 	${YACC} -d ircd_parser.y
 
 lex.yy.o:	lex.yy.c ircd_lexer.l
-	${CC} ${CFLAGS} -I ../include -c lex.yy.c
+	${CC} ${CPPFLAGS} ${CFLAGS} -I. -c lex.yy.c
 
 lex.yy.c:	ircd_lexer.l
 	${LEX} ircd_lexer.l
