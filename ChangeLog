@@ -1,3 +1,15 @@
+leeh        2003/07/08 10:25:21 EDT	(20030708_4)
+
+  Removed files:
+    help/opers           dmem 
+  Log:
+  - removed an unused help file.
+  
+  Revision  Changes    Path
+  1.2       +0 -7      ircd-ratbox/help/opers/dmem (dead)
+
+
+
 leeh        2003/07/08 10:21:30 EDT	(20030708_3)
 
   Modified files:
