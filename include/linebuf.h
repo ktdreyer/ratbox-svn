@@ -20,7 +20,7 @@ typedef struct _buf_line buf_line_t;
 typedef struct _buf_head buf_head_t;
 
 struct _buf_line {
-    char buf[BUF_DATA_SIZE];
+    char buf[BUF_DATA_SIZE+2];
     int  terminated;		/* Whether we've terminated the buffer */
     int  flushing;		/* Whether we're flushing .. */
     int  len;			/* How much data we've got */
