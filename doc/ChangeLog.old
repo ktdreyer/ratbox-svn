@@ -1,3 +1,13 @@
+*** 20010929_5 by db
+Simply reformatted linebuf.c a tad to agree with the rough coding
+standards of project. No electrons were harmed.
+
+Oh yes, fixed configure script. we were over-writing an array in conftest.c
+(hidden inside config.c) nl[] declared as 4 instead of 5. I believe
+it was jv that pointed this one out to me.
+
+
+
 *** 20010929_4 by a1kmm
 1) Fixed a bug where we were not properly terminating long lines sent to
    the parser.
