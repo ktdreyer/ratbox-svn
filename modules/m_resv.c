@@ -423,7 +423,7 @@ handle_remote_unresv(struct Client *source_p, const char *name)
 static int
 remove_temp_resv(struct Client *source_p, const char *name)
 {
-	struct ConfItem *aconf;
+	struct ConfItem *aconf = NULL;
 
 	if(IsChannelName(name))
 	{
@@ -439,14 +439,27 @@ remove_temp_resv(struct Client *source_p, const char *name)
 	}
 	else
 	{
-		if((aconf = find_nick_resv(name)) == NULL)
+		dlink_node *ptr;
+
+		DLINK_FOREACH(ptr, resv_conf_list.head)
+		{
+			aconf = ptr->data;
+
+			if(irccmp(aconf->name, name))
+				aconf = NULL;
+			else
+				break;
+		}
+
+		if(aconf == NULL)
 			return 0;
 
 		/* permanent, remove_resv() needs to do it properly */
 		if(!aconf->hold)
 			return 0;
 
-		dlinkFindDestroy(&resv_conf_list, aconf);
+		/* already have ptr from the loop above.. */
+		dlinkDestroy(ptr, &resv_conf_list);
 		free_conf(aconf);
 	}
 

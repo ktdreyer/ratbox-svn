@@ -577,7 +577,7 @@ find_nick_resv(const char *name)
 	{
 		aconf = ptr->data;
 
-		if(match(aconf->name, name))
+		if(match_esc(aconf->name, name))
 			return aconf;
 	}
 
