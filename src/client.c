@@ -1769,7 +1769,8 @@ int change_local_nick(struct Client *client_p, struct Client *source_p,
   if((ConfigFileEntry.anti_nick_flood && 
       (source_p->localClient->number_of_nick_changes
        <= ConfigFileEntry.max_nick_changes)) ||
-     !ConfigFileEntry.anti_nick_flood)
+     !ConfigFileEntry.anti_nick_flood || 
+     (IsOper(source_p) && ConfigFileEntry.no_oper_flood))
     {
       sendto_realops_flags(FLAGS_NCHANGE,
 			   "Nick change: From %s to %s [%s@%s]",
