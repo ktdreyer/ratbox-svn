@@ -250,9 +250,7 @@ ms_tmode(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		msptr = find_channel_membership(chptr, source_p);
 
-		/* this shouldnt happen, because a user we've marked as
-		 * deopped should be sending modes with a higher TS. --fl
-		 */
+		/* this can still happen on a mixed ts network. */
 		if(is_deop(msptr))
 			return 0;
 
@@ -676,7 +674,7 @@ fix_key_remote(char *arg)
  */
 static void
 chm_nosuch(struct Client *source_p, struct Channel *chptr, 
-	   struct membership *msptr, int parc, int *parn,
+	   int alevel, int parc, int *parn,
 	   const char **parv, int *errors, int dir, char c, long mode_type)
 {
 	if(*errors & SM_ERR_UNKNOWN)
@@ -687,10 +685,10 @@ chm_nosuch(struct Client *source_p, struct Channel *chptr,
 
 static void
 chm_simple(struct Client *source_p, struct Channel *chptr, 
-	   struct membership *msptr, int parc, int *parn,
+	   int alevel, int parc, int *parn,
 	   const char **parv, int *errors, int dir, char c, long mode_type)
 {
-	if(!IsServer(source_p) && !is_chanop(msptr))
+	if(alevel != CHFL_CHANOP)
 	{
 		if(!(*errors & SM_ERR_NOOPS))
 			sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
@@ -732,7 +730,7 @@ chm_simple(struct Client *source_p, struct Channel *chptr,
 
 static void
 chm_ban(struct Client *source_p, struct Channel *chptr, 
-	struct membership *msptr, int parc, int *parn,
+	int alevel, int parc, int *parn,
 	const char **parv, int *errors, int dir, char c, long mode_type)
 {
 	const char *mask;
@@ -807,7 +805,7 @@ chm_ban(struct Client *source_p, struct Channel *chptr,
 		*errors |= errorval;
 
 		/* non-ops cant see +eI lists.. */
-		if(!is_chanop(msptr) && mode_type != CHFL_BAN)
+		if(alevel != CHFL_CHANOP && mode_type != CHFL_BAN)
 		{
 			if(!(*errors & SM_ERR_NOOPS))
 				sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
@@ -828,7 +826,7 @@ chm_ban(struct Client *source_p, struct Channel *chptr,
 		return;
 	}
 
-	if(!IsServer(source_p) && !is_chanop(msptr))
+	if(alevel != CHFL_CHANOP)
 	{
 		if(!(*errors & SM_ERR_NOOPS))
 			sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
@@ -896,14 +894,14 @@ chm_ban(struct Client *source_p, struct Channel *chptr,
 
 static void
 chm_op(struct Client *source_p, struct Channel *chptr, 
-       struct membership *msptr, int parc, int *parn,
+       int alevel, int parc, int *parn,
        const char **parv, int *errors, int dir, char c, long mode_type)
 {
 	struct membership *mstptr;
 	const char *opnick;
 	struct Client *targ_p;
 
-	if(!IsServer(source_p) && !is_chanop(msptr))
+	if(alevel != CHFL_CHANOP)
 	{
 		if(!(*errors & SM_ERR_NOOPS))
 			sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
@@ -990,14 +988,14 @@ chm_op(struct Client *source_p, struct Channel *chptr,
 
 static void
 chm_voice(struct Client *source_p, struct Channel *chptr,
-	  struct membership *msptr, int parc, int *parn,
+	  int alevel, int parc, int *parn,
 	  const char **parv, int *errors, int dir, char c, long mode_type)
 {
 	struct membership *mstptr;
 	const char *opnick;
 	struct Client *targ_p;
 
-	if(!IsServer(source_p) && !is_chanop(msptr))
+	if(alevel != CHFL_CHANOP)
 	{
 		if(!(*errors & SM_ERR_NOOPS))
 			sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
@@ -1069,14 +1067,14 @@ chm_voice(struct Client *source_p, struct Channel *chptr,
 
 static void
 chm_limit(struct Client *source_p, struct Channel *chptr,
-	  struct membership *msptr, int parc, int *parn,
+	  int alevel, int parc, int *parn,
 	  const char **parv, int *errors, int dir, char c, long mode_type)
 {
 	const char *lstr;
 	static char limitstr[30];
 	int limit;
 
-	if(!IsServer(source_p) && !is_chanop(msptr))
+	if(alevel != CHFL_CHANOP)
 	{
 		if(!(*errors & SM_ERR_NOOPS))
 			sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
@@ -1127,12 +1125,12 @@ chm_limit(struct Client *source_p, struct Channel *chptr,
 
 static void
 chm_key(struct Client *source_p, struct Channel *chptr,
-	struct membership *msptr, int parc, int *parn,
+	int alevel, int parc, int *parn,
 	const char **parv, int *errors, int dir, char c, long mode_type)
 {
 	char *key;
 
-	if(!IsServer(source_p) && !is_chanop(msptr))
+	if(alevel != CHFL_CHANOP)
 	{
 		if(!(*errors & SM_ERR_NOOPS))
 			sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
@@ -1191,7 +1189,7 @@ chm_key(struct Client *source_p, struct Channel *chptr,
 struct ChannelMode
 {
 	void (*func) (struct Client *source_p, struct Channel *chptr,
-		      struct membership *msptr, int parc, int *parn, 
+		      int alevel, int parc, int *parn, 
 		      const char **parv, int *errors, int dir, 
 		      char c, long mode_type);
 	long mode_type;
@@ -1262,6 +1260,15 @@ static struct ChannelMode ModeTable[255] =
 };
 /* *INDENT-ON* */
 
+static int
+get_channel_access(struct Client *source_p, struct membership *msptr)
+{
+	if(!MyClient(source_p) || is_chanop(msptr))
+		return CHFL_CHANOP;
+
+	return CHFL_PEON;
+}
+
 /* set_channel_mode()
  *
  * inputs	- client, source, channel, membership pointer, params
@@ -1281,6 +1288,7 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
 	int dir = MODE_ADD;
 	int parn = 1;
 	int errors = 0;
+	int alevel;
 	const char *ml = parv[0];
 	char c;
 	int table_position;
@@ -1288,6 +1296,8 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
 	mask_pos = 0;
 	mode_count = 0;
 	mode_limit = 0;
+
+	alevel = get_channel_access(source_p, msptr);
 
 	for (; (c = *ml) != 0; ml++)
 	{
@@ -1307,7 +1317,7 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
 				table_position = 0;
 			else
 				table_position = c - 'A' + 1;
-			ModeTable[table_position].func(source_p, chptr, msptr, 
+			ModeTable[table_position].func(source_p, chptr, alevel,
 						       parc, &parn, parv, 
 						       &errors, dir, c, 
 						       ModeTable[table_position].mode_type);
