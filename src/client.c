@@ -1053,6 +1053,8 @@ static void exit_one_client(struct Client *client_p, struct
 	      next_lp = lp->next;
 	      remove_user_from_channel(lp->data,source_p, 1);
 	    }
+          /* Should not be in any channels now */
+          assert(source_p->user->channel.head == NULL);
           
           /* Clean up invitefield */
           for (lp = source_p->user->invited.head; lp; lp = next_lp)
