@@ -1,3 +1,11 @@
+*** 20010228_8 by db
+- grrr calculate a delta , if its reasonable use it.
+  Otherwise, report 0. blah.
+  The =proper= fix is to store the TS delta from the svinfo
+  into the server struct for that server.
+
+
+
 *** 20010228_7 by androsyn
 This should fix the /rehash coredump..
 
