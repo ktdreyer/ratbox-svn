@@ -1,3 +1,20 @@
+leeh        2002/01/02 11:44:02 EST	(20020102_3)
+
+  Modified files:
+    include              config.h config.h.dist 
+    src                  modules-dld.c modules.c 
+  Log:
+  - renamed MODPATH to AUTOMODPATH
+  - added MODPATH
+  
+  Revision  Changes    Path
+  7.126     +4 -1      ircd-hybrid-7/include/config.h
+  7.53      +6 -2      ircd-hybrid-7/include/config.h.dist
+  1.12      +4 -4      ircd-hybrid-7/src/modules-dld.c
+  7.79      +4 -4      ircd-hybrid-7/src/modules.c
+
+
+
 leeh        2002/01/02 10:38:38 EST	(20020102_2)
 
   Modified files:
