@@ -1,3 +1,8 @@
+*** 20010223_5 by wcampbel
+Updated my TODO list
+Added madmax's cookies proposal
+
+
 *** 20010223_4 by wcampbel
 Xride submitted the Danish translation, set that up in the translations 
 Makefile.  Also documented in BUGS that you have to set the msglocale to
