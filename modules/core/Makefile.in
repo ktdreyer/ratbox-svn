@@ -4,6 +4,8 @@
 # $Id$
 #
 CC		= @CC@
+AR		= @AR@
+RANLIB		= @RANLIB@
 RM		= @RM@
 SED             = @SED@
 LEX		= @LEX@
@@ -91,11 +93,22 @@ SRCS =                          \
   m_whois.c \
   m_whowas.c 
 
-OBJS = ${SRCS:.c=.so}
+SH_OBJS = ${SRCS:.c=.so}
+
+S_OBJS = ${SRCS:.c=.o}
 
 default:	build
 build: all
-all: $(OBJS)
+all: @MOD_TARGET@
+
+shared_modules: $(SH_OBJS)
+	
+
+libmodules.a: $(S_OBJS)
+	$(RM) -f $@
+	$(AR) cqv $@ $(S_OBJS) 
+	$(RANLIB) $@
+
 
 install: all
 	@echo "Installing modules into $(AUTOMODULEDIR) .."
@@ -103,7 +116,10 @@ install: all
 		$(INSTALL_DATA) $$file $(AUTOMODULEDIR); \
 	done
 
-.SUFFIXES: .so
+.SUFFIXES: .so .o
+
+.c.o:
+	${CC} ${CPPFLAGS} $(CFLAGS) -c $< -o $@
 
 .c.so:
 	${CC} ${PICFLAGS} ${CPPFLAGS} $(CFLAGS) $< -o $@
@@ -115,7 +131,7 @@ depend:
 	@${RM} -f .depend.tmp
 
 clean:
-	${RM} -f *.so *~ 
+	${RM} -f *.so *~ *.o *.a
 
 distclean: clean
 	${RM} -f Makefile

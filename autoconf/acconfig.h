@@ -41,3 +41,6 @@
 
 /* u_int32_t */
 #undef u_int32_t
+
+/* static modules */
+#undef STATIC_MODULES
