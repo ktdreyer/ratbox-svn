@@ -1,3 +1,17 @@
+leeh        2004/09/05 18:51:24 EDT	(20040905_5)
+
+  Modified files:
+    modules              m_stats.c 
+    src                  s_newconf.c 
+  Log:
+  - fix stats_deny() and stats_exempt()
+  
+  Revision  Changes    Path
+  1.235     +21 -40    ircd-ratbox/modules/m_stats.c
+  7.58      +1 -1      ircd-ratbox/src/s_newconf.c
+
+
+
 leeh        2004/09/05 18:40:10 EDT	(20040905_4)
 
   Modified files:
