@@ -1,3 +1,21 @@
+leeh        2003/06/19 17:55:39 UTC	(20030619_0)
+
+  Modified files:
+    include              s_newconf.h 
+    modules              m_resv.c 
+    src                  kdparse.c newconf.c s_newconf.c 
+  Log:
+  - fix duplicate resvs/xlines
+  
+  Revision  Changes    Path
+  7.12      +1 -1      ircd-ratbox/include/s_newconf.h
+  1.39      +23 -7     ircd-ratbox/modules/m_resv.c
+  7.29      +15 -4     ircd-ratbox/src/kdparse.c
+  7.92      +27 -2     ircd-ratbox/src/newconf.c
+  7.11      +2 -16     ircd-ratbox/src/s_newconf.c
+
+
+
 leeh        2003/06/18 10:23:51 UTC	(20030618_4)
 
   Modified files:
