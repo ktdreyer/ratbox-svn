@@ -114,6 +114,70 @@ CHECK_SOCKLEN_T
 dnl Check for stdarg.h - if we can't find it, halt configure
 AC_CHECK_HEADER(stdarg.h, , AC_MSG_ERROR(** stdarg.h could not be found - ircd-hybrid will not compile without it **))
 
+nlist_lib=""
+AC_CHECK_FUNC(nlist,,
+   	AC_CHECK_LIB(dl, nlist, nlist_lib="-ldl",
+   		AC_CHECK_LIB(elf, nlist, nlist_lib="-lelf",
+		AC_MSG_WARN(** cannot locate nlist() **))
+	)
+)
+
+dnl We need to find out whether underscores are appended to symbol names in executable
+dnl files.  First, though, we need to see where nlist.h is hiding.
+AC_CHECK_HEADER(libelf/nlist.h, [ nlist_h="libelf/nlist.h" ], )
+AC_CHECK_HEADER(elf/nlist.h, [ nlist_h="elf/nlist.h" ], )
+AC_CHECK_HEADER(nlist.h, [ nlist_h="nlist.h" ] , )
+if test x"$nlist_h" = "x"; then
+	AC_MSG_WARN(** cannot locate an nlist.h **)
+fi
+AC_MSG_CHECKING(for extra underscores prepended to symbol names)
+AC_CACHE_VAL(symbol_underscores, 
+[
+cat > conftest.c << EOF
+#include <$nlist_h>
+#include <stdio.h>
+void _modinit(void);
+int main(int argc, char *argv[[]]) {
+        int i;
+        struct nlist nl[[4]];
+
+        /* fill the names in this way, so it'll work almost everywhere */
+        nl[[0]].n_name = "_modinit";
+        nl[[1]].n_name = "__modinit";
+        nl[[2]].n_name = "___modinit";
+        nl[[3]].n_name = "____modinit";
+        nl[[0]].n_value = nl[[1]].n_value = nl[[2]].n_value = nl[[3]].n_value =
+                nl[[4]].n_name = NULL;
+
+        if(argc < 2)
+                exit(-1);
+
+        i = nlist(argv[[1]], nl);
+        if(i == -1)
+                exit(-1);
+
+        for(i=0; i<4; i++) {
+                if(nl[[i]].n_value != NULL) {
+					int j;
+					for(j=0; j<i; j++) {
+						printf("_");
+					}
+                    exit(i);
+				}
+        }
+        exit(-1);
+}
+void _modinit(void) {
+        return;
+}
+EOF
+	$CC $CFLAGS -o conftest conftest.c $nlist_lib >/dev/null 2>&1
+	symbol_underscores=`./conftest conftest`
+	AC_MSG_RESULT($symbol_underscores)
+	$RM -f conftest conftest.c
+])
+AC_DEFINE_UNQUOTED(SYMBOL_PREFIX, "${symbol_underscores}")
+
 dnl openssl?
 AC_ARG_ENABLE(openssl,
 [ --enable-openssl      Enable openssl-dependant crypto functions.

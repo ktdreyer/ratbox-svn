@@ -17,3 +17,7 @@
 /* Define if we can include both string.h and strings.h */
 #undef STRING_WITH_STRINGS
 
+/* This is a string containing any extra underscores that must be prepended
+ * to symbols loaded from modules.
+ */
+#undef SYMBOL_PREFIX
