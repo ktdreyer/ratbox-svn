@@ -1,3 +1,12 @@
+*** 20010101_56 by db
+- our new parse.c splits everything up thats separated by a space
+  unlike the old parse.c which stopped parsing into separate parv[]
+  after maxargs?
+- this will handle the RFC just fine, even epic works. Takes up to
+  5 nicks as per the RFC
+
+
+
 *** 20010101_55 by a1kmm
 Fixed links so that when SHIDE=0 it works as before.
 
