@@ -1,3 +1,8 @@
+*** 20001210_4 by db
+- Was missing proper prefix for normal privmsg to local channel
+
+
+
 *** 20001210_3 by db
 - removed last remnant of oratime
 
