@@ -520,7 +520,7 @@ dlink_node *find_channel_link(dlink_list *list, struct Channel *chptr)
 static int change_channel_membership(struct Channel *chptr,
 				     dlink_list *to_list, struct Client *who)
 {
-  volatile dlink_node *ptr;
+  dlink_node *ptr;
 
   if ( (ptr = find_user_link(&chptr->peons, who)) )
     {
@@ -2508,7 +2508,7 @@ void del_invite(struct Channel *chptr, struct Client *who)
     {
       if (ptr->data == who)
 	{
-	  dlinkDelete(who, ptr, &chptr->invites);
+	  dlinkDelete(ptr, &chptr->invites);
 	  free_dlink_node(ptr);
 	  break;
 	}
@@ -2518,7 +2518,7 @@ void del_invite(struct Channel *chptr, struct Client *who)
     {
       if (ptr->data == chptr)
 	{
-	  dlinkDelete(who, ptr, &who->user->invited);
+	  dlinkDelete(ptr, &who->user->invited);
 	  free_dlink_node(ptr);
 	  break;
 	}

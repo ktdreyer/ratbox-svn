@@ -81,5 +81,12 @@ dlinkDelete(dlink_node *m, dlink_list *list)
 void
 dlinkMoveList(dlink_list *from, dlink_list *to)
 {
-
+    if(from->tail != NULL)
+      from->tail->next = to->head;
+    if((from->head !=NULL) && (to->head != NULL))
+      from->head->prev = to->head->prev;
+    if(to->head != NULL)
+      to->head->prev = from->tail;
+    to->head = from->head;
+    from->head = from->tail = NULL;
 }
