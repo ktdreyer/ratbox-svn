@@ -72,7 +72,6 @@ mo_testline(struct Client *client_p, struct Client *source_p, int parc, const ch
 	struct sockaddr_storage ip;
 	int host_mask, t;
 	char *host, *pass, *user, *name, *classname, *given_host, *given_name, *p;
-	char *oper_reason;
 	int port;
 
 	if(parc > 1)
@@ -91,7 +90,7 @@ mo_testline(struct Client *client_p, struct Client *source_p, int parc, const ch
 				aconf = find_dline(&ip,t);
 				if(aconf)
 				{
-					get_printable_kline(source_p, aconf, &host, &pass, &user, &oper_reason);
+					get_printable_conf(aconf, &name, &host, &pass, &user, &port, &classname);
 					if(aconf->status & CONF_EXEMPTDLINE)
 					{
 						sendto_one(source_p,
@@ -135,7 +134,7 @@ mo_testline(struct Client *client_p, struct Client *source_p, int parc, const ch
 
 		if(aconf)
 		{
-			get_printable_kline(source_p, aconf, &host, &pass, &user, &oper_reason);
+			get_printable_conf(aconf, &name, &host, &pass, &user, &port, &classname);
 
 			if(aconf->status & CONF_KILL)
 			{
