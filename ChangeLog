@@ -1,3 +1,29 @@
+leeh        2004/09/03 15:49:58 EDT	(20040903_1)
+
+  Modified files:
+    src                  class.c newconf.c s_newconf.c 
+  Log:
+  - 2.0 sync:
+    - fix a minor memleak with operator {}; passwords
+    - fix a bug with connect {}; not refcounting classes properly
+    - wrap the Destroy_Patricia() check in an if() in free_class(), as we need
+      to be able to free classes that dont have them allocated
+    - fix a couple of minor memleaks in conf parser when we have errors
+    - enforce top-down ordering of shared {}; blocks.  The first one that
+      matches on server and user@host will be used.  The users access will then
+      depend on that shared blocks privs and we will NOT fallback to another
+      that matches and has the right privs.
+    - cluster {}; no longer allows remote opers to apply remote klines etc, it
+      simply dictates who we send our bans to.  To allow remote servers to
+      cluster to a server it must have its own shared {}; block.
+  
+  Revision  Changes    Path
+  7.64      +3 -1      ircd-ratbox/src/class.c
+  7.173     +8 -5      ircd-ratbox/src/newconf.c
+  7.54      +18 -16    ircd-ratbox/src/s_newconf.c
+
+
+
 leeh        2004/09/03 12:53:34 EDT	(20040903_0)
 
   Modified files:
