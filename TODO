@@ -4,7 +4,7 @@
 - ircd -s doesn't work through a restart
 - A flag for Admins
 - let people view topics on -s channels with /topic
-- re-implment first parm in m_lusers()
+- re-implement first parm in m_lusers()
 - UNdline
 - lazy links
 - a version of ircnet's iauth
@@ -12,3 +12,4 @@
 - one time oper passwords
 - SSL support
 - new conf format
+- finish RFC'ing m_message.c

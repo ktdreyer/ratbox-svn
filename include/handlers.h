@@ -172,6 +172,7 @@ extern int mo_wallops(struct Client*, struct Client*, int, char**);
 extern int mo_htm(struct Client *,struct Client *,int,char **);
 extern int mo_quit(struct Client*, struct Client*, int, char**);
 extern int mo_part(struct Client*, struct Client*, int, char**);
+extern int mo_whowas(struct Client*, struct Client*, int, char**);
 
 /* server */
 extern int ms_admin(struct Client*, struct Client*, int, char**);
