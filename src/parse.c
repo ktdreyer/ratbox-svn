@@ -77,6 +77,7 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
   int             handle_idx = -1;	/* Handler index */
   char           *end;
   char*           numeric = 0;
+  char*           ap;
   struct Message* mptr;
   MessageHandler  handler = 0;
 
@@ -249,41 +250,37 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
   {
       if (paramcount > MAXPARA)
 		  paramcount = MAXPARA;
-
+	  
 	  end = s;
 	  while (*end++)
 		  ;
-  
-	  {
-		  char *longarg = NULL;
-		  char *ap;
-		  
-		  while((ap = strsep(&s, " ")) != NULL) 
+	  
+	  while((ap = strsep(&s, " ")) != NULL) 
+		  if(*ap != '\0') 
 		  {
-			  if(*ap != '\0') 
-			  {
-				  para[i] = ap;
-					  
-				  if (ap[0] == ':' || (mpara && (i >= mpara))) {
-					  if ( ap < end ) /* more tokens to follow */
-						  ap [ strlen (ap) ] = ' '; 
-					  longarg = ap + 1;
-					  break;
-				  }
+			  para[i] = ap;
+			  
+			  if (ap[0] == ':' || (mpara && (i >= mpara))) {
+				  char *tendp = ap;
 				  
-				  if(i < MAXPARA)
-					  ++i;
-				  else
-					  break;
+				  while (*tendp++)
+					  ;
+				  
+				  if ( tendp < end ) /* more tokens to follow */
+					  ap [ strlen (ap) ] = ' '; 
+				  
+				  if (ap[0] == ':')
+					  ap++;
+				  
+				  para[i++] = ap;
+				  break;
 			  }
+			  
+			  if(i < MAXPARA)
+				  ++i;
+			  else
+				  break;
 		  }
-		  
-		  if(longarg) 
-		  {
-			  para[i] = longarg;
-			  i++;
-		  }
-      }
   }
   
   para[i] = NULL;
