@@ -37,6 +37,12 @@ static struct ConfItem *yy_aconf;
 static struct ConfItem *yy_cconf;
 static struct ConfItem *yy_nconf;
 static struct ConfItem *yy_hconf;
+static struct ConfItem *yy_lconf;
+
+static struct ConfItem *hub_confs;
+static struct ConfItem *leaf_confs;
+static struct ConfItem *yy_aconf;
+static struct ConfItem *yy_aconf_next;
 
 char* class_name_var;
 int   class_ping_time_var;
@@ -252,7 +258,7 @@ logging_item:           logging_path | logging_oper_log |
 logging_path:           LOGPATH '=' QSTRING ';' 
 logging_oper_log:	OPER_LOG '=' QSTRING ';'
 logging_gline_log:	GLINE_LOG '=' QSTRING ';'
-logging_log_level:	LOG_LEVEL '='
+logging_log_level:	LOG_LEVEL 
                           T_L_CRIT { set_log_level(L_CRIT); };
                         | T_L_ERROR { set_log_level(L_ERROR); };
                         | T_L_WARN {set_log_level(L_WARN); };
@@ -263,7 +269,7 @@ logging_log_level:	LOG_LEVEL '='
 
 /***************************************************************************
  * oper section
- ***************************************************************************/
+  ***************************************************************************/
 
 oper_entry:     OPERATOR 
   {
@@ -302,7 +308,7 @@ oper_name:      NAME '=' QSTRING ';'
     DupString(yy_aconf->name,yylval.string);
   };
 
-oper_user:      USER '=' QSTRING ';'
+oper_user:      USER '='  QSTRING ';'
   {
     DupString(yy_aconf->user,yylval.string);
   };
@@ -618,6 +624,9 @@ quarantine_reason:      REASON '=' QSTRING ';'
 
 connect_entry:  CONNECT   
   {
+    hub_confs = (struct ConfItem *)NULL;
+    leaf_confs = (struct ConfItem *)NULL;
+
     if(yy_cconf)
       {
         free_conf(yy_cconf);
@@ -636,13 +645,18 @@ connect_entry:  CONNECT
         yy_hconf = NULL;
       }
 
+    if(yy_lconf)
+      {
+	free_conf(yy_lconf);
+	yy_lconf = NULL;
+      }
+
     yy_cconf=make_conf();
-    yy_nconf=make_conf();
-    yy_hconf=make_conf();
     yy_cconf->status = CONF_CONNECT_SERVER;
     yy_cconf->flags |= CONF_FLAGS_ALLOW_AUTO_CONN;
+
+    yy_nconf=make_conf();
     yy_nconf->status = CONF_NOCONNECT_SERVER;
-    yy_hconf->status = CONF_HUB;
   };
   '{' connect_items '}' ';'
   {
@@ -668,19 +682,50 @@ connect_entry:  CONNECT
         free_conf(yy_nconf);
       }
 
-    if(yy_hconf->host)
+    for(yy_aconf=hub_confs;yy_aconf;yy_aconf=yy_aconf_next)
       {
-        conf_add_hub_or_leaf(yy_hconf);
-        conf_add_conf(yy_hconf);
-      }
-    else
-      {
-        free_conf(yy_hconf);
+	yy_aconf_next = yy_aconf->next;
+
+	if(yy_cconf->host)
+	  {
+	    DupString(yy_aconf->user,yy_cconf->name);
+	    if(yy_cconf->className)
+	      DupString(yy_aconf->className,yy_cconf->className);
+	    conf_add_class_to_conf(yy_aconf);
+ 	    conf_add_hub_or_leaf(yy_aconf);
+	    conf_add_conf(yy_aconf);
+	  }
+	else
+	  {
+	    free_conf(yy_aconf);
+ 	  }
       }
 
-    yy_cconf = NULL;
-    yy_nconf = NULL;
-    yy_hconf = NULL;
+    for(yy_aconf=leaf_confs;yy_aconf;yy_aconf=yy_aconf_next)
+      {
+	yy_aconf_next = yy_aconf->next;
+
+	if(yy_cconf->host)
+	  {
+	    DupString(yy_aconf->user,yy_cconf->name);
+	    if(yy_cconf->className)
+	      DupString(yy_aconf->className,yy_cconf->className);
+	    conf_add_class_to_conf(yy_aconf);
+ 	    conf_add_hub_or_leaf(yy_aconf);
+	    conf_add_conf(yy_aconf);
+	  }
+	else
+	  {
+	    free_conf(yy_aconf);
+ 	  }
+      }
+
+    hub_confs = (struct ConfItem*)NULL;
+    leaf_confs = (struct ConfItem*)NULL;
+
+    yy_cconf = (struct ConfItem *)NULL;
+    yy_nconf = (struct ConfItem *)NULL;
+    yy_hconf = (struct ConfItem *)NULL;
   };
 
 connect_items:  connect_items connect_item |
@@ -689,13 +734,24 @@ connect_items:  connect_items connect_item |
 connect_item:   connect_name | connect_host | connect_send_password |
                 connect_accept_password | connect_port |
                 connect_compressed | connect_lazylink |
-                connect_hub_mask | connect_class | connect_auto
+                connect_hub_mask | connect_leaf_mask |
+		connect_class | connect_auto
 
 connect_name:   NAME '=' QSTRING ';'
   {
-    DupString(yy_cconf->user,yylval.string);
-    DupString(yy_nconf->user,yylval.string); 
-    DupString(yy_hconf->user,yylval.string);
+    if(yy_cconf->user)
+      {
+	sendto_realops("*** Multiple connect entry");
+      }
+    else
+      DupString(yy_cconf->user,yylval.string);
+
+    if(yy_nconf->user)
+      {
+	sendto_realops("*** Multiple connect accept entry");
+      }
+    else
+      DupString(yy_nconf->user,yylval.string); 
   };
 
 connect_host:   HOST '=' QSTRING ';' 
@@ -721,7 +777,7 @@ connect_compressed:     COMPRESSED '=' TYES ';'
     yy_cconf->flags |= CONF_FLAGS_ZIP_LINK;
   }
                         |
-                        COMPRESSED '=' TNO ';'
+                        COMPRESSED '='  TNO ';'
   {
     yy_cconf->flags &= ~CONF_FLAGS_ZIP_LINK;
   };
@@ -748,9 +804,40 @@ connect_auto:           AUTOCONN '=' TYES ';'
 
 connect_hub_mask:       HUB_MASK '=' QSTRING ';' 
   {
-    DupString(yy_hconf->host,yylval.string);
+    if(!hub_confs)
+      {
+	hub_confs = make_conf();
+	hub_confs->status = CONF_HUB;
+	DupString(hub_confs->host,yylval.string);
+      }
+    else
+      {
+	yy_hconf = make_conf();
+	yy_hconf->status = CONF_HUB;
+	DupString(yy_hconf->host,yylval.string);
+	yy_hconf->next = hub_confs;
+	hub_confs = yy_hconf;
+      }
   };
 
+connect_leaf_mask:       LEAF_MASK '=' QSTRING ';' 
+  {
+    if(!leaf_confs)
+      {
+	leaf_confs = make_conf();
+	leaf_confs->status = CONF_LEAF;
+	DupString(leaf_confs->host,yylval.string);
+      }
+    else
+      {
+	yy_lconf = make_conf();
+	yy_lconf->status = CONF_LEAF;
+	DupString(yy_lconf->host,yylval.string);
+	yy_lconf->next = leaf_confs;
+	leaf_confs = yy_lconf;
+      }
+  };
+ 
 connect_class:  CLASS '=' QSTRING ';'
   {
     DupString(yy_cconf->className,yylval.string);
