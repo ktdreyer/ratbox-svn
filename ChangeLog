@@ -1,3 +1,15 @@
+androsyn    2002/08/23 11:26:18 EDT	(20020823_0)
+
+  Modified files:
+    include              tools.h 
+  Log:
+  Fixed this length thing here as well
+  
+  Revision  Changes    Path
+  1.35      +1 -0      ircd-ratbox/include/tools.h
+
+
+
 androsyn    2002/08/22 19:43:05 EDT	(20020822_13)
 
   Modified files:
