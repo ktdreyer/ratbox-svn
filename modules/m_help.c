@@ -74,7 +74,7 @@ static void m_help(struct Client *client_p, struct Client *source_p,
   if(parc > 1)
     dohelp(source_p, UHPATH, parv[1], parv[0]);
   else
-    dohelp(source_p, UHPATH, "index", parv[0]);
+    dohelp(source_p, UHPATH, NULL, parv[0]);
 }
 
 /*
@@ -87,7 +87,7 @@ static void mo_help(struct Client *client_p, struct Client *source_p,
   if(parc > 1)
     dohelp(source_p, HPATH, parv[1], parv[0]);
   else
-    dohelp(source_p, HPATH, "index", parv[0]);
+    dohelp(source_p, HPATH, NULL, parv[0]);
 }
 
 /*
@@ -102,7 +102,7 @@ static void mo_uhelp(struct Client *client_p, struct Client *source_p,
   if(parc > 1)
     dohelp(source_p, UHPATH, parv[1], parv[0]);
   else
-    dohelp(source_p, UHPATH, "index", parv[0]);
+    dohelp(source_p, UHPATH, NULL, parv[0]);
 }
 
 static void dohelp(struct Client *source_p, char *hpath,
@@ -112,11 +112,16 @@ static void dohelp(struct Client *source_p, char *hpath,
   struct stat sb;
   int i;
 
-  /* convert to lower case */
-  for (i = 0; topic[i] != '\0'; i++)
+  if (topic)
   {
-    topic[i] = ToLower(topic[i]);
+    /* convert to lower case */
+    for (i = 0; topic[i] != '\0'; i++)
+    {
+      topic[i] = ToLower(topic[i]);
+    }
   }
+  else
+    topic = "index"; /* list available help topics */
 
   if (strchr(topic, '/'))
   {
