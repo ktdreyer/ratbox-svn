@@ -8,10 +8,10 @@
 #ifndef INCLUDED_ircd_defs_h
 #include "ircd_defs.h"    /* MAX_DATE_STRING */
 #endif
-#ifndef INCLUDED_limits_h
+
+#define _XOPEN_SOURCE
+
 #include <limits.h>       /* PATH_MAX */
-#define INCLUDED_limits_h
-#endif
 
 /* XXX really, should be mallocing this on the fly but... */
 #define MESSAGELINELEN 256

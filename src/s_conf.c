@@ -2635,7 +2635,7 @@ void conf_add_d_conf(struct ConfItem *aconf)
       aconf->ip_mask = ip_mask;
 
       if(aconf->flags & CONF_FLAGS_E_LINED)
-	add_dline(aconf);
+	add_smalldline(aconf);
       else
 	add_Dline(aconf);
     }

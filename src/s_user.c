@@ -22,6 +22,19 @@
  *
  *  $Id$
  */
+
+#define _XOPEN_SOURCE
+
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <assert.h>
+#include <time.h>
+#include <limits.h>
+#include <sys/stat.h>
+
 #include "tools.h"
 #include "s_user.h"
 #include "channel.h"
@@ -49,14 +62,6 @@
 #include "whowas.h"
 #include "md5.h"
 #include "memory.h"
-
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <assert.h>
-#include <time.h>
-#include <sys/stat.h>
 
 static int valid_hostname(const char* hostname);
 static int valid_username(const char* username);

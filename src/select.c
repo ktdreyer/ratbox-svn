@@ -26,8 +26,24 @@
  *  $Id$
  */
 
-#error "s_bsd_select.c hasn't been rewritten yet. use poll or contact \
-adrian chadd <adrian@creative.net.au>."
+#include <assert.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <netdb.h>
+#include <unistd.h>
+#include <time.h>
+#include <sys/stat.h>
+#include <sys/socket.h>
+#include <sys/file.h>
+#include <sys/ioctl.h>
+#include <sys/resource.h>
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>    /* NOFILE */
+#endif
+#include <arpa/inet.h>
 
 #include "tools.h"
 #include "s_bsd.h"
@@ -54,23 +70,6 @@ adrian chadd <adrian@creative.net.au>."
 #include "s_debug.h"
 #include "s_bsd.h"
 #include "memory.h"
-
-#include <assert.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <netdb.h>
-#include <unistd.h>
-#include <time.h>
-#include <sys/stat.h>
-#include <sys/socket.h>
-#include <sys/file.h>
-#include <sys/ioctl.h>
-#include <sys/resource.h>
-#include <sys/param.h>    /* NOFILE */
-#include <arpa/inet.h>
 
 #ifndef IN_LOOPBACKNET
 #define IN_LOOPBACKNET        0x7f

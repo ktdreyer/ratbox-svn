@@ -14,7 +14,7 @@ extern void zap_Dlines();
 extern void add_Dline(struct ConfItem *conf_ptr);
 extern void add_ip_Kline(struct ConfItem *conf_ptr);
 
-extern void add_dline(struct ConfItem *conf_ptr);
+extern void add_smalldline(struct ConfItem *conf_ptr);
 
 extern struct ConfItem *match_Dline(unsigned long ip);
 extern struct ConfItem* match_ip_Kline(unsigned long ip, const char* name);

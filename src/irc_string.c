@@ -22,6 +22,7 @@
 #include "irc_string.h"
 #include "list.h"
 #include "memory.h"
+#include "setup.h"
 
 #include <assert.h>
 #ifdef STRING_WITH_STRINGS

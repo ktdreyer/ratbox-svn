@@ -20,6 +20,7 @@
  * $Id$
  */
 #include <stdlib.h>
+#include <string.h>
 
 #include "ircd_defs.h"
 #include "ircd.h"

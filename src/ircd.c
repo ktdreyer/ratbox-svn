@@ -19,6 +19,8 @@
  *
  * $Id$
  */
+
+#include "config.h"
 #include "tools.h"
 #include "ircd.h"
 #include "channel.h"
@@ -169,8 +171,12 @@ static size_t get_vm_top(void)
    * offset from 0 (NULL), so the result of sbrk is cast to a size_t and 
    * returned. We really shouldn't be using it here but...
    */
+#ifndef VMS
   void* vptr = sbrk(0);
   return (size_t) vptr;
+#else
+  return 0;
+#endif
 }
 
 /*
@@ -217,6 +223,7 @@ static void init_sys(int boot_daemon)
 #endif        /* RLIMIT_FD_MAX */
 
   /* This is needed to not fork if -s is on */
+#ifndef VMS
   if (boot_daemon)
     {
       int pid;
@@ -239,6 +246,7 @@ static void init_sys(int boot_daemon)
 #endif
      setsid();
     }
+#endif
   close_all_connections();
 }
 
@@ -247,7 +255,7 @@ static void init_sys(int boot_daemon)
  *      This is called when the commandline is not acceptable.
  *      Give error message and exit without starting anything.
  */
-static int bad_command()
+static void bad_command()
 {
   fprintf(stderr, 
           "Usage: ircd [-d dlinefile] [-f configfile] [-h servername] "
@@ -273,6 +281,8 @@ static void parse_command_line(int argc, char* argv[])
   const char* options = "d:f:h:k:l:nvx:"; 
   int         opt;
 
+/* XXX - how does VMS handle command line arguments? */
+#ifndef VMS
   while ((opt = getopt(argc, argv, options)) != EOF) {
     switch (opt) {
     case 'd': 
@@ -319,6 +329,7 @@ static void parse_command_line(int argc, char* argv[])
       break;
     }
   }
+#endif
 }
 
 static time_t io_loop(time_t delay)

@@ -31,7 +31,7 @@ extern  void sendto_all_local_opers(struct Client *, char *message_type,
 extern  void sendto_one(struct Client *, const char *, ...);
 extern  void sendto_channel_butone(struct Client *one, struct Client *from,
                                    struct Channel *chptr, char *command,
-                                   const char *pattern, ...)
+                                   const char *pattern, ...);
 extern  void sendto_one_prefix(struct Client *, struct Client *,
 			       const char *, ...);
 extern  void sendto_serv_butone(struct Client *, const char *, ...);

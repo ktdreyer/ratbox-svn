@@ -22,7 +22,11 @@
  * $Id$
  */
 
+#include "setup.h"
+
+#ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
+#endif
 
 #ifndef INCLUDED_config_h
 #include "config.h"             /* defines */

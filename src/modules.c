@@ -25,6 +25,8 @@
 #include <string.h>
 #include <errno.h>
 #include <dirent.h>
+
+#define _XOPEN_SOURCE
 #include <limits.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -182,7 +184,7 @@ int unload_one_module (char *name, int check)
   if ((modindex = findmodule_byname (name)) == -1) 
     return -1;
 
-  deinitfunc = (void (*)(void))dlsym (modlist[modindex]->address, SYMBOL_PREFIX "_moddeinit");
+  deinitfunc = (void (*)(void))dlsym (modlist[modindex]->address, "_moddeinit");
 
   if( deinitfunc != NULL )
   {
@@ -237,8 +239,7 @@ load_all_modules (int check)
         ldirent->d_name [strlen (ldirent->d_name) - 2] == 's' &&
         ldirent->d_name [strlen (ldirent->d_name) - 1] == 'o')
     {
-      (void)snprintf (module_fq_name, sizeof (module_fq_name),
-                      "%s/%s",  MODPATH,
+      (void)sprintf (module_fq_name, "%s/%s",  MODPATH,
                       ldirent->d_name);
       (void)load_a_module (module_fq_name, check);
     }
@@ -263,7 +264,7 @@ load_one_module (char *path)
 	{
 		mpath = (struct module_path *)pathst->data;
 		
-		snprintf(modpath, MAXPATHLEN, "%s/%s", mpath->path, path);
+		sprintf(modpath, "%s/%s", mpath->path, path);
 		if (stat(modpath, &statbuf) == 0)
 			return load_a_module(modpath, 1);
 	}
@@ -306,7 +307,7 @@ load_a_module (char *path, int check)
       return -1;
   }
 
-  initfunc = (void (*)(void))dlsym (tmpptr, SYMBOL_PREFIX "_modinit");
+  initfunc = (void (*)(void))dlsym (tmpptr, "_modinit");
   if (!initfunc)
   {
     sendto_realops_flags (FLAGS_ALL,
@@ -318,7 +319,7 @@ load_a_module (char *path, int check)
     return -1;
   }
 
-  if (!(verp = (char **)dlsym (tmpptr, SYMBOL_PREFIX "_version")))
+  if (!(verp = (char **)dlsym (tmpptr, "_version")))
     ver = unknown_ver;
   else
     ver = *verp;

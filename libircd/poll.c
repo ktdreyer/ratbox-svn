@@ -64,7 +64,9 @@
 #include <sys/file.h>
 #include <sys/ioctl.h>
 #include <sys/resource.h>
+#ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>    /* NOFILE */
+#endif
 #include <arpa/inet.h>
 
 /*

@@ -25,6 +25,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "tools.h"
 #include "list.h"
@@ -146,7 +147,7 @@ hook_call_event(char *event, void *data)
 
 	for (node = h->hooks.head; node; node = node->next)
 	{
-		fn = node->data;
+		fn = (hookfn)node->data;
 		
 		if (fn(data) != 0)
 			return 0;

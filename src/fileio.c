@@ -35,6 +35,7 @@
 #include <unistd.h> /* read, write, open, close */
 #include <assert.h> /* assert */
 #include <errno.h>
+#include <string.h>
 
 /*
  * Wrappers around open() / close() for fileio, since a whole bunch of

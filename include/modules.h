@@ -22,7 +22,11 @@
 #ifndef INCLUDED_modules_h
 #define INCLUDED_modules_h
 
+#include "setup.h"
+
+#ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
+#endif
 
 #include "ircd_handler.h"
 #include "msg.h"

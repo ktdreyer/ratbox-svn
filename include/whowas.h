@@ -30,6 +30,8 @@
 #define INCLUDED_sys_types_h
 #endif
 
+#include "setup.h"
+
 /*
  * Whowas hash table size
  *

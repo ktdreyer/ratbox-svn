@@ -329,12 +329,12 @@ struct ConfItem *find_exception(unsigned long ip)
 
 
 /*
- * add_dline - add's a d-line to the conf list of the parent D-line
+ * add_smalldline - add's a d-line to the conf list of the parent D-line
  * if no parent D-line can be found, the d-line is added to the list
  * of unplaced d-lines, and is rescanned later by add_Dline.
  * -good
  */
-void add_dline(struct ConfItem *conf_ptr)
+void add_smalldline(struct ConfItem *conf_ptr)
 {
   unsigned long host_ip;
   struct ip_subtree *node;
@@ -376,7 +376,7 @@ struct ConfItem *rescan_dlines(struct ConfItem *s)
     { /* parent found! */
       temp=s->next;
       s->next=NULL;
-      add_dline(s);
+      add_smalldline(s);
       return temp;
     }
   return s;
