@@ -1,3 +1,7 @@
+*** 20010204_1 by a1kmm
+- Better free HostMaskEntries too when we clear_conf
+
+
 *** 20010203_7 by a1kmm
 - 'I' is not the same as 'K'.
 - flags is not the same as status.
