@@ -1461,6 +1461,8 @@ static void free_topic(struct Channel *chptr)
   
   if(chptr == NULL)
     return;
+  if(chptr->topic == NULL)
+    return;
   /* This is safe for now - If you change allocate_topic you
    * MUST change this as well
    */
