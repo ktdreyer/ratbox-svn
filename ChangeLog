@@ -1,3 +1,23 @@
+leeh        2005/02/02 19:18:59 EST	(20050203_1)
+
+  Modified files:
+    help                 Makefile.in 
+    help/opers           index 
+    help/users           index 
+  Added files:
+    help/opers           cnotice cprivmsg 
+  Log:
+  - added help files for cprivmsg/cnotice
+  
+  Revision  Changes    Path
+  1.23      +3 -2      ircd-ratbox/help/Makefile.in
+  1.1       +5 -0      ircd-ratbox/help/opers/cnotice (new)
+  1.1       +5 -0      ircd-ratbox/help/opers/cprivmsg (new)
+  1.10      +19 -19    ircd-ratbox/help/opers/index
+  1.7       +10 -9     ircd-ratbox/help/users/index
+
+
+
 leeh        2005/02/02 19:14:25 EST	(20050203_0)
 
   Modified files:
