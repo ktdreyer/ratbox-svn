@@ -27,6 +27,7 @@
  *  Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. 
  */
 
+#include "memory.h"
 #include "internal.h"
 
 #include <stdlib.h>
@@ -41,7 +42,8 @@ static adns_query query_alloc(adns_state ads, const typeinfo *typei,
   adns_query qu;
   
   qu= MyMalloc(sizeof(*qu));  if (!qu) return 0;
-  qu->answer= MyMalloc(sizeof(*qu->answer));  if (!qu->answer) { MyFree(qu); return 0; }
+  qu->answer= MyMalloc(sizeof(*qu->answer)); 
+  if (!qu->answer) { MyFree(qu); return 0; }
   
   qu->ads= ads;
   qu->state= query_tosend;
@@ -458,7 +460,7 @@ static void free_query_allocs(adns_query qu) {
   allocnode *an, *ann;
 
   cancel_children(qu);
-  for (an= qu->allocations.head; an; an= ann) { ann= an->next; MyFree(an); }
+  for (an= qu->allocations.head; an; an= ann) { ann= an->next; MyFree(an);}
   ADNS_LIST_INIT(qu->allocations);
   adns__vbuf_free(&qu->vb);
   adns__vbuf_free(&qu->search_vb);

@@ -26,6 +26,7 @@
  *  Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. 
  */
 
+#include "memory.h"
 #include <stdlib.h>
 #include <errno.h>
 #include <limits.h>
@@ -127,8 +128,19 @@ static void ccf_search(adns_state ads, const char *fn, int lno, const char *buf)
   tl= 0;
   while (nextword(&bufp,&word,&l)) { count++; tl += l+1; }
 
-  newptrs= MyMalloc(sizeof(char*)*count);  if (!newptrs) { saveerr(ads,errno); return; }
-  newchars= MyMalloc(tl);  if (!newchars) { saveerr(ads,errno); MyFree(newptrs); return; }
+  newptrs = MyMalloc(sizeof(char*)*count); 
+  if (!newptrs)
+    {
+      saveerr(ads,errno);
+      return;
+    }
+  newchars= MyMalloc(tl); 
+  if (!newchars)
+    {
+     saveerr(ads,errno);
+     MyFree(newptrs);
+     return;
+    }
 
   bufp= buf;
   pp= newptrs;
@@ -463,7 +475,7 @@ int adns__setnonblock(adns_state ads, int fd) {
 static int init_begin(adns_state *ads_r, adns_initflags flags, FILE *diagfile) {
   adns_state ads;
   
-  ads= MyMalloc(sizeof(*ads)); if (!ads) return errno;
+  ads = MyMalloc(sizeof(*ads)); if (!ads) return errno;
 
   ads->iflags= flags;
   ads->diagfile= diagfile;

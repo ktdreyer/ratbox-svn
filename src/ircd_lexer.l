@@ -24,6 +24,9 @@
 %option case-insensitive
 
 %{
+/* XXX - No we aren't but lex calls malloc :(. It is even worse that it
+   doesn't call free! */
+#define WE_ARE_MEMORY_C
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>

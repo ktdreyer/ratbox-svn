@@ -39,6 +39,7 @@
 #include <arpa/inet.h>
 #include "s_bsd.h"
 #include "internal.h"
+#include "memory.h"
 #include "tvarith.h"
 #include "irc_string.h"
 #include "memory.h"

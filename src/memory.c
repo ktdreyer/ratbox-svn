@@ -22,6 +22,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define WE_ARE_MEMORY_C
+
 #include "ircd_defs.h"
 #include "ircd.h"
 #include "irc_string.h"
@@ -29,6 +31,7 @@
 #include "list.h"
 #include "client.h"
 #include "send.h"
+#include "tools.h"
 
 #ifdef MEMDEBUG
 /* Hopefully this debugger will work better than the existing one...
@@ -83,6 +86,7 @@ _MyFree(void *what, char *file, int line)
    first_mem_entry = mme->next;
  if (mme->next)
    mme->next->last = mme->last;
+ mem_frob(mme, mme->size+sizeof(MemoryEntry));
  free(mme);
 }
 
@@ -100,6 +104,8 @@ _MyRealloc(void *what, size_t size, char *file, int line)
  mme = (MemoryEntry*)(what - sizeof(MemoryEntry));
  mme = realloc(mme, size+sizeof(MemoryEntry));
  mme->size = size;
+ mme->next->last = mme;
+ mme->last->next = mme; 
  return DATA(mme);
 }
 

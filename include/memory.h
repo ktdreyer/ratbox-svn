@@ -3,6 +3,17 @@
 #define MEMDEBUG
 #include "ircd_defs.h"
 #include "blalloc.h"
+#include <stdlib.h>
+#include <string.h>
+
+#ifndef WE_ARE_MEMORY_C
+#define free this_is_an_error<->
+#undef strdup
+#define strdup this_is_an_error<->
+#define malloc this_is_an_error<->
+#define realloc this_is_an_error<->
+#define calloc this_is_an_error<->
+#endif
 
 #ifdef MEMDEBUG
 extern void*       _MyMalloc(size_t size, char * file, int line);

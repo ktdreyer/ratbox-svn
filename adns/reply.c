@@ -27,6 +27,7 @@
 
 #include <stdlib.h>
 
+#include "memory.h"
 #include "internal.h"
 #include "memory.h"    
 void adns__procdgram(adns_state ads, const byte *dgram, int dglen,
