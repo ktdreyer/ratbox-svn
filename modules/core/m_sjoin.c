@@ -596,6 +596,7 @@ struct mode_letter flags[] = {
   { MODE_NOPRIVMSGS, 'n' },
   { MODE_TOPICLIMIT, 't' },
   { MODE_INVITEONLY, 'i' }
+  { 0, 0 }
 };
 
 static void set_final_mode(struct Mode *mode,struct Mode *oldmode)
