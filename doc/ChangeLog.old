@@ -1,3 +1,7 @@
+*** 20010305_2 by androsyn
+That should have been source_p not server_p
+
+
 *** 20010305_1 by androsyn
 Changed cptr  to client_p and sptr to server_p and acptr to target_p
 as discussed in #ircd-coders with larne and toot.  These names make a bit
