@@ -209,10 +209,6 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
     {
       target_p = ptr->data;
 
-      if (IsInvisible(target_p) && dow &&
-          !(MyConnect(source_p) && IsOper(source_p)) &&
-          !IsOper(target_p) && (target_p != source_p))
-        continue;
       if (!doall && wilds && !match(tname, target_p->name))
         continue;
       if (!dow && irccmp(tname, target_p->name))
@@ -228,10 +224,6 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
     {
       target_p = ptr->data;
 
-      if (IsInvisible(target_p) && dow &&
-          !(MyConnect(source_p) && IsOper(source_p)) &&
-          !IsOper(target_p) && (target_p != source_p))
-        continue;
       if (!doall && wilds && !match(tname, target_p->name))
         continue;
       if (!dow && irccmp(tname, target_p->name))
