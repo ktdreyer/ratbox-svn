@@ -76,7 +76,8 @@ static struct {
   { "NOTICE AUTH :*** Got Ident response\r\n",             37 },
   { "NOTICE AUTH :*** No Ident response\r\n",              36 },
   { "NOTICE AUTH :*** Your forward and reverse DNS do not match, " \
-    "ignoring hostname.\r\n",                              80 }
+    "ignoring hostname.\r\n",                              80 },
+  { "NOTICE AUTH :*** Your hostname is too long, ignoring hostname\r\n", 63 }
 };
 
 typedef enum {
@@ -87,7 +88,8 @@ typedef enum {
   REPORT_DO_ID,
   REPORT_FIN_ID,
   REPORT_FAIL_ID,
-  REPORT_IP_MISMATCH
+  REPORT_IP_MISMATCH,
+  REPORT_HOST_TOOLONG
 } ReportType;
 
 #define sendheader(c, r) \
@@ -212,8 +214,14 @@ static void auth_dns_callback(void* vptr, adns_answer* reply)
 	if(reply && reply->status == adns_s_ok)
 	{
 		assert(reply != 0);
-		strncpy_irc(auth->client->host, *reply->rrs.str, HOSTLEN);
-		sendheader(auth->client, REPORT_FIN_DNS);
+		if(reply->rrs.str <= HOSTLEN)
+		{
+			strncpy_irc(auth->client->host, *reply->rrs.str, HOSTLEN);
+			sendheader(auth->client, REPORT_FIN_DNS);
+		} else
+			strcpy(auth->client->host, auth->client->localClient->sockhost);
+			sendheader(auth->client, REPORT_HOST_TOOLONG);	
+		}
 	} else {
 		strcpy(auth->client->host, auth->client->localClient->sockhost);
 		sendheader(auth->client, REPORT_FAIL_DNS);
