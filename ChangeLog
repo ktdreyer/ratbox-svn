@@ -1,3 +1,21 @@
+leeh        2004/08/09 17:24:57 EDT	(20040809_2)
+
+  Modified files:
+    include              cache.h 
+    modules              m_links.c m_oper.c 
+    src                  cache.c 
+  Log:
+  - move send_oper_motd() to m_oper.c
+  - fix headers on m_links.c
+  
+  Revision  Changes    Path
+  1.5       +0 -1      ircd-ratbox/include/cache.h
+  1.66      +3 -2      ircd-ratbox/modules/m_links.c
+  1.87      +31 -1     ircd-ratbox/modules/m_oper.c
+  1.19      +0 -29     ircd-ratbox/src/cache.c
+
+
+
 leeh        2004/08/09 16:14:23 EDT	(20040809_1)
 
   Modified files:
