@@ -475,7 +475,7 @@ check_klines(void)
     if (IsExemptKline(client_p))
     {
      sendto_realops_flags(FLAGS_ALL,
-       "KLINE over-ruled for %s, client is kline_exmpt",
+       "KLINE over-ruled for %s, client is kline_exempt",
        get_client_name(client_p, HIDE_IP));
      continue;
     }
