@@ -1,3 +1,15 @@
+androsyn    2003/01/20 23:33:35 UTC	(20030120_8)
+
+  Modified files:
+    src                  newconf.c 
+  Log:
+  Make it not crash ;)
+  
+  Revision  Changes    Path
+  7.72      +20 -9     ircd-ratbox/src/newconf.c
+
+
+
 leeh        2003/01/20 23:23:27 UTC	(20030120_7)
 
   Modified files:
