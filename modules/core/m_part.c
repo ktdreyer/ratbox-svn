@@ -65,7 +65,7 @@ static int
 m_part(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	char *p, *name;
-	char reason[TOPICLEN + 1];
+	char reason[REASONLEN + 1];
 	char *s = LOCAL_COPY(parv[1]);
 
 	reason[0] = '\0';

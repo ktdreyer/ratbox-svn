@@ -92,7 +92,10 @@
 #define CHANNELLEN      200
 #define LOC_CHANNELLEN	50
 
+/* reason length of klines, parts, quits etc */
 #define REASONLEN	120
+
+#define AWAYLEN		90
 
 /* 23+1 for \0 */
 #define KEYLEN          24

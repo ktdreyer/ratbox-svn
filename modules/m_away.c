@@ -113,8 +113,8 @@ m_away(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 	source_p->user->last_away = CurrentTime;
 
-	if(strlen(awy2) > (size_t) TOPICLEN)
-		awy2[TOPICLEN] = '\0';
+	if(strlen(awy2) > AWAYLEN)
+		awy2[AWAYLEN] = '\0';
 
 	/* we now send this only if they weren't away already --is */
 	if(!away)

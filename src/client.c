@@ -1142,7 +1142,7 @@ struct abort_client
 {
  	dlink_node node;
   	struct Client *client;
-  	char notice[TOPICLEN];
+  	char notice[REASONLEN];
 };
 
 static dlink_list abort_list;
