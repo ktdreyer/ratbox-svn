@@ -155,6 +155,7 @@ extern const unsigned int CharAttrs[];
 #define IsNickChar(c)   (CharAttrs[(unsigned char)(c)] & NICK_C)
 #define IsServChar(c)   (CharAttrs[(unsigned char)(c)] & (NICK_C | SERV_C))
 #define IsIdChar(c)	(CharAttrs[(unsigned char)(c)] & (DIGIT_C | LET_C))
+#define IsLetter(c)	(CharAttrs[(unsigned char)(c)] & LET_C)
 #define IsCntrl(c)      (CharAttrs[(unsigned char)(c)] & CNTRL_C)
 #define IsAlpha(c)      (CharAttrs[(unsigned char)(c)] & ALPHA_C)
 #define IsSpace(c)      (CharAttrs[(unsigned char)(c)] & SPACE_C)
