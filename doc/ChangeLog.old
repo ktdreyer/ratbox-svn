@@ -1,3 +1,20 @@
+*** 20001006_1 by lusky
+updated Makefile.in's to support parallel make ala -6
+fixed up cjoin a little so it would compile
+synced up changes from -6rc4 to -6rc5(20001005_3):
+ added CVS Id tags to numerous files
+ brought Hybrid-team and version.c.SH
+ deleted ChangeLog.old and include/defs.h
+ Fixed misnamed va var in sendto_realops()
+ changed ltrace to be consistant with trace for non-opers
+ mode channel +e now returns an error to non-chanops
+ unauth connection notices now include servername/port (jdc)
+ changed "juping locally" to "locally juping" (gp)
+ typo in stats z display (gp)
+ typo in channel jupe oper notice (db)
+ new config.h option ALLOW_DOT_IN_IDENT
+
+
 *** 20001003_1 by db
 - initial changes to add cjoin for vchan support
  
