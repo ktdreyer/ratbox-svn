@@ -1,3 +1,8 @@
+*** 20001208_6 by db
+- hide idle time in whois if in server hide
+
+
+
 *** 20001208_5 by toot
 . added 'h' to MYINFO mode list
 . made network_name/desc an ircd.conf option.
