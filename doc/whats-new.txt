@@ -52,6 +52,8 @@ options that were in config.h, to be changed with a /rehash.
   the timestamp protocol will remove the newer side's ops.  These preserved
   channels replace the old NO_CHANOPS_ON_SPLIT and NO_JOIN_ON_SPLIT options.
 
+  Channels will not be preserved if the last user parts from the channel.
+
 
 --------------
  User Changes: 
@@ -131,7 +133,21 @@ options that were in config.h, to be changed with a /rehash.
   and into their own usermode: +l.  This allows oper to ignore operwall,
   but still listen to locops.
 
+- Implemented local RESV.  This replaces:
+     /mode #channel +j and Q: lines in hybrid-6.
 
+  To RESV a nick:
+    /quote resv nick :reason
+
+  To RESV a wildcard nick (must be an admin)
+    /quote resv *nick :reason
+
+  To RESV a channel
+    /quote resv #channel :reason
+
+  You may also UNRESV, and add resv's in the config.  See resv.txt for more
+  details.
+  
 -----------------------
  Miscellaneous Changes:
 -----------------------
