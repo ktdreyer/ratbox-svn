@@ -35,7 +35,7 @@
 /* Efnet wanted this... Maybe we should do this from configure? */
 #define REQUIRE_OANDV
 
-#define INTENSIVE_DEBUG
+/* #define INTENSIVE_DEBUG */
 
 struct Client;
 
