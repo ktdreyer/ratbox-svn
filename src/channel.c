@@ -77,10 +77,8 @@ static void channelheap_garbage_collect(void *unused)
 
 void init_channels(void)
 {
-  channel_heap = BlockHeapCreate(sizeof(struct Channel), 2048);
-  /* Dianora and I agree that 4 banids to a channel is a good 
-   * rough guess. Actual stats anyone? -A1kmm. */
-  ban_heap = BlockHeapCreate(sizeof(struct Ban), 16384);
+  channel_heap = BlockHeapCreate(sizeof(struct Channel), 1024);
+  ban_heap = BlockHeapCreate(sizeof(struct Ban), 2048);
   eventAddIsh("channelheap_garbage_collect", channelheap_garbage_collect,
               NULL, 45);
 }
