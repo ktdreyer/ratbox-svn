@@ -51,7 +51,6 @@ parse_client_queued(struct Client *client_p)
 {
 	int dolen = 0;
 	int checkflood = 1;
-	struct LocalUser *lclient_p = client_p->localClient;
 
 	if(!MyConnect(client_p))
 		return;
@@ -124,14 +123,14 @@ parse_client_queued(struct Client *client_p)
 			 */
 			if(checkflood)
 			{
-				if(lclient_p->sent_parsed >= lclient_p->allow_read)
+				if(client_p->localClient->sent_parsed >= client_p->localClient->allow_read)
 					break;
 			}
 
 			/* allow opers 4 times the amount of messages as users. why 4?
 			 * why not. :) --fl_
 			 */
-			else if(lclient_p->sent_parsed >= (4 * lclient_p->allow_read))
+			else if(client_p->localClient->sent_parsed >= (4 * client_p->localClient->allow_read))
 				break;
 
 			dolen = linebuf_get(&client_p->localClient->
@@ -142,7 +141,9 @@ parse_client_queued(struct Client *client_p)
 				break;
 
 			client_dopacket(client_p, readBuf, dolen);
-			lclient_p->sent_parsed++;
+			if(!MyClient(client_p))
+				return;
+			client_p->localClient->sent_parsed++;
 		}
 	}
 }
@@ -411,7 +412,9 @@ read_packet(int fd, void *data)
 
 	lclient_p->actually_read += lbuf_len;
 
-
+	if(!MyConnect(client_p))
+		return;
+		
 	/* Attempt to parse what we have */
 	parse_client_queued(client_p);
 
