@@ -1,3 +1,21 @@
+leeh        2005/02/07 17:40:58 EST	(20050207_1)
+
+  Modified files:
+    src                  c_mode.c channel.c s_chanserv.c 
+  Log:
+  - make c_mode() call HOOK_MODE_SIMPLE if the +lk values change
+  - fix sjoin not setting MODE_KEY/MODE_INVITE properly
+  - fix wrong parc count checking in sjoin
+  - move HOOK_SJOIN_LOWERTS to after we've merged in the new modes
+  - fix enforcemodes to handle value of +lk changing
+  
+  Revision  Changes    Path
+  1.29      +9 -3      rserv/src/c_mode.c
+  1.39      +8 -4      rserv/src/channel.c
+  1.61      +15 -12    rserv/src/s_chanserv.c
+
+
+
 leeh        2005/02/07 10:41:16 EST	(20050207_0)
 
   Modified files:
