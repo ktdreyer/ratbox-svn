@@ -1,3 +1,25 @@
+leeh        2004/09/25 11:23:45 EDT	(20040925_1)
+
+  Modified files:
+    doc                  schema.txt 
+    include              config.h rserv.h s_userserv.h 
+    src                  Makefile.in rserv.c 
+    src/s_userserv       s_u_db.c s_userserv.c 
+  Log:
+  - make user service save/load from a db
+  
+  Revision  Changes    Path
+  1.3       +8 -8      rserv/doc/schema.txt
+  1.17      +1 -0      rserv/include/config.h
+  1.6       +2 -0      rserv/include/rserv.h
+  1.7       +2 -2      rserv/include/s_userserv.h
+  1.21      +1 -1      rserv/src/Makefile.in
+  1.26      +9 -0      rserv/src/rserv.c
+  1.4       +35 -13    rserv/src/s_userserv/s_u_db.c
+  1.7       +5 -2      rserv/src/s_userserv/s_userserv.c
+
+
+
 leeh        2004/09/25 11:21:56 EDT	(20040925_0)
 
   Modified files:
