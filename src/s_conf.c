@@ -825,7 +825,6 @@ set_default_conf(void)
 
 	ConfigChannel.default_split_user_count = 0;
 	ConfigChannel.default_split_server_count = 0;
-	ConfigChannel.default_split_delay = 60;
 	ConfigChannel.no_join_on_split = NO;
 	ConfigChannel.no_create_on_split = NO;
 

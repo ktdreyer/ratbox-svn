@@ -46,7 +46,6 @@ struct SetOptions
 
 	int spam_num;
 	int spam_time;
-	int split_delay;
 
 	char operstring[REALLEN];
 	char adminstring[REALLEN];

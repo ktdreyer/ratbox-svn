@@ -1865,7 +1865,6 @@ static struct ConfEntry conf_channel_table[] =
 {
 	{ "default_split_user_count",	CF_INT,  NULL, 0, &ConfigChannel.default_split_user_count	 },
 	{ "default_split_server_count",	CF_INT,	 NULL, 0, &ConfigChannel.default_split_server_count },
-	{ "default_split_delay",	CF_TIME, NULL, 0, &ConfigChannel.default_split_delay	 },
 	{ "burst_topicwho",	CF_YESNO, NULL, 0, &ConfigChannel.burst_topicwho	},
 	{ "invite_ops_only",	CF_YESNO, NULL, 0, &ConfigChannel.invite_ops_only	},
 	{ "knock_delay",	CF_TIME,  NULL, 0, &ConfigChannel.knock_delay		},

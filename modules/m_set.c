@@ -80,7 +80,6 @@ static void quote_spamtime(struct Client *, int);
 static void quote_splitmode(struct Client *, char *);
 static void quote_splitnum(struct Client *, int);
 static void quote_splitusers(struct Client *, int);
-static void quote_splitdelay(struct Client *, int);
 static void list_quote_commands(struct Client *);
 
 
@@ -109,7 +108,6 @@ static struct SetStruct set_cmd_table[] = {
 	{"SPLITMODE", 	quote_splitmode, 	1,	0	},
 	{"SPLITNUM", 	quote_splitnum, 	0,	1	},
 	{"SPLITUSERS", 	quote_splitusers, 	0,	1	},
-	{"SPLITDELAY",	quote_splitdelay,	0,	1	},
 	/* -------------------------------------------------------- */
 	{(char *) 0, (void (*)()) 0, 0, 0}
 };
@@ -489,23 +487,6 @@ quote_splitusers(struct Client *source_p, int newval)
 	else
 		sendto_one(source_p, ":%s NOTICE %s :SPLITUSERS is currently %i",
 			   me.name, source_p->name, split_users);
-}
-
-/* SET SPLITDELAY */
-static void
-quote_splitdelay(struct Client *source_p, int newval)
-{
-	if(newval >= 0)
-	{
-		sendto_realops_flags(UMODE_ALL, L_ALL,
-				     "%s has changed SPLITDELAY to %i",
-				     source_p->name, newval);
-		GlobalSetOptions.split_delay = newval;
-	}
-	else
-		sendto_one(source_p, ":%s NOTICE %s :SPLITDELAY is currently %i",
-			   me.name, source_p->name,
-			   GlobalSetOptions.split_delay);
 }
 
 /*

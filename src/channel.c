@@ -716,9 +716,8 @@ check_spambot_warning(struct Client *source_p, const char *name)
  * side effects - splitmode is finished
  */
 static void
-finish_splitmode(void *unused)
+finish_splitmode(void)
 {
-	/* dropped back into a netsplit during split_delay --fl */
 	if(dlink_list_length(&global_serv_list) < (unsigned long) split_servers ||
 	   Count.total < split_users)
 	{
@@ -761,11 +760,7 @@ check_splitmode(void *unused)
 			/* splitmode ended, if we're delaying the
 			 * end of split, add an event, else finish it
 			 */
-			if(GlobalSetOptions.split_delay > 0)
-				eventAddOnce("finish_splitmode", finish_splitmode,
-					     NULL, GlobalSetOptions.split_delay);
-			else
-				finish_splitmode(NULL);
+			finish_splitmode();
 
 			eventDelete(check_splitmode, NULL);
 		}
