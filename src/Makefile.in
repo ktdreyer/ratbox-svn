@@ -11,7 +11,7 @@ PREFIX=@prefix@
 BIN=rserv@EXEEXT@
 INCLUDES=-I ../include/
 LDFLAGS=
-LIBS=@LIBS@
+LIBS=@LIBS@ -lsqlite
 CFLAGS=-g -O0 -Wall -Werror -Wunused -Wshadow -Wmissing-declarations -Wwrite-strings -DPREFIX=\"$(PREFIX)\"
 MAKE = make
 

@@ -1,5 +1,12 @@
 # $Id$
 
+CREATE TABLE users (
+	username TEXT,
+	password TEXT,
+	reg_time TIMESTAMP,
+	last_used TIMESTAMP
+);
+
 CREATE TABLE channels (
 	chname text,
 	topic text,
@@ -7,13 +14,6 @@ CREATE TABLE channels (
 	reg_time unixtime,
 	last_used unixtime,
 	PRIMARY KEY(chname)
-);
-
-CREATE TABLE users (
-	nickname text,
-	password text,
-	reg_time unixtime,
-	last_used unixtime
 );
 
 CREATE TABLE chan_bans (

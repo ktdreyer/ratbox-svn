@@ -9,6 +9,7 @@
 #include "stdinc.h"
 #include <signal.h>
 #include <sys/resource.h>
+#include <sqlite.h>
 #ifdef HAVE_CRYPT_H
 #include <crypt.h>
 #endif
@@ -33,6 +34,7 @@
 #include "newconf.h"
 #include "serno.h"
 
+struct sqlite *rserv_db;
 
 struct timeval system_time;
 
@@ -141,6 +143,7 @@ check_md5_crypt(void)
 int 
 main(int argc, char *argv[])
 {
+	char **errmsg;
 	char c;
 	int nofork = 0;
 	int childpid;
@@ -217,6 +220,12 @@ main(int argc, char *argv[])
 
 	signal(SIGTRAP, SIG_IGN); /* Needed on FreeBSD and possibly others */
 	signal(SIGPIPE, SIG_IGN);
+
+	if((rserv_db = sqlite_open(DB_PATH, 0, errmsg)) == NULL)
+	{
+		slog("ERR: Failed to open db file: %s", *errmsg);
+		exit(-1);
+	}
 
 	init_events();
 

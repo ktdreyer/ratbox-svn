@@ -10,6 +10,7 @@
 #define PID_PATH	PREFIX "/rserv.pid"
 #define LOG_PATH	PREFIX "/zlogfile"
 #define HELP_PATH       PREFIX "/help/"
+#define DB_PATH		PREFIX "/rserv.db"
 
 /* SMALL_NETWORK
  * If your network is fairly small, enable this to save some memory.

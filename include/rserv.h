@@ -17,4 +17,6 @@ extern void die(const char *reason);
 
 extern int have_md5_crypt;
 
+extern struct sqlite *rserv_db;
+
 #endif
