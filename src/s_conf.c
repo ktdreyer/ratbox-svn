@@ -178,11 +178,13 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 
 	case TOO_MANY_LOCAL:
 		sendto_realops_flags(UMODE_FULL, L_ALL,
-				     "Too many local connections for %s",
-				     get_client_name(source_p, SHOW_IP));
+				"Too many local connections for %s!%s%s@%s",
+				source_p->name, IsGotId(source_p) ? "" : "~",
+				source_p->username, source_p->sockhost);
 
-		ilog(L_FUSER, "Too many local connections from %s",
-		     log_client_name(source_p, SHOW_IP));
+		ilog(L_FUSER, "Too many local connections from %s!%s%s@%s",
+			source_p->name, IsGotId(source_p) ? "" : "~",
+			source_p->username, source_p->sockhost);	
 
 		ServerStats->is_ref++;
 		exit_client(client_p, source_p, &me, "Too many host connections (local)");
@@ -190,10 +192,12 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 
 	case TOO_MANY_GLOBAL:
 		sendto_realops_flags(UMODE_FULL, L_ALL,
-				     "Too many global connections for %s",
-				     get_client_name(source_p, SHOW_IP));
-		ilog(L_FUSER, "Too many global connections from %s",
-		     log_client_name(source_p, SHOW_IP));
+				"Too many global connections for %s!%s%s@%s",
+				source_p->name, IsGotId(source_p) ? "" : "~",
+				source_p->username, source_p->sockhost);
+		ilog(L_FUSER, "Too many global connections from %s!%s%s@%s",
+			source_p->name, IsGotId(source_p) ? "" : "~",
+			source_p->username, source_p->sockhost);
 
 		ServerStats->is_ref++;
 		exit_client(client_p, source_p, &me, "Too many host connections (global)");
@@ -201,10 +205,12 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 
 	case TOO_MANY_IDENT:
 		sendto_realops_flags(UMODE_FULL, L_ALL,
-				     "Too many user connections for %s",
-				     get_client_name(source_p, SHOW_IP));
-		ilog(L_FUSER, "Too many user connections from %s",
-		     log_client_name(source_p, SHOW_IP));
+				"Too many user connections for %s!%s%s@%s",
+				source_p->name, IsGotId(source_p) ? "" : "~",
+				source_p->username, source_p->sockhost);
+		ilog(L_FUSER, "Too many user connections from %s!%s%s@%s",
+			source_p->name, IsGotId(source_p) ? "" : "~",
+			source_p->username, source_p->sockhost);
 
 		ServerStats->is_ref++;
 		exit_client(client_p, source_p, &me, "Too many user connections (global)");
@@ -212,11 +218,14 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 
 	case I_LINE_FULL:
 		sendto_realops_flags(UMODE_FULL, L_ALL,
-				     "I-line is full for %s (%s).",
-				     get_client_name(source_p, SHOW_IP),
-				     source_p->sockhost);
+				"I-line is full for %s!%s%s@%s (%s).",
+				source_p->name, IsGotId(source_p) ? "" : "~",
+				source_p->username, source_p->host,
+				source_p->sockhost);
 
-		ilog(L_FUSER, "Too many connections from %s.", log_client_name(source_p, SHOW_IP));
+		ilog(L_FUSER, "Too many connections from %s!%s%s@%s.", 
+			source_p->name, IsGotId(source_p) ? "" : "~",
+			source_p->username, source_p->sockhost);
 
 		ServerStats->is_ref++;
 		exit_client(client_p, source_p, &me,
@@ -225,7 +234,6 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 
 	case NOT_AUTHORISED:
 		{
-			static char ipaddr[HOSTIPLEN];
 			int port = -1;
 #ifdef IPV6
 			if(source_p->localClient->ip.ss_family == AF_INET6)
@@ -237,20 +245,24 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 			ServerStats->is_ref++;
 			/* jdc - lists server name & port connections are on */
 			/*       a purely cosmetical change */
+			/* why ipaddr, and not just source_p->sockhost? --fl */
+#if 0
+			static char ipaddr[HOSTIPLEN];
 			inetntop_sock(&source_p->localClient->ip, ipaddr, sizeof(ipaddr));
+#endif
 			sendto_realops_flags(UMODE_UNAUTH, L_ALL,
-					     "Unauthorised client connection from %s [%s] on [%s/%u].",
-					     get_client_name(source_p,
-							     SHOW_IP),
-					     ipaddr,
-					     source_p->localClient->
-					     listener->name, port);
+					"Unauthorised client connection from "
+					"%s!%s%s@%s [%s] on [%s/%u].",
+					source_p->name, IsGotId(source_p) ? "" : "~",
+					source_p->username, source_p->host,
+					source_p->sockhost,
+					source_p->localClient->listener->name, port);
 
 			ilog(L_FUSER,
-			     "Unauthorised client connection from %s on [%s/%u].",
-			     log_client_name(source_p, SHOW_IP),
-			     source_p->localClient->listener->name,
-			     port);
+				"Unauthorised client connection from %s!%s%s@%s on [%s/%u].",
+				source_p->name, IsGotId(source_p) ? "" : "~",
+				source_p->username, source_p->sockhost,
+				source_p->localClient->listener->name, port);
 			add_reject(client_p);
 			exit_client(client_p, source_p, &me,
 				    "You are not authorised to use this server");

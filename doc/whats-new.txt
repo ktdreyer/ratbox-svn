@@ -13,9 +13,6 @@ Config File
 - logging {}; is gone, replaced with more advanced log system - see
   example.conf log {}; for more info.  Note, by default only very basic
   information will be logged.
-- kline = yes; etc is no longer supported, please use 
-  flags = kline, gline; etc.  As a side effect of this, an oper is not
-  given any default flags, including operwall.
 - support for a specific opers initial umodes on /oper, by umodes = ...;
   in operator {};
 - added stats_e_disabled = yes|no; to general {};, controlling whether stats
@@ -42,6 +39,8 @@ Oper
 - oper reasons are now more fully supported
 - opers can now be hidden from stats p, by flag "invisible"
 - XLINEs no longer contain a type field, theyll now all just silently reject
+- xlines are now 'tracked' - stats X shows how many times each xline has
+  rejected a client
 - temp xlines and resvs
 - klines set against spoofed users will now take effect when the user
   connects as well, if the user is not kline_exempt
