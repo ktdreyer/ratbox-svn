@@ -37,6 +37,21 @@ set_default_conf(void)
 
 	config_file.ping_time = 300;
 	config_file.reconnect_time = 300;
+
+	config_file.ratbox = 1;
+
+	config_file.disable_uregister = 0;
+	config_file.uregister_time = 60;
+	config_file.uregister_amount = 10;
+
+	config_file.disable_cregister = 0;
+	config_file.cregister_time = 60;
+	config_file.cregister_amount = 5;
+
+	config_file.oper_score = 3;
+	config_file.jupe_score = 15;
+	config_file.unjupe_score = 15;
+	config_file.pending_time = 1800;
 }
 
 static void
@@ -47,6 +62,21 @@ validate_conf(void)
 
 	if(EmptyString(config_file.gecos))
 		config_file.gecos = my_strdup("ratbox services");
+
+	if(config_file.dcc_low_port <= 1024)
+		config_file.dcc_low_port = 1025;
+
+	if(config_file.dcc_high_port < config_file.dcc_low_port)
+		config_file.dcc_high_port = 65000;
+
+	if(config_file.ping_time <= 0)
+		config_file.ping_time = 300;
+
+	if(config_file.reconnect_time <= 0)
+		config_file.reconnect_time = 300;
+
+	if(config_file.pending_time <= 0)
+		config_file.pending_time = 1800;
 }
 
 static void
