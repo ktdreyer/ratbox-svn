@@ -116,8 +116,8 @@ diff -u -r1.100 m_kline.c
  
 -  if(result > (24*60))
 -    result = (24*60); /* Max it at 24 hours */
-+  if(result > (24*60*4))
-+    result = (24*60*4); /* Max it at 4 days */
++  if(result > (24*60*7))
++    result = (24*60*7); /* Max it at 7 days */
  
    result = (time_t)result * (time_t)60;  /* turn it into seconds */
  
