@@ -285,17 +285,6 @@ void do_non_priv_stats(struct Client *sptr, char *name, char *target,
 {
   switch (stat)
     {
-    case 'E' : case 'e' :
-    case 'F' : case 'f' :
-      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, sptr->name);
-      stats_spy(sptr,stat);
-      break;
-
-    case 'I' : case 'i' :
-      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, sptr->name);
-      stats_spy(sptr,stat);
-      break;
-
     case 'K' :
       if(target != (char *)NULL)
         report_matching_host_klines(sptr,target);
@@ -306,11 +295,6 @@ void do_non_priv_stats(struct Client *sptr, char *name, char *target,
 
     case 'o' : case 'O' :
       report_configured_links(sptr, CONF_OPS);
-      stats_spy(sptr,stat);
-      break;
-
-    case 'P' :
-      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, sptr->name);
       stats_spy(sptr,stat);
       break;
 
@@ -327,12 +311,19 @@ void do_non_priv_stats(struct Client *sptr, char *name, char *target,
 	}
       break;
 
-    case 'v' : case 'V' :
-      break;
-
-    case '?':
-      break;
-
+    case 'U' :
+    case 'Q' : case 'q' :
+    case 'C' : case 'c' :
+    case 'H' : case 'h' :
+    case 'E' : case 'e' :
+    case 'F' : case 'f' :
+    case 'I' : case 'i' :
+    case 'M' : case 'm' :
+    case 'R' : case 'r' :
+    case 'X' : case 'x' :
+    case 'Y' : case 'y' :
+    case 'V' : case 'v' :
+    case 'P' : case '?' :
     case 'G' : case 'g' :
     case 'D' : case 'd' :
     case 'S' : case 's' :
@@ -468,7 +459,7 @@ void do_priv_stats(struct Client *sptr, char *name, char *target,
       stats_spy(sptr,stat);
       break;
 
-    case 'X' :
+    case 'X' : case 'x' :
       report_specials(sptr,CONF_XLINE,RPL_STATSXLINE);
       stats_spy(sptr,stat);
       break;

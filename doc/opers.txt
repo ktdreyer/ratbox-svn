@@ -66,9 +66,11 @@ COMMAND         - USAGE and DESCRIPTION
                     o - Shows O/o lines
                   * P - Shows configured ports
                     p - Shows opers connected and their idle times
+                  * q - Shows quaranteened nicks (Old Q: lines)
                   * r - Shows resource usage by ircd
                   * s - Shows the server cache
                   * t - Shows generic server stats
+                  * U - Shows shared blocks (Old U: lines)
                     u - Shows server uptime
                   * v - Shows connected servers and their idle times
                   * X - Shows gecos bans (Old X: lines)
