@@ -201,7 +201,7 @@ int     ms_lljoin(struct Client *cptr,
 		 me.name, chptr->chname);
     }
 
-  (void)channel_member_names(sptr, chptr, chname);
+  (void)channel_member_names(acptr, chptr, chname);
 
   return 0;
 }
