@@ -1,3 +1,9 @@
+*** 20010126_15 by db
+- corrected formatting
+- added CVS $Id$ string in comments
+
+
+
 *** 20010126_14 by db
 - rewrote m_kill.c to use kill_client() in send.c noticed I had
   the tests backwards in kill_client()
