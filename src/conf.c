@@ -94,6 +94,7 @@ parse_servinfo(char *line)
 	static char default_gecos[] = "services";
 	const char *my_name = getfield(line);
 	const char *my_gecos = getfield(NULL);
+	const char *my_vhost = getfield(NULL);
 
 	if(EmptyString(my_name))
 		conf_error_fatal("S: Missing servername");
@@ -109,6 +110,9 @@ parse_servinfo(char *line)
 
 	config_file.my_name = my_strdup(my_name);
 	config_file.my_gecos = my_strdup(my_gecos);
+
+	if(my_vhost != NULL)
+		config_file.vhost = my_strdup(my_vhost);
 }
 
 static void
@@ -130,11 +134,12 @@ static void
 parse_connect(char *line)
 {
 	struct conf_server *server;
-	char *server_name = getfield(line);
-	char *server_host = getfield(NULL);
-	char *server_port = getfield(NULL);
-	char *server_rpass = getfield(NULL);
-	char *server_spass = getfield(NULL);
+	const char *server_name = getfield(line);
+	const char *server_host = getfield(NULL);
+	const char *server_port = getfield(NULL);
+	const char *server_rpass = getfield(NULL);
+	const char *server_spass = getfield(NULL);
+	const char *server_vhost = getfield(NULL);
 	int port;
 
 	if(EmptyString(server_name) || EmptyString(server_name) ||
@@ -149,6 +154,9 @@ parse_connect(char *line)
 	server->host = my_strdup(server_host);
 	server->rpass = my_strdup(server_rpass);
 	server->spass = my_strdup(server_spass);
+
+	if(server_vhost != NULL)
+		server->vhost = my_strdup(server_vhost);
 
 	if((port = atoi(server_port)) == 0)
 		server->port = 6667;

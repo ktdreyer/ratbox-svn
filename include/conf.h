@@ -10,6 +10,7 @@ struct _config_file
 {
 	char *my_name;
 	char *my_gecos;
+	char *vhost;
 	int server_port;
 
 	char *admin1;
@@ -25,6 +26,7 @@ struct conf_server
 	char *host;
 	char *rpass;
 	char *spass;
+	char *vhost;
 	int port;
 };
 

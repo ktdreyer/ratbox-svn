@@ -2,6 +2,8 @@
 #ifndef INCLUDED_tools_h
 #define INCLUDED_tools_h
 
+#include "setup.h"
+
 #define EmptyString(x) (!(x) || (*(x) == '\0'))
 
 extern char *getfield(char *newline);

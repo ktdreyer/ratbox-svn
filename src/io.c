@@ -187,7 +187,7 @@ connect_to_server(void *unused)
 	ptr = conf_server_list.head;
 	conf_p = ptr->data;
 
-	serv_fd = sock_open(conf_p->host, conf_p->port, NULL);
+	serv_fd = sock_open(conf_p->host, conf_p->port, conf_p->vhost);
 
 	if(serv_fd < 0)
 		return;
@@ -271,6 +271,10 @@ sock_open(const char *host, int port, const char *vhost)
 
 	if(fcntl(fd, F_SETFL, flags) == -1)
 		return -1;
+
+	/* no specific vhost, try default */
+	if(vhost == NULL)
+		vhost = config_file.vhost;
 
 	if(vhost != NULL)
 	{

@@ -1,0 +1,45 @@
+# $Id$
+
+RM=@RM@
+
+SUBDIRS=src
+
+MAKE = make
+
+all: build
+
+autoconf:
+	autoconf autoconf/configure.in >configure
+	autoheader -l autoconf autoconf/configure.in > include/setup.h.in
+	$(RM) -f config.cache
+
+build:
+	@for i in $(SUBDIRS); do \
+		echo "build -> $$i"; \
+		cd $$i; \
+		$(MAKE) build || exit; cd ..; \
+	done
+
+clean:
+	@for i in $(SUBDIRS); do \
+		echo "clean -> $$i"; \
+		cd $$i; \
+		$(MAKE) clean; cd ..; \
+	done
+
+distclean:
+	$(RM) -f Makefile 
+	$(RM) config.status config.cache config.log include/setup.h
+	@for i in $(SUBDIRS); do \
+		echo "distclean -> $$i"; \
+		cd $$i; \
+		$(MAKE) distclean; cd ..; \
+	done
+
+depend:
+	@for i in $(SUBDIRS); do \
+		echo "depend -> $$i"; \
+		cd $$i; \
+		$(MAKE) depend; cd ..; \
+	done
+

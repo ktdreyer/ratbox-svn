@@ -1,0 +1,51 @@
+# $Id$
+
+CC=@CC@
+RM=@RM@
+MV=@MV@
+INCLUDES=-I ../include/
+LDFLAGS=
+CFLAGS=-g -O0 -Wall -Werror
+
+MAKE = make
+PROG = rserv
+
+SRCS = 			\
+	c_message.c	\
+	c_mode.c	\
+	channel.c	\
+	client.c	\
+	command.c	\
+	conf.c		\
+	event.c		\
+	fileio.c	\
+	log.c		\
+	match.c		\
+	io.c		\
+	rserv.c		\
+	s_alis.c	\
+	service.c	\
+	tools.c
+
+OBJS=$(SRCS:.c=.o)
+
+all: $(PROG)
+
+$(PROG): $(OBJS)
+	${CC} ${CFLAGS} ${LDFLAGS} -o $@ ${OBJS}
+
+.c.o:
+	${CC} ${CFLAGS} $(INCLUDES) -c $<
+
+build: $(PROG)
+
+clean:
+	$(RM) -f $(PROG) *.o
+
+distclean: clean
+	$(RM) Makefile
+
+depend:
+	$(CC) -MM $(CFLAGS) $(INCLUDES) $(SRCS) > .depend
+
+include .depend
