@@ -1,3 +1,19 @@
+androsyn    2004/08/10 11:34:49 EDT	(20040810_1)
+
+  Modified files:
+    include              class.h 
+    modules              m_stats.c 
+    src                  class.c 
+  Log:
+  Merge report_class into m_stats.c
+  
+  Revision  Changes    Path
+                       
+  7.23      +0 -1      ircd-ratbox/include/class.h
+  1.230     +31 -3     ircd-ratbox/modules/m_stats.c
+
+
+
 androsyn    2004/08/10 10:44:30 EDT	(20040810_0)
 
   Modified files:
