@@ -1,3 +1,17 @@
+leeh        2003/12/30 16:55:18 EST	(20031230_1)
+
+  Added files:
+    include              balloc.h 
+    src                  balloc.c 
+  Log:
+  - added balloc.c/h
+  
+  Revision  Changes    Path
+  1.1       +77 -0     rserv/include/balloc.h (new)
+  1.1       +542 -0    rserv/src/balloc.c (new)
+
+
+
 leeh        2003/12/30 16:53:04 EST	(20031230_0)
 
   Modified files:
