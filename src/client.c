@@ -1271,7 +1271,6 @@ exit_generic_client(struct Client *client_p, struct Client *source_p, struct Cli
 	del_from_hostname_hash(source_p->host, source_p);
 	del_from_client_hash(source_p->name, source_p);
 	remove_client_from_list(source_p);
-	s_assert(dlinkFind(&dead_list, source_p) == NULL);
 	s_assert(dlinkFind(&abort_list, source_p) == NULL);
 	
 	SetDead(source_p);
@@ -1330,7 +1329,6 @@ exit_unknown_client(struct Client *client_p, struct Client *source_p, struct Cli
 	del_from_hostname_hash(source_p->host, source_p);
 	del_from_client_hash(source_p->name, source_p);
 	remove_client_from_list(source_p);
-	s_assert(dlinkFind(&dead_list, source_p) == NULL);
 	s_assert(dlinkFind(&abort_list, source_p) == NULL);
 	SetDead(source_p);
 	dlinkAddAlloc(source_p, &dead_list);
@@ -1380,7 +1378,6 @@ exit_remote_server(struct Client *client_p, struct Client *source_p, struct Clie
 
 	del_from_client_hash(source_p->name, source_p);
 	remove_client_from_list(source_p);  
-	s_assert(dlinkFind(&dead_list, source_p) == NULL);
 	s_assert(dlinkFind(&abort_list, source_p) == NULL);
 	
 	SetDead(source_p);
@@ -1407,7 +1404,6 @@ qs_server(struct Client *client_p, struct Client *source_p, struct Client *from,
 
 	del_from_client_hash(source_p->name, source_p);
 	remove_client_from_list(source_p);  
-	s_assert(dlinkFind(&dead_list, source_p) == NULL);
 	s_assert(dlinkFind(&abort_list, source_p) == NULL);
 	
 	SetDead(source_p);
@@ -1475,7 +1471,6 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 
 	del_from_client_hash(source_p->name, source_p);
 	remove_client_from_list(source_p);
-	s_assert(dlinkFind(&dead_list, source_p) == NULL);
 	s_assert(dlinkFind(&abort_list, source_p) == NULL);
 	
 	SetDead(source_p);
