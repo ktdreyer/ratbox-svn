@@ -28,6 +28,7 @@
 #include "numeric.h"
 #include "dline_conf.h"
 #include "ircd.h"
+#include <assert.h>
 
 #define TH_MAX 0x1000
 
@@ -204,7 +205,7 @@ void clear_conf(void)
     conf = ((struct ConfItem*)hme->data);
     if (!conf->clients)
       {
-       hmel ? hmel->next : deferred_masks = hmen;
+       hmel ? hmel->next : deferred_masks = hmen->next;          
        free_conf(conf);
        MyFree(hme->hostmask);
        MyFree(hme);
@@ -212,17 +213,15 @@ void clear_conf(void)
     else
      hmel = hme;
    }
- for (hmel = NULL, hme = first_mask; hme; hme = hmen)
+ for (hme = first_mask; hme; hme = hmen)
    {
     hmen = hme->next;
-    if (hme->type != HOST_CONFITEM)
-      continue;
+    /* We don't use types as of yet, but lets just check... -A1kmm. */
+    assert(hme->type == HOST_CONFITEM);
     conf = (struct ConfItem*)hme->data;
-    hmel ? hmel->next : first_mask = hme->next;
     if (conf->clients)
       {
        conf->status |= CONF_ILLEGAL;
-       hmel = hme;
        hme->next = deferred_masks;
        deferred_masks = hme;
       }
@@ -234,6 +233,7 @@ void clear_conf(void)
       }
    }
  first_miscmask = NULL;
+ first_mask = NULL;
  memset((void *)hmhash,0,sizeof(hmhash));
 }
 
