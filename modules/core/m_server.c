@@ -589,7 +589,6 @@ void write_links_file(void* notused)
       
       ircsprintf(buff, "%s %s :1 %s\n", target_p->name, me.name, p);
       fbputs(buff, file);
-      sendto_realops_flags(FLAGS_ALL, L_ALL, "%s", buff);
     }
     
   fbclose(file);

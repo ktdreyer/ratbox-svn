@@ -88,8 +88,8 @@ static char *parse_stats_args(int, char **, int *, int *);
 static void stats_L(struct Client *, char *, int, int, char);
 static void stats_L_list(struct Client *s, char *, int, int,
                          dlink_list *, char);
-static void stats_spy(struct Client *, char *);
-static void stats_L_spy(struct Client *, char *, char *);
+static void stats_spy(struct Client *, char);
+static void stats_L_spy(struct Client *, char, char *);
 
 /* Heres our struct for the stats table */
 struct StatsStruct
@@ -194,6 +194,7 @@ static void m_stats(struct Client *client_p, struct Client *source_p,
                    int parc, char *parv[])
 {
   int i;
+  char statchar;
   static time_t last_used = 0;
 
   /* Check the user is actually allowed to do /stats, and isnt flooding */
@@ -216,36 +217,32 @@ static void m_stats(struct Client *client_p, struct Client *source_p,
         return;
     }
 
-  if(strlen(parv[1]) == 1)
+  statchar = parv[1][0];
+
+  for (i=0; stats_cmd_table[i].handler; i++)
   {
-    char statchar;
-    statchar=parv[1][0];
-
-    for (i=0; stats_cmd_table[i].handler; i++)
+    if (stats_cmd_table[i].letter == statchar)
+    {
+      /* The stats table says what privs are needed, so check --fl_ */
+      if(stats_cmd_table[i].need_oper || stats_cmd_table[i].need_admin)
       {
-        if (stats_cmd_table[i].letter == statchar)
-          {
-            /* The stats table says what privs are needed, so check --fl_ */
-            if(stats_cmd_table[i].need_oper || stats_cmd_table[i].need_admin)
-              {
-                sendto_one(source_p, form_str(ERR_NOPRIVILEGES),me.name,source_p->name);
-                break;
-              }
+        sendto_one(source_p, form_str(ERR_NOPRIVILEGES),me.name,source_p->name);
+        break;
+      }
 
-            /* Blah, stats L needs the parameters, none of the others do.. */
-            if(statchar == 'L' || statchar == 'l')
-              stats_cmd_table[i].handler(source_p, parc, parv);
-            else
-              stats_cmd_table[i].handler(source_p);
-          }
-       }
-   }
+      /* Blah, stats L needs the parameters, none of the others do.. */
+      if(statchar == 'L' || statchar == 'l')
+        stats_cmd_table[i].handler(source_p, parc, parv);
+      else
+        stats_cmd_table[i].handler(source_p);
+    }
+  }
 
   /* Send the end of stats notice, and the stats_spy */
   sendto_one(source_p, form_str(RPL_ENDOFSTATS), me.name, parv[0], parv[1]);
 
-  if((parv[1][0] != 'L') && (parv[1][0] != 'l'))
-    stats_spy(source_p, parv[1]);
+  if((statchar != 'L') && (statchar != 'l'))
+    stats_spy(source_p, statchar);
 }
 
 /*
@@ -262,38 +259,37 @@ static void mo_stats(struct Client *client_p, struct Client *source_p,
                    int parc, char *parv[])
 {
   int i;
+  char statchar;
 
   if (hunt_server(client_p,source_p,":%s STATS %s :%s",2,parc,parv) != HUNTED_ISME)
      return;
 
-  if(strlen(parv[1]) == 1)
+  statchar=parv[1][0];
+
+  for (i=0; stats_cmd_table[i].handler; i++)
   {
-    char statchar;
-    statchar=parv[1][0];
-
-    for (i=0; stats_cmd_table[i].handler; i++)
+    if (stats_cmd_table[i].letter == statchar)
+    {
+      /* The stats table says what privs are needed, so check --fl_ */
+      if(stats_cmd_table[i].need_admin && !IsSetOperAdmin(source_p))
       {
-        if (stats_cmd_table[i].letter == statchar)
-          {
-            /* The stats table says what privs are needed, so check --fl_ */
-            if(stats_cmd_table[i].need_admin && !IsSetOperAdmin(source_p))
-              {
-                sendto_one(source_p, form_str(ERR_NOPRIVILEGES),me.name,source_p->name);
-                break;
-              }
+        sendto_one(source_p, form_str(ERR_NOPRIVILEGES),me.name,source_p->name);
+        break;
+      }
 
-            /* Blah, stats L needs the parameters, none of the others do.. */
-            if(statchar == 'L' || statchar == 'l')
-              stats_cmd_table[i].handler(source_p, parc, parv, statchar);
-            else
-              stats_cmd_table[i].handler(source_p);
-          }
-       }
-   }
+      /* Blah, stats L needs the parameters, none of the others do.. */
+      if(statchar == 'L' || statchar == 'l')
+        stats_cmd_table[i].handler(source_p, parc, parv, statchar);
+      else
+        stats_cmd_table[i].handler(source_p);
+    }
+  }
 
   /* Send the end of stats notice, and the stats_spy */
   sendto_one(source_p, form_str(RPL_ENDOFSTATS), me.name, parv[0], parv[1]);
-  stats_spy(source_p, parv[1]);
+
+  if((statchar != 'L') && (statchar != 'l'))
+    stats_spy(source_p, statchar);
 }
 
 
@@ -749,18 +745,20 @@ static void stats_ltrace(struct Client *client_p, int parc, char *parv[])
   int             doall = 0;
   int             wilds = 0;
   char            *name=NULL;
-  char            *target=NULL;
-  /* We could possibly pass this on.. but we can take it from parv[1] */
   char            statchar;
+  
   name = parse_stats_args(parc,parv,&doall,&wilds);
 
-  if (parc > 3)
-    target = parv[3];
+  if(name)
+  {
+    statchar=parv[1][0];
 
-  statchar=parv[1][0];
- 
-  stats_L(client_p,name,doall,wilds,statchar);
-  stats_L_spy(client_p, parv[1], name);
+    stats_L(client_p,name,doall,wilds,statchar);
+    stats_L_spy(client_p, statchar, name);
+  }
+  else
+    sendto_one(client_p, form_str(ERR_NEEDMOREPARAMS),
+               me.name, client_p->name, "STATS");
 
   return;
 }
@@ -900,7 +898,7 @@ static void stats_L_list(struct Client *source_p,char *name, int doall, int wild
  *
  * done --is
  */
-static void stats_spy(struct Client *source_p, char *statchar)
+static void stats_spy(struct Client *source_p, char statchar)
 {
   struct hook_stats_data data;
 
@@ -921,7 +919,7 @@ static void stats_spy(struct Client *source_p, char *statchar)
  * side effects	- a notice is sent to opers, IF spy mode is configured
  * 		  in the conf file.
  */
-static void stats_L_spy(struct Client *source_p, char *statchar, char *name)
+static void stats_L_spy(struct Client *source_p, char statchar, char *name)
 {
   struct hook_stats_data data;
 
@@ -957,9 +955,9 @@ static char *parse_stats_args(int parc,char *parv[],int *doall,int *wilds)
         *doall = 1;
       if (strchr(name, '*') || strchr(name, '?'))
         *wilds = 1;
+
+      return(name);
     }
   else
-    name = me.name;
-
-  return(name);
+    return(NULL);
 }

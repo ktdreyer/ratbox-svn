@@ -30,11 +30,11 @@ char *_version = "1.0";
 int
 show_stats(struct hook_stats_data *data)
 {
-  if (irccmp(data->statchar, "L")) 
+  if((data->statchar == 'L') || (data->statchar == 'l'))
     {
       if(data->name != NULL)
 	sendto_realops_flags(FLAGS_SPY, L_ADMIN,
-			     "STATS %s requested by %s (%s@%s) [%s] on %s",
+			     "STATS %c requested by %s (%s@%s) [%s] on %s",
 			     data->statchar,
 			     data->source_p->name,
 			     data->source_p->username,
@@ -43,7 +43,7 @@ show_stats(struct hook_stats_data *data)
 			     data->name);
       else
 	sendto_realops_flags(FLAGS_SPY, L_ADMIN,
-			     "STATS %s requested by %s (%s@%s) [%s]",
+			     "STATS %c requested by %s (%s@%s) [%s]",
 			     data->statchar,
 			     data->source_p->name,
 			     data->source_p->username,
@@ -53,9 +53,10 @@ show_stats(struct hook_stats_data *data)
   else
     {
       sendto_realops_flags(FLAGS_SPY, L_ADMIN,
-                           "STATS %s requested by %s (%s@%s) [%s]",
+                           "STATS %c requested by %s (%s@%s) [%s]",
 			   data->statchar, data->source_p->name, data->source_p->username,
 			   data->source_p->host, data->source_p->user->server);
     }
+
   return 0;
 }
