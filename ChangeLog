@@ -1,3 +1,90 @@
+androsyn    2002/08/23 11:49:47 EDT	(20020823_1)
+
+  Modified files:
+    contrib              m_clearchan.c m_jupe.c m_ojoin.c 
+                         m_olist.c m_owho.c m_owhois.c 
+    include              client.h 
+    modules              .depend m_accept.c m_cryptlink.c m_dmem.c 
+                         m_gline.c m_invite.c m_join.c m_list.c 
+                         m_names.c m_oper.c m_rehash.c m_unkline.c 
+                         m_who.c m_whois.c 
+    modules/core         m_nick.c m_part.c m_server.c m_sjoin.c 
+    src                  .depend Makefile.in channel.c 
+                         channel_mode.c class.c client.c hash.c 
+                         hook.c irc_string.c ircd.c ircdauth.c 
+                         linebuf.c memory.c modules.c newconf.c 
+                         packet.c s_auth.c s_bsd.c s_bsd_devpoll.c 
+                         s_bsd_kqueue.c s_bsd_poll.c 
+                         s_bsd_select.c s_bsd_sigio.c s_conf.c 
+                         s_debug.c s_gline.c s_serv.c s_user.c 
+                         send.c 
+  Removed files:
+    include              list.h 
+    src                  list.c 
+  Log:
+  Remove list.c/list.h.  Move the remaining functions into client.c, where
+  they logically should go.
+  
+  Revision  Changes    Path
+  1.37      +1 -2      ircd-ratbox/contrib/m_clearchan.c
+  1.40      +1 -2      ircd-ratbox/contrib/m_jupe.c
+  1.16      +1 -2      ircd-ratbox/contrib/m_ojoin.c
+  1.6       +1 -2      ircd-ratbox/contrib/m_olist.c
+  1.5       +1 -2      ircd-ratbox/contrib/m_owho.c
+  1.7       +1 -2      ircd-ratbox/contrib/m_owhois.c
+  7.174     +7 -0      ircd-ratbox/include/client.h
+  7.17      +0 -46     ircd-ratbox/include/list.h (dead)
+  1.11      +59 -67    ircd-ratbox/modules/.depend
+  1.101     +9 -6      ircd-ratbox/modules/core/m_nick.c
+  1.62      +1 -2      ircd-ratbox/modules/core/m_part.c
+  1.96      +1 -2      ircd-ratbox/modules/core/m_server.c
+  1.150     +1 -2      ircd-ratbox/modules/core/m_sjoin.c
+  1.36      +1 -2      ircd-ratbox/modules/m_accept.c
+  1.38      +2 -3      ircd-ratbox/modules/m_cryptlink.c
+  1.16      +1 -2      ircd-ratbox/modules/m_dmem.c
+  1.92      +1 -2      ircd-ratbox/modules/m_gline.c
+  1.51      +1 -2      ircd-ratbox/modules/m_invite.c
+  1.101     +1 -2      ircd-ratbox/modules/m_join.c
+  1.49      +1 -2      ircd-ratbox/modules/m_list.c
+  1.52      +1 -2      ircd-ratbox/modules/m_names.c
+  1.51      +1 -2      ircd-ratbox/modules/m_oper.c
+  1.46      +1 -2      ircd-ratbox/modules/m_rehash.c
+  1.59      +1 -2      ircd-ratbox/modules/m_unkline.c
+  1.69      +1 -2      ircd-ratbox/modules/m_who.c
+  1.91      +4 -5      ircd-ratbox/modules/m_whois.c
+  7.12      +92 -97    ircd-ratbox/src/.depend
+  7.117     +0 -1      ircd-ratbox/src/Makefile.in
+  7.349     +0 -1      ircd-ratbox/src/channel.c
+  7.73      +0 -1      ircd-ratbox/src/channel_mode.c
+  7.39      +0 -1      ircd-ratbox/src/class.c
+  7.320     +116 -1    ircd-ratbox/src/client.c
+  7.59      +0 -1      ircd-ratbox/src/hash.c
+  7.19      +0 -1      ircd-ratbox/src/hook.c
+  7.56      +0 -1      ircd-ratbox/src/irc_string.c
+  7.252     +0 -1      ircd-ratbox/src/ircd.c
+  7.49      +0 -1      ircd-ratbox/src/ircdauth.c
+  7.95      +0 -1      ircd-ratbox/src/linebuf.c
+  7.50      +0 -177    ircd-ratbox/src/list.c (dead)
+  7.39      +0 -1      ircd-ratbox/src/memory.c
+  7.113     +0 -1      ircd-ratbox/src/modules.c
+  7.26      +0 -1      ircd-ratbox/src/newconf.c
+  7.97      +0 -1      ircd-ratbox/src/packet.c
+  7.107     +0 -1      ircd-ratbox/src/s_auth.c
+  7.175     +0 -1      ircd-ratbox/src/s_bsd.c
+  7.16      +0 -1      ircd-ratbox/src/s_bsd_devpoll.c
+  1.28      +0 -1      ircd-ratbox/src/s_bsd_kqueue.c
+  7.55      +0 -1      ircd-ratbox/src/s_bsd_poll.c
+  7.27      +0 -1      ircd-ratbox/src/s_bsd_select.c
+  7.24      +0 -1      ircd-ratbox/src/s_bsd_sigio.c
+  7.344     +0 -1      ircd-ratbox/src/s_conf.c
+  7.77      +0 -7      ircd-ratbox/src/s_debug.c
+  1.27      +0 -1      ircd-ratbox/src/s_gline.c
+  7.294     +0 -1      ircd-ratbox/src/s_serv.c
+  7.224     +0 -1      ircd-ratbox/src/s_user.c
+  7.218     +0 -1      ircd-ratbox/src/send.c
+
+
+
 androsyn    2002/08/23 11:26:18 EDT	(20020823_0)
 
   Modified files:
