@@ -1,3 +1,10 @@
+*** 20001024_3 by adrian
+
+
+Remember to initialise the event subsystem early so we can use it.
+
+
+
 *** 20001024_2 by adrian
 
 
