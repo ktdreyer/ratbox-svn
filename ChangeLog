@@ -1,3 +1,25 @@
+androsyn    2004/08/08 16:54:25 EDT	(20040808_0)
+
+  Modified files:
+    include              client.h scache.h 
+    modules/core         m_server.c registration.c 
+    src                  client.c ircd.c scache.c 
+  Log:
+  Move the actual storage of nicknames into struct User for clients and
+  use the scache pointer for servernames.  client->name is now a pointer
+  to either one of these
+  
+  Revision  Changes    Path
+  7.254     +6 -2      ircd-ratbox/include/client.h
+  7.14      +1 -1      ircd-ratbox/include/scache.h
+  1.141     +5 -7      ircd-ratbox/modules/core/m_server.c
+  1.8       +11 -3     ircd-ratbox/modules/core/registration.c
+  7.475     +1 -0      ircd-ratbox/src/client.c
+  7.357     +5 -2      ircd-ratbox/src/ircd.c
+  7.25      +1 -1      ircd-ratbox/src/scache.c
+
+
+
 leeh        2004/08/07 10:42:18 EDT	(20040807_5)
 
   Modified files:
