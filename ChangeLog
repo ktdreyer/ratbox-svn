@@ -1,3 +1,17 @@
+leeh        2004/08/08 19:02:35 EDT	(20040808_2)
+
+  Modified files:
+    include              client.h 
+    modules/core         registration.c 
+  Log:
+  - use a flag rather than an int to note we've had USER
+  
+  Revision  Changes    Path
+  7.255     +4 -1      ircd-ratbox/include/client.h
+  1.9       +3 -3      ircd-ratbox/modules/core/registration.c
+
+
+
 leeh        2004/08/08 17:21:15 EDT	(20040808_1)
 
   Modified files:
