@@ -606,7 +606,7 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 		chptr = BlockHeapAlloc(channel_heap);
 
 		strlcpy(chptr->name, parv[2], sizeof(chptr->name));
-		chptr->tsinfo = atol(parv[1]);
+		newts = chptr->tsinfo = atol(parv[1]);
 		add_channel(chptr);
 
 		keep_old_modes = 0;
@@ -632,8 +632,10 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 	while(*s)
 	{
 		/* skips the leading '+' */
-		switch(*(s++))
+		switch(*s)
 		{
+		case '+':
+			break;
 		case 'i':
 			newmode.mode |= MODE_INVITEONLY;
 			break;
@@ -669,6 +671,8 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 		default:
 			break;
 		}
+
+		s++;
 	}
 
 	if(!keep_old_modes)
@@ -760,13 +764,9 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 	if(finished_bursting && !keep_old_modes &&
 	   dlink_list_length(&chptr->services))
 	{
-		struct client *service_p;
-
 		DLINK_FOREACH(ptr, chptr->services.head)
 		{
-			member_p = ptr->data;
-			service_p = member_p->client_p;
-			rejoin_service(target_p, chptr, 1);
+			rejoin_service(ptr->data, chptr, 1);
 		}
 	}
 
