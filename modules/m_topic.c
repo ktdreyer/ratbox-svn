@@ -223,11 +223,8 @@ int     ms_topic(struct Client *cptr,
 
   if (parv[1] && IsChannelName(parv[1]))
     {
-      chptr = hash_find_channel(parv[1], NullChn);
-      if (!chptr)
-        {
-          return 0;
-        }
+      if ( (chptr = hash_find_channel(parv[1], NullChn)) == NULL )
+	return 0;
 
       strncpy_irc(chptr->topic, parv[4], TOPICLEN);
 	      
@@ -241,7 +238,7 @@ int     ms_topic(struct Client *cptr,
 	{
 	  sendto_channel_local(ONLY_CHANOPS,
 			       chptr, ":%s!%s@%s TOPIC %s :%s",
-			       sptr->name,
+			       me.name,
 			       sptr->username,
 			       sptr->host,
 			       parv[1],
@@ -258,7 +255,7 @@ int     ms_topic(struct Client *cptr,
 	{
 	  sendto_channel_local(ALL_MEMBERS,
 			       chptr, ":%s!%s@%s TOPIC %s :%s",
-			       sptr->name,
+			       me.name,
 			       sptr->username,
 			       sptr->host,
 			       parv[1], chptr->topic);
