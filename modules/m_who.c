@@ -59,7 +59,7 @@ void who_global(struct Client *sptr, char *mask, int oper);
 void    do_who(struct Client *sptr,
 			     struct Client *acptr,
 			     char *repname,
-			     struct SLink *lp);
+			     int flags);
 
 /*
 ** m_who
@@ -208,7 +208,7 @@ int     m_who(struct Client *cptr,
 		chname = bchan->chname;
 	    }
 
-	  do_who(sptr, acptr, chname, lp);
+	  do_who(sptr, acptr, chname, ((lp)?lp->flags:0) );
 	}
       sendto_one(sptr, form_str(RPL_ENDOFWHO), me.name, parv[0], mask );
       return 0;
@@ -293,7 +293,7 @@ void who_global(struct Client *sptr,char *mask, int oper)
 		chname = bchan->chname;
 	    }
 
-	  do_who(sptr, acptr, chname, lp);
+	  do_who(sptr, acptr, chname, ((lp)?lp->flags:0) );
 
           if (maxmatches > 0)
 	    {
@@ -330,7 +330,7 @@ void do_who_on_channel(struct Client *sptr,
 	continue;
       if (IsInvisible(lp->value.cptr) && !member)
 	continue;
-      do_who(sptr, lp->value.cptr, real_name, lp);
+      do_who(sptr, lp->value.cptr, real_name, lp->flags);
     }
 }
 
@@ -340,7 +340,7 @@ void do_who_on_channel(struct Client *sptr,
  * inputs	- pointer to client requesting who
  *		- pointer to client to do who on
  *		- The reported name
- *		- 
+ *		- channel flags
  * output	- NONE
  * side effects - do a who on given person
  */
@@ -348,27 +348,15 @@ void do_who_on_channel(struct Client *sptr,
 void    do_who(struct Client *sptr,
 			     struct Client *acptr,
 			     char *repname,
-			     struct SLink *lp)
+			     int flags)
 {
   char  status[5];
-  char *p = status;
-  /* Using a pointer will compile faster than an index */
-  /* Not always, with modern compilers ... -db */
 
-  if (acptr->user->away)
-    *p++ = 'G';
-  else
-    *p++ = 'H';
-  if (IsAnyOper(acptr))
-    *p++ = '*';
-  if (lp != NULL)
-    {
-      if (lp->flags & CHFL_CHANOP)
-        *p++ = '@';
-      else if (lp->flags & CHFL_VOICE)
-        *p++ = '+';
-    }
-  *p = '\0';
+  ircsprintf(status,"%c%s%s", 
+	     acptr->user->away ? 'G' : 'H',
+	     IsAnyOper(acptr) ? "*" : "",
+	     channel_chanop_or_voice(flags));
+
   sendto_one(sptr, form_str(RPL_WHOREPLY), me.name, sptr->name,
              repname, acptr->username,
              acptr->host, acptr->user->server, acptr->name,
