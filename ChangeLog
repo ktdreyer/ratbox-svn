@@ -1,3 +1,25 @@
+leeh        2002/11/23 17:29:12 UTC	(20021123_0)
+
+  Modified files:
+    .                    RELNOTES configure 
+    autoconf             configure.in 
+    include              patchlevel.h 
+    modules              m_xline.c 
+  Log:
+  - added UNXLINE, to remove xlines on the fly.
+  - upped patchlevel to 2.0beta1, first release will be beta2.
+  - added -Wall etc back to compile flags
+  - cleaned RELNOTES
+  
+  Revision  Changes    Path
+  1.69      +3 -152    ircd-ratbox/RELNOTES
+  7.157     +2 -2      ircd-ratbox/autoconf/configure.in
+  7.164     +2 -2      ircd-ratbox/configure
+  7.46      +1 -1      ircd-ratbox/include/patchlevel.h
+  1.7       +127 -2    ircd-ratbox/modules/m_xline.c
+
+
+
 androsyn    2002/11/22 23:17:32 UTC	(20021122_2)
 
   Modified files:
