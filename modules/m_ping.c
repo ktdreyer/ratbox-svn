@@ -75,19 +75,33 @@ static void m_ping(struct Client *client_p,
       sendto_one(source_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
       return;
     }
+
+/* OK, there is absolutely NO reason the origin shouldnt always be the clients
+ * nick, so we ignore what they say, and use that --fl_ */
+#if 0
   origin = parv[1];
+#endif
+  
+  origin = client_p->name;
   destination = parv[2]; /* Will get NULL or pointer (parc >= 2!!) */
+
   if (GlobalSetOptions.hide_server && !IsOper(source_p))
   {
    sendto_one(source_p,":%s PONG %s :%s", me.name,
               (destination) ? destination : me.name, origin);
    return;
   }
+
+/* Screw this, origin == clients nick --fl_ */
+#if 0
   target_p = find_client(origin, NULL);
   if (!target_p)
     target_p = find_server(origin);
+
   if (target_p && target_p != source_p)
     origin = client_p->name;
+#endif
+
   if (!EmptyString(destination) && irccmp(destination, me.name) != 0)
     {
       if ((target_p = find_server(destination)))
@@ -118,14 +132,22 @@ static void ms_ping(struct Client *client_p,
       sendto_one(source_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
       return;
     }
+
+/* origin == source_p->name, lets not even both wasting effort on it --fl_ */
+#if 0
   origin = parv[1];
+#endif
+  origin = source_p->name;
   destination = parv[2]; /* Will get NULL or pointer (parc >= 2!!) */
 
+#if 0
   target_p = find_client(origin, NULL);
   if (!target_p)
     target_p = find_server(origin);
   if (target_p && target_p != source_p)
     origin = client_p->name;
+#endif
+
   if (!EmptyString(destination) && irccmp(destination, me.name) != 0)
     {
       if ((target_p = find_server(destination)))
