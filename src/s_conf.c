@@ -728,7 +728,7 @@ void remove_one_ip(struct irc_inaddr *ip_in)
    continue;
 #else
   if (ptr->count != 0 ||
-      (CurrentTime-ptr->last_attempt)>RECONNECT_TIME)
+      (CurrentTime-ptr->last_attempt)<=RECONNECT_TIME)
    continue;
 #endif
   *lptr = ptr->next;
