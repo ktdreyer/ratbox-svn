@@ -1,3 +1,51 @@
+enygma      2002/02/27 12:51:50 EST	(20020227_2)
+
+  Modified files:
+    .                    README.PLATFORMS configure 
+    adns                 check.c event.c 
+    autoconf             acconfig.h configure.in 
+    include              modules.h setup.h.in 
+    modules              .depend Makefile.in m_info.c m_oper.c 
+    modules/core         m_server.c 
+    src                  Makefile.in modules.c parse.c s_auth.c 
+                         s_bsd.c s_serv.c send.c 
+  Added files:
+    src                  dynlink.c 
+  Removed files:
+    src                  modules-dld.c 
+  Log:
+  I have modified configure.in to detect shl_load and HP-UX Systems.
+  Then I modified modules.c and seperated some functions into dynlink.c
+  Rework has been done on some files, where declaration inconsistencies
+  existed. Like static int and then only int for the same functions.
+  I believe the HP-UX porting is now completed.
+  
+  Revision  Changes    Path
+  7.8       +2 -0      ircd-hybrid-7/README.PLATFORMS
+  1.5       +16 -5     ircd-hybrid-7/adns/check.c
+  1.12      +2 -2      ircd-hybrid-7/adns/event.c
+  7.19      +7 -1      ircd-hybrid-7/autoconf/acconfig.h
+  7.122     +83 -5     ircd-hybrid-7/autoconf/configure.in
+  7.125     +404 -238  ircd-hybrid-7/configure
+  7.28      +7 -0      ircd-hybrid-7/include/modules.h
+  7.46      +13 -7     ircd-hybrid-7/include/setup.h.in
+  1.6       +1 -697    ircd-hybrid-7/modules/.depend
+  1.66      +26 -5     ircd-hybrid-7/modules/Makefile.in
+  1.78      +2 -2      ircd-hybrid-7/modules/core/m_server.c
+  1.53      +1 -6      ircd-hybrid-7/modules/m_info.c
+  1.44      +2 -2      ircd-hybrid-7/modules/m_oper.c
+  7.108     +3 -2      ircd-hybrid-7/src/Makefile.in
+  7.1       +367 -0    ircd-hybrid-7/src/dynlink.c (new)
+  1.18      +0 -606    ircd-hybrid-7/src/modules-dld.c (dead)
+  7.98      +34 -277   ircd-hybrid-7/src/modules.c
+  7.122     +1 -1      ircd-hybrid-7/src/parse.c
+  7.84      +3 -3      ircd-hybrid-7/src/s_auth.c
+  7.164     +3 -3      ircd-hybrid-7/src/s_bsd.c
+  7.247     +3 -3      ircd-hybrid-7/src/s_serv.c
+  7.181     +1 -1      ircd-hybrid-7/src/send.c
+
+
+
 androsyn    2002/02/27 12:28:19 EST	(20020227_1)
 
   Modified files:
