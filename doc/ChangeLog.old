@@ -1,3 +1,15 @@
+jmallett    2002/02/04 10:23:00 EST	(20020204_8)
+
+  Modified files:
+    .                    configure 
+  Log:
+  Regenerate configure with autoconf 2.13
+  
+  Revision  Changes    Path
+  7.119     +209 -198  ircd-hybrid-7/configure
+
+
+
 jmallett    2002/02/04 10:17:28 EST	(20020204_7)
 
   Modified files:
