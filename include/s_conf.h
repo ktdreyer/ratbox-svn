@@ -82,7 +82,6 @@ struct ConfItem
   int              dns_pending; /* 1 if dns query pending, 0 otherwise */
 #ifdef HAVE_LIBCRYPTO
   RSA *            rsa_public_key;
-  char *           rsa_private_key_filename;
   struct EncPreference *cipher_preference;
 #endif
 };
@@ -260,6 +259,7 @@ struct server_info
   char        *network_desc;
 #ifdef HAVE_LIBCRYPTO
   RSA         *rsa_private_key;
+  char *      rsa_private_key_filename;
 #endif
   int         hub;
   struct      irc_inaddr ip;

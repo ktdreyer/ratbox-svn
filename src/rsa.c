@@ -38,9 +38,10 @@
 #include <openssl/md5.h>
 #include <openssl/bn.h>
 #include <openssl/evp.h>
+#include <openssl/err.h>
 
-static void report_crypto_errors(void);
-static void verify_private_key(void);
+void report_crypto_errors(void);
+void verify_private_key(void);
 static void binary_to_hex( unsigned char * bin, char * hex, int length );
 static int absorb( char ** str, char lowest, char highest );
 static RSA * str_to_RSApublic( char * key );
@@ -48,7 +49,7 @@ static RSA * str_to_RSApublic( char * key );
 /*
  * report_crypto_errors - Dump crypto error list to log
  */
-static void report_crypto_errors(void)
+void report_crypto_errors(void)
 {
   unsigned long e = 0;
   unsigned long cnt = 0;
@@ -64,7 +65,7 @@ static void report_crypto_errors(void)
 /*
  * verify_private_key - reread private key and verify against inmem key
  */
-static void verify_private_key(void)
+void verify_private_key(void)
 {
   BIO * file;
   RSA * key = 0, *mkey = 0;
