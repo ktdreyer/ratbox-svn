@@ -169,4 +169,8 @@ Little things to be done given enough time and initiative
 .  Do we still need start_ircd.c and ircd_start.c?
 .  Look to see what other STATS commands can be made optionally oper-only
 .  Update ircd.8, or get rid of it (move to old?)
+.  Add scaleable database-based authentication.  Probably part of Iauth.
+   Also add support for server-side notify with the list stored in the
+   auth database.  This would make ircd an awesome instant messaging
+   backend.
 
