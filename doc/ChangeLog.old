@@ -1,3 +1,8 @@
+*** 20010821_5 by davidt
+- Oops, fix a couple tiny bugs in the new linebuf_putmsg code that caused
+  some major problems truncating various bits of messages.
+
+
 *** 20010821_4 by davidt
 - Ahem, 'make install' is needed for testing, 'make' doesn't help much.
   Anyway, now that I'm testing the actual changes, this _does_ help
