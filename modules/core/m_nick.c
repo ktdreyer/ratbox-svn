@@ -878,7 +878,7 @@ register_client(struct Client *client_p, struct Client *server,
 		}
 	}
 	else
-		source_p->servptr == server;
+		source_p->servptr = server;
 
 	dlinkAdd(source_p, &source_p->lnode, &source_p->servptr->serv->users);
 
