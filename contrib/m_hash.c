@@ -105,7 +105,7 @@ static void mo_hash(struct Client* client_p, struct Client* source_p,
     for (client = GlobalClientList; client; client = client->next)
       {
 	++client_count;
-	if (hash_find_client(client->name, 0) != client)
+	if (find_client(client->name, 0) != client)
 	  {
 	    sendto_one(source_p, "NOTICE %s :Can't find client %s in hash table",
 		       parv[0], client->name);
