@@ -684,10 +684,6 @@ main(int argc, char **argv)
 fi
 
 
-
-
-fi
-
 echo "Using $SELECT_TYPE for select loop."
 
 AC_DEFINE_UNQUOTED(SELECT_TYPE, "$SELECT_TYPE", [This is the type of IO loop we are using])

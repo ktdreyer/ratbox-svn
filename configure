@@ -7784,10 +7784,6 @@ fi
 fi
 
 
-
-
-fi
-
 echo "Using $SELECT_TYPE for select loop."
 
 
