@@ -1,3 +1,7 @@
+*** 20010626_8 by androsyn
+Some definitions to support inlined versions of strcpy and MyMalloc() and friends...
+
+
 *** 20010626_7 by androsyn
 This seems to get bursts back down to closer to normal times..still not as fast as -6
 though.
