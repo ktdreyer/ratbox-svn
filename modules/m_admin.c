@@ -68,7 +68,8 @@ static void mr_admin(struct Client *client_p, struct Client *source_p,
  
   if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
     {
-      sendto_one(source_p,form_str(RPL_LOAD2HI),me.name,parv[0]);
+      sendto_one(source_p,form_str(RPL_LOAD2HI), me.name, 
+                 BadPtr(parv[0]) ? "*" : parv[0]);
       return;
     }
   else
