@@ -1,3 +1,7 @@
+*** 20010314_8 by toot
+this fixes the bug that made join #x,0 put you in #x0
+
+
 *** 20010314_7 by fl_
 - added a config file option for disabling vchans.. added by request but
   I dont like it :|
