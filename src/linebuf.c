@@ -265,11 +265,12 @@ finish:
  * - This *is* designed to turn into a reference-counter-protected setup
  *   to dodge copious copies.
  */
-void
+int
 linebuf_parse(buf_head_t *bufhead, char *data, int len)
 {
     buf_line_t *bufline;
     int cpylen;
+    int linecnt = 0;
 
     /* First, if we have a partial buffer, try to squeze data into it */
     if (bufhead->list.tail != NULL) {
@@ -278,9 +279,10 @@ linebuf_parse(buf_head_t *bufhead, char *data, int len)
         assert(!bufline->flushing);
         /* just try, the worst it could do is *reject* us .. */
         cpylen = linebuf_copy_line(bufhead, bufline, data, len);
+        linecnt++;
         /* If we've copied the same as what we've got, quit now */
         if (cpylen == len)
-            return; /* all the data done so soon? */
+            return linecnt; /* all the data done so soon? */
 
         /* Skip the data and update len .. */
         len -= cpylen;
@@ -295,7 +297,9 @@ linebuf_parse(buf_head_t *bufhead, char *data, int len)
         cpylen = linebuf_copy_line(bufhead, bufline, data, len);
         len -= cpylen;
         data += cpylen;
+        linecnt++;
     }
+    return linecnt;
 }
 
 
