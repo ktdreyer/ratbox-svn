@@ -1,3 +1,10 @@
+*** 20001213_1 by db
+- msg_tree_root has to be zero'ed in clear_msg_tree() or it causes
+  odd problems esp. on redhat linux for some reason. NO idea why
+  but the stray pointers left in it caused it to core nicely.
+
+
+
 *** 20001212_9 by db
 OH WHAT A BLASTED PITA
 - Ok... a CONNECTING server must put the server its trying to connect to
