@@ -1,3 +1,34 @@
+androsyn    2004/09/22 13:16:46 EDT	(20040922_1)
+
+  Modified files:
+    .                    configure configure.ac 
+    adns                 setup.c 
+    include              hook.h s_conf.h s_newconf.h 
+    modules              m_links.c m_list.c m_oper.c m_stats.c 
+    src                  listener.c newconf.c patricia.c 
+    tools                convertilines.c mkpasswd.c 
+  Log:
+  Various warning cleanups.
+  
+  Revision  Changes    Path
+  1.40      +1 -1      ircd-ratbox/adns/setup.c
+  7.237     +4 -4      ircd-ratbox/configure
+  7.51      +4 -4      ircd-ratbox/configure.ac
+  1.27      +8 -8      ircd-ratbox/include/hook.h
+  7.301     +1 -1      ircd-ratbox/include/s_conf.h
+  7.42      +2 -2      ircd-ratbox/include/s_newconf.h
+  1.68      +3 -3      ircd-ratbox/modules/m_links.c
+  1.79      +4 -4      ircd-ratbox/modules/m_list.c
+  1.89      +1 -2      ircd-ratbox/modules/m_oper.c
+  1.236     +2 -2      ircd-ratbox/modules/m_stats.c
+  7.117     +2 -2      ircd-ratbox/src/listener.c
+  7.182     +2 -1      ircd-ratbox/src/newconf.c
+  7.26      +1 -1      ircd-ratbox/src/patricia.c
+  7.7       +1 -1      ircd-ratbox/tools/convertilines.c
+  7.14      +15 -14    ircd-ratbox/tools/mkpasswd.c
+
+
+
 androsyn    2004/09/22 10:46:30 EDT	(20040922_0)
 
   Modified files:
