@@ -1,3 +1,49 @@
+leeh        2003/08/11 12:01:41 EDT	(20030811_6)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              channel.h client.h irc_string.h s_conf.h 
+    modules              m_capab.c m_challenge.c m_oper.c m_pass.c 
+                         m_rehash.c m_svinfo.c m_userhost.c 
+                         m_whois.c 
+    src                  channel.c client.c ircd.c match.c 
+                         newconf.c s_auth.c s_bsd.c s_conf.c 
+                         s_serv.c s_user.c 
+  Log:
+  - did some prep work for TS6:
+  - sockhost is now in struct Client, not struct LocalUser
+  - server wont start unless a sid="foo"; is specified in serverinfo {};
+  - modified PASS to note TS6.
+  - reworked the burst stuff
+  
+  Revision  Changes    Path
+  7.218     +6 -0      ircd-ratbox/doc/example.conf
+  7.54      +6 -0      ircd-ratbox/doc/example.efnet.conf
+  7.149     +0 -1      ircd-ratbox/include/channel.h
+  7.212     +6 -9      ircd-ratbox/include/client.h
+  7.50      +2 -2      ircd-ratbox/include/irc_string.h
+  7.249     +1 -0      ircd-ratbox/include/s_conf.h
+  1.41      +3 -3      ircd-ratbox/modules/m_capab.c
+  1.59      +3 -3      ircd-ratbox/modules/m_challenge.c
+  1.73      +2 -2      ircd-ratbox/modules/m_oper.c
+  1.38      +10 -2     ircd-ratbox/modules/m_pass.c
+  1.71      +3 -3      ircd-ratbox/modules/m_rehash.c
+  1.51      +27 -7     ircd-ratbox/modules/m_svinfo.c
+  1.52      +2 -9      ircd-ratbox/modules/m_userhost.c
+  1.124     +2 -2      ircd-ratbox/modules/m_whois.c
+  7.394     +5 -150    ircd-ratbox/src/channel.c
+  7.397     +9 -6      ircd-ratbox/src/client.c
+  7.304     +8 -0      ircd-ratbox/src/ircd.c
+  7.33      +63 -126   ircd-ratbox/src/match.c
+  7.104     +41 -0     ircd-ratbox/src/newconf.c
+  7.156     +3 -2      ircd-ratbox/src/s_auth.c
+  7.207     +5 -5      ircd-ratbox/src/s_bsd.c
+  7.425     +2 -2      ircd-ratbox/src/s_conf.c
+  7.344     +307 -60   ircd-ratbox/src/s_serv.c
+  7.278     +2 -1      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2003/08/11 11:47:27 EDT	(20030811_5)
 
   Modified files:
