@@ -423,14 +423,6 @@ flush_write(struct Client *source_p, FILE * out, char *buf, char *temppath)
 	return (error_on_write);
 }
 
-static dlink_list *tdline_list[] = {
-	&tdline_hour,
-	&tdline_day,
-	&tdline_min,
-	&tdline_week,
-	NULL
-};
-
 /* remove_temp_dline()
  *
  * inputs       - hostname to undline
@@ -440,7 +432,6 @@ static dlink_list *tdline_list[] = {
 static int
 remove_temp_dline(const char *host)
 {
-	dlink_list *tdlist;
 	struct ConfItem *aconf;
 	dlink_node *ptr;
 	struct irc_sockaddr_storage addr, caddr;
@@ -449,11 +440,9 @@ remove_temp_dline(const char *host)
 
 	parse_netmask(host, (struct sockaddr *)&addr, &bits);
 
-	for (i = 0; tdline_list[i] != NULL; i++)
+	for (i = 0; i < LAST_TEMP_TYPE; i++)
 	{
-		tdlist = tdline_list[i];
-
-		DLINK_FOREACH(ptr, tdlist->head)
+		DLINK_FOREACH(ptr, temp_dlines[i].head)
 		{
 			aconf = ptr->data;
 
@@ -461,7 +450,7 @@ remove_temp_dline(const char *host)
 
 			if(comp_with_mask_sock((struct sockaddr *)&addr, (struct sockaddr *)&caddr, bits) && bits == cbits)
 			{
-				dlinkDestroy(ptr, tdlist);
+				dlinkDestroy(ptr, &temp_dlines[i]);
 				delete_one_address_conf(aconf->host, aconf);
 				return YES;
 			}

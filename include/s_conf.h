@@ -312,20 +312,17 @@ extern struct admin_info AdminInfo;	/* defined in ircd.c */
 dlink_list service_list;
 #endif
 
-#define TEMP_MIN	1
-#define TEMP_HOUR	2
-#define TEMP_DAY	3
-#define TEMP_WEEK	4
+typedef enum temp_list
+{
+	TEMP_MIN,
+	TEMP_HOUR,
+	TEMP_DAY,
+	TEMP_WEEK,
+	LAST_TEMP_TYPE
+} temp_list;
 
-extern dlink_list tkline_min;
-extern dlink_list tkline_hour;
-extern dlink_list tkline_day;
-extern dlink_list tkline_week;
-
-extern dlink_list tdline_min;
-extern dlink_list tdline_hour;
-extern dlink_list tdline_day;
-extern dlink_list tdline_week;
+dlink_list temp_klines[LAST_TEMP_TYPE];
+dlink_list temp_dlines[LAST_TEMP_TYPE];
 
 extern void init_s_conf(void);
 
@@ -367,12 +364,6 @@ extern void add_temp_kline(struct ConfItem *);
 extern void add_temp_dline(struct ConfItem *);
 extern void report_temp_klines(struct Client *);
 extern void show_temp_klines(struct Client *, dlink_list *);
-
-extern void cleanup_temps_min(void *);
-extern void cleanup_temps_hour(void *);
-extern void cleanup_temps_day(void *);
-extern void cleanup_temps_week(void *);
-
 
 extern const char *get_conf_name(KlineType);
 extern int rehash(int);

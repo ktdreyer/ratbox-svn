@@ -65,15 +65,8 @@ extern char linebuf[];
 
 static BlockHeap *confitem_heap = NULL;
 
-dlink_list tkline_min;
-dlink_list tkline_hour;
-dlink_list tkline_day;
-dlink_list tkline_week;
-
-dlink_list tdline_min;
-dlink_list tdline_hour;
-dlink_list tdline_day;
-dlink_list tdline_week;
+dlink_list temp_klines[LAST_TEMP_TYPE];
+dlink_list temp_dlines[LAST_TEMP_TYPE];
 
 #ifdef ENABLE_SERVICES
 dlink_list service_list;
@@ -85,8 +78,8 @@ static void validate_conf(void);
 static void read_conf(FILE *);
 static void clear_out_old_conf(void);
 
-static void expire_tkline(dlink_list *, int);
-static void expire_tdline(dlink_list *, int);
+static void expire_temp_kd(void *list);
+static void reorganise_temp_kd(void *list);
 
 FILE *conf_fbfile_in;
 extern char yytext[];
@@ -98,6 +91,22 @@ void
 init_s_conf(void)
 {
 	confitem_heap = BlockHeapCreate(sizeof(struct ConfItem), CONFITEM_HEAP_SIZE);
+
+	eventAddIsh("expire_temp_klines", expire_temp_kd, &temp_klines[TEMP_MIN], 60);
+	eventAddIsh("expire_temp_dlines", expire_temp_kd, &temp_dlines[TEMP_MIN], 60);
+
+	eventAddIsh("expire_temp_klines_hour", reorganise_temp_kd,
+			&temp_klines[TEMP_HOUR], 3600);
+	eventAddIsh("expire_temp_dlines_hour", reorganise_temp_kd,
+			&temp_dlines[TEMP_HOUR], 3600);
+	eventAddIsh("expire_temp_klines_day", reorganise_temp_kd,
+			&temp_klines[TEMP_DAY], 86400);
+	eventAddIsh("expire_temp_dlines_day", reorganise_temp_kd,
+			&temp_dlines[TEMP_DAY], 86400);
+	eventAddIsh("expire_temp_klines_week", reorganise_temp_kd,
+			&temp_klines[TEMP_WEEK], 604800);
+	eventAddIsh("expire_temp_dlines_week", reorganise_temp_kd,
+			&temp_dlines[TEMP_WEEK], 604800);
 }
 
 /*
@@ -868,13 +877,25 @@ void
 add_temp_kline(struct ConfItem *aconf)
 {
 	if(aconf->hold >= CurrentTime + (10080 * 60))
-		dlinkAddAlloc(aconf, &tkline_week);
+	{
+		dlinkAddAlloc(aconf, &temp_klines[TEMP_WEEK]);
+		aconf->port = TEMP_WEEK;
+	}
 	else if(aconf->hold >= CurrentTime + (1440 * 60))
-		dlinkAddAlloc(aconf, &tkline_day);
+	{
+		dlinkAddAlloc(aconf, &temp_klines[TEMP_DAY]);
+		aconf->port = TEMP_DAY;
+	}
 	else if(aconf->hold >= CurrentTime + (60 * 60))
-		dlinkAddAlloc(aconf, &tkline_hour);
+	{
+		dlinkAddAlloc(aconf, &temp_klines[TEMP_HOUR]);
+		aconf->port = TEMP_HOUR;
+	}
 	else
-		dlinkAddAlloc(aconf, &tkline_min);
+	{
+		dlinkAddAlloc(aconf, &temp_klines[TEMP_MIN]);
+		aconf->port = TEMP_MIN;
+	}
 
 	aconf->flags |= CONF_FLAGS_TEMPORARY;
 	add_conf_by_address(aconf->host, CONF_KILL, aconf->user, aconf);
@@ -890,44 +911,28 @@ void
 add_temp_dline(struct ConfItem *aconf)
 {
 	if(aconf->hold >= CurrentTime + (10080 * 60))
-		dlinkAddAlloc(aconf, &tdline_week);
+	{
+		dlinkAddAlloc(aconf, &temp_dlines[TEMP_WEEK]);
+		aconf->port = TEMP_WEEK;
+	}
 	else if(aconf->hold >= CurrentTime + (1440 * 60))
-		dlinkAddAlloc(aconf, &tdline_day);
+	{
+		dlinkAddAlloc(aconf, &temp_dlines[TEMP_DAY]);
+		aconf->port = TEMP_DAY;
+	}
 	else if(aconf->hold >= CurrentTime + (60 * 60))
-		dlinkAddAlloc(aconf, &tdline_hour);
+	{
+		dlinkAddAlloc(aconf, &temp_dlines[TEMP_HOUR]);
+		aconf->port = TEMP_HOUR;
+	}
 	else
-		dlinkAddAlloc(aconf, &tdline_min);
+	{
+		dlinkAddAlloc(aconf, &temp_dlines[TEMP_MIN]);
+		aconf->port = TEMP_MIN;
+	}
 
 	aconf->flags |= CONF_FLAGS_TEMPORARY;
 	add_conf_by_address(aconf->host, CONF_DLINE, aconf->user, aconf);
-}
-
-void
-cleanup_temps_min(void *notused)
-{
-	expire_tkline(&tkline_min, TEMP_MIN);
-	expire_tdline(&tdline_min, TEMP_MIN);
-}
-
-void
-cleanup_temps_hour(void *notused)
-{
-	expire_tkline(&tkline_hour, TEMP_HOUR);
-	expire_tdline(&tdline_hour, TEMP_HOUR);
-}
-
-void
-cleanup_temps_day(void *notused)
-{
-	expire_tkline(&tkline_day, TEMP_DAY);
-	expire_tdline(&tdline_day, TEMP_DAY);
-}
-
-void
-cleanup_temps_week(void *notused)
-{
-	expire_tkline(&tkline_week, TEMP_WEEK);
-	expire_tdline(&tdline_week, TEMP_WEEK);
 }
 
 /* expire_tkline()
@@ -938,13 +943,13 @@ cleanup_temps_week(void *notused)
  * side effects - expire tklines and moves them between lists
  */
 static void
-expire_tkline(dlink_list * tklist, int type)
+expire_temp_kd(void *list)
 {
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 	struct ConfItem *aconf;
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, tklist->head)
+	DLINK_FOREACH_SAFE(ptr, next_ptr, ((dlink_list *) list)->head)
 	{
 		aconf = ptr->data;
 
@@ -958,77 +963,46 @@ expire_tkline(dlink_list * tklist, int type)
 						     user : "*", (aconf->host) ? aconf->host : "*");
 
 			delete_one_address_conf(aconf->host, aconf);
-			dlinkDestroy(ptr, tklist);
-		}
-		else if((type == TEMP_WEEK
-			 && aconf->hold < (CurrentTime + (10080 * 60)))
-			|| (type == TEMP_DAY
-			    && aconf->hold < (CurrentTime + (1440 * 60)))
-			|| (type == TEMP_HOUR && aconf->hold < (CurrentTime + (60 * 60))))
-		{
-			/* expires within a hour, check every minute.. */
-			if(aconf->hold < CurrentTime + (60 * 60))
-				dlinkMoveNode(ptr, tklist, &tkline_min);
-
-			/* .. a day, check hourly */
-			else if(aconf->hold < CurrentTime + (1440 * 60))
-				dlinkMoveNode(ptr, tklist, &tkline_hour);
-
-			/* .. a week, check daily */
-			else if(aconf->hold < CurrentTime + (10080 * 60))
-				dlinkMoveNode(ptr, tklist, &tkline_day);
+			dlinkDestroy(ptr, list);
 		}
 	}
 }
 
-/* expire_tdline()
- *
- * inputs       - list pointer
- * 		- type
- * output       - NONE
- * side effects - expire tdlines and moves them between lists
- */
 static void
-expire_tdline(dlink_list * tdlist, int type)
+reorganise_temp_kd(void *list)
 {
-	dlink_node *ptr;
-	dlink_node *next_ptr;
 	struct ConfItem *aconf;
+	dlink_node *ptr, *next_ptr;
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, tdlist->head)
+	DLINK_FOREACH_SAFE(ptr, next_ptr, ((dlink_list *) list)->head)
 	{
 		aconf = ptr->data;
 
-		if(aconf->hold <= CurrentTime)
+		if(aconf->hold < (CurrentTime + (60 * 60)))
 		{
-			if(ConfigFileEntry.tkline_expire_notices)
-				sendto_realops_flags(UMODE_ALL, L_ALL,
-						     "Temporary D-line for [%s] expired",
-						     aconf->host);
-
-			delete_one_address_conf(aconf->host, aconf);
-			dlinkDestroy(ptr, tdlist);
+			dlinkMoveNode(ptr, list, (aconf->status == CONF_KILL) ? 
+					&temp_klines[TEMP_MIN] : &temp_dlines[TEMP_MIN]);
+			aconf->port = TEMP_MIN;
 		}
-		else if((type == TEMP_WEEK
-			 && aconf->hold < (CurrentTime + (10080 * 60)))
-			|| (type == TEMP_DAY
-			    && aconf->hold < (CurrentTime + (1440 * 60)))
-			|| (type == TEMP_HOUR && aconf->hold < (CurrentTime + (60 * 60))))
+		else if(aconf->port > TEMP_HOUR)
 		{
-			/* expires within an hour, check every minute.. */
-			if(aconf->hold < CurrentTime + (60 * 60))
-				dlinkMoveNode(ptr, tdlist, &tdline_min);
-
-			/* .. a day, check hourly */
-			else if(aconf->hold < CurrentTime + (1440 * 60))
-				dlinkMoveNode(ptr, tdlist, &tdline_hour);
-
-			/* .. a week, check daily */
-			else if(aconf->hold < CurrentTime + (10080 * 60))
-				dlinkMoveNode(ptr, tdlist, &tdline_day);
+			if(aconf->hold < (CurrentTime + (1440 * 60)))
+			{
+				dlinkMoveNode(ptr, list, (aconf->status == CONF_KILL) ? 
+						&temp_klines[TEMP_HOUR] : &temp_dlines[TEMP_HOUR]);
+				aconf->port = TEMP_HOUR;
+			}
+			else if(aconf->port > TEMP_DAY && 
+				(aconf->hold < (CurrentTime + (10080 * 60))))
+			{
+				dlinkMoveNode(ptr, list, (aconf->status == CONF_KILL) ? 
+						&temp_klines[TEMP_DAY] : &temp_dlines[TEMP_DAY]);
+				aconf->port = TEMP_DAY;
+			}
 		}
 	}
 }
+
 
 /* const char* get_oper_name(struct Client *client_p)
  * Input: A client to find the active oper{} name for.

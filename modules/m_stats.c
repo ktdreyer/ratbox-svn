@@ -121,8 +121,6 @@ static void stats_servlinks(struct Client *);
 static void stats_ltrace(struct Client *, int, const char **);
 static void stats_ziplinks(struct Client *);
 
-static void report_tklines (struct Client *, dlink_list *);
-
 /* This table contains the possible stats items, in order:
  * stats letter,  function to call, operonly? adminonly?
  * case only matters in the stats letter column.. -- fl_
@@ -534,7 +532,7 @@ stats_glines (struct Client *source_p)
 
 
 static void
-stats_hubleaf (struct Client *source_p)
+stats_hubleaf(struct Client *source_p)
 {
 	struct remote_conf *hub_p;
 	dlink_node *ptr;
@@ -606,7 +604,7 @@ stats_auth (struct Client *source_p)
 
 
 static void
-stats_tklines (struct Client *source_p)
+stats_tklines(struct Client *source_p)
 {
 	/* Oper only, if unopered, return ERR_NOPRIVS */
 	if((ConfigFileEntry.stats_k_oper_only == 2) && !IsOper (source_p))
@@ -646,39 +644,32 @@ stats_tklines (struct Client *source_p)
 	/* Theyre opered, or allowed to see all klines */
 	else
 	{
-		report_tklines(source_p, &tkline_min);
-		report_tklines(source_p, &tkline_hour);
-		report_tklines(source_p, &tkline_day);
-		report_tklines(source_p, &tkline_week);
+		struct ConfItem *aconf;
+		dlink_node *ptr;
+		int i;
+		char *user, *host, *pass, *oper_reason;
+
+		for(i = 0; i < LAST_TEMP_TYPE; i++)
+		{
+			DLINK_FOREACH(ptr, temp_klines[i].head)
+			{
+				aconf = ptr->data;
+
+				get_printable_kline(source_p, aconf, &host, &pass, 
+							&user, &oper_reason);
+
+				sendto_one_numeric(source_p, RPL_STATSKLINE,
+						   form_str(RPL_STATSKLINE),
+						   'k', host, user, pass,
+						   oper_reason ? "|" : "",
+						   oper_reason ? oper_reason : "");
+			}
+		}
 	}
 }
 
 static void
-report_tklines(struct Client *source_p, dlink_list * tkline_list)
-{
-	struct ConfItem *aconf;
-	dlink_node *ptr;
-	char *host;
-	char *pass;
-	char *user;
-	char *oper_reason;
-
-	DLINK_FOREACH (ptr, tkline_list->head)
-	{
-		aconf = ptr->data;
-
-		get_printable_kline(source_p, aconf, &host, &pass, &user, &oper_reason);
-
-		sendto_one_numeric(source_p, RPL_STATSKLINE,
-				   form_str (RPL_STATSKLINE),
-				   'k', host, user, pass,
-				   oper_reason ? "|" : "",
-				   oper_reason ? oper_reason : "");
-	}
-}
-
-static void
-stats_klines (struct Client *source_p)
+stats_klines(struct Client *source_p)
 {
 	/* Oper only, if unopered, return ERR_NOPRIVS */
 	if((ConfigFileEntry.stats_k_oper_only == 2) && !IsOper (source_p))

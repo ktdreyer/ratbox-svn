@@ -664,11 +664,6 @@ main(int argc, char *argv[])
 
 	eventAddIsh("cleanup_glines", cleanup_glines, NULL, CLEANUP_GLINES_TIME);
 
-	eventAddIsh("cleanup_temps_min", cleanup_temps_min, NULL, 60);
-	eventAddIsh("cleanup_temps_hour", cleanup_temps_hour, NULL, 3600);
-	eventAddIsh("cleanup_temps_day", cleanup_temps_day, NULL, 86400);
-	eventAddIsh("cleanup_temps_week", cleanup_temps_week, NULL, 604800);
-
 	/* We want try_connections to be called as soon as possible now! -- adrian */
 	/* No, 'cause after a restart it would cause all sorts of nick collides */
 	/* um.  by waiting even longer, that just means we have even *more*
