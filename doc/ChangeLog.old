@@ -1,3 +1,7 @@
+*** 20000319_1 by lusky
+Changed my email address, this is a test commit (jrl)
+
+
 *** 20000209_1 by db
 - fixed goof with removing of an #ifdef for TOPIC_INFO 
   patch done by is- 
