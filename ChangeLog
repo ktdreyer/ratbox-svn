@@ -1,3 +1,16 @@
+leeh        2004/04/10 17:40:59 EDT	(20040410_0)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+  Log:
+  - update the example confs
+  
+  Revision  Changes    Path
+  7.238     +11 -46    ircd-ratbox/doc/example.conf
+  7.73      +122 -162  ircd-ratbox/doc/example.efnet.conf
+
+
+
 leeh        2004/04/08 19:23:32 EDT	(20040408_7)
 
   Modified files:
