@@ -94,6 +94,6 @@ error HARD_FDLIMIT_ undefined
 #define _(a)       (a)
 #endif
 
-#define CONFIG_H_LEVEL_7
+#define CONFIG_RATBOX_LEVEL_1
 
 #endif /* INCLUDED_defaults_h */

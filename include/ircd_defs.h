@@ -36,7 +36,7 @@
 
 #include "config.h"
 
-#if !defined(CONFIG_H_LEVEL_7)
+#if !defined(CONFIG_RATBOX_LEVEL_1)
 #  error Incorrect config.h for this revision of ircd.
 #endif
 

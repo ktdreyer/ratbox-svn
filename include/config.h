@@ -354,9 +354,8 @@
  * might do due to bugs.  ircd might be slightly more efficient with 
  * these disabled, who knows. keep this enabled during development.
  */
-#define INVARIANTS
 
-#define CONFIG_H_LEVEL_7
+#define CONFIG_RATBOX_LEVEL_1
 
 #include "defaults.h"
 #endif /* INCLUDED_config_h */

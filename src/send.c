@@ -146,14 +146,13 @@ send_format(char *lsendbuf, const char *pattern, va_list args)
 static int
 _send_linebuf(struct Client *to, buf_head_t *linebuf)
 {
-#ifdef INVARIANTS
   if (IsMe(to))
   {
     sendto_realops_flags(UMODE_ALL, L_ALL,
                          "Trying to send message to myself!");
     return 0;
   }
-#endif
+
   if (IsDead(to))
     return 0; 
 
@@ -258,17 +257,8 @@ send_queued_write(int fd, void *data)
    ** Once socket is marked dead, we cannot start writing to it,
    ** even if the error is removed...
    */
-#ifdef INVARIANTS
   if (IsDead(to))
-  {
-    /*
-     * Actually, we should *NEVER* get here--something is
-     * not working correct if send_queued is called for a
-     * dead socket... --msa
-     */
     return;
-  } /* if (IsDead(to)) */
-#endif
 
   /* Next, lets try to write some data */
 #ifndef NDEBUG
@@ -338,16 +328,8 @@ send_queued_slink_write(int fd, void *data)
    ** Once socket is marked dead, we cannot start writing to it,
    ** even if the error is removed...
    */
-#ifdef INVARIANTS
-  if (IsDead(to)) {
-    /*
-     * Actually, we should *NEVER* get here--something is
-     * not working correct if send_queued is called for a
-     * dead socket... --msa
-     */
+  if (IsDead(to)) 
     return;
-  } /* if (IsDead(to)) */
-#endif
 
   /* Next, lets try to write some data */
   if (to->localClient->slinkq)
@@ -452,14 +434,12 @@ sendto_one_prefix(struct Client *to, struct Client *prefix,
   else
     to_sendto = to;
 
-#ifdef INVARIANTS
   if (IsMe(to))
   {
     sendto_realops_flags(UMODE_ALL, L_ALL,
                          "Trying to send to myself!");
     return;
   }
-#endif
 
   linebuf_newbuf(&linebuf);
   va_start(args, pattern);
