@@ -1,3 +1,8 @@
+*** 20001225_18 by wcampbel
+1. Noted that auth blocks with redirection MUST have a class
+2. is- says anonops is hideops
+
+
 *** 20001225_17 by db
 - I'm not sure how this ever worked before..
   yylval.string should be DupString'ed in MOST cases before adding to conf
