@@ -1,3 +1,12 @@
+*** 20010115_8 by db
+- This fixes one of the nasty assert errors. comm_open() and comm_accept()
+  were both returning ENFILE instead of -1, which happens to be 23.. This
+  was seen as a valid fd. This was obviously quite wrong. (s_bsd.c)
+
+- removed numerous debugging code in other files.
+
+
+
 *** 20010115_7 by ejb
 - slight cleanup to modrestart.
 
