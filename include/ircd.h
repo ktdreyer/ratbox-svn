@@ -82,11 +82,12 @@ extern const char *infotext[];
 extern const char *serno;
 extern const char *ircd_version;
 extern const char *logFileName;
+extern const char *pidFileName;
 extern const char serveropts[];
 extern int cold_start;
 extern int dorehash;
 extern int doremotd;
-extern int kline_queued;
+extern int doklines;
 
 extern struct Client me;
 extern dlink_list global_client_list;

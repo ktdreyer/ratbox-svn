@@ -900,7 +900,6 @@ server_estab(struct Client *client_p)
 	const char *inpath;
 	static char inpath_ip[HOSTLEN * 2 + USERLEN + 5];
 	char *host;
-	dlink_node *m;
 	dlink_node *ptr;
 	dlink_node *cptr;
 
@@ -1024,22 +1023,7 @@ server_estab(struct Client *client_p)
 	set_chcap_usage_counts(client_p);
 
 	dlinkAdd(client_p, &client_p->lnode, &me.serv->servers);
-
-	m = dlinkFind(&unknown_list, client_p);
-	assert(m != NULL);
-	if(m != NULL)
-	{
-		dlinkDelete(m, &unknown_list);
-		dlinkAddTail(client_p, m, &serv_list);
-	}
-	else
-	{
-		sendto_realops_flags(UMODE_ALL, L_ADMIN,
-				     "Tried to register (%s) server but it was already registered!?!",
-				     host);
-		exit_client(client_p, client_p, client_p,
-			    "Tried to register server but it was already registered?!?");
-	}
+	dlinkMoveNode(&client_p->localClient->tnode, &unknown_list, &serv_list);
 
 	Count.server++;
 	Count.myserver++;
@@ -1751,7 +1735,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 	if(!set_non_blocking(client_p->localClient->fd))
 	{
 		report_error(L_ADMIN, NONB_ERROR_MSG,
-#ifdef HIDE_SPOOF_IPS
+#ifdef HIDE_SERVERS_IPS
 			     get_client_name(client_p, MASK_IP),
 #else
 			     get_client_name(client_p, SHOW_IP),
@@ -1763,7 +1747,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 	if(!set_sock_buffers(client_p->localClient->fd, READBUF_SIZE))
 	{
 		report_error(L_ADMIN, SETBUF_ERROR_MSG,
-#ifdef HIDE_SPOOF_IPS
+#ifdef HIDE_SERVERS_IPS
 			     get_client_name(client_p, MASK_IP),
 #else
 			     get_client_name(client_p, SHOW_IP),
@@ -1922,7 +1906,7 @@ serv_connect_callback(int fd, int status, void *data)
 	   irccmp(aconf->name, client_p->name) || !match(aconf->name, client_p->name))
 	{
 		sendto_realops_flags(UMODE_ALL, L_ADMIN, "Lost connect{} block for %s",
-#ifdef HIDE_SPOOF_IPS
+#ifdef HIDE_SERVERS_IPS
 				     get_client_name(client_p, MASK_IP));
 #else
 				     get_client_name(client_p, HIDE_IP));

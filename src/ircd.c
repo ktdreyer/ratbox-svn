@@ -113,7 +113,7 @@ int callbacks_called;		/* A measure of server load... */
 
 static unsigned long initialVMTop = 0;	/* top of virtual memory at init */
 const char *logFileName = LPATH;
-static const char *pidFileName = PPATH;
+const char *pidFileName = PPATH;
 
 char **myargv;
 int dorehash = 0;
@@ -121,7 +121,6 @@ int doremotd = 0;
 int debuglevel = -1;		/* Server debug level */
 const char *debugmode = "";	/*  -"-    -"-   -"-  */
 time_t nextconnect = 1;		/* time for next try_connections call */
-int kline_queued = 0;
 
 /* Set to zero because it should be initialized later using
  * initialize_server_capabs
@@ -573,7 +572,7 @@ check_pidfile(const char *filename)
 		}
 		fbclose(fb);
 	}
-	else
+	else if(errno != ENOENT)
 	{
 		/* log(L_ERROR, "Error opening pid file %s", filename); */
 	}

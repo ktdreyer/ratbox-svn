@@ -1267,6 +1267,9 @@ chm_key(struct Client *client_p, struct Client *source_p,
 		if(!(*chptr->mode.key))
 			return;
 
+		if (parc > *parn)
+			(*parn)++;
+
 		*chptr->mode.key = 0;
 
 		mode_changes[mode_count].letter = c;

@@ -75,6 +75,8 @@ server_reboot(void)
 	 */
 	for (i = 0; i < MAXCONNECTIONS; ++i)
 		close(i);
+
+	unlink(pidFileName);
 	execv(SPATH, myargv);
 
 	exit(-1);

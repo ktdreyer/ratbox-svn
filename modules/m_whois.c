@@ -407,18 +407,25 @@ whois_person(struct Client *source_p, struct Client *target_p, int glob)
 			   me.name, source_p->name, target_p->name);
 	}
 
-	if(MyClient(target_p) && ((glob == 1) || IsOper(source_p) ||
-				  !ConfigServerHide.hide_servers || (target_p == source_p)))
+	if(MyClient(target_p))
 	{
-		if(ConfigFileEntry.use_whois_actually && show_ip(source_p, target_p))
-			sendto_one(source_p, form_str(RPL_WHOISACTUALLY),
-				   me.name, source_p->name, target_p->name,
-				   target_p->username, target_p->host,
-				   target_p->localClient->sockhost);
+		/* send idle if its global, source == target, or source and target
+		 * are both local and theres no serverhiding or source is opered
+		 */
+		if((glob == 1) || (MyClient(source_p) &&
+		   (IsOper(source_p) || !ConfigServerHide.hide_servers)) ||
+		   (source_p == target_p))
+		{
+			if(ConfigFileEntry.use_whois_actually && show_ip(source_p, target_p))
+				sendto_one(source_p, form_str(RPL_WHOISACTUALLY),
+					   me.name, source_p->name, target_p->name,
+					   target_p->username, target_p->host,
+					   target_p->localClient->sockhost);
 
-		sendto_one(source_p, form_str(RPL_WHOISIDLE),
-			   me.name, source_p->name, target_p->name,
-			   CurrentTime - target_p->user->last, target_p->firsttime);
+			sendto_one(source_p, form_str(RPL_WHOISIDLE),
+				   me.name, source_p->name, target_p->name,
+				   CurrentTime - target_p->user->last, target_p->firsttime);
+		}
 	}
 
 	hd.client_p = target_p;

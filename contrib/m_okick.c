@@ -41,7 +41,7 @@
 
 static void m_okick(struct Client*, struct Client*, int, char**);
 
-struct Message kick_msgtab = {
+struct Message okick_msgtab = {
   "OKICK", 0, 0, 3, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, m_ignore, m_okick}
 };
@@ -49,13 +49,13 @@ struct Message kick_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(&kick_msgtab);
+  mod_add_cmd(&okick_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(&kick_msgtab);
+  mod_del_cmd(&okick_msgtab);
 }
 
 const char *_version = "$Revision$";
