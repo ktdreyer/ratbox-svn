@@ -1,3 +1,17 @@
+leeh        2004/03/22 19:00:52 EST	(20040323_0)
+
+  Removed files:
+    autoconf             acconfig.h configure.in install-sh 
+  Log:
+  - remove old autoconf stuff.
+  
+  Revision  Changes    Path
+  7.29      +0 -83     ircd-ratbox/autoconf/acconfig.h (dead)
+  7.180     +0 -960    ircd-ratbox/autoconf/configure.in (dead)
+  7.2       +0 -250    ircd-ratbox/autoconf/install-sh (dead)
+
+
+
 leeh        2004/03/22 18:18:28 EST	(20040322_5)
 
   Modified files:
