@@ -1,3 +1,10 @@
+*** 20010103_15 by adrian
+
+
+#preprocessor directives should start at col 0, not be indented.
+
+
+
 *** 20010103_14 by davidt
 Yet another cleanup of lazylink stuff.
 Attempt to introduce clients where appropriate, before sending
