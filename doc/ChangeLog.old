@@ -1,3 +1,9 @@
+*** 20001231_18 by db
+- really ANONOPS is way longer than any other capability we have
+  lets shorten it to AOPS ok?
+
+
+
 *** 20001231_17 by db
 - optimized can_join a bit
   No need to generate an expensive to generate string twice, so added
