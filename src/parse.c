@@ -689,7 +689,7 @@ static void do_numeric(char numeric[],
   struct Client *target_p;
   struct Channel *chptr;
 
-  if (parc < 1 || !IsServer(source_p))
+  if (parc < 2 || !IsServer(source_p))
     return;
 
   /* Remap low number numerics. */
