@@ -1,3 +1,17 @@
+leeh        2002/11/24 01:18:12 UTC	(20021124_1)
+
+  Modified files:
+    contrib              m_clearchan.c 
+    modules/core         m_sjoin.c 
+  Log:
+  - got rid of more remnants
+  
+  Revision  Changes    Path
+  1.42      +16 -20    ircd-ratbox/contrib/m_clearchan.c
+  1.155     +16 -28    ircd-ratbox/modules/core/m_sjoin.c
+
+
+
 leeh        2002/11/24 01:04:30 UTC	(20021124_0)
 
   Modified files:
