@@ -10,12 +10,12 @@ swedish - maintained by trbz - Chris C <chris@mircscripter.com>
 croation - maintained by Martin - Vid Strpic <strpic@bofhlet.net>
 french - in progress
 german - maintained by dmalloc - Darian Lanx <bio@gmx.net>
-norwegian - in progress
+norwegian - maintained by inglish - Stephen Olsen <inglish@sol.no>
 macedonian - in progress
 slovakian - in progress
 danish - maintained by Xride - Soren Straarup Andersen <xride@eit.ihk-edu.dk>
 spanish - maintained by ermak - anonymous <ermak@cyberdude.com>
-dutch - in progress
+dutch - maintained by Riedel - Dennis Vink <vink@vuurwerk.nl>
 
 All of the files are installed into the prefix directory, under messages.
 Each is installed into a different directory, prefixed by ircd-.
