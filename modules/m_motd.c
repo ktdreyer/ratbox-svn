@@ -40,8 +40,8 @@
 #include <time.h>
 
 struct Message motd_msgtab = {
-  MSG_MOTD, 1, 1, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_motd, m_motd, m_motd}
+  MSG_MOTD, 0, 0, 1, MFLG_SLOW, 0,
+  {m_unregistered, m_motd, mo_motd, mo_motd}
 };
 
 void
@@ -67,19 +67,30 @@ int m_motd(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   static time_t last_used = 0;
 
-  if(!IsOper(sptr))
+  if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
     {
-      if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
-        {
-          /* safe enough to give this on a local connect only */
-          if(MyClient(sptr))
-            sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,sptr->name);
-          return 0;
-        }
-      else
-        last_used = CurrentTime;
+      /* safe enough to give this on a local connect only */
+      if(MyClient(sptr))
+	sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,sptr->name);
+      return 0;
     }
+  else
+    last_used = CurrentTime;
 
+  sendto_realops_flags(FLAGS_SPY, "motd requested by %s (%s@%s) [%s]",
+                     sptr->name, sptr->username, sptr->host,
+                     sptr->user->server);
+
+  return(SendMessageFile(sptr,&ConfigFileEntry.motd));
+}
+
+/*
+** mo_motd
+**      parv[0] = sender prefix
+**      parv[1] = servername
+*/
+int mo_motd(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+{
   if (hunt_server(cptr, sptr, ":%s MOTD :%s", 1,parc,parv)!=HUNTED_ISME)
     return 0;
 
