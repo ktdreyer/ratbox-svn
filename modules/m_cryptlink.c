@@ -390,7 +390,7 @@ static void cryptlink_serv(struct Client *client_p, struct Client *source_p,
 
   if(!strncmp(info, "(H)", 3))
   {
-    client_p->hidden_server = 1;
+    SetHidden(client_p);
 
     if((p = strchr(info, ' ')))
     {

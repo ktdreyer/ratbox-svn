@@ -131,9 +131,7 @@ struct Client
   unsigned int      flags;      /* client flags */
   unsigned int      flags2;     /* ugh. overflow */
 
-  int               slink_pid;  /* pid of servlink process if any */
   int               hopcount;   /* number of servers to this 0 = local */
-  int		    hidden_server;
   unsigned short    status;     /* Client type */
   unsigned char     handler;    /* Handler index */
   char              eob;	/* server eob has been received */
@@ -373,6 +371,7 @@ struct LocalUser
 #define FLAGS_WAITAUTH     0x8000 /* waiting for CRYPTLINK AUTH command */
 #define FLAGS_SERVLINK     0x10000 /* servlink has servlink process */
 #define FLAGS_MARK	   0x20000 /* marked client */
+#define FLAGS_HIDDEN       0x40000 /* hidden server */
 /* umodes, settable flags */
 
 #define UMODE_SERVNOTICE   0x0001 /* server notices such as kill */
@@ -388,9 +387,9 @@ struct LocalUser
 #define UMODE_INVISIBLE    0x0400 /* makes user invisible */
 #define UMODE_BOTS         0x0800 /* shows bots */
 #define UMODE_EXTERNAL     0x1000 /* show servers introduced and splitting */
-#define UMODE_CALLERID     0x4000 /* block unless caller id's */
-#define UMODE_UNAUTH       0x8000 /* show unauth connects here */
-#define UMODE_LOCOPS       0x10000 /* show locops */
+#define UMODE_CALLERID     0x2000 /* block unless caller id's */
+#define UMODE_UNAUTH       0x4000 /* show unauth connects here */
+#define UMODE_LOCOPS       0x8000 /* show locops */
 
 /* user information flags, only settable by remote mode or local oper */
 #define UMODE_OPER         0x20000 /* Operator */
@@ -462,6 +461,9 @@ struct LocalUser
 #define SetMark(x)		((x)->flags |= FLAGS_MARK)
 #define ClearMark(x)		((x)->flags &= ~FLAGS_MARK)
 #define IsMarked(x)		((x)->flags & FLAGS_MARK)
+#define SetHidden(x)		((x)->flags |= FLAGS_HIDDEN)
+#define ClearHidden(x)		((x)->flags &= ~FLAGS_HIDDEN)
+#define IsHidden(x)		((x)->flags & FLAGS_HIDDEN)
 
 /* oper flags */
 #define MyOper(x)               (MyConnect(x) && IsOper(x))

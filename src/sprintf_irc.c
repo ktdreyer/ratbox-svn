@@ -263,8 +263,7 @@ static char scratch_buffer[32];
  */
 
 int
-vsprintf_irc(char *str, const char *format, va_list args)
-
+irc_vsprintf(struct Client *target_p, char *str, const char *format, va_list args)
 {
   char c;
   int bytes = 0;
@@ -463,10 +462,25 @@ ircsprintf(char *str, const char *format, ...)
 
   va_start(args, format);
 
-  bytes = vsprintf_irc(str, format, args);
+  bytes = irc_vsprintf(NULL, str, format, args);
 
   va_end(args);
 
   return (bytes);
 } /* ircsprintf() */
 
+
+int
+irc_sprintf(struct Client *target_p, char *str, const char *format, ...)
+{
+  va_list args;
+  int bytes;
+
+  va_start(args, format);
+
+  bytes = irc_vsprintf(NULL, str, format, args);
+
+  va_end(args);
+
+  return (bytes);
+}

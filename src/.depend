@@ -15,13 +15,6 @@ balloc.o: balloc.c ../include/stdinc.h ../include/config.h \
  ../include/client.h ../include/ircd_handler.h ../include/linebuf.h \
  ../include/channel.h ../include/res.h ../include/fileio.h \
  ../adns/adns.h ../include/fdlist.h
-b_sprintf.o: b_sprintf.c ../include/stdinc.h ../include/config.h \
- ../include/setup.h ../include/defaults.h ../include/client.h \
- ../include/ircd_defs.h ../include/ircd_handler.h ../include/linebuf.h \
- ../include/tools.h ../include/channel.h ../include/res.h \
- ../include/fileio.h ../adns/adns.h ../include/ircd.h \
- ../include/memory.h ../include/balloc.h ../include/irc_string.h \
- ../include/sprintf_irc.h
 channel.o: channel.c ../include/stdinc.h ../include/config.h \
  ../include/setup.h ../include/defaults.h ../include/tools.h \
  ../include/channel.h ../include/ircd_defs.h ../include/channel_mode.h \
@@ -456,14 +449,9 @@ send.o: send.c ../include/stdinc.h ../include/config.h \
  ../include/s_bsd.h ../include/s_serv.h ../include/sprintf_irc.h \
  ../include/s_conf.h ../include/motd.h ../include/list.h \
  ../include/s_debug.h ../include/s_log.h ../include/hook.h
-tools.o: tools.c ../include/stdinc.h ../include/config.h \
- ../include/setup.h ../include/defaults.h ../include/tools.h
-whowas.o: whowas.c ../include/stdinc.h ../include/config.h \
- ../include/setup.h ../include/defaults.h ../include/whowas.h \
- ../include/ircd_defs.h ../include/client.h ../include/ircd_handler.h \
+sprintf_irc.o: sprintf_irc.c ../include/stdinc.h ../include/config.h \
+ ../include/setup.h ../include/defaults.h ../include/sprintf_irc.h \
+ ../include/client.h ../include/ircd_defs.h ../include/ircd_handler.h \
  ../include/linebuf.h ../include/tools.h ../include/channel.h \
  ../include/res.h ../include/fileio.h ../adns/adns.h ../include/ircd.h \
- ../include/memory.h ../include/balloc.h ../include/irc_string.h \
- ../include/common.h ../include/hash.h ../include/numeric.h \
- ../include/s_serv.h ../include/s_user.h ../include/send.h \
- ../include/s_conf.h ../include/motd.h ../include/class.h
+ ../include/memory.h ../include/balloc.h ../include/irc_string.h

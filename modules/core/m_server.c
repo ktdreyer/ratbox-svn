@@ -488,7 +488,7 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
 
       sendto_one(bclient_p, ":%s SERVER %s %d :%s%s",
 		 parv[0], target_p->name, hop + 1,
-		 target_p->hidden_server ? "(H) " : "",
+		 SetHidden(target_p) ? "(H) " : "",
 		 target_p->info);
     }
       
@@ -543,7 +543,7 @@ static int set_server_gecos(struct Client *client_p, char *info)
       /* check for (H) which is a hidden server */
       if(!strcmp(s, "(H)"))
       {
-        client_p->hidden_server = 1;
+        SetHidden(client_p);
 
         /* if there was no space.. theres nothing to set info to */
         if(p)

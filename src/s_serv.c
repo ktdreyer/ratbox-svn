@@ -369,7 +369,7 @@ void write_links_file(void* notused)
       continue;
 
     /* skip hidden servers */
-    if(target_p->hidden_server && !ConfigServerHide.disable_hidden)
+    if(IsHidden(target_p) && !ConfigServerHide.disable_hidden)
       continue;
 
     if(target_p->info[0])
@@ -1091,7 +1091,7 @@ int server_estab(struct Client *client_p)
         continue;
       sendto_one(target_p,":%s SERVER %s 2 :%s%s", 
                  me.name, client_p->name,
-		 client_p->hidden_server ? "(H) " : "",
+		 IsHidden(client_p) ? "(H) " : "",
                  client_p->info);
     }
 
@@ -1128,7 +1128,7 @@ int server_estab(struct Client *client_p)
           sendto_one(client_p, ":%s SERVER %s %d :%s%s", 
 	             target_p->serv->up,
                      target_p->name, target_p->hopcount+1, 
-		     target_p->hidden_server ? "(H) " : "",
+		     IsHidden(target_p) ? "(H) " : "",
 		     target_p->info);
         }
     }
