@@ -1,3 +1,16 @@
+leeh        2004/04/08 18:16:08 EDT	(20040408_6)
+
+  Modified files:
+    src                  channel.c 
+  Log:
+  - as pointed out by bill, we dont want to allow external messages to a +m
+    channel
+  
+  Revision  Changes    Path
+  7.413     +6 -1      ircd-ratbox/src/channel.c
+
+
+
 leeh        2004/04/08 16:40:01 EDT	(20040408_5)
 
   Modified files:
