@@ -578,35 +578,30 @@ linebuf_putmsg(buf_head_t *bufhead, const char *format, va_list *va_args,
                     *va_args);
   }
   
-  if (len != 0)
-    {
-      /* Truncate the data if required */
-      if (len > 510)
-	len = 510;
+  /* Truncate the data if required */
+  if (len > 510)
+    len = 510;
 
-      /* Chop trailing CRLF's .. */
-      len--; /* change len to index of last char */
-      while ((bufline->buf[len] == '\r') || (bufline->buf[len] == '\n') ||
-	     (bufline->buf[len] == '\0'))
+  /* Chop trailing CRLF's .. */
+  while (len != 0)
+    {
+      if((bufline->buf[len] == '\r') || (bufline->buf[len] == '\n') ||
+	 (bufline->buf[len] == '\0'))
 	{
 	  len--;
 	}
-      bufline->buf[++len] = '\r';
-      bufline->buf[++len] = '\n';
-      bufline->buf[++len] = '\0'; 
-
-      bufline->len  = len;
-      bufhead->len += len;
+      else
+	{
+	  len++;
+	  break;
+	}
     }
-  elsej
-    {
-      bufline->buf[0] = '\r';
-      bufline->buf[1] = '\n';
-      bufline->buf[2] = '\0'; 
+  bufline->buf[len++] = '\r';
+  bufline->buf[len++] = '\n';
+  bufline->buf[len] = '\0'; 
 
-      bufline->len  = 2;
-      bufhead->len += 2;
-    }
+  bufline->len  = len;
+  bufhead->len += len;
 
   bufline->terminated = 1;
 }
