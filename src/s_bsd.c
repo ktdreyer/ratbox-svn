@@ -383,6 +383,25 @@ add_connection(struct Listener *listener, int fd)
 		return;
 	}
 
+#ifdef IPV6
+	if(new_client->localClient->ip.ss_family == AF_INET6)
+	{
+		struct sockaddr_in6 *in6 = (struct sockaddr_in6 *)&new_client->localClient->ip;
+		if(IN6_IS_ADDR_V4MAPPED(&in6->sin6_addr))
+		{
+			/* Some fucking prick left IPv4 in IPv6 mapped sockets enabled.
+			 * Little assholes.  Anyways work around the retardation
+			 */
+			struct sockaddr_in in;
+			memset(&in, 0, sizeof(struct sockaddr_in));
+			in.sin_family = AF_INET;
+			in.sin_port = in6->sin6_port;
+			in.sin_addr.s_addr = ((uint32_t *)&in6->sin6_addr)[3];
+			memcpy(&new_client->localClient->ip, &in, sizeof(struct sockaddr_in)); 
+		}
+	}
+#endif
+
 	/* 
 	 * copy address to 'sockhost' as a string, copy it to host too
 	 * so we have something valid to put into error messages...
