@@ -1,3 +1,25 @@
+androsyn    2002/02/03 23:29:54 EST	(20020204_0)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    include              setup.h.in 
+    src                  listener.c s_auth.c s_bsd.c s_serv.c 
+  Log:
+  Fix the RT Sigio code on linux once and for all.  Somebody other than me
+  should test this and give me some feedback.
+  
+  Revision  Changes    Path
+  7.115     +3 -3      ircd-hybrid-7/autoconf/configure.in
+  7.118     +6 -6      ircd-hybrid-7/configure
+  7.44      +4 -31     ircd-hybrid-7/include/setup.h.in
+  7.62      +1 -4      ircd-hybrid-7/src/listener.c
+  7.81      +2 -5      ircd-hybrid-7/src/s_auth.c
+  7.159     +0 -7      ircd-hybrid-7/src/s_bsd.c
+  7.236     +3 -9      ircd-hybrid-7/src/s_serv.c
+
+
+
 androsyn    2002/02/03 13:58:08 EST	(20020203_0)
 
   Modified files:
