@@ -1,3 +1,7 @@
+*** 20010202_8 by wcampbel
+Don't core if we don't have the challenge parameter
+
+
 *** 20010202_7 by davidt
 -I flags should be in CPPFLAGS, not CFLAGS, updated configure to stop warning from make depend
 
