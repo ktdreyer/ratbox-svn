@@ -1,3 +1,8 @@
+*** 20010807_1 by leeh
+- when you get server exists, you cannot exit the duplicate, you have to
+  drop your uplink, else you cause *massive* problems
+
+
 *** 20010806_3 by leeh
 - attempting to use things from a null struct is bad (jv)
 
