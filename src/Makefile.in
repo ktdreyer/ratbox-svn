@@ -69,7 +69,6 @@ BASE_SRCS =                     \
   getopt.c                      \
   hash.c                        \
   hook.c                        \
-  iplines.c			\
   irc_string.c                  \
   ircd.c                        \
   ircd_signal.c                 \
