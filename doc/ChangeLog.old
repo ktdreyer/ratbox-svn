@@ -1,3 +1,8 @@
+*** 20010430_3 by jdc
+* Added /QUOTE ACCEPT documentation to opers.txt.
+
+
+
 *** 20010430_2 by ejb
 - call valid_comment even for IPv6.. 
 
