@@ -1,3 +1,33 @@
+db          2001/12/29 23:19:51 EST	(20011230_0)
+
+  Modified files:
+    src                  client.c irc_string.c ircd.c ircdauth.c 
+                         listener.c m_error.c match.c parse.c 
+                         s_bsd_kqueue.c s_bsd_sigio.c s_conf.c 
+                         s_debug.c s_serv.c s_user.c snprintf.c 
+  Log:
+  - removed some #if 0's .. Some of these are ok for commenting code
+    so left those, but most was old and dead code.
+  
+  Revision  Changes    Path
+  7.215     +0 -9      ircd-hybrid-7/src/client.c
+  7.50      +0 -8      ircd-hybrid-7/src/irc_string.c
+  7.209     +0 -8      ircd-hybrid-7/src/ircd.c
+  7.44      +0 -3      ircd-hybrid-7/src/ircdauth.c
+  7.60      +1 -5      ircd-hybrid-7/src/listener.c
+  7.21      +1 -14     ircd-hybrid-7/src/m_error.c
+  7.15      +1 -45     ircd-hybrid-7/src/match.c
+  7.117     +1 -12     ircd-hybrid-7/src/parse.c
+  1.23      +0 -12     ircd-hybrid-7/src/s_bsd_kqueue.c
+  7.14      +0 -11     ircd-hybrid-7/src/s_bsd_sigio.c
+  7.287     +0 -10     ircd-hybrid-7/src/s_conf.c
+  7.62      +1 -9      ircd-hybrid-7/src/s_debug.c
+  7.228     +2 -180    ircd-hybrid-7/src/s_serv.c
+  7.175     +0 -17     ircd-hybrid-7/src/s_user.c
+  1.2       +0 -4      ircd-hybrid-7/src/snprintf.c
+
+
+
 db          2001/12/29 18:29:32 EST	(20011229_5)
 
   Modified files:
