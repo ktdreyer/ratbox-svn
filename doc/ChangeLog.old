@@ -1,3 +1,6 @@
+*** 20001128_6 by davidt
+Fixed broken build
+
 *** 20001128_5 by db
 - removed another #ifdef 
 
