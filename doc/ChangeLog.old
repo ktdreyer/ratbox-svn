@@ -1,3 +1,15 @@
+*** 20010107_3 by db
+- client.c check_klines() was referencing bad ptr's due to the exit client
+  this is why it wasn't klining more than one client at a time. oops.
+
+- fixed m_kill so user just see's a "Disconnected" message instead of
+  the inflammatory "killed by oper message" (as per suggestion of 
+  David Harmlein) *sigh* its sad we cannot have more oper accountability
+  to users, however, a significant proportion of users are proving to
+  be very nasty lusers....  
+
+
+
 *** 20010107_2 by fl_
 - removed a fixed bug from BUGS file..
 
