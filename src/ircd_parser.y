@@ -1408,12 +1408,30 @@ connect_entry:  CONNECT
       }
     else
       {
+        if(yy_aconf->name)
+	{
 #ifndef HAVE_LIBCRYPTO
-        if (IsConfCryptLink(yy_aconf) && yy_aconf->name)
-          sendto_realops_flags(FLAGS_ALL, L_ALL,
-            "Ignoring connect block for %s -- no OpenSSL support",
-            yy_aconf->name);
-#endif        
+          if (IsConfCryptLink(yy_aconf))
+            sendto_realops_flags(FLAGS_ALL, L_ALL,
+                       "Ignoring connect block for %s -- no OpenSSL support",
+                       yy_aconf->name);
+#else
+          if(IsConfCryptLink(yy_aconf) && !yy_aconf->rsa_public_key)
+	    sendto_realops_flags(FLAGS_ALL, L_ALL,
+	                     "Ignoring connect block for %s -- missing key",
+			     yy_aconf->name);
+#endif
+          if(!yy_aconf->host)
+	    sendto_realops_flags(FLAGS_ALL, L_ALL,
+	                     "Ignoring connect block for %s -- missing host",
+	                     yy_aconf->name);
+          else if(!IsConfCryptLink(yy_aconf) && 
+	         (!yy_aconf->passwd || !yy_aconf->spasswd))
+            sendto_realops_flags(FLAGS_ALL, L_ALL,
+	                   "Ignoring connect block for %s -- missing password",
+			   yy_aconf->name);
+        }
+
         free_conf(yy_aconf);
         yy_aconf = NULL;
       }
