@@ -24,7 +24,7 @@ struct HostMaskEntry
   unsigned long precedence;
   char *hostmask;
   void *data;
-  struct HostMaskEntry *next;
+  struct HostMaskEntry *next, *nexthash;
 };
 
 void add_hostmask(const char *mask, int type, void *data);

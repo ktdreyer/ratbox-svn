@@ -697,7 +697,6 @@ auth_entry:   AUTH
       DupString(yy_aconf->name,"NOMATCH");
 
     conf_add_class_to_conf(yy_aconf);
-    conf_delist_old_conf(yy_aconf);
 
     if(yy_aconf->user == NULL)
       DupString(yy_aconf->user,"*");

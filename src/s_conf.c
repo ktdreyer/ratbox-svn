@@ -203,6 +203,8 @@ static void delist_conf(struct ConfItem* aconf)
 void free_conf(struct ConfItem* aconf)
 {
   assert(0 != aconf);
+  assert(!(aconf->status & CONF_CLIENT) ||
+         strcmp(aconf->host, "NOMATCH") || (aconf->clients == -1));
   if (aconf->dns_pending && (aconf->dns_query.query != NULL))
     adns_cancel(aconf->dns_query.query);
   MyFree(aconf->host);
