@@ -297,7 +297,7 @@ int     m_join(struct Client *cptr,
 	  chptr->channelts = CurrentTime;
 	  sendto_match_servs(chptr, cptr,
 			     ":%s SJOIN %lu %s + :@%s", me.name,
-			     chptr->channelts, name, parv[0]);
+			     chptr->channelts, chptr->chname, parv[0]);
 	}
       else 
 	{
@@ -305,7 +305,7 @@ int     m_join(struct Client *cptr,
 	    add_vchan_to_client_cache(sptr,root_chptr,chptr);
 	  sendto_match_servs(chptr, cptr,
 			     ":%s SJOIN %lu %s + :%s", me.name,
-			     chptr->channelts, name, parv[0]);
+			     chptr->channelts, chptr->chname, parv[0]);
 	}
 
       /*
