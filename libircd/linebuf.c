@@ -102,6 +102,7 @@ linebuf_skip_crlf(char *ch, int len)
      /* First, skip until the first non-CRLF */
      while (len && (*ch != '\n') && (*ch != '\r')) {
          ch++;
+	 assert(len > 0);
          len--;
          cpylen++;
      }
@@ -109,6 +110,7 @@ linebuf_skip_crlf(char *ch, int len)
      /* Then, skip until the last CRLF */
      while (len && ((*ch == '\n') || (*ch == '\r'))) {
          ch++;
+	 assert(len > 0);
          len--;
          cpylen++;
      }
@@ -239,6 +241,7 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
         bufch++;
         ch++;
         cpylen++;
+	assert(len > 0);
         len--;
         bufline->len++;
         bufhead->len++;
@@ -289,6 +292,7 @@ linebuf_parse(buf_head_t *bufhead, char *data, int len)
 
         /* Skip the data and update len .. */
         len -= cpylen;
+	assert(len >= 0);
         data += cpylen;
     }
     /* Next, the loop */
@@ -299,6 +303,7 @@ linebuf_parse(buf_head_t *bufhead, char *data, int len)
         /* And parse */
         cpylen = linebuf_copy_line(bufhead, bufline, data, len);
         len -= cpylen;
+	assert(len >= 0);
         data += cpylen;
         linecnt++;
     }
@@ -455,6 +460,7 @@ linebuf_flush(int fd, buf_head_t *bufhead)
     if (bufhead->writeofs == bufline->len) {
        bufhead->writeofs = 0;
        bufhead->len -= bufline->len;
+       assert(bufhead->len >=0);
        linebuf_done_line(bufhead, bufline);
     }
 

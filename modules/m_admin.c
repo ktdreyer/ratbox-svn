@@ -32,7 +32,7 @@
 
 #include "msg.h"
 
-static void do_admin( struct Client *sptr );
+void do_admin( struct Client *sptr );
 
 struct Message admin_msgtab = {
   MSG_ADMIN, 0, 0, MFLG_SLOW | MFLG_UNREG, 0, 
