@@ -33,7 +33,6 @@
 #include "ircd.h"		/* me */
 #include "listener.h"		/* show_ports */
 #include "s_gline.h"
-#include "msg.h"		/* Message */
 #include "hostmask.h"		/* report_mtrie_conf_links */
 #include "numeric.h"		/* ERR_xxx */
 #include "scache.h"		/* list_scache */

@@ -56,7 +56,7 @@
 #include "memory.h"
 #include "channel.h"		/* chcap_usage_counts stuff... */
 #include "hook.h"
-#include "msg.h"
+#include "parse.h"
 
 extern char *crypt();
 

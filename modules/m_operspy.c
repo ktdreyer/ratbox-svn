@@ -39,7 +39,7 @@
 #include "memory.h"
 #include "s_serv.h"
 #include "hash.h"
-#include "msg.h"
+
 #include "parse.h"
 #include "hook.h"
 #include "modules.h"

@@ -32,7 +32,7 @@
 #include "send.h"		/* sendto_one */
 #include "numeric.h"		/* ERR_xxx */
 #include "ircd.h"		/* me */
-#include "msg.h"
+
 #include "parse.h"
 #include "hook.h"
 #include "modules.h"

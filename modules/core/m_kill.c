@@ -38,7 +38,7 @@
 #include "send.h"
 #include "whowas.h"
 #include "irc_string.h"
-#include "msg.h"
+
 #include "parse.h"
 #include "hook.h"
 #include "modules.h"

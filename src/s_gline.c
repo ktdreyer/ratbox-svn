@@ -36,7 +36,6 @@
 #include "s_conf.h"
 #include "scache.h"
 #include "send.h"
-#include "msg.h"
 #include "s_serv.h"
 #include "s_gline.h"
 #include "hash.h"

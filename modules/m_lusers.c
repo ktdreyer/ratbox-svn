@@ -33,7 +33,7 @@
 #include "s_user.h"		/* show_lusers */
 #include "send.h"
 #include "s_conf.h"
-#include "msg.h"
+
 #include "parse.h"
 #include "hook.h"
 #include "modules.h"

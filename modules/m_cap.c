@@ -38,7 +38,7 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "msg.h"
+
 #include "parse.h"
 #include "hook.h"
 #include "modules.h"

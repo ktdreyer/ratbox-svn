@@ -36,7 +36,7 @@
 #include "s_conf.h"
 #include "s_newconf.h"
 #include "hash.h"
-#include "msg.h"
+
 #include "parse.h"
 #include "hook.h"
 #include "modules.h"

@@ -36,7 +36,7 @@
 #include "sprintf_irc.h"
 #include "ircd.h"
 #include "listener.h"
-#include "msg.h"
+#include "parse.h"
 #include "numeric.h"
 #include "commio.h"
 #include "s_conf.h"

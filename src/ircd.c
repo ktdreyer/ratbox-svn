@@ -38,7 +38,6 @@
 #include "ircd_signal.h"
 #include "sprintf_irc.h"
 #include "s_gline.h"
-#include "msg.h"		/* msgtab */
 #include "hostmask.h"
 #include "numeric.h"
 #include "parse.h"

@@ -40,7 +40,7 @@
 #include "s_stats.h"		/* ServerStats */
 #include "scache.h"		/* find_or_add */
 #include "send.h"		/* sendto_one */
-#include "msg.h"
+
 #include "parse.h"
 #include "hook.h"
 #include "modules.h"

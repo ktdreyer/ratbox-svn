@@ -32,7 +32,7 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
-#include "msg.h"
+
 #include "parse.h"
 #include "hook.h"
 #include "modules.h"

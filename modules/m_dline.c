@@ -42,7 +42,7 @@
 #include "send.h"
 #include "hash.h"
 #include "s_serv.h"
-#include "msg.h"
+
 #include "parse.h"
 #include "hook.h"
 #include "modules.h"

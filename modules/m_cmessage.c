@@ -38,7 +38,7 @@
 #include "client.h"
 #include "channel.h"
 #include "numeric.h"
-#include "msg.h"
+
 #include "hook.h"
 #include "modules.h"
 #include "hash.h"

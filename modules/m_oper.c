@@ -37,7 +37,7 @@
 #include "s_log.h"
 #include "s_user.h"
 #include "send.h"
-#include "msg.h"
+
 #include "parse.h"
 #include "hook.h"
 #include "modules.h"

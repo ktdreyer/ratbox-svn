@@ -28,7 +28,7 @@
 #include "tools.h"
 #include "struct.h"
 #include "ircd.h"
-#include "msg.h"
+
 #include "numeric.h"
 #include "send.h"
 #include "s_conf.h"

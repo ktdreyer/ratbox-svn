@@ -32,7 +32,7 @@
 #include "numeric.h"
 #include "s_conf.h"
 #include "s_serv.h"
-#include "msg.h"
+
 #include "parse.h"
 #include "hook.h"
 #include "modules.h"
@@ -40,7 +40,7 @@
 #include "irc_string.h"
 #include "hash.h"
 #include "class.h"
-#include "msg.h"
+
 #include "send.h"
 #include "event.h"
 #include "patricia.h"

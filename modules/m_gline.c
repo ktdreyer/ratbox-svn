@@ -40,7 +40,7 @@
 #include "s_newconf.h"
 #include "scache.h"
 #include "send.h"
-#include "msg.h"
+
 #include "s_serv.h"
 #include "hash.h"
 #include "parse.h"

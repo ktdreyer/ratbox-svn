@@ -34,7 +34,7 @@
 #include "tools.h"
 #include "struct.h"
 #include "client.h"
-#include "msg.h"
+
 #include "parse.h"
 #include "hook.h"
 #include "modules.h"

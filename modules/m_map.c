@@ -27,7 +27,7 @@
 #include "struct.h"
 #include "client.h"
 #include "hook.h"
-#include "msg.h"
+
 #include "modules.h"
 #include "numeric.h"
 #include "send.h"

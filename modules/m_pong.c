@@ -36,7 +36,7 @@
 #include "send.h"
 #include "channel.h"
 #include "irc_string.h"
-#include "msg.h"
+
 #include "parse.h"
 #include "hash.h"
 #include "hook.h"

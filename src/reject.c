@@ -33,11 +33,11 @@
 #include "tools.h"
 #include "reject.h"
 #include "s_stats.h"
-#include "msg.h"
 #include "ircd.h"
 #include "commio.h"
 #include "memory.h"
 #include "send.h"
+#include "parse.h"
 
 static patricia_tree_t *reject_tree;
 dlink_list delay_exit;

@@ -36,7 +36,6 @@
 #include "numeric.h"
 #include "send.h"
 #include "memory.h"
-#include "msg.h"
 #include "cache.h"
 #include "s_newconf.h"
 

@@ -38,7 +38,7 @@
 #include "s_user.h"
 #include "send.h"
 #include "s_conf.h"
-#include "msg.h"
+
 #include "parse.h"
 #include "modules.h"
 

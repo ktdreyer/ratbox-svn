@@ -46,7 +46,7 @@
 #include "numeric.h"
 #include "send.h"
 #include "s_conf.h"
-#include "msg.h"
+
 #include "parse.h"
 #include "irc_string.h"
 #include "s_log.h"

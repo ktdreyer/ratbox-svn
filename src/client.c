@@ -55,9 +55,9 @@
 #include "balloc.h"
 #include "listener.h"
 #include "hook.h"
-#include "msg.h"
 #include "monitor.h"
 #include "linebuf.h"
+#include "parse.h"
 
 #define DEBUG_EXITED_CLIENTS
 

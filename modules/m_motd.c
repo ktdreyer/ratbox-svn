@@ -31,7 +31,7 @@
 #include "send.h"
 #include "numeric.h"
 #include "hook.h"
-#include "msg.h"
+
 #include "s_serv.h"		/* hunt_server */
 #include "parse.h"
 #include "modules.h"

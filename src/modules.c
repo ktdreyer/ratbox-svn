@@ -27,7 +27,6 @@
 #include "stdinc.h"
 #include "tools.h"
 #include "struct.h"
-#include "msg.h"
 #include "hook.h"
 #include "modules.h"
 #include "s_log.h"

@@ -38,7 +38,6 @@
 #include "s_log.h"
 #include "s_stats.h"
 #include "send.h"
-#include "msg.h"
 #include "s_conf.h"
 #include "memory.h"
 #include "s_serv.h"
