@@ -1,3 +1,17 @@
+leeh        2001/12/14 09:31:31 EST	(20011214_4)
+
+  Modified files:
+    modules              m_message.c m_oper.c 
+  Log:
+  - ban our opers doing $irc.server
+  - initialise oconf to NULL
+  
+  Revision  Changes    Path
+  1.81      +7 -0      ircd-hybrid-7/modules/m_message.c
+  1.40      +3 -1      ircd-hybrid-7/modules/m_oper.c
+
+
+
 a1kmm       2001/12/14 03:49:22 EST	(20011214_3)
 
   Modified files:
