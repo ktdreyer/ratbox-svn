@@ -114,9 +114,12 @@ struct host_entry
 #define IsService(x) ((x)->service != NULL)
 
 #define FLAGS_DEAD	0x0001
+#define FLAGS_EOB	0x0002
 
 #define IsDead(x)	((x) && (x)->flags & FLAGS_DEAD)
 #define SetDead(x)	((x)->flags |= FLAGS_DEAD)
+#define IsEOB(x)	((x) && (x)->flags & FLAGS_EOB)
+#define SetEOB(x)	((x)->flags |= FLAGS_EOB)
 
 #define CLIENT_INVIS	0x001
 #define CLIENT_OPER	0x002

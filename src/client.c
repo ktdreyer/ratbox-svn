@@ -688,6 +688,9 @@ c_server(struct client *client_p, const char *parv[], int parc)
 
 	add_client(target_p);
 	dlink_add(target_p, &target_p->listnode, &server_list);
+
+	sendto_one(server_p, ":%s PING %s %s",
+			MYNAME, MYNAME, target_p->name);
 }
 
 /* c_squit()

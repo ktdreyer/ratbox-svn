@@ -322,19 +322,21 @@ c_ping(struct client *client_p, const char *parv[], int parc)
 static void
 c_pong(struct client *client_p, const char *parv[], int parc)
 {
-        if(parc < 2 || EmptyString(parv[1]))
+        if(parc < 2 || EmptyString(parv[1]) || !IsServer(client_p))
                 return;
 
-        if(!(server_p->flags & FLAGS_EOB))
+        if(!finished_bursting)
         {
                 mlog("Connection to server %s completed", server_p->name);
                 sendto_all(UMODE_SERVER, "Connection to server %s completed",
                            server_p->name);
-                server_p->flags |= FLAGS_EOB;
+                SetConnEOB(server_p);
 
 		introduce_services_channels();
 		hook_call(HOOK_FINISHED_BURSTING, NULL, NULL);
         }
+
+	SetEOB(client_p);
 }
 
 static void

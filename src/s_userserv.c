@@ -237,6 +237,10 @@ h_user_burst_login(void *v_client_p, void *v_username)
 	struct user_reg *ureg_p;
 	const char *username = v_username;
 
+	/* only accepted during a burst.. */
+	if(IsEOB(client_p->uplink))
+		return 0;
+
 	/* XXX - log them out? */
 	if((ureg_p = find_user_reg(NULL, username)) == NULL)
 		return 0;

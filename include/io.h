@@ -68,20 +68,21 @@ extern dlink_list connection_list;
 #define ClearConnSentPing(x)	((x)->flags &= ~CONN_SENTPING)
 
 /* server flags */
-#define FLAGS_UNTERMINATED	0x00100
-#define FLAGS_EOB               0x00200
-#define FLAGS_SENTBURST		0x00400
+#define CONN_FLAGS_UNTERMINATED	0x00100
+#define CONN_FLAGS_EOB		0x00200
+#define CONN_FLAGS_SENTBURST	0x00400
 
-#define SetConnSentBurst(x)	((x)->flags |= FLAGS_SENTBURST)
+#define SetConnSentBurst(x)	((x)->flags |= CONN_FLAGS_SENTBURST)
+#define SetConnEOB(x)		((x)->flags |= CONN_FLAGS_EOB)
 
-#define finished_bursting	((server_p) && (server_p->flags & FLAGS_EOB))
-#define sent_burst		((server_p) && (server_p->flags & FLAGS_SENTBURST))
+#define finished_bursting	((server_p) && (server_p->flags & CONN_FLAGS_EOB))
+#define sent_burst		((server_p) && (server_p->flags & CONN_FLAGS_SENTBURST))
 
 /* user flags */
-#define FLAGS_AUTH		0x01000
+#define CONN_FLAGS_AUTH		0x01000
 
-#define UserAuth(x)	((x)->flags & FLAGS_AUTH)
-#define SetUserAuth(x)	((x)->flags |= FLAGS_AUTH)
+#define UserAuth(x)	((x)->flags & CONN_FLAGS_AUTH)
+#define SetUserAuth(x)	((x)->flags |= CONN_FLAGS_AUTH)
 
 /* usermodes */
 #define UMODE_CHAT              0x10000

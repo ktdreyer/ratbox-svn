@@ -115,7 +115,7 @@ get_line(struct connection_entry *conn_p, char *buf, int bufsize)
 	}
 
 	/* we're allowed to parse this line.. */
-	if((conn_p->flags & FLAGS_UNTERMINATED) == 0)
+	if((conn_p->flags & CONN_FLAGS_UNTERMINATED) == 0)
 	{
 		if(n >= BUFSIZE)
 			buf[BUFSIZE-1] = '\0';
@@ -123,14 +123,14 @@ get_line(struct connection_entry *conn_p, char *buf, int bufsize)
 			buf[n] = '\0';
 
 		if(!term)
-			conn_p->flags |= FLAGS_UNTERMINATED;
+			conn_p->flags |= CONN_FLAGS_UNTERMINATED;
 
 		return n;
 	}
 
 	/* found a \n, can begin parsing again.. */
 	if(term)
-		conn_p->flags &= ~FLAGS_UNTERMINATED;
+		conn_p->flags &= ~CONN_FLAGS_UNTERMINATED;
 
 	/* we dont want to parse this.. its the remainder of an unterminated
 	 * line --fl
@@ -595,8 +595,6 @@ signon_server(struct connection_entry *conn_p)
 	sendto_server("SERVER %s 1 :%s", MYNAME, config_file.gecos);
 
 	introduce_services();
-
-        sendto_server("PING :%s", MYNAME);
 
 	SetConnSentBurst(conn_p);
 
