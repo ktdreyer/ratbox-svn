@@ -73,11 +73,12 @@ struct Capability
 #define CAP_ZIP         0x00008000   /* Can do ZIPlinks */
 #define CAP_ENC         0x00010000   /* Can do ENCrypted links */
 #define CAP_KNOCK	0x00020000   /* supports KNOCK */
-
+#define CAP_TBURST	0x00040000   /* supports TBURST */
 #define CAP_MASK        (CAP_QS  | CAP_EX   | CAP_CHW  | \
                          CAP_IE  | CAP_EOB  | CAP_KLN  | \
                          CAP_GLN | CAP_HOPS | CAP_AOPS | \
-                         CAP_UID | CAP_KNOCK)
+                         CAP_UID | CAP_ZIP  | CAP_ENC  | \ 
+                         CAP_KNOCK | CAP_TBURST)
 
 #ifdef HAVE_LIBZ
 #define CAP_ZIP_SUPPORTED       CAP_ZIP

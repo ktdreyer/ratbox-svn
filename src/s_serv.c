@@ -112,6 +112,7 @@ struct Capability captab[] = {
   { "AOPS",  CAP_AOPS },
   { "UID",   CAP_UID },
   { "ZIP",   CAP_ZIP },
+  { "TBURST", CAP_TBURST },
   { 0,           0 }
 };
 
