@@ -1,3 +1,15 @@
+*** 20001025_10 by db
+- split check_pings into two (like it should have been all along)
+  check_pings checks for ping timeouts
+  check_kline checks for klines
+  both call common exit routine
+  m_kline has to call check_kline after placing a kline. It would be
+  better if it was put on the nice event queue incase a tcm or oper
+  places several klines in a row. But then, opers freak when a kline
+  doesn't happen instantly.
+
+
+
 *** 20001025_9 by adrian
 
 
