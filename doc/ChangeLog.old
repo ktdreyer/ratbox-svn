@@ -1,3 +1,8 @@
+*** 20001223_20 by ejb
+- slightly ugly fix to ISON problem committed.  someone might want to take a look
+  at the code in parse.c..
+
+
 *** 20001223_19 by ejb
 - noted in whats-news.txt that the old ocnfig format is no longer
   supported.
