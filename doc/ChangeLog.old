@@ -1,3 +1,7 @@
+*** 20010328_4 by fl_
+- changed lots of include ".depend" into include .depend.. 
+
+
 *** 20010328_3 by fl_
 - we were potentially joining a user to a channel more than once.. not
   a good thing..
