@@ -35,7 +35,6 @@
 #include "ircd.h"
 #include "listener.h"
 #include "numeric.h"
-#include "packet.h"
 #include "adns.h"
 #include "res.h"
 #include "restart.h"
@@ -46,6 +45,7 @@
 #include "s_stats.h"
 #include "send.h"
 #include "commio.h"
+#include "packet.h"
 #include "memory.h"
 
 
