@@ -3,6 +3,15 @@
 o) fixed a core in the servlink code
 o) fixed gettext/message locale code
 o) fixed the prefix on a KILL message
+o) added use_anonops to the channel {}; section in ircd.conf
+   this is disabled by default, due to known problems and the flooding
+   when resyncing users oplists.  this can only be changed on a /restart.
+o) the use_anonops/halfops/invex/except options will actually disable users
+   setting these modes now
+o) a core with clearchan was fixed
+o) more double free fixes
+o) a flaw in serverhide relating to /who was fixed
+
 
 --------------------------------------------------------------------------------
 
