@@ -1127,7 +1127,9 @@ static void exit_one_client(struct Client *cptr, struct
    * Remove sptr from the client lists
    */
   del_from_client_hash_table(sptr->name, sptr);
-
+  if (HasID(sptr))
+	  del_from_id_hash_table(sptr->user->id, sptr);
+  
   /* remove from global client list */
   remove_client_from_list(sptr);
 

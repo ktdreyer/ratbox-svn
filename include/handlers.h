@@ -193,6 +193,7 @@ extern int mo_whowas(struct Client*, struct Client*, int, char**);
 extern int ms_admin(struct Client*, struct Client*, int, char**);
 extern int ms_capab(struct Client*, struct Client*, int, char**);
 extern int ms_cburst(struct Client*, struct Client*, int, char**);
+extern int ms_client(struct Client *, struct Client *, int, char **);
 extern int ms_connect(struct Client*, struct Client*, int, char**);
 extern int ms_drop(struct Client *,struct Client *,int,char **);
 extern int ms_eob(struct Client*, struct Client*, int, char**);

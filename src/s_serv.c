@@ -93,6 +93,7 @@ struct Capability captab[] = {
   { "HOPS",     CAP_HOPS },
   { "HUB",      CAP_HUB },
   { "AOPS",     CAP_AOPS },
+  { "UID",      CAP_UID },
   { 0,   0 }
 };
 
@@ -586,21 +587,29 @@ void sendnick_TS(struct Client *cptr, struct Client *acptr)
 {
   static char ubuf[12];
 
-  if (IsPerson(acptr))
-    {
-      send_umode(NULL, acptr, 0, SEND_UMODES, ubuf);
-      if (!*ubuf)
-        {
-          ubuf[0] = '+';
-          ubuf[1] = '\0';
-        }
-
-      sendto_one(cptr, "NICK %s %d %lu %s %s %s %s :%s",
-		 acptr->name, 
-                 acptr->hopcount + 1, acptr->tsinfo, ubuf,
-                 acptr->username, acptr->host,
-                 acptr->user->server, acptr->info);
-    }
+  if (!IsPerson(acptr))
+	  return;
+  
+  send_umode(NULL, acptr, 0, SEND_UMODES, ubuf);
+  if (!*ubuf)
+  {
+	  ubuf[0] = '+';
+	  ubuf[1] = '\0';
+  }
+ 
+  sendto_realops_flags(FLAGS_ALL, "Server %s: sending %sUID NICK, ID %s", cptr->name, IsCapable(cptr, CAP_UID) ? "" : "non-", acptr->user->id);
+  
+  if (HasID(acptr) && IsCapable(cptr, CAP_UID))
+	  sendto_one(cptr, "CLIENT %s %d %lu %s %s %s %s %s :%s",
+				 acptr->name, acptr->hopcount + 1, acptr->tsinfo, ubuf,
+				 acptr->username, acptr->host,
+				 acptr->user->server, acptr->user->id, acptr->info);
+  else
+	  sendto_one(cptr, "NICK %s %d %lu %s %s %s %s :%s",
+				 acptr->name, 
+				 acptr->hopcount + 1, acptr->tsinfo, ubuf,
+				 acptr->username, acptr->host,
+				 acptr->user->server, acptr->info);
 }
 
 /*

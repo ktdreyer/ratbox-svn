@@ -509,7 +509,8 @@ int main(int argc, char *argv[])
 
   linebuf_init();	/* set up some linebuf stuff to control paging */
   init_hash();
-
+  id_init();
+  
   clear_scache_hash_table();    /* server cache name table */
   clear_ip_hash_table();        /* client host ip hash table */
   clear_Dline_table();          /* d line tree */

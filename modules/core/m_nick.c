@@ -717,7 +717,7 @@ nick_from_server(struct Client *cptr, struct Client *sptr, int parc,
             }
           
           return do_user(nick, cptr, sptr, parv[5], parv[6],
-                         parv[7], parv[8]);
+                         parv[7], parv[8], NULL);
         }
     }
   else if (sptr->name[0])

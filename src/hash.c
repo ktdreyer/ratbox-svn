@@ -54,6 +54,7 @@ static unsigned int hash_channel_name(const char* name);
 #ifdef  DEBUGMODE
 static struct HashEntry* clientTable = NULL;
 static struct HashEntry* channelTable = NULL;
+static struct HashEntry* idTable = NULL;
 static int clhits;
 static int clmiss;
 static int chhits;
@@ -62,6 +63,7 @@ static int chmiss;
 
 static struct HashEntry clientTable[U_MAX];
 static struct HashEntry channelTable[CH_MAX];
+static struct HashEntry idTable[U_MAX];
 
 #endif
 
@@ -125,6 +127,23 @@ int hash_nick_name(const char* name)
 }
 
 /*
+ * hash_id
+ *
+ * IDs are a easy to hash -- they're already evenly distributed,
+ * and they are always case sensitive.   -orabidoo
+ */
+static  unsigned int 
+hash_id(char *nname)
+{
+	unsigned int h = 0;
+	
+	while (*nname) {
+		h = (h << 4) - (h + (unsigned char)*nname++);
+	}
+
+	return (h & (U_MAX - 1));
+}
+/*
  * hash_channel_name
  *
  * calculate a hash value on at most the first 30 characters of the channel
@@ -181,6 +200,21 @@ void init_hash(void)
 }
 
 /*
+ * add_to_id_hash_table
+ */
+int     add_to_id_hash_table(char *name, struct Client *cptr)
+{
+	unsigned int     hashv;
+
+	hashv = hash_id(name);
+	cptr->idhnext = (struct Client *)idTable[hashv].list;
+	idTable[hashv].list = (void *)cptr;
+	idTable[hashv].links++;
+	idTable[hashv].hits++;
+	return 0;
+}
+
+/*
  * add_to_client_hash_table
  */
 void add_to_client_hash_table(const char* name, struct Client* cptr)
@@ -210,6 +244,45 @@ void add_to_channel_hash_table(const char* name, struct Channel* chptr)
   channelTable[hashv].list = (void*) chptr;
   ++channelTable[hashv].links;
   ++channelTable[hashv].hits;
+}
+
+/*
+ * del_from_client_hash_table - remove a client/server from the client
+ * hash table
+ */
+void del_from_id_hash_table(const char* id, struct Client* cptr)
+{
+  struct Client* tmp;
+  struct Client* prev = NULL;
+  unsigned int   hashv;
+
+  assert(0 != id);
+  assert(0 != cptr);
+
+  hashv = hash_id(id);
+  tmp = (struct Client*) idTable[hashv].list;
+
+  for ( ; tmp; tmp = tmp->idhnext)
+    {
+      if (tmp == cptr)
+        {
+          if (prev)
+            prev->idhnext = tmp->idhnext;
+          else
+            idTable[hashv].list = (void*) tmp->idhnext;
+          tmp->idhnext = NULL;
+
+          assert(idTable[hashv].links > 0);
+          if (idTable[hashv].links > 0)
+            --idTable[hashv].links;
+          return;
+        }
+      prev = tmp;
+    }
+  Debug((DEBUG_ERROR, "%#x !in tab %s[%s] %#x %#x %#x %d %d %#x",
+         cptr, cptr->name, cptr->from ? cptr->from->host : "??host",
+         cptr->from, cptr->next, cptr->prev, cptr->fd, 
+         cptr->status, cptr->user));
 }
 
 /*
@@ -283,6 +356,33 @@ void del_from_channel_hash_table(const char* name, struct Channel* chptr)
     }
 }
 
+/*
+ * hash_find_id
+ */
+struct Client *
+hash_find_id(char *name, struct Client *cptr)
+{
+	struct Client *tmp;
+	unsigned int   hashv;
+	
+	if (name == NULL)
+		return NULL;
+	
+	hashv = hash_id(name);
+	tmp = (struct Client *)idTable[hashv].list;
+	
+	/*
+	 * Got the bucket, now search the chain.
+	 */
+	for (; tmp; tmp = tmp->idhnext)
+		if (tmp->user && strcmp(name, tmp->user->id) == 0)
+		{
+			return(tmp);
+		}
+	
+	return (cptr);
+}
+
 
 /*
  * hash_find_client
@@ -293,6 +393,9 @@ struct Client* hash_find_client(const char* name, struct Client* cptr)
   unsigned int   hashv;
   assert(0 != name);
 
+  if (*name == '.') /* it's an ID .. */
+	  return hash_find_id(name, cptr);
+  
   hashv = hash_nick_name(name);
   tmp = (struct Client*) clientTable[hashv].list;
   /*

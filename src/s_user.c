@@ -47,6 +47,7 @@
 #include "send.h"
 #include "supported.h"
 #include "whowas.h"
+#include "md5.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -326,7 +327,8 @@ int register_user(struct Client *cptr, struct Client *sptr,
   int  status;
   dlink_node *ptr;
   dlink_node *m;
-
+  char *id, *cookie;
+  
   assert(0 != sptr);
   assert(sptr->username != username);
 
@@ -340,7 +342,7 @@ int register_user(struct Client *cptr, struct Client *sptr,
   if (MyConnect(sptr))
     {
       if( ( status = check_client(cptr, sptr, username )) < 0 )
-	return(CLIENT_EXITED);
+		  return(CLIENT_EXITED);
 
       if(!valid_hostname(sptr->host))
         {
@@ -434,6 +436,18 @@ int register_user(struct Client *cptr, struct Client *sptr,
       if( (status = check_X_line(cptr,sptr)) < 0 )
 	return status;
 
+	  if (sptr->user->id[0] == '\0') 
+	  {
+		  do {
+			  id = id_get();
+		  } while (hash_find_id(id, NULL));
+		  
+		  strcpy(sptr->user->id, id);
+		  add_to_id_hash_table(sptr->user->id, sptr);
+	  }
+	  
+	  sendto_one(sptr, ":%s NOTICE %s :You have client ID %s", me.name, sptr->name, sptr->user->id);
+	  
       sendto_realops_flags(FLAGS_CCONN,
 			   "Client connecting: %s (%s@%s) [%s] {%s}",
 			   nick, sptr->username, sptr->host,
@@ -544,19 +558,51 @@ int register_user(struct Client *cptr, struct Client *sptr,
    * Only send to non CAP_LL servers, unless we're a lazylink leaf,
    * in that case just send it to the uplink.
    * -davidt
+   * rewritten to cope with UIDs .. eww eww eww --is
    */
+  
   if (!ConfigFileEntry.hub && uplink && IsCapable(uplink,CAP_LL)
-      && cptr != uplink)
-    sendto_one(uplink, "NICK %s %d %lu %s %s %s %s :%s",
-               nick, sptr->hopcount+1, sptr->tsinfo,
-               ubuf, sptr->username, sptr->host, user->server,
-               sptr->info);
+      && cptr != uplink) 
+  {
+	  if (IsCapable(uplink, CAP_UID))
+	  {
+		  sendto_one(uplink, "NICK %s %d %lu %s %s %s %s %s :%s",
+					 nick, sptr->hopcount+1, sptr->tsinfo,
+					 ubuf, sptr->username, sptr->host, user->server,
+					 sptr->user->id, sptr->info);
+	  }
+	  else
+	  {
+		  sendto_one(uplink, "NICK %s %d %lu %s %s %s %s :%s",
+					 nick, sptr->hopcount+1, sptr->tsinfo,
+					 ubuf, sptr->username, sptr->host, user->server,
+					 sptr->info);
+	  }
+  }
   else
-    sendto_nocap_serv_butone(CAP_LL, cptr,
-                             "NICK %s %d %lu %s %s %s %s :%s",
-                             nick, sptr->hopcount+1, sptr->tsinfo,
-                             ubuf, sptr->username, sptr->host, user->server,
-                             sptr->info);
+  {
+	  dlink_node *server_node;
+	  struct Client *server;
+	  
+	  for (server_node = serv_list.head; server_node; server_node = server_node->next)
+	  {
+		  server = (struct Client *) server_node->data;
+		  
+		  if (IsCapable(server, CAP_LL) || server == cptr)
+			  continue;
+		  
+		  if (IsCapable(server, CAP_UID))
+			  sendto_one(server, "CLIENT %s %d %lu %s %s %s %s %s :%s",
+						 nick, sptr->hopcount+1, sptr->tsinfo,
+						 ubuf, sptr->username, sptr->host, user->server,
+						 user->id, sptr->info);
+		  else
+			  sendto_one(server, "NICK %s %d %lu %s %s %s %s :%s",
+						 nick, sptr->hopcount+1, sptr->tsinfo,
+						 ubuf, sptr->username, sptr->host, user->server,
+						 sptr->info);
+	  }
+  }
   
   if (ubuf[1])
     send_umode_out(cptr, sptr, 0);
@@ -701,7 +747,7 @@ report_and_set_user_flags(struct Client *sptr,struct ConfItem *aconf)
 ** do_user
 */
 int do_user(char* nick, struct Client* cptr, struct Client* sptr,
-                   char* username, char *host, char *server, char *realname)
+                   char* username, char *host, char *server, char *realname, char *id)
 {
   unsigned int oflags;
   struct User* user;
@@ -739,7 +785,9 @@ int do_user(char* nick, struct Client* cptr, struct Client* sptr,
       user->server = me.name;
     }
   strncpy_irc(sptr->info, realname, REALLEN);
-
+  if (id)
+	  strncpy_irc(sptr->user->id, id, IDLEN);
+  
   if (sptr->name[0]) /* NICK already received, now I have USER... */
     return register_user(cptr, sptr, sptr->name, username);
   else

@@ -53,9 +53,9 @@
 #define HOSTIPLEN       16      /* Length of dotted quad form of IP        */
 #define PASSWDLEN       20
 
-/* XXX IDLEN is/was for TS4's client ID leave for now... */
 #define IDLEN           12      /* this is the maximum length, not the actual
                                    generated length; DO NOT CHANGE! */
+#define COOKIELEN       IDLEN
 
 #define CLIENT_BUFSIZE 512      /* must be at least 512 bytes */
 
@@ -83,6 +83,8 @@ struct User
   int            joined;        /* number of channels joined */
   const char*    server;        /* pointer to scached server name */
   char*          RSA_response;  /* expected response from client */
+	/* client ID, unique ID per client */
+	char id[IDLEN + 1];
 };
 
 struct Server
@@ -109,7 +111,8 @@ struct Client
   struct Client*    next;
   struct Client*    prev;
   struct Client*    hnext;
-
+	struct Client*  idhnext;
+	
   struct Client*    lnext;      /* Used for Server->servers/users */
   struct Client*    lprev;      /* Used for Server->servers/users */
 
@@ -268,6 +271,8 @@ struct LocalUser
 #define STAT_SERVER     0x10   /* 0  */
 #define STAT_CLIENT     0x20   /* 1  */
 
+
+#define HasID(x) ((x)->user->id[0] != '\0')
 
 #define IsRegisteredUser(x)     ((x)->status == STAT_CLIENT)
 #define IsRegistered(x)         ((x)->status  > STAT_UNKNOWN)

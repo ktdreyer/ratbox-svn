@@ -48,7 +48,8 @@ struct HashEntry {
   void*  list;
 };
 
-
+struct Client *hash_find_id(char *name, struct Client *cptr);
+extern int add_to_id_hash_table(char *, struct Client *);
 extern struct HashEntry hash_get_channel_block(int i);
 extern size_t hash_get_client_table_size(void);
 extern size_t hash_get_channel_table_size(void);
@@ -57,6 +58,8 @@ extern void   add_to_client_hash_table(const char* name,
                                        struct Client* client);
 extern void   del_from_client_hash_table(const char* name, 
                                          struct Client* client);
+extern void   del_from_id_hash_table(const char *name, struct Client *client);
+
 extern void   add_to_channel_hash_table(const char* name, 
                                         struct Channel* chan);
 extern void   del_from_channel_hash_table(const char* name, 

@@ -88,5 +88,5 @@ int m_user(struct Client* cptr, struct Client* sptr, int parc, char *parv[])
   server = parv[3];
   realname = parv[4];
 
-  return do_user(parv[0], cptr, sptr, username, host, server, realname);
+  return do_user(parv[0], cptr, sptr, username, host, server, realname, NULL);
 }

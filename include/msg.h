@@ -66,6 +66,7 @@ struct  Message
 #define MSG_DBOP     "DBOP"
 #endif
 
+#define MSG_CLIENT   "CLIENT"   /* CLIENT */
 #define MSG_ACCEPT   "ACCEPT"   /* ACCEPT */
 #define MSG_PRIVMSG  "PRIVMSG"  /* PRIV */
 #define MSG_CBURST   "CBURST"   /* LazyLink channel burst */
