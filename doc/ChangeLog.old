@@ -1,3 +1,14 @@
+*** 20001210_8 by db
+- cleaned up m_gline.c, STILL untested.
+- removed unnecessary lines in ircd_parser.y due to removed botcheck
+- only show stats 'G' to opers
+- updated opers.txt, client.c to show leaving servers as well as 
+  being introduced servers.
+- cleanup_channels() wasn't being restarted when server was a hub,
+  it should be always run now, to expire persistent channels.
+
+
+
 *** 20001210_7 by db
 - missed a place where send_trim() should have been used
 
