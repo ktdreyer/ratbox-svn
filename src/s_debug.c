@@ -425,7 +425,7 @@ void count_memory(struct Client *source_p)
   total_memory += channel_hash_table_size;
 
   total_memory += mem_servers_cached;
-  sendto_one(source_p, ":%s %d %s :Total: ww %d ch %d co %d",
+  sendto_one(source_p, ":%s %d %s :Total: whowas %d channel %d conf %d",
              me.name, RPL_STATSDEBUG, source_p->name,
 	     (int)totww,
 	     (int)total_channel_memory,

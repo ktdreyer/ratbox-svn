@@ -133,14 +133,14 @@ void tstats(struct Client *source_p)
              me.name, RPL_STATSDEBUG, source_p->name);
   sendto_one(source_p, ":%s %d %s :connected %u %u",
              me.name, RPL_STATSDEBUG, source_p->name, sp->is_cl, sp->is_sv);
-  sendto_one(source_p, ":%s %d %s :bytes sent %lu.%uK %lu.%uK",
+  sendto_one(source_p, ":%s %d %s :bytes sent %d.%uK %d.%uK",
              me.name, RPL_STATSDEBUG, source_p->name,
-             sp->is_cks, sp->is_cbs, sp->is_sks, sp->is_sbs);
-  sendto_one(source_p, ":%s %d %s :bytes recv %lu.%uK %lu.%uK",
+             (int)sp->is_cks, sp->is_cbs, (int)sp->is_sks, sp->is_sbs);
+  sendto_one(source_p, ":%s %d %s :bytes recv %d.%uK %d.%uK",
              me.name, RPL_STATSDEBUG, source_p->name,
-             sp->is_ckr, sp->is_cbr, sp->is_skr, sp->is_sbr);
-  sendto_one(source_p, ":%s %d %s :time connected %lu %lu",
-             me.name, RPL_STATSDEBUG, source_p->name, sp->is_cti, sp->is_sti);
+             (int)sp->is_ckr, sp->is_cbr, (int)sp->is_skr, sp->is_sbr);
+  sendto_one(source_p, ":%s %d %s :time connected %d %d",
+             me.name, RPL_STATSDEBUG, source_p->name, (int)sp->is_cti, (int)sp->is_sti);
 }
 
 
