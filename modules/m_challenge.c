@@ -128,6 +128,8 @@ static void m_challenge( struct Client *client_p, struct Client *source_p,
   
   MyFree(source_p->user->response);
   MyFree(source_p->user->auth_oper);
+  source_p->user->response = NULL;
+  source_p->user->response = NULL;
 
   /* XXX - better get the host matching working sometime... */
   if (!(aconf = find_conf_by_name (parv[1], CONF_OPERATOR))
