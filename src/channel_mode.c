@@ -135,17 +135,14 @@ static char modebuf[MODEBUFLEN], parabuf[MODEBUFLEN];
 static char mask_buf[BUFSIZE];
 static int mask_pos;
 
-static struct ChModeChange mode_changes_plus[BUFSIZE];
-static struct ChModeChange mode_changes_minus[BUFSIZE];
+static struct ChModeChange mode_changes[BUFSIZE];
+static int mode_count;
 
 #ifdef HALFOPS
 static struct ChModeBounce mode_bounces[BUFSIZE];
-#endif
-
-static int mode_count_plus, mode_count_minus;
-#ifdef HALFOPS
 static int bounce_count;
 #endif
+
 #ifdef ANONOPS
 static int hideops_changed;
 #endif
@@ -822,22 +819,13 @@ chm_simple(struct Client *client_p, struct Client *source_p,
   {
     chptr->mode.mode |= mode_type;
 
-    for (i = 0; i < mode_count_minus; i++)
-    {
-      if (mode_changes_minus[i].letter == c)
-      {
-        /* + and - make 0, so return... */
-        mode_changes_minus[i].letter = 0;
-        return;
-      }
-    }
-
-    mode_changes_plus[mode_count_plus].letter = c;
-    mode_changes_plus[mode_count_plus].caps = 0;
-    mode_changes_plus[mode_count_plus].nocaps = 0;
-    mode_changes_plus[mode_count_plus].id = NULL;
-    mode_changes_plus[mode_count_plus].mems = ALL_MEMBERS;
-    mode_changes_plus[mode_count_plus++].arg = NULL;
+    mode_changes[mode_count].letter = c;
+    mode_changes[mode_count].dir = MODE_ADD;
+    mode_changes[mode_count].caps = 0;
+    mode_changes[mode_count].nocaps = 0;
+    mode_changes[mode_count].id = NULL;
+    mode_changes[mode_count].mems = ALL_MEMBERS;
+    mode_changes[mode_count++].arg = NULL;
   }
   else if ((dir == MODE_DEL) && (chptr->mode.mode & mode_type))
   {
@@ -845,20 +833,13 @@ chm_simple(struct Client *client_p, struct Client *source_p,
 
     chptr->mode.mode &= ~mode_type;
 
-    for (i = 0; i < mode_count_plus; i++)
-      if (mode_changes_plus[i].letter == c)
-      {
-        /* - and + make 0, so return... */
-        mode_changes_plus[i].letter = 0;
-        return;
-      }
-
-    mode_changes_minus[mode_count_minus].letter = c;
-    mode_changes_minus[mode_count_minus].caps = 0;
-    mode_changes_minus[mode_count_minus].nocaps = 0;
-    mode_changes_minus[mode_count_minus].mems = ALL_MEMBERS;
-    mode_changes_minus[mode_count_minus].id = NULL;
-    mode_changes_minus[mode_count_minus++].arg = NULL;
+    mode_changes[mode_count].letter = c;
+    mode_changes[mode_count].dir = MODE_DEL;
+    mode_changes[mode_count].caps = 0;
+    mode_changes[mode_count].nocaps = 0;
+    mode_changes[mode_count].mems = ALL_MEMBERS;
+    mode_changes[mode_count].id = NULL;
+    mode_changes[mode_count++].arg = NULL;
   }
 }
 
@@ -887,47 +868,29 @@ chm_hideops(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  if (dir == MODE_ADD)
+  if (dir == MODE_ADD && !(chptr->mode.mode & MODE_HIDEOPS))
   {
-    for (i = 0; i < mode_count_minus; i++)
-      if (mode_changes_minus[i].letter == c)
-      {
-        mode_changes_minus[i].letter = 0;
-	hideops_changed = 0;
-	return;
-      }
+    chptr->mode.mode |= MODE_HIDEOPS;
 
-    if (!(chptr->mode.mode & MODE_HIDEOPS))
-    {
-      mode_changes_plus[mode_count_plus].letter = c;
-      mode_changes_plus[mode_count_plus].caps = CAP_AOPS;
-      mode_changes_plus[mode_count_plus].nocaps = 0;
-      mode_changes_plus[mode_count_plus].id = NULL;
-      mode_changes_plus[mode_count_plus].mems = ALL_MEMBERS;
-      mode_changes_plus[mode_count_plus++].arg = NULL;
-      hideops_changed = 1;
-    }
+    mode_changes[mode_count].letter = c;
+    mode_changes[mode_count].dir = MODE_ADD;
+    mode_changes[mode_count].caps = CAP_AOPS;
+    mode_changes[mode_count].nocaps = 0;
+    mode_changes[mode_count].id = NULL;
+    mode_changes[mode_count].mems = ALL_MEMBERS;
+    mode_changes[mode_count++].arg = NULL;
   }
-  else if (dir == MODE_DEL)
+  else if (dir == MODE_DEL && (chptr->mode.mode & MODE_HIDEOPS))
   {
-    for (i = 0; i < mode_count_plus; i++)
-      if (mode_changes_plus[i].letter == c)
-      {
-        mode_changes_plus[i].letter = 0;
-	hideops_changed = 0;
-	return;
-      }
+    chptr->mode.mode &= ~MODE_HIDEOPS;
 
-    if ((chptr->mode.mode & MODE_HIDEOPS))
-    {
-      mode_changes_minus[mode_count_minus].letter = c;
-      mode_changes_minus[mode_count_minus].caps = CAP_AOPS;
-      mode_changes_minus[mode_count_minus].nocaps = 0;
-      mode_changes_minus[mode_count_minus].id = NULL;
-      mode_changes_minus[mode_count_minus].mems = ALL_MEMBERS;
-      mode_changes_minus[mode_count_minus++].arg = NULL;
-      hideops_changed = -1;
-    }
+    mode_changes[mode_count].letter = c;
+    mode_changes[mode_count].dir = MODE_DEL;
+    mode_changes[mode_count].caps = CAP_AOPS;
+    mode_changes[mode_count].nocaps = 0;
+    mode_changes[mode_count].id = NULL;
+    mode_changes[mode_count].mems = ALL_MEMBERS;
+    mode_changes[mode_count++].arg = NULL;
   }
 }
 #endif
@@ -1002,22 +965,13 @@ chm_ban(struct Client *client_p, struct Client *source_p,
   /* if we're adding a NEW id */
   if ((dir == MODE_ADD) && (add_id(source_p, chptr, mask, CHFL_BAN) == 0))
   {
-    for (i = 0; i < mode_count_minus; i++)
-    {
-      if (mode_changes_minus[i].letter == c &&
-          !irccmp(mode_changes_minus[i].arg, mask))
-      {
-        mode_changes_minus[i].letter = 0;
-        return;
-      }
-    }
-
-    mode_changes_plus[mode_count_plus].letter = c;
-    mode_changes_plus[mode_count_plus].caps = 0;
-    mode_changes_plus[mode_count_plus].nocaps = 0;
-    mode_changes_plus[mode_count_plus].mems = ALL_MEMBERS;
-    mode_changes_plus[mode_count_plus].id = NULL;
-    mode_changes_plus[mode_count_plus++].arg = mask;
+    mode_changes[mode_count].letter = c;
+    mode_changes[mode_count].dir = MODE_ADD;
+    mode_changes[mode_count].caps = 0;
+    mode_changes[mode_count].nocaps = 0;
+    mode_changes[mode_count].mems = ALL_MEMBERS;
+    mode_changes[mode_count].id = NULL;
+    mode_changes[mode_count++].arg = mask;
   }
   else if (dir == MODE_DEL)
   {
@@ -1032,22 +986,13 @@ chm_ban(struct Client *client_p, struct Client *source_p,
       mask = raw_mask;
     }
 
-    for (i = 0; i < mode_count_plus; i++)
-    {
-      if (mode_changes_plus[i].letter == c &&
-          !irccmp(mode_changes_plus[i].arg, mask))
-      {
-        mode_changes_plus[i].letter = 0;
-        return;
-      }
-    }
-
-    mode_changes_minus[mode_count_minus].letter = c;
-    mode_changes_minus[mode_count_minus].caps = 0;
-    mode_changes_minus[mode_count_minus].nocaps = 0;
-    mode_changes_minus[mode_count_minus].mems = ALL_MEMBERS;
-    mode_changes_minus[mode_count_minus].id = NULL;
-    mode_changes_minus[mode_count_minus++].arg = mask;
+    mode_changes[mode_count].letter = c;
+    mode_changes[mode_count].dir = MODE_DEL;
+    mode_changes[mode_count].caps = 0;
+    mode_changes[mode_count].nocaps = 0;
+    mode_changes[mode_count].mems = ALL_MEMBERS;
+    mode_changes[mode_count].id = NULL;
+    mode_changes[mode_count++].arg = mask;
   }
 }
 
@@ -1115,27 +1060,18 @@ chm_except(struct Client *client_p, struct Client *source_p,
   /* If we're adding a NEW id */
   if ((dir == MODE_ADD) && add_id(source_p, chptr, mask, CHFL_EXCEPTION) == 0)
   {
-    for (i = 0; i < mode_count_minus; i++)
-    {
-      if (mode_changes_minus[i].letter == c &&
-          !irccmp(mode_changes_minus[i].arg, mask))
-      {
-        mode_changes_minus[i].letter = 0;
-        return;
-      }
-    }
-
-    mode_changes_plus[mode_count_plus].letter = c;
-    mode_changes_plus[mode_count_plus].caps = CAP_EX;
-    mode_changes_plus[mode_count_plus].nocaps = 0;
+    mode_changes[mode_count].letter = c;
+    mode_changes[mode_count].dir = MODE_ADD;
+    mode_changes[mode_count].caps = CAP_EX;
+    mode_changes[mode_count].nocaps = 0;
 
     if(ConfigChannel.use_except)
-      mode_changes_plus[mode_count_plus].mems = ONLY_CHANOPS_HALFOPS;
+      mode_changes[mode_count].mems = ONLY_CHANOPS_HALFOPS;
     else
-      mode_changes_plus[mode_count_plus].mems = ONLY_SERVERS;
+      mode_changes[mode_count].mems = ONLY_SERVERS;
 
-    mode_changes_plus[mode_count_plus].id = NULL;
-    mode_changes_plus[mode_count_plus++].arg = mask;
+    mode_changes[mode_count].id = NULL;
+    mode_changes[mode_count++].arg = mask;
   }
   else if (dir == MODE_DEL)
   {
@@ -1150,22 +1086,13 @@ chm_except(struct Client *client_p, struct Client *source_p,
       mask = raw_mask;
     }
 
-    for (i = 0; i < mode_count_plus; i++)
-    {
-      if (mode_changes_plus[i].letter == c &&
-          !irccmp(mode_changes_plus[i].arg, mask))
-      {
-        mode_changes_plus[i].letter = 0;
-        return;
-      }
-    }
-
-    mode_changes_minus[mode_count_minus].letter = c;
-    mode_changes_minus[mode_count_minus].caps = CAP_EX;
-    mode_changes_minus[mode_count_minus].nocaps = 0;
-    mode_changes_minus[mode_count_minus].mems = ONLY_CHANOPS_HALFOPS;
-    mode_changes_minus[mode_count_minus].id = NULL;
-    mode_changes_minus[mode_count_minus++].arg = mask;
+    mode_changes[mode_count].letter = c;
+    mode_changes[mode_count].dir = MODE_DEL;
+    mode_changes[mode_count].caps = CAP_EX;
+    mode_changes[mode_count].nocaps = 0;
+    mode_changes[mode_count].mems = ONLY_CHANOPS_HALFOPS;
+    mode_changes[mode_count].id = NULL;
+    mode_changes[mode_count++].arg = mask;
   }
 }
 
@@ -1230,36 +1157,20 @@ chm_invex(struct Client *client_p, struct Client *source_p,
   else
     mask = pretty_mask(raw_mask);
 
-  /* will cause a desync, cant be done */
-#if 0  
-  if (strlen(mask) > NICKLEN+USERLEN+HOSTLEN)
-    return;
-#endif    
-
   if ((dir == MODE_ADD) && add_id(source_p, chptr, mask, CHFL_INVEX) == 0)
   {
-    for (i = 0; i < mode_count_minus; i++)
-    {
-      if (mode_changes_minus[i].letter == c &&
-          !irccmp(mode_changes_minus[i].arg, mask))
-      {
-        /* It cancels out, just return... */
-        mode_changes_minus[i].letter = 0;
-        return;
-      }
-    }
-
-    mode_changes_plus[mode_count_plus].letter = c;
-    mode_changes_plus[mode_count_plus].caps = CAP_IE;
-    mode_changes_plus[mode_count_plus].nocaps = 0;
+    mode_changes[mode_count].letter = c;
+    mode_changes[mode_count].dir = MODE_ADD;
+    mode_changes[mode_count].caps = CAP_IE;
+    mode_changes[mode_count].nocaps = 0;
     
     if(ConfigChannel.use_invex)
-      mode_changes_plus[mode_count_plus].mems = ONLY_CHANOPS_HALFOPS;
+      mode_changes[mode_count].mems = ONLY_CHANOPS_HALFOPS;
     else
-      mode_changes_plus[mode_count_plus].mems = ONLY_SERVERS;
+      mode_changes[mode_count].mems = ONLY_SERVERS;
 
-    mode_changes_plus[mode_count_plus].id = NULL;
-    mode_changes_plus[mode_count_plus++].arg = mask;
+    mode_changes[mode_count].id = NULL;
+    mode_changes[mode_count++].arg = mask;
   }
   else if (dir == MODE_DEL)
   {
@@ -1274,28 +1185,18 @@ chm_invex(struct Client *client_p, struct Client *source_p,
       mask = raw_mask;
     }
 
-    for (i = 0; i < mode_count_plus; i++)
-    {
-      if (mode_changes_plus[i].letter == c &&
-          !irccmp(mode_changes_plus[i].arg, mask))
-      {
-        /* It cancels out, so just return... */
-        mode_changes_plus[i].letter = 0;
-        return;
-      }
-    }
-
-    mode_changes_minus[mode_count_minus].letter = c;
-    mode_changes_minus[mode_count_minus].caps = CAP_IE;
-    mode_changes_minus[mode_count_minus].nocaps = 0;
+    mode_changes[mode_count].letter = c;
+    mode_changes[mode_count].dir = MODE_DEL;
+    mode_changes[mode_count].caps = CAP_IE;
+    mode_changes[mode_count].nocaps = 0;
 
     if(ConfigChannel.use_invex)
-      mode_changes_minus[mode_count_minus].mems = ONLY_CHANOPS_HALFOPS;
+      mode_changes[mode_count].mems = ONLY_CHANOPS_HALFOPS;
     else
-      mode_changes_minus[mode_count_minus].mems = ONLY_SERVERS;
+      mode_changes[mode_count].mems = ONLY_SERVERS;
 
-    mode_changes_minus[mode_count_minus].id = NULL;
-    mode_changes_minus[mode_count_minus++].arg = mask;
+    mode_changes[mode_count].id = NULL;
+    mode_changes[mode_count++].arg = mask;
   }
 }
 
@@ -1383,73 +1284,77 @@ chm_op(struct Client *client_p, struct Client *source_p,
 
   /* Cancel mode changes... */
 
-  for (i = 0; i < mode_count_plus; i++)
-    if ((mode_changes_plus[i].letter == 'o'
+  for (i = 0; i < mode_count; i++)
+    if (mode_changes[i].dir == MODE_ADD && 
+        (mode_changes[i].letter == 'o'
 #ifdef HALFOPS
-         || mode_changes_plus[i].letter == 'h'
+         || mode_changes[i].letter == 'h'
 #endif
 #ifndef REQUIRE_OANDV
-         || mode_changes_plus[i].letter == 'v'
+         || mode_changes[i].letter == 'v'
 #endif
        )
-        && mode_changes_plus[i].client == targ_p)
+        && mode_changes[i].client == targ_p)
     {
-      if (mode_changes_plus[i].letter == 'o')
+      if (mode_changes[i].letter == 'o')
       {
-        mode_changes_plus[i].letter = 0;
+        mode_changes[i].letter = 0;
         return;
       }
 #ifdef HALFOPS
-      else if (mode_changes_plus[i].letter == 'h')
+      else if (mode_changes[i].letter == 'h')
         wasnt_hopped = 1;
 #endif
-      else if (mode_changes_plus[i].letter == 'v')
+      else if (mode_changes[i].letter == 'v')
         wasnt_voiced = 1;
-      mode_changes_plus[i].letter = 0;
+      mode_changes[i].letter = 0;
     }
 
   if (dir == MODE_ADD)
   {
-    for (i = 0; i < mode_count_minus; i++)
-      if (mode_changes_minus[i].letter == 'o'
-          && mode_changes_minus[i].client == targ_p)
+    for (i = 0; i < mode_count; i++)
+      if (mode_changes[i].letter == 'o' && mode_changes[i].dir == MODE_DEL
+          && mode_changes[i].client == targ_p)
       {
-        mode_changes_minus[i].letter = 0; /* clear the mode */
+        mode_changes[i].letter = 0; /* clear the mode */
         return;
       }
 
 #ifndef REQUIRE_OANDV
     if (!wasnt_voiced && t_voice)
     {
-      mode_changes_minus[mode_count_minus].letter = 'v';
-      mode_changes_minus[mode_count_minus].caps = 0;
-      mode_changes_minus[mode_count_minus].nocaps = 0;
-      mode_changes_minus[mode_count_minus].mems = ONLY_CHANOPS_HALFOPS;
-      mode_changes_minus[mode_count_minus].id = targ_p->user->id;
-      mode_changes_minus[mode_count_minus].arg = targ_p->name;
-      mode_changes_minus[mode_count_minus++].client = targ_p;
+      mode_changes[mode_count].letter = 'v';
+      mode_changes[mode_count].dir = MODE_DEL;
+      mode_changes[mode_count].caps = 0;
+      mode_changes[mode_count].nocaps = 0;
+      mode_changes[mode_count].mems = ONLY_CHANOPS_HALFOPS;
+      mode_changes[mode_count].id = targ_p->user->id;
+      mode_changes[mode_count].arg = targ_p->name;
+      mode_changes[mode_count++].client = targ_p;
     }
 #endif
 #ifdef HALFOPS
     if (!wasnt_hopped && t_hop)
     {
-      mode_changes_minus[mode_count_minus].letter = 'h';
-      mode_changes_minus[mode_count_minus].caps = CAP_HOPS;
-      mode_changes_minus[mode_count_minus].nocaps = 0;
-      mode_changes_minus[mode_count_minus].mems = ONLY_CHANOPS_HALFOPS;
-      mode_changes_minus[mode_count_minus].id = targ_p->user->id;
-      mode_changes_minus[mode_count_minus].arg = targ_p->name;
-      mode_changes_minus[mode_count_minus++].client = targ_p;
+      mode_changes[mode_count].letter = 'h';
+      mode_changes[mode_count].dir = MODE_DEL;
+      mode_changes[mode_count].caps = CAP_HOPS;
+      mode_changes[mode_count].nocaps = 0;
+      mode_changes[mode_count].mems = ONLY_CHANOPS_HALFOPS;
+      mode_changes[mode_count].id = targ_p->user->id;
+      mode_changes[mode_count].arg = targ_p->name;
+      mode_changes[mode_count++].client = targ_p;
     }
 #endif
 
-    mode_changes_plus[mode_count_plus].letter = c;
-    mode_changes_plus[mode_count_plus].caps = 0;
-    mode_changes_plus[mode_count_plus].nocaps = 0;
-    mode_changes_plus[mode_count_plus].mems = ONLY_CHANOPS_HALFOPS;
-    mode_changes_plus[mode_count_plus].id = targ_p->user->id;
-    mode_changes_plus[mode_count_plus].arg = targ_p->name;
-    mode_changes_plus[mode_count_plus++].client = targ_p;
+    mode_changes[mode_count].letter = c;
+    mode_changes[mode_count].dir = MODE_ADD;
+    mode_changes[mode_count].caps = 0;
+    mode_changes[mode_count].nocaps = 0;
+    mode_changes[mode_count].mems = ONLY_CHANOPS_HALFOPS;
+    mode_changes[mode_count].id = targ_p->user->id;
+    mode_changes[mode_count].arg = targ_p->name;
+    mode_changes[mode_count++].client = targ_p;
   }
   else
   {
@@ -1470,35 +1375,38 @@ chm_op(struct Client *client_p, struct Client *source_p,
       /* check if this just canceled out an earlier mode we cleared */
       if (!wasnt_hopped)
       {
-        mode_changes_minus[mode_count_minus].letter = 'h';
-        mode_changes_minus[mode_count_minus].caps = CAP_HOPS;
-        mode_changes_minus[mode_count_minus].nocaps = 0;
-        mode_changes_minus[mode_count_minus].mems = ONLY_CHANOPS_HALFOPS;
-        mode_changes_minus[mode_count_minus].id = NULL;
-        mode_changes_minus[mode_count_minus].arg = targ_p->name;
-	mode_changes_minus[mode_count_minus++].client = targ_p;
+        mode_changes[mode_count].letter = 'h';
+        mode_changes[mode_count].dir == MODE_DEL;
+        mode_changes[mode_count].caps = CAP_HOPS;
+        mode_changes[mode_count].nocaps = 0;
+        mode_changes[mode_count].mems = ONLY_CHANOPS_HALFOPS;
+        mode_changes[mode_count].id = NULL;
+        mode_changes[mode_count].arg = targ_p->name;
+	mode_changes[mode_count++].client = targ_p;
 
 #ifdef BOUNCE_BAD_HOPS
-        mode_changes_minus[mode_count_minus].letter = 'o';
-        mode_changes_minus[mode_count_minus].caps = 0;
-        mode_changes_minus[mode_count_minus].nocaps = CAP_HOPS;
-        mode_changes_minus[mode_count_minus].mems = ONLY_SERVERS;
-        mode_changes_minus[mode_count_minus].id = NULL;
-        mode_changes_minus[mode_count_minus].arg = targ_p->name;
-	mode_changes_minus[mode_count_minus++].client = targ_p;
+        mode_changes[mode_count].letter = 'o';
+        mode_changes[mode_count].dir = MODE_DEL;
+        mode_changes[mode_count].caps = 0;
+        mode_changes[mode_count].nocaps = CAP_HOPS;
+        mode_changes[mode_count].mems = ONLY_SERVERS;
+        mode_changes[mode_count].id = NULL;
+        mode_changes[mode_count].arg = targ_p->name;
+	mode_changes[mode_count++].client = targ_p;
 #endif
       }
     }
     else
 #endif
     {
-      mode_changes_minus[mode_count_minus].letter = c;
-      mode_changes_minus[mode_count_minus].caps = 0;
-      mode_changes_minus[mode_count_minus].nocaps = 0;
-      mode_changes_minus[mode_count_minus].mems = ONLY_CHANOPS_HALFOPS;
-      mode_changes_minus[mode_count_minus].id = NULL;
-      mode_changes_minus[mode_count_minus].arg = targ_p->name;
-      mode_changes_minus[mode_count_minus++].client = targ_p;
+      mode_changes[mode_count].letter = c;
+      mode_changes[mode_count].dir = MODE_DEL;
+      mode_changes[mode_count].caps = 0;
+      mode_changes[mode_count].nocaps = 0;
+      mode_changes[mode_count].mems = ONLY_CHANOPS_HALFOPS;
+      mode_changes[mode_count].id = NULL;
+      mode_changes[mode_count].arg = targ_p->name;
+      mode_changes[mode_count++].client = targ_p;
     }
   }
 }
@@ -1598,77 +1506,83 @@ chm_halfop(struct Client *client_p, struct Client *source_p,
 #endif
 
   /* Cancel out all other mode changes... */
-  for (i = 0; i < mode_count_plus; i++)
-    if ((mode_changes_plus[i].letter == 'v' ||
-         mode_changes_plus[i].letter == 'h')
-        && mode_changes_plus[i].client == targ_p)
+  for (i = 0; i < mode_count; i++)
+    if (mode_changes[i].dir == MODE_ADD &&
+        (mode_changes[i].letter == 'v' ||
+         mode_changes[i].letter == 'h')
+        && mode_changes[i].client == targ_p)
     {
-      if (mode_changes_plus[i].letter == 'h')
+      if (mode_changes[i].letter == 'h')
       {
-        mode_changes_plus[i].letter = 0;
+        mode_changes[i].letter = 0;
         return;
       }
-      mode_changes_plus[i].letter = 0;
+      mode_changes[i].letter = 0;
       wasnt_voiced = 1;
     }
 
   if (dir == MODE_ADD)
   {
-    for (i = 0; i < mode_count_minus; i++)
-      if (mode_changes_minus[i].letter == 'h'
-          && mode_changes_minus[i].client == targ_p)
+    for (i = 0; i < mode_count; i++)
+      if (mode_changes[i].dir == MODE_DEL && mode_changes[i].letter == 'h'
+          && mode_changes[i].client == targ_p)
       {
-        mode_changes_minus[i].letter = 0;
+        mode_changes[i].letter = 0;
         return;
       }
 
     if (!wasnt_voiced && t_voice)
     {
-      mode_changes_minus[mode_count_minus].letter = 'v';
-      mode_changes_minus[mode_count_minus].caps = 0;
-      mode_changes_minus[mode_count_minus].nocaps = 0;
-      mode_changes_minus[mode_count_minus].mems = ONLY_CHANOPS_HALFOPS;
-      mode_changes_minus[mode_count_minus].id = targ_p->user->id;
-      mode_changes_minus[mode_count_minus].arg = targ_p->name;
-      mode_changes_minus[mode_count_minus++].client = targ_p;
+      mode_changes[mode_count].letter = 'v';
+      mode_changes[mode_count].dir = MODE_DEL;
+      mode_changes[mode_count].caps = 0;
+      mode_changes[mode_count].nocaps = 0;
+      mode_changes[mode_count].mems = ONLY_CHANOPS_HALFOPS;
+      mode_changes[mode_count].id = targ_p->user->id;
+      mode_changes[mode_count].arg = targ_p->name;
+      mode_changes[mode_count++].client = targ_p;
     }
 
-    mode_changes_plus[mode_count_plus].letter = c;
-    mode_changes_plus[mode_count_plus].caps = CAP_HOPS;
-    mode_changes_plus[mode_count_plus].nocaps = 0;
-    mode_changes_plus[mode_count_plus].mems = ONLY_CHANOPS_HALFOPS;
-    mode_changes_plus[mode_count_plus].id = targ_p->user->id;
-    mode_changes_plus[mode_count_plus].arg = targ_p->name;
-    mode_changes_plus[mode_count_plus++].client = targ_p;
+    mode_changes[mode_count].letter = c;
+    mode_changes[mode_count].dir = MODE_ADD;
+    mode_changes[mode_count].caps = CAP_HOPS;
+    mode_changes[mode_count].nocaps = 0;
+    mode_changes[mode_count].mems = ONLY_CHANOPS_HALFOPS;
+    mode_changes[mode_count].id = targ_p->user->id;
+    mode_changes[mode_count].arg = targ_p->name;
+    mode_changes[mode_count++].client = targ_p;
 
   #ifdef BOUNCE_BAD_HOPS
-    mode_changes_plus[mode_count_plus].letter = 'o';
-    mode_changes_plus[mode_count_plus].caps = 0;
-    mode_changes_plus[mode_count_plus].nocaps = CAP_HOPS;
-    mode_changes_plus[mode_count_plus].mems = ONLY_SERVERS;
-    mode_changes_plus[mode_count_plus].id = targ_p->user->id;
-    mode_changes_plus[mode_count_plus].arg = targ_p->name;
-    mode_changes_plus[mode_count_plus++].client = targ_p;
+    mode_changes[mode_count].letter = 'o';
+    mode_changes[mode_count].dir = MODE_ADD;
+    mode_changes[mode_count].caps = 0;
+    mode_changes[mode_count].nocaps = CAP_HOPS;
+    mode_changes[mode_count].mems = ONLY_SERVERS;
+    mode_changes[mode_count].id = targ_p->user->id;
+    mode_changes[mode_count].arg = targ_p->name;
+    mode_changes[mode_count++].client = targ_p;
   #endif
   }
   else 
   { /* MODE_DEL */
-    mode_changes_minus[mode_count_minus].letter = 'h';
-    mode_changes_minus[mode_count_minus].caps = CAP_HOPS;
-    mode_changes_minus[mode_count_minus].nocaps = 0;
-    mode_changes_minus[mode_count_minus].mems = ONLY_CHANOPS_HALFOPS;
-    mode_changes_minus[mode_count_minus].id = targ_p->user->id;
-    mode_changes_minus[mode_count_minus].arg = targ_p->name;
-    mode_changes_minus[mode_count_minus++].client = targ_p;
+    mode_changes[mode_count].letter = 'h';
+    mode_changes[mode_count].dir = MODE_DEL;
+    mode_changes[mode_count].caps = CAP_HOPS;
+    mode_changes[mode_count].nocaps = 0;
+    mode_changes[mode_count].mems = ONLY_CHANOPS_HALFOPS;
+    mode_changes[mode_count].id = targ_p->user->id;
+    mode_changes[mode_count].arg = targ_p->name;
+    mode_changes[mode_count++].client = targ_p;
 
 #ifdef BOUNCE_BAD_HOPS
-    mode_changes_minus[mode_count_minus].letter = 'o';
-    mode_changes_minus[mode_count_minus].caps = 0;
-    mode_changes_minus[mode_count_minus].nocaps = CAP_HOPS;
-    mode_changes_minus[mode_count_minus].mems = ONLY_SERVERS;
-    mode_changes_minus[mode_count_minus].id = targ_p->user->id;
-    mode_changes_minus[mode_count_minus].arg = targ_p->name;
-    mode_changes_minus[mode_count_minus++].client = targ_p;
+    mode_changes[mode_count].letter = 'o';
+    mode_changes[mode_count].dir = MODE_DEL;
+    mode_changes[mode_count].caps = 0;
+    mode_changes[mode_count].nocaps = CAP_HOPS;
+    mode_changes[mode_count].mems = ONLY_SERVERS;
+    mode_changes[mode_count].id = targ_p->user->id;
+    mode_changes[mode_count].arg = targ_p->name;
+    mode_changes[mode_count++].client = targ_p;
 #endif
   }
 }
@@ -1734,38 +1648,45 @@ chm_voice(struct Client *client_p, struct Client *source_p,
 
   if (dir == MODE_ADD)
   {
-    for (i = 0; i < mode_count_minus; i++)
-      if (mode_changes_minus[i].letter == 'v'
-          && mode_changes_minus[i].client == targ_p)
+    for (i = 0; i < mode_count; i++)
+    {
+      if (mode_changes[i].dir == MODE_DEL && mode_changes[i].letter == 'v'
+          && mode_changes[i].client == targ_p)
       {
-        mode_changes_minus[i].letter = 0;
+        mode_changes[i].letter = 0;
 	return;
       }
+    }
 
-    mode_changes_plus[mode_count_plus].letter = c;
-    mode_changes_plus[mode_count_plus].caps = 0;
-    mode_changes_plus[mode_count_plus].nocaps = 0;
-    mode_changes_plus[mode_count_plus].mems = ONLY_CHANOPS_HALFOPS;
-    mode_changes_plus[mode_count_plus].id = targ_p->user->id;
-    mode_changes_plus[mode_count_plus].arg = targ_p->name;
-    mode_changes_plus[mode_count_plus++].client = targ_p;
+    mode_changes[mode_count].letter = c;
+    mode_changes[mode_count].dir = MODE_ADD;
+    mode_changes[mode_count].caps = 0;
+    mode_changes[mode_count].nocaps = 0;
+    mode_changes[mode_count].mems = ONLY_CHANOPS_HALFOPS;
+    mode_changes[mode_count].id = targ_p->user->id;
+    mode_changes[mode_count].arg = targ_p->name;
+    mode_changes[mode_count++].client = targ_p;
   }
-  else {
-    for (i = 0; i < mode_count_plus; i++)
-      if (mode_changes_plus[i].letter == 'v'
-          && mode_changes_plus[i].client == targ_p)
+  else
+  {
+    for (i = 0; i < mode_count; i++)
+    {
+      if (mode_changes[i].dir == MODE_ADD && mode_changes[i].letter == 'v'
+          && mode_changes[i].client == targ_p)
       {
-        mode_changes_plus[i].letter = 0;
+        mode_changes[i].letter = 0;
         return;
       }
+    }
 
-    mode_changes_minus[mode_count_minus].letter = 'v';
-    mode_changes_minus[mode_count_minus].caps = 0;
-    mode_changes_minus[mode_count_minus].nocaps = 0;
-    mode_changes_minus[mode_count_minus].mems = ONLY_CHANOPS_HALFOPS;
-    mode_changes_minus[mode_count_minus].id = targ_p->user->id;
-    mode_changes_minus[mode_count_minus].arg = targ_p->name;
-    mode_changes_minus[mode_count_minus++].client = targ_p;
+    mode_changes[mode_count].letter = 'v';
+    mode_changes[mode_count].dir = MODE_DEL;
+    mode_changes[mode_count].caps = 0;
+    mode_changes[mode_count].nocaps = 0;
+    mode_changes[mode_count].mems = ONLY_CHANOPS_HALFOPS;
+    mode_changes[mode_count].id = targ_p->user->id;
+    mode_changes[mode_count].arg = targ_p->name;
+    mode_changes[mode_count++].client = targ_p;
   }
 }
 
@@ -1799,20 +1720,20 @@ chm_limit(struct Client *client_p, struct Client *source_p,
 
     ircsprintf(lstr, "%d", limit);
 
-    for (i = 0; i < mode_count_minus; i++)
-      if (mode_changes_minus[i].letter == c)
-        mode_changes_minus[i].letter = 0;
+    /* if somebody sets MODE #channel +ll 1 2, accept latter --fl */
+    for (i = 0; i < mode_count; i++)
+    {
+      if (mode_changes[i].letter == c && mode_changes[i].dir == MODE_ADD)
+        mode_changes[i].letter = 0;
+    }
 
-    for (i = 0; i < mode_count_plus; i++)
-      if (mode_changes_plus[i].letter == c)
-        mode_changes_plus[i].letter = 0;
-
-    mode_changes_plus[mode_count_plus].letter = c;
-    mode_changes_plus[mode_count_plus].caps = 0;
-    mode_changes_plus[mode_count_plus].nocaps = 0;
-    mode_changes_plus[mode_count_plus].mems = ALL_MEMBERS;
-    mode_changes_plus[mode_count_plus].id = NULL;
-    mode_changes_plus[mode_count_plus++].arg = lstr;
+    mode_changes[mode_count].letter = c;
+    mode_changes[mode_count].dir = MODE_ADD;
+    mode_changes[mode_count].caps = 0;
+    mode_changes[mode_count].nocaps = 0;
+    mode_changes[mode_count].mems = ALL_MEMBERS;
+    mode_changes[mode_count].id = NULL;
+    mode_changes[mode_count++].arg = lstr;
 
     chptr->mode.limit = limit;
   }
@@ -1823,21 +1744,13 @@ chm_limit(struct Client *client_p, struct Client *source_p,
 
     chptr->mode.limit = 0;
 
-    for (i = 0; i < mode_count_plus; i++)
-    {
-      if (mode_changes_plus[i].letter == c)
-      {
-        mode_changes_plus[i].letter = 0;
-        return;
-      }
-    }
-
-    mode_changes_minus[mode_count_minus].letter = c;
-    mode_changes_minus[mode_count_minus].caps = 0;
-    mode_changes_minus[mode_count_minus].nocaps = 0;
-    mode_changes_minus[mode_count_minus].mems = ALL_MEMBERS;
-    mode_changes_minus[mode_count_minus].id = NULL;
-    mode_changes_minus[mode_count_minus++].arg = NULL;
+    mode_changes[mode_count].letter = c;
+    mode_changes[mode_count].dir = MODE_DEL;
+    mode_changes[mode_count].caps = 0;
+    mode_changes[mode_count].nocaps = 0;
+    mode_changes[mode_count].mems = ALL_MEMBERS;
+    mode_changes[mode_count].id = NULL;
+    mode_changes[mode_count++].arg = NULL;
   }
 }
 
@@ -1874,24 +1787,20 @@ chm_key(struct Client *client_p, struct Client *source_p,
     assert(key[0] != ' ');
     strlcpy(chptr->mode.key, key, KEYLEN);
 
-    for (i = 0; i < mode_count_minus; i++)
+    /* if somebody does MODE #channel +kk a b, accept latter --fl */
+    for (i = 0; i < mode_count; i++)
     {
-      if (mode_changes_minus[i].letter == c)
-        mode_changes_minus[i].letter = 0;
+      if (mode_changes[i].letter == c && mode_changes[i].dir == MODE_ADD)
+        mode_changes[i].letter = 0;
     }
 
-    for (i = 0; i < mode_count_plus; i++)
-    {
-      if (mode_changes_plus[i].letter == c)
-        mode_changes_plus[i].letter = 0;
-    }
-
-    mode_changes_plus[mode_count_plus].letter = c;
-    mode_changes_plus[mode_count_plus].caps = 0;
-    mode_changes_plus[mode_count_plus].nocaps = 0;
-    mode_changes_plus[mode_count_plus].mems = ALL_MEMBERS;
-    mode_changes_plus[mode_count_plus].id = NULL;
-    mode_changes_plus[mode_count_plus++].arg = chptr->mode.key;
+    mode_changes[mode_count].letter = c;
+    mode_changes[mode_count].dir = MODE_ADD;
+    mode_changes[mode_count].caps = 0;
+    mode_changes[mode_count].nocaps = 0;
+    mode_changes[mode_count].mems = ALL_MEMBERS;
+    mode_changes[mode_count].id = NULL;
+    mode_changes[mode_count++].arg = chptr->mode.key;
   }
   else if (dir == MODE_DEL)
   {
@@ -1900,18 +1809,13 @@ chm_key(struct Client *client_p, struct Client *source_p,
 
     *chptr->mode.key = 0;
 
-    for (i = 0; i < mode_count_plus; i++)
-    {
-      if (mode_changes_plus[i].letter == c)
-        mode_changes_plus[i].letter = 0;
-    }
-
-    mode_changes_minus[mode_count_minus].letter = c;
-    mode_changes_minus[mode_count_minus].caps = 0;
-    mode_changes_minus[mode_count_minus].nocaps = 0;
-    mode_changes_minus[mode_count_minus].mems = ALL_MEMBERS;
-    mode_changes_minus[mode_count_minus].id = NULL;
-    mode_changes_minus[mode_count_minus++].arg = "*";
+    mode_changes[mode_count].letter = c;
+    mode_changes[mode_count].dir = MODE_DEL;
+    mode_changes[mode_count].caps = 0;
+    mode_changes[mode_count].nocaps = 0;
+    mode_changes[mode_count].mems = ALL_MEMBERS;
+    mode_changes[mode_count].id = NULL;
+    mode_changes[mode_count++].arg = "*";
   }
 }
 
@@ -2047,11 +1951,14 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 {
   int i, mbl, pbl, nc, mc;
   char *arg;
+  int dir;
 
   mc = 0;
   nc = 0;
   pbl = 0;
   parabuf[0] = 0;
+  dir = MODE_QUERY;
+
   if ((cap & CAP_UID) && source_p->user &&
       (source_p->user->id[0] == '.'))
     mbl = ircsprintf(modebuf, ":%s MODE %s ", source_p->user->id,
@@ -2060,29 +1967,24 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
     mbl = ircsprintf(modebuf, ":%s MODE %s ", source_p->name,
                      chptr->chname);
 
-  if (mode_count_minus > 0)
-  {
-    modebuf[mbl++] = '-';
-    modebuf[mbl] = 0;
-  }
-
   /* loop the list of - modes we have */
-  for (i = 0; i < mode_count_minus; i++)
+  for (i = 0; i < mode_count; i++)
   {
     /* if they dont support the cap we need, or they do support a cap they
      * cant have, then dont add it to the modebuf.. that way they wont see
      * the mode
      */
-    if ((mode_changes_minus[i].letter == 0) ||
-        ((cap & mode_changes_minus[i].caps) != mode_changes_minus[i].caps)
-        || ((nocap & mode_changes_minus[i].nocaps)
-            != mode_changes_minus[i].nocaps))
+    if ((mode_changes[i].letter == 0) ||
+        ((cap & mode_changes[i].caps) != mode_changes[i].caps)
+        || ((nocap & mode_changes[i].nocaps) != mode_changes[i].nocaps))
       continue;
+
     arg = "";
-    if ((cap & CAP_UID) && mode_changes_minus[i].id)
-      arg = mode_changes_minus[i].id;
+    if ((cap & CAP_UID) && mode_changes[i].id)
+      arg = mode_changes[i].id;
     if (!*arg)
-      arg = mode_changes_minus[i].arg;
+      arg = mode_changes[i].arg;
+
     /* if we're creeping past the buf size, we need to send it and make
      * another line for the other modes
      * XXX - this could give away server topology with uids being
@@ -2098,18 +2000,26 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
                       LL_ICHAN | LL_ICLIENT, "%s %s", modebuf, parabuf);
       nc = 0;
       mc = 0;
+
       if ((cap & CAP_UID) && source_p->user &&
           (source_p->user->id[0] == '.'))
-        mbl = ircsprintf(modebuf, ":%s MODE %s -", source_p->user->id,
+        mbl = ircsprintf(modebuf, ":%s MODE %s ", source_p->user->id,
                          chptr->chname);
       else
-        mbl = ircsprintf(modebuf, ":%s MODE %s -", source_p->name,
+        mbl = ircsprintf(modebuf, ":%s MODE %s ", source_p->name,
                          chptr->chname);
+
       pbl = 0;
       parabuf[0] = 0;
     }
 
-    modebuf[mbl++] = mode_changes_minus[i].letter;
+    if(dir != mode_changes[i].dir)
+    {
+      modebuf[mbl++] = (mode_changes[i].dir == MODE_ADD) ? '+' : '-';
+      dir = mode_changes[i].dir;
+    }
+
+    modebuf[mbl++] = mode_changes[i].letter;
     modebuf[mbl] = 0;
     nc++;
 
@@ -2122,71 +2032,8 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
     }
   }
 
-  if (mode_count_plus > 0)
-  {
-    if (mbl > 0 && modebuf[mbl - 1] == '-')
-      modebuf[mbl - 1] = '+';
-    else
-      modebuf[mbl++] = '+';
-
-    modebuf[mbl] = 0;
-  }
-
-  /* loop the + modes */
-  for (i = 0; i < mode_count_plus; i++)
-  {
-    /* same as above, check they support needed capabs, and dont have
-     * capabs we dont want..
-     */
-    if (mode_changes_plus[i].letter == 0 ||
-        (cap & mode_changes_plus[i].caps) != mode_changes_plus[i].caps
-        || ((nocap & mode_changes_plus[i].nocaps) !=
-            mode_changes_plus[i].nocaps))
-      continue;
-
-    arg = mode_changes_plus[i].arg;
-    if ((cap & CAP_UID) && mode_changes_plus[i].id != NULL)
-      arg = mode_changes_plus[i].id;
-
-    if ((arg != NULL) && ((mc == MAXMODEPARAMS) || 
-                          ((strlen(arg) + mbl + pbl + 2) > BUFSIZE)))
-    {
-      if (mbl && modebuf[mbl - 1] == '+')
-        modebuf[mbl - 1] = '\0';
-
-      if (nc != 0)
-        sendto_server(client_p, source_p, chptr, cap, nocap,
-                      LL_ICLIENT, "%s %s", modebuf, parabuf);
-      nc = 0;
-      mc = 0;
-      if ((cap & CAP_UID) && source_p->user &&
-          (source_p->user->id[0] == '.'))
-        mbl = ircsprintf(modebuf, ":%s MODE %s +", source_p->user->id,
-                         chptr->chname);
-      else
-        mbl = ircsprintf(modebuf, ":%s MODE %s +", source_p->name,
-                         chptr->chname);
-      pbl = 0;
-      parabuf[0] = 0;
-    }
-
-    modebuf[mbl++] = mode_changes_plus[i].letter;
-    modebuf[mbl] = 0;
-    nc++;
-
-    if (mode_changes_plus[i].arg != NULL)
-    {
-      pbl = strlcat(parabuf, mode_changes_plus[i].arg, MODEBUFLEN);
-      parabuf[pbl++] = ' ';
-      parabuf[pbl] = '\0';
-      mc++;
-    }
-  }
-
   if (pbl && parabuf[pbl - 1] == ' ')
     parabuf[pbl - 1] = 0;
-  if (mbl && modebuf[mbl - 1] == '+')
-    modebuf[mbl - 1] = 0;
 
   if (nc != 0)
     sendto_server(client_p, source_p, chptr, cap, nocap,
@@ -2214,7 +2061,7 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
 #endif
 
   /* bail out if we have nothing to do... */
-  if (!(mode_count_plus || mode_count_minus
+  if (!(mode_count
 #ifdef HALFOPS
         || bounce_count
 #endif
@@ -2241,21 +2088,16 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
   nc = 0;
   mc = 0;
 
-  if (mode_count_minus > 0)
+  for (i = 0; i < mode_count; i++)
   {
-    modebuf[mbl++] = '-';
-    modebuf[mbl] = '\0';
-  }
-
-  for (i = 0; i < mode_count_minus; i++)
-  {
-    if (mode_changes_minus[i].letter == 0 ||
-        mode_changes_minus[i].mems == NON_CHANOPS ||
-        mode_changes_minus[i].mems == ONLY_SERVERS)
+    if (mode_changes[i].letter == 0 ||
+        mode_changes[i].mems == NON_CHANOPS ||
+        mode_changes[i].mems == ONLY_SERVERS)
       continue;
-    if (mode_changes_minus[i].arg != NULL &&
+
+    if (mode_changes[i].arg != NULL &&
         ((mc == MAXMODEPARAMS)  || 
-        ((strlen(mode_changes_minus[i].arg) + mbl + pbl + 2) > BUFSIZE)))
+        ((strlen(mode_changes[i].arg) + mbl + pbl + 2) > BUFSIZE)))
     {
       if (mbl && modebuf[mbl - 1] == '-')
         modebuf[mbl - 1] = '\0';
@@ -2267,74 +2109,29 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
       mc = 0;
 
       if (IsServer(source_p))
-        mbl = ircsprintf(modebuf, ":%s MODE %s -", me.name, chname);
+        mbl = ircsprintf(modebuf, ":%s MODE %s ", me.name, chname);
       else
-        mbl = ircsprintf(modebuf, ":%s!%s@%s MODE %s -", source_p->name,
+        mbl = ircsprintf(modebuf, ":%s!%s@%s MODE %s ", source_p->name,
                    source_p->username, source_p->host, chname);
 
       pbl = 0;
       parabuf[0] = '\0';
     }
 
-    modebuf[mbl++] = mode_changes_minus[i].letter;
+    if(dir != mode_changes[i].dir)
+    {
+      modebuf[mbl++] = (mode_changes[i].dir == MODE_ADD) ? '+' : '-';
+      dir = mode_changes[i].dir;
+    }
+
+    modebuf[mbl++] = mode_changes[i].letter;
     modebuf[mbl] = '\0';
     nc++;
 
-    if (mode_changes_minus[i].arg != NULL)
+    if (mode_changes[i].arg != NULL)
     {
       mc++;
-      pbl = strlen(strcat(parabuf, mode_changes_minus[i].arg));
-      parabuf[pbl++] = ' ';
-      parabuf[pbl] = '\0';
-    }
-  }
-
-  if (mode_count_plus > 0)
-  {
-    if (mbl > 0 && modebuf[mbl - 1] == '-')
-      modebuf[mbl - 1] = '+';
-    else
-      modebuf[mbl++] = '+';
-    modebuf[mbl] = '\0';
-  }
-
-  for (i = 0; i < mode_count_plus; i++)
-  {
-    if (mode_changes_plus[i].letter == 0 ||
-        mode_changes_plus[i].mems == NON_CHANOPS ||
-        mode_changes_plus[i].mems == ONLY_SERVERS)
-      continue;
-    if (mode_changes_plus[i].arg != NULL &&
-        ((mc == MAXMODEPARAMS) ||
-         ((strlen(mode_changes_plus[i].arg) + mbl + pbl + 2) > BUFSIZE)))
-    {
-      if (mbl && modebuf[mbl - 1] == '+')
-        modebuf[mbl - 1] = '\0';
-
-      if (nc != 0)
-        sendto_channel_local(st, chptr, "%s %s", modebuf, parabuf);
-
-      nc = 0;
-      mc = 0;
-
-      if (IsServer(source_p))
-        mbl = ircsprintf(modebuf, ":%s MODE %s +", me.name, chname);
-      else
-        mbl = ircsprintf(modebuf, ":%s!%s@%s MODE %s +", source_p->name,
-                   source_p->username, source_p->host, chname);
-
-      pbl = 0;
-      parabuf[0] = '\0';
-    }
-
-    modebuf[mbl++] = mode_changes_plus[i].letter;
-    modebuf[mbl] = '\0';
-    nc++;
-
-    if (mode_changes_plus[i].arg != NULL)
-    {
-      mc++;
-      pbl = strlen(strcat(parabuf, mode_changes_plus[i].arg));
+      pbl = strlen(strcat(parabuf, mode_changes[i].arg));
       parabuf[pbl++] = ' ';
       parabuf[pbl] = '\0';
     }
@@ -2342,8 +2139,6 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
 
   if (pbl && parabuf[pbl - 1] == ' ')
     parabuf[pbl - 1] = 0;
-  if (mbl && modebuf[mbl - 1] == '+')
-    modebuf[mbl - 1] = 0;
 
   if (nc != 0)
     sendto_channel_local(st, chptr, "%s %s", modebuf, parabuf);
@@ -2356,34 +2151,29 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
   if (chptr->mode.mode & MODE_HIDEOPS)
   {
     st = NON_CHANOPS;
+    dir = MODE_QUERY;
     mbl = ircsprintf(modebuf, ":%s MODE %s ", me.name, chname);
     pbl = 0;
     parabuf[0] = '\0';
 
-    if (mode_count_minus > 0)
+    for (i = 0; i < mode_count; i++)
     {
-      modebuf[mbl++] = '-';
-      modebuf[mbl] = '\0';
-    }
-
-    for (i = 0; i < mode_count_minus; i++)
-    {
-      if (mode_changes_minus[i].letter == 0 ||
-          mode_changes_minus[i].mems == ONLY_SERVERS)
+      if (mode_changes[i].letter == 0 ||
+          mode_changes[i].mems == ONLY_SERVERS)
         continue;
-      if (mode_changes_minus[i].mems != ALL_MEMBERS)
+
+      if (mode_changes[i].mems != ALL_MEMBERS)
       {
-        if (mode_changes_minus[i].letter == 'v' &&
-	    MyConnect(mode_changes_minus[i].client) &&
-	    !is_any_op(chptr, mode_changes_minus[i].client))
-	  sendto_one(mode_changes_minus[i].client, ":%s MODE %s -v %s",
-	             me.name, chname, mode_changes_minus[i].arg);
+        if (mode_changes[i].letter == 'v' &&
+	    MyConnect(mode_changes[i].client) &&
+	    !is_any_op(chptr, mode_changes[i].client))
+	  sendto_one(mode_changes[i].client, ":%s MODE %s -v %s",
+	             me.name, chname, mode_changes[i].arg);
 	continue;
       }
 
-      if (mode_changes_minus[i].arg != NULL &&
-          ((mc == MAXMODEPARAMS) ||
-           ((strlen(mode_changes_minus[i].arg) + mbl + pbl + 2) > BUFSIZE)))
+      if (mode_changes[i].arg != NULL && ((mc == MAXMODEPARAMS) ||
+           ((strlen(mode_changes[i].arg) + mbl + pbl + 2) > BUFSIZE)))
       {
         if (mbl && modebuf[mbl - 1] == '-')
           modebuf[mbl - 1] = '\0';
@@ -2394,74 +2184,25 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
         nc = 0;
         mc = 0;
         
-        mbl = ircsprintf(modebuf, ":%s MODE %s -", me.name, chname);
+        mbl = ircsprintf(modebuf, ":%s MODE %s ", me.name, chname);
         pbl = 0;
         parabuf[0] = '\0';
       }
 
-      modebuf[mbl++] = mode_changes_minus[i].letter;
+      if(dir != mode_changes[i].dir)
+      {
+        modebuf[mbl++] = (mode_changes[i].dir == MODE_ADD) ? '+' : '-';
+        dir = mode_changes[i].dir;
+      }
+
+      modebuf[mbl++] = mode_changes[i].letter;
       modebuf[mbl] = '\0';
       nc++;
 
-      if (mode_changes_minus[i].arg != NULL)
+      if (mode_changes[i].arg != NULL)
       {
         mc++;
-        pbl = strlen(strcat(parabuf, mode_changes_minus[i].arg));
-        parabuf[pbl++] = ' ';
-        parabuf[pbl] = '\0';
-      }
-    }
-
-    if (mode_count_plus > 0)
-    {
-      if (mbl > 0 && modebuf[mbl - 1] == '-')
-        modebuf[mbl - 1] = '+';
-      else
-        modebuf[mbl++] = '+';
-
-      modebuf[mbl] = '\0';
-    }
-
-    for (i = 0; i < mode_count_plus; i++)
-    {
-      if (mode_changes_plus[i].letter == 0 ||
-          mode_changes_plus[i].mems == ONLY_SERVERS)
-        continue;
-      if (mode_changes_plus[i].mems != ALL_MEMBERS)
-      {
-        if (mode_changes_plus[i].letter == 'v' &&
-	    MyConnect(mode_changes_plus[i].client) &&
-	    !is_any_op(chptr, mode_changes_plus[i].client))
-	  sendto_one(mode_changes_plus[i].client, ":%s MODE %s +v %s",
-	             me.name, chname, mode_changes_plus[i].arg);
-	continue;
-      }
-
-      if (mode_changes_plus[i].arg != NULL &&
-          ((mc == MAXMODEPARAMS) ||
-           ((strlen(mode_changes_plus[i].arg) + mbl + pbl + 2) > BUFSIZE)))
-      {
-        if (mbl && modebuf[mbl - 1] == '+')
-          modebuf[mbl - 1] = '\0';
-
-        if (nc != 0)
-          sendto_channel_local(st, chptr, "%s %s", modebuf, parabuf);
-
-        nc = 0;
-        mc = 0;
-        mbl = ircsprintf(modebuf, ":%s MODE %s +", me.name, chname);
-        pbl = 0;
-        parabuf[0] = '\0';
-      }
-
-      modebuf[mbl++] = mode_changes_plus[i].letter;
-      modebuf[mbl] = '\0';
-      nc++;
-
-      if (mode_changes_plus[i].arg != NULL)
-      {
-        mc++;
-        pbl = strlen(strcat(parabuf, mode_changes_plus[i].arg));
+        pbl = strlen(strcat(parabuf, mode_changes[i].arg));
         parabuf[pbl++] = ' ';
         parabuf[pbl] = '\0';
       }
@@ -2563,13 +2304,12 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
   int table_position;
 
   mask_pos = 0;
-  mode_count_plus = 0;
-  mode_count_minus = 0;
+  mode_count = 0;
 #ifdef HALFOPS
   bounce_count = 0;
 #endif
 #ifdef ANONOPS
-  hideops_changed = 0;
+  hideops_changed = (chptr->mode.mode & MODE_HIDEOPS);
 #endif
   mode_limit = 0;
 
@@ -2766,42 +2506,29 @@ static void mode_get_status(struct Channel *chptr, struct Client *target_p,
 #endif
     *t_voice = is_voiced(chptr, target_p);
   }
-  else {
+  else
+  {
     *t_op = 0;
     *t_hop = 0;
   }
 
-  for (i = 0; i < mode_count_minus; i++)
-    if (mode_changes_minus[i].client == target_p)
+  for (i = 0; i < mode_count; i++)
+  {
+    if (mode_changes[i].client == target_p)
     {
-      if (mode_changes_minus[i].letter == 'o')
-        *t_op = 0;
+      if (mode_changes[i].letter == 'o')
+        *t_op = (mode_changes[i].dir == MODE_ADD) ? 1 : 0;
 #ifdef HALFOPS
-      else if (mode_changes_minus[i].letter == 'h')
+      else if (mode_changes[i].letter == 'h')
       {
-        *t_hop = 0;
+        *t_hop = (mode_changes[i].dir == MODE_ADD) ? 1 : 0;
 	return;
       }
 #endif
-      else if (mode_changes_minus[i].letter == 'v')
-        *t_voice = 0;
+      else if (mode_changes[i].letter == 'v')
+        *t_voice = (mode_changes[i].dir == MODE_ADD) ? 1 : 0;
     }
-
-  for (i = 0; i < mode_count_plus; i++)
-    if (mode_changes_plus[i].client == target_p)
-    {
-      if (mode_changes_plus[i].letter == 'o')
-        *t_op = 1;
-#ifdef HALFOPS
-      else if (mode_changes_plus[i].letter == 'h')
-      {
-        *t_hop = 1;
-        return;
-      }
-#endif
-      else if (mode_changes_plus[i].letter == 'v')
-        *t_voice = 1;
-    }
+  }
 }
 
 static void update_channel_info(struct Channel *chptr)
@@ -2809,61 +2536,109 @@ static void update_channel_info(struct Channel *chptr)
   int i;
 #ifdef ANONOPS
   int t_voice, t_hop, t_op;
-  dlink_node *ptr, *ptr_next;
+  dlink_node *ptr;
+  dlink_node *ptr_next;
 
-  if (hideops_changed == -1)
+  /* hideops_changed is set to chptr->mode.mode & MODE_HIDEOPS at
+   * the beginning..
+   */
+  if (hideops_changed != (chptr->mode.mode & MODE_HIDEOPS))
   {
-    sync_channel_oplists(chptr, MODE_ADD);
-    chptr->mode.mode &= ~MODE_HIDEOPS;
-  }
-  else if (hideops_changed == 1)
-  {
-    for (ptr = chptr->locpeons.head; ptr != NULL && ptr->data != NULL;
-      ptr = ptr->next)
+    if(chptr->mode.mode & MODE_HIDEOPS)
     {
-      mode_get_status(chptr, ptr->data, &t_op, &t_hop, &t_voice, 0);
-      if (!t_hop && !t_op)
-        sync_oplists(chptr, ptr->data, MODE_DEL, RootChan(chptr)->chname);
-    }
-    for (ptr = chptr->locvoiced.head; ptr != NULL && ptr->data != NULL;
-      ptr = ptr->next)
-    {
-      mode_get_status(chptr, ptr->data, &t_op, &t_hop, &t_voice, 0);
-      if (!t_hop && !t_op)
-        sync_oplists(chptr, ptr->data, MODE_DEL, RootChan(chptr)->chname);
-    }
+      for (ptr = chptr->locpeons.head; ptr != NULL && ptr->data != NULL;
+           ptr = ptr->next)
+      {
+        mode_get_status(chptr, ptr->data, &t_op, &t_hop, &t_voice, 0);
+        if (!t_hop && !t_op)
+          sync_oplists(chptr, ptr->data, MODE_DEL, RootChan(chptr)->chname);
+      }
 
-    chptr->mode.mode |= MODE_HIDEOPS;
+      for (ptr = chptr->locvoiced.head; ptr != NULL && ptr->data != NULL;
+           ptr = ptr->next)
+      {
+        mode_get_status(chptr, ptr->data, &t_op, &t_hop, &t_voice, 0);
+        if (!t_hop && !t_op)
+          sync_oplists(chptr, ptr->data, MODE_DEL, RootChan(chptr)->chname);
+      }
+
+#ifdef HALFOPS
+      for(ptr = chptr->lochalfops.head; ptr != NULL; ptr = ptr->next)
+      {
+        mode_get_status(chptr, ptr->data, &t_op, &t_hop, &t_voice, 1);
+        if(!t_hop && !t_op)
+          sync_oplists(chptr, ptr->data, MODE_DEL, RootChan(chptr)->chname);
+      }
+#endif
+
+#ifdef REQUIRE_OANDV
+      for(ptr = chptr->locchanops_voiced.head; ptr != NULL; ptr = ptr->next)
+      {
+        mode_get_status(chptr, ptr->data, &t_op, &t_hop, &t_voice, 1);
+        if(!t_hop && !t_op)
+          sync_oplists(chptr, ptr->data, MODE_DEL, RootChan(chptr)->chname);
+      }
+#endif
+
+      for(ptr = chptr->locchanops.head; ptr != NULL; ptr = ptr->next)
+      {
+        mode_get_status(chptr, ptr->data, &t_op, &t_hop, &t_voice, 1);
+        if(!t_hop && !t_op)
+          sync_oplists(chptr, ptr->data, MODE_DEL, RootChan(chptr)->chname);
+      }
+    }
+    else
+    {
+      sync_channel_oplists(chptr, MODE_ADD);
+      chptr->mode.mode &= ~MODE_HIDEOPS;
+    }
   }
 
-  /* Create a list of deopped users who need a resync.. */
-  if ((chptr->mode.mode & MODE_HIDEOPS) && hideops_changed != -1)
+  /* +/-a hasnt changed but we're still +a, sync those who have changed
+   * status
+   */
+  else if(chptr->mode.mode & MODE_HIDEOPS)
   {
     dlink_list deopped = {NULL, NULL};
+    dlink_list opped = {NULL, NULL};
 
-    for (i = 0; i < mode_count_minus; i++)
-      if ((mode_changes_minus[i].letter == 'o' ||
-        mode_changes_minus[i].letter == 'h') &&
-	MyConnect(mode_changes_minus[i].client))
+    for (i = 0; i < mode_count; i++)
+    {
+      if(mode_changes[i].dir == MODE_DEL)
       {
-        ptr = make_dlink_node();
-        dlinkAdd(mode_changes_minus[i].client, ptr, &deopped);
+        if((mode_changes[i].letter == 'o' || mode_changes[i].letter == 'h') &&
+           MyConnect(mode_changes[i].client))
+        {
+          if((ptr = dlinkFind(&opped, mode_changes[i].client)) == NULL)
+          {
+            ptr = make_dlink_node();
+            dlinkAdd(mode_changes[i].client, ptr, &deopped);
+          }
+          else
+          {
+            dlinkDelete(ptr, &opped);
+            free_dlink_node(ptr);
+          }
+        }
       }
-
-    for (i = 0; i < mode_count_plus; i++)
-      if ((mode_changes_plus[i].letter == 'o' ||
-        mode_changes_plus[i].letter == 'h') &&
-	MyConnect(mode_changes_plus[i].client))
+      else
       {
-        if ((ptr = dlinkFind(&deopped, mode_changes_plus[i].client)) != NULL)
-	{
-          dlinkDelete(ptr, &deopped);
-	  free_dlink_node(ptr);
-	}
-        else
-	  sync_oplists(chptr, mode_changes_plus[i].client, MODE_ADD,
-            RootChan(chptr)->chname);
+        if((mode_changes[i].letter == 'o' || mode_changes[i].letter == 'h') &&
+           MyConnect(mode_changes[i].client))
+        {
+          if((ptr = dlinkFind(&deopped, mode_changes[i].client)) == NULL)
+          {
+            ptr = make_dlink_node();
+            dlinkAdd(mode_changes[i].client, ptr, &opped);
+          }
+          else
+          {
+            dlinkDelete(ptr, &deopped);
+            free_dlink_node(ptr);
+          }
+        }
       }
+    }
 
     /* ..and send a resync to them */
     for (ptr=deopped.head; ptr != NULL && ptr->data != NULL; ptr=ptr_next)
@@ -2872,68 +2647,99 @@ static void update_channel_info(struct Channel *chptr)
       sync_oplists(chptr, ptr->data, MODE_DEL, RootChan(chptr)->chname);
       free_dlink_node(ptr);
     }
+
+    for(ptr = opped.head; ptr != NULL; ptr = ptr_next)
+    {
+      ptr_next = ptr->next;
+      sync_oplists(chptr, ptr->data, MODE_ADD, RootChan(chptr)->chname);
+      free_dlink_node(ptr);
+    }
   }
 #endif
 
-  /* Update channel members lists. Note we must scan mode_changes_minus
-     earlier, because of the cases like -h+o... */
-  for (i = 0; i < mode_count_minus; i++)
-    if (mode_changes_minus[i].letter == 'o')
+  /* Update channel members lists. */
+  for (i = 0; i < mode_count; i++)
+  {
+    if (mode_changes[i].letter == 'o')
     {
 #ifdef REQUIRE_OANDV
-      if (is_voiced(chptr, mode_changes_minus[i].client))
-        change_channel_membership(chptr, &chptr->voiced, &chptr->locvoiced,
-	  mode_changes_minus[i].client);
+      if (is_voiced(chptr, mode_changes[i].client))
+      {
+        if(mode_changes[i].dir == MODE_DEL)
+        {
+          change_channel_membership(chptr, &chptr->voiced, &chptr->locvoiced,
+	                            mode_changes[i].client);
+        }
+        else
+        {
+          change_channel_membership(chptr, &chptr->chanops_voiced,
+                                    &chptr->locchanops_voiced, 
+                                    mode_changes[i].client);
+        }
+      }
       else
 #endif
-        change_channel_membership(chptr, &chptr->peons, &chptr->locpeons,
-	  mode_changes_minus[i].client);
+      {
+        if(mode_changes[i].dir == MODE_DEL)
+        {
+          change_channel_membership(chptr, &chptr->peons, &chptr->locpeons,
+	                            mode_changes[i].client);
+        }
+        else
+        {
+          change_channel_membership(chptr, &chptr->chanops, &chptr->locchanops,
+                                    mode_changes[i].client);
+        }
+      }
     }
 #ifdef HALFOPS
-    else if (mode_changes_minus[i].letter == 'h')
-      change_channel_membership(chptr, &chptr->peons, &chptr->locpeons,
-        mode_changes_minus[i].client);
-#endif
-    else if (mode_changes_minus[i].letter == 'v')
+    else if (mode_changes[i].letter == 'h')
     {
-#ifdef REQUIRE_OANDV
-      if (is_chan_op(chptr, mode_changes_minus[i].client))
-        change_channel_membership(chptr, &chptr->chanops, &chptr->locchanops,
-	  mode_changes_minus[i].client);
-      else
-#endif
+      if(mode_changes[i].dir == MODE_DEL)
+      {
         change_channel_membership(chptr, &chptr->peons, &chptr->locpeons,
-	  mode_changes_minus[i].client);
+                                  mode_changes[i].client);
+      }
+      else
+      {
+        change_channel_membership(chptr, &chptr->halfops, &chptr->lochalfops,
+                                  mode_changes[i].client);
+      }
     }
-
-  for (i = 0; i < mode_count_plus; i++)
-    if (mode_changes_plus[i].letter == 'o')
+#endif
+    else if (mode_changes[i].letter == 'v')
     {
 #ifdef REQUIRE_OANDV
-      if (is_voiced(chptr, mode_changes_plus[i].client))
-        change_channel_membership(chptr, &chptr->chanops_voiced,
-	  &chptr->locchanops_voiced, mode_changes_plus[i].client);
+      if (is_chan_op(chptr, mode_changes[i].client))
+      {
+        if(mode_changes[i].dir == MODE_DEL)
+        {
+          change_channel_membership(chptr, &chptr->chanops, &chptr->locchanops,
+	                            mode_changes[i].client);
+        }
+        else
+        {
+          change_channel_membership(chptr, &chptr->chanops_voiced,
+                                    &chptr->locchanops_voiced, 
+                                    mode_changes[i].client);
+        }
+      }
       else
 #endif
-        change_channel_membership(chptr, &chptr->chanops, &chptr->locchanops,
-	  mode_changes_plus[i].client);
+      {
+        if(mode_changes[i].dir == MODE_DEL)
+        {
+          change_channel_membership(chptr, &chptr->peons, &chptr->locpeons,
+	                            mode_changes[i].client);
+        }
+        else
+        {
+          change_channel_membership(chptr, &chptr->voiced, &chptr->locvoiced,
+                                    mode_changes[i].client);
+        }
+      }
     }
-#ifdef HALFOPS
-    else if (mode_changes_plus[i].letter == 'h')
-      change_channel_membership(chptr, &chptr->halfops, &chptr->lochalfops,
-        mode_changes_plus[i].client);
-#endif
-    else if (mode_changes_plus[i].letter == 'v')
-    {
-#ifdef REQUIRE_OANDV
-      if (is_chan_op(chptr, mode_changes_plus[i].client))
-        change_channel_membership(chptr, &chptr->chanops_voiced,
-	  &chptr->locchanops_voiced, mode_changes_plus[i].client);
-      else
-#endif
-        change_channel_membership(chptr, &chptr->voiced, &chptr->locvoiced,
-	  mode_changes_plus[i].client);
-    }
+  }
 }
 
 #ifdef INTENSIVE_DEBUG

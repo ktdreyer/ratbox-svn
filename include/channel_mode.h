@@ -121,10 +121,14 @@ extern void unset_chcap_usage_counts(struct Client *serv_p);
 
 struct ChModeChange
 {
- char letter;
- char *arg, *id;
- int caps, nocaps, mems;
- struct Client *client;
+  char letter;
+  char *arg;
+  char *id;
+  int dir;
+  int caps;
+  int nocaps;
+  int mems;
+  struct Client *client;
 };
 
 #ifdef HALFOPS
