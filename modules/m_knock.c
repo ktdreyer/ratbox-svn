@@ -387,7 +387,8 @@ static int check_banned_knock(struct Channel *chptr, struct Client *who,
   {
     actualBan = ban->data;
 
-    if (match(actualBan->banstr, s) || match(actualBan->banstr, s2))
+    if (match(actualBan->banstr, s) || match(actualBan->banstr, s2) ||
+        match_cidr(actualBan->banstr, s))
       break;
     else
       actualBan = NULL;
@@ -399,7 +400,8 @@ static int check_banned_knock(struct Channel *chptr, struct Client *who,
     {
       actualExcept = except->data;
 
-      if (match(actualExcept->banstr, s) || match(actualExcept->banstr, s2))
+      if (match(actualExcept->banstr, s) || match(actualExcept->banstr, s2) ||
+          match_cidr(actualExcept->banstr, s))
         return CHFL_EXCEPTION;
     }
   }
