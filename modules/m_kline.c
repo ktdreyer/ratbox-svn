@@ -81,11 +81,7 @@ int valid_wild_card(struct Client *sptr, char *user, char *host);
 int already_placed_kline( struct Client *sptr, char *user, char *host,
 			  unsigned long ip);
 
-int ip_kline(char *host,unsigned long *ip, unsigned long *ip_mask);
-
-#ifdef SLAVE_SERVERS
-extern struct ConfItem *find_special_conf(char *,int); /* defined in s_conf.c */
-#endif
+int is_ip_kline(char *host,unsigned long *ip, unsigned long *ip_mask);
 
 void WriteKline(const char *, struct Client *, struct Client *,
                        const char *, const char *, const char *, 
@@ -98,15 +94,17 @@ void WriteDline(const char *, struct Client *,
 char *_version = "20001122";
 
 /*
- * mo_kline()
+ * mo_kline
  *
- * re-worked a tad ... -Dianora
+ * inputs	- pointer to server
+ *		- pointer to client
+ *		- parameter count
+ *		- parameter list
+ * output	-
+ * side effects - D line is added
  *
- * -Dianora
  */
-
-int
-mo_kline(struct Client *cptr,
+int mo_kline(struct Client *cptr,
                 struct Client *sptr,
                 int parc,
                 char *parv[])
@@ -119,7 +117,7 @@ mo_kline(struct Client *cptr,
   const char* current_date;
   int  ip_kline = NO;
   struct ConfItem *aconf;
-  time_t temporary_kline_time=0;   /* -Dianora */
+  time_t temporary_kline_time=0;
   char *argv;
   unsigned long ip;
   unsigned long ip_mask;
@@ -169,6 +167,8 @@ mo_kline(struct Client *cptr,
 
   if(*argv)
     reason = argv;
+  else
+    reason = "No reason";
 
   if( valid_user_host(sptr,user,host) == 0 )
     return 0;
@@ -193,10 +193,10 @@ mo_kline(struct Client *cptr,
   if(temporary_kline_time)
     {
       ircsprintf(buffer,
-        "Temporary K-line %d min. - %s (%s)",
-        temporary_kline_time,
-        reason ? reason : "No reason",
-        current_date);
+		 "Temporary K-line %d min. - %s (%s)",
+		 temporary_kline_time,
+		 reason,
+		 current_date);
       DupString(aconf->passwd, buffer );
       aconf->hold = CurrentTime + temporary_kline_time;
       if (ip_kline)
@@ -210,15 +210,15 @@ mo_kline(struct Client *cptr,
         temporary_kline_time/60,
         user,
         host,
-        reason ? reason : "No reason");
+        reason );
       check_klines();
       return 0;
     }
   else
     {
       ircsprintf(buffer, "%s (%s)",
-        reason ? reason : "No reason",
-        current_date);
+		 reason,
+		 current_date);
       DupString(aconf->passwd, buffer );
     }
   ClassPtr(aconf) = find_class(0);
@@ -236,10 +236,10 @@ mo_kline(struct Client *cptr,
     sptr->name,
     user,
     host,
-    reason ? reason : "No reason");
+    reason );
 
   log(L_TRACE, "%s added K-Line for [%s@%s] [%s]",
-      sptr->name, user, host, reason ? reason : "No reason");
+      sptr->name, user, host, reason );
 
   sendto_one(sptr,
     ":%s NOTICE %s :Added K-Line [%s@%s] to %s",
@@ -267,13 +267,9 @@ mo_kline(struct Client *cptr,
 /*
  * ms_kline()
  *
- * re-worked a tad ... -Dianora
  *
- * -Dianora
  */
-
-int
-ms_kline(struct Client *cptr,
+int ms_kline(struct Client *cptr,
                 struct Client *sptr,
                 int parc,
                 char *parv[])
@@ -364,14 +360,12 @@ time_t valid_tkline(struct Client *sptr, int parc, char *p)
 /*
  * cluster()
  *
- * input        - pointer to a hostname
+ * inputs       - pointer to a hostname
  * output       - pointer to a static of the hostname masked
  *                for use in a kline.
  * side effects - NONE
  *
- * reworked a tad -Dianora
  */
-
 char *cluster(char *hostname)
 {
   static char result[HOSTLEN + 1];      /* result to return */
@@ -390,8 +384,6 @@ char *cluster(char *hostname)
    * and must have been introduced by server that doesn't
    * check for bogus domains (dns spoof) very well. *sigh* just return it...
    * I could also legitimately return (char *)NULL as above.
-   *
-   * -Dianora
    */
 
   if(strchr(hostname,'@'))      
@@ -482,15 +474,17 @@ char *cluster(char *hostname)
 }
 
 /*
- * re-worked a tad
- * added Rodders dated KLINE code
- * -Dianora
+ * mo_dline
+ *
+ * inputs	- pointer to server
+ *		- pointer to client
+ *		- parameter count
+ *		- parameter list
+ * output	-
+ * side effects - D line is added
  *
  */
-
-int
-mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
-
+int mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   char *host, *reason;
   char *p;
@@ -690,14 +684,20 @@ mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
 /*
  * WriteKline()
- * Write out a kline to the kline configuration file
+ * inputs	- filename
+ * 		- client to report to
+ * 		- actual client doing kline
+ *		- username being klined
+ *		- hostname being klined
+ *		- reasons for kline
+ *		- when (date)
+ * output	- NONE
+ * side effects	- Write out a kline to the kline configuration file
  */
-
-void
-WriteKline(const char *filename, struct Client *sptr, struct Client *rcptr,
-           const char *user, const char *host, const char *reason, 
-           const char *when)
-
+void WriteKline(const char *filename, struct Client *sptr,
+		struct Client *rcptr,
+		const char *user, const char *host, const char *reason, 
+		const char *when)
 {
   char buffer[1024];
   int out;
@@ -757,13 +757,17 @@ WriteKline(const char *filename, struct Client *sptr, struct Client *rcptr,
 
 /*
  * WriteDline()
- *  Write out a dline to the kline configuration file
+ * inputs	- filename
+ * 		- client to report to
+ * 		- actual client doing dline
+ *		- hostname being dlined
+ *		- reasons for dline
+ *		- when (date)
+ * output	- NONE
+ * side effects	- Write out a kline to the kline configuration file
  */
-
-void
-WriteDline(const char *filename, struct Client *sptr,
-           const char *host, const char *reason, const char *when)
-
+void WriteDline(const char *filename, struct Client *sptr,
+		const char *host, const char *reason, const char *when)
 {
   char buffer[1024];
   int out;
@@ -1049,7 +1053,15 @@ int already_placed_kline( struct Client *sptr, char *user, char *host,
   return 0;
 }
 
-int ip_kline(char *host,unsigned long *ip, unsigned long *ip_mask)
+/*
+ * is_ip_kline
+ * inputs	- hostname (ip)
+ * 		- pointer to where to put ip
+ * 		- pointer to where to put ip_mask
+ * output	- YES if valid ip_kline NO if not
+ * side effects	- NONE
+ */
+int is_ip_kline(char *host,unsigned long *ip, unsigned long *ip_mask)
 {
   char *p;
 
@@ -1062,10 +1074,6 @@ int ip_kline(char *host,unsigned long *ip, unsigned long *ip_mask)
   ** /quote kline *@192.168.0.*
   **
   */
-  /*
-   * what to do if host is a legal ip, and its a temporary kline ?
-   * Don't do the CIDR conversion for now of course.
-   */
 
   if((is_address(host, ip, ip_mask)))
      {
