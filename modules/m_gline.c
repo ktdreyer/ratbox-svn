@@ -965,7 +965,6 @@ remove_gline_match(const char* user, const char* host)
 {
   struct ConfItem *kill_ptr;
   struct ConfItem *last_ptr=NULL;
-  struct ConfItem *tmp_ptr;
 
   for( kill_ptr = glines; kill_ptr; kill_ptr = kill_ptr->next)
     {
