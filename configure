@@ -2395,7 +2395,7 @@ echo "${ECHO_T}no" >&6
 	;;
 	esac
 
-	IRC_CFLAGS="$IRC_CFLAGS -O2 -Wall"
+	IRC_CFLAGS="$IRC_CFLAGS -O0 -Wall -Werror -Wunused -Wmissing-declarations -Wwrite-strings -Wshadow"
 fi
 
 if test "$ac_cv_prog_cc_g" = yes; then

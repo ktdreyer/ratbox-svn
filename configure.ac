@@ -121,7 +121,7 @@ if test "$ac_cv_c_compiler_gnu" = yes; then
 	;;
 	esac
 
-	IRC_CFLAGS="$IRC_CFLAGS -O2 -Wall"
+	IRC_CFLAGS="$IRC_CFLAGS -O0 -Wall -Werror -Wunused -Wmissing-declarations -Wwrite-strings -Wshadow"
 fi
 
 dnl If we support -g, use it!
