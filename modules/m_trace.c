@@ -45,6 +45,8 @@
 static void m_trace(struct Client *, struct Client *, int, char **);
 static void ms_trace(struct Client*, struct Client*, int, char**);
 static void mo_trace(struct Client*, struct Client*, int, char**);
+static struct Client* next_client_double(struct Client *next,
+					 const char* ch);
 
 static void trace_spy(struct Client *);
 
@@ -429,4 +431,39 @@ static void trace_spy(struct Client *source_p)
 
   hook_call_event("doing_trace", &data);
 }
+
+/* 
+ * this slow version needs to be used for hostmasks *sigh
+ *
+ * next_client_double - find the next matching client. 
+ * The search can be continued from the specified client entry. 
+ * Normal usage loop is:
+ *
+ *      for (x = client; x = next_client_double(x,mask); x = x->next)
+ *              HandleMatchingClient;
+ *            
+ */
+static struct Client* 
+next_client_double(struct Client *next, /* First client to check */
+                   const char* ch)      /* search string (may include wilds) */
+{
+  struct Client *tmp = next;
+
+  next = find_client(ch);
+
+  if (next == NULL)
+    next = tmp;
+
+  if (tmp && tmp->prev == next)
+    return NULL;
+  if (next != tmp)
+    return next;
+  for ( ; next; next = next->next)
+    {
+      if (match(ch,next->name) || match(next->name,ch))
+        break;
+    }
+  return next;
+}
+
 

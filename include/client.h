@@ -597,11 +597,7 @@ extern void     count_remote_client_memory(int *count, int *memory);
 
 extern struct Client* find_chasing (struct Client *, char *, int *);
 extern struct Client* find_person (char *);
-extern struct Client* find_userhost (char *, char *, struct Client *, int *);
-extern struct Client* next_client(struct Client* next, const char* name);
-extern struct Client* next_client_double(struct Client* next, 
-                                         const char* name);
-
+extern struct Client* next_client (struct Client *, const char *);
 extern int accept_message(struct Client *source, struct Client *target);
 extern void del_from_accept(struct Client *source, struct Client *target);
 extern void del_all_accepts(struct Client *client_p);

@@ -711,36 +711,6 @@ del_client_from_llist(struct Client **bucket, struct Client *client)
 }
 
 /*
- *  find_userhost - find a user@host (server or user).
- *
- *  *Note*
- *      Semantics of this function has been changed from
- *      the old. 'name' is now assumed to be a null terminated
- *      string and the search is the for server and user.
- */
-struct Client *
-find_userhost(char *user, char *host, struct Client *client_p, int *count)
-{
-  struct Client *c2ptr;
-  struct Client *res = client_p;
-
-  *count = 0;
-  if (collapse(user))
-    for (c2ptr = GlobalClientList; c2ptr; c2ptr = c2ptr->next) 
-      {
-        if (!MyClient(c2ptr)) /* implies mine and a user */
-          continue;
-        if ((!host || match(host, c2ptr->host)) &&
-            irccmp(user, c2ptr->username) == 0)
-          {
-            (*count)++;
-            res = c2ptr;
-          }
-      }
-  return res;
-}
-
-/*
  * next_client - find the next matching client. 
  * The search can be continued from the specified client entry. 
  * Normal usage loop is:
@@ -773,48 +743,14 @@ next_client(struct Client *next,     /* First client to check */
   return next;
 }
 
-
-/* 
- * this slow version needs to be used for hostmasks *sigh
- *
- * next_client_double - find the next matching client. 
- * The search can be continued from the specified client entry. 
- * Normal usage loop is:
- *
- *      for (x = client; x = next_client(x,mask); x = x->next)
- *              HandleMatchingClient;
- *            
- */
-struct Client* 
-next_client_double(struct Client *next, /* First client to check */
-                   const char* ch)      /* search string (may include wilds) */
-{
-  struct Client *tmp = next;
-
-  next = find_client(ch);
-
-  if (next == NULL)
-    next = tmp;
-
-  if (tmp && tmp->prev == next)
-    return NULL;
-  if (next != tmp)
-    return next;
-  for ( ; next; next = next->next)
-    {
-      if (match(ch,next->name) || match(next->name,ch))
-        break;
-    }
-  return next;
-}
-
 /*
- * find_person - find person by (nick)name.
+ * find_person	- find person by (nick)name.
  * inputs	- pointer to name
  * output	- return client pointer
  * side effects -
  */
-struct Client *find_person(char *name)
+struct Client *
+find_person(char *name)
 {
   struct Client       *c2ptr;
 
