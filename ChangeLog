@@ -1,3 +1,19 @@
+leeh        2004/02/23 09:39:12 EST	(20040223_1)
+
+  Modified files:
+    include              s_conf.h 
+    src                  s_conf.c s_newconf.c 
+  Log:
+  - clean up struct ConfItem now we have struct server_conf
+    this cuts the size of it from 328 -> 56 bytes, which isnt bad at all :)
+  
+  Revision  Changes    Path
+  7.266     +0 -8      ircd-ratbox/include/s_conf.h
+  7.446     +0 -9      ircd-ratbox/src/s_conf.c
+  7.20      +1 -0      ircd-ratbox/src/s_newconf.c
+
+
+
 leeh        2004/02/23 09:18:19 EST	(20040223_0)
 
   Modified files:
