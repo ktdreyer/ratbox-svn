@@ -103,10 +103,10 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
         ac2ptr = next_client_double(GlobalClientList, tname);
         if (ac2ptr)
           sendto_one(source_p, form_str(RPL_TRACELINK), me.name, parv[0],
-                     version, debugmode, tname, ac2ptr->from->name);
+                     ircd_version, debugmode, tname, ac2ptr->from->name);
         else
           sendto_one(source_p, form_str(RPL_TRACELINK), me.name, parv[0],
-                     version, debugmode, tname, "ac2ptr_is_NULL!!");
+                     ircd_version, debugmode, tname, "ac2ptr_is_NULL!!");
         return;
       }
     case HUNTED_ISME:

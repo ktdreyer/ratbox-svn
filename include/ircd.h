@@ -80,7 +80,7 @@ extern char*          generation;
 extern char*          platform;
 extern char*          infotext[];
 extern char*          serno;
-extern char*          version;
+extern char*          ircd_version;
 extern const char     serveropts[];
 extern int            cold_start;
 extern int            dorehash;

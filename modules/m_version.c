@@ -70,7 +70,7 @@ static void m_version(struct Client* client_p, struct Client* source_p,
                       int parc, char* parv[])
 {
   sendto_one(source_p, form_str(RPL_VERSION), me.name,
-                parv[0], version, serno, debugmode,
+                parv[0], ircd_version, serno, debugmode,
                 me.name, confopts(source_p), serveropts);
                 
   show_isupport(source_p);
@@ -88,7 +88,7 @@ static void mo_version(struct Client* client_p, struct Client* source_p,
 		  1, parc, parv) != HUNTED_ISME)
     return;
     
-  sendto_one(source_p, form_str(RPL_VERSION), me.name, parv[0], version, 
+  sendto_one(source_p, form_str(RPL_VERSION), me.name, parv[0], ircd_version, 
   	     serno, debugmode, me.name, confopts(source_p), serveropts);
 	       
   show_isupport(source_p);
@@ -110,7 +110,7 @@ static void ms_version(struct Client* client_p, struct Client* source_p,
                        1, parc, parv) == HUNTED_ISME)
          {
            sendto_one(source_p, form_str(RPL_VERSION), me.name,
-                      parv[0], version, serno, debugmode,
+                      parv[0], ircd_version, serno, debugmode,
                       me.name, confopts(source_p), serveropts);
            show_isupport(source_p);
          }
@@ -118,7 +118,7 @@ static void ms_version(struct Client* client_p, struct Client* source_p,
    else
      {
        sendto_one(source_p, form_str(RPL_VERSION), me.name,
-                  parv[0], version, serno, debugmode,
+                  parv[0], ircd_version, serno, debugmode,
                   me.name, confopts(source_p), serveropts);
        show_isupport(source_p);
      }

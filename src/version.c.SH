@@ -55,7 +55,7 @@ $spitshell >version.c <<!SUB!THIS!
 char *generation = "$generation";
 char *creation = "$creation";
 char *platform = "$uname";
-char *version = PATCHLEVEL;
+char *ircd_version = PATCHLEVEL;
 char *serno = SERIALNUM;
 
 char *infotext[] =

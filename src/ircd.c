@@ -179,7 +179,7 @@ size_t get_maxrss(void)
 static void
 print_startup(int pid)
 {
-  printf("ircd: version %s\n", version);
+  printf("ircd: version %s\n", ircd_version);
   printf("ircd: pid %d\n", pid);
   printf("ircd: running in %s mode from %s\n", !server_state.foreground ? "background"
          : "foreground", ConfigFileEntry.dpath);
@@ -541,7 +541,7 @@ int main(int argc, char *argv[])
   
  if (printVersion) 
  {
-  printf("ircd: version %s\n", version);
+  printf("ircd: version %s\n", ircd_version);
   exit(EXIT_SUCCESS);
  }
   
