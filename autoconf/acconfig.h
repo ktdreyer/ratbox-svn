@@ -22,6 +22,9 @@
 /* Using select */
 #undef USE_SELECT
 
+/* Using devpoll */
+#undef USE_DEVPOLL
+
 /* Define if we have socklen_t */
 #undef HAVE_SOCKLEN_T
 

@@ -91,6 +91,7 @@ BASE_SRCS =                     \
   s_bsd_kqueue.c		\
   s_bsd_poll.c			\
   s_bsd_select.c		\
+  s_bsd_devpoll.c		\
   s_conf.c                      \
   s_debug.c                     \
   s_gline.c                     \
