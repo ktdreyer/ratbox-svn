@@ -221,7 +221,9 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
     fde_t *F = &fd_table[fd];
     assert(fd >= 0);
     assert(F->flags.open);
-   
+#if 0
+    fprintf(stderr, "fd[%d]: type: %s %s handler: %p\n", fd, type & COMM_SELECT_READ ? "COMM_SELECT_READ" : "", type & COMM_SELECT_WRITE ? "COMM_SELECT_WRITE" : "", handler); 
+#endif
     if (type & COMM_SELECT_READ) {
         F->read_handler = handler;
         F->read_data = client_data;
@@ -236,7 +238,7 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
         F->timeout = CurrentTime + (timeout / 1000);
 }
  
-/* int comm_select_fdlist(unsigned long delay)
+/* int comm_select(unsigned long delay)
  * Input: The maximum time to delay.
  * Output: Returns -1 on error, 0 on success.
  * Side-effects: Deregisters future interest in IO and calls the handlers
@@ -249,6 +251,7 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
  * comm_setselect and fd_table[] and calls callbacks for IO ready
  * events.
  */
+static int loop_count = 0;
 int
 comm_select(unsigned long delay)
 {
@@ -265,7 +268,7 @@ comm_select(unsigned long delay)
  timeout.tv_nsec = 1000000 * delay;
  for (;;)
  {
-  if(!sigio_is_screwed)
+  if(!sigio_is_screwed < ++loop_count <= 4)
   {
   	if((sig = sigtimedwait(&our_sigset, &si, &timeout)) > 0)
   	{
@@ -282,6 +285,9 @@ comm_select(unsigned long delay)
   	        if (revents & (POLLRDNORM | POLLIN | POLLHUP | POLLERR))
   	        {
 	  		callbacks_called++;
+#if 0
+			fprintf(stderr, "fd[%d]: SIGIO READ handler: %p\n", fd, F->read_handler);
+#endif
   	      		hdl = F->read_handler;
 			F->read_handler = NULL;
 			poll_update_pollfds(fd, POLLIN, NULL);
@@ -291,6 +297,9 @@ comm_select(unsigned long delay)
 		if (revents & (POLLWRNORM | POLLOUT | POLLHUP | POLLERR))
 		{
 			callbacks_called++;
+#if 0
+			fprintf(stderr, "fd[%d]: SIGIO WRITE handler: %p\n", fd,F->write_handler);
+#endif
 			hdl = F->write_handler;
 			F->write_handler = NULL;
 			poll_update_pollfds(fd, POLLOUT, NULL);
@@ -303,7 +312,7 @@ comm_select(unsigned long delay)
   }  else
   	break;
  }
- if(!sigio_is_screwed) /* We don't need to proceed */
+ if(!sigio_is_screwed && loop_count <=4 ) /* We don't need to proceed */
  	return 0;
  for(;;)
  {
@@ -313,6 +322,7 @@ comm_select(unsigned long delay)
     		signal(sigio_signal, SIG_DFL);
 		sigio_is_screwed = 0;
   	}
+  		loop_count = 0;
   		num = poll(pollfd_list.pollfds, pollfd_list.maxindex + 1, 0);
   		if (num >= 0)
     			break;

@@ -25,6 +25,9 @@
 /* Using devpoll */
 #undef USE_DEVPOLL
 
+/* Using sigio */
+#undef USE_SIGIO
+
 /* Define if we have socklen_t */
 #undef HAVE_SOCKLEN_T
 
