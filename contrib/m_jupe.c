@@ -90,7 +90,7 @@ static void mo_jupe(struct Client *client_p, struct Client *source_p,
   if(!ServerInfo.hub)
     return;
 
-  if(!IsSetOperAdmin(source_p))
+  if(!IsOperAdmin(source_p))
     {
       sendto_one(source_p, ":%s NOTICE %s :You must be an admin to use this command",
                  me.name, parv[0]);
