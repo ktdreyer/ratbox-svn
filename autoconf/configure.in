@@ -80,7 +80,9 @@ dnl XXX This could be consecutive 'if' statements, and then check
 dnl for a zero "$IRC_CFLAGS" (but what should we use for TenDRA??)
 dnl and then do the check for whether -g works... Hrrm. -jmallett
 if test "x$GCC" = "xyes"; then
-  IRC_CFLAGS="-O2 -g -ggdb -Wunused -Wall -Wshadow -Wmissing-declarations"
+#  Use this for development..
+#  IRC_CFLAGS="-O2 -g -ggdb -Wunused -Wall -Wshadow -Wmissing-declarations"
+   IRC_CFLAGS="-O2 -g -ggdb"
 else
   if test "x$TenDRA" = "xyes"; then
     dnl CPPFLAGS here is really IRC_CFLAGS but autoconf does silly
