@@ -1,3 +1,8 @@
+*** 20011116_1 by wcampbel
+Updated our manpage to be correct with our current implementation.
+Corrected a few minor formatting issues with the manpage.
+
+
 *** 20011115_2 by leeh
 - err - if servernameis too long, you need to reject it - not chop it..
 
