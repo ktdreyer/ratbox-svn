@@ -1,3 +1,13 @@
+*** 20001217_3 by db
+- I ran it through lint, discovered a pile of unused variables unused
+  parameters. Removed... and made a function static in channel.c
+- added einride and hwy to credits, give them some vanity.
+- fileio.c had an obvious bug, but we never used fbgetc() so it didn't 
+  matter. pro is going to look at the ircu version, to see if we can
+  fold that one back in without issues.
+
+
+
 *** 20001217_2 by db
 - removed the two pass exit procedure in check_klines check_pings
   it was =only= done in the first place to get around the local[] 
