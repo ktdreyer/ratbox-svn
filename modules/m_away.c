@@ -58,6 +58,9 @@ DECLARE_MODULE_AV1(away, NULL, NULL, away_clist, NULL, NULL, "$Revision$");
  *            but perhaps it's worth the load it causes to net.
  *            This requires flooding of the whole net like NICK,
  *            USER, MODE, etc messages...  --msa
+ *		
+ *            The above comments have long since irrelvant, but
+ *            are kept for historical purposes now ;)
  ***********************************************************************/
 
 /*
