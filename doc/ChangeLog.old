@@ -1,3 +1,15 @@
+enygma      2002/03/01 19:23:59 EST	(20020302_1)
+
+  Modified files:
+    src                  modules.c 
+  Log:
+  A cosmetic problem regarding load_core_modules solved
+  
+  Revision  Changes    Path
+  7.99      +2 -4      ircd-hybrid-7/src/modules.c
+
+
+
 leeh        2002/03/01 19:14:28 EST	(20020302_0)
 
   Modified files:
