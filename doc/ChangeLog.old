@@ -1,3 +1,9 @@
+*** 20000407_1 by db
+- unused variable never caught, uneeded va_end caused solaris compiler
+  to not compile
+
+
+
 *** 20000405_1 by db
 - committing some quick hacks for verifying block allocator
   is not leaking.
