@@ -57,7 +57,7 @@ _moddeinit(void)
   mod_del_cmd(&kick_msgtab);
 }
 
-char *_version = "20010121";
+char *_version = "20010428";
 #endif
 /*
 ** m_kick
@@ -181,16 +181,26 @@ static void m_kick(struct Client *client_p,
                      me.name, parv[0], name);
 	  return;
 	}
+      /* jdc
+       * - In the case of a server kicking a user (i.e. CLEARCHAN),
+       *   the kick should show up as coming from the server which did
+       *   the kick.
+       * - Personally, flame and I believe that server kicks shouldn't
+       *   be sent anyways.  Just waiting for some oper to abuse it...
+       */
       if (IsServer(source_p))
-    {
-      sendto_channel_local(ALL_MEMBERS, chptr, ":%s KICK %s %s :%s",
-        who->name, name, who->name, comment);
-    }
+      {
+        sendto_channel_local(ALL_MEMBERS, chptr, ":%s KICK %s %s :%s",
+          source_p->name, name, who->name, comment);
+      }
       else if(chptr->mode.mode & MODE_HIDEOPS)
 	{
+	  /* jdc -- Non-chanops get kicked from me.name, not
+	   *        who->name (themselves).
+	   */
 	  sendto_channel_local(NON_CHANOPS, chptr,
-			       ":%s KICK %s %s :%s", 
-			       who->name,
+			       ":%s KICK %s %s :%s",
+			       me.name,
 			       name, who->name, comment);
 
 	  sendto_channel_local(ONLY_CHANOPS_HALFOPS, chptr,
