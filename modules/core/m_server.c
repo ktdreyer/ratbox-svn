@@ -488,7 +488,7 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
 
       sendto_one(bclient_p, ":%s SERVER %s %d :%s%s",
 		 parv[0], target_p->name, hop + 1,
-		 SetHidden(target_p) ? "(H) " : "",
+		 IsHidden(target_p) ? "(H) " : "",
 		 target_p->info);
     }
       

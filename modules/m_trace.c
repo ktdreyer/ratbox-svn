@@ -177,17 +177,22 @@ static void m_trace(struct Client *client_p, struct Client *source_p,
    */
   if (doall && (IsOper(source_p) || !ConfigServerHide.hide_servers))
   {
-    DLINK_FOREACH(cptr, GlobalClientList.head)
+    struct Client *target2_p;
+
+    DLINK_FOREACH(ptr, serv_list.head)
     {
-      target_p = (struct Client *)cptr->data;
-      if (IsPerson(target_p))
-        {
-          link_u[target_p->from->localClient->fd]++;
-        }
-      else if (IsServer(target_p))
-	{
-	  link_s[target_p->from->localClient->fd]++;
-	}
+      target_p = ptr->data;
+
+      link_u[target_p->localClient->fd] = target_p->serv->usercnt;
+      link_s[target_p->localClient->fd] = 1;
+
+      DLINK_FOREACH(cptr, target_p->serv->servers.head)
+      {
+        target2_p = cptr->data;
+
+        link_u[target_p->localClient->fd] += target2_p->serv->usercnt;
+        link_s[target_p->localClient->fd]++;
+      }
     }
   }
 
