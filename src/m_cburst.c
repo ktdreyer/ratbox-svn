@@ -133,7 +133,7 @@ int     ms_cburst(struct Client *cptr,
 
   if( (acptr = hash_find_client(nick,(struct Client *)NULL)) )
     {
-      if( (is_banned(acptr, chptr) == CHFL_BAN) )
+      if( (is_banned(chptr,acptr) == CHFL_BAN) )
         {
           sendto_one(cptr,":%s LLJOIN %s %s :B",
                            me.name, name, nick);

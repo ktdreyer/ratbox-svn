@@ -38,6 +38,7 @@
  */
 #include "channel.h"
 #include "client.h"
+#include "m_invite.h"
 #include "common.h"
 #include "hash.h"
 #include "irc_string.h"
@@ -59,9 +60,6 @@
 /* LazyLinks */
 static void destroy_channel(struct Channel *);
 
-struct Channel *empty_channel_list=(struct Channel*)NULL;
-void remove_empty_channels();
-
 struct Channel *GlobalChannelList = NullChn;
 
 static  int     add_id (struct Client *, struct Channel *, char *, int);
@@ -76,7 +74,7 @@ static char *fix_key_old(char *);
 static void collapse_signs(char *);
 static int errsent(int,int *);
 static void change_chan_flag(struct Channel *, struct Client *, int );
-static void set_deopped(struct Client *,struct Channel *,int);
+static void set_deopped(struct Channel *chptr, struct Client *who, int flag );
 
 /*
  * some buffers for rebuilding channel/nick lists with ,'s
@@ -85,19 +83,6 @@ static void set_deopped(struct Client *,struct Channel *,int);
 static  char    buf[BUFSIZE];
 static  char    modebuf[MODEBUFLEN], modebuf2[MODEBUFLEN];
 static  char    parabuf[MODEBUFLEN], parabuf2[MODEBUFLEN];
-
-
-/* 
- * return the length (>=0) of a chain of struct SLinks.
- */
-static  int     list_length(struct SLink *lp)
-{
-  int   count = 0;
-
-  for (; lp; lp = lp->next)
-    count++;
-  return count;
-}
 
 /*
  *  Fixes a string so that the first white space found becomes an end of
@@ -368,18 +353,18 @@ static void del_matching_exception(struct Client *cptr,struct Channel *chptr)
  * +e code from orabidoo
  */
 
-int is_banned(struct Client *cptr,struct Channel *chptr)
+int is_banned(struct Channel *chptr, struct Client *who)
 {
   register struct SLink *tmp;
   register struct SLink *t2;
   char  s[NICKLEN+USERLEN+HOSTLEN+6];
   char  *s2;
 
-  if (!IsPerson(cptr))
+  if (!IsPerson(who))
     return (0);
 
-  strcpy(s, make_nick_user_host(cptr->name, cptr->username, cptr->host));
-  s2 = make_nick_user_host(cptr->name, cptr->username, cptr->sockhost);
+  strcpy(s, make_nick_user_host(who->name, who->username, who->host));
+  s2 = make_nick_user_host(who->name, who->username, who->sockhost);
 
   for (tmp = chptr->banlist; tmp; tmp = tmp->next)
     {
@@ -392,7 +377,7 @@ int is_banned(struct Client *cptr,struct Channel *chptr)
     {  /* check +d list */
       for (tmp = chptr->denylist; tmp; tmp = tmp->next)
 	{
-	  if (match(BANSTR(tmp), cptr->info))
+	  if (match(BANSTR(tmp), who->info))
 	    break;
 	}
     }
@@ -413,10 +398,28 @@ int is_banned(struct Client *cptr,struct Channel *chptr)
 }
 
 /*
- * adds a user to a channel by adding another link to the channels member
- * chain.
  */
-void    add_user_to_channel(struct Channel *chptr, struct Client *who, int flags)
+struct SLink *find_channel_link(struct SLink *lp, struct Channel *chptr)
+{ 
+  if (chptr)
+    for(;lp;lp=lp->next)
+      if (lp->value.chptr == chptr)
+        return lp;
+  return ((struct SLink *)NULL);
+}
+
+/*
+ * add_user_to_channel
+ * 
+ * inputs	- pointer to channel to add client to
+ *		- pointer to client (who) to add
+ *		- flags for chanops etc
+ * output	- none
+ * side effects - adds a user to a channel by adding another link to the
+ *		  channels member chain.
+ */
+void    add_user_to_channel(struct Channel *chptr, struct Client *who,
+			    int flags)
 {
   struct SLink *ptr;
 
@@ -446,19 +449,30 @@ void    add_user_to_channel(struct Channel *chptr, struct Client *who, int flags
     }
 }
 
-void    remove_user_from_channel(struct Client *sptr,struct Channel *chptr,int was_kicked)
+/*
+ * remove_user_from_channel
+ * 
+ * inputs	- pointer to channel to remove client from
+ *		- pointer to client (who) to remove
+ *		- flag is set if kicked
+ * output	- none
+ * side effects - deletes an user from a channel by removing a link in the
+ *		  channels member chain.
+ */
+void    remove_user_from_channel(struct Channel *chptr,struct Client *who,
+				 int was_kicked)
 {
   struct SLink  **curr;
   struct SLink  *tmp;
 
   for (curr = &chptr->members; (tmp = *curr); curr = &tmp->next)
-    if (tmp->value.cptr == sptr)
+    if (tmp->value.cptr == who)
       {
         if((tmp->flags & MODE_CHANOP) && chptr->opcount)
           chptr->opcount--;
 
         /* LazyLink code */
-        if(MyClient(sptr) && chptr->locusers)
+        if(MyClient(who) && chptr->locusers)
           {
             chptr->locusers--;
             chptr->locusers_last = CurrentTime;
@@ -469,32 +483,42 @@ void    remove_user_from_channel(struct Client *sptr,struct Channel *chptr,int w
          */
         if(was_kicked && (tmp->flags & CHFL_EXCEPTION))
           {
-            del_matching_exception(sptr,chptr);
+            del_matching_exception(who,chptr);
           }
         *curr = tmp->next;
         free_link(tmp);
         break;
       }
-  for (curr = &sptr->user->channel; (tmp = *curr); curr = &tmp->next)
+  for (curr = &who->user->channel; (tmp = *curr); curr = &tmp->next)
     if (tmp->value.chptr == chptr)
       {
         *curr = tmp->next;
         free_link(tmp);
         break;
       }
-  sptr->user->joined--;
+  who->user->joined--;
   
   if (IsVchan(chptr))
-    del_vchan_from_client_cache(sptr, chptr); 
+    del_vchan_from_client_cache(who, chptr); 
 
   sub1_from_channel(chptr);
 }
 
-static  void    change_chan_flag(struct Channel *chptr,struct Client *cptr, int flag)
+/*
+ * change_chan_flag
+ *
+ * inputs	- pointer to channel to change flags of client on
+ *		- pointer to client struct being modified
+ *		- flags to set for client
+ * output	- none
+ * side effects -
+ */
+static  void    change_chan_flag(struct Channel *chptr,struct Client *who,
+				 int flag)
 {
   struct SLink *tmp;
 
-  if ((tmp = find_user_link(chptr->members, cptr)))
+  if ((tmp = find_user_link(chptr->members, who)))
    {
     if (flag & MODE_ADD)
       {
@@ -522,56 +546,59 @@ static  void    change_chan_flag(struct Channel *chptr,struct Client *cptr, int 
    }
 }
 
-static  void   set_deopped(struct Client *cptr, struct Channel *chptr,int flag)
+/*
+ * set_deopped
+ *
+ * inputs	- pointer to channel to change flags of client on
+ *		- pointer to client struct being modified
+ *		- flags to set for client
+ * output	- none
+ * side effects -
+ */
+static  void   set_deopped(struct Channel *chptr, struct Client *who, int flag)
 {
   struct SLink  *tmp;
 
-  if ((tmp = find_user_link(chptr->members, cptr)))
+  if ((tmp = find_user_link(chptr->members, who)))
     if ((tmp->flags & flag) == 0)
       tmp->flags |= MODE_DEOPPED;
 }
 
-int     is_chan_op(struct Client *cptr, struct Channel *chptr)
+/*
+ * is_chan_op
+ *
+ * inputs	- pointer to channel to check chanop on
+ *		- pointer to client struct being checked
+ * output	- yes if chanop no if not
+ * side effects -
+ */
+int     is_chan_op(struct Channel *chptr, struct Client *who )
 {
   struct SLink  *lp;
 
   if (chptr)
-    if ((lp = find_user_link(chptr->members, cptr)))
+    if ((lp = find_user_link(chptr->members, who)))
       return (lp->flags & CHFL_CHANOP);
   
   return 0;
 }
 
-int     is_deopped(struct Client *cptr, struct Channel *chptr)
+/*
+ * can_send
+ *
+ * inputs	- pointer to channel to check 
+ *		- pointer to client struct being checked
+ * output	- yes if can send, no if cannot
+ * side effects -
+ */
+int     can_send(struct Channel *chptr, struct Client *who)
 {
   struct SLink  *lp;
 
-  if (chptr)
-    if ((lp = find_user_link(chptr->members, cptr)))
-      return (lp->flags & CHFL_DEOPPED);
-  
-  return 0;
-}
-
-int     has_voice(struct Client *cptr, struct Channel *chptr)
-{
-  struct SLink  *lp;
-
-  if (chptr)
-    if ((lp = find_user_link(chptr->members, cptr)))
-      return (lp->flags & CHFL_VOICE);
-
-  return 0;
-}
-
-int     can_send(struct Client *cptr, struct Channel *chptr)
-{
-  struct SLink  *lp;
-
-  lp = find_user_link(chptr->members, cptr);
+  lp = find_user_link(chptr->members, who);
 
   if (ConfigFileEntry.quiet_on_ban)
-    if (is_banned(cptr, chptr))
+    if (is_banned(chptr, who))
       return MODE_BAN;
 
   if (chptr->mode.mode & MODE_MODERATED &&
@@ -584,12 +611,20 @@ int     can_send(struct Client *cptr, struct Channel *chptr)
   return 0;
 }
 
-int     user_channel_mode(struct Client *cptr, struct Channel *chptr)
+/*
+ * user_channel_mode
+ *
+ * inputs	- pointer to channel to return flags on
+ *		- pointer to client struct being checked
+ * output	- flags for this client
+ * side effects -
+ */
+int user_channel_mode(struct Channel *chptr, struct Client *who)
 {
   struct SLink  *lp;
 
   if (chptr)
-    if ((lp = find_user_link(chptr->members, cptr)))
+    if ((lp = find_user_link(chptr->members, who)))
       return (lp->flags);
   
   return 0;
@@ -993,7 +1028,7 @@ void set_channel_mode(struct Client *cptr,
 
   self_lose_ops = 0;
 
-  user_mode = user_channel_mode(sptr, chptr);
+  user_mode = user_channel_mode(chptr, sptr);
   chan_op = (user_mode & CHFL_CHANOP);
 
   /* has ops or is a server */
@@ -1139,7 +1174,7 @@ void set_channel_mode(struct Client *cptr,
             the_mode = MODE_VOICE;
 
           if (isdeop && (c == 'o') && whatt == MODE_ADD)
-            set_deopped(who, chptr, the_mode);
+            set_deopped(chptr, who, the_mode);
 
           if (!isok)
             {
@@ -1783,7 +1818,7 @@ void set_channel_mode(struct Client *cptr,
                 break;
 
               while ( (lp = chptr->invites) )
-                del_invite(lp->value.cptr, chptr);
+                del_invite(chptr, lp->value.cptr);
 
 #ifdef OLD_NON_RED
               if(chptr->mode.mode & MODE_INVITEONLY)
@@ -2164,33 +2199,6 @@ void set_channel_mode(struct Client *cptr,
   return;
 }
 
-int     can_join(struct Client *sptr, struct Channel *chptr, char *key, int *flags)
-{
-  struct SLink  *lp;
-  int ban_or_exception;
-
-  if ( (ban_or_exception = is_banned(sptr, chptr)) == CHFL_BAN)
-    return (ERR_BANNEDFROMCHAN);
-  else
-    *flags |= ban_or_exception; /* Mark this client as "charmed" */
-
-  if (chptr->mode.mode & MODE_INVITEONLY)
-    {
-      for (lp = sptr->user->invited; lp; lp = lp->next)
-        if (lp->value.chptr == chptr)
-          break;
-      if (!lp)
-        return (ERR_INVITEONLYCHAN);
-    }
-
-  if (*chptr->mode.key && (BadPtr(key) || irccmp(chptr->mode.key, key)))
-    return (ERR_BADCHANNELKEY);
-
-  if (chptr->mode.limit && chptr->users >= chptr->mode.limit)
-    return (ERR_CHANNELISFULL);
-
-  return 0;
-}
 
 /*
  * check_channel_name - check channel name for invalid characters
@@ -2261,60 +2269,6 @@ struct Channel* get_channel(struct Client *cptr, char *chname, int flag)
   return chptr;
 }
 
-void    add_invite(struct Client *cptr,struct Channel *chptr)
-{
-  struct SLink  *inv, **tmp;
-
-  del_invite(cptr, chptr);
-  /*
-   * delete last link in chain if the list is max length
-   */
-  if (list_length(cptr->user->invited) >= MAXCHANNELSPERUSER)
-    {
-      del_invite(cptr, cptr->user->invited->value.chptr);
-    }
-  /*
-   * add client to channel invite list
-   */
-  inv = make_link();
-  inv->value.cptr = cptr;
-  inv->next = chptr->invites;
-  chptr->invites = inv;
-  /*
-   * add channel to the end of the client invite list
-   */
-  for (tmp = &(cptr->user->invited); *tmp; tmp = &((*tmp)->next))
-    ;
-  inv = make_link();
-  inv->value.chptr = chptr;
-  inv->next = NULL;
-  (*tmp) = inv;
-}
-
-/*
- * Delete Invite block from channel invite list and client invite list
- */
-void del_invite(struct Client *cptr,struct Channel *chptr)
-{
-  struct SLink  **inv, *tmp;
-
-  for (inv = &(chptr->invites); (tmp = *inv); inv = &tmp->next)
-    if (tmp->value.cptr == cptr)
-      {
-        *inv = tmp->next;
-        free_link(tmp);
-        break;
-      }
-
-  for (inv = &(cptr->user->invited); (tmp = *inv); inv = &tmp->next)
-    if (tmp->value.chptr == chptr)
-      {
-        *inv = tmp->next;
-        free_link(tmp);
-        break;
-      }
-}
-
 /*
 **  Subtract one user from channel (and free channel
 **  block, if channel became empty).
@@ -2334,7 +2288,7 @@ static  void    sub1_from_channel(struct Channel *chptr)
        * Now, find all invite links from channel structure
        */
       while ((tmp = chptr->invites))
-	del_invite(tmp->value.cptr, chptr);
+	del_invite(chptr, tmp->value.cptr);
 
       /* free all bans/exceptions/denies */
       free_channel_masks( chptr );
@@ -2749,7 +2703,7 @@ static void destroy_channel(struct Channel *chptr)
     }
 
   while ((tmp = chptr->invites))
-    del_invite(tmp->value.cptr, chptr);
+    del_invite(chptr, tmp->value.cptr);
 
   /* free all bans/exceptions/denies */
   free_channel_masks( chptr );

@@ -26,6 +26,7 @@
 #include "handlers.h"
 #include "channel.h"
 #include "vchannel.h"
+#include "m_invite.h"
 #include "client.h"
 #include "common.h"   /* bleah */
 #include "hash.h"
@@ -267,7 +268,7 @@ int     m_cjoin(struct Client *cptr,
 		     ":%s MODE %s +nt",
 		     me.name, vchan_chptr->chname);
 
-  del_invite(sptr, vchan_chptr);
+  del_invite(vchan_chptr, sptr);
   (void)names_on_this_channel(sptr, vchan_chptr, chptr->chname);
 
   return 0;

@@ -215,15 +215,6 @@ struct SLink *find_user_link(struct SLink *lp, struct Client *ptr)
   return ((struct SLink *)NULL);
 }
 
-struct SLink *find_channel_link(struct SLink *lp, struct Channel *chptr)
-{ 
-  if (chptr)
-    for(;lp;lp=lp->next)
-      if (lp->value.chptr == chptr)
-        return lp;
-  return ((struct SLink *)NULL);
-}
-
 struct SLink *make_link()
 {
   struct SLink  *lp;

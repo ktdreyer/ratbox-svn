@@ -174,7 +174,7 @@ int     m_notice(struct Client *cptr,
 	{
 	  if( (vchan = map_vchan(chptr,sptr)) )
 	    {
-	      if (can_send(sptr, vchan) == 0)
+	      if (can_send(vchan, sptr) == 0)
 		sendto_channel_butone(cptr, sptr, vchan,
 				      ":%s %s %s :%s",
 				      parv[0], "NOTICE", nick,
@@ -186,7 +186,7 @@ int     m_notice(struct Client *cptr,
 	    }
 	}
 
-      if (can_send(sptr, chptr) == 0)
+      if (can_send(chptr, sptr) == 0)
 	sendto_channel_butone(cptr, sptr, chptr,
 			      ":%s %s %s :%s",
 			      parv[0], "NOTICE", nick,
@@ -238,7 +238,7 @@ int     m_notice(struct Client *cptr,
           if(MyClient(sptr) && sptr->user)
             sptr->user->last = CurrentTime;
 
-          if (!is_chan_op(sptr,chptr))
+          if (!is_chan_op(chptr,sptr))
             {
               return -1;
             }
@@ -501,7 +501,7 @@ int     mo_notice(struct Client *cptr,
       if(MyClient(sptr) && sptr->user)
         sptr->user->last = CurrentTime;
 
-      if (can_send(sptr, chptr) == 0)
+      if (can_send(chptr, sptr) == 0)
         sendto_channel_butone(cptr, sptr, chptr,
                               ":%s %s %s :%s",
                               parv[0], "NOTICE", nick,
@@ -549,7 +549,7 @@ int     mo_notice(struct Client *cptr,
           if(MyClient(sptr) && sptr->user)
             sptr->user->last = CurrentTime;
 
-          if (!is_chan_op(sptr,chptr))
+          if (!is_chan_op(chptr,sptr))
             {
               return -1;
             }
@@ -763,7 +763,7 @@ int     ms_notice(struct Client *cptr,
       if(MyClient(sptr) && sptr->user)
         sptr->user->last = CurrentTime;
 
-      if (can_send(sptr, chptr) == 0)
+      if (can_send(chptr, sptr) == 0)
         sendto_channel_butone(cptr, sptr, chptr,
                               ":%s %s %s :%s",
                               parv[0], "NOTICE", nick,
@@ -811,7 +811,7 @@ int     ms_notice(struct Client *cptr,
           if(MyClient(sptr) && sptr->user)
             sptr->user->last = CurrentTime;
 
-          if (!is_chan_op(sptr,chptr))
+          if (!is_chan_op(chptr,sptr))
             {
               return -1;
             }

@@ -174,7 +174,7 @@ int     m_privmsg(struct Client *cptr,
 	{
 	  if( (vchan = map_vchan(chptr,sptr)) )
 	    {
-	      if (can_send(sptr, vchan) == 0)
+	      if (can_send(vchan, sptr) == 0)
 		sendto_channel_butone(cptr, sptr, vchan,
 				      ":%s %s %s :%s",
 				      parv[0], "PRIVMSG", nick,
@@ -186,7 +186,7 @@ int     m_privmsg(struct Client *cptr,
 	}
       else
 	{
-	  if (can_send(sptr, chptr) == 0)
+	  if (can_send(chptr, sptr) == 0)
 	    sendto_channel_butone(cptr, sptr, chptr,
 				      ":%s %s %s :%s",
 				      parv[0], "PRIVMSG", nick,
@@ -245,7 +245,7 @@ int     m_privmsg(struct Client *cptr,
 	    {
 	      if( (vchan = map_vchan(chptr,sptr)) )
 		{
-		  if (can_send(sptr, vchan) == 0)
+		  if (can_send(vchan, sptr) == 0)
 		    sendto_channel_type(cptr,
 					sptr,
 					vchan,
@@ -260,7 +260,7 @@ int     m_privmsg(struct Client *cptr,
 	    }
 	  else
 	    {
-	      if (can_send(sptr, chptr) == 0)
+	      if (can_send(chptr, sptr) == 0)
 		sendto_channel_butone(cptr, sptr, chptr,
 				      ":%s %s %s :%s",
 				      parv[0], "PRIVMSG", nick,
@@ -443,7 +443,7 @@ int     mo_privmsg(struct Client *cptr,
       if(check_for_ctcp(parv[2]))
 	check_for_flud(sptr, NULL, chptr, 1);
 
-      if (can_send(sptr, chptr) == 0)
+      if (can_send(chptr, sptr) == 0)
         sendto_channel_butone(cptr, sptr, chptr,
                               ":%s %s %s :%s",
                               parv[0], "PRIVMSG", nick,
@@ -497,7 +497,7 @@ int     mo_privmsg(struct Client *cptr,
 	  if(check_for_ctcp(parv[2]))
 	    check_for_flud(sptr, NULL, chptr, 1);
 
-          if (!is_chan_op(sptr,chptr))
+          if (!is_chan_op(chptr,sptr))
             {
 	      sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN),
 			 me.name, parv[0], nick);
@@ -729,7 +729,7 @@ int     ms_privmsg(struct Client *cptr,
       if(check_for_ctcp(parv[2]))
 	check_for_flud(sptr, NULL, chptr, 1);
 
-      if (can_send(sptr, chptr) == 0)
+      if (can_send(chptr, sptr) == 0)
         sendto_channel_butone(cptr, sptr, chptr,
                               ":%s %s %s :%s",
                               parv[0], "PRIVMSG", nick,
@@ -783,7 +783,7 @@ int     ms_privmsg(struct Client *cptr,
 	  if(check_for_ctcp(parv[2]))
 	    check_for_flud(sptr, NULL, chptr, 1);
 
-          if (!is_chan_op(sptr,chptr))
+          if (!is_chan_op(chptr,sptr))
             {
 	      sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN),
 			 me.name, parv[0], nick);

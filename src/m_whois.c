@@ -345,7 +345,7 @@ static int single_whois(struct Client *sptr,struct Client *acptr,int wilds)
 	      *buf = '\0';
 	      len = 0;
 	    }
-	  found_mode = user_channel_mode(acptr, chptr);
+	  found_mode = user_channel_mode(chptr, acptr);
 	  if (found_mode & CHFL_CHANOP)
 	    *(buf + len++) = '@';
 	  else if (found_mode & CHFL_VOICE)

@@ -47,10 +47,7 @@
 #include "send.h"
 #include "whowas.h"
 #include "flud.h"
-
-#ifdef ANTI_DRONE_FLOOD
 #include "dbuf.h"
-#endif
 
 #include <string.h>
 #include <stdlib.h>
@@ -1069,7 +1066,7 @@ report_and_set_user_flags(struct Client *sptr,struct ConfItem *aconf)
                  ":%s NOTICE %s :*** You are exempt from user limits. congrats.",
                  me.name,sptr->name);
     }
-#ifdef IDLE_CHECK
+
   /* If this user is exempt from idle time outs */
   if(IsConfIdlelined(aconf))
     {
@@ -1078,7 +1075,6 @@ report_and_set_user_flags(struct Client *sptr,struct ConfItem *aconf)
          ":%s NOTICE %s :*** You are exempt from idle limits. congrats.",
                  me.name,sptr->name);
     }
-#endif
 }
 
 

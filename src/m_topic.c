@@ -146,7 +146,7 @@ int     m_topic(struct Client *cptr,
 	      return 0;
 	    }
 	  if ((chptr->mode.mode & MODE_TOPICLIMIT) == 0 ||
-	      is_chan_op(sptr, chptr))
+	      is_chan_op(chptr,sptr))
 	    {
 	      /* setting a topic */
 	      /*
@@ -266,7 +266,7 @@ int     ms_topic(struct Client *cptr,
 	    }
 		
 	  if ((chptr->mode.mode & MODE_TOPICLIMIT) == 0 ||
-	      is_chan_op(sptr, chptr))
+	      is_chan_op(chptr,sptr))
 	    {
 	      /* setting a topic */
 	      /*

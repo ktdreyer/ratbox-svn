@@ -26,6 +26,7 @@
 #include "handlers.h"
 #include "channel.h"
 #include "vchannel.h"
+#include "m_invite.h"
 #include "client.h"
 #include "common.h"   /* bleah */
 #include "hash.h"
@@ -100,8 +101,9 @@
 
 static void build_list_of_channels( struct Client *sptr,
 				    char *jbuf, char *given_names);
-static void do_join_0(struct Client *sptr);
+static void do_join_0(struct Client *cptr, struct Client *sptr);
 static void check_spambot_warning( struct Client *sptr, char *name );
+static int can_join (struct Client *, struct Channel *, char *,int *);
 
 /*
 ** m_join
@@ -160,8 +162,8 @@ int     m_join(struct Client *cptr,
         {
           if (sptr->user->channel == NULL)
             continue;
-	  do_join_0(sptr);
-	  sendto_match_servs(NULL, cptr, ":%s JOIN 0", parv[0]);
+	  do_join_0(cptr,sptr);
+	  check_spambot_warning(sptr,"0");
 	  continue;
 	}
 
@@ -352,7 +354,7 @@ int     m_join(struct Client *cptr,
 			     me.name, chptr->chname);
 	}
 
-      del_invite(sptr, chptr);
+      del_invite(chptr, sptr);
       
       if (chptr->topic[0] != '\0')
 	{
@@ -381,15 +383,23 @@ int     ms_join(struct Client *cptr,
                int parc,
                char *parv[])
 {
+  char *name;
+  
+  name = parv[1];
+
   /*
   ** complain for remote JOINs to existing channels
   ** (they should be SJOINs) -orabidoo
   */
-#if 0
-  if (!ChannelExists(name))
-#endif
-    ts_warn("User on %s remotely JOINing new channel", 
-	    sptr->user->server);
+  if ((name[1] == '0') && (name[1] == '\0'))
+    {
+      do_join_0( cptr, sptr );
+    }
+  else
+    {
+      ts_warn("User on %s remotely JOINing new channel", 
+	      sptr->user->server);
+    }
 
   /* AND ignore it finally. */
   return 0;
@@ -426,8 +436,11 @@ static void build_list_of_channels( struct Client *sptr,
                        me.name, sptr->name, (unsigned char*) name);
           continue;
         }
-      if (*name == '0' && !atoi(name))
-        *jbuf = '\0';
+      if (*name == '0' && (atoi(name) == 0))
+	{
+	  strcat(jbuf,"0");
+	  continue;
+	}
       else if (!IsChannelName(name))
         {
 	  sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
@@ -462,20 +475,20 @@ static void build_list_of_channels( struct Client *sptr,
  * 		  anti spambot code.
  */
 
-static void do_join_0(struct Client *sptr)
+static void do_join_0(struct Client *cptr, struct Client *sptr)
 {
   struct Channel *chptr=NULL;
   struct SLink   *lp;
+
+  sendto_match_servs(NULL, cptr, ":%s JOIN 0", sptr->name);
 
   while ((lp = sptr->user->channel))
     {
       chptr = lp->value.chptr;
       sendto_channel_butserv(chptr, sptr, ":%s PART %s",
 			     sptr->name, chptr->chname);
-      remove_user_from_channel(sptr, chptr, 0);
+      remove_user_from_channel(chptr, sptr, 0);
     }
-
-  check_spambot_warning(sptr,"0");
 }
 
 /*
@@ -535,6 +548,42 @@ static void check_spambot_warning( struct Client *sptr, char *name )
 	}
       sptr->last_leave_time = CurrentTime;
     }
+}
+
+/*
+ * can_join
+ *
+ * inputs	- 
+ * output	- 
+ * side effects - NONE
+ */
+static int can_join(struct Client *sptr, struct Channel *chptr,
+		    char *key, int *flags)
+{
+  struct SLink  *lp;
+  int ban_or_exception;
+
+  if ( (ban_or_exception = is_banned(chptr,sptr)) == CHFL_BAN)
+    return (ERR_BANNEDFROMCHAN);
+  else
+    *flags |= ban_or_exception; /* Mark this client as "charmed" */
+
+  if (chptr->mode.mode & MODE_INVITEONLY)
+    {
+      for (lp = sptr->user->invited; lp; lp = lp->next)
+        if (lp->value.chptr == chptr)
+          break;
+      if (!lp)
+        return (ERR_INVITEONLYCHAN);
+    }
+
+  if (*chptr->mode.key && (BadPtr(key) || irccmp(chptr->mode.key, key)))
+    return (ERR_BADCHANNELKEY);
+
+  if (chptr->mode.limit && chptr->users >= chptr->mode.limit)
+    return (ERR_CHANNELISFULL);
+
+  return 0;
 }
 
 #ifdef DBOP

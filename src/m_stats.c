@@ -264,8 +264,6 @@ static void do_normal_stats(struct Client *sptr,
 			    char *name, char *target,
 			    char stat, int doall, int wilds)
 {
-  struct Message* mptr;
-
   switch (stat)
     {
     case 'L' : case 'l' :
@@ -273,11 +271,6 @@ static void do_normal_stats(struct Client *sptr,
       stats_L_spy(sptr,stat,name);
       break;
 
-    case 'C' : case 'c' :
-      report_configured_links(sptr, CONF_CONNECT_SERVER|CONF_NOCONNECT_SERVER);
-      stats_spy(sptr,stat);
-      break;
- 
     case 'G': case 'g' :
       if (ConfigFileEntry.glines)
 	{
@@ -287,14 +280,6 @@ static void do_normal_stats(struct Client *sptr,
       else
         sendto_one(sptr,":%s NOTICE %s :This server does not support G lines",
                    me.name, sptr->name);
-      break;
-
-    case 'M' : case 'm' :
-      for (mptr = msgtab; mptr->cmd; mptr++)
-          sendto_one(sptr, form_str(RPL_STATSCOMMANDS),
-                     me.name, sptr->name, mptr->cmd,
-                     mptr->count, mptr->bytes);
-      stats_spy(sptr,stat);
       break;
 
     case 'u' :
@@ -397,8 +382,15 @@ static void do_non_priv_stats(struct Client *sptr, char *name, char *target,
 static void do_priv_stats(struct Client *sptr, char *name, char *target,
 			    char stat, int doall, int wilds)
 {
+  struct Message* mptr;
+
   switch (stat)
     {
+    case 'C' : case 'c' :
+      report_configured_links(sptr, CONF_CONNECT_SERVER|CONF_NOCONNECT_SERVER);
+      stats_spy(sptr,stat);
+      break;
+ 
     case 'D': case 'd':
       report_dlines(sptr);
       stats_spy(sptr,stat);
@@ -445,6 +437,14 @@ static void do_priv_stats(struct Client *sptr, char *name, char *target,
 
     case 'k' :
       report_temp_klines(sptr);
+      stats_spy(sptr,stat);
+      break;
+
+    case 'M' : case 'm' :
+      for (mptr = msgtab; mptr->cmd; mptr++)
+          sendto_one(sptr, form_str(RPL_STATSCOMMANDS),
+                     me.name, sptr->name, mptr->cmd,
+                     mptr->count, mptr->bytes);
       stats_spy(sptr,stat);
       break;
 

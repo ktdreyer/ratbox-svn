@@ -284,7 +284,7 @@ static struct Channel *parse_knock_args(struct Client *cptr,
 
   /* don't allow a knock if the user is banned, or the channel is secret */
   if ((chptr->mode.mode & MODE_SECRET) ||
-      (is_banned(sptr, chptr) == CHFL_BAN) )
+      (is_banned(chptr,sptr) == CHFL_BAN) )
     {
       sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN), me.name, parv[0],
                  name);

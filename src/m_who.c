@@ -441,5 +441,4 @@ int     ms_who(struct Client *cptr,
     }
 
   return( m_who(cptr,sptr,parc,parv) );
-
 }

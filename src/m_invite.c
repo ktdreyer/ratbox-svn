@@ -25,6 +25,8 @@
 #include "handlers.h"
 #include "common.h"
 #include "channel.h"
+#include "list.h"
+#include "m_invite.h"
 #include "vchannel.h"
 #include "client.h"
 #include "hash.h"
@@ -91,6 +93,8 @@
  *                      non-NULL pointers.
  */
 
+static void add_invite(struct Channel *chptr, struct Client *who);
+static int  list_length(struct SLink *lp);
 
 /*
 ** m_invite
@@ -190,7 +194,7 @@ int     m_invite(struct Client *cptr,
     {
       need_invite = YES;
 
-      if (!is_chan_op(sptr, chptr))
+      if (!is_chan_op(chptr, sptr))
         {
           if (MyClient(sptr))
             sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED),
@@ -253,7 +257,7 @@ int     m_invite(struct Client *cptr,
     }
 
   if(MyConnect(acptr) && need_invite)
-    add_invite(acptr, chptr);
+    add_invite(chptr, acptr);
 
   if (!ConfigFileEntry.invite_plus_i_only || 
 	  (ConfigFileEntry.invite_plus_i_only && need_invite)) 
@@ -273,159 +277,96 @@ int     ms_invite(struct Client *cptr,
                  int parc,
                  char *parv[])
 {
-  struct Client *acptr;
-  struct Channel *chptr;
-  struct Channel *vchan;
-  int need_invite=NO;
-
-  if (parc < 3 || *parv[1] == '\0')
-    {
-      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-                 me.name, parv[0], "INVITE");
-      return -1;
-    }
-
-  /* A little sanity test here */
-  if(!sptr->user)
-    return 0;
-
-  if (!(acptr = find_person(parv[1], (struct Client *)NULL)))
-    {
-      sendto_one(sptr, form_str(ERR_NOSUCHNICK),
-                 me.name, parv[0], parv[1]);
-      return 0;
-    }
-
-  if (!check_channel_name(parv[2]))
-    { 
-      sendto_one(sptr, form_str(ERR_BADCHANNAME),
-                 me.name, parv[0], (unsigned char *)parv[2]);
-      return 0;
-    }
-
-  if (!IsChannelName(parv[2]))
-    {
-      if (MyClient(sptr))
-        sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
-                   me.name, parv[0], parv[2]);
-      return 0;
-    }
-
-  /* Do not send local channel invites to users if they are not on the
-   * same server as the person sending the INVITE message. 
-   */
-  /* Possibly should be an error sent to sptr */
-  if (!MyConnect(acptr) && (parv[2][0] == '&'))
-    return 0;
-
-  if (!(chptr = hash_find_channel(parv[2], NullChn)))
-    {
-      if (MyClient(sptr))
-        sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
-                   me.name, parv[0], parv[2]);
-      return 0;
-    }
-
-  /* By this point, chptr is non NULL */  
-
-  if (HasVchans(chptr))
-    {
-      if ((vchan = map_vchan(chptr,sptr)))
-	chptr = vchan;
-      if (map_vchan(chptr,acptr))
-	{
-	  if (MyClient(sptr))
-	    sendto_one(sptr, form_str(ERR_USERONCHANNEL),
-		       me.name, parv[0], parv[1], parv[2]);
-	  return 0;
-	}
-    }
-
-  if (!IsMember(sptr, chptr))
-    {
-      if (MyClient(sptr))
-        sendto_one(sptr, form_str(ERR_NOTONCHANNEL),
-                   me.name, parv[0], parv[2]);
-      return 0;
-    }
-
-  if (IsMember(acptr, chptr))
-    {
-      if (MyClient(sptr))
-        sendto_one(sptr, form_str(ERR_USERONCHANNEL),
-                   me.name, parv[0], parv[1], parv[2]);
-      return 0;
-    }
-
-  if (chptr && (chptr->mode.mode & MODE_INVITEONLY))
-    {
-      need_invite = YES;
-
-      if (!is_chan_op(sptr, chptr))
-        {
-          if (MyClient(sptr))
-            sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED),
-                       me.name, parv[0], parv[2]);
-          return -1;
-        }
-    }
-
-  /*
-   * due to some whining I've taken out the need for the channel
-   * being +i before sending an INVITE. It was intentionally done this
-   * way, it makes no sense (to me at least) letting the server send
-   * an unnecessary invite when a channel isn't +i !
-   * bah. I can't be bothered arguing it
-   * -Dianora
-   */
-  if (MyConnect(sptr) /* && need_invite*/ )
-    {
-      sendto_one(sptr, form_str(RPL_INVITING), me.name, parv[0],
-                 acptr->name, ((chptr) ? (chptr->chname) : parv[2]));
-      if (acptr->user->away)
-        sendto_one(sptr, form_str(RPL_AWAY), me.name, parv[0],
-                   acptr->name, acptr->user->away);
-      
-      if( need_invite )
-        {
-          /* Send a NOTICE to all channel operators concerning chanops who  *
-           * INVITE other users to the channel when it is invite-only (+i). *
-           * The NOTICE is sent from the local server.                      */
-
-          /* Only allow this invite notice if the channel is +p
-           * i.e. "paranoid"
-           * -Dianora
-           */
-
-          if (chptr && (chptr->mode.mode & MODE_PRIVATE))
-            { 
-              char message[NICKLEN*2+CHANNELLEN+USERLEN+HOSTLEN+30];
-
-              /* bit of paranoia, be a shame if it cored for this -Dianora */
-              if(acptr->user)
-                {
-                  ircsprintf(message,
-                             "INVITE: %s (%s invited %s [%s@%s])",
-                             chptr->chname,
-                             sptr->name,
-                             acptr->name,
-                             acptr->username,
-                             acptr->host);
-
-                  sendto_channel_type(cptr, sptr, chptr,
-                                      MODE_CHANOP,
-                                      chptr->chname,
-                                      "PRIVMSG",
-                                      message);
-                }
-            }
-        }
-    }
-
-  if(MyConnect(acptr) && need_invite)
-    add_invite(acptr, chptr);
-
-  sendto_prefix_one(acptr, sptr, ":%s INVITE %s :%s",
-                    parv[0], acptr->name, parv[2]);
+  /* XXX Consider just mapping this to m_invite in parse.c -db */
+  return (m_invite(cptr,sptr,parc,parv));
+  /* NOT REACHED */
   return 0;
+}
+
+/*
+ * add_invite
+ *
+ * inputs	- pointer to channel block
+ * 		- pointer to client to add invite to
+ * output	- none
+ * side effects	- 
+ *
+ * This one is ONLY used by m_invite.c
+ */
+static void add_invite(struct Channel *chptr, struct Client *who)
+{
+  struct SLink  *inv, **tmp;
+
+  del_invite(chptr, who);
+  /*
+   * delete last link in chain if the list is max length
+   */
+  if (list_length(who->user->invited) >= MAXCHANNELSPERUSER)
+    {
+      del_invite(who->user->invited->value.chptr,who);
+    }
+  /*
+   * add client to channel invite list
+   */
+  inv = make_link();
+  inv->value.cptr = who;
+  inv->next = chptr->invites;
+  chptr->invites = inv;
+  /*
+   * add channel to the end of the client invite list
+   */
+  for (tmp = &(who->user->invited); *tmp; tmp = &((*tmp)->next))
+    ;
+  inv = make_link();
+  inv->value.chptr = chptr;
+  inv->next = NULL;
+  (*tmp) = inv;
+}
+
+/*
+ * del_invite
+ *
+ * inputs	- pointer to channel block
+ * 		- pointer to client to remove invites from
+ * output	- none
+ * side effects	- Delete Invite block from channel invite list
+ *		  and client invite list
+ *
+ * urgh. This one is used elsewhere, hence has to be global.
+ */
+void del_invite(struct Channel *chptr, struct Client *who)
+{
+  struct SLink  **inv, *tmp;
+
+  for (inv = &(chptr->invites); (tmp = *inv); inv = &tmp->next)
+    if (tmp->value.cptr == who)
+      {
+        *inv = tmp->next;
+        free_link(tmp);
+        break;
+      }
+
+  for (inv = &(who->user->invited); (tmp = *inv); inv = &tmp->next)
+    if (tmp->value.chptr == chptr)
+      {
+        *inv = tmp->next;
+        free_link(tmp);
+        break;
+      }
+}
+
+/* 
+ * inputs	- pointer to slink list
+ * output	- returns the length of list
+ * side effects	- return the length (>=0) of a chain of struct SLinks.
+ *
+ * XXX would an int length for invite length be worth it? -db
+ */
+static  int     list_length(struct SLink *lp)
+{
+  int   count = 0;
+
+  for (; lp; lp = lp->next)
+    count++;
+  return count;
 }

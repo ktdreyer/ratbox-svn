@@ -274,7 +274,7 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       struct SLink *tmp = sptr->user->channel;
       while (tmp)
 	{
-	  if (is_banned(sptr, tmp->value.chptr))
+	  if (is_banned(tmp->value.chptr,sptr))
 	    {
 	      sendto_one(sptr, form_str(ERR_BANNEDNICK),
 			 me.name,

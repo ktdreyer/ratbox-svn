@@ -107,17 +107,19 @@ void cleanup_channels(void *);
 #define MAXMODEPARAMS   4
 
 extern struct Channel* find_channel (char *, struct Channel *);
-extern struct SLink*   find_channel_link(struct SLink *, struct Channel *);
-extern void    remove_user_from_channel(struct Client *,struct Channel *,int);
-extern void    del_invite (struct Client *, struct Channel *);
-extern void    send_user_joins (struct Client *, struct Client *);
-extern int     can_send (struct Client *, struct Channel *);
-extern int     can_join (struct Client *, struct Channel *, char *,int *);
-extern int     is_banned(struct Client *cptr,struct Channel *chptr);
-extern void    add_user_to_channel(struct Channel *chptr, struct Client *who, int flags);
-extern int     is_chan_op (struct Client *, struct Channel *);
-extern int     has_voice (struct Client *, struct Channel *);
-extern int     user_channel_mode(struct Client *, struct Channel *);
+
+extern struct SLink*   find_channel_link(struct SLink *,
+					 struct Channel *chptr); 
+extern void    add_user_to_channel(struct Channel *chptr,
+				   struct Client *who, int flags);
+extern void    remove_user_from_channel(struct Channel *chptr,
+					struct Client *who, int flag);
+
+extern int     can_send (struct Channel *chptr, struct Client *who);
+extern int     is_banned (struct Channel *chptr, struct Client *who);
+
+extern int     is_chan_op (struct Channel *chptr,struct Client *who);
+extern int     user_channel_mode (struct Channel *chptr, struct Client *who);
 extern int     count_channels (struct Client *);
 
 extern int     m_names(struct Client *, struct Client *,int, char **);
@@ -126,13 +128,11 @@ extern void    names_on_this_channel( struct Client *sptr,
 				      char *name_of_channel);
 
 extern void    send_channel_modes (struct Client *, struct Channel *);
-extern void    del_invite (struct Client *, struct Channel *);
 extern int     check_channel_name(const char* name);
 extern void    channel_modes(struct Client *, char *, char *, struct Channel*);
 extern void    set_channel_mode(struct Client *, struct Client *, 
                                 struct Channel *, int, char **, char *);
 extern struct Channel* get_channel(struct Client *,char*,int );
-extern void    add_invite (struct Client *, struct Channel *);
 extern void    clear_bans_exceptions_denies(struct Client *,struct Channel *);
 
 /* this should eliminate a lot of ifdef's in the main code... -orabidoo */
@@ -173,8 +173,6 @@ extern void    clear_bans_exceptions_denies(struct Client *,struct Channel *);
 
 #define MODE_LIMIT      0x4000  /* was 0x2000 */
 #define MODE_FLAGS      0x4fff  /* was 0x2fff */
-
-extern void remove_empty_channels();
 
 /*
  * mode flags which take another parameter (With PARAmeterS)
