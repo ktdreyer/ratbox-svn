@@ -1,3 +1,8 @@
+*** 20010405_2 by androsyn
+Added a few asserts to check for NULL callbacks. I'm still not sure why this
+is happening though.
+
+
 *** 20010405_1 by a1kmm
 - Added a proposed KSERVER protocol which will reduce the risk of password sniffing or connection hijacking
   attacks against servers.
