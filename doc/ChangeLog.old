@@ -1,3 +1,16 @@
+*** 20010526_8 by davidt
+- Improve configure.in detection of gettext, openssl and zlib
+- Fix problem with creating module installation dirs
+- If read_packet is called for a 'dead' client, exit it.
+  NOTE: since we don't exit_client in dead_link, there is a chance
+        we can mark a client dead without exiting it.
+        we can't exit any dead clients in parse.c, since we could
+        have already exited it.  perhaps we need a new flag.
+- servlink: Update docs to match implemented protocol
+- servlink: Split process_command into different functions, and
+            stick them into command_table.
+
+
 *** 20010526_7 by leeh
 - commited pasky's patch so we now support ipv6 ips for outgoing 
   connections
