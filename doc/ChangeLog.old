@@ -1,3 +1,8 @@
+*** 19991230_5 by db
+- folding back in USE_IAUTH code
+
+
+
 *** 19991230_4 by db
 - completion of mop up of resync with -6 tree. Compiles again
 
