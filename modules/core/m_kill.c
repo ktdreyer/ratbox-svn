@@ -364,8 +364,8 @@ static void relay_kill(struct Client *one, struct Client *source_p,
       }
     else
       {
-        sendto_one(client_p, ":%s KILL %s :%s %s %s",
-                   source_p->name, user, me.name,
+        sendto_one(client_p, ":%s KILL %s :%s %s",
+                   source_p->name, user,
                    inpath, reason);
       }
   }
