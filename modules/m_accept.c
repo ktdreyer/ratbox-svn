@@ -92,6 +92,7 @@ int m_accept(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   if (add == 1)
     {
+      del_from_accept(source,sptr);
       add_to_accept(source,sptr);
       sendto_one(sptr, ":%s NOTICE %s :Now allowing %s", 
 		 me.name, parv[0], source->name);

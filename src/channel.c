@@ -267,11 +267,7 @@ static  int     del_id(struct Channel *chptr, char *banid, int type)
 	    chptr->num_bed = 0;
 
 	  dlinkDelete(ban, list);
-
-	  if( ban == list->head )
-	    list->head = list->tail = NULL;
-
-	  MyFree(ban);
+	  free_dlink_node(ban);
 
           break;
         }
