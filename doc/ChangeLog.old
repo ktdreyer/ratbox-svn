@@ -1,3 +1,8 @@
+*** 20010331_2 by ejb
+- fixed make .include checking stuff to actually work;
+  rebuilt dependencies.
+
+
 *** 20010331_1 by ejb
 - remove 'always on' things from s_debug.c
   No point putting them in if they never change..
