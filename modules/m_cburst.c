@@ -63,7 +63,7 @@ char *_version = "20001122";
 ** m_cburst
 **      parv[0] = sender prefix
 **      parv[1] = channel
-**      parv[2] = nick if present
+**      parv[2] = nick if present (!nick indicates cjoin)
 **      parv[3] = channel key (EVENTUALLY)
 */
 /*
@@ -106,17 +106,20 @@ int     ms_cburst(struct Client *cptr,
 
   if( (chptr = hash_find_channel(name, NullChn)) == NULL)
     {
-      chptr = get_channel(sptr, name, CREATE);
-      chptr->channelts = (time_t)(-1); /* ! highest possible TS so its always
-                                        * over-ruled
-                                        */
-      chptr->users_last = CurrentTime;
-
-      chptr->lazyLinkChannelExists |= cptr->localClient->serverMask;
-
-      if(nick)
-	sendto_one(cptr,":%s LLJOIN %s %s %s", me.name, name, nick, key);
-      return 0;
+      if(nick && *nick!='!')
+      {
+        chptr = get_channel(sptr, name, CREATE);
+        chptr->channelts = (time_t)(-1); /* ! highest possible TS so its always
+                                          * over-ruled
+                                          */
+        chptr->users_last = CurrentTime;
+      }
+      else if(nick && *nick=='!')
+      {
+        sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
+                   me.name, nick, name);
+        return 0;
+      }
     }
 
   if(IsCapable(cptr,CAP_LL))
@@ -124,14 +127,14 @@ int     ms_cburst(struct Client *cptr,
       burst_channel(cptr,chptr);
 
       if(nick)
-	sendto_one(cptr,":%s LLJOIN %s %s %s", me.name, name, nick, key);
+	sendto_one(cptr,":%s LLJOIN %s %s %s", me.name, name,
+                   nick, key);
     }
   else
     {
       sendto_realops_flags(FLAGS_ALL,
 		   "*** CBURST request received from non LL capable server! [%s]",
 			   cptr->name);
-      return 0;
     }
 
   return 0;

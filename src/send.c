@@ -37,6 +37,7 @@
 #include "list.h"
 #include "s_debug.h"
 #include "s_log.h"
+#include "vchannel.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -789,7 +790,7 @@ sendto_channel_remote(struct Channel *chptr,
 
       if (ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
 	{
-	  if( !(chptr->lazyLinkChannelExists &
+	  if( !(RootChan(chptr)->lazyLinkChannelExists &
 		cptr->localClient->serverMask) )
 	    continue;
 	}
@@ -844,7 +845,7 @@ sendto_ll_channel_remote(struct Channel *chptr,
 	  if(ConfigFileEntry.hub)
 	    {
               /* Only tell leafs that already know about the channel */
-              if ((chptr->lazyLinkChannelExists &
+              if ((RootChan(chptr)->lazyLinkChannelExists &
                    cptr->localClient->serverMask) == 0)
               {
                 continue;
@@ -907,7 +908,7 @@ sendto_match_cap_servs(struct Channel *chptr, struct Client *from, int cap,
 
       if (ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
         {
-          if( !(chptr->lazyLinkChannelExists &
+          if( !(RootChan(chptr)->lazyLinkChannelExists &
                 cptr->localClient->serverMask) )
             continue;
         }

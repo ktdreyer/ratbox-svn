@@ -45,9 +45,142 @@
 static void
 vchan_show_ids(struct Client *sptr, struct Channel *chptr);
 
+struct Channel* cjoin_channel(struct Channel *root,
+                  struct Client *sptr,
+                  char *name)
+{
+  char  vchan_name[CHANNELLEN];
+  struct Channel * vchan_chptr;
+  dlink_node *m;
+
+  /* don't cjoin a vchan, only the top is allowed */
+  if (IsVchan(root))
+  {
+    /* could send a notice here, but on a vchan aware server
+     * they shouldn't see the sub chans anyway
+     */
+    sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
+               me.name, sptr->name, name);
+    return NULL;
+  }
+
+  if(on_sub_vchan(root,sptr))
+  {
+    sendto_one(sptr,":%s NOTICE %s :*** You are on a sub chan of %s already",
+               me.name, sptr->name, name);
+    sendto_one(sptr, form_str(ERR_BADCHANNAME),
+               me.name, sptr->name, name);
+    return NULL;
+  }
+
+  /* "root" channel name exists, now create a new copy of it */
+  /* ZZZ XXX N.B.
+   * Following to be added
+   *
+   * 1. detect if channel already exist (remote chance)
+   */
+
+  if (strlen(name) > CHANNELLEN-15)
+  {
+    sendto_one(sptr, form_str(ERR_BADCHANNAME),me.name, sptr->name, name);
+    return NULL;
+  }
+
+  if ((sptr->user->joined >= MAXCHANNELSPERUSER) &&
+      (!IsOper(sptr) || (sptr->user->joined >= MAXCHANNELSPERUSER*3)))
+  {
+    sendto_one(sptr, form_str(ERR_TOOMANYCHANNELS),
+               me.name, sptr->name, name);
+    return NULL;
+  }
+
+  ircsprintf( vchan_name, "##%s_%lu", name+1, CurrentTime );
+  vchan_chptr = get_channel(sptr, vchan_name, CREATE);
+
+  if( vchan_chptr == NULL )
+  {
+    sendto_one(sptr, form_str(ERR_BADCHANNAME),
+               me.name, sptr->name, (unsigned char*) name);
+    return NULL;
+  }
+
+  m = make_dlink_node();
+  dlinkAdd(vchan_chptr, m, &root->vchan_list);
+  vchan_chptr->root_chptr = root;
+
+  add_vchan_to_client_cache(sptr,root,vchan_chptr);
+
+  vchan_chptr->channelts = CurrentTime;
+
+  del_invite(vchan_chptr, sptr);
+  return vchan_chptr;
+}
+
+struct Channel* select_vchan(struct Channel *root,
+                             struct Client *cptr,
+                             struct Client *sptr,
+                             char *vkey,
+                             char *name)
+{
+  struct Channel * chptr;
+
+  if (IsVchanTop(root))
+  {
+    if (on_sub_vchan(root,sptr))
+      return NULL;
+    if (vkey && vkey[0] == '!')
+    {
+      /* user joined with key "!".  force listing.
+         (this prevents join-invited-chan voodoo) */
+      if (!vkey[1])
+      {
+        show_vchans(cptr, sptr, root, "join");
+        return NULL;
+      }
+
+      /* found a matching vchan? let them join it */
+      if ((chptr = find_vchan(root, vkey)))
+        return chptr;
+      else
+      {
+        sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
+                   me.name, sptr->name, name);
+        return NULL;
+      }
+    }
+    else
+    {
+      /* voodoo to auto-join channel invited to */
+      if ((chptr=vchan_invites(root, sptr)))
+        return chptr;
+      /* otherwise, they get a list of channels */
+      else
+      {
+        show_vchans(cptr, sptr, root, "join");
+        return NULL;
+      }
+    }
+  }
+  /* trying to join a sub chans 'real' name
+   * don't allow that
+   */
+  else if (IsVchan(root))
+  {
+    sendto_one(sptr, form_str(ERR_BADCHANNAME),
+               me.name, sptr->name, name);
+    return NULL;
+  }
+  else
+  {
+    return root;
+  }
+}
+
+
+
 void    add_vchan_to_client_cache(struct Client *sptr,
-				  struct Channel *base_chan,
-				  struct Channel *vchan)
+                                  struct Channel *base_chan,
+                                  struct Channel *vchan)
 {
   dlink_node *vchanmap_node;
   struct Vchan_map *vchan_info;

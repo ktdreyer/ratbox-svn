@@ -88,7 +88,7 @@ int     m_join(struct Client *cptr,
   char  *name, *key = NULL;
   char *vkey = NULL; /* !key for vchans */
   int   i, flags = 0;
-  char  *p = NULL, *p2 = NULL;
+  char  *p = NULL, *p2 = NULL, *p3 = NULL;
   int   successful_join_count = 0; /* Number of channels successfully joined */
   
   if (!(sptr->user))
@@ -111,16 +111,17 @@ int     m_join(struct Client *cptr,
   if (parc > 3)
     {
       key = strtoken(&p2, parv[3], ",");
-      vkey = parv[2];
+      vkey = strtoken(&p3, parv[2], ",");
     }
   else if (parc > 2)
     {
       key = strtoken(&p2, parv[2], ",");
-      vkey = parv[2];
+      vkey = key;
     }
 
   for (name = strtoken(&p, jbuf, ","); name;
-       key = (key) ? strtoken(&p2, NULL, ",") : NULL,
+         key = (key) ? strtoken(&p2, NULL, ",") : NULL,
+         vkey = (parc>3) ? ((vkey) ? strtoken(&p3, NULL, ",") : NULL) : key,
          name = strtoken(&p, NULL, ","))
     {
       /*
@@ -142,64 +143,23 @@ int     m_join(struct Client *cptr,
 
       if( (chptr = hash_find_channel(name, NullChn)) != NULL )
 	{
-	  /* there's subchans so check those
-	   * but not if it was a subchan's realname they specified
-	   */
-	  if (IsVchanTop(chptr))
-	    {
-	      if (on_sub_vchan(chptr,sptr))
-		continue;
-	      if (vkey && vkey[0] == '!')
-		{
-		  /* user joined with key "!".  force listing.
-		     (this prevents join-invited-chan voodoo) */
-		  if (!vkey[1])
-		    {
-		      show_vchans(cptr, sptr, chptr, "join");
-		      continue;
-		    }
+          /* Check if they want to join a subchan or something */
+	  vchan_chptr = select_vchan(chptr, cptr, sptr, vkey, name);
+          
+          if (!vchan_chptr)
+            continue;
 
-		  /* found a matching vchan? let them join it */
-		  if ((vchan_chptr = find_vchan(chptr, vkey)))
-		    {
-		      root_chptr = chptr;
-		      chptr = vchan_chptr;
-		      joining_vchan = 1;
-		    }
-		  else
-		    {
-		      sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
-				 me.name, parv[0], name);
-		      return 0;
-		    }
-		}
-	      else
-		{
-                  /* voodoo to auto-join channel invited to */
-                  if ((vchan_chptr=vchan_invites(chptr, sptr)))
-                    {
-                      root_chptr = chptr;
-                      chptr = vchan_chptr;
-                      joining_vchan = 1;
-                    }
-                  /* otherwise, they get a list of channels */
-                  else
-                    {
-                      show_vchans(cptr, sptr, chptr, "join");
-                      continue;
-                    }
-		}
-	    }
-	  /* trying to join a sub chans 'real' name
-	   * don't allow that
-	   */
-	  else if (IsVchan(chptr))
-	    {
-	      sendto_one(sptr, form_str(ERR_BADCHANNAME),
-			 me.name, parv[0], (unsigned char*) name);
-	      continue;
-	    }
-
+          if (vchan_chptr != chptr)
+          {
+            joining_vchan = 1;
+            root_chptr = chptr;
+            chptr = vchan_chptr;
+          }
+          else
+          {
+            joining_vchan = 0;
+          }
+          
 	  if (chptr->users == 0)
 	    flags = CHFL_CHANOP;
 	  else

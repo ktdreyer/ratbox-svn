@@ -63,7 +63,7 @@ static void send_mode_list(struct Client *, char *, dlink_list *,
 static void sync_channel_oplists(struct Channel *,
                                  int);
 static void sync_oplists(struct Channel *,
-                         struct Client *, int);
+                         struct Client *, int, char *);
 static void send_oplist(char *, struct Client *,
                         dlink_list *, char *, int);
 
@@ -1379,20 +1379,47 @@ void set_channel_mode(struct Client *cptr,
             if ((!target_was_op) && (whatt == MODE_ADD) &&
                 ((to_list == &chptr->chanops) ||
                  (to_list == &chptr->halfops)))
-              sync_oplists(chptr, who, 0);
+              sync_oplists(chptr, who, 0, chname);
             else if (target_was_op && (whatt == MODE_DEL) &&
                      ((to_list != &chptr->chanops) &&
                       (to_list != &chptr->halfops)))
-              sync_oplists(chptr, who, 1);
+              sync_oplists(chptr, who, 1, chname);
             else if ((!target_was_voice) && (whatt == MODE_ADD) &&
                      (to_list == &chptr->voiced))
               sendto_one(who, ":%s MODE %s +v %s",
-                         me.name, chptr->chname, who->name);
+                         me.name, chname, who->name);
             else if (target_was_voice && (whatt == MODE_DEL) &&
                      (to_list != &chptr->voiced))
               sendto_one(who, ":%s MODE %s -v %s",
-                         me.name, chptr->chname, who->name);
+                         me.name, chname, who->name);
           }
+
+/*
+ * This could take up a sizeable amount of bandwidth,
+ * and once opped the clients can just /mode #chan +eI,
+ * Disabled for now.. but *shrug*
+ * -davidt
+ */
+
+#if 0
+          if (MyClient(who))
+          {
+            if ((!target_was_op) && (whatt == MODE_ADD) &&
+                ((to_list == &chptr->chanops) ||
+                 (to_list == &chptr->halfops)))
+            {
+              send_mode_list(who, chname, &chptr->exceptlist, 'e', 0);
+              send_mode_list(who, chname, &chptr->invexlist, 'I', 0);
+            }
+            else if (target_was_op && (whatt == MODE_DEL) &&
+                     ((to_list != &chptr->chanops) &&
+                      (to_list != &chptr->halfops)))
+            {
+              send_mode_list(who, chname, &chptr->exceptlist, 'e', 1);
+              send_mode_list(who, chname, &chptr->invexlist, 'I', 1);
+            }
+          }
+#endif
 
           break;
 
@@ -2100,7 +2127,6 @@ void set_channel_mode(struct Client *cptr,
 	      *mbufw_aops++ = '-';
 	      *mbufw_aops++ = 'a';
 	      len += 2;
-              sync_channel_oplists(chptr, 0);
 	    }
 	  break;
 				
@@ -3159,11 +3185,11 @@ char *channel_chanop_or_voice(struct Channel *chptr, struct Client *acptr)
  *                (for +a channels)
  */
 static void sync_oplists(struct Channel *chptr, struct Client *acptr,
-                         int clear)
+                         int clear, char *name)
 {
-  send_oplist(chptr->chname, acptr, &chptr->chanops, "o", clear);
-  send_oplist(chptr->chname, acptr, &chptr->halfops, "h", clear);
-  send_oplist(chptr->chname, acptr, &chptr->voiced,  "v", clear);
+  send_oplist(name, acptr, &chptr->chanops, "o", clear);
+  send_oplist(name, acptr, &chptr->halfops, "h", clear);
+  send_oplist(name, acptr, &chptr->voiced,  "v", clear);
 }
 
 static void send_oplist(char *chname, struct Client *cptr,
@@ -3232,13 +3258,13 @@ static void sync_channel_oplists(struct Channel *chptr,
     {
       acptr = ptr->data;
       if(MyClient(acptr))
-        sync_oplists(chptr, acptr, clear);
+        sync_oplists(chptr, acptr, clear, RootChan(chptr)->chname);
     }
   list = &chptr->voiced;
   for (ptr = list->head; ptr && ptr->data; ptr = ptr->next)
     {
       acptr = ptr->data;
       if(MyClient(acptr))
-        sync_oplists(chptr, acptr, clear);
+        sync_oplists(chptr, acptr, clear, RootChan(chptr)->chname);
     }
 }

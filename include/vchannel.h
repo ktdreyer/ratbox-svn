@@ -68,16 +68,32 @@ extern int on_sub_vchan(struct Channel *chptr, struct Client *sptr);
 extern struct Channel* vchan_invites(struct Channel *chptr,
                                      struct Client *sptr);
 
+/* Select which vchan to use for JOIN */
+extern struct Channel* select_vchan(struct Channel *root,
+                                    struct Client *cptr,
+                                    struct Client *sptr,
+                                    char *vkey,
+                                    char *name);
+
+/* Create a new vchan for cjoin */
+extern struct Channel* cjoin_channel(struct Channel *root,
+                                     struct Client *sptr,
+                                     char *name);
+
 /* Valid to verify a channel is a subchan */
-#define IsVchan(chan)	(chan->root_chptr != 0)
+#define IsVchan(chan)	((chan)->root_chptr != 0)
 
 /* Only valid for top chan, i.e. only valid to determine if there are vchans
  * under hash table lookup of top level channel
  */
-#define HasVchans(chan)	(chan->vchan_list.head)
+#define HasVchans(chan)	((chan)->vchan_list.head)
 
 /* Valid to determine if this is the top of a set of vchans */
-#define IsVchanTop(chan) ((chan->root_chptr == 0) && (chan->vchan_list.head))
+#define IsVchanTop(chan) \
+  (((chan)->root_chptr == 0) && ((chan)->vchan_list.head))
+
+#define RootChan(chan) \
+  (((chan)->root_chptr == 0) ? (chan) : ((chan)->root_chptr))
 
 #endif  /* INCLUDED_vchannel_h */
 

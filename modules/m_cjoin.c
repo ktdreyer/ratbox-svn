@@ -77,10 +77,9 @@ int     m_cjoin(struct Client *cptr,
   static char   jbuf[BUFSIZE];
   struct Channel *chptr = NULL;
   struct Channel *vchan_chptr = NULL;
+  struct Channel *root_vchan = NULL;
   char  *name;
-  char  vchan_name[CHANNELLEN];
   char  *p = NULL;
-  dlink_node *m;
 
   if (!(sptr->user))
     {
@@ -131,102 +130,48 @@ int     m_cjoin(struct Client *cptr,
 
   if( (chptr = hash_find_channel(name, NullChn)) == NULL )
     {
-      sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
-		 me.name, parv[0], name);
-      return 0;
-    }
-
-  /* don't cjoin a vchan, only the top is allowed */
-  if (IsVchan(chptr))
-    {
-      /* could send a notice here, but on a vchan aware server
-       * they shouldn't see the sub chans anyway
+      /* if chptr isn't found locally, it =could= exist
+       * on the uplink. So ask.
        */
-      sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
-                 me.name, parv[0], name);
+      if ( !ConfigFileEntry.hub && uplink &&
+           IsCapable(uplink, CAP_LL))
+        {
+          /* cache the channel if it exists on uplink
+           * If the channel as seen by the uplink, has vchans,
+           * the uplink will have to SJOIN all of those.
+           */
+          sendto_one(uplink, ":%s CBURST %s !%s",
+                     me.name, parv[1], sptr->name);
+
+          return 0;
+        }
+      else
+        {
+          sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
+                     me.name, sptr->name, name);
+        }
       return 0;
     }
 
-  if( on_sub_vchan(chptr,sptr) )
-    {
-      sendto_one(sptr,":%s NOTICE %s :*** You are on a sub chan of %s already",
-		 me.name, sptr->name, name);
-      sendto_one(sptr, form_str(ERR_BADCHANNAME),
-		 me.name, parv[0], (unsigned char*) name);
-      return 0;
-    }
+  if (! (vchan_chptr = cjoin_channel(chptr, sptr, name)) )
+    return 0;
 
-  /* "root" channel name exists, now create a new copy of it */
-  /* ZZZ XXX N.B. 
-   * Following to be added 
-   *
-   * 1. detect if channel already exist (remote chance)
-   */
-
-  if (strlen(name) > CHANNELLEN-15)
-    {
-      sendto_one(sptr, form_str(ERR_BADCHANNAME),me.name, parv[0], name); 
-      return 0;
-    }
-
-  if ((sptr->user->joined >= MAXCHANNELSPERUSER) &&
-     (!IsOper(sptr) || (sptr->user->joined >= MAXCHANNELSPERUSER*3)))
-     {
-       sendto_one(sptr, form_str(ERR_TOOMANYCHANNELS),
-                  me.name, parv[0], name);
-       return 0;
-     }
-
-  ircsprintf( vchan_name, "##%s_%lu", name+1, CurrentTime );
-  vchan_chptr = get_channel(sptr, vchan_name, CREATE);
-
-  if( vchan_chptr == NULL )
-    {
-      sendto_one(sptr, form_str(ERR_BADCHANNAME),
-		 me.name, parv[0], (unsigned char*) name);
-      return 0;
-    }
-
-  m = make_dlink_node();
-  dlinkAdd(vchan_chptr, m, &chptr->vchan_list);
-  vchan_chptr->root_chptr = chptr;
-
+  root_vchan = chptr;
+  chptr = vchan_chptr;
+  
   /*
   **  Complete user entry to the new channel
   */
+  add_user_to_channel(chptr, sptr, CHFL_CHANOP);
 
-  add_user_to_channel(vchan_chptr, sptr, CHFL_CHANOP);
-
-  add_vchan_to_client_cache(sptr,chptr,vchan_chptr);
-
-  /*
-  **  Set timestamp
-  */
-  
-  vchan_chptr->channelts = CurrentTime;
-  sendto_channel_remote(vchan_chptr, cptr,
+  sendto_channel_remote(chptr, cptr,
 			":%s SJOIN %lu %s + :@%s", me.name,
-			vchan_chptr->channelts,
-			vchan_chptr->chname,
-			parv[0]);
-  /*
-  ** notify all other users on the new channel
-  */
-  sendto_channel_local(ALL_MEMBERS,
-		       vchan_chptr,
-		       ":%s!%s@%s JOIN :%s",
-		       sptr->name,
-		       sptr->username,
-		       sptr->host,
-		       chptr->chname);
-
+			chptr->channelts,
+			chptr->chname,
+			sptr->name);
 
   vchan_chptr->mode.mode |= MODE_TOPICLIMIT;
   vchan_chptr->mode.mode |= MODE_NOPRIVMSGS;
-
-  sendto_channel_local(ONLY_CHANOPS,vchan_chptr,
-		       ":%s MODE %s +nt",
-		       me.name, chptr->chname);
 
   sendto_channel_remote(vchan_chptr, sptr, 
 			":%s MODE %s +nt",
@@ -238,3 +183,4 @@ int     m_cjoin(struct Client *cptr,
 
   return 0;
 }
+
