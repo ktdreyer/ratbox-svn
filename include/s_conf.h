@@ -24,6 +24,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.9  2000/01/16 22:16:46  db
+ * - checkpoint with operator section mostly working...
+ *   class code has to be rewritten still
+ *
  * Revision 7.8  2000/01/16 04:35:06  db
  * - first very rough working lex/yacc under ircd-hybrid..
  *   parser doesn't actually do anything.... yet...
@@ -229,6 +233,8 @@ struct DNSReply;
 struct hostent;
 
 /* used by new parser */
+/* yacc/lex love globals!!! */
+
 struct ip_value {
   unsigned long ip;
   unsigned long ip_mask;
@@ -236,6 +242,7 @@ struct ip_value {
 
 extern FBFILE* conf_fbfile_in;
 extern char conf_line_in[256];
+extern struct ConfItem* yy_aconf;
 
 struct ConfItem
 {
@@ -252,6 +259,7 @@ struct ConfItem
   char*            user;     /* user part of user@host */
   int              port;
   time_t           hold;     /* Hold action until this time (calendar time) */
+  char*		   class_name;   /* Name of class */
   struct Class*    c_class;     /* Class of connection */
   int              dns_pending; /* 1 if dns query pending, 0 otherwise */
 };

@@ -28,9 +28,11 @@
 #include <sys/types.h>
 #include <string.h>
 #include "s_conf.h"
+#include "irc_string.h"
 
 int yyparse();
 	
+static struct ConfItem *yy_aconf;
 
 %}
 
@@ -55,6 +57,8 @@ int yyparse();
 %token  NO_TILDE
 %token  HAVE_IDENT
 %token	OPERATOR
+%token  GLOBAL
+%token  USER
 %token  HOST
 %token  KILL
 %token  DENY
@@ -153,43 +157,91 @@ admin_email:	EMAIL '=' QSTRING ';' { sendto_realops("admin_email [%s]",yylval.st
  * oper section
  ***************************************************************************/
 
-oper_entry:	OPERATOR '{' oper_items '}' ';'
+oper_entry:	OPERATOR 
+  {
+    if(yy_aconf)
+      {
+	free_conf(yy_aconf);
+	yy_aconf = NULL;
+      }
+    yy_aconf=make_conf();
+    yy_aconf->status = CONF_LOCOP;
+  };
+ '{' oper_items '}' ';' {
+
+  if(yy_aconf->name && yy_aconf->passwd && yy_aconf->host)
+    {
+      conf_add_class_to_conf(yy_aconf,NULL);
+      conf_add_conf(yy_aconf);
+    }
+  yy_aconf = NULL;
+};
 
 oper_items:	oper_items oper_item |
 		oper_item
 
-oper_item:	oper_name | oper_host | oper_password | oper_class | 
-		oper_global_kill | oper_remote | oper_unkline | oper_gline |
-		oper_nick_changes | oper_die | oper_rehash
+oper_item:	oper_name  | oper_user | oper_host | oper_password |
+		oper_class | oper_global | oper_global_kill | oper_remote |
+		oper_unkline | oper_gline | oper_nick_changes | oper_die |
+		oper_rehash 
 
-oper_name:	NAME '=' QSTRING ';' { sendto_realops("oper.name [%s]", yylval.string); };
+oper_name:	NAME '=' QSTRING ';' {
+  DupString(yy_aconf->name,yylval.string);
+ };
 
-oper_host:	HOST '=' QSTRING ';' { sendto_realops("oper.host [%s]", yylval.string); };
+oper_user:	USER '=' QSTRING ';' {
+  DupString(yy_aconf->user,yylval.string);
+};
 
-oper_password:	PASSWORD '=' QSTRING ';' { sendto_realops("oper.host [%s]", yylval.string); };
+oper_host:	HOST '=' QSTRING ';' {
+  DupString(yy_aconf->host,yylval.string);
+};
 
-oper_global_kill: GLOBAL_KILL '=' YES ';' {sendto_realops("oper can global kill");}|
-	GLOBAL_KILL '=' NO ';' {sendto_realops("oper can't global kill"); } ;
+oper_password:	PASSWORD '=' QSTRING ';' {
+  DupString(yy_aconf->passwd,yylval.string);
+};
 
-oper_remote: REMOTE '=' YES ';' {sendto_realops("oper can do remote ops");}|
-	REMOTE '=' NO ';' {sendto_realops("oper can't do remote ops"); } ;
+oper_class:	CLASS '=' QSTRING ';' {
+  DupString(yy_aconf->class_name,yylval.string);
+ };
 
-oper_unkline: UNKLINE '=' YES ';' {sendto_realops("oper can unkline");}|
-	UNKLINE '=' NO ';' {sendto_realops("oper can't unkline"); } ;
+oper_global:	GLOBAL '=' YES ';' {yy_aconf->status = CONF_OPERATOR;} |
+		GLOBAL '=' NO ';' {yy_aconf->status = CONF_LOCOP;} ;
 
-oper_gline: GLINE '=' YES ';' {sendto_realops("oper can gline");}|
-	GLINE '=' NO ';' {sendto_realops("oper can't gline"); } ;
+oper_global_kill: GLOBAL_KILL '=' YES ';' {
+	yy_aconf->port |= CONF_OPER_GLOBAL_KILL;}|
+	GLOBAL_KILL '=' NO ';' {
+	yy_aconf->port &= ~CONF_OPER_GLOBAL_KILL;} ;
 
-oper_nick_changes: NICK_CHANGES '=' YES ';' {sendto_realops("oper can see nick changes");}|
-	NICK_CHANGES '=' NO ';' {sendto_realops("oper can't see nick changes"); } ;
+oper_remote: REMOTE '=' YES ';' {
+	yy_aconf->port |= CONF_OPER_REMOTE;}|
+	REMOTE '=' NO ';' {
+	yy_aconf->port &= ~CONF_OPER_REMOTE; } ;
 
-oper_die: DIE '=' YES ';' {sendto_realops("oper can die");}|
-	DIE '=' NO ';' {sendto_realops("oper can't die"); } ;
+oper_unkline: UNKLINE '=' YES ';' {
+	yy_aconf->port |= CONF_OPER_UNKLINE;}|
+	UNKLINE '=' NO ';' {
+	yy_aconf->port &= ~CONF_OPER_UNKLINE; } ;
 
-oper_rehash: REHASH '=' YES ';' {sendto_realops("oper can rehash");}|
-	REHASH '=' NO ';' {sendto_realops("oper can't rehash"); } ;
+oper_gline: GLINE '=' YES ';' {
+	yy_aconf->port |= CONF_OPER_GLINE;}|
+	GLINE '=' NO ';' {
+	yy_aconf->port &= ~CONF_OPER_GLINE; } ;
 
-oper_class:	CLASS '=' QSTRING ';' {sendto_realops("oper.class [%s]", yylval.string); };
+oper_nick_changes: NICK_CHANGES '=' YES ';' {
+	yy_aconf->port |= CONF_OPER_N;}|
+	NICK_CHANGES '=' NO ; {
+	yy_aconf->port &= ~CONF_OPER_N;} ;
+
+oper_die: DIE '=' YES ';' {
+	yy_aconf->port |= CONF_OPER_DIE; }|
+	DIE '=' NO ';' {
+	yy_aconf->port &= ~CONF_OPER_DIE; } ;
+
+oper_rehash: REHASH '=' YES ';' {
+	yy_aconf->port |= CONF_OPER_REHASH;}|
+	REHASH '=' NO ';' {
+	yy_aconf->port &= ~CONF_OPER_REHASH; } ;
 
 
 /***************************************************************************

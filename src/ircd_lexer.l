@@ -76,7 +76,9 @@ admin		{ return ADMIN; }
 class		{ return CLASS; }
 client		{ return CLIENT; }
 operator	{ return OPERATOR; }
+global		{ return GLOBAL; }
 oper		{ return OPERATOR; }
+user		{ return USER;} 
 host		{ return HOST; }
 kill		{ return KILL; }
 deny		{ return DENY; }

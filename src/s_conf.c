@@ -79,6 +79,7 @@ static void     flush_deleted_I_P(void);
 
 FBFILE* conf_fbfile_in;
 char    conf_line_in[256];
+struct ConfItem* yy_aconf;
 
 
 /* address of class 0 conf */
@@ -223,6 +224,7 @@ void free_conf(struct ConfItem* aconf)
   MyFree(aconf->passwd);
   MyFree(aconf->user);
   MyFree(aconf->name);
+  MyFree(aconf->class_name);
   MyFree((char*) aconf);
 }
 
