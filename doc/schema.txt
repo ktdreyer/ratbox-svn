@@ -6,23 +6,23 @@ CREATE TABLE channels (
 	flags int4,
 	reg_time unixtime,
 	last_used unixtime,
-	PRIMARY KEY(name)
+	PRIMARY KEY(chname)
 );
 
 CREATE TABLE users (
 	nickname text,
 	password text,
 	reg_time unixtime,
-	last_used unixtime,
+	last_used unixtime
 );
 
 CREATE TABLE chan_bans (
+	chname text,
 	ban_mask text,
 	ban_reason text,
 	level int4,
-	hold unixtime
-	chname text,
-	FOREIGN KEY(chname) REFERENCES channels (chname) MATCH FULL
+	hold unixtime,
+	FOREIGN KEY(chname) REFERENCES channels 
 );
 
 CREATE TABLE chan_members (
