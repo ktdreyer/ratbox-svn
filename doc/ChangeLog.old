@@ -1,3 +1,8 @@
+*** 20010101_20 by a1kmm
+Fixed whois to always route.
+Now show idle times even when SHIDE=1.
+
+
 *** 20010101_19 by vx0
 
 Updated contributor names list
