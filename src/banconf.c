@@ -51,7 +51,7 @@ getfields(char *line)
 {
 	static char *args[MAX_CONF_FIELDS+1];
 	char *s;
-	char *p;
+	char *p = line;
 	int i;
 
 	for(i = 0; i < MAX_CONF_FIELDS && p; i++)
