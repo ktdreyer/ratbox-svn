@@ -1,3 +1,29 @@
+leeh        2002/09/15 12:30:44 UTC	(20020915_1)
+
+  Modified files:
+    .                    RELNOTES 
+    doc                  example.conf example.efnet.conf 
+    include              config.h config.h.dist m_info.h newconf.h 
+    modules              m_oper.c m_version.c 
+    src                  newconf.c 
+  Log:
+  - CRYPT_OPER_PASSWORD is gone, now specified via "encrypted = ?;" in the
+    oper {};, defaults to being encrypted.
+  
+  Revision  Changes    Path
+  1.53      +7 -1      ircd-ratbox/RELNOTES
+  7.181     +8 -2      ircd-ratbox/doc/example.conf
+  7.19      +9 -3      ircd-ratbox/doc/example.efnet.conf
+  7.150     +0 -6      ircd-ratbox/include/config.h
+  7.63      +0 -6      ircd-ratbox/include/config.h.dist
+  7.43      +0 -6      ircd-ratbox/include/m_info.h
+  7.16      +1 -0      ircd-ratbox/include/newconf.h
+  1.53      +22 -21    ircd-ratbox/modules/m_oper.c
+  1.42      +1 -4      ircd-ratbox/modules/m_version.c
+  7.42      +12 -0     ircd-ratbox/src/newconf.c
+
+
+
 leeh        2002/09/15 11:56:30 UTC	(20020915_0)
 
   Modified files:
