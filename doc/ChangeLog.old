@@ -1,3 +1,6 @@
+*** 20010120_13 by davidt
+Re-enable the warnings for servers sending us numerics, it shouldn't happen [except 'Register First' numerics, when we send a old server a NOTICE AUTH :*** ... message whilest it's connecting to us], and they indicate bugs..
+
 *** 20010120_12 by davidt
 Argh.  argh. always test compile something, no matter how simple it is....
 
