@@ -86,14 +86,6 @@ error HARD_FDLIMIT_ undefined
 #define MIN_SPAM_NUM 5
 #define MIN_SPAM_TIME 60
 
-#if defined( WANT_GETTEXT ) && defined( HAVE_GETTEXT ) && defined( MSGPATH )
-#define USE_GETTEXT 1
-#define _(a)       (gettext(a))
-#else
-#undef USE_GETTEXT
-#define _(a)       (a)
-#endif
-
 #define CONFIG_RATBOX_LEVEL_1
 
 #endif /* INCLUDED_defaults_h */

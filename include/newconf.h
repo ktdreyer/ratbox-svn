@@ -260,7 +260,6 @@ extern 	char *		conf_cur_block_name;
 	void	conf_set_general_short_motd			(void *data);
 	void	conf_set_general_no_oper_flood			(void *data);
 	void	conf_set_general_glines				(void *data);
-	void	conf_set_general_message_locale			(void *data);
 	void	conf_set_general_gline_time			(void *data);
 	void	conf_set_general_idletime			(void *data);
 	void	conf_set_general_dots_in_ident			(void *data);

@@ -182,12 +182,6 @@ Info MyInformation[] = {
   { "TS_MAX_DELTA_DEFAULT", "", TS_MAX_DELTA_DEFAULT, "Maximum Allowed TS Delta from another Server" },
   { "TS_WARN_DELTA_DEFAULT", "", TS_WARN_DELTA_DEFAULT, "Maximum TS Delta before Sending Warning" },
 
-#ifdef USE_GETTEXT
-  { "USE_GETTEXT", "ON", 0, "Use gettext() for message customisation" },
-#else
-  { "USE_GETTEXT", "OFF", 0, "Use gettext() for message customisation" },
-#endif /* USE_GETTEXT */
-
 #ifdef USE_SYSLOG
   { "USE_SYSLOG", "ON", 0, "Log Errors to syslog file" },
 #else

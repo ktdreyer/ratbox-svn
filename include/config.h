@@ -91,7 +91,6 @@
  * LOGPATH     = directory for logfiles,
  * MODPATH     = directory for modules,
  * AUTOMODPATH = directory for autoloaded modules
- * MSGPATH     = directory for gettext message files.
  */
 
 /* dirs */
@@ -99,7 +98,6 @@
 #define BINPATH IRCD_PREFIX "/bin/"
 #define MODPATH IRCD_PREFIX "/modules/"
 #define AUTOMODPATH IRCD_PREFIX "/modules/autoload/"
-#define MSGPATH IRCD_PREFIX "/messages/"
 #define ETCPATH IRCD_PREFIX "/etc"
 #define LOGPATH IRCD_PREFIX "/logs"
 #define UHPATH   IRCD_PREFIX "/help/users"
@@ -133,7 +131,6 @@
  * ETCPATH     = directory for configuration files,
  * LOGPATH     = directory for logfiles,
  * MODPATH     = directory for autoloaded modules (disabled in VMS),
- * MSGPATH     = directory for gettext message files (disabled in VMS).
  */
 
 /* IRCD_PREFIX not needed in VMS -larne */
@@ -145,7 +142,6 @@
 
 #undef  MODPATH
 #undef  AUTOMODPATH
-#undef  MSGPATH
 
 #define SPATH    BINPATH "IRCD.EXE"              /* server executable */
 #define SLPATH   BINPATH "SERVLINK.EXE"          /* servlink executable */
@@ -166,11 +162,6 @@
 
 #endif /* !VMS */
 
-/* WANT_GETTEXT - toggle gettext support.
- * NOTE: if configure doesn't detect gettext, this won't do anything.
- */
-#define WANT_GETTEXT
- 
 /* Ignore bogus timestamps from other servers. Yes this will desync
  * the network, but it will allow chanops to resync with a valid non TS 0
  *

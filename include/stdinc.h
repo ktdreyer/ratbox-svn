@@ -57,9 +57,6 @@
 #include <netdb.h>
 #include <stdarg.h>
 #include <signal.h>
-#ifdef USE_GETTEXT
-#include <libintl.h>
-#endif
 #include <dirent.h>
 #include <ctype.h>
 

@@ -499,8 +499,6 @@ void	newconf_init()
 			conf_set_general_gline_time);
 	add_conf_item("general", "idletime", CF_TIME,
 			conf_set_general_idletime);
-	add_conf_item("general", "message_locale", CF_QSTRING,
-			conf_set_general_message_locale);
 	add_conf_item("general", "client_exit", CF_YESNO,
 			conf_set_general_client_exit);
 	add_conf_item("general", "oper_only_umodes", CF_STRING | CF_FLIST,
@@ -2430,17 +2428,6 @@ void	conf_set_general_no_oper_flood(void *data)
 void	conf_set_general_glines(void *data)
 {
 	ConfigFileEntry.glines = *(unsigned int*) data;
-}
-
-void	conf_set_general_message_locale(void *data)
-{
-	char langenv[BUFSIZE];
-
-	if (strlen((char*)data) > BUFSIZE-10)
-		((char*)data)[BUFSIZE-9] = 0;
-
-	ircsprintf(langenv, "LANGUAGE=%s", (char*)data);
-	putenv(langenv);
 }
 
 void	conf_set_general_gline_time(void *data)

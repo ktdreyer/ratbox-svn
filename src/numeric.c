@@ -59,7 +59,7 @@ const char* form_str(int numeric)
   if (num_ptr == NULL)
     num_ptr = replies[ERR_LAST_ERR_MSG];
 
-  return ((const char *) _(num_ptr));
+  return (num_ptr);
 }
 
 

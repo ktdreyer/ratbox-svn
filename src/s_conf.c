@@ -1426,7 +1426,6 @@ set_default_conf(void)
   ConfigFileEntry.fname_operlog[0] = '\0';
   ConfigFileEntry.glines = NO;
   ConfigFileEntry.use_egd = NO;
-  /* don't reset msglocale setting -- we'd overwrite then env string */
   ConfigFileEntry.gline_time = 12 * 3600;
   ConfigFileEntry.idletime = 0;
   ConfigFileEntry.dots_in_ident = 0;

@@ -11,8 +11,6 @@ fd-management.txt         - Outline of the file descriptor management system
 file-management.txt       - Outline of the disk file management system
 hostmask.txt              - Outline of hostmask handling
 linebuf.txt               - Outline of the linebuf system (dbuf replacement)
-message-customisation.txt - Outline of the message customization procedure
-                            for developers and advanced users
 network.txt               - Outline of the network traffic subsystem
 rfc1459.txt               - The IRC RFC
 send.txt                  - Document on all of the send_to functions

@@ -697,23 +697,6 @@ int main(int argc, char *argv[])
   }
   strncpy(me.info, ServerInfo.description, REALLEN);
 
-#ifdef USE_GETTEXT
-  /*
-   * For 'locale' try (in this order):
-   *    Config entry "msglocale" (yyparse() will overwrite LANGUAGE)
-   *    Env variable "LANGUAGE"
-   *    Default of "" (so don't overwrite LANGUAGE here)
-   */
-
-  if (!getenv("LANGUAGE"))
-  {
-    putenv("LANGUAGE=");
-  }
-
-  textdomain("ircd-hybrid");
-  bindtextdomain("ircd-hybrid" , MSGPATH);
-#endif
-
   me.from = &me;
   me.servptr = &me;
   SetMe(&me);
