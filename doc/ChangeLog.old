@@ -1,3 +1,8 @@
+*** 20010106_8 by fl_
+- didnt know we had a whois_wait.. which was set too high anyway so its
+  now 1 (same as hyb6?)
+
+
 *** 20010106_7 by fl_
 - small fix of an if()
 
