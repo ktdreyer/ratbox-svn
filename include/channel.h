@@ -35,7 +35,7 @@
 #endif
 
 /* Efnet wanted this... Maybe we should do this from configure? */
-#undef REQUIRE_OANDV
+#define REQUIRE_OANDV
 
 /* #define INTENSIVE_DEBUG */
 
