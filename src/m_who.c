@@ -118,7 +118,7 @@ int     m_who(struct Client *cptr,
   struct Client *acptr;
   char  *mask = parc > 1 ? parv[1] : NULL;
   struct SLink  *lp;
-  struct Channel *chptr;
+  struct Channel *chptr=NULL;
   struct Channel *vchan;
   struct Channel *mychannel = NULL;
   int   oper = parc > 2 ? (*parv[2] == 'o' ): 0; /* Show OPERS only */
@@ -224,8 +224,9 @@ int     m_who(struct Client *cptr,
   if (((acptr = find_client(mask, NULL)) != NULL) &&
       IsPerson(acptr) && (!oper || IsAnyOper(acptr)))
     {
+      struct Channel *bchan;
+      char *chname;
       int isinvis = 0;
-      struct Channel *ch2ptr = NULL;
 
       isinvis = IsInvisible(acptr);
       for (lp = acptr->user->channel; lp; lp = lp->next)
@@ -236,14 +237,21 @@ int     m_who(struct Client *cptr,
 	    continue;
 	  if (member || (!isinvis && PubChannel(chptr)))
 	    {
-	      ch2ptr = chptr;
 	      break;
 	    }
 	}
-      if (ch2ptr != NULL)
+      if (chptr != NULL)
 	{
-	  lp = find_user_link(ch2ptr->members, acptr);
-	  do_who(sptr, acptr, ch2ptr->chname, lp);
+	  chname = chptr->chname;
+	  lp = find_user_link(chptr->members, acptr);
+	  if (IsVchan(chptr))
+	    {
+	      bchan = find_bchan (chptr);
+	      if (bchan != NULL)
+		chname = bchan->chname;
+	    }
+
+	  do_who(sptr, acptr, chname, lp);
 	}
       sendto_one(sptr, form_str(RPL_ENDOFWHO), me.name, parv[0], mask );
       return 0;
@@ -268,10 +276,11 @@ int     m_who(struct Client *cptr,
 
 static void who_global(struct Client *sptr,char *mask, int oper)
 {
-  struct Channel *chptr;
-  struct Channel *ch2ptr = NULL;
+  struct Channel *chptr=NULL;
+  struct Channel *bchan;
   struct Client *acptr;
   struct SLink  *lp;
+  char  *chname;
   int   showperson;
   int   member;
   int   isinvis;
@@ -301,7 +310,6 @@ static void who_global(struct Client *sptr,char *mask, int oper)
             continue;
           if (member || (!isinvis && PubChannel(chptr)))
             {
-              ch2ptr = chptr;
               showperson = YES;
               break;
             }
@@ -319,8 +327,17 @@ static void who_global(struct Client *sptr,char *mask, int oper)
            match(mask, acptr->user->server) ||
            match(mask, acptr->info)))
         {
-	  lp = find_user_link(ch2ptr->members, acptr);
-          do_who(sptr, acptr, ch2ptr->chname, lp);
+	  lp = find_user_link(chptr->members, acptr);
+	  chname = chptr->chname;
+	  if (IsVchan(chptr))
+	    {
+	      bchan = find_bchan (chptr);
+	      if (bchan != NULL)
+		chname = bchan->chname;
+	    }
+
+	  do_who(sptr, acptr, chname, lp);
+
           if (!--maxmatches)
             {
               return;
