@@ -35,7 +35,6 @@
 #include "modules.h"
 
 static void m_time(struct Client*, struct Client*, int, char**);
-static void ms_time(struct Client*, struct Client*, int, char**);
 static void mo_time(struct Client*, struct Client*, int, char**);
 
 struct Message time_msgtab = {
@@ -66,8 +65,6 @@ char *_version = "20001202";
 static void m_time(struct Client *client_p, struct Client *source_p,
                   int parc, char *parv[])
 {
-  static time_t last_used = 0;
-
   /* This is safe enough to use during non hidden server mode */
   if(!GlobalSetOptions.hide_server)
     {

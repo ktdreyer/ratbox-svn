@@ -557,8 +557,10 @@ int main(int argc, char *argv[])
   eventAdd("cleanup_tklines", cleanup_tklines, NULL,
            CLEANUP_TKLINES_TIME, 0);
 
+#ifdef OPENSSL
   eventAdd("cryptlink_regen_key", cryptlink_regen_key, NULL,
            CRYPTLINK_REGEN_TIME, 0);
+#endif
 
   /* We want try_connections to be called as soon as possible now! -- adrian */
   /* No, 'cause after a restart it would cause all sorts of nick collides */

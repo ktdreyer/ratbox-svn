@@ -289,7 +289,7 @@ int unbase64_block(char **output, char *data, int len)
   int count = 0;
 
   if ( ( len % 4 ) != 0 )
-    return NULL;
+    return 0;
 
   out = MyMalloc(((len / 4) * 3) + 1);
 
