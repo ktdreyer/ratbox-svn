@@ -372,14 +372,17 @@ check_unknowns_list(dlink_list * list)
 static void
 notify_banned_client(struct Client *client_p, struct ConfItem *aconf, int ban)
 {
+	static const char conn_closed[] = "Connection closed";
 	static const char d_lined[] = "D-lined";
 	static const char k_lined[] = "K-lined";
 	static const char g_lined[] = "G-lined";
 	const char *reason = NULL;
+	const char *exit_reason = conn_closed;
 
 	if(ConfigFileEntry.kline_with_reason && !EmptyString(aconf->passwd))
 	{
 		reason = aconf->passwd;
+		exit_reason = aconf->passwd;
 	}
 	else
 	{
@@ -404,7 +407,7 @@ notify_banned_client(struct Client *client_p, struct ConfItem *aconf, int ban)
 			   me.name, client_p->name, reason);
 	
 	exit_client(client_p, client_p, &me, 
-			EmptyString(ConfigFileEntry.kline_reason) ? reason :
+			EmptyString(ConfigFileEntry.kline_reason) ? exit_reason :
 			 ConfigFileEntry.kline_reason);
 }
 
