@@ -38,6 +38,7 @@
 #include "parse.h"
 #include "modules.h"
 #include "vchannel.h"
+#include "list.h"
 
 #include <string.h>
 
