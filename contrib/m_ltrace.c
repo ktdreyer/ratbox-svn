@@ -172,7 +172,9 @@ static void mo_ltrace(struct Client *client_p, struct Client *source_p,
         if (IsOper(target_p))
           sendto_one(source_p, form_str(RPL_TRACEOPERATOR),
                      me.name, parv[0], class_name, name, 
+#ifndef HIDE_SPOOF_IPS
                      MyOper(source_p) ? ipaddr :
+#endif
 		     (IsIPSpoof(target_p) ? "255.255.255.255" : ipaddr),
                      CurrentTime - target_p->lasttime,
                      (target_p->user) ? (CurrentTime - target_p->user->last) : 0);
@@ -287,14 +289,19 @@ static int report_this_status(struct Client *source_p, struct Client *target_p,
       if (IsAdmin(target_p))
 	sendto_one(source_p, form_str(RPL_TRACEOPERATOR),
                    me.name, source_p->name, class_name, name,
-                   IsOperAdmin(source_p) ? ip : "255.255.255.255",
+#ifndef HIDE_SPOOF_IPS
+                   IsOperAdmin(source_p) ? ip : 
+#endif
+                   (IsIPSpoof(target_p) ? "255.255.255.255" : ip),
                    CurrentTime - target_p->lasttime,
                    (target_p->user) ? (CurrentTime - target_p->user->last) : 0);
 		       
       else if (IsOper(target_p))
 	sendto_one(source_p, form_str(RPL_TRACEOPERATOR),
 		   me.name, source_p->name, class_name, name, 
+#ifndef HIDE_SPOOF_IPS
 		   MyOper(source_p) ? ip : 
+#endif
 		   (IsIPSpoof(target_p) ? "255.255.255.255" : ip),
 		   CurrentTime - target_p->lasttime,
 		   (target_p->user)?(CurrentTime - target_p->user->last):0);
