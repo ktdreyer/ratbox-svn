@@ -1,3 +1,8 @@
+*** 20001221_2 by db
+- added einride's memory debugging
+
+
+
 *** 20001221_1 by db
 - the modes not propagating on sjoin was my fault. 
   channel_modes() set the +ntz in modebuf, which I then promptly
