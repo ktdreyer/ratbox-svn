@@ -1,3 +1,7 @@
+*** 20011113_7 by kreator
+- fix broken build for --disable-openssl
+
+
 *** 20011113_6 by leeh
 - added ERR_VCHANDISABLED (when vchans are disabled)
   ERR_ALREADYONVCHAN (client tries to create two vchans)
