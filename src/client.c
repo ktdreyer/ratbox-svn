@@ -1311,13 +1311,17 @@ detach_client(struct Client *cptr, const char *reason)
  cptr->fd = -1;
  dlinkAdd((void*)cptr, make_dlink_node(), &persist_list);
  cptr->user->last_detach_time = CurrentTime;
+#if 0 /* No we can actually keep this... */
  if (cptr->localClient != NULL)
-   MyFree(cptr->localClient);
+   BlockHeapFree(localUserFreeList, cptr->localClient);
  cptr->localClient = NULL;
+#endif
  if (cptr->user->away == NULL)
    {
     DupString(cptr->user->away, reason);
     cptr->user->last_away = CurrentTime;
+    sendto_ll_serv_butone(NULL, NULL, 0, ":%s AWAY :%s", cptr->name,
+                          cptr->user->away);
    }
  return 0;
 #else
@@ -1369,10 +1373,10 @@ const char* comment         /* Reason for the exit */
         remove_one_ip(&source_p->localClient->ip);
       if (IsPersisting(source_p))
         {
-         m = dlinkFind(&oper_list,source_p);
+         m = dlinkFind(&persist_list,source_p);
          if ( m != NULL )
            {
-            dlinkDelete(m, &oper_list);
+            dlinkDelete(m, &persist_list);
             free_dlink_node(m);
            }
         }

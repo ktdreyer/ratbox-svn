@@ -60,14 +60,18 @@ void parse_client_queued(struct Client *client_p)
 	while ((dolen = linebuf_get(&client_p->localClient->buf_recvq,
 				    readBuf, READBUF_SIZE)) > 0)
         {
-          if (IsDead(client_p))
-	    {
-	      linebuf_donebuf(&client_p->localClient->buf_recvq);
-	      linebuf_donebuf(&client_p->localClient->buf_sendq);
-	      return;
+          if (!IsDead(client_p))
+	        client_dopacket(client_p, readBuf, dolen);
+	      if (IsDead(client_p))
+    	    {
+    	     if (client_p->localClient)
+    	       {
+	            linebuf_donebuf(&client_p->localClient->buf_recvq);
+	            linebuf_donebuf(&client_p->localClient->buf_sendq);
+	           }
+	         return;
+	        }
 	    }
-	  client_dopacket(client_p, readBuf, dolen);
-	}
       }
 #if 0
     else

@@ -23,6 +23,8 @@
 
 #include "setup.h"
 
+#define PERSISTANT_CLIENTS
+
 /* PLEASE READ SECTION:
  */
 
