@@ -1,3 +1,8 @@
+*** 20010617_5 by db
+- ircsprintf() conveniently returns the length of string
+
+
+
 *** 20010617_4 by toot
 renamed some stuff in channel.c so it makes some more sense
 
