@@ -1,3 +1,14 @@
+*** 20010602_8 by leeh
+- made vhost6 actually do something and work..
+  we can now have ipv6 only servers.. it relies on aftype= in the ircd.conf
+
+  Theres still a bug with ipv6 incoming connections.. if it resolves
+  and you have the IP, not the host in the config, itll error and give
+  bad hostname.. we should accept both IP and host, and I dont think I
+  can fix this one.. andro? a1kmm? care to help? ;)
+
+
+
 *** 20010602_7 by jdc
 * Fixed output so that --disable-openssl doesn't bother checking for
   include directories and the like.  Minor fix (mainly cosmetical).
