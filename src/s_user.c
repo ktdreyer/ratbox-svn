@@ -410,6 +410,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 	{
 		memset(source_p->localClient->passwd, 0, strlen(source_p->localClient->passwd));
 		MyFree(source_p->localClient->passwd);
+		source_p->localClient->passwd = NULL;
 	}
 
 	/* report if user has &^>= etc. and set flags as needed in source_p */
