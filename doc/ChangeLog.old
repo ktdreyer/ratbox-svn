@@ -1,3 +1,16 @@
+leeh        2002/07/16 16:26:49 EDT	(20020716_2)
+
+  Modified files:
+    include              supported.h 
+  Log:
+  - fixed RPL_ISUPPORT to accurately report the status of halfops, +eI and
+    anonops
+  
+  Revision  Changes    Path
+  1.23      +15 -6     ircd-hybrid-7/include/supported.h
+
+
+
 lusky       2002/07/16 11:36:11 EDT	(20020716_1)
 
   Modified files:
