@@ -1,3 +1,15 @@
+leeh        2002/07/02 06:35:28 EDT	(20020702_1)
+
+  Modified files:
+    contrib              lmh.diff 
+  Log:
+  - use CASEMAP instead of CHARSET
+  
+  Revision  Changes    Path
+  1.6       +6 -6      ircd-hybrid-7/contrib/lmh.diff
+
+
+
 leeh        2002/07/02 06:22:27 EDT	(20020702_0)
 
   Modified files:
