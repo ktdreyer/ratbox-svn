@@ -1821,6 +1821,12 @@ expire_tklines(dlink_list *tklist)
 
       if (kill_ptr->hold <= CurrentTime)
 	{
+          /* Alert opers that a TKline expired - Hwy */
+          sendto_realops_flags(FLAGS_ALL, L_ALL,
+			       "Temporary K-line for [%s@%s] expired",
+			       (kill_ptr->user) ? kill_ptr->user : "*",
+			       (kill_ptr->host) ? kill_ptr->host : "*");
+
 	  delete_one_address_conf(kill_ptr->host, kill_ptr);
 	  dlinkDelete(kill_node, tklist);
 	  free_dlink_node(kill_node);
