@@ -1,3 +1,55 @@
+leeh        2003/04/19 13:42:05 UTC	(20030419_0)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              client.h irc_string.h resv.h s_conf.h 
+    modules              m_challenge.c m_info.c m_join.c m_resv.c 
+                         m_who.c m_xline.c 
+    modules/core         m_message.c 
+    src                  class.c client.c match.c newconf.c resv.c 
+                         s_conf.c s_log.c s_user.c 
+  Log:
+  - more ports from stable
+    - join compression
+    - end the flood grace period on /who and /who 0
+    - allow clients to message themselves without ending the grace period
+    - make kline_exempt extend exemption to xlines
+    - changed references of "XLINE" and "X-line" to "X-Line" to be consistent
+      with k/d/glines
+    - added code to check xlines against existing clients
+    - added a minimum non-wildcard setting for xlines/resvs
+    - added ConfigFileEntry.min_nonwildcard_simple for this
+    - allow non-admins to set wildcard resvs, providing they have the above
+      number of non-wildcard chars.
+    - updated example confs for min_nonwildcard_simple
+    - fix for foperlog bug reported by powuh
+    - update the connect frequency in classes on /rehash too
+  
+  Revision  Changes    Path
+  7.202     +7 -1      ircd-ratbox/doc/example.conf
+  7.38      +7 -1      ircd-ratbox/doc/example.efnet.conf
+  7.202     +1 -0      ircd-ratbox/include/client.h
+  7.48      +2 -0      ircd-ratbox/include/irc_string.h
+  1.19      +1 -0      ircd-ratbox/include/resv.h
+  7.231     +1 -0      ircd-ratbox/include/s_conf.h
+  1.125     +6 -3      ircd-ratbox/modules/core/m_message.c
+  1.53      +3 -3      ircd-ratbox/modules/m_challenge.c
+  1.80      +7 -1      ircd-ratbox/modules/m_info.c
+  1.119     +55 -54    ircd-ratbox/modules/m_join.c
+  1.32      +5 -4      ircd-ratbox/modules/m_resv.c
+  1.84      +8 -1      ircd-ratbox/modules/m_who.c
+  1.23      +20 -9     ircd-ratbox/modules/m_xline.c
+  7.49      +1 -0      ircd-ratbox/src/class.c
+  7.380     +95 -31    ircd-ratbox/src/client.c
+  7.29      +2 -2      ircd-ratbox/src/match.c
+  7.77      +8 -0      ircd-ratbox/src/newconf.c
+  7.29      +25 -0     ircd-ratbox/src/resv.c
+  7.401     +1 -0      ircd-ratbox/src/s_conf.c
+  7.52      +6 -0      ircd-ratbox/src/s_log.c
+  7.259     +4 -2      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2003/04/17 20:36:53 UTC	(20030417_2)
 
   Modified files:
