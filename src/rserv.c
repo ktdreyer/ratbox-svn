@@ -347,6 +347,8 @@ rebuild_params(const char **parv, int parc, int start)
 			break;
 		}
 
+		strlcat(buf, " ", sizeof(buf));
+
 		start++;
 	}
 

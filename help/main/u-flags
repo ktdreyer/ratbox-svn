@@ -4,3 +4,6 @@ Usage: .flags [[+|-]flag]
        auth      - Oper connections/disconnections from services
        server    - Server connections/disconnections
        spy       - Admin commands issued
+       register  - Username/Channel registrations
+       jupes     - Oper jupes
+       alis      - LIST usage in ALIS

@@ -535,6 +535,13 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 				sendto_all(UMODE_SPY, "#%s:%s# %s %s",
 					client_p->user->oper->name, client_p->name,
 					cmd_table[i].cmd, rebuild_params((const char **) parv, parc, 0));
+			else if(cmd_table[i].spyflags)
+				sendto_all(cmd_table[i].spyflags, "#%s:%s!%s@%s# %s %s",
+					client_p->user->user_reg ? 
+					 client_p->user->user_reg->name : "",
+					client_p->name, client_p->user->username,
+					client_p->user->host, cmd_table[i].cmd,
+					rebuild_params((const char **) parv, parc, 0));
 
                         retval = (cmd_table[i].func)(client_p, parv, parc);
 

@@ -450,6 +450,15 @@ static struct _flags_table flags_table[] = {
         { "auth",       UMODE_AUTH,     },
         { "server",     UMODE_SERVER,   },
 	{ "spy",	UMODE_SPY	},
+#ifdef ENABLE_USERSERV
+	{ "register",	UMODE_REGISTER	},
+#endif
+#ifdef ENABLE_JUPESERV
+	{ "jupes",	UMODE_JUPES	},
+#endif
+#ifdef ENABLE_ALIS
+	{ "alis",	UMODE_ALIS	},
+#endif
         { "\0",         0,              }
 };
 

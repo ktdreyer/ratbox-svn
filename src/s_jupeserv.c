@@ -49,12 +49,12 @@ static int s_jupeserv_pending(struct client *, char *parv[], int parc);
 
 static struct service_command jupeserv_command[] =
 {
-	{ "JUPE",	&s_jupeserv_jupe,	2, NULL, 1, 0L, 0, 0, CONF_OPER_JUPE_ADMIN },
-	{ "UNJUPE",	&s_jupeserv_unjupe,	1, NULL, 1, 0L, 0, 0, CONF_OPER_JUPE_ADMIN },
-	{ "CALLJUPE",	&s_jupeserv_calljupe,	1, NULL, 1, 0L, 0, 1, 0 },
-	{ "CALLUNJUPE",	&s_jupeserv_callunjupe,	1, NULL, 1, 0L, 0, 1, 0 },
-	{ "PENDING",	&s_jupeserv_pending,	0, NULL, 1, 0L, 0, 1, 0 },
-	{ "\0",		NULL,			0, NULL, 0, 0L, 0, 1, 0 }
+	{ "JUPE",	&s_jupeserv_jupe,	2, NULL, 1, 0L, 0, 0, CONF_OPER_JUPE_ADMIN, 0 },
+	{ "UNJUPE",	&s_jupeserv_unjupe,	1, NULL, 1, 0L, 0, 0, CONF_OPER_JUPE_ADMIN, 0 },
+	{ "CALLJUPE",	&s_jupeserv_calljupe,	1, NULL, 1, 0L, 0, 1, 0, UMODE_JUPES },
+	{ "CALLUNJUPE",	&s_jupeserv_callunjupe,	1, NULL, 1, 0L, 0, 1, 0, UMODE_JUPES },
+	{ "PENDING",	&s_jupeserv_pending,	0, NULL, 1, 0L, 0, 1, 0, UMODE_JUPES },
+	{ "\0",		NULL,			0, NULL, 0, 0L, 0, 1, 0, 0 }
 };
 
 static struct ucommand_handler jupeserv_ucommand[] =
@@ -310,7 +310,7 @@ s_jupeserv_jupe(struct client *client_p, char *parv[], int parc)
 	struct server_jupe *jupe_p;
 	const char *reason;
 
-	if(!valid_jupe(parv[1]))
+	if(!valid_jupe(parv[0]))
 	{
 		service_error(jupeserv_p, client_p, "Servername %s is invalid",
 				parv[0]);
@@ -398,7 +398,7 @@ s_jupeserv_calljupe(struct client *client_p, char *parv[], int parc)
 	struct server_jupe *jupe_p;
 	dlink_node *ptr;
 
-	if(!valid_jupe(parv[1]))
+	if(!valid_jupe(parv[0]))
 	{
 		service_error(jupeserv_p, client_p, "Servername %s is invalid",
 				parv[0]);

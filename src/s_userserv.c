@@ -45,16 +45,16 @@ static int s_user_setemail(struct client *, char *parv[], int parc);
 
 static struct service_command userserv_command[] =
 {
-	{ "USERREGISTER",	&s_user_userregister,	2, NULL, 1, 0L, 0, 0, CONF_OPER_US_REGISTER },
-	{ "USERDROP",		&s_user_userdrop,	1, NULL, 1, 0L, 0, 0, CONF_OPER_US_ADMIN },
-	{ "USERSUSPEND",	&s_user_usersuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_US_ADMIN },
-	{ "USERUNSUSPEND",	&s_user_userunsuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_US_ADMIN },
-	{ "REGISTER",	&s_user_register,	2, NULL, 1, 0L, 0, 0, 0 },
-	{ "LOGIN",	&s_user_login,		2, NULL, 1, 0L, 0, 0, 0 },
-	{ "LOGOUT",	&s_user_logout,		0, NULL, 1, 0L, 1, 0, 0 },
-	{ "SETPASS",	&s_user_setpass,	2, NULL, 1, 0L, 1, 0, 0 },
-	{ "SETEMAIL",	&s_user_setemail,	1, NULL, 1, 0L, 1, 0, 0 },
-	{ "\0",		NULL,			0, NULL, 0, 0L, 0, 0, 0 }
+	{ "USERREGISTER",	&s_user_userregister,	2, NULL, 1, 0L, 0, 0, CONF_OPER_US_REGISTER, 0 },
+	{ "USERDROP",		&s_user_userdrop,	1, NULL, 1, 0L, 0, 0, CONF_OPER_US_ADMIN, 0 },
+	{ "USERSUSPEND",	&s_user_usersuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_US_ADMIN, 0 },
+	{ "USERUNSUSPEND",	&s_user_userunsuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_US_ADMIN, 0 },
+	{ "REGISTER",	&s_user_register,	2, NULL, 1, 0L, 0, 0, 0, 0 },
+	{ "LOGIN",	&s_user_login,		2, NULL, 1, 0L, 0, 0, 0, 0 },
+	{ "LOGOUT",	&s_user_logout,		0, NULL, 1, 0L, 1, 0, 0, 0 },
+	{ "SETPASS",	&s_user_setpass,	2, NULL, 1, 0L, 1, 0, 0, 0 },
+	{ "SETEMAIL",	&s_user_setemail,	1, NULL, 1, 0L, 1, 0, 0, 0 },
+	{ "\0",		NULL,			0, NULL, 0, 0L, 0, 0, 0, 0 }
 };
 
 static struct ucommand_handler userserv_ucommand[] =
@@ -570,6 +570,12 @@ s_user_register(struct client *client_p, char *parv[], int parc)
 			last_count++;
 	}
 
+	/* we need to mask the password */
+	sendto_all(UMODE_REGISTER, "#:%s!%s@%s# REGISTER %s %s",
+			client_p->name, client_p->user->username,
+			client_p->user->host, parv[0],
+			EmptyString(parv[2]) ? "" : parv[2]);
+			
 	slog(userserv_p, 2, "%s - REGISTER %s %s",
 		client_p->user->mask, parv[0], 
 		EmptyString(parv[2]) ? "" : parv[2]);
