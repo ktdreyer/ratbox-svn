@@ -1,3 +1,7 @@
+*** 20010612_3 by androsyn
+Fixed Makefile.in after I borked it last night.
+
+
 *** 20010612_2 by androsyn
 Helps if you commit the right makefile.in
 
