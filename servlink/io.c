@@ -24,7 +24,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
-#include <socket.h>
 
 #ifdef HAVE_LIBCRYPTO
 #include <openssl/evp.h>
@@ -131,10 +130,7 @@ void process_recvq(unsigned char *data, unsigned int datalen)
     in_state.zip_state.z_stream.avail_out = BUFLEN;
     if ((ret = inflate(&in_state.zip_state.z_stream,
                        Z_NO_FLUSH)) != Z_OK)
-    {
-      assert(0);
       exit(ret);
-    }
     assert(in_state.zip_state.z_stream.avail_out);
     assert(in_state.zip_state.z_stream.avail_in == 0);
     blen = BUFLEN - in_state.zip_state.z_stream.avail_out;
@@ -286,11 +282,6 @@ void read_data(void)
       assert(out_state.zip_state.z_stream.avail_in == 0);
       blen = BUFLEN - out_state.zip_state.z_stream.avail_out;
       assert(blen);
-
-#if defined(HAVE_LIBZ) || defined(HAVE_LIBCRYPTO)
-     if (out_state.zip || out_state.crypt)
-       buf = tmp_buf;
-#endif
     }
 #endif
 
@@ -318,6 +309,10 @@ void read_data(void)
       out_state.len = blen - ret;
       return;
     }
+#if defined(HAVE_LIBZ) || defined(HAVE_LIBCRYPTO)
+    if (out_state.zip || out_state.crypt)
+      buf = tmp_buf;
+#endif
   }
 }
 
@@ -376,11 +371,6 @@ void read_net(void)
                                buf, &blen,
                                tmp_buf, ret));
       assert(blen == ret);
-
-#if defined(HAVE_LIBCRYPTO) || defined(HAVE_LIBZ)
-      if (in_state.crypt || in_state.zip)
-        buf = tmp_buf;
-#endif
     }
 #endif
     
@@ -416,6 +406,10 @@ void read_net(void)
       fds[REMOTE_FD_R].read_cb = NULL;
       return;
     }
+#if defined(HAVE_LIBCRYPTO) || defined(HAVE_LIBZ)
+    if (in_state.crypt || in_state.zip)
+      buf = tmp_buf;
+#endif
   }
 }
 

@@ -38,7 +38,7 @@
 #endif
 
 
-/* #define SERVLINK_DEBUG */
+//#define SERVLINK_DEBUG
 
 #define READLEN                  2048
 
