@@ -1,3 +1,9 @@
+*** 20010918_4 by davidt
+- Fix src/send.c to send the correct data to io_debug
+- Add eventDelete to event.c, prototype to event.h
+
+
+
 *** 20010918_3 by db
 - yet more cleanups. Its still a cesspool. 
   no more attach_cn_lines its now attach_connect_block
