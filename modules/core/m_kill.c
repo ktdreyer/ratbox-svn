@@ -113,11 +113,6 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                  me.name, parv[0], user, acptr->name);
       chasing = 1;
     }
-  if (!MyConnect(acptr) && IsLocalOper(cptr))
-    {
-      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-      return 0;
-    }
   if (IsServer(acptr) || IsMe(acptr))
     {
       sendto_one(sptr, form_str(ERR_CANTKILLSERVER),
@@ -164,12 +159,6 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   ** Note: "acptr->name" is used instead of "user" because we may
   **     have changed the target because of the nickname change.
   */
-  if (IsLocalOper(sptr) && !MyConnect(acptr))
-    {
-      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-      return 0;
-    }
-
   if(BadPtr(parv[2]))
     {
       reason = sptr->name;
@@ -320,11 +309,6 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                  me.name, parv[0], user, acptr->name);
       chasing = 1;
     }
-  if (!MyConnect(acptr) && IsLocalOper(cptr))
-    {
-      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-      return 0;
-    }
   if (IsServer(acptr) || IsMe(acptr))
     {
       sendto_one(sptr, form_str(ERR_CANTKILLSERVER),
@@ -371,12 +355,6 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   ** Note: "acptr->name" is used instead of "user" because we may
   **     have changed the target because of the nickname change.
   */
-  if (IsLocalOper(sptr) && !MyConnect(acptr))
-    {
-      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-      return 0;
-    }
-
   if(BadPtr(parv[2]))
     {
       reason = sptr->name;

@@ -78,79 +78,79 @@ char *_version = "20001122";
 */
 int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-	struct ConfItem *aconf, *oconf;
-	char  *name;
-	char  *password;
-	dlink_node *ptr;
+  struct ConfItem *aconf, *oconf;
+  char  *name;
+  char  *password;
+  dlink_node *ptr;
 
-	name = parc > 1 ? parv[1] : (char *)NULL;
-	password = parc > 2 ? parv[2] : (char *)NULL;
+  name = parc > 1 ? parv[1] : (char *)NULL;
+  password = parc > 2 ? parv[2] : (char *)NULL;
 
-	if ((EmptyString(name) || EmptyString(password)))
+  if ((EmptyString(name) || EmptyString(password)))
     {
-		sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-				   me.name, sptr->name, "OPER");
-		return 0;
+      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
+		 me.name, sptr->name, "OPER");
+      return 0;
     }
 
-	if( (aconf = find_password_aconf(name,sptr)) == NULL)
+  if( (aconf = find_password_aconf(name,sptr)) == NULL)
     {
-		sendto_one(sptr, form_str(ERR_NOOPERHOST), me.name, sptr->name);
-		if (ConfigFileEntry.failed_oper_notice &&
-			ConfigFileEntry.show_failed_oper_id)
-		{
-			sendto_realops_flags(FLAGS_ALL,
-								 "Failed OPER attempt - host mismatch by %s (%s@%s)",
-								 sptr->name, sptr->username, sptr->host);
-		}
-		return 0;
+      sendto_one(sptr, form_str(ERR_NOOPERHOST), me.name, sptr->name);
+      if (ConfigFileEntry.failed_oper_notice &&
+	  ConfigFileEntry.show_failed_oper_id)
+	{
+	  sendto_realops_flags(FLAGS_ALL,
+			       "Failed OPER attempt - host mismatch by %s (%s@%s)",
+			       sptr->name, sptr->username, sptr->host);
+	}
+      return 0;
     }
 
-	if ( match_oper_password(password,aconf) )
+  if ( match_oper_password(password,aconf) )
     {
-		/*
-		  20001216:
-		  detach old iline
-		  -einride
-		*/
-		ptr = sptr->localClient->confs.head;
-		oconf = ptr->data;
-		detach_conf(sptr,oconf);
-
-		if( attach_conf(sptr, aconf) != 0 )
-		{
-			sendto_one(sptr,":%s NOTICE %s :Can't attach conf!",
-					   me.name,sptr->name);
-			sendto_realops_flags(FLAGS_ALL,
-								 "Failed OPER attempt by %s (%s@%s) can't attach conf!",
-								 sptr->name, sptr->username, sptr->host);
-			/* 
-			   20001216:
-			   Reattach old iline
-			   -einride
-			*/
-			attach_conf(sptr, oconf);
-			return 0;
-		}
-
-		(void)oper_up( sptr, aconf );
+      /*
+	20001216:
+	detach old iline
+	-einride
+      */
+      ptr = sptr->localClient->confs.head;
+      oconf = ptr->data;
+      detach_conf(sptr,oconf);
       
-		log(L_TRACE, "OPER %s by %s!%s@%s",
-			name, sptr->name, sptr->username, sptr->host);
-		log_oper(sptr, name);
-		return 1;
+      if( attach_conf(sptr, aconf) != 0 )
+	{
+	  sendto_one(sptr,":%s NOTICE %s :Can't attach conf!",
+		     me.name,sptr->name);
+	  sendto_realops_flags(FLAGS_ALL,
+			       "Failed OPER attempt by %s (%s@%s) can't attach conf!",
+			       sptr->name, sptr->username, sptr->host);
+	  /* 
+	     20001216:
+	     Reattach old iline
+	     -einride
+	  */
+	  attach_conf(sptr, oconf);
+	  return 0;
+	}
+
+      (void)oper_up( sptr, aconf );
+      
+      log(L_TRACE, "OPER %s by %s!%s@%s",
+	  name, sptr->name, sptr->username, sptr->host);
+      log_oper(sptr, name);
+      return 1;
     }
-	else
+  else
     {
-		sendto_one(sptr,form_str(ERR_PASSWDMISMATCH),me.name, parv[0]);
-		if (ConfigFileEntry.failed_oper_notice)
-		{
-			sendto_realops_flags(FLAGS_ALL,
-								 "Failed OPER attempt by %s (%s@%s)",
-								 sptr->name, sptr->username, sptr->host);
-		}
+      sendto_one(sptr,form_str(ERR_PASSWDMISMATCH),me.name, parv[0]);
+      if (ConfigFileEntry.failed_oper_notice)
+	{
+	  sendto_realops_flags(FLAGS_ALL,
+			       "Failed OPER attempt by %s (%s@%s)",
+			       sptr->name, sptr->username, sptr->host);
+	}
     }
-	return 0;
+  return 0;
 }
 
 /*
@@ -174,19 +174,19 @@ int mo_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 */
 int ms_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-	/* if message arrived from server, trust it, and set to oper */
+  /* if message arrived from server, trust it, and set to oper */
   
-	if (!IsGlobalOper(sptr))
+  if (!IsGlobalOper(sptr))
     {
-		if (sptr->status == STAT_CLIENT)
-			sptr->handler = OPER_HANDLER;
+      if (sptr->status == STAT_CLIENT)
+	sptr->handler = OPER_HANDLER;
       
-		sptr->flags |= FLAGS_OPER;
-		Count.oper++;
-		sendto_serv_butone(cptr, ":%s MODE %s :+o", parv[0], parv[0]);
+      sptr->flags |= FLAGS_OPER;
+      Count.oper++;
+      sendto_serv_butone(cptr, ":%s MODE %s :+o", parv[0], parv[0]);
     }
 
-	return 1;
+  return 1;
 }
 
 /*
@@ -198,17 +198,17 @@ int ms_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
 struct ConfItem *find_password_aconf(char *name, struct Client *sptr)
 {
-	struct ConfItem *aconf;
+  struct ConfItem *aconf;
 
-	if (!(aconf = find_conf_exact(name, sptr->username, sptr->host,
-								  CONF_OPS)) &&
-		!(aconf = find_conf_exact(name, sptr->username,
-								  inetntoa((char *)&sptr->localClient->ip),
-								  CONF_OPS)))
+  if (!(aconf = find_conf_exact(name, sptr->username, sptr->host,
+				CONF_OPS)) &&
+      !(aconf = find_conf_exact(name, sptr->username,
+				inetntoa((char *)&sptr->localClient->ip),
+				CONF_OPS)))
     {
-		return 0;
+      return 0;
     }
-	return(aconf);
+  return(aconf);
 }
 
 /*
@@ -222,32 +222,32 @@ struct ConfItem *find_password_aconf(char *name, struct Client *sptr)
 
 int match_oper_password(char *password, struct ConfItem *aconf)
 {
-	char *encr;
+  char *encr;
 
-	if (!aconf->status & CONF_OPS)
-		return NO;
+  if (!aconf->status & CONF_OPS)
+    return NO;
 
 #ifdef CRYPT_OPER_PASSWORD
-	/* use first two chars of the password they send in as salt */
-        /* If the password in the conf is MD5, and ircd is linked   
-        ** to scrypt on FreeBSD, or the standard crypt library on
-        ** glibc Linux, then this code will work fine on generating
-        ** the proper encrypted hash for comparison.
-        */
+  /* use first two chars of the password they send in as salt */
+  /* If the password in the conf is MD5, and ircd is linked   
+  ** to scrypt on FreeBSD, or the standard crypt library on
+  ** glibc Linux, then this code will work fine on generating
+  ** the proper encrypted hash for comparison.
+  */
 
-	/* passwd may be NULL pointer. Head it off at the pass... */
-	if (password && *aconf->passwd)
-		encr = crypt(password, aconf->passwd);
-	else
-		encr = "";
+  /* passwd may be NULL pointer. Head it off at the pass... */
+  if (password && *aconf->passwd)
+    encr = crypt(password, aconf->passwd);
+  else
+    encr = "";
 #else
-	encr = password;
+  encr = password;
 #endif  /* CRYPT_OPER_PASSWORD */
 
-	if( strcmp(encr, aconf->passwd) == 0 )
-		return YES;
-	else
-		return NO;
+  if( strcmp(encr, aconf->passwd) == 0 )
+    return YES;
+  else
+    return NO;
 }
 
 /*
@@ -264,82 +264,71 @@ int match_oper_password(char *password, struct ConfItem *aconf)
 
 int oper_up( struct Client *sptr, struct ConfItem *aconf )
 {
-	int old = (sptr->umodes & ALL_UMODES);
-	char *operprivs=NULL;
-	dlink_node *ptr;
-	struct ConfItem *found_aconf;
-	dlink_node *m;
+  int old = (sptr->umodes & ALL_UMODES);
+  char *operprivs=NULL;
+  dlink_node *ptr;
+  struct ConfItem *found_aconf;
+  dlink_node *m;
 
-	if (aconf->status == CONF_LOCOP)
+  SetOper(sptr);
+  if((int)aconf->hold)
     {
-		SetLocOp(sptr);
-		if((int)aconf->hold)
-		{
-			sptr->umodes |= ((int)aconf->hold & ALL_UMODES); 
-			sendto_one(sptr, ":%s NOTICE %s :*** Oper flags set from conf",
-					   me.name,sptr->name);
-		}
-		else
-		{
-			sptr->umodes |= (LOCOP_UMODES);
-		}
-    }
-	else
-    {
-		SetOper(sptr);
-		if((int)aconf->hold)
-		{
-			sptr->umodes |= ((int)aconf->hold & ALL_UMODES); 
-			if( !IsSetOperN(sptr) )
-				sptr->umodes &= ~FLAGS_NCHANGE;
-	  
-			sendto_one(sptr, ":%s NOTICE %s :*** Oper flags set from conf",
-					   me.name,sptr->name);
-		}
-		else
-		{
-			sptr->umodes |= (OPER_UMODES);
-		}
-    }
-
-	SetIPHidden(sptr);
-	Count.oper++;
-
-	SetElined(sptr);
+      sptr->umodes |= ((int)aconf->hold & ALL_UMODES); 
+      if( !IsSetOperN(sptr) )
+	sptr->umodes &= ~FLAGS_NCHANGE;
       
-	/* LINKLIST */  
-	m = make_dlink_node();
-	dlinkAdd(sptr,m,&oper_list);
-
-	if(sptr->localClient->confs.head)
-    {
-		ptr = sptr->localClient->confs.head;
-		if(ptr)
-		{
-			found_aconf = ptr->data;
-			if(found_aconf)
-				operprivs = oper_privs_as_string(sptr,found_aconf->port);
-		}
+      sendto_one(sptr, ":%s NOTICE %s :*** Oper flags set from conf",
+		 me.name,sptr->name);
     }
-	else
-		operprivs = "";
+  else
+    {
+      sptr->umodes |= (OPER_UMODES);
+    }
+	
+  SetIPHidden(sptr);
+  Count.oper++;
 
-	if (IsSetOperAdmin(sptr))
-		sptr->umodes |= FLAGS_ADMIN;
+  SetElined(sptr);
+      
+  m = make_dlink_node();
+  dlinkAdd(sptr,m,&oper_list);
 
-	sendto_realops_flags(FLAGS_ALL,
-						 "%s (%s@%s) is now operator (%c)", sptr->name,
-						 sptr->username, sptr->host,
-						 IsGlobalOper(sptr) ? 'O' : 'o');
+  if(sptr->localClient->confs.head)
+    {
+      ptr = sptr->localClient->confs.head;
+      if(ptr)
+	{
+	  found_aconf = ptr->data;
+	  if(found_aconf)
+	    operprivs = oper_privs_as_string(sptr,found_aconf->port);
+	}
+    }
+  else
+    operprivs = "";
 
-	send_umode_out(sptr, sptr, old);
+  if (IsSetOperAdmin(sptr))
+    sptr->umodes |= FLAGS_ADMIN;
 
-	sendto_one(sptr, form_str(RPL_YOUREOPER), me.name, sptr->name);
-	sendto_one(sptr, ":%s NOTICE %s :*** Oper privs are %s",me.name,
-			   sptr->name,	
-			   operprivs);
-	SendMessageFile(sptr, &ConfigFileEntry.opermotd);
+  sendto_realops_flags(FLAGS_ALL,
+		       "%s (%s@%s) is now operator (%c)", sptr->name,
+		       sptr->username, sptr->host,
+		       IsGlobalOper(sptr) ? 'O' : 'o');
+	
+  send_umode_out(sptr, sptr, old);
 
-	return 1;
+  sendto_one(sptr, form_str(RPL_YOUREOPER), me.name, sptr->name);
+  sendto_one(sptr, ":%s NOTICE %s :*** Oper privs are %s",me.name,
+	     sptr->name,	
+	     operprivs);
+  SendMessageFile(sptr, &ConfigFileEntry.opermotd);
+  
+  return 1;
 }
+
+
+
+
+
+
+
 

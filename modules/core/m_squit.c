@@ -79,12 +79,6 @@ int mo_squit(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   struct squit_parms *found_squit;
   char  *comment = (parc > 2 && parv[2]) ? parv[2] : cptr->name;
 
-  if (IsLocalOper(sptr))
-    {
-      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-      return 0;
-    }
-
   if (!IsOperRemote(sptr))
     {
       sendto_one(sptr,":%s NOTICE %s :You have no R flag",me.name,parv[0]);

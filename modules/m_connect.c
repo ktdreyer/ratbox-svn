@@ -80,14 +80,6 @@ int mo_connect(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 
   /* always privileged with handlers */
 
-  if (IsLocalOper(sptr) && parc > 3)
-    {
-      /* 
-       * Only allow LocOps to make local CONNECTS --SRB
-       */
-      return 0;
-    }
-
   if (MyConnect(sptr) && !IsOperRemote(sptr) && parc > 3)
     {
       sendto_one(sptr,":%s NOTICE %s :You have no R flag", me.name, parv[0]);

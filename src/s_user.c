@@ -82,7 +82,6 @@ static struct flag_item user_modes[] =
   {FLAGS_SKILL, 'k'},
   {FLAGS_NCHANGE, 'n'},
   {FLAGS_OPER, 'o'},
-  {FLAGS_LOCOP, 'O'},
   {FLAGS_REJ, 'r'},
   {FLAGS_SERVNOTICE, 's'},
   {FLAGS_UNAUTH, 'u'},
@@ -116,7 +115,7 @@ int user_modes_from_c_to_bitmask[] =
   0,            /* L */
   0,            /* M */
   0,            /* N */
-  FLAGS_LOCOP,  /* O */
+  0,            /* O */
   0,            /* P */
   0,            /* Q */
   0,            /* R */
@@ -818,7 +817,7 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
               if(!IsAnyOper(sptr))
                 break;
 
-              sptr->umodes &= ~(FLAGS_OPER|FLAGS_LOCOP);
+              sptr->umodes &= ~FLAGS_OPER;
 
               Count.oper--;
 

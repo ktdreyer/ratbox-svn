@@ -299,7 +299,7 @@ void report_configured_links(struct Client* sptr, int mask)
                          classname);
 
           }
-        else if(mask & (CONF_OPERATOR|CONF_LOCOP))
+        else if(mask & (CONF_OPERATOR))
           {
             /* Don't allow non opers to see oper privs */
             if(IsAnyOper(sptr))
@@ -933,7 +933,7 @@ int attach_conf(struct Client *cptr,struct ConfItem *aconf)
       return(NOT_AUTHORIZED);
     }
 
-  if ( (aconf->status & (CONF_LOCOP | CONF_OPERATOR ) ) == 0 )
+  if ( (aconf->status & CONF_OPERATOR) == 0 )
     {
       if ((aconf->status & CONF_CLIENT) &&
           ConfLinks(aconf) >= ConfMaxLinks(aconf) && ConfMaxLinks(aconf) > 0)
@@ -1123,7 +1123,7 @@ struct ConfItem* find_conf_exact(const char* name, const char* user,
       if (!match(tmp->host, host) || !match(tmp->user,user)
           || irccmp(tmp->name, name) )
         continue;
-      if (tmp->status & (CONF_OPERATOR|CONF_LOCOP))
+      if (tmp->status & CONF_OPERATOR)
         {
           if (tmp->clients < ConfMaxLinks(tmp))
             return tmp;
@@ -2910,7 +2910,7 @@ void conf_delist_old_conf(struct ConfItem *aconf)
 	  ClassPtr(bconf) = ClassPtr(aconf);
 	  ConfLinks(bconf) += bconf->clients;
 	  bconf->flags = aconf->flags;
-	  if(bconf->flags & (CONF_LOCOP|CONF_OPERATOR))
+	  if(bconf->flags & CONF_OPERATOR)
 	    bconf->port = aconf->port;
 	}
       free_conf(aconf);
