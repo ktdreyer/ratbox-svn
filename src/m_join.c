@@ -300,7 +300,10 @@ int     m_join(struct Client *cptr,
                      {
                        /* found a matching vchan? let them join it */
                        if ((vchan_chptr = find_vchan(chptr, key)))
-                         chptr = vchan_chptr;
+			 {
+			   add_vchan_to_client_cache(sptr, chptr, vchan_chptr);
+			   chptr = vchan_chptr;
+			 }
                        else
                          {
                            sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),

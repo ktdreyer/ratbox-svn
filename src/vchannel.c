@@ -40,14 +40,14 @@
  */
 
 void    add_vchan_to_client_cache(struct Client *sptr,
-				  struct Channel *vchan,
-				  struct Channel *base_chan)
+				  struct Channel *base_chan,
+				  struct Channel *vchan)
 {
   int i=0;
 
   assert(sptr != NULL);
 
-  while(sptr->vchan_map[i].base_chan)
+  while(sptr->vchan_map[i].base_chan != NULL)
     {
       i++;
     }
@@ -92,6 +92,21 @@ int on_sub_vchan(struct Channel *chptr, struct Client *sptr)
   return NO;
 }
 
+/* return matching vchan given base chan and sptr */
+struct Channel* map_vchan(struct Channel *chptr, struct Client *sptr)
+{
+  int i;
+
+  assert(sptr != NULL);
+
+  for(i=0;sptr->vchan_map[i].base_chan;i++)
+    {
+      if( sptr->vchan_map[i].base_chan == chptr )
+	return (sptr->vchan_map[i].vchan);
+    }
+
+  return NullChn;
+}
 
 /* show info on vchans, XXXX this needs to be improved! */
 

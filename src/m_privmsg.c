@@ -32,6 +32,7 @@
 #include "send.h"
 
 #include "channel.h"
+#include "vchannel.h"
 #include "irc_string.h"
 #include "hash.h"
 #include "class.h"
@@ -115,6 +116,7 @@ int     m_privmsg(struct Client *cptr,
   struct Client *acptr;
   char *nick, *server, *host;
   struct Channel *chptr;
+  struct Channel *vchan;
   int type=0;
 
 /* this is no longer required with arg handling in parse() --is */
@@ -173,14 +175,31 @@ int     m_privmsg(struct Client *cptr,
 	check_for_flud(sptr, NULL, chptr, 1);
 #endif /* FLUD */
 
-      if (can_send(sptr, chptr) == 0)
-        sendto_channel_butone(cptr, sptr, chptr,
-                              ":%s %s %s :%s",
-                              parv[0], "PRIVMSG", nick,
-                              parv[2]);
+      if (HasVchans(chptr))
+	{
+	  vchan = map_vchan(chptr,sptr);
+	  if(vchan == 0)
+	    return 0;
+	  if (can_send(sptr, vchan) == 0)
+	    sendto_channel_butone(cptr, sptr, vchan,
+				  ":%s %s %s :%s",
+				  parv[0], "PRIVMSG", nick,
+				  parv[2]);
+	  else
+	    sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN),
+		       me.name, parv[0], nick);
+	}
       else
-        sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN),
-                   me.name, parv[0], nick);
+	{
+	  if (can_send(sptr, chptr) == 0)
+	    sendto_channel_butone(cptr, sptr, chptr,
+				  ":%s %s %s :%s",
+				  parv[0], "PRIVMSG", nick,
+				  parv[2]);
+	  else
+	    sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN),
+		       me.name, parv[0], nick);
+	}
       return 0;
     }
       
