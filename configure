@@ -2687,7 +2687,7 @@ fi
 
 fi
 
-if test x$ac_cv_func_nanosleep = x && test x$ac_cv_lib_posix4_nanosleep = xno  && x$ac_cv_lib_rt_nanosleep
+if test x$ac_cv_func_nanosleep = x && test x$ac_cv_lib_posix4_nanosleep = xno  && test x$ac_cv_lib_rt_nanosleep = xno 
 then	
 	echo "$ac_t"""nanosleep not found..using select for delay"" 1>&6
 else
