@@ -1,3 +1,15 @@
+androsyn    2002/01/22 01:11:36 EST	(20020122_1)
+
+  Modified files:
+    src                  s_user.c 
+  Log:
+  Fixed the ping cookie bug..now we need to fix the negative user count crap..
+  
+  Revision  Changes    Path
+  7.183     +5 -1      ircd-hybrid-7/src/s_user.c
+
+
+
 androsyn    2002/01/21 22:02:29 EST	(20020122_0)
 
   Modified files:
