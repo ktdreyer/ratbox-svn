@@ -1127,11 +1127,6 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
         report_error("opening stream socket to %s: %s", aconf->name, errno);
         return 0;
     }
-    if (fd >= (HARD_FDLIMIT - 10)) {
-        sendto_realops("No more connections allowed (%s)", aconf->name);
-        close(fd); /* Haven't fd_open()ed yet */
-        return 0;
-    }
 
     /* Create a client */
     cptr = make_client(NULL);
