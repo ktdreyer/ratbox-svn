@@ -274,7 +274,7 @@ static void ms_kill(struct Client *client_p, struct Client *source_p,
     }
 
   log(L_INFO,"KILL From %s For %s Path %s (%s)",
-      parv[0], target_p->name, inpath, buf, reason);
+      parv[0], target_p->name, inpath, reason);
   /*
   ** And pass on the message to other servers. Note, that if KILL
   ** was changed, the message has to be sent to all links, also
