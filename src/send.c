@@ -577,10 +577,12 @@ sendto_list_anywhere(struct Client *one, struct Client *from,
                      buf_head_t *remote_linebuf)
 {
   dlink_node *ptr;
+  dlink_node *ptr_next;
   struct Client *target_p;
 
-  for (ptr = list->head; ptr; ptr = ptr->next)
+  for (ptr = list->head; ptr; ptr = ptr_next)
   {
+    ptr_next = ptr->next;
     target_p = ptr->data;
 
     if (target_p->from == one)
@@ -645,6 +647,7 @@ void sendto_server(struct Client *one, struct Client *source_p,
   va_list args;
   struct Client *client_p;
   dlink_node *ptr;
+  dlink_node *ptr_next;
   buf_head_t linebuf;
 
   if (chptr != NULL)
@@ -656,8 +659,9 @@ void sendto_server(struct Client *one, struct Client *source_p,
   linebuf_putmsg(&linebuf, format, args, NULL);
   va_end(args);
 
-  for(ptr = serv_list.head; ptr; ptr = ptr->next)
+  for(ptr = serv_list.head; ptr; ptr = ptr_next)
   {
+    ptr_next = ptr->next;
     client_p = ptr->data;
 
     /* check against 'one' */
@@ -921,10 +925,12 @@ sendto_list_remote(struct Client *one,
                    int nocaps, buf_head_t *linebuf)
 {
   dlink_node *ptr;
+  dlink_node *ptr_next;
   struct Client *target_p;
 
-  for (ptr = list->head; ptr; ptr = ptr->next)
+  for (ptr = list->head; ptr; ptr = ptr_next)
   {
+    ptr_next = ptr->next;
     if ((target_p = ptr->data) == NULL)
       continue;
 
@@ -990,6 +996,7 @@ sendto_match_butone(struct Client *one, struct Client *from,
   va_list args;
   struct Client *client_p;
   dlink_node *ptr;
+  dlink_node *ptr_next;
   buf_head_t local_linebuf;
   buf_head_t remote_linebuf;
 
@@ -1004,8 +1011,9 @@ sendto_match_butone(struct Client *one, struct Client *from,
   va_end(args);
 
   /* scan the local clients */
-  for(ptr = lclient_list.head; ptr; ptr = ptr->next)
+  for(ptr = lclient_list.head; ptr; ptr = ptr_next)
   {
+    ptr_next = ptr->next;
     client_p = ptr->data;
 
     if (client_p == one)  /* must skip the origin !! */
@@ -1114,6 +1122,7 @@ sendto_realops_flags(int flags, int level, const char *pattern, ...)
   struct Client *client_p;
   char nbuf[IRCD_BUFSIZE*2];
   dlink_node *ptr;
+  dlink_node *ptr_next;
   va_list args;
   buf_head_t linebuf;
 
@@ -1121,8 +1130,9 @@ sendto_realops_flags(int flags, int level, const char *pattern, ...)
   send_format(nbuf, pattern, args);
   va_end(args);
 
-  for (ptr = oper_list.head; ptr; ptr = ptr->next)
+  for (ptr = oper_list.head; ptr; ptr = ptr_next)
   {
+    ptr_next = ptr->next;
     client_p = ptr->data;
 
     /* If we're sending it to opers and theyre an admin, skip.
@@ -1162,6 +1172,7 @@ sendto_wallops_flags(int flags, struct Client *source_p,
 {
   struct Client *client_p;
   dlink_node *ptr;
+  dlink_node *ptr_next;
   va_list args;
   buf_head_t linebuf;
 
@@ -1177,8 +1188,9 @@ sendto_wallops_flags(int flags, struct Client *source_p,
 
   va_end(args);
 
-  for (ptr = oper_list.head; ptr; ptr = ptr->next)
+  for (ptr = oper_list.head; ptr; ptr = ptr_next)
   {
+    ptr_next = ptr->next;
     client_p = ptr->data;
 
     if(client_p->umodes & flags)
@@ -1352,6 +1364,7 @@ kill_client_ll_serv_butone(struct Client *one, struct Client *source_p,
   int have_uid = 0;
   struct Client *client_p;
   dlink_node *ptr;
+  dlink_node *ptr_next;
   buf_head_t linebuf_uid;
   buf_head_t linebuf_nick;
 
@@ -1371,8 +1384,9 @@ kill_client_ll_serv_butone(struct Client *one, struct Client *source_p,
 
   va_end(args);
 
-  for(ptr = serv_list.head; ptr; ptr = ptr->next)
+  for(ptr = serv_list.head; ptr; ptr = ptr_next)
   {
+    ptr_next = ptr->next;
     client_p = ptr->data;
 
     if (one && (client_p == one->from))
