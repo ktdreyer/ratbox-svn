@@ -1,3 +1,11 @@
+*** 20001205_2 by db
+- cleaned up these functions, two arguments when 1 is quite enough
+  this makes them consistent with other functions that only pass
+  the struct Client *sptr. No need to also pass the nick.
+- changed wording on vchan's at toyota's suggestion.
+
+
+
 *** 20001205_1 by db
 - added rest of accept code.
   client puts themselves into +u mode, this disallows casual messages
