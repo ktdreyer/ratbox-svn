@@ -417,7 +417,7 @@ static void oldParseOneLine(FILE *out,char* line)
       if(host_field)
 	fprintf(out,"\t\tname=\"%s@%s\";\n", user_field,host_field);
       if(passwd_field)
-	fprintf(out,"\t\treason=\"%s\"\n", passwd_field);
+	fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
       fprintf(out,"\t}\n\n");
       break;
 

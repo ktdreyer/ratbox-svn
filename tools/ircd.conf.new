@@ -151,7 +151,12 @@
 
 	quarantine {
 		name="*Serv";
-		reason="Reserved for HybNet services                   ";
+		reason="Reserved for HybNet services";
+	}
+
+	kill {
+		name="*foo@*bar.com";
+		reason="test kline";
 	}
 
 	connect {
