@@ -547,7 +547,7 @@ linebuf_attach(buf_head_t *bufhead, buf_head_t *new)
  * Then format/va_args is appended to the buffer.
  */
 void
-linebuf_putmsg(buf_head_t *bufhead, const char *format, va_list va_args,
+linebuf_putmsg(buf_head_t *bufhead, const char *format, va_list *va_args,
                const char *prefixfmt, ...)
 {
   buf_line_t *bufline;
@@ -555,12 +555,13 @@ linebuf_putmsg(buf_head_t *bufhead, const char *format, va_list va_args,
   va_list prefix_args;
   
   /* make sure the previous line is terminated */
+#ifndef NDEBUG
   if (bufhead->list.tail)
     {
       bufline = bufhead->list.tail->data;
       assert(bufline->terminated);
     }
-
+#endif
   /* Create a new line */
   bufline = linebuf_new_line(bufhead);
 
@@ -571,10 +572,10 @@ linebuf_putmsg(buf_head_t *bufhead, const char *format, va_list va_args,
     va_end(prefix_args);
   }
 
-  if (va_args)
+  if (va_args != NULL)
   {
     len += vsnprintf((bufline->buf + len), (BUF_DATA_SIZE - len), format,
-                    va_args);
+                    *va_args);
   }
   
   /* Truncate the data if required */

@@ -429,7 +429,7 @@ sendto_one(struct Client *to, const char *pattern, ...)
   linebuf_newbuf(&linebuf);
 
   va_start(args, pattern);
-  linebuf_putmsg(&linebuf, pattern, args, NULL);
+  linebuf_putmsg(&linebuf, pattern, &args, NULL);
   va_end(args);
 
   send_linebuf(to, &linebuf);
@@ -477,9 +477,9 @@ sendto_one_prefix(struct Client *to, struct Client *prefix,
   va_start(args, pattern);
 
   if (IsServer(to_sendto) && IsCapable(to->from, CAP_UID))
-    linebuf_putmsg(&linebuf, pattern, args, ":%s ", ID(prefix));
+    linebuf_putmsg(&linebuf, pattern, &args, ":%s ", ID(prefix));
   else
-    linebuf_putmsg(&linebuf, pattern, args, ":%s ", prefix->name);
+    linebuf_putmsg(&linebuf, pattern, &args, ":%s ", prefix->name);
 
   va_end(args);
   send_linebuf(to_sendto, &linebuf);
@@ -512,17 +512,17 @@ sendto_channel_butone(struct Client *one, struct Client *from,
   va_start(args, pattern);
 
   if(IsServer(from))
-    linebuf_putmsg(&local_linebuf, pattern, args, ":%s %s %s ",
+    linebuf_putmsg(&local_linebuf, pattern, &args, ":%s %s %s ",
                    from->name, command, RootChan(chptr)->chname);
   else
-    linebuf_putmsg(&local_linebuf, pattern, args, ":%s!%s@%s %s %s ",
+    linebuf_putmsg(&local_linebuf, pattern, &args, ":%s!%s@%s %s %s ",
                    from->name, from->username, from->host,
                    command, RootChan(chptr)->chname);
 
-  linebuf_putmsg(&remote_linebuf, pattern, args, ":%s %s %s ",
+  linebuf_putmsg(&remote_linebuf, pattern, &args, ":%s %s %s ",
                  from->name, command, chptr->chname);
 
-  linebuf_putmsg(&uid_linebuf, pattern, args, ":%s %s %s ",
+  linebuf_putmsg(&uid_linebuf, pattern, &args, ":%s %s %s ",
                  ID(from), command, chptr->chname);
 
   va_end(args);
@@ -653,7 +653,7 @@ sendto_server(struct Client *one, struct Client *source_p,
 
   linebuf_newbuf(&linebuf);
   va_start(args, format);
-  linebuf_putmsg(&linebuf, format, args, NULL);
+  linebuf_putmsg(&linebuf, format, &args, NULL);
   va_end(args);
 
   for(ptr = serv_list.head; ptr; ptr = ptr_next)
@@ -726,7 +726,7 @@ sendto_common_channels_local(struct Client *user, const char *pattern, ...)
 
   linebuf_newbuf(&linebuf);
   va_start(args, pattern);
-  linebuf_putmsg(&linebuf, pattern, args, NULL);
+  linebuf_putmsg(&linebuf, pattern, &args, NULL);
   va_end(args);
 
   ++current_serial;
@@ -777,7 +777,7 @@ sendto_channel_local(int type,
 
   linebuf_newbuf(&linebuf);
   va_start(args, pattern);
-  linebuf_putmsg(&linebuf, pattern, args, NULL);
+  linebuf_putmsg(&linebuf, pattern, &args, NULL);
   va_end(args);
 
   /* Serial number checking isn't strictly necessary, but won't hurt */
@@ -832,7 +832,7 @@ sendto_channel_remote(struct Client *one,
 
   linebuf_newbuf(&linebuf);
   va_start(args, pattern);
-  linebuf_putmsg(&linebuf, pattern, args, NULL);
+  linebuf_putmsg(&linebuf, pattern, &args, NULL);
   va_end(args);
 
   /* Serial number checking isn't strictly necessary, but won't hurt */
@@ -1002,8 +1002,8 @@ sendto_match_butone(struct Client *one, struct Client *from,
   linebuf_newbuf(&remote_linebuf);
   va_start(args, pattern);
 
-  linebuf_putmsg(&remote_linebuf, pattern, args, ":%s ", from->name);
-  linebuf_putmsg(&local_linebuf, pattern, args, ":%s!%s@%s ", from->name,
+  linebuf_putmsg(&remote_linebuf, pattern, &args, ":%s ", from->name);
+  linebuf_putmsg(&local_linebuf, pattern, &args, ":%s!%s@%s ", from->name,
 		 from->username, from->host);
 
   va_end(args);
@@ -1088,16 +1088,16 @@ sendto_anywhere(struct Client *to, struct Client *from,
   if(MyClient(to))
   {
     if(IsServer(from))
-      linebuf_putmsg(&linebuf, pattern, args, ":%s ", from->name);
+      linebuf_putmsg(&linebuf, pattern, &args, ":%s ", from->name);
     else
-      linebuf_putmsg(&linebuf, pattern, args, ":%s!%s@%s ", from->name,
+      linebuf_putmsg(&linebuf, pattern, &args, ":%s!%s@%s ", from->name,
                      from->username, from->host);
   }
   else {
     if(IsCapable(to->from, CAP_UID))
-      linebuf_putmsg(&linebuf, pattern, args, ":%s ", ID(from));
+      linebuf_putmsg(&linebuf, pattern, &args, ":%s ", ID(from));
     else
-      linebuf_putmsg(&linebuf, pattern, args, ":%s ", from->name);
+      linebuf_putmsg(&linebuf, pattern, &args, ":%s ", from->name);
 
   }
   va_end(args);
@@ -1186,10 +1186,10 @@ sendto_wallops_flags(int flags, struct Client *source_p,
   va_start(args, pattern);
 
   if(IsPerson(source_p))
-    linebuf_putmsg(&linebuf, pattern, args, ":%s!%s@%s WALLOPS :",
+    linebuf_putmsg(&linebuf, pattern, &args, ":%s!%s@%s WALLOPS :",
                    source_p->name, source_p->username, source_p->host);
   else
-    linebuf_putmsg(&linebuf, pattern, args, ":%s WALLOPS :", source_p->name);
+    linebuf_putmsg(&linebuf, pattern, &args, ":%s WALLOPS :", source_p->name);
 
   va_end(args);
 
@@ -1271,10 +1271,10 @@ kill_client(struct Client *client_p,
   va_start(args, pattern);
 
   if(HasID(diedie) && IsCapable(client_p, CAP_UID))
-    linebuf_putmsg(&linebuf, pattern, args, ":%s KILL %s :",
+    linebuf_putmsg(&linebuf, pattern, &args, ":%s KILL %s :",
                    me.name, ID(diedie));
   else
-    linebuf_putmsg(&linebuf, pattern, args, ":%s KILL %s :",
+    linebuf_putmsg(&linebuf, pattern, &args, ":%s KILL %s :",
                    me.name, diedie->name);
 
   va_end(args);
@@ -1313,12 +1313,12 @@ kill_client_ll_serv_butone(struct Client *one, struct Client *source_p,
   {
     have_uid = 1;
     linebuf_newbuf(&linebuf_uid);
-    linebuf_putmsg(&linebuf_uid, pattern, args, ":%s KILL %s :",
+    linebuf_putmsg(&linebuf_uid, pattern, &args, ":%s KILL %s :",
                    me.name, ID(source_p));
   }
 
   linebuf_newbuf(&linebuf_nick);
-  linebuf_putmsg(&linebuf_nick, pattern, args, ":%s KILL %s :",
+  linebuf_putmsg(&linebuf_nick, pattern, &args, ":%s KILL %s :",
                  me.name, source_p->name);
 
   va_end(args);
