@@ -10,10 +10,10 @@ LEXLIB = @LEXLIB@
 
 MKDEP = ${CC} -MM
 
-IRCDLIBS = @LIBS@ ../zlib/libz.a
+IRCDLIBS = @LIBS@ @SSL_LIBS@ ../zlib/libz.a
 
 INCLUDES = -I../include -I../zlib
-CPPFLAGS = ${INCLUDES} @CPPFLAGS@
+CPPFLAGS = ${INCLUDES} @SSL_DEFINE@ @CPPFLAGS@
  
 y.tab.o:	y.tab.c ircd_parser.y
 	gcc -g -I ../include -I. -c y.tab.c
