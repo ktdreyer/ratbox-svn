@@ -172,6 +172,18 @@ size_t get_maxrss(void)
 }
 
 /*
+ * print_startup - print startup information
+ */
+static void
+print_startup(void)
+{
+  printf("ircd: version %s\n", version);
+  printf("ircd: pid %d\n", (int)getpid());
+  printf("ircd: running in %s mode from %s\n", !noDetach ? "background"
+         : "foreground", ConfigFileEntry.dpath);
+}
+
+/*
  * init_sys
  *
  * inputs	- boot_daemon flag
@@ -208,9 +220,8 @@ init_sys(void)
 #endif        /* RLIMIT_FD_MAX */
 }
 
-#ifndef HAVE_DAEMON
 int
-daemon(int a, int b)
+make_daemon(void)
 {
 #ifndef VMS
   int pid;
@@ -221,7 +232,10 @@ daemon(int a, int b)
       exit(EXIT_FAILURE);
     }
   else if (pid > 0)
-    exit(EXIT_SUCCESS);
+    {
+      print_startup();
+      exit(EXIT_SUCCESS);
+    }
 
   setsid();
   /*  fclose(stdin);
@@ -230,7 +244,6 @@ daemon(int a, int b)
 #endif
   return 0;
 }
-#endif
 
 static int printVersion = 0;
 
@@ -486,16 +499,10 @@ int main(int argc, char *argv[])
     }
 
   if (!noDetach)
-    {
-      daemon(1,1);
-      putchar('\n');
-    }
+    make_daemon();
+  else
+    print_startup();
 
-  printf("ircd: version %s\n", version);
-  printf("ircd: pid %d\n", (int)getpid());
-  printf("ircd: running in %s mode from %s\n", !noDetach ? "background"
-         : "foreground", ConfigFileEntry.dpath);
- 
   setup_signals();
 
   /* We need this to initialise the fd array before anything else */

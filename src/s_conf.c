@@ -63,7 +63,7 @@
 #include "memory.h"
 
 
-extern int yyparse(); /* defined in yy.tab.c */
+extern int yyparse(); /* defined in y.tab.c */
 extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */
 extern int lineno;
 extern char linebuf[];

@@ -94,9 +94,9 @@ static void m_away(struct Client *client_p,
 
       if (away)
         {
-	  /* we now send this only if they were away before --is */
-	  sendto_ll_serv_butone(client_p, source_p, 0, ":%s AWAY", parv[0]);
-	  
+          /* we now send this only if they were away before --is */
+          sendto_ll_serv_butone(client_p, source_p, 0, ":%s AWAY", parv[0]);
+
           MyFree(away);
           source_p->user->away = NULL;
         }
@@ -111,8 +111,8 @@ static void m_away(struct Client *client_p,
   if (MyConnect(source_p) && !IsOper(source_p) &&
      (CurrentTime-source_p->user->last_away)<ConfigFileEntry.pace_wait)
     {
-     sendto_one(source_p, form_str(RPL_LOAD2HI), me.name, parv[0]);
-     return;
+      sendto_one(source_p, form_str(RPL_LOAD2HI), me.name, parv[0]);
+      return;
     }
 
   source_p->user->last_away = CurrentTime;
@@ -123,8 +123,7 @@ static void m_away(struct Client *client_p,
   /* we now send this only if they weren't away already --is */
   if (!away)
     sendto_ll_serv_butone(client_p, source_p, 0, ":%s AWAY :%s", parv[0], awy2); 
-
-  if (away)
+  else
     MyFree(away);
 
   away = (char *)MyMalloc(strlen(awy2)+1);
