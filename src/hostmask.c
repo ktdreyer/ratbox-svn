@@ -723,7 +723,7 @@ report_Ilines(struct Client *client_p, int mask)
     aconf = arec->aconf;
 
     if (!(MyConnect(client_p) && IsOper(client_p)) &&
-        (IsConfDoSpoofIp(aconf) && !mask))
+        IsConfDoSpoofIp(aconf))
      continue;
 
     get_printable_conf(aconf, &name, &host, &pass, &user, &port,
