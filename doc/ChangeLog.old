@@ -1,3 +1,7 @@
+*** 20010528_14 by toot
+reset some defaults in config.h that got changed.
+
+
 *** 20010528_13 by a1kmm
 - Write out a memory log on running out of memory, if MEMDEBUG is defined.
 
