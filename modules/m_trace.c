@@ -45,7 +45,6 @@
 static void m_trace(struct Client *, struct Client *, int, char **);
 static void ms_trace(struct Client*, struct Client*, int, char**);
 static void mo_trace(struct Client*, struct Client*, int, char**);
-static struct Client* next_client_double(struct Client *next, const char* ch);
 
 static void trace_spy(struct Client *);
 
@@ -106,7 +105,7 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
   char  *tname;
   int   doall, link_s[MAXCONNECTIONS], link_u[MAXCONNECTIONS];
   int   cnt = 0, wilds, dow;
-  dlink_node *ptr;
+  dlink_node *ptr, *cptr;
   char *looking_for = parv[0];
 
   if(!IsClient(source_p))
@@ -126,8 +125,18 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
     case HUNTED_PASS: /* note: gets here only if parv[1] exists */
       {
         struct Client *ac2ptr;
-        
-        ac2ptr = next_client_double(GlobalClientList, tname);
+        if( (ac2ptr = find_client(tname)) == NULL)
+        {
+          DLINK_FOREACH(ptr, GlobalClientList.head)
+          {
+            ac2ptr = (struct Client *)ptr->data;
+            if(match(tname, ac2ptr->name) || match(ac2ptr->name, tname))
+            {
+              break;
+            } else
+              ac2ptr = NULL;
+          }
+        }
         if (ac2ptr)
           sendto_one(source_p, form_str(RPL_TRACELINK), me.name, looking_for,
                      ircd_version, debugmode, tname, ac2ptr->from->name);
@@ -198,8 +207,9 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
    */
   if (doall)
    {
-    for (target_p = GlobalClientList; target_p; target_p = target_p->next)
+    DLINK_FOREACH(cptr, GlobalClientList.head)
      {
+      target_p = (struct Client *)cptr->data;
       if (IsPerson(target_p))
         {
           link_u[target_p->from->localClient->fd]++;
@@ -430,39 +440,4 @@ static void trace_spy(struct Client *source_p)
 
   hook_call_event("doing_trace", &data);
 }
-
-/* 
- * this slow version needs to be used for hostmasks *sigh
- *
- * next_client_double - find the next matching client. 
- * The search can be continued from the specified client entry. 
- * Normal usage loop is:
- *
- *      for (x = client; x = next_client_double(x,mask); x = x->next)
- *              HandleMatchingClient;
- *            
- */
-static struct Client* 
-next_client_double(struct Client *next, /* First client to check */
-                   const char* ch)      /* search string (may include wilds) */
-{
-  struct Client *tmp = next;
-
-  next = find_client(ch);
-
-  if (next == NULL)
-    next = tmp;
-
-  if (tmp && tmp->prev == next)
-    return NULL;
-  if (next != tmp)
-    return next;
-  for ( ; next; next = next->next)
-    {
-      if (match(ch,next->name) || match(next->name,ch))
-        break;
-    }
-  return next;
-}
-
 

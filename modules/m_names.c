@@ -149,7 +149,7 @@ static void names_non_public_non_secret(struct Client *source_p)
   int cur_len;
   int reply_to_send = NO;
   int dont_show = NO;
-  dlink_node    *lp;
+  dlink_node    *lp, *ptr;
   struct Client *c2ptr;
   struct Channel *ch3ptr=NULL;
   char buf[BUFSIZE];
@@ -164,8 +164,9 @@ static void names_non_public_non_secret(struct Client *source_p)
 
   /* Second, do all non-public, non-secret channels in one big sweep */
 
-  for (c2ptr = GlobalClientList; c2ptr; c2ptr = c2ptr->next)
+  DLINK_FOREACH(ptr, GlobalClientList.head)
     {
+      c2ptr = ptr->data;
       if (!IsPerson(c2ptr) || IsInvisible(c2ptr))
         continue;
       /*

@@ -178,7 +178,7 @@ static struct squit_parms *find_squit(struct Client *client_p,
   static struct squit_parms found_squit;
   static struct Client *target_p;
   struct ConfItem *aconf;
-
+  dlink_node *ptr;
   found_squit.target_p = NULL;
   found_squit.server_name = NULL;
 
@@ -204,13 +204,18 @@ static struct squit_parms *find_squit(struct Client *client_p,
   ** The following allows wild cards in SQUIT. Only useful
   ** when the command is issued by an oper.
   */
-  for (target_p = GlobalClientList; (target_p = next_client(target_p, server));
-       target_p = target_p->next)
+  DLINK_FOREACH(ptr, GlobalClientList.head)
     {
-      if (IsServer(target_p) || IsMe(target_p))
-	break;
+      target_p = (struct Client *)ptr->data;
+      if(match(server, target_p->name))
+      {
+		break;  	        
+      } else
+        target_p = NULL;
     }
 
+  
+  
   found_squit.target_p = target_p;
   found_squit.server_name = server;
 

@@ -850,12 +850,13 @@ find_userhost(char *user, char *host, int *count)
 {
   struct Client *c2ptr;
   struct Client *res = NULL;
-
+  dlink_node *ptr;
   *count = 0;
   if (collapse(user) != NULL)
     {
-      for (c2ptr = GlobalClientList; c2ptr; c2ptr = c2ptr->next) 
+      DLINK_FOREACH(ptr, GlobalClientList.head) 
 	{
+	  c2ptr = (struct Client *)ptr->data;
 	  if (!MyClient(c2ptr)) /* implies mine and an user */
 	    continue;
 	  if ((!host || match(host, c2ptr->host)) &&

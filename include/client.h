@@ -114,8 +114,7 @@ struct ZipStats
 
 struct Client
 {
-  struct Client*    next;
-  struct Client*    prev;
+  dlink_node        node;
   struct Client*    hnext;
   struct Client*    idhnext;
   struct Client*    hostnext;
@@ -576,7 +575,12 @@ extern const char*    get_client_name(struct Client* client, int show_ip);
 extern void           init_client(void);
 extern struct Client* make_client(struct Client* from);
 extern void           free_client(struct Client* client);
-extern void           add_client_to_list(struct Client* client);
+/*
+ * extern void           add_client_to_list(struct Client* client);
+ * This used to be a function..but now it is a macro
+ */
+#define add_client_to_list(client) dlinkAdd(client, &client->node, &GlobalClientList)
+
 extern void           remove_client_from_list(struct Client *);
 extern void           add_client_to_llist(struct Client** list, 
                                           struct Client* client);

@@ -151,7 +151,7 @@ void count_memory(struct Client *source_p)
   struct Ban *actualBan;
   struct Class *cltmp;
   dlink_node *dlink;
-
+  dlink_node *ptr;
   int channel_count = 0; 
   int local_client_conf_count = 0;      /* local client conf links */
   int users_counted = 0;                /* user structs */
@@ -206,8 +206,9 @@ void count_memory(struct Client *source_p)
 
   count_whowas_memory(&wwu, &wwm);
 
-  for (target_p = GlobalClientList; target_p; target_p = target_p->next)
+  DLINK_FOREACH(ptr, GlobalClientList.head)
     {
+      target_p = ptr->data;
       if (MyConnect(target_p))
         {
           for (dlink = target_p->localClient->confs.head;

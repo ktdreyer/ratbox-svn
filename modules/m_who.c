@@ -292,7 +292,7 @@ static void who_global(struct Client *source_p,char *mask, int server_oper)
 {
   struct Channel *chptr=NULL;
   struct Client *target_p;
-  dlink_node  *lp;
+  dlink_node  *lp, *ptr;
   int   maxmatches = 500;
 
   /* first, list all matching INvisible clients on common channels */
@@ -311,8 +311,9 @@ static void who_global(struct Client *source_p,char *mask, int server_oper)
   }
 
   /* second, list all matching visible clients */
-  for (target_p = GlobalClientList; target_p; target_p = target_p->next)
+  DLINK_FOREACH(ptr, GlobalClientList.head)
   {
+    target_p = (struct Client *)ptr->data;
     if (!IsPerson(target_p))
       continue;
 

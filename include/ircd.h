@@ -82,7 +82,7 @@ extern const char     serveropts[];
 extern int            cold_start;
 extern int            dorehash;
 extern struct Client  me;
-extern struct Client* GlobalClientList;
+extern dlink_list GlobalClientList;
 extern struct Client* local[];
 extern struct Counter Count;
 #if 0

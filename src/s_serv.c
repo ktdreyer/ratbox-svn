@@ -434,7 +434,7 @@ int hunt_server(struct Client *client_p, struct Client *source_p, char *command,
 {
   struct Client *target_p;
   int wilds;
-
+  dlink_node *ptr;
   /*
    * Assume it's me, if no server
    */
@@ -474,19 +474,15 @@ int hunt_server(struct Client *client_p, struct Client *source_p, char *command,
         }
       else
         {
-          for (target_p = GlobalClientList;
-               (target_p = next_client(target_p, parv[server]));
-               target_p = target_p->next)
+          
+          DLINK_FOREACH(ptr, GlobalClientList.head)
             {
-              if (target_p->from == source_p->from && !MyConnect(target_p))
-                continue;
-              /*
-               * Fix to prevent looping in case the parameter for
-               * some reason happens to match someone from the from
-               * link --jto
-               */
-              if (IsRegistered(target_p) && (target_p != client_p))
-                break;
+              target_p = NULL;
+              if(match(parv[server], ((struct Client *)(ptr->data))->name))
+                {
+		  target_p = (struct Client *) ptr->data;
+		  break;
+                } 
             }
         }
     }
@@ -897,6 +893,7 @@ int server_estab(struct Client *client_p)
   char*             host;
   dlink_node        *m;
   dlink_node        *ptr;
+  dlink_node 	    *cptr;
 
   assert(NULL != client_p);
   if(client_p == NULL)
@@ -1121,8 +1118,9 @@ int server_estab(struct Client *client_p)
   */
 
   aconf = client_p->serv->sconf;
-  for (target_p = &me; target_p; target_p = target_p->prev)
+  DLINK_FOREACH(cptr, GlobalClientList.head)
     {
+      target_p = (struct Client *)cptr->data;
       /* target_p->from == target_p for target_p == client_p */
       if (target_p->from == client_p)
         continue;
@@ -1494,7 +1492,7 @@ burst_all(struct Client *client_p)
   struct Client*    target_p;
   struct Channel*   chptr;
   struct hook_burst_channel hinfo; 
-
+  dlink_node *ptr;
   /* serial counter borrowed from send.c */
   current_serial++;
 
@@ -1521,8 +1519,9 @@ burst_all(struct Client *client_p)
   /*
   ** also send out those that are not on any channel
   */
-  for (target_p = &me; target_p; target_p = target_p->prev)
+  DLINK_FOREACH(ptr, GlobalClientList.head)
     {
+      target_p = (struct Client *)ptr->data;
       if (target_p->serial != current_serial)
 	{
 	  target_p->serial = current_serial;
@@ -1553,7 +1552,7 @@ static void burst_members(struct Client *client_p, dlink_list *list)
   struct Client *target_p;
   dlink_node *ptr;
 
-  for (ptr = list->head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, list->head)
     {
       target_p = ptr->data;
       if (target_p->serial != current_serial)

@@ -94,7 +94,8 @@ int     ServerRunning;          /* GLOBAL - server execution state */
 struct Client me;               /* That's me */
 struct LocalUser meLocalUser;	/* That's also part of me */
 
-struct Client* GlobalClientList = 0; /* Pointer to beginning of Client list */
+//struct Client* GlobalClientList = 0; /* Pointer to beginning of Client list */
+dlink_list GlobalClientList;
 
 struct JupedChannel *JupedChannelList = 0;
 
@@ -568,7 +569,7 @@ int main(int argc, char *argv[])
   memset(&global_serv_list, 0, sizeof(global_serv_list));
   memset(&oper_list, 0, sizeof(oper_list));
 
-  GlobalClientList = &me;       /* Pointer to beginning of Client list */
+  dlinkAdd(&me, &me.node,&GlobalClientList);
 
   memset((void *)&Count, 0, sizeof(Count));
   memset((void *)&server_state, 0, sizeof(server_state));

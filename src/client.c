@@ -631,56 +631,21 @@ remove_client_from_list(struct Client* client_p)
 
   if(client_p == NULL)
     return;
+  
   /* A client made with make_client()
    * is on the unknown_list until removed.
    * If it =does= happen to exit before its removed from that list
    * and its =not= on the GlobalClientList, it will core here.
    * short circuit that case now -db
    */
-  if (!client_p->prev && !client_p->next)
-    {
+  if(client_p->node.prev == NULL && client_p->node.next == NULL)
       return;
-    }
 
-  if (client_p->prev)
-    client_p->prev->next = client_p->next;
-  else
-    {
-      GlobalClientList = client_p->next;
-      GlobalClientList->prev = NULL;
-    }
-
-  if (client_p->next)
-    client_p->next->prev = client_p->prev;
-  client_p->next = client_p->prev = NULL;
+  dlinkDelete(&client_p->node, &GlobalClientList);
 
   update_client_exit_stats(client_p);
 }
 
-/*
- * add_client_to_list
- * input	- pointer to client
- * output	- NONE
- * side effects	- although only a small routine,
- *		  it appears in a number of places
- * 		  as a collection of a few lines...functions like this
- *		  should be in this file, shouldnt they ?  after all,
- *		  this is list.c, isnt it ? (no
- *		  -avalon
- */
-void
-add_client_to_list(struct Client *client_p)
-{
-  /*
-   * since we always insert new clients to the top of the list,
-   * this should mean the "me" is the bottom most item in the list.
-   */
-  client_p->next = GlobalClientList;
-  GlobalClientList = client_p;
-  if (client_p->next)
-    client_p->next->prev = client_p;
-  return;
-}
 
 /* Functions taken from +CSr31, paranoified to check that the client
 ** isn't on a llist already when adding, and is there when removing -orabidoo
@@ -712,39 +677,6 @@ del_client_from_llist(struct Client **bucket, struct Client *client)
       client->lnext->lprev = client->lprev;
     }
   client->lnext = client->lprev = NULL;
-}
-
-/*
- * next_client - find the next matching client. 
- * The search can be continued from the specified client entry. 
- * Normal usage loop is:
- *
- *      for (x = client; x = next_client(x,mask); x = x->next)
- *              HandleMatchingClient;
- *            
- */
-struct Client*
-next_client(struct Client *next,     /* First client to check */
-            const char* ch)          /* search string (may include wilds) */
-{
-  struct Client *tmp = next;
-
-  next = find_client(ch);
-
-  if (next == NULL)
-    next = tmp;
-
-  if (tmp && tmp->prev == next)
-    return (NULL);
-
-  if (next != tmp)
-    return next;
-
-  for ( ; next; next = next->next)
-    {
-      if (match(ch,next->name)) break;
-    }
-  return next;
 }
 
 /*

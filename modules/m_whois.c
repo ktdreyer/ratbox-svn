@@ -234,18 +234,18 @@ static int global_whois(struct Client *source_p, char *nick,
                         int wilds, int glob)
 {
   struct Client *target_p;
+  dlink_node *ptr;
   int found = NO;
-
-  for (target_p = GlobalClientList; (target_p = next_client(target_p, nick));
-       target_p = target_p->next)
+  
+  DLINK_FOREACH(ptr, GlobalClientList.head)
     {
+      target_p = (struct Client *)ptr->data;
+      if(!match(nick, target_p->name))
+      {
+        continue;
+      }
       if (IsServer(target_p))
 	continue;
-      /*
-       * I'm always last :-) and target_p->next == NULL!!
-       */
-      if (IsMe(target_p))
-	break;
       /*
        * 'Rules' established for sending a WHOIS reply:
        *

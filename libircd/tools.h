@@ -71,6 +71,29 @@ void mem_frob(void *data, int len);
 #define mem_frob(x, y) 
 #endif
 
+/* This macros are basically swiped from the linux kernel
+ * they are simple yet effective
+ */
+
+/*
+ * Walks forward of a list.  
+ * pos is your node
+ * head is your list head
+ */
+#define DLINK_FOREACH(pos, head) for (pos = (head); pos != NULL; pos = pos->next)
+   		
+/*
+ * Walks forward of a list safely while removing nodes 
+ * pos is your node
+ * n is another list head for temporary storage
+ * head is your list head
+ */
+/*
+ * #define DLINK_FOREACH_SAFE(ptr, n, list) for (pos = (list)->head->next, n = pos->next; pos != (list->head); pos = n, n = pos->next)
+ */
+#define DLINK_FOREACH_PREV(pos, head) for (pos = (head); pos != NULL; pos = pos->prev)
+              		                  	
+
 /*
  * The functions below are included for the sake of inlining
  * hopefully this will speed up things just a bit
