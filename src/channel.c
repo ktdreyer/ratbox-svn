@@ -506,7 +506,8 @@ dlink_node *find_channel_link(dlink_list *list, struct Channel *chptr)
 /*
  * change_channel_membership
  *
- * inputs	- pointer to membership list to modify
+ * inputs	- pointer to channel
+ *		- pointer to membership list of given channel to modify
  *		- pointer to client struct being modified
  * output	- int success 1 or 0 if failure
  * side effects - change given user "who" from whichever membership list
@@ -516,47 +517,57 @@ dlink_node *find_channel_link(dlink_list *list, struct Channel *chptr)
 static int change_channel_membership(struct Channel *chptr,
 				     dlink_list *to_list, struct Client *who)
 {
-  dlink_node *ptr;
-  int success = 0;
+  volatile dlink_node *ptr;
 
   if ( (ptr = find_user_link(&chptr->peons, who)) )
     {
       if (to_list != &chptr->peons)
 	{
 	  dlinkDelete(who, ptr, &chptr->peons);
+	  if( ptr == chptr->peons.head )
+	    chptr->peons.head = NULL;
 	  dlinkAdd(who, ptr, to_list);
-	  success = 1;
+	  return(1);
 	}
     }
-  else if ( (ptr = find_user_link(&chptr->voiced, who)) )
+
+  if ( (ptr = find_user_link(&chptr->voiced, who)) )
     {
       if (to_list != &chptr->voiced)
 	{
 	  dlinkDelete(who, ptr, &chptr->voiced);
+	  if( ptr == chptr->voiced.head )
+	    chptr->peons.head = NULL;
 	  dlinkAdd(who, ptr, to_list);
-	  success = 1;
+	  return(1);
 	}
     }
-  else if ( (ptr = find_user_link(&chptr->halfops, who)) )
+
+  if ( (ptr = find_user_link(&chptr->halfops, who)) )
     {
       if (to_list != &chptr->halfops)
 	{
 	  dlinkDelete(who, ptr, &chptr->halfops);
+	  if( ptr == chptr->halfops.head )
+	    chptr->peons.head = NULL;
 	  dlinkAdd(who, ptr, to_list);
-	  success = 1;
+	  return(1);
 	}
     }
-  else if ( (ptr = find_user_link(&chptr->chanops, who)) )
+
+  if ( (ptr = find_user_link(&chptr->chanops, who)) )
     {
       if (to_list != &chptr->chanops)
 	{
 	  dlinkDelete(who, ptr, &chptr->chanops);
+	  if( ptr == chptr->chanops.head )
+	    chptr->peons.head = NULL;
 	  dlinkAdd(who, ptr, to_list);
-	  success = 1;
+	  return(1);
 	}
     }
 
-  return success;
+  return 0;
 }
 
 /*
