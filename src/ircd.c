@@ -764,37 +764,37 @@ int main(int argc, char *argv[])
   
   ilog(L_NOTICE, "Server Ready");
   
-  eventAdd("cleanup_channels", cleanup_channels, NULL, CLEANUP_CHANNELS_TIME);
+  eventAddIsh("cleanup_channels", cleanup_channels, NULL, CLEANUP_CHANNELS_TIME);
 
-  eventAdd("cleanup_glines", cleanup_glines, NULL, CLEANUP_GLINES_TIME);
+  eventAddIsh("cleanup_glines", cleanup_glines, NULL, CLEANUP_GLINES_TIME);
 
-  eventAdd("cleanup_tklines", cleanup_tklines, NULL, CLEANUP_TKLINES_TIME);
+  eventAddIsh("cleanup_tklines", cleanup_tklines, NULL, CLEANUP_TKLINES_TIME);
 
   /* We want try_connections to be called as soon as possible now! -- adrian */
   /* No, 'cause after a restart it would cause all sorts of nick collides */
-  eventAdd("try_connections", try_connections, NULL, STARTUP_CONNECTIONS_TIME);
+  eventAddIsh("try_connections", try_connections, NULL, STARTUP_CONNECTIONS_TIME);
 
-  eventAdd("collect_zipstats", collect_zipstats, NULL, ZIPSTATS_TIME);
+  eventAddIsh("collect_zipstats", collect_zipstats, NULL, ZIPSTATS_TIME);
 
   /* Setup the timeout check. I'll shift it later :)  -- adrian */
-  eventAdd("comm_checktimeouts", comm_checktimeouts, NULL, 1);
+  eventAddIsh("comm_checktimeouts", comm_checktimeouts, NULL, 1);
 
-  eventAdd("cleanup_zombies", cleanup_zombies, NULL, 30); 
+  eventAddIsh("cleanup_zombies", cleanup_zombies, NULL, 30); 
   
 #ifdef PACE_CONNECT
  if (ConfigFileEntry.throttle_time > 0)
-   eventAdd("flush_expired_ips", flush_expired_ips, NULL, ConfigFileEntry.throttle_time);
+   eventAddIsh("flush_expired_ips", flush_expired_ips, NULL, ConfigFileEntry.throttle_time);
  else
-   eventAdd("flush_expired_ips", flush_expired_ips, NULL, 300);
+   eventAddIsh("flush_expired_ips", flush_expired_ips, NULL, 300);
 #endif
 
   if(ConfigServerHide.links_delay > 0)
-    eventAdd("write_links_file", write_links_file, NULL, ConfigServerHide.links_delay);
+    eventAddIsh("write_links_file", write_links_file, NULL, ConfigServerHide.links_delay);
   else
     ConfigServerHide.links_disabled = 1;
 
   if(splitmode)
-    eventAdd("check_splitmode", check_splitmode, NULL, 60);
+    eventAddIsh("check_splitmode", check_splitmode, NULL, 60);
 
   ServerRunning = 1;
   io_loop();

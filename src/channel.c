@@ -1251,7 +1251,7 @@ void check_splitmode(void *unused)
 
         sendto_realops_flags(FLAGS_ALL,L_ALL,
                            "Network split, activating splitmode");
-        eventAdd("check_splitmode", check_splitmode, NULL, 60);
+        eventAddIsh("check_splitmode", check_splitmode, NULL, 60);
       }
     }
     else if(splitmode)

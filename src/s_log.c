@@ -164,7 +164,7 @@ void init_log(const char* filename)
   openlog("ircd", LOG_PID | LOG_NDELAY, LOG_FACILITY);
 #endif
 #ifndef SYSLOG_USERS
-  eventAdd("user_log_resync", user_log_resync, NULL, 60);
+  eventAddIsh("user_log_resync", user_log_resync, NULL, 60);
 #endif
 }
 

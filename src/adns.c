@@ -93,7 +93,7 @@ void init_resolver(void)
     exit(76);
   }
   
-  eventAdd("timeout_adns", timeout_adns, NULL, 2);
+  eventAddIsh("timeout_adns", timeout_adns, NULL, 2);
   dns_select();
 }
 
