@@ -1,3 +1,15 @@
+leeh        2003/10/08 12:16:20 EDT	(20031008_6)
+
+  Modified files:
+    include              client.h 
+  Log:
+  - dont set handler to OPER_HANDLER for remote opers
+  
+  Revision  Changes    Path
+  7.227     +1 -1      ircd-ratbox/include/client.h
+
+
+
 androsyn    2003/10/08 11:58:05 EDT	(20031008_5)
 
   Modified files:
