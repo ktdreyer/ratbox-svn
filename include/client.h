@@ -346,6 +346,7 @@ struct LocalUser
 
 #define FLAGS_PINGSENT     0x0001	/* Unreplied ping sent */
 #define FLAGS_DEADLOCAL   0x0002	/* Local socket is dead--Exiting soon */
+#define FLAGS_KILLED       0x0004	/* Prevents "QUIT" from being sent for this */
 #define FLAGS_CLOSING      0x0020	/* set when closing to suppress errors */
 #define FLAGS_CHKACCESS    0x0040	/* ok to check clients access if set */
 #define FLAGS_GOTID        0x0080	/* successful ident lookup achieved */
