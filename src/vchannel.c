@@ -285,7 +285,7 @@ on_sub_vchan(struct Channel *chptr, struct Client *source_p)
   struct Vchan_map *vchan_info;
 
   assert(source_p != NULL);
-  if(source_p == NULL);
+  if(source_p == NULL)
     return NO;
 
   /* they are in the root chan */
