@@ -1,3 +1,9 @@
+*** 20001130_6 by db
+- MessageTree stuff should be in parse.h not msg.h
+- Seeing as MyMalloc now zeros memory, no need to do it in blalloc
+
+
+
 *** 20001130_5 by adrian
 
 
