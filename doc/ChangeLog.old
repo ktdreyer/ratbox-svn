@@ -1,3 +1,8 @@
+*** 20001019_3 by toot
+. /join just skips over a subchan you're already in, instead of giving an error.
+. /list shows vchans as #chan<!key> if there's subchans for it..
+
+
 *** 20001019_2 by db
 - removed the dns cache built into res.c
 - will have to fill out cres_mem with something more appropriate
