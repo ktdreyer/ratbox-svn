@@ -107,6 +107,10 @@ struct Channel* map_vchan(struct Channel *chptr, struct Client *sptr)
 
   assert(sptr != NULL);
 
+  /* they're in the root chan */
+  if (IsMember(sptr, chptr))
+    return chptr;
+
   for(i=0;sptr->vchan_map[i].base_chan;i++)
     {
       if( sptr->vchan_map[i].base_chan == chptr )
