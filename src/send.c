@@ -95,7 +95,7 @@ _send_linebuf(struct Client *to, buf_head_t *linebuf)
     return 0;
   }
 #endif
-  if (IsDead(to) || IsClosing(to))
+  if (IsDead(to))
     return 0; 
 
   if (linebuf_len(&to->localClient->buf_sendq) > get_sendq(to))
