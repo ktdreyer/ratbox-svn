@@ -206,9 +206,8 @@ get_mask_hash(const char *text)
  * Side-effects: None
  */
 struct ConfItem *
-find_conf_by_address(const char *name, const char *sockhost, 
-			struct sockaddr *addr, int type, int fam, 
-			const char *username)
+find_auth(const char *name, const char *sockhost, 
+		struct sockaddr *addr, int fam, const char *username)
 {
 	unsigned long hprecv = 0;
 	struct ConfItem *hprec = NULL;
@@ -229,7 +228,7 @@ find_conf_by_address(const char *name, const char *sockhost,
 			{
 				for (arec = atable[hash_ipv6(addr, b)]; arec; arec = arec->next)
 				{
-					if(type == (arec->type & ~CONF_SKIPUSER) &&
+					if((arec->type & ~CONF_SKIPUSER) == CONF_CLIENT &&
 					   arec->masktype == HM_IPV6 &&
 					   comp_with_mask_sock(addr, (struct sockaddr *)&arec->Mask.ipa.addr,
 							       arec->Mask.ipa.bits) && 
@@ -249,7 +248,7 @@ find_conf_by_address(const char *name, const char *sockhost,
 			for (b = 32; b >= 0; b -= 8)
 			{
 				for (arec = atable[hash_ipv4(addr, b)]; arec; arec = arec->next)
-					if(type == (arec->type & ~CONF_SKIPUSER) &&
+					if((arec->type & ~CONF_SKIPUSER) == CONF_CLIENT &&
 					   arec->masktype == HM_IPV4 &&
 					   arec->precedence > hprecv && 
 					   comp_with_mask_sock(addr, (struct sockaddr *)&arec->Mask.ipa.addr,
@@ -272,7 +271,7 @@ find_conf_by_address(const char *name, const char *sockhost,
 		{
 			for (arec = atable[hash_text(p)]; arec; arec = arec->next)
 			{
-				if(type == (arec->type & ~CONF_SKIPUSER) &&
+				if((arec->type & ~CONF_SKIPUSER) == CONF_CLIENT &&
 				   (arec->masktype == HM_HOST) &&
 				   arec->precedence > hprecv &&
 				   match(arec->Mask.hostname, name) &&
@@ -291,7 +290,7 @@ find_conf_by_address(const char *name, const char *sockhost,
 		}
 		for (arec = atable[0]; arec; arec = arec->next)
 		{
-			if(type == (arec->type & ~CONF_SKIPUSER) &&
+			if((arec->type & ~CONF_SKIPUSER) == CONF_CLIENT &&
 			   arec->masktype == HM_HOST &&
 			   arec->precedence > hprecv && 
 			   (match(arec->Mask.hostname, name) ||
@@ -304,6 +303,100 @@ find_conf_by_address(const char *name, const char *sockhost,
 		}
 	}
 	return hprec;
+}
+
+
+/* struct ConfItem* find_conf_by_address(const char*, struct irc_sockaddr_storage*,
+ *         int type, int fam, const char *username)
+ * Input: The hostname, the address, the type of mask to find, the address
+ *        family, the username.
+ * Output: The matching value with the highest precedence.
+ * Side-effects: None
+ */
+struct ConfItem *
+find_conf_by_address(const char *name, const char *sockhost, 
+			struct sockaddr *addr, int type, int fam, 
+			const char *username)
+{
+	struct AddressRec *arec;
+	int b;
+
+	if(username == NULL)
+		username = "";
+
+	if(addr)
+	{
+		/* Check for IPV6 matches... */
+#ifdef IPV6
+		if(fam == AF_INET6)
+		{
+
+			for (b = 128; b >= 0; b -= 16)
+			{
+				for (arec = atable[hash_ipv6(addr, b)]; arec; arec = arec->next)
+				{
+					if(type == (arec->type & ~CONF_SKIPUSER) &&
+					   arec->masktype == HM_IPV6 &&
+					   comp_with_mask_sock(addr, (struct sockaddr *)&arec->Mask.ipa.addr,
+							       arec->Mask.ipa.bits) && 
+					  (arec->type & CONF_SKIPUSER || match(arec->username, username)))
+						return arec->aconf;
+				}
+			}
+		}
+		else
+#endif
+		if(fam == AF_INET)
+		{
+			for (b = 32; b >= 0; b -= 8)
+			{
+				for (arec = atable[hash_ipv4(addr, b)]; arec; arec = arec->next)
+				{
+					if(type == (arec->type & ~CONF_SKIPUSER) &&
+					   arec->masktype == HM_IPV4 &&
+					   comp_with_mask_sock(addr, (struct sockaddr *)&arec->Mask.ipa.addr,
+							       arec->Mask.ipa.bits) && 
+					   (arec->type & CONF_SKIPUSER || match(arec->username, username)))
+						return arec->aconf;
+				}
+			}
+		}
+	}
+
+	if(name != NULL)
+	{
+		const char *p;
+		/* And yes - we have to check p after strchr and p after increment for
+		 * NULL -kre */
+		for (p = name; p != NULL;)
+		{
+			for (arec = atable[hash_text(p)]; arec; arec = arec->next)
+			{
+				if(type == (arec->type & ~CONF_SKIPUSER) &&
+				   (arec->masktype == HM_HOST) &&
+				   match(arec->Mask.hostname, name) &&
+				   (arec->type & CONF_SKIPUSER || match(arec->username, username)))
+					return arec->aconf;
+			}
+
+			p = strchr(p, '.');
+			if(p != NULL)
+				p++;
+			else
+				break;
+		}
+		for (arec = atable[0]; arec; arec = arec->next)
+		{
+			if(type == (arec->type & ~CONF_SKIPUSER) &&
+			   arec->masktype == HM_HOST &&
+			   (match(arec->Mask.hostname, name) ||
+			    (sockhost && match(arec->Mask.hostname, sockhost))) &&
+			   (arec->type & CONF_SKIPUSER || match(arec->username, username)))
+				return arec->aconf;
+		}
+	}
+
+	return NULL;
 }
 
 /* struct ConfItem* find_address_conf(const char*, const char*,
@@ -319,7 +412,7 @@ find_address_conf(const char *host, const char *sockhost, const char *user,
 	struct ConfItem *iconf, *kconf;
 
 	/* Find the best I-line... If none, return NULL -A1kmm */
-	if(!(iconf = find_conf_by_address(host, sockhost, ip, CONF_CLIENT, aftype, user)))
+	if(!(iconf = find_auth(host, sockhost, ip, aftype, user)))
 		return NULL;
 
 	/* If they are exempt from K-lines, return the best I-line. -A1kmm */
@@ -426,8 +519,11 @@ add_conf_by_address(const char *address, int type, const char *username, struct 
 	}
 	arec->username = username;
 	arec->aconf = aconf;
-	arec->precedence = prec_value--;
 	arec->type = type;
+
+	/* only auth {}; gets a precedence */
+	if(type == CONF_CLIENT)
+		arec->precedence = prec_value--;
 
 	if(EmptyString(username) || (username[0] == '*' && username[1] == '\0'))
 		arec->type |= CONF_SKIPUSER;
