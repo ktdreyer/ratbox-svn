@@ -1,3 +1,11 @@
+*** 20001209_12 by db
+- quick fix to fix prefixes on LOCAL channels only...
+  prefix adding was =hidden= in underlying send.c functions. 
+  NOT a good idea IMO.. this makes its harder to optimize code...
+  fughly anyway, I think I got the major prefixes fixed for now.. 
+
+
+
 *** 20001209_11 by db
 - ummmm no check for parc in mo_undline leads to core if no args given
 
