@@ -1,3 +1,17 @@
+leeh        2004/04/03 17:47:08 EST	(20040403_4)
+
+  Modified files:
+    .                    configure configure.ac 
+  Log:
+  - patch via koitsu to fix the time_t stuff, we just pick the formatting
+    based on what the OS wants.
+  
+  Revision  Changes    Path
+  7.218     +41 -126   ircd-ratbox/configure
+  7.31      +47 -18    ircd-ratbox/configure.ac
+
+
+
 leeh        2004/04/03 17:06:03 EST	(20040403_3)
 
   Modified files:
