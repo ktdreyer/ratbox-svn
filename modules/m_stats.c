@@ -57,7 +57,7 @@ static void m_stats(struct Client*, struct Client*, int, char**);
 static void ms_stats(struct Client*, struct Client*, int, char**);
 
 struct Message stats_msgtab = {
-  "STATS", 0, 1, 0, MFLG_SLOW, 0,
+  "STATS", 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_stats, ms_stats, m_stats}
 };
 
@@ -221,15 +221,6 @@ static void m_stats(struct Client *client_p, struct Client *source_p,
   int i;
   static time_t last_used = 0;
   char statchar;
-
-  /* jdc -- Check argument count.  Zero arguments is impossible, but 1
-   * argument means someone just did "/STATS" without a character or word
-   * specifier.  This needs to be checked.  :-)
-   */
-  if (parc < 2)
-  {
-    return;
-  }
 
   /* Check the user is actually allowed to do /stats, and isnt flooding */
   if(!IsOper(source_p) && (last_used + ConfigFileEntry.pace_wait) > CurrentTime)
