@@ -1,3 +1,11 @@
+*** 20011113_4 by leeh
+- extended stats m (a la ircnet).
+  now: COMMAND TOTALCOUNT TOTALBYTES REMOTECOUNT
+
+  where remotecount is the count coming from a server.. this lets you gauge
+  how many commands are coming from our clients - how many from servers..
+
+
 *** 20011113_3 by leeh
 - allow stats ? for non-opers on the condition flatten_links is disabled,
   dont give them capab info tho..
