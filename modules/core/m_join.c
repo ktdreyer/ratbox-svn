@@ -188,6 +188,8 @@ m_join(struct Client *client_p,
       /* look for the channel */
       if((chptr = hash_find_channel(name)) != NULL)
 	{
+	  if(IsMember(chptr, source_p))
+            return;
 	  if(splitmode && !IsOper(source_p) && (*name != '&') && 
              ConfigChannel.no_join_on_split)
 	  {
@@ -260,18 +262,13 @@ m_join(struct Client *client_p,
       if(flags == 0)        /* if channel doesn't exist, don't penalize */
 	successful_join_count++;
 
-      if(!chptr)        /* If I already have a chptr, no point doing this */
+      if(chptr == NULL)     /* If I already have a chptr, no point doing this */
 	{
 	  chptr = get_or_create_channel(source_p, name, NULL);
 	  root_chptr = chptr;
 	}
       
-      if(chptr)
-	{
-	  if (IsMember(source_p, chptr))    /* already a member, ignore this */
-	    continue;
-	}
-      else
+      if(chptr == NULL)
 	{
 	  sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
 		     me.name, parv[0], name);
