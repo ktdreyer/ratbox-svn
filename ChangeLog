@@ -1,3 +1,20 @@
+leeh        2004/08/06 22:22:24 EDT	(20040807_0)
+
+  Modified files:
+    include              s_conf.h 
+    modules/core         registration.c 
+    src                  s_conf.c 
+  Log:
+  - move some stuff from s_conf.c to registration.c and cleaned up
+    registration.c somewhat
+  
+  Revision  Changes     Path
+  7.289     +0 -3       ircd-ratbox/include/s_conf.h
+  1.6       +1166 -823  ircd-ratbox/modules/core/registration.c
+  7.484     +0 -397     ircd-ratbox/src/s_conf.c
+
+
+
 androsyn    2004/08/06 13:40:46 EDT	(20040806_1)
 
   Modified files:
