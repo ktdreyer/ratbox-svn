@@ -1,4 +1,4 @@
-$Id$
+# $Id$
 m_accept.o: m_accept.c ../include/handlers.h ../include/client.h \
  ../include/config.h ../include/setup.h ../include/defaults.h \
  ../include/ircd_defs.h ../include/ircd_handler.h ../include/linebuf.h \

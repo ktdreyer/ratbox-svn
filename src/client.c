@@ -578,6 +578,10 @@ static void update_client_exit_stats(struct Client* client_p)
       if (IsInvisible(client_p)) 
 	--Count.invisi;
     }
+
+  if(!splitmode &&
+    (ConfigChannel.no_join_on_split || ConfigChannel.no_create_on_split))
+    check_splitmode();
 }
 
 /*
