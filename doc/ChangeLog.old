@@ -1,3 +1,15 @@
+leeh        2002/04/18 15:11:10 EDT	(20020418_2)
+
+  Modified files:
+    modules              m_who.c 
+  Log:
+  - dont allow people to use /who <server> when serverhide is enabled.
+  
+  Revision  Changes    Path
+  1.56      +6 -2      ircd-hybrid-7/modules/m_who.c
+
+
+
 db          2002/04/18 12:12:15 EDT	(20020418_1)
 
   Modified files:
