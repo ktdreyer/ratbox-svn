@@ -73,7 +73,8 @@ static void
 sendto_list_local(dlink_list *list, buf_head_t *linebuf);
 
 static void
-sendto_list_remote(struct Client *from, dlink_list *list, char *message);
+sendto_list_remote(struct Client *from, dlink_list *list, int caps,
+                   int nocaps, buf_head_t *linebuf);
 
 static void
 sendto_list_anywhere(struct Client *one, struct Client *from,
@@ -614,7 +615,6 @@ sendto_list_anywhere(struct Client *one, struct Client *from,
   }
 }
 
-
 /*
  * sendto_server
  * 
@@ -783,30 +783,18 @@ sendto_channel_local(int type,
 
   switch(type)
   {
+    case NON_CHANOPS:
+      sendto_list_local(&chptr->locvoiced, &linebuf);
+      sendto_list_local(&chptr->locpeons, &linebuf);
+      break;
+
     default:
     case ALL_MEMBERS:
-      sendto_list_local(&chptr->locchanops, &linebuf);
-      sendto_list_local(&chptr->lochalfops, &linebuf);
-      sendto_list_local(&chptr->locvoiced,  &linebuf);
-      sendto_list_local(&chptr->locpeons,   &linebuf);
-      break;
-
-    case NON_CHANOPS:
-      sendto_list_local(&chptr->locvoiced,  &linebuf);
-      sendto_list_local(&chptr->locpeons,   &linebuf);
-      break;
-
+      sendto_list_local(&chptr->locpeons, &linebuf);
     case ONLY_CHANOPS_HALFOPS_VOICED:
-      sendto_list_local(&chptr->locchanops, &linebuf);
-      sendto_list_local(&chptr->lochalfops, &linebuf);
-      sendto_list_local(&chptr->locvoiced,  &linebuf);
-      break;
-
+      sendto_list_local(&chptr->locvoiced, &linebuf);
     case ONLY_CHANOPS_HALFOPS:
-      sendto_list_local(&chptr->locchanops, &linebuf);
       sendto_list_local(&chptr->lochalfops, &linebuf);
-      break;
-
     case ONLY_CHANOPS:
       sendto_list_local(&chptr->locchanops, &linebuf);
   }
@@ -825,43 +813,40 @@ sendto_channel_local(int type,
  *		  remote to this server.
  */
 void
-sendto_channel_remote(struct Client *from,
-		      int type,
-		      struct Channel *chptr,
-		      char *message)
+sendto_channel_remote(struct Client *from, int type, int caps,
+                      int nocaps, struct Channel *chptr, char *pattern,
+                      ...)
 {
+  va_list args;
+  buf_head_t linebuf;
+
+  linebuf_newbuf(&linebuf);
+  va_start(args, pattern);
+  linebuf_putmsg(&linebuf, pattern, args, NULL);
+  va_end(args);
+
   /* Serial number checking isn't strictly necessary, but won't hurt */
   ++current_serial;
 
   switch(type)
   {
+    case NON_CHANOPS:
+      sendto_list_remote(from, &chptr->voiced, caps, nocaps, &linebuf);
+      sendto_list_remote(from, &chptr->peons, caps, nocaps, &linebuf);
+      break;
+
+    /* Fall through to accumulate lists... */
     default:
     case ALL_MEMBERS:
-      sendto_list_remote(from, &chptr->chanops, message);
-      sendto_list_remote(from, &chptr->halfops, message);
-      sendto_list_remote(from, &chptr->voiced,  message);
-      sendto_list_remote(from, &chptr->peons,   message);
-      break;
-
-    case NON_CHANOPS:
-      sendto_list_remote(from, &chptr->voiced,  message);
-      sendto_list_remote(from, &chptr->peons,   message);
-      break;
-
+      sendto_list_remote(from, &chptr->peons, caps, nocaps, &linebuf);
     case ONLY_CHANOPS_HALFOPS_VOICED:
-      sendto_list_remote(from, &chptr->chanops, message);
-      sendto_list_remote(from, &chptr->halfops, message);
-      sendto_list_remote(from, &chptr->voiced,  message);
-      break;
-
+      sendto_list_remote(from, &chptr->voiced, caps, nocaps, &linebuf);
     case ONLY_CHANOPS_HALFOPS:
-      sendto_list_remote(from, &chptr->chanops, message);
-      sendto_list_remote(from, &chptr->halfops, message);
-      break;
-
+      sendto_list_remote(from, &chptr->halfops, caps, nocaps, &linebuf);
     case ONLY_CHANOPS:
-      sendto_list_remote(from, &chptr->chanops, message);
+      sendto_list_remote(from, &chptr->chanops, caps, nocaps, &linebuf);
   }
+  linebuf_donebuf(&linebuf);
 } /* sendto_channel_remote() */
 
 /*
@@ -899,20 +884,21 @@ sendto_list_local(dlink_list *list, buf_head_t *linebuf_ptr)
 } /* sendto_list_local() */
 
 /*
- * sendto_list_remote
+ * sendto_list_remote(struct Client *from, dlink_list *list, int caps,
+ *                    int nocaps, buf_head_t *linebuf)
  *
- * inputs	- pointer to all members of this list
- *		- buffer to send
- *		- length of buffer
- * output	- NONE
- * side effects	- all members who are remote to this server on given list
- *		  are sent given message. Right now, its always a channel list
- *		  but there is no reason one could not use another dlink
- *		  list to send a message to a group of people.
+ * Input: from => The client who sent this to us.
+ *        list => The list of clients to check.
+ *        caps => The capabilities servers we send this to must have.
+ *      nocaps => The capabilities servers we send this to must lack.
+ *     linebuf => The buffer to send.
+ * Output: None.
+ * Side-effects: Sends a linebuf to all the servers of all the users on
+ *               the list.
  */
 static void
-sendto_list_remote(struct Client *from, 
-		   dlink_list *list, char *message)
+sendto_list_remote(struct Client *from, dlink_list *list, int caps,
+                   int nocaps, buf_head_t *linebuf)
 {
   dlink_node *ptr;
   struct Client *target_p;
@@ -925,11 +911,14 @@ sendto_list_remote(struct Client *from,
     if (MyConnect(target_p))
       continue;
 
-    if (target_p->serial == current_serial)
+    if (((target_p->from->localClient->caps & caps) != caps) ||
+        ((target_p->from->localClient->caps & nocaps) != 0))
+      continue;
+    if (target_p->from->serial == current_serial)
       continue;
 
-    target_p->serial = current_serial;
-    sendto_anywhere(target_p, from, "NOTICE %s :%s", target_p->name, message);
+    target_p->from->serial = current_serial;
+    send_linebuf(target_p, linebuf);
   } 
 } /* sendto_list_remote() */
 
@@ -1060,6 +1049,9 @@ sendto_anywhere(struct Client *to, struct Client *from,
   va_list args;
   buf_head_t linebuf;
 
+  /* This check is worth doing... */
+  if (from->from == to->from)
+    return;
   linebuf_newbuf(&linebuf);
   va_start(args, pattern);
 
