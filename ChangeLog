@@ -1,3 +1,15 @@
+leeh        2003/06/25 08:49:35 UTC	(20030625_2)
+
+  Modified files:
+    .                    RELNOTES 
+  Log:
+  - revved patchlevel to 2.0beta3
+  
+  Revision  Changes    Path
+  1.77      +2 -1      ircd-ratbox/RELNOTES
+
+
+
 leeh        2003/06/25 08:41:21 UTC	(20030625_1)
 
   Modified files:
