@@ -51,10 +51,10 @@
 #include "memory.h"
 
 
-#define EPOLL_LENGTH 256
 
 static int ep;			/* epoll file descriptor */
-
+static struct epoll_event *pfd;
+static int pfd_size;
 
 
 #ifndef HAVE_EPOLL_CTL /* bah..glibc doesn't support epoll yet.. */
@@ -78,7 +78,9 @@ _syscall4(int, epoll_wait, int, epfd, struct epoll_event *, pevents,
 void
 init_netio(void)
 {
-	ep = epoll_create(getdtablesize());
+	pfd_size = getdtablesize();
+	ep = epoll_create(pfd_size);
+	pfd = MyMalloc(sizeof(struct epoll_event) * pfd_size);
 	if(ep < 0)
 	{
 		ilog(L_MAIN, "init_netio: Couldn't open epoll fd!\n");
@@ -169,10 +171,9 @@ comm_select(unsigned long delay)
 {
 	int num, i, flags, old_flags, op;
 	struct epoll_event ep_event;
-	static struct epoll_event pfd[EPOLL_LENGTH];
 	void *data;
 
-	num = epoll_wait(ep, pfd, EPOLL_LENGTH, delay);
+	num = epoll_wait(ep, pfd, pfd_size, delay);
 	set_time();
 	if(num < 0 && !ignoreErrno(errno))
 	{
