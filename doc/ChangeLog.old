@@ -1,3 +1,7 @@
+*** 19990909_26 by tomh
+ewps make sentinel char* instead of void*
+
+
 *** 19990909_25 by tomh
 change (void*)1 to valid sentinel pointer
 
