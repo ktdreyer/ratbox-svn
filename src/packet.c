@@ -61,7 +61,11 @@ void parse_client_queued(struct Client *cptr)
 				    readBuf, READBUF_SIZE)) > 0)
         {
           if (IsDead(cptr))
-            return;
+	    {
+	      linebuf_donebuf(&cptr->localClient->buf_recvq);
+	      linebuf_donebuf(&cptr->localClient->buf_sendq);
+	      return;
+	    }
 	  client_dopacket(cptr, readBuf, dolen);
 	}
       }
