@@ -1,3 +1,20 @@
+leeh        2002/11/23 18:38:29 UTC	(20021123_2)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+  Removed files:
+    include              Makefile.in 
+  Log:
+  - removed include/ from the build fully - didnt do anything sensible
+  
+  Revision  Changes    Path
+  7.158     +0 -1      ircd-ratbox/autoconf/configure.in
+  7.165     +0 -2      ircd-ratbox/configure
+  1.7       +0 -32     ircd-ratbox/include/Makefile.in (dead)
+
+
+
 leeh        2002/11/23 17:40:52 UTC	(20021123_1)
 
   Modified files:
