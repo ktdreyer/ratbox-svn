@@ -445,6 +445,7 @@ void mod_del_cmd(struct Message *msg)
 	  MyFree(ptr);
 	  return;
 	}
+      last_ptr = ptr;
     }
 }
 
