@@ -166,6 +166,8 @@ dlinkMoveList(dlink_list *from, dlink_list *to)
     to->head = from->head;
     to->tail = from->tail;
     from->head = from->tail = NULL;
+    to->length = from->length;
+    from->length = 0;
     return;
   }
 
