@@ -1,3 +1,26 @@
+leeh        2002/05/16 15:14:49 EDT	(20020516_6)
+
+  Modified files:
+    contrib              m_clearchan.c m_force.c m_ojoin.c 
+                         m_opme.c 
+    modules/core         m_kick.c 
+    src                  channel_mode.c 
+  Log:
+  - fixed a bug in channel_mode.c where to_list instead of loc_to_list was
+    being checked.
+  - contrib module fixes for #ifdef HALFOPS/VCHANS
+  - unused variable in m_kick.c with #undef VCHANS
+  
+  Revision  Changes    Path
+  1.28      +14 -1     ircd-hybrid-7/contrib/m_clearchan.c
+  1.6       +3 -1      ircd-hybrid-7/contrib/m_force.c
+  1.6       +11 -2     ircd-hybrid-7/contrib/m_ojoin.c
+  1.23      +8 -1      ircd-hybrid-7/contrib/m_opme.c
+  1.43      +3 -1      ircd-hybrid-7/modules/core/m_kick.c
+  7.39      +5 -5      ircd-hybrid-7/src/channel_mode.c
+
+
+
 androsyn    2002/05/16 10:45:11 EDT	(20020516_5)
 
   Modified files:
