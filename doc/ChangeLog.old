@@ -1,3 +1,16 @@
+a1kmm       2001/12/31 06:13:42 EST	(20011231_1)
+
+  Modified files:
+    src                  channel_mode.c 
+  Log:
+  - Changed cl => ch. It is 1/1/2002 0:13 NZDT so I am allowed to make a few
+    typos.
+  
+  Revision  Changes    Path
+  7.15      +1 -1      ircd-hybrid-7/src/channel_mode.c
+
+
+
 a1kmm       2001/12/31 06:04:38 EST	(20011231_0)
 
   Modified files:
