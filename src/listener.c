@@ -44,7 +44,9 @@
 #define INADDR_NONE ((unsigned int) 0xffffffff)
 #endif
 
-struct Listener* ListenerPollList = 0;
+static PF accept_connection;
+
+static struct Listener* ListenerPollList = NULL;
 
 struct Listener* make_listener(int port, struct in_addr addr)
 {
@@ -222,6 +224,9 @@ static int inetport(struct Listener* listener)
 
   listener->fd = fd;
 
+  /* Listen completion events are READ events .. */
+  comm_setselect(fd, COMM_SELECT_READ, accept_connection, listener, 0);
+
   return 1;
 }
 
@@ -305,6 +310,7 @@ void close_listener(struct Listener* listener)
     }
   }
   if (-1 < listener->fd)
+    /* This will also remove any pending IO interests  -- Adrian */
     fd_close(listener->fd);
   free_listener(listener);
 }
@@ -326,12 +332,13 @@ void close_listeners()
   }
 }
 
-void accept_connection(struct Listener* listener)
+static void accept_connection(int pfd, void *data)
 {
   static time_t      last_oper_notice = 0;
   struct sockaddr_in addr;
   int                addrlen = sizeof(struct sockaddr_in);
   int                fd;
+  struct Listener *  listener = data;
 
   assert(0 != listener);
 
@@ -347,59 +354,65 @@ void accept_connection(struct Listener* listener)
    * point, just assume that connections cannot
    * be accepted until some old is closed first.
    */
-  if (-1 == (fd = accept(listener->fd, (struct sockaddr*) &addr, &addrlen))) {
-    if (EAGAIN == errno)
-       return;
+  do {
+    if (-1 == (fd = accept(listener->fd, (struct sockaddr*) &addr, &addrlen))) {
+      if (EAGAIN == errno)
+         break;
+      /*
+       * slow down the whining to opers bit
+       */
+      if((last_oper_notice + 20) <= CurrentTime) {
+        report_error("Error accepting connection %s:%s", 
+                   listener->name, errno);
+        last_oper_notice = CurrentTime;
+      }
+      break;
+    }
+    fd_open(fd, FD_SOCKET, "New incoming connection");
     /*
-     * slow down the whining to opers bit
+     * check for connection limit
      */
-    if((last_oper_notice + 20) <= CurrentTime) {
-      report_error("Error accepting connection %s:%s", 
-                 listener->name, errno);
-      last_oper_notice = CurrentTime;
+    if ((MAXCONNECTIONS - 10) < fd) {
+      ++ServerStats->is_ref;
+      /* 
+       * slow down the whining to opers bit 
+       */
+      if((last_oper_notice + 20) <= CurrentTime) {
+        sendto_realops("All connections in use. (%s)", 
+                       get_listener_name(listener));
+        last_oper_notice = CurrentTime;
+      }
+      send(fd, "ERROR :All connections in use\r\n", 32, 0);
+      fd_close(fd);
+      break;
     }
-    return;
-  }
-  /*
-   * check for connection limit
-   */
-  if ((MAXCONNECTIONS - 10) < fd) {
-    ++ServerStats->is_ref;
-    /* 
-     * slow down the whining to opers bit 
+    /*
+     * check to see if listener is shutting down
      */
-    if((last_oper_notice + 20) <= CurrentTime) {
-      sendto_realops("All connections in use. (%s)", 
-                     get_listener_name(listener));
-      last_oper_notice = CurrentTime;
+    if (!listener->active) {
+      ++ServerStats->is_ref;
+      send(fd, "ERROR :Use another port\r\n", 25, 0);
+      fd_close(fd);
+      break;
     }
-    send(fd, "ERROR :All connections in use\r\n", 32, 0);
-    fd_close(fd);
-    return;
-  }
-  /*
-   * check to see if listener is shutting down
-   */
-  if (!listener->active) {
-    ++ServerStats->is_ref;
-    send(fd, "ERROR :Use another port\r\n", 25, 0);
-    fd_close(fd);
-    return;
-  }
-  /*
-   * check conf for ip address access
-   */
-  if (!conf_connect_allowed(addr.sin_addr)) {
-    ServerStats->is_ref++;
+    /*
+     * check conf for ip address access
+     */
+    if (!conf_connect_allowed(addr.sin_addr)) {
+      ServerStats->is_ref++;
 #ifdef REPORT_DLINE_TO_USER
-     send(fd, "NOTICE DLINE :*** You have been D-lined\r\n", 41, 0);
+       send(fd, "NOTICE DLINE :*** You have been D-lined\r\n", 41, 0);
 #endif
-    fd_close(fd);
-    return;
-  }
-  ServerStats->is_ac++;
-  nextping = CurrentTime;
+      fd_close(fd);
+      break;
+    }
+    ServerStats->is_ac++;
+    nextping = CurrentTime;
 
-  add_connection(listener, fd);
+    add_connection(listener, fd);
+  } while (0);
+
+  /* Re-register a new IO request for the next accept .. */
+  comm_setselect(listener->fd, COMM_SELECT_READ, accept_connection, listener, 0);
 }
 

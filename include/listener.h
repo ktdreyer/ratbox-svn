@@ -47,9 +47,6 @@ struct Listener {
   char             vhost[HOSTLEN + 1]; /* virtual name of listener */
 };
 
-extern struct Listener* ListenerPollList; /* GLOBAL - listener list */
-
-extern void        accept_connection(struct Listener* listener);
 extern void        add_listener(int port, const char* vaddr_ip);
 extern void        close_listener(struct Listener* listener);
 extern void        close_listeners(void);

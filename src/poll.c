@@ -241,7 +241,6 @@ int read_message(time_t delay, unsigned char mask)
   int                  fd;
   struct AuthRequest*  auth;
   struct AuthRequest*  auth_next;
-  struct Listener*     listener;
   int                  rr;
   int                  rw;
   int                  i;
@@ -263,29 +262,6 @@ int read_message(time_t delay, unsigned char mask)
         PFD_SETW(auth->fd);
       else
         PFD_SETR(auth->fd);
-    }
-    /*
-     * set listener descriptors
-     */
-    for (listener = ListenerPollList; listener; listener = listener->next) {
-      assert(-1 < listener->fd);
-#ifdef CONNECTFAST
-      listener->index = nbr_pfds;
-      PFD_SETR(listener->fd);
-#else
-     /* 
-      * It is VERY bad if someone tries to send a lot
-      * of clones to the server though, as mbuf's can't
-      * be allocated quickly enough... - Comstud
-      */
-      listener->index = -1;
-      if (CurrentTime > (listener->last_accept + 2)) {
-        listener->index = nbr_pfds;
-        PFD_SETR(listener->fd);
-      }
-      else if (delay2 > 2)
-        delay2 = 2;
-#endif
     }
     /*
      * set client descriptors
@@ -329,6 +305,7 @@ int read_message(time_t delay, unsigned char mask)
       restart("too many poll errors");
     sleep(10);
   }
+
   /*
    * check auth descriptors
    */
@@ -343,32 +320,28 @@ int read_message(time_t delay, unsigned char mask)
         send_auth_query(auth);
       else
         read_auth_reply(auth);
+      poll_fdarray[i].fd = -1;
       if (0 == --nfds)
         break;
     }
   }
   /*
-   * check listeners
+   * Since we're going to rip this code out anyway, the current "hack"
+   * will suffice to keep things going. The only two things this loop
+   * services now is the auth and client/server fds (resolver and
+   * listener FDs are done through the new-style interface) . So,
+   * we loop again through the poll_fdarray[] array from scratch again
+   * and fd's that are not -1 are ready for us to do read-type events
+   * with. The pollfd_array[i].fd = -1; in the auth fd loop stops us
+   * from looking at the auth fds as client/server fds which would be
+   * a Bad Thing(tm) right now. :-)    -- adrian
    */
-  for (listener = ListenerPollList; listener; listener = listener->next) {
-    if (-1 == listener->index)
-      continue;
-    i = listener->index;
-    if (poll_fdarray[i].revents) {
-      accept_connection(listener);
-      if (0 == --nfds)
-        break;
-    }
-  }
-  /*
-   * i contains the next non-auth/non-listener index, since we put the 
-   * resolver, auth and listener, file descriptors in poll_fdarray first, 
-   * the very next one should be the start of the clients
-   */
-  pfd = &poll_fdarray[++i];
+  pfd = &poll_fdarray[0];
     
-  for ( ; (i < nbr_pfds); i++, pfd++)
+  for (i = 0; (i < nbr_pfds); i++, pfd++)
     {
+      if (pfd->fd < 0)
+          continue;
       fd = pfd->fd;                   
       rr = pfd->revents & POLLREADFLAGS;
       rw = pfd->revents & POLLWRITEFLAGS;
