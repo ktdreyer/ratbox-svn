@@ -1,3 +1,15 @@
+leeh        2005/02/24 15:27:17 EST	(20050224_9)
+
+  Modified files:
+    contrib              m_42.c 
+  Log:
+  - fix the copyright on m_42.c :p
+  
+  Revision  Changes    Path
+  1.4       +2 -2      ircd-ratbox/contrib/m_42.c
+
+
+
 leeh        2005/02/24 15:22:53 EST	(20050224_8)
 
   Modified files:
