@@ -990,9 +990,6 @@ ts_warn(const char *pattern, ...)
   ** more than 5 every 5 seconds.  -orabidoo
   */
 
-  /*
-   * hybrid servers always do TS_WARNINGS -Dianora
-   */
   now = time(NULL);
   if (now - last < 5)
     {
@@ -1012,7 +1009,6 @@ ts_warn(const char *pattern, ...)
 } /* ts_warn() */
 
 
-#ifdef SLAVE_SERVERS
 
 extern aConfItem *u_conf;
 
@@ -1060,4 +1056,3 @@ sendto_slaves(struct Client *one, char *message, char *nick, int parc, char *par
   return 0;
 } /* sendto_slaves() */
 
-#endif /* SLAVE_SERVERS */
