@@ -216,20 +216,20 @@ void adns_getaddr(struct irc_inaddr *addr, int aftype,
    memcpy(&ipn.sins.sin6.sin6_addr.s6_addr, &addr->sins.sin6.s6_addr,
           sizeof(struct in6_addr));
    adns_submit_reverse(dns_state, (struct sockaddr *)&ipn.sins.sin6,
-                       adns_r_ptr_ip6, adns_qf_owner|adns_qf_cname_loose, req, &req->query);
+                       adns_r_ptr_ip6, adns_qf_owner|adns_qf_cname_loose|adns_qf_quoteok_anshost, req, &req->query);
   } else
   {
    ipn.sins.sin.sin_family = AF_INET;
    ipn.sins.sin.sin_port = 0;
    ipn.sins.sin.sin_addr.s_addr = addr->sins.sin.s_addr;
    adns_submit_reverse(dns_state, (struct sockaddr *)&ipn.sins.sin,
-   adns_r_ptr, adns_qf_owner|adns_qf_cname_loose, req, &req->query);
+   adns_r_ptr, adns_qf_owner|adns_qf_cname_loose|adns_qf_quoteok_anshost, req, &req->query);
   }
 #else
   ipn.sins.sin.sin_family = AF_INET;
   ipn.sins.sin.sin_port = 0;
   ipn.sins.sin.sin_addr.s_addr = addr->sins.sin.s_addr;
   adns_submit_reverse(dns_state, (struct sockaddr *)&ipn.sins.sin,
-                      adns_r_ptr, adns_qf_owner|adns_qf_cname_loose, req, &req->query);
+                      adns_r_ptr, adns_qf_owner|adns_qf_cname_loose|adns_qf_quoteok_anshost, req, &req->query);
 #endif
 }
