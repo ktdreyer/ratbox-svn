@@ -1,4 +1,3 @@
 HOST <hostname>
-  Gives hostname statistics.
-
+Gives hostname statistics.
   <hostname>: hostname to give statistics on

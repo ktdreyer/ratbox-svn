@@ -3,6 +3,7 @@
 #define INCLUDED_s_chanserv_h
 
 struct user_reg;
+struct chmod;
 
 #define MAX_CHAN_REG_HASH	16384
 
@@ -10,6 +11,8 @@ struct chan_reg
 {
 	char *name;
 	char *topic;
+	struct chmode *mode;
+	int flags;
 
 	time_t reg_time;
 	time_t last_used;
@@ -17,6 +20,7 @@ struct chan_reg
 	dlink_node node;
 
 	dlink_list users;
+	dlink_list bans;
 };
 
 struct member_reg
@@ -25,9 +29,18 @@ struct member_reg
 	struct chan_reg *chan_reg;
 
 	int level;
+	int suspend;
 
 	dlink_node usernode;
 	dlink_node channode;
+};
+
+struct ban_reg
+{
+	char *mask;
+	char *reason;
+	int level;
+	time_t hold;
 };
 
 extern dlink_list chan_reg_table[MAX_CHAN_REG_HASH];

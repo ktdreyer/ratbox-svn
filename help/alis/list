@@ -1,4 +1,5 @@
 LIST <mask> [options]
+Gives a channel list based on parameters.
   <mask>   : mask to search for (accepts wildcard '*')
   [options]:
     -min <n>: minimum users in channel

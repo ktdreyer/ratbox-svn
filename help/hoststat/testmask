@@ -1,4 +1,3 @@
 TESTMASK <mask>
-  Counts number of clients using given mask.
-
+Counts number of clients using given mask.
   <mask>: user@host mask (accepts wildcards) to count
