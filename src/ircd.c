@@ -306,7 +306,7 @@ get_current_bandwidth(struct Client *source_p, struct Client *target_p)
 		return;
 	}
 	sendto_one(source_p,
-		   ":%s NOTICE %s :Current traffic: - In (%.1fk/s) Out (%.1fk/s)",
+		   ":%s NOTICE %s :Current traffic: - In (%.1fK/s) Out (%.1fK/s)",
 		   me.name, source_p->name, in_curr_bandwidth, out_curr_bandwidth);
 
 }
@@ -321,9 +321,10 @@ check_htm(void)
 	if(CurrentTime - lasttime < ConfigFileEntry.htm_interval)
 		return;
 
+	in_curr_bandwidth = ((float) me.localClient->receiveK - (float) last_recvK) / (CurrentTime - lasttime);
+	out_curr_bandwidth = ((float) me.localClient->sendK - (float) last_sendK) / (CurrentTime - lasttime);
+
 	lasttime = CurrentTime;
-	in_curr_bandwidth = (float) me.localClient->receiveK - (float) (last_recvK / htm_check);
-	out_curr_bandwidth = (float) me.localClient->sendK - (float) (last_sendK / htm_check);
 
 
 
@@ -334,13 +335,13 @@ check_htm(void)
 		if(!htm_mode)
 		{
 			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "Entering high-traffic mode - In (%.1fk/s) Out(%.1fk/s)",
+					     "Entering high-traffic mode - In (%.1fK/s) Out(%.1fK/s)",
 					     in_curr_bandwidth, out_curr_bandwidth);
 		}
 		else
 		{
 			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "Still in high-traffic mode - In(%.1fk/s) Out(%.1fk/s)",
+					     "Still in high-traffic mode - In(%.1fK/s) Out(%.1fK/s)",
 					     in_curr_bandwidth, out_curr_bandwidth);
 		}
 		htm_mode = 1;
