@@ -64,6 +64,10 @@ mem_frob(void *data, int len)
 void
 dlinkAdd(void *data, dlink_node * m, dlink_list * list)
 {
+  assert(data != NULL);
+  assert(m != NULL);
+  assert(list != NULL);
+  
   m->data = data;
   m->next = list->head;
 
@@ -80,6 +84,11 @@ dlinkAdd(void *data, dlink_node * m, dlink_list * list)
 void
 dlinkAddBefore(dlink_node *b, void *data, dlink_node *m, dlink_list *list)
 {
+  assert(b != NULL);
+  assert(data != NULL);
+  assert(m != NULL);
+  assert(list != NULL);
+  
   /* Shortcut - if its the first one, call dlinkAdd only */
   if (b == list->head)
   {
@@ -99,6 +108,10 @@ dlinkAddBefore(dlink_node *b, void *data, dlink_node *m, dlink_list *list)
 void
 dlinkAddTail(void *data, dlink_node *m, dlink_list *list)
 {
+  assert(data != NULL);
+  assert(m != NULL);
+  assert(list != NULL);
+  
   m->data = data;
   m->next = NULL;
   m->prev = list->tail;
@@ -119,6 +132,9 @@ dlinkAddTail(void *data, dlink_node *m, dlink_list *list)
 void
 dlinkDelete(dlink_node *m, dlink_list *list)
 {
+  assert(m != NULL);
+  assert(list != NULL);
+  
   /* Assumption: If m->next == NULL, then list->tail == m
    *      and:   If m->prev == NULL, then list->head == m
    */
@@ -149,6 +165,8 @@ dlinkDelete(dlink_node *m, dlink_list *list)
 dlink_node *dlinkFind(dlink_list *list, void *data)
 {
   dlink_node *ptr;
+  assert(list != NULL);
+  assert(data != NULL);
 
   DLINK_FOREACH(ptr, list->head)
     {
@@ -161,6 +179,9 @@ dlink_node *dlinkFind(dlink_list *list, void *data)
 void
 dlinkMoveList(dlink_list *from, dlink_list *to)
 {
+  assert(from != NULL);
+  assert(to != NULL);
+  
   /* There are three cases */
   /* case one, nothing in from list */
   if(from->head == NULL)
@@ -191,6 +212,9 @@ dlinkFindDelete(dlink_list *list, void *data)
 {
   dlink_node *m;
 
+  assert(list != NULL);
+  assert(data != NULL);
+  
   DLINK_FOREACH(m, list->head)
   {
      if(m->data != data)
@@ -216,7 +240,11 @@ dlinkFindDelete(dlink_list *list, void *data)
 int
 dlinkFindDestroy(dlink_list *list, void *data)
 {
-  void *ptr = dlinkFindDelete(list, data);
+  void *ptr;
+  assert(list != NULL);
+  assert(data != NULL);
+  
+  ptr  = dlinkFindDelete(list, data);
   if(ptr != NULL)
   {
   	free_dlink_node(ptr);
@@ -229,6 +257,9 @@ dlinkFindDestroy(dlink_list *list, void *data)
 void
 dlinkMoveNode(dlink_node *m, dlink_list *oldlist, dlink_list *newlist)
 {
+   assert(m != NULL);
+   assert(oldlist != NULL);
+   assert(newlist != NULL);
   /* Assumption: If m->next == NULL, then list->tail == m
    *      and:   If m->prev == NULL, then list->head == m
    */
@@ -295,6 +326,8 @@ make_dlink_node(void)
  */
 void free_dlink_node(dlink_node *ptr)
 {
+  assert(ptr != NULL);
+  
   BlockHeapFree(dnode_heap, ptr);
 }
 
