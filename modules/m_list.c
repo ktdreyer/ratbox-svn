@@ -143,7 +143,7 @@ list_all_channels(struct Client *source_p)
 	}
 
 	sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
-	return 0;
+	return;
 }
 
 /* list_named_channel()
@@ -168,7 +168,7 @@ list_named_channel(struct Client *source_p, const char *name)
 	{
 		sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name, source_p->name, name);
 		sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
-		return 0;
+		return;
 	}
 
 	chptr = find_channel(n);
@@ -177,7 +177,7 @@ list_named_channel(struct Client *source_p, const char *name)
 	{
 		sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name, source_p->name, n);
 		sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
-		return 0;
+		return;
 	}
 
 	if(ShowChannel(source_p, chptr))
@@ -187,5 +187,5 @@ list_named_channel(struct Client *source_p, const char *name)
 			   chptr->topic == NULL ? "" : chptr->topic);
 
 	sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
-	return 0;
+	return;
 }

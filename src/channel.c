@@ -148,7 +148,7 @@ add_user_to_channel(struct Channel *chptr, struct Client *client_p, int flags)
 		return;
 
 	msptr = BlockHeapAlloc(member_heap);
-	memset(msptr, 0, sizeof(msptr));
+	memset(msptr, 0, sizeof(struct membership));
 
 	msptr->chptr = chptr;
 	msptr->client_p = client_p;
