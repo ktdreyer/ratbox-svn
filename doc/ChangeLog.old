@@ -1,3 +1,9 @@
+*** 20010121_4 by toot
+changed the default kick msg to the nickname of who's
+getting kicked, rather than the kicker's..
+this makes chanmode +a a little more effective
+
+
 *** 20010121_3 by davidt
 - Various fixes to sjoin..
   The only one I can remember is "MODE #chan +h halfops" wasn't being sent..
