@@ -79,7 +79,7 @@ struct User* make_user(struct Client *client_p)
 
       ++user_count;
 
-      memset(user, 0, sizeof(*user));
+      memset(user, 0, sizeof(struct User));
       user->refcnt = 1;
       client_p->user = user;
     }
@@ -101,7 +101,6 @@ struct Server *make_server(struct Client *client_p)
   if (!serv)
     {
       serv = (struct Server *)MyMalloc(sizeof(struct Server));
-      memset(serv, 0, sizeof(*serv));
 
       /* The commented out lines here are
        * for documentation purposes only
@@ -203,9 +202,9 @@ _make_dlink_node(const char *file, int line)
  strlcpy(nambuf+sizeof(DLINK_DBG_PREFIX)-1, file,
              sizeof(nambuf)-sizeof(DLINK_DBG_PREFIX));
 #ifdef NOBALLOC
- lp = _MyMalloc(sizeof(*lp), nambuf, line);
+ lp = _MyMalloc(sizeof(dlink_node), nambuf, line);
 #else
- lp = memlog(_BlockHeapAlloc(dnode_heap), sizeof(*lp), nambuf, line);
+ lp = memlog(_BlockHeapAlloc(dnode_heap), sizeof(dlink_node), nambuf, line);
 #endif
  lp->next = NULL;
  lp->prev = NULL;

@@ -53,8 +53,7 @@ new_hook(char *name)
 	hook *h;
 	
 	h = MyMalloc(sizeof(hook));
-	memset(h, 0, sizeof(*h));
-    DupString(h->name, name);
+        DupString(h->name, name);
 	return h;
 }
 

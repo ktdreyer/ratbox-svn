@@ -525,7 +525,7 @@ add_conf_by_address(const char *address, int type, const char *username,
   struct AddressRec *arec;
   if (address == NULL)
     address = "/NOMATCH!/";
-  arec = MyMalloc(sizeof(*arec));
+  arec = MyMalloc(sizeof(struct AddressRec));
   masktype = parse_netmask(address, &arec->Mask.ipa.addr, &bits);
   arec->Mask.ipa.bits = bits;
   arec->masktype = masktype;

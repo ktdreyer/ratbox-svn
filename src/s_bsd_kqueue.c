@@ -163,7 +163,7 @@ void init_netio(void)
       exit(115); /* Whee! */
     }
   kqmax = getdtablesize();
-  kqlst = MyMalloc(sizeof(*kqlst) * kqmax);
+  kqlst = MyMalloc(sizeof(struct kevent) * kqmax);
   zero_timespec.tv_sec = 0;
   zero_timespec.tv_nsec = 0;
 }

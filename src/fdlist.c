@@ -75,7 +75,6 @@ void fdlist_init(void)
     {
       /* Since we're doing this once .. */
       fd_table = MyMalloc((MAXCONNECTIONS + 1) * sizeof(fde_t));
-      memset(fd_table, 0, sizeof(fde_t) * (MAXCONNECTIONS+1));
       initialized = 1;
     }
 }
