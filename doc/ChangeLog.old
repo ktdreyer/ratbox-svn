@@ -1,3 +1,9 @@
+*** 19990810_3 by lusky
+fixed bug with NO_JOIN_ON_SPLIT on a coldstart
+added include for stdlib.h to mkpasswd.c
+moved rcs Id into comments in fixklines.c
+
+
 *** 19990810_2 by db
 - %lu screws up idle times as seen by a lot of scripts, notably bitchx *sigh*
 
