@@ -39,6 +39,11 @@
 #include <string.h>
 #include <assert.h>
 
+static void names_all_visible_channels(struct Client *sptr);
+static void names_non_public_non_secret(struct Client *sptr);
+static char *pub_or_secret(struct Channel *chptr);
+static char *chanop_or_voice(struct SLink *lp);
+
 /*
  * m_functions execute protocol messages on this server:
  *
@@ -106,13 +111,6 @@
 **      parv[1] = channel
 **      parv[2] = root name
 */
-/*
- * Modified to report possible names abuse
- * drastically modified to not show all names, just names
- * on given channel names.
- *
- * -Dianora
- */
 /* maximum names para to show to opers when abuse occurs */
 #define TRUNCATED_NAMES 20
 
@@ -122,30 +120,11 @@ int     m_names( struct Client *cptr,
                  int parc,
                  char *parv[])
 { 
-  struct Channel *chptr;
   struct Channel *vchan;
-  struct Client *c2ptr;
-  struct SLink  *lp;
   struct Channel *ch2ptr = NULL;
-  int   idx;
-  int   len;
-  int   mlen;
-  int   reply_to_send = NO;
   char  *s, *para = parc > 1 ? parv[1] : NULL;
   int comma_count=0;
   int char_count=0;
-  char buf[BUFSIZE];
-
-  /* Don't route names, no need for it -Dianora */
-  /*
-  if (parc > 1 &&
-      hunt_server(cptr, sptr, ":%s NAMES %s %s", 2, parc, parv))
-    return 0;
-    */
-
-  /* And throw away non local names requests that do get here -Dianora */
-  if(!MyConnect(sptr))
-    return 0;
 
   if (!BadPtr(para))
     {
@@ -176,9 +155,9 @@ int     m_names( struct Client *cptr,
             }
         }
 
-      s = strchr(para, ',');
-      if (s)
+      if( (s = strchr(para, ',')) )
         *s = '\0';
+
       if (!check_channel_name(para))
         { 
           sendto_one(sptr, form_str(ERR_BADCHANNAME),
@@ -186,8 +165,7 @@ int     m_names( struct Client *cptr,
           return 0;
         }
 
-      ch2ptr = hash_find_channel(para, NULL);
-      if( ch2ptr )
+      if( (ch2ptr = hash_find_channel(para, NULL)) )
 	{
 	  if (HasVchans(ch2ptr))
 	    {
@@ -201,336 +179,172 @@ int     m_names( struct Client *cptr,
 	    {
 	      names_on_this_channel( sptr, ch2ptr, ch2ptr->chname );
 	    }
-	  return 0;
 	}
     }
+  else
+    {
+      names_all_visible_channels(sptr);
+      names_non_public_non_secret(sptr);
+    }
+
+  sendto_one(sptr, form_str(RPL_ENDOFNAMES), me.name, parv[0], "*");
+  return(1);
+}
+
+/*
+ * names_all_visible_channels
+ *
+ * inputs	- pointer to client struct requesting names
+ * output	- none
+ * side effects	- lists all visible channels whee!
+ */
+
+static void names_all_visible_channels(struct Client *sptr)
+{
+  int mlen;
+  int len;
+  int cur_len;
+  int reply_to_send = 0;
+  struct SLink  *lp;
+  struct Client *c2ptr;
+  struct Channel *chptr;
+  char buf[BUFSIZE];
+  char buf2[2*NICKLEN];
 
   mlen = strlen(me.name) + NICKLEN + 7;
-  *buf = '\0';
+  cur_len = mlen;
   
   /* 
-   *
    * First, do all visible channels (public and the one user self is)
    */
 
   for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
     {
-      if (!ShowChannel(sptr, chptr))
-        continue; /* -- users on this are not listed */
-      
-      /* Find users on same channel (defined by chptr) */
+      if (ShowChannel(sptr, chptr))
+	{
+	  /* Find users on same channel (defined by chptr) */
 
-      (void)strcpy(buf, "* ");
-      len = strlen(chptr->chname);
-      (void)strcpy(buf + 2, chptr->chname);
-      (void)strcpy(buf + 2 + len, " :");
+	  ircsprintf(buf,"%s %s :",
+		     pub_or_secret(chptr), chptr->chname);
+	  len = strlen(buf);
+	  cur_len = len + mlen;
 
-      if (PubChannel(chptr))
-        *buf = '=';
-      else if (SecretChannel(chptr))
-        *buf = '@';
-      idx = len + 4;
-      reply_to_send = YES;
-      for (lp = chptr->members; lp; lp = lp->next)
-        {
-          c2ptr = lp->value.cptr;
-          if (IsInvisible(c2ptr) && !IsMember(sptr,chptr))
-            continue;
-          if (lp->flags & CHFL_CHANOP)
-            {
-              strcat(buf, "@");
-              idx++;
-            }
-          else if (lp->flags & CHFL_VOICE)
-            {
-              strcat(buf, "+");
-              idx++;
-            }
-          strncat(buf, c2ptr->name, NICKLEN);
-          idx += strlen(c2ptr->name) + 1;
-          reply_to_send = YES;
-          strcat(buf," ");
-          if (mlen + idx + NICKLEN > BUFSIZE - 3)
-            {
-              sendto_one(sptr, form_str(RPL_NAMREPLY),
-                         me.name, parv[0], buf);
-              strncpy_irc(buf, "* ", 3);
-              if (parc > 2)
-                strncpy_irc(buf + 2, parv[2], len + 1);
-              else
-                strncpy_irc(buf + 2, chptr->chname, len + 1);
-              strcat(buf, " :");
-              if (PubChannel(chptr))
-                *buf = '=';
-              else if (SecretChannel(chptr))
-                *buf = '@';
-              idx = len + 4;
-              reply_to_send = NO;
-            }
-        }
-      if (reply_to_send)
-        sendto_one(sptr, form_str(RPL_NAMREPLY),
-                   me.name, parv[0], buf);
+	  reply_to_send = YES;
+
+	  for (lp = chptr->members; lp; lp = lp->next)
+	    {
+	      c2ptr = lp->value.cptr;
+	      if (IsInvisible(c2ptr) && !IsMember(sptr,chptr))
+		continue;
+
+	      ircsprintf(buf2,"%s%s ", chanop_or_voice(lp), c2ptr->name);
+	      strcat(buf,buf2);
+	      cur_len += strlen(buf2);
+
+	      if ((cur_len + NICKLEN) > (BUFSIZE - 3))
+		{
+		  sendto_one(sptr, form_str(RPL_NAMREPLY),
+			     me.name, sptr->name, buf);
+		  ircsprintf(buf,"%s %s :",
+			     pub_or_secret(chptr), chptr->chname);
+		  reply_to_send = NO;
+		  cur_len = len + mlen;
+		}
+	    }
+	  if (reply_to_send)
+	    sendto_one(sptr, form_str(RPL_NAMREPLY),
+		       me.name, sptr->name, buf);
+	}
     }
+}
+
+/*
+ * names_non_public_non_secret
+ *
+ * inputs	- pointer to client struct requesting names
+ * output	- none
+ * side effects	- lists all non public non secret channels
+ */
+
+static void names_non_public_non_secret(struct Client *sptr)
+{
+  int mlen;
+  int len;
+  int cur_len;
+  int reply_to_send = NO;
+  int dont_show = NO;
+  struct SLink  *lp;
+  struct Client *c2ptr;
+  struct Channel *ch3ptr;
+  char buf[BUFSIZE];
+  char buf2[2*NICKLEN];
+
+  mlen = strlen(me.name) + NICKLEN + 7;
 
   /* Second, do all non-public, non-secret channels in one big sweep */
 
   strncpy_irc(buf, "* * :", 6);
-  idx = 5;
-  reply_to_send = NO;
+  len = strlen(buf);
+  cur_len = len + mlen;
+
   for (c2ptr = GlobalClientList; c2ptr; c2ptr = c2ptr->next)
     {
-      struct Channel *ch3ptr;
-      int       showflag = 0, secret = 0;
-
       if (!IsPerson(c2ptr) || IsInvisible(c2ptr))
         continue;
-      lp = c2ptr->user->channel;
       /*
        * dont show a client if they are on a secret channel or
        * they are on a channel sptr is on since they have already
-       * been show earlier. -avalon
+       * been shown earlier. -avalon
        */
-      while (lp)
+      for( lp = c2ptr->user->channel; lp; lp = lp->next )
         {
           ch3ptr = lp->value.chptr;
-          if (PubChannel(ch3ptr) || IsMember(sptr, ch3ptr))
-            showflag = 1;
-          if (SecretChannel(ch3ptr))
-            secret = 1;
-          lp = lp->next;
+          if ( (PubChannel(ch3ptr) || IsMember(sptr, ch3ptr)) ||
+	       (SecretChannel(ch3ptr)))
+	  {
+            dont_show = YES;
+	    break;
+	  }
         }
-      if (showflag) /* have we already shown them ? */
+      if (dont_show) /* on any secret channels or shown already? */
         continue;
-      if (secret) /* on any secret channels ? */
-        continue;
-      (void)strncat(buf, c2ptr->name, NICKLEN);
-      idx += strlen(c2ptr->name) + 1;
-      (void)strcat(buf," ");
+      ircsprintf(buf2,"%s%s ", chanop_or_voice(lp), c2ptr->name);
+      strcat(buf,buf2);
+      cur_len += strlen(buf2);
       reply_to_send = YES;
-      if (mlen + idx + NICKLEN > BUFSIZE - 3)
+
+      if ( (cur_len + NICKLEN)  > (BUFSIZE - 3))
         {
           sendto_one(sptr, form_str(RPL_NAMREPLY),
-                     me.name, parv[0], buf);
-          strncpy_irc(buf, "* * :", 6);
-          idx = 5;
+                     me.name, sptr->name, buf);
           reply_to_send = NO;
+	  strncpy_irc(buf, "* * :", 6);
+	  cur_len = len + mlen;
         }
     }
 
   if (reply_to_send)
-    sendto_one(sptr, form_str(RPL_NAMREPLY), me.name, parv[0], buf);
-
-  sendto_one(sptr, form_str(RPL_ENDOFNAMES), me.name, parv[0], "*");
-  return(1);
+    sendto_one(sptr, form_str(RPL_NAMREPLY), me.name, sptr->name, buf);
 }
 
-int     ms_names( struct Client *cptr,
-                 struct Client *sptr,
-                 int parc,
-                 char *parv[])
-{ 
-  struct Channel *chptr;
-  struct Client *c2ptr;
-  struct SLink  *lp;
-  struct Channel *ch2ptr = NULL;
-  int   idx, flag = 0, len, mlen;
-  char  *s, *para = parc > 1 ? parv[1] : NULL;
-  int comma_count=0;
-  int char_count=0;
-  char buf[BUFSIZE];
-
-  /* Don't route names, no need for it -Dianora */
-  /*
-  if (parc > 1 &&
-      hunt_server(cptr, sptr, ":%s NAMES %s %s", 2, parc, parv))
-    return 0;
-    */
-
-  /* And throw away non local names requests that do get here -Dianora */
-  if(!MyConnect(sptr))
-    return 0;
-
-  if (!BadPtr(para))
-    {
-      /* Here is the lamer detection code
-       * P.S. meta, GROW UP
-       * -Dianora 
-       */
-      for(s = para; *s; s++)
-        {
-          char_count++;
-          if(*s == ',')
-            comma_count++;
-          if(comma_count > 1)
-            {
-              if(char_count > TRUNCATED_NAMES)
-                para[TRUNCATED_NAMES] = '\0';
-              else
-                {
-                  s++;
-                  *s = '\0';
-                }
-              sendto_realops("POSSIBLE /names abuser %s [%s]",
-                             para,
-                             get_client_name(sptr,FALSE));
-              sendto_one(sptr, form_str(ERR_TOOMANYTARGETS),
-                         me.name, sptr->name, "NAMES", 1);
-              return 0;
-            }
-        }
-
-      s = strchr(para, ',');
-      if (s)
-        *s = '\0';
-      if (!check_channel_name(para))
-        { 
-          sendto_one(sptr, form_str(ERR_BADCHANNAME),
-                     me.name, parv[0], (unsigned char *)para);
-          return 0;
-        }
-
-      ch2ptr = hash_find_channel(para, NULL);
-    }
-
-  *buf = '\0';
-
-  mlen = strlen(me.name) + NICKLEN + 7;
-  
-  /* 
-   *
-   * First, do all visible channels (public and the one user self is)
-   */
-
-  for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
-    {
-      if ((chptr != ch2ptr) && !BadPtr(para))
-        continue; /* -- wanted a specific channel */
-      if (!MyConnect(sptr) && BadPtr(para))
-        continue;
-      if (!ShowChannel(sptr, chptr))
-        continue; /* -- users on this are not listed */
-      
-      /* Find users on same channel (defined by chptr) */
-
-      (void)strcpy(buf, "* ");
-      len = strlen(chptr->chname);
-      (void)strcpy(buf + 2, chptr->chname);
-      (void)strcpy(buf + 2 + len, " :");
-
-      if (PubChannel(chptr))
-        *buf = '=';
-      else if (SecretChannel(chptr))
-        *buf = '@';
-      idx = len + 4;
-      flag = 1;
-      for (lp = chptr->members; lp; lp = lp->next)
-        {
-          c2ptr = lp->value.cptr;
-          if (IsInvisible(c2ptr) && !IsMember(sptr,chptr))
-            continue;
-          if (lp->flags & CHFL_CHANOP)
-            {
-              strcat(buf, "@");
-              idx++;
-            }
-          else if (lp->flags & CHFL_VOICE)
-            {
-              strcat(buf, "+");
-              idx++;
-            }
-          strncat(buf, c2ptr->name, NICKLEN);
-          idx += strlen(c2ptr->name) + 1;
-          flag = 1;
-          strcat(buf," ");
-          if (mlen + idx + NICKLEN > BUFSIZE - 3)
-            {
-              sendto_one(sptr, form_str(RPL_NAMREPLY),
-                         me.name, parv[0], buf);
-              strncpy_irc(buf, "* ", 3);
-              strncpy_irc(buf + 2, chptr->chname, len + 1);
-              strcat(buf, " :");
-              if (PubChannel(chptr))
-                *buf = '=';
-              else if (SecretChannel(chptr))
-                *buf = '@';
-              idx = len + 4;
-              flag = 0;
-            }
-        }
-      if (flag)
-        sendto_one(sptr, form_str(RPL_NAMREPLY),
-                   me.name, parv[0], buf);
-    }
-  if (!BadPtr(para))
-    {
-      sendto_one(sptr, form_str(RPL_ENDOFNAMES), me.name, parv[0],
-                 para);
-      return(1);
-    }
-
-  /* Second, do all non-public, non-secret channels in one big sweep */
-
-  strncpy_irc(buf, "* * :", 6);
-  idx = 5;
-  flag = 0;
-  for (c2ptr = GlobalClientList; c2ptr; c2ptr = c2ptr->next)
-    {
-      struct Channel *ch3ptr;
-      int       showflag = 0, secret = 0;
-
-      if (!IsPerson(c2ptr) || IsInvisible(c2ptr))
-        continue;
-      lp = c2ptr->user->channel;
-      /*
-       * dont show a client if they are on a secret channel or
-       * they are on a channel sptr is on since they have already
-       * been show earlier. -avalon
-       */
-      while (lp)
-        {
-          ch3ptr = lp->value.chptr;
-          if (PubChannel(ch3ptr) || IsMember(sptr, ch3ptr))
-            showflag = 1;
-          if (SecretChannel(ch3ptr))
-            secret = 1;
-          lp = lp->next;
-        }
-      if (showflag) /* have we already shown them ? */
-        continue;
-      if (secret) /* on any secret channels ? */
-        continue;
-      (void)strncat(buf, c2ptr->name, NICKLEN);
-      idx += strlen(c2ptr->name) + 1;
-      (void)strcat(buf," ");
-      flag = 1;
-      if (mlen + idx + NICKLEN > BUFSIZE - 3)
-        {
-          sendto_one(sptr, form_str(RPL_NAMREPLY),
-                     me.name, parv[0], buf);
-          strncpy_irc(buf, "* * :", 6);
-          idx = 5;
-          flag = 0;
-        }
-    }
-
-  if (flag)
-    sendto_one(sptr, form_str(RPL_NAMREPLY), me.name, parv[0], buf);
-
-  sendto_one(sptr, form_str(RPL_ENDOFNAMES), me.name, parv[0], "*");
-  return(1);
-}
-
+/*
+ * names_on_this_channel
+ *
+ * inputs	- pointer to client struct requesting names
+ * output	- none
+ * side effects	- lists all non public non secret channels
+ */
 
 void names_on_this_channel( struct Client *sptr,
 			    struct Channel *chptr,
 			    char *name_of_channel)
 {
-  int len;
   int mlen;
-  int idx;
+  int len;
+  int cur_len;
   int reply_to_send = NO;
   char buf[BUFSIZE];
+  char buf2[2*NICKLEN];
   struct Client *c2ptr;
   struct SLink  *lp;
 
@@ -538,60 +352,59 @@ void names_on_this_channel( struct Client *sptr,
 
   /* Find users on same channel (defined by chptr) */
 
-  (void)strcpy(buf, "* ");
-  len = strlen(name_of_channel);
-  (void)strcpy(buf + 2, name_of_channel);
-  (void)strcpy(buf + 2 + len, " :");
+  ircsprintf(buf, "%s %s :", pub_or_secret(chptr), chptr->chname);
+  len = strlen(buf);
 
-  if (PubChannel(chptr))
-    *buf = '=';
-  else if (SecretChannel(chptr))
-    *buf = '@';
-  idx = len + 4;
+  cur_len = mlen + len;
 
   for (lp = chptr->members; lp; lp = lp->next)
     {
       c2ptr = lp->value.cptr;
-      if (lp->flags & CHFL_CHANOP)
-	{
-	  strcat(buf, "@");
-	  idx++;
-	}
-      else if (lp->flags & CHFL_VOICE)
-	{
-	  strcat(buf, "+");
-	  idx++;
-	}
-      strncat(buf, c2ptr->name, NICKLEN);
-      idx += strlen(c2ptr->name) + 1;
-      strcat(buf," ");
+      ircsprintf(buf2,"%s%s ", chanop_or_voice(lp), c2ptr->name);
+      strcat(buf,buf2);
+      cur_len += strlen(buf2);
       reply_to_send = YES;
-      if (mlen + idx + NICKLEN > BUFSIZE - 3)
+
+      if ((cur_len + NICKLEN) > (BUFSIZE - 3))
 	{
-	  reply_to_send = NO;
 	  sendto_one(sptr, form_str(RPL_NAMREPLY),
 		     me.name, sptr->name, buf);
-	  strncpy_irc(buf, "* ", 3);
-	  strncpy_irc(buf + 2, name_of_channel, len + 1);
-	  strcat(buf, " :");
-	  if (PubChannel(chptr))
-	    *buf = '=';
-	  else if (SecretChannel(chptr))
-	    *buf = '@';
-	  idx = len + 4;
+	  ircsprintf(buf,"%s %s :", pub_or_secret(chptr), chptr->chname);
+	  reply_to_send = NO;
+	  cur_len = mlen + len;
 	}
     }
 
   if(reply_to_send)
-    sendto_one(sptr, form_str(RPL_NAMREPLY),
-	       me.name, sptr->name, buf);
-
-  sendto_one(sptr, form_str(RPL_ENDOFNAMES), me.name, sptr->name,
-	     name_of_channel);
+    sendto_one(sptr, form_str(RPL_NAMREPLY), me.name, sptr->name, buf);
 }
 
 
+static char *pub_or_secret(struct Channel *chptr)
+{
+  if(PubChannel(chptr))
+    return("=");
+  else if(SecretChannel(chptr))
+    return("@");
+  else
+    return("*");
+}
 
 
+static char *chanop_or_voice(struct SLink *lp)
+{
+  if (lp->flags & CHFL_CHANOP)
+    return("@");
+  else if (lp->flags & CHFL_VOICE)
+    return("+");
+  return("");
+}
 
+int ms_names( struct Client *cptr,
+	      struct Client *sptr,
+	      int parc,
+	      char *parv[])
+{ 
+  return(1);
+}
 
