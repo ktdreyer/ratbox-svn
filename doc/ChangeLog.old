@@ -1,3 +1,10 @@
+*** 20010202_10 by davidt
+- Fix problem with assert() failure in ReadMessageFile...
+  It was caused by only generating dependency information for the current
+  select method -- if you used kqueue, and the .depend file was for poll,
+  changes to s_bsd_kqueue's headers wouldn't recompile it...
+
+
 *** 20010202_9 by wcampbel
 sigh...argc again
 
