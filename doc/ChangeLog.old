@@ -1,3 +1,18 @@
+androsyn    2002/05/18 16:53:54 EDT	(20020518_2)
+
+  Modified files:
+    include              client.h 
+    src                  client.c ircd.c 
+  Log:
+  Remove the dead_list
+  
+  Revision  Changes    Path
+  7.144     +0 -14     ircd-hybrid-7/include/client.h
+  7.260     +2 -74     ircd-hybrid-7/src/client.c
+  7.232     +0 -1      ircd-hybrid-7/src/ircd.c
+
+
+
 androsyn    2002/05/18 03:12:10 EDT	(20020518_1)
 
   Modified files:
