@@ -1,3 +1,9 @@
+*** 20001114_3 by db
+- seriously, why was this struct sitting around not doing anything useful?
+  was it to entertain me?
+
+
+
 *** 20001114_2 by db
 - m_whowas.c was missing from modules, 'cause it was hiding like a bad
   little boy inside src/whowas.c... unfortuantely, m_whowas.c has a 
