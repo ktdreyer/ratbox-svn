@@ -45,7 +45,7 @@
  * Grr. -- adrian
  */
 
-static int
+int
 file_open(const char *filename, int mode, int fmode)
 {
     int fd;
@@ -60,7 +60,7 @@ file_open(const char *filename, int mode, int fmode)
     return fd;
 }
 
-static void
+void
 file_close(int fd)
 {
     /*
