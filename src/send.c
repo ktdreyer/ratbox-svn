@@ -454,9 +454,9 @@ sendto_channel_butone(struct Client *one, struct Client *from,
                       const char *pattern, ...)
 {
   char buf[IRCD_BUFSIZE*2];
-  char local_prefix[NICKLEN+HOSTLEN+USERLEN+5];
+  char local_prefix[NICKLEN+HOSTLEN+USERLEN+CHANNELLEN+10];
   char local_sendbuf[IRCD_BUFSIZE*2];
-  char remote_prefix[NICKLEN+HOSTLEN+USERLEN+5];
+  char remote_prefix[NICKLEN+HOSTLEN+USERLEN+CHANNELLEN+10];
   char remote_sendbuf[IRCD_BUFSIZE*2];
   int remote_len;
   int local_len;
