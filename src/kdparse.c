@@ -103,7 +103,7 @@ void DParseFile(FBFILE *file)
       if ((host_field = getfield(line)) == NULL)
 	continue;
 
-      if ((reason_field = getfield(host_field)) == NULL)
+      if ((reason_field = getfield(NULL)) == NULL)
 	continue;
 	  
       aconf = make_conf();

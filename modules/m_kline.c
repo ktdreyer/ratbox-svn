@@ -97,7 +97,8 @@ static int valid_user_host(char *user, char *host);
 static int valid_wild_card(char *user, char *host);
 static int already_placed_kline(struct Client*, char*, char*);
 static void apply_kline(struct Client *source_p, struct ConfItem *aconf,
-                        const char *reason, const char *current_date);
+                        const char *reason, const char *current_date,
+			time_t cur_time);
 
 static void apply_tkline(struct Client *source_p, struct ConfItem *aconf,
                          const char *current_date, int temporary_kline_time);
@@ -131,6 +132,7 @@ static void mo_kline(struct Client *client_p,
   const char* target_server=NULL;
   struct ConfItem *aconf;
   time_t tkline_time=0;
+  time_t cur_time;
 
   if (!IsSetOperK(source_p))
     {
@@ -202,7 +204,8 @@ static void mo_kline(struct Client *client_p,
        return;
     }
 
-  current_date = smalldate((time_t) 0);
+  cur_time = time(NULL);
+  current_date = smalldate(cur_time);
   aconf = make_conf();
   aconf->status = CONF_KILL;
   DupString(aconf->host, host);
@@ -245,7 +248,7 @@ static void mo_kline(struct Client *client_p,
 		 reason,
 		 current_date);
       DupString(aconf->passwd, buffer );
-      apply_kline(source_p, aconf, reason, current_date);
+      apply_kline(source_p, aconf, reason, current_date, cur_time);
     }
 } /* mo_kline() */
 
@@ -262,6 +265,7 @@ static void ms_kline(struct Client *client_p,
   const char *current_date;
   struct ConfItem *aconf=NULL;
   int    tkline_time;
+  time_t cur_time;
 
   char *kuser;
   char *khost;
@@ -335,10 +339,12 @@ static void ms_kline(struct Client *client_p,
       DupString(aconf->passwd, kreason);
       current_date = smalldate((time_t) 0);
 
+      cur_time = time(NULL);
+
       if(tkline_time)
-          apply_tkline(source_p, aconf, current_date, tkline_time);
+	apply_tkline(source_p, aconf, current_date, tkline_time);
       else
-	apply_kline(source_p, aconf, aconf->passwd, current_date);	
+	apply_kline(source_p, aconf, aconf->passwd, current_date, cur_time);
 
       }
 } /* ms_kline() */
@@ -352,13 +358,14 @@ static void ms_kline(struct Client *client_p,
  *		  and conf file
  */
 static void apply_kline(struct Client *source_p, struct ConfItem *aconf,
-                        const char *reason, const char *current_date)
+                        const char *reason, const char *current_date,
+			time_t cur_time)
 {
- add_conf_by_address(aconf->host, CONF_KILL, aconf->user, aconf);
- WriteKlineOrDline(KLINE_TYPE, source_p, aconf->user, aconf->host,
-                   reason, current_date);
- /* Now, activate kline against current online clients */
- check_klines();
+  add_conf_by_address(aconf->host, CONF_KILL, aconf->user, aconf);
+  WriteKlineOrDline(KLINE_TYPE, source_p, aconf->user, aconf->host,
+		    reason, current_date, cur_time);
+  /* Now, activate kline against current online clients */
+  check_klines();
 }
 
 /*
@@ -566,6 +573,7 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
   int bits, t;
   char dlbuffer[1024];
   const char* current_date;
+  time_t cur_time;
 
   if(!IsSetOperK(source_p))
     {
@@ -708,7 +716,8 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
                me.name, parv[0], dlhost, aconf->host, creason);
    return;
   }
-  current_date = smalldate((time_t) 0);
+  cur_time = time(0);
+  current_date = smalldate(cur_time);
 
   ircsprintf(dlbuffer, "%s (%s)",reason,current_date);
 
@@ -722,8 +731,7 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
    * Write dline to configuration file
    */
   WriteKlineOrDline(DLINE_TYPE, source_p, NULL, dlhost, reason,
-                    current_date);
-
+		    current_date, cur_time);
   check_klines();
 } /* m_dline() */
 

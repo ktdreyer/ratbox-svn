@@ -2159,7 +2159,7 @@ static void flush_deleted_I_P(void)
  *              - user name of target
  *              - host name of target
  *              - reason for target
- *              - current tiny date string
+ *              - time_t cur_time
  * output       - NONE
  * side effects - This function takes care of
  *                finding right kline or dline conf file, writing
@@ -2174,7 +2174,8 @@ void WriteKlineOrDline( KlineType type,
 			char *user,
 			char *host,
 			const char *reason,
-			const char *current_date)
+			const char *current_date,
+			time_t cur_time)
 {
   char buffer[1024];
   FBFILE *out;
@@ -2208,16 +2209,20 @@ void WriteKlineOrDline( KlineType type,
     }
 
   if(type==KLINE_TYPE)
-    ircsprintf(buffer, "\"%s\",\"%s\",\"%s\",\"%s\"\n",
+    ircsprintf(buffer, "\"%s\",\"%s\",\"%s %s\",\"%s\",%d\n",
                user,
 	       host,
                reason,
-               current_date);
+	       current_date,
+	       source_p->name,
+               cur_time);
   else
-    ircsprintf(buffer, "\"%s\",\"%s\",\"%s\"\n",
+    ircsprintf(buffer, "\"%s\",\"%s %s\",\"%s\",%d\n",
                host,
                reason,
-               current_date);
+	       current_date,
+	       source_p->name,
+               cur_time);
 
 
   if (fbputs(buffer,out) == -1)

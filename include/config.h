@@ -92,7 +92,7 @@
 #define SLPATH  BINPATH "]SERVLINK.EXE"          /* servlink executable */
 #define CPATH   ETCPATH "]IRCD.CONF"             /* config file */
 #define KPATH   ETCPATH "]KLINE.CONF"            /* kline file */
-#define DLPATH  ETCPATH "]KLINE.CONF"            /* dline file */
+#define DLPATH  ETCPATH "]DLINE.CONF"            /* dline file */
 #define GPATH   LOGPATH "]GLINE.LOG"             /* gline logfile */
 #define RPATH   ETCPATH "]IRCD.RSA"              /* RSA private key file */
 #define MPATH   ETCPATH "]IRCD.MOTD"             /* MOTD filename */
@@ -133,7 +133,7 @@
 #define SLPATH  BINPATH "/servlink"             /* servlink executable */
 #define CPATH   ETCPATH "/ircd.conf"            /* ircd.conf file */
 #define KPATH   ETCPATH "/kline.conf"           /* kline file */
-#define DLPATH  ETCPATH "/kline.conf"           /* dline file */
+#define DLPATH  ETCPATH "/dline.conf"           /* dline file */
 #define GPATH   LOGPATH "/gline.log"            /* gline logfile */
 #define RPATH   ETCPATH "/ircd.rsa"             /* ircd rsa private keyfile */
 #define MPATH   ETCPATH "/ircd.motd"            /* MOTD file */
