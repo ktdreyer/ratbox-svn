@@ -364,7 +364,7 @@ do_who_on_channel(struct Client *source_p, struct Channel *chptr,
 			continue;
 
 		if(member || !IsInvisible(target_p))
-			do_who(source_p, target_p, chname,
+			do_who(source_p, target_p, msptr->chptr->chname,
 			       find_channel_status(msptr, 0));
 	}
 }
