@@ -379,14 +379,6 @@ inet_ntop6(const unsigned char *src, char *dst, unsigned int size)
 	if (best.base != -1 && (best.base + best.len) == 
 	    (IN6ADDRSZ / INT16SZ))
 		*tp++ = ':';
-/* XXX: This is probably broken */
-#if 0
-	*tp++ = '.';
-
-	*tp++ = 'i';
-	*tp++ = 'p';
-	*tp++ = '6';
-#endif
 	*tp++ = '\0';
 
 	/*
