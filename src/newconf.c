@@ -29,6 +29,7 @@
 #include "hash.h"
 #include "cluster.h"
 #include "cache.h"
+#include "ircd.h"
 
 #define CF_TYPE(x) ((x) & CF_MTYPE)
 
@@ -1909,7 +1910,8 @@ conf_set_general_havent_read_conf(void *data)
 			("There is a line in the example conf that will kill your server if not removed.");
 		conf_report_error
 			("Consider actually reading/editing the conf file, and removing this line.");
-		exit(0);
+		if (!testing_conf)
+			exit(0);
 	}
 }
 
@@ -2389,6 +2391,12 @@ conf_report_error(const char *fmt, ...)
 	va_start(ap, fmt);
 	ircvsnprintf(msg, IRCD_BUFSIZE, fmt, ap);
 	va_end(ap);
+
+	if (testing_conf)
+	{
+		fprintf(stderr, "\"%s\", line %d: %s\n", conffilebuf, lineno + 1, msg);
+		return;
+	}
 
 	ilog(L_MAIN, "\"%s\", line %d: %s", conffilebuf, lineno + 1, msg);
 

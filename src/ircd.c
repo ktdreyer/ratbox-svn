@@ -111,6 +111,8 @@ time_t nextconnect = 1;		/* time for next try_connections call */
 int kline_queued = 0;
 int server_state_foreground = 0;
 
+int testing_conf = 0;
+
 /* Set to zero because it should be initialized later using
  * initialize_server_capabs
  */
@@ -253,6 +255,8 @@ struct lgetopt myopts[] = {
 	 YESNO, "Run in foreground (don't detach)"},
 	{"version", &printVersion,
 	 YESNO, "Print version and exit"},
+	{"conftest", &testing_conf,
+	 YESNO, "Test the configuration files and exit"},
 	{"help", NULL, USAGE, "Print this text"},
 	{NULL, NULL, STRING, NULL},
 };
@@ -621,6 +625,8 @@ main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
+	if (testing_conf)
+		server_state_foreground = 1;
 
 	setup_signals();
 	/* We need this to initialise the fd array before anything else */
@@ -678,6 +684,9 @@ main(int argc, char *argv[])
 #endif
 	init_auth();		/* Initialise the auth code */
 	init_resolver();	/* Needs to be setup before the io loop */
+
+	if (testing_conf)
+		fprintf(stderr, "\nBeginning config test\n\n");
 	read_conf_files(YES);	/* cold start init conf files */
 #ifndef STATIC_MODULES
 
@@ -713,6 +722,13 @@ main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 	strlcpy(me.info, ServerInfo.description, sizeof(me.info));
+
+	if (testing_conf)
+	{
+		fprintf(stderr, "\nConfig testing complete.\n");
+		fflush(stderr);
+		exit(EXIT_SUCCESS);
+	}
 
 	me.from = &me;
 	me.servptr = &me;
