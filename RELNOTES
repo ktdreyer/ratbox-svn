@@ -1,5 +1,9 @@
 -- ircd-ratbox-1.0 RELNOTES 
 
+-- ircd-ratbox-1.0-rc8
+- add experimental support for linux epoll, requires linux 2.5.46
+  or newer
+
 -- ircd-ratbox-1.0-rc7
 - fix for the temp kline/dline problems
 - stats d will now list temp dlines
