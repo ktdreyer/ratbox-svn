@@ -345,7 +345,7 @@ int     ms_sjoin(struct Client *cptr,
 
 	  if( top_chptr )
 	    {
-	      add_vchan_to_client_cache(sptr,top_chptr, chptr);
+	      add_vchan_to_client_cache(acptr,top_chptr, chptr);
 	      sendto_channel_butserv(ALL_MEMBERS,chptr, acptr, ":%s JOIN :%s",
 				     s, top_chptr->chname);
 	    }
