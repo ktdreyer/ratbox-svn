@@ -1,3 +1,15 @@
+leeh        2002/04/25 15:37:48 EDT	(20020425_6)
+
+  Modified files:
+    modules/core         m_sjoin.c 
+  Log:
+  - only allow +a in sjoin if enabled.
+  
+  Revision  Changes    Path
+  1.133     +3 -2      ircd-hybrid-7/modules/core/m_sjoin.c
+
+
+
 leeh        2002/04/25 13:57:43 EDT	(20020425_5)
 
   Modified files:
