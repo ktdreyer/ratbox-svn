@@ -856,6 +856,9 @@ general {
 	/* time between uses (server wide) of /whois and /whowas */
 	whois_wait = 5 seconds;
 
+	/* time between uses of various commands such as INFO */
+	pace_wait = 10 seconds;
+
 	/* There are clients ignoring the FORCE_MOTD numeric.  There is no 
 	 * no point forcing MOTD on connecting clients IMO.  Give them a short
 	 * NOTICE telling them they should read the MOTD, and leave it at that.
