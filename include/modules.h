@@ -96,7 +96,7 @@ struct mapi_mheader_av1
 	struct mapi_mheader_av1 _mheader = { MAPI_V1, reg, unreg, cl, hl, hfnlist, v}
 #else
 # define DECLARE_MODULE_AV1(reg,unreg,cl,hl,hfnlist, v) \
-	struct mapi_mheader_av1 MODNAME ##_mheader = { MAPI_V1, reg, unreg, cl, hl, hfnlist, v}
+	struct mapi_mheader_av1 MODNAME  = { MAPI_V1, reg, unreg, cl, hl, hfnlist, v}
 void load_static_modules();
 #endif
 
