@@ -1,3 +1,13 @@
+*** 20001205_10 by db
+- updated TODO
+- c lines were blasted when ZIPLINKS were removed, put them back
+  as normal C lines for now
+- up check ping event time to 30 seconds
+- close fbfile after parsing in .include
+- check for NULL find on strchr('\n') in initconf
+
+
+
 *** 20001205_9 by db
 - moved check for flood attack on channel after check can_send
   
