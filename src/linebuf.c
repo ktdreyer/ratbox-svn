@@ -627,14 +627,75 @@ linebuf_flush(int fd, buf_head_t * bufhead)
 	int retval;
 #ifdef HAVE_WRITEV
 	dlink_node *ptr;
-	int x, y;
+	int x = 0, y;
 	int xret;
 #ifndef UIO_MAXIOV
-#define UIO_MAXIOV 16 /* Posix values, apparently */
+#define UIO_MAXIOV 16
 #endif
-
 	static struct iovec vec[UIO_MAXIOV];
 
+        /* Check we actually have a first buffer */
+	if(bufhead->list.head == NULL)
+	{
+			/* nope, so we return none .. */
+	        errno = EWOULDBLOCK;
+		return -1;
+        }
+ 	
+        ptr = bufhead->list.head;   
+
+        do
+        {
+		if(ptr == NULL)
+			break;
+		bufline = ptr->data;
+	
+		if(!bufline->terminated)
+			break;
+
+	        if(bufline->flushing)
+                {
+	                vec[x].iov_base = bufline->buf + bufhead->writeofs;
+			vec[x].iov_len = bufline->len - bufhead->writeofs;
+	        }
+	 	else {
+	 	        vec[x].iov_base = bufline->buf;
+                        vec[x].iov_len = bufline->len;
+		}
+		ptr = ptr->next;
+		if(vec[x].iov_len == 0)
+			break;		
+        
+        } while(++x < UIO_MAXIOV);
+
+        if(x == 0)
+	{
+	 	errno = EWOULDBLOCK;
+		return -1;
+	}
+	 
+	xret = retval = writev(fd, vec, x);
+	if(retval <= 0)
+	        return retval;
+	
+	ptr = bufhead->list.head;
+	for(y = 0; y < x; y++)   
+	{
+	 	bufline = ptr->data;
+	 	if(xret >= bufline->len)
+	 	{
+         	 	xret -= bufline->len;
+	 	 	ptr = ptr->next;
+	 	 	s_assert(bufhead->len >= 0);
+	 	 	linebuf_done_line(bufhead, bufline, bufhead->list.head);
+	 	} else {
+         	        bufline->flushing = 1;
+		 	bufhead->writeofs += xret;
+	 	        break;
+	 	}
+	} 
+	
+#else /* HAVE_WRITEV */	
 	/* Check we actually have a first buffer */
 	if(bufhead->list.head == NULL)
 	{
@@ -642,71 +703,28 @@ linebuf_flush(int fd, buf_head_t * bufhead)
 		errno = EWOULDBLOCK;
 		return -1;
 	}
-	
-	ptr = bufhead->list.head;
 
-	for(x = 0; x < UIO_MAXIOV; x++)
-	{
-		if(ptr == NULL)
-			break;
-		bufline = ptr->data;
-		if(!bufline->terminated)
-			break;
+	bufline = bufhead->list.head->data;
 
-		if(bufline->flushing)
-		{
-			vec[x].iov_base = bufline->buf + bufhead->writeofs;
-			vec[x].iov_len = bufline->len - bufhead->writeofs;
-		}
-		else {
-			vec[x].iov_base = bufline->buf;
-			vec[x].iov_len = bufline->len;
-		}
-		ptr = ptr->next;
-	}
-
-	if(x == 0)
+	/* And that its actually full .. */
+	if(!bufline->terminated)
 	{
 		errno = EWOULDBLOCK;
 		return -1;
 	}
-	
-	xret = retval = writev(fd, vec, x);	
-	
-	if(retval <= 0)
-		return retval;
-	
-	ptr = bufhead->list.head;
-	for(y = 0; y < x; y++)
-	{
-		bufline = ptr->data;
-		if(xret >= bufline->len)
-		{
-			xret -= bufline->len;
-			ptr = ptr->next;
-			s_assert(bufhead->len >= 0);
-			linebuf_done_line(bufhead, bufline, bufhead->list.head);
-		} else {
-			bufline->flushing = 1;
-			bufhead->writeofs += xret;
-			break;
-		}
-	} 
-#else /* HAVE_WRITEV */
-	bufline = bufhead->list.head->data;
-	
+
 	/* Check we're flushing the first buffer */
 	if(!bufline->flushing)
 	{
-	 	bufline->flushing = 1;
-	 	bufhead->writeofs = 0;
+		bufline->flushing = 1;
+		bufhead->writeofs = 0;
 	}
 
 	/* Now, try writing data */
-	retval = write(fd, bufline->buf + bufhead->writeofs, bufline->len - bufhead->writeofs);
+	retval = send(fd, bufline->buf + bufhead->writeofs, bufline->len - bufhead->writeofs, 0);
 
 	if(retval <= 0)
-	        return retval;
+		return retval;
 
 	/* we've got data, so update the write offset */
 	bufhead->writeofs += retval;
@@ -715,14 +733,16 @@ linebuf_flush(int fd, buf_head_t * bufhead)
 	   bufhead */
 	if(bufhead->writeofs == bufline->len)
 	{
-	 	bufhead->writeofs = 0;
-	 	s_assert(bufhead->len >= 0);
-	 	linebuf_done_line(bufhead, bufline, bufhead->list.head);
+		bufhead->writeofs = 0;
+		s_assert(bufhead->len >= 0);
+		linebuf_done_line(bufhead, bufline, bufhead->list.head);
 	}
 
-#endif
-	return(retval);
+	/* Return line length */
+#endif /* HAVE_WRITEV */
+	return retval;
 }
+
 
 /*
  * count linebufs for stats z
