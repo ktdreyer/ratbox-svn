@@ -51,11 +51,10 @@
     was just updated.
 
 6.  PRIVMSG/NOTICE oper@server :message
-    This translates into a WALLOPS message, broken.
+    This translates into a WALLOPS message, and not marked as an oper@server
+    message.
 
-7.  KNOCK and channel mode +p are inconsistant with Hybrid 6.
-
-8.  TCP Resolver does not function properly and is disabled.
+7.  TCP Resolver does not function properly and is disabled.
     The only time you are likely to hit the TCP resolver is for queries
     over 512 bytes.
 

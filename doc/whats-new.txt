@@ -239,16 +239,15 @@ options that were in config.h, to be changed with a /rehash.
               preventing op hacking
     KLN     - Support remote K-lines
     GLN     - Support G-lines
+    KNOCK   - Support propogated KNOCK
     HOPS    - Support half-ops
     HUB     - Is a hub server (used to prevent two LL hubs from linking in that
               state)
     AOPS    - Supports anonymous channel ops (channel mode +a)
     UID     - Unique user-ID support
     ZIP     - Ziplink (Link is compressed with zlib compression)
-    ENC:a,b - Encrypted link, where 'a' is the cipher being used to decrypt
-              incoming data, and 'b' is the cipher being used to encrypt
-              outgoing data.
-    
+    TBURST  - Not currently used
+    ENC:a   - Encrypted link, where 'a' is the cipher being used
 
 # $Id$
 

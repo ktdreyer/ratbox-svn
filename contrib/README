@@ -6,6 +6,9 @@ hybrid tree.
 
 m_flags.c      - FLAGS - csircd like support of changing usermodes
                  Syntax:  FLAGS :+OWALLOPS -SWALLOPS
+
+m_jupe.c       - JUPE - Server juping command
+                 Syntax:  JUPE juped.server.name :Reason
 		 
 m_map.c        - MAP - Display the server routing graph in a visually pleasing
                        format
