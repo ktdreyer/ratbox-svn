@@ -1,3 +1,27 @@
+leeh        2005/02/19 12:38:09 EST	(20050219_3)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              ircd.h 
+    modules              m_pong.c 
+    src                  channel.c client.c ircd.c s_conf.c 
+  Log:
+  - rework the splitcode, splitservers is now how many servers we've marked as
+    EOB, rather than how many are linked.  Thus pull ourselves out of
+    splitmode immediately once this is satisfied
+  
+  Revision  Changes    Path
+  7.260     +8 -9      ircd-ratbox/doc/example.conf
+  7.88      +10 -11    ircd-ratbox/doc/example.efnet.conf
+  7.83      +1 -0      ircd-ratbox/include/ircd.h
+  1.60      +2 -1      ircd-ratbox/modules/m_pong.c
+  7.435     +16 -36    ircd-ratbox/src/channel.c
+  7.490     +2 -0      ircd-ratbox/src/client.c
+  7.373     +2 -1      ircd-ratbox/src/ircd.c
+  7.510     +11 -3     ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2005/02/19 09:02:34 EST	(20050219_2)
 
   Modified files:
