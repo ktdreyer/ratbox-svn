@@ -1,3 +1,6 @@
+*** 20010121_2 by davidt
+Missing space in parabuf_hops_id, caused desyncs/error messages and other bad things
+
 *** 20010121_1 by davidt
 Send KILL for unknown IDs, not an SQUIT
 
