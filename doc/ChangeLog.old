@@ -1,3 +1,8 @@
+*** 20001208_12 by db
+- removed unnecessary strcat in m_whois
+
+
+
 *** 20001208_11 by db
 - Show the top channel name on a subchannel 
 
