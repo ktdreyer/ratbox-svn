@@ -1,3 +1,17 @@
+androsyn    2002/12/16 10:19:56 UTC	(20021216_23)
+
+  Modified files:
+    include              client.h 
+    src                  client.c 
+  Log:
+  This should keep us from trying to free local client twices.
+  
+  Revision  Changes    Path
+  7.189     +4 -3      ircd-ratbox/include/client.h
+  7.356     +15 -1     ircd-ratbox/src/client.c
+
+
+
 androsyn    2002/12/16 09:01:33 UTC	(20021216_22)
 
   Modified files:
