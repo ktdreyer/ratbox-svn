@@ -70,7 +70,6 @@ fdlist_update_biggest(int fd, int opening)
 void fdlist_init(void)
 {
   static int initialized = 0;
-  assert(0 == initialized);
 
   if (!initialized)
     {
@@ -87,7 +86,7 @@ fd_open(int fd, unsigned int type, const char *desc)
 {
   fde_t *F = &fd_table[fd];
   assert(fd >= 0);
-
+  
   if (F->flags.open)
     {
 #ifdef NOTYET
