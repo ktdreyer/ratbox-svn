@@ -287,7 +287,7 @@ static void parse_knock_local(struct Client *client_p,
     }
 
   /* don't allow a knock if the user is banned, or the channel is secret */
-  if ((chptr->mode.mode & MODE_SECRET) ||
+  if ((chptr->mode.mode & MODE_PRIVATE) ||
       (sockhost && is_banned_knock(chptr, source_p, sockhost)) ||
       (!sockhost && is_banned(chptr, source_p)))
     {
