@@ -1,3 +1,17 @@
+androsyn    2002/11/24 09:55:12 UTC	(20021124_9)
+
+  Modified files:
+    include              newconf.h 
+    src                  newconf.c 
+  Log:
+  Make a bunch of the symbols in newconf.c static instead of global.
+  
+  Revision  Changes      Path
+  7.24      +23 -247     ircd-ratbox/include/newconf.h
+  7.54      +1465 -1451  ircd-ratbox/src/newconf.c
+
+
+
 androsyn    2002/11/24 09:16:41 UTC	(20021124_8)
 
   Modified files:
