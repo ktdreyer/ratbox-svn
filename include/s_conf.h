@@ -24,7 +24,13 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.20  2000/11/05 18:56:40  db
+ * - clean ups to m_join.c
+ * - resolved conflict in s_conf.h
+ *
  * Revision 7.19  2000/11/05 15:51:21  adrian
+ *
+ *
  * Kill #ifdef IDLE_CHECK, since someone did it in mtrie.conf ..
  *
  * Revision 7.18  2000/11/05 07:51:51  db
@@ -388,11 +394,7 @@ typedef struct QlineItem {
 #define CONF_FLAGS_ZIP_LINK             0x0800
 #define CONF_FLAGS_SPOOF_IP             0x1000
 #define CONF_FLAGS_LAZY_LINK            0x2000
-
-#ifdef LITTLE_I_LINES
 #define CONF_FLAGS_LITTLE_I_LINE        0x8000
-#endif
-
 
 
 /* Macros for aConfItem */
@@ -406,12 +408,9 @@ typedef struct QlineItem {
 #define IsConfBlined(x)         ((x)->flags & CONF_FLAGS_B_LINED)
 #define IsConfFlined(x)         ((x)->flags & CONF_FLAGS_F_LINED)
 #define IsConfIdlelined(x)      ((x)->flags & CONF_FLAGS_IDLE_LINED)
-
 #define IsConfDoIdentd(x)       ((x)->flags & CONF_FLAGS_DO_IDENTD)
 #define IsConfDoSpoofIp(x)      ((x)->flags & CONF_FLAGS_SPOOF_IP)
-#ifdef LITTLE_I_LINES
 #define IsConfLittleI(x)        ((x)->flags & CONF_FLAGS_LITTLE_I_LINE)
-#endif
 
 /* port definitions for Opers */
 

@@ -100,6 +100,8 @@
 
 static void build_list_of_channels( struct Client *sptr,
 				    char *jbuf, char *given_names);
+static void do_join_0(struct Client *sptr);
+static void check_spambot_warning( struct Client *sptr, char *name );
 
 /*
 ** m_join
@@ -113,7 +115,6 @@ int     m_join(struct Client *cptr,
                char *parv[])
 {
   static char   jbuf[BUFSIZE];
-  struct SLink  *lp;
   struct Channel *chptr = NULL;
   struct Channel *vchan_chptr = NULL;
   struct Channel *root_chptr = NULL;
@@ -159,50 +160,7 @@ int     m_join(struct Client *cptr,
         {
           if (sptr->user->channel == NULL)
             continue;
-          while ((lp = sptr->user->channel))
-            {
-              chptr = lp->value.chptr;
-              sendto_channel_butserv(chptr, sptr, ":%s PART %s",
-                                     parv[0], chptr->chname);
-              remove_user_from_channel(sptr, chptr, 0);
-            }
-
-	  if(GlobalSetOptions.spam_num &&
-	     (sptr->join_leave_count >= GlobalSetOptions.spam_num))
-	    {
-	      sendto_ops_flags(FLAGS_BOTS,
-			       "User %s (%s@%s) is a possible spambot",
-			       sptr->name,
-			       sptr->username, sptr->host);
-	      sptr->oper_warn_count_down = OPER_SPAM_COUNTDOWN;
-	    }
-	  else
-	    {
-	      int t_delta;
-
-	      if( (t_delta = (CurrentTime - sptr->last_leave_time)) >
-		  JOIN_LEAVE_COUNT_EXPIRE_TIME)
-		{
-		  int decrement_count;
-		  decrement_count = (t_delta/JOIN_LEAVE_COUNT_EXPIRE_TIME);
-
-		  if(decrement_count > sptr->join_leave_count)
-		    sptr->join_leave_count = 0;
-		  else
-		    sptr->join_leave_count -= decrement_count;
-		}
-	      else
-		{
-		  if((CurrentTime - (sptr->last_join_time)) < 
-		     GlobalSetOptions.spam_time)
-		    {
-		      /* oh, its a possible spambot */
-		      sptr->join_leave_count++;
-		    }
-		}
-	      sptr->last_leave_time = CurrentTime;
-	    }
-
+	  do_join_0(sptr);
 	  sendto_match_servs(NULL, cptr, ":%s JOIN 0", parv[0]);
 	  continue;
 	}
@@ -212,9 +170,6 @@ int     m_join(struct Client *cptr,
       ** channel so make them (rightfully) the Channel
       ** Operator.
       */
-      /*     flags = (ChannelExists(name)) ? 0 : CHFL_CHANOP; */
-
-      /* To save a redundant hash table lookup later on */
            
       if((chptr = hash_find_channel(name, NullChn)))
 	{
@@ -315,29 +270,8 @@ int     m_join(struct Client *cptr,
 
       if(flags == 0)        /* if channel doesn't exist, don't penalize */
 	successful_join_count++;
-      if( GlobalSetOptions.spam_num &&
-	  (sptr->join_leave_count >= GlobalSetOptions.spam_num))
-	{ 
-	  /* Its already known as a possible spambot */
-	  
-	  if(sptr->oper_warn_count_down > 0)  /* my general paranoia */
-	    sptr->oper_warn_count_down--;
-	  else
-	    sptr->oper_warn_count_down = 0;
- 
-	  if(sptr->oper_warn_count_down == 0)
-	    {
-	      sendto_ops_flags(FLAGS_BOTS,
-			       "User %s (%s@%s) trying to join %s is a possible spambot",
-			       sptr->name,
-			       sptr->username,
-			       sptr->host,
-			       name);     
-	      sptr->oper_warn_count_down = OPER_SPAM_COUNTDOWN;
-	    }
-	  return 0; /* Don't actually JOIN anything, but don't let
-		       spambot know that */
-	}
+
+      check_spambot_warning(sptr, name);
 
       if(!chptr)        /* If I already have a chptr, no point doing this */
 	chptr = get_channel(sptr, name, CREATE);
@@ -461,6 +395,15 @@ int     ms_join(struct Client *cptr,
   return 0;
 }
 
+/*
+ * build_list_of_channels
+ *
+ * inputs	- pointer to client joining
+ *		- pointer to scratch buffer
+ *		- pointer to list of channel names
+ * output	- NONE
+ * side effects - jbuf is modified to contain valid list of channel names
+ */
 static void build_list_of_channels( struct Client *sptr,
 				    char *jbuf, char *given_names)
 {
@@ -508,6 +451,91 @@ static void build_list_of_channels( struct Client *sptr,
     }
 }
 
+/*
+ * do_join_0
+ *
+ * inputs	- pointer to client doing join 0
+ * output	- NONE
+ * side effects	- Use has decided to join 0. This is legacy
+ *		  from the days when channels were numbers not names. *sigh*
+ *		  There is a bunch of evilness necessary here due to
+ * 		  anti spambot code.
+ */
+
+static void do_join_0(struct Client *sptr)
+{
+  struct Channel *chptr=NULL;
+  struct SLink   *lp;
+
+  while ((lp = sptr->user->channel))
+    {
+      chptr = lp->value.chptr;
+      sendto_channel_butserv(chptr, sptr, ":%s PART %s",
+			     sptr->name, chptr->chname);
+      remove_user_from_channel(sptr, chptr, 0);
+    }
+
+  check_spambot_warning(sptr,"0");
+}
+
+/*
+ * check_spambot_warning
+ *
+ * inputs	- pointer to client to check
+ * output	- NONE
+ * side effects	- 
+ */
+
+static void check_spambot_warning( struct Client *sptr, char *name )
+{
+  int t_delta;
+  int decrement_count;
+
+  if(GlobalSetOptions.spam_num &&
+     (sptr->join_leave_count >= GlobalSetOptions.spam_num))
+    {
+      if(sptr->oper_warn_count_down == 0)
+	{
+	  /* Its already known as a possible spambot */
+	  
+	  if(sptr->oper_warn_count_down > 0)  /* my general paranoia */
+	    sptr->oper_warn_count_down--;
+	  else
+	    sptr->oper_warn_count_down = 0;
+
+	  sendto_ops_flags(FLAGS_BOTS,
+		   "User %s (%s@%s) trying to join %s is a possible spambot",
+			   sptr->name,
+			   sptr->username,
+			   sptr->host,
+			   name);     
+	  sptr->oper_warn_count_down = OPER_SPAM_COUNTDOWN;
+	}
+    }
+  else
+    {
+      if( (t_delta = (CurrentTime - sptr->last_leave_time)) >
+	  JOIN_LEAVE_COUNT_EXPIRE_TIME)
+	{
+	  decrement_count = (t_delta/JOIN_LEAVE_COUNT_EXPIRE_TIME);
+
+	  if(decrement_count > sptr->join_leave_count)
+	    sptr->join_leave_count = 0;
+	  else
+	    sptr->join_leave_count -= decrement_count;
+	}
+      else
+	{
+	  if((CurrentTime - (sptr->last_join_time)) < 
+	     GlobalSetOptions.spam_time)
+	    {
+	      /* oh, its a possible spambot */
+	      sptr->join_leave_count++;
+	    }
+	}
+      sptr->last_leave_time = CurrentTime;
+    }
+}
 
 #ifdef DBOP
 /* ZZZZZZZZZZZZ Q&D debug function */
