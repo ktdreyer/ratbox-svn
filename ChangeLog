@@ -1,3 +1,54 @@
+ejb         2002/08/26 15:10:28 EDT	(20020826_8)
+
+  Modified files:        (Branch: parser-devel)
+    .                    BUGS ChangeLog 
+    doc/technical        index.txt 
+    include              newconf.h serno.h setup.h.in 
+    modules              .depend m_info.c 
+    src                  .depend Makefile.in client.c ircd.c 
+                         ircd_parser.y newconf.c s_auth.c s_bsd.c 
+                         s_bsd_devpoll.c s_bsd_poll.c 
+                         s_bsd_select.c s_bsd_sigio.c 
+  Added files:           (Branch: parser-devel)
+    include              blalloc.h 
+    src                  blalloc.c patricia.c 
+  Removed files:         (Branch: parser-devel)
+    doc/technical        iauth.txt 
+    include              ircdauth.h 
+    src                  ircdauth.c 
+  Log:
+  - merge changes from HEAD into parser-devel
+  
+  Revision    Changes    Path
+  7.51.2.1    +0 -3      ircd-ratbox/BUGS
+  1.218.2.1   +98 -0     ircd-ratbox/ChangeLog
+  1.2.6.1     +0 -205    ircd-ratbox/doc/technical/iauth.txt (dead)
+  1.2.4.1     +1 -2      ircd-ratbox/doc/technical/index.txt
+  7.9.2.1     +75 -0     ircd-ratbox/include/blalloc.h (new)
+  7.5.4.1     +0 -63     ircd-ratbox/include/ircdauth.h (dead)
+  7.12.2.2    +0 -2      ircd-ratbox/include/newconf.h
+  7.3982.2.1  +2 -1      ircd-ratbox/include/serno.h
+  7.57.2.1    +2 -2      ircd-ratbox/include/setup.h.in
+  1.12.2.1    +585 -584  ircd-ratbox/modules/.depend
+  1.64.2.1    +3 -1      ircd-ratbox/modules/m_info.c
+  7.13.2.1    +408 -425  ircd-ratbox/src/.depend
+  7.117.2.1   +0 -1      ircd-ratbox/src/Makefile.in
+  7.30.2.1    +319 -0    ircd-ratbox/src/blalloc.c (new)
+  7.322.2.1   +22 -32    ircd-ratbox/src/client.c
+  7.253.2.1   +0 -12     ircd-ratbox/src/ircd.c
+  1.264.2.2   +0 -2      ircd-ratbox/src/ircd_parser.y
+  7.49.2.1    +0 -768    ircd-ratbox/src/ircdauth.c (dead)
+  7.28.2.1    +0 -18     ircd-ratbox/src/newconf.c
+  7.10.2.1    +927 -0    ircd-ratbox/src/patricia.c (new)
+  7.108.2.1   +0 -20     ircd-ratbox/src/s_auth.c
+  7.176.2.1   +0 -12     ircd-ratbox/src/s_bsd.c
+  7.16.2.1    +0 -1      ircd-ratbox/src/s_bsd_devpoll.c
+  7.55.2.1    +0 -1      ircd-ratbox/src/s_bsd_poll.c
+  7.27.2.1    +0 -1      ircd-ratbox/src/s_bsd_select.c
+  7.24.2.1    +0 -1      ircd-ratbox/src/s_bsd_sigio.c
+
+
+
 ejb         2002/08/26 14:59:37 EDT	(20020826_7)
 
   Modified files:        (Branch: parser-devel)
