@@ -1,3 +1,15 @@
+leeh        2003/07/19 07:16:23 EDT	(20030719_1)
+
+  Modified files:
+    src                  help.c 
+  Log:
+  - tidied up the help code slightly
+  
+  Revision  Changes    Path
+  1.7       +18 -27    ircd-ratbox/src/help.c
+
+
+
 leeh        2003/07/19 07:05:40 EDT	(20030719_0)
 
   Modified files:
