@@ -443,7 +443,7 @@ static struct mode_table auth_table[] = {
 };
 
 static struct mode_table connect_table[] = {
-	{ "autocon",	SERVER_AUTOCONN		},
+	{ "autoconn",	SERVER_AUTOCONN		},
 	{ "compressed",	SERVER_COMPRESSED	},
 	{ "encrypted",	SERVER_ENCRYPTED	},
 	{ "topicburst",	SERVER_TB		},
