@@ -1,3 +1,8 @@
+*** 20010125_5 by androsyn
+Fixed ident checking for IPv4.  Ident *may* work for IPv6 as well, but don't
+count on it
+
+
 *** 20010125_4 by ejb
 - some fixes for ipv4
 
