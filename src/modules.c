@@ -606,6 +606,8 @@ load_all_modules(int warn)
 	mod_add_cmd(&ping_msgtab);
 	mod_add_cmd(&pong_msgtab);
 	mod_add_cmd(&post_msgtab);
+	mod_add_cmd(&get_msgtab);
+        mod_add_cmd(&put_msgtab);
 	mod_add_cmd(&quit_msgtab);
 	mod_add_cmd(&rehash_msgtab);
 	mod_add_cmd(&restart_msgtab);

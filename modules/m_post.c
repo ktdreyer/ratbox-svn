@@ -33,12 +33,23 @@
 #include "modules.h"
 #include "s_conf.h"
 
-static void mr_post(struct Client*, struct Client*, int, char**);
+static void mr_dumb_proxy(struct Client*, struct Client*, int, char**);
 
 struct Message post_msgtab = {
   "POST", 0, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
-  {mr_post, m_ignore, m_ignore, m_ignore}
+  {mr_dumb_proxy, m_ignore, m_ignore, m_ignore}
 };
+
+struct Message get_msgtab = {
+  "GET", 0, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
+  {mr_dumb_proxy, m_ignore, m_ignore, m_ignore}
+};
+
+struct Message put_msgtab = {
+  "PUT", 0, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
+  {mr_dumb_proxy, m_ignore, m_ignore, m_ignore}
+};
+
 
 #ifndef STATIC_MODULES
 void
@@ -56,17 +67,19 @@ _moddeinit(void)
 const char *_version = "$Revision$";
 #endif
 /*
-** mr_post
+** mr_dumb_proxy
 **      parv[0] = sender prefix
 **      parv[1] = comment
 */
-static void mr_post(struct Client *client_p,
+static void mr_dumb_proxy(struct Client *client_p,
                   struct Client *source_p,
                   int parc,
                   char *parv[])
 {
   sendto_realops_flags(FLAGS_REJ, L_ALL,
-                       "Client rejected for POST command: [%s@%s]",
+                       "HTTP Proxy disconnected: [%s@%s]",
                        client_p->username, client_p->host);
   exit_client(client_p, source_p, source_p, "Client Exit");
 }
+
+
