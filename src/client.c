@@ -1190,7 +1190,8 @@ dead_link(struct Client *client_p)
 {
 	struct abort_client *abt;
 	s_assert(!IsMe(client_p));
-	if(IsDeadorAborted(client_p) || IsMe(client_p) || !MyConnect(client_p))
+	if(IsDead(client_p) || IsAborted(client_p) || 
+	   IsMe(client_p) || !MyConnect(client_p))
 		return;
 
 	abt = (struct abort_client *) MyMalloc(sizeof(struct abort_client));
@@ -2079,8 +2080,12 @@ error_exit_client(struct Client *client_p, int error)
 	 * for reading even though it ends up being an EOF. -avalon
 	 */
 	char errmsg[255];
-
 	int current_error = comm_get_sockerr(client_p->localClient->fd);
+
+	if(IsClosing(client_p) || IsDead(client_p))
+		return;
+
+	SetClosing(client_p);
 
 	if(IsServer(client_p) || IsHandshake(client_p))
 	{
@@ -2123,15 +2128,11 @@ error_exit_client(struct Client *client_p, int error)
 				     (connected % 86400) / 3600,
 				     (connected % 3600) / 60, connected % 60);
 	}
+
 	if(error == 0)
-	{
 		strlcpy(errmsg, "Remote host closed the connection", sizeof(errmsg));
-	}
 	else
-	{
 		ircsnprintf(errmsg, sizeof(errmsg), "Read error: %s", strerror(current_error));
-	}
-	fd_close(client_p->localClient->fd);
-	client_p->localClient->fd = -1;
+
 	exit_client(client_p, client_p, &me, errmsg);
 }

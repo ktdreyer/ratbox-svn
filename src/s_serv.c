@@ -1095,7 +1095,7 @@ server_estab(struct Client *client_p)
 
 	client_p->servptr = &me;
 
-	if(IsDeadorAborted(client_p))
+	if(IsAnyDead(client_p))
 		return CLIENT_EXITED;
 
 	SetServer(client_p);
@@ -1755,7 +1755,7 @@ serv_connect_callback(int fd, int status, void *data)
 	 * If we've been marked dead because a send failed, just exit
 	 * here now and save everyone the trouble of us ever existing.
 	 */
-	if(IsDeadorAborted(client_p))
+	if(IsAnyDead(client_p))
 	{
 		sendto_realops_flags(UMODE_ALL, L_ADMIN,
 				     "%s[%s] went dead during handshake",

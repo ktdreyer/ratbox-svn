@@ -281,7 +281,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 	if(source_p == NULL)
 		return -1;
 
-	if(IsDeadorAborted(source_p))
+	if(IsAnyDead(source_p))
 		return -1;
 
 	if(ConfigFileEntry.ping_cookie)
@@ -467,7 +467,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 		return CLIENT_EXITED;
 	}
 
-	if(IsDeadorAborted(client_p))
+	if(IsAnyDead(client_p))
 		return CLIENT_EXITED;
 
 	inetntop_sock(&source_p->localClient->ip, ipaddr, sizeof(ipaddr));
@@ -481,7 +481,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 			     ipaddr, get_client_class(source_p), source_p->info);
 
 	/* If they have died in send_* don't do anything. */
-	if(IsDeadorAborted(source_p))
+	if(IsAnyDead(source_p))
 		return CLIENT_EXITED;
 
 	add_to_hostname_hash(source_p->host, source_p);

@@ -427,9 +427,11 @@ struct exit_client_hook
 #define HasSentEob(x)		((x)->flags & FLAGS_EOB)
 #define IsDead(x)          	((x)->flags &  FLAGS_DEAD)
 #define SetDead(x)         	((x)->flags |= FLAGS_DEAD)
-#define IsAborted(x)		((x)->flags & FLAGS_ABORTED)
+#define IsClosing(x)		((x)->flags & FLAGS_CLOSING)	/* read error */
+#define SetClosing(x)		((x)->flags |= FLAGS_CLOSING)
+#define IsAborted(x)		((x)->flags & FLAGS_ABORTED)	/* write error */
 #define SetAborted(x)		((x)->flags |= FLAGS_ABORTED)
-#define IsDeadorAborted(x)	(IsAborted(x) || IsDead(x))
+#define IsAnyDead(x)		(IsAborted(x) || IsDead(x) || IsClosing(x))
 
 /* oper flags */
 #define MyOper(x)               (MyConnect(x) && IsOper(x))

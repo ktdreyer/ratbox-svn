@@ -130,7 +130,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 
 	s_assert(MyConnect(client_p));
 	s_assert(client_p->localClient->fd >= 0);
-	if(IsDeadorAborted(client_p))
+	if(IsAnyDead(client_p))
 		return;
 
 	for (ch = pbuffer; *ch == ' '; ch++)	/* skip spaces */
@@ -303,7 +303,7 @@ handle_command(struct Message *mptr, struct Client *client_p,
 	struct MessageEntry ehandler;
 	MessageHandler handler = 0;
 
-	if(IsDeadorAborted(client_p))
+	if(IsAnyDead(client_p))
 		return -1;
 
 	if(IsServer(client_p))

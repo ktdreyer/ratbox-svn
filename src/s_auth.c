@@ -245,7 +245,7 @@ start_auth_query(struct AuthRequest *auth)
 	int fd;
 	int family;
 	
-	if(IsDeadorAborted(auth->client))
+	if(IsAnyDead(auth->client))
 		return 0;
 	
 	family = auth->client->localClient->ip.ss_family;
