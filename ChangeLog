@@ -1,3 +1,20 @@
+leeh        2004/02/28 15:11:12 EST	(20040228_0)
+
+  Modified files:
+    .                    Makefile.in configure configure.ac 
+  Log:
+  - create logs dir on install
+  - fix --enable-ipv6
+  - fix --enable-{io}, --enable forces one, --disable removes it from list of
+    choices - this needs a check for when no io system is available.
+  
+  Revision  Changes    Path
+  7.45      +3 -0      ircd-ratbox/Makefile.in
+  7.198     +239 -200  ircd-ratbox/configure
+  7.12      +98 -72    ircd-ratbox/configure.ac
+
+
+
 leeh        2004/02/27 09:20:26 EST	(20040227_2)
 
   Modified files:
