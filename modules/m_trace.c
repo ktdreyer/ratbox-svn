@@ -85,7 +85,7 @@ static void m_trace(struct Client *client_p, struct Client *source_p,
   char  *tname;
   int   doall, link_s[MAXCONNECTIONS], link_u[MAXCONNECTIONS];
   int   cnt = 0, wilds, dow;
-  dlink_node *ptr, *cptr;
+  dlink_node *ptr;
   char *looking_for = parv[0];
 
   if(!IsClient(source_p))
@@ -177,22 +177,12 @@ static void m_trace(struct Client *client_p, struct Client *source_p,
    */
   if (doall && (IsOper(source_p) || !ConfigServerHide.hide_servers))
   {
-    struct Client *target2_p;
-
-    DLINK_FOREACH(ptr, serv_list.head)
+    DLINK_FOREACH(ptr, global_serv_list.head)
     {
       target_p = ptr->data;
 
-      link_u[target_p->localClient->fd] = target_p->serv->usercnt;
-      link_s[target_p->localClient->fd] = 1;
-
-      DLINK_FOREACH(cptr, target_p->serv->servers.head)
-      {
-        target2_p = cptr->data;
-
-        link_u[target_p->localClient->fd] += target2_p->serv->usercnt;
-        link_s[target_p->localClient->fd]++;
-      }
+      link_u[target_p->from->localClient->fd] += target_p->serv->usercnt;
+      link_s[target_p->from->localClient->fd]++;
     }
   }
 
