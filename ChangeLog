@@ -1,3 +1,25 @@
+leeh        2004/01/15 14:10:48 EST	(20040115_11)
+
+  Added files:
+    src/s_userserv       .cvsignore .depend Makefile.in 
+                         s_u_crypt.c s_userserv.c s_userserv.h 
+  Log:
+  - added checks for ranlib/ar to configure
+  - added the initial user registration service, just stored in memory atm
+  - added the Makefile stuff for the service directories
+  - hash_nick() -> global hash_name()
+  - I need to stop just doing "*buf++;" :P
+  
+  Revision  Changes    Path
+  1.1       +1 -0      rserv/src/s_userserv/.cvsignore (new)
+  1.1       +8 -0      rserv/src/s_userserv/.depend (new)
+  1.1       +45 -0     rserv/src/s_userserv/Makefile.in (new)
+  1.1       +120 -0    rserv/src/s_userserv/s_u_crypt.c (new)
+  1.1       +207 -0    rserv/src/s_userserv/s_userserv.c (new)
+  1.1       +25 -0     rserv/src/s_userserv/s_userserv.h (new)
+
+
+
 leeh        2004/01/15 14:10:46 EST	(20040115_10)
 
   Modified files:
