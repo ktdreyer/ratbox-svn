@@ -592,6 +592,17 @@ conf_set_oper_dcc(void *data)
                 yy_oper->flags &= ~CONF_OPER_DCC;
 }
 
+static void
+conf_set_oper_flags(void *data)
+{
+	const char *flag = data;
+
+	if(!strcasecmp(flag, "sadmin"))
+		yy_oper->flags |= CONF_OPER_SADMIN|CONF_OPER_ADMIN;
+	else if(!strcasecmp(flag, "admin"))
+		yy_oper->flags |= CONF_OPER_ADMIN;
+}
+
 static int
 conf_begin_service(struct TopConf *tc)
 {
@@ -688,33 +699,35 @@ newconf_init()
 
         add_top_conf("admin", NULL, NULL);
         add_conf_item("admin", "name", CF_QSTRING,
-                      conf_set_admin_name);
+			conf_set_admin_name);
         add_conf_item("admin", "description", CF_QSTRING,
-                      conf_set_admin_description);
+			conf_set_admin_description);
         add_conf_item("admin", "email", CF_QSTRING,
-                      conf_set_admin_email);
+			conf_set_admin_email);
 
         add_top_conf("connect", conf_begin_connect, conf_end_connect);
         add_conf_item("connect", "host", CF_QSTRING,
-                      conf_set_connect_host);
+			conf_set_connect_host);
         add_conf_item("connect", "password", CF_QSTRING,
-                      conf_set_connect_password);
+			conf_set_connect_password);
         add_conf_item("connect", "vhost", CF_QSTRING,
-                      conf_set_connect_vhost);
+			conf_set_connect_vhost);
         add_conf_item("connect", "port", CF_INT,
-                      conf_set_connect_port);
+			conf_set_connect_port);
 	add_conf_item("connect", "autoconn", CF_YESNO,
 			conf_set_connect_autoconn);
 
         add_top_conf("oper", conf_begin_oper, conf_end_oper);
         add_conf_item("oper", "user", CF_QSTRING | CF_FLIST,
-                      conf_set_oper_user);
+			conf_set_oper_user);
         add_conf_item("oper", "password", CF_QSTRING,
-                      conf_set_oper_password);
+			conf_set_oper_password);
         add_conf_item("oper", "encrypted", CF_YESNO,
-                      conf_set_oper_encrypted);
+			conf_set_oper_encrypted);
         add_conf_item("oper", "dcc", CF_YESNO,
-                      conf_set_oper_dcc);
+			conf_set_oper_dcc);
+	add_conf_item("oper", "flags", CF_STRING,
+			conf_set_oper_flags);
 
 	add_top_conf("service", conf_begin_service, conf_end_service);
 	add_conf_item("service", "nick", CF_QSTRING,

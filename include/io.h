@@ -20,7 +20,7 @@ struct connection_entry
 
 	int fd;
 	int flags;
-	int oflags;		/* privs as an oper */
+	int privs;		/* privs as an oper */
 	time_t first_time;
 	time_t last_time;
 

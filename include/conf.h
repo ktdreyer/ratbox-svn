@@ -59,8 +59,16 @@ struct conf_oper
 #define CONF_OPER_ENCRYPTED     0x0010
 #define CONF_OPER_DCC		0x0020
 
+/* x is an oper_p */
 #define ConfOperEncrypted(x)	((x)->flags & CONF_OPER_ENCRYPTED)
 #define ConfOperDcc(x)		((x)->flags & CONF_OPER_DCC)
+
+/* set in conf, but are moved to ->privs, x here is a connection */
+#define CONF_OPER_ADMIN		0x0100
+#define CONF_OPER_SADMIN	0x0200
+
+#define OperAdmin(x)	((x)->privs & CONF_OPER_ADMIN)
+#define OperSAdminx(x)	((x)->privs & CONF_OPER_SADMIN)
 
 #define CONF_SERVER_AUTOCONN	0x0001
 

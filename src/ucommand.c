@@ -45,16 +45,16 @@ static void u_status(struct connection_entry *, char *parv[], int parc);
 
 static struct ucommand_handler ucommands[] =
 {
-        { "connect",    u_connect,      0, NULL },
-        { "die",        u_die,          0, NULL },
-        { "events",     u_events,       0, NULL },
-        { "flags",      u_flags,        0, NULL },
-        { "help",       u_help,         0, NULL },
-        { "quit",       u_quit,         0, NULL },
-	{ "rehash",	u_rehash,	0, NULL },
-        { "service",    u_service,      0, NULL },
-        { "status",     u_status,       0, NULL },
-        { "\0",         NULL,           0, NULL }
+	{ "connect",	u_connect,	CONF_OPER_ADMIN,	NULL },
+	{ "die",	u_die,		CONF_OPER_SADMIN,	NULL },
+	{ "events",	u_events,	CONF_OPER_ADMIN,	NULL },
+	{ "flags",	u_flags,	0,			NULL },
+	{ "help",	u_help,		0,			NULL },
+	{ "quit",	u_quit,		0,			NULL },
+	{ "rehash",	u_rehash,	CONF_OPER_SADMIN,	NULL },
+	{ "service",	u_service,	0,			NULL },
+	{ "status",	u_status,	0,			NULL },
+	{ "\0",         NULL,		0,			NULL }
 };
 
 void
@@ -115,7 +115,12 @@ handle_ucommand(struct connection_entry *conn_p, const char *command,
         }
 
         if((handler = find_ucommand(command)) != NULL)
-		handler->func(conn_p, parv, parc);
+	{
+		if(!handler->flags || conn_p->privs & handler->flags)
+			handler->func(conn_p, parv, parc);
+		else
+			sendto_one(conn_p, "Insufficient access");
+	}
         else
                 sendto_one(conn_p, "Invalid command: %s", command);
 }
@@ -191,7 +196,7 @@ u_login(struct connection_entry *conn_p, char *parv[], int parc)
         /* set them as 'logged in' */
         SetUserAuth(conn_p);
         conn_p->flags |= UMODE_DEFAULT;
-	conn_p->oflags = oper_p->flags;
+	conn_p->privs = oper_p->flags;
 
         sendto_one(conn_p, "Login successful, for available commands see .help");
 
@@ -358,6 +363,9 @@ u_help(struct connection_entry *conn_p, char *parv[], int parc)
                 DLINK_FOREACH(ptr, ucommand_list.head)
                 {
                         handler = ptr->data;
+
+			if(handler->flags && !(conn_p->privs & handler->flags))
+				continue;
 
                         hparv[j] = handler->cmd;
                         j++;
