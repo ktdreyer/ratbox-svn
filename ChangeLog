@@ -1,3 +1,15 @@
+androsyn    2004/08/16 11:29:49 EDT	(20040816_0)
+
+  Modified files:
+    src                  snprintf.c 
+  Log:
+  Oops, change a call to ircsnprintf to ircvsnprintf, big difference :P
+  
+  Revision  Changes    Path
+  1.15      +1 -1      ircd-ratbox/src/snprintf.c
+
+
+
 androsyn    2004/08/14 20:48:52 EDT	(20040815_0)
 
   Modified files:
