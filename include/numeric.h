@@ -25,103 +25,6 @@
 #endif
 
 /*
- * -- Avalon -- 1 Sep 1992
- *
- * Added RPL_TRACELOG, RPL_STATSOLINE
- */
-
-/*
- * -- Avalon -- 13 Aug 1992
- *
- * Added ERR_BADCHANNELKEY, ERR_KEYSET
- */
-
-/*
- * -- Avalon -- 10 Aug 1992
- *
- * Added RPL_SUMMONING
- */
-
-/*
- * -- Avalon -- 5  Jul 1992
- *
- * Added ERR_NICKCOLLISION
- */
-
-/*
- * -- Avalon -- 14 Jul 1992
- *
- * Added RPL_UNAWAY, RPL_NOWAWAY, ERR_NOORIGIN, ERR_FILEERROR, ERR_NOLOGIN,
- * ERR_SUMMONDISABLED, ERR_USERSDISABLED, RPL_USERSSTART, RPL_USERS,
- * RPL_ENDOFUSERS, RPL_NOUSERS
- */
-
-/*
- * -- Avalon -- 12 Jul 1992
- *
- * Added RPL_CLOSING RPL_CLOSEEND
- */
-
-/*
- * -- Avalon -- 10-11 Jul 1992
- *
- * Added RPL_MOTD, RPL_MOTDSTART, RPL_ENDOFMOTD, ERR_NOMOTD,
- * RPL_INFO, RPL_INFOSTART, RPL_ENDOFINFO, ERR_CANTKILLSERVER,
- * RPL_LUSERCLIENT, RPL_LUSEROP, RPL_LUSERUNKNOWN, RPL_LUSERCHAN, RPL_LUSERME,
- * RPL_STATSUPTIME, RPL_ADMINLOC1, RPL_ADMINLOC2, RPL_ADMINME,
- * RPL_ADMINEMAIL, ERR_NOADMININFO
- */
-
-/*
- * -- Avalon -- 28 Jun 1992
- *
- * Added ERR_BADCHANMASK and RPL_ENDOFWHOWAS
- */
-
-/*
- * -- Avalon -- 13 May 1992
- *
- * Added RPL_STATSLLINE
- */
-
-/*
- * -- Avalon -- 12 Jan 1992
- *
- * Added RPL_TRACELINK
- */
-
-/*
- * -- Wumpus -- 30 Nov 1991
- *
- * It's very important that you never change what a numeric means --
- * you can delete old ones (maybe) and add new ones, but never ever
- * take a number and make it suddenly mean something else, or change
- * an old number just for the hell of it.
- */
-
-/*
- * -- avalon -- 19 Nov 1991
- * Added ERR_USERSDONTMATCH 
- *
- * -- avalon -- 06 Nov 1991
- * Added RPL_BANLIST, RPL_BANLISTEND, ERR_BANNEDFROMCHAN
- *
- * -- avalon -- 15 Oct 1991
- * Added RPL_TRACEs (201-209)
- * Added RPL_STATSs (211-219)
- */
-
-/* -- Jto -- 16 Jun 1990
- * A couple of new numerics added...
- */
-
-/* -- Jto -- 03 Jun 1990
- * Added ERR_YOUWILLBEBANNED and Check defines (sigh, had to put 'em here..)
- * Added ERR_UNKNOWNMODE...
- * Added ERR_CANNOTSENDTOCHAN...
- */
-
-/*
  * form_str - return a format string for a message number
  * messages are defined below
  */
@@ -173,7 +76,6 @@ extern const char* form_str(int);
  */
 #define RPL_STATSPLINE       220
 #define RPL_UMODEIS          221
-#define RPL_MODLIST          222
 
 #define RPL_STATSFLINE       224
 #define RPL_STATSDLINE       225
@@ -372,6 +274,10 @@ extern const char* form_str(int);
 #define ERR_GHOSTEDCLIENT    503
 
 #define ERR_USERNOTONSERV    504
-#define ERR_LAST_ERR_MSG     505
+
+#define RPL_MODLIST          702
+#define RPL_ENDOFMODLIST     703
+
+#define ERR_LAST_ERR_MSG     999
 
 #endif /* INCLUDED_numeric_h */

@@ -143,11 +143,6 @@ msgstr	""
 msgid	":%s 221 %s %s"
 msgstr	""
 
-#: ../src/messages.tab:245
-#, c-format
-msgid	":%s 222 %s %s 0x%x %s"
-msgstr	""
-
 #: ../src/messages.tab:248
 #, c-format
 msgid	":%s 225 %s %c %s %s"
@@ -828,7 +823,17 @@ msgstr	""
 msgid	":%s 504 %s %s :User is not on this server"
 msgstr	""
 
+#: ../src/messages.tab:702
+#, c-format
+msgid   ":%s 702 %s %s 0x%x %s"
+msgstr  ""
+
+#: ../src/messages.tab:703
+#, c-format
+msgid   ":%s 703 %s :End of /MODLIST."
+msgstr  ""
+
 #: ../src/messages.tab:536
 #, c-format
-msgid	":%s 505 %s :Last Error Message"
+msgid	":%s 999 %s :Last Error Message"
 msgstr	""
