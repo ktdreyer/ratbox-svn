@@ -820,7 +820,7 @@ sendto_match_servs(struct Channel *chptr, struct Client *from, const char *patte
         return;
     }
   else
-    return; /* an ooopsies *
+    return; /* an ooopsies */
 
   for(cptr = serv_cptr_list; cptr; cptr = cptr->next_server_client)
     {
