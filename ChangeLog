@@ -1,3 +1,24 @@
+leeh        2005/01/19 16:52:14 EST	(20050119_0)
+
+  Modified files:
+    .                    CREDITS README 
+    doc                  schema.txt 
+    include              s_chanserv.h 
+    src                  s_chanserv.c 
+  Log:
+  - add jilles to CREDITS
+  - update README with a note about reading logfiles
+  - add url storage to channels
+  
+  Revision  Changes    Path
+  1.3       +1 -0      rserv/CREDITS
+  1.2       +2 -1      rserv/README
+  1.16      +1 -0      rserv/doc/schema.txt
+  1.23      +1 -0      rserv/include/s_chanserv.h
+  1.42      +44 -0     rserv/src/s_chanserv.c
+
+
+
 leeh        2005/01/13 10:23:14 EST	(20050113_3)
 
   Modified files:
