@@ -1,3 +1,14 @@
+*** 20011127_1 by davidt
+- Yet more linebuf fixes.
+  * Rename 'binary' flag 'raw', since it was confusing people, and
+    didn't reflect what the code actually did.
+  * Initialise binary/raw flag to 0, to avoid bogusly stripping
+    \r\n from sent data.
+  * Fix linebuf_get to correctly strip leading \r\n from data, when
+    required, instead of removing the correct number of bytes from
+    the _end_ of the string.
+
+
 *** 20011126_5 by davidt
 - Fix compile warnings in contrib modules
 
