@@ -1,3 +1,7 @@
+*** 20001223_25 by ejb
+- fix off-by-one error in parse.c
+
+
 *** 20001223_24 by toot
 made tkline expiry into an event, and fixed some bugs with temp-klines..
 there's still more bugs with them though
