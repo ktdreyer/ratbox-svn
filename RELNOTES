@@ -1,6 +1,8 @@
 -- ircd-ratbox-1.0 RELNOTES 
 
 -- ircd-ratbox-1.0-rc6
+- changed error message on failed /challenge attempt to say failed 
+  CHALLENGE and not failed OPER
 - added clarity in dupe gline notices, will now state either
   "oper has already voted" or "server has already voted"
 - oper reasons are now shown again in the kline message, but still
