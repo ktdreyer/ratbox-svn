@@ -1,3 +1,17 @@
+leeh        2005/01/12 09:31:36 EST	(20050112_1)
+
+  Modified files:
+    src                  s_userserv.c 
+  Log:
+  - make userserv::info give a list of clients using that username if someones
+    asking for info on their own username, or its a userserv admin
+  - notify existing users on userserv::login
+  
+  Revision  Changes    Path
+  1.33      +25 -0     rserv/src/s_userserv.c
+
+
+
 leeh        2005/01/11 19:18:27 EST	(20050112_0)
 
   Modified files:
