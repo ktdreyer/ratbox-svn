@@ -1,3 +1,9 @@
+*** 20000109_8 by db
+- more cleanups, made consistent... no need for MSG_PRIVMSG/MSG_NOTICE
+  other m_ files don't do that
+
+
+
 *** 20000109_7 by db
 - cleanups
 
