@@ -1,3 +1,19 @@
+leeh        2002/09/18 22:24:10 UTC	(20020918_0)
+
+  Modified files:
+    include              send.h 
+    modules/core         m_message.c 
+    src                  send.c 
+  Log:
+  - fixed notice @#channel to not echo back to the sender
+  
+  Revision  Changes    Path
+  7.62      +2 -0      ircd-ratbox/include/send.h
+  1.109     +4 -4      ircd-ratbox/modules/core/m_message.c
+  7.221     +99 -2     ircd-ratbox/src/send.c
+
+
+
 leeh        2002/09/17 00:09:58 UTC	(20020917_0)
 
   Modified files:
