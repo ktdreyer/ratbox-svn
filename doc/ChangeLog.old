@@ -1,3 +1,7 @@
+*** 20010502_6 by androsyn
+Undo my send_queued_write() hack..
+
+
 *** 20010502_5 by androsyn
 Another assert() to try to catch fl_'s cores...
 
