@@ -269,6 +269,17 @@ static void ms_sjoin(struct Client *client_p,
 
       newts = (oldts==0) ? oldts : 800000000;
     }
+#else
+
+  if(!isnew && !newts && oldts)
+  {
+    sendto_channel_local(ALL_MEMBERS, chptr,
+ 		":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to 0",
+		me.name, chptr->chname, chptr->chname, oldts);
+    sendto_realops_flags(FLAGS_ALL, L_ALL,
+		         "Server %s changing TS on %s from %lu to 0",
+			 source_p->name, chptr->chname, oldts);
+  }
 #endif
 
   /*
@@ -336,6 +347,9 @@ static void ms_sjoin(struct Client *client_p,
   if (!keep_our_modes)
     {
       remove_our_modes(hide_or_not, chptr, top_chptr, source_p);
+      sendto_channel_local(ALL_MEMBERS, chptr,
+	    ":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to %lu",
+	    me.name, chptr->chname, chptr->chname, oldts, newts);
     }
      
   if (*modebuf != '\0')
