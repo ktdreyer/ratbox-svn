@@ -32,6 +32,9 @@
 #endif
 
 #include "config.h"
+#ifdef USE_SIGIO
+
+
 #include "fdlist.h"
 #include "s_bsd.h"
 #include "class.h"
@@ -55,7 +58,6 @@
 #include "s_debug.h"
 #include "s_bsd.h"
 #include "memory.h"
-#ifdef USE_SIGIO
 
 #include <assert.h>
 #include <stdio.h>
