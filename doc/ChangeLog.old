@@ -1,3 +1,7 @@
+*** 20010419_6 by fl_
+- ops should never have their part reason removed.. 
+
+
 *** 20010419_5 by fl_
 - puts() could do with some \n's in there..
 
