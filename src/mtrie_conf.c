@@ -101,7 +101,7 @@ static struct ConfItem* find_wild_card_iline(const char* user);
 
 static void report_sub_mtrie(struct Client *sptr,int,DOMAIN_LEVEL *);
 static void clear_sub_mtrie(DOMAIN_LEVEL *);
-static struct ConfItem *find_matching_ip_i_line(unsigned long);
+static struct ConfItem *find_matching_ip_i_line(struct sockaddr *);
 
 /* add_mtrie_conf_entry
  *
@@ -453,7 +453,7 @@ static void find_or_add_user_piece(DOMAIN_PIECE *piece_ptr,
  */
 
 struct ConfItem* find_matching_mtrie_conf(const char* host, const char* user,
-                                    unsigned long ip)
+                                    struct sockaddr *ip)
 {
   struct ConfItem *iline_aconf_unsortable = NULL;
   struct ConfItem *iline_aconf = NULL;
@@ -1410,13 +1410,14 @@ static void clear_sub_mtrie(DOMAIN_LEVEL *dl_ptr)
  * looking for a match, return struct ConfItem pointer if found 
  */
 
-static struct ConfItem *find_matching_ip_i_line(unsigned long host_ip)
+static struct ConfItem *find_matching_ip_i_line(struct sockaddr *host_ip)
 {
   struct ConfItem *aconf;
-
+  /* XXX: This is broken for IPv6 */
+  
   for( aconf = ip_i_lines; aconf; aconf = aconf->next)
     {
-      if((host_ip & aconf->ip_mask) == aconf->ip)
+      if(( ((struct sockaddr_in *)host_ip)->sin_addr.s_addr & aconf->ip_mask) == aconf->ip)
         return(aconf);
     }
   return((struct ConfItem *)NULL);

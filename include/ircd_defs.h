@@ -93,5 +93,10 @@ extern int         BH_CurrentLine;
 #define free_dlink_node(x) _free_dlink_node((x))
 #endif
 
+#ifdef IPV6
+#define INADDR_IRC in6_addr *
+#else
+#define INADDR_IRC in_addr *
+#endif
 
 #endif /* INCLUDED_ircd_defs_h */

@@ -27,7 +27,7 @@
 #ifndef INCLUDED_ircd_defs_h
 #include "ircd_defs.h"        /* buffer sizes */
 #endif
-
+#include <sys/socket.h>
 #include <netinet/in.h>
 
 /*
@@ -72,6 +72,15 @@ int ircsnprintf(char*, int, const char*);
  * inetntoa - optimized inet_ntoa
  */
 const char* inetntoa(const char* in_addr);
+
+/* 
+ * inetntop() 
+ * inetpton()
+ * portable interfaces for inet_ntop() and inet_pton()
+ */
+const char *inetntop(int af, const void *src, char *dst, unsigned int size);
+int inetpton(int af, const char *src, void *dst);
+                                
 /*
  * strncpy_irc - optimized strncpy
  */

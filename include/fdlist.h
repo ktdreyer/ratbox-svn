@@ -15,6 +15,8 @@
 #include <netinet/in.h>
 #endif
 
+#include "config.h"
+
 #define FD_DESC_SZ 32
 
 /*
@@ -104,9 +106,13 @@ struct _fde {
     } flags;
     struct {
         /* We don't need the host here ? */
+#ifdef IPV6
+	struct sockaddr_in6 S;
+	struct sockaddr_in6 hostaddr;
+#else
         struct sockaddr_in S;		/* What we're bound to */
-        struct in_addr hostaddr;	/* Where we are connecting to */
-        u_short port;
+	struct sockaddr_in hostaddr;
+#endif
         CNCB *callback;
         void *data;
         /* We'd also add the retry count here when we get to that -- adrian */

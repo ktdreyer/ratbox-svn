@@ -347,8 +347,12 @@ void close_listeners()
 static void accept_connection(int pfd, void *data)
 {
   static time_t      last_oper_notice = 0;
-  struct sockaddr_in addr;
+  struct sockaddr addr;
+#ifdef IPV6
+  unsigned int		addrlen = sizeof(struct sockaddr_in6);
+#else
   unsigned int          addrlen = sizeof(struct sockaddr_in);
+#endif
   int                fd;
   struct Listener *  listener = data;
 
@@ -367,7 +371,7 @@ static void accept_connection(int pfd, void *data)
    * be accepted until some old is closed first.
    */
   do {
-    fd = comm_accept(listener->fd, (struct sockaddr*) &addr, &addrlen);
+    fd = comm_accept(listener->fd, &addr, &addrlen);
     if (fd < 0) {
       if (EAGAIN == errno)
          break;
@@ -401,7 +405,7 @@ static void accept_connection(int pfd, void *data)
     /*
      * check conf for ip address access
      */
-    if (!conf_connect_allowed(addr.sin_addr)) {
+    if (!conf_connect_allowed(&addr)) {
       ServerStats->is_ref++;
       send(fd, "NOTICE DLINE :*** You have been D-lined\r\n", 41, 0);
       fd_close(fd);

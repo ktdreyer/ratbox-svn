@@ -46,6 +46,7 @@
 #include "s_stats.h"
 #include "send.h"
 #include "memory.h"
+#include "config.h"
 
 #include <netdb.h>               /* struct hostent */
 #include <string.h>
@@ -218,9 +219,15 @@ static void auth_dns_callback(void* vptr, struct DNSReply* reply)
        */
       for (i = 0; hp->h_addr_list[i]; ++i)
 	{
+#ifdef IPV6
 	  if (0 == memcmp(hp->h_addr_list[i],
-			  (char*) &auth->client->localClient->ip,
+			  (char*) &auth->client->localClient->ip.sin6_addr.s6_addr,
+			  sizeof(struct in6_addr)))
+#else
+	  if (0 == memcmp(hp->h_addr_list[i],
+			  (char*) &auth->client->localClient->ip.sin_addr.s_addr,
 			  sizeof(struct in_addr)))
+#endif
 	    break;
 	}
       if (!hp->h_addr_list[i])
@@ -285,7 +292,7 @@ static void auth_error(struct AuthRequest* auth)
  */
 static int start_auth_query(struct AuthRequest* auth)
 {
-  struct sockaddr_in sock;
+/*  struct sockaddr_in sock; */
   struct sockaddr_in localaddr;
   unsigned int          locallen = sizeof(struct sockaddr_in);
   int                fd;
@@ -326,13 +333,16 @@ static int start_auth_query(struct AuthRequest* auth)
   getsockname(auth->client->fd, (struct sockaddr*) &localaddr, &locallen);
   localaddr.sin_port = htons(0);
 
-  memcpy(&sock.sin_addr, &auth->client->localClient->ip,
-	 sizeof(struct in_addr));
+/*  memcpy(&sock, &auth->client->localClient->ip,
+	 sizeof(struct sockaddr_in)); */
   auth->fd = fd;
   SetAuthConnect(auth);
-  comm_connect_tcp(fd, inetntoa((char *)&auth->client->localClient->ip), 113, 
+#ifdef IPV6
+  /* XXX: Write auth checking for IPv6 */
+#else
+  comm_connect_tcp(fd, inetntoa((char *)&auth->client->localClient->ip.sin_addr.s_addr), 113, 
     (struct sockaddr *)&localaddr, locallen, auth_connect_callback, auth);
-
+#endif
   return 1; /* We suceed here for now */
 }
 
@@ -406,7 +416,6 @@ void start_auth(struct Client* client)
   struct AuthRequest* auth = 0;
 
   assert(0 != client);
-
   auth = make_auth_request(client);
 
 #if 0
@@ -444,7 +453,11 @@ void start_auth(struct Client* client)
   sendheader(client, REPORT_DO_DNS);
 
   /* No DNS cache now, remember? -- adrian */
-  gethost_byaddr((const char*) &client->localClient->ip, &query);
+#ifdef IPV6
+  gethost_byaddr((const char*) &client->localClient->ip.sin6_addr.s6_addr, &query);
+#else
+  gethost_byaddr((const char*) &client->localClient->ip.sin_addr.s_addr, &query);
+#endif
   SetDNSPending(auth);
   start_auth_query(auth);
   link_auth_request(auth, &auth_poll_list);

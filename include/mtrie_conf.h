@@ -1,7 +1,8 @@
 /* $Id$ */
 #ifndef INCLUDED_mtrie_conf_h
 #define INCLUDED_mtrie_conf_h
-
+#include <sys/types.h>
+#include <sys/socket.h> 
 #ifndef FOREVER
 #define FOREVER for(;;)
 #endif
@@ -13,7 +14,7 @@ extern void   add_mtrie_conf_entry(struct ConfItem *,int);
 extern void   add_ip_Iline( struct ConfItem * );
 extern struct ConfItem* find_matching_mtrie_conf(const char* host,
                                            const char* user, 
-                                           unsigned long ip);
+                                           struct sockaddr *ip);
 extern void report_mtrie_conf_links(struct Client *,int);
 extern void clear_mtrie_conf_links(void);
 

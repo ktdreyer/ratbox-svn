@@ -19,12 +19,12 @@
  *
  *  $Id$
  */
+#include "config.h"
 #include "fdlist.h"
 #include "s_bsd.h"
 #include "class.h"
 #include "client.h"
 #include "common.h"
-#include "config.h"
 #include "event.h"
 #include "irc_string.h"
 #include "ircdauth.h"
@@ -318,9 +318,12 @@ void close_connection(struct Client *cptr)
 void add_connection(struct Listener* listener, int fd)
 {
   struct Client*     new_client;
-  struct sockaddr_in addr;
-  unsigned int          len = sizeof(struct sockaddr_in);
 
+#ifdef IPV6
+  unsigned int		len = sizeof(struct sockaddr_in6);
+#else
+  unsigned int          len = sizeof(struct sockaddr_in);
+#endif
   assert(0 != listener);
 
 #ifdef USE_IAUTH
@@ -339,7 +342,8 @@ void add_connection(struct Listener* listener, int fd)
    * get the client socket name from the socket
    * the client has already been checked out in accept_connection
    */
-  if (getpeername(fd, (struct sockaddr*) &addr, &len))
+  new_client = make_client(NULL);
+  if (getpeername(fd, (struct sockaddr *)&new_client->localClient->ip, &len))
     {
       report_error("Failed in adding new connection %s :%s", 
 		   get_listener_name(listener), errno);
@@ -348,18 +352,17 @@ void add_connection(struct Listener* listener, int fd)
       return;
     }
 
-  new_client = make_client(NULL);
-
   /* 
    * copy address to 'sockhost' as a string, copy it to host too
    * so we have something valid to put into error messages...
    */
-  strncpy_irc(new_client->localClient->sockhost, 
-              inetntoa((char*) &addr.sin_addr), HOSTIPLEN);
-
+#ifdef IPV6
+  inetntop(AF_INET6,  &new_client->localClient->ip.sin6_addr, new_client->localClient->sockhost, HOSTIPLEN);
+#else
+  inetntop(AF_INET,  &new_client->localClient->ip.sin_addr, new_client->localClient->sockhost, HOSTIPLEN);
+#endif
   strcpy(new_client->host, new_client->localClient->sockhost);
-  new_client->localClient->ip.s_addr = addr.sin_addr.s_addr;
-  new_client->localClient->port      = ntohs(addr.sin_port);
+
   new_client->fd        = fd;
 
   new_client->localClient->listener  = listener;
@@ -548,8 +551,13 @@ comm_connect_tcp(int fd, const char *host, u_short port,
     fd_table[fd].flags.called_connect = 1;
     fd_table[fd].connect.callback = callback;
     fd_table[fd].connect.data = data;
-    fd_table[fd].connect.port = port;
-
+#ifdef IPV6
+    fd_table[fd].connect.hostaddr.sin6_family = AF_INET6;
+    fd_table[fd].connect.hostaddr.sin6_port = htons(port);
+#else
+    fd_table[fd].connect.hostaddr.sin_port = htons(port);
+    fd_table[fd].connect.hostaddr.sin_family = AF_INET;
+#endif
     /*
      * Note that we're using a passed sockaddr here. This is because
      * generally you'll be bind()ing to a sockaddr grabbed from
@@ -569,8 +577,13 @@ comm_connect_tcp(int fd, const char *host, u_short port,
      * Next, if we have been given an IP, get the addr and skip the
      * DNS check (and head direct to comm_connect_tryconnect().
      */
-    if ((fd_table[fd].connect.hostaddr.s_addr = inet_addr(host))
-       == INADDR_NONE) {
+#ifdef IPV6
+    inetpton(AF_INET6, host, &fd_table[fd].connect.hostaddr.sin6_addr.s6_addr);
+    if(IN6_IS_ADDR_UNSPECIFIED(&fd_table[fd].connect.hostaddr.sin6_addr)) {
+#else
+    inetpton(AF_INET, host, &fd_table[fd].connect.hostaddr.sin_addr.s_addr);
+    if (fd_table[fd].connect.hostaddr.sin_addr.s_addr == INADDR_NONE) {
+#endif
         /* Send the DNS request, for the next level */
         query.vptr = &fd_table[fd];
         query.callback = comm_connect_dns_callback;
@@ -665,16 +678,20 @@ static void
 comm_connect_tryconnect(int fd, void *notused)
 {
     int retval;
-    struct sockaddr_in lsin;
+#ifdef IPV6
+    unsigned int len = sizeof(struct sockaddr_in6);
+#else
+    unsigned int len = sizeof(struct sockaddr_in);
+#endif
 
     /* We *COULD* cache this in the fd_table for extra speed .. --adrian */
-    lsin.sin_addr.s_addr = fd_table[fd].connect.hostaddr.s_addr;
-    lsin.sin_port = htons(fd_table[fd].connect.port);
-    lsin.sin_family = AF_INET;
+/*    lsin.sin_addr.s_addr = fd_table[fd].connect.hostaddr.s_addr;
+     lsin.sin_port = htons(fd_table[fd].connect.port);
+     lsin.sin_family = AF_INET; */
 
     /* Try the connect() */
-    retval = connect(fd, (struct sockaddr *)&lsin, sizeof(lsin));
 
+    retval = connect(fd, (struct sockaddr *) &fd_table[fd].connect.hostaddr, len);
     /* Error? */
     if (retval < 0) {
         /*

@@ -141,7 +141,7 @@ struct LocalUser meLocalUser;	/* That's also part of me */
 struct Client* GlobalClientList = 0; /* Pointer to beginning of Client list */
 
 /* Virtual host */
-struct sockaddr_in vserv;
+struct sockaddr *vserv;
 int                specific_virtual_host = 0;
 
 /* unknown/client pointer lists */ 
@@ -567,15 +567,27 @@ int main(int argc, char *argv[])
     }
 
   /* Do virtual host setup here */
-  /* XXX Not yet IPV6 */
-
-  if(ServerInfo.ip != 0)
+  /* We really should have some way of specifying an IPv4 address even if we are compiled
+   * for IPv6 -- aaron
+   */
+#ifdef IPV6
+  if(!IN6_IS_ADDR_UNSPECIFIED(&ServerInfo.ip))
+  {
+    vserv = calloc(sizeof(struct sockaddr_in6), 1);
+    vserv = (struct sockaddr *)&ServerInfo.ip;
+    specific_virtual_host = 1;
+  }
+#else
+//  if((ServerInfo.ip.sin_addr.s_addr != 0)
+    if(0)
     {
-      memset(&vserv,0, sizeof(vserv));
-      vserv.sin_family = AF_INET;
-      vserv.sin_addr.s_addr = htonl(ServerInfo.ip);
+      vserv = calloc(sizeof(struct sockaddr_in), 1);
+      vserv = (struct sockaddr *)&ServerInfo.ip;
       specific_virtual_host = 1;
     }
+#endif
+
+
 
 #ifdef USE_GETTEXT
   /*

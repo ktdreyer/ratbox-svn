@@ -3,6 +3,7 @@
  * Written by Aaron Sethman <androsyn@ratbox.org>
  */
 
+#include "config.h"
 #include "dline_conf.h"
 #include "class.h"
 #include "client.h"
@@ -34,15 +35,14 @@ void zap_Dlines(void)
 #endif
 }
 
-struct ConfItem *match_Dline(unsigned long ip)
+struct ConfItem *match_Dline(struct sockaddr *ip)
 {
 	patricia_node_t *node;
-	unsigned long nip = ntohl(ip);
-	node = match_string(eline, inetntoa((char *)&nip));
+	node = match_ip(eline, ip);
 	if(node != NULL)
 		return(NULL); // Well we are an exception..
 		
-	node = match_string(dline, inetntoa((char *)&nip));
+	node = match_ip(dline, ip);
 	if(node != NULL)
 		return(node->data);
 	else
@@ -59,18 +59,15 @@ void clear_Dline_table(void)
 		Destroy_Patricia(kline, NULL);
 	zap_Dlines();
 }
-struct ConfItem *match_ip_Kline(unsigned long ip, const char *name)
+struct ConfItem *match_ip_Kline(struct sockaddr *ip, const char *name)
 {
 	patricia_node_t *node;
-	unsigned long nip = ntohl(ip);
-	node = match_string(kline, inetntoa((char *)&nip));
-	log(L_DEBUG, "ip_Kline node = %d\n", node);
+	node = match_ip(kline, ip);
+
 	if(node != NULL)
 	{
 		if(match(node->data->user, name))
 		{
-			log(L_DEBUG, "ip_Kline: %s %s\n", node->data->user,
-                            name);
 			return(node->data);
 		}
 	}

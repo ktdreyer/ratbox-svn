@@ -79,20 +79,21 @@ static int mo_testline(struct Client *cptr, struct Client *sptr,
                        int parc, char *parv[])
 {
   struct ConfItem *aconf;
-  unsigned long ip;
+  struct sockaddr_in ip;
   unsigned long host_mask;
   char *host, *pass, *user, *name, *classname, *given_host, *given_name, *p;
   int port;
+  ip.sin_family = AF_INET;
   
   if (parc > 1)
     {
       given_name = parv[1];
       if(!(p = (char*)strchr(given_name,'@')))
         {
-          ip = 0L;
-          if(is_address(given_name,&ip,&host_mask))
+          ip.sin_addr.s_addr = 0L;
+          if(is_address(given_name,(unsigned long *)&ip.sin_addr.s_addr,&host_mask))
             {
-              aconf = match_Dline(ip);    
+              aconf = match_Dline((struct sockaddr *)&ip);    
               if( aconf )
                 {
                   get_printable_conf(aconf, &name, &host, &pass, &user, &port,&classname);
@@ -116,12 +117,12 @@ static int mo_testline(struct Client *cptr, struct Client *sptr,
       *p = '\0';
       p++;
       given_host = p;
-      ip = 0L;
-      (void)is_address(given_host,&ip,&host_mask);
+      ip.sin_addr.s_addr = 0L;
+      (void)is_address(given_host,(unsigned long *)&ip.sin_addr.s_addr,&host_mask);
       
       aconf = find_matching_mtrie_conf(given_host,
                                        given_name,
-                                       (unsigned long)ip);
+                                       (struct sockaddr *)&ip);
           
       if(aconf)
         {

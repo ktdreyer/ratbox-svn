@@ -18,6 +18,7 @@
  *
  */
 
+#include "config.h"
 #include "patricia.h"
 
 
@@ -866,6 +867,41 @@ void lookup_then_remove(patricia_tree_t * tree, char *string)
 		patricia_remove(tree, node);
 }
 #endif
+
+patricia_node_t *match_ip(patricia_tree_t *tree, struct sockaddr *ip)
+{
+	prefix_t *prefix;
+	patricia_node_t *node;
+	unsigned int len;
+	
+	if(ip->sa_family == AF_INET)
+		len = 32;
+	else
+		len = 128;  // Assume ipv6 in this case	
+
+	if(ip->sa_family == AF_INET) {
+		if((prefix = New_Prefix(ip->sa_family, &((struct sockaddr_in *)ip)->sin_addr, len)) != NULL)
+		{		
+			node = patricia_search_best(tree, prefix);
+			Deref_Prefix(prefix);
+			return(node);
+		}
+		return NULL;		
+	} else
+#ifdef IPV6
+	if(ip->sa_family == AF_INET6) {
+		if((prefix = New_Prefix(ip->sa_family, &((struct sockaddr_in6 *)ip)->sin6_addr, len)) != NULL)		
+		{
+			node = patricia_search_best(tree, prefix);
+			Deref_Prefix(prefix);
+			return(node);
+		}
+			return NULL;
+	} else
+#endif
+	return NULL;
+}
+
 patricia_node_t *match_string(patricia_tree_t * tree, const char *string)
 {
 	patricia_node_t *node;

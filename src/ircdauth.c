@@ -53,6 +53,7 @@
 #include "send.h"
 #include "memory.h"
 #include "s_serv.h"
+#include "config.h"
 
 static PF CompleteIAuthConnection;
 static PF ParseIAuth;

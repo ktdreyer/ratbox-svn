@@ -445,8 +445,7 @@ check_klines(void)
       if(IsMe(cptr))
 	continue;
 
-#ifndef IPV6 /* XXX No dlines in IPv6 yet */
-      if ( (aconf = match_Dline(ntohl(cptr->localClient->ip.s_addr))) )
+      if ((aconf = match_Dline((struct sockaddr *)&cptr->localClient->ip)))
 	/* if there is a returned struct ConfItem then kill it */
 	{
 	  if(IsConfElined(aconf))
@@ -479,7 +478,6 @@ check_klines(void)
 
 	  continue; /* and go examine next fd/cptr */
 	}
-#endif /* ifndef IPV6 */
 
       if(IsPerson(cptr))
 	{
@@ -1315,11 +1313,7 @@ const char* comment         /* Reason for the exit */
   if (MyConnect(sptr))
     {
       if(sptr->flags & FLAGS_IPHASH)
-#ifdef IPV6
-      remove_one_ip(sptr->localClient->ip6.s6_addr);
-#else
-      remove_one_ip(sptr->localClient->ip.s_addr);
-#endif
+      remove_one_ip((struct sockaddr *)&sptr->localClient->ip);
 
       delete_resolver_queries(sptr);
       delete_identd_queries(sptr);
@@ -1578,7 +1572,7 @@ void add_to_accept(struct Client *source, struct Client *target)
     {
       sendto_one(target,":%s NOTICE %s :Max accept targets reached %d",
 		 me.name, target->name, len);
-      return 0;
+      return;
     }
 
   m = make_dlink_node();

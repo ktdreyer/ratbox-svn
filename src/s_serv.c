@@ -32,6 +32,7 @@
 #include <time.h>
 #include <netdb.h>
 
+#include "config.h"
 #include "tools.h"
 #include "s_serv.h"
 #include "channel.h"
@@ -378,8 +379,14 @@ int check_server(const char *name, struct Client* cptr)
        }
 
      i = -3;
+
+/* XXX: Fix me for IPv6 */
      if (!(match(aconf->host, cptr->host) ||
-         cptr->localClient->ip.s_addr == aconf->ipnum.s_addr))
+#ifdef IPV6
+       !memcmp(&cptr->localClient->ip.sin6_addr.s6_addr, &aconf->ipnum.s6_addr, sizeof(aconf->ipnum.s6_addr))))
+#else
+       cptr->localClient->ip.sin_addr.s_addr == aconf->ipnum.s_addr))
+#endif
        continue;
 #ifdef CRYPT_LINK_PASSWORD
      if (strcmp(aconf->passwd, crypt(cptr->localClient->passwd,
@@ -406,8 +413,13 @@ int check_server(const char *name, struct Client* cptr)
    * leafs or not.. if you unset it, bad things will happen
    */
 
+#ifdef IPV6
+  if (IN6_IS_ADDR_UNSPECIFIED(&aconf->ipnum))
+    memcpy(&aconf->ipnum.s6_addr, &cptr->localClient->ip.sin6_addr.s6_addr, sizeof(aconf->ipnum.s6_addr));
+#else
   if (aconf->ipnum.s_addr == INADDR_NONE)
-    aconf->ipnum.s_addr = cptr->localClient->ip.s_addr;
+    aconf->ipnum.s_addr = cptr->localClient->ip.sin_addr.s_addr;
+#endif
 
   return 0;
 }
@@ -1573,8 +1585,11 @@ serv_connect_callback(int fd, int status, void *data)
     assert(cptr->fd == fd);
 
     /* Next, for backward purposes, record the ip of the server */
-    cptr->localClient->ip = fd_table[fd].connect.hostaddr;
-
+#ifdef IPV6
+    memcpy(&cptr->localClient->ip, &fd_table[fd].connect.hostaddr, sizeof(struct sockaddr_in6));
+#else
+    memcpy(&cptr->localClient->ip, &fd_table[fd].connect.hostaddr, sizeof(struct sockaddr_in));
+#endif
     /* Check the status */
     if (status != COMM_OK)
       {
