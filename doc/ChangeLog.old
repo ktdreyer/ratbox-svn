@@ -1,3 +1,8 @@
+*** 20001226_9 by db
+- if test on name not className caused spoofs to lose their classes
+
+
+
 *** 20001226_8 by db
 - missing DupString() on cconf classname
 
