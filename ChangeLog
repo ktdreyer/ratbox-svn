@@ -1,3 +1,18 @@
+leeh        2005/01/09 20:30:51 EST	(20050110_0)
+
+  Modified files:
+    help/operserv        takeover u-takeover 
+    src                  s_operserv.c 
+  Log:
+  - added -clear and -clearall to operserv::takeover
+  
+  Revision  Changes    Path
+  1.2       +7 -3      rserv/help/operserv/takeover
+  1.2       +7 -3      rserv/help/operserv/u-takeover
+  1.3       +81 -10    rserv/src/s_operserv.c
+
+
+
 leeh        2005/01/07 11:50:27 EST	(20050107_0)
 
   Modified files:
