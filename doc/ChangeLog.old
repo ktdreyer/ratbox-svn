@@ -1,3 +1,7 @@
+*** 20010109_9 by wcampbel
+Make clean and distclean descend into iauth and contrib
+
+
 *** 20010109_8 by db
 - unnecessary loop removed for now
 
