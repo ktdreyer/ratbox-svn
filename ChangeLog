@@ -1,3 +1,16 @@
+androsyn    2003/04/06 22:47:52 UTC	(20030406_5)
+
+  Modified files:
+    src                  send.c 
+  Log:
+  Fixed our bug where we didn't send QUIT/JOIN etc to remote servers.  This
+  time Lee broke it :P
+  
+  Revision  Changes    Path
+  7.240     +7 -4      ircd-ratbox/src/send.c
+
+
+
 androsyn    2003/04/06 21:52:05 UTC	(20030406_4)
 
   Modified files:
