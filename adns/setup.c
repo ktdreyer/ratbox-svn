@@ -28,7 +28,6 @@
  * $Id$
  */
 
-#include "memory.h"
 #include <stdlib.h>
 #include <errno.h>
 #include <limits.h>
@@ -39,6 +38,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include "memory.h"
 #include "fileio.h"
 #include "s_bsd.h"
 #include "internal.h"
