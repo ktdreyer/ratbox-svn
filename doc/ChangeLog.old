@@ -1,3 +1,8 @@
+*** 20010531_2 by db
+- finished adding the k_ines_oper_only flag, (leeh can review!)
+
+
+
 *** 20010531_1 by db
 - fixed bug with single space in privmsg not being seen. <= instead of <
 - reformatted to be consistent
