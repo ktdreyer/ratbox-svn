@@ -1,3 +1,16 @@
+leeh        2002/07/21 13:53:17 EDT	(20020721_5)
+
+  Modified files:
+    src                  packet.c 
+  Log:
+  - the second half of my flood fixes that splits parsing into three
+    loops instead of two.
+  
+  Revision  Changes    Path
+  7.87      +43 -9     ircd-hybrid-7/src/packet.c
+
+
+
 db          2002/07/21 13:15:35 EDT	(20020721_4)
 
   Modified files:
