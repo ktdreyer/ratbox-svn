@@ -1,3 +1,7 @@
+*** 19990907_2 by tomh
+move dbuf cleanup to free_client, fix send.c bug
+
+
 *** 19990907_1 by lusky
 killpath is now opers only
 +k/-k compatiblity issues
