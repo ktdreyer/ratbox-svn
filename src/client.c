@@ -168,8 +168,6 @@ void free_client(struct Client* client_p)
 {
   assert(NULL != client_p);
   assert(&me != client_p);
-  assert(NULL == client_p->prev);
-  assert(NULL == client_p->next);
 
   if (MyConnect(client_p))
     {
