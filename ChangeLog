@@ -1,3 +1,30 @@
+leeh        2004/02/25 17:21:42 EST	(20040225_0)
+
+  Modified files:
+    include              commio.h irc_string.h patricia.h 
+    modules              m_stats.c m_xline.c 
+    src                  client.c kdparse.c listener.c 
+                         messages.tab newconf.c s_user.c 
+  Log:
+  - xline types are gone, they now always act like klines do (silent and
+    always reject..)
+  - fixed the build for cygwin
+  
+  Revision  Changes    Path
+  1.5       +2 -0      ircd-ratbox/include/commio.h
+  7.55      +3 -0      ircd-ratbox/include/irc_string.h
+  7.15      +0 -2      ircd-ratbox/include/patricia.h
+  1.195     +2 -2      ircd-ratbox/modules/m_stats.c
+  1.40      +14 -34    ircd-ratbox/modules/m_xline.c
+  7.424     +1 -6      ircd-ratbox/src/client.c
+  7.32      +2 -5      ircd-ratbox/src/kdparse.c
+  7.102     +6 -1      ircd-ratbox/src/listener.c
+  7.106     +1 -1      ircd-ratbox/src/messages.tab
+  7.131     +4 -16     ircd-ratbox/src/newconf.c
+  7.306     +7 -51     ircd-ratbox/src/s_user.c
+
+
+
 leeh        2004/02/24 11:31:50 EST	(20040224_0)
 
   Modified files:
