@@ -1,3 +1,8 @@
+*** 20010211_3 by db
+- removed apparent debugging code left in
+
+
+
 *** 20010211_2 by a1kmm
 - Put deleted hostmask confs on a list so we can free them later. Still leaves some memory leaks somewhere
   in the config(but why?) but it is partway there...
