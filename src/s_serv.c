@@ -312,9 +312,18 @@ time_t try_connections(time_t currenttime)
         }
       else
         {
-          if (serv_connect(con_conf, 0))
-            sendto_ops("Connection to %s[%s] activated.",
-                       con_conf->name, con_conf->host);
+          /*
+           * We used to only print this if serv_connect() actually
+           * suceeded, but since comm_tcp_connect() can call the callback
+           * immediately if there is an error, we were getting error messages
+           * in the wrong order. SO, we just print out the activated line,
+           * and let serv_connect() / serv_connect_callback() print an
+           * error afterwards if it fails.
+           *   -- adrian
+           */
+          sendto_ops("Connection to %s[%s] activated.",
+                     con_conf->name, con_conf->host);
+          serv_connect(con_conf, 0);
         }
     }
   Debug((DEBUG_NOTICE,"Next connection check : %s", myctime(next)));
@@ -1263,6 +1272,8 @@ serv_connect_callback(int fd, int status, void *data)
      * here now and save everyone the trouble of us ever existing.
      */
     if (IsDead(cptr)) {
+        sendto_realops("%s[%s] went dead during handshake", cptr->name,
+          cptr->host);
         exit_client(cptr, cptr, &me, "Went dead during handshake");
         return;
     }
