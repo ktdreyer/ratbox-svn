@@ -1,3 +1,9 @@
+*** 20010121_3 by davidt
+- Various fixes to sjoin..
+  The only one I can remember is "MODE #chan +h halfops" wasn't being sent..
+  I need a new memory.
+
+
 *** 20010121_2 by davidt
 Missing space in parabuf_hops_id, caused desyncs/error messages and other bad things
 
