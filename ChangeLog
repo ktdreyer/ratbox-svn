@@ -1,3 +1,15 @@
+leeh        2003/10/04 06:15:07 EDT	(20031004_0)
+
+  Modified files:
+    src                  s_log.c 
+  Log:
+  - this should be i < LAST_LOGFILE..
+  
+  Revision  Changes    Path
+  7.63      +1 -1      ircd-ratbox/src/s_log.c
+
+
+
 leeh        2003/10/03 13:48:31 EDT	(20031003_1)
 
   Modified files:
