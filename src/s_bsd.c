@@ -222,8 +222,12 @@ int set_non_blocking(int fd)
 #ifndef VMS
   int nonb = 0;
   int res;
-  nonb |= O_NONBLOCK;
 
+#ifdef USE_SIGIO
+  setup_sigio_fd(fd);
+#endif
+
+  nonb |= O_NONBLOCK;
   res = fcntl(fd, F_GETFL, 0);
   if (-1 == res || fcntl(fd, F_SETFL, res | nonb) == -1)
     return 0;

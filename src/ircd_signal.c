@@ -28,7 +28,7 @@
 #include "restart.h"      /* server_reboot */
 #include "s_log.h"
 #include "memory.h"
-
+#include "s_bsd.h"
 /*
  * dummy_handler - don't know if this is really needed but if alarm is still
  * being used we probably will
@@ -116,6 +116,12 @@ void setup_signals()
   act.sa_handler = sigterm_handler;
   sigaddset(&act.sa_mask, SIGTERM);
   sigaction(SIGTERM, &act, 0);
+#ifdef USE_SIGIO
+  act.sa_handler = do_sigio;
+  sigaddset(&act.sa_mask, SIGIO);
+  sigaction(SIGIO, &act, 0);
+#endif
+
 }
 
 

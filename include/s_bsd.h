@@ -83,6 +83,10 @@ extern int   read_message (time_t, unsigned char);
 extern int   comm_select(unsigned long);
 extern int   disable_sock_options(int);
 
+#ifdef USE_SIGIO
+void do_sigio(int);
+void setup_sigio_fd(int);
+#endif
 
 #endif /* INCLUDED_s_bsd_h */
 
