@@ -55,10 +55,11 @@
 #include "balloc.h"
 #include "listener.h"
 
+
 static void check_pings_list(dlink_list *list);
 static void check_unknowns_list(dlink_list *list);
 static void free_exited_clients(void *unused);
-
+static void exit_aborted_clients(void *unused);
 static EVH check_pings;
 
 static int remote_client_count=0;
@@ -104,6 +105,7 @@ void init_client(void)
   eventAddIsh("check_pings", check_pings, NULL, 30);
   eventAddIsh("free_exited_clients", &free_exited_clients, NULL, 4);
   eventAddIsh("client_heap_gc", client_heap_gc, NULL, 30);
+  eventAddIsh("exit_aborted_clients", exit_aborted_clients, NULL, 1);
 }
 
 /*
@@ -1065,37 +1067,61 @@ static void remove_dependents(struct Client* client_p,
 
 
 
+struct abort_client
+{
+  dlink_node node;
+  struct Client *client;
+  char notice[TOPICLEN];
+};
 
+static dlink_list abort_list;
+
+void exit_aborted_clients(void *unused)
+{
+  dlink_node *ptr, *next;
+  DLINK_FOREACH_SAFE(ptr, next, abort_list.head)
+  {
+     struct abort_client *abt = ptr->data;
+     dlinkDelete(ptr, &abort_list);
+     if(!IsPerson(abt->client) && !IsUnknown(abt->client) && !IsClosing(abt->client))
+     {
+        sendto_realops_flags(UMODE_ALL, L_ADMIN,
+		             "Closing link to %s: %s",
+                             get_client_name(abt->client, HIDE_IP), abt->notice);
+        sendto_realops_flags(UMODE_ALL, L_OPER,
+		             "Closing link to %s: %s",
+                             get_client_name(abt->client, MASK_IP), abt->notice);
+     }
+     exit_client(abt->client, abt->client, &me, abt->notice);
+     MyFree(abt);
+  }
+}
 /*
  * dead_link - Adds client to a list of clients that need an exit_client()
  *
  */
 void dead_link(struct Client *client_p)
 {
-  char notice[100];
+  struct abort_client *abt;
   if(IsClosing(client_p) || IsDead(client_p) || IsMe(client_p))
     return;
 
   linebuf_donebuf(&client_p->localClient->buf_recvq);
   linebuf_donebuf(&client_p->localClient->buf_sendq);
+  
+  abt = MyMalloc(sizeof(struct abort_client));
+  abt->client = client_p;
+  
   if(client_p->flags & FLAGS_SENDQEX)
-    strlcpy(notice, "Max SendQ exceeded", sizeof(notice));
+    strcpy(abt->notice, "Max SendQ exceeded");
   else
-    snprintf(notice, sizeof(notice), "Write error: %s", strerror(errno));
-
-    	
-  if (!IsPerson(client_p) && !IsUnknown(client_p) && !IsClosing(client_p))
   {
-    sendto_realops_flags(UMODE_ALL, L_ADMIN,
-		         "Closing link to %s: %s",
-                         get_client_name(client_p, HIDE_IP), notice);
-    sendto_realops_flags(UMODE_ALL, L_OPER,
-		         "Closing link to %s: %s",
-                         get_client_name(client_p, MASK_IP), notice);
-  }
+    ircsprintf(abt->notice, "Write error: %s", strerror(errno));
+  } 
+    	
   Debug((DEBUG_ERROR, "Closing link to %s: %s", get_client_name(client_p, HIDE_IP), notice));
   SetDead(client_p); /* You are dead my friend */
-  exit_client(client_p, client_p, &me, notice);
+  dlinkAdd(abt, &abt->node, &abort_list);
 }
 
 
