@@ -1,3 +1,18 @@
+leeh        2004/01/04 06:35:07 EST	(20040104_0)
+
+  Modified files:
+    .                    Makefile.in configure 
+    autoconf             configure.in 
+  Log:
+  - install help files on make install
+  
+  Revision  Changes    Path
+  1.4       +7 -1      rserv/Makefile.in
+  1.6       +1 -0      rserv/autoconf/configure.in
+  1.6       +2 -0      rserv/configure
+
+
+
 leeh        2004/01/03 15:02:57 EST	(20040103_3)
 
   Modified files:
