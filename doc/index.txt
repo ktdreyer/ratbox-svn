@@ -1,0 +1,34 @@
+
+# $Id$
+Here is the overview of the documents in the doc/ directory.
+
+CIDR.txt		- Description of CIDR in IPv4
+LazyLinks.as.implemented.txt
+LazyLinks.txt		- The lazylinks leaf concept
+README.TSora
+Tao-of-IRC.940110
+blalloc.txt		- Outline of the block memory allocator
+event.txt		- Outline of the event system
+example.conf
+fd-management.txt	- Outline of the file descriptor management system
+file-management.txt	- Outline of the disk file management system
+iauth.txt
+index.txt		- This file
+ircd.8			- ircd manpage
+kline.conf
+kline.txt
+linebuf.txt		- Outline of the linebuf system (dbuf replacement)
+message-customisation.txt
+modes.txt
+mtrie.txt
+network.txt		- Outline of the network traffic subsystem
+operguide.txt
+opermyth.txt
+opers.txt
+rfc1459.txt
+send.txt
+server-version-info
+simple.conf
+vchans.txt
+whats-new.txt		- What new features are avaliable
+whats-new-code.txt	- Whats changed in the code

@@ -11,6 +11,8 @@ ircd-hybrid.
 Reading INSTALL is now a must, as the old DPATH is now specified when
 configure is run.
 
+Please read doc/index.txt to get an overview of the current documentation.
+
 *** IMPORTANT ***
 Old Hybrid 5/6 configuration files are no longer supported.  All conf
 files will have to be converted to the Hybrid 7 format.  A convertconf
