@@ -87,7 +87,7 @@ int mr_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (parc < 2)
     {
       sendto_one(sptr, form_str(ERR_NONICKNAMEGIVEN),
-                 me.name, parv[0]);
+                 me.name, BadPtr(parv[0]) ? "*" : parv[0]);
       return 0;
     }
 
@@ -134,6 +134,7 @@ int mr_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   else
     sendto_one(sptr, form_str(ERR_NICKNAMEINUSE), me.name,
 	       BadPtr(parv[0]) ? "*" : parv[0], nick);
+
   return 0; /* NICK message ignored */
 }
 

@@ -42,7 +42,7 @@
 #include <stdlib.h>     /* atoi */
 
 struct Message connect_msgtab = {
-  MSG_CONNECT, 0, 1, 0, MFLG_SLOW, 0,
+  MSG_CONNECT, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, ms_connect, mo_connect}
 };
 
@@ -88,9 +88,11 @@ int mo_connect(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 
   if (hunt_server(cptr, sptr,
                   ":%s CONNECT %s %s :%s", 3, parc, parv) != HUNTED_ISME)
-    return 0;
+    {
+      return 0;
+    }
 
-  if (parc < 2 || *parv[1] == '\0')
+  if (*parv[1] == '\0')
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "CONNECT");
@@ -194,17 +196,13 @@ int ms_connect(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   struct ConfItem* aconf;
   struct Client*   acptr;
 
-  if (!IsPrivileged(sptr))
-    {
-      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-      return -1;
-    }
-
   if (hunt_server(cptr, sptr,
                   ":%s CONNECT %s %s :%s", 3, parc, parv) != HUNTED_ISME)
-    return 0;
+    {
+      return 0;
+    }
 
-  if (parc < 2 || *parv[1] == '\0')
+  if (*parv[1] == '\0')
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "CONNECT");

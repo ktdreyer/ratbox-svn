@@ -35,7 +35,7 @@
 #include "modules.h"
 
 struct Message wallops_msgtab = {
-  MSG_WALLOPS, 0, 1, 0, MFLG_SLOW, 0,
+  MSG_WALLOPS, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, ms_wallops, mo_wallops}
 };
 
@@ -62,7 +62,7 @@ int mo_wallops(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 { 
   char* message;
 
-  message = parc > 1 ? parv[1] : NULL;
+  message = parv[1];
   
   if (EmptyString(message))
     {
@@ -86,7 +86,7 @@ int ms_wallops(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 { 
   char* message;
 
-  message = parc > 1 ? parv[1] : NULL;
+  message = parv[1];
   
   if (EmptyString(message))
     {

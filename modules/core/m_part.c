@@ -44,7 +44,7 @@
 #include <assert.h>
 
 struct Message part_msgtab = {
-  MSG_PART, 1, 1, 0, MFLG_SLOW, 0,
+  MSG_PART, 1, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_part, ms_part, mo_part}
 };
 
@@ -80,7 +80,7 @@ int     m_part(struct Client *cptr,
   int decrement_count;
   char  *p, *name;
 
-  if (parc < 2 || parv[1][0] == '\0')
+  if (*parv[1] == '\0')
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "PART");
@@ -276,7 +276,7 @@ int     mo_part(struct Client *cptr,
 {
   char  *p, *name;
 
-  if (parc < 2 || parv[1][0] == '\0')
+  if (*parv[1] == '\0')
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "PART");

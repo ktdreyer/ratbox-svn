@@ -59,7 +59,7 @@ _moddeinit(void)
 char *_version = "20001122";
 
 /*
-** m_kill
+** mo_kill
 **      parv[0] = sender prefix
 **      parv[1] = kill victim
 **      parv[2] = kill path
@@ -77,24 +77,14 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   user = parv[1];
   path = parv[2]; /* Either defined or NULL (parc >= 2!!) */
 
-  if (!IsPrivileged(cptr))
-    {
-      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-      return 0;
-    }
-
-  if (MyClient(sptr) && IsOper(sptr) && !IsSetOperK(sptr))
+  if (MyClient(sptr) && !IsSetOperK(sptr))
     {
       sendto_one(sptr,":%s NOTICE %s :You have no K flag",me.name,parv[0]);
       return 0;
     }
 
-  if (IsOper(cptr))
-    {
-      if (!BadPtr(path))
-        if (strlen(path) > (size_t) KILLLEN)
-          path[KILLLEN] = '\0';
-    }
+  if (!BadPtr(path) && (strlen(path) > (size_t) KILLLEN))
+    path[KILLLEN] = '\0';
 
   if (!(acptr = find_client(user, NULL)))
     {
@@ -263,7 +253,7 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   char*       reason;
   int         chasing = 0;
 
-  if (parc < 2 || *parv[1] == '\0')
+  if (*parv[1] == '\0')
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "KILL");
@@ -272,12 +262,6 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   user = parv[1];
   path = parv[2]; /* Either defined or NULL (parc >= 2!!) */
-
-  if (!IsPrivileged(cptr))
-    {
-      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-      return 0;
-    }
 
   if (MyClient(sptr) && IsOper(sptr) && !IsSetOperK(sptr))
     {

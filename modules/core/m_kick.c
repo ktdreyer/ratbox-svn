@@ -38,7 +38,7 @@
 #include <string.h>
 
 struct Message kick_msgtab = {
-  MSG_KICK, 0, 2, 0, MFLG_SLOW, 0,
+  MSG_KICK, 0, 3, 0, MFLG_SLOW, 0,
   {m_unregistered, m_kick, ms_kick, m_kick}
 };
 
@@ -78,7 +78,7 @@ int     m_kick(struct Client *cptr,
   char  *user;
   static char     buf[BUFSIZE];
 
-  if (parc < 3 || *parv[1] == '\0')
+  if (*parv[2] == '\0')
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "KICK");
@@ -222,7 +222,7 @@ int     ms_kick(struct Client *cptr,
                int parc,
                char *parv[])
 {
-  if (parc < 3 || *parv[1] == '\0')
+  if (*parv[2] == '\0')
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "KICK");
@@ -230,7 +230,4 @@ int     ms_kick(struct Client *cptr,
     }
 
   return (m_kick(cptr, sptr, parc, parv));
-
-  /* NOT REACHED */
-  return (0);
 }

@@ -41,7 +41,7 @@
 #include "modules.h"
 
 struct Message invite_msgtab = {
-  MSG_INVITE, 0, 2, 0, MFLG_SLOW, 0,
+  MSG_INVITE, 0, 3, 0, MFLG_SLOW, 0,
   {m_unregistered, m_invite, ms_invite, m_invite}
 };
 
@@ -76,10 +76,10 @@ int     m_invite(struct Client *cptr,
   char   *chname;
   int    chop;			/* Is channel op */
 
-  if (parc < 3 || *parv[1] == '\0')
+  if (*parv[2] == '\0')
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-		 me.name, parv[0], "INVITE");
+                 me.name, parv[0], "INVITE");
       return -1;
     }
 

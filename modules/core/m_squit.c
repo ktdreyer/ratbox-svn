@@ -119,12 +119,6 @@ int ms_squit(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   struct squit_parms *found_squit;
   char  *comment = (parc > 2 && parv[2]) ? parv[2] : cptr->name;
 
-  if (!IsPrivileged(sptr))
-    {
-      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-      return 0;
-    }
-
   if(parc < 2)
     {
       return -1;

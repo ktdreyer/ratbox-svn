@@ -39,7 +39,8 @@
 #define UFLAGS  (FLAGS_INVISIBLE|FLAGS_WALLOP|FLAGS_SERVNOTICE)
 
 struct Message user_msgtab = {
-  MSG_USER, 0, 1, 0, MFLG_SLOW, 0L, {m_user, m_registered, m_ignore, m_registered}
+  MSG_USER, 0, 5, 0, MFLG_SLOW, 0L,
+  {m_user, m_registered, m_ignore, m_registered}
 };
 
 void
@@ -71,27 +72,21 @@ int m_user(struct Client* cptr, struct Client* sptr, int parc, char *parv[])
   char* server;
   char* realname;
  
-  if (parc > 2 && (username = strchr(parv[1],'@')))
+  if ((username = strchr(parv[1],'@')))
     *username = '\0'; 
-  if (parc < 5 || *parv[1] == '\0' || *parv[2] == '\0' ||
-      *parv[3] == '\0' || *parv[4] == '\0')
+
+  if (*parv[4] == '\0')
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
                  me.name, BadPtr(parv[0]) ? "*" : parv[0], "USER");
-      if (IsServer(cptr))
-        sendto_realops_flags(FLAGS_ALL,
-			     "bad USER param count for %s from %s",
-			     parv[0], get_client_name(cptr, HIDE_IP));
-      else
-        return 0;
+      return 0;
     }
 
   /* Copy parameters into better documenting variables */
+  username = parv[1];
+  host = parv[2];
+  server = parv[3];
+  realname = parv[4];
 
-  username = (parc < 2 || BadPtr(parv[1])) ? "<bad-boy>" : parv[1];
-  host     = (parc < 3 || BadPtr(parv[2])) ? "<nohost>" : parv[2];
-  server   = (parc < 4 || BadPtr(parv[3])) ? "<noserver>" : parv[3];
-  realname = (parc < 5 || BadPtr(parv[4])) ? "<bad-realname>" : parv[4];
-  
   return do_user(parv[0], cptr, sptr, username, host, server, realname);
 }

@@ -33,7 +33,7 @@
 #include "modules.h"
 
 struct Message pass_msgtab = {
-  MSG_PASS, 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0,
+  MSG_PASS, 0, 2, 0, MFLG_SLOW | MFLG_UNREG, 0,
   {m_pass, m_registered, m_ignore, m_registered}
 };
 
@@ -62,21 +62,17 @@ char *_version = "20001122";
  */
 int m_pass(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  char* password = parc > 1 ? parv[1] : NULL;
+  char* password = parv[1];
 
   if (EmptyString(password))
     {
       sendto_one(cptr, form_str(ERR_NEEDMOREPARAMS),
-                 me.name, parv[0], "PASS");
+                 me.name, BadPtr(parv[0]) ? "*" : parv[0], "PASS");
       return 0;
     }
-  if (!MyConnect(sptr) || (!IsUnknown(cptr) && !IsHandshake(cptr)))
-    {
-      sendto_one(cptr, form_str(ERR_ALREADYREGISTRED),
-                 me.name, parv[0]);
-      return 0;
-    }
+
   strncpy_irc(cptr->localClient->passwd, password, PASSWDLEN);
+
   if (parc > 2)
     {
       /* 

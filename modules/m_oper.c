@@ -52,8 +52,8 @@ extern        char *crypt();
 #endif /* CRYPT_OPER_PASSWORD */
 
 struct Message oper_msgtab = {
-	MSG_OPER, 0, 2, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_oper, ms_oper, mo_oper} 
+  MSG_OPER, 0, 3, 0, MFLG_SLOW, 0,
+  {m_unregistered, m_oper, ms_oper, mo_oper} 
 };
 
 void
@@ -83,10 +83,10 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   char  *password;
   dlink_node *ptr;
 
-  name = parc > 1 ? parv[1] : (char *)NULL;
-  password = parc > 2 ? parv[2] : (char *)NULL;
+  name = parv[1];
+  password = parv[2];
 
-  if ((EmptyString(name) || EmptyString(password)))
+  if (EmptyString(password))
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
 		 me.name, sptr->name, "OPER");

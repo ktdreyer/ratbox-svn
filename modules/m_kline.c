@@ -154,7 +154,7 @@ int mo_kline(struct Client *cptr,
       parc--;
     }
 
-  if(0 == parc)
+  if(parc == 0)
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
 		 me.name, sptr->name, "KLINE");
@@ -172,7 +172,7 @@ int mo_kline(struct Client *cptr,
 	{
 	  parc--;
 	  parv++;
-	  if(0 == parc)
+	  if(parc == 0)
 	    {
 	      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
 			 me.name, sptr->name, "KLINE");

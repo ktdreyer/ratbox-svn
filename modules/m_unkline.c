@@ -109,11 +109,6 @@ int mo_unkline (struct Client *cptr,struct Client *sptr,int parc,char *parv[])
 
   ircsprintf(temppath, "%s.tmp", ConfigFileEntry.klinefile);
   
-  if (check_registered(sptr))
-    {
-      return -1;
-    }
-
   if (!IsSetOperUnkline(sptr))
     {
       sendto_one(sptr,":%s NOTICE %s :You have no U flag",me.name,parv[0]);

@@ -45,7 +45,7 @@
 #include <assert.h>
 
 struct Message join_msgtab = {
-  MSG_JOIN, 0, 1, 0, MFLG_SLOW, 0,
+  MSG_JOIN, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_join, ms_join, m_join}
 };
 
@@ -95,7 +95,7 @@ int     m_join(struct Client *cptr,
       return 0;
     }
 
-  if (parc < 2 || *parv[1] == '\0')
+  if (*parv[1] == '\0')
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "JOIN");
