@@ -1,3 +1,15 @@
+androsyn    2004/06/15 00:14:45 EDT	(20040615_4)
+
+  Modified files:
+    modules              m_dline.c 
+  Log:
+  Make redundant dline logic allow for less specific dlines
+  
+  Revision  Changes    Path
+  1.36      +19 -14    ircd-ratbox/modules/m_dline.c
+
+
+
 androsyn    2004/06/15 00:02:54 EDT	(20040615_3)
 
   Modified files:
