@@ -53,6 +53,13 @@ void free_class(struct Class *tmp)
   MyFree((char *)tmp);
 }
 
+/*
+ * get_conf_ping
+ *
+ * inputs	- pointer to struct ConfItem
+ * output	- ping frequency
+ * side effects - NONE
+ */
 static  int     get_conf_ping(struct ConfItem *aconf)
 {
   if ((aconf) && ClassPtr(aconf))
@@ -64,6 +71,13 @@ static  int     get_conf_ping(struct ConfItem *aconf)
   return (BAD_PING);
 }
 
+/*
+ * get_client_class
+ *
+ * inputs	- pointer to client struct
+ * output	- pointer to name of class
+ * side effects - NONE
+ */
 const char*     get_client_class(struct Client *acptr)
 {
   dlink_node    *ptr;
@@ -86,6 +100,13 @@ const char*     get_client_class(struct Client *acptr)
   return (retc);
 }
 
+/*
+ * get_client_ping
+ *
+ * inputs	- pointer to client struct
+ * output	- ping frequency
+ * side effects - NONE
+ */
 int     get_client_ping(struct Client *acptr)
 {
   int   ping = 0;
@@ -93,33 +114,40 @@ int     get_client_ping(struct Client *acptr)
   struct ConfItem       *aconf;
   dlink_node		*link;
 
-  link = acptr->localClient->confs.head;
 
-  if (link)
-    while (link)
-      {
-        aconf = link->data;
-        if (aconf->status & (CONF_CLIENT|CONF_CONNECT_SERVER|
-                             CONF_NOCONNECT_SERVER))
-          {
-            ping2 = get_conf_ping(aconf);
-            if ((ping2 != BAD_PING) && ((ping > ping2) ||
-                                        !ping))
-              ping = ping2;
-          }
-        link = link->next;
-      }
+  if(acptr->localClient->confs.head != NULL)
+    {
+      for(link = acptr->localClient->confs.head; link; link = link->next)
+	{
+	  aconf = link->data;
+	  if (aconf->status & (CONF_CLIENT|CONF_CONNECT_SERVER|
+			       CONF_NOCONNECT_SERVER))
+	    {
+	      ping2 = get_conf_ping(aconf);
+	      if ((ping2 != BAD_PING) && ((ping > ping2) || !ping))
+		ping = ping2;
+	    }
+	}
+    }
   else
     {
       ping = PINGFREQUENCY;
       Debug((DEBUG_DEBUG,"No Attached Confs"));
     }
+
   if (ping <= 0)
     ping = PINGFREQUENCY;
   Debug((DEBUG_DEBUG,"Client %s Ping %d", acptr->name, ping));
   return (ping);
 }
 
+/*
+ * get_con_freq
+ *
+ * inputs	- pointer to class struct
+ * output	- connection frequency
+ * side effects - NONE
+ */
 int     get_con_freq(struct Class *clptr)
 {
   if (clptr)
@@ -129,6 +157,15 @@ int     get_con_freq(struct Class *clptr)
 }
 
 /*
+ * add_class
+ *
+ * inputs	- classname to use
+ * 		- ping frequency
+ *		- connection frequency
+ * 		- maximum links
+ *		- max sendq
+ * output	- NONE
+ * side effects -
  * When adding a class, check to see if it is already present first.
  * if so, then update the information for that class, rather than create
  * a new entry for it and later delete the old entry.
@@ -169,6 +206,13 @@ void    add_class(char *classname,
     Links(p) = 0;
 }
 
+/*
+ * find_class
+ *
+ * inputs	- string name of class
+ * output	- corresponding class pointer
+ * side effects	- NONE
+ */
 struct Class  *find_class(char* classname)
 {
   struct Class *cltmp;
@@ -182,6 +226,13 @@ struct Class  *find_class(char* classname)
   return ClassList;
 }
 
+/*
+ * check_class
+ *
+ * inputs	- NONE
+ * output	- NONE
+ * side effects	- 
+ */
 void    check_class()
 {
   struct Class *cltmp, *cltmp2;
@@ -205,6 +256,13 @@ void    check_class()
     }
 }
 
+/*
+ * initclass
+ *
+ * inputs	- NONE
+ * output	- NONE
+ * side effects	- 
+ */
 void    initclass()
 {
   ClassList = (struct Class *)make_class();
@@ -219,6 +277,13 @@ void    initclass()
   ClassList->next = NULL;
 }
 
+/*
+ * report_classes
+ *
+ * inputs	- pointer to client to report to
+ * output	- NONE
+ * side effects	- class report is done to this client
+ */
 void    report_classes(struct Client *sptr)
 {
   struct Class *cltmp;
@@ -229,6 +294,13 @@ void    report_classes(struct Client *sptr)
                MaxLinks(cltmp), MaxSendq(cltmp));
 }
 
+/*
+ * get_sendq
+ *
+ * inputs	- pointer to client
+ * output	- sendq for this client as found from its class
+ * side effects	- NONE
+ */
 long    get_sendq(struct Client *cptr)
 {
   int   sendq = MAXSENDQLENGTH, retc = BAD_CLIENT_CLASS;

@@ -232,7 +232,8 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
         /*
          * phew! we can copy a byte. Do it, and update the counters.
          * this definitely blows our register sets on most sane archs,
-         * but hey, someone can recode this later on if the want to.
+         * but hey, someone can recode this later on if they want to.
+	 * (ppc has 32 gp registers! -db)
          */
         *bufch = *ch; 
         bufch++;

@@ -24,6 +24,11 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.36  2000/12/05 17:41:21  db
+ * - cleaned up class.c adding more comment blocks
+ * - cleaned up s_conf.c to actually use nice defines instead of cryptic #'s
+ * - fixed typo in linebuf.c
+ *
  * Revision 7.35  2000/12/05 02:53:37  db
  * - removed duplicate function from m_kline.c replaced with function
  *   already in place but unused in s_conf.c duh. can we say BLOAT?
@@ -689,7 +694,7 @@ extern unsigned long cidr_to_bitmask[];
 #define NOT_AUTHORIZED  (-1)
 #define SOCKET_ERROR    (-2)
 #define I_LINE_FULL     (-3)
-#define I_LINE_FULL2    (-4)
+#define TOO_MANY        (-4)
 #define BANNED_CLIENT   (-5)
 
 #endif /* INCLUDED_s_conf_h */

@@ -363,12 +363,12 @@ void report_specials(struct Client* sptr, int flags, int numeric)
  * check_client
  *
  * inputs	- pointer to client
- * output	-   0 = Success
- * 		   -1 = Access denied (no I line match)
- * 		   -2 = Bad socket.
- * 		   -3 = I-line is full
- *		   -4 = Too many connections from hostname
- * 		   -5 = K-lined
+ * output	- 0 = Success
+ * 		  NOT_AUTHORIZED (-1) = Access denied (no I line match)
+ * 		  SOCKET_ERROR   (-2) = Bad socket.
+ * 		  I_LINE_FULL    (-3) = I-line is full
+ *		  TOO_MANY       (-4) = Too many connections from hostname
+ * 		  BANNED_CLIENT  (-5) = K-lined
  * side effects - Ordinary client access check.
  *		  Look for conf lines which have the same
  * 		  status as the flags passed.
@@ -394,10 +394,20 @@ int check_client(struct Client *cptr, struct Client *sptr, char *username)
       return exit_client(cptr, sptr, &me, "Socket Error");
       break;
 
+    case TOO_MANY:
+      sendto_realops_flags(FLAGS_FULL, "%s for %s (%s).",
+			   "Too many on IP", get_client_host(sptr),
+			   sptr->localClient->sockhost);
+      log(L_INFO,"Too many connections on IP from %s.", get_client_host(sptr));
+      ServerStats->is_ref++;
+      return exit_client(cptr, sptr, &me, 
+		 "No more connections allowed on that IP" );
+      break;
+
     case I_LINE_FULL:
-    case I_LINE_FULL2:
-      sendto_realops_flags(FLAGS_FULL, "%s for %s.",
-			   "I-line is full", get_client_host(sptr));
+      sendto_realops_flags(FLAGS_FULL, "%s for %s (%s).",
+			   "I-line is full", get_client_host(sptr),
+			   sptr->localClient->sockhost);
       log(L_INFO,"Too many connections from %s.", get_client_host(sptr));
       ServerStats->is_ref++;
       return exit_client(cptr, sptr, &me, 
@@ -482,27 +492,28 @@ int attach_Iline(struct Client* cptr, const char* username)
     {
       if (aconf->status & CONF_CLIENT)
         {
-	if (ConfigFileEntry.glines) {
-          if (!IsConfElined(aconf))
-            {
-	      if (IsGotId(cptr))
-		gkill_conf = find_gkill(cptr, cptr->username);
-	      else
-		gkill_conf = find_gkill(cptr, non_ident);
-	      if (gkill_conf)
+	  if (ConfigFileEntry.glines)
+	    {
+	      if (!IsConfElined(aconf))
 		{
-		  sendto_one(cptr, ":%s NOTICE %s :*** G-lined", me.name,
-			     cptr->name);
-		  sendto_one(cptr, ":%s NOTICE %s :*** Banned %s",
-			     me.name, cptr->name,
-			     gkill_conf->passwd);
-		  return -5;
+		  if (IsGotId(cptr))
+		    gkill_conf = find_gkill(cptr, cptr->username);
+		  else
+		    gkill_conf = find_gkill(cptr, non_ident);
+		  if (gkill_conf)
+		    {
+		      sendto_one(cptr, ":%s NOTICE %s :*** G-lined", me.name,
+				 cptr->name);
+		      sendto_one(cptr, ":%s NOTICE %s :*** Banned %s",
+				 me.name, cptr->name,
+				 gkill_conf->passwd);
+		      return(BANNED_CLIENT);
+		    }
 		}
 	    }
-	}
 
-	if(IsConfDoIdentd(aconf))
-	  SetNeedId(cptr);
+	  if(IsConfDoIdentd(aconf))
+	    SetNeedId(cptr);
 
 	  /* Thanks for spoof idea amm */
 	  if(IsConfDoSpoofIp(aconf))
@@ -528,13 +539,21 @@ int attach_Iline(struct Client* cptr, const char* username)
 	  (void)exit_client(cptr,cptr, &me, "*** Banned ");
 
 	  ServerStats->is_ref++;
-          return(-5);
+          return(BANNED_CLIENT);
         }
     }
 
-  return -1;        /* -1 on no match *bleh* */
+  return(NOT_AUTHORIZED);
 }
 
+/*
+ * attach_iline
+ *
+ * inputs	- client pointer
+ *		- conf pointer
+ * output	-
+ * side effects	-
+ */
 static int attach_iline(struct Client *cptr, struct ConfItem *aconf)
 {
   IP_ENTRY *ip_found;
@@ -548,7 +567,7 @@ static int attach_iline(struct Client *cptr, struct ConfItem *aconf)
   if (ConfConFreq(aconf) && ip_found->count > ConfConFreq(aconf))
     {
       if(!IsConfFlined(aconf))
-        return -4; /* Already at maximum allowed ip#'s */
+        return TOO_MANY; /* Already at maximum allowed ip#'s */
       else
         {
           sendto_one(cptr,
@@ -873,10 +892,15 @@ static int is_attached(struct ConfItem *aconf,struct Client *cptr)
 }
 
 /*
- * attach_conf - Associate a specific configuration entry to a *local*
- *        client (this is the one which used in accepting the
- *        connection). Note, that this automatically changes the
- *        attachment if there was an old one...
+ * attach_conf
+ * 
+ * inputs	- client pointer
+ * 		- conf pointer
+ * output	-
+ * side effects - Associate a specific configuration entry to a *local*
+ *                client (this is the one which used in accepting the
+ *                connection). Note, that this automatically changes the
+ *                attachment if there was an old one...
  */
 int attach_conf(struct Client *cptr,struct ConfItem *aconf)
 {
@@ -888,7 +912,7 @@ int attach_conf(struct Client *cptr,struct ConfItem *aconf)
     }
   if (IsIllegal(aconf))
     {
-      return -1;
+      return(NOT_AUTHORIZED);
     }
 
   if ( (aconf->status & (CONF_LOCOP | CONF_OPERATOR ) ) == 0 )
@@ -898,7 +922,7 @@ int attach_conf(struct Client *cptr,struct ConfItem *aconf)
         {
           if (!IsConfFlined(aconf))
             {
-              return -3;        /* Use this for printing error message */
+              return(I_LINE_FULL); 
             }
           else
             {
@@ -913,7 +937,6 @@ int attach_conf(struct Client *cptr,struct ConfItem *aconf)
 
   lp = make_dlink_node();
 
-  /* XXX */
   dlinkAdd(aconf, lp, &cptr->localClient->confs);
 
   aconf->clients++;
