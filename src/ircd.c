@@ -91,8 +91,6 @@ struct LocalUser meLocalUser;	/* That's also part of me */
 
 dlink_list global_client_list;
 
-struct JupedChannel *JupedChannelList = 0;
-
 /* unknown/client pointer lists */
 dlink_list unknown_list;	/* unknown clients ON this server only */
 dlink_list lclient_list;	/* local clients only ON this server */

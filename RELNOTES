@@ -30,6 +30,12 @@ it is important you read this file before upgrading.
   wasnt 4
 - fix a buffer overflow when removing bans
 - ignore ERR_NOSUCHSERVER directed at us, happens naturally now.
+- removed warning when clock runs backwards, happens naturally from ntp
+- first param of RPL_STATSXLINE is now the amount of times that xline has
+  been used to reject a client
+- "SAFELIST" added to 005
+- rewrote testline to be somewhat more useful
+- added testgecos to test a gecos against xlines
 
 -- ircd-ratbox-2.0rc1
 - fix servlink errors with high fds
