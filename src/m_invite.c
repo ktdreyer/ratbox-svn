@@ -158,8 +158,6 @@ int     m_invite(struct Client *cptr,
 
   if (HasVchans(chptr))
     {
-      if ((vchan = map_vchan(chptr,sptr)))
-	chptr = vchan;
       if (map_vchan(chptr,acptr))
 	{
 	  if (MyClient(sptr))
@@ -167,6 +165,9 @@ int     m_invite(struct Client *cptr,
 		       me.name, parv[0], parv[1], parv[2]);
 	  return 0;
 	}
+
+      if ((vchan = map_vchan(chptr,sptr)))
+	chptr = vchan;
     }
 
   if (!IsMember(sptr, chptr))
