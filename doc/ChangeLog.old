@@ -1,3 +1,10 @@
+*** 20010528_8 by davidt
+- Correct configure.in detection of cast (oops)
+- cipher_preference is now per-connect{} block, with a
+  default_cipher_preference line in general{}
+- Add modified version of encspeed.c from hybrid-6 cryptlinks patch
+
+
 *** 20010528_7 by davidt
 - Fix HAVE_ZLIB vs HAVE_LIBZ #ifdef that resulted in any ziplinks failing
   every 5 minutes.  bad david.
