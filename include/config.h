@@ -94,7 +94,7 @@
  */
 
 /* dirs */
-#define DPATH   IRCD_PREFIX                                                     
+#define DPATH   IRCD_PREFIX
 #define BINPATH IRCD_PREFIX "/bin/"
 #define MODPATH IRCD_PREFIX "/modules/"
 #define AUTOMODPATH IRCD_PREFIX "/modules/autoload/"
@@ -104,20 +104,20 @@
 #define HPATH  IRCD_PREFIX "/help/opers"
 
 /* files */
-#define SPATH    BINPATH "/ircd"                 /* ircd executable */
-#define SLPATH   BINPATH "/servlink"             /* servlink executable */
-#define CPATH    ETCPATH "/ircd.conf"            /* ircd.conf file */
-#define KPATH    ETCPATH "/kline.conf"           /* kline file */
-#define DLPATH   ETCPATH "/dline.conf"           /* dline file */
-#define XPATH	 ETCPATH "/xline.conf"		 /* xline file */
-#define RESVPATH ETCPATH "/resv.conf"            /* resv file */
-#define GPATH    LOGPATH "/gline.log"            /* gline logfile */
-#define RPATH    ETCPATH "/ircd.rsa"             /* ircd rsa private keyfile */
-#define MPATH    ETCPATH "/ircd.motd"            /* MOTD file */
-#define LPATH    LOGPATH "/ircd.log"             /* ircd logfile */
-#define PPATH    ETCPATH "/ircd.pid"             /* pid file */
-#define OPATH    ETCPATH "/opers.motd"           /* oper MOTD file */
-#define LIPATH   ETCPATH "/links.txt"            /* cached links file */
+#define SPATH    BINPATH "/ircd"	/* ircd executable */
+#define SLPATH   BINPATH "/servlink"	/* servlink executable */
+#define CPATH    ETCPATH "/ircd.conf"	/* ircd.conf file */
+#define KPATH    ETCPATH "/kline.conf"	/* kline file */
+#define DLPATH   ETCPATH "/dline.conf"	/* dline file */
+#define XPATH	 ETCPATH "/xline.conf"	/* xline file */
+#define RESVPATH ETCPATH "/resv.conf"	/* resv file */
+#define GPATH    LOGPATH "/gline.log"	/* gline logfile */
+#define RPATH    ETCPATH "/ircd.rsa"	/* ircd rsa private keyfile */
+#define MPATH    ETCPATH "/ircd.motd"	/* MOTD file */
+#define LPATH    LOGPATH "/ircd.log"	/* ircd logfile */
+#define PPATH    ETCPATH "/ircd.pid"	/* pid file */
+#define OPATH    ETCPATH "/opers.motd"	/* oper MOTD file */
+#define LIPATH   ETCPATH "/links.txt"	/* cached links file */
 
 #else /* !VMS */
 
@@ -143,22 +143,22 @@
 #undef  MODPATH
 #undef  AUTOMODPATH
 
-#define SPATH    BINPATH "IRCD.EXE"              /* server executable */
-#define SLPATH   BINPATH "SERVLINK.EXE"          /* servlink executable */
-#define CPATH    ETCPATH "IRCD.CONF"             /* config file */
-#define KPATH    ETCPATH "KLINE.CONF"            /* kline file */
-#define DLPATH   ETCPATH "DLINE.CONF"            /* dline file */
-#define XPATH	 ETCPATH "XLINE.CONF"		 /* xline file */
-#define RESVPATH ETCPATH "RESV.CONF"             /* resv file */
-#define GPATH    LOGPATH "GLINE.LOG"             /* gline logfile */
-#define RPATH    ETCPATH "IRCD.RSA"              /* RSA private key file */
-#define MPATH    ETCPATH "IRCD.MOTD"             /* MOTD filename */
-#define LPATH    LOGPATH "IRCD.LOG"              /* logfile */
-#define PPATH    ETCPATH "IRCD.PID"              /* pid file */
-#define HPATH    ETCPATH "OPERS.TXT"             /* oper help file */
-#define UHPATH   ETCPATH "USERS.TXT"             /* user help file */
-#define OPATH    ETCPATH "OPERS.MOTD"            /* oper MOTD file */
-#define LIPATH   ETCPATH "LINKS.TXT"             /* cached LINKS file */
+#define SPATH    BINPATH "IRCD.EXE"	/* server executable */
+#define SLPATH   BINPATH "SERVLINK.EXE"	/* servlink executable */
+#define CPATH    ETCPATH "IRCD.CONF"	/* config file */
+#define KPATH    ETCPATH "KLINE.CONF"	/* kline file */
+#define DLPATH   ETCPATH "DLINE.CONF"	/* dline file */
+#define XPATH	 ETCPATH "XLINE.CONF"	/* xline file */
+#define RESVPATH ETCPATH "RESV.CONF"	/* resv file */
+#define GPATH    LOGPATH "GLINE.LOG"	/* gline logfile */
+#define RPATH    ETCPATH "IRCD.RSA"	/* RSA private key file */
+#define MPATH    ETCPATH "IRCD.MOTD"	/* MOTD filename */
+#define LPATH    LOGPATH "IRCD.LOG"	/* logfile */
+#define PPATH    ETCPATH "IRCD.PID"	/* pid file */
+#define HPATH    ETCPATH "OPERS.TXT"	/* oper help file */
+#define UHPATH   ETCPATH "USERS.TXT"	/* user help file */
+#define OPATH    ETCPATH "OPERS.MOTD"	/* oper MOTD file */
+#define LIPATH   ETCPATH "LINKS.TXT"	/* cached LINKS file */
 
 #endif /* !VMS */
 
@@ -226,11 +226,11 @@
  * If you use syslog above, you may want to turn some (none) of the
  * spurious log messages for KILL,SQUIT,etc off.
  */
-#undef  SYSLOG_KILL     /* log all operator kills to syslog */
-#undef  SYSLOG_SQUIT    /* log all remote squits for all servers to syslog */
-#undef  SYSLOG_CONNECT  /* log remote connect messages for other all servs */
-#undef  SYSLOG_USERS    /* send userlog stuff to syslog */
-#undef  SYSLOG_OPER     /* log all users who successfully become an Op */
+#undef  SYSLOG_KILL		/* log all operator kills to syslog */
+#undef  SYSLOG_SQUIT		/* log all remote squits for all servers to syslog */
+#undef  SYSLOG_CONNECT		/* log remote connect messages for other all servs */
+#undef  SYSLOG_USERS		/* send userlog stuff to syslog */
+#undef  SYSLOG_OPER		/* log all users who successfully become an Op */
 
 /* LOG_FACILITY - facility to use for syslog()
  * Define the facility you want to use for syslog().  Ask your
@@ -269,14 +269,14 @@
  * 1997/09/18 recommended values by ThemBones for modern EFnet
  */
 
-#define HANGONRETRYDELAY 60     /* Recommended value: 30-60 seconds */
-#define HANGONGOODLINK 3600     /* Recommended value: 30-60 minutes */
+#define HANGONRETRYDELAY 60	/* Recommended value: 30-60 seconds */
+#define HANGONGOODLINK 3600	/* Recommended value: 30-60 minutes */
 
 /* KILLCHASETIMELIMIT -
  * Max time from the nickname change that still causes KILL
  * automatically to switch for the current nick of that user. (seconds)
  */
-#define KILLCHASETIMELIMIT 90   /* Recommended value: 90 */
+#define KILLCHASETIMELIMIT 90	/* Recommended value: 90 */
 
 /*
  * If the OS has SOMAXCONN use that value, otherwise
@@ -289,8 +289,8 @@
 
 /* 
  * Default pre-allocations for various things...
- */  
-#ifndef SMALL_NET  /* Normal net */
+ */
+#ifndef SMALL_NET		/* Normal net */
 #define CHANNEL_HEAP_SIZE	1024
 #define BAN_HEAP_SIZE		1024
 #define CLIENT_HEAP_SIZE	1024
@@ -301,7 +301,7 @@
 #define TOPIC_HEAP_SIZE		1024
 #define XLINE_HEAP_SIZE         20
 #define SHARED_HEAP_SIZE        10
-#else  /* Small Net */
+#else /* Small Net */
 #define CHANNEL_HEAP_SIZE	256
 #define BAN_HEAP_SIZE		128
 #define CLIENT_HEAP_SIZE	256
@@ -318,7 +318,7 @@
  * to make your client server very sluggish.
  * You usually shouldn't need this. -Dianora
 */
-#undef  DEBUGMODE               /* define DEBUGMODE to enable debugging mode.*/
+#undef  DEBUGMODE		/* define DEBUGMODE to enable debugging mode. */
 
 /*
  * this checks for various things that should never happen, but

@@ -49,30 +49,33 @@
 
 typedef struct scache_entry
 {
-  char name[HOSTLEN+1];
-  struct scache_entry *next;
-} SCACHE;
+	char name[HOSTLEN + 1];
+	struct scache_entry *next;
+}
+SCACHE;
 
 static SCACHE *scache_hash[SCACHE_HASH_SIZE];
 
-void clear_scache_hash_table(void)
+void
+clear_scache_hash_table (void)
 {
-  memset(scache_hash, 0, sizeof(scache_hash));
+	memset (scache_hash, 0, sizeof (scache_hash));
 }
 
-static int hash(const char* string)
+static int
+hash (const char *string)
 {
-  int hash_value;
+	int hash_value;
 
-  hash_value = 0;
-  while (*string)
-    {
-      hash_value += ToLower(*string);
-      /* I don't like auto increments inside macro calls... -db */
-      string++;
-    }
+	hash_value = 0;
+	while (*string)
+	{
+		hash_value += ToLower (*string);
+		/* I don't like auto increments inside macro calls... -db */
+		string++;
+	}
 
-  return hash_value % SCACHE_HASH_SIZE;
+	return hash_value % SCACHE_HASH_SIZE;
 }
 
 /*
@@ -83,26 +86,27 @@ static int hash(const char* string)
  * existing, servername.  use the hash in list.c for those.  -orabidoo
  */
 
-const char* find_or_add(const char* name)
+const char *
+find_or_add (const char *name)
 {
-  int     hash_index;
-  SCACHE* ptr;
+	int hash_index;
+	SCACHE *ptr;
 
-  ptr = scache_hash[hash_index = hash(name)];
-  for ( ; ptr; ptr = ptr->next) 
-    {
-      if (!irccmp(ptr->name, name))
-        return(ptr->name);
-    }
+	ptr = scache_hash[hash_index = hash (name)];
+	for (; ptr; ptr = ptr->next)
+	{
+		if(!irccmp (ptr->name, name))
+			return (ptr->name);
+	}
 
-  ptr = (SCACHE*) MyMalloc(sizeof(SCACHE));
-  assert(0 != ptr);
+	ptr = (SCACHE *) MyMalloc (sizeof (SCACHE));
+	assert (0 != ptr);
 
-  strlcpy(ptr->name, name, sizeof(ptr->name));
+	strlcpy (ptr->name, name, sizeof (ptr->name));
 
-  ptr->next = scache_hash[hash_index];
-  scache_hash[hash_index] = ptr;
-  return ptr->name;  
+	ptr->next = scache_hash[hash_index];
+	scache_hash[hash_index] = ptr;
+	return ptr->name;
 }
 
 /*
@@ -112,26 +116,25 @@ const char* find_or_add(const char* name)
  * output	- NONE
  * side effects	-
  */
-void count_scache(size_t *number_servers_cached,size_t *mem_servers_cached)
+void
+count_scache (size_t * number_servers_cached, size_t * mem_servers_cached)
 {
-  SCACHE *scache_ptr;
-  int i;
+	SCACHE *scache_ptr;
+	int i;
 
-  *number_servers_cached = 0;
-  *mem_servers_cached = 0;
+	*number_servers_cached = 0;
+	*mem_servers_cached = 0;
 
-  for(i = 0; i < SCACHE_HASH_SIZE ;i++)
-    {
-      scache_ptr = scache_hash[i];
-      while(scache_ptr)
-        {
-          *number_servers_cached = *number_servers_cached + 1;
-          *mem_servers_cached = *mem_servers_cached +
-            (strlen(scache_ptr->name) +
-             sizeof(SCACHE *));
+	for (i = 0; i < SCACHE_HASH_SIZE; i++)
+	{
+		scache_ptr = scache_hash[i];
+		while (scache_ptr)
+		{
+			*number_servers_cached = *number_servers_cached + 1;
+			*mem_servers_cached = *mem_servers_cached +
+				(strlen (scache_ptr->name) + sizeof (SCACHE *));
 
-          scache_ptr = scache_ptr->next;
-        }
-    }
+			scache_ptr = scache_ptr->next;
+		}
+	}
 }
-

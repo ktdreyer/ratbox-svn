@@ -35,51 +35,52 @@
 dlink_list hooks;
 
 void
-init_hooks(void)
+init_hooks (void)
 {
-	memset(&hooks, 0, sizeof(hooks));
+	memset (&hooks, 0, sizeof (hooks));
 #ifndef NDEBUG
-        hook_add_event("iosend");
-        hook_add_event("iorecv");
-        hook_add_event("iorecvctrl");
+	hook_add_event ("iosend");
+	hook_add_event ("iorecv");
+	hook_add_event ("iorecvctrl");
 #endif
-	hook_add_event("burst_channel");
+	hook_add_event ("burst_channel");
 }
 
 static hook *
-new_hook(const char *name)
+new_hook (const char *name)
 {
 	hook *h;
-	
-	h = MyMalloc(sizeof(hook));
-        DupString(h->name, name);
+
+	h = MyMalloc (sizeof (hook));
+	DupString (h->name, name);
 	return h;
 }
 
 int
-hook_add_event(const char *name)
+hook_add_event (const char *name)
 {
 	hook *newhook;
-	
-	newhook = new_hook(name);
-	
-	dlinkAddAlloc(newhook, &hooks);
+
+	newhook = new_hook (name);
+
+	dlinkAddAlloc (newhook, &hooks);
 	return 0;
 }
 
 int
-hook_del_event(const char *name)
+hook_del_event (const char *name)
 {
 	dlink_node *node;
 	hook *h;
-	
-	DLINK_FOREACH(node, hooks.head)
+
+	DLINK_FOREACH (node, hooks.head)
 	{
 		h = node->data;
-		
-		if (!strcmp(h->name, name)) {
-			dlinkDelete(node, &hooks);
-			MyFree(h);
+
+		if(!strcmp (h->name, name))
+		{
+			dlinkDelete (node, &hooks);
+			MyFree (h);
 			return 0;
 		}
 	}
@@ -87,72 +88,70 @@ hook_del_event(const char *name)
 }
 
 static hook *
-find_hook(const char *name)
+find_hook (const char *name)
 {
 	dlink_node *node;
 	hook *h;
-	
-	DLINK_FOREACH(node, hooks.head)
+
+	DLINK_FOREACH (node, hooks.head)
 	{
 		h = node->data;
-		
-		if (!strcmp(h->name, name))
+
+		if(!strcmp (h->name, name))
 			return h;
 	}
 	return NULL;
 }
 
-int 
-hook_del_hook(const char *event, hookfn *fn)
-{
- hook *h;
- dlink_node *node, *nnode;
- h = find_hook(event);
- if (!h)
-  return -1;
-   
- DLINK_FOREACH_SAFE(node, nnode, h->hooks.head)
- {
-  if (fn == node->data)
-  {
-   dlinkDestroy(node, &h->hooks);
-  } 
- }
- return 0;
-}
-
 int
-hook_add_hook(const char *event, hookfn *fn)
+hook_del_hook (const char *event, hookfn * fn)
 {
 	hook *h;
-	
-	h = find_hook(event);
-	if (!h) 
+	dlink_node *node, *nnode;
+	h = find_hook (event);
+	if(!h)
 		return -1;
 
-	dlinkAddAlloc(fn, &h->hooks);
-	return 0;
-}
-
-int
-hook_call_event(const char *event, void *data)
-{
-	hook *h;
-	dlink_node *node;
-	hookfn fn;
-	
-	h = find_hook(event);
-	if (!h)
-		return -1;
-
-	DLINK_FOREACH(node, h->hooks.head)
+	DLINK_FOREACH_SAFE (node, nnode, h->hooks.head)
 	{
-		fn = (hookfn)(uintptr_t)node->data;
-		
-		if (fn(data) != 0)
-			return 0;
+		if(fn == node->data)
+		{
+			dlinkDestroy (node, &h->hooks);
+		}
 	}
 	return 0;
 }
 
-		
+int
+hook_add_hook (const char *event, hookfn * fn)
+{
+	hook *h;
+
+	h = find_hook (event);
+	if(!h)
+		return -1;
+
+	dlinkAddAlloc (fn, &h->hooks);
+	return 0;
+}
+
+int
+hook_call_event (const char *event, void *data)
+{
+	hook *h;
+	dlink_node *node;
+	hookfn fn;
+
+	h = find_hook (event);
+	if(!h)
+		return -1;
+
+	DLINK_FOREACH (node, h->hooks.head)
+	{
+		fn = (hookfn) (uintptr_t) node->data;
+
+		if(fn (data) != 0)
+			return 0;
+	}
+	return 0;
+}

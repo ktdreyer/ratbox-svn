@@ -35,21 +35,19 @@
  */
 
 
-extern int
-irc_vsprintf(struct Client *, char *, const char *, va_list ap);
+extern int irc_vsprintf (struct Client *, char *, const char *, va_list ap);
 
 /*
  * ircsprintf - optimized sprintf
  */
 #ifdef __GNUC__
-extern int ircsprintf(char*, const char*, ...)
-		__attribute__ ((format(printf, 2, 3)));
-extern int irc_sprintf(struct Client *, char *, const char *, ...) 
-		__attribute__ ((format(printf, 3, 4)));
+extern int ircsprintf (char *, const char *, ...) __attribute__ ((format (printf, 2, 3)));
+extern int irc_sprintf (struct Client *, char *, const char *, ...)
+	__attribute__ ((format (printf, 3, 4)));
 
 #else
-extern int ircsprintf(char *str, const char *format, ...);
-extern int irc_sprintf(struct Client *, char *, const char *, ...);
+extern int ircsprintf (char *str, const char *format, ...);
+extern int irc_sprintf (struct Client *, char *, const char *, ...);
 
 #endif
 

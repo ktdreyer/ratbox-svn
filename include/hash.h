@@ -45,48 +45,39 @@ struct ResvEntry;
 
 struct HashEntry
 {
-  int    hits;
-  int    links;
-  dlink_list list;
+	int hits;
+	int links;
+	dlink_list list;
 };
 
-void clear_hostname_hash_table(void);
+void clear_hostname_hash_table (void);
 
-struct Client *find_id(const char *name);
-extern int add_to_id_hash_table(char *, struct Client *);
-extern struct HashEntry hash_get_channel_block(int i);
+struct Client *find_id (const char *name);
+extern int add_to_id_hash_table (char *, struct Client *);
+extern struct HashEntry hash_get_channel_block (int i);
 
-extern struct Channel
-*get_or_create_channel(struct Client *client_p, char *chname, int *isnew);
+extern struct Channel *get_or_create_channel (struct Client *client_p, char *chname, int *isnew);
 
-extern size_t hash_get_client_table_size(void);
-extern size_t hash_get_channel_table_size(void);
-extern size_t hash_get_resv_table_size(void);
+extern size_t hash_get_client_table_size (void);
+extern size_t hash_get_channel_table_size (void);
+extern size_t hash_get_resv_table_size (void);
 
-extern void   init_hash(void);
-extern void   add_to_client_hash_table(const char* name, 
-                                       struct Client* client);
-extern void   del_from_client_hash_table(const char* name, 
-                                         struct Client* client);
-extern void   del_from_id_hash_table(const char *name, struct Client *client);
-extern void   del_from_channel_hash_table(const char* name, 
-                                          struct Channel* chan);
-extern struct Channel* hash_find_channel(const char* name);
-extern struct Client* find_client(const char* name);
-extern struct Client* find_server(const char* name);
-extern struct Client* hash_find_server(const char* name);
+extern void init_hash (void);
+extern void add_to_client_hash_table (const char *name, struct Client *client);
+extern void del_from_client_hash_table (const char *name, struct Client *client);
+extern void del_from_id_hash_table (const char *name, struct Client *client);
+extern void del_from_channel_hash_table (const char *name, struct Channel *chan);
+extern struct Channel *hash_find_channel (const char *name);
+extern struct Client *find_client (const char *name);
+extern struct Client *find_server (const char *name);
+extern struct Client *hash_find_server (const char *name);
 
-dlink_node *find_hostname(const char *);
-void del_from_hostname_hash_table(const char *, struct Client *);
-void add_to_hostname_hash_table(const char *, struct Client *);
+dlink_node *find_hostname (const char *);
+void del_from_hostname_hash_table (const char *, struct Client *);
+void add_to_hostname_hash_table (const char *, struct Client *);
 
-extern void add_to_resv_hash_table(const char *name,
-                                   struct ResvEntry *resv_p);
-extern void del_from_resv_hash_table(const char *name,
-                                     struct ResvEntry *resv_p);
-extern struct ResvEntry *hash_find_resv(const char *name);
+extern void add_to_resv_hash_table (const char *name, struct ResvEntry *resv_p);
+extern void del_from_resv_hash_table (const char *name, struct ResvEntry *resv_p);
+extern struct ResvEntry *hash_find_resv (const char *name);
 
-#endif  /* INCLUDED_hash_h */
-
-
-
+#endif /* INCLUDED_hash_h */

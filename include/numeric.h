@@ -33,7 +33,7 @@
  * form_str - return a format string for a message number
  * messages are defined below
  */
-extern const char* form_str(int);
+extern const char *form_str (int);
 
 /*
  * Reserve numerics 000-099 for server-client connections where the client
@@ -47,9 +47,9 @@ extern const char* form_str(int);
 #define RPL_ISUPPORT         005
 
 #define RPL_REDIR            10
-#define RPL_MAP		     15		/* Undernet extension */
-#define RPL_MAPMORE	     16		/* Undernet extension */
-#define RPL_MAPEND	     17		/* Undernet extension */
+#define RPL_MAP		     15	/* Undernet extension */
+#define RPL_MAPMORE	     16	/* Undernet extension */
+#define RPL_MAPEND	     17	/* Undernet extension */
 #define RPL_YOURID           20
 
 /*
@@ -140,7 +140,7 @@ extern const char* form_str(int);
 /* rpl_endofwho below (315) */
 #define RPL_ENDOFWHOWAS      369
 
-#define RPL_WHOISCHANOP      316 /* redundant and not needed but reserved */
+#define RPL_WHOISCHANOP      316	/* redundant and not needed but reserved */
 #define RPL_WHOISIDLE        317
 
 #define RPL_ENDOFWHOIS       318
@@ -261,8 +261,8 @@ extern const char* form_str(int);
 #define ERR_BANNEDFROMCHAN   474
 #define ERR_BADCHANNELKEY    475
 #define ERR_BADCHANMASK      476
-#define ERR_MODELESS         477        /* ircu numeric -db */
-#define ERR_BANLISTFULL      478        /* I stole the numeric from ircu -db */
+#define ERR_MODELESS         477	/* ircu numeric -db */
+#define ERR_BANLISTFULL      478	/* I stole the numeric from ircu -db */
 #define ERR_BADCHANNAME      479
 
 #define ERR_NOPRIVILEGES     481

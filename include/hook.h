@@ -34,15 +34,16 @@ typedef struct
 {
 	char *name;
 	dlink_list hooks;
-} hook;
+}
+hook;
 
 /* we don't define the arguments to hookfn, because they can
    vary between different hooks */
-typedef int (*hookfn)(void *data);
+typedef int (*hookfn) (void *data);
 
 /* this is used when a hook is called by an m_function
    stand data you'd need in that situation */
-struct hook_mfunc_data 
+struct hook_mfunc_data
 {
 	struct Client *client_p;
 	struct Client *source_p;
@@ -50,7 +51,7 @@ struct hook_mfunc_data
 	char **parv;
 };
 
-struct hook_stats_data 
+struct hook_stats_data
 {
 	struct Client *source_p;
 	char statchar;
@@ -74,9 +75,9 @@ struct hook_spy_data
 
 struct hook_io_data
 {
-        struct Client *connection;
-        char *data;
-        unsigned int len;
+	struct Client *connection;
+	char *data;
+	unsigned int len;
 };
 
 struct hook_burst_channel
@@ -86,11 +87,11 @@ struct hook_burst_channel
 };
 
 
-int hook_add_event(const char *);
-int hook_add_hook(const char *, hookfn *);
-int hook_call_event(const char *, void *);
-int hook_del_event(const char *);
-int hook_del_hook(const char *event, hookfn *fn);
-void init_hooks(void);
+int hook_add_event (const char *);
+int hook_add_hook (const char *, hookfn *);
+int hook_call_event (const char *, void *);
+int hook_del_event (const char *);
+int hook_del_hook (const char *event, hookfn * fn);
+void init_hooks (void);
 
 #endif

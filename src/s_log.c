@@ -30,13 +30,13 @@
 #include <syslog.h>
 #endif
 
-#include "client.h"	/* Needed for struct Client */
+#include "client.h"		/* Needed for struct Client */
 #include "s_log.h"
 #include "fileio.h"
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "ircd.h"
-#include "event.h"	/* Needed for EVH etc. */
+#include "event.h"		/* Needed for EVH etc. */
 #include "s_conf.h"
 #include "memory.h"
 
@@ -46,146 +46,145 @@
 #define LOG_BUFSIZE 2000
 
 #ifdef USE_LOGFILE
-static FBFILE* logFile;
+static FBFILE *logFile;
 #endif
 static int logLevel = INIT_LOG_LEVEL;
 
 
 #ifndef SYSLOG_USERS
 static EVH user_log_resync;
-static FBFILE *user_log_fb=NULL;
+static FBFILE *user_log_fb = NULL;
 #endif
 
 
 #ifdef USE_SYSLOG
 static int sysLogLevel[] = {
-  LOG_CRIT,
-  LOG_ERR,
-  LOG_WARNING,
-  LOG_NOTICE,
-  LOG_INFO,
-  LOG_INFO,
-  LOG_INFO
+	LOG_CRIT,
+	LOG_ERR,
+	LOG_WARNING,
+	LOG_NOTICE,
+	LOG_INFO,
+	LOG_INFO,
+	LOG_INFO
 };
 #endif
 
-static const char *logLevelToString[] =
-{ "L_CRIT",
-  "L_ERROR",
-  "L_WARN",
-  "L_NOTICE",
-  "L_TRACE",
-  "L_INFO",
-  "L_DEBUG"
+static const char *logLevelToString[] = { "L_CRIT",
+	"L_ERROR",
+	"L_WARN",
+	"L_NOTICE",
+	"L_TRACE",
+	"L_INFO",
+	"L_DEBUG"
 };
 
 /*
  * open_log - open ircd logging file
  * returns true (1) if successful, false (0) otherwise
  */
-#if defined(USE_LOGFILE) 
+#if defined(USE_LOGFILE)
 
-static int 
-open_log(const char* filename)
+static int
+open_log (const char *filename)
 {
-  logFile = fbopen(filename, "a");
-  if (logFile == NULL)
-  {
+	logFile = fbopen (filename, "a");
+	if(logFile == NULL)
+	{
 #ifdef USE_SYSLOG
-    syslog(LOG_ERR, "Unable to open log file: %s: %s",
-           filename, strerror(errno));
+		syslog (LOG_ERR, "Unable to open log file: %s: %s", filename, strerror (errno));
 #endif
-    return 0;
-  }
-  return 1;
+		return 0;
+	}
+	return 1;
 }
 #endif
 
 
-#if defined(USE_LOGFILE) 
-static void 
-write_log(const char* message)
+#if defined(USE_LOGFILE)
+static void
+write_log (const char *message)
 {
-  char buf[LOG_BUFSIZE];
+	char buf[LOG_BUFSIZE];
 
-  if(logFile == NULL)
-    return;
+	if(logFile == NULL)
+		return;
 
-  snprintf(buf, LOG_BUFSIZE, "[%s] %s\n", smalldate(), message);
-  fbputs(buf, logFile);
+	snprintf (buf, LOG_BUFSIZE, "[%s] %s\n", smalldate (), message);
+	fbputs (buf, logFile);
 }
 #endif
-   
-void 
-ilog(int priority, const char* fmt, ...)
+
+void
+ilog (int priority, const char *fmt, ...)
 {
-  char    buf[LOG_BUFSIZE];
-  va_list args;
-  assert(-1 < priority);
-  if(fmt == NULL)
-    return;
+	char buf[LOG_BUFSIZE];
+	va_list args;
+	assert (-1 < priority);
+	if(fmt == NULL)
+		return;
 
-  if (priority > logLevel)
-    return;
+	if(priority > logLevel)
+		return;
 
-  va_start(args, fmt);
-  vsprintf(buf, fmt, args);
-  va_end(args);
+	va_start (args, fmt);
+	vsprintf (buf, fmt, args);
+	va_end (args);
 
-#ifdef USE_SYSLOG  
-  if (priority <= L_DEBUG)
-    syslog(sysLogLevel[priority], "%s", buf);
-#endif
-#if defined(USE_LOGFILE) 
-  write_log(buf);
-#endif
-}
-  
-void 
-init_log(const char* filename)
-{
-#if defined(USE_LOGFILE) 
-  open_log(filename);
-#endif
 #ifdef USE_SYSLOG
-  openlog("ircd", LOG_PID | LOG_NDELAY, LOG_FACILITY);
+	if(priority <= L_DEBUG)
+		syslog (sysLogLevel[priority], "%s", buf);
 #endif
-#ifndef SYSLOG_USERS
-  eventAddIsh("user_log_resync", user_log_resync, NULL, 60);
+#if defined(USE_LOGFILE)
+	write_log (buf);
 #endif
 }
 
 void
-reopen_log(const char* filename)
+init_log (const char *filename)
 {
 #if defined(USE_LOGFILE)
-  fbclose(logFile);
-  open_log(filename);
-#endif  
-  
-}
-void 
-set_log_level(int level)
-{
-  if (L_ERROR < level && level <= L_DEBUG)
-    logLevel = level;
+	open_log (filename);
+#endif
+#ifdef USE_SYSLOG
+	openlog ("ircd", LOG_PID | LOG_NDELAY, LOG_FACILITY);
+#endif
+#ifndef SYSLOG_USERS
+	eventAddIsh ("user_log_resync", user_log_resync, NULL, 60);
+#endif
 }
 
-int 
-get_log_level(void)
+void
+reopen_log (const char *filename)
 {
-  return( logLevel );
+#if defined(USE_LOGFILE)
+	fbclose (logFile);
+	open_log (filename);
+#endif
+
+}
+
+void
+set_log_level (int level)
+{
+	if(L_ERROR < level && level <= L_DEBUG)
+		logLevel = level;
+}
+
+int
+get_log_level (void)
+{
+	return (logLevel);
 }
 
 const char *
-get_log_level_as_string(int level)
+get_log_level_as_string (int level)
 {
-  if(level > L_DEBUG)
-    level = L_DEBUG;
-  else if(level < L_ERROR)
-    level = L_ERROR;
+	if(level > L_DEBUG)
+		level = L_DEBUG;
+	else if(level < L_ERROR)
+		level = L_ERROR;
 
-  return(logLevelToString[level]);
+	return (logLevelToString[level]);
 }
 
 
@@ -197,67 +196,68 @@ get_log_level_as_string(int level)
  * side effects - Current exiting client is logged to
  *		  either SYSLOG or to file.
  */
-void 
-log_user_exit(struct Client *source_p)
+void
+log_user_exit (struct Client *source_p)
 {
-  time_t        on_for;
+	time_t on_for;
 
-  on_for = CurrentTime - source_p->firsttime;
+	on_for = CurrentTime - source_p->firsttime;
 
 #ifdef SYSLOG_USERS
 
-  if (IsPerson(source_p))
-    {
+	if(IsPerson (source_p))
+	{
 
-      ilog(L_INFO, "%s (%3ld:%02ld:%02ld): %s!%s@%s %ld/%ld\n",
-	  myctime(source_p->firsttime),
-	  (signed long) on_for / 3600,
-	  (signed long) (on_for % 3600)/60,
-	  (signed long) on_for % 60,
-	  source_p->name, source_p->username, source_p->host,
-	  source_p->localClient->sendK, source_p->localClient->receiveK);
-    }
+		ilog (L_INFO, "%s (%3ld:%02ld:%02ld): %s!%s@%s %ld/%ld\n",
+		      myctime (source_p->firsttime),
+		      (signed long) on_for / 3600,
+		      (signed long) (on_for % 3600) / 60,
+		      (signed long) on_for % 60,
+		      source_p->name, source_p->username, source_p->host,
+		      source_p->localClient->sendK, source_p->localClient->receiveK);
+	}
 
 #else
-  {
-    char        linebuf[BUFSIZ];
+	{
+		char linebuf[BUFSIZ];
 
-    /*
-     * This conditional makes the logfile active only after
-     * it's been created - thus logging can be turned off by
-     * removing the file.
-     * -Taner
-     */
-    if (IsPerson(source_p))
-      {
-	if (user_log_fb == NULL)
-	  {
-	    if((ConfigFileEntry.fname_userlog[0] != '\0') && 
-		(user_log_fb = fbopen(ConfigFileEntry.fname_userlog, "r")) != NULL )
-	      {
-		fbclose(user_log_fb);
-		user_log_fb = fbopen(ConfigFileEntry.fname_userlog, "a");
-	      }
-	  }
+		/*
+		 * This conditional makes the logfile active only after
+		 * it's been created - thus logging can be turned off by
+		 * removing the file.
+		 * -Taner
+		 */
+		if(IsPerson (source_p))
+		{
+			if(user_log_fb == NULL)
+			{
+				if((ConfigFileEntry.fname_userlog[0] != '\0')
+				   && (user_log_fb =
+				       fbopen (ConfigFileEntry.fname_userlog, "r")) != NULL)
+				{
+					fbclose (user_log_fb);
+					user_log_fb = fbopen (ConfigFileEntry.fname_userlog, "a");
+				}
+			}
 
-	if( user_log_fb != NULL )
-	  {
-	    ircsprintf(linebuf,
-		       "%s (%3ld:%02ld:%02ld): %s!%s@%s %d/%d\n",
-		       myctime(source_p->firsttime),
-		       (signed long) on_for / 3600,
-		       (signed long) (on_for % 3600)/60,
-		       (signed long) on_for % 60,
-		       source_p->name,
-		       source_p->username,
-		       source_p->host,
-		       source_p->localClient->sendK,
-		       source_p->localClient->receiveK);
+			if(user_log_fb != NULL)
+			{
+				ircsprintf (linebuf,
+					    "%s (%3ld:%02ld:%02ld): %s!%s@%s %d/%d\n",
+					    myctime (source_p->firsttime),
+					    (signed long) on_for / 3600,
+					    (signed long) (on_for % 3600) /
+					    60, (signed long) on_for % 60,
+					    source_p->name,
+					    source_p->username,
+					    source_p->host,
+					    source_p->localClient->sendK,
+					    source_p->localClient->receiveK);
 
-	    fbputs(linebuf, user_log_fb);
-	  }
-      }
-  }
+				fbputs (linebuf, user_log_fb);
+			}
+		}
+	}
 #endif
 }
 
@@ -270,13 +270,13 @@ log_user_exit(struct Client *source_p)
  * side effects	-
  */
 static void
-user_log_resync(void *notused)
+user_log_resync (void *notused)
 {
-  if (user_log_fb != NULL)
-    {
-      fbclose(user_log_fb);
-      user_log_fb = NULL;
-    }
+	if(user_log_fb != NULL)
+	{
+		fbclose (user_log_fb);
+		user_log_fb = NULL;
+	}
 }
 #endif
 
@@ -288,34 +288,33 @@ user_log_resync(void *notused)
  * side effects - FNAME_OPERLOG is written to, if its present
  */
 
-void 
-log_oper( struct Client *source_p, char *name )
+void
+log_oper (struct Client *source_p, char *name)
 {
-  FBFILE *oper_fb;
-  char linebuf[BUFSIZE];
+	FBFILE *oper_fb;
+	char linebuf[BUFSIZE];
 
-  if(ConfigFileEntry.fname_operlog[0] == '\0')
-    return;
-  
-  if (IsPerson(source_p))
-    {
-      if( (oper_fb = fbopen(ConfigFileEntry.fname_operlog, "r")) != NULL )
+	if(ConfigFileEntry.fname_operlog[0] == '\0')
+		return;
+
+	if(IsPerson (source_p))
 	{
-	  fbclose(oper_fb);
-	  oper_fb = fbopen(ConfigFileEntry.fname_operlog, "a");
-	}
+		if((oper_fb = fbopen (ConfigFileEntry.fname_operlog, "r")) != NULL)
+		{
+			fbclose (oper_fb);
+			oper_fb = fbopen (ConfigFileEntry.fname_operlog, "a");
+		}
 
-      if(oper_fb != NULL)
-	{
-	  ircsprintf(linebuf, "%s OPER (%s) by (%s!%s@%s)\n",
-		     myctime(CurrentTime), name, 
-		     source_p->name, source_p->username,
-		     source_p->host);
+		if(oper_fb != NULL)
+		{
+			ircsprintf (linebuf, "%s OPER (%s) by (%s!%s@%s)\n",
+				    myctime (CurrentTime), name,
+				    source_p->name, source_p->username, source_p->host);
 
-	  fbputs(linebuf,oper_fb);
-	  fbclose(oper_fb);
+			fbputs (linebuf, oper_fb);
+			fbclose (oper_fb);
+		}
 	}
-    }
 }
 
 /* log_foper()
@@ -325,31 +324,32 @@ log_oper( struct Client *source_p, char *name )
  * side effects - FNAME_FOPERLOG is written to, if present
  */
 void
-log_foper(struct Client *source_p, char *name)
+log_foper (struct Client *source_p, char *name)
 {
-  FBFILE *oper_fb;
-  char linebuf[BUFSIZE];
+	FBFILE *oper_fb;
+	char linebuf[BUFSIZE];
 
-  if(ConfigFileEntry.fname_foperlog[0] == '\0')
-    return;
+	if(ConfigFileEntry.fname_foperlog[0] == '\0')
+		return;
 
-  if(IsPerson(source_p))
-  {
-    if((oper_fb = fbopen(ConfigFileEntry.fname_foperlog, "r")) != NULL)
-    {
-      fbclose(oper_fb);
-      oper_fb = fbopen(ConfigFileEntry.fname_foperlog, "a");
-    }
+	if(IsPerson (source_p))
+	{
+		if((oper_fb = fbopen (ConfigFileEntry.fname_foperlog, "r")) != NULL)
+		{
+			fbclose (oper_fb);
+			oper_fb = fbopen (ConfigFileEntry.fname_foperlog, "a");
+		}
 
-    if(oper_fb != NULL)
-    {
-      ircsprintf(linebuf, "%s FAILED OPER (%s) by (%s!%s@%s)\n",
-                 myctime(CurrentTime), name,
-                 source_p->name, source_p->username, source_p->host);
-      fbputs(linebuf,oper_fb);
-      fbclose(oper_fb);
-    }
-  }
+		if(oper_fb != NULL)
+		{
+			ircsprintf (linebuf,
+				    "%s FAILED OPER (%s) by (%s!%s@%s)\n",
+				    myctime (CurrentTime), name,
+				    source_p->name, source_p->username, source_p->host);
+			fbputs (linebuf, oper_fb);
+			fbclose (oper_fb);
+		}
+	}
 }
 
 /* smalldate()
@@ -357,19 +357,17 @@ log_foper(struct Client *source_p, char *name)
  * returns a date in the form YY/MM/DD HH.MM
  */
 const char *
-smalldate(void)
+smalldate (void)
 {
-  static char buf[MAX_DATE_STRING];
-  struct tm *lt;
-  time_t lclock;
+	static char buf[MAX_DATE_STRING];
+	struct tm *lt;
+	time_t lclock;
 
-  lclock = CurrentTime;
-  lt = localtime(&lclock);
+	lclock = CurrentTime;
+	lt = localtime (&lclock);
 
-  ircsprintf(buf, "%d/%d/%d %02d.%02d",
-             lt->tm_year + 1900, lt->tm_mon + 1, lt->tm_mday,
-             lt->tm_hour, lt->tm_min);
+	ircsprintf (buf, "%d/%d/%d %02d.%02d",
+		    lt->tm_year + 1900, lt->tm_mon + 1, lt->tm_mday, lt->tm_hour, lt->tm_min);
 
-  return buf;
+	return buf;
 }
-

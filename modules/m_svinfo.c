@@ -26,7 +26,7 @@
 #include "stdinc.h"
 #include "handlers.h"
 #include "client.h"
-#include "common.h"     /* TRUE bleah */
+#include "common.h"		/* TRUE bleah */
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -38,24 +38,24 @@
 #include "modules.h"
 
 
-static void ms_svinfo(struct Client*, struct Client*, int, char**);
+static void ms_svinfo (struct Client *, struct Client *, int, char **);
 
 struct Message svinfo_msgtab = {
-  "SVINFO", 0, 0, 4, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_ignore, ms_svinfo, m_ignore}
+	"SVINFO", 0, 0, 4, 0, MFLG_SLOW, 0,
+	{m_unregistered, m_ignore, ms_svinfo, m_ignore}
 };
 
 #ifndef STATIC_MODULES
 void
-_modinit(void)
+_modinit (void)
 {
-  mod_add_cmd(&svinfo_msgtab);
+	mod_add_cmd (&svinfo_msgtab);
 }
 
 void
-_moddeinit(void)
+_moddeinit (void)
 {
-  mod_del_cmd(&svinfo_msgtab);
+	mod_del_cmd (&svinfo_msgtab);
 }
 
 const char *_version = "$Revision$";
@@ -68,71 +68,68 @@ const char *_version = "$Revision$";
  *      parv[3] = server is standalone or connected to non-TS only
  *      parv[4] = server's idea of UTC time
  */
-static void ms_svinfo(struct Client *client_p, struct Client *source_p,
-                     int parc, char *parv[])
+static void
+ms_svinfo (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-  time_t deltat;
-  time_t theirtime;
+	time_t deltat;
+	time_t theirtime;
 
-  if (MyConnect(source_p) && IsUnknown(source_p))
-  {
-    exit_client(source_p, source_p, source_p, "Need SERVER before SVINFO");
-    return;
-  }
+	if(MyConnect (source_p) && IsUnknown (source_p))
+	{
+		exit_client (source_p, source_p, source_p, "Need SERVER before SVINFO");
+		return;
+	}
 
-  if (!IsServer(source_p) || !MyConnect(source_p) || parc < 5)
-    return;
+	if(!IsServer (source_p) || !MyConnect (source_p) || parc < 5)
+		return;
 
-  if (TS_CURRENT < atoi(parv[2]) || atoi(parv[1]) < TS_MIN)
-    {
-      /*
-       * a server with the wrong TS version connected; since we're
-       * TS_ONLY we can't fall back to the non-TS protocol so
-       * we drop the link  -orabidoo
-       */
-      sendto_realops_flags(UMODE_ALL, L_ADMIN,
-            "Link %s dropped, wrong TS protocol version (%s,%s)",
-            get_client_name(source_p, SHOW_IP), parv[1], parv[2]);
-      sendto_realops_flags(UMODE_ALL, L_OPER,
-                 "Link %s dropped, wrong TS protocol version (%s,%s)",
-                 get_client_name(source_p, MASK_IP), parv[1], parv[2]);
-      exit_client(source_p, source_p, source_p, "Incompatible TS version");
-      return;
-    }
+	if(TS_CURRENT < atoi (parv[2]) || atoi (parv[1]) < TS_MIN)
+	{
+		/*
+		 * a server with the wrong TS version connected; since we're
+		 * TS_ONLY we can't fall back to the non-TS protocol so
+		 * we drop the link  -orabidoo
+		 */
+		sendto_realops_flags (UMODE_ALL, L_ADMIN,
+				      "Link %s dropped, wrong TS protocol version (%s,%s)",
+				      get_client_name (source_p, SHOW_IP), parv[1], parv[2]);
+		sendto_realops_flags (UMODE_ALL, L_OPER,
+				      "Link %s dropped, wrong TS protocol version (%s,%s)",
+				      get_client_name (source_p, MASK_IP), parv[1], parv[2]);
+		exit_client (source_p, source_p, source_p, "Incompatible TS version");
+		return;
+	}
 
-  /*
-   * since we're here, might as well set CurrentTime while we're at it
-   */
-  set_time(); 
-  theirtime = atol(parv[4]);
-  deltat = abs(theirtime - CurrentTime);
+	/*
+	 * since we're here, might as well set CurrentTime while we're at it
+	 */
+	set_time ();
+	theirtime = atol (parv[4]);
+	deltat = abs (theirtime - CurrentTime);
 
-  if (deltat > ConfigFileEntry.ts_max_delta)
-    {
-      sendto_realops_flags(UMODE_ALL, L_ADMIN,
-          "Link %s dropped, excessive TS delta (my TS=%lu, their TS=%lu, delta=%d)",
-          get_client_name(source_p, SHOW_IP),
-          (unsigned long) CurrentTime,
-          (unsigned long) theirtime,
-          (int) deltat);
-      sendto_realops_flags(UMODE_ALL, L_OPER,
-          "Link %s dropped, excessive TS delta (my TS=%lu, their TS=%lu, delta=%d)",
-           get_client_name(source_p, MASK_IP),
-           (unsigned long) CurrentTime,
-           (unsigned long) theirtime,
-           (int) deltat);
-      ilog(L_NOTICE,
-          "Link %s dropped, excessive TS delta (my TS=%lu, their TS=%lu, delta=%d)",
-          log_client_name(source_p, SHOW_IP), CurrentTime, theirtime,
-          (int) deltat);
-      exit_client(source_p, source_p, source_p, "Excessive TS delta");
-      return;
-    }
+	if(deltat > ConfigFileEntry.ts_max_delta)
+	{
+		sendto_realops_flags (UMODE_ALL, L_ADMIN,
+				      "Link %s dropped, excessive TS delta (my TS=%lu, their TS=%lu, delta=%d)",
+				      get_client_name (source_p, SHOW_IP),
+				      (unsigned long) CurrentTime,
+				      (unsigned long) theirtime, (int) deltat);
+		sendto_realops_flags (UMODE_ALL, L_OPER,
+				      "Link %s dropped, excessive TS delta (my TS=%lu, their TS=%lu, delta=%d)",
+				      get_client_name (source_p, MASK_IP),
+				      (unsigned long) CurrentTime,
+				      (unsigned long) theirtime, (int) deltat);
+		ilog (L_NOTICE,
+		      "Link %s dropped, excessive TS delta (my TS=%lu, their TS=%lu, delta=%d)",
+		      log_client_name (source_p, SHOW_IP), CurrentTime, theirtime, (int) deltat);
+		exit_client (source_p, source_p, source_p, "Excessive TS delta");
+		return;
+	}
 
-  if (deltat > ConfigFileEntry.ts_warn_delta)
-    { 
-      sendto_realops_flags(UMODE_ALL, L_ALL,
-                "Link %s notable TS delta (my TS=%lu, their TS=%lu, delta=%d)",
-                source_p->name, CurrentTime, theirtime, (int)deltat);
-    }
+	if(deltat > ConfigFileEntry.ts_warn_delta)
+	{
+		sendto_realops_flags (UMODE_ALL, L_ALL,
+				      "Link %s notable TS delta (my TS=%lu, their TS=%lu, delta=%d)",
+				      source_p->name, CurrentTime, theirtime, (int) deltat);
+	}
 }

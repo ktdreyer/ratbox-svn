@@ -37,23 +37,23 @@
 #include "parse.h"
 #include "modules.h"
 
-static void mo_close(struct Client*, struct Client*, int, char**);
+static void mo_close (struct Client *, struct Client *, int, char **);
 
 struct Message close_msgtab = {
-  "CLOSE", 0, 0, 0, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_not_oper, m_ignore, mo_close}
+	"CLOSE", 0, 0, 0, 0, MFLG_SLOW, 0,
+	{m_unregistered, m_not_oper, m_ignore, mo_close}
 };
 #ifndef STATIC_MODULES
 void
-_modinit(void)
+_modinit (void)
 {
-  mod_add_cmd(&close_msgtab);
+	mod_add_cmd (&close_msgtab);
 }
 
 void
-_moddeinit(void)
+_moddeinit (void)
 {
-  mod_del_cmd(&close_msgtab);
+	mod_del_cmd (&close_msgtab);
 }
 
 const char *_version = "$Revision$";
@@ -62,25 +62,24 @@ const char *_version = "$Revision$";
  * mo_close - CLOSE message handler
  *  - added by Darren Reed Jul 13 1992.
  */
-static void mo_close(struct Client *client_p, struct Client *source_p,
-                    int parc, char *parv[])
+static void
+mo_close (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-  struct Client  *target_p;
-  dlink_node     *ptr;
-  dlink_node     *ptr_next;
-  int            closed = 0;
+	struct Client *target_p;
+	dlink_node *ptr;
+	dlink_node *ptr_next;
+	int closed = 0;
 
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, unknown_list.head)
-    {
-      target_p = ptr->data;
+	DLINK_FOREACH_SAFE (ptr, ptr_next, unknown_list.head)
+	{
+		target_p = ptr->data;
 
-      sendto_one(source_p, form_str(RPL_CLOSING), me.name, parv[0],
-                 get_client_name(target_p, SHOW_IP), target_p->status);
+		sendto_one (source_p, form_str (RPL_CLOSING), me.name, parv[0],
+			    get_client_name (target_p, SHOW_IP), target_p->status);
 
-      (void)exit_client(target_p, target_p, target_p, "Oper Closing");
-      closed++;
-    }
-  sendto_one(source_p, form_str(RPL_CLOSEEND), me.name, parv[0], closed);
+		(void) exit_client (target_p, target_p, target_p, "Oper Closing");
+		closed++;
+	}
+	sendto_one (source_p, form_str (RPL_CLOSEEND), me.name, parv[0], closed);
 }
-

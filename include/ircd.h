@@ -36,65 +36,67 @@ struct dlink_list;
 
 struct SetOptions
 {
-  int maxclients;       /* max clients allowed */
-  int autoconn;         /* autoconn enabled for all servers? */
+	int maxclients;		/* max clients allowed */
+	int autoconn;		/* autoconn enabled for all servers? */
 
-  int idletime;
+	int idletime;
 
-  int floodcount;	/* Number of messages in 1 second */
-  int ident_timeout;     /* timeout for identd lookups */
+	int floodcount;		/* Number of messages in 1 second */
+	int ident_timeout;	/* timeout for identd lookups */
 
-  int spam_num;
-  int spam_time;
+	int spam_num;
+	int spam_time;
 };
 
-struct Counter {
-  int     server;         /* servers */
-  int     myserver;       /* my servers */
-  int     oper;           /* Opers */
-  int     chan;           /* Channels */
-  int     local;          /* Local Clients */
-  int     total;          /* total clients */
-  int     invisi;         /* invisible clients */
-  int     unknown;        /* unknown connections */
-  int     max_loc;        /* MAX local clients */
-  int     max_tot;        /* MAX global clients */
-  unsigned long totalrestartcount; /* Total client count ever */
+struct Counter
+{
+	int server;		/* servers */
+	int myserver;		/* my servers */
+	int oper;		/* Opers */
+	int chan;		/* Channels */
+	int local;		/* Local Clients */
+	int total;		/* total clients */
+	int invisi;		/* invisible clients */
+	int unknown;		/* unknown connections */
+	int max_loc;		/* MAX local clients */
+	int max_tot;		/* MAX global clients */
+	unsigned long totalrestartcount;	/* Total client count ever */
 };
 
-extern struct SetOptions GlobalSetOptions;  /* defined in ircd.c */
+extern struct SetOptions GlobalSetOptions;	/* defined in ircd.c */
 
-struct ServerState_t {
-  int     foreground;
+struct ServerState_t
+{
+	int foreground;
 };
 
 extern struct ServerState_t server_state;
 
-extern const char*          debugmode;
-extern int            debuglevel;
-extern int            debugtty;
-extern const char*          creation;
-extern const char*          generation;
-extern const char*          platform;
-extern const char*          infotext[];
-extern const char*          serno;
-extern const char*          ircd_version;
-extern const char*    logFileName;
-extern const char     serveropts[];
-extern int            cold_start;
-extern int            dorehash;
-extern int            doremotd;
-extern struct Client  me;
+extern const char *debugmode;
+extern int debuglevel;
+extern int debugtty;
+extern const char *creation;
+extern const char *generation;
+extern const char *platform;
+extern const char *infotext[];
+extern const char *serno;
+extern const char *ircd_version;
+extern const char *logFileName;
+extern const char serveropts[];
+extern int cold_start;
+extern int dorehash;
+extern int doremotd;
+extern struct Client me;
 extern dlink_list global_client_list;
-extern struct Client* local[];
+extern struct Client *local[];
 extern struct Counter Count;
 #if 0
-extern time_t         CurrentTime;
+extern time_t CurrentTime;
 #endif
 extern struct timeval SystemTime;
 #define CurrentTime SystemTime.tv_sec
-extern time_t         nextconnect;
-extern int            default_server_capabs;
+extern time_t nextconnect;
+extern int default_server_capabs;
 
 extern int splitmode;
 extern int splitchecking;
@@ -110,9 +112,9 @@ extern dlink_list dead_list;
 extern dlink_list abort_list;
 extern int callbacks_called;
 
-extern void get_current_bandwidth(struct Client *source_p, struct Client *target_p);
+extern void get_current_bandwidth (struct Client *source_p, struct Client *target_p);
 
-extern unsigned long get_maxrss(void);
-extern void set_time(void);
+extern unsigned long get_maxrss (void);
+extern void set_time (void);
 
 #endif

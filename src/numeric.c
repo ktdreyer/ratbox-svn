@@ -30,7 +30,7 @@
 
 #include "numeric.h"
 #include "irc_string.h"
-#include "common.h"     /* NULL cripes */
+#include "common.h"		/* NULL cripes */
 #include "memory.h"
 
 #include "messages.tab"
@@ -42,24 +42,23 @@
  * output	- corresponding string
  * side effects	- NONE
  */
-const char* form_str(int numeric)
+const char *
+form_str (int numeric)
 {
-  const char *num_ptr;
+	const char *num_ptr;
 
-  assert(-1 < numeric);
-  assert(numeric < ERR_LAST_ERR_MSG);
-  assert(0 != replies[numeric]);
+	assert (-1 < numeric);
+	assert (numeric < ERR_LAST_ERR_MSG);
+	assert (0 != replies[numeric]);
 
-  if (numeric > ERR_LAST_ERR_MSG)
-    numeric = ERR_LAST_ERR_MSG;
-  if (numeric < 0)
-    numeric = ERR_LAST_ERR_MSG;
+	if(numeric > ERR_LAST_ERR_MSG)
+		numeric = ERR_LAST_ERR_MSG;
+	if(numeric < 0)
+		numeric = ERR_LAST_ERR_MSG;
 
-  num_ptr = replies[numeric];
-  if (num_ptr == NULL)
-    num_ptr = replies[ERR_LAST_ERR_MSG];
+	num_ptr = replies[numeric];
+	if(num_ptr == NULL)
+		num_ptr = replies[ERR_LAST_ERR_MSG];
 
-  return (num_ptr);
+	return (num_ptr);
 }
-
-

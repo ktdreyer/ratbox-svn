@@ -44,13 +44,13 @@ typedef unsigned long uintptr_t;
 #endif
 #endif
 
-extern void outofmemory(void);
+extern void outofmemory (void);
 
 
-extern void *MyMalloc(size_t size);
-extern void *MyRealloc(void *x, size_t y);
-extern void MyFree(void *x);
-extern void _DupString(char **x, const char *y);
+extern void *MyMalloc (size_t size);
+extern void *MyRealloc (void *x, size_t y);
+extern void MyFree (void *x);
+extern void _DupString (char **x, const char *y);
 
 /* forte (and maybe others) dont like double declarations, 
  * so we dont declare the inlines unless GNUC
@@ -59,35 +59,39 @@ extern void _DupString(char **x, const char *y);
 #ifndef __APPLE__
 
 #ifdef __GNUC__
-extern inline void * MyMalloc(size_t size)
+extern inline void *
+MyMalloc (size_t size)
 {
-  void *ret = calloc(1, size);
-  if(ret == NULL)
-    outofmemory();
-  return(ret);
+	void *ret = calloc (1, size);
+	if(ret == NULL)
+		outofmemory ();
+	return (ret);
 }
 
-extern inline void* MyRealloc(void* x, size_t y)
+extern inline void *
+MyRealloc (void *x, size_t y)
 {
-  void *ret = realloc(x, y);
-  
-  if(ret == NULL)
-    outofmemory();
-  return(ret);    
+	void *ret = realloc (x, y);
+
+	if(ret == NULL)
+		outofmemory ();
+	return (ret);
 }
 
-extern inline void MyFree(void *x)
+extern inline void
+MyFree (void *x)
 {
-  if(x != NULL)
-    free(x);
+	if(x != NULL)
+		free (x);
 }
 
-extern inline void _DupString(char **x, const char *y)
+extern inline void
+_DupString (char **x, const char *y)
 {
-  (*x) = malloc(strlen(y) + 1);
-  if(x == NULL)
-    outofmemory();
-  strcpy((*x), y); 
+	(*x) = malloc (strlen (y) + 1);
+	if(x == NULL)
+		outofmemory ();
+	strcpy ((*x), y);
 }
 #endif /* __GNUC__ */
 #endif /* __APPLE__ */
@@ -110,4 +114,3 @@ extern inline void _DupString(char **x, const char *y)
 
 
 #endif /* _I_MEMORY_H */
-

@@ -32,13 +32,15 @@ struct Client;
 /*
  * MessageHandler
  */
-typedef enum HandlerType {
-  UNREGISTERED_HANDLER,
-  CLIENT_HANDLER,
-  SERVER_HANDLER,
-  OPER_HANDLER,
-  LAST_HANDLER_TYPE
-} HandlerType;
+typedef enum HandlerType
+{
+	UNREGISTERED_HANDLER,
+	CLIENT_HANDLER,
+	SERVER_HANDLER,
+	OPER_HANDLER,
+	LAST_HANDLER_TYPE
+}
+HandlerType;
 
 /*
  * MessageHandler function
@@ -48,8 +50,7 @@ typedef enum HandlerType {
  * int            parc   - parameter count
  * char*          parv[] - parameter vector
  */
-typedef void (*MessageHandler)(struct Client*, struct Client*, int, char*[]);
+typedef void (*MessageHandler) (struct Client *, struct Client *, int, char *[]);
 
 
 #endif /* INCLUDED_ircd_handler_h */
-

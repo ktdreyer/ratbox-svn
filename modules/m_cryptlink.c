@@ -33,11 +33,11 @@
 
 #include "stdinc.h"
 #include "handlers.h"
-#include "client.h"      /* client struct */
-#include "ircd.h"        /* me */
+#include "client.h"		/* client struct */
+#include "ircd.h"		/* me */
 #include "modules.h"
-#include "numeric.h"     /* ERR_xxx */
-#include "send.h"        /* sendto_one */
+#include "numeric.h"		/* ERR_xxx */
+#include "send.h"		/* sendto_one */
 
 #ifdef HAVE_LIBCRYPTO
 #include <openssl/rsa.h>
@@ -46,73 +46,78 @@
 
 #include "msg.h"
 #include "parse.h"
-#include "irc_string.h"  /* strncpy_irc */
+#include "irc_string.h"		/* strncpy_irc */
 
 #include "tools.h"
 #include "memory.h"
-#include "common.h"      /* TRUE bleah */
+#include "common.h"		/* TRUE bleah */
 #include "event.h"
-#include "hash.h"        /* add_to_client_hash_table */
+#include "hash.h"		/* add_to_client_hash_table */
 #include "md5.h"
-#include "s_conf.h"      /* struct ConfItem */
+#include "s_conf.h"		/* struct ConfItem */
 
-#include "s_log.h"       /* log level defines */
-#include "s_serv.h"      /* server_estab, check_server, my_name_for_link */
-#include "s_stats.h"     /* ServerStats */
-#include "scache.h"      /* find_or_add */
+#include "s_log.h"		/* log level defines */
+#include "s_serv.h"		/* server_estab, check_server, my_name_for_link */
+#include "s_stats.h"		/* ServerStats */
+#include "scache.h"		/* find_or_add */
 #include "motd.h"
 
 #ifndef HAVE_LIBCRYPTO
 
 #ifndef STATIC_MODULES
 /* XXX - print error? */
-void _modinit(void) {}
-void _moddeinit(void) {}
+void
+_modinit (void)
+{
+}
+
+void
+_moddeinit (void)
+{
+}
 
 const char *_version = "$Revision$";
 #endif
 #else
 
-static int bogus_host(char *host);
-static char *parse_cryptserv_args(struct Client *client_p,
-                                  char *parv[], int parc, char *info,
-                                  char *key);
+static int bogus_host (char *host);
+static char *parse_cryptserv_args (struct Client *client_p,
+				   char *parv[], int parc, char *info, char *key);
 
-static void mr_cryptlink(struct Client *, struct Client *, int, char **);
-static void cryptlink_serv(struct Client *, struct Client *, int, char **);
-static void cryptlink_auth(struct Client *, struct Client *, int, char **);
+static void mr_cryptlink (struct Client *, struct Client *, int, char **);
+static void cryptlink_serv (struct Client *, struct Client *, int, char **);
+static void cryptlink_auth (struct Client *, struct Client *, int, char **);
 
 struct Message cryptlink_msgtab = {
-  "CRYPTLINK", 0, 0, 4, 0, MFLG_SLOW | MFLG_UNREG, 0,
-  {mr_cryptlink, m_ignore, m_error, m_ignore}
+	"CRYPTLINK", 0, 0, 4, 0, MFLG_SLOW | MFLG_UNREG, 0,
+	{mr_cryptlink, m_ignore, m_error, m_ignore}
 };
 
 struct CryptLinkStruct
 {
-  const char *cmd;		/* CRYPTLINK <command> to match */
-  void (*handler)();	/* Function to call */
+	const char *cmd;	/* CRYPTLINK <command> to match */
+	void (*handler) ();	/* Function to call */
 };
 
-static struct CryptLinkStruct cryptlink_cmd_table[] =
-{
-  /* command	function	*/
-  { "AUTH",	cryptlink_auth,	},
-  { "SERV",	cryptlink_serv,	},
-  /* End of table */
-  { (char *) 0,	(void (*)()) 0,	}
+static struct CryptLinkStruct cryptlink_cmd_table[] = {
+	/* command    function        */
+	{"AUTH", cryptlink_auth,},
+	{"SERV", cryptlink_serv,},
+	/* End of table */
+	{(char *) 0, (void (*)()) 0,}
 };
 
 #ifndef STATIC_MODULES
-void 
-_modinit(void)
+void
+_modinit (void)
 {
-  mod_add_cmd(&cryptlink_msgtab);
+	mod_add_cmd (&cryptlink_msgtab);
 }
 
 void
-_moddeinit(void)
+_moddeinit (void)
 {
-  mod_del_cmd(&cryptlink_msgtab);
+	mod_del_cmd (&cryptlink_msgtab);
 }
 
 const char *_version = "$Revision$";
@@ -135,24 +140,23 @@ const char *_version = "$Revision$";
  *                          parv[2] == cipher (eg. BF/256)
  *                          parv[3] == keyphrase
  */
-static void mr_cryptlink(struct Client *client_p,
-                         struct Client *source_p,
-                         int parc, char *parv[])
+static void
+mr_cryptlink (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-  int i;
+	int i;
 
-  for (i = 0; cryptlink_cmd_table[i].handler; i++)
-  {
-    /* Traverse through the command table */
-    if (!irccmp(cryptlink_cmd_table[i].cmd, parv[1]))
-    {
-      /*
-       * Match found.  Time to execute the function
-       */
-      cryptlink_cmd_table[i].handler(client_p, source_p, parc, parv);
-    }
-  }
-  return;
+	for (i = 0; cryptlink_cmd_table[i].handler; i++)
+	{
+		/* Traverse through the command table */
+		if(!irccmp (cryptlink_cmd_table[i].cmd, parv[1]))
+		{
+			/*
+			 * Match found.  Time to execute the function
+			 */
+			cryptlink_cmd_table[i].handler (client_p, source_p, parc, parv);
+		}
+	}
+	return;
 }
 
 
@@ -160,118 +164,112 @@ static void mr_cryptlink(struct Client *client_p,
  * cryptlink_auth - CRYPTLINK AUTH message handler
  *        parv[1] = secret key
  */
-static void cryptlink_auth(struct Client *client_p, struct Client *source_p,
-                           int parc, char *parv[])
+static void
+cryptlink_auth (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-  struct EncCapability *ecap;
-  struct ConfItem *aconf;
-  int   enc_len;
-  int   len;
-  char *enc;
-  char *key;
+	struct EncCapability *ecap;
+	struct ConfItem *aconf;
+	int enc_len;
+	int len;
+	char *enc;
+	char *key;
 
-  if (parc < 4)
-  {
-    cryptlink_error(client_p, "AUTH", "Invalid params",
-                    "CRYPTLINK AUTH - Invalid params");
-    return;
-  }
+	if(parc < 4)
+	{
+		cryptlink_error (client_p, "AUTH", "Invalid params",
+				 "CRYPTLINK AUTH - Invalid params");
+		return;
+	}
 
-  if (!IsWaitAuth(client_p))
-    return;
+	if(!IsWaitAuth (client_p))
+		return;
 
-  for (ecap = CipherTable; ecap->name; ecap++)
-  {
-    if ( (!irccmp(ecap->name, parv[2])) &&
-         (IsCapableEnc(client_p, ecap->cap)) )
-    {
-      client_p->localClient->in_cipher = ecap;
-      break;
-    }
-  }
+	for (ecap = CipherTable; ecap->name; ecap++)
+	{
+		if((!irccmp (ecap->name, parv[2])) && (IsCapableEnc (client_p, ecap->cap)))
+		{
+			client_p->localClient->in_cipher = ecap;
+			break;
+		}
+	}
 
-  if (!client_p->localClient->in_cipher)
-  {
-    cryptlink_error(client_p, "AUTH", "Invalid cipher", "Invalid cipher");
-    return;
-  }
+	if(!client_p->localClient->in_cipher)
+	{
+		cryptlink_error (client_p, "AUTH", "Invalid cipher", "Invalid cipher");
+		return;
+	}
 
-  if (!(enc_len = unbase64_block(&enc, parv[3], strlen(parv[3]))))
-  {
-    cryptlink_error(client_p, "AUTH",
-                    "Could not base64 decode response",
-                    "Malformed CRYPTLINK AUTH reply");
-    return;
-  }
+	if(!(enc_len = unbase64_block (&enc, parv[3], strlen (parv[3]))))
+	{
+		cryptlink_error (client_p, "AUTH",
+				 "Could not base64 decode response",
+				 "Malformed CRYPTLINK AUTH reply");
+		return;
+	}
 
-  if ( verify_private_key() == -1 )
-  {
-    sendto_realops_flags(UMODE_ALL, L_ADMIN,
-      "verify_private_key() returned -1.  Check log for information.");
-  }
+	if(verify_private_key () == -1)
+	{
+		sendto_realops_flags (UMODE_ALL, L_ADMIN,
+				      "verify_private_key() returned -1.  Check log for information.");
+	}
 
-  key = MyMalloc(RSA_size(ServerInfo.rsa_private_key));
+	key = MyMalloc (RSA_size (ServerInfo.rsa_private_key));
 
-  len = RSA_private_decrypt( enc_len, (unsigned char *)enc,(unsigned char *)key,
-                             ServerInfo.rsa_private_key,
-                             RSA_PKCS1_PADDING );
+	len = RSA_private_decrypt (enc_len, (unsigned char *) enc, (unsigned char *) key,
+				   ServerInfo.rsa_private_key, RSA_PKCS1_PADDING);
 
-  if ( len < client_p->localClient->in_cipher->keylen )
-  {
-    report_crypto_errors();
-    if (len < 0)
-    {
-      cryptlink_error(client_p, "AUTH",
-                      "Decryption failed",
-                      "Malformed CRYPTLINK AUTH reply");
-    }
-    else
-    {
-      cryptlink_error(client_p, "AUTH",
-                      "Not enough random data sent",
-                      "Malformed CRYPTLINK AUTH reply");
-    }
-    MyFree(enc);
-    MyFree(key);
-    return;
-  }
+	if(len < client_p->localClient->in_cipher->keylen)
+	{
+		report_crypto_errors ();
+		if(len < 0)
+		{
+			cryptlink_error (client_p, "AUTH",
+					 "Decryption failed", "Malformed CRYPTLINK AUTH reply");
+		}
+		else
+		{
+			cryptlink_error (client_p, "AUTH",
+					 "Not enough random data sent",
+					 "Malformed CRYPTLINK AUTH reply");
+		}
+		MyFree (enc);
+		MyFree (key);
+		return;
+	}
 
-  if (memcmp(key, client_p->localClient->in_key,
-             client_p->localClient->in_cipher->keylen) != 0)
-  {
-    cryptlink_error(client_p, "AUTH",
-                    "Unauthorised server connection attempt",
-                    "Malformed CRYPTLINK AUTH reply");
-    return;
-  }
+	if(memcmp (key, client_p->localClient->in_key,
+		   client_p->localClient->in_cipher->keylen) != 0)
+	{
+		cryptlink_error (client_p, "AUTH",
+				 "Unauthorised server connection attempt",
+				 "Malformed CRYPTLINK AUTH reply");
+		return;
+	}
 
-  aconf = client_p->localClient->att_conf;
+	aconf = client_p->localClient->att_conf;
 
-  if((aconf == NULL) || ((aconf->status & CONF_SERVER) == 0) || 
-     irccmp(aconf->name, client_p->name) || 
-     !match(aconf->name, client_p->name))
-  {
-    cryptlink_error(client_p, "AUTH",
-                    "Lost C-line for server",
-                    "Lost C-line" );
-    return;
-  }
+	if((aconf == NULL) || ((aconf->status & CONF_SERVER) == 0) ||
+	   irccmp (aconf->name, client_p->name) || !match (aconf->name, client_p->name))
+	{
+		cryptlink_error (client_p, "AUTH", "Lost C-line for server", "Lost C-line");
+		return;
+	}
 
-  if (!(client_p->localClient->out_cipher ||
-      (client_p->localClient->out_cipher = check_cipher(client_p, aconf))))
-  {
-    cryptlink_error(client_p, "AUTH",
-                    "Couldn't find compatible cipher",
-                    "Couldn't find compatible cipher");
-    return;
-  }
+	if(!(client_p->localClient->out_cipher ||
+	     (client_p->localClient->out_cipher = check_cipher (client_p, aconf))))
+	{
+		cryptlink_error (client_p, "AUTH",
+				 "Couldn't find compatible cipher",
+				 "Couldn't find compatible cipher");
+		return;
+	}
 
-  /* set hopcount */
-  client_p->hopcount = 1;
+	/* set hopcount */
+	client_p->hopcount = 1;
 
-  SetCryptIn(client_p);
-  ClearWaitAuth(client_p);
-  server_estab(client_p);
+	SetCryptIn (client_p);
+	ClearWaitAuth (client_p);
+	server_estab (client_p);
 }
 
 /*
@@ -282,175 +280,167 @@ static void cryptlink_auth(struct Client *client_p, struct Client *source_p,
  *        parv[3] == keyphrase
  *        parv[4] == :server info (M-line)
  */
-static void cryptlink_serv(struct Client *client_p, struct Client *source_p,
-                           int parc, char *parv[])
+static void
+cryptlink_serv (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-  char             info[REALLEN + 1];
-  char            *name;
-  struct Client   *target_p;
-  char            *key = client_p->localClient->out_key;
-  char            *b64_key;
-  struct ConfItem *aconf;
-  char            *encrypted;
-  const char            *p;
-  int              enc_len;
+	char info[REALLEN + 1];
+	char *name;
+	struct Client *target_p;
+	char *key = client_p->localClient->out_key;
+	char *b64_key;
+	struct ConfItem *aconf;
+	char *encrypted;
+	const char *p;
+	int enc_len;
 
-  /*
-  if (client_p->name[0] != 0)
-  return;
-  */
+	/*
+	   if (client_p->name[0] != 0)
+	   return;
+	 */
 
-  if ( (parc < 5) || (*parv[4] == '\0') )
-  {
-    cryptlink_error(client_p, "SERV", "Invalid params",
-                    "CRYPTLINK SERV - Invalid params");
-    return;
-  }
+	if((parc < 5) || (*parv[4] == '\0'))
+	{
+		cryptlink_error (client_p, "SERV", "Invalid params",
+				 "CRYPTLINK SERV - Invalid params");
+		return;
+	}
 
-  if ( (name = parse_cryptserv_args(client_p, parv, parc, info, key)) == NULL )
-  {
-    cryptlink_error(client_p, "SERV", "Invalid params",
-                    "CRYPTLINK SERV - Invalid params");
-    return;
-  }
+	if((name = parse_cryptserv_args (client_p, parv, parc, info, key)) == NULL)
+	{
+		cryptlink_error (client_p, "SERV", "Invalid params",
+				 "CRYPTLINK SERV - Invalid params");
+		return;
+	}
 
-  /* CRYPTLINK SERV support => TS support */
-  client_p->tsinfo = TS_DOESTS;
+	/* CRYPTLINK SERV support => TS support */
+	client_p->tsinfo = TS_DOESTS;
 
-  if (bogus_host(name))
-  {
-    exit_client(client_p, client_p, client_p, "Bogus server name");
-    return;
-  }
+	if(bogus_host (name))
+	{
+		exit_client (client_p, client_p, client_p, "Bogus server name");
+		return;
+	}
 
-  /* Now we just have to call check_server and everything should be
-   * checked for us... -A1kmm. */
-  switch (check_server(name, client_p, CHECK_SERVER_CRYPTLINK))
-  {
-    case -1:
-      if (ConfigFileEntry.warn_no_nline)
-      {
-        cryptlink_error(client_p, "SERV",
-          "Unauthorised server connection attempt: No entry for server",
-          NULL);
-      }
-      exit_client(client_p, client_p, client_p, "Invalid server name");
-      return;
-      break;
-    case -2:
-      cryptlink_error(client_p, "SERV",
-        "Unauthorised server connection attempt: CRYPTLINK not "
-                                      "enabled on remote server",
-        "CRYPTLINK not enabled");
-      return;
-      break;
-    case -3:
-      cryptlink_error(client_p, "SERV",
-        "Unauthorised server connection attempt: Invalid host",
-        "Invalid host");
-      return;
-      break;
-  }
+	/* Now we just have to call check_server and everything should be
+	 * checked for us... -A1kmm. */
+	switch (check_server (name, client_p, CHECK_SERVER_CRYPTLINK))
+	{
+	case -1:
+		if(ConfigFileEntry.warn_no_nline)
+		{
+			cryptlink_error (client_p, "SERV",
+					 "Unauthorised server connection attempt: No entry for server",
+					 NULL);
+		}
+		exit_client (client_p, client_p, client_p, "Invalid server name");
+		return;
+		break;
+	case -2:
+		cryptlink_error (client_p, "SERV",
+				 "Unauthorised server connection attempt: CRYPTLINK not "
+				 "enabled on remote server", "CRYPTLINK not enabled");
+		return;
+		break;
+	case -3:
+		cryptlink_error (client_p, "SERV",
+				 "Unauthorised server connection attempt: Invalid host",
+				 "Invalid host");
+		return;
+		break;
+	}
 
-  if ((target_p = find_server(name)))
-  {
-    /*
-     * This link is trying feed me a server that I already have
-     * access through another path -- multiple paths not accepted
-     * currently, kill this link immediately!!
-     *
-     * Rather than KILL the link which introduced it, KILL the
-     * youngest of the two links. -avalon
-     *
-     * Definitely don't do that here. This is from an unregistered
-     * connect - A1kmm.
-     */
-    cryptlink_error(client_p, "SERV",
-                    "Attempt to re-introduce existing server",
-                    "Server Exists");
-    return;
-  }
+	if((target_p = find_server (name)))
+	{
+		/*
+		 * This link is trying feed me a server that I already have
+		 * access through another path -- multiple paths not accepted
+		 * currently, kill this link immediately!!
+		 *
+		 * Rather than KILL the link which introduced it, KILL the
+		 * youngest of the two links. -avalon
+		 *
+		 * Definitely don't do that here. This is from an unregistered
+		 * connect - A1kmm.
+		 */
+		cryptlink_error (client_p, "SERV",
+				 "Attempt to re-introduce existing server", "Server Exists");
+		return;
+	}
 
 
-  aconf = client_p->localClient->att_conf;
+	aconf = client_p->localClient->att_conf;
 
-  if((aconf == NULL) || ((aconf->status & CONF_SERVER) == 0) || 
-     irccmp(aconf->name, client_p->name) || 
-     !match(aconf->name, client_p->name))
-  {
-    cryptlink_error(client_p, "AUTH",
-                    "Lost C-line for server",
-                    "Lost C-line" );
-    return;
-  }
+	if((aconf == NULL) || ((aconf->status & CONF_SERVER) == 0) ||
+	   irccmp (aconf->name, client_p->name) || !match (aconf->name, client_p->name))
+	{
+		cryptlink_error (client_p, "AUTH", "Lost C-line for server", "Lost C-line");
+		return;
+	}
 
-  /*
-   * if we are connecting (Handshake), we already have the name from the
-   * C:line in client_p->name
-   */
-  strlcpy(client_p->name, name, sizeof(client_p->name));
+	/*
+	 * if we are connecting (Handshake), we already have the name from the
+	 * C:line in client_p->name
+	 */
+	strlcpy (client_p->name, name, sizeof (client_p->name));
 
-  p = info;
+	p = info;
 
-  if(!strncmp(info, "(H)", 3))
-  {
-    SetHidden(client_p);
+	if(!strncmp (info, "(H)", 3))
+	{
+		SetHidden (client_p);
 
-    if((p = strchr(info, ' ')))
-    {
-      p++;
-      if(*p == '\0')
-        p = "(Unknown Location)";
-    }
-    else
-      p = "(Unknown Location)";
-  }
+		if((p = strchr (info, ' ')))
+		{
+			p++;
+			if(*p == '\0')
+				p = "(Unknown Location)";
+		}
+		else
+			p = "(Unknown Location)";
+	}
 
-  strlcpy(client_p->info, p, sizeof(client_p->info));
-  client_p->hopcount = 0;
+	strlcpy (client_p->info, p, sizeof (client_p->info));
+	client_p->hopcount = 0;
 
-  if (!(client_p->localClient->out_cipher ||
-      (client_p->localClient->out_cipher = check_cipher(client_p, aconf))))
-  {
-    cryptlink_error(client_p, "AUTH",
-                    "Couldn't find compatible cipher",
-                    "Couldn't find compatible cipher");
-    return;
-  }
+	if(!(client_p->localClient->out_cipher ||
+	     (client_p->localClient->out_cipher = check_cipher (client_p, aconf))))
+	{
+		cryptlink_error (client_p, "AUTH",
+				 "Couldn't find compatible cipher",
+				 "Couldn't find compatible cipher");
+		return;
+	}
 
-  encrypted = MyMalloc(RSA_size(ServerInfo.rsa_private_key));
+	encrypted = MyMalloc (RSA_size (ServerInfo.rsa_private_key));
 
-  enc_len = RSA_public_encrypt(client_p->localClient->out_cipher->keylen,
-                               (unsigned char *)key,
-                               (unsigned char *)encrypted,
-                               aconf->rsa_public_key,
-                               RSA_PKCS1_PADDING);
+	enc_len = RSA_public_encrypt (client_p->localClient->out_cipher->keylen,
+				      (unsigned char *) key,
+				      (unsigned char *) encrypted,
+				      aconf->rsa_public_key, RSA_PKCS1_PADDING);
 
-  if (enc_len <= 0)
-  {
-    report_crypto_errors();
-    MyFree(encrypted);
-    cryptlink_error(client_p, "AUTH",
-                    "Couldn't encrypt data",
-                    "Couldn't encrypt data");
-    return;
-  }
+	if(enc_len <= 0)
+	{
+		report_crypto_errors ();
+		MyFree (encrypted);
+		cryptlink_error (client_p, "AUTH",
+				 "Couldn't encrypt data", "Couldn't encrypt data");
+		return;
+	}
 
-  base64_block(&b64_key, encrypted, enc_len);
+	base64_block (&b64_key, encrypted, enc_len);
 
-  MyFree(encrypted);
+	MyFree (encrypted);
 
-  if (!IsWaitAuth(client_p))
-  {
-    cryptlink_init(client_p, aconf, -1);
-  }
+	if(!IsWaitAuth (client_p))
+	{
+		cryptlink_init (client_p, aconf, -1);
+	}
 
-  sendto_one(client_p, "CRYPTLINK AUTH %s %s",
-             client_p->localClient->out_cipher->name,
-             b64_key);
+	sendto_one (client_p, "CRYPTLINK AUTH %s %s",
+		    client_p->localClient->out_cipher->name, b64_key);
 
-  SetCryptOut(client_p);
-  MyFree(b64_key);
+	SetCryptOut (client_p);
+	MyFree (b64_key);
 }
 
 /*
@@ -463,74 +453,69 @@ static void cryptlink_serv(struct Client *client_p, struct Client *source_p,
  * output	- NULL if invalid params, server name otherwise
  * side effects	- parv[2] is trimmed to HOSTLEN size if needed.
  */
-static char *parse_cryptserv_args(struct Client *client_p,
-                                  char *parv[], int parc, char *info,
-                                  char *key)
+static char *
+parse_cryptserv_args (struct Client *client_p, char *parv[], int parc, char *info, char *key)
 {
-  char *name;
-  unsigned char *tmp, *out;
-  int len;
-  int decoded_len;
+	char *name;
+	unsigned char *tmp, *out;
+	int len;
+	int decoded_len;
 
-  info[0] = '\0';
+	info[0] = '\0';
 
-  name = parv[2];
+	name = parv[2];
 
-  /* parv[2] contains encrypted auth data */
-  if ( !(decoded_len = unbase64_block((char **)&tmp, parv[3],
-                                      strlen(parv[3]))) )
-  {
-    cryptlink_error(client_p, "SERV",
-                    "Couldn't base64 decode data",
-                    NULL);
-    return(NULL);
-  }
+	/* parv[2] contains encrypted auth data */
+	if(!(decoded_len = unbase64_block ((char **) &tmp, parv[3], strlen (parv[3]))))
+	{
+		cryptlink_error (client_p, "SERV", "Couldn't base64 decode data", NULL);
+		return (NULL);
+	}
 
-  if (verify_private_key() == -1)
-  {
-    sendto_realops_flags(UMODE_ALL, L_ADMIN,
-      "verify_private_key() returned -1.  Check log for information.");
-  }
+	if(verify_private_key () == -1)
+	{
+		sendto_realops_flags (UMODE_ALL, L_ADMIN,
+				      "verify_private_key() returned -1.  Check log for information.");
+	}
 
-  if(ServerInfo.rsa_private_key == NULL)
-  {
-    cryptlink_error(client_p, "SERV", "No local private key found", NULL);
-    return(NULL);
-  }
-  out = MyMalloc(RSA_size(ServerInfo.rsa_private_key));
+	if(ServerInfo.rsa_private_key == NULL)
+	{
+		cryptlink_error (client_p, "SERV", "No local private key found", NULL);
+		return (NULL);
+	}
+	out = MyMalloc (RSA_size (ServerInfo.rsa_private_key));
 
-  len = RSA_private_decrypt(decoded_len, tmp, out,
-                            ServerInfo.rsa_private_key,
-                            RSA_PKCS1_PADDING );
+	len = RSA_private_decrypt (decoded_len, tmp, out,
+				   ServerInfo.rsa_private_key, RSA_PKCS1_PADDING);
 
-  MyFree(tmp);
+	MyFree (tmp);
 
-  if (len < CIPHERKEYLEN)
-  {
-    report_crypto_errors();
-    if (len < 0)
-    {
-      cryptlink_error(client_p, "AUTH", "Decryption failed", NULL);
-    }
-    else
-    {
-      cryptlink_error(client_p, "AUTH", "Not enough random data sent", NULL);
-    }
-    MyFree(out);
-    return(NULL);
-  }
+	if(len < CIPHERKEYLEN)
+	{
+		report_crypto_errors ();
+		if(len < 0)
+		{
+			cryptlink_error (client_p, "AUTH", "Decryption failed", NULL);
+		}
+		else
+		{
+			cryptlink_error (client_p, "AUTH", "Not enough random data sent", NULL);
+		}
+		MyFree (out);
+		return (NULL);
+	}
 
-  memcpy(key, out, CIPHERKEYLEN);
-  MyFree(out);
+	memcpy (key, out, CIPHERKEYLEN);
+	MyFree (out);
 
-  strlcpy(info, parv[4], REALLEN+1);
+	strlcpy (info, parv[4], REALLEN + 1);
 
-  if (strlen(name) > HOSTLEN)
-  {
-    name[HOSTLEN] = '\0';
-  }
+	if(strlen (name) > HOSTLEN)
+	{
+		name[HOSTLEN] = '\0';
+	}
 
-  return(name);
+	return (name);
 }
 
 /*
@@ -540,29 +525,30 @@ static char *parse_cryptserv_args(struct Client *client_p,
  * output	- 1 if a bogus hostname input, 0 if its valid
  * side effects	- none
  */
-static int bogus_host(char *host)
+static int
+bogus_host (char *host)
 {
-  int bogus_server = 0;
-  int dots = 0;
-  char *s;
+	int bogus_server = 0;
+	int dots = 0;
+	char *s;
 
-  for (s = host; *s; s++ )
-  {
-    if (!IsServChar(*s))
-    {
-      bogus_server = 1;
-      break;
-    }
-    if ('.' == *s)
-    {
-      ++dots;
-    }
-  }
+	for (s = host; *s; s++)
+	{
+		if(!IsServChar (*s))
+		{
+			bogus_server = 1;
+			break;
+		}
+		if('.' == *s)
+		{
+			++dots;
+		}
+	}
 
-  if ( (!dots) || (bogus_server) )
-    return 1;
+	if((!dots) || (bogus_server))
+		return 1;
 
-  return 0;
+	return 0;
 }
 
 #endif /* HAVE_LIBCRYPTO */

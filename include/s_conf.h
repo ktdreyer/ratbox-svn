@@ -34,10 +34,10 @@
 #include <openssl/rsa.h>
 #endif
 
-#include "config.h"             /* defines */
-#include "fileio.h"             /* FBFILE */
+#include "config.h"		/* defines */
+#include "fileio.h"		/* FBFILE */
 #include "ircd_defs.h"
-#include "motd.h"               /* MessageFile */
+#include "motd.h"		/* MessageFile */
 #include "class.h"
 #include "client.h"
 #include "common.h"
@@ -49,56 +49,57 @@ struct hostent;
 /* used by new parser */
 /* yacc/lex love globals!!! */
 
-struct ip_value {
-  struct irc_inaddr ip;
-  int ip_mask;
-  int type;
+struct ip_value
+{
+	struct irc_inaddr ip;
+	int ip_mask;
+	int type;
 };
 
-extern FBFILE* conf_fbfile_in;
+extern FBFILE *conf_fbfile_in;
 extern char conf_line_in[256];
-extern struct ConfItem* yy_aconf;
+extern struct ConfItem *yy_aconf;
 
 struct ConfItem
 {
-  struct ConfItem* next;     /* list node pointer */
-  unsigned int     status;   /* If CONF_ILLEGAL, delete when no clients */
-  unsigned int     flags;
-  int              clients;  /* Number of *LOCAL* clients using this */
-  struct irc_inaddr my_ipnum; /* ip to bind to for outgoing connect */
-  struct irc_inaddr ipnum;	/* ip to connect to */
-  char *           name;     /* IRC name, nick, server name, or original u@h */
-  char *           host;     /* host part of user@host */
-  char *           passwd;   /* doubles as kline reason *ugh* */
-  char *           spasswd;  /* Password to send. */
-  char *           user;     /* user part of user@host */
-  int              port;
-  char *           fakename;   /* Mask name */
-  time_t           hold;     /* Hold action until this time (calendar time) */
-  char *           className;   /* Name of class */
-  struct Class *   c_class;     /* Class of connection */
-  struct DNSQuery* dns_query;
-  int              aftype;
+	struct ConfItem *next;	/* list node pointer */
+	unsigned int status;	/* If CONF_ILLEGAL, delete when no clients */
+	unsigned int flags;
+	int clients;		/* Number of *LOCAL* clients using this */
+	struct irc_inaddr my_ipnum;	/* ip to bind to for outgoing connect */
+	struct irc_inaddr ipnum;	/* ip to connect to */
+	char *name;		/* IRC name, nick, server name, or original u@h */
+	char *host;		/* host part of user@host */
+	char *passwd;		/* doubles as kline reason *ugh* */
+	char *spasswd;		/* Password to send. */
+	char *user;		/* user part of user@host */
+	int port;
+	char *fakename;		/* Mask name */
+	time_t hold;		/* Hold action until this time (calendar time) */
+	char *className;	/* Name of class */
+	struct Class *c_class;	/* Class of connection */
+	struct DNSQuery *dns_query;
+	int aftype;
 #ifdef HAVE_LIBCRYPTO
-  char *           rsa_public_key_file;
-  RSA *            rsa_public_key;
-  struct EncCapability *cipher_preference;
+	char *rsa_public_key_file;
+	RSA *rsa_public_key;
+	struct EncCapability *cipher_preference;
 #endif
 };
 
 struct xline
 {
-  char *gecos;
-  char *reason;
-  int type;
+	char *gecos;
+	char *reason;
+	int type;
 };
 
 struct shared
 {
-  char *username;
-  char *host;
-  char *servername;
-  int flags;
+	char *username;
+	char *host;
+	char *servername;
+	int flags;
 };
 
 #define CONF_ILLEGAL            0x80000000
@@ -173,161 +174,161 @@ struct shared
 
 struct config_file_entry
 {
-  const char *dpath;          /* DPATH if set from command line */
-  const char *configfile;
-  const char *klinefile;
-  const char *dlinefile;
-  const char *xlinefile;
-  const char *resvfile;
+	const char *dpath;	/* DPATH if set from command line */
+	const char *configfile;
+	const char *klinefile;
+	const char *dlinefile;
+	const char *xlinefile;
+	const char *resvfile;
 
-  const char *glinefile;
+	const char *glinefile;
 
-  char *logpath;
-  char *operlog;
-  char *glinelog;
+	char *logpath;
+	char *operlog;
+	char *glinelog;
 
-  char *servlink_path;
-  char *egdpool_path;
+	char *servlink_path;
+	char *egdpool_path;
 
-  char* network_name;
-  char* network_desc;
+	char *network_name;
+	char *network_desc;
 
-  char fname_operlog[MAXPATHLEN];
-  char fname_userlog[MAXPATHLEN];
-  char fname_foperlog[MAXPATHLEN];
+	char fname_operlog[MAXPATHLEN];
+	char fname_userlog[MAXPATHLEN];
+	char fname_foperlog[MAXPATHLEN];
 
-  MessageFile motd;
-  MessageFile opermotd;
-  MessageFile linksfile;
+	MessageFile motd;
+	MessageFile opermotd;
+	MessageFile linksfile;
 
-  int           hub;
-  unsigned char compression_level;
-  int		dot_in_ip6_addr;
-  int           dots_in_ident;
-  int           failed_oper_notice;
-  int           anti_nick_flood;
-  int           anti_spam_exit_message_time;
-  int           max_accept;
-  int           max_nick_time;
-  int           max_nick_changes;
-  int           ts_max_delta;
-  int           ts_warn_delta;
-  int           kline_with_reason;
-  int           kline_with_connection_closed;
-  int           warn_no_nline;
-  int           non_redundant_klines;
-  int           stats_o_oper_only;
-  int		stats_k_oper_only;
-  int		stats_i_oper_only;
-  int		stats_P_oper_only;
-  int           map_oper_only;
-  int           pace_wait;
-  int           pace_wait_simple;
-  int           short_motd;
-  int           no_oper_flood;
-  int           glines;
-  int           gline_time;
-  int           idletime;
-  int           hide_server;
-  int           client_exit;
-  int           oper_only_umodes;
-  int           oper_umodes;
-  int           max_targets;
-  int           caller_id_wait;
-  int           min_nonwildcard;
-  int           default_floodcount;
-  int           client_flood;
-  int           use_egd;
-  int		ping_cookie;
-  int           tkline_expire_notices;
-  int           use_help;
-  int           use_whois_actually;
-  int		disable_auth;
-  int		connect_timeout;
-  int		burst_away;
-  int		htm_messages;
-  int		htm_interval;
-  int		htm_trigger;
+	int hub;
+	unsigned char compression_level;
+	int dot_in_ip6_addr;
+	int dots_in_ident;
+	int failed_oper_notice;
+	int anti_nick_flood;
+	int anti_spam_exit_message_time;
+	int max_accept;
+	int max_nick_time;
+	int max_nick_changes;
+	int ts_max_delta;
+	int ts_warn_delta;
+	int kline_with_reason;
+	int kline_with_connection_closed;
+	int warn_no_nline;
+	int non_redundant_klines;
+	int stats_o_oper_only;
+	int stats_k_oper_only;
+	int stats_i_oper_only;
+	int stats_P_oper_only;
+	int map_oper_only;
+	int pace_wait;
+	int pace_wait_simple;
+	int short_motd;
+	int no_oper_flood;
+	int glines;
+	int gline_time;
+	int idletime;
+	int hide_server;
+	int client_exit;
+	int oper_only_umodes;
+	int oper_umodes;
+	int max_targets;
+	int caller_id_wait;
+	int min_nonwildcard;
+	int default_floodcount;
+	int client_flood;
+	int use_egd;
+	int ping_cookie;
+	int tkline_expire_notices;
+	int use_help;
+	int use_whois_actually;
+	int disable_auth;
+	int connect_timeout;
+	int burst_away;
+	int htm_messages;
+	int htm_interval;
+	int htm_trigger;
 #ifdef IPV6
-  int		fallback_to_ip6_int;
+	int fallback_to_ip6_int;
 #endif
 #ifdef HAVE_LIBCRYPTO
-  struct EncCapability *default_cipher_preference;
+	struct EncCapability *default_cipher_preference;
 #endif
 };
 
 struct config_channel_entry
 {
-  int   use_except;
-  int   use_invex;
-  int   use_knock;
-  int   knock_delay;
-  int	knock_delay_channel;
-  int   max_bans;
-  int   max_chans_per_user;
-  int   no_create_on_split;
-  int   no_join_on_split;
-  int	persist_time;
-  int   quiet_on_ban;
-  int   default_split_server_count;
-  int   default_split_user_count;
-  int   no_oper_resvs;
+	int use_except;
+	int use_invex;
+	int use_knock;
+	int knock_delay;
+	int knock_delay_channel;
+	int max_bans;
+	int max_chans_per_user;
+	int no_create_on_split;
+	int no_join_on_split;
+	int persist_time;
+	int quiet_on_ban;
+	int default_split_server_count;
+	int default_split_user_count;
+	int no_oper_resvs;
 };
 
 struct config_server_hide
 {
-  int	flatten_links;
-  int	hide_servers;
-  int	disable_remote;
-  int   disable_local_channels;
-  int	links_delay;
-  int   links_disabled;
-  int	hidden;
-  int	disable_hidden;
+	int flatten_links;
+	int hide_servers;
+	int disable_remote;
+	int disable_local_channels;
+	int links_delay;
+	int links_disabled;
+	int hidden;
+	int disable_hidden;
 };
 
 struct server_info
 {
-  char        *name;
-  char        *description;
-  char        *network_name;
-  char        *network_desc;
+	char *name;
+	char *description;
+	char *network_name;
+	char *network_desc;
 #ifdef HAVE_LIBCRYPTO
-  char *      rsa_private_key_file;
-  RSA *       rsa_private_key;
+	char *rsa_private_key_file;
+	RSA *rsa_private_key;
 #endif
-  int         hub;
-  struct      irc_inaddr ip;
-  struct      irc_inaddr ip6;
-  int         max_clients;
-  int         max_buffer;
-  int         no_hack_ops;
-  int         specific_ipv4_vhost;
-  int         specific_ipv6_vhost;
-  struct      sockaddr_in dns_host;
+	int hub;
+	struct irc_inaddr ip;
+	struct irc_inaddr ip6;
+	int max_clients;
+	int max_buffer;
+	int no_hack_ops;
+	int specific_ipv4_vhost;
+	int specific_ipv6_vhost;
+	struct sockaddr_in dns_host;
 };
 
 struct admin_info
 {
-  char        *name;
-  char        *description;
-  char        *email;
+	char *name;
+	char *description;
+	char *email;
 };
 
 /* bleh. have to become global. */
 extern int scount;
 
-extern void init_conf(void);
+extern void init_conf (void);
 
 /* All variables are GLOBAL */
-extern struct ConfItem* ConfigItemList;      /* conf list head */
-extern int              specific_ipv4_vhost; /* used in s_bsd.c */
-extern int              specific_ipv6_vhost;
-extern struct config_file_entry ConfigFileEntry;/* defined in ircd.c*/
-extern struct config_channel_entry ConfigChannel;/* defined in channel.c*/
-extern struct config_server_hide ConfigServerHide; /* defined in s_conf.c */
-extern struct server_info ServerInfo;       /* defined in ircd.c */
-extern struct admin_info  AdminInfo;        /* defined in ircd.c */
+extern struct ConfItem *ConfigItemList;	/* conf list head */
+extern int specific_ipv4_vhost;	/* used in s_bsd.c */
+extern int specific_ipv6_vhost;
+extern struct config_file_entry ConfigFileEntry;	/* defined in ircd.c */
+extern struct config_channel_entry ConfigChannel;	/* defined in channel.c */
+extern struct config_server_hide ConfigServerHide;	/* defined in s_conf.c */
+extern struct server_info ServerInfo;	/* defined in ircd.c */
+extern struct admin_info AdminInfo;	/* defined in ircd.c */
 /* End GLOBAL section */
 
 #define TEMP_MIN	1
@@ -345,96 +346,96 @@ extern dlink_list tdline_hour;
 extern dlink_list tdline_day;
 extern dlink_list tdline_week;
 
-extern struct ConfItem* make_conf(void);
-extern void             free_conf(struct ConfItem*);
+extern struct ConfItem *make_conf (void);
+extern void free_conf (struct ConfItem *);
 
 extern dlink_list xline_list;
-extern struct xline *make_xline(const char *, const char *, int);
-extern void free_xline(struct xline *);
-extern struct xline *find_xline(char *);
+extern struct xline *make_xline (const char *, const char *, int);
+extern void free_xline (struct xline *);
+extern struct xline *find_xline (char *);
 
 extern dlink_list shared_list;
-extern struct shared *make_shared(void);
-extern void free_shared(struct shared *);
-extern int find_shared(const char *username, const char *host,
-                       const char *servername, int type);
+extern struct shared *make_shared (void);
+extern void free_shared (struct shared *);
+extern int find_shared (const char *username, const char *host, const char *servername, int type);
 
-extern void             read_conf_files(int cold);
+extern void read_conf_files (int cold);
 
-extern int              attach_conf(struct Client*, struct ConfItem *);
-extern int              attach_connect_block(struct Client* client, 
-					     const char* name,
-					     const char* host);
-extern int              check_client(struct Client* client_p, struct Client *source_p, char *);
+extern int attach_conf (struct Client *, struct ConfItem *);
+extern int attach_connect_block (struct Client *client, const char *name, const char *host);
+extern int check_client (struct Client *client_p, struct Client *source_p, char *);
 
-extern int detach_conf(struct Client *);
+extern int detach_conf (struct Client *);
 
-extern struct ConfItem* find_conf_exact(const char* name, const char* user, const char* host, int statmask);
-extern struct ConfItem* find_conf_by_name(const char* name, int status);
-extern struct ConfItem* find_conf_by_host(const char* host, int status);
-extern struct ConfItem* find_kill (struct Client *);
-extern int conf_connect_allowed(struct irc_inaddr *addr, int aftype);
-extern char *oper_flags_as_string(int);
-extern char *oper_privs_as_string(struct Client *, int);
+extern struct ConfItem *find_conf_exact (const char *name, const char *user,
+					 const char *host, int statmask);
+extern struct ConfItem *find_conf_by_name (const char *name, int status);
+extern struct ConfItem *find_conf_by_host (const char *host, int status);
+extern struct ConfItem *find_kill (struct Client *);
+extern int conf_connect_allowed (struct irc_inaddr *addr, int aftype);
+extern char *oper_flags_as_string (int);
+extern char *oper_privs_as_string (struct Client *, int);
 
-extern struct ConfItem* find_tkline(const char*, const char*, struct irc_inaddr *);
-extern char* show_iline_prefix(struct Client *,struct ConfItem *,char *);
-extern void get_printable_conf(struct ConfItem *,
-                                    char **, char **, char **,
-                                    char **, int *,char **);
-extern void report_configured_links(struct Client* client_p, int mask);
+extern struct ConfItem *find_tkline (const char *, const char *, struct irc_inaddr *);
+extern char *show_iline_prefix (struct Client *, struct ConfItem *, char *);
+extern void get_printable_conf (struct ConfItem *,
+				char **, char **, char **, char **, int *, char **);
+extern void report_configured_links (struct Client *client_p, int mask);
 
-extern void yyerror(const char *);
-extern int conf_yy_fatal_error(const char *);
-extern int conf_fbgets(char *, int, FBFILE *);
+extern void yyerror (const char *);
+extern int conf_yy_fatal_error (const char *);
+extern int conf_fbgets (char *, int, FBFILE *);
 
-typedef enum {
-  CONF_TYPE,
-  KLINE_TYPE,
-  DLINE_TYPE,
-  RESV_TYPE
-} KlineType;
+typedef enum
+{
+	CONF_TYPE,
+	KLINE_TYPE,
+	DLINE_TYPE,
+	RESV_TYPE
+}
+KlineType;
 
-extern void write_confitem(KlineType, struct Client *, char *, char *,
-                           const char *, const char *, const char *, int);
-extern  void    add_temp_kline(struct ConfItem *);
-extern void	add_temp_dline(struct ConfItem *);
-extern  void    report_temp_klines(struct Client *);
-extern  void    show_temp_klines(struct Client *, dlink_list *);
+extern void write_confitem (KlineType, struct Client *, char *, char *,
+			    const char *, const char *, const char *, int);
+extern void add_temp_kline (struct ConfItem *);
+extern void add_temp_dline (struct ConfItem *);
+extern void report_temp_klines (struct Client *);
+extern void show_temp_klines (struct Client *, dlink_list *);
 
-extern void cleanup_temps_min(void *);
-extern void cleanup_temps_hour(void *);
-extern void cleanup_temps_day(void *);
-extern void cleanup_temps_week(void *);
+extern void cleanup_temps_min (void *);
+extern void cleanup_temps_hour (void *);
+extern void cleanup_temps_day (void *);
+extern void cleanup_temps_week (void *);
 
 
-extern  const   char *get_conf_name(KlineType);
-extern  int     rehash (int);
+extern const char *get_conf_name (KlineType);
+extern int rehash (int);
 
-extern int  conf_add_server(struct ConfItem *,int);
-extern void conf_add_class_to_conf(struct ConfItem *);
-extern void conf_add_me(struct ConfItem *);
-extern void conf_add_class(struct ConfItem *,int );
-extern void conf_add_d_conf(struct ConfItem *);
-extern void conf_add_fields(struct ConfItem*, const char*, const char *, const char*, const char *, const char *);
-extern void conf_add_conf(struct ConfItem *);
-extern void flush_expired_ips(void *);
+extern int conf_add_server (struct ConfItem *, int);
+extern void conf_add_class_to_conf (struct ConfItem *);
+extern void conf_add_me (struct ConfItem *);
+extern void conf_add_class (struct ConfItem *, int);
+extern void conf_add_d_conf (struct ConfItem *);
+extern void conf_add_fields (struct ConfItem *, const char *, const char *,
+			     const char *, const char *, const char *);
+extern void conf_add_conf (struct ConfItem *);
+extern void flush_expired_ips (void *);
 
 
 /* XXX consider moving these into kdparse.h */
-extern void parse_k_file(FBFILE *fb);
-extern void parse_d_file(FBFILE *fb);
-extern void parse_x_file(FBFILE *fb);
-extern void parse_resv_file(FBFILE *);
-extern char *getfield(char *newline);
+extern void parse_k_file (FBFILE * fb);
+extern void parse_d_file (FBFILE * fb);
+extern void parse_x_file (FBFILE * fb);
+extern void parse_resv_file (FBFILE *);
+extern char *getfield (char *newline);
 
-extern char *get_oper_name(struct Client *client_p);
+extern char *get_oper_name (struct Client *client_p);
 
-extern int yylex(void);
+extern int yylex (void);
 
 extern unsigned long cidr_to_bitmask[];
 
-extern char conffilebuf[IRCD_BUFSIZE+1];
+extern char conffilebuf[IRCD_BUFSIZE + 1];
 extern int lineno;
 
 #define NOT_AUTHORIZED  (-1)
@@ -446,4 +447,3 @@ extern int lineno;
 #define TOO_MANY_IDENT	(-8)
 
 #endif /* INCLUDED_s_conf_h */
-

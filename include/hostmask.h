@@ -28,41 +28,39 @@
 #define INCLUDE_hostmask_h 1
 enum
 {
- HM_HOST,
- HM_IPV4
+	HM_HOST,
+	HM_IPV4
 #ifdef IPV6
- ,HM_IPV6
+		, HM_IPV6
 #endif
 };
 
 struct HostMaskEntry
 {
-  int type, subtype;
-  unsigned long precedence;
-  char *hostmask;
-  void *data;
-  struct HostMaskEntry *next, *nexthash;
+	int type, subtype;
+	unsigned long precedence;
+	char *hostmask;
+	void *data;
+	struct HostMaskEntry *next, *nexthash;
 };
 
-int parse_netmask(const char*, struct irc_inaddr*, int*);
-struct ConfItem* find_conf_by_address(const char*, struct irc_inaddr*,
-                                      int, int, const char*);
-void add_conf_by_address(const char*, int, const char*, struct ConfItem*);
-void delete_one_address_conf(const char*, struct ConfItem*);
-void clear_out_address_conf(void);
-void init_host_hash(void);
-struct ConfItem* find_address_conf(const char*, const char*,
-                                   struct irc_inaddr*, int);
-struct ConfItem* find_dline(struct irc_inaddr *, int);
-struct ConfItem *find_kline(struct Client *);
-struct ConfItem *find_gline(struct Client *);
+int parse_netmask (const char *, struct irc_inaddr *, int *);
+struct ConfItem *find_conf_by_address (const char *, struct irc_inaddr *, int, int, const char *);
+void add_conf_by_address (const char *, int, const char *, struct ConfItem *);
+void delete_one_address_conf (const char *, struct ConfItem *);
+void clear_out_address_conf (void);
+void init_host_hash (void);
+struct ConfItem *find_address_conf (const char *, const char *, struct irc_inaddr *, int);
+struct ConfItem *find_dline (struct irc_inaddr *, int);
+struct ConfItem *find_kline (struct Client *);
+struct ConfItem *find_gline (struct Client *);
 
-void report_Klines(struct Client *);
-void report_auth(struct Client*);
+void report_Klines (struct Client *);
+void report_auth (struct Client *);
 #ifdef IPV6
-int match_ipv6(struct irc_inaddr*, struct irc_inaddr*, int);
+int match_ipv6 (struct irc_inaddr *, struct irc_inaddr *, int);
 #endif
-int match_ipv4(struct irc_inaddr*, struct irc_inaddr*, int);
+int match_ipv4 (struct irc_inaddr *, struct irc_inaddr *, int);
 
 /* Hashtable stuff... */
 #define ATABLE_SIZE 0x1000
@@ -71,36 +69,37 @@ extern struct AddressRec *atable[ATABLE_SIZE];
 
 struct AddressRec
 {
-  /* masktype: HM_HOST, HM_IPV4, HM_IPV6 -A1kmm */
-  int masktype;
+	/* masktype: HM_HOST, HM_IPV4, HM_IPV6 -A1kmm */
+	int masktype;
 
-  union
-  {
-    struct
-    {
-      /* Pointer into ConfItem... -A1kmm */
-      struct irc_inaddr addr;
-      int bits;
-    } ipa;
+	union
+	{
+		struct
+		{
+			/* Pointer into ConfItem... -A1kmm */
+			struct irc_inaddr addr;
+			int bits;
+		}
+		ipa;
 
-  /* Pointer into ConfItem... -A1kmm */
-  const char *hostname;
-  } Mask;
+		/* Pointer into ConfItem... -A1kmm */
+		const char *hostname;
+	}
+	Mask;
 
-  /* type: CONF_CLIENT, CONF_DLINE, CONF_KILL etc... -A1kmm */
-  int type;
+	/* type: CONF_CLIENT, CONF_DLINE, CONF_KILL etc... -A1kmm */
+	int type;
 
-  /* Higher precedences overrule lower ones... */
-  unsigned long precedence;
+	/* Higher precedences overrule lower ones... */
+	unsigned long precedence;
 
-  /* Only checked if !(type & 1)... */
-  const char *username;
-  struct ConfItem *aconf;
+	/* Only checked if !(type & 1)... */
+	const char *username;
+	struct ConfItem *aconf;
 
-  /* The next record in this hash bucket. */
-  struct AddressRec *next;
+	/* The next record in this hash bucket. */
+	struct AddressRec *next;
 };
 
 
 #endif /* INCLUDE_hostmask_h */
-

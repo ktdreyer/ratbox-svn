@@ -42,42 +42,42 @@
  */
 
 void
-parse_k_file(FBFILE *file)
+parse_k_file (FBFILE * file)
 {
-  struct ConfItem *aconf;
-  char* user_field=NULL;
-  char* reason_field=NULL;
-  char* host_field=NULL;
-  char  line[BUFSIZE];
-  char* p;
+	struct ConfItem *aconf;
+	char *user_field = NULL;
+	char *reason_field = NULL;
+	char *host_field = NULL;
+	char line[BUFSIZE];
+	char *p;
 
-  while (fbgets(line, sizeof(line), file))
-    {
-      if ((p = strchr(line, '\n')) != NULL)
-        *p = '\0';
+	while (fbgets (line, sizeof (line), file))
+	{
+		if((p = strchr (line, '\n')) != NULL)
+			*p = '\0';
 
-      if ((*line == '\0') || (*line == '#'))
-        continue;
+		if((*line == '\0') || (*line == '#'))
+			continue;
 
-      user_field = getfield(line);
-      if(BadPtr(user_field))
-	continue;
+		user_field = getfield (line);
+		if(BadPtr (user_field))
+			continue;
 
-      host_field = getfield(NULL);
-      if(BadPtr(host_field))
-	continue;
+		host_field = getfield (NULL);
+		if(BadPtr (host_field))
+			continue;
 
-      reason_field = getfield(NULL);
-      if(BadPtr(reason_field))
-	continue;
-	  
-      aconf = make_conf();
-      aconf->status = CONF_KILL;
-      conf_add_fields(aconf,host_field,reason_field,user_field,0,NULL);
+		reason_field = getfield (NULL);
+		if(BadPtr (reason_field))
+			continue;
 
-      if (aconf->host != NULL)
-	add_conf_by_address(aconf->host, CONF_KILL, aconf->user, aconf);
-    }
+		aconf = make_conf ();
+		aconf->status = CONF_KILL;
+		conf_add_fields (aconf, host_field, reason_field, user_field, 0, NULL);
+
+		if(aconf->host != NULL)
+			add_conf_by_address (aconf->host, CONF_KILL, aconf->user, aconf);
+	}
 }
 
 /*
@@ -87,101 +87,102 @@ parse_k_file(FBFILE *file)
  * Side Effects - Parse one new style D line
  */
 
-void parse_d_file(FBFILE *file)
+void
+parse_d_file (FBFILE * file)
 {
-  struct ConfItem *aconf;
-  char* reason_field=NULL;
-  char* host_field=NULL;
-  char  line[BUFSIZE];
-  char* p;
+	struct ConfItem *aconf;
+	char *reason_field = NULL;
+	char *host_field = NULL;
+	char line[BUFSIZE];
+	char *p;
 
-  while (fbgets(line, sizeof(line), file))
-    {
-      if ((p = strchr(line, '\n')))
-        *p = '\0';
+	while (fbgets (line, sizeof (line), file))
+	{
+		if((p = strchr (line, '\n')))
+			*p = '\0';
 
-      if ((*line == '\0') || (line[0] == '#'))
-        continue;
+		if((*line == '\0') || (line[0] == '#'))
+			continue;
 
-      host_field = getfield(line);
-      if(BadPtr(host_field))
-	continue;
+		host_field = getfield (line);
+		if(BadPtr (host_field))
+			continue;
 
-      reason_field = getfield(NULL);
-      if(BadPtr(reason_field))
-	continue;
-	  
-      aconf = make_conf();
-      aconf->status = CONF_DLINE;
-      conf_add_fields(aconf,host_field,reason_field,"",0,NULL);
-      conf_add_d_conf(aconf);
-    }
+		reason_field = getfield (NULL);
+		if(BadPtr (reason_field))
+			continue;
+
+		aconf = make_conf ();
+		aconf->status = CONF_DLINE;
+		conf_add_fields (aconf, host_field, reason_field, "", 0, NULL);
+		conf_add_d_conf (aconf);
+	}
 }
 
 void
-parse_x_file(FBFILE *file)
+parse_x_file (FBFILE * file)
 {
-  struct xline *xconf;
-  char *reason_field = NULL;
-  char *host_field = NULL;
-  char *port_field = NULL;
-  char line[BUFSIZE];
-  char *p;
+	struct xline *xconf;
+	char *reason_field = NULL;
+	char *host_field = NULL;
+	char *port_field = NULL;
+	char line[BUFSIZE];
+	char *p;
 
-  while(fbgets(line, sizeof(line), file))
-  {
-    if((p = strchr(line, '\n')))
-      *p = '\0';
+	while (fbgets (line, sizeof (line), file))
+	{
+		if((p = strchr (line, '\n')))
+			*p = '\0';
 
-    if((*line == '\0') || (line[0] == '#'))
-      continue;
+		if((*line == '\0') || (line[0] == '#'))
+			continue;
 
-    host_field = getfield(line);
-    if(BadPtr(host_field))
-      continue;
+		host_field = getfield (line);
+		if(BadPtr (host_field))
+			continue;
 
-    port_field = getfield(NULL);
-    if(BadPtr(port_field))
-      continue;
+		port_field = getfield (NULL);
+		if(BadPtr (port_field))
+			continue;
 
-    reason_field = getfield(NULL);
-    if(BadPtr(reason_field))
-      continue;
-	  
-    xconf = make_xline(host_field, reason_field, atoi(port_field));
-    dlinkAddAlloc(xconf, &xline_list);
-  }
+		reason_field = getfield (NULL);
+		if(BadPtr (reason_field))
+			continue;
+
+		xconf = make_xline (host_field, reason_field, atoi (port_field));
+		dlinkAddAlloc (xconf, &xline_list);
+	}
 }
 
 void
-parse_resv_file(FBFILE *file)
+parse_resv_file (FBFILE * file)
 {
-  char *reason_field;
-  char *host_field;
-  char line[BUFSIZE];
-  char *p;
+	char *reason_field;
+	char *host_field;
+	char line[BUFSIZE];
+	char *p;
 
-  while(fbgets(line, sizeof(line), file))
-  {
-    if((p = strchr(line, '\n')))
-      *p = '\0';
+	while (fbgets (line, sizeof (line), file))
+	{
+		if((p = strchr (line, '\n')))
+			*p = '\0';
 
-    if((*line == '\0') || (line[0] == '#'))
-      continue;
+		if((*line == '\0') || (line[0] == '#'))
+			continue;
 
-    host_field = getfield(line);
-    if(BadPtr(host_field))
-      continue;
+		host_field = getfield (line);
+		if(BadPtr (host_field))
+			continue;
 
-    reason_field = getfield(NULL);
-    if(BadPtr(reason_field))
-      continue;
+		reason_field = getfield (NULL);
+		if(BadPtr (reason_field))
+			continue;
 
-    if(IsChannelName(host_field))
-      create_resv(host_field, reason_field, RESV_CHANNEL);
-    else if(clean_resv_nick(host_field))
-      create_resv(host_field, reason_field, RESV_NICK);
-  }
+		if(IsChannelName (host_field))
+			create_resv (host_field, reason_field, RESV_CHANNEL);
+		else if(clean_resv_nick (host_field))
+			create_resv (host_field, reason_field, RESV_NICK);
+	}
 }
 
 /*
@@ -191,44 +192,44 @@ parse_resv_file(FBFILE *file)
  * output	- next field
  * side effects	- field breakup for ircd.conf file.
  */
-char *getfield(char *newline)
+char *
+getfield (char *newline)
 {
-  static char *line = NULL;
-  char  *end, *field;
-        
-  if (newline)
-    line = newline;
+	static char *line = NULL;
+	char *end, *field;
 
-  if (line == NULL)
-    return(NULL);
+	if(newline)
+		line = newline;
 
-  field = line;
+	if(line == NULL)
+		return (NULL);
 
-  /* XXX make this skip to first " if present */
-  if(*field == '"')
-    field++;
-  else
-    return(NULL);	/* mal-formed field */
+	field = line;
 
-  if ((end = strchr(line,',')) == NULL)
-    {
-      end = line + strlen(line);
-      line = NULL;
-      /* XXX verify properly terminating " */
-      if(*end == '"')
-	*end = '\0';
-      else
-	return(NULL);
-    }
-  else
-    {
-      line = end + 1;
-      --end;
-      if(*end == '"')
-	*end = '\0';
-      else
-	return(NULL);
-    }
-  return(field);
+	/* XXX make this skip to first " if present */
+	if(*field == '"')
+		field++;
+	else
+		return (NULL);	/* mal-formed field */
+
+	if((end = strchr (line, ',')) == NULL)
+	{
+		end = line + strlen (line);
+		line = NULL;
+		/* XXX verify properly terminating " */
+		if(*end == '"')
+			*end = '\0';
+		else
+			return (NULL);
+	}
+	else
+	{
+		line = end + 1;
+		--end;
+		if(*end == '"')
+			*end = '\0';
+		else
+			return (NULL);
+	}
+	return (field);
 }
-

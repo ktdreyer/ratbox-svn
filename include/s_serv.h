@@ -52,28 +52,28 @@ struct Channel;
 /* Capabilities */
 struct Capability
 {
-  const char*        name;      /* name of capability */
-  unsigned int cap;       /* mask value */
+	const char *name;	/* name of capability */
+	unsigned int cap;	/* mask value */
 };
 
-#define CAP_CAP         0x00000001   /* received a CAP to begin with */
-#define CAP_QS          0x00000002   /* Can handle quit storm removal */
-#define CAP_EX          0x00000008   /* Can do channel +e exemptions */
-#define CAP_CHW         0x00000010   /* Can do channel wall @# */
-#define CAP_IE          0x00000040   /* Can do invite exceptions */
-#define CAP_EOB	        0x00000100   /* Can do EOB message */
-#define CAP_KLN	        0x00000200   /* Can do KLINE message */
-#define CAP_GLN	        0x00000400   /* Can do GLINE message */
-#define CAP_UID         0x00004000   /* Can do UIDs */
-#define CAP_ZIP         0x00008000   /* Can do ZIPlinks */
-#define CAP_ENC         0x00010000   /* Can do ENCrypted links */
+#define CAP_CAP         0x00000001	/* received a CAP to begin with */
+#define CAP_QS          0x00000002	/* Can handle quit storm removal */
+#define CAP_EX          0x00000008	/* Can do channel +e exemptions */
+#define CAP_CHW         0x00000010	/* Can do channel wall @# */
+#define CAP_IE          0x00000040	/* Can do invite exceptions */
+#define CAP_EOB	        0x00000100	/* Can do EOB message */
+#define CAP_KLN	        0x00000200	/* Can do KLINE message */
+#define CAP_GLN	        0x00000400	/* Can do GLINE message */
+#define CAP_UID         0x00004000	/* Can do UIDs */
+#define CAP_ZIP         0x00008000	/* Can do ZIPlinks */
+#define CAP_ENC         0x00010000	/* Can do ENCrypted links */
 
-#define CAP_KNOCK	0x00020000   /* supports KNOCK */
+#define CAP_KNOCK	0x00020000	/* supports KNOCK */
 
-#define CAP_TBURST	0x00040000   /* supports TBURST */
-#define CAP_PARA	0x00080000   /* supports invite broadcasting for +p */
-#define CAP_UNKLN       0x00100000   /* supports remote unkline */
-#define CAP_CLUSTER     0x00200000   /* supports cluster stuff */
+#define CAP_TBURST	0x00040000	/* supports TBURST */
+#define CAP_PARA	0x00080000	/* supports invite broadcasting for +p */
+#define CAP_UNKLN       0x00100000	/* supports remote unkline */
+#define CAP_CLUSTER     0x00200000	/* supports cluster stuff */
 
 #define CAP_MASK        (CAP_QS  | CAP_EX   | CAP_CHW  | \
                          CAP_IE  | CAP_EOB  | CAP_KLN  | \
@@ -90,10 +90,10 @@ struct Capability
 #ifdef HAVE_LIBCRYPTO
 struct EncCapability
 {
-  const char *        name;     /* name of capability (cipher name) */
-  unsigned int  cap;      /* mask value */
-  int           keylen;   /* keylength (bytes) */
-  int           cipherid; /* ID number of cipher type (BF, IDEA, etc.) */
+	const char *name;	/* name of capability (cipher name) */
+	unsigned int cap;	/* mask value */
+	int keylen;		/* keylength (bytes) */
+	int cipherid;		/* ID number of cipher type (BF, IDEA, etc.) */
 };
 
 /*
@@ -185,9 +185,9 @@ struct EncCapability
 #define IsCapableEnc(x, cap)    ((x)->localClient->enc_caps &   (cap))
 #define SetCapableEnc(x, cap)   ((x)->localClient->enc_caps |=  (cap))
 #define ClearCapEnc(x, cap)     ((x)->localClient->enc_caps &= ~(cap))
-  
+
 #endif /* HAVE_LIBCRYPTO */
-  
+
 #define DoesCAP(x)      ((x)->caps)
 
 #define CHECK_SERVER_CRYPTLINK    1
@@ -200,17 +200,17 @@ struct EncCapability
 #define SetCapable(x, cap)      ((x)->localClient->caps |=  (cap))
 #define ClearCap(x, cap)        ((x)->localClient->caps &= ~(cap))
 
-#define SLINKCMD_SET_ZIP_OUT_LEVEL           1       /* data */
+#define SLINKCMD_SET_ZIP_OUT_LEVEL           1	/* data */
 #define SLINKCMD_START_ZIP_OUT               2
 #define SLINKCMD_START_ZIP_IN                3
-#define SLINKCMD_SET_CRYPT_IN_CIPHER         4       /* data */
-#define SLINKCMD_SET_CRYPT_IN_KEY            5       /* data */
+#define SLINKCMD_SET_CRYPT_IN_CIPHER         4	/* data */
+#define SLINKCMD_SET_CRYPT_IN_KEY            5	/* data */
 #define SLINKCMD_START_CRYPT_IN              6
-#define SLINKCMD_SET_CRYPT_OUT_CIPHER        7       /* data */
-#define SLINKCMD_SET_CRYPT_OUT_KEY           8       /* data */
+#define SLINKCMD_SET_CRYPT_OUT_CIPHER        7	/* data */
+#define SLINKCMD_SET_CRYPT_OUT_KEY           8	/* data */
 #define SLINKCMD_START_CRYPT_OUT             9
-#define SLINKCMD_INJECT_RECVQ                10      /* data */
-#define SLINKCMD_INJECT_SENDQ                11      /* data */
+#define SLINKCMD_INJECT_RECVQ                10	/* data */
+#define SLINKCMD_INJECT_SENDQ                11	/* data */
 #define SLINKCMD_INIT                        12
 #define SLINKCMD_ZIPSTATS                    13
 
@@ -220,19 +220,19 @@ struct EncCapability
 #define LAST_SLINK_FD   5
 #endif
 
-#define SLINKRPL_FLAG_DATA      0x0001  /* reply has data following */
+#define SLINKRPL_FLAG_DATA      0x0001	/* reply has data following */
 #define SLINKRPL_ERROR          1
 #define SLINKRPL_ZIPSTATS       2
 
 #define MAX_SLINKRPL            2
 
-typedef void SlinkRplHnd(unsigned int replyid, unsigned int datalen,
-                         unsigned char *data, struct Client *client_p);
+typedef void SlinkRplHnd (unsigned int replyid, unsigned int datalen,
+			  unsigned char *data, struct Client *client_p);
 struct SlinkRplDef
 {
-  unsigned int  replyid;
-  SlinkRplHnd   *handler;
-  unsigned int  flags;
+	unsigned int replyid;
+	SlinkRplHnd *handler;
+	unsigned int flags;
 };
 
 extern struct SlinkRplDef slinkrpltab[];
@@ -250,53 +250,45 @@ extern struct Capability captab[];
 extern struct EncCapability CipherTable[];
 #endif
 
-extern int MaxClientCount;     /* GLOBAL - highest number of clients */
-extern int MaxConnectionCount; /* GLOBAL - highest number of connections */
+extern int MaxClientCount;	/* GLOBAL - highest number of clients */
+extern int MaxConnectionCount;	/* GLOBAL - highest number of connections */
 
 extern int refresh_user_links;
 
 /*
  * return values for hunt_server() 
  */
-#define HUNTED_NOSUCH   (-1)    /* if the hunted server is not found */
-#define HUNTED_ISME     0       /* if this server should execute the command */
-#define HUNTED_PASS     1       /* if message passed onwards successfully */
+#define HUNTED_NOSUCH   (-1)	/* if the hunted server is not found */
+#define HUNTED_ISME     0	/* if this server should execute the command */
+#define HUNTED_PASS     1	/* if message passed onwards successfully */
 
 
-extern int         check_server(const char* name, struct Client* server,
-                                int cryptlink);
-extern int         hunt_server(struct Client* client_pt,
-                               struct Client* source_pt,
-                               const char* command, int server, 
-                               int parc, char** parv);
-extern const char* my_name_for_link(const char* name, struct ConfItem* conf);
-extern void        send_capabilities(struct Client*, struct ConfItem* conf,
-                                     int, int);
-extern void	   write_links_file(void*);				     
-extern int         server_estab(struct Client* client_p);
-extern void        set_autoconn(struct Client *,char *,char *,int);
-extern const char* show_capabilities(struct Client* client);
-extern void        try_connections(void *unused);
-extern void        start_collect_zipstats(void);
-extern void        collect_zipstats(void *unused);
+extern int check_server (const char *name, struct Client *server, int cryptlink);
+extern int hunt_server (struct Client *client_pt,
+			struct Client *source_pt,
+			const char *command, int server, int parc, char **parv);
+extern const char *my_name_for_link (const char *name, struct ConfItem *conf);
+extern void send_capabilities (struct Client *, struct ConfItem *conf, int, int);
+extern void write_links_file (void *);
+extern int server_estab (struct Client *client_p);
+extern void set_autoconn (struct Client *, char *, char *, int);
+extern const char *show_capabilities (struct Client *client);
+extern void try_connections (void *unused);
+extern void start_collect_zipstats (void);
+extern void collect_zipstats (void *unused);
 
-extern void	   add_server_to_list(struct Client *);
-extern void	   remove_server_from_list(struct Client *);
+extern void add_server_to_list (struct Client *);
+extern void remove_server_from_list (struct Client *);
 
-extern void        initServerMask(void);
-extern void	   sendnick_TS(struct Client*, struct Client* );
-extern int         serv_connect(struct ConfItem *, struct Client *);
-extern unsigned long nextFreeMask(void);
-extern void        cryptlink_init(struct Client *client_p,
-                                  struct ConfItem *aconf, int fd);
-extern void cryptlink_regen_key(void *);
-extern void cryptlink_error(struct Client *client_p, const char *type,
-                            const char *reason, const char *client_reason);
+extern void initServerMask (void);
+extern void sendnick_TS (struct Client *, struct Client *);
+extern int serv_connect (struct ConfItem *, struct Client *);
+extern unsigned long nextFreeMask (void);
+extern void cryptlink_init (struct Client *client_p, struct ConfItem *aconf, int fd);
+extern void cryptlink_regen_key (void *);
+extern void cryptlink_error (struct Client *client_p, const char *type,
+			     const char *reason, const char *client_reason);
 
-struct EncCapability *check_cipher(struct Client *client_p,
-                                   struct ConfItem *aconf);
+struct EncCapability *check_cipher (struct Client *client_p, struct ConfItem *aconf);
 
 #endif /* INCLUDED_s_serv_h */
-
-
-

@@ -72,30 +72,32 @@ fd_set select_writefds;
 fd_set tmpreadfds;
 fd_set tmpwritefds;
 
-static void select_update_selectfds(int fd, short event, PF *handler);
+static void select_update_selectfds (int fd, short event, PF * handler);
 
 /* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
 /* Private functions */
 
 /*
  * set and clear entries in the select array ..
- */ 
+ */
 static void
-select_update_selectfds(int fd, short event, PF *handler)
-{  
-    /* Update the read / write set */
-    if (event & COMM_SELECT_READ) {
-        if (handler)
-            FD_SET(fd, &select_readfds);
-        else
-            FD_CLR(fd, &select_readfds);
-    }
-    if (event & COMM_SELECT_WRITE) {
-        if (handler)
-            FD_SET(fd, &select_writefds);
-        else
-            FD_CLR(fd, &select_writefds);
-    }
+select_update_selectfds (int fd, short event, PF * handler)
+{
+	/* Update the read / write set */
+	if(event & COMM_SELECT_READ)
+	{
+		if(handler)
+			FD_SET (fd, &select_readfds);
+		else
+			FD_CLR (fd, &select_readfds);
+	}
+	if(event & COMM_SELECT_WRITE)
+	{
+		if(handler)
+			FD_SET (fd, &select_writefds);
+		else
+			FD_CLR (fd, &select_writefds);
+	}
 }
 
 
@@ -109,10 +111,11 @@ select_update_selectfds(int fd, short event, PF *handler)
  * This is a needed exported function which will be called to initialise
  * the network loop code.
  */
-void init_netio(void)
+void
+init_netio (void)
 {
-    FD_ZERO(&select_readfds);
-    FD_ZERO(&select_writefds);
+	FD_ZERO (&select_readfds);
+	FD_ZERO (&select_writefds);
 }
 
 /*
@@ -122,31 +125,32 @@ void init_netio(void)
  * and deregister interest in a pending IO state for a given FD.
  */
 void
-comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
-    void *client_data, time_t timeout)
-{  
-    fde_t *F = &fd_table[fd];
-    assert(fd >= 0);
-    assert(F->flags.open);
+comm_setselect (int fd, fdlist_t list, unsigned int type, PF * handler,
+		void *client_data, time_t timeout)
+{
+	fde_t *F = &fd_table[fd];
+	assert (fd >= 0);
+	assert (F->flags.open);
 
 #ifdef NOTYET
-    debug(5, 5) ("commSetSelect: FD %d type %d, %s\n", fd, type, handler ? "SET"
- : "CLEAR");
+	debug (5, 5) ("commSetSelect: FD %d type %d, %s\n", fd, type, handler ? "SET" : "CLEAR");
 #endif
-    if (type & COMM_SELECT_READ) {
-        F->read_handler = handler;
-        F->read_data = client_data;
-        select_update_selectfds(fd, COMM_SELECT_READ, handler);
-    }
-    if (type & COMM_SELECT_WRITE) {
-        F->write_handler = handler;
-        F->write_data = client_data;
-        select_update_selectfds(fd, COMM_SELECT_WRITE, handler);
-    }
-    if (timeout)
-        F->timeout = CurrentTime + (timeout / 1000);
+	if(type & COMM_SELECT_READ)
+	{
+		F->read_handler = handler;
+		F->read_data = client_data;
+		select_update_selectfds (fd, COMM_SELECT_READ, handler);
+	}
+	if(type & COMM_SELECT_WRITE)
+	{
+		F->write_handler = handler;
+		F->write_data = client_data;
+		select_update_selectfds (fd, COMM_SELECT_WRITE, handler);
+	}
+	if(timeout)
+		F->timeout = CurrentTime + (timeout / 1000);
 }
- 
+
 /*
  * Check all connections for new connections and input data that is to be
  * processed. Also check for connections with data queued and whether we can
@@ -160,64 +164,68 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
  */
 
 int
-comm_select(unsigned long delay)
+comm_select (unsigned long delay)
 {
-    int num;
-    int fd;
-    PF *hdl;
-    fde_t *F;
-    struct timeval to;
+	int num;
+	int fd;
+	PF *hdl;
+	fde_t *F;
+	struct timeval to;
 
-    /* Copy over the read/write sets so we don't have to rebuild em */
-    memcpy(&tmpreadfds, &select_readfds, sizeof(fd_set));
-    memcpy(&tmpwritefds, &select_writefds, sizeof(fd_set));
+	/* Copy over the read/write sets so we don't have to rebuild em */
+	memcpy (&tmpreadfds, &select_readfds, sizeof (fd_set));
+	memcpy (&tmpwritefds, &select_writefds, sizeof (fd_set));
 
-    for (;;) {
-        to.tv_sec = 0;
-        to.tv_usec = delay * 1000;
-        num = select(highest_fd + 1, &tmpreadfds, &tmpwritefds, NULL, &to);
-        if (num >= 0)
-            break;
-        if (ignoreErrno(errno))
-            continue;
-        set_time();
-        /* error! */
-        return -1;
-        /* NOTREACHED */
-    }
-    callbacks_called += num;
-    set_time();
+	for (;;)
+	{
+		to.tv_sec = 0;
+		to.tv_usec = delay * 1000;
+		num = select (highest_fd + 1, &tmpreadfds, &tmpwritefds, NULL, &to);
+		if(num >= 0)
+			break;
+		if(ignoreErrno (errno))
+			continue;
+		set_time ();
+		/* error! */
+		return -1;
+		/* NOTREACHED */
+	}
+	callbacks_called += num;
+	set_time ();
 
-    if (num == 0)
-        return 0;
+	if(num == 0)
+		return 0;
 
-    /* XXX we *could* optimise by falling out after doing num fds ... */
-    for (fd = 0; fd < highest_fd + 1; fd++) {
-        F = &fd_table[fd];
+	/* XXX we *could* optimise by falling out after doing num fds ... */
+	for (fd = 0; fd < highest_fd + 1; fd++)
+	{
+		F = &fd_table[fd];
 
-        if (FD_ISSET(fd, &tmpreadfds)) {
-            hdl = F->read_handler;
-            F->read_handler = NULL;
-            if (hdl) 
-                hdl(fd, F->read_data);
-        }
-        
-        if(F->flags.open == 0)
-           continue; /* Read handler closed us..go on */
-          
-        if (FD_ISSET(fd, &tmpwritefds)) {
-            hdl = F->write_handler;
-            F->write_handler = NULL;
-            if (hdl) 
-                hdl(fd, F->write_data);
-        }
-        
-        if(F->read_handler == NULL)
-            select_update_selectfds(fd, COMM_SELECT_READ, NULL);
-        if(F->write_handler == NULL)
-            select_update_selectfds(fd, COMM_SELECT_WRITE, NULL);
-    }
-    return 0;
+		if(FD_ISSET (fd, &tmpreadfds))
+		{
+			hdl = F->read_handler;
+			F->read_handler = NULL;
+			if(hdl)
+				hdl (fd, F->read_data);
+		}
+
+		if(F->flags.open == 0)
+			continue;	/* Read handler closed us..go on */
+
+		if(FD_ISSET (fd, &tmpwritefds))
+		{
+			hdl = F->write_handler;
+			F->write_handler = NULL;
+			if(hdl)
+				hdl (fd, F->write_data);
+		}
+
+		if(F->read_handler == NULL)
+			select_update_selectfds (fd, COMM_SELECT_READ, NULL);
+		if(F->write_handler == NULL)
+			select_update_selectfds (fd, COMM_SELECT_WRITE, NULL);
+	}
+	return 0;
 }
 
 #endif /* USE_SELECT */

@@ -36,7 +36,7 @@
 #endif
 
 
-#ifndef FALSE 
+#ifndef FALSE
 #define FALSE 0
 #endif
 #ifndef TRUE
@@ -47,65 +47,72 @@
 #endif
 
 /* typedef unsigned int u_int; */
-typedef void (*void_fn_t)();
+typedef void (*void_fn_t) ();
 #define prefix_touchar(prefix) ((u_char *)&(prefix)->add.sin)
 #define MAXLINE 1024
 #define BIT_TEST(f, b)  ((f) & (b))
 
 #include <netinet/in.h>
-#include <sys/socket.h> 
+#include <sys/socket.h>
 
-typedef struct _prefix_t {
-    u_short family;		/* AF_INET | AF_INET6 */
-    u_short bitlen;		/* same as mask? */
-    int ref_count;		/* reference count */
-    union {
+typedef struct _prefix_t
+{
+	u_short family;		/* AF_INET | AF_INET6 */
+	u_short bitlen;		/* same as mask? */
+	int ref_count;		/* reference count */
+	union
+	{
 		struct in_addr sin;
 #ifdef IPV6
 		struct in6_addr sin6;
-#endif /* IPV6 */
-    } add;
-} prefix_t;
+#endif				/* IPV6 */
+	}
+	add;
+}
+prefix_t;
 
 
-typedef struct _patricia_node_t {
-   u_int bit;			/* flag if this node used */
-   prefix_t *prefix;		/* who we are in patricia tree */
-   struct _patricia_node_t *l, *r;	/* left and right children */
-   struct _patricia_node_t *parent;/* may be used */
-   void *data;
-} patricia_node_t;
+typedef struct _patricia_node_t
+{
+	u_int bit;		/* flag if this node used */
+	prefix_t *prefix;	/* who we are in patricia tree */
+	struct _patricia_node_t *l, *r;	/* left and right children */
+	struct _patricia_node_t *parent;	/* may be used */
+	void *data;
+}
+patricia_node_t;
 
-typedef struct _patricia_tree_t {
-   patricia_node_t 	*head;
-   u_int		maxbits;	/* for IP, 32 bit addresses */
-   int num_active_node;		/* for debug purpose */
-} patricia_tree_t;
+typedef struct _patricia_tree_t
+{
+	patricia_node_t *head;
+	u_int maxbits;		/* for IP, 32 bit addresses */
+	int num_active_node;	/* for debug purpose */
+}
+patricia_tree_t;
 
 
-patricia_node_t *match_ip(patricia_tree_t *tree, struct irc_inaddr *ip);
-patricia_node_t *match_string(patricia_tree_t *tree, const char *string);
-patricia_node_t *match_exact_string(patricia_tree_t *tree, const char *string);
-patricia_node_t *patricia_search_exact (patricia_tree_t *patricia, prefix_t *prefix);
-patricia_node_t *patricia_search_best (patricia_tree_t *patricia, prefix_t *prefix);
-patricia_node_t * patricia_search_best2 (patricia_tree_t *patricia, prefix_t *prefix, 
-				   int inclusive);
-patricia_node_t *patricia_lookup (patricia_tree_t *patricia, prefix_t *prefix);
+patricia_node_t *match_ip (patricia_tree_t * tree, struct irc_inaddr *ip);
+patricia_node_t *match_string (patricia_tree_t * tree, const char *string);
+patricia_node_t *match_exact_string (patricia_tree_t * tree, const char *string);
+patricia_node_t *patricia_search_exact (patricia_tree_t * patricia, prefix_t * prefix);
+patricia_node_t *patricia_search_best (patricia_tree_t * patricia, prefix_t * prefix);
+patricia_node_t *patricia_search_best2 (patricia_tree_t * patricia,
+					prefix_t * prefix, int inclusive);
+patricia_node_t *patricia_lookup (patricia_tree_t * patricia, prefix_t * prefix);
 
-void patricia_remove (patricia_tree_t *patricia, patricia_node_t *node);
+void patricia_remove (patricia_tree_t * patricia, patricia_node_t * node);
 patricia_tree_t *New_Patricia (int maxbits);
-void Clear_Patricia (patricia_tree_t *patricia, void_fn_t func);
-void Destroy_Patricia (patricia_tree_t *patricia, void_fn_t func);
-void patricia_process (patricia_tree_t *patricia, void_fn_t func);
-void init_patricia(void);
+void Clear_Patricia (patricia_tree_t * patricia, void_fn_t func);
+void Destroy_Patricia (patricia_tree_t * patricia, void_fn_t func);
+void patricia_process (patricia_tree_t * patricia, void_fn_t func);
+void init_patricia (void);
 
 
 #if 0
-prefix_t *
-ascii2prefix (int family, char *string);
+prefix_t *ascii2prefix (int family, char *string);
 #endif
-patricia_node_t *make_and_lookup (patricia_tree_t *tree, char *string);
-patricia_node_t *make_and_lookup_ip(patricia_tree_t * tree, int family, void *in, int bitlen);
+patricia_node_t *make_and_lookup (patricia_tree_t * tree, char *string);
+patricia_node_t *make_and_lookup_ip (patricia_tree_t * tree, int family, void *in, int bitlen);
 
 
 #define PATRICIA_MAXBITS 128

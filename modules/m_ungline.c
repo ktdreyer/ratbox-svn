@@ -45,25 +45,25 @@
 #include "modules.h"
 #include "s_serv.h"
 
-static void mo_ungline(struct Client*, struct Client*, int, char**);
-static int remove_temp_gline(char *, char *);
+static void mo_ungline (struct Client *, struct Client *, int, char **);
+static int remove_temp_gline (char *, char *);
 
 struct Message gline_msgtab = {
-  "UNGLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_not_oper, m_error, mo_ungline}
+	"UNGLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
+	{m_unregistered, m_not_oper, m_error, mo_ungline}
 };
 
 #ifndef STATIC_MODULES
 void
-_modinit(void)
+_modinit (void)
 {
-  mod_add_cmd(&gline_msgtab);
+	mod_add_cmd (&gline_msgtab);
 }
 
 void
-_moddeinit(void)
+_moddeinit (void)
 {
-  mod_del_cmd(&gline_msgtab);
+	mod_del_cmd (&gline_msgtab);
 }
 const char *_version = "$Revision$";
 #endif
@@ -74,62 +74,60 @@ const char *_version = "$Revision$";
  *      parv[1] = gline to remove
  */
 
-static void mo_ungline(struct Client *client_p, struct Client *source_p,
-                      int parc,char *parv[])
+static void
+mo_ungline (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-  char  *user,*host;
-  char splat[] = "*";
+	char *user, *host;
+	char splat[] = "*";
 
-  if (!ConfigFileEntry.glines)
-  {
-    sendto_one(source_p,":%s NOTICE %s :UNGLINE disabled",me.name,parv[0]);
-    return;
-  }
+	if(!ConfigFileEntry.glines)
+	{
+		sendto_one (source_p, ":%s NOTICE %s :UNGLINE disabled", me.name, parv[0]);
+		return;
+	}
 
-  if (!IsOperUnkline(source_p) || !IsOperGline(source_p))
-  {
-    sendto_one(source_p,":%s NOTICE %s :You need unkline = yes;",
-               me.name,parv[0]);
-    return;
-  }
+	if(!IsOperUnkline (source_p) || !IsOperGline (source_p))
+	{
+		sendto_one (source_p, ":%s NOTICE %s :You need unkline = yes;", me.name, parv[0]);
+		return;
+	}
 
-  if ( (host = strchr(parv[1], '@')) || *parv[1] == '*' )
-  {
-    /* Explicit user@host mask given */
+	if((host = strchr (parv[1], '@')) || *parv[1] == '*')
+	{
+		/* Explicit user@host mask given */
 
-    if(host)                  /* Found user@host */
-    {
-      user = parv[1];       /* here is user part */
-      *(host++) = '\0';     /* and now here is host */
-    }
-    else
-    {
-      user = splat;           /* no @ found, assume its *@somehost */
-      host = parv[1];
-    }
-  }
-  else
-  {
-    sendto_one(source_p, ":%s NOTICE %s :Invalid parameters",
-               me.name, parv[0]);
-    return;
-  }
+		if(host)	/* Found user@host */
+		{
+			user = parv[1];	/* here is user part */
+			*(host++) = '\0';	/* and now here is host */
+		}
+		else
+		{
+			user = splat;	/* no @ found, assume its *@somehost */
+			host = parv[1];
+		}
+	}
+	else
+	{
+		sendto_one (source_p, ":%s NOTICE %s :Invalid parameters", me.name, parv[0]);
+		return;
+	}
 
-  if(remove_temp_gline(user, host))
-  {
-    sendto_one(source_p, ":%s NOTICE %s :Un-glined [%s@%s]",
-               me.name, parv[0],user, host);
-    sendto_realops_flags(UMODE_ALL, L_ALL,
-                         "%s has removed the G-Line for: [%s@%s]",
-                         get_oper_name(source_p), user, host);
-    ilog(L_NOTICE, "%s removed G-Line for [%s@%s]",
-         get_oper_name(source_p), user, host);
-  }
-  else
-  {
-    sendto_one(source_p, ":%s NOTICE %s :No G-Line for %s@%s",
-               me.name, parv[0],user,host);
-  }
+	if(remove_temp_gline (user, host))
+	{
+		sendto_one (source_p, ":%s NOTICE %s :Un-glined [%s@%s]",
+			    me.name, parv[0], user, host);
+		sendto_realops_flags (UMODE_ALL, L_ALL,
+				      "%s has removed the G-Line for: [%s@%s]",
+				      get_oper_name (source_p), user, host);
+		ilog (L_NOTICE, "%s removed G-Line for [%s@%s]",
+		      get_oper_name (source_p), user, host);
+	}
+	else
+	{
+		sendto_one (source_p, ":%s NOTICE %s :No G-Line for %s@%s",
+			    me.name, parv[0], user, host);
+	}
 }
 
 
@@ -140,37 +138,38 @@ static void mo_ungline(struct Client *client_p, struct Client *source_p,
  * side effects - tries to ungline anything that matches
  */
 static int
-remove_temp_gline(char *user, char *host)
+remove_temp_gline (char *user, char *host)
 {
-  struct ConfItem *aconf;
-  dlink_node *ptr;
-  struct irc_inaddr addr, caddr;
-  int nm_t, cnm_t, bits, cbits;
+	struct ConfItem *aconf;
+	dlink_node *ptr;
+	struct irc_inaddr addr, caddr;
+	int nm_t, cnm_t, bits, cbits;
 
-  nm_t = parse_netmask(host, &addr, &bits);
+	nm_t = parse_netmask (host, &addr, &bits);
 
-  DLINK_FOREACH(ptr, glines.head)
-  {
-    aconf = (struct ConfItem*)ptr->data;
+	DLINK_FOREACH (ptr, glines.head)
+	{
+		aconf = (struct ConfItem *) ptr->data;
 
-    cnm_t = parse_netmask(aconf->host, &caddr, &cbits);
+		cnm_t = parse_netmask (aconf->host, &caddr, &cbits);
 
-    if (cnm_t != nm_t || (user && irccmp(user, aconf->user)))
-      continue;
+		if(cnm_t != nm_t || (user && irccmp (user, aconf->user)))
+			continue;
 
-    if ((nm_t==HM_HOST && !irccmp(aconf->host, host)) ||
-	  (nm_t==HM_IPV4 && bits==cbits && comp_with_mask(&IN_ADDR(addr), &IN_ADDR(caddr), bits))
+		if((nm_t == HM_HOST && !irccmp (aconf->host, host)) ||
+		   (nm_t == HM_IPV4 && bits == cbits
+		    && comp_with_mask (&IN_ADDR (addr), &IN_ADDR (caddr), bits))
 #ifdef IPV6
-	  || (nm_t==HM_IPV6 && bits==cbits && comp_with_mask(&IN_ADDR(addr), &IN_ADDR(caddr), bits))
+		   || (nm_t == HM_IPV6 && bits == cbits
+		       && comp_with_mask (&IN_ADDR (addr), &IN_ADDR (caddr), bits))
 #endif
-	  )
-    {
-      dlinkDestroy(ptr, &glines);
-      delete_one_address_conf(aconf->host, aconf);
-      return YES;
-    }
-  }
+			)
+		{
+			dlinkDestroy (ptr, &glines);
+			delete_one_address_conf (aconf->host, aconf);
+			return YES;
+		}
+	}
 
-  return NO;
+	return NO;
 }
-

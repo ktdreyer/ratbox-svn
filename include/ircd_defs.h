@@ -30,9 +30,9 @@
  *
  */
  /* ircd_defs.h - Global size definitions for record entries used
- * througout ircd. Please think 3 times before adding anything to this
- * file.
- */
+  * througout ircd. Please think 3 times before adding anything to this
+  * file.
+  */
 #ifndef INCLUDED_ircd_defs_h
 #define INCLUDED_ircd_defs_h
 
@@ -42,23 +42,23 @@
 #  error Incorrect config.h for this revision of ircd.
 #endif
 
-#define HOSTLEN         63      /* Length of hostname.  Updated to         */
-                                /* comply with RFC1123                     */
+#define HOSTLEN         63	/* Length of hostname.  Updated to         */
+				/* comply with RFC1123                     */
 
 #define USERLEN         10
 #define REALLEN         50
-#define KILLLEN         90      
+#define KILLLEN         90
 #define CHANNELLEN      200
 
 /* 23+1 for \0 */
 #define KEYLEN          24
-#define BUFSIZE         512     /* WARNING: *DONT* CHANGE THIS!!!! */
+#define BUFSIZE         512	/* WARNING: *DONT* CHANGE THIS!!!! */
 #define MAXRECIPIENTS   20
 #define MAXBANLENGTH    1024
-#define OPERNICKLEN     NICKLEN*2 /* Length of OPERNICKs. */
+#define OPERNICKLEN     NICKLEN*2	/* Length of OPERNICKs. */
 
 #define USERHOST_REPLYLEN       (NICKLEN+HOSTLEN+USERLEN+5)
-#define MAX_DATE_STRING 32      /* maximum string length for a date string */
+#define MAX_DATE_STRING 32	/* maximum string length for a date string */
 
 #define HELPLEN         400
 
@@ -72,22 +72,26 @@
 
 struct irc_inaddr
 {
-	union {
+	union
+	{
 		struct in_addr sin;
 #ifdef IPV6
-		struct in6_addr sin6;	
+		struct in6_addr sin6;
 #endif
-	} sins;
+	}
+	sins;
 };
 
 struct irc_sockaddr
 {
-	union {
+	union
+	{
 		struct sockaddr_in sin;
 #ifdef IPV6
 		struct sockaddr_in6 sin6;
-#endif			
-	} sins;
+#endif
+	}
+	sins;
 };
 
 
@@ -102,18 +106,18 @@ do { \
 
 
 /* irc_sockaddr macros */
-#define PS_ADDR(x) x->sins.sin6.sin6_addr.s6_addr  	/* s6_addr for pointer */
-#define S_ADDR(x) x.sins.sin6.sin6_addr.s6_addr 	/* s6_addr for non pointer */
-#define S_PORT(x) x.sins.sin6.sin6_port			/* s6_port */
-#define S_FAM(x) x.sins.sin6.sin6_family		/* sin6_family */
-#define SOCKADDR(x) x.sins.sin6				/* struct sockaddr_in6 for nonpointer */
-#define PSOCKADDR(x) x->sins.sin6			/* struct sockaddr_in6 for pointer */
+#define PS_ADDR(x) x->sins.sin6.sin6_addr.s6_addr	/* s6_addr for pointer */
+#define S_ADDR(x) x.sins.sin6.sin6_addr.s6_addr	/* s6_addr for non pointer */
+#define S_PORT(x) x.sins.sin6.sin6_port	/* s6_port */
+#define S_FAM(x) x.sins.sin6.sin6_family	/* sin6_family */
+#define SOCKADDR(x) x.sins.sin6	/* struct sockaddr_in6 for nonpointer */
+#define PSOCKADDR(x) x->sins.sin6	/* struct sockaddr_in6 for pointer */
 
 
 /* irc_inaddr macros */
 #define IN_ADDR(x) x.sins.sin6.s6_addr
 #define IPV4_MAPPED(x) ((uint32_t *)x.sins.sin6.s6_addr)[3]
-#define PIN_ADDR(x) x->sins.sin6.s6_addr /* For Pointers */
+#define PIN_ADDR(x) x->sins.sin6.s6_addr	/* For Pointers */
 #define IN_ADDR2(x) x.sins.sin6
 
 #define DEF_FAM AF_INET6
@@ -124,18 +128,18 @@ do { \
 
 #define PS_ADDR(x)	x->sins.sin.sin_addr.s_addr	/* s_addr for pointer */
 #define S_ADDR(x)	x.sins.sin.sin_addr.s_addr	/* s_addr for nonpointer */
-#define S_PORT(x)	x.sins.sin.sin_port		/* sin_port   */
-#define S_FAM(x)	x.sins.sin.sin_family		/* sin_family */
-#define SOCKADDR(x)	x.sins.sin			/* struct sockaddr_in */
-#define PSOCKADDR(x)	x->sins.sin			/* struct sockaddr_in */
+#define S_PORT(x)	x.sins.sin.sin_port	/* sin_port   */
+#define S_FAM(x)	x.sins.sin.sin_family	/* sin_family */
+#define SOCKADDR(x)	x.sins.sin	/* struct sockaddr_in */
+#define PSOCKADDR(x)	x->sins.sin	/* struct sockaddr_in */
 
 
-#define PIN_ADDR(x) x->sins.sin.s_addr 
+#define PIN_ADDR(x) x->sins.sin.s_addr
 #define IN_ADDR(x) x.sins.sin.s_addr
 
 #ifndef AF_INET6
-#define AF_INET6 10 /* Dummy AF_INET6 declaration */
-#endif 
+#define AF_INET6 10		/* Dummy AF_INET6 declaration */
+#endif
 #define DEF_FAM AF_INET
 
 #endif

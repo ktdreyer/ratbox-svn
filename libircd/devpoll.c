@@ -57,11 +57,11 @@
 #define POLL_LENGTH	HARD_FDLIMIT
 
 
-static void devpoll_update_events(int, short, PF *);
+static void devpoll_update_events (int, short, PF *);
 static int dpfd;
 static short fdmask[POLL_LENGTH];
-static void devpoll_update_events(int, short, PF *);  
-static void devpoll_write_update(int, int);
+static void devpoll_update_events (int, short, PF *);
+static void devpoll_write_update (int, int);
 
 /* #define NOTYET 1 */
 
@@ -75,79 +75,79 @@ static void devpoll_write_update(int, int);
  * the others.
  */
 static void
-devpoll_write_update(int fd, int events)
+devpoll_write_update (int fd, int events)
 {
-	struct pollfd pollfds[1]; /* Just to be careful */
+	struct pollfd pollfds[1];	/* Just to be careful */
 	int retval;
 
 	/* Build the pollfd entry */
 	pollfds[0].revents = 0;
 	pollfds[0].fd = fd;
 	pollfds[0].events = events;
- 
+
 	/* Write the thing to our poll fd */
-	retval = write(dpfd, &pollfds[0], sizeof(struct pollfd));
-	if (retval != sizeof(struct pollfd))
-		ilog(L_NOTICE, "devpoll_write_update: dpfd write failed %d: %s\n", errno, strerror(errno));
-    /* Done! */
+	retval = write (dpfd, &pollfds[0], sizeof (struct pollfd));
+	if(retval != sizeof (struct pollfd))
+		ilog (L_NOTICE,
+		      "devpoll_write_update: dpfd write failed %d: %s\n", errno, strerror (errno));
+	/* Done! */
 }
 
 void
-devpoll_update_events(int fd, short filter, PF * handler)
+devpoll_update_events (int fd, short filter, PF * handler)
 {
 	int update_required = 0;
 	int cur_mask = fdmask[fd];
 	PF *cur_handler;
-	fdmask[fd] = 0;         
-	switch (filter) 
+	fdmask[fd] = 0;
+	switch (filter)
 	{
-		case COMM_SELECT_READ:
-			cur_handler = fd_table[fd].read_handler;
-			if (handler) 
-				fdmask[fd] |= POLLRDNORM;
-			else
-				fdmask[fd] &=  ~POLLRDNORM;
-			if (fd_table[fd].write_handler)
-				fdmask[fd] |= POLLWRNORM;
-			break;
-    		case COMM_SELECT_WRITE:
-			cur_handler = fd_table[fd].write_handler;
-			if (handler) 
-            			fdmask[fd] |= POLLWRNORM;
-            		else
-            			fdmask[fd] &= ~POLLWRNORM;
-			if(fd_table[fd].read_handler)
-				fdmask[fd] |= POLLRDNORM;
-			break;
-		default:
+	case COMM_SELECT_READ:
+		cur_handler = fd_table[fd].read_handler;
+		if(handler)
+			fdmask[fd] |= POLLRDNORM;
+		else
+			fdmask[fd] &= ~POLLRDNORM;
+		if(fd_table[fd].write_handler)
+			fdmask[fd] |= POLLWRNORM;
+		break;
+	case COMM_SELECT_WRITE:
+		cur_handler = fd_table[fd].write_handler;
+		if(handler)
+			fdmask[fd] |= POLLWRNORM;
+		else
+			fdmask[fd] &= ~POLLWRNORM;
+		if(fd_table[fd].read_handler)
+			fdmask[fd] |= POLLRDNORM;
+		break;
+	default:
 #ifdef NOTYET
-		ilog(L_NOTICE,"devpoll_update_events called with unknown filter: %hd\n", filter);
+		ilog (L_NOTICE, "devpoll_update_events called with unknown filter: %hd\n", filter);
 #endif
 		return;
 		break;
 	}
 
-	if (cur_handler == NULL && handler != NULL)
+	if(cur_handler == NULL && handler != NULL)
 		update_required++;
-    	else 
-    	if (cur_handler != NULL && handler == NULL)
-        	update_required++;
+	else if(cur_handler != NULL && handler == NULL)
+		update_required++;
 	if(cur_mask != fdmask[fd])
 		update_required++;
-	if (update_required) 
+	if(update_required)
 	{
-        /*
-         * Ok, we can call devpoll_write_update() here now to re-build the
-         * fd struct. If we end up with nothing on this fd, it won't write
-         * anything.
-         */
-		if (fdmask[fd]) 
-        	{
-			devpoll_write_update(fd, POLLREMOVE);
-			devpoll_write_update(fd, fdmask[fd]);
+		/*
+		 * Ok, we can call devpoll_write_update() here now to re-build the
+		 * fd struct. If we end up with nothing on this fd, it won't write
+		 * anything.
+		 */
+		if(fdmask[fd])
+		{
+			devpoll_write_update (fd, POLLREMOVE);
+			devpoll_write_update (fd, fdmask[fd]);
 		}
-		else 
-			devpoll_write_update(fd, POLLREMOVE);
+		else
+			devpoll_write_update (fd, POLLREMOVE);
 	}
 }
 
@@ -165,15 +165,17 @@ devpoll_update_events(int fd, short filter, PF * handler)
  * This is a needed exported function which will be called to initialise
  * the network loop code.
  */
-void init_netio(void)
+void
+init_netio (void)
 {
-	memset(&fdmask, 0, sizeof(fdmask));
-	dpfd = open("/dev/poll", O_RDWR);
-	if (dpfd < 0) 
+	memset (&fdmask, 0, sizeof (fdmask));
+	dpfd = open ("/dev/poll", O_RDWR);
+	if(dpfd < 0)
 	{
-	ilog(L_CRIT, "init_netio: Couldn't open /dev/poll - %d: %s\n", errno, strerror(errno));
-        exit(115); /* Whee! */
-    	}
+		ilog (L_CRIT,
+		      "init_netio: Couldn't open /dev/poll - %d: %s\n", errno, strerror (errno));
+		exit (115);	/* Whee! */
+	}
 }
 
 /*
@@ -183,32 +185,32 @@ void init_netio(void)
  * and deregister interest in a pending IO state for a given FD.
  */
 void
-comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
-    void *client_data, time_t timeout)
-{  
+comm_setselect (int fd, fdlist_t list, unsigned int type, PF * handler,
+		void *client_data, time_t timeout)
+{
 	fde_t *F = &fd_table[fd];
-	assert(fd >= 0);
-	assert(F->flags.open);
+	assert (fd >= 0);
+	assert (F->flags.open);
 
 	/* Update the list, even though we're not using it .. */
 	F->list = list;
-	
-	if (type & COMM_SELECT_READ) 
+
+	if(type & COMM_SELECT_READ)
 	{
-		devpoll_update_events(fd, COMM_SELECT_READ, handler);
+		devpoll_update_events (fd, COMM_SELECT_READ, handler);
 		F->read_handler = handler;
 		F->read_data = client_data;
-    	}
-	if (type & COMM_SELECT_WRITE) 
+	}
+	if(type & COMM_SELECT_WRITE)
 	{
-		devpoll_update_events(fd, COMM_SELECT_WRITE, handler);
-        	F->write_handler = handler;
-        	F->write_data = client_data;
-    	}
-	if (timeout)
+		devpoll_update_events (fd, COMM_SELECT_WRITE, handler);
+		F->write_handler = handler;
+		F->write_data = client_data;
+	}
+	if(timeout)
 		F->timeout = CurrentTime + (timeout / 1000);
 }
- 
+
 /*
  * Check all connections for new connections and input data that is to be
  * processed. Also check for connections with data queued and whether we can
@@ -225,79 +227,93 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
  */
 
 int
-comm_select(unsigned long delay)
+comm_select (unsigned long delay)
 {
 	int num, i;
 	struct pollfd pollfds[POLL_LENGTH];
 	struct dvpoll dopoll;
 
-	do 
+	do
 	{
-		for (;;) 
+		for (;;)
 		{
 			dopoll.dp_timeout = delay;
 			dopoll.dp_nfds = POLL_LENGTH;
 			dopoll.dp_fds = &pollfds[0];
-			num = ioctl(dpfd, DP_POLL, &dopoll);
-			if (num >= 0)
+			num = ioctl (dpfd, DP_POLL, &dopoll);
+			if(num >= 0)
 				break;
-			if (ignoreErrno(errno))
+			if(ignoreErrno (errno))
 				break;
-			set_time();
+			set_time ();
 			return COMM_ERROR;
 		}
 
-	        set_time();
-		if (num == 0)
+		set_time ();
+		if(num == 0)
 			continue;
 		callbacks_called += num;
 
-		for (i = 0; i < num; i++) 
-        	{
+		for (i = 0; i < num; i++)
+		{
 			int fd = dopoll.dp_fds[i].fd;
 			PF *hdl = NULL;
 			fde_t *F = &fd_table[fd];
-			if ((dopoll.dp_fds[i].revents & (POLLRDNORM | POLLIN | POLLHUP | POLLERR)) && (dopoll.dp_fds[i].events & (POLLRDNORM|POLLIN))) 
+			if((dopoll.dp_fds[i].
+			    revents & (POLLRDNORM | POLLIN | POLLHUP |
+				       POLLERR))
+			   && (dopoll.dp_fds[i].events & (POLLRDNORM | POLLIN)))
 			{
-				if ((hdl = F->read_handler) != NULL) 
+				if((hdl = F->read_handler) != NULL)
 				{
 					F->read_handler = NULL;
-					hdl(fd, F->read_data);
+					hdl (fd, F->read_data);
 					/*
 					 * this call used to be with a NULL pointer, BUT
 					 * in the devpoll case we only want to update the
 					 * poll set *if* the handler changes state (active ->
 					 * NULL or vice versa.)
 					 */
-					devpoll_update_events(fd, COMM_SELECT_READ, F->read_handler);
-				} else
-					ilog(L_NOTICE, "comm_select: Unhandled read event: fdmask: %x\n", fdmask[fd]);
+					devpoll_update_events (fd,
+							       COMM_SELECT_READ, F->read_handler);
+				}
+				else
+					ilog (L_NOTICE,
+					      "comm_select: Unhandled read event: fdmask: %x\n",
+					      fdmask[fd]);
 			}
-			
+
 			if(F->flags.open == 0)
-			   continue;  /* Read handler closed us..go on to do something more useful */
-			if ((dopoll.dp_fds[i].revents & (POLLWRNORM | POLLOUT | POLLHUP | POLLERR)) && (dopoll.dp_fds[i].events & (POLLWRNORM|POLLOUT))) 
+				continue;	/* Read handler closed us..go on to do something more useful */
+			if((dopoll.dp_fds[i].
+			    revents & (POLLWRNORM | POLLOUT | POLLHUP |
+				       POLLERR))
+			   && (dopoll.dp_fds[i].events & (POLLWRNORM | POLLOUT)))
 			{
-				if ((hdl = F->write_handler) != NULL) 
+				if((hdl = F->write_handler) != NULL)
 				{
 					F->write_handler = NULL;
-					hdl(fd, F->write_data);
+					hdl (fd, F->write_data);
 					/* See above similar code in the read case */
-					devpoll_update_events(fd, COMM_SELECT_WRITE, F->write_handler);
-				} 
-                		else 
-		    			ilog(L_NOTICE, "comm_select: Unhandled write event: fdmask: %x\n", fdmask[fd]);
-		
+					devpoll_update_events (fd,
+							       COMM_SELECT_WRITE, F->write_handler);
+				}
+				else
+					ilog (L_NOTICE,
+					      "comm_select: Unhandled write event: fdmask: %x\n",
+					      fdmask[fd]);
+
 			}
-	    		if(dopoll.dp_fds[i].revents & POLLNVAL) 
-	    		{
-				ilog(L_NOTICE, "revents was Invalid for %d\n", fd);
-	    		}
-	    	}	
-        	return COMM_OK;
-        } while(0);
-    /* XXX Get here, we broke! */
-    return 0;
+			if(dopoll.dp_fds[i].revents & POLLNVAL)
+			{
+				ilog (L_NOTICE, "revents was Invalid for %d\n", fd);
+			}
+		}
+		return COMM_OK;
+	}
+	while (0);
+	/* XXX Get here, we broke! */
+	return 0;
 }
 
 #endif /* USE_DEVPOLL */

@@ -39,13 +39,14 @@
 
 struct Client;
 
-struct AuthRequest {
-  struct Client*      client;    /* pointer to client struct for request */
-  unsigned int        flags;     /* current state of request */
-  int                 fd;        /* file descriptor for auth queries */
-  time_t              timeout;   /* time when query expires */
+struct AuthRequest
+{
+	struct Client *client;	/* pointer to client struct for request */
+	unsigned int flags;	/* current state of request */
+	int fd;			/* file descriptor for auth queries */
+	time_t timeout;		/* time when query expires */
 #ifdef IPV6
-  int                 ip6_int;
+	int ip6_int;
 #endif
 };
 
@@ -75,20 +76,10 @@ struct AuthRequest {
 
 
 
-extern void start_auth(struct Client *);
-extern void send_auth_query(struct AuthRequest* req);
-extern void remove_auth_request(struct AuthRequest *req);
-extern void init_auth(void);
-extern void delete_identd_queries(struct Client *);
+extern void start_auth (struct Client *);
+extern void send_auth_query (struct AuthRequest *req);
+extern void remove_auth_request (struct AuthRequest *req);
+extern void init_auth (void);
+extern void delete_identd_queries (struct Client *);
 
 #endif /* INCLUDED_s_auth_h */
-
-
-
-
-
-
-
-
-
-

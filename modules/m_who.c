@@ -25,7 +25,7 @@
  */
 #include "stdinc.h"
 #include "tools.h"
-#include "common.h"   
+#include "common.h"
 #include "handlers.h"
 #include "client.h"
 #include "channel.h"
@@ -42,37 +42,35 @@
 #include "parse.h"
 #include "modules.h"
 
-static void m_who(struct Client*, struct Client*, int, char**);
+static void m_who (struct Client *, struct Client *, int, char **);
 
 struct Message who_msgtab = {
-  "WHO", 0, 0, 2, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_who, m_ignore, m_who}
+	"WHO", 0, 0, 2, 0, MFLG_SLOW, 0,
+	{m_unregistered, m_who, m_ignore, m_who}
 };
 
 #ifndef STATIC_MODULES
 void
-_modinit(void)
+_modinit (void)
 {
-  mod_add_cmd(&who_msgtab);
+	mod_add_cmd (&who_msgtab);
 }
 
 void
-_moddeinit(void)
+_moddeinit (void)
 {
-  mod_del_cmd(&who_msgtab);
+	mod_del_cmd (&who_msgtab);
 }
 const char *_version = "$Revision$";
 #endif
-static void do_who_on_channel(struct Client *source_p,
-			      struct Channel *chptr, const char *real_name,
-			      int server_oper, int member);
+static void do_who_on_channel (struct Client *source_p,
+			       struct Channel *chptr, const char *real_name,
+			       int server_oper, int member);
 
-static void who_global(struct Client *source_p, const char *mask, int server_oper);
+static void who_global (struct Client *source_p, const char *mask, int server_oper);
 
-static void do_who(struct Client *source_p,
-                   struct Client *target_p,
-                   const char *chname,
-                   const char *op_flags);
+static void do_who (struct Client *source_p,
+		    struct Client *target_p, const char *chname, const char *op_flags);
 
 
 /*
@@ -81,133 +79,131 @@ static void do_who(struct Client *source_p,
 **      parv[1] = nickname mask list
 **      parv[2] = additional selection flag, only 'o' for now.
 */
-static void m_who(struct Client *client_p,
-                 struct Client *source_p,
-                 int parc,
-                 char *parv[])
+static void
+m_who (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *target_p;
-  char  *mask = parc > 1 ? parv[1] : NULL;
-  dlink_node *lp;
-  struct Channel *chptr=NULL;
-  struct Channel *mychannel = NULL;
-  int   server_oper = parc > 2 ? (*parv[2] == 'o' ): 0; /* Show OPERS only */
-  int   member;
+	struct Client *target_p;
+	char *mask = parc > 1 ? parv[1] : NULL;
+	dlink_node *lp;
+	struct Channel *chptr = NULL;
+	struct Channel *mychannel = NULL;
+	int server_oper = parc > 2 ? (*parv[2] == 'o') : 0;	/* Show OPERS only */
+	int member;
 
-  /* See if mask is there, collapse it or return if not there */
+	/* See if mask is there, collapse it or return if not there */
 
-  if (mask != NULL)
-    {
-      (void)collapse(mask);
-
-      if (*mask == '\0')
+	if(mask != NULL)
 	{
-	  sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], "*");
-	  return;
+		(void) collapse (mask);
+
+		if(*mask == '\0')
+		{
+			sendto_one (source_p, form_str (RPL_ENDOFWHO), me.name, parv[0], "*");
+			return;
+		}
 	}
-    }
-  else
-    {
-      who_global(source_p, mask, server_oper);
-      sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], "*" );
-      return;
-    }
-
-  /* mask isn't NULL at this point. repeat after me... -db */
-
-  /* '/who *' */
-
-  if ((*(mask+1) == (char) 0) && (*mask == '*'))
-    {
-      if (source_p->user)
-	if ((lp = source_p->user->channel.head))
-	  mychannel = lp->data;
-
-      if (!mychannel)
-        {
-          sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], "*");
-          return;
-        }
-
-      do_who_on_channel(source_p, mychannel, "*", NO, YES);
-
-      sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], "*");
-      return;
-    }
-
-  /* '/who #some_channel' */
-
-  if (IsChannelName(mask))
-    {
-      /*
-       * List all users on a given channel
-       */
-      chptr = hash_find_channel(mask);
-      if (chptr != NULL)
+	else
 	{
-	  if(IsMember(source_p, chptr))
-	     do_who_on_channel(source_p, chptr, chptr->chname, NO, YES);
-	  else if(!SecretChannel(chptr))
-	     do_who_on_channel(source_p, chptr, chptr->chname, NO, NO);
-	}
-      sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], mask);
-      return;
-    }
-
-  /* '/who nick' */
-
-  if (((target_p = find_client(mask)) != NULL) &&
-      IsPerson(target_p) && (!server_oper || IsOper(target_p)))
-    {
-      char *chname=NULL;
-      int isinvis = 0;
-
-
-      isinvis = IsInvisible(target_p);
-      DLINK_FOREACH(lp, target_p->user->channel.head)
-	{
-	  chptr = lp->data;
-	  chname = chptr->chname;
-
-          member = IsMember(source_p, chptr);
-          if (isinvis && !member)
-          {
-            chptr = NULL;
-            continue;
-          }
-          if (member || (!isinvis && PubChannel(chptr)))
-            {
-              break;
-            }
-	  chptr = NULL;	 /* Must be NULL if we don't loop again */    
+		who_global (source_p, mask, server_oper);
+		sendto_one (source_p, form_str (RPL_ENDOFWHO), me.name, parv[0], "*");
+		return;
 	}
 
-      if (chptr != NULL)
+	/* mask isn't NULL at this point. repeat after me... -db */
+
+	/* '/who *' */
+
+	if((*(mask + 1) == (char) 0) && (*mask == '*'))
 	{
-	  if (is_chan_op(chptr,target_p))
-	    do_who(source_p, target_p, chname, channel_flags[0]);
-	  else if(is_voiced(chptr,target_p))
-	    do_who(source_p, target_p, chname, channel_flags[2]);
-	  else
-	    do_who(source_p, target_p, chname, "");
+		if(source_p->user)
+			if((lp = source_p->user->channel.head))
+				mychannel = lp->data;
+
+		if(!mychannel)
+		{
+			sendto_one (source_p, form_str (RPL_ENDOFWHO), me.name, parv[0], "*");
+			return;
+		}
+
+		do_who_on_channel (source_p, mychannel, "*", NO, YES);
+
+		sendto_one (source_p, form_str (RPL_ENDOFWHO), me.name, parv[0], "*");
+		return;
 	}
-      else
+
+	/* '/who #some_channel' */
+
+	if(IsChannelName (mask))
 	{
-	  do_who(source_p, target_p, NULL, "");
+		/*
+		 * List all users on a given channel
+		 */
+		chptr = hash_find_channel (mask);
+		if(chptr != NULL)
+		{
+			if(IsMember (source_p, chptr))
+				do_who_on_channel (source_p, chptr, chptr->chname, NO, YES);
+			else if(!SecretChannel (chptr))
+				do_who_on_channel (source_p, chptr, chptr->chname, NO, NO);
+		}
+		sendto_one (source_p, form_str (RPL_ENDOFWHO), me.name, parv[0], mask);
+		return;
 	}
 
-      sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], mask);
-      return;
-    }
+	/* '/who nick' */
 
-  /* '/who 0' */
-  if ((*(mask + 1) == '\0') && (*mask == '0'))
-    who_global(source_p, NULL, server_oper);
-  else
-    who_global(source_p, mask, server_oper);
+	if(((target_p = find_client (mask)) != NULL) &&
+	   IsPerson (target_p) && (!server_oper || IsOper (target_p)))
+	{
+		char *chname = NULL;
+		int isinvis = 0;
 
- /* Wasn't a nick, wasn't a channel, wasn't a '*' so ... */
-  sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], mask);
+
+		isinvis = IsInvisible (target_p);
+		DLINK_FOREACH (lp, target_p->user->channel.head)
+		{
+			chptr = lp->data;
+			chname = chptr->chname;
+
+			member = IsMember (source_p, chptr);
+			if(isinvis && !member)
+			{
+				chptr = NULL;
+				continue;
+			}
+			if(member || (!isinvis && PubChannel (chptr)))
+			{
+				break;
+			}
+			chptr = NULL;	/* Must be NULL if we don't loop again */
+		}
+
+		if(chptr != NULL)
+		{
+			if(is_chan_op (chptr, target_p))
+				do_who (source_p, target_p, chname, channel_flags[0]);
+			else if(is_voiced (chptr, target_p))
+				do_who (source_p, target_p, chname, channel_flags[2]);
+			else
+				do_who (source_p, target_p, chname, "");
+		}
+		else
+		{
+			do_who (source_p, target_p, NULL, "");
+		}
+
+		sendto_one (source_p, form_str (RPL_ENDOFWHO), me.name, parv[0], mask);
+		return;
+	}
+
+	/* '/who 0' */
+	if((*(mask + 1) == '\0') && (*mask == '0'))
+		who_global (source_p, NULL, server_oper);
+	else
+		who_global (source_p, mask, server_oper);
+
+	/* Wasn't a nick, wasn't a channel, wasn't a '*' so ... */
+	sendto_one (source_p, form_str (RPL_ENDOFWHO), me.name, parv[0], mask);
 }
 
 /* who_common_channel
@@ -221,43 +217,44 @@ static void m_who(struct Client *client_p,
  * 		  marks matched clients.
  *
  */
-static void who_common_channel(struct Client *source_p,dlink_list chain,
-		const char *mask,int server_oper, int *maxmatches)
+static void
+who_common_channel (struct Client *source_p, dlink_list chain,
+		    const char *mask, int server_oper, int *maxmatches)
 {
-  dlink_node *clp;
- struct Client *target_p;
+	dlink_node *clp;
+	struct Client *target_p;
 
-  DLINK_FOREACH(clp, chain.head)
-   {
-     target_p = clp->data;
+	DLINK_FOREACH (clp, chain.head)
+	{
+		target_p = clp->data;
 
-     if (!IsInvisible(target_p) || IsMarked(target_p))
-       continue;
+		if(!IsInvisible (target_p) || IsMarked (target_p))
+			continue;
 
-     if (server_oper && !IsOper(target_p))
-       continue;
+		if(server_oper && !IsOper (target_p))
+			continue;
 
-     SetMark(target_p);
+		SetMark (target_p);
 
-     if ((mask == NULL) ||
-          match(mask, target_p->name) || match(mask, target_p->username) ||
-          match(mask, target_p->host) || 
-	  (match(mask, target_p->user->server) && 
-	   (IsOper(source_p) || !ConfigServerHide.hide_servers)) ||
-	  match(mask, target_p->info))
-     {
-		
-       do_who(source_p, target_p, NULL, "");
+		if((mask == NULL) ||
+		   match (mask, target_p->name) || match (mask, target_p->username) ||
+		   match (mask, target_p->host) ||
+		   (match (mask, target_p->user->server) &&
+		    (IsOper (source_p) || !ConfigServerHide.hide_servers)) ||
+		   match (mask, target_p->info))
+		{
 
-       if (*maxmatches > 0)
-       {
-         --(*maxmatches);
-         if(*maxmatches == 0)
-            return;
-       }
+			do_who (source_p, target_p, NULL, "");
 
-     }
-   }
+			if(*maxmatches > 0)
+			{
+				--(*maxmatches);
+				if(*maxmatches == 0)
+					return;
+			}
+
+		}
+	}
 }
 
 /*
@@ -271,57 +268,59 @@ static void who_common_channel(struct Client *source_p,dlink_list chain,
  *		  this is slightly expensive on EFnet ...
  */
 
-static void who_global(struct Client *source_p,const char *mask, int server_oper)
+static void
+who_global (struct Client *source_p, const char *mask, int server_oper)
 {
-  struct Channel *chptr=NULL;
-  struct Client *target_p;
-  dlink_node  *lp, *ptr;
-  int   maxmatches = 500;
+	struct Channel *chptr = NULL;
+	struct Client *target_p;
+	dlink_node *lp, *ptr;
+	int maxmatches = 500;
 
-  /* first, list all matching INvisible clients on common channels */
-  
-  DLINK_FOREACH(lp, source_p->user->channel.head)
-  {
-     chptr = lp->data;
-     who_common_channel(source_p,chptr->chanops,mask,server_oper,&maxmatches);
-     who_common_channel(source_p,chptr->chanops_voiced,mask,server_oper,&maxmatches);
-     who_common_channel(source_p,chptr->voiced,mask,server_oper,&maxmatches);
-     who_common_channel(source_p,chptr->peons,mask,server_oper,&maxmatches);
-  }
+	/* first, list all matching INvisible clients on common channels */
 
-  /* second, list all matching visible clients */
-  DLINK_FOREACH(ptr, global_client_list.head)
-  {
-    target_p = (struct Client *)ptr->data;
-    if (!IsPerson(target_p))
-      continue;
+	DLINK_FOREACH (lp, source_p->user->channel.head)
+	{
+		chptr = lp->data;
+		who_common_channel (source_p, chptr->chanops, mask, server_oper, &maxmatches);
+		who_common_channel (source_p, chptr->chanops_voiced, mask, server_oper,
+				    &maxmatches);
+		who_common_channel (source_p, chptr->voiced, mask, server_oper, &maxmatches);
+		who_common_channel (source_p, chptr->peons, mask, server_oper, &maxmatches);
+	}
 
-    if (IsInvisible(target_p))
-    {
-      ClearMark(target_p);
-      continue;
-    }
+	/* second, list all matching visible clients */
+	DLINK_FOREACH (ptr, global_client_list.head)
+	{
+		target_p = (struct Client *) ptr->data;
+		if(!IsPerson (target_p))
+			continue;
 
-    if (server_oper && !IsOper(target_p))
-      continue;
+		if(IsInvisible (target_p))
+		{
+			ClearMark (target_p);
+			continue;
+		}
 
-    if (!mask ||
-        match(mask, target_p->name) || match(mask, target_p->username) ||
-	match(mask, target_p->host) || match(mask, target_p->user->server) ||
-	match(mask, target_p->info))
-    {
-		
-      do_who(source_p, target_p, NULL, "");
-      if (maxmatches > 0)
-      {
-        --maxmatches;
-        if( maxmatches == 0 )
-  	  return;
-      }
+		if(server_oper && !IsOper (target_p))
+			continue;
 
-    }
+		if(!mask ||
+		   match (mask, target_p->name) || match (mask, target_p->username) ||
+		   match (mask, target_p->host) || match (mask, target_p->user->server) ||
+		   match (mask, target_p->info))
+		{
 
-  }
+			do_who (source_p, target_p, NULL, "");
+			if(maxmatches > 0)
+			{
+				--maxmatches;
+				if(maxmatches == 0)
+					return;
+			}
+
+		}
+
+	}
 }
 
 
@@ -337,43 +336,44 @@ static void who_global(struct Client *source_p,const char *mask, int server_oper
  * side effects - do a who on given channel
  */
 
-static void do_who_on_channel(struct Client *source_p, struct Channel *chptr,
-			      const char *chname, int server_oper, int member)
+static void
+do_who_on_channel (struct Client *source_p, struct Channel *chptr,
+		   const char *chname, int server_oper, int member)
 {
-  struct Client *target_p;
-  dlink_node *ptr;
+	struct Client *target_p;
+	dlink_node *ptr;
 
-  DLINK_FOREACH(ptr, chptr->peons.head)
-  {
-    target_p = ptr->data;
+	DLINK_FOREACH (ptr, chptr->peons.head)
+	{
+		target_p = ptr->data;
 
-    if(member || !IsInvisible(target_p))
-      do_who(source_p, target_p, chname, channel_flags[3]);
-  }
+		if(member || !IsInvisible (target_p))
+			do_who (source_p, target_p, chname, channel_flags[3]);
+	}
 
-  DLINK_FOREACH(ptr, chptr->voiced.head)
-  {
-    target_p = ptr->data;
-      
-    if(member || !IsInvisible(target_p))
-      do_who(source_p, target_p, chname, channel_flags[2]);
-  }
+	DLINK_FOREACH (ptr, chptr->voiced.head)
+	{
+		target_p = ptr->data;
 
-  DLINK_FOREACH(ptr, chptr->chanops_voiced.head)
-  {
-    target_p = ptr->data;
+		if(member || !IsInvisible (target_p))
+			do_who (source_p, target_p, chname, channel_flags[2]);
+	}
 
-    if(member || !IsInvisible(target_p))
-      do_who(source_p, target_p, chname, channel_flags[1]);
-  }
+	DLINK_FOREACH (ptr, chptr->chanops_voiced.head)
+	{
+		target_p = ptr->data;
 
-  DLINK_FOREACH(ptr, chptr->chanops.head)
-  {
-    target_p = ptr->data;
+		if(member || !IsInvisible (target_p))
+			do_who (source_p, target_p, chname, channel_flags[1]);
+	}
 
-    if(member || !IsInvisible(target_p))
-      do_who(source_p, target_p, chname, channel_flags[0]);
-  }
+	DLINK_FOREACH (ptr, chptr->chanops.head)
+	{
+		target_p = ptr->data;
+
+		if(member || !IsInvisible (target_p))
+			do_who (source_p, target_p, chname, channel_flags[0]);
+	}
 }
 
 /*
@@ -387,21 +387,17 @@ static void do_who_on_channel(struct Client *source_p, struct Channel *chptr,
  * side effects - do a who on given person
  */
 
-static void do_who(struct Client *source_p,
-                   struct Client *target_p,
-                   const char *chname,
-                   const char *op_flags)
+static void
+do_who (struct Client *source_p, struct Client *target_p, const char *chname, const char *op_flags)
 {
-  char  status[5];
+	char status[5];
 
-  ircsprintf(status,"%c%s%s", 
-	     target_p->user->away ? 'G' : 'H',
-	     IsOper(target_p) ? "*" : "", op_flags );
+	ircsprintf (status, "%c%s%s",
+		    target_p->user->away ? 'G' : 'H', IsOper (target_p) ? "*" : "", op_flags);
 
-    sendto_one(source_p, form_str(RPL_WHOREPLY), me.name, source_p->name,
-	       (chname) ? (chname) : "*",
-	       target_p->username,
-	       target_p->host,  target_p->user->server, target_p->name,
-	       status, target_p->hopcount, target_p->info);
+	sendto_one (source_p, form_str (RPL_WHOREPLY), me.name, source_p->name,
+		    (chname) ? (chname) : "*",
+		    target_p->username,
+		    target_p->host, target_p->user->server, target_p->name,
+		    status, target_p->hopcount, target_p->info);
 }
-

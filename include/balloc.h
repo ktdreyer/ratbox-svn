@@ -41,19 +41,21 @@
  */
 
 
-struct Block {
-	size_t		alloc_size;
-	struct Block*	next;			/* Next in our chain of blocks */
-	void*		elems;			/* Points to allocated memory */
-	dlink_list	free_list;
-	dlink_list	used_list;					
+struct Block
+{
+	size_t alloc_size;
+	struct Block *next;	/* Next in our chain of blocks */
+	void *elems;		/* Points to allocated memory */
+	dlink_list free_list;
+	dlink_list used_list;
 };
 
 typedef struct Block Block;
 
-struct MemBlock {
-	dlink_node self;		
-	Block *block;				/* Which block we belong to */
+struct MemBlock
+{
+	dlink_node self;
+	Block *block;		/* Which block we belong to */
 };
 typedef struct MemBlock MemBlock;
 
@@ -61,26 +63,27 @@ typedef struct MemBlock MemBlock;
  * BlockHeap contains the information for the root node of the
  * memory heap.
  */
-struct BlockHeap {
-   size_t  elemSize;                    /* Size of each element to be stored */
-   int     elemsPerBlock;               /* Number of elements per block */
-   int     blocksAllocated;             /* Number of blocks allocated */
-   int     freeElems;                   /* Number of free elements */
-   Block*  base;                        /* Pointer to first block */
+struct BlockHeap
+{
+	size_t elemSize;	/* Size of each element to be stored */
+	int elemsPerBlock;	/* Number of elements per block */
+	int blocksAllocated;	/* Number of blocks allocated */
+	int freeElems;		/* Number of free elements */
+	Block *base;		/* Pointer to first block */
 };
 
 typedef struct BlockHeap BlockHeap;
 
 
-extern int         BlockHeapFree(BlockHeap *bh, void *ptr);
-extern void *     BlockHeapAlloc(BlockHeap *bh);
+extern int BlockHeapFree (BlockHeap * bh, void *ptr);
+extern void *BlockHeapAlloc (BlockHeap * bh);
 
-extern BlockHeap* BlockHeapCreate(size_t elemsize, int elemsperblock);
-extern int        BlockHeapDestroy(BlockHeap *bh);
+extern BlockHeap *BlockHeapCreate (size_t elemsize, int elemsperblock);
+extern int BlockHeapDestroy (BlockHeap * bh);
 
 
-extern int        BlockHeapGarbageCollect(BlockHeap *);
-extern void	  initBlockHeap(void);
-extern void       BlockHeapUsage(BlockHeap *bh, size_t *bused, size_t *bfree, size_t *bmemusage);
+extern int BlockHeapGarbageCollect (BlockHeap *);
+extern void initBlockHeap (void);
+extern void BlockHeapUsage (BlockHeap * bh, size_t * bused, size_t * bfree, size_t * bmemusage);
 
 #endif /* INCLUDED_blalloc_h */

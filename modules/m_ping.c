@@ -38,25 +38,25 @@
 #include "s_conf.h"
 #include "s_serv.h"
 
-static void m_ping(struct Client*, struct Client*, int, char**);
-static void ms_ping(struct Client*, struct Client*, int, char**);
+static void m_ping (struct Client *, struct Client *, int, char **);
+static void ms_ping (struct Client *, struct Client *, int, char **);
 
 struct Message ping_msgtab = {
-  "PING", 0, 0, 1, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_ping, ms_ping, m_ping}
+	"PING", 0, 0, 1, 0, MFLG_SLOW, 0,
+	{m_unregistered, m_ping, ms_ping, m_ping}
 };
 
 #ifndef STATIC_MODULES
 void
-_modinit(void)
+_modinit (void)
 {
-  mod_add_cmd(&ping_msgtab);
+	mod_add_cmd (&ping_msgtab);
 }
 
 void
-_moddeinit(void)
+_moddeinit (void)
 {
-  mod_del_cmd(&ping_msgtab);
+	mod_del_cmd (&ping_msgtab);
 }
 
 const char *_version = "$Revision$";
@@ -67,88 +67,81 @@ const char *_version = "$Revision$";
 **      parv[1] = origin
 **      parv[2] = destination
 */
-static void m_ping(struct Client *client_p,
-                  struct Client *source_p,
-                  int parc,
-                  char *parv[])
+static void
+m_ping (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *target_p;
-  char  *origin, *destination;
+	struct Client *target_p;
+	char *origin, *destination;
 
-  if (parc < 2 || *parv[1] == '\0')
-  {
-    sendto_one(source_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
-    return;
-  }
+	if(parc < 2 || *parv[1] == '\0')
+	{
+		sendto_one (source_p, form_str (ERR_NOORIGIN), me.name, parv[0]);
+		return;
+	}
 
-  origin = parv[1];
-  destination = parv[2]; /* Will get NULL or pointer (parc >= 2!!) */
+	origin = parv[1];
+	destination = parv[2];	/* Will get NULL or pointer (parc >= 2!!) */
 
-  if (ConfigServerHide.disable_remote && !IsOper(source_p))
-  {
-   sendto_one(source_p,":%s PONG %s :%s", me.name,
-              (destination) ? destination : me.name, origin);
-   return;
-  }
+	if(ConfigServerHide.disable_remote && !IsOper (source_p))
+	{
+		sendto_one (source_p, ":%s PONG %s :%s", me.name,
+			    (destination) ? destination : me.name, origin);
+		return;
+	}
 
-  if (!EmptyString(destination) && irccmp(destination, me.name))
-  {
-    /* We're sending it across servers.. origin == client_p->name --fl_ */
-    origin = client_p->name;
+	if(!EmptyString (destination) && irccmp (destination, me.name))
+	{
+		/* We're sending it across servers.. origin == client_p->name --fl_ */
+		origin = client_p->name;
 
-    /* XXX - sendto_server() ? --fl_ */
-    if ((target_p = find_server(destination)))
-    {
-      /* use the direct link for LL checking */
-      target_p = target_p->from;
+		/* XXX - sendto_server() ? --fl_ */
+		if((target_p = find_server (destination)))
+		{
+			/* use the direct link for LL checking */
+			target_p = target_p->from;
 
-      sendto_one(target_p,":%s PING %s :%s", parv[0],
-                 origin, destination);
-    }
-    else
-    {
-      sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
-                 me.name, parv[0], destination);
-      return;
-    }
-  }
-  else
-    sendto_one(source_p,":%s PONG %s :%s", me.name,
-               (destination) ? destination : me.name, origin);
+			sendto_one (target_p, ":%s PING %s :%s", parv[0], origin, destination);
+		}
+		else
+		{
+			sendto_one (source_p, form_str (ERR_NOSUCHSERVER),
+				    me.name, parv[0], destination);
+			return;
+		}
+	}
+	else
+		sendto_one (source_p, ":%s PONG %s :%s", me.name,
+			    (destination) ? destination : me.name, origin);
 }
 
-static void ms_ping(struct Client *client_p,
-                   struct Client *source_p,
-                   int parc,
-                   char *parv[])
+static void
+ms_ping (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *target_p;
-  char  *origin, *destination;
+	struct Client *target_p;
+	char *origin, *destination;
 
-  if (parc < 2 || *parv[1] == '\0')
-  {
-    sendto_one(source_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
-    return;
-  }
+	if(parc < 2 || *parv[1] == '\0')
+	{
+		sendto_one (source_p, form_str (ERR_NOORIGIN), me.name, parv[0]);
+		return;
+	}
 
 /* origin == source_p->name, lets not even both wasting effort on it --fl_ */
-  origin = source_p->name;
-  destination = parv[2]; /* Will get NULL or pointer (parc >= 2!!) */
+	origin = source_p->name;
+	destination = parv[2];	/* Will get NULL or pointer (parc >= 2!!) */
 
-  if (!EmptyString(destination) && irccmp(destination, me.name))
-  {
-    if ((target_p = find_server(destination)))
-      sendto_one(target_p,":%s PING %s :%s", parv[0],
-                 origin, destination);
-    else
-    {
-      sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
-                 me.name, parv[0], destination);
-      return;
-    }
-  }
-  else
-    sendto_one(source_p,":%s PONG %s :%s", me.name,
-               (destination) ? destination : me.name, origin);
+	if(!EmptyString (destination) && irccmp (destination, me.name))
+	{
+		if((target_p = find_server (destination)))
+			sendto_one (target_p, ":%s PING %s :%s", parv[0], origin, destination);
+		else
+		{
+			sendto_one (source_p, form_str (ERR_NOSUCHSERVER),
+				    me.name, parv[0], destination);
+			return;
+		}
+	}
+	else
+		sendto_one (source_p, ":%s PONG %s :%s", me.name,
+			    (destination) ? destination : me.name, origin);
 }
-

@@ -37,11 +37,11 @@
 #include "sprintf_irc.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "s_serv.h"             /* captab */
+#include "s_serv.h"		/* captab */
 #include "s_user.h"
 #include "send.h"
 #include "whowas.h"
-#include "s_conf.h"             /* ConfigFileEntry, ConfigChannel */
+#include "s_conf.h"		/* ConfigFileEntry, ConfigChannel */
 #include "event.h"
 #include "memory.h"
 #include "balloc.h"
@@ -49,64 +49,53 @@
 
 #include "s_log.h"
 
-static int add_id(struct Client *, struct Channel *, char *, int);
-static int del_id(struct Channel *, char *, int);
+static int add_id (struct Client *, struct Channel *, char *, int);
+static int del_id (struct Channel *, char *, int);
 
-static void change_channel_membership(struct Channel *chptr,
-                                     dlink_list *to_list,
-                                     dlink_list *loc_to_list,
-                                     struct Client *who);
+static void change_channel_membership (struct Channel *chptr,
+				       dlink_list * to_list,
+				       dlink_list * loc_to_list, struct Client *who);
 
 /* some small utility functions */
-static char *check_string(char *s);
-static char *pretty_mask(char *);
-static char *fix_key(char *);
-static char *fix_key_old(char *);
+static char *check_string (char *s);
+static char *pretty_mask (char *);
+static char *fix_key (char *);
+static char *fix_key_old (char *);
 
 
-static void chm_nosuch(struct Client *, struct Client *,
-                       struct Channel *, int, int *, char **, int *, int,
-                       int, char, void *, const char *chname);
+static void chm_nosuch (struct Client *, struct Client *,
+			struct Channel *, int, int *, char **, int *, int,
+			int, char, void *, const char *chname);
 
-static void chm_simple(struct Client *, struct Client *, struct Channel *,
-                       int, int *, char **, int *, int, int, char, void *,
-                       const char *chname);
+static void chm_simple (struct Client *, struct Client *, struct Channel *,
+			int, int *, char **, int *, int, int, char, void *, const char *chname);
 
-static void chm_limit(struct Client *, struct Client *, struct Channel *,
-                      int, int *, char **, int *, int, int, char, void *,
-                      const char *chname);
+static void chm_limit (struct Client *, struct Client *, struct Channel *,
+		       int, int *, char **, int *, int, int, char, void *, const char *chname);
 
-static void chm_key(struct Client *, struct Client *, struct Channel *,
-                    int, int *, char **, int *, int, int, char, void *,
-                    const char *chname);
+static void chm_key (struct Client *, struct Client *, struct Channel *,
+		     int, int *, char **, int *, int, int, char, void *, const char *chname);
 
-static void chm_op(struct Client *, struct Client *, struct Channel *, int,
-                   int *, char **, int *, int, int, char, void *,
-                   const char *chname);
+static void chm_op (struct Client *, struct Client *, struct Channel *, int,
+		    int *, char **, int *, int, int, char, void *, const char *chname);
 
-static void chm_voice(struct Client *, struct Client *, struct Channel *,
-                      int, int *, char **, int *, int, int, char, void *,
-                      const char *chname);
+static void chm_voice (struct Client *, struct Client *, struct Channel *,
+		       int, int *, char **, int *, int, int, char, void *, const char *chname);
 
-static void chm_ban(struct Client *, struct Client *, struct Channel *, int,
-                    int *, char **, int *, int, int, char, void *,
-                    const char *chname);
+static void chm_ban (struct Client *, struct Client *, struct Channel *, int,
+		     int *, char **, int *, int, int, char, void *, const char *chname);
 
-static void chm_except(struct Client *, struct Client *, struct Channel *,
-                       int, int *, char **, int *, int, int, char, void *,
-                       const char *chname);
+static void chm_except (struct Client *, struct Client *, struct Channel *,
+			int, int *, char **, int *, int, int, char, void *, const char *chname);
 
-static void chm_invex(struct Client *, struct Client *, struct Channel *,
-                      int, int *, char **, int *, int, int, char, void *,
-                      const char *chname);
+static void chm_invex (struct Client *, struct Client *, struct Channel *,
+		       int, int *, char **, int *, int, int, char, void *, const char *chname);
 
-static void send_cap_mode_changes(struct Client *, struct Client *,
-                                  struct Channel *, int, int);
+static void send_cap_mode_changes (struct Client *, struct Client *, struct Channel *, int, int);
 
-static void send_mode_changes(struct Client *, struct Client *,
-                              struct Channel *, char *chname);
+static void send_mode_changes (struct Client *, struct Client *, struct Channel *, char *chname);
 
-static void update_channel_info(struct Channel *);
+static void update_channel_info (struct Channel *);
 
 /*
  * some buffers for rebuilding channel/nick lists with ,'s
@@ -140,22 +129,22 @@ extern BlockHeap *ban_heap;
  *                was NULL length or a NULL pointer.
  */
 static char *
-check_string(char *s)
+check_string (char *s)
 {
-  char *str = s;
-  static char splat[] = "*";
-  if (!(s && *s))
-    return splat;
+	char *str = s;
+	static char splat[] = "*";
+	if(!(s && *s))
+		return splat;
 
-  for (; *s; ++s)
-  {
-    if (IsSpace(*s))
-    {
-      *s = '\0';
-      break;
-    }
-  }
-  return str;
+	for (; *s; ++s)
+	{
+		if(IsSpace (*s))
+		{
+			*s = '\0';
+			break;
+		}
+	}
+	return str;
 }
 
 /*
@@ -166,73 +155,73 @@ check_string(char *s)
  */
 
 static int
-add_id(struct Client *client_p, struct Channel *chptr, char *banid, int type)
+add_id (struct Client *client_p, struct Channel *chptr, char *banid, int type)
 {
-  dlink_list *list;
-  dlink_node *ban;
-  struct Ban *actualBan;
+	dlink_list *list;
+	dlink_node *ban;
+	struct Ban *actualBan;
 
-  /* dont let local clients overflow the banlist */
-  if(MyClient(client_p))
-  {
-    if(chptr->num_mask >= ConfigChannel.max_bans)
-    {
-      sendto_one(client_p, form_str(ERR_BANLISTFULL),
-                 me.name, client_p->name, chptr->chname, banid);
-      return 0;
-    }
+	/* dont let local clients overflow the banlist */
+	if(MyClient (client_p))
+	{
+		if(chptr->num_mask >= ConfigChannel.max_bans)
+		{
+			sendto_one (client_p, form_str (ERR_BANLISTFULL),
+				    me.name, client_p->name, chptr->chname, banid);
+			return 0;
+		}
 
-    collapse(banid);
-  }
+		collapse (banid);
+	}
 
-  switch (type)
-  {
-    case CHFL_BAN:
-      list = &chptr->banlist;
-      break;
-    case CHFL_EXCEPTION:
-      list = &chptr->exceptlist;
-      break;
-    case CHFL_INVEX:
-      list = &chptr->invexlist;
-      break;
-    default:
-      sendto_realops_flags(UMODE_ALL, L_ALL,
-                           "add_id() called with unknown ban type %d!", type);
-      return 0;
-  }
+	switch (type)
+	{
+	case CHFL_BAN:
+		list = &chptr->banlist;
+		break;
+	case CHFL_EXCEPTION:
+		list = &chptr->exceptlist;
+		break;
+	case CHFL_INVEX:
+		list = &chptr->invexlist;
+		break;
+	default:
+		sendto_realops_flags (UMODE_ALL, L_ALL,
+				      "add_id() called with unknown ban type %d!", type);
+		return 0;
+	}
 
-  DLINK_FOREACH(ban, list->head)
-  {
-    actualBan = ban->data;
-    if (match(actualBan->banstr, banid))
-      return 0;
-  }
+	DLINK_FOREACH (ban, list->head)
+	{
+		actualBan = ban->data;
+		if(match (actualBan->banstr, banid))
+			return 0;
+	}
 
 
-  actualBan = (struct Ban *)BlockHeapAlloc(ban_heap);
-  DupString(actualBan->banstr, banid);
+	actualBan = (struct Ban *) BlockHeapAlloc (ban_heap);
+	DupString (actualBan->banstr, banid);
 
-  if (IsPerson(client_p))
-  {
-    actualBan->who =
-      (char *)MyMalloc(strlen(client_p->name) +
-                       strlen(client_p->username) +
-                       strlen(client_p->host) + 3);
-    ircsprintf(actualBan->who, "%s!%s@%s",
-               client_p->name, client_p->username, client_p->host);
-  }
-  else
-  {
-    DupString(actualBan->who, client_p->name);
-  }
+	if(IsPerson (client_p))
+	{
+		actualBan->who =
+			(char *) MyMalloc (strlen (client_p->name) +
+					   strlen (client_p->username) +
+					   strlen (client_p->host) + 3);
+		ircsprintf (actualBan->who, "%s!%s@%s",
+			    client_p->name, client_p->username, client_p->host);
+	}
+	else
+	{
+		DupString (actualBan->who, client_p->name);
+	}
 
-  actualBan->when = CurrentTime;
+	actualBan->when = CurrentTime;
 
-  dlinkAddAlloc(actualBan, list);
+	dlinkAddAlloc (actualBan, list);
 
-  chptr->num_mask++;
-  return 1;
+	chptr->num_mask++;
+	return 1;
 }
 
 /*
@@ -245,53 +234,53 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, int type)
  * (invex/excemp/etc)
  */
 static int
-del_id(struct Channel *chptr, char *banid, int type)
+del_id (struct Channel *chptr, char *banid, int type)
 {
-  dlink_list *list;
-  dlink_node *ban;
-  struct Ban *banptr;
+	dlink_list *list;
+	dlink_node *ban;
+	struct Ban *banptr;
 
-  if (!banid)
-    return 0;
+	if(!banid)
+		return 0;
 
-  switch (type)
-  {
-    case CHFL_BAN:
-      list = &chptr->banlist;
-      break;
-    case CHFL_EXCEPTION:
-      list = &chptr->exceptlist;
-      break;
-    case CHFL_INVEX:
-      list = &chptr->invexlist;
-      break;
-    default:
-      sendto_realops_flags(UMODE_ALL, L_ALL,
-                           "del_id() called with unknown ban type %d!", type);
-      return 0;
-  }
+	switch (type)
+	{
+	case CHFL_BAN:
+		list = &chptr->banlist;
+		break;
+	case CHFL_EXCEPTION:
+		list = &chptr->exceptlist;
+		break;
+	case CHFL_INVEX:
+		list = &chptr->invexlist;
+		break;
+	default:
+		sendto_realops_flags (UMODE_ALL, L_ALL,
+				      "del_id() called with unknown ban type %d!", type);
+		return 0;
+	}
 
-  DLINK_FOREACH(ban, list->head)
-  {
-    banptr = ban->data;
+	DLINK_FOREACH (ban, list->head)
+	{
+		banptr = ban->data;
 
-    if (irccmp(banid, banptr->banstr) == 0)
-    {
-      MyFree(banptr->banstr);
-      MyFree(banptr->who);
-      BlockHeapFree(ban_heap, banptr);
+		if(irccmp (banid, banptr->banstr) == 0)
+		{
+			MyFree (banptr->banstr);
+			MyFree (banptr->who);
+			BlockHeapFree (ban_heap, banptr);
 
-      /* num_mask should never be < 0 */
-      if (chptr->num_mask > 0)
-        chptr->num_mask--;
-      else
-        chptr->num_mask = 0;
+			/* num_mask should never be < 0 */
+			if(chptr->num_mask > 0)
+				chptr->num_mask--;
+			else
+				chptr->num_mask = 0;
 
-      dlinkDestroy(ban,list);
-      return 1;
-    }
-  }
-  return 0;
+			dlinkDestroy (ban, list);
+			return 1;
+		}
+	}
+	return 0;
 }
 
 /*
@@ -306,58 +295,57 @@ del_id(struct Channel *chptr, char *banid, int type)
  *                
  */
 static void
-change_channel_membership(struct Channel *chptr,
-                          dlink_list * to_list,
-                          dlink_list * loc_to_list, struct Client *who)
+change_channel_membership (struct Channel *chptr,
+			   dlink_list * to_list, dlink_list * loc_to_list, struct Client *who)
 {
-  dlink_node *ptr;
-  int x;
-  dlink_list *loclists[] = {
-  	&chptr->locpeons,
-  	&chptr->locvoiced,
-  	&chptr->locchanops,
-  	&chptr->locchanops_voiced,
-	NULL  
-  };
+	dlink_node *ptr;
+	int x;
+	dlink_list *loclists[] = {
+		&chptr->locpeons,
+		&chptr->locvoiced,
+		&chptr->locchanops,
+		&chptr->locchanops_voiced,
+		NULL
+	};
 
-  dlink_list *lists[] = {
-  	&chptr->peons,
-  	&chptr->voiced,
-  	&chptr->chanops,
-  	&chptr->chanops_voiced,
-  	NULL
-  };
-  /* local clients need to be moved from local list too */
-  if (MyClient(who))
-  {
-    for(x = 0; loclists[x] != NULL; x++)
-    {
-    	ptr = find_user_link(loclists[x], who);
-    	if(ptr != NULL)
-        {
-          if(loclists[x] != loc_to_list)
-	  {
-            dlinkMoveNode(ptr, loclists[x], loc_to_list);
-          }
-          break;
-    	} 
-    }
-  }
+	dlink_list *lists[] = {
+		&chptr->peons,
+		&chptr->voiced,
+		&chptr->chanops,
+		&chptr->chanops_voiced,
+		NULL
+	};
+	/* local clients need to be moved from local list too */
+	if(MyClient (who))
+	{
+		for (x = 0; loclists[x] != NULL; x++)
+		{
+			ptr = find_user_link (loclists[x], who);
+			if(ptr != NULL)
+			{
+				if(loclists[x] != loc_to_list)
+				{
+					dlinkMoveNode (ptr, loclists[x], loc_to_list);
+				}
+				break;
+			}
+		}
+	}
 
-  for(x = 0; lists[x] != NULL; x++)
-  {
-    ptr = find_user_link(lists[x], who);
-    if(ptr != NULL)
-    {
-      if(lists[x] != to_list)
-      {
-	dlinkMoveNode(ptr, lists[x], to_list);
-      }
-      break;
-    }
-  }
-  
-  dlinkFindDestroy(&chptr->deopped, who);
+	for (x = 0; lists[x] != NULL; x++)
+	{
+		ptr = find_user_link (lists[x], who);
+		if(ptr != NULL)
+		{
+			if(lists[x] != to_list)
+			{
+				dlinkMoveNode (ptr, lists[x], to_list);
+			}
+			break;
+		}
+	}
+
+	dlinkFindDestroy (&chptr->deopped, who);
 
 }
 
@@ -375,44 +363,43 @@ change_channel_membership(struct Channel *chptr,
  *       in pbuf if there is a key or limit.
  */
 void
-channel_modes(struct Channel *chptr, struct Client *client_p,
-              char *mbuf, char *pbuf)
+channel_modes (struct Channel *chptr, struct Client *client_p, char *mbuf, char *pbuf)
 {
-  int len;
-  *mbuf++ = '+';
-  *pbuf = '\0';
+	int len;
+	*mbuf++ = '+';
+	*pbuf = '\0';
 
-  if (chptr->mode.mode & MODE_SECRET)
-    *mbuf++ = 's';
-  if (chptr->mode.mode & MODE_PRIVATE)
-    *mbuf++ = 'p';
-  if (chptr->mode.mode & MODE_MODERATED)
-    *mbuf++ = 'm';
-  if (chptr->mode.mode & MODE_TOPICLIMIT)
-    *mbuf++ = 't';
-  if (chptr->mode.mode & MODE_INVITEONLY)
-    *mbuf++ = 'i';
-  if (chptr->mode.mode & MODE_NOPRIVMSGS)
-    *mbuf++ = 'n';
+	if(chptr->mode.mode & MODE_SECRET)
+		*mbuf++ = 's';
+	if(chptr->mode.mode & MODE_PRIVATE)
+		*mbuf++ = 'p';
+	if(chptr->mode.mode & MODE_MODERATED)
+		*mbuf++ = 'm';
+	if(chptr->mode.mode & MODE_TOPICLIMIT)
+		*mbuf++ = 't';
+	if(chptr->mode.mode & MODE_INVITEONLY)
+		*mbuf++ = 'i';
+	if(chptr->mode.mode & MODE_NOPRIVMSGS)
+		*mbuf++ = 'n';
 
-  if (chptr->mode.limit)
-  {
-    *mbuf++ = 'l';
-    if (IsMember(client_p, chptr) || IsServer(client_p))
-    {
-      len = ircsprintf(pbuf, "%d ", chptr->mode.limit);
-      pbuf += len;
-    }
-  }
-  if (*chptr->mode.key)
-  {
-    *mbuf++ = 'k';
-    if (IsMember(client_p, chptr) || IsServer(client_p))
-      ircsprintf(pbuf, "%s ", chptr->mode.key);
-  }
+	if(chptr->mode.limit)
+	{
+		*mbuf++ = 'l';
+		if(IsMember (client_p, chptr) || IsServer (client_p))
+		{
+			len = ircsprintf (pbuf, "%d ", chptr->mode.limit);
+			pbuf += len;
+		}
+	}
+	if(*chptr->mode.key)
+	{
+		*mbuf++ = 'k';
+		if(IsMember (client_p, chptr) || IsServer (client_p))
+			ircsprintf (pbuf, "%s ", chptr->mode.key);
+	}
 
-  *mbuf++ = '\0';
-  return;
+	*mbuf++ = '\0';
+	return;
 }
 
 /* static char *
@@ -432,99 +419,98 @@ channel_modes(struct Channel *chptr, struct Client *client_p,
  * chopped
  */
 static char *
-pretty_mask(char *mask)
+pretty_mask (char *mask)
 {
-  int old_mask_pos;
-  char *nick, *user, *host;
-  char splat[] = "*";
-  char *t, *at, *ex;
-  char ne = 0, ue = 0, he = 0; /* save values at nick[NICKLEN], et all */
+	int old_mask_pos;
+	char *nick, *user, *host;
+	char splat[] = "*";
+	char *t, *at, *ex;
+	char ne = 0, ue = 0, he = 0;	/* save values at nick[NICKLEN], et all */
 
-  mask = check_string(mask);
+	mask = check_string (mask);
 
-  nick = user = host = splat;
-  
-  if (BUFSIZE - mask_pos < strlen(mask) + 5)
-    return NULL;
+	nick = user = host = splat;
 
-  old_mask_pos = mask_pos;
+	if(BUFSIZE - mask_pos < strlen (mask) + 5)
+		return NULL;
 
-  at = ex = NULL;
-  if ((t = strchr(mask, '@')) != NULL)
-  {
-    at = t;
-    *t++ = '\0';
-    if (*t != '\0')
-      host = t;
+	old_mask_pos = mask_pos;
 
-    if ((t = strchr(mask, '!')) != NULL)
-    {
-      ex = t;
-      *t++ = '\0';
-      if (*t != '\0')
-	user = t;
-      if (*mask != '\0')
-	nick = mask;
-    }
-    else
-    {
-      if (*mask != '\0')
-	user = mask;
-    }
-  }
-  else if ((t = strchr(mask, '!')) != NULL)
-  {
-    ex = t;
-    *t++ = '\0';
-    if (*mask != '\0')
-      nick = mask;
-    if (*t != '\0')
-      user = t;
-  }
-  else if (strchr(mask, '.') != NULL && strchr(mask, ':') != NULL)
-  {
-    if (*mask != '\0')
-      host = mask;
-  }
-  else
-  {
-    if (*mask != '\0')
-      nick = mask;
-  }
+	at = ex = NULL;
+	if((t = strchr (mask, '@')) != NULL)
+	{
+		at = t;
+		*t++ = '\0';
+		if(*t != '\0')
+			host = t;
 
-  /* truncate values to max lengths */
-  if (strlen(nick) > NICKLEN - 1)
-  {
-    ne = nick[NICKLEN - 1];
-    nick[NICKLEN - 1] = '\0';
-  }
-  if (strlen(user) > USERLEN)
-  {
-    ue = user[USERLEN];
-    user[USERLEN] = '\0';
-  }
-  if (strlen(host) > HOSTLEN)
-  {
-    he = host[HOSTLEN];
-    host[HOSTLEN] = '\0';
-  }
-    
-  mask_pos += ircsprintf(mask_buf + mask_pos, "%s!%s@%s", nick, user, host)
-    + 1;
+		if((t = strchr (mask, '!')) != NULL)
+		{
+			ex = t;
+			*t++ = '\0';
+			if(*t != '\0')
+				user = t;
+			if(*mask != '\0')
+				nick = mask;
+		}
+		else
+		{
+			if(*mask != '\0')
+				user = mask;
+		}
+	}
+	else if((t = strchr (mask, '!')) != NULL)
+	{
+		ex = t;
+		*t++ = '\0';
+		if(*mask != '\0')
+			nick = mask;
+		if(*t != '\0')
+			user = t;
+	}
+	else if(strchr (mask, '.') != NULL && strchr (mask, ':') != NULL)
+	{
+		if(*mask != '\0')
+			host = mask;
+	}
+	else
+	{
+		if(*mask != '\0')
+			nick = mask;
+	}
 
-  /* restore mask, since we may need to use it again later */
-  if (at)
-    *at = '@';
-  if (ex)
-    *ex = '!';
-  if (ne)
-    nick[NICKLEN - 1] = ne;
-  if (ue)
-    user[USERLEN] = ue;
-  if (he)
-    host[HOSTLEN] = he;
+	/* truncate values to max lengths */
+	if(strlen (nick) > NICKLEN - 1)
+	{
+		ne = nick[NICKLEN - 1];
+		nick[NICKLEN - 1] = '\0';
+	}
+	if(strlen (user) > USERLEN)
+	{
+		ue = user[USERLEN];
+		user[USERLEN] = '\0';
+	}
+	if(strlen (host) > HOSTLEN)
+	{
+		he = host[HOSTLEN];
+		host[HOSTLEN] = '\0';
+	}
 
-  return mask_buf + old_mask_pos;
+	mask_pos += ircsprintf (mask_buf + mask_pos, "%s!%s@%s", nick, user, host) + 1;
+
+	/* restore mask, since we may need to use it again later */
+	if(at)
+		*at = '@';
+	if(ex)
+		*ex = '!';
+	if(ne)
+		nick[NICKLEN - 1] = ne;
+	if(ue)
+		user[USERLEN] = ue;
+	if(he)
+		host[HOSTLEN] = he;
+
+	return mask_buf + old_mask_pos;
 }
 
 /*
@@ -537,18 +523,18 @@ pretty_mask(char *mask)
  * stolen from Undernet's ircd  -orabidoo
  */
 static char *
-fix_key(char *arg)
+fix_key (char *arg)
 {
-  u_char *s, *t, c;
+	u_char *s, *t, c;
 
-  for (s = t = (u_char *) arg; (c = *s); s++)
-  {
-    c &= 0x7f;
-    if (c != ':' && c > ' ')
-      *t++ = c;
-  }
-  *t = '\0';
-  return arg;
+	for (s = t = (u_char *) arg; (c = *s); s++)
+	{
+		c &= 0x7f;
+		if(c != ':' && c > ' ')
+			*t++ = c;
+	}
+	*t = '\0';
+	return arg;
 }
 
 /*
@@ -562,32 +548,32 @@ fix_key(char *arg)
  * We can't back down from the ':' issue however.  --Rodder
  */
 static char *
-fix_key_old(char *arg)
+fix_key_old (char *arg)
 {
-  u_char *s, *t, c;
+	u_char *s, *t, c;
 
-  for (s = t = (u_char *) arg; (c = *s); s++)
-  {
-    c &= 0x7f;
-    if ((c != 0x0a) && (c != ':') && (c != 0x0d))
-      *t++ = c;
-  }
-  *t = '\0';
-  return arg;
+	for (s = t = (u_char *) arg; (c = *s); s++)
+	{
+		c &= 0x7f;
+		if((c != 0x0a) && (c != ':') && (c != 0x0d))
+			*t++ = c;
+	}
+	*t = '\0';
+	return arg;
 }
 
 /* bitmasks for various error returns that set_channel_mode should only return
  * once per call  -orabidoo
  */
 
-#define SM_ERR_NOTS             0x00000001      /* No TS on channel */
-#define SM_ERR_NOOPS            0x00000002      /* No chan ops */
+#define SM_ERR_NOTS             0x00000001	/* No TS on channel */
+#define SM_ERR_NOOPS            0x00000002	/* No chan ops */
 #define SM_ERR_UNKNOWN          0x00000004
 #define SM_ERR_RPL_C            0x00000008
 #define SM_ERR_RPL_B            0x00000010
 #define SM_ERR_RPL_E            0x00000020
-#define SM_ERR_NOTONCHANNEL     0x00000040      /* Not on channel */
-#define SM_ERR_RESTRICTED       0x00000080      /* Restricted chanop */
+#define SM_ERR_NOTONCHANNEL     0x00000040	/* Not on channel */
+#define SM_ERR_RESTRICTED       0x00000080	/* Restricted chanop */
 #define SM_ERR_RPL_I            0x00000100
 #define SM_ERR_RPL_D            0x00000200
 
@@ -610,26 +596,26 @@ fix_key_old(char *arg)
  *                chcap_yes and chcap_no combination tables.
  */
 void
-init_chcap_usage_counts(void)
+init_chcap_usage_counts (void)
 {
-  unsigned long m, c, y, n;
+	unsigned long m, c, y, n;
 
-  memset(chcap_combos, 0, sizeof(chcap_combos));
+	memset (chcap_combos, 0, sizeof (chcap_combos));
 
-  /* For every possible combination */
-  for (m = 0; m < NCHCAP_COMBOS; m++)
-  {
-    /* Check each capab */
-    for (c = y = n = 0; c < NCHCAPS; c++)
-    {
-      if ((m & (1 << c)) == 0)
-        n |= channel_capabs[c];
-      else
-        y |= channel_capabs[c];
-    }
-    chcap_combos[m].cap_yes = y;
-    chcap_combos[m].cap_no  = n;
-  }
+	/* For every possible combination */
+	for (m = 0; m < NCHCAP_COMBOS; m++)
+	{
+		/* Check each capab */
+		for (c = y = n = 0; c < NCHCAPS; c++)
+		{
+			if((m & (1 << c)) == 0)
+				n |= channel_capabs[c];
+			else
+				y |= channel_capabs[c];
+		}
+		chcap_combos[m].cap_yes = y;
+		chcap_combos[m].cap_no = n;
+	}
 }
 
 /* void set_chcap_usage_counts(struct Client *serv_p)
@@ -639,23 +625,23 @@ init_chcap_usage_counts(void)
  *               combination.
  */
 void
-set_chcap_usage_counts(struct Client *serv_p)
+set_chcap_usage_counts (struct Client *serv_p)
 {
-  int n;
+	int n;
 
-  for (n = 0; n < NCHCAP_COMBOS; n++)
-  {
-    if (((serv_p->localClient->caps & chcap_combos[n].cap_yes) ==
-         chcap_combos[n].cap_yes) &&
-        ((serv_p->localClient->caps & chcap_combos[n].cap_no) == 0))
-    {
-      chcap_combos[n].count++;
-      return;
-    }
-  }
+	for (n = 0; n < NCHCAP_COMBOS; n++)
+	{
+		if(((serv_p->localClient->caps & chcap_combos[n].cap_yes) ==
+		    chcap_combos[n].cap_yes) &&
+		   ((serv_p->localClient->caps & chcap_combos[n].cap_no) == 0))
+		{
+			chcap_combos[n].count++;
+			return;
+		}
+	}
 
-  /* This should be impossible -A1kmm. */
-  assert(0);
+	/* This should be impossible -A1kmm. */
+	assert (0);
 }
 
 /* void set_chcap_usage_counts(struct Client *serv_p)
@@ -667,647 +653,636 @@ set_chcap_usage_counts(struct Client *serv_p)
  */
 
 void
-unset_chcap_usage_counts(struct Client *serv_p)
+unset_chcap_usage_counts (struct Client *serv_p)
 {
-  int n;
+	int n;
 
-  for (n = 0; n < NCHCAP_COMBOS; n++)
-  {
-    if ((serv_p->localClient->caps & chcap_combos[n].cap_yes) ==
-        chcap_combos[n].cap_yes &&
-        (serv_p->localClient->caps & chcap_combos[n].cap_no) == 0)
-    {
-      /* Hopefully capabs can't change dynamically or anything... */
-      assert(chcap_combos[n].count > 0);
+	for (n = 0; n < NCHCAP_COMBOS; n++)
+	{
+		if((serv_p->localClient->caps & chcap_combos[n].cap_yes) ==
+		   chcap_combos[n].cap_yes &&
+		   (serv_p->localClient->caps & chcap_combos[n].cap_no) == 0)
+		{
+			/* Hopefully capabs can't change dynamically or anything... */
+			assert (chcap_combos[n].count > 0);
 
-      if(chcap_combos[n].count > 0)
-        chcap_combos[n].count--;
-      return;
-    }
-  }
+			if(chcap_combos[n].count > 0)
+				chcap_combos[n].count--;
+			return;
+		}
+	}
 
-  /* This should be impossible -A1kmm. */
-  assert(0);
+	/* This should be impossible -A1kmm. */
+	assert (0);
 }
 
 /* Mode functions handle mode changes for a particular mode... */
 static void
-chm_nosuch(struct Client *client_p, struct Client *source_p,
-           struct Channel *chptr, int parc, int *parn,
-           char **parv, int *errors, int alev, int dir, char c, void *d,
-           const char *chname)
+chm_nosuch (struct Client *client_p, struct Client *source_p,
+	    struct Channel *chptr, int parc, int *parn,
+	    char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
 {
-  if (*errors & SM_ERR_UNKNOWN)
-    return;
-  *errors |= SM_ERR_UNKNOWN;
-  sendto_one(source_p, form_str(ERR_UNKNOWNMODE), me.name, source_p->name, c);
+	if(*errors & SM_ERR_UNKNOWN)
+		return;
+	*errors |= SM_ERR_UNKNOWN;
+	sendto_one (source_p, form_str (ERR_UNKNOWNMODE), me.name, source_p->name, c);
 }
 
 static void
-chm_simple(struct Client *client_p, struct Client *source_p,
-           struct Channel *chptr, int parc, int *parn,
-           char **parv, int *errors, int alev, int dir, char c, void *d,
-           const char *chname)
+chm_simple (struct Client *client_p, struct Client *source_p,
+	    struct Channel *chptr, int parc, int *parn,
+	    char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
 {
-  long mode_type;
+	long mode_type;
 
-  mode_type = (long)d;
+	mode_type = (long) d;
 
-  if(alev < CHACCESS_CHANOP)
-  {
-    if (!(*errors & SM_ERR_NOOPS))
-      sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
-                 source_p->name, chname);
-    *errors |= SM_ERR_NOOPS;
-    return;
-  }
+	if(alev < CHACCESS_CHANOP)
+	{
+		if(!(*errors & SM_ERR_NOOPS))
+			sendto_one (source_p, form_str (ERR_CHANOPRIVSNEEDED),
+				    me.name, source_p->name, chname);
+		*errors |= SM_ERR_NOOPS;
+		return;
+	}
 
-  /* +ntspmaikl == 9 + MAXMODEPARAMS (4 * +o) */
-  if (MyClient(source_p) && (++mode_limit > (9 + MAXMODEPARAMS)))
-    return;
+	/* +ntspmaikl == 9 + MAXMODEPARAMS (4 * +o) */
+	if(MyClient (source_p) && (++mode_limit > (9 + MAXMODEPARAMS)))
+		return;
 
-  /* setting + */
-  if ((dir == MODE_ADD) && !(chptr->mode.mode & mode_type))
-  {
-    chptr->mode.mode |= mode_type;
+	/* setting + */
+	if((dir == MODE_ADD) && !(chptr->mode.mode & mode_type))
+	{
+		chptr->mode.mode |= mode_type;
 
-    mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].dir = MODE_ADD;
-    mode_changes[mode_count].caps = 0;
-    mode_changes[mode_count].nocaps = 0;
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count].mems = ALL_MEMBERS;
-    mode_changes[mode_count++].arg = NULL;
-  }
-  else if ((dir == MODE_DEL) && (chptr->mode.mode & mode_type))
-  {
-    /* setting - */
+		mode_changes[mode_count].letter = c;
+		mode_changes[mode_count].dir = MODE_ADD;
+		mode_changes[mode_count].caps = 0;
+		mode_changes[mode_count].nocaps = 0;
+		mode_changes[mode_count].id = NULL;
+		mode_changes[mode_count].mems = ALL_MEMBERS;
+		mode_changes[mode_count++].arg = NULL;
+	}
+	else if((dir == MODE_DEL) && (chptr->mode.mode & mode_type))
+	{
+		/* setting - */
 
-    chptr->mode.mode &= ~mode_type;
+		chptr->mode.mode &= ~mode_type;
 
-    mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].dir = MODE_DEL;
-    mode_changes[mode_count].caps = 0;
-    mode_changes[mode_count].nocaps = 0;
-    mode_changes[mode_count].mems = ALL_MEMBERS;
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count++].arg = NULL;
-  }
+		mode_changes[mode_count].letter = c;
+		mode_changes[mode_count].dir = MODE_DEL;
+		mode_changes[mode_count].caps = 0;
+		mode_changes[mode_count].nocaps = 0;
+		mode_changes[mode_count].mems = ALL_MEMBERS;
+		mode_changes[mode_count].id = NULL;
+		mode_changes[mode_count++].arg = NULL;
+	}
 }
 
 static void
-chm_ban(struct Client *client_p, struct Client *source_p,
-        struct Channel *chptr, int parc, int *parn,
-        char **parv, int *errors, int alev, int dir, char c, void *d,
-        const char *chname)
+chm_ban (struct Client *client_p, struct Client *source_p,
+	 struct Channel *chptr, int parc, int *parn,
+	 char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
 {
-  char *mask;
-  char *raw_mask;
-  dlink_node *ptr;
-  struct Ban *banptr;
+	char *mask;
+	char *raw_mask;
+	dlink_node *ptr;
+	struct Ban *banptr;
 
-  if (dir == 0 || parc <= *parn)
-  {
-    if ((*errors & SM_ERR_RPL_B) != 0)
-      return;
-    *errors |= SM_ERR_RPL_B;
+	if(dir == 0 || parc <= *parn)
+	{
+		if((*errors & SM_ERR_RPL_B) != 0)
+			return;
+		*errors |= SM_ERR_RPL_B;
 
-      DLINK_FOREACH(ptr, chptr->banlist.head)
-      {
-        banptr = ptr->data;
-        sendto_one(client_p, form_str(RPL_BANLIST),
-                   me.name, client_p->name, chname,
-                   banptr->banstr, banptr->who, banptr->when);
-      }
-    sendto_one(source_p, form_str(RPL_ENDOFBANLIST), me.name,
-               source_p->name, chname);
-    return;
-  }
+		DLINK_FOREACH (ptr, chptr->banlist.head)
+		{
+			banptr = ptr->data;
+			sendto_one (client_p, form_str (RPL_BANLIST),
+				    me.name, client_p->name, chname,
+				    banptr->banstr, banptr->who, banptr->when);
+		}
+		sendto_one (source_p, form_str (RPL_ENDOFBANLIST), me.name, source_p->name, chname);
+		return;
+	}
 
-  if (alev < CHACCESS_CHANOP)
-  {
-    if (!(*errors & SM_ERR_NOOPS))
-      sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
-                 source_p->name, chname);
-    *errors |= SM_ERR_NOOPS;
-    return;
-  }
+	if(alev < CHACCESS_CHANOP)
+	{
+		if(!(*errors & SM_ERR_NOOPS))
+			sendto_one (source_p, form_str (ERR_CHANOPRIVSNEEDED),
+				    me.name, source_p->name, chname);
+		*errors |= SM_ERR_NOOPS;
+		return;
+	}
 
-  if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
-    return;
+	if(MyClient (source_p) && (++mode_limit > MAXMODEPARAMS))
+		return;
 
-  raw_mask = parv[(*parn)++];
-  
-  if (IsServer(client_p))
-    mask = raw_mask;
-  else
-    mask = pretty_mask(raw_mask);
+	raw_mask = parv[(*parn)++];
 
-  /* we'd have problems parsing this, hyb6 does it too */
-  if(strlen(mask) > (MODEBUFLEN - 2))
-    return;
+	if(IsServer (client_p))
+		mask = raw_mask;
+	else
+		mask = pretty_mask (raw_mask);
 
-  /* if we're adding a NEW id */
-  if (dir == MODE_ADD) 
-  {
-    if(!add_id(source_p, chptr, mask, CHFL_BAN) && MyClient(source_p))
-       return;
-       
-    mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].dir = MODE_ADD;
-    mode_changes[mode_count].caps = 0;
-    mode_changes[mode_count].nocaps = 0;
-    mode_changes[mode_count].mems = ALL_MEMBERS;
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count++].arg = mask;
-  }
-  else if (dir == MODE_DEL)
-  {
-    if (del_id(chptr, mask, CHFL_BAN) == 0)
-    {
-      /* mask isn't a valid ban, check raw_mask */
-      if(del_id(chptr, raw_mask, CHFL_BAN))
-        mask = raw_mask;
-    }
+	/* we'd have problems parsing this, hyb6 does it too */
+	if(strlen (mask) > (MODEBUFLEN - 2))
+		return;
 
-    mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].dir = MODE_DEL;
-    mode_changes[mode_count].caps = 0;
-    mode_changes[mode_count].nocaps = 0;
-    mode_changes[mode_count].mems = ALL_MEMBERS;
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count++].arg = mask;
-  }
+	/* if we're adding a NEW id */
+	if(dir == MODE_ADD)
+	{
+		if(!add_id (source_p, chptr, mask, CHFL_BAN) && MyClient (source_p))
+			return;
+
+		mode_changes[mode_count].letter = c;
+		mode_changes[mode_count].dir = MODE_ADD;
+		mode_changes[mode_count].caps = 0;
+		mode_changes[mode_count].nocaps = 0;
+		mode_changes[mode_count].mems = ALL_MEMBERS;
+		mode_changes[mode_count].id = NULL;
+		mode_changes[mode_count++].arg = mask;
+	}
+	else if(dir == MODE_DEL)
+	{
+		if(del_id (chptr, mask, CHFL_BAN) == 0)
+		{
+			/* mask isn't a valid ban, check raw_mask */
+			if(del_id (chptr, raw_mask, CHFL_BAN))
+				mask = raw_mask;
+		}
+
+		mode_changes[mode_count].letter = c;
+		mode_changes[mode_count].dir = MODE_DEL;
+		mode_changes[mode_count].caps = 0;
+		mode_changes[mode_count].nocaps = 0;
+		mode_changes[mode_count].mems = ALL_MEMBERS;
+		mode_changes[mode_count].id = NULL;
+		mode_changes[mode_count++].arg = mask;
+	}
 }
 
 static void
-chm_except(struct Client *client_p, struct Client *source_p,
-           struct Channel *chptr, int parc, int *parn,
-           char **parv, int *errors, int alev, int dir, char c, void *d,
-           const char *chname)
+chm_except (struct Client *client_p, struct Client *source_p,
+	    struct Channel *chptr, int parc, int *parn,
+	    char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
 {
-  dlink_node *ptr;
-  struct Ban *banptr;
-  char *mask, *raw_mask;
+	dlink_node *ptr;
+	struct Ban *banptr;
+	char *mask, *raw_mask;
 
-  /* if we have +e disabled, allow local clients to do anything but
-   * set the mode.  This prevents the abuse of +e when just a few
-   * servers support it. --fl
-   */
-  if(!ConfigChannel.use_except && MyClient(source_p) && 
-    ((dir == MODE_ADD) && (parc > *parn)))
-  {
-    if ((*errors & SM_ERR_RPL_E) != 0)
-      return;
+	/* if we have +e disabled, allow local clients to do anything but
+	 * set the mode.  This prevents the abuse of +e when just a few
+	 * servers support it. --fl
+	 */
+	if(!ConfigChannel.use_except && MyClient (source_p) &&
+	   ((dir == MODE_ADD) && (parc > *parn)))
+	{
+		if((*errors & SM_ERR_RPL_E) != 0)
+			return;
 
-    *errors |= SM_ERR_RPL_E;
-    return;
-  }
+		*errors |= SM_ERR_RPL_E;
+		return;
+	}
 
-  if (alev < CHACCESS_CHANOP)
-  {
-    if (!(*errors & SM_ERR_NOOPS))
-      sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
-                 source_p->name, chname);
-    *errors |= SM_ERR_NOOPS;
-    return;
-  }
+	if(alev < CHACCESS_CHANOP)
+	{
+		if(!(*errors & SM_ERR_NOOPS))
+			sendto_one (source_p, form_str (ERR_CHANOPRIVSNEEDED),
+				    me.name, source_p->name, chname);
+		*errors |= SM_ERR_NOOPS;
+		return;
+	}
 
-  if ((dir == MODE_QUERY) || parc <= *parn)
-  {
-    if ((*errors & SM_ERR_RPL_E) != 0)
-      return;
-    *errors |= SM_ERR_RPL_E;
+	if((dir == MODE_QUERY) || parc <= *parn)
+	{
+		if((*errors & SM_ERR_RPL_E) != 0)
+			return;
+		*errors |= SM_ERR_RPL_E;
 
-    DLINK_FOREACH(ptr, chptr->exceptlist.head)
-    {
-      banptr = ptr->data;
-      sendto_one(client_p, form_str(RPL_EXCEPTLIST),
-                 me.name, client_p->name, chname,
-                 banptr->banstr, banptr->who, banptr->when);
-    }
-    sendto_one(source_p, form_str(RPL_ENDOFEXCEPTLIST), me.name,
-               source_p->name, chname);
-    return;
-  }
+		DLINK_FOREACH (ptr, chptr->exceptlist.head)
+		{
+			banptr = ptr->data;
+			sendto_one (client_p, form_str (RPL_EXCEPTLIST),
+				    me.name, client_p->name, chname,
+				    banptr->banstr, banptr->who, banptr->when);
+		}
+		sendto_one (source_p, form_str (RPL_ENDOFEXCEPTLIST), me.name,
+			    source_p->name, chname);
+		return;
+	}
 
-  if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
-    return;
+	if(MyClient (source_p) && (++mode_limit > MAXMODEPARAMS))
+		return;
 
-  raw_mask = parv[(*parn)++];
-  if (IsServer(client_p))
-    mask = raw_mask;
-  else
-    mask = pretty_mask(raw_mask);
+	raw_mask = parv[(*parn)++];
+	if(IsServer (client_p))
+		mask = raw_mask;
+	else
+		mask = pretty_mask (raw_mask);
 
-  if(strlen(mask) > (MODEBUFLEN - 2))
-    return;
+	if(strlen (mask) > (MODEBUFLEN - 2))
+		return;
 
-  /* If we're adding a NEW id */
-  if (dir == MODE_ADD)
-  {
-    if(!add_id(source_p, chptr, mask, CHFL_EXCEPTION) && MyClient(source_p))
-      return;
-    mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].dir = MODE_ADD;
-    mode_changes[mode_count].caps = CAP_EX;
-    mode_changes[mode_count].nocaps = 0;
+	/* If we're adding a NEW id */
+	if(dir == MODE_ADD)
+	{
+		if(!add_id (source_p, chptr, mask, CHFL_EXCEPTION) && MyClient (source_p))
+			return;
+		mode_changes[mode_count].letter = c;
+		mode_changes[mode_count].dir = MODE_ADD;
+		mode_changes[mode_count].caps = CAP_EX;
+		mode_changes[mode_count].nocaps = 0;
 
-    if(ConfigChannel.use_except)
-      mode_changes[mode_count].mems = ONLY_CHANOPS;
-    else
-      mode_changes[mode_count].mems = ONLY_SERVERS;
+		if(ConfigChannel.use_except)
+			mode_changes[mode_count].mems = ONLY_CHANOPS;
+		else
+			mode_changes[mode_count].mems = ONLY_SERVERS;
 
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count++].arg = mask;
-  }
-  else if (dir == MODE_DEL)
-  {
-    if (del_id(chptr, mask, CHFL_EXCEPTION) == 0)
-    {
-      /* mask isn't a valid ban, check raw_mask */
-      if(del_id(chptr, raw_mask, CHFL_EXCEPTION))
-        mask = raw_mask;
-    }
+		mode_changes[mode_count].id = NULL;
+		mode_changes[mode_count++].arg = mask;
+	}
+	else if(dir == MODE_DEL)
+	{
+		if(del_id (chptr, mask, CHFL_EXCEPTION) == 0)
+		{
+			/* mask isn't a valid ban, check raw_mask */
+			if(del_id (chptr, raw_mask, CHFL_EXCEPTION))
+				mask = raw_mask;
+		}
 
-    mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].dir = MODE_DEL;
-    mode_changes[mode_count].caps = CAP_EX;
-    mode_changes[mode_count].nocaps = 0;
-    mode_changes[mode_count].mems = ONLY_CHANOPS;
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count++].arg = mask;
-  }
+		mode_changes[mode_count].letter = c;
+		mode_changes[mode_count].dir = MODE_DEL;
+		mode_changes[mode_count].caps = CAP_EX;
+		mode_changes[mode_count].nocaps = 0;
+		mode_changes[mode_count].mems = ONLY_CHANOPS;
+		mode_changes[mode_count].id = NULL;
+		mode_changes[mode_count++].arg = mask;
+	}
 }
 
 static void
-chm_invex(struct Client *client_p, struct Client *source_p,
-          struct Channel *chptr, int parc, int *parn,
-          char **parv, int *errors, int alev, int dir, char c, void *d,
-          const char *chname)
+chm_invex (struct Client *client_p, struct Client *source_p,
+	   struct Channel *chptr, int parc, int *parn,
+	   char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
 {
-  char *mask, *raw_mask;
-  dlink_node *ptr;
-  struct Ban *banptr;
+	char *mask, *raw_mask;
+	dlink_node *ptr;
+	struct Ban *banptr;
 
-  /* if we have +I disabled, allow local clients to do anything but
-   * set the mode.  This prevents the abuse of +I when just a few
-   * servers support it --fl
-   */
-  if(!ConfigChannel.use_invex && MyClient(source_p) && 
-    (dir == MODE_ADD) && (parc > *parn))
-  {
-    if((*errors & SM_ERR_RPL_I) != 0)
-      return;
-    
-    *errors |= SM_ERR_RPL_I;
-    return;
-  }
+	/* if we have +I disabled, allow local clients to do anything but
+	 * set the mode.  This prevents the abuse of +I when just a few
+	 * servers support it --fl
+	 */
+	if(!ConfigChannel.use_invex && MyClient (source_p) && (dir == MODE_ADD) && (parc > *parn))
+	{
+		if((*errors & SM_ERR_RPL_I) != 0)
+			return;
 
-  if (alev < CHACCESS_CHANOP)
-  {
-    if (!(*errors & SM_ERR_NOOPS))
-      sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
-                 source_p->name, chname);
-    *errors |= SM_ERR_NOOPS;
-    return;
-  }
+		*errors |= SM_ERR_RPL_I;
+		return;
+	}
 
-  if ((dir == MODE_QUERY) || parc <= *parn)
-  {
-    if ((*errors & SM_ERR_RPL_I) != 0)
-      return;
-    *errors |= SM_ERR_RPL_I;
+	if(alev < CHACCESS_CHANOP)
+	{
+		if(!(*errors & SM_ERR_NOOPS))
+			sendto_one (source_p, form_str (ERR_CHANOPRIVSNEEDED),
+				    me.name, source_p->name, chname);
+		*errors |= SM_ERR_NOOPS;
+		return;
+	}
 
-    DLINK_FOREACH(ptr, chptr->invexlist.head)
-    {
-      banptr = ptr->data;
-      sendto_one(client_p, form_str(RPL_INVITELIST), me.name,
-                 client_p->name, chname, banptr->banstr,
-                 banptr->who, banptr->when);
-    }
-    sendto_one(source_p, form_str(RPL_ENDOFINVITELIST), me.name,
-               source_p->name, chname);
-    return;
-  }
+	if((dir == MODE_QUERY) || parc <= *parn)
+	{
+		if((*errors & SM_ERR_RPL_I) != 0)
+			return;
+		*errors |= SM_ERR_RPL_I;
 
-  if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
-    return;
+		DLINK_FOREACH (ptr, chptr->invexlist.head)
+		{
+			banptr = ptr->data;
+			sendto_one (client_p, form_str (RPL_INVITELIST),
+				    me.name, client_p->name, chname,
+				    banptr->banstr, banptr->who, banptr->when);
+		}
+		sendto_one (source_p, form_str (RPL_ENDOFINVITELIST), me.name,
+			    source_p->name, chname);
+		return;
+	}
 
-  raw_mask = parv[(*parn)++];
-  if (IsServer(client_p))
-    mask = raw_mask;
-  else
-    mask = pretty_mask(raw_mask);
+	if(MyClient (source_p) && (++mode_limit > MAXMODEPARAMS))
+		return;
 
-  if(strlen(mask) > (MODEBUFLEN - 2))
-    return;
+	raw_mask = parv[(*parn)++];
+	if(IsServer (client_p))
+		mask = raw_mask;
+	else
+		mask = pretty_mask (raw_mask);
 
-  if(dir == MODE_ADD)
-  {
-    if(!add_id(source_p, chptr, mask, CHFL_INVEX) && MyClient(source_p))
-       return;
+	if(strlen (mask) > (MODEBUFLEN - 2))
+		return;
 
-    mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].dir = MODE_ADD;
-    mode_changes[mode_count].caps = CAP_IE;
-    mode_changes[mode_count].nocaps = 0;
-    
-    if(ConfigChannel.use_invex)
-      mode_changes[mode_count].mems = ONLY_CHANOPS;
-    else
-      mode_changes[mode_count].mems = ONLY_SERVERS;
+	if(dir == MODE_ADD)
+	{
+		if(!add_id (source_p, chptr, mask, CHFL_INVEX) && MyClient (source_p))
+			return;
 
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count++].arg = mask;
-  }
-  else if (dir == MODE_DEL)
-  {
-    if (del_id(chptr, mask, CHFL_INVEX) == 0)
-    {
-      /* mask isn't a valid ban, check raw_mask */
-      if(del_id(chptr, raw_mask, CHFL_INVEX))
-        mask = raw_mask;
-    }
+		mode_changes[mode_count].letter = c;
+		mode_changes[mode_count].dir = MODE_ADD;
+		mode_changes[mode_count].caps = CAP_IE;
+		mode_changes[mode_count].nocaps = 0;
 
-    mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].dir = MODE_DEL;
-    mode_changes[mode_count].caps = CAP_IE;
-    mode_changes[mode_count].nocaps = 0;
+		if(ConfigChannel.use_invex)
+			mode_changes[mode_count].mems = ONLY_CHANOPS;
+		else
+			mode_changes[mode_count].mems = ONLY_SERVERS;
 
-    if(ConfigChannel.use_invex)
-      mode_changes[mode_count].mems = ONLY_CHANOPS;
-    else
-      mode_changes[mode_count].mems = ONLY_SERVERS;
+		mode_changes[mode_count].id = NULL;
+		mode_changes[mode_count++].arg = mask;
+	}
+	else if(dir == MODE_DEL)
+	{
+		if(del_id (chptr, mask, CHFL_INVEX) == 0)
+		{
+			/* mask isn't a valid ban, check raw_mask */
+			if(del_id (chptr, raw_mask, CHFL_INVEX))
+				mask = raw_mask;
+		}
 
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count++].arg = mask;
-  }
+		mode_changes[mode_count].letter = c;
+		mode_changes[mode_count].dir = MODE_DEL;
+		mode_changes[mode_count].caps = CAP_IE;
+		mode_changes[mode_count].nocaps = 0;
+
+		if(ConfigChannel.use_invex)
+			mode_changes[mode_count].mems = ONLY_CHANOPS;
+		else
+			mode_changes[mode_count].mems = ONLY_SERVERS;
+
+		mode_changes[mode_count].id = NULL;
+		mode_changes[mode_count++].arg = mask;
+	}
 }
 
 static void
-chm_op(struct Client *client_p, struct Client *source_p,
-       struct Channel *chptr, int parc, int *parn,
-       char **parv, int *errors, int alev, int dir, char c, void *d,
-       const char *chname)
+chm_op (struct Client *client_p, struct Client *source_p,
+	struct Channel *chptr, int parc, int *parn,
+	char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
 {
-  char *opnick;
-  struct Client *targ_p;
+	char *opnick;
+	struct Client *targ_p;
 
-  if (alev < CHACCESS_CHANOP)
-  {
-    if (!(*errors & SM_ERR_NOOPS))
-      sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
-                 source_p->name, chname);
-    *errors |= SM_ERR_NOOPS;
-    return;
-  }
+	if(alev < CHACCESS_CHANOP)
+	{
+		if(!(*errors & SM_ERR_NOOPS))
+			sendto_one (source_p, form_str (ERR_CHANOPRIVSNEEDED),
+				    me.name, source_p->name, chname);
+		*errors |= SM_ERR_NOOPS;
+		return;
+	}
 
-  if ((dir == MODE_QUERY) || (parc <= *parn))
-    return;
+	if((dir == MODE_QUERY) || (parc <= *parn))
+		return;
 
-  if(IsRestricted(source_p) && (dir == MODE_ADD))
-  {
-    if(!(*errors & SM_ERR_RESTRICTED))
-      sendto_one(source_p, 
-                ":%s NOTICE %s :*** Notice -- You are restricted and cannot chanop others",
-		me.name, source_p->name);
-    
-    *errors |= SM_ERR_RESTRICTED;
-    return;
-  }
+	if(IsRestricted (source_p) && (dir == MODE_ADD))
+	{
+		if(!(*errors & SM_ERR_RESTRICTED))
+			sendto_one (source_p,
+				    ":%s NOTICE %s :*** Notice -- You are restricted and cannot chanop others",
+				    me.name, source_p->name);
 
-  opnick = parv[(*parn)++];
+		*errors |= SM_ERR_RESTRICTED;
+		return;
+	}
 
-  if ((targ_p = find_chasing(source_p, opnick, NULL)) == NULL)
-  {
-    return;
-  }
+	opnick = parv[(*parn)++];
 
-  if (!IsMember(targ_p, chptr))
-  {
-    if (!(*errors & SM_ERR_NOTONCHANNEL))
-      sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL), me.name,
-                 source_p->name, opnick, chname);
-    *errors |= SM_ERR_NOTONCHANNEL;
-    return;
-  }
+	if((targ_p = find_chasing (source_p, opnick, NULL)) == NULL)
+	{
+		return;
+	}
 
-  if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
-    return;
+	if(!IsMember (targ_p, chptr))
+	{
+		if(!(*errors & SM_ERR_NOTONCHANNEL))
+			sendto_one (source_p, form_str (ERR_USERNOTINCHANNEL),
+				    me.name, source_p->name, opnick, chname);
+		*errors |= SM_ERR_NOTONCHANNEL;
+		return;
+	}
 
-  if (dir == MODE_ADD)
-  {
-    if(targ_p == source_p)
-      return;
+	if(MyClient (source_p) && (++mode_limit > MAXMODEPARAMS))
+		return;
 
-    mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].dir = MODE_ADD;
-    mode_changes[mode_count].caps = 0;
-    mode_changes[mode_count].nocaps = 0;
-    mode_changes[mode_count].mems = ALL_MEMBERS;
-    mode_changes[mode_count].id = targ_p->user->id;
-    mode_changes[mode_count].arg = targ_p->name;
-    mode_changes[mode_count++].client = targ_p;
-  }
-  else
-  {
-    mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].dir = MODE_DEL;
-    mode_changes[mode_count].caps = 0;
-    mode_changes[mode_count].nocaps = 0;
-    mode_changes[mode_count].mems = ALL_MEMBERS;
-    mode_changes[mode_count].id = targ_p->user->id;
-    mode_changes[mode_count].arg = targ_p->name;
-    mode_changes[mode_count++].client = targ_p;
-  }
+	if(dir == MODE_ADD)
+	{
+		if(targ_p == source_p)
+			return;
+
+		mode_changes[mode_count].letter = c;
+		mode_changes[mode_count].dir = MODE_ADD;
+		mode_changes[mode_count].caps = 0;
+		mode_changes[mode_count].nocaps = 0;
+		mode_changes[mode_count].mems = ALL_MEMBERS;
+		mode_changes[mode_count].id = targ_p->user->id;
+		mode_changes[mode_count].arg = targ_p->name;
+		mode_changes[mode_count++].client = targ_p;
+	}
+	else
+	{
+		mode_changes[mode_count].letter = c;
+		mode_changes[mode_count].dir = MODE_DEL;
+		mode_changes[mode_count].caps = 0;
+		mode_changes[mode_count].nocaps = 0;
+		mode_changes[mode_count].mems = ALL_MEMBERS;
+		mode_changes[mode_count].id = targ_p->user->id;
+		mode_changes[mode_count].arg = targ_p->name;
+		mode_changes[mode_count++].client = targ_p;
+	}
 }
 
 static void
-chm_voice(struct Client *client_p, struct Client *source_p,
-          struct Channel *chptr, int parc, int *parn,
-          char **parv, int *errors, int alev, int dir, char c, void *d,
-          const char *chname)
+chm_voice (struct Client *client_p, struct Client *source_p,
+	   struct Channel *chptr, int parc, int *parn,
+	   char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
 {
-  char *opnick;
-  struct Client *targ_p;
+	char *opnick;
+	struct Client *targ_p;
 
-  if (alev < CHACCESS_CHANOP)
-  {
-    if (!(*errors & SM_ERR_NOOPS))
-      sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
-                 source_p->name, chname);
-    *errors |= SM_ERR_NOOPS;
-    return;
-  }
+	if(alev < CHACCESS_CHANOP)
+	{
+		if(!(*errors & SM_ERR_NOOPS))
+			sendto_one (source_p, form_str (ERR_CHANOPRIVSNEEDED),
+				    me.name, source_p->name, chname);
+		*errors |= SM_ERR_NOOPS;
+		return;
+	}
 
-  if ((dir == MODE_QUERY) || parc <= *parn)
-    return;
+	if((dir == MODE_QUERY) || parc <= *parn)
+		return;
 
-  opnick = parv[(*parn)++];
+	opnick = parv[(*parn)++];
 
-  if ((targ_p = find_chasing(source_p, opnick, NULL)) == NULL)
-  {
-    return;
-  }
+	if((targ_p = find_chasing (source_p, opnick, NULL)) == NULL)
+	{
+		return;
+	}
 
-  if (!IsMember(targ_p, chptr))
-  {
-    if (!(*errors & SM_ERR_NOTONCHANNEL))
-      sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL), me.name,
-                 source_p->name, opnick, chname);
-    *errors |= SM_ERR_NOTONCHANNEL;
-    return;
-  }
+	if(!IsMember (targ_p, chptr))
+	{
+		if(!(*errors & SM_ERR_NOTONCHANNEL))
+			sendto_one (source_p, form_str (ERR_USERNOTINCHANNEL),
+				    me.name, source_p->name, opnick, chname);
+		*errors |= SM_ERR_NOTONCHANNEL;
+		return;
+	}
 
-  if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
-    return;
+	if(MyClient (source_p) && (++mode_limit > MAXMODEPARAMS))
+		return;
 
-  if (dir == MODE_ADD)
-  {
-    mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].dir = MODE_ADD;
-    mode_changes[mode_count].caps = 0;
-    mode_changes[mode_count].nocaps = 0;
-    mode_changes[mode_count].mems = ALL_MEMBERS;
-    mode_changes[mode_count].id = targ_p->user->id;
-    mode_changes[mode_count].arg = targ_p->name;
-    mode_changes[mode_count++].client = targ_p;
-  }
-  else
-  {
-    mode_changes[mode_count].letter = 'v';
-    mode_changes[mode_count].dir = MODE_DEL;
-    mode_changes[mode_count].caps = 0;
-    mode_changes[mode_count].nocaps = 0;
-    mode_changes[mode_count].mems = ALL_MEMBERS;
-    mode_changes[mode_count].id = targ_p->user->id;
-    mode_changes[mode_count].arg = targ_p->name;
-    mode_changes[mode_count++].client = targ_p;
-  }
+	if(dir == MODE_ADD)
+	{
+		mode_changes[mode_count].letter = c;
+		mode_changes[mode_count].dir = MODE_ADD;
+		mode_changes[mode_count].caps = 0;
+		mode_changes[mode_count].nocaps = 0;
+		mode_changes[mode_count].mems = ALL_MEMBERS;
+		mode_changes[mode_count].id = targ_p->user->id;
+		mode_changes[mode_count].arg = targ_p->name;
+		mode_changes[mode_count++].client = targ_p;
+	}
+	else
+	{
+		mode_changes[mode_count].letter = 'v';
+		mode_changes[mode_count].dir = MODE_DEL;
+		mode_changes[mode_count].caps = 0;
+		mode_changes[mode_count].nocaps = 0;
+		mode_changes[mode_count].mems = ALL_MEMBERS;
+		mode_changes[mode_count].id = targ_p->user->id;
+		mode_changes[mode_count].arg = targ_p->name;
+		mode_changes[mode_count++].client = targ_p;
+	}
 }
 
 static void
-chm_limit(struct Client *client_p, struct Client *source_p,
-          struct Channel *chptr, int parc, int *parn,
-          char **parv, int *errors, int alev, int dir, char c, void *d,
-          const char *chname)
+chm_limit (struct Client *client_p, struct Client *source_p,
+	   struct Channel *chptr, int parc, int *parn,
+	   char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
 {
-  int limit;
-  char *lstr;
+	int limit;
+	char *lstr;
 
-  if (alev < CHACCESS_CHANOP)
-  {
-    if (!(*errors & SM_ERR_NOOPS))
-      sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
-                 source_p->name, chname);
-    *errors |= SM_ERR_NOOPS;
-    return;
-  }
+	if(alev < CHACCESS_CHANOP)
+	{
+		if(!(*errors & SM_ERR_NOOPS))
+			sendto_one (source_p, form_str (ERR_CHANOPRIVSNEEDED),
+				    me.name, source_p->name, chname);
+		*errors |= SM_ERR_NOOPS;
+		return;
+	}
 
-  if (dir == MODE_QUERY)
-    return;
+	if(dir == MODE_QUERY)
+		return;
 
-  if ((dir == MODE_ADD) && parc > *parn)
-  {
-    lstr = parv[(*parn)++];
+	if((dir == MODE_ADD) && parc > *parn)
+	{
+		lstr = parv[(*parn)++];
 
-    if ((limit = strtoul(lstr, NULL, 10)) <= 0)
-      return;
+		if((limit = strtoul (lstr, NULL, 10)) <= 0)
+			return;
 
-    ircsprintf(lstr, "%d", limit);
+		ircsprintf (lstr, "%d", limit);
 
-    mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].dir = MODE_ADD;
-    mode_changes[mode_count].caps = 0;
-    mode_changes[mode_count].nocaps = 0;
-    mode_changes[mode_count].mems = ALL_MEMBERS;
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count++].arg = lstr;
+		mode_changes[mode_count].letter = c;
+		mode_changes[mode_count].dir = MODE_ADD;
+		mode_changes[mode_count].caps = 0;
+		mode_changes[mode_count].nocaps = 0;
+		mode_changes[mode_count].mems = ALL_MEMBERS;
+		mode_changes[mode_count].id = NULL;
+		mode_changes[mode_count++].arg = lstr;
 
-    chptr->mode.limit = limit;
-  }
-  else if (dir == MODE_DEL)
-  {
-    if (!chptr->mode.limit)
-      return;
+		chptr->mode.limit = limit;
+	}
+	else if(dir == MODE_DEL)
+	{
+		if(!chptr->mode.limit)
+			return;
 
-    chptr->mode.limit = 0;
+		chptr->mode.limit = 0;
 
-    mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].dir = MODE_DEL;
-    mode_changes[mode_count].caps = 0;
-    mode_changes[mode_count].nocaps = 0;
-    mode_changes[mode_count].mems = ALL_MEMBERS;
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count++].arg = NULL;
-  }
+		mode_changes[mode_count].letter = c;
+		mode_changes[mode_count].dir = MODE_DEL;
+		mode_changes[mode_count].caps = 0;
+		mode_changes[mode_count].nocaps = 0;
+		mode_changes[mode_count].mems = ALL_MEMBERS;
+		mode_changes[mode_count].id = NULL;
+		mode_changes[mode_count++].arg = NULL;
+	}
 }
 
 static void
-chm_key(struct Client *client_p, struct Client *source_p,
-        struct Channel *chptr, int parc, int *parn,
-        char **parv, int *errors, int alev, int dir, char c, void *d,
-        const char *chname)
+chm_key (struct Client *client_p, struct Client *source_p,
+	 struct Channel *chptr, int parc, int *parn,
+	 char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
 {
-  char *key;
+	char *key;
 
-  if (alev < CHACCESS_CHANOP)
-  {
-    if (!(*errors & SM_ERR_NOOPS))
-      sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
-                 source_p->name, chname);
-    *errors |= SM_ERR_NOOPS;
-    return;
-  }
+	if(alev < CHACCESS_CHANOP)
+	{
+		if(!(*errors & SM_ERR_NOOPS))
+			sendto_one (source_p, form_str (ERR_CHANOPRIVSNEEDED),
+				    me.name, source_p->name, chname);
+		*errors |= SM_ERR_NOOPS;
+		return;
+	}
 
-  if (dir == MODE_QUERY)
-    return;
+	if(dir == MODE_QUERY)
+		return;
 
-  if ((dir == MODE_ADD) && parc > *parn)
-  {
-    key = parv[(*parn)++];
+	if((dir == MODE_ADD) && parc > *parn)
+	{
+		key = parv[(*parn)++];
 
-    if (MyClient(source_p))
-      fix_key(key);
-    else
-      fix_key_old(key);
+		if(MyClient (source_p))
+			fix_key (key);
+		else
+			fix_key_old (key);
 
-    assert(key[0] != ' ');
-    strlcpy(chptr->mode.key, key, sizeof(chptr->mode.key));
+		assert (key[0] != ' ');
+		strlcpy (chptr->mode.key, key, sizeof (chptr->mode.key));
 
-    mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].dir = MODE_ADD;
-    mode_changes[mode_count].caps = 0;
-    mode_changes[mode_count].nocaps = 0;
-    mode_changes[mode_count].mems = ALL_MEMBERS;
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count++].arg = chptr->mode.key;
-  }
-  else if (dir == MODE_DEL)
-  {
-    if (!(*chptr->mode.key))
-      return;
+		mode_changes[mode_count].letter = c;
+		mode_changes[mode_count].dir = MODE_ADD;
+		mode_changes[mode_count].caps = 0;
+		mode_changes[mode_count].nocaps = 0;
+		mode_changes[mode_count].mems = ALL_MEMBERS;
+		mode_changes[mode_count].id = NULL;
+		mode_changes[mode_count++].arg = chptr->mode.key;
+	}
+	else if(dir == MODE_DEL)
+	{
+		if(!(*chptr->mode.key))
+			return;
 
-    *chptr->mode.key = 0;
+		*chptr->mode.key = 0;
 
-    mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].dir = MODE_DEL;
-    mode_changes[mode_count].caps = 0;
-    mode_changes[mode_count].nocaps = 0;
-    mode_changes[mode_count].mems = ALL_MEMBERS;
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count++].arg = "*";
-  }
+		mode_changes[mode_count].letter = c;
+		mode_changes[mode_count].dir = MODE_DEL;
+		mode_changes[mode_count].caps = 0;
+		mode_changes[mode_count].nocaps = 0;
+		mode_changes[mode_count].mems = ALL_MEMBERS;
+		mode_changes[mode_count].id = NULL;
+		mode_changes[mode_count++].arg = "*";
+	}
 }
 
 struct ChannelMode
 {
-  void (*func) (struct Client *client_p, struct Client *source_p,
-                struct Channel *chptr, int parc, int *parn, char **parv,
-                int *errors, int alev, int dir, char c, void *d,
-                const char *chname);
-  void *d;
+	void (*func) (struct Client * client_p, struct Client * source_p,
+		      struct Channel * chptr, int parc, int *parn,
+		      char **parv, int *errors, int alev, int dir, char c,
+		      void *d, const char *chname);
+	void *d;
 };
 /* *INDENT-OFF* */
 static struct ChannelMode ModeTable[255] =
@@ -1380,18 +1355,18 @@ static struct ChannelMode ModeTable[255] =
  *         MODE_PEON for peon level access.
  * Side-effects: None.
  */
-  static int
-get_channel_access(struct Client *source_p, struct Channel *chptr)
+static int
+get_channel_access (struct Client *source_p, struct Channel *chptr)
 {
-  /* Let hacked servers in for now... */
+	/* Let hacked servers in for now... */
 
-  if (!MyClient(source_p))
-    return CHACCESS_CHANOP;
+	if(!MyClient (source_p))
+		return CHACCESS_CHANOP;
 
-  if (is_chan_op(chptr, source_p))
-    return CHACCESS_CHANOP;
+	if(is_chan_op (chptr, source_p))
+		return CHACCESS_CHANOP;
 
-  return CHACCESS_PEON;
+	return CHACCESS_PEON;
 }
 
 /* void send_cap_mode_changes(struct Client *client_p,
@@ -1407,99 +1382,94 @@ get_channel_access(struct Client *source_p, struct Channel *chptr)
  * the capabs combinations which are not needed are not worked out. -A1kmm
  */
 static void
-send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
-                      struct Channel *chptr, int cap, int nocap)
+send_cap_mode_changes (struct Client *client_p, struct Client *source_p,
+		       struct Channel *chptr, int cap, int nocap)
 {
-  int i, mbl, pbl, nc, mc;
-  const char *arg;
-  int dir;
+	int i, mbl, pbl, nc, mc;
+	const char *arg;
+	int dir;
 
-  mc = 0;
-  nc = 0;
-  pbl = 0;
-  parabuf[0] = 0;
-  dir = MODE_QUERY;
+	mc = 0;
+	nc = 0;
+	pbl = 0;
+	parabuf[0] = 0;
+	dir = MODE_QUERY;
 
-  if ((cap & CAP_UID) && source_p->user &&
-      (source_p->user->id[0] == '.'))
-    mbl = ircsprintf(modebuf, ":%s MODE %s ", source_p->user->id,
-                     chptr->chname);
-  else
-    mbl = ircsprintf(modebuf, ":%s MODE %s ", source_p->name,
-                     chptr->chname);
+	if((cap & CAP_UID) && source_p->user && (source_p->user->id[0] == '.'))
+		mbl = ircsprintf (modebuf, ":%s MODE %s ", source_p->user->id, chptr->chname);
+	else
+		mbl = ircsprintf (modebuf, ":%s MODE %s ", source_p->name, chptr->chname);
 
-  /* loop the list of - modes we have */
-  for (i = 0; i < mode_count; i++)
-  {
-    /* if they dont support the cap we need, or they do support a cap they
-     * cant have, then dont add it to the modebuf.. that way they wont see
-     * the mode
-     */
-    if ((mode_changes[i].letter == 0) ||
-        ((cap & mode_changes[i].caps) != mode_changes[i].caps)
-        || ((nocap & mode_changes[i].nocaps) != mode_changes[i].nocaps))
-      continue;
+	/* loop the list of - modes we have */
+	for (i = 0; i < mode_count; i++)
+	{
+		/* if they dont support the cap we need, or they do support a cap they
+		 * cant have, then dont add it to the modebuf.. that way they wont see
+		 * the mode
+		 */
+		if((mode_changes[i].letter == 0) ||
+		   ((cap & mode_changes[i].caps) != mode_changes[i].caps)
+		   || ((nocap & mode_changes[i].nocaps) != mode_changes[i].nocaps))
+			continue;
 
-    arg = "";
-    if ((cap & CAP_UID) && mode_changes[i].id)
-      arg = mode_changes[i].id;
-    if (!*arg)
-      arg = mode_changes[i].arg;
+		arg = "";
+		if((cap & CAP_UID) && mode_changes[i].id)
+			arg = mode_changes[i].id;
+		if(!*arg)
+			arg = mode_changes[i].arg;
 
-    /* if we're creeping past the buf size, we need to send it and make
-     * another line for the other modes
-     * XXX - this could give away server topology with uids being
-     * different lengths, but not much we can do, except possibly break
-     * them as if they were the longest of the nick or uid at all times,
-     * which even then won't work as we don't always know the uid -A1kmm.
-     */
-    if ((arg != NULL) && ((mc == MAXMODEPARAMS) ||
-                        ((strlen(arg) + mbl + pbl + 2) > BUFSIZE)))
-    {
-      if (nc != 0)
-        sendto_server(client_p, chptr, cap, nocap,
-                      "%s %s", modebuf, parabuf);
-      nc = 0;
-      mc = 0;
+		/* if we're creeping past the buf size, we need to send it and make
+		 * another line for the other modes
+		 * XXX - this could give away server topology with uids being
+		 * different lengths, but not much we can do, except possibly break
+		 * them as if they were the longest of the nick or uid at all times,
+		 * which even then won't work as we don't always know the uid -A1kmm.
+		 */
+		if((arg != NULL) && ((mc == MAXMODEPARAMS) ||
+				     ((strlen (arg) + mbl + pbl + 2) > BUFSIZE)))
+		{
+			if(nc != 0)
+				sendto_server (client_p, chptr, cap, nocap,
+					       "%s %s", modebuf, parabuf);
+			nc = 0;
+			mc = 0;
 
-      if ((cap & CAP_UID) && source_p->user &&
-          (source_p->user->id[0] == '.'))
-        mbl = ircsprintf(modebuf, ":%s MODE %s ", source_p->user->id,
-                         chptr->chname);
-      else
-        mbl = ircsprintf(modebuf, ":%s MODE %s ", source_p->name,
-                         chptr->chname);
+			if((cap & CAP_UID) && source_p->user && (source_p->user->id[0] == '.'))
+				mbl = ircsprintf (modebuf, ":%s MODE %s ",
+						  source_p->user->id, chptr->chname);
+			else
+				mbl = ircsprintf (modebuf, ":%s MODE %s ",
+						  source_p->name, chptr->chname);
 
-      pbl = 0;
-      parabuf[0] = 0;
-      dir = MODE_QUERY;
-    }
+			pbl = 0;
+			parabuf[0] = 0;
+			dir = MODE_QUERY;
+		}
 
-    if(dir != mode_changes[i].dir)
-    {
-      modebuf[mbl++] = (mode_changes[i].dir == MODE_ADD) ? '+' : '-';
-      dir = mode_changes[i].dir;
-    }
+		if(dir != mode_changes[i].dir)
+		{
+			modebuf[mbl++] = (mode_changes[i].dir == MODE_ADD) ? '+' : '-';
+			dir = mode_changes[i].dir;
+		}
 
-    modebuf[mbl++] = mode_changes[i].letter;
-    modebuf[mbl] = 0;
-    nc++;
+		modebuf[mbl++] = mode_changes[i].letter;
+		modebuf[mbl] = 0;
+		nc++;
 
-    if (arg != NULL)
-    {
-      pbl = strlcat(parabuf, arg, MODEBUFLEN);
-      parabuf[pbl++] = ' ';
-      parabuf[pbl] = '\0';
-      mc++;
-    }
-  }
+		if(arg != NULL)
+		{
+			pbl = strlcat (parabuf, arg, MODEBUFLEN);
+			parabuf[pbl++] = ' ';
+			parabuf[pbl] = '\0';
+			mc++;
+		}
+	}
 
-  if (pbl && parabuf[pbl - 1] == ' ')
-    parabuf[pbl - 1] = 0;
+	if(pbl && parabuf[pbl - 1] == ' ')
+		parabuf[pbl - 1] = 0;
 
-  if (nc != 0)
-    sendto_server(client_p, chptr, cap, nocap,
-                  "%s %s", modebuf, parabuf);
+	if(nc != 0)
+		sendto_server (client_p, chptr, cap, nocap, "%s %s", modebuf, parabuf);
 }
 
 /* void send_mode_changes(struct Client *client_p,
@@ -1513,96 +1483,96 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
  *               and propagates to servers.
  */
 static void
-send_mode_changes(struct Client *client_p, struct Client *source_p,
-                  struct Channel *chptr, char *chname)
+send_mode_changes (struct Client *client_p, struct Client *source_p,
+		   struct Channel *chptr, char *chname)
 {
-  int pbl, mbl, nc, mc;
-  int i, st;
-  int dir = MODE_QUERY;
+	int pbl, mbl, nc, mc;
+	int i, st;
+	int dir = MODE_QUERY;
 
-  /* bail out if we have nothing to do... */
-  if (!mode_count)
-    return;
+	/* bail out if we have nothing to do... */
+	if(!mode_count)
+		return;
 
-  /* Send all mode changes to the chanops, and even peons if -a */
-  st = ALL_MEMBERS;
+	/* Send all mode changes to the chanops, and even peons if -a */
+	st = ALL_MEMBERS;
 
-  if (IsServer(source_p))
-    mbl = ircsprintf(modebuf, ":%s MODE %s ", me.name, chname);
-  else
-    mbl = ircsprintf(modebuf, ":%s!%s@%s MODE %s ", source_p->name,
-                     source_p->username, source_p->host, chname);
+	if(IsServer (source_p))
+		mbl = ircsprintf (modebuf, ":%s MODE %s ", me.name, chname);
+	else
+		mbl = ircsprintf (modebuf, ":%s!%s@%s MODE %s ",
+				  source_p->name, source_p->username, source_p->host, chname);
 
-  pbl = 0;
-  parabuf[0] = '\0';
-  nc = 0;
-  mc = 0;
+	pbl = 0;
+	parabuf[0] = '\0';
+	nc = 0;
+	mc = 0;
 
-  for (i = 0; i < mode_count; i++)
-  {
-    if (mode_changes[i].letter == 0 ||
-        mode_changes[i].mems == NON_CHANOPS ||
-        mode_changes[i].mems == ONLY_SERVERS)
-      continue;
+	for (i = 0; i < mode_count; i++)
+	{
+		if(mode_changes[i].letter == 0 ||
+		   mode_changes[i].mems == NON_CHANOPS || mode_changes[i].mems == ONLY_SERVERS)
+			continue;
 
-    if (mode_changes[i].arg != NULL &&
-        ((mc == MAXMODEPARAMS)  || 
-        ((strlen(mode_changes[i].arg) + mbl + pbl + 2) > BUFSIZE)))
-    {
-      if (mbl && modebuf[mbl - 1] == '-')
-        modebuf[mbl - 1] = '\0';
+		if(mode_changes[i].arg != NULL &&
+		   ((mc == MAXMODEPARAMS) ||
+		    ((strlen (mode_changes[i].arg) + mbl + pbl + 2) > BUFSIZE)))
+		{
+			if(mbl && modebuf[mbl - 1] == '-')
+				modebuf[mbl - 1] = '\0';
 
-      if (nc != 0)
-        sendto_channel_local(st, chptr, "%s %s", modebuf, parabuf);
+			if(nc != 0)
+				sendto_channel_local (st, chptr, "%s %s", modebuf, parabuf);
 
-      nc = 0;
-      mc = 0;
+			nc = 0;
+			mc = 0;
 
-      if (IsServer(source_p))
-        mbl = ircsprintf(modebuf, ":%s MODE %s ", me.name, chname);
-      else
-        mbl = ircsprintf(modebuf, ":%s!%s@%s MODE %s ", source_p->name,
-                   source_p->username, source_p->host, chname);
+			if(IsServer (source_p))
+				mbl = ircsprintf (modebuf, ":%s MODE %s ", me.name, chname);
+			else
+				mbl = ircsprintf (modebuf,
+						  ":%s!%s@%s MODE %s ",
+						  source_p->name,
+						  source_p->username, source_p->host, chname);
 
-      pbl = 0;
-      parabuf[0] = '\0';
-      dir = MODE_QUERY;
-    }
+			pbl = 0;
+			parabuf[0] = '\0';
+			dir = MODE_QUERY;
+		}
 
-    if(dir != mode_changes[i].dir)
-    {
-      modebuf[mbl++] = (mode_changes[i].dir == MODE_ADD) ? '+' : '-';
-      dir = mode_changes[i].dir;
-    }
+		if(dir != mode_changes[i].dir)
+		{
+			modebuf[mbl++] = (mode_changes[i].dir == MODE_ADD) ? '+' : '-';
+			dir = mode_changes[i].dir;
+		}
 
-    modebuf[mbl++] = mode_changes[i].letter;
-    modebuf[mbl] = '\0';
-    nc++;
+		modebuf[mbl++] = mode_changes[i].letter;
+		modebuf[mbl] = '\0';
+		nc++;
 
-    if (mode_changes[i].arg != NULL)
-    {
-      mc++;
-      pbl = strlen(strcat(parabuf, mode_changes[i].arg));
-      parabuf[pbl++] = ' ';
-      parabuf[pbl] = '\0';
-    }
-  }
+		if(mode_changes[i].arg != NULL)
+		{
+			mc++;
+			pbl = strlen (strcat (parabuf, mode_changes[i].arg));
+			parabuf[pbl++] = ' ';
+			parabuf[pbl] = '\0';
+		}
+	}
 
-  if (pbl && parabuf[pbl - 1] == ' ')
-    parabuf[pbl - 1] = 0;
+	if(pbl && parabuf[pbl - 1] == ' ')
+		parabuf[pbl - 1] = 0;
 
-  if (nc != 0)
-    sendto_channel_local(st, chptr, "%s %s", modebuf, parabuf);
+	if(nc != 0)
+		sendto_channel_local (st, chptr, "%s %s", modebuf, parabuf);
 
-  nc = 0;
-  mc = 0;
+	nc = 0;
+	mc = 0;
 
-  /* Now send to servers... */
-  for (i = 0; i < NCHCAP_COMBOS; i++)
-    if (chcap_combos[i].count != 0)
-      send_cap_mode_changes(client_p, source_p, chptr,
-                            chcap_combos[i].cap_yes,
-                            chcap_combos[i].cap_no);
+	/* Now send to servers... */
+	for (i = 0; i < NCHCAP_COMBOS; i++)
+		if(chcap_combos[i].count != 0)
+			send_cap_mode_changes (client_p, source_p, chptr,
+					       chcap_combos[i].cap_yes, chcap_combos[i].cap_no);
 }
 
 /* void set_channel_mode(struct Client *client_p, struct Client *source_p,
@@ -1617,118 +1587,148 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
  *               clients.
  */
 void
-set_channel_mode(struct Client *client_p, struct Client *source_p,
-                 struct Channel *chptr, int parc, char *parv[], char *chname)
+set_channel_mode (struct Client *client_p, struct Client *source_p,
+		  struct Channel *chptr, int parc, char *parv[], char *chname)
 {
-  int dir = MODE_ADD;
-  int parn = 1;
-  int alevel, errors = 0;
-  char *ml = parv[0], c;
-  int table_position;
+	int dir = MODE_ADD;
+	int parn = 1;
+	int alevel, errors = 0;
+	char *ml = parv[0], c;
+	int table_position;
 
-  mask_pos = 0;
-  mode_count = 0;
-  mode_limit = 0;
+	mask_pos = 0;
+	mode_count = 0;
+	mode_limit = 0;
 
-  alevel = get_channel_access(source_p, chptr);
+	alevel = get_channel_access (source_p, chptr);
 
-  for (; (c = *ml) != 0; ml++)
-    switch (c)
-    {
-      case '+':
-        dir = MODE_ADD;
-        break;
-      case '-':
-        dir = MODE_DEL;
-        break;
-      case '=':
-        dir = MODE_QUERY;
-        break;
-      default:
-        if (c < 'A' || c > 'z')
-          table_position = 0;
-        else
-          table_position = c - 'A' + 1;
-        ModeTable[table_position].func(client_p, source_p, chptr,
-                                       parc, &parn,
-                                       parv, &errors, alevel, dir, c,
-                                       ModeTable[table_position].d,
-                                       chname);
-        break;
-    }
+	for (; (c = *ml) != 0; ml++)
+		switch (c)
+		{
+		case '+':
+			dir = MODE_ADD;
+			break;
+		case '-':
+			dir = MODE_DEL;
+			break;
+		case '=':
+			dir = MODE_QUERY;
+			break;
+		default:
+			if(c < 'A' || c > 'z')
+				table_position = 0;
+			else
+				table_position = c - 'A' + 1;
+			ModeTable[table_position].func (client_p, source_p,
+							chptr, parc, &parn,
+							parv, &errors, alevel,
+							dir, c,
+							ModeTable[table_position].d, chname);
+			break;
+		}
 
-  update_channel_info(chptr);
+	update_channel_info (chptr);
 
-  send_mode_changes(client_p, source_p, chptr, chname);
+	send_mode_changes (client_p, source_p, chptr, chname);
 }
 
-static void update_channel_info(struct Channel *chptr)
+static void
+update_channel_info (struct Channel *chptr)
 {
-  int i;
+	int i;
 
-  /* Update channel members lists. */
-  for (i = 0; i < mode_count; i++)
-  {
-    if (mode_changes[i].letter == 'o')
-    {
-      if (is_voiced(chptr, mode_changes[i].client))
-      {
-        if(mode_changes[i].dir == MODE_DEL)
-        {
-          change_channel_membership(chptr, &chptr->voiced, &chptr->locvoiced,
-	                            mode_changes[i].client);
-        }
-        else
-        {
-          change_channel_membership(chptr, &chptr->chanops_voiced,
-                                    &chptr->locchanops_voiced, 
-                                    mode_changes[i].client);
-        }
-      }
-      else
-      {
-        if(mode_changes[i].dir == MODE_DEL)
-        {
-          change_channel_membership(chptr, &chptr->peons, &chptr->locpeons,
-	                            mode_changes[i].client);
-        }
-        else
-        {
-          change_channel_membership(chptr, &chptr->chanops, &chptr->locchanops,
-                                    mode_changes[i].client);
-        }
-      }
-    }
-    else if (mode_changes[i].letter == 'v')
-    {
-      if (is_chan_op(chptr, mode_changes[i].client))
-      {
-        if(mode_changes[i].dir == MODE_DEL)
-        {
-          change_channel_membership(chptr, &chptr->chanops, &chptr->locchanops,
-	                            mode_changes[i].client);
-        }
-        else
-        {
-          change_channel_membership(chptr, &chptr->chanops_voiced,
-                                    &chptr->locchanops_voiced, 
-                                    mode_changes[i].client);
-        }
-      }
-      else
-      {
-        if(mode_changes[i].dir == MODE_DEL)
-        {
-          change_channel_membership(chptr, &chptr->peons, &chptr->locpeons,
-	                            mode_changes[i].client);
-        }
-        else
-        {
-          change_channel_membership(chptr, &chptr->voiced, &chptr->locvoiced,
-                                    mode_changes[i].client);
-        }
-      }
-    }
-  }
+	/* Update channel members lists. */
+	for (i = 0; i < mode_count; i++)
+	{
+		if(mode_changes[i].letter == 'o')
+		{
+			if(is_voiced (chptr, mode_changes[i].client))
+			{
+				if(mode_changes[i].dir == MODE_DEL)
+				{
+					change_channel_membership (chptr,
+								   &chptr->
+								   voiced,
+								   &chptr->
+								   locvoiced,
+								   mode_changes[i].client);
+				}
+				else
+				{
+					change_channel_membership (chptr,
+								   &chptr->
+								   chanops_voiced,
+								   &chptr->
+								   locchanops_voiced,
+								   mode_changes[i].client);
+				}
+			}
+			else
+			{
+				if(mode_changes[i].dir == MODE_DEL)
+				{
+					change_channel_membership (chptr,
+								   &chptr->
+								   peons,
+								   &chptr->
+								   locpeons,
+								   mode_changes[i].client);
+				}
+				else
+				{
+					change_channel_membership (chptr,
+								   &chptr->
+								   chanops,
+								   &chptr->
+								   locchanops,
+								   mode_changes[i].client);
+				}
+			}
+		}
+		else if(mode_changes[i].letter == 'v')
+		{
+			if(is_chan_op (chptr, mode_changes[i].client))
+			{
+				if(mode_changes[i].dir == MODE_DEL)
+				{
+					change_channel_membership (chptr,
+								   &chptr->
+								   chanops,
+								   &chptr->
+								   locchanops,
+								   mode_changes[i].client);
+				}
+				else
+				{
+					change_channel_membership (chptr,
+								   &chptr->
+								   chanops_voiced,
+								   &chptr->
+								   locchanops_voiced,
+								   mode_changes[i].client);
+				}
+			}
+			else
+			{
+				if(mode_changes[i].dir == MODE_DEL)
+				{
+					change_channel_membership (chptr,
+								   &chptr->
+								   peons,
+								   &chptr->
+								   locpeons,
+								   mode_changes[i].client);
+				}
+				else
+				{
+					change_channel_membership (chptr,
+								   &chptr->
+								   voiced,
+								   &chptr->
+								   locvoiced,
+								   mode_changes[i].client);
+				}
+			}
+		}
+	}
 }
-

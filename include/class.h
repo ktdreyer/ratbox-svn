@@ -35,20 +35,20 @@ struct _patricia_tree_t;
 
 struct Class
 {
-  struct Class *next;
-  char *class_name;
-  int max_total;
-  int max_local;
-  int max_global;
-  int max_ident;
-  int max_sendq;
-  int con_freq;
-  int ping_freq;
-  int total;
-  struct _patricia_tree_t *ip_limits;
-  int cidr_bitlen;
-  int cidr_amount;
-  
+	struct Class *next;
+	char *class_name;
+	int max_total;
+	int max_local;
+	int max_global;
+	int max_ident;
+	int max_sendq;
+	int con_freq;
+	int ping_freq;
+	int total;
+	struct _patricia_tree_t *ip_limits;
+	int cidr_bitlen;
+	int cidr_amount;
+
 };
 
 struct Class *ClassList;
@@ -80,19 +80,19 @@ struct Class *ClassList;
 #define ConfCidrAmount(x) (ClassPtr(x)->cidr_amount)
 #define ConfCidrBitlen(x) (ClassPtr(x)->cidr_bitlen)
 
-void add_class(struct Class *);
+void add_class (struct Class *);
 
-struct Class *make_class(void);
+struct Class *make_class (void);
 
-extern  long    get_sendq(struct Client *);
-extern  int     get_con_freq(struct Class* );
-extern  struct Class  *find_class(const char* );
-extern  const   char* get_client_class (struct Client *);
-extern  int     get_client_ping (struct Client *);
-extern  void    check_class(void);
-extern  void    initclass(void);
-extern  void    free_class(struct Class* );
-extern  void    fix_class (struct ConfItem *, struct ConfItem *);
-extern  void    report_classes (struct Client *);
+extern long get_sendq (struct Client *);
+extern int get_con_freq (struct Class *);
+extern struct Class *find_class (const char *);
+extern const char *get_client_class (struct Client *);
+extern int get_client_ping (struct Client *);
+extern void check_class (void);
+extern void initclass (void);
+extern void free_class (struct Class *);
+extern void fix_class (struct ConfItem *, struct ConfItem *);
+extern void report_classes (struct Client *);
 
 #endif /* INCLUDED_class_h */

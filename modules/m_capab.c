@@ -34,23 +34,23 @@
 #include "parse.h"
 #include "modules.h"
 
-static void mr_capab(struct Client*, struct Client*, int, char**);
+static void mr_capab (struct Client *, struct Client *, int, char **);
 
 struct Message capab_msgtab = {
-  "CAPAB", 0, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
-  {mr_capab, m_ignore, m_ignore, m_ignore}
+	"CAPAB", 0, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
+	{mr_capab, m_ignore, m_ignore, m_ignore}
 };
 #ifndef STATIC_MODULES
 void
-_modinit(void)
+_modinit (void)
 {
-  mod_add_cmd(&capab_msgtab);
+	mod_add_cmd (&capab_msgtab);
 }
 
 void
-_moddeinit(void)
+_moddeinit (void)
 {
-  mod_del_cmd(&capab_msgtab);
+	mod_del_cmd (&capab_msgtab);
 }
 
 const char *_version = "$Revision$";
@@ -62,76 +62,75 @@ const char *_version = "$Revision$";
  *      parv[1] = space-separated list of capabilities
  *
  */
-static void mr_capab(struct Client *client_p, struct Client *source_p,
-                    int parc, char *parv[])
+static void
+mr_capab (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-  struct Capability *cap;
-  int i;
-  char* p;
-  char* s;
+	struct Capability *cap;
+	int i;
+	char *p;
+	char *s;
 #ifdef HAVE_LIBCRYPTO
-  struct EncCapability *ecap;
-  unsigned int cipher = 0;
+	struct EncCapability *ecap;
+	unsigned int cipher = 0;
 #endif
 
-  /* ummm, this shouldn't happen. Could argue this should be logged etc. */
-  if (client_p->localClient == NULL)
-    return;
+	/* ummm, this shouldn't happen. Could argue this should be logged etc. */
+	if(client_p->localClient == NULL)
+		return;
 
-  if (client_p->localClient->caps)
-  {
-    exit_client(client_p, client_p, client_p, "CAPAB received twice");
-    return;
-  }
-  else
-    client_p->localClient->caps |= CAP_CAP;
+	if(client_p->localClient->caps)
+	{
+		exit_client (client_p, client_p, client_p, "CAPAB received twice");
+		return;
+	}
+	else
+		client_p->localClient->caps |= CAP_CAP;
 
-  for (i=1; i<parc; i++)
-  {
-    for (s = strtoken(&p, parv[i], " "); s; s = strtoken(&p, NULL, " "))
-    {
+	for (i = 1; i < parc; i++)
+	{
+		for (s = strtoken (&p, parv[i], " "); s; s = strtoken (&p, NULL, " "))
+		{
 #ifdef HAVE_LIBCRYPTO
-      if ( (strncmp(s, "ENC:", 4) == 0) )
-      {
-        /* Skip the "ENC:" portion */
-        s += 4;
+			if((strncmp (s, "ENC:", 4) == 0))
+			{
+				/* Skip the "ENC:" portion */
+				s += 4;
 
-        /* Check the remaining portion against the list of ciphers we
-         * have available (CipherTable).
-         */
-        for (ecap = CipherTable; ecap->name; ecap++)
-        {
-          if ( (!irccmp(ecap->name, s)) && (ecap->cap & CAP_ENC_MASK))
-          {
-            cipher = ecap->cap;
-            break;
-          }
-        }
-        /* Since the name and capabilities matched, use it. */
-        if (cipher != 0)
-        {
-          SetCapable(client_p, CAP_ENC);
-          client_p->localClient->enc_caps |= cipher;
-        }
-        else
-        {
-          /* cipher is still zero; we didn't find a matching entry. */
-          exit_client(client_p, client_p, client_p,
-                      "Cipher selected is not available here.");
-          return;
-        }
-      }
-      else /* normal capab */
+				/* Check the remaining portion against the list of ciphers we
+				 * have available (CipherTable).
+				 */
+				for (ecap = CipherTable; ecap->name; ecap++)
+				{
+					if((!irccmp (ecap->name, s)) && (ecap->cap & CAP_ENC_MASK))
+					{
+						cipher = ecap->cap;
+						break;
+					}
+				}
+				/* Since the name and capabilities matched, use it. */
+				if(cipher != 0)
+				{
+					SetCapable (client_p, CAP_ENC);
+					client_p->localClient->enc_caps |= cipher;
+				}
+				else
+				{
+					/* cipher is still zero; we didn't find a matching entry. */
+					exit_client (client_p, client_p, client_p,
+						     "Cipher selected is not available here.");
+					return;
+				}
+			}
+			else	/* normal capab */
 #endif
-        for (cap = captab; cap->name; cap++)
-        {
-          if (!irccmp(cap->name, s))
-          {
-            client_p->localClient->caps |= cap->cap;
-            break;
-          }
-        }
-    } /* for */
-  } /* for */
+				for (cap = captab; cap->name; cap++)
+				{
+					if(!irccmp (cap->name, s))
+					{
+						client_p->localClient->caps |= cap->cap;
+						break;
+					}
+				}
+		}		/* for */
+	}			/* for */
 }
-

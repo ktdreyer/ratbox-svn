@@ -22,9 +22,9 @@
  * $Id$
  *
  */
- 
-     
-#include "config.h" /* Gotta pull in the autoconf stuff */
+
+
+#include "config.h"		/* Gotta pull in the autoconf stuff */
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -39,8 +39,8 @@
 #  ifdef HAVE_STRINGS_H
 #   include <strings.h>
 #  endif
-# endif 
-#endif  
+# endif
+#endif
 
 
 #ifdef HAVE_STDDEF_H

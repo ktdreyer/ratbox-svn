@@ -39,23 +39,23 @@
 #include "packet.h"
 
 
-static void m_htm(struct Client*, struct Client*, int, char**);
+static void m_htm (struct Client *, struct Client *, int, char **);
 
 struct Message htm_msgtab = {
-  "HTM", 0, 0, 0, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_ignore, m_ignore, m_htm}
+	"HTM", 0, 0, 0, 0, MFLG_SLOW, 0,
+	{m_unregistered, m_ignore, m_ignore, m_htm}
 };
 #ifndef STATIC_MODULES
 void
-_modinit(void)
+_modinit (void)
 {
-  mod_add_cmd(&htm_msgtab);
+	mod_add_cmd (&htm_msgtab);
 }
 
 void
-_moddeinit(void)
+_moddeinit (void)
 {
-  mod_del_cmd(&htm_msgtab);
+	mod_del_cmd (&htm_msgtab);
 }
 const char *_version = "$Revision$";
 #endif
@@ -64,11 +64,8 @@ const char *_version = "$Revision$";
 ** m_htm
 **      parv[0] = sender prefix
 */
-static void m_htm(struct Client *client_p,
-                  struct Client *source_p,
-                  int parc,
-                  char *parv[])
+static void
+m_htm (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-  get_current_bandwidth(client_p, source_p);
+	get_current_bandwidth (client_p, source_p);
 }
-

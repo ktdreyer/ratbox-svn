@@ -27,32 +27,33 @@
 #ifndef INCLUDED_listener_h
 #define INCLUDED_listener_h
 
-#include "ircd_defs.h"  
+#include "ircd_defs.h"
 
 struct Client;
 
-struct Listener {
-  struct Listener* next;               /* list node pointer */
-  const char*      name;               /* listener name */
-  int              fd;                 /* file descriptor */
-  int              port;               /* listener IP port */
-  int              ref_count;          /* number of connection references */
-  int              active;             /* current state of listener */
-  int              index;              /* index into poll array */
+struct Listener
+{
+	struct Listener *next;	/* list node pointer */
+	const char *name;	/* listener name */
+	int fd;			/* file descriptor */
+	int port;		/* listener IP port */
+	int ref_count;		/* number of connection references */
+	int active;		/* current state of listener */
+	int index;		/* index into poll array */
 /* jdc -- this seems to be incorrect in comparison to src/listener.c */
 /*
   struct in_addr    addr;
 */
-  struct irc_inaddr addr;              /* virtual address or INADDR_ANY */
-  struct DNSQuery   *dns_query;
-  char             vhost[HOSTLEN + 1]; /* virtual name of listener */
+	struct irc_inaddr addr;	/* virtual address or INADDR_ANY */
+	struct DNSQuery *dns_query;
+	char vhost[HOSTLEN + 1];	/* virtual name of listener */
 };
 
-extern void        add_listener(int port, const char* vaddr_ip);
-extern void        close_listener(struct Listener* listener);
-extern void        close_listeners(void);
-extern const char* get_listener_name(const struct Listener* listener);
-extern void        show_ports(struct Client* client);
-extern void free_listener(struct Listener * );
+extern void add_listener (int port, const char *vaddr_ip);
+extern void close_listener (struct Listener *listener);
+extern void close_listeners (void);
+extern const char *get_listener_name (const struct Listener *listener);
+extern void show_ports (struct Client *client);
+extern void free_listener (struct Listener *);
 
 #endif /* INCLUDED_listener_h */

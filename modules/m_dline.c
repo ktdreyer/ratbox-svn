@@ -47,36 +47,36 @@
 #include "parse.h"
 #include "modules.h"
 
-static void mo_dline(struct Client *,struct Client *,int,char **);
+static void mo_dline (struct Client *, struct Client *, int, char **);
 
 struct Message dline_msgtab = {
-  "DLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_not_oper, m_error, mo_dline}
+	"DLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
+	{m_unregistered, m_not_oper, m_error, mo_dline}
 };
 
 #ifndef STATIC_MODULES
 
 void
-_modinit(void)
+_modinit (void)
 {
-  mod_add_cmd(&dline_msgtab);
+	mod_add_cmd (&dline_msgtab);
 }
 
 void
-_moddeinit(void)
+_moddeinit (void)
 {
-  mod_del_cmd(&dline_msgtab);
+	mod_del_cmd (&dline_msgtab);
 }
 const char *_version = "$Revision$";
 #endif
 
 /* Local function prototypes */
 
-static time_t valid_tkline(struct Client *source_p, char *string);
-static int valid_comment(const char *comment);
+static time_t valid_tkline (struct Client *source_p, char *string);
+static int valid_comment (const char *comment);
 
-char user[USERLEN+2];
-char host[HOSTLEN+2];
+char user[USERLEN + 2];
+char host[HOSTLEN + 2];
 
 /*
  * mo_dline
@@ -90,241 +90,238 @@ char host[HOSTLEN+2];
  *
  */
 static void
-mo_dline(struct Client *client_p, struct Client *source_p,
-	 int parc, char *parv[])
+mo_dline (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-  char *dlhost, *oper_reason;
-  const char *reason = "<No Reason>";
+	char *dlhost, *oper_reason;
+	const char *reason = "<No Reason>";
 #ifndef IPV6
-  char *p;
-  struct Client *target_p;
+	char *p;
+	struct Client *target_p;
 #endif
-  struct irc_inaddr daddr;
-  char cidr_form_host[HOSTLEN + 1];
-  struct ConfItem *aconf;
-  int bits, t;
-  char dlbuffer[1024];
-  const char* current_date;
-  int tdline_time = 0;
-  int loc = 0;
+	struct irc_inaddr daddr;
+	char cidr_form_host[HOSTLEN + 1];
+	struct ConfItem *aconf;
+	int bits, t;
+	char dlbuffer[1024];
+	const char *current_date;
+	int tdline_time = 0;
+	int loc = 0;
 
-  if (!IsOperK(source_p))
-    {
-      sendto_one(source_p,":%s NOTICE %s :You need kline = yes;",
-		 me.name, parv[0]);
-      return;
-    }
+	if(!IsOperK (source_p))
+	{
+		sendto_one (source_p, ":%s NOTICE %s :You need kline = yes;", me.name, parv[0]);
+		return;
+	}
 
-  loc++;
+	loc++;
 
-  tdline_time = valid_tkline(source_p, parv[loc]);
+	tdline_time = valid_tkline (source_p, parv[loc]);
 
-  if(tdline_time == -1)
-    return;
-  else if(tdline_time) 
-    loc++;
+	if(tdline_time == -1)
+		return;
+	else if(tdline_time)
+		loc++;
 
-  if(parc < loc+1)
-  {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-	       me.name, source_p->name, "DLINE");
-    return;
-  }
-  
-  dlhost = parv[loc];
-  strlcpy(cidr_form_host, dlhost, sizeof(cidr_form_host));
+	if(parc < loc + 1)
+	{
+		sendto_one (source_p, form_str (ERR_NEEDMOREPARAMS),
+			    me.name, source_p->name, "DLINE");
+		return;
+	}
 
-  if ((t=parse_netmask(dlhost, NULL, &bits)) == HM_HOST)
-  {
+	dlhost = parv[loc];
+	strlcpy (cidr_form_host, dlhost, sizeof (cidr_form_host));
+
+	if((t = parse_netmask (dlhost, NULL, &bits)) == HM_HOST)
+	{
 #ifdef IPV6
-   sendto_one(source_p, ":%s NOTICE %s :Sorry, please supply an address.",
-              me.name, parv[0]);
-   return;
+		sendto_one (source_p, ":%s NOTICE %s :Sorry, please supply an address.",
+			    me.name, parv[0]);
+		return;
 #else
-      if (!(target_p = find_chasing(source_p, parv[loc], NULL)))
-        return;
+		if(!(target_p = find_chasing (source_p, parv[loc], NULL)))
+			return;
 
-      if(!target_p->user)
-        return;
-      t = HM_IPV4;
-      if (IsServer(target_p))
-        {
-          sendto_one(source_p,
-                     ":%s NOTICE %s :Can't DLINE a server silly",
-                     me.name, parv[0]);
-          return;
-        }
-              
-      if (!MyConnect(target_p))
-        {
-          sendto_one(source_p,
-                     ":%s NOTICE %s :Can't DLINE nick on another server",
-                     me.name, parv[0]);
-          return;
-        }
+		if(!target_p->user)
+			return;
+		t = HM_IPV4;
+		if(IsServer (target_p))
+		{
+			sendto_one (source_p,
+				    ":%s NOTICE %s :Can't DLINE a server silly", me.name, parv[0]);
+			return;
+		}
 
-      if (IsExemptKline(target_p))
-        {
-          sendto_one(source_p,
-                     ":%s NOTICE %s :%s is E-lined",me.name,parv[0],
-                     target_p->name);
-          return;
-        }
+		if(!MyConnect (target_p))
+		{
+			sendto_one (source_p,
+				    ":%s NOTICE %s :Can't DLINE nick on another server",
+				    me.name, parv[0]);
+			return;
+		}
 
-      /*
-       * XXX - this is always a fixed length output, we can get away
-       * with strcpy here
-       *
-       * strncpy_irc(cidr_form_host, inetntoa((char *)&target_p->ip), 32);
-       * cidr_form_host[32] = '\0';
-       */
-       strcpy(cidr_form_host, inetntoa((char*) &target_p->localClient->ip));
-      
-       if ((p = strchr(cidr_form_host,'.')) == NULL)
-        return;
-      /* 192. <- p */
+		if(IsExemptKline (target_p))
+		{
+			sendto_one (source_p,
+				    ":%s NOTICE %s :%s is E-lined", me.name, parv[0],
+				    target_p->name);
+			return;
+		}
 
-      p++;
-      if ((p = strchr(p,'.')) == NULL)
-        return;
-      /* 192.168. <- p */
+		/*
+		 * XXX - this is always a fixed length output, we can get away
+		 * with strcpy here
+		 *
+		 * strncpy_irc(cidr_form_host, inetntoa((char *)&target_p->ip), 32);
+		 * cidr_form_host[32] = '\0';
+		 */
+		strcpy (cidr_form_host, inetntoa ((char *) &target_p->localClient->ip));
 
-      p++;
-      if ((p = strchr(p,'.')) == NULL)
-        return;
-      /* 192.168.0. <- p */
+		if((p = strchr (cidr_form_host, '.')) == NULL)
+			return;
+		/* 192. <- p */
 
-      p++;
-      *p++ = '0';
-      *p++ = '/';
-      *p++ = '2';
-      *p++ = '4';
-      *p++ = '\0';
-      dlhost = cidr_form_host;
+		p++;
+		if((p = strchr (p, '.')) == NULL)
+			return;
+		/* 192.168. <- p */
 
-      bits = 0xFFFFFF00UL;
+		p++;
+		if((p = strchr (p, '.')) == NULL)
+			return;
+		/* 192.168.0. <- p */
+
+		p++;
+		*p++ = '0';
+		*p++ = '/';
+		*p++ = '2';
+		*p++ = '4';
+		*p++ = '\0';
+		dlhost = cidr_form_host;
+
+		bits = 0xFFFFFF00UL;
 /* XXX: Fix me for IPV6 */
 #endif
-    }
-
-  loc++;
-
-  if (parc >= loc+1) /* host :reason */
-    {
-      if (!valid_comment(parv[loc]))
-	return;
-
-      if(*parv[loc])
-        reason = parv[loc];
-      else
-        reason = "No reason";
-    }
-  else
-    reason = "No reason";
-
-
-  if (IsOperAdmin(source_p))
-    {
-      if (bits < 8)
-	{
-	  sendto_one(source_p,
-	":%s NOTICE %s :For safety, bitmasks less than 8 require conf access.",
-		     me.name, parv[0]);
-	  return;
 	}
-    }
-  else
-    {
-      if (bits < 24)
+
+	loc++;
+
+	if(parc >= loc + 1)	/* host :reason */
 	{
-	  sendto_one(source_p,
-	     ":%s NOTICE %s :Dline bitmasks less than 24 are for admins only.",
-		     me.name, parv[0]);
-	  return;
+		if(!valid_comment (parv[loc]))
+			return;
+
+		if(*parv[loc])
+			reason = parv[loc];
+		else
+			reason = "No reason";
 	}
-    }
+	else
+		reason = "No reason";
+
+
+	if(IsOperAdmin (source_p))
+	{
+		if(bits < 8)
+		{
+			sendto_one (source_p,
+				    ":%s NOTICE %s :For safety, bitmasks less than 8 require conf access.",
+				    me.name, parv[0]);
+			return;
+		}
+	}
+	else
+	{
+		if(bits < 24)
+		{
+			sendto_one (source_p,
+				    ":%s NOTICE %s :Dline bitmasks less than 24 are for admins only.",
+				    me.name, parv[0]);
+			return;
+		}
+	}
 
 #ifdef IPV6
-  if (t == HM_IPV6)
-    t = AF_INET6;
-  else
+	if(t == HM_IPV6)
+		t = AF_INET6;
+	else
 #endif
-  t = AF_INET;
-  if (ConfigFileEntry.non_redundant_klines)
-    {
-      const char *creason;
-      (void)parse_netmask(dlhost, &daddr, NULL);
-
-      if((aconf = find_dline(&daddr, t)) != NULL)
+		t = AF_INET;
+	if(ConfigFileEntry.non_redundant_klines)
 	{
-	  creason = aconf->passwd ? aconf->passwd : "<No Reason>";
-	  if (IsConfExemptKline(aconf))
-	    sendto_one(source_p,
-		       ":%s NOTICE %s :[%s] is (E)d-lined by [%s] - %s",
-		       me.name, parv[0], dlhost, aconf->host, creason);
-	  else
-	    sendto_one(source_p,
-		       ":%s NOTICE %s :[%s] already D-lined by [%s] - %s",
-		       me.name, parv[0], dlhost, aconf->host, creason);
-	  return;
+		const char *creason;
+		(void) parse_netmask (dlhost, &daddr, NULL);
+
+		if((aconf = find_dline (&daddr, t)) != NULL)
+		{
+			creason = aconf->passwd ? aconf->passwd : "<No Reason>";
+			if(IsConfExemptKline (aconf))
+				sendto_one (source_p,
+					    ":%s NOTICE %s :[%s] is (E)d-lined by [%s] - %s",
+					    me.name, parv[0], dlhost, aconf->host, creason);
+			else
+				sendto_one (source_p,
+					    ":%s NOTICE %s :[%s] already D-lined by [%s] - %s",
+					    me.name, parv[0], dlhost, aconf->host, creason);
+			return;
+		}
 	}
-    }
 
-  set_time();
-  current_date = smalldate();
+	set_time ();
+	current_date = smalldate ();
 
-  aconf = make_conf();
+	aconf = make_conf ();
 
-  /* Look for an oper reason */
-  if ((oper_reason = strchr(reason, '|')) != NULL)
-    {
-      *oper_reason = '\0';
-      oper_reason++;
-    }
+	/* Look for an oper reason */
+	if((oper_reason = strchr (reason, '|')) != NULL)
+	{
+		*oper_reason = '\0';
+		oper_reason++;
+	}
 
-  aconf->status = CONF_DLINE;
-  DupString(aconf->host, dlhost);
-  
-  if(tdline_time)
-  {
-    ircsprintf(dlbuffer, "Temporary D-line %d min. - %s (%s)",
-	       (int)(tdline_time/60), reason, current_date);
-    DupString(aconf->passwd, dlbuffer);
-    aconf->hold = CurrentTime + tdline_time;
-    add_temp_dline(aconf);
+	aconf->status = CONF_DLINE;
+	DupString (aconf->host, dlhost);
 
-    if(BadPtr(oper_reason))
-    {
-      sendto_realops_flags(UMODE_ALL, L_ALL,
-		           "%s added temporary %d min. D-Line for [%s] [%s]",
-		           get_oper_name(source_p), tdline_time/60, 
-		           aconf->host, reason);
-      ilog(L_TRACE, "%s added temporary %d min. D-Line for [%s] [%s]",
-           source_p->name, tdline_time/60, aconf->host, reason);
-    }
-    else
-    {
-      sendto_realops_flags(UMODE_ALL, L_ALL,
-                           "%s added temporary %d min. D-Line for [%s] [%s|%s]",
-                           get_oper_name(source_p), tdline_time/60,
-                           aconf->host, reason, oper_reason);
-      ilog(L_TRACE, "%s added temporary %d min. D-Line for [%s] [%s|%s]",
-           source_p->name, tdline_time/60, aconf->host, reason, oper_reason);
-    }
+	if(tdline_time)
+	{
+		ircsprintf (dlbuffer, "Temporary D-line %d min. - %s (%s)",
+			    (int) (tdline_time / 60), reason, current_date);
+		DupString (aconf->passwd, dlbuffer);
+		aconf->hold = CurrentTime + tdline_time;
+		add_temp_dline (aconf);
 
-    sendto_one(source_p, ":%s NOTICE %s :Added temporary %d min. D-Line for [%s]",
-               me.name, source_p->name, tdline_time/60, aconf->host);
-  }
-  else
-  {
-    ircsprintf(dlbuffer, "%s (%s)",reason, current_date);
-    DupString(aconf->passwd, dlbuffer);
-    add_conf_by_address(aconf->host, CONF_DLINE, NULL, aconf);
-    write_confitem(DLINE_TYPE, source_p, NULL, aconf->host, reason,
-                   oper_reason, current_date, 0);
-  }
+		if(BadPtr (oper_reason))
+		{
+			sendto_realops_flags (UMODE_ALL, L_ALL,
+					      "%s added temporary %d min. D-Line for [%s] [%s]",
+					      get_oper_name (source_p), tdline_time / 60,
+					      aconf->host, reason);
+			ilog (L_TRACE, "%s added temporary %d min. D-Line for [%s] [%s]",
+			      source_p->name, tdline_time / 60, aconf->host, reason);
+		}
+		else
+		{
+			sendto_realops_flags (UMODE_ALL, L_ALL,
+					      "%s added temporary %d min. D-Line for [%s] [%s|%s]",
+					      get_oper_name (source_p), tdline_time / 60,
+					      aconf->host, reason, oper_reason);
+			ilog (L_TRACE, "%s added temporary %d min. D-Line for [%s] [%s|%s]",
+			      source_p->name, tdline_time / 60, aconf->host, reason, oper_reason);
+		}
 
-  check_dlines();
+		sendto_one (source_p, ":%s NOTICE %s :Added temporary %d min. D-Line for [%s]",
+			    me.name, source_p->name, tdline_time / 60, aconf->host);
+	}
+	else
+	{
+		ircsprintf (dlbuffer, "%s (%s)", reason, current_date);
+		DupString (aconf->passwd, dlbuffer);
+		add_conf_by_address (aconf->host, CONF_DLINE, NULL, aconf);
+		write_confitem (DLINE_TYPE, source_p, NULL, aconf->host, reason,
+				oper_reason, current_date, 0);
+	}
+
+	check_dlines ();
 }
 
 /*
@@ -338,35 +335,35 @@ mo_dline(struct Client *client_p, struct Client *source_p,
  * side effects - none
  */
 static time_t
-valid_tkline(struct Client *source_p, char *p)
+valid_tkline (struct Client *source_p, char *p)
 {
-  time_t result = 0;
+	time_t result = 0;
 
-  while(*p)
-    {
-      if(IsDigit(*p))
-        {
-          result *= 10;
-          result += ((*p) & 0xF);
-          p++;
-        }
-      else
-        return(0);
-    }
-  /* in the degenerate case where oper does a /quote kline 0 user@host :reason 
-   * i.e. they specifically use 0, I am going to return 1 instead
-   * as a return value of non-zero is used to flag it as a temporary kline
-   */
+	while (*p)
+	{
+		if(IsDigit (*p))
+		{
+			result *= 10;
+			result += ((*p) & 0xF);
+			p++;
+		}
+		else
+			return (0);
+	}
+	/* in the degenerate case where oper does a /quote kline 0 user@host :reason 
+	 * i.e. they specifically use 0, I am going to return 1 instead
+	 * as a return value of non-zero is used to flag it as a temporary kline
+	 */
 
-  if(result == 0)
-    result = 1;
+	if(result == 0)
+		result = 1;
 
-  if(result > (24*60*7*4))
-    result = (24*60*7*4); /* Max it at 4 weeks */
+	if(result > (24 * 60 * 7 * 4))
+		result = (24 * 60 * 7 * 4);	/* Max it at 4 weeks */
 
-  result = (time_t)result * (time_t)60;  /* turn it into seconds */
+	result = (time_t) result *(time_t) 60;	/* turn it into seconds */
 
-  return(result);
+	return (result);
 }
 
 /*
@@ -377,11 +374,10 @@ valid_tkline(struct Client *source_p, char *p)
  * side effects - NONE
  */
 static int
-valid_comment(const char *comment)
+valid_comment (const char *comment)
 {
-  if(strchr(comment, '"'))
-    return 0;
+	if(strchr (comment, '"'))
+		return 0;
 
-  return 1;
+	return 1;
 }
-

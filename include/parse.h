@@ -32,18 +32,18 @@ struct Client;
 
 struct MessageHash
 {
-  char   *cmd;
-  struct Message      *msg;
-  struct MessageHash  *next;
-}; 
+	char *cmd;
+	struct Message *msg;
+	struct MessageHash *next;
+};
 
 #define MAX_MSG_HASH  387
 
-extern  void    parse (struct Client *, char *, char *);
-extern  void    clear_hash_parse (void);
-extern  void    mod_add_cmd(struct Message *msg);
-extern  void    mod_del_cmd(struct Message *msg);
-extern  void    report_messages(struct Client *);
-extern void list_commands(struct Client *);
+extern void parse (struct Client *, char *, char *);
+extern void clear_hash_parse (void);
+extern void mod_add_cmd (struct Message *msg);
+extern void mod_del_cmd (struct Message *msg);
+extern void report_messages (struct Client *);
+extern void list_commands (struct Client *);
 
 #endif /* INCLUDED_parse_h_h */

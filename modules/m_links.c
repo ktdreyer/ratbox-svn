@@ -40,28 +40,28 @@
 #include "hook.h"
 
 
-static void m_links(struct Client*, struct Client*, int, char**);
-static void mo_links(struct Client*, struct Client*, int, char**);
-static void ms_links(struct Client*, struct Client*, int, char**);
+static void m_links (struct Client *, struct Client *, int, char **);
+static void mo_links (struct Client *, struct Client *, int, char **);
+static void ms_links (struct Client *, struct Client *, int, char **);
 
 struct Message links_msgtab = {
-  "LINKS", 0, 0, 0, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_links, ms_links, mo_links}
+	"LINKS", 0, 0, 0, 0, MFLG_SLOW, 0,
+	{m_unregistered, m_links, ms_links, mo_links}
 };
 #ifndef STATIC_MODULES
 
 void
-_modinit(void)
+_modinit (void)
 {
-	hook_add_event("doing_links");
-  mod_add_cmd(&links_msgtab);
+	hook_add_event ("doing_links");
+	mod_add_cmd (&links_msgtab);
 }
 
 void
-_moddeinit(void)
+_moddeinit (void)
 {
-	hook_del_event("doing_links");
-  mod_del_cmd(&links_msgtab);
+	hook_del_event ("doing_links");
+	mod_del_cmd (&links_msgtab);
 }
 
 const char *_version = "$Revision$";
@@ -76,94 +76,93 @@ const char *_version = "$Revision$";
  *      parv[2] = servername mask
  */
 
-static void m_links(struct Client *client_p, struct Client *source_p,
-                   int parc, char *parv[])
+static void
+m_links (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-  if (!ConfigServerHide.flatten_links)
-    {
-      mo_links(client_p, source_p, parc, parv);
-      return;
-    }
+	if(!ConfigServerHide.flatten_links)
+	{
+		mo_links (client_p, source_p, parc, parv);
+		return;
+	}
 
-  SendMessageFile(source_p, &ConfigFileEntry.linksfile);
-    
+	SendMessageFile (source_p, &ConfigFileEntry.linksfile);
+
 /*
  * Print our own info so at least it looks like a normal links
  * then print out the file (which may or may not be empty)
  */
-  
-  sendto_one(source_p, form_str(RPL_LINKS),
-                           me.name, parv[0], me.name, me.name,
-                           0, me.info);
-      
-  sendto_one(source_p, form_str(RPL_ENDOFLINKS), me.name, parv[0], "*");
+
+	sendto_one (source_p, form_str (RPL_LINKS), me.name, parv[0], me.name, me.name, 0, me.info);
+
+	sendto_one (source_p, form_str (RPL_ENDOFLINKS), me.name, parv[0], "*");
 }
 
-static void mo_links(struct Client *client_p, struct Client *source_p,
-                    int parc, char *parv[])
+static void
+mo_links (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-  const char*    mask = "";
-  struct Client* target_p;
-  char           clean_mask[2 * HOSTLEN + 4];
-  const char*          p;
-  struct hook_links_data hd;
-  
-  dlink_node *ptr;
+	const char *mask = "";
+	struct Client *target_p;
+	char clean_mask[2 * HOSTLEN + 4];
+	const char *p;
+	struct hook_links_data hd;
 
-  if (parc > 2) 
-    {
-      if(!ConfigServerHide.disable_remote || IsOper(source_p))
-      {
-        if (hunt_server(client_p, source_p, ":%s LINKS %s :%s", 1, parc, parv)
-            != HUNTED_ISME)
-        return;
-      }
+	dlink_node *ptr;
 
-      mask = parv[2];
-    }
-  else if (parc == 2)
-    mask = parv[1];
+	if(parc > 2)
+	{
+		if(!ConfigServerHide.disable_remote || IsOper (source_p))
+		{
+			if(hunt_server (client_p, source_p, ":%s LINKS %s :%s", 1, parc, parv)
+			   != HUNTED_ISME)
+				return;
+		}
 
-  assert(0 != mask);
+		mask = parv[2];
+	}
+	else if(parc == 2)
+		mask = parv[1];
 
-  if (*mask)       /* only necessary if there is a mask */
-    mask = collapse(clean_string(clean_mask, (const unsigned char*) mask, 2 * HOSTLEN));
+	assert (0 != mask);
 
-  hd.client_p = client_p;
-  hd.source_p = source_p;
-  hd.mask = mask;
-  hd.parc = parc;
-  hd.parv = parv;
-  
-  hook_call_event("doing_links", &hd);
-  
-  DLINK_FOREACH(ptr, global_serv_list.head)
-    {
-      target_p = ptr->data;
+	if(*mask)		/* only necessary if there is a mask */
+		mask = collapse (clean_string
+				 (clean_mask, (const unsigned char *) mask, 2 * HOSTLEN));
 
-      if (*mask && !match(mask, target_p->name))
-        continue;
-    
-      if(target_p->info[0])
-        {
-          if( (p = strchr(target_p->info,']')) )
-            p += 2; /* skip the nasty [IP] part */
-          else
-            p = target_p->info;
-        } 
-      else
-        p = "(Unknown Location)";
+	hd.client_p = client_p;
+	hd.source_p = source_p;
+	hd.mask = mask;
+	hd.parc = parc;
+	hd.parv = parv;
 
-     /* We just send the reply, as if theyre here theres either no SHIDE,
-      * or theyre an oper..  
-      */
-      sendto_one(source_p, form_str(RPL_LINKS),
-		      me.name, parv[0], target_p->name, target_p->serv->up,
-                      target_p->hopcount, p);
-    }
-  
-  sendto_one(source_p, form_str(RPL_ENDOFLINKS), me.name, parv[0],
-             EmptyString(mask) ? "*" : mask);
+	hook_call_event ("doing_links", &hd);
+
+	DLINK_FOREACH (ptr, global_serv_list.head)
+	{
+		target_p = ptr->data;
+
+		if(*mask && !match (mask, target_p->name))
+			continue;
+
+		if(target_p->info[0])
+		{
+			if((p = strchr (target_p->info, ']')))
+				p += 2;	/* skip the nasty [IP] part */
+			else
+				p = target_p->info;
+		}
+		else
+			p = "(Unknown Location)";
+
+		/* We just send the reply, as if theyre here theres either no SHIDE,
+		 * or theyre an oper..  
+		 */
+		sendto_one (source_p, form_str (RPL_LINKS),
+			    me.name, parv[0], target_p->name, target_p->serv->up,
+			    target_p->hopcount, p);
+	}
+
+	sendto_one (source_p, form_str (RPL_ENDOFLINKS), me.name, parv[0],
+		    EmptyString (mask) ? "*" : mask);
 }
 
 /*
@@ -175,14 +174,12 @@ static void mo_links(struct Client *client_p, struct Client *source_p,
  *      parv[1] = server to query 
  *      parv[2] = servername mask
  */
-static void ms_links(struct Client *client_p, struct Client *source_p,
-                    int parc, char *parv[])
+static void
+ms_links (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-  if (hunt_server(client_p, source_p, ":%s LINKS %s :%s", 1, parc, parv)
-      != HUNTED_ISME)
-    return;
+	if(hunt_server (client_p, source_p, ":%s LINKS %s :%s", 1, parc, parv) != HUNTED_ISME)
+		return;
 
-  if(IsClient(source_p))
-    m_links(client_p,source_p,parc,parv);
+	if(IsClient (source_p))
+		m_links (client_p, source_p, parc, parv);
 }
-

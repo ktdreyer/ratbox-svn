@@ -27,20 +27,20 @@
 
 #ifndef INCLUDED_channel_mode_h
 #define INCLUDED_channel_mode_h
-#include "config.h"           /* config settings */
-#include "ircd_defs.h"        /* buffer sizes */
+#include "config.h"		/* config settings */
+#include "ircd_defs.h"		/* buffer sizes */
 
 #define MODEBUFLEN      200
 
 /* Maximum mode changes allowed per client, per server is different */
 #define MAXMODEPARAMS   4
 
-extern void    set_channel_mode(struct Client *, struct Client *, 
-                                struct Channel *, int, char **, char *);
+extern void set_channel_mode (struct Client *, struct Client *,
+			      struct Channel *, int, char **, char *);
 
-extern void init_chcap_usage_counts(void);
-extern void set_chcap_usage_counts(struct Client *serv_p);
-extern void unset_chcap_usage_counts(struct Client *serv_p);
+extern void init_chcap_usage_counts (void);
+extern void set_chcap_usage_counts (struct Client *serv_p);
+extern void unset_chcap_usage_counts (struct Client *serv_p);
 
 /*
 ** Channel Related macros follow
@@ -54,12 +54,12 @@ extern void unset_chcap_usage_counts(struct Client *serv_p);
 
 /* Channel related flags */
 
-#define CHFL_PEON	0x0000 /* normal member of channel */
-#define CHFL_CHANOP     0x0001 /* Channel operator */
-#define CHFL_VOICE      0x0002 /* the power to speak */
-#define CHFL_DEOPPED    0x0004 /* deopped by us, modes need to be bounced */
-#define CHFL_BAN        0x0010 /* ban channel flag */
-#define CHFL_EXCEPTION  0x0020 /* exception to ban channel flag */
+#define CHFL_PEON	0x0000	/* normal member of channel */
+#define CHFL_CHANOP     0x0001	/* Channel operator */
+#define CHFL_VOICE      0x0002	/* the power to speak */
+#define CHFL_DEOPPED    0x0004	/* deopped by us, modes need to be bounced */
+#define CHFL_BAN        0x0010	/* ban channel flag */
+#define CHFL_EXCEPTION  0x0020	/* exception to ban channel flag */
 #define CHFL_INVEX      0x0080
 
 /* Channel Visibility macros */
@@ -100,25 +100,25 @@ extern void unset_chcap_usage_counts(struct Client *serv_p);
 
 struct ChModeChange
 {
-  char letter;
-  const char *arg;
-  const char *id;
-  int dir;
-  int caps;
-  int nocaps;
-  int mems;
-  struct Client *client;
+	char letter;
+	const char *arg;
+	const char *id;
+	int dir;
+	int caps;
+	int nocaps;
+	int mems;
+	struct Client *client;
 };
 
 struct ChCapCombo
 {
-  int count;
-  int cap_yes;
-  int cap_no;
+	int count;
+	int cap_yes;
+	int cap_no;
 };
 
 #define CHACCESS_CHANOP 2
 #define CHACCESS_VOICED 1
 #define CHACCESS_PEON   0
 
-#endif  /* INCLUDED_channel_mode_h */
+#endif /* INCLUDED_channel_mode_h */
