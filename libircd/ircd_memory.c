@@ -34,6 +34,13 @@
 #include "tools.h"
 #include "s_log.h"
 #include "restart.h"
+#ifdef MEMDEBUG
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#endif
+
 
 #ifdef MEMDEBUG
 /* Hopefully this debugger will work better than the existing one...
@@ -127,18 +134,36 @@ void ReportAllocated(struct Client*);
 void
 ReportAllocated(struct Client *client_p)
 {
-  int i = 2000;
-  MemoryEntry *mme;
-  sendto_one(client_p, ":%s NOTICE %s :*** -- Memory Allocation Report",
-	     me.name, client_p->name);
-  for (i=0, mme = first_mem_entry; i < 1000 && mme; mme=mme->next,i++)
-    sendto_one(client_p,
-	       ":%s NOTICE %s :*** -- %u bytes allocated for %lus at %s:%d",
-	       me.name, client_p->name, mme->size, CurrentTime-mme->ts, mme->file,
-	       mme->line);
-  sendto_one(client_p, ":%s NOTICE %s :*** -- End Memory Allocation Report",
-	     me.name, client_p->name);
+ int i = 2000;
+ MemoryEntry *mme;
+ sendto_one(client_p, ":%s NOTICE %s :*** -- Memory Allocation Report",
+            me.name, client_p->name);
+ for (i=0, mme = first_mem_entry; i < 1000 && mme; mme=mme->next,i++)
+  sendto_one(client_p,
+          ":%s NOTICE %s :*** -- %u bytes allocated for %lus at %s:%d",
+          me.name, client_p->name, mme->size, CurrentTime-mme->ts,
+          mme->file, mme->line);
+ sendto_one(client_p,
+            ":%s NOTICE %s :*** -- End Memory Allocation Report",
+            me.name, client_p->name);
 }
+
+void
+log_memory(void)
+{
+ MemoryEntry *mme;
+ int fd;
+ char buffer[200];
+ fd = open("memory.log", O_CREAT|O_WRONLY);
+ for (mme = first_mem_entry; mme; mme=mme->next)
+ {
+  sprintf(buffer, "%u bytes allocated for %lus at %s:%d\n",
+          mme->size, CurrentTime-mme->ts, mme->file, mme->line);
+  write(fd, buffer, strlen(buffer));
+ }
+ close(fd);
+}
+
 #else /* MEMDEBUG */
 /*
  * MyMalloc - allocate memory, call outofmemory on failure
@@ -200,6 +225,9 @@ void outofmemory()
   was_here = 1;
 
   log(L_CRIT, "Out of memory: restarting server...");
+#ifdef MEMDEBUG
+  log_memory();
+#endif
   restart("Out of Memory");
 }
 
