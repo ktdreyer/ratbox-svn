@@ -529,7 +529,6 @@ static time_t io_loop(time_t delay)
 
   if (CurrentTime >= nextping) {
     nextping = check_pings(CurrentTime);
-    timeout_auth_queries(CurrentTime);
   }
 
   if (dorehash && !GlobalSetOptions.lifesux)
@@ -827,6 +826,8 @@ int main(int argc, char *argv[])
 
   init_resolver();
   init_netio();
+
+  init_auth();			/* Initialise the auth code */
 
   read_conf_files(YES);         /* cold start init conf files */
 

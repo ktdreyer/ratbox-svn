@@ -30,6 +30,7 @@
 #include "s_auth.h"
 #include "client.h"
 #include "common.h"
+#include "event.h"
 #include "fdlist.h"              /* fdlist_add */
 #include "irc_string.h"
 #include "ircd.h"
@@ -95,6 +96,19 @@ struct AuthRequest* AuthPollList = 0; /* GLOBAL - auth queries pending io */
 struct AuthRequest *AuthClientList = NULL;
 
 static struct AuthRequest* AuthIncompleteList = 0;
+static EVH timeout_auth_queries_event;
+
+/*
+ * init_auth()
+ *
+ * Initialise the auth code
+ */
+void
+init_auth(void)
+{
+  eventAdd("timeout_auth_queries_event", timeout_auth_queries_event, NULL,
+    1, 0);
+}
 
 /*
  * make_auth_request - allocate a new auth request
@@ -454,7 +468,8 @@ void start_auth(struct Client* client)
  * timeout_auth_queries - timeout resolver and identd requests
  * allow clients through if requests failed
  */
-void timeout_auth_queries(time_t now)
+static void
+timeout_auth_queries_event(void *notused)
 {
   struct AuthRequest* auth;
   struct AuthRequest* auth_next = 0;
@@ -473,7 +488,7 @@ void timeout_auth_queries(time_t now)
       log(L_INFO, "DNS/AUTH timeout %s",
           get_client_name(auth->client, SHOW_IP));
 
-      auth->client->since = now;
+      auth->client->since = CurrentTime;
       release_auth_client(auth->client);
       unlink_auth_request(auth, &AuthPollList);
   #ifdef USE_IAUTH
@@ -490,7 +505,7 @@ void timeout_auth_queries(time_t now)
       sendheader(auth->client, REPORT_FAIL_DNS);
       log(L_INFO, "DNS timeout %s", get_client_name(auth->client, SHOW_IP));
 
-      auth->client->since = now;
+      auth->client->since = CurrentTime;
       release_auth_client(auth->client);
       unlink_auth_request(auth, &AuthIncompleteList);
   #ifdef USE_IAUTH
@@ -500,6 +515,14 @@ void timeout_auth_queries(time_t now)
   #endif
     }
   }
+
+  /* And re-register an event .. */
+  /* 
+   * These *REALLY* should be part of the socket timeout, but we aren't
+   * at that stage yet.   -- adrian
+   */
+  eventAdd("timeout_auth_queries_event", timeout_auth_queries_event, NULL,
+    1, 0);
 }
 
 /*
