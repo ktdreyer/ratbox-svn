@@ -1199,13 +1199,7 @@ echo "Installing into: $prefix"
 
 echo "Ziplinks ................ $zlib"
 
-if test ! -z "$cf_openssl_ciphers"; then
-	tmpresult="yes - ${cf_openssl_ciphers}"
-else
-	tmpresult=no
-fi
-
-echo "OpenSSL ................. $tmpresult"
+echo "OpenSSL ................. $cf_enable_openssl"
 
 if test "$shared_modules" = yes; then
 	tmpresult=shared
