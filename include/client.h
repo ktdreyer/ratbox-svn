@@ -580,7 +580,7 @@ extern int show_ip (struct Client *source_p, struct Client *target_p);
 
 extern void initUser (void);
 extern void free_user (struct User *, struct Client *);
-
+extern void free_local_client(struct Client *);
 extern struct User *make_user (struct Client *);
 extern struct Server *make_server (struct Client *);
 

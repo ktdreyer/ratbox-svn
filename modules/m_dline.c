@@ -33,7 +33,7 @@
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "ircd.h"
-#include "hostmask.h"
+#include "confmatch.h"
 #include "numeric.h"
 #include "fdlist.h"
 #include "s_bsd.h"
@@ -94,14 +94,11 @@ mo_dline (struct Client *client_p, struct Client *source_p, int parc, char *parv
 {
 	char *dlhost, *oper_reason;
 	const char *reason = "<No Reason>";
-#ifndef IPV6
-	char *p;
 	struct Client *target_p;
-#endif
 	struct irc_inaddr daddr;
 	char cidr_form_host[HOSTLEN + 1];
 	struct ConfItem *aconf;
-	int bits, t;
+	int bits;
 	char dlbuffer[1024];
 	const char *current_date;
 	int tdline_time = 0;
@@ -132,19 +129,13 @@ mo_dline (struct Client *client_p, struct Client *source_p, int parc, char *parv
 	dlhost = parv[loc];
 	strlcpy (cidr_form_host, dlhost, sizeof (cidr_form_host));
 
-	if((t = parse_netmask (dlhost, NULL, &bits)) == HM_HOST)
+	if(!parse_netmask (dlhost, NULL, &bits))
 	{
-#ifdef IPV6
-		sendto_one (source_p, ":%s NOTICE %s :Sorry, please supply an address.",
-			    me.name, parv[0]);
-		return;
-#else
 		if(!(target_p = find_chasing (source_p, parv[loc], NULL)))
 			return;
 
 		if(!target_p->user)
 			return;
-		t = HM_IPV4;
 		if(IsServer (target_p))
 		{
 			sendto_one (source_p,
@@ -168,40 +159,22 @@ mo_dline (struct Client *client_p, struct Client *source_p, int parc, char *parv
 			return;
 		}
 
-		/*
-		 * XXX - this is always a fixed length output, we can get away
-		 * with strcpy here
-		 *
-		 * strncpy_irc(cidr_form_host, inetntoa((char *)&target_p->ip), 32);
-		 * cidr_form_host[32] = '\0';
-		 */
-		strcpy (cidr_form_host, inetntoa ((char *) &target_p->localClient->ip));
-
-		if((p = strchr (cidr_form_host, '.')) == NULL)
-			return;
-		/* 192. <- p */
-
-		p++;
-		if((p = strchr (p, '.')) == NULL)
-			return;
-		/* 192.168. <- p */
-
-		p++;
-		if((p = strchr (p, '.')) == NULL)
-			return;
-		/* 192.168.0. <- p */
-
-		p++;
-		*p++ = '0';
-		*p++ = '/';
-		*p++ = '2';
-		*p++ = '4';
-		*p++ = '\0';
+		
+		inetntop(DEF_FAM, &target_p->localClient->ip, cidr_form_host, sizeof(cidr_form_host));
+#ifdef IPV6
+		if(!(IN6_IS_ADDR_V4MAPPED (&IN_ADDR2 (target_p->localClient->ip))) || 
+		    (IN6_IS_ADDR_V4COMPAT (&IN_ADDR2 (target_p->localClient->ip))))
+		{
+			strlcat(cidr_form_host, "/64", sizeof(cidr_form_host));
+			bits = 64;
+		} else
+#else
+		{
+			strlcat(cidr_form_host, "/24", sizeof(cidr_form_host));
+			bits = 24;
+		}
+#endif		
 		dlhost = cidr_form_host;
-
-		bits = 0xFFFFFF00UL;
-/* XXX: Fix me for IPV6 */
-#endif
 	}
 
 	loc++;
@@ -241,18 +214,12 @@ mo_dline (struct Client *client_p, struct Client *source_p, int parc, char *parv
 		}
 	}
 
-#ifdef IPV6
-	if(t == HM_IPV6)
-		t = AF_INET6;
-	else
-#endif
-		t = AF_INET;
 	if(ConfigFileEntry.non_redundant_klines)
 	{
 		const char *creason;
 		(void) parse_netmask (dlhost, &daddr, NULL);
 
-		if((aconf = find_dline (&daddr, t)) != NULL)
+		if((aconf = find_dline (&daddr)) != NULL)
 		{
 			creason = aconf->passwd ? aconf->passwd : "<No Reason>";
 			if(IsConfExemptKline (aconf))

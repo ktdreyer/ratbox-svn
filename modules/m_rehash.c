@@ -40,7 +40,7 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
-#include "hostmask.h"
+#include "confmatch.h"
 
 static void mo_rehash (struct Client *, struct Client *, int, char **);
 
@@ -83,7 +83,7 @@ clear_temps (dlink_list * tlist)
 	{
 		aconf = ptr->data;
 
-		delete_one_address_conf (aconf->host, aconf);
+		delete_one_address_conf (aconf);
 		dlinkDestroy (ptr, tlist);
 	}
 }

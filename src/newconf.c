@@ -21,7 +21,7 @@
 #include "setup.h"
 #include "modules.h"
 #include "listener.h"
-#include "hostmask.h"
+#include "confmatch.h"
 #include "resv.h"
 #include "s_serv.h"
 #include "event.h"
@@ -1859,7 +1859,7 @@ conf_begin_deny (struct TopConf *tc)
 static int
 conf_end_deny (struct TopConf *tc)
 {
-	if(yy_aconf->host && parse_netmask (yy_aconf->host, NULL, NULL) != HM_HOST)
+	if(yy_aconf->host && parse_netmask (yy_aconf->host, NULL, NULL))
 	{
 		add_conf_by_address (yy_aconf->host, CONF_DLINE, NULL, yy_aconf);
 	}
@@ -1905,7 +1905,7 @@ conf_begin_exempt (struct TopConf *tc)
 static int
 conf_end_exempt (struct TopConf *tc)
 {
-	if(yy_aconf->host && parse_netmask (yy_aconf->host, NULL, NULL) != HM_HOST)
+	if(yy_aconf->host && parse_netmask (yy_aconf->host, NULL, NULL))
 	{
 		add_conf_by_address (yy_aconf->host, CONF_EXEMPTDLINE, NULL, yy_aconf);
 	}

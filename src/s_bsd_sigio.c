@@ -250,8 +250,11 @@ comm_select (unsigned long delay)
 				revents = pfds[fd].revents;
 				num++;
 				F = &fd_table[fd];
+				if(!F->flags.open || F->fd < 0)
+					continue;	
+				
 				set_time ();
-				if(F->flags.open && revents & (POLLRDNORM | POLLIN | POLLHUP | POLLERR))
+				if(F->flags.open && (revents & (POLLRDNORM | POLLIN | POLLHUP | POLLERR)))
 				{
 					callbacks_called++;
 					hdl = F->read_handler;
@@ -274,6 +277,7 @@ comm_select (unsigned long delay)
 				if(F->write_handler == NULL)
 					poll_update_pollfds (fd, POLLOUT, NULL);
 
+				F = NULL;
 			}
 			else
 				break;

@@ -36,7 +36,7 @@
 #include "s_gline.h"
 #include "ircd_handler.h"
 #include "msg.h"		/* Message */
-#include "hostmask.h"		/* report_mtrie_conf_links */
+#include "confmatch.h"		/* report_mtrie_conf_links */
 #include "numeric.h"		/* ERR_xxx */
 #include "scache.h"		/* list_scache */
 #include "send.h"		/* sendto_one */
@@ -326,6 +326,8 @@ stats_connect (struct Client *source_p)
 static void
 stats_tdeny (struct Client *source_p)
 {
+#warning fix stats_tdeny()
+#ifdef XXX_FIX_ME_XXX
 	char *name, *host, *pass, *user, *classname;
 	struct AddressRec *arec;
 	struct ConfItem *aconf;
@@ -350,6 +352,7 @@ stats_tdeny (struct Client *source_p)
 			}
 		}
 	}
+#endif
 }
 
 /* stats_deny()
@@ -361,6 +364,8 @@ stats_tdeny (struct Client *source_p)
 static void
 stats_deny (struct Client *source_p)
 {
+#warning fix stats_deny()
+#ifdef XXX_FIX_ME_XXX
 	char *name, *host, *pass, *user, *classname;
 	struct AddressRec *arec;
 	struct ConfItem *aconf;
@@ -385,6 +390,7 @@ stats_deny (struct Client *source_p)
 			}
 		}
 	}
+#endif
 }
 
 
@@ -397,6 +403,8 @@ stats_deny (struct Client *source_p)
 static void
 stats_exempt (struct Client *source_p)
 {
+#warning fix stats_exempt()
+#ifdef XXX_FIXME_XXX
 	char *name, *host, *pass, *user, *classname;
 	struct AddressRec *arec;
 	struct ConfItem *aconf;
@@ -417,6 +425,7 @@ stats_exempt (struct Client *source_p)
 			}
 		}
 	}
+#endif
 }
 
 
@@ -520,6 +529,8 @@ stats_hubleaf (struct Client *source_p)
 static void
 stats_auth (struct Client *source_p)
 {
+#warning "fix stats_auth()"
+#ifdef XXX_FIXME_XXX
 	/* Oper only, if unopered, return ERR_NOPRIVS */
 	if((ConfigFileEntry.stats_i_oper_only == 2) && !IsOper (source_p))
 		sendto_one (source_p, form_str (ERR_NOPRIVILEGES), me.name, source_p->name);
@@ -535,11 +546,10 @@ stats_auth (struct Client *source_p)
 			aconf = find_conf_by_address (source_p->host,
 						      &source_p->localClient->ip,
 						      CONF_CLIENT,
-						      source_p->localClient->aftype,
 						      source_p->username);
 		else
 			aconf = find_conf_by_address (source_p->host, NULL, CONF_CLIENT,
-						      0, source_p->username);
+						      source_p->username);
 
 		if(aconf == NULL)
 			return;
@@ -554,6 +564,7 @@ stats_auth (struct Client *source_p)
 	/* Theyre opered, or allowed to see all auth blocks */
 	else
 		report_auth (source_p);
+#endif
 }
 
 
@@ -575,11 +586,10 @@ stats_tklines (struct Client *source_p)
 			aconf = find_conf_by_address (source_p->host,
 						      &source_p->localClient->ip,
 						      CONF_KILL,
-						      source_p->localClient->aftype,
 						      source_p->username);
 		else
 			aconf = find_conf_by_address (source_p->host, NULL, CONF_KILL,
-						      0, source_p->username);
+						      source_p->username);
 
 		if(aconf == NULL)
 			return;
@@ -645,11 +655,10 @@ stats_klines (struct Client *source_p)
 			aconf = find_conf_by_address (source_p->host,
 						      &source_p->localClient->ip,
 						      CONF_KILL,
-						      source_p->localClient->aftype,
 						      source_p->username);
 		else
 			aconf = find_conf_by_address (source_p->host, NULL, CONF_KILL,
-						      0, source_p->username);
+						      source_p->username);
 
 		if(aconf == NULL)
 			return;
@@ -664,8 +673,11 @@ stats_klines (struct Client *source_p)
 			    source_p->name, 'K', host, user, pass);
 	}
 	/* Theyre opered, or allowed to see all klines */
+#warning write report_Klines()
+#ifdef XXX_FIXME
 	else
 		report_Klines (source_p);
+#endif
 }
 
 static void

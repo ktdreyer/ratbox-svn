@@ -35,7 +35,7 @@
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "ircd.h"
-#include "hostmask.h"
+#include "confmatch.h"
 #include "numeric.h"
 #include "fdlist.h"
 #include "s_bsd.h"

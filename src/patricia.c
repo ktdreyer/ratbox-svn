@@ -20,6 +20,7 @@
 
 
 #include "stdinc.h"
+#include "config.h"
 #include "ircd_defs.h"
 #include "patricia.h"
 #include "balloc.h"
@@ -34,6 +35,8 @@ static BlockHeap *patricia_heap;
 #define NODE_HEAP_COUNT		1024
 #define PATRICIA_HEAP_COUNT	128
 
+#define PATRICIA_DEBUG 1
+#define NOTYET 1
 
 void
 init_patricia (void)
@@ -81,7 +84,7 @@ prefix_toa2x (prefix_t * prefix, char *buf, int buf_len, int with_len)
 		strcpy (buf, "(NULL)");
 		return (buf);
 	}
-	inetntop (prefix->family, &prefix->add.sin, buf, buf_len);
+	inet_ntop (prefix->family, &prefix->add.sin, buf, buf_len);
 	if(with_len)
 	{
 		sprintf (tmp, "/%d", prefix->bitlen);

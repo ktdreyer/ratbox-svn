@@ -35,7 +35,7 @@
 #include "s_conf.h"
 #include "send.h"
 #include "msg.h"
-#include "hostmask.h"
+#include "confmatch.h"
 #include "numeric.h"
 #include "parse.h"
 #include "modules.h"
@@ -81,26 +81,22 @@ const char *_version = "$Revision$";
 static void
 mo_testline (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
+#warning fix mo_testline
+#ifdef XXX_FIXME_XXX
 	struct ConfItem *aconf;
 	struct irc_inaddr ip;
 	int host_mask;
 	char *host, *pass, *user, *name, *classname, *given_host, *given_name, *p;
-	int port, t;
+	int port;
 
 	if(parc > 1)
 	{
 		given_name = parv[1];
 		if(!(p = (char *) strchr (given_name, '@')))
 		{
-			if((t = parse_netmask (given_name, &ip, &host_mask)) != HM_HOST)
+			if(parse_netmask (given_name, &ip, &host_mask))
 			{
-				aconf = find_dline (&ip,
-#ifdef IPV6
-						    (t == HM_IPV6) ? AF_INET6 : AF_INET
-#else
-						    AF_INET
-#endif
-					);
+				aconf = find_dline (&ip);
 				if(aconf)
 				{
 					get_printable_conf (aconf, &name, &host, &pass, &user,
@@ -132,16 +128,10 @@ mo_testline (struct Client *client_p, struct Client *source_p, int parc, char *p
 		*p = '\0';
 		p++;
 		given_host = p;
-		if((t = parse_netmask (given_host, &ip, &host_mask)) != HM_HOST)
-			aconf = find_address_conf (given_host, given_name, &ip,
-#ifdef IPV6
-						   (t == HM_IPV6) ? AF_INET6 : AF_INET
-#else
-						   AF_INET
-#endif
-				);
+		if(parse_netmask (given_host, &ip, &host_mask))
+			aconf = find_address_conf (given_host, given_name, &ip);
 		else
-			aconf = find_address_conf (given_host, given_name, NULL, 0);
+			aconf = find_address_conf (given_host, given_name, NULL);
 
 		if(aconf)
 		{
@@ -171,4 +161,5 @@ mo_testline (struct Client *client_p, struct Client *source_p, int parc, char *p
 	}
 	else
 		sendto_one (source_p, ":%s NOTICE %s :usage: user@host|ip", me.name, parv[0]);
+#endif
 }

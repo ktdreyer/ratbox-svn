@@ -52,7 +52,7 @@
 #include "linebuf.h"
 #include "hash.h"
 #include "memory.h"
-#include "hostmask.h"
+#include "confmatch.h"
 #include "balloc.h"
 #include "listener.h"
 
@@ -167,7 +167,7 @@ make_client (struct Client *from)
 	return client_p;
 }
 
-static void
+void
 free_local_client(struct Client *client_p)
 {
 	assert(NULL != client_p);
@@ -446,7 +446,7 @@ check_banned_lines (void)
 			continue;
 
 		/* if there is a returned struct ConfItem then kill it */
-		if((aconf = find_dline (&client_p->localClient->ip, client_p->localClient->aftype)))
+		if((aconf = find_dline (&client_p->localClient->ip)))
 		{
 			if(aconf->status & CONF_EXEMPTDLINE)
 				continue;
@@ -517,7 +517,7 @@ check_banned_lines (void)
 	{
 		client_p = ptr->data;
 
-		if((aconf = find_dline (&client_p->localClient->ip, client_p->localClient->aftype)))
+		if((aconf = find_dline (&client_p->localClient->ip)))
 		{
 			if(aconf->status & CONF_EXEMPTDLINE)
 				continue;
@@ -639,8 +639,7 @@ check_dlines (void)
 		if(IsMe (client_p))
 			continue;
 
-		if((aconf = find_dline (&client_p->localClient->ip,
-					client_p->localClient->aftype)) != NULL)
+		if((aconf = find_dline (&client_p->localClient->ip)) != NULL)
 		{
 			if(aconf->status & CONF_EXEMPTDLINE)
 				continue;
@@ -659,8 +658,7 @@ check_dlines (void)
 	{
 		client_p = ptr->data;
 
-		if((aconf = find_dline (&client_p->localClient->ip,
-					client_p->localClient->aftype)) != NULL)
+		if((aconf = find_dline (&client_p->localClient->ip)) != NULL)
 		{
 			if(aconf->status & CONF_EXEMPTDLINE)
 				continue;
@@ -1055,6 +1053,7 @@ exit_one_client (struct Client *client_p,
 	/* Check to see if the client isn't already on the dead list */
 	assert (dlinkFind (&dead_list, source_p) == NULL);
 
+
 	SetDead (source_p);
 
 	/* add to dead client dlist */
@@ -1421,6 +1420,8 @@ exit_client (struct Client *client_p,	/* The local client originating the
 					    "ERROR :Closing Link: %s (%s)",
 					    source_p->host, comment);
 		}
+		close_connection (source_p);
+
 	}
 
 	if(IsServer (source_p))
@@ -1463,11 +1464,6 @@ exit_client (struct Client *client_p,	/* The local client originating the
 		}
 	}
 
-	if(MyConnect(source_p))
-	{
-		close_connection (source_p);
-		free_local_client (source_p);
-	} 
 	/* The client *better* be off all of the lists */
 	assert (dlinkFind (&unknown_list, source_p) == NULL);
 	assert (dlinkFind (&lclient_list, source_p) == NULL);

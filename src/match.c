@@ -218,7 +218,9 @@ comp_with_mask (void *addr, void *dest, u_int mask)
 		int n = mask / 8;
 		int m = ((-1) << (8 - (mask % 8)));
 		if(mask % 8 == 0 || (((u_char *) addr)[n] & m) == (((u_char *) dest)[n] & m))
+		{
 			return (1);
+		}
 	}
 	return (0);
 }

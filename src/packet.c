@@ -53,6 +53,9 @@ parse_client_queued (struct Client *client_p)
 	int checkflood = 1;
 	struct LocalUser *lclient_p = client_p->localClient;
 
+	if(!MyConnect(client_p))
+		return;
+	
 	if(IsUnknown (client_p))
 	{
 		int i = 0;
@@ -63,9 +66,9 @@ parse_client_queued (struct Client *client_p)
 			if(i >= MAX_FLOOD)
 				break;
 
-			/* Did the client get closed? */
 			if(!MyConnect(client_p))
-				break;
+				return;
+			
 			dolen = linebuf_get (&client_p->localClient->
 					     buf_recvq, readBuf, READBUF_SIZE,
 					     LINEBUF_COMPLETE, LINEBUF_PARSED);
@@ -147,13 +150,15 @@ parse_client_queued (struct Client *client_p)
 			else if(lclient_p->sent_parsed >= (4 * lclient_p->allow_read))
 				break;
 
-			dolen = linebuf_get (&client_p->localClient->
+				dolen = linebuf_get (&client_p->localClient->
 					     buf_recvq, readBuf, READBUF_SIZE,
 					     LINEBUF_COMPLETE, LINEBUF_PARSED);
 
 			if(!dolen)
 				break;
 
+			if(!MyConnect(client_p))
+				return;			
 			client_dopacket (client_p, readBuf, dolen);
 			lclient_p->sent_parsed++;
 		}
@@ -361,9 +366,9 @@ read_packet (int fd, void *data)
 #ifndef NDEBUG
 	struct hook_io_data hdata;
 #endif
-	if(IsDead (client_p) || !MyConnect(client_p))
+	if(IsDead (client_p))
 		return;
-
+	
 	assert (lclient_p != NULL);
 	fd_r = client_p->localClient->fd;
 
@@ -416,7 +421,8 @@ read_packet (int fd, void *data)
 		binary = 1;
 
 	lbuf_len = linebuf_parse (&client_p->localClient->buf_recvq, readBuf, length, binary);
-
+	if(!MyConnect(client_p))
+		return;
 	if(lbuf_len < 0)
 	{
 		if(IsClient (client_p))
@@ -463,7 +469,7 @@ read_packet (int fd, void *data)
 #endif
 
 
-	if(!IsDead (client_p))
+	if(!IsDead (client_p) && MyConnect(client_p))
 	{
 		/* If we get here, we need to register for another COMM_SELECT_READ */
 		if(PARSE_AS_SERVER (client_p))
@@ -502,6 +508,8 @@ client_dopacket (struct Client *client_p, char *buffer, size_t length)
 	assert (buffer != NULL);
 
 	if(client_p == NULL || buffer == NULL)
+		return;
+	if(!MyConnect(client_p))
 		return;
 	/* 
 	 * Update messages received

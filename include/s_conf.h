@@ -41,6 +41,7 @@
 #include "class.h"
 #include "client.h"
 #include "common.h"
+#include "patricia.h" 
 
 struct Client;
 struct DNSReply;
@@ -80,6 +81,7 @@ struct ConfItem
 	struct Class *c_class;	/* Class of connection */
 	struct DNSQuery *dns_query;
 	int aftype;
+	patricia_node_t *pnode; /* Our patricia node */
 #ifdef HAVE_LIBCRYPTO
 	char *rsa_public_key_file;
 	RSA *rsa_public_key;
@@ -372,7 +374,7 @@ extern struct ConfItem *find_conf_exact (const char *name, const char *user,
 extern struct ConfItem *find_conf_by_name (const char *name, int status);
 extern struct ConfItem *find_conf_by_host (const char *host, int status);
 extern struct ConfItem *find_kill (struct Client *);
-extern int conf_connect_allowed (struct irc_inaddr *addr, int aftype);
+extern int conf_connect_allowed (struct irc_inaddr *addr);
 extern char *oper_flags_as_string (int);
 extern char *oper_privs_as_string (struct Client *, int);
 

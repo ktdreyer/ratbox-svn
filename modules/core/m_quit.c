@@ -92,6 +92,7 @@ static void m_quit(struct Client *client_p,
      > CurrentTime)
     {
       exit_client(client_p, source_p, source_p, "Client Quit");
+      return;
     }
 
   exit_client(client_p, source_p, source_p, comment);

@@ -41,7 +41,7 @@
 #include "sprintf_irc.h"
 #include "ircd.h"
 #include "listener.h"
-#include "hostmask.h"
+#include "confmatch.h"
 #include "modules.h"
 #include "numeric.h"
 #include "fdlist.h"
@@ -686,16 +686,14 @@ verify_access (struct Client *client_p, const char *username)
 	if(IsGotId (client_p))
 	{
 		aconf = find_address_conf (client_p->host, client_p->username,
-					   &client_p->localClient->ip,
-					   client_p->localClient->aftype);
+					   &client_p->localClient->ip);
 	}
 	else
 	{
 		strlcpy (non_ident, "~", sizeof (non_ident));
 		strlcat (non_ident, username, sizeof (non_ident));
 		aconf = find_address_conf (client_p->host, non_ident,
-					   &client_p->localClient->ip,
-					   client_p->localClient->aftype);
+					   &client_p->localClient->ip);
 	}
 
 	if(aconf != NULL)
@@ -1423,9 +1421,9 @@ lookup_confhost (struct ConfItem *aconf)
  * side effects	- none
  */
 int
-conf_connect_allowed (struct irc_inaddr *addr, int aftype)
+conf_connect_allowed (struct irc_inaddr *addr)
 {
-	struct ConfItem *aconf = find_dline (addr, aftype);
+	struct ConfItem *aconf = find_dline (addr);
 
 	/* DLINE exempt also gets you out of static limits/pacing... */
 	if(aconf && (aconf->status & CONF_EXEMPTDLINE))
@@ -1454,7 +1452,7 @@ find_kill (struct Client *client_p)
 		return (NULL);
 
 	aconf = find_address_conf (client_p->host, client_p->username,
-				   &client_p->localClient->ip, client_p->localClient->aftype);
+				   &client_p->localClient->ip);
 	if(aconf == NULL)
 		return (aconf);
 	if((aconf->status & CONF_KILL) || (aconf->status & CONF_GLINE))
@@ -1564,7 +1562,7 @@ expire_tkline (dlink_list * tklist, int type)
 						      user : "*",
 						      (aconf->host) ? aconf->host : "*");
 
-			delete_one_address_conf (aconf->host, aconf);
+			delete_one_address_conf (aconf);
 			dlinkDestroy (ptr, tklist);
 		}
 		else if((type == TEMP_WEEK
@@ -1613,7 +1611,7 @@ expire_tdline (dlink_list * tdlist, int type)
 						      "Temporary D-line for [%s] expired",
 						      aconf->host);
 
-			delete_one_address_conf (aconf->host, aconf);
+			delete_one_address_conf (aconf);
 			dlinkDestroy (ptr, tdlist);
 		}
 		else if((type == TEMP_WEEK
@@ -2367,7 +2365,7 @@ conf_add_d_conf (struct ConfItem *aconf)
 	 *       need this anyway, so I will disable it for now... -A1kmm
 	 */
 
-	if(parse_netmask (aconf->host, NULL, NULL) == HM_HOST)
+	if(!parse_netmask (aconf->host, NULL, NULL))
 	{
 		ilog (L_WARN, "Invalid Dline %s ignored", aconf->host);
 		free_conf (aconf);

@@ -51,7 +51,8 @@
 #include "ircd_handler.h"
 #include "md5.h"
 #include "msg.h"		/* msgtab */
-#include "hostmask.h"
+#include "confmatch.h"
+#include "iplines.h"
 #include "numeric.h"
 #include "parse.h"
 #include "res.h"
@@ -727,7 +728,8 @@ main (int argc, char *argv[])
 	init_hash ();
 	id_init ();
 	clear_scache_hash_table ();	/* server cache name table */
-	init_host_hash ();	/* Host-hashtable. */
+	init_iplines ();
+	init_confmatch ();
 	clear_hash_parse ();
 	init_client ();
 	init_conf ();

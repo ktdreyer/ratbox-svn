@@ -34,7 +34,7 @@
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "ircd.h"
-#include "hostmask.h"
+#include "confmatch.h"
 #include "numeric.h"
 #include "s_conf.h"
 #include "s_log.h"
@@ -406,10 +406,10 @@ remove_temp_kline (char *user, char *host)
 	struct ConfItem *aconf;
 	dlink_node *ptr;
 	struct irc_inaddr addr, caddr;
-	int nm_t, cnm_t, bits, cbits;
+	int bits, cbits;
 	int i;
 
-	nm_t = parse_netmask (host, &addr, &bits);
+	parse_netmask (host, &addr, &bits);
 
 	for (i = 0; tkline_list[i] != NULL; i++)
 	{
@@ -419,22 +419,16 @@ remove_temp_kline (char *user, char *host)
 		{
 			aconf = (struct ConfItem *) ptr->data;
 
-			cnm_t = parse_netmask (aconf->host, &caddr, &cbits);
+			parse_netmask (aconf->host, &caddr, &cbits);
 
-			if(cnm_t != nm_t || (user && irccmp (user, aconf->user)))
+			if(user && irccmp (user, aconf->user))
 				continue;
 
-			if((nm_t == HM_HOST && !irccmp (aconf->host, host)) ||
-			   (nm_t == HM_IPV4 && bits == cbits
-			    && comp_with_mask (&IN_ADDR (addr), &IN_ADDR (caddr), bits))
-#ifdef IPV6
-			   || (nm_t == HM_IPV6 && bits == cbits
-			       && comp_with_mask (&IN_ADDR (addr), &IN_ADDR (caddr), bits))
-#endif
-				)
+			if(!irccmp (aconf->host, host) || (bits == cbits
+			    && comp_with_mask (&IN_ADDR (addr), &IN_ADDR (caddr), bits)))
 			{
 				dlinkDestroy (ptr, tklist);
-				delete_one_address_conf (aconf->host, aconf);
+				delete_one_address_conf (aconf);
 				return YES;
 			}
 		}
