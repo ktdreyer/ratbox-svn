@@ -105,8 +105,8 @@ _send_linebuf(struct Client *to, buf_head_t *linebuf)
     return 0;
   }
 #endif
-  if (to->localClient->fd < 0)
-    return 0; /* Thou shalt not write to closed descriptors */
+  if (IsDead(to) || IsClosing(to))
+    return 0; 
 
   if (linebuf_len(&to->localClient->buf_sendq) > get_sendq(to))
   {
@@ -379,21 +379,6 @@ sendto_one(struct Client *to, const char *pattern, ...)
   if (to->from)
     to = to->from;
 
-#ifdef INVARIANTS
-  if (to->localClient->fd < 0)
-  {
-    Debug((DEBUG_ERROR,
-           "Local socket %s with negative fd... AARGH!",
-           to->name));
-  }
-  else if (IsMe(to))
-  {
-    sendto_realops_flags(FLAGS_ALL, L_ALL,
-                         "Trying to send to myself!");
-    return;
-  }
-#endif
-
   linebuf_newbuf(&linebuf);
 
   va_start(args, pattern);
@@ -433,14 +418,7 @@ sendto_one_prefix(struct Client *to, struct Client *prefix,
     to_sendto = to;
 
 #ifdef INVARIANTS
-  if (to->localClient->fd < 0)
-  {
-    Debug((DEBUG_ERROR,
-           "Local socket %s with negative fd... AARGH!",
-           to->name));
-    return;
-  }
-  else if (IsMe(to))
+  if (IsMe(to))
   {
     sendto_realops_flags(FLAGS_ALL, L_ALL,
                          "Trying to send to myself!");
@@ -671,62 +649,6 @@ sendto_server(struct Client *one, struct Client *source_p,
   linebuf_donebuf(&linebuf);
 }
 
-
-
-/*
- * sendto_remove_channels_local()
- *
- * inputs	- pointer to client
- *		- pattern to send
- * output	- NONE
- * side effects	- Sends a message to all people on local server who are
- * 		  in same channel and removes the user from the channel.
- *		  used by exit_one_client.
- */
-void
-sendto_remove_channels_local(struct Client *user, const char *pattern, ...)
-{
-  va_list args;
-  dlink_node *ptr;
-  dlink_node *ptr_next;
-  struct Channel *chptr;
-  buf_head_t linebuf;
-
-  linebuf_newbuf(&linebuf);
-  va_start(args, pattern);
-  linebuf_putmsg(&linebuf, pattern, args, NULL);
-  va_end(args);
-
-  ++current_serial;
-
-  if (user->user != NULL && user->user->channel.head != NULL)
-  {
-    for (ptr = user->user->channel.head; ptr && user->user->channel.head != NULL; ptr = ptr_next)
-    {
-      ptr_next = ptr->next;
-      chptr = ptr->data;
-      if(remove_user_from_channel(chptr, user) == 0)
-      {
-        sendto_list_local(&chptr->locchanops, &linebuf);
-#ifdef REQUIRE_OANDV
-        sendto_list_local(&chptr->locchanops_voiced, &linebuf);
-#endif
-#ifdef HALFOPS
-        sendto_list_local(&chptr->lochalfops, &linebuf);
-#endif
-        sendto_list_local(&chptr->locvoiced, &linebuf);
-        sendto_list_local(&chptr->locpeons, &linebuf);
-      }
-    }
-
-    if (MyConnect(user) && (user->serial != current_serial))
-      send_linebuf(user, &linebuf);
-    
-  }
-
-  linebuf_donebuf(&linebuf);
-} /* sendto_common_channels() */
-
 /*
  * sendto_common_channels_local()
  *
@@ -735,7 +657,7 @@ sendto_remove_channels_local(struct Client *user, const char *pattern, ...)
  * output	- NONE
  * side effects	- Sends a message to all people on local server who are
  * 		  in same channel with user. 
- *		  used by m_nick.c.
+ *		  used by m_nick.c and exit_one_client.
  */
 void
 sendto_common_channels_local(struct Client *user, const char *pattern, ...)
@@ -773,7 +695,6 @@ sendto_common_channels_local(struct Client *user, const char *pattern, ...)
 
     if (MyConnect(user) && (user->serial != current_serial))
       send_linebuf(user, &linebuf);
-    
   }
 
   linebuf_donebuf(&linebuf);
@@ -906,27 +827,22 @@ sendto_list_local(dlink_list *list, buf_head_t *linebuf_ptr)
   dlink_node *ptr;
   dlink_node *ptr_next;
   struct Client *target_p;
-  if(list->head == NULL)
-     return;
-  
-  for (ptr = list->head; ptr && list->head != NULL; ptr = ptr_next)
+
+  for (ptr = list->head; ptr; ptr = ptr_next)
   {
     ptr_next = ptr->next;
     if ((target_p = ptr->data) == NULL)
       continue;
 
-    if(IsDead(target_p) || IsClosing(target_p))
-      continue;
-
-    if (!MyConnect(target_p) || (target_p->localClient->fd < 0))
+    if (!MyConnect(target_p) || IsDead(target_p))
       continue;
 
     if (target_p->serial == current_serial)
       continue;
 
     target_p->serial = current_serial;
-    send_linebuf(target_p, linebuf_ptr);
-
+    if (!IsDead(target_p))
+      send_linebuf(target_p, linebuf_ptr);
   } 
 } /* sendto_list_local() */
 
@@ -954,7 +870,7 @@ sendto_list_remote(struct Client *one,
   dlink_node *ptr_next;
   struct Client *target_p;
 
-  for (ptr = list->head; ptr && list->head != NULL; ptr = ptr_next)
+  for (ptr = list->head; ptr; ptr = ptr_next)
   {
     ptr_next = ptr->next;
     if ((target_p = ptr->data) == NULL)
@@ -962,9 +878,7 @@ sendto_list_remote(struct Client *one,
 
     if (MyConnect(target_p))
       continue;
-    
-    if(IsDead(target_p) || IsClosing(target_p))
-      continue;
+
 
     if (target_p->from == one->from) /* must skip the origin! */
       continue;

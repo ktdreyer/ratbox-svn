@@ -413,7 +413,7 @@ read_packet(int fd, void *data)
 #endif
 
   
-  if (!IsDead(client_p) || !IsClosing(client_p))
+  if (!IsDead(client_p))
   {
     /* If we get here, we need to register for another COMM_SELECT_READ */
     if (PARSE_AS_SERVER(client_p)) {
@@ -424,6 +424,8 @@ read_packet(int fd, void *data)
         read_packet, client_p, 0);
     }
   }
+  /* This is about the only place useful to put it */
+  exit_aborted_clients();
 
 }
 
