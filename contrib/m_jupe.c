@@ -85,7 +85,6 @@ static void mo_jupe(struct Client *client_p, struct Client *source_p,
 {
   struct Client *target_p;
   struct Client *ajupe;
-  dlink_node *m;
   char reason[REALLEN+2];
 
   if(!ServerInfo.hub)
