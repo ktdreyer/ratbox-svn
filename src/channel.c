@@ -2956,7 +2956,10 @@ channel_member_list(struct Client *sptr,
       if (IsInvisible(who) && !IsMember(sptr, chptr))
         continue;
 
-      ircsprintf(t, "%s%s ", show_flag, who->name);
+      if(who == sptr && is_voiced(chptr, who) && chptr->mode.mode & MODE_HIDEOPS)
+        ircsprintf(t, "+%s ", who->name);
+      else
+        ircsprintf(t, "%s%s ", show_flag, who->name);
       tlen = strlen(t);
       *cur_len += tlen;
       t += tlen;
