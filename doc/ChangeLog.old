@@ -1,3 +1,20 @@
+*** 20010628_1 by leeh
+- hash tables hash tables everywhere!
+
+  extending RESV support for nicks:
+  -irc2.leeh.co.uk- *** Notice -- fl_!flame@irc2.leeh.co.uk{flame} has
+  placed a local RESV on nick: test
+
+  -> Server: nick test
+  test Nick/channel is temporarily unavailable
+
+  it only works with /resv atm, im going to rename quarantine {}; to
+  resv {}; (for obvious reasons.. dont wanna be too confusing now do we)
+
+  I would really, really like someone to review this.. but if you wanna
+  change stuff find me first.. as I know where resv is going ;p
+
+
 *** 20010627_3 by androsyn
 Commit of Diane's linebuf allocator thingy...
 
