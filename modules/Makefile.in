@@ -162,7 +162,7 @@ install_shared_modules: install-mkdirs
 	${CC} ${CPPFLAGS} ${CFLAGS} -c $< -o $@
 
 .c.so:
-	${CC} ${PICFLAGS} ${CPPFLAGS} ${CFLAGS} -c $< -o $@
+	${CC} ${PICFLAGS} ${CPPFLAGS} ${CFLAGS} $< -o $@
 
 .PHONY: depend clean distclean
 depend:

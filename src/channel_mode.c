@@ -752,9 +752,13 @@ chm_simple(struct Client *client_p, struct Client *source_p,
   long mode_type;
   int i;
 
-  if (alev <
-       ((chptr->mode.mode & MODE_PRIVATE) ?
-         CHACCESS_CHANOP : CHACCESS_HALFOP))
+  mode_type = (long)d;
+ 
+  /* dont allow halfops to set +-p, as this controls whether they can set
+   * +-h or not.. all other simple modes are ok
+   */
+  if((alev < CHACCESS_HALFOP) ||
+    ((mode_type == MODE_PRIVATE) && (alev < CHACCESS_CHANOP)))
   {
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
@@ -762,8 +766,6 @@ chm_simple(struct Client *client_p, struct Client *source_p,
     *errors |= SM_ERR_NOOPS;
     return;
   }
-
-  mode_type = (long)d;
 
   /* setting + */
   if ((dir == MODE_ADD) && !(chptr->mode.mode & mode_type))
