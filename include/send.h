@@ -65,6 +65,8 @@ extern  void sendto_one_prefix(struct Client *, struct Client *,
 
 extern  void sendto_common_channels_local(struct Client *, const char *,
                                           ...) AFP(2, 3);
+extern  void sendto_remove_channels_local(struct Client *, const char *,
+                                          ...) AFP(2, 3);
 
 extern  void sendto_channel_local(int type, struct Channel *,
                                   const char *, ...) AFP(3, 4);

@@ -74,7 +74,6 @@ static BlockHeap *client_heap = NULL;
 static BlockHeap *lclient_heap = NULL;
 
 static dlink_list dead_list;
-static dlink_list abort_list;
 /*
  * client_heap_gc
  *
@@ -1030,17 +1029,11 @@ static void exit_one_client(struct Client *client_p,
       */
       if (source_p->user)
         {
-          sendto_common_channels_local(source_p, ":%s!%s@%s QUIT :%s",
+          sendto_remove_channels_local(source_p, ":%s!%s@%s QUIT :%s",
 				       source_p->name,
 				       source_p->username,
 				       source_p->host,
 				       comment);
-
-          for (lp = source_p->user->channel.head; lp; lp = next_lp)
-	    {
-	      next_lp = lp->next;
-	      remove_user_from_channel(lp->data, source_p);
-	    }
           /* Should not be in any channels now */
           assert(source_p->user->channel.head == NULL);
           
@@ -1207,7 +1200,6 @@ static void remove_dependents(struct Client* client_p,
  */
 void dead_link(struct Client *client_p)
 {
-  dlink_node *m;
   const char *notice;
   if(IsClosing(client_p))
     return;
@@ -1228,34 +1220,10 @@ void dead_link(struct Client *client_p)
                          notice, get_client_name(client_p, MASK_IP));
   }
   Debug((DEBUG_ERROR, notice, get_client_name(to, HIDE_IP)));
-  assert(dlinkFind(&abort_list, client_p) == NULL);
-  m = make_dlink_node();
-  dlinkAdd(client_p, m, &abort_list);
-  SetDead(client_p); /* You are dead my friend */
+  SetDead(client_p);
+  exit_client(client_p, client_p, &me, notice);
 }
 
-void exit_aborted_clients(void)
-{
-  dlink_node *ptr, *next;
-  struct Client *target_p;
-  
-  for(ptr = abort_list.head; ptr; ptr = next)
-    {
-      target_p = ptr->data;
-      next = ptr->next;
-      if (ptr->data == NULL)
-        {
-          sendto_realops_flags(FLAGS_ALL, L_ALL,
-                        "Warning: null client on abort_list!");
-          dlinkDelete(ptr, &abort_list);
-          free_dlink_node(ptr);
-          continue;
-        }
-      dlinkDelete(ptr, &abort_list);
-      exit_client(target_p, target_p, &me, "Dead link");  
-      free_dlink_node(ptr);
-    }
-}
 
 
 /*
