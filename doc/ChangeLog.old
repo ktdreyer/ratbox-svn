@@ -1,3 +1,7 @@
+*** 20010530_11 by leeh
+- added the i_lines_oper_only to config..
+
+
 *** 20010530_10 by leeh
 - ok, big revision of stats I, you can now show users nothing,
   everything, or matching auth blocks
