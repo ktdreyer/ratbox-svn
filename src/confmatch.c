@@ -150,28 +150,46 @@ find_conf_by_address (const char *hostname,
 		      struct irc_inaddr *addr, int type, const char *username)
 {
 	struct ConfItem *aconf;
+	const char *p = hostname;
+	dlink_list *list;
+	dlink_node *ptr;
+	int x;
 	if(username == NULL)
 		username = "";
 	
 	
 	if(hostname != NULL)
 	{
-		int lmask = get_mask_hash(hostname);
-		dlink_node *node;
-		dlink_list *list = &hostconf[lmask];
-				
-		DLINK_FOREACH(node, list->head)
+		while(p != NULL)
 		{
-			aconf = (struct ConfItem *)node->data;
-				
-			if(aconf->status & type)
+			list = &hostconf[hash_text(p)];
+			DLINK_FOREACH(ptr, list->head)
 			{
+				aconf = ptr->data;
+				if(match(aconf->user, username) && match(aconf->host, hostname))
+					return(aconf);
+			}	
+
+			p = strchr(p, '.');
+			if(p != NULL)
+				p++;
+			else
+				break;
+		}	
+		
+		/* Life is miserable..we go to a linear scan now */
+		for(x = 0; x < ATABLE_SIZE; x++)
+		{
+			list = &hostconf[x];
+			DLINK_FOREACH(ptr, list->head)
+			{
+				aconf = ptr->data;
 				if(match(aconf->user, username) && match(aconf->host, hostname))
 					return(aconf);
 			}
 		}
 	}
-
+	
 	if(addr != NULL)
 	{
 		aconf = find_generic_line(type, addr);
