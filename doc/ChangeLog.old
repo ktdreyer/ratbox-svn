@@ -1,3 +1,11 @@
+*** 20001130_9 by adrian
+
+
+We don't need to bzero, now that the memory routines return the memory
+zero'ed for us ..
+
+
+
 *** 20001130_8 by db
 - removed memset() 0 after MyMalloc its done already 
 
