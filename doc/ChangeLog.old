@@ -1,3 +1,8 @@
+*** 20011017_3 by leeh
+- IsSetOper* -> IsOper* for consistency, half were IsOper, half were
+  IsSetOper..
+
+
 *** 20011017_2 by jdc
 * Someone please fix this.  We lack the IsSetOperGlobalKill() macro.
   This is commited just to make things build.
