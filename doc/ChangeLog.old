@@ -1,3 +1,9 @@
+*** 20001222_15 by db
+- moved obsolete conf file examples into old
+  purely for historical reasons
+
+
+
 *** 20001222_14 by db
 - simplified conf handling for yacc
 
