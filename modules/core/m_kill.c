@@ -291,7 +291,7 @@ static void relay_kill(struct Client *one, struct Client *sptr,
   dlink_node *ptr;
   struct Client *cptr;
   int introduce_killed_client;
-  char *nickoruid;
+  char* user; 
   
   /* LazyLinks:
    * Check if each lazylink knows about acptr.
@@ -331,28 +331,31 @@ static void relay_kill(struct Client *one, struct Client *sptr,
         }
       }
     }
-    else /* force introduction of killed client */
+    /* force introduction of killed client *
+     * but check that its not on the server we're bursting too.. */
+    else if(strcmp(acptr->user->server,cptr->name))
       client_burst_if_needed(cptr, acptr);
 
     /* introduce source of kill */
     client_burst_if_needed(cptr, sptr);
 
+    /* check the server supports UID */
     if (IsCapable(cptr, CAP_UID))
-      nickoruid = ID(acptr);
+      user = ID(acptr);
     else
-      nickoruid = acptr->name;
+      user = acptr->name;
 
     if(MyConnect(sptr))
     {
       sendto_one(cptr, ":%s KILL %s :%s!%s!%s!%s %s",
-                 sptr->name, nickoruid,
+                 sptr->name, user,
                  me.name, sptr->host, sptr->username,
                  sptr->name, reason);
     }
     else
     {
       sendto_one(cptr, ":%s KILL %s :%s!%s %s",
-                 sptr->name, nickoruid, me.name,
+                 sptr->name, user, me.name,
                  inpath, reason);
     }
   }
