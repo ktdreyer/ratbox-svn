@@ -1,3 +1,8 @@
+*** 20010327_1 by androsyn
+Fixed stupid connect bug...the block heap doesn't memset() our
+blocks..grr...
+
+
 *** 20010326_2 by ejb
 - more messages for ayb.po
 
