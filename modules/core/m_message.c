@@ -550,7 +550,7 @@ msg_client(int p_or_n, const char *command,
   {
     /* reset idle time for message only if its not to self 
      * and its not a notice */
-    if ((p_or_n != NOTICE) && (source_p != target_p) && source_p->user)
+    if ((p_or_n != NOTICE) && source_p->user)
       source_p->user->last = CurrentTime;
   }
 
