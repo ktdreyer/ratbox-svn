@@ -1,3 +1,25 @@
+leeh        2003/06/28 09:39:20 EDT	(20030628_0)
+
+  Modified files:
+    modules              Makefile.in m_dline.c m_gline.c m_kline.c 
+  Removed files:
+    modules              m_undline.c m_ungline.c m_unkline.c 
+  Log:
+  - merged kline/unkline, dline/undline, gline/ungline
+  - removed support for /kline <nick> and /dline <nick>, people will have
+    to specify a user@host now.
+  
+  Revision  Changes    Path
+  1.82      +0 -3      ircd-ratbox/modules/Makefile.in
+  1.20      +227 -64   ircd-ratbox/modules/m_dline.c
+  1.120     +123 -12   ircd-ratbox/modules/m_gline.c
+  1.159     +444 -261  ircd-ratbox/modules/m_kline.c
+  1.16      +0 -262    ircd-ratbox/modules/m_undline.c (dead)
+  1.16      +0 -160    ircd-ratbox/modules/m_ungline.c (dead)
+  1.91      +0 -428    ircd-ratbox/modules/m_unkline.c (dead)
+
+
+
 androsyn    2003/06/27 10:24:11 EDT	(20030627_0)
 
   Modified files:
