@@ -1,3 +1,11 @@
+*** 20001215_15 by db
+- m_mode.c had some twisted logic. Corrected. *duh*
+- did some variable renaming in channel.c chname instead of "real_name"
+- fixed two bugs pointed out and corrected with Walter Campbell in
+  I and D line handling. notably, the conf host string wasn't being updated.
+
+
+
 *** 20001215_14 by db
 - fix for gecos blocks submitted by Walter Campbell
 
