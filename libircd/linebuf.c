@@ -328,60 +328,66 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
  * Copy as much data as possible directly into a linebuf,
  * splitting at \r\n, but without altering any data.
  *
+ * -David-T
  */
 static int
 linebuf_copy_raw(buf_head_t *bufhead, buf_line_t *bufline,
-                  char *data, int len)
+                 char *data, int len)
 {
-  int cpylen = 0;	/* how many bytes we've copied */
   char *ch = data;	/* Pointer to where we are in the read data */
   char *bufch = bufline->buf + bufline->len;
   int clen = 0;                 /* how many bytes we've processed,
                                    and don't ever want to see again.. */
-
+  int remaining;
+  
   /* If its full or terminated, ignore it */
-
-  bufline->raw = 1;
-  assert(bufline->len < BUF_DATA_SIZE);
-  if (bufline->terminated == 1)
+  if ((bufline->len == BUF_DATA_SIZE) || (bufline->terminated == 1))
     return 0;
 
-  clen = cpylen = linebuf_skip_crlf(ch, len);
-  if (clen == -1)
-    return -1;
+  if (len < (BUF_DATA_SIZE - bufline->len - 1))
+    remaining = len;
+  else
+    remaining = BUF_DATA_SIZE - bufline->len - 1;
 
-  /* This is the overflow case..This doesn't happen often.. */
-  if(cpylen > (BUF_DATA_SIZE - bufline->len - 1))
+  while (remaining && *ch != '\r' && *ch != '\n')
+  {
+    if (*ch == 0)
+      return -1;
+    *bufch++ = *ch++;
+    clen++;
+    remaining--;
+  }
+
+  /*
+   * If we've reached '\r' or '\n', or filled up the linebuf,
+   * terminate it
+   */
+  if (*ch == '\r' || *ch == '\n' ||
+      (clen >= (BUF_DATA_SIZE - bufline->len - 1)))
+  {
+    bufline->terminated = 1;
+
+    /*
+     * Whilst we have remaining data (and space in the linebuf)
+     * eat any '\r's or '\n's, but leave them in the linebuf,
+     * incase it's important ziplinks data
+     */
+    while (remaining && (*ch == '\r' || *ch == '\n'))
     {
-      memcpy(bufch, ch, (BUF_DATA_SIZE - bufline->len - 1));
-      bufline->buf[BUF_DATA_SIZE-1] = '\0';
-      bufch = bufline->buf + BUF_DATA_SIZE - 2;
-      bufline->terminated = 1;
-      bufline->len = BUF_DATA_SIZE - 1;
-      bufhead->len += BUF_DATA_SIZE - 1;
-      return clen;
+      *bufch++ = *ch++;
+      clen++;
+      remaining--;
     }
+  }
 
-  memcpy(bufch, ch, cpylen);
-  bufch += cpylen;
   *bufch = '\0';
-  bufch--;
 
-  if(*bufch != '\r' && *bufch != '\n')
-    { 
-      /* No linefeed, bail for the next time */
-      bufhead->len += cpylen;
-      bufline->len += cpylen;
-      bufline->terminated = 0;
-      return clen;
-    }
-
-  bufline->terminated = 1;
-  bufhead->len += cpylen;
-  bufline->len += cpylen;
+  /* Tell linebuf_get that it might need to clean up the buffer */
+  bufline->raw = 1;
+  bufline->len += clen;
+  bufhead->len += clen;
   return clen;
 }
-
 
 /*
  * linebuf_parse
@@ -420,7 +426,6 @@ linebuf_parse(buf_head_t *bufhead, char *data, int len, int raw)
       cpylen = linebuf_copy_line(bufhead, bufline, data, len);
     if (cpylen == -1)
       return -1;
-    
     linecnt++;
     /* If we've copied the same as what we've got, quit now */
     if (cpylen == len)
@@ -445,7 +450,6 @@ linebuf_parse(buf_head_t *bufhead, char *data, int len, int raw)
       cpylen = linebuf_copy_line(bufhead, bufline, data, len);
     if (cpylen == -1)
       return -1;
-
     len -= cpylen;
     assert(len >= 0);
     data += cpylen;
