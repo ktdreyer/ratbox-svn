@@ -1,3 +1,12 @@
+*** 20010103_21 by adrian
+
+
+Re-register IO interest if the client isn't CLIENT_EXITED, rather than
+if its CLIENT_OK. We can get a client parse error which doesn't mean we
+stop listening to the client.
+
+
+
 *** 20010103_20 by ejb
 - better linked list handling in modules.c
 
