@@ -113,8 +113,11 @@ m_invite(struct Client *client_p, struct Client *source_p, int parc, const char 
 		 * user is local or not.  rely on disable_local_channels --fl
 		 */
 		if(!MyConnect(target_p))
+		{
 			sendto_one(source_p, form_str(ERR_USERNOTONSERV),
 				   me.name, parv[0], parv[1]);
+			return 0;
+		}
 	}
 
 	if((chptr = find_channel(parv[2])) == NULL)
