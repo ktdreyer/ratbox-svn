@@ -1152,19 +1152,16 @@ int allocate_topic(struct Channel *chptr)
     return FALSE;
   
   ptr = BlockHeapAlloc(topic_heap);  
-  if(ptr != NULL)
-  {
-    /* Basically we allocate one large block for the topic and
-     * the topic info.  We then split it up into two and shove it
-     * in the chptr 
-     */
-    chptr->topic = ptr;
-    chptr->topic_info = (char *)ptr + TOPICLEN+1;
-    *chptr->topic = '\0';
-    *chptr->topic_info = '\0';
-    return TRUE;
-  }
-  return FALSE;
+  /* Basically we allocate one large block for the topic and
+   * the topic info.  We then split it up into two and shove it
+   * in the chptr 
+   */
+  chptr->topic = ptr;
+  chptr->topic_info = (char *)ptr + TOPICLEN+1;
+  *chptr->topic = '\0';
+  *chptr->topic_info = '\0';
+  return TRUE;
+
 }
 
 void free_topic(struct Channel *chptr)

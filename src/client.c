@@ -124,8 +124,6 @@ struct Client* make_client(struct Client* from)
   struct LocalUser *localClient;
 
   client_p = BlockHeapAlloc(client_heap);
-  if(client_p == NULL)
-    return NULL;
   memset(client_p, 0, sizeof(struct Client));
 
   if (from == NULL)
