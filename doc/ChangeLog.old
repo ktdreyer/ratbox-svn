@@ -1,3 +1,8 @@
+*** 20010104_14 by a1kmm
+- Re-added missing templates in m_server.c
+- #ifdef out id stuff for now - it breaks non-openssl builds.
+
+
 *** 20010104_13 by a1kmm
 - Okay, fixed the 'random' data bug - just a forgotten arg to sendto_realops_flags.
 
