@@ -130,8 +130,7 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       Count.oper++;
       sendto_serv_butone(cptr, ":%s MODE %s :+o", parv[0], parv[0]);
       if (IsMe(cptr))
-        sendto_one(sptr, form_str(RPL_YOUREOPER),
-                   me.name, parv[0]);
+        sendto_one(sptr, form_str(RPL_YOUREOPER), me.name, parv[0]);
       return 0;
     }
   else if (IsAnOper(sptr))
@@ -144,8 +143,7 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         }
       return 0;
     }
-  if (!(aconf = find_conf_exact(name, sptr->username, sptr->host,
-                                CONF_OPS)) &&
+  if (!(aconf = find_conf_exact(name, sptr->username, sptr->host, CONF_OPS)) &&
       !(aconf = find_conf_exact(name, sptr->username,
                                 inetntoa((char *)&cptr->ip), CONF_OPS)))
     {
@@ -181,9 +179,9 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       if (aconf->status == CONF_LOCOP)
         {
           SetLocOp(sptr);
-          if((int)aconf->hold)
+          if (aconf->hold)
             {
-              sptr->umodes |= ((int)aconf->hold & ALL_UMODES); 
+              sptr->umodes |= (aconf->hold & ALL_UMODES); 
               sendto_one(sptr, ":%s NOTICE %s:*** Oper flags set from conf",
                          me.name,parv[0]);
             }
@@ -204,8 +202,8 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           SetOper(sptr);
           if((int)aconf->hold)
             {
-              sptr->umodes |= ((int)aconf->hold & ALL_UMODES); 
-              if( !IsSetOperN(sptr) )
+              sptr->umodes |= (aconf->hold & ALL_UMODES); 
+              if (!IsSetOperN(sptr))
                 sptr->umodes &= ~FLAGS_NCHANGE;
               
               sendto_one(sptr, ":%s NOTICE %s:*** Oper flags set from conf",

@@ -41,6 +41,7 @@ SRCS = \
 	m_die.c \
 	m_error.c \
 	m_gline.c \
+	m_hash.c \
 	m_help.c \
 	m_kick.c \
 	m_htm.c \
@@ -136,6 +137,7 @@ SRCS = \
 #	m_die.o \
 #	m_error.o \
 #	m_gline.o \
+#	m_hash.o \
 #	m_help.o \
 #	m_kick.o \
 #	m_htm.o \
