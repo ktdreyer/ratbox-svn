@@ -25,12 +25,35 @@
 
 #define BUFSIZE 512
 
+#define IS_LEAF 0
+#define IS_HUB 1
+
+struct ConnectPair
+{
+  struct ConnectPair* next;     /* list node pointer */
+  char*            name;     /* server name */
+  char*            host;     /* host part of user@host */
+  char*            c_passwd;
+  char*            n_passwd;
+  char*		   hub_mask;
+  char*		   leaf_mask;
+  int		   compressed;
+  int		   lazylink;
+  int              port;
+  char             *class;     /* Class of connection */
+};
+
+static struct ConnectPair* base_ptr=NULL;
+
 static void ConvertConf(FILE* file,FILE *out);
 static void usage(void);
 static char *getfield(char *);
 static void ReplaceQuotes(char *out, char *in);
 static void oldParseOneLine(FILE *out, char *in);
-
+static void PrintOutServers(FILE *out);
+static void PairUpServers(struct ConnectPair* );
+static void AddHubOrLeaf(int type,char* name,char* host);
+static void OperPrivsFromString(FILE* , char* );
 int main(int argc,char *argv[])
 {
   FILE *in;
@@ -62,7 +85,7 @@ static void usage()
 }
 
 /*
-** convertConf() 
+** ConvertConf() 
 **    Read configuration file.
 **
 *
@@ -124,6 +147,7 @@ static void ConvertConf(FILE* file,FILE *out)
 
     }
 
+  PrintOutServers(out);
   fclose(file);
 }
 
@@ -213,7 +237,8 @@ static void oldParseOneLine(FILE *out,char* line)
   char* host_field=(char *)NULL;
   char* port_field=(char *)NULL;
   char* class_field=(char *)NULL;
-  int   sendq = 0;
+  struct ConnectPair* pair;
+  int sendq = 0;
 
   tmp = getfield(line);
 
@@ -248,90 +273,110 @@ static void oldParseOneLine(FILE *out,char* line)
   switch( conf_letter )
     {
     case 'A':case 'a': /* Name, e-mail address of administrator */
-      fprintf(out,"\tadminstrator {\n");
-      fprintf(out,"\t\tname=\"%s\";\n", host_field);
-      fprintf(out,"\t\temail=\"%s\";\n", user_field);
+      fprintf(out,"\tadministrator {\n");
+      if(host_field)
+	fprintf(out,"\t\tname=\"%s\";\n", host_field);
+      if(user_field)
+	fprintf(out,"\t\temail=\"%s\";\n", user_field);
       fprintf(out,"\t};\n\n");
       break;
 
     case 'c':
-      fprintf(out,"\tconnect_to {\n");
-      fprintf(out,"\t\tname=\"%s\";\n", user_field);
-      fprintf(out,"\t\thost=\"%s\";\n", host_field);
-      fprintf(out,"\t\tpassword=\"%s\";\n", passwd_field);
-      fprintf(out,"\t\tcompressed;\n");
-      fprintf(out,"\t};\n\n");
+      pair = (struct ConnectPair *)malloc(sizeof(struct ConnectPair));
+      memset(pair,0,sizeof(struct ConnectPair));
+      if(user_field)
+	pair->name = strdup(user_field);
+      if(host_field)
+	pair->host = strdup(host_field);
+      if(passwd_field)
+	pair->c_passwd = strdup(passwd_field);
+      if(port_field)
+	pair->port = atoi(port_field);
+      if(class_field)
+	pair->class = strdup(class_field);
+      pair->compressed = 1;
+      PairUpServers(pair);
       break;
 
     case 'C':
-      fprintf(out,"\tconnect_to {\n");
-      fprintf(out,"\t\tname=\"%s\";\n", user_field);
-      fprintf(out,"\t\thost=\"%s\";\n", host_field);
-      fprintf(out,"\t\tpassword=\"%s\";\n", passwd_field);
-      fprintf(out,"\t};\n\n");
+      pair = (struct ConnectPair *)malloc(sizeof(struct ConnectPair));
+      memset(pair,0,sizeof(struct ConnectPair));
+      if(user_field)
+	pair->name = strdup(user_field);
+      if(host_field)
+	pair->host = strdup(host_field);
+      if(passwd_field)
+	pair->c_passwd = strdup(passwd_field);
+      if(port_field)
+	pair->port = atoi(port_field);
+      if(class_field)
+	pair->class = strdup(class_field);
+      PairUpServers(pair);
       break;
 
     case 'd':
       fprintf(out,"\tacl_exception {\n");
-      fprintf(out,"\t\tip=\"%s\";\n", user_field);
-      fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
+      if(user_field)
+	fprintf(out,"\t\tip=\"%s\";\n", user_field);
+      if(passwd_field)
+	fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
       fprintf(out,"\t};\n\n");
       break;
 
     case 'D': /* Deny lines (immediate refusal) */
       fprintf(out,"\tacl {\n");
-      fprintf(out,"\t\tip=\"%s\";\n", user_field);
-      fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
+      if(user_field)
+	fprintf(out,"\t\tip=\"%s\";\n", user_field);
+      if(passwd_field)
+	fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
       fprintf(out,"\t};\n\n");
       break;
 
     case 'H': /* Hub server line */
     case 'h':
-      fprintf(out,"\thub {\n");
-      fprintf(out,"\t\tname=\"%s\";\n", user_field);
-      fprintf(out,"\t};\n\n");
+      AddHubOrLeaf(IS_HUB,user_field,host_field);
       break;
 
     case 'i': 
       fprintf(out,"\tclient {\n");
-      fprintf(out,"\t\tname=\"%s\";\n", user_field);
+      if(user_field)
+	fprintf(out,"\t\tname=\"%s\";\n", user_field);
+      if(passwd_field)
+	fprintf(out,"\t\tpasswd=\"%s\";\n", passwd_field);	
+      else
+	fprintf(out,"\t\tpasswd=\"*\";\n");	
+      if(class_field)
+	fprintf(out,"\t\tclass=\"%s\";\n", class_field);	
+      fprintf(out,"\t\trestricted;\n");	
       fprintf(out,"\t};\n\n");
       break;
 
     case 'I': 
       fprintf(out,"\tclient {\n");
-      fprintf(out,"\t\tname=\"%s\";\n", user_field);
-      fprintf(out,"\t};\n\n");
-      
-      if(host_field)
-	{
-	}
-      
       if(user_field)
-	{
-#if 0
-	  user_field = set_conf_flags(aconf, user_field);
-#endif
-	}
-
-#if 0
-      conf_add_i_line(aconf,class_field);
-#endif
+	fprintf(out,"\t\tname=\"%s\";\n", user_field);
+      if(passwd_field)
+	fprintf(out,"\t\tpasswd=\"%s\";\n", passwd_field);	
+      else
+	fprintf(out,"\t\tpasswd=\"*\";\n");	
+      if(class_field)
+	fprintf(out,"\t\tclass=\"%s\";\n", class_field);	
+      fprintf(out,"\t};\n\n");
       break;
       
     case 'K': /* Kill user line on irc.conf           */
     case 'k':
       fprintf(out,"\tkill {\n");
-      fprintf(out,"\t\tname=\"%s@%s\";\n", user_field,host_field);
-      fprintf(out,"\t\treason=\"%s\"\n", passwd_field);
+      if(host_field)
+	fprintf(out,"\t\tname=\"%s@%s\";\n", user_field,host_field);
+      if(passwd_field)
+	fprintf(out,"\t\treason=\"%s\"\n", passwd_field);
       fprintf(out,"\t};\n\n");
       break;
 
     case 'L': /* guaranteed leaf server */
     case 'l':
-      fprintf(out,"\tleaf {\n");
-      fprintf(out,"\t\tname=\"%s\";\n", user_field);
-      fprintf(out,"\t};\n\n");
+      AddHubOrLeaf(IS_LEAF,user_field,host_field);
       break;
 
       /* Me. Host field is name used for this host */
@@ -339,8 +384,10 @@ static void oldParseOneLine(FILE *out,char* line)
     case 'M':
     case 'm':
       fprintf(out,"\tserver {\n");
-      fprintf(out,"\t\tname=\"%s\";\n", host_field);
-      fprintf(out,"\t\temail=\"%s\";\n", user_field);
+      if(host_field)
+	fprintf(out,"\t\tname=\"%s\";\n", host_field);
+      if(user_field)
+	fprintf(out,"\t\temail=\"%s\";\n", user_field);
       fprintf(out,"\t};\n\n");
 
       if(port_field)
@@ -349,20 +396,36 @@ static void oldParseOneLine(FILE *out,char* line)
       break;
 
     case 'n': 
-      fprintf(out,"\tconnect_from {\n");
-      fprintf(out,"\t\tname=\"%s\";\n", user_field);
-      fprintf(out,"\t\thost=\"%s\";\n", host_field);
-      fprintf(out,"\t\tpassword=\"%s\";\n", passwd_field);
-      fprintf(out,"\t\tlazylink;\n");
-      fprintf(out,"\t};\n\n");
+      pair = (struct ConnectPair *)malloc(sizeof(struct ConnectPair));
+      memset(pair,0,sizeof(struct ConnectPair));
+      if(user_field)
+	pair->name = strdup(user_field);
+      if(host_field)
+	pair->host = strdup(host_field);
+      if(passwd_field)
+	pair->n_passwd = strdup(passwd_field);
+      pair->lazylink = 1;
+      if(port_field)
+	pair->port = atoi(port_field);
+      if(class_field)
+	pair->class = strdup(class_field);
+      PairUpServers(pair);
       break;
 
     case 'N': 
-      fprintf(out,"\tconnect_from {\n");
-      fprintf(out,"\t\tname=\"%s\";\n", user_field);
-      fprintf(out,"\t\thost=\"%s\";\n", host_field);
-      fprintf(out,"\t\tpassword=\"%s\";\n", passwd_field);
-      fprintf(out,"\t};\n\n");
+      pair = (struct ConnectPair *)malloc(sizeof(struct ConnectPair));
+      memset(pair,0,sizeof(struct ConnectPair));
+      if(user_field)
+	pair->name = strdup(user_field);
+      if(host_field)
+	pair->host = strdup(host_field);
+      if(passwd_field)
+	pair->n_passwd = strdup(passwd_field);
+      if(port_field)
+	pair->port = atoi(port_field);
+      if(class_field)
+	pair->class = strdup(class_field);
+      PairUpServers(pair);
       break;
 
       /* Operator. Line should contain at least */
@@ -370,89 +433,250 @@ static void oldParseOneLine(FILE *out,char* line)
     case 'O':
       /* defaults */
       fprintf(out,"\toperator {\n");
-      fprintf(out,"\t\tname=\"%s\";\n", user_field);
-      fprintf(out,"\t\thost=\"%s\";\n", host_field);
-      fprintf(out,"\t\tpassword=\"%s\";\n", passwd_field);
-      fprintf(out,"\t};\n\n");
-#if 0
-      aconf->port = 
-	CONF_OPER_GLOBAL_KILL|CONF_OPER_REMOTE|CONF_OPER_UNKLINE|
-	CONF_OPER_K|CONF_OPER_GLINE|CONF_OPER_REHASH;
+      if(user_field)
+	fprintf(out,"\t\tname=\"%s\";\n", user_field);
+      if(host_field)
+	fprintf(out,"\t\thost=\"%s\";\n", host_field);
+      if(passwd_field)
+	fprintf(out,"\t\tpassword=\"%s\";\n", passwd_field);
       if(port_field)
-	aconf->port = oper_privs_from_string(aconf->port,port_field);
-      if ((tmp = getfield(NULL)) != NULL)
-	aconf->hold = oper_flags_from_string(tmp);
-      aconf = conf_add_o_line(aconf,class_field);
-#endif
+	OperPrivsFromString(out,port_field);
+      if(class_field)
+	fprintf(out,"\t\tclass=\"%s\";\n", class_field);	
+      fprintf(out,"\t};\n\n");
       break;
 
       /* Local Operator, (limited privs --SRB) */
     case 'o':
       fprintf(out,"\tlocal_operator {\n");
-      fprintf(out,"\t\tname=\"%s\";\n", user_field);
-      fprintf(out,"\t\thost=\"%s\";\n", host_field);
-      fprintf(out,"\t\tpassword=\"%s\";\n", passwd_field);
-      fprintf(out,"\t};\n\n");
-#if 0
-      aconf->port = CONF_OPER_UNKLINE|CONF_OPER_K;
+      if(user_field)
+	fprintf(out,"\t\tname=\"%s\";\n", user_field);
+      if(host_field)
+	fprintf(out,"\t\thost=\"%s\";\n", host_field);
+      if(passwd_field)
+	fprintf(out,"\t\tpassword=\"%s\";\n", passwd_field);
       if(port_field)
-	aconf->port = oper_privs_from_string(aconf->port,port_field);
-      if ((tmp = getfield(NULL)) != NULL)
-	aconf->hold = oper_flags_from_string(tmp);
-      aconf = conf_add_o_line(aconf,class_field);
-#endif
+	OperPrivsFromString(out,port_field);
+      if(class_field)
+	fprintf(out,"\t\tclass=\"%s\";\n", class_field);	
+      fprintf(out,"\t};\n\n");
       break;
 
     case 'P': /* listen port line */
     case 'p':
       fprintf(out,"\tlisten {\n");
-      fprintf(out,"\t\tname=\"%s\";\n", host_field);
-      fprintf(out,"\t\tport=%d;\n", atoi(port_field));
+      if(host_field)
+	fprintf(out,"\t\tname=\"%s\";\n", host_field);
+      if(port_field)
+	fprintf(out,"\t\tport=%d;\n", atoi(port_field));
       fprintf(out,"\t};\n\n");
       break;
 
     case 'Q': /* reserved nicks */
     case 'q': 
       fprintf(out,"\tquarantine {\n");
-      fprintf(out,"\t\tname=\"%s\";\n", host_field);
-      fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
+      if(host_field)
+	fprintf(out,"\t\tname=\"%s\";\n", host_field);
+      if(passwd_field)
+	fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
       fprintf(out,"\t};\n\n");
       break;
 
     case 'U': 
     case 'u': 
       fprintf(out,"\tshared {\n");
-      fprintf(out,"\t\tname=\"%s\";\n", host_field);
-      fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
+      if(host_field)
+	fprintf(out,"\t\tname=\"%s\";\n", host_field);
+      if(passwd_field)
+	fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
       fprintf(out,"\t};\n\n");
       break;
 
     case 'X': /* rejected gecos */
     case 'x': 
       fprintf(out,"\tgecos {\n");
-      fprintf(out,"\t\tname=\"%s\";\n", host_field);
-      fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
+      if(host_field)
+	fprintf(out,"\t\tname=\"%s\";\n", host_field);
+      if(passwd_field)
+	fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
       fprintf(out,"\t};\n\n");
       break;
 
     case 'Y':
     case 'y':
       fprintf(out,"\tclass {\n");
-      fprintf(out,"\t\tname=\"%s\";\n", host_field);
-#if 0
-      fprintf(out,"\t\t=\"%s\";\n", passwd_field);
-#endif
+      if(host_field)
+	fprintf(out,"\t\tname=\"%s\";\n", host_field);
+      if(passwd_field)
+	{
+	  int ping_time;
+	  ping_time = atoi(passwd_field);
+	  fprintf(out,"\t\tping_time=\"%d\";\n", ping_time );
+	}
+      if(user_field)
+	{
+	  int number_per_ip;
+	  number_per_ip = atoi(user_field);
+	  fprintf(out,"\t\tnumber_per_ip=\"%d\";\n", number_per_ip );
+	}
+      if(port_field)
+	{
+	  int max_number;
+	  max_number = atoi(port_field);
+	  fprintf(out,"\t\tmax_number=\"%d\";\n", max_number );
+	}
       if(class_field)
 	sendq = atoi(class_field);
       fprintf(out,"\t\tsendq=%d;\n", sendq);
       fprintf(out,"\t};\n\n");
-
       break;
       
     default:
       fprintf(stderr, "Error in config file: %s", line);
       break;
     }
+}
+
+/*
+ * PrintOutServers
+ *
+ * In		- FILE pointer
+ * Out		- NONE
+ * Side Effects	- Print out connect configurations
+ */
+static void PrintOutServers(FILE* out)
+{
+  struct ConnectPair *p;
+
+  for(p = base_ptr; p; p = p->next)
+    {
+      if(p->name && p->c_passwd && p->n_passwd && p->host)
+	{
+	  fprintf(out,"\tconnect {\n");
+	  fprintf(out,"\t\tname=\"%s\";\n", p->name);
+	  fprintf(out,"\t\thost=\"%s\";\n", p->host);
+	  fprintf(out,"\t\tsend_password=\"%s\";\n", p->c_passwd);
+	  fprintf(out,"\t\taccept_password=\"%s\";\n", p->n_passwd);
+	  fprintf(out,"\t\tport=\"%d\";\n", p->port );
+
+	  if(p->compressed)
+	    fprintf(out,"\t\tcompressed;\n");
+
+	  if(p->lazylink)
+	    fprintf(out,"\t\tlazylink;\n");
+
+	  if(p->hub_mask)
+	    {
+	      fprintf(out,"\t\thub \"%s\";\n",p->hub_mask);
+	    }
+	  else
+	    {
+	      if(p->leaf_mask)
+		fprintf(out,"\t\tleaf \"%s\";\n",p->leaf_mask);
+	    }
+
+	  if(p->class)
+	    fprintf(out,"\t\tclass=\"%s\";\n", p->class );
+
+	  fprintf(out,"\t};\n\n");
+	}
+    }
+}
+
+/*
+ * PairUpServers
+ *
+ * In		- pointer to ConnectPair
+ * Out		- none
+ * Side Effects	- Pair up C/N lines on servers into one output
+ */
+static void PairUpServers(struct ConnectPair* pair)
+{
+  struct ConnectPair *p;
+
+  for(p = base_ptr; p; p = p->next )
+    {
+      if(p->name && pair->name )
+	{
+	  if( !strcasecmp(p->name,pair->name) )
+	    {
+	      if(!p->n_passwd && pair->n_passwd)
+		p->n_passwd = strdup(pair->n_passwd);
+
+	      if(!p->c_passwd && pair->c_passwd)
+		p->n_passwd = strdup(pair->n_passwd);
+
+	      p->compressed |= pair->compressed;
+	      p->lazylink |= pair->lazylink;
+
+	      if(pair->port)
+		p->port = pair->port;
+
+	      return;
+	    }
+	}
+    }
+
+  if(base_ptr)
+    {
+      pair->next = base_ptr;
+      base_ptr = pair;
+    }
+  else
+    base_ptr = pair;
+}
+
+/*
+ * AddHubOrLeaf
+ *
+ * In		- type either IS_HUB or IS_LEAF
+ *		- name of leaf or hub
+ *		- mask 
+ * Out		- none
+ * Side Effects	- Pair up hub or leaf with connect configuration
+ */
+static void AddHubOrLeaf(int type,char* name,char* host)
+{
+  struct ConnectPair* p;
+  struct ConnectPair* pair;
+
+  for(p = base_ptr; p; p = p->next )
+    {
+      if(p->name && name )
+	{
+	  if( !strcasecmp(p->name,name) )
+	    {
+	      if(type == IS_HUB)
+		p->hub_mask = strdup(host);
+
+	      if(type == IS_LEAF)
+		p->leaf_mask = strdup(host);
+	      return;
+	    }
+	}
+    }
+
+  pair = (struct ConnectPair *)malloc(sizeof(struct ConnectPair));
+  memset(pair,0,sizeof(struct ConnectPair));
+
+  pair->name = strdup(name);
+
+  if(type == IS_HUB)
+    {
+      pair->hub_mask = strdup(host);
+    }
+  else if(type == IS_LEAF)
+    {
+      pair->leaf_mask = strdup(host);
+    }
+
+  if(base_ptr)
+    {
+      pair->next = base_ptr;
+      base_ptr = pair;
+    }
+  else
+    base_ptr = pair;
 }
 
 /*
@@ -480,4 +704,83 @@ static char *getfield(char *newline)
     line = end + 1;
   *end = '\0';
   return(field);
+}
+
+/* OperPrivsFromString
+ *
+ * inputs        - privs as string
+ * output        - none
+ * side effects -
+ */
+
+static void OperPrivsFromString(FILE* out, char *privs)
+{
+  while(*privs)
+    {
+      if(*privs == 'O')                     /* allow global kill */
+	{
+	  fprintf(out,"\t\tglobal_kill=yes;\n");
+	}
+      else if(*privs == 'o')                /* disallow global kill */
+	{
+	  fprintf(out,"\t\tglobal_kill=no;\n");
+	}
+      else if(*privs == 'U')                /* allow unkline */
+	{
+	  fprintf(out,"\t\tunkline=yes;\n");
+	}
+      else if(*privs == 'u')                /* disallow unkline */
+	{
+	  fprintf(out,"\t\tunkline=no;\n");
+	}
+      else if(*privs == 'R')               /* allow remote squit/connect etc.*/
+	{
+	  fprintf(out,"\t\tremote=yes;\n");
+	}
+      else if(*privs == 'r')                /* disallow remote squit/connect etc.*/
+	{
+	  fprintf(out,"\t\tremote=no;\n");
+	}
+      else if(*privs == 'N')                /* allow +n see nick changes */
+	{
+	  fprintf(out,"\t\tnick_changes=yes;\n");
+	}
+      else if(*privs == 'n')                /* disallow +n see nick changes */
+	{
+	  fprintf(out,"\t\tnick_changes=no;\n");
+	}
+      else if(*privs == 'K')                /* allow kill and kline privs */
+	{
+	  fprintf(out,"\t\tkline_kill=yes;\n");
+	}
+      else if(*privs == 'k')                /* disallow kill and kline privs */
+	{
+	  fprintf(out,"\t\tkline_kill=no;\n");
+	}
+      else if(*privs == 'G')                /* allow gline */
+	{
+	  fprintf(out,"\t\tgline=yes;\n");
+	}
+      else if(*privs == 'g')                /* disallow gline */
+	{
+	  fprintf(out,"\t\tgline=no;\n");
+	}
+      else if(*privs == 'H')                /* allow rehash */
+	{
+	  fprintf(out,"\t\trehash=yes;\n");
+	}
+      else if(*privs == 'h')                /* disallow rehash */
+	{
+	  fprintf(out,"\t\trehash=no;\n");
+	}
+      else if(*privs == 'D')
+	{
+	  fprintf(out,"\t\tdie=yes;\n");
+	}
+      else if(*privs == 'd')
+	{
+	  fprintf(out,"\t\tdie=no;\n");
+	}
+      privs++;
+    }
 }
