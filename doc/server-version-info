@@ -1,8 +1,8 @@
 $Id$
-Updated for Hybrid 6 (2000/11/26)
+Updated for Hybrid 7 (2000/12/28)
 
 When you type /version you will often see something like this:
-*** 2.8/hybrid-6rc6(20001110_1). irc.ins.net.uk ACHiIMpY TS3ow
+*** hybrid-7(20001228_24). irc.vchan HCp TS3ow
 
 Ever wondered what those funny chars mean after the version number? Well
 here they are:
