@@ -177,7 +177,7 @@ remove_user_from_channel(struct Channel *chptr, struct Client *who, int perm)
     dlinkDelete(ptr, &chptr->chanops);
 #ifdef REQUIRE_OANDV
   else if ((ptr = find_user_link(&chptr->chanops_voiced, who)))
-    dlinkDelete(ptr, &chptr->chanops);
+    dlinkDelete(ptr, &chptr->chanops_voiced);
 #endif
   else if ((ptr = find_user_link(&chptr->voiced, who)))
     dlinkDelete(ptr, &chptr->voiced);
