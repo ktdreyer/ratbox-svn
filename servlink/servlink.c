@@ -47,8 +47,8 @@ static void usage(void);
 struct slink_state       in_state;
 struct slink_state       out_state;
 
-#if SERVLINK_DEBUG & SERVLINK_DEBUG_LOG
-FILE *logs[7];
+#if SERVLINK_DEBUG & SERVLINK_DEBUG_LOGS
+FILE *logs[5];
 #endif
 
 struct fd_table          fds[NUM_FDS] =
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
   fd_set rfds;
   fd_set wfds;
   int i;
-#if SERVLINK_DEBUG & SERVLINK_DEBUG_LOG
+#if SERVLINK_DEBUG & SERVLINK_DEBUG_LOGS
   pid_t pid = getpid();
   char logfile[512] = "";
   char lognames[5][8] = { "cin", "din", "nin",
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
     sleep(1);
 #endif
 
-#if SERVLINK_DEBUG & SERVLINK_DEBUG_LOG
+#if SERVLINK_DEBUG & SERVLINK_DEBUG_LOGS
   for(i = 0; i < 5; i++)
   {
     sprintf(logfile, "%s/slink-%lu-%s.log",
