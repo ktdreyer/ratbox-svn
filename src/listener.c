@@ -64,12 +64,12 @@ make_listener(struct sockaddr_storage *addr)
 	listener->name = me.name;
 	listener->fd = -1;
 	memcpy(&listener->addr, addr, sizeof(struct sockaddr_storage));
-	if(listener->addr->ss_family == AF_INET)
+	if(listener->addr.ss_family == AF_INET)
 	{
 		SET_SS_LEN(listener->addr, sizeof(struct sockaddr_in));
 	}
 #ifdef IPV6
-	 else if(listener->addr->ss_family == AF_INET6)
+	 else if(listener->addr.ss_family == AF_INET6)
 	{
 		SET_SS_LEN(listener->addr, sizeof(struct sockaddr_in6));
 	}
