@@ -353,8 +353,7 @@ extern struct ConfItem *find_conf_by_name(const char *name, int status);
 extern struct ConfItem *find_conf_by_host(const char *host, int status);
 extern struct ConfItem *find_kill(struct Client *);
 extern int conf_connect_allowed(struct sockaddr_storage *addr, int);
-extern char *oper_flags_as_string(int);
-extern char *oper_privs_as_string(struct Client *, int);
+extern char *oper_privs_as_string(int);
 
 extern struct ConfItem *find_tkline(const char *, const char *, struct sockaddr_storage *);
 extern char *show_iline_prefix(struct Client *, struct ConfItem *, char *);

@@ -215,6 +215,8 @@ struct LocalUser
 	 * received and not stored, this is not used after registration
 	 */
 	char passwd[PASSWDLEN + 1];
+	char *opername;
+
 	int caps;		/* capabilities bit-field */
 	int fd;			/* >= 0, for local clients */
 

@@ -710,13 +710,6 @@ conf_set_oper_encrypted(void *data)
 		yy_achead->flags &= ~CONF_FLAGS_ENCRYPTED;
 }
 
-static void
-conf_set_oper_class(void *data)
-{
-	MyFree(yy_achead->className);
-	DupString(yy_achead->className, (char *) data);
-}
-
 static int
 conf_begin_class(struct TopConf *tc)
 {
@@ -2619,7 +2612,6 @@ newconf_init()
 	add_conf_item("operator", "name", CF_QSTRING, conf_set_oper_name);
 	add_conf_item("operator", "user", CF_QSTRING, conf_set_oper_user);
 	add_conf_item("operator", "password", CF_QSTRING, conf_set_oper_password);
-	add_conf_item("operator", "class", CF_QSTRING, conf_set_oper_class);
 	add_conf_item("operator", "encrypted", CF_YESNO, conf_set_oper_encrypted);
 	add_conf_item("operator", "rsa_public_key_file", CF_QSTRING,
 		      conf_set_oper_rsa_public_key_file);

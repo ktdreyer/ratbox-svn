@@ -91,7 +91,7 @@ static int
 m_challenge(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	char *challenge;
-	struct ConfItem *aconf, *oconf;
+	struct ConfItem *aconf;
 
 	/* if theyre an oper, reprint oper motd and ignore */
 	if(IsOper(source_p))
@@ -135,24 +135,6 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 						     "Failed CHALLENGE attempt - host mismatch by %s (%s@%s)",
 						     source_p->name, source_p->username,
 						     source_p->host);
-			return 0;
-		}
-
-		oconf = source_p->localClient->att_conf;
-		detach_conf(source_p);
-
-		if(attach_conf(source_p, aconf) != 0)
-		{
-			sendto_one(source_p, ":%s NOTICE %s :Can't attach conf!",
-				   me.name, source_p->name);
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "Failed CHALLENGE attempt by %s (%s@%s) can't attach conf!",
-					     source_p->name, source_p->username, source_p->host);
-			ilog(L_FOPER, "FAILED OPER (%s) by (%s!%s@%s)",
-			     source_p->user->auth_oper, source_p->name,
-			     source_p->username, source_p->host);
-
-			attach_conf(source_p, oconf);
 			return 0;
 		}
 

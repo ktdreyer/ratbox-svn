@@ -847,14 +847,12 @@ user_mode(struct Client *client_p, struct Client *source_p, int parc, const char
 
 					if(MyConnect(source_p))
 					{
-						dlink_node *dm;
-
 						source_p->flags2 &= ~OPER_FLAGS;
-						dm = dlinkFind(&oper_list, source_p);
-						if(dm != NULL)
-						{
-							dlinkDestroy(dm, &oper_list);
-						}
+
+						MyFree(source_p->localClient->opername);
+						source_p->localClient->opername = NULL;
+
+						dlinkFindDestroy(&oper_list, source_p);
 					}
 				}
 				break;
@@ -1130,6 +1128,9 @@ oper_up(struct Client *source_p, struct ConfItem *aconf)
 
 	SetExemptKline(source_p);
 
+	source_p->flags2 |= aconf->port;
+	DupString(source_p->localClient->opername, aconf->name);
+
 	dlinkAddAlloc(source_p, &oper_list);
 
 	if(IsOperAdmin(source_p) && !IsOperHiddenAdmin(source_p))
@@ -1143,7 +1144,7 @@ oper_up(struct Client *source_p, struct ConfItem *aconf)
 	send_umode_out(source_p, source_p, old);
 	sendto_one(source_p, form_str(RPL_YOUREOPER), me.name, source_p->name);
 	sendto_one(source_p, ":%s NOTICE %s :*** Oper privs are %s", me.name,
-		   source_p->name, oper_privs_as_string(source_p, aconf->port));
+		   source_p->name, oper_privs_as_string(aconf->port));
 	send_oper_motd(source_p);
 
 	return (1);

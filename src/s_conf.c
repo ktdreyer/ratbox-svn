@@ -301,7 +301,7 @@ report_configured_links(struct Client *source_p, int mask)
 						   form_str(p->rpl_stats),
 						   user, host, name,
 						   IsOper(source_p) ? 
-						    oper_privs_as_string(NULL, port) : "0", 
+						    oper_privs_as_string(port) : "0", 
 						    classname);
 			else
 				sendto_one_numeric(source_p, p->rpl_stats,
@@ -681,7 +681,6 @@ detach_conf(struct Client *client_p)
 	struct ConfItem *aconf;
 
 	aconf = client_p->localClient->att_conf;
-
 
 	if(aconf != NULL)
 	{
@@ -1437,18 +1436,14 @@ expire_tdline(dlink_list * tdlist, int type)
  * return as string, the oper privs as derived from port
  * also, set the oper privs if given client_p non NULL
  */
-
 char *
-oper_privs_as_string(struct Client *client_p, int port)
+oper_privs_as_string(int port)
 {
 	static char privs_out[17];
 	char *privs_ptr;
 
 	privs_ptr = privs_out;
 	*privs_ptr = '\0';
-
-	if(client_p != NULL)
-		client_p->flags2 |= port;
 
 	if(port & OPER_GLINE)
 		*privs_ptr++ = 'G';
@@ -1516,62 +1511,6 @@ oper_privs_as_string(struct Client *client_p, int port)
 }
 
 
-/* oper_flags_as_string
- *
- * inputs        - oper flags as bit mask
- * output        - oper flags as as string
- * side effects -
- *
- */
-char *
-oper_flags_as_string(int flags)
-{
-	/* This MUST be extended if we add any more modes... -Hwy */
-	static char flags_out[20];
-	char *flags_ptr;
-
-	flags_ptr = flags_out;
-	*flags_ptr = '\0';
-
-	if(flags & UMODE_INVISIBLE)
-		*flags_ptr++ = 'i';
-	if(flags & UMODE_WALLOP)
-		*flags_ptr++ = 'w';
-	if(flags & UMODE_SERVNOTICE)
-		*flags_ptr++ = 's';
-	if(flags & UMODE_CCONN)
-		*flags_ptr++ = 'c';
-	if(flags & UMODE_REJ)
-		*flags_ptr++ = 'r';
-	if(flags & UMODE_SKILL)
-		*flags_ptr++ = 'k';
-	if(flags & UMODE_FULL)
-		*flags_ptr++ = 'f';
-	if(flags & UMODE_SPY)
-		*flags_ptr++ = 'y';
-	if(flags & UMODE_DEBUG)
-		*flags_ptr++ = 'd';
-	if(flags & UMODE_NCHANGE)
-		*flags_ptr++ = 'n';
-	if(flags & UMODE_ADMIN)
-		*flags_ptr++ = 'a';
-	if(flags & UMODE_EXTERNAL)
-		*flags_ptr++ = 'x';
-	if(flags & UMODE_UNAUTH)
-		*flags_ptr++ = 'u';
-	if(flags & UMODE_BOTS)
-		*flags_ptr++ = 'b';
-	if(flags & UMODE_LOCOPS)
-		*flags_ptr++ = 'l';
-	if(flags & UMODE_CALLERID)
-		*flags_ptr++ = 'g';
-	if(flags & UMODE_OPERSPY)
-		*flags_ptr++ = 'Z';
-	*flags_ptr = '\0';
-
-	return (flags_out);
-}
-
 
 /* const char* get_oper_name(struct Client *client_p)
  * Input: A client to find the active oper{} name for.
@@ -1582,27 +1521,20 @@ oper_flags_as_string(int flags)
 char *
 get_oper_name(struct Client *client_p)
 {
-	struct ConfItem *aconf;
-
 	/* +5 for !,@,{,} and null */
 	static char buffer[NICKLEN + USERLEN + HOSTLEN + HOSTLEN + 5];
 
 	if(MyOper(client_p))
 	{
-		aconf = client_p->localClient->att_conf;
-
-		if(aconf->status & CONF_OPERATOR)
-		{
-			ircsnprintf(buffer, sizeof(buffer), "%s!%s@%s{%s}",
-				   client_p->name, client_p->username, client_p->host, aconf->name);
-			return buffer;
-		}
-
-		s_assert(0);
+		ircsnprintf(buffer, sizeof(buffer), "%s!%s@%s{%s}",
+				client_p->name, client_p->username,
+				client_p->host, client_p->localClient->opername);
+		return buffer;
 	}
 
 	ircsnprintf(buffer, sizeof(buffer), "%s!%s@%s{%s}",
-		   client_p->name, client_p->username, client_p->host, client_p->servptr->name);
+		   client_p->name, client_p->username, 
+		   client_p->host, client_p->servptr->name);
 	return buffer;
 }
 

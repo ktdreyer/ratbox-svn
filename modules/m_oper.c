@@ -67,7 +67,6 @@ static int
 m_oper(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct ConfItem *aconf;
-	struct ConfItem *oconf = NULL;
 	const char *name;
 	const char *password;
 
@@ -104,26 +103,6 @@ m_oper(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 	if(match_oper_password(password, aconf))
 	{
-		oconf = source_p->localClient->att_conf;
-
-		detach_conf(source_p);
-
-		if(attach_conf(source_p, aconf) != 0)
-		{
-			sendto_one(source_p, ":%s NOTICE %s :Can't attach conf!",
-				   me.name, source_p->name);
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "Failed OPER attempt by %s (%s@%s) can't attach conf!",
-					     source_p->name, source_p->username, source_p->host);
-
-			ilog(L_FOPER, "FAILED OPER (%s) by (%s!%s@%s)",
-			     name, source_p->name,
-			     source_p->username, source_p->host);
-
-			attach_conf(source_p, oconf);
-			return 0;
-		}
-
 		oper_up(source_p, aconf);
 
 		ilog(L_OPERED, "OPER %s by %s!%s@%s",
