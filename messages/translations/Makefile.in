@@ -4,9 +4,9 @@ RM=	@RM@
 default: all
 
 SRCS = \
-  swedish.po \
-  croatian.po \
-  german.po
+  ircd-swedish.po \
+  ircd-croatian.po \
+  ircd-german.po
 
 OBJS = ${SRCS:.po=.mo}
 
