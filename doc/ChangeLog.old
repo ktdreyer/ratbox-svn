@@ -1,3 +1,8 @@
+*** 20010301_3 by db
+- can't use mem_frob if NDEBUG is defined
+
+
+
 *** 20010301_2 by db
 - mem_frob() is not valid if NDEBUG is defined hence it can't be called here
 
