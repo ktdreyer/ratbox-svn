@@ -49,6 +49,7 @@
 #include "send.h"
 #include "whowas.h"
 #include "s_conf.h" /* ConfigFileEntry */
+#include "vchannel.h"
 
 #include <assert.h>
 #include <string.h>
@@ -511,6 +512,9 @@ void    remove_user_from_channel(struct Client *sptr,struct Channel *chptr,int w
         break;
       }
   sptr->user->joined--;
+  
+  if (IsVchan(chptr))
+    del_vchan_from_client_cache(sptr, chptr); 
 
   sub1_from_channel(chptr);
 }
@@ -2460,9 +2464,9 @@ static  void    sub1_from_channel(struct Channel *chptr)
 	   * If so, don't remove if it has sub vchans
 	   * top level chan always has prev_chan == NULL
 	   */
-          if (chptr->prev_vchan == NULL)
+          if (!IsVchan(chptr))
             {
-	      if(chptr->next_vchan == NULL)
+              if (!HasVchans(chptr))
 		{
 		  if (chptr->prevch)
 		    chptr->prevch->nextch = chptr->nextch;

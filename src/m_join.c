@@ -113,6 +113,8 @@ int     m_join(struct Client *cptr,
   struct SLink  *lp;
   struct Channel *chptr = NULL;
   struct Channel *vchan_chptr = NULL;
+  struct Channel *root_chptr = NULL;
+  int joining_vchan = 0;
   char  *name, *key = NULL;
   int   i, flags = 0;
 #ifdef NO_CHANOPS_WHEN_SPLIT
@@ -294,16 +296,17 @@ int     m_join(struct Client *cptr,
              {
                /* there's subchans so check those 
                 * but not if it was a subchan's realname they specified */
-               if (chptr->next_vchan && !chptr->prev_vchan)
+               if (IsVchanTop(chptr))
                  {
                    if (key && key[0] == '!')
                      {
                        /* found a matching vchan? let them join it */
                        if ((vchan_chptr = find_vchan(chptr, key)))
-			 {
-			   add_vchan_to_client_cache(sptr, chptr, vchan_chptr);
-			   chptr = vchan_chptr;
-			 }
+                         {
+                           root_chptr = chptr;
+                           chptr = vchan_chptr;
+                           joining_vchan = 1;
+                         }
                        else
                          {
                            sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
@@ -484,6 +487,8 @@ int     m_join(struct Client *cptr,
       */
       if (MyClient(sptr) && (flags & CHFL_CHANOP) )
         {
+          if (joining_vchan)
+            add_vchan_to_client_cache(sptr,root_chptr,chptr);
           chptr->channelts = CurrentTime;
           strncpy_irc(chptr->chan_id, parv[0], NICKLEN);
 #ifdef NO_CHANOPS_WHEN_SPLIT
@@ -506,6 +511,8 @@ int     m_join(struct Client *cptr,
         }
       else if (MyClient(sptr))
         {
+          if (joining_vchan)
+            add_vchan_to_client_cache(sptr,root_chptr,chptr);
           sendto_match_servs(chptr, cptr,
                              ":%s SJOIN %lu %s + :%s", me.name,
                              chptr->channelts, name, parv[0]);
@@ -549,6 +556,10 @@ int     m_join(struct Client *cptr,
                          chptr->topic_time);
             }
           parv[1] = name;
+          if (joining_vchan)
+            parv[2] = root_chptr->chname;
+          else
+            parv[2] = chptr->chname;
           (void)m_names(cptr, sptr, 2, parv);
         }
     }
@@ -995,6 +1006,8 @@ int     mo_join(struct Client *cptr,
   struct SLink  *lp;
   struct Channel *chptr = NULL;
   struct Channel *vchan_chptr = NULL;
+  struct Channel *root_chptr = NULL;
+  int joining_vchan = 0;
   char  *name, *key = NULL;
   int   i, flags = 0;
   char  *p = NULL, *p2 = NULL;
@@ -1088,13 +1101,17 @@ int     mo_join(struct Client *cptr,
            if((chptr = hash_find_channel(name, NullChn)))
              {
                /* there's subchans so check those */
-               if (chptr->next_vchan)
+               if (IsVchanTop(chptr))
                  {
                    if (key && key[0] == '!')
                      {
                        /* found a matching vchan? let them join it */
                        if ((vchan_chptr = find_vchan(chptr, key)))
-                         chptr = vchan_chptr;
+                         {
+                           root_chptr = chptr;
+                           chptr = vchan_chptr;
+                           joining_vchan = 1;
+                         }
                        else
                          {
                            sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
@@ -1184,6 +1201,8 @@ int     mo_join(struct Client *cptr,
       */
       if (MyClient(sptr) && (flags & CHFL_CHANOP) )
         {
+          if (joining_vchan)
+            add_vchan_to_client_cache(sptr,root_chptr,chptr);
           chptr->channelts = CurrentTime;
           strncpy_irc(chptr->chan_id, parv[0], NICKLEN);
           sendto_match_servs(chptr, cptr,
@@ -1192,6 +1211,8 @@ int     mo_join(struct Client *cptr,
         }
       else if (MyClient(sptr))
         {
+          if (joining_vchan)
+            add_vchan_to_client_cache(sptr,root_chptr,chptr);
           sendto_match_servs(chptr, cptr,
                              ":%s SJOIN %lu %s + :%s", me.name,
                              chptr->channelts, name, parv[0]);
