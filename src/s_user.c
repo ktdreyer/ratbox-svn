@@ -716,7 +716,7 @@ static int register_user(struct Client *cptr, struct Client *sptr,
             }
         }
 
-     #endif /* USE_IAUTH */
+     #endif /* !USE_IAUTH */
 
 
       sendto_realops_flags(FLAGS_CCONN,
@@ -1323,11 +1323,8 @@ int do_user(char* nick, struct Client* cptr, struct Client* sptr,
      * Now that we have both the NICK and USER, send the
      * client to the iauth module for verification
      */
-    #if 0
-    begin_authorization();
-    #endif
+    BeginAuthorization(sptr);
  	#else
-
     return register_user(cptr, sptr, sptr->name, username);
   #endif
   }

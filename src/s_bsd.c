@@ -965,7 +965,12 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
 
 		#ifdef USE_IAUTH
       if (iAuth.socket != NOSOCK)
-        FD_SET(iAuth.socket, read_set);
+      {
+      	if (IsIAuthConnect(iAuth))
+      		FD_SET(iAuth.socket, write_set);
+      	else
+        	FD_SET(iAuth.socket, read_set);
+      }
     #endif
 
       for (auth = AuthPollList; auth; auth = auth->next) {
@@ -1071,7 +1076,17 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
    * Check IAuth
    */
   if (iAuth.socket != NOSOCK)
-    if (FD_ISSET(iAuth.socket, read_set))
+  {
+  	if (IsIAuthConnect(iAuth) && FD_ISSET(iAuth.socket, write_set))
+  	{
+  		/*FD_CLR(iAuth.socket, write_set);*/
+
+  		/*
+  		 * Complete the connection to the IAuth server
+  		 */
+  		CompleteIAuthConnection();
+  	}
+  	else if (FD_ISSET(iAuth.socket, read_set))
     {
       if (!ParseIAuth())
       {
@@ -1082,6 +1097,7 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
         iAuth.socket = NOSOCK;
       }
     }
+  }
 #endif
 
   for (i = 0; i <= highest_fd; i++) {

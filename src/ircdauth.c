@@ -94,13 +94,23 @@ ConnectToIAuth()
 {
 	struct sockaddr_in ServAddr;
 	register struct hostent *hostptr;
-	char ip[30];
 	struct in_addr *ptr;
+
+	if ((iAuth.socket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+	{
+		log(L_ERROR,
+			"ConnectToIAuth(): Unable to open stream socket: %s",
+			strerror(errno));
+		iAuth.socket = NOSOCK;
+		return(NOSOCK);
+	}
 
 	if ((hostptr = gethostbyname(iAuth.hostname)) == NULL)
 	{
 		log(L_ERROR,
 			"Unable to connect to IAuth server: Unknown host");
+
+		close(iAuth.socket);
 		iAuth.socket = NOSOCK;
 		return(NOSOCK);
 	}
@@ -108,32 +118,62 @@ ConnectToIAuth()
 	memset((void *) &ServAddr, 0, sizeof(ServAddr));
 
 	ptr = (struct in_addr *) *hostptr->h_addr_list;
-	strcpy(ip, inet_ntoa(*ptr));
-	ServAddr.sin_addr.s_addr = inet_addr(ip);
+	ServAddr.sin_addr.s_addr = ptr->s_addr;
 
 	ServAddr.sin_family = AF_INET;
 	ServAddr.sin_port = htons(iAuth.port);
 
-	if ((iAuth.socket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+	if (!set_non_blocking(iAuth.socket))
 	{
 		log(L_ERROR,
-			"ConnectToIAuth(): Unable to open stream socket");
+			"ConnectToIAuth(): set_non_blocking() failed");
+		close(iAuth.socket);
 		iAuth.socket = NOSOCK;
-		return(NOSOCK);
+		return (NOSOCK);
 	}
 
 	if (connect(iAuth.socket, (struct sockaddr *) &ServAddr, sizeof(ServAddr)) < 0)
 	{
-		log(L_ERROR,
-			"Unable to connect to IAuth server: %s",
-			strerror(errno));
-		close(iAuth.socket);
-		iAuth.socket = NOSOCK;
-		return(NOSOCK);
+		if (errno != EINPROGRESS)
+		{
+			log(L_ERROR,
+				"Unable to connect to IAuth server: %s",
+				strerror(errno));
+			close(iAuth.socket);
+			iAuth.socket = NOSOCK;
+			return(NOSOCK);
+		}
 	}
+
+	SetIAuthConnect(iAuth);
 
 	return(iAuth.socket);
 } /* ConnectToIAuth() */
+
+/*
+CompleteIAuthConnection()
+ Second portion of non-blocking connect sequence to IAuth.
+Return: 1 if successful
+        0 if unsuccessful
+*/
+
+int
+CompleteIAuthConnection()
+
+{
+	log(L_INFO, "IN COMPLETEIAUTH\n");
+	ClearIAuthConnect(iAuth);
+
+#if 0
+	if (send(iAuth.socket, "hello\n", 6, 0) < 0)
+	{
+		fprintf(stderr, "Send failed\n");
+		return 0;
+	}
+#endif
+
+	return 1;
+} /* CompleteIAuthConnection() */
 
 /*
 BeginAuthorization()
@@ -141,7 +181,7 @@ BeginAuthorization()
 send the client's information to the IAuth server to begin
 an authorization. The syntax for an auth query is as follows:
 
-    DoAuth <id> <nickname> <username> <hostname> <ip address>
+    DoAuth <id> <nickname> <username> <hostname> <ip address> [password]
 
   <id>            - A unique ID for the client so when the
                     authentication completes, we can re-find
@@ -157,6 +197,8 @@ an authorization. The syntax for an auth query is as follows:
 
   <ip address>    - IP Address of the client. This is represented
                     in unsigned int form.
+
+  [password]      - I-line password (if specified)
 */
 
 void
@@ -177,12 +219,13 @@ BeginAuthorization(struct Client *client)
 	 */
 
 	len = sprintf(buf,
-		"DoAuth %p %s %s %s %u\n",
+		"DoAuth %p %s %s %s %u %s\n",
 		client,
 		client->name,
 		client->username,
 		client->host,
-		(unsigned int) client->ip.s_addr);
+		(unsigned int) client->ip.s_addr,
+		client->passwd);
 
 	send(iAuth.socket, buf, len, 0);
 } /* BeginAuthorization() */
