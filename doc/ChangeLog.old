@@ -1,3 +1,9 @@
+*** 20001214_5 by db
+- removed a bunch of useless B line stuff
+- put sanity test into m_gline.c so it wont' core on a NULL glinefile
+
+
+
 *** 20001214_4 by db
 - YOU missed an #endif toot! ;)
 
