@@ -1,3 +1,15 @@
+leeh        2005/01/24 12:47:13 EST	(20050124_0)
+
+  Modified files:
+    modules              m_cap.c 
+  Log:
+  - cheap hack on sticky capabs..
+  
+  Revision  Changes    Path
+  1.3       +4 -2      ircd-ratbox/modules/m_cap.c
+
+
+
 leeh        2005/01/22 11:36:54 EST	(20050122_0)
 
   Modified files:
