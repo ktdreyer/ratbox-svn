@@ -45,12 +45,13 @@
 #include "sprintf_irc.h"
 
 static int m_mode(struct Client *, struct Client *, int, const char **);
+static int ms_mode(struct Client *, struct Client *, int, const char **);
 static int ms_tmode(struct Client *, struct Client *, int, const char **);
 static int ms_bmask(struct Client *, struct Client *, int, const char **);
 
 struct Message mode_msgtab = {
 	"MODE", 0, 0, 2, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_mode, m_mode, m_mode}
+	{m_unregistered, m_mode, ms_mode, m_mode}
 };
 struct Message tmode_msgtab = {
 	"TMODE", 0, 0, 4, 0, MFLG_SLOW, 0,
@@ -140,15 +141,10 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	{
 		channel_modes(chptr, source_p, modebuf, parabuf);
 		sendto_one(source_p, form_str(RPL_CHANNELMODEIS),
-			   me.name, parv[0], parv[1], modebuf, parabuf);
+			   me.name, source_p->name, parv[1], modebuf, parabuf);
 
 		sendto_one(source_p, form_str(RPL_CREATIONTIME),
-			   me.name, parv[0], parv[1], chptr->channelts);
-	}
-	else if(IsServer(source_p))
-	{
-		set_channel_mode(client_p, source_p, chptr, NULL,
-				 parc - n, parv + n);
+			   me.name, source_p->name, parv[1], chptr->channelts);
 	}
 	else
 	{
@@ -158,7 +154,7 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			return 0;
 
 		/* Finish the flood grace period... */
-		if(MyClient(source_p) && !IsFloodDone(source_p))
+		if(!IsFloodDone(source_p))
 		{
 			if(!((parc == 3) && (parv[2][0] == 'b') && (parv[2][1] == '\0')))
 				flood_endgrace(source_p);
@@ -171,6 +167,43 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	return 0;
 }
 
+static int
+ms_mode(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	struct Channel *chptr;
+	struct membership *msptr;
+
+	if(parc < 3 || EmptyString(parv[2]))
+		return 0;
+
+	chptr = find_channel(parv[1]);
+
+	if(chptr == NULL)
+	{
+		sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL), 
+			   me.name, source_p->name, parv[1]);
+		return 0;
+	}
+
+	if(IsServer(source_p))
+	{
+		set_channel_mode(client_p, source_p, chptr, NULL,
+				 parc - n, parv + n);
+	}
+	else
+	{
+		msptr = find_channel_membership(chptr, source_p);
+
+		if(is_deop(msptr))
+			return 0;
+
+		set_channel_mode(client_p, source_p, chptr, msptr,
+				 parc - n, parv + n);
+	}
+
+	return 0;
+}
+	
 static int
 ms_tmode(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {

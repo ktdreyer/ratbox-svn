@@ -377,10 +377,11 @@ stats_tdeny (struct Client *source_p)
 
 				get_printable_kline(source_p, aconf, &host, &pass, &user, &oper_reason);
 
-				sendto_one(source_p, form_str (RPL_STATSDLINE), me.name,
-					   source_p->name, 'd', host, pass,
-					   oper_reason ? "|" : "",
-					   oper_reason ? oper_reason : "");
+				sendto_one_numeric(source_p, RPL_STATSDLINE, 
+						   form_str (RPL_STATSDLINE),
+						   'd', host, pass,
+						   oper_reason ? "|" : "",
+						   oper_reason ? oper_reason : "");
 			}
 		}
 	}
@@ -413,10 +414,11 @@ stats_deny (struct Client *source_p)
 
 				get_printable_kline(source_p, aconf, &host, &pass, &user, &oper_reason);
 
-				sendto_one(source_p, form_str (RPL_STATSDLINE), me.name,
-					   source_p->name, 'D', host, pass,
-					   oper_reason ? "|" : "",
-					   oper_reason ? oper_reason : "");
+				sendto_one_numeric(source_p, RPL_STATSDLINE, 
+						   form_str (RPL_STATSDLINE),
+						   'D', host, pass,
+						   oper_reason ? "|" : "",
+						   oper_reason ? oper_reason : "");
 			}
 		}
 	}
@@ -447,12 +449,12 @@ stats_exempt (struct Client *source_p)
 				get_printable_conf (aconf, &name, &host, &pass,
 						    &user, &port, &classname);
 
-				sendto_one (source_p, form_str (RPL_STATSDLINE), me.name,
-					    source_p->name, 'e', host, pass, "", "");
+				sendto_one_numeric(source_p, RPL_STATSDLINE, 
+						   form_str(RPL_STATSDLINE),
+						   'e', host, pass, "", "");
 			}
 		}
-	}
-}
+	}}
 
 
 static void
@@ -881,11 +883,15 @@ stats_uptime (struct Client *source_p)
 	time_t now;
 
 	now = CurrentTime - me.since;
-	sendto_one (source_p, form_str (RPL_STATSUPTIME), me.name, source_p->name,
-		    now / 86400, (now / 3600) % 24, (now / 60) % 60, now % 60);
+	sendto_one_numeric(source_p, RPL_STATSUPTIME, 
+			   form_str (RPL_STATSUPTIME),
+			   now / 86400, (now / 3600) % 24, 
+			   (now / 60) % 60, now % 60);
 	if(!ConfigServerHide.disable_remote || IsOper (source_p))
-		sendto_one (source_p, form_str (RPL_STATSCONN), me.name, source_p->name,
-			    MaxConnectionCount, MaxClientCount, Count.totalrestartcount);
+		sendto_one_numeric(source_p, RPL_STATSCONN,
+				   form_str (RPL_STATSCONN),
+				   MaxConnectionCount, MaxClientCount, 
+				   Count.totalrestartcount);
 }
 
 static void
@@ -924,11 +930,11 @@ stats_shared (struct Client *source_p)
 
 		*p++ = '\0';
 
-		sendto_one (source_p, form_str (RPL_STATSULINE),
-			    me.name, source_p->name,
-			    EmptyString (uconf->servername) ? "*" : uconf->servername,
-			    EmptyString (uconf->username) ? "*" : uconf->username,
-			    EmptyString (uconf->host) ? "*" : uconf->host, buf);
+		sendto_one_numeric(source_p, RPL_STATSULINE, 
+				   form_str (RPL_STATSULINE),
+				   EmptyString (uconf->servername) ? "*" : uconf->servername,
+				   EmptyString (uconf->username) ? "*" : uconf->username,
+				   EmptyString (uconf->host) ? "*" : uconf->host, buf);
 	}
 }
 
@@ -992,16 +998,18 @@ stats_gecos (struct Client *source_p)
 	{
 		xconf = ptr->data;
 
-		sendto_one (source_p, form_str (RPL_STATSXLINE),
-			    me.name, source_p->name, xconf->type, xconf->name, xconf->reason);
+		sendto_one_numeric(source_p, RPL_STATSXLINE,
+				   form_str (RPL_STATSXLINE),
+				   xconf->type, xconf->name, xconf->reason);
 	}
 
 	DLINK_FOREACH(ptr, xline_hash_list.head)
 	{
 		xconf = ptr->data;
 
-		sendto_one(source_p, form_str(RPL_STATSXLINE),
-			   me.name, source_p->name, xconf->type, xconf->name, xconf->reason);
+		sendto_one_numeric(source_p, RPL_STATSXLINE,
+				   form_str (RPL_STATSXLINE),
+				   xconf->type, xconf->name, xconf->reason);
 	}
 }
 

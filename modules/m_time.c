@@ -80,7 +80,8 @@ m_time(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			return 0;
 	}
 
-	sendto_one(source_p, form_str(RPL_TIME), me.name, parv[0], me.name, date());
+	sendto_one_numeric(source_p, RPL_TIME, form_str(RPL_TIME), 
+			   me.name, date());
 
 	return 0;
 }
@@ -94,7 +95,8 @@ static int
 mo_time(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(hunt_server(client_p, source_p, ":%s TIME :%s", 1, parc, parv) == HUNTED_ISME)
-		sendto_one(source_p, form_str(RPL_TIME), me.name, parv[0], me.name, date());
+		sendto_one_numeric(source_p, RPL_TIME, form_str(RPL_TIME),
+				   me.name, date());
 
 	return 0;
 }

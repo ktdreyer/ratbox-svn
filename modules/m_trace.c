@@ -96,7 +96,8 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 		if(MyClient(source_p) && irccmp(tname, source_p->name) == 0)
 			report_this_status(source_p, source_p, 0, 0, 0);
 
-		sendto_one(source_p, form_str(RPL_ENDOFTRACE), me.name, parv[0], tname);
+		sendto_one_numeric(source_p, RPL_ENDOFTRACE,
+				   form_str(RPL_ENDOFTRACE), tname);
 		return 0;
 	}
 
@@ -161,7 +162,8 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 		if(target_p && IsPerson(target_p))
 			report_this_status(source_p, target_p, 0, 0, 0);
 
-		sendto_one(source_p, form_str(RPL_ENDOFTRACE), me.name, parv[0], tname);
+		sendto_one_numeric(source_p, RPL_ENDOFTRACE, 
+				   form_str(RPL_ENDOFTRACE),tname);
 		return 0;
 	}
 
@@ -215,7 +217,8 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 					link_s[target_p->localClient->fd]);
 		}
 
-		sendto_one(source_p, form_str(RPL_ENDOFTRACE), me.name, parv[0], tname);
+		sendto_one_numeric(source_p, RPL_ENDOFTRACE, 
+				   form_str(RPL_ENDOFTRACE), tname);
 		return 0;
 	}
 
@@ -278,7 +281,8 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 		/* let the user have some idea that its at the end of the
 		 * trace
 		 */
-		sendto_one(source_p, form_str(RPL_ENDOFTRACE), me.name, parv[0], tname);
+		sendto_one_numeric(source_p, RPL_ENDOFTRACE, 
+				   form_str(RPL_ENDOFTRACE), tname);
 		return 0;
 	}
 
@@ -295,7 +299,7 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 		}
 	}
 
-	sendto_one(source_p, form_str(RPL_ENDOFTRACE), me.name, parv[0], tname);
+	sendto_one_numeric(source_p, RPL_ENDOFTRACE, form_str(RPL_ENDOFTRACE), tname);
 
 	return 0;
 }

@@ -287,10 +287,10 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		if(chptr->topic != NULL)
 		{
 			sendto_one(source_p, form_str(RPL_TOPIC), me.name,
-				   parv[0], chptr->chname, chptr->topic);
+				   source_p->name, chptr->chname, chptr->topic);
 
 			sendto_one(source_p, form_str(RPL_TOPICWHOTIME),
-				   me.name, parv[0], chptr->chname,
+				   me.name, source_p->name, chptr->chname,
 				   chptr->topic_info, chptr->topic_time);
 		}
 

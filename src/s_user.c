@@ -177,52 +177,56 @@ int
 show_lusers(struct Client *source_p)
 {
 	if(!ConfigServerHide.hide_servers || IsOper(source_p))
-		sendto_one(source_p, form_str(RPL_LUSERCLIENT), me.name,
-			   source_p->name, (Count.total - Count.invisi),
-			   Count.invisi, 
-			   dlink_list_length(&global_serv_list));
+		sendto_one_numeric(source_p, RPL_LUSERCLIENT,
+				   form_str(RPL_LUSERCLIENT),
+				   (Count.total - Count.invisi),
+				   Count.invisi, 
+				   dlink_list_length(&global_serv_list));
 	else
-		sendto_one(source_p, form_str(RPL_LUSERCLIENT), me.name,
-			   source_p->name, (Count.total - Count.invisi), Count.invisi, 1);
+		sendto_one_numeric(source_p, RPL_LUSERCLIENT,
+				   form_str(RPL_LUSERCLIENT),
+				   (Count.total - Count.invisi), Count.invisi, 1);
 	if(Count.oper > 0)
-		sendto_one(source_p, form_str(RPL_LUSEROP), me.name, source_p->name, Count.oper);
+		sendto_one_numeric(source_p, RPL_LUSEROP, 
+				   form_str(RPL_LUSEROP), Count.oper);
 
 	if(dlink_list_length(&unknown_list) > 0)
-		sendto_one(source_p, form_str(RPL_LUSERUNKNOWN),
-			   me.name, source_p->name, 
-			   dlink_list_length(&unknown_list));
+		sendto_one_numeric(source_p, RPL_LUSERUNKNOWN, 
+				   form_str(RPL_LUSERUNKNOWN),
+				   dlink_list_length(&unknown_list));
 
 	if(dlink_list_length(&global_channel_list) > 0)
-		sendto_one(source_p, form_str(RPL_LUSERCHANNELS),
-			   me.name, source_p->name, 
-			   dlink_list_length(&global_channel_list));
+		sendto_one_numeric(source_p, RPL_LUSERCHANNELS, 
+				   form_str(RPL_LUSERCHANNELS),
+				   dlink_list_length(&global_channel_list));
 
 	if(!ConfigServerHide.hide_servers || IsOper(source_p))
 	{
-		sendto_one(source_p, form_str(RPL_LUSERME),
-			   me.name, source_p->name,
-			   dlink_list_length(&lclient_list),
-			   dlink_list_length(&serv_list));
-		sendto_one(source_p, form_str(RPL_LOCALUSERS),
-			   me.name, source_p->name, 
-			   dlink_list_length(&lclient_list),
-			   Count.max_loc);
+		sendto_one_numeric(source_p, RPL_LUSERME, form_str(RPL_LUSERME),
+				   dlink_list_length(&lclient_list),
+				   dlink_list_length(&serv_list));
+		sendto_one_numeric(source_p, RPL_LOCALUSERS, 
+				   form_str(RPL_LOCALUSERS),
+				   dlink_list_length(&lclient_list),
+				   Count.max_loc);
 	}
 	else
 	{
-		sendto_one(source_p, form_str(RPL_LUSERME),
-			   me.name, source_p->name, Count.total, 0);
-		sendto_one(source_p, form_str(RPL_LOCALUSERS),
-			   me.name, source_p->name, Count.total, Count.max_tot);
+		sendto_one_numeric(source_p, RPL_LUSERME, form_str(RPL_LUSERME),
+				   Count.total, 0);
+		sendto_one_numeric(source_p, RPL_LOCALUSERS,
+				   form_str(RPL_LOCALUSERS),
+				   Count.total, Count.max_tot);
 	}
 
-	sendto_one(source_p, form_str(RPL_GLOBALUSERS), me.name,
-		   source_p->name, Count.total, Count.max_tot);
+	sendto_one_numeric(source_p, RPL_GLOBALUSERS, form_str(RPL_GLOBALUSERS),
+			   Count.total, Count.max_tot);
 
 	if(!ConfigServerHide.hide_servers || IsOper(source_p))
-		sendto_one(source_p, form_str(RPL_STATSCONN), me.name,
-			   source_p->name, MaxConnectionCount,
-			   MaxClientCount, Count.totalrestartcount);
+		sendto_one_numeric(source_p, RPL_STATSCONN,
+				   form_str(RPL_STATSCONN),
+				   MaxConnectionCount, MaxClientCount, 
+				   Count.totalrestartcount);
 
 	if(dlink_list_length(&lclient_list) > MaxClientCount)
 		MaxClientCount = dlink_list_length(&lclient_list);
@@ -857,7 +861,7 @@ user_mode(struct Client *client_p, struct Client *source_p, int parc, const char
 			if(source_p->umodes & user_modes[i].mode)
 				*m++ = user_modes[i].letter;
 		*m = '\0';
-		sendto_one(source_p, form_str(RPL_UMODEIS), me.name, parv[0], buf);
+		sendto_one(source_p, form_str(RPL_UMODEIS), me.name, source_p->name, buf);
 		return 0;
 	}
 
@@ -1099,13 +1103,12 @@ user_welcome(struct Client *source_p)
 			   "NOTICE %s :*** Notice -- Please read the motd if you haven't read it",
 			   source_p->name);
 
-		sendto_one(source_p, form_str(RPL_MOTDSTART), me.name, source_p->name, me.name);
+		sendto_one_numeric(source_p, RPL_MOTDSTART, form_str(RPL_MOTDSTART), me.name);
 
-		sendto_one(source_p,
-			   form_str(RPL_MOTD),
-			   me.name, source_p->name, "*** This is the short motd ***");
+		sendto_one_numeric(source_p, RPL_MOTD, form_str(RPL_MOTD),
+				   "*** This is the short motd ***");
 
-		sendto_one(source_p, form_str(RPL_ENDOFMOTD), me.name, source_p->name);
+		sendto_one_numeric(source_p, RPL_ENDOFMOTD, form_str(RPL_ENDOFMOTD));
 	}
 	else
 		send_user_motd(source_p);

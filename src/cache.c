@@ -285,16 +285,16 @@ send_user_motd(struct Client *source_p)
 		return;
 	}
 
-	sendto_one(source_p, form_str(RPL_MOTDSTART), me.name, nick, me.name);
+	sendto_one_numeric(source_p, RPL_MOTDSTART, form_str(RPL_MOTDSTART), me.name);
 
 	DLINK_FOREACH(ptr, user_motd->contents.head)
 	{
 		lineptr = ptr->data;
-		sendto_one(source_p, form_str(RPL_MOTD),
-			   me.name, source_p->name, lineptr->data);
+		sendto_one_numeric(source_p, RPL_MOTD, form_str(RPL_MOTD),
+				   lineptr->data);
 	}
 
-	sendto_one(source_p, form_str(RPL_ENDOFMOTD), me.name, nick);
+	sendto_one_numeric(source_p, RPL_ENDOFMOTD, form_str(RPL_ENDOFMOTD));
 }
 
 /* send_oper_motd()

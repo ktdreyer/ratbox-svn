@@ -157,11 +157,12 @@ m_invite(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if(MyConnect(source_p))
 	{
-		sendto_one(source_p, form_str(RPL_INVITING), me.name, parv[0],
+		sendto_one(source_p, form_str(RPL_INVITING), 
+			   me.name, source_p->name,
 			   target_p->name, parv[2]);
 		if(target_p->user->away)
-			sendto_one(source_p, form_str(RPL_AWAY), me.name, parv[0],
-				   target_p->name, target_p->user->away);
+			sendto_one_numeric(source_p, RPL_AWAY, form_str(RPL_AWAY),
+					   target_p->name, target_p->user->away);
 	}
 
 	if(MyConnect(target_p))

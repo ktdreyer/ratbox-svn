@@ -139,13 +139,13 @@ mo_links(struct Client *client_p, struct Client *source_p, int parc, const char 
 		/* We just send the reply, as if theyre here theres either no SHIDE,
 		 * or theyre an oper..  
 		 */
-		sendto_one(source_p, form_str(RPL_LINKS),
-			   me.name, parv[0], target_p->name, target_p->serv->up,
-			   target_p->hopcount, p);
+		sendto_one_numeric(source_p, RPL_LINKS, form_str(RPL_LINKS),
+				   target_p->name, target_p->serv->up,
+				   target_p->hopcount, p);
 	}
 
-	sendto_one(source_p, form_str(RPL_ENDOFLINKS), me.name, parv[0],
-		   EmptyString(mask) ? "*" : mask);
+	sendto_one_numeric(source_p, RPL_ENDOFLINKS, form_str(RPL_ENDOFLINKS),
+			   EmptyString(mask) ? "*" : mask);
 
 	return 0;
 }
@@ -188,10 +188,9 @@ send_links_cache(struct Client *source_p)
 			   me.name, source_p->name, (const char *)ptr->data);
 	}
 
-	sendto_one(source_p, form_str(RPL_LINKS), 
-		   me.name, source_p->name, me.name, me.name, 0, me.info);
+	sendto_one_numeric(source_p, RPL_LINKS, form_str(RPL_LINKS), 
+			   me.name, me.name, 0, me.info);
 
-	sendto_one(source_p, form_str(RPL_ENDOFLINKS),
-		   me.name, source_p->name, "*");
+	sendto_one_numeric(source_p, RPL_ENDOFLINKS, form_str(RPL_ENDOFLINKS), "*");
 }
 

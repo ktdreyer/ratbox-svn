@@ -231,7 +231,8 @@ do_whois(struct Client *client_p, struct Client *source_p, int parc, const char 
 		sendto_one(source_p, form_str(ERR_NOSUCHNICK),
 			   me.name, parv[0], nick);
 
-	sendto_one(source_p, form_str(RPL_ENDOFWHOIS), me.name, parv[0], parv[1]);
+	sendto_one_numeric(source_p, RPL_ENDOFWHOIS, 
+			   form_str(RPL_ENDOFWHOIS), parv[1]);
 	return;
 }
 
@@ -248,7 +249,6 @@ static void
 single_whois(struct Client *source_p, struct Client *target_p, int glob)
 {
 	char buf[BUFSIZE];
-	char *server_name;
 	dlink_node *ptr;
 	struct Client *a2client_p;
 	struct membership *msptr;
@@ -268,23 +268,19 @@ single_whois(struct Client *source_p, struct Client *target_p, int glob)
 
 	if(target_p->user == NULL)
 	{
-		sendto_one(source_p, form_str(RPL_WHOISUSER), me.name,
-			   source_p->name, name,
-			   target_p->username, target_p->host, target_p->info);
-		sendto_one(source_p, form_str(RPL_WHOISSERVER),
-			   me.name, source_p->name, name, "<Unknown>", "*Not On This Net*");
+		s_assert(0);
 		return;
 	}
 
 	a2client_p = find_server(target_p->user->server);
 
-	sendto_one(source_p, form_str(RPL_WHOISUSER), me.name,
-		   source_p->name, target_p->name,
-		   target_p->username, target_p->host, target_p->info);
-	server_name = (char *) target_p->user->server;
+	sendto_one_numeric(source_p, RPL_WHOISUSER, form_str(RPL_WHOISUSER),
+			   target_p->name, target_p->username, 
+			   target_p->host, target_p->info);
 
 	cur_len = mlen = ircsprintf(buf, form_str(RPL_WHOISCHANNELS), 
-				    me.name, source_p->name, target_p->name);
+				    get_uid(&me, source_p), get_uid(source_p, source_p), 
+				    target_p->name);
 
 	t = buf + mlen;
 
@@ -314,24 +310,24 @@ single_whois(struct Client *source_p, struct Client *target_p, int glob)
 		sendto_one(source_p, "%s", buf);
 
 	if((IsOper(source_p) || !ConfigServerHide.hide_servers) || target_p == source_p)
-		sendto_one(source_p, form_str(RPL_WHOISSERVER),
-			   me.name, source_p->name, target_p->name, server_name,
-			   a2client_p ? a2client_p->info : "*Not On This Net*");
+		sendto_one_numeric(source_p, RPL_WHOISSERVER, form_str(RPL_WHOISSERVER),
+				   target_p->name, target_p->user->server,
+				   a2client_p ? a2client_p->info : "*Not On This Net*");
 	else
-		sendto_one(source_p, form_str(RPL_WHOISSERVER),
-			   me.name, source_p->name, target_p->name,
-			   ServerInfo.network_name, ServerInfo.network_desc);
+		sendto_one_numeric(source_p, form_str(RPL_WHOISSERVER),
+				   target_p->name,
+				   ServerInfo.network_name, ServerInfo.network_desc);
 
 	if(target_p->user->away)
-		sendto_one(source_p, form_str(RPL_AWAY), me.name,
-			   source_p->name, target_p->name, target_p->user->away);
+		sendto_one_numeric(source_p, RPL_AWAY, form_str(RPL_AWAY),
+				   target_p->name, target_p->user->away);
 
 	if(IsOper(target_p))
 	{
-		sendto_one(source_p, form_str(RPL_WHOISOPERATOR),
-			   me.name, source_p->name, target_p->name,
-			   IsAdmin(target_p) ? GlobalSetOptions.adminstring :
-			   GlobalSetOptions.operstring);
+		sendto_one_numeric(source_p, RPL_WHOISOPERATOR, form_str(RPL_WHOISOPERATOR),
+				   target_p->name,
+				   IsAdmin(target_p) ? GlobalSetOptions.adminstring :
+				    GlobalSetOptions.operstring);
 	}
 
 	if(MyClient(target_p))
@@ -344,13 +340,15 @@ single_whois(struct Client *source_p, struct Client *target_p, int glob)
 		   (source_p == target_p))
 		{
 			if(ConfigFileEntry.use_whois_actually && show_ip(source_p, target_p))
-				sendto_one(source_p, form_str(RPL_WHOISACTUALLY),
-					   me.name, source_p->name, target_p->name,
-					   target_p->sockhost);
+				sendto_one_numeric(source_p, RPL_WHOISACTUALLY,
+						   form_str(RPL_WHOISACTUALLY),
+						   target_p->name, target_p->sockhost);
 
-			sendto_one(source_p, form_str(RPL_WHOISIDLE),
-				   me.name, source_p->name, target_p->name,
-				   CurrentTime - target_p->user->last, target_p->firsttime);
+			sendto_one_numeric(source_p, RPL_WHOISIDLE, 
+					   form_str(RPL_WHOISIDLE),
+					   target_p->name, 
+					   CurrentTime - target_p->user->last, 
+					   target_p->firsttime);
 		}
 	}
 

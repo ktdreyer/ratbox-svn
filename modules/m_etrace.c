@@ -103,7 +103,7 @@ m_etrace(struct Client *client_p, struct Client *source_p, int parc, const char 
 			   ip_ptr, target_p->info);
 	}
 
-	sendto_one(source_p, form_str(RPL_ENDOFTRACE), me.name, parv[0], me.name);
+	sendto_one_numeric(source_p, RPL_ENDOFTRACE, form_str(RPL_ENDOFTRACE), me.name);
 	return 0;
 }
 

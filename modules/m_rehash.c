@@ -237,7 +237,7 @@ mo_rehash(struct Client *client_p, struct Client *source_p, int parc, const char
 	}
 	else
 	{
-		sendto_one(source_p, form_str(RPL_REHASHING), me.name, parv[0],
+		sendto_one(source_p, form_str(RPL_REHASHING), me.name, source_p->name,
 			   ConfigFileEntry.configfile);
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "%s is rehashing server config file", get_oper_name(source_p));

@@ -264,8 +264,10 @@ list_accepts(struct Client *source_p)
 	}
 
 	if(*nicks)
-		sendto_one(source_p, form_str(RPL_ACCEPTLIST), me.name, source_p->name, nicks);
+		sendto_one(source_p, form_str(RPL_ACCEPTLIST), 
+			   me.name, source_p->name, nicks);
 
-	sendto_one(source_p, form_str(RPL_ENDOFACCEPT), me.name, source_p->name);
+	sendto_one_numeric(source_p, form_str(RPL_ENDOFACCEPT), 
+			   me.name, source_p->name);
 
 }

@@ -156,7 +156,7 @@ m_oper(struct Client *client_p, struct Client *source_p, int parc, const char *p
 static int
 mo_oper(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	sendto_one(source_p, form_str(RPL_YOUREOPER), me.name, parv[0]);
+	sendto_one(source_p, form_str(RPL_YOUREOPER), me.name, source_p->name);
 	send_oper_motd(source_p);
 	return 0;
 }

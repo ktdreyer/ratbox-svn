@@ -89,7 +89,7 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 	/* if theyre an oper, reprint oper motd and ignore */
 	if(IsOper(source_p))
 	{
-		sendto_one(source_p, form_str(RPL_YOUREOPER), me.name, parv[0]);
+		sendto_one(source_p, form_str(RPL_YOUREOPER), me.name, source_p->name);
 		send_oper_motd(source_p);
 		return 0;
 	}
@@ -184,7 +184,8 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 
 	if(!generate_challenge(&challenge, &(source_p->user->response), aconf->rsa_public_key))
 	{
-		sendto_one(source_p, form_str(RPL_RSACHALLENGE), me.name, parv[0], challenge);
+		sendto_one(source_p, form_str(RPL_RSACHALLENGE), 
+			   me.name, source_p->name, challenge);
 	}
 
 	DupString(source_p->user->auth_oper, aconf->name);

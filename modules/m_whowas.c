@@ -136,17 +136,21 @@ whowas_do(struct Client *client_p, struct Client *source_p, int parc, const char
 		if(!irccmp(nick, temp->name))
 		{
 			sendto_one(source_p, form_str(RPL_WHOWASUSER),
-				   me.name, parv[0], temp->name,
+				   me.name, source_p->name, temp->name,
 				   temp->username, temp->hostname, temp->realname);
 
 			if(ConfigServerHide.hide_servers && !IsOper(source_p))
-				sendto_one(source_p, form_str(RPL_WHOISSERVER),
-					   me.name, parv[0], temp->name,
-					   ServerInfo.network_name, myctime(temp->logoff));
+				sendto_one_numeric(source_p, RPL_WHOISSERVER,
+						   form_str(RPL_WHOISSERVER),
+						   temp->name,
+						   ServerInfo.network_name, 
+						   myctime(temp->logoff));
 			else
-				sendto_one(source_p, form_str(RPL_WHOISSERVER),
-					   me.name, parv[0], temp->name,
-					   temp->servername, myctime(temp->logoff));
+				sendto_one_numeric(source_p, RPL_WHOISSERVER,
+						   form_str(RPL_WHOISSERVER),
+						   temp->name,
+						   temp->servername,
+						   myctime(temp->logoff));
 			cur++;
 			found++;
 		}
@@ -156,6 +160,7 @@ whowas_do(struct Client *client_p, struct Client *source_p, int parc, const char
 	if(!found)
 		sendto_one(source_p, form_str(ERR_WASNOSUCHNICK), me.name, parv[0], nick);
 
-	sendto_one(source_p, form_str(RPL_ENDOFWHOWAS), me.name, parv[0], parv[1]);
+	sendto_one(source_p, form_str(RPL_ENDOFWHOWAS), 
+		   me.name, source_p->name, parv[1]);
 	return 0;
 }

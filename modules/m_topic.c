@@ -123,7 +123,7 @@ m_topic(struct Client *client_p, struct Client *source_p, int parc, const char *
 				sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
 					   me.name, parv[0], parv[1]);
 		}
-		else		/* only asking  for topic  */
+		else if(MyClient(source_p))
 		{
 			if(!IsMember(source_p, chptr) && SecretChannel(chptr))
 			{
@@ -133,14 +133,14 @@ m_topic(struct Client *client_p, struct Client *source_p, int parc, const char *
 			}
 			if(chptr->topic == NULL)
 				sendto_one(source_p, form_str(RPL_NOTOPIC),
-					   me.name, parv[0], parv[1]);
+					   me.name, source_p->name, parv[1]);
 			else
 			{
 				sendto_one(source_p, form_str(RPL_TOPIC),
-					   me.name, parv[0], chptr->chname, chptr->topic);
+					   me.name, source_p->name, chptr->chname, chptr->topic);
 
 				sendto_one(source_p, form_str(RPL_TOPICWHOTIME),
-					   me.name, parv[0], chptr->chname,
+					   me.name, source_p->name, chptr->chname,
 					   chptr->topic_info, chptr->topic_time);
 			}
 		}

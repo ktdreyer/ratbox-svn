@@ -91,7 +91,8 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 
 		if(*mask == '\0')
 		{
-			sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], "*");
+			sendto_one(source_p, form_str(RPL_ENDOFWHO), 
+				   me.name, source_p->name, "*");
 			return 0;
 		}
 	}
@@ -113,7 +114,8 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 		}
 
 		who_global(source_p, mask, server_oper);
-		sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], "*");
+		sendto_one(source_p, form_str(RPL_ENDOFWHO),
+			   me.name, source_p->name, "*");
 		return 0;
 	}
 
@@ -131,7 +133,8 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 			do_who_on_channel(source_p, msptr->chptr, server_oper, YES);
 		}
 
-		sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], "*");
+		sendto_one(source_p, form_str(RPL_ENDOFWHO),
+			   me.name, source_p->name, "*");
 		return 0;
 	}
 
@@ -147,7 +150,8 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 			else if(!SecretChannel(chptr))
 				do_who_on_channel(source_p, chptr, server_oper, NO);
 		}
-		sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], mask);
+		sendto_one(source_p, form_str(RPL_ENDOFWHO),
+			   me.name, source_p->name, mask);
 		return 0;
 	}
 
@@ -182,7 +186,8 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 		else
 			do_who(source_p, target_p, NULL, "");
 
-		sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], mask);
+		sendto_one(source_p, form_str(RPL_ENDOFWHO), 
+			   me.name, source_p->name, mask);
 		return 0;
 	}
 
@@ -209,7 +214,8 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 		who_global(source_p, mask, server_oper);
 
 	/* Wasn't a nick, wasn't a channel, wasn't a '*' so ... */
-	sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], mask);
+	sendto_one(source_p, form_str(RPL_ENDOFWHO),
+		   me.name, source_p->name, mask);
 
 	return 0;
 }

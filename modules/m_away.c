@@ -94,7 +94,8 @@ m_away(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			source_p->user->away = NULL;
 		}
 		if(MyConnect(source_p))
-			sendto_one(source_p, form_str(RPL_UNAWAY), me.name, parv[0]);
+			sendto_one(source_p, form_str(RPL_UNAWAY),
+				   me.name, source_p->name);
 		return 0;
 	}
 
@@ -129,7 +130,7 @@ m_away(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	source_p->user->away = away;
 
 	if(MyConnect(source_p))
-		sendto_one(source_p, form_str(RPL_NOWAWAY), me.name, parv[0]);
+		sendto_one(source_p, form_str(RPL_NOWAWAY), me.name, source_p->name);
 
 	return 0;
 }
