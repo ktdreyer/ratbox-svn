@@ -209,7 +209,7 @@ ms_tmode(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(IsServer(source_p))
 	{
 		set_channel_mode(client_p, source_p, chptr, NULL,
-				 parc - 2, parv + 2);
+				 parc - 3, parv + 3);
 	}
 	else
 	{
@@ -220,7 +220,7 @@ ms_tmode(struct Client *client_p, struct Client *source_p, int parc, const char 
 			return 0;
 
 		set_channel_mode(client_p, source_p, chptr, msptr, 
-			         parc - 2, parv + 2);
+			         parc - 3, parv + 3);
 	}
 
 	return 0;
