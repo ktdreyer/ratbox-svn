@@ -95,6 +95,7 @@ extern struct Message kill_msgtab;
 extern struct Message kline_msgtab;
 extern struct Message dline_msgtab;
 extern struct Message knock_msgtab;
+extern struct Message knockll_msgtab;
 extern struct Message links_msgtab;
 extern struct Message list_msgtab;
 extern struct Message lljoin_msgtab;
