@@ -1,3 +1,15 @@
+androsyn    2003/08/12 10:19:52 EDT	(20030812_1)
+
+  Modified files:
+    src                  s_user.c 
+  Log:
+  Removed a pointless static declaration of a global function
+  
+  Revision  Changes    Path
+  7.282     +0 -2      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2003/08/11 20:10:54 EDT	(20030812_0)
 
   Modified files:
