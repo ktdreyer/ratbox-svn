@@ -2384,7 +2384,8 @@ void get_printable_conf(struct ConfItem *aconf, char **name, char **host,
 void recheck_clients()
 {
   struct Client *cptr;
-  dlink_node *ptr;
+  dlink_node *ptr, *ptr2, *nptr;
+
   for (ptr=lclient_list.head; ptr; ptr=ptr->next)
     {
       cptr = ptr->data;
@@ -2395,6 +2396,17 @@ void recheck_clients()
 #else
       remove_one_ip(cptr->localClient->ip.s_addr);
 #endif
+
+      /* detach old confs */
+      for( ptr2 = cptr->localClient->confs.head; ptr2; ptr2 = nptr )
+	{
+	  nptr = ptr2->next;
+	  if ( ptr2->data && ( ((struct ConfItem *) ptr2->data)->status & CONF_CLIENT_MASK )) {
+	    detach_conf(cptr, ptr2->data);
+	  }
+	}
+
+      /* attach new */
       check_client(cptr->servptr, cptr, cptr->username);
     }
 };
@@ -3195,7 +3207,7 @@ void yyerror(char *msg)
 
   strip_tabs(newlinebuf, linebuf, strlen(linebuf));
 
-  sendto_realops_flags(FLAGS_ALL, "%d: %s on line: %s",
+  sendto_realops_flags(FLAGS_ALL,"%d: %s on line: %s",
 		       lineno, msg, newlinebuf);
 }
 

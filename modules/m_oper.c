@@ -76,9 +76,10 @@ char *_version = "20001122";
 */
 int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  struct ConfItem *aconf;
+  struct ConfItem *aconf, *oconf;
   char  *name;
   char  *password;
+  dlink_node *ptr;
 
   name = parc > 1 ? parv[1] : (char *)NULL;
   password = parc > 2 ? parv[2] : (char *)NULL;
@@ -105,6 +106,15 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   if ( match_oper_password(password,aconf) )
     {
+      /*
+	20001216:
+	detach old iline
+	-einride
+      */
+      ptr = sptr->localClient->confs.head;
+      oconf = ptr->data;
+      detach_conf(sptr,oconf);
+
       if( attach_conf(sptr, aconf) != 0 )
 	{
 	  sendto_one(sptr,":%s NOTICE %s :Can't attach conf!",
@@ -112,11 +122,17 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	  sendto_realops_flags(FLAGS_ALL,
                        "Failed OPER attempt by %s (%s@%s) can't attach conf!",
 			 sptr->name, sptr->username, sptr->host);
+	  /* 
+	     20001216:
+	     Reattach old iline
+	     -einride
+	  */
+	  attach_conf(sptr, oconf);
 	  return 0;
 	}
 
       (void)oper_up( sptr, aconf );
-
+      
       log(L_TRACE, "OPER %s by %s!%s@%s",
 	  name, sptr->name, sptr->username, sptr->host);
       log_oper(sptr, name);

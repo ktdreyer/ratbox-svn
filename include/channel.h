@@ -108,6 +108,7 @@ extern void    remove_user_from_channel(struct Channel *chptr,
 extern int     can_send (struct Channel *chptr, struct Client *who);
 extern int     is_banned (struct Channel *chptr, struct Client *who);
 
+extern int     can_join(struct Client *sptr, struct Channel *chptr, char *key);
 extern int     is_chan_op (struct Channel *chptr,struct Client *who);
 extern int     is_any_op (struct Channel *chptr,struct Client *who);
 extern int     is_half_op (struct Channel *chptr,struct Client *who);

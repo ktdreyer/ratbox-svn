@@ -63,7 +63,6 @@ void build_list_of_channels( struct Client *sptr,
                				    char *jbuf, char *given_names);
 void do_join_0(struct Client *cptr, struct Client *sptr);
 void check_spambot_warning( struct Client *sptr, char *name );
-int can_join (struct Client *, struct Channel *, char *);
 
 char *_version = "20001122";
 
@@ -538,38 +537,6 @@ void check_spambot_warning( struct Client *sptr, char *name )
     }
 }
 
-/*
- * can_join
- *
- * inputs	- 
- * output	- 
- * side effects - NONE
- */
-int can_join(struct Client *sptr, struct Channel *chptr, char *key)
-{
-  dlink_node  *lp;
-  int ban_or_exception;
-
-  if ((ban_or_exception = is_banned(chptr,sptr)) == CHFL_BAN)
-    return (ERR_BANNEDFROMCHAN);
-
-  if (chptr->mode.mode & MODE_INVITEONLY)
-    {
-      for (lp = sptr->user->invited.head; lp; lp = lp->next)
-        if (lp->data == chptr)
-          break;
-      if (!lp)
-        return (ERR_INVITEONLYCHAN);
-    }
-
-  if (*chptr->mode.key && (BadPtr(key) || irccmp(chptr->mode.key, key)))
-    return (ERR_BADCHANNELKEY);
-
-  if (chptr->mode.limit && chptr->users >= chptr->mode.limit)
-    return (ERR_CHANNELISFULL);
-
-  return 0;
-}
 
 #ifdef DBOP
 /* ZZZZZZZZZZZZ Q&D debug function */

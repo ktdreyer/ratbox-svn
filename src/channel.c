@@ -533,6 +533,39 @@ static int change_channel_membership(struct Channel *chptr,
 
 /* small series of "helper" functions */
 /*
+ * can_join
+ *
+ * inputs	- 
+ * output	- 
+ * side effects - NONE
+ */
+int can_join(struct Client *sptr, struct Channel *chptr, char *key)
+{
+  dlink_node  *lp;
+  int ban_or_exception;
+
+  if ((ban_or_exception = is_banned(chptr,sptr)) == CHFL_BAN)
+    return (ERR_BANNEDFROMCHAN);
+
+  if (chptr->mode.mode & MODE_INVITEONLY)
+    {
+      for (lp = sptr->user->invited.head; lp; lp = lp->next)
+        if (lp->data == chptr)
+          break;
+      if (!lp)
+        return (ERR_INVITEONLYCHAN);
+    }
+
+  if (*chptr->mode.key && (BadPtr(key) || irccmp(chptr->mode.key, key)))
+    return (ERR_BADCHANNELKEY);
+
+  if (chptr->mode.limit && chptr->users >= chptr->mode.limit)
+    return (ERR_CHANNELISFULL);
+
+  return 0;
+}
+
+/*
  * is_chan_op
  *
  * inputs	- pointer to channel to check chanop on

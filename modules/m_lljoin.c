@@ -21,6 +21,7 @@
  */
 #include "tools.h"
 #include "channel.h"
+#include "vchannel.h"
 #include "client.h"
 #include "common.h"
 #include "hash.h"
@@ -99,7 +100,7 @@ int     ms_lljoin(struct Client *cptr,
       return 0;
     }
 
-  if( parc < 4 )
+  if( parc < 3 )
     return 0;
 
   chname = parv[1];
@@ -110,9 +111,9 @@ int     ms_lljoin(struct Client *cptr,
   if(nick == NULL)
     return 0;
 
-  key = parv[3];
-  if(key == NULL)
-    return 0;
+  key = NULL;
+  if(parc > 3 )
+    key = parv[3];
 
   flags = 0;
 

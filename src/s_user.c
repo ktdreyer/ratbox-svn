@@ -228,7 +228,7 @@ int show_lusers(struct Client *sptr)
   if (GlobalSetOptions.hide_server && !IsAnyOper(sptr))
     sendto_one(sptr, ":%s %d %s :There are %d users and %d invisible",
                me.name, RPL_LUSERCLIENT, sptr->name,
-               (Count.total-Count.invisi), Count.invisi);
+	       (Count.total-Count.invisi), Count.invisi);
   else
     sendto_one(sptr, form_str(RPL_LUSERCLIENT), me.name, sptr->name,
                (Count.total-Count.invisi), Count.invisi, Count.server);
@@ -835,6 +835,18 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 		      dlinkDelete(m,&oper_list);
 		      free_dlink_node(m);
 		    }
+
+		  /*
+		    20001216:
+		    reattach to "old" iline
+		    - einride
+		  */
+#ifdef IPV6
+		  remove_one_ip(sptr->localClient->ip6);
+#else
+		  remove_one_ip(sptr->localClient->ip.s_addr);
+#endif
+		  check_client(sptr->servptr, sptr, sptr->username);
                 }
             }
           break;
