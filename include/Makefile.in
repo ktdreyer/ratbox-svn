@@ -22,7 +22,6 @@ install:
 		mkdir $(prefix)/include; \
 	fi
 	@for header in *.h; do \
-	echo 	$$header; \
 		${INSTALL_DATA} $$header $(prefix)/include/ircd-hybrid-7; \
 	done
 

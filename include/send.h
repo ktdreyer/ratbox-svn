@@ -81,7 +81,13 @@ extern  void sendto_ll_channel_remote(struct Channel *, struct Client *cptr,
 				      const char *, ...);
 extern  void sendto_match_cap_servs(struct Channel *, struct Client *, 
                                     int, const char *, ...);
-                                    
+
+extern  void sendto_match_cap_servs_nocap(struct Channel *, struct Client *,
+											int, int, const char *, ...);
+
+extern void sendto_match_nocap_servs(struct Channel *, struct Client *,
+									 int, const char *, ...);
+
 extern  void sendto_match_butone(struct Client *, struct Client *, 
                                  char *, int, const char *, ...);
 
@@ -110,6 +116,12 @@ extern  void sendto_match_cap_servs(struct Channel *, struct Client *,
                                     int, const char *, ...)
 	    __attribute__((format (printf, 4, 5)));
 
+extern void sendto_match_cap_servs_nocap(struct Channel *, struct Client *, int, int, const char *, ...)
+	__attribute__((format (printf, 5, 6)));
+
+	extern void sendto_match_nocap_servs(struct Channel *, struct Client *, int, const char *, ...)
+	__attribute__((format (printf, 4, 5)));
+	
 extern  void sendto_match_butone(struct Client *, struct Client *, 
                                  char *, int, const char *, ...)
 	    __attribute__((format (printf, 5, 6)));
