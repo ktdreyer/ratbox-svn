@@ -1,3 +1,7 @@
+*** 20010124_6 by fl_
+- androsyn's ipv6 patch :)
+
+
 *** 20010124_5 by fl_
 - removed a remote rate limit in lusers.. this should only be done
   locally..
