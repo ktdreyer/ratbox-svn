@@ -1,4 +1,4 @@
-Overview of the network subsystem
+Overview of the network / filedescriptor subsystem
 Adrian Chadd <adrian@creative.net.au>
 
 $Id$
@@ -10,6 +10,11 @@ subsystem.
 The code is based loosely upon the network core found in the Squid web cache
 server, with some optimisations for the IO patterns an ircd will have.
 
+
+
+Socket operations
+-----------------
+
 Filedescriptor IO is initiated using comm_setselect(). comm_setselect()
 registers interest in reading from or writing to a file descriptor.
 When a filedescriptor is ready for the required IO a callback is called
@@ -18,10 +23,12 @@ from the IO loop.
 The comm_setselect() usage is:
 
 void
-comm_setselect(int fd, int type, PF *callback, void *cbdata, int timeout)
+comm_setselect(int fd, fdlist_t list, int type, PF *callback, void *cbdata,
+    int timeout)
 
 where:
   fd 		filedescriptor
+  list		Which list the FD should be put on
   type		IO type. Can currently include:
 			COMM_SELECT_READ  - register for read
 			COMM_SELECT_WRITE - register for write
@@ -35,7 +42,8 @@ A typical use is:
 ..
 
 /* Register interest in the FD for a read event */
-comm_setselect(fd, COMM_SELECT_READ, read_callback, read_data, 0);
+comm_setselect(fd, FDLIST_SERVICE, COMM_SELECT_READ, read_callback, read_data,
+    0);
 
 ..
 
@@ -49,6 +57,102 @@ read_callback(int fd, void *data)
 
     ..
     /* Ok, we need to read some more when its ready */
-    comm_setselect(fd, COMM_SELECT_READ, read_callback, data, 0);
+    comm_setselect(fd, FDLIST_SERVICE, COMM_SELECT_READ, read_callback, data,
+        0);
 }
+
+
+
+comm_open() - a socket() wrapper, enforcing fd limitations and tagging the
+  file descriptor with a note
+comm_accept() - an accept() wrapper, enforcing fd limitations and tagging
+  the file descriptor with a note
+comm_connect_tcp() - attempt an async connect(). Handles DNS lookups if
+  required, and will call the given callback at completion or error
+
+Notes:
+
+* All socket creation should go through comm_open() / comm_accept().
+* All socket closing should go through fd_close(). comm_close() isn't
+  implemented yet.
+* comm_connect_tcp() is your best friend. :-)
+* *ALL* network sockets should be non-blocking. If your OS doesn't support
+  non-blocking sockets, you shouldn't be here.
+
+
+
+Filedescriptor lists
+--------------------
+
+The filedescriptor list is managed through the routines in fdlist.c .
+These include:
+
+fd_open() - tag an FD as "open" and active
+fd_close() - tag an FD as "closed" and close() the filedescriptor
+fd_note() - update the filedescriptor tag
+
+You can get the current list of open filedescriptors through /stats F as
+an oper.
+
+
+
+FD lists
+--------
+
+The FD list support is very alpha. There are a few lists defined:
+
+typedef enum fdlist_t {
+    FDLIST_NONE,
+    FDLIST_SERVICE,
+    FDLIST_SERVER,
+    FDLIST_IDLECLIENT,
+    FDLIST_BUSYCLIENT,
+    FDLIST_MAX
+} fdlist_t;
+
+FDLIST_NONE		Not on any list (ie close()d)
+FDLIST_SERVICE		A service - listen() sockets, resolver, etc
+FDLIST_SERVER		Server connections
+FDLIST_IDLECLIENT	An idle client
+FDLIST_BUSYCLIENT	A busy client
+FDLIST_MAX		Used for bounds checking
+
+The idea is that the SERVICE sockets need polling frequently, the SERVER
+sockets also need polling frequently, BUSYCLIENT is for busy clients
+which need frequent polling (eg we're trying to write to them), and
+IDLECLIENT is for clients which we don't need to poll frequently.
+THIS hasn't been decided upon yet.
+
+
+
+File operations
+---------------
+
+The file operations are also wrapped through file_open() and file_close()
+which handle calling fd_open() / fd_close() and tracking the filedescriptors
+correctly. fbopen() / fbclose() use file_open() / file_close() too.
+
+fileio.c defines the functions:
+
+int
+file_open(const char *filename, int mode, int fmode)
+
+A wrapper around open(filename, flags, mode). Read the open manpage for
+information. file_open() enforces filedescriptor limits and tags the FD
+through fd_open().
+
+void
+file_close(int fd)
+
+A wrapper around close() for files. close() handles fd_close()ing the fd.
+
+
+FBFILE *
+fbopen(const char *filename, const char *mode)
+
+void
+fbclose(FBFILE *fb)
+
+These are the 'buffered disk IO' routines. You can read the code yourself.
+Note that these routines use file_open() and file_close().
 
