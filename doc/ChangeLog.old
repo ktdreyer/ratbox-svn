@@ -1,3 +1,9 @@
+*** 20001020_1 by toot
+msg nick with no text made it core..
+privmsg/notice give different errors depending what args are missing, so
+they check it instead of parse()
+
+
 *** 20001019_5 by toot
 /list #channel was showing the wrong key :P
 
