@@ -103,9 +103,9 @@ hash.o: hash.c ../include/stdinc.h ../include/config.h \
  ../include/send.h ../include/s_debug.h ../include/fdlist.h \
  ../include/msg.h ../include/handlers.h
 hook.o: hook.c ../include/stdinc.h ../include/config.h \
- ../include/setup.h ../include/defaults.h ../include/tools.h \
- ../include/hook.h ../include/memory.h ../include/ircd_defs.h \
- ../include/balloc.h
+ ../include/setup.h ../include/defaults.h ../include/memory.h \
+ ../include/ircd_defs.h ../include/balloc.h ../include/tools.h \
+ ../include/hook.h
 hostmask.o: hostmask.c ../include/stdinc.h ../include/config.h \
  ../include/setup.h ../include/defaults.h ../include/memory.h \
  ../include/ircd_defs.h ../include/balloc.h ../include/tools.h \
@@ -152,7 +152,8 @@ kdparse.o: kdparse.c ../include/stdinc.h ../include/config.h \
  ../include/client.h ../include/ircd_handler.h ../include/linebuf.h \
  ../include/channel.h ../include/res.h ../adns/adns.h \
  ../include/ircd.h ../include/memory.h ../include/balloc.h \
- ../include/irc_string.h ../include/common.h ../include/hostmask.h
+ ../include/irc_string.h ../include/common.h ../include/hostmask.h \
+ ../include/resv.h
 linebuf.o: linebuf.c ../include/stdinc.h ../include/config.h \
  ../include/setup.h ../include/defaults.h ../include/tools.h \
  ../include/client.h ../include/ircd_defs.h ../include/ircd_handler.h \
@@ -306,6 +307,14 @@ s_bsd.o: s_bsd.c ../include/stdinc.h ../include/config.h \
 s_bsd_kqueue.o: s_bsd_kqueue.c ../include/config.h ../include/setup.h \
  ../include/defaults.h
 s_bsd_poll.o: s_bsd_poll.c ../include/config.h ../include/setup.h \
+ ../include/defaults.h
+s_bsd_select.o: s_bsd_select.c ../include/config.h ../include/setup.h \
+ ../include/defaults.h
+s_bsd_devpoll.o: s_bsd_devpoll.c ../include/config.h \
+ ../include/setup.h ../include/defaults.h
+s_bsd_sigio.o: s_bsd_sigio.c ../include/config.h ../include/setup.h \
+ ../include/defaults.h
+s_bsd_epoll.o: s_bsd_epoll.c ../include/config.h ../include/setup.h \
  ../include/defaults.h ../include/stdinc.h ../include/fdlist.h \
  ../include/ircd_defs.h ../include/res.h ../include/fileio.h \
  ../adns/adns.h ../include/ircd.h ../include/tools.h \
@@ -317,12 +326,6 @@ s_bsd_poll.o: s_bsd_poll.c ../include/config.h ../include/setup.h \
  ../include/s_conf.h ../include/motd.h ../include/s_log.h \
  ../include/s_serv.h ../include/s_stats.h ../include/send.h \
  ../include/s_debug.h
-s_bsd_select.o: s_bsd_select.c ../include/config.h ../include/setup.h \
- ../include/defaults.h
-s_bsd_devpoll.o: s_bsd_devpoll.c ../include/config.h \
- ../include/setup.h ../include/defaults.h
-s_bsd_sigio.o: s_bsd_sigio.c ../include/config.h ../include/setup.h \
- ../include/defaults.h
 s_conf.o: s_conf.c ../include/stdinc.h ../include/config.h \
  ../include/setup.h ../include/defaults.h ../include/ircd_defs.h \
  ../include/tools.h ../include/s_conf.h ../include/fileio.h \
@@ -378,11 +381,11 @@ s_misc.o: s_misc.c ../include/stdinc.h ../include/config.h \
  ../include/motd.h ../include/class.h ../include/s_serv.h \
  ../include/send.h
 s_serv.o: s_serv.c ../include/stdinc.h ../include/config.h \
- ../include/setup.h ../include/defaults.h ../include/tools.h \
- ../include/s_serv.h ../include/channel_mode.h ../include/ircd_defs.h \
- ../include/class.h ../include/client.h ../include/ircd_handler.h \
- ../include/linebuf.h ../include/channel.h ../include/res.h \
- ../include/fileio.h ../adns/adns.h ../include/ircd.h \
+ ../include/setup.h ../include/defaults.h ../include/rsa.h \
+ ../include/tools.h ../include/s_serv.h ../include/channel_mode.h \
+ ../include/ircd_defs.h ../include/class.h ../include/client.h \
+ ../include/ircd_handler.h ../include/linebuf.h ../include/channel.h \
+ ../include/res.h ../include/fileio.h ../adns/adns.h ../include/ircd.h \
  ../include/memory.h ../include/balloc.h ../include/irc_string.h \
  ../include/common.h ../include/event.h ../include/fdlist.h \
  ../include/hash.h ../include/md5.h ../include/sprintf_irc.h \
