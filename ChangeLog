@@ -1,3 +1,51 @@
+leeh        2004/02/18 16:45:28 EST	(20040218_2)
+
+  Modified files:
+    .                    .cvsignore 
+    include              s_oldnewconf.h 
+    modules              .depend m_encap.c m_join.c m_kline.c 
+                         m_locops.c m_resv.c m_stats.c m_xline.c 
+    modules/core         m_nick.c 
+    src                  .depend Makefile.in channel.c client.c 
+                         hash.c ircd.c kdparse.c newconf.c 
+                         s_conf.c s_oldnewconf.c s_user.c 
+  Removed files:
+    include              cluster.h 
+    src                  cluster.c 
+  Log:
+  - fixed the build for s_newconf.? -> s_oldnewconf.?
+  - redid the whole cluster/shared thing, theyre now in the same struct
+    in a shiny spanking new s_newconf.? (although actual clustering is broken
+    atm)
+  
+  Revision  Changes    Path
+  1.5       +1 -0      ircd-ratbox/.cvsignore
+  7.8       +0 -80     ircd-ratbox/include/cluster.h (dead)
+  7.15      +2 -9      ircd-ratbox/include/s_oldnewconf.h
+  1.36      +676 -0    ircd-ratbox/modules/.depend
+  1.137     +2 -1      ircd-ratbox/modules/core/m_nick.c
+  1.14      +2 -2      ircd-ratbox/modules/m_encap.c
+  1.143     +2 -1      ircd-ratbox/modules/m_join.c
+  1.170     +9 -21     ircd-ratbox/modules/m_kline.c
+  1.45      +4 -3      ircd-ratbox/modules/m_locops.c
+  1.46      +10 -9     ircd-ratbox/modules/m_resv.c
+  1.189     +26 -38    ircd-ratbox/modules/m_stats.c
+  1.37      +8 -9      ircd-ratbox/modules/m_xline.c
+  7.38      +19 -32    ircd-ratbox/src/.depend
+  7.144     +2 -2      ircd-ratbox/src/Makefile.in
+  7.398     +1 -1      ircd-ratbox/src/channel.c
+  7.421     +1 -1      ircd-ratbox/src/client.c
+  7.10      +0 -212    ircd-ratbox/src/cluster.c (dead)
+  7.91      +1 -1      ircd-ratbox/src/hash.c
+  7.323     +1 -1      ircd-ratbox/src/ircd.c
+  7.30      +1 -1      ircd-ratbox/src/kdparse.c
+  7.125     +45 -55    ircd-ratbox/src/newconf.c
+  7.442     +2 -4      ircd-ratbox/src/s_conf.c
+  7.15      +2 -93     ircd-ratbox/src/s_oldnewconf.c
+  7.302     +1 -1      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2004/02/18 16:31:01 EST	(20040218_1)
 
   Removed files:
