@@ -204,7 +204,7 @@ find_matching_conf(const char *host, const char *user,
  ircsprintf(buffer, "%s@%s", user, host);
  if ((hm = match_hostmask(buffer, HOST_CONFITEM)))
    aconf = (struct ConfItem*)hm->data;
- if (aconf->status == CONF_KILL)
+ if (aconf && aconf->status == CONF_KILL)
    {
     aconf_k = aconf;
     aconf = NULL;
