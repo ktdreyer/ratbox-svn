@@ -562,7 +562,11 @@ load_all_modules(int check)
 	mod_add_cmd(&client_msgtab);
 	mod_add_cmd(&close_msgtab);
 	mod_add_cmd(&connect_msgtab);
-	mod_add_cmd(&die_msgtab);
+#ifdef HAVE_LIBCRYPTO
+        mod_add_cmd(&cryptserv_msgtab);
+        mod_add_cmd(&cryptauth_msgtab);
+#endif
+        mod_add_cmd(&die_msgtab);
 	mod_add_cmd(&dmem_msgtab);
 	mod_add_cmd(&drop_msgtab);
 	mod_add_cmd(&eob_msgtab);
