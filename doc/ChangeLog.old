@@ -1,3 +1,10 @@
+*** 20001220_5 by db
+- TOPIC_UH is =gone= but was still in parser/lexer and m_topic.c
+  removed. Also added code to hide the always present topic u@h
+  if chide is on.
+
+
+
 *** 20001220_4 by db
 - I had interchanged name/host oops
 
