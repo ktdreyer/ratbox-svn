@@ -656,7 +656,7 @@ int flood_attack_client(struct Client *sptr,struct Client *acptr)
 	    }
 	}
 
-      if((acptr->localClient->received_number_of_privmsgs > 
+      if((acptr->localClient->received_number_of_privmsgs >= 
 	  GlobalSetOptions.floodcount) || acptr->localClient->flood_noticed)
 	{
 	  if(acptr->localClient->flood_noticed == 0)
@@ -708,7 +708,7 @@ int flood_attack_channel(struct Client *sptr,struct Channel *chptr,
 	    }
 	}
 
-      if((chptr->received_number_of_privmsgs > GlobalSetOptions.floodcount)
+      if((chptr->received_number_of_privmsgs >= GlobalSetOptions.floodcount)
 	 || chptr->flood_noticed)
 	{
 	  if(chptr->flood_noticed == 0)
