@@ -98,18 +98,21 @@ int m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       /* this was segfaulting if we had no servers linked.
        *  -pro
        */
-      if ( !ConfigFileEntry.hub && uplink &&
-	   IsCapable(uplink, CAP_LL) )
+      /* only send a mode upstream if a local client sent this request
+       * -davidt
+       */
+      if ( MyClient(sptr) && !ConfigFileEntry.hub && uplink &&
+	   IsCapable(uplink, CAP_LL))
 	{
 	  /* cache the channel if it exists on uplink
 	   * If the channel as seen by the uplink, has vchans,
 	   * the uplink will have to SJOIN all of those.
 	   */
 	  sendto_one(uplink, ":%s CBURST %s",
-		      me.name, parv[1]);
-	      
-	  sendto_one(uplink, ":%s MODE %s",
-		     sptr->name, parv[1]);
+                     me.name, parv[1]);
+	  
+	  sendto_one(uplink, ":%s MODE %s %s",
+		     sptr->name, parv[1], (parv[2] ? parv[2] : ""));
 	  return 0;
 	}
       else

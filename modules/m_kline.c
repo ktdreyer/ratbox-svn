@@ -411,10 +411,10 @@ time_t valid_tkline(struct Client *sptr, char *p)
   if(result == 0)
     result = 1;
 
-  if(result > 24)
-    result = 24; /* Max it at 24 hours */
+  if(result > (24*60))
+    result = (24*60); /* Max it at 24 hours */
 
-  result = (time_t)result * (time_t)60;  /* turn it into minutes */
+  result = (time_t)result * (time_t)60;  /* turn it into seconds */
 
   return(result);
 }
