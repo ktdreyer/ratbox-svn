@@ -1,3 +1,15 @@
+androsyn    2002/08/10 14:00:58 EDT	(20020810_26)
+
+  Modified files:
+    tools                convertconf.c 
+  Log:
+  Update convertconf to output connect "foo" {} type things
+  
+  Revision  Changes    Path
+  1.37      +11 -15    ircd-ratbox/tools/convertconf.c
+
+
+
 androsyn    2002/08/10 13:21:43 EDT	(20020810_25)
 
   Modified files:
