@@ -90,8 +90,8 @@
  *
  */
 
-#define DPATH   "/home/ejb/ircd/"
-#define SPATH   "/home/ejb/ircd/ircd"
+#define DPATH   "/usr/ejb/ircd/"
+#define SPATH   "/usr/ejb/ircd/ircd"
 #define CPATH   "ircd.conf"
 #define KPATH   "kline.conf"
 #define DLPATH  "kline.conf"
@@ -146,8 +146,8 @@
  *
  * These need to be defined if you want to use SYSLOG logging, too.
  */
-#define FNAME_USERLOG "/home/ejb/ircd/users" /* */
-#define FNAME_OPERLOG "/home/ejb/ircd/opers" /* */
+#define FNAME_USERLOG "/usr/ejb/ircd/users" /* */
+#define FNAME_OPERLOG "/usr/ejb/ircd/opers" /* */
 
 /* RFC1035_ANAL
  * Defining this causes ircd to reject hostnames with non-compliant chars.
@@ -162,7 +162,7 @@
  * messages, define this.  Otherwise leave it undef'd for plain ole
  * boring messages.
  */
-#undef CUSTOM_ERR
+#define CUSTOM_ERR
 
 
 /* SHOW_FAILED_OPER_PASSWD - if FAILED_OPER_NOTICE is defined, also show the
@@ -508,6 +508,13 @@
  */
 
 #undef NO_PRIORITY
+
+/*
+ * Define this to enable IPv6 support.  IPv6 is currently still being
+ * developed, and is not guarenteed to work properly..
+ */
+
+#undef IPV6
 
 /*   STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP  */
 

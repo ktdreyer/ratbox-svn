@@ -28,6 +28,7 @@
 #include "s_conf.h"
 #include "s_stats.h"
 #include "send.h"
+#include "config.h"
 
 #include <assert.h>
 #include <string.h>
@@ -109,7 +110,7 @@ void show_ports(struct Client* sptr)
 }
   
 /*
- * inetport - create a listener socket in the AF_INET domain, 
+ * inetport - create a listener socket in the AF_INET or AF_INET6 domain, 
  * bind it to the port given in 'port' and listen to it  
  * returns true (1) if successful false (0) on error.
  *
@@ -123,14 +124,22 @@ void show_ports(struct Client* sptr)
 
 static int inetport(struct Listener* listener)
 {
+#ifdef IPV6
+  struct sockaddr_in6 sin6;
+#else
   struct sockaddr_in sin;
+#endif
   int                fd;
   int                opt = 1;
 
   /*
    * At first, open a new socket
    */
+#ifdef IPV6
+  fd = socket(AF_INET6, SOCK_STREAM, 0);
+#else
   fd = socket(AF_INET, SOCK_STREAM, 0);
+#endif
 
   if (-1 == fd) {
     report_error("opening listener socket %s:%s", 
@@ -158,11 +167,19 @@ static int inetport(struct Listener* listener)
    * Bind a port to listen for new connections if port is non-null,
    * else assume it is already open and try get something from it.
    */
+#ifdef IPV6
+  memset(&sin6, 0, sizeof(sin6));
+  sin6.sin6_family = AF_INET6;
+  memcpy(&sin6.sin6_addr.s6_addr, &in6addr_any, sizeof(in6addr_any));
+  sin6.sin6_port = htons(listener->port);
+#else
   memset(&sin, 0, sizeof(sin));
   sin.sin_family = AF_INET;
   sin.sin_addr   = listener->addr;
   sin.sin_port   = htons(listener->port);
+#endif
 
+#ifndef IPV6
   if (INADDR_ANY != listener->addr.s_addr) {
     struct hostent* hp;
     /*
@@ -174,8 +191,13 @@ static int inetport(struct Listener* listener)
       listener->name = listener->vhost;
     }
   }
+#endif
 
+#ifdef IPV6
+  if (bind(fd, (struct sockaddr*) &sin6, sizeof(sin6))) {
+#else
   if (bind(fd, (struct sockaddr*) &sin, sizeof(sin))) {
+#endif
     report_error("binding listener socket %s:%s", 
                  get_listener_name(listener), errno);
     close(fd);

@@ -309,6 +309,7 @@ time_t check_pings(time_t currenttime)
             {
               if(IsPerson(cptr))
                 {
+#ifndef IPV6 /* XXX No dlines in IPv6 yet */
                   if( (aconf = match_Dline(ntohl(cptr->ip.s_addr))) )
 
                       /* if there is a returned 
@@ -349,6 +350,7 @@ time_t check_pings(time_t currenttime)
                                  me.name, cptr->name, reason);
                       continue;         /* and go examine next fd/cptr */
                     }
+#endif
                 }
             }
           else
@@ -1373,7 +1375,11 @@ const char* comment         /* Reason for the exit */
         remove_one_ip(sptr);
 #else
       if(sptr->flags & FLAGS_IPHASH)
+#ifdef IPV6
+        remove_one_ip(sptr->ip6.s6_addr);
+#else
         remove_one_ip(sptr->ip.s_addr);
+#endif
 #endif
       if (IsAnOper(sptr))
         {

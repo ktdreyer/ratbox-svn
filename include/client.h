@@ -233,7 +233,11 @@ struct Client
   int               priority;
   struct Listener*  listener;   /* listener accepted from */
   struct SLink*     confs;      /* Configuration record associated */
-  struct in_addr    ip;       /* IPv6 */
+#ifdef IPV6
+  struct in6_addr    ip6;       /* Client's IP*/
+#else
+  struct in_addr	ip;	/* non-ipv6 version */
+#endif
   unsigned short    port;       /* and the remote port# too :-) */
   struct DNSReply*  dns_reply;  /* result returned from resolver query */
   unsigned long     serverMask; /* Only used for Lazy Links */

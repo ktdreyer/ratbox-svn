@@ -25,6 +25,8 @@
 #define INCLUDED_sys_types_h
 #endif
 
+#include <netinet/in.h>
+
 /*
  * match - compare name with mask, mask may contain * and ? as wildcards
  * match - returns 1 on successful match, 0 otherwise
@@ -76,6 +78,7 @@ extern void*       MyMalloc(size_t size);
 extern void*       MyRealloc(void* p, size_t size);
 /* MyFree is defined as a macro in ircd_defs.h */
 /* extern void MyFree(void* p); */
+extern char* mk6addrstr(struct in6_addr *addr);
 
 #define DupString(x,y) \
   do{ x = (char*) MyMalloc(strlen(y) + 1); strcpy(x, y); } while(0)

@@ -716,7 +716,11 @@ static int count_users_on_this_ip(IP_ENTRY *ip_list,
 #ifdef LIMIT_UH
 void remove_one_ip(struct Client *cptr)
 #else
+#ifdef IPV6
+void remove_one_ip(struct in6_addr *ip_in)
+#else
 void remove_one_ip(unsigned long ip_in)
+#endif
 #endif
 {
   int hash_index;

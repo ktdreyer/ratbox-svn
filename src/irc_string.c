@@ -231,3 +231,47 @@ const char* inetntoa(const char* in)
   return buf;
 }
 
+#ifdef IPV6
+/* mk6addrstr - convert an IPv6 IP into a string */
+
+#define IP6ADDRLEN 40
+
+char *
+mk6addrstr(struct in6_addr *addr)
+{
+        uint8_t *cp = (uint8_t *)&addr->s6_addr;
+        char dest2[IP6ADDRLEN + 1];
+        static char dest[IP6ADDRLEN + 1];
+        char *c;
+        int i = 0, k = 0, j;
+        int lo = -1;
+        int am = 0;
+        int le = 0;
+
+        /* hehe */
+        sprintf(dest2, "%x%x%x%x:%x%x%x%x:%x%x%x%x:%x%x%x%x:%x%x%x%x:%x%x%x%x:%x
+%x%x%x:%x%x%x%x",
+                        cp[0]  >> 4, cp[0]  & 0xf, cp[1]  >> 4, cp[1]  & 0xf,
+                        cp[2]  >> 4, cp[2]  & 0xf, cp[3]  >> 4, cp[3]  & 0xf,
+                        cp[4]  >> 4, cp[4]  & 0xf, cp[5]  >> 4, cp[5]  & 0xf,
+                        cp[6]  >> 4, cp[6]  & 0xf, cp[7]  >> 4, cp[7]  & 0xf,
+                        cp[8]  >> 4, cp[8]  & 0xf, cp[9]  >> 4, cp[9]  & 0xf,
+                        cp[10] >> 4, cp[10] & 0xf, cp[11] >> 4, cp[11] & 0xf,
+                        cp[12] >> 4, cp[12] & 0xf, cp[13] >> 4, cp[13] & 0xf,
+                        cp[14] >> 4, cp[14] & 0xf, cp[15] >> 4, cp[15] & 0xf);
+        /* remove excessive zeros */
+        for(j = 0, k = 0; dest2[j];) 
+        {
+                if (dest2[j] == ':') 
+                {
+                        dest[2++] = dest2[j++];
+                        while(dest2[j] == '0')
+                                j++;
+                        continue;
+                }
+                dest[k++] = dest2[j++];
+        }
+        dest[k] = 0;
+        return dest;
+}
+#endif
