@@ -360,17 +360,17 @@ void apply_kline(struct Client *sptr, struct ConfItem *aconf,
  * side effects	- tkline as given is placed
  */
 void apply_tkline(struct Client *sptr, struct ConfItem *aconf,
-		  const char *current_date, int temporary_kline_time,
+		  const char *current_date, int tkline_time,
 		  int ip_kline, unsigned long ip, unsigned long ip_mask)
 {
-  aconf->hold = CurrentTime + temporary_kline_time;
+  aconf->hold = CurrentTime + tkline_time;
   add_temp_kline(aconf);
   sendto_realops_flags(FLAGS_ALL,
 		       "%s added temporary %d min. K-Line for [%s@%s] [%s]",
 		       sptr->name,
-		       temporary_kline_time/60,
-		       user,
-		       host,
+		       tkline_time/60,
+		       aconf->user,
+		       aconf->host,
 		       aconf->passwd);
   check_klines();
 }
