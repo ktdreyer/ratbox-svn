@@ -31,6 +31,7 @@
 #include "common.h"
 #include "config.h"
 #include "irc_string.h"
+#include "sprintf_irc.h"
 #include "ircd.h"
 #include "m_kline.h"
 #include "hostmask.h"

@@ -25,7 +25,7 @@
 #include "stdinc.h"
 #include "handlers.h"
 #include "client.h"
-#include "hash.h"       /* for find_client() */
+#include "hash.h"      
 #include "ircd.h"
 #include "list.h"
 #include "numeric.h"
@@ -34,6 +34,7 @@
 #include "send.h"
 #include "msg.h"
 #include "parse.h"
+#include "sprintf_irc.h"
 #include "modules.h"
 
 static void m_accept(struct Client*, struct Client*, int, char**);

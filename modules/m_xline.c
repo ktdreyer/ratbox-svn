@@ -44,6 +44,7 @@
 #include "s_serv.h"
 #include "whowas.h"
 #include "irc_string.h"
+#include "sprintf_irc.h"
 #include "hash.h"
 #include "msg.h"
 #include "parse.h"
