@@ -1,3 +1,15 @@
+androsyn    2003/06/26 13:54:28 UTC	(20030626_0)
+
+  Removed files:         (Branch: STABLE)
+    .                    README.epoll 
+  Log:
+  Remove README.epoll from STABLE
+  
+  Revision  Changes    Path
+  1.1.4.1   +0 -16     ircd-ratbox/README.epoll (dead)
+
+
+
 androsyn    2003/06/25 19:36:29 UTC	(20030625_3)
 
   Modified files:
