@@ -1,3 +1,44 @@
+*** 20011021_1 by davidt
+- Commit of fixed table mode code:
+   * Non USE_TABLE_MODE code is gone.  If we commit this patch, we go
+     with USE_TABLE mode.
+   * The TABLE_MODE code has been broken out into channel_mode.[ch].
+   * -o on +a channels has been fixed to show the user being deopped the
+     mode change, and to resync their oplist.
+   * +a on channels has been fixed to resync the channel's oplist.
+   * The code has been cleaned up, although it's still a bit icky in some
+     places, but there shouldn't be any weird mystical -1/0/1 constants
+     lying around anymore.
+   * +b/-b from servers is NOT pretty_mask'ified (like the old code, I
+     beleive).
+   * -b from clients will be pretty_mask'ed, but if that doesn't match a
+     ban on the channel, the original, un prettified mask is checked.
+   * Misc other bug fixes.
+   * Misc other bugs introduced. (probably :)
+
+- If BOUNCE_BAD_HOPS is #define'd, the following is also done:
+   * +h is translated to +o for non CAP_HOPS servers
+     except towards the target's own server
+     (i.e. no priviledges can be gained using this).
+   * -h is translated to -o for non CAP_HOPS servers (this can never
+     happen towards the target's own server).
+   * -o is translated to -h from non CAP_HOPS servers.
+   * A +h on a client which is linked through a non CAP_HOPS server
+     is bounced back to the server that sent it (or dropped if from
+     a client) as sendto_one(client_p, ":%s MODE %s -h %s", me.name,
+     chptr->chname, target_p->name). [Although multiple bounces
+     are merged into one MODE].  Assuming source_p is a client,
+     a notice is also sent back.  Note that this notice will probably
+     break serverhiding, so something should be done about this if
+     we want to use BOUNCE_BAD_HOPS.
+   * BOUNCE_BAD_HOPS will allow mixed CAP_HOPS/non CAP_HOPS nets to work
+     sanely(ish), by ensuring the whole net will see the client as privileged,
+     or unprivileged, and the clients local server will never see a +h'd user
+     as +o'd.
+- This will probably have a few bugs, but it needs a few linked servers to
+  test properly.
+
+
 *** 20011020_1 by davidt
 - Back out memset of ConfigChannel and ConfigFileEntry, since CVS has
   been broken due to it for ages.  We need to zero it before we read the
