@@ -1,3 +1,8 @@
+*** 20001210_11 by db
+- fixed length error in sendto_realops_flags
+
+
+
 *** 20001210_10 by db
 - re-wrote send_operwall, renamed as sendto_all_local_opers()
   this necessitated changes to send.c send.h send.txt
