@@ -102,8 +102,11 @@ linebuf_new_line(buf_head_t *bufhead)
   dlink_node *node;
 
   bufline = linebuf_allocate();
+  if(bufline == NULL)
+    return NULL;
   ++bufline_count;
-
+  
+  
   node = make_dlink_node();
   
   bufline->len = 0;
