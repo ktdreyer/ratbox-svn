@@ -218,6 +218,9 @@ static void mr_cryptauth(struct Client *client_p, struct Client *source_p,
       return;
     }
 
+  /* set hopcount */
+  client_p->hopcount = 1;
+  
   SetCryptIn(client_p);
   ClearWaitAuth(client_p);
   server_estab(client_p);
