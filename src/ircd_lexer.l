@@ -141,6 +141,7 @@ network_desc    { return NETWORK_DESC; }
 nick_changes	{ return NICK_CHANGES; }
 no		{ return TNO; }
 no_tilde	{ return NO_TILDE; }
+no_hack_ops     { return NO_HACK_OPS; }
 no_oper_flood   { return NO_OPER_FLOOD; }
 number_per_ip	{ return NUMBER_PER_IP; }
 oper		{ return OPERATOR; }

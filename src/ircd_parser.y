@@ -124,6 +124,7 @@ int   class_redirport_var;
 %token  NETWORK_NAME
 %token  NETWORK_DESC
 %token  NICK_CHANGES
+%token  NO_HACK_OPS
 %token  NO_TILDE
 %token  NUMBER
 %token  NUMBER_PER_IP
@@ -283,8 +284,19 @@ serverinfo_items:       serverinfo_items serverinfo_item |
 serverinfo_item:        serverinfo_name | serverinfo_vhost |
                         serverinfo_hub | serverinfo_description |
                         serverinfo_network_name | serverinfo_network_desc |
-                        serverinfo_max_clients |
+                        serverinfo_max_clients | serverinfo_no_hack_ops |
 			error
+
+serverinfo_no_hack_ops: NO_HACK_OPS '=' TYES ';'
+  {
+    ServerInfo.no_hack_ops = 1;
+  }
+                  |
+                  NO_HACK_OPS '=' TNO ';'
+  {
+    ServerInfo.no_hack_ops = 0;
+  };
+
 
 serverinfo_name:        NAME '=' QSTRING ';' 
   {

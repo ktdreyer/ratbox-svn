@@ -215,6 +215,7 @@ struct server_info
   struct in_addr ip;
 #endif
   int         max_clients;
+  int         no_hack_ops;
 };
 
 struct admin_info

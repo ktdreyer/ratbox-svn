@@ -265,13 +265,20 @@ static int ms_sjoin(struct Client *cptr,
     tstosend = oldts;
   else if (newts < oldts)
     {
-      if (doesop)
-        keep_our_modes = NO;
-
-      if (chptr->opcount && !doesop)
-          tstosend = oldts;
+      if (ServerInfo.no_hack_ops)
+	{
+	  keep_our_modes = NO;
+	  chptr->channelts = tstosend = newts;
+	}
       else
-        chptr->channelts = tstosend = newts;
+	{
+	  if (doesop)
+	    keep_our_modes = NO;
+	  if (chptr->opcount && !doesop)
+	    tstosend = oldts;
+	  else
+	    chptr->channelts = tstosend = newts;
+	}
     }
   else
     {
@@ -552,140 +559,52 @@ static int ms_sjoin(struct Client *cptr,
  * side effects	- 
  */
 
+struct mode_letter {
+  int mode;
+  char letter;
+};
+
+struct mode_letter flags[] = {
+  { MODE_HIDEOPS,    'a' },
+  { MODE_PRIVATE,    'p' },
+  { MODE_SECRET,     's' },
+  { MODE_MODERATED,  'm' },
+  { MODE_NOPRIVMSGS, 'n' },
+  { MODE_TOPICLIMIT, 't' },
+  { MODE_INVITEONLY, 'i' }
+};
+
 static void set_final_mode(struct Mode *mode,struct Mode *oldmode)
 {
   int what = 0;
   char numeric[16];
   char *s;
+  int  i;
 
-  if ((MODE_HIDEOPS & mode->mode) && !(MODE_HIDEOPS & oldmode->mode))
-  {
-    if (what != 1)
-      {
-        *mbuf++ = '+';
-        what = 1;
-      }
-    *mbuf++ = 'a';
-  }
-  
-  if((MODE_PRIVATE    & mode->mode) && !(MODE_PRIVATE    & oldmode->mode))
+  for (i = 0; flags[i].letter; i++)
     {
-      if (what != 1)
-        {
-          *mbuf++ = '+';
-          what = 1;
-        }
-      *mbuf++ = 'p';
-    }
-  if((MODE_SECRET     & mode->mode) && !(MODE_SECRET     & oldmode->mode))
-    {
-      if (what != 1)
-        {
-          *mbuf++ = '+';
-          what = 1;
-        }
-      *mbuf++ = 's';
-    }
-  if((MODE_MODERATED  & mode->mode) && !(MODE_MODERATED  & oldmode->mode))
-    {
-      if (what != 1)
-        {
-          *mbuf++ = '+';
-          what = 1;
-        }
-      *mbuf++ = 'm';
-    }
-  if((MODE_NOPRIVMSGS & mode->mode) && !(MODE_NOPRIVMSGS & oldmode->mode))
-    {
-      if (what != 1)
-        {
-          *mbuf++ = '+';
-          what = 1;
-        }
-      *mbuf++ = 'n';
-    }
-  if((MODE_TOPICLIMIT & mode->mode) && !(MODE_TOPICLIMIT & oldmode->mode))
-    {
-      if (what != 1)
-        {
-          *mbuf++ = '+';
-          what = 1;
-        }
-      *mbuf++ = 't';
-    }
-  if((MODE_INVITEONLY & mode->mode) && !(MODE_INVITEONLY & oldmode->mode))
-    {
-      if (what != 1)
-        {
-          *mbuf++ = '+';
-          what = 1;             /* This one is actually redundant now */
-        }
-      *mbuf++ = 'i';
+      if ((flags[i].mode & mode->mode) && !(flags[i].mode & oldmode->mode))
+	{
+	  if (what != 1)
+	    {
+	      *mbuf++ = '+';
+	      what = 1;
+	    }
+	  *mbuf++ = flags[i].letter;
+	}
     }
 
-  if((MODE_PRIVATE    & oldmode->mode) && !(MODE_PRIVATE    & mode->mode))
+  for (i = 0; flags[i].letter; i++)
     {
-      if (what != -1)
-        {
-          *mbuf++ = '-';
-          what = -1;
-        }
-      *mbuf++ = 'p';
-    }
-  if((MODE_SECRET     & oldmode->mode) && !(MODE_SECRET     & mode->mode))
-    {
-      if (what != -1)
-        {
-          *mbuf++ = '-';
-          what = -1;
-        }
-      *mbuf++ = 's';
-    }
-  if ((MODE_HIDEOPS & oldmode->mode) && !(MODE_HIDEOPS & mode->mode))
-  {
-    if (what != -1)
-      {
-        *mbuf++ = '-';
-        what = -1;
-      }
-    *mbuf++ = 'a';
-  }
-  
-  if((MODE_MODERATED  & oldmode->mode) && !(MODE_MODERATED  & mode->mode))
-    {
-      if (what != -1)
-        {
-          *mbuf++ = '-';
-          what = -1;
-        }
-      *mbuf++ = 'm';
-    }
-  if((MODE_NOPRIVMSGS & oldmode->mode) && !(MODE_NOPRIVMSGS & mode->mode))
-    {
-      if (what != -1)
-        {
-          *mbuf++ = '-';
-          what = -1;
-        }
-      *mbuf++ = 'n';
-    }
-  if((MODE_TOPICLIMIT & oldmode->mode) && !(MODE_TOPICLIMIT & mode->mode))
-    {
-      if (what != -1)
-        {
-          *mbuf++ = '-';
-          what = -1;
-        }
-      *mbuf++ = 't';
-    }
-  if((MODE_INVITEONLY & oldmode->mode) && !(MODE_INVITEONLY & mode->mode))
-    {
-      if (what != -1)
-        {
-          *mbuf++ = '-';
-          what = -1;
-        }
-      *mbuf++ = 'i';
+      if ((flags[i].mode & oldmode->mode) && !(flags[i].mode & mode->mode))
+	{
+	  if (what != -1)
+	    {
+	      *mbuf++ = '-';
+	      what = -1;
+	    }
+	  *mbuf++ = flags[i].letter;
+	}
     }
 
   if (oldmode->limit && !mode->limit)
