@@ -8,7 +8,7 @@ people who have jumped up and taken responsibility for Hybrid, including
 making sure it compiles, runs, and doesn't crash.
 
 ARCHITECTURE COMPILER         SYSTEM	    MAINTAINER
-============ ================ ============= =====================================
+============ ================ ============= ===================================
 PowerPC      Apple gcc        Darwin        J. Mallett <jmallett@newgold.net>
 PowerPC      Apple gcc        Mac OS X      J. Mallett <jmallett@newgold.net>
 SPARC        gcc              OpenBSD       J. Mallett <jmallett@newgold.net>
@@ -19,7 +19,8 @@ SPARC        gcc              Solaris       Joan Touzet <joant@ieee.org>
 x86          Cygwin gcc       Windows       W. Campbell <wcampbel@botbay.net>
 x86          gcc              Linux         Aaron Sethman <androsyn@ratbox.org>
 SPARC        gcc              Linux         Aaron Sethman <androsyn@ratbox.org>
-Alpha        DEC C V6.0       OpenVMS 7.2   Edward Brocklesby <ejb@sdf.lonestar.org>
+Alpha        DEC C V6.0       OpenVMS 7.2   Edward Brocklesby
+                                                <ejb@sdf.lonestar.org>
 PA-RISC 2.0  cc		      HP-UX B.11    Yusuf Iskenderoglu 
 						<uhc0@stud.uni-karlsruhe.de>
 

@@ -13,7 +13,7 @@ messages to specific clients in a channel:
 The nick can be extended to fit into the following
 syntax:
 
-username[%hostname]@servername
+username@servername
 
-This syntax (without the hostname) is used to securely
-send a message to a service or a bot.
+This syntax is used to securely send a message to a
+service or a bot.
