@@ -365,7 +365,9 @@ add_id(struct Client *source_p, struct Channel *chptr, const char *banid,
 	char *realban = LOCAL_COPY(banid);
 	dlink_node *ptr;
 
-	/* dont let local clients overflow the banlist */
+	/* dont let local clients overflow the banlist, or set redundant
+	 * bans
+	 */
 	if(MyClient(source_p))
 	{
 		if(chptr->num_mask >= ConfigChannel.max_bans)
@@ -376,15 +378,24 @@ add_id(struct Client *source_p, struct Channel *chptr, const char *banid,
 		}
 
 		collapse(realban);
-	}
 
-	DLINK_FOREACH(ptr, list->head)
+		DLINK_FOREACH(ptr, list->head)
+		{
+			actualBan = ptr->data;
+			if(match(actualBan->banstr, realban))
+				return 0;
+		}
+	}
+	/* dont let remotes set duplicates */
+	else
 	{
-		actualBan = ptr->data;
-		if(match(actualBan->banstr, realban))
-			return 0;
+		DLINK_FOREACH(ptr, list->head)
+		{
+			actualBan = ptr->data;
+			if(!irccmp(actualBan->banstr, realban))
+				return 0;
+		}
 	}
-
 
 	actualBan = allocate_ban();
 
@@ -819,12 +830,10 @@ chm_ban(struct Client *source_p, struct Channel *chptr,
 	/* if we're adding a NEW id */
 	if(dir == MODE_ADD)
 	{
-		/* dont allow local clients to overflow the banlist, and dont
-		 * let servers do redundant +b's, as it wastes bandwidth on
-		 * a netjoin.
+		/* dont allow local clients to overflow the banlist, dont
+		 * let remote servers set duplicate bans
 		 */
-		if(!add_id(source_p, chptr, mask, list, mode_type) &&
-		   (MyClient(source_p) || IsServer(source_p)))
+		if(!add_id(source_p, chptr, mask, list, mode_type))
 			return;
 
 		mode_changes[mode_count].letter = c;
