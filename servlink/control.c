@@ -99,7 +99,7 @@ void cmd_start_zip_out(struct ctrl_command *cmd)
 
   if ((ret = deflateInit(&out_state.zip_state.z_stream,
                          out_state.zip_state.level)) != Z_OK)
-    send_error("deflateInit failed: %d", ret);
+    send_error("deflateInit failed: %s", zError(ret));
 
   out_state.zip = 1;
 #else
@@ -121,7 +121,7 @@ void cmd_start_zip_in(struct ctrl_command *cmd)
   in_state.zip_state.z_stream.zfree = (free_func)0;
   in_state.zip_state.z_stream.data_type = Z_ASCII;
   if ((ret = inflateInit(&in_state.zip_state.z_stream)) != Z_OK)
-    send_error("inflateInit failed: %d", ret);
+    send_error("inflateInit failed: %s", zError(ret));
   in_state.zip = 1;
 #else
   send_error("can't start decompression - no libz support!");

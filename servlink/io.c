@@ -210,7 +210,7 @@ void process_recvq(struct ctrl_command *cmd)
     {
       if ((ret = inflate(&in_state.zip_state.z_stream,
                          Z_NO_FLUSH)) != Z_OK)
-        send_error("Inflate failed: %d", ret);
+        send_error("Inflate failed: %s", zError(ret));
 
       blen = BUFLEN - in_state.zip_state.z_stream.avail_out;
 
@@ -477,8 +477,8 @@ void read_data(void)
       out_state.zip_state.z_stream.avail_out = BUFLEN;
       if(!(ret2 = deflate(&out_state.zip_state.z_stream,
                           Z_PARTIAL_FLUSH)) == Z_OK)
-        send_error("error compressing outgoing data - deflate returned %d",
-                   ret2);
+        send_error("error compressing outgoing data - deflate returned: %s",
+                   zError(ret2));
 
       if (!out_state.zip_state.z_stream.avail_out)
         send_error("error compressing outgoing data - avail_out == 0");
@@ -598,7 +598,7 @@ void read_net(void)
       {
         if ((ret2 = inflate(&in_state.zip_state.z_stream,
                             Z_NO_FLUSH)) != Z_OK)
-          send_error("inflate failed: %d", ret2);
+          send_error("Inflate failed: %s", zError(ret2));
 
         blen = BUFLEN - in_state.zip_state.z_stream.avail_out;
 
