@@ -41,13 +41,26 @@ struct Iline;
  *          "koruna"       "scorched"
  *              |              |
  *             "*"            "*"
+ *
+ * As can be seen from the diagram, each level may only have 1
+ * parent node.
  */
 
 struct Level
 {
 	struct Level *nextpiece; /* pointer to next piece (in this level) */
-	struct Level *nextlevel; /* pointer to next level (below this one) */
+	struct Level *nextlevel, /* pointer to next level (below this one) */
+	             *prevlevel; /* pointer to parent level (above this one) */
+
 	char *name;              /* name of piece on this level */
+
+	int SubNodes;            /* # of nodes immediately below this one */
+
+	/*
+	 * This is the number of unsearched nodes immediately below
+	 * this node. This number can never exceed SubNodes.
+	 */
+	int UnsearchedSubNodes;
 
 	/*
 	 * This is an array of pointers to the corresponding
@@ -65,10 +78,15 @@ struct Level
 };
 
 /*
- * LV_xxx flags indicate the status of a particular level
+ * LV_xxx flags indicate the status of a particular level node
  */
 
-#define LV_WILDCARD   (1 << 0) /* level contains a wild host piece */
+#define LV_WILDCARD   (1 << 0) /* node contains a wild host piece */
+#define LV_CHECKED    (1 << 1) /* node has been checked during a search */
+
+#define SetChecked(x)   ((x)->flags |= LV_CHECKED)
+#define WasChecked(x)   ((x)->flags &  LV_CHECKED)
+#define ClearChecked(x) ((x)->flags &= ~LV_CHECKED)
 
 /*
  * Prototypes

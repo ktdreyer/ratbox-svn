@@ -123,15 +123,17 @@
  * to our hostname, declare that the client has an acceptable I:
  * line.
  *
- *  One more note about exact matches vs. wildcard matches. Although
- * exact matches are given preference over wildcard matches, all
- * wildcard matches are treated equally. This means if you have
- * an I: line for *.n?t and one for *.?nderw?rld.n?t, either could
- * be returned as a valid match, even though you may think one
- * is more specific than the other.
- *  Thus, it is up to the server administrator to make their I:
- * lines as specific as possible if they want to guarantee their
- * clients get assigned to the correct I: line.
+ *  One more note about wildcard matches. The tree search starts
+ * with the last segment of the hostname. In other words, if
+ * you have two I: lines:
+ *   1) *@*.net
+ *   2) *@uwns.*
+ * A client from uwns.underworld.net will be given the first I:
+ * line. This is not a bug ;-). It is the way the routine was
+ * designed. If you were to do something like this:
+ *   1) *@*.net
+ *   2) *@uwns.*.net
+ * then the client would be sure to get the second I: line.
  *
  * Patrick Alken <wnder@underworld.net>
  * 09/13/1999
@@ -163,13 +165,16 @@ static struct Level          *KlineTree = NULL;
  * Local functions
  */
 
-static void CreateSubTree(struct Level **level, void *typeptr,
-                          int hostc, char **hostv);
+static void CreateSubTree(struct Level **level, struct Level *parent,
+                          void *typeptr, int hostc, char **hostv);
 static struct Level *SearchSubTree(struct Level **level, int hostc,
                                    char **hostv);
 
+static void ResetTree(struct Level **tree);
+static void MarkNodeSearched(struct Level *node);
 static void LinkStructPointer(void *ptr, struct Level **list);
 static struct Level *IsOnLevel(struct Level *level, char *piece);
+static int CountNonWilds(char *str);
 
 static int BreakupHost(char *hostname, char ***array);
 
@@ -191,12 +196,12 @@ TreeAddIline(struct Iline *iptr)
 	/*
 	 * So we don't destroy iptr->hostname, use another buffer
 	 */
+	memset(hostname, 0, sizeof(hostname));
 	strncpy_irc(hostname, iptr->hostname, HOSTLEN);
-	hostname[HOSTLEN] = '\0';
 
 	hostpieces = BreakupHost(hostname, &hostv);
 
-	CreateSubTree(&IlineTree, iptr, hostpieces, hostv);
+	CreateSubTree(&IlineTree, NULL, iptr, hostpieces, hostv);
 
 	MyFree(hostv);
 } /* TreeAddIline() */
@@ -219,12 +224,12 @@ TreeAddKline(struct ServerBan *kptr)
 	/*
 	 * So we don't destroy kptr->hostname, use another buffer
 	 */
+	memset(hostname, 0, sizeof(hostname));
 	strncpy_irc(hostname, kptr->hostname, HOSTLEN);
-	hostname[HOSTLEN] = '\0';
 
 	hostpieces = BreakupHost(hostname, &hostv);
 
-	CreateSubTree(&KlineTree, kptr, hostpieces, hostv);
+	CreateSubTree(&KlineTree, NULL, kptr, hostpieces, hostv);
 
 	MyFree(hostv);
 } /* TreeAddKline() */
@@ -234,6 +239,7 @@ CreateSubTree()
  Create a sub-tree within 'level' containing the given information.
 
 Inputs: level   - where to start building our tree
+        parent  - pointer to this level's parent node
         typeptr - Iline or Kline structure that we're adding to
                   the tree
         hostc   - number of hostname pieces we're adding
@@ -241,10 +247,11 @@ Inputs: level   - where to start building our tree
 */
 
 static void
-CreateSubTree(struct Level **level, void *typeptr, int hostc, char **hostv)
+CreateSubTree(struct Level **level, struct Level *parent,
+              void *typeptr, int hostc, char **hostv)
 
 {
-	struct Level *tmplev;
+	struct Level *tmpnode;
 	char *ch;
 
 	if (hostc == 0)
@@ -258,15 +265,15 @@ CreateSubTree(struct Level **level, void *typeptr, int hostc, char **hostv)
 	 * exact match (strcasecmp) - we don't want stuff like
 	 * "c?m" and "com" being put in the same node.
 	 */
-	for (tmplev = *level; tmplev; tmplev = tmplev->nextpiece)
+	for (tmpnode = *level; tmpnode; tmpnode = tmpnode->nextpiece)
 	{
-		if (!strcasecmp(tmplev->name, hostv[hostc - 1]))
+		if (!strcasecmp(tmpnode->name, hostv[hostc - 1]))
 		{
 			/*
 			 * We have found a matching host piece on this
 			 * level - no need to allocate a new level
 			 * structure. Now we will recursively call
-			 * CreateSubTree() again using tmplev->nextlevel
+			 * CreateSubTree() again using tmpnode->nextlevel
 			 * as the level pointer, indicating that we want
 			 * to see if the next lower index of hostv
 			 * (hostv[hostc - 2]) is in the next level. If so,
@@ -276,13 +283,15 @@ CreateSubTree(struct Level **level, void *typeptr, int hostc, char **hostv)
 			 * happens, the loop will fail and we will
 			 * drop below to allocate a new level structure.
 			 * If that does not happen, we have an exact duplicate
-			 * of a previous I/K line.
+			 * of a previous I/K line, in which case hostc will
+			 * be 1, and we add typeptr to the node's list of
+			 * pointers (the username may differ).
 			 */
 
 			if (hostc == 1)
-				LinkStructPointer(typeptr, &tmplev);
+				LinkStructPointer(typeptr, &tmpnode);
 
-			CreateSubTree(&tmplev->nextlevel, typeptr, hostc - 1, hostv);
+			CreateSubTree(&tmpnode->nextlevel, tmpnode, typeptr, hostc - 1, hostv);
 
 			return;
 		}
@@ -297,15 +306,22 @@ CreateSubTree(struct Level **level, void *typeptr, int hostc, char **hostv)
 	 *     on this level - allocate a new structure for it.
 	 */
 
-	tmplev = (struct Level *) MyMalloc(sizeof(struct Level));
-	memset(tmplev, 0, sizeof(struct Level));
-	tmplev->name = MyStrdup(hostv[hostc - 1]);
+	tmpnode = (struct Level *) MyMalloc(sizeof(struct Level));
+	memset(tmpnode, 0, sizeof(struct Level));
 
-	for (ch = tmplev->name; *ch; ++ch)
+	tmpnode->name = MyStrdup(hostv[hostc - 1]);
+	if (parent)
+	{
+		tmpnode->prevlevel = parent;
+		++parent->SubNodes;
+		++parent->UnsearchedSubNodes;
+	}
+
+	for (ch = tmpnode->name; *ch; ++ch)
 	{
 		if (IsWild(*ch))
 		{
-			tmplev->flags |= LV_WILDCARD;
+			tmpnode->flags |= LV_WILDCARD;
 			break;
 		}
 	}
@@ -340,7 +356,7 @@ CreateSubTree(struct Level **level, void *typeptr, int hostc, char **hostv)
 		 * it is looking for, will know how deep to go.
 		 */
 
-		LinkStructPointer(typeptr, &tmplev);
+		LinkStructPointer(typeptr, &tmpnode);
 	}
 
 	if (*level == NULL)
@@ -348,7 +364,7 @@ CreateSubTree(struct Level **level, void *typeptr, int hostc, char **hostv)
 		/*
 		 * Set the level to our newly allocated structure
 		 */
-		*level = tmplev;
+		*level = tmpnode;
 	}
 	else
 	{
@@ -366,10 +382,10 @@ CreateSubTree(struct Level **level, void *typeptr, int hostc, char **hostv)
 		 *
 		 *  ...
 		 *   |
-		 * "com" --> tmplev->name --> "net" --> "org" --> NULL
+		 * "com" --> tmpnode->name --> "net" --> "org" --> NULL
 		 */
-		tmplev->nextpiece = (*level)->nextpiece;
-		(*level)->nextpiece = tmplev;
+		tmpnode->nextpiece = (*level)->nextpiece;
+		(*level)->nextpiece = tmpnode;
 	}
 
 	/*
@@ -378,7 +394,7 @@ CreateSubTree(struct Level **level, void *typeptr, int hostc, char **hostv)
 	 * to add. Recursively call CreateSubTree() until there
 	 * are no more pieces to add.
 	 */
-	CreateSubTree(&tmplev->nextlevel, typeptr, hostc - 1, hostv);
+	CreateSubTree(&tmpnode->nextlevel, tmpnode, typeptr, hostc - 1, hostv);
 } /* CreateSubTree() */
 
 /*
@@ -398,17 +414,35 @@ SearchIlineTree(char *username, char *hostname)
 	struct Level *ret;
 	struct Iline *tmp;
 
+	memset(host, 0, sizeof(host));
 	strncpy_irc(host, hostname, HOSTLEN);
-	host[HOSTLEN] = '\0';
 
 	hostc = BreakupHost(host, &hostv);
 
-	ret = SearchSubTree(&IlineTree, hostc, hostv);
-
-	MyFree(hostv);
-
-	if (ret)
+	/*
+	 * A loop is needed to continually search the IlineTree
+	 * because of the username problem. Suppose we have 2
+	 * Ilines:
+	 *    (a) foo@*.net
+	 *    (b)   *@*.underworld.net
+	 * and suppose the client comes from wnder@uwns.underworld.net.
+	 * SearchSubTree() may return (a) since the hostname part
+	 * actually does match, but this routine will return NULL
+	 * because it cannot find a username match, even though
+	 * there is another I: line that matches. Therefore, this
+	 * loop will continue searching the tree until absolutely
+	 * no more hostname matches are found. We can be sure
+	 * it will not return the same I: line twice because the
+	 * nodes are marked with LV_CHECKED when they are checked.
+	 */
+	while ((ret = SearchSubTree(&IlineTree, hostc, hostv)))
 	{
+		if (!ret->numptrs)
+		{
+			log(L_ERROR,
+				"SearchIlineTree(): search result has 0 Iline pointers");
+		}
+
 		/*
 		 * Now for the username check
 		 */
@@ -416,9 +450,16 @@ SearchIlineTree(char *username, char *hostname)
 		{
 			tmp = (struct Iline *) ret->typeptrs[ii];
 			if (match(tmp->username, username))
+			{
+				MyFree(hostv);
+				ResetTree(&IlineTree);
 				return (tmp);
+			}
 		}
 	}
+
+	MyFree(hostv);
+	ResetTree(&IlineTree);
 
 	return (NULL);
 } /* SearchIlineTree() */
@@ -440,17 +481,19 @@ SearchKlineTree(char *username, char *hostname)
 	struct Level *ret;
 	struct ServerBan *tmp;
 
+	memset(host, 0, sizeof(host));
 	strncpy_irc(host, hostname, HOSTLEN);
-	host[HOSTLEN] = '\0';
 
 	hostc = BreakupHost(host, &hostv);
 
-	ret = SearchSubTree(&KlineTree, hostc, hostv);
-
-	MyFree(hostv);
-
-	if (ret)
+	while ((ret = SearchSubTree(&KlineTree, hostc, hostv)))
 	{
+		if (!ret->numptrs)
+		{
+			log(L_ERROR,
+				"SearchKlineTree(): search result has 0 Kline pointers");
+		}
+
 		/*
 		 * Check the username
 		 */
@@ -458,9 +501,16 @@ SearchKlineTree(char *username, char *hostname)
 		{
 			tmp = (struct ServerBan *) ret->typeptrs[ii];
 			if (match(tmp->username, username))
+			{
+				MyFree(hostv);
+				ResetTree(&KlineTree);
 				return (tmp);
+			}
 		}
 	}
+
+	MyFree(hostv);
+	ResetTree(&KlineTree);
 
 	return (NULL);
 } /* SearchKlineTree() */
@@ -478,110 +528,122 @@ static struct Level *
 SearchSubTree(struct Level **level, int hostc, char **hostv)
 
 {
-	struct Level *tmplev,
-	             *tmplev2;
+	struct Level *tmpnode,
+	             *tmpnode2,
+	             *ret;
 
 	if (hostc == 0)
 		return (NULL);
 
 	/*
-	 * Search the current level for hostv[hostc - 1]
+	 * Search the current level for our host piece
 	 */
-	if (!(tmplev = IsOnLevel(*level, hostv[hostc - 1])))
-		return (NULL);
-
-	if (hostc == 1)
+	while ((tmpnode = IsOnLevel(*level, hostv[hostc - 1])))
 	{
-		/*
-		 * Since hostc is 1, there are no more pieces to
-		 * search for - we have found a match
-		 */
-		if (!tmplev->typeptrs)
-		{
-			log(L_ERROR,
-				"SearchSubTree(): hostc is 1, but the corresponding level does not have a typeptr");
-		}
+		if (tmpnode->UnsearchedSubNodes == 0)
+			MarkNodeSearched(tmpnode);
 
-		return (tmplev);
-	}
-
-	/*
-	 * We found a match on a particular host piece, but
-	 * there are still more pieces to check - continue
-	 * searching
-	 */
-
-	if (tmplev->flags & LV_WILDCARD)
-	{
-		/*
-		 * We want to try to take this wildcard piece as
-		 * far as we can before moving on to the next level.
-		 * In other words, move to the next level only when:
-		 *  a) we find a match on the next level for the
-		 *     corresponding host piece
-		 *  b) the wildcard on this level fails to match
-		 *     the next host piece
-		 */
-
-		if ((tmplev2 = IsOnLevel(tmplev->nextlevel, hostv[hostc - 2])))
+		if (hostc == 1)
 		{
 			/*
-			 * Since the next index of hostv[] was found
-			 * on the level below tmplev, give up on the
-			 * current wildcard (tmplev->name), and go
-			 * down to the next level to continue the search.
+			 * Since hostc is 1, there are no more pieces to
+			 * search for - we have found a match
 			 */
-			tmplev = tmplev2;
-			--hostc;
+			return (tmpnode);
 		}
 
-		while (hostc)
-		{
-			if (!match(tmplev->name, hostv[hostc - 2]))
-				break;
-			if (--hostc == 1)
-			{
-				if (!tmplev->typeptrs)
-				{
-					log(L_ERROR,
-						"SearchSubTree(): typeptrs for piece [%s] is NULL which it should not be",
-						tmplev->name);
-				}
+		/*
+		 * We found a match on a particular host piece, but
+		 * there are still more pieces to check - continue
+		 * searching
+		 */
 
-				return (tmplev);
+		if (tmpnode->flags & LV_WILDCARD)
+		{
+			/*
+			 * We want to try to take this wildcard piece as
+			 * far as we can before moving on to the next level.
+			 * In other words, move to the next level only when:
+			 *  a) we find a match on the next level for the
+			 *     corresponding host piece
+			 *  b) the wildcard on this level fails to match
+			 *     the next host piece
+			 */
+
+			if ((tmpnode2 = IsOnLevel(tmpnode->nextlevel, hostv[hostc - 2])))
+			{
+				/*
+				 * Since the next index of hostv[] was found
+				 * on the level below tmpnode, give up on the
+				 * current wildcard (tmpnode->name), and go
+				 * down to the next level to continue the search.
+				 */
+				tmpnode = tmpnode2;
+				--hostc;
+
+				if (tmpnode->UnsearchedSubNodes == 0)
+					MarkNodeSearched(tmpnode);
 			}
 
-			/*
-			 * Since we just decremented hostc, we need to check
-			 * if the corresponding index of hostv[] is on the
-			 * next level - if so, drop to the next level to
-			 * continue checking.
-			 * For example, suppose the tree looked like this:
-			 *
-			 *   *
-			 *   |
-			 *  irc
-			 *
-			 * And we're checking the host: irc.wnder.com.
-			 * "com" and "wnder" should both be matched against
-			 * the "*", but once we see that "irc" matches
-			 * something on the next level, drop down and continue
-			 * searching - we wouldn't want to match "irc" against
-			 * "*" (even though its a good match) because although
-			 * we're at the end of our hostv[] array, the "*"
-			 * structure will NOT contain a pointer to the
-			 * corresponding I/K line structure - only the very
-			 * last branch of the tree does that.
-			 */
-			if (IsOnLevel(tmplev->nextlevel, hostv[hostc - 2]))
-				break;
-		} /* while (hostc) */
-	} /* if (tmplev->flags & LV_WILDCARD) */
+			while (hostc)
+			{
+				if (!match(tmpnode->name, hostv[hostc - 2]))
+					break;
+
+				if (--hostc == 1)
+					return (tmpnode);
+
+				/*
+				 * Since we just decremented hostc, we need to check
+				 * if the corresponding index of hostv[] is on the
+				 * next level - if so, drop to the next level to
+				 * continue checking.
+				 * For example, suppose the tree looked like this:
+				 *
+				 *   *
+				 *   |
+				 *  irc
+				 *
+				 * And we're checking the host: irc.wnder.com.
+				 * "com" and "wnder" should both be matched against
+				 * the "*", but once we see that "irc" matches
+				 * something on the next level, drop down and continue
+				 * searching - we wouldn't want to match "irc" against
+				 * "*" (even though its a good match) because although
+				 * we're at the end of our hostv[] array, the "*"
+				 * structure will NOT contain a pointer to the
+				 * corresponding I/K line structure - only the very
+				 * last branch of the tree does that.
+				 */
+				if (IsOnLevel(tmpnode->nextlevel, hostv[hostc - 2]))
+					break;
+			} /* while (hostc) */
+		} /* if (tmpnode->flags & LV_WILDCARD) */
+
+		/*
+		 * Continue our search on the next level
+		 */
+		ret = SearchSubTree(&tmpnode->nextlevel, hostc - 1, hostv);
+		if (ret)
+			return (ret);
+
+		/*
+		 * We didn't find a match in the current branch of the tree -
+		 * continue the loop to search other branches
+		 */
+
+	} /* while ((tmpnode = IsOnLevel(*level, hostv[hostc - 1]))) */
 
 	/*
-	 * Continue our search on the next level
+	 * If we get here, we've hit a level that does not contain
+	 * the corresponding host piece in our list - the hostname
+	 * is not in this branch of the tree - continue searching
+	 * other branches.
 	 */
-	return (SearchSubTree(&tmplev->nextlevel, hostc - 1, hostv));
+	if (*level && (*level)->prevlevel)
+		MarkNodeSearched((*level)->prevlevel);
+
+	return (NULL);
 
 #if 0
 	for (tmplev = *level; tmplev; tmplev = tmplev->nextpiece)
@@ -679,7 +741,6 @@ SearchSubTree(struct Level **level, int hostc, char **hostv)
 			return (SearchSubTree(&tmplev->nextlevel, hostc - 1, hostv));
 		}
 	}
-#endif /* 0 */
 
 	/*
 	 * If we get here, we've hit a level that does not contain
@@ -687,7 +748,52 @@ SearchSubTree(struct Level **level, int hostc, char **hostv)
 	 * is not in our tree.
 	 */
 	return (NULL);
+#endif /* 0 */
 } /* SearchSubTree() */
+
+/*
+ResetTree()
+ The SearchSubTree() routine marks various nodes as "searched"
+so after the search is complete, we need to unmark those nodes.
+*/
+
+static void
+ResetTree(struct Level **tree)
+
+{
+	struct Level *tmplev,
+	             *tmpnode;
+
+	for (tmplev = *tree; tmplev; tmplev = tmplev->nextlevel)
+	{
+		for (tmpnode = tmplev; tmpnode; tmpnode = tmpnode->nextpiece)
+		{
+			ClearChecked(tmpnode);
+			tmpnode->UnsearchedSubNodes = tmpnode->SubNodes;
+		}
+	}
+} /* ResetTree() */
+
+/*
+MarkNodeSearched()
+ Called when a node has been, or is about to be searched. The
+idea is to determine if we can mark this node as "searched".
+A node is considered searched/checked when:
+ a) It is the very last node in a branch
+ b) Or, all nodes below this node have been checked
+*/
+
+static void
+MarkNodeSearched(struct Level *node)
+
+{
+	SetChecked(node);
+	if (node->prevlevel)
+	{
+		if (--node->prevlevel->UnsearchedSubNodes == 0)
+			MarkNodeSearched(node->prevlevel);
+	}
+} /* MarkNodeSearched() */
 
 /*
 LinkStructPointer()
@@ -712,32 +818,110 @@ LinkStructPointer(void *ptr, struct Level **list)
 IsOnLevel()
  Determine if 'piece' is on the sub-level 'level'.
 Return a pointer to the level struct containing 'piece'
+
+NOTE: We always try to find the MOST exact match - for example:
+      Nodes which contain no wildcards are always taken over
+      nodes which do contain wildcards. If an exact match
+      cannot be found, the best wildcard match is taken. The
+      best wildcard match is calculated by counting the number
+      of non-wildcard characters in the node. A node with a
+      greater number of non-wildcard characters is considered
+      a better match. For example, suppose the following are true:
+
+           piece = "net"
+
+           nodeA = "n*t"
+           nodeB = "???"
+           nodeC = "*t"
+
+      nodeA will be considered the best match available, since it
+      is the most specific.
 */
 
 static struct Level *
 IsOnLevel(struct Level *level, char *piece)
 
 {
-	struct Level *tmplev;
+	struct Level *tmpnode,
+	             *prevmatch;
+	int currnw, /* non wild characters in current level */
+	    prevnw; /* non wild characters in previous match */
 
+#if 0
 	/*
 	 * First try to do strcasecmp's because exact matches
 	 * should be taken over wildcard matches
 	 */
-	for (tmplev = level; tmplev; tmplev = tmplev->nextpiece)
+	for (tmpnode = level; tmpnode; tmpnode = tmpnode->nextpiece)
 	{
-		if (!strcasecmp(tmplev->name, piece))
-			return (tmplev);
+		if (!strcasecmp(tmpnode->name, piece))
+			return (tmpnode);
+	}
+#endif
+
+	prevmatch = NULL;
+	for (tmpnode = level; tmpnode; tmpnode = tmpnode->nextpiece)
+	{
+		/*
+		 * Don't check the same node twice
+		 */
+		if (WasChecked(tmpnode))
+			continue;
+
+		if (match(tmpnode->name, piece))
+		{
+			if (!(tmpnode->flags & LV_WILDCARD))
+			{
+				/*
+				 * If there are no wildcards in tmpnode, it must
+				 * be an exact match - return it.
+				 */
+				return (tmpnode);
+			}
+
+			currnw = CountNonWilds(tmpnode->name);
+
+			/*
+			 * If the number of non-wildcard characters in tmpnode->name
+			 * is greater than that of our previous match, drop
+			 * prevmatch and record tmpnode because it is a more exact
+			 * match. If hostA has more non-wildcard characters than
+			 * hostB it is considered to be a more exact match.
+			 */
+			if (!prevmatch || (currnw > prevnw))
+			{
+				/*
+				 * We've found an acceptable match, but keep going
+				 * in case we find a more exact match
+				 */
+				prevmatch = tmpnode;
+				prevnw = currnw;
+			}
+		} /* if (match(tmpnode->name, piece)) */
 	}
 
-	for (tmplev = level; tmplev; tmplev = tmplev->nextpiece)
-	{
-		if (match(tmplev->name, piece))
-			return (tmplev);
-	}
-
-	return (NULL);
+	return (prevmatch);
 } /* IsOnLevel() */
+
+/*
+CountNonWilds()
+ Return the number of non-wildcard characters in 'str'.
+'*' and '?' are considered wilds
+*/
+
+static int
+CountNonWilds(char *str)
+
+{
+	char *ch;
+	int nonwildcnt = 0;
+
+	for (ch = str; *ch; ++ch)
+		if (!IsWild(*ch))
+			++nonwildcnt;
+
+	return (nonwildcnt);
+} /* CountNonWilds() */
 
 /*
 BreakupHost()
@@ -746,7 +930,7 @@ to each piece in 'array'.
 
 Return: number of host pieces in 'hostname'
 
-NOTE: Memory is allocated for array - so free it when you're done.
+NOTE: Memory is allocated for array - so free it when done.
 */
 
 static int
