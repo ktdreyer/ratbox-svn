@@ -1,3 +1,27 @@
+leeh        2003/08/26 12:57:25 EDT	(20030826_3)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              client.h s_conf.h 
+    modules              m_links.c m_map.c m_stats.c m_trace.c 
+    src                  newconf.c s_user.c 
+  Log:
+  - heres shide_exempt, to exempt a user from flattened links.
+  
+  Revision  Changes    Path
+  7.222     +1 -0      ircd-ratbox/doc/example.conf
+  7.58      +1 -0      ircd-ratbox/doc/example.efnet.conf
+  7.220     +3 -0      ircd-ratbox/include/client.h
+  7.253     +9 -7      ircd-ratbox/include/s_conf.h
+  1.57      +2 -2      ircd-ratbox/modules/m_links.c
+  1.31      +3 -2      ircd-ratbox/modules/m_map.c
+  1.181     +10 -6     ircd-ratbox/modules/m_stats.c
+  1.87      +3 -2      ircd-ratbox/modules/m_trace.c
+  7.108     +1 -0      ircd-ratbox/src/newconf.c
+  7.292     +8 -0      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2003/08/26 12:17:24 EDT	(20030826_2)
 
   Modified files:
