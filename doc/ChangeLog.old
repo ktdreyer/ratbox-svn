@@ -1,3 +1,7 @@
+*** 20001118_1 by davidt
+fix for gcc warnings, and do a fd_note on nickchanges.
+
+
 *** 20001117_2 by davidt
 - added missing _modinit function to m_gline.c
 - removed #ifdef LTRACE from m_ltrace.c 
