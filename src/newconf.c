@@ -1231,7 +1231,7 @@ conf_set_exempt_ip(void *data)
 {
 	struct ConfItem *yy_tmp;
 
-	if((yy_tmp = find_dline_string(yy_tmp->host)))
+	if((yy_tmp = find_dline_string((const char *) data)))
 	{
 		if(yy_tmp->status == CONF_EXEMPTDLINE)
 			return;
