@@ -361,7 +361,7 @@ read_packet (int fd, void *data)
 #ifndef NDEBUG
 	struct hook_io_data hdata;
 #endif
-	if(IsDead (client_p))
+	if(IsDead (client_p) || !MyConnect(client_p))
 		return;
 
 	assert (lclient_p != NULL);
@@ -431,8 +431,14 @@ read_packet (int fd, void *data)
 
 	lclient_p->actually_read += lbuf_len;
 
+	
 	/* Attempt to parse what we have */
 	parse_client_queued (client_p);
+	
+	/* We got closed last time around */
+	if(!MyConnect(client_p))
+		return;
+	
 
 	/* Check to make sure we're not flooding */
 	if(IsPerson (client_p) &&
@@ -446,6 +452,7 @@ read_packet (int fd, void *data)
 	}
 
 	/* server fd may have changed */
+	
 	fd_r = client_p->localClient->fd;
 #ifndef HAVE_SOCKETPAIR
 	if(HasServlink (client_p))
