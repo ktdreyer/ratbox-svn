@@ -52,7 +52,7 @@ struct Channel
   struct Channel* hnextch;
   struct Mode     mode;
   char            topic[TOPICLEN + 1];
-  char           *topic_info;
+  char            topic_info[USERHOST_REPLYLEN];
   time_t          topic_time;
   char            vchan_id[NICKLEN*2];   /* use this for empty vchans */
   int             users;      /* user count */
