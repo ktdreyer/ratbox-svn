@@ -1,3 +1,8 @@
+*** 20010619_4 by leeh
+- when we send glines to hyb6 servers, they need to come from the opers
+  server, not the opers nick..
+
+
 *** 20010619_3 by jdc
 - doc/README.openssl
     Severe "touch-ups," and added a section pertaining to Solaris and
