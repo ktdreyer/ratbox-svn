@@ -1,3 +1,7 @@
+*** 20010626_15 by androsyn
+Remove some unnecessary memset()'s
+
+
 *** 20010626_14 by androsyn
 Knocked off about 12 seconds of a burst by replacing malloc/memset with calloc. Go figure..
 
