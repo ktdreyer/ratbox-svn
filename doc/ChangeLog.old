@@ -1,3 +1,9 @@
+*** 20011011_1 by jdc
+* Support for channel {} block command "use_halfops".  Default is yes.
+  The code which uses the use_halfops variable hasn't been written yet,
+  though.  This is just for the config and what not.
+
+
 *** 20011010_3 by androsyn
 Forgot to commit Makefile.in
 
