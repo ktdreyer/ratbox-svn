@@ -333,7 +333,6 @@ void close_listeners()
   }
 }
 
-#define TOOMANY_WARNING "ERROR :Too many connections from IP address.\r\n"
 #define TOOFAST_WARNING "ERROR :Trying to reconnect too fast.\r\n"
 #define DLINE_WARNING "ERROR :You have been D-lined.\r\n"
 
@@ -419,9 +418,6 @@ static void accept_connection(int pfd, void *data)
      send(fd, DLINE_WARNING, sizeof(DLINE_WARNING)-1, 0);
      break;
 #ifdef PACE_CONNECT      
-    case TOO_MANY:
-     send(fd, TOOMANY_WARNING, sizeof(TOOMANY_WARNING)-1, 0);
-     break;
     case TOO_FAST:
      send(fd, TOOFAST_WARNING, sizeof(TOOFAST_WARNING)-1, 0);
      break;
