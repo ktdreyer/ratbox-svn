@@ -25,13 +25,13 @@
 #include "m_commands.h"
 #include "channel.h"
 #include "client.h"
+#include "common.h"   /* bleah */
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "list.h"
 #include "numeric.h"
 #include "send.h"
-#include "common.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -98,20 +98,20 @@
 **      parv[1] = channel
 **      parv[2] = channel password (key)
 */
-int     m_join(struct Client *cptr,
-               struct Client *sptr,
-               int parc,
-               char *parv[])
+int m_join(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  static char   jbuf[BUFSIZE];
-  struct SLink  *lp;
-  struct Channel *chptr = NULL;
-  char  *name, *key = NULL;
-  int   i, flags = 0;
+  static char     jbuf[BUFSIZE];
+  struct SLink*   lp;
+  struct Channel* chptr = 0;
+  char*           name;
+  char*           key = 0;
+  int             i;
+  int             flags = 0;
+  char*           p = 0;
+  char*           p2 = 0;
 #ifdef NO_CHANOPS_WHEN_SPLIT
-  int   allow_op=YES;
+  int             allow_op = 1;
 #endif
-  char  *p = NULL, *p2 = NULL;
 #ifdef ANTI_SPAMBOT
   int   successful_join_count = 0; /* Number of channels successfully joined */
 #endif
@@ -295,7 +295,7 @@ int     m_join(struct Client *cptr,
             {
               if(server_was_split)
                 {
-                  allow_op = NO;
+                  allow_op = 0;
 
                   if(!IsRestricted(sptr) && (flags & CHFL_CHANOP))
                 sendto_one(sptr,":%s NOTICE %s :*** Notice -- Due to a network split, you can not obtain channel operator status in a new channel at this time.",
