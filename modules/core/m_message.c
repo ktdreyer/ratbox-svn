@@ -553,9 +553,13 @@ msg_channel_flags(int p_or_n, char *command, struct Client *client_p,
   if (chptr->chname[0] == '&')
     return;
 
-  sendto_channel_remote(source_p, client_p, type, CAP_CHW, NOCAPS, vchan,
+  sendto_channel_remote(source_p, client_p, type, CAP_CHW, CAP_UID, vchan,
                 ":%s %s %c%s :%s", source_p->name, command, c,
                 vchan->chname, text);
+  sendto_channel_remote(source_p, client_p, type, CAP_CHW|CAP_UID, NOCAPS, vchan,
+                ":%s %s %c%s :%s", ID(source_p), command, c,
+                vchan->chname, text);
+
   /* non CAP_CHW servers? */
 }
 

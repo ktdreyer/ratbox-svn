@@ -71,7 +71,7 @@ sendto_list_remote(struct Client *one,
 static void
 sendto_list_anywhere(struct Client *one, struct Client *from,
                      dlink_list *list, buf_head_t *local_linebuf,
-                     buf_head_t *remote_linebuf);
+                     buf_head_t *remote_linebuf, buf_head_t *uid_linebuf);
 
 
 /*
@@ -504,9 +504,11 @@ sendto_channel_butone(struct Client *one, struct Client *from,
   va_list    args;
   buf_head_t local_linebuf;
   buf_head_t remote_linebuf;
+  buf_head_t uid_linebuf;
 
   linebuf_newbuf(&local_linebuf);
   linebuf_newbuf(&remote_linebuf);
+  linebuf_newbuf(&uid_linebuf);
   va_start(args, pattern);
 
   if(IsServer(from))
@@ -520,31 +522,35 @@ sendto_channel_butone(struct Client *one, struct Client *from,
   linebuf_putmsg(&remote_linebuf, pattern, args, ":%s %s %s ",
                  from->name, command, chptr->chname);
 
+  linebuf_putmsg(&uid_linebuf, pattern, args, ":%s %s %s ",
+                 ID(from), command, chptr->chname);
+
   va_end(args);
 
   ++current_serial;
 
   sendto_list_anywhere(one, from, &chptr->chanops,
-                       &local_linebuf, &remote_linebuf);
+                       &local_linebuf, &remote_linebuf, &uid_linebuf);
 
 #ifdef REQUIRE_OANDV
   sendto_list_anywhere(one, from, &chptr->chanops_voiced,
-                       &local_linebuf, &remote_linebuf);
+                       &local_linebuf, &remote_linebuf, &uid_linebuf);
 #endif
 
   sendto_list_anywhere(one, from, &chptr->voiced,
-                       &local_linebuf, &remote_linebuf);
+                       &local_linebuf, &remote_linebuf, &uid_linebuf);
 
 #ifdef HALFOPS
   sendto_list_anywhere(one, from, &chptr->halfops,
-                       &local_linebuf, &remote_linebuf);
+                       &local_linebuf, &remote_linebuf, &uid_linebuf);
 #endif
 
   sendto_list_anywhere(one, from, &chptr->peons,
-                       &local_linebuf, &remote_linebuf);
+                       &local_linebuf, &remote_linebuf, &uid_linebuf);
 
   linebuf_donebuf(&local_linebuf);
   linebuf_donebuf(&remote_linebuf);
+  linebuf_donebuf(&uid_linebuf);
 } /* sendto_channel_butone() */
 
 /*
@@ -561,7 +567,7 @@ sendto_channel_butone(struct Client *one, struct Client *from,
 static void
 sendto_list_anywhere(struct Client *one, struct Client *from,
                      dlink_list *list, buf_head_t *local_linebuf,
-                     buf_head_t *remote_linebuf)
+                     buf_head_t *remote_linebuf, buf_head_t *uid_linebuf)
 {
   dlink_node *ptr;
   dlink_node *ptr_next;
@@ -591,7 +597,10 @@ sendto_list_anywhere(struct Client *one, struct Client *from,
        */
       if(target_p->from->serial != current_serial)
       {
-        send_linebuf_remote(target_p, from, remote_linebuf);
+        if(IsCapable(target_p->from, CAP_UID))
+          send_linebuf_remote(target_p, from, uid_linebuf);
+        else
+          send_linebuf_remote(target_p, from, remote_linebuf);
         target_p->from->serial = current_serial;
       }
     }
@@ -1084,9 +1093,13 @@ sendto_anywhere(struct Client *to, struct Client *from,
       linebuf_putmsg(&linebuf, pattern, args, ":%s!%s@%s ", from->name,
                      from->username, from->host);
   }
-  else
-    linebuf_putmsg(&linebuf, pattern, args, ":%s ", from->name);
+  else {
+    if(IsCapable(to->from, CAP_UID))
+      linebuf_putmsg(&linebuf, pattern, args, ":%s ", ID(from));
+    else
+      linebuf_putmsg(&linebuf, pattern, args, ":%s ", from->name);
 
+  }
   va_end(args);
 
   if(MyClient(to))
