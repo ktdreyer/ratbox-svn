@@ -23,6 +23,7 @@
 #include <ctype.h>
 #include <string.h>
 #include "../include/config.h"
+#include "../include/setup.h"
 
 #define CONFPATH ETCPATH "/.convertconf-example.conf"
 #define BUFSIZE 512
@@ -82,6 +83,10 @@ int main(int argc,char *argv[])
     fileout = argv[2];
   }
 
+#ifdef EFNET
+  basic = 1;
+#endif
+
   if ((in = fopen(filein, "r")) == NULL)
     {
       fprintf(stderr,"Can't open %s for reading\n", filein);
@@ -124,7 +129,7 @@ static void usage()
 {
   fprintf(stderr,"convertconf [-b] ircd.conf.old ircd.conf.new\n");
   fprintf(stderr, "   -b - this will run in 'basic' mode and not add extra blocks\n");
-  fprintf(stderr, "        such as general{}, channel{} etc.\n");
+  fprintf(stderr, "        such as general{}, channel{} etc. (Used for EFNet)\n");
   exit(-1);
 }
 

@@ -515,6 +515,28 @@ void report_messages(struct Client *source_p)
     }
 }
 
+/* list_commands()
+ *
+ * inputs       - pointer to client to report to
+ * outputs      -
+ * side effects - client is shown list of commands
+ */
+void
+list_commands(struct Client *source_p)
+{
+  struct MessageHash *ptr;
+  int i;
+
+  for(i = 0; i < MAX_MSG_HASH; i++)
+  {
+    for(ptr = msg_hash_table[i]; ptr; ptr = ptr->next)
+    {
+      sendto_one(source_p, ":%s NOTICE %s :%s",
+                 me.name, source_p->name, ptr->cmd);
+    }
+  }
+}
+
 /*
  * cancel_clients
  *
@@ -522,9 +544,8 @@ void report_messages(struct Client *source_p)
  * output	- 
  * side effects	- 
  */
-static  int     cancel_clients(struct Client *client_p,
-                               struct Client *source_p,
-                               char *cmd)
+static int
+cancel_clients(struct Client *client_p, struct Client *source_p, char *cmd)
 {
   /*
    * kill all possible points that are causing confusion here,

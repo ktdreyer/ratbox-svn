@@ -42,5 +42,6 @@ extern  void    clear_hash_parse (void);
 extern  void    mod_add_cmd(struct Message *msg);
 extern  void    mod_del_cmd(struct Message *msg);
 extern  void    report_messages(struct Client *);
+extern void list_commands(struct Client *);
 
 #endif /* INCLUDED_parse_h_h */

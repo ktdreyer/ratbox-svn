@@ -217,6 +217,7 @@ use_anonops	{ return USE_ANONOPS; }
 use_egd 	{ return USE_EGD; }
 use_except	{ return USE_EXCEPT; }
 use_halfops     { return USE_HALFOPS; }
+use_help        { return USE_HELP; }
 use_invex	{ return USE_INVEX; }
 use_knock	{ return USE_KNOCK; }
 use_vchans      { return USE_VCHANS; }

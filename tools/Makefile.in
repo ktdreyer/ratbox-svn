@@ -38,8 +38,6 @@ mkpasswd_SOURCES = mkpasswd.c
 mkpasswd_OBJECTS = mkpasswd.o
 viconf_SOURCES = viconf.c
 viconf_OBJECTS = viconf.o
-fixklines_SOURCES = fixklines.c
-fixklines_OBJECTS = fixklines.o
 convertconf_SOURCES = convertconf.c
 convertconf_OBJECTS = convertconf.o
 convertklines_SOURCES = convertklines.c
@@ -49,9 +47,8 @@ convertilines_OBJECTS = convertilines.o
 encspeed_SOURCES = encspeed.c
 encspeed_OBJECTS = encspeed.o
 
-all_OBJECTS = $(viconf_OBJECTS) $(mkpasswd_OBJECTS) $(fixklines_OBJECTS)\
-	$(convertconf_OBJECTS) $(convertklines_OBJECTS) $(encspeed_OBJECTS)\
-	$(convertilines_OBJECTS)
+all_OBJECTS = $(viconf_OBJECTS) $(mkpasswd_OBJECTS) $(convertconf_OBJECTS)\
+        $(convertklines_OBJECTS) $(encspeed_OBJECTS) $(convertilines_OBJECTS)
 
 all: $(PROGS)
 
@@ -70,20 +67,18 @@ convertilines: convertilines.o
 
 convertklines: convertklines.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o convertklines $(convertklines_OBJECTS) $(IRCDLIBS)
-fixklines: fixklines.o
-	$(CC) $(CFLAGS) $(LDFLAGS) -o fixklines $(fixklines_OBJECTS) $(IRCDLIBS)
 
 convertconf: convertconf.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o convertconf $(convertconf_OBJECTS) $(IRCDLIBS)
 
 clean:
-	$(RM) -f $(all_OBJECTS) convertconf encspeed fixklines viconf chkconf mkpasswd *~ core *.exe convertklines convertilines
+	$(RM) -f $(all_OBJECTS) convertconf encspeed viconf chkconf mkpasswd *~ core *.exe convertklines convertilines
 
 distclean: clean
 	$(RM) -f Makefile
 
 lint:
-	lint -aacgprxhH $(CPPFLAGS) -DIRCD_PREFIX=\"@prefix@\" $(convertconf_SOURCES) $(convertklines_SOURCES) $(mkpasswd_SOURCES) $(viconf_SOURCES) $(fixklines_SOURCES) $(encspeed_SOURCES) >>../lint.out
+	lint -aacgprxhH $(CPPFLAGS) -DIRCD_PREFIX=\"@prefix@\" $(convertconf_SOURCES) $(convertklines_SOURCES) $(mkpasswd_SOURCES) $(viconf_SOURCES) $(encspeed_SOURCES) >>../lint.out
 
 depend:
 

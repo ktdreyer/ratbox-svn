@@ -271,6 +271,7 @@ int   class_redirport_var;
 %token  USE_EGD
 %token  USE_EXCEPT
 %token  USE_HALFOPS
+%token  USE_HELP
 %token  USE_INVEX
 %token  USE_KNOCK
 %token  USE_VCHANS
@@ -1969,7 +1970,7 @@ general_item:       general_failed_oper_notice |
                     general_oper_umodes |
                     general_caller_id_wait | general_default_floodcount |
                     general_min_nonwildcard |
-                    general_servlink_path |
+                    general_servlink_path | general_use_help |
                     general_default_cipher_preference |
                     general_compression_level | general_client_flood |
                     general_throttle_time | general_havent_read_conf |
@@ -2330,6 +2331,16 @@ general_ping_cookie: PING_COOKIE '=' TYES ';'
     PING_COOKIE '=' TNO ';'
   {
     ConfigFileEntry.ping_cookie = 0;
+  } ;
+
+general_use_help: USE_HELP '=' TYES ';'
+  {
+    ConfigFileEntry.use_help = 1;
+  }
+    |
+    USE_HELP '=' TNO ';'
+  {
+    ConfigFileEntry.use_help = 0;
   } ;
 
 general_throttle_time: THROTTLE_TIME '=' timespec ';'

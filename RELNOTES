@@ -4,7 +4,8 @@ o) Made topiclen configurable with autoconf
 o) Autoconf fixes for Forte C
 o) Bugfixes for m_jupe.c in contrib/
 o) Fixed bug where we would give away spoofed IPs
-
+o) You may now disable the help system for users, by setting
+   "use_help = no;" in your general {}; block.
 
 --------------------------------------------------------------------------------
 

@@ -77,22 +77,29 @@ static void m_help(struct Client *client_p, struct Client *source_p,
 {
   static time_t last_used = 0;
 
-  /* HELP is always local */
-  if ((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
+  if(ConfigFileEntry.use_help)
   {
-    /* safe enough to give this on a local connect only */
-    sendto_one(source_p,form_str(RPL_LOAD2HI),me.name,parv[0]);
-    return;
-  }
-  else
-  {
-    last_used = CurrentTime;
-  }
+    /* HELP is always local */
+    if ((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
+    {
+      /* safe enough to give this on a local connect only */
+      sendto_one(source_p,form_str(RPL_LOAD2HI),me.name,parv[0]);
+        return;
+    }
+    else
+    {
+      last_used = CurrentTime;
+    }
 
-  if(parc > 1)
-    dohelp(source_p, UHPATH, parv[1], parv[0]);
+    if(parc > 1)
+      dohelp(source_p, UHPATH, parv[1], parv[0]);
+    else
+      dohelp(source_p, UHPATH, NULL, parv[0]);
+  }
   else
-    dohelp(source_p, UHPATH, NULL, parv[0]);
+  {
+    list_commands(source_p);
+  }
 }
 
 /*

@@ -231,6 +231,7 @@ struct config_file_entry
   int           throttle_time;
   int           use_egd;
   int		ping_cookie;
+  int           use_help;
 #ifdef HAVE_LIBCRYPTO
   struct EncCapability *default_cipher_preference;
 #endif
