@@ -1,3 +1,8 @@
+*** 20010102_28 by db
+- backed out a changed until beta-2 , its broken hostmasking
+
+
+
 *** 20010102_27 by davidt
 Add (#if 0'd out) code not to introduce new NICK's to lazyleafs
 immediately.  This will also make debugging LazyLeafs easier, since it
