@@ -28,6 +28,7 @@ compiled in standard messages.
 Currently available locales are:
 	custom		These are the messages you would have seen if
 			you used the old CUSTOM_ERR define in config.h.
+	ayb		'All Your Base'-type messages.
 	standard	(This doesn't actually exist as a locale, but
 			 using a non-existent locale will use the compiled
 			 in defaults).

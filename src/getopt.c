@@ -14,6 +14,8 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
   /* loop through each argument */
   for (;;)
     {
+      int found = 0;
+
       (*argc)--;
       (*argv)++;
       
@@ -34,6 +36,8 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
 	  if (!strcmp(opts[i].opt, (*argv)[0] + 1))
 	    {
 	      /* found our argument */
+	      found = 1;
+
 	      switch (opts[i].argtype)
 		{
 		case YESNO:
@@ -90,6 +94,11 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
 		  exit(EXIT_FAILURE);
 		}
 	    }
+	  if (!found)
+	    {
+	      fprintf(stderr, "error: unknown argument '-%s'\n", (*argv)[0]);
+	      usage(progname);
+	    }
 	}
     }
 }
@@ -106,7 +115,7 @@ usage(char *name)
     {
       fprintf(stderr, "\t-%-10s %-20s%s\n", myopts[i].opt, 
 	      (myopts[i].argtype == YESNO || myopts[i].argtype == USAGE) ? "" : 
-	      myopts[i].argtype == INTEGER ? "[Integer]" : "[String]",
+	      myopts[i].argtype == INTEGER ? "<number>" : "<string>",
 	      myopts[i].desc);
     }
   
