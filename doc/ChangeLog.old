@@ -1,3 +1,7 @@
+*** 19990831_2 by wnder
+standard gnu copyright
+
+
 *** 19990831_1 by wnder
 New macro: IsEol() which looks for \r or \n characters
 
