@@ -132,7 +132,8 @@ static void mo_kill(struct Client *client_p, struct Client *source_p,
 	     inpath, client_p->username, reason);
 #endif
 
-  sendto_one(target_p, ":%s KILL %s :%s", parv[0], target_p->name, reason);
+  if(MyConnect(target_p))
+    sendto_one(target_p, ":%s KILL %s :%s", parv[0], target_p->name, reason);
 
   /* Do not change the format of this message.  There's no point in changing messages
    * that have been around for ever, for no reason.. */
@@ -248,8 +249,16 @@ static void ms_kill(struct Client *client_p, struct Client *source_p,
         reason = parv[2];
     }
 
-  if(MyOper(target_p))
+  /* dont send clients kills from a hidden server */
+  if(MyConnect(target_p))
+  {
+    if(ConfigServerHide.hide_servers && IsServer(source_p) && 
+       !IsOper(source_p))
+      sendto_one(target_p, ":%s KILL %s :%s",
+                 me.name, target_p->name, reason);
+    else
       sendto_one(target_p, ":%s KILL %s :%s", parv[0], target_p->name, reason);
+  }
 
   /* Be warned, this message must be From %s, or it confuses clients
    * so dont change it to From: or the case or anything! -- fl -- db */
