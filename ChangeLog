@@ -1,3 +1,15 @@
+leeh        2004/02/01 18:43:09 EST	(20040201_0)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  - fix find_chasing()
+  
+  Revision  Changes    Path
+  7.420     +9 -2      ircd-ratbox/src/client.c
+
+
+
 leeh        2004/01/31 09:40:13 EST	(20040131_2)
 
   Modified files:
