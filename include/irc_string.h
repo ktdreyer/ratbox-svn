@@ -29,7 +29,7 @@
 #endif
 #include <sys/socket.h>
 #include <netinet/in.h>
-
+#include <string.h>
 
 /*
  * match - compare name with mask, mask may contain * and ? as wildcards
@@ -85,29 +85,7 @@ int inetpton(int af, const char *src, void *dst);
 /*
  * strncpy_irc - optimized strncpy
  */
-/* #ifdef __GNUC__ this is broken. */
-#if 0
-/* GCC ends up providing its own optimized memcpy() with -O2 turned on..
- * which is far faster than strncpy_irc()
- */
 char* strncpy_irc(char* s1, const char* s2, size_t n);
-#define strncpy_irc(x, y, z) ((char *)memcpy(x, y, z))
-#else
-#ifndef VMS
-extern inline char* strncpy_irc(char* s1, const char* s2, size_t n);
-#if 0
-{
-	register char* endp = s1 + n;
-	register char* s = s1;
-	while (s < endp && (*s++ = *s2++))
-		; 
-	return s1;
-}
-#endif
-#else
-char *strncpy_irc(char *s1, const char *s2, size_t n);
-#endif
-#endif /* #ifdef __GNUC__ */
 
 
 #ifndef HAVE_STRLCPY
@@ -129,15 +107,8 @@ char* clean_string(char* dest, const unsigned char* src, size_t len);
  */
 char *strip_tabs(char *dest, const unsigned char *src, size_t len);
 
-#ifdef DEAD_CODE 
-unsigned long textip_to_ul(const char *ip);
-#endif
 const char* myctime(time_t);
-#ifndef HAVE_STRTOK_R
-char*       strtoken(char** save, char* str, char* fs);
-#else
-#define strtoken(save, str, fs) strtok_r(str, fs, save)
-#endif
+
 #define EmptyString(x) (!(x) || (*(x) == '\0'))
 
 /*

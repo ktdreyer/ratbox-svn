@@ -64,8 +64,8 @@ extern MemoryEntry *first_mem_entry;
 
 extern void * _MyMalloc(size_t size);
 extern void* _MyRealloc(void* x, size_t y);
-extern inline void _MyFree(void *x);
-extern inline void _DupString(char **x, const char *y);
+extern void _MyFree(void *x);
+extern void _DupString(char **x, const char *y);
 extern int         _BlockHeapFree(BlockHeap *bh, void *ptr);
 extern void *	  _BlockHeapAlloc(BlockHeap *bh);
 
