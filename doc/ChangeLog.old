@@ -1,3 +1,8 @@
+*** 20001206_5 by db
+- cleaned up m_server.c, removed some redundant code
+
+
+
 *** 20001206_4 by db
 - "CAP_KLN" string was missing in s_serv.c
 
