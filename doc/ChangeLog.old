@@ -1,3 +1,8 @@
+*** 20001210_7 by db
+- missed a place where send_trim() should have been used
+
+
+
 *** 20001210_6 by db
 - as promised, tidied up send.c added to send.txt document
 
