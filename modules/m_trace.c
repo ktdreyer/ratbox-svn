@@ -125,6 +125,8 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
   wilds = !parv[1] || strchr(tname, '*') || strchr(tname, '?');
   dow = wilds || doall;
   
+  now = time(NULL);
+
   if(!IsOper(source_p) || !dow) /* non-oper traces must be full nicks */
                               /* lets also do this for opers tracing nicks */
     {
