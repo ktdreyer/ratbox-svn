@@ -135,17 +135,8 @@ void
 free_channel_reg(struct chan_reg *reg_p)
 {
 	dlink_node *ptr, *next_ptr;
+
 	unsigned int hashv = hash_channel(reg_p->name);
-
-	dlink_delete(&reg_p->node, &channel_reg_table[hashv]);
-
-	loc_sqlite_exec(NULL, "DELETE FROM members WHERE chname = %Q",
-			reg_p->name);
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, reg_p->users.head)
-	{
-		free_member_reg(ptr->data);
-	}
 
 	loc_sqlite_exec(NULL, "DELETE FROM bans WHERE chname = %Q",
 			reg_p->name);
@@ -155,6 +146,8 @@ free_channel_reg(struct chan_reg *reg_p)
 		free_ban_reg(reg_p, ptr->data);
 	}
 
+	dlink_delete(&reg_p->node, &channel_reg_table[hashv]);
+
 	loc_sqlite_exec(NULL, "DELETE FROM channels WHERE chname = %Q",
 			reg_p->name);
 
@@ -162,6 +155,21 @@ free_channel_reg(struct chan_reg *reg_p)
 	my_free(reg_p->topic);
 
 	BlockHeapFree(channel_reg_heap, reg_p);
+}
+
+static void
+destroy_channel_reg(struct chan_reg *reg_p)
+{
+	dlink_node *ptr, *next_ptr;
+
+	loc_sqlite_exec(NULL, "DELETE FROM members WHERE chname = %Q",
+			reg_p->name);
+
+	/* free_member_reg() will call free_channel_reg() when its done */
+	DLINK_FOREACH_SAFE(ptr, next_ptr, reg_p->users.head)
+	{
+		free_member_reg(ptr->data, 0);
+	}
 }
 
 static void
@@ -211,12 +219,61 @@ make_member_reg(struct user_reg *ureg_p, struct chan_reg *chreg_p,
 }
 
 void
-free_member_reg(struct member_reg *mreg_p)
+free_member_reg(struct member_reg *mreg_p, int upgrade)
 {
+	struct chan_reg *chreg_p = mreg_p->channel_reg;
+	int level = mreg_p->level;
+
+	/* remove the user before we find highest */
 	dlink_delete(&mreg_p->usernode, &mreg_p->user_reg->channels);
 	dlink_delete(&mreg_p->channode, &mreg_p->channel_reg->users);
+
 	my_free(mreg_p->lastmod);
 	BlockHeapFree(member_reg_heap, mreg_p);
+
+	if(!dlink_list_length(&chreg_p->users))
+	{
+		free_channel_reg(chreg_p);
+	}
+	/* upgrade the highest user to owner */
+	else if(level == S_C_OWNER && upgrade)
+	{
+		struct member_reg *mreg_tp;
+		struct member_reg *mreg_top = NULL;
+		struct member_reg *mreg_topsus = NULL;
+		dlink_node *ptr;
+
+		level = 0;
+
+		DLINK_FOREACH(ptr, chreg_p->users.head)
+		{
+			mreg_tp = ptr->data;
+
+			if(mreg_tp->suspend)
+			{
+				if(!mreg_topsus || mreg_tp->level > mreg_topsus->level)
+					mreg_topsus = mreg_tp;
+			}
+			else if(!mreg_top || mreg_tp->level > mreg_top->level)
+				mreg_top = mreg_tp;
+		}
+
+		if(mreg_topsus && !mreg_top)
+		{
+			mreg_top = mreg_topsus;
+			mreg_top->suspend = 0;
+		}
+
+		/* now promote the highest user */
+		mreg_top->level = S_C_OWNER;
+		mreg_top->lastmod = my_strdup(MYNAME);
+
+		loc_sqlite_exec(NULL, 
+				"UPDATE members SET level = %d, suspend = 0, lastmod = %Q "
+				"WHERE chname = %Q AND username = %Q",
+				mreg_top->level, MYNAME, chreg_p->name, 
+				mreg_top->user_reg->name);
+	}
 }
 
 static struct member_reg *
@@ -609,7 +666,7 @@ u_chan_chandrop(struct connection_entry *conn_p, char *parv[], int parc)
 
 	slog(chanserv_p, 1, "%s - CHANDROP %s", conn_p->name, parv[1]);
 
-	free_channel_reg(reg_p);
+	destroy_channel_reg(reg_p);
 
 	sendto_one(conn_p, "Channel %s registration dropped", parv[1]);
 }
@@ -718,7 +775,7 @@ s_chan_chandrop(struct client *client_p, char *parv[], int parc)
 	slog(chanserv_p, 1, "%s - CHANDROP %s", 
 		client_p->user->oper->name, parv[0]);
 
-	free_channel_reg(reg_p);
+	destroy_channel_reg(reg_p);
 
 	service_error(chanserv_p, client_p, "Channel %s registration dropped",
 			parv[0]);
@@ -936,21 +993,7 @@ s_chan_deluser(struct client *client_p, char *parv[], int parc)
 
 	delete_member_db_entry(mreg_tp);
 
-	/* must be done before we possibly free the channel - mreg_p is
-	 * possibly free()'d after this so should not be used
-	 */
-	free_member_reg(mreg_tp);
-
-	/* handle a user deleting themselves, when theyre the only member on
-	 * the channel
-	 */
-	if(dlink_list_length(&chreg_p->users) == 0)
-	{
-		service_error(chanserv_p, client_p, "Channel %s registration dropped",
-				chreg_p->name);
-
-		free_channel_reg(chreg_p);
-	}
+	free_member_reg(mreg_tp, 1);
 
 	return 1;
 }

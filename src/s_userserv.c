@@ -96,7 +96,6 @@ add_user_reg(struct user_reg *reg_p)
 static void
 free_user_reg(struct user_reg *ureg_p)
 {
-	struct member_reg *mreg_p;
 	dlink_node *ptr, *next_ptr;
 	unsigned int hashv = hash_name(ureg_p->name);
 
@@ -107,13 +106,7 @@ free_user_reg(struct user_reg *ureg_p)
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, ureg_p->channels.head)
 	{
-		mreg_p = ptr->data;
-
-		/* only member of this channel, so drop the channel too */
-		if(dlink_list_length(&mreg_p->channel_reg->users) == 1)
-			free_channel_reg(mreg_p->channel_reg);
-		else
-			free_member_reg(mreg_p);
+		free_member_reg(ptr->data, 1);
 	}
 
 	loc_sqlite_exec(NULL, "DELETE FROM users WHERE username = %Q",
