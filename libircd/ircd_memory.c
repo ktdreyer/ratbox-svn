@@ -22,8 +22,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define WE_ARE_MEMORY_C
-
 #include "ircd_defs.h"
 #include "ircd.h"
 #include "irc_string.h"
