@@ -43,7 +43,7 @@ _moddeinit(void)
   hook_del_hook("doing_whois", (hookfn *)show_notice);
 }
 
-char *_version = "1.0";
+char *_version = "$Revision$";
 
 /* show a whois notice
    source_p does a /whois on client_p */
