@@ -1,3 +1,16 @@
+androsyn    2002/12/07 23:03:13 UTC	(20021207_5)
+
+  Modified files:
+    doc                  example.conf 
+  Log:
+  Update the example config about how to deal with using ipv4 limits on an
+  ipv6 compiled server..essentially how you need to add 96 to the ipv4 length.
+  
+  Revision  Changes    Path
+  7.198     +5 -0      ircd-ratbox/doc/example.conf
+
+
+
 androsyn    2002/12/07 22:23:07 UTC	(20021207_4)
 
   Modified files:
