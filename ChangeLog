@@ -1,3 +1,16 @@
+androsyn    2003/03/16 05:19:38 UTC	(20030316_2)
+
+  Modified files:
+    src                  s_auth.c s_bsd.c 
+  Log:
+  remove a few stray fprintf()'s
+  
+  Revision  Changes    Path
+  7.140     +0 -1      ircd-ratbox/src/s_auth.c
+  7.201     +0 -1      ircd-ratbox/src/s_bsd.c
+
+
+
 androsyn    2003/03/16 05:19:03 UTC	(20030316_1)
 
   Modified files:
