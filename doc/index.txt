@@ -24,6 +24,8 @@ kline.txt               - Outline of the remote K-line protocol for both
 linebuf.txt		- Outline of the linebuf system (dbuf replacement)
 message-customisation.txt
                         - Outline of the message customization procedure
+modeg.txt               - An in depth description of the server side silence
+                          user mode (+g)
 modes.txt               - A list of all user and channel modes
 mtrie.txt               - Brief outline of the mtrie data structure used
                           for auth and kill blocks
