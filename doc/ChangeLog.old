@@ -1,3 +1,19 @@
+leeh        2002/04/22 16:50:18 EDT	(20020422_1)
+
+  Modified files:
+    src                  channel.c channel_mode.c 
+  Log:
+  - fixed two bugs reported by ShadowDog <esast@shadow.no>
+    - an +ov user being sent +nick on a +a channel
+    - server 'resynced' an opped users +v mode on +a channel, they can
+      already see it as theyre opped.
+  
+  Revision  Changes    Path
+  7.309     +8 -0      ircd-hybrid-7/src/channel.c
+  7.31      +2 -5      ircd-hybrid-7/src/channel_mode.c
+
+
+
 leeh        2002/04/22 13:26:57 EDT	(20020422_0)
 
   Modified files:
