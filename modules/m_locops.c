@@ -64,7 +64,7 @@ m_locops(struct Client *client_p, struct Client *source_p, int parc, const char 
 	
 	if(dlink_list_length(&cluster_conf_list) > 0)
 		cluster_generic(source_p, "LOCOPS", SHARED_LOCOPS, CAP_CLUSTER,
-				"%s", parv[1]);
+				":%s", parv[1]);
 
 	return 0;
 }
@@ -76,7 +76,7 @@ ms_locops(struct Client *client_p, struct Client *source_p, int parc, const char
 	 * oper     target serv  message
 	 */
 	propagate_generic(source_p, "LOCOPS", parv[1], CAP_CLUSTER, 
-				"%s", parv[2]);
+				":%s", parv[2]);
 
 	if(!match(parv[1], me.name))
 		return 0;
