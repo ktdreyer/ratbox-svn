@@ -1,3 +1,20 @@
+androsyn    2003/06/26 14:57:24 UTC	(20030626_4)
+
+  Modified files:        (Branch: STABLE)
+    include              balloc.h 
+    src                  balloc.c channel.c client.c linebuf.c 
+  Log:
+  Merge balloc changes from current.
+  
+  Revision   Changes    Path
+  1.20.2.2   +2 -15     ircd-ratbox/include/balloc.h
+  7.63.2.2   +64 -112   ircd-ratbox/src/balloc.c
+  7.381.2.2  +0 -10     ircd-ratbox/src/channel.c
+  7.385.2.2  +0 -17     ircd-ratbox/src/client.c
+  7.109.2.2  +0 -8      ircd-ratbox/src/linebuf.c
+
+
+
 androsyn    2003/06/26 14:53:12 UTC	(20030626_3)
 
   Added files:           (Branch: STABLE)
