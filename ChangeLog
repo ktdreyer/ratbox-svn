@@ -1,3 +1,15 @@
+androsyn    2003/02/03 22:48:58 UTC	(20030203_4)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Kill the abort list..this should fix that goofy problem :)
+  
+  Revision  Changes    Path
+  7.363     +4 -46     ircd-ratbox/src/client.c
+
+
+
 androsyn    2003/02/03 21:53:31 UTC	(20030203_3)
 
   Modified files:
