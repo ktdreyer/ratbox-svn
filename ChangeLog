@@ -1,3 +1,15 @@
+leeh        2004/01/02 17:04:11 EST	(20040102_0)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  - patch from hwy to fix an invalid pointer reference
+  
+  Revision  Changes    Path
+  1.10      +1 -1      rserv/src/client.c
+
+
+
 leeh        2004/01/01 13:17:46 EST	(20040101_0)
 
   Modified files:
