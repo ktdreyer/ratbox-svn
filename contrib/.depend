@@ -46,4 +46,12 @@ m_opme.so: m_opme.c ../include/tools.h ../include/handlers.h \
 whois_notice.so: whois_notice.c ../include/modules.h \
  ../include/ircd_handler.h ../include/msg.h ../include/config.h \
  ../include/setup.h ../include/memory.h ../include/ircd_defs.h \
- ../include/blalloc.h ../include/hook.h
+ ../include/blalloc.h ../include/hook.h ../include/tools.h \
+ ../include/client.h ../include/linebuf.h ../include/ircd.h \
+ ../include/send.h
+stats_notice.so: stats_notice.c ../include/modules.h \
+ ../include/ircd_handler.h ../include/msg.h ../include/config.h \
+ ../include/setup.h ../include/memory.h ../include/ircd_defs.h \
+ ../include/blalloc.h ../include/hook.h ../include/tools.h \
+ ../include/client.h ../include/linebuf.h ../include/ircd.h \
+ ../include/send.h
