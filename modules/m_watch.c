@@ -223,7 +223,6 @@ m_watch(struct Client * client_p, struct Client * source_p, int parc, const char
 			if(w_nicks[0] != NULL)
 			{
 				int last = 0, y;
-				watchn = MyMalloc(sizeof(struct watch_table) * z);
 				watchn[last].nick = (w_nicks[0])+1;
 				watchn[last].flag = *w_nicks[0];
 
