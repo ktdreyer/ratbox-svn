@@ -1,3 +1,9 @@
+*** 20010820_3 by db
+- re idented to conform with project standards. 
+- removed unnecessary strncat, replaced with strncpy()
+
+
+
 *** 20010820_2 by androsyn
 This is a hack to make poll() use a single list. This isn't the right way to do it, but
 it will do for now.
