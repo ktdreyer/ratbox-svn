@@ -1,3 +1,7 @@
+*** 20010806_3 by leeh
+- attempting to use things from a null struct is bad (jv)
+
+
 *** 20010806_2 by db
 - missing set of last_ptr. oops. 
 
