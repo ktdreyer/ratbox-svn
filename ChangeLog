@@ -1,3 +1,16 @@
+leeh        2004/04/05 20:16:36 EDT	(20040406_0)
+
+  Modified files:
+    src                  parse.c 
+  Log:
+  - ignore ERR_NOSUCHSERVER directed at us too, as this happens now that we
+    send PING on server connect
+  
+  Revision  Changes    Path
+  7.180     +6 -1      ircd-ratbox/src/parse.c
+
+
+
 leeh        2004/04/05 19:53:57 EDT	(20040405_5)
 
   Modified files:
