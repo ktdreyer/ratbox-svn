@@ -1,3 +1,16 @@
+androsyn    2003/01/20 23:48:32 UTC	(20030120_10)
+
+  Modified files:
+    src                  listener.c s_bsd.c 
+  Log:
+  Fix some endian issues..
+  
+  Revision  Changes    Path
+  7.84      +5 -5      ircd-ratbox/src/listener.c
+  7.192     +2 -2      ircd-ratbox/src/s_bsd.c
+
+
+
 androsyn    2003/01/20 23:38:29 UTC	(20030120_9)
 
   Modified files:
