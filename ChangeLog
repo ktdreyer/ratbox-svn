@@ -1,3 +1,15 @@
+androsyn    2003/02/08 18:23:24 UTC	(20030208_11)
+
+  Modified files:
+    src                  fdlist.c 
+  Log:
+  Remove yet another strncpy()
+  
+  Revision  Changes    Path
+  7.37      +1 -1      ircd-ratbox/src/fdlist.c
+
+
+
 androsyn    2003/02/08 18:19:27 UTC	(20030208_10)
 
   Modified files:
