@@ -1,3 +1,7 @@
+*** 20010106_7 by fl_
+- small fix of an if()
+
+
 *** 20010106_6 by fl_
 - fixes and added rate limiting to remote whois (whois nick nick)
 
