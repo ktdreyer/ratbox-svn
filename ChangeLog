@@ -1,3 +1,48 @@
+leeh        2004/03/07 11:46:41 EST	(20040307_4)
+
+  Modified files:
+    contrib              .indent.pro example_module.c 
+                         m_clearchan.c m_flags.c m_force.c 
+                         m_mkpasswd.c m_ojoin.c m_okick.c 
+                         m_olist.c m_omode.c m_opme.c 
+                         spy_admin_notice.c spy_info_notice.c 
+                         spy_links_notice.c spy_motd_notice.c 
+                         spy_stats_notice.c spy_stats_p_notice.c 
+                         spy_trace_notice.c spy_whois_notice.c 
+                         spy_whois_notice_global.c 
+    include              .indent.pro 
+    modules              .indent.pro 
+    src                  .indent.pro 
+  Log:
+  - ran contrib/ through indent and updated the .indent.pro files
+  
+  Revision  Changes    Path
+  1.2       +1 -1      ircd-ratbox/contrib/.indent.pro
+  1.8       +106 -104  ircd-ratbox/contrib/example_module.c
+  1.47      +24 -31    ircd-ratbox/contrib/m_clearchan.c
+  1.14      +296 -300  ircd-ratbox/contrib/m_flags.c
+  1.24      +183 -194  ircd-ratbox/contrib/m_force.c
+  1.12      +104 -99   ircd-ratbox/contrib/m_mkpasswd.c
+  1.20      +87 -97    ircd-ratbox/contrib/m_ojoin.c
+  1.10      +58 -75    ircd-ratbox/contrib/m_okick.c
+  1.12      +72 -75    ircd-ratbox/contrib/m_olist.c
+  1.5       +9 -10     ircd-ratbox/contrib/m_omode.c
+  1.41      +17 -23    ircd-ratbox/contrib/m_opme.c
+  1.11      +7 -7      ircd-ratbox/contrib/spy_admin_notice.c
+  1.11      +7 -7      ircd-ratbox/contrib/spy_info_notice.c
+  1.16      +7 -7      ircd-ratbox/contrib/spy_links_notice.c
+  1.11      +7 -7      ircd-ratbox/contrib/spy_motd_notice.c
+  1.17      +18 -20    ircd-ratbox/contrib/spy_stats_notice.c
+  1.9       +9 -8      ircd-ratbox/contrib/spy_stats_p_notice.c
+  1.11      +7 -7      ircd-ratbox/contrib/spy_trace_notice.c
+  1.17      +11 -9     ircd-ratbox/contrib/spy_whois_notice.c
+  1.6       +12 -9     ircd-ratbox/contrib/spy_whois_notice_global.c
+  7.3       +1 -1      ircd-ratbox/include/.indent.pro
+  1.3       +1 -1      ircd-ratbox/modules/.indent.pro
+  7.3       +1 -1      ircd-ratbox/src/.indent.pro
+
+
+
 leeh        2004/03/07 11:34:22 EST	(20040307_3)
 
   Modified files:
