@@ -368,6 +368,10 @@ static int oper_privs_from_string(int int_privs,char *privs)
         int_privs |= CONF_OPER_DIE;         /* allow die */
       else if(*privs == 'd')
         int_privs &= ~CONF_OPER_DIE;        /* disallow die */
+      else if(*privs == 'A')
+        int_privs |= CONF_OPER_ADMIN;       
+      else if(*privs == 'a')
+	int_privs &= ~CONF_OPER_ADMIN;
       privs++;
     }
   return(int_privs);

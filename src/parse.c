@@ -54,7 +54,8 @@ static  void    remove_unknown (struct Client *, char *, char *);
 static int do_numeric (char [], struct Client *,
                          struct Client *, int, char **);
 
-static struct Message *do_msg_tree(MESSAGE_TREE *, char *, struct Message *);
+static struct Message *do_msg_tree(struct MessageTree *,
+				   char *, struct Message *);
 static struct Message *tree_parse(char *);
 
 struct MessageTree *msg_tree_root;
@@ -65,6 +66,8 @@ int max_msgs=0;
 /* allow room for 10 messages at a time */
 #define MESSAGES_INCREMENT 10
 void update_msgtab();
+void clear_msg_tree();
+void clear_sub_msg_tree(struct MessageTree *mtree);
 
 static char buffer[1024];  /* ZZZ must this be so big? must it be here? */
 
@@ -378,7 +381,7 @@ static int mcmp(struct Message *m1, struct Message *m2)
  */
 void init_tree_parse(struct Message *mptr)
 {
-  msg_tree_root = (MESSAGE_TREE *)MyMalloc(sizeof(MESSAGE_TREE));
+  msg_tree_root = (struct MessageTree *)MyMalloc(sizeof(struct MessageTree));
   msgtab = (struct Message *)MyMalloc(
 				      sizeof(struct Message) * 
 				      MESSAGES_INCREMENT);
@@ -395,12 +398,12 @@ void init_tree_parse(struct Message *mptr)
 
 /*  Recursively make a prefix tree out of the msgtab -orabidoo
  */
-static struct Message *do_msg_tree(MESSAGE_TREE *mtree, char *prefix,
+static struct Message *do_msg_tree(struct MessageTree *mtree, char *prefix,
                                 struct Message *mptr)
 {
   char newpref[64];  /* must be longer than any command */
   int c, c2, lp;
-  MESSAGE_TREE *mtree1;
+  struct MessageTree *mtree1;
 
   lp = strlen(prefix);
   if (!lp || !strncmp(mptr->cmd, prefix, lp))
@@ -431,7 +434,9 @@ static struct Message *do_msg_tree(MESSAGE_TREE *mtree, char *prefix,
         {
           if (mptr->cmd[lp] == c)
             {
-              mtree1 = (MESSAGE_TREE *)MyMalloc(sizeof(MESSAGE_TREE));
+              mtree1 = (struct MessageTree *)
+		MyMalloc(sizeof(struct MessageTree));
+
               mtree1->final = NULL;
               mtree->pointers[c-'A'] = mtree1;
               strcpy(newpref, prefix);
@@ -475,7 +480,7 @@ static struct Message *do_msg_tree(MESSAGE_TREE *mtree, char *prefix,
 static struct Message *tree_parse(char *cmd)
 {
   char r;
-  MESSAGE_TREE *mtree = msg_tree_root;
+  struct MessageTree *mtree = msg_tree_root;
 
   while ((r = *cmd++))
     {
@@ -502,6 +507,7 @@ mod_add_cmd(char *cmd, struct Message *msg)
 {
   int i; 
 
+  clear_msg_tree();
 
   for (i = 0; i < num_msgs && msgtab[i].cmd; i++)
     {
@@ -524,6 +530,38 @@ mod_add_cmd(char *cmd, struct Message *msg)
   do_msg_tree(msg_tree_root, "", msgtab);
 }
 
+void
+mod_del_cmd(char *cmd)
+{
+  int i; 
+
+  clear_msg_tree();
+
+  for (i = 0; i < num_msgs && msgtab[i].cmd; i++)
+    {
+      if (!irccmp(msgtab[i].cmd, cmd))
+	{
+	  memcpy( &msgtab[i], &msgtab[i+1],
+		  sizeof(struct Message) * ((num_msgs-1) - i) );
+
+	  if(num_msgs != 0)
+	    num_msgs--;
+
+	  qsort((void *)msgtab, num_msgs, sizeof(struct Message), 
+		(int (*)(const void *, const void *)) mcmp);
+	  do_msg_tree(msg_tree_root, "", msgtab);
+	  return;
+	}
+    }
+}
+
+/*
+ * update_msgtab
+ *
+ * inputs	- NONE
+ * output	- NONE
+ * side effects	- expand the size of msgtab if necessary
+ */
 void update_msgtab()
 {
   struct Message *nmsgtab;
@@ -537,11 +575,69 @@ void update_msgtab()
 
   memcpy((void *)nmsgtab, (void *)msgtab, sizeof(struct Message) * num_msgs);
 
-  free(msgtab);
+  MyFree(msgtab);
   msgtab = nmsgtab;
   max_msgs += MESSAGES_INCREMENT;
 }
 
+
+/*
+ * clear_msg_tree
+ * inputs	- NONE
+ * output	- NONE
+ * side effects	- msg_tree is cleared out, all memory allocated is freed
+ */
+void clear_msg_tree()
+{
+  struct MessageTree *mtree = msg_tree_root;
+  int c;
+
+  for (c=0; c<=25; c++)
+    {
+      clear_sub_msg_tree(mtree->pointers[c]);
+    }
+
+  mtree = msg_tree_root;
+
+  for (c=0; c<=25; c++)
+    {
+      mtree->pointers[c] = NULL;
+    }
+
+  return; 
+}
+
+/*
+ * clear_sub_msg_tree
+ * inputs	- pointer to current level of MessageTree to clear
+ * output	- NONE
+ * side effects	- msg_tree is cleared out, all memory allocated is freed
+ */
+void clear_sub_msg_tree(struct MessageTree *mtree)
+{
+  int c;
+
+  if( mtree == NULL )
+    return;
+
+  for (c=0; c<=25; c++)
+    {
+      if(mtree->pointers[c] != NULL)
+	{
+	  clear_sub_msg_tree(mtree->pointers[c]);
+	  MyFree(mtree->pointers[c]);
+	}
+    }
+  return; 
+}
+
+/*
+ * cancel_clients
+ *
+ * inputs	- 
+ * output	- 
+ * side effects	- 
+ */
 static  int     cancel_clients(struct Client *cptr,
                                struct Client *sptr,
                                char *cmd)
@@ -616,6 +712,13 @@ static  int     cancel_clients(struct Client *cptr,
   return exit_client(cptr, cptr, &me, "Fake prefix");
 }
 
+/*
+ * remove_unknown
+ *
+ * inputs	- 
+ * output	- 
+ * side effects	- 
+ */
 static  void    remove_unknown(struct Client *cptr,
                                char *sender,
                                char *buffer)
@@ -746,8 +849,11 @@ static int     do_numeric(
 }
 
 
-/* stick these here for now, to get it to compile
- * will go into m_defaults.c just like ircu (thanks bleep!)
+/* 
+ * m_not_oper
+ * inputs	-
+ * output	-
+ * side effects	-
  */
 int m_not_oper(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 {

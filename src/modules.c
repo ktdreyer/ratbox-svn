@@ -32,6 +32,9 @@
 #include "config.h"
 #include "ircd.h"
 #include "client.h"
+#include "handlers.h"
+#include "numeric.h"
+#include "ircd_defs.h"
 
 static char unknown_ver[] = "<unknown>";
 
@@ -66,6 +69,13 @@ findmodule_byname (char *name)
   return NULL;
 }
 
+/*
+ * unload_one_module 
+ *
+ * inputs	- name of module to unload
+ * output	- 0 if successful, -1 if error
+ * side effects	- module is unloaded
+ */
 int
 unload_one_module (char *name)
 {
@@ -74,17 +84,29 @@ unload_one_module (char *name)
   if ((mod = findmodule_byname (name)) == NULL) 
     return -1;
 
-  free (mod->name);
+  MyFree (mod->name);
   mod->name = modlist [num_mods - 1]->name;
   mod->version = modlist [num_mods - 1]->version;
   mod->address = modlist [num_mods - 1]->address;
 
   modlist = (struct module **)realloc (modlist, sizeof (struct module) * (num_mods - 1));
   
+  mod_del_cmd(name);
+
   log (L_INFO, "Module %s unloaded", name);
   sendto_realops ("Module %s unloaded", name);
   return 0;
 }
+
+struct Message modload_msgtab = {
+  MSG_MODLOAD, 0, 0, MFLG_SLOW, 0,
+  {m_unregistered, m_ignore, m_ignore, mo_modload}
+};
+
+struct Message modunload_msgtab = {
+  MSG_MODUNLOAD, 0, 0, MFLG_SLOW, 0,
+  {m_unregistered, m_ignore, m_ignore, mo_modunload}
+};
 
 /* load all modules from MPATH */
 void
@@ -96,29 +118,36 @@ load_all_modules (void)
   char           *old_dir = getcwd (NULL, 0); /* XXX not portable */
   char            module_fq_name[PATH_MAX + 1];
 
-  if (chdir (system_module_dir_name) == -1) {
-    log (L_WARN, "Could not load modules from %s: %s",
-	system_module_dir_name, strerror (errno));
-    return;
-  }
+  mod_add_cmd(MSG_MODLOAD,&modload_msgtab);
+  mod_add_cmd(MSG_MODUNLOAD,&modunload_msgtab);
+
+  if (chdir (system_module_dir_name) == -1)
+    {
+      log (L_WARN, "Could not load modules from %s: %s",
+	   system_module_dir_name, strerror (errno));
+      return;
+    }
 
   system_module_dir = opendir (".");
-  if (system_module_dir == NULL) {
-    log (L_WARN, "Could not load modules from %s: %s",
-	system_module_dir_name, strerror (errno));
-    return;
-  }
-
-  while ((ldirent = readdir (system_module_dir)) != NULL) {
-    if (ldirent->d_name [strlen (ldirent->d_name) - 3] == '.' &&
-        ldirent->d_name [strlen (ldirent->d_name) - 2] == 's' &&
-        ldirent->d_name [strlen (ldirent->d_name) - 1] == 'o') {
-      (void)snprintf (module_fq_name, sizeof (module_fq_name),
-        "%s/%s",  system_module_dir_name,
-        ldirent->d_name);
-      (void)load_one_module (module_fq_name);
+  if (system_module_dir == NULL)
+    {
+      log (L_WARN, "Could not load modules from %s: %s",
+	   system_module_dir_name, strerror (errno));
+      return;
     }
-  }
+
+  while ((ldirent = readdir (system_module_dir)) != NULL)
+    {
+      if (ldirent->d_name [strlen (ldirent->d_name) - 3] == '.' &&
+	  ldirent->d_name [strlen (ldirent->d_name) - 2] == 's' &&
+	  ldirent->d_name [strlen (ldirent->d_name) - 1] == 'o')
+	{
+	  (void)snprintf (module_fq_name, sizeof (module_fq_name),
+			  "%s/%s",  system_module_dir_name,
+			  ldirent->d_name);
+	  (void)load_one_module (module_fq_name);
+	}
+    }
 
   (void)closedir (system_module_dir);
   (void)chdir (old_dir);
@@ -133,29 +162,30 @@ load_one_module (char *path)
   void (*initfunc)(void) = NULL;
   char *ver;
 
-
   mod_basename = basename(path);
 
   errno = 0;
   tmpptr = dlopen (path, RTLD_LAZY);
 
-  if (tmpptr == NULL) {
-    const char *err = dlerror();
+  if (tmpptr == NULL)
+    {
+      const char *err = dlerror();
 
-    sendto_realops ("Error loading module %s: %s", mod_basename, err);
-    log (L_WARN, "Error loading module %s: %s", mod_basename, err);
-    free (mod_basename);
-    return -1;
-  }
+      sendto_realops ("Error loading module %s: %s", mod_basename, err);
+      log (L_WARN, "Error loading module %s: %s", mod_basename, err);
+      free (mod_basename);
+      return -1;
+    }
 
   initfunc = (void (*)(void))dlsym (tmpptr, "_modinit");
-  if (!initfunc) {
-    sendto_realops ("Module %s has no _modinit() function", mod_basename);
-    log (L_WARN, "Module %s has no _modinit() function", mod_basename);
-    (void)dlclose (tmpptr);
-    free (mod_basename);
-    return -1;
-  }
+  if (!initfunc)
+    {
+      sendto_realops ("Module %s has no _modinit() function", mod_basename);
+      log (L_WARN, "Module %s has no _modinit() function", mod_basename);
+      (void)dlclose (tmpptr);
+      free (mod_basename);
+      return -1;
+    }
 
   if (!(ver = (char *)dlsym (tmpptr, "_modver")));
     ver = unknown_ver;
@@ -170,8 +200,10 @@ load_one_module (char *path)
 
   initfunc ();
 
-  sendto_realops ("Module %s [version: %s] loaded at 0x%x", mod_basename, ver, tmpptr);
-  log (L_WARN, "Module %s [version: %s] loaded at 0x%x", mod_basename, ver, tmpptr);
+  sendto_realops ("Module %s [version: %s] loaded at 0x%x",
+		  mod_basename, ver, tmpptr);
+  log (L_WARN, "Module %s [version: %s] loaded at 0x%x",
+       mod_basename, ver, tmpptr);
   free (mod_basename);
 
   return 0;
@@ -181,40 +213,73 @@ load_one_module (char *path)
 int
 mo_modload (struct Client *cptr, struct Client *sptr, int parc, char **parv)
 {
-  char *m_bn = basename (parv[1]);
+  char *m_bn;
 
-  if (!IsSetOperAdmin(sptr)) {
-    sendto_one(sptr, ":%s NOTICE %s :You have no M flag", me.name, parv[0]);
-    return 0;
-  }
+  if( parc < 2 )
+    {
+      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
+		 me.name, sptr->name, "MODLOAD");
+      return 0;
+    }
 
-  if (findmodule_byname (m_bn)) {
-    sendto_one (sptr, ":%s NOTICE %s :Module %s is already loaded", me.name, m_bn);
-    return 0;
-  }
+  if (!IsSetOperAdmin(sptr))
+    {
+      sendto_one(sptr, ":%s NOTICE %s :You have no A flag", me.name, parv[0]);
+      return 0;
+    }
+
+  m_bn = basename (parv[1]);
+
+  if (findmodule_byname (m_bn))
+    {
+      sendto_one (sptr, ":%s NOTICE %s :Module %s is already loaded",
+		  me.name, m_bn);
+      return 0;
+    }
 
   (void)load_one_module (parv[1]);
   return 0;
 }
 
+
 /* unload a module .. */
 int
 mo_modunload (struct Client *cptr, struct Client *sptr, int parc, char **parv)
 {
-  char *m_bn = basename (parv[1]);
+  char *m_bn;
 
-  if (!IsSetOperAdmin (sptr)) {
-    sendto_one (sptr, ":%s NOTICE %s :You have no M flag", me.name, parv[0]);
-    free (m_bn);
+  if( parc < 2 )
+    {
+      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
+		 me.name, sptr->name, "MODUNLOAD");
+      return 0;
+    }
+
+  m_bn = basename (parv[1]);
+
+  if (!IsSetOperAdmin (sptr))
+    {
+      sendto_one (sptr, ":%s NOTICE %s :You have no A flag",
+		  me.name, parv[0]);
+      free (m_bn);
+      return 0;
+    }
+
+  if( strcmp(m_bn,MSG_MODLOAD) == 0)
     return 0;
-  }
 
-  if (!findmodule_byname (m_bn)) {
-    sendto_one (sptr, ":%s NOTICE %s :Module %s is not loaded", me.name, m_bn);
-    free (m_bn);
+  if( strcmp(m_bn,MSG_MODUNLOAD) == 0)
     return 0;
-  }
+  
 
-  (void)unload_one_module (parv[1]);
+  if (!findmodule_byname (m_bn))
+    {
+      sendto_one (sptr, ":%s NOTICE %s :Module %s is not loaded",
+		  me.name, m_bn);
+      free (m_bn);
+      return 0;
+    }
+
+  (void)unload_one_module (m_bn);
   free (m_bn);
 }

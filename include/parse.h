@@ -31,5 +31,6 @@ struct Client;
 
 extern  int     parse (struct Client *, char *, char *);
 extern  void    init_tree_parse (struct Message *);
+extern  void    mod_del_cmd(char *cmd);
 
 #endif /* INCLUDED_parse_h_h */

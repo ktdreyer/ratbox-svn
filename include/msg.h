@@ -105,7 +105,6 @@ typedef struct MessageTree MESSAGE_TREE;
 #define MSG_NAMES    "NAMES"    /* NAME */
 #define MSG_ADMIN    "ADMIN"    /* ADMI */
 #define MSG_TRACE    "TRACE"    /* TRAC */
-#define MSG_LTRACE   "LTRACE"   /* LTRA */
 #define MSG_NOTICE   "NOTICE"   /* NOTI */
 #define MSG_JOIN     "JOIN"     /* JOIN */
 #define MSG_CJOIN    "CJOIN"    /* CJOIN */
@@ -138,6 +137,8 @@ typedef struct MessageTree MESSAGE_TREE;
 #define MSG_LOCOPS   "LOCOPS"   /* LOCOPS */
 #define MSG_LTRACE   "LTRACE"   /* LTRACE */
 #define MSG_SVINFO   "SVINFO"   /* SVINFO */
+#define MSG_MODLOAD  "MODLOAD"  /* MODLOAD */
+#define MSG_MODUNLOAD  "MODUNLOAD"  /* MODUNLOAD */
 
 /*
  * Constants
