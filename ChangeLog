@@ -1,3 +1,27 @@
+leeh        2004/04/06 19:01:38 EDT	(20040406_4)
+
+  Modified files:
+    include              s_newconf.h 
+    modules              m_stats.c m_xline.c 
+    src                  client.c kdparse.c messages.tab newconf.c 
+                         s_newconf.c s_user.c 
+  Log:
+  - track the amount of times an xline is hit in aconf->port, show it in the
+    old type field of RPL_STATSXLINE
+  
+  Revision  Changes    Path
+  7.29      +1 -1      ircd-ratbox/include/s_newconf.h
+  1.216     +2 -2      ircd-ratbox/modules/m_stats.c
+  1.51      +3 -3      ircd-ratbox/modules/m_xline.c
+  7.451     +2 -2      ircd-ratbox/src/client.c
+  7.34      +1 -1      ircd-ratbox/src/kdparse.c
+  7.111     +1 -1      ircd-ratbox/src/messages.tab
+  7.149     +1 -1      ircd-ratbox/src/newconf.c
+  7.37      +5 -1      ircd-ratbox/src/s_newconf.c
+  7.318     +1 -1      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2004/04/06 15:57:52 EDT	(20040406_3)
 
   Modified files:
