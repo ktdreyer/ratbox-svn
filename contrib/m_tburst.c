@@ -86,7 +86,7 @@ static void ms_tburst(struct Client *client_p, struct Client *source_p,
 
     else if(chptr->channelts == newchannelts)
     {
-      if(chptr->topic_time > newtopicts)
+      if(!chptr->topic[0] || (chptr->topic_time > newtopicts))
 	set_topic(source_p, chptr, newtopicts, parv[4], parv[5]);
       else
 	return;
