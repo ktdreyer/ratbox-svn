@@ -1,3 +1,8 @@
+*** 20010820_2 by androsyn
+This is a hack to make poll() use a single list. This isn't the right way to do it, but
+it will do for now.
+
+
 *** 20010820_1 by androsyn
 I think this fix is right for linebuf_copy_line() please look at it as it could probably still use work.
 
