@@ -1,3 +1,9 @@
+*** 20010101_44 by db
+- ignore bogus TS from servers. pure and simple. TS0 is broken
+  It =will= desync for a while. *TOUGH*
+
+
+
 *** 20010101_43 by ejb
 - DONT put all modules in example.conf, they are loaded on startup anyway.
 
