@@ -27,6 +27,8 @@
 #include "event.h"
 #include "hash.h"
 
+#define CF_TYPE(x) ((x) & CF_MTYPE)
+
 struct	TopConf *	conf_cur_block;
 	char *		conf_cur_block_name;
 
@@ -124,17 +126,33 @@ int 	conf_call_set(struct TopConf *tc, char *item, conf_parm_t *value, int type)
 
 	cp = value->v.list;
 
-	/* maybe it's a CF_TIME and they passed CF_INT --
-	   should still be valid */
-		
-	if (((value->v.list->type & CF_MTYPE) != (cf->cf_type & CF_MTYPE)) &&
-	    !((value->v.list->type & CF_MTYPE) == CF_INT && 
-		(cf->cf_type & CF_MTYPE) == CF_TIME))
-	{
-		conf_report_error("Wrong type for %s::%s (expected %s, got %s)",
-				tc->tc_name, (char*)item, conf_strtype(cf->cf_type),
-				conf_strtype(value->v.list->type));
-		return -1;
+
+        if(CF_TYPE(value->v.list->type) != CF_TYPE(cf->cf_type))
+        {
+                /* if it expects a string value, but we got a yesno, 
+                 * convert it back
+                 */
+                if((CF_TYPE(value->v.list->type) == CF_YESNO) &&
+                   (CF_TYPE(cf->cf_type) == CF_STRING))
+                {
+                        value->v.list->type = CF_STRING;
+                
+                        if(cp->v.number == 1)
+                                DupString(cp->v.string, "yes");
+                        else
+                                DupString(cp->v.string, "no");
+                }
+
+        	/* maybe it's a CF_TIME and they passed CF_INT --
+	           should still be valid */
+                else if(!((CF_TYPE(value->v.list->type) == CF_INT) &&
+                          (CF_TYPE(cf->cf_type) == CF_TIME)))
+        	{
+	        	conf_report_error("Wrong type for %s::%s (expected %s, got %s)",
+		        		tc->tc_name, (char*)item, conf_strtype(cf->cf_type),
+			        	conf_strtype(value->v.list->type));
+        		return -1;
+                }
 	}
 
 	if (cf->cf_type & CF_FLIST)
