@@ -1,3 +1,20 @@
+androsyn    2002/04/11 21:05:07 EDT	(20020412_0)
+
+  Modified files:
+    doc                  Makefile.in 
+    tools                convertconf.c 
+  Added files:
+    doc                  convertconf-example.conf 
+  Log:
+  Lee's convertconf patch
+  
+  Revision  Changes    Path
+  7.16      +4 -1      ircd-hybrid-7/doc/Makefile.in
+  7.1       +559 -0    ircd-hybrid-7/doc/convertconf-example.conf (new)
+  1.32      +19 -20    ircd-hybrid-7/tools/convertconf.c
+
+
+
 db          2002/04/11 01:33:40 EDT	(20020411_1)
 
   Modified files:
