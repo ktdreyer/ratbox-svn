@@ -1,3 +1,23 @@
+/************************************************************************
+ *   IRC - Internet Relay Chat, tools/convertconf.c
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 1, or (at your option)
+ *   any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
+ *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ * $Id$
+ */
+
 #include <stdio.h>
 #include <stddef.h>
 #include <ctype.h>
@@ -228,20 +248,31 @@ static void oldParseOneLine(FILE *out,char* line)
     {
     case 'A':case 'a': /* Name, e-mail address of administrator */
       fprintf(out,"\tadminstrator {\n");
-      fprintf(out,"\t\tname=\"%s\"\n;", host_field);
-      fprintf(out,"\t\temail=\"%s\"\n;", user_field);
+      fprintf(out,"\t\tname=\"%s\";\n", host_field);
+      fprintf(out,"\t\temail=\"%s\";\n", user_field);
       fprintf(out,"\t};\n\n");
       break;
 
     case 'c':
-      /* drop into normal C line code */
+      fprintf(out,"\tconnect_to {\n");
+      fprintf(out,"\t\tname=\"%s\";\n", user_field);
+      fprintf(out,"\t\thost=\"%s\";\n", host_field);
+      fprintf(out,"\t\tpassword=\"%s\";\n", passwd_field);
+      fprintf(out,"\t\tcompressed;\n", passwd_field);
+      fprintf(out,"\t};\n\n");
+      break;
 
     case 'C':
+      fprintf(out,"\tconnect_to {\n");
+      fprintf(out,"\t\tname=\"%s\";\n", user_field);
+      fprintf(out,"\t\thost=\"%s\";\n", host_field);
+      fprintf(out,"\t\tpassword=\"%s\";\n", passwd_field);
+      fprintf(out,"\t};\n\n");
       break;
 
     case 'd':
       fprintf(out,"\tacl_exception {\n");
-      fprintf(out,"\t\tip=\"%s\"\n;", user_field);
+      fprintf(out,"\t\tip=\"%s\";\n", user_field);
       fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
       fprintf(out,"\t};\n\n");
       break;
@@ -260,14 +291,13 @@ static void oldParseOneLine(FILE *out,char* line)
       fprintf(out,"\t};\n\n");
       break;
 
-    case 'i': /* Just plain normal irc client trying  */
-                  /* to connect to me */
+    case 'i': 
+      fprintf(out,"\tclient {\n");
+      fprintf(out,"\t\tname=\"%s\";\n", user_field);
+      fprintf(out,"\t};\n\n");
+      break;
 
-      /* drop into normal I line code */
-
-    case 'I': /* Just plain normal irc client trying  */
-      /* to connect to me */
-
+    case 'I': 
       fprintf(out,"\tclient {\n");
       fprintf(out,"\t\tname=\"%s\";\n", user_field);
       fprintf(out,"\t};\n\n");
@@ -292,28 +322,46 @@ static void oldParseOneLine(FILE *out,char* line)
     case 'k':
       fprintf(out,"\tkill {\n");
       fprintf(out,"\t\tname=\"%s@%s\";\n", user_field,host_field);
-      fprintf(out,"\t\treason=\"%s\"\n;", passwd_field);
+      fprintf(out,"\t\treason=\"%s\"\n", passwd_field);
       fprintf(out,"\t};\n\n");
       break;
 
     case 'L': /* guaranteed leaf server */
     case 'l':
+      fprintf(out,"\tleaf {\n");
+      fprintf(out,"\t\tname=\"%s\";\n", user_field);
+      fprintf(out,"\t};\n\n");
       break;
 
       /* Me. Host field is name used for this host */
       /* and port number is the number of the port */
     case 'M':
     case 'm':
+      fprintf(out,"\tserver {\n");
+      fprintf(out,"\t\tname=\"%s\";\n", host_field);
+      fprintf(out,"\t\temail=\"%s\";\n", user_field);
+      fprintf(out,"\t};\n\n");
+
       if(port_field)
         {
 	}
       break;
 
-    case 'n': /* connect in case of lp failures     */
-      /* drop into normal N line code */
+    case 'n': 
+      fprintf(out,"\tconnect_from {\n");
+      fprintf(out,"\t\tname=\"%s\";\n", user_field);
+      fprintf(out,"\t\thost=\"%s\";\n", host_field);
+      fprintf(out,"\t\tpassword=\"%s\";\n", passwd_field);
+      fprintf(out,"\t\tlazylink;\n", passwd_field);
+      fprintf(out,"\t};\n\n");
+      break;
 
-    case 'N': /* Server where I should NOT try to     */
-      /* but which tries to connect ME        */
+    case 'N': 
+      fprintf(out,"\tconnect_from {\n");
+      fprintf(out,"\t\tname=\"%s\";\n", user_field);
+      fprintf(out,"\t\thost=\"%s\";\n", host_field);
+      fprintf(out,"\t\tpassword=\"%s\";\n", passwd_field);
+      fprintf(out,"\t};\n\n");
       break;
 
       /* Operator. Line should contain at least */
@@ -339,6 +387,11 @@ static void oldParseOneLine(FILE *out,char* line)
 
       /* Local Operator, (limited privs --SRB) */
     case 'o':
+      fprintf(out,"\tlocal_operator {\n");
+      fprintf(out,"\t\tname=\"%s\";\n", user_field);
+      fprintf(out,"\t\thost=\"%s\";\n", host_field);
+      fprintf(out,"\t\tpassword=\"%s\";\n", passwd_field);
+      fprintf(out,"\t};\n\n");
 #if 0
       aconf->port = CONF_OPER_UNKLINE|CONF_OPER_K;
       if(port_field)
@@ -351,27 +404,48 @@ static void oldParseOneLine(FILE *out,char* line)
 
     case 'P': /* listen port line */
     case 'p':
-#if 0
-      conf_add_port(aconf);
-#endif
+      fprintf(out,"\tlisten {\n");
+      fprintf(out,"\t\tname=\"%s\";\n", host_field);
+      fprintf(out,"\t\tport=%d;\n", atoi(port_field));
+      fprintf(out,"\t};\n\n");
       break;
 
     case 'Q': /* reserved nicks */
     case 'q': 
+      fprintf(out,"\tquarantine {\n");
+      fprintf(out,"\t\tname=\"%s\";\n", host_field);
+      fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
+      fprintf(out,"\t};\n\n");
       break;
 
-    case 'U': /* Uphost, ie. host where client reading */
-    case 'u': /* this should connect.                  */
+    case 'U': 
+    case 'u': 
+      fprintf(out,"\tshared {\n");
+      fprintf(out,"\t\tname=\"%s\";\n", host_field);
+      fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
+      fprintf(out,"\t};\n\n");
       break;
 
     case 'X': /* rejected gecos */
     case 'x': 
+      fprintf(out,"\tgecos {\n");
+      fprintf(out,"\t\tname=\"%s\";\n", host_field);
+      fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
+      fprintf(out,"\t};\n\n");
       break;
 
     case 'Y':
     case 'y':
+      fprintf(out,"\tclass {\n");
+      fprintf(out,"\t\tname=\"%s\";\n", host_field);
+#if 0
+      fprintf(out,"\t\t=\"%s\";\n", passwd_field);
+#endif
       if(class_field)
 	sendq = atoi(class_field);
+      fprintf(out,"\t\tsendq=%d;\n", sendq);
+      fprintf(out,"\t};\n\n");
+
       break;
       
     default:
