@@ -29,9 +29,11 @@ IRCD_EXE	= ircd
 
 PROGS		= $(IRCD_EXE)
 
-IRCDLIBS	= @MODULES_LIBS@ -L../adns -ladns @LIBS@
+SSL_LIBS=	= @SSL_LIBS@
+IRCDLIBS	= @MODULES_LIBS@ -L../adns -ladns @LIBS@ @SSL_LIBS@
 
-INCLUDES	= -I../include
+SSL_INCLUDES=	= @SSL_INCLUDES@
+INCLUDES	= -I../include @SSL_INCLUDES@
 CPPFLAGS	= ${INCLUDES} @CPPFLAGS@
  
 default:	all

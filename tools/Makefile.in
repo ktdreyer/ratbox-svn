@@ -14,8 +14,11 @@ MKDEP		= ${CC} -MM
 MV		= @MV@
 RM		= @RM@
 
-IRCDLIBS	= @LIBS@
-INCLUDES	= -I../include
+SSL_LIBS	= @SSL_LIBS@
+SSL_INCLUDES	= @SSL_INCLUDES@
+
+IRCDLIBS	= @LIBS@ @SSL_LIBS@
+INCLUDES	= -I../include @SSL_INCLUDES@
 CPPFLAGS	= ${INCLUDES} @CPPFLAGS@
 
 prefix		= @prefix@

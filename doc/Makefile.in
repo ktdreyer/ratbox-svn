@@ -31,10 +31,10 @@ MANPAGES        = ircd.8
 CONFS		= example.conf opers.txt
 DEFAULTCONFS	= ircd.motd kline.conf
 
-IRCDLIBS	= @LIBS@ @SSL_LIBS@
+IRCDLIBS	= @LIBS@
 
 INCLUDES	= -I../include
-CPPFLAGS	= ${INCLUDES} @SSL_DEFINE@ @CPPFLAGS@
+CPPFLAGS	= ${INCLUDES} @CPPFLAGS@
  
 install-mkdirs:
 	-@if test ! -d $(sysconfdir); then \

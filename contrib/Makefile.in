@@ -17,9 +17,12 @@ INSTALL_SUID    = @INSTALL_PROGRAM@ -o root -m 4755
 SHELL		= /bin/sh
 AUTOMODULEDIR	= @prefix@/modules
 
-IRCDLIBS	= @LIBS@
+SSL_LIBS	= @SSL_LIBS@
+SSL_INCLUDES	= @SSL_INCLUDES@
 
-INCLUDES	= -I../include
+IRCDLIBS	= @LIBS@ @SSL_LIBS@
+
+INCLUDES	= -I../include @SSL_INCLUDES@
 CPPFLAGS	= ${INCLUDES} @CPPFLAGS@
 
 SRCS =                          \

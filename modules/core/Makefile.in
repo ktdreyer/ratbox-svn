@@ -18,14 +18,18 @@ INSTALL_PROGRAM	= @INSTALL_PROGRAM@
 INSTALL_DATA	= @INSTALL_DATA@
 INSTALL_SUID    = @INSTALL_PROGRAM@ -o root -m 4755
 SHELL		= /bin/sh
-IRCDLIBS        = @LIBS@                                                        
+
+SSL_LIBS	= @SSL_LIBS@
+SSL_INCLUDES	= @SSL_INCLUDES@
+
+IRCDLIBS        = @LIBS@ @SSL_LIBS@
 
 prefix          = @prefix@
 # Change this later! -- adrian
 moduledir       = @prefix@/modules
 automoduledir   = @prefix@/modules/autoload
 
-INCLUDES	= -I../include
+INCLUDES	= -I../include @SSL_INCLUDES@
 CPPFLAGS	= ${INCLUDES} @CPPFLAGS@
 
 SRCS =                          \
