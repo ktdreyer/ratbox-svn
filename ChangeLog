@@ -1,3 +1,32 @@
+ejb         2003/05/27 03:23:57 UTC	(20030527_0)
+
+  Modified files:
+    include              config.h s_log.h setup.h_vms stdinc.h 
+    modules              m_rehash.c 
+    src                  descrip.mms event.c ircd.c ircd_signal.c 
+                         s_log.c 
+  Added files:
+    src                  s_bsd_qio.c 
+  Log:
+  - support VMS interrupt-based IO using sys$qio.
+  - Move to an entirely interrupt based event system under VMS
+    where events are run from AST services routines.
+  
+  Revision  Changes    Path
+  7.157     +3 -3      ircd-ratbox/include/config.h
+  7.19      +4 -0      ircd-ratbox/include/s_log.h
+  7.13      +3 -3      ircd-ratbox/include/setup.h_vms
+  1.10      +40 -1     ircd-ratbox/include/stdinc.h
+  1.63      +1 -2      ircd-ratbox/modules/m_rehash.c
+  7.12      +1 -1      ircd-ratbox/src/descrip.mms
+  7.37      +53 -0     ircd-ratbox/src/event.c
+  7.288     +8 -5      ircd-ratbox/src/ircd.c
+  7.18      +28 -0     ircd-ratbox/src/ircd_signal.c
+  7.1       +223 -0    ircd-ratbox/src/s_bsd_qio.c (new)
+  7.54      +50 -0     ircd-ratbox/src/s_log.c
+
+
+
 androsyn    2003/05/26 15:01:08 UTC	(20030526_2)
 
   Modified files:
