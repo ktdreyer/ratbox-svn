@@ -1,3 +1,17 @@
+androsyn    2003/02/14 04:40:37 UTC	(20030214_3)
+
+  Modified files:
+    doc                  hooks.txt 
+    include              client.h 
+  Log:
+  Forgot the client.h part of the new hooks and update hooks.txt
+  
+  Revision  Changes    Path
+  1.2       +7 -0      ircd-ratbox/doc/hooks.txt
+  7.199     +7 -0      ircd-ratbox/include/client.h
+
+
+
 androsyn    2003/02/14 04:37:27 UTC	(20030214_2)
 
   Modified files:
