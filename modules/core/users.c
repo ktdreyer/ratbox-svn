@@ -185,7 +185,7 @@ mr_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 		/* fd_desc is long enough */
 		fd_note(client_p->localClient->fd, "Nick: %s", nick);
 
-		if(source_p->user->init)
+		if(HasSentUser(source_p))
 			register_local_user(client_p, source_p, nick, source_p->username);
 
 	}
@@ -549,7 +549,7 @@ mr_user(struct Client *client_p, struct Client *source_p, int parc, const char *
 	 */
 	if(!IsGotId(source_p))
 		strlcpy(source_p->username, parv[1], sizeof(source_p->username));
-	source_p->user->init = 1;
+	SetSentUser(source_p);
 	/* NICK already received, now I have USER... */
 	if(!EmptyString(source_p->name))
 		register_local_user(client_p, source_p, source_p->name, source_p->username);

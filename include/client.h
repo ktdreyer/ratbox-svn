@@ -69,7 +69,6 @@ struct User
 	int refcnt;		/* Number of times this block is referenced */
 	const char *server;	/* pointer to scached server name */
 	char name[NICKLEN];	/* users nickname */
-	char init;		/* Flag if we've been in mr_user yet */
 };
 
 struct Server
@@ -348,6 +347,7 @@ struct exit_client_hook
 #define FLAGS_PINGSENT     0x0001	/* Unreplied ping sent */
 #define FLAGS_DEAD	   0x0002	/* Local socket is dead--Exiting soon */
 #define FLAGS_KILLED       0x0004	/* Prevents "QUIT" from being sent for this */
+#define FLAGS_SENTUSER     0x0008	/* client has sent the "USER" command */
 #define FLAGS_CLOSING      0x0020	/* set when closing to suppress errors */
 #define FLAGS_GOTID        0x0080	/* successful ident lookup achieved */
 #define FLAGS_NEEDID       0x0100	/* I-lines say must use ident return */
@@ -436,6 +436,9 @@ struct exit_client_hook
 #define SetClosing(x)		((x)->flags |= FLAGS_CLOSING)
 #define IsIOError(x)		((x)->flags & FLAGS_IOERROR)
 #define SetIOError(x)		((x)->flags |= FLAGS_IOERROR)
+#define HasSentUser(x)		((x)->flags & FLAGS_SENTUSER)
+#define SetSentUser(x)		((x)->flags |= FLAGS_SENTUSER)
+
 #define IsAnyDead(x)		(IsIOError(x) || IsDead(x) || IsClosing(x))
 
 /* oper flags */
