@@ -205,7 +205,7 @@ remove_user_from_channel(struct Channel *chptr, struct Client *who)
 		NULL
 	};
 
-	if(MyClient(who))
+	if(who->servptr == &me)
 	{
 		for (x = 0; chan_loclists[x] != NULL; x++)
 		{
