@@ -1,3 +1,9 @@
+*** 20010305_1 by androsyn
+Changed cptr  to client_p and sptr to server_p and acptr to target_p
+as discussed in #ircd-coders with larne and toot.  These names make a bit
+more sense.
+
+
 *** 20010304_1 by androsyn
 We don't need a functional system resolver anymore :)
 
