@@ -1,3 +1,7 @@
+*** 20010114_2 by fl_
+- documented /modrestart
+
+
 *** 20010114_1 by fl_
 - we now have a fully working, unobtrusive modrestart command
 
