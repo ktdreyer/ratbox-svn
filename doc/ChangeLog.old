@@ -1,3 +1,9 @@
+*** 20001211_9 by db
+- removed the last remnant of local[], was one hidden in s_serv.c
+  the definition for it was hiding in s_bsd.c
+
+
+
 *** 20001211_8 by db
 - renamed send_channel_members to sendto_list_anywhere, to remain consistent
   in send.c with sendto_list_local. This really means we =could= set up
