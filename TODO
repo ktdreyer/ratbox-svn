@@ -56,11 +56,6 @@ Adrian's TODO list
 
 * make the reserved FD limit run-time tuneable, esp from comm_open()
 
-* make sure we've fd_note()d on all the fd's as they change state
-  eg a listen socket becoming a client or server, etc ...
-
-* KILL THE ZIPLINKS CODE! DIE! Reimplement as an external process later.
-
 * What the _FUCK_ is IsLocal() and FLAGS_LOCAL and why the *smeg* is it
   not defined ?
 
@@ -90,6 +85,10 @@ Done things:
 * Find what uses the res.c routines. Since there's no caching anymore,
   rip out the code that deals with cached replies.
 
+* KILL THE ZIPLINKS CODE! DIE! Reimplement as an external process later.
+
+* make sure we've fd_note()d on all the fd's as they change state
+  eg a listen socket becoming a client or server, etc ...
 
 ------------------------------------------------------------------------------
 
