@@ -1,3 +1,10 @@
+*** 20011005_3 by db
+- reformatted balloc.c to project standard format
+- added part of Lee's proposed m_sjoin.c patches. We are simply
+  being very very anal IMO.
+
+
+
 *** 20011005_2 by androsyn
 Fixed the stupid core related to typecasting. I'll fix the warnings on sun
 later
