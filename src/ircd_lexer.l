@@ -181,7 +181,6 @@ network_name    { return NETWORK_NAME; }
 nick		{ return NICK; }
 nick_changes	{ return NICK_CHANGES; }
 no		{ return TNO; }
-no_hack_ops     { return NO_HACK_OPS; }
 no_oper_flood   { return NO_OPER_FLOOD; }
 no_tilde	{ return NO_TILDE; }
 number_per_ip	{ return NUMBER_PER_IP; }

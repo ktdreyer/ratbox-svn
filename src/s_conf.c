@@ -1356,7 +1356,6 @@ static void set_default_conf(void)
   ServerInfo.rsa_private_key_file = NULL;
 #endif
 
-  ServerInfo.no_hack_ops = YES;
   /* ServerInfo.name is not rehashable */
   /* ServerInfo.name = ServerInfo.name; */
   ServerInfo.description = NULL;
