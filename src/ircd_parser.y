@@ -187,6 +187,7 @@ int   class_redirport_var;
 %token  T_IPV6
 %token  TNO
 %token  TYES
+%token	TMASKED
 %token  T_L_CRIT
 %token  T_L_DEBUG
 %token  T_L_ERROR
@@ -215,6 +216,8 @@ int   class_redirport_var;
 %token  WARN_NO_NLINE
 %token  NON_REDUNDANT_KLINES
 %token  O_LINES_OPER_ONLY
+%token	K_LINES_OPER_ONLY
+%token	I_LINES_OPER_ONLY
 %token  WHOIS_WAIT
 %token  PACE_WAIT
 %token  CALLER_ID_WAIT
@@ -1892,8 +1895,8 @@ general_item:       general_failed_oper_notice |
                     general_kline_with_connection_closed |
                     general_warn_no_nline |
                     general_non_redundant_klines | general_dots_in_ident |
-                    general_o_lines_oper_only |
-                    general_pace_wait |
+                    general_o_lines_oper_only | general_k_lines_oper_only |
+                    general_pace_wait | general_i_lines_oper_only |
                     general_whois_wait | 
                     general_knock_delay | general_quiet_on_ban |
                     general_short_motd | general_no_oper_flood |
@@ -2037,6 +2040,36 @@ general_o_lines_oper_only: O_LINES_OPER_ONLY '=' TYES ';'
     O_LINES_OPER_ONLY '=' TNO ';'
   {
     ConfigFileEntry.o_lines_oper_only = 0;
+  } ;
+
+general_k_lines_oper_only: K_LINES_OPER_ONLY '=' TYES ';'
+  {
+    ConfigFileEntry.k_lines_oper_only = 2;
+  }
+    |
+    K_LINES_OPER_ONLY '=' TMASKED ';'
+  {
+    ConfigFileEntry.k_lines_oper_only = 1;
+  }
+    |
+    K_LINES_OPER_ONLY '=' TNO ';'
+  {
+    ConfigFileEntry.k_lines_oper_only = 0;
+  } ;
+
+general_i_lines_oper_only: I_LINES_OPER_ONLY '=' TYES ';'
+  {
+    ConfigFileEntry.i_lines_oper_only = 2;
+  }
+    |
+    I_LINES_OPER_ONLY '=' TMASKED ';'
+  {
+    ConfigFileEntry.i_lines_oper_only = 1;
+  }
+    |
+    I_LINES_OPER_ONLY '=' TNO ';'
+  {
+    ConfigFileEntry.i_lines_oper_only = 0;
   } ;
 
 general_pace_wait: PACE_WAIT '=' timespec ';'

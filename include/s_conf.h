@@ -209,6 +209,8 @@ typedef struct config_file_entry
   int           warn_no_nline;
   int           non_redundant_klines;
   int           o_lines_oper_only;
+  int		k_lines_oper_only;
+  int		i_lines_oper_only;
   int           pace_wait;
   int           whois_wait;
   int           knock_delay;

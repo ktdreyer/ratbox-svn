@@ -147,10 +147,10 @@ static struct StatsStruct stats_cmd_table[] =
   { 'G',	stats_glines,		1,	0,	},
   { 'h',	stats_hubleaf,		1,	0,	},
   { 'H',	stats_hubleaf,		1,	0,	},
-  { 'i',	stats_auth,		1,	0,	},
-  { 'I',	stats_auth,		1,	0,	},
-  { 'k',	stats_tklines,		1,	0,	},
-  { 'K',	stats_klines,		1,	0,	},
+  { 'i',	stats_auth,		0,	0,	},
+  { 'I',	stats_auth,		0,	0,	},
+  { 'k',	stats_tklines,		0,	0,	},
+  { 'K',	stats_klines,		0,	0,	},
   { 'l',	stats_ltrace,		1,	0,	},
   { 'L',	stats_ltrace,		1,	0,	},
   { 'm',	stats_messages,		1,	0,	},
@@ -341,7 +341,17 @@ static void stats_hubleaf(struct Client *client_p)
 
 static void stats_auth(struct Client *client_p)
 {
-  report_Ilines(client_p);
+  /* Oper only, if unopered, return ERR_NOPRIVS */
+  if((ConfigFileEntry.i_lines_oper_only == 2) && !IsOper(client_p))
+    sendto_one(client_p, form_str(ERR_NOPRIVILEGES),me.name,client_p->name);
+
+  /* If unopered, Only return matching auth blocks */
+  else if((ConfigFileEntry.i_lines_oper_only == 1) && !IsOper(client_p))
+    report_Ilines(client_p, 1);
+
+  /* Theyre opered, or allowed to see all auth blocks */
+  else
+    report_Ilines(client_p, 0);
 }
 
 static void stats_tklines(struct Client *client_p)
