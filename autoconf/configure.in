@@ -1,6 +1,8 @@
 dnl $Id$
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(include/class.h)
+dnl AC_INIT(include/class.h) <- what is this ? -TimeMr14C
+
+AC_INIT
 
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CONFIG_HEADER(include/setup.h servlink/setup.h)
@@ -93,10 +95,32 @@ else
   fi
 fi
 
+dnl cc on HPUX 11.00 does not produce any output on cc -V
+dnl Therefore I will use the following hack to discover HPUX 
+dnl -TimeMr14C
+
+case `uname -s` in
+        HP-UX*)
+                AC_MSG_RESULT(HP-UX found - Assuming HPUX C compiler cc)  
+		IRC_CFLAGS="$IRC_CFLAGS +e"
+		HPUX=yes
+		;;
+	OSF*)
+		OSF=yes
+		;;
+	*)
+		;;
+esac
+
+
 AC_MSG_CHECKING(how to generate dependancy info)
 if test "$SunWorkShop" = "yes"; then
   AC_MSG_RESULT(Sun WorkShop using $CC -xM)
   MKDEP="$CC -xM"
+fi
+if test "$HPUX" = "yes"; then
+  AC_MSG_RESULT(HP-UX C Compiler using makedepend)
+  MKDEP="makedepend"
 fi
 if test "x$MKDEP" = "x"; then
   AC_MSG_RESULT(assuming $CC -MM)
@@ -109,7 +133,7 @@ dnl jdc -- If CFLAGS is defined, best use it everywhere...
 dnl NOTE: jv says it must be added to the *END*, because things like
 dnl "gcc -O9 -O2" will result in -O2 getting preference.  How stupid.
 if test "x$CFLAGS" != "x"; then
-  IRC_CFLAGS="$IRC_CFLAGS $CFLAGS"
+  IRC_CFLAGS="$IRC_CFLAGS $CPPFLAGS"
 fi
 
 AC_ISC_POSIX
@@ -120,6 +144,7 @@ AC_PATH_PROG(MV, mv)
 AC_PATH_PROG(LN, ln)
 AC_PATH_PROG(SED, sed)
 AC_PATH_PROG(AR, ar)
+AC_PATH_PROG(LD, ld)
 AC_PROG_YACC
 AC_PROG_INSTALL
 AC_PROG_LEX
@@ -650,6 +675,38 @@ AC_ARG_ENABLE(assert,
   esac
 ])
 
+dnl Here are two helper functions to discover the
+dnl implemented way in the OS that shared module support 
+dnl has to use. -TimeMr14C
+
+AC_DEFUN(CHECK_DLOPEN_LD,
+[
+        AC_CHECK_FUNC(shl_load,
+                [
+                        AC_DEFINE(HAVE_SHL_LOAD)
+                        ac_cv_have_shl_load='yes'
+                ],
+                AC_CHECK_LIB(dld, shl_load, AC_DEFINE(HAVE_SHL_LOAD),
+                [
+                ac_cv_have_shl_load='no'
+                echo "shl_load could not be found"
+                ]))
+])
+
+AC_DEFUN(CHECK_DLOPEN_DL,
+[
+        AC_CHECK_FUNC(dlopen,
+                [   
+                        ac_cv_have_dlopen='yes'
+                ],
+                AC_CHECK_LIB(dl, dlopen,
+                [
+                        ac_cv_have_dlopen='yes'
+                ],
+                [   
+                        ac_cv_have_dlopen='no'
+                ]))
+])
 
 dnl shared-modules
 AC_ARG_ENABLE(shared-modules,
@@ -685,9 +742,13 @@ else
 	MODULES_LIBS=""
 	MOD_TARGET="shared_modules"
 	SEDOBJ="-e s/.o:/.so:/"
-	AC_CHECK_HEADER(mach-o/dyld.h,,
-	AC_CHECK_FUNC(dlopen,, AC_CHECK_LIB(dl, dlopen,,AC_MSG_ERROR(**
-	shared module support could not be found - try running configure with --disable-shared-modules))))
+        CHECK_DLOPEN_LD
+        if test "$ac_cv_have_shl_load" = "no"; then
+            AC_CHECK_HEADER([mach-o/dyld.h],, [CHECK_DLOPEN_DL])
+        fi
+        if test "$ac_cv_have_dlopen" = "no"; then
+            AC_MSG_ERROR(shared module support could not be found - try running configure with --disable-shared-modules)
+        fi
 	dnl Without this, include/setup.h will not be set up right.
 	AC_CHECK_LIB(dl, dlsym)
 	AC_CHECK_FUNCS(dlopen)
@@ -717,10 +778,27 @@ else
 		AC_MSG_RESULT(Darwin or Mac OS X - Assuming you want to make Mach-O bundles: -fno-common -bundle -flat_namespace -undefined suppress)
 		PICFLAGS="-fno-common -bundle -flat_namespace -undefined suppress"
 	fi
+	dnl Please note, that on HPUX two different stages of module compilation occurs, since
+	dnl while compiling modules, the compiler does not allow you to give arguments
+	dnl to the linker. (I did not design this) 
+	dnl So we need -c in the first stage of module compilation.
+	dnl In the second stage, we link the modules via ld -b.
+	dnl Additionally, HPUX does not like -export-dynamic, it likes -E instead.
+	dnl -TimeMr14C
+	if test "$HPUX" = "yes"; then
+		AC_MSG_RESULT(HP-UX - Assuming HPUX C compiler cc: +z -r -q -n +ESfic)
+		PICFLAGS="+z -r -q -n +ESfic -c"
+		MOD_TARGET="hpux_shared"
+		LDFLAGS="${LDFLAGS} -Wl,-E"
+	fi
 	if test -z "$PICFLAGS"; then
 		if test "$ac_cv_prog_gcc" = "yes"; then
 			AC_MSG_RESULT(gcc: -fPIC -DPIC -shared)
 			PICFLAGS="-fPIC -DPIC -shared"
+			if test "$OSF" = "yes"; then
+				echo "OSF Discovered: Adding -Wl,-expect_unresolved -Wl,* to compiler flags"
+				PICFLAGS="$PICFLAGS -Wl,-expect_unresolved -Wl,*"
+			fi
 		else
 			AC_MSG_RESULT(no)
 			AC_MSG_ERROR(could not find a way to produce position independent code. Try ./configure  --disable-shared-modules)

@@ -20,6 +20,7 @@ INSTALL_SUID    = @INSTALL_PROGRAM@ -o root -m 4755
 SEDOBJ		= @SEDOBJ@
 SHELL		= /bin/sh
 MV		= @MV@
+LD		= @LD@
 
 SSL_LIBS	= @SSL_LIBS@
 SSL_INCLUDES	= @SSL_INCLUDES@
@@ -110,6 +111,9 @@ ALL_SRCS = $(CORE_SRCS) \
 SH_OBJS = ${SRCS:.c=.so}
 SH_CORE_OBJS = ${CORE_SRCS:.c=.so}
 
+HPUX_OBJS = ${SH_OBJS:.so=.sl}
+HPUX_CORE_OBJS = ${SH_CORE_OBJS:.so=.sl}
+
 S_OBJS = ${ALL_SRCS:.c=.o}
 
 DOLLAR = $$
@@ -119,7 +123,11 @@ build: all
 all: @MOD_TARGET@
 
 shared_modules: $(SH_CORE_OBJS) $(SH_OBJS)
-	
+
+hpux_modules: $(HPUX_CORE_OBJS) $(HPUX_OBJS)
+
+hpux_shared: $(SH_CORE_OBJS) $(SH_OBJS)
+	${MAKE} hpux_modules
 
 libmodules.a: $(S_OBJS)
 	$(RM) -f $@
@@ -166,7 +174,17 @@ install_shared_modules: install-mkdirs
 		$(INSTALL_DATA) $$file $(automoduledir); \
 	done
 
-.SUFFIXES: .so .o
+install_hpux_shared: install-mkdirs
+	@echo "Installing core modules into $(moduledir) .."
+	@for file in $(HPUX_CORE_OBJS); do \
+		$(INSTALL_DATA) $$file $(moduledir); \
+	done
+	@echo "Installing modules into $(automoduledir) .."
+	@for file in $(HPUX_OBJS); do \
+		$(INSTALL_DATA) $$file $(automoduledir); \
+	done
+
+.SUFFIXES: .sl .so .o
 
 .c.o:
 	${CC} ${CPPFLAGS} ${CFLAGS} -c $< -o $@
@@ -174,15 +192,18 @@ install_shared_modules: install-mkdirs
 .c.so:
 	${CC} ${PICFLAGS} ${CPPFLAGS} ${CFLAGS} $< -o $@
 
+.so.sl:
+	$(LD) -b $< -o $@
+
 .PHONY: depend clean distclean
 depend:
 	grep "Id:" .depend > .depend.out
 	${MV} .depend.out .depend
-	${MKDEP} ${CPPFLAGS} ${ALL_SRCS} >> .depend
+	${MKDEP} ${INCLUDES} ${ALL_SRCS} >> .depend
 
 clean:
-	${RM} -f *.so *~ *.o *.a
-	${RM} -f core/*.so core/*~ core/*.o
+	${RM} -f *.so *.sl *~ *.o *.a
+	${RM} -f core/*.so core/*.sl core/*~ core/*.o
 
 lint:
 	lint -aacgprxhH ${CFLAGS} $(ALL_SRCS) >../lint.out

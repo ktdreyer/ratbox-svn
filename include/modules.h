@@ -31,6 +31,13 @@
 #include <sys/param.h>
 #endif
 
+#if defined(HAVE_SHL_LOAD)
+#include <dl.h>
+#endif
+#if !defined(STATIC_MODULES) && (defined(HAVE_DLOPEN) || defined(HAVE_LIBDL))
+#include <dlfcn.h>
+#endif
+
 #include "ircd_handler.h"
 #include "msg.h"
 #include "memory.h"

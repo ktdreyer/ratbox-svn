@@ -75,11 +75,6 @@ _moddeinit(void)
 char *_version = "$Revision$";
 #endif
 
-void send_info_text(struct Client *source_p);
-void send_birthdate_online_time(struct Client *source_p);
-void send_conf_options(struct Client *source_p);
-
-
 /*
  * jdc -- Structure for our configuration value table
  */

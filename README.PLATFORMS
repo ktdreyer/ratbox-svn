@@ -20,5 +20,7 @@ x86          Cygwin gcc       Windows       W. Campbell <wcampbel@botbay.net>
 x86          gcc              Linux         Aaron Sethman <androsyn@ratbox.org>
 SPARC        gcc              Linux         Aaron Sethman <androsyn@ratbox.org>
 Alpha        DEC C V6.0       OpenVMS 7.2   Edward Brocklesby <ejb@sdf.lonestar.org>
+PA-RISC 2.0  cc		      HP-UX B.11    Yusuf Iskenderoglu 
+						<uhc0@stud.uni-karlsruhe.de>
 
 $Id$

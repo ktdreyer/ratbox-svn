@@ -1,5 +1,5 @@
 /* $Id$ */
-/* include/setup.h.in.  Generated automatically from autoconf/configure.in by autoheader 2.13.  */
+/* include/setup.h.in.  Generated automatically from autoconf/configure.in by autoheader.  */
 
 /* Define as __inline if that's what the C compiler calls it.  */
 #undef inline
@@ -47,6 +47,12 @@
 
 /* Define if we have socklen_t */
 #undef HAVE_SOCKLEN_T
+
+/* Define if we have uintptr_t */
+#undef HAVE_UINTPTR_T
+
+/* Define if we need HAVE_SHL_LOAD - HPUX */
+#undef HAVE_SHL_LOAD
 
 /* Define based upon RLIMIT value is found in sys/resource.h */
 /* By default, we assume nothing is found. */
@@ -96,6 +102,9 @@
 /* Define if you have the EVP_rc5_32_12_16_cfb function.  */
 #undef HAVE_EVP_RC5_32_12_16_CFB
 
+/* Define if you have the dlopen function.  */
+#undef HAVE_DLOPEN
+
 /* Define if you have the gettext function.  */
 #undef HAVE_GETTEXT
 
@@ -129,6 +138,9 @@
 /* Define if you have the <inttypes.h> header file.  */
 #undef HAVE_INTTYPES_H
 
+/* Define if you have the <mach-o/dyld.h> header file.  */
+#undef HAVE_MACH_O_DYLD_H
+
 /* Define if you have the <stddef.h> header file.  */
 #undef HAVE_STDDEF_H
 
@@ -140,9 +152,6 @@
 
 /* Define if you have the <strings.h> header file.  */
 #undef HAVE_STRINGS_H
-
-/* Define if you have the <mach-o/dyld.h> header file.  */
-#undef HAVE_MACH_O_DYLD_H
 
 /* Define if you have the <sys/param.h> header file.  */
 #undef HAVE_SYS_PARAM_H
@@ -161,9 +170,6 @@
 
 /* Define if you have the descrypt library (-ldescrypt).  */
 #undef HAVE_LIBDESCRYPT
-
-/* Define if you have dlopen.  */
-#undef HAVE_DLOPEN
 
 /* Define if you have the dl library (-ldl).  */
 #undef HAVE_LIBDL

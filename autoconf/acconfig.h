@@ -31,6 +31,12 @@
 /* Define if we have socklen_t */
 #undef HAVE_SOCKLEN_T
 
+/* Define if we have uintptr_t */
+#undef HAVE_UINTPTR_T
+
+/* Define if we need HAVE_SHL_LOAD - HPUX */
+#undef HAVE_SHL_LOAD
+
 /* Define based upon RLIMIT value is found in sys/resource.h */
 /* By default, we assume nothing is found. */
 #undef RLIMIT_FD_MAX

@@ -208,7 +208,7 @@ static void ms_oper(struct Client *client_p, struct Client *source_p,
  * output       -
  */
 
-struct ConfItem *find_password_aconf(char *name, struct Client *source_p)
+static struct ConfItem *find_password_aconf(char *name, struct Client *source_p)
 {
   struct ConfItem *aconf;
 

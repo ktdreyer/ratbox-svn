@@ -348,7 +348,7 @@ static int start_auth_query(struct AuthRequest* auth)
    * and machines with multiple IP addresses are common now
    */
   memset(&localaddr, 0, locallen);
-  getsockname(auth->client->localClient->fd, (struct sockaddr*)&SOCKADDR(localaddr), (unsigned int*)&locallen);
+  getsockname(auth->client->localClient->fd, (struct sockaddr*)&SOCKADDR(localaddr), (int*)&locallen);
   S_PORT(localaddr) = htons(0);
 
   auth->fd = fd;
@@ -518,8 +518,8 @@ void auth_connect_callback(int fd, int error, void *data)
       return;
     }
 
-  if (getsockname(auth->client->localClient->fd, (struct sockaddr *)&us,   (unsigned int*)&ulen) ||
-      getpeername(auth->client->localClient->fd, (struct sockaddr *)&them, (unsigned int*)&tlen))
+  if (getsockname(auth->client->localClient->fd, (struct sockaddr *)&us,   (int*)&ulen) ||
+      getpeername(auth->client->localClient->fd, (struct sockaddr *)&them, (int*)&tlen))
     {
       ilog(L_INFO, "auth get{sock,peer}name error for %s:%m",
         get_client_name(auth->client, SHOW_IP));

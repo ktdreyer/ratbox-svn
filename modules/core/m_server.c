@@ -523,7 +523,7 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
  * output	- none
  * side effects - servers gecos field is set
  */
-int set_server_gecos(struct Client *client_p, char *info)
+static int set_server_gecos(struct Client *client_p, char *info)
 {
   /* check the info for [IP] */
   if(info[0])

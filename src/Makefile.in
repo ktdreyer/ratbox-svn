@@ -62,6 +62,7 @@ BASE_SRCS =                     \
   class.c                       \
   client.c                      \
   debug.c                       \
+  dynlink.c			\
   event.c                       \
   fdlist.c                      \
   fileio.c                      \
@@ -109,7 +110,7 @@ BASE_SRCS =                     \
   @SNPRINTF_C@			\
   tools.c                       \
   whowas.c
-#  ircdauth.c                    \
+#  ircdauth.c
 
 SRCS = ${BASE_SRCS}
 
@@ -119,7 +120,7 @@ all: ircd
 
 build: all
 
-ircd: ${OBJS} y.tab.o lex.yy.o version.o
+ircd: $(OBJS) y.tab.o lex.yy.o version.o
 	${CC} ${CFLAGS} ${LDFLAGS} -o $@ ${OBJS} lex.yy.o y.tab.o version.o ${IRCDLIBS} ${LEXLIB}
 	mv version.c version.c.last
 

@@ -24,9 +24,6 @@
 
 #include "config.h"
 
-#if !defined(STATIC_MODULES) && (defined(HAVE_DLOPEN) || defined(HAVE_LIBDL))
-#include <dlfcn.h>
-#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -57,38 +54,40 @@
 #include "tools.h"
 #include "list.h"
 
-
+/* -TimeMr14C:
+ * I have moved the dl* function definitions and
+ * the two functions (load_a_module / unload_a_module) to the
+ * file dynlink.c 
+ * And also made the necessary changes to those functions
+ * to comply with shl_load and friends.
+ * In this file, to keep consistency with the makefile, 
+ * I added the ability to load *.sl files, too.
+ * 27/02/2002
+ */
 
 #ifndef STATIC_MODULES
-
-#ifndef RTLD_NOW
-#define RTLD_NOW RTLD_LAZY /* openbsd deficiency */
-#endif
-
-static char unknown_ver[] = "<unknown>";
 
 struct module **modlist = NULL;
 
 static char *core_module_table[] =
 {
-  "m_die.so",
-  "m_kick.so",
-  "m_kill.so",
-  "m_message.so",
-  "m_mode.so",
-  "m_nick.so",
-  "m_part.so",
-  "m_quit.so",
-  "m_server.so",
-  "m_sjoin.so",
-  "m_squit.so",
+  "m_die.s",
+  "m_kick.s",
+  "m_kill.s",
+  "m_message.s",
+  "m_mode.s",
+  "m_nick.s",
+  "m_part.s",
+  "m_quit.s",
+  "m_server.s",
+  "m_sjoin.s",
+  "m_squit.s",
   NULL
 };
 
 #define MODS_INCREMENT 10
 int num_mods = 0;
 int max_mods = MODS_INCREMENT;
-static void increase_modlist(void);
 
 static dlink_list mod_paths;
 
@@ -124,117 +123,6 @@ struct Message modrestart_msgtab = {
 };
 
 extern struct Message error_msgtab;
-
-#ifdef HAVE_MACH_O_DYLD_H
-/*
-** jmallett's dl*(3) shims for NSModule(3) systems.
-*/
-#include <mach-o/dyld.h>
-
-#ifndef HAVE_DLOPEN
-#ifndef	RTLD_LAZY
-#define RTLD_LAZY 2185 /* built-in dl*(3) don't care */
-#endif
-
-void undefinedErrorHandler(const char *);
-NSModule multipleErrorHandler(NSSymbol, NSModule, NSModule);
-void linkEditErrorHandler(NSLinkEditErrors, int,const char *, const char *);
-char *dlerror(void);
-void *dlopen(char *, int);
-int dlclose(void *);
-void *dlsym(void *, char *);
-
-static int firstLoad = TRUE;
-static int myDlError;
-static char *myErrorTable[] =
-{ "Loading file as object failed\n",
-  "Loading file as object succeeded\n",
-  "Not a valid shared object\n",
-  "Architecture of object invalid on this architecture\n",
-  "Invalid or corrupt image\n",
-  "Could not access object\n",
-  "NSCreateObjectFileImageFromFile failed\n",
-  NULL
-};
-
-void undefinedErrorHandler(const char *symbolName)
-{
-  sendto_realops_flags(FLAGS_ALL, L_ALL, "Undefined symbol: %s", symbolName);
-  ilog(L_WARN, "Undefined symbol: %s", symbolName);
-  return;
-}
-
-NSModule multipleErrorHandler(NSSymbol s, NSModule old, NSModule new)
-{
-  /* XXX
-  ** This results in substantial leaking of memory... Should free one
-  ** module, maybe?
-  */
-  sendto_realops_flags(FLAGS_ALL, L_ALL, "Symbol `%s' found in `%s' and `%s'",
-                       NSNameOfSymbol(s), NSNameOfModule(old), NSNameOfModule(new));
-  ilog(L_WARN, "Symbol `%s' found in `%s' and `%s'", NSNameOfSymbol(s),
-       NSNameOfModule(old), NSNameOfModule(new));
-  /* We return which module should be considered valid, I believe */
-  return new;
-}
-
-void linkEditErrorHandler(NSLinkEditErrors errorClass, int errnum,
-                          const char *fileName, const char *errorString)
-{
-  sendto_realops_flags(FLAGS_ALL, L_ALL, "Link editor error: %s for %s",
-                       errorString, fileName);
-  ilog(L_WARN, "Link editor error: %s for %s", errorString, fileName);
-  return;
-}
-
-char *dlerror(void)
-{
-  return myDlError == NSObjectFileImageSuccess ? NULL : myErrorTable[myDlError % 7];
-}
-
-void *dlopen(char *filename, int unused)
-{
-  NSObjectFileImage myImage;
-  NSModule myModule;
-
-  if (firstLoad)
-    {
-      /*
-      ** If we are loading our first symbol (huzzah!) we should go ahead
-      ** and install link editor error handling!
-      */
-      NSLinkEditErrorHandlers linkEditorErrorHandlers;
-
-      linkEditorErrorHandlers.undefined = undefinedErrorHandler;
-      linkEditorErrorHandlers.multiple = multipleErrorHandler;
-      linkEditorErrorHandlers.linkEdit = linkEditErrorHandler;
-      NSInstallLinkEditErrorHandlers(&linkEditorErrorHandlers);
-      firstLoad = FALSE;
-    }
-  myDlError = NSCreateObjectFileImageFromFile(filename, &myImage);
-  if (myDlError != NSObjectFileImageSuccess)
-    {
-      return NULL;
-    }
-  myModule = NSLinkModule(myImage, filename, NSLINKMODULE_OPTION_PRIVATE);
-  return (void *)myModule;
-}
-
-int dlclose(void *myModule)
-{
-  NSUnLinkModule(myModule, FALSE);
-  return 0;
-}
-
-void *dlsym(void *myModule, char *mySymbolName)
-{
-  NSSymbol mySymbol;
-
-  mySymbol = NSLookupSymbolInModule((NSModule)myModule, mySymbolName);
-  return NSAddressOfSymbol(mySymbol);
-}
-#endif
-#endif
 
 void
 modules_init(void)
@@ -358,47 +246,6 @@ findmodule_byname (char *name)
   return -1;
 }
 
-/* unload_one_module()
- *
- * inputs	- name of module to unload
- *		- 1 to say modules unloaded, 0 to not
- * output	- 0 if successful, -1 if error
- * side effects	- module is unloaded
- */
-int unload_one_module (char *name, int warn)
-{
-  int modindex;
-  void (*deinitfunc)(void) = NULL;
-
-  if ((modindex = findmodule_byname (name)) == -1) 
-    return -1;
-
-  if( (deinitfunc = (void (*)(void))(uintptr_t)dlsym (modlist[modindex]->address, 
-				  "_moddeinit")) 
-		  || (deinitfunc = (void (*)(void))(uintptr_t)dlsym (modlist[modindex]->address, 
-				  "__moddeinit")))
-  {
-    deinitfunc ();
-  }
-
-  (void)dlclose(modlist[modindex]->address);
-
-  MyFree(modlist[modindex]->name);
-  memcpy( &modlist[modindex], &modlist[modindex+1],
-          sizeof(struct module) * ((num_mods-1) - modindex) );
-
-  if(num_mods != 0)
-    num_mods--;
-
-  if(warn == 1)
-    {
-      ilog (L_INFO, "Module %s unloaded", name);
-      sendto_realops_flags(FLAGS_ALL, L_ALL,"Module %s unloaded", name);
-    }
-
-  return 0;
-}
-
 /* load_all_modules()
  *
  * input        -
@@ -432,11 +279,14 @@ load_all_modules (int warn)
   while ((ldirent = readdir (system_module_dir)) != NULL)
     {
       len = strlen(ldirent->d_name);
+
+      /* On HPUX, we have *.sl as shared library extension
+       * -TimeMr14C */
       
       if ((len > 3) && 
           (ldirent->d_name[len-3] == '.') &&
           (ldirent->d_name[len-2] == 's') &&
-          (ldirent->d_name[len-1] == 'o'))
+          ((ldirent->d_name[len-1] == 'o') || (ldirent->d_name[len-1] == 'l')))
 	{
 	  (void)sprintf (module_fq_name, "%s/%s",  AUTOMODPATH,
 			 ldirent->d_name);
@@ -457,12 +307,18 @@ void
 load_core_modules(int warn)
 {
   char module_name[MAXPATHLEN];
-  int i;
+  int i, hpux = 0;
+
+#ifdef HAVE_SHL_LOAD
+  hpux = 1;
+#else
+  hpux = 0;
+#endif
 
   for(i = 0; core_module_table[i]; i++)
   {
-    sprintf(module_name, "%s/%s",
-            MODPATH, core_module_table[i]);
+    sprintf(module_name, "%s/%s%c",
+            MODPATH, core_module_table[i], hpux ? 'l' : 'o');
 	    
     if(load_a_module(module_name, warn, 1) == -1)
     {
@@ -506,105 +362,6 @@ load_one_module (char *path)
   return -1;
 }
 		
-
-/*
- * load_a_module()
- *
- * inputs	- path name of module, int to notice, int of core
- * output	- -1 if error 0 if success
- * side effects - loads a module if successful
- */
-int
-load_a_module (char *path, int warn, int core)
-{
-  void *tmpptr = NULL;
-  char *mod_basename;
-  void (*initfunc)(void) = NULL;
-  char **verp;
-  char *ver;
-
-  mod_basename = irc_basename(path);
-
-  tmpptr = dlopen (path, RTLD_NOW);
-
-  if (tmpptr == NULL)
-  {
-      const char *err = dlerror();
-	  
-      sendto_realops_flags(FLAGS_ALL, L_ALL,
-                            "Error loading module %s: %s",
-                            mod_basename, err);
-      ilog (L_WARN, "Error loading module %s: %s", mod_basename, err);
-      MyFree (mod_basename);
-      return -1;
-  }
-
-  initfunc = (void (*)(void))(uintptr_t)dlsym (tmpptr, "_modinit");
-  if (initfunc == NULL 
-		  && (initfunc = (void (*)(void))(uintptr_t)dlsym(tmpptr, "__modinit")) == NULL)
-  {
-    sendto_realops_flags(FLAGS_ALL, L_ALL,
-                          "Module %s has no _modinit() function",
-                          mod_basename);
-    ilog (L_WARN, "Module %s has no _modinit() function", mod_basename);
-    (void)dlclose (tmpptr);
-    MyFree (mod_basename);
-    return -1;
-  }
-
-  verp = (char **)dlsym (tmpptr, "_version");
-  if (verp == NULL 
-		  && (verp = (char **)dlsym (tmpptr, "__version")) == NULL)
-    ver = unknown_ver;
-  else
-    ver = *verp;
-
-  increase_modlist();
-
-  modlist [num_mods] = MyMalloc (sizeof (struct module));
-  modlist [num_mods]->address = tmpptr;
-  modlist [num_mods]->version = ver;
-  modlist[num_mods]->core = core;
-  DupString(modlist [num_mods]->name, mod_basename );
-  num_mods++;
-
-  initfunc ();
-
-  if(warn == 1)
-    {
-      sendto_realops_flags(FLAGS_ALL, L_ALL,
-                        "Module %s [version: %s] loaded at 0x%lx",
-                        mod_basename, ver, (unsigned long)tmpptr);
-       ilog (L_WARN, "Module %s [version: %s] loaded at 0x%x",
-            mod_basename, ver, tmpptr);
-    }
-  MyFree (mod_basename);
-  return 0;
-}
-
-/*
- * increase_modlist
- *
- * inputs	- NONE
- * output	- NONE
- * side effects	- expand the size of modlist if necessary
- */
-static void increase_modlist(void)
-{
-  struct module **new_modlist = NULL;
-
-  if((num_mods + 1) < max_mods)
-    return;
-
-  new_modlist = (struct module **)MyMalloc ( sizeof (struct module) *
-                                             (max_mods + MODS_INCREMENT));
-  memcpy((void *)new_modlist,
-         (void *)modlist, sizeof(struct module) * num_mods);
-
-  MyFree(modlist);
-  modlist = new_modlist;
-  max_mods += MODS_INCREMENT;
-}
 
 /* load a module .. */
 static void

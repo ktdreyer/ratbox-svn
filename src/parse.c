@@ -446,7 +446,7 @@ void mod_del_cmd(struct Message *msg)
  * output	- pointer to struct Message
  * side effects - 
  */
-struct Message *hash_parse(char *cmd)
+static struct Message *hash_parse(char *cmd)
 {
   struct MessageHash *ptr;
   int    msgindex;

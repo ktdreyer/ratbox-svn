@@ -560,7 +560,7 @@ sendto_channel_butone(struct Client *one, struct Client *from,
  *		- pointer to sendbuf to use for remote clients
  *		- length of remote_sendbuf
  */
-void
+static void
 sendto_list_anywhere(struct Client *one, struct Client *from,
                      dlink_list *list, buf_head_t *local_linebuf,
                      buf_head_t *remote_linebuf)

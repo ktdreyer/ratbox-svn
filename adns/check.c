@@ -51,6 +51,17 @@ void adns_checkconsistency(adns_state ads, adns_query qu) {
     }										\
   }
 
+#define DLIST_CHECK_PARTLESS(list, nodevar, body)                               \
+  if ((list).head) {                                                            \
+    assert(! (list).head->back);                                                \
+    for ((nodevar)= (list).head; (nodevar); (nodevar)= (nodevar)->next) {       \
+      assert((nodevar)->next                                                    \
+             ? (nodevar) == (nodevar)->next->back                               \
+             : (nodevar) == (list).tail);                                       \
+      body                                                                      \
+    }                                                                           \
+  }
+
 #define DLIST_ASSERTON(node, nodevar, list, part)				\
   do {										\
     for ((nodevar)= (list).head;						\
@@ -63,7 +74,7 @@ void adns_checkconsistency(adns_state ads, adns_query qu) {
 static void checkc_query_alloc(adns_state ads, adns_query qu) {
   allocnode *an;
 
-  DLIST_CHECK(qu->allocations, an, , {
+  DLIST_CHECK_PARTLESS(qu->allocations, an, {
   });
 }
 
@@ -116,7 +127,7 @@ static void checkc_global(adns_state ads) {
 static void checkc_queue_udpw(adns_state ads) {
   adns_query qu;
   
-  DLIST_CHECK(ads->udpw, qu, , {
+  DLIST_CHECK_PARTLESS(ads->udpw, qu, {
     assert(qu->state==query_tosend);
     assert(qu->retries <= UDPMAXRETRIES);
     assert(qu->udpsent);
@@ -129,7 +140,7 @@ static void checkc_queue_udpw(adns_state ads) {
 static void checkc_queue_tcpw(adns_state ads) {
   adns_query qu;
   
-  DLIST_CHECK(ads->tcpw, qu, , {
+  DLIST_CHECK_PARTLESS(ads->tcpw, qu, {
     assert(qu->state==query_tcpw);
     assert(!qu->children.head && !qu->children.tail);
     assert(qu->retries <= ads->nservers+1);
@@ -141,7 +152,7 @@ static void checkc_queue_tcpw(adns_state ads) {
 static void checkc_queue_childw(adns_state ads) {
   adns_query parent, child;
 
-  DLIST_CHECK(ads->childw, parent, , {
+  DLIST_CHECK_PARTLESS(ads->childw, parent, {
     assert(parent->state == query_childw);
     assert(parent->children.head);
     DLIST_CHECK(parent->children, child, siblings., {
@@ -156,7 +167,7 @@ static void checkc_queue_childw(adns_state ads) {
 static void checkc_queue_output(adns_state ads) {
   adns_query qu;
   
-  DLIST_CHECK(ads->output, qu, , {
+  DLIST_CHECK_PARTLESS(ads->output, qu, {
     assert(qu->state == query_done);
     assert(!qu->children.head && !qu->children.tail);
     assert(!qu->parent);

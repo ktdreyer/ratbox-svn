@@ -389,7 +389,7 @@ int adns_processreadable(adns_state ads, int fd, const struct timeval *now) {
     for (;;) {
       udpaddrlen= sizeof(udpaddr);
       r= recvfrom(ads->udpsocket,udpbuf,sizeof(udpbuf),0,
-		  (struct sockaddr*)&udpaddr,(unsigned int*)&udpaddrlen);
+		  (struct sockaddr*)&udpaddr,(int*)&udpaddrlen);
       if (r<0) {
 	if (errno == EAGAIN || errno == EWOULDBLOCK) { r= 0; goto xit; }
 	if (errno == EINTR) continue;
