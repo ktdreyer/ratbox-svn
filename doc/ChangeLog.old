@@ -1,3 +1,9 @@
+*** 20010913_1 by habeeb
+Fix for Lee's patch to m_nick.c, ms_nick didn't check whether it was a new nick
+(parc = 9) or a nick change (parc = 3) and when a nick change happened it tried
+to check the user/host which used the arguments parv[5] and parv[6]. 
+
+
 *** 20010912_3 by habeeb
 more changes to event code.  Fixed eventNewTime and a few other things.
 
