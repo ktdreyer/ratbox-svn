@@ -1,3 +1,13 @@
+*** 20001111_6 by db
+- more cleanup on m_kline.c
+  with iauth, kline file locking etc. will be handled by iauthd anyway..
+  We'll need a local link list of klines to place as they are handed to 
+iauthd eventually...
+
+- fixed small bug in s_conf.c removed another #ifdef
+
+
+
 *** 20001111_5 by db
 - more clean ups on m_kline.c, I'll make this sane yet!
 
