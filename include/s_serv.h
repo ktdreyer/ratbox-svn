@@ -30,6 +30,12 @@
 #define INCLUDED_sys_types_h
 #endif
 
+/*
+ * The number of seconds between calls to try_connections(). Fiddle with
+ * this ONLY if you KNOW what you're doing!
+ */
+#define TRY_CONNECTIONS_TIME	60
+
 struct Client;
 struct ConfItem;
 struct Channel;
@@ -109,7 +115,7 @@ extern int         server_estab(struct Client* cptr);
 extern void        set_autoconn(struct Client *,char *,char *,int);
 extern const char* show_capabilities(struct Client* client);
 extern void        show_servers(struct Client *);
-extern time_t      try_connections(time_t currenttime);
+extern void        try_connections(void *unused);
 
 extern void        initServerMask(void);
 extern void        burst_channel(struct Client *cptr, struct Channel *chptr);

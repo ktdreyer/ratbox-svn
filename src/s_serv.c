@@ -29,6 +29,7 @@
 #include "class.h"
 #include "client.h"
 #include "common.h"
+#include "event.h"
 #include "fdlist.h"
 #include "hash.h"
 #include "irc_string.h"
@@ -233,7 +234,8 @@ int hunt_server(struct Client *cptr, struct Client *sptr, char *command,
  * function should be made latest. (No harm done if this
  * is called earlier or later...)
  */
-time_t try_connections(time_t currenttime)
+void
+try_connections(void *unused)
 {
   struct ConfItem*   aconf;
   struct Client*     cptr;
@@ -244,7 +246,7 @@ time_t try_connections(time_t currenttime)
   struct ConfItem*   con_conf = NULL;
   int                con_class = 0;
 
-  Debug((DEBUG_NOTICE,"Connection check at: %s", myctime(currenttime)));
+  Debug((DEBUG_NOTICE,"Connection check at: %s", myctime(CurrentTime)));
 
   for (aconf = ConfigItemList; aconf; aconf = aconf->next )
     {
@@ -261,7 +263,7 @@ time_t try_connections(time_t currenttime)
        * made one successfull connection... [this algorithm is
        * a bit fuzzy... -- msa >;) ]
        */
-      if (aconf->hold > currenttime)
+      if (aconf->hold > CurrentTime)
         {
           if (next > aconf->hold || next == 0)
             next = aconf->hold;
@@ -271,7 +273,7 @@ time_t try_connections(time_t currenttime)
       if ((confrq = get_con_freq(cltmp)) < MIN_CONN_FREQ )
         confrq = MIN_CONN_FREQ;
 
-      aconf->hold = currenttime + confrq;
+      aconf->hold = CurrentTime + confrq;
       /*
        * Found a CONNECT config with port specified, scan clients
        * and see if this server is already connected?
@@ -302,7 +304,7 @@ time_t try_connections(time_t currenttime)
       sendto_realops_flags(FLAGS_ALL,
 			   "WARNING AUTOCONNALL is 0, all autoconns are disabled");
       Debug((DEBUG_NOTICE,"Next connection check : %s", myctime(next)));
-      return next;
+      goto finish;
     }
 
   if (connecting)
@@ -348,7 +350,9 @@ time_t try_connections(time_t currenttime)
         }
     }
   Debug((DEBUG_NOTICE,"Next connection check : %s", myctime(next)));
-  return next;
+finish:
+  eventAdd("try_connections", try_connections, NULL,
+      TRY_CONNECTIONS_TIME, 0);
 }
 
 /*

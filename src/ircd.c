@@ -356,34 +356,8 @@ static time_t io_loop(time_t delay)
   comm_select(delay);
 
   /*
-  ** We only want to connect if a connection is due,
-  ** not every time through.  Note, if there are no
-  ** active C lines, this call to Tryconnections is
-  ** made once only; it will return 0. - avalon
-  */
-  if (nextconnect && CurrentTime >= nextconnect)
-    nextconnect = try_connections(CurrentTime);
-  /*
-  ** take the smaller of the two 'timed' event times as
-  ** the time of next event (stops us being late :) - avalon
-  ** WARNING - nextconnect can return 0!
-  */
-  if (nextconnect) 
-    delay = IRCD_MIN(delay, (nextconnect - CurrentTime));
-  /*
-  ** Adjust delay to something reasonable [ad hoc values]
-  ** (one might think something more clever here... --msa)
-  ** We don't really need to check that often and as long
-  ** as we don't delay too long, everything should be ok.
-  ** waiting too long can cause things to timeout...
-  ** i.e. PINGS -> a disconnection :(
-  ** - avalon
-  */
-  if (delay < 1)
-    delay = 1;
-  else
-    delay = IRCD_MIN(delay, TIMESEC);
-
+   * Check to see whether we have to rehash the configuration ..
+   */
   if (dorehash)
     {
       rehash(&me, &me, 1);
@@ -613,6 +587,9 @@ int main(int argc, char *argv[])
 
   eventAdd("cleanup_tklines", cleanup_tklines, NULL,
            CLEANUP_TKLINES_TIME, 0);
+
+  /* We want try_connections to be called as soon as possible now! -- adrian */
+  eventAdd("try_connections", try_connections, NULL, 0, 0);
 
   /* Setup the timeout check. I'll shift it later :)  -- adrian */
   eventAdd("comm_checktimeouts", comm_checktimeouts, NULL, 1, 0);
