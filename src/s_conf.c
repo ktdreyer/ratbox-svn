@@ -89,6 +89,9 @@ static void     initconf(FBFILE*, int);
 static void     clear_out_old_conf(void);
 static void     flush_deleted_I_P(void);
 
+/* address of class 0 conf */
+static struct   Class* class0;
+
 #ifdef LIMIT_UH
 static  int     attach_iline(struct Client *, struct ConfItem *,const char *);
 #else
@@ -1847,6 +1850,8 @@ static void initconf(FBFILE* file, int use_include)
   struct ConfItem* include_conf = NULL;
   int              sendq = 0;
 
+  class0 = find_class(0);       /* which one is class 0 ? */
+
   while (fbgets(line, sizeof(line), file))
     {
       user_field = host_field = port_field = class_field = (char *)NULL;
@@ -3495,20 +3500,18 @@ static void conf_add_class_to_conf(struct ConfItem *aconf,char *class_field)
   if(class_field)
     classToFind = atoi(class_field);
   else
-    classToFind = 0;
+    {
+      sendto_realops("Warning *** Missing class field");
+      ClassPtr(aconf) = class0;
+      return;
+    }
 
   ClassPtr(aconf) = find_class(classToFind);
 
-  if(ClassPtr(aconf) == 0)
+  if(classToFind && (ClassPtr(aconf) == class0))
     {
-      if(classToFind)
-        {
-          sendto_realops(
-		     "Warning *** Defaulting to class 0 for missing class %d",
-		     classToFind);
-	}
-
-      ClassPtr(aconf) = find_class(0);
+      sendto_realops("Warning *** Defaulting to class 0 for missing class %d",
+	     classToFind);
     }
 
   if (ConfMaxLinks(aconf) < 0)
