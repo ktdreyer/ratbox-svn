@@ -62,7 +62,7 @@ _moddeinit(void)
   mod_del_cmd(&ojoin_msgtab);
 }
 
-char *_version = "20010104";
+char *_version = "$Revision$";
 
 /*
 ** mo_ojoin

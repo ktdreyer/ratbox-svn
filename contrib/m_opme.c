@@ -62,7 +62,7 @@ _moddeinit(void)
   mod_del_cmd(&opme_msgtab);
 }
 
-char *_version = "20010528";
+char *_version = "$Revision$";
 
 static int chan_is_opless(struct Channel *chptr)
 {
