@@ -251,10 +251,10 @@ int ms_connect(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   /*
    * Notify all operators about remote connect requests
    */
-  send_operwall( &me, NULL,
-		 ":Remote CONNECT %s %s from %s",
-		 parv[1], parv[2] ? parv[2] : "",
-		 get_client_name(sptr, FALSE));
+  sendto_all_local_opers( &me, NULL,
+			  "Remote CONNECT %s %s from %s",
+			  parv[1], parv[2] ? parv[2] : "",
+			  get_client_name(sptr, FALSE));
   sendto_serv_butone(cptr,
 		     ":%s WALLOPS :Remote CONNECT %s %s from %s",
 		     me.name, parv[1], parv[2] ? parv[2] : "",

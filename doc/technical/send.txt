@@ -169,13 +169,15 @@ sendto_match_cap_servs()
                   who are capable of it. i.e. MODE #channel +e nick!user@host
 
 
-send_operwall() - Is only used to send a NOTICE to each local oper on  
+send_to_all_local_opers()
+                - Is only used to send a NOTICE to each local oper on  
                   server.
-                  usage - send_operwall(struct Client *from,
-                                        char *type_message,
-                                        ...);
-                  where type_message can be "LOCOPS" "WALLOPS" "OPERWALL"
-                  or "" for server wallop.
+                  usage - send_to_all_local_opers(struct Client *from,
+                                                  char *type_message,
+                                                  const char *pattern,
+                                                  ...);
+                  where type_message can be "LOCOPS", "OPERWALL"
+                  or NULL for plain old wallop.
 
 sendto_anywhere()
                 - Allows the sending of a message to any client on the net

@@ -25,7 +25,8 @@ unsigned long current_serial;
 
 extern void send_queued_write(int fd, void *data);
 
-extern  void send_operwall(struct Client *,char *,...);
+extern  void sendto_all_local_opers(struct Client *, char *message_type,
+				    const char *pattern,...);
 extern  void sendto_one(struct Client *, const char *, ...);
 extern  void sendto_channel_butone(struct Client *, struct Client *, 
                                    struct Channel *, const char *, ...);

@@ -345,8 +345,13 @@ send_queued_write(int fd, void *data)
 } /* send_queued_write() */
 
 /*
-** send message to single client
-*/
+ * sendto_one
+ *
+ * inputs	- pointer to destination client
+ *		- var args message
+ * output	- NONE
+ * side effects	- send message to single client
+ */
 
 void
 sendto_one(struct Client *to, const char *pattern, ...)
@@ -524,8 +529,13 @@ sendto_serv_butone(struct Client *one, const char *pattern, ...)
 
 /*
  * sendto_cap_serv_butone
- *
- * Send a message to all connected servers except the client 'one'.
+ * 
+ * inputs       - int capability mask
+ *              - pointer to client NOT to send to or NULL
+ *		- var args pattern of message to send
+ * output	- NONE
+ * side effects - Send a message to all connected servers
+ *                except the client 'one'.
  */
 void
 sendto_cap_serv_butone(int cap, struct Client *one, const char *pattern, ...)
@@ -593,7 +603,10 @@ sendto_common_channels_local(struct Client *user, const char *pattern, ...)
 /*
  * sendto_channel_local
  *
- * inputs	-
+ * inputs	- int type, i.e. ALL_MEMBERS, NON_CHANOPS,
+ *                ONLY_CHANOPS_VOICED, ONLY_CHANOPS
+ *              - pointer to channel to send to
+ *              - var args pattern
  * output	- NONE
  * side effects - Send a message to all members of a channel that are
  *		  locally connected to this server.
@@ -697,7 +710,11 @@ match_it(const struct Client *one, const char *mask, int what)
 /*
  * sendto_channel_remote
  *
- * send to all servers the channel given, except for "from"
+ * inputs	- pointer to channel
+ *              - from pointer
+ *              - var args pattern
+ * output       - NONE
+ * side effects - send to all servers the channel given, except for "from"
  */
 void
 sendto_channel_remote(struct Channel *chptr,
@@ -709,15 +726,17 @@ sendto_channel_remote(struct Channel *chptr,
   struct Client *cptr;
   dlink_node *ptr;
 
-  va_start(args, pattern);
-  len = send_format(sendbuf,pattern,args);
-  va_end(args);
-
-  if (chptr)
+  if (chptr != NULL)
     {
       if (*chptr->chname == '&')
         return;
     }
+  else
+    return;
+
+  va_start(args, pattern);
+  len = send_format(sendbuf,pattern,args);
+  va_end(args);
 
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
@@ -726,7 +745,7 @@ sendto_channel_remote(struct Channel *chptr,
       if (cptr == from)
         continue;
 
-      if(chptr && ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
+      if(ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
         {
           if( !(chptr->lazyLinkChannelExists & cptr->localClient->serverMask) )
              continue;
@@ -739,8 +758,14 @@ sendto_channel_remote(struct Channel *chptr,
 /*
  * sendto_match_cap_servs
  *
- * send to all servers which match the mask at the end of a channel name
- * (if there is a mask present) or to all if no mask, and match the capability
+ * inputs	- channel pointer
+ * 		- client to not send back towards (often a server)
+ *		- integer capability
+ *		- var args message
+ * output	- NONE
+ * side effects - send to all servers but 'from',
+ *                to the given channel only if
+ *                they match the capability, the given message.
  */
 
 void
@@ -850,65 +875,63 @@ sendto_match_butone(struct Client *one, struct Client *from,
 } /* sendto_match_butone() */
 
 /*
-** send_operwall -- Send Wallop to All Opers on this server
-**  now va'ified  -bill
-*/
+ * sendto_all_local_opers()
+ *
+ * inputs	- pointer to client message is from
+ *              - string to insert after "WALLOPS" if given
+ * 		- pointer to var arg message
+ * output	- NONE
+ * side effects	- send given message to all local opers,
+ *                clients go nuts if sent message types of "LOCOPS"
+ *                or "OPERWALL" hence, they are all "WALLOPS" but
+ *                with "OPERWALL" or "LOCOPS" prefixed to the message.
+ *
+ * now va'ified  -bill
+ */
 
 void
-send_operwall(struct Client *from, char *type_message, ...)
+sendto_all_local_opers(struct Client *from, char *type_message,
+		       const char *pattern, ...)
 
 {
-  char sender[NICKLEN + USERLEN + HOSTLEN + 5];
-  char message[514];
-  char *format;
-  va_list va;
+  char prefix[NICKLEN + USERLEN + HOSTLEN + 5];
+  va_list args;
   struct Client *acptr;
-  struct User *user;
   dlink_node *ptr;
-
-  va_start(va, type_message);
-  format = va_arg(va, char *);
-  vsnprintf(message, sizeof(message)-2, format, va);
-  if (message[strlen(message)-1] != '\n') strncat(message, "\n\0", 2);
+  char message[IRCD_BUFSIZE*2];
+  int len;
 
   if (!from || !message[0])
     return;
 
-  user = from->user;
-
+  va_start(args, pattern);
+  (void)send_format(message, pattern, args);
+  va_end(args);
+  
   if(IsPerson(from))
-    {
-      (void)ircsprintf(sender,"%s!%s@%s",from->name,from->username,from->host);
-    }
+    (void)ircsprintf(prefix,":%s!%s@%s",
+		     from->name, from->username, from->host);
   else
-    {
-      (void)strcpy(sender, from->name);
-    }
+    (void)ircsprintf(prefix,":%s", from->name);
 
   if(type_message != NULL)
-    {
-      for (ptr = oper_list.head; ptr; ptr = ptr->next)
-	{
-	  acptr = ptr->data;
-
-	  if (!SendOperwall(acptr))
-	    continue; /* has to be oper if in this linklist */
-	  sendto_one(acptr, ":%s WALLOPS :%s %s", sender,
-		     type_message, message);
-	}
-    }
+    len = ircsprintf(sendbuf,"%s WALLOPS :%s> %s",
+		     prefix, type_message, message);
   else
-    {
-      for (ptr = oper_list.head; ptr; ptr = ptr->next)
-	{
-	  acptr = ptr->data;
-	  if (!SendOperwall(acptr))
-	    continue; /* has to be oper if in this linklist */
+    len = ircsprintf(sendbuf,"%s WALLOPS :%s",
+		     prefix, message);
 
-	  sendto_one(acptr, ":%s WALLOPS :%s", sender, message);
-	}
+  len = send_trim(sendbuf,len);
+
+  for (ptr = oper_list.head; ptr; ptr = ptr->next)
+    {
+      acptr = ptr->data;
+      
+      if (!SendOperwall(acptr))
+	continue; /* has to be oper if in this linklist */
+      send_message(acptr, sendbuf, len);
     }
-} /* send_operwall() */
+} /* sendto_all_local_opers() */
 
 
 /*
@@ -966,7 +989,10 @@ sendto_anywhere(struct Client *to, struct Client *from,
 /*
  * sendto_realops_flags
  *
- *    Send to *local* ops only but NOT +s nonopers.
+ * inputs	- flag types of messages to show to real opers
+ *		- var args input message
+ * output	- NONE
+ * side effects	- Send to *local* ops only but NOT +s nonopers.
  */
 
 void
@@ -1028,10 +1054,12 @@ sendto_realops_flags(int flags, const char *pattern, ...)
 } /* sendto_realops_flags() */
 
 /*
-** ts_warn
-**      Call sendto_realops, with some flood checking (at most 5 warnings
-**      every 5 seconds)
-*/
+ * ts_warn
+ * inputs	- var args message
+ * output	- NONE
+ * side effects	- Call sendto_realops_flags, with some flood checking
+ *		  (at most 5 warnings every 5 seconds)
+ */
  
 void
 ts_warn(const char *pattern, ...)
@@ -1071,6 +1099,15 @@ ts_warn(const char *pattern, ...)
 } /* ts_warn() */
 
 
+/*
+ * send_format
+ *
+ * inputs	- buffer to format into
+ *		- format pattern to use
+ *		- var args
+ * output	- number of bytes formatted output
+ * side effects	- modifies sendbuf
+ */
 static int
 send_format(char *sendbuf, const char *pattern, va_list args)
 {
