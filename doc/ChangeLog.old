@@ -1,3 +1,15 @@
+*** 20001211_13 by db
+- a client being made into a server, should be removed from the unknown_list
+  this was happening in the new server establish code...
+  This left an unknown client hanging around, not removed from unknown_list
+  because it was now a server, not an unknown client.
+
+- local removal was missed in m_stats.c, this meant /stats didn't work
+  since it was never loaded. There are three other functions that have
+  to be fixed as well... m_trace.c, m_die.c, m_close.c
+
+
+
 *** 20001211_12 by db
 - tiny comment fix in check_pings
 
