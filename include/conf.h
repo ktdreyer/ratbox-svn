@@ -38,7 +38,6 @@ struct _config_file
 
 	/* jupeserv */
 	int oper_score;
-	int admin_score;
 	int jupe_score;
 	int unjupe_score;
 };
