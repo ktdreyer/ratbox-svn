@@ -287,20 +287,9 @@ extern const char *form_str(int);
 /* #define ERR_LAST_ERR_MSG 505 
  * moved to 999
  */
-#define ERR_TOOMANYWATCH     512
-
 #define ERR_WRONGPONG	     513
 
 #define ERR_HELPNOTFOUND     524
-
-#define RPL_LOGON            600
-#define RPL_LOGOFF           601
-#define RPL_WATCHOFF         602
-#define RPL_WATCHSTAT        603
-#define RPL_NOWON            604
-#define RPL_NOWOFF           605
-#define RPL_WATCHLIST        606
-#define RPL_ENDOFWATCHLIST   607
 
 #define RPL_MODLIST          702
 #define RPL_ENDOFMODLIST     703

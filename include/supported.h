@@ -65,11 +65,10 @@
 		" ETRACE"		\
 		" CPRIVMSG"		\
 		" CNOTICE"		\
-		" DEAF=D"		\
-		" WATCH=%i"
+		" DEAF=D"
 
 #define FEATURES2VALUES \
-	LOC_CHANNELLEN, TOPICLEN, REASONLEN, ConfigFileEntry.max_watch
+	LOC_CHANNELLEN, TOPICLEN, REASONLEN
 
 /*
  * - from mirc's versions.txt

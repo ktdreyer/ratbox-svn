@@ -8534,11 +8534,6 @@ cat >>confdefs.h <<\_ACEOF
 #define CONFITEM_HEAP_SIZE 128
 _ACEOF
 
-
-cat >>confdefs.h <<\_ACEOF
-#define WATCH_HEAP_SIZE 1024
-_ACEOF
-
 else
 
 cat >>confdefs.h <<\_ACEOF
@@ -8598,11 +8593,6 @@ _ACEOF
 
 cat >>confdefs.h <<\_ACEOF
 #define CONFITEM_HEAP_SIZE 256
-_ACEOF
-
-
-cat >>confdefs.h <<\_ACEOF
-#define WATCH_HEAP_SIZE 8192
 _ACEOF
 
 fi

@@ -270,9 +270,6 @@
 /* Define this to enable IO Debug hooks. */
 #undef USE_IODEBUG_HOOKS
 
-/* Size of the watch heap. */
-#undef WATCH_HEAP_SIZE
-
 /* Define to 1 if your processor stores words with the most significant byte
    first (like Motorola and SPARC, unlike Intel and VAX). */
 #undef WORDS_BIGENDIAN

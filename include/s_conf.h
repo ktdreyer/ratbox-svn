@@ -236,7 +236,6 @@ struct config_file_entry
 	int reject_ban_time;
 	int reject_after_count;
 	int reject_duration;
-	int max_watch;
 	int target_change;
 #ifdef IPV6
 	int fallback_to_ip6_int;

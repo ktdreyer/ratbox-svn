@@ -34,7 +34,6 @@
 #include "s_stats.h"
 #include "s_user.h"
 #include "hash.h"
-#include "watch.h"
 #include "whowas.h"
 #include "s_serv.h"
 #include "send.h"
@@ -644,16 +643,10 @@ change_local_nick(struct Client *client_p, struct Client *source_p, char *nick)
 				source_p->name, nick, (long) source_p->tsinfo);
 	}
 
-        if(!samenick)
-                hash_check_watch(source_p, RPL_LOGOFF);
-
 	/* Finally, add to hash */
 	del_from_client_hash(source_p->name, source_p);
 	strcpy(source_p->name, nick);
 	add_to_client_hash(nick, source_p);
-
-        if(!samenick)
-                hash_check_watch(source_p, RPL_LOGON);
 
 	/* Make sure everyone that has this client on its accept list
 	 * loses that reference. 
@@ -691,13 +684,7 @@ change_remote_nick(struct Client *client_p, struct Client *source_p, int parc,
 			      parv[0], nick, (long) source_p->tsinfo);
 	}
 
-        if(!samenick)
-                hash_check_watch(source_p, RPL_LOGOFF);
-
 	del_from_client_hash(source_p->name, source_p);
-
-        if(!samenick)
-                hash_check_watch(source_p, RPL_LOGOFF);
 
 	/* invalidate nick delay when a remote client uses the nick.. */
 	if((nd = hash_find_nd(nick)))
@@ -937,8 +924,6 @@ register_client(struct Client *client_p, struct Client *server,
 
 	add_to_client_hash(nick, source_p);
 	add_to_hostname_hash(source_p->host, source_p);
-	hash_check_watch(source_p, RPL_LOGON);
-
 
 	m = &parv[4][1];
 	while(*m)

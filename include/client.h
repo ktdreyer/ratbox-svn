@@ -257,8 +257,6 @@ struct LocalUser
 	time_t last_knock;	/* time of last knock */
 	unsigned long random_ping;
 	struct AuthRequest	*auth_request;
-        /* watch list */
-        dlink_list watchlist;   
 
 	/* target change stuff */
 	void *targets[10];		/* targets were aware of */

@@ -47,7 +47,6 @@
 #include "scache.h"
 #include "send.h"
 #include "supported.h"
-#include "watch.h"
 #include "whowas.h"
 #include "memory.h"
 #include "packet.h"
@@ -545,7 +544,6 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 	if(find_tgchange(source_p->sockhost))
 		USED_TARGETS(source_p) = 6;
 
-	hash_check_watch(source_p, RPL_LOGON);
 	user_welcome(source_p);
 	return (introduce_client(client_p, source_p, user, source_p->name));
 }
