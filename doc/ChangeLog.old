@@ -1,3 +1,9 @@
+*** 20010609_2 by a1kmm
+- We probably want to #if 0 this out until 7.1, especially as it isn't finished
+  and it needs more stuff to be moved into headers etc... later.
+- Implements a table driven channel mode system. Not quite complete, but almost.
+
+
 *** 20010609_1 by androsyn
 Okay...this fixes the usleep hack.  Basically we end up doing the delay in
 select/poll/kqueue.  In the case of poll() we set the delay on the last poll
