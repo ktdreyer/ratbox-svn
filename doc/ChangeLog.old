@@ -1,3 +1,8 @@
+*** 20010510_2 by fl_
+- we shouldnt really send CAP_ZIP.. we can actually support it but
+  in theory we dont, the code is left in, just the cap sending
+
+
 *** 20010510_1 by a1kmm
 - Fixed a major memory leak.
 - Added some better memory debugging code for dlink_nodes.
