@@ -1,3 +1,8 @@
+*** 20010822_1 by leeh
+- fixed sjoin.. I commented most of it
+  someone should probably review this :)
+
+
 *** 20010821_10 by androsyn
 Okay so strspn() wasn't such a great idea...
 
