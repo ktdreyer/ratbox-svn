@@ -120,6 +120,47 @@ static void	free_cur_list(conf_parm_t* list)
 		
 conf_parm_t *	cur_list = NULL;
 
+static void	add_cur_list_cpt(conf_parm_t *new)
+{
+	if (cur_list == NULL)
+	{
+		cur_list = MyMalloc(sizeof(conf_parm_t));
+		memset(cur_list, 0, sizeof(conf_parm_t));
+		cur_list->type |= CF_FLIST;
+		cur_list->v.list = new;
+	}
+	else
+	{
+		new->next = cur_list->v.list;
+		cur_list->v.list = new;
+	}
+}
+
+static void	add_cur_list(int type, char *str, int number)
+{
+	conf_parm_t *new;
+
+	new = MyMalloc(sizeof(conf_parm_t));
+	new->next = NULL;
+	new->type = type;
+
+	switch(type)
+	{
+	case CF_INT:
+	case CF_TIME:
+	case CF_YESNO:
+		new->v.number = number;
+		break;
+	case CF_STRING:
+	case CF_QSTRING:
+		DupString(new->v.string, str);
+		break;
+	}
+
+	add_cur_list_cpt(new);
+}
+
+
 %}
 
 %union {
@@ -128,27 +169,27 @@ conf_parm_t *	cur_list = NULL;
 	conf_parm_t *	conf_parm;
 }
 
-%token LOADMODULE
+%token LOADMODULE TWODOTS
 
 %token <string> QSTRING STRING
 %token <number> NUMBER
 
 %type <string> qstring string
 %type <number> number timespec 
-%type <conf_parm> itemlist oneitem 
+%type <conf_parm> oneitem single itemlist
 
 %start conf
 
 %%
 
 conf: 
-    | conf conf_item | error
-    ;
+	| conf conf_item 
+	| error
+	;
 
 conf_item:
          | block
 	 | loadmodule
-	 | error
          ;
 
 block: string 
@@ -169,12 +210,10 @@ block: string
 	   if (conf_cur_block)
            	conf_end_block(conf_cur_block);
          }
-     | error
      ;
 
 block_items: block_items block_item 
            | block_item 
-	   | error
            ;
 
 block_item:	string '=' itemlist ';'
@@ -185,35 +224,31 @@ block_item:	string '=' itemlist ';'
 		}
 		;
 
-itemlist: itemlist ',' oneitem 
+itemlist: itemlist ',' single
+	| single
+	;
+
+single: oneitem
 	{
-		/* add this item to the list ($1) */
-		if (cur_list == NULL)
-		{
-			cur_list = MyMalloc(sizeof(conf_parm_t));
-			memset(cur_list, 0, sizeof(conf_parm_t));
-			cur_list->v.list = $3;
-			cur_list->type |= CF_FLIST;
-		}
-		else
-		{
-			$3->next = cur_list->v.list;
-			cur_list->v.list = $3;
-			cur_list->type |= CF_FLIST;
-		}
+		add_cur_list_cpt($1);
 	}
-	| oneitem
+	| oneitem TWODOTS oneitem
 	{
-		if (cur_list == NULL)
+		/* "1 .. 5" meaning 1,2,3,4,5 - only valid for integers */
+		if (($1->type & CF_MTYPE) != CF_INT ||
+		    ($3->type & CF_MTYPE) != CF_INT)
 		{
-			cur_list = MyMalloc(sizeof(conf_parm_t));
-			memset(cur_list, 0, sizeof(conf_parm_t));
-			cur_list->v.list = $1;
+			conf_report_error("Both arguments in '..' notation must be integers.");
+			break;
 		}
 		else
 		{
-			$1->next = cur_list->v.list;
-			cur_list->v.list = $1;
+			int i;
+
+			for (i = $1->v.number; i <= $3->v.number; i++)
+			{
+				add_cur_list(CF_INT, 0, i);
+			}
 		}
 	}
 	;
@@ -267,31 +302,30 @@ loadmodule:
 	      load_one_module($2);
 	    }
 	  ';'
-	| error
           ;
 
 qstring: QSTRING { strcpy($$, $1); } ;
 string: STRING { strcpy($$, $1); } ;
 number: NUMBER { $$ = $1; } ;
 
-timespec: number
-          {
-            $$ = $1;
-          }
-        | number string
-          {
-	    time_t t;
+timespec:	number string
+         	{
+			time_t t;
 
-	    if ((t = conf_find_time($2)) == 0)
-	      {
-		conf_report_error("Unrecognised time type '%s'", $2);
-		t = 1;
-	      }
+			if ((t = conf_find_time($2)) == 0)
+			{
+				conf_report_error("Unrecognised time type '%s'", $2);
+				t = 1;
+			}
 	    
-	    $$ = $1 * t;
-	  }
-          | timespec timespec
-          {
-            $$ = $1 + $2;
-          }
-          ;
+			$$ = $1 * t;
+		}
+		| timespec timespec
+		{
+			$$ = $1 + $2;
+		}
+		| timespec number
+		{
+			$$ = $1 + $2;
+		}
+		;

@@ -137,7 +137,7 @@ int 	conf_call_set(struct TopConf *tc, char *item, conf_parm_t *value, int type)
 		return -1;
 	}
 
-	if (value->type & CF_FLIST)
+	if (cf->cf_type & CF_FLIST)
 	{
 		/* just pass it the extended argument list */
 		cf->cf_func(value->v.list);
@@ -308,7 +308,7 @@ void	newconf_init()
 	add_conf_item("class", "sendq", CF_TIME, conf_set_class_sendq);
 
 	add_top_conf("listen", conf_begin_listen, conf_end_listen);
-	add_conf_item("listen", "port", CF_INT, conf_set_listen_port);
+	add_conf_item("listen", "port", CF_INT | CF_FLIST, conf_set_listen_port);
 	add_conf_item("listen", "ip", CF_QSTRING, conf_set_listen_address);
 	add_conf_item("listen", "host", CF_QSTRING, conf_set_listen_address);
 
@@ -1233,7 +1233,19 @@ int	conf_end_listen(struct TopConf *tc)
 
 void	conf_set_listen_port(void *data)
 {
-	add_listener(*(unsigned int *) data, listener_address);
+	conf_parm_t *args = data;
+
+	for (; args; args = args->next)
+	{
+		if ((args->type & CF_MTYPE) != CF_INT)
+		{
+			conf_report_error("listener::port argument is not an integer "
+				"-- ignoring.");
+			continue;	
+		}
+
+		add_listener(args->v.number, listener_address);
+	}
 }
 
 void	conf_set_listen_address(void *data)
@@ -2225,7 +2237,8 @@ void	conf_set_general_stats_k_oper_only(void *data)
 	else if (strcasecmp(val, "no") == 0)
 		ConfigFileEntry.stats_k_oper_only = 0;
 	else
-		conf_report_error("Invalid setting for general::stats_k_oper_only.");
+		conf_report_error("Invalid setting '%s' for general::stats_k_oper_only.",
+					val);
 }
 
 void	conf_set_general_stats_i_oper_only(void *data)
@@ -2239,7 +2252,7 @@ void	conf_set_general_stats_i_oper_only(void *data)
 	else if (strcasecmp(val, "no") == 0)
 		ConfigFileEntry.stats_i_oper_only = 0;
 	else
-		conf_report_error("Invalid setting for general::stats_i_oper_only.");
+		conf_report_error("Invalid setting '%s' for general::stats_i_oper_only.", val);
 }
 
 void	conf_set_general_pace_wait(void *data)

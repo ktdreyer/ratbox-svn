@@ -128,6 +128,7 @@ loadmodule	{ return LOADMODULE; }
                   return STRING;
                 }
 
+\.\.		{ return TWODOTS; }
 .               { return yytext[0]; }
 <<EOF>>         { if (ieof()) yyterminate(); }
 %%

@@ -2661,10 +2661,10 @@ yyerror(char *msg)
 
   strip_tabs(newlinebuf, (const unsigned char *)linebuf, strlen(linebuf));
 
-  sendto_realops_flags(FLAGS_ALL, L_ALL,"\"%s\", line %d: %s: %s",
+  sendto_realops_flags(FLAGS_ALL, L_ALL,"\"%s\", line %d: %s at '%s'",
 		       conffilebuf, lineno + 1, msg, newlinebuf);
 
-  ilog(L_WARN, "\"%s\", line %d: %s: %s",
+  ilog(L_WARN, "\"%s\", line %d: %s at '%s'",
 		       conffilebuf, lineno + 1, msg, newlinebuf);
 }
 
