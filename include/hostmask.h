@@ -51,9 +51,13 @@ void delete_one_address_conf(const char *, struct ConfItem *);
 void clear_out_address_conf(void);
 void init_host_hash(void);
 struct ConfItem *find_address_conf(const char *, const char *, struct sockaddr_storage *, int);
+
 struct ConfItem *find_dline(struct sockaddr_storage *, int);
-struct ConfItem *find_kline(struct Client *);
-struct ConfItem *find_gline(struct Client *);
+
+#define find_kline(x)	(find_conf_by_address((x)->host, &(x)->localClient->ip, CONF_KILL,\
+			 (x)->localClient->ip.ss_family, (x)->username))
+#define find_gline(x)	(find_conf_by_address((x)->host, &(x)->localClient->ip, CONF_GLINE,\
+			 (x)->localClient->ip.ss_family, (x)->username))
 
 void report_Klines(struct Client *);
 void report_auth(struct Client *);

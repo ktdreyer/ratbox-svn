@@ -845,31 +845,6 @@ conf_connect_allowed(struct sockaddr_storage *addr, int aftype)
 	return 0;
 }
 
-/*
- * find_kill
- *
- * inputs	- pointer to client structure
- * output	- pointer to struct ConfItem if found
- * side effects	- See if this user is klined already,
- *		  and if so, return struct ConfItem pointer
- */
-struct ConfItem *
-find_kill(struct Client *client_p)
-{
-	struct ConfItem *aconf;
-	s_assert(client_p != NULL);
-	if(client_p == NULL)
-		return (NULL);
-
-	aconf = find_address_conf(client_p->host, client_p->username, &client_p->localClient->ip,client_p->localClient->ip.ss_family);
-	if(aconf == NULL)
-		return (aconf);
-	if((aconf->status & CONF_KILL) || (aconf->status & CONF_GLINE))
-		return (aconf);
-
-	return (NULL);
-}
-
 /* add_temp_kline()
  *
  * inputs        - pointer to struct ConfItem

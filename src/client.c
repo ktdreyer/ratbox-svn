@@ -443,73 +443,65 @@ check_banned_lines(void)
 			continue;	/* and go examine next fd/client_p */
 		}
 
-		if(IsPerson(client_p))
+		if(!IsPerson(client_p))
+			continue;
+
+		if((aconf = find_kline(client_p)) != NULL)
 		{
-			if((aconf = find_kill(client_p)) != NULL)
+			if(IsExemptKline(client_p))
 			{
-				if(aconf->status & CONF_GLINE)
-				{
-					if(IsExemptKline(client_p))
-					{
-						sendto_realops_flags(UMODE_ALL,
-								L_ALL,
-								"GLINE over-ruled for %s, client is kline_exempt",
-								get_client_name(client_p, HIDE_IP));
-						continue;
-					}
-
-					if(IsExemptGline(client_p))
-					{
-						sendto_realops_flags(UMODE_ALL,
-								L_ALL,
-								"GLINE over-ruled for %s, client is gline_exempt",
-								get_client_name(client_p, HIDE_IP));
-						continue;
-					}
-
-					sendto_realops_flags(UMODE_ALL, L_ALL,
-							"GLINE active for %s",
-							get_client_name(client_p, HIDE_IP));
-
-					notify_banned_client(client_p, aconf, G_LINED);
-					continue;
-				}
-				else if(aconf->status & CONF_KILL)
-				{
-					/* if there is a returned struct ConfItem.. then kill it */
-					if(IsExemptKline(client_p))
-					{
-						sendto_realops_flags(UMODE_ALL, L_ALL,
-							     "KLINE over-ruled for %s, client is kline_exempt",
-							     get_client_name(client_p, HIDE_IP));
-						continue;
-					}
-
-					sendto_realops_flags(UMODE_ALL, L_ALL,
-							"KLINE active for %s",
-							get_client_name(client_p, HIDE_IP));
-					notify_banned_client(client_p, aconf, K_LINED);
-					continue;
-				}
-			}
-			else if((aconf = find_xline(client_p->info)) != NULL)
-			{
-				if(IsExemptKline(client_p))
-				{
-					sendto_realops_flags(UMODE_ALL, L_ALL,
-							"XLINE over-ruled for %s, client is kline_exempt",
-							get_client_name(client_p, HIDE_IP));
-					continue;
-				}
-
-				sendto_realops_flags(UMODE_ALL, L_ALL, "XLINE active for %s",
+				sendto_realops_flags(UMODE_ALL, L_ALL,
+						"KLINE over-ruled for %s, client is kline_exempt",
 						get_client_name(client_p, HIDE_IP));
-
-				(void) exit_client(client_p, client_p, &me, "Bad user info");
 				continue;
 			}
-			
-			
+
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					"KLINE active for %s",
+					get_client_name(client_p, HIDE_IP));
+			notify_banned_client(client_p, aconf, K_LINED);
+			continue;
+		}
+		else if((aconf = find_gline(client_p)) != NULL)
+		{
+			if(IsExemptKline(client_p))
+			{
+				sendto_realops_flags(UMODE_ALL, L_ALL,
+						"GLINE over-ruled for %s, client is kline_exempt",
+						get_client_name(client_p, HIDE_IP));
+				continue;
+			}
+
+			if(IsExemptGline(client_p))
+			{
+				sendto_realops_flags(UMODE_ALL, L_ALL,
+						"GLINE over-ruled for %s, client is gline_exempt",
+						get_client_name(client_p, HIDE_IP));
+				continue;
+			}
+
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					"GLINE active for %s",
+					get_client_name(client_p, HIDE_IP));
+
+			notify_banned_client(client_p, aconf, G_LINED);
+			continue;
+		}
+		else if((aconf = find_xline(client_p->info)) != NULL)
+		{
+			if(IsExemptKline(client_p))
+			{
+				sendto_realops_flags(UMODE_ALL, L_ALL,
+						"XLINE over-ruled for %s, client is kline_exempt",
+						get_client_name(client_p, HIDE_IP));
+				continue;
+			}
+
+			sendto_realops_flags(UMODE_ALL, L_ALL, "XLINE active for %s",
+					get_client_name(client_p, HIDE_IP));
+
+			(void) exit_client(client_p, client_p, &me, "Bad user info");
+			continue;
 		}
 	}
 
