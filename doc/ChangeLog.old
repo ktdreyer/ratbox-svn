@@ -1,3 +1,10 @@
+*** 20001229_6 by madmax
+Links are now stored in the file in a format resembling normal links output
+ie "servername uplink(me.name) :hops(1) info"
+This makes it look a bit prettier in mirc etc ;)
+Also it now outputs me.name in the links list (again for consistency).
+
+
 *** 20001229_5 by toot
 flame's right.. there's no need to send +e/+I when you get opped
 in a +a chan.
