@@ -1602,36 +1602,28 @@ kill_client(struct Client *cptr,
 {
   va_list args;
   int len = 0;
-  int len_uid=0;
-  int len_nick=0;
-  int have_uid;
-  char sendbuf_uid[IRCD_BUFSIZE*2];
-  char sendbuf_nick[IRCD_BUFSIZE*2];
+  int len_buf = 0;
+  char sendbuf[IRCD_BUFSIZE*2];
   char reason[IRCD_BUFSIZE*2];
 
   va_start(args, pattern);
   len = send_format(reason,"%s",args);
   va_end(args);
   
-  have_uid = 0;
-  if(HasID(diedie))
+  if(HasID(diedie) && IsCapable(cptr, CAP_UID))
     {
-      len_uid = ircsprintf(sendbuf_uid,":%s KILL %s :%s",
-			    me.name, ID(diedie), reason);
-      len_uid = send_trim(sendbuf_uid, len_uid);
-      have_uid = 1;
+      len_buf = ircsprintf(sendbuf, ":%s KILL %s :%s",
+                           me.name, ID(diedie), reason);
+      len_buf = send_trim(sendbuf, len_buf);
     }		    
   else
     {
-      len_nick  = ircsprintf(sendbuf_nick,":%s KILL %s :%s",
-			    me.name,diedie->name, reason);
-      len_nick  = send_trim(sendbuf_nick, len_nick);
+      len_buf = ircsprintf(sendbuf, ":%s KILL %s :%s",
+                           me.name, diedie->name, reason);
+      len_buf = send_trim(sendbuf, len_buf);
     }
 
-  if (have_uid && IsCapable(cptr, CAP_UID))
-    send_message(cptr, (char *)sendbuf_uid, len_uid);
-  else
-    send_message(cptr, (char *)sendbuf_nick, len_nick);
+  send_message(cptr, sendbuf, len_buf);
 }
 
 
