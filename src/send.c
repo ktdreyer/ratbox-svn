@@ -1053,6 +1053,10 @@ sendto_match_servs(struct Client *source_p, const char *mask, int cap, const cha
 		if(target_p->from->serial == current_serial)
 			continue;
 
+		/* dont send to ourselves, or back to where it came from.. */
+		if(IsMe(target_p) || target_p->from == source_p->from)
+			continue;
+
 		if(!IsCapable(target_p->from, cap))
 			continue;
 

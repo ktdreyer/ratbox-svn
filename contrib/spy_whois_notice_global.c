@@ -54,9 +54,9 @@ show_notice(struct hook_mfunc_data *data)
       IsOper(data->client_p) && (data->client_p != data->source_p) 
       && data->client_p->umodes & UMODE_SPY) 
     {
-      sendto_one(data->client_p, ":%s NOTICE %s :*** Notice -- %s (%s@%s) is doing a whois on you",
+      sendto_one(data->client_p, ":%s NOTICE %s :*** Notice -- %s (%s@%s) is doing a whois on you [%s]",
                  me.name, data->client_p->name, data->source_p->name, data->source_p->username,
-                 data->source_p->host);
+                 data->source_p->host, data->source_p->user->server);
     }
 
   return 0;
