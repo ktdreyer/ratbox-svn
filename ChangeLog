@@ -1,3 +1,15 @@
+leeh        2004/04/04 21:55:07 EDT	(20040405_1)
+
+  Modified files:
+    tools                Makefile.in 
+  Log:
+  - fixed something thats wrong, via koitsu :P
+  
+  Revision  Changes    Path
+  7.36      +4 -4      ircd-ratbox/tools/Makefile.in
+
+
+
 leeh        2004/04/04 20:04:23 EDT	(20040405_0)
 
   Modified files:
