@@ -1,3 +1,8 @@
+*** 20000124_2 by db
+- updated convertconf
+
+
+
 *** 20000124_1 by db
 - removed #ifdef for ZIP_LINKS
   I hate #ifdef's
