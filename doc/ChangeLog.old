@@ -1,3 +1,9 @@
+*** 20001014_7 by toot
+. fixed typo in s_user.c
+. made RPL_WHOISADMIN numeric consistent with dalnet
+. changed a ->flags pointer that should have been ->umodes in m_whois
+
+
 *** 20001014_6 by toot
 forgot to change that parv to parc>2
 
