@@ -1,3 +1,24 @@
+leeh        2005/01/24 19:08:29 EST	(20050125_0)
+
+  Modified files:
+    doc                  example.conf 
+    include              client.h s_conf.h 
+    modules/core         m_join.c 
+    src                  newconf.c s_user.c 
+  Log:
+  - added jupe_exempt to auth {};, exempts the user from generating warnings
+    when they attempt to join juped channels.
+  
+  Revision  Changes    Path
+  7.254     +2 -0      ircd-ratbox/doc/example.conf
+  7.261     +3 -0      ircd-ratbox/include/client.h
+  7.306     +2 -0      ircd-ratbox/include/s_conf.h
+  1.162     +5 -2      ircd-ratbox/modules/core/m_join.c
+  7.192     +1 -0      ircd-ratbox/src/newconf.c
+  7.338     +8 -0      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2005/01/24 18:57:02 EST	(20050124_6)
 
   Modified files:
