@@ -1,3 +1,15 @@
+androsyn    2002/08/22 19:43:05 EDT	(20020822_13)
+
+  Modified files:
+    src                  tools.c 
+  Log:
+  Fix a buglet in dlinkMoveList
+  
+  Revision  Changes    Path
+  7.32      +2 -0      ircd-ratbox/src/tools.c
+
+
+
 androsyn    2002/08/22 19:34:26 EDT	(20020822_12)
 
   Modified files:
