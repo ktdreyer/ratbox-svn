@@ -474,8 +474,6 @@ void	newconf_init()
 			conf_set_general_gline_time);
 	add_conf_item("general", "idletime", CF_TIME,
 			conf_set_general_idletime);
-	add_conf_item("general", "maximum_links", CF_INT,
-			conf_set_general_maximum_links);
 	add_conf_item("general", "message_locale", CF_QSTRING,
 			conf_set_general_message_locale);
 	add_conf_item("general", "client_exit", CF_YESNO,
@@ -2414,11 +2412,6 @@ void	conf_set_general_idletime(void *data)
 void	conf_set_general_dots_in_ident(void *data)
 {
 	ConfigFileEntry.dots_in_ident = *(unsigned int*) data;
-}
-
-void	conf_set_general_maximum_links(void *data)
-{
-	ConfigFileEntry.maximum_links = *(unsigned int*) data;
 }
 
 void	conf_set_general_max_targets(void *data)

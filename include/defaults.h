@@ -56,8 +56,6 @@ error HARD_FDLIMIT_ undefined
 #define NETWORK_DESC_DEFAULT "Eris Free Network" /* default for network_desc */
 
 /* General defaults */
-#define MAXIMUM_LINKS_DEFAULT 1         /* default for maximum_links */
-
 #define CLIENT_FLOOD_DEFAULT 20         /* default for client_flood */
 #define CLIENT_FLOOD_MAX     2000
 #define CLIENT_FLOOD_MIN     10

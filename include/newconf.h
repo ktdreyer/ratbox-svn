@@ -262,7 +262,6 @@ extern 	char *		conf_cur_block_name;
 	void	conf_set_general_gline_time			(void *data);
 	void	conf_set_general_idletime			(void *data);
 	void	conf_set_general_dots_in_ident			(void *data);
-	void	conf_set_general_maximum_links			(void *data);
 	void	conf_set_general_max_targets			(void *data);
 	void	conf_set_general_servlink_path			(void *data);
 	void	conf_set_general_default_cipher_preference	(void *data);

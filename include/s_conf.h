@@ -214,7 +214,6 @@ struct config_file_entry
   int           idletime;
   int           hide_server;
   int           client_exit;
-  int           maximum_links;
   int           oper_only_umodes;
   int           oper_umodes;
   int           max_targets;

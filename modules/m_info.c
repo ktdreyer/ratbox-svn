@@ -241,12 +241,6 @@ static struct InfoStruct info_table[] =
     "The maximum number of PRIVMSG/NOTICE targets"
   },
   {
-    "maximum_links",
-    OUTPUT_DECIMAL,
-    &ConfigFileEntry.maximum_links,
-    "Class default maximum links count",
-  },
-  {
     "min_nonwildcard",
     OUTPUT_DECIMAL,
     &ConfigFileEntry.min_nonwildcard,

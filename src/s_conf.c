@@ -1419,7 +1419,6 @@ set_default_conf(void)
   ConfigFileEntry.gline_time = 12 * 3600;
   ConfigFileEntry.idletime = 0;
   ConfigFileEntry.dots_in_ident = 0;
-  ConfigFileEntry.maximum_links = MAXIMUM_LINKS_DEFAULT;
   ConfigFileEntry.max_targets = MAX_TARGETS_DEFAULT;
   DupString(ConfigFileEntry.servlink_path, SLPATH);
   ConfigFileEntry.egdpool_path = NULL;
