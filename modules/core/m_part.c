@@ -105,7 +105,7 @@ static void m_part(struct Client *client_p,
   while(name)
   {
     part_one_client(client_p, source_p, name, reason);
-    name = strtoken(&p, (char *)NULL, ",");
+    name = strtoken(&p, NULL, ",");
   }
   return;
 }

@@ -232,7 +232,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
   if( *(ch + 3) == ' '  && /* ok, lets see if its a possible numeric.. */
       IsDigit(*ch) && IsDigit(*(ch + 1)) && IsDigit(*(ch + 2)) )
     {
-      mptr = (struct Message *)NULL;
+      mptr = NULL;
       numeric = ch;
       paramcount = MAXPARA;
       ServerStats->is_num++;
@@ -293,7 +293,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
   if (s != NULL)
     i = string_to_array(s, para);
 
-  if (mptr == (struct Message *)NULL)
+  if (mptr == NULL)
     {
       do_numeric(numeric, client_p, from, i, para);
       return;

@@ -254,9 +254,9 @@ static void oldParseOneLine(FILE *out,char* line)
 {
   char conf_letter;
   char* tmp;
-  const char* host_field=(char *)NULL;
-  const char* passwd_field=(char *)NULL;
-  const char* user_field=(char *)NULL;
+  const char* host_field=NULL;
+  const char* passwd_field=NULL;
+  const char* user_field=NULL;
   const char* port_field = NULL;
   const char* classconf_field = NULL;
   int class_field = 0;
@@ -440,20 +440,20 @@ static void write_specific(FILE *out, struct AuthBlock *ptr)
  */
 static char *getfield(char *newline)
 {
-  static char *line = (char *)NULL;
+  static char *line = NULL;
   char  *end, *field;
         
   if (newline)
     line = newline;
 
-  if (line == (char *)NULL)
-    return((char *)NULL);
+  if (line == NULL)
+    return(NULL);
 
   field = line;
   if ((end = strchr(line,':')) == NULL)
     {
-      line = (char *)NULL;
-      if ((end = strchr(field,'\n')) == (char *)NULL)
+      line = NULL;
+      if ((end = strchr(field,'\n')) == NULL)
         end = field + strlen(field);
     }
   else

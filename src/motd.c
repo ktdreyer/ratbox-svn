@@ -79,7 +79,7 @@ SendMessageFile(struct Client *source_p, MessageFile *motdToPrint)
     case USER_MOTD:
       nick = BadPtr(source_p->name) ? "*" : source_p->name;
       
-      if (motdToPrint->contentsOfFile == (MessageFileLine *)NULL)
+      if (motdToPrint->contentsOfFile == NULL)
         {
           sendto_one(source_p, form_str(ERR_NOMOTD), me.name, nick);
           return 0;
@@ -100,7 +100,7 @@ SendMessageFile(struct Client *source_p, MessageFile *motdToPrint)
       break;
 
     case USER_LINKS:
-      if (motdToPrint->contentsOfFile == (MessageFileLine *)NULL)
+      if (motdToPrint->contentsOfFile == NULL)
 	return -1;
 
       for(linePointer = motdToPrint->contentsOfFile;linePointer;
@@ -114,7 +114,7 @@ SendMessageFile(struct Client *source_p, MessageFile *motdToPrint)
       break;
 
     case OPER_MOTD:
-      if (motdToPrint->contentsOfFile == (MessageFileLine *)NULL)
+      if (motdToPrint->contentsOfFile == NULL)
         {
 /*          sendto_one(source_p, ":%s NOTICE %s :No OPER MOTD", me.name,
  *          source_p->name); */
@@ -201,7 +201,7 @@ ReadMessageFile(MessageFile *MessageFileptr)
       newMessageLine = (MessageFileLine*) MyMalloc(sizeof(MessageFileLine));
 
       strlcpy(newMessageLine->line, buffer, sizeof(newMessageLine->line));
-      newMessageLine->next = (MessageFileLine *)NULL;
+      newMessageLine->next = NULL;
 
       if(MessageFileptr->contentsOfFile)
         {

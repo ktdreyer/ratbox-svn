@@ -431,7 +431,7 @@ void
 check_banned_lines(void)
 {               
   struct Client *client_p;          /* current local client_p being examined */
-  struct ConfItem     *aconf = (struct ConfItem *)NULL;
+  struct ConfItem     *aconf = NULL;
   dlink_node    *ptr, *next_ptr;
  
   DLINK_FOREACH_SAFE(ptr, next_ptr, lclient_list.head)
@@ -1869,18 +1869,6 @@ struct Server *make_server(struct Client *client_p)
   if (!serv)
     {
       serv = (struct Server *)MyMalloc(sizeof(struct Server));
-
-      /* The commented out lines here are
-       * for documentation purposes only
-       * as they are zeroed by MyMalloc above
-       */
-#if 0
-      serv->user = NULL;
-      serv->users = NULL;
-      serv->servers = NULL;
-      *serv->by = '\0'; 
-      serv->up = (char *)NULL;
-#endif
       client_p->serv = serv;
     }
   return client_p->serv;

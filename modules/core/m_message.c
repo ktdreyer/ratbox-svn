@@ -266,7 +266,7 @@ build_target_list(int p_or_n, const char *command, struct Client *client_p,
   ntargets = 0;
 
   for (nick = strtoken(&p, target_list, ","); nick;
-       nick = strtoken(&p, (char *)NULL, ","))
+       nick = strtoken(&p, NULL, ","))
   {
     char *with_prefix;
     /*

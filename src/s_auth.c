@@ -496,8 +496,8 @@ static void
 read_auth_reply(int fd, void *data)
 {
   struct AuthRequest *auth = data;
-  char* s=(char *)NULL;
-  char* t=(char *)NULL;
+  char* s=NULL;
+  char* t=NULL;
   int   len;
   int   count;
   char  buf[AUTH_BUFSIZ + 1]; /* buffer to read auth reply into */

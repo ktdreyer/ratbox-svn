@@ -523,7 +523,7 @@ report_configured_links(struct Client* source_p, int mask)
                          source_p->name,
                          p->conf_char,
                          user, host, name,
-                         oper_privs_as_string((struct Client *)NULL,port),
+                         oper_privs_as_string(NULL,port),
                          classname,
                          oper_flags_as_string((int)tmp->hold));
             else

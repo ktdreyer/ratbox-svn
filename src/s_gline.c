@@ -89,7 +89,7 @@ find_is_glined(const char* host, const char *user)
         }
     }
 
-  return((struct ConfItem *)NULL);
+  return(NULL);
 }
 
 /*

@@ -45,9 +45,9 @@ void
 parse_k_file(FBFILE *file)
 {
   struct ConfItem *aconf;
-  char* user_field=(char *)NULL;
-  char* reason_field=(char *)NULL;
-  char* host_field=(char *)NULL;
+  char* user_field=NULL;
+  char* reason_field=NULL;
+  char* host_field=NULL;
   char  line[BUFSIZE];
   char* p;
 
@@ -90,8 +90,8 @@ parse_k_file(FBFILE *file)
 void parse_d_file(FBFILE *file)
 {
   struct ConfItem *aconf;
-  char* reason_field=(char *)NULL;
-  char* host_field=(char *)NULL;
+  char* reason_field=NULL;
+  char* host_field=NULL;
   char  line[BUFSIZE];
   char* p;
 
@@ -193,14 +193,14 @@ parse_resv_file(FBFILE *file)
  */
 char *getfield(char *newline)
 {
-  static char *line = (char *)NULL;
+  static char *line = NULL;
   char  *end, *field;
         
   if (newline)
     line = newline;
 
-  if (line == (char *)NULL)
-    return((char *)NULL);
+  if (line == NULL)
+    return(NULL);
 
   field = line;
 
@@ -208,17 +208,17 @@ char *getfield(char *newline)
   if(*field == '"')
     field++;
   else
-    return((char *)NULL);	/* mal-formed field */
+    return(NULL);	/* mal-formed field */
 
   if ((end = strchr(line,',')) == NULL)
     {
       end = line + strlen(line);
-      line = (char *)NULL;
+      line = NULL;
       /* XXX verify properly terminating " */
       if(*end == '"')
 	*end = '\0';
       else
-	return((char *)NULL);
+	return(NULL);
     }
   else
     {
@@ -227,7 +227,7 @@ char *getfield(char *newline)
       if(*end == '"')
 	*end = '\0';
       else
-	return((char *)NULL);
+	return(NULL);
     }
   return(field);
 }

@@ -379,7 +379,7 @@ static int flush_write(struct Client *source_p, FBFILE* out, char *buf,
       sendto_one(source_p,":%s NOTICE %s :Unable to write to %s",
         me.name, source_p->name, temppath );
       fbclose(out);
-      if(temppath != (char *)NULL)
+      if(temppath != NULL)
         (void)unlink(temppath);
     }
   return(error_on_write);

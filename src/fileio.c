@@ -129,7 +129,7 @@ FBFILE* fdbopen(int fd, const char* mode)
     fb->ptr = fb->endp = fb->buf;
     fb->fd = fd;
     fb->flags = 0;
-    fb->pbptr = (char *)NULL;
+    fb->pbptr = NULL;
   }
   return fb;
 }

@@ -369,7 +369,7 @@ void write_links_file(void* notused)
 
     ircsprintf(newMessageLine->line,"%s %s :1 %s",
                target_p->name, me.name, p);
-    newMessageLine->next = (MessageFileLine *)NULL;
+    newMessageLine->next = NULL;
 
     if (MessageFileptr->contentsOfFile)
     {

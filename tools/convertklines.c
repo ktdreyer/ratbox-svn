@@ -290,7 +290,7 @@ static char *getfield(char *newline)
   
   if ((end = strchr(line,':')) == NULL)
     {
-      line = (char *)NULL;
+      line = NULL;
       if ((end = strchr(field,'\n')) == NULL)
         end = field + strlen(field);
     }

@@ -173,7 +173,7 @@ static void build_nicklist(struct Client *source_p, char *addbuf,
 
   /* build list of clients to add into addbuf, clients to remove in delbuf */
   for(name = strtoken(&p, nicks, ","); name; 
-      name = strtoken(&p, (char *)NULL, ","), del = 0)
+      name = strtoken(&p, NULL, ","), del = 0)
   {
     if(*name == '-')
     {

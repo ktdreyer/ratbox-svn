@@ -107,7 +107,7 @@ LockedFile(const char *filename)
   
   sprintf(lockpath, "%s.lock", filename);
   
-  if ((fileptr = fopen(lockpath, "r")) != (FILE *) NULL)
+  if ((fileptr = fopen(lockpath, "r")) != NULL)
     {
       if (fgets(buffer, sizeof(buffer) - 1, fileptr))
 	{

@@ -473,12 +473,12 @@ cluster(char *hostname)
   int         number_of_dots;   /* count number of dots for both ip# and
                                    domain klines */
   if (!hostname)
-    return (char *) NULL;       /* EEK! */
+    return NULL;       /* EEK! */
 
   /* If a '@' is found in the hostname, this is bogus
    * and must have been introduced by server that doesn't
    * check for bogus domains (dns spoof) very well. *sigh* just return it...
-   * I could also legitimately return (char *)NULL as above.
+   * I could also legitimately return NULL as above.
    */
 
   if(strchr(hostname,'@'))      

@@ -137,7 +137,7 @@ static int irc_sleep(unsigned long useconds)
 	struct timespec t;
 	t.tv_sec = useconds / (unsigned long)  1000000;
 	t.tv_nsec = (useconds % (unsigned long) 1000000) * 1000 ;
-	return nanosleep(&t, (struct timespec *) NULL);
+	return nanosleep(&t, NULL);
 #else
 	struct timeval t;
 	t.tv_sec = 0;

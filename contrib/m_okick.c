@@ -77,7 +77,7 @@ static void m_okick(struct Client *client_p,
   int   chasing = 0;
   char  *comment;
   char  *name;
-  char  *p = (char *)NULL;
+  char  *p = NULL;
   char  *user;
   static char     buf[BUFSIZE];
 
