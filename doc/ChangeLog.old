@@ -1,3 +1,10 @@
+*** 20000108_4 by db
+- LazyLinks /list on leaf is sent to its uplink now
+- still bug to track down with leaf connected to hub, hub joins net
+  leaf does not see channel bursts properly
+
+
+
 *** 20000108_3 by wnder
 Implemented unsortable I/K lines
 
