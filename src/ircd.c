@@ -571,7 +571,7 @@ int main(int argc, char *argv[])
    * for IPv6 -- aaron
    */
 #ifdef IPV6
-  if(!IN6_IS_ADDR_UNSPECIFIED(&IN_ADDR(ServerInfo.ip)))
+  if(!IN6_IS_ADDR_UNSPECIFIED(&ServerInfo.ip.sins.sin6))
 #else
   if(IN_ADDR(ServerInfo.ip) != 0)
 #endif

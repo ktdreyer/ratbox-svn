@@ -665,7 +665,7 @@ static void do_query_number(const struct DNSQuery* query,
   } else
   {
 	/* IPv4 in IPv6 addresses..we want to resolve them correctly too */
-	  cp = (unsigned char *)&addr->sins.sin6.s6_addr32[3];
+	  cp = (unsigned char *)&addr->sins.sin6.s6_addr[12];
 	  ircsprintf(ipbuf, "%u.%u.%u.%u.in-addr.arpa.",
         	     (unsigned int)(cp[3]), (unsigned int)(cp[2]),
 	             (unsigned int)(cp[1]), (unsigned int)(cp[0]));
