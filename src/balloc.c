@@ -153,6 +153,7 @@ bh_sanity_check_block(BlockHeap *bh, Block *block)
 		blockheap_fail("used_list + free_list != elemsPerBlock");
 }
 
+#if 0
 /* See how confused we are */
 static void
 bh_sanity_check(BlockHeap *bh)
@@ -203,6 +204,7 @@ bh_sanity_check_all(void *unused)
 		bh_sanity_check(ptr->data);
 	}				
 }
+#endif
 
 #endif
 
