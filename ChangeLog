@@ -1,3 +1,15 @@
+leeh        2003/06/28 11:14:38 EDT	(20030628_2)
+
+  Modified files:
+    modules              m_gline.c 
+  Log:
+  - acptr points to the actual client, so these should use acptr not source_p
+  
+  Revision  Changes    Path
+  1.122     +9 -9      ircd-ratbox/modules/m_gline.c
+
+
+
 leeh        2003/06/28 11:11:12 EDT	(20030628_1)
 
   Modified files:
