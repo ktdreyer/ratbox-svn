@@ -179,7 +179,7 @@ void init_netio(void)
  */
 void
 comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
-    void *client_data, time_t timeout)
+    void *client_data, unsigned long timeout)
 {  
     fde_t *F = &fd_table[fd];
     assert(fd >= 0);
@@ -199,7 +199,7 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
         F->write_data = client_data;
     }
     if (timeout)
-        F->timeout = CurrentTime + timeout;
+        F->timeout = CurrentTime + (timeout / 1000);
 
 }
  
@@ -219,7 +219,7 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
  */
 
 int
-comm_select(time_t delay)
+comm_select(unsigned long delay)
 {
     int num, i;
     static struct kevent ke[KE_LENGTH];
@@ -231,8 +231,8 @@ comm_select(time_t delay)
          * why jlemon used a timespec, but hey, he wrote the interface, not I
          *   -- Adrian
          */
-        poll_time.tv_sec = (time_t) delay;
-        poll_time.tv_nsec = (long) 0;
+        poll_time.tv_sec = 0;
+        poll_time.tv_nsec = delay * 1000;
         for (;;) {
             num = kevent(kq, kqlst, kqoff, ke,  KE_LENGTH, &poll_time);
 	    kqoff = 0;

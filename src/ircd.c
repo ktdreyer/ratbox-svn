@@ -302,9 +302,9 @@ set_time(void)
 }
 
 static void
-io_loop(time_t delay)
+io_loop(void)
 {
- int empty_cycles=0, st, status;
+ int empty_cycles=0, st=0, status, delay;
  while (ServerRunning)
  {
   /* Run pending events, then get the number of seconds to the next
@@ -316,15 +316,17 @@ io_loop(time_t delay)
   /* Reset the callback counter... */
   callbacks_called = 0;
   
-  /* Do IO events */
-  comm_select(delay);
-   
   /* Check on the last activity, sleep for up to 1/2s if we are idle... */
   if (callbacks_called > 0)
    empty_cycles = 0;
   else if (empty_cycles++ > 10)
-   usleep((st=(empty_cycles-10)*1000)>500000 ? 500000 : st);
- 
+   if(empty_cycles - 10 > 5000)
+   	st = 5000;
+   else
+   	st = empty_cycles;
+  /* Do IO events */
+  comm_select(st);
+  
   /* clean up any zombies lying around... */
   waitpid(-1, &status, WNOHANG);
   
@@ -474,7 +476,6 @@ static void setup_corefile(void)
 
 int main(int argc, char *argv[])
 {
-  time_t      delay = 0;
 
  /*
   * save server boot time right away, so getrusage works correctly
@@ -655,7 +656,7 @@ int main(int argc, char *argv[])
  eventAdd("comm_checktimeouts", comm_checktimeouts, NULL, 1, 0);
  
  ServerRunning = 1;
- io_loop(delay);
+ io_loop();
  return 0;
 }
 

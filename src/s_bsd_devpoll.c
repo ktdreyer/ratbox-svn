@@ -194,7 +194,7 @@ void init_netio(void)
  */
 void
 comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
-    void *client_data, time_t timeout)
+    void *client_data, unsigned long timeout)
 {  
     fde_t *F = &fd_table[fd];
     assert(fd >= 0);
@@ -214,7 +214,7 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
         F->write_data = client_data;
     }
     if (timeout)
-        F->timeout = CurrentTime + timeout;
+        F->timeout = CurrentTime + (timeout / 1000);
 
 }
  
@@ -234,7 +234,7 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
  */
 
 int
-comm_select(time_t delay)
+comm_select(unsigned long delay)
 {
     int num, i;
     struct pollfd pollfds[POLL_LENGTH];
@@ -242,7 +242,7 @@ comm_select(time_t delay)
 
     do {
         for (;;) {
-            dopoll.dp_timeout = delay * 1000;
+            dopoll.dp_timeout = delay;
             dopoll.dp_nfds = POLL_LENGTH;
             dopoll.dp_fds = &pollfds[0];
 

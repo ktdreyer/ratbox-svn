@@ -516,12 +516,12 @@ ignoreErrno(int ierrno)
  * Set the timeout for the fd
  */
 void
-comm_settimeout(int fd, time_t timeout, PF *callback, void *cbdata)
+comm_settimeout(int fd, unsigned long timeout, PF *callback, void *cbdata)
 {
     assert(fd > -1);
     assert(fd_table[fd].flags.open);
 
-    fd_table[fd].timeout = CurrentTime + timeout;
+    fd_table[fd].timeout = CurrentTime + (timeout / 1000);
     fd_table[fd].timeout_handler = callback;
     fd_table[fd].timeout_data = cbdata;
 }
@@ -538,12 +538,12 @@ comm_settimeout(int fd, time_t timeout, PF *callback, void *cbdata)
  * with close functions, we _actually_ don't call comm_close() here ..
  */
 void
-comm_setflush(int fd, time_t timeout, PF *callback, void *cbdata)
+comm_setflush(int fd, unsigned long timeout, PF *callback, void *cbdata)
 {
     assert(fd > -1);
     assert(fd_table[fd].flags.open);
 
-    fd_table[fd].flush_timeout = CurrentTime + timeout;
+    fd_table[fd].flush_timeout = CurrentTime + (timeout / 1000);
     fd_table[fd].flush_handler = callback;
     fd_table[fd].flush_data = cbdata;
 }
@@ -653,7 +653,7 @@ comm_connect_tcp(int fd, const char *host, u_short port,
  {
   /* We have a valid IP, so we just call tryconnect */
   /* Make sure we actually set the timeout here .. */
-  comm_settimeout(fd, 30, comm_connect_timeout, NULL);
+  comm_settimeout(fd, 30*1000, comm_connect_timeout, NULL);
   comm_connect_tryconnect(fd, NULL);
  }
 }
@@ -721,7 +721,7 @@ comm_connect_dns_callback(void *vptr, adns_answer *reply)
       } 
 
     /* No error, set a 10 second timeout */
-    comm_settimeout(F->fd, 30, comm_connect_timeout, NULL);
+    comm_settimeout(F->fd, 30*1000, comm_connect_timeout, NULL);
 
     /* Copy over the DNS reply info so we can use it in the connect() */
     /*

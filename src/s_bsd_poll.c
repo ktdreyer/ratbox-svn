@@ -223,7 +223,7 @@ void init_netio(void)
  */
 void
 comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
-    void *client_data, time_t timeout)
+    void *client_data, unsigned long timeout)
 {  
     fde_t *F = &fd_table[fd];
     assert(fd >= 0);
@@ -248,10 +248,10 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
         poll_update_pollfds(fd, list, POLLWRNORM, handler);
     }
     if (timeout)
-        F->timeout = CurrentTime + timeout;
+        F->timeout = CurrentTime + (timeout / 1000);
 }
  
-/* int comm_select_fdlist(fdlist_t fdlist, time_t delay)
+/* int comm_select_fdlist(fdlist_t fdlist, unsigned long delay)
  * Input: The list to select, the maximum time to delay on this list.
  * Output: Returns -1 on error, 0 on success.
  * Side-effects: Deregisters future interest in IO and calls the handlers
@@ -264,8 +264,8 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
  * comm_setselect and fd_table[] and calls callbacks for IO ready
  * events.
  */
-int
-comm_select_fdlist(fdlist_t fdlist, time_t delay)
+static int
+comm_select_fdlist(fdlist_t fdlist, unsigned long delay)
 {
  int num;
  int fd;
@@ -276,7 +276,7 @@ comm_select_fdlist(fdlist_t fdlist, time_t delay)
  for (;;)
  {
   /* XXX kill that +1 later ! -- adrian */
-  num = poll(pf->pollfds, pf->maxindex + 1, delay * 1000);
+  num = poll(pf->pollfds, pf->maxindex + 1, delay);
   if (num >= 0)
    break;
   if (ignoreErrno(errno))
@@ -333,12 +333,12 @@ comm_select_fdlist(fdlist_t fdlist, time_t delay)
  *   -- adrian
  */
 int
-comm_select(time_t delay)
+comm_select(unsigned long delay)
 {
     comm_select_fdlist(FDLIST_SERVICE, 0);
     comm_select_fdlist(FDLIST_SERVER, 0);
     /* comm_select_fdlist(FDLIST_BUSYCLIENT, 0); */
-    comm_select_fdlist(FDLIST_IDLECLIENT, 0);
+    comm_select_fdlist(FDLIST_IDLECLIENT, delay);
     return 0;
 }
 #endif
