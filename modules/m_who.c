@@ -248,11 +248,13 @@ static void m_who(struct Client *client_p,
       sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], mask);
       return;
     }
+
   /* '/who 0' */
   if ((*(mask + 1) == '\0') && (*mask == '0'))
     who_global(source_p, NULL, server_oper);
   else
     who_global(source_p, mask, server_oper);
+
  /* Wasn't a nick, wasn't a channel, wasn't a '*' so ... */
   sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], mask);
 }
@@ -288,7 +290,9 @@ static void who_common_channel(struct Client *source_p,dlink_list chain,
 
      if ((mask == NULL) ||
           match(mask, target_p->name) || match(mask, target_p->username) ||
-          match(mask, target_p->host) || match(mask, target_p->user->server) ||
+          match(mask, target_p->host) || 
+	  (match(mask, target_p->user->server) && 
+	   (IsOper(source_p) || !ConfigServerHide.hide_servers)) ||
 	  match(mask, target_p->info))
      {
 		
