@@ -1,11 +1,8 @@
 - add more stderr debugging (ircd -s)... one for every place we syslog()
-- make wrapper function for res_init() to do spare_fd crap
 - ircd -s doesn't work through a restart
 - re-implement first param in m_lusers()
 - trie' channel name list
 - finish RFC'ing m_message.c
-- add dns_query_host and dns_query_port options to serverinfo {} block;
-  dns_query_port would be similar to query-port in BIND-8.
 
 ----
 is-'s TODO list
@@ -140,8 +137,3 @@ Little things to be done given enough time and initiative -Hwy
   flood messages on a channel in t seconds.. This log would be available
   to hand to authorities if requested.
 
--- AndroSyn's list
-* Add support for my static modules hack.  Basically just add #define
-  STATIC_MODULES in setup.h via autoconf.  Then modules/Makefile compile
-  everything out to modules.a.  src/Makefile just includes this in the link.
-  --> Is this done?
