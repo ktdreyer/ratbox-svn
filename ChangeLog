@@ -1,3 +1,15 @@
+androsyn    2003/04/06 21:52:05 UTC	(20030406_4)
+
+  Modified files:
+    src                  adns.c 
+  Log:
+  Oops..but that *before* the assert
+  
+  Revision  Changes    Path
+  7.59      +1 -1      ircd-ratbox/src/adns.c
+
+
+
 androsyn    2003/04/06 21:43:35 UTC	(20030406_3)
 
   Modified files:
