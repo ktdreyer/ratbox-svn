@@ -398,7 +398,6 @@ static void rem_request(ResRQ* request)
 	  MyFree(request->name);
 	  MyFree(request);
 	  free_dlink_node(ptr);
-	  return;
 	}
     }
 }
@@ -517,8 +516,13 @@ void delete_resolver_queries(const void* vptr)
       if( (request = ptr->data) != NULL )
 	{
 	  if (vptr == request->query.vptr)
-	    rem_request(request);
-	  return;
+	    {
+	      dlinkDelete(ptr, &request_list);
+	      MyFree(request->he.buf);
+	      MyFree(request->name);
+	      MyFree(request);
+	      free_dlink_node(ptr);
+	    }
 	}
     }
 }
