@@ -1,3 +1,15 @@
+androsyn    2001/12/16 05:11:09 EST	(20011216_11)
+
+  Modified files:
+    src                  irc_string.c 
+  Log:
+  Fix another #ifdef
+  
+  Revision  Changes    Path
+  7.47      +4 -0      ircd-hybrid-7/src/irc_string.c
+
+
+
 androsyn    2001/12/16 05:08:29 EST	(20011216_10)
 
   Modified files:
