@@ -1,3 +1,25 @@
+jmallett    2002/02/12 08:45:28 EST	(20020212_0)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    include              setup.h.in 
+    src                  modules.c 
+  Log:
+  I finally sat down and wrote working dl*(3) shims for dyld systems that do
+  not have their own. Based on the NSModule(3) manpage, and various header
+  files.
+  
+  Works on OSX 10.0.4 with December 2001 Development Tools.
+  
+  Revision  Changes    Path
+  7.120     +5 -1      ircd-hybrid-7/autoconf/configure.in
+  7.123     +330 -213  ircd-hybrid-7/configure
+  7.45      +6 -0      ircd-hybrid-7/include/setup.h.in
+  7.90      +112 -6    ircd-hybrid-7/src/modules.c
+
+
+
 jmallett    2002/02/11 18:06:28 EST	(20020211_0)
 
   Modified files:
