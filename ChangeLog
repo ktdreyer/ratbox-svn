@@ -1,3 +1,37 @@
+androsyn    2004/10/07 16:44:27 EDT	(20041007_0)
+
+  Modified files:
+    .                    configure configure.ac 
+    doc                  example.conf 
+    include              client.h numeric.h s_conf.h setup.h.in 
+    modules              Makefile.in 
+    modules/core         users.c 
+    src                  Makefile.in client.c ircd.c newconf.c 
+                         numeric.c s_conf.c 
+  Log:
+  WATCH implementation. Mostly swiped from tr-ircd, which was probably swiped
+  in some part from bahamut at some point.  Seems to be useful to reduce load
+  from ISON crazyness
+  
+  Revision  Changes    Path
+  7.238     +12 -2     ircd-ratbox/configure
+  7.52      +4 -2      ircd-ratbox/configure.ac
+  7.249     +3 -0      ircd-ratbox/doc/example.conf
+  7.257     +3 -0      ircd-ratbox/include/client.h
+  7.50      +11 -1     ircd-ratbox/include/numeric.h
+  7.302     +1 -0      ircd-ratbox/include/s_conf.h
+  7.92      +3 -0      ircd-ratbox/include/setup.h.in
+  1.113     +1 -0      ircd-ratbox/modules/Makefile.in
+  1.20      +23 -7     ircd-ratbox/modules/core/users.c
+  7.152     +1 -0      ircd-ratbox/src/Makefile.in
+  7.482     +5 -1      ircd-ratbox/src/client.c
+  7.364     +2 -0      ircd-ratbox/src/ircd.c
+  7.184     +1 -0      ircd-ratbox/src/newconf.c
+  7.31      +10 -10    ircd-ratbox/src/numeric.c
+  7.495     +1 -0      ircd-ratbox/src/s_conf.c
+
+
+
 androsyn    2004/09/29 14:25:11 EDT	(20040929_1)
 
   Modified files:
