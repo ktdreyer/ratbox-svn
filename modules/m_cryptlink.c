@@ -518,6 +518,11 @@ static char *parse_cryptserv_args(struct Client *client_p,
       "verify_private_key() returned -1.  Check log for information.");
   }
 
+  if(ServerInfo.rsa_private_key == NULL)
+  {
+    cryptlink_error(client_p, "SERV", "No local private key found", NULL);
+    return(NULL);
+  }
   out = MyMalloc(RSA_size(ServerInfo.rsa_private_key));
 
   len = RSA_private_decrypt(decoded_len, tmp, out,
