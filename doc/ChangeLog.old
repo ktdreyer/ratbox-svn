@@ -1,3 +1,8 @@
+*** 20001228_3 by lusky
+removed a bunch of unneeded junk from configure script
+fix for missing RTLD_NOW on openbsd
+
+
 *** 20001228_2 by lusky
 fixed some typos in ChangeLog (yes, you can edit ChangeLog even though
    it's automatically updated).
