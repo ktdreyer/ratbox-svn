@@ -954,10 +954,17 @@ sendto_match_butone(struct Client *one, struct Client *from,
   va_list args;
   struct Client *cptr;
   dlink_node *ptr;
+  char buf[IRCD_BUFSIZE*2];
 
   va_start(args, pattern);
-  len = send_format(sendbuf, pattern, args);
+  send_format(sendbuf, pattern, args);
   va_end(args);
+
+  if(IsServer(from))
+    len = ircsprintf(buf,":%s %s", from->name, sendbuf);
+  else
+    len = ircsprintf(buf,":%s!%s@%s %s", from->name,
+               from->username, from->host, sendbuf);
 
   /* scan the local clients */
   for(ptr = lclient_list.head; ptr; ptr = ptr->next)
@@ -968,10 +975,11 @@ sendto_match_butone(struct Client *one, struct Client *from,
         continue;
       
       if (match_it(cptr, mask, what))
-	send_message(cptr, (char *)sendbuf, len);
+	send_message(cptr, (char *)buf, len);
     }
 
   /* Now scan servers */
+  len = ircsprintf(buf,":%s %s", from->name, sendbuf);
   for (ptr = serv_list.head; ptr; ptr = ptr->next)
     {
       cptr = ptr->data;
@@ -1004,7 +1012,7 @@ sendto_match_butone(struct Client *one, struct Client *from,
        * -wnder
        */
 
-      send_message_remote(cptr, from, sendbuf, len);
+      send_message_remote(cptr, from, buf, len);
     }
 
 

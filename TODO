@@ -152,7 +152,7 @@ Little things to be done given enough time and initiative
    Notice -- Unknown prefix (:Hwy-7!wcampbel@bee-90-245.bee.net PRIVMSG 
    $hyb-devel.monkie.org :test) from 
    hyb-devel.monkie.org[wcampbel@cats.meow.st], Squitting 
-   Hwy-7!wcampbel@bee-90-245.bee.net
+   Hwy-7!wcampbel@bee-90-245.bee.net (DONE -- except for LL bugs)
 .  Have a few more things /quote SET'table
 .  Have a command (maybe a STATS or in INFO) to show all ircd.conf derived
    options

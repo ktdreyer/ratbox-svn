@@ -372,7 +372,7 @@ int build_target_list(int p_or_n,
 
       if (IsOper(sptr) && (*nick == '$'))
 	{
-	  handle_opers(p_or_n, command, cptr,sptr,nick+1,text);
+	  handle_opers(p_or_n, command, cptr,sptr,nick,text);
 	  continue;
 	}
 
@@ -770,7 +770,7 @@ void handle_opers(int p_or_n,
   **
   ** Armin, 8Jun90 (gruner@informatik.tu-muenchen.de)
   */
-  if ((*nick == '$' || *nick == '#'))
+  if (nick[0] == '$' && (nick[1] == '$' || nick[1] == '#'))
     {
       if (!(s = (char *)strrchr(nick, '.')))
 	{
@@ -788,11 +788,9 @@ void handle_opers(int p_or_n,
 	  return;
 	}
       sendto_match_butone(IsServer(cptr) ? cptr : NULL, sptr,
-			  nick + 1, (*nick == '#') ? MATCH_HOST : MATCH_SERVER,
-			  ":%s!%s@%s PRIVMSG %s :%s",
-			  sptr->name,
-			  sptr->username,
-			  sptr->host,
+			  nick + 2,
+                          (nick[1] == '#') ? MATCH_HOST : MATCH_SERVER,
+			  "PRIVMSG %s :%s",
 			  nick,
 			  text);
       return;
