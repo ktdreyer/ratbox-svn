@@ -1,3 +1,47 @@
+leeh        2004/10/16 18:47:50 EDT	(20041016_2)
+
+  Modified files:
+    help/chanserv        adduser deluser join moduser op part 
+                         register voice 
+  Added files:
+    help/chanserv        addban cdrop clearallops clearbans 
+                         clearmodes clearops cregister delban 
+                         invite listbans listusers suspend unban 
+                         unsuspend 
+  Removed files:
+    help/chanserv        deop devoice modauto 
+  Log:
+  - updated the chanserv documentation
+  
+  Revision  Changes    Path
+  1.1       +8 -0      rserv/help/chanserv/addban (new)
+  1.2       +3 -3      rserv/help/chanserv/adduser
+  1.1       +3 -0      rserv/help/chanserv/cdrop (new)
+  1.1       +3 -0      rserv/help/chanserv/clearallops (new)
+  1.1       +3 -0      rserv/help/chanserv/clearbans (new)
+  1.1       +3 -0      rserv/help/chanserv/clearmodes (new)
+  1.1       +3 -0      rserv/help/chanserv/clearops (new)
+  1.1       +4 -0      rserv/help/chanserv/cregister (new)
+  1.1       +4 -0      rserv/help/chanserv/delban (new)
+  1.2       +2 -2      rserv/help/chanserv/deluser
+  1.2       +0 -5      rserv/help/chanserv/deop (dead)
+  1.2       +0 -5      rserv/help/chanserv/devoice (dead)
+  1.1       +3 -0      rserv/help/chanserv/invite (new)
+  1.2       +3 -3      rserv/help/chanserv/join
+  1.1       +3 -0      rserv/help/chanserv/listbans (new)
+  1.1       +3 -0      rserv/help/chanserv/listusers (new)
+  1.2       +0 -5      rserv/help/chanserv/modauto (dead)
+  1.2       +12 -2     rserv/help/chanserv/moduser
+  1.2       +3 -5      rserv/help/chanserv/op
+  1.2       +3 -3      rserv/help/chanserv/part
+  1.2       +2 -2      rserv/help/chanserv/register
+  1.1       +5 -0      rserv/help/chanserv/suspend (new)
+  1.1       +3 -0      rserv/help/chanserv/unban (new)
+  1.1       +4 -0      rserv/help/chanserv/unsuspend (new)
+  1.2       +3 -5      rserv/help/chanserv/voice
+
+
+
 leeh        2004/10/16 18:02:00 EDT	(20041016_1)
 
   Modified files:
