@@ -53,6 +53,7 @@
 #include "scache.h"
 #include "send.h"
 #include "setup.h"
+#include "supported.h"
 #include "whowas.h"
 #include "modules.h"
 
@@ -122,6 +123,9 @@ struct SetOptions GlobalSetOptions;
 
 /* config.h config file paths etc */
 ConfigFileEntryType ConfigFileEntry; 
+
+/* ISUPPORT buffer */
+char isupportbuffer[512];
 
 struct  Counter Count;
 
@@ -431,6 +435,8 @@ static void initialize_message_files(void)
     ReadMessageFile( &ConfigFileEntry.helpfile );
     ReadMessageFile( &ConfigFileEntry.motd );
     ReadMessageFile( &ConfigFileEntry.opermotd );
+    
+    ircsprintf(isupportbuffer,FEATURES,FEATURESVALUES);
   }
 
 /*

@@ -45,6 +45,7 @@
 #include "s_stats.h"
 #include "scache.h"
 #include "send.h"
+#include "supported.h"
 #include "whowas.h"
 
 #include <string.h>
@@ -1030,6 +1031,8 @@ static void user_welcome(struct Client *sptr)
   sendto_one(sptr, form_str(RPL_CREATED),me.name,sptr->name,creation);
   sendto_one(sptr, form_str(RPL_MYINFO), me.name, sptr->name,
 	     me.name, version);
+  sendto_one(sptr, form_str(RPL_ISUPPORT), me.name, sptr->name, 
+  	     isupportbuffer);
   show_lusers(sptr);
 
   if (ConfigFileEntry.short_motd)
