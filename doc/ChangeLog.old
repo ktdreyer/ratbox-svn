@@ -1,3 +1,7 @@
+*** 20010109_4 by wcampbel
+All of the variables are shown in INFO now (except for oper_only_umodes)
+
+
 *** 20010109_3 by wcampbel
 1. Some doc cleanup
 2. Added some more variables to INFO...When I'm done, I will alphabetize 
