@@ -677,7 +677,9 @@ find_or_add_ip(struct irc_inaddr *ip_in)
 
       memcpy(&newptr->ip, ip_in, sizeof(*ip_in));
       newptr->count = 0;
+#ifdef PACE_CONNECT
       newptr->last_attempt = 0;
+#endif      
       newptr->next = ptr;
       return(newptr);
     }
