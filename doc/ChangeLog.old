@@ -1,3 +1,15 @@
+androsyn    2001/12/16 02:53:03 EST	(20011216_5)
+
+  Modified files:
+    src                  irc_string.c 
+  Log:
+  Removed a stupid check for INADDRSZ
+  
+  Revision  Changes    Path
+  7.44      +2 -9      ircd-hybrid-7/src/irc_string.c
+
+
+
 androsyn    2001/12/16 02:50:13 EST	(20011216_4)
 
   Modified files:
