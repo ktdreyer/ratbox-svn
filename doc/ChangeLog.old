@@ -1,3 +1,17 @@
+androsyn    2002/05/24 21:22:46 EDT	(20020525_4)
+
+  Modified files:
+    src                  event.c ircd.c s_user.c 
+  Log:
+  Change srandom/random to srand/rand which is a little more common
+  
+  Revision  Changes    Path
+  7.28      +1 -1      ircd-hybrid-7/src/event.c
+  7.235     +1 -1      ircd-hybrid-7/src/ircd.c
+  7.194     +1 -1      ircd-hybrid-7/src/s_user.c
+
+
+
 androsyn    2002/05/24 19:48:39 EDT	(20020525_3)
 
   Modified files:
