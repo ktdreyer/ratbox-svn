@@ -253,7 +253,7 @@ static const char *IntTable[] = {
 
 #define TEMPBUF_MAX  20
 
-char TempBuffer[TEMPBUF_MAX];
+static char TempBuffer[TEMPBUF_MAX];
 
 /*
 vSnprintf()
