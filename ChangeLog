@@ -1,3 +1,24 @@
+androsyn    2005/03/23 13:41:06 UTC	(20050323_5)
+
+  Modified files:
+    .                    Makefile.am Makefile.in 
+    adns                 Makefile.in 
+    modules              Makefile.in 
+    src                  Makefile.in 
+    tools                Makefile.in 
+  Log:
+  Damnit, forgot to add help/
+  
+  Revision  Changes    Path
+  7.3       +1 -1      ircd-ratbox/Makefile.am
+  7.59      +2 -2      ircd-ratbox/Makefile.in
+  1.21      +0 -0      ircd-ratbox/adns/Makefile.in
+  1.129     +0 -0      ircd-ratbox/modules/Makefile.in
+  7.165     +0 -0      ircd-ratbox/src/Makefile.in
+  7.47      +0 -0      ircd-ratbox/tools/Makefile.in
+
+
+
 androsyn    2005/03/23 13:31:35 UTC	(20050323_4)
 
   Modified files:
