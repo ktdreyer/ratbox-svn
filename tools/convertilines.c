@@ -432,7 +432,7 @@ static void write_specific(FILE *out, struct AuthBlock *ptr)
 	fprintf(out, "\trestricted = yes;\n");
 
     fprintf(out, "\tclass = \"%d\";\n", ptr->class);
-    fprintf(out, "}\n");
+    fprintf(out, "};\n");
 }
 
 /*
