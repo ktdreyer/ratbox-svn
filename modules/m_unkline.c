@@ -313,10 +313,11 @@ remove_permkline_match(struct Client *source_p, const char *host, const char *us
 		return;
 	}
 
-	if(!pairme && !cluster)
+	if(!pairme)
 	{
-		sendto_one(source_p, ":%s NOTICE %s :No K-Line for %s@%s",
-			   me.name, source_p->name, user, host);
+		if(!cluster)
+			sendto_one(source_p, ":%s NOTICE %s :No K-Line for %s@%s",
+				   me.name, source_p->name, user, host);
 		return;
 	}
 

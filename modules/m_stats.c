@@ -835,6 +835,11 @@ stats_shared (struct Client *source_p)
 		else
 			*p++ = 'x';
 
+		if(uconf->flags & OPER_RESV)
+			*p++ = 'V';
+		else
+			*p++ = 'v';
+
 		*p++ = '\0';
 
 		sendto_one (source_p, form_str (RPL_STATSULINE),

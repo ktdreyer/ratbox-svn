@@ -504,6 +504,8 @@ static struct mode_table cluster_table[] = {
 	{ "locops",	CLUSTER_LOCOPS	},
 	{ "xline",	CLUSTER_XLINE	},
 	{ "unxline",	CLUSTER_UNXLINE	},
+	{ "resv",	CLUSTER_RESV	},
+	{ "unresv",	CLUSTER_UNRESV	},
 	{ "all",	CLUSTER_ALL	},
 	{NULL}
 };
@@ -513,6 +515,7 @@ static struct mode_table shared_table[] =
 	{ "kline",	OPER_K		},
 	{ "unkline",	OPER_UNKLINE	},
 	{ "xline",	OPER_XLINE	},
+	{ "resv",	OPER_RESV	},
 	{ "all",	OPER_K|OPER_UNKLINE|OPER_XLINE },
 	{NULL}
 };

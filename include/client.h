@@ -405,7 +405,7 @@ struct exit_client_hook
 #define OPER_ADMIN              0x000100
 #define OPER_XLINE              0x000200
 /*      OPER_SPY                0x000400 */
-/*                              0x000800 */
+#define OPER_RESV		0x000800 /* XXX - only here for shared {}; */
 #define OPER_OPERWALL		0x001000
 #define OPER_HIDDENADMIN        0x002000
 #define OPER_FLAGS      (OPER_GLOBAL_KILL | OPER_REMOTE | OPER_UNKLINE |\

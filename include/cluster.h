@@ -51,9 +51,12 @@ struct cluster
 #define CLUSTER_LOCOPS  0x0004
 #define CLUSTER_XLINE	0x0008
 #define CLUSTER_UNXLINE	0x0010
+#define CLUSTER_RESV	0x0020
+#define CLUSTER_UNRESV	0x0040
 
 #define CLUSTER_ALL   (CLUSTER_KLINE | CLUSTER_UNKLINE | CLUSTER_LOCOPS |\
-			CLUSTER_XLINE | CLUSTER_UNXLINE)
+			CLUSTER_XLINE | CLUSTER_UNXLINE | CLUSTER_RESV |\
+			CLUSTER_UNRESV)
 
 extern struct cluster *make_cluster(void);
 extern void free_cluster(struct cluster *clptr);
@@ -69,5 +72,9 @@ extern void cluster_locops(struct Client *source_p, const char *message);
 extern void cluster_xline(struct Client *source_p, const char *gecos,
 			  int xtype, const char *reason);
 extern void cluster_unxline(struct Client *source_p, const char *gecos);
+
+extern void cluster_resv(struct Client *source_p, const char *name,
+			 const char *reason);
+extern void cluster_unresv(struct Client *source_p, const char *name);
 
 #endif

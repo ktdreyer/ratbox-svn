@@ -179,3 +179,37 @@ cluster_unxline(struct Client *source_p, const char *gecos)
 	}
 }
 
+void
+cluster_resv(struct Client *source_p, const char *name, const char *reason)
+{
+	struct cluster *clptr;
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, cluster_list.head)
+	{
+		clptr = ptr->data;
+
+		if(clptr->type & CLUSTER_RESV)
+			sendto_match_servs(source_p, clptr->name, CAP_CLUSTER,
+					   "RESV %s %s :%s",
+					   clptr->name, name, reason);
+	}
+}
+
+void
+cluster_unresv(struct Client *source_p, const char *name)
+{
+	struct cluster *clptr;
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, cluster_list.head)
+	{
+		clptr = ptr->data;
+
+		if(clptr->type & CLUSTER_UNRESV)
+			sendto_match_servs(source_p, clptr->name, CAP_CLUSTER,
+					   "UNRESV %s %s",
+					   clptr->name, name);
+	}
+}
+

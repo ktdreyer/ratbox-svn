@@ -35,22 +35,31 @@
 #include "parse.h"
 #include "modules.h"
 #include "s_conf.h"
+#include "s_newconf.h"
 #include "resv.h"
 #include "hash.h"
 #include "s_log.h"
 #include "sprintf_irc.h"
+#include "cluster.h"
 
 static void mo_resv(struct Client *, struct Client *, int, const char **);
+static void ms_resv(struct Client *, struct Client *, int, const char **);
 static void mo_unresv(struct Client *, struct Client *, int, const char **);
+static void ms_unresv(struct Client *, struct Client *, int, const char **);
+
+static void parse_resv(struct Client *source_p, const char *name,
+			const char *reason, int cluster);
+static void remove_resv(struct Client *source_p, const char *name,
+			int cluster);
 
 struct Message resv_msgtab = {
 	"RESV", 0, 0, 3, 0, MFLG_SLOW | MFLG_UNREG, 0,
-	{m_ignore, m_not_oper, m_ignore, mo_resv}
+	{m_ignore, m_not_oper, ms_resv, mo_resv}
 };
 
 struct Message unresv_msgtab = {
 	"UNRESV", 0, 0, 2, 0, MFLG_SLOW | MFLG_UNREG, 0,
-	{m_ignore, m_not_oper, m_ignore, mo_unresv}
+	{m_ignore, m_not_oper, ms_unresv, mo_unresv}
 };
 
 mapi_clist_av1 resv_clist[] = {
@@ -62,63 +71,144 @@ DECLARE_MODULE_AV1(NULL, NULL, resv_clist, NULL, NULL, "$Revision$");
  * mo_resv()
  *      parv[0] = sender prefix
  *      parv[1] = channel/nick to forbid
+ *      parv[2] = reason
  */
 static void
 mo_resv(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	if(EmptyString(parv[1]) || EmptyString(parv[2]))
+	const char *reason;
+
+	if(parc == 5)
+		reason = parv[4];
+	else
+		reason = parv[2];
+
+	if(EmptyString(parv[1]) || EmptyString(reason))
 	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, source_p->name, "RESV");
+		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+			   me.name, source_p->name, "RESV");
 		return;
 	}
 
-	if(IsChannelName(parv[1]))
+	/* remote resv.. */
+	if((parc == 5) && (irccmp(parv[2], "ON") == 0))
+	{
+		sendto_match_servs(source_p, parv[3], CAP_CLUSTER,
+				   "RESV %s %s :%s",
+				   parv[3], parv[1], reason);
+
+		if(match(parv[3], me.name) == 0)
+			return;
+	}
+
+	else if(dlink_list_length(&cluster_list) > 0)
+	{
+		cluster_resv(source_p, parv[1], reason);
+	}
+
+	parse_resv(source_p, parv[1], reason, 0);
+}
+
+/* ms_resv()
+ *     parv[0] = sender prefix
+ *     parv[1] = target server
+ *     parv[2] = channel/nick to forbid
+ *     parv[3] = reason
+ */
+static void
+ms_resv(struct Client *client_p, struct Client *source_p,
+	int parc, const char *parv[])
+{
+	if((parc != 4) || EmptyString(parv[3]))
+		return;
+
+	/* parv[0]  parv[1]        parv[2]  parv[3]
+	 * oper     target server  resv     reason
+	 */
+	sendto_match_servs(source_p, parv[1], CAP_CLUSTER,
+			   "RESV %s %s :%s",
+			   parv[1], parv[2], parv[3]);
+
+	if(!match(parv[1], me.name))
+		return;
+
+	if(!IsPerson(source_p))
+		return;
+
+	if(find_cluster(source_p->user->server, CLUSTER_RESV))
+	{
+		parse_resv(source_p, parv[2], parv[3], 1);
+	}
+	else if(find_shared(source_p->username, source_p->host, 
+			    source_p->user->server, OPER_RESV))
+	{
+		parse_resv(source_p, parv[2], parv[3], 0);
+	}
+}
+
+/* parse_resv()
+ *
+ * inputs       - source_p if error messages wanted
+ * 		- thing to resv
+ * 		- reason for resv
+ * outputs	-
+ * side effects - will parse the resv and create it if valid
+ */
+static void
+parse_resv(struct Client *source_p, const char *name, 
+	   const char *reason, int cluster)
+{
+	if(IsChannelName(name))
 	{
 		struct ResvEntry *resv_p;
 
-		resv_p = create_resv(parv[1], parv[2], RESV_CHANNEL);
+		resv_p = create_resv(name, reason, RESV_CHANNEL);
 
 		if(resv_p == NULL)
 		{
-			sendto_one(source_p,
-				   ":%s NOTICE %s :A RESV has already been placed on channel: %s",
-				   me.name, source_p->name, parv[1]);
+			if(!cluster)
+				sendto_one(source_p,
+					   ":%s NOTICE %s :A RESV has already been placed on channel: %s",
+					   me.name, source_p->name, name);
 			return;
 		}
 
 		write_confitem(RESV_TYPE, source_p, NULL, resv_p->name, resv_p->reason,
 			       NULL, NULL, 0);
 	}
-	else if(clean_resv_nick(parv[1]))
+	else if(clean_resv_nick(name))
 	{
 		struct ResvEntry *resv_p;
 
-		if(!valid_wild_card_simple(parv[1]))
+		if(!valid_wild_card_simple(name))
 		{
-			sendto_one(source_p,
-				   ":%s NOTICE %s :Please include at least %d non-wildcard characters with the resv",
-				   me.name, source_p->name,
-				   ConfigFileEntry.min_nonwildcard_simple);
+			if(!cluster)
+				sendto_one(source_p,
+					   ":%s NOTICE %s :Please include at least %d"
+					   " non-wildcard characters with the resv",
+					   me.name, source_p->name,
+					   ConfigFileEntry.min_nonwildcard_simple);
 			return;
 		}
 
-		resv_p = create_resv(parv[1], parv[2], RESV_NICK);
+		resv_p = create_resv(name, reason, RESV_NICK);
 
 		if(resv_p == NULL)
 		{
-			sendto_one(source_p,
-				   ":%s NOTICE %s :A RESV has already been placed on nick: %s",
-				   me.name, source_p->name, parv[1]);
+			if(!cluster)
+				sendto_one(source_p,
+					   ":%s NOTICE %s :A RESV has already been placed on nick: %s",
+					   me.name, source_p->name, name);
 			return;
 		}
 
 		write_confitem(RESV_TYPE, source_p, NULL, resv_p->name, resv_p->reason,
 			       NULL, NULL, 0);
 	}
-	else
+	else if(!cluster)
 		sendto_one(source_p,
 			   ":%s NOTICE %s :You have specified an invalid resv: [%s]",
-			   me.name, source_p->name, parv[1]);
+			   me.name, source_p->name, name);
 }
 
 /*
@@ -129,6 +219,76 @@ mo_resv(struct Client *client_p, struct Client *source_p, int parc, const char *
 static void
 mo_unresv(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
+	if(EmptyString(parv[1]))
+	{
+		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+			   me.name, source_p->name, "RESV");
+		return;
+	}
+
+	if((parc == 4) && (irccmp(parv[2], "ON") == 0))
+	{
+		sendto_match_servs(source_p, parv[3], CAP_CLUSTER,
+				   "UNRESV %s %s",
+				   parv[3], parv[1]);
+
+		if(match(parv[3], me.name) == 0)
+			return;
+	}
+	else if(dlink_list_length(&cluster_list) > 0)
+	{
+		cluster_unresv(source_p, parv[1]);
+	}
+
+	remove_resv(source_p, parv[1], 0);
+}
+
+/* ms_unresv()
+ *     parv[0] = sender prefix
+ *     parv[1] = target server
+ *     parv[2] = resv to remove
+ */
+static void
+ms_unresv(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	if((parc != 3) || EmptyString(parv[2]))
+		return;
+
+	/* parv[0]  parv[1]        parv[2]
+	 * oper     target server  resv to remove
+	 */
+	sendto_match_servs(source_p, parv[1], CAP_CLUSTER,
+			   "UNRESV %s %s",
+			   parv[1], parv[2]);
+
+	if(!match(me.name, parv[1]))
+		return;
+
+	if(!IsPerson(source_p))
+		return;
+
+	if(find_cluster(source_p->user->server, CLUSTER_UNRESV))
+	{
+		remove_resv(source_p, parv[2], 1);
+	}
+	else if(find_shared(source_p->username, source_p->host, 
+			    source_p->user->server, OPER_RESV))
+	{
+		remove_resv(source_p, parv[2], 0);
+	}
+}
+
+/* remove_resv()
+ *
+ * inputs	- client removing the resv
+ * 		- resv to remove
+ * 		- whether this is done as a cluster or not
+ * outputs	-
+ * side effects - resv if found, is removed
+ */
+static void
+remove_resv(struct Client *source_p, const char *name, int cluster)
+{
 	FBFILE *in, *out;
 	char buf[BUFSIZE];
 	char buff[BUFSIZE];
@@ -138,12 +298,6 @@ mo_unresv(struct Client *client_p, struct Client *source_p, int parc, const char
 	char *p;
 	int error_on_write = 0;
 	int found_resv = 0;
-
-	if(EmptyString(parv[1]))
-	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, source_p->name, "RESV");
-		return;
-	}
 
 	ircsprintf(temppath, "%s.tmp", ConfigFileEntry.resvfile);
 	filename = get_conf_name(RESV_TYPE);
@@ -159,8 +313,9 @@ mo_unresv(struct Client *client_p, struct Client *source_p, int parc, const char
 
 	if((out = fbopen(temppath, "w")) == NULL)
 	{
-		sendto_one(source_p, ":%s NOTICE %s :Cannot open %s",
-			   me.name, source_p->name, temppath);
+		if(!cluster)
+			sendto_one(source_p, ":%s NOTICE %s :Cannot open %s",
+				   me.name, source_p->name, temppath);
 		fbclose(in);
 		umask(oldumask);
 		return;
@@ -170,7 +325,7 @@ mo_unresv(struct Client *client_p, struct Client *source_p, int parc, const char
 
 	while (fbgets(buf, sizeof(buf), in))
 	{
-		char *resv_name;
+		const char *resv_name;
 
 		if(error_on_write)
 		{
@@ -197,7 +352,7 @@ mo_unresv(struct Client *client_p, struct Client *source_p, int parc, const char
 			continue;
 		}
 
-		if(irccmp(resv_name, parv[1]) == 0)
+		if(irccmp(resv_name, name) == 0)
 		{
 			found_resv++;
 		}
@@ -217,22 +372,25 @@ mo_unresv(struct Client *client_p, struct Client *source_p, int parc, const char
 	}
 	else
 	{
-		sendto_one(source_p,
-			   ":%s NOTICE %s :Couldn't write temp resv file, aborted",
-			   me.name, source_p->name);
+		if(!cluster)
+			sendto_one(source_p,
+				   ":%s NOTICE %s :Couldn't write temp resv file, aborted",
+				   me.name, source_p->name);
 		return;
 	}
 
 	if(!found_resv)
 	{
-		sendto_one(source_p, ":%s NOTICE %s :No RESV for %s",
-			   me.name, source_p->name, parv[1]);
+		if(!cluster)
+			sendto_one(source_p, ":%s NOTICE %s :No RESV for %s",
+				   me.name, source_p->name, name);
 		return;
 	}
 
-	sendto_one(source_p, ":%s NOTICE %s :RESV for [%s] is removed",
-		   me.name, source_p->name, parv[1]);
+	if(!cluster)
+		sendto_one(source_p, ":%s NOTICE %s :RESV for [%s] is removed",
+			   me.name, source_p->name, name);
 	sendto_realops_flags(UMODE_ALL, L_ALL,
-			     "%s has removed the RESV for: [%s]", get_oper_name(source_p), parv[1]);
-	ilog(L_NOTICE, "%s has removed the RESV for [%s]", get_oper_name(source_p), parv[1]);
+			     "%s has removed the RESV for: [%s]", get_oper_name(source_p), name);
+	ilog(L_NOTICE, "%s has removed the RESV for [%s]", get_oper_name(source_p), name);
 }
