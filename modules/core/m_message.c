@@ -51,23 +51,22 @@ struct entity {
 
 int build_target_list(int p_or_n, char *command,
 		      struct Client *cptr, struct Client *sptr,
-		      char *nicks_channels, struct entity target_table[],
+		      char *nicks_channels, struct entity ***targets,
 		      char *text);
 
 int flood_attack_client(struct Client *sptr, struct Client *acptr);
 int flood_attack_channel(struct Client *sptr, struct Channel *chptr,
 			 char *chname);
 
-#define MAX_TARGETS 20
-
 #define ENTITY_NONE    0
 #define ENTITY_CHANNEL 1
 #define ENTITY_CHANOPS_ON_CHANNEL 2
 #define ENTITY_CLIENT  3
 
-struct entity target_table[MAX_TARGETS];
+struct entity **target_table = NULL;
+int target_table_size = 0;
 
-int duplicate_ptr( void *ptr, struct entity target_table[], int n);
+int duplicate_ptr( void *ptr, struct entity **target_table, int n);
 
 void msg_channel( int p_or_n, char *command,
 		  struct Client *cptr,
@@ -91,6 +90,8 @@ void handle_opers(int p_or_n, char *command,
 		  struct Client *sptr,
 		  char *nick,
 		  char *text);
+
+void free_target_table(void);
 
 struct Message privmsg_msgtab = {
   MSG_PRIVMSG, 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0L,
@@ -117,6 +118,22 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
+
+/* free_target_table -
+   free the target_table
+*/
+
+void
+free_target_table(void)
+{
+	int i;
+	
+	for (i = 0; i < target_table_size; i++) 
+		free (target_table[i]);
+	
+	free(target_table);
+	target_table = NULL;
+}
 
 /*
 ** m_privmsg
@@ -192,33 +209,35 @@ int     m_message(int p_or_n,
     }
 
   ntargets = build_target_list(p_or_n,command,
-			       cptr,sptr,parv[1],target_table,parv[2]);
-
+			       cptr,sptr,parv[1],&target_table,parv[2]);
+  target_table_size = ntargets;
+  
   for(i = 0; i < ntargets ; i++)
     {
-      switch (target_table[i].type)
+      switch (target_table[i]->type)
 	{
 	case ENTITY_CHANNEL:
 	  msg_channel(p_or_n,command,
 		      cptr,sptr,
-		      (struct Channel *)target_table[i].ptr,
+		      (struct Channel *)target_table[i]->ptr,
 		      parv[2]);
 	  break;
 
 	case ENTITY_CHANOPS_ON_CHANNEL:
 	  msg_channel_flags(p_or_n,command,
 			    cptr,sptr,
-			    (struct Channel *)target_table[i].ptr,
-			    target_table[i].flags,parv[2]);
+			    (struct Channel *)target_table[i]->ptr,
+			    target_table[i]->flags,parv[2]);
 	  break;
 
 	case ENTITY_CLIENT:
 	  msg_client(p_or_n,command,
-		     sptr,(struct Client *)target_table[i].ptr,parv[2]);
+		     sptr,(struct Client *)target_table[i]->ptr,parv[2]);
 	  break;
 	}
     }
 
+  free_target_table();
   return 1;
 }
 
@@ -245,7 +264,7 @@ int build_target_list(int p_or_n,
 		      struct Client *cptr,
 		      struct Client *sptr,
 		      char *nicks_channels,
-		      struct entity target_table[],
+		      struct entity ***targets,
 		      char *text)
 {
   int  i = 0;
@@ -267,12 +286,15 @@ int build_target_list(int p_or_n,
 	{
 	  if( (chptr = hash_find_channel(nick, NullChn)) )
 	    {
-	      if( !duplicate_ptr(chptr, target_table, i) ) 
+	      if( !duplicate_ptr(chptr, *targets, i) ) 
 		{
-		  target_table[i].ptr = (void *)chptr;
-		  target_table[i++].type = ENTITY_CHANNEL;
+			*targets = realloc(*targets, sizeof(struct entity *) * (i + 1));
+			(*targets)[i] = malloc (sizeof (struct entity));
+			
+		  (*targets)[i]->ptr = (void *)chptr;
+		  (*targets)[i++]->type = ENTITY_CHANNEL;
 	  
-		  if( i >= MAX_TARGETS)
+		  if( i >= ConfigFileEntry.max_targets)
 		    return(i);
 		  continue;
 		}
@@ -319,13 +341,15 @@ int build_target_list(int p_or_n,
 
 	  if ( (chptr = hash_find_channel(nick+1, NullChn)) )
 	    {
-	      if( !duplicate_ptr(chptr, target_table,i) )
+	      if( !duplicate_ptr(chptr, *targets, i) )
 		{
-		  target_table[i].ptr = (void *)chptr;
-		  target_table[i].type = ENTITY_CHANOPS_ON_CHANNEL;
-		  target_table[i++].flags = type;
+			*targets = realloc(*targets, sizeof(struct entity *) * (i + 1));
+			(*targets)[i] = malloc (sizeof (struct entity));
+		  (*targets)[i]->ptr = (void *)chptr;
+		  (*targets)[i]->type = ENTITY_CHANOPS_ON_CHANNEL;
+		  (*targets)[i++]->flags = type;
 
-		  if( i >= MAX_TARGETS)
+		  if( i >= ConfigFileEntry.max_targets)
 		    return(i);
 		  continue;
 		}
@@ -349,13 +373,16 @@ int build_target_list(int p_or_n,
 
       if ( (acptr = find_person(nick, NULL)) )
 	{
-	  if( !duplicate_ptr(acptr, target_table, i) )
+	  if( !duplicate_ptr(acptr, *targets, i) )
 	    {
-	      target_table[i].ptr = (void *)acptr;
-	      target_table[i].type = ENTITY_CLIENT;
-	      target_table[i++].flags = 0;
+			*targets = realloc(*targets, sizeof(struct entity *) * (i + 1));
+			(*targets)[i] = malloc (sizeof (struct entity));
+
+	      (*targets)[i]->ptr = (void *)acptr;
+	      (*targets)[i]->type = ENTITY_CLIENT;
+	      (*targets)[i++]->flags = 0;
 	      
-	      if( i >= MAX_TARGETS)
+	      if( i >= ConfigFileEntry.max_targets)
 		return(i);
 	      continue;
 	    }
@@ -382,13 +409,16 @@ int build_target_list(int p_or_n,
  *		  note, this does the canonize using pointers
  * side effects	- NONE
  */
-int duplicate_ptr( void *ptr, struct entity target_table[], int n)
+int duplicate_ptr( void *ptr, struct entity **target_table, int n)
 {
   int i;
 
+  if (!target_table)
+	  return NO;
+  
   for(i = 0; i < n; i++)
     {
-      if (target_table[i].ptr == ptr)
+      if (target_table[i]->ptr == ptr)
 	return YES;
     }
   return NO;

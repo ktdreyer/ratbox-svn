@@ -217,7 +217,8 @@ typedef struct
   int         client_exit;
   int         maximum_links;
 	int       oper_only_umodes;
-	
+	int       max_targets;
+
 } ConfigFileEntryType;
 
 /* bleh. have to become global. */

@@ -199,6 +199,7 @@ int   class_redirport_var;
 %token  T_WALLOP
 %token  OPER_ONLY_UMODES
 %token  PATH
+%token  MAX_TARGETS
 
 %%
 conf:   
@@ -1270,6 +1271,7 @@ general_item:       general_failed_oper_notice | general_show_failed_oper_id |
                     general_message_locale | general_client_exit |
                     general_fname_userlog | general_fname_operlog |
                     general_fname_foperlog | general_oper_only_umodes |
+                    general_max_targets |
                     error
 
 
@@ -1511,6 +1513,11 @@ general_hide_server: HIDESERVER '=' TYES ';'
         ConfigFileEntry.hide_server = 0;
 } ;
 
+general_max_targets: MAX_TARGETS '=' NUMBER ';'
+{
+	ConfigFileEntry.max_targets = yylval.number;
+} ;
+
 general_oper_only_umodes: OPER_ONLY_UMODES 
   {
     ConfigFileEntry.oper_only_umodes = 0;
@@ -1519,7 +1526,8 @@ general_oper_only_umodes: OPER_ONLY_UMODES
 			  umode_item
 
 umode_items:	umode_items ',' umode_item |
-		umode_item ;
+  umode_item 
+
 
 umode_item:	T_BOTS 
   {

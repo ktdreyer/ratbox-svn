@@ -193,6 +193,7 @@ glines                  { return GLINES; }
 modules                 { return MODULES; }
 module                  { return MODULE; }
 path                    { return PATH; }
+max_targets             { return MAX_TARGETS; }
 
 oper_only_umodes        { return OPER_ONLY_UMODES; }
 bots                    { return T_BOTS; }
