@@ -573,14 +573,14 @@ mo_undline (struct Client *client_p, struct Client *source_p,
        cidr);
 }
 
-/*
-** m_ungline
-** added May 29th 2000 by Toby Verrall <toot@melnet.co.uk>
-** added to hybrid-7 7/11/2000 --is
-**
-**      parv[0] = sender nick
-**      parv[1] = gline to remove
-*/
+/* m_ungline()
+ *
+ * added May 29th 2000 by Toby Verrall <toot@melnet.co.uk>
+ * added to hybrid-7 7/11/2000 --is
+ *
+ *      parv[0] = sender nick
+ *      parv[1] = gline to remove
+ */
 
 static void mo_ungline(struct Client *client_p, struct Client *source_p,
                       int parc,char *parv[])
@@ -622,7 +622,7 @@ static void mo_ungline(struct Client *client_p, struct Client *source_p,
       return;
     }
 
-  if(remove_gline_match(user, host))
+  if(remove_temp_match_list(host, user, &glines))
     {
       sendto_one(source_p, ":%s NOTICE %s :Un-glined [%s@%s]",
                  me.name, parv[0],user, host);

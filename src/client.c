@@ -455,8 +455,10 @@ check_klines(void)
 
       if (IsPerson(client_p))
 	{
-	  if (ConfigFileEntry.glines &&
-	      (aconf = find_gkill(client_p, client_p->username)))
+	  if((aconf = find_kill(client_p)) == NULL)
+            continue;
+
+          if(aconf->status & CONF_GLINE)
 	    {
 	      if (IsExemptKline(client_p))
 		{
@@ -503,7 +505,7 @@ check_klines(void)
 	      /* and go examine next fd/client_p */    
 	      continue;
 	    } 
-	  else if((aconf = find_kill(client_p))) 
+	  else if(aconf->status & CONF_KILL)
 	    {
 	      /* if there is a returned struct ConfItem.. then kill it */
 	      if (IsExemptKline(client_p))

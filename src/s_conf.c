@@ -537,7 +537,6 @@ static int
 verify_access(struct Client* client_p, const char* username)
 {
   struct ConfItem* aconf;
-  struct ConfItem* gkill_conf;
   char       non_ident[USERLEN + 1];
 
   if (IsGotId(client_p))
@@ -564,31 +563,13 @@ verify_access(struct Client* client_p, const char* username)
 	      sendto_one(client_p, form_str(RPL_REDIR), me.name, client_p->name,
 			 aconf->name ? aconf->name : "", aconf->port);
 	      return(NOT_AUTHORIZED);
-	    }
-	  if (ConfigFileEntry.glines)
-	    {
-	      if (!IsConfExemptKline(aconf) && !IsConfExemptGline(aconf))
-		{
-		  if (IsGotId(client_p))
-		    gkill_conf = find_gkill(client_p, client_p->username);
-		  else
-		    gkill_conf = find_gkill(client_p, non_ident);
+            }
 
-		  if (gkill_conf)
-		    {
-		      sendto_one(client_p, ":%s NOTICE %s :*** G-lined", me.name,
-				 client_p->name);
-		      sendto_one(client_p, ":%s NOTICE %s :*** Banned %s",
-				 me.name, client_p->name, 
-				 gkill_conf->passwd);
-		      return(BANNED_CLIENT);
-		    }
-		}
-	    }
 	  if (IsConfDoIdentd(aconf))
 	    SetNeedId(client_p);
 	  if (IsConfRestricted(aconf))
 	    SetRestricted(client_p);
+
 	  /* Thanks for spoof idea amm */
 	  if (IsConfDoSpoofIp(aconf))
 	    {
@@ -614,6 +595,17 @@ verify_access(struct Client* client_p, const char* username)
 	    }
 	  return(BANNED_CLIENT);
 	}
+      else if(aconf->status & CONF_GLINE)
+      {
+        sendto_one(client_p, ":%s NOTICE %s :*** G-lined", 
+                   me.name, client_p->name);
+
+        if(ConfigFileEntry.kline_with_reason)
+          sendto_one(client_p, ":%s NOTICE %s :*** Banned %s",
+                     me.name, client_p->name, aconf->passwd);
+
+        return(BANNED_CLIENT);
+      }
     }
  return(NOT_AUTHORIZED);
 }
@@ -1714,8 +1706,9 @@ find_kill(struct Client* client_p)
 			    client_p->localClient->aftype);
   if (aconf == NULL)
     return(aconf);
-  if(aconf->status & CONF_KILL)
+  if((aconf->status & CONF_KILL) || (aconf->status & CONF_GLINE))
     return(aconf);
+
   return(NULL);
 }
 

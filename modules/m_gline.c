@@ -527,13 +527,13 @@ static void set_local_gline(const char *oper_nick,
   current_date = smalldate((time_t) 0);
           
   aconf = make_conf();
-  aconf->status = CONF_KILL;
+  aconf->status = CONF_GLINE;
   DupString(aconf->host, host);
 
   ircsprintf(buffer, "%s (%s)",reason,current_date);
       
   DupString(aconf->passwd, buffer);
-  DupString(aconf->name, (char *)user);
+  DupString(aconf->user, (char *)user);
   DupString(aconf->host, (char *)host);
   aconf->hold = CurrentTime + ConfigFileEntry.gline_time;
   add_gline(aconf);

@@ -488,10 +488,19 @@ find_address_conf(const char *host, const char *user,
   /* Find the best K-line... -A1kmm */
   kconf = find_conf_by_address(host, ip, CONF_KILL, aftype, user);
 
-  /* If they are K-lined, return the K-line. Otherwise, return the
-   * I-line. -A1kmm */
+  /* If they are K-lined, return the K-line */
   if (kconf)
     return kconf;
+
+  /* hunt for a gline */
+  if(ConfigFileEntry.glines)
+  {
+    kconf = find_conf_by_address(host, ip, CONF_GLINE, aftype, user);
+
+    if((kconf != NULL) && !IsConfExemptGline(iconf))
+      return kconf;
+  }
+
   return iconf;
 }
 

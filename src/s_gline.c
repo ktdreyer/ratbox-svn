@@ -67,21 +67,7 @@ add_gline(struct ConfItem *aconf)
   dlink_node *gline_node;
   gline_node = make_dlink_node();
   dlinkAdd(aconf, gline_node, &glines);
-}
-
-/* find_gkill
- *
- * inputs       - struct Client pointer to a Client struct
- * output       - struct ConfItem pointer if a gline was found for this client
- * side effects - none
- */
-struct ConfItem*
-find_gkill(struct Client* client_p, char* username)
-{
-  assert(NULL != client_p);
-  if(client_p == NULL)
-    return NULL;
-  return (IsExemptKline(client_p)) ? 0 : find_is_glined(client_p->host, username);
+  add_conf_by_address(aconf->host, CONF_GLINE, aconf->user, aconf);
 }
 
 /*
@@ -109,33 +95,6 @@ find_is_glined(const char* host, const char* name)
     }
 
   return((struct ConfItem *)NULL);
-}
-
-/*
- * remove_gline_match
- *
- * inputs       - user@host
- * output       - 1 if successfully removed, otherwise 0
- * side effects -
- */
-int
-remove_gline_match(const char* user, const char* host)
-{
-  dlink_node *gline_node;
-  struct ConfItem *kill_ptr;
-
-  for(gline_node = glines.head; gline_node; gline_node = gline_node->next)
-    {
-      kill_ptr = gline_node->data;
-      if(!irccmp(kill_ptr->host,host) && !irccmp(kill_ptr->name,user))
-	{
-          free_conf(kill_ptr);
-          dlinkDelete(gline_node, &glines);
-          free_dlink_node(gline_node);
-          return 1;
-	}
-    }
-  return 0;
 }
 
 /*

@@ -31,9 +31,7 @@
 struct Client;
 struct ConfItem;
 
-extern struct ConfItem* find_gkill(struct Client* client, char *);
 extern struct ConfItem* find_is_glined(const char* host, const char* name);
-extern int    remove_gline_match(const char *user, const char *host);
 extern void   cleanup_glines();
 extern void   add_gline(struct ConfItem *);
 

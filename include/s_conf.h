@@ -95,6 +95,7 @@ struct ConfItem
 #define CONF_HUB                0x2000
 #define CONF_EXEMPTKLINE        0x4000
 #define CONF_NOLIMIT            0x8000
+#define CONF_GLINE             0x10000
 #define CONF_DLINE             0x20000
 #define CONF_XLINE             0x40000
 #define CONF_ULINE             0x80000

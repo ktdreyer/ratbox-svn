@@ -887,8 +887,8 @@ fi
 
 if test "x$GCC" = "xyes"; then
 #  Use this for development..
-#  IRC_CFLAGS="-O2 -g -ggdb -Wunused -Wall -Wshadow -Wmissing-declarations"
-   IRC_CFLAGS="-O2 -g -ggdb"
+  IRC_CFLAGS="-O2 -g -ggdb -Wunused -Wall -Wshadow -Wmissing-declarations"
+#   IRC_CFLAGS="-O2 -g -ggdb"
 else
   if test "x$TenDRA" = "xyes"; then
             IRC_CFLAGS=""
