@@ -1,3 +1,10 @@
+*** 20000402_8 by db
+- clean: in Makefile remove .c files for parser
+- cleaned up serverinfo code
+- make sure network order not host order for local ip
+
+
+
 *** 20000402_7 by db
 - further cleanups to remove #ifdef's 
 
