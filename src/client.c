@@ -1423,7 +1423,6 @@ const char* comment         /* Reason for the exit */
       if (IsAnyOper(sptr))
         {
           /* LINKLIST */
-          /* oh for in-line functions... */
           {
             struct Client *prev_cptr=(struct Client *)NULL;
             struct Client *cur_cptr = oper_cptr_list;
@@ -1449,7 +1448,6 @@ const char* comment         /* Reason for the exit */
           Count.local--;
 
           /* LINKLIST */
-          /* oh for in-line functions... */
           if(IsPerson(sptr))        /* a little extra paranoia */
             {
               if(sptr->previous_local_client)
@@ -1538,13 +1536,20 @@ const char* comment         /* Reason for the exit */
 
   if(IsServer(sptr))
     {        
-      if((sptr->serv) && (sptr->serv->up))
-        strcpy(comment1, sptr->serv->up);
+      if( GlobalSetOptions.hide_server )
+	{
+	  strcpy(comment1, "<server split>");
+	}
       else
-        strcpy(comment1, "<Unknown>" );
+	{
+	  if((sptr->serv) && (sptr->serv->up))
+	    strcpy(comment1, sptr->serv->up);
+	  else
+	    strcpy(comment1, "<Unknown>" );
 
-      strcat(comment1," ");
-      strcat(comment1, sptr->name);
+	  strcat(comment1," ");
+	  strcat(comment1, sptr->name);
+	}
 
       remove_dependents(cptr, sptr, from, comment, comment1);
 
