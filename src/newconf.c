@@ -703,22 +703,16 @@ static int
 conf_end_class(struct TopConf *tc)
 {
 	if(conf_cur_block_name != NULL)
-	{
-		MyFree(yy_class->class_name);
 		DupString(yy_class->class_name, conf_cur_block_name);
+
+	if(EmptyString(yy_class->class_name))
+	{
+		conf_report_error("Ignoring connect block -- missing name.");
+		return 0;
 	}
 
-	if(yy_class->class_name)
-		add_class(yy_class);
-	else
-		free_class(yy_class);
+	add_class(yy_class);
 	return 0;
-}
-
-static void
-conf_set_class_name(void *data)
-{
-	DupString(yy_class->class_name, (char *) data);
 }
 
 static void
@@ -2535,7 +2529,6 @@ newconf_init()
 	add_conf_item("operator", "umodes", CF_STRING | CF_FLIST, conf_set_oper_umodes);
 
 	add_top_conf("class", conf_begin_class, conf_end_class);
-	add_conf_item("class", "name", CF_QSTRING, conf_set_class_name);
 	add_conf_item("class", "ping_time", CF_TIME, conf_set_class_ping_time);
 	add_conf_item("class", "cidr_bitlen", CF_INT, conf_set_class_cidr_bitlen);
 	add_conf_item("class", "number_per_cidr", CF_INT, conf_set_class_number_per_cidr);
