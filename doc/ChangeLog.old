@@ -1,3 +1,7 @@
+*** 20010226_2 by androsyn
+More updates to adns.  Using the block allocator for struct DNSQuery now.
+
+
 *** 20010226_1 by androsyn
 Minor interface change to adns.  Basically we have the callbacks freeing
 memory for the struct DNSQuery in the callbacks.  I should probably modify
