@@ -19,6 +19,7 @@
 
 #define WE_ARE_MEMORY_C
 
+#include "stdinc.h"
 #include "ircd_defs.h"
 #include "common.h"
 #include "config.h"

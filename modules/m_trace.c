@@ -159,10 +159,6 @@ static void m_trace(struct Client *client_p, struct Client *source_p,
   /* specific trace */
   if(dow == 0)
     {
-      const char* name;
-      const char* class_name;
-      char ipaddr[HOSTIPLEN];
-
       target_p = find_client(tname);
       
       if(target_p && IsPerson(target_p)) 

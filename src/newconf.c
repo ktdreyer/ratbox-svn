@@ -1644,7 +1644,7 @@ void	conf_set_connect_aftype(void *data)
 
 	if (strcasecmp(aft, "ipv4") == 0)
 		yy_aconf->aftype = AF_INET;
-#ifdef IPv6
+#ifdef IPV6
 	else if (strcasecmp(aft, "ipv6") == 0)
 		yy_aconf->aftype = AF_INET6;
 #endif
