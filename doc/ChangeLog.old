@@ -1,3 +1,7 @@
+*** 20010525_12 by ejb
+- make version.c for vms actually work..
+
+
 *** 20010525_11 by ejb
 - added auto version.c support for VMS (thanks to robert byer).
 
