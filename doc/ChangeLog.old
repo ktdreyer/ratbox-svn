@@ -1,3 +1,32 @@
+androsyn    2002/02/17 00:39:33 EST	(20020217_14)
+
+  Modified files:
+    include              client.h 
+    modules              m_trace.c 
+    src                  client.c hash.c ircd.c packet.c parse.c 
+                         s_auth.c s_bsd.c s_conf.c s_serv.c send.c 
+  Log:
+  Okay..I know this is a big ass commit, but it was driving me nuts.  I don't
+  care if this delays an rc another week or two but its the right thing to do.
+  Basically move client_p->fd into client_p->localClient->fd.  If you don't
+  like it, tough.
+  
+  Revision  Changes    Path
+  7.140     +5 -4      ircd-hybrid-7/include/client.h
+  1.44      +7 -7      ircd-hybrid-7/modules/m_trace.c
+  7.228     +8 -12     ircd-hybrid-7/src/client.c
+  7.38      +2 -2      ircd-hybrid-7/src/hash.c
+  7.220     +0 -1      ircd-hybrid-7/src/ircd.c
+  7.70      +6 -6      ircd-hybrid-7/src/packet.c
+  7.121     +1 -1      ircd-hybrid-7/src/parse.c
+  7.82      +8 -8      ircd-hybrid-7/src/s_auth.c
+  7.162     +13 -13    ircd-hybrid-7/src/s_bsd.c
+  7.292     +1 -1      ircd-hybrid-7/src/s_conf.c
+  7.243     +23 -23    ircd-hybrid-7/src/s_serv.c
+  7.178     +6 -6      ircd-hybrid-7/src/send.c
+
+
+
 androsyn    2002/02/16 23:58:59 EST	(20020217_13)
 
   Modified files:
