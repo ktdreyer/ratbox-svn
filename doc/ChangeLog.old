@@ -1,3 +1,9 @@
+*** 20010227_3 by ejb
+- fixes to make compile on solaris using sunsoft cc work.
+  tested compile, and it loads the module fine, but i haven't
+  checked that it works any more than that. 
+
+
 *** 20010227_2 by db
 - don't try to use a flag on a NULL pointer
 
