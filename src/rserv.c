@@ -6,22 +6,16 @@
  *
  * $Id$
  */
-#include <stdio.h>
-#include <string.h>
-#include <sys/types.h>
-#include <limits.h>
+#include "stdinc.h"
 #include <signal.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <unistd.h>
-#include <errno.h>
-#include <sys/time.h>
 #include <sys/resource.h>
+#ifdef HAVE_CRYPT_H
+#include <crypt.h>
+#endif
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
 
-#include "stdinc.h"
 #include "rserv.h"
 #include "conf.h"
 #include "io.h"
@@ -39,7 +33,10 @@
 #include "newconf.h"
 #include "serno.h"
 
+
 struct timeval system_time;
+
+int have_md5_crypt;
 
 void
 die(const char *reason)
@@ -127,12 +124,23 @@ print_help(void)
 	printf(" -f foreground mode\n");
 }
 
+static void
+check_md5_crypt(void)
+{
+	if(strcmp((crypt("validate", "$1$tEsTiNg1")), "$1$tEsTiNg1$Orp/Maa6pOxfOpGWjmtVE/") == 0)
+		have_md5_crypt = 1;
+	else
+		have_md5_crypt = 0;
+}
+
 int 
 main(int argc, char *argv[])
 {
 	char c;
 	int nofork = 0;
 	int childpid;
+
+	check_md5_crypt();
 
 	setup_corefile();
 
