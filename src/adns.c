@@ -49,11 +49,13 @@ void delete_adns_queries(struct DNSQuery *q)
 /* void restart_resolver(void)
  * Input: None
  * Output: None
- * Side effects: Rehashes the ADNS configuration.
+ * Side effects: Tears down any old ADNS sockets..reloads the conf
  */
 void restart_resolver(void)
 {
- adns__rereadconfig(dns_state);
+  fd_close(dns_state->udpsocket);
+  adns_globalsystemfailure(dns_state);
+  init_resolver();
 }
 
 /* void init_resolver(void)
