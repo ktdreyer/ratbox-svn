@@ -2933,7 +2933,7 @@ void send_user_joins(struct Client *cptr, struct Client *user)
         if (!match(++mask, cptr->name))
           continue;
       clen = strlen(chptr->chname);
-      if (clen > (size_t) BUFSIZE - 7 - len)
+      if (clen > BUFSIZE - 7 - len)
         {
           if (cnt)
             sendto_one(cptr, "%s", buf);
