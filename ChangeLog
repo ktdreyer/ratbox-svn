@@ -1,3 +1,16 @@
+androsyn    2003/09/02 15:35:07 EDT	(20030902_0)
+
+  Modified files:
+    modules              Makefile.in 
+  Log:
+  Make the build do an intermediate .o file before making the .so file, to
+  keep depends working right.
+  
+  Revision  Changes    Path
+  1.85      +1 -1      ircd-ratbox/modules/Makefile.in
+
+
+
 androsyn    2003/09/01 13:31:42 EDT	(20030901_6)
 
   Modified files:
