@@ -1,3 +1,9 @@
+*** 20000124_1 by db
+- removed #ifdef for ZIP_LINKS
+  I hate #ifdef's
+
+
+
 *** 20000123_2 by db
 - added fbunputc mimics unputc (Sorry Tom)
 - single conf file, is either old style or new style determined
