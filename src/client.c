@@ -370,6 +370,7 @@ check_unknowns_list(dlink_list * list)
 
 		if(client_p->firsttime ? ((CurrentTime - client_p->firsttime) > 30) : 0)
 		{
+			SetClosing(client_p);
 			exit_unknown_client(client_p, client_p, &me, "Connection timed out");
 		}
 	}
