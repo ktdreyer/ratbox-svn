@@ -128,7 +128,7 @@ extern const char* form_str(int);
 #define RPL_UNAWAY           305
 #define RPL_NOWAWAY          306
 
-#define RPL_WHOISADMIN       308
+/*      RPL_WHOISADMIN       308 -- hybrid */
 
 #define RPL_WHOISUSER        311
 #define RPL_WHOISSERVER      312

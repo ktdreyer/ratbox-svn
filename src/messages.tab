@@ -332,7 +332,7 @@ static  char *  replies[] = {
 /* 305 RPL_UNAWAY, */   ":%s 305 %s :You are no longer marked as being away",
 /* 306 RPL_NOWAWAY, */  ":%s 306 %s :You have been marked as being away",
 /* 307 */       NULL,
-/* 308 RPL_WHOISADMIN,  */      ":%s 308 %s %s :is a Server Administrator",
+/* 308 */       NULL,
 /* 309 */       NULL,
 /* 310 */       NULL,
 /* 311 RPL_WHOISUSER, */        ":%s 311 %s %s %s %s * :%s",

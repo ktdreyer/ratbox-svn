@@ -360,10 +360,6 @@ static void whois_person(struct Client *source_p,struct Client *target_p, int gl
     {
       sendto_one(source_p, form_str(RPL_WHOISOPERATOR),
 		 me.name, source_p->name, target_p->name);
-
-      if (IsAdmin(target_p))
-	sendto_one(source_p, form_str(RPL_WHOISADMIN),
-		   me.name, source_p->name, target_p->name);
     }
 
   if ( (glob == 1) || (MyConnect(target_p) && (IsOper(source_p) ||
