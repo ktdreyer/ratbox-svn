@@ -1,3 +1,10 @@
+*** 20001105_6 by adrian
+
+
+Kill #ifdef IDLE_CHECK, since someone did it in mtrie.conf ..
+
+
+
 *** 20001105_5 by db
 - redid m_join.c its still evil, but not quite as bad
 
