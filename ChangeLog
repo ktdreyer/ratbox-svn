@@ -1,3 +1,17 @@
+leeh        2003/06/30 15:00:59 EDT	(20030630_5)
+
+  Removed files:
+    include              channel_mode.h 
+    src                  channel_mode.c 
+  Log:
+  - helps if I actually remove channel_mode.{c|h}
+  
+  Revision  Changes    Path
+  7.24      +0 -133    ircd-ratbox/include/channel_mode.h (dead)
+  7.109     +0 -1659   ircd-ratbox/src/channel_mode.c (dead)
+
+
+
 leeh        2003/06/30 14:59:17 EDT	(20030630_4)
 
   Modified files:
