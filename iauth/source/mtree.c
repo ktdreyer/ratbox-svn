@@ -480,7 +480,18 @@ SearchIlineTree(char *username, char *hostname)
    * we know it has been searched if it's serial matches
    * SerialNumber.
    */
-  ++SerialNumber;
+
+  if (!(++SerialNumber))
+  {
+    /*
+     * SerialNumber will eventually roll over to 0 when it
+     * reaches it's 32 bit limit - reset both trees and
+     * increment SerialNumber to 1.
+     */
+    ++SerialNumber;
+    ResetTree(&IlineTree);
+    ResetTree(&KlineTree);
+  }
 
   while ((ret = SearchSubTree(&IlineTree, hostc, hostv)))
   {
@@ -541,7 +552,12 @@ SearchKlineTree(char *username, char *hostname)
 
   hostc = BreakupHost(host, &hostv);
 
-  ++SerialNumber;
+  if (!(++SerialNumber))
+  {
+    ++SerialNumber;
+    ResetTree(&IlineTree);
+    ResetTree(&KlineTree);
+  }
 
   while ((ret = SearchSubTree(&KlineTree, hostc, hostv)))
   {
@@ -753,111 +769,6 @@ SearchSubTree(struct Level **level, int hostc, char **hostv)
     MarkNodeSearched((*level)->prevlevel);
 
   return (NULL);
-
-#if 0
-  for (tmplev = *level; tmplev; tmplev = tmplev->nextpiece)
-  {
-    if (match(tmplev->name, hostv[hostc - 1]))
-    {
-      if (hostc == 1)
-      {
-        /*
-         * Since hostc is 1, there are no more pieces to
-         * search for - we have found a match
-         */
-        if (!tmplev->typeptr)
-        {
-          log(L_ERROR,
-            "SearchSubTree(): hostc is 1, but the corresponding level does not have a typeptr");
-        }
-
-        return (tmplev->typeptr);
-      }
-
-      /*
-       * We found a match on a particular host piece, but
-       * there are still more pieces to check - continue
-       * searching
-       */
-      
-      if (tmplev->flags & LV_WILDCARD)
-      {
-        /*
-         * We want to try to take this wildcard piece as
-         * far as we can before moving on to the next level.
-         * In other words, move to the next level only when:
-         *  a) we find a match on the next level for the
-         *     corresponding host piece
-         *  b) the wildcard on this level fails to match
-         *     the next host piece
-         */
-
-        if ((tmplev2 = IsOnLevel(tmplev->nextlevel, hostv[hostc - 2])))
-        {
-          /*
-           * Since the next index of hostv[] was found
-           * on the level below tmplev, give up on the
-           * current wildcard (tmplev->name), and go
-           * down to the next level to continue the search.
-           */
-          tmplev = tmplev2;
-          --hostc;
-        }
-
-        while (hostc)
-        {
-          if (!match(tmplev->name, hostv[hostc - 2]))
-            break;
-          if (--hostc == 1)
-          {
-            if (!tmplev->typeptr)
-            {
-              log(L_ERROR,
-                "SearchSubTree(): typeptr for piece [%s] is NULL which it should not be",
-                tmplev->name);
-            }
-
-            return (tmplev->typeptr);
-          }
-
-          /*
-           * Since we just decremented hostc, we need to check
-           * if the corresponding index of hostv[] is on the
-           * next level - if so, drop to the next level to
-           * continue checking.
-           * For example, suppose the tree looked like this:
-           *
-           *   *
-           *   |
-           *  irc
-           *
-           * And we're checking the host: irc.wnder.com.
-           * "com" and "wnder" should both be matched against
-           * the "*", but once we see that "irc" matches
-           * something on the next level, drop down and continue
-           * searching - we wouldn't want to match "irc" against
-           * "*" (even though its a good match) because although
-           * we're at the end of our hostv[] array, the "*"
-           * structure will NOT contain a pointer to the
-           * corresponding I/K line structure - only the very
-           * last branch of the tree does that.
-           */
-          if (IsOnLevel(tmplev->nextlevel, hostv[hostc - 2]))
-            break;
-        } /* while (hostc) */
-      }
-
-      return (SearchSubTree(&tmplev->nextlevel, hostc - 1, hostv));
-    }
-  }
-
-  /*
-   * If we get here, we've hit a level that does not contain
-   * the corresponding host piece in our list - the hostname
-   * is not in our tree.
-   */
-  return (NULL);
-#endif /* 0 */
 } /* SearchSubTree() */
 
 /*
