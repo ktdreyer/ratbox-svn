@@ -1,3 +1,7 @@
+*** 20010528_13 by a1kmm
+- Write out a memory log on running out of memory, if MEMDEBUG is defined.
+
+
 *** 20010528_12 by a1kmm
 - Always always do a compile test, even for simple patches. cptrs don't
   exist anymore...
