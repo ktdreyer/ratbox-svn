@@ -1,3 +1,17 @@
+androsyn    2003/01/20 16:44:13 UTC	(20030120_2)
+
+  Modified files:
+    modules              m_trace.c 
+    src                  s_user.c 
+  Log:
+  In general, inetntop should be called with DEF_FAM not ->aftype
+  
+  Revision  Changes    Path
+  1.65      +2 -2      ircd-ratbox/modules/m_trace.c
+  7.251     +1 -1      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2003/01/20 03:09:38 UTC	(20030120_1)
 
   Modified files:
