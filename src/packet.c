@@ -321,8 +321,10 @@ read_packet(int fd, void *data)
    */
   length = read(fd_r, readBuf, READBUF_SIZE);
 
-  if (length <= 0) {
-    if(ignoreErrno(errno)) {
+  if (length <= 0)
+  {
+    if((length == -1) && ignoreErrno(errno))
+    {
       comm_setselect(fd_r, FDLIST_IDLECLIENT, COMM_SELECT_READ,
       		read_packet, client_p, 0);
       return;
