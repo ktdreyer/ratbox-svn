@@ -1,3 +1,7 @@
+*** 20010220_5 by wcampbel
+Directory /cvsroot/ircd-hybrid-7/messages/translations added to the repository
+
+
 *** 20010220_4 by davidt
 - Missed test in src/packet.c, while( <get line from sendq> ) should
   check the client hasn't died before parsing the line..
