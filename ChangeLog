@@ -1,3 +1,15 @@
+androsyn    2002/08/26 20:58:27 EDT	(20020827_2)
+
+  Modified files:
+    src                  newconf.c 
+  Log:
+  Add a missing *
+  
+  Revision  Changes    Path
+  7.30      +1 -1      ircd-ratbox/src/newconf.c
+
+
+
 leeh        2002/08/26 20:10:09 EDT	(20020827_1)
 
   Modified files:
