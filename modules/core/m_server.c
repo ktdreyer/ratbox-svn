@@ -277,9 +277,6 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     {
      if (!(aconf->status == CONF_LEAF || aconf->status == CONF_HUB))
        continue;
-     sendto_realops_flags(FLAGS_ALL,
-              "Conf: status = %d, name = %s, user = %s, host = %s",
-                    aconf->status, aconf->name, aconf->user, aconf->host);
      if (!match(aconf->host, host))
        continue;
      if (aconf->status == CONF_HUB && match(aconf->name, cptr->name))
