@@ -1,3 +1,23 @@
+leeh        2002/08/16 13:42:38 EDT	(20020816_8)
+
+  Modified files:
+    modules              m_join.c 
+    src                  channel_mode.c 
+  Log:
+  - if someone is joining a channel as CHFL_CHANOP, burst the channels modes
+    in the sjoin in case its persisting to avoid desync.
+  
+    This also cleans up the +nt slightly, as it can be used for that.
+  
+    It has just occured to me though that the +beI list will need to be
+    burst as well.
+  
+  Revision  Changes    Path
+  1.98      +38 -42    ircd-ratbox/modules/m_join.c
+  7.64      +4 -1      ircd-ratbox/src/channel_mode.c
+
+
+
 leeh        2002/08/16 06:44:33 EDT	(20020816_7)
 
   Modified files:
