@@ -127,7 +127,13 @@ slow_list_length(dlink_list *list)
 	unsigned long count = 0;
     
 	for (ptr = list->head; ptr; ptr = ptr->next)
+	{
 		count++;
+		if(count > list->length * 2)
+		{
+			blockheap_fail("count > list->length * 2 - I give up");
+		}
+	}
 	return count;
 }
 
