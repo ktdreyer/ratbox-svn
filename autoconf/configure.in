@@ -128,13 +128,15 @@ CHECK_SOCKLEN_T
 
 dnl Check for stdarg.h - if we can't find it, halt configure
 AC_CHECK_HEADER(stdarg.h, , AC_MSG_ERROR(** stdarg.h could not be found - ircd-hybrid will not compile without it **))
-
 dnl Checks for the existance of strlcat
 
 AC_CHECK_FUNCS(strlcat strlcpy)
 
 dnl check for socketpair
 AC_CHECK_FUNCS(socketpair)
+
+dnl check for snprintf and vsnprintf
+AC_CHECK_FUNCS(snprintf vsnprintf)
 
 dnl check for mmap
 AC_CHECK_FUNCS(mmap)

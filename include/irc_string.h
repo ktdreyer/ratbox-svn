@@ -30,7 +30,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <string.h>
-
+#include <stdarg.h>
 /*
  * match - compare name with mask, mask may contain * and ? as wildcards
  * match - returns 1 on successful match, 0 otherwise
@@ -94,6 +94,14 @@ size_t strlcpy(char *dst, const char *src, size_t siz);
 
 #ifndef HAVE_STRLCAT
 size_t strlcat(char *dst, const char *src, size_t siz);
+#endif
+
+#ifndef HAVE_SNPRINTF
+int snprintf (char *str,size_t count,const char *fmt,...);
+#endif
+
+#ifndef HAVE_VSNPRINTF
+int vsnprintf (char *str, size_t count, const char *fmt, va_list args);
 #endif
 
 /*

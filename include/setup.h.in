@@ -98,6 +98,9 @@
 /* Define if you have the mmap function.  */
 #undef HAVE_MMAP
 
+/* Define if you have the snprintf function.  */
+#undef HAVE_SNPRINTF
+
 /* Define if you have the socketpair function.  */
 #undef HAVE_SOCKETPAIR
 
@@ -106,6 +109,9 @@
 
 /* Define if you have the strlcpy function.  */
 #undef HAVE_STRLCPY
+
+/* Define if you have the vsnprintf function.  */
+#undef HAVE_VSNPRINTF
 
 /* Define if you have the <errno.h> header file.  */
 #undef HAVE_ERRNO_H
