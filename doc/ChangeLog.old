@@ -1,3 +1,7 @@
+*** 20010105_42 by ejb
+- dont ever put the nick into the ID field.
+
+
 *** 20010105_41 by toot
 no reason to block remote /whois now
 
