@@ -1248,6 +1248,8 @@ clear_out_old_conf(void)
 	/* clean out module paths */
 #ifndef STATIC_MODULES
 	mod_clear_paths();
+	mod_add_path(MODULE_DIR);
+	mod_add_path(MODULE_DIR  "/autoload");
 #endif
 
 	/* clean out ServerInfo */
