@@ -624,33 +624,32 @@ else
 	fi
 
 	AC_MSG_CHECKING(for compiler option to produce PIC)
-	dnl Check the OS first, where we know _something_ about the system compiler,
-	dnl and then try GCC. If we are using GCC, do not bother to set anything
-	dnl unless the system compiler is a modified GCC and the options it needs
-	dnl are non-standard for GCC. Most GNU and BSD operating systems and such
-	dnl just use GCC anyway, so let them fall through. Either we do it like
-	dnl this or we put the gcc test first and look for -z PICFLAGS in cases
-	dnl where we currently check for not-gcc. Which is worse? -jmallett
+	dnl Check if we are using GCC. If we are set up some generic PICFLAGS.
+	dnl Check the operating system, if the system compiler is GCC but not
+	dnl compatible with GCC's regular flags, override what we set, else
+	dnl set the system compiler values for PIC shared modules if we have
+	dnl not already set PICFLAGS some other way (checks for odd compilers
+	dnl can thus be thrown before the OS checks making this very moduluar)
+	dnl -jmallett
+	if test "$ac_cv_prog_gcc" = "yes"; then
+		AC_MSG_RESULT(gcc: -fPIC -DPIC -shared)
+		PICFLAGS="-fPIC -DPIC -shared"
+	fi
 	case `uname -s` in
 	Darwin*)
 		AC_MSG_RESULT(Darwin or Mac OS X - Assuming you want to make Mach-O bundles: -fno-common -bundle -flat_namespace -undefined suppress)
 		PICFLAGS="-fno-common -bundle -flat_namespace -undefined suppress"
 		;;
 	SunOS*)
-		if test "$ac_cv_prog_gcc" != "yes"; then
+		if test -z "$PICFLAGS"; then
 			AC_MSG_RESULT(SunOS - Assuming Sun Workshop compiler: -KPIC -DPIC -G)
 			PICFLAGS="-KPIC -DPIC -G"
 		fi
 		;;
 	esac
 	if test -z "$PICFLAGS"; then
-		if test "$ac_cv_prog_gcc" = "yes"; then
-			AC_MSG_RESULT(gcc: -fPIC -DPIC -shared)
-			PICFLAGS="-fPIC -DPIC -shared"
-		else
-			AC_MSG_RESULT(no)
-			AC_MSG_ERROR(could not find a way to produce position independent code. Try ./configure  --disable-shared-modules)
-		fi
+		AC_MSG_RESULT(no)
+		AC_MSG_ERROR(could not find a way to produce position independent code. Try ./configure  --disable-shared-modules)
 	fi
 	AC_SUBST(PICFLAGS)
 
