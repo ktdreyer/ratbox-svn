@@ -260,7 +260,7 @@ build_target_list(int p_or_n, char *command, struct Client *client_p,
 {
   int type;
   char *p, *nick, *target_list, ncbuf[BUFSIZE];
-  struct Channel *chptr;
+  struct Channel *chptr=NULL;
   struct Client *target_p;
 
   /* Sigh, we can't mutilate parv[1] incase we need it to send to a hub */
@@ -285,8 +285,10 @@ build_target_list(int p_or_n, char *command, struct Client *client_p,
 
     if (IsChanPrefix(*nick))
     {
+      /* ignore send of local channel to a server (should not happen) */
       if (IsServer(client_p) && *nick == '&')
         continue;
+
       if ((chptr = hash_find_channel(nick)) != NULL)
       {
         if (!duplicate_ptr(chptr))
@@ -295,8 +297,11 @@ build_target_list(int p_or_n, char *command, struct Client *client_p,
           targets[ntargets++].type = ENTITY_CHANNEL;
 
           if (ntargets >= ConfigFileEntry.max_targets)
-            return (ntargets);
-          continue;
+	    {
+	      sendto_one(source_p, form_str(ERR_TOOMANYTARGETS),
+			 me.name, source_p->name, nick);
+	      return (1);
+	    }
         }
       }
       else
@@ -306,8 +311,8 @@ build_target_list(int p_or_n, char *command, struct Client *client_p,
         else if (p_or_n != NOTICE)
           sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name,
                      source_p->name, nick);
-        continue;
       }
+      continue;
     }
 
     /* look for a privmsg to another client */
@@ -320,9 +325,13 @@ build_target_list(int p_or_n, char *command, struct Client *client_p,
         targets[ntargets++].flags = 0;
 
         if (ntargets >= ConfigFileEntry.max_targets)
-          return (ntargets);
-        continue;
+	  {
+	    sendto_one(source_p, form_str(ERR_TOOMANYTARGETS),
+		       me.name, source_p->name, nick);
+	    return (1);
+	  }
       }
+      continue;
     }
     
     /* @#channel or +#channel message ? */
@@ -343,50 +352,53 @@ build_target_list(int p_or_n, char *command, struct Client *client_p,
       nick++;
     }
 
-    if (type)
+    if (type != 0)
     {
+      if(!is_any_op(chptr, source_p) && !is_voiced(chptr, source_p))
+        {
+	  sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
+		     source_p->name, with_prefix);
+	  return(-1);
+          continue;
+        }
+
       /* suggested by Mortiis */
-      if (!*nick)               /* if its a '\0' dump it, there is no recipient */
-      {
-        sendto_one(source_p, form_str(ERR_NORECIPIENT),
-                   me.name, source_p->name, command);
-        continue;
-      }
+      if (*nick == '\0')      /* if its a '\0' dump it, there is no recipient */
+	{
+	  sendto_one(source_p, form_str(ERR_NORECIPIENT),
+		     me.name, source_p->name, command);
+	  continue;
+	}
 
       /* At this point, nick+1 should be a channel name i.e. #foo or &foo
        * if the channel is found, fine, if not report an error
        */
 
       if ((chptr = hash_find_channel(nick)) != NULL)
-      {
+	{
+	  if (!duplicate_ptr(chptr))
+	    {
+	      targets[ntargets].ptr = (void *)chptr;
+	      targets[ntargets].type = ENTITY_CHANOPS_ON_CHANNEL;
+	      targets[ntargets++].flags = type;
 
-        if(!is_any_op(chptr, source_p) && !is_voiced(chptr, source_p))
-        {
-          sendto_one(source_p, form_str(ERR_NOSUCHNICK),
-                     me.name, source_p->name, with_prefix);
-          continue;
-        }
-	
-        if (!duplicate_ptr(chptr))
-        {
-          targets[ntargets].ptr = (void *)chptr;
-          targets[ntargets].type = ENTITY_CHANOPS_ON_CHANNEL;
-          targets[ntargets++].flags = type;
-
-          if (ntargets >= ConfigFileEntry.max_targets)
-            return (ntargets);
-          continue;
-        }
-      }
+	      if (ntargets >= ConfigFileEntry.max_targets)
+		{
+		  sendto_one(source_p, form_str(ERR_TOOMANYTARGETS),
+			     me.name, source_p->name, nick);
+		  return (1);
+		}
+	    }
+	}
       else
-      {
-        if (!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
-          return -1;
-        else if (p_or_n != NOTICE)
-          sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name,
-                     source_p->name, nick);
-        continue;
-      }
+	{
+	  if (!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
+	    return -1;
+	  else if (p_or_n != NOTICE)
+	    sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name,
+		       source_p->name, nick);
+	}
+      continue;
     }
 
     if(IsOper(source_p) && ((*nick == '$') || strchr(nick, '@')))
