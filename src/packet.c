@@ -218,7 +218,7 @@ read_ctrl_packet(int fd, void *data)
 	unsigned char tmp[2];
 	unsigned char *len = tmp;
 	struct SlinkRplDef *replydef;
-#ifndef NDEBUG
+#ifdef USE_IODEBUG_HOOKS
 	struct hook_io_data hdata;
 #endif
 
@@ -307,7 +307,7 @@ read_ctrl_packet(int fd, void *data)
 			return;	/* wait for more data */
 	}
 
-#ifndef NDEBUG
+#ifdef USE_IODEBUG_HOOKS
 	hdata.connection = server;
 	hdata.len = reply->command;
 	hdata.data = NULL;
@@ -342,7 +342,7 @@ read_packet(int fd, void *data)
 	int lbuf_len;
 
 	int binary = 0;
-#ifndef NDEBUG
+#ifdef USE_IODEBUG_HOOKS
 	struct hook_io_data hdata;
 #endif
 	if(IsAnyDead(client_p))
@@ -368,7 +368,7 @@ read_packet(int fd, void *data)
 		return;
 	}
 
-#ifndef NDEBUG
+#ifdef USE_IODEBUG_HOOKS
 	hdata.connection = client_p;
 	hdata.data = readBuf;
 	hdata.len = length;

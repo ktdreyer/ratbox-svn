@@ -189,6 +189,11 @@ Info MyInformation[] = {
 	 "Maximum Allowed TS Delta from another Server"},
 	{"TS_WARN_DELTA_DEFAULT", "", TS_WARN_DELTA_DEFAULT,
 	 "Maximum TS Delta before Sending Warning"},
+#ifdef USE_IODEBUG_HOOKS
+	{"USE_IODEBUG_HOOKS", "YES", 0, "IO Debugging support"},
+#else
+	{"USE_IODEBUG_HOOKS", "NO", 0, "IO Debugging support"},
+#endif
 
 	/*
 	 * since we don't want to include the world here, NULL probably
