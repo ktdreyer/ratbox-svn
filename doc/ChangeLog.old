@@ -1,3 +1,8 @@
+*** 20010223_8 by wcampbel
+Added the spanish translation, submitted by ermak and corrected by xfrob
+(both from Hybnet)
+
+
 *** 20010223_7 by a1kmm
 - Fixed glines.
 - Fixed parse.c so exit_client it is only called once.
