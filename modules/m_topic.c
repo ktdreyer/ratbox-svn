@@ -158,22 +158,25 @@ static void m_topic(struct Client *client_p,
 		       me.name, parv[0], parv[1]);
           else
 	    {
-              sendto_one(source_p, form_str(RPL_TOPIC),
-                         me.name, parv[0],
-                         chptr->chname, chptr->topic);
+              sendto_one(source_p, form_str(RPL_TOPIC), 
+                         me.name, parv[0], chptr->chname, chptr->topic);
 
-                if(!(chptr->mode.mode & MODE_HIDEOPS) ||
-                  is_chan_op(chptr,source_p))
+#ifdef ANONOPS
+                if((chptr->mode.mode & MODE_HIDEOPS) && 
+                    !is_chan_op(chptr, source_p))
+                {
+                  sendto_one(source_p, form_str(RPL_TOPICWHOTIME), 
+                             me.name, source_p->name, chptr->chname,
+                             me.name, chptr->topic_time);
+                }
+                else
+#endif
                 {
                   sendto_one(source_p, form_str(RPL_TOPICWHOTIME),
                              me.name, parv[0], chptr->chname,
                              chptr->topic_info,
                              chptr->topic_time);
                 }
-                sendto_one(source_p, form_str(RPL_TOPICWHOTIME),
-                             me.name, parv[0], chptr->chname,
-                             me.name,
-                             chptr->topic_time);
             }
         }
     }

@@ -734,7 +734,7 @@ chm_simple(struct Client *client_p, struct Client *source_p,
   }
 
   /* +ntspmaikl == 9 + MAXMODEPARAMS (4 * +o) */
-  if (MyClient(source_p) && (++mode_limit > (9 + MAXMODEPARAMS))
+  if (MyClient(source_p) && (++mode_limit > (9 + MAXMODEPARAMS)))
     return;
 
   /* setting + */
