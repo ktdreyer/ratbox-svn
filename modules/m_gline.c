@@ -475,11 +475,7 @@ log_gline_request(
   char        filenamebuf[PATH_MAX + 1];
   static char timebuffer[MAX_DATE_STRING];
   struct tm*  tmptr;
-<<<<<<< m_gline.c
   FBFILE*     out;
-=======
-  FBFILE      *out;
->>>>>>> 1.20
 
   if(ConfigFileEntry.glinefile == NULL)
     {
@@ -505,11 +501,7 @@ log_gline_request(
            oper_nick,oper_user,oper_host,oper_server,
            timebuffer);
 
-<<<<<<< m_gline.c
   if (fbputs(buffer, out) == -1)
-=======
-  if (fbputs(buffer, out) == NULL)
->>>>>>> 1.20
     {
       sendto_realops_flags(FLAGS_ALL,"*** Problem writing to %s (%s)",
 				     filenamebuf, strerror(errno));
