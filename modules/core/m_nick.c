@@ -234,8 +234,13 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	      sendto_one(sptr, form_str(ERR_NICKNAMEINUSE),
 			 /* parv[0] is empty when connecting */
 			 me.name, BadPtr(parv[0]) ? "*" : parv[0], nick);
-	      return 0; /* NICK message ignored */
 	    }
+	}
+      else
+	{
+	  if (MyConnect(sptr))
+	    sendto_one(sptr, form_str(ERR_NICKNAMEINUSE), me.name,
+		       BadPtr(parv[0]) ? "*" : parv[0], nick);
 	}
     }
   else
