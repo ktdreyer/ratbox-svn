@@ -1,3 +1,15 @@
+leeh        2004/03/18 14:02:13 EST	(20040318_0)
+
+  Modified files:
+    include              supported.h 
+  Log:
+  - add AWAYLEN to 005.
+  
+  Revision  Changes    Path
+  1.38      +3 -1      ircd-ratbox/include/supported.h
+
+
+
 leeh        2004/03/17 10:20:28 EST	(20040317_2)
 
   Modified files:
