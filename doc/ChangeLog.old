@@ -798,13 +798,12 @@ leeh        2002/06/06 15:28:51 EDT	(20020606_0)
 leeh        2002/06/05 09:49:56 EDT	(20020605_0)
 
   Modified files:
-    doc                  example.conf example.conf.efnet 
+    doc                  example.conf
   Log:
   - doc update, compressed is disabled by default.
   
   Revision  Changes    Path
   7.161     +2 -2      ircd-hybrid-7/doc/example.conf
-  7.16      +2 -2      ircd-hybrid-7/doc/example.conf.efnet
 
 
 
@@ -1267,16 +1266,12 @@ leeh        2002/05/27 18:48:15 EDT	(20020527_1)
 leeh        2002/05/27 08:14:54 EDT	(20020527_0)
 
   Modified files:
-    doc                  example.conf.efnet 
     src                  ircd_parser.y 
   Log:
-  - removed the havent_read_conf from efnets example config, we know theyre
-    not gunna read the conf anyway and thisll just make it worse
   - dont enable compressed links by default, only when someone sets
     compressed=yes;
   
   Revision  Changes    Path
-  7.15      +0 -3      ircd-hybrid-7/doc/example.conf.efnet
   1.251     +0 -3      ircd-hybrid-7/src/ircd_parser.y
 
 
@@ -2433,14 +2428,11 @@ androsyn    2002/05/13 00:04:18 EDT	(20020513_0)
 leeh        2002/05/12 17:37:10 EDT	(20020512_4)
 
   Modified files:
-    doc                  example.conf.efnet 
     modules/core         m_sjoin.c 
   Log:
   - yes! align bits of code where I cant see them!
-  - removed the crap from efnets example config that they wont use
   
   Revision  Changes    Path
-  7.14      +0 -27     ircd-hybrid-7/doc/example.conf.efnet
   1.137     +2 -2      ircd-hybrid-7/modules/core/m_sjoin.c
 
 
@@ -2698,14 +2690,13 @@ androsyn    2002/05/06 01:48:48 EDT	(20020506_0)
 leeh        2002/05/02 12:58:14 EDT	(20020502_0)
 
   Modified files:
-    doc                  example.conf example.conf.efnet kline.txt 
+    doc                  example.conf kline.txt 
                          whats-new.txt 
   Log:
   - misc documentation fixes and updates
   
   Revision  Changes    Path
   7.160     +2 -3      ircd-hybrid-7/doc/example.conf
-  7.13      +4 -5      ircd-hybrid-7/doc/example.conf.efnet
   1.5       +69 -56    ircd-hybrid-7/doc/kline.txt
   7.36      +39 -17    ircd-hybrid-7/doc/whats-new.txt
 
@@ -2714,7 +2705,7 @@ leeh        2002/05/02 12:58:14 EDT	(20020502_0)
 leeh        2002/05/01 13:24:05 EDT	(20020501_1)
 
   Modified files:
-    doc                  example.conf example.conf.efnet 
+    doc                  example.conf
     src                  channel_mode.c s_conf.c 
   Log:
   - added back code that makes restricted do something
@@ -2722,7 +2713,6 @@ leeh        2002/05/01 13:24:05 EDT	(20020501_1)
   
   Revision  Changes    Path
   7.159     +6 -6      ircd-hybrid-7/doc/example.conf
-  7.12      +6 -6      ircd-hybrid-7/doc/example.conf.efnet
   7.35      +11 -0     ircd-hybrid-7/src/channel_mode.c
   7.301     +3 -0      ircd-hybrid-7/src/s_conf.c
 
@@ -2732,7 +2722,6 @@ leeh        2002/05/01 12:36:08 EDT	(20020501_0)
 
   Modified files:
     doc                  convertconf-example.conf example.conf 
-                         example.conf.efnet 
     tools                convertconf.c 
   Log:
   - rewrote nearly all of the config.  ugh.  its still horribly horribly
@@ -2744,7 +2733,6 @@ leeh        2002/05/01 12:36:08 EDT	(20020501_0)
   Revision  Changes    Path
   7.4       +209 -308  ircd-hybrid-7/doc/convertconf-example.conf
   7.158     +387 -612  ircd-hybrid-7/doc/example.conf
-  7.11      +413 -615  ircd-hybrid-7/doc/example.conf.efnet
   1.33      +28 -9     ircd-hybrid-7/tools/convertconf.c
 
 
@@ -2766,7 +2754,6 @@ leeh        2002/04/30 13:21:25 EDT	(20020430_7)
 
   Modified files:
     doc                  convertconf-example.conf example.conf 
-                         example.conf.efnet 
     src                  packet.c 
   Log:
   - fixed a > that shouldve been >=
@@ -2776,7 +2763,6 @@ leeh        2002/04/30 13:21:25 EDT	(20020430_7)
   Revision  Changes    Path
   7.3       +3 -1      ircd-hybrid-7/doc/convertconf-example.conf
   7.157     +3 -1      ircd-hybrid-7/doc/example.conf
-  7.10      +3 -1      ircd-hybrid-7/doc/example.conf.efnet
   7.76      +21 -4     ircd-hybrid-7/src/packet.c
 
 
@@ -2849,29 +2835,24 @@ leeh        2002/04/30 06:46:53 EDT	(20020430_2)
 leeh        2002/04/29 19:57:26 EDT	(20020430_1)
 
   Modified files:
-    doc                  example.conf example.conf.efnet 
+    doc                  example.conf
   Log:
   - we dont negotiate ciphers anymore.
   
   Revision  Changes    Path
   7.156     +3 -2      ircd-hybrid-7/doc/example.conf
-  7.9       +3 -2      ircd-hybrid-7/doc/example.conf.efnet
 
 
 
 leeh        2002/04/29 19:05:08 EDT	(20020430_0)
 
   Modified files:
-    doc                  example.conf example.conf.efnet 
+    doc                  example.conf
   Log:
   - added a warning that example.conf is not for efnet.
-  - added a warning that example.conf.efnet is not for people other than
-    efnet.
-  - removed efnet references in example.conf
   
   Revision  Changes    Path
   7.155     +17 -10    ircd-hybrid-7/doc/example.conf
-  7.8       +8 -2      ircd-hybrid-7/doc/example.conf.efnet
 
 
 
@@ -3259,7 +3240,7 @@ leeh        2002/04/25 13:55:22 EDT	(20020425_4)
 leeh        2002/04/25 13:53:25 EDT	(20020425_3)
 
   Modified files:
-    doc                  example.conf example.conf.efnet 
+    doc                  example.conf
     include              s_conf.h 
     src                  channel_mode.c ircd.c ircd_lexer.l 
                          ircd_parser.y s_conf.c 
@@ -3273,7 +3254,6 @@ leeh        2002/04/25 13:53:25 EDT	(20020425_3)
   
   Revision  Changes    Path
   7.154     +13 -0     ircd-hybrid-7/doc/example.conf
-  7.7       +6 -0      ircd-hybrid-7/doc/example.conf.efnet
   7.179     +1 -0      ircd-hybrid-7/include/s_conf.h
   7.32      +39 -9     ircd-hybrid-7/src/channel_mode.c
   7.229     +4 -0      ircd-hybrid-7/src/ircd.c
@@ -5203,7 +5183,7 @@ leeh        2002/02/28 11:12:22 EST	(20020228_6)
 
   Modified files:
     .                    INSTALL RELNOTES 
-    doc                  example.conf example.conf.efnet 
+    doc                  example.conf
     src                  ircd_parser.y 
   Log:
   - added a b12 specific section in RELNOTES, noting the recent config change
@@ -5220,7 +5200,6 @@ leeh        2002/02/28 11:12:22 EST	(20020228_6)
   7.23      +8 -3      ircd-hybrid-7/INSTALL
   1.14      +9 -8      ircd-hybrid-7/RELNOTES
   7.153     +2 -2      ircd-hybrid-7/doc/example.conf
-  7.6       +4 -2      ircd-hybrid-7/doc/example.conf.efnet
   1.238     +3 -1      ircd-hybrid-7/src/ircd_parser.y
 
 
@@ -7593,18 +7572,6 @@ db          2002/01/09 12:30:35 EST	(20020109_7)
 
 
 
-leeh        2002/01/09 12:17:50 EST	(20020109_6)
-
-  Modified files:
-    doc                  example.conf.efnet 
-  Log:
-  - missed pace_wait from here..
-  
-  Revision  Changes    Path
-  7.5       +3 -0      ircd-hybrid-7/doc/example.conf.efnet
-
-
-
 leeh        2002/01/09 12:16:58 EST	(20020109_5)
 
   Modified files:
@@ -8443,13 +8410,12 @@ leeh        2002/01/01 11:28:02 EST	(20020101_4)
 leeh        2002/01/01 10:58:42 EST	(20020101_3)
 
   Modified files:
-    doc                  example.conf example.conf.efnet 
+    doc                  example.conf
   Log:
   - documented vhost=""
   
   Revision  Changes    Path
   7.148     +5 -0      ircd-hybrid-7/doc/example.conf
-  7.4       +5 -0      ircd-hybrid-7/doc/example.conf.efnet
 
 
 
@@ -8711,13 +8677,12 @@ db          2001/12/29 18:29:32 EST	(20011229_5)
 wcampbel    2001/12/29 17:52:13 EST	(20011229_4)
 
   Modified files:
-    doc                  example.conf example.conf.efnet 
+    doc                  example.conf
   Log:
-  Document ping_cookie in both example.conf's
+  Document ping_cookie in example.conf
   
   Revision  Changes    Path
   7.147     +7 -0      ircd-hybrid-7/doc/example.conf
-  7.3       +7 -0      ircd-hybrid-7/doc/example.conf.efnet
 
 
 
@@ -9154,7 +9119,7 @@ leeh        2001/12/20 15:32:04 EST	(20011220_6)
 leeh        2001/12/20 15:23:14 EST	(20011220_5)
 
   Modified files:
-    doc                  example.conf example.conf.efnet 
+    doc                  example.conf
     src                  ircd_parser.y 
   Log:
   - ripped host=""; from shared {}; and made it use user="user@host"; like the
@@ -9163,7 +9128,6 @@ leeh        2001/12/20 15:23:14 EST	(20011220_5)
   
   Revision  Changes    Path
   7.146     +1 -2      ircd-hybrid-7/doc/example.conf
-  7.2       +1 -2      ircd-hybrid-7/doc/example.conf.efnet
   1.227     +16 -8     ircd-hybrid-7/src/ircd_parser.y
 
 
@@ -9960,16 +9924,12 @@ leeh        2001/12/14 10:46:25 EST	(20011214_8)
     .                    INSTALL 
     doc                  example.conf 
     src                  s_conf.c 
-  Added files:
-    doc                  example.conf.efnet 
   Log:
-  - added example.conf.efnet, which allows us to make exmaple.conf more
-    userfriendly with features..
+  - doc updates
   
   Revision  Changes    Path
   7.18      +5 -2      ircd-hybrid-7/INSTALL
   7.144     +6 -6      ircd-hybrid-7/doc/example.conf
-  7.1       +1035 -0   ircd-hybrid-7/doc/example.conf.efnet (new)
   7.282     +1 -1      ircd-hybrid-7/src/s_conf.c
 
 

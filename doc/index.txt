@@ -10,8 +10,6 @@ challenge.txt           - Overview of the challenge/response system for
 dline.conf              - A blank dline.conf file used by make install
 example.conf            - An example ircd.conf file describing most of the
                           user settable options
-example.conf.efnet      - An example ircd.conf file for use on EFnet, only
-                          features approved on EFnet will be enabled
 guidelines.txt		- Documentation guidelines
 index.txt		- This file
 ircd.8                  - The new revised manpage, read with the following
