@@ -111,7 +111,7 @@ static void mo_forcejoin(struct Client *client_p, struct Client *source_p,
    */
   if (!MyClient(target_p))
   {
-    if ((hunt_server(client_p, source_p, ":%s FORCEJOIN %s %s", 1, parc, parv)) != NULL)
+    if ((hunt_server(client_p, source_p, ":%s FORCEJOIN %s %s", 1, parc, parv)) != HUNTED_ISME)
     return;
   }
 
@@ -292,7 +292,7 @@ static void mo_forcepart(struct Client *client_p, struct Client *source_p,
    */
   if (!MyClient(target_p))
   {
-    if ((hunt_server(client_p, source_p, ":%s FORCEPART %s %s", 1, parc, parv)) != NULL)
+    if ((hunt_server(client_p, source_p, ":%s FORCEPART %s %s", 1, parc, parv)) != HUNTED_ISME)
     return;
   }
 
