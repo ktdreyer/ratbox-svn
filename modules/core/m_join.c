@@ -55,6 +55,7 @@ mapi_clist_av1 join_clist[] = { &join_msgtab, NULL };
 DECLARE_MODULE_AV1(join, NULL, NULL, join_clist, NULL, NULL, "$Revision$");
 
 static void do_join_0(struct Client *client_p, struct Client *source_p);
+static int check_channel_name_loc(const char *name);
 
 static void set_final_mode(struct Mode *mode, struct Mode *oldmode);
 static void remove_our_modes(struct Channel *chptr, struct Client *source_p);
@@ -93,7 +94,7 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	    name = strtoken(&p, NULL, ","))
 	{
 		/* check the length and name of channel is ok */
-		if(!check_channel_name(name) || (strlen(name) > LOC_CHANNELLEN))
+		if(!check_channel_name_loc(name) || (strlen(name) > LOC_CHANNELLEN))
 		{
 			sendto_one_numeric(source_p, ERR_BADCHANNAME,
 					   form_str(ERR_BADCHANNAME),
@@ -513,6 +514,33 @@ do_join_0(struct Client *client_p, struct Client *source_p)
 				     source_p->username, source_p->host, chptr->chname);
 		remove_user_from_channel(msptr);
 	}
+}
+
+static int
+check_channel_name_loc(const char *name)
+{
+	s_assert(name != NULL);
+	if(EmptyString(name))
+		return 0;
+
+	if(ConfigFileEntry.disable_fake_channels)
+	{
+		for (; *name; ++name)
+		{
+			if(!IsChanChar(*name) || IsFakeChanChar(*name))
+				return 0;
+		}
+	}
+	else
+	{
+		for(; *name; ++name)
+		{
+			if(!IsChanChar(*name))
+				return 0;
+		}
+	}
+
+	return 1;
 }
 
 struct mode_letter

@@ -180,6 +180,7 @@ struct config_file_entry
 	char fname_ioerrorlog[MAXPATHLEN];
 
 	unsigned char compression_level;
+	int disable_fake_channels;
 	int dot_in_ip6_addr;
 	int dots_in_ident;
 	int failed_oper_notice;

@@ -19,11 +19,12 @@ Config File
   e (which can contain server ips) is never shown to anyone
 - support for compressed|encrypted|topicburst|autoconn = yes|no; is gone,
   replaced with flags = compressed, encrypted, topicburst, autoconn;
+- support for individual auth flags "kline_exempt = yes"; etc removed, now
+  must use flags = ...; method
 - support for individual oper flags "kline = yes;" etc removed, now must use
   flags = ...; method -- NOTE, this means an oper gets *no* flags by
   default, including operwall.
-- support for individual auth flags "kline_exempt = yes"; etc removed, now
-  must use flags = ...; method
+- to reiterate, an oper gets *no flags at all by default*
 
 Client
 ------
@@ -77,6 +78,8 @@ Misc
   a remote client uses this nick, or until it expires after the time nick_delay 
   in general {}.  This prevents the masses of kills from clients 'regaining'
   nicknames on a short split.
+- support for disabling bold chars etc in channel names for local users, to
+  prevent faking channels.  disable_fake_channels = <yes|no>; in general {};
 
 Code cleanups
 -------------

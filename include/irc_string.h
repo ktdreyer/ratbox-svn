@@ -153,11 +153,13 @@ extern const unsigned int CharAttrs[];
 #define EOL_C    0x4000
 #define MWILD_C  0x8000
 #define LET_C   0x10000 /* an actual letter */
+#define FCHAN_C 0x20000 /* a 'fake' channel char */
 
 #define IsHostChar(c)   (CharAttrs[(unsigned char)(c)] & HOST_C)
 #define IsUserChar(c)   (CharAttrs[(unsigned char)(c)] & USER_C)
 #define IsChanPrefix(c) (CharAttrs[(unsigned char)(c)] & CHANPFX_C)
 #define IsChanChar(c)   (CharAttrs[(unsigned char)(c)] & CHAN_C)
+#define IsFakeChanChar(c)	(CharAttrs[(unsigned char)(c)] & FCHAN_C)
 #define IsKWildChar(c)  (CharAttrs[(unsigned char)(c)] & KWILD_C)
 #define IsMWildChar(c)  (CharAttrs[(unsigned char)(c)] & MWILD_C)
 #define IsNickChar(c)   (CharAttrs[(unsigned char)(c)] & NICK_C)

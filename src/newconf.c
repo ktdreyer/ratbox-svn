@@ -2037,6 +2037,12 @@ conf_set_general_connect_timeout(void *data)
 }
 
 static void
+conf_set_general_disable_fake_channels(void *data)
+{
+	ConfigFileEntry.disable_fake_channels = *(unsigned int *) data;
+}
+
+static void
 conf_set_general_burst_away(void *data)
 {
 	ConfigFileEntry.burst_away = *(unsigned int *) data;
@@ -2604,6 +2610,8 @@ newconf_init()
 	add_conf_item("general", "dot_in_ip6_addr", CF_YESNO, conf_set_general_dot_in_ip6_addr);
 	add_conf_item("general", "ping_cookie", CF_YESNO, conf_set_general_ping_cookie);
 	add_conf_item("general", "disable_auth", CF_YESNO, conf_set_general_disable_auth);
+	add_conf_item("general", "disable_fake_channels", CF_YESNO,
+			conf_set_general_disable_fake_channels);
 	add_conf_item("general", "connect_timeout", CF_TIME, conf_set_general_connect_timeout);
 	add_conf_item("general", "burst_away", CF_YESNO, conf_set_general_burst_away);
 	add_conf_item("general", "reject_ban_time", CF_TIME, conf_set_general_reject_ban_time);
