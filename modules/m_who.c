@@ -280,7 +280,7 @@ who_common_channel(struct Client *source_p, struct Channel *chptr,
 static void
 who_global(struct Client *source_p, const char *mask, int server_oper)
 {
-	struct Channel *chptr = NULL;
+	struct membership *msptr;
 	struct Client *target_p;
 	dlink_node *lp, *ptr;
 	int maxmatches = 500;
@@ -289,8 +289,8 @@ who_global(struct Client *source_p, const char *mask, int server_oper)
 
 	DLINK_FOREACH(lp, source_p->user->channel.head)
 	{
-		chptr = lp->data;
-		who_common_channel(source_p, chptr, mask, server_oper, &maxmatches);
+		msptr = lp->data;
+		who_common_channel(source_p, msptr->chptr, mask, server_oper, &maxmatches);
 	}
 
 	/* second, list all matching visible clients */
