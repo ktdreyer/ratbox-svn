@@ -1,3 +1,8 @@
+*** 20010118_2 by ejb
+- added README.VMS and make.com
+- minor compile for for VMX.
+
+
 *** 20010118_1 by ejb
 - start of VMS port .. doesn't work yet, we need
   - res.c to use BIND8 (VMS does not support BIND4 compatibility)
