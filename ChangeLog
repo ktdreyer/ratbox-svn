@@ -1,3 +1,19 @@
+androsyn    2003/01/28 21:51:57 UTC	(20030128_0)
+
+  Modified files:
+    src                  listener.c s_bsd.c 
+  Log:
+  This is a two for one.  Fix dlines in the case when we might receive a
+  mapped ipv4 connection in an ipv6 socket.  Also get rid of a needless call
+  to getpeername() when we can just pass the sockaddr_storage down from accept
+  into add_connection()
+  
+  Revision  Changes    Path
+  7.87      +3 -2      ircd-ratbox/src/listener.c
+  7.199     +2 -11     ircd-ratbox/src/s_bsd.c
+
+
+
 androsyn    2003/01/27 20:02:59 UTC	(20030127_7)
 
   Modified files:
