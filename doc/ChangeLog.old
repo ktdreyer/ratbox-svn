@@ -1,3 +1,10 @@
+*** 20010929_3 by davidt
+- Zero pointers after they are freed, before this commit doing
+  /challenge foo
+  /challenge <anything not starting with '+'>
+  would core the ircd (where foo was a valid oper with a public key)
+
+
 *** 20010929_2 by davidt
 - Fix Count.invisi and Count.oper so they are only incremented once per
   user.
