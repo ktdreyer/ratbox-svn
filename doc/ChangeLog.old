@@ -1,3 +1,15 @@
+androsyn    2002/02/16 20:27:37 EST	(20020217_2)
+
+  Modified files:
+    src                  s_bsd.c 
+  Log:
+  Fixed a tyop
+  
+  Revision  Changes    Path
+  7.161     +1 -1      ircd-hybrid-7/src/s_bsd.c
+
+
+
 db          2002/02/16 19:54:10 EST	(20020217_1)
 
   Modified files:
