@@ -1,6 +1,7 @@
 	serverinfo {
 		name="ircd.db.net";
-		email="admin@ircd.db.net";
+		vhost=This is a test conf;
+		description="admin@ircd.db.net";
 		hub=yes;
 	};
 
@@ -35,64 +36,54 @@
 	};
 
 	auth {
-		passwd="";
 		user="*";
 		class="1";
 	};
 
 	auth {
-		passwd="";
 		user="*@*ppp*";
 		class="3";
 	};
 
 	auth {
-		passwd="";
 		user="*@*slip*";
 		class="3";
 	};
 
 	auth {
-		passwd="";
 		user="*@*ts*";
 		class="3";
 	};
 
 	auth {
-		passwd="";
 		kline_exempt=yes;
-		have_ident;
-		no_tilde;
+		no_tilde=yes;
 		user="db@*db.net";
 		class="3";
 	};
 
 	auth {
-		passwd="";
 		spoof="localhost";
 		kline_exempt=yes;
-		allow_bots=yes;
-		have_ident;
-		no_tilde;
+		no_tilde=yes;
 		user="db@home.db.net";
 		class="3";
 	};
 
 	auth {
 		ip=192.168.0.0/24;
-		passwd="";
 		class="3";
 	};
 
 	listen {
 		name="*";
+		ip="";
 		port=6667;
 	};
 
 	operator {
 		name="Dianora";
-		user="db";
-		host="artemis.db.dbn";
+		user="db@artemis.db.dbn";
 		password="heFw0NKyvGSTg";
 		global_kill=yes;
 		remote=yes;
@@ -105,8 +96,7 @@
 
 	operator {
 		name="Dianora";
-		user="db";
-		host="127.0.0.1";
+		user="db@127.0.0.1";
 		password="heFw0NKyvGSTg";
 		global_kill=yes;
 		remote=yes;
@@ -156,7 +146,7 @@
 	};
 
 	kill {
-		name="*foo@*bar.com";
+		user="*foo@*bar.com";
 		reason="test kline";
 	};
 
@@ -166,12 +156,11 @@
 	};
 
 	connect {
-		host="192.168.0.100";
-		name="irc.blackened.com";
+		host="irc.blackened.com";
+		name="192.168.0.100";
 		send_password="l00p3r";
 		accept_password="l00p3r";
 		port=6666;
-		compressed=yes;
 		lazylink=yes;
 		class="3";
 	};
@@ -182,7 +171,6 @@
 		send_password="l00p3r";
 		accept_password="5u31ts";
 		port=6666;
-		compressed=yes;
 		hub_mask="*";
 		class="3";
 	};

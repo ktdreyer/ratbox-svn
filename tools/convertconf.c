@@ -291,22 +291,6 @@ static void oldParseOneLine(FILE *out,char* line)
       break;
 
     case 'c':
-      pair = (struct ConnectPair *)malloc(sizeof(struct ConnectPair));
-      memset(pair,0,sizeof(struct ConnectPair));
-      if(user_field)
-	pair->name = strdup(user_field);
-      if(host_field)
-	pair->host = strdup(host_field);
-      if(passwd_field)
-	pair->c_passwd = strdup(passwd_field);
-      if(port_field)
-	pair->port = atoi(port_field);
-      if(class_field)
-	pair->class = strdup(class_field);
-      pair->compressed = 1;
-      PairUpServers(pair);
-      break;
-
     case 'C':
       pair = (struct ConnectPair *)malloc(sizeof(struct ConnectPair));
       memset(pair,0,sizeof(struct ConnectPair));
@@ -346,9 +330,8 @@ static void oldParseOneLine(FILE *out,char* line)
       AddHubOrLeaf(IS_HUB,user_field,host_field);
       break;
 
+    /* We no longer have restricted connection in Hybrid 7 */
     case 'i': 
-      restricted = 1;
-
     case 'I': 
       fprintf(out,"\tauth {\n");
 
@@ -372,8 +355,11 @@ static void oldParseOneLine(FILE *out,char* line)
 
       if(passwd_field && *passwd_field)
 	fprintf(out,"\t\tpasswd=\"%s\";\n", passwd_field);	
+#if 0
+      /* This part isn't needed at all */
       else
 	fprintf(out,"\t\tpasswd=\"*\";\n");	
+#endif
 
       if(!client_allow && user_field)
 	{
@@ -383,9 +369,6 @@ static void oldParseOneLine(FILE *out,char* line)
 	      fprintf(out,"\t\tuser=\"%s\";\n", client_allow );
 	    }
 	}
-
-      if(restricted)
-	fprintf(out,"\t\trestricted;\n");	
 
       if(class_field)
 	fprintf(out,"\t\tclass=\"%s\";\n", class_field);	
@@ -460,6 +443,11 @@ static void oldParseOneLine(FILE *out,char* line)
 
       /* Operator. Line should contain at least */
       /* password and host where connection is  */
+      /* Local operators no longer exist        */
+      /* For now, I don't force locals to have  */
+      /* certain default flags.  I probably     */
+      /* should if there is no port field       */
+    case 'o':
     case 'O':
       /* defaults */
       fprintf(out,"\toperator {\n");
@@ -471,24 +459,6 @@ static void oldParseOneLine(FILE *out,char* line)
 	}
       if(passwd_field)
 	fprintf(out,"\t\tpassword=\"%s\";\n", passwd_field);
-      fprintf(out,"\t\tglobal=yes;\n");
-      if(port_field)
-	OperPrivsFromString(out,port_field);
-      if(class_field)
-	fprintf(out,"\t\tclass=\"%s\";\n", class_field);	
-      fprintf(out,"\t};\n\n");
-      break;
-
-      /* Local Operator, (limited privs --SRB) */
-    case 'o':
-      fprintf(out,"\tlocal_operator {\n");
-      if(user_field)
-	fprintf(out,"\t\tname=\"%s\";\n", user_field);
-      if(host_field)
-	fprintf(out,"\t\thost=\"%s\";\n", host_field);
-      if(passwd_field)
-	fprintf(out,"\t\tpassword=\"%s\";\n", passwd_field);
-      fprintf(out,"\t\tglobal=no;\n");
       if(port_field)
 	OperPrivsFromString(out,port_field);
       if(class_field)
@@ -499,8 +469,11 @@ static void oldParseOneLine(FILE *out,char* line)
     case 'P': /* listen port line */
     case 'p':
       fprintf(out,"\tlisten {\n");
+      /* What is the purpose of this field? */
       if(host_field)
 	fprintf(out,"\t\tname=\"%s\";\n", host_field);
+      if(passwd_field)
+        fprintf(out,"\t\tip=\"%s\";\n", passwd_field);
       if(port_field)
 	fprintf(out,"\t\tport=%d;\n", atoi(port_field));
       fprintf(out,"\t};\n\n");
@@ -535,6 +508,10 @@ static void oldParseOneLine(FILE *out,char* line)
 	fprintf(out,"\t\tname=\"%s\";\n", host_field);
       if(passwd_field)
 	fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
+      if(port_field)
+        fprintf(out,"\t\taction=reject;\n");
+      else
+        fprintf(out,"\t\taction=warn;\n");
       fprintf(out,"\t};\n\n");
       break;
 
@@ -551,6 +528,10 @@ static void oldParseOneLine(FILE *out,char* line)
 	}
       if(user_field)
 	{
+          /* Note that connectfreq and number_per_ip set the same variable
+          ** when read by the ircd.  They *ARE* interchangable, just both
+          ** exist for the user's benefit
+          */
 	  int number_per_ip;
 	  number_per_ip = atoi(user_field);
 	  fprintf(out,"\t\tnumber_per_ip=%d;\n", number_per_ip );
@@ -595,8 +576,11 @@ static void PrintOutServers(FILE* out)
 	  fprintf(out,"\t\taccept_password=\"%s\";\n", p->n_passwd);
 	  fprintf(out,"\t\tport=%d;\n", p->port );
 
+#if 0
+          /* ZIP links are gone */
 	  if(p->compressed)
 	    fprintf(out,"\t\tcompressed=yes;\n");
+#endif
 
 	  if(p->lazylink)
 	    fprintf(out,"\t\tlazylink=yes;\n");
@@ -837,19 +821,28 @@ static char* ClientFlags(FILE *out, char* spoof, char *tmp)
 	    fprintf(out,"\t\tspoof=\"%s\";\n",spoof);	  
           break;
 	case '!':
+#if 0
+          /* This is gone */
 	  fprintf(out,"\t\tlimit_ip;\n");
+#endif
 	  break;
         case '-':
-	  fprintf(out,"\t\tno_tilde;\n");	  
+	  fprintf(out,"\t\tno_tilde=yes;\n");	  
           break;
         case '+':
-	  fprintf(out,"\t\tneed_ident;\n");	  
+	  fprintf(out,"\t\tneed_ident=yes;\n");	  
           break;
         case '$':
+#if 0
+          /* This is also gone */
 	  fprintf(out,"\t\thave_ident;\n");	  
+#endif
           break;
         case '%':
+#if 0
+          /* As is this... */
 	  fprintf(out,"\t\tnomatch_ip;\n");	  
+#endif
           break;
         case '^':        /* is exempt from k/g lines */
 	  fprintf(out,"\t\tkline_exempt=yes;\n");	  
@@ -860,7 +853,10 @@ static char* ClientFlags(FILE *out, char* spoof, char *tmp)
 	  fprintf(out,"\t\texceed_limit=yes;\n");	  
           break;
         case '<':        /* can idle */
+#if 0
+          /* So's this... */
 	  fprintf(out,"\t\tcan_idle=yes;\n");	  
+#endif
           break;
         default:
           return tmp;
