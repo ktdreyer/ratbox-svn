@@ -1,3 +1,17 @@
+androsyn    2004/08/10 15:37:34 EDT	(20040810_4)
+
+  Modified files:
+    include              commio.h 
+    src                  commio.c 
+  Log:
+  Remove flush handler code as its not needed now.
+  
+  Revision  Changes    Path
+  1.9       +0 -3      ircd-ratbox/include/commio.h
+  1.14      +0 -24     ircd-ratbox/src/commio.c
+
+
+
 androsyn    2004/08/10 12:42:19 EDT	(20040810_3)
 
   Modified files:
