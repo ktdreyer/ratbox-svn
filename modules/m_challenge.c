@@ -163,7 +163,7 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 	if(!(aconf = find_conf_exact(parv[1], source_p->username, source_p->host,
 				     CONF_OPERATOR)) &&
 	   !(aconf = find_conf_exact(parv[1], source_p->username,
-				     source_p->localClient->sockhost, CONF_OPERATOR)))
+				     source_p->sockhost, CONF_OPERATOR)))
 	{
 		sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, parv[0]);
 		log_foper(source_p, parv[1]);

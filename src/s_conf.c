@@ -371,7 +371,7 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 	if((i = verify_access(source_p, username)))
 	{
 		ilog(L_INFO, "Access denied: %s[%s]", 
-		     source_p->name, source_p->localClient->sockhost);
+		     source_p->name, source_p->sockhost);
 	}
 	
 	switch (i)
@@ -418,7 +418,7 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 		sendto_realops_flags(UMODE_FULL, L_ALL,
 				     "I-line is full for %s (%s).",
 				     get_client_name(source_p, SHOW_IP),
-				     source_p->localClient->sockhost);
+				     source_p->sockhost);
 
 		ilog(L_INFO, "Too many connections from %s.", log_client_name(source_p, SHOW_IP));
 

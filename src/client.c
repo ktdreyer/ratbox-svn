@@ -906,14 +906,17 @@ get_client_name(struct Client *client, int showip)
 		switch (showip)
 		{
 		case SHOW_IP:
-			ircsprintf(nbuf, "%s[%s@%s]", client->name,
-				   client->username, client->localClient->sockhost);
+			ircsprintf(nbuf, "%s[%s@%s]", 
+				   client->name, client->username, 
+				   client->sockhost);
 			break;
 		case MASK_IP:
-			ircsprintf(nbuf, "%s[%s@255.255.255.255]", client->name, client->username);
+			ircsprintf(nbuf, "%s[%s@255.255.255.255]",
+				   client->name, client->username);
 			break;
 		default:
-			ircsprintf(nbuf, "%s[%s@%s]", client->name, client->username, client->host);
+			ircsprintf(nbuf, "%s[%s@%s]",
+				   client->name, client->username, client->host);
 		}
 		return nbuf;
 	}
@@ -946,7 +949,7 @@ log_client_name(struct Client *target_p, int showip)
 		{
 		case SHOW_IP:
 			ircsprintf(nbuf, "%s[%s@%s]", target_p->name,
-				   target_p->username, target_p->localClient->sockhost);
+				   target_p->username, target_p->sockhost);
 			break;
 
 		case MASK_IP:
@@ -1447,7 +1450,7 @@ exit_local_client(struct Client *client_p, struct Client *source_p, struct Clien
 #ifdef HIDE_SPOOF_IPS
                              IsIPSpoof(source_p) ? "255.255.255.255" :
 #endif
-			     source_p->localClient->sockhost);
+			     source_p->sockhost);
 
 	log_user_exit(source_p);
 	call_local_exit_hook(source_p, comment);	

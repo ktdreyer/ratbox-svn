@@ -360,22 +360,22 @@ add_connection(struct Listener *listener, int fd, struct sockaddr_storage *sai)
 	 * copy address to 'sockhost' as a string, copy it to host too
 	 * so we have something valid to put into error messages...
 	 */
-	inetntop_sock(&new_client->localClient->ip, new_client->localClient->sockhost, 
-		sizeof(new_client->localClient->sockhost));
+	inetntop_sock(&new_client->localClient->ip, new_client->sockhost, 
+		sizeof(new_client->sockhost));
 
 	*new_client->host = '\0';
 #ifdef IPV6
-	if(*new_client->localClient->sockhost == ':')
+	if(*new_client->sockhost == ':')
 		strlcat(new_client->host, "0", sizeof(new_client->host));
 
 	if(new_client->localClient->ip.ss_family == AF_INET6 && ConfigFileEntry.dot_in_ip6_addr == 1)
 	{
-		strlcat(new_client->host, new_client->localClient->sockhost, sizeof(new_client->host));
+		strlcat(new_client->host, new_client->sockhost, sizeof(new_client->host));
 		strlcat(new_client->host, ".", sizeof(new_client->host));
 	}
 	else
 #endif
-		strlcat(new_client->host, new_client->localClient->sockhost, sizeof(new_client->host));
+		strlcat(new_client->host, new_client->sockhost, sizeof(new_client->host));
 
 	new_client->localClient->fd = fd;
 

@@ -290,6 +290,7 @@ struct config_server_hide
 struct server_info
 {
 	char *name;
+	char sid[3];
 	char *description;
 	char *network_name;
 	char *network_desc;

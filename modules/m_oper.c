@@ -198,7 +198,7 @@ find_password_aconf(const char *name, struct Client *source_p)
 	if(!(aconf = find_conf_exact(name, source_p->username, source_p->host,
 				     CONF_OPERATOR)) &&
 	   !(aconf = find_conf_exact(name, source_p->username,
-				     source_p->localClient->sockhost, CONF_OPERATOR)))
+				     source_p->sockhost, CONF_OPERATOR)))
 	{
 		return 0;
 	}

@@ -219,7 +219,7 @@ mo_rehash(struct Client *client_p, struct Client *source_p, int parc, const char
 					   source_p->name, rehash_commands[x].cmd);
 				rehash_commands[x].handler(source_p);
 				ilog(L_NOTICE, "REHASH %s From %s[%s]", parv[1],
-				     get_oper_name(source_p), source_p->localClient->sockhost);
+				     get_oper_name(source_p), source_p->sockhost);
 				return 0;
 			}
 		}
@@ -242,7 +242,7 @@ mo_rehash(struct Client *client_p, struct Client *source_p, int parc, const char
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "%s is rehashing server config file", get_oper_name(source_p));
 		ilog(L_NOTICE, "REHASH From %s[%s]", get_oper_name(source_p),
-		     source_p->localClient->sockhost);
+		     source_p->sockhost);
 		rehash(0);
 		return 0;
 	}

@@ -706,6 +706,14 @@ main(int argc, char *argv[])
 	}
 	strlcpy(me.name, ServerInfo.name, sizeof(me.name));
 
+	if(ServerInfo.sid[0] == '\0')
+	{
+		fprintf(stderr, "ERROR: No server sid specified in serverinfo block.\n");
+		ilog(L_CRIT, "No server sid specified in serverinfo block.");
+		exit(EXIT_FAILURE);
+	}
+	strcpy(me.id, ServerInfo.sid);
+
 	/* serverinfo{} description must exist.  If not, error out. */
 	if(ServerInfo.description == NULL)
 	{

@@ -70,6 +70,8 @@ int MaxConnectionCount = 1;
 int MaxClientCount = 1;
 int refresh_user_links = 0;
 
+static char buf[BUFSIZE];
+
 static void start_io(struct Client *server);
 
 static SlinkRplHnd slink_error;
@@ -537,7 +539,7 @@ check_server(const char *name, struct Client *client_p, int cryptlink)
 		/* XXX sockhost is the IPv4 ip as a string */
 
 		if(match(aconf->host, client_p->host) ||
-		   match(aconf->host, client_p->localClient->sockhost))
+		   match(aconf->host, client_p->sockhost))
 		{
 			error = -2;
 
@@ -672,10 +674,64 @@ send_capabilities(struct Client *client_p, struct ConfItem *aconf,
 	sendto_one(client_p, "CAPAB :%s", msgbuf);
 }
 
+/* burst_mode_list()
+ *
+ * input	- client to burst to, channel name, list to burst, mode flag
+ * output	-
+ * side effects - client is sent a list of +b, or +e, or +I modes
+ */
+static void
+burst_mode_list(struct Client *client_p, char *chname, dlink_list *list, char flag)
+{
+	dlink_node *ptr;
+	struct Ban *banptr;
+	char mbuf[MODEBUFLEN];
+	char pbuf[BUFSIZE];
+	int tlen;
+	int mlen;
+	int cur_len;
+	char *mp;
+	char *pp;
+	int count = 0;
 
+	mlen = ircsprintf(buf, ":%s MODE %s +", me.name, chname);
+	cur_len = mlen;
+
+	mp = mbuf;
+	pp = pbuf;
+
+	DLINK_FOREACH(ptr, list->head)
+	{
+		banptr = ptr->data;
+		tlen = strlen(banptr->banstr) + 3;
+
+		/* uh oh */
+		if(tlen > MODEBUFLEN)
+			continue;
+
+		if((count >= MAXMODEPARAMS) || ((cur_len + tlen + 2) > (BUFSIZE - 3)))
+		{
+			sendto_one(client_p, "%s%s %s", buf, mbuf, pbuf);
+
+			mp = mbuf;
+			pp = pbuf;
+			cur_len = mlen;
+			count = 0;
+		}
+
+		*mp++ = flag;
+		*mp = '\0';
+		pp += ircsprintf(pp, "%s ", banptr->banstr);
+		cur_len += tlen;
+		count++;
+	}
+
+	if(count != 0)
+		sendto_one(client_p, "%s%s %s", buf, mbuf, pbuf);
+}
 
 /*
- * burst_users
+ * burst_TS5
  * 
  * inputs	- client (server) to send nick towards
  * 		- client to send nick for
@@ -683,11 +739,20 @@ send_capabilities(struct Client *client_p, struct ConfItem *aconf,
  * side effects	- NICK message is sent towards given client_p
  */
 static void
-burst_users(struct Client *client_p)
+burst_TS5(struct Client *client_p)
 {
-	struct Client *target_p;
-	dlink_node *ptr;
+	static char modebuf[MODEBUFLEN];
+	static char parabuf[MODEBUFLEN];
 	static char ubuf[12];
+	struct Client *target_p;
+	struct Channel *chptr;
+	struct membership *msptr;
+	struct hook_burst_channel hinfo;
+	dlink_node *ptr;
+	dlink_node *uptr;
+	char *t;
+	int tlen, mlen;
+	int cur_len = 0;
 
 	DLINK_FOREACH(ptr, global_client_list.head)
 	{
@@ -703,17 +768,129 @@ burst_users(struct Client *client_p)
 			ubuf[1] = '\0';
 		}
 
-#ifdef BROKEN_TS6
-		if(HasID(target_p) && IsCapable(client_p, CAP_UID))
-			sendto_one(client_p, "CLIENT %s %d %lu %s %s %s %s %s :%s",
-					target_p->name,
-					target_p->hopcount + 1,
-					(unsigned long) target_p->tsinfo,
-					ubuf,
-					target_p->username, target_p->host,
-					target_p->user->server, target_p->user->id, target_p->info);
+		sendto_one(client_p, "NICK %s %d %lu %s %s %s %s :%s",
+			   target_p->name, target_p->hopcount + 1,
+			   (unsigned long) target_p->tsinfo, ubuf,
+			   target_p->username, target_p->host,
+			   target_p->user->server, target_p->info);
+
+		if(ConfigFileEntry.burst_away && !EmptyString(target_p->user->away))
+			sendto_one(client_p, ":%s AWAY :%s",
+				   target_p->name, target_p->user->away);
+	}
+
+	DLINK_FOREACH(ptr, global_channel_list.head)
+	{
+		chptr = ptr->data;
+
+		s_assert(dlink_list_length(&chptr->members) > 0);
+		if(dlink_list_length(&chptr->members) <= 0)
+			continue;
+
+		if(*chptr->chname != '#')
+			return;
+
+		hinfo.chptr = chptr;
+		hinfo.client = client_p;
+		hook_call_event(h_burst_channel_id, &hinfo);
+
+		*modebuf = *parabuf = '\0';
+		channel_modes(chptr, client_p, modebuf, parabuf);
+
+		cur_len = mlen = ircsprintf(buf, ":%s SJOIN %lu %s %s %s:", me.name,
+				(unsigned long) chptr->channelts,
+				chptr->chname, modebuf, parabuf);
+
+		t = buf + mlen;
+
+		DLINK_FOREACH(uptr, chptr->members.head)
+		{
+			msptr = uptr->data;
+
+			tlen = strlen(msptr->client_p->name) + 1;
+			if(is_chanop(msptr))
+				tlen++;
+			if(is_voiced(msptr))
+				tlen++;
+
+			if(cur_len + tlen >= BUFSIZE - 3)
+			{
+				t--;
+				*t = '\0';
+				sendto_one(client_p, "%s", buf);
+				cur_len = mlen;
+				t = buf + mlen;
+			}
+
+			ircsprintf(t, "%s%s ", find_channel_status(msptr, 1), 
+				   msptr->client_p->name);
+
+			cur_len += tlen;
+			t += tlen;
+		}
+
+		/* remove trailing space */
+		t--;
+		*t = '\0';
+		sendto_one(client_p, "%s", buf);
+
+		burst_mode_list(client_p, chptr->chname, &chptr->banlist, 'b');
+
+		if(IsCapable(client_p, CAP_EX))
+			burst_mode_list(client_p, chptr->chname, &chptr->exceptlist, 'e');
+
+		if(IsCapable(client_p, CAP_IE))
+			burst_mode_list(client_p, chptr->chname, &chptr->invexlist, 'I');
+	}
+}
+
+/*
+ * burst_TS6
+ * 
+ * inputs	- client (server) to send nick towards
+ * 		- client to send nick for
+ * output	- NONE
+ * side effects	- NICK message is sent towards given client_p
+ */
+static void
+burst_TS6(struct Client *client_p)
+{
+	static char modebuf[MODEBUFLEN];
+	static char parabuf[MODEBUFLEN];
+	static char ubuf[12];
+	struct Client *target_p;
+	struct Channel *chptr;
+	struct membership *msptr;
+	struct hook_burst_channel hinfo;
+	dlink_node *ptr;
+	dlink_node *uptr;
+	char *t;
+	int tlen, mlen;
+	int cur_len = 0;
+
+	DLINK_FOREACH(ptr, global_client_list.head)
+	{
+		target_p = ptr->data;
+
+		if(!IsPerson(target_p))
+			continue;
+
+		send_umode(NULL, target_p, 0, SEND_UMODES, ubuf);
+		if(!*ubuf)
+		{
+			ubuf[0] = '+';
+			ubuf[1] = '\0';
+		}
+
+		if(has_id(target_p))
+			sendto_one(client_p, ":%s UID %s %d %lu %s %s %s %s %s :%s",
+				   target_p->servptr->id, target_p->name,
+				   target_p->hopcount + 1, 
+				   (unsigned long) target_p->tsinfo, ubuf,
+				   target_p->username, target_p->host,
+				   IsIPSpoof(target_p) ? "0" : target_p->sockhost,
+				   target_p->id, target_p->info);
 		else
-#endif
 			sendto_one(client_p, "NICK %s %d %lu %s %s %s %s :%s",
 					target_p->name,
 					target_p->hopcount + 1,
@@ -724,10 +901,76 @@ burst_users(struct Client *client_p)
 
 		if(ConfigFileEntry.burst_away && !EmptyString(target_p->user->away))
 			sendto_one(client_p, ":%s AWAY :%s",
-				   get_id(client_p, target_p),
+				   use_id(target_p),
 				   target_p->user->away);
 	}
+
+	DLINK_FOREACH(ptr, global_channel_list.head)
+	{
+		chptr = ptr->data;
+
+		s_assert(dlink_list_length(&chptr->members) > 0);
+		if(dlink_list_length(&chptr->members) <= 0)
+			continue;
+
+		if(*chptr->chname != '#')
+			return;
+
+		hinfo.chptr = chptr;
+		hinfo.client = client_p;
+		hook_call_event(h_burst_channel_id, &hinfo);
+
+		*modebuf = *parabuf = '\0';
+		channel_modes(chptr, client_p, modebuf, parabuf);
+
+		cur_len = mlen = ircsprintf(buf, ":%s SJOIN %lu %s %s %s:", me.name,
+				(unsigned long) chptr->channelts,
+				chptr->chname, modebuf, parabuf);
+
+		t = buf + mlen;
+
+		DLINK_FOREACH(uptr, chptr->members.head)
+		{
+			msptr = uptr->data;
+
+			tlen = strlen(msptr->client_p->name) + 1;
+			if(is_chanop(msptr))
+				tlen++;
+			if(is_voiced(msptr))
+				tlen++;
+
+			if(cur_len + tlen >= BUFSIZE - 3)
+			{
+				t--;
+				*t = '\0';
+				sendto_one(client_p, "%s", buf);
+				cur_len = mlen;
+				t = buf + mlen;
+			}
+
+			ircsprintf(t, "%s%s ", find_channel_status(msptr, 1), 
+				   use_id(msptr->client_p));
+
+			cur_len += tlen;
+			t += tlen;
+		}
+
+		/* remove trailing space */
+		t--;
+		*t = '\0';
+		sendto_one(client_p, "%s", buf);
+
+		burst_mode_list(client_p, chptr->chname, &chptr->banlist, 'b');
+
+		if(IsCapable(client_p, CAP_EX))
+			burst_mode_list(client_p, chptr->chname, &chptr->exceptlist, 'e');
+
+		if(IsCapable(client_p, CAP_IE))
+			burst_mode_list(client_p, chptr->chname, &chptr->invexlist, 'I');
+	}
 }
+
+
 
 /*
  * show_capabilities - show current server capabilities
@@ -847,7 +1090,8 @@ server_estab(struct Client *client_p)
 		 */
 		if(!EmptyString(aconf->spasswd))
 		{
-			sendto_one(client_p, "PASS %s :TS", aconf->spasswd);
+			sendto_one(client_p, "PASS %s TS :%d", 
+				   aconf->spasswd, TS_CURRENT);
 		}
 
 		/*
@@ -903,8 +1147,8 @@ server_estab(struct Client *client_p)
 	}
 #endif
 
-	sendto_one(client_p, "SVINFO %d %d 0 :%lu",
-		   TS_CURRENT, TS_MIN, (unsigned long) CurrentTime);
+	sendto_one(client_p, "SVINFO %d %d %s :%lu",
+		   TS_CURRENT, TS_MIN, me.id, (unsigned long) CurrentTime);
 
 	client_p->servptr = &me;
 
@@ -1019,9 +1263,11 @@ server_estab(struct Client *client_p)
 		}
 	}
 
-	burst_users(client_p);
-	burst_channels(client_p);
-
+	if(DoesTS6(client_p))
+		burst_TS6(client_p);
+	else
+		burst_TS5(client_p);
+		
 	if(IsCapable(client_p, CAP_EOB))
 		sendto_one(client_p, ":%s EOB", me.name);
 
@@ -1034,50 +1280,50 @@ server_estab(struct Client *client_p)
 static void
 start_io(struct Client *server)
 {
-	unsigned char *buf;
+	unsigned char *iobuf;
 	int c = 0;
 	int linecount = 0;
 	int linelen;
 
-	buf = MyMalloc(256);
+	iobuf = MyMalloc(256);
 
 	if(IsCapable(server, CAP_ZIP))
 	{
 		/* ziplink */
-		buf[c++] = SLINKCMD_SET_ZIP_OUT_LEVEL;
-		buf[c++] = 0;	/* |          */
-		buf[c++] = 1;	/* \ len is 1 */
-		buf[c++] = ConfigFileEntry.compression_level;
-		buf[c++] = SLINKCMD_START_ZIP_IN;
-		buf[c++] = SLINKCMD_START_ZIP_OUT;
+		iobuf[c++] = SLINKCMD_SET_ZIP_OUT_LEVEL;
+		iobuf[c++] = 0;	/* |          */
+		iobuf[c++] = 1;	/* \ len is 1 */
+		iobuf[c++] = ConfigFileEntry.compression_level;
+		iobuf[c++] = SLINKCMD_START_ZIP_IN;
+		iobuf[c++] = SLINKCMD_START_ZIP_OUT;
 	}
 #ifdef HAVE_LIBCRYPTO
 	if(IsCapable(server, CAP_ENC))
 	{
 		/* Decryption settings */
-		buf[c++] = SLINKCMD_SET_CRYPT_IN_CIPHER;
-		buf[c++] = 0;	/* /                     (upper 8-bits of len) */
-		buf[c++] = 1;	/* \ cipher id is 1 byte (lower 8-bits of len) */
-		buf[c++] = server->localClient->in_cipher->cipherid;
-		buf[c++] = SLINKCMD_SET_CRYPT_IN_KEY;
-		buf[c++] = 0;	/* keylen < 256 */
-		buf[c++] = server->localClient->in_cipher->keylen;
-		memcpy((buf + c), server->localClient->in_key,
+		iobuf[c++] = SLINKCMD_SET_CRYPT_IN_CIPHER;
+		iobuf[c++] = 0;	/* /                     (upper 8-bits of len) */
+		iobuf[c++] = 1;	/* \ cipher id is 1 byte (lower 8-bits of len) */
+		iobuf[c++] = server->localClient->in_cipher->cipherid;
+		iobuf[c++] = SLINKCMD_SET_CRYPT_IN_KEY;
+		iobuf[c++] = 0;	/* keylen < 256 */
+		iobuf[c++] = server->localClient->in_cipher->keylen;
+		memcpy((iobuf + c), server->localClient->in_key,
 		       server->localClient->in_cipher->keylen);
 		c += server->localClient->in_cipher->keylen;
 		/* Encryption settings */
-		buf[c++] = SLINKCMD_SET_CRYPT_OUT_CIPHER;
-		buf[c++] = 0;	/* /                     (upper 8-bits of len) */
-		buf[c++] = 1;	/* \ cipher id is 1 byte (lower 8-bits of len) */
-		buf[c++] = server->localClient->out_cipher->cipherid;
-		buf[c++] = SLINKCMD_SET_CRYPT_OUT_KEY;
-		buf[c++] = 0;	/* keylen < 256 */
-		buf[c++] = server->localClient->out_cipher->keylen;
-		memcpy((buf + c), server->localClient->out_key,
+		iobuf[c++] = SLINKCMD_SET_CRYPT_OUT_CIPHER;
+		iobuf[c++] = 0;	/* /                     (upper 8-bits of len) */
+		iobuf[c++] = 1;	/* \ cipher id is 1 byte (lower 8-bits of len) */
+		iobuf[c++] = server->localClient->out_cipher->cipherid;
+		iobuf[c++] = SLINKCMD_SET_CRYPT_OUT_KEY;
+		iobuf[c++] = 0;	/* keylen < 256 */
+		iobuf[c++] = server->localClient->out_cipher->keylen;
+		memcpy((iobuf + c), server->localClient->out_key,
 		       server->localClient->out_cipher->keylen);
 		c += server->localClient->out_cipher->keylen;
-		buf[c++] = SLINKCMD_START_CRYPT_IN;
-		buf[c++] = SLINKCMD_START_CRYPT_OUT;
+		iobuf[c++] = SLINKCMD_START_CRYPT_IN;
+		iobuf[c++] = SLINKCMD_START_CRYPT_OUT;
 	}
 #endif
 
@@ -1085,17 +1331,17 @@ start_io(struct Client *server)
 	{
 		linecount++;
 
-		buf = MyRealloc(buf, (c + READBUF_SIZE + 64));
+		iobuf = MyRealloc(buf, (c + READBUF_SIZE + 64));
 
 		/* store data in c+3 to allow for SLINKCMD_INJECT_RECVQ and len u16 */
-		linelen = linebuf_get(&server->localClient->buf_recvq, (char *) (buf + c + 3), READBUF_SIZE, LINEBUF_PARTIAL, LINEBUF_RAW);	/* include partial lines & don't
+		linelen = linebuf_get(&server->localClient->buf_recvq, (char *) (iobuf + c + 3), READBUF_SIZE, LINEBUF_PARTIAL, LINEBUF_RAW);	/* include partial lines & don't
 																		   parse data */
 
 		if(linelen)
 		{
-			buf[c++] = SLINKCMD_INJECT_RECVQ;
-			buf[c++] = (linelen >> 8);
-			buf[c++] = (linelen & 0xff);
+			iobuf[c++] = SLINKCMD_INJECT_RECVQ;
+			iobuf[c++] = (linelen >> 8);
+			iobuf[c++] = (linelen & 0xff);
 			c += linelen;
 		}
 		else
@@ -1106,16 +1352,18 @@ start_io(struct Client *server)
 	{
 		linecount++;
 
-		buf = MyRealloc(buf, (c + BUF_DATA_SIZE + 64));
+		iobuf = MyRealloc(buf, (c + BUF_DATA_SIZE + 64));
 
 		/* store data in c+3 to allow for SLINKCMD_INJECT_RECVQ and len u16 */
-		linelen = linebuf_get(&server->localClient->buf_sendq, (char *) (buf + c + 3), READBUF_SIZE, LINEBUF_PARTIAL, LINEBUF_PARSED);	/* include partial lines */
+		linelen = linebuf_get(&server->localClient->buf_sendq, 
+				      (char *) (iobuf + c + 3), READBUF_SIZE, 
+				      LINEBUF_PARTIAL, LINEBUF_PARSED);	/* include partial lines */
 
 		if(linelen)
 		{
-			buf[c++] = SLINKCMD_INJECT_SENDQ;
-			buf[c++] = (linelen >> 8);
-			buf[c++] = (linelen & 0xff);
+			iobuf[c++] = SLINKCMD_INJECT_SENDQ;
+			iobuf[c++] = (linelen >> 8);
+			iobuf[c++] = (linelen & 0xff);
 			c += linelen;
 		}
 		else
@@ -1123,9 +1371,9 @@ start_io(struct Client *server)
 	}
 
 	/* start io */
-	buf[c++] = SLINKCMD_INIT;
+	iobuf[c++] = SLINKCMD_INIT;
 
-	server->localClient->slinkq = buf;
+	server->localClient->slinkq = iobuf;
 	server->localClient->slinkq_ofs = 0;
 	server->localClient->slinkq_len = c;
 
@@ -1459,7 +1707,6 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 	struct Client *client_p;
 	struct sockaddr_storage myipnum; 
 	int fd;
-	char buf[HOSTIPLEN];
 	/* Make sure aconf is useful */
 	s_assert(aconf != NULL);
 	if(aconf == NULL)
@@ -1506,7 +1753,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 	/* Copy in the server, hostname, fd */
 	strlcpy(client_p->name, aconf->name, sizeof(client_p->name));
 	strlcpy(client_p->host, aconf->host, sizeof(client_p->host));
-	strlcpy(client_p->localClient->sockhost, buf, sizeof(client_p->localClient->sockhost));
+	strlcpy(client_p->sockhost, buf, sizeof(client_p->sockhost));
 	client_p->localClient->fd = fd;
 
 	/*

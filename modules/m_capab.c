@@ -61,13 +61,13 @@ mr_capab(struct Client *client_p, struct Client *source_p, int parc, const char 
 	struct EncCapability *ecap;
 	unsigned int cipher = 0;
 #endif
-	
 
 	/* ummm, this shouldn't happen. Could argue this should be logged etc. */
 	if(client_p->localClient == NULL)
 		return 0;
 
-	if(client_p->localClient->caps)
+	/* CAP_TS6 is set in PASS, so is valid.. */
+	if((client_p->localClient->caps & ~CAP_TS6) != 0)
 	{
 		exit_client(client_p, client_p, client_p, "CAPAB received twice");
 		return 0;

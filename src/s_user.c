@@ -354,7 +354,8 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 		sendto_one(source_p,
 			   ":%s NOTICE %s :*** Notice -- You have an illegal character in your hostname",
 			   me.name, source_p->name);
-		strlcpy(source_p->host, source_p->localClient->sockhost, sizeof(source_p->localClient->sockhost));
+		strlcpy(source_p->host, source_p->sockhost,
+			sizeof(source_p->sockhost));
 	}
 
 	aconf = source_p->localClient->att_conf;

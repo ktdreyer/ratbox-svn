@@ -117,8 +117,6 @@ const char *myctime(time_t);
 
 char *strtoken(char **save, char *str, const char *fs);
 
-
-
 /*
  * character macros
  */
@@ -146,6 +144,7 @@ extern const unsigned int CharAttrs[];
 #define SERV_C   0x2000
 #define EOL_C    0x4000
 #define MWILD_C  0x8000
+#define LET_C   0x10000 /* an actual letter */
 
 #define IsHostChar(c)   (CharAttrs[(unsigned char)(c)] & HOST_C)
 #define IsUserChar(c)   (CharAttrs[(unsigned char)(c)] & USER_C)
@@ -155,6 +154,7 @@ extern const unsigned int CharAttrs[];
 #define IsMWildChar(c)  (CharAttrs[(unsigned char)(c)] & MWILD_C)
 #define IsNickChar(c)   (CharAttrs[(unsigned char)(c)] & NICK_C)
 #define IsServChar(c)   (CharAttrs[(unsigned char)(c)] & (NICK_C | SERV_C))
+#define IsIdChar(c)	(CharAttrs[(unsigned char)(c)] & (DIGIT_C | LET_C))
 #define IsCntrl(c)      (CharAttrs[(unsigned char)(c)] & CNTRL_C)
 #define IsAlpha(c)      (CharAttrs[(unsigned char)(c)] & ALPHA_C)
 #define IsSpace(c)      (CharAttrs[(unsigned char)(c)] & SPACE_C)

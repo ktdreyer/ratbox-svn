@@ -146,6 +146,7 @@ struct Client
 	 * considered a read-only field after the client has registered.
 	 */
 	char host[HOSTLEN + 1];	/* client's hostname */
+	char sockhost[HOSTIPLEN + 1]; /* clients ip */
 	char info[REALLEN + 1];	/* Free form additional client info */
 
 	char id[IDLEN + 1];	/* UID/SID, unique on the network */
@@ -209,13 +210,7 @@ struct LocalUser
 	unsigned long serverMask;	/* Only used for Lazy Links */
 	time_t last_nick_change;
 	int number_of_nick_changes;
-	/*
-	 * client->sockhost contains the ip address gotten from the socket as a
-	 * string, this field should be considered read-only once the connection
-	 * has been made. (set in s_bsd.c only)
-	 */
-	char sockhost[HOSTIPLEN + 1];	/* This is the host name from the 
-					   socket ip address as string */
+
 	/*
 	 * XXX - there is no reason to save this, it should be checked when it's
 	 * received and not stored, this is not used after registration
@@ -351,8 +346,10 @@ struct exit_client_hook
 #define TS_MIN          3
 #endif
 
-#define TS_DOESTS       0x20000000
-#define DoesTS(x)       ((x)->tsinfo == TS_DOESTS)
+#define TS_DOESTS       0x10000000
+#define TS_DOESTS6	0x20000000
+#define DoesTS(x)       ((x)->tsinfo & (TS_DOESTS|TS_DOESTS6))
+#define DoesTS6(x)	((x)->tsinfo & TS_DOESTS6)
 
 /* housekeeping flags */
 

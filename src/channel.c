@@ -62,8 +62,6 @@ static struct ChCapCombo chcap_combos[NCHCAP_COMBOS];
 static void destroy_channel(struct Channel *);
 static void free_topic(struct Channel *chptr);
 
-static char buf[BUFSIZE];
-
 /* init_channels()
  *
  * input	-
@@ -235,148 +233,6 @@ remove_user_from_channels(struct Client *client_p)
 
 	client_p->user->channel.head = client_p->user->channel.tail = NULL;
 	client_p->user->channel.length = 0;
-}
-
-/* burst_mode_list()
- *
- * input	- client to burst to, channel name, list to burst, mode flag
- * output	-
- * side effects - client is sent a list of +b, or +e, or +I modes
- */
-static void
-burst_mode_list(struct Client *client_p, char *chname, dlink_list *list, char flag)
-{
-	dlink_node *ptr;
-	struct Ban *banptr;
-	char mbuf[MODEBUFLEN];
-	char pbuf[BUFSIZE];
-	int tlen;
-	int mlen;
-	int cur_len;
-	char *mp;
-	char *pp;
-	int count = 0;
-
-	mlen = ircsprintf(buf, ":%s MODE %s +", me.name, chname);
-	cur_len = mlen;
-
-	mp = mbuf;
-	pp = pbuf;
-
-	DLINK_FOREACH(ptr, list->head)
-	{
-		banptr = ptr->data;
-		tlen = strlen(banptr->banstr) + 3;
-
-		/* uh oh */
-		if(tlen > MODEBUFLEN)
-			continue;
-
-		if((count >= MAXMODEPARAMS) || ((cur_len + tlen + 2) > (BUFSIZE - 3)))
-		{
-			sendto_one(client_p, "%s%s %s", buf, mbuf, pbuf);
-
-			mp = mbuf;
-			pp = pbuf;
-			cur_len = mlen;
-			count = 0;
-		}
-
-		*mp++ = flag;
-		*mp = '\0';
-		pp += ircsprintf(pp, "%s ", banptr->banstr);
-		cur_len += tlen;
-		count++;
-	}
-
-	if(count != 0)
-		sendto_one(client_p, "%s%s %s", buf, mbuf, pbuf);
-}
-
-/* burst_channels()
- *
- * input	- client to burst all channels to
- * output	-
- * side effects - client gets SJOIN's of all members in all channels
- */
-void
-burst_channels(struct Client *client_p)
-{
-	struct Channel *chptr;
-	struct hook_burst_channel hinfo;
-	static char modebuf[MODEBUFLEN];
-	static char parabuf[MODEBUFLEN];
-	struct membership *msptr;
-	dlink_node *ptr;
-	dlink_node *uptr;
-	int tlen;		/* length of t (temp pointer) */
-	int mlen;		/* minimum length */
-	int cur_len = 0;	/* current length */
-	char *t;		/* temp char pointer */
-
-	DLINK_FOREACH(ptr, global_channel_list.head)
-	{
-		chptr = ptr->data;
-
-		s_assert(dlink_list_length(&chptr->members) > 0);
-		if(dlink_list_length(&chptr->members) <= 0)
-			continue;
-
-		if(*chptr->chname != '#')
-			return;
-
-		hinfo.chptr = chptr;
-		hinfo.client = client_p;
-		hook_call_event(h_burst_channel_id, &hinfo);
-
-		*modebuf = *parabuf = '\0';
-		channel_modes(chptr, client_p, modebuf, parabuf);
-
-		cur_len = mlen = ircsprintf(buf, ":%s SJOIN %lu %s %s %s:", me.name,
-				(unsigned long) chptr->channelts,
-				chptr->chname, modebuf, parabuf);
-
-		t = buf + mlen;
-
-		DLINK_FOREACH(uptr, chptr->members.head)
-		{
-			msptr = uptr->data;
-
-			tlen = strlen(msptr->client_p->name) + 1;
-			if(is_chanop(msptr))
-				tlen++;
-			if(is_voiced(msptr))
-				tlen++;
-
-			if(cur_len + tlen >= BUFSIZE - 3)
-			{
-				t--;
-				*t = '\0';
-				sendto_one(client_p, "%s", buf);
-				cur_len = mlen;
-				t = buf + mlen;
-			}
-
-			ircsprintf(t, "%s%s ", find_channel_status(msptr, 1), 
-					msptr->client_p->name);
-
-			cur_len += tlen;
-			t += tlen;
-		}
-
-		/* remove trailing space */
-		t--;
-		*t = '\0';
-		sendto_one(client_p, "%s", buf);
-
-		burst_mode_list(client_p, chptr->chname, &chptr->banlist, 'b');
-
-		if(IsCapable(client_p, CAP_EX))
-			burst_mode_list(client_p, chptr->chname, &chptr->exceptlist, 'e');
-
-		if(IsCapable(client_p, CAP_IE))
-			burst_mode_list(client_p, chptr->chname, &chptr->invexlist, 'I');
-	}
 }
 
 /* check_channel_name()
@@ -571,10 +427,10 @@ is_banned(struct Channel *chptr, struct Client *who, struct membership *msptr,
 	/* if the buffers havent been built, do it here */
 	if(s == NULL)
 	{
-		ircsprintf(src_host, "%s!%s@%s", who->name, who->username, 
-			   who->host);
-		ircsprintf(src_iphost, "%s!%s@%s", who->name, who->username, 
-			   who->localClient->sockhost);
+		ircsprintf(src_host, "%s!%s@%s",
+			   who->name, who->username, who->host);
+		ircsprintf(src_iphost, "%s!%s@%s",
+			   who->name, who->username, who->sockhost);
 
 		s = src_host;
 		s2 = src_iphost;
@@ -654,8 +510,7 @@ can_join(struct Client *source_p, struct Channel *chptr, char *key)
 	ircsprintf(src_host, "%s!%s@%s", 
 		   source_p->name, source_p->username, source_p->host);
 	ircsprintf(src_iphost, "%s!%s@%s",
-		   source_p->name, source_p->username,
-		   source_p->localClient->sockhost);
+		   source_p->name, source_p->username, source_p->sockhost);
 
 	if((is_banned(chptr, source_p, NULL, src_host, src_iphost)) == CHFL_BAN)
 		return (ERR_BANNEDFROMCHAN);

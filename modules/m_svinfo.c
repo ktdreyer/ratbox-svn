@@ -36,7 +36,6 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
-#include "s_serv.h"
 
 static int ms_svinfo(struct Client *, struct Client *, int, const char **);
 
@@ -53,7 +52,7 @@ DECLARE_MODULE_AV1(svinfo, NULL, NULL, svinfo_clist, NULL, NULL, "$Revision$");
  *      parv[0] = sender prefix
  *      parv[1] = TS_CURRENT for the server
  *      parv[2] = TS_MIN for the server
- *      parv[3] = server is standalone or connected to non-TS only
+ *      parv[3] = servers sid (if ts6), else 0
  *      parv[4] = server's idea of UTC time
  */
 static int
@@ -63,7 +62,8 @@ ms_svinfo(struct Client *client_p, struct Client *source_p, int parc, const char
 	time_t theirtime;
 	int tsver = atoi(parv[1]);
 
-	if(!IsServer(source_p) || !MyConnect(source_p))
+	/* SVINFO isnt remote. */
+	if(source_p != client_p)
 		return 0;
 
 	if(TS_CURRENT < atoi(parv[2]) || tsver < TS_MIN)
@@ -114,9 +114,29 @@ ms_svinfo(struct Client *client_p, struct Client *source_p, int parc, const char
 
 	client_p->serv->tsver = tsver;
 
-	/* kludge for sendto_server() */
-	if(tsver >= 6)
-		client_p->localClient->caps |= CAP_TS6;
+	if(DoesTS6(client_p))
+	{
+		/* invalid sid? */
+		if(!IsDigit(parv[3][0]) || !IsIdChar(parv[3][1]) ||
+		   !IsIdChar(parv[3][2]) || parv[3][3] != '\0')
+		{
+			sendto_realops_flags(UMODE_ALL, L_ADMIN,
+					     "Link %s dropped, invalid SID: %s",
+					     get_client_name(source_p, SHOW_IP),
+					     parv[3]);
+			sendto_realops_flags(UMODE_ALL, L_OPER,
+					     "Link %s dropped, invalid SID: %s",
+					     get_client_name(source_p, MASK_IP),
+					     parv[3]);
+			ilog(L_NOTICE, "Link %s dropped, invalid SID: %s",
+			     log_client_name(source_p, SHOW_IP), parv[3]);
+			exit_client(source_p, source_p, source_p, 
+				    "Invalid SID");
+		}
+		else
+			strcpy(client_p->id, parv[3]);
+	}		
 
 	return 0;
 }
+

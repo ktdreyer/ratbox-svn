@@ -34,6 +34,7 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "s_serv.h"
 
 static int mr_pass(struct Client *, struct Client *, int, const char **);
 
@@ -52,7 +53,8 @@ DECLARE_MODULE_AV1(pass, NULL, NULL, pass_clist, NULL, NULL, "$Revision$");
  * mr_pass - PASS message handler
  *      parv[0] = sender prefix
  *      parv[1] = password
- *      parv[2] = optional extra version information
+ *      parv[2] = "TS" if this server supports TS.
+ *      parv[3] = optional TS version field -- needed for TS6
  */
 static int
 mr_pass(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
@@ -80,6 +82,12 @@ mr_pass(struct Client *client_p, struct Client *source_p, int parc, const char *
 		 */
 		if(0 == irccmp(parv[2], "TS") && client_p->tsinfo == 0)
 			client_p->tsinfo = TS_DOESTS;
+
+		if(parc > 3 && (atoi(parv[3]) >= 6))
+		{
+			client_p->localClient->caps |= CAP_TS6;
+			client_p->tsinfo |= TS_DOESTS6;
+		}
 	}
 
 	return 0;

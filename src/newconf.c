@@ -213,9 +213,49 @@ conf_set_serverinfo_name(void *data)
 {
 	if(ServerInfo.name == NULL)
 	{
+		const char *s;
+		int dots = 0;
+
+		for(s = data; *s != '\0'; s++)
+		{
+			if(!IsServChar(*s))
+			{
+				conf_report_error("Ignoring serverinfo::name "
+						  "-- bogus servername.");
+				return;
+			}
+			else if(*s == '.')
+				++dots;
+		}
+
+		if(!dots)
+		{
+			conf_report_error("Ignoring serverinfo::name -- must contain '.'");
+			return;
+		}
+
 		/* the ircd will exit() in main() if we dont set one */
 		if(strlen((char *) data) <= HOSTLEN)
 			DupString(ServerInfo.name, (char *) data);
+	}
+}
+
+static void
+conf_set_serverinfo_sid(void *data)
+{
+	char *sid = data;
+
+	if(ServerInfo.sid[0] == '\0')
+	{
+		if(!IsDigit(sid[0]) || !IsIdChar(sid[1]) ||
+		   !IsIdChar(sid[2]) || sid[3] != '\0')
+		{
+			conf_report_error("Ignoring serverinfo::sid "
+					  "-- bogus sid.");
+			return;
+		}
+
+		strcpy(ServerInfo.sid, sid);
 	}
 }
 
@@ -2686,6 +2726,7 @@ newconf_init()
 	add_conf_item("serverinfo", "rsa_private_key_file", CF_QSTRING,
 		      conf_set_serverinfo_rsa_private_key_file);
 	add_conf_item("serverinfo", "name", CF_QSTRING, conf_set_serverinfo_name);
+	add_conf_item("serverinfo", "sid", CF_QSTRING, conf_set_serverinfo_sid);
 	add_conf_item("serverinfo", "description", CF_QSTRING, conf_set_serverinfo_description);
 	add_conf_item("serverinfo", "network_name", CF_QSTRING, conf_set_serverinfo_network_name);
 	add_conf_item("serverinfo", "network_desc", CF_QSTRING, conf_set_serverinfo_network_desc);
