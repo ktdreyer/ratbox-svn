@@ -416,7 +416,9 @@ int _BlockHeapFree(BlockHeap * bh, void *ptr)
 
     memblock = (void *)((size_t)ptr - sizeof(MemBlock));
     assert(memblock->block != NULL);
-    /* XXX: Should check that the block is really our block */
+    /* Is this block really on the used list? */
+    assert(dlinkFind(&memblock->block->used_list, memblock) == NULL); 
+
     block = memblock->block;
     bh->freeElems++;
     block->freeElems++;
