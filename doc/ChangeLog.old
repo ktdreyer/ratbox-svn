@@ -1,3 +1,21 @@
+db          2002/03/13 08:53:09 EST	(20020313_3)
+
+  Modified files:
+    modules/core         m_server.c 
+    src                  ircd_parser.y s_serv.c 
+  Log:
+  Fix by Lee, approved by db
+  
+  - drop servers that have/introduce servers with invalid servername length
+  - don't set a servername > HOSTLEN
+  
+  Revision  Changes    Path
+  1.81      +27 -7     ircd-hybrid-7/modules/core/m_server.c
+  1.240     +5 -1      ircd-hybrid-7/src/ircd_parser.y
+  7.251     +3 -0      ircd-hybrid-7/src/s_serv.c
+
+
+
 androsyn    2002/03/12 23:21:44 EST	(20020313_2)
 
   Modified files:
