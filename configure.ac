@@ -162,7 +162,9 @@ AC_COMPILE_IFELSE(
 have_v6="no"])
 fi
 
+save_LIBS=$(LIBS)
 AC_SEARCH_LIBS(crypt, [crypt descrypt],,)
+LIBS=$(SAVE_LIBS)
 
 CRYPT_LIB=$ac_cv_search_crypt
 

@@ -45,6 +45,7 @@ static void
 sigchld_handler(int sig)
 {
 	int status;
+	resolver_sigchld(); /* let the resolver check its children first */
 	waitpid(-1, &status, WNOHANG);
 }
 /*

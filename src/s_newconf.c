@@ -422,7 +422,7 @@ free_server_conf(struct server_conf *server_p)
 		MyFree(server_p->spasswd);
 	}
 
-	delete_adns_queries(server_p->dns_query);
+	cancel_lookup(server_p->dns_query);
 
 	MyFree(server_p->name);
 	MyFree(server_p->host);
@@ -441,20 +441,20 @@ free_server_conf(struct server_conf *server_p)
  * if successful save hp in the conf item it was called with
  */
 static void
-conf_dns_callback(void *vptr, adns_answer * reply)
+conf_dns_callback(const char *result, int status, int aftype, void *data)
 {
-	struct server_conf *server_p = (struct server_conf *) vptr;
+	struct server_conf *server_p = data;
 
-	if(reply && reply->status == adns_s_ok)
+	if(status == 1)
 	{
+		inetpton(aftype, result, &server_p->ipnum);
 #ifdef IPV6
-		if(reply->type ==  adns_r_addr6)
+		if(aftype == AF_INET6)
 		{
 			struct sockaddr_in6 *in6 = (struct sockaddr_in6 *)&server_p->ipnum;
 			SET_SS_LEN(server_p->ipnum, sizeof(struct sockaddr_in6));
 			in6->sin6_family = AF_INET6;
 			in6->sin6_port = 0;
-			memcpy(&in6->sin6_addr, &reply->rrs.addr->addr.inet6.sin6_addr, sizeof(struct in6_addr));
 		}
 		else
 #endif
@@ -463,13 +463,9 @@ conf_dns_callback(void *vptr, adns_answer * reply)
 			SET_SS_LEN(server_p->ipnum, sizeof(struct sockaddr_in));
 			in->sin_family = AF_INET;
 			in->sin_port = 0;
-			in->sin_addr.s_addr = reply->rrs.addr->addr.inet.sin_addr.s_addr;
 		}
-		MyFree(reply);
 	}
-
-	MyFree(server_p->dns_query);
-	server_p->dns_query = NULL;
+	server_p->dns_query = 0;
 }
 
 
@@ -500,10 +496,7 @@ add_server_conf(struct server_conf *server_p)
 	if(inetpton_sock(server_p->host, (struct sockaddr *)&server_p->ipnum) > 0)
 		return;
 
-	server_p->dns_query = MyMalloc(sizeof(struct DNSQuery));
-	server_p->dns_query->ptr = server_p;
-	server_p->dns_query->callback = conf_dns_callback;
-	adns_gethost(server_p->host, server_p->ipnum.ss_family, server_p->dns_query);
+	server_p->dns_query = lookup_hostname(server_p->host, server_p->ipnum.ss_family, conf_dns_callback, server_p);
 }
 
 struct server_conf *

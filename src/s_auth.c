@@ -166,45 +166,24 @@ release_auth_client(struct AuthRequest *auth)
  * of success of failure
  */
 static void
-auth_dns_callback(void *vptr, adns_answer * reply)
+auth_dns_callback(const char *res, int status, int aftype, void *data)
 {
-        struct AuthRequest *auth = (struct AuthRequest *) vptr;
+        struct AuthRequest *auth = data;
         ClearDNSPending(auth);
-
-        if(reply && (reply->status == adns_s_ok))
+        auth->dns_query = 0;
+        /* The resolver won't return us anything > HOSTLEN */
+        if(status == 1)
         {
-                if(strlen(*reply->rrs.str) <= HOSTLEN)
-                {
-                        strlcpy(auth->client->host, *reply->rrs.str, sizeof(auth->client->host));
-                        sendheader(auth->client, REPORT_FIN_DNS);
-                }
-                else {
-                        sendheader(auth->client, REPORT_HOST_TOOLONG);
-                }
-                MyFree(reply);
+        	strlcpy(auth->client->host, res, sizeof(auth->client->host));
+		sendheader(auth->client, REPORT_FIN_DNS);	
         } else
-#ifdef IPV6   
-        if(ConfigFileEntry.fallback_to_ip6_int && auth->client->localClient->ip.ss_family == AF_INET6
-                && auth->ip6_int == 0)
         {
-                MyFree(reply);
-                reply = NULL;
-                if(adns_getaddr((struct sockaddr *)&auth->client->localClient->ip,
-                                auth->client->localClient->ip.ss_family, 
-                                &auth->dns_query, 0)) 
-                {
-                        sendheader(auth->client, REPORT_FAIL_DNS);
-                } else {
-                        SetDNSPending(auth);
-                        auth->ip6_int = 1;  
-                        return;
-                }
-        } else   
-#endif
-	{
+        	if(!strcmp(res, "HOSTTOOLONG"))
+        	{
+        		sendheader(auth->client, REPORT_HOST_TOOLONG);
+        	}
                 sendheader(auth->client, REPORT_FAIL_DNS);
-                MyFree(reply);
-	}      
+        } 
         release_auth_client(auth);
 
 }
@@ -369,27 +348,10 @@ start_auth(struct Client *client)
 		return;
 	auth = make_auth_request(client);
 
-	auth->dns_query.ptr = auth;
-	auth->dns_query.callback = auth_dns_callback;
-
 	sendheader(client, REPORT_DO_DNS);
 
-	/* No DNS cache now, remember? -- adrian */
-	if(adns_getaddr((struct sockaddr *)&client->localClient->ip, client->localClient->ip.ss_family,
-		     &auth->dns_query, 1))
-        {
-#ifdef IPV6
-                if(ConfigFileEntry.fallback_to_ip6_int && auth->client->localClient->ip.ss_family == AF_INET6 &&
-                  !adns_getaddr((struct sockaddr *)&auth->client->localClient->ip, client->localClient->ip.ss_family,
-                                &auth->dns_query, 0))
-		{
-                	SetDNSPending(auth);
-            	} else            
-#endif
-		sendheader(client, REPORT_FAIL_DNS);
-	}
-	else 
-		SetDNSPending(auth);
+	auth->dns_query = lookup_ip(client->sockhost, client->localClient->ip.ss_family, auth_dns_callback, auth);
+	SetDNSPending(auth);
 
 	if(ConfigFileEntry.disable_auth == 0)
 		start_auth_query(auth);
@@ -426,8 +388,8 @@ timeout_auth_queries_event(void *notused)
 			if(IsDNSPending(auth))
 			{
 				ClearDNSPending(auth);
-				delete_adns_queries(&auth->dns_query);
-				auth->dns_query.query = NULL;
+				cancel_lookup(auth->dns_query);
+				auth->dns_query = 0;
 				sendheader(auth->client, REPORT_FAIL_DNS);
 			}
 
@@ -584,8 +546,10 @@ delete_auth_queries(struct Client *target_p)
 	target_p->localClient->auth_request = NULL;
 
 	if(IsDNSPending(auth))
-		delete_adns_queries(&auth->dns_query);
-
+	{
+		cancel_lookup(auth->dns_query);
+		auth->dns_query = 0;
+	}
 	if(auth->fd >= 0)
 		comm_close(auth->fd);
 		

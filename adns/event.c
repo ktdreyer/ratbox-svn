@@ -52,7 +52,7 @@ static void tcp_close(adns_state ads) {
   int serv;
   
   serv= ads->tcpserver;
-  comm_close(ads->tcpsocket);
+  close(ads->tcpsocket);
   ads->tcpsocket= -1;
   ads->tcprecv.used= ads->tcprecv_skip= ads->tcpsend.used= 0;
 }
@@ -115,7 +115,7 @@ void adns__tcp_tryconnect(adns_state ads, struct timeval now) {
     if (!proto) { adns__diag(ads,-1,0,"unable to find protocol no. for TCP !"); return; }
     fd= socket(AF_INET,SOCK_STREAM,proto->p_proto);
 #endif
-    fd= comm_socket(AF_INET, SOCK_STREAM, 0, "adns TCP socket");
+    fd= socket(AF_INET, SOCK_STREAM, 0);
     
     if (fd<0) {
       adns__diag(ads,-1,0,"cannot create TCP socket: %s",strerror(errno));
@@ -124,7 +124,7 @@ void adns__tcp_tryconnect(adns_state ads, struct timeval now) {
     r= adns__setnonblock(ads,fd);
     if (r) {
       adns__diag(ads,-1,0,"cannot make TCP socket nonblocking: %s",strerror(r));
-      comm_close(fd);
+      close(fd);
       return;
     }
     memset(&addr,0,sizeof(addr));
@@ -552,7 +552,6 @@ void adns__fdevents(adns_state ads,
 }
 
 /* Wrappers for select(2). */
-#if 0
 void adns_beforeselect(adns_state ads, int *maxfd_io, fd_set *readfds_io,
 		       fd_set *writefds_io, fd_set *exceptfds_io,
 		       struct timeval **tv_mod, struct timeval *tv_tobuf,
@@ -606,7 +605,7 @@ void adns_afterselect(adns_state ads, int maxfd, const fd_set *readfds,
 xit:
   adns__consistency(ads,0,cc_entex);
 }
-#endif
+
 /* General helpful functions. */
 
 void adns_globalsystemfailure(adns_state ads) {

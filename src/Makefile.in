@@ -53,7 +53,7 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_ircd_OBJECTS = adns.$(OBJEXT) balloc.$(OBJEXT) cache.$(OBJEXT) \
+am_ircd_OBJECTS = dns.$(OBJEXT) balloc.$(OBJEXT) cache.$(OBJEXT) \
 	channel.$(OBJEXT) class.$(OBJEXT) client.$(OBJEXT) \
 	commio.$(OBJEXT) event.$(OBJEXT) getopt.$(OBJEXT) \
 	hash.$(OBJEXT) hook.$(OBJEXT) hostmask.$(OBJEXT) \
@@ -73,10 +73,10 @@ DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/include
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/@SELECT_TYPE@.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/adns.Po ./$(DEPDIR)/balloc.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/cache.Po ./$(DEPDIR)/channel.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/class.Po ./$(DEPDIR)/client.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/commio.Po ./$(DEPDIR)/event.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/balloc.Po ./$(DEPDIR)/cache.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/channel.Po ./$(DEPDIR)/class.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/client.Po ./$(DEPDIR)/commio.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dns.Po ./$(DEPDIR)/event.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/getopt.Po ./$(DEPDIR)/hash.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/hook.Po ./$(DEPDIR)/hostmask.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/irc_string.Po ./$(DEPDIR)/ircd.Po \
@@ -247,7 +247,7 @@ target_alias = @target_alias@
 AUTOMAKE_OPTIONS = foreign
 INCLUDES = -I../adns $(INCLTDL)
 ircd_SOURCES = \
-  adns.c                        \
+  dns.c                        \
   balloc.c                      \
   cache.c                       \
   channel.c                     \
@@ -290,11 +290,11 @@ ircd_SOURCES = \
   version.c			\
   @SELECT_TYPE@.c		
 
-@STATIC_MODULES_FALSE@ircd_LDADD = lex.yy.o y.tab.o $(LIBLTDL) ../adns/libadns.a @SSL_LIBS@
-@STATIC_MODULES_TRUE@ircd_LDADD = ../adns/libadns.a @SSL_LIBS@ ../modules/libmodules.a
+@STATIC_MODULES_FALSE@ircd_LDADD = lex.yy.o y.tab.o $(LIBLTDL) @SSL_LIBS@ @CRYPT_LIB@
+@STATIC_MODULES_TRUE@ircd_LDADD = lex.yy.o y.tab.o @SSL_LIBS@ ../modules/libmodules.a @CRYPT_LIB@
 ircd_LDFLAGS = -export-dynamic
-@STATIC_MODULES_FALSE@ircd_DEPENDENCIES = $(LIBLTDLC) ../adns/libadns.a version.o lex.yy.o y.tab.o
-@STATIC_MODULES_TRUE@ircd_DEPENDENCIES = ../adns/libadns.a version.o ../modules/libmodules.a  lex.yy.o y.tab.o
+@STATIC_MODULES_FALSE@ircd_DEPENDENCIES = $(LIBLTDLC) version.o lex.yy.o y.tab.o
+@STATIC_MODULES_TRUE@ircd_DEPENDENCIES = version.o ../modules/libmodules.a  lex.yy.o y.tab.o
 all: all-am
 
 .SUFFIXES:
@@ -367,13 +367,13 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/@SELECT_TYPE@.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/adns.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/balloc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cache.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/class.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/commio.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dns.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/event.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getopt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hash.Po@am__quote@

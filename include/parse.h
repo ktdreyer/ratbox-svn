@@ -87,6 +87,7 @@ struct MessageHash
 #define MAX_MSG_HASH  387
 
 extern void parse(struct Client *, char *, char *);
+int string_to_array(char *string, char *parv[]);
 extern void handle_encap(struct Client *, struct Client *, 
 		         const char *, int, const char *parv[]);
 extern void clear_hash_parse(void);

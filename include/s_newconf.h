@@ -200,7 +200,7 @@ struct server_conf
 
 	char *class_name;
 	struct Class *class;
-	struct DNSQuery *dns_query;
+	u_int16_t dns_query;
 	dlink_node node;
 
 };

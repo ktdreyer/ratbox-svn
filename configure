@@ -22108,6 +22108,7 @@ fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
 
+save_LIBS=$(LIBS)
 echo "$as_me:$LINENO: checking for library containing crypt" >&5
 echo $ECHO_N "checking for library containing crypt... $ECHO_C" >&6
 if test "${ac_cv_search_crypt+set}" = set; then
@@ -22232,6 +22233,7 @@ if test "$ac_cv_search_crypt" != no; then
 
 fi
 
+LIBS=$(SAVE_LIBS)
 
 CRYPT_LIB=$ac_cv_search_crypt
 

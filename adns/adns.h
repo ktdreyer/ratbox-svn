@@ -56,21 +56,22 @@
 
 #ifndef ADNS_H_INCLUDED
 #define ADNS_H_INCLUDED
+#include <stdio.h>
+#include <stdarg.h>
 
-#include "stdinc.h"
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <sys/time.h>
+#include <unistd.h>
+
+
+
 #define MAXFD_POLL 2
 struct adns_pollfd { int fd; short events; short revents; };
 #define ADNS_POLLIN  1
 #define ADNS_POLLPRI 2
 #define ADNS_POLLOUT 4
-#define sprintf ircsprintf
-#define vsnprintf ircvsnprintf
-
-#undef inet_ntop
-#undef inet_pton
-#define inet_ntop inetntop
-#define inet_pton inetpton
-
 
 #ifndef timercmp
 #define timercmp(tvp, uvp, cmp)                                 \
@@ -694,7 +695,7 @@ void adns_globalsystemfailure(adns_state ads);
 /*
  * Entrypoints for select-loop based asynch io:
  */
-#if 0
+
 void adns_beforeselect(adns_state ads, int *maxfd, fd_set *readfds,
 		       fd_set *writefds, fd_set *exceptfds,
 		       struct timeval **tv_mod, struct timeval *tv_buf,
@@ -718,7 +719,7 @@ void adns_afterselect(adns_state ads, int maxfd, const fd_set *readfds,
  * writeable/timeouts as appropriate, as if select had returned the
  * data being passed.  Always succeeds.
  */
-#endif
+
 /*
  * Example calling sequence:
  *

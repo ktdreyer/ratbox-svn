@@ -25,7 +25,7 @@ lex.yy.c: ircd_lexer.l y.tab.c
 	$(LEX) ircd_lexer.l
 	
 ircd_SOURCES =                     \
-  adns.c                        \
+  dns.c                        \
   balloc.c                      \
   cache.c                       \
   channel.c                     \
@@ -69,16 +69,16 @@ ircd_SOURCES =                     \
   @SELECT_TYPE@.c		
 
 if STATIC_MODULES
-ircd_LDADD = ../adns/libadns.a @SSL_LIBS@ ../modules/libmodules.a
+ircd_LDADD = lex.yy.o y.tab.o @SSL_LIBS@ ../modules/libmodules.a @CRYPT_LIB@
 else
-ircd_LDADD = lex.yy.o y.tab.o $(LIBLTDL) ../adns/libadns.a @SSL_LIBS@
+ircd_LDADD = lex.yy.o y.tab.o $(LIBLTDL) @SSL_LIBS@ @CRYPT_LIB@
 endif
 
 ircd_LDFLAGS = -export-dynamic
 
 if STATIC_MODULES
-ircd_DEPENDENCIES = ../adns/libadns.a version.o ../modules/libmodules.a  lex.yy.o y.tab.o
+ircd_DEPENDENCIES = version.o ../modules/libmodules.a  lex.yy.o y.tab.o
 else
-ircd_DEPENDENCIES = $(LIBLTDLC) ../adns/libadns.a version.o lex.yy.o y.tab.o
+ircd_DEPENDENCIES = $(LIBLTDLC) version.o lex.yy.o y.tab.o
 endif
 

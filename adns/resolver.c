@@ -41,16 +41,7 @@ int cfd; /* control fd is blocking from our end */
 #define REVIPV6FALLBACK 3
 #define FWDHOST 4
 
-#define DLINK_FOREACH(pos, head) for (pos = (head); pos != NULL; pos = pos->next)
-#define DLINK_FOREACH_SAFE(pos, n, head) for (pos = (head), n = pos ? pos->next : NULL; pos != NULL; pos = n, n = pos ? pos->next : NULL) 
-#define dlink_list_length(list) (list)->length
-#define dlink_add_alloc(data, list) dlink_add(data, MyMalloc(sizeof(dlink_node)), list)
-#define dlink_add_tail_alloc(data, list) dlink_add_tail(data, MyMalloc(sizeof(dlink_node)), list)
-#define dlink_destroy(node, list) do { dlink_delete(node, list); MyFree(node); } while(0)
 #define EmptyString(x) (!(x) || (*(x) == '\0'))
-
-typedef struct _dlink_node dlink_node;
-typedef struct _dlink_list dlink_list;
 
 static void process_request(void);
 static void resolve_ip(char **parv);
@@ -72,21 +63,6 @@ struct dns_request
 #ifdef IPV6
 	int fallback;
 #endif
-};
-
-struct _dlink_node
-{
-        void *data;
-        dlink_node *prev;
-        dlink_node *next;
-
-};
-
-struct _dlink_list
-{
-        dlink_node *head;
-        dlink_node *tail;
-        unsigned long length;
 };
 
 fd_set readfds;
@@ -141,57 +117,6 @@ static  void MyFree(void *ptr)
 	if(ptr != NULL)
 		free(ptr);
 }
-
-static char *MyStrdup(const char *str)
-{
-	char *ptr;
-	ptr = malloc(strlen(str)+1);
-	if(ptr == NULL)
-	{
-		report_error("MyStrdup failed, giving up");
-	}
-	strcpy(ptr, str);
-	return(ptr);
-}
-
-static void
-dlink_add_tail(void *data, dlink_node * m, dlink_list * list)
-{
-        m->data = data;
-        m->next = NULL;
-        m->prev = list->tail;
-
-        /* Assumption: If list->tail != NULL, list->head != NULL */
-        if(list->tail != NULL)
-                list->tail->next = m;
-        else if(list->head == NULL)  
-                list->head = m;
-
-        list->tail = m;
-        list->length++;
-}
-
-static void
-dlink_delete(dlink_node * m, dlink_list * list)
-{
-        /* Assumption: If m->next == NULL, then list->tail == m
-         *      and:   If m->prev == NULL, then list->head == m
-         */
-        if(m->next)
-                m->next->prev = m->prev;
-        else
-                list->tail = m->prev;
-
-        if(m->prev)
-                m->prev->next = m->next;
-        else
-                list->head = m->next;
-
-        /* Set this to NULL does matter */
-        m->next = m->prev = NULL;
-        list->length--;
-}
-
 
 /* stolen from squid */
 static int
@@ -250,15 +175,14 @@ static void send_answer(struct dns_request *req, adns_answer *reply)
 {
 	char buf[512];
 	char response[64];
-	char rtype[4];
 	int result = 0;
+	int aftype = 0;
 	if(reply && reply->status == adns_s_ok)
 	{
 		switch(req->revfwd)
 		{
 			case REQREV:
 			{
-				strcpy(rtype, "REV");
 				if(strlen(*reply->rrs.str) < 63)
 				{
 					strcpy(response, *reply->rrs.str);
@@ -272,7 +196,6 @@ static void send_answer(struct dns_request *req, adns_answer *reply)
 
 			case REQFWD:
 			{
-				strcpy(rtype, "FWD");
 				switch(reply->type)
 				{
 #ifdef IPV6
@@ -280,6 +203,7 @@ static void send_answer(struct dns_request *req, adns_answer *reply)
 					{
 						char tmpres[65];
 						inet_ntop(AF_INET6, &reply->rrs.addr->addr.inet6.sin6_addr, tmpres, sizeof(tmpres)-1);
+						aftype = 6;
 						if(*tmpres == ':')
 						{
 							strcpy(response, "0");
@@ -293,6 +217,7 @@ static void send_answer(struct dns_request *req, adns_answer *reply)
 					case adns_r_addr:
 					{
 						result = 1;
+						aftype = 4;
 						strcpy(response, inet_ntoa(reply->rrs.addr->addr.inet.sin_addr));
 						break;
 					} 
@@ -300,6 +225,7 @@ static void send_answer(struct dns_request *req, adns_answer *reply)
 					{
 						strcpy(response, "FAILED");
 						result = 0;
+						aftype = 0;
 						break;
 					}						
 				}
@@ -328,7 +254,7 @@ static void send_answer(struct dns_request *req, adns_answer *reply)
               		MyFree(reply);
 			if(result != 0)
 			{
-				snprintf(buf, sizeof(buf), "REV %s 0 FAILED\n", req->reqid);
+				snprintf(buf, sizeof(buf), "%s 0 FAILED\n", req->reqid);
 				send(fd, buf, strlen(buf));
 				MyFree(reply);
 				MyFree(req);
@@ -337,22 +263,10 @@ static void send_answer(struct dns_request *req, adns_answer *reply)
 			return;
 		}
 #endif
-		switch(req->revfwd)
-		{
-			case REQREV:
-				strcpy(rtype, "REV");
-				break;
-			case REQFWD:
-				strcpy(rtype, "FWD");
-				break;
-			default:
-				snprintf(buf, sizeof(buf), "I have an request type of %d, and I don't know what to do!", req->reqtype);
-				report_error(buf);
-		}
 		strcpy(response, "FAILED");
 		result = 0;
 	}
-	snprintf(buf, sizeof(buf), "%s %s %d %s\n", rtype, req->reqid, result, response);
+	snprintf(buf, sizeof(buf), "%s %d %d %s\n", req->reqid, result, aftype, response);
 	if(send(fd, buf, strlen(buf), 0) == -1)
 		report_error("send failure");
 	MyFree(reply);
@@ -365,18 +279,21 @@ static void process_adns_incoming(void)
 	adns_query q, r;
 	adns_answer *answer;
 	struct dns_request *req;
-	
+	int failure = 0;
+		
 	adns_forallqueries_begin(dns_state);
 	while(   (q = adns_forallqueries_next(dns_state, (void *)&r)) != NULL)
 	{
 		switch(adns_check(dns_state, &q, &answer, (void **)&req))
 		{
 			case EAGAIN:
-				break;
+				continue;
 			case 0:
 				send_answer(req, answer);
-				break;
+				continue;
 			default:
+                        	if(answer != NULL && answer->status == adns_s_systemfail)
+					failure = 1;
 				send_answer(req, NULL);
 				break;
 		}
@@ -394,27 +311,32 @@ static void process_adns_incoming(void)
 static void
 read_io(void)
 {
-	struct timeval *tv, tvbuf, tvx, now;
+	struct timeval *tv, tvbuf, now, tvx;
 	int select_result;
 	int maxfd = -1;
-	
+
 	while(1)
 	{
 		FD_ZERO(&readfds);
 		FD_ZERO(&writefds);
 		FD_ZERO(&exceptfds);
 
+		// FD_SET(cfd, &readfds);
 		FD_SET(fd, &readfds);
-		tv = &tvx;
-		maxfd = fd;
-		gettimeofday(&now, NULL);
+		
+		if(fd > cfd)
+			maxfd = fd+1;
+		else
+			maxfd = cfd+1;
+
+		gettimeofday(&now, 0);
 		adns_beforeselect(dns_state, &maxfd, &readfds, &writefds, &exceptfds, &tv, &tvbuf, &now);
-
-		tvx.tv_sec = 1L;
-		tvx.tv_usec = 0L;
-
-		select_result = select(maxfd, &readfds, &writefds, &exceptfds,
-				tv);
+		tvx.tv_sec = 1;
+		tvx.tv_usec = 0;
+		select_result = select(maxfd, &readfds, &writefds, &exceptfds, &tvx);
+		gettimeofday(&now, NULL);
+		adns_afterselect(dns_state, maxfd, &readfds,&writefds,&exceptfds, &now);
+		process_adns_incoming();
 
 		if(select_result == 0)
 			continue;
@@ -422,17 +344,13 @@ read_io(void)
 		/* have data to parse */
 		if(select_result > 0)
 		{
-			gettimeofday(&now, NULL);
-			adns_afterselect(dns_state, maxfd, &readfds,&writefds,&exceptfds, &now);
-			
-			process_adns_incoming();
-			
 			if(FD_ISSET(fd, &readfds))
 			{
 				process_request();
 				/* incoming requests */
 			}
 		}
+		
 	}
 }
 
@@ -655,19 +573,27 @@ int main(int argc, char **argv)
 	char *tfd;
 	char *tcfd;
 	int res;
+	int x = 2;
+	
 	tfd = getenv("FD");
 	tcfd = getenv("CFD");
-
-	if(tfd == NULL || tcfd == NULL)
+	
+	if(tfd == NULL && tcfd == NULL)
 		exit(0);
 	fd = atoi(tfd);
 	cfd = atoi(tcfd);
+
+	while(x++ < 65535)
+	{
+		if(x != fd && x != cfd)
+			close(x);
+	}
 	res = fcntl(fd, F_GETFL, 0);
 	fcntl(fd, F_SETFL, res | O_NONBLOCK);
 
 	res = fcntl(cfd, F_GETFL, 0);
 	fcntl(cfd, F_SETFL, res | O_NONBLOCK);
-
+	
 	adns_init(&dns_state, adns_if_noautosys, 0);
 	setup_signals();
 	read_io();	
