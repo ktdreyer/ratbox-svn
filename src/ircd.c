@@ -199,7 +199,8 @@ size_t get_maxrss(void)
  * output	- none
  * side effects	- if boot_daemon flag is not set, don't daemonize
  */
-static void init_sys(int boot_daemon)
+static void 
+init_sys(void)
 {
 #ifdef RLIMIT_FD_MAX
   struct rlimit limit;
@@ -221,39 +222,35 @@ static void init_sys(int boot_daemon)
         {
           fprintf(stderr,"error setting max fd's to %ld\n",
                         (long) limit.rlim_cur);
-          exit(-1);
+          exit(EXIT_FAILURE);
         }
       printf("Value of NOFILE is %d\n", NOFILE);
     }
 #endif        /* RLIMIT_FD_MAX */
-
-  /* This is needed to not fork if -s is on */
-#ifndef VMS
-  if (boot_daemon)
-    {
-      int pid;
-      if((pid = fork()) < 0)
-        {
-          fprintf(stderr, "Couldn't fork: %s\n", strerror(errno));
-          exit(0);
-        }
-      else if (pid > 0)
-        exit(0);
-#ifdef TIOCNOTTY
-      { /* scope */
-        FBFILE* fd;
-        if ((fd = fbopen("/dev/tty", "+")))
-          {
-            ioctl(fd->fd, TIOCNOTTY, NULL);
-            fbclose(fd);
-          }
-      }
-#endif
-     setsid();
-    }
-#endif
-  close_all_connections();
 }
+
+#ifndef HAVE_DAEMON
+int
+daemon(int a, int b)
+{
+#ifndef VMS
+  int pid;
+  
+  if((pid = fork()) < 0)
+    {
+      perror("fork");
+      exit(EXIT_FAILURE);
+    }
+  else if (pid > 0)
+    exit(EXIT_SUCCESS);
+
+  setsid();
+  fclose(stdin);
+  fclose(stdout);
+  fclose(stderr);
+#endif
+}
+#endif
 
 /*
  * bad_command
@@ -454,14 +451,17 @@ int main(int argc, char *argv[])
 {
   time_t      delay = 0;
 
+  printf("ircd version %s\n", version);
+
   /*
    * save server boot time right away, so getrusage works correctly
    */
   if ((CurrentTime = time(0)) == -1)
     {
       fprintf(stderr, "ERROR: Clock Failure: %s\n", strerror(errno));
-      exit(errno);
+      exit(EXIT_FAILURE);
     }
+
   /* 
    * set initialVMTop before we allocate any memory
    */
@@ -508,7 +508,7 @@ int main(int argc, char *argv[])
   if (chdir(ConfigFileEntry.dpath))
     {
       perror("chdir");
-      exit(-1);
+      exit(EXIT_FAILURE);
     }
 
   setup_signals();
@@ -519,7 +519,7 @@ int main(int argc, char *argv[])
   /* Init the event subsystem */
   eventInit();
 
-  init_sys(bootDaemon);
+  init_sys();
   init_log(logFileName);
 
   init_netio();		/* This needs to be setup early ! -- adrian */
@@ -555,8 +555,9 @@ int main(int argc, char *argv[])
 
   if (ServerInfo.name == NULL)
     {
+      fprintf(stderr, "Error: No server name specified\n");
       log(L_CRIT,"You need a server name to run.");
-      exit(-1);
+      exit(EXIT_FAILURE);
     }
 
   strncpy_irc(me.name, ServerInfo.name, HOSTLEN);
@@ -585,19 +586,16 @@ int main(int argc, char *argv[])
 #endif
   
 #ifdef USE_IAUTH
-	/* bingo - hardcoded for now - will be changed later */
-  /* done - its in ircd.conf now --is */
-  /* strcpy(iAuth.hostname, "127.0.0.1"); 
-	 iAuth.port = 4444; */
-	iAuth.flags = 0;
+  iAuth.flags = 0;
 
-	ConnectToIAuth();
-
-	if (iAuth.socket == NOSOCK)
-	{
-		fprintf(stderr, "Unable to connect to IAuth server\n");
-		exit (-1);
-	}
+  ConnectToIAuth();
+  
+  if (iAuth.socket == NOSOCK)
+    {
+      fprintf(stderr, "Unable to connect to IAuth server\n");
+      log(L_CRIT, "Unable to connect to IAuth server\n");
+      exit (EXIT_FAILURE);
+    }
 #endif
 
   me.fd = -1;
@@ -613,6 +611,12 @@ int main(int argc, char *argv[])
   write_pidfile();
 
   log(L_NOTICE, "Server Ready");
+  printf("server ready: %s\n", bootDaemon ? "detaching from terminal" : "not detaching");
+
+  if (bootDaemon)
+    daemon(1,1);
+
+  close_all_connections();
 
   eventAdd("cleanup_channels", cleanup_channels, NULL,
 	   CLEANUP_CHANNELS_TIME, 0);

@@ -41,3 +41,5 @@
 
 /* u_int32_t */
 #undef u_int32_t
+
+#undef HAVE_DAEMON
