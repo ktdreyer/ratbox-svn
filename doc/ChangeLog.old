@@ -1,3 +1,8 @@
+*** 20001223_53 by wcampbel
+1. Updated .depend's
+2. Added blank depend rules in doc, gnats, and tools Makefile.in's
+
+
 *** 20001223_52 by ejb
 - make ISUPPORT numeric support max_targets dynamically
 - cleaned up gnats/Makefile.in a bit.
