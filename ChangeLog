@@ -1,3 +1,15 @@
+leeh        2003/08/18 17:51:04 EDT	(20030818_1)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  - qs fix for TS6
+  
+  Revision  Changes    Path
+  7.403     +9 -18     ircd-ratbox/src/client.c
+
+
+
 leeh        2003/08/18 17:39:05 EDT	(20030818_0)
 
   Modified files:
