@@ -13,6 +13,7 @@
 int main(int argc, char *argv[])
 {
   printf("No OpenSSL support.\n");
+  return 0;
 }
 
 #else
