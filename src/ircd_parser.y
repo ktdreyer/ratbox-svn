@@ -253,11 +253,13 @@ modules_module:  MODULE '=' QSTRING ';'
    * otherwise we would flood the opers on rehash) -A1kmm. */
   if (!findmodule_byname(yylval.string))
     load_one_module (yylval.string);
+  MyFree(yylval.string);
 };
 
 modules_path: PATH '=' QSTRING ';'
 {
   mod_add_path(yylval.string);
+  MyFree(yylval.string);
 };
 
 
