@@ -14,7 +14,7 @@ it is important you read this file before upgrading.
 - ilog() now properly handles an error during writing
 - rehash/SIGHUP now close/reopen logfiles
 - reject list is now ordered by time, for efficiency
-- fix the time_t formatting stuff
+- fix the time_t formatting stuff, now always uses %ld, casted to (long)
 - fix remote klines that werent accepted causing a rehash
 - fix no libz and compression check in parser
 - we were (wrongly) showing 'E' in stats C if a servers password is
@@ -22,6 +22,14 @@ it is important you read this file before upgrading.
 - added an (unused) type field to xlines over ENCAP, for compatibility with
   other ircds which have it.  Temporary xlines, or xlines sent over a hyb6
   hub will NOT work between between 2.0rc2 and earlier versions anymore.
+- implemented operspy stuff, same as 1.x
+- added m_testmask.c, given a user@host mask, gives anonymous stats on how
+  many local/remote clients match the mask:
+  <- :stable.lan 724 anfl *@*.goat 1 0 :Local/remote clients match
+- fixed problems when removing modes due to an SJOIN/JOIN if MAXMODEPARAMS
+  wasnt 4
+- fix a buffer overflow when removing bans
+- ignore ERR_NOSUCHSERVER directed at us, happens naturally now.
 
 -- ircd-ratbox-2.0rc1
 - fix servlink errors with high fds
