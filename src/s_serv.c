@@ -1624,12 +1624,7 @@ serv_connect_callback(int fd, int status, void *data)
         return;
     }
 
-    m = dlinkFind(&unknown_list, cptr);
-    if(m != NULL)
-      {
-	dlinkDelete(m, &unknown_list);
-	dlinkAdd(cptr, m, &serv_list);
-      }
+    /* don't move to serv_list yet -- we haven't sent a burst! */
 
     /* If we get here, we're ok, so lets start reading some data */
     comm_setselect(fd, FDLIST_SERVER, COMM_SELECT_READ, read_packet, cptr, 0);
