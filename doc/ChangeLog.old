@@ -1,3 +1,16 @@
+db          2002/07/04 12:07:32 EDT	(20020704_3)
+
+  Modified files:
+    contrib              m_jupe.c 
+  Log:
+  - there is no way we are going to find a client struct we just created
+    on the unknowns list!
+  
+  Revision  Changes    Path
+  1.32      +1 -10     ircd-hybrid-7/contrib/m_jupe.c
+
+
+
 androsyn    2002/07/04 12:07:25 EDT	(20020704_2)
 
   Modified files:
