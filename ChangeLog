@@ -1,3 +1,22 @@
+leeh        2002/11/24 20:54:43 UTC	(20021124_18)
+
+  Modified files:
+    include              s_conf.h 
+    modules              m_kline.c m_stats.c m_unkline.c 
+    src                  newconf.c s_conf.c 
+  Log:
+  - shared blocks -> own struct.
+  
+  Revision  Changes    Path
+  7.211     +14 -8     ircd-ratbox/include/s_conf.h
+  1.129     +3 -3      ircd-ratbox/modules/m_kline.c
+  1.130     +22 -23    ircd-ratbox/modules/m_stats.c
+  1.66      +3 -3      ircd-ratbox/modules/m_unkline.c
+  7.56      +16 -26    ircd-ratbox/src/newconf.c
+  7.366     +121 -111  ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2002/11/24 19:42:41 UTC	(20021124_17)
 
   Modified files:
