@@ -1,3 +1,8 @@
+*** 20010929_6 by davidt
+- More fixes for linebuf.c, this should hopefully cope with any length of
+  line properly.
+
+
 *** 20010929_5 by db
 Simply reformatted linebuf.c a tad to agree with the rough coding
 standards of project. No electrons were harmed.
