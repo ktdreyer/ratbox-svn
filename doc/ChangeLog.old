@@ -1,3 +1,9 @@
+*** 20001106_10 by db
+- cryptic code must die if(!--maxmatches) ...
+- minor cleanups
+
+
+
 *** 20001106_9 by adrian
 
 
