@@ -1,3 +1,8 @@
+*** 20001027_1 by toot
+made vchan notices into numeric replies.  276-278 don't seem to be used for anything in
+any ircd i checked, so went for them
+
+
 *** 20001026_6 by adrian
 
 
