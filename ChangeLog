@@ -1,3 +1,15 @@
+leeh        2004/01/07 18:19:03 EST	(20040107_0)
+
+  Modified files:
+    include              config.h 
+  Log:
+  - revved patchlevel to rc1
+  
+  Revision  Changes    Path
+  1.9       +1 -1      rserv/include/config.h
+
+
+
 leeh        2004/01/04 06:35:07 EST	(20040104_0)
 
   Modified files:
