@@ -31,9 +31,39 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int             DBufUsedCount = 0;
-int             DBufCount = 0;
-static dbufbuf* dbufFreeList = NULL;
+
+/*
+ * And this 'DBufBuffer' should never be referenced outside the
+ * implementation of 'dbuf'--would be "hidden" if C had such
+ * keyword...
+ * doh!!! ya just gotta know how to do it ;-)
+ * If it was possible, this would compile to be exactly 1 memory
+ * page in size. 2048 bytes seems to be the most common size, so
+ * as long as a pointer is 4 bytes, we get 2032 bytes for buffer
+ * data after we take away a bit for malloc to play with. -avalon
+ */
+#ifdef _4K_DBUFS
+# define DBUF_SIZE (4096 - sizeof(void*))
+#else
+# define DBUF_SIZE (2048 - sizeof(void*))
+#endif
+
+struct DBufBuffer {
+  struct DBufBuffer* next;  /* Next data buffer, NULL if this is last */
+  char            data[DBUF_SIZE];/* Actual data stored here */
+};
+
+int                       DBufUsedCount = 0;
+int                       DBufCount = 0;
+static struct DBufBuffer* dbufFreeList = NULL;
+
+void count_dbuf_memory(size_t* allocated, size_t* used)
+{
+  assert(0 != allocated);
+  assert(0 != used);
+  *allocated = DBufCount * sizeof(struct DBufBuffer);
+  *used      = DBufUsedCount * sizeof(struct DBufBuffer);
+}
 
 /* 
  * dbuf_init--initialize a stretch of memory as dbufs.
@@ -49,10 +79,10 @@ static dbufbuf* dbufFreeList = NULL;
 void dbuf_init()
 {
   int      i;
-  dbufbuf* dbp;
+  struct DBufBuffer* dbp;
 
   assert(0 == dbufFreeList);
-  dbufFreeList = (dbufbuf*) MyMalloc(sizeof(dbufbuf) * INITIAL_DBUFS);
+  dbufFreeList = (struct DBufBuffer*) MyMalloc(sizeof(struct DBufBuffer) * INITIAL_DBUFS);
   assert(0 != dbufFreeList);
 
   dbp = dbufFreeList;
@@ -66,12 +96,12 @@ void dbuf_init()
 }
 
 /*
-** dbuf_alloc - allocates a dbufbuf structure either from dbufFreeList or
+** dbuf_alloc - allocates a struct DBufBuffer structure either from dbufFreeList or
 ** creates a new one.
 */
-static dbufbuf *dbuf_alloc()
+static struct DBufBuffer *dbuf_alloc()
 {
-  dbufbuf* dbptr = dbufFreeList;
+  struct DBufBuffer* dbptr = dbufFreeList;
 
   if (DBufUsedCount * DBUF_SIZE == BUFFERPOOL)
     return NULL;
@@ -79,7 +109,7 @@ static dbufbuf *dbuf_alloc()
   if (dbptr)
     dbufFreeList = dbufFreeList->next;
   else {
-    dbptr = (dbufbuf*) MyMalloc(sizeof(dbufbuf));
+    dbptr = (struct DBufBuffer*) MyMalloc(sizeof(struct DBufBuffer));
     assert(0 != dbptr);
     ++DBufCount;
   }
@@ -88,9 +118,9 @@ static dbufbuf *dbuf_alloc()
 }
 
 /*
-** dbuf_free - return a dbufbuf structure to the dbufFreeList
+** dbuf_free - return a struct DBufBuffer structure to the dbufFreeList
 */
-static void dbuf_free(dbufbuf* ptr)
+static void dbuf_free(struct DBufBuffer* ptr)
 {
   assert(0 != ptr);
   --DBufUsedCount;
@@ -103,9 +133,9 @@ static void dbuf_free(dbufbuf* ptr)
 ** there is no reason to continue this buffer...). After this
 ** the "dbuf" has consistent EMPTY status... ;)
 */
-static int dbuf_malloc_error(dbuf *dyn)
+static int dbuf_malloc_error(struct DBuf *dyn)
 {
-  dbufbuf *p;
+  struct DBufBuffer *p;
 
   dyn->length = 0;
   dyn->offset = 0;
@@ -119,9 +149,9 @@ static int dbuf_malloc_error(dbuf *dyn)
 }
 
 
-int dbuf_put(dbuf *dyn, char *buf, int length)
+int dbuf_put(struct DBuf *dyn, char *buf, int length)
 {
-  dbufbuf       **h, *d;
+  struct DBufBuffer       **h, *d;
   int    off;
   int   chunk;
 
@@ -150,7 +180,7 @@ int dbuf_put(dbuf *dyn, char *buf, int length)
     {
       if ((d = *h) == NULL)
         {
-          if ((d = (dbufbuf *)dbuf_alloc()) == NULL)
+          if ((d = (struct DBufBuffer *)dbuf_alloc()) == NULL)
             return dbuf_malloc_error(dyn);
           dyn->tail = d;
           *h = d;
@@ -168,7 +198,7 @@ int dbuf_put(dbuf *dyn, char *buf, int length)
 }
 
 
-char* dbuf_map(dbuf *dyn, int *length)
+char* dbuf_map(struct DBuf *dyn, int *length)
 {
   if (dyn->head == NULL)
     {
@@ -182,9 +212,9 @@ char* dbuf_map(dbuf *dyn, int *length)
   return (dyn->head->data + dyn->offset);
 }
 
-void dbuf_delete(dbuf *dyn,int length)
+void dbuf_delete(struct DBuf *dyn,int length)
 {
-  dbufbuf *d;
+  struct DBufBuffer *d;
   int chunk;
 
   if (length > dyn->length)
@@ -213,7 +243,7 @@ void dbuf_delete(dbuf *dyn,int length)
     }
 }
 
-int dbuf_get(dbuf *dyn, char *buf, int length)
+int dbuf_get(struct DBuf *dyn, char *buf, int length)
 {
   int   moved = 0;
   int   chunk;
@@ -239,9 +269,9 @@ int dbuf_get(dbuf *dyn, char *buf, int length)
 ** either a \r or \n present.  If so, copy as much as possible (determined by
 ** length) into buf and return the amount copied - else return 0.
 */
-int     dbuf_getmsg(dbuf *dyn,char *buf,int length)
+int     dbuf_getmsg(struct DBuf *dyn,char *buf,int length)
 {
-  dbufbuf       *d;
+  struct DBufBuffer       *d;
   register char *s;
   register int  dlen;
   register int  i;
@@ -320,7 +350,7 @@ void test_dbuf(void)
 
   increment = -(int)dbuf_alloc()+(int)dbuf_alloc();
   nextalloc = -(int)dbuf_alloc()+(int)malloc(sizeof(char));
-  printf("size: %d increment is %d, nextalloc is %d, pagesize is %d\n",sizeof(dbufbuf),increment,nextalloc,getpagesize());
+  printf("size: %d increment is %d, nextalloc is %d, pagesize is %d\n",sizeof(struct DBufBuffer),increment,nextalloc,getpagesize());
   return;
 }
 #endif /* TEST_DBUF */

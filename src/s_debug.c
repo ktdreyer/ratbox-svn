@@ -242,7 +242,6 @@ void count_memory(struct Client* cptr, char* nick)
   size_t channel_ban_mem      = 0;      /* memory used by channel bans */
   size_t channel_mem          = 0;      /* memory used by channels */
   size_t conf_mem             = 0;      /* memory used by conf lines */
-  size_t dbuf_mem             = 0;      /* memory used by dbufs */
   size_t listener_mem         = 0;      /* memory used by listeners */
   size_t local_client_mem     = 0;      /* memory used by local clients */
   size_t ip_hash_mem          = 0;      /* memory used by ip address hash */
@@ -258,6 +257,8 @@ void count_memory(struct Client* cptr, char* nick)
   size_t client_mem_total     = 0;
   size_t channel_mem_total    = 0;
 
+  size_t dbuf_allocated          = 0;
+  size_t dbuf_used               = 0;
   size_t local_client_allocated  = 0;
   size_t local_client_used       = 0;
   size_t remote_client_allocated = 0;
@@ -347,7 +348,7 @@ void count_memory(struct Client* cptr, char* nick)
   count_listener_memory(&listener_count, &listener_mem);
   count_scache(&scache_count, &scache_mem);
   count_ip_hash(&ip_hash_count, &ip_hash_mem);
-  dbuf_mem = DBufCount * sizeof(dbufbuf);
+  count_dbuf_memory(&dbuf_allocated, &dbuf_used);
 
   resolver_mem = cres_mem(cptr);
 
@@ -363,7 +364,7 @@ void count_memory(struct Client* cptr, char* nick)
 
   mem_total = channel_mem_total + client_mem_total + listener_mem +
               conf_mem + class_count * sizeof(struct Class) + 
-              dbuf_mem + resolver_mem + ip_hash_mem + scache_mem;
+              dbuf_allocated + resolver_mem + ip_hash_mem + scache_mem;
 
   count_local_client_memory(&local_client_allocated, &local_client_used);
   mem_total += local_client_allocated - local_client_mem;
@@ -429,8 +430,8 @@ void count_memory(struct Client* cptr, char* nick)
              class_count * sizeof(struct Class));
 
   sendto_one(cptr, ":%s %d %s :DBuf: allocated %d(%d) used %d(%d)",
-             me.name, RPL_STATSDEBUG, nick, DBufCount, dbuf_mem,
-             DBufUsedCount, DBufUsedCount * sizeof(dbufbuf));
+             me.name, RPL_STATSDEBUG, nick, DBufCount, dbuf_allocated,
+             DBufUsedCount, dbuf_used);
 
   sendto_one(cptr, ":%s %d %s :SCache: %d(%d)",
              me.name, RPL_STATSDEBUG, nick, scache_count, scache_mem);
@@ -451,7 +452,7 @@ void count_memory(struct Client* cptr, char* nick)
 #if 0
   sendto_one(cptr, ":%s %d %s :Total: channel %d client %d conf %d dbuf %d",
              me.name, RPL_STATSDEBUG, nick, channel_mem_total, 
-             client_mem_total, conf_mem, dbuf_mem);
+             client_mem_total, conf_mem, dbuf_allocated);
 #endif
   sendto_one(cptr, ":%s %d %s :Total: %d",
              me.name, RPL_STATSDEBUG, nick, mem_total);

@@ -196,8 +196,8 @@ struct Client
   unsigned short    port;       /* and the remote port# too :-) */
 
   short             lastsq;     /* # of 2k blocks when sendqueued called last*/
-  dbuf              sendQ;      /* Outgoing message queue--if socket full */
-  dbuf              recvQ;      /* Hold for data incoming yet to be parsed */
+  struct DBuf       sendQ;      /* Outgoing message queue--if socket full */
+  struct DBuf       recvQ;      /* Hold for data incoming yet to be parsed */
   /*
    * we want to use unsigned int here so the sizes have a better chance of
    * staying the same on 64 bit machines. The current trend is to use
