@@ -36,6 +36,7 @@ INCLUDES	= -I../include -I../adns $(SSL_INCLUDES)
 CPPFLAGS	= ${INCLUDES} @CPPFLAGS@
 
 CORE_SRCS = \
+  core/register.c \
   core/m_die.c \
   core/m_error.c \
   core/m_join.c \
@@ -43,7 +44,6 @@ CORE_SRCS = \
   core/m_kill.c \
   core/m_message.c \
   core/m_mode.c \
-  core/m_nick.c \
   core/m_part.c \
   core/m_quit.c \
   core/m_server.c \
@@ -75,8 +75,6 @@ SRCS =                          \
   m_oper.c \
   m_operspy.c \
   m_pass.c \
-  m_ping.c \
-  m_pong.c \
   m_post.c \
   m_rehash.c \
   m_restart.c \
@@ -89,7 +87,6 @@ SRCS =                          \
   m_time.c \
   m_topic.c \
   m_trace.c \
-  m_user.c \
   m_userhost.c \
   m_users.c \
   m_version.c \
