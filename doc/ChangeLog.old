@@ -1,3 +1,9 @@
+*** 20010927_2 by wcampbel
+Updated BUGS, INSTALL, and Riedel's operguide.txt.
+Updated numerics.txt slightly.
+Aproval from Diane on IRC.
+
+
 *** 20010927_1 by wcampbel
 Fix for STATS i/I showing restricted mode auth blocks as 'i' as discussed on
 the ircd-coders list.
