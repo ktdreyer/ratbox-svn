@@ -170,10 +170,11 @@ findmodule_byname (char *name)
  * unload_one_module 
  *
  * inputs	- name of module to unload
+ *		- 1 to say modules unloaded, 0 to not
  * output	- 0 if successful, -1 if error
  * side effects	- module is unloaded
  */
-int unload_one_module (char *name)
+int unload_one_module (char *name, int check)
 {
   int modindex;
   void (*deinitfunc)(void) = NULL;
@@ -196,15 +197,19 @@ int unload_one_module (char *name)
 
   if(num_mods != 0)
     num_mods--;
-  
-  log (L_INFO, "Module %s unloaded", name);
-  sendto_realops_flags(FLAGS_ALL,"Module %s unloaded", name);
+
+  if(check == 1)
+    {
+      log (L_INFO, "Module %s unloaded", name);
+      sendto_realops_flags(FLAGS_ALL,"Module %s unloaded", name);
+    }
+
   return 0;
 }
 
 /* load all modules from MPATH */
 void
-load_all_modules (void)
+load_all_modules (int check)
 {
   DIR            *system_module_dir = NULL;
   struct dirent  *ldirent = NULL;
@@ -235,7 +240,7 @@ load_all_modules (void)
       (void)snprintf (module_fq_name, sizeof (module_fq_name),
                       "%s/%s",  MODPATH,
                       ldirent->d_name);
-      (void)load_a_module (module_fq_name);
+      (void)load_a_module (module_fq_name, check);
     }
   }
 
@@ -252,7 +257,7 @@ load_one_module (char *path)
 	struct stat statbuf;
 
 	if (strchr(path, '/')) /* absolute path, try it */
-		return load_a_module(modpath);
+		return load_a_module(modpath, 1);
 
 	for (pathst = mod_paths.head; pathst; pathst = pathst->next)
 	{
@@ -260,7 +265,7 @@ load_one_module (char *path)
 		
 		snprintf(modpath, MAXPATHLEN, "%s/%s", mpath->path, path);
 		if (stat(modpath, &statbuf) == 0)
-			return load_a_module(modpath);
+			return load_a_module(modpath, 1);
 	}
 	
 	sendto_realops_flags (FLAGS_ALL, "Cannot locate module %s", path);
@@ -270,14 +275,14 @@ load_one_module (char *path)
 		
 
 /*
- * load_one_module
+ * load_a_module
  *
  * inputs	- path name of module
  * output	- -1 if error 0 if success
  * side effects - loads a module if successful
  */
 int
-load_a_module (char *path)
+load_a_module (char *path, int check)
 {
   void *tmpptr = NULL;
   char *mod_basename;
@@ -328,10 +333,13 @@ load_a_module (char *path)
 
   initfunc ();
 
-  sendto_realops_flags (FLAGS_ALL, "Module %s [version: %s] loaded at 0x%lx",
+  if(check == 1)
+    {
+      sendto_realops_flags (FLAGS_ALL, "Module %s [version: %s] loaded at 0x%lx",
                         mod_basename, ver, (unsigned long)tmpptr);
-  log (L_WARN, "Module %s [version: %s] loaded at 0x%x",
-       mod_basename, ver, tmpptr);
+       log (L_WARN, "Module %s [version: %s] loaded at 0x%x",
+            mod_basename, ver, tmpptr);
+    }
   MyFree (mod_basename);
 
   return 0;
@@ -412,7 +420,7 @@ mo_modunload (struct Client *cptr, struct Client *sptr, int parc, char **parv)
     return 0;
   }
 
-  if( unload_one_module (m_bn) == -1 )
+  if( unload_one_module (m_bn, 1) == -1 )
   {
     sendto_one (sptr, ":%s NOTICE %s :Module %s is not loaded",
                 me.name, sptr->name, m_bn);
@@ -444,7 +452,7 @@ mo_modreload (struct Client *cptr, struct Client *sptr, int parc, char **parv)
       return 0;
     }
 
-  if( unload_one_module (m_bn) == -1 )
+  if( unload_one_module (m_bn, 1) == -1 )
     {
       sendto_one (sptr, ":%s NOTICE %s :Module %s is not loaded",
                   me.name, sptr->name, m_bn);
@@ -509,7 +517,7 @@ static int
 mo_modrestart (struct Client *cptr, struct Client *sptr, int parc, char **parv)
 
 {
-  int i;
+  int i, modnum;
 
   if (!IsSetOperAdmin (sptr))
   {
@@ -521,12 +529,18 @@ mo_modrestart (struct Client *cptr, struct Client *sptr, int parc, char **parv)
   sendto_one(sptr, ":%s NOTICE %s :Reloading all modules",
              me.name, parv[0]);
 
+  modnum = num_mods;
   for(i = 0; i < num_mods; )
   {
-     unload_one_module(modlist[i]->name);
+     unload_one_module(modlist[i]->name, 0);
   }
 
-  load_all_modules();
+  load_all_modules(0);
+
+  sendto_realops_flags (FLAGS_ALL, "Module Restart: %d modules unloaded, %d modules loaded",
+			modnum, num_mods);
+  log(L_WARN, "Module Restart: %d modules unloaded, %d modules loaded",
+      modnum, num_mods);
 
   return 0;
 }

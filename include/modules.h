@@ -46,14 +46,14 @@ void mod_add_path(char *path);
 extern void load_module(char *path);
 
 /* load all modules */
-extern void load_all_modules(void);
+extern void load_all_modules(int check);
 
 extern void _modinit(void);
 extern void _moddeinit(void);
 
-extern int unload_one_module (char *);
+extern int unload_one_module (char *, int);
 extern int load_one_module (char *);
-extern int load_a_module (char *);
+extern int load_a_module (char *, int);
 extern int  findmodule_byname (char *);
 extern void modules_init(void);
 

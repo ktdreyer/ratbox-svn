@@ -521,7 +521,7 @@ int main(int argc, char *argv[])
   initwhowas();
   init_stats();
 
-  load_all_modules();
+  load_all_modules(1);
 
   initServerMask();
 
