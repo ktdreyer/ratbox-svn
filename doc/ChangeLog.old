@@ -1,3 +1,15 @@
+db          2002/06/24 00:28:05 EDT	(20020624_1)
+
+  Modified files:
+    src                  s_serv.c 
+  Log:
+  - pure consistency in naming. use local_server_p to keep it obvious.
+  
+  Revision  Changes    Path
+  7.265     +6 -8      ircd-hybrid-7/src/s_serv.c
+
+
+
 leeh        2002/06/23 19:02:44 EDT	(20020624_0)
 
   Modified files:
