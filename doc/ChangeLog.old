@@ -1,3 +1,9 @@
+*** 20011129_2 by db
+Removed unnecessary casting on NULL in messages.tab
+be a bit more paranoid in numeric.c
+
+
+
 *** 20011129_1 by db
 - KNOCK is now using a numeric at least on local server.
 - numeric.c was not checking all validity
