@@ -1,3 +1,7 @@
+*** 20010421_6 by toot
+made stats t and stats z a bit more readable.
+
+
 *** 20010421_5 by kreator
 - fix example conf: we don't support cpp, but we do support .include
   "blah" and .include <blah>
