@@ -75,11 +75,7 @@ struct User
   const char*    server;        /* pointer to scached server name */
   char*          response;  /* expected response from client */
   char*          auth_oper; /* Operator to become if they supply the response.*/
-	/* client ID, unique ID per client */
-  char id[IDLEN + 1];
-  char id_key[IDLEN + 1];
-  /* When did we detach from them, if they are detached... */
-  time_t            last_detach_time;
+  char id[IDLEN + 1];       /* client ID, unique ID per client */
 };
 
 struct Server
@@ -135,16 +131,10 @@ struct Client
   unsigned short    status;     /* Client type */
   unsigned char     handler;    /* Handler index */
   unsigned long     serial;	/* used to enforce 1 send per nick */
-  /*
-   * client->name is the unique name for a client nick or host
-   */
+
+  /* client->name is the unique name for a client nick or host */
   char              name[HOSTLEN + 1]; 
 
-  /*
-   * client->llname is used to store the clients requested nick
-   * temporarily for new connections.
-   */
-  char              llname[NICKLEN];
   /* 
    * client->username is the username from ident or the USER message, 
    * If the client is idented the USER message is ignored, otherwise 
@@ -173,9 +163,7 @@ struct Client
   dlink_list	allow_list;	/* clients I'll allow to talk to me */
   dlink_list	on_allow_list;	/* clients that have =me= on their allow list*/
   
-  
   struct LocalUser *localClient;
-
 };
 
 struct LocalUser

@@ -1417,9 +1417,6 @@ set_initial_nick(struct Client *client_p, struct Client *source_p,
  /* fd_desc is long enough */
  fd_note(client_p->localClient->fd, "Nick: %s", nick);
   
- /* They have the nick they want now.. */
- *client_p->llname = '\0';
-
  if (source_p->user)
  {
   strlcpy(buf, source_p->username, sizeof(buf));

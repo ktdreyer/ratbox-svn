@@ -437,8 +437,6 @@ register_local_user(struct Client *client_p, struct Client *source_p,
         ;
       strcpy(source_p->user->id, id);
       add_to_id_hash_table(id, source_p);
-      id = id_get();
-      strcpy(user->id_key, id);
     }
 
   inetntop(source_p->localClient->aftype, &IN_ADDR(source_p->localClient->ip), 
