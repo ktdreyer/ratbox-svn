@@ -1,3 +1,18 @@
+*** 20010125_1 by db
+  ConfItem->name is what should be used for server names
+  fixing that caused a cascade of other bugs to show up.. neato
+
+- first off, added numeric for RESTRICTED numeric.h, messages.tab
+- added notification of restricted mode to s_user.c
+- free and zero spasswd in free_conf() s_conf.c
+- conf_add_server() should return an int, modifed s_conf.c s_conf.h
+  if it fails, it should also log() and not free any given aconf,
+  thats up to the caller
+- fix ircd_parse.y to NOT ignore the result of conf_add_server 
+  and to free etc. whatever on errors
+
+
+
 *** 20010124_10 by wcampbel
 Diane's fix for the connect {} in the conf
 
