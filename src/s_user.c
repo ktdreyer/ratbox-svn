@@ -1068,7 +1068,7 @@ static int check_X_line(struct Client *cptr, struct Client *sptr)
   if(IsAnyOper(sptr))
     return 0;
 
-  if ((aconf = find_special_conf(sptr->info,CONF_XLINE)))
+  if ((aconf = find_x_conf(sptr->info)))
     {
       if(aconf->passwd)
 	reason = aconf->passwd;

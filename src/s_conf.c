@@ -1242,42 +1242,60 @@ struct ConfItem *find_conf_entry(struct ConfItem *aconf, int mask)
 }
 
 /*
- * find_special_conf
+ * find_x_conf
  *
  * inputs       - pointer to char string to find
- *              - mask of type of conf to compare on
  * output       - NULL or pointer to found struct ConfItem
  * side effects - looks for a match on name field
  */
-struct ConfItem *find_special_conf(char *to_find, int mask)
+struct ConfItem *find_x_conf(char *to_find)
 {
   struct ConfItem *aconf;
-  struct ConfItem *this_conf;
 
-  if(mask & CONF_XLINE)
-    this_conf = x_conf;
-  else if(mask & CONF_ULINE)
-    this_conf = u_conf;
-  else
-    return((struct ConfItem *)NULL);
-
-  for (aconf = this_conf; aconf; aconf = aconf->next)
+  for (aconf = x_conf; aconf; aconf = aconf->next)
     {
-      if (!(aconf->status & mask))
-        continue;
-      
       if (BadPtr(aconf->name))
           continue;
 
       if(match(aconf->name,to_find))
-        return aconf;
+        return(aconf);
 
     }
-  return((struct ConfItem *)NULL);
+  return(NULL);
 }
 
 /*
- * find_q_line
+ * find_u_conf
+ *
+ * inputs       - pointer to servername
+ *		- pointer to user of oper
+ *		- pointer to host of oper
+ * output       - NULL or pointer to found struct ConfItem
+ * side effects - looks for a matches on all fields
+ */
+int find_u_conf(char *server,char *user,char *host)
+{
+  struct ConfItem *aconf;
+
+  for (aconf = u_conf; aconf; aconf = aconf->next)
+    {
+      if (BadPtr(aconf->name))
+          continue;
+
+      if(match(aconf->name,server))
+	{
+	  if (BadPtr(aconf->user) || BadPtr(aconf->host))
+	    return YES;
+	  if(match(aconf->user,user) && match(aconf->host,host))
+	    return YES;
+
+	}
+    }
+  return NO;
+}
+
+/*
+ * find_q_conf
  *
  * inputs       - nick to find
  *              - user to match
@@ -1285,7 +1303,7 @@ struct ConfItem *find_special_conf(char *to_find, int mask)
  * output       - YES if found, NO if not found
  * side effects - looks for matches on Q lined nick
  */
-int find_q_line(char *nickToFind,char *user,char *host)
+int find_q_conf(char *nickToFind,char *user,char *host)
 {
   aQlineItem *qp;
   struct ConfItem *aconf;
@@ -3114,11 +3132,6 @@ void conf_add_x_line(struct ConfItem *aconf)
 
 void conf_add_u_line(struct ConfItem *aconf)
 {
-  MyFree(aconf->user);
-  aconf->user = (char *)NULL;
-  aconf->name = aconf->host;
-  aconf->host = (char *)NULL;
-  aconf->next = u_conf;
   u_conf = aconf;
 }
 

@@ -238,10 +238,9 @@ int ms_kline(struct Client *cptr,
                 int parc,
                 char *parv[])
 {
-  char *slave_oper;
   const char *current_date;
   struct Client *rcptr=NULL;
-  struct ConfItem *aconf;
+  struct ConfItem *aconf=NULL;
 
   if(parc < 5)
     return 0;
@@ -249,9 +248,7 @@ int ms_kline(struct Client *cptr,
   sendto_cap_serv_butone (CAP_KLN, cptr, ":%s KLINE %s %s %s : %s",
 			  parv[0], parv[1], parv[2], parv[3], parv[4]);
 
-  slave_oper = parv[1];
-
-  if ((rcptr = hash_find_client(slave_oper,(struct Client *)NULL)))
+  if ((rcptr = hash_find_client(parv[1],(struct Client *)NULL)))
     {
       if(!IsPerson(rcptr))
 	return 0;
@@ -259,22 +256,28 @@ int ms_kline(struct Client *cptr,
   else
     return 0;
 
-  if(!find_special_conf(sptr->name,CONF_ULINE))
+  /* These should never happen but... */
+  if( rcptr->name == NULL )
+    return 0;
+  if( rcptr->user == NULL )
+    return 0;
+  if( rcptr->host == NULL )
+    return 0;
+
+  if(!find_u_conf(sptr->name,rcptr->username,rcptr->host))
     {
       sendto_realops_flags(FLAGS_ALL,
-		   "*** Received Unauthorized kline from %s",sptr->name);
+		   "*** Received Unauthorized kline from %s!%s@%s on %s",
+			   rcptr->name,
+			   rcptr->username,
+			   rcptr->host,
+			   sptr->name);
     }
   else
     {
-      /* These should never happen but... */
-      if( rcptr->user == NULL )
-	return 0;
-      if( rcptr->host == NULL )
-	return 0;
-
       sendto_realops_flags(FLAGS_ALL,
 			   "*** Received kline from %s!%s@%s on %s",
-			   slave_oper,
+			   rcptr->name,
 			   rcptr->user,
 			   rcptr->host,
 			   sptr->name);

@@ -3,17 +3,14 @@
 
   First off, read the original LazyLinks.txt spec.
 
-  I will outline differences. Nicks are at present, always sent.
-This can easily be removed in LL version 2, more closely matching
-the original LazyLinks spec.
-
   The bit map idea was used to mark which channels a leaf "knows" about.
 This limits the number of LL servers to a hub at 32 for now. This is
-easily rewritten, though a little more code consumming. I'd add another
-unsigned long to each channel struct.
+easily rewritten, though a little more code consumming.
+  Each client needs a bit mask as well, to mark if that client is
+known to the leaf or not.
 
 Now from original LazyLinks spec:
-
+LLL = Lazy Link Leaf.
 
 "1.1) Joining
 
@@ -22,41 +19,31 @@ has the channel locally, it just joins the user, sends an SJOIN to HUB,
 and all is well; if it doesn't have the channel, it creates it, sends a
 SJOIN to HUB with the current time as the TS.  LLL tells the user that it
 has joined the channel, but it doesn't tell it that it has ops yet.  So
-LLL sends"
+LLL sends..."
 
-This was modified to this:
+I modified this to:
+When a client on a LLL sends a "JOIN #channel", LLL does as usual: if it
+has the channel locally, it just joins the user, sends an SJOIN to HUB,
+and all is well; if it doesn't have the channel it sends a CBURST 
+request to HUB. The client is then in hiatus until the LLL receives
+back a LLJOIN (lazy link join ) from the HUB.
 
 [LLL -> HUB]     :LLL CBURST #channel <LLLuser|LLLuser key>
 
   The Lazy Link Leaf (LLL), tells the HUB, it wants a channel burst for
-"#channel", with optional LLLuser joining. The HUB will send
+"#channel", with the LLLuser joining. The HUB will send
 a channel burst back for the specified channel in either case. This
 results in the leaf now knowing about the channel. This helps prevent
 "chatter," as the LLLuser could be trying to repeatedly join a channel
 they are banned on. It now becomes the LLL servers responsibility
 as usual in the non LL case.
 
-  There is another case a CBURST is sent. If an user on the LLL server
-is already on a channel that exists on HUB, this CBURST request will
-be sent as the LLL joins the HUB for each channel that a LLL client
-exists on. This way, all clients see consistent information about
-each channel. It appears to each client as a normal resync.
+So the HUB then sends
+[HUB -> LLL]     :HUB LLJOIN #channel LLLuser key
 
-  If the LLL sends the optional "LLLuser", the uplink will check to
-see if that client can join, using the rules of that channel. Depending
-on what the HUB finds, the HUB will send back;
-
-[HUB -> LLL]      :HUB LLJOIN #channel LLLuser Flag
-
-Where Flag is one of the following:
-
-'I'   - Channel is invite only.
-'B'   - User is banned.
-'K'   - Channel is keyed, and user did not have right key.
-'F'   - Channel is full.
-'J'   - User can join channel.
-
-[LLL -> LLLuser]  :LLLuser JOIN #channel
+  The Lazy Link Leaf then tries to join that client to the given channel,
+as it already has requested a CBURST from the HUB, it now has full
+information on the channel on the leaf.
 
 "1.2) Bursts
 
@@ -69,6 +56,11 @@ LLL's SJOIN for a channel with a SJOIN back with its own info.  So at the
 end of the burst, LLL has been put up to date with all the channels it
 needs to know about."
 
+This has been modified to do: In a burst, the leaf sends back CBURST
+for each channel it knows about requesting further information from the
+hub for each channel. The hub then sends back SJOIN's for each client
+missing on the leaf (known by the bit map) and SJOIN's the client to
+the channel.
 
 "1.3) Parts, Kicks and Modes
 
@@ -103,7 +95,5 @@ for each non wanted join.
 Nicks are simpler, because they are atomic, there is no list associated
 with them."
 
-  We have not implemented the nick part yet. Its easier, but not yet
-done. Its questionable whether we need this yet.
 
 - Diane Bruce <db@db.net>

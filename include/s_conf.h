@@ -24,6 +24,12 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.44  2000/12/20 22:00:43  db
+ * - shared {} can now have user/host for user@host of oper allowed
+ *   to place a remote kline from server given by name.
+ *
+ * - updated the lazy link docs a bit, its badly written, fix.
+ *
  * Revision 7.43  2000/12/19 17:46:01  ejb
  * - added client_exit:
  *    *** Signoff: foo (Client Exit: foo)
@@ -682,8 +688,11 @@ extern struct ConfItem* find_kill (struct Client *);
 extern int conf_connect_allowed(struct in_addr addr);
 extern char *oper_flags_as_string(int);
 extern char *oper_privs_as_string(struct Client *, int);
-extern int find_q_line(char*, char*, char *);
-extern struct ConfItem* find_special_conf(char *,int );
+
+extern int find_q_conf(char*, char*, char *);
+extern int find_u_conf(char*, char*, char *);
+extern struct ConfItem *find_x_conf(char*);
+
 extern struct ConfItem* find_is_klined(const char* host, 
                                        const char* name,
                                        unsigned long ip);
