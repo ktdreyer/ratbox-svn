@@ -142,11 +142,17 @@ struct Channel *parse_knock_args(struct Client *cptr,
   struct Channel      *chptr,*vchan_chptr;
   char *p, *name, *key;
 
+  if (parc < 2)
+    {
+      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
+		me.name, parv[0], "KNOCK");
+      return NULL;
+    }
+
   name = parv[1];
   key = (parc > 2) ? parv[2] : NULL;
 
-  p = strchr(name,',');
-  if(p)
+  if( (p = strchr(name,',')) )
     *p = '\0';
 
   if (!IsChannelName(name) || !(chptr = hash_find_channel(name, NullChn)))
