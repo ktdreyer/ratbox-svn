@@ -1,3 +1,21 @@
+a1kmm       2002/02/17 04:07:34 EST	(20020217_18)
+
+  Modified files:
+    src                  s_serv.c s_user.c 
+  Log:
+  - If you are removing a client from one list and putting them on to another,
+    after you have called send*, you have to check that the client is not dead.
+    I have done this for register_local_user and server_estab, but there may be
+    other places where we move from one list to another. I would appreciate it if
+    someone can check this to make sure it is okay to just return where I do
+    etc... and that I don't check too early for IsDead()
+  
+  Revision  Changes    Path
+  7.244     +3 -0      ircd-hybrid-7/src/s_serv.c
+  7.186     +5 -2      ircd-hybrid-7/src/s_user.c
+
+
+
 a1kmm       2002/02/17 03:34:22 EST	(20020217_17)
 
   Modified files:
