@@ -1,3 +1,7 @@
+*** 20011004_2 by androsyn
+That would be dns_state->nservers not nserver
+
+
 *** 20011004_1 by androsyn
 Three asserts that will hopefully track down the bug where ads->nserver == 0, which is technically not possible
 
