@@ -1,3 +1,7 @@
+*** 20011011_6 by wcampbel
+Updated the README to be consistant with the deletes I did earlier.
+
+
 *** 20011011_5 by davidt
 - Prevent use_halfops from being changed at runtime, as that would Break
   Stuff(TM).
