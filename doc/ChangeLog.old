@@ -1,3 +1,15 @@
+leeh        2002/04/29 18:30:25 EDT	(20020429_3)
+
+  Modified files:
+    include              Makefile.in 
+  Log:
+  - larnes makefile fix.
+  
+  Revision  Changes    Path
+  1.5       +2 -0      ircd-hybrid-7/include/Makefile.in
+
+
+
 androsyn    2002/04/29 18:12:37 EDT	(20020429_2)
 
   Modified files:
