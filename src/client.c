@@ -1323,7 +1323,7 @@ exit_remote_server(struct Client *client_p, struct Client *source_p, struct Clie
 	if(source_p->serv != NULL)
 		remove_dependents(client_p, source_p, from, comment, comment1);
 
-	exit_generic_server(client_p, source_p, from comment);
+	exit_generic_server(client_p, source_p, from, comment);
 	return 0;
 }
 
