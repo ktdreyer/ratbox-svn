@@ -1,3 +1,15 @@
+a1kmm       2001/12/27 20:10:21 EST	(20011228_0)
+
+  Modified files:
+    modules              m_llnick.c 
+  Log:
+  - Don't allow a ll client server to change a nick on the ll hub.
+  
+  Revision  Changes    Path
+  1.16      +2 -2      ircd-hybrid-7/modules/m_llnick.c
+
+
+
 leeh        2001/12/27 16:02:53 EST	(20011227_3)
 
   Modified files:
