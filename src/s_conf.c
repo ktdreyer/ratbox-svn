@@ -2514,23 +2514,6 @@ conf_add_server(struct ConfItem *aconf, int lcount)
 }
 
 /*
- * conf_add_k_conf
- *
- * inputs       - pointer to config item
- * output       - NONE
- * side effects - Add a K line
- */
-
-void 
-conf_add_k_conf(struct ConfItem *aconf)
-{
-  if (aconf->host != NULL)
-    {
-      add_conf_by_address(aconf->host, CONF_KILL, aconf->user, aconf);
-    }
-}
-
-/*
  * conf_add_d_conf
  * inputs       - pointer to config item
  * output       - NONE

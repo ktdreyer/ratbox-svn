@@ -1636,7 +1636,9 @@ kill_entry:     KILL
   {
     if(yy_aconf->user && yy_aconf->passwd && yy_aconf->host)
       {
-        conf_add_k_conf(yy_aconf);
+        if (yy_aconf->host != NULL)
+	  add_conf_by_address(yy_aconf->host, CONF_KILL,
+			      yy_aconf->user, yy_aconf);
       }
     else
       {

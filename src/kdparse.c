@@ -31,6 +31,7 @@
 #include "tools.h"
 #include "s_log.h"
 #include "s_conf.h"
+#include "hostmask.h"
 #include "client.h"
 #include "irc_string.h"
 #include "memory.h"
@@ -71,7 +72,9 @@ void parse_k_file(FBFILE *file)
       aconf = make_conf();
       aconf->status = CONF_KILL;
       conf_add_fields(aconf,host_field,reason_field,user_field,0,NULL);
-      conf_add_k_conf(aconf);
+
+      if (aconf->host != NULL)
+	add_conf_by_address(aconf->host, CONF_KILL, aconf->user, aconf);
     }
 }
 
