@@ -38,18 +38,18 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "s_conf.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
 static void m_part(struct Client*, struct Client*, int, char**);
-static void ms_part(struct Client*, struct Client*, int, char**);
-static void mo_part(struct Client *, struct Client *, int, char **);
+void check_spambot_warning(struct Client *source_p, const char *name);
 
 struct Message part_msgtab = {
   "PART", 1, 2, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_part, ms_part, mo_part}
+  {m_unregistered, m_part, m_part, m_part}
 };
 
 #ifndef STATIC_MODULES
@@ -83,8 +83,6 @@ static void m_part(struct Client *client_p,
                   int parc,
                   char *parv[])
 {
-  int t_delta;
-  int decrement_count;
   char  *p, *name;
   char reason[TOPICLEN+1];
 
@@ -104,47 +102,12 @@ static void m_part(struct Client *client_p,
 
   /* if its my client, and isn't an oper */
 
-  if (name)
-    {
-      if(GlobalSetOptions.spam_num &&
-	 (source_p->localClient->join_leave_count >= GlobalSetOptions.spam_num))
-	{
-	  sendto_realops_flags(FLAGS_BOTS,
-			       "User %s (%s@%s) is a possible spambot",
-			       source_p->name,
-			       source_p->username, source_p->host);
-	  source_p->localClient->oper_warn_count_down = OPER_SPAM_COUNTDOWN;
-	}
-      else
-	{
-	  if( (t_delta = (CurrentTime - source_p->localClient->last_leave_time)) >
-	      JOIN_LEAVE_COUNT_EXPIRE_TIME)
-	    {
-	      decrement_count = (t_delta/JOIN_LEAVE_COUNT_EXPIRE_TIME);
-	      
-	      if(decrement_count > source_p->localClient->join_leave_count)
-		source_p->localClient->join_leave_count = 0;
-	      else
-		source_p->localClient->join_leave_count -= decrement_count;
-	    }
-	  else
-	    {
-	      if( (CurrentTime - (source_p->localClient->last_join_time)) < 
-		  GlobalSetOptions.spam_time)
-		{
-		  source_p->localClient->join_leave_count++;
-		}
-	    }
-	  source_p->localClient->last_leave_time = CurrentTime;
-	}
-     
-      while(name)
-	{
-	  part_one_client(client_p, source_p, name, reason);
-	  name = strtoken(&p, (char *)NULL, ",");
-	}
-      return;
-    }
+  while(name)
+  {
+    part_one_client(client_p, source_p, name, reason);
+    name = strtoken(&p, (char *)NULL, ",");
+  }
+  return;
 }
 
 /*
@@ -195,12 +158,17 @@ static void part_one_client(struct Client *client_p,
                  me.name, source_p->name, name);
       return;
     }
+  if (MyConnect(source_p) && !IsOper(source_p))
+   check_spambot_warning(source_p, NULL);
 
   /*
    *  Remove user from the old channel (if any)
    *  only allow /part reasons in -m chans
    */
-  if (reason[0] && (can_send(chptr, source_p) > 0))
+  if (reason[0] && (can_send(chptr, source_p) > 0) &&
+      (!MyConnect(source_p) || IsOper(source_p) ||
+      (source_p->firsttime + ConfigFileEntry.anti_spam_exit_message_time)
+        > CurrentTime))
     {
       sendto_channel_remote_prefix(chptr, client_p, source_p, "PART %s :%s",
                               chptr->chname,
@@ -226,75 +194,3 @@ static void part_one_client(struct Client *client_p,
     }
   remove_user_from_channel(chptr, source_p);
 }
-
-
-/*
- * ms_part
- *
- * same as m_part
- * but no spam checks
- */
-
-static void ms_part(struct Client *client_p,
-                   struct Client *source_p,
-                   int parc,
-                   char *parv[])
-{
-  char  *p, *name;
-  char reason[TOPICLEN+1];
-
-  if (*parv[1] == '\0')
-    {
-      return;
-    }
-
-  reason[0] = '\0';
-
-  if (parc > 2)
-    strncpy_irc(reason, parv[2], TOPICLEN);
-
-  name = strtoken( &p, parv[1], ",");
-
-  while(name)
-    {
-      part_one_client(client_p, source_p, name, reason);
-      name = strtoken(&p, (char *)NULL, ",");
-    }
-}
-
-/*
- * mo_part
- *
- * same as m_part
- * but no spam checks
- */
-
-static void mo_part(struct Client *client_p,
-                   struct Client *source_p,
-                   int parc,
-                   char *parv[])
-{
-  char  *p, *name;
-  char reason[TOPICLEN+1];
-
-  if (*parv[1] == '\0')
-    {
-      sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-                 me.name, parv[0], "PART");
-      return;
-    }
-
-  reason[0] = '\0';
-
-  if (parc > 2)
-    strncpy_irc(reason, parv[2], TOPICLEN);
-
-  name = strtoken( &p, parv[1], ",");
-
-  while ( name )
-    {
-      part_one_client(client_p, source_p, name, reason);
-      name = strtoken(&p, (char *)NULL, ",");
-    }
-}
-

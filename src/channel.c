@@ -99,6 +99,8 @@ static  char    buf[BUFSIZE];
 static  char    modebuf[MODEBUFLEN], modebuf2[MODEBUFLEN];
 static  char    parabuf[MODEBUFLEN], parabuf2[MODEBUFLEN];
 static  char    parabuf_id[MODEBUFLEN], parabuf2_id[MODEBUFLEN];
+void check_spambot_warning(struct Client *source_p, const char *name);
+
 
 /*
  * check_string
@@ -3192,5 +3194,59 @@ void sync_channel_oplists(struct Channel *chptr,
     }
 }
 
-
-
+/* void check_spambot_warning(struct Client *source_p)
+ * Input: Client to check, channel name or NULL if this is a part.
+ * Output: none
+ * Side-effects: Updates the client's oper_warn_count_down, warns the
+ *    IRC operators if necessary, and updates join_leave_countdown as
+ *    needed.
+ */
+void check_spambot_warning(struct Client *source_p, const char *name)
+{
+  int t_delta;
+  int decrement_count;
+  if ((GlobalSetOptions.spam_num &&
+      (source_p->localClient->join_leave_count >=
+       GlobalSetOptions.spam_num)))
+  {
+   if (source_p->localClient->oper_warn_count_down > 0) 
+    source_p->localClient->oper_warn_count_down--;
+   else
+    source_p->localClient->oper_warn_count_down = 0;
+   if (source_p->localClient->oper_warn_count_down == 0)
+   {
+    /* Its already known as a possible spambot */
+    if (name != NULL)
+     sendto_realops_flags(FLAGS_BOTS,
+              "User %s (%s@%s) trying to join %s is a possible spambot",
+              source_p->name, source_p->username, source_p->host, name);
+    else
+     sendto_realops_flags(FLAGS_BOTS,
+                          "User %s (%s@%s) is a possible spambot",
+                          source_p->name, source_p->username,
+                          source_p->host);
+    source_p->localClient->oper_warn_count_down = OPER_SPAM_COUNTDOWN;
+   }
+  } else {
+   if ((t_delta = (CurrentTime - source_p->localClient->last_leave_time))
+       > JOIN_LEAVE_COUNT_EXPIRE_TIME)
+   {
+    decrement_count = (t_delta/JOIN_LEAVE_COUNT_EXPIRE_TIME);
+    if (decrement_count > source_p->localClient->join_leave_count)
+     source_p->localClient->join_leave_count = 0;
+    else
+     source_p->localClient->join_leave_count -= decrement_count;
+   } else {
+    if ((CurrentTime - (source_p->localClient->last_join_time)) < 
+        GlobalSetOptions.spam_time)
+    {
+     /* oh, its a possible spambot */
+     source_p->localClient->join_leave_count++;
+    }
+   }
+   if (name != NULL)
+    source_p->localClient->last_join_time = CurrentTime;
+   else
+    source_p->localClient->last_leave_time = CurrentTime;
+  }
+}

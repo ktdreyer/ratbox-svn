@@ -71,7 +71,7 @@ char *_version = "20001122";
 static void build_list_of_channels( struct Client *source_p,
                                     char *jbuf, char *given_names);
 static void do_join_0(struct Client *client_p, struct Client *source_p);
-static void check_spambot_warning( struct Client *source_p, char *name );
+void check_spambot_warning(struct Client *source_p, const char *name);
 
 
 /*
@@ -113,8 +113,6 @@ static void m_join(struct Client *client_p,
 
   build_list_of_channels( source_p, jbuf , parv[1] );
 
-  p = NULL;
-
   if (parc > 3)
     {
       key = strtoken(&p2, parv[3], ",");
@@ -144,7 +142,6 @@ static void m_join(struct Client *client_p,
           if (source_p->user->channel.head == NULL)
             continue;
 	  do_join_0(&me,source_p);
-	  check_spambot_warning(source_p,"0");
 	  continue;
 	}
 
@@ -203,8 +200,6 @@ static void m_join(struct Client *client_p,
       if(flags == 0)        /* if channel doesn't exist, don't penalize */
 	successful_join_count++;
 
-      check_spambot_warning(source_p, name);
-
       if(!chptr)        /* If I already have a chptr, no point doing this */
       {
 	chptr = get_channel(source_p, name, CREATE);
@@ -222,8 +217,10 @@ static void m_join(struct Client *client_p,
 		     me.name, parv[0], name);
 	  if(successful_join_count > 0)
 	    successful_join_count--;
-	  continue;
-	}
+     continue;
+    }
+    if (!IsOper(source_p))
+     check_spambot_warning(source_p, name);
       
       /*
        * can_join checks for +i key, bans.
@@ -485,6 +482,10 @@ static void do_join_0(struct Client *client_p, struct Client *source_p)
 
   sendto_ll_serv_butone(client_p, source_p, 0, ":%s JOIN 0", source_p->name);
 
+  if (source_p->user->channel.head &&
+      MyConnect(source_p) && !IsOper(source_p))
+   check_spambot_warning(source_p, NULL);
+
   while ((lp = source_p->user->channel.head))
     {
       chptr = lp->data;
@@ -496,63 +497,3 @@ static void do_join_0(struct Client *client_p, struct Client *source_p)
       remove_user_from_channel(chptr, source_p);
     }
 }
-
-/*
- * check_spambot_warning
- *
- * inputs	- pointer to client to check
- * output	- NONE
- * side effects	- 
- */
-
-static void check_spambot_warning( struct Client *source_p, char *name )
-{
-  int t_delta;
-  int decrement_count;
-
-  if(GlobalSetOptions.spam_num &&
-     (source_p->localClient->join_leave_count >= GlobalSetOptions.spam_num))
-    {
-      if(source_p->localClient->oper_warn_count_down == 0)
-	{
-	  /* Its already known as a possible spambot */
-	  
-	  if(source_p->localClient->oper_warn_count_down > 0) 
-	    source_p->localClient->oper_warn_count_down--;
-	  else
-	    source_p->localClient->oper_warn_count_down = 0;
-
-	  sendto_realops_flags(FLAGS_BOTS,
-	       "User %s (%s@%s) trying to join %s is a possible spambot",
-			       source_p->name,
-			       source_p->username,
-			       source_p->host,
-			       name);     
-	  source_p->localClient->oper_warn_count_down = OPER_SPAM_COUNTDOWN;
-	}
-    }
-  else
-    {
-      if( (t_delta = (CurrentTime - source_p->localClient->last_leave_time)) >
-	  JOIN_LEAVE_COUNT_EXPIRE_TIME)
-	{
-	  decrement_count = (t_delta/JOIN_LEAVE_COUNT_EXPIRE_TIME);
-
-	  if(decrement_count > source_p->localClient->join_leave_count)
-	    source_p->localClient->join_leave_count = 0;
-	  else
-	    source_p->localClient->join_leave_count -= decrement_count;
-	}
-      else
-	{
-	  if((CurrentTime - (source_p->localClient->last_join_time)) < 
-	     GlobalSetOptions.spam_time)
-	    {
-	      /* oh, its a possible spambot */
-	      source_p->localClient->join_leave_count++;
-	    }
-	}
-      source_p->localClient->last_leave_time = CurrentTime;
-    }
-}
-
