@@ -106,7 +106,6 @@ int verify_private_key(void)
    *         For some reason the system thinks PEM_read_bio_RSAPrivateKey
    *         is returning an int, not a RSA *.
    */
-  RSA_free(key);
   key = (RSA *) PEM_read_bio_RSAPrivateKey(file, NULL, 0, NULL);
 
   if (key == NULL)
