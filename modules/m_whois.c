@@ -367,7 +367,7 @@ void whois_person(struct Client *sptr,struct Client *acptr)
 	       sptr->host);
   
   
-  if (MyConnect(acptr))
+  if (!GlobalSetOptions.hide_server && MyConnect(acptr))
     sendto_one(sptr, form_str(RPL_WHOISIDLE),
 	       me.name, sptr->name, acptr->name,
 	       CurrentTime - acptr->user->last,
