@@ -1,3 +1,9 @@
+*** 20000107_1 by db
+- split out m_user.c m_nick.c, modified s_user.c s_user.h Makefile.in
+  LazyLinks is in unworkable state in this version.
+
+
+
 *** 20000106_1 by db
 - fixed bug introduced in ReplaceQuotes, '\#' was not handled correctly.
 
