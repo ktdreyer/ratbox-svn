@@ -1,3 +1,8 @@
+*** 20010617_3 by toot
+added -ncs to .indent..
+(re)indented channel.c and vchannel.c..
+
+
 *** 20010617_2 by toot
 added .indent.pro to use in other dirs
 "-gnu -nut -npcs -cdw" seems close to what we use.. 
