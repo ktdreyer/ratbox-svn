@@ -1,3 +1,15 @@
+leeh        2002/07/18 05:49:07 EDT	(20020718_4)
+
+  Modified files:
+    tools                convertconf.c 
+  Log:
+  - missing a break; that broke things
+  
+  Revision  Changes    Path
+  1.35      +2 -1      ircd-hybrid-7/tools/convertconf.c
+
+
+
 db          2002/07/18 03:13:48 EDT	(20020718_3)
 
   Modified files:
