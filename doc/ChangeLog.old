@@ -1,3 +1,7 @@
+*** 20010826_1 by davidt
+- Forgot to commit these changes when I added the hooks for m_iodebug.c
+
+
 *** 20010825_8 by wcampbel
 1. Numerous doc cleanups (spelling, obsolete things, efnow.net references,
    missing files, files that have been removed)
