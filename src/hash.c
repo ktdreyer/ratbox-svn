@@ -142,8 +142,6 @@ hash_id(const char *nname)
 		h = (h << 4) - (h + (unsigned char)*nname++);
 	}
 
-	sendto_realops_flags(FLAGS_ALL, "Hashed %s to %d", n, h & (U_MAX - 1));
-	
 	return (h & (U_MAX - 1));
 }
 /*
