@@ -1,3 +1,8 @@
+*** 20001219_1 by ejb
+- make invex code actually work.
+
+
+
 *** 20001218_7 by db
 - modifed lazylinks partially, to not send a full nick burst..
   still some work to do on this..
