@@ -1447,7 +1447,7 @@ int allocate_topic(struct Channel *chptr)
      * in the chptr 
      */
     chptr->topic = ptr;
-    chptr->topic_info = ptr + TOPICLEN+1;
+    chptr->topic_info = (char *)ptr + TOPICLEN+1;
     *chptr->topic = '\0';
     *chptr->topic_info = '\0';
     return TRUE;
