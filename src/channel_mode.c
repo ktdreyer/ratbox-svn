@@ -332,84 +332,53 @@ change_channel_membership(struct Channel *chptr,
                           dlink_list * loc_to_list, struct Client *who)
 {
   dlink_node *ptr;
-  int ok = 1;
+  int ok = 1, x;
+  dlink_list *loclists[] = {
+  	&chptr->locpeons,
+  	&chptr->locvoiced,
+  	&chptr->locchanops,
+#ifdef REQUIRE_OANDV
+  	&chptr->locchanops_voiced,
+#endif
+	NULL  
+  };
 
+  dlink_list *lists[] = {
+  	&chptr->peons,
+  	&chptr->voiced,
+  	&chptr->chanops,
+#ifdef REQUIRE_OANDV
+  	&chptr->chanops_voiced,
+#endif
+  	NULL
+  };
   /* local clients need to be moved from local list too */
   if (MyClient(who))
   {
-    if ((ptr = find_user_link(&chptr->locpeons, who)))
+    for(x = 0; loclists[x] != NULL; x++)
     {
-      if (loc_to_list != &chptr->locpeons)
-      {
-        dlinkDelete(ptr, &chptr->locpeons);
-        dlinkAdd(who, ptr, loc_to_list);
-      }
+    	ptr = find_user_link(loclists[x], who);
+    	if(ptr != NULL && loclists[x] != loc_to_list)
+    	{
+    	   dlinkMoveNode(ptr, loclists[x], loc_to_list);
+    	   break;
+    	} 
     }
-    else if ((ptr = find_user_link(&chptr->locvoiced, who)))
-    {
-      if (loc_to_list != &chptr->locvoiced)
-      {
-        dlinkDelete(ptr, &chptr->locvoiced);
-        dlinkAdd(who, ptr, loc_to_list);
-      }
-    }
-    else if ((ptr = find_user_link(&chptr->locchanops, who)))
-    {
-      if (loc_to_list != &chptr->locchanops)
-      {
-        dlinkDelete(ptr, &chptr->locchanops);
-        dlinkAdd(who, ptr, loc_to_list);
-      }
-    }
-#ifdef REQUIRE_OANDV
-    else if ((ptr = find_user_link(&chptr->locchanops_voiced, who)))
-    {
-      if (loc_to_list != &chptr->locchanops_voiced)
-      {
-        dlinkDelete(ptr, &chptr->locchanops_voiced);
-        dlinkAdd(who, ptr, loc_to_list);
-      }
-    }
-#endif
-    else
+    if(loclists[x] == NULL)
       ok = 0;
   }
 
-  if ((ptr = find_user_link(&chptr->peons, who)))
+  for(x = 0; lists[x] != NULL; x++)
   {
-    if (to_list != &chptr->peons)
+    ptr = find_user_link(lists[x], who);
+    if(ptr != NULL && lists[x] != to_list)
     {
-      dlinkDelete(ptr, &chptr->peons);
-      dlinkAdd(who, ptr, to_list);
+       dlinkMoveNode(ptr, lists[x], to_list);
+       break;
     }
   }
-  else if ((ptr = find_user_link(&chptr->voiced, who)))
-  {
-    if (to_list != &chptr->voiced)
-    {
-      dlinkDelete(ptr, &chptr->voiced);
-      dlinkAdd(who, ptr, to_list);
-    }
-  }
-  else if ((ptr = find_user_link(&chptr->chanops, who)))
-  {
-    if (to_list != &chptr->chanops)
-    {
-      dlinkDelete(ptr, &chptr->chanops);
-      dlinkAdd(who, ptr, to_list);
-    }
-  }
-#ifdef REQUIRE_OANDV
-  else if ((ptr = find_user_link(&chptr->chanops_voiced, who)))
-  {
-    if (to_list != &chptr->chanops_voiced)
-    {
-      dlinkDelete(ptr, &chptr->chanops_voiced);
-      dlinkAdd(who, ptr, to_list);
-    }
-  }
-#endif
-  else
+  
+  if(lists[x] == NULL)
     ok = 0;
 
   if((ptr = find_user_link(&chptr->deopped, who)))
