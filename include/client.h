@@ -618,8 +618,6 @@ extern int            exit_client(struct Client*, struct Client*,
 
 extern void     count_local_client_memory(int *count, int *memory);
 extern void     count_remote_client_memory(int *count, int *memory);
-extern  int     check_registered (struct Client *);
-extern  int     check_registered_user (struct Client *);
 
 extern struct Client* find_chasing (struct Client *, char *, int *);
 extern struct Client* find_person (char *);

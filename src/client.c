@@ -894,7 +894,7 @@ find_chasing(struct Client *source_p, char *user, int *chasing)
  * error message should be restricted to local clients and some
  * other thing generated for remotes...
  */
-int
+static int
 check_registered_user(struct Client* client)
 {
   if (!IsRegisteredUser(client))
@@ -910,7 +910,7 @@ check_registered_user(struct Client* client)
  * registered (e.g. we don't know yet whether a server
  * or user)
  */
-int
+static int
 check_registered(struct Client* client)
 {
   if (!IsRegistered(client))
