@@ -1,3 +1,15 @@
+*** 20001114_1 by db
+- A long time ago, in an ircd far far away, there was one a function called
+  m_message.c which did both m_privmsg and m_notice. When the evil bleep
+  bleep from another ircd universe invaded us, we split that into
+  m_privmsg.c and m_notice.c ... I really don't see the point, they
+  share too much functionality, they both do the same thing blah blah blah.
+  Its really miserable fixing something in m_privmsg.c only to duplicate
+  the work in m_notice.c as well.
+
+
+
+
 *** 20001113_5 by db
 - fixed mistake found by David-T an = should have been an |=
 
