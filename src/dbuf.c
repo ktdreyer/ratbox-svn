@@ -338,7 +338,7 @@ int dbuf_getmsg(struct DBuf* dyn, char* buf, size_t length)
       *buf++ = *start++;
 
     count = start - db->start;
-    if (start < end && IsEol(*start)) {
+    if (start < end) {
       *buf = '\0';
       copied += count;
       dbuf_delete(dyn, copied);
