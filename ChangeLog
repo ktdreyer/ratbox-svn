@@ -1,3 +1,15 @@
+androsyn    2003/09/22 21:17:11 EDT	(20030923_0)
+
+  Modified files:
+    src                  linebuf.c 
+  Log:
+  Go back to the linebuf_copy_* code from stable
+  
+  Revision  Changes    Path
+  7.116     +135 -83   ircd-ratbox/src/linebuf.c
+
+
+
 androsyn    2003/09/22 08:49:08 EDT	(20030922_0)
 
   Modified files:
