@@ -33,6 +33,8 @@ static int s_userserv_udrop(struct client *, char *parv[], int parc);
 static int s_userserv_register(struct client *, char *parv[], int parc);
 static int s_userserv_login(struct client *, char *parv[], int parc);
 static int s_userserv_logout(struct client *, char *parv[], int parc);
+static int s_userserv_setpass(struct client *, char *parv[], int parc);
+static int s_userserv_setemail(struct client *, char *parv[], int parc);
 
 static struct service_command userserv_command[] =
 {
@@ -40,6 +42,8 @@ static struct service_command userserv_command[] =
 	{ "REGISTER",	&s_userserv_register,	2, NULL, 1, 0L, 0, 0, 0 },
 	{ "LOGIN",	&s_userserv_login,	2, NULL, 1, 0L, 0, 0, 0 },
 	{ "LOGOUT",	&s_userserv_logout,	0, NULL, 1, 0L, 1, 0, 0 },
+	{ "SETPASS",	&s_userserv_setpass,	2, NULL, 1, 0L, 1, 0, 0 },
+	{ "SETEMAIL",	&s_userserv_setemail,	1, NULL, 1, 0L, 1, 0, 0 },
 	{ "\0",		NULL,			0, NULL, 0, 0L, 0, 0, 0 }
 };
 
@@ -351,4 +355,54 @@ s_userserv_logout(struct client *client_p, char *parv[], int parc)
 
 	return 1;
 }
+
+static int
+s_userserv_setpass(struct client *client_p, char *parv[], int parc)
+{
+	const char *password;
+
+	if(!config_file.allow_setpass)
+	{
+		service_error(userserv_p, client_p, "%s::SETPASS is disabled", userserv_p->name);
+		return 1;
+	}
+
+	password = get_crypt(parv[0], client_p->user->user_reg->password);
+
+	if(strcmp(password, client_p->user->user_reg->password))
+	{
+		service_error(userserv_p, client_p, "Invalid password");
+		return 1;
+	}
+
+	password = get_crypt(parv[1], NULL);
+	my_free(client_p->user->user_reg->password);
+	client_p->user->user_reg->password = my_strdup(password);
+
+	loc_sqlite_exec(NULL, "UPDATE users SET password = %Q WHERE username = %Q",
+			password, client_p->user->user_reg->name);
+
+	service_error(userserv_p, client_p, "Password change successful");
+	return 1;
+}
+
+static int
+s_userserv_setemail(struct client *client_p, char *parv[], int parc)
+{
+	if(!config_file.allow_setemail)
+	{
+		service_error(userserv_p, client_p, "%s::SETEMAIL is disabled", userserv_p->name);
+		return 1;
+	}
+
+	my_free(client_p->user->user_reg->email);
+	client_p->user->user_reg->email = my_strdup(parv[0]);
+
+	loc_sqlite_exec(NULL, "UPDATE users SET email = %Q WHERE username = %Q",
+			parv[0], client_p->user->user_reg->name);
+
+	service_error(userserv_p, client_p, "Email change successful");
+	return 1;
+}
+
 #endif

@@ -1,0 +1,4 @@
+SETPASS <oldpass> <newpass>
+Changes password of current username.
+  <oldpass>: Your old password
+  <newpass>: New password to change to

@@ -742,6 +742,8 @@ static struct ConfEntry conf_userserv_table[] =
 	{ "register_time",	CF_TIME,  NULL, 0, &config_file.uregister_time		},
 	{ "register_amount",	CF_INT,   NULL, 0, &config_file.uregister_amount	},
 	{ "register_email",	CF_YESNO, NULL, 0, &config_file.uregister_email		},
+	{ "allow_setpass",	CF_YESNO, NULL, 0, &config_file.allow_setpass		},
+	{ "allow_setemail",	CF_YESNO, NULL, 0, &config_file.allow_setemail		},
 	{ "\0", 0, NULL, 0, NULL }
 };
 
