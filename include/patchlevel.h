@@ -17,5 +17,5 @@
  */
 
 #ifndef PATCHLEVEL
-#define PATCHLEVEL    "hybrid-7(alpha)"
+#define PATCHLEVEL    "hybrid-7beta1"
 #endif
