@@ -499,11 +499,8 @@ BlockHeapFree(BlockHeap * bh, void *ptr)
 	bh->freeElems++;
 	mem_frob(ptr, bh->elemSize);
 	dlinkMoveNode(&memblock->self, &block->used_list, &block->free_list);
-#ifdef DEBUG_BALLOC
-	if(dlink_list_length(&block->free_list) > 0 && block->free_list.head == NULL)
-	{
-		blockheap_fail("block->free_list > 0 and free_list.head == NULL");
-	}
+#ifdef DEBUG_BALLOC_HARDER
+	bh_sanity_check(bh);
 #endif
 	return (0);
 }
