@@ -302,7 +302,7 @@ static void who_global(struct Client *source_p,char *mask, int server_oper)
   }
 
   /* second, list all matching visible clients */
-  DLINK_FOREACH(ptr, GlobalClientList.head)
+  DLINK_FOREACH(ptr, global_client_list.head)
   {
     target_p = (struct Client *)ptr->data;
     if (!IsPerson(target_p))

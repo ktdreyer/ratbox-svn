@@ -612,13 +612,13 @@ remove_client_from_list(struct Client* client_p)
   /* A client made with make_client()
    * is on the unknown_list until removed.
    * If it =does= happen to exit before its removed from that list
-   * and its =not= on the GlobalClientList, it will core here.
+   * and its =not= on the global_client_list, it will core here.
    * short circuit that case now -db
    */
   if(client_p->node.prev == NULL && client_p->node.next == NULL)
       return;
 
-  dlinkDelete(&client_p->node, &GlobalClientList);
+  dlinkDelete(&client_p->node, &global_client_list);
 
   update_client_exit_stats(client_p);
 }

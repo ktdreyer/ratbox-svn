@@ -206,7 +206,7 @@ static int global_whois(struct Client *source_p, char *nick,
   dlink_node *ptr;
   int found = NO;
   
-  DLINK_FOREACH(ptr, GlobalClientList.head)
+  DLINK_FOREACH(ptr, global_client_list.head)
     {
       target_p = (struct Client *)ptr->data;
       if(!match(nick, target_p->name))

@@ -203,7 +203,7 @@ void count_memory(struct Client *source_p)
 
   count_whowas_memory(&wwu, &wwm);
 
-  DLINK_FOREACH(ptr, GlobalClientList.head)
+  DLINK_FOREACH(ptr, global_client_list.head)
     {
       target_p = ptr->data;
       if (MyConnect(target_p))

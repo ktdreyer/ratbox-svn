@@ -847,7 +847,7 @@ find_userhost(char *user, char *host, int *count)
   *count = 0;
   if (collapse(user) != NULL)
     {
-      DLINK_FOREACH(ptr, GlobalClientList.head) 
+      DLINK_FOREACH(ptr, global_client_list.head) 
 	{
 	  c2ptr = (struct Client *)ptr->data;
 	  if (!MyClient(c2ptr)) /* implies mine and an user */

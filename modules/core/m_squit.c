@@ -203,7 +203,7 @@ static struct squit_parms *find_squit(struct Client *client_p,
   ** The following allows wild cards in SQUIT. Only useful
   ** when the command is issued by an oper.
   */
-  DLINK_FOREACH(ptr, GlobalClientList.head)
+  DLINK_FOREACH(ptr, global_client_list.head)
     {
       p = (struct Client *)ptr->data;
       if(IsServer(p) || IsMe(p))

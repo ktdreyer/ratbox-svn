@@ -121,7 +121,7 @@ static void m_trace(struct Client *client_p, struct Client *source_p,
         struct Client *ac2ptr;
         if( (ac2ptr = find_client(tname)) == NULL)
         {
-          DLINK_FOREACH(ptr, GlobalClientList.head)
+          DLINK_FOREACH(ptr, global_client_list.head)
           {
             ac2ptr = (struct Client *)ptr->data;
             if(match(tname, ac2ptr->name) || match(ac2ptr->name, tname))

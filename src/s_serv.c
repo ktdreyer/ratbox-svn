@@ -456,7 +456,7 @@ int hunt_server(struct Client *client_p, struct Client *source_p, char *command,
       else
         {
           
-          DLINK_FOREACH(ptr, GlobalClientList.head)
+          DLINK_FOREACH(ptr, global_client_list.head)
             {
               target_p = NULL;
               if(match(parv[server], ((struct Client *)(ptr->data))->name))
@@ -1097,7 +1097,7 @@ int server_estab(struct Client *client_p)
   */
 
   aconf = client_p->serv->sconf;
-  DLINK_FOREACH(cptr, GlobalClientList.head)
+  DLINK_FOREACH(cptr, global_client_list.head)
     {
       target_p = (struct Client *)cptr->data;
       /* target_p->from == target_p for target_p == client_p */
@@ -1518,7 +1518,7 @@ burst_all(struct Client *client_p)
   /*
   ** also send out those that are not on any channel
   */
-  DLINK_FOREACH(ptr, GlobalClientList.head)
+  DLINK_FOREACH(ptr, global_client_list.head)
     {
       target_p = (struct Client *)ptr->data;
       if (target_p->serial != current_serial)

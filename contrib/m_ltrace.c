@@ -132,7 +132,7 @@ static void mo_ltrace(struct Client *client_p, struct Client *source_p,
         
         if((ac2ptr = find_client(tname)) == NULL)
         {
-          DLINK_FOREACH(cptr, GlobalClientList.head)
+          DLINK_FOREACH(cptr, global_client_list.head)
           {
             ac2ptr = (struct Client *)cptr->data;
             if(match(tname, ac2ptr->name) || match(ac2ptr->name, tname))
@@ -203,7 +203,7 @@ static void mo_ltrace(struct Client *client_p, struct Client *source_p,
    */
   if (doall)
    {
-    DLINK_FOREACH(ptr, GlobalClientList.head)
+    DLINK_FOREACH(ptr, global_client_list.head)
      {
       target_p = (struct Client *)ptr->data;
       if (IsPerson(target_p))

@@ -167,7 +167,7 @@ static void names_non_public_non_secret(struct Client *source_p)
 
   /* Second, do all non-public, non-secret channels in one big sweep */
 
-  DLINK_FOREACH(ptr, GlobalClientList.head)
+  DLINK_FOREACH(ptr, global_client_list.head)
     {
       c2ptr = ptr->data;
       if (!IsPerson(c2ptr) || IsInvisible(c2ptr))
