@@ -1,3 +1,8 @@
+*** 20010110_3 by db
+- first pass at cleaning up mtrie_conf.c
+
+
+
 *** 20010110_2 by wcampbel
 Added the documentation for the new mkpasswd
 
