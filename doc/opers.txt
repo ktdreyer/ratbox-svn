@@ -28,6 +28,10 @@ Usermodes: (* designates that the umode is oper only)
        * +e     - Can see possible drone warnings
          +g     - "caller id" mode only allow accept clients to message you
 
+For +g: /QUOTE ACCEPT <nick>   -- Add a permitted nickname
+        /QUOTE ACCEPT -<nick>  -- Remove a permitted nickname
+        /QUOTE ACCEPT *        -- List the present permitted nicknames
+
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 Oper Commands: (+ indicates that /quote must be used with ircII)
