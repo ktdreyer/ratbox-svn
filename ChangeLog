@@ -1,3 +1,16 @@
+leeh        2004/04/27 17:00:41 EDT	(20040427_2)
+
+  Modified files:
+    src                  channel.c 
+  Log:
+  - fix coming out of splitmode when we use split_delay and we arent
+    out of split anymore when the delay ends
+  
+  Revision  Changes    Path
+  7.415     +7 -0      ircd-ratbox/src/channel.c
+
+
+
 leeh        2004/04/27 14:10:16 EDT	(20040427_1)
 
   Modified files:
