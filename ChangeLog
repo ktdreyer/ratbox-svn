@@ -1,3 +1,16 @@
+androsyn    2003/02/04 08:12:23 UTC	(20030204_5)
+
+  Modified files:
+    include              patchlevel.h 
+  Log:
+  Increment to beta2.  Lets kick out a beta release before larne rewrites the
+  module code :)
+  
+  Revision  Changes    Path
+  7.48      +1 -1      ircd-ratbox/include/patchlevel.h
+
+
+
 androsyn    2003/02/04 08:06:38 UTC	(20030204_4)
 
   Modified files:
