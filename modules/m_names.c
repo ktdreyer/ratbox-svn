@@ -176,6 +176,7 @@ void names_all_visible_channels(struct Client *sptr)
   char buf[BUFSIZE];
   char buf2[2*NICKLEN];
   char *chname;
+  int show_ops=0;
 
   buf2[0] = '\0';
   mlen = strlen(me.name) + NICKLEN + 7;
@@ -199,7 +200,13 @@ void names_all_visible_channels(struct Client *sptr)
 		chname = bchan->chname;
 	    }
 
+	  if(GlobalSetOptions.hide_chanops && !is_chan_op(chptr,sptr))
+	    show_ops = 0;
+	  else
+	    show_ops = 1;
+
 	  ircsprintf(buf,"%s %s :", channel_pub_or_secret(chptr), chname);
+
 	  len = strlen(buf);
 	  cur_len = len + mlen;
 
@@ -211,7 +218,12 @@ void names_all_visible_channels(struct Client *sptr)
 	      if (IsInvisible(c2ptr) && !IsMember(sptr,chptr))
 		continue;
 
-	      ircsprintf(buf2,"%s%s ", chanop_or_voice(lp), c2ptr->name);
+	      if(show_ops)
+		ircsprintf(buf2,"%s%s ", channel_chanop_or_voice(lp->flags),
+			   c2ptr->name);
+	      else
+		ircsprintf(buf2," %s ", c2ptr->name);
+
 	      strcat(buf,buf2);
 	      cur_len += strlen(buf2);
 
@@ -287,7 +299,12 @@ void names_non_public_non_secret(struct Client *sptr)
       if(lp == NULL)	/* Nothing to do. yay */
 	continue;
 
-      ircsprintf(buf2,"%s%s ", chanop_or_voice(lp), c2ptr->name);
+      if(GlobalSetOptions.hide_chanops)
+	ircsprintf(buf2," %s ", c2ptr->name);
+      else
+	ircsprintf(buf2,"%s%s ", channel_chanop_or_voice(lp->flags),
+		   c2ptr->name);
+
       strcat(buf,buf2);
       cur_len += strlen(buf2);
       reply_to_send = YES;
