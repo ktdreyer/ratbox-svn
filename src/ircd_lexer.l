@@ -143,6 +143,7 @@ gline_log       { return GLINE_LOG; }
 gline_time      { return GLINE_TIME; }
 global_kill	{ return GLOBAL_KILL; }
 have_ident	{ return HAVE_IDENT; }
+havent_read_conf { return HAVENT_READ_CONF; }
 hide_server	{ return HIDESERVER; }
 host		{ return HOST; }
 hub		{ return HUB; }
