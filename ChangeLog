@@ -1,3 +1,15 @@
+androsyn    2003/02/05 22:52:35 UTC	(20030205_4)
+
+  Modified files:
+    src                  s_conf.c 
+  Log:
+  Replace a call to send() with sendto_one()
+  
+  Revision  Changes    Path
+  7.396     +1 -3      ircd-ratbox/src/s_conf.c
+
+
+
 androsyn    2003/02/05 22:48:40 UTC	(20030205_3)
 
   Modified files:
