@@ -264,7 +264,6 @@ int single_whois(struct Client *sptr,struct Client *acptr,int wilds)
 void whois_person(struct Client *sptr,struct Client *acptr)
 {
   char buf[BUFSIZE];
-  char buf2[2*NICKLEN];
   char *chname;
   char *server_name;
   dlink_node  *lp;
@@ -274,6 +273,8 @@ void whois_person(struct Client *sptr,struct Client *acptr)
   int user_flags;
   int cur_len = 0;
   int mlen;
+  char *t;
+  int tlen;
   int reply_to_send = NO;
 
   a2cptr = find_server(acptr->user->server);
@@ -283,10 +284,12 @@ void whois_person(struct Client *sptr,struct Client *acptr)
 	 acptr->username, acptr->host, acptr->info);
   server_name = (char *)acptr->user->server;
 
-  mlen = strlen(me.name) + strlen(sptr->name) + 6 + strlen(acptr->name);
+  ircsprintf(buf, form_str(RPL_WHOISCHANNELS),
+	       me.name, sptr->name, acptr->name, "");
 
+  mlen = strlen(buf);
   cur_len = mlen;
-  buf[0] = '\0';
+  t = buf + mlen;
 
   for (lp = acptr->user->channel.head; lp; lp = lp->next)
     {
@@ -304,35 +307,31 @@ void whois_person(struct Client *sptr,struct Client *acptr)
 	{
 	  if (GlobalSetOptions.hide_chanops && !is_any_op(chptr,sptr))
 	    {
-	      ircsprintf(buf2,"%s ",chname);
+	      ircsprintf(t,"%s ",chname);
 	    }
 	  else
 	    {
-	      ircsprintf(buf2,"%s%s ", channel_chanop_or_voice(chptr,acptr),
+	      ircsprintf(t,"%s%s ", channel_chanop_or_voice(chptr,acptr),
 			 chname);
 	    }
 
-	  strcat(buf,buf2);
-	  cur_len += strlen(buf2);
+	  tlen = strlen(t);
+	  t += tlen;
+	  cur_len += tlen;
 	  reply_to_send = YES;
 
 	  if ((cur_len + NICKLEN) > (BUFSIZE - 4))
 	    {
-	      sendto_one(sptr,
-			 ":%s %d %s %s :%s",
-			 me.name,
-			 RPL_WHOISCHANNELS,
-			 sptr->name, acptr->name, buf);
+	      sendto_one(sptr, "%s", buf);
 	      cur_len = mlen;
-	      buf[0] = '\0';
+	      t = buf + mlen;
 	      reply_to_send = NO;
 	    }
 	}
     }
 
   if (reply_to_send)
-    sendto_one(sptr, form_str(RPL_WHOISCHANNELS),
-	       me.name, sptr->name, acptr->name, buf);
+    sendto_one(sptr, "%s", buf);
           
   if (!GlobalSetOptions.hide_server || acptr == sptr)
     sendto_one(sptr, form_str(RPL_WHOISSERVER),
