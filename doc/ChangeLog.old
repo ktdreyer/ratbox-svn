@@ -1,3 +1,15 @@
+*** 20010409_1 by a1kmm
+- Did my hashtable lookup code for hosts/addresses properly - now replaces
+  patricia tries too, and provides proper IP parsing to replace is_address
+  that works with IPV4 and IPV6. This also means that both CIDR and ip.*
+  work with both IPV4 and IPV6.
+- Changed the parser a little, so that we now simplify things by putting
+  IP addresses in quotes. Deleted the complicating user=a@b vs ip=... ipv6=...
+  thing for auth{} blocks, we now always do user=a@b, but we can put IPs(both
+  V4 & V6) into the auth{} block. This means we can specify a username too, and
+  simplifies things, although it does make unchanged older confs incompatible.
+
+
 *** 20010408_4 by davidt
 After reformatting kserver.txt, I couldn't resist rewriting bits of it,
 so I decided instead of overwriting A1kmm's version, I'd add an
