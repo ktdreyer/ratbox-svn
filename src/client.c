@@ -1228,6 +1228,7 @@ void dead_link(struct Client *client_p)
                          notice, get_client_name(client_p, MASK_IP));
   }
   Debug((DEBUG_ERROR, notice, get_client_name(to, HIDE_IP)));
+  assert(dlinkFind(&abort_list, client_p) == NULL);
   m = make_dlink_node();
   dlinkAdd(client_p, m, &abort_list);
   SetDead(client_p); /* You are dead my friend */
