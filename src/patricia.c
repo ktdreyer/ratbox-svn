@@ -322,7 +322,7 @@ Clear_Patricia(patricia_tree_t * patricia, void_fn_t func)
 			{
 				assert(Xrn->data == NULL);
 			}
-			BlockHeapFree(prefix_heap, Xrn);
+			BlockHeapFree(node_heap, Xrn);
 			patricia->num_active_node--;
 
 			if(l)
