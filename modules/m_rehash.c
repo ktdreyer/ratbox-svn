@@ -42,6 +42,7 @@
 
 static void mo_rehash(struct Client*, struct Client*, int, char**);
 static void clear_temps(dlink_list *, int);
+static void clear_pending_glines(void);
 
 struct Message rehash_msgtab = {
   "REHASH", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -113,6 +114,13 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
                              source_p->name);
         clear_temps(&glines, CONF_GLINE);
       }
+      else if(irccmp(parv[1], "PGLINES") == 0)
+      {
+        sendto_realops_flags(UMODE_ALL, L_ALL,
+                             "%s is clearing pending glines",
+                             source_p->name);
+        clear_pending_glines();
+      }
       else if(irccmp(parv[1], "TKLINES") == 0)
       {
         sendto_realops_flags(UMODE_ALL, L_ALL,
@@ -136,12 +144,12 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
       else
       {
         sendto_one(source_p,":%s NOTICE %s :rehash one of: "
-                   "GLINES TKLINES TDLINES CHANNELS DNS MOTD OMOTD",
+                   "GLINES PGLINES TKLINES TDLINES CHANNELS DNS MOTD OMOTD",
                    me.name, source_p->name);
         return;
       }
          
-      ilog(L_NOTICE, "REHASH %s From %s\n", parv[1], 
+      ilog(L_NOTICE, "REHASH %s From %s", parv[1], 
            get_client_name(source_p, HIDE_IP));
       return;
     }
@@ -177,3 +185,22 @@ clear_temps(dlink_list *tlist, int type)
     dlinkDestroy(ptr, tlist);
   }
 }
+
+static void
+clear_pending_glines(void)
+{
+  struct gline_pending *glp_ptr;
+  dlink_node *ptr;
+  dlink_node *next_ptr;
+  
+  DLINK_FOREACH_SAFE(ptr, next_ptr, pending_glines.head)
+  {
+    glp_ptr = ptr->data;
+
+    MyFree(glp_ptr->reason1);
+    MyFree(glp_ptr->reason2);
+    MyFree(glp_ptr);
+    dlinkDestroy(ptr, &pending_glines);
+  }
+}
+
