@@ -84,6 +84,7 @@
 struct Client;
 
 /* unregistered */
+extern int mr_capab(struct Client*, struct Client*, int, char**);
 extern int mr_nick(struct Client*, struct Client*, int, char**);
 extern int mr_error(struct Client*, struct Client*, int, char**);
 extern int mr_pong(struct Client*, struct Client*, int, char**);

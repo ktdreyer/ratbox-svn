@@ -33,7 +33,7 @@
 
 struct Message capab_msgtab = {
   MSG_CAPAB, 0, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_error, ms_capab, m_error}
+  {mr_capab, m_error, m_error, m_error}
 };
 
 void
@@ -51,11 +51,12 @@ _moddeinit(void)
 char *_version = "20001122";
 
 /*
- * ms_capab - CAPAB message handler
+ * mr_capab - CAPAB message handler
  *      parv[0] = sender prefix
  *      parv[1] = space-separated list of capabilities
+ *
  */
-int ms_capab(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+int mr_capab(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   struct Capability *cap;
   char* p;

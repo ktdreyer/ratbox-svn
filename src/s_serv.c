@@ -698,11 +698,9 @@ int server_estab(struct Client *cptr)
   if (!set_sock_buffers(cptr->fd, READBUF_SIZE))
     report_error(SETBUF_ERROR_MSG, get_client_name(cptr, TRUE), errno);
 
-  /* LINKLIST */
   m = make_dlink_node();
   dlinkAdd(cptr, m, &serv_list);
   
-  /* ircd-hybrid-6 can do TS links, and  zipped links*/
   sendto_realops("Link with %s established: (%s) link",
              inpath,show_capabilities(cptr));
   log(L_NOTICE, "Link with %s established: (%s) link",
@@ -735,12 +733,6 @@ int server_estab(struct Client *cptr)
         continue;
       if (split)
         {
-          /*
-          sendto_one(acptr,":%s SERVER %s 2 :[%s] %s",
-                   me.name, cptr->name,
-                   cptr->host, cptr->info);
-                   */
-
           /* DON'T give away the IP of the server here
            * if its a hub especially.
            */
@@ -795,12 +787,6 @@ int server_estab(struct Client *cptr)
                        acptr->serv->up, acptr->name,
                        acptr->hopcount+1,
                        acptr->info);
-            /*
-            sendto_one(cptr, ":%s SERVER %s %d :[%s] %s",
-                       acptr->serv->up, acptr->name,
-                       acptr->hopcount+1,
-                       acptr->host, acptr->info);
-                       */
           else
             sendto_one(cptr, ":%s SERVER %s %d :%s",
                        acptr->serv->up, acptr->name,

@@ -1101,6 +1101,13 @@ const char* get_client_name(struct Client* client, int showip)
   return client->name;
 }
 
+/*
+ * get_client_host
+ *
+ * inputs	- pointer to client struct
+ * output	- pointer to static char string with client hostname
+ * side effects	-
+ */
 const char* get_client_host(struct Client* client)
 {
   static char nbuf[HOSTLEN * 2 + USERLEN + 5];
@@ -1695,11 +1702,11 @@ int del_all_accepts(struct Client *dying)
   dlink_node *ptr;
   struct Client *acptr;
 
-
   for (ptr = dying->on_allow_list.head; ptr; ptr = ptr->next)
     {
       acptr = ptr->data;
-      del_from_accept(acptr, dying);
+      if(acptr != NULL)
+	del_from_accept(acptr, dying);
     }
 
   return 0;

@@ -346,7 +346,7 @@ logging_gline_log:	GLINE_LOG '=' QSTRING ';'
                           yylval.string = (char *)NULL;
                         };
 
-logging_log_level:	LOG_LEVEL 
+logging_log_level:	LOG_LEVEL '='
                           T_L_CRIT { set_log_level(L_CRIT); };
                         | T_L_ERROR { set_log_level(L_ERROR); };
                         | T_L_WARN {set_log_level(L_WARN); };
