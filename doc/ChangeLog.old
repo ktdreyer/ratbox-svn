@@ -1,3 +1,9 @@
+*** 20010816_11 by androsyn
+Changed a few eventAdd()'s to eventAddIsh() which keeps some of the events
+from running all at once.  We should look into making some of the events
+do this.
+
+
 *** 20010816_10 by androsyn
 Oops..an off by one error..
 
