@@ -591,7 +591,7 @@ static void clear_msg_tree()
       mtree->pointers[c] = NULL;
     }
 
-  memset(msg_tree_root,0,sizeof(struct Message Tree));
+  memset(msg_tree_root,0,sizeof(struct MessageTree));
   return; 
 }
 
