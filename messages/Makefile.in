@@ -43,7 +43,7 @@ install-mkdirs:
 	done
 
 install: build install-mkdirs
-	@echo    "Installing message files to $(messagedir)..."; \
+	-@echo    "Installing message files to $(messagedir)..."; \
 	echo -n "   "; \
 	for i in ./*.mo; do \
 		LNAME=`echo $$i | sed 's/^\.\///' | sed 's/\.mo$$//'`; \
