@@ -706,9 +706,9 @@ static void do_numeric(char numeric[],
            * We shouldn't get numerics sent to us,
            * any numerics we do get indicate a bug somewhere..
            */
-          sendto_realops_flags(FLAGS_ALL,
-                               "*** %s(via %s) sent a %s numeric to me?!?",
-                               source_p->name, client_p->name, numeric);
+          sendto_realops_flags(FLAGS_ADMIN,
+                               "*** %s(via %s) sent a %s numeric to me: %s",
+                               source_p->name, client_p->name, numeric, buffer);
           return;
         }
       else if (target_p->from == client_p) 
