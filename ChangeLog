@@ -1,3 +1,24 @@
+leeh        2004/01/10 19:22:26 EST	(20040111_0)
+
+  Modified files:
+    doc                  example.conf 
+    include              conf.h 
+    src                  c_message.c conf.c newconf.c s_hoststat.c 
+  Log:
+  - added TESTMASK to hoststat, returning how many clients match the
+    given user@host
+  - added "dcc" priv to oper {};, controlling whether they can dcc in or not
+  
+  Revision  Changes    Path
+  1.4       +4 -1      rserv/doc/example.conf
+  1.7       +3 -1      rserv/include/conf.h
+  1.11      +8 -1      rserv/src/c_message.c
+  1.13      +4 -4      rserv/src/conf.c
+  1.2       +15 -1     rserv/src/newconf.c
+  1.2       +37 -0     rserv/src/s_hoststat.c
+
+
+
 leeh        2004/01/10 13:32:04 EST	(20040110_0)
 
   Modified files:
