@@ -705,6 +705,8 @@ s_user_register(struct client *client_p, const char *parv[], int parc)
 
 	service_error(userserv_p, client_p, "Username %s registered", parv[0]);
 
+	hook_call(HOOK_USER_LOGIN, client_p, NULL);
+
 	return 5;
 }
 
@@ -757,6 +759,8 @@ s_user_login(struct client *client_p, const char *parv[], int parc)
 	reg_p->last_time = CURRENT_TIME;
 	dlink_add_alloc(client_p, &reg_p->users);
 	service_error(userserv_p, client_p, "Login successful");
+
+	hook_call(HOOK_USER_LOGIN, client_p, NULL);
 
 	return 1;
 }

@@ -127,6 +127,7 @@ static int h_chanserv_join(void *members, void *unused);
 static int h_chanserv_mode_op(void *chptr, void *members);
 static int h_chanserv_mode_simple(void *chptr, void *unused);
 static int h_chanserv_sjoin_lowerts(void *chptr, void *unused);
+static int h_chanserv_user_login(void *client, void *unused);
 static void e_chanserv_expirechan(void *unused);
 static void e_chanserv_expireban(void *unused);
 static void e_chanserv_enforcetopic(void *unused);
@@ -145,6 +146,7 @@ init_s_chanserv(void)
 	hook_add(h_chanserv_mode_op, HOOK_MODE_OP);
 	hook_add(h_chanserv_mode_simple, HOOK_MODE_SIMPLE);
 	hook_add(h_chanserv_sjoin_lowerts, HOOK_SJOIN_LOWERTS);
+	hook_add(h_chanserv_user_login, HOOK_USER_LOGIN);
 
 	eventAdd("chanserv_expirechan", e_chanserv_expirechan, NULL, 43205);
 
@@ -1076,6 +1078,56 @@ h_chanserv_join(void *v_chptr, void *v_members)
 
 	modebuild_finish();
 	kickbuild_finish(chanserv_p, chptr);
+
+	return 0;
+}
+
+/* User logged in; op/voice them on any channels they are on and have access */
+static int
+h_chanserv_user_login(void *v_client_p, void *unused)
+{
+	dlink_node *ptr;
+	struct user *user;
+	struct user_reg *ureg_p;
+	struct channel *chptr;
+	struct chmember *member;
+	struct chan_reg *chreg_p;
+	struct member_reg *mreg_p;
+
+	user = ((struct client *)v_client_p)->user;
+	ureg_p = user->user_reg;
+
+	DLINK_FOREACH(ptr, user->channels.head)
+	{
+		member = ptr->data;
+		chptr = member->chptr;
+
+		if((chreg_p = find_channel_reg(NULL, chptr->name)) == NULL)
+			continue;
+
+		/* user has no access to channel */
+		if((mreg_p = find_member_reg(ureg_p, chreg_p)) == NULL)
+			continue;
+
+		if(mreg_p->flags & CS_MEMBER_AUTOOP &&
+		   !(member->flags & MODE_OPPED))
+		{
+			sendto_server(":%s MODE %s +o %s",
+					chanserv_p->name, chptr->name,
+					member->client_p->name);
+			member->flags |= MODE_OPPED;
+			mreg_p->channel_reg->last_time = CURRENT_TIME;
+		}
+		else if(mreg_p->flags & CS_MEMBER_AUTOVOICE &&
+			!(member->flags & (MODE_OPPED | MODE_VOICED)))
+		{
+			sendto_server(":%s MODE %s +v %s",
+					chanserv_p->name, chptr->name,
+					member->client_p->name);
+			member->flags |= MODE_VOICED;
+			mreg_p->channel_reg->last_time = CURRENT_TIME;
+		}
+	}
 
 	return 0;
 }
