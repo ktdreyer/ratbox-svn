@@ -1,3 +1,15 @@
+leeh        2002/08/10 18:41:19 EDT	(20020810_39)
+
+  Modified files:
+    modules              m_gline.c 
+  Log:
+  - set CONF_FLAGS_TEMPORARY to glines.
+  
+  Revision  Changes    Path
+  1.85      +2 -1      ircd-ratbox/modules/m_gline.c
+
+
+
 leeh        2002/08/10 18:22:32 EDT	(20020810_38)
 
   Modified files:
