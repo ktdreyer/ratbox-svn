@@ -1,3 +1,23 @@
+androsyn    2004/08/10 15:40:38 EDT	(20040810_5)
+
+  Modified files:
+    adns                 event.c setup.c 
+    include              commio.h 
+    src                  commio.c listener.c s_auth.c s_serv.c 
+  Log:
+  Rename comm_open to comm_socket
+  
+  Revision  Changes    Path
+  1.24      +1 -1      ircd-ratbox/adns/event.c
+  1.37      +1 -1      ircd-ratbox/adns/setup.c
+  1.10      +1 -1      ircd-ratbox/include/commio.h
+  1.15      +7 -7      ircd-ratbox/src/commio.c
+  7.114     +1 -1      ircd-ratbox/src/listener.c
+  7.174     +1 -1      ircd-ratbox/src/s_auth.c
+  7.411     +1 -1      ircd-ratbox/src/s_serv.c
+
+
+
 androsyn    2004/08/10 15:37:34 EDT	(20040810_4)
 
   Modified files:
