@@ -23,6 +23,9 @@
 /* Size of the dlink_node heap. */
 #undef DNODE_HEAP_SIZE
 
+/* Prefix where config files are installed. */
+#undef ETC_DIR
+
 /* Define to 1 if you have `alloca', as a function or macro. */
 #undef HAVE_ALLOCA
 
@@ -162,6 +165,9 @@
 /* Define to 1 if you have the <wait.h> header file. */
 #undef HAVE_WAIT_H
 
+/* Prefix where help files are installed. */
+#undef HELP_DIR
+
 /* Define if IPv6 support is present and available. */
 #undef IPV6
 
@@ -174,11 +180,17 @@
 /* Size of the linebuf heap. */
 #undef LINEBUF_HEAP_SIZE
 
+/* Prefix where logs are written. */
+#undef LOG_DIR
+
 /* Maximum number of network connections */
 #undef MAX_CLIENTS
 
 /* Sizeof member heap. */
 #undef MEMBER_HEAP_SIZE
+
+/* Prefix where modules are installed. */
+#undef MODULE_DIR
 
 /* Define this to disable debugging support. */
 #undef NDEBUG

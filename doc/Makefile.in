@@ -23,11 +23,11 @@ libexecdir	= @libexecdir@
 sysconfdir	= @sysconfdir@
 localstatedir	= @localstatedir@
 # Change this later! -- adrian
-moduledir	= @prefix@/modules
-automoduledir	= @prefix@/modules/autoload
+moduledir	= @moduledir@
+automoduledir	= @moduledir@/autoload
 
 # Local to the etc Makefile
-mandir          = @prefix@/man8
+mandir          = @mandir@/man8
 MANPAGES        = ircd.8
 
 CONFS		= example.conf example.efnet.conf
@@ -42,45 +42,45 @@ INCLUDES	= -I../include $(SSL_INCLUDES)
 CPPFLAGS	= ${INCLUDES} @CPPFLAGS@
  
 install-mkdirs:
-	-@if test ! -d $(sysconfdir); then \
+	-@if test ! -d $(DESTDIR)$(sysconfdir); then \
 		echo "mkdir $(sysconfdir)"; \
-		mkdir $(sysconfdir); \
+		mkdir $(DESTDIR)$(sysconfdir); \
 	fi
 
-	-@if test ! -d $(mandir); then \
+	-@if test ! -d $(DESTDIR)$(mandir); then \
 		echo "mkdir $(mandir)"; \
-		mkdir $(mandir); \
+		mkdir $(DESTDIR)$(mandir); \
 	fi
 
 install: install-mkdirs build
 	@echo "ircd: installing example config files ($(CONFS))"
 	@for i in $(CONFS); do \
-		if test -f $(sysconfdir)/$$i; then \
-			$(MV) $(sysconfdir)/$$i $(sysconfdir)/$$i.old; \
+		if test -f $(DESTDIR)$(sysconfdir)/$$i; then \
+			$(MV) $(DESTDIR)$(sysconfdir)/$$i $(DESTDIR)$(sysconfdir)/$$i.old; \
 		fi; \
-		$(INSTALL_DATA) $$i $(sysconfdir); \
+		$(INSTALL_DATA) $$i $(DESTDIR)$(sysconfdir); \
 	done
 
 	@for i in $(DEFAULTCONFS); do \
-		if test ! -f $(sysconfdir)/$$i; then \
+		if test ! -f $(DESTDIR)$(sysconfdir)/$$i; then \
 			echo "ircd: creating config file ($$i)"; \
-			${TOUCH} $(sysconfdir)/$$i; \
+			${TOUCH} $(DESTDIR)$(sysconfdir)/$$i; \
 		fi; \
 	done
 
-	-@if test ! -f $(sysconfdir)/ircd.motd; then \
+	-@if test ! -f $(DESTDIR)$(sysconfdir)/ircd.motd; then \
 		echo "ircd: installing motd file (ircd.motd)"; \
-		$(INSTALL_DATA) ircd.motd $(sysconfdir); \
+		$(INSTALL_DATA) ircd.motd $(DESTDIR)$(sysconfdir); \
 	fi
 
-	-@if test -f $(sysconfdir)/links.txt; then \
-		$(RM) $(sysconfdir)/links.txt; \
+	-@if test -f $(DESTDIR)$(sysconfdir)/links.txt; then \
+		$(RM) $(DESTDIR)$(sysconfdir)/links.txt; \
 	fi
 
 	@echo "ircd: installing manpage"
 	@for i in $(MANPAGES); do \
-		if test ! -f $(mandir)/$$i; then \
-			$(INSTALL_DATA) $$i $(mandir); \
+		if test ! -f $(DESTDIR)$(mandir)/$$i; then \
+			$(INSTALL_DATA) $$i $(DESTDIR)$(mandir); \
 		fi; \
 	done
 

@@ -53,9 +53,9 @@ build: all
 all: $(OBJS)
 
 install: all
-	@echo "Installing modules into $(AUTOMODULEDIR) .."
+	@echo "Installing modules into $(DESTDIR)$(AUTOMODULEDIR) .."
 	@for file in $(OBJS); do \
-		$(INSTALL_DATA) $$file $(AUTOMODULEDIR); \
+		$(INSTALL_DATA) $$file $(DESTDIR)$(AUTOMODULEDIR); \
 	done
 
 .SUFFIXES: .so

@@ -72,32 +72,32 @@ libexecdir	= @libexecdir@
 sysconfdir	= @sysconfdir@
 localstatedir	= @localstatedir@
 # Change this later! -- adrian
-moduledir	= @prefix@/modules
-automoduledir	= @prefix@/modules/autoload
+moduledir	= @moduledir@
+automoduledir	= @moduledir@/autoload
 
 
  
 install-mkdirs:
-	-@if test ! -d $(prefix); then \
+	-@if test ! -d $(DESTDIR)$(prefix); then \
 		echo "ircd: setting up tools directory structure"; \
-		mkdir $(prefix); \
+		mkdir $(DESTDIR)$(prefix); \
 	fi
-	-@if test ! -d $(exec_prefix); then \
-		mkdir $(exec_prefix); \
+	-@if test ! -d $(DESTDIR)$(exec_prefix); then \
+		mkdir $(DESTDIR)$(exec_prefix); \
 	fi
-	-@if test ! -d $(bindir); then \
-		mkdir $(bindir); \
+	-@if test ! -d $(DESTDIR)$(bindir); then \
+		mkdir $(DESTDIR)$(bindir); \
 	fi
 
 install: install-mkdirs build
 	@echo "ircd: installing tools ($(PROGS))"
 	@for i in $(PROGS); do \
-		if test -f $(bindir)/$$i; then \
-			$(MV) $(bindir)/$$i $(bindir)/$$i.old; \
+		if test -f $(DESTDIR)$(bindir)/$$i; then \
+			$(MV) $(DESTDIR)$(bindir)/$$i $(DESTDIR)$(bindir)/$$i.old; \
 		fi; \
-		$(INSTALL_BIN) $$i $(bindir); \
+		$(INSTALL_BIN) $$i $(DESTDIR)$(bindir); \
 	done; \
-	$(RM) -f $(bindir)/vimotd $(bindir)/viklines
-	$(LN) $(bindir)/viconf $(bindir)/vimotd
-	$(LN) $(bindir)/viconf $(bindir)/viklines
+	$(RM) -f $(DESTDIR)$(bindir)/vimotd $(DESTDIR)$(bindir)/viklines
+	$(LN) $(DESTDIR)$(bindir)/viconf $(DESTDIR)$(bindir)/vimotd
+	$(LN) $(DESTDIR)$(bindir)/viconf $(DESTDIR)$(bindir)/viklines
 

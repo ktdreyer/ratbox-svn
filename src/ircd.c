@@ -615,8 +615,9 @@ main(int argc, char *argv[])
 	read_conf_files(YES);	/* cold start init conf files */
 #ifndef STATIC_MODULES
 
-	mod_add_path(IRCD_PREFIX "/modules");
-	mod_add_path(IRCD_PREFIX "/modules/autoload");
+	mod_add_path(MODULE_DIR); 
+	/* mod_add_path(IRCD_PREFIX "/modules"); */
+	/* mod_add_path(IRCD_PREFIX "/modules/autoload"); */
 #endif
 
 	initialize_server_capabs();	/* Set up default_server_capabs */

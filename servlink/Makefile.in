@@ -51,10 +51,10 @@ servlink: ${OBJECTS}
 install: build
 	@echo "ircd: installing servlink ($(PROGS))"
 	@for i in $(PROGS); do \
-                if test -f $(bindir)/$$i; then \
-                        $(MV) $(bindir)/$$i $(bindir)/$$i.old; \
+                if test -f $(DESTDIR)$(bindir)/$$i; then \
+                        $(MV) $(DESTDIR)$(bindir)/$$i $(DESTDIR)$(bindir)/$$i.old; \
                 fi; \
-                $(INSTALL_BIN) $$i $(bindir); \
+                $(INSTALL_BIN) $$i $(DESTDIR)$(bindir); \
         done
 
 .c.o:
