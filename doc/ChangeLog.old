@@ -1,3 +1,15 @@
+*** 20010207_3 by db
+- ok. once a client has exited, any recvq linebufs it has, must be flushed
+  else client_dopacket() will try to parse stuff while the client has
+  a -1 fd... oops. The old code (before david cleaned it up) swept
+  this under the carpet by simply ignoring the buffer if the fd < 0
+  Sooo instead exit_client() should flush all recvq linebufs when it
+  exits a client. I added a new interface client_flush_input() to linebuf.c
+  I don't think client.c should be diddling directly with linebuf_donebuf
+  but thats just me.
+
+
+
 *** 20010207_2 by db
 - one line comments aren't generally useful in fixing bugs.
   THIS fixes the stack smash observed on dead links
