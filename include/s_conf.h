@@ -189,6 +189,7 @@ struct config_file_entry
 	int max_nick_changes;
 	int ts_max_delta;
 	int ts_warn_delta;
+	int dline_with_reason;
 	int kline_with_reason;
 	int kline_delay;
 	int warn_no_nline;

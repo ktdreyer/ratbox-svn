@@ -286,6 +286,12 @@ static struct InfoStruct info_table[] = {
 		"K-lined clients sign off with this reason"
 	},
 	{
+		"dline_with_reason",
+		OUTPUT_BOOLEAN_YN,
+		&ConfigFileEntry.dline_with_reason,
+		"Display D-line reason to client on disconnect"
+	},
+	{
 		"kline_with_reason",
 		OUTPUT_BOOLEAN_YN,
 		&ConfigFileEntry.kline_with_reason,

@@ -554,7 +554,7 @@ accept_connection(int pfd, void *data)
 	{
 		ServerStats->is_ref++;
 
-        if(ConfigFileEntry.kline_with_reason)
+        if(ConfigFileEntry.dline_with_reason)
         {
             if (ircsnprintf(buf, sizeof(buf), "ERROR :*** Banned: %s\r\n", aconf->passwd) >= (sizeof(buf)-1))
             {
