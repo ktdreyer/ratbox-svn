@@ -1,3 +1,9 @@
+*** 20010211_5 by db
+- modified logging in adns functions to work with ircd s_log
+  bit of a quick hack for now ;-/
+
+
+
 *** 20010211_4 by db
 - reworked adns to not use fgetc, fprintf and friends, but the ircd
   specific FBFILE library (fileio.h)
