@@ -1,3 +1,18 @@
+leeh        2002/01/04 10:01:58 EST	(20020104_4)
+
+  Modified files:
+    modules              Makefile.in 
+    src                  modules-dld.c modules.c 
+  Log:
+  - made m_message.c a core module
+  
+  Revision  Changes    Path
+  1.64      +1 -1      ircd-hybrid-7/modules/Makefile.in
+  1.16      +1 -0      ircd-hybrid-7/src/modules-dld.c
+  7.86      +1 -0      ircd-hybrid-7/src/modules.c
+
+
+
 leeh        2002/01/04 07:10:06 EST	(20020104_3)
 
   Modified files:
