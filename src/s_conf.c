@@ -692,8 +692,7 @@ verify_access (struct Client *client_p, const char *username)
 	{
 		strlcpy (non_ident, "~", sizeof (non_ident));
 		strlcat (non_ident, username, sizeof (non_ident));
-		aconf = find_address_conf (client_p->host, non_ident,
-					   &client_p->localClient->ip);
+		aconf = find_address_conf (client_p->host, non_ident, &client_p->localClient->ip);
 	}
 
 	if(aconf != NULL)
@@ -1039,7 +1038,8 @@ struct ConfItem *
 find_conf_exact (const char *name, const char *user, const char *host, int statmask)
 {
 	struct ConfItem *tmp;
-
+	struct irc_inaddr ip, cip;
+	int bits, cbits;
 	for (tmp = ConfigItemList; tmp; tmp = tmp->next)
 	{
 		if(!(tmp->status & statmask) || !tmp->name || !tmp->host ||
@@ -1050,8 +1050,21 @@ find_conf_exact (const char *name, const char *user, const char *host, int statm
 		 ** socket host) matches *either* host or name field
 		 ** of the configuration.
 		 */
-		if(!match (tmp->host, host) || !match (tmp->user, user) || irccmp (tmp->name, name))
+		if(!match (tmp->user, user) || irccmp (tmp->name, name))
 			continue;
+
+
+		if(parse_netmask (tmp->host, &ip, &bits) && parse_netmask (host, &cip, &cbits))
+		{
+			if(!comp_with_mask (&IN_ADDR (ip), &IN_ADDR (cip), bits))
+				continue;
+
+		}
+		else if(!match (tmp->host, host))
+		{
+			continue;
+		}
+
 		if(tmp->status & CONF_OPERATOR)
 		{
 			if(tmp->clients < ConfMaxUsers (tmp))
@@ -1451,8 +1464,7 @@ find_kill (struct Client *client_p)
 	if(client_p == NULL)
 		return (NULL);
 
-	aconf = find_address_conf (client_p->host, client_p->username,
-				   &client_p->localClient->ip);
+	aconf = find_address_conf (client_p->host, client_p->username, &client_p->localClient->ip);
 	if(aconf == NULL)
 		return (aconf);
 	if((aconf->status & CONF_KILL) || (aconf->status & CONF_GLINE))

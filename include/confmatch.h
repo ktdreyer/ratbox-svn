@@ -28,8 +28,6 @@
 
 #include "client.h"
 
-/* Hashtable stuff... */
-#define ATABLE_SIZE 0x1000
 
 void init_confmatch(void);
 void add_conf_by_address (const char *address, int type, const char *username, struct ConfItem *aconf);
