@@ -1,3 +1,15 @@
+androsyn    2003/09/15 16:17:58 EDT	(20030915_1)
+
+  Modified files:
+    include              irc_string.h 
+  Log:
+  Forgot this too..
+  
+  Revision  Changes    Path
+  7.52      +1 -0      ircd-ratbox/include/irc_string.h
+
+
+
 androsyn    2003/09/15 16:16:56 EDT	(20030915_0)
 
   Modified files:
