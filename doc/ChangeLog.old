@@ -1,3 +1,15 @@
+androsyn    2002/02/19 10:22:13 EST	(20020219_0)
+
+  Modified files:
+    src                  packet.c 
+  Log:
+  Move an assert up a little bit..
+  
+  Revision  Changes    Path
+  7.71      +4 -3      ircd-hybrid-7/src/packet.c
+
+
+
 wcampbel    2002/02/18 17:07:45 EST	(20020218_2)
 
   Modified files:
