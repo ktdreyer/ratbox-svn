@@ -1,3 +1,18 @@
+androsyn    2004/03/01 19:08:32 EST	(20040302_1)
+
+  Modified files:
+    .                    configure configure.ac 
+    include              setup.h.in 
+  Log:
+  Put back the check to actually *look* for -lcrypto
+  
+  Revision  Changes    Path
+  7.205     +74 -0     ircd-ratbox/configure
+  7.19      +4 -1      ircd-ratbox/configure.ac
+  7.78      +3 -0      ircd-ratbox/include/setup.h.in
+
+
+
 androsyn    2004/03/01 19:05:40 EST	(20040302_0)
 
   Modified files:
