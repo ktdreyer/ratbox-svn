@@ -1,3 +1,15 @@
+leeh        2003/06/30 08:33:53 EDT	(20030630_0)
+
+  Modified files:
+    modules              m_rehash.c 
+  Log:
+  - remove /rehash channels
+  
+  Revision  Changes    Path
+  1.67      +1 -11     ircd-ratbox/modules/m_rehash.c
+
+
+
 leeh        2003/06/29 08:17:32 EDT	(20030629_0)
 
   Modified files:
