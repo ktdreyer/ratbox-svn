@@ -581,4 +581,6 @@ extern void close_connection(struct Client *);
 extern void init_uid(void);
 extern char *generate_uid(void);
 
+extern void flood_endgrace(struct Client *);
+
 #endif /* INCLUDED_client_h */

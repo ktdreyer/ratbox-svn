@@ -35,8 +35,6 @@
 #include "modules.h"
 #include "s_conf.h"
 #include "s_serv.h"
-#include "packet.h"
-
 
 static int m_away(struct Client *, struct Client *, int, const char **);
 

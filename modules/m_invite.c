@@ -39,7 +39,6 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
-#include "packet.h"
 
 static int m_invite(struct Client *, struct Client *, int, const char **);
 

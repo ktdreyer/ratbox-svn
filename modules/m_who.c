@@ -40,7 +40,6 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
-#include "packet.h"
 #include "s_newconf.h"
 
 static int m_who(struct Client *, struct Client *, int, const char **);

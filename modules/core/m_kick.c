@@ -36,7 +36,6 @@
 #include "modules.h"
 #include "parse.h"
 #include "hash.h"
-#include "packet.h"
 #include "s_serv.h"
 
 static int m_kick(struct Client *, struct Client *, int, const char **);

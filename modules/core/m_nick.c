@@ -43,7 +43,6 @@
 #include "parse.h"
 #include "modules.h"
 #include "common.h"
-#include "packet.h"
 #include "scache.h"
 #include "s_newconf.h"
 #include "monitor.h"

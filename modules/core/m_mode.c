@@ -41,7 +41,6 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
-#include "packet.h"
 #include "sprintf_irc.h"
 #include "s_newconf.h"
 

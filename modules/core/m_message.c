@@ -39,7 +39,6 @@
 #include "hash.h"
 #include "class.h"
 #include "msg.h"
-#include "packet.h"
 #include "send.h"
 #include "event.h"
 #include "patricia.h"

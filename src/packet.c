@@ -147,24 +147,6 @@ parse_client_queued(struct Client *client_p)
 	}
 }
 
-/* flood_endgrace()
- *
- * marks the end of the clients grace period
- */
-void
-flood_endgrace(struct Client *client_p)
-{
-	SetFloodDone(client_p);
-
-	/* Drop their flood limit back down */
-	client_p->localClient->allow_read = MAX_FLOOD;
-
-	/* sent_parsed could be way over MAX_FLOOD but under MAX_FLOOD_BURST,
-	 * so reset it.
-	 */
-	client_p->localClient->sent_parsed = 0;
-}
-
 /*
  * flood_recalc
  *

@@ -40,7 +40,6 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
-#include "packet.h"
 #include "cache.h"
 
 static int m_oper(struct Client *, struct Client *, int, const char **);
