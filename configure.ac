@@ -374,8 +374,8 @@ AC_LINK_IFELSE(
 	[AC_LANG_PROGRAM(
 		[[#include <string.h>
 		#include <stdlib.h>]],
-		[[char *a = malloc(6), *b = strdup("hello");
-		strlcpy(a, b, 6);]]
+		[[char *a = malloc(6);
+		strlcpy(a, "hello", 6);]]
 	)],
 	[AC_MSG_RESULT(yes)
 	AC_DEFINE(HAVE_STRLCPY, 1, [Define if strlcpy is available (most BSDs.)])],
@@ -387,8 +387,9 @@ AC_LINK_IFELSE(
 	[AC_LANG_PROGRAM(
 		[[#include <string.h>
 		#include <stdlib.h>]],
-		[[char *a = malloc(6), *b = strdup("hello");
-		strlcat(a, b, 6);]]
+		[[char *a = malloc(6);
+		a[0] = '\0';
+		strlcat(a, "hello", 6);]]
 	)],
 	[AC_MSG_RESULT(yes)
 	AC_DEFINE(HAVE_STRLCAT, 1, [Define if strlcat is available (most BSDs.)])],
@@ -443,7 +444,7 @@ AC_CHECK_TYPE([sa_family_t], [],
 AC_CHECK_TYPES([uintptr_t])
 
 dnl check for various functions...
-AC_CHECK_FUNCS([socketpair vsnprintf mmap gettimeofday])
+AC_CHECK_FUNCS([socketpair vsnprintf mmap gettimeofday strdup strndup ])
 
 AC_FUNC_ALLOCA
 

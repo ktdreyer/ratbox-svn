@@ -5429,8 +5429,8 @@ cat >>conftest.$ac_ext <<_ACEOF
 int
 main ()
 {
-char *a = malloc(6), *b = strdup("hello");
-		strlcpy(a, b, 6);
+char *a = malloc(6);
+		strlcpy(a, "hello", 6);
 
   ;
   return 0;
@@ -5488,8 +5488,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 int
 main ()
 {
-char *a = malloc(6), *b = strdup("hello");
-		strlcat(a, b, 6);
+char *a = malloc(6);
+		a[0] = '\0';
+		strlcat(a, "hello", 6);
 
   ;
   return 0;
@@ -6125,7 +6126,9 @@ fi
 
 
 
-for ac_func in socketpair vsnprintf mmap gettimeofday
+
+
+for ac_func in socketpair vsnprintf mmap gettimeofday strdup strndup
 do
 as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`
 echo "$as_me:$LINENO: checking for $ac_func" >&5
