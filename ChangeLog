@@ -1,3 +1,23 @@
+leeh        2005/03/21 22:02:58 UTC	(20050321_7)
+
+  Modified files:
+    modules              Makefile.in 
+    modules/core         m_join.c 
+    src                  modules.c 
+  Removed files:
+    modules/core         m_sjoin.c 
+  Log:
+  - merge m_sjoin.c into m_join.c, theres just too much TS related code shared
+    between them to keep them seperate
+  
+  Revision  Changes    Path
+  1.120     +1 -2      ircd-ratbox/modules/Makefile.in
+  1.173     +503 -2    ircd-ratbox/modules/core/m_join.c
+  1.212     +0 -753    ircd-ratbox/modules/core/m_sjoin.c (dead)
+  7.159     +0 -1      ircd-ratbox/src/modules.c
+
+
+
 leeh        2005/03/21 21:21:12 UTC	(20050321_6)
 
   Modified files:
