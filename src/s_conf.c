@@ -825,7 +825,7 @@ validate_conf(void)
 int
 conf_connect_allowed(struct sockaddr *addr, int aftype)
 {
-	struct ConfItem *aconf = find_dline(addr, aftype);
+	struct ConfItem *aconf = find_dline(addr);
 
 	/* DLINE exempt also gets you out of static limits/pacing... */
 	if(aconf && (aconf->status & CONF_EXEMPTDLINE))
@@ -880,7 +880,7 @@ clear_ircd_conf(void)
 		MaxUsers(cltmp) = -1;
 	}
 
-	clear_out_address_conf(CONF_CLIENT|CONF_EXEMPTDLINE);
+	clear_out_address_conf(CONF_CLIENT);
 	clear_s_newconf_ircd();
 
 	/* clean out module paths */
@@ -955,7 +955,7 @@ clear_ircd_conf(void)
 static void
 clear_ban_confs(void)
 {
-	clear_out_address_conf(CONF_KILL|CONF_DLINE);
+	clear_out_address_conf(CONF_KILL);
 	clear_s_newconf_bans();
 }
 
@@ -1126,12 +1126,6 @@ write_confitem(KlineType type, struct Client *source_p, char *user,
 			   user, host, reason, oper_reason, current_date,
 			   get_oper_name(source_p), CurrentTime);
 	}
-	else if(type == DLINE_TYPE)
-	{
-		ircsnprintf(buffer, sizeof(buffer),
-			   "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%ld\n", host,
-			   reason, oper_reason, current_date, get_oper_name(source_p), CurrentTime);
-	}
 	else if(type == RESV_TYPE)
 	{
 		ircsnprintf(buffer, sizeof(buffer), "\"%s\",\"%s\",\"%s\",%ld\n",
@@ -1173,32 +1167,6 @@ write_confitem(KlineType type, struct Client *source_p, char *user,
 
 		sendto_one_notice(source_p, ":Added K-Line [%s@%s]",
 				  user, host);
-	}
-	else if(type == DLINE_TYPE)
-	{
-		if(EmptyString(oper_reason))
-		{
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					"%s added D-Line for [%s] [%s]",
-					get_oper_name(source_p), host, reason);
-			ilog(L_KLINE, "D %s 0 %s %s",
-				get_oper_name(source_p), host, reason);
-		}
-		else
-		{
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					"%s added D-Line for [%s] [%s|%s]",
-					get_oper_name(source_p), host, 
-					reason, oper_reason);
-			ilog(L_KLINE, "D %s 0 %s %s|%s",
-				get_oper_name(source_p), host, 
-				reason, oper_reason);
-		}
-
-		sendto_one(source_p,
-			   ":%s NOTICE %s :Added D-Line [%s] to %s", me.name,
-			   source_p->name, host, filename);
-
 	}
 	else if(type == RESV_TYPE)
 	{
@@ -1279,36 +1247,6 @@ conf_add_class_to_conf(struct ConfItem *aconf)
 		return;
 	}
 }
-
-/*
- * conf_add_d_conf
- * inputs       - pointer to config item
- * output       - NONE
- * side effects - Add a d/D line
- */
-void
-conf_add_d_conf(struct ConfItem *aconf)
-{
-	if(aconf->host == NULL)
-		return;
-
-	aconf->user = NULL;
-
-	/* XXX - Should 'd' ever be in the old conf? For new conf we don't
-	 *       need this anyway, so I will disable it for now... -A1kmm
-	 */
-
-	if(parse_netmask(aconf->host, NULL, NULL) == HM_HOST)
-	{
-		ilog(L_MAIN, "Invalid Dline %s ignored", aconf->host);
-		free_conf(aconf);
-	}
-	else
-	{
-		add_conf_by_address(aconf->host, CONF_DLINE, NULL, aconf);
-	}
-}
-
 
 /*
  * yyerror

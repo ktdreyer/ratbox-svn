@@ -59,6 +59,8 @@ dlink_list resv_conf_list;	/* nicks only! */
 static dlink_list nd_list;	/* nick delay */
 dlink_list glines;
 dlink_list pending_glines;
+dlink_list dlines;
+static dlink_list exempt_list;
 
 dlink_list temp_klines[LAST_TEMP_TYPE];
 dlink_list temp_dlines[LAST_TEMP_TYPE];
@@ -70,6 +72,9 @@ static void expire_nd_entries(void *unused);
 static void expire_glines(void *unused);
 static void expire_temp_kd(void *list);
 static void reorganise_temp_kd(void *list);
+
+patricia_tree_t *dline_tree;
+patricia_tree_t *exempt_tree;
 
 void
 init_s_newconf(void)
@@ -92,6 +97,14 @@ init_s_newconf(void)
 			&temp_klines[TEMP_WEEK], 604800);
 	eventAddIsh("expire_temp_dlines_week", reorganise_temp_kd,
 			&temp_dlines[TEMP_WEEK], 604800);
+
+#ifdef IPV6
+	dline_tree = New_Patricia(128);
+	exempt_tree = New_Patricia(128);
+#else
+	dline_tree = New_Patricia(32);
+	exempt_tree = New_Patricia(32);
+#endif
 }
 
 
@@ -99,6 +112,7 @@ void
 clear_s_newconf_ircd(void)
 {
 	struct server_conf *server_p;
+	struct ConfItem *aconf;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 
@@ -139,6 +153,16 @@ clear_s_newconf_ircd(void)
 		else
 			server_p->flags |= SERVER_ILLEGAL;
 	}
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, exempt_list.head)
+	{
+		aconf = ptr->data;
+
+		dlinkDelete(ptr, &exempt_list);
+		patricia_remove(exempt_tree, aconf->pnode);
+		free_conf(aconf);
+	}
+
 }
 
 void
@@ -171,6 +195,124 @@ clear_s_newconf_bans(void)
 	}
 
 	clear_resv_hash();
+	clear_dlines(&dlines);
+}
+
+void
+add_dline(struct ConfItem *aconf)
+{
+	patricia_node_t *pnode;
+
+	pnode = make_and_lookup(dline_tree, aconf->host);
+	pnode->data = aconf;
+	aconf->pnode = pnode;
+
+	if(aconf->flags & CONF_FLAGS_TEMPORARY)
+	{
+		if(aconf->hold >= CurrentTime + (10080 * 60))
+		{
+			dlinkAdd(aconf, &aconf->dnode, &temp_dlines[TEMP_WEEK]);
+			aconf->port = TEMP_WEEK;
+		}
+		else if(aconf->hold >= CurrentTime + (1440 * 60))
+		{
+			dlinkAdd(aconf, &aconf->dnode, &temp_dlines[TEMP_DAY]);
+			aconf->port = TEMP_DAY;
+		}
+		else if(aconf->hold >= CurrentTime + (60 * 60))
+		{
+			dlinkAdd(aconf, &aconf->dnode, &temp_dlines[TEMP_HOUR]);
+			aconf->port = TEMP_HOUR;
+		}
+		else
+		{
+			dlinkAdd(aconf, &aconf->dnode, &temp_dlines[TEMP_MIN]);
+			aconf->port = TEMP_MIN;
+		}
+
+		aconf->flags |= CONF_FLAGS_TEMPORARY;
+	}
+	else
+		dlinkAdd(aconf, &aconf->dnode, &dlines);
+}
+
+int
+remove_dline(const char *host)
+{
+	struct ConfItem *aconf;
+	patricia_node_t *pnode;
+
+	if((pnode = match_exact_string(dline_tree, host)) == NULL)
+		return 0;
+
+	aconf = pnode->data;
+
+	if((aconf->flags & CONF_FLAGS_TEMPORARY) == 0)
+	{
+		dlinkDelete(&aconf->dnode, &dlines);
+	}
+	else
+		dlinkDelete(&aconf->dnode, &temp_dlines[aconf->port]);
+		
+	free_conf(aconf);
+	patricia_remove(dline_tree, pnode);
+	return 1;
+}
+
+void
+clear_dlines(dlink_list *list)
+{
+	struct ConfItem *aconf;
+	dlink_node *ptr, *next_ptr;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, list->head)
+	{
+		aconf = ptr->data;
+
+		patricia_remove(dline_tree, aconf->pnode);
+		dlinkDelete(ptr, list);
+		free_conf(aconf);
+	}
+}
+
+struct ConfItem *
+find_dline(struct sockaddr *addr)
+{
+	patricia_node_t *pnode;
+
+	if((pnode = match_ip(exempt_tree, addr)))
+		return pnode->data;
+
+	if((pnode = match_ip(dline_tree, addr)))
+		return pnode->data;
+
+	return NULL;
+}
+
+struct ConfItem *
+find_dline_string(const char *host)
+{
+	patricia_node_t *pnode;
+
+	if((pnode = match_string(exempt_tree, host)))
+		return pnode->data;
+
+	if((pnode = match_string(dline_tree, host)))
+		return pnode->data;
+
+	return NULL;
+}
+
+void
+add_exempt(struct ConfItem *aconf)
+{
+	patricia_node_t *pnode;
+
+	pnode = make_and_lookup(exempt_tree, aconf->host);
+	pnode->data = aconf;
+	aconf->pnode = pnode;
+
+	dlinkAdd(aconf, &aconf->dnode, &exempt_list);
 }
 
 /* add_temp_kline()
@@ -208,40 +350,6 @@ add_temp_kline(struct ConfItem *aconf)
 	add_conf_by_address(aconf->host, CONF_KILL, aconf->user, aconf);
 }
 
-/* add_temp_dline()
- *
- * input	- pointer to struct ConfItem
- * output	- none
- * side effects - added to tdline link list and address hash
- */
-void
-add_temp_dline(struct ConfItem *aconf)
-{
-	if(aconf->hold >= CurrentTime + (10080 * 60))
-	{
-		dlinkAdd(aconf, &aconf->dnode, &temp_dlines[TEMP_WEEK]);
-		aconf->port = TEMP_WEEK;
-	}
-	else if(aconf->hold >= CurrentTime + (1440 * 60))
-	{
-		dlinkAdd(aconf, &aconf->dnode, &temp_dlines[TEMP_DAY]);
-		aconf->port = TEMP_DAY;
-	}
-	else if(aconf->hold >= CurrentTime + (60 * 60))
-	{
-		dlinkAdd(aconf, &aconf->dnode, &temp_dlines[TEMP_HOUR]);
-		aconf->port = TEMP_HOUR;
-	}
-	else
-	{
-		dlinkAdd(aconf, &aconf->dnode, &temp_dlines[TEMP_MIN]);
-		aconf->port = TEMP_MIN;
-	}
-
-	aconf->flags |= CONF_FLAGS_TEMPORARY;
-	add_conf_by_address(aconf->host, CONF_DLINE, aconf->user, aconf);
-}
-
 static void
 expire_temp_kd(void *list)
 {
@@ -255,15 +363,27 @@ expire_temp_kd(void *list)
 
 		if(aconf->hold <= CurrentTime)
 		{
-			/* Alert opers that a TKline expired - Hwy */
-			if(ConfigFileEntry.tkline_expire_notices)
-				sendto_realops_flags(UMODE_ALL, L_ALL,
-						     "Temporary K-line for [%s@%s] expired",
-						     (aconf->user) ? aconf->
-						     user : "*", (aconf->host) ? aconf->host : "*");
-
 			dlinkDelete(ptr, list);
-			delete_one_address_conf(aconf->host, aconf);
+
+			if(aconf->status & CONF_KILL)
+			{
+				/* Alert opers that a TKline expired - Hwy */
+				if(ConfigFileEntry.tkline_expire_notices)
+					sendto_realops_flags(UMODE_ALL, L_ALL,
+							     "Temporary K-line for [%s@%s] expired",
+							     (aconf->user) ? aconf->
+							     user : "*", (aconf->host) ? aconf->host : "*");
+				delete_one_address_conf(aconf->host, aconf);
+			}
+			else
+			{
+				if(ConfigFileEntry.tkline_expire_notices)
+					sendto_realops_flags(UMODE_ALL, L_ALL,
+							"Temporary D-line for [%s] expired",
+							aconf->host);
+				patricia_remove(dline_tree, aconf->pnode);
+				free_conf(aconf);
+			}
 		}
 	}
 }

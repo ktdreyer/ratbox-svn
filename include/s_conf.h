@@ -338,11 +338,8 @@ extern const char *get_conf_name(KlineType);
 extern int rehash(int);
 extern int rehash_ban(int);
 
-extern int conf_add_server(struct ConfItem *, int);
 extern void conf_add_class_to_conf(struct ConfItem *);
-extern void conf_add_me(struct ConfItem *);
 extern void conf_add_class(struct ConfItem *, int);
-extern void conf_add_d_conf(struct ConfItem *);
 extern void flush_expired_ips(void *);
 
 

@@ -54,6 +54,12 @@ extern dlink_list resv_conf_list;
 
 extern dlink_list pending_glines;
 extern dlink_list glines;
+extern dlink_list dlines;
+extern dlink_list exempt_list;
+
+struct _patricia_tree_t;
+extern struct _patricia_tree_t *dline_tree;
+extern struct _patricia_tree_t *exempt_tree;
 
 typedef enum temp_list
 {
@@ -71,8 +77,15 @@ extern void init_s_newconf(void);
 extern void clear_s_newconf_ircd(void);
 extern void clear_s_newconf_bans(void);
 
+extern void add_dline(struct ConfItem *aconf);
+extern int remove_dline(const char *host);
+extern void clear_dlines(dlink_list *list);
+extern struct ConfItem *find_dline(struct sockaddr *addr);
+extern struct ConfItem *find_dline_string(const char *host);
+
+extern void add_exempt(struct ConfItem *aconf);
+
 extern void add_temp_kline(struct ConfItem *);
-extern void add_temp_dline(struct ConfItem *);
 
 /* shared/cluster/hub/leaf confs */
 struct remote_conf

@@ -52,8 +52,6 @@ void clear_out_address_conf(int type);
 void init_host_hash(void);
 struct ConfItem *find_address_conf(const char *, const char *, struct sockaddr *, int);
 
-struct ConfItem *find_dline(struct sockaddr *, int);
-
 #define find_kline(x)	(find_conf_by_address((x)->host, (struct sockaddr *)&(x)->localClient->ip, CONF_KILL,\
 			 (x)->localClient->ip.ss_family, (x)->username))
 #define find_gline(x)	(find_conf_by_address((x)->host, (struct sockaddr *)&(x)->localClient->ip, CONF_GLINE,\

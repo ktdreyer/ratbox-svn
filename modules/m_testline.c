@@ -95,14 +95,13 @@ mo_testline(struct Client *client_p, struct Client *source_p, int parc, const ch
 		host = mask;
 
 	/* parses as an IP, check for a dline */
+	/* note, we could use the string match for dlines here, but we have
+	 * to grab the ip to hunt for klines anyway, so this is just
+	 * efficiency --fl
+	 */
 	if((type = parse_netmask(host, (struct sockaddr *)&ip, &host_mask)) != HM_HOST)
 	{
-#ifdef IPV6
-		if(type == HM_IPV6)
-			aconf = find_dline((struct sockaddr *)&ip, AF_INET6);
-		else
-#endif
-			aconf = find_dline((struct sockaddr *)&ip, AF_INET);
+		aconf = find_dline((struct sockaddr *)&ip);
 
 		if(aconf && aconf->status & CONF_DLINE)
 		{

@@ -1234,7 +1234,7 @@ conf_set_exempt_ip(void *data)
 		free_conf(yy_tmp);
 	}
 	else
-		add_conf_by_address(yy_tmp->host, CONF_EXEMPTDLINE, NULL, yy_tmp);
+		add_exempt(yy_tmp);
 }
 
 static int

@@ -144,7 +144,15 @@ parse_d_file(FILE * file)
 		aconf = make_conf();
 		aconf->status = CONF_DLINE;
 		conf_add_fields(aconf, host_field, reason_field, "", operreason_field);
-		conf_add_d_conf(aconf);
+		aconf->user = NULL;
+
+		if(parse_netmask(aconf->host, NULL, NULL) == HM_HOST)
+		{
+			ilog(L_MAIN, "Invalid Dline %s ignored", aconf->host);
+			free_conf(aconf);
+		}
+		else
+			add_dline(aconf);
 	}
 }
 
