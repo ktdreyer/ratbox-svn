@@ -43,8 +43,8 @@
 
 static void usage(void);
 
-const struct slink_state in_state;
-const struct slink_state out_state;
+struct slink_state in_state;
+struct slink_state out_state;
 
 struct fd_table fds[5] = {
 	{0, read_ctrl, NULL},
