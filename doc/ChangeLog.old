@@ -1,3 +1,16 @@
+db          2001/12/16 18:04:14 EST	(20011216_21)
+
+  Modified files:
+    include              channel_mode.h 
+  Log:
+  - removed unused macro
+    I bet there are still a ton of these left ;-(
+  
+  Revision  Changes    Path
+  7.4       +0 -2      ircd-hybrid-7/include/channel_mode.h
+
+
+
 db          2001/12/16 17:25:01 EST	(20011216_20)
 
   Modified files:
