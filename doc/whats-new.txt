@@ -25,6 +25,7 @@ Client
 ------
 - /help is now available for all users, as its now cached in memory.
   removes config option use_help from general {};
+- default CHANNELLEN for local clients is now 50
 
 Oper
 ----
@@ -33,6 +34,9 @@ Oper
 - opers can now be hidden from stats p, by flag "invisible"
 - XLINEs no longer contain a type field, theyll now all just silently reject
 - temp xlines and resvs
+- klines set against spoofed users will now take effect when the user
+  connects as well, if the user is not kline_exempt
+- trace spy now contains target param if its against a single user
 
 Channels
 --------
