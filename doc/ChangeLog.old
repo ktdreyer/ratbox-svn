@@ -1,3 +1,20 @@
+leeh        2002/05/01 13:24:05 EDT	(20020501_1)
+
+  Modified files:
+    doc                  example.conf example.conf.efnet 
+    src                  channel_mode.c s_conf.c 
+  Log:
+  - added back code that makes restricted do something
+  - fixed errors in the config (hi larne!)
+  
+  Revision  Changes    Path
+  7.159     +6 -6      ircd-hybrid-7/doc/example.conf
+  7.12      +6 -6      ircd-hybrid-7/doc/example.conf.efnet
+  7.35      +11 -0     ircd-hybrid-7/src/channel_mode.c
+  7.301     +3 -0      ircd-hybrid-7/src/s_conf.c
+
+
+
 leeh        2002/05/01 12:36:08 EDT	(20020501_0)
 
   Modified files:
