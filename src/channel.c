@@ -926,9 +926,8 @@ set_chcap_usage_counts(struct Client *serv_p)
 
 	for (n = 0; n < NCHCAP_COMBOS; n++)
 	{
-		if(((serv_p->localClient->caps & chcap_combos[n].cap_yes) ==
-		    chcap_combos[n].cap_yes) &&
-		   ((serv_p->localClient->caps & chcap_combos[n].cap_no) == 0))
+		if(IsCapable(serv_p, chcap_combos[n].cap_yes) &&
+		   NotCapable(serv_p, chcap_combos[n].cap_no))
 		{
 			chcap_combos[n].count++;
 			return;
@@ -953,9 +952,8 @@ unset_chcap_usage_counts(struct Client *serv_p)
 
 	for (n = 0; n < NCHCAP_COMBOS; n++)
 	{
-		if((serv_p->localClient->caps & chcap_combos[n].cap_yes) ==
-		   chcap_combos[n].cap_yes &&
-		   (serv_p->localClient->caps & chcap_combos[n].cap_no) == 0)
+		if(IsCapable(serv_p, chcap_combos[n].cap_yes) &&
+		   NotCapable(serv_p, chcap_combos[n].cap_no))
 		{
 			/* Hopefully capabs can't change dynamically or anything... */
 			s_assert(chcap_combos[n].count > 0);

@@ -76,7 +76,7 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 	struct Client *target_p = NULL;
 	struct Class *cltmp;
 	const char *tname;
-	int doall, link_s[MAXCONNECTIONS], link_u[MAXCONNECTIONS];
+	int doall = 0, link_s[MAXCONNECTIONS], link_u[MAXCONNECTIONS];
 	int cnt = 0, wilds, dow;
 	dlink_node *ptr;
 
@@ -140,8 +140,20 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 	trace_spy(source_p);
 
-	doall = (parv[1] && (parc > 1)) ? match(tname, me.name) : TRUE;
-	wilds = !parv[1] || strchr(tname, '*') || strchr(tname, '?');
+	if(match(tname, me.name))
+	{
+		doall = 1;
+	}
+	/* if theyre tracing our SID, we need to move tname to our name so
+	 * we dont give the sid in ENDOFTRACE
+	 */
+	else if(!MyClient(source_p) && !strcmp(tname, me.id))
+	{
+		doall = 1;
+		tname = me.name;
+	}
+
+	wilds = strchr(tname, '*') || strchr(tname, '?');
 	dow = wilds || doall;
 
 	set_time();
@@ -154,11 +166,17 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 		else
 			target_p = find_person(tname);
 
+		/* tname could be pointing to an ID at this point, so reset
+		 * it to target_p->name if we have a target --fl
+		 */
 		if(target_p != NULL)
+		{
 			report_this_status(source_p, target_p, 0, 0, 0);
+			tname = target_p->name;
+		}
 
 		sendto_one_numeric(source_p, RPL_ENDOFTRACE, 
-				   form_str(RPL_ENDOFTRACE),tname);
+				   form_str(RPL_ENDOFTRACE), tname);
 		return 0;
 	}
 

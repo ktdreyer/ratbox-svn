@@ -88,7 +88,8 @@ struct Capability
 /*
  * Capability macros.
  */
-#define IsCapable(x, cap)       ((x)->localClient->caps &   (cap))
+#define IsCapable(x, cap)       (((x)->localClient->caps & (cap)) == cap)
+#define NotCapable(x, cap)	(((x)->localClient->caps & (cap)) == 0)
 #define SetCapable(x, cap)      ((x)->localClient->caps |=  (cap))
 #define ClearCap(x, cap)        ((x)->localClient->caps &= ~(cap))
 

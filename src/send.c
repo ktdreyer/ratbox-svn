@@ -470,11 +470,11 @@ sendto_server(struct Client *one, struct Channel *chptr, unsigned long caps,
 			continue;
 
 		/* check we have required capabs */
-		if((target_p->localClient->caps & caps) != caps)
+		if(!IsCapable(target_p, caps))
 			continue;
 
 		/* check we don't have any forbidden capabs */
-		if((target_p->localClient->caps & nocaps) != 0)
+		if(!NotCapable(target_p, nocaps))
 			continue;
 
 		_send_linebuf(target_p, &linebuf);
@@ -540,7 +540,7 @@ sendto_channel_flags(struct Client *one, int type, struct Client *source_p,
 			/* if we've got a specific type, target must support
 			 * CHW.. --fl
 			 */
-			if(type && !IsCapable(target_p->from, CAP_CHW))
+			if(type && NotCapable(target_p->from, CAP_CHW))
 				continue;
 
 			if(target_p->from->serial != current_serial)
@@ -784,7 +784,7 @@ sendto_match_servs(struct Client *source_p, const char *mask, int cap,
 			if(cap && !IsCapable(target_p->from, cap))
 				continue;
 
-			if(nocap && IsCapable(target_p->from, nocap))
+			if(nocap && !NotCapable(target_p->from, nocap))
 				continue;
 
 			if(DoesTS6(target_p->from))
