@@ -12,9 +12,18 @@ version.c:
 version.o: version.c
 	$(COMPILE) -c version.c -o version.o
 	$(MV) version.c version.c.last
-	
-AM_YFLAGS=-d
 
+
+# Note GNU bison uses <file>.tab.c not y.tab.c
+y.tab.c: ircd_parser.y
+	$(YACC) -d ircd_parser.y
+
+lex.yy.o: lex.yy.c ircd_lexer.l 
+	$(COMPILE) -c lex.yy.c 
+
+lex.yy.c: ircd_lexer.l y.tab.c
+	$(LEX) ircd_lexer.l
+	
 ircd_SOURCES =                     \
   adns.c                        \
   balloc.c                      \
@@ -57,21 +66,19 @@ ircd_SOURCES =                     \
   tools.c                       \
   whowas.c			\
   version.c			\
-  ircd_lexer.l			\
-  ircd_parser.y			\
   @SELECT_TYPE@.c		
 
 if STATIC_MODULES
 ircd_LDADD = ../adns/libadns.a @SSL_LIBS@ ../modules/libmodules.a
 else
-ircd_LDADD = $(LIBLTDL) ../adns/libadns.a @SSL_LIBS@
+ircd_LDADD = lex.yy.o y.tab.o $(LIBLTDL) ../adns/libadns.a @SSL_LIBS@
 endif
 
 ircd_LDFLAGS = -export-dynamic
 
 if STATIC_MODULES
-ircd_DEPENDENCIES = ../adns/libadns.a version.o ../modules/libmodules.a
+ircd_DEPENDENCIES = ../adns/libadns.a version.o ../modules/libmodules.a  lex.yy.o y.tab.o
 else
-ircd_DEPENDENCIES = $(LIBLTDLC) ../adns/libadns.a version.o
+ircd_DEPENDENCIES = $(LIBLTDLC) ../adns/libadns.a version.o lex.yy.o y.tab.o
 endif
 

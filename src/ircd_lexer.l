@@ -35,6 +35,8 @@
 #define WE_ARE_MEMORY_C
 
 #include "stdinc.h"
+#include "config.h"
+#include "tools.h"
 #include "ircd_defs.h"
 #include "common.h"
 #include "config.h"
@@ -42,7 +44,7 @@
 #include "s_conf.h"
 #include "newconf.h"
 
-#include "ircd_parser.h"
+#include "y.tab.h"
 
 int yylex(void);
 

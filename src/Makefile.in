@@ -41,8 +41,7 @@ POST_UNINSTALL = :
 host_triplet = @host@
 bin_PROGRAMS = ircd$(EXEEXT)
 subdir = src
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in ircd_lexer.c \
-	ircd_parser.c ircd_parser.h
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/configure.ac
@@ -67,8 +66,7 @@ am_ircd_OBJECTS = adns.$(OBJEXT) balloc.$(OBJEXT) cache.$(OBJEXT) \
 	s_conf.$(OBJEXT) s_newconf.$(OBJEXT) s_log.$(OBJEXT) \
 	s_serv.$(OBJEXT) s_user.$(OBJEXT) scache.$(OBJEXT) \
 	send.$(OBJEXT) snprintf.$(OBJEXT) tools.$(OBJEXT) \
-	whowas.$(OBJEXT) version.$(OBJEXT) ircd_lexer.$(OBJEXT) \
-	ircd_parser.$(OBJEXT) @SELECT_TYPE@.$(OBJEXT)
+	whowas.$(OBJEXT) version.$(OBJEXT) @SELECT_TYPE@.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 am__DEPENDENCIES_1 =
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/include
@@ -82,8 +80,6 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/getopt.Po ./$(DEPDIR)/hash.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/hook.Po ./$(DEPDIR)/hostmask.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/irc_string.Po ./$(DEPDIR)/ircd.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/ircd_lexer.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/ircd_parser.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/ircd_signal.Po ./$(DEPDIR)/kdparse.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/linebuf.Po ./$(DEPDIR)/listener.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/match.Po ./$(DEPDIR)/memory.Po \
@@ -106,11 +102,6 @@ LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-LEXCOMPILE = $(LEX) $(LFLAGS) $(AM_LFLAGS)
-LTLEXCOMPILE = $(LIBTOOL) --mode=compile $(LEX) $(LFLAGS) $(AM_LFLAGS)
-YACCCOMPILE = $(YACC) $(YFLAGS) $(AM_YFLAGS)
-LTYACCCOMPILE = $(LIBTOOL) --mode=compile $(YACC) $(YFLAGS) \
-	$(AM_YFLAGS)
 SOURCES = $(ircd_SOURCES)
 DIST_SOURCES = $(ircd_SOURCES)
 ETAGS = etags
@@ -252,7 +243,6 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 AUTOMAKE_OPTIONS = foreign
 INCLUDES = -I../adns $(INCLTDL)
-AM_YFLAGS = -d
 ircd_SOURCES = \
   adns.c                        \
   balloc.c                      \
@@ -295,19 +285,17 @@ ircd_SOURCES = \
   tools.c                       \
   whowas.c			\
   version.c			\
-  ircd_lexer.l			\
-  ircd_parser.y			\
   @SELECT_TYPE@.c		
 
-@STATIC_MODULES_FALSE@ircd_LDADD = $(LIBLTDL) ../adns/libadns.a @SSL_LIBS@
+@STATIC_MODULES_FALSE@ircd_LDADD = lex.yy.o y.tab.o $(LIBLTDL) ../adns/libadns.a @SSL_LIBS@
 @STATIC_MODULES_TRUE@ircd_LDADD = ../adns/libadns.a @SSL_LIBS@ ../modules/libmodules.a
 ircd_LDFLAGS = -export-dynamic
-@STATIC_MODULES_FALSE@ircd_DEPENDENCIES = $(LIBLTDLC) ../adns/libadns.a version.o
-@STATIC_MODULES_TRUE@ircd_DEPENDENCIES = ../adns/libadns.a version.o ../modules/libmodules.a
+@STATIC_MODULES_FALSE@ircd_DEPENDENCIES = $(LIBLTDLC) ../adns/libadns.a version.o lex.yy.o y.tab.o
+@STATIC_MODULES_TRUE@ircd_DEPENDENCIES = ../adns/libadns.a version.o ../modules/libmodules.a  lex.yy.o y.tab.o
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .l .lo .o .obj .y
+.SUFFIXES: .c .lo .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -365,11 +353,6 @@ clean-binPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
-ircd_parser.h: ircd_parser.c
-	@if test ! -f $@; then \
-	  rm -f ircd_parser.c; \
-	  $(MAKE) ircd_parser.c; \
-	else :; fi
 ircd$(EXEEXT): $(ircd_OBJECTS) $(ircd_DEPENDENCIES) 
 	@rm -f ircd$(EXEEXT)
 	$(LINK) $(ircd_LDFLAGS) $(ircd_OBJECTS) $(ircd_LDADD) $(LIBS)
@@ -395,8 +378,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hostmask.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/irc_string.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd_lexer.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd_parser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd_signal.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kdparse.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/linebuf.Po@am__quote@
@@ -448,31 +429,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
-
-.l.c:
-	$(LEXCOMPILE) $<
-	sed '/^#/ s|$(LEX_OUTPUT_ROOT)\.c|$@|' $(LEX_OUTPUT_ROOT).c >$@
-	rm -f $(LEX_OUTPUT_ROOT).c
-
-.y.c:
-	$(YACCCOMPILE) $<
-	if test -f y.tab.h; then \
-	  to=`echo "$*_H" | sed \
-                -e 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/' \
-                -e 's/[^ABCDEFGHIJKLMNOPQRSTUVWXYZ]/_/g'`; \
-	  sed "/^#/ s/Y_TAB_H/$$to/g" y.tab.h >$*.ht; \
-	  rm -f y.tab.h; \
-	  if cmp -s $*.ht $*.h; then \
-	    rm -f $*.ht ;\
-	  else \
-	    mv $*.ht $*.h; \
-	  fi; \
-	fi
-	if test -f y.output; then \
-	  mv y.output $*.output; \
-	fi
-	sed '/^#/ s|y\.tab\.c|$@|' y.tab.c >$@t && mv $@t $@
-	rm -f y.tab.c
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -590,9 +546,6 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-	-rm -f ircd_parser.c
-	-rm -f ircd_lexer.c
-	-rm -f ircd_parser.h
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
@@ -662,6 +615,16 @@ version.c:
 version.o: version.c
 	$(COMPILE) -c version.c -o version.o
 	$(MV) version.c version.c.last
+
+# Note GNU bison uses <file>.tab.c not y.tab.c
+y.tab.c: ircd_parser.y
+	$(YACC) -d ircd_parser.y
+
+lex.yy.o: lex.yy.c ircd_lexer.l 
+	$(COMPILE) -c lex.yy.c 
+
+lex.yy.c: ircd_lexer.l y.tab.c
+	$(LEX) ircd_lexer.l
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
