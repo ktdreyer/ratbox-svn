@@ -117,7 +117,7 @@ int     ms_cburst(struct Client *cptr,
       else if(nick && *nick=='!')
       {
         sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
-                   me.name, nick, name);
+                   me.name, nick+1, name);
         return 0;
       }
     }
