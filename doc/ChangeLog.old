@@ -1,3 +1,7 @@
+*** 20010612_5 by androsyn
+Fixes autoconf so that u_int32_t always is a 32bit integer on all platforms, include 64bit ones..
+
+
 *** 20010612_4 by androsyn
 Maybe this will fix the ipv6 . problem
 
