@@ -1,3 +1,8 @@
+*** 20010401_2 by ejb
+- added first stab at new command line arguments system..
+  not yet tested well, seems to work ok though.
+
+
 *** 20010401_1 by ejb
 - fix for broken daemon(), caused abort upon start.
 
