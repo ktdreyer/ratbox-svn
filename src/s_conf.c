@@ -1641,7 +1641,7 @@ int rehash_dump(struct Client *sptr)
 
   for(aconf = ConfigItemList; aconf; aconf = aconf->next)
     {
-      aClass* class_ptr = ClassPtr(aconf);
+      struct Class* class_ptr = ClassPtr(aconf);
       get_printable_conf(aconf, &name, &host, &pass, &user, & port );
 
       if(aconf->status == CONF_CONNECT_SERVER)
@@ -1826,7 +1826,7 @@ static void initconf(FBFILE* file, int use_include)
   unsigned long    ip;
   unsigned long    ip_mask;
   int              sendq = 0;
-  aClass*          class0;
+  struct Class*    class0;
 
   class0 = find_class(0);        /* which one is class 0 ? */
 
@@ -3426,7 +3426,7 @@ static void clear_out_old_conf(void)
 {
   struct ConfItem **tmp = &ConfigItemList;
   struct ConfItem *tmp2;
-  aClass    *cltmp;
+  struct Class    *cltmp;
 
     while ((tmp2 = *tmp))
       {

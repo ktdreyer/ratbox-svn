@@ -366,7 +366,7 @@ void count_memory(struct Client *cptr,char *nick)
              me.name, RPL_STATSDEBUG, nick, co, com);
 
   sendto_one(cptr, ":%s %d %s :Classes %d(%d)",
-             me.name, RPL_STATSDEBUG, nick, cl, cl*sizeof(aClass));
+             me.name, RPL_STATSDEBUG, nick, cl, cl*sizeof(struct Class));
 
   sendto_one(cptr, ":%s %d %s :Channels %d(%d) Bans %d(%d)",
              me.name, RPL_STATSDEBUG, nick, ch, chm, chb, chbm);
@@ -411,7 +411,7 @@ void count_memory(struct Client *cptr,char *nick)
              number_ips_stored,
              mem_ips_stored);
 
-  tot = totww + totch + totcl + com + cl*sizeof(aClass) + dbuf_allocated + rm;
+  tot = totww + totch + totcl + com + cl*sizeof(struct Class) + dbuf_allocated + rm;
   tot += client_hash_table_size;
   tot += channel_hash_table_size;
 
