@@ -1,3 +1,11 @@
+*** 20001223_5 by db
+- added a rough document outlining how remote klines work
+  for oper and server protocol.
+  I know Walter or Joan can do better, but I think its better than
+  nothing no?
+
+
+
 *** 20001223_4 by db
 - re-added "Ping timeout: nnn seconds" to time out code. 
 
