@@ -202,16 +202,21 @@ free_conf(struct ConfItem* aconf)
   assert(aconf != NULL);
   if(aconf == NULL)
     return;
+
   assert(!(aconf->status & CONF_CLIENT) ||
          (aconf->host && strcmp(aconf->host, "NOMATCH")) ||
          (aconf->clients == -1));
+
   delete_adns_queries(aconf->dns_query);
   MyFree(aconf->host);
+
+  /* security.. */
   if (aconf->passwd)
     memset(aconf->passwd, 0, strlen(aconf->passwd));
-  MyFree(aconf->passwd);
   if (aconf->spasswd)
     memset(aconf->spasswd, 0, strlen(aconf->spasswd));
+
+  MyFree(aconf->passwd);
   MyFree(aconf->spasswd);
   MyFree(aconf->name);
   MyFree(aconf->className);

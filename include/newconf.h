@@ -161,6 +161,7 @@ extern 	char *		conf_cur_block_name;
 	void	conf_set_auth_flags				(void *data);
 	void	conf_set_auth_user				(void *data);
 	void	conf_set_auth_passwd				(void *data);
+        void    conf_set_auth_encrypted                         (void *data);
 	void	conf_set_auth_no_spoof_notice			(void *data);
 	void	conf_set_auth_spoof				(void *data);
 	void	conf_set_auth_exceed_limit			(void *data);

@@ -381,6 +381,7 @@ void	newconf_init()
 	add_top_conf("auth", conf_begin_auth, conf_end_auth);
 	add_conf_item("auth", "user", CF_QSTRING, conf_set_auth_user);
 	add_conf_item("auth", "password", CF_QSTRING, conf_set_auth_passwd);
+	add_conf_item("auth", "encrypted", CF_YESNO, conf_set_auth_encrypted);
 	add_conf_item("auth", "class", CF_QSTRING, conf_set_auth_class);
 	add_conf_item("auth", "kline_exempt", CF_YESNO, conf_set_auth_kline_exempt);
 	add_conf_item("auth", "need_ident", CF_YESNO, conf_set_auth_need_ident);
@@ -1462,6 +1463,16 @@ void	conf_set_auth_passwd(void *data)
 		memset(yy_achead->passwd, 0, strlen(yy_achead->passwd));
 	MyFree(yy_achead->passwd);
 	DupString(yy_achead->passwd, data);
+}
+
+void	conf_set_auth_encrypted(void *data)
+{
+	int yesno = *(unsigned int*) data;
+
+	if (yesno)
+		yy_achead->flags |= CONF_FLAGS_ENCRYPTED;
+	else
+		yy_achead->flags &= ~CONF_FLAGS_ENCRYPTED;
 }
 
 void	conf_set_auth_no_spoof_notice(void *data)

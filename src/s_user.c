@@ -62,6 +62,7 @@ static int introduce_client(struct Client *client_p, struct Client *source_p,
 			    struct User *user, char *nick);
 int oper_up( struct Client *source_p, struct ConfItem *aconf );
 
+extern char *crypt();
 
 /* table of ascii char letters to corresponding bitmask */
 
@@ -370,15 +371,30 @@ register_local_user(struct Client *client_p, struct Client *source_p,
     }
 
   /* password check */
-  if (!BadPtr(aconf->passwd) &&
-      strcmp(source_p->localClient->passwd, aconf->passwd))
+  if (!BadPtr(aconf->passwd))
+  {
+    char *encr;
+
+    if(IsConfEncrypted(aconf))
     {
-      ServerStats->is_ref++;
-      sendto_one(source_p, form_str(ERR_PASSWDMISMATCH),
-		 me.name, source_p->name);
-      (void)exit_client(client_p, source_p, &me, "Bad Password");
-      return(CLIENT_EXITED);
+      if(!BadPtr(source_p->localClient->passwd))
+        encr = crypt(source_p->localClient->passwd, aconf->passwd);
+      else
+        encr = "";
     }
+    else
+      encr = source_p->localClient->passwd;
+
+    if(strcmp(encr, aconf->passwd))
+    {
+        ServerStats->is_ref++;
+        sendto_one(source_p, form_str(ERR_PASSWDMISMATCH),
+		   me.name, source_p->name);
+        (void)exit_client(client_p, source_p, &me, "Bad Password");
+        return(CLIENT_EXITED);
+    }
+  }
+
   memset(source_p->localClient->passwd,0, sizeof(source_p->localClient->passwd));
 
   /* report if user has &^>= etc. and set flags as needed in source_p */

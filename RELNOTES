@@ -17,6 +17,8 @@
 - encrypted passwords in oper {}; are now specified per oper block.
   They will default to being encrypted, any unencrypted passwords
   in oper {}; must also have "encrypted = no;"
+- encrypted passwords in auth {}; are now supported.  To use them
+  encrypt your password (DES or MD5) and set "encrypted = yes;"
 
 
 -- ircd-ratbox-1.0-rc3
