@@ -221,6 +221,7 @@ struct config_file_entry
   int           min_nonwildcard;
   int           default_floodcount;
   int           client_flood;
+  int		client_flood_grace;
   /* 0 == don't use throttle... */
   int           throttle_time;
   int           use_egd;
