@@ -1,3 +1,8 @@
+*** 20011204_2 by db
+- added oper_reason to conf struct, nothing with it yet
+
+
+
 *** 20011204_1 by androsyn
 Removed an unused field.
 
