@@ -26,6 +26,7 @@
 #include "channel.h"
 #include "log.h"
 #include "c_init.h"
+#include "service.h"
 
 struct timeval system_time;
 
@@ -196,6 +197,11 @@ int main(int argc, char *argv[])
 
 	/* load specific commands */
 	add_scommand_handler(&mode_command);
+	add_scommand_handler(&notice_command);
+	add_scommand_handler(&privmsg_command);
+
+	/* load our services.. */
+	add_service(&alis_service);
 
 	set_time();
 	config_file.first_time = CURRENT_TIME;

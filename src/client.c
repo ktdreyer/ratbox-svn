@@ -6,17 +6,18 @@
  *  $Id$
  */
 #include "stdinc.h"
+#include "rserv.h"
 #include "client.h"
 #include "channel.h"
 #include "command.h"
 #include "io.h"
 #include "log.h"
+#include "service.h"
 
 static dlink_list name_table[MAX_NAME_HASH];
 
 dlink_list user_list;
 dlink_list server_list;
-dlink_list service_list;
 dlink_list exited_list;
 
 static void c_kill(struct client *, char *parv[], int parc);
@@ -374,11 +375,21 @@ c_kill(struct client *client_p, char *parv[], int parc)
 	if(parc < 2 || EmptyString(parv[1]))
 		return;
 
-	if((target_p = find_user(parv[1])) == NULL)
+	if((target_p = find_client(parv[1])) == NULL)
 		return;
 
+	if(IsServer(target_p))
+	{
+		slog("PROTO: KILL received for server %s", target_p->name);
+		return;
+	}
+
+	/* grmbl. */
 	if(IsService(target_p))
-		;
+	{
+		introduce_service(target_p);
+		return;
+	}
 
 	exit_client(target_p);
 }

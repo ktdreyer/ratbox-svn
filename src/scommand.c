@@ -163,7 +163,7 @@ c_version(struct client *client_p, char *parv[], int parc)
 		return;
 
 	if(IsUser(client_p))
-		sendto_server(":%s 351 %s rserv-0.1(%s). %s CONFOPTS TS",
+		sendto_server(":%s 351 %s rserv-0.1(%s). %s A TS",
 			      MYNAME, parv[0], SERIALNUM, MYNAME);
 }
 

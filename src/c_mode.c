@@ -14,7 +14,7 @@
 #include "log.h"
 
 static void c_mode(struct client *, char *parv[], int parc);
-struct scommand_handler mode_command = { "MODE", c_mode };
+struct scommand_handler mode_command = { "MODE", c_mode, 0 };
 
 static void
 change_chmember_status(struct channel *chptr, const char *nick, 

@@ -20,6 +20,7 @@
 #include "tools.h"
 #include "client.h"
 #include "log.h"
+#include "service.h"
 
 struct connection_entry *server_p;
 time_t last_connect_time;
@@ -213,6 +214,8 @@ signon_server(struct connection_entry *conn_p)
 	sendto_server("PASS test TS");
 	sendto_server("CAPAB :QS");
 	sendto_server("SERVER %s 1 :%s", MYNAME, config_file.my_gecos);
+
+	introduce_services();
 }
 
 static void

@@ -8,7 +8,6 @@
 
 extern dlink_list user_list;
 extern dlink_list server_list;
-extern dlink_list service_list;
 extern dlink_list exited_list;
 
 struct client
@@ -53,6 +52,7 @@ struct service
 {
 	char username[USERLEN+1];
 	char host[HOSTLEN+1];
+	void (*func)(struct client *, char *text);
 };
 
 #define IsServer(x) ((x)->server != NULL)
@@ -79,6 +79,7 @@ extern void del_client(struct client *target_p);
 extern struct client *find_client(const char *name);
 extern struct client *find_user(const char *name);
 extern struct client *find_server(const char *name);
+extern struct client *find_service(const char *name);
 
 extern void exit_client(struct client *target_p);
 extern void free_client(struct client *target_p);

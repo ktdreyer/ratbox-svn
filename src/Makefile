@@ -1,11 +1,13 @@
 
 # a simple makefile for compiling alis under U*X
+# $Id$
 
 CC=gcc
 LD=gcc
 CFLAGS=-c -g -O -Wall
 LDFLAGS=
 SRCS=			\
+	c_message.c	\
 	c_mode.c	\
 	channel.c	\
 	client.c	\
@@ -17,6 +19,8 @@ SRCS=			\
 	match.c		\
 	io.c		\
 	rserv.c		\
+	s_alis.c	\
+	service.c	\
 	tools.c
 
 OBJS=${SRCS:.c=.o}
