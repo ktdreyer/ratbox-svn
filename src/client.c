@@ -68,7 +68,6 @@ static BlockHeap *client_heap = NULL;
 static BlockHeap *lclient_heap = NULL;
 
 dlink_list dead_list;
-dlink_list abort_list;
 
 /*
  * client_heap_gc
@@ -1004,9 +1003,9 @@ static void remove_dependents(struct Client* client_p,
   struct Client *to;
   struct ConfItem *aconf;
   static char myname[HOSTLEN+1];
-  dlink_node *ptr;
+  dlink_node *ptr, *next;
 
-  DLINK_FOREACH(ptr, serv_list.head)
+  DLINK_FOREACH_SAFE(ptr, next, serv_list.head)
     {
       to = ptr->data;
 
@@ -1039,17 +1038,16 @@ static void remove_dependents(struct Client* client_p,
  */
 void dead_link(struct Client *client_p)
 {
-  dlink_node *m;
-  const char *notice;
+  char notice[100];
   if(IsClosing(client_p) || IsDead(client_p) || IsMe(client_p))
     return;
 
   linebuf_donebuf(&client_p->localClient->buf_recvq);
   linebuf_donebuf(&client_p->localClient->buf_sendq);
   if(client_p->flags & FLAGS_SENDQEX)
-    notice = "Max SendQ exceeded";
+    strlcpy(notice, "Max SendQ exceeded", sizeof(notice));
   else
-    notice = "Write error: connection closed";
+    snprintf(notice, sizeof(notice), "Write error: %s", strerror(errno));
 
     	
   if (!IsPerson(client_p) && !IsUnknown(client_p) && !IsClosing(client_p))
@@ -1062,37 +1060,8 @@ void dead_link(struct Client *client_p)
                          get_client_name(client_p, MASK_IP), notice);
   }
   Debug((DEBUG_ERROR, "Closing link to %s: %s", get_client_name(client_p, HIDE_IP), notice));
-  assert(dlinkFind(&abort_list, client_p) == NULL);
-  m = make_dlink_node();
-  dlinkAdd(client_p, m, &abort_list);
   SetDead(client_p); /* You are dead my friend */
-}
-
-void exit_aborted_clients(void)
-{
-  dlink_node *ptr, *next;
-  struct Client *target_p;
-  char *notice;
-  DLINK_FOREACH_SAFE(ptr, next, abort_list.head)
-    {
-      target_p = ptr->data;
-      if (ptr->data == NULL)
-        {
-          sendto_realops_flags(FLAGS_ALL, L_ALL,
-                        "Warning: null client on abort_list!");
-          dlinkDelete(ptr, &abort_list);
-          free_dlink_node(ptr);
-          continue;
-        }
-      dlinkDelete(ptr, &abort_list);
-      if(target_p->flags & FLAGS_SENDQEX)
-        notice = "Max SendQ exceeded";
-      else
-        notice = "Write error: connection closed";
-      
-      exit_client(target_p, target_p, &me, notice);  
-      free_dlink_node(ptr);
-    }
+  exit_client(client_p, client_p, &me, notice);
 }
 
 

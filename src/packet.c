@@ -468,8 +468,6 @@ read_packet(int fd, void *data)
         read_packet, client_p, 0);
     }
   }
-  /* This is about the only place useful to put it */
-  exit_aborted_clients();
 
 }
 
