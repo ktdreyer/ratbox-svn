@@ -30,7 +30,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#ifdef  ZIP_LINKS
 /*
 ** Important note:
 **      The provided buffers for uncompression and compression *MUST* be big
@@ -347,4 +346,3 @@ char *zip_buffer(aClient *cptr, char *buffer, int *length, int flush)
   return((char *)NULL);
 }
 
-#endif  /* ZIP_LINKS */

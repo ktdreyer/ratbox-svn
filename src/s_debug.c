@@ -116,9 +116,7 @@ const char serveropts[] = {
 #ifdef  USE_SYSLOG
   'Y',
 #endif
-#ifdef ZIP_LINKS
   'Z',
-#endif
   ' ',
   'T',
   'S',

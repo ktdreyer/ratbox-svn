@@ -707,14 +707,12 @@ void close_connection(struct Client *cptr)
     {
       flush_connections(cptr);
       local[cptr->fd] = NULL;
-#ifdef ZIP_LINKS
         /*
          * the connection might have zip data (even if
          * FLAGS2_ZIP is not set)
          */
       if (IsServer(cptr))
         zip_free(cptr);
-#endif
       fdlist_delete(cptr->fd, FDL_ALL);
       close(cptr->fd);
       cptr->fd = -1;
@@ -1021,11 +1019,8 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
                FD_SET(i, read_set);
             }
 
-          if (DBufLength(&cptr->sendQ) || IsConnecting(cptr)
-#ifdef ZIP_LINKS
-              || ((cptr->flags2 & FLAGS2_ZIP) && (cptr->zip->outcount > 0))
-#endif
-              )
+          if (DBufLength(&cptr->sendQ) || IsConnecting(cptr) ||
+              ((cptr->flags2 & FLAGS2_ZIP) && (cptr->zip->outcount > 0)))
             {
                FD_SET(i, write_set);
             }
@@ -1292,11 +1287,8 @@ int read_message(time_t delay, unsigned char mask)
       if (DBufLength(&cptr->recvQ) < 4088)
         PFD_SETR(i);
       
-      if (DBufLength(&cptr->sendQ) || IsConnecting(cptr)
-#ifdef ZIP_LINKS
-          || ((cptr->flags2 & FLAGS2_ZIP) && (cptr->zip->outcount > 0))
-#endif
-          )
+      if (DBufLength(&cptr->sendQ) || IsConnecting(cptr) ||
+          ((cptr->flags2 & FLAGS2_ZIP) && (cptr->zip->outcount > 0)))
         PFD_SETW(i);
     }
 

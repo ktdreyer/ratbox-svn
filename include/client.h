@@ -207,9 +207,9 @@ struct Client
   int               drone_noticed;
 #endif
   char  buffer[CLIENT_BUFSIZE]; /* Incoming message buffer */
-#ifdef ZIP_LINKS
+
   struct Zdata*     zip;        /* zip data */
-#endif
+
   short             lastsq;     /* # of 2k blocks when sendqueued called last*/
   dbuf              sendQ;      /* Outgoing message queue--if socket full */
   dbuf              recvQ;      /* Hold for data incoming yet to be parsed */

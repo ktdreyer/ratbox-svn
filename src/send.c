@@ -167,26 +167,17 @@ send_message(aClient *to, char *msg, int len)
         }
         else
         {
-        #ifdef ZIP_LINKS
+           /*
+            * data is first stored in to->zip->outbuf until
+            * it's big enough to be compressed and stored in the sendq.
+            * send_queued is then responsible to never let the sendQ
+            * be empty and to->zip->outbuf not empty.
+            */
+           if (to->flags2 & FLAGS2_ZIP)
+              msg = zip_buffer(to, msg, &len, 0);
 
-                /*
-                ** data is first stored in to->zip->outbuf until
-                ** it's big enough to be compressed and stored in the sendq.
-                ** send_queued is then responsible to never let the sendQ
-                ** be empty and to->zip->outbuf not empty.
-                */
-                if (to->flags2 & FLAGS2_ZIP)
-                        msg = zip_buffer(to, msg, &len, 0);
-
-                if (len && dbuf_put(&to->sendQ, msg, len) < 0)
-
-        #else /* ZIP_LINKS */
-
-                if (dbuf_put(&to->sendQ, msg, len) < 0)
-
-        #endif /* ZIP_LINKS */
-
-                        return dead_link(to, "Buffer allocation error for %s");
+            if (len && dbuf_put(&to->sendQ, msg, len) < 0)
+              return dead_link(to, "Buffer allocation error for %s");
         }
 
         /*
@@ -248,42 +239,33 @@ send_message(aClient *to, char *msg, int len)
                 return dead_link(to,"Write error to %s, closing link");
         else if (rlen < len)
         {
-                /*
-                ** Was unable to transfer all of the requested data. Queue
-                ** up the remainder for some later time...
-                */
-                if (DBufLength(&to->sendQ) > get_sendq(to))
-                {
-                        sendto_ops_butone(to,
+            /*
+             * Was unable to transfer all of the requested data. Queue
+             * up the remainder for some later time...
+             */
+            if (DBufLength(&to->sendQ) > get_sendq(to))
+            {
+               sendto_ops_butone(to,
                                 "Max SendQ limit exceeded for %s : %d > %d",
                                 get_client_name(to, FALSE),
                                 DBufLength(&to->sendQ), get_sendq(to));
 
                                 return dead_link(to, "Max Sendq exceeded");
-                }
-                else
-                {
-                #ifdef ZIP_LINKS
+            }
+            else
+            {
+                /*
+                 * data is first stored in to->zip->outbuf until
+                 * it's big enough to be compressed and stored in the sendq.
+                 * send_queued is then responsible to never let the sendQ
+                 * be empty and to->zip->outbuf not empty.
+                 */
+                if (to->flags2 & FLAGS2_ZIP)
+                   msg = zip_buffer(to, msg, &len, 0);
 
-                        /*
-                        ** data is first stored in to->zip->outbuf until
-                        ** it's big enough to be compressed and stored in the sendq.
-                        ** send_queued is then responsible to never let the sendQ
-                        ** be empty and to->zip->outbuf not empty.
-                        */
-                        if (to->flags2 & FLAGS2_ZIP)
-                                msg = zip_buffer(to, msg, &len, 0);
-
-                        if (len && dbuf_put(&to->sendQ,msg+rlen,len-rlen) < 0)
-
-                #else /* ZIP_LINKS */
-
-                        if (dbuf_put(&to->sendQ,msg+rlen,len-rlen) < 0)
-
-                #endif /* ZIP_LINKS */
-
-                                return dead_link(to,"Buffer allocation error for %s");
-                }
+                 if (len && dbuf_put(&to->sendQ,msg+rlen,len-rlen) < 0)
+                    return dead_link(to,"Buffer allocation error for %s");
+             }
         } /* else if (rlen < len) */
 
         /*
@@ -311,10 +293,7 @@ send_queued(aClient *to)
 {
         char *msg;
         int len, rlen;
-#ifdef ZIP_LINKS
         int more = NO;
-#endif
-
         /*
         ** Once socket is marked dead, we cannot start writing to it,
         ** even if the error is removed...
@@ -333,7 +312,6 @@ send_queued(aClient *to)
         #endif
         } /* if (IsDead(to)) */
 
-#ifdef ZIP_LINKS
         /*
         ** Here, we must make sure than nothing will be left in to->zip->outbuf
         ** This buffer needs to be compressed and sent if all the sendQ is sent
@@ -353,7 +331,6 @@ send_queued(aClient *to)
                                 return dead_link(to, "Buffer allocation error for %s");
                 }
         } /* if ((to->flags2 & FLAGS2_ZIP) && to->zip->outcount) */
-#endif /* ZIP_LINKS */
 
         while (DBufLength(&to->sendQ) > 0)
         {
@@ -384,7 +361,6 @@ send_queued(aClient *to)
                         break;
                 }
 
-        #ifdef ZIP_LINKS
                 if (DBufLength(&to->sendQ) == 0 && more)
                 {
                         /*
@@ -400,7 +376,6 @@ send_queued(aClient *to)
                         if (dbuf_put(&to->sendQ, msg, len) < 0)
                                 return dead_link(to, "Buffer allocation error for %s");
                 } /* if (DBufLength(&to->sendQ) == 0 && more) */
-        #endif /* ZIP_LINKS */      
         } /* while (DBufLength(&to->sendQ) > 0) */
 
         return (IsDead(to)) ? -1 : 0;

@@ -54,10 +54,8 @@ int     dopacket(aClient *cptr, char *buffer, int length)
   char  *ch1;
   char  *ch2;
   register char *cptrbuf;
-#ifdef ZIP_LINKS
   int  zipped = NO;
   int  done_unzip = NO;
-#endif
 
   cptrbuf = cptr->buffer;
   me.receiveB += length; /* Update bytes received */
@@ -77,7 +75,6 @@ int     dopacket(aClient *cptr, char *buffer, int length)
   ch1 = cptrbuf + cptr->count;
   ch2 = buffer;
 
-#ifdef ZIP_LINKS
   if (cptr->flags2 & FLAGS2_ZIPFIRST)
     {
       if (*ch2 == '\n' || *ch2 == '\r')
@@ -103,16 +100,12 @@ int     dopacket(aClient *cptr, char *buffer, int length)
         return exit_client(cptr, cptr, &me,
                            "fatal error in unzip_packet(1)");
     }
-#endif /* ZIP_LINKS */
-
-#ifdef ZIP_LINKS
   /* While there is "stuff" in the compressed input to deal with,
    * keep loop parsing it. I have to go through this loop at least once.
    * -Dianora
    */
   do
     {
-#endif
       /* While there is "stuff" in uncompressed input to deal with
        * loop around parsing it. -Dianora
        */
@@ -163,7 +156,6 @@ int     dopacket(aClient *cptr, char *buffer, int length)
                                     "Local kill by /list (so many channels!)" :
                                    "SendQ exceeded") : "Dead socket");
 
-#ifdef ZIP_LINKS
               if ((cptr->flags2 & FLAGS2_ZIP) && (zipped == 0) &&
                   (length > 0))
                 {
@@ -191,13 +183,11 @@ int     dopacket(aClient *cptr, char *buffer, int length)
                     return exit_client(cptr, cptr, &me,
                                        "fatal error in unzip_packet(2)");
                 }
-#endif /* ZIP_LINKS */
               ch1 = cptrbuf;
             }
           else if (ch1 < cptrbuf + (sizeof(cptr->buffer)-1))
             ch1++; /* There is always room for the null */
         }
-#ifdef ZIP_LINKS
       /* Now see if anything is left uncompressed in the input
        * If so, uncompress it and continue to parse
        * -Dianora
@@ -218,11 +208,8 @@ int     dopacket(aClient *cptr, char *buffer, int length)
             }
           else
             done_unzip = YES;
-#endif
 
-#ifdef ZIP_LINKS
-    }while(!done_unzip);
-#endif
+    } while(!done_unzip);
   cptr->count = ch1 - cptrbuf;
   return 0;
 }
