@@ -1,3 +1,9 @@
+*** 20010626_4 by jdc
+- doc/cryptlink.txt
+    * Minor changes (cosmetical, grammatical, typos).
+
+
+
 *** 20010626_3 by a1kmm
 - Tried to fix the mode code a little more. Still minor problems with the
   stuff sent to the local client on -o+v
