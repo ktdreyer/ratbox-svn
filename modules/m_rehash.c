@@ -78,6 +78,15 @@ clear_temps(dlink_list * tlist)
 }
 
 static void
+rehash_banconfs(struct Client *source_p)
+{
+	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is rehashing ban configs",
+			get_oper_name(source_p));
+
+	rehash_ban(0);
+}
+
+static void
 rehash_dns(struct Client *source_p)
 {
 	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is rehashing DNS", 
@@ -239,6 +248,7 @@ rehash_help(struct Client *source_p)
 /* *INDENT-OFF* */
 static struct hash_commands rehash_commands[] =
 {
+	{"BANCONFS",	rehash_banconfs		},
 	{"DNS", 	rehash_dns		},
 	{"MOTD", 	rehash_motd		},
 	{"OMOTD", 	rehash_omotd		},

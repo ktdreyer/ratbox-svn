@@ -79,7 +79,6 @@ dlink_list tdline_week;
 static void set_default_conf(void);
 static void validate_conf(void);
 static void read_conf(FBFILE *);
-static void clear_out_old_conf(void);
 
 static void expire_tkline(dlink_list *, int);
 static void expire_tdline(dlink_list *, int);
@@ -612,23 +611,31 @@ int
 rehash(int sig)
 {
 	if(sig != 0)
-	{
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Got signal SIGHUP, reloading ircd conf. file");
-	}
 
 	restart_resolver();
 	/* don't close listeners until we know we can go ahead with the rehash */
-	read_conf_files(NO);
+	read_ircd_conf(NO);
 
 	if(ServerInfo.description != NULL)
-	{
 		strlcpy(me.info, ServerInfo.description, sizeof(me.info));
-	}
 
-	check_banned_lines();
 	open_logfiles();
 	return (0);
+}
+
+int
+rehash_ban(int sig)
+{
+	if(sig != 0)
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+				"Got signal SIGUSR2, reloading ban configs");
+
+	read_ban_confs(NO);
+
+	check_banned_lines();
+	return 0;
 }
 
 /*
@@ -1091,144 +1098,8 @@ get_printable_kline(struct Client *source_p, struct ConfItem *aconf,
 		*oper_reason = aconf->spasswd;
 }
 
-/*
- * read_conf_files
- *
- * inputs       - cold start YES or NO
- * output       - none
- * side effects - read all conf files needed, ircd.conf kline.conf etc.
- */
-void
-read_conf_files(int cold)
-{
-	FBFILE *file;
-	const char *filename, *kfilename, *dfilename;	/* kline or conf filename */
-	const char *xfilename;
-	const char *resvfilename;
-
-	conf_fbfile_in = NULL;
-
-	filename = get_conf_name(CONF_TYPE);
-
-	/* We need to know the initial filename for the yyerror() to report
-	   FIXME: The full path is in conffilenamebuf first time since we
-	   dont know anything else
-
-	   - Gozem 2002-07-21 
-	 */
-	strlcpy(conffilebuf, filename, sizeof(conffilebuf));
-
-	if((conf_fbfile_in = fbopen(filename, "r")) == NULL)
-	{
-		if(cold)
-		{
-			ilog(L_MAIN, "Failed in reading configuration file %s", filename);
-			exit(-1);
-		}
-		else
-		{
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "Can't open file '%s' - aborting rehash!", filename);
-			return;
-		}
-	}
-
-	if(!cold)
-	{
-		clear_out_old_conf();
-	}
-
-	read_conf(conf_fbfile_in);
-	fbclose(conf_fbfile_in);
-
-	kfilename = get_conf_name(KLINE_TYPE);
-	if(irccmp(filename, kfilename))
-	{
-		if((file = fbopen(kfilename, "r")) == NULL)
-		{
-			if(cold)
-				ilog(L_MAIN, "Failed reading kline file %s", filename);
-			else
-				sendto_realops_flags(UMODE_ALL, L_ALL,
-						     "Can't open %s file klines could be missing!",
-						     kfilename);
-		}
-		else
-		{
-			parse_k_file(file);
-			fbclose(file);
-		}
-	}
-
-	dfilename = get_conf_name(DLINE_TYPE);
-	if(irccmp(filename, dfilename) && irccmp(kfilename, dfilename))
-	{
-		if((file = fbopen(dfilename, "r")) == NULL)
-		{
-			if(cold)
-				ilog(L_MAIN, "Failed reading dline file %s", dfilename);
-			else
-				sendto_realops_flags(UMODE_ALL, L_ALL,
-						     "Can't open %s file dlines could be missing!",
-						     dfilename);
-		}
-		else
-		{
-			parse_d_file(file);
-			fbclose(file);
-		}
-	}
-
-	xfilename = ConfigFileEntry.xlinefile;
-
-	if(irccmp(filename, xfilename) && irccmp(kfilename, xfilename) &&
-	   irccmp(dfilename, xfilename))
-	{
-		if((file = fbopen(xfilename, "r")) == NULL)
-		{
-			if(cold)
-				ilog(L_MAIN, "Failed reading xline file %s", xfilename);
-			else
-				sendto_realops_flags(UMODE_ALL, L_ALL,
-						     "Can't open %s file xlines could be missing!",
-						     xfilename);
-		}
-		else
-		{
-			parse_x_file(file);
-			fbclose(file);
-		}
-	}
-
-	resvfilename = get_conf_name(RESV_TYPE);
-	if(irccmp(filename, resvfilename))
-	{
-		if((file = fbopen(resvfilename, "r")) == NULL)
-		{
-			if(cold)
-				ilog(L_MAIN, "Failed reading resv file %s", resvfilename);
-			else
-				sendto_realops_flags(UMODE_ALL, L_ALL,
-						     "Can't open %s file resvs could be missing!",
-						     resvfilename);
-		}
-		else
-		{
-			parse_resv_file(file);
-			fbclose(file);
-		}
-	}
-}
-
-/*
- * clear_out_old_conf
- *
- * inputs       - none
- * output       - none
- * side effects - Clear out the old configuration
- */
 static void
-clear_out_old_conf(void)
+clear_ircd_conf(void)
 {
 	struct Class *cltmp;
 	dlink_node *ptr;
@@ -1243,8 +1114,8 @@ clear_out_old_conf(void)
 		MaxUsers(cltmp) = -1;
 	}
 
-	clear_out_address_conf();
-	clear_s_newconf();
+	clear_out_address_conf(CONF_CLIENT|CONF_EXEMPTDLINE);
+	clear_s_newconf_ircd();
 
 	/* clean out module paths */
 #ifndef STATIC_MODULES
@@ -1284,6 +1155,137 @@ clear_out_old_conf(void)
 	/* OK, that should be everything... */
 }
 
+static void
+clear_ban_confs(void)
+{
+	clear_out_address_conf(CONF_KILL|CONF_DLINE);
+	clear_s_newconf_bans();
+}
+
+
+/*
+ * read_conf_files
+ *
+ * inputs       - cold start YES or NO
+ * output       - none
+ * side effects - read all conf files needed, ircd.conf kline.conf etc.
+ */
+void
+read_ircd_conf(int cold)
+{
+	const char *filename;
+
+	conf_fbfile_in = NULL;
+
+	filename = get_conf_name(CONF_TYPE);
+
+	/* We need to know the initial filename for the yyerror() to report
+	   FIXME: The full path is in conffilenamebuf first time since we
+	   dont know anything else
+
+	   - Gozem 2002-07-21 
+	 */
+	strlcpy(conffilebuf, filename, sizeof(conffilebuf));
+
+	if((conf_fbfile_in = fbopen(filename, "r")) == NULL)
+	{
+		if(cold)
+		{
+			ilog(L_MAIN, "Failed in reading configuration file %s", filename);
+			exit(-1);
+		}
+		else
+		{
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					     "Can't open file '%s' - aborting rehash!", filename);
+			return;
+		}
+	}
+
+	if(!cold)
+		clear_ircd_conf();
+
+	read_conf(conf_fbfile_in);
+	fbclose(conf_fbfile_in);
+}
+
+void
+read_ban_confs(int cold)
+{
+	FBFILE *file;
+	const char *filename;
+
+	if(!cold)
+		clear_ban_confs();
+
+	filename = get_conf_name(KLINE_TYPE);
+
+	if((file = fbopen(filename, "r")) == NULL)
+	{
+		if(cold)
+			ilog(L_MAIN, "Failed reading kline file %s", filename);
+		else
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					     "Can't open %s file klines could be missing!",
+					     filename);
+	}
+	else
+	{
+		parse_k_file(file);
+		fbclose(file);
+	}
+
+	filename = get_conf_name(DLINE_TYPE);
+
+	if((file = fbopen(filename, "r")) == NULL)
+	{
+		if(cold)
+			ilog(L_MAIN, "Failed reading dline file %s", filename);
+		else
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					     "Can't open %s file dlines could be missing!",
+					     filename);
+	}
+	else
+	{
+		parse_d_file(file);
+		fbclose(file);
+	}
+	
+	filename = ConfigFileEntry.xlinefile;
+
+	if((file = fbopen(filename, "r")) == NULL)
+	{
+		if(cold)
+			ilog(L_MAIN, "Failed reading xline file %s", filename);
+		else
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					     "Can't open %s file xlines could be missing!",
+					     filename);
+	}
+	else
+	{
+		parse_x_file(file);
+		fbclose(file);
+	}
+
+	filename = get_conf_name(RESV_TYPE);
+
+	if((file = fbopen(filename, "r")) == NULL)
+	{
+		if(cold)
+			ilog(L_MAIN, "Failed reading resv file %s", filename);
+		else
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					     "Can't open %s file resvs could be missing!",
+					     filename);
+	}
+	else
+	{
+		parse_resv_file(file);
+		fbclose(file);
+	}
+}
 
 /* write_confitem()
  *

@@ -104,6 +104,7 @@ const char *pidFileName = PPATH;
 
 char **myargv;
 int dorehash = 0;
+int dorehashban = 0;
 int doremotd = 0;
 time_t nextconnect = 1;		/* time for next try_connections call */
 int kline_queued = 0;
@@ -312,6 +313,13 @@ io_loop(void)
 			rehash(1);
 			dorehash = 0;
 		}
+
+		if(dorehashban)
+		{
+			rehash_ban(1);
+			dorehashban = 0;
+		}
+
 		if(doremotd)
 		{
 			sendto_realops_flags(UMODE_ALL, L_ALL,
@@ -612,7 +620,10 @@ main(int argc, char *argv[])
 
 	if (testing_conf)
 		fprintf(stderr, "\nBeginning config test\n");
-	read_conf_files(YES);	/* cold start init conf files */
+
+	read_ircd_conf(YES);	/* cold start init conf files */
+	read_ban_confs(YES);
+
 #ifndef STATIC_MODULES
 
 	mod_add_path(MODULE_DIR); 

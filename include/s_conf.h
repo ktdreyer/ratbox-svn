@@ -325,7 +325,8 @@ extern void init_s_conf();
 extern struct ConfItem *make_conf(void);
 extern void free_conf(struct ConfItem *);
 
-extern void read_conf_files(int cold);
+extern void read_ircd_conf(int cold);
+extern void read_ban_confs(int cold);
 
 extern int attach_conf(struct Client *, struct ConfItem *);
 extern int check_client(struct Client *client_p, struct Client *source_p, const char *);
@@ -369,6 +370,7 @@ extern void cleanup_temps_week(void *);
 
 extern const char *get_conf_name(KlineType);
 extern int rehash(int);
+extern int rehash_ban(int);
 
 extern int conf_add_server(struct ConfItem *, int);
 extern void conf_add_class_to_conf(struct ConfItem *);

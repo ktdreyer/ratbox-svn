@@ -471,15 +471,15 @@ delete_one_address_conf(const char *address, struct ConfItem *aconf)
 	}
 }
 
-/* void clear_out_address_conf(void)
+/* void clear_out_address_conf(int type)
  * Input: None
  * Output: None
- * Side effects: Clears out all address records in the hash table,
+ * Side effects: Clears out all address records in the hash table of given type
  *               frees them, and frees the ConfItems if nothing references
  *               them, otherwise sets them as illegal.
  */
 void
-clear_out_address_conf(void)
+clear_out_address_conf(int type)
 {
 	int i;
 	struct AddressRec **store_next;
@@ -493,7 +493,8 @@ clear_out_address_conf(void)
 			arecn = arec->next;
 			/* We keep the temporary K-lines and destroy the
 			 * permanent ones, just to be confusing :) -A1kmm */
-			if(arec->aconf->flags & CONF_FLAGS_TEMPORARY)
+			if(((arec->type & type) == 0) || 
+			   (arec->aconf->flags & CONF_FLAGS_TEMPORARY))
 			{
 				*store_next = arec;
 				store_next = &arec->next;

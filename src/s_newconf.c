@@ -72,10 +72,9 @@ init_s_newconf(void)
 }
 
 void
-clear_s_newconf(void)
+clear_s_newconf_ircd(void)
 {
 	struct server_conf *server_p;
-	struct ConfItem *aconf;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 
@@ -116,6 +115,13 @@ clear_s_newconf(void)
 		else
 			server_p->flags |= SERVER_ILLEGAL;
 	}
+}
+
+void
+clear_s_newconf_bans(void)
+{
+	struct ConfItem *aconf;
+	dlink_node *ptr, *next_ptr;
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, xline_conf_list.head)
 	{

@@ -53,7 +53,8 @@ extern dlink_list xline_conf_list;
 extern dlink_list resv_conf_list;
 
 extern void init_s_newconf(void);
-extern void clear_s_newconf(void);
+extern void clear_s_newconf_ircd(void);
+extern void clear_s_newconf_bans(void);
 
 /* shared/cluster/hub/leaf confs */
 struct remote_conf
