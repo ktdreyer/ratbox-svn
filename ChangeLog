@@ -1,3 +1,30 @@
+leeh        2004/03/31 13:12:25 EST	(20040331_2)
+
+  Modified files:
+    help                 Makefile.in 
+    help/opers           index 
+    src                  s_conf.c 
+    tools                Makefile.in 
+  Removed files:
+    help/opers           client cryptlink drop 
+    tools                convertconf.c 
+  Log:
+  - remove some unused help files, and rebuild the indexes
+  - drop default compression_level to 4
+  - remove convertconf
+  
+  Revision  Changes    Path
+  1.19      +2 -2      ircd-ratbox/help/Makefile.in
+  1.2       +0 -1      ircd-ratbox/help/opers/client (dead)
+  1.2       +0 -1      ircd-ratbox/help/opers/cryptlink (dead)
+  1.2       +0 -1      ircd-ratbox/help/opers/drop (dead)
+  1.6       +17 -19    ircd-ratbox/help/opers/index
+  7.459     +1 -1      ircd-ratbox/src/s_conf.c
+  7.35      +3 -6      ircd-ratbox/tools/Makefile.in
+  1.43      +0 -796    ircd-ratbox/tools/convertconf.c (dead)
+
+
+
 androsyn    2004/03/30 23:16:21 EST	(20040331_1)
 
   Modified files:
