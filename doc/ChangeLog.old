@@ -1,3 +1,17 @@
+jmallett    2002/01/16 11:02:25 EST	(20020116_1)
+
+  Modified files:
+    include              hook.h memory.h 
+  Log:
+  Move my uintptr_t checks to memory.h, since it works with pointers and
+  belongs there moreso than hook.h and now we can build on OpenBSD!
+  
+  Revision  Changes    Path
+  1.14      +0 -8      ircd-hybrid-7/include/hook.h
+  7.28      +9 -0      ircd-hybrid-7/include/memory.h
+
+
+
 jmallett    2002/01/16 10:48:07 EST	(20020116_0)
 
   Modified files:
