@@ -121,13 +121,6 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	name = parv[loc];
 	loc++;
 
-	if((aconf = find_xline(name, 0)) != NULL)
-	{
-		sendto_one(source_p, ":%s NOTICE %s :[%s] already X-Lined by [%s] - %s",
-			   me.name, source_p->name, parv[1], aconf->name, aconf->passwd);
-		return 0;
-	}
-
 	/* XLINE <gecos> ON <server> :<reason> */
 	if(parc >= loc+2 && !irccmp(parv[loc], "ON"))
 	{
@@ -154,6 +147,13 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	}
 	else if(dlink_list_length(&cluster_conf_list) > 0)
 		cluster_xline(source_p, temp_time, name, reason);
+
+	if((aconf = find_xline(name, 0)) != NULL)
+	{
+		sendto_one(source_p, ":%s NOTICE %s :[%s] already X-Lined by [%s] - %s",
+			   me.name, source_p->name, parv[1], aconf->name, aconf->passwd);
+		return 0;
+	}
 
 	if(!valid_xline(source_p, name, reason))
 		return 0;
@@ -252,13 +252,6 @@ valid_xline(struct Client *source_p, const char *gecos,
 	{
 		sendto_one_notice(source_p,
 				":Invalid character '\"' in comment");
-		return 0;
-	}
-
-	if(strstr(reason, "\","))
-	{
-		sendto_one_notice(source_p,
-				":Invalid characters \", in comment");
 		return 0;
 	}
 

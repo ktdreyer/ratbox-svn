@@ -542,6 +542,7 @@ ms_uid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 static int
 mr_user(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
+	static char buf[BUFSIZE];
 	struct User *user;
 	char *p;
 
@@ -553,6 +554,10 @@ mr_user(struct Client *client_p, struct Client *source_p, int parc, const char *
 		user = make_user(source_p);
 		user->server = me.name;
 	}
+
+	ircsnprintf(buf, sizeof(buf), "%s %s", parv[2], parv[3]);
+	MyFree(source_p->localClient->fullcaps);
+	DupString(source_p->localClient->fullcaps, buf);
 
 	strlcpy(source_p->info, parv[4], sizeof(source_p->info));
 
@@ -1737,6 +1742,16 @@ register_local_user(struct Client *client_p, struct Client *source_p)
 #endif
 			     ipaddr, get_client_class(source_p), source_p->info);
 
+	sendto_realops_flags(UMODE_CCONNEXT, L_ALL,
+			"CLICONN %s %s %s %s %s %s 0 %s",
+			nick, source_p->username, source_p->host,
+#ifdef HIDE_SPOOF_IPS
+			IsIPSpoof(source_p) ? "255.255.255.255" :
+#endif
+			ipaddr, get_client_class(source_p),
+			source_p->localClient->fullcaps,
+			source_p->info);
+
 	/* If they have died in send_* don't do anything. */
 	if(IsAnyDead(source_p))
 		return CLIENT_EXITED;
@@ -1746,9 +1761,11 @@ register_local_user(struct Client *client_p, struct Client *source_p)
 	strcpy(source_p->id, generate_uid());
 	add_to_id_hash(source_p->id, source_p);
 
-	source_p->umodes |= UMODE_INVISIBLE;
-
-	Count.invisi++;
+	if(ConfigFileEntry.default_invisible)
+	{
+		source_p->umodes |= UMODE_INVISIBLE;
+		Count.invisi++;
+	}
 
 	s_assert(!IsClient(source_p));
 	dlinkMoveNode(&source_p->localClient->tnode, &unknown_list, &lclient_list);

@@ -272,11 +272,8 @@ check_pings_list(dlink_list * list)
 		 ** Note: No need to notify opers here. It's
 		 ** already done when "FLAGS_DEADSOCKET" is set.
 		 */
-		if(!MyConnect(client_p))
-		{
-			/* Ignore it, its been exited already */
+		if(!MyConnect(client_p) || IsAnyDead(client_p))
 			continue;
-		}
 
 		if(!IsRegistered(client_p))
 			ping = ConfigFileEntry.connect_timeout;
@@ -1138,7 +1135,10 @@ exit_aborted_clients(void *unused)
   	 	 	                     "Closing link to %s: %s",
    	 	 	                     get_server_name(abt->client, HIDE_IP), abt->notice);
 
-		/* its no longer on abort list */
+		/* its no longer on abort list - we *must* remove
+		 * FLAGS_CLOSING otherwise exit_client() will not run --fl
+		 */
+		abt->client->flags &= ~FLAGS_CLOSING;
  	 	exit_client(abt->client, abt->client, &me, abt->notice);
  	 	MyFree(abt);
  	}
@@ -1168,6 +1168,7 @@ dead_link(struct Client *client_p)
     	abt->client = client_p;
 	SetIOError(client_p);
 	SetDead(client_p);
+	SetClosing(client_p);
 	dlinkAdd(abt, &abt->node, &abort_list);
 }
 
@@ -1427,6 +1428,14 @@ exit_local_client(struct Client *client_p, struct Client *source_p, struct Clien
 #endif
 			     source_p->sockhost);
 
+	sendto_realops_flags(UMODE_CCONNEXT, L_ALL,
+			"CLIEXIT %s %s %s %s 0 %s",
+			source_p->name, source_p->username, source_p->host,
+#ifdef HIDE_SPOOF_IPS
+                             IsIPSpoof(source_p) ? "255.255.255.255" :
+#endif
+			     source_p->sockhost, comment);
+			
 	on_for = CurrentTime - source_p->localClient->firsttime;
 
 	ilog(L_USER, "%s (%3lu:%02lu:%02lu): %s!%s@%s %d/%d",

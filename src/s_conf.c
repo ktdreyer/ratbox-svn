@@ -355,6 +355,7 @@ set_default_conf(void)
 
 	ConfigFileEntry.min_nonwildcard = 4;
 	ConfigFileEntry.min_nonwildcard_simple = 3;
+	ConfigFileEntry.default_invisible = 0;
 	ConfigFileEntry.default_floodcount = 8;
 	ConfigFileEntry.client_flood = CLIENT_FLOOD_DEFAULT;
 	ConfigFileEntry.tkline_expire_notices = 0;

@@ -535,6 +535,9 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	int fl;
 	int isnew;
 	int mlen;
+	int len_nick = 0;
+	int len_uid = 0;
+	int len;
 	int joins = 0;
 	const char *s;
 	char *ptr_nick;
@@ -714,23 +717,53 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 		   (target_p->from != client_p) || !IsPerson(target_p))
 			goto nextnick;
 
+		/* check we can fit another status+nick+space into buffer,
+		 * if we're converting nicks to uids and vice versa this may
+		 * not fit..
+		 */
+		if((mlen + len_nick + NICKLEN + 3) > (BUFSIZE - 3))
+		{
+			*(ptr_nick - 1) = '\0';
+			sendto_server(client_p->from, NULL, NOCAPS, CAP_TS6,
+					"%s", buf_nick);
+			ptr_nick = buf_nick + mlen;
+			len_nick = 0;
+		}
+
+		if((mlen + len_uid + IDLEN + 3) > (BUFSIZE - 3))
+		{
+			*(ptr_uid - 1) = '\0';
+			sendto_server(client_p->from, NULL, NOCAPS, CAP_TS6,
+					"%s", buf_uid);
+			ptr_uid = buf_uid + mlen;
+			len_uid = 0;
+		}
+
 		if(keep_new_modes)
 		{
 			if(fl & CHFL_CHANOP)
 			{
 				*ptr_nick++ = '@';
 				*ptr_uid++ = '@';
+				len_nick++;
+				len_uid++;
 			}
 			if(fl & CHFL_VOICE)
 			{
 				*ptr_nick++ = '+';
 				*ptr_uid++ = '+';
+				len_nick++;
+				len_uid++;
 			}
 		}
 
 		/* copy the nick to the two buffers */
-		ptr_nick += ircsprintf(ptr_nick, "%s ", target_p->name);
-		ptr_uid += ircsprintf(ptr_uid, "%s ", use_id(target_p));
+		len = ircsprintf(ptr_nick, "%s ", target_p->name);
+		ptr_nick += len;
+		len_nick += len;
+		len = ircsprintf(ptr_uid, "%s ", use_id(target_p));
+		ptr_uid += len;
+		len_uid += len;
 
 		if(!keep_new_modes)
 		{

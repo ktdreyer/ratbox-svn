@@ -162,7 +162,6 @@ del_from_watch_hash_table(const char *nick, struct Client *client_p)
 {
 	int hashv;
 	struct Watch *awptr, *nlast = NULL;
-	dlink_node *lp;
 
 	hashv = watch_hash_nick(nick);
 	if(hashv <= 0)
@@ -202,7 +201,7 @@ hash_del_watch_list(struct Client *client_p)
 {
 	int hashv;
 	struct Watch *awptr;
-	dlink_node *ptr, *next_ptr, *lp;
+	dlink_node *ptr, *next_ptr;
 
 	if(!(client_p->localClient->watchlist.head))
 		return 0;	/* Nothing to do */

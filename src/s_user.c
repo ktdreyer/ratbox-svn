@@ -58,6 +58,7 @@ struct flag_item user_modes[] = {
 	{UMODE_ADMIN,		'a'},
 	{UMODE_BOTS,		'b'},
 	{UMODE_CCONN,		'c'},
+	{UMODE_CCONNEXT,	'C'},
 	{UMODE_DEBUG,		'd'},
 	{UMODE_FULL,		'f'},
 	{UMODE_CALLERID,	'g'},
@@ -86,7 +87,7 @@ int user_modes_from_c_to_bitmask[] = {
 	0,			/* @ */
 	0,			/* A */
 	0,			/* B */
-	0,			/* C */
+	UMODE_CCONNEXT,		/* C */
 	0,			/* D */
 	0,			/* E */
 	0,			/* F */
@@ -184,9 +185,12 @@ show_lusers(struct Client *source_p)
 	sendto_one_numeric(source_p, RPL_LOCALUSERS, 
 			   form_str(RPL_LOCALUSERS),
 			   dlink_list_length(&lclient_list),
+			   Count.max_loc,
+			   dlink_list_length(&lclient_list),
 			   Count.max_loc);
 
 	sendto_one_numeric(source_p, RPL_GLOBALUSERS, form_str(RPL_GLOBALUSERS),
+			   Count.total, Count.max_tot,
 			   Count.total, Count.max_tot);
 
 	sendto_one_numeric(source_p, RPL_STATSCONN,

@@ -145,7 +145,7 @@ mo_kline(struct Client *client_p, struct Client *source_p,
 	if(target_server != NULL)
 	{
 		propagate_generic(source_p, "KLINE", target_server, CAP_KLN,
-				"%d %s %s %s",
+				"%d %s %s :%s",
 				tkline_time, user, host, reason);
 
 		/* If we are sending it somewhere that doesnt include us, stop */
@@ -229,7 +229,7 @@ ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	int tkline_time = atoi(parv[2]);
 
 	propagate_generic(source_p, "KLINE", parv[1], CAP_KLN,
-			"%d %s %s %s",
+			"%d %s %s :%s",
 			tkline_time, parv[3], parv[4], parv[5]);
 
 	if(!match(parv[1], me.name))
@@ -342,8 +342,16 @@ mo_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 
 		if(host)	/* Found user@host */
 		{
-			user = h;	/* here is user part */
-			*host++ = '\0';	/* and now here is host */
+			*host++ = '\0';
+
+			/* check for @host */
+			if(*h)
+				user = h;
+			else
+				user = splat;
+
+			if(!*host)
+				host = splat;
 		}
 		else
 		{
@@ -701,9 +709,10 @@ remove_temp_kline(const char *user, const char *host)
 	dlink_node *ptr;
 	struct irc_sockaddr_storage addr, caddr;
 	int bits, cbits;
+	int mtype, ktype;
 	int i;
 
-	parse_netmask(host, (struct sockaddr *)&addr, &bits);
+	mtype = parse_netmask(host, (struct sockaddr *)&addr, &bits);
 
 	for (i = 0; i < LAST_TEMP_TYPE; i++)
 	{
@@ -711,19 +720,24 @@ remove_temp_kline(const char *user, const char *host)
 		{
 			aconf = ptr->data;
 
-			parse_netmask(aconf->host, (struct sockaddr *)&caddr, &cbits);
+			ktype = parse_netmask(aconf->host, (struct sockaddr *)&caddr, &cbits);
 
-			if(user && irccmp(user, aconf->user))
+			if(ktype != mtype || (user && irccmp(user, aconf->user)))
 				continue;
 
-			if(!irccmp(aconf->host, host) || (bits == cbits
-							  && comp_with_mask_sock((struct sockaddr *)&addr,
-									    (struct sockaddr *)&caddr, bits)))
+			if(ktype == HM_HOST)
 			{
-				dlinkDelete(ptr, &temp_klines[i]);
-				delete_one_address_conf(aconf->host, aconf);
-				return YES;
+				if(irccmp(aconf->host, host))
+					continue;
 			}
+			else if(bits != cbits ||
+				!comp_with_mask_sock((struct sockaddr *)&addr,
+						(struct sockaddr *)&caddr, bits))
+				continue;
+
+			dlinkDelete(ptr, &temp_klines[i]);
+			delete_one_address_conf(aconf->host, aconf);
+			return YES;
 		}
 	}
 

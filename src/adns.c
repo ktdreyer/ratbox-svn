@@ -54,8 +54,7 @@ report_adns_servers(struct Client *source_p)
 	for (x = 0; x < dns_state->nservers; x++)
 	{
 		inetntop(AF_INET, &dns_state->servers[x].addr.s_addr, buf, 16);
-		sendto_one_numeric(source_p, RPL_STATSALINE, 
-				   form_str(RPL_STATSALINE), buf);
+		sendto_one_numeric(source_p, RPL_STATSDEBUG, "A %s", buf);
 	}
 }
 

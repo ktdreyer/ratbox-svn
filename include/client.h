@@ -385,10 +385,11 @@ struct exit_client_hook
 #define UMODE_UNAUTH       0x4000	/* show unauth connects here */
 #define UMODE_LOCOPS       0x8000	/* show locops */
 #define UMODE_OPERSPY	   0x10000
+#define UMODE_CCONNEXT     0x20000
 
 /* user information flags, only settable by remote mode or local oper */
-#define UMODE_OPER         0x20000	/* Operator */
-#define UMODE_ADMIN        0x40000	/* Admin on server */
+#define UMODE_OPER         0x40000	/* Operator */
+#define UMODE_ADMIN        0x80000	/* Admin on server */
 
 #define UMODE_ALL	   UMODE_SERVNOTICE
 
@@ -414,7 +415,7 @@ struct exit_client_hook
                       UMODE_NCHANGE | UMODE_OPERWALL | UMODE_DEBUG | \
                       UMODE_BOTS | UMODE_EXTERNAL | UMODE_LOCOPS | \
  		      UMODE_ADMIN | UMODE_UNAUTH | UMODE_CALLERID | \
-		      UMODE_OPERSPY)
+		      UMODE_OPERSPY | UMODE_CCONNEXT)
 
 #define FLAGS_ID     (FLAGS_NEEDID | FLAGS_GOTID)
 

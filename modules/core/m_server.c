@@ -1208,7 +1208,7 @@ burst_TS5(struct Client *client_p)
 			continue;
 
 		if(*chptr->chname != '#')
-			return;
+			continue;
 
 		hinfo.client = client_p;
 		hinfo.arg1 = chptr;
@@ -1337,7 +1337,7 @@ burst_TS6(struct Client *client_p)
 			continue;
 
 		if(*chptr->chname != '#')
-			return;
+			continue;
 
 		hinfo.client = client_p;
 		hinfo.arg1 = chptr;
