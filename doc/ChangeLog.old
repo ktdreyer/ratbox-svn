@@ -1,3 +1,11 @@
+*** 20010124_1 by db
+- m_whowas.c was referencing ConfigFileEntry intead of ServerInfo
+  causing a core. oops.
+- cleaned up check_server() in s_serv.c, this is probably why
+  irc.efnow.net had connect problems.
+
+
+
 *** 20010123_4 by wcampbel
 Fixed spelling errors (Noticed by Jonathan Roes)
 
