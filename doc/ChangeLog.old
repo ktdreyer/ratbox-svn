@@ -1,3 +1,8 @@
+*** 20001016_4 by db
+- global who should work when its a wild card mask
+
+
+
 *** 20001016_3 by db
 - fixed bug in m_who
 
