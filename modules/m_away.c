@@ -31,6 +31,7 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "s_conf.h"
 
 #include <stdlib.h>
 
@@ -75,6 +76,7 @@ int     m_away(struct Client *cptr,
                char *parv[])
 {
   char  *away, *awy2 = parv[1];
+  static time_t last_away;
 
   /* make sure the user exists */
   if (!(sptr->user))
@@ -84,7 +86,14 @@ int     m_away(struct Client *cptr,
 			   cptr->name,sptr->name);
       return 0;
     }
-
+  if (MyConnect(sptr) && ((CurrentTime-last_away) < 2 ||
+      (CurrentTime-sptr->user->last_away)<ConfigFileEntry.pace_wait))
+    {
+     sendto_one(sptr, form_str(RPL_LOAD2HI), me.name, parv[0]);
+     return 0;
+    }
+  last_away = CurrentTime;
+  sptr->user->last_away = CurrentTime;
   away = sptr->user->away;
 
   if (parc < 2 || !*awy2)

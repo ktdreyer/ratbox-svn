@@ -77,6 +77,7 @@ struct User
   dlink_list     channel;       /* chain of channel pointer blocks */
   dlink_list     invited;       /* chain of invite pointer blocks */
   char*          away;          /* pointer to away message */
+  time_t         last_away;     /* Away since... */
   time_t         last;
   int            refcnt;        /* Number of times this block is referenced */
   int            joined;        /* number of channels joined */
