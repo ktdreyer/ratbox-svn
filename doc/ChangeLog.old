@@ -1,3 +1,7 @@
+*** 20010101_13 by bysin
+Oops, fixed buffer overflow again.
+
+
 *** 20010101_12 by bysin
 I fixed a buffer overflow in this.  Right before its gunna be released.  I hope this works.
 
