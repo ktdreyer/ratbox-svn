@@ -1,3 +1,30 @@
+leeh        2005/01/04 15:57:55 EST	(20050104_15)
+
+  Modified files:
+    doc                  example.conf 
+    help/userserv        register 
+    include              conf.h s_chanserv.h s_userserv.h 
+    src                  conf.c newconf.c s_chanserv.c 
+                         s_userserv.c 
+  Log:
+  - allow_setx -> allow_set_x in conf
+  - added CHANSERV::SET::WARNOVERRIDE
+  - added CHANSERV::GETKEY
+  - move SETPASS|SETEMAIL to SET PASS|EMAIL
+  
+  Revision  Changes    Path
+  1.30      +6 -6      rserv/doc/example.conf
+  1.2       +2 -2      rserv/help/userserv/register
+  1.36      +2 -2      rserv/include/conf.h
+  1.21      +5 -0      rserv/include/s_chanserv.h
+  1.15      +1 -0      rserv/include/s_userserv.h
+  1.38      +3 -3      rserv/src/conf.c
+  1.40      +2 -2      rserv/src/newconf.c
+  1.35      +94 -3     rserv/src/s_chanserv.c
+  1.28      +165 -34   rserv/src/s_userserv.c
+
+
+
 leeh        2005/01/04 15:55:24 EST	(20050104_14)
 
   Modified files:
