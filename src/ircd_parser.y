@@ -64,7 +64,6 @@ int   class_number_per_ip_var;
 int   class_max_number_var;
 int   class_sendq_var;
 
-static int   listener_port;
 static char  *listener_address;
 
 char  *class_redirserv_var;
@@ -663,12 +662,10 @@ class_sendq:    SENDQ '=' NUMBER ';'
 listen_entry:   LISTEN
   {
     listener_address = NULL;
-    listener_port = 0;
   }
   '{' listen_items '}' ';'
   {
-    add_listener (listener_port, listener_address);     
-    MyFree (listener_address);
+    MyFree(listener_address);
     listener_address = NULL;
   };
 
@@ -679,16 +676,18 @@ listen_item:    listen_port | listen_address | listen_host | error
 
 listen_port:    PORT '=' NUMBER ';'
   {
-    listener_port = yylval.number;
+    add_listener(yylval.number, listener_address);
   };
 
 listen_address: IP '=' QSTRING ';'
   {
+    MyFree(listener_address);
     DupString(listener_address, yylval.string);
   };
 
 listen_host:	HOST '=' QSTRING ';'
   {
+    MyFree(listener_address);
     DupString(listener_address, yylval.string);
   };
 

@@ -4,10 +4,10 @@ check.o: check.c ../include/fileio.h internal.h ../include/config.h \
  ../include/sprintf_irc.h dlist.h
 event.o: event.c ../include/fileio.h ../include/s_bsd.h \
  ../include/config.h ../include/setup.h ../include/fdlist.h \
- ../include/ircd_defs.h ../include/res.h ../include/../adns/adns.h \
- ../include/ircd.h ../include/tools.h ../include/irc_string.h \
- ../include/sprintf_irc.h internal.h adns.h dlist.h \
- ../include/memory.h ../include/blalloc.h tvarith.h
+ ../include/ircd_defs.h ../include/res.h ../include/blalloc.h \
+ ../include/memory.h ../include/../adns/adns.h ../include/ircd.h \
+ ../include/tools.h ../include/irc_string.h ../include/sprintf_irc.h \
+ internal.h adns.h dlist.h tvarith.h
 general.o: general.c ../include/fileio.h ../include/s_log.h \
  ../include/memory.h ../include/ircd_defs.h ../include/config.h \
  ../include/setup.h ../include/blalloc.h internal.h adns.h \
