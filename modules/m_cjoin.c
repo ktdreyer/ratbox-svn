@@ -220,4 +220,3 @@ static void m_cjoin(struct Client *client_p,
   channel_member_names(source_p, vchan_chptr, root_vchan->chname, 1);
 }
 
-#endif /* VCHANS */
