@@ -1425,8 +1425,8 @@ connect_host:   HOST '=' QSTRING ';'
  
 connect_send_password:  SEND_PASSWORD '=' QSTRING ';'
   {
-    if (yy_aconf->passwd)
-      memset(yy_aconf->passwd, 0, strlen(yy_aconf->passwd));
+    if (yy_aconf->spasswd)
+      memset(yy_aconf->spasswd, 0, strlen(yy_aconf->spasswd));
     MyFree(yy_aconf->spasswd);
     DupString(yy_aconf->spasswd, yylval.string);
   };
