@@ -213,8 +213,8 @@ static void mo_kline(struct Client *client_p,
   if(target_server != NULL)
     {
       sendto_cap_serv_butone(CAP_KLN, &me,
-			   ":%s KLINE %s %s %lu %s %s :%s",
-			   me.name, source_p->name,
+			   ":%s KLINE %s %lu %s %s :%s",
+			   source_p->name,
 			   target_server,
 			   tkline_time, user, host, reason);
 
@@ -259,88 +259,84 @@ static void ms_kline(struct Client *client_p,
                     char *parv[])
 {
   const char *current_date;
-  struct Client *rclient_p=NULL;
   struct ConfItem *aconf=NULL;
   int    tkline_time;
-  if(parc < 7)
+
+  char *kuser;
+  char *khost;
+  char *kreason;
+
+  if(parc != 6)
     return;
 
-  /* parv[0] parv[1] parv[2]       parv[3]     parv[4] parv[5] parv[6] */
-  /* server  oper    target_server tkline_time user    host    reason */
-  sendto_cap_serv_butone (CAP_KLN, client_p, ":%s KLINE %s %s %s %s %s :%s",
+  /* parv[0]  parv[1]        parv[2]      parv[3]  parv[4]  parv[5] */
+  /* oper     target_server  tkline_time  user     host     reason */
+  sendto_cap_serv_butone (CAP_KLN, client_p, ":%s KLINE %s %s %s %s :%s",
 			  parv[0], parv[1],
 			  parv[2], parv[3],
-			  parv[4], parv[5],parv[6]);
+			  parv[4], parv[5]);
 
 
-  if(!match(parv[2],me.name))
+  kuser = parv[3];
+  khost = parv[4];
+  kreason = parv[5];
+
+  if(!match(parv[1],me.name))
     return;
 
-  if ((rclient_p = hash_find_client(parv[1],(struct Client *)NULL)))
-    {
-      if(!IsPerson(rclient_p))
-	return;
-    }
-  else
+  if(!IsPerson(source_p))
     return;
 
-  /* These should never happen but... */
-  if( rclient_p->name == NULL )
-    return;
-  if( rclient_p->user == NULL )
-    return;
-  if( rclient_p->host == NULL )
-    return;
-
-  if(valid_user_host(parv[4],parv[5]))
+  if(valid_user_host(kuser, khost))
     {
       sendto_realops_flags(FLAGS_ALL,
-             "*** Received Invalid K-Line for %s@%s, from %s!%s@%s on %s",
-             parv[4], parv[5], rclient_p->name, rclient_p->username,
-             rclient_p->host, source_p->name);
+             "*** %s!%s@%s on %s is requesting an Invalid K-Line for [%s@%s] [%s]",
+             source_p->name, source_p->username, source_p->host, source_p->user->server,
+             kuser, khost, kreason);
       return;
     }
 
-  if(valid_wild_card(parv[4],parv[5]))
+  if(valid_wild_card(kuser, khost))
     {
        sendto_realops_flags(FLAGS_ALL, 
-             "*** Received Wildcard K-Line for %s@%s, from %s!%s@%s on %s",
-             parv[4], parv[5], rclient_p->name, rclient_p->username,
-             rclient_p->host, source_p->name);
+             "*** %s!%s@%s on %s is requesting a K-Line without %d wildcard chars for [%s@%s] [%s]",
+             source_p->name, source_p->username, source_p->host, source_p->user->server,
+             ConfigFileEntry.min_nonwildcard, kuser, khost, kreason);
        return;
      }
 
-  tkline_time = atoi(parv[3]);
+  tkline_time = atoi(parv[2]);
 
-  if(find_u_conf(source_p->name,rclient_p->username,rclient_p->host))
+  if(find_u_conf((char *)source_p->user->server, source_p->username, source_p->host))
     {
       sendto_realops_flags(FLAGS_ALL,
-			   "*** Received K-Line for %s@%s, from %s!%s@%s on %s",
-			   parv[4],
-			   parv[5],
-			   rclient_p->name,
-			   rclient_p->username,
-			   rclient_p->host,
-			   source_p->name);
+			   "*** Received K-Line for [%s@%s] [%s], from %s!%s@%s on %s",
+			   kuser,
+			   khost,
+                           kreason,
+			   source_p->name,
+			   source_p->username,
+			   source_p->host,
+			   source_p->user->server);
 
       /* We check if the kline already exists after we've announced its 
        * arrived, to avoid confusing opers - fl
        */
-      if (already_placed_kline(source_p, parv[4], parv[5]))
+      if (already_placed_kline(source_p, kuser, khost))
         return;
 
       aconf = make_conf();
 
       aconf->status = CONF_KILL;
-      DupString(aconf->user, parv[4]);
-      DupString(aconf->host, parv[5]);
-      DupString(aconf->passwd, parv[6]);
+      DupString(aconf->user, kuser);
+      DupString(aconf->host, khost);
+      DupString(aconf->passwd, kreason);
       current_date = smalldate((time_t) 0);
 
       if(tkline_time)
-          apply_tkline(rclient_p, aconf, current_date, tkline_time);
+          apply_tkline(source_p, aconf, current_date, tkline_time);
       else
-	apply_kline(rclient_p, aconf, aconf->passwd, current_date);	
+	apply_kline(source_p, aconf, aconf->passwd, current_date);	
 
       }
 } /* ms_kline() */
@@ -667,6 +663,29 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
   else
     reason = "No reason";
 
+<<<<<<< m_kline.c
+  if(IsSetOperAdmin(source_p))
+    {
+      if(bits < 8)
+        {
+          sendto_one(source_p,
+            ":%s NOTICE %s :For safety, bitmasks less than 8 require conf access.",
+            me.name, parv[0]);
+          return;
+        }
+    }
+  else
+    {
+      if (bits < 24)
+        {
+          sendto_one(source_p,
+                     ":%s NOTICE %s :Can't use a mask less than 24 with dline.",
+                     me.name, parv[0]);
+          return;
+        }
+    }
+
+=======
 
   if(IsSetOperAdmin(source_p))
   {
@@ -689,6 +708,7 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
     }
   }
 
+>>>>>>> 1.72
 #ifdef IPV6
   if (t == HM_IPV6)
    t = AF_INET6;
@@ -868,7 +888,7 @@ static int valid_wild_card(char *luser, char *lhost)
      * The user portion did not contain enough non-wild
      * characters, try the host.
      */
-    p = host;
+    p = lhost;
     while ((tmpch = *p++))
     {
       if (!IsKWildChar(tmpch))
