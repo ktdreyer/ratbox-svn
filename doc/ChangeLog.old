@@ -1,3 +1,7 @@
+*** 20011023_3 by androsyn
+Updated the example config to reflect the change with challenge.
+
+
 *** 20011023_2 by androsyn
 Changed challenge to use standard PEM format keys similiar to those used for
 cryptlinks in hybrid.  Removed the genkey utility as well, as the standard
