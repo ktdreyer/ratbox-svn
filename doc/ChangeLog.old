@@ -1,3 +1,10 @@
+*** 20001223_13 by wcampbel
+1. Make STATS for non-opers consistent...if it's an oper only STATS request,
+   then always show ERR_NOPRIVILEGES.
+2. Allow STATS x, does the same as X, no reason why it shouldn't
+3. I forgot a couple STATS in the opers.txt documentation
+
+
 *** 20001223_12 by wcampbel
 1. Add the broken $$target and $#target to the TODO list
 2. Channel Mode +z became +a, update whats-new.txt
