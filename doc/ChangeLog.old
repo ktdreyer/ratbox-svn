@@ -1,3 +1,10 @@
+*** 20001222_8 by wcampbel
+1. Added an example of user and host in the shared section
+2. Updated opers.txt some more
+3. Added OMOTD to the REHASH help message
+4. STATS P shouldn't show to non-opers
+
+
 *** 20001222_7 by db
 - tiny bug fix for logging
 
