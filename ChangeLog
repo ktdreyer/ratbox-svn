@@ -1,3 +1,31 @@
+leeh        2003/08/20 17:43:28 EDT	(20030820_1)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              client.h config.h config.h.dist s_conf.h 
+    modules              m_pass.c 
+    modules/core         m_nick.c 
+    src                  newconf.c s_conf.c s_serv.c 
+  Log:
+  - fixed register_client() to use parc/parv
+  - made use_ts6 a configfile option and fixed it to disable new TS6 links
+  - removed a couple of unused variables
+  
+  Revision  Changes    Path
+  7.220     +8 -0      ircd-ratbox/doc/example.conf
+  7.56      +8 -0      ircd-ratbox/doc/example.efnet.conf
+  7.216     +0 -8      ircd-ratbox/include/client.h
+  7.166     +0 -9      ircd-ratbox/include/config.h
+  7.70      +0 -9      ircd-ratbox/include/config.h.dist
+  7.251     +1 -4      ircd-ratbox/include/s_conf.h
+  1.128     +37 -56    ircd-ratbox/modules/core/m_nick.c
+  1.41      +5 -3      ircd-ratbox/modules/m_pass.c
+  7.106     +12 -0     ircd-ratbox/src/newconf.c
+  7.428     +2 -0      ircd-ratbox/src/s_conf.c
+  7.353     +18 -4     ircd-ratbox/src/s_serv.c
+
+
+
 androsyn    2003/08/20 11:42:27 EDT	(20030820_0)
 
   Modified files:
