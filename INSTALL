@@ -2,7 +2,8 @@
   * Reading INSTALL is now a must, as the old DPATH is now specified when *
   * configure is run.                                                     *
   * - You now need to ./configure --prefix="/path/to/install/it"          *
-  * The old config format WILL NOT WORK.  Please see doc/example.conf (!) *
+  *                                                                       *
+  * The old config format WILL NOT WORK.  Please see point 6!             *
   *************************************************************************
 
 HOW TO BUILD:
@@ -57,10 +58,15 @@ Note that if you use different names in ircd.conf, you must 'touch' those
 specific names.
 
 6.  If you are upgrading from hybrid6/5, the config file has changed
-drastically.. convertconf can transform most of it, but this will still
-need to be checked, and a little look in example.conf for new options
-that havent quite been updated.
+drastically.. 
 
+There is a utility to convert your old config file, to the new format!
+in prefix/bin there is something called "convertconf".  its usage is:
+./convertconf (old config file to convert) (converted file name)
+
+Once this is done, move your new config to prefix/etc/ircd.conf and
+EDIT IT!  There are still things that need changing in the config, 
+including the fact that classes must be above auth/connect blocks!
 
 HOW TO GET HELP:
 ----------------
