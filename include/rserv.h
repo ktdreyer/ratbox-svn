@@ -9,13 +9,14 @@
 #define MAX_DATE_STRING	32
 
 int current_mark;
+int testing_conf;
 
 extern struct timeval system_time;
 #define CURRENT_TIME system_time.tv_sec
 
 extern void set_time(void);
 
-extern void die(const char *reason);
+extern void die(const char *format, ...);
 
 extern int have_md5_crypt;
 

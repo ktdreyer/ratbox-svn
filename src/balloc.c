@@ -98,8 +98,7 @@ static int zero_fd = -1;
 static void
 _blockheap_fail(const char *reason, const char *file, int line)
 {
-	mlog("Blockheap failure: %s (%s:%d)", reason, file, line);
-        die("out of memory");
+	die("Blockheap failure: %s (%s:%d)", reason, file, line);
 }
 
 void
@@ -283,8 +282,8 @@ BlockHeapCreate(size_t elemsize, int elemsperblock)
 	bh = (BlockHeap *) calloc(1, sizeof(BlockHeap));
 	if(bh == NULL)
 	{
-		mlog("Attempt to calloc() failed: (%s:%d)", __FILE__, __LINE__);
-		die("Out of memory");
+		die("Out of memory: Attempt to calloc() failed: (%s:%d)", 
+			__FILE__, __LINE__);
 	}
 
 	if((elemsize % sizeof(void *)) != 0)
@@ -305,8 +304,7 @@ BlockHeapCreate(size_t elemsize, int elemsperblock)
 	{
 		if(bh != NULL)
 			free(bh);
-		mlog("newblock() failed");
-		die("Out of memory");
+		die("Out of memory: newblock() failed");
 	}
 
 	if(bh == NULL)
@@ -351,10 +349,7 @@ BlockHeapAlloc(BlockHeap * bh)
 			/* That didn't work..try to garbage collect */
 			BlockHeapGarbageCollect(bh);
 			if(bh->freeElems == 0)
-			{
-				mlog("newblock() failed and garbage collection didn't help");
-                		die("Out of memory");
-			}
+				die("Out of memory: newblock() failed with GC");
 		}
 	}
 
@@ -399,7 +394,6 @@ BlockHeapFree(BlockHeap * bh, void *ptr)
 
 	if(bh == NULL)
 	{
-
 		mlog("balloc.c:BlockHeapFree() bh == NULL");
 		return (1);
 	}
@@ -415,7 +409,6 @@ BlockHeapFree(BlockHeap * bh, void *ptr)
 	if(memblock->block == NULL)
 	{
 		blockheap_fail("memblock->block == NULL, not a valid block?");
-                die("Out of memory");
 	}
 
 	block = memblock->block;

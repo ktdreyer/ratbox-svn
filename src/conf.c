@@ -145,7 +145,7 @@ conf_parse(int cold)
 	validate_conf();
 
 	/* if we havent sent our burst, the following will just break */
-	if(sent_burst)
+	if(!testing_conf && sent_burst)
 	{
 		DLINK_FOREACH(ptr, service_list.head)
 		{

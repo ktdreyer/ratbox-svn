@@ -43,6 +43,7 @@ struct timeval system_time;
 
 int have_md5_crypt;
 int current_mark;
+int testing_conf = 0;
 
 static int need_rehash = 0;
 static void sig_hup(int);
@@ -50,15 +51,28 @@ static void sig_term(int);
 static void check_rehash(void *);
 
 void
-die(const char *reason)
+die(const char *format, ...)
 {
+	char buf[BUFSIZE];
+	va_list args;
+
 #ifndef ANFL_LAPTOP
 	if(rserv_db)
 		sqlite_close(rserv_db);
 #endif
 
-	sendto_all(0, "Services terminated: (%s)", reason);
-	mlog("ratbox-services terminated: (%s)", reason);
+	va_start(args, format);
+	vsnprintf(buf, sizeof(buf), format, args);
+	va_end(args);
+
+	if(testing_conf)
+	{
+		fprintf(stderr, "Services terminated: (%s)\n", buf);
+		exit(1);
+	}
+
+	sendto_all(0, "Services terminated: (%s)", buf);
+	mlog("ratbox-services terminated: (%s)", buf);
 	exit(1);
 }
 
@@ -134,10 +148,11 @@ write_pidfile(void)
 static void
 print_help(void)
 {
-	printf("ratbox-services [-h|-v|-f]\n");
+	printf("ratbox-services [-h|-v|-f|-t]\n");
 	printf(" -h show this help\n");
 	printf(" -v show version\n");
 	printf(" -f foreground mode\n");
+	printf(" -t test config\n");
 }
 
 static void
@@ -149,11 +164,21 @@ check_md5_crypt(void)
 		have_md5_crypt = 0;
 }
 
+static void
+print_startup(int pid, int nofork)
+{
+	printf("ratbox-services: version %s(%s)\n",
+		RSERV_VERSION, SERIALNUM);
+	printf("ratbox-services: pid %d\n", pid);
+	printf("ratbox-services: running in %s\n",
+		nofork ? "foreground" : "background");
+}
+
 int 
 main(int argc, char *argv[])
 {
 #ifndef ANFL_LAPTOP
-	char **errmsg;
+	char *errmsg;
 #endif
 	char c;
 	int nofork = 0;
@@ -169,7 +194,7 @@ main(int argc, char *argv[])
 
 	setup_corefile();
 
-	while((c = getopt(argc, argv, "hvf")) != -1)
+	while((c = getopt(argc, argv, "hvft")) != -1)
 	{
 		switch(c)
 		{
@@ -185,6 +210,9 @@ main(int argc, char *argv[])
 			case 'f':
 				nofork = 1;
 				break;
+			case 't':
+				testing_conf = 1;
+				break;
 		}
 	}
 
@@ -194,43 +222,44 @@ main(int argc, char *argv[])
         nofork = 1;
 #endif
 
-        if(!nofork)
+	if(testing_conf)
+		nofork = 1;
+
+        if(!testing_conf)
+	{
         	check_pidfile();
 
-	printf("ratbox-services: version %s(%s)\n",
-		RSERV_VERSION, SERIALNUM);
-
-	if(!nofork)
-	{
-		childpid = fork();
-
-		switch (childpid)
+		if(!nofork)
 		{
-			case -1:
-				perror("fork()");
-				exit(3);
-			case 0:
-				close(STDIN_FILENO);
-				close(STDOUT_FILENO);
-				close(STDERR_FILENO);
-				if (setsid() == -1)
-					die("setsid() error");
+			childpid = fork();
 
-				break;
-			default:
-				printf("ratbox-services: pid %d\n", childpid);
-				printf("ratbox-services: running in background\n");
-				return 0;
+			switch (childpid)
+			{
+				case -1:
+					perror("fork()");
+					exit(3);
+				case 0:
+					close(STDIN_FILENO);
+					close(STDOUT_FILENO);
+					close(STDERR_FILENO);
+					if (setsid() == -1)
+						die("setsid() error");
+
+					break;
+				default:
+					print_startup(childpid, nofork);
+					return 0;
+			}
 		}
+		else
+			print_startup(getpid(), nofork);
 	}
-
-        if(!nofork)
-        	write_pidfile();
 
 	/* log requires time is set */
 	open_logfile();
 
-	mlog("ratbox-services started");
+	mlog("ratbox-services started%s",
+		testing_conf ? " (config test)" : "");
 
 	signal(SIGHUP, sig_hup);
 	signal(SIGTERM, sig_term);
@@ -240,14 +269,6 @@ main(int argc, char *argv[])
 
 	current_mark = 0;
 
-#ifndef ANFL_LAPTOP
-	if((rserv_db = sqlite_open(DB_PATH, 0, errmsg)) == NULL)
-	{
-		mlog("ERR: Failed to open db file: %s", *errmsg);
-		exit(-1);
-	}
-#endif
-
 	init_events();
 
 	/* balloc requires events */
@@ -256,8 +277,19 @@ main(int argc, char *argv[])
 	/* tools requires balloc */
 	init_tools();
 
+	if(testing_conf)
+		fprintf(stderr, "Conf check started\n");
+
 	/* conf requires log is opened */
         newconf_init();
+
+
+#ifndef ANFL_LAPTOP
+	if((rserv_db = sqlite_open(DB_PATH, 0, &errmsg)) == NULL)
+	{
+		die("Failed to open db file: %s", errmsg);
+	}
+#endif
 
 	/* commands require cache */
 	init_cache();
@@ -298,8 +330,17 @@ main(int argc, char *argv[])
 	/* must be done after adding services. */
 	conf_parse(1);
 
-	eventAdd("update_service_floodcount", update_service_floodcount, NULL, 1);
+	if(testing_conf)
+	{
+		fprintf(stderr, "\nConf check finished\n");
+		exit(0);
+	}
+
+	eventAdd("update_service_floodcount", update_service_floodcount, 
+		NULL, 1);
 	eventAdd("check_rehash", check_rehash, NULL, 2);
+
+       	write_pidfile();
 
 	connect_to_server(NULL);
 

@@ -66,7 +66,7 @@ static struct ucommand_handler userserv_ucommand[] =
 };
 
 static struct service_handler userserv_service = {
-	"USERSERV", "USERSERV", "userserv", "services.userserv", "User Auth Services",
+	"USERSERV", "USERSERV", "userserv", "services.int", "User Auth Services",
 	30, 50, userserv_command, userserv_ucommand, NULL
 };
 

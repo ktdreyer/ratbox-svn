@@ -34,7 +34,7 @@ static struct service_command alis_command[] =
 };
 
 static struct service_handler alis_service = {
-	"ALIS", "ALIS", "alis", "services.alis", "Advanced List Service",
+	"ALIS", "ALIS", "alis", "services.int", "Advanced List Service",
         60, 80, alis_command, NULL, NULL
 };
 
