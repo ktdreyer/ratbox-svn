@@ -669,10 +669,11 @@ static void msg_client(int p_or_n, char *command,
 
   if(MyClient(target_p))
     {
+      /* XXX Controversial? allow opers always to send through a +g */
       if(!IsServer(source_p) && IsSetCallerId(target_p))
 	{
 	  /* Here is the anti-flood bot/spambot code -db */
-	  if(accept_message(source_p,target_p))
+	  if(accept_message(source_p,target_p) || IsOper(source_p))
 	    {
 	      sendto_one(target_p, ":%s!%s@%s %s %s :%s",
 			 source_p->name,
