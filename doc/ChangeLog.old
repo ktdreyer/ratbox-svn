@@ -1,3 +1,7 @@
+*** 20010102_4 by a1kmm
+Fixed convertconf not to core when not all fields are present.
+
+
 *** 20010102_3 by db
 - ircsprintf() returns the length of the string it formats, 
   I forgot. This means don't have to use an unnecessary strlen()
