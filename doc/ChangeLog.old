@@ -1,3 +1,11 @@
+*** 20010605_13 by db
+- ok, moved channel {} block related stuff into ConfigChannel struct
+  this was all over the place
+- removed redundant extern for ConfigFileEntry
+- removed typedef on ConfigFileEntry struct
+
+
+
 *** 20010605_12 by jdc
 * And here we are, folks.  Read it and weep.
 
