@@ -1,3 +1,18 @@
+androsyn    2002/11/27 15:09:00 UTC	(20021127_3)
+
+  Modified files:
+    src                  s_bsd_poll.c 
+  Log:
+  Make s_bsd_poll not so brain damaged.  Basically what we do is, instead of
+  trying to find the nearest slot in the the pollfd array we simply add to the
+  end, and when we remove an item, we replace the open slot with the item from
+  the end of the array.
+  
+  Revision  Changes    Path
+  7.60      +45 -52    ircd-ratbox/src/s_bsd_poll.c
+
+
+
 androsyn    2002/11/27 03:24:55 UTC	(20021127_2)
 
   Modified files:
