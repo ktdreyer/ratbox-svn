@@ -1,3 +1,12 @@
+*** 20011001_1 by davidt
+- Fix evil core that killed half the testnet, we now need to check the
+  length of remote channel names, since we use the block allocator,
+  and no longer just allocate whatever amount is required.
+  We now send a message to opers when a SJOIN to a long channel is
+  detected, as well as ignoring the SJOIN.
+
+
+
 *** 20010929_9 by db
 added ':' to RPL_STATSQLINE DLINE KLINE as per discussion with walter
 online, originally suggested by Chris Behrens
