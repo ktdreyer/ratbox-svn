@@ -1,3 +1,7 @@
+*** 20011112_3 by leeh
+- kre fixed the auth thing, removed
+
+
 *** 20011112_2 by kreator
 - fix find_conf_by_address() issue which resulted in auth{} (and other)
   blocks to malfunction, ie. issue when admins had to add wildcards after
