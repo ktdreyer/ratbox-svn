@@ -203,31 +203,3 @@ dlinkFindDelete(dlink_list *list, void *data)
   return NULL;
 }
 
-int
-dlinkFindDestroy(dlink_list *list, void *data)
-{
-  dlink_node *m;
-
-  DLINK_FOREACH(m, list->head)
-  {
-    if(m->data != data)
-      continue;
-
-    if(m->next)
-      m->next->prev = m->prev;
-    else
-      list->tail = m->prev;
-
-    if(m->prev != NULL)
-      m->prev->next = m->next;
-    else
-      list->head = m->next;
-
-    free_dlink_node(m);
-    list->length--;
-    return 1;
-  }
-
-  return 0;
-}
-

@@ -66,9 +66,6 @@ dlinkFind(dlink_list *m, void *data);
 dlink_node *
 dlinkFindDelete(dlink_list *, void *);
 
-int
-dlinkFindDestroy(dlink_list *, void *);
-
 #ifndef NDEBUG
 void mem_frob(void *data, int len);
 #else
@@ -216,33 +213,6 @@ dlinkFindDelete(dlink_list *list, void *data)
 
   return NULL;
 }  
-
-extern inline int
-dlinkFindDestroy(dlink_list *list, void *data)
-{
-  dlink_node *m;
-  DLINK_FOREACH(m, list->head)
-  { 
-    if(m->data != data)
-      continue;
-    
-    if (m->next)
-      m->next->prev = m->prev;
-    else
-      list->tail = m->prev;
-
-    if (m->prev)
-      m->prev->next = m->next;
-    else
-      list->head = m->next;
-
-    free_dlink_node(m);
-    list->length--;
-    return 1;
-  }
-
-  return 0;
-}
 
 /*
  * dlinkFind
