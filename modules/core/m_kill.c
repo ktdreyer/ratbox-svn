@@ -258,11 +258,15 @@ static void ms_kill(struct Client *client_p, struct Client *source_p,
 
   /* Be warned, this message must be From %s, or it confuses clients
    * so dont change it to From: or the case or anything! -- fl -- db */
+  /* path must contain at least 2 !'s, or bitchx falsely declares it
+   * local --fl
+   */
   if (IsOper(source_p)) /* send it normally */
     {
       sendto_realops_flags(FLAGS_ALL, L_ALL,
-			   "Received KILL message for %s. From %s Path: %s %s",
-			   target_p->name, parv[0], source_p->user->server, reason);
+		"Received KILL message for %s. From %s Path: %s!%s!%s!%s %s",
+		target_p->name, parv[0], source_p->user->server, 
+                source_p->host, source_p->username, source_p->name, reason);
     }
   else
     {
