@@ -1,3 +1,7 @@
+*** 20010105_37 by ejb
+- finally fixed bug with IDs killing remote users.
+
+
 *** 20010105_36 by a1kmm
 Don't try and DNS resolve ConfItems with wildcards in them.
 
