@@ -1,3 +1,15 @@
+androsyn    2002/08/08 04:36:13 EDT	(20020808_7)
+
+  Modified files:
+    src                  version.c.SH 
+  Log:
+  Lets try that again
+  
+  Revision  Changes    Path
+  7.20      +3 -2      ircd-ratbox/src/version.c.SH
+
+
+
 androsyn    2002/08/08 04:33:36 EDT	(20020808_6)
 
   Modified files:
