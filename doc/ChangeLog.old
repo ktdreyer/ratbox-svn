@@ -1,3 +1,6 @@
+*** 20010104_36 by davidt
+Fix sjoin for +a channels, again
+
 *** 20010104_35 by ejb
 - make set_channel_mode support IDs (not fully tested)
 
