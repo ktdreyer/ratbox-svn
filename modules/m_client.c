@@ -100,8 +100,11 @@ static int ms_client(struct Client *cptr, struct Client *sptr,
   char    *id;
   char    *name;
   
-  if (parc < 2)
+  if (parc < 10)
     {
+      sendto_realops_flags(FLAGS_ALL, "Warning: Received a CLIENT "
+        "message from %s(via %s) with too few(%d) parameters.", sptr->name,
+        cptr->name, parc);
       sendto_one(sptr, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
       return 0;
     }
