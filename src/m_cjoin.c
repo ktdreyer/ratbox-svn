@@ -114,7 +114,7 @@ int     m_cjoin(struct Client *cptr,
   struct Channel *chptr = NULL;
   struct Channel *vchan_chptr = NULL;
   char  *name;
-  char  *vchan_name;
+  char  vchan_name[CHANNELLEN];
   char  *p = NULL;
   
   if (!(sptr->user))
@@ -188,12 +188,6 @@ int     m_cjoin(struct Client *cptr,
    * - Dianora
    */
 
-  /* TODO 
-   * 1) add flag to flag this is a sub vchan
-   * 2) check this flag in sub1_from_channel
-   * 3) add this vchan to main chan
-   */
-
   ircsprintf( vchan_name, "#%s_%lu", name+1, CurrentTime );
   vchan_chptr = get_channel(sptr, vchan_name, CREATE);
 
@@ -203,6 +197,14 @@ int     m_cjoin(struct Client *cptr,
 		 me.name, parv[0], (unsigned char*) name);
       return 0;
     }
+
+  vchan_chptr->vchan_flag = YES;
+
+  vchan_chptr->next_vchan = chptr->next_vchan;
+  chptr->next_vchan->prev_vchan = vchan_chptr;
+
+  chptr->next_vchan = vchan_chptr;
+  vchan_chptr->prev_vchan = chptr;
 
   /*
   **  Complete user entry to the new channel
