@@ -1,3 +1,8 @@
+*** 20010616_2 by jdc
+- doc/README.openssl: Lots of changes, and still some left to do (a
+  section on how to modify your configuration file, and what's what).
+
+
 *** 20010616_1 by jdc
 * Small typos and the like.
 
