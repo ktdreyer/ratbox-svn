@@ -1,3 +1,8 @@
+*** 19991230_8 by db
+- more missed updates local_cptr_list -> LocalClientList
+
+
+
 *** 19991230_7 by db
 - missed a opcount-- in m_sjoin.c
 - missed an #endif for IAUTH
