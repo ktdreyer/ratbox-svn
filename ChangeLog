@@ -1,3 +1,19 @@
+leeh        2003/06/30 17:12:23 EDT	(20030630_8)
+
+  Modified files:
+    include              channel.h 
+    modules/core         m_mode.c 
+    src                  channel.c 
+  Log:
+  - added a dlink_node to struct Ban
+  
+  Revision  Changes    Path
+  7.144     +1 -0      ircd-ratbox/include/channel.h
+  1.79      +11 -9     ircd-ratbox/modules/core/m_mode.c
+  7.385     +0 -2      ircd-ratbox/src/channel.c
+
+
+
 leeh        2003/06/30 16:57:10 EDT	(20030630_7)
 
   Modified files:
