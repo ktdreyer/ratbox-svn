@@ -1,3 +1,7 @@
+*** 20010221_4 by androsyn
+Fixed stupid misteak in last commit...
+
+
 *** 20010221_3 by androsyn
 Misc adns cleanups.  Half way to getting /dns rehash working again
 
