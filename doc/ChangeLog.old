@@ -1,3 +1,8 @@
+*** 20010824_2 by leeh
+- moved report_dlines and report_elines -> m_stats.c and merged them with
+  the stats function that called them
+
+
 *** 20010824_1 by leeh
 - dumped build_list_of_channels, theres no point remaking the buffer, with
   the possibility that we will ignore half of the new buffer anyway
