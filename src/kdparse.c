@@ -38,7 +38,8 @@
  * Side Effects - Parse one new style K line
  */
 
-void parse_k_file(FBFILE *file)
+void
+parse_k_file(FBFILE *file)
 {
   struct ConfItem *aconf;
   char* user_field=(char *)NULL;
@@ -49,7 +50,7 @@ void parse_k_file(FBFILE *file)
 
   while (fbgets(line, sizeof(line), file))
     {
-      if ((p = strchr(line, '\n')))
+      if ((p = strchr(line, '\n')) != NULL)
         *p = '\0';
 
       if ((*line == '\0') || (*line == '#'))

@@ -116,10 +116,9 @@ char host[HOSTLEN+2];
  * side effects - k line is added
  *
  */
-static void mo_kline(struct Client *client_p,
-                    struct Client *source_p,
-                    int parc,
-                    char **parv)
+static void
+mo_kline(struct Client *client_p, struct Client *source_p,
+	 int parc, char **parv)
 {
   char *reason = "No Reason";
   char *oper_reason;
@@ -141,7 +140,7 @@ static void mo_kline(struct Client *client_p,
 
   tkline_time = valid_tkline(source_p,*parv);
 
-  if( tkline_time > 0 )
+  if (tkline_time > 0)
     {
       parv++;
       parc--;
@@ -155,7 +154,8 @@ static void mo_kline(struct Client *client_p,
     }
 
   if (find_user_host(source_p, *parv, user, host) == 0)
-   return;
+    return;
+
   parc--;
   parv++;
 
@@ -180,10 +180,10 @@ static void mo_kline(struct Client *client_p,
   if(parc != 0)
     reason = *parv;
 
-  if(valid_user_host(source_p, user,host))
+  if (valid_user_host(source_p, user,host))
      return;
 
-  if(valid_wild_card(user,host))
+  if (valid_wild_card(user,host))
     {
        sendto_one(source_p, 
           ":%s NOTICE %s :Please include at least %d non-wildcard characters with the user@host",
@@ -193,8 +193,9 @@ static void mo_kline(struct Client *client_p,
        return;
     }
 
-  if(!valid_comment(source_p, reason))
+  if (!valid_comment(source_p, reason))
     return;
+
   set_time();  
   cur_time = CurrentTime;
   current_date = smalldate(cur_time);
@@ -202,10 +203,9 @@ static void mo_kline(struct Client *client_p,
   aconf->status = CONF_KILL;
   DupString(aconf->host, host);
   DupString(aconf->user, user);
-
   aconf->port = 0;
 
-  if(target_server != NULL)
+  if (target_server != NULL)
     {
       sendto_server(NULL, source_p, NULL, CAP_KLN, NOCAPS, LL_ICLIENT,
                     ":%s KLINE %s %lu %s %s :%s",
@@ -232,7 +232,7 @@ static void mo_kline(struct Client *client_p,
       oper_reason++;
     }
 
-  if(tkline_time)
+  if (tkline_time)
     {
       ircsprintf(buffer,
 		 "Temporary K-line %d min. - %s (%s)",
@@ -258,10 +258,9 @@ static void mo_kline(struct Client *client_p,
  *
  *
  */
-static void ms_kline(struct Client *client_p,
-                    struct Client *source_p,
-                    int parc,
-                    char *parv[])
+static void
+ms_kline(struct Client *client_p, struct Client *source_p,
+	 int parc, char *parv[])
 {
   const char *current_date;
   struct ConfItem *aconf=NULL;
@@ -272,29 +271,27 @@ static void ms_kline(struct Client *client_p,
   char *khost;
   char *kreason;
 
-  if(parc != 6)
+  if (parc != 6)
     return;
 
   /* parv[0]  parv[1]        parv[2]      parv[3]  parv[4]  parv[5] */
   /* oper     target_server  tkline_time  user     host     reason */
   sendto_server(client_p, source_p, NULL, CAP_KLN, NOCAPS, LL_ICLIENT,
                 ":%s KLINE %s %s %s %s :%s",
-                parv[0], parv[1],
-                parv[2], parv[3],
-                parv[4], parv[5]);
+                parv[0], parv[1], parv[2], parv[3], parv[4], parv[5]);
 
 
   kuser = parv[3];
   khost = parv[4];
   kreason = parv[5];
 
-  if(!match(parv[1],me.name))
+  if (!match(parv[1],me.name))
     return;
 
-  if(!IsPerson(source_p))
+  if (!IsPerson(source_p))
     return;
 
-  if(valid_user_host(source_p, kuser, khost))
+  if (valid_user_host(source_p, kuser, khost))
     {
       sendto_realops_flags(FLAGS_ALL, L_ALL,
              "*** %s!%s@%s on %s is requesting an Invalid K-Line for [%s@%s] [%s]",
@@ -303,7 +300,7 @@ static void ms_kline(struct Client *client_p,
       return;
     }
 
-  if(valid_wild_card(kuser, khost))
+  if (valid_wild_card(kuser, khost))
     {
        sendto_realops_flags(FLAGS_ALL, L_ALL, 
              "*** %s!%s@%s on %s is requesting a K-Line without %d wildcard chars for [%s@%s] [%s]",
@@ -317,17 +314,14 @@ static void ms_kline(struct Client *client_p,
 
   tkline_time = atoi(parv[2]);
 
-  if(find_u_conf((char *)source_p->user->server, source_p->username, source_p->host))
+  if (find_u_conf((char *)source_p->user->server,
+		  source_p->username, source_p->host))
     {
       sendto_realops_flags(FLAGS_ALL, L_ALL,
 			   "*** Received K-Line for [%s@%s] [%s], from %s!%s@%s on %s",
-			   kuser,
-			   khost,
-                           kreason,
-			   source_p->name,
-			   source_p->username,
-			   source_p->host,
-			   source_p->user->server);
+			   kuser, khost, kreason,
+			   source_p->name, source_p->username,
+			   source_p->host, source_p->user->server);
 
       /* We check if the kline already exists after we've announced its 
        * arrived, to avoid confusing opers - fl
@@ -345,7 +339,7 @@ static void ms_kline(struct Client *client_p,
       set_time();
       cur_time = CurrentTime;
 
-      if(tkline_time)
+      if (tkline_time)
 	apply_tkline(source_p, aconf, current_date, tkline_time);
       else
 	apply_kline(source_p, aconf, aconf->passwd, NULL,
@@ -381,20 +375,24 @@ apply_kline(struct Client *source_p, struct ConfItem *aconf,
  * output	- NONE
  * side effects	- tkline as given is placed
  */
-static void apply_tkline(struct Client *source_p, struct ConfItem *aconf,
+static void
+apply_tkline(struct Client *source_p, struct ConfItem *aconf,
                          const char *current_date, int tkline_time)
 {
- aconf->hold = CurrentTime + tkline_time;
- add_temp_kline(aconf);
- sendto_realops_flags(FLAGS_ALL, L_ALL,
-                      "%s added temporary %d min. K-Line for [%s@%s] [%s]",
-                      get_oper_name(source_p), tkline_time/60, aconf->user, aconf->host,
-                      aconf->passwd);
- sendto_one(source_p, ":%s NOTICE %s :Added temporary %d min. K-Line for [%s@%s]",
-            me.name, source_p->name, tkline_time/60, aconf->user, aconf->host);
- ilog(L_TRACE, "%s added temporary %d min. K-Line for [%s@%s] [%s]",
-      source_p->name, tkline_time/60, aconf->user, aconf->host, aconf->passwd);
- check_klines();
+  aconf->hold = CurrentTime + tkline_time;
+  add_temp_kline(aconf);
+  sendto_realops_flags(FLAGS_ALL, L_ALL,
+		       "%s added temporary %d min. K-Line for [%s@%s] [%s]",
+		       get_oper_name(source_p), tkline_time/60,
+		       aconf->user, aconf->host,
+		       aconf->passwd);
+  sendto_one(source_p, ":%s NOTICE %s :Added temporary %d min. K-Line for [%s@%s]",
+	     me.name, source_p->name, tkline_time/60,
+	     aconf->user, aconf->host);
+  ilog(L_TRACE, "%s added temporary %d min. K-Line for [%s@%s] [%s]",
+       source_p->name, tkline_time/60,
+       aconf->user, aconf->host, aconf->passwd);
+  check_klines();
 }
 
 /*
@@ -407,7 +405,8 @@ static void apply_tkline(struct Client *source_p, struct ConfItem *aconf,
  *              - 0 if not an integer number, else the number
  * side effects - none
  */
-static time_t valid_tkline(struct Client *source_p, char *p)
+static time_t
+valid_tkline(struct Client *source_p, char *p)
 {
   time_t result = 0;
 
@@ -447,7 +446,8 @@ static time_t valid_tkline(struct Client *source_p, char *p)
  * side effects - NONE
  *
  */
-static char *cluster(char *hostname)
+static char *
+cluster(char *hostname)
 {
   static char result[HOSTLEN + 1];      /* result to return */
   char        temphost[HOSTLEN + 1];    /* work place */
@@ -481,7 +481,7 @@ static char *cluster(char *hostname)
 
   while (*ipp)
     {
-      if( *ipp == '.' )
+      if(*ipp == '.')
         {
           number_of_dots++;
 
@@ -497,7 +497,7 @@ static char *cluster(char *hostname)
       ipp++;
     }
 
-  if(is_ip_number && (number_of_dots == 3))
+  if (is_ip_number && (number_of_dots == 3))
     {
       zap_point++;
       *zap_point++ = '*';               /* turn 111.222.333.444 into */
@@ -559,8 +559,9 @@ static char *cluster(char *hostname)
  * side effects - D line is added
  *
  */
-static void mo_dline(struct Client *client_p, struct Client *source_p,
-                    int parc, char *parv[])
+static void
+mo_dline(struct Client *client_p, struct Client *source_p,
+	 int parc, char *parv[])
 {
   char *dlhost, *reason, *oper_reason;
 #ifndef IPV6
@@ -575,9 +576,10 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
   const char* current_date;
   time_t cur_time;
 
-  if(!IsOperK(source_p))
+  if (!IsOperK(source_p))
     {
-      sendto_one(source_p,":%s NOTICE %s :You need kline = yes;",me.name,parv[0]);
+      sendto_one(source_p,":%s NOTICE %s :You need kline = yes;",
+		 me.name, parv[0]);
       return;
     }
 
@@ -606,7 +608,7 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
           return;
         }
               
-      if(!MyConnect(target_p))
+      if (!MyConnect(target_p))
         {
           sendto_one(source_p,
                      ":%s NOTICE :%s :Can't DLINE nick on another server",
@@ -614,7 +616,7 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
           return;
         }
 
-      if(IsExemptKline(target_p))
+      if (IsExemptKline(target_p))
         {
           sendto_one(source_p,
                      ":%s NOTICE %s :%s is E-lined",me.name,parv[0],
@@ -661,7 +663,7 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
 
   if (parc > 2) /* host :reason */
     {
-      if ( valid_comment(source_p,parv[2]) == 0 )
+      if (valid_comment(source_p,parv[2]) == 0)
 	return;
 
       if(*parv[2])
@@ -673,7 +675,7 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
     reason = "No reason";
 
 
-  if(IsOperAdmin(source_p))
+  if (IsOperAdmin(source_p))
     {
       if (bits < 8)
 	{
@@ -696,23 +698,30 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
 
 #ifdef IPV6
   if (t == HM_IPV6)
-   t = AF_INET6;
+    t = AF_INET6;
   else
 #endif
   t = AF_INET;
-  if (ConfigFileEntry.non_redundant_klines &&
-      (aconf = find_dline(&daddr, t)) )
-  {
-   char *creason;
-   creason = aconf->passwd ? aconf->passwd : "<No Reason>";
-   if (IsConfExemptKline(aconf))
-    sendto_one(source_p, ":%s NOTICE %s :[%s] is (E)d-lined by [%s] - %s",
-               me.name, parv[0], dlhost, aconf->host, creason);
-   else
-    sendto_one(source_p, ":%s NOTICE %s :[%s] already D-lined by [%s] - %s",
-               me.name, parv[0], dlhost, aconf->host, creason);
-   return;
-  }
+  if (ConfigFileEntry.non_redundant_klines)
+    {
+      char *creason;
+      (void)parse_netmask(dlhost, &daddr, NULL);
+
+      if (aconf = find_dline(&daddr, t)) 
+	{
+	  creason = aconf->passwd ? aconf->passwd : "<No Reason>";
+	  if (IsConfExemptKline(aconf))
+	    sendto_one(source_p,
+		       ":%s NOTICE %s :[%s] is (E)d-lined by [%s] - %s",
+		       me.name, parv[0], dlhost, aconf->host, creason);
+	  else
+	    sendto_one(source_p,
+		       ":%s NOTICE %s :[%s] already D-lined by [%s] - %s",
+		       me.name, parv[0], dlhost, aconf->host, creason);
+	  return;
+	}
+    }
+
   set_time();
   cur_time = CurrentTime;
   current_date = smalldate(cur_time);
@@ -750,17 +759,18 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
  * output	- 0 if not ok to kline, 1 to kline i.e. if valid user host
  * side effects -
  */
-static int find_user_host(struct Client *source_p,
-                          char *user_host_or_nick, char *luser, char *lhost)
+static int
+find_user_host(struct Client *source_p,
+	       char *user_host_or_nick, char *luser, char *lhost)
 {
   struct Client *target_p;
   char *hostp;
 
-  if ( (hostp = strchr(user_host_or_nick, '@')) || *user_host_or_nick == '*' )
+  if ((hostp = strchr(user_host_or_nick, '@')) || *user_host_or_nick == '*')
     {
       /* Explicit user@host mask given */
 
-      if(hostp)                                    /* I'm a little user@host */
+      if(hostp != NULL)                            /* I'm a little user@host */
         {
           *(hostp++) = '\0';                       /* short and squat */
           strlcpy(luser,user_host_or_nick,USERLEN); /* here is my user */
@@ -824,7 +834,8 @@ static int find_user_host(struct Client *source_p,
  * output	- 1 if not valid user or host, 0 if valid
  * side effects -
  */
-static int valid_user_host(struct Client *source_p, char *luser, char *lhost)
+static int
+valid_user_host(struct Client *source_p, char *luser, char *lhost)
 {
   /*
    * Check for # in user@host
@@ -856,7 +867,8 @@ static int valid_user_host(struct Client *source_p, char *luser, char *lhost)
  * output       - 0 if not valid, 1 if valid
  * side effects -
  */
-static int valid_wild_card(char *luser, char *lhost)
+static int
+valid_wild_card(char *luser, char *lhost)
 {
   char *p;
   char tmpch;
@@ -917,7 +929,8 @@ static int valid_wild_card(char *luser, char *lhost)
  * output       - 0 if no valid comment, 1 if valid
  * side effects - NONE
  */
-static int valid_comment(struct Client *source_p, char *comment)
+static int
+valid_comment(struct Client *source_p, char *comment)
 {
   if(strchr(comment, '"'))
     {
