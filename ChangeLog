@@ -1,3 +1,18 @@
+leeh        2002/09/20 10:29:51 UTC	(20020920_1)
+
+  Modified files:
+    .                    RELNOTES 
+  Added files:
+    tools/rsa_respond    rsa_respond-insecure.diff 
+  Log:
+  - added hwys rsa respond diff
+  
+  Revision  Changes    Path
+  1.56      +3 -0      ircd-ratbox/RELNOTES
+  1.1       +106 -0    ircd-ratbox/tools/rsa_respond/rsa_respond-insecure.diff (new)
+
+
+
 leeh        2002/09/20 10:25:20 UTC	(20020920_0)
 
   Modified files:
