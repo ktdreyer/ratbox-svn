@@ -787,7 +787,7 @@ static void send_mode_list(struct Client *cptr,
   cur_len = mlen = (strlen(buf) + 2);
   count = 0;
   mp = mbuf;
-  *mp++ = '+';
+  *mp++ = (clear ? '-' : '+');
   *mp   = '\0';
   pp = pbuf;
 
