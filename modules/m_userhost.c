@@ -61,7 +61,7 @@ int     m_userhost(struct Client *cptr,
   char  *p;            /* scratch end pointer */
   char  *cn;           /* current name */
   struct Client *acptr;
-  char response[5][NICKLEN*2+CHANNELLEN+USERLEN+HOSTLEN+30];
+  char response[5][NICKLEN*2+USERLEN+HOSTLEN+30];
   int i;               /* loop counter */
 
   if (parc < 2)
@@ -73,7 +73,7 @@ int     m_userhost(struct Client *cptr,
 
   /* The idea is to build up the response string out of pieces
    * none of this strlen() nonsense.
-   * 5 * (NICKLEN*2+CHANNELLEN+USERLEN+HOSTLEN+30) is still << sizeof(buf)
+   * 5 * (NICKLEN*2+USERLEN+HOSTLEN+30) is still << sizeof(buf)
    * and our ircsprintf() truncates it to fit anyway. There is
    * no danger of an overflow here. -Dianora
    */
