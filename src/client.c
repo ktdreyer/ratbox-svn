@@ -1431,22 +1431,23 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 		strcpy(comment1, "<Unknown>");
 	
 	strcat(comment1, " ");
-	strcat(comment1, source_p->name);							        		                		                                                                      		
+	strcat(comment1, source_p->name);
+
 	if(source_p->serv != NULL)
 		remove_dependents(client_p, source_p, from, comment, comment1);
 
-	sendto_realops_flags(UMODE_ALL, L_ALL, "%s was connected for %ld seconds.  %d/%d sendK/recvK.",
+	sendto_realops_flags(UMODE_ALL, L_ALL, "%s was connected"
+			     " for %ld seconds.  %d/%d sendK/recvK.",
 			     source_p->name, CurrentTime - source_p->firsttime, sendk, recvk);
 
-	ilog(L_SERVER, "%s was connected for %ld seconds.  %d/%d sendK/recvK.", 
-	     source_p->name, CurrentTime - source_p->firsttime, 
-	     sendk, recvk);
+	ilog(L_SERVER, "%s was connected for %ld seconds.  %d/%d sendK/recvK.",
+	     source_p->name, CurrentTime - source_p->firsttime, sendk, recvk);
         
 	if(has_id(source_p))
 		del_from_id_hash(source_p->id, source_p);
 
 	del_from_client_hash(source_p->name, source_p);
-	remove_client_from_list(source_p);  
+	remove_client_from_list(source_p);
 	s_assert(dlinkFind(&dead_list, source_p) == NULL);
 	s_assert(dlinkFind(&abort_list, source_p) == NULL);
 	

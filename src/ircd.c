@@ -284,8 +284,8 @@ set_time(void)
 	if(newtime.tv_sec < CurrentTime)
 	{
 		ircsnprintf(to_send, sizeof(to_send), 
-			   "System clock is running backwards - (%lu < %lu)",
-			   (unsigned long) newtime.tv_sec, (unsigned long) CurrentTime);
+			   "System clock is running backwards - (%ld < %ld)",
+			   newtime.tv_sec, CurrentTime);
 		report_error(to_send, me.name, me.name, 0);
 		set_back_events(CurrentTime - newtime.tv_sec);
 	}

@@ -260,7 +260,7 @@ stats_delay(struct Client *source_p)
 	HASH_WALK(i, U_MAX, ptr, ndTable)
 	{
 		nd = ptr->data;
-		sendto_one_notice(source_p, "Delaying: %s for %lu",
+		sendto_one_notice(source_p, "Delaying: %s for " IRCD_TIME_FMT,
 				nd->name, nd->expire);
 	}
 	HASH_WALK_END

@@ -166,8 +166,8 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(newts < 800000000)
 	{
 		sendto_realops_flags(UMODE_DEBUG, L_ALL,
-				     "*** Bogus TS %lu on %s ignored from %s",
-				     (unsigned long) newts, chptr->chname, client_p->name);
+				     "*** Bogus TS " IRCD_TIME_FMT " on %s ignored from %s",
+				     newts, chptr->chname, client_p->name);
 
 		newts = (oldts == 0) ? oldts : 800000000;
 	}
@@ -175,10 +175,11 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(!isnew && !newts && oldts)
 	{
 		sendto_channel_local(ALL_MEMBERS, chptr,
-				     ":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to 0",
+				     ":%s NOTICE %s :*** Notice -- TS for %s"
+                                     "changed from " IRCD_TIME_FMT " to 0",
 				     me.name, chptr->chname, chptr->chname, oldts);
 		sendto_realops_flags(UMODE_ALL, L_ALL,
-				     "Server %s changing TS on %s from %lu to 0",
+				     "Server %s changing TS on %s from " IRCD_TIME_FMT " to 0",
 				     source_p->name, chptr->chname, oldts);
 	}
 #endif
@@ -216,7 +217,8 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		remove_our_modes(chptr, source_p);
 		sendto_channel_local(ALL_MEMBERS, chptr,
-				     ":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to %lu",
+				     ":%s NOTICE %s :*** Notice -- TS for %s changed"
+				     "from " IRCD_TIME_FMT " to " IRCD_TIME_FMT,
 				     me.name, chptr->chname, chptr->chname, oldts, newts);
 	}
 
@@ -237,16 +239,16 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 		modebuf[1] = '\0';
 	}
 
-	mlen = ircsprintf(buf_nick, ":%s SJOIN %lu %s %s %s:",
-			  source_p->name, (unsigned long) chptr->channelts, 
+	mlen = ircsprintf(buf_nick, ":%s SJOIN " IRCD_TIME_FMT " %s %s %s:",
+			  source_p->name, chptr->channelts,
 			  parv[2], modebuf, parabuf);
 	ptr_nick = buf_nick + mlen;
 
 	/* working on the presumption eventually itll be more efficient to
 	 * build a TS6 buffer without checking its needed..
 	 */
-	mlen = ircsprintf(buf_uid, ":%s SJOIN %lu %s %s %s:",
-			  use_id(source_p), (unsigned long) chptr->channelts,
+	mlen = ircsprintf(buf_uid, ":%s SJOIN " IRCD_TIME_FMT " %s %s %s:",
+			  use_id(source_p), chptr->channelts,
 			  parv[2], modebuf, parabuf);
 	ptr_uid = buf_uid + mlen;
 

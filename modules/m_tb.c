@@ -100,12 +100,12 @@ ms_tb(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 		sendto_channel_local(ALL_MEMBERS, chptr, ":%s TOPIC %s :%s",
 				     source_p->name, chptr->chname, newtopic);
 		sendto_server(client_p, chptr, CAP_TB|CAP_TS6, NOCAPS,
-			      ":%s TB %s %ld %s%s:%s",
+			      ":%s TB %s " IRCD_TIME_FMT " %s%s:%s",
 			      use_id(source_p), chptr->chname, chptr->topic_time,
 			      ConfigChannel.burst_topicwho ? chptr->topic_info : "",
 			      ConfigChannel.burst_topicwho ? " " : "", chptr->topic);
 		sendto_server(client_p, chptr, CAP_TB, CAP_TS6,
-			      ":%s TB %s %ld %s%s:%s",
+			      ":%s TB %s " IRCD_TIME_FMT " %s%s:%s",
 			      source_p->name, chptr->chname, chptr->topic_time,
 			      ConfigChannel.burst_topicwho ? chptr->topic_info : "",
 			      ConfigChannel.burst_topicwho ? " " : "", chptr->topic);

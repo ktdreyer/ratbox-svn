@@ -327,7 +327,7 @@ write_xline(struct Client *source_p, struct ConfItem *aconf)
 		return;
 	}
 
-	ircsprintf(buffer, "\"%s\",\"0\",\"%s\",\"%s\",%lu\n",
+	ircsprintf(buffer, "\"%s\",\"0\",\"%s\",\"%s\",%ld\n",
 		   aconf->name, aconf->passwd,
 		   get_oper_name(source_p), CurrentTime);
 

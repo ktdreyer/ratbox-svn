@@ -1010,7 +1010,7 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 		nocap = chcap_combos[j].cap_no;
 
 		if(cap & CAP_TS6)
-			mbl = ircsprintf(modebuf, ":%s TMODE %lu %s ",
+			mbl = ircsprintf(modebuf, ":%s TMODE " IRCD_TIME_FMT " %s ",
 					 use_id(source_p), chptr->channelts,
 					 chptr->chname);
 		else
@@ -1052,7 +1052,7 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 				mc = 0;
 
 				if(cap & CAP_TS6)
-					mbl = ircsprintf(modebuf, ":%s TMODE %lu %s ",
+					mbl = ircsprintf(modebuf, ":%s TMODE " IRCD_TIME_FMT " %s ",
 							 use_id(source_p), chptr->channelts,
 							 chptr->chname);
 				else

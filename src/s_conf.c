@@ -1331,7 +1331,7 @@ write_confitem(KlineType type, struct Client *source_p, char *user,
 	}
 	else if(type == RESV_TYPE)
 	{
-		ircsnprintf(buffer, sizeof(buffer), "\"%s\",\"%s\",\"%s\",%lu\n",
+		ircsnprintf(buffer, sizeof(buffer), "\"%s\",\"%s\",\"%s\",%ld\n",
 			   host, reason, get_oper_name(source_p), CurrentTime);
 	}
 

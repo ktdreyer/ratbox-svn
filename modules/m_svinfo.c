@@ -57,7 +57,7 @@ DECLARE_MODULE_AV1(svinfo, NULL, NULL, svinfo_clist, NULL, NULL, "$Revision$");
 static int
 ms_svinfo(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	time_t deltat;
+	signed int deltat;
 	time_t theirtime;
 
 	/* SVINFO isnt remote. */
@@ -87,18 +87,19 @@ ms_svinfo(struct Client *client_p, struct Client *source_p, int parc, const char
 	if(deltat > ConfigFileEntry.ts_max_delta)
 	{
 		sendto_realops_flags(UMODE_ALL, L_ADMIN,
-				     "Link %s dropped, excessive TS delta (my TS=%lu, their TS=%lu, delta=%d)",
+				     "Link %s dropped, excessive TS delta"
+				     " (my TS=%ld, their TS=" IRCD_TIME_FMT ", delta=%d)",
 				     get_client_name(source_p, SHOW_IP),
-				     (unsigned long) CurrentTime,
-				     (unsigned long) theirtime, (int) deltat);
+				     CurrentTime, theirtime, deltat);
 		sendto_realops_flags(UMODE_ALL, L_OPER,
-				     "Link %s dropped, excessive TS delta (my TS=%lu, their TS=%lu, delta=%d)",
+				     "Link %s dropped, excessive TS delta"
+				     " (my TS=%ld, their TS=" IRCD_TIME_FMT ", delta=%d)",
 				     get_client_name(source_p, MASK_IP),
-				     (unsigned long) CurrentTime,
-				     (unsigned long) theirtime, (int) deltat);
+				     CurrentTime, theirtime, deltat);
 		ilog(L_SERVER,
-		     "Link %s dropped, excessive TS delta (my TS=%lu, their TS=%lu, delta=%d)",
-		     log_client_name(source_p, SHOW_IP), CurrentTime, theirtime, (int) deltat);
+		     "Link %s dropped, excessive TS delta"
+		     " (my TS=%ld, their TS=" IRCD_TIME_FMT ", delta=%d)",
+		     log_client_name(source_p, SHOW_IP), CurrentTime, theirtime, deltat);
 		exit_client(source_p, source_p, source_p, "Excessive TS delta");
 		return 0;
 	}
@@ -106,8 +107,9 @@ ms_svinfo(struct Client *client_p, struct Client *source_p, int parc, const char
 	if(deltat > ConfigFileEntry.ts_warn_delta)
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL,
-				     "Link %s notable TS delta (my TS=%lu, their TS=%lu, delta=%d)",
-				     source_p->name, CurrentTime, theirtime, (int) deltat);
+				     "Link %s notable TS delta"
+				     " (my TS=%ld, their TS=" IRCD_TIME_FMT ", delta=%d)",
+				     source_p->name, CurrentTime, theirtime, deltat);
 	}
 
 	return 0;

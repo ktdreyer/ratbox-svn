@@ -345,7 +345,7 @@ ms_bmask(struct Client *client_p, struct Client *source_p, int parc, const char 
 	}
 
 	sendto_server(client_p, chptr, CAP_TS6|needcap, NOCAPS,
-		      ":%s BMASK %lu %s %s :%s",
+		      ":%s BMASK " IRCD_TIME_FMT " %s %s :%s",
 		      source_p->id, chptr->channelts, chptr->chname,
 		      parv[3], parv[4]);
 	return 0;

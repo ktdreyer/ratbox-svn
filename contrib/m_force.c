@@ -144,8 +144,8 @@ mo_forcejoin(struct Client *client_p, struct Client *source_p, int parc, const c
 		add_user_to_channel(chptr, target_p, type);
 
 		sendto_server(target_p, chptr, NOCAPS, NOCAPS,
-			      ":%s SJOIN %lu %s + :%c%s",
-			      me.name, (unsigned long) chptr->channelts,
+			      ":%s SJOIN " IRCD_TIME_FMT " %s + :%c%s",
+			      me.name, chptr->channelts,
 			      chptr->chname, type ? sjmode : ' ', target_p->name);
 
 		sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s JOIN :%s",
@@ -198,8 +198,8 @@ mo_forcejoin(struct Client *client_p, struct Client *source_p, int parc, const c
 
 		/* send out a join, make target_p join chptr */
 		sendto_server(target_p, chptr, NOCAPS, NOCAPS,
-			      ":%s SJOIN %lu %s +nt :@%s", me.name,
-			      (unsigned long) chptr->channelts, chptr->chname, target_p->name);
+			      ":%s SJOIN " IRCD_TIME_FMT " %s +nt :@%s", me.name,
+			      chptr->channelts, chptr->chname, target_p->name);
 
 		sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s JOIN :%s",
 				     target_p->name, target_p->username,
