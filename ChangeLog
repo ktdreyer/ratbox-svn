@@ -1,3 +1,70 @@
+leeh        2003/05/14 19:06:58 UTC	(20030514_0)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    doc                  example.conf example.efnet.conf 
+    include              s_conf.h 
+    modules              m_accept.c m_gline.c m_info.c m_knock.c 
+                         m_ping.c m_stats.c m_topic.c m_trace.c 
+                         m_unkline.c m_user.c m_whois.c 
+    modules/core         m_die.c m_kick.c m_message.c m_mode.c 
+                         m_part.c m_sjoin.c m_squit.c 
+    src                  ircd_lexer.l messages.tab newconf.c 
+                         s_conf.c 
+  Log:
+  - stable port:
+    - s/need_identd/need_ident in example confs
+    - allow have_ident as well as need_ident in auth {}; for compat with
+      hyb7.
+    - make the conf parser look in both PREFIX and PREFIX/etc
+    - rework RPL_WHOISACTUALLY to send parameters first, then text, and not
+      just mash it all together in one parameter making it hard to parse.
+    - allow "all" in shared type, requested by primalz
+    - fixed /trace for non-opers to not output themselves, if the mask
+      doesnt match them.
+    - reallow stats l/L for non-opers:
+      - when target is a specific client (no wildcards), its allowed
+      - with wildcards in shide, no output
+      - with wildcards otherwise, show matching opers/servers and themselves
+    - cleaned up stats_ltrace fairly heavily.
+    - added stats_h_oper_only (default no)
+    - added stats_y_oper_only (default no)
+    - a bunch of *parv[n] == '\0' -> EmptyString()
+    - added some EmptyString() tests to functions that dont have them.
+    - make RPL_ENDOFSTATS simply use the char, not the full string.
+  
+  Revision  Changes    Path
+  7.172     +9 -6      ircd-ratbox/autoconf/configure.in
+  7.179     +56 -51    ircd-ratbox/configure
+  7.206     +11 -2     ircd-ratbox/doc/example.conf
+  7.41      +11 -2     ircd-ratbox/doc/example.efnet.conf
+  7.234     +2 -0      ircd-ratbox/include/s_conf.h
+  1.34      +2 -2      ircd-ratbox/modules/core/m_die.c
+  1.63      +2 -2      ircd-ratbox/modules/core/m_kick.c
+  1.126     +3 -3      ircd-ratbox/modules/core/m_message.c
+  1.68      +8 -1      ircd-ratbox/modules/core/m_mode.c
+  1.75      +2 -2      ircd-ratbox/modules/core/m_part.c
+  1.167     +2 -2      ircd-ratbox/modules/core/m_sjoin.c
+  1.64      +2 -2      ircd-ratbox/modules/core/m_squit.c
+  1.46      +8 -1      ircd-ratbox/modules/m_accept.c
+  1.110     +8 -1      ircd-ratbox/modules/m_gline.c
+  1.81      +13 -1     ircd-ratbox/modules/m_info.c
+  1.72      +11 -1     ircd-ratbox/modules/m_knock.c
+  1.41      +2 -2      ircd-ratbox/modules/m_ping.c
+  1.153     +168 -128  ircd-ratbox/modules/m_stats.c
+  1.73      +8 -1      ircd-ratbox/modules/m_topic.c
+  1.73      +14 -13    ircd-ratbox/modules/m_trace.c
+  1.84      +2 -2      ircd-ratbox/modules/m_unkline.c
+  1.33      +2 -2      ircd-ratbox/modules/m_user.c
+  1.110     +1 -2      ircd-ratbox/modules/m_whois.c
+  1.153     +12 -2     ircd-ratbox/src/ircd_lexer.l
+  7.84      +2 -2      ircd-ratbox/src/messages.tab
+  7.81      +17 -0     ircd-ratbox/src/newconf.c
+  7.405     +2 -0      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2003/05/02 16:42:11 UTC	(20030502_0)
 
   Modified files:
