@@ -1,3 +1,18 @@
+leeh        2002/09/04 11:09:01 EDT	(20020904_2)
+
+  Modified files:
+    contrib              README 
+    src                  s_conf.c 
+  Log:
+  - updated contrib/README
+  - fixed some time checking in tklines for moving them between lists
+  
+  Revision  Changes    Path
+  1.25      +0 -32     ircd-ratbox/contrib/README
+  7.349     +24 -24    ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2002/09/04 10:53:07 EDT	(20020904_1)
 
   Modified files:
