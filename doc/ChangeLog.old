@@ -1,3 +1,8 @@
+*** 20010308_3 by toot
+removed some more ugly %lu's
+memory.c needed restart.h
+
+
 *** 20010308_2 by androsyn
 Moved outofmemory() to memory.c from list.c.  Also updated a few comments
 regarding outofmemory().
