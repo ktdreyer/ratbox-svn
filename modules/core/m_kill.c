@@ -136,11 +136,9 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   sendto_realops_flags(FLAGS_ALL,
 		       "Received KILL message for %s. From %s (%s)", 
 		       acptr->name, parv[0], reason);
-
-#if defined(USE_SYSLOG) && defined(SYSLOG_KILL)
   log(L_INFO,"KILL From %s For %s Path %s",
       parv[0], acptr->name, buf );
-#endif
+
   /*
   ** And pass on the message to other servers. Note, that if KILL
   ** was changed, the message has to be sent to all links, also
@@ -260,10 +258,8 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 			   acptr->name, parv[0]);
     }
 
-#if defined(USE_SYSLOG) && defined(SYSLOG_KILL)
   log(L_INFO,"KILL From %s For %s Path %s!%s",
       parv[0], acptr->name, inpath, path);
-#endif
   /*
   ** And pass on the message to other servers. Note, that if KILL
   ** was changed, the message has to be sent to all links, also

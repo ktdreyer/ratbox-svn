@@ -5,7 +5,7 @@ To compile ircd, execute the following commands (this assumes
 you extracted the archive into [.ircd-hybrid-7]:
 
 $ SET DEF [.IRCD-HYBRID-7.INCLUDE]
-$ COPY SETUP.H_VMS SETUP>H
+$ COPY SETUP.H_VMS SETUP.H
 $ EDIT CONFIG.H   <or whatever your preferred editor is>
 Change config.h as appropriate.  Note that the paths have to
 be changed to use VMS-style pathnames, not Unix style.
