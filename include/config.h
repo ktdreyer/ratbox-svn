@@ -128,8 +128,8 @@
 #define MSGPATH IRCD_PREFIX "/messages/"
 #define ETCPATH IRCD_PREFIX "/etc"
 #define LOGPATH IRCD_PREFIX "/logs"
-#define HPATH   IRCD_PREFIX "/help/users"
-#define UHPATH  IRCD_PREFIX "/help/opers"
+#define UHPATH   IRCD_PREFIX "/help/users"
+#define HPATH  IRCD_PREFIX "/help/opers"
 
 /* files */
 #define SPATH   BINPATH "/ircd"                 /* ircd executable */
