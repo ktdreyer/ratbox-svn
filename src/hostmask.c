@@ -802,7 +802,7 @@ report_Klines(struct Client *client_p, int k_or_K, int mask)
       if (arec->type == CONF_KILL)
 	{
 	  if ((k_or_K && !((aconf=arec->aconf)->flags & CONF_FLAGS_TEMPORARY))
-	      || (!temp && ((aconf=arec->aconf)->flags & CONF_FLAGS_TEMPORARY)))
+	      || (!k_or_K && ((aconf=arec->aconf)->flags & CONF_FLAGS_TEMPORARY)))
 	    continue;
 	  get_printable_conf(aconf, &name, &host, &pass, &user, &port,
 			     &classname);
