@@ -1,3 +1,27 @@
+androsyn    2004/09/20 14:43:57 EDT	(20040920_1)
+
+  Modified files:
+    adns                 adns.h event.c query.c types.c 
+    include              res.h s_conf.h 
+    modules/core         m_quit.c 
+    src                  adns.c newconf.c s_auth.c 
+  Log:
+  Merge back in ip6.int support
+  
+  Revision  Changes    Path
+  1.15      +2 -0      ircd-ratbox/adns/adns.h
+  1.27      +4 -4      ircd-ratbox/adns/event.c
+  1.24      +2 -2      ircd-ratbox/adns/query.c
+  1.18      +2 -0      ircd-ratbox/adns/types.c
+  7.32      +1 -3      ircd-ratbox/include/res.h
+  7.300     +3 -0      ircd-ratbox/include/s_conf.h
+  1.49      +2 -2      ircd-ratbox/modules/core/m_quit.c
+  7.72      +11 -14    ircd-ratbox/src/adns.c
+  7.181     +3 -0      ircd-ratbox/src/newconf.c
+  7.185     +34 -4     ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2004/09/20 10:56:50 EDT	(20040920_0)
 
   Modified files:
