@@ -1,3 +1,9 @@
+*** 19991230_7 by db
+- missed a opcount-- in m_sjoin.c
+- missed an #endif for IAUTH
+
+
+
 *** 19991230_6 by db
 - Added chanop counter to Channel struct, keep track of current op count
   use instead of that nasty loop in SJOIN code
