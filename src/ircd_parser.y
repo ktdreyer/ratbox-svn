@@ -66,10 +66,6 @@ int   class_redirport_var;
         struct ip_value ip_entry;
 }
 
-%type   <ip_value> IP
-%type   <string>   QSTRING
-%type   <number>   NUMBER
-
 %token  ACCEPT
 %token  ACCEPT_PASSWORD
 %token  ACTION
@@ -203,6 +199,9 @@ int   class_redirport_var;
 %token  MAX_TARGETS
 %token  LINKS_NOTICE
 %token  LINKS_DELAY
+%type   <ip_entry> IP_TYPE
+%type   <string>   QSTRING
+%type   <number>   NUMBER
 %%
 conf:   
         | conf conf_item
