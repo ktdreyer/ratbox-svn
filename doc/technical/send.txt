@@ -180,10 +180,10 @@ sendto_match_cap_servs()
 
 sendto_match_noncap_servs()
 		- Is used only to send MODE lists to remote servers that
-		  are not capable of it. i.e. MODE #channel +o nick!user@host
-		- This allows you to send a MODE #channel +h nick!user@host
-		  via sendto_match_cap_servs and MODE #channel +o
-		  nick!user@host to servers which dont support it.
+		  are not capable of it. i.e. MODE #channel +o nick
+		- This allows you to send a MODE #channel +h nick via 
+                  sendto_match_cap_servs and MODE #channel +o nick to 
+                  servers which dont support it.
 
 send_to_all_local_opers()
                 - Is only used to send a NOTICE to each local oper on  
