@@ -1,3 +1,7 @@
+*** 20010123_2 by ejb
+- remove some remanants of splitcode
+
+
 *** 20010123_1 by db
 - this fixes paul's /whois core. basically, network_name, network_desc
   moved from ConfigFileEntry to ServerInfo. These two modules weren't
