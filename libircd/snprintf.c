@@ -991,7 +991,7 @@ inline int
 ircvsnprintf_append(char *str, size_t len, const char *format, va_list ap)
 {
         size_t x = strlen(str);
-        return(ircsnprintf(str+x, len - x, format, ap) + x);
+        return(ircvsnprintf(str+x, len - x, format, ap) + x);
 }
 
 /*
