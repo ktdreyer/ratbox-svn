@@ -16,6 +16,7 @@ LDFLAGS   	= @LDFLAGS@
 MKDEP		= ${CC} -MM
 MV		= @MV@
 RM		= @RM@
+YACC		= @YACC@
 
 prefix		= @prefix@
 exec_prefix	= @exec_prefix@
@@ -41,13 +42,13 @@ CPPFLAGS	= ${INCLUDES} @SSL_DEFINE@ @CPPFLAGS@
 default:	all
 
 y.tab.o:	y.tab.c ircd_parser.y
-	gcc -g -I ../include -I. -c y.tab.c
+	${CC} -g -I ../include -I. -c y.tab.c
 
 y.tab.c:	ircd_parser.y
-	yacc -d ircd_parser.y
+	${YACC} -d ircd_parser.y
 
 lex.yy.o:	lex.yy.c ircd_lexer.l
-	gcc -g -I ../include -c lex.yy.c
+	${CC} -g -I ../include -c lex.yy.c
 
 lex.yy.c:	ircd_lexer.l
 	${LEX} ircd_lexer.l
