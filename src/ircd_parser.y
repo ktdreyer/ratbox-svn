@@ -902,10 +902,10 @@ auth_class:   CLASS '=' QSTRING ';'
 
 auth_persistant: PERSISTANT '=' TYES ';'
   {
-   yy_aconf->flags |= CONF_FLAGS_PERSISTANT
+   yy_aconf->flags |= CONF_FLAGS_PERSISTANT;
   } |            PERSISTANT '=' TNO ';'
   {
-   yy_aconf->flags &= CONF_FLAGS_PERSISTANT
+   yy_aconf->flags &= CONF_FLAGS_PERSISTANT;
   };
 
 /***************************************************************************
