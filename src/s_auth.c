@@ -59,59 +59,31 @@
  * a bit different approach
  * this replaces the original sendheader macros
  */
-static struct
+
+static const char *HeaderMessages[] =
 {
-	const char *message;
-	size_t length;
-}
-HeaderMessages[] =
-{
-	/* 123456789012345678901234567890123456789012345678901234567890 */
-	{
-	"NOTICE AUTH :*** Looking up your hostname...\r\n", 46}
-	,
-	{
-	"NOTICE AUTH :*** Found your hostname\r\n", 38}
-	,
-	{
-	"NOTICE AUTH :*** Found your hostname, cached\r\n", 46}
-	,
-	{
-	"NOTICE AUTH :*** Couldn't look up your hostname\r\n", 49}
-	,
-	{
-	"NOTICE AUTH :*** Checking Ident\r\n", 33}
-	,
-	{
-	"NOTICE AUTH :*** Got Ident response\r\n", 37}
-	,
-	{
-	"NOTICE AUTH :*** No Ident response\r\n", 36}
-	,
-	{
-	"NOTICE AUTH :*** Your forward and reverse DNS do not match, "
-			"ignoring hostname.\r\n", 80}
-	,
-	{
-	"NOTICE AUTH :*** Your hostname is too long, ignoring hostname\r\n", 63}
+	"NOTICE AUTH :*** Looking up your hostname...",
+	"NOTICE AUTH :*** Found your hostname",
+	"NOTICE AUTH :*** Couldn't look up your hostname",
+	"NOTICE AUTH :*** Checking Ident",
+	"NOTICE AUTH :*** Got Ident response",
+	"NOTICE AUTH :*** No Ident response",
+	"NOTICE AUTH :*** Your hostname is too long, ignoring hostname"
 };
 
 typedef enum
 {
 	REPORT_DO_DNS,
 	REPORT_FIN_DNS,
-	REPORT_FIN_DNSC,
 	REPORT_FAIL_DNS,
 	REPORT_DO_ID,
 	REPORT_FIN_ID,
 	REPORT_FAIL_ID,
-	REPORT_IP_MISMATCH,
 	REPORT_HOST_TOOLONG
 }
 ReportType;
 
-#define sendheader(c, r) send(c->localClient->fd, HeaderMessages[(r)].message, HeaderMessages[(r)].length, SEND_FLAGS)
-
+#define sendheader(c, r) sendto_one(c, HeaderMessages[(r)]) 
 /*
  */
 dlink_list auth_client_list;
@@ -217,9 +189,13 @@ auth_dns_callback(void *vptr, adns_answer * reply)
 		{
 			strlcpy(auth->client->host, *reply->rrs.str, sizeof(auth->client->host));
 			sendheader(auth->client, REPORT_FIN_DNS);
+			if(!MyConnect(auth->client))
+				return;
 		}
 		else {
 			sendheader(auth->client, REPORT_HOST_TOOLONG);
+			if(!MyConnect(auth->client))
+				return;
 		}
 	}
 	else
@@ -239,6 +215,8 @@ auth_dns_callback(void *vptr, adns_answer * reply)
 		}
 #endif
 		sendheader(auth->client, REPORT_FAIL_DNS);
+		if(!MyConnect(auth->client))
+			return;
 	}
 
 	MyFree(reply);
@@ -268,6 +246,8 @@ auth_error(struct AuthRequest *auth)
 
 	ClearAuth(auth);
 	sendheader(auth->client, REPORT_FAIL_ID);
+	if(!MyConnect(auth->client))
+		return;
 		
 	if(!IsDNSPending(auth))
 	{
@@ -293,6 +273,9 @@ start_auth_query(struct AuthRequest *auth)
 	int fd;
 	int family;
 	
+	if(!MyConnect(auth->client))
+		return 0;
+	
 	family = auth->client->localClient->ip.ss_family;
 	if((fd = comm_open(family, SOCK_STREAM, 0, "ident")) == -1)
 	{
@@ -313,7 +296,11 @@ start_auth_query(struct AuthRequest *auth)
 	}
 
 	sendheader(auth->client, REPORT_DO_ID);
-	
+	if(!MyConnect(auth->client))
+	{
+		fd_close(fd);
+		return 0;
+	}
 	if(!set_non_blocking(fd))
 	{
 		report_error(L_ALL, NONB_ERROR_MSG, get_client_name(auth->client, SHOW_IP), errno);
@@ -429,6 +416,8 @@ start_auth(struct Client *client)
 	client->localClient->dns_query->callback = auth_dns_callback;
 
 	sendheader(client, REPORT_DO_DNS);
+	if(!MyConnect(client))
+		return;
 
 	/* No DNS cache now, remember? -- adrian */
 	adns_getaddr(&client->localClient->ip, client->localClient->ip.ss_family,
@@ -464,12 +453,16 @@ timeout_auth_queries_event(void *notused)
 			if(IsDoingAuth(auth))
 			{
 				sendheader(auth->client, REPORT_FAIL_ID);
+				if(!MyConnect(auth->client))
+					return;
 			}
 			if(IsDNSPending(auth))
 			{
 				delete_adns_queries(auth->client->localClient->dns_query);
 				auth->client->localClient->dns_query->query = NULL;
 				sendheader(auth->client, REPORT_FAIL_DNS);
+				if(!MyConnect(auth->client))
+					return;
 			}
 			ilog(L_INFO, "DNS/AUTH timeout %s", log_client_name(auth->client, SHOW_IP));
 
@@ -597,10 +590,15 @@ read_auth_reply(int fd, void *data)
 		++ServerStats->is_abad;
 		strcpy(auth->client->username, "unknown");
 		sendheader(auth->client, REPORT_FAIL_ID);
+		if(!MyConnect(auth->client))
+			return;
 	}
 	else
 	{
 		sendheader(auth->client, REPORT_FIN_ID);
+		if(!MyConnect(auth->client))
+			return;
+			
 		++ServerStats->is_asuc;
 		SetGotId(auth->client);
 	}

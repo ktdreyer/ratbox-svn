@@ -442,7 +442,7 @@ struct LocalUser
 #define ClearWaitAuth(x)        ((x)->flags &= ~FLAGS_WAITAUTH)
 #define HasServlink(x)          ((x)->flags &  FLAGS_SERVLINK)
 #define SetServlink(x)          ((x)->flags |= FLAGS_SERVLINK)
-#define MyConnect(x)            ((x)->localClient != NULL)
+#define MyConnect(x)            (x != NULL && (x)->localClient != NULL)
 #define MyClient(x)             (MyConnect(x) && IsClient(x))
 #define SetMark(x)		((x)->flags |= FLAGS_MARK)
 #define ClearMark(x)		((x)->flags &= ~FLAGS_MARK)
