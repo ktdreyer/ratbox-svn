@@ -1,3 +1,16 @@
+*** 20001121_2 by adrian
+
+Actually create a tools module with stuff that is abused reguarly,
+and rip some of squid's dlink-list management stuff.
+
+I'll commit some code which uses them soon, so people have something
+to work with.
+
+This should remove a *lot* of ugliness/duplication in dlink list
+management. :)
+
+
+
 *** 20001121_1 by db
 - general cleanups continue, just a few this time
 - ltrace removed for now, it can go back in later
