@@ -28,7 +28,7 @@ field of each of the oper's oper {} block in the conf file.
 The oper wishes to obtain their operator status, and issues the CHALLENGE
 command.
 
-The server will print out a long hexadecimel string, that needs to be fed
+The server will print out a long hexadecimal string, that needs to be fed
 to the respond utility provided in tools/rsa_respond
 
 The respond program will generate an answer, that is fed back to the CHALLENGE
@@ -37,7 +37,13 @@ command.
 Generating the Key Files:
 
 The genkey and respond tools are in tools/rsa_respond in the source tree.
-These two programs can easily be distributed seperately to each oper
+These two programs can easily be distributed separately to each oper
+
+A script is included in the Makefile to create a distributable tar file
+from the source tree.  Issue 'make rsa_respond' from the root of the source
+tree to create the rsa_respond.tar.gz archive.  This can then be distributed
+to all of the server opers.  Look at the README in the tar archive for 
+more detailed instructions.
 
 genkey will create the private and public key files.  The syntax is as
 follows:
@@ -72,7 +78,7 @@ instead of /challenge.
 
 The oper will then have to feed that challenge to the respond program.
 
-The respond utility's suntax is:
+The respond utility's syntax is:
 $ ./respond <private key file> <challenge from the server>
 
 Example:
@@ -93,7 +99,7 @@ The oper will issue the following command in order to obtain operator status:
 
 Note that the '+' is needed
 
-If sucessful, the oper will obtain operator status on the server.
+If successful, the oper will obtain operator status on the server.
 
 Benefits:
 

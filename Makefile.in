@@ -66,7 +66,7 @@ build:
 	done
 
 clean:
-	${RM} -f *~ core
+	${RM} -f *~ core rsa_respond.tar rsa_respond.tar.gz
 	@for i in $(CLEANDIRS); do \
 		echo "clean ==> $$i";\
 		cd $$i;\
@@ -101,3 +101,9 @@ install: all
 		cd ..; \
 	done
 
+rsa_respond:
+	@cd tools;\
+	echo "Creating rsa_respond.tar.gz";\
+	tar cf ../rsa_respond.tar rsa_respond;\
+	cd ..;\
+	gzip rsa_respond.tar;\
