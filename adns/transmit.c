@@ -236,13 +236,12 @@ void adns__query_send(adns_query qu, struct timeval now) {
   assert(qu->ads->nservers > 0);
   assert(qu->state == query_tosend);
 
-#ifdef SOMEBODYFIX_TCP_RESOLVER  /* XXX: The TCP resolver is broken */
   if ((qu->flags & adns_qf_usevc) || (qu->query_dglen > DNS_MAXUDP)) {
     query_usetcp(qu,now);
     return;
   }
-#endif
-  if(qu->query_dglen > DNS_MAXUDP) {
+
+   if(qu->query_dglen > DNS_MAXUDP) {
     adns__query_fail(qu, adns_s_systemfail);
     return;
   }

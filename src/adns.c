@@ -198,7 +198,6 @@ void dns_select(void)
   for(i = 0; i < npollfds; i++)
   {
     fd = pollfds[i].fd;
-    
     if (pollfds[i].events & ADNS_POLLIN) 
       comm_setselect(fd, FDLIST_SERVER, COMM_SELECT_READ, dns_readable, NULL, 0);
     if (pollfds[i].events & ADNS_POLLOUT)
@@ -226,7 +225,7 @@ void adns_gethost(const char *name, int aftype, struct DNSQuery *req)
                 &req->query);
   else
 #endif
-    adns_submit(dns_state, name, adns_r_addr, adns_qf_owner, req,
+    adns_submit(dns_state, name, adns_r_addr, adns_qf_owner|adns_qf_usevc, req,
                 &req->query);
 }
 
@@ -270,7 +269,7 @@ void adns_getaddr(struct irc_inaddr *addr, int aftype,
   ipn.sins.sin.sin_port = 0;
   ipn.sins.sin.sin_addr.s_addr = addr->sins.sin.s_addr;
   adns_submit_reverse(dns_state, (struct sockaddr *)&ipn.sins.sin, adns_r_ptr, 
-                      adns_qf_owner|adns_qf_cname_loose|adns_qf_quoteok_anshost, 
+                      adns_qf_owner|adns_qf_cname_loose|adns_qf_quoteok_anshost|adns_qf_usevc, 
                       req, &req->query);
 #endif
 }

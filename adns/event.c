@@ -124,6 +124,7 @@ void adns__tcp_tryconnect(adns_state ads, struct timeval now) {
     if (errno == EWOULDBLOCK || errno == EINPROGRESS) {
       ads->tcptimeout= now;
       timevaladd(&ads->tcptimeout,TCPCONNMS);
+      dns_select();
       return;
     }
     adns__tcp_broken(ads,"connect",strerror(errno));
@@ -313,8 +314,11 @@ int adns__pollfds(adns_state ads, struct adns_pollfd pollfds_buf[MAX_POLLFDS]) {
     pollfds_buf[1].events= ADNS_POLLOUT;
     break;
   case server_ok:
+#if 0     
     pollfds_buf[1].events= ads->tcpsend.used ? ADNS_POLLIN|ADNS_POLLOUT|ADNS_POLLPRI : ADNS_POLLIN|ADNS_POLLPRI;
-    break;
+#endif
+    pollfds_buf[1].events= ADNS_POLLIN|ADNS_POLLOUT|ADNS_POLLPRI;
+     break;
   default:
     abort();
   }
@@ -367,7 +371,7 @@ int adns_processreadable(adns_state ads, int fd, const struct timeval *now) {
 	ads->tcprecv.used+= r;
       } else {
 	if (r) {
-	  if (errno==EAGAIN || errno==EWOULDBLOCK) { r= 0; goto xit; }
+	  if (errno==EAGAIN || errno==EWOULDBLOCK) { r= 0; dns_select(); goto xit; }
 	  if (errno==EINTR) continue;
 	  if (errno_resources(errno)) { r= errno; goto xit; }
 	}
