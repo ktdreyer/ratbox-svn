@@ -103,64 +103,55 @@ int m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   static char     parabuf[MODEBUFLEN];
 
   /* Now, try to find the channel in question */
-  if (parc > 1)
-    {
-      if( IsChanPrefix(parv[1][0]) )
-        {
-          /* Don't do any of this stuff at all
-           * unless it looks like a channel name 
-           */
-
-          if (!check_channel_name(parv[1]))
-            { 
-              sendto_one(sptr, form_str(ERR_BADCHANNAME),
-                         me.name, parv[0], (unsigned char *)parv[1]);
-              return 0;
-            }
-
-          chptr = hash_find_channel(parv[1], NullChn);
+  if( IsChanPrefix(parv[1][0]) )
+  {
+	  /* Don't do any of this stuff at all
+	   * unless it looks like a channel name 
+	   */
+	  
+	  if (!check_channel_name(parv[1]))
+	  { 
+		  sendto_one(sptr, form_str(ERR_BADCHANNAME),
+					 me.name, parv[0], (unsigned char *)parv[1]);
+		  return 0;
+	  }
+	  
+	  chptr = hash_find_channel(parv[1], NullChn);
 	  if(!chptr)
-	    {
+	  {
 	      /* LazyLinks */
 	      if ( !ConfigFileEntry.hub && IsCapable( serv_cptr_list, CAP_LL) )
-		{
-		  /* cache the channel if it exists on uplink */
-		  /* nasty possibility of a DoS here... ?
-		   * nefarious user purposefully mode's non existent
-		   * channel hoping to create a lot of traffic...
-		   */
-
-		  sendto_one( serv_cptr_list, ":%s CBURST %s",
-			      me.name, parv[1] );
-
-		  /* meanwhile, ask for channel mode */
-		  sendto_one( serv_cptr_list, ":%s MODE %s",
-			      sptr->name, parv[1] );
-		  return 0;
-		}
+		  {
+			  /* cache the channel if it exists on uplink */
+			  /* nasty possibility of a DoS here... ?
+			   * nefarious user purposefully mode's non existent
+			   * channel hoping to create a lot of traffic...
+			   */
+			  
+			  sendto_one( serv_cptr_list, ":%s CBURST %s",
+						  me.name, parv[1] );
+			  
+			  /* meanwhile, ask for channel mode */
+			  sendto_one( serv_cptr_list, ":%s MODE %s",
+						  sptr->name, parv[1] );
+			  return 0;
+		  }
 	      else
-		{
-		  sendto_one(sptr, form_str(ERR_BADCHANNAME),
-			     me.name, parv[0], (unsigned char *)parv[1]);
-		  return 0;
-		}
-	    }
-        }
-      else
-        {
-          /* if here, it has to be a non-channel name */
-          return user_mode(cptr, sptr, parc, parv);
-        }
-    }
+		  {
+			  sendto_one(sptr, form_str(ERR_BADCHANNAME),
+						 me.name, parv[0], (unsigned char *)parv[1]);
+			  return 0;
+		  }
+	  }
+  }
   else
-    {
-      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-                 me.name, parv[0], "MODE");
-      return 0;
-    }
+  {
+	  /* if here, it has to be a non-channel name */
+	  return user_mode(cptr, sptr, parc, parv);
+  }
 
   if (parc < 3)
-    {
+  {
       *modebuf = *parabuf = '\0';
       modebuf[1] = '\0';
       channel_modes(sptr, modebuf, parabuf, chptr);
@@ -187,61 +178,52 @@ int ms_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   static char     parabuf[MODEBUFLEN];
 
   /* Now, try to find the channel in question */
-  if (parc > 1)
-    {
-      if( IsChanPrefix(parv[1][0]) )
-        {
-          /* Don't do any of this stuff at all
-           * unless it looks like a channel name 
-           */
-
-          if (!check_channel_name(parv[1]))
-            { 
-              sendto_one(sptr, form_str(ERR_BADCHANNAME),
-                         me.name, parv[0], (unsigned char *)parv[1]);
-              return 0;
-            }
-
-          chptr = hash_find_channel(parv[1], NullChn);
+  if( IsChanPrefix(parv[1][0]) )
+  {
+	  /* Don't do any of this stuff at all
+	   * unless it looks like a channel name 
+	   */
+	  
+	  if (!check_channel_name(parv[1]))
+	  { 
+		  sendto_one(sptr, form_str(ERR_BADCHANNAME),
+					 me.name, parv[0], (unsigned char *)parv[1]);
+		  return 0;
+	  }
+	  
+	  chptr = hash_find_channel(parv[1], NullChn);
 	  if(!chptr)
-	    {
+	  {
 	      /* LazyLinks */
 	      if ( !ConfigFileEntry.hub && IsCapable( serv_cptr_list, CAP_LL) )
-		{
-		  /* cache the channel if it exists on uplink */
-		  /* nasty possibility of a DoS here... ?
-		   * nefarious user purposefully mode's non existent
-		   * channel hoping to create a lot of traffic...
-		   */
-
-		  sendto_one( serv_cptr_list, ":%s CBURST %s",
-			      me.name, parv[1] );
-
-		  /* meanwhile, ask for channel mode */
-		  sendto_one( serv_cptr_list, ":%s MODE %s",
-			      sptr->name, parv[1] );
-		  return 0;
-		}
+		  {
+			  /* cache the channel if it exists on uplink */
+			  /* nasty possibility of a DoS here... ?
+			   * nefarious user purposefully mode's non existent
+			   * channel hoping to create a lot of traffic...
+			   */
+			  
+			  sendto_one( serv_cptr_list, ":%s CBURST %s",
+						  me.name, parv[1] );
+			  
+			  /* meanwhile, ask for channel mode */
+			  sendto_one( serv_cptr_list, ":%s MODE %s",
+						  sptr->name, parv[1] );
+			  return 0;
+		  }
 	      else
-		{
-		  sendto_one(sptr, form_str(ERR_BADCHANNAME),
-			     me.name, parv[0], (unsigned char *)parv[1]);
-		  return 0;
-		}
-	    }
-        }
-      else
-        {
-          /* if here, it has to be a non-channel name */
-          return user_mode(cptr, sptr, parc, parv);
-        }
-    }
+		  {
+			  sendto_one(sptr, form_str(ERR_BADCHANNAME),
+						 me.name, parv[0], (unsigned char *)parv[1]);
+			  return 0;
+		  }
+	  }
+  }
   else
-    {
-      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-                 me.name, parv[0], "MODE");
-      return 0;
-    }
+  {
+	  /* if here, it has to be a non-channel name */
+	  return user_mode(cptr, sptr, parc, parv);
+  }
 
   if (parc < 3)
     {

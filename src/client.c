@@ -355,8 +355,7 @@ time_t check_pings(time_t currenttime)
             {
               if(IsPerson(cptr))
                 {
-#ifdef GLINES
-                  if( (aconf = find_gkill(cptr)) )
+                  if( ConfigFileEntry.glines && (aconf = find_gkill(cptr)) )
                     {
                       if(IsElined(cptr))
                         {
@@ -392,7 +391,6 @@ time_t check_pings(time_t currenttime)
                       continue;         /* and go examine next fd/cptr */
                     }
                   else
-#endif
                   if((aconf = find_kill(cptr))) /* if there is a returned
                                                    struct ConfItem.. then kill it */
                     {

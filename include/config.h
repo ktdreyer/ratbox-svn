@@ -90,8 +90,8 @@
  *
  */
 
-#define DPATH   "/home/ben/ircd/"
-#define SPATH   "/home/ben/ircd/ircd"
+#define DPATH   "/home/ejb/ircd/"
+#define SPATH   "/home/ejb/ircd/ircd"
 #define CPATH   "ircd.conf"
 #define KPATH   "kline.conf"
 #define DLPATH  "kline.conf"
@@ -146,8 +146,8 @@
  *
  * These need to be defined if you want to use SYSLOG logging, too.
  */
-#define FNAME_USERLOG "/home/ben/ircd/users" /* */
-#define FNAME_OPERLOG "/home/ben/ircd/opers" /* */
+#define FNAME_USERLOG "/home/ejb/ircd/users" /* */
+#define FNAME_OPERLOG "/home/ejb/ircd/opers" /* */
 
 /* RFC1035_ANAL
  * Defining this causes ircd to reject hostnames with non-compliant chars.
@@ -190,11 +190,6 @@
  * NOTICE telling them they should read the motd, and leave it at that.
  */
 #undef SHORT_MOTD
-
-/* NO_OPER_FLOOD - disable flood control for opers
- * define this to remove flood control for opers
- */
-#define NO_OPER_FLOOD
 
 /* SHOW_INVISIBLE_LUSERS - show invisible clients in LUSERS
  * As defined this will show the correct invisible count for anyone who does
@@ -318,7 +313,7 @@
  * need not be the same for both, as long as hte opposite end has the
  * right password in the opposite line.
  */
-#define  CRYPT_LINK_PASSWORD
+#undef  CRYPT_LINK_PASSWORD
 
 /* IDLE_FROM_MSG - Idle-time reset only from privmsg
  * Idle-time reset only from privmsg, if undefined idle-time
@@ -754,21 +749,6 @@
  * to keep the conf file  under RCS control.
  */
 #define USE_RCS
-
-/* ----------------- not approved on EFnet section -------------------- */
-/* GLINES - global Kline-like bans
- * Define this if you want GLINE support
- * when this is defined, 3 completely different opers from
- * three different servers must do the identical GLINE in order
- * for the G line to take effect.
- */
-#define GLINES
-#define GLINEFILE       "gline.log"
-
-/* GLINE_TIME - local expire time for GLINES
- * As configured here, a GLINE will last 12 hours
- */
-#define GLINE_TIME      (12*3600)
 
 /* ----------------- archaic and/or broken section -------------------- */
 #undef DNS_DEBUG

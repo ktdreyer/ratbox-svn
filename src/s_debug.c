@@ -77,9 +77,6 @@ const char serveropts[] = {
 #ifdef  SHOW_INVISIBLE_LUSERS
   'i',
 #endif
-#ifndef NO_DEFAULT_INVISIBLE
-  'I',
-#endif
 #ifdef  OPER_KILL
 # ifdef  LOCAL_KILL_ONLY
   'k',

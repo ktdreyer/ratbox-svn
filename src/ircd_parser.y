@@ -30,6 +30,7 @@
 #include "s_conf.h"
 #include "s_log.h"
 #include "irc_string.h"
+#include "ircdauth.h"
 
 int yyparse();
         
@@ -79,6 +80,7 @@ int   class_sendq_var;
 %token  EXCEED_LIMIT
 %token  GECOS
 %token  GLINE
+%token  GLINE_TIME
 %token  GLINE_LOG
 %token  GLOBAL
 %token  GLOBAL_KILL
@@ -160,6 +162,15 @@ int   class_sendq_var;
 %token  PACE_WALLOPS
 %token  WALLOPS_WAIT
 %token  SHORT_MOTD
+%token  NO_OPER_FLOOD
+%token  IAUTH_SERVER
+%token  IAUTH_PORT
+%token  STATS_P_NOTICE
+%token  ADMIN
+%token  INVITE_PLUS_I_ONLY
+%token  GLINES
+%token  GLINE_FILE
+%token  TOPIC_UH
 
 %%
 conf:   
@@ -360,7 +371,7 @@ oper_items:     oper_items oper_item |
 oper_item:      oper_name  | oper_user | oper_password |
                 oper_class | oper_global | oper_global_kill | oper_remote |
                 oper_kline | oper_unkline | oper_gline | oper_nick_changes |
-                oper_die | oper_rehash 
+                oper_die | oper_rehash | oper_admin
 
 oper_name:      NAME '=' QSTRING ';'
   {
@@ -440,6 +451,10 @@ oper_die: DIE '=' TYES ';' { yy_aconf->port |= CONF_OPER_DIE; }
 oper_rehash: REHASH '=' TYES ';' { yy_aconf->port |= CONF_OPER_REHASH;}
              |
              REHASH '=' TNO ';' { yy_aconf->port &= ~CONF_OPER_REHASH; } ;
+
+oper_admin: ADMIN '=' TYES ';' { yy_aconf->port |= CONF_OPER_ADMIN;}
+            |
+            ADMIN '=' TNO ';' { yy_aconf->port |= CONF_OPER_ADMIN;}
 
 /***************************************************************************
  *  section class
@@ -1146,7 +1161,9 @@ general_item:       general_quiet_on_ban | general_failed_oper_notice |
                     general_e_lines_oper_only | general_f_lines_oper_only | general_stats_notice |
                     general_whois_notice | general_pace_wait | general_whois_wait | 
                     general_knock_delay | general_pace_wallops | general_wallops_wait |
-                    general_short_motd
+                    general_short_motd | general_no_oper_flood | general_iauth_server |
+                    general_iauth_port | general_stats_p_notice | general_invite_plus_i_only |
+                    general_glines | general_topic_uh | general_gline_time 
 
 general_quiet_on_ban:   QUIET_ON_BAN '=' TYES ';'
   {
@@ -1360,3 +1377,65 @@ general_short_motd: SHORT_MOTD '=' TYES ';'
     ConfigFileEntry.short_motd = 0;
   } ;
   
+general_no_oper_flood: NO_OPER_FLOOD '=' TYES ';'
+{
+	ConfigFileEntry.no_oper_flood = 1;
+}
+| NO_OPER_FLOOD '=' TNO ';'
+{
+	ConfigFileEntry.no_oper_flood = 0;
+};
+
+general_iauth_server: IAUTH_SERVER '=' QSTRING ';'
+{
+	strcpy(iAuth.hostname, yylval.string);
+} ;
+
+general_iauth_port: IAUTH_PORT '=' NUMBER ';'
+{
+	iAuth.port = yylval.number;
+} ;
+
+general_stats_p_notice: STATS_P_NOTICE '=' TYES ';'
+{
+	ConfigFileEntry.stats_p_notice = 1;
+} | STATS_P_NOTICE '=' TNO ';'
+{
+	ConfigFileEntry.stats_p_notice = 0;
+} ;
+
+general_invite_plus_i_only: INVITE_PLUS_I_ONLY '=' TYES ';'
+{
+	ConfigFileEntry.invite_plus_i_only = 1;
+} | INVITE_PLUS_I_ONLY '=' TNO ';'
+{
+	ConfigFileEntry.invite_plus_i_only = 0;
+} ;
+
+general_glines: GLINES '=' TYES ';'
+{
+	ConfigFileEntry.glines = 1;
+} | GLINES '=' TNO ';'
+{
+	ConfigFileEntry.glines = 0;
+} ;
+
+
+general_topic_uh: TOPIC_UH '=' TYES ';'
+{
+	ConfigFileEntry.topic_uh = 1;
+} | TOPIC_UH '=' TNO ';'
+{
+	ConfigFileEntry.topic_uh = 0;
+} ;
+
+general_gline_file: GLINE_FILE '=' QSTRING ';'
+{
+	ConfigFileEntry.glinefile = MyMalloc(strlen(yylval.string) + 1);
+	strcpy(ConfigFileEntry.glinefile, yylval.string);
+} ;
+
+general_gline_time: GLINE_TIME '=' NUMBER ';'
+{
+	ConfigFileEntry.gline_time = yylval.number;
+} ;

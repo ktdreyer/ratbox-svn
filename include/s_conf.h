@@ -24,6 +24,30 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.15  2000/08/13 22:35:00  ejb
+ * Large commit, folding in a number of changes i made over the weekend.
+ * - add n!u@h for topic_info ala ircnet.
+ * - stats p notice.
+ * - removed some old non-TS cruft.
+ * - unreg users can't send version.
+ * - added +a umode, shows oper is admin in whois
+ *   if they are 'admin=yes'.
+ * - users can see the topic of a -s channel they aren't
+ *   on (but can't set it even if it is -t, to prevent
+ *   topic floods *sigh*)
+ * - many changes in parse.c .. fixed a few bugs, rewrote
+ *   the argument parser code, added support for catching
+ *   users passing not enough parms before the m_ function
+ *   is even called.
+ * - you can now set in ircd.conf whether channels have to
+ *   be +i for an invite to work.
+ * - added a numeric (504) for sending to users trying to
+ *   invite remote users to +i channels.
+ * - started changing m_* functions to not check parc anymore,
+ *   in most cases parse() has already handled this.
+ * - move glines from config.h to ircd.conf
+ * plus a lot of other stuff i probably forgot.
+ *
  * Revision 7.14  2000/03/31 02:38:27  db
  * - large resync , folding in a number of changes contributed by is
  *   This moves some config.h items into the conf file
@@ -385,6 +409,7 @@ typedef struct QlineItem {
 #define CONF_OPER_K          32
 #define CONF_OPER_REHASH     64
 #define CONF_OPER_DIE       128
+#define CONF_OPER_ADMIN     256
 
 typedef struct
 {
@@ -393,9 +418,7 @@ typedef struct
   char *klinefile;
   char *dlinefile;
 
-#ifdef GLINES
   char  *glinefile;
-#endif
 
   char* logpath;
   char* operlog;
@@ -430,6 +453,12 @@ typedef struct
   int         wallops_wait;
   int         pace_wallops;
   int         short_motd;
+  int         no_oper_flood;
+  int         stats_p_notice;
+  int         invite_plus_i_only;
+  int         glines;
+  int         topic_uh;
+  int         gline_time;
 } ConfigFileEntryType;
 
 /* bleh. have to become global. */

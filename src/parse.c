@@ -34,6 +34,7 @@
 #include "s_debug.h"
 #include "ircd_handler.h"
 #include "msg.h"
+#include "s_conf.h"
 
 #include <assert.h>
 #include <string.h>
@@ -230,13 +231,13 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
        */
       if ((mptr->flags & 1) && !(IsServer(cptr)))
         {
-#ifdef NO_OPER_FLOOD
-          if (IsAnOper(cptr))
-            /* "randomly" (weighted) increase the since */
-            cptr->since += (cptr->receiveM % 5) ? 1 : 0;
-          else
-#endif
+	  if (ConfigFileEntry.no_oper_flood) {
+            if (IsAnOper(cptr))
+              /* "randomly" (weighted) increase the since */
+              cptr->since += (cptr->receiveM % 5) ? 1 : 0;
+            else
             cptr->since += (2 + i / 120);
+	  }
         }
     }
   /*
@@ -245,46 +246,47 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
   ** blank spaces. But, if paramcount has been reached,
   ** the rest of the message goes into this last parameter
   ** (about same effect as ":" has...) --msa
+  **
+  ** changed how this works - now paramcount is simply the
+  ** required number of arguments for a command.  imo the
+  ** previous behavior isn't needed --is
   */
 
   /* Note initially true: s==NULL || *(s-1) == '\0' !! */
 
   i = 1;
 
-  if (s)
+  if (s)   /* redone by is, aug 2000 */
     {
       if (paramcount > MAXPARA)
         paramcount = MAXPARA;
 
-      for (;;)
-        {
-	  while(*s == ' ')	/* tabs are not considered space */
-	    *s++ = '\0';
+	  {
+		  char *longarg = NULL;
+		  char *ap;
+		  
+		  longarg = s;
+		  
+		  if(strsep(&longarg,":")) /* Tear off short args */
 
-          if(!*s)
-            break;
+		  if(longarg)
+			  *(longarg-2) = '\0';
+		  
+		  while((ap = strsep(&s, " ")) != NULL) {
+			  if(*ap != '\0') {
+				  para[i] = ap;
+				  if(i < MAXPARA)
+					  ++i;
+				  else
+					  break;
+			  }
+		  }
 
-          if (*s == ':')
-            {
-              /*
-              ** The rest is single parameter--can
-              ** include blanks also.
-              */
-              para[i++] = s + 1;
-              break;
-            }
-	  else
-	    {
-	      para[i++] = s;
-              if (i > paramcount)
-                {
-                  break;
-                }
-              /* scan for end of string, either ' ' or '\0' */
-              while (IsNonEOS(*s))
-                s++;
-	    }
-        }
+		  if(longarg) {
+			  para[i] = longarg;
+			  i++;
+		  }
+	  }
     }
 
   para[i] = NULL;
@@ -359,6 +361,13 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
          ,cptr->name,mptr->cmd);             
 
   handler = mptr->handlers[handle_idx];
+  /* check right amount of params is passed... --is */
+  
+  if (i < mptr->parameters) {
+	  sendto_one(cptr, form_str(ERR_NEEDMOREPARAMS),
+                 me.name, para[0], mptr->cmd);
+	  return 0;
+  }
   return (*handler)(cptr, from, i, para);
 }
 
@@ -471,553 +480,249 @@ static struct Message *do_msg_tree(MESSAGE_TREE *mtree, char *prefix,
 }
 
 struct Message msgtab[] = {
-  {
-    MSG_PRIVMSG,
-    0,
-    MAXPARA,
-    MFLG_SLOW | MFLG_UNREG,
-    0L,
+  {MSG_PRIVMSG, 0, 2, MFLG_SLOW | MFLG_UNREG, 0L,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_privmsg, ms_privmsg, mo_privmsg }
   },
-  {
-    MSG_NOTICE,
-    0,
-    MAXPARA, 
-    MFLG_SLOW,
-    0L,
+  {MSG_NOTICE, 0, 2, MFLG_SLOW | MFLG_UNREG, 0L,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_notice, ms_notice, mo_notice }
   },
-/*  {
-    MSG_JOIN,
-    0,
-    MAXPARA,
-    MFLG_SLOW | MFLG_UNREG,
-    0L, */
-    /* UNREG, CLIENT, SERVER, OPER */
-/*    { m_unregistered, m_join, ms_join, m_join }
-  }, */
-  {
-    MSG_CBURST,
-    0,
-    MAXPARA,
-    MFLG_SLOW | MFLG_UNREG,
-    0L,
+  {MSG_CBURST, 0, 1, MFLG_SLOW | MFLG_UNREG, 0L,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_error, ms_cburst, m_error }
   },
-  {
-    MSG_DROP,
-    0,
-    MAXPARA,
-    MFLG_SLOW | MFLG_UNREG,
-    0L,
+  {MSG_DROP, 0, 2, MFLG_SLOW | MFLG_UNREG, 0L,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_error, ms_drop, m_error }
   },
-  {
-    MSG_LLJOIN,
-    0,
-    MAXPARA,
-    MFLG_SLOW | MFLG_UNREG,
-    0L,
+  {MSG_LLJOIN, 0, 3, MFLG_SLOW | MFLG_UNREG, 0L,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_error, ms_lljoin, m_error }
   },
-  {
-    MSG_JOIN,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_JOIN, 0, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_join, ms_join, m_join }
   },
-  {
-    MSG_MODE,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_MODE, 0, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_mode, ms_mode, m_mode }
   },
-  {
-    MSG_QUIT,
-    0,
-    MAXPARA,
-    MFLG_SLOW | MFLG_UNREG,
-    0,
+  {MSG_QUIT, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
     /* UNREG, CLIENT, SERVER, OPER */
-    { m_quit, m_quit, ms_quit, m_quit }
+    { m_quit, m_quit, ms_quit, mo_quit }
   },
-  {
-    MSG_PART,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_PART, 1, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_part, ms_part, m_part }
+    { m_unregistered, m_part, ms_part, mo_part }
   },
-  {
-    MSG_KNOCK,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_KNOCK, 0, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_part, ms_part, m_part }
+   /* can knock be recvd from a server? i think not --is */
+    { m_unregistered, m_knock, m_ignore, m_knock }
   },
-  {
-    MSG_TOPIC,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_TOPIC, 0, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_topic, ms_topic, m_topic}
   },
-  {
-    MSG_INVITE,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_INVITE, 0, 2, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_invite, ms_invite, m_invite }
   },
-  {
-    MSG_KICK,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_KICK, 0, 2, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_kick, ms_kick, m_kick }
   },
-  {
-    MSG_WALLOPS,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_WALLOPS, 0, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_not_oper, ms_wallops, mo_wallops }
   },
-  {
-    MSG_PING,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_PING, 0, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_ping, ms_ping, m_ping }
   },
-  {
-    MSG_PONG,
-    0,
-    MAXPARA,
-    MFLG_SLOW | MFLG_UNREG,
-    0,
+  {MSG_PONG, 0, 1, MFLG_SLOW | MFLG_UNREG, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { mr_pong, m_ignore, ms_pong, m_ignore }
   },
-  {
-    MSG_ERROR,
-    0,
-    MAXPARA, 
-    MFLG_SLOW | MFLG_UNREG,
-    0,
+  {MSG_ERROR, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { mr_error, m_ignore, ms_error, m_ignore }
   },
-  {
-    MSG_KILL,
-    0,
-    MAXPARA, 
-    MFLG_SLOW,
-    0,
+  {MSG_KILL, 0, 2, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_not_oper, ms_kill, mo_kill }
   },
-  {
-    MSG_USER,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_USER, 0, 4, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_user, m_registered, m_ignore, m_registered }
   },
-  {
-    MSG_NICK,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_NICK, 0, 1, MFLG_SLOW, 0,
     { m_nick, m_nick, m_nick, m_nick }
   },
-  {
-    MSG_AWAY,
-    0,
-    MAXPARA, 
-    MFLG_SLOW,
-    0,
+  {MSG_AWAY, 0, 0, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_away, ms_away, m_away }
   },
-  {
-    MSG_ISON,
-    0,
-    1,
-    MFLG_SLOW,
-    0,
+  {MSG_ISON, 0, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_ison, m_ignore, m_ison }
   },
-  {
-    MSG_SERVER,
-    0,
-    MAXPARA, 
-    MFLG_SLOW | MFLG_UNREG,
-    0,
+  {MSG_SERVER, 0, 3, MFLG_SLOW | MFLG_UNREG, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { mr_server, m_registered, ms_server, m_registered }
   },
-  {
-    MSG_SQUIT,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_SQUIT, 0, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_not_oper, ms_squit, mo_squit }
   },
-  {
-    MSG_WHOIS,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_WHOIS, 0, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_whois, m_whois, m_whois }
   },
-  {
-    MSG_WHO,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_WHO, 0, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_who, m_ignore, m_who }
   },
-  {
-    MSG_WHOWAS,
-    0,
-    MAXPARA, 
-    MFLG_SLOW,
-    0,
+  {MSG_WHOWAS, 0, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_whowas, m_whowas, m_whowas }
   },
-  {
-    MSG_LIST,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_LIST, 0, 0, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_list, m_ignore, m_list }
   },
-  {
-    MSG_NAMES,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_NAMES, 0, 0, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_names, ms_names, m_names }
   },
-  {
-    MSG_USERHOST,
-    0,
-    1,
-    MFLG_SLOW,
-    0,
+  {MSG_USERHOST, 0, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_userhost, m_ignore, m_userhost }
   },
 #if 0
-  {
-    MSG_USERIP,
-    0,
-    1,
-    MFLG_SLOW,
-    0,
+  {MSG_USERIP, 0, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_userip, m_ignore, m_userip }
   },
 #endif
-  {
-    MSG_TRACE,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_TRACE, 0, 0, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_trace, ms_trace, mo_trace }
   },
-  {
-    MSG_PASS,
-    0,
-    MAXPARA,
-    MFLG_SLOW | MFLG_UNREG,
-    0,
+  {MSG_PASS, 0, 1, MFLG_SLOW | MFLG_UNREG, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_pass, m_registered, m_ignore, m_registered }
   },
-  {
-    MSG_LUSERS,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_LUSERS, 0, 0, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_lusers, ms_lusers, m_lusers }
   },
-  {
-    MSG_TIME,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_TIME, 0, 0, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_time, m_time, m_time }
   },
-  {
-    MSG_OPER,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_OPER, 0, 2, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_oper, ms_oper, mo_oper }
   },
-  {
-    MSG_CONNECT,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_CONNECT, 0, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_not_oper, ms_connect, mo_connect }
   },
-  {
-    MSG_VERSION,
-    0,
-    MAXPARA,
-    MFLG_SLOW | MFLG_UNREG,
-    0,
+  {MSG_VERSION, 0, 0, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
-    { m_version, m_version, ms_version, m_version }
+        /* why allow version command from unreg'd users? no point --is */
+    { m_unregistered, m_version, ms_version, m_version }
   },
-  {
-    MSG_STATS,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_STATS, 0, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_stats, ms_stats, mo_stats }
   },
-  {
-    MSG_LINKS,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_LINKS, 0, 0, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_links, ms_links, m_links }
   },
-  {
-    MSG_ADMIN,
-    0,
-    MAXPARA,
-    MFLG_SLOW | MFLG_UNREG,
-    0,
+  {MSG_ADMIN, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_admin, m_admin, ms_admin, m_admin }
   },
-  {
-    MSG_HELP,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_HELP, 0, 0, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_help, m_ignore, m_help }
   },
-  {
-    MSG_INFO,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_INFO, 0, 0, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_info, ms_info, mo_info }
   },
-  {
-    MSG_MOTD,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_MOTD, 0, 0, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_motd, m_motd, m_motd }
   },
-  {
-    MSG_SJOIN,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_SJOIN, 0, 0, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_error, ms_sjoin, m_error }
+   /* there's absolutely no reason for a user to send sjoin, ignore it --is
+    *  */
+    { m_unregistered, m_ignore, ms_sjoin, m_ignore }
   },
-  {
-    MSG_CAPAB,
-    0,
-    MAXPARA,
-    MFLG_SLOW | MFLG_UNREG,
-    0,
+  {MSG_CAPAB, 0, 0, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
-    { ms_capab, m_error, ms_capab, m_error }
+   /* ditto */
+    { m_unregistered, m_error, ms_capab, m_error }
   },
-  {
-    MSG_OPERWALL,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_OPERWALL, 0, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_not_oper, ms_operwall, mo_operwall }
   },
-  {
-    MSG_CLOSE,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_CLOSE, 0, MAXPARA, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_not_oper, m_ignore, mo_close }
   },
-  {
-    MSG_KLINE,
-    0,
-    MAXPARA, 
-    MFLG_SLOW,
-    0,
+  {MSG_KLINE, 0, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_not_oper, ms_kline, mo_kline }
   },
-  {
-    MSG_UNKLINE,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_UNKLINE, 0, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_not_oper, m_error, mo_unkline }
   },
-  {
-    MSG_DLINE,
-    0, 
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_DLINE, 0, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_not_oper, m_error, mo_dline }
   },
-  {
-    MSG_GLINE,
-    0,
-    MAXPARA, 
-    MFLG_SLOW,
-    0,
+  {MSG_GLINE, 0, 2, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_not_oper, ms_gline, mo_gline }
   },
-  {
-    MSG_HASH,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_HASH, 0, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_hash, m_hash, m_hash }
+    { m_unregistered, m_not_oper, m_hash, m_hash }
   },
-  {
-    MSG_DNS,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_DNS, 0, 0, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_dns, m_dns, m_dns }
   },
-  {
-    MSG_REHASH,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_REHASH, 0, 0, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_not_oper, m_ignore, mo_rehash }
   },
-  {
-    MSG_RESTART,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_RESTART, 0, 0, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_not_oper, m_ignore, mo_restart }
   },
-  {
-    MSG_DIE,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_DIE, 0, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_not_oper, m_ignore, mo_die }
   },
-  {
-    MSG_HTM,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_HTM, 0, 0, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_not_oper, m_ignore, mo_die }
+    { m_unregistered, m_not_oper, m_ignore, mo_htm }
   },
-  {
-    MSG_SET,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_SET, 0, 0, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_not_oper, m_error, mo_set }
   },
-  {
-    MSG_TESTLINE,
-    0,
-    MAXPARA,
-    MFLG_SLOW,
-    0,
+  {MSG_TESTLINE, 0, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_not_oper, m_error, mo_testline }
   },
@@ -1121,33 +826,15 @@ static  int     cancel_clients(struct Client *cptr,
     /*
     ** If the fake prefix is coming from a TS server, discard it
     ** silently -orabidoo
+	**
+	** all servers must be TS these days --is
     */
-    if (DoesTS(cptr))
-      {
-        if (sptr->user)
-          sendto_realops_flags(FLAGS_DEBUG,
-              "Message for %s[%s@%s!%s] from %s (TS, ignored)",
-                             sptr->name, sptr->username, sptr->host,
-                           sptr->from->name, get_client_name(cptr, TRUE));
-        return 0;
-      }
-    else
-      {
-        if (sptr->user)
-          {
-            sendto_realops_flags(FLAGS_DEBUG,
-                             "Message for %s[%s@%s!%s] from %s",
-                           sptr->name, sptr->username, sptr->host,
-                           sptr->from->name, get_client_name(cptr, TRUE));
-          }
-        sendto_serv_butone(NULL,
-                           ":%s KILL %s :%s (%s[%s] != %s, Fake Prefix)",
-                           me.name, sptr->name, me.name,
-                           sptr->name, sptr->from->name,
-                           get_client_name(cptr, TRUE));
-        sptr->flags |= FLAGS_KILLED;
-        return exit_client(cptr, sptr, &me, "Fake Prefix");
-      }
+	   if (sptr->user)
+		   sendto_realops_flags(FLAGS_DEBUG,
+								"Message for %s[%s@%s!%s] from %s (TS, ignored)",
+								sptr->name, sptr->username, sptr->host,
+								sptr->from->name, get_client_name(cptr, TRUE));
+	   return 0;
    }
   return exit_client(cptr, cptr, &me, "Fake prefix");
 }

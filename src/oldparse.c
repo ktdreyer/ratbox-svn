@@ -360,12 +360,10 @@ static int oper_privs_from_string(int int_privs,char *privs)
         int_privs |= CONF_OPER_K;
       else if(*privs == 'k')                /* disallow kill and kline privs */
         int_privs &= ~CONF_OPER_K;
-#ifdef GLINES
-      else if(*privs == 'G')                /* allow gline */
+      else if(ConfigFileEntry.glines && *privs == 'G')                /* allow gline */
         int_privs |= CONF_OPER_GLINE;
-      else if(*privs == 'g')                /* disallow gline */
+      else if(ConfigFileEntry.glines && *privs == 'g')                /* disallow gline */
         int_privs &= ~CONF_OPER_GLINE;
-#endif
       else if(*privs == 'H')                /* allow rehash */
         int_privs |= CONF_OPER_REHASH;
       else if(*privs == 'h')                /* disallow rehash */

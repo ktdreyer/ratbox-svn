@@ -117,7 +117,8 @@ int     m_privmsg(struct Client *cptr,
   struct Channel *chptr;
   int type=0;
 
-  if (parc < 2 || *parv[1] == '\0')
+/* this is no longer required with arg handling in parse() --is */
+/*  if (parc < 2 || *parv[1] == '\0')
     {
       sendto_one(sptr, form_str(ERR_NORECIPIENT),
                  me.name, parv[0], "PRIVMSG");
@@ -128,7 +129,7 @@ int     m_privmsg(struct Client *cptr,
     {
       sendto_one(sptr, form_str(ERR_NOTEXTTOSEND), me.name, parv[0]);
       return -1;
-    }
+	  } */
 
   if (MyConnect(sptr))
     {
@@ -210,8 +211,8 @@ int     m_privmsg(struct Client *cptr,
           return -1;
         }
 
-      if (!IsPerson(sptr))      /* This means, servers can't send messages */
-        return -1;
+      if (!IsPerson(sptr))       /* This means, servers can't send messages */
+        return -1; 
 
       /* At this point, nick+1 should be a channel name i.e. #foo or &foo
        * if the channel is found, fine, if not report an error
@@ -319,7 +320,7 @@ int     m_privmsg(struct Client *cptr,
                       if(acptr->drone_noticed == 1) /* tiny FSM */
                         {
                           sendto_ops_flags(FLAGS_BOTS,
-                         "ANTI_DRONE_FLOOD SendQ protection activated for %s",
+                         "anti_drone_flood SendQ protection activated for %s",
                                          acptr->name);
 
                           sendto_one(acptr,     
@@ -377,45 +378,12 @@ int     m_privmsg(struct Client *cptr,
    * -Dianora
    */
 
-  /*
-  ** the following two cases allow masks in NOTICEs
-  ** (for OPERs only)
-  **
-  ** Armin, 8Jun90 (gruner@informatik.tu-muenchen.de)
-  */
   if ((*nick == '$' || *nick == '#'))
     {
-
-      if(!IsAnOper(sptr))
-        {
-          sendto_one(sptr, form_str(ERR_NOSUCHNICK),
-                     me.name, parv[0], nick);
-          return -1;
-        }
-
-      if (!(s = (char *)strrchr(nick, '.')))
-        {
-          sendto_one(sptr, form_str(ERR_NOTOPLEVEL),
-                     me.name, parv[0], nick);
-          return 0;
-        }
-      while (*++s)
-        if (*s == '.' || *s == '*' || *s == '?')
-          break;
-      if (*s == '*' || *s == '?')
-        {
-          sendto_one(sptr, form_str(ERR_WILDTOPLEVEL),
-                     me.name, parv[0], nick);
-          return 0;
-        }
-      sendto_match_butone(IsServer(cptr) ? cptr : NULL, 
-                          sptr, nick + 1,
-                          (*nick == '#') ? MATCH_HOST :
-                          MATCH_SERVER,
-                          ":%s %s %s :%s", parv[0],
-                          "PRIVMSG", nick, parv[2]);
-      return 0;
-    }
+		sendto_one(sptr, form_str(ERR_NOSUCHNICK),
+				   me.name, parv[0], nick);
+		return -1;
+	}
         
   /*
   ** user[%host]@server addressed?
@@ -429,7 +397,7 @@ int     m_privmsg(struct Client *cptr,
        * -Dianora
        */
 
-      if( (char *)strchr(nick,'%') && !IsAnOper(sptr))
+      if( (char *)strchr(nick,'%'))
         {
           sendto_one(sptr, form_str(ERR_NOSUCHNICK),
                      me.name, parv[0], nick);
@@ -448,13 +416,6 @@ int     m_privmsg(struct Client *cptr,
 
       *server = '\0';
 
-      /* special case opers@server */
-      if(!irccmp(nick,"opers") && IsAnOper(sptr))
-        {
-          sendto_realops("To opers: From %s: %s",sptr->name,parv[2]);
-          return 0;
-        }
-        
       if ((host = (char *)strchr(nick, '%')))
         *host++ = '\0';
 
@@ -499,7 +460,8 @@ int     mo_privmsg(struct Client *cptr,
   struct Channel *chptr;
   int type=0;
 
-  if (parc < 2 || *parv[1] == '\0')
+/*  this isn't needed now arg handling is done in parse() --is */
+/*  if (parc < 2 || *parv[1] == '\0')
     {
       sendto_one(sptr, form_str(ERR_NORECIPIENT),
                  me.name, parv[0], "PRIVMSG");
@@ -510,7 +472,7 @@ int     mo_privmsg(struct Client *cptr,
     {
       sendto_one(sptr, form_str(ERR_NOTEXTTOSEND), me.name, parv[0]);
       return -1;
-    }
+	  } */
 
   if (MyConnect(sptr))
     {
@@ -664,71 +626,6 @@ int     mo_privmsg(struct Client *cptr,
           if(check_for_flud(sptr, acptr, NULL, 1))
             return 0;
 #endif
-#ifdef ANTI_DRONE_FLOOD
-      if(MyConnect(acptr) && IsClient(sptr) && !IsAnOper(sptr) &&
-	 GlobalSetOptions.dronetime)
-        {
-          if((acptr->first_received_message_time+
-	      GlobalSetOptions.dronetime) < CurrentTime)
-            {
-              acptr->received_number_of_privmsgs=1;
-              acptr->first_received_message_time = CurrentTime;
-              acptr->drone_noticed = 0;
-            }
-          else
-            {
-              if(acptr->received_number_of_privmsgs > 
-		 GlobalSetOptions.dronecount)
-                {
-                  if(acptr->drone_noticed == 0) /* tiny FSM */
-                    {
-                      sendto_ops_flags(FLAGS_BOTS,
-                             "Possible Drone Flooder %s [%s@%s] on %s target: %s",
-                                     sptr->name, sptr->username,
-                                     sptr->host,
-                                     sptr->user->server, acptr->name);
-                      acptr->drone_noticed = 1;
-                    }
-                  /* heuristic here, if target has been getting a lot
-                   * of privmsgs from clients, and sendq is above halfway up
-                   * its allowed sendq, then throw away the privmsg, otherwise
-                   * let it through. This adds some protection, yet doesn't
-                   * DOS the client.
-                   * -Dianora
-                   */
-                  if(DBufLength(&acptr->sendQ) > (get_sendq(acptr)/2L))
-                    {
-                      if(acptr->drone_noticed == 1) /* tiny FSM */
-                        {
-                          sendto_ops_flags(FLAGS_BOTS,
-                         "ANTI_DRONE_FLOOD SendQ protection activated for %s",
-                                         acptr->name);
-
-                          sendto_one(acptr,     
- ":%s NOTICE %s :*** Notice -- Server drone flood protection activated for %s",
-                                     me.name, acptr->name, acptr->name);
-                          acptr->drone_noticed = 2;
-                        }
-                    }
-
-                  if(DBufLength(&acptr->sendQ) <= (get_sendq(acptr)/4L))
-                    {
-                      if(acptr->drone_noticed == 2)
-                        {
-                          sendto_one(acptr,     
-                                     ":%s NOTICE %s :*** Notice -- Server drone flood protection de-activated for %s",
-                                     me.name, acptr->name, acptr->name);
-                          acptr->drone_noticed = 1;
-                        }
-                    }
-                  if(acptr->drone_noticed > 1)
-                    return 0;
-                }
-              else
-                acptr->received_number_of_privmsgs++;
-            }
-        }
-#endif
       if (MyConnect(sptr) &&
           acptr->user && acptr->user->away)
         sendto_one(sptr, form_str(RPL_AWAY), me.name,
@@ -767,14 +664,6 @@ int     mo_privmsg(struct Client *cptr,
   */
   if ((*nick == '$' || *nick == '#'))
     {
-
-      if(!IsAnOper(sptr))
-        {
-          sendto_one(sptr, form_str(ERR_NOSUCHNICK),
-                     me.name, parv[0], nick);
-          return -1;
-        }
-
       if (!(s = (char *)strrchr(nick, '.')))
         {
           sendto_one(sptr, form_str(ERR_NOTOPLEVEL),
@@ -807,17 +696,6 @@ int     mo_privmsg(struct Client *cptr,
     {
       int count = 0;
 
-      /* Disable the user%host@server form for non-opers
-       * -Dianora
-       */
-
-      if( (char *)strchr(nick,'%') && !IsAnOper(sptr))
-        {
-          sendto_one(sptr, form_str(ERR_NOSUCHNICK),
-                     me.name, parv[0], nick);
-          return -1;
-        }
-        
       /*
       ** Not destined for a user on me :-(
       */
@@ -831,7 +709,7 @@ int     mo_privmsg(struct Client *cptr,
       *server = '\0';
 
       /* special case opers@server */
-      if(!irccmp(nick,"opers") && IsAnOper(sptr))
+      if(!irccmp(nick,"opers"))
         {
           sendto_realops("To opers: From %s: %s",sptr->name,parv[2]);
           return 0;
@@ -881,7 +759,8 @@ int     ms_privmsg(struct Client *cptr,
   struct Channel *chptr;
   int type=0;
 
-  if (parc < 2 || *parv[1] == '\0')
+/* this isn't needed now arg stuff is handled in parse() --is */
+  /* if (parc < 2 || *parv[1] == '\0')
     {
       sendto_one(sptr, form_str(ERR_NORECIPIENT),
                  me.name, parv[0], "PRIVMSG");
@@ -892,7 +771,7 @@ int     ms_privmsg(struct Client *cptr,
     {
       sendto_one(sptr, form_str(ERR_NOTEXTTOSEND), me.name, parv[0]);
       return -1;
-    }
+	  } */
 
   if (MyConnect(sptr))
     {

@@ -91,14 +91,14 @@
 
 #define LOADCFREQ 5
 /*
- * m_htm - HTM command handler
+ * mo_htm - HTM command handler
  * high traffic mode info
  */
-int m_htm(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+int mo_htm(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   char *command;
 
-  if (!MyClient(sptr) || !IsOper(sptr))
+  if (!MyClient(sptr))
     {
       sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
       return 0;

@@ -31,6 +31,7 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
+#include "s_conf.h"
 
 /*
  * m_functions execute protocol messages on this server:
@@ -105,13 +106,6 @@ int     m_invite(struct Client *cptr,
   struct Channel *chptr;
   int need_invite=NO;
 
-  if (parc < 3 || *parv[1] == '\0')
-    {
-      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-                 me.name, parv[0], "INVITE");
-      return -1;
-    }
-
   /* A little sanity test here */
   if(!sptr->user)
     return 0;
@@ -142,9 +136,14 @@ int     m_invite(struct Client *cptr,
    * same server as the person sending the INVITE message. 
    */
   /* Possibly should be an error sent to sptr */
-  if (!MyConnect(acptr) && (parv[2][0] == '&'))
-    return 0;
-
+  /* done .. there should be no problem because MyConnect(sptr) should
+	 always be true if parse() and such is working correctly --is */
+  if (!MyConnect(acptr) && (parv[2][0] == '&')) {
+	  sendto_one(sptr, form_str(ERR_USERNOTONSERV),
+				 me.name, parv[0], parv[1]);
+	  return 0;
+  }
+	  
   if (!(chptr = hash_find_channel(parv[2], NullChn)))
     {
       if (MyClient(sptr))
@@ -191,8 +190,9 @@ int     m_invite(struct Client *cptr,
    * an unnecessary invite when a channel isn't +i !
    * bah. I can't be bothered arguing it
    * -Dianora
+   * this is now settable in the config file  --is 
    */
-  if (MyConnect(sptr) /* && need_invite*/ )
+  if (MyConnect(sptr) && (ConfigFileEntry.invite_plus_i_only && need_invite))
     {
       sendto_one(sptr, form_str(RPL_INVITING), me.name, parv[0],
                  acptr->name, ((chptr) ? (chptr->chname) : parv[2]));
@@ -239,8 +239,10 @@ int     m_invite(struct Client *cptr,
   if(MyConnect(acptr) && need_invite)
     add_invite(acptr, chptr);
 
-  sendto_prefix_one(acptr, sptr, ":%s INVITE %s :%s",
-                    parv[0], acptr->name, parv[2]);
+  if (!ConfigFileEntry.invite_plus_i_only || 
+	  (ConfigFileEntry.invite_plus_i_only && need_invite)) 
+	  sendto_prefix_one(acptr, sptr, ":%s INVITE %s :%s",
+						parv[0], acptr->name, parv[2]);
   return 0;
 }
 

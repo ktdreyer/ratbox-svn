@@ -347,7 +347,7 @@ static  char *  replies[] = {
 /* 317 RPL_WHOISIDLE, */        ":%s 317 %s %s %d %d :seconds idle, signon time",
 /* 318 RPL_ENDOFWHOIS, */       ":%s 318 %s %s :End of /WHOIS list.",
 /* 319 RPL_WHOISCHANNELS, */    ":%s 319 %s %s :%s",
-/* 320 */       (char *)NULL,
+/* 320 RPL_WHOISADMIN     */    ":%s 320 %s %s :is a Server Administrator", 
 /* 321 RPL_LISTSTART, */        ":%s 321 %s Channel :Users  Name",
 /* 322 RPL_LIST, */             ":%s 322 %s %s %d :%s",
 /* 323 RPL_LISTEND, */          ":%s 323 %s :End of /LIST",
@@ -543,7 +543,8 @@ static  char *  replies[] = {
 /* 501 ERR_UMODEUNKNOWNFLAG, */ ":%s 501 %s :Unknown MODE flag",
 /* 502 ERR_USERSDONTMATCH, */   ":%s 502 %s :Cant change mode for other users",
 /* 503 ERR_GHOSTEDCLIENT, */    ":%s 503 %s :Message could not be delivered to %s",
-/* 504 LAST ERR_LAST_ERR_MSG, */        ":%s 504 %s :Last Error Message",
+/* 504 ERR_USERNOTONSERV, */    ":%s 504 %s %s :User is not on this server",
+/* 505 LAST ERR_LAST_ERR_MSG, */        ":%s 505 %s :Last Error Message",
                 (char *)NULL
 };
 

@@ -422,7 +422,7 @@ int attach_Iline(struct Client* cptr, const char* username, char **preason)
     {
       if (aconf->status & CONF_CLIENT)
         {
-#ifdef GLINES
+	if (ConfigFileEntry.glines) {
           if ( !IsConfElined(aconf) && (gkill_conf = find_gkill(cptr)) )
             {
               *preason = gkill_conf->passwd;
@@ -430,8 +430,7 @@ int attach_Iline(struct Client* cptr, const char* username, char **preason)
                            me.name,cptr->name);
               return ( -5 );
             }
-#endif        /* GLINES */
-
+	}
           if(IsConfDoIdentd(aconf))
             SetNeedId(cptr);
 
@@ -2353,6 +2352,15 @@ char *oper_privs_as_string(struct Client *cptr,int port)
   else
     *privs_ptr++ = 'd';
 
+  if (port & CONF_OPER_ADMIN)
+  {
+	  if (cptr)
+		  SetOperAdmin(cptr);
+	  *privs_ptr++ = 'A';
+  }
+  else
+	  *privs_ptr++ = 'a';
+  
   *privs_ptr = '\0';
 
   return(privs_out);

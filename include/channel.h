@@ -53,7 +53,7 @@ struct Channel
   struct Channel* hnextch;
   struct Mode     mode;
   char            topic[TOPICLEN + 1];
-  char            topic_nick[NICKLEN + 1];
+  char           *topic_info;
   time_t          topic_time;
   int             users;      /* user count */
   int             opcount;    /* number of chanops */

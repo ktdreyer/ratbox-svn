@@ -225,6 +225,7 @@ extern const char* form_str(int);
 
 #define RPL_ENDOFWHOIS       318
 #define RPL_WHOISCHANNELS    319
+#define RPL_WHOISADMIN       320
 
 #define RPL_LISTSTART        321
 #define RPL_LIST             322
@@ -346,6 +347,8 @@ extern const char* form_str(int);
 #define ERR_USERSDONTMATCH   502
 
 #define ERR_GHOSTEDCLIENT    503
-#define ERR_LAST_ERR_MSG     504
+
+#define ERR_USERNOTONSERV    504
+#define ERR_LAST_ERR_MSG     505
 
 #endif /* INCLUDED_numeric_h */

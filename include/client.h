@@ -233,7 +233,7 @@ struct Client
   int               priority;
   struct Listener*  listener;   /* listener accepted from */
   struct SLink*     confs;      /* Configuration record associated */
-  struct in_addr    ip;         /* keep real ip# too */
+  struct in_addr    ip;       /* IPv6 */
   unsigned short    port;       /* and the remote port# too :-) */
   struct DNSReply*  dns_reply;  /* result returned from resolver query */
   unsigned long     serverMask; /* Only used for Lazy Links */
@@ -346,6 +346,7 @@ struct Client
 /* user information flags, only settable by remote mode or local oper */
 #define FLAGS_OPER         0x4000 /* Operator */
 #define FLAGS_LOCOP        0x8000 /* Local operator -- SRB */
+#define FLAGS_ADMIN        0x10000 /* server administrator */
 
 /* *sigh* overflow flags */
 #define FLAGS2_RESTRICTED   0x0001      /* restricted client */
@@ -363,6 +364,7 @@ struct Client
 #define FLAGS2_OPER_K           0x0400  /* oper can kill/kline */
 #define FLAGS2_OPER_DIE         0x0800  /* oper can die */
 #define FLAGS2_OPER_REHASH      0x1000  /* oper can rehash */
+#define FLAGS2_OPER_ADMIN       0x2000  /* oper can set umode +a */
 #define FLAGS2_OPER_FLAGS       (FLAGS2_OPER_GLOBAL_KILL | \
                                  FLAGS2_OPER_REMOTE | \
                                  FLAGS2_OPER_UNKLINE | \
@@ -370,7 +372,8 @@ struct Client
                                  FLAGS2_OPER_N | \
                                  FLAGS2_OPER_K | \
                                  FLAGS2_OPER_DIE | \
-                                 FLAGS2_OPER_REHASH)
+                                 FLAGS2_OPER_REHASH| \
+                                 FLAGS2_OPER_ADMIN)
 
 #define FLAGS2_ZIP           0x4000  /* (server) zipped link */
 #define FLAGS2_ZIPFIRST      0x8000  /* start of zip (ignore any CR/LF) */
@@ -390,11 +393,12 @@ struct Client
 #define ALL_UMODES   (SEND_UMODES | FLAGS_SERVNOTICE | FLAGS_CCONN | \
                       FLAGS_REJ | FLAGS_SKILL | FLAGS_FULL | FLAGS_SPY | \
                       FLAGS_NCHANGE | FLAGS_OPERWALL | FLAGS_DEBUG | \
-                      FLAGS_BOTS | FLAGS_EXTERNAL )
+                      FLAGS_BOTS | FLAGS_EXTERNAL | FLAGS_ADMIN)
 
 #ifndef OPER_UMODES
 #define OPER_UMODES  (FLAGS_OPER | FLAGS_WALLOP | FLAGS_SERVNOTICE | \
-                      FLAGS_SPY | FLAGS_OPERWALL | FLAGS_DEBUG | FLAGS_BOTS)
+                      FLAGS_SPY | FLAGS_OPERWALL | FLAGS_DEBUG | FLAGS_BOTS |
+	                  FLAGS_ADMIN)
 #endif /* OPER_UMODES */
 
 #ifndef LOCOP_UMODES
@@ -515,6 +519,8 @@ struct Client
 #define IsOperDie(x)            ((x)->flags2 & FLAGS2_OPER_DIE)
 #define SetOperRehash(x)        ((x)->flags2 |= FLAGS2_OPER_REHASH)
 #define IsOperRehash(x)         ((x)->flags2 & FLAGS2_OPER_REHASH)
+#define SetOperAdmin(x)         ((x)->flags2 |= FLAGS2_OPER_ADMIN)
+#define IsSetOperAdmin(x)          ((x)->flags2 & FLAGS2_OPER_ADMIN)
 #define CBurst(x)               ((x)->flags2 & FLAGS2_CBURST)
 
 /*

@@ -115,7 +115,7 @@ int     ms_cburst(struct Client *cptr,
       send_channel_modes(cptr, chptr);
        /* Send the topic */
       sendto_one(cptr, ":%s TOPIC %s :%s",
-         chptr->topic_nick, chptr->chname, chptr->topic);
+         chptr->topic_info, chptr->chname, chptr->topic);
     }
   else
     {

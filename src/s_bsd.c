@@ -895,9 +895,7 @@ static int read_packet(struct Client *cptr)
       return exit_client(cptr, cptr, cptr, "dbuf_put fail");
     
     if (IsPerson(cptr) &&
-#ifdef NO_OPER_FLOOD
-        !IsAnOper(cptr) &&
-#endif
+        (ConfigFileEntry.no_oper_flood && !IsAnOper(cptr)) &&
         DBufLength(&cptr->recvQ) > CLIENT_FLOOD) {
       return exit_client(cptr, cptr, cptr, "Excess Flood");
     }

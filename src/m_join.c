@@ -175,8 +175,7 @@ int     m_join(struct Client *cptr,
         }
 
 #ifdef NO_JOIN_ON_SPLIT_SIMPLE
-      if (server_was_split && MyClient(sptr) && (*name != '&') &&
-          !IsAnOper(sptr))
+      if (server_was_split && MyClient(sptr) && (*name != '&'))
         {
               sendto_one(sptr, form_str(ERR_UNAVAILRESOURCE),
                          me.name, parv[0], name);
@@ -192,9 +191,8 @@ int     m_join(struct Client *cptr,
        * cold_start is set to NO if SPLITDELAY is set to 0 in m_set()
        */
 
-      if(cold_start && MyClient(sptr) && (*name != '&') &&
-         !IsAnOper(sptr))
-        {
+      if(cold_start && MyClient(sptr) && (*name != '&'))
+{
               sendto_one(sptr, form_str(ERR_UNAVAILRESOURCE),
                          me.name, parv[0], name);
               continue;
@@ -218,6 +216,10 @@ int     m_join(struct Client *cptr,
       /*
       ** JOIN 0 sends out a part for all channels a user
       ** has joined.
+	  **
+	  ** this should be either disabled or selectable in
+	  ** config file .. it's abused a lot more than it's
+	  ** used these days :/ --is
       */
       if (*name == '0' && !atoi(name))
         {
@@ -233,7 +235,7 @@ int     m_join(struct Client *cptr,
 
 #ifdef ANTI_SPAMBOT       /* Dianora */
 
-          if( MyConnect(sptr) && !IsAnOper(sptr) )
+          if( MyConnect(sptr) )
             {
               if(GlobalSetOptions.spam_num &&
 		 (sptr->join_leave_count >= GlobalSetOptions.spam_num))
@@ -311,7 +313,7 @@ int     m_join(struct Client *cptr,
             */
 
 #ifdef NO_CHANOPS_WHEN_SPLIT
-          if((*name != '&') && !IsAnOper(sptr) && server_was_split)
+          if((*name != '&') && server_was_split)
             {
               allow_op = NO;
 
@@ -322,9 +324,8 @@ int     m_join(struct Client *cptr,
             }
 #endif
 
-          if ((sptr->user->joined >= MAXCHANNELSPERUSER) &&
-             (!IsAnOper(sptr) || (sptr->user->joined >= MAXCHANNELSPERUSER*3)))
-            {
+          if (sptr->user->joined >= MAXCHANNELSPERUSER)
+		  {
               sendto_one(sptr, form_str(ERR_TOOMANYCHANNELS),
                          me.name, parv[0], name);
 #ifdef ANTI_SPAMBOT
@@ -515,7 +516,7 @@ int     m_join(struct Client *cptr,
 
               sendto_one(sptr, form_str(RPL_TOPICWHOTIME),
                          me.name, parv[0], name,
-                         chptr->topic_nick,
+                         chptr->topic_info,
                          chptr->topic_time);
             }
           parv[1] = name;
@@ -941,7 +942,7 @@ int     ms_join(struct Client *cptr,
 
               sendto_one(sptr, form_str(RPL_TOPICWHOTIME),
                          me.name, parv[0], name,
-                         chptr->topic_nick,
+                         chptr->topic_info,
                          chptr->topic_time);
             }
           parv[1] = name;
@@ -953,6 +954,236 @@ int     ms_join(struct Client *cptr,
   if(MyConnect(sptr) && successful_join_count)
     sptr->last_join_time = CurrentTime;
 #endif
+  return 0;
+}
+
+int     mo_join(struct Client *cptr,
+               struct Client *sptr,
+               int parc,
+               char *parv[])
+{
+  static char   jbuf[BUFSIZE];
+  struct SLink  *lp;
+  struct Channel *chptr = NULL;
+  char  *name, *key = NULL;
+  int   i, flags = 0;
+  char  *p = NULL, *p2 = NULL;
+  
+  if (!(sptr->user))
+    {
+      /* something is *fucked* - bail */
+      return 0;
+    }
+
+/* not needed --is */
+/*  if (parc < 2 || *parv[1] == '\0')
+    {
+      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
+                 me.name, parv[0], "JOIN");
+      return 0;
+    } */
+
+  *jbuf = '\0';
+  /*
+  ** Rebuild list of channels joined to be the actual result of the
+  ** JOIN.  Note that "JOIN 0" is the destructive problem.
+  */
+  for (i = 0, name = strtoken(&p, parv[1], ","); name;
+       name = strtoken(&p, (char *)NULL, ","))
+    {
+      if (!check_channel_name(name))
+        {
+          sendto_one(sptr, form_str(ERR_BADCHANNAME),
+                       me.name, parv[0], (unsigned char*) name);
+          continue;
+        }
+      if (*name == '&' && !MyConnect(sptr))
+        continue;
+      if (*name == '0' && !atoi(name))
+        *jbuf = '\0';
+      else if (!IsChannelName(name))
+        {
+          if (MyClient(sptr))
+            sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
+                       me.name, parv[0], name);
+          continue;
+        }
+
+      if (*jbuf)
+        (void)strcat(jbuf, ",");
+      (void)strncat(jbuf, name, sizeof(jbuf) - i - 1);
+      i += strlen(name)+1;
+    }
+  /*    (void)strcpy(parv[1], jbuf);*/
+
+  p = NULL;
+  if (parv[2])
+    key = strtoken(&p2, parv[2], ",");
+  parv[2] = NULL;       /* for m_names call later, parv[parc] must == NULL */
+  for (name = strtoken(&p, jbuf, ","); name;
+       key = (key) ? strtoken(&p2, NULL, ",") : NULL,
+         name = strtoken(&p, NULL, ","))
+    {
+      /*
+      ** JOIN 0 sends out a part for all channels a user
+      ** has joined.
+      */
+      if (*name == '0' && !atoi(name))
+        {
+          if (sptr->user->channel == NULL)
+            continue;
+          while ((lp = sptr->user->channel))
+            {
+              chptr = lp->value.chptr;
+              sendto_channel_butserv(chptr, sptr, ":%s PART %s",
+                                     parv[0], chptr->chname);
+              remove_user_from_channel(sptr, chptr, 0);
+            }
+
+          sendto_match_servs(NULL, cptr, ":%s JOIN 0", parv[0]);
+          continue;
+        }
+      
+      if (MyConnect(sptr))
+        {
+          /*
+          ** local client is first to enter previously nonexistent
+          ** channel so make them (rightfully) the Channel
+          ** Operator.
+          */
+           /*     flags = (ChannelExists(name)) ? 0 : CHFL_CHANOP; */
+
+          /* To save a redundant hash table lookup later on */
+           
+           if((chptr = hash_find_channel(name, NullChn)))
+             flags = 0;
+           else
+             {
+               flags = CHFL_CHANOP;
+               if(!ConfigFileEntry.hub)
+                 {
+                   /* LazyLinks */
+                   if( (*name != '&') && serv_cptr_list
+                       && IsCapable( serv_cptr_list, CAP_LL) )
+                     {
+                       sendto_one(serv_cptr_list,":%s CBURST %s %s %s",
+                         me.name,name,sptr->name, key ? key: "" );
+                       /* And wait for LLJOIN */
+                       return 0;
+                     }
+                 }
+             }
+
+          if (sptr->user->joined >= MAXCHANNELSPERUSER*3)
+            {
+              sendto_one(sptr, form_str(ERR_TOOMANYCHANNELS),
+                         me.name, parv[0], name);
+              return 0;
+            }
+        }
+      else
+        {
+          /*
+          ** complain for remote JOINs to existing channels
+          ** (they should be SJOINs) -orabidoo
+          */
+          if (!ChannelExists(name))
+            ts_warn("User on %s remotely JOINing new channel", 
+                    sptr->user->server);
+        }
+
+      if(!chptr)        /* If I already have a chptr, no point doing this */
+        chptr = get_channel(sptr, name, CREATE);
+
+      if(chptr)
+        {
+          if (IsMember(sptr, chptr))    /* already a member, ignore this */
+            continue;
+        }
+      else
+        {
+          sendto_one(sptr,
+                     ":%s %d %s %s :Sorry, cannot join channel.",
+                     me.name, i, parv[0], name);
+          continue;
+        }
+
+      /*
+       * can_join checks for +i key, bans.
+       * If a ban is found but an exception to the ban was found
+       * flags will have CHFL_EXCEPTION set
+       */
+
+      if (MyConnect(sptr) && (i = can_join(sptr, chptr, key, &flags)))
+        {
+          sendto_one(sptr,
+                    form_str(i), me.name, parv[0], name);
+          continue;
+        }
+
+      /*
+      **  Complete user entry to the new channel (if any)
+      */
+
+      add_user_to_channel(chptr, sptr, flags);
+      /*
+      **  Set timestamp if appropriate, and propagate
+      */
+      if (MyClient(sptr) && (flags & CHFL_CHANOP) )
+        {
+          chptr->channelts = CurrentTime;
+          sendto_match_servs(chptr, cptr,
+                             ":%s SJOIN %lu %s + :@%s", me.name,
+                             chptr->channelts, name, parv[0]);
+        }
+      else if (MyClient(sptr))
+        {
+          sendto_match_servs(chptr, cptr,
+                             ":%s SJOIN %lu %s + :%s", me.name,
+                             chptr->channelts, name, parv[0]);
+        }
+      else
+        sendto_match_servs(chptr, cptr, ":%s JOIN :%s", parv[0],
+                           name);
+
+      /*
+      ** notify all other users on the new channel
+      */
+      sendto_channel_butserv(chptr, sptr, ":%s JOIN :%s",
+                             parv[0], name);
+
+      if (MyClient(sptr))
+        {
+          if( flags & CHFL_CHANOP )
+            {
+              chptr->mode.mode |= MODE_TOPICLIMIT;
+              chptr->mode.mode |= MODE_NOPRIVMSGS;
+
+              sendto_channel_butserv(chptr, sptr,
+                                 ":%s MODE %s +nt",
+                                 me.name, chptr->chname);
+
+              sendto_match_servs(chptr, sptr, 
+                                 ":%s MODE %s +nt",
+                                 me.name, chptr->chname);
+            }
+
+          del_invite(sptr, chptr);
+
+          if (chptr->topic[0] != '\0')
+            {
+              sendto_one(sptr, form_str(RPL_TOPIC), me.name,
+                         parv[0], name, chptr->topic);
+
+              sendto_one(sptr, form_str(RPL_TOPICWHOTIME),
+                         me.name, parv[0], name,
+                         chptr->topic_info,
+                         chptr->topic_time);
+            }
+          parv[1] = name;
+          (void)m_names(cptr, sptr, 2, parv);
+        }
+    }
   return 0;
 }
 

@@ -39,7 +39,6 @@
 struct Client;
 struct ConfItem;
 
-#ifdef  GLINES
 extern struct ConfItem* find_gkill(struct Client* client);
 extern struct ConfItem* find_is_glined(const char* host, const char* name);
 extern void   flush_glines(void);             
@@ -73,7 +72,6 @@ typedef struct gline_pending
  */
 
 #define GLINE_PENDING_EXPIRE 600
-#endif
 
 
 #endif

@@ -260,13 +260,12 @@ int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       break;
 
     case 'G': case 'g' :
-#ifdef GLINES
-      report_glines(sptr);
-      valid_stats++;
-#else
-      sendto_one(sptr,":%s NOTICE %s :This server does not support G lines",
-               me.name, parv[0]);
-#endif
+      if (ConfigFileEntry.glines) {
+        report_glines(sptr);
+        valid_stats++;
+      } else
+        sendto_one(sptr,":%s NOTICE %s :This server does not support G lines",
+                   me.name, parv[0]);
       break;
 
     case 'H' : case 'h' :
@@ -392,6 +391,11 @@ int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
    * at all. They are just "noise" to an oper, and users can't do
    * any damage with stats requests now anyway. So, why show them?
    * -Dianora
+   *
+   * so they can see stats p requests .. should probably add an
+   * option so only stats p is shown..  --is
+   *
+   * done --is
    */
 
   if (ConfigFileEntry.stats_notice && valid_stats)
@@ -399,6 +403,13 @@ int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                          "STATS %c requested by %s (%s@%s) [%s]", stat,
                          sptr->name, sptr->username, sptr->host,
                          sptr->user->server);
+  else
+	  if (ConfigFileEntry.stats_p_notice && !ConfigFileEntry.stats_notice 
+		  && valid_stats && stat == 'p')
+		  sendto_realops_flags(FLAGS_SPY,
+								"STATS p requested by %s (%s@%s) [%s]",
+								sptr->name, sptr->username, sptr->host,
+								sptr->user->server);
   return 0;
 }
 
@@ -577,13 +588,12 @@ int mo_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       break;
 
     case 'G': case 'g' :
-#ifdef GLINES
-      report_glines(sptr);
-      valid_stats++;
-#else
-      sendto_one(sptr,":%s NOTICE %s :This server does not support G lines",
-               me.name, parv[0]);
-#endif
+      if(ConfigFileEntry.glines) {
+        report_glines(sptr);
+        valid_stats++;
+      } else
+        sendto_one(sptr,":%s NOTICE %s :This server does not support G lines",
+                   me.name, parv[0]);
       break;
 
     case 'H' : case 'h' :
@@ -730,6 +740,7 @@ int mo_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
    * at all. They are just "noise" to an oper, and users can't do
    * any damage with stats requests now anyway. So, why show them?
    * -Dianora
+   * see m_stats --is
    */
 
   if (ConfigFileEntry.stats_notice && valid_stats)
@@ -737,6 +748,13 @@ int mo_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                          "STATS %c requested by %s (%s@%s) [%s]", stat,
                          sptr->name, sptr->username, sptr->host,
                          sptr->user->server);
+  else
+	  if (ConfigFileEntry.stats_p_notice && valid_stats &&
+		  !ConfigFileEntry.stats_notice && stat == 'p')
+		  sendto_realops_flags(FLAGS_SPY,
+							   "STATS p requested by %s (%s@%s) [%s]", stat,
+							   sptr->name, sptr->username, sptr->host,
+							   sptr->user->server);
   return 0;
 }
 
@@ -915,13 +933,12 @@ int ms_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       break;
 
     case 'G': case 'g' :
-#ifdef GLINES
-      report_glines(sptr);
-      valid_stats++;
-#else
-      sendto_one(sptr,":%s NOTICE %s :This server does not support G lines",
-               me.name, parv[0]);
-#endif
+      if (ConfigFileEntry.glines) {
+        report_glines(sptr);
+        valid_stats++;
+      } else
+        sendto_one(sptr,":%s NOTICE %s :This server does not support G lines",
+                   me.name, parv[0]);
       break;
 
     case 'H' : case 'h' :
@@ -1068,6 +1085,7 @@ int ms_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
    * at all. They are just "noise" to an oper, and users can't do
    * any damage with stats requests now anyway. So, why show them?
    * -Dianora
+   * see m_stats --is
    */
 
   if (ConfigFileEntry.stats_notice && valid_stats)
@@ -1075,6 +1093,13 @@ int ms_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                          "STATS %c requested by %s (%s@%s) [%s]", stat,
                          sptr->name, sptr->username, sptr->host,
                          sptr->user->server);
+  else
+	  if (ConfigFileEntry.stats_p_notice && valid_stats &&
+		  !ConfigFileEntry.stats_notice && stat == 'p')
+		  sendto_realops_flags(FLAGS_SPY,
+							   "STATS p requested by %s (%s@%s) [%s]", stat,
+							   sptr->name, sptr->username, sptr->host,
+							   sptr->user->server);
   return 0;
 }
 

@@ -185,12 +185,6 @@ Info MyInformation[] = {
   { "GLINEFILE", "NONE", 0, "Path to G-line File" },
 #endif /* GLINEFILE */
 
-#ifdef GLINES
-  { "GLINES", "ON", 0, "Network wide K-lines" },
-#else
-  { "GLINES", "OFF", 0, "Network wide K-lines" },
-#endif /* GLINES */
-
   { "HARD_FDLIMIT_", "", HARD_FDLIMIT_, "Maximum Number of File Descriptors Available" },
 
 #ifdef HPATH

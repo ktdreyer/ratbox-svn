@@ -720,10 +720,6 @@ int main(int argc, char *argv[])
   ConfigFileEntry.dlinefile = CPATH;
 #endif /* DLPATH */
 
-#ifdef GLINES
-  ConfigFileEntry.glinefile = GLINEFILE;
-#endif
-
 #ifdef  CHROOTDIR
   if (chdir(DPATH))
     {
@@ -847,8 +843,9 @@ int main(int argc, char *argv[])
 
 #ifdef USE_IAUTH
 	/* bingo - hardcoded for now - will be changed later */
-	strcpy(iAuth.hostname, "127.0.0.1");
-	iAuth.port = 4444;
+  /* done - its in ircd.conf now --is */
+  /* strcpy(iAuth.hostname, "127.0.0.1"); 
+	 iAuth.port = 4444; */
 	iAuth.flags = 0;
 
 	ConnectToIAuth();

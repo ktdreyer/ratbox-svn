@@ -139,7 +139,6 @@ int mo_rehash(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                  parv[0]);
           found = YES;
         }
-#ifdef GLINES
       else if(irccmp(parv[1],"GLINES") == 0)
         {
           sendto_one(sptr, form_str(RPL_REHASHING), me.name, parv[0], "g-lines");
@@ -152,7 +151,6 @@ int mo_rehash(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                  parv[0]);
           found = YES;
         }
-#endif
       else if(irccmp(parv[1],"GC") == 0)
         {
           sendto_one(sptr, form_str(RPL_REHASHING), me.name, parv[0], "garbage collecting");
@@ -212,14 +210,11 @@ int mo_rehash(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         }
       else
         {
-#undef OUT
 
-#ifdef GLINES
-#define OUT "rehash one of :DNS TKLINES GLINES GC MOTD OMOTD DUMP"
-#else
-#define OUT "rehash one of :DNS TKLINES GC MOTD OMOTD DUMP"
-#endif
-          sendto_one(sptr,":%s NOTICE %s : " OUT,me.name,sptr->name);
+	if (ConfigFileEntry.glines)
+          sendto_one(sptr,":%s NOTICE %s : rehash one of :DNS TKLINES GLINES GC MOTD OMOTD DUMP" ,me.name,sptr->name);
+	else
+	  sendto_one(sptr,":%s NOTICE %s : rehash one of :DNS TKLINES GC MOTD OMOTD DUMP" ,me.name,sptr->name);
           return(0);
         }
     }

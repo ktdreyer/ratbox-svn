@@ -109,7 +109,6 @@ const char* smalldate(time_t clock)
 }
 
 
-#if defined(GLINES) || defined(SEPARATE_QUOTE_KLINES_BY_DATE)
 /*
  * small_file_date
  * Make a small YYYYMMDD formatted string suitable for a
@@ -126,7 +125,6 @@ char* small_file_date(time_t clock)
   strftime(timebuffer, MAX_DATE_STRING, "%Y%m%d", tmptr);
   return timebuffer;
 }
-#endif
 
 /*
  * Retarded - so sue me :-P
