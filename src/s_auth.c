@@ -166,6 +166,8 @@ release_auth_client(struct Client *client)
 	 * us. This is what read_packet() does.
 	 *     -- adrian
 	 */
+	assert(client->localClient->dns_query == NULL);
+//	delete_adns_queries(client->localClient->dns_query);
 	client->localClient->allow_read = MAX_FLOOD;
 	comm_setflush(client->localClient->fd, 1000, flood_recalc, client);
 	dlinkAddTail(client, &client->node, &global_client_list);
@@ -206,11 +208,12 @@ auth_dns_callback(void *vptr, adns_answer * reply)
 			struct Client *client = auth->client;
 			auth->ip6_int = 1;
 			MyFree(reply);
-			if(adns_getaddr(&client->localClient->ip,
+			if(!adns_getaddr(&client->localClient->ip,
 				     client->localClient->ip.ss_family,
-				     client->localClient->dns_query, 1) > 0)
-				
+				     client->localClient->dns_query, 1))
+			{
 				SetDNSPending(auth);
+			}
 			return;
 		}
 #endif
@@ -412,10 +415,11 @@ start_auth(struct Client *client)
 	sendheader(client, REPORT_DO_DNS);
 
 	/* No DNS cache now, remember? -- adrian */
-	if(adns_getaddr(&client->localClient->ip, client->localClient->ip.ss_family,
-		     client->localClient->dns_query, 0) > 0)
+	if(!adns_getaddr(&client->localClient->ip, client->localClient->ip.ss_family,
+		     client->localClient->dns_query, 0))
+	{
 		SetDNSPending(auth);
-
+	}
 	if(ConfigFileEntry.disable_auth == 0)
 		start_auth_query(auth);
 
