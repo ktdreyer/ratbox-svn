@@ -176,7 +176,7 @@ static void part_one_client(struct Client *client_p,
    */
   if(reason[0] && (is_any_op(chptr, source_p) || !MyConnect(source_p)) ||
      (can_send(chptr, source_p) > 0 && 
-      (source_p->firsttime + ConfigFileEntry.anti_spam_exit_message_time) > CurrentTime))
+      (source_p->firsttime + ConfigFileEntry.anti_spam_exit_message_time) < CurrentTime))
     {
       sendto_channel_remote_prefix(chptr, client_p, source_p, "PART %s :%s",
                               chptr->chname,
