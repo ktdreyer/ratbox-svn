@@ -1,3 +1,8 @@
+*** 20010120_7 by toot
+fixed compile error with gettext..  needed config.h included before
+the #ifdef..
+
+
 *** 20010120_6 by toot
 fixed a compile warning
 removed an old hacky #define which is fixed better now
