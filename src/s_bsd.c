@@ -90,12 +90,26 @@ static PF comm_connect_tryconnect;
 void close_all_connections(void)
 {
   int i;
-  for (i = 0; i < MAXCONNECTIONS; ++i) {
-    if (fd_table[i].flags.open)
+  int fd;
+
+  for (i = 0; i < MAXCONNECTIONS; ++i)
+    {
+      if (fd_table[i].flags.open)
         fd_close(i);
-    else
+      else
         close(i);
-  }
+    }
+
+#ifndef NDEBUG
+  /* fugly hack to reserve fd == 2 */
+  (void)close(2);
+  fd = open("stderr.log",O_WRONLY|O_CREAT|O_APPEND,0755);
+  if( fd >= 0 )
+    {
+      dup2(fd, 2);
+      close(fd);
+    }
+#endif
 }
 
 /*
