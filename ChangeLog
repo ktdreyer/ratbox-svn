@@ -1,3 +1,19 @@
+androsyn    2002/10/30 01:01:06 UTC	(20021030_3)
+
+  Modified files:
+    adns                 adns.h internal.h types.c 
+    src                  adns.c 
+  Log:
+  Try the fallback stuff again..
+  
+  Revision  Changes    Path
+  1.9       +2 -1      ircd-ratbox/adns/adns.h
+  1.11      +2 -1      ircd-ratbox/adns/internal.h
+  1.8       +82 -0     ircd-ratbox/adns/types.c
+  7.49      +11 -5     ircd-ratbox/src/adns.c
+
+
+
 androsyn    2002/10/30 00:41:27 UTC	(20021030_2)
 
   Modified files:
