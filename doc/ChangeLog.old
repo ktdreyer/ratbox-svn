@@ -1,3 +1,8 @@
+*** 20010210_12 by a1kmm
+- Some general tidyups to help catch memory leaks and other problems, like changing calls to calloc and malloc
+  and strdup to MyMalloc, + a few memory leak fixes. Still some more to go, however.
+
+
 *** 20010210_11 by a1kmm
 - Fixed IP I/K lines to work properly, but we still have to put IP I lines and normal I lines on the
   same precedence scheme.
