@@ -114,9 +114,9 @@ send_trim(char *lsendbuf,int len)
 
   if(len > 510)
   {
-    lsendbuf[IRCD_BUFSIZE-2] = '\r';
-    lsendbuf[IRCD_BUFSIZE-1] = '\n';
-    lsendbuf[IRCD_BUFSIZE] = '\0';
+    lsendbuf[IRCD_BUFSIZE-3] = '\r';
+    lsendbuf[IRCD_BUFSIZE-2] = '\n';
+    lsendbuf[IRCD_BUFSIZE-1] = '\0';
     return(IRCD_BUFSIZE);
   }
   return len;
