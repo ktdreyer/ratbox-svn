@@ -1,3 +1,7 @@
+*** 20010508_2 by ejb
+- remove the somewhat controversial message wrt Path: in kill messages.
+
+
 *** 20010508_1 by fl_
 - this:
 Try setting the delay rate for the poll idleclient to 0 like the rest of 
