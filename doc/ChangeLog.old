@@ -1,3 +1,16 @@
+leeh        2002/07/19 06:56:03 EDT	(20020719_2)
+
+  Modified files:
+    modules/core         m_kill.c 
+  Log:
+  - bitchx determines foreign/local operkill based on the amount of !'s in
+    a path, so for remote kills send server!host!user!nick as path.
+  
+  Revision  Changes    Path
+  1.65      +7 -3      ircd-hybrid-7/modules/core/m_kill.c
+
+
+
 leeh        2002/07/19 06:11:43 EDT	(20020719_1)
 
   Modified files:
