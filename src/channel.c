@@ -436,8 +436,8 @@ channel_member_names(struct Channel *chptr, struct Client *client_p, int show_eo
 void
 del_invite(struct Channel *chptr, struct Client *who)
 {
-	dlinkFindDestroy(&chptr->invites, who);
-	dlinkFindDestroy(&who->user->invited, chptr);
+	dlinkFindDestroy(who, &chptr->invites);
+	dlinkFindDestroy(chptr, &who->user->invited);
 }
 
 /* is_banned()

@@ -478,6 +478,8 @@ setup_corefile(void)
 int
 main(int argc, char *argv[])
 {
+	static char empty_name[] = "";
+
 	/* Check to see if the user is running us as root, which is a nono */
 	if(geteuid() == 0)
 	{
@@ -522,7 +524,7 @@ main(int argc, char *argv[])
 	/* XXX lots of stupid code in the init relies on me.name being there
 	 *  even if its empty *dumb* 
 	 */  
-	me.name = "";
+	me.name = empty_name;
 	/* Initialise the channel capability usage counts... */
 	init_chcap_usage_counts();
 

@@ -144,7 +144,7 @@ remove_top_conf(char *name)
 	if((tc = find_top_conf(name)) == NULL)
 		return -1;
 
-	if((ptr = dlinkFind(&conf_items, tc)) == NULL)
+	if((ptr = dlinkFind(tc, &conf_items)) == NULL)
 		return -1;
 
 	dlinkDestroy(ptr, &conf_items);

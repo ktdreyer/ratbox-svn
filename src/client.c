@@ -1334,7 +1334,7 @@ exit_remote_server(struct Client *client_p, struct Client *source_p, struct Clie
 	else
 		s_assert(0);
 
-	dlinkFindDestroy(&global_serv_list, source_p);
+	dlinkFindDestroy(source_p, &global_serv_list);
 	target_p = source_p->from;
 	
 	if(target_p != NULL && IsServer(target_p) && target_p != client_p &&
@@ -1367,7 +1367,7 @@ qs_server(struct Client *client_p, struct Client *source_p, struct Client *from,
 	else
 		s_assert(0);
 
-	dlinkFindDestroy(&global_serv_list, source_p);
+	dlinkFindDestroy(source_p, &global_serv_list);
 	target_p = source_p->from;
 	
 	if(has_id(source_p))
@@ -1389,7 +1389,7 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 	unsigned int sendk, recvk;
 	
 	dlinkDelete(&source_p->localClient->tnode, &serv_list);
-	dlinkFindDestroy(&global_serv_list, source_p);
+	dlinkFindDestroy(source_p, &global_serv_list);
 	
 	unset_chcap_usage_counts(source_p);
 	sendk = source_p->localClient->sendK;
@@ -1460,7 +1460,7 @@ exit_local_client(struct Client *client_p, struct Client *source_p, struct Clien
 	dlinkDelete(&source_p->localClient->tnode, &lclient_list);
 	dlinkDelete(&source_p->lnode, &me.serv->users);
 	if(IsOper(source_p))
-		dlinkFindDestroy(&oper_list, source_p);
+		dlinkFindDestroy(source_p, &oper_list);
 
 	sendto_realops_flags(UMODE_CCONN, L_ALL,
 			     "Client exiting: %s (%s@%s) [%s] [%s]",
@@ -1616,7 +1616,7 @@ count_remote_client_memory(size_t * count, size_t * remote_client_memory_used)
 int
 accept_message(struct Client *source, struct Client *target)
 {
-	if(dlinkFind(&target->localClient->allow_list, source) != NULL)
+	if(dlinkFind(source, &target->localClient->allow_list) != NULL)
 		return 1;
 
 	return 0;

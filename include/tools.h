@@ -247,7 +247,7 @@ dlinkDelete(dlink_node * m, dlink_list * list)
 }
 
 static inline dlink_node *
-dlinkFindDelete(dlink_list * list, void *data)
+dlinkFindDelete(void *data, dlink_list *list)
 {
 	dlink_node *m;
 	assert(list != NULL);
@@ -277,14 +277,14 @@ dlinkFindDelete(dlink_list * list, void *data)
 }
 
 static inline int
-dlinkFindDestroy(dlink_list * list, void *data)
+dlinkFindDestroy(void *data, dlink_list *list)
 {
 	void *ptr;
 
 	assert(list != NULL);
 	assert(data != NULL);
 
-	ptr = dlinkFindDelete(list, data);
+	ptr = dlinkFindDelete(data, list);
 
 	if(ptr != NULL)
 	{
@@ -302,7 +302,7 @@ dlinkFindDestroy(dlink_list * list, void *data)
  * side effects	- Look for ptr in the linked listed pointed to by link.
  */
 static inline dlink_node *
-dlinkFind(dlink_list * list, void *data)
+dlinkFind(void *data, dlink_list *list)
 {
 	dlink_node *ptr;
 	assert(list != NULL);
