@@ -159,7 +159,9 @@ m_kick(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		return 0;
 	}
 
-	if(IsMember(who, chptr))
+	msptr = find_channel_membership(chptr, who);
+
+	if(msptr != NULL)
 	{
 		/* jdc
 		 * - In the case of a server kicking a user (i.e. CLEARCHAN),
@@ -181,7 +183,7 @@ m_kick(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 		sendto_server(client_p, chptr, NOCAPS, NOCAPS,
 			      ":%s KICK %s %s :%s", parv[0], chptr->chname, who->name, comment);
-		remove_user_from_channel(chptr, who);
+		remove_user_from_channel(msptr);
 	}
 	else
 		sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL), me.name, parv[0], user, name);

@@ -360,8 +360,9 @@ ms_join(struct Client *client_p, struct Client *source_p, int parc, const char *
 static void
 do_join_0(struct Client *client_p, struct Client *source_p)
 {
+	struct membership *msptr;
 	struct Channel *chptr = NULL;
-	dlink_node *lp;
+	dlink_node *ptr;
 
 	/* Finish the flood grace period... */
 	if(MyClient(source_p) && !IsFloodDone(source_p))
@@ -373,12 +374,13 @@ do_join_0(struct Client *client_p, struct Client *source_p)
 	if(source_p->user->channel.head && MyConnect(source_p) && !IsOper(source_p))
 		check_spambot_warning(source_p, NULL);
 
-	while ((lp = source_p->user->channel.head))
+	while ((ptr = source_p->user->channel.head))
 	{
-		chptr = lp->data;
+		msptr = ptr->data;
+		chptr = msptr->chptr;
 		sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s PART %s",
 				     source_p->name,
 				     source_p->username, source_p->host, chptr->chname);
-		remove_user_from_channel(chptr, source_p);
+		remove_user_from_channel(msptr);
 	}
 }

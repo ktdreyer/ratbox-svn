@@ -136,7 +136,9 @@ dohelp(struct Client *source_p, int flags, const char *topic)
 {
 	static const char ntopic[] = "index";
 	struct helpfile *hptr;
+	struct helpline *lineptr;
 	dlink_node *ptr;
+	const char *myline;
 
 	if(EmptyString(topic))
 		topic = ntopic;
@@ -155,8 +157,16 @@ dohelp(struct Client *source_p, int flags, const char *topic)
 
 	DLINK_FOREACH(ptr, hptr->contents.head)
 	{
+		if(ptr->data != emptyline)
+		{
+			lineptr = ptr->data;
+			myline = lineptr->data;
+		}
+		else
+			myline = emptyline;
+
 		sendto_one(source_p, form_str(RPL_HELPTXT),
-			   me.name, source_p->name, topic, (const char *) ptr->data);
+			   me.name, source_p->name, topic, myline);
 	}
 
 	sendto_one(source_p, form_str(RPL_ENDOFHELP),

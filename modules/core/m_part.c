@@ -158,5 +158,5 @@ part_one_client(struct Client *client_p, struct Client *source_p, char *name, ch
 				     source_p->name,
 				     source_p->username, source_p->host, chptr->chname);
 	}
-	remove_user_from_channel(chptr, source_p);
+	remove_user_from_channel(msptr);
 }

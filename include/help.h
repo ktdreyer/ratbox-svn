@@ -22,6 +22,12 @@ struct helpfile
 	int flags;
 };
 
+struct helpline
+{
+	char data[HELPLINELEN];
+	dlink_node linenode;
+};
+
 extern void init_help(void);
 extern void load_help(void);
 extern void free_help(struct helpfile *);

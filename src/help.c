@@ -53,7 +53,7 @@ void
 init_help(void)
 {
 	helpfile_heap = BlockHeapCreate(sizeof(struct helpfile), HELPFILE_HEAP_SIZE);
-	helpline_heap = BlockHeapCreate(HELPLINELEN, HELPLINE_HEAP_SIZE);
+	helpline_heap = BlockHeapCreate(sizeof(struct helpline), HELPLINE_HEAP_SIZE);
 }
 
 static void
@@ -61,8 +61,8 @@ load_help_file(const char *hfname, const char *helpname, int flags)
 {
 	FBFILE *in;
 	struct helpfile *hptr;
+	struct helpline *lineptr;
 	char line[BUFSIZE];
-	char *lineptr;
 	char *p;
 
 	if((in = fbopen(hfname, "r")) == NULL)
@@ -86,8 +86,8 @@ load_help_file(const char *hfname, const char *helpname, int flags)
 		if(!EmptyString(line))
 		{
 			lineptr = BlockHeapAlloc(helpline_heap);
-			strlcpy(lineptr, line, HELPLINELEN);
-			dlinkAddTailAlloc(lineptr, &hptr->contents);
+			strlcpy(lineptr->data, line, sizeof(lineptr->data));
+			dlinkAddTail(lineptr, &lineptr->linenode, &hptr->contents);
 		}
 		else
 			dlinkAddTailAlloc((char *) emptyline, &hptr->contents);
@@ -144,7 +144,6 @@ free_help(struct helpfile *hptr)
 	{
 		if(ptr->data != emptyline)
 			BlockHeapFree(helpline_heap, ptr->data);
-		free_dlink_node(ptr);
 	}
 
 	BlockHeapFree(helpfile_heap, hptr);

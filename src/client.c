@@ -1224,7 +1224,7 @@ static inline void
 exit_generic_client(struct Client *client_p, struct Client *source_p, struct Client *from,
 		   const char *comment)
 {
-	dlink_node *lp, *next_lp;
+	dlink_node *ptr, *next_ptr;
 	if(IsDead(source_p))
 		return;
 		
@@ -1232,18 +1232,18 @@ exit_generic_client(struct Client *client_p, struct Client *source_p, struct Cli
 				     source_p->name,
 				     source_p->username, source_p->host, comment);
 
-	DLINK_FOREACH_SAFE(lp, next_lp, source_p->user->channel.head)
+	DLINK_FOREACH_SAFE(ptr, next_ptr, source_p->user->channel.head)
 	{
-		remove_user_from_channel(lp->data, source_p);
+		remove_user_from_channel(ptr->data);
 	}
 
 	/* Should not be in any channels now */
 	s_assert(source_p->user->channel.head == NULL);
 
 	/* Clean up invitefield */
-	DLINK_FOREACH_SAFE(lp, next_lp, source_p->user->invited.head)
+	DLINK_FOREACH_SAFE(ptr, next_ptr, source_p->user->invited.head)
 	{
-		del_invite(lp->data, source_p);
+		del_invite(ptr->data, source_p);
 	}
 
 	/* Clean up allow lists */

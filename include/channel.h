@@ -94,7 +94,7 @@ extern int can_join(struct Client *source_p, struct Channel *chptr, char *key);
 extern struct membership *find_channel_membership(struct Channel *, struct Client *);
 extern const char *find_channel_status(struct membership *msptr, int combine);
 extern void add_user_to_channel(struct Channel *, struct Client *, int flags);
-extern int remove_user_from_channel(struct Channel *, struct Client *);
+extern int remove_user_from_channel(struct membership *);
 extern int qs_user_from_channel(struct Channel *, struct Client *);
 
 extern void free_channel_list(dlink_list *);

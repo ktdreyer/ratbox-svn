@@ -145,15 +145,16 @@ add_user_to_channel(struct Channel *chptr, struct Client *client_p, int flags)
 }
 
 int
-remove_user_from_channel(struct Channel *chptr, struct Client *client_p)
+remove_user_from_channel(struct membership *msptr)
 {
-	struct membership *msptr;
-
-	msptr = find_channel_membership(chptr, client_p);
-
+	struct Client *client_p;
+	struct Channel *chptr;
 	s_assert(msptr != NULL);
 	if(msptr == NULL)
 		return 0;
+
+	client_p = msptr->client_p;
+	chptr = msptr->chptr;
 
 	dlinkDelete(&msptr->usernode, &client_p->user->channel);
 	dlinkDelete(&msptr->channode, &chptr->members);

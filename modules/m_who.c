@@ -117,16 +117,8 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 		if((lp = source_p->user->channel.head) != NULL)
 		{
 			msptr = lp->data;
-			chptr = msptr->chptr;
+			do_who_on_channel(source_p, msptr->chptr, "*", server_oper, YES);
 		}
-
-		if(chptr == NULL)
-		{
-			sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], "*");
-			return 0;
-		}
-
-		do_who_on_channel(source_p, chptr, "*", server_oper, YES);
 
 		sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], "*");
 		return 0;
