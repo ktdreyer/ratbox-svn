@@ -332,7 +332,11 @@ int _BlockHeapFree(BlockHeap *bh, void *ptr)
     assert(mme->next != mme);
    }
 #endif
+
+#ifndef NDEBUG
    mem_frob(ptr, bh->elemSize);
+#endif
+
    for (walker = bh->base; walker != NULL; walker = walker->next)
      {
       if ((ptr >= walker->elems) && (ptr <= walker->endElem))
