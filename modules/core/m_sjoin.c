@@ -125,11 +125,10 @@ static void ms_sjoin(struct Client *client_p,
   int i;
   dlink_node *m;
 
-  /* changed from \0 to NULL.. */
-  *buf = NULL;
-  *sjbuf = NULL;
-  *sjbuf_nh = NULL;
-  
+  *buf = '\0';
+  *sjbuf = '\0';
+  *sjbuf_nh = '\0';
+
   if (IsClient(source_p) || parc < 5)
     return;
   if (!IsChannelName(parv[2]))
