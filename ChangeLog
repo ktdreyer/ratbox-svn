@@ -1,3 +1,20 @@
+ejb         2002/08/08 13:36:44 EDT	(20020808_16)
+
+  Modified files:
+    include              numeric.h 
+    modules/core         m_message.c 
+    src                  messages.tab 
+  Log:
+  - changed the umode +g notices to use a numeric, rather than
+    a NOTICE from the target. much neater.
+  
+  Revision  Changes    Path
+  7.29      +5 -1      ircd-ratbox/include/numeric.h
+  1.101     +13 -15    ircd-ratbox/modules/core/m_message.c
+  7.72      +4 -4      ircd-ratbox/src/messages.tab
+
+
+
 leeh        2002/08/08 12:03:09 EDT	(20020808_15)
 
   Modified files:
