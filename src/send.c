@@ -1138,7 +1138,7 @@ sendto_match_vacap_servs(struct Channel *chptr, struct Client *from, ...)
 	va_start(args, from);
 	
 	/* at this point, we have a list of CAPs followed by a terminating 0 */
-	for (ncaps = 0; cap = va_arg(args, int); ncaps++)
+	for (ncaps = 0; (cap = va_arg(args, int)); ncaps++)
 	{
 		/* for each cap, add it to the caps list */
 		if (ncaps > MAX_CAPS)

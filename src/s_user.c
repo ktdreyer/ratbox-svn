@@ -1387,7 +1387,7 @@ int oper_up( struct Client *source_p,
         }
       else
         {
-          source_p->umodes |= FLAGS_SERVNOTICE|FLAGS_OPERWALL|FLAGS_WALLOP|FLAGS_LOCOPS & ALL_UMODES;
+          source_p->umodes |= (FLAGS_SERVNOTICE|FLAGS_OPERWALL|FLAGS_WALLOP|FLAGS_LOCOPS) & ALL_UMODES;
         }
     }
 	
