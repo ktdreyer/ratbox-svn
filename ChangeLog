@@ -1,3 +1,18 @@
+androsyn    2002/10/12 19:10:19 UTC	(20021012_0)
+
+  Modified files:
+    src                  channel_mode.c 
+  Log:
+  Fix ported from hybrid-7:
+    - fixed another bug. When more than four modes happened locally in a mode change
+      the code was not placing a new + or - on the next line
+      so ended up with "bare" modes with no + or - in front. fixed.
+  
+  Revision  Changes    Path
+  7.80      +2 -0      ircd-ratbox/src/channel_mode.c
+
+
+
 androsyn    2002/10/09 17:03:59 UTC	(20021009_1)
 
   Modified files:
