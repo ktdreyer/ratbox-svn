@@ -1,3 +1,32 @@
+leeh        2004/08/20 13:03:18 EDT	(20040820_0)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              s_newconf.h 
+    modules              m_kline.c m_resv.c m_stats.c m_xline.c 
+    src                  newconf.c 
+  Log:
+  - rework cluster {}; and shared {};.. kline/xline/resv have been split up
+    with new tkline, txline and tresv.
+  
+    in shared {}; kline (etc) applies both perm/temp, new flag tkline will
+    only allow temp.
+  
+    in cluster {}; kline will now only cluster perm, tkline will only cluster
+    temp.
+  
+  Revision  Changes    Path
+  7.247     +15 -7     ircd-ratbox/doc/example.conf
+  7.79      +15 -7     ircd-ratbox/doc/example.efnet.conf
+  7.39      +14 -10    ircd-ratbox/include/s_newconf.h
+  1.191     +6 -4      ircd-ratbox/modules/m_kline.c
+  1.67      +15 -19    ircd-ratbox/modules/m_resv.c
+  1.232     +16 -18    ircd-ratbox/modules/m_stats.c
+  1.58      +9 -8      ircd-ratbox/modules/m_xline.c
+  7.171     +17 -11    ircd-ratbox/src/newconf.c
+
+
+
 androsyn    2004/08/19 15:41:00 EDT	(20040819_0)
 
   Modified files:
