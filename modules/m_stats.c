@@ -309,16 +309,34 @@ void do_non_priv_stats(struct Client *sptr, char *name, char *target,
       break;
 
     case 'p' :
-      if (ConfigFileEntry.stats_p_notice)
-	{
-	  stats_p_spy(sptr);
-	  show_opers(sptr);
-	}
+      if (GlobalSetOptions.hide_server)
+        {
+           if (ConfigFileEntry.stats_p_notice)
+             {
+               stats_p_spy(sptr);
+             }
+           else
+             {
+               stats_spy(sptr,statchar);
+             }
+           /* Should we send a notice to the user saying we have paged the
+           ** opers?  Also, should we ALWAYS stats_p_spy even if neither
+           ** stats_p_spy or stats_spy is on...Otherwise...no one will
+           ** know a STATS p was used
+           */
+        }
       else
-	{
-	  show_opers(sptr);
-	  stats_spy(sptr,statchar);
-	}
+        {
+          if (ConfigFileEntry.stats_p_notice)
+            {
+              stats_p_spy(sptr);
+            }
+          else
+            {
+              stats_spy(sptr,statchar);
+            }
+          show_opers(sptr);
+        }
       break;
 
     case 'U' :
@@ -455,13 +473,12 @@ void do_priv_stats(struct Client *sptr, char *name, char *target,
       if (ConfigFileEntry.stats_p_notice)
 	{
 	  stats_p_spy(sptr);
-	  show_opers(sptr);
 	}
       else
 	{
-	  show_opers(sptr);
           stats_spy(sptr,statchar);
 	}
+      show_opers(sptr);
       break;
 
     case 'v' : case 'V' :
