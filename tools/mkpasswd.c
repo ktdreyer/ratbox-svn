@@ -29,6 +29,19 @@ char *make_md5_salt_para(char *);
 void usage();
 static char saltChars[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./";
 
+#ifdef VMS
+static char *
+mygetpass(prompt)
+        char *prompt;
+{
+        static char line[100];
+
+        printf("warning: input will be echoed to screen.\n");
+        printf("%s", prompt);
+        fgets(line, sizeof(line), stdin);
+        return line;
+}
+#endif
 int main(int argc, char *argv[])
 {
   char *plaintext = NULL;
@@ -108,7 +121,11 @@ int main(int argc, char *argv[])
   }
   else
   {
+#ifndef VMS
     plaintext = getpass("plaintext: ");
+#else
+    plaintext = mygetpass("plaintext: ");
+#endif
   }
 
   printf("%s\n", crypt(plaintext, salt));
