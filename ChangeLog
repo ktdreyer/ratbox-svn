@@ -1,3 +1,31 @@
+leeh        2003/09/01 12:39:54 EDT	(20030901_2)
+
+  Modified files:
+    include              client.h packet.h s_serv.h send.h 
+    modules/core         m_server.c 
+    src                  client.c ircd.c packet.c s_bsd.c s_serv.c 
+                         send.c 
+  Log:
+  - remove LL mask remnants
+  - removed bits of servlink still remaining in the ircd
+  - moved check_server(), burst_*(), server_estab() s_serv.c -> m_server.c
+  - ziplink stats are now under #ifdef BROKEN_ZIPLINKS
+  
+  Revision  Changes    Path
+  7.222     +0 -21     ircd-ratbox/include/client.h
+  7.22      +0 -1      ircd-ratbox/include/packet.h
+  7.86      +0 -42     ircd-ratbox/include/s_serv.h
+  7.78      +0 -1      ircd-ratbox/include/send.h
+  1.123     +682 -7    ircd-ratbox/modules/core/m_server.c
+  7.410     +0 -7      ircd-ratbox/src/client.c
+  7.310     +0 -1      ircd-ratbox/src/ircd.c
+  7.121     +0 -126    ircd-ratbox/src/packet.c
+  7.209     +0 -9      ircd-ratbox/src/s_bsd.c
+  7.360     +5 -1037   ircd-ratbox/src/s_serv.c
+  7.257     +0 -63     ircd-ratbox/src/send.c
+
+
+
 leeh        2003/08/31 20:57:37 EDT	(20030901_1)
 
   Modified files:
