@@ -1,3 +1,8 @@
+*** 20001127_11 by db
+- fixed reference to version in module, its a **char pointer. 
+
+
+
 *** 20001127_10 by db
 - fixed a few typos
 
