@@ -688,9 +688,10 @@ else
 	AC_CHECK_HEADER(mach-o/dyld.h,,
 	AC_CHECK_FUNC(dlopen,, AC_CHECK_LIB(dl, dlopen,,AC_MSG_ERROR(**
 	shared module support could not be found - try running configure with --disable-shared-modules))))
-	dnl Redundant... Combine with above? -jmallett
-	AC_CHECK_HEADERS(mach-o/dyld.h)
+	dnl Without this, include/setup.h will not be set up right.
+	AC_CHECK_LIB(dl, dlsym)
 	AC_CHECK_FUNCS(dlopen)
+	AC_CHECK_HEADERS(mach-o/dyld.h)
 
 	# The GNU linker requires the -export-dynamic option to make
 	# all symbols visible in the dynamic symbol table.
