@@ -69,10 +69,8 @@
 #include <sys/resource.h>
 #include <sys/param.h>    /* NOFILE */
 #include <arpa/inet.h>
-
 /* I don't know if this is right or not.. -AS */
 #define POLL_LENGTH	16
-
 static void devpoll_update_events(int, short, PF *);
 static int dpfd;
 
@@ -82,7 +80,7 @@ static void devpoll_write_update(int, int);
 
 /* static void devpoll_incoming_stats(StoreEntry *); */
 /* Does this do anything?? -AS */
-
+#define NOTYET 1
 
 /* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
 /* Private functions */
@@ -98,9 +96,8 @@ devpoll_write_update(int fd, int events)
 {
     struct pollfd pollfds[1]; /* Just to be careful */
     int retval;
-
 #ifdef NOTYET
-    debug(5, 3) ("devpoll_write_update: FD %d: called with %d\n", fd, events);
+    log(L_NOTICE, "devpoll_write_update: FD %d: called with %d\n", fd, events);
 #endif
     /* Build the pollfd entry */
     pollfds[0].revents = 0;
@@ -111,8 +108,7 @@ devpoll_write_update(int fd, int events)
     retval = write(dpfd, &pollfds[0], sizeof(struct pollfd));
 #ifdef NOTYET
     if (retval < 0)
-        debug(5, 2) ("devpoll_write_update: dpfd write failed %d: %s\n",
-            errno, xstrerror());
+        log(L_NOTICE, "devpoll_write_update: dpfd write failed %d: %s\n", errno, strerror(errno));
 #endif
     /* Done! */
 }
@@ -141,7 +137,7 @@ devpoll_update_events(int fd, short filter, PF * handler)
         break;
     default:
 #ifdef NOTYET
-        debug (5, 0) ("devpoll_update_events called with unknown filter: %hd\n",
+        log(L_NOTICE,"devpoll_update_events called with unknown filter: %hd\n",
             filter);
 #endif
         return;
@@ -208,12 +204,12 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
     F->list = list;
 
     if (type & COMM_SELECT_READ) {
-        devpoll_update_events(fd, POLLRDNORM, handler);
+        devpoll_update_events(fd, COMM_SELECT_READ, handler);
         F->read_handler = handler;
         F->read_data = client_data;
     }
     if (type & COMM_SELECT_WRITE) {
-        devpoll_update_events(fd, POLLWRNORM, handler);
+        devpoll_update_events(fd, COMM_SELECT_WRITE, handler);
         F->write_handler = handler;
         F->write_data = client_data;
     }
