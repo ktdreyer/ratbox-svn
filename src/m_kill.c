@@ -26,6 +26,7 @@
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
+#include "s_log.h"
 #include "s_serv.h"
 #include "send.h"
 #include "whowas.h"
@@ -215,10 +216,10 @@ int m_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                      "Received KILL message for %s. From %s Path: %s!%s",
                      acptr->name, parv[0], inpath, path);
 
-#if defined(USE_SYSLOG) && defined(SYSLOG_KILL)
+#if defined(SYSLOG_KILL)
   if (IsOper(sptr))
-    syslog(LOG_INFO,"KILL From %s For %s Path %s!%s",
-                        parv[0], acptr->name, inpath, path);
+    log(L_INFO,"KILL From %s For %s Path %s!%s",
+        parv[0], acptr->name, inpath, path);
 #endif
   /*
   ** And pass on the message to other servers. Note, that if KILL
