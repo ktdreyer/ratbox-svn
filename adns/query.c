@@ -44,9 +44,10 @@ static adns_query query_alloc(adns_state ads, const typeinfo *typei,
   /* Allocate a virgin query and return it. */
   adns_query qu;
   
-  qu= MyMalloc(sizeof(*qu));  if (!qu) return 0;
+  qu= MyMalloc(sizeof(*qu)); 
+  memset((void *)qu,0,sizeof(*qu));
   qu->answer= MyMalloc(sizeof(*qu->answer)); 
-  if (!qu->answer) { MyFree(qu); return 0; }
+  memset((void *)qu->answer,0,sizeof(*qu->answer));
   
   qu->ads= ads;
   qu->state= query_tosend;
@@ -101,7 +102,12 @@ static void query_submit(adns_state ads, adns_query qu,
   adns__vbuf_init(qumsg_vb);
 
   qu->query_dgram= MyMalloc(qu->vb.used);
+  memset((void *)qu->query_dgram,0,qu->vb.used);
+
+#if 0
+  /* XXX MyMalloc will abort before it gets here if malloc fails. */
   if (!qu->query_dgram) { adns__query_fail(qu,adns_s_nomemory); return; }
+#endif
   
   qu->id= id;
   qu->query_dglen= qu->vb.used;
@@ -288,7 +294,9 @@ int adns_submit_reverse_ip6(adns_state ads,
 	lreq = 71 + strlen(zone) + 1;
   if (lreq > sizeof(shortbuf)) {
     buf= MyMalloc(strlen(zone) + 4*4 + 1);
+#if 0
     if (!buf) return errno;
+#endif
     buf_free= buf;
   } else {
     buf= shortbuf;
@@ -326,7 +334,9 @@ int adns_submit_reverse_any(adns_state ads,
   lreq= strlen(zone) + 4*4 + 1;
   if (lreq > sizeof(shortbuf)) {
     buf= MyMalloc(strlen(zone) + 4*4 + 1);
+#if 0
     if (!buf) return errno;
+#endif
     buf_free= buf;
   } else {
     buf= shortbuf;
@@ -378,7 +388,9 @@ static void *alloc_common(adns_query qu, size_t sz) {
   if (!sz) return qu; /* Any old pointer will do */
   assert(!qu->final_allocspace);
   an= MyMalloc(MEM_ROUND(MEM_ROUND(sizeof(*an)) + sz));
+#if 0
   if (!an) return 0;
+#endif
   LIST_LINK_TAIL(qu->allocations,an);
   return (byte*)an + MEM_ROUND(sizeof(*an));
 }
@@ -492,7 +504,10 @@ void adns_cancel(adns_query qu) {
     LIST_UNLINK(ads->output,qu);
     break;
   default:
+    break;
+#if 0
     abort();
+#endif
   }
   free_query_allocs(qu);
   MyFree(qu->answer);
