@@ -31,6 +31,7 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "s_conf.h"
 
 static void m_ping(struct Client*, struct Client*, int, char**);
 static void ms_ping(struct Client*, struct Client*, int, char**);
@@ -76,7 +77,12 @@ static void m_ping(struct Client *client_p,
     }
   origin = parv[1];
   destination = parv[2]; /* Will get NULL or pointer (parc >= 2!!) */
-
+  if (ConfigFileEntry.hide_server && !IsOper(source_p))
+  {
+   sendto_one(source_p,":%s PONG %s :%s", me.name,
+              (destination) ? destination : me.name, origin);
+   return;
+  }
   target_p = find_client(origin, NULL);
   if (!target_p)
     target_p = find_server(origin);
