@@ -1,3 +1,16 @@
+a1kmm       2002/02/16 23:52:25 EST	(20020217_11)
+
+  Modified files:
+    src                  send.c 
+  Log:
+  - Close the fd in dead_link() so we don't get into an infinite loop by trying
+    to send from exit_client().
+  
+  Revision  Changes    Path
+  7.175     +4 -0      ircd-hybrid-7/src/send.c
+
+
+
 androsyn    2002/02/16 23:38:37 EST	(20020217_10)
 
   Modified files:
