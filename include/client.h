@@ -345,7 +345,7 @@ struct exit_client_hook
 #define use_id(source)	((source)->id[0] != '\0' ? (source)->id : (source)->name)
 
 /* if target is TS6, use id if it has one, else name */
-#define get_id(source, target) ((IsServer(target) && DoesTS6(target)) ? \
+#define get_id(source, target) ((IsServer(target->from) && DoesTS6(target->from)) ? \
 				use_id(source) : (source)->name)
 
 /* housekeeping flags */

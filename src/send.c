@@ -315,17 +315,20 @@ void
 sendto_one_prefix(struct Client *target_p, struct Client *source_p,
 		  const char *command, const char *pattern, ...)
 {
+	struct Client *dest_p;
 	va_list args;
 	buf_head_t linebuf;
 
 	/* send remote if to->from non NULL */
 	if(target_p->from != NULL)
-		target_p = target_p->from;
+		dest_p = target_p->from;
+	else
+		dest_p = target_p;
 
-	if(IsDeadorAborted(target_p))
+	if(IsDeadorAborted(dest_p))
 		return;
 
-	if(IsMe(target_p))
+	if(IsMe(dest_p))
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL, "Trying to send to myself!");
 		return;
@@ -339,7 +342,48 @@ sendto_one_prefix(struct Client *target_p, struct Client *source_p,
 		       command, get_id(target_p, target_p));
 	va_end(args);
 
-	_send_linebuf(target_p, &linebuf);
+	_send_linebuf(dest_p, &linebuf);
+	linebuf_donebuf(&linebuf);
+}
+
+/* sendto_one_numeric()
+ *
+ * inputs	- client to send to, source, va_args
+ * outputs	- client has message put into its queue
+ * side effects - source/target is chosen based on TS6 capability
+ */
+void
+sendto_one_numeric(struct Client *target_p, struct Client *source_p,
+		   int numeric, const char *pattern, ...)
+{
+	struct Client *dest_p;
+	va_list args;
+	buf_head_t linebuf;
+
+	/* send remote if to->from non NULL */
+	if(target_p->from != NULL)
+		dest_p = target_p->from;
+	else
+		dest_p = target_p;
+
+	if(IsDeadorAborted(dest_p))
+		return;
+
+	if(IsMe(dest_p))
+	{
+		sendto_realops_flags(UMODE_ALL, L_ALL, "Trying to send to myself!");
+		return;
+	}
+
+	linebuf_newbuf(&linebuf);
+	va_start(args, pattern);
+	linebuf_putmsg(&linebuf, pattern, &args,
+		       ":%s %03d %s ",
+		       get_id(source_p, target_p),
+		       numeric, get_id(target_p, target_p));
+	va_end(args);
+
+	_send_linebuf(dest_p, &linebuf);
 	linebuf_donebuf(&linebuf);
 }
 
@@ -776,14 +820,16 @@ void
 sendto_realops_flags(int flags, int level, const char *pattern, ...)
 {
 	struct Client *client_p;
-	char nbuf[IRCD_BUFSIZE * 2];
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 	va_list args;
 	buf_head_t linebuf;
 
+	linebuf_newbuf(&linebuf);
+
 	va_start(args, pattern);
-	irc_vsprintf(NULL, nbuf, pattern, args);
+	linebuf_putmsg(&linebuf, pattern, &args, 
+		       ":%s NOTICE * :*** Notice -- ", me.name);
 	va_end(args);
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, oper_list.head)
@@ -798,18 +844,11 @@ sendto_realops_flags(int flags, int level, const char *pattern, ...)
 			continue;
 
 		if(client_p->umodes & flags)
-		{
-			linebuf_newbuf(&linebuf);
-			linebuf_putmsg(&linebuf, NULL, NULL,
-				       ":%s NOTICE %s :*** Notice -- %s",
-				       me.name, client_p->name, nbuf);
-
-			send_linebuf(client_p, &linebuf);
-
-			linebuf_donebuf(&linebuf);
-		}
+			_send_linebuf(client_p, &linebuf);
 	}
-}				/* sendto_realops_flags() */
+
+	linebuf_donebuf(&linebuf);
+}
 
 /*
  * sendto_wallops_flags
@@ -851,7 +890,7 @@ sendto_wallops_flags(int flags, struct Client *source_p, const char *pattern, ..
 			continue;
 
 		if(client_p->umodes & flags)
-			send_linebuf(client_p, &linebuf);
+			_send_linebuf(client_p, &linebuf);
 	}
 
 	linebuf_donebuf(&linebuf);

@@ -337,7 +337,8 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 			{
 				sendto_one(source_p,
 					   form_str(ERR_NOSUCHSERVER),
-					   me.name, parv[0], parv[server]);
+					   get_id(&me, source_p), 
+					   get_id(source_p, source_p), parv[server]);
 				return (HUNTED_NOSUCH);
 			}
 		}
@@ -361,7 +362,8 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 		if(!IsRegistered(target_p))
 		{
 			sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
-				   me.name, parv[0], parv[server]);
+				   get_id(&me, source_p), 
+				   get_id(source_p, source_p), parv[server]);
 			return HUNTED_NOSUCH;
 		}
 
@@ -371,7 +373,6 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 		if(!match(target_p->name, parv[server]))
 			parv[server] = target_p->name;
 
-/* BROKEN_TS6 */
 		/* This is a little kludgy but should work... */
 		if(DoesTS6(target_p->from))
 			parv[0] = use_id(source_p);
@@ -381,7 +382,9 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 		return (HUNTED_PASS);
 	}
 
-	sendto_one(source_p, form_str(ERR_NOSUCHSERVER), me.name, parv[0], parv[server]);
+	sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
+		   get_id(&me, source_p), 
+		   get_id(source_p, source_p), parv[server]);
 	return (HUNTED_NOSUCH);
 }
 
