@@ -110,7 +110,7 @@ int mo_opme(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   if (!chan_is_opless(chptr))
   {
-	  sendto_one(sptr, ":%s NOTICE %s %s :Channel is not opless",
+	  sendto_one(sptr, ":%s NOTICE %s :%s Channel is not opless",
 				 me.name, parv[0], parv[1]);
 	  return 0;
   }
