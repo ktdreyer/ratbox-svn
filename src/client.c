@@ -359,7 +359,7 @@ check_pings_list(dlink_list *list)
               cptr->flags2 |= FLAGS2_PING_TIMEOUT;
 
 	      (void)ircsprintf(scratch,
-			       "Ping timeout: %d seconds",
+			       "Ping timeout: %lu seconds",
 			       CurrentTime - cptr->lasttime);
 	      
 	      (void)exit_client(cptr, cptr, &me, scratch);

@@ -32,6 +32,7 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include <stdlib.h>
 
 static int ms_eob(struct Client*, struct Client*, int, char**);
 
@@ -63,8 +64,8 @@ static int ms_eob(struct Client *cptr, struct Client *sptr,
                   int parc, char *parv[])
 {
   if (parc > 1)
-    sendto_realops_flags(FLAGS_ALL,"*** End of burst from %s (%d seconds)",
-			 sptr->name, atoi(parv[1]));
+    sendto_realops_flags(FLAGS_ALL,"*** End of burst from %s (%lu seconds)",
+			 sptr->name, strtoul(parv[1], NULL, 10));
   else
     sendto_realops_flags(FLAGS_ALL,"*** End of burst from %s",
 			 sptr->name);

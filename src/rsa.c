@@ -103,6 +103,7 @@ static RSA * str_to_RSApublic( char * key )
   return rsa;
 }
 
+int generate_challenge( char **, char **, char*);
 int generate_challenge( char ** r_challenge, char ** r_response, char * key )
 {
   unsigned char secret[32], session[16], response[16], *tmp;

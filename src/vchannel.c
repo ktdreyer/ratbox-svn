@@ -93,7 +93,7 @@ struct Channel* cjoin_channel(struct Channel *root,
   /* Find an unused vchan name (##<chan>_<ts> format) */
   i = CurrentTime;
   do {
-    ircsprintf( vchan_name, "##%s_%lu", name+1, i );
+    ircsprintf( vchan_name, "##%s_%u", name+1, i );
     vchan_chptr = hash_find_channel(vchan_name, NULL);
     i++;
 

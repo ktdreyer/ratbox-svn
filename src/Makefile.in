@@ -66,7 +66,6 @@ SRCS =                          \
   hash.c                        \
   irc_string.c                  \
   ircd.c                        \
-  ircdauth.c                    \
   ircd_signal.c                 \
   linebuf.c                     \
   list.c                        \

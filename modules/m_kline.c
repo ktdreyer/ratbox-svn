@@ -235,7 +235,7 @@ static int mo_kline(struct Client *cptr,
   if(tkline_time)
     {
       ircsprintf(buffer,
-		 "Temporary K-line %d min. - %s (%s)",
+		 "Temporary K-line %lu min. - %s (%s)",
 		 tkline_time/60,
 		 reason,
 		 current_date);

@@ -59,7 +59,16 @@ extern char* canonize(char *);
 /*
  * ircsprintf - optimized sprintf
  */
+#ifdef __GNUC__
+extern int ircsprintf(register char*, register const char*, ...)
+           __attribute__ ((format(printf, 2, 3)));
+extern int ircsnprintf(register char*, register int, register const char*,
+                       ...) __attribute__ ((format(printf, 3, 4)));
+#else
 extern int ircsprintf(register char *str, register const char *format, ...);
+extern int ircsnprintf(register char*, register int,
+                       register const char*);
+#endif
 /*
  * inetntoa - optimized inet_ntoa
  */

@@ -209,7 +209,7 @@ static int      proc_answer(ResRQ* request, HEADER* header,
                                     char *, char *);
 static ResRQ*   find_id(int);
 
-static struct cache* make_cache(ResRQ* request);
+/*static struct cache* make_cache(ResRQ* request);*/
 
 static  struct  resinfo {
   int  re_errors;
@@ -1105,7 +1105,7 @@ res_readreply(int fd, void *data)
            * callback was being called with a value of 0x2C != NULL
 	   *
 	   */
-	  cp = make_cache(request);
+	  /*cp = make_cache(request);*/
 	  (*request->query.callback)(request->query.vptr,
 				     (cp) ? &cp->reply : 0);
 	  rem_request(request);
@@ -1129,6 +1129,7 @@ res_readreply(int fd, void *data)
 }
 
 
+#if 0
 /*
  * dup_hostent - Duplicate a hostent struct, allocate only enough memory for
  * the data we're putting in it.
@@ -1197,7 +1198,10 @@ static void dup_hostent(aHostent* new_hp, struct hostent* hp)
     }
   *ap = 0;
 }
+#endif
 
+#if 0
+/* We don't actually keep a cache atm, this was just leaking... -A1kmm.*/
 static struct cache* make_cache(ResRQ* request)
 {
   struct cache* cp;
@@ -1219,7 +1223,7 @@ static struct cache* make_cache(ResRQ* request)
 
   return(cp);
 }
-
+#endif
 
 unsigned long cres_mem(struct Client *sptr)
 {

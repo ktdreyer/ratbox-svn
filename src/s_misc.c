@@ -82,7 +82,7 @@ char* date(time_t lclock)
   if (minswest < 0)
     minswest = -minswest;
   
-  ircsprintf(buf, "%s %s %d %d -- %t:%t:%t %c%t:%t",
+  ircsprintf(buf, "%s %s %d %d -- %d:%d:%d %c%d:%d",
           weekdays[lt->tm_wday], months[lt->tm_mon],lt->tm_mday,
           lt->tm_year + 1900, lt->tm_hour, lt->tm_min, lt->tm_sec,
           plus, minswest/60, minswest%60);
@@ -103,7 +103,7 @@ const char* smalldate(time_t lclock)
   gm = &gmbuf; 
   lt = localtime(&lclock);
   
-  ircsprintf(buf, "%d/%t/%t %t.%t",
+  ircsprintf(buf, "%d/%d/%d %d.%d",
              lt->tm_year + 1900, lt->tm_mon + 1, lt->tm_mday,
              lt->tm_hour, lt->tm_min);
   

@@ -336,7 +336,7 @@ static time_t io_loop(time_t delay)
 
   if (CurrentTime < lasttimeofday)
     {
-      ircsprintf(to_send, "System clock is running backwards - (%d < %d)",
+      ircsprintf(to_send, "System clock is running backwards - (%lu < %lu)",
                  CurrentTime, lasttimeofday);
       report_error(to_send, me.name, 0);
     }

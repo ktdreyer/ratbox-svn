@@ -183,7 +183,7 @@ int ReadMessageFile(MessageFile *MessageFileptr)
 
   if (local_tm)
     ircsprintf(MessageFileptr->lastChangedDate,
-               "%d/%d/%d %t:%t",
+               "%d/%d/%d %d:%d",
                local_tm->tm_mday,
                local_tm->tm_mon + 1,
                1900 + local_tm->tm_year,

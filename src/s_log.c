@@ -228,7 +228,7 @@ void log_user_exit(struct Client *sptr)
 	if( user_log_fb != NULL )
 	  {
 	    ircsprintf(linebuf,
-		       "%s (%3d:%02d:%02d): %s!%s@%s %d/%d\n",
+		       "%s (%lu:%lu:%lu): %s!%s@%s %u/%u\n",
 		       myctime(sptr->firsttime), on_for / 3600,
 		       (on_for % 3600)/60, on_for % 60,
 		       sptr->name,

@@ -1654,12 +1654,16 @@ general_no_oper_flood: NO_OPER_FLOOD '=' TYES ';'
 
 general_iauth_server: IAUTH_SERVER '=' QSTRING ';'
 {
-	strncpy(iAuth.hostname, yylval.string, HOSTLEN)[HOSTLEN] = 0;
+#if 0
+    strncpy(iAuth.hostname, yylval.string, HOSTLEN)[HOSTLEN] = 0;
+#endif
 } ;
 
 general_iauth_port: IAUTH_PORT '=' NUMBER ';'
 {
-	iAuth.port = yylval.number;
+#if 0
+    iAuth.port = yylval.number;
+#endif
 } ;
 
 general_fname_userlog: FNAME_USERLOG '=' QSTRING ';'
@@ -1703,6 +1707,8 @@ general_glines: GLINES '=' TYES ';'
 general_message_locale: MESSAGE_LOCALE '=' QSTRING ';'
   {
     char langenv[BUFSIZE];
+    if (strlen(yylval.string) > BUFSIZE-10)
+      yylval.string[BUFSIZE-9] = 0;
     ircsprintf(langenv, "LANGUAGE=%s", yylval.string);
     putenv(langenv);
   } ;
