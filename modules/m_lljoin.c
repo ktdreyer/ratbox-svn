@@ -47,7 +47,8 @@ _modinit(void)
   mod_add_cmd(MSG_LLJOIN, &lljoin_msgtab);
 }
 
-/* Only leaves need lljoin */
+char *_version = "20001122";
+
 /*
 ** m_lljoin
 **      parv[0] = sender prefix

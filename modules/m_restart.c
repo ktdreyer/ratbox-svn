@@ -44,6 +44,8 @@ _modinit(void)
   mod_add_cmd(MSG_RESTART, &restart_msgtab);
 }
 
+char *_version = "20001122";
+
 /*
  * mo_restart
  *

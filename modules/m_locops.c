@@ -44,6 +44,8 @@ _modinit(void)
   mod_add_cmd(MSG_LOCOPS, &locops_msgtab);
 }
 
+char *_version = "20001122";
+
 /*
  * m_locops - LOCOPS message handler
  * (write to *all* local opers currently online)

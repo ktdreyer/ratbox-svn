@@ -63,6 +63,8 @@ extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */
 static int flush_write(struct Client *, FBFILE* , char *, char *);
 static int remove_tkline_match(char *,char *);
 
+char *_version = "20001122";
+
 /*
 ** mo_unkline
 ** Added Aug 31, 1997 

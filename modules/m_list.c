@@ -51,6 +51,8 @@ _modinit(void)
 int list_all_channels(struct Client *sptr);
 int list_named_channel(struct Client *sptr,char *name);
 
+char *_version = "20001122";
+
 /*
 ** m_list
 **      parv[0] = sender prefix

@@ -50,6 +50,8 @@ _modinit(void)
   mod_add_cmd(MSG_CONNECT, &connect_msgtab);
 }
 
+char *_version = "20001122";
+
 /*
  * mo_connect - CONNECT command handler
  * 

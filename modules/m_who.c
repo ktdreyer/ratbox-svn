@@ -61,6 +61,8 @@ void    do_who(struct Client *sptr,
 			     char *repname,
 			     int flags);
 
+char *_version = "20001122";
+
 /*
 ** m_who
 **      parv[0] = sender prefix

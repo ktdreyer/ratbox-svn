@@ -55,6 +55,8 @@ static void part_one_client(struct Client *cptr,
 			    struct Client *sptr,
 			    char *name);
 
+char *_version = "20001122";
+
 /*
 ** m_part
 **      parv[0] = sender prefix

@@ -51,6 +51,8 @@ _modinit(void)
 int whowas_do(struct Client *cptr, struct Client *sptr,
 	      int parc, char *parv[]);
 
+char *_version = "20001122";
+
 /*
 ** m_whowas
 **      parv[0] = sender prefix

@@ -43,6 +43,8 @@ _modinit(void)
   mod_add_cmd(MSG_LUSERS, &lusers_msgtab);
 }
 
+char *_version = "20001122";
+
 /*
  * m_lusers - LUSERS message handler
  * parv[0] = sender

@@ -41,6 +41,8 @@ _modinit(void)
   mod_add_cmd(MSG_QUIT, &quit_msgtab);
 }
 
+char *_version = "20001122";
+
 /*
 ** m_quit
 **      parv[0] = sender prefix

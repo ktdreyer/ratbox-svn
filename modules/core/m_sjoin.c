@@ -50,6 +50,8 @@ _modinit(void)
   mod_add_cmd(MSG_SJOIN, &sjoin_msgtab);
 }
 
+char *_version = "20001122";
+
 /*
  * ms_sjoin
  * parv[0] - sender

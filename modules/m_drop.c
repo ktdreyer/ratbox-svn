@@ -48,7 +48,8 @@ _modinit(void)
   mod_add_cmd(MSG_DROP, &drop_msgtab);
 }
 
-/* Only HUB's need drop */
+
+char *_version = "20001122";
 
 /*
 ** ms_drop
@@ -58,7 +59,6 @@ _modinit(void)
 **
 **      "drop" a channel from consideration on a lazy link
 */
-
 int     ms_drop(struct Client *cptr,
                struct Client *sptr,
                int parc,

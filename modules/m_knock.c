@@ -53,6 +53,8 @@ _modinit(void)
   mod_add_cmd(MSG_KNOCK, &knock_msgtab);
 }
 
+char *_version = "20001122";
+
 /* m_knock
 **    parv[0] = sender prefix
 **    parv[1] = channel

@@ -41,6 +41,8 @@ _modinit(void)
   mod_add_cmd(MSG_VERSION, &version_msgtab);
 }
 
+char *_version = "20001122";
+
 /*
  * m_version - VERSION command handler
  *      parv[0] = sender prefix
