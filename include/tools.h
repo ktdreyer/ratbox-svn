@@ -154,7 +154,7 @@ dlinkMoveNode(dlink_node *m, dlink_list *oldlist, dlink_list *newlist)
   newlist->head = m;
  
   oldlist->length--;
-  newlist->length++;  
+  newlist->length++;
 }
 
 extern inline void
@@ -306,6 +306,7 @@ dlinkMoveList(dlink_list *from, dlink_list *to)
     to->head = from->head;
     to->tail = from->tail;
     from->head = from->tail = NULL;
+    to->length = from->length;
     from->length = 0;
     return;
   }
