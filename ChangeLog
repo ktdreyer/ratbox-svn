@@ -1,3 +1,45 @@
+leeh        2004/01/25 17:11:50 EST	(20040125_0)
+
+  Modified files:
+    include              channel.h s_chanserv.h service.h 
+    src                  Makefile.in channel.c client.c io.c 
+                         scommand.c service.c 
+    src/s_chanserv       Makefile.in s_c_admin.c s_c_local.h 
+                         s_chanserv.c 
+  Added files:
+    include              hook.h 
+    src                  hook.c 
+    src/s_chanserv       s_c_clear.c s_c_set.c 
+  Log:
+  - added very basic hook support
+  - added a hook for joined users
+  - fix a bug where we destroyed a channel with services still in it
+  - split introduce_services() up, as we need to introduce the services
+    first, then channels after burst
+  - added some of "SET" stuff
+  - added "CLEARMODES"
+  
+  Revision  Changes    Path
+  1.11      +1 -1      rserv/include/channel.h
+  1.1       +13 -0     rserv/include/hook.h (new)
+  1.8       +1 -0      rserv/include/s_chanserv.h
+  1.11      +2 -0      rserv/include/service.h
+  1.19      +1 -0      rserv/src/Makefile.in
+  1.23      +48 -28    rserv/src/channel.c
+  1.18      +1 -0      rserv/src/client.c
+  1.1       +38 -0     rserv/src/hook.c (new)
+  1.23      +2 -0      rserv/src/io.c
+  1.4       +3 -1      rserv/src/s_chanserv/Makefile.in
+  1.4       +2 -1      rserv/src/s_chanserv/s_c_admin.c
+  1.1       +55 -0     rserv/src/s_chanserv/s_c_clear.c (new)
+  1.5       +11 -0     rserv/src/s_chanserv/s_c_local.h
+  1.1       +155 -0    rserv/src/s_chanserv/s_c_set.c (new)
+  1.8       +95 -0     rserv/src/s_chanserv/s_chanserv.c
+  1.15      +1 -1      rserv/src/scommand.c
+  1.17      +20 -4     rserv/src/service.c
+
+
+
 leeh        2004/01/24 10:33:49 EST	(20040124_2)
 
   Modified files:
