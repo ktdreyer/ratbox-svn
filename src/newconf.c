@@ -1343,7 +1343,7 @@ conf_set_resv_channel(void *data)
 	{
 		yy_rxconf = make_rxconf(data, 
 					EmptyString(resv_reason) ? "No Reason" : resv_reason, 
-					CONF_RESV|RESV_CHANNEL);
+					0, CONF_RESV|RESV_CHANNEL);
 		add_rxconf(yy_rxconf);
 	}
 	else
@@ -1368,7 +1368,7 @@ conf_set_resv_nick(void *data)
 	{
 		yy_rxconf = make_rxconf(data,
 					EmptyString(resv_reason) ? "No Reason" : resv_reason,
-					CONF_RESV|RESV_NICK);
+					0, CONF_RESV|RESV_NICK);
 		add_rxconf(yy_rxconf);
 	}
 	else
