@@ -1,3 +1,32 @@
+leeh        2005/01/04 14:20:54 EST	(20050104_6)
+
+  Modified files:
+    doc                  example.conf 
+    include              rserv.h 
+    src                  balloc.c conf.c newconf.c rserv.c 
+                         s_alis.c s_chanserv.c s_global.c 
+                         s_jupeserv.c s_operbot.c s_userserv.c 
+  Log:
+  - made the hostnames for services to "services.int"
+  - made die() take format strings
+  - added ability to just make ircd test the config
+  
+  Revision  Changes    Path
+  1.23      +2 -2      rserv/doc/example.conf
+  1.12      +2 -1      rserv/include/rserv.h
+  1.7       +5 -12     rserv/src/balloc.c
+  1.32      +1 -1      rserv/src/conf.c
+  1.33      +6 -1      rserv/src/newconf.c
+  1.42      +82 -41    rserv/src/rserv.c
+  1.28      +1 -1      rserv/src/s_alis.c
+  1.30      +1 -1      rserv/src/s_chanserv.c
+  1.2       +1 -1      rserv/src/s_global.c
+  1.19      +1 -1      rserv/src/s_jupeserv.c
+  1.20      +1 -1      rserv/src/s_operbot.c
+  1.23      +1 -1      rserv/src/s_userserv.c
+
+
+
 leeh        2005/01/04 13:51:23 EST	(20050104_5)
 
   Modified files:
