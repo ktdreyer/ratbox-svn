@@ -1,3 +1,21 @@
+leeh        2005/04/06 23:03:23 UTC	(20050406_1)
+
+  Modified files:
+    doc                  example.conf 
+    include              client.h 
+    src                  log.c newconf.c 
+  Log:
+  - patch via jilles to add support for sending WALLOPS when an admin command
+    is used
+  
+  Revision  Changes    Path
+  1.35      +3 -1      rserv/doc/example.conf
+  1.42      +2 -0      rserv/include/client.h
+  1.9       +11 -4     rserv/src/log.c
+  1.44      +1 -0      rserv/src/newconf.c
+
+
+
 leeh        2005/04/06 23:00:15 UTC	(20050406_0)
 
   Modified files:
