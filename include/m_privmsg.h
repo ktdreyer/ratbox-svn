@@ -7,8 +7,9 @@ struct entity {
   int flags;
 };
 
-int build_target_list(struct Client *sptr,
-		      char *nicks_channels, struct entity target_table[]);
+int build_target_list(struct Client *cptr, struct Client *sptr,
+		      char *nicks_channels, struct entity target_table[],
+		      char *text);
 
 int drone_attack(struct Client *sptr, struct Client *acptr);
 

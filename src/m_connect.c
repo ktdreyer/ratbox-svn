@@ -116,12 +116,13 @@ int mo_connect(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 
   /* always privileged with handlers */
 
-  if (IsLocalOper(sptr) && parc > 3) {
-    /* 
-     * Only allow LocOps to make local CONNECTS --SRB
-     */
-    return 0;
-  }
+  if (IsLocalOper(sptr) && parc > 3)
+    {
+      /* 
+       * Only allow LocOps to make local CONNECTS --SRB
+       */
+      return 0;
+    }
 
   if (MyConnect(sptr) && !IsOperRemote(sptr) && parc > 3)
     {
@@ -151,14 +152,16 @@ int mo_connect(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   /*
    * try to find the name, then host, if both fail notify ops and bail
    */
-  if (!(aconf = find_conf_by_name(parv[1], CONF_CONNECT_SERVER))) {
-    if (!(aconf = find_conf_by_host(parv[1], CONF_CONNECT_SERVER))) {
-      sendto_one(sptr,
-                 "NOTICE %s :Connect: Host %s not listed in ircd.conf",
-                 parv[0], parv[1]);
-      return 0;
+  if (!(aconf = find_conf_by_name(parv[1], CONF_CONNECT_SERVER)))
+    {
+      if (!(aconf = find_conf_by_host(parv[1], CONF_CONNECT_SERVER)))
+	{
+	  sendto_one(sptr,
+		     "NOTICE %s :Connect: Host %s not listed in ircd.conf",
+		     parv[0], parv[1]);
+	  return 0;
+	}
     }
-  }
   assert(0 != aconf);
   /*
    * Get port number from user, if given. If not specified,
@@ -238,19 +241,6 @@ int ms_connect(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
       return -1;
     }
 
-  if (IsLocalOper(sptr) && parc > 3) {
-    /* 
-     * Only allow LocOps to make local CONNECTS --SRB
-     */
-    return 0;
-  }
-
-  if (MyConnect(sptr) && !IsOperRemote(sptr) && parc > 3)
-    {
-      sendto_one(sptr,":%s NOTICE %s :You have no R flag", me.name, parv[0]);
-      return 0;
-    }
-
   if (hunt_server(cptr, sptr,
                   ":%s CONNECT %s %s :%s", 3, parc, parv) != HUNTED_ISME)
     return 0;
@@ -335,5 +325,6 @@ int ms_connect(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   aconf->port = tmpport;
   return 0;
 }
+
 
 

@@ -157,7 +157,7 @@ int     m_notice(struct Client *cptr,
       return -1;
     }
 
-  ntargets = build_target_list(sptr,parv[1],target_table);
+  ntargets = build_target_list(cptr,sptr,parv[1],target_table,parv[2]);
 
   for(i = 0; i < ntargets ; i++)
     {

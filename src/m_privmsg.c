@@ -117,6 +117,11 @@ static void privmsg_channel_flags( struct Client *cptr,
 static void privmsg_client(struct Client *sptr, struct Client *acptr,
 			   char *text);
 
+static void handle_opers(struct Client *cptr,
+			 struct Client *sptr,
+			 char *nick,
+			 char *text);
+
 /*
 ** m_privmsg
 **
@@ -161,7 +166,7 @@ int     m_privmsg(struct Client *cptr,
       return -1;
     }
 
-  ntargets = build_target_list(sptr,parv[1],target_table);
+  ntargets = build_target_list(cptr,sptr,parv[1],target_table,parv[2]);
 
   for(i = 0; i < ntargets ; i++)
     {
@@ -195,18 +200,26 @@ int     m_privmsg(struct Client *cptr,
 /*
  * build_target_list
  *
- * inputs	- pointer to list of nicks/channels
+ * inputs	- pointer to given cptr (server)
+ *		- pointer to given source (oper/client etc.)
+ *		- pointer to list of nicks/channels
  *		- pointer to table to place results
+ *		- pointer to text (only used if sptr is an oper)
  * output	- number of valid entities
  * side effects	- target_table is modified to contain a list of
  *		  pointers to channels or clients
+ *		  if source client is an oper
+ *		  all the classic old bizzare oper privmsg tricks
+ *		  are parsed and sent as is...
  *
  * This function will be also used in m_notice.c
  */
 
-int build_target_list(struct Client *sptr,
+int build_target_list(struct Client *cptr,
+		      struct Client *sptr,
 		      char *nicks_channels,
-		      struct entity target_table[])
+		      struct entity target_table[],
+		      char *text)
 {
   int  i = 0;
   int  type;
@@ -273,8 +286,8 @@ int build_target_list(struct Client *sptr,
 
 	      if( i >= MAX_MULTI_MESSAGES)
 		return(i);
+	      continue;
 	    }
-	  continue;
 	}
       /* At this point, its likely its another client */
 
@@ -288,6 +301,13 @@ int build_target_list(struct Client *sptr,
 	      
 	  if( i >= MAX_MULTI_MESSAGES)
 	    return(i);
+	  continue;
+	}
+
+      /* anything else below needs global oper privs */
+      if (IsGlobalOper(sptr))
+	{
+	  handle_opers(cptr,sptr,nick,text);
 	}
     }
   return i;
@@ -467,109 +487,6 @@ int     mo_privmsg(struct Client *cptr,
       return -1;
     }
 
-#if 0
-  /* Everything below here should be reserved for opers 
-   * as pointed out by Mortiis, user%host.name@server.name 
-   * syntax could be used to flood without FLUD protection
-   * its also a delightful way for non-opers to find users who
-   * have changed nicks -Dianora
-   *
-   * Grrr it was pointed out to me that x@service is valid
-   * for non-opers too, and wouldn't allow for flooding/stalking
-   * -Dianora
-   */
-
-  /*
-  ** the following two cases allow masks in NOTICEs
-  ** (for OPERs only)
-  **
-  ** Armin, 8Jun90 (gruner@informatik.tu-muenchen.de)
-  */
-  if ((*nick == '$' || *nick == '#'))
-    {
-      if (!(s = (char *)strrchr(nick, '.')))
-        {
-          sendto_one(sptr, form_str(ERR_NOTOPLEVEL),
-                     me.name, parv[0], nick);
-          return 0;
-        }
-      while (*++s)
-        if (*s == '.' || *s == '*' || *s == '?')
-          break;
-      if (*s == '*' || *s == '?')
-        {
-          sendto_one(sptr, form_str(ERR_WILDTOPLEVEL),
-                     me.name, parv[0], nick);
-          return 0;
-        }
-      sendto_match_butone(IsServer(cptr) ? cptr : NULL, 
-                          sptr, nick + 1,
-                          (*nick == '#') ? MATCH_HOST :
-                          MATCH_SERVER,
-                          ":%s %s %s :%s", parv[0],
-                          "PRIVMSG", nick, parv[2]);
-      return 0;
-    }
-        
-  /*
-  ** user[%host]@server addressed?
-  */
-  if ((server = (char *)strchr(nick, '@')) &&
-      (acptr = find_server(server + 1)))
-    {
-      int count = 0;
-
-      /*
-      ** Not destined for a user on me :-(
-      */
-      if (!IsMe(acptr))
-        {
-          sendto_one(acptr,":%s %s %s :%s", parv[0],
-                     "PRIVMSG", nick, parv[2]);
-          return 0;
-        }
-
-      *server = '\0';
-
-      /* special case opers@server */
-      if(!irccmp(nick,"opers"))
-        {
-          sendto_realops("To opers: From %s: %s",sptr->name,parv[2]);
-          return 0;
-        }
-        
-      if ((host = (char *)strchr(nick, '%')))
-        *host++ = '\0';
-
-      /*
-      ** Look for users which match the destination host
-      ** (no host == wildcard) and if one and one only is
-      ** found connected to me, deliver message!
-      */
-      acptr = find_userhost(nick, host, NULL, &count);
-      if (server)
-        *server = '@';
-      if (host)
-        *--host = '%';
-      if (acptr)
-        {
-          if (count == 1)
-            sendto_prefix_one(acptr, sptr,
-                              ":%s %s %s :%s",
-                              parv[0], "PRIVMSG",
-                              nick, parv[2]);
-          else 
-            sendto_one(sptr,
-                       form_str(ERR_TOOMANYTARGETS),
-                       me.name, parv[0], nick);
-        }
-      if (acptr)
-          return 0;
-    }
-  sendto_one(sptr, form_str(ERR_NOSUCHNICK), me.name,
-             parv[0], nick);
-
-#endif
   m_privmsg(cptr,sptr,parc,parv);
   return 0;
 }
@@ -672,3 +589,131 @@ int drone_attack(struct Client *sptr,struct Client *acptr)
 
   return 0;
 }
+
+
+/*
+ * handle_opers
+ *
+ * inputs	- server pointer
+ *		- client pointer
+ *		- nick stuff to grok for opers
+ *		- text to send if grok
+ * output	- none
+ * side effects	- all the classic icky oper type messages are parsed
+ *		  i.e. privmsg #some.host 
+ *		  for the moment, oper NOTICE to this icky stuff
+ *		  is translated to privmsg. deal for now.
+ */
+static void handle_opers(struct Client *cptr,
+			       struct Client *sptr,
+			       char *nick,
+			       char *text)
+{
+  struct Client *acptr;
+  char *host;
+  char *server;
+  char *s;
+  int count;
+
+  /* Everything below here should be reserved for opers 
+   * as pointed out by Mortiis, user%host.name@server.name 
+   * syntax could be used to flood without FLUD protection
+   * its also a delightful way for non-opers to find users who
+   * have changed nicks -Dianora
+   *
+   * Grrr it was pointed out to me that x@service is valid
+   * for non-opers too, and wouldn't allow for flooding/stalking
+   * -Dianora
+   */
+
+  /*
+  ** the following two cases allow masks in NOTICEs
+  ** (for OPERs only)
+  **
+  ** Armin, 8Jun90 (gruner@informatik.tu-muenchen.de)
+  */
+  if ((*nick == '$' || *nick == '#'))
+    {
+      if (!(s = (char *)strrchr(nick, '.')))
+	{
+	  sendto_one(sptr, form_str(ERR_NOTOPLEVEL),
+		     me.name, sptr->name, nick);
+	  return;
+	}
+      while (*++s)
+	if (*s == '.' || *s == '*' || *s == '?')
+	  break;
+      if (*s == '*' || *s == '?')
+	{
+	  sendto_one(sptr, form_str(ERR_WILDTOPLEVEL),
+		     me.name, sptr->name, nick);
+	  return;
+	}
+      sendto_match_butone(IsServer(cptr) ? cptr : NULL, 
+			  sptr, nick + 1,
+			  (*nick == '#') ? MATCH_HOST :
+			  MATCH_SERVER,
+			  ":%s %s %s :%s", sptr->name,
+			  "PRIVMSG", nick, text);
+      return;
+    }
+  /*
+  ** user[%host]@server addressed?
+  */
+  if ((server = (char *)strchr(nick, '@')) &&
+      (acptr = find_server(server + 1)))
+    {
+      count = 0;
+      
+      /*
+      ** Not destined for a user on me :-(
+      */
+      if (!IsMe(acptr))
+	{
+	  sendto_one(acptr,":%s %s %s :%s", sptr->name,
+		     "PRIVMSG", nick, text);
+	  return;
+	}
+
+      *server = '\0';
+
+      /* special case opers@server */
+      if(!irccmp(nick,"opers"))
+	{
+	  sendto_realops("To opers: From %s: %s",sptr->name,sptr->name);
+	  return;
+	}
+        
+      if ((host = (char *)strchr(nick, '%')))
+	*host++ = '\0';
+      
+      /*
+      ** Look for users which match the destination host
+      ** (no host == wildcard) and if one and one only is
+      ** found connected to me, deliver message!
+      */
+      acptr = find_userhost(nick, host, NULL, &count);
+      if (server)
+	*server = '@';
+      if (host)
+	*--host = '%';
+      if (acptr)
+	{
+	  if (count == 1)
+	    sendto_prefix_one(acptr, sptr,
+			      ":%s %s %s :%s",
+			      sptr->name, "PRIVMSG",
+			      nick, text);
+	  else 
+	    sendto_one(sptr,
+		       form_str(ERR_TOOMANYTARGETS),
+		       me.name, sptr->name, nick);
+	}
+    }
+}
+
+
+
+
+
+
