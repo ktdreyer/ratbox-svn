@@ -1495,7 +1495,7 @@ client.c and linebuf.c
 
 
 *** 20010810_1 by leeh
-- I agree with Hwy, we should block remote versions at all, mainly
+- I agree with Hwy, we shouldn't block remote versions at all, mainly
   because you know the first server to reply to the request, if its not
   the target is a hub.. which would make hub hiding useless.. :)
 

@@ -19,6 +19,8 @@ options that were in config.h, to be changed with a /rehash.
   ops, or deop ops.   This leads to greater security on channels.  This is
   the mode (+h) and is seen as % on the channel list.
 
+  NOTE:  Half ops are optional.
+
 - Channel Op Hiding is now included as a channel mode.  By setting the
   mode +a when a user joins the channel, they will not see who is opped,
   voiced, or halfopped.  They will see mode changes except +ohv but will
@@ -74,11 +76,11 @@ options that were in config.h, to be changed with a /rehash.
   her nick, he or she will be removed from any other user's ACCEPT list.  This
   must be done in order to prevent other users from being able to trace another
   user through NICK changes and the like.  When a user is placed on the ACCEPT
-  list, the user will be notified.
+  list, the user will be notified.  More information is available in the
+  modeg.txt document in this directory.
 
 - Due to the new flood control for users, the multiple message restriction has
-  been removed. (/msg nick1,nick2,nick3 message) and is configurable in the
-  config file.
+  been removed. (/msg nick1,nick2,nick3 message)
 
 - LINKS for non-opers uses a file, links.txt, in the etc directory.  This file
   is automatically updated by the server every links_delay seconds.  There
@@ -97,8 +99,7 @@ options that were in config.h, to be changed with a /rehash.
   to hide the IPs of servers, by only showing them to admins:
      (indicated by umode +a and admin=yes; in oper block)
 
-  It also limits certain stats commands to admin only, and certain special
-  contrib/ modules (such as opme).
+  It also limits certain stats commands to admin only.
   
 - Remote K-Lines are supported.  These allow you to permit operators on 
   remote servers to place klines on your server.  The shared block in the
@@ -181,11 +182,12 @@ options that were in config.h, to be changed with a /rehash.
   MODUNLOAD will remove a module from the ircd, and MODLOAD will load a new
   module into the ircd.  MODRELOAD will unload then load the module in one
   simple command.  All of these commands are documented in opers.txt and are
-  restricted to admins only.
+  restricted to admins only.  These commands are disabled when compiled with
+  static modules.
 
 - HUB is now a runtime option.
 
-- Classes (Y: lines) can now have names instead of numbers.
+- Classes (formerly Y: lines) can now have names instead of numbers.
 
 - Hybrid now supports IRCnet-like redirection.  The redirserv and redirport
   options in an auth {} block will allow an admin to specify other servers
