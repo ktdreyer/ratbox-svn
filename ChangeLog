@@ -1,3 +1,23 @@
+androsyn    2003/01/26 22:48:36 UTC	(20030126_3)
+
+  Modified files:
+    src                  ircd.c ircd_signal.c listener.c s_bsd.c 
+                         s_conf.c s_serv.c s_user.c 
+  Log:
+  Use a signal handler for SIGCHLD.  Also various cleanups to make things use
+  sizeof() instead of magic numbers
+  
+  Revision  Changes    Path
+  7.277     +0 -15     ircd-ratbox/src/ircd.c
+  7.16      +11 -0     ircd-ratbox/src/ircd_signal.c
+  7.85      +2 -2      ircd-ratbox/src/listener.c
+  7.196     +4 -4      ircd-ratbox/src/s_bsd.c
+  7.393     +1 -1      ircd-ratbox/src/s_conf.c
+  7.317     +2 -2      ircd-ratbox/src/s_serv.c
+  7.254     +2 -2      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2003/01/26 20:19:10 UTC	(20030126_2)
 
   Modified files:
