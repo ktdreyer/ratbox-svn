@@ -1,3 +1,7 @@
+*** 20010127_9 by fl_
+- configfileentry -> servinfo
+
+
 *** 20010127_8 by davidt
 Eventually found the weird bug which causes list.c to complain about
 users still being on channels when they are freed.
