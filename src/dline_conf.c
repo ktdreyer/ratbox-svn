@@ -51,6 +51,9 @@ struct ConfItem *match_Dline(unsigned long ip)
 
 void clear_Dline_table(void)
 {
+	Destroy_Patricia(dline, NULL);
+	Destroy_Patricia(eline, NULL);
+	Destroy_Patricia(kline, NULL);
 	zap_Dlines();
 }
 struct ConfItem *match_ip_Kline(unsigned long ip, const char *name)
@@ -64,7 +67,16 @@ struct ConfItem *match_ip_Kline(unsigned long ip, const char *name)
 }
 void report_ip_Klines(struct Client *sptr)
 {
+	patricia_node_t *node;
+	char *name, *host, *pass, *user, *classname;
+	char conftype = 'K';
+	int port;
 
+	PATRICIA_WALK(kline->head, node) 
+	{
+		get_printable_conf(node->data, &name, &host, &pass, &user, &port, &classname);
+		sendto_one(sptr, form_str(RPL_STATSKLINE), me.name, sptr->name, conftype, host, user, pass);	
+	} PATRICIA_WALK_END;
 }
 
 void add_Dline(struct ConfItem *conf_ptr)
@@ -87,14 +99,22 @@ void add_Eline(struct ConfItem *conf_ptr)
 void add_ip_Kline(struct ConfItem *conf_ptr)
 {
 	patricia_node_t *node;
-	log(L_NOTICE, "Added ipKline: %s\n", conf_ptr->host);
 	node = make_and_lookup(kline, conf_ptr->host);
 	node->data = conf_ptr;	
-
 }
 
-void report_dlines(struct Client *foo)
+void report_dlines(struct Client *sptr)
 {
-
-
+	patricia_node_t *node;
+	char *name, *host, *pass, *user, *classname, conftype;
+	int port;
+	PATRICIA_WALK(dline->head, node) 
+	{
+		if(IsConfElined(node->data))
+			conftype = 'd';
+		else
+			conftype = 'D';
+		get_printable_conf(node->data, &name, &host, &pass, &user, &port, &classname);
+		sendto_one(sptr, form_str(RPL_STATSDLINE), me.name, sptr->name, conftype, host, pass);	
+	} PATRICIA_WALK_END;
 }
