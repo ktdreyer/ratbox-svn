@@ -1,3 +1,21 @@
+leeh        2004/01/15 09:01:16 EST	(20040115_0)
+
+  Modified files:
+    doc                  example.conf 
+    include              channel.h 
+    src                  channel.c s_alis.c 
+  Log:
+  - add operbot {}; to example.conf
+  - add chmode_to_string_simple() for alis
+  
+  Revision  Changes    Path
+  1.6       +9 -0      rserv/doc/example.conf
+  1.8       +1 -0      rserv/include/channel.h
+  1.18      +39 -0     rserv/src/channel.c
+  1.17      +2 -2      rserv/src/s_alis.c
+
+
+
 leeh        2004/01/14 15:59:31 EST	(20040114_0)
 
   Modified files:
