@@ -8,7 +8,7 @@ SET <option> [parameter]
   CREATEMODES  [modes] : Channel modes used on channel creation.
   ENFORCEMODES [modes] : Channel modes that are enforced.  You may only
                          enforce modes exist (eg, +n).  For proper
-			 enforcement of +i and +k, enable AUTOJOIN.
+                         enforcement of +i and +k, enable AUTOJOIN.
   TOPIC        [topic] : Sets channel topic to [topic].  This will be
                          enforced periodically by services.
   URL          [url]   : Sets channel URL to [url]
