@@ -1,3 +1,8 @@
+*** 20010205_12 by db
+- temporary fix for adns /rehash cores
+
+
+
 *** 20010205_11 by davidt
 oops, missed a return
 
