@@ -4183,6 +4183,17 @@ static void destroy_channel(struct Channel *chptr)
   MyFree(chptr->topic_info);
 
   del_from_channel_hash_table(chptr->chname, chptr);
+  if (ServerInfo.hub == 1)
+  {
+   for (m=lazylink_channels.head; m; m=m->next)
+   {
+    if (m->data != chptr)
+     continue;
+    dlinkDelete(m, &lazylink_channels);
+    free_dlink_node(m);
+    break;
+   }
+  }
   MyFree((char*) chptr);
   Count.chan--;
 }
