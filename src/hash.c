@@ -133,7 +133,7 @@ int hash_nick_name(const char* name)
  * and they are always case sensitive.   -orabidoo
  */
 static  unsigned int 
-hash_id(char *nname)
+hash_id(const char *nname)
 {
 	unsigned int h = 0;
 	
@@ -360,7 +360,7 @@ void del_from_channel_hash_table(const char* name, struct Channel* chptr)
  * hash_find_id
  */
 struct Client *
-hash_find_id(char *name, struct Client *cptr)
+hash_find_id(const char *name, struct Client *cptr)
 {
 	struct Client *tmp;
 	unsigned int   hashv;

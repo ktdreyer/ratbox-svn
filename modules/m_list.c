@@ -43,6 +43,8 @@
 static int m_list(struct Client*, struct Client*, int, char**);
 static int ms_list(struct Client*, struct Client*, int, char**);
 static int mo_list(struct Client*, struct Client*, int, char**);
+static int list_all_channels(struct Client *);
+static void list_one_channel(struct Client *,struct Channel *);
 
 struct Message list_msgtab = {
   MSG_LIST, 0, 0, 0, MFLG_SLOW, 0,

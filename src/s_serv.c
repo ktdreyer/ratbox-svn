@@ -1117,7 +1117,7 @@ burst_channel(struct Client *cptr, struct Channel *chptr)
 
   if(chptr->topic[0])
     {
-      sendto_one(cptr, ":%s TOPIC %s %s %d :%s",
+      sendto_one(cptr, ":%s TOPIC %s %s %lu :%s",
 		 me.name, chptr->chname,
 		 chptr->topic_info,chptr->topic_time,
 		 chptr->topic);
@@ -1137,7 +1137,7 @@ burst_channel(struct Client *cptr, struct Channel *chptr)
 
 	  if(vchan->topic[0])
 	    {
-	      sendto_one(cptr, ":%s TOPIC %s %s %d :%s",
+	      sendto_one(cptr, ":%s TOPIC %s %s %lu :%s",
 			 me.name, vchan->chname,
 			 vchan->topic_info,vchan->topic_time,
 			 vchan->topic);
@@ -1377,7 +1377,7 @@ void show_servers(struct Client *cptr)
       cptr2 = ptr->data;
 
       ++j;
-      sendto_one(cptr, ":%s %d %s :%s (%s!%s@%s) Idle: %d",
+      sendto_one(cptr, ":%s %d %s :%s (%s!%s@%s) Idle: %lu",
                  me.name, RPL_STATSDEBUG, cptr->name, cptr2->name,
                  (cptr2->serv->by[0] ? cptr2->serv->by : "Remote."), 
                  "*", "*", CurrentTime - cptr2->lasttime);
@@ -1531,7 +1531,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 			     aconf->name);
         if (by && IsPerson(by) && !MyClient(by))  
             sendto_one(by, ":%s NOTICE %s :Connect to host %s failed.",
-              me.name, by->name, cptr);
+              me.name, by->name, cptr->name);
         det_confs_butmask(cptr, 0);
         free_client(cptr);
         return 0;

@@ -162,7 +162,7 @@ send_message(struct Client *to, char *msg, int len)
     {
       if (IsServer(to))
         sendto_realops_flags(FLAGS_ALL,
-			     "Max SendQ limit exceeded for %s: %d > %d",
+			     "Max SendQ limit exceeded for %s: %u > %lu",
 			     get_client_name(to, FALSE),
           linebuf_len(&to->localClient->buf_sendq), get_sendq(to));
       if (IsClient(to))
@@ -255,7 +255,7 @@ send_message_remote(struct Client *to, struct Client *from,
     {
       if (IsServer(to))
         sendto_realops_flags(FLAGS_ALL,
-			     "Max SendQ limit exceeded for %s: %d > %d",
+			     "Max SendQ limit exceeded for %s: %u > %lu",
 			     get_client_name(to, FALSE),
           linebuf_len(&to->localClient->buf_sendq), get_sendq(to));
       if (IsClient(to))

@@ -314,8 +314,8 @@ load_a_module (char *path)
 
   initfunc ();
 
-  sendto_realops_flags (FLAGS_ALL, "Module %s [version: %s] loaded at 0x%x",
-                        mod_basename, ver, tmpptr);
+  sendto_realops_flags (FLAGS_ALL, "Module %s [version: %s] loaded at 0x%lx",
+                        mod_basename, ver, (unsigned long)tmpptr);
   log (L_WARN, "Module %s [version: %s] loaded at 0x%x",
        mod_basename, ver, tmpptr);
   MyFree (mod_basename);

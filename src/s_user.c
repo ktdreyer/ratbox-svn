@@ -196,7 +196,7 @@ void show_opers(struct Client *cptr)
 	  ptr = cptr2->localClient->confs.head;
 	  aconf = ptr->data;
 
-          sendto_one(cptr, ":%s %d %s :[%c][%s] %s (%s@%s) Idle: %d",
+          sendto_one(cptr, ":%s %d %s :[%c][%s] %s (%s@%s) Idle: %lu",
                      me.name, RPL_STATSDEBUG, cptr->name,
                      IsOper(cptr2) ? 'O' : 'o',
 		     oper_privs_as_string(cptr2, aconf->port),
@@ -206,7 +206,7 @@ void show_opers(struct Client *cptr)
         }
       else
         {
-          sendto_one(cptr, ":%s %d %s :[%c] %s (%s@%s) Idle: %d",
+          sendto_one(cptr, ":%s %d %s :[%c] %s (%s@%s) Idle: %lu",
                      me.name, RPL_STATSDEBUG, cptr->name,
                      IsOper(cptr2) ? 'O' : 'o',
                      cptr2->name,

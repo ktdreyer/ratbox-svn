@@ -579,7 +579,7 @@ GreetUser(struct Client *client)
   client->user->last = CurrentTime;
 
   sendto_realops_flags(FLAGS_CCONN,
-		       "Client connecting: %s (%s@%s) [%s] {%d}",
+		       "Client connecting: %s (%s@%s) [%s] {%s}",
 		       client->name,
 		       client->username,
 		       client->host,

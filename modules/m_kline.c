@@ -211,7 +211,7 @@ static int mo_kline(struct Client *cptr,
   if(target_server != NULL)
     {
       sendto_cap_serv_butone(CAP_KLN, &me,
-			   ":%s KLINE %s %s %d %s %s :%s",
+			   ":%s KLINE %s %s %lu %s %s :%s",
 			   me.name, sptr->name,
 			   target_server,
 			   tkline_time, user, host, reason);

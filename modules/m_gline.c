@@ -495,9 +495,8 @@ log_gline_request(
              ConfigFileEntry.glinefile, small_file_date((time_t)0));
   if ( (out = fbopen(filenamebuf, "+a")) == NULL )
     {
-      sendto_realops_flags(FLAGS_ALL,"*** Problem opening %s error %s",
-			   filenamebuf,
-			   strerror(errno));
+      sendto_realops_flags(FLAGS_ALL,"*** Problem opening %s: %s",
+                     filenamebuf, strerror(errno));
       return;
     }
 
