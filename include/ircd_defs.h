@@ -60,6 +60,7 @@
  * message return values 
  */
 #define CLIENT_EXITED    -2
+#define CLIENT_PARSE_ERROR -1
 #define CLIENT_OK	1
 
 /* 

@@ -143,8 +143,12 @@ int parse(struct Client *cptr, char *pbuffer, char *bufend)
   Debug((DEBUG_DEBUG, "Parsing %s:", pbuffer));
 
   if (IsDead(cptr))
-    return -1;
+    return (CLIENT_EXITED);
   
+  /* XXX kludgy test, can it be combined into IsDead() ? */
+  if (cptr->fd < 0)
+    return (CLIENT_EXITED);
+
   for (ch = pbuffer; *ch == ' '; ch++)   /* skip spaces */
     /* null statement */ ;
 
@@ -191,7 +195,7 @@ int parse(struct Client *cptr, char *pbuffer, char *bufend)
 
               remove_unknown(cptr, sender, pbuffer);
 
-              return -1;
+              return (CLIENT_PARSE_ERROR);
             }
           if (from->from != cptr)
             {
@@ -211,7 +215,7 @@ int parse(struct Client *cptr, char *pbuffer, char *bufend)
       ServerStats->is_empt++;
       Debug((DEBUG_NOTICE, "Empty message from host %s:%s",
              cptr->name, from->name));
-      return(-1);
+      return (CLIENT_PARSE_ERROR);
     }
 
   /*
@@ -224,7 +228,9 @@ int parse(struct Client *cptr, char *pbuffer, char *bufend)
   * ummm????
   */
 
-  if( *(ch + 3) == ' ' && /* ok, lets see if its a possible numeric.. */
+  /* EOB is 3 chars long but is not a numeric */
+
+  if( *(ch + 3) == ' ' ) && /* ok, lets see if its a possible numeric.. */
       IsDigit(*ch) && IsDigit(*(ch + 1)) && IsDigit(*(ch + 2)) )
     {
       mptr = (struct Message *)NULL;
@@ -238,9 +244,9 @@ int parse(struct Client *cptr, char *pbuffer, char *bufend)
     { 
       int ii = 0;
 
-      s = strchr(ch, ' ');      /* moved from above,now need it here */
-      if (s)
+      if( (s = strchr(ch, ' ')) )
         *s++ = '\0';
+
       mptr = hash_parse(ch);
 
       if (!mptr || !mptr->cmd)
@@ -267,7 +273,7 @@ int parse(struct Client *cptr, char *pbuffer, char *bufend)
                      ch, get_client_name(cptr, TRUE)));
             }
           ServerStats->is_unco++;
-          return(-1);
+          return (CLIENT_PARSE_ERROR);
         }
 
       paramcount = mptr->parameters;
@@ -644,7 +650,7 @@ static int     do_numeric(
   struct Channel *chptr;
 
   if (parc < 1 || !IsServer(sptr))
-    return 0;
+    return CLIENT_PARSE_ERROR;
 
   /* Remap low number numerics. */
   if(numeric[0] == '0')
