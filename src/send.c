@@ -165,15 +165,16 @@ send_queued_write(int fd, void *data)
 	int retlen;
 	int flags;
 #ifdef USE_IODEBUG_HOOKS
-	struct hook_io_data hdata;
+	hook_data_int hd;
 #endif
 	/* cant write anything to a dead socket. */
 	if(IsIOError(to))
 		return;
+
 #ifdef USE_IODEBUG_HOOKS
-	hdata.connection = to;
+	hd.client = to;
 	if(to->localClient->buf_sendq.list.head)
-		hdata.data = ((buf_line_t *) to->localClient->buf_sendq.list.head->data)->buf +
+		hd.arg1 = ((buf_line_t *) to->localClient->buf_sendq.list.head->data)->buf +
 	                     to->localClient->buf_sendq.writeofs;
 #endif
 
@@ -184,10 +185,11 @@ send_queued_write(int fd, void *data)
 		{
 			/* We have some data written .. update counters */
 #ifdef USE_IODEBUG_HOOKS
-                        hdata.len = retlen;
-                        hook_call_event(h_iosend_id, &hdata);
+                        hd.arg2 = retlen;
+                        call_hook(h_iosend_id, &hd);
+
                         if(to->localClient->buf_sendq.list.head)
-                                hdata.data =
+                                hd.arg1 =
                                         ((buf_line_t *) to->localClient->buf_sendq.list.head->
                                          data)->buf + to->localClient->buf_sendq.writeofs;
 #endif

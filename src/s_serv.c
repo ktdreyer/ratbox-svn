@@ -694,7 +694,6 @@ burst_TS5(struct Client *client_p)
 	struct Client *target_p;
 	struct Channel *chptr;
 	struct membership *msptr;
-	struct hook_burst_channel hinfo;
 	dlink_node *ptr;
 	dlink_node *uptr;
 	char *t;
@@ -726,8 +725,6 @@ burst_TS5(struct Client *client_p)
 				   target_p->name, target_p->user->away);
 	}
 
-	hook_call_event(h_sent_client_burst_id, client_p);
-
 	DLINK_FOREACH(ptr, global_channel_list.head)
 	{
 		chptr = ptr->data;
@@ -738,10 +735,6 @@ burst_TS5(struct Client *client_p)
 
 		if(*chptr->chname != '#')
 			continue;
-
-		hinfo.chptr = chptr;
-		hinfo.client = client_p;
-		hook_call_event(h_burst_channel_id, &hinfo);
 
 		*modebuf = *parabuf = '\0';
 		channel_modes(chptr, client_p, modebuf, parabuf);
@@ -816,7 +809,6 @@ burst_TS6(struct Client *client_p)
 	struct Client *target_p;
 	struct Channel *chptr;
 	struct membership *msptr;
-	struct hook_burst_channel hinfo;
 	dlink_node *ptr;
 	dlink_node *uptr;
 	char *t;
@@ -860,8 +852,6 @@ burst_TS6(struct Client *client_p)
 				   target_p->user->away);
 	}
 
-	hook_call_event(h_sent_client_burst_id, client_p);
-
 	DLINK_FOREACH(ptr, global_channel_list.head)
 	{
 		chptr = ptr->data;
@@ -872,10 +862,6 @@ burst_TS6(struct Client *client_p)
 
 		if(*chptr->chname != '#')
 			continue;
-
-		hinfo.chptr = chptr;
-		hinfo.client = client_p;
-		hook_call_event(h_burst_channel_id, &hinfo);
 
 		*modebuf = *parabuf = '\0';
 		channel_modes(chptr, client_p, modebuf, parabuf);
@@ -1226,8 +1212,6 @@ server_estab(struct Client *client_p)
 		burst_TS6(client_p);
 	else
 		burst_TS5(client_p);
-
-	hook_call_event(h_server_link_id, client_p);
 
 	/* Always send a PING after connect burst is done */
 	sendto_one(client_p, "PING :%s", get_id(&me, client_p));

@@ -413,8 +413,6 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 	sendto_one(target_p, ":%s PING %s %s",
 			get_id(&me, target_p), me.name, target_p->name);
 
-	hook_call_event(h_server_link_id, target_p);
-
 	return 0;
 }
 

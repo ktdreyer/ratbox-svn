@@ -45,7 +45,7 @@
 
 static int m_trace(struct Client *, struct Client *, int, const char **);
 
-static void trace_spy(struct Client *, const char *);
+static void trace_spy(struct Client *, struct Client *);
 
 struct Message trace_msgtab = {
 	"TRACE", 0, 0, 0, MFLG_SLOW,
@@ -171,7 +171,7 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 			tname = target_p->name;
 		}
 
-		trace_spy(source_p, tname);
+		trace_spy(source_p, target_p);
 
 		sendto_one_numeric(source_p, RPL_ENDOFTRACE, 
 				   form_str(RPL_ENDOFTRACE), tname);
@@ -434,13 +434,12 @@ report_this_status(struct Client *source_p, struct Client *target_p,
  * side effects - hook event doing_trace is called
  */
 static void
-trace_spy(struct Client *source_p, const char *target)
+trace_spy(struct Client *source_p, struct Client *target_p)
 {
-	struct hook_spy_data data;
+	hook_data_client hdata;
 
-	data.source_p = source_p;
-	data.name = target;
-	data.statchar = '\0';
+	hdata.client = source_p;
+	hdata.target = target_p;
 
-	hook_call_event(doing_trace_hook, &data);
+	call_hook(doing_trace_hook, &hdata);
 }

@@ -1,90 +1,54 @@
 /*
- *  ircd-ratbox: A slightly useful ircd.
- *  hook.h: A header for the hooks into parts of ircd.
+ * Copyright (C) 2004-2005 Lee Hardy <lee -at- leeh.co.uk>
+ * Copyright (C) 2004-2005 ircd-ratbox development team
  *
- *  Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center
- *  Copyright (C) 1996-2002 Hybrid Development Team
- *  Copyright (C) 2002-2004 ircd-ratbox development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- *  USA
- *
- *  $Id$
+ * $Id$
  */
-
-#ifndef __HOOK_H_INCLUDED
-#define __HOOK_H_INCLUDED
-
-#include "tools.h"
-
+#ifndef INCLUDED_HOOK_H
+#define INCLUDED_HOOK_H
 
 typedef struct
 {
 	char *name;
-	int id;
 	dlink_list hooks;
-}
-hook;
+} hook;
 
-/* we don't define the arguments to hookfn, because they can
-   vary between different hooks */
-typedef int (*hookfn) (void *data);
+typedef void (*hookfn) (void *data);
 
-/* this is used when a hook is called by an m_function
-   stand data you'd need in that situation */
-struct hook_mfunc_data
+int h_iosend_id;
+int h_iorecv_id;
+int h_iorecvctrl_id;
+
+void init_hook(void);
+int register_hook(const char *name);
+void add_hook(const char *name, hookfn fn);
+void remove_hook(const char *name, hookfn fn);
+void call_hook(int id, void *arg);
+
+typedef struct
 {
-	struct Client *client_p;
-	struct Client *source_p;
-	int parc;
-	char **parv;
-};
+	struct Client *client;
+	const void *arg1;
+	const void *arg2;
+} hook_data;
 
-struct hook_spy_data
+typedef struct
 {
-	struct Client *source_p;
-	const char *name;
-	char statchar;
-};
+	struct Client *client;
+	const void *arg1;
+	int arg2;
+} hook_data_int;
 
-struct hook_io_data
+typedef struct
 {
-	struct Client *connection;
-	const char *data;
-	unsigned int len;
-};
+	struct Client *client;
+	struct Client *target;
+} hook_data_client;
 
-struct hook_burst_channel
+typedef struct
 {
 	struct Client *client;
 	struct Channel *chptr;
-};
+} hook_data_channel;
 
-
-int hook_add_event(const char *, int *);
-int hook_add_hook(const char *, hookfn );
-int hook_call_event(int id, void *);
-int hook_del_event(const char *);
-int hook_del_hook(const char *event, hookfn );
-void init_hooks(void);
-
-extern int h_iosend_id;
-extern int h_iorecv_id;
-extern int h_iorecvctrl_id;
-extern int h_burst_channel_id;
-extern int h_client_auth_id;
-int h_sent_client_burst_id;
-int h_server_link_id;	/* server is introduced to the network */
 #endif

@@ -1,200 +1,194 @@
 /*
- *  ircd-ratbox: A slightly useful ircd.
- *  hook.c: Provides a generic event hooking interface.
+ * ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
+ * hook.c - code for dealing with the hook system
  *
- *  Copyright (C) 2000-2002 Edward Brocklesby, Hybrid Development Team
+ * This code is basically a slow leaking array.  Events are simply just a
+ * position in this array.  When hooks are added, events will be created if
+ * they dont exist - this means modules with hooks can be loaded in any
+ * order, and events are preserved through module reloads.
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ * Copyright (C) 2004-2005 Lee Hardy <lee -at- leeh.co.uk>
+ * Copyright (C) 2004-2005 ircd-ratbox development team
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- *  USA
+ * 1.Redistributions of source code must retain the above copyright notice,
+ *   this list of conditions and the following disclaimer.
+ * 2.Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in the
+ *   documentation and/or other materials provided with the distribution.
+ * 3.The name of the author may not be used to endorse or promote products
+ *   derived from this software without specific prior written permission.
  *
- *  $Id$
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ * $Id$
  */
-
-/* hooks are used by modules to hook into events called by other parts of
-   the code.  modules can also register their own events, and call them
-   as appropriate. */
-
 #include "stdinc.h"
+#include "memory.h"
+#include "tools.h"
+#include "hook.h"
 #include "irc_string.h"
 
-#include "tools.h"
-#include "memory.h"
-#include "hook.h"
+hook *hooks;
 
-dlink_list hooks;
+#define HOOK_INCREMENT 10
 
-static hook* find_hook_byname(const char *);
+int num_hooks = 0;
+int last_hook = 0;
+int max_hooks = HOOK_INCREMENT;
 
-#ifndef NDEBUG
+#ifdef USE_IODEBUG_HOOKS
 int h_iosend_id;
 int h_iorecv_id;
 int h_iorecvctrl_id;
 #endif
-int h_burst_channel_id;
-int h_sent_client_burst_id;
-int h_client_auth_id;
-int h_server_link_id;
 
 void
-init_hooks(void)
+init_hook(void)
 {
-	memset(&hooks, 0, sizeof(hooks));
-#ifndef NDEBUG
-	hook_add_event("iosend", &h_iosend_id);
-	hook_add_event("iorecv", &h_iorecv_id);
-	hook_add_event("iorecvctrl", &h_iorecvctrl_id);
+	hooks = MyMalloc(sizeof(hook) * HOOK_INCREMENT);
+
+#ifdef USE_IODEBUG_HOOKS
+	h_iosend_id = register_hook("iosend");
+	h_iorecv_id = register_hook("iorecv");
+	h_iorecvctrl_id = register_hook("iorecvctrl");
 #endif
-	hook_add_event("burst_channel", &h_burst_channel_id);
-	hook_add_event("sent_client_burst", &h_sent_client_burst_id);
-	hook_add_event("client_auth", &h_client_auth_id);
-
-	/* server introduced to the network, local or remote */
-	hook_add_event("server_link", &h_server_link_id);
 }
 
-static int hook_curid = 0;
-
-static hook *
-new_hook(const char *name, int *id)
+/* grow_hooktable()
+ *   Enlarges the hook table by HOOK_INCREMENT
+ */
+static void
+grow_hooktable(void)
 {
-	hook *h;
+	hook *newhooks;
 
-	h = MyMalloc(sizeof(hook));
-	DupString(h->name, name);
+	newhooks = MyMalloc(sizeof(hook) * (max_hooks + HOOK_INCREMENT));
+	memcpy(newhooks, hooks, sizeof(hook) * num_hooks);
 
-	h->id = *id = hook_curid++;
-	return h;
+	MyFree(hooks);
+	hooks = newhooks;
+	max_hooks += HOOK_INCREMENT;
 }
 
-int
-hook_add_event(const char *name, int* id)
+/* find_freehookslot()
+ *   Finds the next free slot in the hook table, given by an entry with
+ *   h->name being NULL.
+ */
+static int
+find_freehookslot(void)
 {
-	hook *newhook;
-	if ((newhook = find_hook_byname(name)) != NULL)
+	int i;
+
+	if((num_hooks + 1) > max_hooks)
+		grow_hooktable();
+
+	for(i = 0; i < max_hooks; i++)
 	{
-		*id = newhook->id;
-		return 0;
+		if(!hooks[i].name)
+			return i;
 	}
 
-	newhook = new_hook(name, id);
-
-	dlinkAddAlloc(newhook, &hooks);
-	return 0;
+	/* shouldnt ever get here */
+	return(max_hooks - 1);
 }
 
-int
-hook_del_event(const char *name)
+/* find_hook()
+ *   Finds an event in the hook table.
+ */
+static int
+find_hook(const char *name)
 {
-	dlink_node *node;
-	hook *h;
+	int i;
 
-	DLINK_FOREACH(node, hooks.head)
+	for(i = 0; i < max_hooks; i++)
 	{
-		h = node->data;
+		if(!hooks[i].name)
+			continue;
 
-		if(!strcmp(h->name, name))
-		{
-			dlinkDelete(node, &hooks);
-			MyFree(h);
-			return 0;
-		}
+		if(!irccmp(hooks[i].name, name))
+			return i;
 	}
-	return 0;
+
+	return -1;
 }
 
-static hook *
-find_hook_byname(const char *name)
-{
-	dlink_node *node;
-	hook *h;
-
-	DLINK_FOREACH(node, hooks.head)
-	{
-		h = node->data;
-
-		if(!strcmp(h->name, name))
-			return h;
-	}
-	return NULL;
-}
-
-static hook *
-find_hook_byid(int id)
-{
-	dlink_node *node;
-	hook *h;
-
-	DLINK_FOREACH(node, hooks.head)
-	{
-		h = node->data;
-
-		if (h->id == id)
-			return h;
-	}
-	return NULL;
-}
-
+/* register_hook()
+ *   Finds an events position in the hook table, creating it if it doesnt
+ *   exist.
+ */
 int
-hook_del_hook(const char *event, hookfn  fn)
+register_hook(const char *name)
 {
-	hook *h;
-	dlink_node *node, *nnode;
-	h = find_hook_byname(event);
-	if(!h)
-		return -1;
+	int i;
 
-	DLINK_FOREACH_SAFE(node, nnode, h->hooks.head)
+	if((i = find_hook(name)) < 0)
 	{
-		if(fn == (hookfn) node->data)
-		{
-			dlinkDestroy(node, &h->hooks);
-		}
+		i = find_freehookslot();
+		DupString(hooks[i].name, name);
+		num_hooks++;
 	}
-	return 0;
+
+	return i;
 }
 
-int
-hook_add_hook(const char *event, hookfn fn)
+/* add_hook()
+ *   Adds a hook to an event in the hook table, creating event first if
+ *   needed.
+ */
+void
+add_hook(const char *name, hookfn fn)
 {
-	hook *h;
+	int i;
 
-	h = find_hook_byname(event);
-	if(!h)
-		return -1;
+	i = register_hook(name);
 
-	dlinkAddAlloc(fn, &h->hooks);
-	return 0;
+	dlinkAddAlloc(fn, &hooks[i].hooks);
 }
 
-int
-hook_call_event(int id, void *data)
+/* remove_hook()
+ *   Removes a hook from an event in the hook table.
+ */
+void
+remove_hook(const char *name, hookfn fn)
 {
-	hook *h;
-	dlink_node *node;
+	int i;
+
+	if((i = find_hook(name)) < 0)
+		return;
+
+	dlinkFindDestroy(&hooks[i].hooks, fn);
+}
+
+/* call_hook()
+ *   Calls functions from a given event in the hook table.
+ */
+void
+call_hook(int id, void *arg)
+{
 	hookfn fn;
+	dlink_node *ptr;
 
-	h = find_hook_byid(id);
-	if(!h)
-		return -1;
-
-	DLINK_FOREACH(node, h->hooks.head)
+	/* The ID we were passed is the position in the hook table of this
+	 * hook
+	 */
+	DLINK_FOREACH(ptr, hooks[id].hooks.head)
 	{
-		fn = (hookfn) (uintptr_t) node->data;
-
-		if(fn(data) != 0)
-			return 0;
+		fn = ptr->data;
+		fn(arg);
 	}
-	return 0;
 }
+

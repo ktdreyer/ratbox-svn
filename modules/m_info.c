@@ -846,11 +846,10 @@ send_conf_options(struct Client *source_p)
 static void
 info_spy(struct Client *source_p)
 {
-	struct hook_spy_data data;
+	hook_data hd;
 
-	data.source_p = source_p;
-	data.name = NULL;
-	data.statchar = '\0';
+	hd.client = source_p;
+	hd.arg1 = hd.arg2 = NULL;
 
-	hook_call_event(doing_info_hook, &data);
+	call_hook(doing_info_hook, &hd);
 }

@@ -223,7 +223,7 @@ single_whois(struct Client *source_p, struct Client *target_p, int operspy)
 	int mlen;
 	char *t;
 	int tlen;
-	struct hook_mfunc_data hd;
+	hook_data_client hdata;
 	char *name;
 	char quest[] = "?";
 	int visible;
@@ -320,19 +320,19 @@ single_whois(struct Client *source_p, struct Client *target_p, int operspy)
 	
 	}
 
-	hd.client_p = target_p;
-	hd.source_p = source_p;
+	hdata.client = source_p;
+	hdata.target = target_p;
 
-	/* although we should fill in parc and parv, we don't ..
-	 * be careful of this when writing whois hooks
+	/* doing_whois_hook must only be called for local clients,
+	 * doing_whois_global_hook must only be called for local targets
 	 */
 	/* it is important that these are called *before* RPL_ENDOFWHOIS is
 	 * sent, services compatibility code depends on it. --anfl
 	 */
 	if(MyClient(source_p))
-		hook_call_event(doing_whois_hook, &hd);
+		call_hook(doing_whois_hook, &hdata);
 	else
-		hook_call_event(doing_whois_global_hook, &hd);
+		call_hook(doing_whois_global_hook, &hdata);
 
 	return;
 }

@@ -90,7 +90,6 @@ static EVH timeout_auth_queries_event;
 
 static PF read_auth_reply;
 static CNCB auth_connect_callback;
-static int h_new_local_client;
 /*
  * init_auth()
  *
@@ -100,7 +99,6 @@ void
 init_auth(void)
 {
 	/* This hook takes a struct Client for its argument */
-	hook_add_event("new_local_client", &h_new_local_client);
 	memset(&auth_poll_list, 0, sizeof(auth_poll_list));
 	eventAddIsh("timeout_auth_queries_event", timeout_auth_queries_event, NULL, 1);
 	auth_heap = BlockHeapCreate(sizeof(struct AuthRequest), LCLIENT_HEAP_SIZE);
@@ -156,7 +154,6 @@ release_auth_client(struct AuthRequest *auth)
 	client->localClient->allow_read = MAX_FLOOD;
 	comm_setflush(client->localClient->fd, 1000, flood_recalc, client);
 	dlinkAddTail(client, &client->node, &global_client_list);
-	hook_call_event(h_new_local_client, client);
 	read_packet(client->localClient->fd, client);
 }
 

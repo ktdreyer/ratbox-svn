@@ -81,14 +81,14 @@ void load_static_modules(void)
 				{
 					mapi_hlist_av1 *m;
 					for(m = mheader->mapi_hook_list; m->hapi_name; ++m)
-						hook_add_event(m->hapi_name, m->hapi_id);
+						*m->hapi_id = register_hook(m->hapi_name);
 				}	
 				
 				if(mheader->mapi_hfn_list)
 				{
 					mapi_hfn_list_av1 *m;
 					for(m = mheader->mapi_hfn_list; m->hapi_name; ++m)
-						hook_add_hook(m->hapi_name, m->fn);
+						add_hook(m->hapi_name, m->fn);
 						
 				}
 				

@@ -589,7 +589,7 @@ main(int argc, char *argv[])
 	initwhowas();
 	initwatch();
 	init_stats();
-	init_hooks();
+	init_hook();
 	init_reject();
 	init_cache();
 	load_all_modules(1);

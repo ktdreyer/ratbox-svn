@@ -28,7 +28,7 @@
 #include "ircd.h"
 #include "send.h"
 
-int show_links(struct hook_spy_data *);
+void show_links(hook_data *);
 
 mapi_hfn_list_av1 links_hfnlist[] = {
 	{"doing_links", (hookfn) show_links},
@@ -37,13 +37,13 @@ mapi_hfn_list_av1 links_hfnlist[] = {
 
 DECLARE_MODULE_AV1(links_spy, NULL, NULL, NULL, NULL, links_hfnlist, "$Revision$");
 
-int
-show_links(struct hook_spy_data *data)
+void
+show_links(hook_data *data)
 {
+	const char *mask = data->arg1;
+
 	sendto_realops_flags(UMODE_SPY, L_ALL,
 			     "LINKS '%s' requested by %s (%s@%s) [%s]",
-			     data->name, data->source_p->name, data->source_p->username,
-			     data->source_p->host, data->source_p->user->server);
-
-	return 0;
+			     mask, data->client->name, data->client->username,
+			     data->client->host, data->client->user->server);
 }

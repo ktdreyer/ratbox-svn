@@ -28,7 +28,7 @@
 #include "ircd.h"
 #include "send.h"
 
-int show_trace(struct hook_spy_data *);
+void show_trace(hook_data_client *);
 
 mapi_hfn_list_av1 trace_hfnlist[] = {
 	{"doing_trace", (hookfn) show_trace},
@@ -37,20 +37,18 @@ mapi_hfn_list_av1 trace_hfnlist[] = {
 
 DECLARE_MODULE_AV1(trace_spy, NULL, NULL, NULL, NULL, trace_hfnlist, "$Revision$");
 
-int
-show_trace(struct hook_spy_data *data)
+void
+show_trace(hook_data_client *data)
 {
-	if(data->name)
+	if(data->target)
 		sendto_realops_flags(UMODE_SPY, L_ALL,
 				"trace requested by %s (%s@%s) [%s] on %s",
-				data->source_p->name, data->source_p->username,
-				data->source_p->host, data->source_p->user->server,
-				data->name);
+				data->client->name, data->client->username,
+				data->client->host, data->client->user->server,
+				data->target->name);
 	else
 		sendto_realops_flags(UMODE_SPY, L_ALL,
 				"trace requested by %s (%s@%s) [%s]",
-				data->source_p->name, data->source_p->username,
-				data->source_p->host, data->source_p->user->server);
-
-	return 0;
+				data->client->name, data->client->username,
+				data->client->host, data->client->user->server);
 }

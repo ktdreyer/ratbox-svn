@@ -54,7 +54,9 @@ static int me_login(struct Client *, struct Client *, int, const char **);
 
 static int h_sent_client_burst(struct Client *);
 static int h_server_link(struct Client *);
+#if 0
 static int h_svc_whois(struct hook_mfunc_data *hd);
+#endif
 
 struct Message su_msgtab = {
 	"SU", 0, 0, 0, MFLG_SLOW,
@@ -66,6 +68,7 @@ struct Message login_msgtab = {
 };
 
 mapi_clist_av1 services_clist[] = { &su_msgtab, &login_msgtab, NULL };
+#if 0
 mapi_hfn_list_av1 services_hfnlist[] = {
 	{ "sent_client_burst",	(hookfn) h_sent_client_burst },
 	{ "server_link",	(hookfn) h_server_link },
@@ -73,8 +76,15 @@ mapi_hfn_list_av1 services_hfnlist[] = {
 	{ "doing_whois_global",	(hookfn) h_svc_whois },
 	{ NULL, NULL }
 };
+#endif
 
-DECLARE_MODULE_AV1(services, NULL, NULL, services_clist, NULL, services_hfnlist, "$Revision$");
+DECLARE_MODULE_AV1(services, NULL, NULL, services_clist, NULL, 
+#if 0
+		services_hfnlist, 
+#else
+		NULL,
+#endif
+		"$Revision$");
 
 static int
 me_su(struct Client *client_p, struct Client *source_p,
@@ -115,6 +125,7 @@ me_login(struct Client *client_p, struct Client *source_p,
 	return 0;
 }
 
+#if 0
 static int
 h_sent_client_burst(struct Client *target_p)
 {
@@ -168,5 +179,6 @@ h_svc_whois(struct hook_mfunc_data *data)
 
 	return 0;
 }
+#endif
 
 #endif
