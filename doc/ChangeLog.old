@@ -1,3 +1,8 @@
+*** 20010407_1 by toot
+/invite was showing the secret vchan name to users, cleaned m_invite a bit too
+fixed "voodoo" invites on root chans
+
+
 *** 20010406_2 by fl_
 - updated todo a bit..
 
