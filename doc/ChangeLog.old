@@ -1,3 +1,7 @@
+*** 20010319_4 by toot
+/away flood control was a bit harsh
+
+
 *** 20010319_3 by androsyn
 Adds our own definition of INADDR_LOOPBACK if it wasn't defined by the OS
 headers. Don't you love hacks around hacks. The first being the hack
