@@ -1,3 +1,15 @@
+leeh        2004/08/02 20:45:24 EDT	(20040803_0)
+
+  Modified files:
+    include              client.h 
+  Log:
+  - remove 3 unused vars from LocalUser
+  
+  Revision  Changes    Path
+  7.248     +0 -3      ircd-ratbox/include/client.h
+
+
+
 leeh        2004/08/02 19:37:03 EDT	(20040802_5)
 
   Modified files:
