@@ -45,7 +45,7 @@
 #define INADDR_NONE ((unsigned int) 0xffffffff)
 #endif
 
-#ifdef NO_IN6ADDR_ANY
+#if defined(NO_IN6ADDR_ANY) && defined(IPV6)
 static const struct in6_addr in6addr_any =
 { { { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 } } };
 #endif 
