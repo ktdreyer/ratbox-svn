@@ -1,3 +1,24 @@
+leeh        2005/02/15 19:13:31 EST	(20050216_0)
+
+  Modified files:
+    include              stdinc.h 
+    src                  event.c ircd_lexer.l ircd_signal.c 
+                         modules.c 
+  Removed files:
+    servlink             descrip.mms 
+  Log:
+  - remove a few vms bits
+  
+  Revision  Changes    Path
+  1.16      +0 -46     ircd-ratbox/include/stdinc.h
+  1.4       +0 -15     ircd-ratbox/servlink/descrip.mms (dead)
+  7.47      +0 -54     ircd-ratbox/src/event.c
+  1.168     +1 -5      ircd-ratbox/src/ircd_lexer.l
+  7.27      +0 -25     ircd-ratbox/src/ircd_signal.c
+  7.152     +0 -3      ircd-ratbox/src/modules.c
+
+
+
 leeh        2005/02/15 18:53:32 EST	(20050215_0)
 
   Modified files:
