@@ -1,3 +1,7 @@
+*** 20010528_10 by androsyn
+Changed ipv4_vhost/ipv6_vhost to vhost and vhost6 respectively.
+
+
 *** 20010528_9 by leeh
 - added ipv6_vhost="", and changed vhost= to ipv4_vhost=, this will
   allow us to connect to ipv4 servers using ipv4, and ipv6 servers
