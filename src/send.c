@@ -150,7 +150,7 @@ _send_linebuf(struct Client *to, buf_head_t *linebuf)
     return 0;
   }
 #endif
-  if (to->fd < 0)
+  if (to->localClient->fd < 0)
     return 0; /* Thou shalt not write to closed descriptors */
 
   if (IsDead(to))
@@ -182,7 +182,7 @@ _send_linebuf(struct Client *to, buf_head_t *linebuf)
   to->localClient->sendM += 1;
   me.localClient->sendM += 1;
 
-  send_queued_write(to->fd, to);	
+  send_queued_write(to->localClient->fd, to);	
   return 0;
 } /* send_linebuf() */
 
@@ -285,7 +285,7 @@ send_queued_write(int fd, void *data)
 #endif
   
   if (linebuf_len(&to->localClient->buf_sendq)) {
-    while((retlen = linebuf_flush(to->fd, &to->localClient->buf_sendq)) > 0)
+    while((retlen = linebuf_flush(to->localClient->fd, &to->localClient->buf_sendq)) > 0)
     {
       /* We have some data written .. update counters */
 #ifndef NDEBUG
@@ -410,7 +410,7 @@ sendto_one(struct Client *to, const char *pattern, ...)
     to = to->from;
 
 #ifdef INVARIANTS
-  if (to->fd < 0)
+  if (to->localClient->fd < 0)
   {
     Debug((DEBUG_ERROR,
            "Local socket %s with negative fd... AARGH!",
@@ -461,7 +461,7 @@ sendto_one_prefix(struct Client *to, struct Client *prefix,
     to_sendto = to;
 
 #ifdef INVARIANTS
-  if (to->fd < 0)
+  if (to->localClient->fd < 0)
   {
     Debug((DEBUG_ERROR,
            "Local socket %s with negative fd... AARGH!",
@@ -867,7 +867,7 @@ sendto_list_local(dlink_list *list, buf_head_t *linebuf_ptr)
     if ((target_p = ptr->data) == NULL)
       continue;
 
-    if (!MyConnect(target_p) || (target_p->fd < 0))
+    if (!MyConnect(target_p) || (target_p->localClient->fd < 0))
       continue;
 
     if (target_p->serial == current_serial)

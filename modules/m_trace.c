@@ -202,11 +202,11 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
      {
       if (IsPerson(target_p))
         {
-          link_u[target_p->from->fd]++;
+          link_u[target_p->from->localClient->fd]++;
         }
       else if (IsServer(target_p))
 	{
-	  link_s[target_p->from->fd]++;
+	  link_s[target_p->from->localClient->fd]++;
 	}
      }
    }
@@ -238,8 +238,8 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
         continue;
 
       cnt = report_this_status(source_p, target_p, dow,
-                               link_u[target_p->fd],
-                               link_s[target_p->fd]);
+                               link_u[target_p->localClient->fd],
+                               link_s[target_p->localClient->fd]);
     }
 
   /* This section is to report the unknowns */
@@ -266,8 +266,8 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
        */
       if(!cnt)
 	sendto_one(source_p, form_str(RPL_TRACESERVER),
-	           me.name, parv[0], 0, link_s[me.fd],
-		   link_u[me.fd], me.name, "*", "*", me.name);
+	           me.name, parv[0], 0, link_s[me.localClient->fd],
+		   link_u[me.localClient->fd], me.name, "*", "*", me.name);
 		   
       /* let the user have some idea that its at the end of the
        * trace

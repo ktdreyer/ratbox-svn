@@ -289,7 +289,7 @@ read_packet(int fd, void *data)
   struct LocalUser *lclient_p = client_p->localClient;
   int length = 0;
   int lbuf_len;
-  int fd_r = client_p->fd;
+  int fd_r = client_p->localClient->fd;
   int binary = 0;
 #ifndef NDEBUG
   struct hook_io_data hdata;
@@ -301,8 +301,8 @@ read_packet(int fd, void *data)
 #ifndef HAVE_SOCKETPAIR
   if (HasServlink(client_p))
   {
-    assert(client_p->fd_r > -1);
-    fd_r = client_p->fd_r;
+    assert(client_p->localClient->fd_r > -1);
+    fd_r = client_p->localClient->fd_r;
   }
 #endif
   assert(lclient_p != NULL);
@@ -373,12 +373,12 @@ read_packet(int fd, void *data)
   parse_client_queued(client_p);
 
   /* server fd may have changed */
-  fd_r = client_p->fd;
+  fd_r = client_p->localClient->fd;
 #ifndef HAVE_SOCKETPAIR
   if (HasServlink(client_p))
   {
-    assert(client_p->fd_r > -1);
-    fd_r = client_p->fd_r;
+    assert(client_p->localClient->fd_r > -1);
+    fd_r = client_p->localClient->fd_r;
   }
 #endif
 

@@ -1010,7 +1010,7 @@ int server_estab(struct Client *client_p)
   /*
    * XXX - this should be in s_bsd
    */
-  if (!set_sock_buffers(client_p->fd, READBUF_SIZE))
+  if (!set_sock_buffers(client_p->localClient->fd, READBUF_SIZE))
     report_error(L_ALL, SETBUF_ERROR_MSG, get_client_name(client_p, SHOW_IP), errno);
 
   /* Hand the server off to servlink now */
@@ -1103,19 +1103,19 @@ int server_estab(struct Client *client_p)
        * client_p->name + 64
        */
 #ifdef HAVE_SOCKETPAIR
-      fd_note(client_p->fd, "slink data: %s", client_p->name);
+      fd_note(client_p->localClient->fd, "slink data: %s", client_p->name);
       fd_note(client_p->localClient->ctrlfd, "slink ctrl: %s",
               client_p->name);
 #else
-      fd_note(client_p->fd, "slink data (out): %s", client_p->name);
+      fd_note(client_p->localClient->fd, "slink data (out): %s", client_p->name);
       fd_note(client_p->localClient->ctrlfd, "slink ctrl (out): %s",
               client_p->name);
-      fd_note(client_p->fd_r, "slink data  (in): %s", client_p->name);
+      fd_note(client_p->localClient->fd_r, "slink data  (in): %s", client_p->name);
       fd_note(client_p->localClient->ctrlfd_r, "slink ctrl  (in): %s",
               client_p->name);
 #endif
     } else
-        fd_note(client_p->fd, "Server: %s", client_p->name);
+        fd_note(client_p->localClient->fd, "Server: %s", client_p->name);
 
   /*
   ** Old sendto_serv_but_one() call removed because we now
@@ -1368,7 +1368,7 @@ int fork_server(struct Client *server)
       
       if ((i == slink_fds[0][0][0]) || (i == slink_fds[0][0][1]) ||
           (i == slink_fds[0][0][0]) || (i == slink_fds[1][0][1]) ||
-          (i == server->fd)) {
+          (i == server->localClient->fd)) {
         set_non_blocking(i);
 #ifdef USE_SIGIO /* the servlink process doesn't need O_ASYNC */
 	{
@@ -1392,7 +1392,7 @@ int fork_server(struct Client *server)
     sprintf(fd_str[1], "%d", slink_fds[0][0][1]); /* ctrl write */
     sprintf(fd_str[2], "%d", slink_fds[1][0][0]); /* data read */
     sprintf(fd_str[3], "%d", slink_fds[1][0][1]); /* data write */
-    sprintf(fd_str[4], "%d", server->fd);         /* network read/write */
+    sprintf(fd_str[4], "%d", server->localClient->fd);         /* network read/write */
     
     kid_argv[0] = "-slink";
     kid_argv[1] = fd_str[0];
@@ -1410,7 +1410,7 @@ int fork_server(struct Client *server)
   }
   else
   {
-    fd_close( server->fd );
+    fd_close( server->localClient->fd );
 
     /* close the childs end of the pipes */
     close(slink_fds[0][0][0]);
@@ -1420,14 +1420,14 @@ int fork_server(struct Client *server)
 
     assert(server->localClient);
     server->localClient->ctrlfd = slink_fds[0][1][1];
-    server->fd = slink_fds[1][1][1];
+    server->localClient->fd = slink_fds[1][1][1];
 
 #ifndef HAVE_SOCKETPAIR
     server->localClient->ctrlfd_r = slink_fds[0][1][0];
-    server->fd_r = slink_fds[1][1][0];
+    server->localClient->fd_r = slink_fds[1][1][0];
 #endif
 
-    if (!set_non_blocking(server->fd))
+    if (!set_non_blocking(server->localClient->fd))
     {
       report_error(L_ADMIN, NONB_ERROR_MSG, get_client_name(server, SHOW_IP), errno);
       report_error(L_OPER, NONB_ERROR_MSG, get_client_name(server, MASK_IP), errno);
@@ -1440,7 +1440,7 @@ int fork_server(struct Client *server)
                    get_client_name(server, MASK_IP), errno);
     }
 #ifndef HAVE_SOCKETPAIR
-    if (!set_non_blocking(server->fd_r))
+    if (!set_non_blocking(server->localClient->fd_r))
     {
       report_error(L_ADMIN, NONB_ERROR_MSG, 
                    get_client_name(server, SHOW_IP), errno);
@@ -1458,12 +1458,12 @@ int fork_server(struct Client *server)
 
 #ifdef HAVE_SOCKETPAIR
     fd_open(server->localClient->ctrlfd, FD_SOCKET, NULL);
-    fd_open(server->fd, FD_SOCKET, NULL);
+    fd_open(server->localClient->fd, FD_SOCKET, NULL);
 #else
     fd_open(server->localClient->ctrlfd, FD_PIPE, NULL);
-    fd_open(server->fd, FD_PIPE, NULL);
+    fd_open(server->localClient->fd, FD_PIPE, NULL);
     fd_open(server->localClient->ctrlfd_r, FD_PIPE, NULL);
-    fd_open(server->fd_r, FD_PIPE, NULL);
+    fd_open(server->localClient->fd_r, FD_PIPE, NULL);
 #endif
 
    read_ctrl_packet(slink_fds[0][1][0], server);
@@ -2005,7 +2005,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
     strncpy_irc(client_p->name, aconf->name, HOSTLEN);
     strncpy_irc(client_p->host, aconf->host, HOSTLEN);
     inetntop(DEF_FAM, &IN_ADDR(aconf->ipnum), client_p->localClient->sockhost, HOSTIPLEN);
-    client_p->fd = fd;
+    client_p->localClient->fd = fd;
 
     /*
      * Set up the initial server evilness, ripped straight from
@@ -2013,13 +2013,13 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
      *   -- adrian
      */
 
-    if (!set_non_blocking(client_p->fd))
+    if (!set_non_blocking(client_p->localClient->fd))
     {
       report_error(L_ADMIN, NONB_ERROR_MSG, get_client_name(client_p, SHOW_IP), errno);
       report_error(L_OPER, NONB_ERROR_MSG, get_client_name(client_p, MASK_IP), errno);
     }
 
-    if (!set_sock_buffers(client_p->fd, READBUF_SIZE))
+    if (!set_sock_buffers(client_p->localClient->fd, READBUF_SIZE))
     {
       report_error(L_ADMIN, SETBUF_ERROR_MSG, get_client_name(client_p, SHOW_IP), errno);
       report_error(L_OPER, SETBUF_ERROR_MSG, get_client_name(client_p, MASK_IP), errno);
@@ -2083,7 +2083,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 
 	copy_s_addr(S_ADDR(ipn), IN_ADDR(aconf->my_ipnum));
 
-	comm_connect_tcp(client_p->fd, aconf->host, aconf->port,
+	comm_connect_tcp(client_p->localClient->fd, aconf->host, aconf->port,
 			 (struct sockaddr *)&SOCKADDR(ipn), sizeof(struct irc_sockaddr), 
 			 serv_connect_callback, client_p, aconf->aftype, 30);
       }
@@ -2096,7 +2096,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 
 	copy_s_addr(S_ADDR(ipn), IN_ADDR(ServerInfo.ip));
 
-	comm_connect_tcp(client_p->fd, aconf->host, aconf->port,
+	comm_connect_tcp(client_p->localClient->fd, aconf->host, aconf->port,
 			 (struct sockaddr *)&SOCKADDR(ipn), sizeof(struct irc_sockaddr), 
 			 serv_connect_callback, client_p, aconf->aftype, 30);
       }
@@ -2110,14 +2110,14 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 	
 	copy_s_addr(S_ADDR(ipn), IN_ADDR(ServerInfo.ip6));
 
-	comm_connect_tcp(client_p->fd, aconf->host, aconf->port,
+	comm_connect_tcp(client_p->localClient->fd, aconf->host, aconf->port,
 			 (struct sockaddr *)&SOCKADDR(ipn), sizeof(struct irc_sockaddr),
 			 serv_connect_callback, client_p, aconf->aftype, 30);
       }
 #endif
     else
       {
-	comm_connect_tcp(client_p->fd, aconf->host, aconf->port, NULL, 0, 
+	comm_connect_tcp(client_p->localClient->fd, aconf->host, aconf->port, NULL, 0, 
 			 serv_connect_callback, client_p, aconf->aftype, 30);
       }
 
@@ -2141,7 +2141,7 @@ serv_connect_callback(int fd, int status, void *data)
 
     /* First, make sure its a real client! */
     assert(client_p != NULL);
-    assert(client_p->fd == fd);
+    assert(client_p->localClient->fd == fd);
 
     /* Next, for backward purposes, record the ip of the server */
     copy_s_addr(IN_ADDR(client_p->localClient->ip), S_ADDR(fd_table[fd].connect.hostaddr));

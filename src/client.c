@@ -135,6 +135,7 @@ struct Client* make_client(struct Client* from)
       memset(localClient, 0, sizeof(struct LocalUser));
 
       client_p->localClient = localClient;
+       
       client_p->localClient->ctrlfd = -1;
 #ifndef HAVE_SOCKETPAIR
       client_p->localClient->ctrlfd_r = -1;
@@ -152,10 +153,6 @@ struct Client* make_client(struct Client* from)
     }
 
   client_p->status = STAT_UNKNOWN;
-  client_p->fd = -1;
-#ifndef HAVE_SOCKETPAIR
-  client_p->fd_r = -1;
-#endif
   strcpy(client_p->username, "unknown");
 #if 0
   client_p->name[0] = '\0';
@@ -186,8 +183,8 @@ void _free_client(struct Client* client_p)
 
   if (MyConnect(client_p))
     {
-      if (client_p->fd >= 0)
-	fd_close(client_p->fd);
+      if (client_p->localClient->fd >= 0)
+	fd_close(client_p->localClient->fd);
 
 #ifndef NDEBUG
       mem_frob(client_p->localClient, sizeof(struct LocalUser));
@@ -1287,12 +1284,11 @@ int exit_client(
 {
   char comment1[HOSTLEN + HOSTLEN + 2];
   dlink_node *m;
-
   if (MyConnect(source_p))
     {
       /* Attempt to flush any queued data */
-      if (source_p->fd > -1)
-        send_queued_write(source_p->fd, source_p);
+      if (source_p->localClient->fd > -1)
+        send_queued_write(source_p->localClient->fd, source_p);
       if (source_p->flags & FLAGS_IPHASH)
         remove_one_ip(&source_p->localClient->ip);
 
@@ -1374,7 +1370,7 @@ int exit_client(
 
       log_user_exit(source_p);
 
-      if (source_p->fd >= 0)
+      if (source_p->localClient->fd >= 0)
 	{
 	  if (client_p != NULL && source_p != client_p)
 	    sendto_one(source_p, "ERROR :Closing Link: %s %s (%s)",
@@ -1611,7 +1607,7 @@ set_initial_nick(struct Client *client_p, struct Client *source_p,
  strcpy(source_p->name, nick);
  add_to_client_hash_table(nick, source_p);
  /* fd_desc is long enough */
- fd_note(client_p->fd, "Nick: %s", nick);
+ fd_note(client_p->localClient->fd, "Nick: %s", nick);
   
  /* They have the nick they want now.. */
  *client_p->llname = '\0';
@@ -1715,7 +1711,7 @@ int change_local_nick(struct Client *client_p, struct Client *source_p,
   del_all_accepts(source_p);
 
   /* fd_desc is long enough */
-  fd_note(client_p->fd, "Nick: %s", nick);
+  fd_note(client_p->localClient->fd, "Nick: %s", nick);
 
   return 1;
 }

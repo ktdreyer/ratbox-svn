@@ -381,7 +381,7 @@ del_from_id_hash_table(const char* id, struct Client* client_p)
     }
   Debug((DEBUG_ERROR, "%#x !in tab %s[%s] %#x %#x %#x %d %d %#x",
          client_p, client_p->name, client_p->from ? client_p->from->host : "??host",
-         client_p->from, client_p->next, client_p->prev, client_p->fd, 
+         client_p->from, client_p->next, client_p->prev, client_p->localClient->fd, 
          client_p->status, client_p->user));
 }
 
@@ -420,7 +420,7 @@ del_from_client_hash_table(const char* name, struct Client* client_p)
     }
   Debug((DEBUG_ERROR, "%#x !in tab %s[%s] %#x %#x %#x %d %d %#x",
          client_p, client_p->name, client_p->from ? client_p->from->host : "??host",
-         client_p->from, client_p->next, client_p->prev, client_p->fd, 
+         client_p->from, client_p->next, client_p->prev, client_p->localClient->fd, 
          client_p->status, client_p->user));
 }
 

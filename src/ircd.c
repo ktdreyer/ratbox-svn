@@ -734,7 +734,6 @@ int main(int argc, char *argv[])
  }
 #endif
 
-  me.fd = -1;
   me.from = &me;
   me.servptr = &me;
   SetMe(&me);
