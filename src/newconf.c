@@ -50,8 +50,6 @@ static dlink_list yy_shared_list;
 static dlink_list yy_cluster_list;
 static struct oper_conf *yy_oper = NULL;
 
-static char *resv_reason;
-
 static const char *
 conf_strtype(int type)
 {
@@ -71,8 +69,6 @@ conf_strtype(int type)
 		return "unknown type";
 	}
 }
-
-
 
 static int
 add_top_conf(const char *name, int (*sfunc) (struct TopConf *), 
@@ -999,97 +995,6 @@ conf_set_auth_class(void *data)
 	DupString(yy_aconf->className, data);
 }
 
-static int
-conf_begin_resv(struct TopConf *tc)
-{
-	if(yy_aconf)
-	{
-		free_conf(yy_aconf);
-		yy_aconf = NULL;
-	}
-
-	MyFree(resv_reason);
-	DupString(resv_reason, "No Reason");
-	return 0;
-}
-
-static int
-conf_end_resv(struct TopConf *tc)
-{
-	MyFree(resv_reason);
-	resv_reason = NULL;
-	return 0;
-}
-
-static void
-conf_set_resv_reason(void *data)
-{
-	if(!EmptyString((char *) data))
-	{
-		MyFree(resv_reason);
-		DupString(resv_reason, data);
-	}
-}
-
-static void
-conf_set_resv_channel(void *data)
-{
-	char *name = data;
-
-	if(!IsChannelName(name))
-	{
-		conf_report_error("Ignoring channel resv %s -- invalid channel name.",
-					name);
-		return;
-	}
-
-	if(hash_find_resv(name))
-	{
-		conf_report_error("Ignoring channel resv %s -- already resvd.",
-					name);
-		return;
-	}
-
-	yy_aconf = make_conf();
-	yy_aconf->status = CONF_RESV_CHANNEL;
-
-	DupString(yy_aconf->name, name);
-	DupString(yy_aconf->passwd, EmptyString(resv_reason) ? "No Reason" : resv_reason);
-
-	add_to_resv_hash(yy_aconf->name, yy_aconf);
-
-	yy_aconf = NULL;
-}
-
-static void
-conf_set_resv_nick(void *data)
-{
-	char *name = data;
-
-	if(!clean_resv_nick(name))
-	{
-		conf_report_error("Ignoring nick resv %s -- invalid nick.",
-					name);
-		return;
-	}
-	
-	if(find_nick_resv(name))
-	{
-		conf_report_error("Ignoring nick resv %s -- already resvd.",
-					name);
-		return;
-	}
-
-	yy_aconf = make_conf();
-	yy_aconf->status = CONF_RESV_NICK;
-
-	DupString(yy_aconf->name, name);
-	DupString(yy_aconf->passwd, resv_reason);
-
-	dlinkAddAlloc(yy_aconf, &resv_conf_list);
-	yy_aconf = NULL;
-}
-
 /* ok, shared_oper handles the stacking, shared_flags handles adding
  * things.. so all we need to do when we start and end a shared block, is
  * clean up anything thats been left over.
@@ -1365,109 +1270,6 @@ conf_set_connect_class(void *data)
 	DupString(yy_server->class_name, data);
 }
 
-static int
-conf_begin_kill(struct TopConf *tc)
-{
-	if(yy_aconf)
-		free_conf(yy_aconf);
-
-	yy_aconf = make_conf();
-	yy_aconf->status = CONF_KILL;
-	return 0;
-}
-
-static int
-conf_end_kill(struct TopConf *tc)
-{
-	if(yy_aconf->user && yy_aconf->passwd && yy_aconf->host)
-	{
-		if(yy_aconf->host != NULL)
-			add_conf_by_address(yy_aconf->host, CONF_KILL, yy_aconf->user, yy_aconf);
-	}
-	else
-		free_conf(yy_aconf);
-
-	yy_aconf = NULL;
-	return 0;
-}
-
-static void
-conf_set_kill_user(void *data)
-{
-	char *p;
-
-	if((p = strchr(data, '@')))
-	{
-		*p++ = '\0';
-
-		MyFree(yy_aconf->user);
-		MyFree(yy_aconf->host);
-		DupString(yy_aconf->user, data);
-		DupString(yy_aconf->host, p);
-		collapse(yy_aconf->user);
-		collapse(yy_aconf->host);
-	}
-	else
-	{
-		MyFree(yy_aconf->host);
-		DupString(yy_aconf->host, data);
-		collapse(yy_aconf->host);
-		MyFree(yy_aconf->user);
-		DupString(yy_aconf->user, "*");
-	}
-}
-
-static void
-conf_set_kill_reason(void *data)
-{
-	MyFree(yy_aconf->passwd);
-	DupString(yy_aconf->passwd, data);
-}
-
-static int
-conf_begin_deny(struct TopConf *tc)
-{
-	if(yy_aconf)
-		free_conf(yy_aconf);
-
-	yy_aconf = make_conf();
-	yy_aconf->status = CONF_DLINE;
-	/* default reason */
-	DupString(yy_aconf->passwd, "No Reason");
-
-	return 0;
-}
-
-static int
-conf_end_deny(struct TopConf *tc)
-{
-	if(yy_aconf->host && parse_netmask(yy_aconf->host, NULL, NULL) != HM_HOST)
-	{
-		add_conf_by_address(yy_aconf->host, CONF_DLINE, NULL, yy_aconf);
-	}
-	else
-	{
-		free_conf(yy_aconf);
-		conf_report_error("Ignoring deny -- invalid hostname.");
-	}
-	yy_aconf = NULL;
-	return 0;
-}
-
-static void
-conf_set_deny_ip(void *data)
-{
-	MyFree(yy_aconf->host);
-	DupString(yy_aconf->host, data);
-}
-
-static void
-conf_set_deny_reason(void *data)
-{
-	MyFree(yy_aconf->passwd);
-	DupString(yy_aconf->passwd, data);
-}
-
 static void
 conf_set_exempt_ip(void *data)
 {
@@ -1484,63 +1286,6 @@ conf_set_exempt_ip(void *data)
 	DupString(yy_tmp->host, data);
 	yy_tmp->status = CONF_EXEMPTDLINE;
 	add_conf_by_address(yy_tmp->host, CONF_EXEMPTDLINE, NULL, yy_tmp);
-}
-
-static int
-conf_begin_gecos(struct TopConf *tc)
-{
-	if(yy_aconf)
-		free_conf(yy_aconf);
-
-	yy_aconf = make_conf();
-	yy_aconf->status = CONF_XLINE;
-
-	return 0;
-}
-
-static int
-conf_end_gecos(struct TopConf *tc)
-{
-	if(EmptyString(yy_aconf->name))
-	{
-		conf_report_error("Ignoring gecos block -- missing name.");
-		free_conf(yy_aconf);
-		yy_aconf = NULL;
-		return 0;
-	}
-
-	if(find_xline(yy_aconf->name, 0) != NULL)
-	{
-		conf_report_error("Ignoring gecos block %s -- already xlined.",
-					yy_aconf->name);
-		free_conf(yy_aconf);
-		yy_aconf = NULL;
-		return 0;
-	}
-
-	dlinkAddAlloc(yy_aconf, &xline_conf_list);
-	yy_aconf = NULL;
-
-	return 0;
-}
-
-static void
-conf_set_gecos_name(void *data)
-{
-	MyFree(yy_aconf->name);
-	DupString(yy_aconf->name, data);
-	collapse(yy_aconf->name);
-}
-
-static void
-conf_set_gecos_reason(void *data)
-{
-	MyFree(yy_aconf->passwd);
-
-	if(strchr((char *) data, ':') == NULL)
-		DupString(yy_aconf->passwd, data);
-	else
-		DupString(yy_aconf->passwd, "No Reason");
 }
 
 static int
@@ -2182,31 +1927,14 @@ newconf_init()
 
 	add_top_conf("auth", conf_begin_auth, conf_end_auth, conf_auth_table);
 
-	add_top_conf("resv", conf_begin_resv, conf_end_resv, NULL);
-	add_conf_item("resv", "reason", CF_QSTRING, conf_set_resv_reason);
-	add_conf_item("resv", "channel", CF_QSTRING, conf_set_resv_channel);
-	add_conf_item("resv", "nick", CF_QSTRING, conf_set_resv_nick);
-
 	add_top_conf("shared", conf_cleanup_shared, conf_cleanup_shared, NULL);
 	add_conf_item("shared", "oper", CF_QSTRING|CF_FLIST, conf_set_shared_oper);
 	add_conf_item("shared", "flags", CF_STRING | CF_FLIST, conf_set_shared_flags);
 
 	add_top_conf("connect", conf_begin_connect, conf_end_connect, conf_connect_table);
 
-	add_top_conf("kill", conf_begin_kill, conf_end_kill, NULL);
-	add_conf_item("kill", "user", CF_QSTRING, conf_set_kill_user);
-	add_conf_item("kill", "reason", CF_QSTRING, conf_set_kill_reason);
-
-	add_top_conf("deny", conf_begin_deny, conf_end_deny, NULL);
-	add_conf_item("deny", "ip", CF_QSTRING, conf_set_deny_ip);
-	add_conf_item("deny", "reason", CF_QSTRING, conf_set_deny_reason);
-
 	add_top_conf("exempt", NULL, NULL, NULL);
 	add_conf_item("exempt", "ip", CF_QSTRING, conf_set_exempt_ip);
-
-	add_top_conf("gecos", conf_begin_gecos, conf_end_gecos, NULL);
-	add_conf_item("gecos", "name", CF_QSTRING, conf_set_gecos_name);
-	add_conf_item("gecos", "reason", CF_QSTRING, conf_set_gecos_reason);
 
 	add_top_conf("cluster", conf_cleanup_cluster, conf_cleanup_cluster, NULL);
 	add_conf_item("cluster", "name", CF_QSTRING, conf_set_cluster_name);
