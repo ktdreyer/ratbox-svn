@@ -1,3 +1,15 @@
+androsyn    2002/05/30 19:55:50 EDT	(20020531_0)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Don't send QUIT to remote servers for unregistered clients
+  
+  Revision  Changes    Path
+  7.272     +29 -30    ircd-hybrid-7/src/client.c
+
+
+
 leeh        2002/05/30 16:14:01 EDT	(20020530_0)
 
   Modified files:
