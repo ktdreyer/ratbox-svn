@@ -1,3 +1,7 @@
+*** 20010515_5 by toot
+slight mistake in ms_version
+
+
 *** 20010515_4 by toot
 . show ISUPPORT numeric on remote /version (will be 105 rather than 005)
 . only put the VCHANS token in ISUPPORT if disable_vchans if off
