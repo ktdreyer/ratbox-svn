@@ -1,3 +1,7 @@
+*** 20010116_4 by ejb
+- commit links_notice.c
+
+
 *** 20010116_3 by db
 - reverted sprintf_irc.c
   The entire point of sprintf_irc is to be much faster than sprintf
