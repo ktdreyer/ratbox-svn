@@ -95,8 +95,8 @@ static void dump_map(struct Client *client_p,struct Client *root_p, char *pbuf)
 {
   int cnt = 0, i = 0, len;
   int users = 0;
-  struct Client *server_p,*user_p;
-        
+  struct Client *server_p;
+  dlink_node *ptr;      
   *pbuf= '\0';
        
   strncat(pbuf,root_p->name,BUFSIZE - ((size_t) pbuf - (size_t) buf));
@@ -112,8 +112,7 @@ static void dump_map(struct Client *client_p,struct Client *root_p, char *pbuf)
   }
 	
   /* FIXME: add serv->usercnt */
-  for( user_p = root_p->serv->users; user_p; user_p = user_p->lnext )
-    users++;
+  users += dlink_list_length(&root_p->serv->users);
         
   snprintf(buf + USER_COL, BUFSIZE - USER_COL,
            " | Users: %5d (%4.1f%%)", users,
@@ -121,12 +120,9 @@ static void dump_map(struct Client *client_p,struct Client *root_p, char *pbuf)
         
   sendto_one(client_p, form_str(RPL_MAP),me.name,client_p->name,buf);
         
-  if ((server_p = root_p->serv->servers))
+  if(root_p->serv->servers.head != NULL)
   {
-    for (; server_p; server_p = server_p->lnext)
-    {
-      cnt++;
-    }
+    cnt += dlink_list_length(&root_p->serv->servers);
     
     if (cnt)
     {
@@ -138,8 +134,10 @@ static void dump_map(struct Client *client_p,struct Client *root_p, char *pbuf)
       }
     }
   }
-  for (i = 1,server_p = root_p->serv->servers; server_p; server_p=server_p->lnext)
+  i = 1;
+  DLINK_FOREACH(ptr, root_p->serv->servers.head)
   {
+    server_p = (struct Client *)ptr->data;
     *pbuf = ' ';
     if (i < cnt)
       *(pbuf + 1) = '|';

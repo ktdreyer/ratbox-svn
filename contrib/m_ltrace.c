@@ -44,7 +44,6 @@
 
 static void m_ltrace(struct Client *, struct Client *, int, char **);
 static void mo_ltrace(struct Client*, struct Client*, int, char**);
-static struct Client* next_client_double(struct Client *next, const char* ch);
 static void ltrace_spy(struct Client *);
 
 struct Message ltrace_msgtab = {
@@ -129,8 +128,19 @@ static void mo_ltrace(struct Client *client_p, struct Client *source_p,
     case HUNTED_PASS: /* note: gets here only if parv[1] exists */
       {
         struct Client *ac2ptr;
+        dlink_node *cptr;
         
-        ac2ptr = next_client_double(GlobalClientList, tname);
+        if((ac2ptr = find_client(tname)) == NULL)
+        {
+          DLINK_FOREACH(cptr, GlobalClientList.head)
+          {
+            ac2ptr = (struct Client *)cptr->data;
+            if(match(tname, ac2ptr->name) || match(ac2ptr->name, tname))
+               break;
+            else
+              ac2ptr = NULL;
+          }
+        }
         if (ac2ptr)
           sendto_one(source_p, form_str(RPL_TRACELINK), me.name, looking_for,
                      ircd_version, debugmode, tname, ac2ptr->from->name);
@@ -193,8 +203,9 @@ static void mo_ltrace(struct Client *client_p, struct Client *source_p,
    */
   if (doall)
    {
-    for (target_p = GlobalClientList; target_p; target_p = target_p->next)
+    DLINK_FOREACH(ptr, GlobalClientList.head)
      {
+      target_p = (struct Client *)ptr->data;
       if (IsPerson(target_p))
         {
           link_u[target_p->from->localClient->fd]++;
@@ -207,7 +218,7 @@ static void mo_ltrace(struct Client *client_p, struct Client *source_p,
    }
    
   /* report all opers */
-  for (ptr = lclient_list.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, lclient_list.head)
     {
       target_p = ptr->data;
 
@@ -224,7 +235,7 @@ static void mo_ltrace(struct Client *client_p, struct Client *source_p,
     }
 
   /* report all servers */
-  for (ptr = serv_list.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, serv_list.head)
     {
       target_p = ptr->data;
 
@@ -342,36 +353,3 @@ static void ltrace_spy(struct Client *source_p)
   hook_call_event("doing_ltrace", &data);
 }
 
-/* 
- * this slow version needs to be used for hostmasks *sigh
- *
- * next_client_double - find the next matching client. 
- * The search can be continued from the specified client entry. 
- * Normal usage loop is:
- *
- *      for (x = client; x = next_client_double(x,mask); x = x->next)
- *              HandleMatchingClient;
- *            
- */
-static struct Client* 
-next_client_double(struct Client *next, /* First client to check */
-                   const char* ch)      /* search string (may include wilds) */
-{
-  struct Client *tmp = next;
-
-  next = find_client(ch);
-
-  if (next == NULL)
-    next = tmp;
-
-  if (tmp && tmp->prev == next)
-    return NULL;
-  if (next != tmp)
-    return next;
-  for ( ; next; next = next->next)
-    {
-      if (match(ch,next->name) || match(next->name,ch))
-        break;
-    }
-  return next;
-}
