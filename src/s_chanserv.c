@@ -406,13 +406,11 @@ channel_db_callback(void *db, int argc, char **argv, char **colnames)
 	char *modev[MAXPARA + 1];
 	int modec;
 
-	if(argc < 7)
+	if(argc < 8)
 		return 0;
 
 	if(EmptyString(argv[0]))
 		return 0;
-
-	memset(&mode, 0, sizeof(struct chmode));
 
 	reg_p = BlockHeapAlloc(channel_reg_heap);
 	reg_p->name = my_strdup(argv[0]);
@@ -420,6 +418,7 @@ channel_db_callback(void *db, int argc, char **argv, char **colnames)
 	if(!EmptyString(argv[1]))
 		reg_p->topic = my_strdup(argv[1]);
 
+	memset(&mode, 0, sizeof(struct chmode));
 	modec = string_to_array(argv[2], modev);
 
 	if(parse_simple_mode(&mode, (const char **) modev, modec, 0))
@@ -432,12 +431,25 @@ channel_db_callback(void *db, int argc, char **argv, char **colnames)
 				sizeof(reg_p->cmode.key));
 	}
 
-	reg_p->reg_time = atol(argv[3]);
-	reg_p->last_time = atol(argv[4]);
-	reg_p->flags = atoi(argv[5]);
+	memset(&mode, 0, sizeof(struct chmode));
+	modec = string_to_array(argv[3], modev);
 
-	if(!EmptyString(argv[6]))
-		reg_p->suspender = my_strdup(argv[6]);
+	if(parse_simple_mode(&mode, (const char **) modev, modec, 0))
+	{
+		reg_p->emode.mode = mode.mode;
+		reg_p->emode.limit = mode.limit;
+
+		if(mode.key[0])
+			strlcpy(reg_p->emode.key, mode.key,
+				sizeof(reg_p->emode.key));
+	}
+
+	reg_p->reg_time = atol(argv[4]);
+	reg_p->last_time = atol(argv[5]);
+	reg_p->flags = atoi(argv[6]);
+
+	if(!EmptyString(argv[7]))
+		reg_p->suspender = my_strdup(argv[7]);
 
 	add_channel_reg(reg_p);
 

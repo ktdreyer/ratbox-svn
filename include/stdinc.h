@@ -2,8 +2,6 @@
 #ifndef INCLUDED_stdinc_h
 #define INCLUDED_stdinc_h
 
-#define ANFL_LAPTOP
-
 #include "setup.h"
 
 #include <stdio.h>
