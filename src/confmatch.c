@@ -132,7 +132,7 @@ parse_netmask (const char *address, struct irc_inaddr *addr, int *bits)
 	char *p;
 	struct irc_inaddr laddr;
 	int lbits;
-
+	
 	p = strchr (address, '/');
 
 	if(addr == NULL)
@@ -278,7 +278,6 @@ find_dline (struct irc_inaddr *ip)
 	/* Found a e/D line.maybe exempt..return */
 	if(aconf != NULL)
 		return (aconf);
-
 	/* Check and see if we match an IP Kline */
 	aconf = find_ipkline (ip);
 	if(aconf != NULL)

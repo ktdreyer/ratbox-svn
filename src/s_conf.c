@@ -1039,7 +1039,9 @@ find_conf_exact (const char *name, const char *user, const char *host, int statm
 {
 	struct ConfItem *tmp;
 	struct irc_inaddr ip, cip;
+	char addr[HOSTLEN+1];
 	int bits, cbits;
+
 	for (tmp = ConfigItemList; tmp; tmp = tmp->next)
 	{
 		if(!(tmp->status & statmask) || !tmp->name || !tmp->host ||
@@ -1053,9 +1055,10 @@ find_conf_exact (const char *name, const char *user, const char *host, int statm
 		if(!match (tmp->user, user) || irccmp (tmp->name, name))
 			continue;
 
-
-		if(parse_netmask (tmp->host, &ip, &bits) && parse_netmask (host, &cip, &cbits))
+		strlcpy(addr, tmp->host, sizeof(addr));
+		if(parse_netmask (addr, &ip, &bits) && parse_netmask (host, &cip, &cbits))
 		{
+			MyFree(addr);
 			if(!comp_with_mask (&IN_ADDR (ip), &IN_ADDR (cip), bits))
 				continue;
 
