@@ -174,7 +174,6 @@ static void ms_kill(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
   struct Client*    target_p;
-  const char* inpath = client_p->name;
   char*       user;
   char*       reason;
   int         chasing = 0;
