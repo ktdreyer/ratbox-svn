@@ -154,13 +154,14 @@ static void conf_dns_callback(void* vptr, struct DNSReply* reply)
  */
 void conf_dns_lookup(struct ConfItem* aconf)
 {
-  if (!aconf->dns_pending) {
-    struct DNSQuery query;
-    query.vptr     = aconf;
-    query.callback = conf_dns_callback;
-    gethost_byname(aconf->host, &query);
-    aconf->dns_pending = 1;
-  }
+  if (!aconf->dns_pending)
+    {
+      struct DNSQuery query;
+      query.vptr     = aconf;
+      query.callback = conf_dns_callback;
+      gethost_byname(aconf->host, &query);
+      aconf->dns_pending = 1;
+    }
 }
 
 /*
@@ -1544,6 +1545,7 @@ static void lookup_confhost(struct ConfItem* aconf)
   */
   if (is_address(aconf->host, &ip, &mask))
     {
+      /* XXX IPV6 silliness to finish */
 /*      aconf->ipnum.s_addr = htonl(ip); */
     }
   else 
@@ -2486,7 +2488,7 @@ void conf_delist_old_conf(struct ConfItem *aconf)
  * conf_add_server
  * inputs       - pointer to config item
  * output       - NONE
- * side effects - Add a C or N line
+ * side effects - Add a connect block
  */
 int conf_add_server(struct ConfItem *aconf, int lcount)
 {
@@ -2494,22 +2496,24 @@ int conf_add_server(struct ConfItem *aconf, int lcount)
 
   if (lcount > MAXCONFLINKS || !aconf->host || !aconf->name)
     {
-      sendto_realops_flags(FLAGS_ALL,"Bad C/N line");
-      log(L_WARN, "Bad C/N line");
+      sendto_realops_flags(FLAGS_ALL,"Bad connect block");
+      log(L_WARN, "Bad connect block");
       return -1;
     }
 
   if (BadPtr(aconf->passwd))
     {
-      sendto_realops_flags(FLAGS_ALL,"Bad C/N line host %s", aconf->host);
-      log(L_WARN, "Bad C/N line host %s",aconf->name);
+      sendto_realops_flags(FLAGS_ALL,"Bad connect block, name %s",
+			   aconf->name);
+      log(L_WARN, "Bad connect block, host %s",aconf->name);
       return -1;
     }
           
   if( SplitUserHost(aconf) < 0 )
     {
-      sendto_realops_flags(FLAGS_ALL,"Bad C/N line host %s", aconf->host);
-      log(L_WARN, "Bad C/N line name %s",aconf->name);
+      sendto_realops_flags(FLAGS_ALL,"Bad connect block, name %s",
+			   aconf->name);
+      log(L_WARN, "Bad connect block, name %s",aconf->name);
       return -1;
     }
   lookup_confhost(aconf);
