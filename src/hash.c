@@ -56,27 +56,11 @@ struct Message hash_msgtab = {
 };
 #endif
 
-#ifdef DEBUGMODE
-static struct HashEntry* clientTable = NULL;
-static struct HashEntry* channelTable = NULL;
-static struct HashEntry* idTable = NULL;
-static struct HashEntry* resvTable = NULL;
-static struct HashEntry *hostTable = NULL;
-static int clhits;
-static int clmiss;
-static int chhits;
-static int chmiss;
-static int rhits;
-static int rmiss;
-#else
-
 static struct HashEntry clientTable[U_MAX];
 static struct HashEntry channelTable[CH_MAX];
 static struct HashEntry idTable[U_MAX];
 static struct HashEntry resvTable[R_MAX];
 static struct HashEntry hostTable[HOST_MAX];
-
-#endif
 
 /* XXX move channel hash into channel.c or hash channel stuff in channel.c
  * into here eventually -db
@@ -224,12 +208,6 @@ int hash_resv_channel(const char *name)
  */
 static void clear_client_hash_table()
 {
-#ifdef DEBUGMODE
-  clhits = 0;
-  clmiss = 0;
-  if(!clientTable)
-    clientTable = (struct HashEntry*) MyMalloc(U_MAX * sizeof(struct HashEntry));
-#endif
   memset(clientTable, 0, sizeof(struct HashEntry) * U_MAX);
 }
 
@@ -240,51 +218,24 @@ static void clear_client_hash_table()
  */
 static void clear_id_hash_table()
 {
-#ifdef DEBUGMODE
-  /* XXX -
-   * idhits = 0;
-   * idmiss = 0;
-   * -cosine
-   */
-  if(!idTable)
-    idTable = (struct HashEntry*) MyMalloc(U_MAX * sizeof(struct HashEntry));
-#endif
   memset(idTable, 0, sizeof(struct HashEntry) * U_MAX);
 }
 
 static void
 clear_channel_hash_table(void)
 {
-#ifdef DEBUGMODE
-  chmiss = 0;
-  chhits = 0;
-  if (!channelTable)
-    channelTable = (struct HashEntry*) MyMalloc(CH_MAX *
-                                                sizeof(struct HashEntry));
-#endif
   memset(channelTable, 0, sizeof(struct HashEntry) * CH_MAX);
 }
 
 static void
 clear_hostname_hash_table(void)
 {
-#ifdef DEBUGMODE
-  if(!hostTable)
-    hostTable = (struct HashEntry *)MyMalloc(HOST_MAX * sizeof(struct HashEntry));
-#endif
   memset(hostTable, 0, sizeof(struct HashEntry) * HOST_MAX);
 }
 
 static void
 clear_resv_hash_table()
 {
-#ifdef DEBUGMODE
-  rmiss = 0;
-  rhits = 0;
-  if(!resvTable)
-    resvTable = (struct HashEntry*) MyMalloc(R_MAX *
-                                             sizeof(struct HashEntry));
-#endif
   memset(resvTable, 0, sizeof(struct HashEntry) * R_MAX);
 }
 
@@ -621,14 +572,8 @@ find_client(const char* name)
   for ( ; found_client; found_client = found_client->hnext)
     if (irccmp(name, found_client->name) == 0)
       {
-#ifdef DEBUGMODE
-        ++clhits;
-#endif
         return (found_client);
       }
-#ifdef DEBUGMODE
-  ++clmiss;
-#endif
   
   return (NULL);
 }
@@ -719,21 +664,11 @@ find_server(const char* name)
         continue;
       if (irccmp(name, found_server->name) == 0)
         {
-#ifdef DEBUGMODE
-          ++clhits;
-#endif
           return (found_server);
         }
     }
-  
-#ifndef DEBUGMODE
-  return hash_find_masked_server(name);
 
-#else /* DEBUGMODE */
-  if (!(found_server = hash_find_masked_server(name)))
-    ++clmiss;
-  return (found_server);
-#endif
+  return hash_find_masked_server(name);
 }
 
 /*
@@ -759,14 +694,9 @@ hash_find_channel(const char* name)
   
     if (irccmp(name, found_chptr->chname) == 0)
       {
-#ifdef DEBUGMODE
-        ++chhits;
-#endif
         return(found_chptr);
       }
-#ifdef DEBUGMODE
-  ++chmiss;
-#endif
+
   return(NULL);
 }
 
@@ -815,16 +745,10 @@ get_or_create_channel(struct Client *client_p, char *chname, int *isnew)
     {
       if (irccmp(chname, found_chptr->chname) == 0)
 	{
-#ifdef DEBUGMODE
-	  ++chhits;
-#endif
 	  if(isnew != NULL)
 	    *isnew = 0;
 	  return(found_chptr);
 	}
-#ifdef DEBUGMODE
-      ++chmiss;
-#endif
     }
 
   if(isnew != NULL)
@@ -871,15 +795,9 @@ hash_find_resv(const char *name)
   {
     if(!irccmp(name, found_chptr->name))
     {
-#ifdef DEBUGMODE
-      ++rhits;
-#endif      
       return(found_chptr);
     }
   }
-#ifdef DEBUGMODE
-  ++rmiss;
-#endif
   
   return(NULL);
 }  
