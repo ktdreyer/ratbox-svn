@@ -1,3 +1,57 @@
+leeh        2003/11/20 18:18:24 EST	(20031120_2)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              client.h reject.h s_conf.h 
+    modules              m_info.c m_join.c 
+    modules/core         m_error.c m_kick.c m_kill.c m_nick.c 
+                         m_sjoin.c 
+    src                  client.c messages.tab newconf.c reject.c 
+                         s_conf.c s_user.c 
+  Log:
+  - ports from -stable:
+    - dont send someones ip out when we send ERROR to unknowns or
+      servers, can cause problems with server ip hiding.
+    - fix /info on stats_{i|k}_oper_only
+    - added hide_error_messages = {yes|opers|no}; to general {};.  Controls
+      whether ERROR messages from servers are hidden or not.
+    - fixed an IP leak to admins in m_error.c
+    - log the full IP when we get an ERROR
+    - fix a bug found by Hwy when servers kick users out of channels
+    - juped nicks now use ERR_ERRONEUSNICKNAME numeric
+    - juped chans now use ERR_BADCHANNAME numeric
+    - split ability to locally /kill out of 'kline' priv.  it now has its
+      own priv, 'local_kill' - this is implied by 'global_kill' however.
+    - make SJOIN and NICK use sendto_server(), rather than looping the server
+      list and using sendto_one().  Using sendto_one() means hub servers
+      have to allocate a buffer per individual server, which can cause
+      memory usage to explode during high traffic.
+    - the reject cache fixes for clients on unknown_list
+    - raise DELAYED_EXIT_TIME to 10s
+    - remove 'a' from 004, anonops dont exist..
+  
+  Revision  Changes    Path
+  7.229     +12 -1     ircd-ratbox/doc/example.conf
+  7.64      +13 -1     ircd-ratbox/doc/example.efnet.conf
+  7.229     +21 -15    ircd-ratbox/include/client.h
+  1.7       +1 -1      ircd-ratbox/include/reject.h
+  7.261     +1 -0      ircd-ratbox/include/s_conf.h
+  1.5       +47 -43    ircd-ratbox/modules/core/m_error.c
+  1.74      +6 -8      ircd-ratbox/modules/core/m_kick.c
+  1.95      +4 -3      ircd-ratbox/modules/core/m_kill.c
+  1.136     +3 -3      ircd-ratbox/modules/core/m_nick.c
+  1.191     +5 -15     ircd-ratbox/modules/core/m_sjoin.c
+  1.98      +24 -1     ircd-ratbox/modules/m_info.c
+  1.142     +2 -2      ircd-ratbox/modules/m_join.c
+  7.418     +4 -5      ircd-ratbox/src/client.c
+  7.103     +1 -1      ircd-ratbox/src/messages.tab
+  7.119     +19 -1     ircd-ratbox/src/newconf.c
+  1.11      +3 -1      ircd-ratbox/src/reject.c
+  7.440     +7 -1      ircd-ratbox/src/s_conf.c
+  7.297     +25 -37    ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2003/11/20 14:38:32 EST	(20031120_1)
 
   Modified files:
