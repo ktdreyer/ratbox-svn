@@ -61,7 +61,6 @@ int main(int argc,char *argv[])
 {
   FILE *in;
   FILE *out;
-  char line[BUFSIZE];
   char *filein, *fileout;
 
   if(argc < 3)

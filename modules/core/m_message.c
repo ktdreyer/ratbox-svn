@@ -292,6 +292,14 @@ build_target_list(int p_or_n, char *command, struct Client *client_p,
           targets[ntargets++].type = ENTITY_CHANNEL;
         }
       }
+
+      /* non existant channel */
+      else if(p_or_n != NOTICE)
+      {
+        sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name,
+                   source_p->name, nick);
+      }
+
       continue;
     }
 
@@ -344,7 +352,7 @@ build_target_list(int p_or_n, char *command, struct Client *client_p,
        */
 
       if ((chptr = hash_find_channel(nick)) != NULL)
-	{
+      {
 	  if(!is_chan_op(chptr, source_p) && !is_voiced(chptr, source_p))
 	    {
 	      sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
@@ -364,15 +372,29 @@ build_target_list(int p_or_n, char *command, struct Client *client_p,
 	      targets[ntargets].type = ENTITY_CHANOPS_ON_CHANNEL;
 	      targets[ntargets++].flags = type;
 	    }
-	}
+      }
+      else if(p_or_n != NOTICE)
+      {
+        sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name,
+                   source_p->name, nick);
+      }
+
       continue;
     }
 
     if(IsOper(source_p) && ((*nick == '$') || strchr(nick, '@')))
     {
       handle_opers(p_or_n, command, client_p, source_p, nick, text);
+      continue;
     }
-    /* continue; */
+
+    /* no matching anything found - error if not NOTICE */
+    if(p_or_n != NOTICE)
+    {
+      sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name,
+                 source_p->name, nick);
+    }
+                 
   }
   return (1);
 }
