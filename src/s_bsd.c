@@ -235,7 +235,7 @@ close_connection(struct Client *client_p)
 {
 	struct ConfItem *aconf;
 	assert(NULL != client_p);
-
+	fprintf(stderr, "Closing client: %lx\n", client_p);
 	if(client_p == NULL)
 		return;
 
@@ -334,7 +334,7 @@ close_connection(struct Client *client_p)
 	memset(client_p->localClient->passwd, 0, sizeof(client_p->localClient->passwd));
 	detach_conf(client_p);
 	client_p->from = NULL;	/* ...this should catch them! >:) --msa */
-	free_local_client(client_p);
+	ClearMyConnect(client_p);
 }
 
 /*

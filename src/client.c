@@ -60,6 +60,7 @@
 static void check_pings_list(dlink_list * list);
 static void check_unknowns_list(dlink_list * list);
 static void free_exited_clients(void *unused);
+static void exit_aborted_clients(void *unused);
 
 static int exit_remote_client(struct Client *, struct Client *, struct Client *,const char *);
 static int exit_remote_server(struct Client *, struct Client *, struct Client *,const char *);
@@ -121,8 +122,10 @@ init_client(void)
 	eventAddIsh("check_pings", check_pings, NULL, 30);
 	eventAddIsh("free_exited_clients", &free_exited_clients, NULL, 4);
 	eventAddIsh("client_heap_gc", client_heap_gc, NULL, 30);
+	eventAddIsh("exit_aborted_clients", exit_aborted_clients, NULL, 1);
 	hook_add_event("local_exit_client", &h_local_exit_client);
 	hook_add_event("unknown_exit_client", &h_unknown_exit_client);
+	
 }
 
 
@@ -152,7 +155,7 @@ make_client(struct Client *from)
 
 		localClient = (struct LocalUser *) BlockHeapAlloc(lclient_heap);
 		memset(localClient, 0, sizeof(struct LocalUser));
-
+		SetMyConnect(client_p);
 		client_p->localClient = localClient;
 
 		client_p->localClient->fd = -1;
@@ -176,7 +179,7 @@ make_client(struct Client *from)
 	return client_p;
 }
 
-void
+static void
 free_local_client(struct Client *client_p)
 {
 	assert(NULL != client_p);
@@ -209,7 +212,7 @@ free_client(struct Client *client_p)
 {
 	assert(NULL != client_p);
 	assert(&me != client_p);
-
+	free_local_client(client_p);
 	BlockHeapFree(client_heap, client_p);
 }
 
@@ -1088,6 +1091,38 @@ call_unknown_exit_hook(struct Client *client_p, const char *comment)
 }
 
 
+struct abort_client
+{
+ 	dlink_node node;
+  	struct Client *client;
+  	char notice[TOPICLEN];
+};
+
+static dlink_list abort_list;
+
+void
+exit_aborted_clients(void *unused)
+{
+ 	dlink_node *ptr, *next;
+ 	DLINK_FOREACH_SAFE(ptr, next, abort_list.head)
+ 	{
+ 	 	struct abort_client *abt = ptr->data;
+ 	 	dlinkDelete(ptr, &abort_list);
+ 	 	if(!IsPerson(abt->client) && !IsUnknown(abt->client))
+ 	 	{
+ 	 	 	sendto_realops_flags(UMODE_ALL, L_ADMIN,
+  	 	 	                     "Closing link to %s: %s",
+   	 	 	                     get_client_name(abt->client, HIDE_IP), abt->notice);
+         	 	sendto_realops_flags(UMODE_ALL, L_OPER,
+                                             "Closing link to %s: %s",
+ 		                             get_client_name(abt->client, MASK_IP), abt->notice);
+ 	        }
+ 	 	exit_client(abt->client, abt->client, &me, abt->notice);
+ 	 	MyFree(abt);
+ 	}
+}
+
+
 /*
  * dead_link - Adds client to a list of clients that need an exit_client()
  *
@@ -1095,19 +1130,20 @@ call_unknown_exit_hook(struct Client *client_p, const char *comment)
 void
 dead_link(struct Client *client_p)
 {
-	char notice[TOPICLEN]; 
-	if(!MyConnect(client_p)|| IsMe(client_p))
+	struct abort_client *abt;
+	if(!MyConnect(client_p) || IsMe(client_p))
 		return;
 
 	if(client_p->flags & FLAGS_SENDQEX)
-		strcpy(notice, "Max SendQ exceeded");
+		strcpy(abt->notice, "Max SendQ exceeded");
 	else
 	{
-		ircsprintf(notice, "Write error: %s", strerror(errno));
+		ircsprintf(abt->notice, "Write error: %s", strerror(errno));
 	}
 
 	Debug((DEBUG_ERROR, "Closing link to %s: %s", get_client_name(client_p, HIDE_IP), notice));
-	exit_client(client_p, client_p, &me, notice);
+    	abt->client = client_p;
+	dlinkAdd(abt, &abt->node, &abort_list);
 }
 
 
@@ -1118,15 +1154,15 @@ exit_generic_client(struct Client *client_p, struct Client *source_p, struct Cli
 {
 	dlink_node *lp, *next_lp;
 	
-	DLINK_FOREACH_SAFE(lp, next_lp, source_p->user->channel.head)
-	{
-		remove_user_from_channel(lp->data, source_p);
-	}
 
 	sendto_common_channels_local(source_p, ":%s!%s@%s QUIT :%s",
 				     source_p->name,
 				     source_p->username, source_p->host, comment);
 
+	DLINK_FOREACH_SAFE(lp, next_lp, source_p->user->channel.head)
+	{
+		remove_user_from_channel(lp->data, source_p);
+	}
 
 	/* Should not be in any channels now */
 	assert(source_p->user->channel.head == NULL);

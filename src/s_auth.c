@@ -87,7 +87,6 @@ ReportType;
 #define sendheader(c, r) sendto_one(c, HeaderMessages[(r)]) 
 /*
  */
-dlink_list auth_client_list;
 dlink_list auth_poll_list;
 
 static EVH timeout_auth_queries_event;
@@ -105,7 +104,6 @@ init_auth(void)
 {
 	/* This hook takes a struct Client for its argument */
 	hook_add_event("new_local_client", &h_new_local_client);
-	memset(&auth_client_list, 0, sizeof(auth_client_list));
 	memset(&auth_poll_list, 0, sizeof(auth_poll_list));
 	eventAddIsh("timeout_auth_queries_event", timeout_auth_queries_event, NULL, 1);
 }
@@ -136,9 +134,13 @@ free_auth_request(struct AuthRequest *request)
 /*
  * unlink_auth_request - remove auth request from a list
  */
+static void *last;
 static void
 unlink_auth_request(struct AuthRequest *request, dlink_list * list)
 {
+	fprintf(stderr, "Unlink: %lx\n", request);
+	assert(last != request);
+	last = request;
 	dlinkFindDestroy(list, request);
 }
 
@@ -150,6 +152,7 @@ link_auth_request(struct AuthRequest *request, dlink_list * list)
 {
 	dlinkAddAlloc(request, list);
 }
+
 
 /*
  * release_auth_client - release auth client from auth system
@@ -230,10 +233,10 @@ auth_dns_callback(void *vptr, adns_answer * reply)
 	if(!IsDoingAuth(auth))
 	{
 		struct Client *client_p = auth->client;
+		unlink_auth_request(auth, &auth_poll_list);
+		free_auth_request(auth);
 		client_p->localClient->auth_request = NULL;
-		remove_auth_request(auth);
 		release_auth_client(client_p);
-		
 	}
 
 }
@@ -256,10 +259,10 @@ auth_error(struct AuthRequest *auth)
 		
 	if(!IsDNSPending(auth))
 	{
-		struct Client *client_p = auth->client;
-		client_p->localClient->auth_request = NULL;
-		remove_auth_request(auth);
+		unlink_auth_request(auth, &auth_poll_list);
+		auth->client->localClient->auth_request = NULL;
 		release_auth_client(auth->client);
+		free_auth_request(auth);
 	}
 }
 
@@ -446,7 +449,6 @@ timeout_auth_queries_event(void *notused)
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 	struct AuthRequest *auth;
-	struct Client *client_p;
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, auth_poll_list.head)
 	{
@@ -460,6 +462,7 @@ timeout_auth_queries_event(void *notused)
 			if(IsDoingAuth(auth))
 			{
 				sendheader(auth->client, REPORT_FAIL_ID);
+				auth->client->localClient->auth_request = NULL;
 				if(!MyConnect(auth->client))
 					return;
 			}
@@ -475,10 +478,8 @@ timeout_auth_queries_event(void *notused)
 
 			auth->client->since = CurrentTime;
 			dlinkDestroy(ptr, &auth_poll_list);
-			client_p = auth->client;
-			client_p->localClient->auth_request = NULL;
-			remove_auth_request(auth);
-			release_auth_client(client_p);
+			release_auth_client(auth->client);
+			free_auth_request(auth);
 		}
 	}
 }
@@ -614,27 +615,12 @@ read_auth_reply(int fd, void *data)
 
 	if(!IsDNSPending(auth))
 	{
-		struct Client *client_p = auth->client;
-		client_p->localClient->auth_request = NULL;
-		remove_auth_request(auth);
-		release_auth_client(client_p);
+		unlink_auth_request(auth, &auth_poll_list);
+		auth->client->localClient->auth_request = NULL;
+		release_auth_client(auth->client);
+		free_auth_request(auth);
 	}
 }
-
-/*
- * remove_auth_request()
- * Remove request 'auth' from AuthClientList, and free it.
- * There is no need to release auth->client since it has
- * already been done
- */
-
-void
-remove_auth_request(struct AuthRequest *auth)
-{
-	unlink_auth_request(auth, &auth_client_list);
-	free_auth_request(auth);
-}				/* remove_auth_request() */
-
 
 /*
  * delete_identd_queries()
@@ -644,13 +630,13 @@ void
 delete_identd_queries(struct Client *target_p)
 {
 	struct AuthRequest *auth = target_p->localClient->auth_request;
-
-	if(auth == NULL || !IsAuthPending(target_p))
+	if(auth == NULL)
 		return;
+	target_p->localClient->auth_request = NULL;
 
 	if(auth->fd >= 0)
 		fd_close(auth->fd);
-	
-	target_p->localClient->auth_request = NULL;
-	remove_auth_request(auth);
+		
+	unlink_auth_request(auth, &auth_poll_list);
+	free_auth_request(auth);
 }

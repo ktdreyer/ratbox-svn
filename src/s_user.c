@@ -519,6 +519,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 	Count.totalrestartcount++;
 
 	dlinkMoveNode(&source_p->localClient->tnode, &unknown_list, &lclient_list);
+	assert(source_p->localClient != NULL);
 	user_welcome(source_p);
 
 	return (introduce_client(client_p, source_p, user, nick));
@@ -1197,6 +1198,8 @@ user_welcome(struct Client *source_p)
 {
 	sendto_one(source_p, form_str(RPL_WELCOME), me.name, source_p->name,
 		   ServerInfo.network_name, source_p->name);
+	if(!MyConnect(source_p))
+		return;
 	sendto_one(source_p, form_str(RPL_YOURHOST), me.name,
 		   source_p->name,
 		   get_listener_name(source_p->localClient->listener), ircd_version);

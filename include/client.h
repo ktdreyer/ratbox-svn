@@ -365,6 +365,7 @@ struct exit_client_hook
 #define FLAGS_MARK	   0x20000	/* marked client */
 #define FLAGS_HIDDEN       0x40000	/* hidden server */
 #define FLAGS_EOB          0x80000	/* EOB */
+#define FLAGS_MYCONNECT	   0x100000	/* MyConnect */
 /* umodes, settable flags */
 
 #define UMODE_SERVNOTICE   0x0001	/* server notices such as kill */
@@ -449,7 +450,10 @@ struct exit_client_hook
 #define ClearWaitAuth(x)        ((x)->flags &= ~FLAGS_WAITAUTH)
 #define HasServlink(x)          ((x)->flags &  FLAGS_SERVLINK)
 #define SetServlink(x)          ((x)->flags |= FLAGS_SERVLINK)
-#define MyConnect(x)            (x != NULL && (x)->localClient != NULL)
+#define MyConnect(x)		((x)->flags & FLAGS_MYCONNECT)
+#define SetMyConnect(x)		((x)->flags |= FLAGS_MYCONNECT)
+#define ClearMyConnect(x)	((x)->flags &= ~FLAGS_MYCONNECT)
+
 #define MyClient(x)             (MyConnect(x) && IsClient(x))
 #define SetMark(x)		((x)->flags |= FLAGS_MARK)
 #define ClearMark(x)		((x)->flags &= ~FLAGS_MARK)
@@ -578,7 +582,6 @@ extern int show_ip(struct Client *source_p, struct Client *target_p);
 
 extern void initUser(void);
 extern void free_user(struct User *, struct Client *);
-extern void free_local_client(struct Client *);
 extern struct User *make_user(struct Client *);
 extern struct Server *make_server(struct Client *);
 
