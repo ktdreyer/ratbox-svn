@@ -1,3 +1,7 @@
+*** 20001219_9 by cosine
+iauth is now working again
+
+
 *** 20001219_8 by db
 - lazylinks final form. New nicks introduced after the burst, are
   simply passed on. The reason is simple. SJOIN would have to be modifed
