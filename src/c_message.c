@@ -37,10 +37,11 @@ c_message(struct client *client_p, char *parv[], int parc)
 		if(!strncasecmp(parv[2], "\001DCC CHAT ", 10))
 		{
 			/* skip the first bit.. */
-			char *p = parv[2]+10;
 			char *host;
 			char *cport;
 			int port;
+
+			p = parv[2]+10;
 
 			/* skip the 'chat' */
 			if((host = strchr(p, ' ')) == NULL)
@@ -106,7 +107,7 @@ c_message(struct client *client_p, char *parv[], int parc)
 
 			if(!irccmp(parv[1], target_p->service->username))
 			{
-				(target_p->service->func)(client_p, parv[2]);
+                                handle_service(target_p, client_p, parv[2]);
 				break;
 			}
 		}
@@ -116,6 +117,6 @@ c_message(struct client *client_p, char *parv[], int parc)
 
 	/* hunt for the nick.. */
 	if((target_p = find_service(parv[1])) != NULL)
-		target_p->service->func(client_p, parv[2]);
+                handle_service(target_p, client_p, parv[2]);
 }
 

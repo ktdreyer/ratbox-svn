@@ -14,6 +14,8 @@ extern dlink_list server_list;
 extern dlink_list exited_list;
 
 struct connection_entry;
+struct service_command;
+struct service_error;
 
 struct client
 {
@@ -60,9 +62,13 @@ struct service
 	char id[NICKLEN+1];
 	int opered;
 
-	int floodcount;
+	int flood;
+        int flood_max;
+        int flood_max_ignore;
 
-	void (*func)(struct client *, char *text);
+	struct service_command *command;
+        struct service_error *error;
+
         void (*stats)(struct connection_entry *, char *parv[], int parc);
 };
 
