@@ -55,7 +55,7 @@ static int mo_ungline(struct Client *, struct Client *, int, const char **);
 
 struct Message gline_msgtab = {
 	"GLINE", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, {mc_gline, 4}, {ms_gline, 8}, mg_ignore, {mo_gline, 3}}
+	{mg_unreg, mg_not_oper, {mc_gline, 3}, {ms_gline, 7}, mg_ignore, {mo_gline, 3}}
 };
 struct Message ungline_msgtab = {
 	"UNGLINE", 0, 0, 0, MFLG_SLOW,
@@ -219,6 +219,10 @@ mc_gline(struct Client *client_p, struct Client *source_p,
 	char *reason;
 	char *ptr;
 
+	/* hyb6 allows empty gline reasons */
+	if(parc < 4 || EmptyString(parv[3]))
+		return 0;
+
 	acptr = source_p;
 
 	user = parv[1];
@@ -318,6 +322,10 @@ ms_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	const char *user;
 	const char *host;
 	char *reason;
+
+	/* hyb6 allows empty gline reasons */
+	if(parc < 8 || EmptyString(parv[7]))
+		return 0;
 
 	/* client doesnt exist.. someones messing */
 	if((acptr = find_client(parv[1])) == NULL)
