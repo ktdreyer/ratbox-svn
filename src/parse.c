@@ -674,6 +674,7 @@ do_numeric(char numeric[], struct Client *client_p, struct Client *source_p, int
 	{
 		if(IsMe(target_p))
 		{
+			int 
 			/*
 			 * We shouldn't get numerics sent to us,
 			 * any numerics we do get indicate a bug somewhere..
@@ -692,7 +693,11 @@ do_numeric(char numeric[], struct Client *client_p, struct Client *source_p, int
 			 * will do the "right thing" and kill a nick that is colliding.
 			 * unfortunately, it did not work. --Dianora
 			 */
-			if(atoi(numeric) != ERR_NOSUCHNICK)
+			/* note, now we send PING on server connect, we can
+			 * also get ERR_NOSUCHSERVER..
+			 */
+			if(atoi(numeric) != ERR_NOSUCHNICK &&
+			   atoi(numeric) != ERR_NOSUCHSERVER)
 				sendto_realops_flags(UMODE_ALL, L_ADMIN,
 						     "*** %s(via %s) sent a %s numeric to me: %s",
 						     source_p->name,
