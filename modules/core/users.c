@@ -844,7 +844,7 @@ m_version(struct Client *client_p, struct Client *source_p, int parc, const char
 			ConfigChannel.use_except ? "e" : "", \
                         ConfigChannel.use_invex ? "I" : "", \
                         ServerInfo.network_name, \
-			ConfigFileEntry.watch_max
+			ConfigFileEntry.max_watch
 
 /*
  * show_isupport
