@@ -1,3 +1,7 @@
+*** 20010323_4 by ejb
+- add support for '1 minute 30 seconds' and suchlike in the parser.
+
+
 *** 20010323_3 by ejb
 - add a simple arithmatic parser to ircd.conf.  it understands
   +, -, *, / and () precedence.
