@@ -1,3 +1,20 @@
+androsyn    2002/11/13 06:50:04 UTC	(20021113_8)
+
+  Modified files:
+    contrib              Makefile.in 
+  Added files:
+    contrib              m_okick.c 
+  Log:
+  In the grand tradition of abusive things in contrib/ here is OKICK, which
+  removes users from channels without regard for much of anything.  As usual,
+  this is evil, so don't go and run this on EFnet or anything.
+  
+  Revision  Changes    Path
+  1.38      +1 -0      ircd-ratbox/contrib/Makefile.in
+  1.1       +134 -0    ircd-ratbox/contrib/m_okick.c (new)
+
+
+
 androsyn    2002/11/13 05:52:50 UTC	(20021113_7)
 
   Modified files:
