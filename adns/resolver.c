@@ -38,8 +38,8 @@ int cfd; /* control fd is blocking from our end */
 #define REVIPV4 0
 #define REVIPV6 1
 #define REVIPV6INT 2
-#define FWDHOST 3
-
+#define REVIPV6FALLBACK 3
+#define FWDHOST 4
 
 #define DLINK_FOREACH(pos, head) for (pos = (head); pos != NULL; pos = pos->next)
 #define DLINK_FOREACH_SAFE(pos, n, head) for (pos = (head), n = pos ? pos->next : NULL; pos != NULL; pos = n, n = pos ? pos->next : NULL) 
@@ -247,7 +247,10 @@ get_line(char *buf, int bufsize)
 	}
 
         if((p = memchr(buf, '\n', n)) != NULL)
+        {
                 n = p - buf + 1;
+                *p = '\0';
+        }        
         else 
                 return 0;
 	
@@ -259,7 +262,7 @@ static void send_answer(struct dns_request *req, adns_answer *reply)
 	char buf[512];
 	char response[64];
 	char rtype[4];
-	int result;
+	int result = 0;
 	if(reply && reply->status == adns_s_ok)
 	{
 		switch(req->revfwd)
@@ -286,19 +289,21 @@ static void send_answer(struct dns_request *req, adns_answer *reply)
 #ifdef IPV6
 					case adns_r_addr6:
 					{
-						char tmpres[64];
-						inet_ntop(AF_INET6, reply->rrs.addr->addr.inet6.sin6_addr, tmpres, sizeof(struct in6_addr));
+						char tmpres[65];
+						inet_ntop(AF_INET6, &reply->rrs.addr->addr.inet6.sin6_addr, tmpres, sizeof(tmpres)-1);
 						if(*tmpres == ':')
 						{
 							strcpy(response, "0");
 							strcat(response, tmpres);
 						} else
 							strcpy(response, tmpres);
+						result = 1;
 						break;
 					}
 #endif
 					case adns_r_addr:
 					{
+						result = 1;
 						strcpy(response, inet_ntoa(reply->rrs.addr->addr.inet.sin_addr));
 						break;
 					} 
@@ -306,12 +311,14 @@ static void send_answer(struct dns_request *req, adns_answer *reply)
 					{
 						strcpy(response, "FAILED");
 						result = 0;
+						break;
 					}						
 				}
+				break;
 			}
 			default:
 			{
-				snprintf(buf, sizeof(buf), "I have an request type of %d, and I don't know what to do!", req->reqtype);
+				snprintf(buf, sizeof(buf), "I have an revfwd type of %d, and I don't know what to do!", req->revfwd);
 				report_error(buf);				
 				break;				
 			}				
@@ -321,16 +328,16 @@ static void send_answer(struct dns_request *req, adns_answer *reply)
 	else
 	{
 #ifdef IPV6
-		if(req->revfwd == REQREV && req->reqtype == 5 && req->fallback == 0)
+		if(req->revfwd == REQREV && req->reqtype == REVIPV6FALLBACK && req->fallback == 0)
 		{
 			req->fallback = 1;
 		        result = adns_submit_reverse(dns_state,
-                                    (struct sockaddr *) req->sins.in6,
-                                    flags,
+                                    (struct sockaddr *) &req->sins.in6,
+                                    adns_r_ptr_ip6_old,
                                     adns_qf_owner | adns_qf_cname_loose |
                                     adns_qf_quoteok_anshost, req, &req->query);
-                                    
-			if(result == -1)
+              		MyFree(reply);
+			if(result != 0)
 			{
 				snprintf(buf, sizeof(buf), "REV %s 0 FAILED\n", req->reqid);
 				sock_write(buf, strlen(buf));	
@@ -409,7 +416,7 @@ read_io(void)
 		FD_ZERO(&exceptfds);
 
 		FD_SET(fd, &readfds);
-		if(sendq_list.length > 0)
+		if(dlink_list_length(&sendq_list) > 0)
 			FD_SET(fd, &writefds);
 		tv = &tvx;
 		maxfd = fd;
@@ -419,7 +426,7 @@ read_io(void)
 		tvx.tv_sec = 1L;
 		tvx.tv_usec = 0L;
 
-		select_result = select(FD_SETSIZE, &readfds, &writefds, &exceptfds,
+		select_result = select(maxfd, &readfds, &writefds, &exceptfds,
 				tv);
 
 		if(select_result == 0)
@@ -702,8 +709,38 @@ process_request(void)
 static void
 resolve_host(char **parv)
 {
+	struct dns_request *req;
+	char *requestid = parv[1];
+	char *iptype = parv[2];
+	char *rec = parv[3];
+	int result;
+	int flags;
+	req = MyMalloc(sizeof(struct dns_request));
+	strcpy(req->reqid, requestid);
+
+	req->revfwd = REQFWD;
+	req->reqtype = FWDHOST; 
+	switch(*iptype)
+	{
+#ifdef IPV6
+		case '5': /* I'm not sure why somebody would pass a 5 here, but okay */
+		case '6':
+			flags = adns_r_addr6;
+			break;
+#endif
+		default:
+			flags = adns_r_addr;		
+			break;
+	}
+	result = adns_submit(dns_state, rec, flags, adns_qf_owner, req, &req->query);
+	if(result != 0)
+	{
+		/* Failed to even submit */
+		send_answer(req, NULL);
+	}
 
 }
+
 
 static void
 resolve_ip(char **parv)
@@ -739,12 +776,14 @@ resolve_ip(char **parv)
 			req->reqtype = REVIPV6FALLBACK;
 			flags = adns_r_ptr_ip6;
 			inet_pton(AF_INET6, rec, &req->sins.in6.sin6_addr);
+			req->sins.in6.sin6_family = AF_INET6;
 			req->fallback = 0;
 			break;
 		case '6':
 			req->reqtype = REVIPV6;
 			flags = adns_r_ptr_ip6;
 			inet_pton(AF_INET6, rec, &req->sins.in6.sin6_addr);
+			req->sins.in6.sin6_family = AF_INET6;
 			break;
 #endif
 		default:
@@ -757,7 +796,7 @@ resolve_ip(char **parv)
                                     adns_qf_owner | adns_qf_cname_loose |
                                     adns_qf_quoteok_anshost, req, &req->query);
 		
-	if(result == -1)
+	if(result != 0)
 	{
 		send_answer(req, NULL);		
 	}
