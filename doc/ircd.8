@@ -5,8 +5,8 @@ ircd \- The Internet Relay Chat Program Server
 .SH SYNOPSIS
 .hy 0
 .IP \fBircd\fP
-[-tvn] [-f filename] [-d filename] [-k filename] [-h servername]
-[-l filename] [-x level]
+[-dlinefile filename] [-configfile filename] [-klinefile filename]
+[-logfile filename] [-pidfile filename] [-foreground] [-version] [-debug]
 .SH DESCRIPTION
 .LP
 \fIircd\fP is the server (daemon) program for the Internet Relay Chat
@@ -19,34 +19,34 @@ and relaying to other ircd sites.
 .B \-t
 Instructs the server to direct debugging output to standard output.
 .TP
-.B \-f filename
-Specifies the ircd.conf file to be used for this ircdaemon. The option
-is used to override the default ircd.conf given at compile time.
-.TP
-.B \-d filename
+.B \-dlinefile filename
 Specifies the D-line file to be used.  This file is used for both reading
 D-lines at startup, and writing to while \fIircd\fP is running.
 .TP
-.B \-k filename
+.B \-configfile filename
+Specifies the ircd.conf file to be used for this ircdaemon. The option
+is used to override the default ircd.conf given at compile time.
+.TP
+.B \-klinefile filename
 Specifies the K-line file to be used.  This file is used for both reading
 K-lines at startup, and writing to while \fIircd\fP is running.
 .TP
-.B \-h servername
-Specifies the name of the IRC server.  This overrides the setting in
-ircd.conf.
-.TP
-.B \-l filename
+.B \-logfile filename
 Specifies an alternative logfile to be used than that specified in config.h
 .TP
-.B \-n
-Makes \fIircd\fP run in the foreground, and, if -x is also specified, output
-debugging information to stdout.
+.B \-pidfile filename
+Specifies the ircd.pid used. The option is used to override the default
+ircd.pid given at compile time.
 .TP
-.B \-v
-Makes \Fircd\fP print its version, and exit.
+.B \-foreground
+Makes \fIircd\fP run in the foreground
 .TP
-.B \-x <level>
-Sets \fPircd\fP's debug level to <level>.
+.B \-version
+Makes \fIircd\fP print its version, and exit.
+.TP
+.B \-debug
+Makes \fIircd\fP start in debug mode.  \fIIrcd\fP must be compiled in DEBUGMODE
+for this to work.
 .SH USAGE
 If you plan to connect your \fIircd\fP server to an existing Irc-Network,
 you will need to alter your local IRC configuration file (typically named
@@ -77,11 +77,11 @@ Note:  You do not have to add the "&" to this command, the program will
 automatically detach itself from tty.
 .RS
 .nf
-leguin% \fBbin/ircd -n -x 9\fP
+leguin% \fBbin/ircd -foreground\fP
 .fi
 .RE
 .LP
-Runs ircd in the foreground, with maximum debugging information.
+Runs ircd in the foreground.
 .RS
 .nf
 .SH COPYRIGHT
