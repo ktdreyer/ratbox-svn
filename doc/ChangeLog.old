@@ -1,3 +1,15 @@
+androsyn    2002/05/30 20:36:38 EDT	(20020531_7)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Same story as before..add non-assert failure checks..
+  
+  Revision  Changes    Path
+  7.273     +5 -2      ircd-hybrid-7/src/client.c
+
+
+
 androsyn    2002/05/30 20:32:24 EDT	(20020531_6)
 
   Modified files:
