@@ -1,3 +1,17 @@
+*** 20010128_10 by ejb
+OOH
+YES YES YES
+YES "£$"£*(
+YES !!!!!!!
+OOOOOOOOH YES.
+
+um
+sorry.
+
+- removed sea^H^H^H+d s^U
+- removed +d support, as it causes more problems than it solves.
+
+
 *** 20010128_9 by jdc
 msg_hash_table bug (MAX_MSG_HASH+10 vs. MAX_MSG_HASH) seems to be
 gone; do some more testing on this one, but it's not showing up
