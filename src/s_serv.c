@@ -1484,7 +1484,7 @@ serv_connect(struct server_conf *server_p, struct Client *by)
 
 	/* log */
 	inetntop_sock(&server_p->ipnum, buf, sizeof(buf));
-	ilog(L_SERVER, "Connect to *[%s] @%s", server_p->host, buf);
+	ilog(L_SERVER, "Connect to *[%s] @%s", server_p->name, buf);
 
 	/*
 	 * Make sure this server isn't already connected
