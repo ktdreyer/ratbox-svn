@@ -358,7 +358,7 @@ mo_undline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	}
 
 	(void) rename(temppath, filename);
-	rehash(0);
+	rehash_bans(0);
 
 
 	sendto_one(source_p, ":%s NOTICE %s :D-Line for [%s] is removed", me.name, parv[0], cidr);

@@ -367,6 +367,7 @@ extern void show_temp_klines(struct Client *, dlink_list *);
 
 extern const char *get_conf_name(KlineType);
 extern int rehash(int);
+extern void rehash_bans(int);
 
 extern int conf_add_server(struct ConfItem *, int);
 extern void conf_add_class_to_conf(struct ConfItem *);

@@ -644,9 +644,67 @@ rehash(int sig)
 	else
 		strlcpy(me.info, "unknown", sizeof(me.info));
 
-	check_banned_lines();
 	open_logfiles();
 	return (0);
+}
+
+static struct banconf_entry
+{
+	const char **filename;
+	void (*func) (FILE *);
+	int perm;
+} banconfs[] = {
+	{ &ConfigFileEntry.klinefile,	parse_k_file,	0 },
+	{ &ConfigFileEntry.klinefile,	parse_k_file,	1 },
+	{ &ConfigFileEntry.dlinefile,	parse_d_file,	0 },
+	{ &ConfigFileEntry.dlinefile,	parse_d_file,	1 },
+	{ &ConfigFileEntry.xlinefile,	parse_x_file,	0 },
+	{ &ConfigFileEntry.xlinefile,	parse_x_file,	1 },
+	{ &ConfigFileEntry.resvfile,	parse_resv_file,0 },
+	{ &ConfigFileEntry.resvfile,	parse_resv_file,1 },
+	{ NULL,				NULL,		0 }
+};
+
+void
+rehash_bans(int sig)
+{
+	FILE *file;
+	char buf[MAXPATHLEN];
+	int i;
+
+	if(sig != 0)
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+				"Got signal SIGUSR2, reloading ban confs");
+
+	clear_out_address_conf_bans();
+	clear_s_newconf_bans();
+
+	for(i = 0; banconfs[i].filename; i++)
+	{
+		if(banconfs[i].perm)
+			snprintf(buf, sizeof(buf), "%s.perm", *banconfs[i].filename);
+		else
+			snprintf(buf, sizeof(buf), "%s", *banconfs[i].filename);
+
+		if((file = fopen(buf, "r")) == NULL)
+		{
+			if(banconfs[i].perm)
+				continue;
+
+			ilog(L_MAIN, "Failed reading ban file %s",
+				*banconfs[i].filename);
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					"Can't open %s file bans could be missing!",
+					*banconfs[i].filename);
+		}
+		else
+		{
+			(banconfs[i].func)(file);
+			fclose(file);
+		}
+	}
+
+	check_banned_lines();
 }
 
 /*
@@ -1078,23 +1136,6 @@ get_printable_kline(struct Client *source_p, struct ConfItem *aconf,
 		*oper_reason = aconf->spasswd;
 }
 
-static struct banconf_entry
-{
-	const char **filename;
-	void (*func) (FILE *);
-	int perm;
-} banconfs[] = {
-	{ &ConfigFileEntry.klinefile,	parse_k_file,	0 },
-	{ &ConfigFileEntry.klinefile,	parse_k_file,	1 },
-	{ &ConfigFileEntry.dlinefile,	parse_d_file,	0 },
-	{ &ConfigFileEntry.dlinefile,	parse_d_file,	1 },
-	{ &ConfigFileEntry.xlinefile,	parse_x_file,	0 },
-	{ &ConfigFileEntry.xlinefile,	parse_x_file,	1 },
-	{ &ConfigFileEntry.resvfile,	parse_resv_file,0 },
-	{ &ConfigFileEntry.resvfile,	parse_resv_file,1 },
-	{ NULL,				NULL,		0 }
-};
-	
 /*
  * read_conf_files
  *
@@ -1107,8 +1148,6 @@ read_conf_files(int cold)
 {
 	FILE *file;
 	const char *filename;
-	char buf[MAXPATHLEN];
-	int i;
 
 	conf_fbfile_in = NULL;
 
@@ -1144,33 +1183,6 @@ read_conf_files(int cold)
 
 	read_conf(conf_fbfile_in);
 	fclose(conf_fbfile_in);
-
-	for(i = 0; banconfs[i].filename; i++)
-	{
-		if(banconfs[i].perm)
-			snprintf(buf, sizeof(buf), "%s.perm", *banconfs[i].filename);
-		else
-			snprintf(buf, sizeof(buf), "%s", *banconfs[i].filename);
-
-		if((file = fopen(buf, "r")) == NULL)
-		{
-			if(banconfs[i].perm)
-				continue;
-			else if(cold)
-				ilog(L_MAIN, "Failed reading ban file %s",
-					*banconfs[i].filename);
-			else
-				sendto_realops_flags(UMODE_ALL, L_ALL,
-						"Can't open %s file bans could be missing!",
-						*banconfs[i].filename);
-		}
-		else
-		{
-			(banconfs[i].func)(file);
-			fclose(file);
-		}
-
-	}
 }
 
 /*

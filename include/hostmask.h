@@ -41,6 +41,7 @@ struct ConfItem *find_conf_by_address(const char *host, const char *sockhost,
 void add_conf_by_address(const char *, int, const char *, struct ConfItem *);
 void delete_one_address_conf(const char *, struct ConfItem *);
 void clear_out_address_conf(void);
+void clear_out_address_conf_bans(void);
 void init_host_hash(void);
 struct ConfItem *find_address_conf(const char *host, const char *sockhost, 
 				const char *, struct sockaddr *, int);

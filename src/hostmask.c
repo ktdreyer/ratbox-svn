@@ -498,7 +498,41 @@ clear_out_address_conf(void)
 			arecn = arec->next;
 			/* We keep the temporary K-lines and destroy the
 			 * permanent ones, just to be confusing :) -A1kmm */
-			if(arec->aconf->flags & CONF_FLAGS_TEMPORARY)
+			if(arec->aconf->flags & CONF_FLAGS_TEMPORARY ||
+			   (arec->type != CONF_CLIENT && arec->type != CONF_EXEMPTDLINE))
+			{
+				*store_next = arec;
+				store_next = &arec->next;
+			}
+			else
+			{
+				arec->aconf->status |= CONF_ILLEGAL;
+				if(!arec->aconf->clients)
+					free_conf(arec->aconf);
+				MyFree(arec);
+			}
+		}
+		*store_next = NULL;
+	}
+}
+
+void
+clear_out_address_conf_bans(void)
+{
+	int i;
+	struct AddressRec **store_next;
+	struct AddressRec *arec, *arecn;
+
+	for (i = 0; i < ATABLE_SIZE; i++)
+	{
+		store_next = &atable[i];
+		for (arec = atable[i]; arec; arec = arecn)
+		{
+			arecn = arec->next;
+			/* We keep the temporary K-lines and destroy the
+			 * permanent ones, just to be confusing :) -A1kmm */
+			if(arec->aconf->flags & CONF_FLAGS_TEMPORARY ||
+			   (arec->type == CONF_CLIENT || arec->type == CONF_EXEMPTDLINE))
 			{
 				*store_next = arec;
 				store_next = &arec->next;

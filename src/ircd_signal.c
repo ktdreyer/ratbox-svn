@@ -105,6 +105,12 @@ sigusr1_handler(int sig)
 #endif
 }
 
+static void
+sigusr2_handler(int sig)
+{
+	dorehashbans = 1;
+}
+
 /*
  * sigint_handler - restart the server
  */
@@ -174,6 +180,10 @@ setup_signals()
 	act.sa_handler = sigusr1_handler;
 	sigaddset(&act.sa_mask, SIGUSR1);
 	sigaction(SIGUSR1, &act, 0);
+
+	act.sa_handler = sigusr2_handler;
+	sigaddset(&act.sa_mask, SIGUSR2);
+	sigaction(SIGUSR2, &act, 0);
 
 	act.sa_handler = sigchld_handler;
 	sigaddset(&act.sa_mask, SIGCHLD);

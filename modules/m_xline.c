@@ -662,7 +662,7 @@ remove_xline(struct Client *source_p, const char *huntgecos)
 	}
 
 	(void) rename(temppath, filename);
-	rehash(0);
+	rehash_bans(0);
 
 	sendto_one_notice(source_p, ":X-Line for [%s] is removed", huntgecos);
 	sendto_realops_flags(UMODE_ALL, L_ALL,

@@ -597,7 +597,7 @@ remove_resv(struct Client *source_p, const char *name)
 	}
 
 	(void) rename(temppath, filename);
-	rehash(0);
+	rehash_bans(0);
 
 	sendto_one_notice(source_p, ":RESV for [%s] is removed", name);
 	sendto_realops_flags(UMODE_ALL, L_ALL,

@@ -120,6 +120,13 @@ clear_s_newconf(void)
 		else
 			server_p->flags |= SERVER_ILLEGAL;
 	}
+}
+
+void
+clear_s_newconf_bans(void)
+{
+	struct ConfItem *aconf;
+	dlink_node *ptr, *next_ptr;
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, xline_conf_list.head)
 	{

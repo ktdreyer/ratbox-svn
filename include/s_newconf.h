@@ -57,6 +57,7 @@ struct _patricia_tree_t *tgchange_tree;
 
 extern void init_s_newconf(void);
 extern void clear_s_newconf(void);
+extern void clear_s_newconf_bans(void);
 
 #define FREE_TARGET(x) ((x)->localClient->targinfo[0])
 #define USED_TARGETS(x) ((x)->localClient->targinfo[1])

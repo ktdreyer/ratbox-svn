@@ -62,6 +62,15 @@ struct hash_commands
 };
 
 static void
+rehash_bans_loc(struct Client *source_p)
+{
+	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is rehashing bans",
+				get_oper_name(source_p));
+
+	rehash_bans(0);
+}
+
+static void
 rehash_dns(struct Client *source_p)
 {
 	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is rehashing DNS", 
@@ -255,6 +264,7 @@ rehash_help(struct Client *source_p)
 /* *INDENT-OFF* */
 static struct hash_commands rehash_commands[] =
 {
+	{"BANS",	rehash_bans_loc		},
 	{"DNS", 	rehash_dns		},
 	{"MOTD", 	rehash_motd		},
 	{"OMOTD", 	rehash_omotd		},

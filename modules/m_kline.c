@@ -806,7 +806,7 @@ remove_permkline_match(struct Client *source_p, const char *host, const char *us
 	}
 		
 	(void) rename(temppath, filename);
-	rehash(0);
+	rehash_bans(0);
 
 	sendto_one_notice(source_p, ":K-Line for [%s@%s] is removed",
 			  user, host);

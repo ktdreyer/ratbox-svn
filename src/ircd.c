@@ -105,6 +105,7 @@ const char *pidFileName = PPATH;
 
 char **myargv;
 int dorehash = 0;
+int dorehashbans = 0;
 int doremotd = 0;
 time_t nextconnect = 1;		/* time for next try_connections call */
 int kline_queued = 0;
@@ -304,6 +305,11 @@ io_loop(void)
 		{
 			rehash(1);
 			dorehash = 0;
+		}
+		if(dorehashbans)
+		{
+			rehash_bans(1);
+			dorehashbans = 0;
 		}
 		if(doremotd)
 		{
@@ -602,6 +608,7 @@ main(int argc, char *argv[])
 	if (testing_conf)
 		fprintf(stderr, "\nBeginning config test\n");
 	read_conf_files(YES);	/* cold start init conf files */
+	rehash_bans(0);
 #ifndef STATIC_MODULES
 
 	mod_add_path(MODULE_DIR); 
