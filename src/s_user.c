@@ -791,14 +791,14 @@ int do_local_user(char* nick, struct Client* client_p, struct Client* source_p,
 
   user = make_user(source_p);
 
-  oflags = source_p->flags;
+  oflags = source_p->umodes;
 
   if (!IsUnknown(source_p))
     {
       sendto_one(source_p, form_str(ERR_ALREADYREGISTRED), me.name, nick);
       return 0;
     }
-  source_p->flags |= FLAGS_INVISIBLE;
+  source_p->umodes |= FLAGS_INVISIBLE;
 
   if (!(oflags & FLAGS_INVISIBLE) && IsInvisible(source_p))
     Count.invisi++;
