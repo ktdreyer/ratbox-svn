@@ -7,6 +7,7 @@ o) added configure option --enable-efnet to compile the ircd with the three
 o) fixed a bug with opme causing channel member lists to be corrupted
 o) Fixed the issue where we would attempt to exit an already exited
    client   
+o) Fixed the TCP resolver so that it actually works
 
 --------------------------------------------------------------------------------
 
