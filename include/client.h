@@ -134,7 +134,6 @@ struct Client
   int               hopcount;   /* number of servers to this 0 = local */
   unsigned short    status;     /* Client type */
   unsigned char     handler;    /* Handler index */
-  char              eob;	/* server eob has been received */
   unsigned long     serial;	/* used to enforce 1 send per nick */
   /*
    * client->name is the unique name for a client nick or host
@@ -338,8 +337,6 @@ struct LocalUser
 #define PARSE_AS_CLIENT(x)      ((x)->status & STAT_CLIENT_PARSE)
 #define PARSE_AS_SERVER(x)      ((x)->status & STAT_SERVER_PARSE)
 
-#define SetEob(x)		((x)->eob = 1)
-#define HasSentEob(x)		((x)->eob)
 
 /*
  * ts stuff
@@ -372,6 +369,7 @@ struct LocalUser
 #define FLAGS_SERVLINK     0x10000 /* servlink has servlink process */
 #define FLAGS_MARK	   0x20000 /* marked client */
 #define FLAGS_HIDDEN       0x40000 /* hidden server */
+#define FLAGS_EOB          0x80000 /* EOB */
 /* umodes, settable flags */
 
 #define UMODE_SERVNOTICE   0x0001 /* server notices such as kill */
@@ -464,6 +462,9 @@ struct LocalUser
 #define SetHidden(x)		((x)->flags |= FLAGS_HIDDEN)
 #define ClearHidden(x)		((x)->flags &= ~FLAGS_HIDDEN)
 #define IsHidden(x)		((x)->flags & FLAGS_HIDDEN)
+#define ClearEob(x)		((x)->flags &= ~FLAGS_EOB)
+#define SetEob(x)		((x)->flags |= FLAGS_EOB)
+#define HasSentEob(x)		((x)->flags & FLAGS_EOB)
 
 /* oper flags */
 #define MyOper(x)               (MyConnect(x) && IsOper(x))
