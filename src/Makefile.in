@@ -29,7 +29,7 @@ IRCD_EXE	= ircd
 
 PROGS		= $(IRCD_EXE)
 
-IRCDLIBS	= @LIBS@ @MODULES_LIBS@ -L../adns -ladns
+IRCDLIBS	= @MODULES_LIBS@ -L../adns -ladns @LIBS@
 
 INCLUDES	= -I../include
 CPPFLAGS	= ${INCLUDES} @CPPFLAGS@
