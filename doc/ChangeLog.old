@@ -1,3 +1,8 @@
+*** 20010504_2 by androsyn
+Added a check for spoofs to prevent moron server admins from doing stupid
+things like having spoofs in excess of HOSTLEN.
+
+
 *** 20010504_1 by fl_
 - dont burst persistant channels
 - destroy_channel() if the user is parting.. persistant chans should only
