@@ -1,3 +1,7 @@
+*** 20010301_7 by davidt
+- Fix for a core on /rehash when removing in-use I lines.
+
+
 *** 20010301_6 by androsyn
 Forgot to commit res.h last night
 
