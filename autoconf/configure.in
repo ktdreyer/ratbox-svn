@@ -312,6 +312,7 @@ AC_OUTPUT(                   \
  Makefile                    \
  iauth/Makefile              \
  iauth/source/Makefile       \
+ contrib/Makefile            \
  src/Makefile                \
  include/Makefile            \
  messages/Makefile           \

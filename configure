@@ -2782,6 +2782,7 @@ trap 'rm -fr `echo "\
  Makefile                    \
  iauth/Makefile              \
  iauth/source/Makefile       \
+ contrib/Makefile            \
  src/Makefile                \
  include/Makefile            \
  messages/Makefile           \
@@ -2887,6 +2888,7 @@ CONFIG_FILES=\${CONFIG_FILES-"\
  Makefile                    \
  iauth/Makefile              \
  iauth/source/Makefile       \
+ contrib/Makefile            \
  src/Makefile                \
  include/Makefile            \
  messages/Makefile           \
