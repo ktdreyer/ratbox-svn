@@ -129,31 +129,28 @@
 
 static const char* Lformat = ":%s %d %s %s %u %u %u %u %u :%u %u %s";
 
+static void stats_L(struct Client *sptr,char *name,int doall, int wilds);
+
 int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   struct Message* mptr;
-  struct Client*  acptr;
   char            stat = parc > 1 ? parv[1][0] : '\0';
-  int             i;
   int             doall = 0;
   int             wilds = 0;
   int             valid_stats = 0;
   char*           name;
   static time_t   last_used = 0;
 
-  if(!IsAnOper(sptr))
+  if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
     {
-      if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
-        {
-          /* safe enough to give this on a local connect only */
-          if(MyClient(sptr))
-            sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);
-          return 0;
-        }
-      else
-        {
-          last_used = CurrentTime;
-        }
+      /* safe enough to give this on a local connect only */
+      if(MyClient(sptr))
+	sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);
+      return 0;
+    }
+  else
+    {
+      last_used = CurrentTime;
     }
 
   if (hunt_server(cptr,sptr,":%s STATS %s :%s",2,parc,parv)!=HUNTED_ISME)
@@ -175,70 +172,10 @@ int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   switch (stat)
     {
     case 'L' : case 'l' :
-      /*
-       * send info about connections which match, or all if the
-       * mask matches me.name.  Only restrictions are on those who
-       * are invisible not being visible to 'foreigners' who use
-       * a wild card based search to list it.
-       */
-      for (i = 0; i <= highest_fd; i++)
-        {
-          if (!(acptr = local[i]))
-            continue;
-
-          if (IsPerson(acptr) &&
-              !IsAnOper(acptr) && !IsAnOper(sptr) &&
-              (acptr != sptr))
-            continue;
-          if (IsInvisible(acptr) && (doall || wilds) &&
-              !(MyConnect(sptr) && IsOper(sptr)) &&
-              !IsAnOper(acptr) && (acptr != sptr))
-            continue;
-          if (!doall && wilds && !match(name, acptr->name))
-            continue;
-          if (!(doall || wilds) && irccmp(name, acptr->name))
-            continue;
-
-          /* I've added a sanity test to the "CurrentTime - acptr->since"
-           * occasionally, acptr->since is larger than CurrentTime.
-           * The code in parse.c "randomly" increases the "since",
-           * which means acptr->since is larger then CurrentTime at times,
-           * this gives us very high odd number.. 
-           * So, I am going to return 0 for ->since if this happens.
-           * - Dianora
-           */
-          /* trust opers not on this server */
-          /* if(IsAnOper(sptr)) */
-
-          /* Don't trust opers not on this server */
-          if(MyClient(sptr))
-            {
-                if(IsIPHidden(acptr) || IsServer(acptr))
-                  sendto_one(sptr, Lformat, me.name,
-                     RPL_STATSLINKINFO, parv[0],
-                     get_client_name(acptr, HIDEME),
-                     (int)DBufLength(&acptr->sendQ),
-                     (int)acptr->sendM, (int)acptr->sendK,
-                     (int)acptr->receiveM, (int)acptr->receiveK,
-                     CurrentTime - acptr->firsttime,
-                     (CurrentTime > acptr->since) ? (CurrentTime - acptr->since):0,
-                     IsServer(acptr) ? show_capabilities(acptr) : "-");
-                 else
-                  sendto_one(sptr, Lformat, me.name,
-                     RPL_STATSLINKINFO, parv[0],
-                     (IsUpper(stat)) ?
-                     get_client_name(acptr, TRUE) :
-                     get_client_name(acptr, FALSE),
-                     (int)DBufLength(&acptr->sendQ),
-                     (int)acptr->sendM, (int)acptr->sendK,
-                     (int)acptr->receiveM, (int)acptr->receiveK,
-                     CurrentTime - acptr->firsttime,
-                     (CurrentTime > acptr->since) ? (CurrentTime - acptr->since):0,
-                     IsServer(acptr) ? show_capabilities(acptr) : "-");
-              }
-        }
+      stats_L(sptr,name,doall,wilds);
       valid_stats++;
       break;
+
     case 'C' : case 'c' :
       report_configured_links(sptr, CONF_CONNECT_SERVER|CONF_NOCONNECT_SERVER);
       valid_stats++;
@@ -275,7 +212,10 @@ int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       break;
 
     case 'I' : case 'i' :
+/* ZZZ  should be in run time config */
+#ifndef I_LINES_OPER_ONLY
       report_mtrie_conf_links(sptr, CONF_CLIENT);
+#endif
       valid_stats++;
       break;
 
@@ -317,14 +257,8 @@ int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       break;
 
     case 'Q' : case 'q' :
-      if(!IsAnOper(sptr))
         sendto_one(sptr,":%s NOTICE %s :This server does not support Q lines",
                    me.name, parv[0]);
-      else
-        {
-          report_qlines(sptr);
-          valid_stats++;
-        }
       break;
 
     case 'R' : case 'r' :
@@ -369,11 +303,6 @@ int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       break;;
 
     case 'Y' : case 'y' :
-      if(IsAnOper(sptr))
-        {
-          report_classes(sptr);
-          valid_stats++;
-        }
       break;
 
     case 'Z' : case 'z' :
@@ -465,29 +394,11 @@ int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 int mo_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   struct Message* mptr;
-  struct Client*  acptr;
   char            stat = parc > 1 ? parv[1][0] : '\0';
-  int             i;
   int             doall = 0;
   int             wilds = 0;
   int             valid_stats = 0;
   char*           name;
-  static time_t   last_used = 0;
-
-  if(!IsAnOper(sptr))
-    {
-      if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
-        {
-          /* safe enough to give this on a local connect only */
-          if(MyClient(sptr))
-            sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);
-          return 0;
-        }
-      else
-        {
-          last_used = CurrentTime;
-        }
-    }
 
   if (hunt_server(cptr,sptr,":%s STATS %s :%s",2,parc,parv)!=HUNTED_ISME)
     return 0;
@@ -508,84 +419,10 @@ int mo_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   switch (stat)
     {
     case 'L' : case 'l' :
-      /*
-       * send info about connections which match, or all if the
-       * mask matches me.name.  Only restrictions are on those who
-       * are invisible not being visible to 'foreigners' who use
-       * a wild card based search to list it.
-       */
-      for (i = 0; i <= highest_fd; i++)
-        {
-          if (!(acptr = local[i]))
-            continue;
-
-          if (IsPerson(acptr) &&
-              !IsAnOper(acptr) && !IsAnOper(sptr) &&
-              (acptr != sptr))
-            continue;
-          if (IsInvisible(acptr) && (doall || wilds) &&
-              !(MyConnect(sptr) && IsOper(sptr)) &&
-              !IsAnOper(acptr) && (acptr != sptr))
-            continue;
-          if (!doall && wilds && !match(name, acptr->name))
-            continue;
-          if (!(doall || wilds) && irccmp(name, acptr->name))
-            continue;
-
-          /* I've added a sanity test to the "CurrentTime - acptr->since"
-           * occasionally, acptr->since is larger than CurrentTime.
-           * The code in parse.c "randomly" increases the "since",
-           * which means acptr->since is larger then CurrentTime at times,
-           * this gives us very high odd number.. 
-           * So, I am going to return 0 for ->since if this happens.
-           * - Dianora
-           */
-          /* trust opers not on this server */
-          /* if(IsAnOper(sptr)) */
-
-          /* Don't trust opers not on this server */
-          if(MyClient(sptr) && IsAnOper(sptr))
-            {
-              sendto_one(sptr, Lformat, me.name,
-                     RPL_STATSLINKINFO, parv[0],
-                     (IsUpper(stat)) ?
-                     get_client_name(acptr, TRUE) :
-                     get_client_name(acptr, FALSE),
-                     (int)DBufLength(&acptr->sendQ),
-                     (int)acptr->sendM, (int)acptr->sendK,
-                     (int)acptr->receiveM, (int)acptr->receiveK,
-                     CurrentTime - acptr->firsttime,
-                     (CurrentTime > acptr->since) ? (CurrentTime - acptr->since):0,
-                     IsServer(acptr) ? show_capabilities(acptr) : "-");
-              }
-            else
-              {
-                if(IsIPHidden(acptr) || IsServer(acptr))
-                  sendto_one(sptr, Lformat, me.name,
-                     RPL_STATSLINKINFO, parv[0],
-                     get_client_name(acptr, HIDEME),
-                     (int)DBufLength(&acptr->sendQ),
-                     (int)acptr->sendM, (int)acptr->sendK,
-                     (int)acptr->receiveM, (int)acptr->receiveK,
-                     CurrentTime - acptr->firsttime,
-                     (CurrentTime > acptr->since) ? (CurrentTime - acptr->since):0,
-                     IsServer(acptr) ? show_capabilities(acptr) : "-");
-                 else
-                  sendto_one(sptr, Lformat, me.name,
-                     RPL_STATSLINKINFO, parv[0],
-                     (IsUpper(stat)) ?
-                     get_client_name(acptr, TRUE) :
-                     get_client_name(acptr, FALSE),
-                     (int)DBufLength(&acptr->sendQ),
-                     (int)acptr->sendM, (int)acptr->sendK,
-                     (int)acptr->receiveM, (int)acptr->receiveK,
-                     CurrentTime - acptr->firsttime,
-                     (CurrentTime > acptr->since) ? (CurrentTime - acptr->since):0,
-                     IsServer(acptr) ? show_capabilities(acptr) : "-");
-              }
-        }
+      stats_L(sptr,name,doall,wilds);
       valid_stats++;
       break;
+
     case 'C' : case 'c' :
       report_configured_links(sptr, CONF_CONNECT_SERVER|CONF_NOCONNECT_SERVER);
       valid_stats++;
@@ -596,11 +433,6 @@ int mo_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       break;
 
     case 'D': case 'd':
-      if (!IsAnOper(sptr))
-        {
-          sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-          break;
-        }
       report_dlines(sptr);
       valid_stats++;
       break;
@@ -673,14 +505,8 @@ int mo_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       break;
 
     case 'Q' : case 'q' :
-      if(!IsAnOper(sptr))
-        sendto_one(sptr,":%s NOTICE %s :This server does not support Q lines",
-                   me.name, parv[0]);
-      else
-        {
-          report_qlines(sptr);
-          valid_stats++;
-        }
+      report_qlines(sptr);
+      valid_stats++;
       break;
 
     case 'R' : case 'r' :
@@ -689,19 +515,11 @@ int mo_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       break;
 
     case 'S' : case 's':
-      if (IsAnOper(sptr))
-        list_scache(cptr,sptr,parc,parv);
-      else
-        sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
+      list_scache(cptr,sptr,parc,parv);
       valid_stats++;
       break;
 
     case 'T' : case 't' :
-      if (!IsAnOper(sptr))
-        {
-          sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-          break;
-        }
       tstats(sptr, parv[0]);
       valid_stats++;
       break;
@@ -730,28 +548,17 @@ int mo_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       break;
 
     case 'x' : case 'X' :
-      if(IsAnOper(sptr))
-        {
-          report_specials(sptr,CONF_XLINE,RPL_STATSXLINE);
-          valid_stats++;
-        }
+      report_specials(sptr,CONF_XLINE,RPL_STATSXLINE);
+      valid_stats++;
       break;;
 
     case 'Y' : case 'y' :
-      if(IsAnOper(sptr))
-        {
-          report_classes(sptr);
-          valid_stats++;
-        }
+      report_classes(sptr);
+      valid_stats++;
       break;
 
     case 'Z' : case 'z' :
-      if (IsAnOper(sptr))
-        {
-          count_memory(sptr, parv[0]);
-        }
-      else
-        sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
+      count_memory(sptr, parv[0]);
       valid_stats++;
       break;
 
@@ -832,348 +639,97 @@ int mo_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
 int ms_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  struct Message* mptr;
-  struct Client*  acptr;
-  char            stat = parc > 1 ? parv[1][0] : '\0';
-  int             i;
-  int             doall = 0;
-  int             wilds = 0;
-  int             valid_stats = 0;
-  char*           name;
-  static time_t   last_used = 0;
-
-  if(!IsAnOper(sptr))
-    {
-      if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
-        {
-          /* safe enough to give this on a local connect only */
-          if(MyClient(sptr))
-            sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);
-          return 0;
-        }
-      else
-        {
-          last_used = CurrentTime;
-        }
-    }
-
   if (hunt_server(cptr,sptr,":%s STATS %s :%s",2,parc,parv)!=HUNTED_ISME)
     return 0;
 
-  if (parc > 2)
-    {
-      name = parv[2];
-      if (!irccmp(name, me.name))
-        doall = 2;
-      else if (match(name, me.name))
-        doall = 1;
-      if (strchr(name, '*') || strchr(name, '?'))
-        wilds = 1;
-    }
+  if (IsAnOper(sptr))
+    mo_stats(cptr,sptr,parc,parv);
   else
-    name = me.name;
+    m_stats(cptr,sptr,parc,parv);
 
-  switch (stat)
-    {
-    case 'L' : case 'l' :
-      /*
-       * send info about connections which match, or all if the
-       * mask matches me.name.  Only restrictions are on those who
-       * are invisible not being visible to 'foreigners' who use
-       * a wild card based search to list it.
-       */
-      for (i = 0; i <= highest_fd; i++)
-        {
-          if (!(acptr = local[i]))
-            continue;
-
-          if (IsPerson(acptr) &&
-              !IsAnOper(acptr) && !IsAnOper(sptr) &&
-              (acptr != sptr))
-            continue;
-          if (IsInvisible(acptr) && (doall || wilds) &&
-              !(MyConnect(sptr) && IsOper(sptr)) &&
-              !IsAnOper(acptr) && (acptr != sptr))
-            continue;
-          if (!doall && wilds && !match(name, acptr->name))
-            continue;
-          if (!(doall || wilds) && irccmp(name, acptr->name))
-            continue;
-
-          /* I've added a sanity test to the "CurrentTime - acptr->since"
-           * occasionally, acptr->since is larger than CurrentTime.
-           * The code in parse.c "randomly" increases the "since",
-           * which means acptr->since is larger then CurrentTime at times,
-           * this gives us very high odd number.. 
-           * So, I am going to return 0 for ->since if this happens.
-           * - Dianora
-           */
-          /* trust opers not on this server */
-          /* if(IsAnOper(sptr)) */
-
-          /* Don't trust opers not on this server */
-          if(MyClient(sptr) && IsAnOper(sptr))
-            {
-              sendto_one(sptr, Lformat, me.name,
-                     RPL_STATSLINKINFO, parv[0],
-                     (IsUpper(stat)) ?
-                     get_client_name(acptr, TRUE) :
-                     get_client_name(acptr, FALSE),
-                     (int)DBufLength(&acptr->sendQ),
-                     (int)acptr->sendM, (int)acptr->sendK,
-                     (int)acptr->receiveM, (int)acptr->receiveK,
-                     CurrentTime - acptr->firsttime,
-                     (CurrentTime > acptr->since) ? (CurrentTime - acptr->since):0,
-                     IsServer(acptr) ? show_capabilities(acptr) : "-");
-              }
-            else
-              {
-                if(IsIPHidden(acptr) || IsServer(acptr))
-                  sendto_one(sptr, Lformat, me.name,
-                     RPL_STATSLINKINFO, parv[0],
-                     get_client_name(acptr, HIDEME),
-                     (int)DBufLength(&acptr->sendQ),
-                     (int)acptr->sendM, (int)acptr->sendK,
-                     (int)acptr->receiveM, (int)acptr->receiveK,
-                     CurrentTime - acptr->firsttime,
-                     (CurrentTime > acptr->since) ? (CurrentTime - acptr->since):0,
-                     IsServer(acptr) ? show_capabilities(acptr) : "-");
-                 else
-                  sendto_one(sptr, Lformat, me.name,
-                     RPL_STATSLINKINFO, parv[0],
-                     (IsUpper(stat)) ?
-                     get_client_name(acptr, TRUE) :
-                     get_client_name(acptr, FALSE),
-                     (int)DBufLength(&acptr->sendQ),
-                     (int)acptr->sendM, (int)acptr->sendK,
-                     (int)acptr->receiveM, (int)acptr->receiveK,
-                     CurrentTime - acptr->firsttime,
-                     (CurrentTime > acptr->since) ? (CurrentTime - acptr->since):0,
-                     IsServer(acptr) ? show_capabilities(acptr) : "-");
-              }
-        }
-      valid_stats++;
-      break;
-    case 'C' : case 'c' :
-      report_configured_links(sptr, CONF_CONNECT_SERVER|CONF_NOCONNECT_SERVER);
-      valid_stats++;
-      break;
- 
-    case 'B' : case 'b' :
-      sendto_one(sptr,":%s NOTICE %s :Use stats I instead", me.name, parv[0]);
-      break;
-
-    case 'D': case 'd':
-      if (!IsAnOper(sptr))
-        {
-          sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-          break;
-        }
-      report_dlines(sptr);
-      valid_stats++;
-      break;
-
-    case 'E' : case 'e' :
-      sendto_one(sptr,":%s NOTICE %s :Use stats I instead", me.name, parv[0]);
-      break;
-
-    case 'F' : case 'f' :
-      sendto_one(sptr,":%s NOTICE %s :Use stats I instead", me.name, parv[0]);
-      break;
-
-    case 'G': case 'g' :
-      if (ConfigFileEntry.glines) {
-        report_glines(sptr);
-        valid_stats++;
-      } else
-        sendto_one(sptr,":%s NOTICE %s :This server does not support G lines",
-                   me.name, parv[0]);
-      break;
-
-    case 'H' : case 'h' :
-      report_configured_links(sptr, CONF_HUB|CONF_LEAF);
-      valid_stats++;
-      break;
-
-    case 'I' : case 'i' :
-      report_mtrie_conf_links(sptr, CONF_CLIENT);
-      valid_stats++;
-      break;
-
-    case 'k' :
-      report_temp_klines(sptr);
-      valid_stats++;
-      break;
-
-    case 'K' :
-/* sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]); */
-      if(parc > 3)
-        report_matching_host_klines(sptr,parv[3]);
-      else
-        if (IsAnOper(sptr))
-          report_mtrie_conf_links(sptr, CONF_KILL);
-        else
-          report_matching_host_klines(sptr,sptr->host);
-      valid_stats++;
-      break;
-
-    case 'M' : case 'm' :
-      for (mptr = msgtab; mptr->cmd; mptr++)
-          sendto_one(sptr, form_str(RPL_STATSCOMMANDS),
-                     me.name, parv[0], mptr->cmd,
-                     mptr->count, mptr->bytes);
-      valid_stats++;
-      break;
-
-    case 'o' : case 'O' :
-      report_configured_links(sptr, CONF_OPS);
-      valid_stats++;
-      break;
-
-    case 'P' :
-      show_ports(sptr);
-      valid_stats++;
-      break;
-
-    case 'p' :
-      show_opers(sptr);
-      valid_stats++;
-      break;
-
-    case 'Q' : case 'q' :
-      if(!IsAnOper(sptr))
-        sendto_one(sptr,":%s NOTICE %s :This server does not support Q lines",
-                   me.name, parv[0]);
-      else
-        {
-          report_qlines(sptr);
-          valid_stats++;
-        }
-      break;
-
-    case 'R' : case 'r' :
-      send_usage(sptr,parv[0]);
-      valid_stats++;
-      break;
-
-    case 'S' : case 's':
-      if (IsAnOper(sptr))
-        list_scache(cptr,sptr,parc,parv);
-      else
-        sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-      valid_stats++;
-      break;
-
-    case 'T' : case 't' :
-      if (!IsAnOper(sptr))
-        {
-          sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-          break;
-        }
-      tstats(sptr, parv[0]);
-      valid_stats++;
-      break;
-
-    case 'U' :
-      report_specials(sptr,CONF_ULINE,RPL_STATSULINE);
-      valid_stats++;
-      break;
-
-    case 'u' :
-      {
-        time_t now;
-        
-        now = CurrentTime - me.since;
-        sendto_one(sptr, form_str(RPL_STATSUPTIME), me.name, parv[0],
-                   now/86400, (now/3600)%24, (now/60)%60, now%60);
-        sendto_one(sptr, form_str(RPL_STATSCONN), me.name, parv[0],
-                   MaxConnectionCount, MaxClientCount);
-        valid_stats++;
-        break;
-      }
-
-    case 'v' : case 'V' :
-      show_servers(sptr);
-      valid_stats++;
-      break;
-
-    case 'x' : case 'X' :
-      if(IsAnOper(sptr))
-        {
-          report_specials(sptr,CONF_XLINE,RPL_STATSXLINE);
-          valid_stats++;
-        }
-      break;;
-
-    case 'Y' : case 'y' :
-      if(IsAnOper(sptr))
-        {
-          report_classes(sptr);
-          valid_stats++;
-        }
-      break;
-
-    case 'Z' : case 'z' :
-      if (IsAnOper(sptr))
-        {
-          count_memory(sptr, parv[0]);
-        }
-      else
-        sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-      valid_stats++;
-      break;
-
-    case '?':
-      serv_info(sptr, parv[0]);
-      valid_stats++;
-      break;
-
-    default :
-      stat = '*';
-      break;
-    }
-  sendto_one(sptr, form_str(RPL_ENDOFSTATS), me.name, parv[0], stat);
-
-  /* personally, I don't see why opers need to see stats requests
-   * at all. They are just "noise" to an oper, and users can't do
-   * any damage with stats requests now anyway. So, why show them?
-   * -Dianora
-   * see m_stats --is
-   */
-
-  if (ConfigFileEntry.stats_notice && valid_stats)
-    {
-      if ( (stat == 'L') || (stat == 'l') )
-        {
-          sendto_realops_flags(FLAGS_SPY,
-               "STATS %c requested by %s (%s@%s) [%s] on %s",
-               stat,
-               sptr->name,
-               sptr->username,
-               sptr->host,
-               sptr->user->server,
-               parc > 2 ? parv[2] : "\0" );
-        }
-      else
-        {
-          sendto_realops_flags(FLAGS_SPY,
-               "STATS %c requested by %s (%s@%s) [%s]",
-               stat,
-               sptr->name,
-               sptr->username,
-               sptr->host,
-               sptr->user->server );
-        }
-    }
-  else
-	  if (ConfigFileEntry.stats_p_notice && valid_stats &&
-		  !ConfigFileEntry.stats_notice && stat == 'p')
-		  sendto_realops_flags(FLAGS_SPY,
-							   "STATS p requested by %s (%s@%s) [%s]", stat,
-							   sptr->name, sptr->username, sptr->host,
-							   sptr->user->server);
   return 0;
 }
 
 
+static void stats_L(struct Client *sptr,char *name,int doall, int wilds)
+{
+  int i;
+  struct Client *acptr;
 
+  /*
+   * send info about connections which match, or all if the
+   * mask matches me.name.  Only restrictions are on those who
+   * are invisible not being visible to 'foreigners' who use
+   * a wild card based search to list it.
+   */
+  for (i = 0; i <= highest_fd; i++)
+    {
+      if (!(acptr = local[i]))
+	continue;
+
+      if (IsPerson(acptr) &&
+	  !IsAnOper(acptr) && !IsAnOper(sptr) &&
+	  (acptr != sptr))
+	continue;
+      if (IsInvisible(acptr) && (doall || wilds) &&
+	  !(MyConnect(sptr) && IsOper(sptr)) &&
+	  !IsAnOper(acptr) && (acptr != sptr))
+	continue;
+      if (!doall && wilds && !match(name, acptr->name))
+	continue;
+      if (!(doall || wilds) && irccmp(name, acptr->name))
+	continue;
+
+      /* I've added a sanity test to the "CurrentTime - acptr->since"
+       * occasionally, acptr->since is larger than CurrentTime.
+       * The code in parse.c "randomly" increases the "since",
+       * which means acptr->since is larger then CurrentTime at times,
+       * this gives us very high odd number.. 
+       * So, I am going to return 0 for ->since if this happens.
+       * - Dianora
+       */
+      /* trust opers not on this server */
+      /* if(IsAnOper(sptr)) */
+
+      /* Don't trust opers not on this server */
+      if(MyClient(sptr) && IsAnOper(sptr))
+	{
+	  sendto_one(sptr, Lformat, me.name,
+                     RPL_STATSLINKINFO, sptr->name,
+                     (IsUpper(stat)) ?
+                     get_client_name(acptr, TRUE) :
+                     get_client_name(acptr, FALSE),
+                     (int)DBufLength(&acptr->sendQ),
+                     (int)acptr->sendM, (int)acptr->sendK,
+                     (int)acptr->receiveM, (int)acptr->receiveK,
+                     CurrentTime - acptr->firsttime,
+                     (CurrentTime > acptr->since) ? (CurrentTime - acptr->since):0,
+                     IsServer(acptr) ? show_capabilities(acptr) : "-");
+	}
+      else
+	{
+	  if(IsIPHidden(acptr) || IsServer(acptr))
+	    sendto_one(sptr, Lformat, me.name,
+		       RPL_STATSLINKINFO, sptr->name,
+		       get_client_name(acptr, HIDEME),
+		       (int)DBufLength(&acptr->sendQ),
+		       (int)acptr->sendM, (int)acptr->sendK,
+		       (int)acptr->receiveM, (int)acptr->receiveK,
+		       CurrentTime - acptr->firsttime,
+		       (CurrentTime > acptr->since) ? (CurrentTime - acptr->since):0,
+		       IsServer(acptr) ? show_capabilities(acptr) : "-");
+	  else
+	    sendto_one(sptr, Lformat, me.name,
+		       RPL_STATSLINKINFO, sptr->name,
+		       (IsUpper(stat)) ?
+		       get_client_name(acptr, TRUE) :
+		       get_client_name(acptr, FALSE),
+		       (int)DBufLength(&acptr->sendQ),
+		       (int)acptr->sendM, (int)acptr->sendK,
+		       (int)acptr->receiveM, (int)acptr->receiveK,
+		       CurrentTime - acptr->firsttime,
+		       (CurrentTime > acptr->since) ? (CurrentTime - acptr->since):0,
+		       IsServer(acptr) ? show_capabilities(acptr) : "-");
+	}
+    }
+}
