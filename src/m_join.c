@@ -557,10 +557,12 @@ int     m_join(struct Client *cptr,
             }
           parv[1] = name;
           if (joining_vchan)
-            parv[2] = root_chptr->chname;
+            {
+              parv[2] = root_chptr->chname;
+              (void)m_names(cptr, sptr, 3, parv);
+            }
           else
-            parv[2] = chptr->chname;
-          (void)m_names(cptr, sptr, 2, parv);
+            (void)m_names(cptr, sptr, 2, parv);
         }
     }
 
@@ -1256,7 +1258,13 @@ int     mo_join(struct Client *cptr,
                          chptr->topic_time);
             }
           parv[1] = name;
-          (void)m_names(cptr, sptr, 2, parv);
+          if (joining_vchan)
+            {
+              parv[2] = root_chptr->chname;
+              (void)m_names(cptr, sptr, 3, parv);
+            } 
+          else
+            (void)m_names(cptr, sptr, 2, parv);
         }
     }
   return 0;
