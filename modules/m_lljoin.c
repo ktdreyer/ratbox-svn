@@ -236,6 +236,9 @@ static int ms_lljoin(struct Client *cptr,
     }
 
   add_user_to_channel(chptr, acptr, flags);
+
+  if ( chptr != root_vchan )
+    add_vchan_to_client_cache(acptr,root_vchan,chptr);
  
   sendto_channel_local(ALL_MEMBERS, chptr,
 		       ":%s!%s@%s JOIN :%s",
