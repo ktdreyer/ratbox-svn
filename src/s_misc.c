@@ -144,13 +144,12 @@ char* small_file_date(time_t lclock)
 void serv_info(struct Client *client_p)
 {
   static char Lformat[] = ":%s %d %s %s %u %u %u %u %u :%u %u %s";
-  int        j;
+  int        j = 1;
   long        sendK, receiveK, uptime;
   struct Client        *target_p;
   dlink_node *ptr;
 
   sendK = receiveK = 0;
-  j = 1;
 
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
@@ -186,11 +185,12 @@ void serv_info(struct Client *client_p)
                      (CurrentTime > target_p->since)?(CurrentTime - target_p->since): 0,
                      IsServer(target_p) ? show_capabilities(target_p) : "-" );
         }
-      j++;
+	j++;
     }
 
-  sendto_one(client_p, ":%s %d %s :%u total server%s",
-             me.name, RPL_STATSDEBUG, client_p->name, --j, (j==1)?"":"s");
+ 
+  sendto_one(client_p, ":%s %d %s :%u total server(s)",
+             me.name, RPL_STATSDEBUG, client_p->name, --j);
 
   sendto_one(client_p, ":%s %d %s :Sent total : %7.2f %s",
              me.name, RPL_STATSDEBUG, client_p->name, _GMKv(sendK), _GMKs(sendK));

@@ -333,17 +333,17 @@ void count_memory(struct Client *source_p)
 
   count_linebuf_memory(&linebuf_count, &linebuf_memory_used);
 
-  sendto_one(source_p, ":%s %d %s :Users %u(%u) Invites %u(%u)",
+  sendto_one(source_p, ":%s %d %s :Users %u(%lu) Invites %u(%lu)",
              me.name, RPL_STATSDEBUG, source_p->name,
 	     users_counted, users_counted * sizeof(struct User),
 	     users_invited_count, users_invited_count * sizeof(dlink_node));
 
-  sendto_one(source_p, ":%s %d %s :User channels %u(%u) Aways %u(%d)",
+  sendto_one(source_p, ":%s %d %s :User channels %u(%lu) Aways %u(%d)",
              me.name, RPL_STATSDEBUG, source_p->name,
 	     user_channels, user_channels*sizeof(dlink_node),
              aways_counted, (int)away_memory);
 
-  sendto_one(source_p, ":%s %d %s :Attached confs %u(%u)",
+  sendto_one(source_p, ":%s %d %s :Attached confs %u(%lu)",
              me.name, RPL_STATSDEBUG, source_p->name,
 	     local_client_conf_count,
 	     local_client_conf_count * sizeof(dlink_node));
@@ -352,7 +352,7 @@ void count_memory(struct Client *source_p)
              me.name, RPL_STATSDEBUG, source_p->name,
 	     conf_count, (int)conf_memory);
 
-  sendto_one(source_p, ":%s %d %s :Classes %u(%u)",
+  sendto_one(source_p, ":%s %d %s :Classes %u(%lu)",
              me.name, RPL_STATSDEBUG, source_p->name,
 	     class_count, class_count*sizeof(struct Class));
 
@@ -372,7 +372,7 @@ void count_memory(struct Client *source_p)
              me.name, RPL_STATSDEBUG, source_p->name,
 	     channel_invex, (int)channel_invex_memory);
 
-  sendto_one(source_p, ":%s %d %s :Channel members %u(%u) invite %u(%u)",
+  sendto_one(source_p, ":%s %d %s :Channel members %u(%lu) invite %u(%lu)",
              me.name, RPL_STATSDEBUG, source_p->name, channel_users,
 	     channel_users*sizeof(dlink_node),
              channel_invites, channel_invites*sizeof(dlink_node));
@@ -382,7 +382,7 @@ void count_memory(struct Client *source_p)
     channel_users*sizeof(dlink_node) + 
     channel_invites*sizeof(dlink_node);
 
-  sendto_one(source_p, ":%s %d %s :Whowas users %u(%u)",
+  sendto_one(source_p, ":%s %d %s :Whowas users %u(%lu)",
              me.name, RPL_STATSDEBUG, source_p->name,
 	     wwu, wwu*sizeof(struct User));
 
@@ -394,7 +394,7 @@ void count_memory(struct Client *source_p)
   client_hash_table_size  = hash_get_client_table_size();
   channel_hash_table_size = hash_get_channel_table_size();
 
-  sendto_one(source_p, ":%s %d %s :Hash: client %u(%u) chan %u(%u)",
+  sendto_one(source_p, ":%s %d %s :Hash: client %u(%lu) chan %u(%lu)",
              me.name, RPL_STATSDEBUG, source_p->name,
              U_MAX, client_hash_table_size,
              CH_MAX, channel_hash_table_size);
@@ -469,7 +469,7 @@ void count_memory(struct Client *source_p)
              (int)links_memory_used);
 
   sendto_one(source_p, 
-             ":%s %d %s :TOTAL: %d Available:  Current max RSS: %u",
+             ":%s %d %s :TOTAL: %d Available:  Current max RSS: %lu",
              me.name, RPL_STATSDEBUG, source_p->name,
 	     (int)total_memory, get_maxrss());
 }
