@@ -74,6 +74,11 @@ static struct HashEntry resvTable[R_MAX];
 
 #endif
 
+/* XXX move channel hash into channel.c or hash channel stuff in channel.c
+ * into here eventually -db
+ */
+extern BlockHeap *channel_heap;
+
 struct HashEntry hash_get_channel_block(int i)
 {
   return channelTable[i];
@@ -655,6 +660,85 @@ struct Channel* hash_find_channel(const char* name, struct Channel* chptr)
 #ifdef        DEBUGMODE
   ++chmiss;
 #endif
+  return chptr;
+}
+
+/*
+ * get_or_create_channel
+ * inputs       - client pointer
+ *              - channel name
+ *              - pointer to int flag whether channel was newly created or not
+ * output       - returns channel block or NULL if illegal name
+ *		- also modifies *isnew
+ *
+ *  Get Channel block for chname (and allocate a new channel
+ *  block, if it didn't exist before).
+ */
+struct Channel *
+get_or_create_channel(struct Client *client_p, char *chname, int *isnew)
+{
+  struct Channel *chptr;
+  struct Channel *tmp;
+  unsigned int hashv;
+  int len;
+
+  if (BadPtr(chname))
+    return NULL;
+
+  len = strlen(chname);
+  if (len > CHANNELLEN)
+    {
+      if (IsServer(client_p))
+	{
+	  sendto_realops_flags(FLAGS_DEBUG, L_ALL,
+			       "*** Long channel name from %s (%d > %d): %s",
+			       client_p->name,
+			       len,
+			       CHANNELLEN,
+			       chname);
+	}
+      len = CHANNELLEN;
+      *(chname + CHANNELLEN) = '\0';
+    }
+
+  hashv = hash_channel_name(chname);
+
+  for ( tmp = (struct Channel*) channelTable[hashv].list;
+	tmp; tmp = tmp->hnextch)
+    {
+      if (irccmp(chname, tmp->chname) == 0)
+	{
+#ifdef        DEBUGMODE
+	  ++chhits;
+#endif
+	  *isnew = 0;
+	  return tmp;
+	}
+#ifdef        DEBUGMODE
+      ++chmiss;
+#endif
+    }
+
+  *isnew = 1;
+
+  chptr = BlockHeapAlloc(channel_heap);
+  memset(chptr, 0, sizeof(*chptr)-CHANNELLEN);
+  strcpy(chptr->chname, chname);
+
+  if (GlobalChannelList)
+    GlobalChannelList->prevch = chptr;
+
+  chptr->prevch = NULL;
+  chptr->nextch = GlobalChannelList;
+  GlobalChannelList = chptr;
+  chptr->channelts = CurrentTime;     /* doesn't hurt to set it here */
+
+  chptr->hnextch = (struct Channel*) channelTable[hashv].list;
+  channelTable[hashv].list = (void*) chptr;
+  ++channelTable[hashv].links;
+  ++channelTable[hashv].hits;
+
+  Count.chan++;
   return chptr;
 }
 

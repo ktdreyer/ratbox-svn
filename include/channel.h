@@ -105,7 +105,6 @@ void cleanup_channels(void *);
 
 #define NullChn ((struct Channel *)0)
 
-#define ChannelExists(n)        (hash_find_channel(n, NullChn) != NullChn)
 
 /* Maximum mode changes allowed per client, per server is different */
 #define MAXMODEPARAMS   4

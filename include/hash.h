@@ -60,6 +60,9 @@ struct Client *hash_find_id(const char *name, struct Client *client_p);
 extern int add_to_id_hash_table(char *, struct Client *);
 extern struct HashEntry hash_get_channel_block(int i);
 
+extern struct Channel
+*get_or_create_channel(struct Client *client_p, char *chname, int *isnew);
+
 extern size_t hash_get_client_table_size(void);
 extern size_t hash_get_channel_table_size(void);
 extern size_t hash_get_resv_table_size(void);

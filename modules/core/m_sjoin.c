@@ -190,9 +190,7 @@ static void ms_sjoin(struct Client *client_p,
 
   *parabuf = '\0';
 
-  isnew = ChannelExists(parv[2]) ? 0 : 1;
-
-  if (!(chptr = get_channel(source_p, parv[2], CREATE)))
+  if ( (chptr = get_or_create_channel(source_p, parv[2], &isnew)) == NULL )
     return; /* channel name too long? */
 
   /* XXX vchan cruft */
