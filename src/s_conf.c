@@ -184,7 +184,7 @@ make_conf()
   aconf = (struct ConfItem*) MyMalloc(sizeof(struct ConfItem));
   aconf->status       = CONF_ILLEGAL;
   aconf->aftype       = AF_INET;
-  return (aconf);
+  return(aconf);
 }
 
 /*
@@ -617,7 +617,7 @@ int attach_iline(struct Client *client_p, struct ConfItem *aconf)
        ConfConFreq(aconf) && ip_found->count > ConfConFreq(aconf))
     {
       if(!IsConfExemptLimits(aconf))
-        return TOO_MANY; /* Already at maximum allowed ip#'s */
+        return(TOO_MANY); /* Already at maximum allowed ip#'s */
       else
         {
           sendto_one(client_p,
@@ -626,7 +626,7 @@ int attach_iline(struct Client *client_p, struct ConfItem *aconf)
         }
     }
 
-  return (attach_conf(client_p, aconf) );
+  return(attach_conf(client_p, aconf));
 }
 
 /* link list of free IP_ENTRY's */
@@ -722,7 +722,7 @@ find_or_add_ip(struct irc_inaddr *ip_in)
   memcpy(&ptr->ip, ip_in, sizeof(struct irc_inaddr));
   ptr->count = 0;
   ptr->next = (IP_ENTRY *)NULL;
-  return (ptr);
+  return(ptr);
 }
 
 /* 
@@ -899,7 +899,7 @@ detach_conf(struct Client* client_p,struct ConfItem* aconf)
   dlink_node *ptr;
 
   if(aconf == NULL)
-    return -1;
+    return(-1);
 
   for(ptr = client_p->localClient->confs.head; ptr; ptr = ptr->next)
     {
@@ -924,10 +924,10 @@ detach_conf(struct Client* client_p,struct ConfItem* aconf)
             }
 	  dlinkDelete(ptr, &client_p->localClient->confs);
           free_dlink_node(ptr);
-          return 0;
+          return(0);
         }
     }
-  return -1;
+  return(-1);
 }
 
 /*
@@ -947,7 +947,7 @@ is_attached(struct Client *client_p, struct ConfItem *aconf)
     if (ptr->data == aconf)
       break;
   
-  return (ptr) ? 1 : 0;
+  return((ptr != NULL) ? 1 : 0);
 }
 
 /*
@@ -968,7 +968,7 @@ attach_conf(struct Client *client_p,struct ConfItem *aconf)
 
   if (is_attached(client_p, aconf))
     {
-      return 1;
+      return(1);
     }
   if (IsIllegal(aconf))
     {
@@ -1005,7 +1005,7 @@ attach_conf(struct Client *client_p,struct ConfItem *aconf)
   aconf->clients++;
   if (aconf->status & CONF_CLIENT_MASK)
     ConfLinks(aconf)++;
-  return 0;
+  return(0);
 }
 
 /*
@@ -1039,7 +1039,7 @@ attach_confs(struct Client* client_p, const char* name, int statmask)
             ++conf_counter;
         }
     }
-  return conf_counter;
+  return(conf_counter);
 }
 
 /*
@@ -1061,7 +1061,7 @@ attach_connect_block(struct Client *client_p,
   assert(client_p != NULL);
   assert(host != NULL);
   if(client_p == NULL || host == NULL)
-    return 0;
+    return(0);
 
   for (ptr = ConfigItemList; ptr; ptr = ptr->next)
     {
@@ -1072,9 +1072,9 @@ attach_connect_block(struct Client *client_p,
      if ((match(name, ptr->name) == 0) || (match(ptr->host, host) == 0))
        continue;
      attach_conf(client_p, ptr);
-     return -1;
+     return(-1);
     }
-  return 0;
+  return(0);
 }
 
 /*
@@ -1110,14 +1110,14 @@ find_conf_exact(const char* name, const char* user,
       if (tmp->status & CONF_OPERATOR)
         {
           if (tmp->clients < ConfMaxLinks(tmp))
-            return tmp;
+            return(tmp);
           else
             continue;
         }
       else
-        return tmp;
+        return(tmp);
     }
-  return NULL;
+  return(NULL);
 }
 
 /*
@@ -1141,9 +1141,9 @@ find_conf_name(dlink_list *list, const char* name, int statmask)
       aconf = ptr->data;
       if ((aconf->status & statmask) && aconf->name && 
           (!irccmp(aconf->name, name) || match(aconf->name, name)))
-        return aconf;
+        return(aconf);
     }
-  return NULL;
+  return(NULL);
 }
 
 
@@ -1189,14 +1189,14 @@ find_conf_by_host(const char* host, int status)
   struct ConfItem* conf;
   assert(host != NULL);
   if(host == NULL)
-    return NULL;
+    return(NULL);
   for (conf = ConfigItemList; conf; conf = conf->next)
     {
       if (conf->status == status && conf->host &&
           match(host, conf->host))
-        return conf;
+        return(conf);
     }
-  return NULL;
+  return(NULL);
 }
 
 /*
@@ -1245,13 +1245,13 @@ find_u_conf(char *server,char *user,char *host)
       if (match(aconf->name,server))
 	{
 	  if (BadPtr(aconf->user) || BadPtr(aconf->host))
-	    return YES;
+	    return(YES);
 	  if(match(aconf->user,user) && match(aconf->host,host))
-	    return YES;
+	    return(YES);
 
 	}
     }
-  return NO;
+  return(NO);
 }
 
 
@@ -1305,7 +1305,7 @@ rehash(int sig)
   flush_deleted_I_P();
   check_klines();
   reopen_log(logFileName);
-  return 0;
+  return(0);
 }
 
 /*
@@ -1608,10 +1608,10 @@ conf_connect_allowed(struct irc_inaddr *addr, int aftype)
  
   /* DLINE exempt also gets you out of static limits/pacing... */
   if (aconf && (aconf->status & CONF_EXEMPTDLINE))
-    return 0;
+    return(0);
  
-  if (aconf)
-    return BANNED_CLIENT;
+  if (aconf != NULL)
+    return(BANNED_CLIENT);
 
   ip_found = find_or_add_ip(addr);
   if ((CurrentTime - ip_found->last_attempt) <
@@ -1619,10 +1619,10 @@ conf_connect_allowed(struct irc_inaddr *addr, int aftype)
     {
       ip_found->last_attempt = CurrentTime;
       ip_found->count--;
-      return TOO_FAST;
+      return(TOO_FAST);
     }
   ip_found->last_attempt = CurrentTime;
-  return 0;
+  return(0);
 }
 
 /*
@@ -1647,7 +1647,7 @@ find_kill(struct Client* client_p)
     return aconf;
   if(aconf->status & CONF_KILL)
     return aconf;
-  return NULL;
+  return(NULL);
 }
 
 /* add_temp_kline
@@ -1895,7 +1895,7 @@ get_oper_name(struct Client *client_p)
 	    ircsprintf(buffer, "%s!%s@%s{%s}", client_p->name,
 		       client_p->username, client_p->host,
 		       ((struct ConfItem*)cnode->data)->name);
-	    return buffer;
+	    return(buffer);
 	  }
       /* Probably should assert here for now. If there is an oper out there 
        * with no oper{} conf attached, it would be good for us to know...
@@ -1904,7 +1904,7 @@ get_oper_name(struct Client *client_p)
     }
   ircsprintf(buffer, "%s!%s@%s{%s}", client_p->name,
 	     client_p->username, client_p->host, client_p->servptr->name);
-  return buffer;
+  return(buffer);
 }
 
 /*
@@ -2352,7 +2352,7 @@ conf_add_server(struct ConfItem *aconf, int lcount)
     {
       sendto_realops_flags(FLAGS_ALL, L_ALL,"Bad connect block");
       ilog(L_WARN, "Bad connect block");
-      return -1;
+      return(-1);
     }
 
   if (BadPtr(aconf->passwd) && !(aconf->flags & CONF_FLAGS_CRYPTLINK))
@@ -2360,7 +2360,7 @@ conf_add_server(struct ConfItem *aconf, int lcount)
       sendto_realops_flags(FLAGS_ALL, L_ALL,"Bad connect block, name %s",
 			   aconf->name);
       ilog(L_WARN, "Bad connect block, host %s",aconf->name);
-      return -1;
+      return(-1);
     }
           
   if (SplitUserHost(aconf) < 0)
@@ -2368,10 +2368,10 @@ conf_add_server(struct ConfItem *aconf, int lcount)
       sendto_realops_flags(FLAGS_ALL, L_ALL,"Bad connect block, name %s",
 			   aconf->name);
       ilog(L_WARN, "Bad connect block, name %s",aconf->name);
-      return -1;
+      return(-1);
     }
   lookup_confhost(aconf);
-  return 0;
+  return(0);
 }
 
 /*
@@ -2494,10 +2494,8 @@ conf_fbgets(char *lbuf,int max_size, FBFILE *fb)
 {
   char* buff;
 
-  buff = fbgets(lbuf,max_size,fb);
-
-  if(!buff)
-    return 0;
+  if ((buff = fbgets(lbuf,max_size,fb)) == NULL)
+    return(0);
 
   return(strlen(lbuf));
 }
@@ -2505,7 +2503,7 @@ conf_fbgets(char *lbuf,int max_size, FBFILE *fb)
 int 
 conf_yy_fatal_error(char *msg)
 {
-  return 0;
+  return(0);
 }
 
 
