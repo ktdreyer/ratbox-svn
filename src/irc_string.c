@@ -572,12 +572,15 @@ inet_pton6(src, dst)
 			val = 0;
 			continue;
 		}
-		if (ch == '.' && ((tp + INADDRSZ) <= endp) &&
-		    inet_pton4(curtok, tp) > 0) {
-			tp += INADDRSZ;
-			saw_xdigit = 0;
-			break;	/* '\0' was seen by inet_pton4(). */
-		}
+		if(*src != '\0' && ch == '.')
+		{
+			if ( ((tp + INADDRSZ) <= endp) && inet_pton4(curtok, tp) > 0) {
+				tp += INADDRSZ;
+				saw_xdigit = 0;
+				break;	/* '\0' was seen by inet_pton4(). */
+			}
+		} else
+			continue;
 		return (0);
 	}
 	if (saw_xdigit) {
