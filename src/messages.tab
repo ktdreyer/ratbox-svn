@@ -300,7 +300,7 @@ static  char *  replies[] = {
 /* 273 */       NULL,
 /* 274 */       NULL,
 /* 275 */       NULL,
-/* 276 RPL_VCHANEXIST, */       ":%s 276 %s %s :has %d possible virtual channels available",
+/* 276 RPL_VCHANEXIST, */       ":%s 276 %s %s %d :virtual channels are available for this channel",
 /* 277 RPL_VCHANLIST, */        ":%s 277 %s %s ",
 /* 278 RPL_VCHANHELP, */        ":%s 278 %s :Type /%s %s <key> to specify the channel you want",
 /* 279 */       NULL,
