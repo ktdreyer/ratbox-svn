@@ -264,21 +264,21 @@ char* pick_vchan_id(struct Channel *chptr)
     if (!lp->next)
       { 
 	acptr = lp->data;
-	return acptr->name;;
+	return acptr->name;
       }
 
   for (lp = chptr->halfops.head; lp; lp = lp->next)
     if (!lp->next)
       { 
 	acptr = lp->data;
-	return acptr->name;;
+	return acptr->name;
       }
 
   for (lp = chptr->voiced.head; lp; lp = lp->next)
     if (!lp->next)
       { 
 	acptr = lp->data;
-	return acptr->name;;
+	return acptr->name;
       }
 
   for (lp = chptr->peons.head; lp; lp = lp->next)
@@ -290,7 +290,11 @@ char* pick_vchan_id(struct Channel *chptr)
 
   /* all else failed, must be an empty channel, 
    * so we use the vchan_id */
-  ircsprintf(vchan_id, "%s", chptr->vchan_id);
+  if (chptr->vchan_id)
+    ircsprintf(vchan_id, "%s", chptr->vchan_id);
+  else
+    ircsprintf(vchan_id, "-ERROR-");
+
   return(vchan_id);
 }
 
