@@ -623,7 +623,6 @@ destroy_channel(struct Channel *chptr)
   if (chptr->nextch)
     chptr->nextch->prevch = chptr->prevch;
 
-  MyFree(chptr->topic_info);
 
   del_from_channel_hash_table(chptr->chname, chptr);
   if (ServerInfo.hub == 1)
