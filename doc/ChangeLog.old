@@ -1,3 +1,18 @@
+androsyn    2002/05/20 13:53:54 EDT	(20020520_5)
+
+  Modified files:
+    include              channel.h 
+    src                  channel.c send.c 
+  Log:
+  Don't attempt to send to channels you just freed..dumbass
+  
+  Revision  Changes    Path
+  7.113     +1 -1      ircd-hybrid-7/include/channel.h
+  7.315     +9 -5      ircd-hybrid-7/src/channel.c
+  7.194     +8 -6      ircd-hybrid-7/src/send.c
+
+
+
 androsyn    2002/05/20 13:28:43 EDT	(20020520_4)
 
   Modified files:
