@@ -1387,12 +1387,12 @@ int exit_client(
       if(IsAnyServer(source_p))
 	{
 	  dlinkFindDestroy(&serv_list,source_p);
-          unset_chcap_usage_counts(source_p);
 	}
 
       if (IsServer(source_p))
         {
           Count.myserver--;
+          unset_chcap_usage_counts(source_p);
         }
 
       if (IsPerson(source_p))
