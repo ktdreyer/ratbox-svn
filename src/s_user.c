@@ -288,7 +288,6 @@ register_local_user(struct Client *client_p, struct Client *source_p,
   char        tmpstr2[IRCD_BUFSIZE];
   char	      ipaddr[HOSTIPLEN];
   int  status;
-  dlink_node *ptr;
   dlink_node *m;
   char *id;
   assert(NULL != source_p);
@@ -332,14 +331,13 @@ register_local_user(struct Client *client_p, struct Client *source_p,
       strncpy(source_p->host,source_p->localClient->sockhost,HOSTIPLEN+1);
     }
 
-  ptr = source_p->localClient->confs.head;
-  aconf = ptr->data;
+  aconf = source_p->localClient->att_conf;
 
   if (aconf == NULL)
-    {
-      (void)exit_client(client_p, source_p, &me, "*** Not Authorized");
-      return(CLIENT_EXITED);
-    }
+  {
+    (void) exit_client(client_p, source_p, &me, "*** Not Authorized");
+    return(CLIENT_EXITED);
+  }
 
   if (!IsGotId(source_p))
     {
@@ -1300,8 +1298,6 @@ int
 oper_up(struct Client *source_p, struct ConfItem *aconf)
 {
   int old = (source_p->umodes & ALL_UMODES);
-  dlink_node *ptr;
-  struct ConfItem *found_aconf;
 
   SetOper(source_p);
   if(ConfigFileEntry.oper_umodes)

@@ -369,9 +369,6 @@ extern int              check_client(struct Client* client_p, struct Client *sou
 extern int detach_conf(struct Client *);
 
 extern struct ConfItem* find_conf_exact(const char* name, const char* user, const char* host, int statmask);
-extern struct ConfItem* find_conf_name(dlink_list *list, const char* name, int statmask);
-extern struct ConfItem* find_conf_host(dlink_list *list, const char* host, int statmask);
-extern struct ConfItem* find_conf_ip(dlink_list *list, char* ip, char* name, int);
 extern struct ConfItem* find_conf_by_name(const char* name, int status);
 extern struct ConfItem* find_conf_by_host(const char* host, int status);
 extern struct ConfItem* find_kill (struct Client *);

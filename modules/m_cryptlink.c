@@ -245,10 +245,11 @@ static void cryptlink_auth(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  aconf = find_conf_name(&client_p->localClient->confs,
-                         client_p->name, CONF_SERVER);
+  aconf = client_p->localClient->att_conf;
 
-  if (!aconf)
+  if(((aconf->status & CONF_SERVER) == 0) || 
+     irccmp(aconf->name, client_p->name) || 
+     !match(aconf->name, client_p->name))
   {
     cryptlink_error(client_p, "AUTH",
                     "Lost C-line for server",
@@ -371,9 +372,11 @@ static void cryptlink_serv(struct Client *client_p, struct Client *source_p,
   }
 
 
-  aconf = find_conf_name(&client_p->localClient->confs,
-                         name, CONF_SERVER);
-  if (!aconf)
+  aconf = client_p->localClient->att_conf;
+
+  if(((aconf->status & CONF_SERVER) == 0) || 
+     irccmp(aconf->name, client_p->name) || 
+     !match(aconf->name, client_p->name))
   {
     cryptlink_error(client_p, "AUTH",
                     "Lost C-line for server",

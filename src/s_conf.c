@@ -974,33 +974,6 @@ find_conf_exact(const char* name, const char* user,
 }
 
 /*
- * find_conf_name
- *
- * inputs	- pointer to conf link list to search
- *		- pointer to name to find
- *		- int mask of type of conf to find
- * output	- NULL or pointer to conf found
- * side effects	- find a conf entry which matches the name
- *		  and has the given mask.
- */
-struct ConfItem* 
-find_conf_name(dlink_list *list, const char* name, int statmask)
-{
-  dlink_node *ptr;
-  struct ConfItem* aconf;
-  
-  DLINK_FOREACH(ptr, list->head)
-    {
-      aconf = ptr->data;
-      if ((aconf->status & statmask) && aconf->name && 
-          (!irccmp(aconf->name, name) || match(aconf->name, name)))
-        return(aconf);
-    }
-  return(NULL);
-}
-
-
-/*
  * find_conf_by_name
  *
  * inputs	- pointer to name to match on

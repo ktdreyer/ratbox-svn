@@ -880,14 +880,19 @@ int server_estab(struct Client *client_p)
   inpath = get_client_name(client_p, MASK_IP); /* "refresh" inpath with host */
   host = client_p->name;
 
-  if (!(aconf = find_conf_name(&client_p->localClient->confs, host,
-                               CONF_SERVER)))
-    {
-     /* This shouldn't happen, better tell the ops... -A1kmm */
-     sendto_realops_flags(UMODE_ALL, L_ALL, "Warning: Lost connect{} block "
-       "for server %s(this shouldn't happen)!", host);
-     return exit_client(client_p, client_p, client_p, "Lost connect{} block!");
-    }
+  aconf = client_p->localClient->att_conf;
+
+  if(((aconf->status & CONF_SERVER) == 0) || 
+     irccmp(aconf->name, client_p->name) || 
+     !match(aconf->name, client_p->name))
+  {
+      /* This shouldn't happen, better tell the ops... -A1kmm */
+      sendto_realops_flags(UMODE_ALL, L_ALL, 
+                           "Warning: Lost connect{} block for server %s!", 
+                           host);
+      return exit_client(client_p, client_p, client_p, "Lost connect{} block!");
+  }
+
   /* We shouldn't have to check this, it should already done before
    * server_estab is called. -A1kmm
    */
@@ -986,7 +991,9 @@ int server_estab(struct Client *client_p)
     {
       dlinkDelete(m, &unknown_list);
       dlinkAddTail(client_p, m, &serv_list);
-    } else {
+    }
+  else
+    {
       sendto_realops_flags(UMODE_ALL, L_ADMIN, "Tried to register (%s) server but it was already registered!?!", host);
       exit_client(client_p, client_p, client_p, "Tried to register server but it was already registered?!?"); 
     }
@@ -1865,23 +1872,26 @@ serv_connect_callback(int fd, int status, void *data)
 
     /* COMM_OK, so continue the connection procedure */
     /* Get the C/N lines */
-    aconf = find_conf_name(&client_p->localClient->confs,
-			    client_p->name, CONF_SERVER); 
-    if (!aconf)
-      {
-        sendto_realops_flags(UMODE_ALL, L_ADMIN,
-                             "Lost connect{} block for %s",
+    aconf = client_p->localClient->att_conf;
+
+    if(((aconf->status & CONF_SERVER) == 0) || 
+       irccmp(aconf->name, client_p->name) ||
+       !match(aconf->name, client_p->name))
+    {
+      sendto_realops_flags(UMODE_ALL, L_ADMIN,
+                           "Lost connect{} block for %s",
 #ifdef HIDE_SPOOF_IPS
-                             get_client_name(client_p, MASK_IP));
+                           get_client_name(client_p, MASK_IP));
 #else
-                             get_client_name(client_p, HIDE_IP));
+                           get_client_name(client_p, HIDE_IP));
 #endif
-        sendto_realops_flags(UMODE_ALL, L_OPER,
-		             "Lost connect{} block for %s",
-                             get_client_name(client_p, MASK_IP));
-        exit_client(client_p, client_p, &me, "Lost connect{} block");
-        return;
-      }
+      sendto_realops_flags(UMODE_ALL, L_OPER,
+                           "Lost connect{} block for %s",
+                           get_client_name(client_p, MASK_IP));
+      exit_client(client_p, client_p, &me, "Lost connect{} block");
+      return;
+    }
+
     /* Next, send the initial handshake */
     SetHandshake(client_p);
 
