@@ -1,0 +1,14 @@
+leeh        2004/07/27 22:17:51 EDT	(20040728_0)
+
+  Modified files:
+    .                    ChangeLog 
+    include              patchlevel.h 
+  Log:
+  - clear the ChangeLog and rename to 2.1.0beta
+  
+  Revision  Changes    Path
+  1.1412    +0 -25339  ircd-ratbox/ChangeLog
+  7.66      +1 -1      ircd-ratbox/include/patchlevel.h
+
+
+
