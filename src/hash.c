@@ -124,6 +124,7 @@ fnv_hash(const unsigned char *s, int bits)
 
 	while (*s)
 	{
+		h ^= *s++;
 		h += (h<<1) + (h<<4) + (h<<7) + (h << 8) + (h << 24);
 	}
         h = (h >> bits) ^ (h & ((2^bits)-1));
@@ -137,6 +138,7 @@ fnv_hash_len(const unsigned char *s, int bits, int len)
 	const unsigned char *x = s + len;
 	while (s < x)
 	{
+		h ^= *s++;
 		h += (h<<1) + (h<<4) + (h<<7) + (h << 8) + (h << 24);
 	}
         h = (h >> bits) ^ (h & ((2^bits)-1));
