@@ -75,7 +75,7 @@ static void m_topic(struct Client *client_p,
                    char *parv[])
 {
   struct Channel *chptr = NullChn;
-  struct Channel *vchan;
+  struct Channel *root_chan, *vchan;
   char  *p = NULL;
   
   if ((p = strchr(parv[1],',')))
@@ -118,12 +118,17 @@ static void m_topic(struct Client *client_p,
         }
       }
 
+      root_chan = chptr;
+
       if (HasVchans(chptr))
 	{
 	  vchan = map_vchan(chptr,source_p);
 	  if(vchan != NULL)
 	    chptr = vchan;
 	}
+      else if (IsVchan(chptr))
+        root_chan = RootChan(chptr);
+          
 
       if (parc > 2)
 	{ /* setting topic */
@@ -155,7 +160,7 @@ static void m_topic(struct Client *client_p,
 	      chptr->topic_time = CurrentTime;
 	      
 	      sendto_channel_remote(chptr, client_p,":%s TOPIC %s :%s",
-				 parv[0], parv[1],
+				 parv[0], chptr->chname,
 				 chptr->topic);
 	      if(chptr->mode.mode & MODE_HIDEOPS)
 		{
@@ -164,13 +169,13 @@ static void m_topic(struct Client *client_p,
 				       source_p->name,
 				       source_p->username,
 				       source_p->host,
-				       parv[1],
+				       root_chan->chname,
 				       chptr->topic);
 
 		  sendto_channel_local(NON_CHANOPS,
 				       chptr, ":%s TOPIC %s :%s",
 				       me.name,
-				       parv[1],
+				       root_chan->chname,
 				       chptr->topic);
 		}
 	      else
@@ -180,7 +185,7 @@ static void m_topic(struct Client *client_p,
 				       source_p->name,
 				       source_p->username,
 				       source_p->host,
-				       parv[1], chptr->topic);
+				       root_chan->chname, chptr->topic);
 		}
 	    }
 	  else
@@ -202,19 +207,19 @@ static void m_topic(struct Client *client_p,
 	    {
               sendto_one(source_p, form_str(RPL_TOPIC),
                          me.name, parv[0],
-                         parv[1], chptr->topic);
+                         root_chan->chname, chptr->topic);
               if (!(chptr->mode.mode & MODE_HIDEOPS) ||
                   is_any_op(chptr,source_p))
                 {
                   sendto_one(source_p, form_str(RPL_TOPICWHOTIME),
-                             me.name, parv[0], parv[1],
+                             me.name, parv[0], root_chan->chname,
                              chptr->topic_info,
                              chptr->topic_time);
                 }
 	      else /* Hide from nonops */
 		{
                   sendto_one(source_p, form_str(RPL_TOPICWHOTIME),
-                             me.name, parv[0], parv[1],
+                             me.name, parv[0], root_chan->chname,
                              me.name,
                              chptr->topic_time);
                 }
