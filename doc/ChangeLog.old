@@ -1,3 +1,8 @@
+*** 20010813_10 by androsyn
+make_dlink_node now uses the block heap again..
+
+
+
 *** 20010813_9 by androsyn
 Put memset() back for struct Client allocations..
 
