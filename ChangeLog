@@ -1,3 +1,27 @@
+leeh        2005/01/30 18:54:03 EST	(20050130_0)
+
+  Modified files:
+    help/chanserv        index 
+    help/userserv        index 
+  Added files:
+    help/chanserv        set 
+    help/userserv        set 
+  Removed files:
+    help/userserv        setemail setpass 
+  Log:
+  - added help for chanserv::set and userserv::set
+  - remove setemail/setpass, theyre no longer relevant
+  
+  Revision  Changes    Path
+  1.5       +1 -0      rserv/help/chanserv/index
+  1.1       +13 -0     rserv/help/chanserv/set (new)
+  1.4       +1 -2      rserv/help/userserv/index
+  1.1       +5 -0      rserv/help/userserv/set (new)
+  1.2       +0 -3      rserv/help/userserv/setemail (dead)
+  1.2       +0 -4      rserv/help/userserv/setpass (dead)
+
+
+
 leeh        2005/01/27 12:46:57 EST	(20050127_0)
 
   Modified files:
