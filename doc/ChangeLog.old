@@ -1,3 +1,18 @@
+androsyn    2002/03/09 12:03:41 EST	(20020309_0)
+
+  Modified files:
+    include              fileio.h 
+    src                  fileio.c 
+  Log:
+  file_open / file_close can be static now, as they only get called in
+  fileio.c
+  
+  Revision  Changes    Path
+  7.9       +0 -4      ircd-hybrid-7/include/fileio.h
+  7.20      +2 -2      ircd-hybrid-7/src/fileio.c
+
+
+
 db          2002/03/07 09:04:35 EST	(20020307_3)
 
   Modified files:
