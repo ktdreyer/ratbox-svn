@@ -140,15 +140,6 @@ COMMAND         - USAGE and DESCRIPTION
                   Terminates the IRC server with optional reason 
                   [reason]
 
-+ HASH          - HASH <param>
-                  Shows some stats about ircd's internal hashes.
-                  V - Verify and report channel hash table stats
-                  v - Verify and report client hash table stats
-                  P - Report channel hash table stats
-                  p - Report client hash table stats
-                  R - Rebuild channel hash table
-                  r - Rebuild client hash table
-
 + KLINE         - KLINE <nick|user@host> :[reason]
                   Adds a KLINE to the ircd.conf or klines.conf file which
                   will ban the specified user from using that server.
