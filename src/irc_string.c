@@ -147,7 +147,6 @@ char *strip_tabs(char *dest, const unsigned char *src, size_t len)
   return dest;
 }
 
-#ifndef HAVE_STRTOK_R
 /*
  * strtoken - walk through a string of tokens, using a set of separators
  *   argv 9/90
@@ -180,7 +179,6 @@ char* strtoken(char** save, char* str, char* fs)
   *save = pos;
   return tmp;
 }
-#endif
 
 /* 
  * From: Thomas Helvey <tomh@inxpress.net>
