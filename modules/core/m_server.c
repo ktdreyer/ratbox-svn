@@ -326,8 +326,8 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
    * .edu's
    */
 
-  /* Ok, check for this server allowed to HUB */
-  if (!hlined)
+  /* Ok, check cptr can hub the new server, and make sure it's not a LL */
+  if (!hlined || (IsCapable(cptr, CAP_LL) && !IsCapable(cptr, CAP_HUB)))
     {
       /* OOOPs nope can't HUB */
       sendto_realops_flags(FLAGS_ALL,"Non-Hub link %s introduced %s.",
