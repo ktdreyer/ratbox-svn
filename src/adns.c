@@ -33,7 +33,6 @@
 #include "s_log.h"
 #include "event.h"
 #include "client.h"
-#include "ircd_defs.h"
 #include "numeric.h"
 #include "../adns/internal.h"
 #define ADNS_MAXFD 2

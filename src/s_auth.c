@@ -38,7 +38,6 @@
 #include "s_auth.h"
 #include "s_conf.h"
 #include "client.h"
-#include "common.h"
 #include "event.h"
 #include "irc_string.h"
 #include "sprintf_irc.h"

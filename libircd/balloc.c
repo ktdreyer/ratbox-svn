@@ -63,7 +63,6 @@
 #include "balloc.h"
 #ifndef NOBALLOC
 
-#include "ircd_defs.h"		/* DEBUG_BLOCK_ALLOCATOR */
 #include "ircd.h"
 #include "memory.h"
 #include "irc_string.h"

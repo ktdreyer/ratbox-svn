@@ -28,7 +28,6 @@
 #include "parse.h"
 #include "client.h"
 #include "channel.h"
-#include "common.h"
 #include "hash.h"
 #include "irc_string.h"
 #include "sprintf_irc.h"

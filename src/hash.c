@@ -25,12 +25,10 @@
  */
 
 #include "stdinc.h"
-#include "ircd_defs.h"
 #include "tools.h"
 #include "s_conf.h"
 #include "channel.h"
 #include "client.h"
-#include "common.h"
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"

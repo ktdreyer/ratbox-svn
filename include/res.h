@@ -27,7 +27,6 @@
 #ifndef _RES_H_INCLUDED
 #define _RES_H_INCLUDED 1
 
-#include "ircd_defs.h"
 #include "adns.h"
 
 struct DNSQuery

@@ -27,8 +27,6 @@
 #ifndef INCLUDED_irc_string_h
 #define INCLUDED_irc_string_h
 
-#include "ircd_defs.h"
-
 /*
  * match - compare name with mask, mask may contain * and ? as wildcards
  * match - returns 1 on successful match, 0 otherwise

@@ -27,8 +27,6 @@
 #ifndef INCLUDED_s_gline_h
 #define INCLUDED_s_gline_h
 
-#include "ircd_defs.h"
-
 struct Client;
 struct ConfItem;
 

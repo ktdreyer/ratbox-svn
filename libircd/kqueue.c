@@ -30,7 +30,6 @@
 
 #include "class.h"
 #include "client.h"
-#include "common.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "listener.h"

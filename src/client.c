@@ -28,7 +28,6 @@
 #include "tools.h"
 #include "client.h"
 #include "class.h"
-#include "common.h"
 #include "event.h"
 #include "hash.h"
 #include "irc_string.h"

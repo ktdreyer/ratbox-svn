@@ -28,7 +28,6 @@
 #include "commio.h"
 #include "class.h"
 #include "client.h"
-#include "common.h"
 #include "event.h"
 #include "irc_string.h"
 #include "sprintf_irc.h"

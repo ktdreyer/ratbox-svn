@@ -28,11 +28,9 @@
 
 #include "whowas.h"
 #include "client.h"
-#include "common.h"
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"
-#include "ircd_defs.h"
 #include "numeric.h"
 #include "s_serv.h"
 #include "s_user.h"

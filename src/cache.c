@@ -33,8 +33,6 @@
  */
 
 #include "stdinc.h"
-#include "ircd_defs.h"
-#include "common.h"
 #include "s_conf.h"
 #include "tools.h"
 #include "client.h"

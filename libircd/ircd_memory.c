@@ -28,7 +28,6 @@
 #define WE_ARE_MEMORY_C
 
 #include "stdinc.h"
-#include "ircd_defs.h"
 #include "ircd.h"
 #include "irc_string.h"
 #include "memory.h"

@@ -26,7 +26,6 @@
 
 #ifndef INCLUDED_channel_h
 #define INCLUDED_channel_h
-#include "ircd_defs.h"		/* buffer sizes */
 
 #define MODEBUFLEN      200
 

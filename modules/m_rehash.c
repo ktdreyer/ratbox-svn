@@ -27,7 +27,6 @@
 #include "stdinc.h"
 #include "client.h"
 #include "channel.h"
-#include "common.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "s_gline.h"

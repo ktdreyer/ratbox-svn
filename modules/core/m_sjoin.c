@@ -34,7 +34,6 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
-#include "common.h"
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"

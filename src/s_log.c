@@ -32,7 +32,6 @@
  */
 
 #include "stdinc.h"
-#include "ircd_defs.h"
 #include "s_log.h"
 #include "s_conf.h"
 #include "sprintf_irc.h"

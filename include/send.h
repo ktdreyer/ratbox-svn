@@ -27,8 +27,6 @@
 #ifndef INCLUDED_send_h
 #define INCLUDED_send_h
 
-#include "ircd_defs.h"
-
 struct Client;
 struct Channel;
 struct dlink_list;

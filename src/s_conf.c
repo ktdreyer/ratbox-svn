@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "ircd_defs.h"
 #include "tools.h"
 #include "s_conf.h"
 #include "s_newconf.h"
@@ -34,7 +33,6 @@
 #include "channel.h"
 #include "class.h"
 #include "client.h"
-#include "common.h"
 #include "event.h"
 #include "hash.h"
 #include "irc_string.h"

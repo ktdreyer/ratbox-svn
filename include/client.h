@@ -31,7 +31,6 @@
 #error Incorrect config.h for this revision of ircd.
 #endif
 
-#include "ircd_defs.h"
 #include "linebuf.h"
 #include "channel.h"
 #include "res.h"

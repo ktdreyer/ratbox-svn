@@ -27,8 +27,6 @@
 #ifndef INCLUDED_listener_h
 #define INCLUDED_listener_h
 
-#include "ircd_defs.h"
-
 struct Client;
 
 struct Listener

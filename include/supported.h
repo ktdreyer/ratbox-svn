@@ -28,7 +28,6 @@
 #define INCLUDED_supported_h
 
 #include "channel.h"
-#include "ircd_defs.h"
 
 #define FEATURES "CHANTYPES=&#"		\
 		"%s%s"			\

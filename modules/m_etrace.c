@@ -37,7 +37,6 @@
 #include "hook.h"
 #include "client.h"
 #include "hash.h"
-#include "common.h"
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"

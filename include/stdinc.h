@@ -26,6 +26,8 @@
 #include "setup.h"
 #include "config.h"		/* Gotta pull in the autoconf stuff */
 
+/* we include common.h and ircd_defs.h down at bottom */
+
 /* AIX requires this to be the first thing in the file.  */
 #ifdef __GNUC__
 #undef alloca
@@ -150,3 +152,6 @@ extern int errno;
 # define LOCAL_COPY(s) strcpy(alloca(strlen(s) + 1), s) /* XXX Is that allowed? */
 #endif /* defined(__INTEL_COMPILER) || defined(__GNUC__) */
 #endif /* strdupa */
+
+#include "ircd_defs.h"
+#include "common.h"

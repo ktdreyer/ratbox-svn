@@ -36,7 +36,6 @@
 #include "s_newconf.h"
 #include "numeric.h"
 #include "parse.h"
-#include "ircd_defs.h"
 #include "irc_string.h"
 #include "memory.h"
 #include "tools.h"

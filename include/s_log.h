@@ -34,8 +34,6 @@
 #ifndef INCLUDED_s_log_h
 #define INCLUDED_s_log_h
 
-#include "ircd_defs.h"
-
 typedef enum ilogfile
 {
 	L_MAIN,
