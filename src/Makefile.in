@@ -64,6 +64,7 @@ SRCS =                          \
   fdlist.c                      \
   fileio.c                      \
   hash.c                        \
+  hook.c                        \
   irc_string.c                  \
   ircd.c                        \
   ircd_signal.c                 \

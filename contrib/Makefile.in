@@ -27,7 +27,8 @@ SRCS =                          \
   m_jupe.c			\
   m_hash.c			\
   m_nickinfo.c                  \
-  m_opme.c
+  m_opme.c                      \
+  whois_notice.c
 
 OBJS = ${SRCS:.c=.so}
 

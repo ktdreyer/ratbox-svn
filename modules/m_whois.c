@@ -22,6 +22,10 @@
  *
  *   $Id$
  */
+
+#include <string.h>
+#include <time.h>
+
 #include "tools.h"
 #include "common.h"   /* bleah */
 #include "handlers.h"
@@ -41,9 +45,7 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
-
-#include <string.h>
-#include <time.h>
+#include "hook.h"
 
 static int do_whois(struct Client *cptr, struct Client *sptr,
                     int parc, char *parv[]);
@@ -64,12 +66,14 @@ struct Message whois_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(&whois_msgtab);
+	hook_add_event("doing_whois");
+	mod_add_cmd(&whois_msgtab);
 }
 
 void
 _moddeinit(void)
 {
+	hook_del_event("doing_whois");
   mod_del_cmd(&whois_msgtab);
 }
 
@@ -164,7 +168,7 @@ static int do_whois(struct Client *cptr, struct Client *sptr,
   int   found=NO;
   int   wilds;
   int   glob=0;
-
+  
   /* This lets us make all "whois nick" queries look the same, and all
    * "whois nick nick" queries look the same.  We have to pass it all
    * the way down to whois_person() though -- fl */
@@ -294,7 +298,7 @@ static int single_whois(struct Client *sptr,struct Client *acptr,
   int invis;
   int member;
   int showperson;
-
+  
   if (acptr->name[0] == '\0')
     name = "?";
   else
@@ -360,7 +364,8 @@ static void whois_person(struct Client *sptr,struct Client *acptr, int glob)
   char *t;
   int tlen;
   int reply_to_send = NO;
-
+  struct hook_mfunc_data hd;
+  
   a2cptr = find_server(acptr->user->server);
           
   sendto_one(sptr, form_str(RPL_WHOISUSER), me.name,
@@ -451,6 +456,12 @@ static void whois_person(struct Client *sptr,struct Client *acptr, int glob)
                  acptr->firsttime);
     }
 
+  hd.cptr = acptr;
+  hd.sptr = sptr;
+  /* although we should fill in parc and parv, we don't ..
+	 be careful of this when writing whois hooks */
+  hook_call_event("doing_whois", &hd);
+  
   return;
 }
 
