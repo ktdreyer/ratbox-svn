@@ -297,7 +297,6 @@ register_local_user(struct Client *client_p, struct Client *source_p, char *nick
 	char tmpstr2[IRCD_BUFSIZE];
 	char ipaddr[HOSTIPLEN];
 	int status;
-	dlink_node *m;
 	char *id;
 	assert(NULL != source_p);
 	assert(MyConnect(source_p));
