@@ -1,3 +1,15 @@
+leeh        2004/02/23 18:54:10 EST	(20040223_4)
+
+  Modified files:
+    src                  messages.tab 
+  Log:
+  - updated RPL_YOUREOPER
+  
+  Revision  Changes    Path
+  7.105     +1 -1      ircd-ratbox/src/messages.tab
+
+
+
 leeh        2004/02/23 18:38:51 EST	(20040223_3)
 
   Modified files:
