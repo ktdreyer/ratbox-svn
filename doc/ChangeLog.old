@@ -1,3 +1,8 @@
+*** 20000102_3 by db
+- bug reported by Colten Edwards in m_userhost.c
+
+
+
 *** 20000102_2 by db
 - oops bogus code in m_sjoin.c
 
