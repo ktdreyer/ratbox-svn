@@ -1,3 +1,7 @@
+*** 20010925_6 by davidt
+- Um, move this assert again. I'm sure i commited this before....
+
+
 *** 20010925_5 by leeh
 - dont forward nicks thatdont exist in sjoin..
 
