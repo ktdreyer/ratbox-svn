@@ -1,3 +1,15 @@
+androsyn    2004/01/14 14:29:12 EST	(20040114_2)
+
+  Modified files:
+    modules              m_links.c 
+  Log:
+  remove some old "ip skipping" stuff in links that wasnt relevant
+  
+  Revision  Changes    Path
+  1.60      +3 -13     ircd-ratbox/modules/m_links.c
+
+
+
 androsyn    2004/01/14 14:26:10 EST	(20040114_1)
 
   Modified files:
