@@ -1,3 +1,21 @@
+androsyn    2004/03/01 13:35:25 EST	(20040301_3)
+
+  Modified files:
+    include              ircd_defs.h 
+    src                  irc_string.c listener.c s_newconf.c 
+                         s_serv.c 
+  Log:
+  Hopefully the freebsd brokenness is fixed with that..
+  
+  Revision  Changes    Path
+  7.43      +6 -2      ircd-ratbox/include/ircd_defs.h
+  7.68      +2 -0      ircd-ratbox/src/irc_string.c
+  7.103     +10 -1     ircd-ratbox/src/listener.c
+  7.27      +2 -0      ircd-ratbox/src/s_newconf.c
+  7.377     +9 -0      ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2004/03/01 13:34:27 EST	(20040301_2)
 
   Modified files:
