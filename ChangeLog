@@ -1,3 +1,15 @@
+androsyn    2002/10/09 16:57:38 UTC	(20021009_0)
+
+  Modified files:
+    modules/core         m_server.c 
+  Log:
+  Fix a potential memory leak.
+  
+  Revision  Changes    Path
+  1.97      +5 -4      ircd-ratbox/modules/core/m_server.c
+
+
+
 leeh        2002/10/08 14:51:39 UTC	(20021008_1)
 
   Modified files:
