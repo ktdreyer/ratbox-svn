@@ -877,6 +877,8 @@ register_client(struct Client *client_p, struct Client *server,
 			return exit_client(NULL, source_p, &me, "Ghosted Client");
 		}
 	}
+	else
+		source_p->servptr == server;
 
 	dlinkAdd(source_p, &source_p->lnode, &source_p->servptr->serv->users);
 
