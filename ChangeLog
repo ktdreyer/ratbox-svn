@@ -1,3 +1,31 @@
+leeh        2004/11/18 19:57:02 EST	(20041119_0)
+
+  Modified files:
+    .                    INSTALL configure 
+    autoconf             configure.in 
+    include              rserv.h 
+    src                  newconf.c rserv.c s_jupeserv.c 
+  Added files:
+    .                    README 
+  Log:
+  - added sqlite installation instructions to INSTALL
+  - add some info to README
+  - fix configure including -lsqlite twice
+  - check servername is a valid servername
+  - check requested jupes are valid servernames and dont match our name.
+  
+  Revision  Changes    Path
+  1.4       +47 -7     rserv/INSTALL
+  1.1       +29 -0     rserv/README (new)
+  1.17      +1 -1      rserv/autoconf/configure.in
+  1.17      +1 -1      rserv/configure
+  1.11      +2 -0      rserv/include/rserv.h
+  1.23      +8 -0      rserv/src/newconf.c
+  1.37      +23 -0     rserv/src/rserv.c
+  1.12      +20 -1     rserv/src/s_jupeserv.c
+
+
+
 leeh        2004/11/18 18:35:25 EST	(20041118_6)
 
   Added files:
