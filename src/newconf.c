@@ -1318,44 +1318,23 @@ conf_set_connect_class(void *data)
 	DupString(yy_server->class_name, data);
 }
 
-static int
-conf_begin_exempt(struct TopConf *tc)
-{
-	if(yy_aconf)
-	{
-		free_conf(yy_aconf);
-		yy_aconf = NULL;
-	}
-
-	yy_aconf = make_conf();
-	DupString(yy_aconf->passwd, "*");
-	yy_aconf->status = CONF_EXEMPTDLINE;
-
-	return 0;
-}
-
-static int
-conf_end_exempt(struct TopConf *tc)
-{
-	if(yy_aconf->host && parse_netmask(yy_aconf->host, NULL, NULL) != HM_HOST)
-	{
-		add_conf_by_address(yy_aconf->host, CONF_EXEMPTDLINE, NULL, yy_aconf);
-	}
-	else
-	{
-		conf_report_error("Ignoring exempt -- invalid exempt::ip.");
-		free_conf(yy_aconf);
-	}
-
-	yy_aconf = NULL;
-	return 0;
-}
-
 static void
 conf_set_exempt_ip(void *data)
 {
-	MyFree(yy_aconf->host);
-	DupString(yy_aconf->host, data);
+	struct ConfItem *yy_tmp;
+
+	yy_tmp = make_conf();
+	DupString(yy_tmp->host, data);
+	DupString(yy_tmp->passwd, "*");
+	yy_tmp->status = CONF_EXEMPTDLINE;
+
+	if(parse_netmask(yy_tmp->host, NULL, NULL) == HM_HOST)
+	{
+		conf_report_error("Ignoring exempt::ip -- invalid ip mask");
+		free_conf(yy_tmp);
+	}
+	else
+		add_conf_by_address(yy_tmp->host, CONF_EXEMPTDLINE, NULL, yy_tmp);
 }
 
 static int
@@ -2250,7 +2229,7 @@ newconf_init()
 	add_conf_item("connect", "flags", CF_STRING | CF_FLIST,
 			conf_set_connect_flags);
 
-	add_top_conf("exempt", conf_begin_exempt, conf_end_exempt);
+	add_top_conf("exempt", NULL, NULL);
 	add_conf_item("exempt", "ip", CF_QSTRING, conf_set_exempt_ip);
 
 	add_top_conf("cluster", conf_begin_cluster, conf_end_cluster);
