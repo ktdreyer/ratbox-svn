@@ -303,7 +303,19 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
       for (p = pbuffer; p <= end; p +=8)
 	{
 	  /* HACK HACK */
-	  ilog(L_CRIT, "%x %x %x %x %x %x %x %x |%c%c%c%c%c%c%c%c",
+	  /* Its expected this nasty code can be removed
+	   * or rewritten later if still needed.
+	   */
+	  if ((unsigned long)(p+8) > (unsigned long) end)
+	    {
+	       for(;p <= end; p++)
+		 {
+		    ilog(L_CRIT, "%02x |%c", p[0], p[0]);
+		 }
+	    }
+	  else
+            ilog(L_CRIT,
+	       "%02x %02x %02x %02x %02x %02x %02x %02x |%c%c%c%c%c%c%c%c",
 	       p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7],
 	       p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7]);
 	}
@@ -322,8 +334,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
  *		- pointer to client message is from
  *		- count of number of args
  *		- pointer to argv[] array
- * output	- -1 if error from client
- *              - -2 if error from server
+ * output	- -1 if error from server
  * side effects	-
  */
 static int
@@ -361,7 +372,10 @@ handle_command(struct Message *mptr, struct Client *client_p,
 	{
 	  sendto_one(client_p, form_str(ERR_NEEDMOREPARAMS),
 		     me.name, BadPtr(hpara[0]) ? "*" : hpara[0], mptr->cmd);
-	  return(-1);
+	  if (MyClient(client_p))
+	    return(1);
+	  else
+	    return(-1);
 	}
 
       sendto_realops_flags(FLAGS_ALL, L_ALL, 
@@ -373,7 +387,7 @@ handle_command(struct Message *mptr, struct Client *client_p,
       
       exit_client(client_p, client_p, client_p,
 		  "Not enough arguments to server command.");
-      return(-2);
+      return(-1);
     }
 
   (*handler)(client_p, from, i, hpara);
