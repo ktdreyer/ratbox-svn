@@ -1,3 +1,18 @@
+androsyn    2002/12/10 13:03:13 UTC	(20021210_13)
+
+  Modified files:
+    src                  confmatch.c iplines.c 
+  Log:
+  Clean up confmatch and iplines some more.  Fixed an off by one error.
+  Only make lines IP lines if username is invalid or is a simple wildcard
+  such as "*"
+  
+  Revision  Changes    Path
+  7.8       +28 -3     ircd-ratbox/src/confmatch.c
+  7.3       +5 -6      ircd-ratbox/src/iplines.c
+
+
+
 androsyn    2002/12/10 12:25:16 UTC	(20021210_12)
 
   Modified files:
