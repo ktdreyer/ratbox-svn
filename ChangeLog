@@ -1,3 +1,18 @@
+leeh        2004/03/30 06:47:46 EST	(20040330_9)
+
+  Modified files:
+    modules/core         m_mode.c 
+    src                  channel.c 
+  Log:
+  - I shouldnt fix things in a morning, because that last "fix" was even worse
+    than what was there.
+  
+  Revision  Changes    Path
+  1.103     +5 -4      ircd-ratbox/modules/core/m_mode.c
+  7.407     +4 -3      ircd-ratbox/src/channel.c
+
+
+
 leeh        2004/03/30 06:34:49 EST	(20040330_8)
 
   Modified files:
