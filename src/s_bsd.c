@@ -235,7 +235,6 @@ close_connection(struct Client *client_p)
 {
 	struct ConfItem *aconf;
 	assert(NULL != client_p);
-	fprintf(stderr, "Closing client: %lx\n", client_p);
 	if(client_p == NULL)
 		return;
 

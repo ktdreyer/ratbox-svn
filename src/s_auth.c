@@ -138,7 +138,6 @@ static void *last;
 static void
 unlink_auth_request(struct AuthRequest *request, dlink_list * list)
 {
-	fprintf(stderr, "Unlink: %lx\n", request);
 	assert(last != request);
 	last = request;
 	dlinkFindDestroy(list, request);
