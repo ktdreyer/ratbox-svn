@@ -724,9 +724,20 @@ static void do_numeric(char numeric[],
        * We shouldn't get numerics sent to us,
        * any numerics we do get indicate a bug somewhere..
        */
-      sendto_realops_flags(FLAGS_ALL, L_ADMIN,
-			   "*** %s(via %s) sent a %s numeric to me: %s",
-			   source_p->name, client_p->name, numeric, buffer);
+      /* ugh.  this is here because of nick collisions.  when two servers
+       * relink, they burst each other their nicks, then perform collides.
+       * if there is a nick collision, BOTH servers will kill their own
+       * nicks, and BOTH will kill the other servers nick, which wont exist,
+       * because it will have been already killed by the local server.
+       *
+       * unfortunately, as we cant guarantee other servers will do the
+       * "right thing" on a nick collision, we have to keep both kills.  
+       * ergo we need to ignore ERR_NOSUCHNICK. --fl_
+       */
+      if(atoi(numeric) != ERR_NOSUCHNICK)
+        sendto_realops_flags(FLAGS_ALL, L_ADMIN,
+			     "*** %s(via %s) sent a %s numeric to me: %s",
+			     source_p->name, client_p->name, numeric, buffer);
       return;
     }
     else if (target_p->from == client_p) 
