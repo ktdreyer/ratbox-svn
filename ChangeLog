@@ -1,3 +1,15 @@
+leeh        2005/02/11 06:42:48 EST	(20050211_0)
+
+  Modified files:
+    modules              m_gline.c 
+  Log:
+  - workaround hyb6 allowing empty gline reasons
+  
+  Revision  Changes    Path
+  1.150     +10 -2     ircd-ratbox/modules/m_gline.c
+
+
+
 leeh        2005/02/09 14:39:13 EST	(20050209_2)
 
   Modified files:
