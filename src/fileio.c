@@ -33,7 +33,7 @@
 #include <fcntl.h>  /* O_RDONLY, O_WRONLY, ... */
 #include <unistd.h> /* read, write, open, close */
 #include <assert.h> /* assert */
-#include <sys/errno.h>
+#include <errno.h>
 #include "memdebug.h"
 
 /*
