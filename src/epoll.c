@@ -67,25 +67,38 @@ static int ep; /* epoll file descriptor */
 
 
 #include <linux/version.h>
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,5,46)
-#error "epoll support requires kernel headers newer than 2.5.46..try rtsigio instead"
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,5,49)
+#error "epoll support requires kernel headers newer than 2.5.49..try rtsigio instead"
 #endif
 
 
 #include <linux/unistd.h>
 
-#define EP_CTL_ADD 1
-#define EP_CTL_DEL 2
-#define EP_CTL_MOD 3
+#define EPOLL_CTL_ADD 1
+#define EPOLL_CTL_DEL 2
+#define EPOLL_CTL_MOD 3
 
-#define __NR_epoll_create __NR_sys_epoll_create
-#define __NR_epoll_ctl __NR_sys_epoll_ctl
-#define __NR_epoll_wait __NR_sys_epoll_wait
+#define EPOLLIN POLLIN
+#define EPOLLOUT POLLOUT
+#define EPOLLERR POLLERR
+#define EPOLLHUP POLLHUP
+
+typedef union epoll_data {
+	void *ptr;
+        int fd;
+        __uint32_t u32;
+        __uint64_t u64;
+} epoll_data_t;
+
+struct epoll_event {   
+       __uint32_t events;   
+       epoll_data_t data;
+};
 
 
 static _syscall1(int, epoll_create, int, maxfds);
-static _syscall4(int, epoll_ctl, int, epfd, int, op, int, fd, unsigned int, events);
-static _syscall4(int, epoll_wait, int, epfd, struct pollfd *, pevents, int, maxevents, int, timeout);
+static _syscall4(int, epoll_ctl, int, epfd, int, op, int, fd, struct epoll_event *, events);
+static _syscall4(int, epoll_wait, int, epfd, struct epoll_event *, pevents, int, maxevents, int, timeout);
 
 #endif /* HAVE_EPOLL_LIB */
 
@@ -116,6 +129,8 @@ void
 comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
     void *client_data, time_t timeout)
 {  
+  struct epoll_event ep_event;
+
   fde_t *F = &fd_table[fd];
   int old_flags = F->pflags;
   int op = 0;
@@ -128,9 +143,9 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
   if (type & COMM_SELECT_READ)
     {
       if(handler != NULL)
-        F->pflags |= POLLIN | POLLHUP | POLLERR;
+        F->pflags |= EPOLLIN | EPOLLHUP | EPOLLERR;
       else 
-        F->pflags &= ~(POLLIN|POLLHUP|POLLERR); 
+        F->pflags &= ~(EPOLLIN|EPOLLHUP|EPOLLERR); 
       
       F->read_handler = handler;
       F->read_data = client_data;
@@ -139,9 +154,9 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
   if (type & COMM_SELECT_WRITE)
     {
       if(handler != NULL)
-        F->pflags = POLLOUT | POLLHUP | POLLERR;
+        F->pflags = EPOLLOUT | EPOLLHUP | EPOLLERR;
       else
-        F->pflags &= ~(POLLOUT|POLLHUP|POLLERR);
+        F->pflags &= ~(EPOLLOUT|EPOLLHUP|EPOLLERR);
       F->write_handler = handler;
       F->write_data = client_data;
     }
@@ -149,11 +164,11 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
   if(old_flags != 0)
   {
     if(F->pflags == 0)
-      op = EP_CTL_DEL;
+      op = EPOLL_CTL_DEL;
     else
-      op = EP_CTL_MOD;
+      op = EPOLL_CTL_MOD;
   } else {
-    op = EP_CTL_ADD;
+    op = EPOLL_CTL_ADD;
   }
  
    
@@ -164,7 +179,9 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
   if(old_flags == F->pflags)
     return;
 
-  if(epoll_ctl(ep, op, fd, F->pflags) != 0)
+  ep_event.events = F->pflags;
+  ep_event.data.ptr = F;
+  if(epoll_ctl(ep, op, fd, &ep_event) != 0)
   {
     ilog(L_ERROR, "comm_setselect(): epoll_ctl failed: %s", strerror(errno));
   }
@@ -185,7 +202,7 @@ int
 comm_select(unsigned long delay)
 {
   int num, i;
-  static struct pollfd pfd[EPOLL_LENGTH];
+  static struct epoll_event pfd[EPOLL_LENGTH];
 
   num = epoll_wait(ep, pfd, EPOLL_LENGTH, delay);
   set_time();
@@ -201,21 +218,24 @@ comm_select(unsigned long delay)
   for(i = 0; i < num; i++)
   {
     PF *hdl;
-    int fd = pfd[i].fd;
-    fde_t *F = &fd_table[fd];
-    if(pfd[i].revents & (POLLIN | POLLHUP | POLLERR))
+    fde_t *F = pfd[i].data.ptr;
+    if(pfd[i].events & (EPOLLIN | EPOLLHUP | EPOLLERR))
     {
       callbacks_called++;
       hdl = F->read_handler;
       if(hdl) 
-        hdl(fd, F->read_data); 
+        hdl(F->fd, F->read_data); 
+      else
+        ilog(L_WARN, "s_bsd_epoll.c: NULL read handler called");
     }
-    if(pfd[i].revents & (POLLOUT | POLLHUP | POLLERR))
+    if(pfd[i].events & (EPOLLOUT | EPOLLHUP | EPOLLERR))
     {
       callbacks_called++;
       hdl = F->write_handler;
       if(hdl)
-        hdl(fd, F->write_data);
+        hdl(F->fd, F->write_data);
+      else
+        ilog(L_WARN, "s_bsd_epoll.c: NULL write handler called");
     } 
   }
   return COMM_OK;
