@@ -54,3 +54,6 @@
 
 /* No block allocator */
 #undef NOBALLOC
+
+/* Gettext support */
+#undef HAVE_GETTEXT
