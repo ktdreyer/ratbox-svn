@@ -1,3 +1,36 @@
+leeh        2002/08/08 20:49:05 EDT	(20020809_0)
+
+  Modified files:
+    include              channel.h client.h modules.h s_serv.h 
+    modules              Makefile.in m_knock.c m_whois.c 
+    modules/core         m_message.c m_nick.c 
+    src                  channel.c client.c ircd_parser.y 
+                         modules.c s_serv.c s_user.c 
+  Removed files:
+    modules              m_drop.c 
+  Log:
+  - removed more vchan traces, got rid of uplink
+  
+  Revision  Changes    Path
+  7.119     +0 -1      ircd-ratbox/include/channel.h
+  7.156     +1 -4      ircd-ratbox/include/client.h
+  7.33      +1 -7      ircd-ratbox/include/modules.h
+  7.68      +0 -5      ircd-ratbox/include/s_serv.h
+  1.73      +0 -1      ircd-ratbox/modules/Makefile.in
+  1.103     +1 -5      ircd-ratbox/modules/core/m_message.c
+  1.95      +7 -49     ircd-ratbox/modules/core/m_nick.c
+  1.25      +0 -96     ircd-ratbox/modules/m_drop.c (dead)
+  1.56      +1 -7      ircd-ratbox/modules/m_knock.c
+  1.81      +2 -3      ircd-ratbox/modules/m_whois.c
+  7.330     +0 -12     ircd-ratbox/src/channel.c
+  7.297     +0 -2      ircd-ratbox/src/client.c
+  1.258     +0 -1      ircd-ratbox/src/ircd_parser.y
+  7.108     +1 -2      ircd-ratbox/src/modules.c
+  7.272     +0 -7      ircd-ratbox/src/s_serv.c
+  7.207     +3 -0      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2002/08/08 19:49:11 EDT	(20020808_19)
 
   Modified files:
