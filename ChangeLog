@@ -1,3 +1,18 @@
+leeh        2004/04/22 15:00:26 EDT	(20040422_1)
+
+  Modified files:
+    doc                  ircd.8 
+    src                  s_conf.c 
+  Log:
+  - update of manpage via Jeremy
+  - raise default split_delay to 60s
+  
+  Revision  Changes    Path
+  1.7       +15 -7     ircd-ratbox/doc/ircd.8
+  7.463     +1 -1      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2004/04/22 14:35:10 EDT	(20040422_0)
 
   Modified files:
