@@ -1,3 +1,24 @@
+*** 20001212_8 by adrian
+
+
+Do build magick in the binary. Now, --prefix="foo" is reflected in DPATH
+and is also reflected in the various PATH's there are.
+
+The handling of the ETCDIR stuff is ugly and warrants instant death in
+my eyes, but it works and it doesn't cause me to retch when I look at it
+so I guess it can stay there until Someone Else(tm) fixes it.
+
+Note that IRCD_PREFIX needs to be defined during the ircd and tools build.
+I *did* try doing the squid thing - take config.h, pass a sed script over
+it to map DPATH to @prefix@, and do it that way, but it might have made some
+people throw up.
+
+This completes tonights set of work which I just shouldn't have done.
+Comments can be piped through cvs commit.
+
+
+
+
 *** 20001212_7 by adrian
 
 
