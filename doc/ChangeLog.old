@@ -1,3 +1,7 @@
+*** 20010108_1 by toot
+fixed a memleak dianora found, when reading modules from the config
+
+
 *** 20010107_8 by toot
 expire_gline/tklines wasn't removing more than 1 entry at a time
 
