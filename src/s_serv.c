@@ -1140,7 +1140,6 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
     int fd;
     char servname[HOSTLEN + 1];
     char serv_desc[HOSTLEN + 15];
-    dlink_node *m;
 
     /* Make sure aconf is useful */
     assert(aconf != NULL);

@@ -58,7 +58,6 @@ char *_version = "20001122";
  */
 int m_help(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  int i;
   static time_t last_used = 0;
 
   /* HELP is always local */

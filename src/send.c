@@ -295,7 +295,6 @@ void
 send_queued_write(int fd, void *data)
 {
   struct Client *to = data;
-  const char *msg;
   int retlen;
 
   /*

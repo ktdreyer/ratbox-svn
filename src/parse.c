@@ -697,7 +697,7 @@ static int     do_numeric(
 	    }
           else if (IsServer(acptr) && acptr->from != cptr)
 	    {
-	      sendto_anywhere(acptr, sptr,"%s %s %s",
+	      sendto_anywhere(acptr, sptr,"%s %s%s",
 			      numeric, nick, buffer);
 	    }
         }
