@@ -1,3 +1,38 @@
+leeh        2005/02/01 17:50:58 EST	(20050201_5)
+
+  Modified files:
+    include              cache.h client.h conf.h event.h io.h 
+                         service.h ucommand.h 
+    src                  cache.c event.c io.c s_chanserv.c 
+                         s_global.c s_jupeserv.c s_operbot.c 
+                         s_operserv.c s_userserv.c service.c 
+                         u_stats.c ucommand.c 
+  Log:
+  - s/struct connection_entry/struct lconn
+  
+  Revision  Changes    Path
+  1.2       +2 -2      rserv/include/cache.h
+  1.39      +2 -2      rserv/include/client.h
+  1.38      +1 -1      rserv/include/conf.h
+  1.5       +2 -2      rserv/include/event.h
+  1.22      +10 -10    rserv/include/io.h
+  1.20      +3 -3      rserv/include/service.h
+  1.9       +3 -3      rserv/include/ucommand.h
+  1.5       +1 -1      rserv/src/cache.c
+  1.6       +1 -1      rserv/src/event.c
+  1.37      +37 -37    rserv/src/io.c
+  1.53      +8 -8      rserv/src/s_chanserv.c
+  1.7       +2 -2      rserv/src/s_global.c
+  1.23      +4 -4      rserv/src/s_jupeserv.c
+  1.27      +4 -4      rserv/src/s_operbot.c
+  1.7       +8 -8      rserv/src/s_operserv.c
+  1.43      +8 -8      rserv/src/s_userserv.c
+  1.42      +1 -1      rserv/src/service.c
+  1.13      +7 -7      rserv/src/u_stats.c
+  1.26      +29 -29    rserv/src/ucommand.c
+
+
+
 leeh        2005/02/01 15:35:23 EST	(20050201_4)
 
   Modified files:
