@@ -1,3 +1,9 @@
+*** 20010429_3 by fl_
+- couple of small bugs in stats
+- replaced unused things in stats Q with "*"
+- exempt {}; dont have reasons..
+
+
 *** 20010429_2 by fl_
 - massive rewrite of m_stats.c to use a table based lookup for stats..
   this means we can now support /stats auth etc.. dont attempt it yet tho,
