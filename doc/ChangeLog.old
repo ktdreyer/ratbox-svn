@@ -1,3 +1,7 @@
+*** 20010529_11 by ejb
+- VMS-style ircd/foo getopt support (only on VMS, not Unix).
+
+
 *** 20010529_10 by ejb
 - set a process name on VMS.
 
