@@ -247,7 +247,7 @@ static void cryptlink_auth(struct Client *client_p, struct Client *source_p,
 
   aconf = client_p->localClient->att_conf;
 
-  if(((aconf->status & CONF_SERVER) == 0) || 
+  if((aconf == NULL) || ((aconf->status & CONF_SERVER) == 0) || 
      irccmp(aconf->name, client_p->name) || 
      !match(aconf->name, client_p->name))
   {
@@ -374,7 +374,7 @@ static void cryptlink_serv(struct Client *client_p, struct Client *source_p,
 
   aconf = client_p->localClient->att_conf;
 
-  if(((aconf->status & CONF_SERVER) == 0) || 
+  if((aconf == NULL) || ((aconf->status & CONF_SERVER) == 0) || 
      irccmp(aconf->name, client_p->name) || 
      !match(aconf->name, client_p->name))
   {

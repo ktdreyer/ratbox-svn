@@ -882,7 +882,7 @@ int server_estab(struct Client *client_p)
 
   aconf = client_p->localClient->att_conf;
 
-  if(((aconf->status & CONF_SERVER) == 0) || 
+  if((aconf == NULL) || ((aconf->status & CONF_SERVER) == 0) || 
      irccmp(aconf->name, client_p->name) || 
      !match(aconf->name, client_p->name))
   {
@@ -1874,7 +1874,7 @@ serv_connect_callback(int fd, int status, void *data)
     /* Get the C/N lines */
     aconf = client_p->localClient->att_conf;
 
-    if(((aconf->status & CONF_SERVER) == 0) || 
+    if((aconf == NULL) || ((aconf->status & CONF_SERVER) == 0) || 
        irccmp(aconf->name, client_p->name) ||
        !match(aconf->name, client_p->name))
     {
