@@ -1,3 +1,15 @@
+androsyn    2004/03/01 14:11:36 EST	(20040301_8)
+
+  Modified files:
+    include              setup.h.in 
+  Log:
+  Helps if i run autoheader too
+  
+  Revision  Changes    Path
+  7.76      +1 -1      ircd-ratbox/include/setup.h.in
+
+
+
 androsyn    2004/03/01 14:06:10 EST	(20040301_7)
 
   Modified files:
