@@ -1321,7 +1321,7 @@ exit_remote_server(struct Client *client_p, struct Client *source_p, struct Clie
 	   !IsMe(target_p) && (source_p->flags & FLAGS_KILLED) == 0)
 	{
 		sendto_one(target_p, ":%s SQUIT %s :%s", 
-			   get_id(from, target_p), get_id(source_p, target_p)
+			   get_id(from, target_p), get_id(source_p, target_p),
 			   comment);
 	}
 
