@@ -290,16 +290,22 @@ void do_non_priv_stats(struct Client *sptr, char *name, char *target,
       break;
 
     case 'o' : case 'O' :
-      if (ConfigFileEntry.o_lines_oper_only && IsOper(sptr))
-        {
-          report_configured_links(sptr, CONF_OPS);
-          stats_spy(sptr,statchar);
-        }
+      if (ConfigFileEntry.o_lines_oper_only)
+	{
+	  if(IsOper(sptr))
+	    {
+	      report_configured_links(sptr, CONF_OPS);
+	    }
+	  else
+	    {
+	      sendto_one(sptr, form_str(ERR_NOPRIVILEGES),me.name,sptr->name);
+	    }
+	}
       else
-        {
-          sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, sptr->name);
-          stats_spy(sptr,statchar);
-        }
+	{
+	  report_configured_links(sptr, CONF_OPS);
+	}
+      stats_spy(sptr,statchar);
       break;
 
     case 'p' :
