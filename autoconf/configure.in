@@ -372,9 +372,9 @@ dnl mostly ripped from squid-commloops, thanks to adrian and benno
 
 dnl Make sure headers required for kqueue exist if we want to use it.
 if test "$ac_cv_func_kqueue" = "yes" ; then
-	AC_CHECK_HEADER(sys/event.h, [ event_h="sys/event.h" ], )
-	if test "X$event_h" = "X" ; then
-		AC_MSG_WARN(** sys/event.h not found - can not build kqueue support without it **)
+	AC_CHECK_FUNCS(kevent, [ kqueue_func="yes" ], )
+	if test "X$kqueue_func" = "X" ; then
+		AC_MSG_WARN(** kevent() not found - not building kqueue support **)
 	else
 	        SELECT_TYPE="kqueue"
 		AC_DEFINE(USE_KQUEUE)
