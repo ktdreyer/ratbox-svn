@@ -79,7 +79,11 @@ int     m_whois(struct Client *cptr,
                 int parc,
                 char *parv[])
 {
-  struct Client *acptr;
+
+/*
+ *  struct Client *acptr;
+ */  
+
   if (parc < 2)
     {
       sendto_one(sptr, form_str(ERR_NONICKNAMEGIVEN),
@@ -89,14 +93,27 @@ int     m_whois(struct Client *cptr,
   /* Don't break old clients... -A1kmm. */
   /* Okay, after discussion with other coders we have to always route,
    * and always show idle times... -A1kmm */
-  if ((acptr = hash_find_client(parv[1], (struct Client*)NULL)) &&
-      !MyConnect(acptr) && IsClient(acptr))
-    {
-     sendto_one(acptr->from, ":%s WHOIS %s %s", parv[0], parv[1],
-                parv[1]);
-     return 0;
-    }
-  return(do_whois(cptr,sptr,parc,parv));
+
+  /* 
+   * The other coders didnt agree :>
+   * This as is breaks /whois of clients on non compatable servers
+   * We will add another way to get idle times later..
+   * 
+   */
+
+/*  if ((acptr = hash_find_client(parv[1], (struct Client*)NULL)) &&
+ *     !MyConnect(acptr) && IsClient(acptr))
+ *   {
+ *    sendto_one(acptr->from, ":%s WHOIS %s %s", parv[0], parv[1],
+ *               parv[1]);
+ *    return 0;
+ *   }
+ */
+
+ return(do_whois(cptr,sptr,parc,parv));
+ 
+ 
+
 }
 
 /*
@@ -406,9 +423,16 @@ void whois_person(struct Client *sptr,struct Client *acptr)
 	sendto_one(sptr, form_str(RPL_WHOISADMIN),
 		   me.name, sptr->name, acptr->name);
     }
+
+
   /* Always route, always show idle time - A1kmm. */
-  if (MyConnect(acptr))
-    sendto_one(sptr, form_str(RPL_WHOISIDLE),
+/* 
+ *  if (MyConnect(acptr))
+ * Lets not - broken for now..
+ *
+ */  
+if ((IsOper(sptr) || !GlobalSetOptions.hide_server) && MyConnect(acptr))
+  sendto_one(sptr, form_str(RPL_WHOISIDLE),
 	       me.name, sptr->name, acptr->name,
 	       CurrentTime - acptr->user->last,
 	       acptr->firsttime);
