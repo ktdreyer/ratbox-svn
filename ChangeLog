@@ -1,3 +1,32 @@
+ejb         2002/08/09 19:53:16 EDT	(20020809_13)
+
+  Modified files:
+    include              client.h s_conf.h 
+    modules              .depend 
+    src                  .depend Makefile.in ircd.c ircd_lexer.l 
+                         ircd_parser.y packet.c send.c 
+  Added files:
+    include              newconf.h 
+    src                  newconf.c 
+  Log:
+  - rewrote config parser to be much better (modular).
+  
+  Revision  Changes     Path
+  7.159     +0 -1       ircd-ratbox/include/client.h
+  7.1       +288 -0     ircd-ratbox/include/newconf.h (new)
+  7.187     +5 -0       ircd-ratbox/include/s_conf.h
+  1.9       +114 -161   ircd-ratbox/modules/.depend
+  7.9       +34 -18     ircd-ratbox/src/.depend
+  7.114     +1 -0       ircd-ratbox/src/Makefile.in
+  7.244     +3 -0       ircd-ratbox/src/ircd.c
+  1.146     +133 -393   ircd-ratbox/src/ircd_lexer.l
+  1.259     +231 -2755  ircd-ratbox/src/ircd_parser.y
+  7.1       +2531 -0    ircd-ratbox/src/newconf.c (new)
+  7.93      +4 -0       ircd-ratbox/src/packet.c
+  7.205     +20 -1      ircd-ratbox/src/send.c
+
+
+
 leeh        2002/08/09 14:36:57 EDT	(20020809_12)
 
   Modified files:
