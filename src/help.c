@@ -68,34 +68,30 @@ load_help_file(const char *hfname, const char *helpname, int flags)
 	if((in = fbopen(hfname, "r")) == NULL)
 		return;
 
+	if(fbgets(line, sizeof(line), in) == NULL)
+		return;
+
+	if((p = strchr(line, '\n')) != NULL)
+		*p = '\0';
+
+	/* first line of a help file CANNOT be empty, m_help.c depends on
+	 * this assumption
+	 */
+	if(EmptyString(line))
+		return;
+	
 	hptr = BlockHeapAlloc(helpfile_heap);
 	memset(hptr, 0, sizeof(struct helpfile));
 
 	strlcpy(hptr->helpname, helpname, sizeof(hptr->helpname));
 	hptr->flags = flags;
 
-	if(fbgets(line, sizeof(line), in) != NULL)
-	{
-		if((p = strchr(line, '\n')) != NULL)
-			*p = '\0';
+	/* add first line.. */
+	lineptr = BlockHeapAlloc(helpline_heap);
+	strlcpy(lineptr->data, line, sizeof(lineptr->data));
+	dlinkAdd(lineptr, &lineptr->linenode, &hptr->contents);
 
-		/* first line of a help file CANNOT be empty, m_help.c
-		 * depends on this assumption
-		 */
-		if(!EmptyString(line))
-		{
-			lineptr = BlockHeapAlloc(helpline_heap);
-			strlcpy(lineptr->data, line, sizeof(lineptr->data));
-			dlinkAdd(lineptr, &lineptr->linenode, &hptr->contents);
-		}
-		else
-		{
-			fbclose(in);
-			free_help(hptr);
-			return;
-		}
-	}
-
+	/* now add everything else */
 	while(fbgets(line, sizeof(line), in) != NULL)
 	{
 		if((p = strchr(line, '\n')) != NULL)
@@ -112,12 +108,7 @@ load_help_file(const char *hfname, const char *helpname, int flags)
 	}
 
 	fbclose(in);
-
-	if(dlink_list_length(&hptr->contents) > 0)
-		add_to_help_hash(helpname, hptr);
-	else
-		free_help(hptr);
-
+	add_to_help_hash(helpname, hptr);
 }
 
 void
