@@ -145,7 +145,7 @@
  * doc/TS6.txt for more information.  If your network has old servers
  * (hyb7.0, ircd-ratbox-1.x, +CSr) or hybserv you should NOT define this.
  */
-#define TS6_ONLY
+#undef TS6_ONLY
 
 /* USE_LOGFILE - log errors and such to LPATH
  * If you wish to have the server send 'vital' messages about server

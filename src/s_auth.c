@@ -386,7 +386,6 @@ start_auth(struct Client *client)
 
 	sendheader(client, REPORT_DO_DNS);
 
-#ifndef LEEH
 	/* No DNS cache now, remember? -- adrian */
 	if(adns_getaddr(&client->localClient->ip, client->localClient->ip.ss_family,
 		     &auth->dns_query, 0))
@@ -411,7 +410,6 @@ start_auth(struct Client *client)
 	}
 	else 
 		SetDNSPending(auth);
-#endif
 
 	if(ConfigFileEntry.disable_auth == 0)
 		start_auth_query(auth);

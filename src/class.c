@@ -57,6 +57,7 @@ make_class(void)
 	PingFreq(tmp) = DEFAULT_PINGFREQUENCY;
 	MaxUsers(tmp) = 1;
 	MaxSendq(tmp) = DEFAULT_SENDQ;
+	MaxSendqEob(tmp) = DEFAULT_SENDQ;
 
 #ifdef IPV6
 	tmp->ip_limits = New_Patricia(128);
@@ -190,6 +191,7 @@ add_class(struct Class *classptr)
 		MaxIdent(tmpptr) = MaxIdent(classptr);
 		PingFreq(tmpptr) = PingFreq(classptr);
 		MaxSendq(tmpptr) = MaxSendq(classptr);
+		MaxSendqEob(tmpptr) = MaxSendqEob(classptr);
 		ConFreq(tmpptr) = ConFreq(classptr);
 		CidrBitlen(tmpptr) = CidrBitlen(classptr);
 		CidrAmount(tmpptr) = CidrAmount(classptr);
@@ -312,7 +314,6 @@ report_classes(struct Client *source_p)
 long
 get_sendq(struct Client *client_p)
 {
-	int sendq = DEFAULT_SENDQ;
 	struct ConfItem *aconf;
 
 	if((client_p != NULL) && !IsMe(client_p))
@@ -322,9 +323,15 @@ get_sendq(struct Client *client_p)
 		if(aconf != NULL)
 		{
 			if(aconf->status & (CONF_CLIENT | CONF_SERVER))
-				sendq = ConfMaxSendq(aconf);
+			{
+				/* never true for clients */
+				if(HasSentEob(client_p))
+					return ConfMaxSendqEob(aconf);
+
+				return ConfMaxSendq(aconf);
+			}
 		}
 	}
 
-	return sendq;
+	return DEFAULT_SENDQ;
 }
