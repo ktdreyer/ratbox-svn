@@ -1,3 +1,15 @@
+leeh        2001/12/14 10:16:25 EST	(20011214_5)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  - fixed the kline_with_connection_closed/kline_with_reason stuff
+  
+  Revision  Changes    Path
+  7.211     +72 -39    ircd-hybrid-7/src/client.c
+
+
+
 leeh        2001/12/14 09:31:31 EST	(20011214_4)
 
   Modified files:
