@@ -48,13 +48,13 @@
 static void mo_ungline(struct Client *, struct Client *, int, char **);
 static int remove_temp_gline(char *, char *);
 
-struct Message gline_msgtab = {
+struct Message ungline_msgtab = {
 	"UNGLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
 	{m_unregistered, m_not_oper, m_error, mo_ungline}
 };
 
-mapi_clist_av1 gline_clist[] = { &gline_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, gline_clist, NULL, NULL, "$Revision$");
+mapi_clist_av1 ungline_clist[] = { &ungline_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, ungline_clist, NULL, NULL, "$Revision$");
 
 /* m_ungline()
  *
