@@ -1,3 +1,10 @@
+*** 20001105_4 by db
+- removed a bunch of stuff. JUPE_CHANNEL is gone
+  Its really not needed with vchans
+- removed more SPLIT_MODE cruft, also not needed
+
+
+
 *** 20001105_3 by db
 - fixed stupid in m_oper.c, it wouldn't have honoured O from other servers..
 
