@@ -11,7 +11,7 @@
 #include "send.h"
 #include "s_debug.h"
 #include "s_log.h"
-#include "client.h"	/* for FLAGS_ALL */
+#include "client.h"     /* for FLAGS_ALL */
 #include "memory.h"
 
 #include <unistd.h>
@@ -40,8 +40,8 @@ void server_reboot(void)
   int i;
 
   sendto_realops_flags(FLAGS_ALL,
-		       "Aieeeee!!!  Restarting server... memory: %ld",
-		       get_maxrss());
+                       "Aieeeee!!!  Restarting server... memory: %u",
+                       get_maxrss());
 
   ilog(L_NOTICE, "Restarting server...");
   /*
