@@ -885,8 +885,7 @@ get_client_name(struct Client* client, int showip)
         return client->name;
 
 #ifdef HIDE_SERVERS_IPS
-      if(showip == SHOW_IP && (IsServer(client) || IsConnecting(client)
-			      || IsHandshake(client)))
+      if(IsServer(client) || IsConnecting(client) || IsHandshake(client))
         showip = MASK_IP;
 #endif
 #ifdef HIDE_SPOOF_IPS
