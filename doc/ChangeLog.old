@@ -1,3 +1,15 @@
+lusky       2002/06/20 22:33:13 EDT	(20020621_0)
+
+  Modified files:
+    include              patchlevel.h 
+  Log:
+  - revved patchlevel to beta17
+  
+  Revision  Changes    Path
+  7.32      +1 -1      ircd-hybrid-7/include/patchlevel.h
+
+
+
 leeh        2002/06/20 17:39:58 EDT	(20020620_1)
 
   Modified files:
