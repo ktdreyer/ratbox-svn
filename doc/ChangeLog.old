@@ -1,3 +1,9 @@
+*** 20001203_4 by db
+- cleaned up m_nick.c again. HEY! the docs in the comments are wrong.
+  surprise surprise.
+
+
+
 *** 20001203_3 by db
 - oopsie in m_nick.c wrong order of things... gah this code is 
   still a mess ;-(
