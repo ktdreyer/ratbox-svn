@@ -73,8 +73,9 @@ static int local_client_count=0;
 static BlockHeap *client_heap = NULL;
 static BlockHeap *lclient_heap = NULL;
 
-static dlink_list dead_list;
-static dlink_list abort_list;
+dlink_list dead_list;
+dlink_list abort_list;
+
 /*
  * client_heap_gc
  *
