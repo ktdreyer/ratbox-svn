@@ -1,3 +1,14 @@
+*** 20010117_14 by db
+- fixed /nick changes so they are removed from accept lists of
+  any client that happens to have that nick on its accept list.
+  This stops someone from tracking nick changes using /accept *
+
+- discovered bug in del_all_accepts()
+
+- renamed misnomer in prototypes
+
+
+
 *** 20010117_13 by fl_
 - shouldnt really leave debug code in when I commit stuff..
 
