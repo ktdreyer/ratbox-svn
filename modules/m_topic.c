@@ -139,15 +139,21 @@ int     m_topic(struct Client *cptr,
 	      if(GlobalSetOptions.hide_chanops)
 		{
 		  sendto_channel_local(ONLY_CHANOPS,
-				       chptr, ":%s TOPIC %s :%s",
-				       parv[0],
-				       name, chptr->topic);
+				       chptr, ":%s!%s@%s TOPIC %s :%s",
+				       sptr->name,
+				       sptr->user,
+				       sptr->host,
+				       name,
+				       chptr->topic);
+	  /* XXX could send something to NON_CHANOPS suppressing prefix */
 		}
 	      else
 		{
 		  sendto_channel_local(ALL_MEMBERS,
-				       chptr, ":%s TOPIC %s :%s",
-				       parv[0],
+				       chptr, ":%s!%s@%s TOPIC %s :%s",
+				       sptr->name,
+				       sptr->user,
+				       sptr->host,
 				       name, chptr->topic);
 		}
 	    }

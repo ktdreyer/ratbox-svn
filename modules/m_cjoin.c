@@ -217,8 +217,11 @@ int     m_cjoin(struct Client *cptr,
   */
   sendto_channel_local(ALL_MEMBERS,
 		       vchan_chptr,
-		       ":%s JOIN :%s",
-		       parv[0], chptr->chname);
+		       ":%s!%s@%s JOIN :%s",
+		       sptr->name,
+		       sptr->user,
+		       sptr->host,
+		       chptr->chname);
 
 
   vchan_chptr->mode.mode |= MODE_TOPICLIMIT;

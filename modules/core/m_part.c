@@ -177,7 +177,11 @@ static void part_one_client(struct Client *cptr,
 	  sendto_channel_remote(chptr, cptr, ":%s PART %s", sptr->name, name);
 	  
 	  sendto_channel_local(ALL_MEMBERS,
-			       chptr, ":%s PART %s", sptr->name, name);
+			       chptr, ":%s!%s@%s PART %s",
+			       sptr->name,
+			       sptr->user,
+			       sptr->host,
+			       name);
 	  remove_user_from_channel(chptr, sptr);
 	}
       else
@@ -195,7 +199,11 @@ static void part_one_client(struct Client *cptr,
 	  sendto_channel_remote(chptr, cptr, ":%s PART %s", sptr->name, name);
             
 	  sendto_channel_local(ALL_MEMBERS,
-			       vchan, ":%s PART %s", sptr->name, name);
+			       vchan, ":%s!%s@%s PART %s",
+			       sptr->name,
+			       sptr->user,
+			       sptr->host,
+			       name);
 	  remove_user_from_channel(vchan, sptr);
 	}
     }
@@ -214,7 +222,11 @@ static void part_one_client(struct Client *cptr,
       sendto_channel_remote(chptr, cptr, ":%s PART %s", sptr->name, name);
             
       sendto_channel_local(ALL_MEMBERS,
-			   chptr, ":%s PART %s", sptr->name, name);
+			   chptr, ":%s!%s@%s PART %s",
+			   sptr->name,
+			   sptr->user,
+			   sptr->host,
+			   name);
       remove_user_from_channel(chptr, sptr);
     }
 }
