@@ -1,3 +1,17 @@
+androsyn    2003/06/17 15:59:10 UTC	(20030617_0)
+
+  Modified files:
+    .                    RELNOTES 
+    include              patchlevel.h 
+  Log:
+  Updates RELNOTES for a soon to be released beta3(hopefully?)
+  
+  Revision  Changes    Path
+  1.75      +27 -0     ircd-ratbox/RELNOTES
+  7.50      +1 -1      ircd-ratbox/include/patchlevel.h
+
+
+
 leeh        2003/06/15 16:12:35 UTC	(20030615_0)
 
   Modified files:
