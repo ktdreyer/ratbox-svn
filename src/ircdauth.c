@@ -31,8 +31,10 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <string.h>
+#include <assert.h>
 
 #include "common.h"
+#include "client.h"
 #include "ircd_defs.h"
 #include "s_log.h"
 #include "irc_string.h"
@@ -102,18 +104,63 @@ ConnectToIAuth()
 } /* ConnectToIAuth() */
 
 /*
-GenerateClientID()
- Generate a unique ID based on cptr. It is imperative that
-no two clients may have the same ID.
+IAuthQuery()
+ Called when a client connects - send the client's information
+to the IAuth server to begin an authentication. The syntax
+for an authentication query is as follows:
+
+    DoAuth <ID> <IP Address> <RemotePort> <LocalPort>
+
+  <ID>            - A unique ID for the client so when the
+                    authentication completes, we can re-find
+                    the client.
+
+  <IP Address>    - IP Address of the client. This is represented
+                    in unsigned int form.
+
+  <RemotePort>    - Client's remote port for the connection.
+
+  <LocalPort>     - Port the client connected to us on.
 */
 
-int
-GenerateClientID(const struct Client *cptr)
+void
+IAuthQuery(struct Client *client)
 
 {
-	/* bingo */
-	return (1);
-} /* GenerateClientID() */
+	char buf[BUFSIZE];
+	int len;
+	struct sockaddr_in us;
+	struct sockaddr_in them;
+	int ulen = sizeof(struct sockaddr_in);
+	int tlen = sizeof(struct sockaddr_in);
+
+	assert(iAuth.socket != NOSOCK);
+
+	if (getsockname(client->fd, (struct sockaddr *)&us,   &ulen) ||
+			getpeername(client->fd, (struct sockaddr *)&them, &tlen))
+	{
+		log(L_INFO, "auth get{sock,peer}name error for %s:%m",
+			get_client_name(client, SHOW_IP));
+		return;
+	}
+
+	/*
+	 * The client ID will be the memory address of the
+	 * client. This is acceptable, because as long
+	 * as the client exists, no other client will have
+	 * the same address, thus ensuring a unique ID for
+	 * each client.
+	 */
+
+	len = sprintf(buf,
+		"DoAuth %p %u %u %u\n",
+		client,
+		(unsigned int) client->ip.s_addr,
+		(unsigned int) ntohs(them.sin_port),
+		(unsigned int) ntohs(us.sin_port));
+
+	send(iAuth.socket, buf, len, 0);
+} /* IAuthQuery() */
 
 /*
 ParseIAuth()
@@ -197,23 +244,33 @@ ProcessIAuthData(int parc, char **parv)
 {
 	struct AuthRequest *auth;
 	long id;
-	char *user;
 
 	if (!strcasecmp(parv[0], "DoneAuth"))
 	{
 		id = strtol(parv[1], 0, 0);
 		for (auth = AuthPollList; auth; auth = auth->next)
 		{
-			if (auth->clientid == (void *) id)
+			/*
+			 * Remember: the client id is the memory address
+			 * of auth->client, so if it matches id, we
+			 * found our client.
+			 */
+			if ((void *) auth->client == (void *) id)
 			{
 				fprintf(stderr, "GOT IT: %s %s %s\n",
 					parv[1],
 					parv[2],
 					parv[3]);
 
-				user = (char *)auth->client->username;
-				strcpy(user, parv[2]);
-				strcpy(auth->client->host, parv[3]);
+				strncpy_irc(auth->client->username, parv[2], USERLEN);
+				strncpy_irc(auth->client->host, parv[3], HOSTLEN);
+
+				/*
+				 * The IAuth server will return a "~" if the ident
+				 * query failed.
+				 */
+				if (*auth->client->username != '~')
+					SetGotId(auth->client);
 
 				remove_auth_request(auth);
 

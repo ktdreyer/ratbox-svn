@@ -27,7 +27,7 @@ struct Client;
 /* ircdauth.c prototypes */
 
 int ConnectToIAuth();
-int GenerateClientID(const struct Client *cptr);
+void IAuthQuery(struct Client *client);
 int ParseIAuth();
 
 typedef struct IrcdAuthentication IrcdAuth;
@@ -41,5 +41,9 @@ struct IrcdAuthentication
 	int port; /* port for connection */
 	int socket; /* socket descriptor for IAuth connection */
 };
+
+/* external declarations */
+
+extern struct IrcdAuthentication iAuth;
 
 #endif /* INCLUDED_ircdauth_h */
