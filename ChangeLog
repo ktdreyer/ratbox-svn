@@ -1,3 +1,22 @@
+leeh        2004/09/03 20:59:40 EDT	(20040904_2)
+
+  Modified files:
+    doc                  server-version-info 
+    include              config.h config.h.dist 
+    modules              m_version.c 
+    modules/core         channels.c 
+  Log:
+  - remove IGNORE_BOGUS_TS
+  
+  Revision  Changes    Path
+  7.17      +0 -2      ircd-ratbox/doc/server-version-info
+  7.179     +0 -8      ircd-ratbox/include/config.h
+  7.76      +0 -8      ircd-ratbox/include/config.h.dist
+  1.9       +1 -22     ircd-ratbox/modules/core/channels.c
+  1.66      +1 -5      ircd-ratbox/modules/m_version.c
+
+
+
 leeh        2004/09/03 20:56:56 EDT	(20040904_1)
 
   Modified files:
