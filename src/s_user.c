@@ -58,8 +58,6 @@
 static void report_and_set_user_flags(struct Client *, struct ConfItem *);
 static int check_X_line(struct Client *client_p, struct Client *source_p);
 void user_welcome(struct Client *source_p);
-static int introduce_client(struct Client *client_p, struct Client *source_p,
-			    struct User *user, const char *nick);
 int oper_up(struct Client *source_p, struct ConfItem *aconf);
 
 extern char *crypt();
