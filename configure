@@ -1916,84 +1916,8 @@ rm -fr conftest*
 fi
 
 
-echo $ac_n "checking signal implementation""... $ac_c" 1>&6
-echo "configure:1921: checking signal implementation" >&5
-if test "$cross_compiling" = yes; then
-  echo "$ac_t""unknown" 1>&6
-else
-  cat > conftest.$ac_ext <<EOF
-#line 1926 "configure"
-#include "confdefs.h"
-
-int main()
-{
-#if defined(HAVE_SIGACTION)
-	exit(0);
-#else
-	exit(1);
-#endif
-}
-
-EOF
-if { (eval echo configure:1939: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
-then
-  cat >> confdefs.h <<\EOF
-#define POSIX_SIGNALS 1
-EOF
- echo "$ac_t""posix" 1>&6
-else
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  rm -fr conftest*
-  if test "$cross_compiling" = yes; then
-  echo "$ac_t""uknown" 1>&6
-else
-  cat > conftest.$ac_ext <<EOF
-#line 1953 "configure"
-#include "confdefs.h"
-
-#include <signal.h>
-int calls = 0;
-void handler()
-{
-	if (calls) return;
- 	calls++;
-	kill(getpid(), SIGTERM);
-	sleep(1);
-}
-int main()
-{
-	signal(SIGTERM, handler);
-	kill(getpid(), SIGTERM);
-	exit (0);
-}
-
-EOF
-if { (eval echo configure:1973: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
-then
-  cat >> confdefs.h <<\EOF
-#define BSD_RELIABLE_SIGNALS 1
-EOF
- echo "$ac_t""bsd" 1>&6
-else
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  rm -fr conftest*
-  cat >> confdefs.h <<\EOF
-#define SYSV_UNRELIABLE_SIGNALS 1
-EOF
- echo "$ac_t""sysv" 1>&6
-fi
-rm -fr conftest*
-fi
-
-fi
-rm -fr conftest*
-fi
-
-
 echo $ac_n "checking operating system""... $ac_c" 1>&6
-echo "configure:1997: checking operating system" >&5
+echo "configure:1921: checking operating system" >&5
 case "$target" in
 *-solaris2*) cat >> confdefs.h <<\EOF
 #define OS_SOLARIS2 1
