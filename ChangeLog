@@ -1,3 +1,16 @@
+androsyn    2002/12/10 14:21:45 UTC	(20021210_18)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+  Log:
+  Update documentation about CIDR being supported again in operator blocks
+  
+  Revision  Changes    Path
+  7.199     +3 -2      ircd-ratbox/doc/example.conf
+  7.35      +2 -2      ircd-ratbox/doc/example.efnet.conf
+
+
+
 androsyn    2002/12/10 14:19:04 UTC	(20021210_17)
 
   Modified files:
