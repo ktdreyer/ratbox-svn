@@ -56,7 +56,7 @@ void _moddeinit(void)
   mod_del_cmd(&map_msgtab);
 }
 
-char *_version = "20010913";
+char *_version = "$Revision$";
 static char buf[BUFSIZE];
 
 /* m_map

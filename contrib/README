@@ -1,3 +1,5 @@
+$Id$
+
 This directory contains modules that have been contributed
 by other people, or aren't suitable for including into the 
 hybrid tree.
@@ -18,13 +20,16 @@ example_module.c - An example module to be used for creating your own.
 
 The following are the 'spy' parts, accessible via the +y usermode
 
-spy_admin_notice.c - Spy on clients doing ADMIN
-spy_info_notice.c  - Spy on clients doing INFO
-spy_links_notice.c - Spy on clients doing LINKS
-spy_motd_notice.c  - Spy on clients doing MOTD
-spy_stats_notice.c - Spy on clients doing STATS
-spy_trace_notice.c - Spy on clients doing TRACE
-spy_whois_notice.c - Spy on local clients who WHOIS you.
+spy_admin_notice.c   - Spy on clients doing ADMIN
+spy_info_notice.c    - Spy on clients doing INFO
+spy_links_notice.c   - Spy on clients doing LINKS
+spy_motd_notice.c    - Spy on clients doing MOTD
+spy_stats_notice.c   - Spy on clients doing all STATS
+spy_stats_p_notice.c - Spy on clients doing STATS p only
+spy_trace_notice.c   - Spy on clients doing TRACE
+spy_whois_notice.c   - Spy on local clients who WHOIS you.
 
+Note: if you have both spy_stats_notice.c and spy_stats_p_notice.c loaded
+you will get two messages.
 
 vms_*.c        - Misc files needed for VMS support.

@@ -1,5 +1,6 @@
-/* copyright (c) 2000 Edward Brocklesby, Hybrid Development Team */
-/*
+/* contrib/spy_stats_notice.c
+ * Copyright (c) 2000,2001 Edward Brocklesby, Hybrid Development Team
+ *
  * $Id$
  */
 
@@ -24,7 +25,7 @@ _moddeinit(void)
 	hook_del_hook("doing_stats", (hookfn *)show_stats);
 }
 
-char *_version = "1.0";
+char *_version = "$Revision$";
 
 /* show a stats request */
 int

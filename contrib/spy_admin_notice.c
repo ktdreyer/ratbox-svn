@@ -1,4 +1,5 @@
-/* copyright (c) 2001 Hybrid Development Team
+/* contrib/spy_admin_notice.c
+ * Copyright (c) 2001 Hybrid Development Team
  *
  * $Id$
  */
@@ -23,17 +24,15 @@ _moddeinit(void)
   hook_del_hook("doing_admin", (hookfn *)show_admin);
 }
 
-char *_version = "1.0";
+char *_version = "$Revision$";
 
 int show_admin(struct hook_spy_data *data)
 {
-  if (!MyConnect(data->source_p))
-    return 0;
-	
-  sendto_realops_flags(FLAGS_SPY, L_ALL,
-                       "admin requested by %s (%s@%s) [%s]",
-                       data->source_p->name, data->source_p->username,
-                       data->source_p->host, data->source_p->user->server);
+  if(MyConnect(data->source_p))
+    sendto_realops_flags(FLAGS_SPY, L_ALL,
+                         "admin requested by %s (%s@%s) [%s]",
+                         data->source_p->name, data->source_p->username,
+                         data->source_p->host, data->source_p->user->server);
 
   return 0;
 }

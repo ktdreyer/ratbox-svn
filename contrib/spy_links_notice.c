@@ -1,4 +1,5 @@
-/* copyright (c) 2000 Edward Brocklesby, Hybrid Development Team
+/* contrib/spy_links_notice.c
+ * Copyright (c) 2000 Edward Brocklesby, Hybrid Development Team
  *
  * $Id$
  */
@@ -24,19 +25,16 @@ _moddeinit(void)
   hook_del_hook("doing_links", (hookfn *)show_links);
 }
 
-char *_version = "1.0";
+char *_version = "$Revision$";
 
-/* show a stats request */
 int
 show_links(struct hook_links_data *data)
 {
-  if (!MyConnect(data->source_p))
-    return 0;
-	
-  sendto_realops_flags(FLAGS_SPY, L_ALL,
-                       "LINKS '%s' requested by %s (%s@%s) [%s]",
-                       data->mask, data->source_p->name, data->source_p->username,
-                       data->source_p->host, data->source_p->user->server);
+  if(MyConnect(data->source_p))
+    sendto_realops_flags(FLAGS_SPY, L_ALL,
+                         "LINKS '%s' requested by %s (%s@%s) [%s]",
+                         data->mask, data->source_p->name, data->source_p->username,
+                         data->source_p->host, data->source_p->user->server);
 
   return 0;
 }

@@ -67,7 +67,7 @@ _moddeinit(void)
   mod_del_cmd(&test_msgtab);
 }
 
-char *_version = "20011001";
+char *_version = "$Revision$";
 
 /* FLAGS requires it's own mini parser, since the last parameter in it can
 ** contain a number of FLAGS.  CS handles FLAGS mode1 mode2 OR

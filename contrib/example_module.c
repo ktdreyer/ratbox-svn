@@ -63,12 +63,12 @@ static void mo_test(struct Client *client_p, struct Client *source_p,
 struct Message test_msgtab = {
 
  /* Fields are in order:
-  *-> "COMMAND", 0, parc_count, maxparc, MFLG_SLOW, 0,
+  *-> "COMMAND", 0, 0, parc_count, maxparc, MFLG_SLOW, 0,
   *
   * where:
   * COMMAND == the /command you want
   * parc_count == the number of parameters needed
-  *               (the command is one parameter)
+  *               (the clients name is one param, parv[0])
   * maxparc == the maximum parameters we allow
   * the 0's and MFLG_SLOW should not be changed..
   */
@@ -84,7 +84,7 @@ struct Message test_msgtab = {
   * where:
   * unregged == function to call for unregistered clients
   * regged == function to call for normal users
-  * remote == function to call for remote servers/users
+  * remote == function to call for servers/remote users
   * oper == function to call for operators
   *
   * There are also some pre-coded functions for use:
@@ -120,15 +120,14 @@ _moddeinit(void)
 }
 
 /* When we last modified the file (shown in /modlist), this is usually:
- * YYYY/MM/DD
  */
-char *_version = "20010606";
+char *_version = "$Revision$";
 
 /*
-** mr_test
-**      parv[0] = sender prefix
-**      parv[1] = parameter
-*/
+ * mr_test
+ *      parv[0] = sender prefix
+ *      parv[1] = parameter
+ */
 
 /* Here we have the functions themselves that we declared above,
  * and the fairly normal C coding
@@ -145,10 +144,10 @@ static void mr_test(struct Client *client_p, struct Client *source_p,
 }
 
 /*
-** m_test
-**      parv[0] = sender prefix
-**      parv[1] = parameter
-*/
+ * m_test
+ *      parv[0] = sender prefix
+ *      parv[1] = parameter
+ */
 static void m_test(struct Client *client_p, struct Client *source_p,
                    int parc, char *parv[])
 {
@@ -161,10 +160,10 @@ static void m_test(struct Client *client_p, struct Client *source_p,
 }
 
 /*
-** ms_test
-**      parv[0] = sender prefix
-**      parv[1] = parameter
-*/
+ * ms_test
+ *      parv[0] = sender prefix
+ *      parv[1] = parameter
+ */
 static void ms_test(struct Client *client_p, struct Client *source_p,
                    int parc, char *parv[])
 {
@@ -189,10 +188,10 @@ static void ms_test(struct Client *client_p, struct Client *source_p,
 }    
 	  
 /*
-** mo_test
-**      parv[0] = sender prefix
-**      parv[1] = parameter
-*/
+ * mo_test
+ *      parv[0] = sender prefix
+ *      parv[1] = parameter
+ */
 static void mo_test(struct Client *client_p, struct Client *source_p,
                    int parc, char *parv[])
 {		 
