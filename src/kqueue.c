@@ -156,7 +156,7 @@ init_netio(void)
 		fprintf(stderr, "init_netio: Couldn't open kqueue fd!\n");
 		exit(115);	/* Whee! */
 	}
-	comm_note(ep, "kqueue file descriptor");
+	comm_note(kq, "kqueue file descriptor");
 	kqmax = getdtablesize();
 	kqlst = MyMalloc(sizeof(struct kevent) * kqmax);
 	zero_timespec.tv_sec = 0;
