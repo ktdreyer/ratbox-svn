@@ -17,11 +17,13 @@ struct monitor
 	dlink_list users;
 };
 
+extern BlockHeap *monitor_heap;
+
 #define MONITOR_HASH_SIZE 65536
 #define MONITOR_HASH_BITS 16
 
 void init_monitor(void);
-struct monitor *find_monitor(const char *name);
+struct monitor *find_monitor(const char *name, int add);
 void clear_monitor(struct Client *);
 
 void monitor_signon(struct Client *);

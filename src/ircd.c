@@ -66,6 +66,7 @@
 #include "s_conf.h"
 #include "s_newconf.h"
 #include "cache.h"
+#include "monitor.h"
 
 /*
  * Try and find the correct name to use with getrlimit() for setting the max.
@@ -596,6 +597,7 @@ main(int argc, char *argv[])
 	init_hook();
 	init_reject();
 	init_cache();
+	init_monitor();
 	load_all_modules(1);
 #ifndef STATIC_MODULES
 	load_core_modules(1);

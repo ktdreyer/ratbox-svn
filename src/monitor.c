@@ -42,7 +42,7 @@
 #include "numeric.h"
 
 static struct monitor *monitorTable[MONITOR_HASH_SIZE];
-static BlockHeap *monitor_heap;
+BlockHeap *monitor_heap;
 
 static void cleanup_monitor(void *unused);
 
@@ -60,7 +60,7 @@ hash_monitor_nick(const char *name)
 }
 
 struct monitor *
-find_monitor(const char *name)
+find_monitor(const char *name, int add)
 {
 	struct monitor *monptr;
 
@@ -70,6 +70,17 @@ find_monitor(const char *name)
 	{
 		if(!irccmp(monptr->name, name))
 			return monptr;
+	}
+
+	if(add)
+	{
+		monptr = BlockHeapAlloc(monitor_heap);
+		strlcpy(monptr->name, name, sizeof(monptr->name));
+
+		monptr->hnext = monitorTable[hashv];
+		monitorTable[hashv] = monptr;
+
+		return monptr;
 	}
 
 	return NULL;
@@ -86,7 +97,7 @@ void
 monitor_signon(struct Client *client_p)
 {
 	char buf[USERHOST_REPLYLEN];
-	struct monitor *monptr = find_monitor(client_p->name);
+	struct monitor *monptr = find_monitor(client_p->name, 0);
 	struct Client *target_p;
 	dlink_node *ptr;
 
@@ -116,7 +127,7 @@ monitor_signon(struct Client *client_p)
 void
 monitor_signoff(struct Client *client_p)
 {
-	struct monitor *monptr = find_monitor(client_p->name);
+	struct monitor *monptr = find_monitor(client_p->name, 0);
 	dlink_node *ptr;
 
 	/* noones watching this nick */
