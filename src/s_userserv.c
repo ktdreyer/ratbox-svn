@@ -252,6 +252,9 @@ h_user_burst_login(void *v_client_p, void *v_username)
 	client_p->user->user_reg = ureg_p;
 	dlink_add_alloc(client_p, &ureg_p->users);
 
+	ureg_p->last_time = CURRENT_TIME;
+	ureg_p->flags |= US_FLAGS_NEEDUPDATE;
+
 	return 0;
 }
 
@@ -266,15 +269,23 @@ e_user_expire(void *unused)
 	{
 		ureg_p = ptr->data;
 
-		if((ureg_p->last_time + config_file.uexpire_time) > CURRENT_TIME)
-			continue;
-
-		/* if theyre logged in, reset the expiry */
+		/* if they're logged in, reset the expiry */
 		if(dlink_list_length(&ureg_p->users))
 		{
 			ureg_p->last_time = CURRENT_TIME;
-			continue;
+			ureg_p->flags |= US_FLAGS_NEEDUPDATE;
 		}
+		
+		if(ureg_p->flags & US_FLAGS_NEEDUPDATE)
+		{
+			ureg_p->flags &= ~US_FLAGS_NEEDUPDATE;
+			loc_sqlite_exec(NULL, "UPDATE users SET last_time=%lu"
+					" WHERE username=%Q",
+			ureg_p->last_time, ureg_p->name);
+		}
+
+		if((ureg_p->last_time + config_file.uexpire_time) > CURRENT_TIME)
+			continue;
 
 		free_user_reg(ureg_p);
 	}
@@ -637,6 +648,7 @@ s_user_login(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 
 	client_p->user->user_reg = reg_p;
 	reg_p->last_time = CURRENT_TIME;
+	reg_p->flags |= US_FLAGS_NEEDUPDATE;
 	dlink_add_alloc(client_p, &reg_p->users);
 	service_error(userserv_p, client_p, "Login successful");
 
