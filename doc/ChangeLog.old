@@ -1,3 +1,7 @@
+*** 20010215_3 by a1kmm
+- Fixed dserv not to core and to do the linked list right.
+
+
 *** 20010215_2 by a1kmm
 - Fixed dserv to not core, although blockallocator is temporarily broken, so it isn't used now.
 
