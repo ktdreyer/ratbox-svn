@@ -79,7 +79,7 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
                         char *chanop_flag,
 			char *halfop_flag,
 			char *voiced_flag,
-                        char *chname);
+                        char *chname, int member);
 
 static void who_global(struct Client *source_p, char *mask, int server_oper);
 
@@ -430,7 +430,7 @@ static void do_who_on_channel(struct Client *source_p,
               flags[0],
               flags[1],
               flags[2],
-              chname);
+              chname, member);
 
 }
 
@@ -447,7 +447,7 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
 			char *chanop_flag,
 			char *halfop_flag,
 			char *voiced_flag,
-			char *chname)
+			char *chname, int member)
 {
   struct Client *target_p;
 
@@ -480,7 +480,9 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
       if(peons_ptr != NULL)
         {
           target_p = peons_ptr->data;
-          do_who(source_p, target_p, chname, "");
+
+          if(member || !IsInvisible(target_p))
+            do_who(source_p, target_p, chname, "");
           peons_ptr = peons_ptr->next;
         }
       else
@@ -489,7 +491,9 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
       if(chanops_ptr != NULL)
         {
           target_p = chanops_ptr->data;
-          do_who(source_p, target_p, chname, chanop_flag);
+
+          if(member || !IsInvisible(target_p))
+            do_who(source_p, target_p, chname, chanop_flag);
           chanops_ptr = chanops_ptr->next;
         }
       else
@@ -499,7 +503,9 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
       if(halfops_ptr != NULL)
         {
           target_p = halfops_ptr->data;
-          do_who(source_p, target_p, chname, halfop_flag);
+
+          if(member || !IsInvisible(target_p))
+            do_who(source_p, target_p, chname, halfop_flag);
           halfops_ptr = halfops_ptr->next;
         }
       else
@@ -511,10 +517,15 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
       if(voiced_ptr != NULL)
         {
           target_p = voiced_ptr->data;
-          if(target_p == source_p && is_voiced(chptr, source_p) && chptr->mode.mode & MODE_HIDEOPS)
-             do_who(source_p, target_p, chname, "+");
-          else
-            do_who(source_p, target_p, chname, voiced_flag);
+
+          if(member || !IsInvisible(target_p))
+          {
+            if(target_p == source_p && is_voiced(chptr, source_p) && 
+               chptr->mode.mode & MODE_HIDEOPS)
+               do_who(source_p, target_p, chname, "+");
+            else
+              do_who(source_p, target_p, chname, voiced_flag);
+          }
           voiced_ptr = voiced_ptr->next;
         }
       else
@@ -524,7 +535,9 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
       if(chanops_voiced_ptr != NULL)
         {
           target_p = chanops_voiced_ptr->data;
-          do_who(source_p, target_p, chname, chanop_flag);
+
+          if(member || !IsInvisible(target_p))
+            do_who(source_p, target_p, chname, chanop_flag);
           chanops_voiced_ptr = chanops_voiced_ptr->next;
         }
       else
@@ -537,27 +550,35 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
     for(ptr = peons_list->head; ptr; ptr = ptr->next)
     {
       target_p = ptr->data;
-      do_who(source_p, target_p, chname, "");
+
+      if(member || !IsInvisible(target_p))
+        do_who(source_p, target_p, chname, "");
     }
 
     for(ptr = voiced_list->head; ptr; ptr = ptr->next)
     {
       target_p = ptr->data;
-      do_who(source_p, target_p, chname, voiced_flag);
+      
+      if(member || !IsInvisible(target_p))
+        do_who(source_p, target_p, chname, voiced_flag);
     }
 
 #ifdef REQUIRE_OANDV
     for(ptr = chanops_voiced_list->head; ptr; ptr = ptr->next)
     {
       target_p = ptr->data;
-      do_who(source_p, target_p, chname, chanop_flag);
+
+      if(member || !IsInvisible(target_p))
+        do_who(source_p, target_p, chname, chanop_flag);
     }
 #endif
 
     for(ptr = chanops_list->head; ptr; ptr = ptr->next)
     {
       target_p = ptr->data;
-      do_who(source_p, target_p, chname, chanop_flag);
+
+      if(member || !IsInvisible(target_p))
+        do_who(source_p, target_p, chname, chanop_flag);
     }
 #endif
 }
