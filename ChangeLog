@@ -1,3 +1,15 @@
+androsyn    2002/08/11 04:55:15 EDT	(20020811_4)
+
+  Modified files:
+    src                  dynlink.c 
+  Log:
+  Fix a little typo..
+  
+  Revision  Changes    Path
+  7.5       +1 -1      ircd-ratbox/src/dynlink.c
+
+
+
 androsyn    2002/08/11 04:51:17 EDT	(20020811_3)
 
   Modified files:
