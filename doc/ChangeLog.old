@@ -1,3 +1,8 @@
+*** 20001105_5 by db
+- redid m_join.c its still evil, but not quite as bad
+
+
+
 *** 20001105_4 by db
 - removed a bunch of stuff. JUPE_CHANNEL is gone
   Its really not needed with vchans
