@@ -202,7 +202,7 @@ void _free_client(struct Client* cptr)
   /* If localClient is non NULL, its a local client */
   if (cptr->localClient)
     {
-      if (-1 < cptr->fd)
+      if (0 > cptr->fd)
 	fd_close(cptr->fd);
 
       if (cptr->localClient->dns_reply)
