@@ -709,10 +709,6 @@ static void do_numeric(char numeric[],
           sendto_realops_flags(FLAGS_ALL,
                                "*** %s(via %s) sent a %s numeric to me?!?",
                                sptr->name, cptr->name, numeric);
-	  /* This is contains the full numeric.. should be removed once bugs found */
-          sendto_realops_flags(FLAGS_ADMIN,
-                               "*** %s(via %s) send a %s numeric to me: %s",
-                               sptr->name, cptr->name, numeric, buffer);
           return;
         }
       else if (acptr->from == cptr) 
