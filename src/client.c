@@ -1125,12 +1125,6 @@ exit_generic_client(struct Client *client_p, struct Client *source_p, struct Cli
 {
 	dlink_node *lp, *next_lp;
 	
-	if((source_p->flags & FLAGS_KILLED) == 0)
-	{
-		sendto_server(client_p, NULL, NOCAPS, NOCAPS, ":%s QUIT :%s",
-			      source_p->name, comment)	;
-	}
-	
 	sendto_common_channels_local(source_p, ":%s!%s@%s QUIT :%s",
 				     source_p->name,
 				     source_p->username, source_p->host, comment);
@@ -1361,6 +1355,13 @@ exit_local_client(struct Client *client_p, struct Client *source_p, struct Clien
 	log_user_exit(source_p);
 	sendto_one(source_p, "ERROR :Closing Link: %s (%s)", source_p->host, comment);
 	close_connection(source_p);
+
+	if((source_p->flags & FLAGS_KILLED) == 0)
+	{
+		sendto_server(client_p, NULL, NOCAPS, NOCAPS, ":%s QUIT :%s",
+			      source_p->name, comment)	;
+	}
+	
 	exit_generic_client(client_p, source_p, from, comment);
 	return(CLIENT_EXITED);
 }
