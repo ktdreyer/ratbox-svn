@@ -1,3 +1,49 @@
+androsyn    2003/09/01 13:01:40 EDT	(20030901_3)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    include              setup.h.in sprintf_irc.h 
+    modules              m_dline.c m_encap.c m_gline.c m_kline.c 
+                         m_map.c m_xline.c 
+    modules/core         m_quit.c 
+    src                  Makefile.in cache.c event.c fdlist.c 
+                         linebuf.c modules.c newconf.c patricia.c 
+                         s_log.c 
+  Added files:
+    src                  snprint.c 
+  Removed files:
+    src                  sprintf_irc.c 
+  Log:
+  Remove sprintf_irc and replace it with a decent sprintf/snprintf.  Now we
+  just need to review all of the ircsprintf calls
+  
+  Revision  Changes    Path
+  7.176     +0 -13     ircd-ratbox/autoconf/configure.in
+  7.183     +112 -231  ircd-ratbox/configure
+  7.69      +0 -6      ircd-ratbox/include/setup.h.in
+  7.14      +7 -10     ircd-ratbox/include/sprintf_irc.h
+  1.41      +2 -6      ircd-ratbox/modules/core/m_quit.c
+  1.24      +4 -4      ircd-ratbox/modules/m_dline.c
+  1.10      +5 -5      ircd-ratbox/modules/m_encap.c
+  1.128     +10 -10    ircd-ratbox/modules/m_gline.c
+  1.165     +4 -4      ircd-ratbox/modules/m_kline.c
+  1.32      +2 -2      ircd-ratbox/modules/m_map.c
+  1.33      +2 -2      ircd-ratbox/modules/m_xline.c
+  7.137     +1 -2      ircd-ratbox/src/Makefile.in
+  1.8       +3 -3      ircd-ratbox/src/cache.c
+  7.39      +1 -1      ircd-ratbox/src/event.c
+  7.42      +1 -1      ircd-ratbox/src/fdlist.c
+  7.112     +2 -2      ircd-ratbox/src/linebuf.c
+  7.130     +3 -3      ircd-ratbox/src/modules.c
+  7.111     +1 -1      ircd-ratbox/src/newconf.c
+  7.20      +1 -1      ircd-ratbox/src/patricia.c
+  7.57      +3 -3      ircd-ratbox/src/s_log.c
+  7.1       +959 -0    ircd-ratbox/src/snprint.c (new)
+  7.23      +0 -689    ircd-ratbox/src/sprintf_irc.c (dead)
+
+
+
 leeh        2003/09/01 12:39:54 EDT	(20030901_2)
 
   Modified files:
