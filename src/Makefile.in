@@ -53,6 +53,7 @@ lex.yy.c:	ircd_lexer.l
 
 BASE_SRCS =                     \
   adns.c                        \
+  blalloc.c			\
   channel.c                     \
   vchannel.c                    \
   class.c                       \

@@ -50,6 +50,7 @@
 #include "hash.h"
 #include "memory.h"
 #include "hostmask.h"
+#include "blalloc.h"
 
 #include <assert.h>
 #include <fcntl.h>
@@ -68,6 +69,24 @@ static EVH check_pings;
 static int remote_client_count=0;
 static int local_client_count=0;
 
+static BlockHeap *client_heap = NULL;
+static BlockHeap *lclient_heap = NULL;
+
+/*
+ * client_heap_gc
+ *
+ * inputs	- NONE
+ * output	- NONE
+ * side effect  - Does garbage collection of client heaps
+ */
+ 
+static void client_heap_gc(void *unused)
+{
+  BlockHeapGarbageCollect(client_heap);
+  BlockHeapGarbageCollect(lclient_heap);
+  eventAdd("client_heap_gc", client_heap_gc, NULL, 30, 0);
+}
+
 /*
  * init_client
  *
@@ -83,8 +102,11 @@ void init_client(void)
   * start off the check ping event ..  -- adrian
   * Every 30 seconds is plenty -- db
   */
+ client_heap = BlockHeapCreate(sizeof(struct Client), 1024);
+ lclient_heap = BlockHeapCreate(sizeof(struct LocalUser), 512); 
  eventAdd("check_pings", check_pings, NULL, 30, 0);
  eventAdd("free_exited_clients()", &free_exited_clients, NULL, 4, 0);
+ eventAdd("client_heap_gc", client_heap_gc, NULL, 30, 0);
 }
 
 /*
@@ -103,14 +125,20 @@ struct Client* make_client(struct Client* from)
   struct LocalUser *localClient;
   dlink_node *m;
 
+#if 1
   client_p = (struct Client *)MyMalloc(sizeof(struct Client));
+#endif 
+  client_p = BlockHeapAlloc(client_heap);
          
   if (from == NULL)
     {
       client_p->from  = client_p; /* 'from' of local client is self! */
       client_p->since = client_p->lasttime = client_p->firsttime = CurrentTime;
 
+#if 0
       localClient = (struct LocalUser *)MyMalloc(sizeof(struct LocalUser));
+#endif
+      localClient = (struct LocalUser *)BlockHeapAlloc(lclient_heap);
       client_p->localClient = localClient;
 
       client_p->localClient->ctrlfd = -1;
@@ -165,7 +193,10 @@ void _free_client(struct Client* client_p)
       mem_frob(client_p->localClient, sizeof(struct LocalUser));
 #endif
 
+#if 0
       MyFree(client_p->localClient);
+#endif
+      BlockHeapFree(lclient_heap, client_p->localClient);
       --local_client_count;
       assert(local_client_count >= 0);
     }
@@ -177,7 +208,10 @@ void _free_client(struct Client* client_p)
 #ifndef NDEBUG
   mem_frob(client_p, sizeof(struct Client));
 #endif
+  BlockHeapFree(client_heap, client_p);
+#if 0
   MyFree(client_p);
+#endif
 }
 
 /*

@@ -20,6 +20,8 @@
 #include "client.h"
 #include "linebuf.h"
 #include "memory.h"
+#include "event.h"
+#include "blalloc.h"
 
 #ifdef STRING_WITH_STRINGS
 # include <string.h>
@@ -34,6 +36,7 @@
 # endif
 #endif
 
+static BlockHeap *linebuf_heap;
 /* jdc -- linebuf_initialised seems to be unused */
 /* static int linebuf_initialised = 0; */
 
@@ -45,45 +48,35 @@ static int bufline_count = 0;
  * Initialise the linebuf mechanism
  */
 buf_line_t *linebuf_freelist;
-#define MAXLINEBUFS 10000
+
+static void linebuf_garbage_collect(void *unused)
+{
+  BlockHeapGarbageCollect(linebuf_heap);
+  eventAdd("linebuf_garbage_collect", linebuf_garbage_collect, NULL, 30, 0);
+}
+      
 
 void
 linebuf_init(void)
 {
-  int i;
-  buf_line_t *new;
-
-  for(i=0; i < MAXLINEBUFS; i++)
-    {
-      new = (buf_line_t *)MyMalloc(sizeof(buf_line_t));
-      new->next = linebuf_freelist;
-      linebuf_freelist = new;
-    }
+  linebuf_heap  = BlockHeapCreate(sizeof(buf_line_t), 2048);
+  eventAdd("linebuf_garbage_collect", linebuf_garbage_collect, NULL, 30, 0);
 }
 
 buf_line_t *
 linebuf_allocate(void)
 {
-  buf_line_t *new;
-
-  if (linebuf_freelist != NULL)
-    {
-      new = linebuf_freelist;
-      linebuf_freelist = linebuf_freelist->next;
-      new->next = NULL;
-    }
-  else
-    {
-       new = (buf_line_t *)MyMalloc(sizeof(buf_line_t));
-    }
-  return new;
+  buf_line_t *t;
+  t = BlockHeapAlloc(linebuf_heap);
+  memset(t, 0, sizeof(buf_line_t));
+  assert(t != NULL);
+  return(t);
 }
 
 void
 linebuf_free(buf_line_t *p)
 {
-   p->next = linebuf_freelist;
-   linebuf_freelist = p;
+   BlockHeapFree(linebuf_heap, p);
 }
 
 /*
@@ -98,9 +91,6 @@ linebuf_new_line(buf_head_t *bufhead)
   buf_line_t *bufline;
   dlink_node *node;
 
-#if 0
-  bufline = (buf_line_t *)MyMalloc(sizeof(buf_line_t));
-#endif
   bufline = linebuf_allocate();
   ++bufline_count;
 
@@ -150,9 +140,6 @@ linebuf_done_line(buf_head_t *bufhead, buf_line_t *bufline,
     /* and finally, deallocate the buf */
     --bufline_count;
     assert(bufline_count >= 0);
-#if 0
-    MyFree(bufline);
-#endif
     linebuf_free(bufline);
   }
 }
