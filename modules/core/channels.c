@@ -48,6 +48,7 @@ static int ms_join(struct Client *, struct Client *, int, const char **);
 static int ms_sjoin(struct Client *, struct Client *, int, const char **);
 static int m_kick(struct Client *, struct Client *, int, const char **);
 static int m_part(struct Client *, struct Client *, int, const char **);
+static int m_names(struct Client *, struct Client *, int, const char **);
 
 #define mg_kick { m_kick, 3 }
 
@@ -71,7 +72,12 @@ struct Message kick_msgtab = {
 	{mg_unreg, mg_kick, mg_kick, mg_kick, mg_ignore, mg_kick}
 };
 
-mapi_clist_av1 channels_clist[] = { &join_msgtab, &sjoin_msgtab, &kick_msgtab, &part_msgtab, NULL };
+struct Message names_msgtab = {
+	"NAMES", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_names, 0}, mg_ignore, mg_ignore, mg_ignore, {m_names, 0}}
+};
+
+mapi_clist_av1 channels_clist[] = { &join_msgtab, &sjoin_msgtab, &kick_msgtab, &part_msgtab, &names_msgtab, NULL };
 DECLARE_MODULE_AV1(channels, NULL, NULL, channels_clist, NULL, NULL, "$Revision$");
 
 static void do_join_0(struct Client *client_p, struct Client *source_p);
@@ -86,6 +92,9 @@ static void remove_ban_list(struct Channel *chptr, struct Client *source_p,
 static void add_user_to_channel(struct Channel *chptr, struct Client *client_p, int flags);
 static void remove_user_from_channel(struct membership *msptr);
 static void part_one_client(struct Client *client_p, struct Client *source_p, char *name, char *reason);
+
+static void channel_member_names(struct Channel *chptr, struct Client *client_p, int show_eon);
+static void names_global(struct Client *source_p);
 
 static char modebuf[MODEBUFLEN];
 static char parabuf[MODEBUFLEN];
@@ -1065,6 +1074,220 @@ m_part(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	}
 	return 0;
 }
+
+static int
+m_names(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	static time_t last_used = 0;
+	struct Channel *chptr = NULL;
+	char *s;
+
+	if(parc > 1 && !EmptyString(parv[1]))
+	{
+		char *p = LOCAL_COPY(parv[1]);
+		if((s = strchr(p, ',')))
+			*s = '\0';
+
+		if(!check_channel_name(p))
+		{
+			sendto_one_numeric(source_p, ERR_BADCHANNAME,
+					   form_str(ERR_BADCHANNAME),
+					   (unsigned char *) p);
+			return 0;
+		}
+
+		if((chptr = find_channel(p)) != NULL)
+			channel_member_names(chptr, source_p, 1);
+		else
+			sendto_one(source_p, form_str(RPL_ENDOFNAMES), 
+				   me.name, source_p->name, p);
+	}
+	else
+	{
+		if(!IsOper(source_p))
+		{
+			if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
+			{
+				sendto_one(source_p, form_str(RPL_LOAD2HI),
+					   me.name, source_p->name, "NAMES");
+				sendto_one(source_p, form_str(RPL_ENDOFNAMES),
+					   me.name, source_p->name, "*");
+				return 0;
+			}
+			else
+				last_used = CurrentTime;
+		}
+
+		names_global(source_p);
+		sendto_one(source_p, form_str(RPL_ENDOFNAMES), 
+			   me.name, source_p->name, "*");
+	}
+
+	return 0;
+}
+
+/* channel_pub_or_secret()
+ *
+ * input	- channel
+ * output	- "=" if public, "@" if secret, else "*"
+ * side effects	-
+ */
+static const char *
+channel_pub_or_secret(struct Channel *chptr)
+{
+	if(PubChannel(chptr))
+		return ("=");
+	else if(SecretChannel(chptr))
+		return ("@");
+	return ("*");
+}
+
+/* channel_member_names()
+ *
+ * input	- channel to list, client to list to, show endofnames
+ * output	-
+ * side effects - client is given list of users on channel
+ */
+static void
+channel_member_names(struct Channel *chptr, struct Client *client_p, int show_eon)
+{
+	struct membership *msptr;
+	struct Client *target_p;
+	dlink_node *ptr;
+	char lbuf[BUFSIZE];
+	char *t;
+	int mlen;
+	int tlen;
+	int cur_len;
+	int is_member;
+
+	if(ShowChannel(client_p, chptr))
+	{
+		is_member = IsMember(client_p, chptr);
+
+		cur_len = mlen = ircsprintf(lbuf, form_str(RPL_NAMREPLY),
+					    me.name, client_p->name, 
+					    channel_pub_or_secret(chptr),
+					    chptr->chname);
+
+		t = lbuf + cur_len;
+
+		DLINK_FOREACH(ptr, chptr->members.head)
+		{
+			msptr = ptr->data;
+			target_p = msptr->client_p;
+
+			if(IsInvisible(target_p) && !is_member)
+				continue;
+
+			tlen = strlen(target_p->name) + 1;
+			if(is_chanop_voiced(msptr))
+				tlen++;
+
+			if(cur_len + tlen >= BUFSIZE - 3)
+			{
+				*(t - 1) = '\0';
+				sendto_one(client_p, "%s", lbuf);
+				cur_len = mlen;
+				t = lbuf + mlen;
+			}
+
+			ircsprintf(t, "%s%s ", find_channel_status(msptr, 0),
+				   target_p->name);
+
+			cur_len += tlen;
+			t += tlen;
+		}
+
+		*(t - 1) = '\0';
+		sendto_one(client_p, "%s", lbuf);
+	}
+
+	if(show_eon)
+		sendto_one(client_p, form_str(RPL_ENDOFNAMES),
+			   me.name, client_p->name, chptr->chname);
+}
+
+
+/*
+* names_global
+*
+* inputs       - pointer to client struct requesting names
+* output       - none
+* side effects - lists all non public non secret channels
+*/
+static void
+names_global(struct Client *source_p)
+{
+       int mlen;
+       int tlen;
+       int cur_len;
+       int dont_show = NO;
+       dlink_node *lp, *ptr;
+       struct Client *target_p;
+       struct Channel *chptr = NULL;
+       struct membership *msptr;
+       char buf[BUFSIZE];
+       char *t;
+
+       /* first do all visible channels */
+       DLINK_FOREACH(ptr, global_channel_list.head)
+       {
+	       chptr = ptr->data;
+	       channel_member_names(chptr, source_p, 0);
+       }
+       cur_len = mlen = ircsprintf(buf, form_str(RPL_NAMREPLY), 
+				   me.name, source_p->name, "*", "*");
+       t = buf + mlen;
+
+       /* Second, do all clients in one big sweep */
+       DLINK_FOREACH(ptr, global_client_list.head)
+       {
+	       target_p = ptr->data;
+	       dont_show = NO;
+
+	       if(!IsPerson(target_p) || IsInvisible(target_p))
+		       continue;
+
+	       /* we want to show -i clients that are either:
+		*   a) not on any channels
+		*   b) only on +p channels
+		*
+		* both were missed out above.  if the target is on a
+		* common channel with source, its already been shown.
+		*/
+	       DLINK_FOREACH(lp, target_p->user->channel.head)
+	       {
+		       msptr = lp->data;
+		       chptr = msptr->chptr;
+
+		       if(PubChannel(chptr) || IsMember(source_p, chptr) ||
+			  SecretChannel(chptr))
+		       {
+			       dont_show = YES;
+			       break;
+		       }
+	       }
+
+	       if(dont_show)
+		       continue;
+
+	       if((cur_len + NICKLEN + 2) > (BUFSIZE - 3))
+	       {
+		       sendto_one(source_p, "%s", buf);
+		       cur_len = mlen;
+		       t = buf + mlen;
+	       }
+
+	       tlen = ircsprintf(t, "%s ", target_p->name);
+	       cur_len += tlen;
+	       t += tlen;
+       }
+
+       if(cur_len > mlen)
+	       sendto_one(source_p, "%s", buf);
+}
+
 
 /*
  * part_one_client

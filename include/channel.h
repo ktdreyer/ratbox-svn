@@ -193,9 +193,6 @@ extern void free_channel_list(dlink_list *);
 
 extern int check_channel_name(const char *name);
 
-extern void channel_member_names(struct Channel *chptr, struct Client *,
-				 int show_eon);
-
 extern void del_invite(struct Channel *chptr, struct Client *who);
 
 extern void channel_modes(struct Channel *chptr, struct Client *who, char *, char *);
