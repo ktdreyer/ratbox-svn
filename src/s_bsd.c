@@ -609,7 +609,7 @@ comm_connect_tcp(int fd, const char *host, u_short port,
      * Next, if we have been given an IP, get the addr and skip the
      * DNS check (and head direct to comm_connect_tryconnect().
      */
-    if(!inetpton(DEF_FAM, host, S_ADDR(&fd_table[fd].connect.hostaddr)))
+    if(inetpton(DEF_FAM, host, S_ADDR(&fd_table[fd].connect.hostaddr)) <=0)
     {
         /* Send the DNS request, for the next level */
         fd_table[fd].dns_query.ptr = &fd_table[fd];
