@@ -68,27 +68,26 @@ struct MessageHash *msg_hash_table[MAX_MSG_HASH];
 static char buffer[1024];
 
 /* turn a string into a parc/parv pair
- */
 
-static inline void
-string_to_array(char *string, int mpara, int paramcount,
-                char *end, int *parc, char *parv[MAXPARA])
+
+static inline int
+string_to_array(char *string, char *parv[MAXPARA])
 {
 	char *p, *buf = string;
-	int x = 1, y;
-	if((y = strspn(buf, " ")) > 0)
-		buf += y;
+	register int x = 1;
+	buf += strspn(buf, " ");
+	if(*buf == '\0')
+		return x;
 	do 
 	{
 		if((p = strchr(buf, ' ')) != NULL)
 		{
 			if(*buf == ':') /* Last parameter */
 			{
-			        parv[x] = buf+1;
-		 		x++;
-		    		parv[x+1] = NULL;
-	  			(*parc) = x;
-	                        return;
+				buf++;
+			        parv[x++] = buf;
+		    		parv[x] = NULL;
+	                        return x;
 	                }
 	                parv[x] = buf;
 	    		*p++ = '\0';
@@ -97,21 +96,17 @@ string_to_array(char *string, int mpara, int paramcount,
           		if(*buf == ':')
           			buf++;
           		parv[x] = buf;
-	                if(strlen(buf) < 1)
-	                	x--;
-	                parv[x+1] = NULL;
-			(*parc) = x+1;
-			return;
+	                if(*buf != '\0')
+	                	x++;
+	                parv[x] = NULL;
+			return x;
 	        }       
 	        buf += strspn(buf, " ");
 	        x++;
 	} while(x < MAXPARA - 1);
-	parv[x] = p;
-	parv[x+1] = NULL;
-	x++;
-
-	(*parc) += x+1;
-	return;
+	parv[x++] = p;
+	parv[x] = NULL;
+	return x;
 }
 
 /*
@@ -281,14 +276,7 @@ void parse(struct Client *client_p, char *pbuffer, char *bufend)
   i = 0;
   
   if (s)
-    string_to_array(s, mpara, paramcount, end, &i, para);
-#if 0
-  {
-  	int q;
-  	for(q = 1; q < i; q++)
-  		fprintf(stderr, "para[%d]: %s\n", q, para[q]);
-  }
-#endif
+    i = string_to_array(s, para);
   if (mptr == (struct Message *)NULL)
     {
       do_numeric(numeric, client_p, from, i, para);
