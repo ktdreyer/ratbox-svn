@@ -1948,7 +1948,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 		     get_client_name(client_p, SHOW_IP));
         return 0;
       }
-
+    
     /* create a socket for the server connection */ 
     if ((fd = comm_open(DEF_FAM, SOCK_STREAM, 0, NULL)) < 0)
       {
@@ -2027,23 +2027,38 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
     client_p->serv->up = me.name;
     SetConnecting(client_p);
     add_client_to_list(client_p);
-    client_p->localClient->aftype = DEF_FAM;
+    /* from def_fam */
+    client_p->localClient->aftype = aconf->aftype;
+    
     /* Now, initiate the connection */
-    if(ServerInfo.specific_ipv4_vhost)
+    if((aconf->aftype == AF_INET) && ServerInfo.specific_ipv4_vhost)
       {
 	struct irc_sockaddr ipn;
 	memset(&ipn, 0, sizeof(struct irc_sockaddr));
 	S_FAM(ipn) = DEF_FAM;
 	S_PORT(ipn) = 0;
-#ifdef IPV6
+
 	copy_s_addr(S_ADDR(ipn), IN_ADDR(ServerInfo.ip));
-#else
-	copy_s_addr(S_ADDR(ipn), IN_ADDR(ServerInfo.ip));
-#endif
+
 	comm_connect_tcp(client_p->fd, aconf->host, aconf->port,
 			 (struct sockaddr *)&SOCKADDR(ipn), sizeof(struct irc_sockaddr), 
 			 serv_connect_callback, client_p, aconf->aftype);
       }
+#ifdef IPV6
+    else if((aconf->aftype == AF_INET6) && ServerInfo.specific_ipv6_vhost)
+      {
+	struct irc_sockaddr ipn;
+	memset(&ipn, 0, sizeof(struct irc_sockaddr));
+	S_FAM(ipn) = AF_INET6;
+	S_PORT(ipn) = 0;
+	
+	copy_s_addr(S_ADDR(ipn), IN_ADDR(ServerInfo.ip6));
+
+	comm_connect_tcp(client_p->fd, aconf->host, aconf->port,
+			 (struct sockaddr *)&SOCKADDR(ipn), sizeof(struct irc_sockaddr),
+			 serv_connect_callback, client_p, aconf->aftype);
+      }
+#endif
     else
       {
 	comm_connect_tcp(client_p->fd, aconf->host, aconf->port, NULL, 0, 
