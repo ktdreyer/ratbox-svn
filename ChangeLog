@@ -1,3 +1,23 @@
+androsyn    2004/07/30 12:20:39 EDT	(20040730_2)
+
+  Modified files:
+    include              s_user.h 
+    modules              Makefile.in m_oper.c 
+    src                  s_user.c 
+  Removed files:
+    modules              m_challenge.c 
+  Log:
+  Merge oper/challenge into one module, move oper_up into the module as well
+  
+  Revision  Changes    Path
+  7.30      +0 -1      ircd-ratbox/include/s_user.h
+  1.101     +0 -1      ircd-ratbox/modules/Makefile.in
+  1.71      +0 -273    ircd-ratbox/modules/m_challenge.c (dead)
+  1.83      +268 -2    ircd-ratbox/modules/m_oper.c
+  7.324     +0 -46     ircd-ratbox/src/s_user.c
+
+
+
 leeh        2004/07/30 11:38:38 EDT	(20040730_1)
 
   Modified files:
