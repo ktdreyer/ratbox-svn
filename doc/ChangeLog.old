@@ -1,3 +1,11 @@
+*** 20011114_2 by androsyn
+Cleaned up the poll() loop so that it is really only using a single list
+now.  Also modified the timeout parameters for ADNS.  Added a flag to
+comm_connect_tcp() so that the caller can pass a timeout.  We needed this to
+reduce the timeout on identd checking, which is now set to a 10 second
+timeout.
+
+
 *** 20011114_1 by androsyn
 Modified build so that any errors during the make will cause the make
 process to stop.
