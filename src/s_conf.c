@@ -391,7 +391,7 @@ int check_client(struct Client *cptr, struct Client *sptr, char *username)
   switch( i )
     {
     case SOCKET_ERROR:
-      return exit_client(cptr, sptr, &me, "Socket Error");
+      (void)exit_client(cptr, sptr, &me, "Socket Error");
       break;
 
     case TOO_MANY:
@@ -400,8 +400,8 @@ int check_client(struct Client *cptr, struct Client *sptr, char *username)
 			   sptr->localClient->sockhost);
       log(L_INFO,"Too many connections on IP from %s.", get_client_host(sptr));
       ServerStats->is_ref++;
-      return exit_client(cptr, sptr, &me, 
-		 "No more connections allowed on that IP" );
+      (void)exit_client(cptr, sptr, &me, 
+			"No more connections allowed on that IP" );
       break;
 
     case I_LINE_FULL:
@@ -410,8 +410,8 @@ int check_client(struct Client *cptr, struct Client *sptr, char *username)
 			   sptr->localClient->sockhost);
       log(L_INFO,"Too many connections from %s.", get_client_host(sptr));
       ServerStats->is_ref++;
-      return exit_client(cptr, sptr, &me, 
-		 "No more connections allowed in your connection class" );
+      (void)exit_client(cptr, sptr, &me, 
+		"No more connections allowed in your connection class" );
       break;
 
     case NOT_AUTHORIZED:
@@ -433,18 +433,21 @@ int check_client(struct Client *cptr, struct Client *sptr, char *username)
 	  sptr->localClient->listener->port
 	  );
 	  
-      return exit_client(cptr, sptr, &me,
-			 "You are not authorized to use this server");
+      (void)exit_client(cptr, sptr, &me,
+			"You are not authorized to use this server");
       break;
 
     case BANNED_CLIENT:
-	return exit_client(cptr, sptr, &me, "Banned" );
-	break;
+      (void)exit_client(cptr,cptr, &me, "*** Banned ");
+      ServerStats->is_ref++;
+      break;
+
+    case 0:
     default:
       release_client_dns_reply(sptr);
       break;
     }
-  return 0;
+  return(i);
 }
 
 /*
@@ -544,12 +547,7 @@ int attach_Iline(struct Client* cptr, const char* username)
 	    {
 	      sendto_one(cptr, ":%s NOTICE %s :*** Banned %s",
 			 me.name,cptr->name,aconf->passwd);
-	      (void)exit_client(cptr, cptr, &me, "*** Banned");
 	    }
-
-	  (void)exit_client(cptr,cptr, &me, "*** Banned ");
-
-	  ServerStats->is_ref++;
           return(BANNED_CLIENT);
         }
     }

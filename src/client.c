@@ -608,6 +608,7 @@ remove_client_from_list(struct Client* cptr)
 {
   assert(0 != cptr);
   
+#if 0
   /* HACK somehow this client has already exited
    * but has come back to haunt us.. looks like a bug
    * XXX isn't this bug fixed now? -is
@@ -618,6 +619,7 @@ remove_client_from_list(struct Client* cptr)
 	  cptr, cptr->name?cptr->name:"NULL");
       return;
     }
+#endif
 
   if (cptr->prev)
     cptr->prev->next = cptr->next;
