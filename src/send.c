@@ -699,7 +699,7 @@ sendto_remove_channels_local(struct Client *user, const char *pattern, ...)
 
   ++current_serial;
 
-  if (user->user != NULL)
+  if (user->user != NULL && user->user->channel.head != NULL)
   {
     for (ptr = user->user->channel.head; ptr && user->user->channel.head != NULL; ptr = ptr_next)
     {
@@ -904,6 +904,8 @@ sendto_list_local(dlink_list *list, buf_head_t *linebuf_ptr)
   dlink_node *ptr;
   dlink_node *ptr_next;
   struct Client *target_p;
+  if(list->head == NULL)
+     return;
   
   for (ptr = list->head; ptr && list->head != NULL; ptr = ptr_next)
   {
