@@ -1,3 +1,20 @@
+leeh        2002/04/29 12:58:07 EDT	(20020429_0)
+
+  Modified files:
+    modules              m_operwall.c m_wallops.c 
+    modules/core         m_message.c 
+  Log:
+  - notice opers@server returned to hyb6 methods
+  - prefix both a wallops/operwall done by an oper with "OPERWALL -",
+    differentiating is pointless.
+  
+  Revision  Changes    Path
+  1.90      +3 -7      ircd-hybrid-7/modules/core/m_message.c
+  1.28      +3 -3      ircd-hybrid-7/modules/m_operwall.c
+  1.28      +3 -3      ircd-hybrid-7/modules/m_wallops.c
+
+
+
 leeh        2002/04/28 12:47:55 EDT	(20020428_7)
 
   Modified files:
