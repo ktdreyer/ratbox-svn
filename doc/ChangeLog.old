@@ -1,3 +1,6 @@
+*** 20001228_29 by davidt
+oops, got -/+ back to front
+
 *** 20001228_28 by davidt
 Try to keep +a channels synced up with the clients.
 When a channel goes +a, tell everyone that the channel has been massdeoped
