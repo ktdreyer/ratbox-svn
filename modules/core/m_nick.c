@@ -809,8 +809,18 @@ int change_local_nick(struct Client *cptr, struct Client *sptr,
 	{
 	  add_history(sptr,1);
 	  
-          sendto_ll_serv_butone(cptr, sptr, 0, ":%s NICK %s :%lu",
-                                sptr->name, nick, sptr->tsinfo);
+	  /* Only hubs care about lazy link nicks not being sent on yet
+	   * lazylink leafs/leafs always send their nicks up to hub,
+	   * hence must always propogate nick changes.
+	   * hubs might not propogate a nick change, if the leaf
+	   * does not know about that client yet.
+	   */
+	  if (ConfigFileEntry.hub)
+	    sendto_ll_serv_butone(cptr, sptr, 0, ":%s NICK %s :%lu",
+				  sptr->name, nick, sptr->tsinfo);
+	  else
+	    sendto_serv_butone(cptr, ":%s NICK %s :%lu",
+			       sptr->name, nick, sptr->tsinfo);
 	}
     }
   else
