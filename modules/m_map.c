@@ -65,14 +65,14 @@ static char buf[BUFSIZE];
 static void m_map(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
-  if (!ConfigServerHide.flatten_links)
+  if(ConfigFileEntry.map_oper_only || ConfigServerHide.flatten_links)
   {
-    dump_map(client_p,&me,buf);
-    sendto_one(client_p, form_str(RPL_MAPEND), me.name, client_p->name);
+    m_not_oper(client_p,source_p,parc,parv);
     return;
   }
 
-  m_not_oper(client_p,source_p,parc,parv);
+  dump_map(client_p,&me,buf);
+  sendto_one(client_p, form_str(RPL_MAPEND), me.name, client_p->name);
   return;
 }
 

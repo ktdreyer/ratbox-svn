@@ -220,6 +220,7 @@ struct config_file_entry
   int		stats_k_oper_only;
   int		stats_i_oper_only;
   int		stats_P_oper_only;
+  int           map_oper_only;
   int           pace_wait;
   int           pace_wait_simple;
   int           short_motd;

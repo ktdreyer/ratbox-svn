@@ -1922,6 +1922,11 @@ static void	conf_set_general_stats_i_oper_only(void *data)
 		conf_report_error("Invalid setting '%s' for general::stats_i_oper_only.", val);
 }
 
+static void     conf_set_general_map_oper_only(void *data)
+{
+        ConfigFileEntry.map_oper_only = *(unsigned int*) data;
+}
+
 static void	conf_set_general_pace_wait(void *data)
 {
 	ConfigFileEntry.pace_wait = *(unsigned int*) data;
@@ -2603,6 +2608,8 @@ void	newconf_init()
 			conf_set_general_stats_o_oper_only);
 	add_conf_item("general", "stats_k_oper_only", CF_STRING,
 			conf_set_general_stats_k_oper_only);
+        add_conf_item("general", "map_oper_only", CF_YESNO,
+                        conf_set_general_map_oper_only);
 	add_conf_item("general", "pace_wait", CF_TIME,
 			conf_set_general_pace_wait);
 	add_conf_item("general", "stats_i_oper_only", CF_STRING,

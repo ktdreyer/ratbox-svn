@@ -32,7 +32,6 @@ SRCS =                          \
   m_force.c			\
   m_jupe.c			\
   m_ltrace.c			\
-  m_map.c			\
   m_mkpasswd.c                  \
   m_ojoin.c			\
   m_owhois.c			\

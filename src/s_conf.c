@@ -1122,6 +1122,7 @@ set_default_conf(void)
   ConfigFileEntry.stats_k_oper_only = 1; /* masked */
   ConfigFileEntry.stats_i_oper_only = 1; /* masked */
   ConfigFileEntry.stats_P_oper_only = NO;
+  ConfigFileEntry.map_oper_only = YES;
   ConfigFileEntry.pace_wait = 10;
   ConfigFileEntry.caller_id_wait = 60;
   ConfigFileEntry.pace_wait_simple = 1;
