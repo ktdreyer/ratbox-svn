@@ -68,6 +68,8 @@ extern dlink_list connection_list;
 #define FLAGS_UNTERMINATED	0x0100
 #define FLAGS_EOB               0x0200
 
+#define finished_bursting	((server_p) && (server_p->flags & FLAGS_EOB))
+
 #define UMODE_CHAT              0x1000
 #define UMODE_AUTH              0x2000
 #define UMODE_SERVER            0x4000

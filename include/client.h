@@ -67,6 +67,8 @@ struct service
 	char id[NICKLEN+1];
 	int opered;
 
+	dlink_list channels;		/* the channels this service is in */
+
 	int flood;
         int flood_max;
         int flood_max_ignore;

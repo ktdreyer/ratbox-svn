@@ -7,12 +7,15 @@
  * $Id$
  */
 #include "stdinc.h"
+#include "rserv.h"
 #include "client.h"
+#include "conf.h"
 #include "tools.h"
 #include "channel.h"
 #include "scommand.h"
 #include "log.h"
 #include "balloc.h"
+#include "io.h"
 
 static dlink_list channel_table[MAX_CHANNEL_TABLE];
 dlink_list channel_list;
@@ -233,6 +236,49 @@ count_topics(void)
         return topic_count;
 }
 
+void
+join_service(struct client *service_p, const char *chname)
+{
+	struct channel *chptr;
+
+	if((chptr = find_channel(chname)) == NULL)
+	{
+		chptr = BlockHeapAlloc(channel_heap);
+		memset(chptr, 0, sizeof(struct channel));
+
+		strlcpy(chptr->name, chname, sizeof(chptr->name));
+		chptr->tsinfo = CURRENT_TIME;
+
+		chptr->mode.mode = MODE_NOEXTERNAL|MODE_TOPIC;
+
+		add_channel(chptr);
+	}
+
+	dlink_add_alloc(service_p, &chptr->services);
+	dlink_add_alloc(chptr, &service_p->service->channels);
+
+	if(finished_bursting)
+		sendto_server(":%s SJOIN %lu %s %s :@%s",
+				MYNAME, chptr->tsinfo, chptr->name,
+				chmode_to_string(chptr), service_p->name);
+}
+
+void
+part_service(struct client *service_p, struct channel *chptr)
+{
+}
+
+void
+rejoin_service(struct client *service_p, struct channel *chptr, int send_part)
+{
+	if(send_part)
+		sendto_server(":%s PART %s", service_p->name, chptr->name);
+
+	sendto_server(":%s SJOIN %lu %s %s :@%s",
+			MYNAME, chptr->tsinfo, chptr->name,
+			chmode_to_string(chptr), service_p->name);
+}
+
 /* c_join()
  *   the JOIN handler
  */
@@ -273,6 +319,12 @@ c_kick(struct client *client_p, const char *parv[], int parc)
 
 	if((chptr = find_channel(parv[1])) == NULL)
 		return;
+
+	if((target_p = find_service(parv[2])) != NULL)
+	{
+		rejoin_service(target_p, chptr, 0);
+		return;
+	}
 
 	if((target_p = find_user(parv[2])) == NULL)
 		return;
@@ -396,7 +448,7 @@ remove_our_modes(struct channel *chptr)
 const char *
 chmode_to_string(struct channel *chptr)
 {
-	static char buf[10];
+	static char buf[BUFSIZE];
 	char *p;
 
 	p = buf;
@@ -415,12 +467,22 @@ chmode_to_string(struct channel *chptr)
 		*p++ = 's';
 	if(chptr->mode.mode & MODE_TOPIC)
 		*p++ = 't';
-	if(chptr->mode.limit)
-		*p++ = 'l';
-	if(chptr->mode.key[0])
-		*p++ = 'k';
 
-	*p = '\0';
+	if(chptr->mode.limit && chptr->mode.key[0])
+	{
+		sprintf(p, "lk %d %s", chptr->mode.limit, chptr->mode.key);
+	}
+	else if(chptr->mode.limit)
+	{
+		sprintf(p, "l %d", chptr->mode.limit);
+	}
+	else if(chptr->mode.key[0])
+	{
+		sprintf(p, "k %s", chptr->mode.key);
+	}
+	else
+		*p = '\0';
+
 	return buf;
 }
 
@@ -442,13 +504,15 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 	int keep_new_modes = 1;
 	int args = 0;
 
-	/* :<server> SJOIN <#channel> <TS> +[modes [key][limit]] :<nicks> */
+	/* :<server> SJOIN <TS> <#channel> +[modes [key][limit]] :<nicks> */
 	if(parc < 5 || EmptyString(parv[4]))
 		return;
 
 	if((chptr = find_channel(parv[2])) == NULL)
 	{
 		chptr = BlockHeapAlloc(channel_heap);
+		memset(chptr, 0, sizeof(struct channel));
+
 		strlcpy(chptr->name, parv[2], sizeof(chptr->name));
 		chptr->tsinfo = atol(parv[1]);
 		add_channel(chptr);
@@ -532,6 +596,21 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 		if(!chptr->mode.key[0] || strcmp(chptr->mode.key, newmode.key) > 0)
 			strlcpy(chptr->mode.key, newmode.key,
 				sizeof(chptr->mode.key));
+
+		if(finished_bursting && dlink_list_length(&chptr->services))
+		{
+			struct client *service_p;
+			struct chmember *mptr;
+			dlink_node *ptr;
+
+			DLINK_FOREACH(ptr, chptr->services.head)
+			{
+				mptr = ptr->data;
+				service_p = mptr->client_p;
+
+				rejoin_service(target_p, chptr, 1);
+			}
+		}
 	}
 
 	if(EmptyString(parv[4+args]))

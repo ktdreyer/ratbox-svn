@@ -219,6 +219,7 @@ main(int argc, char *argv[])
 	/* load our services.. */
 	init_s_alis();
 	init_s_hoststat();
+	init_s_operbot();
 
 	first_time = CURRENT_TIME;
 

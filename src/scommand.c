@@ -224,6 +224,8 @@ c_pong(struct client *client_p, const char *parv[], int parc)
                 sendto_all(UMODE_SERVER, "Connection to server %s completed",
                            server_p->name);
                 server_p->flags |= FLAGS_EOB;
+
+		introduce_services();
         }
 }
 

@@ -30,6 +30,16 @@ change_chmember_status(struct channel *chptr, const char *nick,
 	struct client *target_p;
 	struct chmember *mptr;
 
+	if((target_p = find_service(nick)) != NULL)
+	{
+		/* we only care about -o */
+		if(type != 'o' || dir)
+			return;
+
+		rejoin_service(target_p, chptr, 1);
+		return;
+	}
+
 	if((target_p = find_user(nick)) == NULL)
 		return;
 

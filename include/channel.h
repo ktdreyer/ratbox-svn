@@ -26,6 +26,8 @@ struct channel
 	time_t tsinfo;
 
 	dlink_list users;		/* users in this channel */
+	dlink_list services;
+
 	dlink_list bans;		/* +b */
 	dlink_list excepts;		/* +e */
 	dlink_list invites;		/* +I */
@@ -72,5 +74,10 @@ extern struct chmember *find_chmember(struct channel *chptr, struct client *targ
 #define is_member(chptr, target_p) ((find_chmember(chptr, target_p)) ? 1 : 0)
 
 extern unsigned long count_topics(void);
+
+extern void join_service(struct client *service_p, const char *chname);
+extern void part_service(struct client *service_p, struct channel *chptr);
+extern void rejoin_service(struct client *service_p, struct channel *chptr,
+				int send_part);
 
 #endif

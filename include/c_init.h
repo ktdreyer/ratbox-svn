@@ -17,6 +17,9 @@ extern void init_s_alis(void);
 /* s_hoststat.c */
 extern void init_s_hoststat(void);
 
+/* s_operbot.c */
+extern void init_s_operbot(void);
+
 /* u_stats.c */
 extern struct ucommand_handler stats_ucommand;
 

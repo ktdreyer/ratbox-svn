@@ -16,6 +16,7 @@
 #include "log.h"
 #include "ucommand.h"
 #include "cache.h"
+#include "channel.h"
 
 dlink_list service_list;
 
@@ -119,10 +120,22 @@ find_service_id(const char *name)
 void
 introduce_service(struct client *target_p)
 {
+	struct channel *chptr;
+	dlink_node *ptr;
+
 	sendto_server("NICK %s 1 1 +i%s %s %s %s :%s",
 		      target_p->name, target_p->service->opered ? "o" : "",
 		      target_p->service->username,
 		      target_p->service->host, MYNAME, target_p->info);
+
+	DLINK_FOREACH(ptr, target_p->service->channels.head)
+	{
+		chptr = ptr->data;
+
+		sendto_server(":%s SJOIN %lu %s %s :@%s",
+				MYNAME, chptr->tsinfo, chptr->name,
+				chmode_to_string(chptr), target_p->name);
+	}
 }
 
 void
