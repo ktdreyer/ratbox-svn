@@ -1,3 +1,10 @@
+*** 20001116_3 by davidt
+- Figured out how to create a .so without the .tmp file..
+
+this tree seems to compile/run correctly for me on Linux, hopefully
+I didn't break anything elsewhere..
+
+
 *** 20001116_2 by davidt
 - modules/Makefile.in modified to work with gmake (like src/Makefile.in)
 - src/Makefile.in @DL_OPEN@ removed, since configure doesn't use this
