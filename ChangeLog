@@ -1,3 +1,21 @@
+leeh        2004/03/19 19:34:34 EST	(20040320_0)
+
+  Modified files:
+    .                    RELNOTES 
+    include              client.h 
+    modules              m_capab.c 
+    src                  s_serv.c 
+  Log:
+  - fixed global capabs to not lose capabilities we dont locally support
+  
+  Revision  Changes    Path
+  1.86      +17 -0     ircd-ratbox/RELNOTES
+  7.237     +2 -0      ircd-ratbox/include/client.h
+  1.48      +12 -1     ircd-ratbox/modules/m_capab.c
+  7.390     +16 -6     ircd-ratbox/src/s_serv.c
+
+
+
 androsyn    2004/03/19 17:18:29 EST	(20040319_5)
 
   Modified files:
