@@ -255,19 +255,25 @@ void adns_getaddr(struct irc_inaddr *addr, int aftype,
 #ifdef IPV6
   if (aftype == AF_INET6)
   {
-    if(!arpa_type)
-       domain = "ip6.arpa";
-    else
-       domain = "ip6.int";
     ipn.sins.sin6.sin6_family = AF_INET6;
     ipn.sins.sin6.sin6_port = 0;
     memcpy(&ipn.sins.sin6.sin6_addr.s6_addr, &addr->sins.sin6.s6_addr,
            sizeof(struct in6_addr));
            
-    adns_submit_reverse_ip6(dns_state,(struct sockaddr *)&ipn.sins.sin6,domain, 
+    if(!arpa_type)
+    {
+    	adns_submit_reverse(dns_state,(struct sockaddr *)&ipn.sins.sin6, 
                             adns_r_ptr_ip6,
     			    adns_qf_owner|adns_qf_cname_loose|adns_qf_quoteok_anshost, 
     			    req, &req->query);
+    } else
+    {
+    	adns_submit_reverse(dns_state,(struct sockaddr *)&ipn.sins.sin6, 
+                            adns_r_ptr_ip6_old,
+    			    adns_qf_owner|adns_qf_cname_loose|adns_qf_quoteok_anshost, 
+    			    req, &req->query);
+    
+    }
   } 
   else
   {
