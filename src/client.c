@@ -855,12 +855,19 @@ find_named_person(const char *name)
 struct Client *
 find_chasing(struct Client *source_p, const char *user, int *chasing)
 {
-	struct Client *who = find_named_person(user);
+	struct Client *who;
+
+	if(MyClient(source_p))
+		who = find_named_person(user);
+	else
+		who = find_person(user);
 
 	if(chasing)
 		*chasing = 0;
-	if(who)
+
+	if(who || IsDigit(*user))
 		return who;
+
 	if(!(who = get_history(user, (long) KILLCHASETIMELIMIT)))
 	{
 		sendto_one_numeric(source_p, ERR_NOSUCHNICK,
