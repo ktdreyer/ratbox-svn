@@ -1,3 +1,15 @@
+androsyn    2002/12/06 03:47:00 UTC	(20021206_0)
+
+  Removed files:
+    .                    .indent.pro 
+  Log:
+  Remove this stupid .indent.pro file..nobody uses it anyways..
+  
+  Revision  Changes    Path
+  1.4       +0 -17     ircd-ratbox/.indent.pro (dead)
+
+
+
 leeh        2002/12/04 00:03:11 UTC	(20021204_0)
 
   Modified files:
