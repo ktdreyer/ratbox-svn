@@ -19,6 +19,17 @@
  *
  *   $Id$
  */
+
+#include <sys/types.h>
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <time.h>
+#include <assert.h>
+#include <errno.h>
+
 #include "tools.h"
 #include "send.h"
 #include "channel.h"
@@ -39,14 +50,6 @@
 #include "s_log.h"
 #include "vchannel.h"
 #include "memory.h"
-
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <time.h>
-#include <assert.h>
-#include <errno.h>
 
 #define LOG_BUFSIZE 2048
 
@@ -1204,8 +1207,8 @@ match_it(const struct Client *one, const char *mask, int what)
 {
   if(what == MATCH_HOST)
     return match(mask, one->host);
-  else
-    return match(mask, one->user->server);
+
+  return match(mask, one->user->server);
 } /* match_it() */
 
 /*

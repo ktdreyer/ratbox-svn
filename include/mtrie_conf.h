@@ -48,6 +48,9 @@ extern void clear_mtrie_conf_links(void);
  *                     \-->[domain_level "varner" "voo"]->...
  *                
  */
+
+struct domain_level;
+
 typedef struct domain_piece
 {
   char *host_piece;

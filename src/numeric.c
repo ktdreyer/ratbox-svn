@@ -18,18 +18,21 @@
  *
  *   $Id$
  */
+
+#include <sys/types.h>
+
+#include <assert.h>
+
+#ifdef USE_GETTEXT
+#include <libintl.h>
+#endif
+
 #include "numeric.h"
 #include "irc_string.h"
 #include "common.h"     /* NULL cripes */
 #include "memory.h"
 
-#include <assert.h>
-
 #include "messages.tab"
-
-#ifdef USE_GETTEXT
-#include <libintl.h>
-#endif
 
 /*
  * form_str

@@ -181,10 +181,7 @@ struct Channel* select_vchan(struct Channel *root,
                me.name, sptr->name, name);
     return NULL;
   }
-  else
-  {
-    return root;
-  }
+  return root;
 }
 
 

@@ -20,6 +20,9 @@
  * $Id$
  */
 
+#include <sys/types.h>        /* time_t */
+#include <sys/time.h>
+
 #ifndef INCLUDED_channel_h
 #define INCLUDED_channel_h
 #ifndef INCLUDED_config_h
@@ -27,10 +30,6 @@
 #endif
 #ifndef INCLUDED_ircd_defs_h
 #include "ircd_defs.h"        /* buffer sizes */
-#endif
-#ifndef INCLUDED_sys_types_h
-#include <sys/types.h>        /* time_t */
-#define INCLUDED_sys_types_h
 #endif
 
 struct Client;

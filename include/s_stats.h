@@ -22,13 +22,11 @@
  */
 #ifndef INCLUDED_s_stats_h
 #define INCLUDED_s_stats_h
-#ifndef INCLUDED_config_h
-#include "config.h"
-#endif
-#ifndef INCLUDED_sys_types_h
+
 #include <sys/types.h>
-#define INCLUDED_sys_types_h
-#endif
+#include <sys/time.h>
+
+#include "config.h"
 
 struct Client;
 

@@ -443,6 +443,7 @@ ignoreErrno(int ierrno)
         return 0;
     }
     /* NOTREACHED */
+  return 0;
 }
 
 
@@ -759,7 +760,7 @@ comm_open(int family, int sock_type, int proto, const char *note)
 int
 comm_accept(int fd, struct sockaddr *pn, unsigned int *addrlen)
 {
-    int new;
+    int newfd;
 
     if (number_fd >= MASTER_MAX) {
 	errno = ENFILE;
@@ -771,20 +772,20 @@ comm_accept(int fd, struct sockaddr *pn, unsigned int *addrlen)
      * reserved fd limit, but we can deal with that when comm_open()
      * also does it. XXX -- adrian
      */
-    new = accept(fd, pn, addrlen);
-    if (new < 0)
+    newfd = accept(fd, pn, addrlen);
+    if (newfd < 0)
         return -1;
 
     /* Set the socket non-blocking, and other wonderful bits */
-    if (!set_non_blocking(new)) {
-        log(L_CRIT, "comm_accept: Couldn't set FD %d non blocking!", new);
-        close(new);
+    if (!set_non_blocking(newfd)) {
+        log(L_CRIT, "comm_accept: Couldn't set FD %d non blocking!", newfd);
+        close(newfd);
         return -1;
     }
 
     /* Next, tag the FD as an incoming connection */
-    fd_open(new, FD_SOCKET, "Incoming connection");
+    fd_open(newfd, FD_SOCKET, "Incoming connection");
 
     /* .. and return */
-    return new;
+    return newfd;
 }

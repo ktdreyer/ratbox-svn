@@ -21,34 +21,27 @@
  */
 #ifndef INCLUDED_client_h
 #define INCLUDED_client_h
-#ifndef INCLUDED_config_h
-#include "config.h"
-#endif
-#if !defined(CONFIG_H_LEVEL_7)
-#error Incorrect config.h for this revision of ircd.
-#endif
-#ifndef INCLUDED_sys_types_h
+
 #include <sys/types.h>       /* time_t */
-#define INCLUDED_sys_types_h
-#endif
-#ifndef INCLUDED_netinet_in_h
 #include <netinet/in.h>      /* in_addr */
-#define INCLUDED_netinet_in_h
-#endif
+
 #if defined(HAVE_STDDEF_H)
 # ifndef INCLUDED_stddef_h
 #  include <stddef.h>        /* offsetof */
 #  define INCLUDED_stddef_h
 # endif
 #endif
-#ifndef INCLUDED_ircd_defs_h
-# include "ircd_defs.h"
-#endif
-#ifndef INCLUDED_ircd_handler_h
-#include "ircd_handler.h"
+
+#include "config.h"
+
+#if !defined(CONFIG_H_LEVEL_7)
+#error Incorrect config.h for this revision of ircd.
 #endif
 
+#include "ircd_defs.h"
+#include "ircd_handler.h"
 #include "linebuf.h"
+#include "channel.h"
 
 #define HOSTIPLEN       16      /* Length of dotted quad form of IP        */
 #define PASSWDLEN       20
@@ -67,6 +60,7 @@ struct Whowas;
 struct DNSReply;
 struct Listener;
 struct Client;
+struct LocalUser;
 
 /*
  * Client structures

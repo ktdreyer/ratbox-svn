@@ -2988,8 +2988,7 @@ char *channel_pub_or_secret(struct Channel *chptr)
     return("=");
   else if(SecretChannel(chptr))
     return("@");
-  else
-    return("*");
+  return("*");
 }
 
 /*
@@ -3078,7 +3077,7 @@ char *channel_chanop_or_voice(struct Channel *chptr, struct Client *acptr)
     return("+");
   else if(find_user_link(&chptr->halfops,acptr))
     return("%");
-  else return("");
+  return("");
 }
 
 /*

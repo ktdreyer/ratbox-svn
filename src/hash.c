@@ -18,6 +18,19 @@
  *
  *  $Id$
  */
+
+#include <sys/types.h>
+#include <sys/stat.h>
+
+#include <errno.h>
+#include <assert.h>
+#include <fcntl.h>     /* O_RDWR ... */
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <time.h>
+
 #include "tools.h"
 #include "s_conf.h"
 #include "channel.h"
@@ -32,16 +45,6 @@
 #include "fdlist.h"
 #include "fileio.h"
 #include "memory.h"
-
-#include <errno.h>
-#include <assert.h>
-#include <fcntl.h>     /* O_RDWR ... */
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <time.h>
-#include <sys/stat.h>
 
 /* New hash code */
 /*

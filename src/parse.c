@@ -301,14 +301,13 @@ int parse(struct Client *cptr, char *pbuffer, char *bufend)
    
   if (mptr == (struct Message *)NULL)
     return do_numeric(numeric, cptr, from, i, para);
-  else
-  {
-    status = handle_command(mptr, cptr, from, i, para);
-    if (cptr->fd < 0)
-      return(CLIENT_EXITED);
-    else
-      return status;
-  }
+
+  status = handle_command(mptr, cptr, from, i, para);
+
+  if (cptr->fd < 0)
+    return(CLIENT_EXITED);
+
+  return status;
 }
 
 static int

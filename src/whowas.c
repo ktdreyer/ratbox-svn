@@ -18,6 +18,14 @@
 *
 *   $Id$
 */
+
+#include <sys/types.h>
+#include <sys/time.h>
+
+#include <assert.h>
+#include <string.h>
+#include <stdlib.h>
+
 #include "whowas.h"
 #include "client.h"
 #include "common.h"
@@ -31,10 +39,6 @@
 #include "send.h"
 #include "s_conf.h"
 #include "memory.h"
-
-#include <assert.h>
-#include <string.h>
-#include <stdlib.h>
 
 /* internally defined function */
 static void add_whowas_to_clist(struct Whowas **, struct Whowas *);

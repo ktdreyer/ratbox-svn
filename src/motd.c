@@ -22,6 +22,12 @@
  *
  *   $Id$
  */
+
+#include <sys/types.h>
+#include <string.h>
+#include <stdlib.h>
+#include <time.h>
+
 #include "tools.h"
 #include "motd.h"
 #include "ircd.h"
@@ -36,10 +42,6 @@
 #include "client.h"
 #include "irc_string.h"
 #include "memory.h"
-
-#include <string.h>
-#include <stdlib.h>
-#include <time.h>
 
 extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */
 

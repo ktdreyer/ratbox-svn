@@ -151,8 +151,7 @@ int     get_con_freq(struct Class *clptr)
 {
   if (clptr)
     return (ConFreq(clptr));
-  else
-    return (CONNECTFREQUENCY);
+  return (CONNECTFREQUENCY);
 }
 
 /*

@@ -20,14 +20,6 @@
  *   $Id$
  */
 
-#include <sys/types.h>
-#include <sys/time.h>
-#include <sys/resource.h>
-
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
@@ -35,6 +27,10 @@
 #include <errno.h>
 #include <time.h>
 #include <sys/file.h>
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#include <sys/resource.h>
 
 #include "tools.h"
 #include "s_debug.h"

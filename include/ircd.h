@@ -24,17 +24,12 @@
  */
 #ifndef INCLUDED_ircd_h
 #define INCLUDED_ircd_h
-#ifndef INCLUDED_config_h
-#include "config.h"
-#endif
-#ifndef INCLUDED_sys_types_h
-#include <sys/types.h>
-#define INCLUDED_sys_types_h
-#endif
 
-#ifndef __TOOLS_H__
+#include <sys/types.h>
+#include <sys/time.h>
+
+#include "config.h"
 #include "tools.h"
-#endif
 
 struct Client;
 struct dlink_list;

@@ -20,6 +20,28 @@
  * $Id$
  */
 
+#include <sys/types.h>
+#include <sys/file.h>
+#include <sys/stat.h>
+#include <sys/socket.h>
+
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <errno.h>
+#include <time.h>
+#include <pwd.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+#if defined(HAVE_GETOPT_H)
+#include <getopt.h>
+#endif /* HAVE_GETOPT_H */
+
+#ifdef USE_GETTEXT
+#include <libintl.h>
+#endif
+
 #include "config.h"
 #include "tools.h"
 #include "ircd.h"
@@ -60,26 +82,6 @@
 #include "modules.h"
 #include "memory.h"
 #include "hook.h"
-
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <errno.h>
-#include <time.h>
-#include <pwd.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/file.h>
-#include <sys/stat.h>
-#include <sys/socket.h>
-
-#if defined(HAVE_GETOPT_H)
-#include <getopt.h>
-#endif /* HAVE_GETOPT_H */
-
-#ifdef USE_GETTEXT
-#include <libintl.h>
-#endif
 
 
 /*
@@ -281,8 +283,6 @@ static void parse_command_line(int argc, char* argv[])
   const char* options = "d:f:h:k:l:nvx:"; 
   int         opt;
 
-/* XXX - how does VMS handle command line arguments? */
-#ifndef VMS
   while ((opt = getopt(argc, argv, options)) != EOF) {
     switch (opt) {
     case 'd': 
@@ -329,7 +329,6 @@ static void parse_command_line(int argc, char* argv[])
       break;
     }
   }
-#endif
 }
 
 static time_t io_loop(time_t delay)

@@ -21,6 +21,19 @@
  *
  *  $Id$
  */
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <time.h>
+#include <fcntl.h>
+#include <assert.h>
 #include "tools.h"
 #include "s_conf.h"
 #include "s_stats.h"
@@ -47,16 +60,6 @@
 #include "fileio.h"
 #include "memory.h"
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <time.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <fcntl.h>
-#include <assert.h>
 
 extern int yyparse(); /* defined in yy.tab.c */
 extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */
@@ -670,18 +673,16 @@ find_or_add_ip(struct Client *cptr)
       newptr->next = ptr;
       return(newptr);
     }
-  else
-    {
-      if( free_ip_entries == (IP_ENTRY *)NULL)
-	outofmemory();
 
-      ptr = ip_hash_table[hash_index] = free_ip_entries;
-      free_ip_entries = ptr->next;
-      ptr->ip = ip_in;
-      ptr->count = 0;
-      ptr->next = (IP_ENTRY *)NULL;
-      return (ptr);
-    }
+  if( free_ip_entries == (IP_ENTRY *)NULL)
+    outofmemory();
+
+  ptr = ip_hash_table[hash_index] = free_ip_entries;
+  free_ip_entries = ptr->next;
+  ptr->ip = ip_in;
+  ptr->count = 0;
+  ptr->next = (IP_ENTRY *)NULL;
+  return (ptr);
 }
 
 /* 
@@ -1656,8 +1657,8 @@ struct ConfItem *find_is_klined(const char* host, const char* name,
   found_aconf = find_matching_mtrie_conf(host, name, ntohl(ip));
   if(found_aconf && (found_aconf->status & (CONF_ELINE|CONF_DLINE|CONF_KILL)))
     return(found_aconf);
-  else
-    return NULL;
+
+  return NULL;
 }
 
 /* add_temp_kline
@@ -2746,8 +2747,8 @@ int conf_fbgets(char *lbuf,int max_size, FBFILE *fb)
 
   if(!buff)
     return 0;
-  else
-    return(strlen(lbuf));
+
+  return(strlen(lbuf));
 }
 
 int conf_yy_fatal_error(char *msg)

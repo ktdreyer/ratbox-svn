@@ -348,7 +348,7 @@ static void accept_connection(int pfd, void *data)
 {
   static time_t      last_oper_notice = 0;
   struct sockaddr_in addr;
-  socklen_t          addrlen = sizeof(struct sockaddr_in);
+  unsigned int          addrlen = sizeof(struct sockaddr_in);
   int                fd;
   struct Listener *  listener = data;
 

@@ -22,6 +22,16 @@
  *
  *   $Id$
  */
+
+#include <sys/types.h>
+
+#include <assert.h>
+#include <string.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <time.h>
+#include <netdb.h>
+
 #include "tools.h"
 #include "s_serv.h"
 #include "channel.h"
@@ -50,12 +60,6 @@
 #include "s_debug.h"
 #include "memory.h"
 
-#include <assert.h>
-#include <string.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <time.h>
-#include <netdb.h>
 
 #define MIN_CONN_FREQ 300
 

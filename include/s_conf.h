@@ -24,26 +24,17 @@
 
 #include "setup.h"
 
+#include <netinet/in.h>         /* in_addr */
+
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
 
-#ifndef INCLUDED_config_h
 #include "config.h"             /* defines */
-#endif
-#ifndef INCLUDED_fileio_h
 #include "fileio.h"             /* FBFILE */
-#endif
-#ifndef INCLUDED_netinet_in_h
-#include <netinet/in.h>         /* in_addr */
-#define INCLUDED_netinet_in_h
-#endif
-#ifndef INCLUDED_ircd_defs_h
 #include "ircd_defs.h"
-#endif
-#ifndef INCLUDED_motd_h
 #include "motd.h"               /* MessageFile */
-#endif
+#include "class.h"
 
 struct Client;
 struct DNSReply;

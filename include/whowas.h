@@ -22,13 +22,10 @@
  */
 #ifndef INCLUDED_whowas_h
 #define INCLUDED_whowas_h
-#ifndef INCLUDED_ircd_defs_h
-#include "ircd_defs.h"
-#endif
-#ifndef INCLUDED_sys_types_h
 #include <sys/types.h>
-#define INCLUDED_sys_types_h
-#endif
+
+#include "ircd_defs.h"
+#include "client.h"
 
 #include "setup.h"
 
