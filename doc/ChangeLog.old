@@ -1,3 +1,21 @@
+leeh        2002/06/03 08:15:14 EDT	(20020603_1)
+
+  Modified files:
+    modules              Makefile.in 
+    servlink             Makefile.in 
+    src                  Makefile.in 
+    tools                Makefile.in 
+  Log:
+  - hwys lint fixes
+  
+  Revision  Changes    Path
+  1.68      +1 -1      ircd-hybrid-7/modules/Makefile.in
+  1.13      +1 -1      ircd-hybrid-7/servlink/Makefile.in
+  7.111     +1 -1      ircd-hybrid-7/src/Makefile.in
+  7.31      +1 -1      ircd-hybrid-7/tools/Makefile.in
+
+
+
 lusky       2002/06/02 19:23:23 EDT	(20020603_0)
 
   Modified files:
