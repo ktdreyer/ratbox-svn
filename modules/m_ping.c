@@ -96,7 +96,7 @@ static void m_ping(struct Client *client_p,
     origin = client_p->name;
 #endif
 
-  if (!EmptyString(destination) && irccmp(destination, me.name) != 0)
+  if (!EmptyString(destination) && !match(destination, me.name))
     {
       /* We're sending it across servers.. origin == client_p->name --fl_ */
       origin = client_p->name;
@@ -144,7 +144,7 @@ static void ms_ping(struct Client *client_p,
     origin = client_p->name;
 #endif
 
-  if (!EmptyString(destination) && irccmp(destination, me.name) != 0)
+  if (!EmptyString(destination) && !match(destination, me.name))
     {
       if ((target_p = find_server(destination)))
         sendto_one(target_p,":%s PING %s :%s", parv[0],
