@@ -1,3 +1,20 @@
+leeh        2003/05/19 15:36:26 UTC	(20030519_0)
+
+  Modified files:
+    include              hash.h 
+    modules              m_join.c 
+    src                  s_serv.c 
+  Log:
+  - rework the burst order - first send nicks, then channels.
+    it saves us joining users to chans, then colliding them out of it
+  
+  Revision  Changes    Path
+  7.31      +4 -0      ircd-ratbox/include/hash.h
+  1.123     +4 -3      ircd-ratbox/modules/m_join.c
+  7.331     +14 -84    ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2003/05/15 19:10:16 UTC	(20030515_9)
 
   Modified files:
