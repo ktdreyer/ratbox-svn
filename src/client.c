@@ -1373,7 +1373,6 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 		return -1;
 	
 	dlinkDelete(&source_p->localClient->tnode, &serv_list);
-	dlinkFindDestroy(&global_serv_list, source_p);
 	
 	unset_chcap_usage_counts(source_p);
 	sendk = source_p->localClient->sendK;
@@ -1391,12 +1390,9 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 		source_p->localClient->ctrlfd = -1;
 	}
 
-	if(source_p->servptr && source_p->servptr->serv)
-		dlinkDelete(&source_p->lnode, &source_p->servptr->serv->servers);
-	else
-		s_assert(0);
-
-
+	/* exit_generic_server() depends on this setting source_p->from to
+	 * NULL to not send an squit
+	 */
 	close_connection(source_p);
 	
 	if((source_p->serv) && (source_p->serv->up))
@@ -1415,17 +1411,8 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 	ilog(L_SERVER, "%s was connected for %ld seconds.  %d/%d sendK/recvK.", 
 	     source_p->name, CurrentTime - source_p->firsttime, 
 	     sendk, recvk);
-        
-	if(has_id(source_p))
-		del_from_id_hash(source_p->id, source_p);
 
-	del_from_client_hash(source_p->name, source_p);
-	remove_client_from_list(source_p);  
-	s_assert(dlinkFind(&dead_list, source_p) == NULL);
-	s_assert(dlinkFind(&abort_list, source_p) == NULL);
-	
-	SetDead(source_p);
-	dlinkAddAlloc(source_p, &dead_list);
+	exit_generic_server(client_p, source_p, from, comment);
 	return 0;
 }
 
@@ -2028,6 +2015,9 @@ close_connection(struct Client *client_p)
 	/* XXX shouldnt really be done here. */
 	detach_server_conf(client_p);
 
+	/* note, exit_generic_server() depends on this not being NULL to not
+	 * send an SQUIT
+	 */
 	client_p->from = NULL;	/* ...this should catch them! >:) --msa */
 	ClearMyConnect(client_p);
 }
