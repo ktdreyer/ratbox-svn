@@ -94,6 +94,7 @@ SRCS =                          \
   match.c                       \
   motd.c                        \
   mtrie_conf.c                  \
+  oldparse.c			\
   oratime.c                     \
   numeric.c                     \
   packet.c                      \
@@ -181,6 +182,7 @@ SRCS =                          \
 #	oratime.o \
 #	numeric.o \
 #	packet.o \
+#	oldparse.o \
 #	parse.o \
 #	res.o \
 #	s_auth.o \

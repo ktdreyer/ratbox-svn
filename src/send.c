@@ -277,7 +277,7 @@ send_message(struct Client *to, char *msg, int len)
                 */
                 if (DBufLength(&to->sendQ) > get_sendq(to))
                 {
-                        sendto_ops_butone(to,
+                        sendto_ops_butone(to, &me,
                                 "Max SendQ limit exceeded for %s : %d > %d",
                                 get_client_name(to, FALSE),
                                 DBufLength(&to->sendQ), get_sendq(to));

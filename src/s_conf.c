@@ -66,24 +66,8 @@ int                specific_virtual_host = 0;
 
 static void lookup_confhost(struct ConfItem* aconf);
 static int  SplitUserHost( struct ConfItem * );
-static char *getfield(char *newline);
-static struct ConfItem* oldParseOneLine(char* ,struct ConfItem*,int*,int*);
-static void ReplaceQuotes(char* quotedLine,char* line);
 
-static struct ConfItem* conf_add_server(struct ConfItem *,char *,int ,int );
-static struct ConfItem* conf_add_o_line(struct ConfItem *,char *);
-static void conf_add_port(struct ConfItem *);
-static void conf_add_class_to_conf(struct ConfItem *,char *);
-static void conf_add_i_line(struct ConfItem *,char *);
-static void conf_add_me(struct ConfItem *);
-static void conf_add_hub_or_leaf(struct ConfItem *);
-static void conf_add_class(struct ConfItem *,int );
-static void conf_add_k_line(struct ConfItem *);
-static void conf_add_d_line(struct ConfItem *);
-static void conf_add_x_line(struct ConfItem *);
-static void conf_add_u_line(struct ConfItem *);
-static void conf_add_q_line(struct ConfItem *);
-static void conf_add_fields(struct ConfItem*, char*, char *, char*, char *);
+static void ReplaceQuotes(char* quotedLine,char* line);
 
 static FBFILE*  openconf(const char* filename);
 static void     initconf(FBFILE*);
@@ -106,10 +90,6 @@ static void clear_special_conf(struct ConfItem **);
 static struct ConfItem* find_tkline(const char* host, const char* name);
 
 struct ConfItem *temporary_klines = NULL;
-
-static  char *set_conf_flags(struct ConfItem *,char *);
-static  int  oper_privs_from_string(int,char *);
-static  int  oper_flags_from_string(char *);
 
 /* usually, with hash tables, you use a prime number...
  * but in this case I am dealing with ip addresses, not ascii strings.
@@ -1733,54 +1713,6 @@ static FBFILE* openconf(const char *filename)
   return fbopen(filename, "r");
 }
 
-/*
-** from comstud
-*/
-
-static char *set_conf_flags(struct ConfItem *aconf,char *tmp)
-{
-  for(;*tmp;tmp++)
-    {
-      switch(*tmp)
-        {
-        case '=':
-          aconf->flags |= CONF_FLAGS_SPOOF_IP;
-          break;
-        case '!':
-          aconf->flags |= CONF_FLAGS_LIMIT_IP;
-          break;
-        case '-':
-          aconf->flags |= CONF_FLAGS_NO_TILDE;
-          break;
-        case '+':
-          aconf->flags |= CONF_FLAGS_NEED_IDENTD;
-          break;
-        case '$':
-          aconf->flags |= CONF_FLAGS_PASS_IDENTD;
-          break;
-        case '%':
-          aconf->flags |= CONF_FLAGS_NOMATCH_IP;
-          break;
-        case '^':        /* is exempt from k/g lines */
-          aconf->flags |= CONF_FLAGS_E_LINED;
-          break;
-        case '&':        /* can run a bot */
-          aconf->flags |= CONF_FLAGS_B_LINED;
-          break;
-        case '>':        /* can exceed max connects */
-          aconf->flags |= CONF_FLAGS_F_LINED;
-          break;
-#ifdef IDLE_CHECK
-        case '<':        /* can idle */
-          aconf->flags |= CONF_FLAGS_IDLE_LINED;
-          break;
-#endif
-        default:
-          return tmp;
-        }
-    }
-  return tmp;
-}
 
 /*
 ** initconf() 
@@ -1961,248 +1893,6 @@ static void ReplaceQuotes(char* quotedLine,char *inputLine)
         *out = *in;
     }
   *out = '\0';
-}
-
-/*
- * oldParseOneLine
- * Inputs       - pointer to line to parse
- *              - pointer to conf item to add
- * Output       - pointer to aconf if aconf to be added
- *                to link list or NULL if not
- * Side Effects - Parse one old style conf line.
- */
-
-static struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
-                            int* pccount,int* pncount)
-{
-  char conf_letter;
-  char* tmp;
-  char* user_field=(char *)NULL;
-  char* pass_field=(char *)NULL;
-  char* host_field=(char *)NULL;
-  char* port_field=(char *)NULL;
-  char* class_field=(char *)NULL;
-  int   sendq = 0;
-
-  tmp = getfield(line);
-  if (!tmp)
-    return aconf;
-
-  conf_letter = *tmp;
-
-  for (;;) /* Fake loop, that I can use break here --msa */
-    {
-      /* host field */
-      if ((host_field = getfield(NULL)) == NULL)
-	break;
-      
-      /* pass field */
-      if ((pass_field = getfield(NULL)) == NULL)
-	break;
-
-      /* user field */
-      if ((user_field = getfield(NULL)) == NULL)
-	break;
-
-      /* port field */
-      if ((port_field = getfield(NULL)) == NULL)
-	break;
-
-      /* class field */
-      if ((class_field = getfield(NULL)) == NULL)
-	break;
-      
-      break;
-      /* NOTREACHED */
-    }
-
-  aconf->flags = 0;
-
-  switch( conf_letter )
-    {
-    case 'A':case 'a': /* Name, e-mail address of administrator */
-      aconf->status = CONF_ADMIN;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
-      break;
-
-    case 'c':
-      aconf->flags |= CONF_FLAGS_ZIP_LINK;
-      /* drop into normal C line code */
-
-    case 'C':
-      aconf->status = CONF_CONNECT_SERVER;
-      ++*pccount;
-      aconf->flags |= CONF_FLAGS_ALLOW_AUTO_CONN;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
-      aconf = conf_add_server(aconf,class_field,*pncount,*pccount);
-      break;
-
-    case 'd':
-      aconf->status = CONF_DLINE;
-      aconf->flags = CONF_FLAGS_E_LINED;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
-      conf_add_d_line(aconf);
-      aconf = NULL;
-      break;
-
-    case 'D': /* Deny lines (immediate refusal) */
-      aconf->status = CONF_DLINE;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
-      conf_add_d_line(aconf);
-      aconf = NULL;
-      break;
-
-    case 'H': /* Hub server line */
-    case 'h':
-      aconf->status = CONF_HUB;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
-      conf_add_hub_or_leaf(aconf);
-      break;
-
-    case 'i': /* Just plain normal irc client trying  */
-                  /* to connect to me */
-
-      /* drop into normal I line code */
-
-#ifdef LITTLE_I_LINES
-      aconf->flags |= CONF_FLAGS_LITTLE_I_LINE;
-#endif
-    case 'I': /* Just plain normal irc client trying  */
-      /* to connect to me */
-      aconf->status = CONF_CLIENT;
-      
-      if(host_field)
-	{
-	  host_field = set_conf_flags(aconf, host_field);
-	  DupString(aconf->host, host_field);
-	}
-      
-      if(user_field)
-	{
-	  user_field = set_conf_flags(aconf, user_field);
-	  DupString(aconf->user, user_field);
-	}
-
-      conf_add_i_line(aconf,class_field);
-      aconf = NULL;
-      break;
-      
-    case 'K': /* Kill user line on irc.conf           */
-    case 'k':
-      aconf->status = CONF_KILL;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
-      conf_add_k_line(aconf);
-      aconf = NULL;
-      break;
-
-    case 'L': /* guaranteed leaf server */
-    case 'l':
-      aconf->status = CONF_LEAF;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
-      conf_add_hub_or_leaf(aconf);
-      break;
-
-      /* Me. Host field is name used for this host */
-      /* and port number is the number of the port */
-    case 'M':
-    case 'm':
-      aconf->status = CONF_ME;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
-      conf_add_me(aconf);
-      ConfigFileEntry.hub = 0;
-      if(port_field)
-        {
-          if(*port_field == '1')
-            ConfigFileEntry.hub = 1;
-	}
-      break;
-
-    case 'n': /* connect in case of lp failures     */
-      aconf->flags |= CONF_FLAGS_LAZY_LINK;
-      /* drop into normal N line code */
-
-    case 'N': /* Server where I should NOT try to     */
-      /* but which tries to connect ME        */
-      aconf->status = CONF_NOCONNECT_SERVER;
-      ++*pncount;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
-      aconf = conf_add_server(aconf,class_field,*pncount,*pccount);
-      break;
-
-      /* Operator. Line should contain at least */
-      /* password and host where connection is  */
-    case 'O':
-      aconf->status = CONF_OPERATOR;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
-      /* defaults */
-      aconf->port = 
-	CONF_OPER_GLOBAL_KILL|CONF_OPER_REMOTE|CONF_OPER_UNKLINE|
-	CONF_OPER_K|CONF_OPER_GLINE|CONF_OPER_REHASH;
-      if(port_field)
-	aconf->port = oper_privs_from_string(aconf->port,port_field);
-      if ((tmp = getfield(NULL)) != NULL)
-	aconf->hold = oper_flags_from_string(tmp);
-      aconf = conf_add_o_line(aconf,class_field);
-      break;
-
-      /* Local Operator, (limited privs --SRB) */
-    case 'o':
-      aconf->status = CONF_LOCOP;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
-      aconf->port = CONF_OPER_UNKLINE|CONF_OPER_K;
-      if(port_field)
-	aconf->port = oper_privs_from_string(aconf->port,port_field);
-      if ((tmp = getfield(NULL)) != NULL)
-	aconf->hold = oper_flags_from_string(tmp);
-      aconf = conf_add_o_line(aconf,class_field);
-      break;
-
-    case 'P': /* listen port line */
-    case 'p':
-      aconf->status = CONF_LISTEN_PORT;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
-      conf_add_port(aconf);
-      break;
-
-    case 'Q': /* reserved nicks */
-    case 'q': 
-      aconf->status = CONF_QUARANTINED_NICK;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
-      conf_add_q_line(aconf);
-      aconf = NULL;
-      break;
-
-    case 'U': /* Uphost, ie. host where client reading */
-    case 'u': /* this should connect.                  */
-      aconf->status = CONF_ULINE;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
-      conf_add_u_line(aconf);
-      aconf = NULL;
-      break;
-
-    case 'X': /* rejected gecos */
-    case 'x': 
-      aconf->status = CONF_XLINE;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
-      conf_add_x_line(aconf);
-      aconf = NULL;
-      break;
-
-    case 'Y':
-    case 'y':
-      aconf->status = CONF_CLASS;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
-      if(class_field)
-	sendq = atoi(class_field);
-      conf_add_class(aconf,sendq);
-      break;
-      
-    default:
-      log(L_ERROR, "Error in config file: %s", line);
-      break;
-    }
-
-  return aconf;
 }
 
 /*
@@ -2524,57 +2214,6 @@ void report_temp_klines(struct Client *sptr)
     }
 }
 
-/* oper_privs_from_string
- *
- * inputs        - default privs
- *               - privs as string
- * output        - default privs as modified by privs string
- * side effects -
- *
- */
-
-static int oper_privs_from_string(int int_privs,char *privs)
-{
-  while(*privs)
-    {
-      if(*privs == 'O')                     /* allow global kill */
-        int_privs |= CONF_OPER_GLOBAL_KILL;
-      else if(*privs == 'o')                /* disallow global kill */
-        int_privs &= ~CONF_OPER_GLOBAL_KILL;
-      else if(*privs == 'U')                /* allow unkline */
-        int_privs |= CONF_OPER_UNKLINE;
-      else if(*privs == 'u')                /* disallow unkline */
-        int_privs &= ~CONF_OPER_UNKLINE;
-      else if(*privs == 'R')                /* allow remote squit/connect etc.*/
-        int_privs |= CONF_OPER_REMOTE;        
-      else if(*privs == 'r')                /* disallow remote squit/connect etc.*/
-        int_privs &= ~CONF_OPER_REMOTE;
-      else if(*privs == 'N')                /* allow +n see nick changes */
-        int_privs |= CONF_OPER_N;
-      else if(*privs == 'n')                /* disallow +n see nick changes */
-        int_privs &= ~CONF_OPER_N;
-      else if(*privs == 'K')                /* allow kill and kline privs */
-        int_privs |= CONF_OPER_K;
-      else if(*privs == 'k')                /* disallow kill and kline privs */
-        int_privs &= ~CONF_OPER_K;
-#ifdef GLINES
-      else if(*privs == 'G')                /* allow gline */
-        int_privs |= CONF_OPER_GLINE;
-      else if(*privs == 'g')                /* disallow gline */
-        int_privs &= ~CONF_OPER_GLINE;
-#endif
-      else if(*privs == 'H')                /* allow rehash */
-        int_privs |= CONF_OPER_REHASH;
-      else if(*privs == 'h')                /* disallow rehash */
-        int_privs &= ~CONF_OPER_REHASH;
-      else if(*privs == 'D')
-        int_privs |= CONF_OPER_DIE;         /* allow die */
-      else if(*privs == 'd')
-        int_privs &= ~CONF_OPER_DIE;        /* disallow die */
-      privs++;
-    }
-  return(int_privs);
-}
 
 /*
  * oper_privs_as_string
@@ -2668,46 +2307,6 @@ char *oper_privs_as_string(struct Client *cptr,int port)
   return(privs_out);
 }
 
-/* oper_flags_from_string
- *
- * inputs        - flags as string
- * output        - flags as bit mask
- * side effects -
- *
- * -Dianora
- */
-
-static int oper_flags_from_string(char *flags)
-{
-  int int_flags=0;
-
-  while(*flags)
-    {
-      if(*flags == 'i')                        /* invisible */
-        int_flags |= FLAGS_INVISIBLE;
-      else if(*flags == 'w')                /* see wallops */
-        int_flags |= FLAGS_WALLOP;
-      else if(*flags == 's')
-        int_flags |= FLAGS_SERVNOTICE;
-      else if(*flags == 'c')
-        int_flags |= FLAGS_CCONN;
-      else if(*flags == 'r')
-        int_flags |= FLAGS_REJ;
-      else if(*flags == 'k')
-        int_flags |= FLAGS_SKILL;
-      else if(*flags == 'f')
-        int_flags |= FLAGS_FULL;
-      else if(*flags == 'y')
-        int_flags |= FLAGS_SPY;
-      else if(*flags == 'd')
-        int_flags |= FLAGS_DEBUG;
-      else if(*flags == 'n')
-        int_flags |= FLAGS_NCHANGE;
-      flags++;
-    }
-
-  return(int_flags);
-}
 
 /* oper_flags_as_string
  *
@@ -3375,32 +2974,6 @@ get_conf_name(KlineType type)
   return(ConfigFileEntry.dlinefile);
 }
 
-/*
- * field breakup for ircd.conf file.
- */
-static char *getfield(char *newline)
-{
-  static char *line = (char *)NULL;
-  char  *end, *field;
-        
-  if (newline)
-    line = newline;
-
-  if (line == (char *)NULL)
-    return((char *)NULL);
-
-  field = line;
-  if ((end = strchr(line,':')) == NULL)
-    {
-      line = (char *)NULL;
-      if ((end = strchr(field,'\n')) == (char *)NULL)
-        end = field + strlen(field);
-    }
-  else
-    line = end + 1;
-  *end = '\0';
-  return(field);
-}
 
 /*
  * conf_add_hub_or_leaf
@@ -3409,7 +2982,7 @@ static char *getfield(char *newline)
  * side effects -
  * Add a hub or leaf
  */
-static void conf_add_hub_or_leaf(struct ConfItem *aconf)
+void conf_add_hub_or_leaf(struct ConfItem *aconf)
 {
   char *ps;        /* space finder */
   char *pt;        /* tab finder */
@@ -3448,7 +3021,7 @@ static void conf_add_hub_or_leaf(struct ConfItem *aconf)
  * side effects - Add a class
  */
 
-static void conf_add_class(struct ConfItem *aconf,int sendq)
+void conf_add_class(struct ConfItem *aconf,int sendq)
 {
   /*
   ** If conf line is a class definition, create a class entry
@@ -3474,7 +3047,7 @@ static void conf_add_class(struct ConfItem *aconf,int sendq)
  * side effects - Add a port
  */
 
-static void conf_add_port(struct ConfItem *aconf)
+void conf_add_port(struct ConfItem *aconf)
 {
   /*
    * P: line - listener port
@@ -3492,7 +3065,7 @@ static void conf_add_port(struct ConfItem *aconf)
  * side effects - Add a class pointer to a conf 
  */
 
-static void conf_add_class_to_conf(struct ConfItem *aconf,char *class_field)
+void conf_add_class_to_conf(struct ConfItem *aconf,char *class_field)
 {
   int classToFind;
 
@@ -3524,7 +3097,7 @@ static void conf_add_class_to_conf(struct ConfItem *aconf,char *class_field)
  * side effects - Add an I line
  */
 
-static void conf_add_i_line(struct ConfItem *aconf,char *class_field)
+void conf_add_i_line(struct ConfItem *aconf,char *class_field)
 {
   struct ConfItem *bconf;
 
@@ -3634,7 +3207,7 @@ static void conf_add_i_line(struct ConfItem *aconf,char *class_field)
  * side effects - Add a C or N line
  */
 
-static struct ConfItem *conf_add_server(struct ConfItem *aconf,
+struct ConfItem *conf_add_server(struct ConfItem *aconf,
                                         char* class_field,
                                         int ncount, int ccount )
 {
@@ -3672,7 +3245,7 @@ static struct ConfItem *conf_add_server(struct ConfItem *aconf,
  * side effects - Add an o/O line
  */
 
-static struct ConfItem *conf_add_o_line(struct ConfItem *aconf,char *class_field)
+struct ConfItem *conf_add_o_line(struct ConfItem *aconf,char *class_field)
 {
   conf_add_class_to_conf(aconf,class_field);
 
@@ -3692,7 +3265,7 @@ static struct ConfItem *conf_add_o_line(struct ConfItem *aconf,char *class_field
  * side effects - Add the M line
  */
 
-static void conf_add_me(struct ConfItem *aconf)
+void conf_add_me(struct ConfItem *aconf)
 {
   /*
   ** Own port and name cannot be changed after the startup.
@@ -3727,7 +3300,7 @@ static void conf_add_me(struct ConfItem *aconf)
  * side effects - Add a K line
  */
 
-static void conf_add_k_line(struct ConfItem *aconf)
+void conf_add_k_line(struct ConfItem *aconf)
 {
   unsigned long    ip;
   unsigned long    ip_mask;
@@ -3757,7 +3330,7 @@ static void conf_add_k_line(struct ConfItem *aconf)
  * side effects - Add a d/D line
  */
 
-static void conf_add_d_line(struct ConfItem *aconf)
+void conf_add_d_line(struct ConfItem *aconf)
 {
   unsigned long    ip;
   unsigned long    ip_mask;
@@ -3784,7 +3357,7 @@ static void conf_add_d_line(struct ConfItem *aconf)
  * side effects - Add a X line
  */
 
-static void conf_add_x_line(struct ConfItem *aconf)
+void conf_add_x_line(struct ConfItem *aconf)
 {
   MyFree(aconf->user);
   aconf->user = NULL;
@@ -3801,7 +3374,7 @@ static void conf_add_x_line(struct ConfItem *aconf)
  * side effects - Add an U line
  */
 
-static void conf_add_u_line(struct ConfItem *aconf)
+void conf_add_u_line(struct ConfItem *aconf)
 {
   MyFree(aconf->user);
   aconf->user = (char *)NULL;
@@ -3818,7 +3391,7 @@ static void conf_add_u_line(struct ConfItem *aconf)
  * side effects - Add a Q line
  */
 
-static void conf_add_q_line(struct ConfItem *aconf)
+void conf_add_q_line(struct ConfItem *aconf)
 {
   aconf->name = aconf->host;
   DupString(aconf->host, "*");
@@ -3878,7 +3451,7 @@ static void conf_add_q_line(struct ConfItem *aconf)
  * side effects - update host/pass/user/port fields of given aconf
  */
 
-static void conf_add_fields(struct ConfItem *aconf,
+void conf_add_fields(struct ConfItem *aconf,
                                char *host_field,
                                char *pass_field,
                                char *user_field,

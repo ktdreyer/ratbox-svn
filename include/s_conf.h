@@ -24,6 +24,14 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.6  2000/01/14 01:16:47  db
+ * - externalized the old parser, unfortunately, this means a lot
+ *   more of the s_conf interface is visible ;-(, can do better in the future...
+ *   This is in preparation for new parser inclusion.
+ *   This will (ick) allow us to use both old conf files and new format conf files
+ *   for backwards compatibility. (I'm not terribly happy about this, but...
+ *   Hi Tom!)
+ *
  * Revision 7.5  2000/01/06 03:19:32  db
  * - removed HUB from config.h etc. now in a config entry
  *
@@ -440,6 +448,22 @@ extern  void    report_temp_klines(struct Client *);
 extern  int     is_address(char *,unsigned long *,unsigned long *); 
 extern  int     rehash (struct Client *, struct Client *, int);
 
+/* BLAH, pity I extern'ed all these. later will do better -db */
+extern struct ConfItem* conf_add_server(struct ConfItem *,char *,int ,int );
+extern struct ConfItem* conf_add_o_line(struct ConfItem *,char *);
+extern void conf_add_port(struct ConfItem *);
+extern void conf_add_class_to_conf(struct ConfItem *,char *);
+extern void conf_add_i_line(struct ConfItem *,char *);
+extern void conf_add_me(struct ConfItem *);
+extern void conf_add_hub_or_leaf(struct ConfItem *);
+extern void conf_add_class(struct ConfItem *,int );
+extern void conf_add_k_line(struct ConfItem *);
+extern void conf_add_d_line(struct ConfItem *);
+extern void conf_add_x_line(struct ConfItem *);
+extern void conf_add_u_line(struct ConfItem *);
+extern void conf_add_q_line(struct ConfItem *);
+extern void conf_add_fields(struct ConfItem*, char*, char *, char*, char *);
+extern struct ConfItem* oldParseOneLine(char* ,struct ConfItem*,int*,int*);
 
 #endif /* INCLUDED_s_conf_h */
 
