@@ -1,3 +1,7 @@
+*** 20001223_49 by ejb
+- documented max_targets, and made it default to 4.
+
+
 *** 20001223_48 by ejb
 - fix for another parse.c bug
 - make max_targets an ircd.conf options
