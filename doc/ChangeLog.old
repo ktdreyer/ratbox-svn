@@ -1,3 +1,8 @@
+*** 20010814_1 by db
+- removed unused variable, since we are back to using a block allocator
+
+
+
 *** 20010813_12 by leeh
 - missing ;
 
