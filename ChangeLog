@@ -1,3 +1,15 @@
+androsyn    2004/09/20 16:54:59 EDT	(20040920_3)
+
+  Modified files:
+    adns                 adns.h 
+  Log:
+  undef inet_ntop and inet_pton for bsd and friends..
+  
+  Revision  Changes    Path
+  1.16      +2 -0      ircd-ratbox/adns/adns.h
+
+
+
 androsyn    2004/09/20 14:58:26 EDT	(20040920_2)
 
   Modified files:
