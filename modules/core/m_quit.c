@@ -35,11 +35,10 @@
 
 static void m_quit(struct Client*, struct Client*, int, char**);
 static void ms_quit(struct Client*, struct Client*, int, char**);
-static void mo_quit(struct Client*, struct Client*, int, char**);
 
 struct Message quit_msgtab = {
   "QUIT", 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
-  {m_quit, m_quit, ms_quit, mo_quit}
+  {m_quit, m_quit, ms_quit, m_quit}
 };
 
 void
@@ -79,14 +78,14 @@ static void m_quit(struct Client *cptr,
       comment = reason;
     }
   
-  if( !IsServer(sptr) && MyConnect(sptr) &&
+  if( !IsServer(sptr) && MyConnect(sptr) && !IsOper(sptr) && 
      (sptr->firsttime + ANTI_SPAM_EXIT_MESSAGE_TIME) > CurrentTime)
     comment = "Client Quit";
 
   exit_client(cptr, sptr, sptr, comment);
 }
 /*
-** m_quit
+** ms_quit
 **      parv[0] = sender prefix
 **      parv[1] = comment
 */
@@ -104,23 +103,3 @@ static void ms_quit(struct Client *cptr,
   exit_client(cptr, sptr, sptr, comment);
 }
 
-static void mo_quit(struct Client *cptr,
-                   struct Client *sptr,
-                   int parc,
-                   char *parv[])
-{
-  char *comment = (parc > 1 && parv[1]) ? parv[1] : cptr->name;
-  char reason [TOPICLEN + 1];
-  
-  sptr->flags |= FLAGS_NORMALEX;
-  if (strlen(comment) > (size_t) TOPICLEN)
-    comment[TOPICLEN] = '\0';
-
-  if (ConfigFileEntry.client_exit)
-    {
-      snprintf(reason, TOPICLEN, "Client Exit: %s", comment);
-      comment = reason;
-    }
-
-  exit_client(cptr, sptr, sptr, comment);
-}
