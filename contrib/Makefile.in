@@ -37,6 +37,7 @@ SRCS =                          \
   m_ojoin.c			\
   m_owhois.c			\
   m_olist.c			\
+  m_okick.c			\
   m_opme.c			\
   m_owho.c			\
   m_omode.c			\
