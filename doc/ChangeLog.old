@@ -1,3 +1,12 @@
+*** 20001130_12 by adrian
+
+
+* added an Id tag
+* we needed to keep those bzero()'s. Hrm, I wonder why ...
+  What happened was that we'd have get a line in, and then immediately flush
+  some previously printed garbage. Weird.
+
+
 *** 20001130_11 by db
 - similar bug to parse.c in modules.c when increasing moduletable
 
