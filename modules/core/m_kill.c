@@ -211,7 +211,8 @@ ms_kill(struct Client *client_p, struct Client *source_p, int parc, const char *
 		if(IsDigit(*user) || (!(target_p = get_history(user, (long) KILLCHASETIMELIMIT))))
 		{
 			sendto_one_numeric(source_p, ERR_NOSUCHNICK, 
-					   form_str(ERR_NOSUCHNICK), user);
+					   form_str(ERR_NOSUCHNICK), 
+					   IsDigit(*user) ? "*" : user);
 			return 0;
 		}
 		sendto_one_notice(source_p, ":KILL changed from %s to %s",

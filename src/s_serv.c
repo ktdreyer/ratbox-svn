@@ -289,9 +289,10 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 	{
 		if(!wilds)
 		{
-			sendto_one_numeric(source_p, ERR_NOSUCHSERVER,
-					   form_str(ERR_NOSUCHSERVER),
-					   parv[server]);
+			if(!IsDigit(parv[server][0]))
+				sendto_one_numeric(source_p, ERR_NOSUCHSERVER,
+						   form_str(ERR_NOSUCHSERVER),
+						   parv[server]);
 			return (HUNTED_NOSUCH);
 		}
 		else
@@ -331,8 +332,9 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 		return (HUNTED_PASS);
 	}
 
-	sendto_one_numeric(source_p, ERR_NOSUCHSERVER,
-			   form_str(ERR_NOSUCHSERVER), parv[server]);
+	if(!IsDigit(parv[server][0]))
+		sendto_one_numeric(source_p, ERR_NOSUCHSERVER,
+				   form_str(ERR_NOSUCHSERVER), parv[server]);
 	return (HUNTED_NOSUCH);
 }
 

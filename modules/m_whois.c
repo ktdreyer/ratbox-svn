@@ -121,7 +121,8 @@ ms_whois(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if((target_p = find_client(parv[1])) == NULL)
 	{
 		sendto_one_numeric(source_p, ERR_NOSUCHSERVER,
-				   form_str(ERR_NOSUCHSERVER), parv[1]);
+				   form_str(ERR_NOSUCHSERVER), 
+				   IsDigit(parv[1][0]) ? "*" : parv[1]);
 		return 0;
 	}
 
@@ -172,7 +173,8 @@ do_whois(struct Client *client_p, struct Client *source_p, int parc, const char 
 		single_whois(source_p, target_p);
 	else
 		sendto_one_numeric(source_p, ERR_NOSUCHNICK,
-				   form_str(ERR_NOSUCHNICK), nick);
+				   form_str(ERR_NOSUCHNICK), 
+				   IsDigit(*nick) ? "*" : nick);
 
 	sendto_one_numeric(source_p, RPL_ENDOFWHOIS, 
 			   form_str(RPL_ENDOFWHOIS), parv[1]);

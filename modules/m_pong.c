@@ -75,8 +75,9 @@ ms_pong(struct Client *client_p, struct Client *source_p, int parc, const char *
 				   get_id(target_p, target_p));
 		else
 		{
-			sendto_one_numeric(source_p, ERR_NOSUCHSERVER,
-					   form_str(ERR_NOSUCHSERVER), destination);
+			if(!IsDigit(*destination))
+				sendto_one_numeric(source_p, ERR_NOSUCHSERVER,
+						   form_str(ERR_NOSUCHSERVER), destination);
 			return 0;
 		}
 	}

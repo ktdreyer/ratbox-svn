@@ -71,7 +71,8 @@ m_invite(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if((target_p = find_person(parv[1])) == NULL)
 	{
 		sendto_one_numeric(source_p, ERR_NOSUCHNICK, 
-				   form_str(ERR_NOSUCHNICK), parv[1]);
+				   form_str(ERR_NOSUCHNICK), 
+				   IsDigit(parv[1][0]) ? "*" : parv[1]);
 		return 0;
 	}
 
