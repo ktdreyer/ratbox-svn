@@ -417,20 +417,9 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
       sendto_realops_flags(FLAGS_ALL, L_OPER,
           "Non-Hub link %s introduced %s.",
 	  get_client_name(client_p, MASK_IP), name);
-      /* If it is new, we are probably misconfigured, so split the
-       * non-hub server introducing this. Otherwise, split the new
-       * server. -A1kmm. */
-      if ((CurrentTime - source_p->firsttime) < 20)
-        {
-          exit_client(NULL, source_p, &me, "No matching hub_mask.");
-          return;
-        }
-      else
-        {
-          sendto_one(source_p, ":%s SQUIT %s :Sorry, no matching hub_mask.",
-                     me.name, name);
-          return;
-        }
+
+      exit_client(NULL, source_p, &me, "No matching hub_mask.");
+      return;
     }
 
   /* Check for the new server being leafed behind this HUB */
