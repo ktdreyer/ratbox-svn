@@ -219,7 +219,6 @@ static void auth_dns_callback(void* vptr, adns_answer* reply)
       unlink_auth_request(auth, &auth_poll_list);
       free_auth_request(auth);
       release_auth_client(client_p);
-      fprintf(stderr, "released auth\n");
     }
 
 }
