@@ -1,3 +1,15 @@
+*** 20010311_7 by fl_
+- This reverts the tree to its state on the 8th
+
+  The main reason for this is to fix klines.. which were broken in a
+  hostmask.c commit.. but finding out what was wrong wouldve been
+  insane.. the patch is available of what ive changed to restore it
+  back with persistant clients (which this removes), and the buggy
+  kline stuff..
+
+- We need a stable tree for beta3.. not a buggy one :/
+
+
 *** 20010311_6 by fl_
 - undefine persistant clients by default.. is there a missing 
   messages.tab?
