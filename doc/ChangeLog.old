@@ -1,3 +1,7 @@
+*** 20010831_4 by leeh
+- fixed the stats spy stuff
+
+
 *** 20010831_3 by leeh
 - modlist/modrestart dont require params, modrestart doesnt take them,
   theyre optional in modlist
