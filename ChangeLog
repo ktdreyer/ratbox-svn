@@ -1,3 +1,19 @@
+leeh        2004/01/08 07:54:01 EST	(20040108_1)
+
+  Modified files:
+    include              stdinc.h 
+    src                  service.c ucommand.c 
+  Log:
+  - s/MAXPATHLEN/PATH_MAX
+  - linux needs <limits.h>
+  
+  Revision  Changes    Path
+  1.7       +1 -0      rserv/include/stdinc.h
+  1.8       +1 -1      rserv/src/service.c
+  1.9       +1 -1      rserv/src/ucommand.c
+
+
+
 leeh        2004/01/08 07:45:48 EST	(20040108_0)
 
   Added files:
