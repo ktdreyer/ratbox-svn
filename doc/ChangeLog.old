@@ -1,3 +1,8 @@
+*** 20001222_7 by db
+- tiny bug fix for logging
+
+
+
 *** 20001222_6 by db
 - massive addition to add extra parameter to struct Message
   this will enable us to have the parser handle parameter counts
