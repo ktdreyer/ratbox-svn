@@ -1,3 +1,7 @@
+*** 20011006_5 by leeh
+- we need to set the time on gline2, not gline1..
+
+
 *** 20011006_4 by androsyn
 Added a change to allow strtok_r() to work without warnings..
 
