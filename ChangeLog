@@ -1,3 +1,23 @@
+leeh        2004/01/15 15:31:05 EST	(20040115_13)
+
+  Modified files:
+    include              client.h 
+    src/s_userserv       Makefile.in s_u_crypt.c s_userserv.h 
+  Added files:
+    src/s_userserv       s_u_db.c 
+  Log:
+  - add db stubs
+  - prepare source for repo move of s_userserv.h
+  
+  Revision  Changes    Path
+  1.15      +1 -1      rserv/include/client.h
+  1.2       +4 -2      rserv/src/s_userserv/Makefile.in
+  1.2       +4 -0      rserv/src/s_userserv/s_u_crypt.c
+  1.1       +47 -0     rserv/src/s_userserv/s_u_db.c (new)
+  1.2       +3 -0      rserv/src/s_userserv/s_userserv.h
+
+
+
 leeh        2004/01/15 14:22:59 EST	(20040115_12)
 
   Modified files:
