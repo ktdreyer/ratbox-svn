@@ -1,3 +1,16 @@
+leeh        2002/04/25 12:25:05 EDT	(20020425_2)
+
+  Modified files:
+    contrib              m_clearchan.c 
+  Log:
+  - incrementing sptr->user->joined then calling add_user_to_channel which
+    also increments it isnt exactly a good idea
+  
+  Revision  Changes    Path
+  1.27      +1 -3      ircd-hybrid-7/contrib/m_clearchan.c
+
+
+
 leeh        2002/04/25 05:38:40 EDT	(20020425_1)
 
   Modified files:
