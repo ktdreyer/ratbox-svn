@@ -213,16 +213,14 @@ read_ctrl_packet(int fd, void *data)
 	unsigned char *len = tmp;
 	struct SlinkRplDef *replydef;
 #ifdef USE_IODEBUG_HOOKS
-	struct hook_io_data hdata;
+	hook_data_int hinfo;
 #endif
-
 
 	s_assert(lserver != NULL);
 	if(IsAnyDead(server))
 		return;
 
 	reply = &lserver->slinkrpl;
-
 
 	if(!reply->command)
 	{
@@ -302,10 +300,10 @@ read_ctrl_packet(int fd, void *data)
 	}
 
 #ifdef USE_IODEBUG_HOOKS
-	hdata.connection = server;
-	hdata.len = reply->command;
-	hdata.data = NULL;
-	hook_call_event(h_iorecvctrl_id, &hdata);
+	hinfo.client = server;
+	hinfo.arg1 = NULL;
+	hinfo.arg2 = reply->command;
+	call_hook(h_iorecvctrl_id, &hinfo);
 #endif
 
 	/* we now have the command and any data, pass it off to the handler */
@@ -334,14 +332,13 @@ read_packet(int fd, void *data)
 	struct LocalUser *lclient_p = client_p->localClient;
 	int length = 0;
 	int lbuf_len;
-
 	int binary = 0;
 #ifdef USE_IODEBUG_HOOKS
-	struct hook_io_data hdata;
+	hook_data_int hinfo;
 #endif
+
 	if(IsAnyDead(client_p))
 		return;
-
 
 	/*
 	 * Read some data. We *used to* do anti-flood protection here, but
@@ -363,10 +360,10 @@ read_packet(int fd, void *data)
 	}
 
 #ifdef USE_IODEBUG_HOOKS
-	hdata.connection = client_p;
-	hdata.data = readBuf;
-	hdata.len = length;
-	hook_call_event(h_iorecv_id, &hdata);
+	hinfo.client = client_p;
+	hinfo.arg1 = readBuf;
+	hinfo.arg2 = length;
+	call_hook(h_iorecv_id, &hinfo);
 #endif
 
 	if(client_p->localClient->lasttime < CurrentTime)
@@ -417,9 +414,6 @@ read_packet(int fd, void *data)
 			       COMM_SELECT_READ, read_packet, client_p, 0);
 	}
 }
-
-
-
 
 /*
  * client_dopacket - copy packet to client buf and parse it

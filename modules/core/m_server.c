@@ -45,6 +45,7 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "hook.h"
 
 static int mr_server(struct Client *, struct Client *, int, const char **);
 static int ms_server(struct Client *, struct Client *, int, const char **);
@@ -1167,7 +1168,7 @@ burst_TS5(struct Client *client_p)
 	struct Client *target_p;
 	struct Channel *chptr;
 	struct membership *msptr;
-	struct hook_burst_channel hinfo;
+	hook_data hinfo;
 	dlink_node *ptr;
 	dlink_node *uptr;
 	char *t;
@@ -1210,9 +1211,9 @@ burst_TS5(struct Client *client_p)
 		if(*chptr->chname != '#')
 			return;
 
-		hinfo.chptr = chptr;
 		hinfo.client = client_p;
-		hook_call_event(h_burst_channel_id, &hinfo);
+		hinfo.arg1 = chptr;
+		call_hook(h_burst_channel_id, &hinfo);
 
 		cur_len = mlen = ircsprintf(buf, ":%s SJOIN %ld %s %s :", me.name,
 				(long) chptr->channelts, chptr->chname,
@@ -1284,7 +1285,7 @@ burst_TS6(struct Client *client_p)
 	struct Client *target_p;
 	struct Channel *chptr;
 	struct membership *msptr;
-	struct hook_burst_channel hinfo;
+	hook_data hinfo;
 	dlink_node *ptr;
 	dlink_node *uptr;
 	char *t;
@@ -1339,9 +1340,9 @@ burst_TS6(struct Client *client_p)
 		if(*chptr->chname != '#')
 			return;
 
-		hinfo.chptr = chptr;
 		hinfo.client = client_p;
-		hook_call_event(h_burst_channel_id, &hinfo);
+		hinfo.arg1 = chptr;
+		call_hook(h_burst_channel_id, &hinfo);
 
 		cur_len = mlen = ircsprintf(buf, ":%s SJOIN %ld %s %s :", me.name,
 				(long) chptr->channelts, chptr->chname, channel_modes(chptr, client_p));

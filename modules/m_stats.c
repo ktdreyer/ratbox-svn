@@ -1771,13 +1771,13 @@ stats_l_client(struct Client *source_p, struct Client *target_p,
 static void
 stats_spy(struct Client *source_p, char statchar, const char *name)
 {
-	struct hook_spy_data data;
+	hook_data_int data;
 
-	data.source_p = source_p;
-	data.statchar = statchar;
-	data.name = name;
+	data.client = source_p;
+	data.arg1 = (void *) name;
+	data.arg2 = (int) statchar;
 
-	hook_call_event (doing_stats_hook, &data);
+	call_hook(doing_stats_hook, &data);
 }
 
 /* stats_p_spy()
@@ -1787,15 +1787,14 @@ stats_spy(struct Client *source_p, char statchar, const char *name)
  * side effects - call hook doing_stats_p
  */
 static void
-stats_p_spy (struct Client *source_p)
+stats_p_spy(struct Client *source_p)
 {
-	struct hook_spy_data data;
+	hook_data data;
 
-	data.source_p = source_p;
-	data.name = NULL;
-	data.statchar = 'p';
+	data.client = source_p;
+	data.arg1 = data.arg2 = NULL;
 
-	hook_call_event (doing_stats_p_hook, &data);
+	call_hook(doing_stats_p_hook, &data);
 }
 
 /*

@@ -100,11 +100,11 @@ mapi_hlist_av1 test_hlist[] = {
 };
 
 /* The mapi_hfn_list_av1 declares the hook functions which other modules can
- * call.  The first parameter is the name of the hook, the second is an int
+ * call.  The first parameter is the name of the hook, the second is an void
  * returning function, with arbitrary parameters casted to (hookfn).  This
  * list must be terminated with NULLs.
  */
-static int show_example_hook(void *unused);
+static void show_example_hook(void *unused);
 
 mapi_hfn_list_av1 test_hfnlist[] = {
 	{ "doing_example_hook", (hookfn) show_example_hook },
@@ -173,7 +173,7 @@ munreg_test(struct Client *client_p, struct Client *source_p, int parc, const ch
 	}
 
 	/* illustration of how to call a hook function */
-	hook_call_event(doing_example_hook, NULL);
+	call_hook(doing_example_hook, NULL);
 
 	return 0;
 }
@@ -199,7 +199,7 @@ mclient_test(struct Client *client_p, struct Client *source_p, int parc, const c
 	}
 
 	/* illustration of how to call a hook function */
-	hook_call_event(doing_example_hook, NULL);
+	call_hook(doing_example_hook, NULL);
 
 	return 0;
 }
@@ -271,11 +271,10 @@ moper_test(struct Client *client_p, struct Client *source_p, int parc, const cha
 	return 0;
 }
 
-static int
+static void
 show_example_hook(void *unused)
 {
 	sendto_realops_flags(UMODE_ALL, L_ALL, "Called example hook!");
-	return 0;
 }
 
 /* END OF EXAMPLE MODULE */

@@ -603,7 +603,7 @@ main(int argc, char *argv[])
 	init_channels();
 	initclass();
 	initwhowas();
-	init_hooks();
+	init_hook();
 	init_reject();
 	init_cache();
 	load_all_modules(1);

@@ -28,7 +28,7 @@
 #include "ircd.h"
 #include "send.h"
 
-int show_info(struct hook_spy_data *);
+void show_info(hook_data *);
 
 mapi_hfn_list_av1 info_hfnlist[] = {
 	{"doing_info", (hookfn) show_info},
@@ -37,13 +37,11 @@ mapi_hfn_list_av1 info_hfnlist[] = {
 
 DECLARE_MODULE_AV1(info_spy, NULL, NULL, NULL, NULL, info_hfnlist, "$Revision$");
 
-int
-show_info(struct hook_spy_data *data)
+void
+show_info(hook_data *data)
 {
 	sendto_realops_flags(UMODE_SPY, L_ALL,
-			     "info requested by %s (%s@%s) [%s]",
-			     data->source_p->name, data->source_p->username,
-			     data->source_p->host, data->source_p->user->server);
-
-	return 0;
+			"info requested by %s (%s@%s) [%s]",
+			data->client->name, data->client->username,
+			data->client->host, data->client->user->server);
 }

@@ -1576,7 +1576,7 @@ register_local_user(struct Client *client_p, struct Client *source_p)
 	 * when its called.  If the hook wants to terminate the client, it
 	 * can call exit_client(). --fl
 	 */
-	hook_call_event(h_client_auth_id, client_p);
+	call_hook(h_client_auth_id, client_p);
 
 	if(IsAnyDead(client_p))
 		return CLIENT_EXITED;

@@ -35,15 +35,6 @@ enum
 #endif
 };
 
-struct HostMaskEntry
-{
-	int type, subtype;
-	unsigned long precedence;
-	char *hostmask;
-	void *data;
-	struct HostMaskEntry *next, *nexthash;
-};
-
 int parse_netmask(const char *, struct sockaddr *, int *);
 struct ConfItem *find_conf_by_address(const char *, struct sockaddr *, int, int, const char *);
 void add_conf_by_address(const char *, int, const char *, struct ConfItem *);

@@ -68,9 +68,6 @@ static int exit_unknown_client(struct Client *, struct Client *, struct Client *
 static int exit_local_server(struct Client *, struct Client *, struct Client *,const char *);
 static int qs_server(struct Client *, struct Client *, struct Client *, const char *comment);
 
-static int h_local_exit_client;
-static int h_unknown_exit_client;
-
 static EVH check_pings;
 
 static BlockHeap *client_heap = NULL;
@@ -106,8 +103,6 @@ init_client(void)
 	eventAddIsh("check_pings", check_pings, NULL, 30);
 	eventAddIsh("free_exited_clients", &free_exited_clients, NULL, 4);
 	eventAddIsh("exit_aborted_clients", exit_aborted_clients, NULL, 1);
-	hook_add_event("local_exit_client", &h_local_exit_client);
-	hook_add_event("unknown_exit_client", &h_unknown_exit_client);
 	
 }
 
@@ -1117,24 +1112,6 @@ remove_dependents(struct Client *client_p,
 	recurse_remove_clients(source_p, comment1);
 }
 
-static inline void
-call_local_exit_hook(struct Client *client_p, const char *comment)
-{
-	struct exit_client_hook e_hook;
-	e_hook.client_p = client_p;
-	strlcpy(e_hook.exit_message, comment, sizeof(e_hook.exit_message));
-	hook_call_event(h_local_exit_client, &e_hook);
-}
-
-static inline void
-call_unknown_exit_hook(struct Client *client_p, const char *comment)
-{
-	struct exit_client_hook e_hook;
-	e_hook.client_p = client_p;
-	strlcpy(e_hook.exit_message, comment, sizeof(e_hook.exit_message));
-	hook_call_event(h_unknown_exit_client, &e_hook);
-}
-
 
 struct abort_client
 {
@@ -1273,7 +1250,6 @@ exit_unknown_client(struct Client *client_p, struct Client *source_p, struct Cli
 
 	if(!IsIOError(source_p))
 		sendto_one(source_p, "ERROR :Closing Link: 127.0.0.1 (%s)", comment);
-	call_unknown_exit_hook(source_p, comment);
 	
 	close_connection(source_p);
 
@@ -1456,7 +1432,6 @@ exit_local_client(struct Client *client_p, struct Client *source_p, struct Clien
 		source_p->name, source_p->username, source_p->host,
 		source_p->localClient->sendK, source_p->localClient->receiveK);
 
-	call_local_exit_hook(source_p, comment);	
 	sendto_one(source_p, "ERROR :Closing Link: %s (%s)", source_p->host, comment);
 	close_connection(source_p);
 
