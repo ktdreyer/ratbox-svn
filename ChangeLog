@@ -1,3 +1,27 @@
+leeh        2004/11/05 18:15:59 EST	(20041105_0)
+
+  Modified files:
+    include              modebuild.h rserv.h s_chanserv.h 
+    src                  channel.c modebuild.c rserv.c 
+                         s_chanserv.c s_jupeserv.c 
+  Log:
+  - reworked kickbuilder to store reason per kick
+  - hook for HOOK_JOIN_CHANNEL was using wrong params
+  - added support to chanserv for kickbanning people who join and match
+    stored bans
+  
+  Revision  Changes    Path
+  1.3       +2 -3      rserv/include/modebuild.h
+  1.10      +2 -0      rserv/include/rserv.h
+  1.12      +1 -0      rserv/include/s_chanserv.h
+  1.31      +1 -1      rserv/src/channel.c
+  1.3       +21 -7     rserv/src/modebuild.c
+  1.33      +3 -0      rserv/src/rserv.c
+  1.13      +105 -0    rserv/src/s_chanserv.c
+  1.10      +1 -1      rserv/src/s_jupeserv.c
+
+
+
 leeh        2004/10/29 15:06:56 EDT	(20041029_1)
 
   Modified files:
