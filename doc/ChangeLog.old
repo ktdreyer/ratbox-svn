@@ -1,3 +1,11 @@
+*** 20001126_6 by adrian
+
+
+Hrm, return the number of lines parsed by linebuf_parse() - this'll be
+used later on by some anti-flood code at a later date.
+
+
+
 *** 20001126_5 by adrian
 
 
