@@ -124,7 +124,6 @@ static void ms_sjoin(struct Client *client_p,
   int hide_or_not;
   int i;
   dlink_node *m;
-
   *buf = '\0';
   *sjbuf = '\0';
   *sjbuf_nh = '\0';
@@ -144,8 +143,10 @@ static void ms_sjoin(struct Client *client_p,
   *mbuf = '\0';
   pargs = 0;
   newts = atol(parv[1]);
-  memset(&mode, 0, sizeof(mode));
 
+  mode.mode = 0;
+  mode.limit = 0;
+  mode.key[0] = '\0';;
   s = parv[3];
   while (*s)
     switch(*(s++))
@@ -368,7 +369,6 @@ static void ms_sjoin(struct Client *client_p,
   *mbuf++ = '+';
 
   sh = sjbuf_nh;
-  
   for (s = s0 = strtoken(&p, parv[args+4], " "); s;
        				s = s0 = strtoken(&p, (char *)NULL, " "))
     {
