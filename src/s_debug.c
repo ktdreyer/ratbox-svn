@@ -46,10 +46,6 @@
 #include <sys/resource.h>
 
 
-extern  void    count_whowas_memory(int *, u_long *);
-extern  void    count_ip_hash(int *,u_long *);    /* defined in s_conf.c */
-extern  int     maxdbufblocks;                    /* defined in dbuf.c */
-
 /*
  * Option string.  Must be before #ifdef DEBUGMODE.
  */
@@ -209,258 +205,250 @@ void send_usage(struct Client *cptr, char *nick)
    * even debugging.
    */
 
-  sendto_one(cptr, ":%s %d %s :DBUF alloc %d blocks %d",
-             me.name, RPL_STATSDEBUG, nick, dbufalloc, dbufblocks);
+  sendto_one(cptr, ":%s %d %s :DBUF used %d allocated %d",
+             me.name, RPL_STATSDEBUG, nick, DBufUsedCount, DBufCount);
   return;
 }
 
-void count_memory(struct Client *cptr,char *nick)
+void count_memory(struct Client* cptr, char* nick)
 {
-  struct Client *acptr;
-  struct SLink *link;
-  aChannel *chptr;
-  struct ConfItem *aconf;
-  aClass *cltmp;
+  struct Client*   acptr;
+  struct SLink*    link;
+  aChannel*        chptr;
+  struct ConfItem* aconf;
+  aClass*          cltmp;
 
-  int lc = 0;           /* local clients */
-  int ch = 0;           /* channels */
-  int lcc = 0;          /* local client conf links */
-  int rc = 0;           /* remote clients */
-  int us = 0;           /* user structs */
-  int chu = 0;          /* channel users */
-  int chi = 0;          /* channel invites */
-  int chb = 0;          /* channel bans */
-  int wwu = 0;          /* whowas users */
-  int cl = 0;           /* classes */
-  int co = 0;           /* conf lines */
+  int local_client_count      = 0;      /* local clients */
+  int channel_count           = 0;      /* channels */
+  int local_client_conf_count = 0;      /* local client conf links */
+  int remote_client_count     = 0;      /* remote clients */
+  int user_count              = 0;      /* user structs */
+  int server_count            = 0;      /* server structs */
+  int channel_user_count      = 0;      /* channel users */
+  int channel_invite_count    = 0;      /* channel invites */
+  int channel_ban_count       = 0;      /* channel bans */
+  int class_count             = 0;      /* classes */
+  int conf_count              = 0;      /* conf lines */
+  int slink_count             = 0;      /* slinks */
+  int invite_count            = 0;      /* users invited */
+  int user_channel_count      = 0;      /* users in channels */
+  int away_count              = 0;      /* aways set */
+  int number_ips_stored       = 0;      /* number of ip addresses hashed */
+  int number_servers_cached   = 0;      /* number of servers cached by scache */
 
-  int usi = 0;          /* users invited */
-  int usc = 0;          /* users in channels */
-  int aw = 0;           /* aways set */
-  int number_ips_stored;        /* number of ip addresses hashed */
-  int number_servers_cached; /* number of servers cached by scache */
+  size_t channel_mem          = 0;      /* memory used by channels */
+  size_t channel_ban_mem      = 0;      /* memory used by channel bans */
+  size_t local_client_mem     = 0;      /* memory used by local clients */
+  size_t remote_client_mem    = 0;      /* memory used by remote clients */
+  size_t user_mem             = 0;      /* memory used by users */
+  size_t server_mem           = 0;      /* memory used by servers */
+  size_t away_mem             = 0;      /* memory used by aways */
+  size_t conf_mem             = 0;      /* memory used by conf lines */
+  size_t dbuf_mem             = 0;      /* memory used by dbufs */
+  size_t resolver_mem         = 0;      /* memory used by resolver */
+  size_t mem_servers_cached   = 0;      /* memory used by scache */
+  size_t mem_ips_stored       = 0;      /* memory used by ip address hash */
+  size_t slink_mem            = 0;      /* memory used by slinks */
 
-  u_long chm = 0;       /* memory used by channels */
-  u_long chbm = 0;      /* memory used by channel bans */
-  u_long lcm = 0;       /* memory used by local clients */
-  u_long rcm = 0;       /* memory used by remote clients */
-  u_long awm = 0;       /* memory used by aways */
-  u_long wwm = 0;       /* whowas array memory used */
-  u_long com = 0;       /* memory used by conf lines */
-  u_long db = 0;        /* memory used by dbufs */
-  u_long maxdb = 0;     /* max used by dbufs */
-  u_long rm = 0;        /* res memory used */
-  u_long mem_servers_cached; /* memory used by scache */
-  u_long mem_ips_stored; /* memory used by ip address hash */
+  size_t client_mem_total     = 0;
+  size_t channel_mem_total    = 0;
 
-  size_t client_hash_table_size = 0;
-  size_t channel_hash_table_size = 0;
-  u_long totcl = 0;
-  u_long totch = 0;
-  u_long totww = 0;
+  size_t local_client_memory_used = 0;
+  size_t local_client_memory_allocated = 0;
 
-  u_long local_client_memory_used = 0;
-  u_long local_client_memory_allocated = 0;
+  size_t remote_client_memory_used = 0;
+  size_t remote_client_memory_allocated = 0;
 
-  u_long remote_client_memory_used = 0;
-  u_long remote_client_memory_allocated = 0;
+  size_t user_memory_used = 0;
+  size_t user_memory_allocated = 0;
 
-  u_long user_memory_used = 0;
-  u_long user_memory_allocated = 0;
-
-  u_long links_memory_used = 0;
-  u_long links_memory_allocated = 0;
+  size_t links_memory_used = 0;
+  size_t links_memory_allocated = 0;
 
 #ifdef FLUD
-  u_long flud_memory_used = 0;
-  u_long flud_memory_allocated = 0;
+  size_t flud_memory_used = 0;
+  size_t flud_memory_allocated = 0;
 #endif
 
-  u_long tot = 0;
-
-  count_whowas_memory(&wwu, &wwm);      /* no more away memory to count */
+  size_t mem_total = 0;
 
   for (acptr = GlobalClientList; acptr; acptr = acptr->next)
     {
       if (MyConnect(acptr))
         {
-          lc++;
+          ++local_client_count;
           for (link = acptr->confs; link; link = link->next)
-            lcc++;
+            ++local_client_conf_count;
         }
-      else
-        rc++;
+      else if (!IsMe(cptr))
+        ++remote_client_count;
       if (acptr->user)
         {
-          us++;
-          for (link = acptr->user->invited; link;
-               link = link->next)
-            usi++;
-          for (link = acptr->user->channel; link;
-               link = link->next)
-            usc++;
+          ++user_count;
+          for (link = acptr->user->invited; link; link = link->next)
+            ++invite_count;
+          for (link = acptr->user->channel; link; link = link->next)
+            ++user_channel_count;
           if (acptr->user->away)
             {
-              aw++;
-              awm += (strlen(acptr->user->away)+1);
+              ++away_count;
+              away_mem += (strlen(acptr->user->away) + 1);
             }
         }
     }
-  lcm = lc * CLIENT_LOCAL_SIZE;
-  rcm = rc * CLIENT_REMOTE_SIZE;
+  local_client_mem  = local_client_count  * CLIENT_LOCAL_SIZE;
+  remote_client_mem = remote_client_count * CLIENT_REMOTE_SIZE;
+  user_mem          = user_count * sizeof(struct User);
 
   for (chptr = channel; chptr; chptr = chptr->nextch)
     {
-      ch++;
-      chm += (strlen(chptr->chname) + sizeof(aChannel));
+      ++channel_count;
+      channel_mem += (strlen(chptr->chname) + 1 + sizeof(aChannel));
       for (link = chptr->members; link; link = link->next)
-        chu++;
+        ++channel_user_count;
       for (link = chptr->invites; link; link = link->next)
-        chi++;
+        ++channel_invite_count;
       for (link = chptr->banlist; link; link = link->next)
         {
-          chb++;
-          chbm += (strlen(link->value.cp)+1+sizeof(struct SLink));
-        #ifdef BAN_INFO
-        	if (link->value.banptr->banstr)
-        		chbm += strlen(link->value.banptr->banstr);
-        	if (link->value.banptr->who)
-        		chbm += strlen(link->value.banptr->who);
-        #endif /* BAN_INFO */
+          ++channel_ban_count;
+          channel_ban_mem += (strlen(link->value.cp) + 1 + sizeof(struct SLink));
+#ifdef BAN_INFO
+          if (link->value.banptr->banstr)
+            channel_ban_mem += strlen(link->value.banptr->banstr) + 1;
+          if (link->value.banptr->who)
+            channel_ban_mem += strlen(link->value.banptr->who) + 1;
+#endif /* BAN_INFO */
         }
     }
 
+  slink_count = local_client_conf_count + invite_count + user_channel_count +
+                channel_user_count + channel_invite_count + channel_ban_count;   
+  slink_mem = slink_count * sizeof(struct SLink);
+
   for (aconf = ConfigItemList; aconf; aconf = aconf->next)
     {
-      co++;
-      com += aconf->host ? strlen(aconf->host)+1 : 0;
-      com += aconf->passwd ? strlen(aconf->passwd)+1 : 0;
-      com += aconf->name ? strlen(aconf->name)+1 : 0;
-      com += sizeof(struct ConfItem);
+      ++conf_count;
+      conf_mem += aconf->host ? strlen(aconf->host) + 1 : 0;
+      conf_mem += aconf->passwd ? strlen(aconf->passwd) + 1 : 0;
+      conf_mem += aconf->name ? strlen(aconf->name) + 1 : 0;
+      conf_mem += sizeof(struct ConfItem);
     }
 
   for (cltmp = ClassList; cltmp; cltmp = cltmp->next)
-    cl++;
+    ++class_count;
 
   sendto_one(cptr, ":%s %d %s :Client Local %d(%d) Remote %d(%d)",
-             me.name, RPL_STATSDEBUG, nick, lc, lcm, rc, rcm);
+             me.name, RPL_STATSDEBUG, nick, local_client_count, 
+             local_client_mem, remote_client_count, remote_client_mem);
   sendto_one(cptr, ":%s %d %s :Users %d(%d) Invites %d(%d)",
-             me.name, RPL_STATSDEBUG, nick, us, us*sizeof(struct User), usi,
-             usi * sizeof(struct SLink));
+             me.name, RPL_STATSDEBUG, nick, user_count, user_mem,
+             invite_count, invite_count * sizeof(struct SLink));
   sendto_one(cptr, ":%s %d %s :User channels %d(%d) Aways %d(%d)",
-             me.name, RPL_STATSDEBUG, nick, usc, usc*sizeof(struct SLink),
-             aw, awm);
+             me.name, RPL_STATSDEBUG, nick, user_channel_count, 
+             user_channel_count * sizeof(struct SLink),
+             away_count, away_mem);
   sendto_one(cptr, ":%s %d %s :Attached confs %d(%d)",
-             me.name, RPL_STATSDEBUG, nick, lcc, lcc*sizeof(struct SLink));
+             me.name, RPL_STATSDEBUG, nick, local_client_conf_count, 
+             local_client_conf_count * sizeof(struct SLink));
 
-  totcl = lcm + rcm + us*sizeof(struct User) + usc*sizeof(struct SLink) + awm;
-  totcl += lcc*sizeof(struct SLink) + usi*sizeof(struct SLink);
+  client_mem_total = local_client_mem + remote_client_mem + user_mem +
+                     user_channel_count * sizeof(struct SLink) + away_mem;
+  client_mem_total += local_client_conf_count * sizeof(struct SLink) + 
+                      invite_count * sizeof(struct SLink);
 
   sendto_one(cptr, ":%s %d %s :Conflines %d(%d)",
-             me.name, RPL_STATSDEBUG, nick, co, com);
+             me.name, RPL_STATSDEBUG, nick, conf_count, conf_mem);
 
   sendto_one(cptr, ":%s %d %s :Classes %d(%d)",
-             me.name, RPL_STATSDEBUG, nick, cl, cl*sizeof(struct Class));
+             me.name, RPL_STATSDEBUG, nick, class_count, 
+             class_count * sizeof(struct Class));
 
   sendto_one(cptr, ":%s %d %s :Channels %d(%d) Bans %d(%d)",
-             me.name, RPL_STATSDEBUG, nick, ch, chm, chb, chbm);
+             me.name, RPL_STATSDEBUG, nick, channel_count, channel_mem, 
+             channel_ban_count, channel_ban_mem);
   sendto_one(cptr, ":%s %d %s :Channel members %d(%d) invite %d(%d)",
-             me.name, RPL_STATSDEBUG, nick, chu, chu*sizeof(struct SLink),
-             chi, chi*sizeof(struct SLink));
+             me.name, RPL_STATSDEBUG, nick, channel_user_count, 
+             channel_user_count * sizeof(struct SLink),
+             channel_invite_count, channel_invite_count * sizeof(struct SLink));
 
-  totch = chm + chbm + chu*sizeof(struct SLink) + chi*sizeof(struct SLink);
+  channel_mem_total = channel_mem + channel_ban_mem + 
+                      channel_user_count * sizeof(struct SLink) + 
+                      channel_invite_count * sizeof(struct SLink);
 
-  sendto_one(cptr, ":%s %d %s :Whowas users %d(%d))",
-             me.name, RPL_STATSDEBUG, nick, wwu, wwu*sizeof(struct User));
+  sendto_one(cptr, ":%s %d %s :Hash: client %d chan %d",
+             me.name, RPL_STATSDEBUG, nick, U_MAX, CH_MAX);
 
-  sendto_one(cptr, ":%s %d %s :Whowas array %d(%d)",
-             me.name, RPL_STATSDEBUG, nick, NICKNAMEHISTORYLENGTH, wwm);
+  dbuf_mem = DBufCount * sizeof(dbufbuf);
+  sendto_one(cptr, ":%s %d %s :DBuf allocated %d(%d), used %d(%d)",
+             me.name, RPL_STATSDEBUG, nick, DBufCount, dbuf_mem,
+             DBufUsedCount, DBufUsedCount * sizeof(dbufbuf));
 
-  totww = wwu * sizeof(struct User) + wwm;
+  resolver_mem = cres_mem(cptr);
 
-  client_hash_table_size  = hash_get_client_table_size();
-  channel_hash_table_size = hash_get_channel_table_size();
-
-  sendto_one(cptr, ":%s %d %s :Hash: client %d(%d) chan %d(%d)",
-             me.name, RPL_STATSDEBUG, nick,
-             U_MAX, client_hash_table_size,
-             CH_MAX, channel_hash_table_size);
-
-  db = dbufblocks * sizeof(dbufbuf);
-  maxdb = maxdbufblocks * sizeof(dbufbuf);
-  sendto_one(cptr, ":%s %d %s :Dbuf blocks %d(%d), Max %d(%d)",
-             me.name, RPL_STATSDEBUG, nick, dbufblocks, db,
-             maxdbufblocks, maxdb);
-
-  rm = cres_mem(cptr);
-
-  count_scache(&number_servers_cached,&mem_servers_cached);
+  count_scache(&number_servers_cached, &mem_servers_cached);
 
   sendto_one(cptr, ":%s %d %s :scache %d(%d)",
              me.name, RPL_STATSDEBUG, nick,
-             number_servers_cached,
-             mem_servers_cached);
+             number_servers_cached, mem_servers_cached);
 
-  count_ip_hash(&number_ips_stored,&mem_ips_stored);
+  count_ip_hash(&number_ips_stored, &mem_ips_stored);
   sendto_one(cptr, ":%s %d %s :iphash %d(%d)",
              me.name, RPL_STATSDEBUG, nick,
-             number_ips_stored,
-             mem_ips_stored);
+             number_ips_stored, mem_ips_stored);
 
-  tot = totww + totch + totcl + com + cl*sizeof(aClass) + db + rm;
-  tot += client_hash_table_size;
-  tot += channel_hash_table_size;
+  mem_total = channel_mem_total + client_mem_total + 
+              conf_mem + class_count * sizeof(aClass) + 
+              dbuf_mem + resolver_mem + mem_servers_cached;
 
-  tot += mem_servers_cached;
-  sendto_one(cptr, ":%s %d %s :Total: ww %d ch %d cl %d co %d db %d",
-             me.name, RPL_STATSDEBUG, nick, totww, totch, totcl, com, db);
+  sendto_one(cptr, ":%s %d %s :Total: ch %d cl %d co %d db %d",
+             me.name, RPL_STATSDEBUG, nick, channel_mem_total, 
+             client_mem_total, conf_mem, dbuf_mem);
 
 
-  count_local_client_memory((int *)&local_client_memory_used,
-                            (int *)&local_client_memory_allocated);
-  tot += local_client_memory_allocated;
-  sendto_one(cptr, ":%s %d %s :Local client Memory in use: %d Local client Memory allocated: %d",
+  count_local_client_memory(&local_client_memory_used, 
+                            &local_client_memory_allocated);
+  mem_total += local_client_memory_allocated - local_client_mem;
+
+  sendto_one(cptr, ":%s %d %s :Local client memory allocated: %d used: %d",
              me.name, RPL_STATSDEBUG, nick,
              local_client_memory_used, local_client_memory_allocated);
 
 
-  count_remote_client_memory( (int *)&remote_client_memory_used,
-                              (int *)&remote_client_memory_allocated);
-  tot += remote_client_memory_allocated;
-  sendto_one(cptr, ":%s %d %s :Remote client Memory in use: %d Remote client Memory allocated: %d",
+  count_remote_client_memory(&remote_client_memory_used, 
+                             &remote_client_memory_allocated);
+  mem_total += remote_client_memory_allocated - remote_client_mem;
+
+  sendto_one(cptr, ":%s %d %s :Remote client memory allocated: %d used: %d",
              me.name, RPL_STATSDEBUG, nick,
              remote_client_memory_used, remote_client_memory_allocated);
 
 
-  count_user_memory( (int *)&user_memory_used,
-                    (int *)&user_memory_allocated);
-  tot += user_memory_allocated;
-  sendto_one(cptr, ":%s %d %s :anUser Memory in use: %d anUser Memory allocated: %d",
+  count_user_memory(&user_memory_used, &user_memory_allocated);
+  mem_total += user_memory_allocated - user_mem;
+
+  sendto_one(cptr, ":%s %d %s :User memory allocated: %d used: %d",
              me.name, RPL_STATSDEBUG, nick,
-             user_memory_used,
-             user_memory_allocated);
+             user_memory_used, user_memory_allocated);
 
 
-  count_links_memory( (int *)&links_memory_used,
-                    (int *)&links_memory_allocated);
-  sendto_one(cptr, ":%s %d %s :Links Memory in use: %d Links Memory allocated: %d",
+  count_links_memory(&links_memory_used, &links_memory_allocated);
+  mem_total += links_memory_allocated - slink_mem;
+
+  sendto_one(cptr, ":%s %d %s :Links memory allocated: %d used: %d",
              me.name, RPL_STATSDEBUG, nick,
-             links_memory_used,
-             links_memory_allocated);
+             links_memory_used, links_memory_allocated);
 
 #ifdef FLUD
-  count_flud_memory( (int *)&flud_memory_used,
-                    (int *)&flud_memory_allocated);
-  sendto_one(cptr, ":%s %d %s :FLUD Memory in use: %d FLUD Memory allocated: %d",
+  count_flud_memory(&flud_memory_used, &flud_memory_allocated);
+  mem_total += flud_memory_allocated;
+
+  sendto_one(cptr, ":%s %d %s :FLUD memory allocated: %d used: %d",
              me.name, RPL_STATSDEBUG, nick,
-             flud_memory_used,
-             flud_memory_allocated);
+             flud_memory_used, flud_memory_allocated);
 
-  tot += flud_memory_allocated;
 #endif
-
   sendto_one(cptr, 
              ":%s %d %s :TOTAL: %d Available:  Current max RSS: %u",
-             me.name, RPL_STATSDEBUG, nick, tot, get_maxrss());
+             me.name, RPL_STATSDEBUG, nick, mem_total, get_maxrss());
 
 }

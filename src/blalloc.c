@@ -394,40 +394,39 @@ int BlockHeapDestroy(BlockHeap *bh)
    return 0;
 }
 
-/* ************************************************************************ */
-/* FUNCTION DOCUMENTATION:                                                  */
-/*    BlockHeapCountMemory                                                  */
-/* Description:                                                             */
-/*    Counts up memory used by heap, and memory allocated out of heap       */
-/* Parameters:                                                              */
-/*    bh (IN):  Pointer to the BlockHeap to be counted.                     */
-/*    TotalUsed (IN): Pointer to int, total memory used by heap             */
-/*    TotalAllocated (IN): Pointer to int, total memory allocated           */
-/* Returns:                                                                 */
-/*   TotalUsed                                                              */
-/*   TotalAllocated                                                         */
-/* ************************************************************************ */
-
-void BlockHeapCountMemory(BlockHeap *bh,int *TotalUsed,int *TotalAllocated)
+/*
+ * block_heap_count_memory - count memory used by heap
+ * Description:                                                          
+ *    Counts up memory used by heap, and memory allocated out of heap   
+ * Parameters:                                                         
+ *    bh (IN):  Pointer to the BlockHeap to be counted.               
+ *    used (OUT): Pointer to int, total memory used by heap          
+ *    allocated (OUT): Pointer to int, total memory allocated        
+ * Returns:                                                        
+ *   used                                                         
+ *   allocated                                                   
+ */
+void block_heap_count_memory(BlockHeap *bh, size_t* used, size_t* allocated)
 {
   Block *walker;
 
-  *TotalUsed = 0;
-  *TotalAllocated = 0;
+  *used = 0;
+  *allocated = 0;
 
   if (bh == NULL)
     return;
 
-  *TotalUsed = sizeof(BlockHeap);
-  *TotalAllocated = sizeof(BlockHeap);
+  *used      = sizeof(BlockHeap);
+  *allocated = sizeof(BlockHeap);
 
   for (walker = bh->base; walker != NULL; walker = walker->next)
     {
-      *TotalUsed += sizeof(Block);
-      *TotalUsed += ((bh->elemSize * bh->elemsPerBlock) + bh->numlongs);
+      *used += sizeof(Block);
+      *used += ((bh->elemSize * bh->elemsPerBlock) + bh->numlongs);
 
-      *TotalAllocated = sizeof(Block);      
-      *TotalAllocated = ((bh->elemsPerBlock - walker->freeElems)
-                         * bh->elemSize);
+      *allocated = sizeof(Block);      
+      *allocated = ((bh->elemsPerBlock - walker->freeElems) * bh->elemSize);
     }
 }
+
+

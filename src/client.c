@@ -1647,21 +1647,23 @@ const char* comment        /* Reason for the exit */
 /*
  * Count up local client memory
  */
-void count_local_client_memory(int *local_client_memory_used,
-                               int *local_client_memory_allocated )
+void count_local_client_memory(size_t* local_client_memory_used,
+                               size_t* local_client_memory_allocated)
 {
-  BlockHeapCountMemory( localClientFreeList,
-                        local_client_memory_used,
-                        local_client_memory_allocated);
+  block_heap_count_memory(localClientFreeList,
+                          local_client_memory_used,
+                          local_client_memory_allocated);
 }
 
 /*
  * Count up remote client memory
  */
-void count_remote_client_memory(int *remote_client_memory_used,
-                               int *remote_client_memory_allocated )
+void count_remote_client_memory(size_t* remote_client_memory_used,
+                                size_t* remote_client_memory_allocated )
 {
-  BlockHeapCountMemory( remoteClientFreeList,
-                        remote_client_memory_used,
-                        remote_client_memory_allocated);
+  block_heap_count_memory(remoteClientFreeList,
+                          remote_client_memory_used,
+                          remote_client_memory_allocated);
 }
+
+

@@ -27,81 +27,75 @@
 #include "common.h"
 #include "irc_string.h"
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-int             dbufalloc = 0;
-int             dbufblocks = 0;
-int             maxdbufalloc = 0;
-int             maxdbufblocks = 0;
-static dbufbuf* freelist = NULL;
+int             DBufUsedCount = 0;
+int             DBufCount = 0;
+static dbufbuf* dbufFreeList = NULL;
 
-/* This is a dangerous define because a broken compiler will set DBUFSIZ
-** to 4, which will work but will be very inefficient. However, there
-** are other places where the code breaks badly if this is screwed
-** up, so... -- Wumpus
-*/
-
-#define DBUFSIZ sizeof(((dbufbuf *)0)->data)
-
-/* dbuf_init--initialize a stretch of memory as dbufs.
-   Doing this early on should save virtual memory if not real memory..
-   at the very least, we get more control over what the server is doing 
-   
-   mika@cs.caltech.edu 6/24/95
+/* 
+ * dbuf_init--initialize a stretch of memory as dbufs.
+ * Doing this early on should save virtual memory if not real memory..
+ * at the very least, we get more control over what the server is doing 
+ * 
+ * mika@cs.caltech.edu 6/24/95
+ *
+ * XXX - Unfortunately this makes cleanup impossible because the block 
+ * pointer isn't saved and dbufs are not allocated in chunks anywhere else.
+ * --Bleep
  */
-
 void dbuf_init()
 {
-  int      i = 0;
+  int      i;
   dbufbuf* dbp;
 
-  freelist = (dbufbuf*) MyMalloc(sizeof(dbufbuf) * INITIAL_DBUFS);
-  if (!freelist) 
-    return; /* screw this if it doesn't work */
-  dbp = freelist;
+  assert(0 == dbufFreeList);
+  dbufFreeList = (dbufbuf*) MyMalloc(sizeof(dbufbuf) * INITIAL_DBUFS);
+  assert(0 != dbufFreeList);
 
-  for (; i < INITIAL_DBUFS - 1; ++i, ++dbp, ++dbufblocks)
+  dbp = dbufFreeList;
+
+  for (i = 0; i < INITIAL_DBUFS - 1; ++i) {
     dbp->next = (dbp + 1);
-
-  dbp->next = NULL;
-  ++dbufblocks;
-  maxdbufblocks = dbufblocks;
+    ++dbp;
+  }
+  dbp->next  = NULL;
+  DBufCount = INITIAL_DBUFS;
 }
 
 /*
-** dbuf_alloc - allocates a dbufbuf structure either from freelist or
+** dbuf_alloc - allocates a dbufbuf structure either from dbufFreeList or
 ** creates a new one.
 */
 static dbufbuf *dbuf_alloc()
 {
-  dbufbuf *dbptr;
+  dbufbuf* dbptr = dbufFreeList;
 
-  dbufalloc++;
+  if (DBufUsedCount * DBUF_SIZE == BUFFERPOOL)
+    return NULL;
 
-  if ( (dbptr = freelist) )
-    {
-      freelist = freelist->next;
-      return dbptr;
-    }
-  if (dbufalloc * DBUFSIZ > BUFFERPOOL)
-    {
-      dbufalloc--;
-      return NULL;
-    }
-
-  dbufblocks++;
-  return (dbufbuf *)MyMalloc(sizeof(dbufbuf));
+  if (dbptr)
+    dbufFreeList = dbufFreeList->next;
+  else {
+    dbptr = (dbufbuf*) MyMalloc(sizeof(dbufbuf));
+    assert(0 != dbptr);
+    ++DBufCount;
+  }
+  ++DBufUsedCount;
+  return dbptr;
 }
 
 /*
-** dbuf_free - return a dbufbuf structure to the freelist
+** dbuf_free - return a dbufbuf structure to the dbufFreeList
 */
-static  void    dbuf_free(dbufbuf *ptr)
+static void dbuf_free(dbufbuf* ptr)
 {
-  dbufalloc--;
-  ptr->next = freelist;
-  freelist = ptr;
+  assert(0 != ptr);
+  --DBufUsedCount;
+  ptr->next = dbufFreeList;
+  dbufFreeList = ptr;
 }
 /*
 ** This is called when malloc fails. Scrap the whole content
@@ -125,13 +119,13 @@ static int dbuf_malloc_error(dbuf *dyn)
 }
 
 
-int     dbuf_put(dbuf *dyn,char *buf,int length)
+int dbuf_put(dbuf *dyn, char *buf, int length)
 {
   dbufbuf       **h, *d;
   int    off;
   int   chunk;
 
-  off = (dyn->offset + dyn->length) % DBUFSIZ;
+  off = (dyn->offset + dyn->length) % DBUF_SIZE;
   /*
   ** Locate the last non-empty buffer. If the last buffer is
   ** full, the loop will terminate with 'd==NULL'. This loop
@@ -150,7 +144,7 @@ int     dbuf_put(dbuf *dyn,char *buf,int length)
   /*
   ** Append users data to buffer, allocating buffers as needed
   */
-  chunk = DBUFSIZ - off;
+  chunk = DBUF_SIZE - off;
   dyn->length += length;
   for ( ;length > 0; h = &(d->next))
     {
@@ -168,13 +162,13 @@ int     dbuf_put(dbuf *dyn,char *buf,int length)
       length -= chunk;
       buf += chunk;
       off = 0;
-      chunk = DBUFSIZ;
+      chunk = DBUF_SIZE;
     }
   return 1;
 }
 
 
-char    *dbuf_map(dbuf *dyn,int *length)
+char* dbuf_map(dbuf *dyn, int *length)
 {
   if (dyn->head == NULL)
     {
@@ -182,20 +176,20 @@ char    *dbuf_map(dbuf *dyn,int *length)
       *length = 0;
       return NULL;
     }
-  *length = DBUFSIZ - dyn->offset;
+  *length = DBUF_SIZE - dyn->offset;
   if (*length > dyn->length)
     *length = dyn->length;
   return (dyn->head->data + dyn->offset);
 }
 
-int     dbuf_delete(dbuf *dyn,int length)
+void dbuf_delete(dbuf *dyn,int length)
 {
   dbufbuf *d;
   int chunk;
 
   if (length > dyn->length)
     length = dyn->length;
-  chunk = DBUFSIZ - dyn->offset;
+  chunk = DBUF_SIZE - dyn->offset;
   while (length > 0)
     {
       if (chunk > length)
@@ -203,24 +197,23 @@ int     dbuf_delete(dbuf *dyn,int length)
       length -= chunk;
       dyn->offset += chunk;
       dyn->length -= chunk;
-      if (dyn->offset == DBUFSIZ || dyn->length == 0)
+      if (dyn->offset == DBUF_SIZE || dyn->length == 0)
         {
           d = dyn->head;
           dyn->head = d->next;
           dyn->offset = 0;
           dbuf_free(d);
         }
-      chunk = DBUFSIZ;
+      chunk = DBUF_SIZE;
     }
-  if (dyn->head == (dbufbuf *)NULL)
+  if (dyn->head == NULL)
     {
       dyn->length = 0;
       dyn->tail = 0;
     }
-  return 0;
 }
 
-int     dbuf_get(dbuf *dyn,char *buf,int length)
+int dbuf_get(dbuf *dyn, char *buf, int length)
 {
   int   moved = 0;
   int   chunk;
@@ -231,7 +224,7 @@ int     dbuf_get(dbuf *dyn,char *buf,int length)
       if (chunk > length)
         chunk = length;
       memcpy(buf, b, (int)chunk);
-      (void)dbuf_delete(dyn, chunk);
+      dbuf_delete(dyn, chunk);
       buf += chunk;
       length -= chunk;
       moved += chunk;
@@ -257,7 +250,7 @@ int     dbuf_getmsg(dbuf *dyn,char *buf,int length)
 getmsg_init:
   d = dyn->head;
   dlen = dyn->length;
-  i = DBUFSIZ - dyn->offset;
+  i = DBUF_SIZE - dyn->offset;
   if (i <= 0)
     return -1;
   copy = 0;
@@ -280,7 +273,7 @@ getmsg_init:
           */
           if (copy == 1)
             {
-              (void)dbuf_delete(dyn, 1);
+              dbuf_delete(dyn, 1);
               goto getmsg_init;
             }
           break;
@@ -291,7 +284,7 @@ getmsg_init:
           if ((d = d->next))
             {
               s = d->data;
-              i = IRCD_MIN(DBUFSIZ, dlen);
+              i = IRCD_MIN(DBUF_SIZE, dlen);
             }
         }
       else
@@ -309,12 +302,13 @@ getmsg_init:
   ** and delete the rest of it!
   */
   if (copy - i > 0)
-    (void)dbuf_delete(dyn, copy - i);
+    dbuf_delete(dyn, copy - i);
   if (i >= 0)
     *(buf+i) = '\0';    /* mark end of messsage */
   
   return i;
 }
+
 #ifdef TEST_DBUF
 void test_dbuf(void)
 {
@@ -330,3 +324,4 @@ void test_dbuf(void)
   return;
 }
 #endif /* TEST_DBUF */
+

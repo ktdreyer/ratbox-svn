@@ -3822,10 +3822,7 @@ int     m_topic(struct Client *cptr,
 **      parv[1] - user to invite
 **      parv[2] - channel number
 */
-int     m_invite(struct Client *cptr,
-                 struct Client *sptr,
-                 int parc,
-                 char *parv[])
+int m_invite(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   struct Client *acptr;
   struct Channel *chptr;

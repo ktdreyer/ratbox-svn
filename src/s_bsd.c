@@ -343,24 +343,13 @@ int deliver_it(struct Client *cptr, char *str, int len)
  * also updates reason if a K-line
  *
  */
-int check_client(struct Client *cptr,char *username,char **reason)
+int check_client(struct Client *cptr, const char* username, char **reason)
 {
-  static char     sockname[HOSTLEN + 1];
-  int             i;
-  struct hostent* hp = 0;
- 
-  ClearAccess(cptr);
+  int i = attach_Iline(cptr, username, reason);
 
-  if (cptr->dns_reply)
-    hp = cptr->dns_reply->hp;
-
-  if ((i = attach_Iline(cptr, hp, sockname, username, reason)))
-    {
-      log(L_INFO, "Access denied: %s[%s]", cptr->name, sockname);
-      return i;
-    }
-
-  return 0;
+  if (0 != i)
+    log(L_INFO, "Access denied: %s[%s]", cptr->name, cptr->sockhost);
+  return i;
 }
 
 /*

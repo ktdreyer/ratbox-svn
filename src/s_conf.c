@@ -381,53 +381,33 @@ void report_specials(struct Client* sptr, int flags, int numeric)
  *  Cleaned up again Sept 7 1998 - Dianora
  */
 
-int attach_Iline(struct Client* cptr, struct hostent* hp,
-                 const char* sockhost, const char* username, char **preason)
+int attach_Iline(struct Client* cptr, const char* username, char **preason)
 {
   struct ConfItem* aconf;
   struct ConfItem* gkill_conf;
   struct ConfItem* tkline_conf;
-  char       host[HOSTLEN + 3];
-  char       non_ident[USERLEN + 1];
-
-  host[HOSTLEN] = '\0';
-
-  /* who cares about aliases? sheeeshhh -db */
-
-  if (hp && hp->h_name)
-    {
-      strncpy_irc(host, hp->h_name, HOSTLEN);
-      /*
-       * XXX - this probably isn't needed, but ...
-       */
-      add_local_domain(host, HOSTLEN);
-    }
-  else
-    {
-      strncpy_irc(host, sockhost, HOSTLEN);
-      host[HOSTLEN] = '\0';
-    }
+  char             non_ident[USERLEN + 1];
 
   if (IsGotId(cptr))
     {
-      aconf = find_matching_mtrie_conf(host,cptr->username,
+      aconf = find_matching_mtrie_conf(cptr->host, cptr->username,
                                        ntohl(cptr->ip.s_addr));
-      if(aconf && !IsConfElined(aconf))
+      if (aconf && !IsConfElined(aconf))
         {
-          if( (tkline_conf = find_tkline(host, cptr->username)) )
+          if( (tkline_conf = find_tkline(cptr->host, cptr->username)) )
             aconf = tkline_conf;
         }
     }
   else
     {
       non_ident[0] = '~';
-      strncpy_irc(&non_ident[1],username, USERLEN - 1);
+      strncpy_irc(&non_ident[1], username, USERLEN - 1);
       non_ident[USERLEN] = '\0';
-      aconf = find_matching_mtrie_conf(host,non_ident,
+      aconf = find_matching_mtrie_conf(cptr->host, non_ident,
                                        ntohl(cptr->ip.s_addr));
-      if(aconf && !IsConfElined(aconf))
+      if (aconf && !IsConfElined(aconf))
         {
-          if( (tkline_conf = find_tkline(host, non_ident)) )
+          if( (tkline_conf = find_tkline(cptr->host, non_ident)) )
             aconf = tkline_conf;
         }
     }
@@ -441,26 +421,26 @@ int attach_Iline(struct Client* cptr, struct hostent* hp,
             {
               *preason = gkill_conf->passwd;
               sendto_one(cptr, ":%s NOTICE %s :*** G-lined",
-                           me.name,cptr->name);
-              return ( -5 );
+                         me.name, cptr->name);
+              return -5;
             }
 #endif        /* GLINES */
 
-          if(IsConfDoIdentd(aconf))
+          if (IsConfDoIdentd(aconf))
             SetNeedId(cptr);
 
           /* Thanks for spoof idea amm */
-          if(IsConfDoSpoofIp(aconf))
+          if (IsConfDoSpoofIp(aconf))
             {
               /* abuse it, lose it. */
 #ifdef SPOOF_FREEFORM
               sendto_realops("%s spoofing: %s as %s", cptr->name,
-                             host, aconf->name);
+                             cptr->host, aconf->name);
               strncpy_irc(cptr->host, aconf->name, HOSTLEN);
 #else
               /* default to oper.server.name.tld */
               sendto_realops("%s spoofing: %s(%s) as oper.%s", cptr->name, 
-                             host, inetntoa((char*) &cptr->ip), me.name);
+                             cptr->host, cptr->sockhost, me.name);
               strcpy(cptr->host, "oper.");
               strncpy_irc(&cptr->host[5], me.name, HOSTLEN - 5);
 #endif
@@ -469,16 +449,16 @@ int attach_Iline(struct Client* cptr, struct hostent* hp,
             }
 
 #ifdef LIMIT_UH
-          return(attach_iline(cptr, aconf, username));
+          return attach_iline(cptr, aconf, username);
 #else
-          return(attach_iline(cptr, aconf));
+          return attach_iline(cptr, aconf);
 #endif
 
         }
       else if(aconf->status & CONF_KILL)
         {
           *preason = aconf->passwd;
-          return(-5);
+          return -5;
         }
     }
 
@@ -540,7 +520,7 @@ static int attach_iline(struct Client *cptr, struct ConfItem *aconf)
     }
 #endif
 
-  return (attach_conf(cptr, aconf) );
+  return attach_conf(cptr, aconf);
 }
 
 /* link list of free IP_ENTRY's */
@@ -823,7 +803,7 @@ static int hash_ip(unsigned long ip)
 
 /* Added so s_debug could check memory usage in here -Dianora */
 /*
- * count_ip_hash
+ * count_ip_hash - count memory for ip hash table
  *
  * inputs        - pointer to counter of number of ips hashed 
  *               - pointer to memory used for ip hash
@@ -834,26 +814,27 @@ static int hash_ip(unsigned long ip)
  * used in the hash.
  */
 
-void count_ip_hash(int *number_ips_stored,u_long *mem_ips_stored)
+void count_ip_hash(int *number_ips_stored, size_t* mem_ips_stored)
 {
   IP_ENTRY *ip_hash_ptr;
   int i;
 
-  *number_ips_stored = 0;
-  *mem_ips_stored = 0;
+  int    count = 0;
+  size_t size = 0;
 
   for(i = 0; i < IP_HASH_SIZE ;i++)
     {
       ip_hash_ptr = ip_hash_table[i];
       while(ip_hash_ptr)
         {
-          *number_ips_stored = *number_ips_stored + 1;
-          *mem_ips_stored = *mem_ips_stored +
-             sizeof(IP_ENTRY);
+          ++count;
+          size += sizeof(IP_ENTRY);
 
           ip_hash_ptr = ip_hash_ptr->next;
         }
     }
+  *number_ips_stored = count;
+  *mem_ips_stored    = size;
 }
 
 

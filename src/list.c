@@ -285,33 +285,30 @@ void block_garbage_collect()
 
 /*
  */
-void count_user_memory(int *user_memory_used,
-                       int *user_memory_allocated )
+void count_user_memory(size_t* user_memory_used,
+                       size_t* user_memory_allocated)
 {
-  BlockHeapCountMemory( free_anUsers,
-                        user_memory_used,
-                        user_memory_allocated);
+  block_heap_count_memory(free_anUsers, user_memory_used,
+                          user_memory_allocated);
 }
 
 /*
  */
-void count_links_memory(int *links_memory_used,
-                       int *links_memory_allocated )
+void count_links_memory(size_t* links_memory_used,
+                        size_t* links_memory_allocated)
 {
-  BlockHeapCountMemory( free_Links,
-                        links_memory_used,
-                        links_memory_allocated);
+  block_heap_count_memory(free_Links, links_memory_used,
+                          links_memory_allocated);
 }
 
 #ifdef FLUD
 /*
  */
-void count_flud_memory(int *flud_memory_used,
-                       int *flud_memory_allocated )
+void count_flud_memory(size_t* flud_memory_used,
+                       size_t* flud_memory_allocated)
 {
-  BlockHeapCountMemory( free_fludbots,
-                        flud_memory_used,
-                        flud_memory_allocated);
+  block_heap_count_memory(free_fludbots, flud_memory_used,
+                          flud_memory_allocated);
 }
 #endif
 
