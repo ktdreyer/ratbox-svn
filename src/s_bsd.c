@@ -646,7 +646,7 @@ comm_connect_dns_callback(void *vptr, struct DNSReply *reply)
      * the DNS record around, and the DNS cache is gone anyway.. 
      *     -- adrian
      */
-    memcpy(&F->connect.hostaddr, reply->hp->h_addr, sizeof(struct in_addr));
+    memcpy(&S_ADDR(F->connect.hostaddr), reply->hp->h_addr, sizeof(struct irc_inaddr));
 
     /* Now, call the tryconnect() routine to try a connect() */
     comm_connect_tryconnect(F->fd, NULL);
