@@ -70,9 +70,9 @@ Feature Specific Requirements:
   work fine, and any gcc or SunPro compiled on 32bit.
 
 - SUPPORTED PLATFORMS: this code should compile without any warnings
-  on FreeBSD 3.x/4.x, RedHat 6.2 and Solaris 7/sparc.  Please let us know 
-  if you find otherwise.  It probably does not compile on AIX, IRIX
-  or libc5 Linux.
+  on FreeBSD 3.x/4.x, RedHat 6.2, Debian Potato and Solaris 7/8 sparc.  
+  Please let us know if you find otherwise.  
+  It probably does not compile on AIX, IRIX or libc5 Linux.
 
 - TESTED PLATFORMS:  The code has been tested on the following platforms, and
   is known to run properly.
