@@ -1,3 +1,20 @@
+wcampbel    2002/02/28 11:14:19 EST	(20020228_7)
+
+  Modified files:
+    .                    README.PLATFORMS 
+    help/users           notice privmsg 
+  Log:
+  Cleaned up some formatting in README.PLATFORMS
+  Non-opers cannot use username%hostname@server, so don't include
+    it in the help files
+  
+  Revision  Changes    Path
+  7.9       +3 -2      ircd-hybrid-7/README.PLATFORMS
+  1.2       +3 -3      ircd-hybrid-7/help/users/notice
+  1.2       +3 -3      ircd-hybrid-7/help/users/privmsg
+
+
+
 leeh        2002/02/28 11:12:22 EST	(20020228_6)
 
   Modified files:
