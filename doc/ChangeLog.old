@@ -1,3 +1,21 @@
+jmallett    2002/02/13 13:41:20 EST	(20020213_2)
+
+  Modified files:
+    include              channel.h 
+    modules              m_who.c 
+    src                  channel.c channel_mode.c 
+  Log:
+  Centralize the preprocessor definition that controls how many lists are needed
+  depending on OANDV, and make use of it correctly.
+  
+  Revision  Changes    Path
+  7.103     +5 -1      ircd-hybrid-7/include/channel.h
+  1.53      +1 -7      ircd-hybrid-7/modules/m_who.c
+  7.299     +0 -6      ircd-hybrid-7/src/channel.c
+  7.21      +2 -12     ircd-hybrid-7/src/channel_mode.c
+
+
+
 jmallett    2002/02/13 13:39:15 EST	(20020213_1)
 
   Modified files:
