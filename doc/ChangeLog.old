@@ -1,3 +1,9 @@
+*** 20011002_2 by db
+- After online discussion on IRC, I took the plunge. no more stupid NullChn
+  all replaced with NULL, hence all the touched files here.
+
+
+
 *** 20011002_1 by db
 - This takes some silliness out of m_sjoin.c
 
