@@ -1,3 +1,15 @@
+leeh        2004/01/15 17:00:39 EST	(20040115_17)
+
+  Modified files:
+    include              s_chanserv.h 
+  Log:
+  - add topic storage to struct chan_reg
+  
+  Revision  Changes    Path
+  1.2       +1 -0      rserv/include/s_chanserv.h
+
+
+
 leeh        2004/01/15 16:38:35 EST	(20040115_16)
 
   Modified files:
