@@ -48,10 +48,8 @@ ircd_SOURCES =                     \
   s_auth.c                      \
   s_conf.c                      \
   s_newconf.c                   \
-  s_gline.c                     \
   s_log.c                       \
   s_serv.c                      \
-  s_stats.c                     \
   s_user.c                      \
   scache.c                      \
   send.c                        \

@@ -4,7 +4,7 @@
  *
  *  Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center
  *  Copyright (C) 1996-2002 Hybrid Development Team
- *  Copyright (C) 2002-2004 ircd-ratbox development team
+ *  Copyright (C) 2002-2005 ircd-ratbox development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,17 +27,15 @@
 #include "stdinc.h"
 #include "sprintf_irc.h"
 #include "tools.h"
+#include "struct.h"
 #include "channel.h"
 #include "client.h"
-#include "common.h"
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
-#include "s_serv.h"
 #include "s_conf.h"
-#include "msg.h"
 #include "parse.h"
 #include "modules.h"
 

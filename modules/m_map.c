@@ -23,12 +23,17 @@
  */
 
 #include "stdinc.h"
+#include "tools.h"
+#include "struct.h"
 #include "client.h"
+#include "parse.h"
 #include "modules.h"
 #include "numeric.h"
 #include "send.h"
 #include "s_conf.h"
 #include "sprintf_irc.h"
+#include "ircd.h"
+#include "irc_string.h"
 
 #define USER_COL       50	/* display | Users: %d at col 50 */
 

@@ -4,7 +4,7 @@
  *
  *  Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center
  *  Copyright (C) 1996-2002 Hybrid Development Team
- *  Copyright (C) 2002-2004 ircd-ratbox development team
+ *  Copyright (C) 2002-2005 ircd-ratbox development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,11 +25,12 @@
  */
 #include "stdinc.h"
 #include "tools.h"
+#include "struct.h"
 #include "commio.h"
 #include "s_conf.h"
 #include "s_serv.h"
+#include "linebuf.h"
 #include "client.h"
-#include "common.h"
 #include "ircd.h"
 #include "parse.h"
 #include "packet.h"
@@ -145,24 +146,6 @@ parse_client_queued(struct Client *client_p)
 			client_p->localClient->sent_parsed++;
 		}
 	}
-}
-
-/* flood_endgrace()
- *
- * marks the end of the clients grace period
- */
-void
-flood_endgrace(struct Client *client_p)
-{
-	SetFloodDone(client_p);
-
-	/* Drop their flood limit back down */
-	client_p->localClient->allow_read = MAX_FLOOD;
-
-	/* sent_parsed could be way over MAX_FLOOD but under MAX_FLOOD_BURST,
-	 * so reset it.
-	 */
-	client_p->localClient->sent_parsed = 0;
 }
 
 /*

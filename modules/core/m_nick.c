@@ -4,7 +4,7 @@
  *
  *  Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center
  *  Copyright (C) 1996-2002 Hybrid Development Team
- *  Copyright (C) 2002-2004 ircd-ratbox development team
+ *  Copyright (C) 2002-2005 ircd-ratbox development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,6 +25,8 @@
  */
 
 #include "stdinc.h"
+#include "tools.h"
+#include "struct.h"
 #include "client.h"
 #include "hash.h"
 #include "irc_string.h"
@@ -37,16 +39,12 @@
 #include "whowas.h"
 #include "s_serv.h"
 #include "send.h"
-#include "channel.h"
-#include "s_log.h"
-#include "msg.h"
 #include "parse.h"
 #include "modules.h"
-#include "common.h"
-#include "packet.h"
 #include "scache.h"
 #include "s_newconf.h"
 #include "monitor.h"
+#include "commio.h"
 
 static int mr_nick(struct Client *, struct Client *, int, const char **);
 static int m_nick(struct Client *, struct Client *, int, const char **);
@@ -262,7 +260,7 @@ mc_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 	/* if nicks erroneous, or too long, kill */
 	if(!clean_nick(parv[1], 0))
 	{
-		ServerStats->is_kill++;
+		ServerStats.is_kill++;
 		sendto_realops_flags(UMODE_DEBUG, L_ALL,
 				     "Bad Nick: %s From: %s(via %s)",
 				     parv[1], source_p->user->server,
@@ -319,7 +317,7 @@ ms_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 	/* if nicks empty, erroneous, or too long, kill */
 	if(!clean_nick(parv[1], 0))
 	{
-		ServerStats->is_kill++;
+		ServerStats.is_kill++;
 		sendto_realops_flags(UMODE_DEBUG, L_ALL,
 				     "Bad Nick: %s From: %s(via %s)",
 				     parv[1], parv[7], client_p->name);
@@ -331,7 +329,7 @@ ms_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 	/* invalid username or host? */
 	if(!clean_username(parv[5]) || !clean_host(parv[6]))
 	{
-		ServerStats->is_kill++;
+		ServerStats.is_kill++;
 		sendto_realops_flags(UMODE_DEBUG, L_ALL,
 				"Bad user@host: %s@%s From: %s(via %s)",
 				parv[5], parv[6], parv[7],
@@ -407,7 +405,7 @@ ms_uid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	/* if nicks erroneous, or too long, kill */
 	if(!clean_nick(parv[1], 0))
 	{
-		ServerStats->is_kill++;
+		ServerStats.is_kill++;
 		sendto_realops_flags(UMODE_DEBUG, L_ALL,
 				     "Bad Nick: %s From: %s(via %s)",
 				     parv[1], source_p->name,
@@ -419,7 +417,7 @@ ms_uid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 	if(!clean_username(parv[5]) || !clean_host(parv[6]))
 	{
-		ServerStats->is_kill++;
+		ServerStats.is_kill++;
 		sendto_realops_flags(UMODE_DEBUG, L_ALL,
 				     "Bad user@host: %s@%s From: %s(via %s)",
 				     parv[5], parv[6], source_p->name,
@@ -431,7 +429,7 @@ ms_uid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 	if(!clean_uid(parv[8]))
 	{
-		ServerStats->is_kill++;
+		ServerStats.is_kill++;
 		sendto_realops_flags(UMODE_DEBUG, L_ALL,
 					"Bad UID: %s From: %s(via %s)",
 					parv[8], source_p->name,
@@ -739,7 +737,7 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
 		/* we then need to KILL the old client everywhere */
 		kill_client_serv_butone(NULL, target_p,
 					"%s (Nick collision (new))", me.name);
-		ServerStats->is_kill++;
+		ServerStats.is_kill++;
 
 		target_p->flags |= FLAGS_KILLED;
 		exit_client(client_p, target_p, &me, "Nick collision (new)");
@@ -777,7 +775,7 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
 						     target_p->name, target_p->from->name,
 						     client_p->name);
 
-			ServerStats->is_kill++;
+			ServerStats.is_kill++;
 			sendto_one_numeric(target_p, ERR_NICKCOLLISION,
 					   form_str(ERR_NICKCOLLISION), target_p->name);
 
@@ -812,13 +810,13 @@ perform_nickchange_collides(struct Client *source_p, struct Client *client_p,
 				     source_p->name, target_p->name, target_p->from->name,
 				     client_p->name);
 
-		ServerStats->is_kill++;
+		ServerStats.is_kill++;
 		sendto_one_numeric(target_p, ERR_NICKCOLLISION,
 				   form_str(ERR_NICKCOLLISION), target_p->name);
 
 		kill_client_serv_butone(NULL, source_p, "%s (Nick change collision)", me.name);
 
-		ServerStats->is_kill++;
+		ServerStats.is_kill++;
 
 		kill_client_serv_butone(NULL, target_p, "%s (Nick change collision)", me.name);
 
@@ -847,7 +845,7 @@ perform_nickchange_collides(struct Client *source_p, struct Client *client_p,
 						     source_p->name, target_p->name,
 						     target_p->from->name, client_p->name);
 
-			ServerStats->is_kill++;
+			ServerStats.is_kill++;
 
 			sendto_one_numeric(target_p, ERR_NICKCOLLISION,
 					   form_str(ERR_NICKCOLLISION), target_p->name);
@@ -884,7 +882,7 @@ perform_nickchange_collides(struct Client *source_p, struct Client *client_p,
 			kill_client_serv_butone(client_p, target_p, 
 					"%s (Nick collision)", me.name);
 
-			ServerStats->is_kill++;
+			ServerStats.is_kill++;
 
 			target_p->flags |= FLAGS_KILLED;
 			(void) exit_client(client_p, target_p, &me, "Nick collision");
@@ -921,7 +919,18 @@ register_client(struct Client *client_p, struct Client *server,
 	{
 		user->server = find_or_add(server->name);
 		strlcpy(source_p->info, parv[9], sizeof(source_p->info));
-		strlcpy(source_p->sockhost, parv[7], sizeof(source_p->sockhost));
+
+		/* if we dont have ipv6 support, then we dont keep track of
+		 * their IP if its in v6 form, we cant parse it, and it wont
+		 * fit into ->sockhost.  --anfl
+		 */
+#ifndef IPV6
+		if(strchr(parv[7], ':'))
+			strcpy(source_p->sockhost, "0");
+		else
+#endif
+			strlcpy(source_p->sockhost, parv[7], sizeof(source_p->sockhost));
+
 		strlcpy(source_p->id, parv[8], sizeof(source_p->id));
 		add_to_id_hash(source_p->id, source_p);
 	}

@@ -4,7 +4,7 @@
  *
  *  Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center
  *  Copyright (C) 1996-2002 Hybrid Development Team
- *  Copyright (C) 2002-2004 ircd-ratbox development team
+ *  Copyright (C) 2002-2005 ircd-ratbox development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,25 +26,20 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "channel.h"
-#include "class.h"
+#include "struct.h"
 #include "client.h"
-#include "common.h"
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "ircd.h"
 #include "hostmask.h"
 #include "numeric.h"
-#include "commio.h"
 #include "s_conf.h"
 #include "s_newconf.h"
 #include "s_log.h"
 #include "send.h"
-#include "hash.h"
-#include "s_serv.h"
-#include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "memory.h"
 
 static int mo_dline(struct Client *, struct Client *, int, const char **);
 static int mo_undline(struct Client *, struct Client *, int, const char **);
@@ -64,6 +59,7 @@ DECLARE_MODULE_AV1(dline, NULL, NULL, dline_clist, NULL, NULL, "$Revision$");
 static int valid_comment(char *comment);
 static int flush_write(struct Client *, FILE *, char *, char *);
 static int remove_temp_dline(const char *);
+static void check_dlines(void);
 
 /* mo_dline()
  * 
@@ -466,3 +462,54 @@ remove_temp_dline(const char *host)
 
 	return NO;
 }
+
+/* check_dlines()
+ *
+ * inputs       -
+ * outputs      -
+ * side effects - all clients will be checked for dlines
+ */
+static void
+check_dlines(void)
+{
+	struct Client *client_p;
+	struct ConfItem *aconf;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, lclient_list.head)
+	{
+		client_p = ptr->data;
+
+		if(IsMe(client_p))
+			continue;
+
+		if((aconf = find_dline((struct sockaddr *)&client_p->localClient->ip,client_p->localClient->ip.ss_family)) != NULL)
+		{
+			if(aconf->status & CONF_EXEMPTDLINE)
+				continue;
+
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					     "DLINE active for %s",
+					     get_client_name(client_p, HIDE_IP));
+
+			notify_banned_client(client_p, aconf, NOTIFY_BANNED_DLINE);
+			continue;
+		}
+	}
+
+	/* dlines need to be checked against unknowns too */
+	DLINK_FOREACH_SAFE(ptr, next_ptr, unknown_list.head)
+	{
+		client_p = ptr->data;
+
+		if((aconf = find_dline((struct sockaddr *)&client_p->localClient->ip,client_p->localClient->ip.ss_family)) != NULL)
+		{
+			if(aconf->status & CONF_EXEMPTDLINE)
+				continue;
+
+			notify_banned_client(client_p, aconf, NOTIFY_BANNED_DLINE);
+		}
+	}
+}
+

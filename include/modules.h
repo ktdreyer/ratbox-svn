@@ -4,7 +4,7 @@
  *
  *  Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center
  *  Copyright (C) 1996-2002 Hybrid Development Team
- *  Copyright (C) 2002-2004 ircd-ratbox development team
+ *  Copyright (C) 2002-2005 ircd-ratbox development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,15 +26,15 @@
 
 #ifndef INCLUDED_modules_h
 #define INCLUDED_modules_h
-#include "config.h"
-#include "setup.h"
-#include "parse.h"
-#include "ltdl.h"
+
 #define MAPI_RATBOX 1
 
-#include "msg.h"
-#include "memory.h"
-#include "hook.h"
+#if defined(HAVE_SHL_LOAD)
+#include <dl.h>
+#endif
+#if !defined(STATIC_MODULES) && defined(HAVE_DLFCN_H)
+#include <dlfcn.h>
+#endif
 
 struct module
 {
@@ -69,7 +69,7 @@ typedef struct
 typedef struct
 {
 	const char * 	hapi_name;
-	hookfn 		fn;
+	void (*hookfn) (void *);
 } mapi_hfn_list_av1;
 
 struct mapi_mheader_av1

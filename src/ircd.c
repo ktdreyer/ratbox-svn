@@ -4,7 +4,7 @@
  *
  *  Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center
  *  Copyright (C) 1996-2002 Hybrid Development Team
- *  Copyright (C) 2002-2004 ircd-ratbox development team
+ *  Copyright (C) 2002-2005 ircd-ratbox development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,25 +25,22 @@
  */
 
 #include "stdinc.h"
-#include "setup.h"
-#include "config.h"
-
 #include "tools.h"
+#include "struct.h"
 #include "ircd.h"
 #include "channel.h"
 #include "class.h"
+#include "linebuf.h"
 #include "client.h"
-#include "common.h"
 #include "event.h"
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd_signal.h"
 #include "sprintf_irc.h"
-#include "s_gline.h"
-#include "msg.h"		/* msgtab */
 #include "hostmask.h"
 #include "numeric.h"
 #include "parse.h"
+#include "adns.h"
 #include "res.h"
 #include "restart.h"
 #include "s_auth.h"
@@ -55,9 +52,9 @@
 #include "scache.h"
 #include "send.h"
 #include "whowas.h"
+#include "hook.h"
 #include "modules.h"
 #include "memory.h"
-#include "hook.h"
 #include "ircd_getopt.h"
 #include "balloc.h"
 #include "newconf.h"
@@ -84,6 +81,7 @@ struct server_info ServerInfo;
 struct admin_info AdminInfo;
 
 struct Counter Count;
+struct ServerStatistics ServerStats;
 
 struct timeval SystemTime;
 int ServerRunning;		/* GLOBAL - server execution state */
@@ -514,6 +512,7 @@ main(int argc, char *argv[])
 	memset((void *) &Count, 0, sizeof(Count));
 	memset((void *) &ServerInfo, 0, sizeof(ServerInfo));
 	memset((void *) &AdminInfo, 0, sizeof(AdminInfo));
+	memset(&ServerStats, 0, sizeof(struct ServerStatistics));
 
 	/* Initialise the channel capability usage counts... */
 	init_chcap_usage_counts();
@@ -593,7 +592,6 @@ main(int argc, char *argv[])
 	init_channels();
 	initclass();
 	initwhowas();
-	init_stats();
 	init_hook();
 	init_reject();
 	init_cache();
@@ -668,8 +666,6 @@ main(int argc, char *argv[])
 	open_logfiles();
 
 	ilog(L_MAIN, "Server Ready");
-
-	eventAddIsh("cleanup_glines", cleanup_glines, NULL, CLEANUP_GLINES_TIME);
 
 	/* We want try_connections to be called as soon as possible now! -- adrian */
 	/* No, 'cause after a restart it would cause all sorts of nick collides */

@@ -1,5 +1,5 @@
 /*  modules/m_operspy.c
- *  Copyright (C) 2003-2004 ircd-ratbox development team
+ *  Copyright (C) 2003-2005 ircd-ratbox development team
  *  Copyright (C) 2003 Lee Hardy <lee@leeh.co.uk>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,20 +31,13 @@
 
 #include "stdinc.h"
 #include "tools.h"
+#include "struct.h"
 #include "send.h"
-#include "channel.h"
-#include "client.h"
-#include "common.h"
-#include "config.h"
 #include "ircd.h"
-#include "numeric.h"
-#include "memory.h"
-#include "s_serv.h"
-#include "hash.h"
-#include "msg.h"
 #include "parse.h"
 #include "modules.h"
 #include "sprintf_irc.h"
+#include "s_log.h"
 
 static int ms_operspy(struct Client *client_p, struct Client *source_p,
 		      int parc, const char *parv[]);

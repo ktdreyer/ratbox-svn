@@ -4,7 +4,7 @@
  *
  *  Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center
  *  Copyright (C) 1996-2002 Hybrid Development Team
- *  Copyright (C) 2002-2004 ircd-ratbox development team
+ *  Copyright (C) 2002-2005 ircd-ratbox development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,8 +25,8 @@
  */
 
 #include "stdinc.h"
-#include "ircd_defs.h"
 #include "tools.h"
+#include "struct.h"
 #include "s_conf.h"
 #include "s_newconf.h"
 #include "s_serv.h"
@@ -34,7 +34,6 @@
 #include "channel.h"
 #include "class.h"
 #include "client.h"
-#include "common.h"
 #include "event.h"
 #include "hash.h"
 #include "irc_string.h"
@@ -42,6 +41,7 @@
 #include "ircd.h"
 #include "listener.h"
 #include "hostmask.h"
+#include "hook.h"
 #include "modules.h"
 #include "numeric.h"
 #include "commio.h"
@@ -53,6 +53,8 @@
 #include "patricia.h"
 #include "reject.h"
 #include "cache.h"
+#include "adns.h"
+#include "res.h"
 
 struct config_server_hide ConfigServerHide;
 
@@ -199,7 +201,7 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 			source_p->name, IsGotId(source_p) ? "" : "~",
 			source_p->username, source_p->sockhost);	
 
-		ServerStats->is_ref++;
+		ServerStats.is_ref++;
 		exit_client(client_p, source_p, &me, "Too many host connections (local)");
 		break;
 
@@ -212,7 +214,7 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 			source_p->name, IsGotId(source_p) ? "" : "~",
 			source_p->username, source_p->sockhost);
 
-		ServerStats->is_ref++;
+		ServerStats.is_ref++;
 		exit_client(client_p, source_p, &me, "Too many host connections (global)");
 		break;
 
@@ -225,7 +227,7 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 			source_p->name, IsGotId(source_p) ? "" : "~",
 			source_p->username, source_p->sockhost);
 
-		ServerStats->is_ref++;
+		ServerStats.is_ref++;
 		exit_client(client_p, source_p, &me, "Too many user connections (global)");
 		break;
 
@@ -240,7 +242,7 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 			source_p->name, IsGotId(source_p) ? "" : "~",
 			source_p->username, source_p->sockhost);
 
-		ServerStats->is_ref++;
+		ServerStats.is_ref++;
 		exit_client(client_p, source_p, &me,
 			    "No more connections allowed in your connection class");
 		break;
@@ -255,7 +257,7 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 #endif
 				port = ((struct sockaddr_in *)&source_p->localClient->listener)->sin_port;
 			
-			ServerStats->is_ref++;
+			ServerStats.is_ref++;
 			/* jdc - lists server name & port connections are on */
 			/*       a purely cosmetical change */
 			/* why ipaddr, and not just source_p->sockhost? --fl */
@@ -284,7 +286,7 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 	case BANNED_CLIENT:
 		add_reject(client_p);
 		exit_client(client_p, client_p, &me, "*** Banned ");
-		ServerStats->is_ref++;
+		ServerStats.is_ref++;
 		break;
 
 	case 0:

@@ -9,18 +9,18 @@
 #include <openssl/rsa.h>
 #endif
 
+#include "tools.h"
+#include "struct.h"
+#include "client.h"
 #include "memory.h"
 #include "newconf.h"
-#include "tools.h"
-#include "ircd_defs.h"
 #include "sprintf_irc.h"
-#include "common.h"
 #include "s_log.h"
 #include "s_conf.h"
 #include "s_user.h"
 #include "s_newconf.h"
 #include "send.h"
-#include "setup.h"
+#include "hook.h"
 #include "modules.h"
 #include "listener.h"
 #include "hostmask.h"
@@ -29,6 +29,8 @@
 #include "hash.h"
 #include "cache.h"
 #include "ircd.h"
+#include "irc_string.h"
+#include "class.h"
 
 #define CF_TYPE(x) ((x) & CF_MTYPE)
 

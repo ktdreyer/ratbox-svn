@@ -35,6 +35,8 @@
 #include <arpa/inet.h>
 
 #include "internal.h"
+#include "sprintf_irc.h"
+#include "irc_string.h"
 
 #define R_NOMEM           return adns_s_nomemory
 #define CSP_ADDSTR(s)     do { if (!adns__vbuf_appendstr(vb,(s))) R_NOMEM; } while (0)

@@ -4,7 +4,7 @@
  *
  *  Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center
  *  Copyright (C) 1996-2002 Hybrid Development Team
- *  Copyright (C) 2002-2004 ircd-ratbox development team
+ *  Copyright (C) 2002-2005 ircd-ratbox development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,13 +25,13 @@
  */
 
 #include "stdinc.h"
-#include "setup.h"
+#include "tools.h"
+#include "struct.h"
 #include "listener.h"
 #include "client.h"
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "ircd.h"
-#include "ircd_defs.h"
 #include "numeric.h"
 #include "commio.h"
 #include "s_conf.h"
@@ -39,8 +39,11 @@
 #include "s_stats.h"
 #include "send.h"
 #include "memory.h"
+#include "adns.h"
+#include "res.h"
 #include "s_auth.h"
 #include "reject.h"
+#include "s_log.h"
 
 #ifndef INADDR_NONE
 #define INADDR_NONE ((unsigned int) 0xffffffff)
@@ -528,7 +531,7 @@ accept_connection(int pfd, void *data)
 	 */
 	if((MAXCONNECTIONS - 10) < fd)
 	{
-		++ServerStats->is_ref;
+		++ServerStats.is_ref;
 		/*
 		 * slow down the whining to opers bit
 		 */
@@ -552,7 +555,7 @@ accept_connection(int pfd, void *data)
 	 * from this IP... */
 	if((aconf = conf_connect_allowed((struct sockaddr *)&sai, sai.ss_family)) != NULL)
 	{
-		ServerStats->is_ref++;
+		ServerStats.is_ref++;
 
         if(ConfigFileEntry.dline_with_reason)
         {
@@ -575,7 +578,7 @@ accept_connection(int pfd, void *data)
 		return;
 	}
 
-	ServerStats->is_ac++;
+	ServerStats.is_ac++;
 	add_connection(listener, fd, (struct sockaddr *)&sai);
 
 	/* Re-register a new IO request for the next accept .. */

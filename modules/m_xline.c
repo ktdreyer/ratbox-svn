@@ -1,7 +1,7 @@
 /* modules/m_xline.c
  * 
  *  Copyright (C) 2002-2003 Lee Hardy <lee@leeh.co.uk>
- *  Copyright (C) 2002-2004 ircd-ratbox development team
+ *  Copyright (C) 2002-2005 ircd-ratbox development team
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -32,22 +32,17 @@
 
 #include "stdinc.h"
 #include "tools.h"
+#include "struct.h"
 #include "send.h"
-#include "channel.h"
 #include "client.h"
-#include "common.h"
-#include "config.h"
 #include "class.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "memory.h"
 #include "s_log.h"
 #include "s_serv.h"
-#include "whowas.h"
 #include "irc_string.h"
 #include "sprintf_irc.h"
-#include "hash.h"
-#include "msg.h"
 #include "parse.h"
 #include "modules.h"
 #include "s_conf.h"
@@ -273,6 +268,46 @@ valid_xline(struct Client *source_p, const char *gecos,
 	}
 
 	return 1;
+}
+
+/* check_xlines
+ *
+ * inputs       -
+ * outputs      -
+ * side effects - all clients will be checked for xlines
+ */
+static void
+check_xlines(void)
+{
+	struct Client *client_p;
+	struct ConfItem *aconf;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, lclient_list.head)
+	{
+		client_p = ptr->data;
+
+		if(IsMe(client_p) || !IsPerson(client_p))
+			continue;
+
+		if((aconf = find_xline(client_p->info, 1)) != NULL)
+		{
+			if(IsExemptKline(client_p))
+			{
+				sendto_realops_flags(UMODE_ALL, L_ALL,
+						     "XLINE over-ruled for %s, client is kline_exempt",
+						     get_client_name(client_p, HIDE_IP));
+				continue;
+			}
+
+			sendto_realops_flags(UMODE_ALL, L_ALL, "XLINE active for %s",
+					     get_client_name(client_p, HIDE_IP));
+
+			(void) exit_client(client_p, client_p, &me, "Bad user info");
+			continue;
+		}
+	}
 }
 
 void

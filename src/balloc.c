@@ -4,7 +4,7 @@
  *
  * Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center
  * Copyright (C) 1996-2002 Hybrid Development Team
- * Copyright (C) 2002-2004 ircd-ratbox development team
+ * Copyright (C) 2002-2005 ircd-ratbox development team
  *
  *  File:   blalloc.c
  *  Owner:  Wohali (Joan Touzet)
@@ -58,19 +58,17 @@
  */
 
 #include "stdinc.h"
+#include "tools.h"
 
 #define WE_ARE_MEMORY_C
-#include "setup.h"
 #include "balloc.h"
 #ifndef NOBALLOC
 
-#include "ircd_defs.h"		/* DEBUG_BLOCK_ALLOCATOR */
 #include "ircd.h"
 #include "memory.h"
 #include "irc_string.h"
 #include "tools.h"
 #include "s_log.h"
-#include "client.h"
 #include "event.h"
 
 #ifdef HAVE_MMAP		/* We've got mmap() that is good */

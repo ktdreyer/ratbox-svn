@@ -20,8 +20,7 @@
  *
  */
 #include "stdinc.h"
-#include "config.h"
-#include "client.h"
+#include "tools.h"
 #include "ircd.h"
 #include "irc_string.h"
 

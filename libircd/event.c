@@ -4,7 +4,7 @@
  *
  *  Copyright (C) 1998-2000 Regents of the University of California
  *  Copyright (C) 2001-2002 Hybrid Development Team
- *  Copyright (C) 2002-2004 ircd-ratbox development team
+ *  Copyright (C) 2002-2005 ircd-ratbox development team
  *
  *  Code borrowed from the squid web cache by Adrian Chadd.
  *  Original header:
@@ -51,8 +51,8 @@
  */
 
 #include "stdinc.h"
-#include "config.h"
-
+#include "tools.h"
+#include "struct.h"
 #include "ircd.h"
 #include "event.h"
 #include "client.h"

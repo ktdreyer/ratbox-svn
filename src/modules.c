@@ -25,8 +25,9 @@
  */
 
 #include "stdinc.h"
-
-
+#include "tools.h"
+#include "struct.h"
+#include "hook.h"
 #include "modules.h"
 #include "s_log.h"
 #include "ircd.h"
@@ -36,10 +37,8 @@
 #include "s_newconf.h"
 #include "numeric.h"
 #include "parse.h"
-#include "ircd_defs.h"
 #include "irc_string.h"
 #include "memory.h"
-#include "tools.h"
 #include "sprintf_irc.h"
 #include "ltdl.h"
 
@@ -58,7 +57,6 @@ static const char *core_module_table[] = {
 	"m_part",
 	"m_quit",
 	"m_server",
-	"m_sjoin",
 	"m_squit",
 	NULL
 };
@@ -616,7 +614,7 @@ unload_one_module(const char *name, int warn)
 			{
 				mapi_hfn_list_av1 *m;
 				for (m = mheader->mapi_hfn_list; m->hapi_name; ++m)
-					remove_hook(m->hapi_name, m->fn);
+					remove_hook(m->hapi_name, m->hookfn);
 			}
 
 			if(mheader->mapi_unregister)
@@ -738,7 +736,7 @@ load_a_module(const char *path, int warn, int core)
 			{
 				mapi_hfn_list_av1 *m;
 				for (m = mheader->mapi_hfn_list; m->hapi_name; ++m)
-					add_hook(m->hapi_name, m->fn);
+					add_hook(m->hapi_name, m->hookfn);
 			}
 
 			ver = mheader->mapi_module_version;

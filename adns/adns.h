@@ -58,11 +58,6 @@
 #define ADNS_H_INCLUDED
 
 #include "stdinc.h"
-#include "commio.h"
-#include "ircd.h"
-#include "ircd_defs.h"
-#include "irc_string.h"
-#include "sprintf_irc.h"
 #define MAXFD_POLL 2
 struct adns_pollfd { int fd; short events; short revents; };
 #define ADNS_POLLIN  1

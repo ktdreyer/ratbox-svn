@@ -4,7 +4,7 @@
  *
  *  Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center
  *  Copyright (C) 1996-2002 Hybrid Development Team
- *  Copyright (C) 2002-2004 ircd-ratbox development team
+ *  Copyright (C) 2002-2005 ircd-ratbox development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,8 +26,6 @@
 
 #ifndef INCLUDED_channel_h
 #define INCLUDED_channel_h
-#include "config.h"		/* config settings */
-#include "ircd_defs.h"		/* buffer sizes */
 
 #define MODEBUFLEN      200
 
@@ -182,7 +180,6 @@ extern int can_send(struct Channel *chptr, struct Client *who,
 		    struct membership *);
 extern int is_banned(struct Channel *chptr, struct Client *who,
 		     struct membership *msptr, const char *, const char *);
-extern int can_join(struct Client *source_p, struct Channel *chptr, char *key);
 
 extern struct membership *find_channel_membership(struct Channel *, struct Client *);
 extern const char *find_channel_status(struct membership *msptr, int combine);

@@ -33,13 +33,16 @@
  */
 #include "stdinc.h"
 #include "tools.h"
-#include "client.h"
+#include "struct.h"
 #include "memory.h"
 #include "balloc.h"
 #include "monitor.h"
 #include "hash.h"
 #include "event.h"
 #include "numeric.h"
+#include "ircd.h"
+#include "irc_string.h"
+#include "send.h"
 
 static struct monitor *monitorTable[MONITOR_HASH_SIZE];
 BlockHeap *monitor_heap;

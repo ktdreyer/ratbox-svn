@@ -4,7 +4,7 @@
  *
  *  Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center
  *  Copyright (C) 1996-2002 Hybrid Development Team
- *  Copyright (C) 2002-2004 ircd-ratbox development team
+ *  Copyright (C) 2002-2005 ircd-ratbox development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,25 +34,26 @@
  *     --Bleep  Thomas Helvey <tomh@inxpress.net>
  */
 #include "stdinc.h"
-#include "config.h"
 #include "tools.h"
+#include "struct.h"
+#include "adns.h"
+#include "res.h"
 #include "s_auth.h"
 #include "s_conf.h"
 #include "client.h"
-#include "common.h"
 #include "event.h"
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "packet.h"
-#include "res.h"
 #include "commio.h"
+#include "packet.h"
 #include "s_log.h"
 #include "s_stats.h"
 #include "send.h"
 #include "memory.h"
 #include "hook.h"
+#include "balloc.h"
 
 /*
  * a bit different approach
@@ -214,7 +215,7 @@ auth_dns_callback(void *vptr, adns_answer * reply)
 static void
 auth_error(struct AuthRequest *auth)
 {
-	++ServerStats->is_abad;
+	++ServerStats.is_abad;
 
 	comm_close(auth->fd);
 	auth->fd = -1;
@@ -250,7 +251,7 @@ start_auth_query(struct AuthRequest *auth)
 		report_error("creating auth stream socket %s:%s",
 			     get_client_name(auth->client, SHOW_IP), 
 			     log_client_name(auth->client, SHOW_IP), errno);
-		++ServerStats->is_abad;
+		++ServerStats.is_abad;
 		return 0;
 	}
 	if((MAXCONNECTIONS - 10) < fd)
@@ -550,14 +551,14 @@ read_auth_reply(int fd, void *data)
 
 	if(s == NULL)
 	{
-		++ServerStats->is_abad;
+		++ServerStats.is_abad;
 		strcpy(auth->client->username, "unknown");
 		sendheader(auth->client, REPORT_FAIL_ID);
 	}
 	else
 	{
 		sendheader(auth->client, REPORT_FIN_ID);
-		++ServerStats->is_asuc;
+		++ServerStats.is_asuc;
 		SetGotId(auth->client);
 	}
 

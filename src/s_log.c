@@ -2,7 +2,7 @@
  * ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
  *
  * Copyright (C) 2003 Lee H <lee@leeh.co.uk>
- * Copyright (C) 2003-2004 ircd-ratbox development team
+ * Copyright (C) 2003-2005 ircd-ratbox development team
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -32,13 +32,16 @@
  */
 
 #include "stdinc.h"
-#include "ircd_defs.h"
+#include "tools.h"
+#include "struct.h"
 #include "s_log.h"
 #include "s_conf.h"
 #include "sprintf_irc.h"
 #include "send.h"
 #include "client.h"
 #include "s_serv.h"
+#include "irc_string.h"
+#include "ircd.h"
 
 static FILE *log_main;
 static FILE *log_user;

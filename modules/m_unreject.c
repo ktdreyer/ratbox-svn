@@ -3,7 +3,7 @@
  *  m_unreject.c: Removes an ip from the reject cache
  *
  *  Copyright (C) 2004 Aaron Sethman <androsyn@ratbox.org>
- *  Copyright (C) 2004 ircd-ratbox development team
+ *  Copyright (C) 2004-2005 ircd-ratbox development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,13 +24,15 @@
  */
 
 #include "stdinc.h"
-#include "client.h"
+#include "tools.h"
+#include "struct.h"
 #include "s_conf.h"
 #include "hostmask.h"
 #include "reject.h"
-#include "msg.h"
+#include "parse.h"
 #include "modules.h"
 #include "send.h"
+#include "ircd.h"
 
 static int mo_unreject(struct Client *, struct Client *, int, const char **);
 

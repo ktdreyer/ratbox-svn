@@ -4,7 +4,7 @@
  *
  *  Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center
  *  Copyright (C) 1996-2002 Hybrid Development Team
- *  Copyright (C) 2002-2004 ircd-ratbox development team
+ *  Copyright (C) 2002-2005 ircd-ratbox development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,8 +26,6 @@
 
 #ifndef INCLUDED_serv_h
 #define INCLUDED_serv_h
-
-#include "config.h"
 
 /*
  * The number of seconds between calls to try_connections(). Fiddle with
@@ -152,9 +150,6 @@ extern const char *show_capabilities(struct Client *client);
 extern void try_connections(void *unused);
 extern void start_collect_zipstats(void);
 extern void collect_zipstats(void *unused);
-
-extern int check_server(const char *name, struct Client *server);
-extern int server_estab(struct Client *client_p);
 
 extern int serv_connect(struct server_conf *, struct Client *);
 

@@ -44,6 +44,7 @@
 
 #include "internal.h"
 #include "tvarith.h"
+#include "commio.h"
 
 /* TCP connection management. */
 

@@ -3,7 +3,7 @@
  *  m_etrace.c: Gives local opers a trace output with added info.
  *
  *  Copyright (C) 2002-2003 Lee Hardy <lee@leeh.co.uk>
- *  Copyright (C) 2002-2004 ircd-ratbox development team
+ *  Copyright (C) 2002-2005 ircd-ratbox development team
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are
@@ -33,20 +33,15 @@
  */
 
 #include "stdinc.h"
+#include "tools.h"
+#include "struct.h"
 #include "class.h"
-#include "hook.h"
 #include "client.h"
-#include "hash.h"
-#include "common.h"
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "commio.h"
-#include "s_serv.h"
-#include "s_conf.h"
 #include "send.h"
-#include "msg.h"
 #include "parse.h"
 #include "modules.h"
 

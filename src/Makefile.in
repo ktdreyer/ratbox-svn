@@ -64,12 +64,11 @@ am_ircd_OBJECTS = adns.$(OBJEXT) balloc.$(OBJEXT) cache.$(OBJEXT) \
 	monitor.$(OBJEXT) newconf.$(OBJEXT) numeric.$(OBJEXT) \
 	packet.$(OBJEXT) parse.$(OBJEXT) patricia.$(OBJEXT) \
 	reject.$(OBJEXT) restart.$(OBJEXT) s_auth.$(OBJEXT) \
-	s_conf.$(OBJEXT) s_newconf.$(OBJEXT) s_gline.$(OBJEXT) \
-	s_log.$(OBJEXT) s_serv.$(OBJEXT) s_stats.$(OBJEXT) \
-	s_user.$(OBJEXT) scache.$(OBJEXT) send.$(OBJEXT) \
-	snprintf.$(OBJEXT) tools.$(OBJEXT) whowas.$(OBJEXT) \
-	version.$(OBJEXT) ircd_lexer.$(OBJEXT) ircd_parser.$(OBJEXT) \
-	@SELECT_TYPE@.$(OBJEXT)
+	s_conf.$(OBJEXT) s_newconf.$(OBJEXT) s_log.$(OBJEXT) \
+	s_serv.$(OBJEXT) s_user.$(OBJEXT) scache.$(OBJEXT) \
+	send.$(OBJEXT) snprintf.$(OBJEXT) tools.$(OBJEXT) \
+	whowas.$(OBJEXT) version.$(OBJEXT) ircd_lexer.$(OBJEXT) \
+	ircd_parser.$(OBJEXT) @SELECT_TYPE@.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 am__DEPENDENCIES_1 =
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/include
@@ -93,9 +92,8 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/packet.Po ./$(DEPDIR)/parse.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/patricia.Po ./$(DEPDIR)/reject.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/restart.Po ./$(DEPDIR)/s_auth.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/s_conf.Po ./$(DEPDIR)/s_gline.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/s_log.Po ./$(DEPDIR)/s_newconf.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/s_serv.Po ./$(DEPDIR)/s_stats.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/s_conf.Po ./$(DEPDIR)/s_log.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/s_newconf.Po ./$(DEPDIR)/s_serv.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/s_user.Po ./$(DEPDIR)/scache.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/send.Po ./$(DEPDIR)/snprintf.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/tools.Po ./$(DEPDIR)/version.Po \
@@ -288,10 +286,8 @@ ircd_SOURCES = \
   s_auth.c                      \
   s_conf.c                      \
   s_newconf.c                   \
-  s_gline.c                     \
   s_log.c                       \
   s_serv.c                      \
-  s_stats.c                     \
   s_user.c                      \
   scache.c                      \
   send.c                        \
@@ -418,11 +414,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/restart.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_auth.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_conf.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_gline.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_log.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_newconf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_serv.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_stats.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_user.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/scache.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/send.Po@am__quote@
