@@ -1,3 +1,10 @@
+*** 20010702_4 by jdc
+- messages/*.po
+  messages/translations/*.po
+    * Updated with latest changes to src/messages.tab to ensure sanity.
+
+
+
 *** 20010702_2 by wcampbel
 - fixed m_error.c grrrr
 
