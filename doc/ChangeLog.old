@@ -1,3 +1,8 @@
+*** 20010613_5 by leeh
+- ug, I came across check_klines() when trying to find this bug..
+  it was just about unreadable.. 
+
+
 *** 20010613_4 by androsyn
 Cleaned up more abuses of inetntoa() 
 
