@@ -1,3 +1,6 @@
+*** 20010524_20 by davidt
+- add cryptlinks commands to STATIC_MODULES list
+
 *** 20010524_19 by davidt
 - oops, miscounted a } in my fix, so cryptlinks + ziplinks broke.
   really really fix it this time. heh. I'm tired after a day of debuging
