@@ -51,8 +51,8 @@ static BlockHeap *cacheline_heap = NULL;
 struct cachefile *user_motd = NULL;
 struct cachefile *oper_motd = NULL;
 struct cacheline *emptyline = NULL;
-
 dlink_list links_cache_list;
+char user_motd_changed[MAX_DATE_STRING];
 
 /* init_cache()
  *
@@ -70,6 +70,7 @@ init_cache(void)
 	emptyline = BlockHeapAlloc(cacheline_heap);
 	emptyline->data[0] = ' ';
 	emptyline->data[1] = '\0';
+	user_motd_changed[0] = '\0';
 
 	user_motd = cache_file(MPATH, "ircd.motd", 0);
 	oper_motd = cache_file(OPATH, "opers.motd", 0);
@@ -93,6 +94,24 @@ cache_file(const char *filename, const char *shortname, int flags)
 
 	if((in = fbopen(filename, "r")) == NULL)
 		return NULL;
+
+	if(strcmp(shortname, "ircd.motd") == 0)
+	{
+		struct stat sb;
+		struct tm *local_tm;
+
+		if(fbstat(&sb, in) < 0)
+			return NULL;
+
+		local_tm = localtime(&sb.st_mtime);
+
+		if(local_tm != NULL)
+			snprintf(user_motd_changed, sizeof(user_motd_changed),
+				 "%d/%d/%d %d:%d",
+				 local_tm->tm_mday, local_tm->tm_mon + 1,
+				 1900 + local_tm->tm_year, local_tm->tm_hour,
+				 local_tm->tm_min);
+	}
 
 	cacheptr = BlockHeapAlloc(cachefile_heap);
 	memset(cacheptr, 0, sizeof(struct cachefile));

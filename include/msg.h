@@ -62,15 +62,11 @@ struct Message
 	MessageHandler handlers[LAST_HANDLER_TYPE];
 };
 
-/*
- * Constants
- */
-#define   MFLG_SLOW              0x01	/* Command can be executed roughly    *
-					 * once per 2 seconds.                */
-#define   MFLG_UNREG             0x02	/* Command available to unregistered  *
-					 * clients.                           */
-#define   MFLG_IGNORE            0x04	/* silently ignore command from
-					 * unregistered clients */
+#define MFLG_SLOW	0x01	/* executed roughly once per 2s */
+#define MFLG_UNREG	0x02	/* available to unregistered clients */
+#define MFLG_ENCAP	0x04	/* available as an encap command */
+#define MFLG_ENCAPONLY	0x08	/* only available as an encap command */
+
 #define MAXPARA    15
 
 #endif /* INCLUDED_msg_h */

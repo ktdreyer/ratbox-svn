@@ -1213,12 +1213,11 @@ user_welcome(struct Client *source_p)
 
 	show_lusers(source_p);
 
-#if 0
 	if(ConfigFileEntry.short_motd)
 	{
 		sendto_one(source_p,
 			   "NOTICE %s :*** Notice -- motd was last changed at %s",
-			   source_p->name, ConfigFileEntry.motd.lastChangedDate);
+			   source_p->name, user_motd_changed);
 
 		sendto_one(source_p,
 			   "NOTICE %s :*** Notice -- Please read the motd if you haven't read it",
@@ -1233,7 +1232,6 @@ user_welcome(struct Client *source_p)
 		sendto_one(source_p, form_str(RPL_ENDOFMOTD), me.name, source_p->name);
 	}
 	else
-#endif
 		send_user_motd(source_p);
 
 	if(IsRestricted(source_p))
