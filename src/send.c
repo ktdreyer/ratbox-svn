@@ -292,7 +292,7 @@ send_message(struct Client *to, char *msg, int len)
 int send_queued(struct Client *to)
 {
   const char* msg;
-  size_t      len;
+  int      len;
   int         rlen;
   int         more = 0;
   /*
