@@ -1,3 +1,6 @@
+*** 20001228_23 by davidt
+Attempt to sync the client up when it gets given ops on a +a channel..
+
 *** 20001228_22 by davidt
 Only hubs don't send info... leafs always send..
 
