@@ -43,8 +43,8 @@
 void
 mem_frob(void *data, int len)
 {
-	/* correct for Intel only! little endian */
-	unsigned char b[4] = { 0xef, 0xbe, 0xad, 0xde };
+	unsigned long x = 0xdeadbeef;
+	unsigned char *b = (unsigned char *)&x;
 	int i;
 	char *cdata = data;
 	for (i = 0; i < len; i++)
