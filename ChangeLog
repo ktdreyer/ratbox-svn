@@ -1,3 +1,23 @@
+leeh        2005/01/24 15:48:09 EST	(20050124_3)
+
+  Modified files:
+    include              newconf.h s_conf.h 
+    modules              m_info.c 
+    src                  newconf.c s_conf.c s_log.c 
+  Log:
+  - move the conf parser over to a table based structure, with generic setting
+    of integers/strings
+  
+  Revision  Changes    Path
+  7.34      +9 -8      ircd-ratbox/include/newconf.h
+  7.305     +13 -13    ircd-ratbox/include/s_conf.h
+  1.121     +13 -16    ircd-ratbox/modules/m_info.c
+  7.190     +264 -808  ircd-ratbox/src/newconf.c
+  7.498     +11 -13    ircd-ratbox/src/s_conf.c
+  7.77      +13 -13    ircd-ratbox/src/s_log.c
+
+
+
 leeh        2005/01/24 13:11:30 EST	(20050124_2)
 
   Modified files:
