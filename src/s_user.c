@@ -818,15 +818,6 @@ int register_user(struct Client *cptr, struct Client *sptr,
         }
 #endif
 
-#ifdef NEED_SPLITCODE
-      if (server_was_split)
-        {
-          sendto_one(sptr,"NOTICE %s :*** Notice -- server is currently in split-mode",nick);
-        }
-
-      nextping = CurrentTime;
-#endif
-
 
     }
   else if (IsServer(cptr))

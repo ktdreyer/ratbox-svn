@@ -701,7 +701,6 @@ int server_estab(struct Client *cptr)
   
   fdlist_add(cptr->fd, FDL_SERVER | FDL_BUSY);
 
-  nextping = CurrentTime;
   /* ircd-hybrid-6 can do TS links, and  zipped links*/
   sendto_ops("Link with %s established: (%s) link",
              inpath,show_capabilities(cptr));

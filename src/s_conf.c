@@ -1847,7 +1847,6 @@ static void initconf(FBFILE* file)
 
   fbclose(file);
   check_class();
-  nextping = nextconnect = time(NULL);
 
   if( ConfigFileEntry.ts_warn_delta < TS_WARN_DELTA_MIN )
     {

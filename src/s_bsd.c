@@ -581,7 +581,6 @@ int connect_server(struct ConfItem* aconf,
 
   add_client_to_list(cptr);
   fdlist_add(cptr->fd, FDL_DEFAULT);
-  nextping = CurrentTime;
 
   return 1;
 }

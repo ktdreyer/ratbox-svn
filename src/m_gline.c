@@ -326,10 +326,7 @@ int     mo_gline(struct Client *cptr,
                      host,
                      reason);
       
-      rehashed = YES;
-      dline_in_progress = NO;
-      nextping = CurrentTime;
-
+      check_klines();
       return 0;
     }
   }
@@ -588,9 +585,7 @@ int     ms_gline(struct Client *cptr,
                      host,
                      reason);
       
-      rehashed = YES;
-      dline_in_progress = NO;
-      nextping = CurrentTime;
+      check_klines();
 
       return 0;
     }

@@ -407,7 +407,6 @@ static void accept_connection(int pfd, void *data)
       break;
     }
     ServerStats->is_ac++;
-    nextping = CurrentTime;
 
     add_connection(listener, fd);
   } while (0);
