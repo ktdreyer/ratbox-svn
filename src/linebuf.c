@@ -319,8 +319,13 @@ linebuf_get(buf_head_t *bufhead, char *buf, int buflen)
     if (bufhead->list.head == NULL)
         return 0; /* Obviously not.. hrm. */
 
-    /* make sure we've got the space, including the NULL */
     bufline = bufhead->list.head->data; 
+
+    /* make sure that the buffer was actually *terminated */
+    if (!bufline->terminated)
+        return 0;  /* Wait for more data! */
+
+    /* make sure we've got the space, including the NULL */
     cpylen = bufline->len;
     assert(cpylen + 1 <= buflen);
 
