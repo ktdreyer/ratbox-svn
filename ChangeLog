@@ -1,3 +1,22 @@
+leeh        2004/01/16 07:24:29 EST	(20040116_1)
+
+  Modified files:
+    doc                  example.conf 
+    include              rserv.h 
+    src                  rserv.c 
+    src/s_userserv       s_u_crypt.c 
+  Log:
+  - cleaned up includes in rserv.c
+  - added a runtime check for md5 support in crypt()
+  
+  Revision  Changes    Path
+  1.7       +8 -1      rserv/doc/example.conf
+  1.4       +2 -0      rserv/include/rserv.h
+  1.23      +18 -10    rserv/src/rserv.c
+  1.3       +9 -11     rserv/src/s_userserv/s_u_crypt.c
+
+
+
 leeh        2004/01/16 06:45:55 EST	(20040116_0)
 
   Modified files:
