@@ -1,3 +1,8 @@
+*** 20001203_5 by db
+- simplified dlinkMoveList code 
+
+
+
 *** 20001203_4 by db
 - cleaned up m_nick.c again. HEY! the docs in the comments are wrong.
   surprise surprise.
