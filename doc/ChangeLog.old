@@ -11,8 +11,8 @@ online, originally suggested by Chris Behrens
 
 *** 20010929_7 by a1kmm
 - Fixed linebuf code so that it sets the length correctly. It now works
-  entirely with jv's converted IRCnet burst.
-Approved by Diane on IRC.
+  entirely with jv's test burst.
+  Approved by Diane on IRC.
 
 
 

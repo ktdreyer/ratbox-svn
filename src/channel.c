@@ -4311,8 +4311,17 @@ get_channel(struct Client *client_p, char *chname, int flag)
     return NULL;
 
   len = strlen(chname);
-  if (MyClient(client_p) && len > CHANNELLEN)
+  if (len > CHANNELLEN)
   {
+    if (IsServer(client_p))
+    {
+      sendto_realops_flags(FLAGS_DEBUG, L_ALL,
+                           "*** Long channel name from %s (%d > %d): %s",
+                           client_p->name,
+                           len,
+                           CHANNELLEN,
+                           chname);
+    }
     len = CHANNELLEN;
     *(chname + CHANNELLEN) = '\0';
   }
