@@ -1,3 +1,15 @@
+leeh        2002/08/31 09:24:05 EDT	(20020831_1)
+
+  Modified files:
+    modules              m_stats.c 
+  Log:
+  - glines moved from acptr->name to acptr->user, fixed stats g.
+  
+  Revision  Changes    Path
+  1.118     +5 -20     ircd-ratbox/modules/m_stats.c
+
+
+
 leeh        2002/08/31 09:11:15 EDT	(20020831_0)
 
   Modified files:
