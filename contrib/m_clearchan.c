@@ -138,17 +138,20 @@ int mo_clearchan(struct Client *cptr, struct Client *sptr, int parc, char *parv[
     add_vchan_to_client_cache(sptr,root_chptr,chptr);
   chptr->mode.mode =
     MODE_SECRET | MODE_TOPICLIMIT | MODE_INVITEONLY | MODE_NOPRIVMSGS;
-  if (chptr->topic_info)
-    {
-      free(chptr->topic_info);
-      chptr->topic_info = 0;
-    }
+
+  MyFree(chptr->topic_info);
+  chptr->topic_info = 0;
+
   *chptr->topic = 0;
   *chptr->mode.key = 0;
   sendto_ll_channel_remote(chptr, cptr, sptr,
       ":%s SJOIN %lu %s +ntsi :@%s", me.name, chptr->channelts,
       chptr->chname, sptr->name);
-  sendto_one(sptr, ":%s JOIN %s", sptr->name, chptr->chname);
+  sendto_one(sptr, ":%s!%s@%s JOIN %s",
+	     sptr->name,
+	     sptr->username,
+	     sptr->host,
+	     root_chptr->chname);
   channel_member_names(sptr, chptr, root_chptr->chname);
   return 0;
 }
