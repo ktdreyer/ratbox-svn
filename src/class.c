@@ -152,7 +152,7 @@ get_client_ping(struct Client *target_p)
 
 		if(aconf != NULL)
 		{
-			if(aconf->status & CONF_CLIENT)
+			if(aconf->status & CONF_CLIENT_MASK)
 				ping = get_conf_ping(aconf);
 		}
 		else
