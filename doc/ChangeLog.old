@@ -1,3 +1,7 @@
+*** 20001228_6 by toot
+cleaned up /stats e.. tab symbols just don't work with most irc clients
+
+
 *** 20001228_5 by toot
 . check /set, rather than ircd.conf option for hide_server in m_whois
 
