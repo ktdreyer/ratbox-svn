@@ -1,3 +1,9 @@
+*** 20010104_24 by davidt
+Tidy up lazylink nickcollides partially..
+we still get a collision if a new user is already known by the hub...
+(but it'll just collide off the new user, not the existing one)
+
+
 *** 20010104_23 by a1kmm
 - Fixed more compile warnings.
 
