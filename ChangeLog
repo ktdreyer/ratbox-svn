@@ -1,3 +1,17 @@
+leeh        2004/02/29 18:40:35 EST	(20040229_5)
+
+  Modified files:
+    include              channel.h 
+    src                  channel.c 
+  Log:
+  - destroy_channel() needs to be extern..
+  
+  Revision  Changes    Path
+  7.151     +1 -1      ircd-ratbox/include/channel.h
+  7.400     +1 -2      ircd-ratbox/src/channel.c
+
+
+
 leeh        2004/02/29 18:38:30 EST	(20040229_4)
 
   Modified files:
