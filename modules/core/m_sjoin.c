@@ -115,16 +115,18 @@ static void ms_sjoin(struct Client *client_p,
   int            people = 0;
   int            vc_ts = 0;
   int            isnew;
-  register       char *s, *sh;
-  static         char buf[BUFSIZE];
-  static         char sjbuf_nh[BUFSIZE];
-  char    *p;
+  register       char *s, *hops, *nhops;
+  static         char buf[BUFSIZE]; /* buffer for modes and prefix */
+  static         char sjbuf_hops[BUFSIZE]; /* buffer with halfops as % */
+  static         char sjbuf_nhops[BUFSIZE]; /* buffer with halfops as @ */
+  char           *p; /* pointer used making sjbuf */
   int hide_or_not;
   int i;
   dlink_node *m;
 
   *buf = '\0';
-  *sjbuf_nh = '\0';
+  *sjbuf_hops = '\0';
+  *sjbuf_nhops = '\0';
 
   if (IsClient(source_p) || parc < 5)
     return;
@@ -365,7 +367,9 @@ static void ms_sjoin(struct Client *client_p,
 
   *mbuf++ = '+';
 
-  sh = sjbuf_nh;
+  hops = sjbuf_hops;
+  nhops = sjbuf_nhops;
+
   s = parv[args+4];
 
   /* remove any leading spaces */
@@ -393,26 +397,40 @@ static void ms_sjoin(struct Client *client_p,
 	    {
 	      fl |= MODE_CHANOP;
 	      if (keep_new_modes)
-		*sh++ = *s;
+	      {
+	        *hops++ = *s;
+		*nhops++ = *s;
+              }
+	      
 	      s++;
 	    }
 	  else if (*s == '+')
 	    {
 	      fl |= MODE_VOICE;
 	      if (keep_new_modes)
-		*sh++ = *s;
+	      {
+	        *hops++ = *s;
+		*nhops++ = *s;
+	      }
+	      
 	      s++;
 	    }
 	  else if (*s == '%')
 	    {
 	      fl |= MODE_HALFOP;
 	      if (keep_new_modes)
-		*sh++ = '@';
+	      {
+	        *hops++ = *s;
+		*nhops++ = '@';
+	      }
+	      
 	      s++;
 	    }
 	}
 
-      sh += ircsprintf(sh, "%s ", s); /* Copy over the nick */
+      /* copy the nick to the two buffers */
+      hops += ircsprintf(hops, "%s ", s);
+      nhops += ircsprintf(nhops, "%s ", s);
 
       if (!keep_new_modes)
 	{
@@ -585,9 +603,11 @@ nextnick:
       /* Its a blank sjoin, ugh */
       if (!parv[4+args][0])
           return;
-
-      /* XXX - ids ? */
-      sendto_one(target_p, "%s %s", buf, sjbuf_nh);
+  
+      if(IsCapable(target_p, CAP_HOPS))
+        sendto_one(target_p, "%s %s", buf, sjbuf_hops);
+      else
+        sendto_one(target_p, "%s %s", buf, sjbuf_nhops);
    }
 }
 
