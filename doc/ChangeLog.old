@@ -1,3 +1,24 @@
+jmallett    2002/03/01 11:03:22 EST	(20020301_6)
+
+  Modified files:
+    .                    README.FIRST RELNOTES 
+  Log:
+  Combine the notices for people who don't read documentation.  In reality,
+  if someone can't be bothered reading documentation, should we really
+  document this _twice_ on their account?  Sooth, if they aren't reading
+  README.FIRST, I don't think they'll read RELNOTES.  The former has a name
+  that yells out to be read, the latter is just something people with good
+  sense will read.
+  
+  In short, I've combined the notices into README.FIRST, using the (IMO)
+  much nicer formatting from RELNOTES.
+  
+  Revision  Changes    Path
+  7.32      +8 -7      ircd-hybrid-7/README.FIRST
+  1.15      +0 -9      ircd-hybrid-7/RELNOTES
+
+
+
 androsyn    2002/03/01 09:55:59 EST	(20020301_5)
 
   Modified files:
