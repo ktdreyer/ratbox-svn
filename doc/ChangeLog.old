@@ -1,3 +1,7 @@
+*** 20011024_4 by androsyn
+I don't think we need this anymore.  
+
+
 *** 20011024_3 by androsyn
 Fixed stupidness with headers that prevented us from including openssl/pem.h
 
