@@ -255,6 +255,7 @@ BeginAuthorization(struct Client *client)
 	 * each client.
 	 */
 
+        /* XXX - the IPv6 code is very broken */
 	len = sprintf(buf,
 #ifdef IPV6
 		"DoAuth %p %s %s %s %lu %s\n",
@@ -266,7 +267,8 @@ BeginAuthorization(struct Client *client)
 		client->username,
 		client->host,
 #ifdef IPV6
-		(unsigned int) client->localClient->ip6.s6_addr,
+		0,
+/*                (unsigned int) client->localClient->ip6.s6_addr, */
 #else
 		(unsigned int) client->localClient->ip.sins.sin.s_addr,
 #endif
@@ -592,8 +594,10 @@ GreetUser(struct Client *client)
 		       client->name,
 		       client->username,
 		       client->host,
+                       /* XXX - the IPv6 code is very broken */
 #ifdef IPV6
-		       inetntoa((char *)&client->localClient->ip6),
+		       0,
+                       /*inetntoa((char *)&client->localClient->ip6),*/
 #else
 		       inetntoa((char *)&client->localClient->ip),
 #endif
