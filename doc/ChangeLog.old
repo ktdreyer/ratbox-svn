@@ -1,3 +1,10 @@
+*** 20001207_1 by db
+- fixed obvious bug in sjoin code for vchannels. its still broken
+  for remote joins, but getting there.
+- allow halfops to +imtsp channels like full ops
+
+
+
 *** 20001206_13 by db
 - reverted previous m_kline.c change in favour of...
 - letting s_conf.c figure out if the oper placing the kline is remote oper
