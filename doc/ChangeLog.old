@@ -1,3 +1,8 @@
+*** 19990804_1 by db
+- fixes IP Klines not showing host
+
+
+
 *** 19990803_2 by db
 - updated .depend
 - added m_set for LOG
