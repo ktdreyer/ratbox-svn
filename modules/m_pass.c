@@ -87,7 +87,7 @@ static void mr_pass(struct Client *client_p, struct Client *source_p,
        * safely assume if there is a ":TS" then its a TS server
        * -Dianora
        */
-      if (0 == irccmp(parv[2], "TS"))
+      if (0 == irccmp(parv[2], "TS") && client_p->tsinfo == 0)
         client_p->tsinfo = TS_DOESTS;
     }
 }
