@@ -342,7 +342,7 @@ static void send_knock(struct Client *client_p, struct Client *source_p,
 			     source_p->username,
 			     source_p->host);
       
-      sendto_server(NULL, client_p, NULL, CAP_KNOCK, NOCAPS, NOFLAGS,
+      sendto_server(NULL, client_p, chptr, CAP_KNOCK, NOCAPS, NOFLAGS,
                     ":%s KNOCK %s %s",
 		    source_p->name, name, key ? key : "");
     }
