@@ -65,11 +65,14 @@ struct AuthRequest {
 
 
 extern struct AuthRequest* AuthPollList;  /* GLOBAL - auth queries pending io */
+extern struct AuthRequest* AuthClientList;
 
 extern void start_auth(struct Client *);
 extern void timeout_auth_queries(time_t now);
 extern void read_auth_reply(struct AuthRequest* req);
 extern void send_auth_query(struct AuthRequest* req);
+extern void remove_auth_request(struct AuthRequest *req);
+extern struct AuthRequest *FindAuthClient(long id);
 
 #endif /* INCLUDED_s_auth_h */
 
