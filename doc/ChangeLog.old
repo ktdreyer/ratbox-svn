@@ -1,3 +1,14 @@
+*** 20010911_5 by habeeb
+This changes event to a static table.  It is not complete so please finish:
+*Add eventDelete code that will basically set the active flag to 0
+*impliment active flag
+*fix eventNextTime ; need to add a variable to store next time.
+*check line 593 in src/s_serv.c i commented it, need to set the event inactive
+ if the if() is true
+
+This should be all for now;  If I missed anything I will update this. 
+
+
 *** 20010911_4 by db
 - corrected tiny typo. Our table size is still too large for yacc
   We are going to have to require bison.
