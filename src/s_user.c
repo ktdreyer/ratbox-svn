@@ -550,26 +550,26 @@ introduce_client(struct Client *client_p, struct Client *source_p, struct User *
 			strcpy(sockhost, source_p->sockhost);
 		
 		sendto_server(client_p, NULL, CAP_TS6, NOCAPS,
-			      ":%s UID %s %d " IRCD_TIME_FMT " %s %s %s %s %s :%s",
-			      source_p->servptr->id, nick, 
+			      ":%s UID %s %d %" PRIdMAX " %s %s %s %s %s :%s",
+			      source_p->servptr->id, nick,
 			      source_p->hopcount + 1,
-			      source_p->tsinfo, ubuf,
+			      (intmax_t) source_p->tsinfo, ubuf,
 			      source_p->username, source_p->host,
 			      IsIPSpoof(source_p) ? "0" : sockhost,
 			      source_p->id, source_p->info);
 
 		sendto_server(client_p, NULL, NOCAPS, CAP_TS6,
-			      "NICK %s %d " IRCD_TIME_FMT " %s %s %s %s :%s",
+			      "NICK %s %d %" PRIdMAX " %s %s %s %s :%s",
 			      nick, source_p->hopcount + 1,
-			      source_p->tsinfo,
+			      (intmax_t) source_p->tsinfo,
 			      ubuf, source_p->username, source_p->host,
 			      user->server, source_p->info);
 	}
 	else
 		sendto_server(client_p, NULL, NOCAPS, NOCAPS,
-			      "NICK %s %d " IRCD_TIME_FMT " %s %s %s %s :%s",
+			      "NICK %s %d %" PRIdMAX " %s %s %s %s :%s",
 			      nick, source_p->hopcount + 1,
-			      source_p->tsinfo,
+			      (intmax_t) source_p->tsinfo,
 			      ubuf, source_p->username, source_p->host,
 			      user->server, source_p->info);
 

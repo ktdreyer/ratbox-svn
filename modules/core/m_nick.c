@@ -630,13 +630,13 @@ change_local_nick(struct Client *client_p, struct Client *source_p, char *nick)
 			add_history(source_p, 1);
 
 			sendto_server(client_p, NULL, CAP_TS6, NOCAPS,
-				      ":%s NICK %s :" IRCD_TIME_FMT,
+				      ":%s NICK %s :%" PRIdMAX,
 				      use_id(source_p), nick,
-				      source_p->tsinfo);
+				      (intmax_t) source_p->tsinfo);
 			sendto_server(client_p, NULL, NOCAPS, CAP_TS6,
-				      ":%s NICK %s :" IRCD_TIME_FMT,
+				      ":%s NICK %s :%" PRIdMAX,
 				      source_p->name, nick,
-				      source_p->tsinfo);
+				      (intmax_t) source_p->tsinfo);
 		}
 	}
 	else
@@ -684,8 +684,8 @@ change_remote_nick(struct Client *client_p, struct Client *source_p, int parc,
 	{
 		add_history(source_p, 1);
 		sendto_server(client_p, NULL, NOCAPS, NOCAPS,
-			      ":%s NICK %s :" IRCD_TIME_FMT,
-			      parv[0], nick, source_p->tsinfo);
+			      ":%s NICK %s :%" PRIdMAX,
+			      parv[0], nick, (intmax_t) source_p->tsinfo);
 	}
 
 	del_from_client_hash(source_p->name, source_p);

@@ -165,9 +165,6 @@
 /* Prefix where the ircd is installed. */
 #undef IRCD_PREFIX
 
-/* Formatting for time_t strings */
-#undef IRCD_TIME_FMT
-
 /* Size of the local client heap. */
 #undef LCLIENT_HEAP_SIZE
 
@@ -213,14 +210,14 @@
 /* Path to /dev/null */
 #undef PATH_DEVNULL
 
+/* If system does not define PRIdMAX, define a usable substitute */
+#undef PRIdMAX
+
 /* This is the type of IO loop we are using */
 #undef SELECT_TYPE
 
 /* Suffix for shared libraries on this platform. */
 #undef SHARED_SUFFIX
-
-/* The size of a `time_t', as computed by sizeof. */
-#undef SIZEOF_TIME_T
 
 /* Define to 1 if sockaddr has a 'sa_len' member. */
 #undef SOCKADDR_IN_HAS_LEN
@@ -282,6 +279,9 @@
 #ifndef __cplusplus
 #undef inline
 #endif
+
+/* If system does not define intmax_t, define a usable substitute */
+#undef intmax_t
 
 /* If system does not define sa_family_t, define it here. */
 #undef sa_family_t

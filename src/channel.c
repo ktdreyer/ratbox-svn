@@ -1010,8 +1010,8 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 		nocap = chcap_combos[j].cap_no;
 
 		if(cap & CAP_TS6)
-			mbl = preflen = ircsprintf(modebuf, ":%s TMODE " IRCD_TIME_FMT " %s ",
-						use_id(source_p), chptr->channelts,
+			mbl = preflen = ircsprintf(modebuf, ":%s TMODE %" PRIdMAX " %s ",
+						use_id(source_p), (intmax_t) chptr->channelts,
 						chptr->chname);
 		else
 			mbl = preflen = ircsprintf(modebuf, ":%s MODE %s ",

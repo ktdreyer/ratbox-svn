@@ -97,8 +97,8 @@ mo_ojoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		add_user_to_channel(chptr, source_p, CHFL_CHANOP);
 		sendto_server(client_p, chptr, NOCAPS, NOCAPS,
-			      ":%s SJOIN " IRCD_TIME_FMT " %s + :@%s",
-			      me.name, chptr->channelts, chptr->chname, source_p->name);
+			      ":%s SJOIN %" PRIdMAX " %s + :@%s",
+			      me.name, (intmax_t) chptr->channelts, chptr->chname, source_p->name);
 		sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s JOIN %s",
 				     source_p->name,
 				     source_p->username, source_p->host, chptr->chname);
@@ -110,8 +110,8 @@ mo_ojoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		add_user_to_channel(chptr, source_p, CHFL_VOICE);
 		sendto_server(client_p, chptr, NOCAPS, NOCAPS,
-			      ":%s SJOIN " IRCD_TIME_FMT " %s + :+%s",
-			      me.name, chptr->channelts, chptr->chname, source_p->name);
+			      ":%s SJOIN %" PRIdMAX " %s + :+%s",
+			      me.name, (intmax_t) chptr->channelts, chptr->chname, source_p->name);
 		sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s JOIN %s",
 				     source_p->name,
 				     source_p->username, source_p->host, chptr->chname);
@@ -122,8 +122,8 @@ mo_ojoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		add_user_to_channel(chptr, source_p, CHFL_PEON);
 		sendto_server(client_p, chptr, NOCAPS, NOCAPS,
-			      ":%s SJOIN " IRCD_TIME_FMT " %s + :%s",
-			      me.name, chptr->channelts, chptr->chname, source_p->name);
+			      ":%s SJOIN %" PRIdMAX " %s + :%s",
+			      me.name, (intmax_t) chptr->channelts, chptr->chname, source_p->name);
 		sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s JOIN %s",
 				     source_p->name,
 				     source_p->username, source_p->host, chptr->chname);

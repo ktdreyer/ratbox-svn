@@ -105,8 +105,8 @@ mo_clearchan(struct Client *client_p, struct Client *source_p, int parc, const c
 
 		/* SJOIN the user to give them ops, and lock the channel */
 		sendto_server(client_p, chptr, NOCAPS, NOCAPS,
-			      ":%s SJOIN " IRCD_TIME_FMT " %s +ntsi :@%s",
-			      me.name, (chptr->channelts - 1),
+			      ":%s SJOIN %" PRIdMAX " %s +ntsi :@%s",
+			      me.name, (intmax_t) (chptr->channelts - 1),
 			      chptr->chname, source_p->name);
 	}
 

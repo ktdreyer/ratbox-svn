@@ -85,13 +85,13 @@ ms_svinfo(struct Client *client_p, struct Client *source_p, int parc, const char
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Link %s dropped, excessive TS delta"
-				     " (my TS=%ld, their TS=" IRCD_TIME_FMT ", delta=%d)",
+				     " (my TS=%" PRIdMAX ", their TS=%" PRIdMAX ", delta=%d)",
 				     get_server_name(source_p, SHOW_IP),
-				     CurrentTime, theirtime, deltat);
+				     (intmax_t) CurrentTime, (intmax_t) theirtime, deltat);
 		ilog(L_SERVER,
 		     "Link %s dropped, excessive TS delta"
-		     " (my TS=%ld, their TS=" IRCD_TIME_FMT ", delta=%d)",
-		     log_client_name(source_p, SHOW_IP), CurrentTime, theirtime, deltat);
+		     " (my TS=% " PRIdMAX ", their TS=%" PRIdMAX ", delta=%d)",
+		     log_client_name(source_p, SHOW_IP), (intmax_t) CurrentTime, (intmax_t) theirtime, deltat);
 		exit_client(source_p, source_p, source_p, "Excessive TS delta");
 		return 0;
 	}
@@ -100,8 +100,8 @@ ms_svinfo(struct Client *client_p, struct Client *source_p, int parc, const char
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Link %s notable TS delta"
-				     " (my TS=%ld, their TS=" IRCD_TIME_FMT ", delta=%d)",
-				     source_p->name, CurrentTime, theirtime, deltat);
+				     " (my TS=%" PRIdMAX ", their TS=%" PRIdMAX ", delta=%d)",
+				     source_p->name, (intmax_t) CurrentTime, (intmax_t) theirtime, deltat);
 	}
 
 	return 0;

@@ -250,12 +250,12 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			if(*chptr->chname == '#')
 			{
 				sendto_server(client_p, chptr, CAP_TS6, NOCAPS,
-					      ":%s SJOIN " IRCD_TIME_FMT " %s +nt :@%s",
-					      me.id, chptr->channelts,
+					      ":%s SJOIN %" PRIdMAX " %s +nt :@%s",
+					      me.id, (intmax_t) chptr->channelts,
 					      chptr->chname, source_p->id);
 				sendto_server(client_p, chptr, NOCAPS, CAP_TS6,
-					      ":%s SJOIN " IRCD_TIME_FMT " %s +nt :@%s",
-					      me.name, chptr->channelts,
+					      ":%s SJOIN %" PRIdMAX " %s +nt :@%s",
+					      me.name, (intmax_t) chptr->channelts,
 					      chptr->chname, source_p->name);
 			}
 		}
@@ -264,14 +264,14 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			channel_modes(chptr, source_p, modebuf, parabuf);
 
 			sendto_server(client_p, chptr, CAP_TS6, NOCAPS,
-				      ":%s JOIN " IRCD_TIME_FMT " %s %s %s",
-				      use_id(source_p), chptr->channelts,
+				      ":%s JOIN %" PRIdMAX " %s %s %s",
+				      use_id(source_p), (intmax_t) chptr->channelts,
 				      chptr->chname, modebuf,
 				      parabuf[0] == '\0' ? "" : parabuf);
 
 			sendto_server(client_p, chptr, NOCAPS, CAP_TS6,
-				      ":%s SJOIN " IRCD_TIME_FMT " %s %s %s:%s",
-				      me.name, chptr->channelts,
+				      ":%s SJOIN %" PRIdMAX " %s %s %s:%s",
+				      me.name, (intmax_t) chptr->channelts,
 				      chptr->chname, modebuf,
 				      parabuf[0] == '\0' ? "" : parabuf, 
 				      source_p->name);
@@ -394,8 +394,8 @@ ms_join(struct Client *client_p, struct Client *source_p, int parc, const char *
 	if(newts < 800000000)
 	{
 		sendto_realops_flags(UMODE_DEBUG, L_ALL,
-				     "*** Bogus TS " IRCD_TIME_FMT " on %s ignored from %s",
-				     newts, chptr->chname,
+				     "*** Bogus TS %" PRIdMAX " on %s ignored from %s",
+				     (intmax_t) newts, chptr->chname,
 				     client_p->name);
 		newts = (oldts == 0) ? oldts : 800000000;
 	}
@@ -405,12 +405,12 @@ ms_join(struct Client *client_p, struct Client *source_p, int parc, const char *
 	{
 		sendto_channel_local(ALL_MEMBERS, chptr,
 				     ":%s NOTICE %s :*** Notice -- TS for %s"
-				     " changed from " IRCD_TIME_FMT " to 0",
-				     me.name, chptr->chname, chptr->chname, oldts);
+				     " changed from %" PRIdMAX " to 0",
+				     me.name, chptr->chname, chptr->chname, (intmax_t) oldts);
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Server %s changing TS on %s"
-				     " from " IRCD_TIME_FMT " to 0",
-				     source_p->name, chptr->chname, oldts);
+				     " from %" PRIdMAX " to 0",
+				     source_p->name, chptr->chname, (intmax_t) oldts);
 	}
 #endif
 
@@ -448,8 +448,9 @@ ms_join(struct Client *client_p, struct Client *source_p, int parc, const char *
 		remove_our_modes(chptr, source_p);
 		sendto_channel_local(ALL_MEMBERS, chptr,
 				     ":%s NOTICE %s :*** Notice -- TS for %s"
-				     " changed from " IRCD_TIME_FMT " to " IRCD_TIME_FMT,
-				     me.name, chptr->chname, chptr->chname, oldts, newts);
+				     " changed from %" PRIdMAX " to %" PRIdMAX,
+				     me.name, chptr->chname, chptr->chname,
+				     (intmax_t) oldts, (intmax_t) newts);
 	}
 
 	if(*modebuf != '\0')
@@ -469,13 +470,13 @@ ms_join(struct Client *client_p, struct Client *source_p, int parc, const char *
 	}
 
 	sendto_server(client_p, chptr, CAP_TS6, NOCAPS,
-		      ":%s JOIN " IRCD_TIME_FMT " %s %s %s",
-		      source_p->id, chptr->channelts, chptr->chname,
+		      ":%s JOIN %" PRIdMAX " %s %s %s",
+		      source_p->id, (intmax_t) chptr->channelts, chptr->chname,
 		      modebuf, parabuf);
 	sendto_server(client_p, chptr, NOCAPS, CAP_TS6,
-		      ":%s SJOIN " IRCD_TIME_FMT " %s %s %s:%s",
-		      source_p->user->server, chptr->channelts, chptr->chname,
-		      modebuf, parabuf, source_p->name);
+		      ":%s SJOIN %" PRIdMAX " %s %s %s:%s",
+		      source_p->user->server, (intmax_t) chptr->channelts,
+		      chptr->chname, modebuf, parabuf, source_p->name);
 	return 0;
 }
 

@@ -634,8 +634,8 @@ burst_modes_TS6(struct Client *client_p, struct Channel *chptr,
 	int mlen;
 	int cur_len;
 
-	cur_len = mlen = ircsprintf(buf, ":%s BMASK " IRCD_TIME_FMT " %s %c :",
-				    me.id, chptr->channelts, chptr->chname, flag);
+	cur_len = mlen = ircsprintf(buf, ":%s BMASK %" PRIdMAX " %s %c :",
+				    me.id, (intmax_t) chptr->channelts, chptr->chname, flag);
 	t = buf + mlen;
 
 	DLINK_FOREACH(ptr, list->head)
@@ -711,9 +711,9 @@ burst_TS5(struct Client *client_p)
 			ubuf[1] = '\0';
 		}
 
-		sendto_one(client_p, "NICK %s %d " IRCD_TIME_FMT " %s %s %s %s :%s",
+		sendto_one(client_p, "NICK %s %d %" PRIdMAX " %s %s %s %s :%s",
 			   target_p->name, target_p->hopcount + 1,
-			   target_p->tsinfo, ubuf,
+			   (intmax_t) target_p->tsinfo, ubuf,
 			   target_p->username, target_p->host,
 			   target_p->user->server, target_p->info);
 
@@ -740,8 +740,8 @@ burst_TS5(struct Client *client_p)
 		*modebuf = *parabuf = '\0';
 		channel_modes(chptr, client_p, modebuf, parabuf);
 
-		cur_len = mlen = ircsprintf(buf, ":%s SJOIN " IRCD_TIME_FMT " %s %s %s:", me.name,
-				chptr->channelts, chptr->chname, modebuf, parabuf);
+		cur_len = mlen = ircsprintf(buf, ":%s SJOIN %" PRIdMAX " %s %s %s:", me.name,
+				(intmax_t) chptr->channelts, chptr->chname, modebuf, parabuf);
 
 		t = buf + mlen;
 
@@ -785,8 +785,8 @@ burst_TS5(struct Client *client_p)
 			burst_modes_TS5(client_p, chptr->chname, &chptr->invexlist, 'I');
 
 		if(IsCapable(client_p, CAP_TB) && chptr->topic != NULL)
-			sendto_one(client_p, ":%s TB %s " IRCD_TIME_FMT " %s%s:%s",
-				   me.name, chptr->chname, chptr->topic_time,
+			sendto_one(client_p, ":%s TB %s %" PRIdMAX " %s%s:%s",
+				   me.name, chptr->chname, (intmax_t) chptr->topic_time,
 				   ConfigChannel.burst_topicwho ? chptr->topic_info : "",
 				   ConfigChannel.burst_topicwho ? " " : "",
 				   chptr->topic);
@@ -832,18 +832,18 @@ burst_TS6(struct Client *client_p)
 		}
 
 		if(has_id(target_p))
-			sendto_one(client_p, ":%s UID %s %d " IRCD_TIME_FMT " %s %s %s %s %s :%s",
+			sendto_one(client_p, ":%s UID %s %d %" PRIdMAX " %s %s %s %s %s :%s",
 				   target_p->servptr->id, target_p->name,
 				   target_p->hopcount + 1, 
-				   target_p->tsinfo, ubuf,
+				   (intmax_t) target_p->tsinfo, ubuf,
 				   target_p->username, target_p->host,
 				   IsIPSpoof(target_p) ? "0" : target_p->sockhost,
 				   target_p->id, target_p->info);
 		else
-			sendto_one(client_p, "NICK %s %d " IRCD_TIME_FMT " %s %s %s %s :%s",
+			sendto_one(client_p, "NICK %s %d %" PRIdMAX " %s %s %s %s :%s",
 					target_p->name,
 					target_p->hopcount + 1,
-					target_p->tsinfo,
+					(intmax_t) target_p->tsinfo,
 					ubuf,
 					target_p->username, target_p->host,
 					target_p->user->server, target_p->info);
@@ -872,8 +872,8 @@ burst_TS6(struct Client *client_p)
 		*modebuf = *parabuf = '\0';
 		channel_modes(chptr, client_p, modebuf, parabuf);
 
-		cur_len = mlen = ircsprintf(buf, ":%s SJOIN " IRCD_TIME_FMT " %s %s %s:", me.name,
-				chptr->channelts, chptr->chname, modebuf, parabuf);
+		cur_len = mlen = ircsprintf(buf, ":%s SJOIN %" PRIdMAX " %s %s %s:", me.name,
+				(intmax_t) chptr->channelts, chptr->chname, modebuf, parabuf);
 
 		t = buf + mlen;
 
@@ -918,8 +918,8 @@ burst_TS6(struct Client *client_p)
 			burst_modes_TS6(client_p, chptr, &chptr->invexlist, 'I');
 
 		if(IsCapable(client_p, CAP_TB) && chptr->topic != NULL)
-			sendto_one(client_p, ":%s TB %s " IRCD_TIME_FMT " %s%s:%s",
-				   me.id, chptr->chname, chptr->topic_time,
+			sendto_one(client_p, ":%s TB %s %" PRIdMAX " %s%s:%s",
+				   me.id, chptr->chname, (intmax_t) chptr->topic_time,
 				   ConfigChannel.burst_topicwho ? chptr->topic_info : "",
 				   ConfigChannel.burst_topicwho ? " " : "",
 				   chptr->topic);
