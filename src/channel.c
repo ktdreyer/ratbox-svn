@@ -1607,7 +1607,21 @@ void set_channel_mode(struct Client *cptr,
         case 'l':
           if (whatt == MODE_QUERY)
             break;
-          if (!isok_c || limitset++)
+	  /* allow ops and halfops to set limits */
+          if (!isok_c)
+            {
+              if (!errsent(SM_ERR_NOOPS, &errors_sent) && MyClient(sptr))
+                sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED),
+                           me.name, sptr->name, 
+                           real_name);
+
+              if (whatt == MODE_ADD && parc-- > 0)
+                parv++;
+
+              break;
+            }
+
+          if (limitset++)
             {
               if (whatt == MODE_ADD && parc-- > 0)
                 parv++;
