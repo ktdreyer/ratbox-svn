@@ -208,7 +208,7 @@ void adns_getaddr(struct irc_inaddr *addr, int aftype,
                   struct DNSQuery *req)
 {
  struct irc_sockaddr ipn;
- assert(dns_state->nserver > 0);
+ assert(dns_state->nservers > 0);
 #ifdef IPV6
  if (aftype == AF_INET6)
   {
