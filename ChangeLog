@@ -1,3 +1,15 @@
+leeh        2003/08/09 08:25:24 EDT	(20030809_1)
+
+  Modified files:
+    src                  m_error.c 
+  Log:
+  - missing ',' in m_error.c
+  
+  Revision  Changes    Path
+  7.35      +1 -1      ircd-ratbox/src/m_error.c
+
+
+
 leeh        2003/08/09 05:42:59 EDT	(20030809_0)
 
   Modified files:
