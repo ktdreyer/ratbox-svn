@@ -1,3 +1,15 @@
+androsyn    2002/12/16 10:21:29 UTC	(20021216_24)
+
+  Modified files:
+    include              client.h 
+  Log:
+  Oops..
+  
+  Revision  Changes    Path
+  7.190     +1 -0      ircd-ratbox/include/client.h
+
+
+
 androsyn    2002/12/16 10:19:56 UTC	(20021216_23)
 
   Modified files:
