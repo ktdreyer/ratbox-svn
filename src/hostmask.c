@@ -67,7 +67,7 @@ try_parse_v6_netmask(const char *text, struct irc_inaddr *addr, int *b)
   const char *p;
   char c;
   int d[8] = { 0, 0, 0, 0, 0, 0, 0, 0 }, dp = 0, nyble = 4, finsert =
-    -1, bits = 0, deficit = 0;
+    -1, bits = 128, deficit = 0;
   short dc[8];
   
   for (p = text; (c = *p); p++)
