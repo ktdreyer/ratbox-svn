@@ -1,3 +1,17 @@
+leeh        2003/06/20 00:21:00 UTC	(20030620_0)
+
+  Added files:
+    include              help.h 
+    src                  help.c 
+  Log:
+  - add missing help files
+  
+  Revision  Changes    Path
+  1.1       +30 -0     ircd-ratbox/include/help.h (new)
+  1.1       +147 -0    ircd-ratbox/src/help.c (new)
+
+
+
 leeh        2003/06/19 23:18:00 UTC	(20030619_1)
 
   Modified files:
