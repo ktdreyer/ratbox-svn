@@ -20,7 +20,7 @@ msgstr	":%s 001 %s :ALL YOUR BASE ARE BELONG TO %s, %s!!!"
 
 #: ../src/messages.tab:25
 #, c-format
-msgid	":%s 002 %s :Your host is %s, running version %s"
+msgid	":%s 002 %s :Your host is %s, running version %s for great justice"
 msgstr	""
 
 #: ../src/messages.tab:26
@@ -187,7 +187,7 @@ msgstr	""
 #: ../src/messages.tab:277
 #, c-format
 msgid	":%s 251 %s :There are %d users and %d invisible on %d servers"
-msgstr	""
+msgstr	":%s 251 %s :There are %d minor Zigs and %d invisible on %d servers"
 
 #: ../src/messages.tab:278
 #, c-format
@@ -207,7 +207,7 @@ msgstr	""
 #: ../src/messages.tab:281
 #, c-format
 msgid	":%s 255 %s :I have %d clients and %d servers"
-msgstr	""
+msgstr	":%s 255 %s :%d clients and %d servers are belong to me"
 
 #: ../src/messages.tab:282
 #, c-format
@@ -249,17 +249,17 @@ msgstr	":%s 263 %s :Hold your horses... the server load is temporarily too "
 #: ../src/messages.tab:292
 #, c-format
 msgid	":%s 265 %s :Current local  users: %d  Max: %d"
-msgstr	""
+msgstr	":%s 265 %s :%d users (max %d) are belong to me"
 
 #: ../src/messages.tab:293
 #, c-format
 msgid	":%s 266 %s :Current global users: %d  Max: %d"
-msgstr	""
+msgstr	":%s 266 %s :%d users (max %d) are belong to the network"
 
 #: ../src/messages.tab:303
 #, c-format
 msgid	":%s 276 %s %s :has %d possible virtual channels available"
-msgstr	""
+msgstr	":%s 276 %s %s :%d virtual channels are belong to it"
 
 #: ../src/messages.tab:304
 #, c-format
@@ -289,7 +289,7 @@ msgstr	""
 #: ../src/messages.tab:332
 #, c-format
 msgid	":%s 305 %s :You are no longer marked as being away"
-msgstr	":%s 305 %s :OK, you're not /away anymore. Did you have fun?"
+msgstr	":%s 305 %s :OK, you're not /away anymore. Did you move Zig for great justice?"
 
 #: ../src/messages.tab:333
 #, c-format
@@ -520,7 +520,7 @@ msgstr	""
 #: ../src/messages.tab:428
 #, c-format
 msgid	":%s 401 %s %s :No such nick/channel"
-msgstr	""
+msgstr	":%s 401 %s %s :No such Zig"
 
 #: ../src/messages.tab:429
 #, c-format
@@ -540,17 +540,17 @@ msgstr	""
 #: ../src/messages.tab:432
 #, c-format
 msgid	":%s 405 %s %s :You have joined too many channels"
-msgstr	""
+msgstr	":%s 405 %s %s :Too many channels are belong to you"
 
 #: ../src/messages.tab:433
 #, c-format
 msgid	":%s 406 %s %s :There was no such nickname"
-msgstr	""
+msgstr	":%s 406 %s %s :There was no such Zig"
 
 #: ../src/messages.tab:435
 #, c-format
 msgid	":%s 407 %s %s :Too many recipients. Only %d processed"
-msgstr	""
+msgstr	":%s 407 %s %s :Too many recipients. Your message is only belong to %d"
 
 #: ../src/messages.tab:437
 #, c-format
@@ -560,7 +560,7 @@ msgstr	""
 #: ../src/messages.tab:439
 #, c-format
 msgid	":%s 411 %s :No recipient given (%s)"
-msgstr	""
+msgstr	":%s 411 %s :No Zigs Moved (%s)"
 
 #: ../src/messages.tab:440
 #, c-format
@@ -580,12 +580,12 @@ msgstr	""
 #: ../src/messages.tab:449
 #, c-format
 msgid	":%s 421 %s %s :Unknown command"
-msgstr	""
+msgstr	":%s 421 %s %s :THAT COMMAND IS NOT BELONG TO ME!!!"
 
 #: ../src/messages.tab:450
 #, c-format
 msgid	":%s 422 %s :MOTD File is missing"
-msgstr	""
+msgstr	":%s 422 %s :MOTD file is not belong to me"
 
 #: ../src/messages.tab:452
 #, c-format
@@ -610,7 +610,7 @@ msgstr	""
 #: ../src/messages.tab:462
 #, c-format
 msgid	":%s 433 %s %s :Nickname is already in use."
-msgstr	""
+msgstr	":%s 433 %s %s :Zig is belong to someone else."
 
 #: ../src/messages.tab:465
 #, c-format
