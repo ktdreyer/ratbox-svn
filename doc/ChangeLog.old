@@ -1,3 +1,16 @@
+androsyn    2002/05/06 01:48:48 EDT	(20020506_0)
+
+  Modified files:
+    src                  s_bsd_sigio.c 
+  Log:
+  Add some logging about RT signal queue overflows.  It might be useful for
+  this to get noticed by the admin.
+  
+  Revision  Changes    Path
+  7.20      +1 -0      ircd-hybrid-7/src/s_bsd_sigio.c
+
+
+
 leeh        2002/05/02 12:58:14 EDT	(20020502_0)
 
   Modified files:
