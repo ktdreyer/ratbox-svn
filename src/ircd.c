@@ -669,6 +669,7 @@ main(int argc, char *argv[])
 	check_class();
 	write_pidfile(pidFileName);
 	load_help();
+	open_logfiles();
 
 	ilog(L_MAIN, "Server Ready");
 
