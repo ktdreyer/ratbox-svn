@@ -61,7 +61,8 @@ static int check_channel_name_loc(struct Client *source_p, const char *name);
 
 static int can_join(struct Client *source_p, struct Channel *chptr, char *key);
 
-static void set_final_mode(struct Mode *mode, struct Mode *oldmode);
+static void set_final_mode(struct Client *, struct Channel *, 
+			struct Mode *, struct Mode *);
 static void remove_our_modes(struct Channel *chptr, struct Client *source_p);
 static void remove_ban_list(struct Channel *chptr, struct Client *source_p,
 			    dlink_list *list, char c, int cap, int mems);
@@ -456,9 +457,6 @@ ms_join(struct Client *client_p, struct Client *source_p, int parc, const char *
 			strcpy(mode.key, oldmode->key);
 	}
 
-	set_final_mode(&mode, oldmode);
-	chptr->mode = mode;
-
 	/* Lost the TS, other side wins, so remove modes on this side */
 	if(!keep_our_modes)
 	{
@@ -468,10 +466,8 @@ ms_join(struct Client *client_p, struct Client *source_p, int parc, const char *
 				     me.name, chptr->chname, chptr->chname, (long) oldts, (long) newts);
 	}
 
-	if(*modebuf != '\0')
-		sendto_channel_local(ALL_MEMBERS, chptr, ":%s MODE %s %s %s",
-				     source_p->user->server,
-				     chptr->chname, modebuf, parabuf);
+	set_final_mode(source_p->servptr, chptr, &mode, oldmode);
+	chptr->mode = mode;
 
 	*modebuf = *parabuf = '\0';
 
@@ -663,9 +659,6 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 			strcpy(mode.key, oldmode->key);
 	}
 
-	set_final_mode(&mode, oldmode);
-	chptr->mode = mode;
-
 	/* Lost the TS, other side wins, so remove modes on this side */
 	if(!keep_our_modes)
 	{
@@ -676,10 +669,8 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 				     (long) oldts, (long) newts);
 	}
 
-	if(*modebuf != '\0')
-		sendto_channel_local(ALL_MEMBERS, chptr, ":%s MODE %s %s %s",
-				     source_p->name, chptr->chname, 
-				     modebuf, parabuf);
+	set_final_mode(source_p, chptr, &mode, oldmode);
+	chptr->mode = mode;
 
 	*modebuf = *parabuf = '\0';
 
@@ -1071,12 +1062,17 @@ static struct mode_letter
 };
 
 static void
-set_final_mode(struct Mode *mode, struct Mode *oldmode)
+set_final_mode(struct Client *source_p, struct Channel *chptr,
+		struct Mode *mode, struct Mode *oldmode)
 {
+	static char lmodebuf[MODEBUFLEN];
+	static char lparabuf[MODEBUFLEN];
 	int dir = MODE_QUERY;
-	char *pbuf = parabuf;
-	int len;
+	char *lmbuf = lmodebuf;
+	char *lpbuf = lparabuf;
 	int i;
+
+	lparabuf[0] = '\0';
 
 	/* ok, first get a list of modes we need to add */
 	for (i = 0; flags[i].letter; i++)
@@ -1085,10 +1081,10 @@ set_final_mode(struct Mode *mode, struct Mode *oldmode)
 		{
 			if(dir != MODE_ADD)
 			{
-				*mbuf++ = '+';
+				*lmbuf++ = '+';
 				dir = MODE_ADD;
 			}
-			*mbuf++ = flags[i].letter;
+			*lmbuf++ = flags[i].letter;
 		}
 	}
 
@@ -1099,10 +1095,10 @@ set_final_mode(struct Mode *mode, struct Mode *oldmode)
 		{
 			if(dir != MODE_DEL)
 			{
-				*mbuf++ = '-';
+				*lmbuf++ = '-';
 				dir = MODE_DEL;
 			}
-			*mbuf++ = flags[i].letter;
+			*lmbuf++ = flags[i].letter;
 		}
 	}
 
@@ -1110,45 +1106,58 @@ set_final_mode(struct Mode *mode, struct Mode *oldmode)
 	{
 		if(dir != MODE_DEL)
 		{
-			*mbuf++ = '-';
+			*lmbuf++ = '-';
 			dir = MODE_DEL;
 		}
-		*mbuf++ = 'l';
+		*lmbuf++ = 'l';
 	}
 	if(oldmode->key[0] && !mode->key[0])
 	{
 		if(dir != MODE_DEL)
 		{
-			*mbuf++ = '-';
+			*lmbuf++ = '-';
 			dir = MODE_DEL;
 		}
-		*mbuf++ = 'k';
-		len = ircsprintf(pbuf, "%s ", oldmode->key);
-		pbuf += len;
+		*lmbuf++ = 'k';
+		lpbuf += ircsprintf(lpbuf, "%s ", oldmode->key);
 	}
 	if(mode->limit && oldmode->limit != mode->limit)
 	{
 		if(dir != MODE_ADD)
 		{
-			*mbuf++ = '+';
+			*lmbuf++ = '+';
 			dir = MODE_ADD;
 		}
-		*mbuf++ = 'l';
-		len = ircsprintf(pbuf, "%d ", mode->limit);
-		pbuf += len;
+		*lmbuf++ = 'l';
+		lpbuf += ircsprintf(lpbuf, "%d ", mode->limit);
 	}
 	if(mode->key[0] && strcmp(oldmode->key, mode->key))
 	{
 		if(dir != MODE_ADD)
 		{
-			*mbuf++ = '+';
+			*lmbuf++ = '+';
 			dir = MODE_ADD;
 		}
-		*mbuf++ = 'k';
-		len = ircsprintf(pbuf, "%s ", mode->key);
-		pbuf += len;
+		*lmbuf++ = 'k';
+		lpbuf += ircsprintf(lpbuf, "%s ", mode->key);
 	}
-	*mbuf = '\0';
+
+	*lmbuf = '\0';
+
+	if(!EmptyString(lmodebuf))
+	{
+		/* arguments, cut trailing space */
+		if(!EmptyString(lparabuf))
+		{
+			*(lpbuf - 1) = '\0';
+			sendto_channel_local(ALL_MEMBERS, chptr, ":%s MODE %s %s %s",
+					source_p->name, chptr->chname,
+					lmodebuf, lparabuf);
+		}
+		else
+			sendto_channel_local(ALL_MEMBERS, chptr, ":%s MODE %s %s",
+					source_p->name, chptr->chname, lmodebuf);
+	}
 }
 
 /*
