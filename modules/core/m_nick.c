@@ -127,7 +127,7 @@ static void mr_nick(struct Client *client_p, struct Client *source_p, int parc,
     {
       sendto_realops_flags(FLAGS_REJ,
 			   "Quarantined nick [%s] from user %s",
-			   nick, get_client_name(client_p, HIDE_IP));
+			   nick, client_p->name);
       sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
 		 me.name, BadPtr(parv[0]) ? "*" : parv[0], nick);
       return;
@@ -222,7 +222,7 @@ static void m_nick(struct Client *client_p, struct Client *source_p,
     {
       sendto_realops_flags(FLAGS_REJ,
 			   "Quarantined nick [%s] from user %s",
-			   nick, get_client_name(client_p, HIDE_IP));
+			   nick, source_p->name);
       sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
 		 me.name, parv[0], nick);
       return;
@@ -369,19 +369,20 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
           ServerStats->is_kill++;
           sendto_realops_flags(FLAGS_DEBUG, "Bad Nick: %s From: %s %s",
 			       parv[1], parv[0],
-			       get_client_name(client_p, HIDE_IP));
+			       client_p->name);
 
 
 	  /* XXX UID */
           sendto_one(client_p, ":%s KILL %s :%s (%s <- %s[%s])",
                      me.name, parv[1], me.name, parv[1],
                      nick, client_p->name);
+          /* When the hell is this ever triggered?! */
           if (source_p != client_p) /* bad nick change */
             {
               kill_client_ll_serv_butone(client_p, source_p,
 					 "%s (%s <- %s!%s@%s)",
 					 me.name,
-					 get_client_name(client_p, HIDE_IP),
+					 client_p->name,
 					 parv[0],
 					 source_p->username,
 					 source_p->user ?
@@ -557,7 +558,7 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
           sendto_realops_flags(FLAGS_ALL,
 			       "Nick collision on %s(%s <- %s)(both killed)",
 			       target_p->name, target_p->from->name,
-			       get_client_name(client_p, HIDE_IP));
+			       client_p->name);
 
 #ifndef LOCAL_NICK_COLLIDE
           /* If we got the message from a LL, ensure it gets the kill */
@@ -568,7 +569,7 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
 				     "%s (%s <- %s)",
 				     me.name,
 				     target_p->from->name,
-				     get_client_name(client_p, HIDE_IP));
+				     client_p->name);
 #if 0
           sendto_ll_serv_butone(NULL, target_p, 0,/* all servers */
 			     ":%s KILL %s :%s (%s <- %s)",
@@ -605,14 +606,14 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
             {
               if (sameuser)
                 sendto_realops_flags(FLAGS_ALL,
-                       "Nick collision on %s(%s <- %s)(older killed)",
+                       "Nick collision on %s(%s <- %s)(older killed)",		      
 		       target_p->name, target_p->from->name,
-		       get_client_name(client_p, HIDE_IP));
+		       client_p->name);
               else
                 sendto_realops_flags(FLAGS_ALL,
 			     "Nick collision on %s(%s <- %s)(newer killed)",
 			     target_p->name, target_p->from->name,
-			     get_client_name(client_p, HIDE_IP));
+			     client_p->name);
               
               ServerStats->is_kill++;
               sendto_one(target_p, form_str(ERR_NICKCOLLISION),
@@ -627,7 +628,7 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
 					 "%s (%s <- %s)",
 					 me.name,
 					 target_p->from->name,
-					 get_client_name(client_p, HIDE_IP));
+					 client_p->name);
 #if 0
 	      sendto_ll_serv_butone(source_p, target_p, 0, /* all servers but source_p */
 				 ":%s KILL %s :%s (%s <- %s)",
@@ -657,7 +658,7 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
       sendto_realops_flags(FLAGS_ALL,
 	   "Nick change collision from %s to %s(%s <- %s)(both killed)",
            source_p->name, target_p->name, target_p->from->name,
-	   get_client_name(client_p, HIDE_IP));
+	   client_p->name);
       ServerStats->is_kill++;
       sendto_one(target_p, form_str(ERR_NICKCOLLISION),
                  me.name, target_p->name, target_p->name);
@@ -671,7 +672,7 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
 				 me.name,
 				 target_p->from->name,
 				 target_p->name,
-				 get_client_name(client_p, HIDE_IP));
+				 client_p->name);
 #if 0
       sendto_ll_serv_butone(NULL, source_p, 0, /* KILL old from outgoing servers */
 			 ":%s KILL %s :%s (%s(%s) <- %s)",
@@ -689,9 +690,9 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
 
       kill_client_ll_serv_butone(NULL, target_p,
 				 "%s (%s <- %s(%s))",
-				 me.name, 
+				 me.name,
 				 target_p->from->name,
-				 get_client_name(client_p, HIDE_IP),
+				 client_p->name,
 				 source_p->name);
 #if 0
       sendto_ll_serv_butone(NULL, target_p, 0, /* Kill new from incoming link */
@@ -718,12 +719,12 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
             sendto_realops_flags(FLAGS_ALL,
                  "Nick change collision from %s to %s(%s <- %s)(older killed)",
                  source_p->name, target_p->name, target_p->from->name,
-                 get_client_name(client_p, HIDE_IP));
+                 client_p->name);
           else
             sendto_realops_flags(FLAGS_ALL,
                  "Nick change collision from %s to %s(%s <- %s)(newer killed)",
                  source_p->name, target_p->name, target_p->from->name,
-                 get_client_name(client_p, HIDE_IP));
+                 client_p->name);
 
           ServerStats->is_kill++;
 
@@ -736,7 +737,7 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
 				     "%s (%s(%s) <- %s)",
 				     me.name, target_p->from->name,
 				     target_p->name,
-				     get_client_name(client_p, HIDE_IP));
+				     client_p->name);
 #if 0
 
 	  sendto_ll_serv_butone(client_p, source_p, 0, /* KILL old from outgoing servers */
@@ -759,12 +760,12 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
             sendto_realops_flags(FLAGS_ALL,
                                "Nick collision on %s(%s <- %s)(older killed)",
                                target_p->name, target_p->from->name,
-                               get_client_name(client_p, HIDE_IP));
+                               client_p->name);
           else
             sendto_realops_flags(FLAGS_ALL,
                          "Nick collision on %s(%s <- %s)(newer killed)",
                          target_p->name, target_p->from->name,
-                         get_client_name(client_p, HIDE_IP));
+                         client_p->name);
           
 #ifndef LOCAL_NICK_COLLIDE
           /* this won't go back to the incoming link, so it doesn't
@@ -774,7 +775,7 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
 				     "%s (%s <- %s)",
 				     me.name,
 				     target_p->from->name,
-				     get_client_name(client_p, HIDE_IP));
+				     client_p->name);
 #if 0
 	  sendto_ll_serv_butone(source_p, target_p, 0, /* all servers but source_p */
 			     ":%s KILL %s :%s (%s <- %s)",
