@@ -1,3 +1,9 @@
+*** 20001105_2 by db
+- redid m_oper.c to clean that up a bit 
+- changed the header in m_challenge.c from m_version.c to m_challenge.c
+
+
+
 *** 20001105_1 by db
 - slight cleanups to m_part.c
 - added vchan support to m_whois.c m_who.c
