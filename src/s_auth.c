@@ -195,6 +195,7 @@ auth_dns_callback(void *vptr, adns_answer * reply)
 			{
 				ClearDNSPending(auth);
 				sendheader(auth->client, REPORT_FAIL_DNS);
+				release_auth_client(auth);
 			} else {
 				SetDNSPending(auth);
 			}
