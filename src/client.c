@@ -271,6 +271,7 @@ check_pings(void *notused)
 static void
 check_pings_list(dlink_list *list)
 {
+  char         scratch[32];	/* way too generous but... */
   struct Client *cptr;          /* current local cptr being examined */
   int           ping = 0;       /* ping time value from client */
   time_t        timeout;        /* found necessary ping time */
@@ -345,7 +346,12 @@ check_pings_list(dlink_list *list)
                 }
 
               cptr->flags2 |= FLAGS2_PING_TIMEOUT;
-	      (void)exit_client(cptr, cptr, &me, "Ping timeout:");
+
+	      (void)ircsprintf(scratch,
+			       "Ping timeout: %d seconds",
+			       CurrentTime - cptr->lasttime);
+	      
+	      (void)exit_client(cptr, cptr, &me, scratch);
               continue;
             }
           else if ((cptr->flags & FLAGS_PINGSENT) == 0)
