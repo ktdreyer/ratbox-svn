@@ -100,7 +100,13 @@ static void m_ison(struct Client *client_p, struct Client *source_p,
     for (nick = strtoken(&p, parv[i], " "); nick;
          nick = strtoken(&p, NULL, " "))
     {
-      if ((target_p = find_person(nick)))
+      target_p = find_person(nick);
+      if(target_p == NULL && IsOper(source_p) && 
+         !ConfigServerHide.hide_servers)
+      {
+         target_p = find_server(nick);
+      }
+      if (target_p != NULL)
       {
         len = strlen(target_p->name);
         if( (current_insert_point + (len + 5)) < (buf + sizeof(buf)) )
