@@ -1,3 +1,9 @@
+*** 20001014_10 by toot
+. move add_vchan_to_client lower down, incase of bans etc in m_join
+. hopefully m_names works now after /join #chan !id
+. put a del_vchan_from_client in remove_user_from_channel
+
+
 *** 20001014_9 by db
 - fixed bug in add_vchan_to_client_cache, reversed two args while at it
 - made m_privmsg message right channel 
