@@ -1,3 +1,29 @@
+androsyn    2003/02/04 07:37:11 UTC	(20030204_3)
+
+  Modified files:
+    .                    configure 
+    autoconf             acconfig.h configure.in 
+    include              s_bsd.h setup.h.in 
+    src                  linebuf.c listener.c packet.c s_auth.c 
+                         s_conf.c send.c 
+  Log:
+  Add checks for MSG_NOSIGNAL and use it for send/recv
+  
+  Revision  Changes    Path
+  7.28      +4 -1      ircd-ratbox/autoconf/acconfig.h
+  7.166     +10 -0     ircd-ratbox/autoconf/configure.in
+  7.173     +148 -121  ircd-ratbox/configure
+  7.44      +9 -0      ircd-ratbox/include/s_bsd.h
+  7.65      +3 -0      ircd-ratbox/include/setup.h.in
+  7.106     +2 -1      ircd-ratbox/src/linebuf.c
+  7.88      +2 -2      ircd-ratbox/src/listener.c
+  7.114     +4 -4      ircd-ratbox/src/packet.c
+  7.129     +3 -3      ircd-ratbox/src/s_auth.c
+  7.395     +1 -1      ircd-ratbox/src/s_conf.c
+  7.235     +1 -1      ircd-ratbox/src/send.c
+
+
+
 androsyn    2003/02/04 02:44:11 UTC	(20030204_2)
 
   Modified files:
