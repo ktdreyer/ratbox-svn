@@ -1,5 +1,6 @@
 *** 20010103_3 by davidt
-m_join.c
+- Fixed slight bug in lazylinks handling in m_topic.c
+- Now tell nonops the topic was set by me.name on +a channels.
 
 *** 20010103_2 by db
 - yet another obsolete prototype gone
@@ -11,7 +12,7 @@ m_join.c
 
 
 *** 20010102_35 by spookey
- - removes AUTOCONN output lines (ANNOYING)
+- removes AUTOCONN output lines (ANNOYING)
 
 
 *** 20010102_34 by db
