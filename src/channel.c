@@ -1580,7 +1580,7 @@ void set_channel_mode(struct Client *client_p,
                 break;
               /* don't allow a non chanop to see the invex list
                */
-              if(isok)
+              if(isok_c)
                 {
                   for (ptr = chptr->invexlist.head; ptr; ptr = ptr->next)
 		    {
@@ -1610,7 +1610,7 @@ void set_channel_mode(struct Client *client_p,
           if (MyClient(source_p) && opcnt >= MAXMODEPARAMS)
             break;
 
-          if (!isok)
+          if (!isok_c)
             {
               if (!errsent(SM_ERR_NOOPS, &errors_sent) && MyClient(source_p))
                 sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
@@ -1666,7 +1666,7 @@ void set_channel_mode(struct Client *client_p,
               /* don't allow a non chanop to see the exception list
                * suggested by Matt on operlist nov 25 1998
                */
-              if(isok)
+              if(isok_c)
                 {
                   for (ptr = chptr->exceptlist.head; ptr; ptr = ptr->next)
 		    {
@@ -1695,7 +1695,7 @@ void set_channel_mode(struct Client *client_p,
           if (MyClient(source_p) && opcnt >= MAXMODEPARAMS)
             break;
 
-          if (!isok)
+          if (!isok_c)
             {
               if (!errsent(SM_ERR_NOOPS, &errors_sent) && MyClient(source_p))
                 sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
