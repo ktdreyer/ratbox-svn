@@ -96,6 +96,12 @@ Info MyInformation[] = {
 
   { "HARD_FDLIMIT_", "", HARD_FDLIMIT_, "Maximum Number of File Descriptors Available" },
 
+#ifdef HAVE_GETTEXT
+  { "HAVE_GETTEXT", "ON", 0, "Gettext Message Support" },
+#else
+  { "HAVE_GETTEXT", "OFF", 0, "Gettext Message Support" },
+#endif /* HAVE_GETTEXT */
+
 #ifdef HPATH
   { "HPATH", HPATH, 0, "Path to Operator Help File" },
 #else
@@ -169,6 +175,8 @@ Info MyInformation[] = {
 #else
   { "REPORT_DLINE_TO_USER", "OFF", 0, "Inform Clients They are D-lined" },
 #endif /* REPORT_DLINE_TO_USER */
+
+  { "SELECT_TYPE", SELECT_TYPE, 0, "Method of Multiplexed I/O" },
 
 #ifdef SPATH
   { "SPATH", SPATH, 0, "Path to Server Executable" },

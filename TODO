@@ -159,4 +159,6 @@ Little things to be done given enough time and initiative
 .  Create some make release or something for rsa_respond
 .  Fix convertconf more
 .  Do we still need start_ircd.c and ircd_start.c?
+.  Look to see what other STATS commands can be made optionally oper-only
+.  Update ircd.8, or get rid of it (move to old?)
 
