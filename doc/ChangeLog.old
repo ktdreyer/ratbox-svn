@@ -1,3 +1,10 @@
+*** 20010528_1 by jdc
+* Added autoconf support for RLIMIT_* definitions; prior, all this work
+  was done in ircd.c.  Someone running Linux should test this and pay
+  close attention to the configure output.
+
+
+
 *** 20010527_3 by davidt
 - Convert MISSING_SOCKPAIR into HAVE_SOCKETPAIR and make configure check for
   it.
