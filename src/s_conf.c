@@ -176,6 +176,7 @@ struct ConfItem* make_conf()
 
   aconf = (struct ConfItem*) MyMalloc(sizeof(struct ConfItem));
   aconf->status       = CONF_ILLEGAL;
+  aconf->aftype	      = AF_INET;
 /*  aconf->ipnum.s_addr = INADDR_NONE; */
   return (aconf);
 }
