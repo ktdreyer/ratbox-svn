@@ -64,9 +64,6 @@ _moddeinit(void)
 
 char *_version = "20001122";
 
-void names_list( struct Client *sptr, struct Channel *chptr, char *chname,
-		 dlink_list *list, char *flag,
-		 char *buf, int mlen);
 
 /************************************************************************
  * m_names() - Added by Jto 27 Apr 1989
@@ -78,10 +75,6 @@ void names_list( struct Client *sptr, struct Channel *chptr, char *chname,
 **      parv[1] = channel
 **      parv[2] = root name
 */
-/* maximum names para to show to opers when abuse occurs */
-#define TRUNCATED_NAMES 20
-
-
 int     m_names( struct Client *cptr,
                  struct Client *sptr,
                  int parc,
@@ -120,6 +113,7 @@ int     m_names( struct Client *cptr,
 	    {
 	      channel_member_names( sptr, ch2ptr, ch2ptr->chname );
 	    }
+	  return 1;
 	}
     }
   else
@@ -143,18 +137,17 @@ int     m_names( struct Client *cptr,
 void names_all_visible_channels(struct Client *sptr)
 {
   int mlen;
-  int len;
+  int cur_len;
+  int reply_to_send;
   dlink_node *lp;
   struct Channel *chptr;
   struct Channel *bchan;
   char buf[BUFSIZE];
   char *chname;
-  char *show_op_flags;
-  char *show_voiced_flags;
-  char *show_halfop_flags;
+  char *show_ops_flag;
+  char *show_voiced_flag;
+  char *show_halfop_flag;
 
-  mlen = strlen(me.name) + NICKLEN + 7;
-  
   /* 
    * First, do all visible channels (public and the one user self is)
    */
@@ -164,98 +157,58 @@ void names_all_visible_channels(struct Client *sptr)
       if (ShowChannel(sptr, chptr))
 	{
 	  /* Find users on same channel (defined by chptr) */
-	  chname = chptr->chname;
-
 	  if (IsVchan(chptr))
 	    {
 	      bchan = find_bchan (chptr);
 	      if (bchan != NULL)
 		chname = bchan->chname;
 	    }
+	  else
+	    chname = chptr->chname;
 
 	  if(GlobalSetOptions.hide_chanops && !is_chan_op(chptr,sptr))
 	    {
-	      show_op_flags = "";
-	      show_voiced_flags = "";
-	      show_halfop_flags = "";
+	      show_ops_flag = "";
+	      show_voiced_flag = "";
+	      show_halfop_flag = "";
 	    }
 	  else
 	    {
-	      show_op_flags = "@";
-	      show_voiced_flags = "+";
-	      show_halfop_flags = "%";
+	      show_ops_flag = "@";
+	      show_voiced_flag = "+";
+	      show_halfop_flag = "%";
 	    }
 
 	  ircsprintf(buf,form_str(RPL_NAMREPLY),
-		     me.name, sptr->name);
+		     me.name, sptr->name,channel_pub_or_secret(chptr));
 	  mlen = strlen(buf);
-	  ircsprintf(buf + mlen,":%s%s ",
-		     channel_pub_or_secret(chptr), chname);
+	  ircsprintf(buf + mlen," %s : ", chname);
 	  mlen = strlen(buf);
-
-	  names_list(sptr, chptr, chname,
-		     &chptr->chanops, show_op_flags, buf, mlen);
-	  names_list(sptr, chptr, chname,
-		     &chptr->halfops, show_halfop_flags, buf, mlen);
-	  names_list(sptr, chptr, chname,
-		     &chptr->voiced, show_voiced_flags,buf, mlen);
-	  names_list(sptr, chptr, chname,
-		     &chptr->peons, "", buf, mlen);
-
-	}
-    }
-}
-
-/*
- * names_list
- *
- * inputs	- pointer to output to
- * 		- pointer to channel list
- *		- flag string to display
- *		- buffer to use
- *		- len of buffer
- *		- mlen
- * output	- NONE
- * side effects	-
- */
-void names_list( struct Client *sptr, struct Channel *chptr, char *chname,
-		 dlink_list *list, char *flag,
-		 char *buf, int mlen)
-{
-  dlink_node *ptr;
-  int cur_len;
-  int llen;
-  int reply_to_send = NO;
-  struct Client *c2ptr;
-  char *t;
-
-  cur_len = mlen;
-  t = buf + mlen;
-
-  for (ptr = list->head; ptr; ptr = ptr->next)
-    {
-      c2ptr = ptr->data;
-      if (IsInvisible(c2ptr) && !IsMember(sptr,chptr))
-	continue;
-
-      ircsprintf(t,"%s%s ", flag, c2ptr->name);
-      llen = strlen(t);
-      cur_len += llen;
-      t += llen;
-
-      reply_to_send = YES;
-
-      if ((cur_len + NICKLEN) > (BUFSIZE - 3))
-	{
-	  sendto_one(sptr, "%s", buf );
-	  reply_to_send = NO;
 	  cur_len = mlen;
-	  t = buf + mlen;
+
+	  channel_member_list(sptr,
+			      &chptr->chanops, chptr, chname,
+			      show_ops_flag,
+			      buf, mlen, &cur_len, &reply_to_send);
+
+	  channel_member_list(sptr,
+			      &chptr->voiced, chptr, chname,
+			      show_voiced_flag,
+			      buf, mlen, &cur_len, &reply_to_send);
+
+	  channel_member_list(sptr,
+			      &chptr->halfops, chptr, chname,
+			      show_voiced_flag,
+			      buf, mlen, &cur_len, &reply_to_send);
+
+	  channel_member_list(sptr, &chptr->peons, chptr, chname,
+			      "",
+			      buf, mlen, &cur_len, &reply_to_send);
+
+	  if (reply_to_send)
+	    sendto_one(sptr, "%s", buf);
 	}
     }
-
-  if (reply_to_send)
-    sendto_one(sptr, "s", buf);
 }
 
 /*
@@ -269,7 +222,7 @@ void names_list( struct Client *sptr, struct Channel *chptr, char *chname,
 void names_non_public_non_secret(struct Client *sptr)
 {
   int mlen;
-  int llen;
+  int tlen;
   int cur_len;
   int reply_to_send = NO;
   int dont_show = NO;
@@ -280,12 +233,10 @@ void names_non_public_non_secret(struct Client *sptr)
   char *t;
 
   ircsprintf(buf,form_str(RPL_NAMREPLY),
-	     me.name,sptr->name);
+	     me.name,sptr->name," * * :");
 
   mlen = strlen(buf);
-  ircsprinf(buf + mlen, " * * :");
 
-  mlen = strlen(buf);
   cur_len = mlen;
   t = buf + mlen;
 
@@ -303,7 +254,12 @@ void names_non_public_non_secret(struct Client *sptr)
       for( lp = c2ptr->user->channel.head; lp; lp = lp->next )
         {
           ch3ptr = lp->data;
-          if ( (PubChannel(ch3ptr) || IsMember(sptr, ch3ptr)) ||
+
+sendto_realops("PubChannel(ch3ptr) %d", PubChannel(ch3ptr));
+sendto_realops("SecretChannel(ch3ptr) %d", SecretChannel(ch3ptr));
+sendto_realops("IsMember(sptr,ch3ptr) %d", IsMember(sptr,ch3ptr));
+
+          if ( (!PubChannel(ch3ptr) || IsMember(sptr, ch3ptr)) ||
 	       (SecretChannel(ch3ptr)))
 	  {
             dont_show = YES;
@@ -322,9 +278,9 @@ void names_non_public_non_secret(struct Client *sptr)
 	ircsprintf(t,"%s%s ", channel_chanop_or_voice(ch3ptr, c2ptr),
 		   c2ptr->name);
 
-      llen = strlen(t);
-      cur_len += llen;
-      t += llen;
+      tlen = strlen(t);
+      cur_len += tlen;
+      t += tlen;
 
       reply_to_send = YES;
 
