@@ -1120,7 +1120,10 @@ void set_channel_mode(struct Client *cptr,
   int   chan_op;
   int   type;
 
+  int   target_was_chop;
   int   target_was_op;
+  int   target_was_hop;
+  int   target_was_voice;
 
   dlink_node *ptr;
   dlink_list *to_list=NULL;
@@ -1231,21 +1234,43 @@ void set_channel_mode(struct Client *cptr,
                        who->name,sptr->name);
             }
 
+          target_was_chop = is_chan_op(chptr, who);
+          target_was_hop = is_half_op(chptr,who);
+          target_was_voice = is_voiced(chptr,who);
+          target_was_op = target_was_chop | target_was_hop;
+
           if (c == 'o')
 	    {
-	      the_mode = MODE_CHANOP;
+              /* convert attempts to -o a +h user into a -h
+               * ignore attempts to -o a +v user.
+               */
+              if((whatt == MODE_DEL) && target_was_hop)
+              {
+                the_mode = MODE_HALFOP;
+                c = 'h';
+              }
+              else if ((whatt == MODE_DEL) &&  target_was_voice)
+                break;
+              else
+                the_mode = MODE_CHANOP;
+              
 	      to_list = &chptr->chanops;
 	    }
           else if (c == 'v')
 	    {
-	      /* ignore attempts to voice/devoice if they are opped */
-	      if(is_any_op(chptr,who))
+	      /* ignore attempts to +v/-v if they are +o/+h */
+	      if(target_was_op)
 		break;
 	      the_mode = MODE_VOICE;
 	      to_list = &chptr->voiced;
 	    }
 	  else if (c == 'h')
 	    {
+              /* ignore attempts to +h/-h if they are +o
+               * ignore attempts to -h if they are +v */
+              if(target_was_chop ||
+                 ((whatt == MODE_DEL) && target_was_voice))
+                break;
 	      the_mode = MODE_HALFOP;
 	      to_list = &chptr->halfops;
 	    }
@@ -1278,32 +1303,26 @@ void set_channel_mode(struct Client *cptr,
           if (len + tmp + 2 >= MODEBUFLEN)
             break;
 
-		  if (c == 'h')
-		  {
-			  *mbufw_hops++ = plus;
-			  *mbufw_hops++ = c;
-			  strcpy(pbufw_hops, who->name);
-			  pbufw_hops += strlen(pbufw_hops);
-			  *pbufw_hops++ = ' ';
-		  }
-		  else 
-		  {
-			  *mbuf2w++ = plus;
-			  *mbuf2w++ = c;
-			  strcpy(pbuf2w, who->name);
-			  pbuf2w += strlen(pbuf2w);
-			  *pbuf2w++ = ' ';
-		  }
+          if (c == 'h')
+          {
+            *mbufw_hops++ = plus;
+            *mbufw_hops++ = c;
+            strcpy(pbufw_hops, who->name);
+            pbufw_hops += strlen(pbufw_hops);
+            *pbufw_hops++ = ' ';
+          }
+          else 
+          {
+            *mbuf2w++ = plus;
+            *mbuf2w++ = c;
+            strcpy(pbuf2w, who->name);
+            pbuf2w += strlen(pbuf2w);
+            *pbuf2w++ = ' ';
+          }
 
-		  len += tmp + 1;
-		  opcnt++;
+          len += tmp + 1;
+          opcnt++;
 		  
-	  /* ignore attempts to "demote" a full op to halfop */
-	  if((to_list == &chptr->halfops) && is_chan_op(chptr,who))
-	    break;
-
-          target_was_op = is_any_op(chptr,who);
-
           if(change_channel_membership(chptr,to_list, who))
           {
 	    if((to_list == &chptr->chanops) && (whatt == MODE_ADD))
@@ -1312,23 +1331,45 @@ void set_channel_mode(struct Client *cptr,
             }
           }
 
-          if ((!target_was_op) &&
-              ((to_list == &chptr->chanops) ||
-               (to_list == &chptr->halfops))
-              && (whatt == MODE_ADD) && MyClient(who)
-              && (chptr->mode.mode & MODE_HIDEOPS))
-            {
+          /* Keep things in sync on +a channels... */
+          if ((chptr->mode.mode & MODE_HIDEOPS) && MyClient(who))
+          {
+            if ((!target_was_op) && (whatt == MODE_ADD) &&
+                ((to_list == &chptr->chanops) ||
+                 (to_list == &chptr->halfops)))
               sync_oplists(chptr, who, 0);
-            }
-          else if (target_was_op &
-              ((to_list != &chptr->chanops) &&
-               (to_list != &chptr->halfops))
-              && (whatt == MODE_DEL) && MyClient(who)
-              && (chptr->mode.mode & MODE_HIDEOPS))
-            {
+            else if (target_was_op && (whatt == MODE_DEL) &&
+                     ((to_list != &chptr->chanops) &&
+                      (to_list != &chptr->halfops)))
               sync_oplists(chptr, who, 1);
-            }
+            else if ((!target_was_voice) && (whatt == MODE_ADD) &&
+                     (to_list == &chptr->voiced))
+              sendto_one(who, ":%s MODE %s +v %s",
+                         me.name, chptr->chname, who->name);
+            else if (target_was_voice && (whatt == MODE_DEL) &&
+                     (to_list != &chptr->voiced))
+              sendto_one(who, ":%s MODE %s -v %s",
+                         me.name, chptr->chname, who->name);
+          }
 
+          if (MyClient(who))
+          {
+            if ((!target_was_op) && (whatt == MODE_ADD) &&
+                ((to_list == &chptr->chanops) ||
+                 (to_list == &chptr->halfops)))
+            {
+              send_mode_list(who, chptr->chname, &chptr->exceptlist, 'e', 0);
+              send_mode_list(who, chptr->chname, &chptr->invexlist, 'I', 0);
+            }
+            else if (target_was_op && (whatt == MODE_DEL) &&
+                     ((to_list != &chptr->chanops) &&
+                      (to_list != &chptr->halfops)))
+            {
+              send_mode_list(who, chptr->chname, &chptr->exceptlist, 'e', 1);
+              send_mode_list(who, chptr->chname, &chptr->invexlist, 'I', 1);
+            }
+          }
+          
           break;
 
         case 'k':
