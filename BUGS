@@ -37,9 +37,14 @@
       Other versions are untested, and some are known to be
       incompatible.
 
-4.  When linking servers, you may see warnings about servers being sent
-    403 numerics.  This is caused by the NOTICE AUTH :*** ... messages,
-    and is normal.
+4.  Problems with quote set msglocale not working on linux.
+    This seems to be a linux problem, /quote set msglocale will sometimes get
+    "undone" when a new client connects.  The server will also sometimes
+    not correctly set the locale from ircd.conf on startup.
+
+    The solution is if a locale is needed, to have the message_locale="x" in
+    ircd.conf, and then rehash to make it take effect.  A rehash after startup
+    will also need to be performed to set the locale.
 
 5.  Modules loaded via 'module="..."' in the modules {} block do not get
     loaded on start-up.  They must be manually MODLOAD'd after the server
