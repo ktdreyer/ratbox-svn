@@ -1857,7 +1857,7 @@ general_max_nick_changes:  MAX_NICK_CHANGES '=' expr ';'
     ConfigFileEntry.max_nick_changes = $3;
   } ;
 
-general_max_slow:  MAX_ACCEPT '=' expr ';'
+general_max_accept:  MAX_ACCEPT '=' expr ';'
   {
     ConfigFileEntry.max_accept = $3;
   } ;
