@@ -14,7 +14,7 @@
 #include "io.h"
 
 static void u_stats(struct connection_entry *, char *parv[], int parc);
-struct ucommand_handler stats_ucommand = { "stats", u_stats, 0, 0, NULL };
+struct ucommand_handler stats_ucommand = { "stats", u_stats, 0, 0, 1, NULL };
 
 struct _stats_table
 {

@@ -531,6 +531,11 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 				return;
 			}
 
+			if(cmd_table[i].operflags)
+				sendto_all(UMODE_SPY, "#%s:%s# %s %s",
+					client_p->user->oper->name, client_p->name,
+					cmd_table[i].cmd, rebuild_params((const char **) parv, parc, 0));
+
                         retval = (cmd_table[i].func)(client_p, parv, parc);
 
                         service_p->service->flood += retval;
@@ -599,7 +604,7 @@ service_stats(struct client *service_p, struct connection_entry *conn_p)
 
                 j++;
 
-                if(j > 8)
+                if(j > 6)
                 {
                         sendto_one(conn_p, "%s", buf);
                         sprintf(buf, "                ");

@@ -16,6 +16,7 @@ struct ucommand_handler
 	void (*func)(struct connection_entry *, char *parv[], int parc);
 	int flags;
 	int minpara;
+	int spy;
         struct cachefile *helpfile;
 };
 

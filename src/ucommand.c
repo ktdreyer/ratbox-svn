@@ -45,16 +45,16 @@ static void u_status(struct connection_entry *, char *parv[], int parc);
 
 static struct ucommand_handler ucommands[] =
 {
-	{ "connect",	u_connect,	CONF_OPER_ROUTE,	2, NULL },
-	{ "die",	u_die,		CONF_OPER_ADMIN,	2, NULL },
-	{ "events",	u_events,	CONF_OPER_ADMIN,	0, NULL },
-	{ "flags",	u_flags,	0,			0, NULL },
-	{ "help",	u_help,		0,			0, NULL },
-	{ "quit",	u_quit,		0,			0, NULL },
-	{ "rehash",	u_rehash,	CONF_OPER_ADMIN,	0, NULL },
-	{ "service",	u_service,	0,			0, NULL },
-	{ "status",	u_status,	0,			0, NULL },
-	{ "\0",         NULL,		0,			0, NULL }
+	{ "connect",	u_connect,	CONF_OPER_ROUTE,	2, 1, NULL },
+	{ "die",	u_die,		CONF_OPER_ADMIN,	2, 1, NULL },
+	{ "events",	u_events,	CONF_OPER_ADMIN,	0, 1, NULL },
+	{ "flags",	u_flags,	0,			0, 0, NULL },
+	{ "help",	u_help,		0,			0, 0, NULL },
+	{ "quit",	u_quit,		0,			0, 0, NULL },
+	{ "rehash",	u_rehash,	CONF_OPER_ADMIN,	0, 1, NULL },
+	{ "service",	u_service,	0,			0, 1, NULL },
+	{ "status",	u_status,	0,			0, 1, NULL },
+	{ "\0",         NULL,		0,			0, 0, NULL }
 };
 
 void
@@ -119,7 +119,14 @@ handle_ucommand(struct connection_entry *conn_p, const char *command,
 		if(parc < handler->minpara)
 			sendto_one(conn_p, "Insufficient parameters");
 		else if(!handler->flags || conn_p->privs & handler->flags)
+		{
+			if(handler->spy)
+				sendto_all(UMODE_SPY, "#%s# %s %s",
+					conn_p->name, ucase(handler->cmd),
+					rebuild_params((const char **) parv, parc, 1));
+
 			handler->func(conn_p, parv, parc);
+		}
 		else
 			sendto_one(conn_p, "Insufficient access");
 	}
@@ -442,6 +449,7 @@ static struct _flags_table flags_table[] = {
         { "chat",       UMODE_CHAT,     },
         { "auth",       UMODE_AUTH,     },
         { "server",     UMODE_SERVER,   },
+	{ "spy",	UMODE_SPY	},
         { "\0",         0,              }
 };
 

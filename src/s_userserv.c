@@ -59,11 +59,11 @@ static struct service_command userserv_command[] =
 
 static struct ucommand_handler userserv_ucommand[] =
 {
-	{ "userregister",	u_user_userregister,	CONF_OPER_US_REGISTER,	3, NULL },
-	{ "userdrop",		u_user_userdrop,	CONF_OPER_US_ADMIN,	2, NULL },
-	{ "usersuspend",	u_user_usersuspend,	CONF_OPER_US_ADMIN,	2, NULL },
-	{ "userunsuspend",	u_user_userunsuspend,	CONF_OPER_US_ADMIN,	2, NULL },
-	{ "\0",			NULL,			0,			0, NULL }
+	{ "userregister",	u_user_userregister,	CONF_OPER_US_REGISTER,	3, 1, NULL },
+	{ "userdrop",		u_user_userdrop,	CONF_OPER_US_ADMIN,	2, 1, NULL },
+	{ "usersuspend",	u_user_usersuspend,	CONF_OPER_US_ADMIN,	2, 1, NULL },
+	{ "userunsuspend",	u_user_userunsuspend,	CONF_OPER_US_ADMIN,	2, 1, NULL },
+	{ "\0",			NULL,			0,			0, 0, NULL }
 };
 
 static struct service_handler userserv_service = {

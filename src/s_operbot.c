@@ -43,9 +43,9 @@ static struct service_command operbot_command[] =
 
 static struct ucommand_handler operbot_ucommand[] =
 {
-	{ "ojoin",	u_operbot_ojoin,	CONF_OPER_OPERBOT_ADMIN, 2, NULL },
-	{ "opart",	u_operbot_opart,	CONF_OPER_OPERBOT_ADMIN, 2, NULL },
-	{ "\0",		NULL,			0, 0, NULL }
+	{ "ojoin",	u_operbot_ojoin,	CONF_OPER_OPERBOT_ADMIN, 2, 1, NULL },
+	{ "opart",	u_operbot_opart,	CONF_OPER_OPERBOT_ADMIN, 2, 1, NULL },
+	{ "\0",		NULL,			0, 0, 0, NULL }
 };
 
 static struct service_handler operbot_service = {

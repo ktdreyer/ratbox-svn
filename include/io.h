@@ -77,9 +77,10 @@ extern dlink_list connection_list;
 #define UMODE_CHAT              0x10000
 #define UMODE_AUTH              0x20000
 #define UMODE_SERVER            0x40000
+#define UMODE_SPY		0x80000
 
-#define UMODE_ALL               (UMODE_CHAT|UMODE_AUTH|UMODE_SERVER)
-#define UMODE_DEFAULT           UMODE_ALL
+#define UMODE_ALL               (UMODE_CHAT|UMODE_AUTH|UMODE_SERVER|UMODE_SPY)
+#define UMODE_DEFAULT           (UMODE_CHAT|UMODE_AUTH|UMODE_SERVER)
 
 #define IsUmodeChat(x)          ((x)->flags & UMODE_CHAT)
 
