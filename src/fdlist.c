@@ -34,6 +34,7 @@
 #include "memory.h"
 #include "numeric.h"
 #include "s_log.h"
+#include "sprintf_irc.h"
 
 fde_t *fd_table = NULL;
 

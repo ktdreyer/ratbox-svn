@@ -40,6 +40,8 @@
 #include "irc_string.h"
 #include "memory.h"
 #include "tools.h"
+#include "sprintf_irc.h"
+
 
 /* -TimeMr14C:
  * I have moved the dl* function definitions and
