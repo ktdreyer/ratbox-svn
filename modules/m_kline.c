@@ -56,7 +56,7 @@ static int me_unkline(struct Client *, struct Client *, int, const char **);
 
 struct Message kline_msgtab = {
 	"KLINE", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, {ms_kline, 6}, {ms_kline, 6}, {me_kline, 5}, {mo_kline, 2}}
+	{mg_unreg, mg_not_oper, {ms_kline, 5}, {ms_kline, 5}, {me_kline, 5}, {mo_kline, 3}}
 };
 
 struct Message unkline_msgtab = {
@@ -236,6 +236,13 @@ static int
 ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	int tkline_time = atoi(parv[2]);
+
+	/* 1.5-3 and earlier contains a bug that allows remote klines to be
+	 * sent with an empty reason field.  This is a protocol violation,
+	 * but its not worth dropping the link over.. --anfl
+	 */
+	if(parc < 6 || EmptyString(parv[5]))
+		return 0;
 
 	propagate_generic(source_p, "KLINE", parv[1], CAP_KLN,
 			"%d %s %s :%s",

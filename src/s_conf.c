@@ -631,9 +631,9 @@ rehash(int sig)
 	read_conf_files(NO);
 
 	if(ServerInfo.description != NULL)
-	{
 		strlcpy(me.info, ServerInfo.description, sizeof(me.info));
-	}
+	else
+		strlcpy(me.info, "unknown", sizeof(me.info));
 
 	check_banned_lines();
 	open_logfiles();
