@@ -3,7 +3,7 @@ This is the current beta release version of the 'devel' tree of ircd-ratbox.
 
 NOTE: THIS IS BETA CODE.  It is run at your own risk.  By running this
       code you assume FULL responsibility for any problems it may cause.  We
-      do NOT recommend this code is run on production servers.
+      do NOT recommend this code is run on production servers. 
 
 -- ircd-ratbox-2.0 RELNOTES 
 
@@ -26,6 +26,7 @@ NOTE: THIS IS BETA CODE.  It is run at your own risk.  By running this
 - modified burst order to send nicks then channels
 - added support for VMS ast i/o
 - misc code cleanups
+- added a helpfile cache, allowing users to use /quote help
 - all fixes done to -stable
 
 -- ircd-ratbox-2.0beta2 
