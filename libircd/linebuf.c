@@ -259,46 +259,51 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
   register char *ch = data;	/* Pointer to where we are in the read data */
   register char *bufch = &bufline->buf[bufline->len];
   int clen = 0;
+
   /* If its full or terminated, ignore it */
+
   if ((bufline->len == BUF_DATA_SIZE) || (bufline->terminated == 1))
     return 0;
+
   clen = cpylen = linebuf_skip_crlf(ch, len);
 
   /* This is the ~overflow case..This doesn't happen often.. */
-  if(cpylen > BUF_DATA_SIZE - bufline->len) {
-  	cpylen = BUF_DATA_SIZE - bufline->len - 1;
-  	memcpy(bufch, ch, cpylen);
-  	bufch += cpylen-1;
+  if(cpylen > BUF_DATA_SIZE - bufline->len)
+    {
+      cpylen = BUF_DATA_SIZE - bufline->len - 1;
+      memcpy(bufch, ch, cpylen);
+      bufch += cpylen-1;
       while(cpylen && (*bufch == '\r' || *bufch == '\n'))
-      {
-  	 *bufch = '\0';
-  	 cpylen--;
-  	 bufch--;
-      }
-  	bufline->overflow = 1;
-  	bufline->terminated = 1;
+	{
+	  *bufch = '\0';
+	  cpylen--;
+	  bufch--;
+	}
+      bufline->overflow = 1;
+      bufline->terminated = 1;
       bufline->len = cpylen;
-  	bufhead->len += bufline->len;
-  	return clen;
-  }
+      bufhead->len += bufline->len;
+      return clen;
+    }
   memcpy(bufch, ch, cpylen);
   bufch += cpylen-1;
   
-  if(*bufch != '\r' && *bufch != '\n') /* No linefeed..so we bail for the next time */
-  { 
-    *(bufch+1) = 0;
-	bufhead->len += bufline->len += cpylen;
-  	bufline->terminated = 0;
-	return clen;
-  }
+ /* If no linefeed.. bail for the next time */
+  if(*bufch != '\r' && *bufch != '\n')
+    { 
+      *(bufch+1) = 0;
+      bufhead->len += bufline->len += cpylen;
+      bufline->terminated = 0;
+      return clen;
+    }
 
   /* Yank the CRLF off this, replace with a \0 */
   while(cpylen && (*bufch == '\r' || *bufch == '\n'))
-  {
-  	*bufch = '\0';
-  	cpylen--;
-  	bufch--;
-  }
+    {
+      *bufch = '\0';
+      cpylen--;
+      bufch--;
+    }
   
   bufline->terminated = 1;
   bufhead->len += bufline->len += cpylen;

@@ -3893,7 +3893,7 @@ cat << EOF > conftest.c
 	int main(int argc, char *argv[])
         {
           int i;
-          struct nlist nl[4];
+          struct nlist nl[5];
 
           /* fill the names in this way, so it'll work almost everywhere */
           nl[0].n_name = "_modinit";
