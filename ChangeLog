@@ -1,3 +1,18 @@
+leeh        2004/05/21 17:22:19 EDT	(20040521_0)
+
+  Modified files:
+    include              hook.h 
+    src                  hook.c s_user.c 
+  Log:
+  - added a "client_auth" hook
+  
+  Revision  Changes    Path
+  1.25      +1 -1      ircd-ratbox/include/hook.h
+  7.30      +2 -0      ircd-ratbox/src/hook.c
+  7.321     +7 -0      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2004/05/16 16:08:31 EDT	(20040516_0)
 
   Modified files:
