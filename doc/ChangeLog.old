@@ -1,3 +1,12 @@
+*** 20001203_10 by db
+- modified code to use dlink_node/dlink_list for oper_list serv_list
+  and lclient_list (local clients) this gets rid of my evil double link
+  list code mess, cleans up the code a lot more still..
+  I think we really need to have another global (sigh) for the current
+  uplink Client pointer for leafs...
+
+
+
 *** 20001203_9 by adrian
 
 
