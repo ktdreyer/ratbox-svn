@@ -269,7 +269,7 @@ join_service(struct client *service_p, const char *chname, time_t tsinfo,
 		chptr = BlockHeapAlloc(channel_heap);
 
 		strlcpy(chptr->name, chname, sizeof(chptr->name));
-		chptr->tsinfo = tsinfo;
+		chptr->tsinfo = tsinfo ? tsinfo : CURRENT_TIME;
 
 		if(mode != NULL)
 		{
