@@ -4044,13 +4044,14 @@ void cleanup_channels(void *unused)
 
    if (uplink != NULL)
      {
+       /* XXX The assert disapears when NDEBUG is set */
        assert (MyConnect(uplink) == 1);
-     }
 
-   if (!MyConnect(uplink))
-     {
-       ilog(L_ERROR, "non-local uplink [%s]", uplink->name);
-       uplink = NULL;
+       if (!MyConnect(uplink))
+	 {
+	   ilog(L_ERROR, "non-local uplink [%s]", uplink->name);
+	   uplink = NULL;
+	 }
      }
 
    for(chptr = GlobalChannelList; chptr; chptr = next_chptr)
