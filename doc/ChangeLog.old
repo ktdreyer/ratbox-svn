@@ -1,3 +1,9 @@
+*** 20001215_13 by db
+- added patch contributed by Walter Campbell, it adds connectfreq
+  to a class block. Note, it is a synonym for class_number_per_ip
+
+
+
 *** 20001215_12 by db
 - removed unused variables found with -Wunused
 - removed an extra space in parse.c
