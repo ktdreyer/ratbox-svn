@@ -1,3 +1,16 @@
+androsyn    2004/03/01 14:28:57 EST	(20040301_10)
+
+  Modified files:
+    .                    configure configure.ac 
+  Log:
+  I hate autoconf
+  
+  Revision  Changes    Path
+  7.203     +10 -4     ircd-ratbox/configure
+  7.17      +6 -3      ircd-ratbox/configure.ac
+
+
+
 androsyn    2004/03/01 14:24:24 EST	(20040301_9)
 
   Modified files:
