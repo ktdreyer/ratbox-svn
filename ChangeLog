@@ -1,3 +1,15 @@
+androsyn    2002/12/16 08:09:06 UTC	(20021216_13)
+
+  Modified files:
+    src                  s_user.c 
+  Log:
+  Remove an unused variable
+  
+  Revision  Changes    Path
+  7.249     +0 -1      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2002/12/16 08:04:50 UTC	(20021216_12)
 
   Modified files:
