@@ -1,3 +1,8 @@
+*** 19991231_2 by db
+- Preliminary cleanups on s_conf.c
+
+
+
 *** 19991231_1 by db
 - missing NULL assignment would cause double free's and eventual
   core on malformed U: lines.
