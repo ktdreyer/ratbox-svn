@@ -110,7 +110,7 @@ usage(char *name)
 {
   int i = 0;
   
-  fprintf(stderr, "Usage: %s [options] host\n", name);
+  fprintf(stderr, "Usage: %s [options]\n", name);
   fprintf(stderr, "Where valid options are:\n");
   
   for (i = 0; myopts[i].opt; i++)
