@@ -79,6 +79,7 @@
  *
  * DPATH = directory,
  * SPATH = server executable,
+ * MODPATH = directory of module to load automatically,
  * CPATH = conf file,
  * MPATH = MOTD
  * KPATH = kline conf file
@@ -100,6 +101,7 @@
 
 #define DPATH   "/usr/local/ircd/"
 #define SPATH   "/usr/local/ircd/ircd"
+#define MODPATH "/usr/local/ircd/modules/autoload/"
 #define CPATH   "ircd.conf"
 #define KPATH   "kline.conf"
 #define DLPATH  "kline.conf"
@@ -137,15 +139,6 @@
  */
 #undef SLAVE_SERVERS
 
-/* SEPARATE_QUOTE_KLINES_BY_DATE
- * If you define this, then klines will be read and written
- * to a separate kline file according to date. You =must= then run
- * a daily/nightly script to consolidate your klines, or the previous
- * days klines are lost. If you define this, LOCKFILE on kline file
- * makes no sense
- */
-#undef SEPARATE_QUOTE_KLINES_BY_DATE
-
 /* FNAME_USERLOG and FNAME_OPERLOG - logs of local USERS and OPERS
  * Define this filename to maintain a list of persons who log
  * into this server. Logging will stop when the file does not exist.
@@ -157,6 +150,9 @@
  */
 #define FNAME_USERLOG "/usr/local/ircd/users" /* */
 #define FNAME_OPERLOG "/usr/local/ircd/opers" /* */
+
+#define NETWORK_NAME "EFnet"
+#define NETWORK_DESC "Eris Free Network"
 
 /* RFC1035_ANAL
  * Defining this causes ircd to reject hostnames with non-compliant chars.
@@ -179,40 +175,12 @@
  */
 #define CUSTOM_ERR
 
-
-/* SHOW_FAILED_OPER_PASSWD - if FAILED_OPER_NOTICE is defined, also show the
- * attempted passwd
- */
-#undef SHOW_FAILED_OPER_PASSWD
-
-
 /* DO_IDENTD - check identd
  * if you undefine this, ircd will never check identd regardless of
  * @'s in I:lines.  You must still use @'s in your I: lines to get
  * ircd to do ident lookup even if you define this.
  */
 #define DO_IDENTD
-
-/* WHOIS_NOTICE - Shows a notice to an oper when a user does a
- * /whois on them
- * Why do opers need this at all? Its an invasion of privacy. bah.
- * you don't need this. -Dianora
- */
-#undef WHOIS_NOTICE
-
-/* SHORT_MOTD
- * There are client ignoring the FORCE_MOTD MOTD numeric, there is
- * no point forcing MOTD on connecting clients IMO. Give them a short
- * NOTICE telling them they should read the motd, and leave it at that.
- */
-#undef SHORT_MOTD
-
-/* SHOW_INVISIBLE_LUSERS - show invisible clients in LUSERS
- * As defined this will show the correct invisible count for anyone who does
- * LUSERS on your server. On a large net this doesnt mean much, but on a
- * small net it might be an advantage to undefine it.
- */
-#define SHOW_INVISIBLE_LUSERS
 
 /* NO_DEFAULT_INVISIBLE - clients not +i by default
  * When defined, your users will not automatically be attributed with user
@@ -291,10 +259,6 @@
  * and obtain their permission to send messages to the system log files.
  */
 #define USE_SYSLOG
-
-#if defined(__CYGWIN__)
-#undef USE_SYSLOG
-#endif
 
 #ifdef  USE_SYSLOG
 /* SYSLOG_KILL SYSLOG_SQUIT SYSLOG_CONNECT SYSLOG_USERS SYSLOG_OPER
@@ -379,24 +343,6 @@
  *
  */
 #undef LIMIT_UH
-
-/* SEND_FAKE_KILL_TO_CLIENT - make the client think it's being /KILL'ed
- * 
- * This was originally intended to prevent clients from reconnecting to the
- * server after being dropped for idleness.  It can probably be used for
- * other events too.
- *
- * This really only works if the
- * client was compiled with QUIT_ON_OPERATOR_KILL which was mandatory policy
- * on UMich.Edu hosts.
- */
-#define SEND_FAKE_KILL_TO_CLIENT
-
-/*
- * Define this to enable WintrHawk "styling"
- */
-#define WINTRHAWK
-
 
 /*
  * Define this to enable IPv6 support.  IPv6 is currently still being

@@ -81,13 +81,16 @@ struct die_client {
 };
 
 static struct die_client dying_clients[MAXCONNECTIONS];
-
 static void exit_marked_for_death_clients(struct die_client dying_clients[]);
 
 static EVH check_pings;
 
 /*
- * init_client_heap - initialize client free memory
+ * init_client_heap 
+ *
+ * inputs	- NONE
+ * output	- NONE
+ * side effects	- initialize client free memory
  */
 void init_client_heap(void)
 {
@@ -109,6 +112,13 @@ void init_client_heap(void)
   eventAdd("check_pings", check_pings, NULL, 1, 0);
 }
 
+/*
+ * clean_client_heap
+ *
+ * inputs	- NONE
+ * output	- NONE
+ * side effects	- 
+ */
 void clean_client_heap(void)
 {
   BlockHeapGarbageCollect(localClientFreeList);
@@ -166,13 +176,6 @@ struct Client* make_client(struct Client* from)
   strcpy(cptr->username, "unknown");
 
 #ifdef NULL_POINTER_NOT_ZERO
-  /* commenting out unnecessary assigns, but leaving them
-   * for documentation. REMEMBER the fripping struct is already
-   * zeroed up above =DUH= 
-   * -Dianora 
-   */
-  cptr->listprogress=0;
-  cptr->listprogress2=0;
   cptr->next    = NULL;
   cptr->prev    = NULL;
   cptr->hnext   = NULL;
@@ -200,28 +203,24 @@ void _free_client(struct Client* cptr)
   assert(0 == cptr->prev);
   assert(0 == cptr->next);
 
-  if (cptr->local_flag) {
-    if (-1 < cptr->fd)
-      fd_close(cptr->fd);
+  if (cptr->local_flag)
+    {
+      if (-1 < cptr->fd)
+	fd_close(cptr->fd);
 
-    if (cptr->dns_reply)
-      --cptr->dns_reply->ref_count;
+      if (cptr->dns_reply)
+	--cptr->dns_reply->ref_count;
 
-    result = BlockHeapFree(localClientFreeList, cptr);
-  }
+      result = BlockHeapFree(localClientFreeList, cptr);
+    }
   else
     result = BlockHeapFree(remoteClientFreeList, cptr);
 
   assert(0 == result);
   if (result)
     {
-      /* 
-       * Looks "unprofessional" maybe, but I am going to leave this 
-       * sendto_realops in it should never happen, and if it does, the 
-       * hybrid team wants to hear about it
-       */
       sendto_realops(BH_FREE_ERROR_MESSAGE, cptr);
-      sendto_realops("Please report to the hybrid team! " \
+      sendto_realops("Please report to the hybrid team!" \
                  "ircd-hybrid@the-project.org");
 
       log(L_WARN, BH_FREE_ERROR_MESSAGE, cptr);
@@ -229,14 +228,11 @@ void _free_client(struct Client* cptr)
 }
 
 /*
- * I re-wrote check_pings a tad
- *
  * check_pings - go through the local client list and check activity
  * kill off stuff that should die
  *
  * inputs       - current time
  * output       - next time_t when check_pings() should be called again
- *
  * side effects - 
  *
  * Clients can be k-lined/d-lined/g-lined/r-lined and exit_client
@@ -245,7 +241,6 @@ void _free_client(struct Client* cptr)
  * A PING can be sent to clients as necessary.
  *
  * Client/Server ping outs are handled.
- *
  */
 
 /*
@@ -293,14 +288,6 @@ check_pings(void *notused)
       */
       if (cptr->flags & FLAGS_DEADSOCKET)
         {
-          /* N.B. EVERY single time dying_clients[] is set
-           * it must be followed by an immediate continue,
-           * to prevent this cptr from being marked again for exit.
-           * If you don't, you could cause exit_client() to be called twice
-           * for the same cptr. i.e. bad news
-           * -Dianora
-           */
-	  
           dying_clients[die_index].client = cptr;
           dying_clients[die_index].fake_kill = 0;
           dying_clients[die_index++].reason =
@@ -390,7 +377,7 @@ check_pings(void *notused)
                * need to start loop over because the close can
                * affect the ordering of the local[] array.- avalon
                *
-               ** Not if you do it right - Dianora
+               ** Not if you do it right - db
                */
 
               continue;
@@ -457,18 +444,6 @@ void check_klines(void)
 
   dying_clients[0].client = (struct Client *)NULL;   /* mark first one empty */
 
-  /*
-   * I re-wrote the way klines are handled. Instead of rescanning
-   * the local[] array and calling exit_client() right away, I
-   * mark the client thats dying by placing a pointer to its struct Client
-   * into dying_clients[]. When I have examined all in local[],
-   * I then examine the dying_clients[] for struct Client's to exit.
-   * This saves the rescan on k-lines, also greatly simplifies the code,
-   *
-   * Jan 28, 1998
-   * -Dianora
-   */
-
   for (i = 0; i <= highest_fd; i++)
     {
       if (!(cptr = local[i]) || IsMe(cptr))
@@ -479,13 +454,6 @@ void check_klines(void)
       */
       if (cptr->flags & FLAGS_DEADSOCKET)
         {
-          /* N.B. EVERY single time dying_clients[] is set
-           * it must be followed by an immediate continue,
-           * to prevent this cptr from being marked again for exit.
-           * If you don't, you could cause exit_client() to be called twice
-           * for the same cptr. i.e. bad news
-           */
-	  
           dying_clients[die_index].client = cptr;
           dying_clients[die_index].fake_kill = 0;
           dying_clients[die_index++].reason =
@@ -746,31 +714,47 @@ static void exit_marked_for_death_clients(struct die_client dying_clients[])
     }
 }
 
+/*
+ * update_client_exit_stats
+ *
+ * input	- pointer to client
+ * output	- NONE
+ * side effects	- 
+ */
 static void update_client_exit_stats(struct Client* cptr)
 {
   if (IsServer(cptr))
     {
       --Count.server;
     }
-
-  else if (IsClient(cptr)) {
-    --Count.total;
-    if (IsAnyOper(cptr))
-      --Count.oper;
-    if (IsInvisible(cptr)) 
-      --Count.invisi;
-  }
+  else if (IsClient(cptr))
+    {
+      --Count.total;
+      if (IsAnyOper(cptr))
+	--Count.oper;
+      if (IsInvisible(cptr)) 
+	--Count.invisi;
+    }
 }
 
+/*
+ * release_client_state
+ *
+ * input	- pointer to client to release
+ * output	- NONE
+ * side effects	- 
+ */
 static void release_client_state(struct Client* cptr)
 {
-  if (cptr->user) {
-    if (IsPerson(cptr)) {
-      add_history(cptr,0);
-      off_history(cptr);
+  if (cptr->user)
+    {
+      if (IsPerson(cptr))
+	{
+	  add_history(cptr,0);
+	  off_history(cptr);
+	}
+      free_user(cptr->user, cptr); /* try this here */
     }
-    free_user(cptr->user, cptr); /* try this here */
-  }
   if (cptr->serv)
     {
       if (cptr->serv->user)
@@ -780,8 +764,11 @@ static void release_client_state(struct Client* cptr)
 }
 
 /*
- * taken the code from ExitOneClient() for this and placed it here.
- * - avalon
+ * remove_client_from_list
+ * inputs	- point to client to remove
+ * output	- NONE
+ * side effects - taken the code from ExitOneClient() for this
+ *		  and placed it here. - avalon
  */
 void remove_client_from_list(struct Client* cptr)
 {
@@ -818,10 +805,15 @@ void remove_client_from_list(struct Client* cptr)
 }
 
 /*
- * although only a small routine, it appears in a number of places
- * as a collection of a few lines...functions like this *should* be
- * in this file, shouldnt they ?  after all, this is list.c, isnt it ?
- * -avalon
+ * add_client_to_list
+ * input	- pointer to client
+ * output	- NONE
+ * side effects	- although only a small routine,
+ *		  it appears in a number of places
+ * 		  as a collection of a few lines...functions like this
+ *		  should be in this file, shouldnt they ?  after all,
+ *		  this is list.c, isnt it ? (no
+ *		  -avalon
  */
 void add_client_to_list(struct Client *cptr)
 {
@@ -891,7 +883,8 @@ struct Client* find_client(const char* name, struct Client *cptr)
  *      the old. 'name' is now assumed to be a null terminated
  *      string and the search is the for server and user.
  */
-struct Client *find_userhost(char *user, char *host, struct Client *cptr, int *count)
+struct Client *find_userhost(char *user, char *host,
+			     struct Client *cptr, int *count)
 {
   struct Client       *c2ptr;
   struct Client       *res = cptr;
@@ -991,43 +984,12 @@ next_client_double(struct Client *next, /* First client to check */
   return next;
 }
 
-#if 0
 /*
- * find_server_by_name - attempt to find server in hash table, otherwise 
- * scan the GlobalClientList
- */
-struct Client* find_server_by_name(const char* name)
-{
-  struct Client* cptr = 0;
-
-  if (EmptyString(name))
-    return cptr;
-
-  if ((cptr = hash_find_server(name)))
-    return cptr;
-  /*
-   * XXX - this shouldn't be needed at all hash_find_server should
-   * find hostmasked names
-   */
-  if (!strchr(name, '*'))
-    return cptr;
-
-  for (cptr = GlobalClientList; cptr; cptr = cptr->next)
-    {
-      if (!IsServer(cptr) && !IsMe(cptr))
-        continue;
-      if (match(name, cptr->name))
-        break;
-      if (strchr(cptr->name, '*'))
-        if (match(cptr->name, name))
-          break;
-    }
-  return cptr;
-}
-#endif
-
-/*
- *  find_person - find person by (nick)name.
+ * find_person - find person by (nick)name.
+ * inputs	- pointer to name
+ *		- pointer to client
+ * output	- return client pointer
+ * side effects -
  */
 struct Client *find_person(char *name, struct Client *cptr)
 {
@@ -1114,10 +1076,11 @@ int check_registered(struct Client* client)
 void release_client_dns_reply(struct Client* client)
 {
   assert(0 != client);
-  if (client->dns_reply) {
-    --client->dns_reply->ref_count;
-    client->dns_reply = 0;
-  }
+  if (client->dns_reply)
+    {
+      --client->dns_reply->ref_count;
+      client->dns_reply = 0;
+    }
 }
 
 /*
@@ -1520,9 +1483,6 @@ const char* comment         /* Reason for the exit */
 
 	  if(ConfigFileEntry.hub)
 	    restoreUnusedServerMask(sptr->serverMask);
-
-          /* LINKLIST */
-          /* oh for in-line functions... */
           {
             struct Client *prev_cptr = NULL;
             struct Client *cur_cptr = serv_cptr_list;
@@ -1550,11 +1510,7 @@ const char* comment         /* Reason for the exit */
           sendto_realops_flags(FLAGS_CCONN,
                                "Client exiting: %s (%s@%s) [%s] [%s]",
                                sptr->name, sptr->username, sptr->host,
-#ifdef WINTRHAWK
-                               comment,
-#else
                (sptr->flags & FLAGS_NORMALEX) ?  "Client Quit" : comment,
-#endif /* WINTRHAWK */
                                sptr->sockhost);
         }
 #ifdef FNAME_USERLOG
