@@ -1,3 +1,7 @@
+*** 20010103_1 by vx0
+- modules.c:279 'char *err;' >-> 'const char *err;'
+
+
 *** 20010102_35 by spookey
  - removes AUTOCONN output lines (ANNOYING)
 
