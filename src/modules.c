@@ -727,6 +727,20 @@ unload_one_module(const char *name, int warn)
 					mod_del_cmd(*m);
 			}
 
+			if(mheader->mapi_hook_list)
+			{
+				mapi_hlist_av1 *m;
+				for (m = mheader->mapi_hook_list; m->hapi_name; ++m)
+					hook_del_event(m->hapi_name);
+			}
+
+			if(mheader->mapi_hfn_list)
+			{
+				mapi_hfn_list_av1 *m;
+				for (m = mheader->mapi_hfn_list; m->hapi_name; ++m)
+					hook_del_hook(m->hapi_name, m->fn);
+			}
+
 			if(mheader->mapi_unregister)
 				mheader->mapi_unregister();
 			break;
