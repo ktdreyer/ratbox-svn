@@ -71,7 +71,7 @@ void send_info_text(struct Client *sptr);
 void send_birthdate_online_time(struct Client *sptr);
 void send_conf_options(struct Client *sptr);
 
-char *_version = "20010101";
+char *_version = "20010109";
 
 /*
 ** m_info
@@ -459,6 +459,49 @@ static void send_conf_options(struct Client *sptr)
               me.name, RPL_INFO, sptr->name, "client_exit",
               ConfigFileEntry.client_exit ? "YES" : "NO",
               "Prepend 'Client Exit:' to User QUIT Message");
+  sendto_one(sptr,
+              ":%s %d %s :%-30s %-5s [%-30s]",
+              me.name, RPL_INFO, sptr->name, "hide_server",
+              GlobalSetOptions.hide_server ? "YES" : "NO",
+              "Hide server info in WHOIS, netsplits, and hide topology");
+  sendto_one(sptr,
+              ":%s %d %s :%-30s %-5s [%-30s]",
+              me.name, RPL_INFO, sptr->name, "quiet_on_ban",
+              ConfigFileEntry.quiet_on_ban ? "YES" : "NO",
+              "Banned users may not send text to a channel");
+  sendto_one(sptr,
+              ":%s %d %s :%-30s %-5d [%-30s]",
+              me.name, RPL_INFO, sptr->name, "max_targets",
+              ConfigFileEntry.max_targets,
+              "The maximum number of PRIVMSG/NOTICE targets");
+  sendto_one(sptr,
+              ":%s %d %s :%-30s %-5d [%-30s]",
+              me.name, RPL_INFO, sptr->name, "maximum_links",
+              ConfigFileEntry.maximum_links,
+              "Maximum Links for Class default");
+  sendto_one(sptr,
+              ":%s %d %s :%-30s %-5d [%-30s]",
+              me.name, RPL_INFO, sptr->name, "idletime",
+              ConfigFileEntry.idletime,
+              "Delay (in minutes) before a client is considered idle");
+  sendto_one(sptr,
+              ":%s %d %s :%-30s %-5d [%-30s]",
+              me.name, RPL_INFO, sptr->name, "no_oper_flood",
+              ConfigFileEntry.no_oper_flood,
+              "Disable Flood Control for Operators");
+  sendto_one(sptr,
+              ":%s %d %s :%-30s %-5d [%-30s]",
+              me.name, RPL_INFO, sptr->name, "pace_wait",
+              ConfigFileEntry.pace_wait,
+              "Minimum Delay between uses of certain commands");
+  sendto_one(sptr,
+              ":%s %d %s :%-30s %-5d [%-30s]",
+              me.name, RPL_INFO, sptr->name, "whois_wait",
+              ConfigFileEntry.whois_wait,
+              "Delay between Remote uses of WHOIS");
+  /* Don't send oper_only_umodes...it's a bit mask, we will have to decode it
+  ** in order for it to show up properly to opers who issue INFO
+  */
 
   sendto_one(sptr,
 	     ":%s %d %s :Compiled on [%s]",
