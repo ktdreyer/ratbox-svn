@@ -1,3 +1,15 @@
+bill        2001/12/13 23:20:55 EST	(20011214_1)
+
+  Modified files:
+    src                  s_conf.c 
+  Log:
+  - added | support into klines
+  
+  Revision  Changes    Path
+  7.281     +31 -4     ircd-hybrid-7/src/s_conf.c
+
+
+
 leeh        2001/12/13 20:30:06 EST	(20011214_0)
 
   Modified files:
