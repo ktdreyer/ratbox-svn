@@ -1382,24 +1382,27 @@ exit_client(struct Client *client_p,	/* The local client originating the
 {
 	if(IsDeadLocal(source_p))
 		return -1;
+
 	if(MyConnect(source_p))
 	{
 		/* Local clients of various types */
 		if(IsPerson(source_p))
 			return exit_local_client(client_p, source_p, from, comment);
-		if(IsUnknown(source_p))
-			return exit_unknown_client(client_p, source_p, from, comment);
-		if(IsServer(source_p))
+		else if(IsServer(source_p))
 			return exit_local_server(client_p, source_p, from, comment);
+		/* IsUnknown || IsConnecting || IsHandShake */
+		else
+			return exit_unknown_client(client_p, source_p, from, comment);
 	} 
 	else 
 	{
 		/* Remotes */
 		if(IsPerson(source_p))
 			return exit_remote_client(client_p, source_p, from, comment);
-		if(IsServer(source_p))
+		else if(IsServer(source_p))
 			return exit_remote_server(client_p, source_p, from, comment);
 	}
+
 	return -1;
 }
 
