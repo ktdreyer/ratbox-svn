@@ -81,6 +81,7 @@ static void m_mode(struct Client *cptr, struct Client *sptr,
     {
       /* if here, it has to be a non-channel name */
       user_mode(cptr, sptr, parc, parv);
+      return;
     }
 
   if (!check_channel_name(parv[1]))
