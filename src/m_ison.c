@@ -109,9 +109,9 @@ static char buf[BUFSIZE];
 int m_ison(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   struct Client *acptr;
-  char *current_nick;
+  char *nick;
+  char *p;
   char *current_insert_point;
-  char *end_of_current_nick;
   int len;
 
   if (parc < 2)
@@ -128,15 +128,10 @@ int m_ison(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (!IsGlobalOper(cptr))
     cptr->priority +=20; /* this keeps it from moving to 'busy' list */
 
-  current_nick = parv[1];
-
-  end_of_current_nick = strchr(current_nick,' ');
-
-  for (;;)
+  for (nick = strtoken(&p, parv[1], ","); nick;
+       nick = strtoken(&p, NULL, ","))
     {
-      if(end_of_current_nick)
-        *end_of_current_nick = '\0';
-      if ((acptr = find_person(current_nick, NULL)))
+      if ((acptr = find_person(nick, NULL)))
 	{
 	  len = strlen(acptr->name);
 	  if( (current_insert_point + (len + 5)) < (buf + sizeof(buf)) )
@@ -149,13 +144,6 @@ int m_ison(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	  else
 	    break;
 	}
-
-      if(!end_of_current_nick)
-        break;
-
-      current_nick = end_of_current_nick;
-      current_nick++;  /* should skip to next '\0' or non ' ' */
-      end_of_current_nick = strchr(current_nick,' ');
     }
 
 /*  current_insert_point--; Do NOT take out the trailing space, it breaks ircII --Rodder */
