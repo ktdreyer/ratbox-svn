@@ -221,6 +221,13 @@ int list_named_channel(struct Client *sptr,char *name)
 
   chptr = hash_find_channel(name, NullChn);
 
+  if (chptr == NULL)
+    {
+      sendto_one(sptr,form_str(ERR_NOSUCHNICK),me.name, sptr->name, name);
+      sendto_one(sptr, form_str(RPL_LISTEND), me.name, sptr->name);
+      return 0;
+    }
+
   for (ptr = chptr->vchan_list.head; ptr; ptr = ptr->next)
     {
       tmpchptr = ptr->data;
