@@ -1,3 +1,19 @@
+db          2002/07/29 21:43:45 EDT	(20020730_2)
+
+  Modified files:
+    src                  packet.c parse.c 
+  Log:
+  - cleaned up style in packet.c
+  - cleaned up style in parse.c
+  - added logging of complete input buffer if insufficient parms received.
+    We might have a bogus \0 or something, we need to see what we have.
+  
+  Revision  Changes    Path
+  7.89      +9 -5      ircd-hybrid-7/src/packet.c
+  7.135     +118 -92   ircd-hybrid-7/src/parse.c
+
+
+
 androsyn    2002/07/29 20:47:30 EDT	(20020730_1)
 
   Modified files:
