@@ -404,6 +404,7 @@ int write_links_file(void* notused)
   MessageFileLine *newMessageLine = 0;
   MessageFile *MessageFileptr;
   struct Client *acptr;
+  char *p;
   FBFILE* file;
   char buff[512];
 
@@ -426,8 +427,19 @@ int write_links_file(void* notused)
     {
       if(IsServer(acptr))
 	{
+          if(acptr->info[0])
+            {
+              if( (p = strchr(acptr->info,']')) )
+                p += 2; /* skip the nasty [IP] part */
+              else
+                p = acptr->info;
+            }
+          else
+            p = "(Unknown Location)";
+
 	  newMessageLine = (MessageFileLine*) MyMalloc(sizeof(MessageFileLine));
-	  ircsprintf(newMessageLine->line,"%s * * 0",acptr->name);
+	  ircsprintf(newMessageLine->line,"%s %s %s",
+		     acptr->name,ConfigFileEntry.network_name,p);
 	  newMessageLine->next = (MessageFileLine *)NULL;
 
 	  if (MessageFileptr->contentsOfFile)
@@ -441,7 +453,8 @@ int write_links_file(void* notused)
 	      MessageFileptr->contentsOfFile = newMessageLine;
 	      currentMessageLine = newMessageLine;
 	    }
-	  ircsprintf(buff,"%s * * 0\n", acptr->name);
+	  ircsprintf(buff,"%s %s %s\n",
+		     acptr->name,ConfigFileEntry.network_name,p);
 	  fbputs(buff,file);
 	}
     }

@@ -13,7 +13,8 @@
 #define INCLUDED_limits_h
 #endif
 
-#define MESSAGELINELEN 89       
+/* XXX really, should be mallocing this on the fly but... */
+#define MESSAGELINELEN 256
 
 typedef enum {
   USER_MOTD,
