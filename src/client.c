@@ -1002,7 +1002,7 @@ recurse_remove_clients(struct Client *source_p, const char *comment)
 
 		/* XXX - this next line can probably go now --fl */
 		target_p->flags |= FLAGS_KILLED;
-		exit_remote_client(NULL, target_p, &me, me.name);		
+		exit_remote_client(NULL, target_p, &me, comment);		
 	}
 
 	DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->serv->servers.head)
@@ -1010,7 +1010,7 @@ recurse_remove_clients(struct Client *source_p, const char *comment)
 		target_p = (struct Client *) ptr->data;
 		recurse_remove_clients(target_p, comment);
 		target_p->flags |= FLAGS_KILLED;
-		exit_remote_server(NULL, target_p, &me, me.name);
+		exit_remote_server(NULL, target_p, &me, comment);
 	}
 }
 
@@ -1235,6 +1235,7 @@ exit_remote_server(struct Client *client_p, struct Client *source_p, struct Clie
 	
 	strcat(comment1, " ");
 	strcat(comment1, source_p->name);							        		                		                                                                      		
+
 	if(source_p->serv != NULL)
 		remove_dependents(client_p, source_p, from, comment, comment1);
 
