@@ -20,8 +20,6 @@ Necessary Requirements:
 
 - A working dynamic load library
 
-- A working getopt() function
-
 - A working lex.  Solaris /usr/ccs/bin/lex
   appears to be broken, on this system flex
   should be used.
@@ -80,6 +78,7 @@ Feature Specific Requirements:
   Linux glibc
   Solaris 2.6/7/8
   OpenBSD 2.8
+  NetBSD 1.4
 
 - CYGWIN USERS: Unfortunately, cygwin support has been removed
   because there is no way to support dynamic modules under cygwin.
