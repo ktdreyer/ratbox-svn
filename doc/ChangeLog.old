@@ -1,3 +1,8 @@
+*** 20010213_3 by db
+- don't increment scount unless it was successfully added
+
+
+
 *** 20010213_2 by db
 - fixed IP in conf when ip is used for host = ""; in connect block
   use inetpton() on given string, if returns 0 use dns... otherwise
