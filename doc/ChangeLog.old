@@ -1,3 +1,8 @@
+*** 20001231_26 by toot
+it didn't :P
+char *_version = "$Revision$"; looks a bit poo
+
+
 *** 20001231_25 by toot
 checking that Revision CVS tag works okay for module version numbers
 
