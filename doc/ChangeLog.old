@@ -1,3 +1,8 @@
+*** 20000106_1 by db
+- fixed bug introduced in ReplaceQuotes, '\#' was not handled correctly.
+
+
+
 *** 20000105_16 by db
 - all over the place
 
