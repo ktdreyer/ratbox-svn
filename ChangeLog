@@ -1,3 +1,26 @@
+leeh        2004/01/01 13:17:46 EST	(20040101_0)
+
+  Modified files:
+    include              balloc.h stdinc.h tools.h 
+    src                  balloc.c channel.c client.c rserv.c 
+  Log:
+  - added init_blockheap() to main()
+  - ported s_assert() from ircd-ratbox
+  - reenabled s_assert() calls in balloc.c, added a couple in client.c
+  - I forgot to change some (read: any) my_free() to BlockHeapFree() :P
+  - dont fork under cygwin, dont check pidfile if not forking
+  
+  Revision  Changes    Path
+  1.2       +1 -3      rserv/include/balloc.h
+  1.5       +2 -0      rserv/include/stdinc.h
+  1.5       +24 -0     rserv/include/tools.h
+  1.2       +8 -7      rserv/src/balloc.c
+  1.11      +2 -2      rserv/src/channel.c
+  1.9       +27 -28    rserv/src/client.c
+  1.15      +11 -3     rserv/src/rserv.c
+
+
+
 leeh        2003/12/30 16:55:18 EST	(20031230_1)
 
   Added files:
