@@ -65,6 +65,10 @@
 #include <sys/stat.h>
 #include <sys/socket.h>
 
+#if defined(HAVE_GETOPT_H)
+#include <getopt.h>
+#endif /* HAVE_GETOPT_H */
+
 #ifdef SETUID_ROOT
 #include <sys/lock.h>
 #include <unistd.h>
@@ -239,7 +243,6 @@ static void init_sys(int boot_daemon)
     }
 #endif        /* RLIMIT_FD_MAX */
 
-#ifndef __CYGWIN__
   /* This is needed to not fork if -s is on */
   if (boot_daemon)
     {
@@ -263,7 +266,6 @@ static void init_sys(int boot_daemon)
 #endif
      setsid();
     }
-#endif /* __CYGWIN__ */
   close_all_connections();
 }
 

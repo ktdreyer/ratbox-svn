@@ -113,7 +113,7 @@ int     m_privmsg(struct Client *cptr,
                           char *parv[])
 {
   struct Client *acptr;
-  char *s, *nick, *server, *host;
+  char *nick, *server, *host;
   struct Channel *chptr;
   int type=0;
 

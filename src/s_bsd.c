@@ -1384,11 +1384,8 @@ int read_message(time_t delay, unsigned char mask)
    */
   pfd = &poll_fdarray[++i];
     
-  for ( ; (nfds > 0) && (i < nbr_pfds); i++, pfd++)
+  for ( ; (i < nbr_pfds); i++, pfd++)
     {
-      if (!pfd->revents)
-        continue;
-      --nfds;
       fd = pfd->fd;                   
       rr = pfd->revents & POLLREADFLAGS;
       rw = pfd->revents & POLLWRITEFLAGS;

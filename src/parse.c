@@ -260,36 +260,40 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
     {
       if (paramcount > MAXPARA)
         paramcount = MAXPARA;
-
+      
+      {
+	char *longarg = NULL;
+	char *ap;
+	
+	longarg = s;
+	
+	if(strsep(&longarg,":")) /* Tear off short args */
+	  
+	  if(longarg)
+	    *(longarg-2) = '\0';
+	
+	while((ap = strsep(&s, " ")) != NULL) 
 	  {
-		  char *longarg = NULL;
-		  char *ap;
-		  
-		  longarg = s;
-		  
-		  if(strsep(&longarg,":")) /* Tear off short args */
-
-		  if(longarg)
-			  *(longarg-2) = '\0';
-		  
-		  while((ap = strsep(&s, " ")) != NULL) {
-			  if(*ap != '\0') {
-				  para[i] = ap;
-				  if(i < MAXPARA)
-					  ++i;
-				  else
-					  break;
-			  }
-		  }
-
-		  if(longarg) {
-			  para[i] = longarg;
-			  i++;
-		  }
+	    if(*ap != '\0') 
+	      {
+		para[i] = ap;
+		if(i < MAXPARA)
+		  ++i;
+		else
+		  break;
+	      }
 	  }
+	
+	if(longarg) 
+	  {
+	    para[i] = longarg;
+	    i++;
+	  }
+      }
     }
-
+  
   para[i] = NULL;
+
   if (mptr == (struct Message *)NULL)
     return (do_numeric(numeric, cptr, from, i, para));
 

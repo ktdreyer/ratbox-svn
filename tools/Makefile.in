@@ -33,7 +33,7 @@ convertconf: convertconf.o $(IRCDLIBS)
 	$(CC) $(LDFLAGS) -o convertconf $(convertconf_OBJECTS) $(IRCDLIBS)
 
 clean:
-	$(RM) -f $(all_OBJECTS) convertconf fixklines viconf chkconf mkpasswd *~ core
+	$(RM) -f $(all_OBJECTS) convertconf fixklines viconf chkconf mkpasswd *~ core *.exe
 
 distclean: clean
 	$(RM) -f Makefile

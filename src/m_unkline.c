@@ -196,6 +196,7 @@ K:bar:No reason (1997/08/30 14.56):foo
                          me.name, parv[0]);
               sendto_one(sptr, ":%s NOTICE %s :Couldn't find host",
                          me.name, parv[0]);
+	      log(L_ERROR, "K-Line file corrupted (couldn't find host)");
               if(!error_on_write)
                 error_on_write = flush_write(sptr, out, buf, temppath);
               continue;         /* This K line is corrupted ignore */
@@ -211,6 +212,7 @@ K:bar:No reason (1997/08/30 14.56):foo
                          me.name, parv[0]);
               sendto_one(sptr, ":%s NOTICE %s :Couldn't find comment",
                          me.name, parv[0]);
+	      log(L_ERROR, "K-Line file corrupted (couldn't find comment)");
               if(!error_on_write)
                 error_on_write = flush_write(sptr, out, buf, temppath);
               continue;         /* This K line is corrupted ignore */

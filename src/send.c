@@ -35,6 +35,7 @@
 #include "s_conf.h"
 #include "list.h"
 #include "s_debug.h"
+#include "s_log.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -44,6 +45,7 @@
 #include <assert.h>
 
 #define NEWLINE "\r\n"
+#define LOG_BUFSIZE 2048
 
 static  char    sendbuf[2048];
 static  int     send_message (struct Client *, char *, int);
@@ -1179,7 +1181,7 @@ vsendto_prefix_one(register struct Client *to, register struct Client *from,
 #endif
 
   *sendbuf = ':';
-  strncpy_irc(sendbuf + 1, par, sizeof(sendbuf) - 1);
+  strncpy_irc(sendbuf + 1, par, sizeof(sendbuf) - 2);
 
   parlen = strlen(par) + 1;
   sendbuf[parlen++] = ' ';
@@ -1292,6 +1294,7 @@ ts_warn(const char *pattern, ...)
 
 {
   va_list args;
+  char buf[LOG_BUFSIZE];
   static time_t last = 0;
   static int warnings = 0;
   time_t now;
@@ -1321,7 +1324,8 @@ ts_warn(const char *pattern, ...)
     }
 
   vsendto_realops(pattern, args);
-
+  vsprintf(buf, pattern, args);
+  log(L_CRIT, buf);
   va_end(args);
 } /* ts_warn() */
 

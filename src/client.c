@@ -262,7 +262,6 @@ time_t check_pings(time_t currenttime)
   int           fakekill=0;
 #endif /* IDLE_CHECK && SEND_FAKE_KILL_TO_CLIENT */
 
-                                        /* of dying clients */
   dying_clients[0] = (struct Client *)NULL;   /* mark first one empty */
 
   /*
@@ -277,7 +276,7 @@ time_t check_pings(time_t currenttime)
    * -Dianora
    */
 
-   for (i = 0; i <= highest_fd; i++)
+  for (i = 0; i <= highest_fd; i++)
     {
       if (!(cptr = local[i]) || IsMe(cptr))
         continue;               /* and go examine next fd/cptr */
@@ -294,7 +293,7 @@ time_t check_pings(time_t currenttime)
            * for the same cptr. i.e. bad news
            * -Dianora
            */
-
+	  
           dying_clients[die_index] = cptr;
           dying_clients_reason[die_index++] =
             ((cptr->flags & FLAGS_SENDQEX) ?
@@ -302,136 +301,136 @@ time_t check_pings(time_t currenttime)
           dying_clients[die_index] = (struct Client *)NULL;
           continue;             /* and go examine next fd/cptr */
         }
-
+      
       if (rehashed)
         {
           if(dline_in_progress)
             {
-              if(IsPerson(cptr))
-                {
 #ifndef IPV6 /* XXX No dlines in IPv6 yet */
-                  if( (aconf = match_Dline(ntohl(cptr->ip.s_addr))) )
-
-                      /* if there is a returned 
-                       * struct ConfItem then kill it
-                       */
-                    {
-                      if(IsConfElined(aconf))
-                        {
-                          sendto_realops("D-line over-ruled for %s client is E-lined",
-                                     get_client_name(cptr,FALSE));
-                                     continue;
-                          continue;
-                        }
-
-                      sendto_realops("D-line active for %s",
-                                 get_client_name(cptr, FALSE));
-
-                      dying_clients[die_index] = cptr;
-                      /* Wintrhawk */
-                      if(ConfigFileEntry.kline_with_connection_closed) {
-                        /*
-                         * We use a generic non-descript message here on 
-                         * purpose so as to prevent other users seeing the
-                         * client disconnect from harassing the IRCops
-                         */
-                        reason = "Connection closed";
-                      } else {
-                        if (ConfigFileEntry.kline_with_reason) {
-                          reason = aconf->passwd ? aconf->passwd : "D-lined";
-                        } else {
-                          reason = "D-lined";
-                        }
-                      }
-
-                      dying_clients_reason[die_index++] = reason;
-                      dying_clients[die_index] = (struct Client *)NULL;
-                      sendto_one(cptr, form_str(ERR_YOUREBANNEDCREEP),
-                                 me.name, cptr->name, reason);
-                      continue;         /* and go examine next fd/cptr */
-                    }
+	      if ( (aconf = match_Dline(ntohl(cptr->ip.s_addr))) )
+		/* if there is a returned struct ConfItem then kill it */
+		{
+		  if(IsConfElined(aconf))
+		    {
+		      sendto_realops("D-line over-ruled for %s client is E-lined",
+				     get_client_name(cptr, FALSE));
+		      continue;
+		}
+	      sendto_realops("D-line active for %s",
+			     get_client_name(cptr, FALSE));
+	      
+	      dying_clients[die_index] = cptr;
+	      /* Wintrhawk */
+	      if(ConfigFileEntry.kline_with_connection_closed) {
+		/*
+		 * We use a generic non-descript message here on 
+		 * purpose so as to prevent other users seeing the
+		 * client disconnect from harassing the IRCops
+		 */
+		reason = "Connection closed";
+	      } else {
+		if (ConfigFileEntry.kline_with_reason) {
+		  reason = aconf->passwd ? aconf->passwd : "D-lined";
+		} else {
+		  reason = "D-lined";
+		}
+	      }
+	      if (IsPerson(cptr)) 
+		{
+		  dying_clients_reason[die_index++] = reason;
+		  dying_clients[die_index] = (struct Client *)NULL;
+		  sendto_one(cptr, form_str(ERR_YOUREBANNEDCREEP),
+			     me.name, cptr->name, reason);
+		}
+#ifdef REPORT_DLINE_TO_USER
+	      else
+		{
+		  sendto_one(cptr, "NOTICE DLINE :*** You have been D-lined");
+		}
 #endif
-                }
-            }
-          else
-            {
-              if(IsPerson(cptr))
-                {
-                  if( ConfigFileEntry.glines && (aconf = find_gkill(cptr)) )
-                    {
-                      if(IsElined(cptr))
-                        {
-                          sendto_realops("G-line over-ruled for %s client is E-lined",
+	      continue; /* and go examine next fd/cptr */
+#endif /* ifndef IPV6 */
+	    }
+	}
+      else
+	{
+	  if(IsPerson(cptr))
+	    {
+	      if( ConfigFileEntry.glines && (aconf = find_gkill(cptr, cptr->username)) )
+		{
+		  if(IsElined(cptr))
+		    {
+		      sendto_realops("G-line over-ruled for %s client is E-lined",
                                      get_client_name(cptr,FALSE));
-                                     continue;
-                        }
-
-                      sendto_realops("G-line active for %s",
+		      continue;
+		    }
+		  
+		  sendto_realops("G-line active for %s",
                                  get_client_name(cptr, FALSE));
-
-                      dying_clients[die_index] = cptr;
-                      /* Wintrhawk */
-                      if (ConfigFileEntry.kline_with_connection_closed) {
+		  
+		  dying_clients[die_index] = cptr;
+		  /* Wintrhawk */
+		  if (ConfigFileEntry.kline_with_connection_closed) {
+		    /*
+		     * We use a generic non-descript message here on 
+		     * purpose so as to prevent other users seeing the
+		     * client disconnect from harassing the IRCops
+		     */
+		    reason = "Connection closed";
+		  } else {
+		    if (ConfigFileEntry.kline_with_reason) {
+		      reason = aconf->passwd ? aconf->passwd : "G-lined";
+		    } else {
+		      reason = "G-lined";
+		    }
+		  }
+		  
+		  dying_clients_reason[die_index++] = reason;
+		  dying_clients[die_index] = (struct Client *)NULL;
+		  sendto_one(cptr, form_str(ERR_YOUREBANNEDCREEP),
+			     me.name, cptr->name, reason);
+		  continue;         /* and go examine next fd/cptr */
+		}
+	      else
+		if((aconf = find_kill(cptr))) /* if there is a returned
+						 struct ConfItem.. then kill it */
+		  {
+		    if(aconf->status & CONF_ELINE)
+		      {
+			sendto_realops("K-line over-ruled for %s client is E-lined",
+				       get_client_name(cptr,FALSE));
+			continue;
+		      }
+		    
+		    sendto_realops("K-line active for %s",
+				   get_client_name(cptr, FALSE));
+		    dying_clients[die_index] = cptr;
+		    
+		    /* Wintrhawk */
+		    if (ConfigFileEntry.kline_with_connection_closed) {
                       /*
                        * We use a generic non-descript message here on 
                        * purpose so as to prevent other users seeing the
                        * client disconnect from harassing the IRCops
                        */
-                        reason = "Connection closed";
-                      } else {
-                        if (ConfigFileEntry.kline_with_reason) {
-                          reason = aconf->passwd ? aconf->passwd : "G-lined";
-                        } else {
-                          reason = "G-lined";
-                        }
-                      }
+		      reason = "Connection closed";
+		    } else {
+		      if (ConfigFileEntry.kline_with_reason) {
+			reason = aconf->passwd ? aconf->passwd : "K-lined";
+		      } else {
+			reason = "K-lined";
+		      }
+		    }
 
-                      dying_clients_reason[die_index++] = reason;
-                      dying_clients[die_index] = (struct Client *)NULL;
-                      sendto_one(cptr, form_str(ERR_YOUREBANNEDCREEP),
-                                 me.name, cptr->name, reason);
-                      continue;         /* and go examine next fd/cptr */
-                    }
-                  else
-                  if((aconf = find_kill(cptr))) /* if there is a returned
-                                                   struct ConfItem.. then kill it */
-                    {
-                      if(aconf->status & CONF_ELINE)
-                        {
-                          sendto_realops("K-line over-ruled for %s client is E-lined",
-                                     get_client_name(cptr,FALSE));
-                                     continue;
-                        }
-
-                      sendto_realops("K-line active for %s",
-                                 get_client_name(cptr, FALSE));
-                      dying_clients[die_index] = cptr;
-
-                      /* Wintrhawk */
-                      if (ConfigFileEntry.kline_with_connection_closed) {
-                      /*
-                       * We use a generic non-descript message here on 
-                       * purpose so as to prevent other users seeing the
-                       * client disconnect from harassing the IRCops
-                       */
-                        reason = "Connection closed";
-                      } else {
-                        if (ConfigFileEntry.kline_with_reason) {
-                          reason = aconf->passwd ? aconf->passwd : "K-lined";
-                        } else {
-                          reason = "K-lined";
-                        }
-                      }
-
-                      dying_clients_reason[die_index++] = reason;
-                      dying_clients[die_index] = (struct Client *)NULL;
-                      sendto_one(cptr, form_str(ERR_YOUREBANNEDCREEP),
-                                 me.name, cptr->name, reason);
-                      continue;         /* and go examine next fd/cptr */
-                    }
-                }
-            }
-        }
+		    dying_clients_reason[die_index++] = reason;
+		    dying_clients[die_index] = (struct Client *)NULL;
+		    sendto_one(cptr, form_str(ERR_YOUREBANNEDCREEP),
+			       me.name, cptr->name, reason);
+		    continue;         /* and go examine next fd/cptr */
+		  }
+	    }
+	}
+    }
 
 #ifdef IDLE_CHECK
       if (IsPerson(cptr))
@@ -491,7 +490,6 @@ time_t check_pings(time_t currenttime)
 
       if (ping < (currenttime - cptr->lasttime))
         {
-
           /*
            * If the server hasnt talked to us in 2*ping seconds
            * and it has a ping time, then close its connection.
@@ -706,6 +704,17 @@ static void release_client_state(struct Client* cptr)
 void remove_client_from_list(struct Client* cptr)
 {
   assert(0 != cptr);
+  
+  /* HACK somehow this client has already exited
+   * but has come back to haunt us.. looks like a bug
+   * XXX isn't this bug fixed now? -is */
+  if (!cptr->prev && !cptr->next)
+    {
+      log(L_CRIT, "already exited client %X [%s]",
+	  cptr, cptr->name?cptr->name:"NULL");
+      return;
+    }
+
   if (cptr->prev)
     cptr->prev->next = cptr->next;
   else

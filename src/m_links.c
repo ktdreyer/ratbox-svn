@@ -104,8 +104,10 @@ int m_links(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   const char*    mask = "";
   struct Client* acptr;
-  char           clean_mask[2 * HOSTLEN + 1];
+  char           clean_mask[2 * HOSTLEN + 4];
   char*          p;
+  char*          s;
+  int            bogus_server = 0;
   static time_t  last_used = 0L;
 
   if (parc > 2)
@@ -143,6 +145,26 @@ int m_links(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
    * annoying opers, lets clean up what is sent to all opers
    * -Dianora
    */
+  s = (char *) mask;
+  while (*s)
+    {
+      if (!IsServChar(*s)) {
+	bogus_server = 1;
+	break;
+      }
+      s++;
+    }
+  
+  if (bogus_server)
+    {
+      sendto_realops_flags(FLAGS_SPY, 
+			   "BOGUS LINKS '%s' requested by %s (%s@%s) [%s]",
+			   clean_string(clean_mask, mask, 2 * HOSTLEN),
+			   sptr->name, sptr->username,
+			   sptr->host, sptr->user->server);
+      return 0;
+    }
+
   if (*mask)       /* only necessary if there is a mask */
     mask = collapse(clean_string(clean_mask, mask, 2 * HOSTLEN));
 
@@ -204,8 +226,10 @@ int ms_links(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   const char*    mask = "";
   struct Client* acptr;
-  char           clean_mask[2 * HOSTLEN + 1];
+  char           clean_mask[2 * HOSTLEN + 4];
   char*          p;
+  char*          s;
+  int            bogus_server = 0;
   static time_t  last_used = 0L;
 
   if (parc > 2)
@@ -243,6 +267,27 @@ int ms_links(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
    * annoying opers, lets clean up what is sent to all opers
    * -Dianora
    */
+
+  s = (char *) mask;
+  while (*s)
+    {
+      if (!IsServChar(*s)) {
+	bogus_server = 1;
+	break;
+      }
+      s++;
+    }
+
+  if (bogus_server)
+    {
+      sendto_realops_flags(FLAGS_SPY,
+			   "BOGUS LINKS '%s' requested by %s (%s@%s) [%s]",
+			   clean_string(clean_mask, mask, 2 + HOSTLEN),
+			   sptr->name, sptr->username,
+			   sptr->host, sptr->user->server);
+      return 0;
+    }
+  
   if (*mask)       /* only necessary if there is a mask */
     mask = collapse(clean_string(clean_mask, mask, 2 * HOSTLEN));
 

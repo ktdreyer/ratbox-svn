@@ -39,9 +39,12 @@
 
 #define LOG_BUFSIZE 2048 
 
+#ifdef USE_LOGFILE
 static int logFile = -1;
+#endif
 static int logLevel = INIT_LOG_LEVEL;
 
+#ifdef USE_SYSLOG
 static int sysLogLevel[] = {
   LOG_CRIT,
   LOG_ERR,
@@ -51,6 +54,7 @@ static int sysLogLevel[] = {
   LOG_INFO,
   LOG_INFO
 };
+#endif
 
 static const char *logLevelToString[] =
 { "L_CRIT",
@@ -118,7 +122,7 @@ void log(int priority, const char* fmt, ...)
 
 #ifdef USE_SYSLOG  
   if (priority <= L_DEBUG)
-    syslog(sysLogLevel[priority], buf);
+    syslog(sysLogLevel[priority], "%s", buf);
 #endif
 #if defined(USE_LOGFILE) 
   write_log(buf);

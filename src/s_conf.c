@@ -97,9 +97,10 @@ struct ConfItem *find_special_conf(char *, int );
 static void add_q_line(struct ConfItem *);
 static void clear_q_lines(void);
 static void clear_special_conf(struct ConfItem **);
-static struct ConfItem* find_tkline(const char* host, const char* name);
+static struct ConfItem* find_tkline(const char*, const char*, unsigned long);
 
 struct ConfItem *temporary_klines = NULL;
+struct ConfItem *temporary_ip_klines = NULL;
 
 /* usually, with hash tables, you use a prime number...
  * but in this case I am dealing with ip addresses, not ascii strings.
@@ -400,7 +401,7 @@ int attach_Iline(struct Client* cptr, const char* username, char **preason)
                                        ntohl(cptr->ip.s_addr));
       if(aconf && !IsConfElined(aconf))
         {
-          if( (tkline_conf = find_tkline(cptr->host, cptr->username)) )
+          if( (tkline_conf = find_tkline(cptr->host, cptr->username, ntohl(cptr->ip.s_addr))) )
             aconf = tkline_conf;
         }
     }
@@ -413,7 +414,7 @@ int attach_Iline(struct Client* cptr, const char* username, char **preason)
                                        ntohl(cptr->ip.s_addr));
       if(aconf && !IsConfElined(aconf))
         {
-          if( (tkline_conf = find_tkline(cptr->host, non_ident)) )
+          if( (tkline_conf = find_tkline(cptr->host, non_ident, ntohl(cptr->ip.s_addr))) )
             aconf = tkline_conf;
         }
     }
@@ -423,12 +424,19 @@ int attach_Iline(struct Client* cptr, const char* username, char **preason)
       if (aconf->status & CONF_CLIENT)
         {
 	if (ConfigFileEntry.glines) {
-          if ( !IsConfElined(aconf) && (gkill_conf = find_gkill(cptr)) )
+          if (!IsConfElined(aconf))
             {
-              *preason = gkill_conf->passwd;
-              sendto_one(cptr, ":%s NOTICE %s :*** G-lined",
-                           me.name,cptr->name);
-              return ( -5 );
+	      if (IsGotId(cptr))
+		gkill_conf = find_gkill(cptr, cptr->username);
+	      else
+		gkill_conf = find_gkill(cptr, non_ident);
+	      if (gkill_conf)
+		{
+		  *preason = gkill_conf->passwd;
+		  sendto_one(cptr, "%s NOTICE %s :*** G-lined", me.name,
+			     cptr->name);
+		  return -5;
+		}
             }
 	}
           if(IsConfDoIdentd(aconf))
@@ -2075,7 +2083,7 @@ struct ConfItem *find_kill(struct Client* cptr)
  * thats expected to be done by caller.... *sigh* -Dianora
  */
 
-static struct ConfItem* find_tkline(const char* host, const char* user)
+static struct ConfItem* find_tkline(const char* host, const char* user, unsigned long ip)
 {
   struct ConfItem *kill_list_ptr;        /* used for the link list only */
   struct ConfItem *last_list_ptr;
@@ -2136,7 +2144,7 @@ struct ConfItem *find_is_klined(const char* host, const char* name, unsigned lon
 {
   struct ConfItem *found_aconf;
 
-  if( (found_aconf = find_tkline(host, name)) )
+  if( (found_aconf = find_tkline(host, name, ntohl(ip))) )
     return(found_aconf);
 
   /* find_matching_mtrie_conf() can return either CONF_KILL,
@@ -2161,8 +2169,16 @@ struct ConfItem *find_is_klined(const char* host, const char* name, unsigned lon
 
 void add_temp_kline(struct ConfItem *aconf)
 {
-  aconf->next = temporary_klines;
-  temporary_klines = aconf;
+  if (aconf->ip == 0)
+    {
+      aconf->next = temporary_klines;
+      temporary_klines = aconf;
+    } 
+  else 
+    {
+      aconf->next = temporary_ip_klines;
+      temporary_ip_klines = aconf;
+    }
 }
 
 /* flush_temp_klines
@@ -2185,6 +2201,16 @@ void flush_temp_klines()
           kill_list_ptr = temporary_klines;
         }
     }
+
+  if ((kill_list_ptr = temporary_ip_klines))
+    {
+      while (kill_list_ptr)
+	{
+	  temporary_ip_klines = kill_list_ptr->next;
+	  free_conf(kill_list_ptr);
+	  kill_list_ptr = temporary_ip_klines;
+	}
+    }
 }
 
 /* report_temp_klines
@@ -2196,6 +2222,22 @@ void flush_temp_klines()
  */
 void report_temp_klines(struct Client *sptr)
 {
+  if (temporary_klines)
+    show_temp_klines(sptr, temporary_klines);
+  if (temporary_ip_klines)
+    show_temp_klines(sptr, temporary_ip_klines);
+}
+
+/* show_temp_klines
+ *
+ * inputs         - struct Client pointer, client to report to
+ *                - ConfItem pointer, the tkline list to show
+ * outputs        - NONE
+ * side effects   - NONE
+ */
+void
+show_temp_klines(struct Client *sptr, struct ConfItem *tklist)
+{
   struct ConfItem *kill_list_ptr;
   struct ConfItem *last_list_ptr;
   struct ConfItem *tmp_list_ptr;
@@ -2204,67 +2246,64 @@ void report_temp_klines(struct Client *sptr)
   char *reason;
   char *p;
 
-  if(temporary_klines)
+  kill_list_ptr = last_list_ptr = tklist;
+
+  while(kill_list_ptr)
     {
-      kill_list_ptr = last_list_ptr = temporary_klines;
-
-      while(kill_list_ptr)
-        {
-          if(kill_list_ptr->hold <= CurrentTime)        /* kline has expired */
+      if (kill_list_ptr->hold <= CurrentTime) /* kline has expired */
+	{
+	  if (tklist == kill_list_ptr)
             {
-              if(temporary_klines == kill_list_ptr)
-                {
-                  /* Its pointing to first one in link list*/
-                  /* so, bypass this one, remember bad things can happen
-                     if you try to use an already freed pointer.. */
+	      /* It's pointing to first one in link list */
+	      /* so, bypass this one, remember bad things can happen
+		 if you try to use an already freed pointer.. */
 
-                  temporary_klines = last_list_ptr = tmp_list_ptr =
-                    kill_list_ptr->next;
-                }
-              else
-                {
-                  /* its in the middle of the list, so link around it */
-                  tmp_list_ptr = last_list_ptr->next = kill_list_ptr->next;
-                }
-
-              free_conf(kill_list_ptr);
-              kill_list_ptr = tmp_list_ptr;
+	      tklist = last_list_ptr = tmp_list_ptr = kill_list_ptr->next;
             }
           else
             {
-              if(kill_list_ptr->host)
-                host = kill_list_ptr->host;
-              else
-                host = "*";
+	      /* its in the middle of the list, so link around it */
+	      tmp_list_ptr = last_list_ptr->next = kill_list_ptr->next;
+	    }
 
-              if(kill_list_ptr->user)
-                user = kill_list_ptr->user;
-              else
-                user = "*";
+	  free_conf(kill_list_ptr);
+	  kill_list_ptr = tmp_list_ptr;
+	}
+      else
+	{
+	  if (kill_list_ptr->host)
+	    host = kill_list_ptr->host;
+	  else
+	    host = "*";
 
-              if(kill_list_ptr->passwd)
-                reason = kill_list_ptr->passwd;
-              else
-                reason = "No Reason";
+	  if (kill_list_ptr->user)
+	    user = kill_list_ptr->user;
+	  else
+	    user = "*";
 
-              if(!IsAnOper(sptr))
-                {
-                  if( (p = strchr(reason,'|')) )
-                    *p = '\0';
+	  if (kill_list_ptr->passwd)
+	    reason = kill_list_ptr->passwd;
+	  else
+	    reason = "No Reason";
 
-                  sendto_one(sptr,form_str(RPL_STATSKLINE), me.name,
-                             sptr->name, 'k' , host, user, reason);
-                  if(p)
-                    *p = '|';
-                }
-              else
-                sendto_one(sptr,form_str(RPL_STATSKLINE), me.name,
-                           sptr->name, 'k' , host, user, reason);
+	  if (!IsAnOper(sptr))
+	    {
+	      if ((p = strchr(reason, '|')))
+		*p = '\0';
 
-              last_list_ptr = kill_list_ptr;
-              kill_list_ptr = kill_list_ptr->next;
-            }
-        }
+
+            sendto_one(sptr, form_str(RPL_STATSKLINE), me.name,
+		       sptr->name, 'k', host, user, reason);
+	    if(p)
+	      *p = '|';
+	    }
+	  else
+	    sendto_one(sptr, form_str(RPL_STATSKLINE), me.name,
+		       sptr->name, 'k', host, user, reason);
+
+	  last_list_ptr = kill_list_ptr;
+	  kill_list_ptr = kill_list_ptr->next;
+	}
     }
 }
 
@@ -2668,7 +2707,7 @@ int mo_testline(struct Client *cptr, struct Client *sptr, int parc, char *parv[]
                          port,
                          classname);
 
-              aconf = find_tkline(given_host,given_name);
+              aconf = find_tkline(given_host, given_name, 0);
               if(aconf)
                 {
                   sendto_one(sptr, 
@@ -2733,7 +2772,7 @@ void get_printable_conf(struct ConfItem *aconf, char **name, char **host,
 void read_conf_files(int cold)
 {
   FBFILE *file;
-  const char *filename; /* kline or conf filename */
+  const char *filename, *kfilename, *dfilename; /* kline or conf filename */
 
   conf_fbfile_in = NULL;
 
@@ -2748,7 +2787,7 @@ void read_conf_files(int cold)
         }
       else
         {
-          sendto_ops("Can't open %s file aborting rehash!", filename );
+          sendto_realops("Can't open %s file aborting rehash!", filename );
           return;
         }
     }
@@ -2758,24 +2797,35 @@ void read_conf_files(int cold)
 
   initconf(conf_fbfile_in);
 
-#ifdef KPATH
-  filename = get_conf_name(KLINE_TYPE);
-
-  if ((file = openconf(filename)) == 0)
+  kfilename = get_conf_name(KLINE_TYPE);
+  if (irccmp(filename, kfilename) != 0)
     {
-      if(cold)
+      if((file = openconf(kfilename)) == 0)
         {
-          log(L_ERROR,"Failed reading kline file %s", filename);
-        }
+	  if (cold)
+	    log(L_ERROR, "Failed reading kline file %s", filename);
+	  else
+	    sendto_realops("Can't open %s file klines could be missing!",
+			   kfilename);
+	}
       else
-        {
-          sendto_ops("Can't open %s file klines could be missing!",
-                     filename);
-        }
+	initconf(file);
     }
-  else
-    initconf(file);
-#endif
+
+  dfilename = get_conf_name(DLINE_TYPE);
+  if ((irccmp(filename, dfilename) != 0) && (irccmp(kfilename, dfilename) != 0))
+    {
+      if ((file = openconf(dfilename)) == 0)
+	{
+	  if(cold)
+	    log(L_ERROR, "Failed reading dline file %s", dfilename);
+	  else
+	    sendto_realops("Can't open %s file dlines could be missing!",
+			   dfilename);
+	}
+      else
+	initconf(file);
+   }
 }
 
 /*
@@ -2895,9 +2945,6 @@ void write_kline_or_dline_to_conf_and_notice_opers(
                                                    char *current_date)
   {
   char buffer[1024];
-#ifdef SEPARATE_QUOTE_KLINES_BY_DATE
-  char *timebuffer;
-#endif
   int out;
   const char *filename;         /* filename to use for kline */
 

@@ -155,7 +155,7 @@ depend:
 	${MKDEP} ${CPPFLAGS} ${SRCS} > .depend
 
 clean:
-	${RM} -f *.o *~ y.tab.c lex.yy.c ircd.core core ircd 
+	${RM} -f *.o *.exe *~ y.tab.c lex.yy.c ircd.core core ircd 
 
 distclean: clean
 	${RM} -f Makefile version.c.last

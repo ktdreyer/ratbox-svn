@@ -436,7 +436,7 @@ static  char *  replies[] = {
 /* 405 ERR_TOOMANYCHANNELS, */  ":%s 405 %s %s :You have joined too many channels",
 /* 406 ERR_WASNOSUCHNICK, */    ":%s 406 %s %s :There was no such nickname",
 /* 407 ERR_TOOMANYTARGETS, */
-                ":%s 407 %s %s :Duplicate recipients. No message delivered",
+                ":%s 407 %s %s :Too many recipients.  Only %d processed",
 /* 408 */       (char *)NULL,
 /* 409 ERR_NOORIGIN, */         ":%s 409 %s :No origin specified",
 /* 410 */       (char *)NULL,
@@ -510,7 +510,7 @@ static  char *  replies[] = {
 /* 477 ERR_MODELESS, */         ":%s 477 %s %s :Channel does not support modes",
 /* 478 ERR_BANLISTFULL, */      ":%s 478 %s %s %s :Channel ban list is full",
 /* 479 ERR_BADCHANNAME */
-                ":%s 479 %s %s :Cannot join channel (illegal name)",
+                ":%s 479 %s %s :Illegal channel name",
 /* 480 */	(char *)NULL,
 /* 481 ERR_NOPRIVILEGES, */
                 ":%s 481 %s :I don't THINK so, homez... you ain't got what it takes. (IRC operator)",

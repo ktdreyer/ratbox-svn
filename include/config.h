@@ -54,6 +54,13 @@
 #define HARD_FDLIMIT_   256
 #define INIT_MAXCLIENTS 200
 
+#if defined(__CYGWIN__)
+#undef HARD_FDLIMIT_
+#define HARD_FDLIMIT_ 25
+#undef INIT_MAXCLIENTS
+#define INIT_MAXCLIENTS 20
+#endif /* __CYGWIN__ */
+
 /*
  * This is how many 'buffer connections' we allow... 
  * Remember, MAX_BUFFER + MAX_CLIENTS can't exceed HARD_FDLIMIT :)
@@ -155,9 +162,16 @@
  */
 #define RFC1035_ANAL
 
+/* MAX_MULTI_MESSAGES
+ * Maximum number of recipients to a PRIVMSG.  Any more than MAX_MULTI_MESSAGES
+ * will not be sent.  If MAX_MULTI_MESSAGES is 1, then any PRIVMSG with a ',' in
+ * the target will be rejected.
+ */
+#define MAX_MULTI_MESSAGES 2
+
 /* CUSTOM_ERR - colorful notice/error/messages
- * Defining this will use custom notice/error/messages from include/s_err.h
- * instead of stock ones in ircd/s_err.c.  If you prefer the "colorful"
+ * Defining this will use custom notice/error/messages from src/messages_cust.tab
+ * instead of stock ones in src/messages.tab.  If you prefer the "colorful"
  * messages that Hybrid was known for, or if you wish to customize the
  * messages, define this.  Otherwise leave it undef'd for plain ole
  * boring messages.
@@ -184,6 +198,7 @@
  * you don't need this. -Dianora
  */
 #undef WHOIS_NOTICE
+
 /* SHORT_MOTD
  * There are client ignoring the FORCE_MOTD MOTD numeric, there is
  * no point forcing MOTD on connecting clients IMO. Give them a short
@@ -204,6 +219,12 @@
  * WHO or NAMES unless they are on the same channel as you.
  */
 #undef  NO_DEFAULT_INVISIBLE
+
+/* NO_WHOIS_WILDCARDS - disable the use of wildcards in WHOIS.
+ * this will probably be permanently enabled in the next release.
+ * (should this be removed now? -is)
+ */
+#define NO_WHOIS_WILDCARDS
 
 /*
  * The compression level used for zipped links. (Suggested values: 1 to 5)
@@ -465,12 +486,6 @@
 #undef  IDLE_CHECK
 #define IDLE_TIME 60
 #define OPER_IDLE
-
-/* If defined USE_IP_I_LINE_FIRST will search IP I lines first
- * and use that in preference over the mtrie. (hi jimmie)
- * -Dianora
- */
-#undef USE_IP_I_LINE_FIRST
 
 /* SEND_FAKE_KILL_TO_CLIENT - make the client think it's being /KILL'ed
  * 

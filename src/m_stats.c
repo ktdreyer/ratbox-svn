@@ -244,7 +244,7 @@ int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       break;
  
     case 'B' : case 'b' :
-      sendto_one(sptr,":%s NOTICE %s Use stats I instead", me.name, parv[0]);
+      sendto_one(sptr,":%s NOTICE %s :Use stats I instead", me.name, parv[0]);
       break;
 
     case 'D': case 'd':
@@ -252,11 +252,11 @@ int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       break;
 
     case 'E' : case 'e' :
-      sendto_one(sptr,":%s NOTICE %s Use stats I instead", me.name, parv[0]);
+      sendto_one(sptr,":%s NOTICE %s :Use stats I instead", me.name, parv[0]);
       break;
 
     case 'F' : case 'f' :
-      sendto_one(sptr,":%s NOTICE %s Use stats I instead", me.name, parv[0]);
+      sendto_one(sptr,":%s NOTICE %s :Use stats I instead", me.name, parv[0]);
       break;
 
     case 'G': case 'g' :
@@ -566,7 +566,7 @@ int mo_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       break;
  
     case 'B' : case 'b' :
-      sendto_one(sptr,":%s NOTICE %s Use stats I instead", me.name, parv[0]);
+      sendto_one(sptr,":%s NOTICE %s :Use stats I instead", me.name, parv[0]);
       break;
 
     case 'D': case 'd':
@@ -580,11 +580,11 @@ int mo_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       break;
 
     case 'E' : case 'e' :
-      sendto_one(sptr,":%s NOTICE %s Use stats I instead", me.name, parv[0]);
+      sendto_one(sptr,":%s NOTICE %s :Use stats I instead", me.name, parv[0]);
       break;
 
     case 'F' : case 'f' :
-      sendto_one(sptr,":%s NOTICE %s Use stats I instead", me.name, parv[0]);
+      sendto_one(sptr,":%s NOTICE %s :Use stats I instead", me.name, parv[0]);
       break;
 
     case 'G': case 'g' :
@@ -911,7 +911,7 @@ int ms_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       break;
  
     case 'B' : case 'b' :
-      sendto_one(sptr,":%s NOTICE %s Use stats I instead", me.name, parv[0]);
+      sendto_one(sptr,":%s NOTICE %s :Use stats I instead", me.name, parv[0]);
       break;
 
     case 'D': case 'd':
@@ -925,11 +925,11 @@ int ms_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       break;
 
     case 'E' : case 'e' :
-      sendto_one(sptr,":%s NOTICE %s Use stats I instead", me.name, parv[0]);
+      sendto_one(sptr,":%s NOTICE %s :Use stats I instead", me.name, parv[0]);
       break;
 
     case 'F' : case 'f' :
-      sendto_one(sptr,":%s NOTICE %s Use stats I instead", me.name, parv[0]);
+      sendto_one(sptr,":%s NOTICE %s :Use stats I instead", me.name, parv[0]);
       break;
 
     case 'G': case 'g' :

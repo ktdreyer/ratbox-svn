@@ -637,9 +637,9 @@ mo_kline(struct Client *cptr,
      * Not enough non-wild characters were found, assume
      * they are trying to kline *@*.
      */
-  #ifdef SLAVE_SERVERS
+#ifdef SLAVE_SERVERS
     if (!IsServer(sptr))
-  #endif
+#endif
       sendto_one(sptr,
         ":%s NOTICE %s :Please include at least %d non-wildcard characters with the user@host",
         me.name,
@@ -664,7 +664,7 @@ mo_kline(struct Client *cptr,
    * Don't do the CIDR conversion for now of course.
    */
 
-  if(!temporary_kline_time && (ip_kline = is_address(host, &ip, &ip_mask)))
+  if((ip_kline = is_address(host, &ip, &ip_mask)))
      {
        /*
         * XXX - ack
@@ -726,6 +726,11 @@ mo_kline(struct Client *cptr,
         current_date);
       DupString(aconf->passwd, buffer );
       aconf->hold = CurrentTime + temporary_kline_time_seconds;
+      if (ip_kline)
+	{
+	  aconf->ip = ip;
+	  aconf->ip_mask = ip_mask;
+	}
       add_temp_kline(aconf);
       rehashed = YES;
       dline_in_progress = NO;
@@ -789,11 +794,11 @@ mo_kline(struct Client *cptr,
     DupString(pptr->reason, reason ? reason : "No reason");
     DupString(pptr->when, current_date);
 
-  #ifdef SLAVE_SERVERS
+#ifdef SLAVE_SERVERS
     pptr->rcptr = rcptr;
-  #else
+#else
     pptr->rcptr = (struct Client *) NULL;
-  #endif
+#endif
 
     sendto_one(sptr,
       ":%s NOTICE %s :Added K-Line [%s@%s] (config file write delayed)",
@@ -1529,7 +1534,7 @@ mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if ( parc < 2 )
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-                 me.name, parv[0], "KLINE");
+                 me.name, parv[0], "DLINE");
       return 0;
     }
 

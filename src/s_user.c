@@ -120,7 +120,7 @@ int user_modes_from_c_to_bitmask[] =
   0,            /* L */
   0,            /* M */
   0,            /* N */
-  0,            /* O */
+  FLAGS_LOCOPS, /* O */
   0,            /* P */
   0,            /* Q */
   0,            /* R */
@@ -270,7 +270,7 @@ int show_lusers(struct Client *cptr, struct Client *sptr,
               s_count++;
               break;
             case STAT_CLIENT:
-              if (IsOper(acptr))
+              if (IsAnOper(acptr))
                 o_count++;
 #ifdef  SHOW_INVISIBLE_LUSERS
               if (MyConnect(acptr))
@@ -716,16 +716,6 @@ int register_user(struct Client *cptr, struct Client *sptr,
                                    reason,
                                    get_client_name(cptr, FALSE));
             }
-
-          if((find_q_line(nick, sptr->username, sptr->host)))
-            {
-              sendto_realops_flags(FLAGS_REJ,
-                                 "Quarantined nick [%s], dumping user %s",
-                                 nick,get_client_name(cptr, FALSE));
-      
-              ServerStats->is_ref++;      
-              return exit_client(cptr, sptr, &me, "quarantined nick");
-            }
         }
 #endif /* USE_IAUTH */
 
@@ -753,7 +743,7 @@ int register_user(struct Client *cptr, struct Client *sptr,
     {
       sendto_ops("Ghost killed: %s on invalid server %s",
                  sptr->name, sptr->user->server);
-      sendto_one(cptr,":%s KILL %s: %s (Ghosted, %s doesn't exist)",
+      sendto_one(cptr,":%s KILL %s :%s (Ghosted, %s doesn't exist)",
                  me.name, sptr->name, me.name, user->server);
       sptr->flags |= FLAGS_KILLED;
       return exit_client(NULL, sptr, &me, "Ghost");

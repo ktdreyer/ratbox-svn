@@ -192,7 +192,7 @@ int     m_join(struct Client *cptr,
        */
 
       if(cold_start && MyClient(sptr) && (*name != '&'))
-{
+	{
               sendto_one(sptr, form_str(ERR_UNAVAILRESOURCE),
                          me.name, parv[0], name);
               continue;
@@ -408,9 +408,7 @@ int     m_join(struct Client *cptr,
         }
       else
         {
-          sendto_one(sptr,
-                     ":%s %d %s %s :Sorry, cannot join channel.",
-                     me.name, i, parv[0], name);
+          sendto_one(sptr, me.name, parv[0], name);     
 #ifdef ANTI_SPAMBOT
           if(successful_join_count > 0)
             successful_join_count--;
@@ -834,9 +832,7 @@ int     ms_join(struct Client *cptr,
         }
       else
         {
-          sendto_one(sptr,
-                     ":%s %d %s %s :Sorry, cannot join channel.",
-                     me.name, i, parv[0], name);
+          sendto_one(sptr, form_str(ERR_UNAVAILRESOURCE), me.name, parv[0], name);
 #ifdef ANTI_SPAMBOT
           if(successful_join_count > 0)
             successful_join_count--;
@@ -1102,9 +1098,8 @@ int     mo_join(struct Client *cptr,
         }
       else
         {
-          sendto_one(sptr,
-                     ":%s %d %s %s :Sorry, cannot join channel.",
-                     me.name, i, parv[0], name);
+          sendto_one(sptr, form_str(ERR_UNAVAILRESOURCE),
+		     me.name, parv[0], name);
           continue;
         }
 

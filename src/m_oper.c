@@ -187,7 +187,7 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           if((int)aconf->hold)
             {
               sptr->umodes |= ((int)aconf->hold & ALL_UMODES); 
-              sendto_one(sptr, ":%s NOTICE %s:*** Oper flags set from conf",
+              sendto_one(sptr, ":%s NOTICE %s :*** Oper flags set from conf",
                          me.name,parv[0]);
             }
           else
@@ -204,7 +204,7 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
               if( !IsSetOperN(sptr) )
                 sptr->umodes &= ~FLAGS_NCHANGE;
               
-              sendto_one(sptr, ":%s NOTICE %s:*** Oper flags set from conf",
+              sendto_one(sptr, ":%s NOTICE %s :*** Oper flags set from conf",
                          me.name,parv[0]);
             }
           else
@@ -241,7 +241,7 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                  IsOper(sptr) ? 'O' : 'o');
       send_umode_out(cptr, sptr, old);
       sendto_one(sptr, form_str(RPL_YOUREOPER), me.name, parv[0]);
-      sendto_one(sptr, ":%s NOTICE %s:*** Oper privs are %s",me.name,parv[0],
+      sendto_one(sptr, ":%s NOTICE %s :*** Oper privs are %s",me.name,parv[0],
                  operprivs);
 
       SendMessageFile(sptr, &ConfigFileEntry.opermotd);
@@ -384,7 +384,7 @@ int mo_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           if((int)aconf->hold)
             {
               sptr->umodes |= ((int)aconf->hold & ALL_UMODES); 
-              sendto_one(sptr, ":%s NOTICE %s:*** Oper flags set from conf",
+              sendto_one(sptr, ":%s NOTICE %s :*** Oper flags set from conf",
                          me.name,parv[0]);
             }
           else
@@ -401,7 +401,7 @@ int mo_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
               if( !IsSetOperN(sptr) )
                 sptr->umodes &= ~FLAGS_NCHANGE;
               
-              sendto_one(sptr, ":%s NOTICE %s:*** Oper flags set from conf",
+              sendto_one(sptr, ":%s NOTICE %s :*** Oper flags set from conf",
                          me.name,parv[0]);
             }
           else
@@ -438,7 +438,7 @@ int mo_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                  IsOper(sptr) ? 'O' : 'o');
       send_umode_out(cptr, sptr, old);
       sendto_one(sptr, form_str(RPL_YOUREOPER), me.name, parv[0]);
-      sendto_one(sptr, ":%s NOTICE %s:*** Oper privs are %s",me.name,parv[0],
+      sendto_one(sptr, ":%s NOTICE %s :*** Oper privs are %s",me.name,parv[0],
                  operprivs);
 
       SendMessageFile(sptr, &ConfigFileEntry.opermotd);
@@ -581,7 +581,7 @@ int ms_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           if((int)aconf->hold)
             {
               sptr->umodes |= ((int)aconf->hold & ALL_UMODES); 
-              sendto_one(sptr, ":%s NOTICE %s:*** Oper flags set from conf",
+              sendto_one(sptr, ":%s NOTICE %s :*** Oper flags set from conf",
                          me.name,parv[0]);
             }
           else
@@ -598,7 +598,7 @@ int ms_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
               if( !IsSetOperN(sptr) )
                 sptr->umodes &= ~FLAGS_NCHANGE;
               
-              sendto_one(sptr, ":%s NOTICE %s:*** Oper flags set from conf",
+              sendto_one(sptr, ":%s NOTICE %s :*** Oper flags set from conf",
                          me.name,parv[0]);
             }
           else
@@ -635,7 +635,7 @@ int ms_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                  IsOper(sptr) ? 'O' : 'o');
       send_umode_out(cptr, sptr, old);
       sendto_one(sptr, form_str(RPL_YOUREOPER), me.name, parv[0]);
-      sendto_one(sptr, ":%s NOTICE %s:*** Oper privs are %s",me.name,parv[0],
+      sendto_one(sptr, ":%s NOTICE %s :*** Oper privs are %s",me.name,parv[0],
                  operprivs);
 
       SendMessageFile(sptr, &ConfigFileEntry.opermotd);

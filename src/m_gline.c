@@ -752,10 +752,10 @@ void flush_glines()
  * side effects - none
  */
 
-struct ConfItem *find_gkill(struct Client* cptr)
+struct ConfItem *find_gkill(struct Client* cptr, char* username)
 {
   assert(0 != cptr);
-  return (IsElined(cptr)) ? 0 : find_is_glined(cptr->host, cptr->username);
+  return (IsElined(cptr)) ? 0 : find_is_glined(cptr->host, username);
 }
 
 /*
@@ -1080,7 +1080,7 @@ static int majority_gline(struct Client *sptr,
                   (irccmp(gline_pending_ptr->oper_server2,oper_server)==0))
                 {
                   /* This oper or server has already "voted" */
-                  sendto_ops("oper or server has already voted");
+                  sendto_realops("oper or server has already voted");
                   return NO;
                 }
 

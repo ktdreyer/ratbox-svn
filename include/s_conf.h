@@ -24,6 +24,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.16  2000/09/29 17:16:55  ejb
+ * merged toot's patch to resync with -6rc4
+ *
  * Revision 7.15  2000/08/13 22:35:00  ejb
  * Large commit, folding in a number of changes i made over the weekend.
  * - add n!u@h for topic_info ala ircnet.
@@ -476,6 +479,7 @@ extern struct QlineItem *q_conf;
 extern struct ConfItem* ConfigItemList;        /* GLOBAL - conf list head */
 extern int              specific_virtual_host; /* GLOBAL - used in s_bsd.c */
 extern struct ConfItem *temporary_klines;
+extern struct ConfItem *temporary_ip_klines;
 extern ConfigFileEntryType ConfigFileEntry;    /* GLOBAL - defined in ircd.c */
 
 extern void clear_ip_hash_table(void);
@@ -554,6 +558,7 @@ extern int safe_write(struct Client *, const char *, int ,char *);
 extern void add_temp_kline(struct ConfItem *);
 extern  void    flush_temp_klines(void);
 extern  void    report_temp_klines(struct Client *);
+extern  void    show_temp_klines(struct Client *, struct ConfItem *);
 extern  int     is_address(char *,unsigned long *,unsigned long *); 
 extern  int     rehash (struct Client *, struct Client *, int);
 

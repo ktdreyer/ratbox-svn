@@ -143,7 +143,7 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
    * parc == 9 on a normal TS style server-to-server NICK
    *      introduction
    */
-  if ((parc > 4) && (parc < 9))
+  if (IsServer(sptr) && (parc < 9))
     {
       /*
        * We got the wrong number of params. Someone is trying
@@ -153,11 +153,11 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        * then its worth, just note the problem, and continue
        * -Dianora
        */
-      sendto_realops("BAD NICK: %s[%s@%s] on %s (from %s)", parv[1],
+      ts_warn("BAD NICK: %s[%s@%s] on %s (from %s)", parv[1],
                      (parc >= 6) ? parv[5] : "-",
                      (parc >= 7) ? parv[6] : "-",
                      (parc >= 8) ? parv[7] : "-", parv[0]);
-      
+      return 0;
      }
 
   if ((parc >= 7) && (!strchr(parv[6], '.')))
@@ -167,8 +167,9 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        * isn't a single dot in the hostname, which is suspicious.
        * Don't fret about it just kill it. - ThemBones
        */
-      sendto_realops("BAD HOSTNAME: %s[%s@%s] on %s (from %s)",
+      ts_warn("BAD HOSTNAME: %s[%s@%s] on %s (from %s)",
                      parv[0], parv[5], parv[6], parv[7], parv[0]);
+      return 0;
     }
 
   fromTS = (parc > 6);
@@ -224,15 +225,15 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
-  if(MyConnect(sptr) && !IsServer(sptr) &&
-     !IsAnOper(sptr) && sptr->user &&
+  if (MyConnect(sptr) && !IsServer(sptr) && !IsAnOper(sptr) &&
      find_q_line(nick, sptr->username, sptr->host)) 
     {
       sendto_realops_flags(FLAGS_REJ,
-                         "Quarantined nick [%s], dumping user %s",
+                         "Quarantined nick [%s] from user %s",
                          nick,get_client_name(cptr, HIDE_IP));
-
-      return exit_client(cptr, sptr, &me, "quarantined nick");
+      sendto_one(sptr, form_str(ERR_ERRONEUSNICKNAME),
+		 me.name, parv[0], parv[1]);
+      return 0;
     }
 
   /* if quiet_on_ban is set, don't allow nick changes if the user
@@ -619,7 +620,7 @@ static int nickkilldone(struct Client *cptr, struct Client *sptr, int parc,
       else
         {
           newts = sptr->tsinfo = CurrentTime;
-          ts_warn("Remote nick %s introduced without a TS", nick);
+          ts_warn("Remote nick %s (%s) introduced without a TS", nick, parv[0]);
         }
       /* copy the nick in place */
       (void)strcpy(sptr->name, nick);
