@@ -1,3 +1,8 @@
+*** 20010622_1 by jdc
+- modules/m_gline.c: time_t warning (moved to %lu with a typecast).
+
+
+
 *** 20010621_4 by leeh
 - added a missing #ifdef PACE_CONNECT
 
