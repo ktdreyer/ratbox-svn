@@ -1,3 +1,8 @@
+*** 20001113_2 by db
+- use more common functions whenever possible. grrr 
+
+
+
 *** 20001113_1 by db
 - cleaned up m_whois.c a bit more
 - moved find_user_link from list.c into channel.c thats the only place it
