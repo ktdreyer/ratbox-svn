@@ -1,3 +1,7 @@
+*** 19990904_1 by tomh
+change (start < end && IsEol(*start)) to (start < end)
+
+
 *** 19990903_2 by wnder
 IAuth now does dns queries
 
