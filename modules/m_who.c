@@ -41,11 +41,10 @@
 #include "modules.h"
 
 static void m_who(struct Client*, struct Client*, int, char**);
-static void ms_who(struct Client*, struct Client*, int, char**);
 
 struct Message who_msgtab = {
   "WHO", 0, 0, 2, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_who, ms_who, m_who}
+  {m_unregistered, m_who, m_ignore, m_who}
 };
 
 #ifndef STATIC_MODULES
@@ -176,8 +175,6 @@ static void m_who(struct Client *client_p,
       char *chname=NULL;
       int isinvis = 0;
 
-      if(IsServer(client_p))
-	client_burst_if_needed(client_p,target_p);
 
       isinvis = IsInvisible(target_p);
       for (lp = target_p->user->channel.head; lp; lp = lp->next)
@@ -579,27 +576,3 @@ static void do_who(struct Client *source_p,
     }
 }
 
-/*
-** ms_who
-**      parv[0] = sender prefix
-**      parv[1] = nickname mask list
-**      parv[2] = additional selection flag, only 'o' for now.
-*/
-static void ms_who(struct Client *client_p,
-                  struct Client *source_p,
-                  int parc,
-                  char *parv[])
-{
-  /* If its running as a hub, and linked with lazy links
-   * then allow leaf to use normal client m_who()
-   * other wise, ignore it.
-   */
-
-  if( ServerInfo.hub )
-    {
-      if(!IsCapable(client_p->from,CAP_LL))
-	return;
-    }
-
-  m_who(client_p,source_p,parc,parv);
-}

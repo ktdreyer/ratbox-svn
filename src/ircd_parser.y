@@ -42,7 +42,7 @@
 #include "ircdauth.h"
 #include "memory.h"
 #include "modules.h"
-#include "s_serv.h" /* for CAP_LL / IsCapable */
+#include "s_serv.h" /*  IsCapable */
 #include "hostmask.h"
 #include "send.h"
 #include "listener.h"
@@ -71,7 +71,6 @@ static struct ConfItem *hub_confs;
 static struct ConfItem *leaf_confs;
 static struct ConfItem *yy_aconf_next;
 
-static dlink_node *node;
 
 static char  *listener_address;
 
@@ -157,7 +156,6 @@ int   class_redirport_var;
 %token  KLINE_WITH_REASON
 %token  KNOCK_DELAY
 %token  KNOCK_DELAY_CHANNEL
-%token  LAZYLINK
 %token  LEAF_MASK
 %token  LINKS_DELAY
 %token  LISTEN
@@ -554,39 +552,12 @@ serverinfo_max_buffer: T_MAX_BUFFER '=' NUMBER ';'
 
 serverinfo_hub:         HUB '=' TYES ';' 
   {
-    /* Don't become a hub if we have a lazylink active. */
-    if (!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
-    {
-      sendto_realops_flags(FLAGS_ALL, L_ALL,
-        "Ignoring config file line hub = yes; due to active LazyLink (%s)",
-        uplink->name);
-    }
-    else
-    {
       ServerInfo.hub = 1;
       uplink = NULL;
-    }
   }
                         |
                         HUB '=' TNO ';'
   {
-    /* Don't become a leaf if we have a lazylink active. */
-    if (ServerInfo.hub)
-    {
-      ServerInfo.hub = 0;
-      for(node = serv_list.head; node; node = node->next)
-      {
-        if(MyConnect((struct Client *)node->data) &&
-           IsCapable((struct Client *)node->data,CAP_LL))
-        {
-          sendto_realops_flags(FLAGS_ALL, L_ALL,
-            "Ignoring config file line hub = no; due to active LazyLink (%s)",
-            ((struct Client *)node->data)->name);
-          ServerInfo.hub = 1;
-        }
-      }
-    }
-    else
       ServerInfo.hub = 0;
   } ;
 
@@ -1503,7 +1474,7 @@ connect_items:  connect_items connect_item |
 
 connect_item:   connect_name | connect_host | connect_send_password |
                 connect_accept_password | connect_port | connect_aftype | 
- 		connect_fakename | connect_lazylink | connect_hub_mask | 
+ 		connect_fakename | connect_hub_mask | 
 		connect_leaf_mask | connect_class | connect_auto | 
 		connect_encrypted | connect_compressed | connect_cryptlink |
 		connect_rsa_public_key_file | connect_cipher_preference |
@@ -1563,16 +1534,6 @@ connect_fakename: FAKENAME '=' QSTRING ';'
     MyFree(yy_aconf->fakename);
     DupString(yy_aconf->fakename, yylval.string);
  };
-
-connect_lazylink:       LAZYLINK '=' TYES ';'
-  {
-    yy_aconf->flags |= CONF_FLAGS_LAZY_LINK;
-  }
-                        |
-                        LAZYLINK '=' TNO ';'
-  {
-    yy_aconf->flags &= ~CONF_FLAGS_LAZY_LINK;
-  };
 
 connect_encrypted:       ENCRYPTED '=' TYES ';'
   {

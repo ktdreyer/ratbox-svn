@@ -72,7 +72,7 @@ static void m_userhost(struct Client *client_p,
   struct Client *target_p;
   char response[NICKLEN*2+USERLEN+HOSTLEN+30];
   char *t;
-  int i, n;               /* loop counter */
+  int i;               /* loop counter */
   int cur_len;
   int rl;
 
@@ -127,23 +127,6 @@ static void m_userhost(struct Client *client_p,
 	  else
 	    break;
 	}
-      else if ( !ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL) )
-        {
-          t = buf;
-          for( n = 0; n < 5; n++ )
-          {
-            if( parv[n+1] )
-            {
-              rl = ircsprintf(t, "%s ", parv[n+1]);
-              t += rl;
-            }
-            else
-              break;
-          }
-          /* Relay upstream, and let hub reply */
-          sendto_one(uplink, ":%s USERHOST %s", parv[0], buf );
-          return;
-        }
     }
 
   sendto_one(source_p, "%s", buf);

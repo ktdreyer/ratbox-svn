@@ -559,7 +559,6 @@ load_all_modules(int warn)
 	mod_add_cmd(&admin_msgtab);
 	mod_add_cmd(&away_msgtab);
 	mod_add_cmd(&capab_msgtab);
-	mod_add_cmd(&cburst_msgtab);
 	mod_add_cmd(&client_msgtab);
 	mod_add_cmd(&close_msgtab);
 	mod_add_cmd(&connect_msgtab);
@@ -585,8 +584,6 @@ load_all_modules(int warn)
 	mod_add_cmd(&knockll_msgtab);
 	mod_add_cmd(&links_msgtab);
 	mod_add_cmd(&list_msgtab);
-	mod_add_cmd(&lljoin_msgtab);
-	mod_add_cmd(&llnick_msgtab);
 	mod_add_cmd(&locops_msgtab);
 	mod_add_cmd(&lusers_msgtab);
 	mod_add_cmd(&privmsg_msgtab);
@@ -594,7 +591,6 @@ load_all_modules(int warn)
 	mod_add_cmd(&mode_msgtab);
 	mod_add_cmd(&motd_msgtab);
 	mod_add_cmd(&names_msgtab);
-	mod_add_cmd(&nburst_msgtab);
 	mod_add_cmd(&nick_msgtab);
 	mod_add_cmd(&oper_msgtab);
 	mod_add_cmd(&operwall_msgtab);

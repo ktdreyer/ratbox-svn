@@ -97,9 +97,9 @@ kill_client(struct Client *client_p, struct Client *diedie,
             const char *pattern, ... ) AFP(3, 4);
 
 extern void
-kill_client_ll_serv_butone(struct Client *one, struct Client *source_p,
+kill_client_serv_butone(struct Client *one, struct Client *source_p,
                            const char *pattern, ...) AFP(3, 4);
-
+                           
 
 #define ALL_MEMBERS  0
 #define NON_CHANOPS  1

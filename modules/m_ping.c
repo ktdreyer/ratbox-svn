@@ -100,12 +100,6 @@ static void m_ping(struct Client *client_p,
       /* use the direct link for LL checking */
       target_p = target_p->from;
 
-      if(ServerInfo.hub && IsCapable(target_p, CAP_LL))
-      {
-        if((source_p->lazyLinkClientExists & target_p->localClient->serverMask) == 0)
-          client_burst_if_needed(target_p, source_p);
-      }
-
       sendto_one(target_p,":%s PING %s :%s", parv[0],
                  origin, destination);
     }

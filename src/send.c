@@ -203,13 +203,6 @@ send_linebuf_remote(struct Client *to, struct Client *from,
   if(to->from)
     to = to->from;
 
-  if(ServerInfo.hub && IsCapable(to, CAP_LL))
-  {
-    if(((from->lazyLinkClientExists &
-         to->localClient->serverMask) == 0))
-      client_burst_if_needed(to, from);
-  }
-
   /* Optimize by checking if (from && to) before everything */
   /* we set to->from up there.. */
 
@@ -670,35 +663,6 @@ sendto_server(struct Client *one, struct Client *source_p,
     if ((client_p->localClient->caps & nocaps) != 0)
       continue;
 
-    if (ServerInfo.hub && IsCapable(client_p, CAP_LL))
-    {
-      /* check LL channel */
-      if (chptr &&
-          ((chptr->lazyLinkChannelExists &
-            client_p->localClient->serverMask) == 0))
-      {
-        /* Only introduce the channel if we really will send this message */
-        if (!(llflags & LL_ICLIENT) && source_p &&
-            ((source_p->lazyLinkClientExists &
-              client_p->localClient->serverMask) == 0))
-          continue; /* we can't introduce the unknown source_p, skip */
-
-        if (llflags & LL_ICHAN)
-          burst_channel(client_p, chptr);
-        else
-          continue; /* we can't introduce the unknown chptr, skip */
-      }
-      /* check LL client */
-      if (source_p &&
-          ((source_p->lazyLinkClientExists &
-            client_p->localClient->serverMask) == 0))
-      {
-        if (llflags & LL_ICLIENT)
-          client_burst_if_needed(client_p,source_p);
-        else
-          continue; /* we can't introduce the unknown source_p, skip */
-      }
-    }
     send_linebuf(client_p, &linebuf);
   }
   linebuf_donebuf(&linebuf);
@@ -1284,7 +1248,7 @@ kill_client(struct Client *client_p,
 
 
 /*
- * kill_client_ll_serv_butone
+ * kill_client_serv_butone
  *
  * inputs	- pointer to client to not send to
  *		- pointer to client to kill
@@ -1295,7 +1259,7 @@ kill_client(struct Client *client_p,
  *		  client being unknown to leaf, as in lazylink...
  */
 void
-kill_client_ll_serv_butone(struct Client *one, struct Client *source_p,
+kill_client_serv_butone(struct Client *one, struct Client *source_p,
                            const char *pattern, ...)
 {
   va_list args;
@@ -1330,24 +1294,10 @@ kill_client_ll_serv_butone(struct Client *one, struct Client *source_p,
     if (one && (client_p == one->from))
       continue;
 
-    if (IsCapable(client_p,CAP_LL) && ServerInfo.hub)
-    {
-      if((source_p->lazyLinkClientExists &
-          client_p->localClient->serverMask) != 0)
-      {
-        if (have_uid && IsCapable(client_p, CAP_UID))
-          send_linebuf(client_p, &linebuf_uid);
-        else
-          send_linebuf(client_p, &linebuf_nick);
-      }
-    }
-    else
-    {
       if (have_uid && IsCapable(client_p, CAP_UID))
         send_linebuf(client_p, &linebuf_uid);
       else
         send_linebuf(client_p, &linebuf_nick);
-    }
   }
 
   if (have_uid)

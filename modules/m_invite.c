@@ -180,18 +180,6 @@ m_invite(struct Client *client_p,
                  target_p->name, target_p->user->away);
   }
 
-  if (!MyConnect(target_p) && ServerInfo.hub &&
-      IsCapable(target_p->from, CAP_LL))
-  {
-    /* target_p is connected to a LL leaf, connected to us */
-    if (IsPerson(source_p))
-      client_burst_if_needed(target_p->from, source_p);
-
-    if ((chptr->lazyLinkChannelExists &
-         target_p->from->localClient->serverMask) == 0)
-      burst_channel(target_p->from, chptr);
-  }
-
   if (MyConnect(target_p))
   {
     if (chop)

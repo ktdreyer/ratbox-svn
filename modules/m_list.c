@@ -42,14 +42,13 @@
 
 
 static void m_list(struct Client*, struct Client*, int, char**);
-static void ms_list(struct Client*, struct Client*, int, char**);
 static void mo_list(struct Client*, struct Client*, int, char**);
 static int list_all_channels(struct Client *);
 static void list_one_channel(struct Client *,struct Channel *);
 
 struct Message list_msgtab = {
   "LIST", 0, 0, 0, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_list, ms_list, mo_list}
+  {m_unregistered, m_list, m_ignore, mo_list}
 };
 #ifndef STATIC_MODULES
 
@@ -94,16 +93,6 @@ static void m_list(struct Client *client_p,
     last_used = CurrentTime;
 
 
-  /* If its a LazyLinks connection, let uplink handle the list */
-  if( uplink && IsCapable(uplink,CAP_LL) )
-    {
-      if(parc < 2)
-	sendto_one( uplink, ":%s LIST", source_p->name );
-      else
-	sendto_one( uplink, ":%s LIST %s", source_p->name, parv[1] );
-      return;
-    }
-
   /* If no arg, do all channels *whee*, else just one channel */
   if (parc < 2 || BadPtr(parv[1]))
     {
@@ -127,19 +116,6 @@ static void mo_list(struct Client *client_p,
                    char *parv[])
 {
 
-  /* If its a LazyLinks connection, let uplink handle the list
-   * even for opers!
-   */
-
-  if( uplink && IsCapable( uplink, CAP_LL) )
-    {
-      if(parc < 2)
-	sendto_one( uplink, ":%s LIST", source_p->name );
-      else
-	sendto_one( uplink, ":%s LIST %s", source_p->name, parv[1] );
-      return;
-    }
-
   /* If no arg, do all channels *whee*, else just one channel */
   if (parc < 2 || BadPtr(parv[1]))
     {
@@ -151,33 +127,6 @@ static void mo_list(struct Client *client_p,
     }
 }
 
-/*
-** ms_list
-**      parv[0] = sender prefix
-**      parv[1] = channel
-*/
-static void ms_list(struct Client *client_p,
-                   struct Client *source_p,
-                   int parc,
-                   char *parv[])
-{
-  /* Only allow remote list if LazyLink request */
-
-  if( ServerInfo.hub )
-    {
-      if(!IsCapable(client_p->from,CAP_LL) && !MyConnect(source_p))
-	return;
-
-      if (parc < 2 || BadPtr(parv[1]))
-	{
-	  list_all_channels(source_p);
-	}
-      else
-	{
-	  list_named_channel(source_p,parv[1]);
-	}
-    }
-}
 
 /*
  * list_all_channels

@@ -114,20 +114,6 @@ static void m_knock(struct Client *client_p,
       return;
     }
 
-  /* a remote KNOCKLL request, check we're capable of handling it.. */
-  if(!MyConnect(source_p))
-  {
-    if(!ServerInfo.hub || !IsCapable(client_p, CAP_LL) || parc < 3)
-      return;
-    else
-    {
-      /* set sockhost to parv[2] */
-      sockhost = parv[2];
-      
-      parv[2] = NULL;
-      parc--;
-    }
-  }
     
   if(IsClient(source_p))
     parse_knock_local(client_p, source_p, parc, parv, sockhost);
@@ -186,19 +172,8 @@ static void parse_knock_local(struct Client *client_p,
 
   if(!(chptr = hash_find_channel(name)))
   {
-    if(!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
-    {
-      sendto_one(uplink, ":%s KNOCKLL %s %s",
-                 source_p->name, parv[1],
-		 IsIPSpoof(source_p) ? "255.255.255.255" :
-		 source_p->localClient->sockhost);
-    }
-    else
-    {
-      sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL), me.name, parv[0],
-                 name);
-    }
-
+    sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL), me.name, parv[0],
+               name);
     return;
   }
 

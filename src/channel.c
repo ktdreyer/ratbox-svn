@@ -542,20 +542,7 @@ cleanup_channels(void *unused)
     {
       if((chptr->users_last + ConfigChannel.persist_time) < CurrentTime)
       {
-	if(uplink && IsCapable(uplink, CAP_LL))
-	   sendto_one(uplink, ":%s DROP %s", me.name, chptr->chname);
 	destroy_channel(chptr);
-      }
-    }
-    else
-    {
-      if ((CurrentTime - chptr->users_last >= CLEANUP_CHANNELS_TIME))
-      {
-        if (uplink != NULL && IsCapable(uplink, CAP_LL) && (chptr->locusers == 0))
-        {
-          sendto_one(uplink, ":%s DROP %s", me.name, chptr->chname);
-          destroy_channel(chptr);
-        }
       }
     }
   }
@@ -572,7 +559,6 @@ static void
 destroy_channel(struct Channel *chptr)
 {
   dlink_node *ptr;
-  dlink_node *m;
 
   /* Walk through all the dlink's pointing to members of this channel,
    * then walk through each client found from each dlink, removing
@@ -628,17 +614,6 @@ destroy_channel(struct Channel *chptr)
 
 
   del_from_channel_hash_table(chptr->chname, chptr);
-  if (ServerInfo.hub == 1)
-  {
-    for (m = lazylink_channels.head; m; m = m->next)
-    {
-      if (m->data != chptr)
-        continue;
-      dlinkDelete(m, &lazylink_channels);
-      free_dlink_node(m);
-      break;
-    }
-  }
   BlockHeapFree(channel_heap, chptr);
   Count.chan--;
 }

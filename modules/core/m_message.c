@@ -259,18 +259,11 @@ build_target_list(int p_or_n, char *command, struct Client *client_p,
                   char *text)
 {
   int type;
-  char *p, *nick, *target_list, ncbuf[BUFSIZE];
+  char *p, *nick, *target_list;
   struct Channel *chptr=NULL;
   struct Client *target_p;
 
-  /* Sigh, we can't mutilate parv[1] incase we need it to send to a hub */
-  if (!ServerInfo.hub && (uplink != NULL) && IsCapable(uplink, CAP_LL))
-  {
-    strncpy(ncbuf, nicks_channels, BUFSIZE);
-    target_list = ncbuf;
-  }
-  else
-    target_list = nicks_channels; /* skip strcpy for non-lazyleafs */
+  target_list = nicks_channels; /* skip strcpy for non-lazyleafs */
 
   ntargets = 0;
 
@@ -302,14 +295,6 @@ build_target_list(int p_or_n, char *command, struct Client *client_p,
           targets[ntargets].ptr = (void *)chptr;
           targets[ntargets++].type = ENTITY_CHANNEL;
         }
-      }
-      else
-      {
-        if (!ServerInfo.hub && (uplink != NULL) && IsCapable(uplink, CAP_LL))
-          return -1;
-        else if (p_or_n != NOTICE)
-          sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name,
-                     source_p->name, nick);
       }
       continue;
     }
@@ -386,28 +371,12 @@ build_target_list(int p_or_n, char *command, struct Client *client_p,
 	      targets[ntargets++].flags = type;
 	    }
 	}
-      else
-	{
-	  if (!ServerInfo.hub && (uplink != NULL) && IsCapable(uplink, CAP_LL))
-	    return -1;
-	  else if (p_or_n != NOTICE)
-	    sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name,
-		       source_p->name, nick);
-	}
       continue;
     }
 
     if(IsOper(source_p) && ((*nick == '$') || strchr(nick, '@')))
     {
       handle_opers(p_or_n, command, client_p, source_p, nick, text);
-    }
-    else
-    {
-      if (!ServerInfo.hub && (uplink != NULL) && IsCapable(uplink, CAP_LL))
-        return -1;
-      else if(p_or_n != NOTICE)
-        sendto_one(source_p, form_str(ERR_NOSUCHNICK),
-	           me.name, source_p->name, nick);
     }
     /* continue; */
   }

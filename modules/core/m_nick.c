@@ -455,10 +455,7 @@ static void ms_client(struct Client *client_p, struct Client *source_p,
 			 target_p->name, target_p->from->name,
 			 client_p->name);
 
-    if(ServerInfo.hub && IsCapable(client_p, CAP_LL))
-      add_lazylinkclient(client_p, source_p);
-
-    kill_client_ll_serv_butone(NULL, target_p, "%s (ID collision)",
+    kill_client_serv_butone(NULL, target_p, "%s (ID collision)",
 		               me.name);
 
     ServerStats->is_kill++;
@@ -518,7 +515,7 @@ static int check_clean_nick(struct Client *client_p, struct Client *source_p,
     /* bad nick change */
     if(source_p != client_p)
     {
-      kill_client_ll_serv_butone(client_p, source_p,
+      kill_client_serv_butone(client_p, source_p,
                                  "%s (Bad Nickname)",
 				 me.name);
       source_p->flags |= FLAGS_KILLED;
@@ -677,10 +674,6 @@ nick_from_server(struct Client *client_p, struct Client *source_p, int parc,
     source_p = make_client(client_p);
     add_client_to_list(source_p);
 
-    /* We don't need to introduce leafs clients back to them! */
-    if (ConfigFileEntry.hub && IsCapable(client_p, CAP_LL))
-      add_lazylinkclient(client_p, source_p);
-
     if(parc > 2)
       source_p->hopcount = atoi(parv[2]);
     if(newts)
@@ -769,10 +762,6 @@ client_from_server(struct Client *client_p, struct Client *source_p, int parc,
   source_p = make_client(client_p);
   add_client_to_list(source_p);
 
-  /* We don't need to introduce leafs clients back to them! */
-  if (ConfigFileEntry.hub && IsCapable(client_p, CAP_LL))
-    add_lazylinkclient(client_p, source_p);
-
   source_p->hopcount = atoi(parv[2]);
   source_p->tsinfo = newts;
 
@@ -819,10 +808,7 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
 			   target_p->name, target_p->from->name,
 			   client_p->name);
       
-      if(ServerInfo.hub && IsCapable(client_p,CAP_LL))
-        add_lazylinkclient(client_p, target_p);
-
-      kill_client_ll_serv_butone(NULL, target_p,
+      kill_client_serv_butone(NULL, target_p,
                                  "%s (Nick collision (new))",
 				 me.name);
       ServerStats->is_kill++;
@@ -846,7 +832,6 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
       if ((sameuser && newts < target_p->tsinfo) ||
          (!sameuser && newts > target_p->tsinfo))
       {
-        client_burst_if_needed(client_p, target_p);
 	return 0;
       }
       else
@@ -869,7 +854,7 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
         /* if it came from a LL server, itd have been source_p,
 	 * so we dont need to mark target_p as known
 	 */
-	kill_client_ll_serv_butone(source_p, target_p,
+	kill_client_serv_butone(source_p, target_p,
 	                           "%s (Nick collision (new))",
 				   me.name);
 
@@ -900,16 +885,13 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
                  me.name, target_p->name, target_p->name);
 
       /* if we got the message from a LL, it knows about source_p */
-      kill_client_ll_serv_butone(NULL, source_p,
+      kill_client_serv_butone(NULL, source_p,
                                   "%s (Nick change collision)",
 				  me.name);
 
       ServerStats->is_kill++;
-      /* If we got the message from a LL, ensure it gets the kill */
-      if(ServerInfo.hub && IsCapable(client_p,CAP_LL))
-        add_lazylinkclient(client_p, target_p);
 
-      kill_client_ll_serv_butone(NULL, target_p,
+      kill_client_serv_butone(NULL, target_p,
                                  "%s (Nick change collision)",
 				 me.name);
 
@@ -941,7 +923,7 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
         ServerStats->is_kill++;
 
 	/* this won't go back to the incoming link, so LL doesnt matter */
-        kill_client_ll_serv_butone(client_p, source_p,
+        kill_client_serv_butone(client_p, source_p,
 	                           "%s (Nick change collision)",
 				   me.name);
 
@@ -966,7 +948,7 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
 			      target_p->name, target_p->from->name,
 			      client_p->name);
   			      
-       kill_client_ll_serv_butone(source_p, target_p,
+       kill_client_serv_butone(source_p, target_p,
                                  "%s (Nick collision)",
 				 me.name);
 

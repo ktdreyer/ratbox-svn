@@ -208,37 +208,6 @@ static void mr_server(struct Client *client_p, struct Client *source_p,
       return;
     }
 
-  if(ServerInfo.hub && IsCapable(client_p, CAP_LL))
-    {
-      if(IsCapable(client_p, CAP_HUB))
-        {
-          ClearCap(client_p,CAP_LL);
-          sendto_realops_flags(FLAGS_ALL, L_ALL,
-               "*** LazyLinks to a hub from a hub, thats a no-no.");
-        }
-      else
-        {
-          client_p->localClient->serverMask = nextFreeMask();
-
-          if(!client_p->localClient->serverMask)
-            {
-              sendto_realops_flags(FLAGS_ALL, L_ALL,
-                                   "serverMask is full!");
-              /* try and negotiate a non LL connect */
-              ClearCap(client_p,CAP_LL);
-            }
-        }
-    }
-  else if (IsCapable(client_p, CAP_LL))
-    {
-      if(!IsCapable(client_p, CAP_HUB))
-        {
-          ClearCap(client_p,CAP_LL);
-          sendto_realops_flags(FLAGS_ALL, L_ALL,
-               "*** LazyLinks to a leaf from a leaf, thats a no-no.");
-        }
-    }
-
   /*
    * if we are connecting (Handshake), we already have the name from the
    * C:line in client_p->name
@@ -408,7 +377,7 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
    */
 
   /* Ok, check client_p can hub the new server, and make sure it's not a LL */
-  if (!hlined || (IsCapable(client_p, CAP_LL) && !IsCapable(client_p, CAP_HUB)))
+  if (!hlined)
     {
       /* OOOPs nope can't HUB */
       sendto_realops_flags(FLAGS_ALL, L_ADMIN, "Non-Hub link %s introduced %s.",

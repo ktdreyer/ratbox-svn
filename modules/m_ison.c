@@ -37,15 +37,11 @@
 
 #include <string.h>
 
-static int do_ison(struct Client *up, struct Client *source_p,
-                   int parc, char *parv[]);
-
 static void m_ison(struct Client*, struct Client*, int, char**);
-static void ms_ison(struct Client*, struct Client*, int, char**);
 
 struct Message ison_msgtab = {
   "ISON", 0, 0, 1, 1, MFLG_SLOW, 0,
-  {m_unregistered, m_ison, ms_ison, m_ison}
+  {m_unregistered, m_ison, m_ignore, m_ison}
 };
 
 #ifndef STATIC_MODULES
@@ -80,32 +76,6 @@ static char buf2[BUFSIZE];
 static void m_ison(struct Client *client_p, struct Client *source_p,
                   int parc, char *parv[])
 {
-  struct Client *up = NULL;
-
-  if (!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
-    up = uplink;
-
-  do_ison(up, source_p, parc, parv);
-}
-
-/*
- * ms_ison added by David Taylor 04/01/2000 to handle relayed ISON requests.
- * It's slightly less bandwidth efficient than a normal ISON, but it's
- * only ever going to get relayed over one link...
- * Plus, we'll only ever relay each nick once in it's lifetime, if it
- * exists...
- * ISON :nicklist
- */
-static void ms_ison(struct Client *client_p, struct Client *source_p,
-                   int parc, char *parv[])
-{
-  if (ServerInfo.hub && IsCapable(client_p, CAP_LL))
-    do_ison(NULL, source_p, parc, parv);
-}
-
-static int do_ison(struct Client *up, struct Client *source_p,
-                   int parc, char *parv[])
-{
   struct Client *target_p;
   char *nick;
   char *p;
@@ -113,7 +83,6 @@ static int do_ison(struct Client *up, struct Client *source_p,
   int len;
   int i;
   int done = 0;
-  int relay_to_hub = 0;
 
   current_insert_point2 = buf2;
   *buf2 = '\0';
@@ -146,31 +115,6 @@ static int do_ison(struct Client *up, struct Client *source_p,
           break;
         }
       }
-      if (up)
-      {
-        /* Build up a single list, for use if we relay.. */
-        len = strlen(nick);
-        if((current_insert_point2 + len + 5) < (buf2 + sizeof(buf2)))
-        {
-          memcpy((void *)current_insert_point2,
-                 (void *)nick, len);
-          current_insert_point2 += len;
-          *current_insert_point2++ = ' ';
-        }
-        if (!target_p)
-        {
-          /*
-           * XXX Ick. we need to ask our hub if nick is online.
-           * it's probably safest to relay the whole command,
-           * unless we can answer it fully ourselves.
-           * -davidt
-           */
-          relay_to_hub = 1;
-
-          /* Also cache info about nick */
-          sendto_one(up, ":%s NBURST %s", me.name, nick);
-        }
-      }
     }
     if(done)
       break;
@@ -183,10 +127,6 @@ static int do_ison(struct Client *up, struct Client *source_p,
   *current_insert_point = '\0';
   *current_insert_point2 = '\0'; 
   
-  if (relay_to_hub)
-    sendto_one(up, ":%s ISON :%s", source_p->name, buf2);
-  else
-    sendto_one(source_p, "%s", buf);
+  sendto_one(source_p, "%s", buf);
 
-  return 0;
 }

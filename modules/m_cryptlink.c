@@ -369,36 +369,6 @@ static void cryptlink_serv(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  if (ServerInfo.hub && IsCapable(client_p, CAP_LL))
-  {
-      if(IsCapable(client_p, CAP_HUB))
-      {
-          ClearCap(client_p,CAP_LL);
-          sendto_realops_flags(FLAGS_ALL, L_ALL,
-               "*** LazyLinks to a hub from a hub, thats a no-no.");
-      }
-      else
-      {
-          client_p->localClient->serverMask = nextFreeMask();
-
-          if(!client_p->localClient->serverMask)
-          {
-              sendto_realops_flags(FLAGS_ALL, L_ALL,
-                                   "serverMask is full!");
-              /* try and negotiate a non LL connect */
-              ClearCap(client_p,CAP_LL);
-          }
-      }
-  }
-  else if (IsCapable(client_p, CAP_LL))
-  {
-      if (!IsCapable(client_p, CAP_HUB))
-      {
-        ClearCap(client_p,CAP_LL);
-        sendto_realops_flags(FLAGS_ALL, L_ALL,
-          "*** LazyLinks to a leaf from a leaf, thats a no-no.");
-      }
-  }
 
   aconf = find_conf_name(&client_p->localClient->confs,
                          name, CONF_SERVER);

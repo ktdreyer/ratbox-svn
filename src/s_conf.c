@@ -302,8 +302,6 @@ report_configured_links(struct Client* source_p, int mask)
 	      *s++ = 'A';
 	    if (tmp->flags & CONF_FLAGS_CRYPTLINK)
 	      *s++ = 'C';
-	    if (tmp->flags & CONF_FLAGS_LAZY_LINK)
-	      *s++ = 'L';
 	    if (tmp->flags & CONF_FLAGS_COMPRESSED)
 	      *s++ = 'Z';
 	    if (tmp->fakename)

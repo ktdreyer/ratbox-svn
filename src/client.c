@@ -1319,9 +1319,7 @@ int exit_client(
       if (IsServer(source_p))
         {
           Count.myserver--;
-	  if(ServerInfo.hub)
-	    remove_lazylink_flags(source_p->localClient->serverMask);
-	  else
+	  if(!ServerInfo.hub)
 	    uplink = NULL;
         }
 
@@ -1641,12 +1639,6 @@ int change_local_nick(struct Client *client_p, struct Client *source_p,
 	{
 	  add_history(source_p, 1);
 	  
-	  /* Only hubs care about lazy link nicks not being sent on yet
-	   * lazylink leafs/leafs always send their nicks up to hub,
-	   * hence must always propogate nick changes.
-	   * hubs might not propogate a nick change, if the leaf
-	   * does not know about that client yet.
-	   */
           sendto_server(client_p, source_p, NULL, NOCAPS, NOCAPS,
                         NOFLAGS, ":%s NICK %s :%lu", source_p->name,
                         nick, (unsigned long) source_p->tsinfo);

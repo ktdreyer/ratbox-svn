@@ -99,7 +99,7 @@ static void ms_sjoin(struct Client *client_p,
                     char *parv[])
 {
   struct Channel *chptr;
-  struct Client  *target_p, *lclient_p;
+  struct Client  *target_p;
   time_t         newts;
   time_t         oldts;
   time_t         tstosend;
@@ -473,37 +473,6 @@ static void ms_sjoin(struct Client *client_p,
 
       people++;
 
-      /* LazyLinks - Introduce unknown clients before sending the sjoin */
-      if (ServerInfo.hub)
-	{
-	  for (m = serv_list.head; m; m = m->next)
-	    {
-	      lclient_p = m->data;
-	      
-	      /* Hopefully, the server knows about it's own clients. */
-	      if (client_p == lclient_p)
-		continue;
-
-	      /* Ignore non lazylinks */
-	      if (!IsCapable(lclient_p,CAP_LL))
-		continue;
-
-	      /* Ignore servers we won't tell anyway */
-	      if (!(chptr->lazyLinkChannelExists &
-		    lclient_p->localClient->serverMask) )
-		continue;
-
-	      /* Ignore servers that already know target_p */
-	      if (!(target_p->lazyLinkClientExists &
-		    lclient_p->localClient->serverMask) )
-		{
-		  /* Tell LazyLink Leaf about client_p,
-		   * as the leaf is about to get a SJOIN */
-		  sendnick_TS( lclient_p, target_p );
-		  add_lazylinkclient(lclient_p,target_p);
-		}
-	    }
-	}
       
       if (!IsMember(target_p, chptr))
         {
@@ -616,14 +585,6 @@ nextnick:
 
       if (target_p == client_p->from)
         continue;
-
-      /* skip lazylinks that don't know about this server */
-      if (ServerInfo.hub && IsCapable(target_p,CAP_LL))
-      {
-        if (!(chptr->lazyLinkChannelExists &
-              target_p->localClient->serverMask) )
-          continue;
-      }
 
       /* Its a blank sjoin, ugh */
       if (!parv[4+args][0])

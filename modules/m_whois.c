@@ -197,8 +197,6 @@ static int do_whois(struct Client *client_p, struct Client *source_p,
 	  if(!MyClient(target_p))
 	    glob=0;
 	    
-	  if (IsServer(client_p))
-	    client_burst_if_needed(client_p,target_p);
 
 	  if(IsPerson(target_p))
 	    {
@@ -206,28 +204,10 @@ static int do_whois(struct Client *client_p, struct Client *source_p,
 	      found = YES;
             }
         }
-      else
-	{
-	  if (!ServerInfo.hub && uplink && IsCapable(uplink,CAP_LL))
-	    {
-	      if(glob == 1)
-   	        sendto_one(uplink,":%s WHOIS %s :%s",
-		  	   source_p->name, nick, nick);
-	      else
-		sendto_one(uplink,":%s WHOIS %s",
-			   source_p->name, nick);
-	      return 0;
-	    }
-	}
     }
   else
     {
-      /* disallow wild card whois on lazylink leafs for now */
 
-      if (!ServerInfo.hub && uplink && IsCapable(uplink,CAP_LL))
-	{
-	  return 0;
-	}
       /* Oh-oh wilds is true so have to do it the hard expensive way */
       found = global_whois(source_p,nick,wilds,glob);
     }
@@ -530,63 +510,9 @@ static void ms_whois(struct Client *client_p,
      */
     if(!MyClient(target_p) && !IsMe(target_p))
     {
-
-      /* we're being asked to forward a whois request to a LL to answer,
-       * if the target isnt on that server.. answer it for them, as the
-       * LL might not know that the target exists..
-       */
-      if(MyConnect(target_p) && ServerInfo.hub && 
-         IsCapable(target_p, CAP_LL))
-      {
-        struct Client *whois_p;
-
-        /* try to find the client */
-	whois_p = find_client(parv[2]);
-	if (whois_p)
-	{
-	  /* check the server being asked to perform the whois, is that
-	   * clients uplink */
-	  if(whois_p->servptr != target_p)
-	  {
-	    /* they asked the LL for info on a client it didnt know about..
-	     * as we're answering for them, make sure its non-detailed
-	     */
-	    parv[1] = parv[2];
-	    parc = 2;
-	    
-            do_whois(client_p, source_p, parc, parv);
-	    return;
-	  }
-	  
-	  /* the server is that clients uplink, get them to do it */
-	  else
-	  {
-	    client_burst_if_needed(target_p->from, source_p);
-	    sendto_one(target_p->from, ":%s WHOIS %s :%s", parv[0], parv[1],
-	               parv[2]);
-            return;
-          }
-	}
-
-	/* the client doesnt exist.. erk! */
-	else
-	{
-	  /* set parv[1] = parv[2], then let do_whois handle the error */
-	  parv[1] = parv[2];
-	  do_whois(client_p, source_p, parc, parv);
-	  return;
-	}
-      }
-
-      /* its not a lazylink.. forward it as it is */
-      else
-      {
-        /* client_burst_if_needed(target_p->from, source_p); 
-	 * the target isnt a LL.. why would I need to burst? */
         sendto_one(target_p->from, ":%s WHOIS %s :%s", parv[0], parv[1],
                    parv[2]);
         return;	       
-      }
     }
 
   /* ok, the target is either us, or a client on our server, so perform the whois

@@ -195,18 +195,6 @@ m_join(struct Client *client_p,
 	  }
 	  
 	  flags = CHFL_CHANOP;
-	  if(!ServerInfo.hub)
-	    {
-	      /* LazyLinks */
-	      if( (*name != '&') && uplink
-		  && IsCapable(uplink, CAP_LL) )
-		{
-		  sendto_one(uplink,":%s CBURST %s %s %s",
-			     me.name,name,source_p->name, key ? key: "" );
-		  /* And wait for LLJOIN */
-		  return;
-		}
-	    }
 	}
 
       if ((source_p->user->joined >= ConfigChannel.max_chans_per_user) &&

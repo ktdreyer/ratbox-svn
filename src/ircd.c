@@ -104,7 +104,6 @@ dlink_list lclient_list;        /* local clients only ON this server */
 dlink_list serv_list;           /* local servers to this server ONLY */
 dlink_list global_serv_list;    /* global servers on the network */
 dlink_list oper_list;           /* our opers, duplicated in lclient_list */
-dlink_list lazylink_channels;   /* known about lazylink channels on HUB */
 
 int callbacks_called;          /* A measure of server load... */
 
@@ -568,14 +567,6 @@ int main(int argc, char *argv[])
   memset(&serv_list, 0, sizeof(serv_list));
   memset(&global_serv_list, 0, sizeof(global_serv_list));
   memset(&oper_list, 0, sizeof(oper_list));
-  memset(&lazylink_channels, 0, sizeof(lazylink_channels));
-
-#if 0
-  lclient_list.head = lclient_list.tail = NULL;
-  oper_list.head = oper_list.tail = NULL;
-  serv_list.head = serv_list.tail = NULL;
-  global_serv_list.head = global_serv_list.tail = NULL;
-#endif
 
   GlobalClientList = &me;       /* Pointer to beginning of Client list */
 

@@ -625,43 +625,14 @@ introduce_client(struct Client *client_p, struct Client *source_p,
    * We now introduce nicks "on the fly" in SJOIN anyway --
    * you _need_ to if you aren't going to burst everyone initially.
    *
-   * Only send to non CAP_LL servers, unless we're a lazylink leaf,
-   * in that case just send it to the uplink.
-   * -davidt
    * rewritten to cope with UIDs .. eww eww eww --is
    */
   
-  if (!ServerInfo.hub && uplink && IsCapable(uplink,CAP_LL)
-      && client_p != uplink) 
-    {
-      if (IsCapable(uplink, CAP_UID) && HasID(source_p))
-	{
-	  sendto_one(uplink, "CLIENT %s %d %lu %s %s %s %s %s :%s",
-		     nick,
-		     source_p->hopcount+1,
-		     (unsigned long) source_p->tsinfo,
-		     ubuf,
-		     source_p->username, source_p->host, user->server,
-		     user->id, source_p->info);
-	}
-      else
-	{
-	  sendto_one(uplink, "NICK %s %d %lu %s %s %s %s :%s",
-		     nick,
-		     source_p->hopcount+1,
-		     (unsigned long) source_p->tsinfo,
-		     ubuf,
-		     source_p->username, source_p->host, user->server,
-		     source_p->info);
-	}
-    }
-  else
-    {
       for (server_node = serv_list.head; server_node; server_node = server_node->next)
 	{
 	  server = (struct Client *) server_node->data;
 		  
-	  if (IsCapable(server, CAP_LL) || server == client_p)
+	  if (server == client_p)
 	    continue;
 		  
 	  if (IsCapable(server, CAP_UID) && HasID(source_p))
@@ -681,7 +652,6 @@ introduce_client(struct Client *client_p, struct Client *source_p,
 		       source_p->username, source_p->host, user->server,
 		       source_p->info);
 	}
-    }
   
   return 0;
 }

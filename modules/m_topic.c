@@ -88,22 +88,9 @@ static void m_topic(struct Client *client_p,
 
       if(chptr == NULL)
       {
-        /* if chptr isn't found locally, it =could= exist
-         * on the uplink. so forward reqeuest
-         */
-        if(!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
-        {
-          sendto_one(uplink, ":%s TOPIC %s %s",
-                     source_p->name, parv[1],
-                     ((parc > 2) ? parv[2] : ""));
-          return;
-        }
-        else
-        {
           sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
                      me.name, parv[0], parv[1]);
           return;
-        }
       }
 
       /* setting topic */
@@ -182,25 +169,10 @@ static void m_topic(struct Client *client_p,
                              chptr->topic_info,
                              chptr->topic_time);
                 }
-	        /* client on LL needing the topic - if we have serverhide, say
-	         * its the actual LL server that set the topic, not us the
-	         * uplink -- fl_
-	         */
-	        else if(ConfigServerHide.hide_servers && !MyClient(source_p)
-	                && IsCapable(client_p, CAP_LL) && ServerInfo.hub)
-  	        {
-	          sendto_one(source_p, form_str(RPL_TOPICWHOTIME),
-	  	             me.name, parv[0], chptr->chname,
-	  		     client_p->name, chptr->topic_time);
-                }
-  	        /* just normal topic hiding.. */
-	        else
-	 	{
-                  sendto_one(source_p, form_str(RPL_TOPICWHOTIME),
+                sendto_one(source_p, form_str(RPL_TOPICWHOTIME),
                              me.name, parv[0], chptr->chname,
                              me.name,
                              chptr->topic_time);
-                }
             }
         }
     }
