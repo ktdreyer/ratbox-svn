@@ -276,7 +276,7 @@ load_one_module (char *path)
 
       if (tmpptr == NULL)
       {
-        char *err;
+        const char *err;
 
         if (errno == ENOENT) /* module not found, try next path */
           continue;
