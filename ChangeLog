@@ -1,3 +1,15 @@
+leeh        2004/04/29 07:56:22 EDT	(20040429_1)
+
+  Modified files:
+    src                  channel.c 
+  Log:
+  - whoops, 2.x doesnt have Count.server :)
+  
+  Revision  Changes    Path
+  7.416     +2 -1      ircd-ratbox/src/channel.c
+
+
+
 leeh        2004/04/29 07:47:50 EDT	(20040429_0)
 
   Modified files:
