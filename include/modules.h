@@ -152,7 +152,8 @@ extern struct Message wallops_msgtab;
 extern struct Message who_msgtab;
 extern struct Message whois_msgtab;
 extern struct Message whowas_msgtab;
-
+extern struct Message get_msgtab;
+extern struct Message put_msgtab;
 extern void load_all_modules(int check);
 
 #endif /* STATIC_MODULES */
