@@ -1,3 +1,7 @@
+*** 20010513_2 by davidt
+Fix core on /close
+
+
 *** 20010513_1 by db
 - This should fix the multiple numeric 366's
 - some cleanups
