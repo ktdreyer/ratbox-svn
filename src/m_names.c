@@ -404,6 +404,10 @@ static char *pub_or_secret(struct Channel *chptr)
 
 static char *chanop_or_voice(struct SLink *lp)
 {
+  /* lp should not be NULL */
+  if ( lp == NULL )
+    return ("");
+
   if (lp->flags & CHFL_CHANOP)
     return("@");
   else if (lp->flags & CHFL_VOICE)

@@ -2363,7 +2363,7 @@ static  void    sub1_from_channel(struct Channel *chptr)
 	      Count.chan--;
 	    }
 	}
-      /* if this is a subchan take it out the linked list */
+      /* if this is a subchan take it out of the linked list */
       else
 	{
 	  /* find it's base chan, incase we can remove that after */
@@ -2707,7 +2707,19 @@ static void destroy_channel(struct Channel *chptr)
 
   struct Client *sptr;
 
-  /* Walk through all the struct SLink's pointing to members of this chanel,
+  /* Don't ever delete the top of a chain of vchans! */
+  if (IsVchanTop(chptr))
+    return;
+
+  if (IsVchan(chptr))
+    {
+      /* remove from vchan double link list */
+      chptr->prev_vchan->next_vchan = chptr->next_vchan;
+      if (chptr->next_vchan)
+	chptr->next_vchan->prev_vchan = chptr->prev_vchan;
+    }
+
+  /* Walk through all the struct SLink's pointing to members of this channel,
    * then walk through each client found from each SLink, removing
    * any reference it has to this channel.
    * Finally, free now unused SLink's

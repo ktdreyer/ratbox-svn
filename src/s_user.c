@@ -807,7 +807,6 @@ int register_user(struct Client *cptr, struct Client *sptr,
       } else  
         SendMessageFile(sptr, &ConfigFileEntry.motd);
       
-#ifdef LITTLE_I_LINES
       if(sptr->confs && sptr->confs->value.aconf &&
          (sptr->confs->value.aconf->flags
           & CONF_FLAGS_LITTLE_I_LINE))
@@ -816,9 +815,6 @@ int register_user(struct Client *cptr, struct Client *sptr,
           sendto_one(sptr,"NOTICE %s :*** Notice -- You are in a restricted access mode",nick);
           sendto_one(sptr,"NOTICE %s :*** Notice -- You can not chanop others",nick);
         }
-#endif
-
-
     }
   else if (IsServer(cptr))
     {

@@ -120,13 +120,6 @@ int reject_held_fds = 0;
 /* LazyLinks code */
 time_t lastCleanup;
 
-#ifdef NEED_SPLITCODE
-extern time_t server_split_time;
-extern int    server_was_split;
-#endif
-
-int cold_start = YES;   /* set if the server has just fired up */
-
 /* /quote set variables */
 struct SetOptions GlobalSetOptions;
 
@@ -509,7 +502,6 @@ int main(int argc, char *argv[])
   ServerRunning = 0;
   memset(&me, 0, sizeof(me));
   GlobalClientList = &me;       /* Pointer to beginning of Client list */
-  cold_start = YES;             /* set when server first starts up */
 
   memset(&Count, 0, sizeof(Count));
   Count.server = 1;     /* us */
