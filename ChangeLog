@@ -1,3 +1,15 @@
+leeh        2004/03/17 10:14:19 EST	(20040317_0)
+
+  Modified files:
+    src                  newconf.c 
+  Log:
+  - stack all oper entries, it makes adding rsa keys far easier
+  
+  Revision  Changes    Path
+  7.143     +3 -18     ircd-ratbox/src/newconf.c
+
+
+
 leeh        2004/03/16 11:57:17 EST	(20040316_0)
 
   Removed files:
