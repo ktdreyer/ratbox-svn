@@ -1,3 +1,25 @@
+db          2002/05/24 07:23:45 EDT	(20020524_3)
+
+  Modified files:
+    src                  client.c s_bsd.c 
+  Log:
+  <adx> first, we don't need to send queued data at the beginning of
+  +exit_client, because it's going to be sent in close_connection..
+  <adx> second, setting a client as dead before calling close_connection is not
+  +a good idea
+  <adx> because then he/she won't receive a Closing Link message
+  <adx> client is set as dead in exit_one_client anyway..
+  <adx> there is also sth in s_bsd.c, we're setting client as dead but it is
+  +done by exit_client too
+  
+  - approved db
+  
+  Revision  Changes    Path
+  7.269     +0 -4      ircd-hybrid-7/src/client.c
+  7.168     +0 -1      ircd-hybrid-7/src/s_bsd.c
+
+
+
 androsyn    2002/05/23 22:39:17 EDT	(20020524_2)
 
   Modified files:
