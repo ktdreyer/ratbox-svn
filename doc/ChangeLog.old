@@ -1,3 +1,7 @@
+*** 20010204_4 by androsyn
+Directory /cvsroot/ircd-hybrid-7/adns added to the repository
+
+
 *** 20010204_3 by fl_
 - we notice the oper when we add a tkline remotely/locally.. (untested)
 - dont give the path to our kline.conf in remote klines
