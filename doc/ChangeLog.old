@@ -1,3 +1,8 @@
+*** 20000201_3 by db
+- synced up convertconf to current parser format
+
+
+
 *** 20000201_2 by tomh
 
 Fix UMR picked up by purify:
