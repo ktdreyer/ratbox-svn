@@ -1,3 +1,17 @@
+leeh        2004/02/19 09:24:03 EST	(20040219_0)
+
+  Added files:
+    include              s_newconf.h 
+    src                  s_newconf.c 
+  Log:
+  - add missing s_newconf.?
+  
+  Revision  Changes    Path
+  7.16      +70 -0     ircd-ratbox/include/s_newconf.h (new)
+  7.16      +124 -0    ircd-ratbox/src/s_newconf.c (new)
+
+
+
 leeh        2004/02/18 16:45:28 EST	(20040218_2)
 
   Modified files:
