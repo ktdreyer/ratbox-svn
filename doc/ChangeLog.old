@@ -1,3 +1,19 @@
+leeh        2001/12/13 05:29:28 EST	(20011213_1)
+
+  Modified files:
+    include              s_conf.h 
+    src                  ircd_lexer.l ircd_parser.y 
+  Log:
+  - added split_user_count and split_server_count (number) to channel {};
+  - added no_create_on_split and no_join_on_split (yes/no) to channel {};
+  
+  Revision  Changes    Path
+  7.167     +16 -12    ircd-hybrid-7/include/s_conf.h
+  1.130     +4 -0      ircd-hybrid-7/src/ircd_lexer.l
+  1.225     +37 -0     ircd-hybrid-7/src/ircd_parser.y
+
+
+
 leeh        2001/12/13 05:07:34 EST	(20011213_0)
 
   Removed files:
