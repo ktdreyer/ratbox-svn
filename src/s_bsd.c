@@ -474,14 +474,7 @@ comm_settimeout(int fd, time_t timeout, PF *callback, void *cbdata)
 void
 comm_setflush(int fd, time_t timeout, PF *callback, void *cbdata)
 {
-  /* XXX sigh another one */
-#if 0
     assert(fd > -1);
-#endif
-    /* This should not happen */
-    if(fd < 0)
-      return;
-
     assert(fd_table[fd].flags.open);
 
     fd_table[fd].flush_timeout = CurrentTime + timeout;

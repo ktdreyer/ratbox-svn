@@ -229,15 +229,10 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
     void *client_data, time_t timeout)
 {  
     fde_t *F = &fd_table[fd];
-    /* XXX NOT the right "solution" */
-#if 0
     assert(fd >= 0);
-#endif
-    if(fd < 0)
-      return;
+    assert(F->flags.open);
 
 #ifdef NOTYET
-    assert(F->flags.open);
     debug(5, 5) ("commSetSelect: FD %d type %d, %s\n", fd, type, handler ? "SET"
  : "CLEAR");
 #endif
