@@ -1,3 +1,8 @@
+*** 20001227_10 by db
+- use the parameter block, don't core on 0 parameters for dline
+
+
+
 *** 20001227_9 by davidt
 Fixed the off-by-one error in the paramcount
 
