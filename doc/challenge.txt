@@ -26,6 +26,9 @@
 
    m_challenge.so must be loaded.
 
+   The oper has their private key file and an implementation of the RSA
+   Respond tool available to be run.
+
      ----------------------------------------------------------------------
 
                                     Process
@@ -61,20 +64,15 @@
 
    It is highly recommended that you set a password on your private key.
 
-   A key pair can also be generated with the tools/mkkeypair utility.
-
-   There is a tool called respond in tools/rsa_respond in the Hybrid source
-   tree. This program can be easily distributed to each oper.
-
-   A script is included in the Makefile to create a distributable tar file
-   from the source tree. Issue make rsa_respond from the root of the source
-   tree to create the rsa_respond.tar.gz archive. This can then be
-   distributed to all of the server operators. Look at the README in the tar
-   archive for more detailed instructions.
+   A key pair can also be generated with the tools/mkkeypair utility. No
+   password will be set, however.
 
      ----------------------------------------------------------------------
 
                           Using CHALLENGE and respond
+
+     Note: All examples assume the use of the stock respond client included
+     with the Hybrid 7 source, run on a UNIX(c) platform.
 
    The administrator of the server you oper on should remove the password in
    your oper {} block and replace it with an entry for your public key, so
@@ -97,14 +95,12 @@
 
    The oper will then have to feed that challenge to the respond program.
 
-   +--------------------------------------------------+
-   | The respond utility's syntax is:                 |
-   |                                                  |
-   |$ ./respond private_key_file challenge_from_server|
-   |                                                  |
-   +--------------------------------------------------+
-
    +------------------------------------------------------------------+
+   | The respond utility's syntax is:                                 |
+   |                                                                  |
+   |$ ./respond private_key_file challenge_from_server                |
+   |                                                                  |
+   |                                                                  |
    | Example:                                                         |
    |                                                                  |
    |wcampbel@botbay (rsa_respond): ./respond hwy.key \                |
@@ -118,8 +114,8 @@
    |   Note: The challenge parameter must be on one line.             |
    +------------------------------------------------------------------+
 
-   The keyphase must be entered properly to get the response. The bottom line
-   is the response that must be sent back to the server.
+   The keyphrase must be entered properly to get the response. The bottom
+   line is the response that must be sent back to the server.
 
    The oper will issue the following command in order to obtain operator
    status:
@@ -134,10 +130,43 @@
    +------------------------------------------------------------------------+
    |                                Warning                                 |
    |------------------------------------------------------------------------|
-   | If the CHALLENGE fails, and you use ircii, EPIC, or BX, you may get    |
+   | If the CHALLENGE fails, and you use ircII, EPIC, or BX, you may get    |
    | disconnected with the client asking for the server password. This is a |
    | client bug, not an ircd bug.                                           |
    +------------------------------------------------------------------------+
+
+     ----------------------------------------------------------------------
+
+                                RSA Respond Tool
+
+   The RSA Respond tool is a vital part of challenge/response system. In
+   order to function, the operator must have must have a way to quickly issue
+   the respond command, and to copy and paste data to and from the IRC
+   client.
+
+   The respond source code is included with the Hybrid 7 source, in the
+   tools/rsa_respond directory. A distributable tar file can easily be
+   created by issuing make rsa_respond in the root of the source tree. The
+   file rsa_respond.tar.gz will be created in the root of the source tree.
+
+   rsa_respond.tar.gz should compile with little or no modifications[1] on
+   most UNIX(c) and UNIX-like platforms[2]. The README in the tar archive
+   gives more information.
+
+   A copy of the source tar file is available on
+   http://ircd.botbay.net/pub/hybrid/rsa/rsa_respond.tar.gz.
+
+   For Windows platforms, there are two available RSA Respond tools. One is a
+   text only port of the stock tool. The binary is available from
+   http://ircd.botbay.net/pub/hybrid/rsa/rsa_respond-bin.tar.gz. The other
+   tool is a GUI enabled version[3]. The source tree[4] is available from
+   http://ircd.botbay.net/pub/hybrid/rsa/winrespond-src.tar.gz. A binary
+   distribution is available from
+   http://ircd.botbay.net/pub/hybrid/rsa/winrespond-bin.tar.gz.
+
+   With the appropriate version of the RSA Respond tool, any operator can
+   protect their privileged access to the server, with little additional
+   effort over using standard operator passwords.
 
      ----------------------------------------------------------------------
 
@@ -149,3 +178,14 @@
    conf. The use of public/private key encryption provides far greater
    security over having a single password, and may (if the key is kept
    secure, and has a good passphrase) virtually eliminate hacked O-lines.
+
+  Notes
+
+   [1] Some platforms may require Makefile changes in order to link in the    
+       OpenSSL library. This may change in the future.                        
+   [2] Platforms known to function include: Linux, FreeBSD, Solaris, and      
+       Cygwin.                                                                
+   [3] A screenshot of the program is available on                            
+       http://kabel.pp.ru/sgml/winrespond.png .                               
+   [4] The winrespond source depends on a working, up to date, Cygwin         
+       installation.                                                          
