@@ -257,7 +257,6 @@ void clear_conf(void)
    {
     hmen = hme->next;
     conf = ((struct ConfItem*)hme->data);
-    assert(conf->clients > 0);
     if (conf->clients == 0)
       {
        hmel ? hmel->next : deferred_masks = hmen->next;
