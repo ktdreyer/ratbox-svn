@@ -277,7 +277,7 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
     return 0;
 
   /* Next, lets enter the copy loop */
-  while(len && buflen_allowed && (*ch != '\r') && (*ch != '\n'))
+  while(cpylen && buflen_allowed && (*ch != '\r') && (*ch != '\n'))
     {
       *bufch++ = *ch++; 
       --cpylen;
