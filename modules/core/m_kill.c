@@ -43,7 +43,7 @@ static char buf[BUFSIZE];
 static int ms_kill(struct Client*, struct Client*, int, char**);
 static int mo_kill(struct Client*, struct Client*, int, char**);
 static void relay_kill(struct Client *, struct Client *, struct Client *,
-                       const char *, const char *, const char *);
+                       const char *, const char *);
 
 struct Message kill_msgtab = {
   "KILL", 0, 2, 0, MFLG_SLOW, 0,
@@ -134,9 +134,9 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	     inpath, cptr->username, reason);
 
   sendto_realops_flags(FLAGS_ALL,
-		       "Received KILL message for %s. From %s (%s)", 
-		       acptr->name, parv[0], reason);
-  log(L_INFO,"KILL From %s For %s Path %s",
+		       "Received KILL message for %s. From %s Path: %s (%s)", 
+		       acptr->name, parv[0], me.name, reason);
+  log(L_INFO,"KILL From %s For %s Path %s ",
       parv[0], acptr->name, buf );
 
   /*
@@ -147,7 +147,7 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   */
   if (!MyConnect(acptr))
     {
-      relay_kill(cptr, sptr, acptr, inpath, cptr->username, reason);
+      relay_kill(cptr, sptr, acptr, inpath, reason);
       /*
       ** Set FLAGS_KILLED. This prevents exit_one_client from sending
       ** the unnecessary QUIT for this. (This flag should never be
@@ -209,15 +209,9 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
-  if (MyOper(sptr) && !MyConnect(acptr) && (!IsOperGlobalKill(sptr)))
-    {
-      sendto_one(sptr, ":%s NOTICE %s :Nick %s isnt on your server",
-                 me.name, parv[0], acptr->name);
-      return 0;
-    }
-
   if (BadPtr(path))
     path = "*no-path*"; /* Bogus server sending??? */
+
   /*
   ** Notify all *local* opers about the KILL (this includes the one
   ** originating the kill, if from this server--the special numeric
@@ -228,7 +222,7 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   */
   if(BadPtr(parv[2]))
     {
-      reason = sptr->name;
+      reason = "<No reason given>";
     }
   else
     {
@@ -249,8 +243,8 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (IsOper(sptr)) /* send it normally */
     {
       sendto_realops_flags(FLAGS_ALL,
-			   "Received KILL message for %s. From %s Path: %s!%s %s",
-			   acptr->name, parv[0], inpath, path, reason);
+			   "Received KILL message for %s. From %s Path: %s %s",
+			   acptr->name, parv[0], sptr->user->server, reason);
     }
   else
     {
@@ -259,7 +253,7 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 			   acptr->name, parv[0], reason);
     }
 
-  log(L_INFO,"KILL From %s For %s Path %s!%s %s",
+  log(L_INFO,"KILL From %s For %s Path %s!%s (%s)",
       parv[0], acptr->name, inpath, path, reason);
   /*
   ** And pass on the message to other servers. Note, that if KILL
@@ -267,15 +261,17 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   ** back.
   ** Suicide kills are NOT passed on --SRB
   */
+
   if (!MyConnect(acptr) || !MyConnect(sptr) || !IsOper(sptr))
     {
-      relay_kill(cptr, sptr, acptr, inpath, path, reason);
-      if (chasing)
-	kill_client(cptr, acptr, "%s!%s %s", inpath, path, reason);	
+      relay_kill(cptr, sptr, acptr, inpath, reason);
+/*      if (chasing) */
+/*	kill_client(cptr, acptr, "%s!%s %s", inpath, path, reason); */
 #if 0
         sendto_one(cptr, ":%s KILL %s :%s!%s",
                    me.name, acptr->name, inpath, path);
 #endif
+
       /*
       ** Set FLAGS_KILLED. This prevents exit_one_client from sending
       ** the unnecessary QUIT for this. (This flag should never be
@@ -290,12 +286,12 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 static void relay_kill(struct Client *one, struct Client *sptr,
                        struct Client *acptr,
                        const char *inpath,
-                       const char *path,
 		       const char *reason)
 {
   dlink_node *ptr;
   struct Client *cptr;
   int introduce_killed_client;
+  char *nickoruid;
   
   /* LazyLinks:
    * Check if each lazylink knows about acptr.
@@ -339,12 +335,44 @@ static void relay_kill(struct Client *one, struct Client *sptr,
       client_burst_if_needed(cptr, acptr);
 
     client_burst_if_needed(cptr, sptr);
+  }
 
+  /* check they have a UID */
+  if(HasID(acptr))
+      nickoruid = ID(acptr);
+  else
+    nickoruid = acptr->name;
+
+    /* Oper is local, send it to everyone and build a path */
+    if(MyConnect(sptr))
+      {
+        sendto_cap_serv_butone(CAP_UID, NULL,
+                               ":%s KILL %s :%s!%s!%s!%s %s",
+                               sptr->name, nickoruid,
+                               me.name, sptr->host, sptr->username,
+                               sptr->name, reason);
+        sendto_nocap_serv_butone(CAP_UID, NULL,
+                               ":%s KILL %s :%s!%s!%s!%s %s",
+                               sptr->name, acptr->name, 
+                               me.name, sptr->host, sptr->username,
+                               sptr->name, reason);
+      }
+    else
+      {
+        sendto_cap_serv_butone(CAP_UID, one,
+                               ":%s KILL %s :%s!%s %s",
+                               sptr->name, nickoruid, me.name,
+                               inpath, reason);
+        sendto_nocap_serv_butone(CAP_UID, one,
+                               ":%s KILL %s :%s!%s %s",
+                               sptr->name, acptr->name, me.name,
+                               inpath, reason);
+      }
 #if 0
     sendto_one(cptr, ":%s KILL %s :%s!%s", sptr->name, acptr->name,
                inpath, path);
-#endif
     kill_client(cptr, acptr, "%s!%s %s", inpath, path, reason);
-  }
+#endif
+
 }
 
