@@ -139,8 +139,6 @@ struct sockaddr_storage {
                         ((sizeof(int64_t)) - sizeof(unsigned char) -
                          sizeof(sa_family_t)) - (sizeof(int64_t)))];
 };
-#undef HAVE_SA_LEN
-#define HAVE_SA_LEN 1
 #else /* Linux style for everything else (for now) */
 struct sockaddr_storage
 {
@@ -153,12 +151,13 @@ struct sockaddr_storage
 
 
 
-#ifdef HAVE_SA_LEN
-#define SET_SS_LEN(x, y) x.sa_len = y
-#define GET_SS_LEN(x) x.sa_len
+#ifdef SOCKADDR_IN_HAS_LEN
+#define SET_SS_LEN(x, y) x.ss_len = y
+#define GET_SS_LEN(x) x.ss_len
 #else
 #define SET_SS_LEN(x, y)
 #define GET_SS_LEN(x) x.ss_family == AF_INET ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_storage)
 #endif
 
 #endif /* INCLUDED_ircd_defs_h */
+b

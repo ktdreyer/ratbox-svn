@@ -4383,6 +4383,7 @@ echo "$as_me: error: You have no socket()! Aborting." >&2;}
 fi
 
 
+
 echo "$as_me:$LINENO: checking for struct sockaddr_storage" >&5
 echo $ECHO_N "checking for struct sockaddr_storage... $ECHO_C" >&6
 if test "${ac_cv_type_struct_sockaddr_storage+set}" = set; then
@@ -4451,8 +4452,7 @@ _ACEOF
 fi
 
 
-if test "$ac_cv_type_struct_sockaddr_storage" = no; then
-	echo "$as_me:$LINENO: checking for struct sockaddr.sa_len" >&5
+echo "$as_me:$LINENO: checking for struct sockaddr.sa_len" >&5
 echo $ECHO_N "checking for struct sockaddr.sa_len... $ECHO_C" >&6
 if test "${ac_cv_member_struct_sockaddr_sa_len+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -4559,7 +4559,6 @@ _ACEOF
 
 fi
 
-fi
 
 echo "$as_me:$LINENO: checking for socklen_t" >&5
 echo $ECHO_N "checking for socklen_t... $ECHO_C" >&6
@@ -4689,7 +4688,6 @@ fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
 
 fi
-
 
 
 # Check whether --enable-ipv6 or --disable-ipv6 was given.
