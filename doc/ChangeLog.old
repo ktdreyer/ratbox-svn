@@ -1,3 +1,17 @@
+androsyn    2002/04/29 18:12:37 EDT	(20020429_2)
+
+  Modified files:
+    .                    configure 
+    include              setup.h.in 
+  Log:
+  Rebuilt configure with autoconf 2.13
+  
+  Revision  Changes      Path
+  7.136     +3077 -7081  ircd-hybrid-7/configure
+  7.52      +1 -1        ircd-hybrid-7/include/setup.h.in
+
+
+
 leeh        2002/04/29 15:59:07 EDT	(20020429_1)
 
   Modified files:
