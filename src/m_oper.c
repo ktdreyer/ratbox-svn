@@ -36,6 +36,7 @@
 #include "list.h"
 
 #include <fcntl.h>
+#define _XOPEN_SOURCE
 #include <unistd.h>
 
 
