@@ -1,3 +1,7 @@
+*** 20001231_11 by wcampbel
+Added Riedel's REHASH CHANNELS patch
+
+
 *** 20001231_10 by lusky
 - david (accidentally?) moved the %type's back to the top, they've got
   to be below the %tokens.
