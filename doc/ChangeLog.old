@@ -1,3 +1,20 @@
+db          2002/06/28 14:18:51 EDT	(20020628_0)
+
+  Modified files:
+    modules/core         m_message.c 
+    src                  client.c messages.tab 
+  Log:
+  - ERR_TOOMANYRECIPIENTS 407 reply was bogus we no longer give
+    actual number of recipients actually processed.
+  - Fixed a few style problems, and removed unnecessary casts
+  
+  Revision  Changes    Path
+  1.93      +11 -11    ircd-hybrid-7/modules/core/m_message.c
+  7.286     +4 -4      ircd-hybrid-7/src/client.c
+  7.68      +1 -2      ircd-hybrid-7/src/messages.tab
+
+
+
 leeh        2002/06/27 11:16:40 EDT	(20020627_3)
 
   Modified files:
