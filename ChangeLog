@@ -1,3 +1,15 @@
+leeh        2005/02/24 14:24:18 EST	(20050224_0)
+
+  Modified files:
+    src                  s_chanserv.c 
+  Log:
+  - s/chreg_p/reg_p
+  
+  Revision  Changes    Path
+  1.68      +1 -1      rserv/src/s_chanserv.c
+
+
+
 leeh        2005/02/22 14:51:30 EST	(20050222_1)
 
   Modified files:
