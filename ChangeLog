@@ -1,3 +1,21 @@
+leeh        2004/03/05 12:08:10 EST	(20040305_3)
+
+  Modified files:
+    include              hostmask.h s_conf.h 
+    src                  client.c hostmask.c s_conf.c 
+  Log:
+  - replace find_kline and find_gline with macros for find_conf_by_address
+  - remove find_kill, now just call find_kline and find_gline by themselves
+  
+  Revision  Changes    Path
+  1.31      +6 -2      ircd-ratbox/include/hostmask.h
+  7.272     +0 -1      ircd-ratbox/include/s_conf.h
+  7.432     +50 -58    ircd-ratbox/src/client.c
+  7.91      +0 -36     ircd-ratbox/src/hostmask.c
+  7.453     +0 -25     ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2004/03/05 11:34:09 EST	(20040305_2)
 
   Modified files:
