@@ -1,3 +1,11 @@
+*** 20010119_6 by adrian
+
+
+use the delay value when calling select(), rather than my hard-coded
+value of '1'.
+
+
+
 *** 20010119_5 by adrian
 
 
