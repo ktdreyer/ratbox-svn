@@ -90,7 +90,7 @@ parse_client_queued(struct Client *client_p)
 
 	if(IsAnyServer(client_p) || IsExemptFlood(client_p))
 	{
-		while ((dolen = linebuf_get(&client_p->localClient->buf_recvq,
+		while (MyConnect(client_p) && (dolen = linebuf_get(&client_p->localClient->buf_recvq,
 					   readBuf, READBUF_SIZE, LINEBUF_COMPLETE,
 					   LINEBUF_PARSED)) > 0)
 		{
