@@ -1,3 +1,16 @@
+androsyn    2004/08/03 15:11:49 EDT	(20040803_8)
+
+  Modified files:
+    .                    configure configure.ac 
+  Log:
+  Default build to ipv4 only
+  
+  Revision  Changes    Path
+  7.231     +4 -4      ircd-ratbox/configure
+  7.45      +3 -3      ircd-ratbox/configure.ac
+
+
+
 androsyn    2004/08/02 22:19:04 EDT	(20040803_7)
 
   Modified files:
