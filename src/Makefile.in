@@ -9,9 +9,9 @@ LEXLIB=@LEXLIB@
 YACC=@YACC@
 PREFIX=@prefix@
 BIN=rserv@EXEEXT@
-INCLUDES=-I ../include/
-LDFLAGS=
-LIBS=@LIBS@ -lsqlite
+INCLUDES=-I ../include/ -I @SQLITE_INCLUDES@
+LDFLAGS=@LDFLAGS@
+LIBS=@LIBS@
 CFLAGS=-g -O0 -Wall -Werror -Wunused -Wshadow -Wmissing-declarations -Wwrite-strings -DPREFIX=\"$(PREFIX)\"
 MAKE = make
 
