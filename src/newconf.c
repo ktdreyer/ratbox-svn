@@ -895,8 +895,6 @@ conf_end_auth(struct TopConf *tc)
 		if(yy_tmp->name == NULL)
 			DupString(yy_tmp->name, "NOMATCH");
 
-		conf_add_class_to_conf(yy_tmp);
-
 		if(yy_tmp->user == NULL)
 			DupString(yy_tmp->user, "*");
 		else
@@ -906,6 +904,8 @@ conf_end_auth(struct TopConf *tc)
 			continue;
 		else
 			collapse(yy_tmp->host);
+
+		conf_add_class_to_conf(yy_tmp);
 
 		add_conf_by_address(yy_tmp->host, CONF_CLIENT, yy_tmp->user, yy_tmp);
 	}
