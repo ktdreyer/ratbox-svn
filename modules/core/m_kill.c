@@ -135,11 +135,16 @@ static void mo_kill(struct Client *client_p, struct Client *source_p,
   ircsprintf(buf, "%s!%s (%s)",
 	     inpath, client_p->username, reason);
 
+  if(MyOper(target_p))
+      sendto_one(target_p, ":%s KILL %s :%s", parv[0], target_p->name, reason);
+
   sendto_realops_flags(FLAGS_ALL,
 		       "Received KILL message for %s. From %s Path: %s (%s)", 
 		       target_p->name, parv[0], me.name, reason);
+
   log(L_INFO,"KILL From %s For %s Path %s ",
       parv[0], target_p->name, buf );
+
 
   /*
   ** And pass on the message to other servers. Note, that if KILL
@@ -233,6 +238,9 @@ static void ms_kill(struct Client *client_p, struct Client *source_p,
       else
         reason = parv[2];
     }
+
+  if(MyOper(target_p))
+      sendto_one(target_p, ":%s KILL %s :%s", parv[0], target_p->name, reason);
 
   if (IsOper(source_p)) /* send it normally */
     {
