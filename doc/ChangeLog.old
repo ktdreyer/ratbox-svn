@@ -1,3 +1,15 @@
+leeh        2001/12/13 12:40:47 EST	(20011213_2)
+
+  Modified files:
+    autoconf             configure.in 
+  Log:
+  - I shouldve done configure.in, not configure (hi larne!)
+  
+  Revision  Changes    Path
+  7.104     +1 -1      ircd-hybrid-7/autoconf/configure.in
+
+
+
 leeh        2001/12/13 05:29:28 EST	(20011213_1)
 
   Modified files:
