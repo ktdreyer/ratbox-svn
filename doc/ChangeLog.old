@@ -1,3 +1,8 @@
+*** 20010101_3 by db
+- just stuck an early draft of this into cvs
+
+
+
 *** 20010101_2 by wcampbel
 make depend needs to have the CFLAGS in addition to -MM.
 This is for making sure that the error messages associated with gcc
