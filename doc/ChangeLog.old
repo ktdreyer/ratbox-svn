@@ -1,3 +1,9 @@
+*** 20010826_6 by db
+- There was a bug in eventAdd which could lead to an infinite loop.
+  I rewrote eventAdd and eventDelete. They actually look sane now.
+
+
+
 *** 20010826_5 by androsyn
 localtime and strftime need time.h
 
