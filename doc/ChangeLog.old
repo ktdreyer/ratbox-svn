@@ -1,3 +1,8 @@
+*** 20011202_9 by leeh
+- we only support one cipher both ways:
+  ENC:BF/256,BF/256 -> ENC:BF/256
+
+
 *** 20011202_8 by leeh
 - make MODRESTART cause a rehash, to reload modules from the conf
 - rehash() was taking source_p and client_p, yet doing nothing with them,
