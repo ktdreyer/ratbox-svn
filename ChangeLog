@@ -1,3 +1,36 @@
+leeh        2003/12/08 18:02:02 EST	(20031208_3)
+
+  Modified files:
+    include              c_init.h channel.h client.h config.h 
+                         event.h io.h log.h rserv.h stdinc.h 
+                         tools.h 
+    src                  c_mode.c channel.c client.c 
+  Log:
+  - added Id headers to include files
+  - split channel modes into its own struct
+  - parse a keyed sjoin properly
+  - get_chmember() -> find_chmember()
+  - added initial services storage
+  - support for MODE on channels
+  - support for KICK
+  
+  Revision  Changes    Path
+  1.2       +1 -0      rserv/include/c_init.h
+  1.2       +13 -5     rserv/include/channel.h
+  1.2       +10 -0     rserv/include/client.h
+  1.2       +1 -0      rserv/include/config.h
+  1.2       +1 -0      rserv/include/event.h
+  1.2       +1 -0      rserv/include/io.h
+  1.2       +1 -0      rserv/include/log.h
+  1.2       +6 -0      rserv/include/rserv.h
+  1.2       +1 -0      rserv/include/stdinc.h
+  1.2       +1 -0      rserv/include/tools.h
+  1.2       +189 -0    rserv/src/c_mode.c
+  1.2       +121 -59   rserv/src/channel.c
+  1.2       +71 -8     rserv/src/client.c
+
+
+
 leeh        2003/12/07 22:04:14 EST	(20031208_2)
 
   Added files:
