@@ -1,3 +1,35 @@
+leeh        2003/12/30 16:53:04 EST	(20031230_0)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    include              config.h io.h setup.h.in 
+    src                  Makefile.in channel.c client.c io.c 
+                         rserv.c scommand.c 
+  Log:
+  - ported the balloc from ircd-ratbox
+  - added CONN_HANDSHAKE, for servers who have connected sockets, but havent
+    authed yet
+  - changed the connect notices, so we gve "established" on a sockets
+    connection and "completed" when we receive a PONG
+  - added a check that the servername equals the one in the C:
+  - added a handler for PONG
+  
+  Revision  Changes    Path
+  1.5       +1 -1      rserv/autoconf/configure.in
+  1.5       +1 -1      rserv/configure
+  1.7       +26 -1     rserv/include/config.h
+  1.8       +5 -2      rserv/include/io.h
+  1.4       +3 -0      rserv/include/setup.h.in
+  1.9       +1 -0      rserv/src/Makefile.in
+  1.10      +9 -2      rserv/src/channel.c
+  1.8       +30 -5     rserv/src/client.c
+  1.15      +21 -3     rserv/src/io.c
+  1.14      +1 -1      rserv/src/rserv.c
+  1.9       +33 -4     rserv/src/scommand.c
+
+
+
 leeh        2003/12/26 16:45:24 EST	(20031226_8)
 
   Modified files:
