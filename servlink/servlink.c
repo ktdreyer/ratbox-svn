@@ -45,6 +45,7 @@ static void usage(void);
 
 struct slink_state in_state;
 struct slink_state out_state;
+int	fd_flush;
 
 struct fd_table fds[5] = {
 	{0, read_ctrl, NULL},
@@ -87,7 +88,7 @@ main(int argc, char *argv[])
 #endif
 
 	/* Make sure we are running under ircd.. */
-	if(argc != 6 || strcmp(argv[0], "-slink"))
+	if(argc != 7 || strcmp(argv[0], "-slink"))
 		usage();	/* exits */
 
 	for (i = 0; i < 5; i++)
@@ -98,12 +99,16 @@ main(int argc, char *argv[])
 		if(fds[i].fd > max_fd)
 			max_fd = fds[i].fd;
 	}
-
+	fd_flush = atoi(argv[6]);
 	/* set file descriptors to nonblocking mode */
 	for (i = 0; i < 5; i++)
 	{
 		fcntl(fds[i].fd, F_SETFL, O_NONBLOCK);
 	}
+
+	fcntl(fd_flush, F_SETFL, O_NONBLOCK);
+
+	while(read_flush(fd_flush));
 
 	/* enter io loop */
 	io_loop(max_fd + 1);
