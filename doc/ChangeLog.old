@@ -1,3 +1,15 @@
+androsyn    2002/05/20 13:11:24 EDT	(20020520_3)
+
+  Modified files:
+    src                  send.c 
+  Log:
+  Add another NULL dlink head check
+  
+  Revision  Changes    Path
+  7.192     +1 -1      ircd-hybrid-7/src/send.c
+
+
+
 androsyn    2002/05/20 12:41:15 EDT	(20020520_2)
 
   Modified files:
