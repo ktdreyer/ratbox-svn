@@ -1,3 +1,12 @@
+*** 20010113_2 by fl_
+- added the beginnings of a modrestart command
+  be warned:
+  this command will atm generate about (roughly) 120 notices telling you
+  which have been unloaded and which have been reloaded, but im tired
+  and gunna finish it tomorrow
+- because of that I didnt document it :), thatll come tomorrow
+
+
 *** 20010113_1 by lusky
 test commit
 
