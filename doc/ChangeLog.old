@@ -1,3 +1,8 @@
+*** 20000107_4 by db
+- sticky / key
+
+
+
 *** 20000107_3 by db
 - don't core if chptr == NULL in sendto_match_servs()
   shouldn't normally ever happen, but does in LL 
