@@ -1,3 +1,8 @@
+*** 20010616_4 by a1kmm
+- Ripped out the last remnants of the TOO_MANY code I was going to commit but
+  then decided was pointless so ripped most of it before...
+
+
 *** 20010616_3 by a1kmm
 - Fixed that "/squit" bug where we don't remove channels/nicks from a linked
   list.
