@@ -356,6 +356,7 @@ set_default_conf(void)
 	ConfigFileEntry.default_floodcount = 8;
 	ConfigFileEntry.client_flood = CLIENT_FLOOD_DEFAULT;
 	ConfigFileEntry.tkline_expire_notices = 0;
+	ConfigFileEntry.target_change = 1;
 
 #ifdef IPV6
 	ConfigFileEntry.fallback_to_ip6_int = YES;

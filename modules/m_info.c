@@ -439,6 +439,12 @@ static struct InfoStruct info_table[] = {
 		"STATS Y is only shown to operators",
 	},
 	{
+		"target_change",
+		OUTPUT_BOOLEAN_YN,
+		&ConfigFileEntry.targeT_change,
+		"Target change anti-spam protection",
+	},
+	{
 		"tkline_expire_notices",
 		OUTPUT_BOOLEAN,
 		&ConfigFileEntry.tkline_expire_notices,

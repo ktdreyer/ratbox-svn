@@ -215,6 +215,7 @@ struct config_file_entry
 	int min_nonwildcard_simple;
 	int default_floodcount;
 	int client_flood;
+	int target_change;
 	int use_egd;
 	int ping_cookie;
 	int tkline_expire_notices;

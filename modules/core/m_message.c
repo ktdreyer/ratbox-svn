@@ -478,6 +478,45 @@ msg_channel_flags(int p_or_n, const char *command, struct Client *client_p,
 			     command, c, chptr->chname, text);
 }
 
+#define FREE_TARGET(x) ((x)->localClient->targinfo[0])		/* next free target slot */
+#define USED_TARGETS(x) ((x)->localClient->targinfo[1])		/* number of used targets */
+
+#define PREV_FREE_TARGET(x) ((FREE_TARGET(x) == 0) ? 9 : FREE_TARGET(x) - 1)
+#define PREV_TARGET(i) ((i == 0) ? i = 9 : --i)
+#define NEXT_TARGET(i) ((i == 9) ? i = 0 : ++i)
+				
+static int
+add_target(struct Client *source_p, struct Client *target_p)
+{
+	int i, j;
+
+	for(i = PREV_FREE_TARGET(source_p), j = USED_TARGETS(source_p);
+	    j;
+	    --j, PREV_TARGET(i))
+	{
+		if(source_p->localClient->targets[i] == target_p)
+			return 1;
+	}	
+	    
+
+	/* list is full */
+	if(USED_TARGETS(source_p) == 10)
+	{
+		if((i = (CurrentTime - source_p->localClient->target_last) / 60))
+		{
+			USED_TARGETS(source_p) -= i;
+			source_p->localClient->target_last += (60 * i);
+		}
+		else
+			return 0;
+	}
+
+	source_p->localClient->targets[FREE_TARGET(source_p)] = target_p;
+	NEXT_TARGET(FREE_TARGET(source_p));
+	++USED_TARGETS(source_p);
+	return 1;
+}
+		
 /*
  * msg_client
  *
@@ -500,6 +539,18 @@ msg_client(int p_or_n, const char *command,
 		 * and its not a notice */
 		if(p_or_n != NOTICE)
 			source_p->localClient->last = CurrentTime;
+
+		/* target change stuff, only if we're not dealing with a
+		 * ctcp reply (NOTICE)
+		 */
+		if((p_or_n != NOTICE || *text != '\001') && ConfigFileEntry.target_change)
+		{
+			if(!add_target(source_p, target_p))
+			{
+				/* error */
+				return;
+			}
+		}
 	}
 	else if(source_p->from == target_p->from)
 	{

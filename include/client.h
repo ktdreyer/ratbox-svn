@@ -254,6 +254,11 @@ struct LocalUser
 	time_t last_knock;	/* time of last knock */
 	unsigned long random_ping;
 	struct AuthRequest	*auth_request;
+
+	/* message target change stuff */
+	void *targets[10];		/* targets we're aware of */
+	u_int16_t targinfo[2];		/* for cyclic array and number in use */
+	time_t target_last;		/* last time we cleared a slot */
 };
 
 struct exit_client_hook
