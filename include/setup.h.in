@@ -192,6 +192,9 @@
 /* Prefix where modules are installed. */
 #undef MODULE_DIR
 
+/* Size of the monitor heap. */
+#undef MONITOR_HEAP_SIZE
+
 /* Define this to disable debugging support. */
 #undef NDEBUG
 

@@ -41,8 +41,6 @@
 #include "event.h"
 #include "numeric.h"
 
-#define MONITOR_HEAP_SIZE	1024
-
 static struct monitor *monitorTable[MONITOR_HASH_SIZE];
 static BlockHeap *monitor_heap;
 
