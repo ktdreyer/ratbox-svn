@@ -1,3 +1,16 @@
+leeh        2004/07/20 15:57:57 EDT	(20040720_4)
+
+  Modified files:
+    modules/core         m_mode.c 
+  Log:
+  - undo commit, we return after finding match so dont need to walk bans
+    safely
+  
+  Revision  Changes    Path
+  1.111     +3 -3      ircd-ratbox/modules/core/m_mode.c
+
+
+
 leeh        2004/07/20 15:51:06 EDT	(20040720_3)
 
   Modified files:
