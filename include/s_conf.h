@@ -299,12 +299,12 @@ typedef enum {
 extern void WriteKlineOrDline( KlineType, struct Client *,
 			       char *user, char *host, char *reason,
 			       const char *current_date );
-
-extern  const   char *get_conf_name(KlineType);
 extern  void    add_temp_kline(struct ConfItem *);
-extern  void    flush_temp_klines(void);
 extern  void    report_temp_klines(struct Client *);
 extern  void    show_temp_klines(struct Client *, struct ConfItem *);
+extern  void    cleanup_tklines(void *notused);
+
+extern  const   char *get_conf_name(KlineType);
 extern  int     is_address(char *,unsigned long *,unsigned long *); 
 extern  int     rehash (struct Client *, struct Client *, int);
 
@@ -331,6 +331,8 @@ extern unsigned long cidr_to_bitmask[];
 #define I_LINE_FULL     (-3)
 #define TOO_MANY        (-4)
 #define BANNED_CLIENT   (-5)
+
+#define CLEANUP_TKLINES_TIME 60
 
 #endif /* INCLUDED_s_conf_h */
 

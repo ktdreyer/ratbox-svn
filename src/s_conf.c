@@ -80,6 +80,7 @@ static void     read_conf(FBFILE*);
 static void     read_kd_lines(FBFILE*);
 static void     clear_out_old_conf(void);
 static void     flush_deleted_I_P(void);
+static void     expire_tklines(struct ConfItem *);
 
 FBFILE* conf_fbfile_in;
 char    conf_line_in[256];
@@ -1887,41 +1888,38 @@ struct ConfItem *find_kill(struct Client* cptr)
 struct ConfItem* find_tkline(const char* host, const char* user, unsigned long ip)
 {
   struct ConfItem *kill_list_ptr;        /* used for the link list only */
-  struct ConfItem *last_list_ptr;
-  struct ConfItem *tmp_list_ptr;
 
-  if(temporary_klines)
+  if (temporary_klines)
     {
-      kill_list_ptr = last_list_ptr = temporary_klines;
+      kill_list_ptr = temporary_klines;
 
       while(kill_list_ptr)
         {
-          if(kill_list_ptr->hold <= CurrentTime)    /* a kline has expired */
+          if ((kill_list_ptr->user
+               && (!user || match(kill_list_ptr->user, user)))
+             && (kill_list_ptr->host
+                 && (!host || match(kill_list_ptr->host, host))))
             {
-              if(temporary_klines == kill_list_ptr)
-                {
-                  temporary_klines = last_list_ptr = tmp_list_ptr =
-                    kill_list_ptr->next;
-                }
-              else
-                {
-                  /* its in the middle of the list, so link around it */
-                  tmp_list_ptr = last_list_ptr->next = kill_list_ptr->next;
-                }
+              return(kill_list_ptr);
+            }
+          kill_list_ptr = kill_list_ptr->next;
+        }
+    }
 
-              free_conf(kill_list_ptr);
-              kill_list_ptr = tmp_list_ptr;
-            }
-          else
+  if (temporary_ip_klines)
+    {
+      kill_list_ptr = temporary_ip_klines;
+
+      while(kill_list_ptr)
+        {
+          if ((kill_list_ptr->user
+               && (!user || match(kill_list_ptr->user, user)))
+             && (kill_list_ptr->ip
+                 && ((ip & kill_list_ptr->ip_mask) == kill_list_ptr->ip)))
             {
-              if( (kill_list_ptr->user
-                   && (!user || match(kill_list_ptr->user, user)))
-                  && (kill_list_ptr->host
-                      && (!host || match(kill_list_ptr->host,host))))
-                return(kill_list_ptr);
-              last_list_ptr = kill_list_ptr;
-              kill_list_ptr = kill_list_ptr->next;
+              return(kill_list_ptr);
             }
+          kill_list_ptr = kill_list_ptr->next;
         }
     }
 
@@ -1981,38 +1979,6 @@ void add_temp_kline(struct ConfItem *aconf)
     }
 }
 
-/* flush_temp_klines
- *
- * inputs        - NONE
- * output        - NONE
- * side effects  - All temporary klines are flushed out. 
- *
- */
-void flush_temp_klines()
-{
-  struct ConfItem *kill_list_ptr;
-
-  if( (kill_list_ptr = temporary_klines) )
-    {
-      while(kill_list_ptr)
-        {
-          temporary_klines = kill_list_ptr->next;
-          free_conf(kill_list_ptr);
-          kill_list_ptr = temporary_klines;
-        }
-    }
-
-  if ((kill_list_ptr = temporary_ip_klines))
-    {
-      while (kill_list_ptr)
-	{
-	  temporary_ip_klines = kill_list_ptr->next;
-	  free_conf(kill_list_ptr);
-	  kill_list_ptr = temporary_ip_klines;
-	}
-    }
-}
-
 /* report_temp_klines
  *
  * inputs        - struct Client pointer, client to report to
@@ -2039,61 +2005,87 @@ void
 show_temp_klines(struct Client *sptr, struct ConfItem *tklist)
 {
   struct ConfItem *kill_list_ptr;
-  struct ConfItem *last_list_ptr;
-  struct ConfItem *tmp_list_ptr;
   char *host;
   char *user;
   char *reason;
 
-  kill_list_ptr = last_list_ptr = tklist;
+  kill_list_ptr = tklist;
 
   while(kill_list_ptr)
     {
-      if (kill_list_ptr->hold <= CurrentTime) /* kline has expired */
-	{
-	  if (tklist == kill_list_ptr)
-            {
-	      /* It's pointing to first one in link list */
-	      /* so, bypass this one, remember bad things can happen
-		 if you try to use an already freed pointer.. */
-
-	      tklist = last_list_ptr = tmp_list_ptr = kill_list_ptr->next;
-            }
-          else
-            {
-	      /* its in the middle of the list, so link around it */
-	      tmp_list_ptr = last_list_ptr->next = kill_list_ptr->next;
-	    }
-
-	  free_conf(kill_list_ptr);
-	  kill_list_ptr = tmp_list_ptr;
-	}
+      if (kill_list_ptr->host)
+        host = kill_list_ptr->host;
       else
-	{
-	  if (kill_list_ptr->host)
-	    host = kill_list_ptr->host;
-	  else
-	    host = "*";
+        host = "*";
 
-	  if (kill_list_ptr->user)
-	    user = kill_list_ptr->user;
-	  else
-	    user = "*";
+      if (kill_list_ptr->user)
+        user = kill_list_ptr->user;
+      else
+        user = "*";
 
-	  if (kill_list_ptr->passwd)
-	    reason = kill_list_ptr->passwd;
-	  else
-	    reason = "No Reason";
+      if (kill_list_ptr->passwd)
+        reason = kill_list_ptr->passwd;
+      else
+        reason = "No Reason";
 
-	  sendto_one(sptr, form_str(RPL_STATSKLINE), me.name,
-		     sptr->name, 'k', host, user, reason);
+      sendto_one(sptr, form_str(RPL_STATSKLINE), me.name,
+                 sptr->name, 'k', host, user, reason);
 
-	  last_list_ptr = kill_list_ptr;
-	  kill_list_ptr = kill_list_ptr->next;
-	}
+      kill_list_ptr = kill_list_ptr->next;
     }
 }
 
+/*
+ * cleanup_tklines
+ *
+ * inputs       - NONE
+ * output       - NONE
+ * side effects - call function to expire tklines
+ *                This is an event started off in ircd.c
+ */
+void
+cleanup_tklines(void *notused)
+{
+  if (temporary_klines)
+    expire_tklines(temporary_klines);
+  if (temporary_ip_klines)
+    expire_tklines(temporary_ip_klines);
+
+  eventAdd("cleanup_tklines", cleanup_tklines, NULL,
+           CLEANUP_TKLINES_TIME, 0);
+}
+
+/*
+ * expire_tklines
+ *
+ * inputs       - NONE 
+ * output       - NONE
+ * side effects - expire tklines
+ */
+static void
+expire_tklines(struct ConfItem *tklist)
+{
+  struct ConfItem *kill_ptr;
+  struct ConfItem *last_ptr = NULL;
+  struct ConfItem *next_ptr;
+
+  for (kill_ptr = tklist; kill_ptr; kill_ptr = next_ptr)
+    {
+      next_ptr = kill_ptr->next;
+
+      if (kill_ptr->hold <= CurrentTime)
+        {
+          if (last_ptr != NULL)
+            last_ptr->next = next_ptr;
+          else
+            tklist->next = next_ptr;
+ 
+          free_conf(kill_ptr);
+        }
+      else
+        last_ptr = kill_ptr;
+    }
+}
 
 /*
  * oper_privs_as_string
