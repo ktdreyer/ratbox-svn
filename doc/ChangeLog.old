@@ -1,3 +1,7 @@
+*** 20010612_2 by androsyn
+Helps if you commit the right makefile.in
+
+
 *** 20010612_1 by androsyn
 Disable iauth and libnsl/libresolv checks, as we really don't need, or want
 these libraries.
