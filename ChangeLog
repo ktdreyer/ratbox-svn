@@ -1,3 +1,22 @@
+leeh        2003/07/19 11:48:15 EDT	(20030719_3)
+
+  Added files:
+    include              cache.h 
+    src                  cache.c 
+  Removed files:
+    include              help.h 
+    src                  help.c 
+  Log:
+  - remove help.?, add cache.?
+  
+  Revision  Changes    Path
+  1.1       +36 -0     ircd-ratbox/include/cache.h (new)
+  1.4       +0 -35     ircd-ratbox/include/help.h (dead)
+  1.1       +195 -0    ircd-ratbox/src/cache.c (new)
+  1.8       +0 -183    ircd-ratbox/src/help.c (dead)
+
+
+
 leeh        2003/07/19 08:45:44 EDT	(20030719_2)
 
   Modified files:
