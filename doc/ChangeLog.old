@@ -1,3 +1,7 @@
+*** 20011128_2 by leeh
+- undef BOUNCE_BAD_HOPS by default and reenable for release.
+
+
 *** 20011128_1 by leeh
 - attempt at fixing up +a.. there was a bogus if() that was preventing
   resyncs when setting -a, amongst other things.. (unsure if it was ok to
