@@ -185,7 +185,6 @@ iauth_server            { return IAUTH_SERVER; }
 iauth_port		{ return IAUTH_PORT; }
 stats_p_notice	        { return STATS_P_NOTICE; }
 glines                  { return GLINES; }
-topic_uh                { return TOPIC_UH; }
 modules                 { return MODULES; }
 module                  { return MODULE; }
 .		        { return yytext[0]; }

@@ -84,6 +84,7 @@ int   class_sendq_var;
 %token  EXCEED_LIMIT
 %token  GECOS
 %token  GLINE
+%token  GLINES
 %token  GLINE_TIME
 %token  GLINE_LOG
 %token  GLOBAL
@@ -168,10 +169,7 @@ int   class_sendq_var;
 %token  IAUTH_SERVER
 %token  IAUTH_PORT
 %token  STATS_P_NOTICE
-%token  ADMIN
 %token  INVITE_PLUS_I_ONLY
-%token  GLINES
-%token  TOPIC_UH
 %token  MODULE
 %token  MODULES
 %token  HIDECHANOPS
@@ -1235,7 +1233,7 @@ general_item:       general_failed_oper_notice | general_show_failed_oper_id |
                     general_short_motd | general_no_oper_flood |
 	            general_iauth_server |
                     general_iauth_port | general_stats_p_notice |
-                    general_glines | general_topic_uh | general_gline_time |
+                    general_glines | general_gline_time |
 		    general_idletime |
 		    general_hide_server | general_hide_chanops |
                     general_message_locale | general_client_exit
@@ -1434,15 +1432,6 @@ general_glines: GLINES '=' TYES ';'
 general_message_locale: MESSAGE_LOCALE '=' QSTRING ';'
 {
         setenv("LANGUAGE", yylval.string, 1);
-} ;
-
-
-general_topic_uh: TOPIC_UH '=' TYES ';'
-{
-	ConfigFileEntry.topic_uh = 1;
-} | TOPIC_UH '=' TNO ';'
-{
-	ConfigFileEntry.topic_uh = 0;
 } ;
 
 general_gline_time: GLINE_TIME '=' NUMBER ';'
