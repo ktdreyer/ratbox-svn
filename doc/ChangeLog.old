@@ -1,3 +1,15 @@
+androsyn    2002/02/21 08:47:45 EST	(20020221_1)
+
+  Modified files:
+    modules              m_svinfo.c 
+  Log:
+  Remove a call to time() and replace it with set_time()
+  
+  Revision  Changes    Path
+  1.32      +2 -2      ircd-hybrid-7/modules/m_svinfo.c
+
+
+
 wcampbel    2002/02/20 21:47:34 EST	(20020221_0)
 
   Modified files:
