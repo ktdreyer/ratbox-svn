@@ -68,9 +68,6 @@ static int valid_comment(char *comment);
 static int flush_write(struct Client *, FBFILE *, char *, char *);
 static int remove_temp_dline(const char *);
 
-char user[USERLEN + 2];
-char host[HOSTLEN + 2];
-
 /* mo_dline()
  * 
  *   parv[1] - dline to add

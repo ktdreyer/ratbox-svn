@@ -85,10 +85,6 @@ static void remove_permkline_match(struct Client *, const char *, const char *, 
 static int flush_write(struct Client *, FBFILE *, const char *, const char *);
 static int remove_temp_kline(const char *, const char *);
 
-char buffer[IRCD_BUFSIZE];
-char user[USERLEN + 2];
-char host[HOSTLEN + 2];
-
 /* mo_kline()
  *
  *   parv[1] - temp time or user@host
@@ -102,6 +98,9 @@ mo_kline(struct Client *client_p, struct Client *source_p,
 	 int parc, const char **parv)
 {
 	char def[] = "No Reason";
+	char user[USERLEN + 2];
+	char host[HOSTLEN + 2];
+	char buffer[IRCD_BUFSIZE];
 	char *reason = def;
 	char *oper_reason;
 	const char *current_date;
@@ -637,7 +636,6 @@ valid_tkline(struct Client *source_p, const char *p)
 static int
 find_user_host(struct Client *source_p, const char *userhost, char *luser, char *lhost)
 {
-	struct Client *target_p;
 	char *hostp;
 
 	hostp = strchr(userhost, '@');
