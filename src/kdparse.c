@@ -223,6 +223,7 @@ parse_resv_file(FILE * file)
 
 			aconf = make_conf();
 			aconf->status = CONF_RESV_CHANNEL;
+			aconf->port = 0;
 
 			DupString(aconf->name, host_field);
 			DupString(aconf->passwd, reason_field);
@@ -235,6 +236,7 @@ parse_resv_file(FILE * file)
 
 			aconf = make_conf();
 			aconf->status = CONF_RESV_NICK;
+			aconf->port = 0;
 
 			DupString(aconf->name, host_field);
 			DupString(aconf->passwd, reason_field);

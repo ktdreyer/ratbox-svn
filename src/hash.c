@@ -751,7 +751,10 @@ hash_find_resv(const char *name)
 		aconf = ptr->data;
 
 		if(!irccmp(name, aconf->name))
+		{
+			aconf->port++;
 			return aconf;
+		}
 	}
 
 	return NULL;

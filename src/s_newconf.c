@@ -582,7 +582,10 @@ find_nick_resv(const char *name)
 		aconf = ptr->data;
 
 		if(match_esc(aconf->name, name))
+		{
+			aconf->port++;
 			return aconf;
+		}
 	}
 
 	return NULL;

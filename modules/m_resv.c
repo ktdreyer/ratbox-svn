@@ -216,6 +216,7 @@ parse_resv(struct Client *source_p, const char *name,
 
 		aconf = make_conf();
 		aconf->status = CONF_RESV_CHANNEL;
+		aconf->port = 0;
 		DupString(aconf->name, name);
 		DupString(aconf->passwd, reason);
 		add_to_resv_hash(aconf->name, aconf);
@@ -273,6 +274,7 @@ parse_resv(struct Client *source_p, const char *name,
 
 		aconf = make_conf();
 		aconf->status = CONF_RESV_NICK;
+		aconf->port = 0;
 		DupString(aconf->name, name);
 		DupString(aconf->passwd, reason);
 		dlinkAddAlloc(aconf, &resv_conf_list);
