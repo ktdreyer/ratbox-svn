@@ -1,3 +1,11 @@
+*** 20001229_19 by lusky
+- added rm config.cache to make autoconf
+- fixed configure to find gettext() in /usr/local/lib/libintl.a
+- kludge in config.h so HAVE_GETTEXT follows HAVE_LIBINTL
+- custom.mo shouldn't be in the respository
+- removed HAVE_GETTEXT from m_info, USE_GETTEXT is what we care about
+
+
 *** 20001229_18 by davidt
 Stop LL leafs replying to MODEs from servers with another MODE..
 this should never happen, but it is currently (see bug #7 on hybzilla).
