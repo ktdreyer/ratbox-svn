@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+extern void outofmemory();
+
 #ifndef WE_ARE_MEMORY_C
 #undef strdup
 #undef malloc
