@@ -1,3 +1,32 @@
+leeh        2004/09/08 20:26:01 EDT	(20040909_0)
+
+  Modified files:
+    include              s_conf.h s_newconf.h 
+    modules              m_info.c 
+    modules/core         m_message.c users.c 
+    src                  newconf.c s_conf.c s_newconf.c 
+  Log:
+  - second half of my target change stuff.  This is the code that stores users
+    filling their targets (patricia for lookup, linked list for expiry),
+    and sends global ENCAPs about it.
+  
+    Basically, whenever a user fills their target list we (optionally, and not
+    for spoofed users) send a global ENCAP with the ip.  We also store it
+    internally.  When a user connects, we lookup their ip and apply them a
+    starting target limit if their ip is found.
+  
+  Revision  Changes    Path
+  7.298     +5 -0      ircd-ratbox/include/s_conf.h
+  7.41      +14 -0     ircd-ratbox/include/s_newconf.h
+  1.152     +96 -2     ircd-ratbox/modules/core/m_message.c
+  1.18      +8 -1      ircd-ratbox/modules/core/users.c
+  1.118     +20 -2     ircd-ratbox/modules/m_info.c
+  7.179     +3 -0      ircd-ratbox/src/newconf.c
+  7.492     +9 -1      ircd-ratbox/src/s_conf.c
+  7.59      +16 -0     ircd-ratbox/src/s_newconf.c
+
+
+
 leeh        2004/09/08 19:23:11 EDT	(20040908_0)
 
   Modified files:
