@@ -500,6 +500,11 @@ serverinfo_description: DESCRIPTION '=' QSTRING ';'
 
 serverinfo_network_name: NETWORK_NAME '=' QSTRING ';'
   {
+    char *p;
+
+    if((p = strchr(yylval.string, ' ')))
+      p = '\0';
+
     MyFree(ServerInfo.network_name);
     DupString(ServerInfo.network_name,yylval.string);
   };
