@@ -1,3 +1,9 @@
+*** 20001202_3 by db
+- recoded send_members in channel.c so it actually works
+  its still a dogs breakfast... but =better=
+
+
+
 *** 20001202_2 by db
 - connect bursts are still broken, but it works enough to 
   be usable. More debugging to do.
