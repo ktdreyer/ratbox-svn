@@ -498,6 +498,7 @@ pretty_mask(const char *idmask)
 
 	mask = LOCAL_COPY(idmask);
 	mask = check_string(mask);
+	collapse(mask);
 
 	nick = user = host = splat;
 
