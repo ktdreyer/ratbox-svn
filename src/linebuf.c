@@ -289,7 +289,14 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
 	  */
           bufline->overflow = 1;
           cpylen += linebuf_skip_crlf(ch, len);
+#if 0
           linebuf_terminate_crlf(bufhead, bufline);
+#endif
+	  *bufch++ = '\r';
+	  *bufch++ = '\n';
+	  *bufch = '\0';
+	  bufhead->len += 4;
+	           
 	  /* NOTE: We're finishing, so ignore updating len */
 	  bufline->terminated = 1;
 	  break;
