@@ -683,7 +683,8 @@ static int     do_numeric(
       if (IsMe(acptr)) 
         {
           sendto_realops_flags(FLAGS_ALL,
-			       "*** numeric to me? are you on drugs honey?");
+			       "*** %s numeric to me? are you on drugs honey?",
+			       numeric);
           return 0;
         }
       else if (acptr->from == cptr) 

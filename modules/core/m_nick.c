@@ -809,8 +809,8 @@ int change_local_nick(struct Client *cptr, struct Client *sptr,
 	{
 	  add_history(sptr,1);
 	  
-	  sendto_ll_serv_butone(cptr, sptr, 0, ":%s NICK %s :%lu",
-				sptr->name, nick, sptr->tsinfo);
+          sendto_ll_serv_butone(cptr, sptr, 0, ":%s NICK %s :%lu",
+                                sptr->name, nick, sptr->tsinfo);
 	}
     }
   else
