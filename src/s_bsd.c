@@ -64,6 +64,7 @@
  * Stuff for poll()
  */
 #ifdef USE_POLL
+#define CONNECTFAST
 #include <sys/poll.h>
 #endif
 
@@ -1213,10 +1214,6 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
                 pfd->fd     = thisfd;           \
                 pfd->events = 0;                \
         }
-
-#if defined(SOL20)
-#define CONNECTFAST
-#endif
 
 int read_message(time_t delay, unsigned char mask)
 {
