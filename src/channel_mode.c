@@ -1259,7 +1259,7 @@ chm_limit(struct Client *client_p, struct Client *source_p,
           char **parv, int *errors, int alev, int dir, char c, void *d,
           const char *chname)
 {
-  int i, limit;
+  int limit;
   char *lstr;
 
   if (alev < CHACCESS_CHANOP)
@@ -1316,7 +1316,6 @@ chm_key(struct Client *client_p, struct Client *source_p,
         char **parv, int *errors, int alev, int dir, char c, void *d,
         const char *chname)
 {
-  int i;
   char *key;
 
   if (alev < CHACCESS_CHANOP)

@@ -53,7 +53,6 @@ BlockHeap *channel_heap;
 BlockHeap *ban_heap;
 BlockHeap *topic_heap;
 
-static void free_channel_list(dlink_list * list);
 static int  sub1_from_channel(struct Channel *);
 static void destroy_channel(struct Channel *);
 
@@ -426,7 +425,7 @@ sub1_from_channel(struct Channel *chptr)
  * output       - NONE
  * side effects -
  */
-static void
+void
 free_channel_list(dlink_list * list)
 {
   dlink_node *ptr;
@@ -435,8 +434,6 @@ free_channel_list(dlink_list * list)
 
   DLINK_FOREACH_SAFE(ptr, next_ptr, list->head)
   {
-    next_ptr = ptr->next;
-
     actualBan = ptr->data;
     MyFree(actualBan->banstr);
     MyFree(actualBan->who);
@@ -444,6 +441,9 @@ free_channel_list(dlink_list * list)
 
     free_dlink_node(ptr);
   }
+
+  list->head = list->tail = NULL;
+  list->length = 0;
 }
 
 /*
@@ -515,10 +515,6 @@ destroy_channel(struct Channel *chptr)
 
   /* Free the topic */
   free_topic(chptr);
-  /* This should be redundant at this point but JIC */
-  chptr->banlist.head = chptr->exceptlist.head = chptr->invexlist.head = NULL;
-
-  chptr->banlist.tail = chptr->exceptlist.tail = chptr->invexlist.tail = NULL;
 
   dlinkDelete(&chptr->node, &global_channel_list);
 

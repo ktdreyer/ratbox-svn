@@ -222,19 +222,25 @@ static void ms_sjoin(struct Client *client_p,
   }
 #endif
 
-  /*
-   * XXX - this no doubt destroys vchans
-   */
   if (isnew)
     chptr->channelts = tstosend = newts;
+
   /* Remote is sending users to a permanent channel.. we need to drop our
    * version and use theirs, to keep compatibility -- fl */
   else if (chptr->users == 0 && parv[4+args][0])
     {
        keep_our_modes = NO;
        chptr->channelts = tstosend = newts;
+
+       /* drop +beI lists to avoid desync as they will not be burst
+        * with the sjoin --fl
+        */
+       free_channel_list(&chptr->banlist);
+       free_channel_list(&chptr->exceptlist);
+       free_channel_list(&chptr->invexlist);
     }
-  /* They're not sending users, lets just ignore it and carry on */
+
+  /* remote is bursting a persistent channel to us, ignore it */
   else if (chptr->users == 0 && !parv[4+args][0])
     return;
 
@@ -280,8 +286,10 @@ static void ms_sjoin(struct Client *client_p,
 
   /* Don't reveal the ops, only to remove them all */
   if (keep_our_modes)
+  {
     if (!(MODE_HIDEOPS & mode.mode) && (MODE_HIDEOPS & oldmode->mode))
       sync_channel_oplists(chptr, MODE_ADD);
+  }
 #endif
 
   set_final_mode(&mode,oldmode);

@@ -99,6 +99,8 @@ extern void    add_user_to_channel(struct Channel *chptr,
 extern int     remove_user_from_channel(struct Channel *chptr,
 					struct Client *who);
 
+extern void free_channel_list(dlink_list *);
+
 extern int     check_channel_name(const char* name);
 
 extern void    channel_member_names( struct Client *source_p,

@@ -47,7 +47,7 @@ extern int   do_remote_user(char* ,struct Client* ,struct Client*,
 			    char* ,char *,char *,char *,char *);
 
 extern int   user_modes_from_c_to_bitmask[];
-extern void  show_isupport(struct Client *);
+extern void  show_isupport(struct Client *, int);
 
 
 #endif
