@@ -1,3 +1,29 @@
+*** 20001108_8 by ejb
+Initial commit of loadable modules support.  right now we can
+load modules, but not unload them.  support for adding commands
+via modules is there, and about 50% of the m_*.c has been ported.
+currently ircd will neither compile nor link properly, but i 
+wanted to commit this as soon as possible.. from now on if you
+modify m_*.c please edit the version in modules/ rather than
+in src/, since src/m_*.c will disappear soon.
+
+i'll try to make another commit tomorrow that fixes compilation,
+and allows ircd to be used ..
+
+also we need a modules.txt that explains how to write modules.
+
+so, if you need a working ircd now, sorry, you'll have to wait
+until tomorrow :/
+
+(btw if anyone feels like porting the rest of modules/m_*.c (i've done
+up to m_operwall.c so far), just look at one of the existing ones
+as an example, all you need is the struct Message and _modinit()
+function).  as for global symbols defined in modules (this is why
+ircd won't link right now), i have a solution to this which i can
+hopefully also commit tomorrow.
+
+
+
 *** 20001108_7 by ejb
 Directory /cvsroot/ircd-hybrid-7/modules added to the repository
 
