@@ -114,7 +114,8 @@ int SendMessageFile(struct Client *source_p, MessageFile *motdToPrint)
     case OPER_MOTD:
       if (motdToPrint->contentsOfFile == (MessageFileLine *)NULL)
         {
-          sendto_one(source_p, ":%s NOTICE %s :No OPER MOTD", me.name, source_p->name);
+/*          sendto_one(source_p, ":%s NOTICE %s :No OPER MOTD", me.name,
+ *          source_p->name); */
           return -1;
         }
       sendto_one(source_p,":%s NOTICE %s :Start of OPER MOTD",me.name,source_p->name);
