@@ -1,3 +1,41 @@
+androsyn    2002/05/24 19:48:39 EDT	(20020525_3)
+
+  Modified files:
+    contrib              Makefile.in example_module.c 
+                         m_clearchan.c m_flags.c m_force.c 
+                         m_jupe.c m_ltrace.c m_map.c m_mkpasswd.c 
+                         m_ojoin.c m_opme.c m_tburst.c 
+                         spy_admin_notice.c spy_info_notice.c 
+                         spy_links_notice.c spy_motd_notice.c 
+                         spy_stats_notice.c spy_stats_p_notice.c 
+                         spy_trace_notice.c spy_whois_notice.c 
+  Log:
+  Update contrib for the header changes and update .depend as well
+  
+  Revision  Changes    Path
+  1.33      +1 -1      ircd-hybrid-7/contrib/Makefile.in
+  1.6       +2 -3      ircd-hybrid-7/contrib/example_module.c
+  1.29      +2 -2      ircd-hybrid-7/contrib/m_clearchan.c
+  1.9       +2 -4      ircd-hybrid-7/contrib/m_flags.c
+  1.7       +2 -2      ircd-hybrid-7/contrib/m_force.c
+  1.29      +2 -2      ircd-hybrid-7/contrib/m_jupe.c
+  1.2       +2 -3      ircd-hybrid-7/contrib/m_ltrace.c
+  1.12      +2 -4      ircd-hybrid-7/contrib/m_map.c
+  1.9       +2 -1      ircd-hybrid-7/contrib/m_mkpasswd.c
+  1.7       +2 -1      ircd-hybrid-7/contrib/m_ojoin.c
+  1.25      +2 -2      ircd-hybrid-7/contrib/m_opme.c
+  1.8       +2 -2      ircd-hybrid-7/contrib/m_tburst.c
+  1.6       +2 -2      ircd-hybrid-7/contrib/spy_admin_notice.c
+  1.6       +2 -2      ircd-hybrid-7/contrib/spy_info_notice.c
+  1.11      +2 -2      ircd-hybrid-7/contrib/spy_links_notice.c
+  1.6       +2 -2      ircd-hybrid-7/contrib/spy_motd_notice.c
+  1.12      +2 -2      ircd-hybrid-7/contrib/spy_stats_notice.c
+  1.4       +2 -2      ircd-hybrid-7/contrib/spy_stats_p_notice.c
+  1.6       +2 -2      ircd-hybrid-7/contrib/spy_trace_notice.c
+  1.10      +2 -2      ircd-hybrid-7/contrib/spy_whois_notice.c
+
+
+
 androsyn    2002/05/24 19:40:18 EDT	(20020525_2)
 
   Modified files:
