@@ -31,7 +31,7 @@
 #include "internal.h"
 
 int vbuf__append_quoted1035(vbuf *vb, const byte *buf, int len) {
-  char qbuf[10];
+  byte qbuf[10];
   int i, ch;
   
   while (len) {
@@ -39,14 +39,14 @@ int vbuf__append_quoted1035(vbuf *vb, const byte *buf, int len) {
     for (i=0; i<len; i++) {
       ch= buf[i];
       if (ch <= ' ' || ch >= 127) {
-	ircsprintf(qbuf,"\\%03o",ch);
+	ircsprintf((char *)qbuf,"\\%03o",ch);
 	break;
       } else if (!ctype_domainunquoted(ch)) {
-	ircsprintf(qbuf,"\\%c",ch);
+	ircsprintf((char *)qbuf,"\\%c",ch);
 	break;
       }
     }
-    if (!adns__vbuf_append(vb,buf,i) || !adns__vbuf_append(vb,qbuf,strlen(qbuf)))
+    if (!adns__vbuf_append(vb,buf,i) || !adns__vbuf_append(vb,qbuf,strlen((const char *)qbuf)))
       return 0;
     if (i<len) i++;
     buf+= i;
@@ -75,7 +75,7 @@ adns_status adns__findlabel_next(findlabel_state *fls,
   int lablen, jumpto;
   const char *dgram;
 
-  dgram= fls->dgram;
+  dgram= (const char *)fls->dgram;
   for (;;) {
     if (fls->cbyte >= fls->dglen) goto x_truncated;
     if (fls->cbyte >= fls->max) goto x_badresponse;
@@ -114,7 +114,7 @@ adns_status adns__findlabel_next(findlabel_state *fls,
 }
 
 adns_status adns__parse_domain(adns_state ads, int serv, adns_query qu,
-			       vbuf *vb, adns_queryflags flags,
+			       vbuf *vb, parsedomain_flags flags,
 			       const byte *dgram, int dglen, int *cbyte_io, int max) {
   findlabel_state fls;
   
@@ -138,7 +138,7 @@ adns_status adns__parse_domain_more(findlabel_state *fls, adns_state ads,
     if (first) {
       first= 0;
     } else {
-      if (!adns__vbuf_append(vb,".",1)) return adns_s_nomemory;
+      if (!adns__vbuf_append(vb,(const byte *)".",1)) return adns_s_nomemory;
     }
     if (flags & pdf_quoteok) {
       if (!vbuf__append_quoted1035(vb,dgram+labstart,lablen))
@@ -155,7 +155,7 @@ adns_status adns__parse_domain_more(findlabel_state *fls, adns_state ads,
 	return adns_s_nomemory;
     }
   }
-  if (!adns__vbuf_append(vb,"",1)) return adns_s_nomemory;
+  if (!adns__vbuf_append(vb,(const byte *)"",1)) return adns_s_nomemory;
   return adns_s_ok;
 }
 	

@@ -294,7 +294,7 @@ static adns_status cs_in6addr(vbuf *vb, const void *datap) {
 }
 #endif
 static adns_status cs_inaddr(vbuf *vb, const void *datap) {
-  const unsigned char *rr= datap;
+  const char *rr= datap;
   const char *ia;
 
   ia= inetntoa(rr); assert(ia);
@@ -350,7 +350,7 @@ static adns_status csp_addr(vbuf *vb, const adns_rr_addr *rrp) {
   switch (rrp->addr.sa.sa_family) {
   case AF_INET:
     CSP_ADDSTR("INET ");
-    ia= inetntoa((unsigned char *)&rrp->addr.inet.sin_addr); assert(ia);
+    ia= inetntoa((char *)&rrp->addr.inet.sin_addr); assert(ia);
     CSP_ADDSTR(ia);
     break;
 #ifdef IPV6
@@ -988,13 +988,13 @@ static adns_status pap_mailbox822(const parseinfo *pai, int *cbyte_io, int max,
 
   if (needquote || neednorm) {
     r= adns__vbuf_ensure(vb, lablen+needquote+4); if (!r) R_NOMEM;
-    adns__vbuf_appendq(vb,"\"",1);
+    adns__vbuf_appendq(vb,(const byte *)"\"",1);
     for (i=0, needquote=0, p= pai->dgram+labstart; i<lablen; i++, p++) {
       c= *p;
-      if (c == '"' || c=='\\') adns__vbuf_appendq(vb,"\\",1);
+      if (c == '"' || c=='\\') adns__vbuf_appendq(vb,(const byte *)"\\",1);
       adns__vbuf_appendq(vb,p,1);
     }
-    adns__vbuf_appendq(vb,"\"",1);
+    adns__vbuf_appendq(vb,(const byte *)"\"",1);
   } else {
     r= adns__vbuf_append(vb, pai->dgram+labstart, lablen); if (!r) R_NOMEM;
   }
