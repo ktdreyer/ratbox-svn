@@ -1,3 +1,8 @@
+*** 20001219_7 by ejb
+- made modlist return a numeric
+- put ms_quit back in (oops).
+
+
 *** 20001219_6 by ejb
 - added client_exit:
    *** Signoff: foo (Client Exit: foo)
