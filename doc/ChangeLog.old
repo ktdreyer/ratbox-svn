@@ -1,3 +1,8 @@
+*** 20001225_12 by toot
+. fixed soem paramcounts in modules
+. make GLINE_CLEANUP_TIME a bit more frequent
+
+
 *** 20001225_11 by wcampbel
 Document HUB CAPAB
 
