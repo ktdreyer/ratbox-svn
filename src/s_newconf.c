@@ -60,11 +60,15 @@ static dlink_list nd_list;	/* nick delay */
 
 static BlockHeap *nd_heap = NULL;
 
+static void expire_temp_rxlines(void *unused);
+static void expire_nd_entries(void *unused);
+
 void
 init_s_newconf(void)
 {
 	nd_heap = BlockHeapCreate(sizeof(struct nd_entry), ND_HEAP_SIZE);
 	eventAddIsh("expire_nd_entries", expire_nd_entries, NULL, 30);
+	eventAddIsh("expire_temp_rxlines", expire_temp_rxlines, NULL, 300);
 }
 
 void
@@ -681,7 +685,7 @@ valid_temp_time(const char *p)
 	return(result * 60);
 }
 
-void
+static void
 expire_temp_rxlines(void *unused)
 {
 	struct ConfItem *aconf;

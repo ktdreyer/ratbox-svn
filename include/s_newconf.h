@@ -218,8 +218,6 @@ extern int valid_wild_card_simple(const char *);
 extern int clean_resv_nick(const char *);
 time_t valid_temp_time(const char *p);
 
-extern void expire_temp_rxlines(void *unused);
-
 struct nd_entry
 {
 	char name[NICKLEN+1];
@@ -232,7 +230,6 @@ struct nd_entry
 
 extern void add_nd_entry(const char *name);
 extern void free_nd_entry(struct nd_entry *);
-extern void expire_nd_entries(void *unused);
 
 #endif
 
