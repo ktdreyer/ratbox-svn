@@ -215,8 +215,6 @@ m_message(int p_or_n,
     switch (targets[i].type)
     {
       case ENTITY_CHANNEL:
-        if (!IsPerson(source_p))
-          continue;
         msg_channel(p_or_n, command, client_p, source_p,
                     (struct Channel *)targets[i].ptr, parv[2]);
         break;
