@@ -233,7 +233,7 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
  * Comments: Check all connections for new connections and input data
  * that is to be processed. Also check for connections with data queued
  * and whether we can write it out.
- * Called to do the new-style IO, courtesy of of squid (like most of this
+ * Called to do the new-style IO, courtesy of squid (like most of this
  * new IO code). This routine handles the stuff we've hidden in
  * comm_setselect and fd_table[] and calls callbacks for IO ready
  * events.
