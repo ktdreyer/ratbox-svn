@@ -1,3 +1,16 @@
+davidt      2001/12/13 13:31:52 EST	(20011213_5)
+
+  Modified files:
+    doc/technical        cryptlink.txt 
+  Log:
+  - Updated cryptlinks specification as discussed with vulture and einride.
+    Note that this new protocol has not yet been implemented.
+  
+  Revision  Changes    Path
+  7.7       +127 -95   ircd-hybrid-7/doc/technical/cryptlink.txt
+
+
+
 androsyn    2001/12/13 13:11:56 EST	(20011213_4)
 
   Modified files:
