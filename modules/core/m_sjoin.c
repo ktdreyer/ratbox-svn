@@ -215,14 +215,15 @@ static int ms_sjoin(struct Client *cptr,
 	       * root, don't re-add it.
 	       */
 
-	      if(dlinkFind(&top_chptr->vchan_list,chptr) == NULL)
+	      if(dlinkFind(&top_chptr->vchan_list,chptr) == NULL &&
+                        (!strcmp(parv[1], subp + 1)))
 		{
 		  m = make_dlink_node();
 		  dlinkAdd(chptr, m, &top_chptr->vchan_list);
 		  chptr->root_chptr=top_chptr;
 		}
 	    }
-	  else
+	  else if(!strcmp(parv[1], subp + 1))
 	    {
 	      top_chptr = get_channel(sptr, (parv[2] + 1), CREATE);
 	      m = make_dlink_node();
