@@ -149,7 +149,7 @@ int dbuf_put(struct DBuf* dyn, const char* buf, size_t length)
 {
   struct DBufBuffer** h;
   struct DBufBuffer*  db;
-  int                 chunk;
+  size_t              chunk;
 
   assert(0 != dyn);
   assert(0 != buf);
