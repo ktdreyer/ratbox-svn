@@ -79,7 +79,9 @@ static char *parse_cryptserv_args(char *parv[], int parc, char *info,
 
 static void mr_cryptserv(struct Client*, struct Client*, int, char **);
 static void mr_cryptauth(struct Client*, struct Client*, int, char **);
+#if 0
 static void m_cryptkey(struct Client*, struct Client*, int, char **);         
+#endif
 
 struct Message cryptserv_msgtab = {
   "CRYPTSERV", 0, 3, 0, MFLG_SLOW | MFLG_UNREG, 0,
@@ -151,11 +153,11 @@ static void mr_cryptauth(struct Client *client_p, struct Client *source_p,
   if (!client_p->localClient->in_cipher)
   {
     sendto_realops_flags(FLAGS_ADMIN,
-          "Unauthorized server connection attempt from %s: invalid cipher ",
-          get_client_name(client_p, HIDE_IP), client_p->name);
+          "Unauthorized server connection attempt from %s: invalid cipher",
+          get_client_name(client_p, HIDE_IP));
     sendto_realops_flags(FLAGS_NOTADMIN,
-          "Unauthorized server connection attempt from %s: invalid cipher ",
-          get_client_name(client_p, MASK_IP), client_p->name);
+          "Unauthorized server connection attempt from %s: invalid cipher",
+          get_client_name(client_p, MASK_IP));
     exit_client(client_p, client_p, &me, "Invalid cipher");
     return;
   }

@@ -26,3 +26,4 @@ extern void write_net(void);
 extern void read_net(void);
 extern void process_recvq(unsigned char *, int);
 extern void process_sendq(unsigned char *, int);
+extern void send_data_blocking(int fd, unsigned char *data, int datalen);
