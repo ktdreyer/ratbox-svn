@@ -2338,13 +2338,7 @@ void    add_invite(struct Client *cptr,struct Channel *chptr)
    */
   if (list_length(cptr->user->invited) >= MAXCHANNELSPERUSER)
     {
-      /*                This forgets the channel side of invitation     -Vesa
-                        inv = cptr->user->invited;
-                        cptr->user->invited = inv->next;
-                        free_link(inv);
-*/
       del_invite(cptr, cptr->user->invited->value.chptr);
- 
     }
   /*
    * add client to channel invite list
