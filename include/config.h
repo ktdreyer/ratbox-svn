@@ -76,7 +76,6 @@
  * (unless "." is in your exec path). -Rodder
  *
  * Leave KPATH undefined if you want klines in main conf file.
- * -Dianora
  *
  * Leave MSGPATH undefined if you don't want to include gettext() support
  * for alternate message files -dt
@@ -232,14 +231,6 @@
  */
 #define MAXSENDQLENGTH 7050000    /* Recommended value: 7050000 for efnet */
 
-/* IRC_UID IRC_GID - user and group id ircd should switch to if run as root
- * If you start the server as root but wish to have it run as another user,
- * define IRC_UID to that UID.  This should only be defined if you are running
- * as root and even then perhaps not.
- */
-#define IRC_UID 1001
-#define IRC_GID 31
-
 /* CLIENT_FLOOD - client excess flood threshold
  * this controls the number of bytes the server will allow a client to
  * send to the server without processing before disconnecting the client for
@@ -333,11 +324,6 @@
 #define HANGONRETRYDELAY 60     /* Recommended value: 30-60 seconds */
 #define HANGONGOODLINK 3600     /* Recommended value: 30-60 minutes */
 
-/* WRITEWAITDELAY - Number of seconds to wait for write to
- * complete if stuck.
- */
-#define WRITEWAITDELAY     10   /* Recommended value: 15 */
-
 /* CONNECTTIMEOUT -
  * Number of seconds to wait for a connect(2) call to complete.
  * NOTE: this must be at *LEAST* 10.  When a client connects, it has
@@ -355,10 +341,10 @@
 /* MAXCHANNELSPERUSER -
  * Max number of channels a user is allowed to join.
  */
-#define MAXCHANNELSPERUSER  10  /* Recommended value: 10 */
+#define MAXCHANNELSPERUSER  15  /* Recommended value: 15 */
 
 /*
- * ANTI_FLOODBOT code
+ * ANTI_FLOOD code
  * The defaults =should= be fine for the initial timers/counters etc.
  * they are all changeable at run time anyway
  *
@@ -390,7 +376,6 @@
  * The idea is, some spambots exit with their spam, thus advertising
  * this way.
  * (idea due to ThaDragon, I just couldn't find =his= code)
- * - Dianora
  */
 #undef ANTI_SPAM_EXIT_MESSAGE
 /* 300 is five minutes, seems reasonable */
@@ -417,30 +402,6 @@
 
 /* ----------------- archaic and/or broken section -------------------- */
 #undef DNS_DEBUG
-
-/* SETUID_ROOT - plock - keep the ircd from being swapped out.
- * BSD swapping criteria do not match the requirements of ircd.
- * Note that the server needs to be setuid root for this to work.
- * The result of this is that the text segment of the ircd will be
- * locked in core; thus swapper cannot touch it and the behavior
- * noted above will not occur.  This probably doesn't work right
- * anymore.  IRCD_UID MUST be defined correctly if SETUID_ROOT.
- */
-#undef SETUID_ROOT
- 
-/* SUN_GSO_BUG support removed
- *
- * if you still have a machine with this bug, it doesn't belong on EFnet
- */
-
-/* CHROOTDIR - chroot() before reading conf
- * Define for value added security if you are paranoid.
- * All files you access must be in the directory you define as DPATH.
- * (This may effect the PATH locations above, though you can symlink it)
- *
- * You may want to define IRC_UID and IRC_GID
- */
-#undef CHROOTDIR
 
 /* ------------------------- END CONFIGURATION SECTION -------------------- */
 #define MAX_CLIENTS INIT_MAXCLIENTS

@@ -109,7 +109,7 @@ int m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 		      me.name, parv[1]);
 	      
 	  sendto_one(uplink, ":%s MODE %s",
-		     me.name, parv[1]);
+		     sptr->name, parv[1]);
 	  return 0;
 	}
       else

@@ -461,8 +461,6 @@ static void write_pidfile(void)
 
 int main(int argc, char *argv[])
 {
-  uid_t       uid;
-  uid_t       euid;
   time_t      delay = 0;
   struct ConfItem*  aconf;
 
@@ -504,95 +502,22 @@ int main(int argc, char *argv[])
 
   initialize_global_set_options();
 
-#ifdef SETUID_ROOT
-  if (setuid(IRCD_UID) < 0)
-    exit(-1); /* blah.. this should be done better */
-#endif
-
-  uid = getuid();
-  euid = geteuid();
-
   ConfigFileEntry.dpath = DPATH;
   ConfigFileEntry.configfile = CPATH;   /* Server configuration file */
   ConfigFileEntry.klinefile = KPATH;    /* Server kline file */
   ConfigFileEntry.dlinefile = DLPATH;   /* dline file */
   ConfigFileEntry.glinefile = GPATH;    /* gline log file */
 
-
-#ifdef  CHROOTDIR
-  if (chdir(DPATH))
-    {
-      perror("chdir " DPATH );
-      exit(-1);
-    }
-
-  if (chroot(DPATH))
-    {
-      fprintf(stderr,"ERROR:  Cannot chdir/chroot\n");
-      exit(5);
-    }
-#endif /*CHROOTDIR*/
-
   myargv = argv;
   umask(077);                /* better safe than sorry --SRB */
 
-  setuid(uid);
   parse_command_line(argc, argv); 
 
-#ifndef CHROOT
   if (chdir(ConfigFileEntry.dpath))
     {
       perror("chdir");
       exit(-1);
     }
-#endif
-
-#if !defined(IRC_UID)
-  if ((uid != euid) && !euid)
-    {
-      fprintf(stderr,
-              "ERROR: do not run ircd setuid root. " \
-              "Make it setuid a normal user.\n");
-      exit(-1);
-    }
-#endif
-
-#if !defined(CHROOTDIR) || (defined(IRC_UID) && defined(IRC_GID))
-
-  setuid(euid);
-
-  if (getuid() == 0)
-    {
-# if defined(IRC_UID) && defined(IRC_GID)
-
-      /* run as a specified user */
-      fprintf(stderr,"WARNING: running ircd with uid = %d\n", IRC_UID);
-      fprintf(stderr,"         changing to gid %d.\n",IRC_GID);
-
-      /* setgid/setuid previous usage noted unsafe by ficus@neptho.net
-       */
-
-      if (setgid(IRC_GID) < 0)
-        {
-          fprintf(stderr,"ERROR: can't setgid(%d)\n", IRC_GID);
-          exit(-1);
-        }
-
-      if(setuid(IRC_UID) < 0)
-        {
-          fprintf(stderr,"ERROR: can't setuid(%d)\n", IRC_UID);
-          exit(-1);
-        }
-
-#else
-      /* check for setuid root as usual */
-      fprintf(stderr,
-              "ERROR: do not run ircd setuid root. " \
-              "Make it setuid a normal user.\n");
-      return -1;
-# endif 
-            } 
-#endif /*CHROOTDIR/UID/GID*/
 
   setup_signals();
 

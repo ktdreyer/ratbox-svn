@@ -110,7 +110,7 @@ int   class_redirport_var;
 %token  LEAF_MASK
 %token  LISTEN
 %token  LOGGING
-%token  LOGPATH
+%token  T_LOGPATH
 %token  LOG_LEVEL
 %token  MAX_NUMBER
 %token  MAXIMUM_LINKS
@@ -373,7 +373,7 @@ logging_item:           logging_path | logging_oper_log |
                         logging_gline_log | logging_log_level |
 			error
 
-logging_path:           LOGPATH '=' QSTRING ';' 
+logging_path:           T_LOGPATH '=' QSTRING ';' 
                         {
                         };
 

@@ -698,7 +698,8 @@ static int     do_numeric(
       */
       if (IsMe(acptr)) 
         {
-          /* sendto_realops(...); ? */
+          sendto_realops_flags(FLAGS_ALL,
+			       "*** numeric to me? are you on drugs honey?");
           return 0;
         }
       else if (acptr->from == cptr) 
@@ -708,7 +709,11 @@ static int     do_numeric(
            */
           return 0;
         }
-        sendto_anywhere(acptr, sptr, ":%s %s%s", numeric, parv[1], buffer);
+      /* Fake it for server hiding, if its our client */
+      if(MyClient(acptr) && !IsOper(acptr))
+	sendto_one(acptr, ":%s %s%s", me.name, numeric, buffer);
+      else
+        sendto_one(acptr, ":%s %s%s", sptr->name, numeric, buffer);
         return 0;
       }
       else if ((chptr = hash_find_channel(parv[1], (struct Channel *)NULL)))
@@ -721,9 +726,9 @@ static int     do_numeric(
 
 /* 
  * m_not_oper
- * inputs	-
+ * inputs	- 
  * output	-
- * side effects	-
+ * side effects	- just returns a nastyogram to given user
  */
 int m_not_oper(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 {

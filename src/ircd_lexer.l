@@ -130,7 +130,7 @@ leaf_mask	{ return LEAF_MASK; }
 listen		{ return LISTEN; }
 log_level	{ return LOG_LEVEL; }
 logging         { return LOGGING; }
-logpath         { return LOGPATH; }
+logpath         { return T_LOGPATH; }
 max_number	{ return MAX_NUMBER; }
 maximum_links   { return MAXIMUM_LINKS; }
 message_locale	{ return MESSAGE_LOCALE; }
