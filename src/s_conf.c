@@ -3875,11 +3875,11 @@ static void conf_add_q_line(struct ConfItem *aconf)
 	   */
 	  strcpy(chptr->chname, aconf->name);
 	  chptr->mode.mode = MODE_JUPED;
-	  if (channel)
-	    channel->prevch = chptr;
+	  if (GlobalChannelList)
+	    GlobalChannelList->prevch = chptr;
 	  chptr->prevch = NULL;
-	  chptr->nextch = channel;
-	  channel = chptr;
+	  chptr->nextch = GlobalChannelList;
+	  GlobalChannelList = chptr;
 	  /* JIC */
 	  chptr->channelts = CurrentTime;
 	  (void)add_to_channel_hash_table(aconf->name, chptr);
