@@ -145,8 +145,11 @@ void dns_do_callbacks(void)
       case 0:
         /* Looks like we got a winner */            
         assert(query->callback != NULL);
-        query->query = NULL;
-        query->callback(query->ptr, answer);
+        if(query->callback != NULL)
+        {
+          query->query = NULL;
+          query->callback(query->ptr, answer);
+        }
         break;
 	
       case EAGAIN:
@@ -155,9 +158,12 @@ void dns_do_callbacks(void)
 	
       default:
         assert(query->callback != NULL);
-        /* Awww we failed, what a shame */
-        query->query = NULL;
-        query->callback(query->ptr, NULL);      
+        if(query->callback != NULL)
+        {
+          /* Awww we failed, what a shame */
+          query->query = NULL;
+          query->callback(query->ptr, NULL);      
+        }
         break;
     } 
   }
