@@ -1,3 +1,8 @@
+*** 20000116_2 by db
+- oops. I changed Makefile rather than Makefile.in
+
+
+
 *** 20000116_1 by db
 - copyright touch ups
 - missing -ll in Makefile
