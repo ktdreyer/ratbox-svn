@@ -1056,7 +1056,8 @@ sendto_anywhere(struct Client *to, struct Client *from,
       linebuf_putmsg(&linebuf, pattern, &args, ":%s!%s@%s ", from->name,
                      from->username, from->host);
   }
-  else {
+  else
+  {
     if(IsCapable(to->from, CAP_UID))
       linebuf_putmsg(&linebuf, pattern, &args, ":%s ", ID(from));
     else

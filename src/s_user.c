@@ -504,8 +504,11 @@ register_local_user(struct Client *client_p, struct Client *source_p,
   if(m != NULL)
   {
     dlinkMoveNode(m, &unknown_list, &lclient_list);
-  } else {
-     sendto_realops_flags(UMODE_ALL, L_ADMIN, "Tried to register %s (%s@%s) but I couldn't find it?!?", 
+  }
+  else
+  {
+     sendto_realops_flags(UMODE_ALL, L_ADMIN,
+                    "Tried to register %s (%s@%s) but I couldn't find it?!?", 
      			  nick, source_p->username, source_p->host);
      exit_client(client_p, source_p, &me, "Client exited");
      return CLIENT_EXITED;
