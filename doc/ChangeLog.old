@@ -1,3 +1,22 @@
+androsyn    2002/06/25 23:05:48 EDT	(20020626_2)
+
+  Modified files:
+    include              ircd.h s_log.h 
+    src                  ircd.c ircd_signal.c s_conf.c s_log.c 
+  Log:
+  Make ircd.log close and open itself on rehash or SIGHUP.  Also clean up some
+  formatting
+  
+  Revision  Changes    Path
+  7.51      +1 -0      ircd-hybrid-7/include/ircd.h
+  7.10      +1 -0      ircd-hybrid-7/include/s_log.h
+  7.237     +1 -1      ircd-hybrid-7/src/ircd.c
+  7.12      +10 -5     ircd-hybrid-7/src/ircd_signal.c
+  7.308     +1 -0      ircd-hybrid-7/src/s_conf.c
+  7.43      +28 -14    ircd-hybrid-7/src/s_log.c
+
+
+
 leeh        2002/06/25 19:08:36 EDT	(20020626_1)
 
   Modified files:
