@@ -88,7 +88,10 @@ static void m_help(struct Client *client_p, struct Client *source_p,
       last_used = CurrentTime;
     }
 
-  dohelp(source_p, UHPATH, parv[1], parv[0]);
+  if(parc > 1)
+    dohelp(source_p, UHPATH, parv[1], parv[0]);
+  else
+    dohelp(source_p, UHPATH, "", parv[0]);
 }
 
 /*
@@ -98,7 +101,10 @@ static void m_help(struct Client *client_p, struct Client *source_p,
 static void mo_help(struct Client *client_p, struct Client *source_p,
                    int parc, char *parv[])
 {
-  dohelp(source_p, HPATH, parv[1], parv[0]);
+  if(parc > 1)
+    dohelp(source_p, HPATH, parv[1], parv[0]);
+  else
+    dohelp(source_p, HPATH, "", parv[0]);
 }
 
 /*
@@ -110,7 +116,10 @@ static void mo_help(struct Client *client_p, struct Client *source_p,
 static void mo_uhelp(struct Client *client_p, struct Client *source_p,
                    int parc, char *parv[])
 {
-  dohelp(source_p, UHPATH, parv[1], parv[0]);
+  if(parc > 1)
+    dohelp(source_p, UHPATH, parv[1], parv[0]);
+  else
+    dohelp(source_p, UHPATH, "", parv[0]);
 }
 
 static void dohelp(source_p, hpath, topic, nick)
