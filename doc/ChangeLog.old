@@ -1,3 +1,7 @@
+*** 20010926_2 by leeh
+- client_p is where we get data from, dont clear FLAGS_PINGSENT (jv)
+
+
 *** 20010926_1 by androsyn
 Added the mmap() check in autoconf that was discussed earlier.  Added a work around
 for balloc.c if mmap() isn't found.  I feel bad for the poor bastard who doesn't have
