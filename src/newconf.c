@@ -2586,6 +2586,12 @@ conf_set_channel_default_split_server_count(void *data)
 }
 
 static void
+conf_set_channel_default_split_delay(void *data)
+{
+	ConfigChannel.default_split_delay = *(unsigned int *) data;
+}
+
+static void
 conf_set_channel_no_create_on_split(void *data)
 {
 	ConfigChannel.no_create_on_split = *(unsigned int *) data;
@@ -3073,6 +3079,8 @@ newconf_init()
 		      conf_set_channel_default_split_user_count);
 	add_conf_item("channel", "default_split_server_count", CF_INT,
 		      conf_set_channel_default_split_server_count);
+	add_conf_item("channel", "default_split_delay", CF_TIME,
+		      conf_set_channel_default_split_delay);
 	add_conf_item("channel", "no_create_on_split", CF_YESNO,
 		      conf_set_channel_no_create_on_split);
 	add_conf_item("channel", "no_join_on_split", CF_YESNO, conf_set_channel_no_join_on_split);

@@ -271,6 +271,7 @@ struct config_channel_entry
 	int quiet_on_ban;
 	int default_split_server_count;
 	int default_split_user_count;
+	int default_split_delay;
 	int no_oper_resvs;
 };
 

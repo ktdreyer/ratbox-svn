@@ -426,6 +426,7 @@ initialize_global_set_options(void)
 
 	split_servers = ConfigChannel.default_split_server_count;
 	split_users = ConfigChannel.default_split_user_count;
+	GlobalSetOptions.split_delay = ConfigChannel.default_split_delay;
 
 	if(split_users && split_servers
 	   && (ConfigChannel.no_create_on_split || ConfigChannel.no_join_on_split))

@@ -1055,6 +1055,21 @@ check_spambot_warning(struct Client *source_p, const char *name)
 	}
 }
 
+/* finish_splitmode()
+ *
+ * inputs	-
+ * outputs	-
+ * side effects - splitmode is finished
+ */
+static void
+finish_splitmode(void *unused)
+{
+	splitmode = 0;
+
+	sendto_realops_flags(UMODE_ALL, L_ALL,
+			     "Network rejoined, deactivating splitmode");
+}
+
 /* check_splitmode()
  *
  * input	-
@@ -1074,15 +1089,20 @@ check_splitmode(void *unused)
 
 			sendto_realops_flags(UMODE_ALL, L_ALL,
 					     "Network split, activating splitmode");
-			eventAddIsh("check_splitmode", check_splitmode, NULL, 60);
+			eventAddIsh("check_splitmode", check_splitmode, NULL, 10);
 		}
 		else if(splitmode && (Count.server >= split_servers) &&
 			(Count.total >= split_users))
 		{
-			splitmode = 0;
+			/* splitmode ended, if we're delaying the
+			 * end of split, add an event, else finish it
+			 */
+			if(GlobalSetOptions.split_delay > 0)
+				eventAddOnce("finish_splitmode", finish_splitmode,
+					     NULL, GlobalSetOptions.split_delay);
+			else
+				finish_splitmode(NULL);
 
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "Network rejoined, deactivating splitmode");
 			eventDelete(check_splitmode, NULL);
 		}
 	}

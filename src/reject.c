@@ -62,7 +62,7 @@ reject_expires(void *unused)
 	patricia_node_t *pnode;
 	struct reject_data *rdata;
 	
-	PATRICIA_WALK_ALL(reject_tree->head, pnode)
+	PATRICIA_WALK(reject_tree->head, pnode)
 	{
 		rdata = pnode->data;
 		if(rdata->time + ConfigFileEntry.reject_duration < CurrentTime)
@@ -97,10 +97,19 @@ add_reject(struct Client *client_p)
 	if(ConfigFileEntry.reject_after_count == 0 || ConfigFileEntry.reject_ban_time == 0)
 		return;
 
-	pnode = make_and_lookup_ip(reject_tree, &client_p->localClient->ip, GET_SS_LEN(client_p->localClient->ip));
-	rdata = MyMalloc(sizeof(struct reject_data));
-	rdata->time = CurrentTime;
-	rdata->count = 1;
+	if((pnode = match_ip(reject_tree, &client_p->localClient->ip)) != NULL)
+	{
+		rdate = pnode->data;
+		rdata->time = CurrentTime;
+		rdata->count++;
+	}
+	else
+	{
+		pnode = make_and_lookup_ip(reject_tree, &client_p->localClient->ip, GET_SS_LEN(client_p->localClient->ip));
+		pnode->data = rdata = MyMalloc(sizeof(struct reject_data));
+		rdata->time = CurrentTime;
+		rdata->count = 1;
+	}
 }
 
 int
@@ -125,8 +134,6 @@ check_reject(struct Client *client_p)
 			dlinkAddAlloc(client_p, &delay_exit);
 			return 1;
 		}
-		/* They live for now.. */
-		rdata->count++;		
 	}	
 	/* Caller does what it wants */	
 	return 0;
