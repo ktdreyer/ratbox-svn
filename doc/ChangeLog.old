@@ -1,3 +1,16 @@
+leeh        2001/12/20 13:34:06 EST	(20011220_2)
+
+  Modified files:
+    modules              m_restart.c 
+  Log:
+  - SHOW_IP -> HIDE_IP
+  - removed a pointless ilog(), we have two others anyway.
+  
+  Revision  Changes    Path
+  1.19      +1 -2      ircd-hybrid-7/modules/m_restart.c
+
+
+
 leeh        2001/12/20 13:22:45 EST	(20011220_1)
 
   Modified files:
