@@ -52,6 +52,7 @@
 #include "patricia.h"
 #include "reject.h"
 #include "cache.h"
+#include "banconf.h"
 
 struct config_server_hide ConfigServerHide;
 
@@ -610,79 +611,13 @@ read_ircd_conf(int cold)
 void
 read_ban_confs(int cold)
 {
-	FILE *file;
-	const char *filename;
-
 	if(!cold)
 		clear_ban_confs();
 
-	filename = get_conf_name(KLINE_TYPE);
-
-	if((file = fopen(filename, "r")) == NULL)
-	{
-		if(cold)
-			ilog(L_MAIN, "Failed reading kline file %s", filename);
-		else
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "Can't open %s file klines could be missing!",
-					     filename);
-	}
-	else
-	{
-		parse_k_file(file);
-		fclose(file);
-	}
-
-	filename = get_conf_name(DLINE_TYPE);
-
-	if((file = fopen(filename, "r")) == NULL)
-	{
-		if(cold)
-			ilog(L_MAIN, "Failed reading dline file %s", filename);
-		else
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "Can't open %s file dlines could be missing!",
-					     filename);
-	}
-	else
-	{
-		parse_d_file(file);
-		fclose(file);
-	}
-	
-	filename = ConfigFileEntry.xlinefile;
-
-	if((file = fopen(filename, "r")) == NULL)
-	{
-		if(cold)
-			ilog(L_MAIN, "Failed reading xline file %s", filename);
-		else
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "Can't open %s file xlines could be missing!",
-					     filename);
-	}
-	else
-	{
-		parse_x_file(file);
-		fclose(file);
-	}
-
-	filename = get_conf_name(RESV_TYPE);
-
-	if((file = fopen(filename, "r")) == NULL)
-	{
-		if(cold)
-			ilog(L_MAIN, "Failed reading resv file %s", filename);
-		else
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "Can't open %s file resvs could be missing!",
-					     filename);
-	}
-	else
-	{
-		parse_resv_file(file);
-		fclose(file);
-	}
+	read_kline_conf(ConfigFileEntry.klinefile);
+	read_dline_conf(ConfigFileEntry.dlinefile);
+	read_xline_conf(ConfigFileEntry.xlinefile);
+	read_resv_conf(ConfigFileEntry.resvfile);
 }
 
 /* write_confitem()

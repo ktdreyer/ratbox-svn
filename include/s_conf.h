@@ -330,11 +330,6 @@ extern int rehash_ban(int);
 extern void conf_add_class_to_conf(struct ConfItem *);
 extern void conf_add_class(struct ConfItem *, int);
 
-/* XXX consider moving these into kdparse.h */
-extern void parse_k_file(FILE * fb);
-extern void parse_d_file(FILE * fb);
-extern void parse_x_file(FILE * fb);
-extern void parse_resv_file(FILE *);
 extern char *getfield(char *newline);
 
 extern char *get_oper_name(struct Client *client_p);
