@@ -50,13 +50,13 @@
  * Contributed by James L. Davis
  */
 
-static struct HashEntry clientTable[U_MAX];
-static struct HashEntry channelTable[CH_MAX];
-static struct HashEntry idTable[U_MAX];
-static struct HashEntry resvTable[R_MAX];
-static struct HashEntry hostTable[HOST_MAX];
-static struct HashEntry xlineTable[R_MAX];
-static struct HashEntry helpTable[HELP_MAX];
+static dlink_list clientTable[U_MAX];
+static dlink_list channelTable[CH_MAX];
+static dlink_list idTable[U_MAX];
+static dlink_list resvTable[R_MAX];
+static dlink_list hostTable[HOST_MAX];
+static dlink_list xlineTable[R_MAX];
+static dlink_list helpTable[HELP_MAX];
 
 /* XXX move channel hash into channel.c or hash channel stuff in channel.c
  * into here eventually -db
@@ -66,19 +66,19 @@ extern BlockHeap *channel_heap;
 size_t
 hash_get_channel_table_size(void)
 {
-	return sizeof(struct HashEntry) * CH_MAX;
+	return sizeof(dlink_list) * CH_MAX;
 }
 
 size_t
 hash_get_client_table_size(void)
 {
-	return sizeof(struct HashEntry) * U_MAX;
+	return sizeof(dlink_list) * U_MAX;
 }
 
 size_t
 hash_get_resv_table_size(void)
 {
-	return sizeof(struct HashEntry) * R_MAX;
+	return sizeof(dlink_list) * R_MAX;
 }
 
 /*
@@ -118,13 +118,13 @@ hash_get_resv_table_size(void)
 void
 init_hash(void)
 {
-	memset(clientTable, 0, sizeof(struct HashEntry) * U_MAX);
-	memset(idTable, 0, sizeof(struct HashEntry) * U_MAX);
-	memset(channelTable, 0, sizeof(struct HashEntry) * CH_MAX);
-	memset(hostTable, 0, sizeof(struct HashEntry) * HOST_MAX);
-	memset(resvTable, 0, sizeof(struct HashEntry) * R_MAX);
-	memset(xlineTable, 0, sizeof(struct HashEntry) * R_MAX);
-	memset(helpTable, 0, sizeof(struct HashEntry) * HELP_MAX);
+	memset(clientTable, 0, sizeof(dlink_list) * U_MAX);
+	memset(idTable, 0, sizeof(dlink_list) * U_MAX);
+	memset(channelTable, 0, sizeof(dlink_list) * CH_MAX);
+	memset(hostTable, 0, sizeof(dlink_list) * HOST_MAX);
+	memset(resvTable, 0, sizeof(dlink_list) * R_MAX);
+	memset(xlineTable, 0, sizeof(dlink_list) * R_MAX);
+	memset(helpTable, 0, sizeof(dlink_list) * HELP_MAX);
 }
 
 /* hash_nick()
@@ -258,10 +258,8 @@ add_to_id_hash(const char *name, struct Client *client_p)
 		return;
 
 	hashv = hash_id(name);
-	dlinkAddAlloc(client_p, &idTable[hashv].list);
+	dlinkAddAlloc(client_p, &idTable[hashv]);
 
-	++idTable[hashv].links;
-	++idTable[hashv].hits;
 }
 
 /* add_to_client_hash()
@@ -279,10 +277,8 @@ add_to_client_hash(const char *name, struct Client *client_p)
 		return;
 
 	hashv = hash_nick(name);
-	dlinkAddAlloc(client_p, &clientTable[hashv].list);
+	dlinkAddAlloc(client_p, &clientTable[hashv]);
 
-	++clientTable[hashv].links;
-	++clientTable[hashv].hits;
 }
 
 /* add_to_hostname_hash()
@@ -300,10 +296,7 @@ add_to_hostname_hash(const char *hostname, struct Client *client_p)
 		return;
 
 	hashv = hash_hostname(hostname);
-	dlinkAddAlloc(client_p, &hostTable[hashv].list);
-
-	++hostTable[hashv].links;
-	++hostTable[hashv].hits;
+	dlinkAddAlloc(client_p, &hostTable[hashv]);
 }
 
 /* add_to_resv_hash()
@@ -321,10 +314,8 @@ add_to_resv_hash(const char *name, struct rxconf *resv_p)
 		return;
 
 	hashv = hash_resv(name);
-	dlinkAddAlloc(resv_p, &resvTable[hashv].list);
+	dlinkAddAlloc(resv_p, &resvTable[hashv]);
 
-	++resvTable[hashv].links;
-	++resvTable[hashv].hits;
 }
 
 /* add_to_xline_hash()
@@ -340,10 +331,8 @@ add_to_xline_hash(const char *name, struct rxconf *xconf)
 		return;
 
 	hashv = hash_xline(name);
-	dlinkAddAlloc(xconf, &xlineTable[hashv].list);
+	dlinkAddAlloc(xconf, &xlineTable[hashv]);
 
-	++xlineTable[hashv].links;
-	++xlineTable[hashv].hits;
 };
 
 void
@@ -355,10 +344,8 @@ add_to_help_hash(const char *name, struct helpfile *hptr)
 		return;
 
 	hashv = hash_help(name);
-	dlinkAddAlloc(hptr, &helpTable[hashv].list);
+	dlinkAddAlloc(hptr, &helpTable[hashv]);
 
-	++helpTable[hashv].links;
-	++helpTable[hashv].hits;
 }
 
 /* del_from_id_hash()
@@ -380,17 +367,14 @@ del_from_id_hash(const char *id, struct Client *client_p)
 
 	hashv = hash_id(id);
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, idTable[hashv].list.head)
+	DLINK_FOREACH_SAFE(ptr, next_ptr, idTable[hashv].head)
 	{
 		target_p = ptr->data;
 
 		if(target_p == client_p)
 		{
-			dlinkDestroy(ptr, &idTable[hashv].list);
+			dlinkDestroy(ptr, &idTable[hashv]);
 
-			s_assert(idTable[hashv].links > 0);
-			if(idTable[hashv].links > 0)
-				--idTable[hashv].links;
 			return;
 		}
 	}
@@ -422,17 +406,14 @@ del_from_client_hash(const char *name, struct Client *client_p)
 
 	hashv = hash_nick(name);
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, clientTable[hashv].list.head)
+	DLINK_FOREACH_SAFE(ptr, next_ptr, clientTable[hashv].head)
 	{
 		target_p = ptr->data;
 
 		if(client_p == target_p)
 		{
-			dlinkDestroy(ptr, &clientTable[hashv].list);
+			dlinkDestroy(ptr, &clientTable[hashv]);
 
-			s_assert(clientTable[hashv].links > 0);
-			if(clientTable[hashv].links > 0)
-				--clientTable[hashv].links;
 			return;
 		}
 	}
@@ -464,17 +445,13 @@ del_from_channel_hash(const char *name, struct Channel *chptr)
 
 	hashv = hash_channel(name);
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, channelTable[hashv].list.head)
+	DLINK_FOREACH_SAFE(ptr, next_ptr, channelTable[hashv].head)
 	{
 		ch2ptr = ptr->data;
 
 		if(chptr == ch2ptr)
 		{
-			dlinkDestroy(ptr, &channelTable[hashv].list);
-
-			s_assert(channelTable[hashv].links > 0);
-			if(channelTable[hashv].links > 0)
-				--channelTable[hashv].links;
+			dlinkDestroy(ptr, &channelTable[hashv]);
 			return;
 		}
 	}
@@ -497,18 +474,13 @@ del_from_hostname_hash(const char *hostname, struct Client *client_p)
 
 	hashv = hash_hostname(hostname);
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, hostTable[hashv].list.head)
+	DLINK_FOREACH_SAFE(ptr, next_ptr, hostTable[hashv].head)
 	{
 		target_p = ptr->data;
 
 		if(target_p == client_p)
 		{
-			dlinkDestroy(ptr, &hostTable[hashv].list);
-
-			s_assert(hostTable[hashv].links > 0);
-			if(hostTable[hashv].links > 0)
-				--hostTable[hashv].links;
-
+			dlinkDestroy(ptr, &hostTable[hashv]);
 			return;
 		}
 	}
@@ -533,18 +505,13 @@ del_from_resv_hash(const char *name, struct rxconf *resv_p)
 
 	hashv = hash_resv(name);
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, resvTable[hashv].list.head)
+	DLINK_FOREACH_SAFE(ptr, next_ptr, resvTable[hashv].head)
 	{
 		r2ptr = ptr->data;
 
 		if(resv_p == r2ptr)
 		{
-			dlinkDestroy(ptr, &resvTable[hashv].list);
-
-			s_assert(resvTable[hashv].links > 0);
-			if(resvTable[hashv].links > 0)
-				--resvTable[hashv].links;
-
+			dlinkDestroy(ptr, &resvTable[hashv]);
 			return;
 		}
 	}
@@ -567,17 +534,13 @@ del_from_xline_hash(const char *name, struct rxconf *xconf)
 
 	hashv = hash_xline(name);
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, xlineTable[hashv].list.head)
+	DLINK_FOREACH_SAFE(ptr, next_ptr, xlineTable[hashv].head)
 	{
 		acptr = ptr->data;
 
 		if(xconf == acptr)
 		{
-			dlinkDestroy(ptr, &xlineTable[hashv].list);
-
-			s_assert(xlineTable[hashv].links > 0);
-			if(xlineTable[hashv].links > 0)
-				--xlineTable[hashv].links;
+			dlinkDestroy(ptr, &xlineTable[hashv]);
 			return;
 		}
 	}
@@ -592,14 +555,14 @@ clear_help_hash(void)
 
 	for(i = 0; i < HELP_MAX; i++)
 	{
-		DLINK_FOREACH_SAFE(ptr, next_ptr, helpTable[i].list.head)
+		DLINK_FOREACH_SAFE(ptr, next_ptr, helpTable[i].head)
 		{
 			free_help(ptr->data);
 			free_dlink_node(ptr);
 		}
 
-		helpTable[i].list.head = helpTable[i].list.tail = NULL;
-		helpTable[i].list.length = 0;
+		helpTable[i].head = helpTable[i].tail = NULL;
+		helpTable[i].length = 0;
 	}
 }
 
@@ -619,7 +582,7 @@ find_id(const char *name)
 
 	hashv = hash_id(name);
 
-	DLINK_FOREACH(ptr, idTable[hashv].list.head)
+	DLINK_FOREACH(ptr, idTable[hashv].head)
 	{
 		target_p = ptr->data;
 
@@ -651,7 +614,7 @@ find_client(const char *name)
 
 	hashv = hash_nick(name);
 
-	DLINK_FOREACH(ptr, clientTable[hashv].list.head)
+	DLINK_FOREACH(ptr, clientTable[hashv].head)
 	{
 		target_p = ptr->data;
 
@@ -678,7 +641,7 @@ find_hostname(const char *hostname)
 
 	hashv = hash_hostname(hostname);
 
-	return hostTable[hashv].list.head;
+	return hostTable[hashv].head;
 }
 
 /* hash_find_masked_server()
@@ -737,7 +700,7 @@ find_server(const char *name)
 
 	hashv = hash_nick(name);
 
-	DLINK_FOREACH(ptr, clientTable[hashv].list.head)
+	DLINK_FOREACH(ptr, clientTable[hashv].head)
 	{
 		target_p = ptr->data;
 
@@ -769,7 +732,7 @@ find_channel(const char *name)
 
 	hashv = hash_channel(name);
 
-	DLINK_FOREACH(ptr, channelTable[hashv].list.head)
+	DLINK_FOREACH(ptr, channelTable[hashv].head)
 	{
 		chptr = ptr->data;
 
@@ -821,7 +784,7 @@ get_or_create_channel(struct Client *client_p, const char *chname, int *isnew)
 
 	hashv = hash_channel(s);
 
-	DLINK_FOREACH(ptr, channelTable[hashv].list.head)
+	DLINK_FOREACH(ptr, channelTable[hashv].head)
 	{
 		chptr = ptr->data;
 
@@ -844,9 +807,7 @@ get_or_create_channel(struct Client *client_p, const char *chname, int *isnew)
 
 	chptr->channelts = CurrentTime;	/* doesn't hurt to set it here */
 
-	dlinkAddAlloc(chptr, &channelTable[hashv].list);
-	++channelTable[hashv].links;
-	++channelTable[hashv].hits;
+	dlinkAddAlloc(chptr, &channelTable[hashv]);
 
 	Count.chan++;
 	return chptr;
@@ -869,7 +830,7 @@ hash_find_resv(const char *name)
 
 	hashv = hash_resv(name);
 
-	DLINK_FOREACH(ptr, resvTable[hashv].list.head)
+	DLINK_FOREACH(ptr, resvTable[hashv].head)
 	{
 		resv_p = ptr->data;
 
@@ -896,7 +857,7 @@ hash_find_xline(const char *name)
 
 	hashv = hash_xline(name);
 
-	DLINK_FOREACH(ptr, xlineTable[hashv].list.head)
+	DLINK_FOREACH(ptr, xlineTable[hashv].head)
 	{
 		xconf = ptr->data;
 
@@ -919,7 +880,7 @@ hash_find_help(const char *name, int flags)
 
 	hashv = hash_help(name);
 
-	DLINK_FOREACH(ptr, helpTable[hashv].list.head)
+	DLINK_FOREACH(ptr, helpTable[hashv].head)
 	{
 		hptr = ptr->data;
 

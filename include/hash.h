@@ -44,13 +44,6 @@ struct Channel;
 struct rxconf;
 struct helpfile;
 
-struct HashEntry
-{
-	int hits;
-	int links;
-	dlink_list list;
-};
-
 extern void init_hash(void);
 
 extern size_t hash_get_client_table_size(void);
