@@ -1,3 +1,7 @@
+*** 20010309_3 by fl_
+- dont allow clearchan from servers.. ick!
+
+
 *** 20010309_2 by davidt
 - oops, apparantly I forgot to commit my multiple-ports-per-listen{} patch.  Note: host= lines must now come before port= lines
 
