@@ -1,3 +1,7 @@
+*** 20001223_34 by ejb
+- add cap_hops, doesn't do anything yet.
+
+
 *** 20001223_33 by ejb
 - move oper_only_umodes into ircd.conf.
 
