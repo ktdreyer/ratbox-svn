@@ -1,3 +1,7 @@
+*** 20010223_6 by a1kmm
+- Removed an assert which simply shouldn't be there.
+
+
 *** 20010223_5 by wcampbel
 Updated my TODO list
 Added madmax's cookies proposal
