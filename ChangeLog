@@ -1,3 +1,20 @@
+leeh        2005/02/23 20:57:51 EST	(20050224_1)
+
+  Modified files:
+    .                    configure configure.ac 
+    include              setup.h.in 
+    src                  monitor.c 
+  Log:
+  - move MONITOR_HEAP_SIZE over to configure
+  
+  Revision  Changes    Path
+  7.244                ircd-ratbox/configure
+  7.58      +4 -2      ircd-ratbox/configure.ac
+  7.95      +3 -0      ircd-ratbox/include/setup.h.in
+  7.2       +0 -2      ircd-ratbox/src/monitor.c
+
+
+
 leeh        2005/02/23 20:48:08 EST	(20050224_0)
 
   Modified files:
