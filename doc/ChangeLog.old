@@ -1,3 +1,9 @@
+*** 20000111_10 by db
+- more work on yacc/lex parser
+  added "kill" open to discussion, but efnet has "K" and "D" lines
+  
+
+
 *** 20000111_9 by db
 - changes to bring it into line with Kev's sample conf just a tiny bit
 - removed that dumb ';' at end of sections
