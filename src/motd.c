@@ -31,49 +31,15 @@
 #include "s_conf.h"
 #include "class.h"
 #include "send.h"
-#include "s_conf.h"
 #include "numeric.h"
 #include "client.h"
 #include "irc_string.h"
-#include "s_serv.h"     /* hunt_server */
 
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
 
 extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */
-
-/*
-** m_motd
-**      parv[0] = sender prefix
-**      parv[1] = servername
-*/
-int m_motd(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
-{
-  static time_t last_used = 0;
-
-  if(!IsAnyOper(sptr))
-    {
-      if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
-        {
-          /* safe enough to give this on a local connect only */
-          if(MyClient(sptr))
-            sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,sptr->name);
-          return 0;
-        }
-      else
-        last_used = CurrentTime;
-    }
-
-  if (hunt_server(cptr, sptr, ":%s MOTD :%s", 1,parc,parv)!=HUNTED_ISME)
-    return 0;
-
-  sendto_realops_flags(FLAGS_SPY, "motd requested by %s (%s@%s) [%s]",
-                     sptr->name, sptr->username, sptr->host,
-                     sptr->user->server);
-
-  return(SendMessageFile(sptr,&ConfigFileEntry.motd));
-}
 
 /*
 ** InitMessageFile

@@ -45,6 +45,7 @@ SRCS =                          \
   m_ltrace.c \
   m_lusers.c \
   m_mode.c \
+  m_motd.c \
   m_names.c \
   m_message.c \
   m_nick.c \
