@@ -138,7 +138,7 @@ eventAddIsh(const char *name, EVH *func, void *arg, time_t delta_ish)
   if (delta_ish >= 3.0)
     {
       const time_t two_third = (2 * delta_ish) / 3;
-      delta_ish = two_third + ((random() % 1000) * two_third) / 1000;
+      delta_ish = two_third + ((rand() % 1000) * two_third) / 1000;
       /*
        * XXX I hate the above magic, I don't even know if its right.
        * Grr. -- adrian

@@ -555,7 +555,7 @@ int main(int argc, char *argv[])
 
   ServerRunning = 0;
   /* It ain't random, but it ought to be a little harder to guess */
-  srandom(SystemTime.tv_sec ^ (SystemTime.tv_usec | (getpid() << 20)));
+  srand(SystemTime.tv_sec ^ (SystemTime.tv_usec | (getpid() << 20)));
   memset(&me, 0, sizeof(me));
   memset(&meLocalUser, 0, sizeof(meLocalUser));
   me.localClient = &meLocalUser;

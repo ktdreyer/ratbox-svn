@@ -293,7 +293,7 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
   {
   	if(!(source_p->flags & FLAGS_PINGSENT) && source_p->random_ping == 0)
   	{
-           source_p->random_ping = (unsigned long)random();
+           source_p->random_ping = (unsigned long)rand();
            sendto_one(source_p, "PING :%lu", (unsigned long)source_p->random_ping);
            source_p->flags |= FLAGS_PINGSENT;
 	   strlcpy(source_p->username, username, USERLEN);
