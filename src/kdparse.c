@@ -151,7 +151,7 @@ parse_x_file(FBFILE * file)
 			continue;
 
 		xconf = make_xline(host_field, reason_field, atoi(port_field));
-		dlinkAddAlloc(xconf, &xline_list);
+		add_xline(xconf);
 	}
 }
 

@@ -1967,7 +1967,7 @@ conf_end_gecos(struct TopConf *tc)
 {
 	if(!EmptyString(yy_xconf->gecos))
 	{
-		dlinkAddAlloc(yy_xconf, &xline_list);
+		add_xline(yy_xconf);
 	}
 	else
 	{

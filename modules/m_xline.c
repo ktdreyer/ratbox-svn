@@ -126,6 +126,7 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if((out = fbopen(filename, "a")) == NULL)
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem opening %s ", filename);
+		free_xline(xconf);
 		return;
 	}
 
@@ -135,6 +136,7 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(fbputs(buffer, out) == -1)
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem writing to %s", filename);
+		free_xline(xconf);
 		fbclose(out);
 		return;
 	}
@@ -148,7 +150,7 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	ilog(L_TRACE, "%s added X-line for [%s] [%s]",
 	     get_oper_name(source_p), xconf->gecos, xconf->reason);
 
-	dlinkAddAlloc(xconf, &xline_list);
+	add_xline(xconf);
 }
 
 /* mo_unxline()

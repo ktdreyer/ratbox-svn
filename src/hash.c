@@ -43,37 +43,24 @@
 #include "memory.h"
 #include "msg.h"
 #include "handlers.h"
+#include "s_newconf.h"
 
 /* New hash code */
 /*
  * Contributed by James L. Davis
  */
 
-static unsigned int hash_channel_name(const char *name);
-
-#ifdef FL_DEBUG
-struct Message hash_msgtab = {
-	"HASH", 0, 0, 1, 0, MFLG_SLOW, 0,
-	{m_ignore, m_ignore, m_ignore, mo_hash}
-};
-#endif
-
 static struct HashEntry clientTable[U_MAX];
 static struct HashEntry channelTable[CH_MAX];
 static struct HashEntry idTable[U_MAX];
 static struct HashEntry resvTable[R_MAX];
 static struct HashEntry hostTable[HOST_MAX];
+static struct HashEntry xlineTable[R_MAX];
 
 /* XXX move channel hash into channel.c or hash channel stuff in channel.c
  * into here eventually -db
  */
 extern BlockHeap *channel_heap;
-
-struct HashEntry
-hash_get_channel_block(int i)
-{
-	return channelTable[i];
-}
 
 size_t
 hash_get_channel_table_size(void)
@@ -209,54 +196,28 @@ hash_resv_channel(const char *name)
 	return (h & (R_MAX - 1));
 }
 
-/*
- * clear_client_hash_table
- *
- * Nullify the hashtable and its contents so it is completely empty.
- */
-static void
-clear_client_hash_table()
+static unsigned int
+hash_xline(const char *name)
 {
-	memset(clientTable, 0, sizeof(struct HashEntry) * U_MAX);
-}
+	unsigned int h = 0;
 
-/*
- * clear_id_hash_table
- *
- * Nullify the hashtable and its contents so it is completely empty.
- */
-static void
-clear_id_hash_table()
-{
-	memset(idTable, 0, sizeof(struct HashEntry) * U_MAX);
-}
+	while(*name)
+	{
+		h = (h << 4) - (h + (unsigned char) ToLower(*name++));
+	}
 
-static void
-clear_channel_hash_table(void)
-{
-	memset(channelTable, 0, sizeof(struct HashEntry) * CH_MAX);
-}
-
-void
-clear_hostname_hash_table(void)
-{
-	memset(hostTable, 0, sizeof(struct HashEntry) * HOST_MAX);
-}
-
-static void
-clear_resv_hash_table()
-{
-	memset(resvTable, 0, sizeof(struct HashEntry) * R_MAX);
+	return (h & (R_MAX - 1));
 }
 
 void
 init_hash(void)
 {
-	clear_client_hash_table();
-	clear_channel_hash_table();
-	clear_id_hash_table();
-	clear_hostname_hash_table();
-	clear_resv_hash_table();
+	memset(clientTable, 0, sizeof(struct HashEntry) * U_MAX);
+	memset(idTable, 0, sizeof(struct HashEntry) * U_MAX);
+	memset(channelTable, 0, sizeof(struct HashEntry) * CH_MAX);
+	memset(hostTable, 0, sizeof(struct HashEntry) * HOST_MAX);
+	memset(resvTable, 0, sizeof(struct HashEntry) * R_MAX);
+	memset(xlineTable, 0, sizeof(struct HashEntry) * R_MAX);
 }
 
 /*
@@ -332,6 +293,19 @@ add_to_resv_hash_table(const char *name, struct ResvEntry *resv_p)
 	++resvTable[hashv].hits;
 }
 
+void
+add_to_xline_hash(const char *name, struct xline *xconf)
+{
+	unsigned int hashv;
+
+	if(EmptyString(name) || xconf == NULL)
+		return;
+
+	hashv = hash_xline(name);
+	dlinkAddAlloc(xconf, &xlineTable[hashv].list);
+	++xlineTable[hashv].links;
+	++xlineTable[hashv].hits;
+};
 
 /*
  * del_from_client_hash_table - remove a client/server from the client
@@ -512,6 +486,28 @@ del_from_resv_hash_table(const char *name, struct ResvEntry *resv_p)
 
 			return;
 		}
+	}
+}
+
+void
+clear_xline_hash(void)
+{
+	struct xline *xconf;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+	int i;
+
+	for(i = 0; i < R_MAX; i++)
+	{
+		DLINK_FOREACH_SAFE(ptr, next_ptr, xlineTable[i].list.head)
+		{
+			xconf = ptr->data;
+
+			free_xline(xconf);
+			dlinkDestroy(ptr, &xlineTable[i].list);
+		}
+
+		xlineTable[i].links = 0;
 	}
 }
 
@@ -812,73 +808,26 @@ hash_find_resv(const char *name)
 	return NULL;
 }
 
-#ifdef FL_DEBUG
-void
-mo_hash(struct Client *source_p, struct Client *client_p, int argc, char *argv[])
+struct xline *
+hash_find_xline(const char *name)
 {
-	int i;
-	struct Client *target_p;
-	u_long used_count;
-	int deepest_link;
-	u_long average_link;
-	int this_link;
-	int node[11];
+	struct xline *xconf;
+	dlink_node *ptr;
+	unsigned int hashv;
 
-	for (i = 0; i < 11; i++)
-		node[i] = 0;
+	if(EmptyString(name))
+		return NULL;
 
-	deepest_link = used_count = this_link = average_link = 0;
+	hashv = hash_xline(name);
 
-	sendto_one(source_p, ":%s %d %s :Hostname hash statistics",
-		   me.name, RPL_STATSDEBUG, source_p->name);
-
-	for (i = 0; i < HOST_MAX; i++)
+	DLINK_FOREACH(ptr, xlineTable[hashv].list.head)
 	{
-		this_link = 0;
+		xconf = ptr->data;
 
-		for (target_p = hostTable[i].list; target_p; target_p = target_p->hostnext)
-		{
-			used_count++;
-			this_link++;
-		}
-
-		if(this_link > deepest_link)
-			deepest_link = this_link;
-
-		if(this_link >= 10)
-		{
-			int j = 0;
-			for (target_p = hostTable[i].list; target_p; target_p = target_p->hostnext)
-			{
-				sendto_one(source_p,
-					   ":%s %d %s :Node[%d][%d] %s",
-					   me.name, RPL_STATSDEBUG,
-					   source_p->name, i, j, target_p->host);
-				j++;
-			}
-
-			this_link = 10;
-		}
-
-		node[this_link]++;
+		if(irccmp(name, xconf->gecos) == 0)
+			return xconf;
 	}
 
-	for (i = 1; i < 11; i++)
-		average_link += node[i] * i;
-
-	sendto_one(source_p,
-		   ":%s %d %s :Hash Size: %d - Used %lu %f%% - Free %lu %f%%",
-		   me.name, RPL_STATSDEBUG, source_p->name, HOST_MAX,
-		   used_count, (float) ((used_count / HOST_MAX) * 100),
-		   HOST_MAX - used_count,
-		   (float) ((float) ((float) (HOST_MAX - used_count) / HOST_MAX) * 100));
-
-	sendto_one(source_p, ":%s %d %s :Deepest Link: %d - Average  %f",
-		   me.name, RPL_STATSDEBUG, source_p->name, deepest_link,
-		   (float) (average_link / used_count));
-
-	for (i = 0; i < 11; i++)
-		sendto_one(source_p, ":%s %d %s :Nodes with %d entries: %d",
-			   me.name, RPL_STATSDEBUG, source_p->name, i, node[i]);
+	return NULL;
 }
-#endif
+

@@ -36,11 +36,16 @@
 
 #include "tools.h"
 
+/* how to store the xline (hash/dlink) */
+#define XLINE_PLAIN	0x010
+#define XLINE_WILD	0x020
+
 struct xline
 {
 	char *gecos;
 	char *reason;
 	int type;
+	int flags;
 };
 
 struct shared
@@ -55,6 +60,7 @@ extern void init_conf(void);
 
 extern dlink_list xline_list;
 extern struct xline *make_xline(const char *, const char *, int);
+extern void add_xline(struct xline *);
 extern void free_xline(struct xline *);
 extern void clear_xlines(void);
 extern struct xline *find_xline(const char *);

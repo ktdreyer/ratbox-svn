@@ -42,6 +42,7 @@
 #include "send.h"
 #include "balloc.h"
 #include "event.h"
+#include "hash.h"
 
 static BlockHeap *xline_heap = NULL;
 static BlockHeap *shared_heap = NULL;
@@ -97,9 +98,35 @@ make_xline(const char *gecos, const char *reason, int type)
 		DupString(xconf->reason, reason);
 
 	xconf->type = type;
+	xconf->flags = 0;
 	return xconf;
 }
 
+/* add_xline()
+ *
+ * inputs	- pointer to xline
+ * outputs	-
+ * side effects - adds the xline to either the hash, or dlink
+ */
+void
+add_xline(struct xline *xconf)
+{
+	/* no wildcards, add to the hash */
+	if((strchr(xconf->gecos, '?') == NULL) && 
+	   (strchr(xconf->gecos, '*') == NULL))
+	{
+		xconf->flags = XLINE_PLAIN;
+		add_to_xline_hash(xconf->gecos, xconf);
+	}
+
+	/* otherwise it goes in the dlink */
+	else
+	{
+		xconf->flags = XLINE_WILD;
+		dlinkAddAlloc(xconf, &xline_list);
+	}
+}
+	
 /* free_xline()
  *
  * inputs       - pointer to xline to free
@@ -131,6 +158,8 @@ clear_xlines(void)
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 
+	clear_xline_hash();
+
 	DLINK_FOREACH_SAFE(ptr, next_ptr, xline_list.head)
 	{
 		xconf = ptr->data;
@@ -153,6 +182,13 @@ find_xline(const char *gecos)
 	struct xline *xconf;
 	dlink_node *ptr;
 
+	/* first hunt the hash.. */
+	xconf = hash_find_xline(gecos);
+
+	if(xconf != NULL)
+		return xconf;
+
+	/* then hunt the less efficient dlink list */
 	DLINK_FOREACH(ptr, xline_list.head)
 	{
 		xconf = ptr->data;
