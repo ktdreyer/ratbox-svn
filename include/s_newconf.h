@@ -211,10 +211,13 @@ extern void set_server_conf_autoconn(struct Client *source_p, char *name,
 
 extern struct ConfItem *find_xline(const char *);
 extern int find_channel_resv(const char *name);
-extern int find_nick_resv(const char *name);
+extern struct ConfItem *find_nick_resv(const char *name);
 
 extern int valid_wild_card_simple(const char *);
 extern int clean_resv_nick(const char *);
+time_t valid_temp_time(const char *p);
+
+extern void expire_temp_rxlines(void *unused);
 
 #endif
 

@@ -58,6 +58,7 @@ void
 clear_s_newconf(void)
 {
 	struct server_conf *server_p;
+	struct ConfItem *aconf;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 
@@ -107,7 +108,13 @@ clear_s_newconf(void)
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, resv_conf_list.head)
 	{
-		free_conf(ptr->data);
+		aconf = ptr->data;
+
+		/* temporary resv */
+		if(aconf->hold)
+			continue;
+
+		free_conf(aconf);
 		dlinkDestroy(ptr, &resv_conf_list);
 	}
 
@@ -484,7 +491,7 @@ find_channel_resv(const char *name)
 	return 0;
 }
 
-int
+struct ConfItem *
 find_nick_resv(const char *name)
 {
 	struct ConfItem *aconf;
@@ -495,10 +502,10 @@ find_nick_resv(const char *name)
 		aconf = ptr->data;
 
 		if(match(aconf->name, name))
-			return 1;
+			return aconf;
 	}
 
-	return 0;
+	return NULL;
 }
 
 /* clean_resv_nick()
@@ -571,3 +578,53 @@ valid_wild_card_simple(const char *data)
 
 	return 0;
 }
+
+time_t
+valid_temp_time(const char *p)
+{
+	time_t result = 0;
+
+	while(*p)
+	{
+		if(IsDigit(*p))
+		{
+			result *= 10;
+			result += ((*p) & 0xF);
+			p++;
+		}
+		else
+			return -1;
+	}
+
+	if(result > (24 * 60 * 7 * 4))
+		result = (24 * 60 * 7 * 4);
+
+	return(result * 60);
+}
+
+void
+expire_temp_rxlines(void *unused)
+{
+	struct ConfItem *aconf;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+	int i;
+
+	HASH_WALK_SAFE(i, R_MAX, ptr, next_ptr, resvTable)
+	{
+		aconf = ptr->data;
+
+		if(aconf->hold && aconf->hold <= CurrentTime)
+		{
+			if(ConfigFileEntry.tkline_expire_notices)
+				sendto_realops_flags(UMODE_ALL, L_ALL,
+						"Temporary RESV for [%s] expired",
+						aconf->name);
+
+			free_conf(aconf);
+			dlinkDestroy(ptr, &resvTable[i]);
+		}
+	}
+	HASH_WALK_END
+}
+

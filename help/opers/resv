@@ -1,9 +1,10 @@
-RESV <channel|nick> :<reason>
+RESV [time] <channel|nick> :<reason>
 
--- RESV a channel or nick
-Will create a resv for the given channel/nick, stopping
-local users from joining the channel, or using the
-nick.  Will not affect remote clients.
+Reserves a channel or nickname from use.  If [time] is not specified this 
+is added to resv.conf, otherwise is temporary for [time] minutes.
 
-If the oper is an admin, they may create a wildcard
-resv, for example: clones*
+Nick resvs accept wildcard characters '*' and '?'.
+
+RESV [time] <channel|nick> ON <server> :<reason>
+
+Will attempt to set the RESV on <server> if <server accepts remote RESVs.

@@ -57,8 +57,9 @@ mapi_clist_av1 resv_clist[] = {	&resv_msgtab, &unresv_msgtab, NULL };
 DECLARE_MODULE_AV1(resv, NULL, NULL, resv_clist, NULL, NULL, "$Revision$");
 
 static void parse_resv(struct Client *source_p, const char *name,
-			const char *reason);
+			const char *reason, int temp_time);
 static void remove_resv(struct Client *source_p, const char *name);
+static int remove_temp_resv(struct Client *source_p, const char *name);
 
 /*
  * mo_resv()
@@ -69,24 +70,37 @@ static void remove_resv(struct Client *source_p, const char *name);
 static int
 mo_resv(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
+	const char *name;
 	const char *reason;
+	const char *target_server = NULL;
+	int temp_time;
+	int loc = 1;
 
-	if(parc == 5)
+	/* RESV [time] <name> [ON <server>] :<reason> */
+
+	if((temp_time = valid_temp_time(parv[loc])) >= 0)
+		loc++;
+
+	name = parv[loc];
+	loc++;
+
+	if((parc >= loc+2) && (irccmp(parv[2], "ON") == 0))
 	{
-		reason = parv[4];
-		if(EmptyString(reason))
-		{
-			sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-				   me.name, source_p->name, "RESV");
-			return 0;
-		}
+		target_server = parv[loc+1];
+		loc += 2;
 	}
-	/* verified as non empty by parse(). */
-	else
-		reason = parv[2];
+
+	if(parc <= loc || EmptyString(parv[loc]))
+	{
+		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+			   me.name, source_p->name, "RESV");
+		return 0;
+	}
+
+	reason = parv[loc];
 
 	/* remote resv.. */
-	if((parc == 5) && (irccmp(parv[2], "ON") == 0))
+	if(target_server)
 	{
 		sendto_match_servs(source_p, parv[3], CAP_CLUSTER,
 				   "RESV %s %s :%s",
@@ -102,7 +116,7 @@ mo_resv(struct Client *client_p, struct Client *source_p, int parc, const char *
 	}
 #endif
 
-	parse_resv(source_p, parv[1], reason);
+	parse_resv(source_p, name, reason, temp_time);
 
 	return 0;
 }
@@ -133,7 +147,7 @@ ms_resv(struct Client *client_p, struct Client *source_p,
 	if(find_shared_conf(source_p->username, source_p->host,
 				source_p->user->server, SHARED_RESV))
 	{
-		parse_resv(source_p, parv[2], parv[3]);
+		parse_resv(source_p, parv[2], parv[3], 0);
 	}
 
 	return 0;
@@ -149,7 +163,7 @@ ms_resv(struct Client *client_p, struct Client *source_p,
  */
 static void
 parse_resv(struct Client *source_p, const char *name, 
-	   const char *reason)
+	   const char *reason, int temp_time)
 {
 	struct ConfItem *aconf;
 
@@ -172,13 +186,27 @@ parse_resv(struct Client *source_p, const char *name,
 
 		aconf = make_conf();
 		aconf->status = CONF_RESV_CHANNEL;
-
 		DupString(aconf->name, name);
 		DupString(aconf->passwd, reason);
 		add_to_resv_hash(aconf->name, aconf);
 
-		write_confitem(RESV_TYPE, source_p, NULL, aconf->name, 
-				aconf->passwd, NULL, NULL, 0);
+		if(temp_time > 0)
+		{
+			aconf->hold = CurrentTime + temp_time;
+
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+				     "%s added temporary %d min. RESV for [%s] [%s]",
+				     get_oper_name(source_p), temp_time / 60,
+				     name, reason);
+			ilog(L_KLINE, "%s added temporary %d min. RESV for [%s] [%s]",
+				get_oper_name(source_p), temp_time / 60,
+				name, reason);
+			sendto_one_notice(source_p, ":Added temporary %d min. RESV [%s]",
+					temp_time / 60, name);
+		}
+		else
+			write_confitem(RESV_TYPE, source_p, NULL, aconf->name, 
+					aconf->passwd, NULL, NULL, 0);
 	}
 	else if(clean_resv_nick(name))
 	{
@@ -208,13 +236,27 @@ parse_resv(struct Client *source_p, const char *name,
 
 		aconf = make_conf();
 		aconf->status = CONF_RESV_NICK;
-
 		DupString(aconf->name, name);
 		DupString(aconf->passwd, reason);
 		dlinkAddAlloc(aconf, &resv_conf_list);
 
-		write_confitem(RESV_TYPE, source_p, NULL, aconf->name, 
-				aconf->passwd, NULL, NULL, 0);
+		if(temp_time > 0)
+		{
+			aconf->hold = CurrentTime + (temp_time * 60);
+
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+				     "%s added temporary %d min. RESV for [%s] [%s]",
+				     get_oper_name(source_p), temp_time / 60,
+				     name, reason);
+			ilog(L_KLINE, "%s added temporary %d min. RESV for [%s] [%s]",
+				get_oper_name(source_p), temp_time / 60,
+				name, reason);
+			sendto_one_notice(source_p, ":Added temporary %d min. RESV [%s]",
+					temp_time / 60, name);
+		}
+		else
+			write_confitem(RESV_TYPE, source_p, NULL, aconf->name, 
+					aconf->passwd, NULL, NULL, 0);
 	}
 	else
 		sendto_one_notice(source_p,
@@ -246,6 +288,17 @@ mo_unresv(struct Client *client_p, struct Client *source_p, int parc, const char
 	}
 #endif
 
+	if(remove_temp_resv(source_p, parv[1]))
+	{
+		sendto_one_notice(source_p, ":RESV for [%s] is removed", parv[1]);
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+				     "%s has removed the temporary RESV for: [%s]", 
+				     get_oper_name(source_p), parv[1]);
+		ilog(L_KLINE, "%s has removed the temporary RESV for [%s]", 
+			get_oper_name(source_p), parv[1]);
+		return 0;
+	}
+
 	remove_resv(source_p, parv[1]);
 	return 0;
 }
@@ -274,10 +327,52 @@ ms_unresv(struct Client *client_p, struct Client *source_p, int parc, const char
 	if(find_shared_conf(source_p->username, source_p->host,
 				source_p->user->server, SHARED_UNRESV))
 	{
+		if(remove_temp_resv(source_p, parv[1]))
+		{
+			sendto_one_notice(source_p, ":RESV for [%s] is removed", parv[1]);
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					"%s has removed the RESV for: [%s]", 
+					get_oper_name(source_p), parv[1]);
+			ilog(L_KLINE, "%s has removed the RESV for [%s]", 
+					get_oper_name(source_p), parv[1]);
+			return 0;
+		}
+
 		remove_resv(source_p, parv[2]);
 	}
 
 	return 0;
+}
+
+static int
+remove_temp_resv(struct Client *source_p, const char *name)
+{
+	struct ConfItem *aconf;
+
+	if(IsChannelName(name))
+	{
+		if((aconf = hash_find_resv(name)) == NULL)
+			return 0;
+
+		/* its permanent, let remove_resv do it properly */
+		if(!aconf->hold)
+			return 0;
+
+		del_from_resv_hash(name, aconf);
+		free_conf(aconf);
+		return 1;
+	}
+
+	if((aconf = find_nick_resv(name)) == NULL)
+		return 0;
+
+	/* permanent, remove_resv() needs to do it properly */
+	if(!aconf->hold)
+		return 0;
+
+	dlinkFindDestroy(&resv_conf_list, aconf);
+	free_conf(aconf);
+	return 1;
 }
 
 /* remove_resv()

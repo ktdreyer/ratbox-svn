@@ -48,7 +48,7 @@
 static dlink_list *clientTable;
 static dlink_list *channelTable;
 static dlink_list *idTable;
-static dlink_list *resvTable;
+dlink_list *resvTable;
 static dlink_list *hostTable;
 static dlink_list *helpTable;
 
@@ -409,17 +409,12 @@ clear_help_hash(void)
 	dlink_node *next_ptr;
 	int i;
 
-	for(i = 0; i < HELP_MAX; i++)
+	HASH_WALK_SAFE(i, HELP_MAX, ptr, next_ptr, helpTable)
 	{
-		DLINK_FOREACH_SAFE(ptr, next_ptr, helpTable[i].head)
-		{
-			free_cachefile(ptr->data);
-			free_dlink_node(ptr);
-		}
-
-		helpTable[i].head = helpTable[i].tail = NULL;
-		helpTable[i].length = 0;
+		free_cachefile(ptr->data);
+		dlinkDestroy(ptr, &helpTable[i]);
 	}
+	HASH_WALK_END
 }
 
 /* find_id()
@@ -799,6 +794,7 @@ print_resv_hash(struct Client *source_p)
 
 			sendto_one_numeric(source_p, RPL_STATSQLINE,
 					form_str(RPL_STATSQLINE),
+					aconf->hold ? 'q' : 'Q',
 					aconf->name, aconf->passwd);
 		}
 	}
@@ -807,21 +803,22 @@ print_resv_hash(struct Client *source_p)
 void
 clear_resv_hash(void)
 {
+	struct ConfItem *aconf;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 	int i;
 
-	for(i = 0; i < R_MAX; i++)
+	HASH_WALK_SAFE(i, R_MAX, ptr, next_ptr, resvTable)
 	{
-		DLINK_FOREACH_SAFE(ptr, next_ptr, resvTable[i].head)
-		{
-			free_conf(ptr->data);
-			free_dlink_node(ptr);
-		}
+		aconf = ptr->data;
 
-		resvTable[i].head = resvTable[i].tail = NULL;
-		resvTable[i].length = 0;
+		/* skip temp resvs */
+		if(aconf->hold)
+			continue;
+
+		free_conf(ptr->data);
+		dlinkDestroy(ptr, &resvTable[i]);
 	}
+	HASH_WALK_END
 }
-
 

@@ -27,6 +27,10 @@
 #ifndef INCLUDED_hash_h
 #define INCLUDED_hash_h
 
+#include "tools.h"
+
+extern dlink_list *resvTable;
+
 /* Client hash table size, used in hash.c/s_debug.c */
 #define U_MAX 65536
 
@@ -38,6 +42,10 @@
 
 /* RESV/XLINE hash table size, used in hash.c */
 #define R_MAX 1024
+
+#define HASH_WALK(i, max, ptr, table) for (i = 0; i < max; i++) { DLINK_FOREACH(ptr, table[i].head)
+#define HASH_WALK_SAFE(i, max, ptr, nptr, table) for (i = 0; i < max; i++) { DLINK_FOREACH_SAFE(ptr, nptr, table[i].head)
+#define HASH_WALK_END }
 
 struct Client;
 struct Channel;

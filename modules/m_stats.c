@@ -787,6 +787,7 @@ stats_resv(struct Client *source_p)
 		aconf = ptr->data;
 		sendto_one_numeric(source_p, RPL_STATSQLINE,
 				   form_str(RPL_STATSQLINE),
+				   aconf->hold ? 'q' : 'Q',
 				   aconf->name, aconf->passwd);
 	}
 

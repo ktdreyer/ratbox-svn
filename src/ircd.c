@@ -64,6 +64,7 @@
 #include "patricia.h"
 #include "reject.h"
 #include "s_conf.h"
+#include "s_newconf.h"
 #include "cache.h"
 
 /*
@@ -751,6 +752,7 @@ main(int argc, char *argv[])
 	eventAddIsh("cleanup_temps_hour", cleanup_temps_hour, NULL, 3600);
 	eventAddIsh("cleanup_temps_day", cleanup_temps_day, NULL, 86400);
 	eventAddIsh("cleanup_temps_week", cleanup_temps_week, NULL, 604800);
+	eventAddIsh("expire_temp_rxlines", expire_temp_rxlines, NULL, 300);
 
 	/* We want try_connections to be called as soon as possible now! -- adrian */
 	/* No, 'cause after a restart it would cause all sorts of nick collides */
