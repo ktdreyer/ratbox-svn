@@ -1,3 +1,8 @@
+*** 20001211_12 by db
+- tiny comment fix in check_pings
+
+
+
 *** 20001211_11 by db
 - how did THAT get back in. removed local[] again *sigh*
 
