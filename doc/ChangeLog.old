@@ -1,3 +1,10 @@
+*** 20001224_12 by db
+- removed lame test that was restarting irc.mcs.net for no reason..
+  under heavy ddos the server was being lagged enough to restart..
+  No real need for this test.
+
+
+
 *** 20001224_11 by db
 - remove last remnant of evil #ifdef CHROOT
 
