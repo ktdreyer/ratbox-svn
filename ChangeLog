@@ -1,3 +1,19 @@
+androsyn    2003/10/07 12:01:58 EDT	(20031007_0)
+
+  Modified files:
+    modules              m_pong.c 
+    src                  devpoll.c s_user.c 
+  Log:
+  Remove a pointless #ifdef in devpoll.c and make ping cookies be longer on
+  systems where RAND_MAX = 32k
+  
+  Revision  Changes    Path
+  1.50      +2 -2      ircd-ratbox/modules/m_pong.c
+  7.29      +0 -2      ircd-ratbox/src/devpoll.c
+  7.295     +2 -2      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2003/10/06 17:02:39 EDT	(20031006_3)
 
   Modified files:
