@@ -63,7 +63,7 @@ static char    *mbuf;
 
 
 struct Message clearchan_msgtab = {
-  MSG_CLEARCHAN, 0, 2, 0, MFLG_SLOW, 0,
+  MSG_CLEARCHAN, 0, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, m_ignore, mo_clearchan}
 };
 

@@ -55,7 +55,7 @@ static void mo_jupe(struct Client *client_p, struct Client *source_p,
 static int bogus_host(char *host);
 
 struct Message jupe_msgtab = {
-  "JUPE", 0, 3, 0, MFLG_SLOW, 0,
+  "JUPE", 0, 0, 3, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, mo_jupe, mo_jupe}
 };
 
