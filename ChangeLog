@@ -1,3 +1,26 @@
+leeh        2005/03/21 14:30:43 UTC	(20050321_0)
+
+  Modified files:
+    include              s_gline.h 
+    modules              m_gline.c 
+    src                  Makefile.in ircd.c s_newconf.c 
+  Removed files:
+    src                  s_gline.c 
+  Log:
+  - move most of the gline code from s_gline.c -> m_gline.c
+  - make find_is_glined() use irccmp() rather than match()
+  - rewrite remaining gline code (triggered expiry) and put it in s_newconf.c
+  
+  Revision  Changes    Path
+  7.24      +0 -3      ircd-ratbox/include/s_gline.h
+  1.158     +82 -6     ircd-ratbox/modules/m_gline.c
+  7.156     +0 -1      ircd-ratbox/src/Makefile.in
+  7.381     +0 -3      ircd-ratbox/src/ircd.c
+  7.8       +0 -164    ircd-ratbox/src/s_gline.c (dead)
+  7.72      +23 -0     ircd-ratbox/src/s_newconf.c
+
+
+
 androsyn    2005/03/20 18:06:59 UTC	(20050320_13)
 
   ircd-ratbox/libltdl - New directory
