@@ -291,8 +291,8 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
   dlink_node *ptr;
   dlink_node *m;
   char *id;
-  assert(0 != source_p);
-  assert(0 != source_p->localClient);
+  assert(NULL != source_p);
+  assert(NULL != source_p->localClient);
   assert(source_p->username != username);
 
 
@@ -481,7 +481,7 @@ int register_remote_user(struct Client *client_p, struct Client *source_p,
   struct User*     user = source_p->user;
   struct Client *target_p;
   
-  assert(0 != source_p);
+  assert(NULL != source_p);
   assert(source_p->username != username);
 
   user->last = CurrentTime;
@@ -665,7 +665,7 @@ static int valid_hostname(const char* hostname)
 {
   const char* p     = hostname;
 
-  assert(0 != p);
+  assert(NULL != p);
 
   if ('.' == *p)
     return NO;
@@ -696,7 +696,7 @@ static int valid_username(const char* username)
   int dots = 0;
   const char *p = username;
 
-  assert(0 != p);
+  assert(NULL != p);
 
   if ('~' == *p)
     ++p;
@@ -786,7 +786,7 @@ int do_local_user(char* nick, struct Client* client_p, struct Client* source_p,
   unsigned int oflags;
   struct User* user;
 
-  assert(0 != source_p);
+  assert(NULL != source_p);
   assert(source_p->username != username);
 
   user = make_user(source_p);
@@ -842,7 +842,7 @@ int do_remote_user(char* nick, struct Client* client_p, struct Client* source_p,
   unsigned int oflags;
   struct User* user;
 
-  assert(0 != source_p);
+  assert(NULL != source_p);
   assert(source_p->username != username);
 
   user = make_user(source_p);

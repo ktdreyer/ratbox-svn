@@ -258,7 +258,7 @@ int set_non_blocking(int fd)
 void close_connection(struct Client *client_p)
 {
   struct ConfItem *aconf;
-  assert(0 != client_p);
+  assert(NULL != client_p);
 
   if (IsServer(client_p))
     {
@@ -368,7 +368,7 @@ void add_connection(struct Listener* listener, int fd)
 
   socklen_t len = sizeof(struct irc_sockaddr);
   struct irc_sockaddr   irn;
-  assert(0 != listener);
+  assert(NULL != listener);
 
 #ifdef USE_IAUTH
   if (iAuth.socket == NOSOCK)

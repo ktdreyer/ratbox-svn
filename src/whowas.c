@@ -69,7 +69,7 @@ void add_history(struct Client* client_p, int online)
 {
   struct Whowas* who = &WHOWAS[whowas_next];
 
-  assert(0 != client_p);
+  assert(NULL != client_p);
 
   if (who->hashv != -1)
     {

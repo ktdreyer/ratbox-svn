@@ -179,10 +179,10 @@ struct Client* make_client(struct Client* from)
 
 void _free_client(struct Client* client_p)
 {
-  assert(0 != client_p);
+  assert(NULL != client_p);
   assert(&me != client_p);
-  assert(0 == client_p->prev);
-  assert(0 == client_p->next);
+  assert(NULL == client_p->prev);
+  assert(NULL == client_p->next);
 
   /* If localClient is non NULL, its a local client */
   if (client_p->localClient != NULL)
@@ -611,7 +611,7 @@ release_client_state(struct Client* client_p)
 void
 remove_client_from_list(struct Client* client_p)
 {
-  assert(0 != client_p);
+  assert(NULL != client_p);
   
   /* A client made with make_client()
    * is on the unknown_list until removed.
@@ -904,7 +904,7 @@ get_client_name(struct Client* client, int showip)
 {
   static char nbuf[HOSTLEN * 2 + USERLEN + 5];
 
-  assert(0 != client);
+  assert(NULL != client);
 
   if (MyConnect(client))
     {

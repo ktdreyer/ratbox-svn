@@ -648,7 +648,7 @@ int check_server(const char *name, struct Client* client_p, int cryptlink)
   struct ConfItem *server_aconf=NULL;
   int error = -1;
 
-  assert(0 != client_p);
+  assert(NULL != client_p);
 
   if (!(client_p->localClient->passwd))
     return -2;
@@ -936,7 +936,7 @@ int server_estab(struct Client *client_p)
   dlink_node        *m;
   dlink_node        *ptr;
 
-  assert(0 != client_p);
+  assert(NULL != client_p);
   ClearAccess(client_p);
 
   strcpy(inpath_ip, get_client_name(client_p, SHOW_IP));

@@ -83,7 +83,7 @@ add_gline(struct ConfItem *aconf)
 struct ConfItem*
 find_gkill(struct Client* client_p, char* username)
 {
-  assert(0 != client_p);
+  assert(NULL != client_p);
   return (IsExemptKline(client_p)) ? 0 : find_is_glined(client_p->host, username);
 }
 
