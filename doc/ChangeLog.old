@@ -1,3 +1,7 @@
+*** 20010225_8 by androsyn
+Further fixes to listen {} blocks for adns stuff...
+
+
 *** 20010225_7 by jdc
 CVS prior to now would not compile on FreeBSD.  So here are my fixes.
 If any of this is wrong, someone please fix it.  This isn't code I
