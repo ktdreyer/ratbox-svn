@@ -1,3 +1,15 @@
+leeh        2002/06/24 14:12:22 EDT	(20020624_2)
+
+  Modified files:
+    modules/core         m_server.c 
+  Log:
+  - exit the server that introduced the existing server to us always.
+  
+  Revision  Changes    Path
+  1.84      +9 -28     ircd-hybrid-7/modules/core/m_server.c
+
+
+
 db          2002/06/24 00:28:05 EDT	(20020624_1)
 
   Modified files:
