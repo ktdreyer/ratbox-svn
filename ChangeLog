@@ -1,3 +1,26 @@
+leeh        2004/10/19 18:20:13 EDT	(20041019_0)
+
+  Modified files:
+    .                    CREDITS INSTALL 
+    include              conf.h hook.h 
+    src                  newconf.c s_jupeserv.c scommand.c 
+  Log:
+  - updated CREDITS and INSTALL
+  - added JUPE/UNJUPE over irc commands, to immediately jupe/unjupe servers,
+    controllable via jupe_admin
+  - add a finished_bursting hook, at which point reintroduce juped servers
+  
+  Revision  Changes    Path
+  1.2       +4 -6      rserv/CREDITS
+  1.2       +18 -7     rserv/INSTALL
+  1.19      +1 -0      rserv/include/conf.h
+  1.4       +2 -1      rserv/include/hook.h
+  1.16      +1 -0      rserv/src/newconf.c
+  1.6       +99 -2     rserv/src/s_jupeserv.c
+  1.16      +2 -0      rserv/src/scommand.c
+
+
+
 leeh        2004/10/16 20:11:02 EDT	(20041017_0)
 
   Modified files:
