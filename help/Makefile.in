@@ -16,9 +16,8 @@ SYMLINKS=	topic accept cjoin cmode admin names links away whowas \
 		time credits motd userhost users whois ison lusers \
 		user help pass error challenge knock ping pong
 
-all: build
-build: index
-
+all:
+build:
 clean:
 depend:
 lint:
