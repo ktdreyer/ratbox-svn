@@ -582,7 +582,7 @@ auth_user:   USER '=' QSTRING ';'
       }
   };
              |
-             HOST '=' IP_TYPE ';'
+             IP '=' IP_TYPE ';'
   {
     yy_aconf->ip = yylval.ip_entry.ip;
     yy_aconf->ip_mask = yylval.ip_entry.ip_mask;

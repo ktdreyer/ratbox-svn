@@ -85,6 +85,7 @@ deny		{ return DENY; }
 description	{ return DESCRIPTION; }
 die		{ return DIE; }
 email		{ return EMAIL; }
+exceed_limit    { return EXCEED_LIMIT; }
 gecos		{ return GECOS; }
 general		{ return GENERAL; }
 gline		{ return GLINE; }

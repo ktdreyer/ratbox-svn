@@ -3554,8 +3554,8 @@ void conf_add_fields(struct ConfItem *aconf,
 
 void yyerror(char *msg)
 {
-  sendto_realops("%d: %s at %s in this line %s",
-		 lineno, msg, yytext, linebuf);
+  sendto_realops("%d: %s in this line %s",
+		 lineno, msg, linebuf);
 }
 
 int conf_fbgets(char *buf,int max_size, FBFILE *fb)

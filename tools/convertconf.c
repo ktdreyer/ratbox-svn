@@ -370,7 +370,7 @@ static void oldParseOneLine(FILE *out,char* line)
 	    }
 	}
 
-      if(passwd_field)
+      if(passwd_field && *passwd_field)
 	fprintf(out,"\t\tpasswd=\"%s\";\n", passwd_field);	
       else
 	fprintf(out,"\t\tpasswd=\"*\";\n");	
@@ -471,6 +471,7 @@ static void oldParseOneLine(FILE *out,char* line)
 	}
       if(passwd_field)
 	fprintf(out,"\t\tpassword=\"%s\";\n", passwd_field);
+      fprintf(out,"\t\tglobal=yes;\n");
       if(port_field)
 	OperPrivsFromString(out,port_field);
       if(class_field)
@@ -487,6 +488,7 @@ static void oldParseOneLine(FILE *out,char* line)
 	fprintf(out,"\t\thost=\"%s\";\n", host_field);
       if(passwd_field)
 	fprintf(out,"\t\tpassword=\"%s\";\n", passwd_field);
+      fprintf(out,"\t\tglobal=no;\n");
       if(port_field)
 	OperPrivsFromString(out,port_field);
       if(class_field)
