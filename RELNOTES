@@ -8,6 +8,10 @@ NOTE: THIS IS BETA CODE.  It is run at your own risk.  By running this
 doc/whats-new.txt contains important lists of changes between 2.0 and 1.4 -
 it is important you read this file before upgrading.
 
+-- ircd-ratbox-2.0rc8
+- fix silly autoconf issues
+- fix an old reject cache bug
+
 -- ircd-ratbox-2.0rc7
 - try to autoconnect on startup
 - nick resvs now allow @ and # like xlines do
