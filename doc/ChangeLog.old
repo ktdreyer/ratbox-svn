@@ -1,3 +1,8 @@
+*** 20011114_1 by androsyn
+Modified build so that any errors during the make will cause the make
+process to stop.
+
+
 *** 20011113_9 by leeh
 - added a cvsignore to help
 
