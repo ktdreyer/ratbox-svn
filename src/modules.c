@@ -183,9 +183,10 @@ int unload_one_module (char *name, int check)
   if ((modindex = findmodule_byname (name)) == -1) 
     return -1;
 
-  deinitfunc = (void (*)(void))dlsym (modlist[modindex]->address, "_moddeinit");
-
-  if( deinitfunc != NULL )
+  if( (deinitfunc = (void (*)(void))dlsym (modlist[modindex]->address, 
+				  "_moddeinit")) 
+		  || (deinitfunc = (void (*)(void))dlsym (modlist[modindex]->address, 
+				  "__moddeinit")))
   {
     deinitfunc ();
   }
@@ -307,7 +308,8 @@ load_a_module (char *path, int check)
   }
 
   initfunc = (void (*)(void))dlsym (tmpptr, "_modinit");
-  if (!initfunc)
+  if (initfunc == NULL 
+		  && (initfunc = (void (*)(void))dlsym(tmpptr, "__modinit")) == NULL)
   {
     sendto_realops_flags (FLAGS_ALL,
                           "Module %s has no _modinit() function",
@@ -318,7 +320,9 @@ load_a_module (char *path, int check)
     return -1;
   }
 
-  if (!(verp = (char **)dlsym (tmpptr, "_version")))
+  verp = (char **)dlsym (tmpptr, "_version");
+  if (verp == NULL 
+		  && (verp = (char **)dlsym (tmpptr, "__version")) == NULL)
     ver = unknown_ver;
   else
     ver = *verp;
