@@ -190,7 +190,7 @@ struct LocalUser
   time_t            last_caller_id_time;
   time_t            first_received_message_time;
   int               received_number_of_privmsgs;
-  int               drone_noticed;
+  int               flood_noticed;
 
 
   /* Send and receive linebuf queues .. */
@@ -343,11 +343,14 @@ struct LocalUser
 #define FLAGS_BOTS         0x0800 /* shows bots */
 #define FLAGS_EXTERNAL     0x1000 /* show servers introduced */
 #define FLAGS_LOCOPS       0x2000 /* show locops */
+#define FLAGS_CALLERID     0x4000 /* block unless caller id's */
+#define FLAGS_UNAUTH       0x8000 /* show unauth connects here */
+
 /* user information flags, only settable by remote mode or local oper */
-#define FLAGS_OPER         0x4000 /* Operator */
-#define FLAGS_LOCOP        0x8000 /* Local operator -- SRB */
-#define FLAGS_ADMIN        0x10000 /* block unless caller id's */
-#define FLAGS_CALLERID     0x20000 /* block unless caller id's */
+#define FLAGS_OPER         0x10000 /* Operator */
+#define FLAGS_LOCOP        0x20000 /* Local operator -- SRB */
+#define FLAGS_ADMIN        0x40000 /* block unless caller id's */
+
 
 /* *sigh* overflow flags */
 #define FLAGS2_PING_TIMEOUT 0x0001
@@ -387,7 +390,7 @@ struct LocalUser
                       FLAGS_REJ | FLAGS_SKILL | FLAGS_FULL | FLAGS_SPY | \
                       FLAGS_NCHANGE | FLAGS_OPERWALL | FLAGS_DEBUG | \
                       FLAGS_BOTS | FLAGS_EXTERNAL | FLAGS_LOCOP | \
- 		      FLAGS_ADMIN | FLAGS_CALLERID)
+ 		      FLAGS_ADMIN | FLAGS_UNAUTH | FLAGS_CALLERID)
 
 #ifndef OPER_UMODES
 #define OPER_UMODES  (FLAGS_OPER | FLAGS_WALLOP | FLAGS_SERVNOTICE | \

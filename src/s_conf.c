@@ -408,7 +408,7 @@ int check_client(struct Client *cptr, struct Client *sptr, char *username)
       ServerStats->is_ref++;
       /* jdc - lists server name & port connections are on */
       /*       a purely cosmetical change */
-      sendto_realops_flags(FLAGS_CCONN,
+      sendto_realops_flags(FLAGS_UNAUTH,
 			   "%s from %s [%s] on [%s/%u].",
 			   "Unauthorized client connection",
 			   get_client_host(sptr),

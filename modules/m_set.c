@@ -65,8 +65,8 @@ char *_version = "20001122";
  *       2 - IDLETIME
  *       4 - FLUDTIME
  *       5 - FLUDBLOCK
- *       6 - DRONETIME
- *       7 - DRONECOUNT
+ *       6 - FLOODTIME
+ *       7 - FLOODCOUNT
  *       8 - SPAMNUM
  *       9 - SPAMTIME
  *	10 - LOG
@@ -76,8 +76,8 @@ char *_version = "20001122";
 #define TOKEN_MAX 0
 #define TOKEN_AUTOCONN 1
 #define TOKEN_IDLETIME 2
-#define TOKEN_DRONETIME 3
-#define TOKEN_DRONECOUNT 4
+#define TOKEN_FLOODTIME 3
+#define TOKEN_FLOODCOUNT 4
 #define TOKEN_SPAMNUM 5
 #define TOKEN_SPAMTIME 6
 #define TOKEN_LOG 7
@@ -90,8 +90,8 @@ char *set_token_table[] = {
   "MAX",
   "AUTOCONN",
   "IDLETIME",
-  "DRONETIME",
-  "DRONECOUNT",
+  "FLOODTIME",
+  "FLOODCOUNT",
   "SPAMNUM",
   "SPAMTIME",
   "LOG",
@@ -218,52 +218,52 @@ int mo_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
             return 0;
             break;
 
-          case TOKEN_DRONETIME:
+          case TOKEN_FLOODTIME:
             if(parc > 2)
               {
                 int newval = atoi(parv[2]);
 
                 if(newval < 0)
                   {
-                    sendto_one(sptr, ":%s NOTICE %s :DRONETIME must be > 0",
+                    sendto_one(sptr, ":%s NOTICE %s :FLOODTIME must be > 0",
                                me.name, parv[0]);
                     return 0;
                   }       
-                GlobalSetOptions.dronetime = newval;
-                if(GlobalSetOptions.dronetime == 0)
-                  sendto_realops("%s has disabled the ANTI_DRONE_FLOOD code",
+                GlobalSetOptions.floodtime = newval;
+                if(GlobalSetOptions.floodtime == 0)
+                  sendto_realops("%s has disabled the ANTI_FLOOD code",
                                  parv[0]);
                 else
-                  sendto_realops("%s has changed DRONETIME to %i",
-                                 parv[0], GlobalSetOptions.dronetime);
+                  sendto_realops("%s has changed FLOODTIME to %i",
+                                 parv[0], GlobalSetOptions.floodtime);
               }
             else
               {
-                sendto_one(sptr, ":%s NOTICE %s :DRONETIME is currently %i",
-                           me.name, parv[0], GlobalSetOptions.dronetime);
+                sendto_one(sptr, ":%s NOTICE %s :FLOODTIME is currently %i",
+                           me.name, parv[0], GlobalSetOptions.floodtime);
               }
             return 0;
             break;
 
-        case TOKEN_DRONECOUNT:
+        case TOKEN_FLOODCOUNT:
           if(parc > 2)
             {
               int newval = atoi(parv[2]);
 
               if(newval <= 0)
                 {
-                  sendto_one(sptr, ":%s NOTICE %s :DRONECOUNT must be > 0",
+                  sendto_one(sptr, ":%s NOTICE %s :FLOODCOUNT must be > 0",
                              me.name, parv[0]);
                   return 0;
                 }       
-              GlobalSetOptions.dronecount = newval;
-              sendto_realops("%s has changed DRONECOUNT to %i",
-                             parv[0], GlobalSetOptions.dronecount);
+              GlobalSetOptions.floodcount = newval;
+              sendto_realops("%s has changed FLOODCOUNT to %i",
+                             parv[0], GlobalSetOptions.floodcount);
             }
           else
             {
-              sendto_one(sptr, ":%s NOTICE %s :DRONECOUNT is currently %i",
-                         me.name, parv[0], GlobalSetOptions.dronecount);
+              sendto_one(sptr, ":%s NOTICE %s :FLOODCOUNT is currently %i",
+                         me.name, parv[0], GlobalSetOptions.floodcount);
             }
           return 0;
           break;
@@ -438,7 +438,7 @@ int mo_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   sendto_one(sptr, ":%s NOTICE %s :Options: MAX AUTOCONN",
              me.name, parv[0]);
-  sendto_one(sptr, ":%s NOTICE %s :Options: DRONETIME, DRONECOUNT",
+  sendto_one(sptr, ":%s NOTICE %s :Options: FLOODTIME, FLOODCOUNT",
              me.name, parv[0]);
   sendto_one(sptr, ":%s NOTICE %s :Options: SPAMNUM, SPAMTIME",
              me.name, parv[0]);

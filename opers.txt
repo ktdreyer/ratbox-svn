@@ -12,12 +12,13 @@ Usermodes: (* designates that the umode is oper only)
          +o     - Designates this client is a global IRC Operator.
                   Use the /oper command to attain this.
          +i     - Designates this client 'invisible'.
-         +w     - Can see server wallops.
+       * +w     - Can see server wallops.
        * +z     - Can see oper wallops.
-         +s     - Can see generic server messages and oper kills.
+       * +s     - Can see generic server messages and oper kills.
        * +c     - Can see client connections and exits.
+       * +u     - Show unauthorized client connections.
        * +r     - Can see 'rejected' client notices.
-         +k     - Can see server kill messages.
+       * +k     - Can see server kill messages.
        * +f     - Can see 'I-line is full' notices.
        * +y     - Can see stats/links/admin requests to name a few.
        * +d     - Can see server debug messages.
@@ -25,6 +26,7 @@ Usermodes: (* designates that the umode is oper only)
        * +x     - Can see new server introduction messages.
        * +b     - Can see possible bot warnings.
        * +a     - Is marked as a server admin in whois.
+         +g     - "caller id" mode only allow accept clients to message you
 
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
@@ -50,10 +52,8 @@ COMMAND         - USAGE and DESCRIPTION
                   LETTER (* = Oper only.)
                   ------ (^ = Can be configured to be oper only.)
                     c - Shows C/N lines
-                  ^ b - Shows B lines
                   ^ d - Shows D lines
-                  ^ e - Shows E lines
-                  ^ f - Shows F lines
+                  ^ e - Shows Events
                     g - Shows G lines
                     h - Shows H/L lines
                     i - Shows I lines
@@ -63,9 +63,8 @@ COMMAND         - USAGE and DESCRIPTION
                     l - Shows hostname and generic info about [nick]
                     m - Shows commands and their usage
                     o - Shows O/o lines
-                    p - Shows opers connected and their idle times (disabled
-                              if LTRACE option is enabled - see below)
-                    r - Shows resource usage by ircd (only in DEBUGMODE)
+                    p - Shows opers connected and their idle times
+                  * r - Shows resource usage by ircd
                   * t - Shows generic server stats
                     u - Shows server uptime
                     v - Shows connected servers and their idle times
@@ -99,10 +98,6 @@ COMMAND         - USAGE and DESCRIPTION
                   Sends an LOCOPS message of <message. o to all
                   opers on local server who are umode +w and +z
 
-+ LWALLOPS      - LWALLOPS :<message>
-                  -- If compiled with LWALLOPS --
-                  Same as LOCOPS (see above)
-
   TRACE         - TRACE [server|nick]
                   TRACE shows client info about [server|nick] or about
                   the server you are on if no [server|nick] is given.
@@ -116,32 +111,17 @@ COMMAND         - USAGE and DESCRIPTION
                   with TRACE as well as the connection class they
                   fall into.
 
-+ LTRACE        - LTRACE [server|nick]
-                  -- If compiled with LTRACE --
-                  Displays only Oper, Serv, Link, and Class reports even if
-                  the O-line is active.  Useful for just showing pertinent
-                  info of a specific server.  Note however that if the
-                  target server is not running this option then you will
-                  still receive a normal trace output.  Server with this
-                  option remove "STATS p" funtionality since the two are
-                  basically redundant.
-
   REHASH        - REHASH [option]
                   When no [option] is given, ircd will re-read the
                   ircd.conf file.
 
                   [option] can be one of the following:
                     DNS     - Re-read the /etc/resolv.conf file
-                    IP      - Reloads the IP hash for the new and
-                              improved ACKPATCH.  Should never need 
-                              to be used.
-                    TKLINES - Clears temporary klines
                     GLINES  - Clears G lines
                     GC      - Performs garbage collecting of excess
                               memory.
                     MOTD    - Re-reads MOTD file
                     HELP    - Re-reads this HELP file
-                    DLINES  - Re-hashes D-lines
 
   RESTART       - RESTART
                   Restarts the IRC server.
@@ -220,29 +200,13 @@ COMMAND         - USAGE and DESCRIPTION
                                 to <value>.  (This number cannot exceed
                                 HARD_FDLIMIT in config.h)
 
-                    -- The following three are if compiled with FLUD --
-                     FLUDNUM   - Sets the number of flud messages to 
-                                 trip flud alarm to <value>
-                     FLUDTIME  - Sets the number of seconds in which 
-                                  FLUDNUM msgs must occur to <value>
-                     FLUDBLOCK - Sets the number of seconds to block 
-                                 fluds to <value>
+                    FLOODNUM  - How many times a client gets flooded in
+                    FLOODTIME - in seconds before triggering a flood warning
 
-                    -- The following is if compiled with NO_CHANOPS_ON_SPLIT
-                       or NO_JOIN_ON_SPLIT or PRESERVE_CHANNEL_ON_SPLIT
-                     SPLITDELAY - Sets how long after the connect burst
-                                  starts before ops can be hacked on new
-                                  channels. 5(minutes) is usually plenty.
-                                  Disable using 0.
-
-                     SMALLNET   - Below this number of servers present
-                                  means special split handling is now on.
-
-                     -- The following is if compiled with ANTI_SPAMBOT
-                      SPAMNUM   - Sets how many join/parts to channels
-                                  constitutes a possible spambot.
-                      SPAMTIME  - Below this time on a channel
-                                  counts as a join/part as above.
+                    SPAMNUM   - Sets how many join/parts to channels
+                                constitutes a possible spambot.
+                    SPAMTIME  - Below this time on a channel
+                                counts as a join/part as above.
 
 + GLINE         - GLINE <user@host> :[reason]
 		   -- if glines are enabled --

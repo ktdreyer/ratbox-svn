@@ -46,8 +46,8 @@ struct SetOptions
 
   int idletime;
 
-  int dronetime;
-  int dronecount;
+  int floodtime;
+  int floodcount;
 
   int spam_num;
   int spam_time;

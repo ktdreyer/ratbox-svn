@@ -401,46 +401,25 @@
  */
 #define MAXCHANNELSPERUSER  10  /* Recommended value: 10 */
 
-/* ANTI_DRONE_FLOOD - anti flooding code for drones
- * This code adds server side ignore for a client who gets
- * messaged more than drone_count times within drone_time seconds.
- * I have no idea what to use for values here, trying 8 privmsgs
- * within 1 seconds. (I'm told it is usually that fast)
+/*
+ * ANTI_FLOODBOT code
+ * The defaults =should= be fine for the initial timers/counters etc.
+ * they are all changeable at run time anyway
+ *
+ * 8 messages in 1 second on a target is a possible flood 
  */
-#define ANTI_DRONE_FLOOD
-#define DEFAULT_DRONE_TIME 1
-#define DEFAULT_DRONE_COUNT 8
-
-/* JUPE_CHANNEL - jupes a channel from being joined on this server only
- * if added to Q lines e.g. Q:\#packet_channel:Tired of packets
- */
-#undef JUPE_CHANNEL
+#define DEFAULT_FLOOD_TIME 1
+#define DEFAULT_FLOOD_COUNT 8
 
 /* 
- * ANTI_SPAMBOT
- * if ANTI_SPAMBOT is defined try to discourage spambots
- * The defaults =should= be fine for the timers/counters etc.
- * but you can play with them. -Dianora
+ * ANTI_SPAMBOT code.
+ * The defaults =should= be fine for the initial timers/counters etc.
+ * they are all changeable at run time anyway
  *
- * Defining this also does a quick check whether the client sends
- * us a "user foo x x :foo" where x is just a single char.  More
- * often than not, it's a bot if it did. -ThemBones
- */
-#define ANTI_SPAMBOT
-
-/* ANTI_SPAMBOT parameters, don't touch these if you don't
- * understand what is going on.
- *
- * if a client joins MAX_JOIN_LEAVE_COUNT channels in a row,
- * but spends less than MIN_JOIN_LEAVE_TIME seconds
- * on each one, flag it as a possible spambot.
- * disable JOIN for it and PRIVMSG but give no indication to the client
- * that this is happening.
- * every time it tries to JOIN OPER_SPAM_COUNTDOWN times, flag
- * all opers on local server.
- * If a client doesn't LEAVE a channel for at least 2 minutes
- * the join/leave counter is decremented each time a LEAVE is done
- *
+ * join/leave 25 times and stay on each channel less than 60 seconds
+ * opers will get a warning every 5 
+ * if a client stays on a channel for at least 2 minutes, their
+ * spam JOIN_LEAVE_COUNT goes down by 1
  */
 #define MIN_JOIN_LEAVE_TIME  60
 #define MAX_JOIN_LEAVE_COUNT  25

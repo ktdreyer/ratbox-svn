@@ -38,7 +38,7 @@
  * the network..
  *   -- adrian
  */
-#define MAX_FLOOD_PER_SEC               5
+#define MAX_FLOOD_PER_SEC               8
 
 
 extern PF  read_packet;

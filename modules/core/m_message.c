@@ -52,7 +52,7 @@ int build_target_list(int p_or_n, char *command,
 		      char *nicks_channels, struct entity target_table[],
 		      char *text);
 
-int drone_attack(struct Client *sptr, struct Client *acptr);
+int flood_attack(struct Client *sptr, struct Client *acptr);
 
 #define MAX_TARGETS 20
 
@@ -347,7 +347,7 @@ int build_target_list(int p_or_n,
       if ( (acptr = find_person(nick, NULL)) )
 	{
 	  if( !duplicate_ptr(acptr, target_table, i) &&
-	      !drone_attack(sptr, acptr) )
+	      !flood_attack(sptr, acptr) )
 	    {
 	      target_table[i].ptr = (void *)acptr;
 	      target_table[i].type = ENTITY_CLIENT;
@@ -527,7 +527,7 @@ void msg_client(int n_or_p, char *command,
       if(IsSetCallerId(acptr))
 	{
 
-	  /* Here is the anti-drone bot/spambot bloat^H^H^H^H^Hcode -db */
+	  /* Here is the anti-flood bot/spambot bloat^H^H^H^H^Hcode -db */
 	  if(accept_message(sptr,acptr))
 	    {
 	      sendto_prefix_one(acptr, sptr, ":%s %s %s :%s",
@@ -537,7 +537,7 @@ void msg_client(int n_or_p, char *command,
 	    {
 	      /* check for accept, flag recipient incoming message */
 	      sendto_prefix_one(sptr, acptr,
-		":%s NOTICE %s :*** I'm in +u mode (server side ignore).",
+		":%s NOTICE %s :*** I'm in +g mode (server side ignore).",
 			    acptr->name, sptr->name);
 	      /* XXX hard coded 60 ick fix -db */
 	      if((acptr->localClient->last_caller_id_time + 60) < CurrentTime)
@@ -547,7 +547,7 @@ void msg_client(int n_or_p, char *command,
 				    acptr->name, sptr->name);
 
 		  sendto_prefix_one(acptr, sptr,
-		    ":%s NOTICE %s :*** Client %s [%s@%s] is messaging you",
+        ":%s NOTICE %s :*** Client %s [%s@%s] is messaging you and you are +g",
 				    me.name, acptr->name,
 				    sptr->name, sptr->username,
 				    sptr->host );
@@ -567,38 +567,38 @@ void msg_client(int n_or_p, char *command,
 }
       
 /*
- * drone_attack
+ * flood_attack
  * inputs	- pointer to source Client 
  *		- pointer to target Client
- * output	- 1 if target is under drone attack
- * side effects	- check for drone attack on target acptr
+ * output	- 1 if target is under flood attack
+ * side effects	- check for flood attack on target acptr
  */
 
-int drone_attack(struct Client *sptr,struct Client *acptr)
+int flood_attack(struct Client *sptr,struct Client *acptr)
 {
-  if(GlobalSetOptions.dronetime &&
+  if(GlobalSetOptions.floodtime &&
      MyConnect(acptr) && IsClient(sptr) )
     {
-      if((acptr->localClient->first_received_message_time+GlobalSetOptions.dronetime)
+      if((acptr->localClient->first_received_message_time+GlobalSetOptions.floodtime)
 	 < CurrentTime)
 	{
 	  acptr->localClient->received_number_of_privmsgs=1;
 	  acptr->localClient->first_received_message_time = CurrentTime;
-	  acptr->localClient->drone_noticed = 0;
+	  acptr->localClient->flood_noticed = 0;
 	}
       else
 	{
 	  if(acptr->localClient->received_number_of_privmsgs > 
-	     GlobalSetOptions.dronecount)
+	     GlobalSetOptions.floodcount)
 	    {
-	      if(acptr->localClient->drone_noticed == 0)
+	      if(acptr->localClient->flood_noticed == 0)
 		{
 		  sendto_realops_flags(FLAGS_BOTS,
-		       "Possible Drone Flooder %s [%s@%s] on %s target: %s",
+		       "Possible Flooder %s [%s@%s] on %s target: %s",
 				       sptr->name, sptr->username,
 				       sptr->host,
 				       sptr->user->server, acptr->name);
-		  acptr->localClient->drone_noticed = 1;
+		  acptr->localClient->flood_noticed = 1;
 		  return 1;
 		}
 	    }

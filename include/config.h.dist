@@ -401,20 +401,8 @@
  */
 #define MAXCHANNELSPERUSER  10  /* Recommended value: 10 */
 
-/* ANTI_DRONE_FLOOD - anti flooding code for drones
- * This code adds server side ignore for a client who gets
- * messaged more than drone_count times within drone_time seconds.
- * I have no idea what to use for values here, trying 8 privmsgs
- * within 1 seconds. (I'm told it is usually that fast)
- */
-#define ANTI_DRONE_FLOOD
-#define DEFAULT_DRONE_TIME 1
-#define DEFAULT_DRONE_COUNT 8
-
-/* JUPE_CHANNEL - jupes a channel from being joined on this server only
- * if added to Q lines e.g. Q:\#packet_channel:Tired of packets
- */
-#undef JUPE_CHANNEL
+#define DEFAULT_FLOOD_TIME 1
+#define DEFAULT_FLOOD_COUNT 8
 
 /* 
  * ANTI_SPAMBOT
