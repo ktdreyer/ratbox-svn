@@ -1,3 +1,7 @@
+*** 20010303_1 by wcampbel
+Typo, thanks for spotting it Martin
+
+
 *** 20010302_4 by fl_
 - added some TS rules to permanent channels..
   if a remote server sends users to a perm channel, we drop our modes,
