@@ -269,11 +269,10 @@ send_members(struct Client *client_p,
   int data_to_send = 0;
   char *t;                      /* temp char pointer */
 
-  ircsprintf(buf, ":%s SJOIN %lu %s %s %s :", me.name,
-             (unsigned long)chptr->channelts,
-             chptr->chname, lmodebuf, lparabuf);
+  cur_len = mlen = ircsprintf(buf, ":%s SJOIN %lu %s %s %s :", me.name,
+                   (unsigned long)chptr->channelts,
+                   chptr->chname, lmodebuf, lparabuf);
 
-  cur_len = mlen = strlen(buf);
   t = buf + mlen;
 
   for (ptr = list->head; ptr && ptr->data; ptr = ptr->next)
