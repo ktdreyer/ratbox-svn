@@ -1,3 +1,43 @@
+leeh        2002/11/29 17:28:31 UTC	(20021129_0)
+
+  Modified files:
+    contrib              m_okick.c 
+    modules              m_accept.c m_kline.c m_pong.c m_unkline.c 
+    modules/core         m_kick.c m_message.c m_part.c 
+    src                  client.c fileio.c ircd.c kdparse.c motd.c 
+                         parse.c s_auth.c s_conf.c s_gline.c 
+                         s_serv.c 
+    tools                convertconf.c convertilines.c 
+                         convertklines.c viconf.c 
+  Log:
+  - removed all the casts of NULL.
+  
+  Revision  Changes    Path
+  1.4       +2 -2      ircd-ratbox/contrib/m_okick.c
+  1.54      +2 -2      ircd-ratbox/modules/core/m_kick.c
+  1.114     +2 -2      ircd-ratbox/modules/core/m_message.c
+  1.67      +2 -2      ircd-ratbox/modules/core/m_part.c
+  1.38      +2 -2      ircd-ratbox/modules/m_accept.c
+  1.134     +3 -3      ircd-ratbox/modules/m_kline.c
+  1.31      +2 -2      ircd-ratbox/modules/m_pong.c
+  1.68      +2 -2      ircd-ratbox/modules/m_unkline.c
+  7.335     +1 -13     ircd-ratbox/src/client.c
+  7.25      +1 -1      ircd-ratbox/src/fileio.c
+  7.267     +1 -1      ircd-ratbox/src/ircd.c
+  7.15      +12 -12    ircd-ratbox/src/kdparse.c
+  7.30      +4 -4      ircd-ratbox/src/motd.c
+  7.146     +2 -2      ircd-ratbox/src/parse.c
+  7.117     +2 -2      ircd-ratbox/src/s_auth.c
+  7.376     +1 -1      ircd-ratbox/src/s_conf.c
+  1.32      +1 -1      ircd-ratbox/src/s_gline.c
+  7.305     +1 -1      ircd-ratbox/src/s_serv.c
+  1.41      +10 -10    ircd-ratbox/tools/convertconf.c
+  7.5       +8 -8      ircd-ratbox/tools/convertilines.c
+  7.7       +1 -1      ircd-ratbox/tools/convertklines.c
+  7.6       +2 -2      ircd-ratbox/tools/viconf.c
+
+
+
 androsyn    2002/11/28 22:27:13 UTC	(20021128_7)
 
   Modified files:
