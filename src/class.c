@@ -58,7 +58,7 @@ make_class(void)
 	PingFreq(tmp) = DEFAULT_PINGFREQUENCY;
 	MaxUsers(tmp) = 1;
 	MaxSendq(tmp) = DEFAULT_SENDQ;
-	MaxSendqEob(tmp) = DEFAULT_SENDQ;
+	MaxSendqEob(tmp) = 0;
 
 #ifdef IPV6
 	tmp->ip_limits = New_Patricia(128);
@@ -339,7 +339,7 @@ get_sendq(struct Client *client_p)
 		struct server_conf *server_p;
 		server_p = client_p->localClient->att_sconf;
 
-		if(HasSentEob(client_p))
+		if(HasSentEob(client_p) && MaxSendqEob(server_p->class))
 			return MaxSendqEob(server_p->class);
 
 		return MaxSendq(server_p->class);
