@@ -266,28 +266,31 @@ m_join(struct Client *client_p,
 	  sendto_channel_local(ONLY_CHANOPS, chptr, ":%s MODE %s +nt",
 			       me.name, chptr->chname);
 
-          channel_modes(chptr, source_p, mbuf, pbuf);
+          if(*chptr->chname == '#')
+          {
+            channel_modes(chptr, source_p, mbuf, pbuf);
 
-          strlcat(mbuf, " ", sizeof(mbuf));
+            strlcat(mbuf, " ", sizeof(mbuf));
 
-          if(pbuf[0] != '\0')
-            strlcat(mbuf, pbuf, sizeof(mbuf));
+            if(pbuf[0] != '\0')
+              strlcat(mbuf, pbuf, sizeof(mbuf));
 
-          /* note: mbuf here will have a trailing space.  we add one above,
-           * and channel_modes() will leave a trailing space on pbuf if
-           * its used --fl
-           */
-	  sendto_server(client_p, NOCAPS, NOCAPS,
-                        ":%s SJOIN %lu %s %s:@%s",
-                        me.name, (unsigned long) chptr->channelts, 
-                        chptr->chname, mbuf, parv[0]);
+            /* note: mbuf here will have a trailing space.  we add one above,
+             * and channel_modes() will leave a trailing space on pbuf if
+             * its used --fl
+             */
+	    sendto_server(client_p, NOCAPS, NOCAPS,
+                          ":%s SJOIN %lu %s %s:@%s",
+                          me.name, (unsigned long) chptr->channelts, 
+                          chptr->chname, mbuf, parv[0]);
+          }
 
           /* drop our +beI modes */
           free_channel_list(&chptr->banlist);
           free_channel_list(&chptr->exceptlist);
           free_channel_list(&chptr->invexlist);
 	}
-      else
+      else if(*chptr->chname == '#')
 	{
 	  sendto_server(client_p, NOCAPS, NOCAPS,
                         ":%s SJOIN %lu %s + :%s",
