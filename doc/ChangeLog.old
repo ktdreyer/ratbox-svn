@@ -1,3 +1,7 @@
+*** 20010108_9 by fl_
+- commited dianes fix, modified slightly :)
+
+
 *** 20010108_8 by db
 - don't assume a client is only listed once in the request_list,
   there might be a forward as well as reverse pending in the same list.
