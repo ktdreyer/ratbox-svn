@@ -732,6 +732,13 @@ expire_temp_rxlines(void *unused)
 	}
 }
 
+unsigned long
+get_nd_count(void)
+{
+	return(dlink_list_length(&nd_list));
+}
+
+
 void
 add_nd_entry(const char *name)
 {

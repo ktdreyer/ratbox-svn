@@ -34,6 +34,7 @@
 #include "send.h"
 #include "memory.h"
 #include "s_conf.h"
+#include "s_newconf.h"
 #include "whowas.h"
 #include "hash.h"
 #include "scache.h"
@@ -124,6 +125,9 @@ tstats(struct Client *source_p)
 	sendto_one_numeric(source_p, RPL_STATSDEBUG,
 			"T :rejected %u delaying %lu", 
 			sp->is_rej, dlink_list_length(&delay_exit));
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			"T :nicks being delayed %lu",
+			get_nd_count());
 	sendto_one_numeric(source_p, RPL_STATSDEBUG,
 			   "T :unknown commands %u prefixes %u",
 			   sp->is_unco, sp->is_unpf);
