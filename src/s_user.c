@@ -586,15 +586,21 @@ valid_hostname(const char *hostname)
 	if(hostname == NULL)
 		return NO;
 
-	if('.' == *p)
+	if('.' == *p || ':" == *P)
 		return NO;
 
 	while (*p)
 	{
 		if(!IsHostChar(*p))
 			return NO;
+                if(*p == '.' || *p == ':')
+  			found_sep++;
 		p++;
 	}
+
+	if(found_sep == 0)
+		return(NO);
+
 	return (YES);
 }
 

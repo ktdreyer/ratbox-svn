@@ -1052,7 +1052,7 @@ conf_set_auth_spoof(void *data)
 		return;
 	}
 
-	if(!valid_hostname(host) || (strchr(host, '.') == NULL))
+	if(!valid_hostname(host))
 	{
 		conf_report_error("Warning -- invalid spoof (host).");
 		return;
