@@ -97,32 +97,32 @@ flood_recalc(int fd, void *data)
      * cheap and it means that if a op is downgraded they still get considered
      * for anti-flood protection ..
      */
-    if (IsServer(cptr) || IsAnyOper(cptr))
-        goto finish;
+    if (!IsPrivileged(cptr))
+      {
+	/*
+	 * ok, we have to recalculate the number of messages we can receive
+	 * in this second, based upon what happened in the last second.
+	 * If we still exceed the flood limit, don't move the parsed limit.
+	 * If we are below the flood limit, increase the flood limit.
+	 *   -- adrian
+	 */
 
-    /*
-     * ok, we have to recalculate the number of messages we can recieve
-     * in this second, based upon what happened in the last second.
-     * If we still exceed the flood limit, don't move the parsed limit.
-     * If we are below the flood limit, increase the flood limit.
-     *   -- adrian
-     */
+	if (lcptr->allow_read == 0)
+	  /* Give the poor person a go! */
+	  lcptr->allow_read = 1;
+	else if (lcptr->actually_read < lcptr->allow_read)
+	  /* Raise the allowed messages if we flooded under the limit */
+	  lcptr->allow_read++;
+	else
+	  /* Drop the limit to avoid flooding .. */
+	  lcptr->allow_read--;
 
-    if (lcptr->allow_read == 0)
-        /* Give the poor person a go! */
-        lcptr->allow_read = 1;
-    else if (lcptr->actually_read < lcptr->allow_read)
-        /* Raise the allowed messages if we flooded under the limit */
-        lcptr->allow_read++;
-    else
-        /* Drop the limit to avoid flooding .. */
-        lcptr->allow_read--;
-
-    /* Enforce floor/ceiling restrictions */
-    if (lcptr->allow_read < 1)
-        lcptr->allow_read = 1;
-    else if (lcptr->allow_read > MAX_FLOOD_PER_SEC)
-        lcptr->allow_read = MAX_FLOOD_PER_SEC;
+	/* Enforce floor/ceiling restrictions */
+	if (lcptr->allow_read < 1)
+	  lcptr->allow_read = 1;
+	else if (lcptr->allow_read > MAX_FLOOD_PER_SEC)
+	  lcptr->allow_read = MAX_FLOOD_PER_SEC;
+      }
 
     /* Reset the sent-per-second count */
     lcptr->sent_parsed = 0;
@@ -131,7 +131,6 @@ flood_recalc(int fd, void *data)
     /* And now, try flushing .. */
     parse_client_queued(cptr);
 
-finish:
     /* and finally, reset the flood check */
     comm_setflush(fd, 1, flood_recalc, cptr);
 }
@@ -209,10 +208,7 @@ read_packet(int fd, void *data)
 
   /* Attempt to parse what we have */
   parse_client_queued(cptr);
-#ifdef REJECT_HOLD
-  /* Silence compiler warnings -- adrian */
-finish:
-#endif
+
   /* If we get here, we need to register for another COMM_SELECT_READ */
   if (cptr->fd > -1) {
     if (PARSE_AS_SERVER(cptr)) {

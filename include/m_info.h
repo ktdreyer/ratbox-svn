@@ -248,18 +248,6 @@ Info MyInformation[] = {
   { "PPATH", "NONE", 0, "Path to Pid File" },
 #endif /* PPATH */
 
-#ifdef REJECT_HOLD
-  { "REJECT_HOLD", "ON", 0, "Do not Dump a K-lined Client immediately" },
-#else
-  { "REJECT_HOLD", "OFF", 0, "Do not Dump a K-lined Client immediately" },
-#endif /* REJECT_HOLE */
-
-#ifdef REJECT_HOLD_TIME
-  { "REJECT_HOLD_TIME", "", REJECT_HOLD_TIME, "Amount of Time to Hold a K-lined Client" },
-#else
-  { "REJECT_HOLD_TIME", "OFF", 0, "Amount of Time to Hold a K-lined Client" },
-#endif /* REJECT_HOLD_TIME */
-
 #ifdef REPORT_DLINE_TO_USER
   { "REPORT_DLINE_TO_USER", "ON", 0, "Inform Clients They are D-lined" },
 #else
