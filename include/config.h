@@ -379,80 +379,6 @@
  */
 #define LITTLE_I_LINES
 
-/*
- * define ONE of NO_CHANOPS_ON_SPLIT, NO_JOIN_ON_SPLIT
- * PRESERVE_CHANNEL_ON_SPLIT, NO_JOIN_ON_SPLIT_SIMPLE
- *
- * choose =one= only
- */
-
-/* NO_CHANOPS_WHEN_SPLIT
- * When this is defined, users will not be chanopped on empty channels
- * if there are no servers presently connected to this server
- * opers are not affected. 
- */
-#undef NO_CHANOPS_WHEN_SPLIT
-
-/* 
- * NO_JOIN_ON_SPLIT_SIMPLE
- * 
- * When this is defined, users will not be allowed to join channels
- * while the server is split.
- */
-#undef NO_JOIN_ON_SPLIT_SIMPLE
-
-/*
- * NO_JOIN_ON_SPLIT
- *
- * When this is defined, users will not be allowed to join channels
- * that were present before a split. THIS IS BROKEN - DO NOT USE
- * ON A PRODUCTION SERVER --Rodder
- */
-#undef NO_JOIN_ON_SPLIT
-
-/*
- * PRESERVE_CHANNEL_ON_SPLIT
- *
- * When this is defined, channel modes are preserved when this
- * server is split from net until rejoin. i.e. if the channel
- * was +i before this server split, it remains +i during the split
- * THIS IS BROKEN - DO NOT USE ON PRODUCTION SERVER --Rodder
- */
-#undef PRESERVE_CHANNEL_ON_SPLIT
-
-/*
- * SPLIT_SMALLNET_SIZE defines what constitutes a split from 
- * the net. for a leaf, 2 is fine. If the number of servers seen
- * on the net gets less than 2, a split is deemed to have happened.
- */
-#define SPLIT_SMALLNET_SIZE 2
-
-/*
- * SPLIT_SMALLNET_USER_SIZE defines how many global users on the
- * net constitute a "normal" net size. It's used in conjunction
- * with SPLIT_SMALLNET_SIZE to help determine the end of a split.
- * if number of server seen on net > SPLIT_SMALLNET_SIZE &&
- * number of users seen on net > SPLIT_SMALLNET_USER_SIZE start
- * counting down the SERVER_SPLIT_RECOVERY_TIME
- */
-#define SPLIT_SMALLNET_USER_SIZE 10000
-
-/*
- * SPLIT_PONG will send a PING to a server after the connect burst.
- * It will stay in "split" mode until it receives a PONG in addition
- * to meeting the other conditions.  This is very useful for true
- * leafs, less useful for "clustered" servers.  If this is enabled,
- * you should be able to crank DEFAULT_SERVER_SPLIT_RECOVERY_TIME
- * down to 1.
- */
-#define SPLIT_PONG
-
-/*
- * DEFAULT_SERVER_SPLIT_RECOVERY_TIME - determines how long to delay split
- * status after resyncing
- */
-#define DEFAULT_SERVER_SPLIT_RECOVERY_TIME 1
-
 /* LIMIT_UH
  * If this is defined, Y line limit is made against the actual
  * username not the ip. i.e. if you limit the connect frequency line
@@ -499,29 +425,10 @@
 #define SEND_FAKE_KILL_TO_CLIENT
 
 /*
- * LWALLOPS - Like wallops but only local.
- *
- * This is actually a compatibility command which really calls m_locops().
- */
-#define LWALLOPS
-
-/*
  * Define this to enable WintrHawk "styling"
  */
 #define WINTRHAWK
 
-/*
- * comstud and I have both noted that solaris 2.5 at least, takes a hissy
- * fit if you don't read a fd that becomes ready right away. Unfortunately
- * the dog3 priority code relies upon not having to read a ready fd right away.
- * If you have HTM mode set low as it is normally, the server will
- * eventually grind to a halt.
- * Don't complain if Solaris lags if you don't define this. I warned you.
- *
- * -Dianora
- */
-
-#undef NO_PRIORITY
 
 /*
  * Define this to enable IPv6 support.  IPv6 is currently still being
@@ -818,11 +725,6 @@ error CLIENT_FLOOD undefined.
 #endif
 
 #define REPORT_DLINE_TO_USER
-
-#if defined(NO_CHANOPS_WHEN_SPLIT) || defined(PRESERVE_CHANNEL_ON_SPLIT) || \
-        defined(NO_JOIN_ON_SPLIT) || defined(NO_JOIN_ON_SPLIT_SIMPLE)
-#define NEED_SPLITCODE
-#endif
 
 #ifdef FLUD
 void    free_fluders();

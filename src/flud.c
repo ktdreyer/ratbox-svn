@@ -39,13 +39,12 @@
 
 /* Shadowfax's FLUD code */
 
-#ifdef FLUD
 
 void announce_fluder(
-                            struct Client *fluder, /* fluder, client being fluded */
-                            struct Client *cptr,
-                            struct Channel *chptr,    /* channel being fluded */
-                            int type)           /* for future use */
+                     struct Client *fluder, /* fluder, client being fluded */
+                     struct Client *cptr,
+                     struct Channel *chptr, /* channel being fluded */
+                     int type)              /* for future use */
 {
   char *fludee;
 
@@ -62,7 +61,8 @@ void announce_fluder(
 
 /* This is really just a "convenience" function.  I can only keep three or
 ** four levels of pointer dereferencing straight in my head.  This removes
-** an entry in a fluders list.  Use this when working on a fludees list :) */
+** an entry in a fluders list.  Use this when working on a fludees list :)
+*/
 
 struct fludbot *remove_fluder_reference(struct fludbot **fluders,
                                         struct Client *fluder)
@@ -283,7 +283,8 @@ check_for_flud(struct Client *fluder, /* fluder, client being fluded */
 
   /* Okay, if we are not blocking, we need to decide if it's time to
   ** begin doing so.  We already have a count of messages received in
-  ** the last flud_time seconds */
+  ** the last flud_time seconds
+  */
   if(!blocking && (count > GlobalSetOptions.fludnum))
     {
       blocking = 1;   
@@ -391,5 +392,3 @@ void free_fludees(struct Client *badguy)
       fludees = next;
     }       
 }       
-
-#endif /* FLUD */

@@ -105,11 +105,9 @@
  *       5 - FLUDBLOCK
  *       6 - DRONETIME
  *       7 - DRONECOUNT
- *       8 - SPLITDELAY
- *       9 - SPLITNUM
- *      10 - SPLITUSERS
- *      11 - SPAMNUM
- *      12 - SPAMTIME
+ *       8 - SPAMNUM
+ *       9 - SPAMTIME
+ *	10 - LOG
  * - rjp
  */
 
@@ -121,13 +119,10 @@
 #define TOKEN_FLUDBLOCK 5
 #define TOKEN_DRONETIME 6
 #define TOKEN_DRONECOUNT 7
-#define TOKEN_SPLITDELAY 8
-#define TOKEN_SPLITNUM 9
-#define TOKEN_SPLITUSERS 10
-#define TOKEN_SPAMNUM 11
-#define TOKEN_SPAMTIME 12
-#define TOKEN_LOG 13
-#define TOKEN_BAD 14
+#define TOKEN_SPAMNUM 8
+#define TOKEN_SPAMTIME 9
+#define TOKEN_LOG 10
+#define TOKEN_BAD 11
 
 static char *set_token_table[] = {
   "MAX",
@@ -138,9 +133,6 @@ static char *set_token_table[] = {
   "FLUDBLOCK",
   "DRONETIME",
   "DRONECOUNT",
-  "SPLITDELAY",
-  "SPLITNUM",
-  "SPLITUSERS",
   "SPAMNUM",
   "SPAMTIME",
   "LOG",
@@ -237,7 +229,6 @@ int mo_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           return 0;
           break;
 
-#ifdef IDLE_CHECK
           case TOKEN_IDLETIME:
             if(parc > 2)
               {
@@ -263,8 +254,7 @@ int mo_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
               }
             return 0;
             break;
-#endif
-#ifdef FLUD
+
           case TOKEN_FLUDNUM:
             if(parc > 2)
               {
@@ -341,8 +331,7 @@ int mo_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
               }
             return 0;       
             break;
-#endif
-#ifdef ANTI_DRONE_FLOOD
+
           case TOKEN_DRONETIME:
             if(parc > 2)
               {
@@ -392,108 +381,7 @@ int mo_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
             }
           return 0;
           break;
-#endif
-#ifdef NEED_SPLITCODE
 
-            case TOKEN_SPLITDELAY:
-              if(parc > 2)
-                {
-                  int newval = atoi(parv[2]);
-                  
-                  if(newval < 0)
-                    {
-                      sendto_one(sptr, ":%s NOTICE %s :SPLITDELAY must be > 0",
-                                 me.name, parv[0]);
-                      return 0;
-                    }
-                  /* sygma found it, the hard way */
-                  if(newval > MAX_SERVER_SPLIT_RECOVERY_TIME)
-                    {
-                      sendto_one(sptr,
-                                 ":%s NOTICE %s :Cannot set SPLITDELAY over %d",
-                                 me.name, parv[0], MAX_SERVER_SPLIT_RECOVERY_TIME);
-                      newval = MAX_SERVER_SPLIT_RECOVERY_TIME;
-                    }
-                  sendto_realops("%s has changed SPLITDELAY to %i",
-                                 parv[0], newval);
-                  GlobalSetOptions.server_split_recovery_time = (newval*60);
-                  if(GlobalSetOption.server_split_recovery_time == 0)
-                    {
-                      cold_start = NO;
-                      if (server_was_split)
-                        {
-                          server_was_split = NO;
-                          sendto_ops("split-mode deactived by manual override");
-                        }
-#if defined(PRESERVE_CHANNEL_ON_SPLIT) || defined(NO_JOIN_ON_SPLIT)
-                      remove_empty_channels();
-#endif
-#if defined(SPLIT_PONG)
-                      got_server_pong = YES;
-#endif
-                    }
-                }
-              else
-                {
-                  sendto_one(sptr, ":%s NOTICE %s :SPLITDELAY is currently %i",
-                             me.name,
-                             parv[0],
-                             GlobalSetOptions.server_split_recovery_time/60);
-                }
-          return 0;
-          break;
-
-        case TOKEN_SPLITNUM:
-          if(parc > 2)
-            {
-              int newval = atoi(parv[2]);
-
-              if(newval < SPLIT_SMALLNET_SIZE)
-                {
-                  sendto_one(sptr, ":%s NOTICE %s :SPLITNUM must be >= %d",
-                             me.name, parv[0],SPLIT_SMALLNET_SIZE);
-                  return 0;
-                }
-              sendto_realops("%s has changed SPLITNUM to %i",
-                             parv[0], newval);
-              SPLITNUM = newval;
-            }
-          else
-            {
-              sendto_one(sptr, ":%s NOTICE %s :SPLITNUM is currently %i",
-                         me.name,
-                         parv[0],
-                         SPLITNUM);
-            }
-          return 0;
-          break;
-
-          case TOKEN_SPLITUSERS:
-            if(parc > 2)
-              {
-                int newval = atoi(parv[2]);
-
-                if(newval < 0)
-                  {
-                    sendto_one(sptr, ":%s NOTICE %s :SPLITUSERS must be >= 0",
-                               me.name, parv[0]);
-                    return 0;
-                  }
-                sendto_realops("%s has changed SPLITUSERS to %i",
-                               parv[0], newval);
-                SPLITUSERS = newval;
-              }
-            else
-              {
-                sendto_one(sptr, ":%s NOTICE %s :SPLITUSERS is currently %i",
-                           me.name,
-                           parv[0],
-                           SPLITUSERS);
-              }
-            return 0;
-            break;
-#endif
-#ifdef ANTI_SPAMBOT
           case TOKEN_SPAMNUM:
             if(parc > 2)
               {
@@ -554,7 +442,7 @@ int mo_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
             }
           return 0;
           break;
-#endif
+
         case TOKEN_LOG:
           if(parc > 2)
             {
@@ -588,28 +476,17 @@ int mo_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           break;
         }
     }
+
   sendto_one(sptr, ":%s NOTICE %s :Options: MAX AUTOCONN",
              me.name, parv[0]);
-#ifdef FLUD
   sendto_one(sptr, ":%s NOTICE %s :Options: FLUDNUM, FLUDTIME, FLUDBLOCK",
              me.name, parv[0]);
-#endif
-#ifdef ANTI_DRONE_FLOOD
   sendto_one(sptr, ":%s NOTICE %s :Options: DRONETIME, DRONECOUNT",
              me.name, parv[0]);
-#endif
-#ifdef ANTI_SPAMBOT
   sendto_one(sptr, ":%s NOTICE %s :Options: SPAMNUM, SPAMTIME",
              me.name, parv[0]);
-#endif
-#ifdef NEED_SPLITCODE
-  sendto_one(sptr, ":%s NOTICE %s :Options: SPLITNUM SPLITUSERS SPLITDELAY",
-               me.name, parv[0]);
-#endif
-#ifdef IDLE_CHECK
   sendto_one(sptr, ":%s NOTICE %s :Options: IDLETIME",
              me.name, parv[0]);
-#endif
   sendto_one(sptr, ":%s NOTICE %s :Options: LOG",
              me.name, parv[0]);
   return 0;
