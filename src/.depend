@@ -119,7 +119,7 @@ ircd.o: ircd.c ../include/stdinc.h ../include/config.h ../include/setup.h \
   ../include/s_serv.h ../include/scache.h ../include/whowas.h \
   ../include/modules.h ../include/hook.h ../include/ircd_getopt.h \
   ../include/newconf.h ../include/reject.h ../include/s_newconf.h \
-  ../include/cache.h
+  ../include/cache.h ../include/packet.h
 ircd_signal.o: ircd_signal.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/ircd_signal.h \
   ../include/ircd.h ../include/tools.h ../include/memory.h \
@@ -198,8 +198,7 @@ numeric.o: numeric.c ../include/stdinc.h ../include/config.h \
   ../include/linebuf.h ../include/channel.h ../include/res.h \
   ../adns/adns.h ../include/commio.h ../include/ircd.h \
   ../include/memory.h ../include/balloc.h ../include/irc_string.h \
-  ../include/common.h ../include/patricia.h ../include/numeric.h \
-  messages.tab
+  ../include/common.h ../include/patricia.h ../include/numeric.h
 packet.o: packet.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/tools.h \
   ../include/commio.h ../include/ircd_defs.h ../include/s_log.h \
