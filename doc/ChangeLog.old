@@ -1,3 +1,16 @@
+leeh        2002/04/13 11:30:34 EDT	(20020413_5)
+
+  Modified files:
+    contrib              Makefile.in README 
+  Log:
+  - updated README/Makefile for the modules thatve been repo moved.
+  
+  Revision  Changes    Path
+  1.31      +6 -2      ircd-hybrid-7/contrib/Makefile.in
+  1.15      +20 -1     ircd-hybrid-7/contrib/README
+
+
+
 leeh        2002/04/13 10:58:02 EDT	(20020413_4)
 
   Modified files:
