@@ -62,7 +62,7 @@ static int me_unxline(struct Client *client_p, struct Client *source_p, int parc
 
 struct Message xline_msgtab = {
 	"XLINE", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, {ms_xline, 5}, {ms_xline, 5}, {me_xline, 4}, {mo_xline, 3}}
+	{mg_unreg, mg_not_oper, {ms_xline, 5}, {ms_xline, 5}, {me_xline, 5}, {mo_xline, 3}}
 };
 struct Message unxline_msgtab = {
 	"UNXLINE", 0, 0, 0, MFLG_SLOW,
@@ -77,7 +77,8 @@ static void apply_xline(struct Client *client_p, const char *name,
 			const char *reason, int temp_time);
 static void write_xline(struct Client *source_p, struct ConfItem *aconf);
 static void propagate_xline(struct Client *source_p, const char *target,
-			int temp_time, const char *name, const char *reason);
+			int temp_time, const char *name, 
+			const char *type, const char *reason);
 static void cluster_xline(struct Client *source_p, int temp_time,
 			const char *name, const char *reason);
 
@@ -147,7 +148,7 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(target_server != NULL)
 	{
 		propagate_xline(source_p, target_server, temp_time,
-				name, reason);
+				name, "2", reason);
 
 		if(!match(target_server, me.name))
 			return 0;
@@ -173,7 +174,7 @@ ms_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	/* parv[0]  parv[1]      parv[2]  parv[3]  parv[4]
 	 * oper     target serv  xline    type     reason
 	 */
-	propagate_xline(source_p, parv[1], 0, parv[2], parv[4]);
+	propagate_xline(source_p, parv[1], 0, parv[2], parv[3], parv[4]);
 
 	if(!IsPerson(source_p))
 		return 0;
@@ -189,11 +190,11 @@ ms_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 static int
 me_xline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	/* time name :reason */
+	/* time name type :reason */
 	if(!IsPerson(source_p))
 		return 0;
 
-	handle_remote_xline(source_p, atoi(parv[1]), parv[2], parv[3]);
+	handle_remote_xline(source_p, atoi(parv[1]), parv[2], parv[4]);
 	return 0;
 }
 
@@ -342,21 +343,22 @@ write_xline(struct Client *source_p, struct ConfItem *aconf)
 
 static void 
 propagate_xline(struct Client *source_p, const char *target,
-		int temp_time, const char *name, const char *reason)
+		int temp_time, const char *name, const char *type,
+		const char *reason)
 {
 	if(!temp_time)
 	{
 		sendto_match_servs(source_p, target, CAP_CLUSTER, NOCAPS,
-					"XLINE %s %s 2 :%s",
-					target, name, reason);
+					"XLINE %s %s %s :%s",
+					target, name, type, reason);
 		sendto_match_servs(source_p, target, CAP_ENCAP, CAP_CLUSTER,
-				"ENCAP %s XLINE %d %s :%s",
+				"ENCAP %s XLINE %d %s 2 :%s",
 				target, temp_time, name, reason);
 	}
 	else
 		sendto_match_servs(source_p, target, CAP_ENCAP, NOCAPS,
-				"ENCAP %s XLINE %d %s :%s",
-				target, temp_time, name, reason);
+				"ENCAP %s XLINE %d %s %s :%s",
+				target, temp_time, name, type, reason);
 }
 			
 static void
@@ -382,12 +384,12 @@ cluster_xline(struct Client *source_p, int temp_time, const char *name,
 					"XLINE %s %s 2 :%s",
 					shared_p->server, name, reason);
 			sendto_match_servs(source_p, shared_p->server, CAP_ENCAP, CAP_CLUSTER,
-					"ENCAP %s XLINE %d %s :%s",
+					"ENCAP %s XLINE %d %s 2 :%s",
 					shared_p->server, temp_time, name, reason);
 		}
 		else
 			sendto_match_servs(source_p, shared_p->server, CAP_ENCAP, NOCAPS,
-					"ENCAP %s XLINE %d %s :%s",
+					"ENCAP %s XLINE %d %s 2 :%s",
 					shared_p->server, temp_time, name, reason);
 	}
 }
