@@ -1,3 +1,11 @@
+*** 20010307_6 by madmax
+Netsplits now show client quits as (irc.server.com a.server.split.from.<network>.net)
+So clients pick up the split now:
+ωνω NetSplit: a.server.on.EFnet.net split from irc.efnow.net [02:44pm]
+
+Also swapped strcpy and strcat for an ircsprintf.
+
+
 *** 20010307_5 by fl_
 - changed the numerics warning..
 
