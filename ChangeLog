@@ -1,3 +1,16 @@
+leeh        2004/05/06 18:50:07 EDT	(20040506_3)
+
+  Modified files:
+    src                  s_user.c 
+  Log:
+  - dont replace a clients ident when theyre unidented if its supposed to be
+    spoofed.
+  
+  Revision  Changes    Path
+  7.320     +14 -10    ircd-ratbox/src/s_user.c
+
+
+
 leeh        2004/05/06 18:24:01 EDT	(20040506_2)
 
   Modified files:
