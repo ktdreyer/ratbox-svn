@@ -8,5 +8,8 @@ ircd.conf file.
   MOTD     - Re-reads MOTD file
   OMOTD    - Re-reads Oper MOTD file
   CHANNELS - Forces a channel cleanup
+  TDLINES  - Clears temporary D Lines
+  TKLINES  - Clears temporary K Lines
+  PGLINES  - Clears pending G Lines
 
 - Requires Oper Priv: H

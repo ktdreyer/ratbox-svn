@@ -13,7 +13,8 @@ X A - Shows the ADNS DNS servers in use
 * e - Shows exemptions to D lines
 X E - Shows Events
 X f - Shows File Descriptors
-* g - Shows G lines
+* g - Shows pending G lines
+* G - Shows active G lines
 * h - Shows H/L lines
 ^ i - Shows I lines
 ^ K - Shows K lines (or matched klines)
