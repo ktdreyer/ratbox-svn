@@ -83,14 +83,9 @@ static void m_away(struct Client *client_p,
   if(MyClient(source_p) && !IsFloodDone(source_p))
     flood_endgrace(source_p);
 
-  /* make sure the user exists */
-  if (!(source_p->user))
-    {
-      sendto_realops_flags(FLAGS_DEBUG, L_ALL,
-                           "Got AWAY from nil user, from %s (%s)",
-			   client_p->name, source_p->name);
-      return;
-    }
+  if(!IsClient(source_p))
+    return;
+
   away = source_p->user->away;
 
   if (parc < 2 || !*awy2)

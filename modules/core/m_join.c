@@ -188,7 +188,8 @@ m_join(struct Client *client_p,
       /* look for the channel */
       if((chptr = hash_find_channel(name)) != NULL)
 	{
-	  if(splitmode && (*name != '&') && ConfigChannel.no_join_on_split)
+	  if(splitmode && !IsOper(source_p) && (*name != '&') && 
+             ConfigChannel.no_join_on_split)
 	  {
 	    sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
                        me.name, source_p->name, name);
@@ -222,7 +223,7 @@ m_join(struct Client *client_p,
 	}
       else
 	{
-	  if(splitmode && (*name != '&') && 
+	  if(splitmode && !IsOper(source_p) && (*name != '&') && 
             (ConfigChannel.no_create_on_split || ConfigChannel.no_join_on_split))
 	  {
 	    sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),

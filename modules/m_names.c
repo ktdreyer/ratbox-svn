@@ -285,6 +285,7 @@ static void ms_names( struct Client *client_p,
         return;
     }
 
-  m_names(client_p,source_p,parc,parv);
+  if(IsClient(source_p))
+    m_names(client_p,source_p,parc,parv);
 }
 

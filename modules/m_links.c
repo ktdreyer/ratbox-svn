@@ -77,14 +77,13 @@ const char *_version = "$Revision$";
 static void m_links(struct Client *client_p, struct Client *source_p,
                    int parc, char *parv[])
 {
-
   if (!ConfigServerHide.flatten_links)
     {
-     mo_links(client_p, source_p, parc, parv);
-     return;
+      mo_links(client_p, source_p, parc, parv);
+      return;
     }
-  SendMessageFile(source_p, &ConfigFileEntry.linksfile);
 
+  SendMessageFile(source_p, &ConfigFileEntry.linksfile);
     
 /*
  * Print our own info so at least it looks like a normal links
@@ -109,11 +108,15 @@ static void mo_links(struct Client *client_p, struct Client *source_p,
   
   dlink_node *ptr;
 
-  if (parc > 2)
+  if (parc > 2) 
     {
-      if (hunt_server(client_p, source_p, ":%s LINKS %s :%s", 1, parc, parv)
-          != HUNTED_ISME)
+      if(!ConfigServerHide.disable_remote || IsOper(source_p))
+      {
+        if (hunt_server(client_p, source_p, ":%s LINKS %s :%s", 1, parc, parv)
+            != HUNTED_ISME)
         return;
+      }
+
       mask = parv[2];
     }
   else if (parc == 2)
@@ -177,7 +180,7 @@ static void ms_links(struct Client *client_p, struct Client *source_p,
       != HUNTED_ISME)
     return;
 
-  if(IsOper(source_p))
+  if(IsClient(source_p))
     m_links(client_p,source_p,parc,parv);
 }
 

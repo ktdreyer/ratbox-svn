@@ -117,7 +117,7 @@ static void m_motd(struct Client *client_p, struct Client *source_p,
 static void mo_motd(struct Client *client_p, struct Client *source_p,
                    int parc, char *parv[])
 {
-  if(IsServer(source_p))
+  if(!IsClient(source_p))
     return;
 
   if (hunt_server(client_p, source_p, ":%s MOTD :%s", 1,parc,parv)!=HUNTED_ISME)

@@ -867,7 +867,8 @@ static void ms_stats(struct Client *client_p, struct Client *source_p,
   if (hunt_server(client_p,source_p,":%s STATS %s :%s",2,parc,parv)!=HUNTED_ISME)
     return;
 
-  mo_stats(client_p, source_p, parc, parv);
+  if(IsClient(source_p))
+    mo_stats(client_p, source_p, parc, parv);
 }
 
 

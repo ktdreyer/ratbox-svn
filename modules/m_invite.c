@@ -90,8 +90,7 @@ m_invite(struct Client *client_p,
     return;
   }
 
-  /* A little sanity test here */
-  if (source_p->user == NULL)
+  if(!IsClient(source_p))
     return;
 
   if(MyClient(source_p) && !IsFloodDone(source_p))

@@ -113,6 +113,8 @@ static void ms_lusers(struct Client *client_p, struct Client *source_p,
           return;
         }
     }
-  show_lusers(source_p);
+
+  if(IsClient(source_p))
+    show_lusers(source_p);
 }
 

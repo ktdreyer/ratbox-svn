@@ -123,7 +123,8 @@ static void ms_admin(struct Client *client_p, struct Client *source_p,
   if (hunt_server(client_p,source_p,":%s ADMIN :%s",1,parc,parv) != HUNTED_ISME)
     return;
 
-  do_admin( source_p );
+  if(IsClient(source_p))
+    do_admin(source_p);
 }
 
 

@@ -504,6 +504,9 @@ static void ms_whois(struct Client *client_p,
       return;
     }
 
+  if(!IsClient(source_p))
+    return;
+
   /* its a client doing a remote whois:
    * :parv[0] WHOIS parv[1] :parv[2]
    *
