@@ -100,15 +100,13 @@ int     m_list(struct Client *cptr,
               root_chptr = find_bchan(chptr);
 
               if( (IsVchan(chptr) || HasVchans(chptr)) && 
-                (root_chptr->members || root_chptr->next_vchan->next_vchan) )
+                  (root_chptr->members || root_chptr->next_vchan->next_vchan) )
                 {
-                  strcpy(vname, root_chptr->chname);
-                  strcat(vname, "<!");
-                  strcat(vname, chptr->members->value.cptr->name);
-                  strcat(vname, ">");
+                  ircsprintf(vname, "%s<!%s>", root_chptr->chname,
+                             chptr->members->value.cptr->name);
                 }
               else
-                strcpy(vname, root_chptr->chname);
+                ircsprintf(vname, "%s", root_chptr->chname);
 
               sendto_one(sptr, form_str(RPL_LIST), me.name, parv[0],
                          vname, chptr->users, chptr->topic);
@@ -156,16 +154,14 @@ int     m_list(struct Client *cptr,
             {
               root_chptr = find_bchan(chptr);
  
-              if( (IsVchan(chptr) || HasVchans(chptr)) && 
-                (root_chptr->members || root_chptr->next_vchan->next_vchan) )
+              if( (IsVchan(chptr) || HasVchans(chptr)) &&
+                  (root_chptr->members || root_chptr->next_vchan->next_vchan) )
                 {
-                  strcpy(vname, root_chptr->chname);
-                  strcat(vname, "<!");
-                  strcat(vname, chptr->members->value.cptr->name);
-                  strcat(vname, ">");
-                }   
-              else 
-                strcpy(vname, root_chptr->chname);
+                  ircsprintf(vname, "%s<!%s>", root_chptr->chname,  
+                             chptr->members->value.cptr->name);
+                }
+              else
+                ircsprintf(vname, "%s", root_chptr->chname);
 
               sendto_one(sptr, form_str(RPL_LIST), me.name, parv[0],
                          vname, chptr->users, chptr->topic);
@@ -206,15 +202,13 @@ int     m_list(struct Client *cptr,
         if (ShowChannel(sptr, tmpchptr) && tmpchptr->members && sptr->user)
           {
             if( (IsVchan(tmpchptr) || HasVchans(tmpchptr)) &&
-              (root_chptr->members || root_chptr->next_vchan->next_vchan) )
+                (root_chptr->members || root_chptr->next_vchan->next_vchan) )
               {
-                strcpy(vname, root_chptr->chname);
-                strcat(vname, "<!");
-                strcat(vname, tmpchptr->members->value.cptr->name);
-                strcat(vname, ">");
+                ircsprintf(vname, "%s<!%s>", root_chptr->chname,
+                           chptr->members->value.cptr->name);
               }
             else
-              strcpy(vname, root_chptr->chname);
+              ircsprintf(vname, "%s", root_chptr->chname);
 
             sendto_one(sptr, form_str(RPL_LIST), me.name, parv[0],
                        vname, tmpchptr->users, tmpchptr->topic);
