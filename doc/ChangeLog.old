@@ -1,3 +1,25 @@
+jmallett    2002/03/01 02:09:16 EST	(20020301_0)
+
+  Modified files:
+    adns                 event.c 
+    src                  s_auth.c 
+  Log:
+  Oops, bad juli!
+  
+  Committing for standards reasons after being up for far too long is a bad
+  idea.  Inserting inappropriate casts is worse.
+  
+  Change some idiocy I did involving use of size_t instead of socklen_t.
+  
+  And as an aside, I mixed up my ranting about signed vs. unsigned in my last
+  commit.
+  
+  Revision  Changes    Path
+  1.14      +2 -2      ircd-hybrid-7/adns/event.c
+  7.88      +1 -1      ircd-hybrid-7/src/s_auth.c
+
+
+
 ejb         2002/02/28 14:36:48 EST	(20020228_8)
 
   Modified files:
