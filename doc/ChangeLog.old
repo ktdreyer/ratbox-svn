@@ -1,3 +1,8 @@
+*** 19990810_1 by db
+- FLAGS_SPY was being checked against old flags, its now umodes *sigh*
+
+
+
 *** 19990809_3 by db
 - missed the user mode +b for bots
 - applied neph's operwall/wallops pacing patch
