@@ -918,16 +918,56 @@ comm_open(int family, int sock_type, int proto, const char *note)
      * XXX !!! -- adrian
      */
     fd = socket(family, sock_type, proto);
-    if (fd < -1)
+    if (fd < 0)
         return -1; /* errno will be passed through, yay.. */
+
+    /* Set the socket non-blocking, and other wonderful bits */
+    if (!set_non_blocking(fd)) {
+        log(L_CRIT, "comm_open: Couldn't set FD %d non blocking!", fd);
+        close(fd);
+        return -1;
+    }
 
     /* Next, update things in our fd tracking */
     fd_open(fd, FD_SOCKET, note);
 
-    /*
-     * Here we can do stuff like set non-block, no-delay, tweak the
-     * recvbuf, etc, but there's no point right now.
-     *   -- adrian
-     */
     return fd;
+}
+
+
+/*
+ * comm_accept() - accept an incoming connection
+ *
+ * This is a simple wrapper for accept() which enforces FD limits like
+ * comm_open() does.
+ */
+int
+comm_accept(int fd, struct sockaddr *pn, socklen_t *addrlen)
+{
+    int new;
+
+    if (number_fd >= MASTER_MAX)
+        return ENFILE;
+
+    /*
+     * Next, do the accept(). if we get an error, we should drop the
+     * reserved fd limit, but we can deal with that when comm_open()
+     * also does it. XXX -- adrian
+     */
+    new = accept(fd, pn, addrlen);
+    if (new < 0)
+        return -1;
+
+    /* Set the socket non-blocking, and other wonderful bits */
+    if (!set_non_blocking(new)) {
+        log(L_CRIT, "comm_accept: Couldn't set FD %d non blocking!", new);
+        close(new);
+        return -1;
+    }
+
+    /* Next, tag the FD as an incoming connection */
+    fd_open(new, FD_SOCKET, "Incoming connection");
+
+    /* .. and return */
+    return new;
 }

@@ -354,7 +354,8 @@ static void accept_connection(int pfd, void *data)
    * be accepted until some old is closed first.
    */
   do {
-    if (-1 == (fd = accept(listener->fd, (struct sockaddr*) &addr, &addrlen))) {
+    fd = comm_accept(listener->fd, (struct sockaddr*) &addr, &addrlen);
+    if (fd < 0) {
       if (EAGAIN == errno)
          break;
       /*
@@ -367,7 +368,6 @@ static void accept_connection(int pfd, void *data)
       }
       break;
     }
-    fd_open(fd, FD_SOCKET, "New incoming connection");
     /*
      * check for connection limit
      */
