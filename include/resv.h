@@ -29,13 +29,17 @@
 #define INCLUDED_sys_types_h
 #endif
 
+/* allows resv *nicknick* etc */
+#define RESVNICKLEN NICKLEN*2
+
 struct ResvChannel
 {
   struct ResvChannel *next;
   struct ResvChannel *prev;
   struct ResvChannel *hnext;
 
-  char	name[CHANNELLEN];
+  /* +1 for \0 */
+  char	name[CHANNELLEN + 1];
   char	*reason;
   int	conf;
 };
@@ -45,7 +49,7 @@ struct ResvNick
   struct ResvNick *next;
   struct ResvNick *prev;
 
-  char	name[NICKLEN];
+  char	name[RESVNICKLEN];
   char	*reason;
   int	conf;
 };
