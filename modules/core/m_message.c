@@ -790,10 +790,10 @@ handle_opers(int p_or_n,
   int count;
 
   /*
-     ** the following two cases allow masks in NOTICEs
-     ** (for OPERs only)
-     **
-     ** Armin, 8Jun90 (gruner@informatik.tu-muenchen.de)
+   * the following two cases allow masks in NOTICEs
+   * (for OPERs only)
+   *
+   * Armin, 8Jun90 (gruner@informatik.tu-muenchen.de)
    */
   if(*nick == '$')
   {
@@ -807,7 +807,7 @@ handle_opers(int p_or_n,
       return;
     }
       
-    if (!(s = (char *)strrchr(nick, '.')))
+    if ((s = strrchr(nick, '.')) == NULL)
     {
       sendto_one(source_p, form_str(ERR_NOTOPLEVEL),
                  me.name, source_p->name, nick);
@@ -839,8 +839,9 @@ handle_opers(int p_or_n,
     count = 0;
 
     /*
-       ** Not destined for a user on me :-(
+     * Not destined for a user on me :-(
      */
+
     if (!IsMe(target_p))
     {
       sendto_one(target_p, ":%s %s %s :%s", source_p->name,
@@ -850,7 +851,7 @@ handle_opers(int p_or_n,
 
     *server = '\0';
 
-    if ((host = strchr(nick, '%')))
+    if ((host = strchr(nick, '%')) != NULL)
       *host++ = '\0';
 
     /* Check if someones msg'ing opers@our.server */
