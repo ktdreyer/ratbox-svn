@@ -86,7 +86,11 @@ _MyFree(void *what, char *file, int line)
    first_mem_entry = mme->next;
  if (mme->next)
    mme->next->last = mme->last;
+
+#ifndef NDEBUG
  mem_frob(mme, mme->size+sizeof(MemoryEntry));
+#endif
+
  free(mme);
 }
 
