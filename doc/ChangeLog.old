@@ -1,3 +1,9 @@
+*** 20001226_5 by db
+- number of wrong counts in the parmcount table.. caused these to core
+  parc inludes the source as well as arguments
+
+
+
 *** 20001226_4 by db
 - lljoin was checking for arg count, when thats no longer necessary
   given the new parser
