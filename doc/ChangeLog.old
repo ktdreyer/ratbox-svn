@@ -1,3 +1,8 @@
+*** 20001205_9 by db
+- moved check for flood attack on channel after check can_send
+  
+
+
 *** 20001205_8 by db
 - ok, added channel throttling tested both channel throttling and message
   throttling, both appear to work. Removed FLOODTIME, default to always
