@@ -1,3 +1,22 @@
+leeh        2003/06/10 20:09:28 UTC	(20030610_7)
+
+  Modified files:
+    include              s_conf.h 
+    modules              m_gline.c 
+    src                  kdparse.c s_conf.c 
+  Log:
+  - move conf_add_fields s_conf.c -> kdparse.c
+  - remove check_majority_gline() and add_new_majority_gline(), merging
+    with their parent functions.
+  
+  Revision  Changes    Path
+  7.238     +0 -2      ircd-ratbox/include/s_conf.h
+  1.116     +79 -183   ircd-ratbox/modules/m_gline.c
+  7.26      +21 -0     ircd-ratbox/src/kdparse.c
+  7.410     +0 -28     ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2003/06/10 19:28:19 UTC	(20030610_6)
 
   Modified files:
