@@ -30,6 +30,9 @@ struct member_reg
 
 	int level;
 	int suspend;
+	int flags;
+
+	char *lastmod;			/* last user to modify this membership */
 
 	dlink_node usernode;
 	dlink_node channode;

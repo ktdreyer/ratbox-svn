@@ -5,6 +5,8 @@
 #define USERREGNAME_LEN	10
 #define MAX_USER_REG_HASH	65536
 
+struct client;
+
 struct user_reg
 {
 	char name[USERREGNAME_LEN+1];
@@ -24,8 +26,8 @@ extern void free_user_reg(struct user_reg *);
 
 extern void add_user_reg(struct user_reg *);
 
-extern struct user_reg *find_user_reg(const char *name);
-extern struct user_reg *find_user_reg_nick(const char *name);
+extern struct user_reg *find_user_reg(struct client *, const char *name);
+extern struct user_reg *find_user_reg_nick(struct client *, const char *name);
 
 extern void load_user_db(void);
 extern void save_user_db(void);
