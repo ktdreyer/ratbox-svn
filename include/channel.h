@@ -73,8 +73,8 @@ extern void del_channel(struct channel *chptr);
 extern void free_channel(struct channel *chptr);
 extern struct channel *find_channel(const char *name);
 
-extern const char *chmode_to_string(struct channel *chptr);
-extern const char *chmode_to_string_simple(struct channel *chptr);
+extern const char *chmode_to_string(struct chmode *mode);
+extern const char *chmode_to_string_simple(struct chmode *mode);
 
 extern struct chmember *add_chmember(struct channel *chptr, struct client *target_p, int flags);
 extern void del_chmember(struct chmember *mptr);
@@ -88,5 +88,8 @@ extern unsigned long count_topics(void);
 extern void join_service(struct client *service_p, const char *chname);
 extern int part_service(struct client *service_p, const char *chname);
 extern void rejoin_service(struct client *service_p, struct channel *chptr, int reop);
+
+/* c_mode.c */
+int parse_simple_mode(struct chmode *, const char **, int, int);
 
 #endif

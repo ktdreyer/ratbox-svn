@@ -156,7 +156,7 @@ introduce_service_channels(struct client *target_p)
 
 		sendto_server(":%s SJOIN %lu %s %s :@%s",
 				MYNAME, (unsigned long) chptr->tsinfo, 
-				chptr->name, chmode_to_string(chptr), 
+				chptr->name, chmode_to_string(&chptr->mode), 
 				target_p->name);
 	}
 }

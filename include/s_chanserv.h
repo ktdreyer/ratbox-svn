@@ -20,6 +20,7 @@ struct chan_reg
 	char *name;
 	char *topic;
 	char *suspender;
+	char *modes;
 #if 0
 	struct chmode mode;
 #endif

@@ -374,7 +374,7 @@ channel_db_callback(void *db, int argc, char **argv, char **colnames)
 	if(!EmptyString(argv[1]))
 		reg_p->topic = my_strdup(argv[1]);
 
-	/* modes - argv[2] */
+	reg_p->modes = my_strdup(argv[2]);
 
 	reg_p->reg_time = atol(argv[3]);
 	reg_p->last_time = atol(argv[4]);
@@ -1575,12 +1575,24 @@ s_chan_set(struct client *client_p, char *parv[], int parc)
 			chreg_p->flags &= ~CS_FLAGS_NOOPS;
 		}
 		else
+		{
 			service_error(chanserv_p, client_p,
-					"Channel %s NOOPS is %s",
-					chreg_p->name,
-					(chreg_p->flags & CS_FLAGS_NOOPS) ?
-					 "ON" : "OFF");
+				"Channel %s NOOPS is %s",
+				chreg_p->name,
+				(chreg_p->flags & CS_FLAGS_NOOPS) ?
+				 "ON" : "OFF");
+			return 1;
+		}
 
+		service_error(chanserv_p, client_p,
+				"Channel %s NOOPS set %s",
+				chreg_p->name,
+				(chreg_p->flags & CS_FLAGS_NOOPS) ?
+				 "ON" : "OFF");
+
+		loc_sqlite_exec(NULL, "UPDATE channels SET flags = %d "
+				"WHERE chname = %Q",
+				chreg_p->flags, chreg_p->name);
 		return 1;
 	}
 	else if(!strcasecmp(parv[1], "AUTOJOIN"))
@@ -1594,6 +1606,49 @@ s_chan_set(struct client *client_p, char *parv[], int parc)
 
 		return 1;
 	}
+	else if(!strcasecmp(parv[1], "MODES"))
+	{
+		struct chmode mode;
+		const char *modestring;
+
+		if(EmptyString(arg))
+		{
+			service_error(chanserv_p, client_p,
+				"Channel %s MODES are %s",
+				chreg_p->name,
+				EmptyString(chreg_p->modes) ? "<none>" : 
+				 chreg_p->modes);
+			return 1;
+		}
+
+		memset(&mode, 0, sizeof(struct chmode));
+
+		if(strchr(parv[2], '-') ||
+		   !parse_simple_mode(&mode, (const char **) parv, parc, 2))
+		{
+			service_error(chanserv_p, client_p,
+				"Mode %s invalid",
+				parv[2]);
+			return 1;
+		}
+
+		modestring = chmode_to_string(&mode);
+
+		my_free(chreg_p->modes);
+		chreg_p->modes = my_strdup(modestring);
+
+		loc_sqlite_exec(NULL, "UPDATE channels SET modes = %Q "
+				"WHERE chname = %Q",
+				modestring, chreg_p->name);
+
+
+		service_error(chanserv_p, client_p,
+				"Channel %s MODES set %s",
+				chreg_p->name, modestring);
+
+		return 1;
+	}
+
 
 	service_error(chanserv_p, client_p, "Set option invalid");
 	return 1;

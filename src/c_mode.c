@@ -21,6 +21,100 @@ struct scommand_handler mode_command = { "MODE", c_mode, 0, DLINK_EMPTY };
 dlink_list deopped_list;
 dlink_list opped_list;
 
+int
+parse_simple_mode(struct chmode *mode, const char *parv[], int parc, int start)
+{
+	const char *p = parv[start];
+	int dir = 1;
+
+	if(parc <= start)
+		return 0;
+
+	start++;
+
+	for(; *p; p++)
+	{
+		switch(*p)
+		{
+			case '+':
+				dir = 1;
+				break;
+			case '-':
+				dir = 0;
+				break;
+
+			case 'i':
+				if(dir)
+					mode->mode |= MODE_INVITEONLY;
+				else
+					mode->mode &= ~MODE_INVITEONLY;
+				break;
+			case 'm':
+				if(dir)
+					mode->mode |= MODE_MODERATED;
+				else
+					mode->mode &= ~MODE_MODERATED;
+				break;
+			case 'n':
+				if(dir)
+					mode->mode |= MODE_NOEXTERNAL;
+				else
+					mode->mode &= ~MODE_NOEXTERNAL;
+				break;
+			case 'p':
+				if(dir)
+					mode->mode |= MODE_PRIVATE;
+				else
+					mode->mode &= ~MODE_PRIVATE;
+				break;
+			case 's':
+				if(dir)
+					mode->mode |= MODE_SECRET;
+				else
+					mode->mode &= ~MODE_SECRET;
+				break;
+			case 't':
+				if(dir)
+					mode->mode |= MODE_TOPIC;
+				else
+					mode->mode &= ~MODE_TOPIC;
+				break;
+
+			case 'k':
+				if(EmptyString(parv[start]))
+					return 0;
+
+				if(dir)
+					strlcpy(mode->key, parv[start],
+						sizeof(mode->key));
+				else
+					mode->key[0] = '\0';
+
+				start++;
+				break;
+			case 'l':
+				if(dir)
+				{
+					if(EmptyString(parv[start]))
+						return 0;
+
+					mode->limit = atoi(parv[start]);
+					start++;
+				}
+				else
+					mode->limit = 0;
+
+				break;
+
+			default:
+				return 0;
+				break;
+		}
+	}
+
+	return 1;
+}
+
 /* change_chmember_status()
  *   changes a channel members +ov status
  *

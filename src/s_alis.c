@@ -44,14 +44,14 @@ init_s_alis(void)
 	alis_p = add_service(&alis_service);
 }
 
-/* parse_mode()
+/* alis_parse_mode()
  *   parses a given string into modes
  *
  * inputs	- text to parse, pointer to key, pointer to limit
  * outputs	- mode, or -1 on error.
  */
 static int
-parse_mode(const char *text, int *key, int *limit)
+alis_parse_mode(const char *text, int *key, int *limit)
 {
 	int mode = 0;
 
@@ -187,7 +187,7 @@ parse_alis(struct client *client_p, struct alis_query *query,
 					return 0;
 			}
 
-			query->mode = parse_mode(modestring+1, 
+			query->mode = alis_parse_mode(modestring+1, 
 					&query->mode_key, 
 					&query->mode_limit);
 
@@ -216,12 +216,12 @@ print_channel(struct client *client_p, struct channel *chptr,
 {
 	if(query->show_mode && query->show_topicwho)
 		service_error(alis_p, client_p, "%-50s %-8s %3d :%s (%s)",
-			chptr->name, chmode_to_string_simple(chptr),
+			chptr->name, chmode_to_string_simple(&chptr->mode),
 			dlink_list_length(&chptr->users),
 			chptr->topic, chptr->topicwho);
 	else if(query->show_mode)
 		service_error(alis_p, client_p, "%-50s %-8s %3d :%s",
-			chptr->name, chmode_to_string_simple(chptr),
+			chptr->name, chmode_to_string_simple(&chptr->mode),
 			dlink_list_length(&chptr->users),
 			chptr->topic);
 	else if(query->show_topicwho)

@@ -282,7 +282,7 @@ join_service(struct client *service_p, const char *chname)
 	if(finished_bursting)
 		sendto_server(":%s SJOIN %lu %s %s :@%s",
 				MYNAME, (unsigned long) chptr->tsinfo, 
-				chptr->name, chmode_to_string(chptr), 
+				chptr->name, chmode_to_string(&chptr->mode), 
 				service_p->name);
 }
 
@@ -325,7 +325,7 @@ rejoin_service(struct client *service_p, struct channel *chptr, int reop)
 
 	sendto_server(":%s SJOIN %lu %s %s :@%s",
 			MYNAME, (unsigned long) chptr->tsinfo, chptr->name, 
-			chmode_to_string(chptr),  service_p->name);
+			chmode_to_string(&chptr->mode),  service_p->name);
 }
 
 /* c_join()
@@ -505,7 +505,7 @@ remove_our_modes(struct channel *chptr)
  * outputs	- string version of modes
  */
 const char *
-chmode_to_string(struct channel *chptr)
+chmode_to_string(struct chmode *mode)
 {
 	static char buf[BUFSIZE];
 	char *p;
@@ -514,30 +514,30 @@ chmode_to_string(struct channel *chptr)
 
 	*p++ = '+';
 
-	if(chptr->mode.mode & MODE_INVITEONLY)
+	if(mode->mode & MODE_INVITEONLY)
 		*p++ = 'i';
-	if(chptr->mode.mode & MODE_MODERATED)
+	if(mode->mode & MODE_MODERATED)
 		*p++ = 'm';
-	if(chptr->mode.mode & MODE_NOEXTERNAL)
+	if(mode->mode & MODE_NOEXTERNAL)
 		*p++ = 'n';
-	if(chptr->mode.mode & MODE_PRIVATE)
+	if(mode->mode & MODE_PRIVATE)
 		*p++ = 'p';
-	if(chptr->mode.mode & MODE_SECRET)
+	if(mode->mode & MODE_SECRET)
 		*p++ = 's';
-	if(chptr->mode.mode & MODE_TOPIC)
+	if(mode->mode & MODE_TOPIC)
 		*p++ = 't';
 
-	if(chptr->mode.limit && chptr->mode.key[0])
+	if(mode->limit && mode->key[0])
 	{
-		sprintf(p, "lk %d %s", chptr->mode.limit, chptr->mode.key);
+		sprintf(p, "lk %d %s", mode->limit, mode->key);
 	}
-	else if(chptr->mode.limit)
+	else if(mode->limit)
 	{
-		sprintf(p, "l %d", chptr->mode.limit);
+		sprintf(p, "l %d", mode->limit);
 	}
-	else if(chptr->mode.key[0])
+	else if(mode->key[0])
 	{
-		sprintf(p, "k %s", chptr->mode.key);
+		sprintf(p, "k %s", mode->key);
 	}
 	else
 		*p = '\0';
@@ -552,7 +552,7 @@ chmode_to_string(struct channel *chptr)
  * outputs	- string version of modes
  */
 const char *
-chmode_to_string_simple(struct channel *chptr)
+chmode_to_string_simple(struct chmode *mode)
 {
 	static char buf[10];
 	char *p;
@@ -561,21 +561,21 @@ chmode_to_string_simple(struct channel *chptr)
 
 	*p++ = '+';
 
-	if(chptr->mode.mode & MODE_INVITEONLY)
+	if(mode->mode & MODE_INVITEONLY)
 		*p++ = 'i';
-	if(chptr->mode.mode & MODE_MODERATED)
+	if(mode->mode & MODE_MODERATED)
 		*p++ = 'm';
-	if(chptr->mode.mode & MODE_NOEXTERNAL)
+	if(mode->mode & MODE_NOEXTERNAL)
 		*p++ = 'n';
-	if(chptr->mode.mode & MODE_PRIVATE)
+	if(mode->mode & MODE_PRIVATE)
 		*p++ = 'p';
-	if(chptr->mode.mode & MODE_SECRET)
+	if(mode->mode & MODE_SECRET)
 		*p++ = 's';
-	if(chptr->mode.mode & MODE_TOPIC)
+	if(mode->mode & MODE_TOPIC)
 		*p++ = 't';
-	if(chptr->mode.limit)
+	if(mode->limit)
 		*p++ = 'l';
-	if(chptr->mode.key[0])
+	if(mode->key[0])
 		*p++ = 'k';
 
 	*p = '\0';
@@ -773,15 +773,18 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 		}
 	}
 
-	hook_call(HOOK_JOIN_CHANNEL, chptr, &joined_members);
+	/* we didnt join any members in the sjoin above, so destroy the
+	 * channel we just created.  This has to be tested before we call the
+	 * hook, as the hook may empty the channel and free it itself.
+	 */
+	if(dlink_list_length(&chptr->users) == 0 &&
+	   dlink_list_length(&chptr->services) == 0)
+		free_channel(chptr);
+	else
+		hook_call(HOOK_JOIN_CHANNEL, chptr, &joined_members);
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, joined_members.head)
 	{
 		free_dlink_node(ptr);
 	}
-
-	/* didnt join any members, nuke it */
-	if(dlink_list_length(&chptr->users) == 0 &&
-	   dlink_list_length(&chptr->services) == 0)
-		free_channel(chptr);
 }
