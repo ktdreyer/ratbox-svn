@@ -122,6 +122,12 @@ extern int     can_join(struct Client* client, struct Channel* chan,
 
 extern void    add_user_to_channel(struct Channel* chptr, 
                                    struct Client* who, int flags);
+extern void add_invite(struct Client *cptr, struct Channel *chptr);
+extern void clear_bans_exceptions_denies(struct Client *sptr, 
+                                         struct Channel *chptr);
+extern void sjoin_sendit(struct Client *cptr, struct Client *sptr,
+                         struct Channel *chptr, char *from);
+int is_banned(struct Client *cptr, struct Channel *chptr);
 
 /* this should eliminate a lot of ifdef's in the main code... -orabidoo */
 #ifdef BAN_INFO
