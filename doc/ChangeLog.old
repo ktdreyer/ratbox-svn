@@ -1,3 +1,7 @@
+*** 20010606_4 by leeh
+- if ConfigFileEntry.no_oper_flood dont stop opers nick changes..
+
+
 *** 20010606_3 by androsyn
 Fixed stuff that was breaking the compile of ircd.c on solaris.
 
