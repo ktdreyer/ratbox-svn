@@ -231,7 +231,7 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, int type)
       return 0;
   }
 
-  for (ban = list->head; ban; ban = ban->next)
+  DLINK_FOREACH(ban, list->head)
   {
     actualBan = ban->data;
     if (match(actualBan->banstr, banid))
@@ -301,7 +301,7 @@ del_id(struct Channel *chptr, char *banid, int type)
       return 0;
   }
 
-  for (ban = list->head; ban; ban = ban->next)
+  DLINK_FOREACH(ban, list->head)
   {
     banptr = ban->data;
 
@@ -2400,7 +2400,7 @@ send_oplist(const char *chname, struct Client *client_p, dlink_list * list,
   *mcbuf = *opbuf = '\0';
   t = opbuf;
 
-  for (ptr = list->head; ptr && ptr->data; ptr = ptr->next)
+  DLINK_FOREACH(ptr, list->head)
   {
     target_p = ptr->data;
     if (dir == MODE_DEL && *prefix == 'v' && target_p == client_p)

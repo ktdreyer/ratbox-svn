@@ -532,7 +532,7 @@ linebuf_attach(buf_head_t *bufhead, buf_head_t *new)
   dlink_node *node;
   buf_line_t *line;
   
-  for (node = new->list.head; node; node = node->next)
+  DLINK_FOREACH(node, new->list.head)
   {
     line = (buf_line_t *)node->data;
     new_node = make_dlink_node();

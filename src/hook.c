@@ -76,7 +76,7 @@ hook_del_event(char *name)
 	dlink_node *node;
 	hook *h;
 	
-	for (node = hooks.head; node; node = node->next)
+	DLINK_FOREACH(node, hooks.head)
 	{
 		h = node->data;
 		
@@ -95,7 +95,7 @@ find_hook(char *name)
 	dlink_node *node;
 	hook *h;
 	
-	for (node = hooks.head; node; node = node->next)
+	DLINK_FOREACH(node, hooks.head)
 	{
 		h = node->data;
 		
@@ -114,9 +114,8 @@ hook_del_hook(char *event, hookfn *fn)
  if (!h)
   return -1;
    
- for (node = h->hooks.head; node; node = nnode)
+ DLINK_FOREACH_SAFE(node, nnode, h->hooks.head)
  {
-  nnode = node->next;
   if (fn == node->data)
   {
    dlinkDelete(node, &h->hooks);
@@ -153,7 +152,7 @@ hook_call_event(char *event, void *data)
 	if (!h)
 		return -1;
 
-	for (node = h->hooks.head; node; node = node->next)
+	DLINK_FOREACH(node, h->hooks.head)
 	{
 		fn = (hookfn)(uintptr_t)node->data;
 		

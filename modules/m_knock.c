@@ -352,7 +352,7 @@ static int check_banned_knock(struct Channel *chptr, struct Client *who,
   struct Ban *actualBan = NULL;
   struct Ban *actualExcept = NULL;
 
-  for (ban = chptr->banlist.head; ban; ban = ban->next)
+  DLINK_FOREACH(ban, chptr->banlist.head)
   {
     actualBan = ban->data;
 
@@ -365,7 +365,7 @@ static int check_banned_knock(struct Channel *chptr, struct Client *who,
 
   if ((actualBan != NULL) && ConfigChannel.use_except)
   {
-    for (except = chptr->exceptlist.head; except; except = except->next)
+    DLINK_FOREACH(except, chptr->exceptlist.head)
     {
       actualExcept = except->data;
 

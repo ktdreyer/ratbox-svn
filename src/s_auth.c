@@ -440,9 +440,8 @@ timeout_auth_queries_event(void *notused)
   dlink_node *next_ptr;
   struct AuthRequest* auth;
 
-  for (ptr = auth_poll_list.head; ptr; ptr = next_ptr)
+  DLINK_FOREACH_SAFE(ptr, next_ptr, auth_poll_list.head)
     {
-      next_ptr = ptr->next;
       auth = ptr->data;
 
       if (auth->timeout < CurrentTime)
@@ -638,7 +637,7 @@ FindAuthClient(long id)
   dlink_node *ptr;
   struct AuthRequest *auth;
 
-  for (ptr = auth_client_list.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, auth_client_list.head)
     {
       auth = ptr->data;
       if( auth->client == (struct Client *)id)
@@ -657,10 +656,9 @@ delete_identd_queries(struct Client *target_p)
   dlink_node *ptr;
   dlink_node *next_ptr;
   struct AuthRequest* auth;
-  for (ptr = auth_poll_list.head; ptr; ptr = next_ptr)
+  DLINK_FOREACH_SAFE(ptr, next_ptr, auth_poll_list.head)
     {
       auth = ptr->data;
-      next_ptr = ptr->next;
 
       if(auth->client == target_p)
 	{
@@ -672,10 +670,9 @@ delete_identd_queries(struct Client *target_p)
 	}
     }
 
-  for (ptr = auth_client_list.head; ptr; ptr = next_ptr)
+  DLINK_FOREACH_SAFE(ptr, next_ptr, auth_client_list.head)
     {
       auth = ptr->data;
-      next_ptr = ptr->next;
 
       if(auth->client == target_p)
 	{

@@ -1199,7 +1199,7 @@ find_conf_name(dlink_list *list, const char* name, int statmask)
   dlink_node *ptr;
   struct ConfItem* aconf;
   
-  for (ptr = list->head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, list->head)
     {
       aconf = ptr->data;
       if ((aconf->status & statmask) && aconf->name && 
@@ -1799,10 +1799,9 @@ expire_temps(dlink_list *tklist, int type)
   dlink_node *next_node;
   struct ConfItem *kill_ptr;
 
-  for (kill_node = tklist->head; kill_node; kill_node = next_node)
+  DLINK_FOREACH_SAFE(kill_node, next_node, tklist->head)
     {
       kill_ptr = kill_node->data;
-      next_node = kill_node->next;
 
       if (kill_ptr->hold <= CurrentTime)
 	{

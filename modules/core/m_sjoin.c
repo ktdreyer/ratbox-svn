@@ -773,7 +773,7 @@ static void remove_a_mode( int hide_or_not,
 
   ircsprintf(buf,":%s MODE %s ", me.name, chptr->chname);
 
-  for (ptr = list->head; ptr && ptr->data; ptr = ptr->next)
+  DLINK_FOREACH(ptr, list->head)
     {
       target_p = ptr->data;
       lpara[count++] = target_p->name;

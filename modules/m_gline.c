@@ -804,8 +804,7 @@ majority_gline(struct Client *source_p,
       return NO;
     }
 
-  for (pending_node = pending_glines.head;
-       pending_node; pending_node = pending_node->next)
+  DLINK_FOREACH(pending_node, pending_glines.head)
     {
       gline_pending_ptr = pending_node->data;
 

@@ -238,10 +238,8 @@ remove_user_from_channel(struct Channel *chptr, struct Client *who)
 
   chptr->users_last = CurrentTime;
 
-  for (ptr = who->user->channel.head; ptr; ptr = next_ptr)
+  DLINK_FOREACH_SAFE(ptr, next_ptr, who->user->channel.head)
   {
-    next_ptr = ptr->next;
-
     if (ptr->data == chptr)
     {
       dlinkDelete(ptr, &who->user->channel);
@@ -300,7 +298,7 @@ send_members(struct Client *client_p,
 
   t = buf + mlen;
 
-  for (ptr = list->head; ptr && ptr->data; ptr = ptr->next)
+  DLINK_FOREACH(ptr, list->head)
   {
     target_p = ptr->data;
     ircsprintf(t, "%s%s ", op_flag, target_p->name);
@@ -406,7 +404,7 @@ send_mode_list(struct Client *client_p,
   *mp = '\0';
   pp = pbuf;
 
-  for (lp = top->head; lp; lp = lp->next)
+  DLINK_FOREACH(lp, top->head)
   {
     banptr = lp->data;
     tlen = strlen(banptr->banstr);
@@ -496,7 +494,7 @@ free_channel_list(dlink_list * list)
   dlink_node *next_ptr;
   struct Ban *actualBan;
 
-  for (ptr = list->head; ptr; ptr = next_ptr)
+  DLINK_FOREACH_SAFE(ptr, next_ptr, list->head)
   {
     next_ptr = ptr->next;
 
@@ -545,7 +543,7 @@ cleanup_channels(void *unused)
 static void
 destroy_channel(struct Channel *chptr)
 {
-  dlink_node *ptr;
+  dlink_node *ptr, *next;
 
   /* Walk through all the dlink's pointing to members of this channel,
    * then walk through each client found from each dlink, removing
@@ -577,9 +575,10 @@ destroy_channel(struct Channel *chptr)
   delete_members(chptr, &chptr->lochalfops);
 #endif
 
-  while ((ptr = chptr->invites.head))
+  DLINK_FOREACH_SAFE(ptr, next, chptr->invites.head)
+  {
     del_invite(chptr, ptr->data);
-
+  }
   /* free all bans/exceptions/denies */
   free_channel_list(&chptr->banlist);
   free_channel_list(&chptr->exceptlist);
@@ -616,13 +615,12 @@ delete_members(struct Channel *chptr, dlink_list * list)
 
   struct Client *who;
 
-  for (ptr = list->head; ptr; ptr = next_ptr)
+  DLINK_FOREACH_SAFE(ptr, next_ptr, list->head)
   {
-    next_ptr = ptr->next;
     who = (struct Client *)ptr->data;
 
     /* remove reference to chptr from who */
-    for (ptr_ch = who->user->channel.head; ptr_ch; ptr_ch = next_ptr_ch)
+    DLINK_FOREACH_SAFE(ptr_ch, next_ptr_ch, who->user->channel.head)
     {
       next_ptr_ch = ptr_ch->next;
 
@@ -902,9 +900,9 @@ add_invite(struct Channel *chptr, struct Client *who)
 void
 del_invite(struct Channel *chptr, struct Client *who)
 {
-  dlink_node *ptr;
+  dlink_node *ptr, *next;
 
-  for (ptr = chptr->invites.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH_SAFE(ptr, next, chptr->invites.head)
   {
     if (ptr->data == who)
     {
@@ -914,7 +912,7 @@ del_invite(struct Channel *chptr, struct Client *who)
     }
   }
 
-  for (ptr = who->user->invited.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH_SAFE(ptr, next, who->user->invited.head)
   {
     if (ptr->data == chptr)
     {
@@ -1003,7 +1001,7 @@ check_banned(struct Channel *chptr, struct Client *who, char *s, char *s2)
   struct Ban *actualBan = NULL;
   struct Ban *actualExcept = NULL;
 
-  for (ban = chptr->banlist.head; ban; ban = ban->next)
+  DLINK_FOREACH(ban, chptr->banlist.head)
   {
     actualBan = ban->data;
     if (match(actualBan->banstr, s) || 
@@ -1016,7 +1014,7 @@ check_banned(struct Channel *chptr, struct Client *who, char *s, char *s2)
 
   if ((actualBan != NULL) && ConfigChannel.use_except)
   {
-    for (except = chptr->exceptlist.head; except; except = except->next)
+    DLINK_FOREACH(except, chptr->exceptlist.head)
     {
       actualExcept = except->data;
 
@@ -1062,14 +1060,16 @@ can_join(struct Client *source_p, struct Channel *chptr, char *key)
 
   if (chptr->mode.mode & MODE_INVITEONLY)
   {
-    for (lp = source_p->user->invited.head; lp; lp = lp->next)
+    DLINK_FOREACH(lp, source_p->user->invited.head)
+    {
       if (lp->data == chptr)
         break;
-    if (!lp)
+    }
+    if (lp == NULL)
     {
       if (!ConfigChannel.use_invex)
         return (ERR_INVITEONLYCHAN);
-      for (ptr = chptr->invexlist.head; ptr; ptr = ptr->next)
+      DLINK_FOREACH(ptr, chptr->invexlist.head)
       {
         invex = ptr->data;
         if (match(invex->banstr, src_host) || match(invex->banstr, src_iphost) ||

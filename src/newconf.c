@@ -187,7 +187,7 @@ struct 	ConfEntry *find_conf_item(const struct TopConf *top, const char* name)
 	dlink_node *d;
  	struct ConfEntry* cf;
  
-	for (d = top->tc_items.head; d; d = d->next)
+	DLINK_FOREACH(d, top->tc_items.head)
 	{
 		cf = d->data;
 		if (strcasecmp(cf->cf_name, name) == 0)
@@ -202,7 +202,7 @@ struct 	TopConf *find_top_conf(char *name)
 	dlink_node *d;
 	struct TopConf* tc;
 
-	for (d = conf_items.head; d; d = d->next)
+	DLINK_FOREACH(d, conf_items.head)
 	{
 		tc = d->data;
 		if (strcasecmp(tc->tc_name, name) == 0)

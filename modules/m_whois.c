@@ -309,7 +309,7 @@ static int single_whois(struct Client *source_p,struct Client *target_p,
   member = (target_p->user->channel.head) ? 1 : 0;
   showperson = (wilds && !invis && !member) || !wilds;
 
-  for (ptr = target_p->user->channel.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, target_p->user->channel.head)
     {
       chptr = ptr->data;
       member = IsMember(source_p, chptr);
@@ -370,7 +370,7 @@ static void whois_person(struct Client *source_p,struct Client *target_p, int gl
   cur_len = mlen;
   t = buf + mlen;
 
-  for (lp = target_p->user->channel.head; lp; lp = lp->next)
+  DLINK_FOREACH(lp, target_p->user->channel.head)
     {
       chptr = lp->data;
       chname = chptr->chname;
