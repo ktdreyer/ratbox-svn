@@ -1,3 +1,10 @@
+*** 20011129_3 by leeh
+- added first half of knock stuff.. the remote propagation doesnt exist yet,
+  and the numerics needadding to messages/*
+
+  but ive run out of time, ill finish later :P
+
+
 *** 20011129_2 by db
 Removed unnecessary casting on NULL in messages.tab
 be a bit more paranoid in numeric.c
