@@ -1,3 +1,16 @@
+wcampbel    2001/12/29 17:52:13 EST	(20011229_4)
+
+  Modified files:
+    doc                  example.conf example.conf.efnet 
+  Log:
+  Document ping_cookie in both example.conf's
+  
+  Revision  Changes    Path
+  7.147     +7 -0      ircd-hybrid-7/doc/example.conf
+  7.3       +7 -0      ircd-hybrid-7/doc/example.conf.efnet
+
+
+
 davidt      2001/12/29 13:40:08 EST	(20011229_3)
 
   Modified files:
