@@ -80,7 +80,7 @@ static void m_topic(struct Client *client_p,
 #ifdef VCHANS
   struct Channel *vchan;
 #endif
-  
+    
   if ((p = strchr(parv[1],',')))
     *p = '\0';
 
@@ -127,6 +127,7 @@ static void m_topic(struct Client *client_p,
       /* setting topic */
       if (parc > 2)
 	{
+          char *topic, *topic_info;
 
 	  if (!IsMember(source_p, chptr))
 	    {
@@ -137,22 +138,30 @@ static void m_topic(struct Client *client_p,
 	  if ((chptr->mode.mode & MODE_TOPICLIMIT) == 0 ||
 	      is_any_op(chptr,source_p))
 	    {
-	      /* setting a topic */
-	      /*
-	       * chptr zeroed
-	       */
-	      strlcpy(chptr->topic, parv[2], TOPICLEN);
-	      
-	      
-	      ircsprintf(chptr->topic_info, "%s!%s@%s",
-			 source_p->name, source_p->username, source_p->host);
-
-	      chptr->topic_time = CurrentTime;
+	       
+              
+	      if(strlen(parv[2]) > 0)
+	      {
+	        if(chptr->topic == NULL)
+	           allocate_topic(chptr);
+        
+        	strlcpy(chptr->topic, parv[2], TOPICLEN);
+        	ircsprintf(chptr->topic_info, "%s!%s@%s",
+			   source_p->name, source_p->username, source_p->host);
+        	chptr->topic_time = CurrentTime;
+                topic = chptr->topic;
+              } else
+              {
+                if(chptr->topic != NULL)
+                   free_topic(chptr);
+                topic = "";
+                topic_info = "";
+              } 	      
 	      
 	      sendto_server(client_p, NULL, chptr, NOCAPS, NOCAPS, NOFLAGS,
                             ":%s TOPIC %s :%s",
                             parv[0], chptr->chname,
-                            chptr->topic);
+                            topic);
 	      if(chptr->mode.mode & MODE_HIDEOPS)
 		{
 		  sendto_channel_local(ONLY_CHANOPS_HALFOPS,
@@ -161,13 +170,13 @@ static void m_topic(struct Client *client_p,
 				       source_p->username,
 				       source_p->host,
 				       root_chan->chname,
-				       chptr->topic);
+				       topic);
 
 		  sendto_channel_local(NON_CHANOPS,
 				       chptr, ":%s TOPIC %s :%s",
 				       me.name,
 				       root_chan->chname,
-				       chptr->topic);
+				       topic);
 		}
 	      else
 		{
@@ -176,7 +185,7 @@ static void m_topic(struct Client *client_p,
 				       source_p->name,
 				       source_p->username,
 				       source_p->host,
-				       root_chan->chname, chptr->topic);
+				       root_chan->chname, topic);
 		}
 	    }
 	  else
@@ -191,7 +200,7 @@ static void m_topic(struct Client *client_p,
 			 parv[1]);
 	      return;
 	    }
-          if (chptr->topic[0] == '\0')
+          if (chptr->topic == NULL)
 	    sendto_one(source_p, form_str(RPL_NOTOPIC),
 		       me.name, parv[0], parv[1]);
           else
@@ -265,12 +274,23 @@ static void ms_topic(struct Client *client_p,
 
   if (parv[1] && IsChannelName(parv[1]))
     {
+      char *topic;
       if ((chptr = hash_find_channel(parv[1])) == NULL)
 	return;
 
-      strlcpy(chptr->topic, parv[4], TOPICLEN);
-	      
-      strlcpy(chptr->topic_info, parv[2], USERHOST_REPLYLEN);	      
+      if(strlen(parv[4]) > 0)
+      {
+        if(chptr->topic == NULL)
+          allocate_topic(chptr);
+        strlcpy(chptr->topic, parv[4], TOPICLEN);
+        strlcpy(chptr->topic_info, parv[2], USERHOST_REPLYLEN);	      
+        topic = chptr->topic;
+      } else
+      {
+        if(chptr->topic != NULL)
+          free_topic(chptr);
+        topic = "";
+      }
 
       chptr->topic_time = atoi(parv[3]);
 
@@ -280,7 +300,7 @@ static void ms_topic(struct Client *client_p,
 			       chptr, ":%s TOPIC %s :%s",
 			       me.name,
 			       parv[1],
-			       chptr->topic);
+			       topic);
 
 	}
       else
@@ -288,7 +308,7 @@ static void ms_topic(struct Client *client_p,
 	  sendto_channel_local(ALL_MEMBERS,
 			       chptr, ":%s TOPIC %s :%s",
 			       source_p->name,
-			       parv[1], chptr->topic);
+			       parv[1], topic);
 	}
     }
 }

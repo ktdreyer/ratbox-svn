@@ -303,6 +303,7 @@
 #define LINEBUF_HEAP_SIZE	1024
 #define	USER_HEAP_SIZE		1024
 #define	DNODE_HEAP_SIZE		2048
+#define TOPIC_HEAP_SIZE		1024
 #else  /* Small Net */
 #define CHANNEL_HEAP_SIZE	256
 #define BAN_HEAP_SIZE		128
@@ -311,6 +312,7 @@
 #define LINEBUF_HEAP_SIZE	128
 #define	USER_HEAP_SIZE		128
 #define	DNODE_HEAP_SIZE		256
+#define TOPIC_HEAP_SIZE		256
 #endif
 
 /* DEBUGMODE is used mostly for internal development, it is likely

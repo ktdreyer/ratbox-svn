@@ -244,10 +244,10 @@ static int list_named_channel(struct Client *source_p,char *name)
 
 #ifdef VCHANS
   if (HasVchans(chptr))
-    ircsprintf(id_and_topic, "<!%s> %s", pick_vchan_id(chptr), chptr->topic);
+    ircsprintf(id_and_topic, "<!%s> %s", pick_vchan_id(chptr), chptr->topic == NULL ? "" : chptr->topic );
   else
 #endif
-    ircsprintf(id_and_topic, "%s", chptr->topic);
+    ircsprintf(id_and_topic, "%s", chptr->topic == NULL ? "" : chptr->topic);
 
   if (ShowChannel(source_p, chptr))
     sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
@@ -263,7 +263,7 @@ static int list_named_channel(struct Client *source_p,char *name)
       if (ShowChannel(source_p, tmpchptr))
 	{
           root_chptr = find_bchan(tmpchptr);
-          ircsprintf(id_and_topic, "<!%s> %s", pick_vchan_id(tmpchptr), tmpchptr->topic);
+          ircsprintf(id_and_topic, "<!%s> %s", pick_vchan_id(tmpchptr), tmpchptr->topic == NULL ? "" : chptr->topic);
           sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
                      root_chptr->chname, tmpchptr->users, id_and_topic);
         }
@@ -294,13 +294,13 @@ static void list_one_channel(struct Client *source_p, struct Channel *chptr)
       
       if(root_chptr != NULL)
         {
-          ircsprintf(id_and_topic, "<!%s> %s", pick_vchan_id(chptr), chptr->topic);
+          ircsprintf(id_and_topic, "<!%s> %s", pick_vchan_id(chptr), chptr->topic == NULL ? "" : chptr->topic );
           sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
                      root_chptr->chname, chptr->users, id_and_topic);
         }
       else
         {
-          ircsprintf(id_and_topic, "<!%s> %s", pick_vchan_id(chptr), chptr->topic);
+          ircsprintf(id_and_topic, "<!%s> %s", pick_vchan_id(chptr), chptr->topic == NULL ? "" : chptr->topic );
           sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
                      chptr->chname, chptr->users, id_and_topic);     
         }
@@ -309,6 +309,6 @@ static void list_one_channel(struct Client *source_p, struct Channel *chptr)
 #endif
     {
       sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
-                 chptr->chname, chptr->users, chptr->topic);
+                 chptr->chname, chptr->users, chptr->topic == NULL ? "" : chptr->topic );
     }
 }

@@ -390,7 +390,7 @@ m_join(struct Client *client_p,
 
       del_invite(chptr, source_p);
       
-      if (chptr->topic[0] != '\0')
+      if (chptr->topic != NULL)
 	{
 	  sendto_one(source_p, form_str(RPL_TOPIC), me.name,
 		     parv[0], root_chptr->chname, chptr->topic);

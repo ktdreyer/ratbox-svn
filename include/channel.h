@@ -51,8 +51,8 @@ struct Channel
   struct Channel* prevch;
   struct Channel* hnextch;
   struct Mode     mode;
-  char            topic[TOPICLEN + 1];
-  char            topic_info[USERHOST_REPLYLEN];
+  char            *topic;
+  char            *topic_info;
   time_t          topic_time;
 #ifdef VCHANS
   char            vchan_id[NICKLEN*2];   /* use this for empty vchans */
@@ -179,5 +179,8 @@ struct Ban          /* also used for exceptions -orabidoo */
 #ifdef INTENSIVE_DEBUG
 void do_channel_integrity_check(void);
 #endif
+
+int allocate_topic(struct Channel *);
+void free_topic(struct Channel *);
 
 #endif  /* INCLUDED_channel_h */

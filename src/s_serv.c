@@ -1695,7 +1695,7 @@ burst_channel(struct Client *client_p, struct Channel *chptr)
   send_channel_modes(client_p, chptr);
   add_lazylinkchannel(client_p,chptr);
 
-  if(chptr->topic[0])
+  if(chptr->topic != NULL && chptr->topic_info != NULL)
     {
       sendto_one(client_p, ":%s TOPIC %s %s %lu :%s",
 		 me.name,
@@ -1723,7 +1723,7 @@ burst_channel(struct Client *client_p, struct Channel *chptr)
 	  send_channel_modes(client_p, vchan);
 	  add_lazylinkchannel(client_p,vchan);
 
-	  if(vchan->topic[0])
+	  if(vchan->topic != NULL && vchan->topic_info != NULL)
 	    {
 	      sendto_one(client_p, ":%s TOPIC %s %s %lu :%s",
 			 me.name,
