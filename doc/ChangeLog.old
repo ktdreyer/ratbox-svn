@@ -1,3 +1,8 @@
+*** 20010321_1 by ejb
+- detect in configure how we should include files in Makefile.
+  This isn't a perfect test, but it should work..
+
+
 *** 20010319_4 by toot
 /away flood control was a bit harsh
 
