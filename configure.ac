@@ -27,7 +27,7 @@ if test "$enable_static" = "yes"; then
 	AM_ENABLE_STATIC	
         AC_DEFINE([STATIC_MODULES], 1, [Define to 1 if dynamic modules can't be used.])
 else
-	$enable_static = "no"
+	$enable_static="no"
 fi
 
 AC_LIBLTDL_CONVENIENCE
