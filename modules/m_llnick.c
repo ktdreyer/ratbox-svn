@@ -126,7 +126,9 @@ static int  ms_llnick(struct Client *cptr,
   if(hash_find_client(nick,(struct Client *)NULL) || exists)
   {
     /* The nick they want is in use. complain */
-    sendto_one(acptr, form_str(ERR_NICKNAMEINUSE), me.name, nick_old, nick);
+    sendto_one(acptr, form_str(ERR_NICKNAMEINUSE), me.name,
+               new ? "*" : nick_old,
+               nick);
     return 0;
   }
 
