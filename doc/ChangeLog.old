@@ -1,3 +1,15 @@
+db          2002/06/22 18:39:09 EDT	(20020622_2)
+
+  Modified files:
+    src                  s_serv.c 
+  Log:
+  - same bug was in add_lazylinkchannel() grrr
+  
+  Revision  Changes    Path
+  7.264     +1 -4      ircd-hybrid-7/src/s_serv.c
+
+
+
 db          2002/06/22 17:23:08 EDT	(20020622_1)
 
   Modified files:
