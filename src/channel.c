@@ -763,7 +763,7 @@ void channel_modes(struct Channel *chptr, struct Client *cptr,
  * 		- char flag flagging type of mode i.e. 'b' 'e' etc.
  * 		- clear (remove all current modes, for ophiding, etc)
  * output	- NONE
- * side effects - only used to send +b and +e now, +d/+a/+I too.
+ * side effects - sends +b/+e/+d/+I
  *		  
  */
 static void send_mode_list(struct Client *cptr,
@@ -1295,17 +1295,17 @@ void set_channel_mode(struct Client *cptr,
                (to_list == &chptr->halfops))
               && (whatt == MODE_ADD) && MyClient(who)
               && (chptr->mode.mode & MODE_HIDEOPS))
-          {
-            sync_oplists(chptr, who, 0);
-          }
+            {
+              sync_oplists(chptr, who, 0);
+            }
           else if (target_was_op &
               ((to_list != &chptr->chanops) &&
                (to_list != &chptr->halfops))
               && (whatt == MODE_DEL) && MyClient(who)
               && (chptr->mode.mode & MODE_HIDEOPS))
-          {
-            sync_oplists(chptr, who, 1);
-          }
+            {
+              sync_oplists(chptr, who, 1);
+            }
 
           break;
 
@@ -3056,7 +3056,7 @@ static void send_oplist(char *chname, struct Client *cptr,
 
       data_to_send = 1;
 
-      if ( cur_modes == 5 ) /* '+' and 4 modes */
+      if ( cur_modes == (MAXMODEPARAMS + 1) ) /* '+' and modes */
       {
         *t = '\0';
         mcbuf[cur_modes] = '\0';
@@ -3088,16 +3088,16 @@ static void sync_channel_oplists(struct Channel *chptr,
 
   list = &chptr->peons;
   for (ptr = list->head; ptr && ptr->data; ptr = ptr->next)
-  {
-    acptr = ptr->data;
-    if(MyClient(acptr))
-      sync_oplists(chptr, acptr, clear);
-  }
+    {
+      acptr = ptr->data;
+      if(MyClient(acptr))
+        sync_oplists(chptr, acptr, clear);
+    }
   list = &chptr->voiced;
   for (ptr = list->head; ptr && ptr->data; ptr = ptr->next)
-  {
-    acptr = ptr->data;
-    if(MyClient(acptr))
-      sync_oplists(chptr, acptr, clear);
-  }
+    {
+      acptr = ptr->data;
+      if(MyClient(acptr))
+        sync_oplists(chptr, acptr, clear);
+    }
 }
