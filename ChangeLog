@@ -1,3 +1,17 @@
+leeh        2003/03/17 00:55:40 UTC	(20030317_0)
+
+  Modified files:
+    include              s_newconf.h 
+    src                  client.c 
+  Log:
+  - actually allocating some memory for the abort_client might be good ;)
+  
+  Revision  Changes    Path
+  7.3       +1 -1      ircd-ratbox/include/s_newconf.h
+  7.376     +4 -1      ircd-ratbox/src/client.c
+
+
+
 androsyn    2003/03/16 05:28:21 UTC	(20030316_3)
 
   Modified files:
