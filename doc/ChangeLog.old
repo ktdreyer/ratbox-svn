@@ -1,3 +1,19 @@
+a1kmm       2002/02/14 00:50:35 EST	(20020214_0)
+
+  Modified files:
+    src                  .depend client.c s_serv.c send.c 
+  Log:
+  - A patch by mrtime14c to fix double frees, with some cleanups by
+    Dianora and a minor fix by me.
+  
+  Revision  Changes    Path
+  7.4       +20 -16    ircd-hybrid-7/src/.depend
+  7.225     +37 -79    ircd-hybrid-7/src/client.c
+  7.239     +1 -1      ircd-hybrid-7/src/s_serv.c
+  7.172     +10 -13    ircd-hybrid-7/src/send.c
+
+
+
 jmallett    2002/02/13 13:41:20 EST	(20020213_2)
 
   Modified files:
