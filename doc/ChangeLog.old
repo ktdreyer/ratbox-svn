@@ -1,3 +1,15 @@
+*** 20010603_1 by db
+From jason@sabruno.wiz.cx  Sat Jun  2 23:59:06 2001
+
+typo in hybrid 7:
+
+[20:57|wiz] KLINE over-ruled for tek-X[bigpoppate@a24b161n137client58.hawaii.rr.
+com], client is kline_exmpt
+
+should be kline_exempt.
+
+
+
 *** 20010602_8 by leeh
 - made vhost6 actually do something and work..
   we can now have ipv6 only servers.. it relies on aftype= in the ircd.conf
