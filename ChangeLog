@@ -1,3 +1,25 @@
+androsyn    2002/11/13 04:29:32 UTC	(20021113_0)
+
+  Modified files:
+    .                    configure 
+    autoconf             acconfig.h configure.in 
+    include              fdlist.h setup.h.in 
+    src                  Makefile.in 
+  Log:
+  Add Linux epoll support..marked as experimental..also anybody who really
+  wants to use it, needs to be running a linux kernel newer than 2.5.46, which
+  is unstable..
+  
+  Revision  Changes    Path
+  7.26      +3 -3      ircd-ratbox/autoconf/acconfig.h
+  7.155     +21 -1     ircd-ratbox/autoconf/configure.in
+  7.162     +251 -224  ircd-ratbox/configure
+  7.26      +3 -0      ircd-ratbox/include/fdlist.h
+  7.60      +3 -3      ircd-ratbox/include/setup.h.in
+  7.119     +1 -0      ircd-ratbox/src/Makefile.in
+
+
+
 leeh        2002/11/12 23:36:05 UTC	(20021112_1)
 
   Modified files:
