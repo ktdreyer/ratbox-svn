@@ -1,3 +1,8 @@
+*** 20000402_10 by db
+- MAX_SETBACK_TIME added
+
+
+
 *** 20000402_9 by db
 - more cleanups to parser
 - make sure 'O' is converted to global=yes in convertconf
