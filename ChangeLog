@@ -1,3 +1,22 @@
+leeh        2004/07/29 11:50:00 EDT	(20040729_0)
+
+  Modified files:
+    modules              Makefile.in 
+    modules/core         m_join.c 
+    src                  modules.c 
+  Removed files:
+    modules/core         m_sjoin.c 
+  Log:
+  - merge m_sjoin.c into m_join.c
+  
+  Revision  Changes    Path
+  1.100     +0 -1      ircd-ratbox/modules/Makefile.in
+  1.157     +466 -2    ircd-ratbox/modules/core/m_join.c
+  1.202     +0 -718    ircd-ratbox/modules/core/m_sjoin.c (dead)
+  7.144     +0 -1      ircd-ratbox/src/modules.c
+
+
+
 leeh        2004/07/28 19:34:43 EDT	(20040728_5)
 
   Modified files:
