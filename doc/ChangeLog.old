@@ -1,3 +1,8 @@
+*** 20001106_18 by db
+- slight tweak to m_privmsg code to allow sending of errors to client
+  
+
+
 *** 20001106_17 by db
 - rewrote m_privmsg.c more or less completely.
   Still TODO re-add the additional privileged things opers get
