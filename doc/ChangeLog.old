@@ -1,3 +1,16 @@
+androsyn    2002/08/05 12:30:41 EDT	(20020805_0)
+
+  Modified files:
+    src                  linebuf.c 
+  Log:
+  This *should* fix linebuf_copy_raw() to work correctly.  Lets hope those old
+  issues with ziplinks don't show up again.
+  
+  Revision  Changes    Path
+  7.90      +37 -41    ircd-hybrid-7/src/linebuf.c
+
+
+
 androsyn    2002/08/03 18:42:28 EDT	(20020803_2)
 
   Modified files:
