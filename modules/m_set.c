@@ -102,6 +102,7 @@ static struct SetStruct set_cmd_table[] = {
 	{"IDENTTIMEOUT", quote_identtimeout,	0,	1	},
 	{"IDLETIME", 	quote_idletime, 	0,	1	},
 	{"MAX", 	quote_max, 		0,	1	},
+	{"MAXCLIENTS",	quote_max,		0,	1	},
 	{"OPERSTRING",	quote_operstring,	1,	0	},
 	{"SPAMNUM", 	quote_spamnum, 		0,	1	},
 	{"SPAMTIME", 	quote_spamtime, 	0,	1	},
