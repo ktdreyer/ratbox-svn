@@ -319,9 +319,9 @@ void clear_conf(void)
       if (conf->clients == 0)
 	{
 	  if(hmel)
-	    hmel->next = hmen->next;
+	    hmel->next = hmen;
 	  else
-	    deferred_masks = hmen->next;
+	    deferred_masks = hmen;
 	  conf->clients--;
 	  free_conf(conf);
 	  MyFree(hme->hostmask);
