@@ -1401,13 +1401,10 @@ int exit_client(
     {        
       if(ConfigServerHide.hide_servers)
 	{
-          /* 
-          ** Replaces the name of the splitting server with
-          ** a.server.on.<networkname>.net        
-          ** when a client exits from a split, in an attempt to 
-          ** hide topology but let clients detect a split still.
-          */
-	  ircsprintf(comment1,"%s a.server.on.%s.net",me.name, ServerInfo.network_name);
+          /* set netsplit message to "me.name *.split" to still show 
+	   * that its a split, but hide the servers splitting
+	   */
+	  ircsprintf(comment1,"%s *.split", me.name);
 	}
       else
 	{

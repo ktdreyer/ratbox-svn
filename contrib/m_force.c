@@ -1,4 +1,4 @@
-/* developers/m_force.c
+/* contrib/m_force.c
  * Copyright (C) 2002 Hybrid Development Team
  *
  * $Id$

@@ -1,10 +1,5 @@
-/************************************************************************
- *   IRC - Internet Relay Chat, contrib/m_clearchan.c
- *   Copyright (C) 1990 Jarkko Oikarinen and
- *                      University of Oulu, Computing Center
- *
- *   See file AUTHORS in IRC package for additional names of
- *   the programmers. 
+/*   contrib/m_ojoin.c
+ *   Copyright (C) 2002 Hybrid Development Team
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
