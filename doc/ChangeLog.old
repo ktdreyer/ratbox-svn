@@ -1,3 +1,12 @@
+*** 20001206_1 by db
+- on_accept_list can be on a remote client, having it on the localClient
+  part will lead to a core..
+- hacked out a portion of adrian's flood control for now.. to get
+  the darn thing to do a server link. I'll look at it in the morning
+  when I am awake.
+
+
+
 *** 20001205_10 by db
 - updated TODO
 - c lines were blasted when ZIPLINKS were removed, put them back
