@@ -1,3 +1,15 @@
+*** 20010430_4 by jdc
+* m_stats() did not check the parc count.  Doing a /STATS without any
+  arguments could result in the server just sitting there until some
+  output was sent, then the connection would be severed.
+* Please note the change to message.tab (in another update) -- this is
+  CRUCIAL to the above fix.
+* Added descriptions for the STATS letters in stats_let_table[].  This
+  will be used (in the future) for for something like /STATS HELP,
+  once word-based STATS are added.
+
+
+
 *** 20010430_3 by jdc
 * Added /QUOTE ACCEPT documentation to opers.txt.
 
