@@ -1,3 +1,9 @@
+*** 20001207_6 by db
+- missing parc test in m_knock.c caused it to core on knock with 
+  no args. spotted by poptix...
+
+
+
 *** 20001207_5 by db
 - missed committing new conf file because I forgot to rename it from
   ircd.conf to example.conf grrr
