@@ -1376,7 +1376,7 @@ sendto_slaves(struct Client *one, char *message, char *nick, int parc, char *par
       
       for (aconf = u_conf; aconf; aconf = aconf->next)
         {
-          if (match(acptr->name,aconf->user))
+          if (match(acptr->name,aconf->name))
             { 
               if(parc > 3)
                 sendto_one(acptr,":%s %s %s %s %s :%s",
