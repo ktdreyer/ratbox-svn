@@ -2370,12 +2370,22 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
   {
-
     target_p = ptr->data;
 
     if(target_p == source_p)
       continue;
+    
+    /* if its a LL, check they have the channel */
+    if(ServerInfo.hub && IsCapable(target_p, CAP_LL))
+    {
+      if((chptr->lazyLinkChannelExists & target_p->localClient->serverMask) == 0)
+        continue;
       
+      if(IsClient(source_p) && 
+        (source_p->lazyLinkClientExists & target_p->localClient->serverMask) == 0)
+	client_burst_if_needed(target_p, source_p);
+    }
+	
     if (mode_count_minus > 0)
     {
       modebuf[mbl++] = '-';
