@@ -1,3 +1,15 @@
+leeh        2002/01/04 07:10:06 EST	(20020104_3)
+
+  Modified files:
+    src                  modules.c 
+  Log:
+  - there was an #ifdef STATIC_MODULES at the top :)
+  
+  Revision  Changes    Path
+  7.85      +2 -3      ircd-hybrid-7/src/modules.c
+
+
+
 db          2002/01/04 00:33:43 EST	(20020104_2)
 
   Modified files:
