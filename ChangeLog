@@ -1,3 +1,16 @@
+androsyn    2004/01/12 16:31:13 EST	(20040112_0)
+
+  Modified files:
+    src                  newconf.c s_serv.c 
+  Log:
+  Fix vhosts
+  
+  Revision  Changes    Path
+  7.122     +2 -1      ircd-ratbox/src/newconf.c
+  7.374     +1 -1      ircd-ratbox/src/s_serv.c
+
+
+
 androsyn    2003/12/19 10:20:57 EST	(20031219_0)
 
   Modified files:
