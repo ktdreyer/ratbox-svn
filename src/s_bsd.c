@@ -337,7 +337,7 @@ void close_connection(struct Client *client_p)
       fd_close(client_p->localClient->ctrlfd_r);
       fd_close(client_p->fd_r);
       client_p->localClient->ctrlfd_r = -1;
-      client_p->localClient->fd_r = -1;
+      client_p->fd_r = -1;
 #endif
       client_p->localClient->ctrlfd = -1;
 
