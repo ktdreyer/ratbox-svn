@@ -1,3 +1,8 @@
+*** 20001218_4 by bill
+
+- removed compile-time warnings caused by fbputs()
+
+
 *** 20001218_3 by db
 - still more cleanups
 - removed superflous sjoin code, it was already done by send_channel_modes
