@@ -34,9 +34,6 @@ typedef struct Information
 
 Info MyInformation[] = {
 
-  { "ANTI_DRONE_FLOOD", "ON", 0, "Anti Flood for Drones" },
-  { "ANTI_SPAMBOT", "ON", 0, "Spam Bot Detection" },
-
 #ifdef ANTI_SPAMBOT_WARN_ONLY
   { "ANTI_SPAMBOT_WARN_ONLY", "ON", 0, "Warn Operators of Possible Spam Bots" },
 #else
@@ -99,12 +96,6 @@ Info MyInformation[] = {
   { "DEBUGMODE", "OFF", 0, "Debugging Mode" },
 #endif /* DEBUGMODE */
 
-#ifdef DNS_DEBUG
-  { "DNS_DEBUG", "ON", 0, "Dns Debugging" },
-#else
-  { "DNS_DEBUG", "OFF", 0, "Dns Debugging" },
-#endif /* DNS_DEBUG */
-
 #ifdef DO_IDENTD
   { "DO_IDENTD", "ON", 0, "Perform identd checks" },
 #else
@@ -128,12 +119,6 @@ Info MyInformation[] = {
 #else
   { "GLINE_TIME", "NONE", 0, "Expire Time for Glines" },
 #endif /* GLINE_TIME */
-
-#ifdef GLINEFILE
-  { "GLINEFILE", GLINEFILE, 0, "Path to G-line File" },
-#else
-  { "GLINEFILE", "NONE", 0, "Path to G-line File" },
-#endif /* GLINEFILE */
 
   { "HARD_FDLIMIT_", "", HARD_FDLIMIT_, "Maximum Number of File Descriptors Available" },
 
@@ -168,25 +153,11 @@ Info MyInformation[] = {
   { "KPATH", "NONE", 0, "Path to K-line File" },
 #endif /* KPATH */
 
-#ifdef LIMIT_UH
-  { "LIMIT_UH", "ON", 0, "Make Y: lines limit username instead of hostname" },
-#else
-  { "LIMIT_UH", "OFF", 0, "Make Y: lines limit username instead of hostname" },
-#endif /* LIMIT_UH */
-
-  { "LITTLE_I_LINES", "ON", 0, "\"i\" lines prevent matching clients from channel opping" },
-
 #ifdef LPATH
   { "LPATH", LPATH, 0, "Path to Log File" },
 #else
   { "LPATH", "NONE", 0, "Path to Log File" },
 #endif /* LPATH */
-
-#ifdef LWALLOPS
-  { "LWALLOPS", "ON", 0, "Local Wallops Support" },
-#else
-  { "LWALLOPS", "OFF", 0, "Local Wallops Support" },
-#endif /* LWALLOPS */
 
   { "MAX_BUFFER", "", MAX_BUFFER, "Maximum Buffer Connections Allowed" },
 
@@ -211,24 +182,6 @@ Info MyInformation[] = {
   { "NO_DEFAULT_INVISIBLE", "OFF", 0, "Do not Give Clients +i Mode Upon Connection" },
 #endif /* NO_DEFAULT_INVISIBLE */
 
-#ifdef NO_OPER_FLOOD
-  { "NO_OPER_FLOOD", "ON", 0, "Disable Flood Control for Operators" },
-#else
-  { "NO_OPER_FLOOD", "OFF", 0, "Disable Flood Control for Operators" },
-#endif /* NO_OPER_FLOOD */
-
-#ifdef NOISY_HTM
-  { "NOISY_HTM", "ON", 0, "Notify Operators of HTM (De)activation" },
-#else
-  { "NOISY_HTM", "OFF", 0, "Notify Operators of HTM (De)activation" },
-#endif /* NOISY_HTM */
-
-#ifdef OLD_Y_LIMIT
-  { "OLD_Y_LIMIT", "ON", 0, "Use Old Y: line Limit Behavior" },
-#else
-  { "OLD_Y_LIMIT", "OFF", 0, "Use Old Y: line Limit Behavior" },
-#endif /* OLD_Y_LIMIT */
-
 #ifdef OPATH
   { "OPATH", OPATH, 0, "Path to Operator MOTD File" },
 #else
@@ -249,35 +202,11 @@ Info MyInformation[] = {
   { "REPORT_DLINE_TO_USER", "OFF", 0, "Inform Clients They are D-lined" },
 #endif /* REPORT_DLINE_TO_USER */
 
-#ifdef SEND_FAKE_KILL_TO_CLIENT
-  { "SEND_FAKE_KILL_TO_CLIENT", "ON", 0, "Make Client think they were KILLed" },
-#else
-  { "SEND_FAKE_KILL_TO_CLIENT", "OFF", 0, "Make Client think they were KILLed" },
-#endif /* SEND_FAKE_KILL_TO_CLIENT */
-
-#ifdef SENDQ_ALWAYS
-  { "SENDQ_ALWAYS", "ON", 0, "Put All OutBound data into a SendQ" },
-#else
-  { "SENDQ_ALWAYS", "OFF", 0, "Put All OutBound data into a SendQ" },
-#endif /* SENDQ_ALWAYS */
-
-#ifdef SEPARATE_QUOTE_KLINES_BY_DATE
-  { "SEPARATE_QUOTE_KLINES_BY_DATE", "ON", 0, "Read/Write K-lines According to Date" },
-#else
-  { "SEPARATE_QUOTE_KLINES_BY_DATE", "OFF", 0, "Read/Write K-lines According to Date" },
-#endif /* SEPARATE_QUOTE_KLINES_BY_DATE */
-
 #ifdef SHOW_INVISIBLE_LUSERS
   { "SHOW_INVISIBLE_LUSERS", "ON", 0, "Show Invisible Clients in LUSERS" },
 #else
   { "SHOW_INVISIBLE_LUSERS", "OFF", 0, "Show Invisible Clients in LUSERS" },
 #endif /* SHOW_INVISIBLE_LUSERS */
-
-#ifdef SLAVE_SERVERS
-  { "SLAVE_SERVERS", "ON", 0, "Send LOCOPS and K-lines to U: lined Servers" },
-#else
-  { "SLAVE_SERVERS", "OFF", 0, "Send LOCOPS and K-lines to U: lined Servers" },
-#endif /* SLAVE_SERVERS */
 
 #ifdef SPATH
   { "SPATH", SPATH, 0, "Path to Server Executable" },
@@ -309,18 +238,6 @@ Info MyInformation[] = {
 #else
   { "USE_SYSLOG", "OFF", 0, "Log Errors to syslog file" },
 #endif /* USE_SYSLOG */
-
-#ifdef WHOIS_NOTICE
-  { "WHOIS_NOTICE", "ON", 0, "Show Operators when they are WHOIS'd" },
-#else
-  { "WHOIS_NOTICE", "OFF", 0, "Show Operators when they are WHOIS'd" },
-#endif /* WHOIS_NOTICE */
-
-#ifdef WINTRHAWK
-  { "WINTRHAWK", "ON", 0, "Enable Wintrhawk Styling" },
-#else
-  { "WINTRHAWK", "OFF", 0, "Enable Wintrhawk Styling" },
-#endif /* WINTRHAWK */
 
   /*
    * since we don't want to include the world here, NULL probably

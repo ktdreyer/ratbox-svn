@@ -86,11 +86,6 @@ char *_version = "20001122";
 **      parv[1] = address to remove
 *
 *
-* re-worked and cleanedup for use in hybrid-5 
-* -Dianora
-*
-* Added comstuds SEPARATE_QUOTE_KLINES_BY_DATE
-*
 */
 int mo_unkline (struct Client *cptr,struct Client *sptr,int parc,char *parv[])
 {
