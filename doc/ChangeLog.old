@@ -1,3 +1,18 @@
+*** 20010119_9 by adrian
+
+
+* Kill the POLLREADFLAGS/POLLWRITEFLAGS/POLLERRORS gunk. God I hated
+  that
+
+* replace it with something that makes a tad more sense-
+  - check all the various flags on return from poll() to catch all IO
+    types. Yes, all the IO types will be defined in most useful OSes
+    even if it only pays attention to one of them
+  - define POLLRDFLAGS as POLLIN and POLLWRFLAGS as POLLOUT for older
+    broken linux boxen
+
+
+
 *** 20010119_8 by db
 - just a spelling mistake in a comment, but I couldn't take it any more!
   "automaticly"
