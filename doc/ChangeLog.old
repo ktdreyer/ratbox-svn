@@ -1,3 +1,11 @@
+*** 20001210_5 by db
+- went through and removed a bunch of unused variables
+- fixed sendto_channel_butone, need to generate both local and remote
+  prefixes in this one. The function will need tidying up later.
+- updated send.txt to include info on prefixes.
+
+
+
 *** 20001210_4 by db
 - Was missing proper prefix for normal privmsg to local channel
 
