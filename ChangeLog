@@ -1,3 +1,17 @@
+androsyn    2002/11/25 02:56:54 UTC	(20021125_4)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+  Log:
+  Re-enable assert()
+  
+  Revision  Changes    Path
+  7.160     +2 -1      ircd-ratbox/autoconf/configure.in
+  7.167     +210 -222  ircd-ratbox/configure
+
+
+
 leeh        2002/11/25 02:56:47 UTC	(20021125_3)
 
   Modified files:
