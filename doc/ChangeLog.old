@@ -1,3 +1,16 @@
+jmallett    2002/02/17 20:30:30 EST	(20020218_0)
+
+  Modified files:
+    src                  modules.c 
+  Log:
+  Finally get around to testing src/modules.c on my old OSX box again.  Fixed
+  a typo I managed to dissipate pretty well in the code of the word 'Modules'.
+  
+  Revision  Changes    Path
+  7.97      +4 -4      ircd-hybrid-7/src/modules.c
+
+
+
 a1kmm       2002/02/17 04:07:34 EST	(20020217_18)
 
   Modified files:
