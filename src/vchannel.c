@@ -33,6 +33,7 @@
 #include "send.h"
 #include "numeric.h"
 #include "memory.h"
+#include "s_conf.h" /* ConfigFileEntry */
 
 #include <assert.h>
 #include <string.h>
@@ -51,7 +52,7 @@ struct Channel* cjoin_channel(struct Channel *root,
 {
   char  vchan_name[CHANNELLEN];
   struct Channel * vchan_chptr;
-  int i;
+  int vchan_ts;
   dlink_node *m;
 
   /* don't cjoin a vchan, only the top is allowed */
@@ -91,20 +92,22 @@ struct Channel* cjoin_channel(struct Channel *root,
   }
 
   /* Find an unused vchan name (##<chan>_<ts> format) */
-  i = CurrentTime;
-  do {
-    ircsprintf( vchan_name, "##%s_%u", name+1, i );
-    vchan_chptr = hash_find_channel(vchan_name, NULL);
-    i++;
-
-    /* paranoid check to make sure we eventually give up */
-    if ( i > (CurrentTime+50) )
+  for (vchan_ts = CurrentTime; vchan_chptr; vchan_ts++)
+  {
+    /* 
+     * We have to give up eventually, so only allow the TS
+     * to be up to MAX_TS_DELTA seconds out.
+     */
+    if ( vchan_ts > ( CurrentTime + ConfigFileEntry.ts_max_delta ) )
     {
       sendto_one(sptr, form_str(ERR_UNAVAILRESOURCE),
                  me.name, sptr->name, name);
       return NULL;
     }
-  } while (vchan_chptr);
+
+    ircsprintf( vchan_name, "##%s_%u", name+1, vchan_ts );
+    vchan_chptr = hash_find_channel( vchan_name, NULL );
+  }
   
   vchan_chptr = get_channel(sptr, vchan_name, CREATE);
 
@@ -121,7 +124,7 @@ struct Channel* cjoin_channel(struct Channel *root,
 
   add_vchan_to_client_cache(sptr,root,vchan_chptr);
 
-  vchan_chptr->channelts = CurrentTime;
+  vchan_chptr->channelts = vchan_ts;
 
   del_invite(vchan_chptr, sptr);
   return vchan_chptr;

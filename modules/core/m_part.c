@@ -162,7 +162,7 @@ static void part_one_client(struct Client *cptr,
                             char *reason)
 {
   struct Channel *chptr;
-  struct Channel *vchan;
+  struct Channel *bchan;
 
   chptr = get_channel(sptr, name, 0);
   if (!chptr)
@@ -175,84 +175,71 @@ static void part_one_client(struct Client *cptr,
   if (IsVchan(chptr) || HasVchans(chptr))
     {
       if(HasVchans(chptr))
-        vchan = map_vchan(chptr,sptr);
-      else
       {
-        vchan = chptr;
-        chptr = map_bchan(vchan,sptr);
+        /* Set chptr to actual channel, bchan to the base channel */
+        bchan = chptr;
+        chptr = map_vchan(bchan,sptr);
       }
-      
-      if (!IsMember(sptr, vchan))
-      {
-        sendto_one(sptr, form_str(ERR_NOTONCHANNEL),
-                   me.name, sptr->name, name);
-        return;
-       }
-
-      /*
-       *  Remove user from the old channel (if any)
-       *  only allow /part reasons in -m chans
-       */
-      if (reason[0] && (can_send(chptr, cptr) > 0))
-        {
-          sendto_channel_remote_prefix(vchan, cptr, sptr, "PART %s :%s",
-                                vchan->chname,
-                                reason);
-          sendto_channel_local(ALL_MEMBERS,
-                               vchan, ":%s!%s@%s PART %s :%s",
-                               sptr->name,
-                               sptr->username,
-                               sptr->host,
-                               chptr->chname,
-                               reason);
-        }
       else
-        {
-          sendto_channel_remote_prefix(vchan, cptr, sptr, "PART %s", vchan->chname);
-          sendto_channel_local(ALL_MEMBERS,
-                               vchan, ":%s!%s@%s PART %s",
-                               sptr->name,
-                               sptr->username,
-                               sptr->host,
-                               chptr->chname);
-        }
-      remove_user_from_channel(vchan, sptr);
+      {
+        /* chptr = chptr; */
+        bchan = map_bchan(chptr,sptr);
+      }
+    }
+  else
+    bchan = chptr; /* not a vchan */
+
+  /* XXX - we get here somehow.  we shouldn't */
+  if ( !( bchan && chptr ) )
+  {
+    sendto_realops_flags(FLAGS_ALL,
+                "Uh oh.  Parting %s from %s, but couldn't find bchan/chptr!",
+                sptr->name, name);
+    sendto_realops_flags(FLAGS_ALL,
+                "chptr == %p, bchan == %p", chptr, bchan);
+
+    /* yell at the user a bit too */
+    sendto_one(sptr, form_str(ERR_NOTONCHANNEL),
+               me.name, sptr->name, name);
+    return;
+  }
+      
+  if (!IsMember(sptr, chptr))
+    {
+      sendto_one(sptr, form_str(ERR_NOTONCHANNEL),
+                 me.name, sptr->name, name);
+      return;
+    }
+
+  /*
+   *  Remove user from the old channel (if any)
+   *  only allow /part reasons in -m chans
+   */
+  if (reason[0] && (can_send(chptr, cptr) > 0))
+    {
+      sendto_channel_remote_prefix(chptr, cptr, sptr, "PART %s :%s",
+                              chptr->chname,
+                              reason);
+      sendto_channel_local(ALL_MEMBERS,
+                           chptr, ":%s!%s@%s PART %s :%s",
+                           sptr->name,
+                           sptr->username,
+                           sptr->host,
+                           bchan->chname,
+                           reason);
     }
   else
     {
-      if (!IsMember(sptr, chptr))
-	{
-	  sendto_one(sptr, form_str(ERR_NOTONCHANNEL),
-		     me.name, sptr->name, name);
-	  return;
-	}
-
-     /*
-       *  Remove user from the old channel (if any)
-       *  only allow /part reasons in -m chans
-       */
-      if (reason[0] && (can_send(chptr, sptr) > 0))
-        {
-          sendto_channel_remote_prefix(chptr, cptr, sptr, "PART %s :%s", name, reason);
-          sendto_channel_local(ALL_MEMBERS,
-                               chptr, ":%s!%s@%s PART %s :%s",
-                               sptr->name,
-                               sptr->username,
-                               sptr->host,
-                               name, reason);
-        }
-      else
-        {
-			sendto_channel_remote_prefix(chptr, cptr, sptr, "PART %s", name);
-          sendto_channel_local(ALL_MEMBERS,
-                               chptr, ":%s!%s@%s PART %s",
-                               sptr->name,
-                               sptr->username,
-                               sptr->host,
-                               name);
-         }
-      remove_user_from_channel(chptr, sptr);
+      sendto_channel_remote_prefix(chptr, cptr, sptr, "PART %s",
+                                   chptr->chname);
+      sendto_channel_local(ALL_MEMBERS,
+                           chptr, ":%s!%s@%s PART %s",
+                           sptr->name,
+                           sptr->username,
+                           sptr->host,
+                           bchan->chname);
     }
+  remove_user_from_channel(chptr, sptr);
 }
 
 
