@@ -50,16 +50,15 @@
 #include "parse.h"
 #include "modules.h"
 
-static int m_etrace(struct Client *, struct Client *, int, const char **);
+static int mo_etrace(struct Client *, struct Client *, int, const char **);
 static int me_etrace(struct Client *, struct Client *, int, const char **);
 
 struct Message etrace_msgtab = {
 	"ETRACE", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, {me_etrace, 0}, {m_etrace, 0}}
+	{mg_ignore, mg_not_oper, mg_ignore, mg_ignore, {me_etrace, 0}, {mo_etrace, 0}}
 };
 
-mapi_clist_av1 etrace_clist[] =  { &etrace_msgtab, NULL };
-
+mapi_clist_av1 etrace_clist[] = { &etrace_msgtab, NULL };
 DECLARE_MODULE_AV1(etrace, NULL, NULL, etrace_clist, NULL, NULL, "$Revision$");
 
 static void do_etrace(struct Client *source_p, int ipv4, int ipv6);
@@ -73,7 +72,7 @@ static void do_single_etrace(struct Client *source_p, struct Client *target_p);
  *	parv[2] = [target]
  */
 static int
-m_etrace(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+mo_etrace(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(parc > 1 && !EmptyString(parv[1]))
 	{
@@ -115,12 +114,15 @@ me_etrace(struct Client *client_p, struct Client *source_p, int parc, const char
 {
 	struct Client *target_p;
 
-	if(parc < 2 || EmptyString(parv[1]))
+	if(!IsOper(source_p) || parc < 2 || EmptyString(parv[1]))
 		return 0;
 
-	/* we cant etrace remotes.. we shouldnt even get sent them */
+	/* we cant etrace remote clients.. we shouldnt even get sent them */
 	if((target_p = find_person(parv[1])) && MyClient(target_p))
 		do_single_etrace(source_p, target_p);
+
+        sendto_one_numeric(source_p, RPL_ENDOFTRACE, form_str(RPL_ENDOFTRACE), 
+				target_p ? target_p->name : parv[1]);
 
 	return 0;
 }
@@ -130,7 +132,6 @@ do_etrace(struct Client *source_p, int ipv4, int ipv6)
 {
 	struct Client *target_p;
 	dlink_node *ptr;
-	char ip[HOSTIPLEN];
 
 	/* report all direct connections */
 	DLINK_FOREACH(ptr, lclient_list.head)
@@ -143,8 +144,6 @@ do_etrace(struct Client *source_p, int ipv4, int ipv6)
 			continue;
 #endif
 
-		inetntop_sock((struct sockaddr *)&target_p->localClient->ip, ip, sizeof(ip));
-
 		sendto_one(source_p, form_str(RPL_ETRACE),
 			   me.name, source_p->name, 
 			   IsOper(target_p) ? "Oper" : "User", 
@@ -153,7 +152,7 @@ do_etrace(struct Client *source_p, int ipv4, int ipv6)
 #ifdef HIDE_SPOOF_IPS
 			   IsIPSpoof(target_p) ? "255.255.255.255" :
 #endif
-			    ip, target_p->info);
+			    target_p->sockhost, target_p->info);
 	}
 
 	sendto_one_numeric(source_p, RPL_ENDOFTRACE, form_str(RPL_ENDOFTRACE), me.name);
@@ -164,23 +163,10 @@ do_etrace_full(struct Client *source_p)
 {
 	struct Client *target_p;
 	dlink_node *ptr;
-	char ip[HOSTIPLEN];
 
 	DLINK_FOREACH(ptr, lclient_list.head)
 	{
-		target_p = ptr->data;
-
-		inetntop_sock((struct sockaddr *) &target_p->localClient->ip, ip, sizeof(ip));
-
-		sendto_one(source_p, form_str(RPL_ETRACEFULL),
-			me.name, source_p->name, 
-			IsOper(target_p) ? "Oper" : "User",
-			get_client_class(target_p),
-			target_p->name, target_p->username, target_p->host,
-#ifdef HIDE_SPOOF_IPS
-			IsIPSpoof(target_p) ? "255.255.255.255" :
-#endif
-			 ip, target_p->localClient->fullcaps, target_p->info);
+		do_single_etrace(source_p, ptr->data);
 	}
 
 	sendto_one_numeric(source_p, RPL_ENDOFTRACE, form_str(RPL_ENDOFTRACE), me.name);
@@ -189,28 +175,32 @@ do_etrace_full(struct Client *source_p)
 /*
  * do_single_etrace  - searches local clients and displays those matching
  *                     a pattern
- * input             - source client, target client, full (or not?)
+ * input             - source client, target client
  * output	     - etrace results
  * side effects	     - etrace results are displayed
  */
 static void
 do_single_etrace(struct Client *source_p, struct Client *target_p)
 {
-        char ip[HOSTIPLEN];
-
-        inetntop_sock((struct sockaddr *) &target_p->localClient->ip, ip, sizeof(ip));
-
-        sendto_one(source_p, form_str(RPL_ETRACEFULL),
-        	           me.name, source_p->name,
-                           IsOper(target_p) ? "Oper" : "User",
-                       	   get_client_class(target_p),
-                    	   target_p->name, target_p->username, target_p->host,
 #ifdef HIDE_SPOOF_IPS
-              	           IsIPSpoof(target_p) ? "255.255.255.255" :
+	/* note, we hide fullcaps for spoofed users, as mirc can often
+	 * advertise its internal ip address in the field --fl
+	 */
+	if(IsIPSpoof(target_p))
+		sendto_one(source_p, form_str(RPL_ETRACEFULL),
+				me.name, source_p->name, 
+				IsOper(target_p) ? "Oper" : "User",
+				get_client_class(target_p),
+				target_p->name, target_p->username, target_p->host, 
+				"255.255.255.255", "<hidden> <hidden>", target_p->info);
+	else
 #endif
-     	                   ip, target_p->localClient->fullcaps, target_p->info);
-
-        sendto_one_numeric(source_p, RPL_ENDOFTRACE, form_str(RPL_ENDOFTRACE), target_p->name);
+		sendto_one(source_p, form_str(RPL_ETRACEFULL),
+				me.name, source_p->name, 
+				IsOper(target_p) ? "Oper" : "User",
+				get_client_class(target_p),
+				target_p->name, target_p->username, 
+				target_p->host, target_p->sockhost,
+				target_p->localClient->fullcaps, target_p->info);
 }
-
 
