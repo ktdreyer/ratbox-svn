@@ -57,11 +57,14 @@ dlink_list server_conf_list;
 dlink_list xline_conf_list;
 dlink_list resv_conf_list;	/* nicks only! */
 static dlink_list nd_list;	/* nick delay */
+dlink_list glines;
+dlink_list pending_glines;
 
 static BlockHeap *nd_heap = NULL;
 
 static void expire_temp_rxlines(void *unused);
 static void expire_nd_entries(void *unused);
+static void expire_glines(void *unused);
 
 void
 init_s_newconf(void)
@@ -69,6 +72,7 @@ init_s_newconf(void)
 	nd_heap = BlockHeapCreate(sizeof(struct nd_entry), ND_HEAP_SIZE);
 	eventAddIsh("expire_nd_entries", expire_nd_entries, NULL, 30);
 	eventAddIsh("expire_temp_rxlines", expire_temp_rxlines, NULL, 300);
+	eventAddIsh("expire_glines", expire_glines, NULL, 300);
 }
 
 void
@@ -148,6 +152,26 @@ clear_s_newconf_bans(void)
 
 	clear_resv_hash();
 }
+
+static void
+expire_glines(void *unused)
+{
+	struct ConfItem *aconf;
+	dlink_node *ptr, *next_ptr;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, glines.head)
+	{
+		aconf = ptr->data;
+
+		/* these are in chronological order */
+		if(aconf->hold > CurrentTime)
+			break;
+
+		dlinkDestroy(ptr, &glines);
+		delete_one_address_conf(aconf->host, aconf);
+	}
+}
+
 
 struct remote_conf *
 make_remote_conf(void)

@@ -52,6 +52,9 @@ extern dlink_list server_conf_list;
 extern dlink_list xline_conf_list;
 extern dlink_list resv_conf_list;
 
+extern dlink_list pending_glines;
+extern dlink_list glines;
+
 extern void init_s_newconf(void);
 extern void clear_s_newconf_ircd(void);
 extern void clear_s_newconf_bans(void);

@@ -47,11 +47,14 @@
 #include "parse.h"
 #include "modules.h"
 #include "s_log.h"
+#include "event.h"
 
 static int mo_gline(struct Client *, struct Client *, int, const char **);
 static int mc_gline(struct Client *, struct Client *, int, const char **);
 static int ms_gline(struct Client *, struct Client *, int, const char **);
 static int mo_ungline(struct Client *, struct Client *, int, const char **);
+
+static void expire_pending_glines(void *unused);
 
 struct Message gline_msgtab = {
 	"GLINE", 0, 0, 0, MFLG_SLOW,
@@ -62,8 +65,21 @@ struct Message ungline_msgtab = {
 	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, mg_ignore, {mo_ungline, 2}}
 };
 
+static int
+modinit(void)
+{
+	eventAddIsh("expire_pending_glines", expire_pending_glines, NULL, 300);
+	return 0;
+}
+
+static void
+moddeinit(void)
+{
+	eventDelete(expire_pending_glines, NULL);
+}
+
 mapi_clist_av1 gline_clist[] = { &gline_msgtab, &ungline_msgtab, NULL };
-DECLARE_MODULE_AV1(gline, NULL, NULL, gline_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(gline, modinit, moddeinit, gline_clist, NULL, NULL, "$Revision$");
 
 static int majority_gline(struct Client *source_p, const char *user,
 			  const char *host, const char *reason);
@@ -605,7 +621,7 @@ majority_gline(struct Client *source_p, const char *user,
 	struct gline_pending *pending;
 
 	/* to avoid desync.. --fl */
-	cleanup_glines();
+	expire_pending_glines(NULL);
 
 	/* if its already glined, why bother? :) -- fl_ */
 	if(find_existing_gline(user, host))
@@ -652,7 +668,8 @@ majority_gline(struct Client *source_p, const char *user,
 				set_local_gline(source_p, user, host,
 						pending->reason1);
 
-				cleanup_glines();
+				/* XXX - simply remove this gline. */
+				expire_pending_glines(NULL);
 				return YES;
 			}
 			else
@@ -733,4 +750,26 @@ remove_temp_gline(const char *user, const char *host)
 	}
 
 	return NO;
+}
+
+static void
+expire_pending_glines(void *unused)
+{
+	dlink_node *ptr, *next_ptr;
+	struct gline_pending *glp_ptr;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, pending_glines.head)
+	{
+		glp_ptr = ptr->data;
+
+		if(((glp_ptr->last_gline_time + GLINE_PENDING_EXPIRE) <=
+		    CurrentTime))
+
+		{
+			MyFree(glp_ptr->reason1);
+			MyFree(glp_ptr->reason2);
+			MyFree(glp_ptr);
+			dlinkDestroy(ptr, &pending_glines);
+		}
+	}
 }
