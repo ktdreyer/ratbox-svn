@@ -1,4 +1,4 @@
-TOPIC channel <new topic>
+TOPIC <#channel> :[new topic]
 
 With only a channel argument, TOPIC shows the current topic of
 the specified channel.
