@@ -514,6 +514,24 @@ invalid_gline(struct Client *source_p, const char *luser,
 	return 0;
 }
 
+static int
+find_existing_gline(const char *user, const char *host)
+{
+	struct ConfItem *aconf;
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, glines.head)
+	{
+		aconf = ptr->data;
+
+		if((aconf->user && match(aconf->user, user)) &&
+		   (aconf->host && match(aconf->host, host)))
+			return 1;
+	}
+
+	return 0;
+}
+
 /*
  * set_local_gline
  *
@@ -558,7 +576,8 @@ set_local_gline(struct Client *source_p, const char *user,
 	DupString(aconf->user, user);
 	DupString(aconf->host, host);
 	aconf->hold = CurrentTime + ConfigFileEntry.gline_time;
-	add_gline(aconf);
+	dlinkAddTailAlloc(aconf, &glines);
+	add_conf_by_address(aconf->host, CONF_GLINE, aconf->user, aconf);
 
 	sendto_realops_flags(UMODE_ALL, L_ALL,
 			     "%s!%s@%s on %s has triggered gline for [%s@%s] [%s]",
@@ -589,7 +608,7 @@ majority_gline(struct Client *source_p, const char *user,
 	cleanup_glines();
 
 	/* if its already glined, why bother? :) -- fl_ */
-	if(find_is_glined(host, user))
+	if(find_existing_gline(user, host))
 		return NO;
 
 	DLINK_FOREACH(pending_node, pending_glines.head)

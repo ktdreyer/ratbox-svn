@@ -50,45 +50,6 @@ dlink_list glines;
 static void expire_glines(void);
 static void expire_pending_glines(void);
 
-/* add_gline
- *
- * inputs       - pointer to struct ConfItem
- * output       - none
- * Side effects - links in given struct ConfItem into gline link list
- */
-void
-add_gline(struct ConfItem *aconf)
-{
-	dlinkAddTailAlloc(aconf, &glines);
-	add_conf_by_address(aconf->host, CONF_GLINE, aconf->user, aconf);
-}
-
-/*
- * find_is_glined
- * inputs       - hostname
- *              - username
- * output       - pointer to struct ConfItem if user@host glined
- * side effects -
- */
-struct ConfItem *
-find_is_glined(const char *host, const char *user)
-{
-	dlink_node *gline_node;
-	struct ConfItem *kill_ptr;
-
-	DLINK_FOREACH(gline_node, glines.head)
-	{
-		kill_ptr = gline_node->data;
-		if((kill_ptr->user && (!user || match(kill_ptr->user, user)))
-		   && (kill_ptr->host && (!host || match(kill_ptr->host, host))))
-		{
-			return (kill_ptr);
-		}
-	}
-
-	return (NULL);
-}
-
 /*
  * cleanup_glines
  *
@@ -155,7 +116,7 @@ expire_pending_glines()
 		glp_ptr = pending_node->data;
 
 		if(((glp_ptr->last_gline_time + GLINE_PENDING_EXPIRE) <=
-		    CurrentTime) || find_is_glined(glp_ptr->host, glp_ptr->user))
+		    CurrentTime))
 
 		{
 			MyFree(glp_ptr->reason1);
