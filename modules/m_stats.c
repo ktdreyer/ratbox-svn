@@ -68,12 +68,14 @@ void
 _modinit(void)
 {
   hook_add_event("doing_stats");
+  hook_add_event("doing_stats_p");
   mod_add_cmd(&stats_msgtab);
 }
 
 void
 _moddeinit(void)
 {
+  hook_del_event("doing_stats_p");
   hook_del_event("doing_stats");
   mod_del_cmd(&stats_msgtab);
 }
