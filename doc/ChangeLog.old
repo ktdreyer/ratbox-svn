@@ -1,3 +1,10 @@
+*** 20011126_2 by androsyn
+Okay..the dns_host stuff was a good idea..but its a chicken vs the egg
+problem.  The parser needs to setup the dns_host stuff..but the parser
+relies on the resolver being started already...oh well..
+This removes the dns_host and dns_port option
+
+
 *** 20011126_1 by a1kmm
 - Fixed a bug to stop carriage returns or linefeeds making their way into
   messages under some cases.
