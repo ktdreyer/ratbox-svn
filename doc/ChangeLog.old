@@ -1,3 +1,17 @@
+davidt      2001/12/06 18:34:09 EST	(20011206_9)
+
+  Modified files:
+    .                    ChangeLog make.com 
+  Log:
+  - Remove accidental #Id# tag from ChangeLog
+  - Add #Id# tag to make.com
+  
+  Revision  Changes    Path
+  7.3119    +2 -1      ircd-hybrid-7/ChangeLog
+  1.7       +1 -0      ircd-hybrid-7/make.com
+
+
+
 davidt      2001/12/06 17:53:00 EST	(20011206_8)
 
   Modified files:
