@@ -119,13 +119,13 @@ Done things:
 ------------------------------------------------------------------------------
 Little things to be done given enough time and initiative
 
-.  The "ping timeout" message brought back to the old style
+.  The "ping timeout" message brought back to the old style (DONE)
 .  Bring back CIDR support in operator blocks
    user="wcampbel@144.26.*"; # works - even if the hostname resolves
    user="wcampbel@144.26.0.0/16"; # Does not work
 .  RESTART needs to stop coring
-.  CAPAB needs added for half-ops
-.  LINKS when server-hide is set ON breaks some clients
+.  CAPAB needs added for half-ops (DONE)
+.  LINKS when server-hide is set ON breaks some clients (DONE)
 .  GETTEXT not being detected without
    CC='gcc -L/usr/local/lib' ./configure --prefix='...'
    THEN...it doesn't adjust the #define in setup.h
@@ -138,3 +138,6 @@ Little things to be done given enough time and initiative
    $hyb-devel.monkie.org :test) from 
    hyb-devel.monkie.org[wcampbel@cats.meow.st], Squitting 
    Hwy-7!wcampbel@bee-90-245.bee.net
+.  Have a few more things /quote SET'table
+.  Have a command (maybe a STATS or in INFO) to show all ircd.conf derived
+   options

@@ -135,6 +135,10 @@ original normal local klines
   /quote kline user@host :reason
   /quote kline [time] user@host :reason
 
+User modes can be specified oper only.  This is yet another start time
+configurable option in ircd.conf.  See the comments in example.conf for
+more details.
+
 # complete me
 
 # $Id$
