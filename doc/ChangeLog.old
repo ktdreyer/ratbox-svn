@@ -1,3 +1,7 @@
+*** 20010816_9 by androsyn
+Its helpful if you update the length of the bufhead as well as the bufline
+
+
 *** 20010816_8 by androsyn
 Added block heap allocation for struct Channel.  This ends up enabling us to
 return most all of the memory allocated while servers are joined back to the
