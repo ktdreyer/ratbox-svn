@@ -1023,44 +1023,82 @@ int attach_confs(struct Client* cptr, const char* name, int statmask)
 }
 
 /*
+ * attach_cn_lines
+ *
+ * inputs	- pointer to server to attach c/ns to
+ * 		- name of server
+ *		- hostname of server
+ * output	- true (1) if both are found, otherwise return false (0)
+ * side effects -
  * attach_cn_lines - find C/N lines and attach them to connecting client
- * return true (1) if both are found, otherwise return false (0)
- * called from connect_server
  * NOTE: this requires an exact match between the name on the C:line and
  * the name on the N:line
  */
-int attach_cn_lines(struct Client *cptr, const char* host)
+int attach_cn_lines(struct Client *cptr, const char* name, const char* host)
 {
-  struct ConfItem* tmp;
+  struct ConfItem* ptr;
   int              found_cline = 0;
   int              found_nline = 0; 
+
   assert(0 != cptr);
   assert(0 != host);
 
-  for (tmp = ConfigItemList; tmp; tmp = tmp->next) {
-    if (!IsIllegal(tmp)) {
-      /*
-       * look for matching C:line
-       */
-      if (!found_cline && CONF_CONNECT_SERVER == tmp->status && 
-          tmp->host && 0 == irccmp(tmp->host, host)) {
-        attach_conf(cptr, tmp);
-        if (found_nline)
-          return 1;
-        found_cline = 1;
-      }
-      /*
-       * look for matching N:line
-       */
-      else if (!found_nline && CONF_NOCONNECT_SERVER == tmp->status &&
-               tmp->host && 0 == irccmp(tmp->host, host)) {
-        attach_conf(cptr, tmp);
-        if (found_cline)
-          return 1;
-        found_nline = 1;
-      }
+  for (ptr = ConfigItemList; ptr; ptr = ptr->next)
+    {
+      if (!IsIllegal(ptr))
+	{
+	  /*
+	   * look for matching C:line
+	   *
+	   * "busy if" - find a conf line thats for a server:
+	   * have I found a cline yet? 
+	   * is it a C line?
+	   * then make sure it has a non null name,
+	   * finally see if that name matches the one being looked for.
+	   * oh but hang on, this name might have multiple ip's or hostnames..
+	   */
+
+	  if (!found_cline
+	      &&
+	      CONF_CONNECT_SERVER == ptr->status
+	      && 
+	      ptr->name
+	      &&
+	      0 == irccmp(ptr->name, name))
+	    {
+	      if ( 0 == irccmp(ptr->host, host) )
+		{
+		  attach_conf(cptr, ptr);
+		  if (found_nline)
+		    return 1;
+		  found_cline = 1;
+		}
+	      continue;
+	    }
+	  
+	  /*
+	   * look for matching N:line
+	   */
+	  
+	  if (!found_nline
+	      &&
+	      CONF_NOCONNECT_SERVER == ptr->status
+	      &&
+	      ptr->name
+	      &&
+	      0 == irccmp(ptr->name, name))
+	    {
+	      if ( 0 == irccmp(ptr->host, host) )
+		{
+		  attach_conf(cptr, ptr);
+		  if (found_cline)
+		    return 1;
+		  found_nline = 1;
+		}
+	      continue;
+	    }
+	}
     }
-  }
   return 0;
 }
 

@@ -24,6 +24,17 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.48  2000/12/22 22:59:21  db
+ * - ok. attach_cn_lines() was just plain wrong.
+ *   The code was matching on hostname(ip) instead of servername
+ *   One needs to look up by servername, then check if the hostname/ip matches..
+ *   This explains why I had problem with multi servers on same host but different
+ *   names.
+ *
+ *   I think I got this right... but I am NOT sure if it works for hostmasked
+ *   servers properly. that has to be verified asap. Might need a match()
+ *   in the code..
+ *
  * Revision 7.47  2000/12/22 04:10:04  ejb
  * - moved maximum_links to ircd.conf
  *
@@ -660,11 +671,7 @@ extern ConfigFileEntryType ConfigFileEntry;    /* GLOBAL - defined in ircd.c */
 extern void clear_ip_hash_table(void);
 extern void iphash_stats(struct Client *,struct Client *,int,char **,FBFILE*);
 
-#ifdef LIMIT_UH
-void remove_one_ip(struct Client *);
-#else
 void remove_one_ip(unsigned long);
-#endif
 
 extern struct ConfItem* make_conf(void);
 extern void             free_conf(struct ConfItem*);
@@ -676,7 +683,7 @@ extern int              attach_conf(struct Client*, struct ConfItem *);
 extern int              attach_confs(struct Client* client, 
                                      const char* name, int statmask);
 extern int              attach_cn_lines(struct Client* client, 
-                                        const char* host);
+                                        const char* name, const char* host);
 extern int              check_client(struct Client* cptr, struct Client *sptr,
 				     char *);
 extern int              attach_Iline(struct Client* client,

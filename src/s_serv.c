@@ -1435,11 +1435,11 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
      * Attach config entries to client here rather than in
      * serv_connect_callback(). This to avoid null pointer references.
      */
-    if (!attach_cn_lines(cptr, aconf->host))
+    if (!attach_cn_lines(cptr, aconf->name, aconf->host))
       {
         sendto_realops_flags(FLAGS_ALL,
 			   "Host %s is not enabled for connecting:no C/N-line",
-			     aconf->host);
+			     aconf->name);
         if (by && IsPerson(by) && !MyClient(by))  
             sendto_one(by, ":%s NOTICE %s :Connect to host %s failed.",
               me.name, by->name, cptr);
