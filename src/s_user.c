@@ -531,7 +531,7 @@ int register_remote_user(struct Client *client_p, struct Client *source_p,
 		  me.name);
 
       source_p->flags |= FLAGS_KILLED;
-      return exit_client(NULL, source_p, &me, "Ghost");
+      return exit_client(NULL, source_p, &me, "Ghosted Client");
     }
 
   add_client_to_llist(&(source_p->servptr->serv->users), source_p);
