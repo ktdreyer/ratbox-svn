@@ -22,6 +22,8 @@
 #ifndef INCLUDED_s_log_h
 #define INCLUDED_s_log_h
 
+struct Client;
+
 #define L_CRIT    0
 #define L_ERROR   1
 #define L_WARN    2

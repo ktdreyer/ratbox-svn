@@ -87,7 +87,7 @@ int m_lusers(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           return 0;
         }
     }
-  return show_lusers(cptr,sptr,parc,parv);
+  return show_lusers(sptr);
 }
 
 /*
@@ -126,6 +126,6 @@ int ms_lusers(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           return 0;
         }
     }
-  return show_lusers(cptr,sptr,parc,parv);
+  return show_lusers(sptr);
 }
 

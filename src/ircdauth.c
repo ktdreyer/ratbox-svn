@@ -609,7 +609,7 @@ GreetUser(struct Client *client)
 	parv[0] = client->name;
 	parv[1] = parv[2] = NULL;
 
-	show_lusers(client, client, 1, parv);
+	show_lusers(client);
 
   if(ConfigFileEntry.short_motd) {
   	sendto_one(client,"NOTICE %s :*** Notice -- motd was last changed at %s",

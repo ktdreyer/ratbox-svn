@@ -61,6 +61,7 @@ static int valid_hostname(const char* hostname);
 static int valid_username(const char* username);
 static void report_and_set_user_flags( struct Client *, struct ConfItem * );
 static int tell_user_off(struct Client *,char **);
+static void user_welcome(struct Client *sptr);
 
 /* table of ascii char letters to corresponding bitmask */
 
@@ -212,232 +213,39 @@ void show_opers(struct Client *cptr)
 }
 
 /*
- * show_lusers - total up counts and display to client
+ * show_lusers -
+ *
+ * inputs	- pointer to client
+ * output	-
+ * side effects	- display to client user counts etc.
  */
-int show_lusers(struct Client *cptr, struct Client *sptr, 
-                int parc, char *parv[])
+int show_lusers(struct Client *sptr) 
 {
-#define LUSERS_CACHE_TIME 180
-  static long last_time=0;
-  static int    s_count = 0, c_count = 0, u_count = 0, i_count = 0;
-  static int    o_count = 0, m_client = 0, m_server = 0;
-  int forced;
-  struct Client *acptr;
+  sendto_one(sptr,
+	     ":%s %d %s :There are %d users on %d servers", me.name,
+	     RPL_LUSERCLIENT, sptr->name, Count.total, Count.server);
 
-/*  forced = (parc >= 2); */
-  forced = (IsAnyOper(sptr) && (parc > 3));
-
-/* (void)collapse(parv[1]); */
-
-  Count.unknown = 0;
-  m_server = Count.myserver;
-  m_client = Count.local;
-  i_count  = Count.invisi;
-  u_count  = Count.unknown;
-  c_count  = Count.total-Count.invisi;
-  s_count  = Count.server;
-  o_count  = Count.oper;
-  if (forced || (CurrentTime > last_time+LUSERS_CACHE_TIME))
-    {
-      last_time = CurrentTime;
-      /* only recount if more than a second has passed since last request */
-      /* use LUSERS_CACHE_TIME instead... */
-      s_count = 0; c_count = 0; u_count = 0; i_count = 0;
-      o_count = 0; m_client = 0; m_server = 0;
-
-      for (acptr = GlobalClientList; acptr; acptr = acptr->next)
-        {
-          switch (acptr->status)
-            {
-            case STAT_SERVER:
-              if (MyConnect(acptr))
-                m_server++;
-            case STAT_ME:
-              s_count++;
-              break;
-            case STAT_CLIENT:
-              if (IsAnyOper(acptr))
-                o_count++;
-#ifdef  SHOW_INVISIBLE_LUSERS
-              if (MyConnect(acptr))
-                m_client++;
-              if (!IsInvisible(acptr))
-                c_count++;
-              else
-                i_count++;
-#else
-              if (MyConnect(acptr))
-                {
-                  if (IsInvisible(acptr))
-                    {
-                      if (IsAnyOper(sptr))
-                        m_client++;
-                    }
-                  else
-                    m_client++;
-                }
-              if (!IsInvisible(acptr))
-                c_count++;
-              else
-                i_count++;
-#endif
-              break;
-            default:
-              u_count++;
-              break;
-            }
-        }
-      /*
-       * We only want to reassign the global counts if the recount
-       * time has expired, and NOT when it was forced, since someone
-       * may supply a mask which will only count part of the userbase
-       *        -Taner
-       */
-      if (!forced)
-        {
-          if (m_server != Count.myserver)
-            {
-              sendto_realops_flags(FLAGS_DEBUG, 
-                                 "Local server count off by %d",
-                                 Count.myserver - m_server);
-              Count.myserver = m_server;
-            }
-          if (s_count != Count.server)
-            {
-              sendto_realops_flags(FLAGS_DEBUG,
-                                 "Server count off by %d",
-                                 Count.server - s_count);
-              Count.server = s_count;
-            }
-          if (i_count != Count.invisi)
-            {
-              sendto_realops_flags(FLAGS_DEBUG,
-                                 "Invisible client count off by %d",
-                                 Count.invisi - i_count);
-              Count.invisi = i_count;
-            }
-          if ((c_count+i_count) != Count.total)
-            {
-              sendto_realops_flags(FLAGS_DEBUG, "Total client count off by %d",
-                                 Count.total - (c_count+i_count));
-              Count.total = c_count+i_count;
-            }
-          if (m_client != Count.local)
-            {
-              sendto_realops_flags(FLAGS_DEBUG,
-                                 "Local client count off by %d",
-                                 Count.local - m_client);
-              Count.local = m_client;
-            }
-          if (o_count != Count.oper)
-            {
-              sendto_realops_flags(FLAGS_DEBUG,
-                                 "Oper count off by %d", Count.oper - o_count);
-              Count.oper = o_count;
-            }
-          Count.unknown = u_count;
-        } /* Complain & reset loop */
-    } /* Recount loop */
-  
-#ifndef SHOW_INVISIBLE_LUSERS
-  if (IsAnyOper(sptr) && i_count)
-#endif
-    sendto_one(sptr, form_str(RPL_LUSERCLIENT), me.name, parv[0],
-               c_count, i_count, s_count);
-#ifndef SHOW_INVISIBLE_LUSERS
-  else
-    sendto_one(sptr,
-               ":%s %d %s :There are %d users on %d servers", me.name,
-               RPL_LUSERCLIENT, parv[0], c_count,
-               s_count);
-#endif
-  if (o_count)
-    sendto_one(sptr, form_str(RPL_LUSEROP),
-               me.name, parv[0], o_count);
-  if (u_count > 0)
-    sendto_one(sptr, form_str(RPL_LUSERUNKNOWN),
-               me.name, parv[0], u_count);
-  /* This should be ok */
-  if (Count.chan > 0)
-    sendto_one(sptr, form_str(RPL_LUSERCHANNELS),
-               me.name, parv[0], Count.chan);
+  sendto_one(sptr, form_str(RPL_LUSERCHANNELS),
+               me.name, sptr->name, Count.chan);
   sendto_one(sptr, form_str(RPL_LUSERME),
-             me.name, parv[0], m_client, m_server);
-  sendto_one(sptr, form_str(RPL_LOCALUSERS), me.name, parv[0],
+             me.name, sptr->name, Count.local, Count.myserver);
+  sendto_one(sptr, form_str(RPL_LOCALUSERS), me.name, sptr->name,
              Count.local, Count.max_loc);
-  sendto_one(sptr, form_str(RPL_GLOBALUSERS), me.name, parv[0],
+  sendto_one(sptr, form_str(RPL_GLOBALUSERS), me.name, sptr->name,
              Count.total, Count.max_tot);
-
-  sendto_one(sptr, form_str(RPL_STATSCONN), me.name, parv[0],
+  sendto_one(sptr, form_str(RPL_STATSCONN), me.name, sptr->name,
              MaxConnectionCount, MaxClientCount);
-  if (m_client > MaxClientCount)
-    MaxClientCount = m_client;
-  if ((m_client + m_server) > MaxConnectionCount)
+
+  if (Count.local > MaxClientCount)
+    MaxClientCount = Count.local;
+
+  if ((Count.local + Count.myserver) > MaxConnectionCount)
     {
-      MaxConnectionCount = m_client + m_server;
+      MaxConnectionCount = Count.local + Count.myserver;
     }
 
   return 0;
 }
-
-  
-
-/*
-** m_functions execute protocol messages on this server:
-**
-**      cptr    is always NON-NULL, pointing to a *LOCAL* client
-**              structure (with an open socket connected!). This
-**              identifies the physical socket where the message
-**              originated (or which caused the m_function to be
-**              executed--some m_functions may call others...).
-**
-**      sptr    is the source of the message, defined by the
-**              prefix part of the message if present. If not
-**              or prefix not found, then sptr==cptr.
-**
-**              (!IsServer(cptr)) => (cptr == sptr), because
-**              prefixes are taken *only* from servers...
-**
-**              (IsServer(cptr))
-**                      (sptr == cptr) => the message didn't
-**                      have the prefix.
-**
-**                      (sptr != cptr && IsServer(sptr) means
-**                      the prefix specified servername. (?)
-**
-**                      (sptr != cptr && !IsServer(sptr) means
-**                      that message originated from a remote
-**                      user (not local).
-**
-**              combining
-**
-**              (!IsServer(sptr)) means that, sptr can safely
-**              taken as defining the target structure of the
-**              message in this server.
-**
-**      *Always* true (if 'parse' and others are working correct):
-**
-**      1)      sptr->from == cptr  (note: cptr->from == cptr)
-**
-**      2)      MyConnect(sptr) <=> sptr == cptr (e.g. sptr
-**              *cannot* be a local connection, unless it's
-**              actually cptr!). [MyConnect(x) should probably
-**              be defined as (x == x->from) --msa ]
-**
-**      parc    number of variable parameter strings (if zero,
-**              parv is allowed to be NULL)
-**
-**      parv    a NULL terminated list of parameter pointers,
-**
-**                      parv[0], sender (prefix string), if not present
-**                              this points to an empty string.
-**                      parv[1]...parv[parc-1]
-**                              pointers to additional parameters
-**                      parv[parc] == NULL, *always*
-**
-**              note:   it is guaranteed that parv[0]..parv[parc-1] are all
-**                      non-NULL pointers.
-*/
 
 /*
 ** register_user
@@ -485,12 +293,6 @@ int register_user(struct Client *cptr, struct Client *sptr,
     username[USERLEN] = '\0';
 
   reason = NULL;
-
-#define NOT_AUTHORIZED  (-1)
-#define SOCKET_ERROR    (-2)
-#define I_LINE_FULL     (-3)
-#define I_LINE_FULL2    (-4)
-#define BANNED_CLIENT   (-5)
 
   if (MyConnect(sptr))
     {
@@ -729,54 +531,7 @@ int register_user(struct Client *cptr, struct Client *sptr,
 
   if (MyConnect(sptr))
     {
-      sendto_one(sptr, form_str(RPL_WELCOME), me.name, nick, nick);
-      /* This is a duplicate of the NOTICE but see below...*/
-      sendto_one(sptr, form_str(RPL_YOURHOST), me.name, nick,
-                 get_listener_name(sptr->listener), version);
-      
-      /*
-      ** Don't mess with this one - IRCII needs it! -Avalon
-      */
-      sendto_one(sptr,
-                 "NOTICE %s :*** Your host is %s, running version %s",
-                 nick, get_listener_name(sptr->listener), version);
-      
-      sendto_one(sptr, form_str(RPL_CREATED),me.name,nick,creation);
-      sendto_one(sptr, form_str(RPL_MYINFO), me.name, parv[0],
-                 me.name, version);
-      show_lusers(sptr, sptr, 1, parv);
-
-      if (ConfigFileEntry.short_motd) {
-        sendto_one(sptr,"NOTICE %s :*** Notice -- motd was last changed at %s",
-                   sptr->name,
-                   ConfigFileEntry.motd.lastChangedDate);
-
-        sendto_one(sptr,
-                   "NOTICE %s :*** Notice -- Please read the motd if you haven't read it",
-                   sptr->name);
-      
-        sendto_one(sptr, form_str(RPL_MOTDSTART),
-                   me.name, sptr->name, me.name);
-      
-        sendto_one(sptr,
-                   form_str(RPL_MOTD),
-                   me.name, sptr->name,
-                   "*** This is the short motd ***"
-                   );
-
-        sendto_one(sptr, form_str(RPL_ENDOFMOTD),
-                   me.name, sptr->name);
-      } else  
-        SendMessageFile(sptr, &ConfigFileEntry.motd);
-      
-      if(sptr->confs && sptr->confs->value.aconf &&
-         (sptr->confs->value.aconf->flags
-          & CONF_FLAGS_LITTLE_I_LINE))
-        {
-          SetRestricted(sptr);
-          sendto_one(sptr,"NOTICE %s :*** Notice -- You are in a restricted access mode",nick);
-          sendto_one(sptr,"NOTICE %s :*** Notice -- You can not chanop others",nick);
-        }
+      user_welcome(sptr);
     }
   else if (IsServer(cptr))
     {
@@ -822,18 +577,6 @@ int register_user(struct Client *cptr, struct Client *sptr,
       ubuf[0] = '+';
       ubuf[1] = '\0';
     }
-  
-  /* LINKLIST 
-   * add to local client link list -Dianora
-   * I really want to move this add to link list
-   * inside the if (MyConnect(sptr)) up above
-   * but I also want to make sure its really good and registered
-   * local client
-   *
-   * double link list only for clients, traversing
-   * a small link list for opers/servers isn't a big deal
-   * but it is for clients -Dianora
-   */
 
   if (MyConnect(sptr))
     {
@@ -1376,5 +1119,66 @@ void send_umode_out(struct Client *cptr,
     send_umode(cptr, sptr, old, ALL_UMODES, buf);
 }
 
+/* 
+ * user_welcome
+ *
+ * inputs	- client pointer to client to welcome
+ * output	- NONE
+ * side effects	-
+ */
+static void user_welcome(struct Client *sptr)
+{
+  sendto_one(sptr, form_str(RPL_WELCOME), me.name, sptr->name, sptr->name );
+  /* This is a duplicate of the NOTICE but see below...*/
+  sendto_one(sptr, form_str(RPL_YOURHOST), me.name, sptr->name,
+	     get_listener_name(sptr->listener), version);
+  
+  /*
+  ** Don't mess with this one - IRCII needs it! -Avalon
+  */
+  sendto_one(sptr,
+	     "NOTICE %s :*** Your host is %s, running version %s",
+	     sptr->name, get_listener_name(sptr->listener), version);
+  
+  sendto_one(sptr, form_str(RPL_CREATED),me.name,sptr->name,creation);
+  sendto_one(sptr, form_str(RPL_MYINFO), me.name, sptr->name,
+	     me.name, version);
+  show_lusers(sptr);
 
+  if (ConfigFileEntry.short_motd)
+    {
+      sendto_one(sptr,"NOTICE %s :*** Notice -- motd was last changed at %s",
+		 sptr->name,
+		 ConfigFileEntry.motd.lastChangedDate);
+      
+      sendto_one(sptr,
+		 "NOTICE %s :*** Notice -- Please read the motd if you haven't read it",
+		 sptr->name);
+    
+      sendto_one(sptr, form_str(RPL_MOTDSTART),
+		 me.name, sptr->name, me.name);
+    
+      sendto_one(sptr,
+		 form_str(RPL_MOTD),
+		 me.name, sptr->name,
+		 "*** This is the short motd ***"
+		 );
 
+      sendto_one(sptr, form_str(RPL_ENDOFMOTD),
+		 me.name, sptr->name);
+    }
+  else  
+    SendMessageFile(sptr, &ConfigFileEntry.motd);
+      
+  if(sptr->confs && sptr->confs->value.aconf &&
+     (sptr->confs->value.aconf->flags
+      & CONF_FLAGS_LITTLE_I_LINE))
+    {
+      SetRestricted(sptr);
+      sendto_one(sptr,
+	 "NOTICE %s :*** Notice -- You are in a restricted access mode",
+		 sptr->name);
+      sendto_one(sptr,"NOTICE %s :*** Notice -- You can not chanop others",
+		 sptr->name);
+    }
+}
