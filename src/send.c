@@ -986,31 +986,6 @@ sendto_match_butone(struct Client *one, struct Client *from,
     if (client_p == one) /* must skip the origin !! */
       continue;
 
-    /*
-     * The old code looped through every client on the
-     * network for each server to check if the
-     * server (client_p) has at least 1 client matching
-     * the mask, using something like:
-     *
-     * for (target_p = GlobalClientList; target_p; target_p = target_p->next)
-     *        if (IsRegisteredUser(target_p) &&
-     *                        match_it(target_p, mask, what) &&
-     *                        (target_p->from == client_p))
-     *   vsendto_prefix_one(client_p, from, pattern, args);
-     *
-     * That way, we wouldn't send the message to
-     * a server who didn't have a matching client.
-     * However, on a network such as EFNet, that
-     * code would have looped through about 50
-     * servers, and in each loop, loop through
-     * about 50k clients as well, calling match()
-     * in each nested loop. That is a very bad
-     * thing cpu wise - just send the message
-     * to every connected server and let that
-     * server deal with it.
-     * -wnder
-     */
-
     send_linebuf_remote(client_p, from, &remote_linebuf);
   }
   linebuf_donebuf(&local_linebuf);
