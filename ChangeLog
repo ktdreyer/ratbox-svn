@@ -1,3 +1,15 @@
+androsyn    2002/11/13 04:31:50 UTC	(20021113_2)
+
+  Added files:
+    src                  s_bsd_epoll.c 
+  Log:
+  Helps if I add s_bsd_epoll.c
+  
+  Revision  Changes    Path
+  1.1       +224 -0    ircd-ratbox/src/s_bsd_epoll.c (new)
+
+
+
 androsyn    2002/11/13 04:31:09 UTC	(20021113_1)
 
   Modified files:
