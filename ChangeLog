@@ -1,3 +1,19 @@
+leeh        2004/04/04 20:04:23 EDT	(20040405_0)
+
+  Modified files:
+    .                    RELNOTES 
+    modules              m_xline.c 
+  Log:
+  - added an (unused) type field to xlines over ENCAP, for compatibility with
+    other ircds which have it.  Temporary xlines, or xlines sent over a hyb6
+    hub will NOT work between between 2.0rc2 and earlier versions anymore.
+  
+  Revision  Changes    Path
+  1.95      +15 -0     ircd-ratbox/RELNOTES
+  1.50      +17 -15    ircd-ratbox/modules/m_xline.c
+
+
+
 leeh        2004/04/04 14:41:31 EDT	(20040404_3)
 
   Modified files:
