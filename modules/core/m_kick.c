@@ -181,35 +181,11 @@ static void m_kick(struct Client *client_p,
         sendto_channel_local(ALL_MEMBERS, chptr, ":%s KICK %s %s :%s",
           source_p->name, name, who->name, comment);
       }
-#ifdef ANONOPS
-      else if(chptr->mode.mode & MODE_HIDEOPS)
-	{
-	  /* jdc -- Non-chanops get kicked from me.name, not
-	   *        who->name (themselves).
-	   */
-	  sendto_channel_local(NON_CHANOPS, chptr,
-			       ":%s KICK %s %s :%s",
-			       me.name,
-			       name, who->name, comment);
 
-	  sendto_channel_local(ONLY_CHANOPS, chptr,
-			       ":%s!%s@%s KICK %s %s :%s",
-			       source_p->name,
-			       source_p->username,
-			       source_p->host,
-			       name,
-			       who->name, comment);
-	}
-      else
-#endif
-	{
-	  sendto_channel_local(ALL_MEMBERS, chptr,
-			       ":%s!%s@%s KICK %s %s :%s",
-			       source_p->name,
-			       source_p->username,
-			       source_p->host,
-			       name, who->name, comment);
-	}
+      sendto_channel_local(ALL_MEMBERS, chptr,
+		           ":%s!%s@%s KICK %s %s :%s",
+		           source_p->name, source_p->username,
+			   source_p->host, name, who->name, comment);
 
       sendto_server(client_p, chptr, NOCAPS, NOCAPS,
                     ":%s KICK %s %s :%s",

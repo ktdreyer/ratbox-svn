@@ -384,89 +384,31 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
 {
   struct Client *target_p;
 
-#ifdef ANONOPS
-  dlink_node *chanops_ptr;
-  dlink_node *peons_ptr;
-  dlink_node *voiced_ptr;
-  dlink_node *chanops_voiced_ptr;
-  int done=0;
+  dlink_node *ptr;
 
-  peons_ptr   = peons_list->head;
-  chanops_ptr = chanops_list->head;
-  voiced_ptr  = voiced_list->head;
-  chanops_voiced_ptr = chanops_voiced_list->head;
+  DLINK_FOREACH(ptr, peons_list->head)
+  {
+    target_p = ptr->data;
+    do_who(source_p, target_p, chname, "");
+  }
 
-  while (done != NUMLISTS)
-    {
-      done = 0;
+  DLINK_FOREACH(ptr, voiced_list->head)
+  {
+    target_p = ptr->data;
+    do_who(source_p, target_p, chname, voiced_flag);
+  }
 
-      if(peons_ptr != NULL)
-        {
-          target_p = peons_ptr->data;
-            do_who(source_p, target_p, chname, "");
-            peons_ptr = peons_ptr->next;
-        }
-      else
-        done++;
+  DLINK_FOREACH(ptr, chanops_voiced_list->head)
+  {
+    target_p = ptr->data;
+    do_who(source_p, target_p, chname, chanop_flag);
+  }
 
-      if(chanops_ptr != NULL)
-        {
-          target_p = chanops_ptr->data;
-          do_who(source_p, target_p, chname, chanop_flag);
-          chanops_ptr = chanops_ptr->next;
-        }
-      else
-        done++;
-
-      if(voiced_ptr != NULL)
-        {
-          target_p = voiced_ptr->data;
-          if(target_p == source_p && is_voiced(chptr, source_p) && 
-               chptr->mode.mode & MODE_HIDEOPS)
-               do_who(source_p, target_p, chname, "+");
-          else
-              do_who(source_p, target_p, chname, voiced_flag);
-          voiced_ptr = voiced_ptr->next;
-        }
-      else
-        done++;
-
-      if(chanops_voiced_ptr != NULL)
-        {
-          target_p = chanops_voiced_ptr->data;
-          do_who(source_p, target_p, chname, chanop_flag);
-          chanops_voiced_ptr = chanops_voiced_ptr->next;
-        }
-      else
-        done++;
-    }
-#else /* ANONOPS */
-    dlink_node *ptr;
-
-    DLINK_FOREACH(ptr, peons_list->head)
-    {
-      target_p = ptr->data;
-      do_who(source_p, target_p, chname, "");
-    }
-
-    DLINK_FOREACH(ptr, voiced_list->head)
-    {
-      target_p = ptr->data;
-      do_who(source_p, target_p, chname, voiced_flag);
-    }
-
-    DLINK_FOREACH(ptr, chanops_voiced_list->head)
-    {
-      target_p = ptr->data;
-      do_who(source_p, target_p, chname, chanop_flag);
-    }
-
-    DLINK_FOREACH(ptr, chanops_list->head)
-    {
-      target_p = ptr->data;
-      do_who(source_p, target_p, chname, chanop_flag);
-    }
-#endif
+  DLINK_FOREACH(ptr, chanops_list->head)
+  {
+    target_p = ptr->data;
+    do_who(source_p, target_p, chname, chanop_flag);
+  }
 }
 
 /*
@@ -491,25 +433,11 @@ static void do_who(struct Client *source_p,
 	     target_p->user->away ? 'G' : 'H',
 	     IsOper(target_p) ? "*" : "", op_flags );
 
-#ifdef ANONOPS
-  if(ConfigServerHide.hide_servers)
-    {
-      sendto_one(source_p, form_str(RPL_WHOREPLY), me.name, source_p->name,
-		 (chname) ? (chname) : "*",
-		 target_p->username,
-		 target_p->host, IsOper(source_p) ? target_p->user->server : "*",
-		 target_p->name,
-		 status, 0, target_p->info);
-    }
-  else
-#endif
-    {
-      sendto_one(source_p, form_str(RPL_WHOREPLY), me.name, source_p->name,
-		 (chname) ? (chname) : "*",
-		 target_p->username,
-		 target_p->host,  target_p->user->server, target_p->name,
-		 status, target_p->hopcount, target_p->info);
-    }
+  sendto_one(source_p, form_str(RPL_WHOREPLY), me.name, source_p->name,
+	     (chname) ? (chname) : "*",
+	     target_p->username,
+	     target_p->host,  target_p->user->server, target_p->name,
+	     status, target_p->hopcount, target_p->info);
 }
 
 void

@@ -294,14 +294,6 @@
 */
 #define HYBRID_SOMAXCONN 25
 
-/* ANONOPS
- *
- * Anonops (chanmode +a) provide a method of hiding chanops from users
- * in a channel who are unopped.  However they can cause mode floods so
- * are disabled by default.
- */
-#undef ANONOPS
-
 /* END OF CONFIGURABLE OPTIONS */
 
 /* 
@@ -339,7 +331,7 @@
  * these disabled, who knows. keep this enabled during development.
  */
 
-#define CONFIG_RATBOX_LEVEL_1
+#define CONFIG_RATBOX_LEVEL_2
 
 #include "defaults.h"
 #endif /* INCLUDED_config_h */

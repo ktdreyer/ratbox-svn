@@ -38,10 +38,6 @@
 extern void    set_channel_mode(struct Client *, struct Client *, 
                                 struct Channel *, int, char **, char *);
 
-#ifdef ANONOPS
-extern void sync_channel_oplists(struct Channel *, int);
-#endif
-
 extern void set_channel_mode_flags( char flags_ptr[4][2],
 				    struct Channel *chptr,
 				    struct Client *source_p);
@@ -86,7 +82,6 @@ extern void unset_chcap_usage_counts(struct Client *serv_p);
 #define MODE_BAN        0x0400
 #define MODE_EXCEPTION  0x0800
 #define MODE_INVEX	0x2000
-#define MODE_HIDEOPS    0x4000
 
 /*
  * mode flags which take another parameter (With PARAmeterS)

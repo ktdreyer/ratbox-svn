@@ -168,12 +168,6 @@ static void ms_sjoin(struct Client *client_p,
       case 't':
         mode.mode |= MODE_TOPICLIMIT;
         break;
-#ifdef ANONOPS
-      case 'a':
-	if(ConfigChannel.use_anonops)
-          mode.mode |= MODE_HIDEOPS;
-        break;
-#endif
       case 'k':
         strlcpy(mode.key, parv[4 + args], sizeof(mode.key));
         args++;
@@ -275,24 +269,7 @@ static void ms_sjoin(struct Client *client_p,
         strcpy(mode.key, oldmode->key);
     }
 
-#ifdef ANONOPS
-  if (mode.mode & MODE_HIDEOPS)
-    hide_or_not = ONLY_CHANOPS;
-  else
-#endif
-    hide_or_not = ALL_MEMBERS;
-
-#ifdef ANONOPS
-  if ((MODE_HIDEOPS & mode.mode) && !(MODE_HIDEOPS & oldmode->mode))
-    sync_channel_oplists(chptr, MODE_DEL);
-
-  /* Don't reveal the ops, only to remove them all */
-  if (keep_our_modes)
-  {
-    if (!(MODE_HIDEOPS & mode.mode) && (MODE_HIDEOPS & oldmode->mode))
-      sync_channel_oplists(chptr, MODE_ADD);
-  }
-#endif
+  hide_or_not = ALL_MEMBERS;
 
   set_final_mode(&mode,oldmode);
   chptr->mode = mode;
@@ -572,9 +549,6 @@ struct mode_letter flags[] = {
   { MODE_MODERATED,  'm' },
   { MODE_INVITEONLY, 'i' },
   { MODE_PRIVATE,    'p' },
-#ifdef ANONOPS
-  { MODE_HIDEOPS,    'a' },
-#endif
   { 0, 0 }
 };
 

@@ -308,21 +308,10 @@ m_join(struct Client *client_p,
 	  sendto_one(source_p, form_str(RPL_TOPIC), me.name,
 		     parv[0], chptr->chname, chptr->topic);
 
-          if (!(chptr->mode.mode & MODE_HIDEOPS) ||
-              (flags & CHFL_CHANOP))
-            {
-              sendto_one(source_p, form_str(RPL_TOPICWHOTIME),
-                         me.name, parv[0], chptr->chname,
-                         chptr->topic_info,
-                         chptr->topic_time);
-            }
-          else /* Hide from nonops */
-            {
-               sendto_one(source_p, form_str(RPL_TOPICWHOTIME),
-                         me.name, parv[0], chptr->chname,
-                         me.name,
-                         chptr->topic_time);
-            }
+          sendto_one(source_p, form_str(RPL_TOPICWHOTIME),
+                     me.name, parv[0], chptr->chname,
+                     chptr->topic_info,
+                     chptr->topic_time);
 	}
 
       channel_member_names(source_p, chptr, chptr->chname, 1);

@@ -117,31 +117,11 @@ static void m_topic(struct Client *client_p,
                             ":%s TOPIC %s :%s",
                             parv[0], chptr->chname,
                             chptr->topic == NULL ? "" : chptr->topic);
-	      if(chptr->mode.mode & MODE_HIDEOPS)
-		{
-		  sendto_channel_local(ONLY_CHANOPS,
-				       chptr, ":%s!%s@%s TOPIC %s :%s",
-				       source_p->name,
-				       source_p->username,
-				       source_p->host,
-				       chptr->chname,
-				       chptr->topic == NULL ? "" : chptr->topic);
-
-		  sendto_channel_local(NON_CHANOPS,
-				       chptr, ":%s TOPIC %s :%s",
-				       me.name,
-				       chptr->chname,
-				       chptr->topic == NULL ? "" : chptr->topic);
-		}
-	      else
-		{
-		  sendto_channel_local(ALL_MEMBERS,
-				       chptr, ":%s!%s@%s TOPIC %s :%s",
-				       source_p->name,
-				       source_p->username,
-				       source_p->host,
-				       chptr->chname, chptr->topic == NULL ? "" : chptr->topic);
-		}
+	      sendto_channel_local(ALL_MEMBERS,
+                                   chptr, ":%s!%s@%s TOPIC %s :%s",
+                                   source_p->name, source_p->username,
+                                   source_p->host, chptr->chname, 
+                                   chptr->topic == NULL ? "" : chptr->topic);
 	    }
 	  else
             sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
@@ -163,22 +143,9 @@ static void m_topic(struct Client *client_p,
               sendto_one(source_p, form_str(RPL_TOPIC), 
                          me.name, parv[0], chptr->chname, chptr->topic);
 
-#ifdef ANONOPS
-                if((chptr->mode.mode & MODE_HIDEOPS) && 
-                    !is_chan_op(chptr, source_p))
-                {
-                  sendto_one(source_p, form_str(RPL_TOPICWHOTIME), 
-                             me.name, source_p->name, chptr->chname,
-                             me.name, chptr->topic_time);
-                }
-                else
-#endif
-                {
-                  sendto_one(source_p, form_str(RPL_TOPICWHOTIME),
-                             me.name, parv[0], chptr->chname,
-                             chptr->topic_info,
-                             chptr->topic_time);
-                }
+              sendto_one(source_p, form_str(RPL_TOPICWHOTIME),
+                         me.name, parv[0], chptr->chname,
+                         chptr->topic_info, chptr->topic_time);
             }
         }
     }

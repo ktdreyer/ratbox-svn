@@ -422,14 +422,6 @@ static struct InfoStruct info_table[] =
     &ConfigChannel.quiet_on_ban,
     "Banned users may not send text to a channel"
   },
-#ifdef ANONOPS
-  {
-    "use_anonops",
-    OUTPUT_BOOLEAN_YN,
-    &ConfigChannel.use_anonops,
-    "Enable chanmode +a (anonymous ops)",
-  },
-#endif
   {
     "use_except",
     OUTPUT_BOOLEAN_YN,

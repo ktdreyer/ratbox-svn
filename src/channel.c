@@ -627,97 +627,6 @@ void
 channel_member_names(struct Client *source_p,
                      struct Channel *chptr,
                      char *name_of_channel, int show_eon)
-#ifdef ANONOPS
-{
-  int mlen;
-  int sublists_done = 0;
-  int tlen;
-  int cur_len;
-  char lbuf[BUFSIZE];
-  char *t;
-  int reply_to_send = NO;
-  dlink_node *members_ptr[NUMLISTS];
-  char show_flags[NUMLISTS][2];
-  struct Client *who;
-  int is_member;
-  int i;
-
-  /* Find users on same channel (defined by chptr) */
-  if (ShowChannel(source_p, chptr))
-  {
-    ircsprintf(lbuf, form_str(RPL_NAMREPLY),
-               me.name, source_p->name, channel_pub_or_secret(chptr));
-    mlen = strlen(lbuf);
-    ircsprintf(lbuf + mlen, " %s :", name_of_channel);
-    mlen = strlen(lbuf);
-    cur_len = mlen;
-    t = lbuf + cur_len;
-
-    set_channel_mode_flags(show_flags, chptr, source_p);
-    members_ptr[0] = chptr->chanops.head;
-    members_ptr[1] = chptr->voiced.head;
-    members_ptr[2] = chptr->peons.head;
-    members_ptr[3] = chptr->chanops_voiced.head;
-
-    is_member = IsMember(source_p, chptr);
-
-    /* Note: This code will show one chanop followed by one voiced followed
-     * followed by one peon followed by one chanop...
-     * XXX - this is very predictable, randomise it later.
-     */
-
-    while (sublists_done != (1 << NUMLISTS) - 1)
-    {
-      for (i = 0; i < NUMLISTS; i++)
-      {
-        if (members_ptr[i] != NULL)
-        {
-          who = members_ptr[i]->data;
-
-          if (IsInvisible(who) && !is_member)
-          {
-            /* We definitely need this code -A1kmm. */
-            members_ptr[i] = members_ptr[i]->next;
-            continue;
-          }
-
-          reply_to_send = YES;
-
-          if (who == source_p && is_voiced(chptr, who)
-	      && !is_chan_op(chptr, who)
-              && chptr->mode.mode & MODE_HIDEOPS)
-            ircsprintf(t, "+%s ", who->name);
-          else 
-            ircsprintf(t, "%s%s ", show_flags[i], who->name);
-
-          tlen = strlen(t);
-          cur_len += tlen;
-          t += tlen;
-          if ((cur_len + NICKLEN) > (BUFSIZE - 3))
-          {
-            sendto_one(source_p, "%s", lbuf);
-            reply_to_send = NO;
-            cur_len = mlen;
-            t = lbuf + mlen;
-          }
-
-          members_ptr[i] = members_ptr[i]->next;
-        }
-        else
-        {
-          sublists_done |= 1 << i;
-        }
-      }
-    }
-    if (reply_to_send)
-      sendto_one(source_p, "%s", lbuf);
-  }
-
-  if (show_eon)
-    sendto_one(source_p, form_str(RPL_ENDOFNAMES), me.name,
-               source_p->name, name_of_channel);
-}
-#else
 {
   struct Client *target_p;
   dlink_node *ptr_list[NUMLISTS];
@@ -788,7 +697,6 @@ channel_member_names(struct Client *source_p,
     sendto_one(source_p, form_str(RPL_ENDOFNAMES), me.name,
 	       source_p->name, name_of_channel);
 }
-#endif /* ANONOPS */     
       
 
 /*

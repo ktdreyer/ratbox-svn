@@ -100,17 +100,6 @@ static void chm_invex(struct Client *, struct Client *, struct Channel *,
                       int, int *, char **, int *, int, int, char, void *,
                       const char *chname);
 
-#ifdef ANONOPS
-static void chm_hideops(struct Client *, struct Client *, struct Channel *,
-                        int, int *, char **, int *, int, int, char, void *,
-                        const char *chname);
-
-static void send_oplist(const char *, struct Client *, dlink_list *,
-                        char *, int);
-static void mode_get_status(struct Channel *, struct Client *, 
-                            int *, int *, int);
-#endif
-
 static void send_cap_mode_changes(struct Client *, struct Client *,
                                   struct Channel *, int, int);
 
@@ -129,11 +118,6 @@ static int mask_pos;
 
 static struct ChModeChange mode_changes[BUFSIZE];
 static int mode_count;
-
-#ifdef ANONOPS
-static int hideops_changed;
-#endif
-
 static int mode_limit;
 
 static int channel_capabs[] = { CAP_AOPS, CAP_EX, CAP_IE, CAP_UID };
@@ -410,10 +394,7 @@ channel_modes(struct Channel *chptr, struct Client *client_p,
     *mbuf++ = 'i';
   if (chptr->mode.mode & MODE_NOPRIVMSGS)
     *mbuf++ = 'n';
-#ifdef ANONOPS
-  if (chptr->mode.mode & MODE_HIDEOPS)
-    *mbuf++ = 'a';
-#endif
+
   if (chptr->mode.limit)
   {
     *mbuf++ = 'l';
@@ -768,60 +749,6 @@ chm_simple(struct Client *client_p, struct Client *source_p,
   }
 }
 
-#ifdef ANONOPS
-static void
-chm_hideops(struct Client *client_p, struct Client *source_p,
-            struct Channel *chptr, int parc, int *parn,
-            char **parv, int *errors, int alev, int dir, char c, void *d,
-            const char *chname)
-{
-  /* if we dont support it, dont send it anywhere.  well only
-   * have the capab if we support it, so we should never get
-   * here for a remote server if we dont support it..
-   */
-  if(!ConfigChannel.use_anonops)
-    return;
-
-  if (alev < CHACCESS_CHANOP)
-  {
-    if (!(*errors & SM_ERR_NOOPS))
-      sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
-                 source_p->name, chname);
-    *errors |= SM_ERR_NOOPS;
-    return;
-  }
-  
-  
-  if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
-    return;
-
-  if (dir == MODE_ADD && !(chptr->mode.mode & MODE_HIDEOPS))
-  {
-    chptr->mode.mode |= MODE_HIDEOPS;
-
-    mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].dir = MODE_ADD;
-    mode_changes[mode_count].caps = CAP_AOPS;
-    mode_changes[mode_count].nocaps = 0;
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count].mems = ALL_MEMBERS;
-    mode_changes[mode_count++].arg = NULL;
-  }
-  else if (dir == MODE_DEL && (chptr->mode.mode & MODE_HIDEOPS))
-  {
-    chptr->mode.mode &= ~MODE_HIDEOPS;
-
-    mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].dir = MODE_DEL;
-    mode_changes[mode_count].caps = CAP_AOPS;
-    mode_changes[mode_count].nocaps = 0;
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count].mems = ALL_MEMBERS;
-    mode_changes[mode_count++].arg = NULL;
-  }
-}
-#endif
-
 static void
 chm_ban(struct Client *client_p, struct Client *source_p,
         struct Channel *chptr, int parc, int *parn,
@@ -839,17 +766,6 @@ chm_ban(struct Client *client_p, struct Client *source_p,
       return;
     *errors |= SM_ERR_RPL_B;
 
-#ifdef ANONOPS
-    if ((chptr->mode.mode & MODE_HIDEOPS) && (alev < CHACCESS_CHANOP))
-      DLINK_FOREACH(ptr, chptr->banlist.head)
-      {
-        banptr = ptr->data;
-        sendto_one(client_p, form_str(RPL_BANLIST),
-                   me.name, client_p->name, chname,
-                   banptr->banstr, me.name, banptr->when);
-      }
-    else
-#endif
       DLINK_FOREACH(ptr, chptr->banlist.head)
       {
         banptr = ptr->data;
@@ -1421,11 +1337,7 @@ static struct ChannelMode ModeTable[255] =
   {chm_nosuch, NULL},
   {chm_nosuch, NULL},
   {chm_nosuch, NULL},
-#ifdef ANONOPS
-  {chm_hideops, NULL},                            /* a */
-#else
   {chm_nosuch, NULL},				  /* a */
-#endif
   {chm_ban, NULL},                                /* b */
   {chm_nosuch, NULL},                             /* c */
   {chm_nosuch, NULL},                             /* d */
@@ -1605,11 +1517,7 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
     return;
 
   /* Send all mode changes to the chanops, and even peons if -a */
-#ifdef ANONOPS
-  st = (chptr->mode.mode & MODE_HIDEOPS) ? ONLY_CHANOPS : ALL_MEMBERS;
-#else
   st = ALL_MEMBERS;
-#endif
 
   if (IsServer(source_p))
     mbl = ircsprintf(modebuf, ":%s MODE %s ", me.name, chname);
@@ -1681,78 +1589,6 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
   nc = 0;
   mc = 0;
 
-#ifdef ANONOPS
-  /* If peons were missed out above, send to them now... */
-  if (chptr->mode.mode & MODE_HIDEOPS)
-  {
-    st = NON_CHANOPS;
-    dir = MODE_QUERY;
-    mbl = ircsprintf(modebuf, ":%s MODE %s ", me.name, chname);
-    pbl = 0;
-    parabuf[0] = '\0';
-
-    for (i = 0; i < mode_count; i++)
-    {
-      if (mode_changes[i].letter == 0 ||
-          mode_changes[i].mems == ONLY_SERVERS)
-        continue;
-
-      if (mode_changes[i].mems != ALL_MEMBERS)
-      {
-        if (mode_changes[i].letter == 'v' &&
-	    MyConnect(mode_changes[i].client) &&
-	    !is_chan_op(chptr, mode_changes[i].client))
-	  sendto_one(mode_changes[i].client, ":%s MODE %s -v %s",
-	             me.name, chname, mode_changes[i].arg);
-	continue;
-      }
-
-      if (mode_changes[i].arg != NULL && ((mc == MAXMODEPARAMS) ||
-           ((strlen(mode_changes[i].arg) + mbl + pbl + 2) > BUFSIZE)))
-      {
-        if (mbl && modebuf[mbl - 1] == '-')
-          modebuf[mbl - 1] = '\0';
-
-        if (nc != 0)
-          sendto_channel_local(st, chptr, "%s %s", modebuf, parabuf);
-
-        nc = 0;
-        mc = 0;
-        
-        mbl = ircsprintf(modebuf, ":%s MODE %s ", me.name, chname);
-        pbl = 0;
-        parabuf[0] = '\0';
-      }
-
-      if(dir != mode_changes[i].dir)
-      {
-        modebuf[mbl++] = (mode_changes[i].dir == MODE_ADD) ? '+' : '-';
-        dir = mode_changes[i].dir;
-      }
-
-      modebuf[mbl++] = mode_changes[i].letter;
-      modebuf[mbl] = '\0';
-      nc++;
-
-      if (mode_changes[i].arg != NULL)
-      {
-        mc++;
-        pbl = strlen(strcat(parabuf, mode_changes[i].arg));
-        parabuf[pbl++] = ' ';
-        parabuf[pbl] = '\0';
-      }
-    }
-
-    if (pbl && parabuf[pbl - 1] == ' ')
-      parabuf[pbl - 1] = 0;
-    if (mbl && modebuf[mbl - 1] == '+')
-      modebuf[mbl - 1] = 0;
-
-    if (nc != 0)
-      sendto_channel_local(st, chptr, "%s %s", modebuf, parabuf);
-  }
-#endif
-
   /* Now send to servers... */
   for (i = 0; i < NCHCAP_COMBOS; i++)
     if (chcap_combos[i].count != 0)
@@ -1784,9 +1620,6 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
 
   mask_pos = 0;
   mode_count = 0;
-#ifdef ANONOPS
-  hideops_changed = (chptr->mode.mode & MODE_HIDEOPS);
-#endif
   mode_limit = 0;
 
   alevel = get_channel_access(source_p, chptr);
@@ -1835,260 +1668,20 @@ void
 set_channel_mode_flags(char flags_ptr[NUMLISTS][2], struct Channel *chptr,
                        struct Client *source_p)
 {
-#ifdef ANONOPS
-  if (chptr->mode.mode & MODE_HIDEOPS && !is_chan_op(chptr, source_p))
-  {
-    flags_ptr[0][0] = '\0';
-    flags_ptr[1][0] = '\0';
-    flags_ptr[2][0] = '\0';
-    flags_ptr[3][0] = '\0';
-  }
-  else
-#endif
-  {
-    flags_ptr[0][0] = '@';
-    flags_ptr[1][0] = '+';
-    flags_ptr[2][0] = '\0';
-    flags_ptr[3][0] = '@';
+  flags_ptr[0][0] = '@';
+  flags_ptr[1][0] = '+';
+  flags_ptr[2][0] = '\0';
+  flags_ptr[3][0] = '@';
 
-    flags_ptr[0][1] = '\0';
-    flags_ptr[1][1] = '\0';
-    flags_ptr[3][1] = '\0';
-  }
+  flags_ptr[0][1] = '\0';
+  flags_ptr[1][1] = '\0';
+  flags_ptr[3][1] = '\0';
 }
 
-
-#ifdef ANONOPS
-/*
- * sync_oplists
- *
- * inputs       - pointer to channel
- *              - pointer to client
- * output       - none
- * side effects - Sends MODE +o/+h/+v list to user
- *                (for +a channels)
- */
-static void
-sync_oplists(struct Channel *chptr, struct Client *target_p,
-             int dir, const char *name)
-{
-  send_oplist(name, target_p, &chptr->chanops, "o", dir);
-  send_oplist(name, target_p, &chptr->chanops_voiced, "o", dir);
-  send_oplist(name, target_p, &chptr->voiced, "v", dir);
-  send_oplist(name, target_p, &chptr->chanops_voiced, "v", dir);
-}
-
-static void
-send_oplist(const char *chname, struct Client *client_p, dlink_list * list,
-            char *prefix, int dir)
-{
-  dlink_node *ptr;
-  int cur_modes = 0;            /* no of chars in modebuf */
-  struct Client *target_p;
-  int data_to_send = 0;
-  char mcbuf[6] = "";
-  char opbuf[MODEBUFLEN];
-  char *t;
-
-  *mcbuf = *opbuf = '\0';
-  t = opbuf;
-
-  DLINK_FOREACH(ptr, list->head)
-  {
-    target_p = ptr->data;
-    if (dir == MODE_DEL && *prefix == 'v' && target_p == client_p)
-      continue;
-
-    if (cur_modes == 0)
-    {
-      mcbuf[cur_modes++] = ((dir == MODE_ADD) ? '+' : '-');
-    }
-
-    mcbuf[cur_modes++] = *prefix;
-
-    t += ircsprintf(t, "%s ", target_p->name);
-    data_to_send = 1;
-
-    if (cur_modes == (MAXMODEPARAMS + 1))       /* '+' and modes */
-    {
-      *t = '\0';
-      mcbuf[cur_modes] = '\0';
-      sendto_one(client_p, ":%s MODE %s %s %s", me.name,
-                 chname, mcbuf, opbuf);
-
-      cur_modes = 0;
-      *mcbuf = *opbuf = '\0';
-      t = opbuf;
-      data_to_send = 0;
-    }
-  }
-
-  if (data_to_send)
-  {
-    *t = '\0';
-    mcbuf[cur_modes] = '\0';
-    sendto_one(client_p, ":%s MODE %s %s %s", me.name, chname, mcbuf, opbuf);
-  }
-}
-
-void
-sync_channel_oplists(struct Channel *chptr, int dir)
-{
-  dlink_node *ptr;
-
-  DLINK_FOREACH(ptr, chptr->locpeons.head)
-  {
-    sync_oplists(chptr, ptr->data, MODE_ADD, chptr->chname);
-  }
-  DLINK_FOREACH(ptr, chptr->locvoiced.head)
-  {
-    sync_oplists(chptr, ptr->data, MODE_ADD, chptr->chname);
-  }
-}
-
-#endif
-
-/* mode_get_status()
- *
- * Used by chm_op and others instead of calling is_chan_op and is_voiced.
- * Since member status is now changed *after* processing all
- * modes, we need a special tool to keep track of who is opped, voiced etc.
- */
-#ifdef ANONOPS
-static void mode_get_status(struct Channel *chptr, struct Client *target_p,
-                            int *t_op, int *t_voice, int need_check)
-{
-  int i;
-
-  if (need_check)
-  {
-    *t_op = is_chan_op(chptr, target_p);
-    *t_voice = is_voiced(chptr, target_p);
-  }
-  else
-  {
-    *t_op = 0;
-  }
-
-  for (i = 0; i < mode_count; i++)
-  {
-    if (mode_changes[i].client == target_p)
-    {
-      if (mode_changes[i].letter == 'o')
-        *t_op = (mode_changes[i].dir == MODE_ADD) ? 1 : 0;
-      else if (mode_changes[i].letter == 'v')
-        *t_voice = (mode_changes[i].dir == MODE_ADD) ? 1 : 0;
-    }
-  }
-}
-#endif
 
 static void update_channel_info(struct Channel *chptr)
 {
   int i;
-#ifdef ANONOPS
-  int t_voice, t_op;
-  dlink_node *ptr;
-  dlink_node *ptr_next;
-
-  /* hideops_changed is set to chptr->mode.mode & MODE_HIDEOPS at
-   * the beginning..
-   */
-  if (hideops_changed != (chptr->mode.mode & MODE_HIDEOPS))
-  {
-    if(chptr->mode.mode & MODE_HIDEOPS)
-    {
-      DLINK_FOREACH(ptr, chptr->locpeons.head)
-      {
-        mode_get_status(chptr, ptr->data, &t_op, &t_voice, 0);
-        if (!t_op)
-          sync_oplists(chptr, ptr->data, MODE_DEL, chptr->chname);
-      }
-
-      DLINK_FOREACH(ptr, chptr->locvoiced.head)
-      {
-        mode_get_status(chptr, ptr->data, &t_op, &t_voice, 0);
-        if (!t_op)
-          sync_oplists(chptr, ptr->data, MODE_DEL, chptr->chname);
-      }
-
-      DLINK_FOREACH(ptr, chptr->locchanops_voiced.head)
-      {
-        mode_get_status(chptr, ptr->data, &t_op, &t_voice, 1);
-        if(!t_op)
-          sync_oplists(chptr, ptr->data, MODE_DEL, chptr->chname);
-      }
-
-      DLINK_FOREACH(ptr, chptr->locchanops.head)
-      {
-        mode_get_status(chptr, ptr->data, &t_op, &t_voice, 1);
-        if(!t_op)
-          sync_oplists(chptr, ptr->data, MODE_DEL, chptr->chname);
-      }
-    }
-    else
-    {
-      sync_channel_oplists(chptr, MODE_ADD);
-      chptr->mode.mode &= ~MODE_HIDEOPS;
-    }
-  }
-
-  /* +/-a hasnt changed but we're still +a, sync those who have changed
-   * status
-   */
-  else if(chptr->mode.mode & MODE_HIDEOPS)
-  {
-    dlink_list deopped = {NULL, NULL};
-    dlink_list opped = {NULL, NULL};
-
-    for (i = 0; i < mode_count; i++)
-    {
-      if(mode_changes[i].dir == MODE_DEL)
-      {
-        if((mode_changes[i].letter == 'o' || mode_changes[i].letter == 'h') &&
-           MyConnect(mode_changes[i].client))
-        {
-          if((ptr = dlinkFind(&opped, mode_changes[i].client)) == NULL)
-          {
-            dlinkAddAlloc(mode_changes[i].client, &deopped);
-          }
-          else
-          {
-            dlinkDestroy(ptr, &opped);
-          }
-        }
-      }
-      else
-      {
-        if((mode_changes[i].letter == 'o' || mode_changes[i].letter == 'h') &&
-           MyConnect(mode_changes[i].client))
-        {
-          if((ptr = dlinkFind(&deopped, mode_changes[i].client)) == NULL)
-          {
-            dlinkAddAlloc(mode_changes[i].client, &opped);
-          }
-          else
-          {
-            dlinkDestroy(ptr, &deopped);
-          }
-        }
-      }
-    }
-
-    /* ..and send a resync to them */
-    DLINK_FOREACH_SAFE(ptr, ptr_next, deopped.head)
-    {
-      sync_oplists(chptr, ptr->data, MODE_DEL, chptr->chname);
-      free_dlink_node(ptr);
-    }
-
-    DLINK_FOREACH_SAFE(ptr, ptr_next, opped.head)
-    {
-      sync_oplists(chptr, ptr->data, MODE_ADD, chptr->chname);
-      free_dlink_node(ptr);
-    }
-  }
-#endif
 
   /* Update channel members lists. */
   for (i = 0; i < mode_count; i++)

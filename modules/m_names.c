@@ -202,11 +202,8 @@ static void names_non_public_non_secret(struct Client *source_p)
           t = buf + mlen;
         }
 
-      if(ch3ptr->mode.mode & MODE_HIDEOPS)
-        ircsprintf(t," %s ", c2ptr->name);
-      else
-        ircsprintf(t,"%s%s ", channel_chanop_or_voice(ch3ptr, c2ptr),
-                   c2ptr->name);
+      ircsprintf(t,"%s%s ", channel_chanop_or_voice(ch3ptr, c2ptr),
+                 c2ptr->name);
 
       tlen = strlen(t);
       cur_len += tlen;
