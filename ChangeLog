@@ -1,3 +1,15 @@
+leeh        2004/06/13 22:10:55 EDT	(20040614_2)
+
+  Modified files:
+    help/opers           resv 
+  Log:
+  - note the special resv chars in the helpfile
+  
+  Revision  Changes    Path
+  1.4       +2 -1      ircd-ratbox/help/opers/resv
+
+
+
 leeh        2004/06/13 22:09:21 EDT	(20040614_1)
 
   Modified files:
