@@ -200,9 +200,15 @@ _send_message(struct Client *to, char *msg, int len)
      * data to the FD, it'd be an optimisation, and we can deal with it
      * later.
      *     -- adrian
+     * So I took adrian's comments to heart..whether it works or not remains
+     * to been seen...
+     * -- Aaron
      */
+    send_queued_write(to->fd, to);	
+#if 0
     comm_setselect(to->fd, FDLIST_IDLECLIENT, COMM_SELECT_WRITE,
       send_queued_write, to, 0);
+#endif
     return 0;
 } /* send_message() */
 
