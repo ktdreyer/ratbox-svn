@@ -1,3 +1,27 @@
+leeh        2004/07/31 11:04:27 EDT	(20040731_0)
+
+  Modified files:
+    include              s_gline.h s_newconf.h 
+    modules              m_gline.c 
+    src                  Makefile.in ircd.c s_newconf.c 
+  Removed files:
+    src                  s_gline.c 
+  Log:
+  - move expiration of temp glines over to m_gline.c
+  - move expiration of triggered glines to s_newconf.c
+  - remove s_gline.c
+  
+  Revision  Changes    Path
+  7.19      +0 -9      ircd-ratbox/include/s_gline.h
+  7.34      +3 -0      ircd-ratbox/include/s_newconf.h
+  1.143     +42 -3     ircd-ratbox/modules/m_gline.c
+  7.149     +0 -1      ircd-ratbox/src/Makefile.in
+  7.351     +0 -2      ircd-ratbox/src/ircd.c
+  1.43      +0 -128    ircd-ratbox/src/s_gline.c (dead)
+  7.47      +24 -0     ircd-ratbox/src/s_newconf.c
+
+
+
 leeh        2004/07/30 19:50:38 EDT	(20040730_12)
 
   Modified files:
