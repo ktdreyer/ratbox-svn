@@ -1312,25 +1312,45 @@ void set_channel_mode(struct Client *cptr,
 
 	      if(chptr->mode.mode & MODE_HIDEOPS)
 		{
+		  if (IsServer(sptr)) 
 		  sendto_channel_local(ONLY_CHANOPS,
 				       chptr,
 				       ":%s!%s@%s MODE %s -k %s", 
-				       sptr->name,
+				       me.name,
 				       sptr->username,
 				       sptr->host,
 				       chname,
 				       chptr->mode.key);
+		  else
+		     sendto_channel_local(ONLY_CHANOPS, 
+                                       chptr,
+                                       ":%s!%s@%s MODE %s -k %s",
+                                       sptr->name,   
+                                       sptr->username,
+                                       sptr->host,
+                                       chname,
+                                       chptr->mode.key);
 		}
 	      else
 		{
+		  if (IsServer(sptr)) 
 		  sendto_channel_local(ALL_MEMBERS,
 				       chptr,
 				       ":%s!%s@%s MODE %s -k %s", 
-				       sptr->name,
+				       me.name,
 				       sptr->username,
 				       sptr->host,
 				       chname,
 				       chptr->mode.key);
+		  else
+     	 	     sendto_channel_local(ALL_MEMBERS,
+                                       chptr,
+                                       ":%s!%s@%s MODE %s -k %s",
+                                       sptr->name,
+                                       sptr->username,
+                                       sptr->host,
+                                       chname,
+                                       chptr->mode.key);
 		}
 
               sendto_channel_remote(chptr, cptr, ":%s MODE %s -k %s",
@@ -2087,7 +2107,7 @@ void set_channel_mode(struct Client *cptr,
 	sendto_channel_local(type,
 			     chptr,
 			     ":%s MODE %s %s %s", 
-			     sptr->name,
+			     me.name,
 			     chname,
 			     modebuf, parabuf);
       else
@@ -2110,7 +2130,7 @@ void set_channel_mode(struct Client *cptr,
 	sendto_channel_local(type,
 			     chptr,
 			     ":%s MODE %s %s %s", 
-			     sptr->name,
+			     me.name,
 			     chname,
 			     modebuf_ex, parabuf_ex);
       else
@@ -2133,7 +2153,7 @@ void set_channel_mode(struct Client *cptr,
 	sendto_channel_local(type,
 			     chptr,
 			     ":%s MODE %s %s %s",
-			     sptr->name,
+			     me.name,
 			     chname,
 			     modebuf_de, parabuf_de);
       else
@@ -2156,7 +2176,7 @@ void set_channel_mode(struct Client *cptr,
 	sendto_channel_local(type,
 			     chptr,
 			     ":%s MODE %s %s %s",
-			     sptr->name,
+			     me.name,
 			     chname,
 			     modebuf_invex, parabuf_invex);
       else
@@ -2372,12 +2392,20 @@ static void clear_channel_list(int type, struct Channel *chptr,
 
       if ((count >= MAXMODEPARAMS) || ((cur_len + tlen) > BUFSIZE))
         {
+	 if (IsServer(sptr)) 
 	  sendto_channel_local(type,
 			       chptr,
 			       ":%s MODE %s %s %s",
-			       sptr->name,
+			       me.name,
 			       chname,
 			       modebuf,parabuf);
+	 else
+	      sendto_channel_local(type, 
+                               chptr,
+                               ":%s MODE %s %s %s",
+                               sptr->name,
+                               chname,
+                               modebuf,parabuf);
           mp = modebuf;
           *mp++ = '-';
           *mp = '\0';
@@ -2396,11 +2424,18 @@ static void clear_channel_list(int type, struct Channel *chptr,
 
   if(count != 0)
     {
+      if (IsServer(sptr)) 
       sendto_channel_local(type, chptr,
 			   ":%s MODE %s %s %s",
-			   sptr->name,
+			   me.name,
 			   chname,
 			   modebuf,parabuf);
+      else
+	  sendto_channel_local(type, chptr,
+                           ":%s MODE %s %s %s",
+                           sptr->name,
+                           chname,
+                           modebuf,parabuf);
     }
 }
 

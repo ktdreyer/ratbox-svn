@@ -421,7 +421,7 @@ int     ms_sjoin(struct Client *cptr,
 		{
 		  sendto_channel_local(hide_or_not, chptr,
 				       ":%s MODE %s %s %s %s %s %s",
-				       sptr->name,
+				       me.name,
 				       top_chptr->chname,
 				       modebuf,
 				       para[0],para[1],para[2],para[3]);
@@ -430,7 +430,7 @@ int     ms_sjoin(struct Client *cptr,
 		{
 		  sendto_channel_local(hide_or_not, chptr,
 				       ":%s MODE %s %s %s %s %s %s",
-				       sptr->name,
+				       me.name,
 				       chptr->chname,
 				       modebuf,
 				       para[0],para[1],para[2],para[3]);
@@ -452,7 +452,7 @@ int     ms_sjoin(struct Client *cptr,
 		{
 		  sendto_channel_local(hide_or_not, chptr,
 				       ":%s MODE %s %s %s %s %s %s",
-				       sptr->name,
+				       me.name,
 				       top_chptr->chname,
 				       modebuf,
 				       para[0],para[1],para[2],para[3]);
@@ -461,7 +461,7 @@ int     ms_sjoin(struct Client *cptr,
 		{
 		  sendto_channel_local(hide_or_not, chptr,
 				       ":%s MODE %s %s %s %s %s %s",
-				       sptr->name,
+				       me.name,
 				       chptr->chname,
 				       modebuf,
 				       para[0],para[1],para[2],para[3]);
@@ -481,7 +481,7 @@ int     ms_sjoin(struct Client *cptr,
 	{
 	  sendto_channel_local(hide_or_not, chptr,
 			       ":%s MODE %s %s %s %s %s %s",
-			       sptr->name,
+			       me.name,
 			       top_chptr->chname,
 			       modebuf,
 			       para[0], para[1], para[2], para[3]);
@@ -490,7 +490,7 @@ int     ms_sjoin(struct Client *cptr,
 	{
 	  sendto_channel_local(hide_or_not, chptr,
 			       ":%s MODE %s %s %s %s %s %s",
-			       sptr->name,
+			       me.name,
 			       chptr->chname,
 			       modebuf,
 			       para[0], para[1], para[2], para[3]);
@@ -754,7 +754,7 @@ void remove_a_mode( int hide_or_not,
   if(IsVchan(chptr) && top_chptr)
     chname = top_chptr->chname;
 
-  ircsprintf(buf,":%s MODE %s ", sptr->name, chname);
+  ircsprintf(buf,":%s MODE %s ", me.name, chname);
 
   for (ptr = list->head; ptr && ptr->data; ptr = ptr->next)
     {
@@ -768,7 +768,7 @@ void remove_a_mode( int hide_or_not,
 	  *mbuf   = '\0';
 	  sendto_channel_local(hide_or_not, chptr,
 			       ":%s MODE %s %s %s %s %s %s",
-			       sptr->name,
+			       me.name,
 			       chname,
 			       modebuf,
 			       para[0], para[1], para[2], para[3] );
@@ -785,7 +785,7 @@ void remove_a_mode( int hide_or_not,
       *mbuf   = '\0';
       sendto_channel_local(hide_or_not, chptr,
 			   ":%s MODE %s %s %s %s %s %s",
-			   sptr->name,
+			   me.name,
 			   chname,
 			   modebuf,
 			   para[0], para[1], para[2], para[3] );
