@@ -386,7 +386,7 @@ hash_find_id(const char *name, struct Client *cptr)
 	
 	if (name == NULL)
 		return NULL;
-	
+
 	hashv = hash_id(name);
 	tmp = (struct Client *)idTable[hashv].list;
 
@@ -415,7 +415,7 @@ struct Client* hash_find_client(const char* name, struct Client* cptr)
 
   if (*name == '.') /* it's an ID .. */
 	  return hash_find_id(name, cptr);
-  
+
   hashv = hash_nick_name(name);
   tmp = (struct Client*) clientTable[hashv].list;
   /*
@@ -432,6 +432,7 @@ struct Client* hash_find_client(const char* name, struct Client* cptr)
 #ifdef        DEBUGMODE
   ++clmiss;
 #endif
+  
 return cptr;
 
   /*

@@ -597,7 +597,7 @@ introduce_client(struct Client *cptr, struct Client *sptr,
   if (!ConfigFileEntry.hub && uplink && IsCapable(uplink,CAP_LL)
       && cptr != uplink) 
     {
-      if (IsCapable(uplink, CAP_UID))
+      if (IsCapable(uplink, CAP_UID) && HasID(sptr))
 	{
 	  sendto_one(uplink, "CLIENT %s %d %lu %s %s %s %s %s :%s",
 		     nick, sptr->hopcount+1, sptr->tsinfo,
@@ -621,7 +621,7 @@ introduce_client(struct Client *cptr, struct Client *sptr,
 	  if (IsCapable(server, CAP_LL) || server == cptr)
 	    continue;
 		  
-	  if (IsCapable(server, CAP_UID))
+	  if (IsCapable(server, CAP_UID) && HasID(sptr))
 	    sendto_one(server, "CLIENT %s %d %lu %s %s %s %s %s :%s",
 		       nick, sptr->hopcount+1, sptr->tsinfo,
 		       ubuf, sptr->username, sptr->host, user->server,
