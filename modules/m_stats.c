@@ -864,9 +864,7 @@ stats_resv(struct Client *source_p)
 static void
 stats_usage (struct Client *source_p)
 {
-#ifndef __VMS
 	struct rusage rus;
-#endif
 	time_t secs;
 	time_t rup;
 #ifdef  hz
@@ -879,12 +877,6 @@ stats_usage (struct Client *source_p)
 # endif
 #endif
 
-#ifdef __VMS
-	sendto_one(source_p, 
-		   ":%s NOTICE %s :getrusage not supported on this system",
-		   me.name, source_p->name);
-	return;
-#else
 	if(getrusage(RUSAGE_SELF, &rus) == -1)
 	{
 		sendto_one_notice(source_p, ":Getruseage error: %s.",
@@ -923,7 +915,6 @@ stats_usage (struct Client *source_p)
 			   "R :Signals %d Context Vol. %d Invol %d",
 			   (int) rus.ru_nsignals, (int) rus.ru_nvcsw, 
 			   (int) rus.ru_nivcsw);
-#endif /* __VMS */
 }
 
 static void
