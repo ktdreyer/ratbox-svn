@@ -10,7 +10,7 @@ RM		= @RM@
 SED             = @SED@
 LEX		= @LEX@
 LEXLIB		= @LEXLIB@
-CFLAGS		= @CFLAGS@ -DIRCD_PREFIX=\"@prefix@\"
+CFLAGS		= @IRC_CFLAGS@ -DIRCD_PREFIX=\"@prefix@\"
 PICFLAGS	= @PICFLAGS@
 MKDEP		= ${CC} -MM
 INSTALL		= @INSTALL@

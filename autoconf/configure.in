@@ -14,14 +14,13 @@ AC_SUBST(VERSION)
 dnl Checks for programs.
 AC_PROG_CC
 
-if test "x$CFLAGS" = "x"; then
-	if test "x$GCC" = "xyes"; then
-	  CFLAGS="-g -O2 -Wunused -Wall -ggdb -Wshadow -Wmissing-declarations"
-	else
-	  CFLAGS="-g"
-	fi
+if test "x$GCC" = "xyes"; then
+  IRC_CFLAGS="-g -O2 -Wunused -Wall -ggdb -Wshadow -Wmissing-declarations"
+else
+  IRC_CFLAGS="-g"
 fi
 
+AC_SUBST(IRC_CFLAGS)
 AC_ISC_POSIX
 AC_PROG_MAKE_SET
 AC_PATH_PROG(RM, rm)
