@@ -1,3 +1,16 @@
+leeh        2002/07/17 09:59:01 EDT	(20020717_0)
+
+  Modified files:
+    src                  s_conf.c 
+  Log:
+  - dont allow local admins to see ips in stats c if HIDE_SERVERS_IPS is
+    defined, only local admins would have been given the ip, noone else.
+  
+  Revision  Changes    Path
+  7.312     +1 -0      ircd-hybrid-7/src/s_conf.c
+
+
+
 db          2002/07/16 18:30:22 EDT	(20020716_3)
 
   Modified files:
