@@ -117,7 +117,7 @@ hook_del_hook(char *event, hookfn *fn)
  if (!h)
   return -1;
    
- for (node = h->hooks.head; node; node = node->next)
+ for (node = h->hooks.head; node; node = nnode)
  {
   nnode = node->next;
   if (fn == node->data)
