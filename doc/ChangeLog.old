@@ -1,3 +1,9 @@
+*** 20010314_1 by toot
+. let halfops set +v and +k
+. removed some unused variables, and moved one of trhe PERSISTANT_CLIENT
+  ifdefs to kill a compile warning ;)
+
+
 *** 20010313_5 by davidt
 - Allow multiple user="..."; lines per auth{} block...
   (oper{}, etc. blocks can probably be changed to work the same way
