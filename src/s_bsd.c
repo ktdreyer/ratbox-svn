@@ -823,6 +823,25 @@ comm_open(int family, int sock_type, int proto, const char *note)
   if (fd < 0)
     return -1; /* errno will be passed through, yay.. */
 
+#if defined(IPV6) && defined(IPV6_V6ONLY)
+  /* 
+   * Make sure we can take both IPv4 and IPv6 connections
+   * on an AF_INET6 socket
+   */
+   if(family == AF_INET6)
+   {
+     int off = 0;
+     if(setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, &off, sizeof(off)) == -1)
+     { 
+        ilog(L_CRIT, "comm_open: Could not set IPV6_V6ONLY option to 0 on FD %d: %s", 
+                     fd, strerror(errno));
+        close(fd);
+        return -1;
+     }
+   }
+#endif
+  
+#endif
   /* Set the socket non-blocking, and other wonderful bits */
   if (!set_non_blocking(fd))
     {
