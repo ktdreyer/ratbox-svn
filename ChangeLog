@@ -1,3 +1,29 @@
+leeh        2004/07/31 19:39:51 EDT	(20040731_5)
+
+  Modified files:
+    include              s_stats.h 
+    modules/core         m_nick.c m_server.c 
+    src                  client.c listener.c parse.c reject.c 
+                         s_auth.c s_conf.c s_stats.c s_user.c 
+  Log:
+  - removed some pointless code.. we were declaring ircst as a struct, then
+    ServerStats as a pointer to it and never touching ircst again.
+  
+  Revision  Changes    Path
+  7.18      +1 -1      ircd-ratbox/include/s_stats.h
+  1.153     +13 -13    ircd-ratbox/modules/core/m_nick.c
+  1.137     +2 -2      ircd-ratbox/modules/core/m_server.c
+  7.464     +25 -25    ircd-ratbox/src/client.c
+  7.111     +3 -3      ircd-ratbox/src/listener.c
+  7.183     +5 -5      ircd-ratbox/src/parse.c
+  1.26      +1 -1      ircd-ratbox/src/reject.c
+  7.167     +4 -4      ircd-ratbox/src/s_auth.c
+  7.479     +6 -6      ircd-ratbox/src/s_conf.c
+  7.37      +3 -4      ircd-ratbox/src/s_stats.c
+  7.325     +5 -5      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2004/07/31 19:19:36 EDT	(20040731_4)
 
   Modified files:
