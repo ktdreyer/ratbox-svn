@@ -60,7 +60,6 @@
 #endif
 
 const char *const NONB_ERROR_MSG = "set_non_blocking failed for %s:%s";
-const char *const OPT_ERROR_MSG = "disable_sock_options failed for %s:%s";
 const char *const SETBUF_ERROR_MSG = "set_sock_buffers failed for server %s:%s";
 
 static const char *comm_err_str[] = { "Comm OK", "Error during bind()",
@@ -184,24 +183,6 @@ set_sock_buffers(int fd, int size)
 	   (fd, SOL_SOCKET, SO_RCVBUF, (char *) &size, sizeof(size))
 	   || setsockopt(fd, SOL_SOCKET, SO_SNDBUF, (char *) &size, sizeof(size)))
 		return 0;
-	return 1;
-}
-
-/*
- * disable_sock_options
- * 
- * inputs	- fd
- * output	- returns true (1) if successful, false (0) otherwise
- * side effects - disable_sock_options - if remote has any socket options set,
- *                disable them 
- */
-int
-disable_sock_options(int fd)
-{
-#if defined(IP_OPTIONS) && defined(IPPROTO_IP) && !defined(IPV6)
-	if(setsockopt(fd, IPPROTO_IP, IP_OPTIONS, NULL, 0))
-		return 0;
-#endif
 	return 1;
 }
 
@@ -413,8 +394,6 @@ add_connection(struct Listener *listener, int fd)
 
 	if(!set_non_blocking(new_client->localClient->fd))
 		report_error(L_ALL, NONB_ERROR_MSG, get_client_name(new_client, SHOW_IP), errno);
-	if(!disable_sock_options(new_client->localClient->fd))
-		report_error(L_ALL, OPT_ERROR_MSG, get_client_name(new_client, SHOW_IP), errno);
 	start_auth(new_client);
 }
 
