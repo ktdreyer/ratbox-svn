@@ -1,3 +1,11 @@
+*** 20001102_11 by adrian
+
+
+tidy up the code in serv_connect(), which basically is some formatting
+changes and a comment change to reflect a function name change.
+
+
+
 *** 20001102_10 by adrian
 
 
