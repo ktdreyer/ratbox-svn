@@ -50,6 +50,8 @@ extern  void sendto_ll_channel_remote(struct Channel *, struct Client *cptr,
 				      const char *, ...);
 extern  void sendto_match_cap_servs(struct Channel *, struct Client *, 
                                     int, const char *, ...);
+extern	void sendto_match_noncap_servs(struct Channel *, struct Client *,
+				       int, const char *, ...);
 extern  void sendto_match_butone(struct Client *, struct Client *, 
                                  char *, int, const char *, ...);
 

@@ -26,11 +26,9 @@ is-'s TODO list
 fl's TODO
 
 - remote klines should be checked for redundancy
-- sendto_match_noncap_servs()
 - users should see +b/+d modes, however when +a they should see it as smode
   bearing in mind it can be +a/-a, and set by a server/user, which gives 4
   combinations
-- +h modes should propogate to servers supporting it as +h, not +o
 
 ------------------------------------------------------------------------------
 

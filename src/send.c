@@ -908,6 +908,54 @@ sendto_match_cap_servs(struct Channel *chptr, struct Client *from, int cap,
     }
 } /* sendto_match_cap_servs() */
 
+
+/*
+ * sendto_match_noncap_servs
+ *
+ * inputs	- channel pointer
+ *		- client to not send back towards (often a server)
+ *		- integer capability
+ *		- var args message
+ * output	- NONE
+ * side effects - send to all servers but 'from,
+ *		  to the given channel only if
+ *		  they dont match the capabbility, the given message
+ */
+
+void
+sendto_match_noncap_servs(struct Channel *chptr, struct Client *from, int cap,
+			  const char *pattern, ...)
+
+{
+  int len;
+  va_list args;
+  struct Client *cptr;
+  dlink_node *ptr;
+
+  if (chptr)
+    {
+      if (*chptr->chname == '&')
+	return;
+    }
+
+  va_start(args, pattern);
+  len = send_format(sendbuf,pattern,args);
+  va_end(args);
+
+  for(ptr = serv_list.head; ptr; ptr = ptr->next)
+    {
+      cptr = ptr->data;
+
+      if (cptr == from)
+	continue;
+
+      if(IsCapable(cptr, cap))
+	continue;
+
+      send_message (cptr, (char *)sendbuf, len);
+    }
+} /* sendto_match_noncap_servs() */
+
 /*
 ** match_it() and sendto_match_butone() ARE only used
 ** to send a msg to all ppl on servers/hosts that match a specified mask
