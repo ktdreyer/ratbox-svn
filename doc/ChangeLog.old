@@ -1,3 +1,27 @@
+*** 20001216_5 by db
+        Included here is a patch which adds the function strip_tabs
+        to irc_string.c; the function converts all found tabs to
+        spaces, while copying the string.
+
+        The reason I wrote this is because in h7, when HUPd or
+        /REHASHd, the server will show opers any bad lines it
+        finds in ircd.conf.  Most of these lines start with tab,
+        so, displaying the actual tab character is irritating for
+        users who use something other than an ircii derivative.
+
+        It applies to ircd-hybrid-7-20001216-103810.tar.gz, which
+        adrian gave me this morning.  I tested it, and it's being
+        used on hybrid.best.net's test H7 server.
+
+        Another function which might be useful would be one which
+        squeezes excessive whitespace into just one space itself
+        (eg. tr/ / /s (or "     " --> " ")).
+
+-- 
+| Jeremy Chadwick                                   yoshi@parodius.com |
+
+
+
 *** 20001216_4 by db
 - fixed lazy links. I was trying to use the extended "join new nick
   to network" SJOIN instead of the simpler "join this nick to channel" SJOIN
