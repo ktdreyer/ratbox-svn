@@ -1,3 +1,25 @@
+androsyn    2004/08/16 12:10:15 EDT	(20040816_4)
+
+  Modified files:
+    include              channel.h 
+    modules              Makefile.in 
+    modules/core         channels.c 
+    src                  channel.c 
+  Removed files:
+    modules              m_invite.c 
+  Log:
+  Merge m_invite into channels.c, make del_invite() a macro as it seems silly
+  to waste a function call on it
+  
+  Revision  Changes    Path
+  7.160     +6 -2      ircd-ratbox/include/channel.h
+  1.110     +0 -1      ircd-ratbox/modules/Makefile.in
+  1.8       +151 -2    ircd-ratbox/modules/core/channels.c
+  1.82      +0 -202    ircd-ratbox/modules/m_invite.c (dead)
+  7.426     +0 -13     ircd-ratbox/src/channel.c
+
+
+
 androsyn    2004/08/16 11:50:21 EDT	(20040816_3)
 
   Modified files:
