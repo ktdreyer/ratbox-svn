@@ -182,20 +182,20 @@ void _free_client(struct Client* client_p)
   assert(NULL == client_p->prev);
   assert(NULL == client_p->next);
 
-  /*
-   * clean up extra sockets from P-lines which have been discarded.
-   */
-  if (client_p->localClient->listener)
-  {
-    assert(0 < client_p->localClient->listener->ref_count);
-    if (0 == --client_p->localClient->listener->ref_count &&
-        !client_p->localClient->listener->active) 
-      free_listener(client_p->localClient->listener);
-    client_p->localClient->listener = 0;
-  }
-
   if (MyConnect(client_p))
     {
+    /*
+     * clean up extra sockets from P-lines which have been discarded.
+     */
+    if (client_p->localClient->listener)
+    {
+      assert(0 < client_p->localClient->listener->ref_count);
+      if (0 == --client_p->localClient->listener->ref_count &&
+          !client_p->localClient->listener->active) 
+        free_listener(client_p->localClient->listener);
+      client_p->localClient->listener = 0;
+    }
+
       if (client_p->localClient->fd >= 0)
 	fd_close(client_p->localClient->fd);
 
