@@ -1,3 +1,22 @@
+leeh        2003/07/30 13:51:35 EDT	(20030730_1)
+
+  Modified files:
+    modules              m_list.c 
+    src                  channel.c 
+  Log:
+  - s/return 0/return in m_list.c
+  - fix membership memset
+  Submitted by:
+  Reviewed by:
+  Approved by:
+  Obtained from:
+  
+  Revision  Changes    Path
+  1.70      +5 -5      ircd-ratbox/modules/m_list.c
+  7.391     +1 -1      ircd-ratbox/src/channel.c
+
+
+
 leeh        2003/07/29 20:59:53 EDT	(20030730_0)
 
   Modified files:
