@@ -135,14 +135,18 @@
 #else
 #define irc_sockaddr_storage sockaddr
 #define ss_family sa_family
+#ifdef SOCKADDR_IN_HAS_LEN
+#define ss_len sa_len
 #endif
+#endif
+
 
 #ifdef SOCKADDR_IN_HAS_LEN
 #define SET_SS_LEN(x, y) ((struct irc_sockaddr_storage)(x)).ss_len = y
 #define GET_SS_LEN(x) x.ss_len
 #else
 #define SET_SS_LEN(x, y)
-#define GET_SS_LEN(x) x.ss_family == AF_INET ? sizeof(struct sockaddr_in) : sizeof(struct irc_sockaddr_storage)
+#define GET_SS_LEN(x) x.ss_family == AF_INET ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6)
 #endif
 
 
