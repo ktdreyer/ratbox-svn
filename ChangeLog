@@ -1,3 +1,15 @@
+leeh        2003/10/08 11:55:33 EDT	(20031008_4)
+
+  Modified files:
+    modules/core         m_nick.c 
+  Log:
+  - set servptr when we're given the server pointer
+  
+  Revision  Changes    Path
+  1.134     +3 -1      ircd-ratbox/modules/core/m_nick.c
+
+
+
 androsyn    2003/10/08 11:25:11 EDT	(20031008_3)
 
   Modified files:
