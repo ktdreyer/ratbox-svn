@@ -37,4 +37,7 @@ extern int  get_log_level(void);
 extern void log(int priority, const char* fmt, ...);
 extern const char *get_log_level_as_string(int level);
 
+extern void log_user_connect(struct Client *);
+extern void log_oper(struct Client *, char *name);
+
 #endif /* INCLUDED_s_log_h */

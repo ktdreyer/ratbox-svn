@@ -22,11 +22,13 @@
  *
  *   $Id$
  */
+#include "client.h"	/* Needed for struct Client */
 #include "s_log.h"
 #include "fileio.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "s_misc.h"
+#include "event.h"	/* Needed for EVH etc. */
 
 #include <assert.h>
 #include <errno.h>
@@ -72,6 +74,7 @@ static const char *logLevelToString[] =
  * returns true (1) if successful, false (0) otherwise
  */
 #if defined(USE_LOGFILE) 
+
 static int open_log(const char* filename)
 {
   logFile = file_open(filename, 
@@ -159,4 +162,140 @@ const char *get_log_level_as_string(int level)
     level = L_ERROR;
 
   return(logLevelToString[level]);
+}
+
+static FBFILE *user_log_fb=NULL;
+
+#ifndef SYSLOG_USERS
+static EVH user_log_resync;
+#endif
+
+/*
+ * log_user_connect
+ *
+ * inputs	- pointer to connecting client
+ * output	- NONE
+ * side effects - Current connecting client is logged to
+ *		  either SYSLOG or to file.
+ */
+void log_user_connect(struct Client *sptr)
+{
+  time_t        on_for;
+
+  on_for = CurrentTime - sptr->firsttime;
+
+#ifdef SYSLOG_USERS
+
+  if (IsPerson(sptr))
+    {
+      log(L_INFO, "%s (%3ld:%02ld:%02ld): %s!%s@%s %ld/%ld\n",
+	  myctime(sptr->firsttime),
+	  on_for / 3600, (on_for % 3600)/60,
+	  on_for % 60, sptr->name,
+	  sptr->username, sptr->host,
+	  sptr->sendK, sptr->receiveK);
+    }
+
+#else
+  {
+    char        linebuf[BUFSIZ];
+
+    /*
+     * This conditional makes the logfile active only after
+     * it's been created - thus logging can be turned off by
+     * removing the file.
+     *
+     * Keep the logfile open, syncing it every 10 seconds
+     * -Taner
+     */
+    if (IsPerson(sptr))
+      {
+	if (user_log_fb == NULL)
+	  {
+	    if( (user_log_fb = fbopen(FNAME_USERLOG, "r")) != NULL )
+	      {
+		fbclose(user_log_fb);
+		user_log_fb = fbopen(FNAME_USERLOG, "a");
+	      }
+	  }
+
+	if( user_log_fb != NULL )
+	  {
+	    ircsprintf(linebuf,
+		       "%s (%3d:%02d:%02d): %s!%s@%s %d/%d\n",
+		       myctime(sptr->firsttime), on_for / 3600,
+		       (on_for % 3600)/60, on_for % 60,
+		       sptr->name,
+		       sptr->username,
+		       sptr->host,
+		       sptr->sendK,
+		       sptr->receiveK);
+
+	    fbputs(linebuf, user_log_fb);
+
+	    /* Now, schedule file resync every 60 seconds */
+
+	    eventAdd("user_log_resync", user_log_resync, NULL,
+		     60, 0 );
+
+	  }
+      }
+  }
+#endif
+}
+
+/*
+ * user_log_resync
+ *
+ * inputs	- NONE
+ * output	- NONE
+ * side effects	-
+ */
+static void
+user_log_resync(void *notused)
+{
+  if (user_log_fb != NULL)
+    {
+      fbclose(user_log_fb);
+      user_log_fb = NULL;
+    }
+
+  /* XXX Consider not rescheduling this in future */
+  eventAdd("user_log_resync", user_log_resync, NULL, 60, 0 );
+}
+
+/*
+ * log_oper
+ *
+ * inputs	- pointer to client
+ * output	- none
+ * side effects - FNAME_OPERLOG is written to, if its present
+ */
+
+void log_oper( struct Client *sptr, char *name )
+{
+#ifdef FNAME_OPERLOG
+  FBFILE *oper_fb;
+  char linebuf[BUFSIZE];
+
+  if (IsPerson(sptr))
+    {
+      if( (oper_fb = fbopen(FNAME_OPERLOG, "r")) != NULL )
+	{
+	  fbclose(oper_fb);
+	  oper_fb = fbopen(FNAME_OPERLOG, "a");
+	}
+
+      if(oper_fb != NULL)
+	{
+	  ircsprintf(linebuf, "%s OPER (%s) by (%s!%s@%s)\n",
+		     myctime(CurrentTime), name, 
+		     sptr->name, sptr->username,
+		     sptr->host);
+
+	  fbputs(linebuf,oper_fb);
+	  fbclose(oper_fb);
+	}
+    }
+#endif
 }

@@ -776,7 +776,8 @@ void remove_client_from_list(struct Client* cptr)
   
   /* HACK somehow this client has already exited
    * but has come back to haunt us.. looks like a bug
-   * XXX isn't this bug fixed now? -is */
+   * XXX isn't this bug fixed now? -is
+   */
   if (!cptr->prev && !cptr->next)
     {
       log(L_CRIT, "already exited client %X [%s]",
@@ -1409,9 +1410,6 @@ const char* comment         /* Reason for the exit */
 {
   struct Client        *acptr;
   struct Client        *next;
-#ifdef        FNAME_USERLOG
-  time_t        on_for;
-#endif
   char comment1[HOSTLEN + HOSTLEN + 2];
   if (MyConnect(sptr))
     {
@@ -1513,88 +1511,34 @@ const char* comment         /* Reason for the exit */
                (sptr->flags & FLAGS_NORMALEX) ?  "Client Quit" : comment,
                                sptr->sockhost);
         }
-#ifdef FNAME_USERLOG
-          on_for = CurrentTime - sptr->firsttime;
-# if defined(SYSLOG_USERS)
-          if (IsPerson(sptr))
-            log(L_INFO, "%s (%3ld:%02ld:%02ld): %s!%s@%s %ld/%ld\n",
-                myctime(sptr->firsttime),
-                on_for / 3600, (on_for % 3600)/60,
-                on_for % 60, sptr->name,
-                sptr->username, sptr->host,
-                sptr->sendK, sptr->receiveK);
-# else
-          {
-            char        linebuf[300];
-            static int        logfile = -1;
-            static long        lasttime;
 
-            /*
-             * This conditional makes the logfile active only after
-             * it's been created - thus logging can be turned off by
-             * removing the file.
-             *
-             * stop NFS hangs...most systems should be able to open a
-             * file in 3 seconds. -avalon (curtesy of wumpus)
-             *
-             * Keep the logfile open, syncing it every 10 seconds
-             * -Taner
-             */
-            if (IsPerson(sptr))
-              {
-                if (logfile == -1)
-                  {
-                    logfile = file_open(FNAME_USERLOG, O_WRONLY|O_APPEND, 0644);
-                  }
-                ircsprintf(linebuf,
-                           "%s (%3d:%02d:%02d): %s!%s@%s %d/%d\n",
-                            myctime(sptr->firsttime), on_for / 3600,
-                            (on_for % 3600)/60, on_for % 60,
-                            sptr->name,
-                            sptr->username,
-                            sptr->host,
-                            sptr->sendK,
-                            sptr->receiveK);
-                write(logfile, linebuf, strlen(linebuf));
-                /*
-                 * Resync the file evey 10 seconds
-                 */
-                if (CurrentTime - lasttime > 10)
-                  {
-                    if (logfile != -1) {
-                        file_close(logfile);
-                        logfile = -1;
-                        lasttime = CurrentTime;
-                    }
-                  }
-              }
-          }
-# endif
-#endif
-          if (sptr->fd >= 0)
-            {
-              if (cptr != NULL && sptr != cptr)
-                sendto_one(sptr, "ERROR :Closing Link: %s %s (%s)",
-                           sptr->host, sptr->name, comment);
-              else
-                sendto_one(sptr, "ERROR :Closing Link: %s (%s)",
-                           sptr->host, comment);
-            }
-          /*
-          ** Currently only server connections can have
-          ** depending remote clients here, but it does no
-          ** harm to check for all local clients. In
-          ** future some other clients than servers might
-          ** have remotes too...
-          **
-          ** Close the Client connection first and mark it
-          ** so that no messages are attempted to send to it.
-          ** (The following *must* make MyConnect(sptr) == FALSE!).
-          ** It also makes sptr->from == NULL, thus it's unnecessary
-          ** to test whether "sptr != acptr" in the following loops.
-          */
+      /* Log user connect */
+      log_user_connect(sptr);
 
-          close_connection(sptr);
+      if (sptr->fd >= 0)
+	{
+	  if (cptr != NULL && sptr != cptr)
+	    sendto_one(sptr, "ERROR :Closing Link: %s %s (%s)",
+		       sptr->host, sptr->name, comment);
+	  else
+	    sendto_one(sptr, "ERROR :Closing Link: %s (%s)",
+		       sptr->host, comment);
+	}
+      /*
+      ** Currently only server connections can have
+      ** depending remote clients here, but it does no
+      ** harm to check for all local clients. In
+      ** future some other clients than servers might
+      ** have remotes too...
+      **
+      ** Close the Client connection first and mark it
+      ** so that no messages are attempted to send to it.
+      ** (The following *must* make MyConnect(sptr) == FALSE!).
+      ** It also makes sptr->from == NULL, thus it's unnecessary
+      ** to test whether "sptr != acptr" in the following loops.
+      */
+      
+      close_connection(sptr);
     }
 
   if(IsServer(sptr))

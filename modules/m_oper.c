@@ -42,7 +42,6 @@
 #include <unistd.h>
 
 
-void log_fname( struct Client *sptr, char *name );
 struct ConfItem *find_password_aconf(char *name, struct Client *sptr);
 int match_oper_password(char *password, struct ConfItem *aconf);
 int oper_up( struct Client *sptr, struct ConfItem *aconf );
@@ -117,7 +116,7 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
       log(L_TRACE, "OPER %s by %s!%s@%s",
 	  name, sptr->name, sptr->username, sptr->host);
-      log_fname(sptr, name);
+      log_oper(sptr, name);
       return 1;
     }
   else
@@ -166,40 +165,6 @@ int ms_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     }
 
   return 1;
-}
-
-/*
- * log_fname
- *
- * inputs	- pointer to client
- * output	- none
- * side effects - FNAME_OPERLOG is written to, if its present
- */
-
-void log_fname( struct Client *sptr, char *name )
-{
-#ifdef FNAME_OPERLOG
-  int     logfile;
-  static char buf[BUFSIZE];
-
-  /*
-   * This conditional makes the logfile active only after
-   * it's been created - thus logging can be turned off by
-   * removing the file.
-   *
-   */
-
-  if (IsPerson(sptr) &&
-      (logfile = file_open(FNAME_OPERLOG, O_WRONLY|O_APPEND, 0644)) != -1)
-    {
-      ircsprintf(buf, "%s OPER (%s) by (%s!%s@%s)\n",
-		 myctime(CurrentTime), name, 
-		 sptr->name, sptr->username,
-		 sptr->host);
-      write(logfile, buf, strlen(buf));
-      file_close(logfile);
-    }
-#endif
 }
 
 /*
