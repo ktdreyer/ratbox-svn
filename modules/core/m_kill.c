@@ -273,8 +273,18 @@ static void
 relay_kill(struct Client *one, struct Client *source_p,
 	   struct Client *target_p, const char *inpath, const char *reason)
 {
-	dlink_node *ptr;
 	struct Client *client_p;
+	dlink_node *ptr;
+	char buffer[BUFSIZE];
+
+	if(MyClient(source_p))
+		ircsnprintf(buffer, sizeof(buffer),
+			    "%s!%s!%s!%s (%s)",
+			    me.name, source_p->host, source_p->username,
+			    source_p->name, reason);
+	else
+		ircsnprintf(buffer, sizeof(buffer),
+			    "%s %s", inpath, reason);
 
 	DLINK_FOREACH(ptr, serv_list.head)
 	{
@@ -283,13 +293,8 @@ relay_kill(struct Client *one, struct Client *source_p,
 		if(!client_p || client_p == one)
 			continue;
 
-		if(MyClient(source_p))
-			sendto_one_prefix(client_p, source_p, "KILL", 
-					  ":%s!%s!%s!%s (%s)",
-					  me.name, source_p->host, source_p->username,
-					  source_p->name, reason);
-		else
-			sendto_one_prefix(client_p, source_p, "KILL", 
-					  ":%s %s", inpath, reason);
+		sendto_one(client_p, ":%s KILL %s :%s",
+			   get_id(source_p, client_p),
+			   get_id(target_p, client_p));
 	}
 }
