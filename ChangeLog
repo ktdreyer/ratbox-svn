@@ -1,3 +1,31 @@
+androsyn    2002/12/07 22:23:07 UTC	(20021207_4)
+
+  Modified files:
+    doc                  example.conf 
+    include              class.h s_conf.h 
+    src                  class.c client.c ircd.c newconf.c 
+                         s_conf.c 
+  Added files:
+    include              patricia.h 
+    src                  patricia.c 
+  Log:
+  Adds support for cidr limits.  Readd patricia.{c,h} to the tree,
+  blockheapify it.  Review and make sure this works :P
+  
+  Revision  Changes    Path
+  7.197     +11 -0     ircd-ratbox/doc/example.conf
+  7.14      +13 -1     ircd-ratbox/include/class.h
+  7.10      +158 -0    ircd-ratbox/include/patricia.h (new)
+  7.220     +1 -0      ircd-ratbox/include/s_conf.h
+  7.44      +7 -0      ircd-ratbox/src/class.c
+  7.339     +2 -3      ircd-ratbox/src/client.c
+  7.268     +2 -0      ircd-ratbox/src/ircd.c
+  7.63      +22 -0     ircd-ratbox/src/newconf.c
+  7.11      +966 -0    ircd-ratbox/src/patricia.c (new)
+  7.379     +80 -2     ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2002/12/07 18:20:14 UTC	(20021207_3)
 
   Modified files:
