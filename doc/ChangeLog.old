@@ -1,3 +1,10 @@
+*** 20010421_5 by kreator
+- fix example conf: we don't support cpp, but we do support .include
+  "blah" and .include <blah>
+- add check_pidfile() that does kill 0 ircd_pid from PPATH: that will
+  check if there exists another daemon running and exit if it is there
+
+
 *** 20010421_4 by fl_
 - changed an assert to a simple warning.. its a bit too highly sensitive
   to have an assert there..
