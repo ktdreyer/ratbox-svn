@@ -1,3 +1,15 @@
+androsyn    2002/07/28 21:08:17 EDT	(20020729_2)
+
+  Modified files:
+    src                  channel_mode.c 
+  Log:
+  Fill in the UID in the mode_changes array..
+  
+  Revision  Changes    Path
+  7.50      +3 -3      ircd-hybrid-7/src/channel_mode.c
+
+
+
 androsyn    2002/07/28 20:27:30 EDT	(20020729_1)
 
   Modified files:
