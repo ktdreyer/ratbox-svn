@@ -1,3 +1,31 @@
+leeh        2005/02/23 20:48:08 EST	(20050224_0)
+
+  Modified files:
+    doc                  monitor.txt 
+    include              client.h numeric.h 
+    modules/core         m_nick.c 
+    src                  Makefile.in client.c messages.tab 
+                         s_user.c 
+  Added files:
+    include              monitor.h 
+    src                  monitor.c 
+  Log:
+  - first half of my server-side notify list implementation..
+  
+  Revision  Changes    Path
+  1.3       +2 -2      ircd-ratbox/doc/monitor.txt
+  7.266     +3 -0      ircd-ratbox/include/client.h
+  7.1       +30 -0     ircd-ratbox/include/monitor.h (new)
+  7.58      +6 -0      ircd-ratbox/include/numeric.h
+  1.161     +17 -3     ircd-ratbox/modules/core/m_nick.c
+  7.155     +1 -0      ircd-ratbox/src/Makefile.in
+  7.491     +3 -0      ircd-ratbox/src/client.c
+  7.126     +5 -5      ircd-ratbox/src/messages.tab
+  7.1       +182 -0    ircd-ratbox/src/monitor.c (new)
+  7.342     +2 -0      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2005/02/23 18:42:59 EST	(20050223_0)
 
   Modified files:
