@@ -1,3 +1,9 @@
+*** 20001021_5 by toot
+. renamed free_bans_exceptions_denies to free_channel_masks, and had it
+  free invite exceptions too.
+. remove_empty_channels() wasn't freeing +d (or +I)
+
+
 *** 20001021_4 by bill
 
 /usr/local/ircd/ IS the default, not /usr/ejb/whatever
