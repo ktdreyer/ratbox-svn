@@ -1,3 +1,7 @@
+*** 20010815_2 by leeh
+- updated the docs to cover the multi accept system
+
+
 *** 20010815_1 by androsyn
 Missing prototype for init_dlink_nodes() or whatever the function is called :)
 
