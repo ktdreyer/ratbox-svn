@@ -1,3 +1,8 @@
+*** 20000102_8 by db
+- oops got an if backwards key when NULL cores it
+
+
+
 *** 20000102_7 by db
 - try to negotiate a non LL connect if serverMask's get all used up
 - report all serverMask's used up. That will mean a recode ;-)
