@@ -1,3 +1,15 @@
+androsyn    2003/08/27 15:57:48 EDT	(20030827_2)
+
+  Modified files:
+    src                  newconf.c 
+  Log:
+  Fixed logic inversion..
+  
+  Revision  Changes    Path
+  7.109     +1 -1      ircd-ratbox/src/newconf.c
+
+
+
 leeh        2003/08/27 15:17:20 EDT	(20030827_1)
 
   Modified files:
