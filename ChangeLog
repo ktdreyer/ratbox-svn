@@ -1,3 +1,15 @@
+leeh        2002/11/20 00:01:46 UTC	(20021120_0)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  - make ircd build with --enable-assert
+  
+  Revision  Changes    Path
+  7.329     +0 -2      ircd-ratbox/src/client.c
+
+
+
 leeh        2002/11/19 23:25:07 UTC	(20021119_1)
 
   Modified files:
