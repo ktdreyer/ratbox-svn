@@ -243,8 +243,11 @@ int     ms_topic(struct Client *cptr,
                 int parc,
                 char *parv[])
 {
-  struct Channel *chptr = NullChn;
+  struct Channel *chptr = NULL;
   
+  if (!IsServer(sptr))
+    return m_topic(cptr, sptr, parc, parv);
+
   if( parc < 5 )
     return 0;
 
