@@ -94,13 +94,13 @@ static void
 select_update_selectfds(int fd, short event, PF *handler)
 {  
     /* Update the read / write set */
-    if (event || COMM_SELECT_READ) {
+    if (event && COMM_SELECT_READ) {
         if (handler)
             FD_SET(fd, &select_readfds);
         else
             FD_CLR(fd, &select_readfds);
     }
-    if (event || COMM_SELECT_WRITE) {
+    if (event && COMM_SELECT_WRITE) {
         if (handler)
             FD_SET(fd, &select_writefds);
         else
