@@ -130,6 +130,15 @@ static void stats_servlinks(struct Client *);
 static void stats_ltrace(struct Client *, int, const char **);
 static void stats_ziplinks(struct Client *);
 
+static void
+get_printable_kline(struct Client *source_p, struct ConfItem *aconf, 
+                    char **host, char **reason,
+		    char **user, char **oper_reason);
+static void
+get_printable_conf(struct ConfItem *aconf, char **name, char **host,
+                   char **pass, char **user, int *port, char **classname);
+                                        
+
 /* This table contains the possible stats items, in order:
  * stats letter,  function to call, operonly? adminonly?
  * case only matters in the stats letter column.. -- fl_
@@ -601,8 +610,37 @@ stats_auth (struct Client *source_p)
 	}
 
 	/* Theyre opered, or allowed to see all auth blocks */
-	else
-		report_auth (source_p);
+	else {
+		char *name, *host, *pass, *user, *classname;
+		struct AddressRec *arec;
+		struct ConfItem *aconf;
+		int i, port;
+
+		for (i = 0; i < ATABLE_SIZE; i++)
+		{
+			for (arec = atable[i]; arec; arec = arec->next)
+			{
+				if(arec->type == CONF_CLIENT)
+				{
+					aconf = arec->aconf;
+					
+					if(!MyOper(source_p) && IsConfDoSpoofIp(aconf))
+						continue;
+
+					get_printable_conf(aconf, &name, &host, &pass, &user, &port,
+							   &classname);
+
+					sendto_one_numeric(source_p, RPL_STATSILINE, 
+							   form_str(RPL_STATSILINE),
+							   name, show_iline_prefix(source_p, aconf, user),
+#ifdef HIDE_SPOOF_IPS
+							   IsConfDoSpoofIp(aconf) ? "255.255.255.255" :
+#endif
+							   host, port, classname);
+				}
+			}
+		}
+	}
 }
 
 
@@ -709,8 +747,34 @@ stats_klines (struct Client *source_p)
 				   oper_reason ? oper_reason : "");
 	}
 	/* Theyre opered, or allowed to see all klines */
-	else
-		report_Klines (source_p);
+	else {
+		char *host, *pass, *user, *oper_reason;
+		struct AddressRec *arec;
+		struct ConfItem *aconf = NULL;
+		int i;
+
+		for (i = 0; i < ATABLE_SIZE; i++)
+		{
+			for (arec = atable[i]; arec; arec = arec->next)
+			{
+				if(arec->type == CONF_KILL)
+				{
+					aconf = arec->aconf;
+					
+					/* its a tempkline, theyre reported elsewhere */
+					if(aconf->flags & CONF_FLAGS_TEMPORARY)
+						continue;
+
+					get_printable_kline(source_p, aconf, &host, &pass, &user, &oper_reason);
+					sendto_one_numeric(source_p, RPL_STATSKLINE,
+							   form_str(RPL_STATSKLINE),
+							   'K', host, user, pass,
+							   oper_reason ? "|" : "",
+							   oper_reason ? oper_reason : "");
+				}
+			}
+		}
+	}
 }
 
 static void
@@ -1704,5 +1768,59 @@ stats_p_spy (struct Client *source_p)
 	data.statchar = 'p';
 
 	hook_call_event (doing_stats_p_hook, &data);
+}
+
+/*
+ * get_printable_kline
+ *
+ * formats klines
+ */
+static void
+get_printable_kline(struct Client *source_p, struct ConfItem *aconf, 
+		    char **host, char **reason,
+		    char **user, char **oper_reason)
+{
+	static char null[] = "<NULL>";
+
+	*host = EmptyString(aconf->host) ? null : aconf->host;
+	*reason = EmptyString(aconf->passwd) ? null : aconf->passwd;
+	*user = EmptyString(aconf->user) ? null : aconf->user;
+
+	if(EmptyString(aconf->spasswd) || !IsOper(source_p))
+		*oper_reason = NULL;
+	else
+		*oper_reason = aconf->spasswd;
+}
+
+
+/*
+ * get_printable_conf
+ *
+ * inputs        - struct ConfItem
+ *
+ * output         - name 
+ *                - host
+ *                - pass
+ *                - user
+ *                - port
+ *
+ * side effects        -
+ * Examine the struct struct ConfItem, setting the values
+ * of name, host, pass, user to values either
+ * in aconf, or "<NULL>" port is set to aconf->port in all cases.
+ */
+static void
+get_printable_conf(struct ConfItem *aconf, char **name, char **host,
+		   char **pass, char **user, int *port, char **classname)
+{
+	static char null[] = "<NULL>";
+	static char zero[] = "default";
+
+	*name = EmptyString(aconf->name) ? null : aconf->name;
+	*host = EmptyString(aconf->host) ? null : aconf->host;
+	*pass = EmptyString(aconf->passwd) ? null : aconf->passwd;
+	*user = EmptyString(aconf->user) ? null : aconf->user;
+	*classname = EmptyString(aconf->className) ? zero : aconf->className;
+	*port = (int) aconf->port;
 }
 

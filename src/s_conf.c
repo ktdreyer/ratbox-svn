@@ -863,53 +863,6 @@ get_oper_name(struct Client *client_p)
 	return buffer;
 }
 
-/*
- * get_printable_conf
- *
- * inputs        - struct ConfItem
- *
- * output         - name 
- *                - host
- *                - pass
- *                - user
- *                - port
- *
- * side effects        -
- * Examine the struct struct ConfItem, setting the values
- * of name, host, pass, user to values either
- * in aconf, or "<NULL>" port is set to aconf->port in all cases.
- */
-void
-get_printable_conf(struct ConfItem *aconf, char **name, char **host,
-		   char **pass, char **user, int *port, char **classname)
-{
-	static char null[] = "<NULL>";
-	static char zero[] = "default";
-
-	*name = EmptyString(aconf->name) ? null : aconf->name;
-	*host = EmptyString(aconf->host) ? null : aconf->host;
-	*pass = EmptyString(aconf->passwd) ? null : aconf->passwd;
-	*user = EmptyString(aconf->user) ? null : aconf->user;
-	*classname = EmptyString(aconf->className) ? zero : aconf->className;
-	*port = (int) aconf->port;
-}
-
-void
-get_printable_kline(struct Client *source_p, struct ConfItem *aconf, 
-		    char **host, char **reason,
-		    char **user, char **oper_reason)
-{
-	static char null[] = "<NULL>";
-
-	*host = EmptyString(aconf->host) ? null : aconf->host;
-	*reason = EmptyString(aconf->passwd) ? null : aconf->passwd;
-	*user = EmptyString(aconf->user) ? null : aconf->user;
-
-	if(EmptyString(aconf->spasswd) || !IsOper(source_p))
-		*oper_reason = NULL;
-	else
-		*oper_reason = aconf->spasswd;
-}
 
 static void
 clear_ircd_conf(void)

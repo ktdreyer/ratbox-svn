@@ -59,8 +59,6 @@ struct ConfItem *find_dline(struct sockaddr *, int);
 #define find_gline(x)	(find_conf_by_address((x)->host, (struct sockaddr *)&(x)->localClient->ip, CONF_GLINE,\
 			 (x)->localClient->ip.ss_family, (x)->username))
 
-void report_Klines(struct Client *);
-void report_auth(struct Client *);
 #ifdef IPV6
 int match_ipv6(struct sockaddr *, struct sockaddr *, int);
 #endif
