@@ -25,12 +25,13 @@
  *
  *  $Id$
  */
+#include "config.h"
+#ifdef USE_POLL
 #include "fdlist.h"
 #include "s_bsd.h"
 #include "class.h"
 #include "client.h"
 #include "common.h"
-#include "config.h"
 #include "irc_string.h"
 #include "ircdauth.h"
 #include "ircd.h"
@@ -347,4 +348,4 @@ comm_select(time_t delay)
     comm_select_fdlist(FDLIST_IDLECLIENT, delay);
     return 0;
 }
-
+#endif

@@ -273,20 +273,24 @@ dnl Actually do the define magic now
 dnl mostly ripped from squid-commloops, thanks to adrian and benno
 if test "$ac_cv_func_kqueue" = "yes" ; then
         SELECT_TYPE="kqueue"   
+	AC_DEFINE(USE_KQUEUE)
 elif test "$ac_cv_func_devpoll" = "yes" ; then
         SELECT_TYPE="devpoll"
         AC_DEFINE(HAVE_DEVPOLL)
+	AC_DEFINE(USE_DEVPOLL)
 elif test "$ac_cv_func_poll" = "yes" ; then
         SELECT_TYPE="poll"
+	AC_DEFINE(USE_POLL)
 elif test "$ac_cv_func_select" = "yes" ; then
         SELECT_TYPE="select"
+	AC_DEFINE(USE_SELECT)
 else
         echo "Eep!  Can't find kqueue, devpoll, poll _or_ select!"
         echo "I'll try select and hope for the best."
         SELECT_TYPE="select"
+	AC_DEFINE(USE_SELECT)
 fi
 echo "Using ${SELECT_TYPE} for select loop."
-SELECT_SRC="s_bsd_${SELECT_TYPE}.c"
 AC_DEFINE_UNQUOTED(SELECT_TYPE, "$SELECT_TYPE")
 AC_SUBST(SELECT_SRC)
 

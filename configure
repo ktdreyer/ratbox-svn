@@ -2561,23 +2561,42 @@ fi
 
 if test "$ac_cv_func_kqueue" = "yes" ; then
         SELECT_TYPE="kqueue"   
+	cat >> confdefs.h <<\EOF
+#define USE_KQUEUE 1
+EOF
+
 elif test "$ac_cv_func_devpoll" = "yes" ; then
         SELECT_TYPE="devpoll"
         cat >> confdefs.h <<\EOF
 #define HAVE_DEVPOLL 1
 EOF
 
+	cat >> confdefs.h <<\EOF
+#define USE_DEVPOLL 1
+EOF
+
 elif test "$ac_cv_func_poll" = "yes" ; then
         SELECT_TYPE="poll"
+	cat >> confdefs.h <<\EOF
+#define USE_POLL 1
+EOF
+
 elif test "$ac_cv_func_select" = "yes" ; then
         SELECT_TYPE="select"
+	cat >> confdefs.h <<\EOF
+#define USE_SELECT 1
+EOF
+
 else
         echo "Eep!  Can't find kqueue, devpoll, poll _or_ select!"
         echo "I'll try select and hope for the best."
         SELECT_TYPE="select"
+	cat >> confdefs.h <<\EOF
+#define USE_SELECT 1
+EOF
+
 fi
 echo "Using ${SELECT_TYPE} for select loop."
-SELECT_SRC="s_bsd_${SELECT_TYPE}.c"
 cat >> confdefs.h <<EOF
 #define SELECT_TYPE "$SELECT_TYPE"
 EOF

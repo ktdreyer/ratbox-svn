@@ -11,6 +11,17 @@
 /* Define if we are going to use /dev/poll for network IO */
 #undef HAVE_DEVPOLL
 
+#undef USE_DEVPOLL
+
+/* Using kqueue */
+#undef USE_KQUEUE
+
+/* Using poll */
+#undef USE_POLL
+
+/* Using select */
+#undef USE_SELECT
+
 /* Define if we have socklen_t */
 #undef HAVE_SOCKLEN_T
 

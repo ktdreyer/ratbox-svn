@@ -25,12 +25,13 @@
  *
  *  $Id$
  */
+#include "config.h"
+#ifdef USE_KQUEUE
 #include "fdlist.h"
 #include "s_bsd.h"
 #include "class.h"
 #include "client.h"
 #include "common.h"
-#include "config.h"
 #include "irc_string.h"
 #include "ircdauth.h"
 #include "ircd.h"
@@ -252,3 +253,4 @@ comm_select(time_t delay)
     return 0;
 }
 
+#endif /* USE_KQUEUE */

@@ -90,6 +90,9 @@ BASE_SRCS =                     \
   restart.c                     \
   s_auth.c                      \
   s_bsd.c                       \
+  s_bsd_kqueue.c		\
+  s_bsd_poll.c			\
+  s_bsd_select.c		\
   s_conf.c                      \
   s_debug.c                     \
   s_gline.c                     \
@@ -104,13 +107,7 @@ BASE_SRCS =                     \
   tools.c                       \
   whowas.c
 
-EXTRA_SRCS =	s_bsd_kqueue.c	\
-		s_bsd_poll.c	\
-		s_bsd_select.c
-
-SELECT_SRC = @SELECT_SRC@
-
-SRCS = ${BASE_SRCS} ${SELECT_SRC}
+SRCS = ${BASE_SRCS}
 
 OBJS = ${SRCS:.c=.o}
 

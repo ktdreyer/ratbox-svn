@@ -1,4 +1,4 @@
-/* include/setup.h.in.  Generated automatically from autoconf/configure.in by autoheader.  */
+/* include/setup.h.in.  Generated automatically from ./configure.in by autoheader.  */
 
 /* Define if you need to in order for stat and other things to work.  */
 #undef _POSIX_SOURCE
@@ -15,11 +15,25 @@
 /* Define if you have the ANSI C header files.  */
 #undef STDC_HEADERS
 
+/* Define if you have the poll() system call.  */
+#undef USE_POLL
+
 /* Define with our select type */
 #undef SELECT_TYPE
 
 /* Define if we are going to use /dev/poll for network IO */
 #undef HAVE_DEVPOLL
+
+#undef USE_DEVPOLL
+
+/* Using kqueue */
+#undef USE_KQUEUE
+
+/* Using poll */
+#undef USE_POLL
+
+/* Using select */
+#undef USE_SELECT
 
 /* Define if we have socklen_t */
 #undef HAVE_SOCKLEN_T
@@ -70,12 +84,6 @@
 
 /* Define if you have the intl library (-lintl).  */
 #undef HAVE_LIBINTL
-
-/* Define if you have the nsl library (-lnsl).  */
-#undef HAVE_LIBNSL
-
-/* Define if you have the resolv library (-lresolv).  */
-#undef HAVE_LIBRESOLV
 
 /* Define if you have the socket library (-lsocket).  */
 #undef HAVE_LIBSOCKET
