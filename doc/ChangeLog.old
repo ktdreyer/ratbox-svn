@@ -1,3 +1,7 @@
+*** 19990821_2 by tomh
+removed unused struct member
+
+
 *** 19990821_1 by tomh
 break out m_hash from hash.c
 
