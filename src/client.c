@@ -787,6 +787,7 @@ static void exit_one_client(struct Client *client_p,
   else if (source_p->servptr && source_p->servptr->serv)
     {
       dlinkDelete(&source_p->lnode, &source_p->servptr->serv->users);
+      source_p->servptr->serv->usercnt--;
     }
   /* there are clients w/o a servptr: unregistered ones */
 

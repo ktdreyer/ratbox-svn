@@ -474,7 +474,7 @@ register_local_user(struct Client *client_p, struct Client *source_p,
   /* XXX source_p->servptr is &me, since local client */
   source_p->servptr = find_server(user->server);
   dlinkAdd(source_p, &source_p->lnode, &source_p->servptr->serv->users);
-
+  source_p->servptr->serv->usercnt++;
   /* Increment our total user count here */
   if (++Count.total > Count.max_tot)
     Count.max_tot = Count.total;
@@ -549,7 +549,7 @@ register_remote_user(struct Client *client_p, struct Client *source_p,
     }
 
   dlinkAdd(source_p, &source_p->lnode, &source_p->servptr->serv->users);
-
+  source_p->servptr->serv->usercnt++;
   if ((target_p = find_server(user->server)) && target_p->from != source_p->from)
     {
       sendto_realops_flags(FLAGS_DEBUG, L_ALL,

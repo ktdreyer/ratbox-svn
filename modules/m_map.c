@@ -94,7 +94,6 @@ static void mo_map(struct Client *client_p, struct Client *source_p,
 static void dump_map(struct Client *client_p,struct Client *root_p, char *pbuf)
 {
   int cnt = 0, i = 0, len;
-  int users = 0;
   struct Client *server_p;
   dlink_node *ptr;      
   *pbuf= '\0';
@@ -111,12 +110,9 @@ static void dump_map(struct Client *client_p,struct Client *root_p, char *pbuf)
      }
   }
 	
-  /* FIXME: add serv->usercnt */
-  users += dlink_list_length(&root_p->serv->users);
-        
   snprintf(buf + USER_COL, BUFSIZE - USER_COL,
-           " | Users: %5d (%4.1f%%)", users,
-           100 * (float) users / (float) Count.total);
+           " | Users: %5d (%4.1f%%)", root_p->serv->usercnt,
+           100 * (float) root_p->serv->usercnt / (float) Count.total);
         
   sendto_one(client_p, form_str(RPL_MAP),me.name,client_p->name,buf);
         
