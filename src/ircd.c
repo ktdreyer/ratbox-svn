@@ -418,6 +418,7 @@ static void initialize_server_capabs(void)
   {
     default_server_capabs &= ~CAP_HOPS;
   }
+  default_server_capabs &= ~CAP_ZIP;
 }
 
 
