@@ -233,7 +233,7 @@ void collect_zipstats(void *unused)
   dlink_node *ptr;
   struct Client *target_p;
 
-  for(ptr = serv_list.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, serv_list.head)
     {
       target_p = ptr->data;
       if (IsCapable(target_p, CAP_ZIP))
@@ -316,7 +316,7 @@ void remove_server_from_list(struct Client *client_p)
   dlink_node *ptr;
   struct Client *target_p;
 
-  for (ptr = global_serv_list.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, global_serv_list.head)
   {
     target_p = ptr->data;
 
@@ -361,7 +361,7 @@ void write_links_file(void* notused)
   MessageFileptr->contentsOfFile = NULL;
   currentMessageLine = NULL;
 
-  for (ptr = global_serv_list.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, global_serv_list.head)
   {
     target_p = ptr->data;
 
@@ -1082,7 +1082,7 @@ int server_estab(struct Client *client_p)
   ** need to send different names to different servers
   ** (domain name matching) Send new server to other servers.
   */
-  for(ptr=serv_list.head;ptr;ptr=ptr->next)
+  DLINK_FOREACH(ptr, serv_list.head)
     {
       target_p = ptr->data;
 

@@ -249,9 +249,8 @@ check_pings_list(dlink_list *list)
   int           ping = 0;       /* ping time value from client */
   dlink_node    *ptr, *next_ptr;
 
-  for (ptr = list->head; ptr; ptr = next_ptr)
+  DLINK_FOREACH_SAFE(ptr, next_ptr, list->head)
     {
-      next_ptr = ptr->next;
       client_p = ptr->data;
 
       /*
@@ -356,9 +355,8 @@ check_unknowns_list(dlink_list *list)
   dlink_node *ptr, *next_ptr;
   struct Client *client_p;
 
-  for(ptr = list->head; ptr; ptr = next_ptr)
+  DLINK_FOREACH_SAFE(ptr, next_ptr, list->head)
     {
-      next_ptr = ptr->next;
       client_p = ptr->data;
 
       /*
@@ -388,9 +386,8 @@ check_klines(void)
   char          *reason;                /* pointer to reason string */
   dlink_node    *ptr, *next_ptr;
  
-  for (ptr = lclient_list.head; ptr; ptr = next_ptr)
+  DLINK_FOREACH_SAFE(ptr, next_ptr, lclient_list.head)
     {
-      next_ptr = ptr->next;
       client_p = ptr->data;
       
       if (IsMe(client_p))
@@ -533,9 +530,8 @@ check_klines(void)
     }
  
   /* also check the unknowns list for new dlines */
-  for (ptr = unknown_list.head; ptr; ptr = next_ptr)
+  DLINK_FOREACH_SAFE(ptr, next_ptr, unknown_list.head)
   {
-    next_ptr = ptr->next;
     client_p = ptr->data;
 
     if((aconf = find_dline(&client_p->localClient->ip,
@@ -780,10 +776,9 @@ free_exited_clients(void *unused)
   dlink_node *ptr, *next;
   struct Client *target_p;
   
-  for(ptr = dead_list.head; ptr; ptr = next)
+  DLINK_FOREACH_SAFE(ptr, next, dead_list.head)
     {
       target_p = ptr->data;
-      next = ptr->next;
       if (ptr->data == NULL)
         {
           sendto_realops_flags(FLAGS_ALL, L_ALL,
@@ -895,9 +890,8 @@ static void exit_one_client(struct Client *client_p,
 				   source_p->host,
 				   comment);
 
-      for (lp = source_p->user->channel.head; lp; lp = next_lp)
+      DLINK_FOREACH_SAFE(lp, next_lp, source_p->user->channel.head)
 	{
-	   next_lp = lp->next;
 	   remove_user_from_channel(lp->data, source_p);
 	}
         
@@ -905,9 +899,8 @@ static void exit_one_client(struct Client *client_p,
         assert(source_p->user->channel.head == NULL);
           
         /* Clean up invitefield */
-        for (lp = source_p->user->invited.head; lp; lp = next_lp)
+        DLINK_FOREACH_SAFE(lp, next_lp, source_p->user->invited.head)
         {
-           next_lp = lp->next;
            del_invite(lp->data, source_p);
         }
 
@@ -1036,7 +1029,7 @@ static void remove_dependents(struct Client* client_p,
   static char myname[HOSTLEN+1];
   dlink_node *ptr;
 
-  for(ptr = serv_list.head; ptr; ptr=ptr->next)
+  DLINK_FOREACH(ptr, serv_list.head)
     {
       to = ptr->data;
 
@@ -1103,10 +1096,9 @@ void exit_aborted_clients(void)
   dlink_node *ptr, *next;
   struct Client *target_p;
   char *notice;
-  for(ptr = abort_list.head; ptr; ptr = next)
+  DLINK_FOREACH_SAFE(ptr, next, abort_list.head)
     {
       target_p = ptr->data;
-      next = ptr->next;
       if (ptr->data == NULL)
         {
           sendto_realops_flags(FLAGS_ALL, L_ALL,
@@ -1372,7 +1364,7 @@ int accept_message(struct Client *source, struct Client *target)
   dlink_node *ptr;
   struct Client *target_p;
 
-  for(ptr = target->allow_list.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, target->allow_list.head)
   {
     target_p = ptr->data;
     if(source == target_p)
@@ -1401,21 +1393,16 @@ void del_from_accept(struct Client *source, struct Client *target)
   dlink_node *next_ptr2;
   struct Client *target_p;
 
-  for (ptr = target->allow_list.head; ptr; ptr = next_ptr)
+  DLINK_FOREACH_SAFE(ptr, next_ptr, target->allow_list.head)
     {
-      next_ptr = ptr->next;
-
       target_p = ptr->data;
       if(source == target_p)
 	{
 	  dlinkDelete(ptr, &target->allow_list);
 	  free_dlink_node(ptr);
 
-	  for (ptr2 = source->on_allow_list.head; ptr2;
-	       ptr2 = next_ptr2)
+          DLINK_FOREACH_SAFE(ptr2, next_ptr2, source->on_allow_list.head)
 	    {
-	      next_ptr2 = ptr2->next;
-
 	      target_p = ptr2->data;
 	      if (target == target_p)
 		{
@@ -1441,17 +1428,15 @@ void del_all_accepts(struct Client *client_p)
   dlink_node *next_ptr;
   struct Client *target_p;
 
-  for (ptr = client_p->allow_list.head; ptr; ptr = next_ptr)
+  DLINK_FOREACH_SAFE(ptr, next_ptr, client_p->allow_list.head)
     {
-      next_ptr = ptr->next;
       target_p = ptr->data;
       if(target_p != NULL)
         del_from_accept(target_p,client_p);
     }
 
-  for (ptr = client_p->on_allow_list.head; ptr; ptr = next_ptr)
+  DLINK_FOREACH_SAFE(ptr, next_ptr, client_p->on_allow_list.head)
     {
-      next_ptr = ptr->next;
       target_p = ptr->data;
       if(target_p != NULL)
 	del_from_accept(client_p, target_p);

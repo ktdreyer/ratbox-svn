@@ -910,7 +910,7 @@ chm_ban(struct Client *client_p, struct Client *source_p,
 
 #ifdef ANONOPS
     if ((chptr->mode.mode & MODE_HIDEOPS) && (alev < CHACCESS_HALFOP))
-      for (ptr = chptr->banlist.head; ptr; ptr = ptr->next)
+      DLINK_FOREACH(ptr, chptr->banlist.head)
       {
         banptr = ptr->data;
         sendto_one(client_p, form_str(RPL_BANLIST),
@@ -919,6 +919,7 @@ chm_ban(struct Client *client_p, struct Client *source_p,
       }
     else
 #endif
+      DLINK_FOREACH(ptr, chptr->banlist.head)
       for (ptr = chptr->banlist.head; ptr; ptr = ptr->next)
       {
         banptr = ptr->data;
@@ -1033,7 +1034,7 @@ chm_except(struct Client *client_p, struct Client *source_p,
       return;
     *errors |= SM_ERR_RPL_E;
 
-    for (ptr = chptr->exceptlist.head; ptr; ptr = ptr->next)
+    DLINK_FOREACH(ptr, chptr->exceptlist.head)
     {
       banptr = ptr->data;
       sendto_one(client_p, form_str(RPL_EXCEPTLIST),
@@ -1135,7 +1136,7 @@ chm_invex(struct Client *client_p, struct Client *source_p,
       return;
     *errors |= SM_ERR_RPL_I;
 
-    for (ptr = chptr->invexlist.head; ptr; ptr = ptr->next)
+    DLINK_FOREACH(ptr, chptr->invexlist.head)
     {
       banptr = ptr->data;
       sendto_one(client_p, form_str(RPL_INVITELIST), me.name,
@@ -2443,9 +2444,9 @@ sync_channel_oplists(struct Channel *chptr, int dir)
 {
   dlink_node *ptr;
 
-  for (ptr=chptr->locpeons.head; ptr!=NULL && ptr->data!=NULL; ptr=ptr->next)
+  DLINK_FOREACH(ptr, chptr->locpeons.head)
     sync_oplists(chptr, ptr->data, MODE_ADD, chptr->chname);
-  for (ptr=chptr->locvoiced.head; ptr!=NULL && ptr->data!=NULL; ptr = ptr->next)
+  DLINK_FOREACH(ptr, chptr->locvoice.head)
     sync_oplists(chptr, ptr->data, MODE_ADD, chptr->chname);
 }
 
@@ -2509,7 +2510,7 @@ static void update_channel_info(struct Channel *chptr)
   {
     if(chptr->mode.mode & MODE_HIDEOPS)
     {
-      for (ptr = chptr->locpeons.head; ptr != NULL && ptr->data != NULL;
+      DLINK_FOREACH(ptr, chptr->locpeons.head)
            ptr = ptr->next)
       {
         mode_get_status(chptr, ptr->data, &t_op, &t_hop, &t_voice, 0);
@@ -2517,8 +2518,7 @@ static void update_channel_info(struct Channel *chptr)
           sync_oplists(chptr, ptr->data, MODE_DEL, chptr->chname);
       }
 
-      for (ptr = chptr->locvoiced.head; ptr != NULL && ptr->data != NULL;
-           ptr = ptr->next)
+      DLINK_FOREACH(ptr, chptr->locvoiced.head)
       {
         mode_get_status(chptr, ptr->data, &t_op, &t_hop, &t_voice, 0);
         if (!t_hop && !t_op)
@@ -2526,7 +2526,7 @@ static void update_channel_info(struct Channel *chptr)
       }
 
 #ifdef HALFOPS
-      for(ptr = chptr->lochalfops.head; ptr != NULL; ptr = ptr->next)
+      DLINK_FOREACH(ptr, chptr->lochalfops.head)
       {
         mode_get_status(chptr, ptr->data, &t_op, &t_hop, &t_voice, 1);
         if(!t_hop && !t_op)
@@ -2535,15 +2535,14 @@ static void update_channel_info(struct Channel *chptr)
 #endif
 
 #ifdef REQUIRE_OANDV
-      for(ptr = chptr->locchanops_voiced.head; ptr != NULL; ptr = ptr->next)
+      DLINK_FOREACH(ptr, chptr->locchanops_voiced.head)
       {
         mode_get_status(chptr, ptr->data, &t_op, &t_hop, &t_voice, 1);
         if(!t_hop && !t_op)
           sync_oplists(chptr, ptr->data, MODE_DEL, chptr->chname);
       }
 #endif
-
-      for(ptr = chptr->locchanops.head; ptr != NULL; ptr = ptr->next)
+      DLINK_FOREACH(ptr, chptr->locchanops.head)
       {
         mode_get_status(chptr, ptr->data, &t_op, &t_hop, &t_voice, 1);
         if(!t_hop && !t_op)
@@ -2604,16 +2603,14 @@ static void update_channel_info(struct Channel *chptr)
     }
 
     /* ..and send a resync to them */
-    for (ptr=deopped.head; ptr != NULL && ptr->data != NULL; ptr=ptr_next)
+    DLINK_FOREACH_SAFE(ptr, ptr_next, deopped.head)
     {
-      ptr_next = ptr->next;
       sync_oplists(chptr, ptr->data, MODE_DEL, chptr->chname);
       free_dlink_node(ptr);
     }
 
-    for(ptr = opped.head; ptr != NULL; ptr = ptr_next)
+    DLINK_FOREACH_SAFE(ptr, ptr_next, opped.head)
     {
-      ptr_next = ptr->next;
       sync_oplists(chptr, ptr->data, MODE_ADD, chptr->chname);
       free_dlink_node(ptr);
     }

@@ -137,13 +137,13 @@ modules_init(void)
 static struct module_path *
 mod_find_path(char *path)
 {
-  dlink_node *pathst = mod_paths.head;
+  dlink_node *pathst;
   struct module_path *mpath;
   
   if (!pathst)
     return NULL;
 
-  for (; pathst; pathst = pathst->next)
+  DLINK_FOREACH(pathst, mod_paths.head)
   {
     mpath = (struct module_path *)pathst->data;
 
@@ -188,9 +188,8 @@ mod_clear_paths(void)
   struct module_path *pathst;
   dlink_node *node, *next;
 
-  for(node = mod_paths.head; node; node = next)
+  DLINK_FOREACH_SAVE(node, next, mod_paths.head)
     {
-      next = node->next;
       pathst = (struct module_path *)node->data;
       dlinkDelete(node, &mod_paths);
       free_dlink_node(node);
@@ -335,7 +334,7 @@ load_one_module (char *path)
 	
   struct stat statbuf;
   
-  for (pathst = mod_paths.head; pathst; pathst = pathst->next)
+  DLINK_FOREACH(pathst, mod_paths.head)
     {
       mpath = (struct module_path *)pathst->data;
       

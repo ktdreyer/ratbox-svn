@@ -93,7 +93,7 @@ const char*     get_client_class(struct Client *target_p)
   const char* retc = "unknown";
 
   if (target_p && !IsMe(target_p)  && (target_p->localClient->confs.head))
-    for (ptr = target_p->localClient->confs.head; ptr; ptr = ptr->next)
+    DLINK_FOREACH(ptr, target_p->localClient->confs.head)
       {
 	aconf = ptr->data;
 	if(aconf->className == NULL)
@@ -124,7 +124,7 @@ int     get_client_ping(struct Client *target_p)
 
   if(target_p->localClient->confs.head != NULL)
     {
-      for(nlink = target_p->localClient->confs.head; nlink; nlink = nlink->next)
+      DLINK_FOREACH(nlink, target_p->localClient->confs.head)
 	{
 	  aconf = nlink->data;
 	  if (aconf->status & (CONF_CLIENT|CONF_SERVER))
@@ -294,7 +294,7 @@ long    get_sendq(struct Client *client_p)
   struct ConfItem *aconf;
 
   if (client_p && !IsMe(client_p)  && (client_p->localClient->confs.head))
-    for (ptr = client_p->localClient->confs.head; ptr; ptr = ptr->next)
+    DLINK_FOREACH(ptr, client_p->localClient->confs.head)
       {
 	aconf = ptr->data;
 	if(aconf == NULL)

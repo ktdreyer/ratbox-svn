@@ -628,7 +628,7 @@ introduce_client(struct Client *client_p, struct Client *source_p,
    * rewritten to cope with UIDs .. eww eww eww --is
    */
   
-      for (server_node = serv_list.head; server_node; server_node = server_node->next)
+      DLINK_FOREACH(server_node, serv_list.head)
 	{
 	  server = (struct Client *) server_node->data;
 		  
@@ -1152,7 +1152,7 @@ send_umode_out(struct Client *client_p,
 
   send_umode(NULL, source_p, old, SEND_UMODES, buf);
 
-  for(ptr = serv_list.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, serv_list.head)
     {
       target_p = ptr->data;
 

@@ -61,7 +61,7 @@ void tstats(struct Client *source_p)
   sp = &tmp;
   memcpy(sp, ServerStats, sizeof(struct ServerStatistics));
 
-  for(ptr = serv_list.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, serv_list.head)
     {
       target_p = ptr->data;
 
@@ -83,7 +83,7 @@ void tstats(struct Client *source_p)
 	}
     }
 
-  for(ptr = lclient_list.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, lclient_list.head)
     {
       target_p = ptr->data;
 
@@ -106,7 +106,7 @@ void tstats(struct Client *source_p)
       
     }
 
-  for(ptr = unknown_list.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, unknown_list.head)
     {
       sp->is_ni++;
     }

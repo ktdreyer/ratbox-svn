@@ -233,9 +233,8 @@ det_confs_butmask(struct Client *client_p, int mask)
   dlink_node *link_next;
   struct ConfItem *aconf;
 
-  for (dlink = client_p->localClient->confs.head; dlink; dlink = link_next)
+  DLINK_FOREACH_SAFE(dlink, link_next, client_p->localClient->confs.head)
   {
-    link_next = dlink->next;
     aconf = dlink->data;
 
     if ((aconf->status & mask) == 0)
@@ -965,7 +964,7 @@ detach_conf(struct Client* client_p,struct ConfItem* aconf)
   if(aconf == NULL)
     return(-1);
 
-  for(ptr = client_p->localClient->confs.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, client_p->localClient->confs.head)
     {
       if (ptr->data == aconf)
         {
@@ -1005,9 +1004,9 @@ detach_conf(struct Client* client_p,struct ConfItem* aconf)
 static int 
 is_attached(struct Client *client_p, struct ConfItem *aconf)
 {
-  dlink_node *ptr=NULL;
+  dlink_node *ptr;
 
-  for (ptr = client_p->localClient->confs.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, client_p->localClient->confs.head)
     if (ptr->data == aconf)
       break;
   
@@ -2037,7 +2036,7 @@ get_oper_name(struct Client *client_p)
 
   if (MyConnect(client_p))
     {
-      for (cnode=client_p->localClient->confs.head; cnode; cnode=cnode->next)
+      DLINK_FOREACH(cnode, client_p->localClient->confs.head)
 	if (((struct ConfItem*)cnode->data)->status & CONF_OPERATOR)
 	  {
 	    ircsprintf(buffer, "%s!%s@%s{%s}", client_p->name,
