@@ -1,3 +1,15 @@
+androsyn    2001/12/10 01:01:41 EST	(20011210_7)
+
+  Modified files:
+    src                  s_bsd_sigio.c 
+  Log:
+  Keep sigio from using 100% of the cpu..
+  
+  Revision  Changes    Path
+  7.3       +49 -27    ircd-hybrid-7/src/s_bsd_sigio.c
+
+
+
 lusky       2001/12/10 00:09:23 EST	(20011210_6)
 
   Modified files:
