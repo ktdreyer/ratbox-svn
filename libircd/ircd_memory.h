@@ -1,11 +1,27 @@
+/* $Id$ */
+
 #ifndef _I_MEMORY_H
 #define _I_MEMORY_H
-#undef MEMDEBUG
+
+/* #define MEMDEBUG */
+
 #include "ircd_defs.h"
 #include "blalloc.h"
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef WE_ARE_MEMORY_C
+#undef strdup
+#undef malloc
+#undef realloc
+#undef calloc
+#undef free
+#define malloc do_not_call_old_memory_functions!call_My*functions
+#define calloc do_not_call_old_memory_functions!call_My*functions
+#define realloc do_not_call_old_memory_functions!call_My*functions
+#define strdup do_not_call_old_memory_functions!call_My*functions
+#define free do_not_call_old_memory_functions!call_My*functions
+#endif
 
 #ifdef MEMDEBUG
 extern void*       _MyMalloc(size_t size, char * file, int line);
