@@ -46,6 +46,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+int mr_server(struct Client*, struct Client*, int, char **);
+int ms_server(struct Client*, struct Client*, int, char **);
 struct Message server_msgtab = {
   MSG_SERVER, 0, 3, 0, MFLG_SLOW | MFLG_UNREG, 0,
   {mr_server, m_registered, ms_server, m_registered}

@@ -436,6 +436,9 @@ int register_user(struct Client *cptr, struct Client *sptr,
       if( (status = check_X_line(cptr,sptr)) < 0 )
 	return status;
 
+/* Put this in #ifdef now, and make sure that we are using openssl or
+ * it breaks the build. */
+#ifdef USE_IDS
 	  if (sptr->user->id[0] == '\0') 
 	  {
 		  do {
@@ -445,7 +448,8 @@ int register_user(struct Client *cptr, struct Client *sptr,
 		  strcpy(sptr->user->id, id);
 		  add_to_id_hash_table(sptr->user->id, sptr);
 	  }
-	  
+#endif
+
       sendto_realops_flags(FLAGS_CCONN,
 			   "Client connecting: %s (%s@%s) [%s] {%s}",
 			   nick, sptr->username, sptr->host,
