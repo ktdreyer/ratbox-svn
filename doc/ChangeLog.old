@@ -1,3 +1,16 @@
+*** 20010618_2 by jdc
+- Modifications to support verbose logging for cryptlink problems.
+  Patches originally written by einride.  Logging levels are L_NOTICE
+  and L_CRIT.
+  Modified files:
+    * include/s_conf.h
+    * modules/m_cryptlink.c
+    * src/ircd_parser.y
+    * src/rsa.c
+    * src/s_serv.c
+
+
+
 *** 20010618_1 by a1kmm
 - Committing my version of .indent.pro
 
