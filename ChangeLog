@@ -1,3 +1,18 @@
+androsyn    2003/11/17 12:26:53 EST	(20031117_0)
+
+  Modified files:
+    include              ircd.h 
+    src                  ircd.c newconf.c 
+  Log:
+  Add Hwy's -conftest patch
+  
+  Revision  Changes    Path
+  7.72      +2 -0      ircd-ratbox/include/ircd.h
+  7.320     +16 -0     ircd-ratbox/src/ircd.c
+  7.118     +9 -1      ircd-ratbox/src/newconf.c
+
+
+
 androsyn    2003/11/11 20:58:03 EST	(20031112_0)
 
   Modified files:
