@@ -1,3 +1,8 @@
+*** 20001127_9 by bill
+
+ - added _moddeinit()
+
+
 *** 20001127_8 by db
 - fixed modload/modunload yes. they work now
 
