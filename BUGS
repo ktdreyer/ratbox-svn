@@ -45,6 +45,9 @@
     loaded on start-up.  They must be manually MODLOAD'd after the server
     starts.
 
+6.  IPv6 Address ::1 is not supported.  Weird things can happen, including
+    numeric 461 errors (ERR_NEEDMOREPARAMS) and KILL's for the clients with
+    that IP.
 
 For more information see http://bugs.efnow.net
 
