@@ -1,3 +1,37 @@
+leeh        2004/07/30 16:24:00 EDT	(20040730_10)
+
+  Modified files:
+    modules/core         m_server.c 
+    src                  commio.c crypt.c event.c getopt.c ircd.c 
+                         ircd_lexer.l ircd_signal.c modules.c 
+    tools                README.mkpasswd 
+  Removed files:
+    servlink             descrip.mms 
+    src                  descrip.mms qio.c version.com 
+    tools                descrip.mms mkpasswd_vms.c 
+  Log:
+  - remove VMS
+  
+  Revision  Changes    Path
+  1.136     +2 -7      ircd-ratbox/modules/core/m_server.c
+  1.2       +0 -15     ircd-ratbox/servlink/descrip.mms (dead)
+  1.11      +0 -20     ircd-ratbox/src/commio.c
+  7.10      +0 -4      ircd-ratbox/src/crypt.c
+  7.13      +0 -44     ircd-ratbox/src/descrip.mms (dead)
+  7.42      +0 -54     ircd-ratbox/src/event.c
+  7.22      +0 -4      ircd-ratbox/src/getopt.c
+  7.350     +3 -19     ircd-ratbox/src/ircd.c
+  1.162     +0 -4      ircd-ratbox/src/ircd_lexer.l
+  7.24      +0 -25     ircd-ratbox/src/ircd_signal.c
+  7.145     +0 -3      ircd-ratbox/src/modules.c
+  7.6       +0 -221    ircd-ratbox/src/qio.c (dead)
+  7.6       +0 -101    ircd-ratbox/src/version.com (dead)
+  1.7       +0 -5      ircd-ratbox/tools/README.mkpasswd
+  7.7       +0 -25     ircd-ratbox/tools/descrip.mms (dead)
+  7.2       +0 -458    ircd-ratbox/tools/mkpasswd_vms.c (dead)
+
+
+
 leeh        2004/07/30 14:09:42 EDT	(20040730_9)
 
   Modified files:
