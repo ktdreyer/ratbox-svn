@@ -1,9 +1,9 @@
-  *********** Note for those who dont bother reading docs *****************    
+  *********** Note for those who dont bother reading docs *****************
   * Reading INSTALL is now a must, as the old DPATH is now specified when *
   * configure is run.                                                     *
   * - You now need to ./configure --prefix="/path/to/install/it"          *
+  * The old config format WILL NOT WORK.  Please see doc/example.conf (!) *
   *************************************************************************
-
 
 HOW TO BUILD:
 -------------

@@ -36,6 +36,7 @@ Other files recommended for reading: BUGS, README.FIRST, INSTALL
   * Reading INSTALL is now a must, as the old DPATH is now specified when *
   * configure is run.                                                     *
   * - You now need to ./configure --prefix="/path/to/install/it"          *
+  * The old config format WILL NOT WORK.  Please see doc/example.conf (!) *
   *************************************************************************
 
 --------------------------------------------------------------------------------
