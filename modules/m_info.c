@@ -125,10 +125,17 @@ static struct InfoStruct info_table[] = {
 	 "Startup value of FLOODCOUNT",
 	 },
 	{
+	  "default_operstring",
+	  OUTPUT_STRING,
+	  &ConfigFileEntry.default_operstring,
+	  "Default operstring at startup.",
+	},
+	{
 	 "disable_auth",
 	 OUTPUT_BOOLEAN_YN,
 	 &ConfigFileEntry.disable_auth,
-	 "Controls whether auth checking is disabled or not"},
+	 "Controls whether auth checking is disabled or not"
+	},
 	{
 	 "dot_in_ip6_addr",
 	 OUTPUT_BOOLEAN,

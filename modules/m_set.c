@@ -77,6 +77,7 @@ static void quote_identtimeout(struct Client *, int);
 static void quote_idletime(struct Client *, int);
 static void quote_log(struct Client *, int);
 static void quote_max(struct Client *, int);
+static void quote_operstring(struct Client *, const char *);
 static void quote_spamnum(struct Client *, int);
 static void quote_spamtime(struct Client *, int);
 static void quote_splitmode(struct Client *, char *);
@@ -94,20 +95,21 @@ static void list_quote_commands(struct Client *);
  */
 
 static struct SetStruct set_cmd_table[] = {
-	/* name               function        string arg  int arg */
+	/* name               function      string arg  int arg */
 	/* -------------------------------------------------------- */
-	{"AUTOCONN", quote_autoconn, 1, 1},
-	{"AUTOCONNALL", quote_autoconnall, 0, 1},
-	{"FLOODCOUNT", quote_floodcount, 0, 1},
-	{"IDENTTIMEOUT", quote_identtimeout, 0, 1},
-	{"IDLETIME", quote_idletime, 0, 1},
-	{"LOG", quote_log, 0, 1},
-	{"MAX", quote_max, 0, 1},
-	{"SPAMNUM", quote_spamnum, 0, 1},
-	{"SPAMTIME", quote_spamtime, 0, 1},
-	{"SPLITMODE", quote_splitmode, 1, 0},
-	{"SPLITNUM", quote_splitnum, 0, 1},
-	{"SPLITUSERS", quote_splitusers, 0, 1},
+	{"AUTOCONN", 	quote_autoconn, 	1,	1	},
+	{"AUTOCONNALL", quote_autoconnall, 	0,	1	},
+	{"FLOODCOUNT", 	quote_floodcount, 	0,	1	},
+	{"IDENTTIMEOUT", quote_identtimeout,	0,	1	},
+	{"IDLETIME", 	quote_idletime, 	0,	1	},
+	{"LOG", 	quote_log, 		0,	1	},
+	{"MAX", 	quote_max, 		0,	1	},
+	{"OPERSTRING",	quote_operstring,	1,	0	},
+	{"SPAMNUM", 	quote_spamnum, 		0,	1	},
+	{"SPAMTIME", 	quote_spamtime, 	0,	1	},
+	{"SPLITMODE", 	quote_splitmode, 	1,	0	},
+	{"SPLITNUM", 	quote_splitnum, 	0,	1	},
+	{"SPLITUSERS", 	quote_splitusers, 	0,	1	},
 	/* -------------------------------------------------------- */
 	{(char *) 0, (void (*)()) 0, 0, 0}
 };
@@ -309,6 +311,38 @@ quote_max(struct Client *source_p, int newval)
 	{
 		sendto_one(source_p, ":%s NOTICE %s :Current Maxclients = %d (%d)",
 			   me.name, source_p->name, GlobalSetOptions.maxclients, Count.local);
+	}
+}
+
+/* SET OPERSTRING */
+static void
+quote_operstring(struct Client *source_p, const char *arg)
+{
+	if(!EmptyString(arg))
+	{
+		if(strlen(arg) > REALLEN)
+		{
+			sendto_one(source_p, 
+				   ":%s NOTICE %s :You cannot set OPERSTRING to"
+				   " longer than %d characters.",
+				   me.name, source_p->name, REALLEN);
+			return;
+		}
+
+		MyFree(GlobalSetOptions.operstring);
+		DupString(GlobalSetOptions.operstring, arg);
+
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+				     "%s has changed OPERSTRING to \"%s\"",
+				     get_oper_name(source_p), arg);
+
+		return;
+	}
+	else
+	{
+		sendto_one(source_p, ":%s NOTICE %s :OPERSTRING is currently \"%s\"",
+			   me.name, source_p->name, GlobalSetOptions.operstring);
+		return;
 	}
 }
 

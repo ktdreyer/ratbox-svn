@@ -46,6 +46,8 @@ struct SetOptions
 
 	int spam_num;
 	int spam_time;
+
+	char *operstring;
 };
 
 struct Counter

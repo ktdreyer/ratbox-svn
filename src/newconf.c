@@ -2079,6 +2079,25 @@ conf_set_cluster_type(void *data)
 }
 
 static void
+conf_set_general_default_operstring(void *data)
+{
+	if(EmptyString((char *) data) || strlen((char *) data) > REALLEN)
+	{
+		conf_report_error("Warning -- operstring must exist and be less than"
+				  " %d characters; ignoring this.",
+				  REALLEN);
+		MyFree(ConfigFileEntry.default_operstring);
+		DupString(ConfigFileEntry.default_operstring, "is an IRC Operator");
+	}
+	else
+	{
+		MyFree(ConfigFileEntry.default_operstring);
+		DupString(ConfigFileEntry.default_operstring, (char *) data);
+	}
+}
+	
+
+static void
 conf_set_general_failed_oper_notice(void *data)
 {
 	ConfigFileEntry.failed_oper_notice = *(unsigned int *) data;
@@ -2946,6 +2965,8 @@ newconf_init()
 	add_conf_item("cluster", "type", CF_STRING | CF_FLIST, conf_set_cluster_type);
 
 	add_top_conf("general", NULL, NULL);
+	add_conf_item("general", "default_operstring", CF_QSTRING,
+		      conf_set_general_default_operstring);
 	add_conf_item("general", "failed_oper_notice", CF_YESNO,
 		      conf_set_general_failed_oper_notice);
 	add_conf_item("general", "anti_nick_flood", CF_YESNO, conf_set_general_anti_nick_flood);

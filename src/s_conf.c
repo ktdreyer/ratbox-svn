@@ -1013,6 +1013,8 @@ set_default_conf(void)
 
 	set_log_level(L_NOTICE);
 
+	DupString(ConfigFileEntry.default_operstring, "is an IRC Operator");
+	
 	ConfigFileEntry.failed_oper_notice = YES;
 	ConfigFileEntry.anti_nick_flood = NO;
 	ConfigFileEntry.max_nick_time = 20;
@@ -1882,6 +1884,9 @@ clear_out_old_conf(void)
 	AdminInfo.email = NULL;
 	MyFree(AdminInfo.description);
 	AdminInfo.description = NULL;
+
+	MyFree(ConfigFileEntry.default_operstring);
+	ConfigFileEntry.default_operstring = NULL;
 
 	/* operator{} and class{} blocks are freed above */
 	/* clean out listeners */

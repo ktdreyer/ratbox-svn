@@ -404,7 +404,8 @@ whois_person(struct Client *source_p, struct Client *target_p, int glob)
 	if(IsOper(target_p))
 	{
 		sendto_one(source_p, form_str(RPL_WHOISOPERATOR),
-			   me.name, source_p->name, target_p->name);
+			   me.name, source_p->name, target_p->name,
+			   GlobalSetOptions.operstring);
 	}
 
 	if(MyClient(target_p))

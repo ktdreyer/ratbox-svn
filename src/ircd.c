@@ -467,6 +467,7 @@ initialize_global_set_options(void)
 
 	GlobalSetOptions.ident_timeout = IDENT_TIMEOUT;
 
+	DupString(GlobalSetOptions.operstring, ConfigFileEntry.default_operstring);
 	/* memset( &ConfigChannel, 0, sizeof(ConfigChannel)); */
 
 	/* End of global set options */
