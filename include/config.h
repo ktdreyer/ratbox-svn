@@ -192,10 +192,6 @@
  */
 #define USE_UH
 
-/* TOPIC_INFO - Shows you who and when someone set the topic
- */
-#define TOPIC_INFO
-
 /* ANTI_NICK_FLOOD - prevents nick flooding
  * define if you want to block local clients from nickflooding
  */

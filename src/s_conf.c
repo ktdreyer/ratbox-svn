@@ -306,6 +306,8 @@ void report_configured_links(struct Client* sptr, int mask)
             c = p->conf_char;
             if(tmp->flags & CONF_FLAGS_ZIP_LINK)
               c = 'c';
+            if(tmp->flags & CONF_FLAGS_LAZY_LINK)
+              c = 'n';
 
             /* Don't allow non opers to see actual ips */
             if(IsAnOper(sptr))
@@ -1952,6 +1954,8 @@ static void initconf(FBFILE* file, int use_include)
           /* NOTREACHED */
         }
 
+      aconf->flags = 0;
+
       switch( conf_letter )
 	{
         case 'A':case 'a': /* Name, e-mail address of administrator */
@@ -1959,18 +1963,14 @@ static void initconf(FBFILE* file, int use_include)
           add_host_user_port_fields(aconf,host_field,user_field,port_field);
           break;
 
-        case 'C':
-          ccount++;
-          aconf->status = CONF_CONNECT_SERVER;
-          aconf->flags = CONF_FLAGS_ALLOW_AUTO_CONN;
-          add_host_user_port_fields(aconf,host_field,user_field,port_field);
-          aconf = conf_add_server(aconf,class_field,ncount,ccount);
-          break;
-
         case 'c':
-          ccount++;
+          aconf->flags |= CONF_FLAGS_ZIP_LINK;
+          /* drop into normal C line code */
+
+        case 'C':
           aconf->status = CONF_CONNECT_SERVER;
-          aconf->flags = CONF_FLAGS_ALLOW_AUTO_CONN|CONF_FLAGS_ZIP_LINK;
+          ccount++;
+          aconf->flags |= CONF_FLAGS_ALLOW_AUTO_CONN;
           add_host_user_port_fields(aconf,host_field,user_field,port_field);
           aconf = conf_add_server(aconf,class_field,ncount,ccount);
           break;
@@ -1999,6 +1999,9 @@ static void initconf(FBFILE* file, int use_include)
 
         case 'i': /* Just plain normal irc client trying  */
                   /* to connect to me */
+
+        /* drop into normal I line code */
+
 #ifdef LITTLE_I_LINES
           aconf->flags |= CONF_FLAGS_LITTLE_I_LINE;
 #endif
@@ -2046,11 +2049,14 @@ static void initconf(FBFILE* file, int use_include)
           conf_add_me(aconf);
           break;
 
-        case 'N': /* Server where I should NOT try to     */
         case 'n': /* connect in case of lp failures     */
+          aconf->flags |= CONF_FLAGS_LAZY_LINK;
+	  /* drop into normal N line code */
+
+        case 'N': /* Server where I should NOT try to     */
           /* but which tries to connect ME        */
-          ++ncount;
           aconf->status = CONF_NOCONNECT_SERVER;
+          ++ncount;
           add_host_user_port_fields(aconf,host_field,user_field,port_field);
           aconf = conf_add_server(aconf,class_field,ncount,ccount);
           break;

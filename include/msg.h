@@ -64,6 +64,7 @@ typedef struct MessageTree MESSAGE_TREE;
 #define MSG_DBOP     "DBOP"
 #endif
 #define MSG_PRIVATE  "PRIVMSG"  /* PRIV */
+#define MSG_CBURST   "CBURST"   /* channel burst */
 #define MSG_WHO      "WHO"      /* WHO  -> WHOC */
 #define MSG_WHOIS    "WHOIS"    /* WHOI */
 #define MSG_WHOWAS   "WHOWAS"   /* WHOW */
@@ -168,6 +169,7 @@ struct Message msgtab[] = {
 #ifdef DBOP
   { MSG_DBOP,    m_dbop,     0, MAXPARA, 1, 0, 0, 0L },
 #endif
+  { MSG_CBURST,  m_cburst,   0, MAXPARA, 1, 0, 0, 0L },
   { MSG_MODE,    m_mode,     0, MAXPARA, 1, 0, 0, 0L },
   { MSG_QUIT,    m_quit,     0, MAXPARA, 1, 1, 0, 0L },
   { MSG_PART,    m_part,     0, MAXPARA, 1, 0, 0, 0L },

@@ -148,14 +148,14 @@ int     m_topic(struct Client *cptr,
                * chptr zeroed
                */
               strncpy_irc(chptr->topic, topic, TOPICLEN);
-#ifdef TOPIC_INFO
+
               /*
                * XXX - this truncates the topic_nick if
                * strlen(sptr->name) > NICKLEN
                */
               strncpy_irc(chptr->topic_nick, sptr->name, NICKLEN);
               chptr->topic_time = CurrentTime;
-#endif
+
               sendto_match_servs(chptr, cptr,":%s TOPIC %s :%s",
                                  parv[0], chptr->chname,
                                  chptr->topic);

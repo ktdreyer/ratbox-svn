@@ -822,6 +822,10 @@ int main(int argc, char *argv[])
   init_stats();
   init_tree_parse(msgtab);      /* tree parse code (orabidoo) */
 
+#ifdef HUB
+  initServerMask();
+#endif
+
   fdlist_init();
   init_netio();
 

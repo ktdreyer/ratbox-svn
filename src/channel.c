@@ -1003,6 +1003,83 @@ void send_channel_modes(struct Client *cptr, struct Channel *chptr)
                me.name, chptr->chname, modebuf, parabuf);
 }
 
+/*
+** m_cburst
+**      parv[0] = sender prefix
+**      parv[1] = channel
+**      parv[2] = channel password (key)
+*/
+int     m_cburst(struct Client *cptr,
+               struct Client *sptr,
+               int parc,
+               char *parv[])
+{
+  char *name;
+  char *nick;
+  struct Client *acptr;
+  struct Channel *chptr;
+
+   if(parc < 2 || *parv[1] == '\0')
+     return 0;
+
+  name = parv[1];
+  nick = NULL;
+
+  if( parc > 2 )
+    nick = parv[2];
+
+  sendto_realops("CBURST locally called for %s nick %s", name,
+    nick ? nick : "<NULL>" );
+
+  if(!(chptr=hash_find_channel(name, NullChn)))
+    {
+      sendto_realops(
+        "CBURST %s does not exist",
+        name );
+      return -1;
+    }
+
+   chptr->lazyLinkChannelExists = cptr->serverMask;
+
+#if 0
+  /* If client attempting to join on a CBURST request
+   * is banned or the channel is +i etc. reject client "noisily"
+   * using a KICK... This is a kludge. I admit it.
+   * -Dianora
+   */
+  /* oops problem is, the CBURST request comes just before
+   * the leaf sends an SJOIN
+   */
+  if( nick && (acptr = hash_find_client(nick,(struct Client *)NULL)))
+    {
+      if( (is_banned(acptr, chptr) == CHFL_BAN) ||
+          (chptr->mode.mode & MODE_INVITEONLY) ||
+          (*chptr->mode.key))
+        {
+          sendto_channel_butserv(chptr, sptr,
+                             ":%s KICK %s %s :LL",
+                             me.name, name, nick);
+          sendto_one(cptr,":%s KICK %s %s :LL kick",
+                         me.name, name, nick); 
+          remove_user_from_channel(acptr, chptr, 1);
+        }
+    }
+#endif
+  if(IsCapable(cptr,CAP_LL))
+  {
+    send_channel_modes(cptr, chptr);
+     /* Send the topic */
+    sendto_one(cptr, ":%s TOPIC %s :%s",
+       chptr->topic_nick, chptr->chname, chptr->topic);
+  }
+  else
+    {
+      sendto_realops("CBURST request received from non LL capable server!");
+    }
+
+  return 0;
+}
+
 /* stolen from Undernet's ircd  -orabidoo
  *
  */

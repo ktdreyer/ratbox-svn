@@ -45,6 +45,8 @@ struct Capability
 #define CAP_EX          0x00000008      /* Can do channel +e exemptions */
 #define CAP_CHW         0x00000010      /* Can do channel wall @# */
 #define CAP_DE          0x00000020      /* Can do channel +d (regex deny) */
+#define CAP_LL          0x00000040      /* Can do lazy links */
+#define CAP_MASK        CAP_QS|CAP_EX|CAP_CHW|CAP_DE
 
 #define DoesCAP(x)      ((x)->caps)
 
@@ -100,6 +102,11 @@ extern void        set_autoconn(struct Client *,char *,char *,int);
 extern const char* show_capabilities(struct Client* client);
 extern void        show_servers(struct Client *);
 extern time_t      try_connections(time_t currenttime);
+
+#ifdef HUB
+extern void        initServerMask(void);
+extern void        restoreUnusedServerMask(unsigned long);
+#endif
 
 #endif /* INCLUDED_s_serv_h */
 

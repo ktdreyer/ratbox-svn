@@ -53,21 +53,24 @@ struct Channel
   struct Channel* hnextch;
   struct Mode     mode;
   char            topic[TOPICLEN + 1];
-#ifdef TOPIC_INFO
   char            topic_nick[NICKLEN + 1];
   time_t          topic_time;
+  int             users;      /* user count */
+  int             locusers;   /* local user count (Not used yet) */
+  int             opcount;    /* number of chanops */
+#ifdef HUB
+  /* Only needed for lazy links and hubs */
+  unsigned long   lazyLinkChannelExists;
 #endif
-  int             users;    /* user count */
-  int             opcount;  /* number of chanops */
   struct SLink*   members;
   struct SLink*   invites;
   struct SLink*   banlist;
   struct SLink*   exceptlist;
   struct SLink*   denylist;
-  int             num_bed;  /* number of bans+exceptions+denies */
+  int             num_bed;          /* number of bans+exceptions+denies */
   time_t          channelts;
-  int             locally_created;  /* used to flag a locally created channel */
-  int             keep_their_modes; /* used only on mode after sjoin */
+  char            locally_created;  /* used to flag a locally created channel*/
+  char            keep_their_modes; /* used only on mode after sjoin */
 #ifdef FLUD
   time_t          fludblock;
   struct fludbot* fluders;

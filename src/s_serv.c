@@ -73,9 +73,14 @@ struct Capability captab[] = {
   { "EX",       CAP_EX },
   { "CHW",      CAP_CHW },
   { "DE",       CAP_DE },
+  { "LL",       CAP_LL },
   { 0,   0 }
 };
 
+#ifdef HUB
+static unsigned long nextFreeMask();
+static unsigned long freeMask;
+#endif
 
 /*
  * my_name_for_link - return wildcard name of my server name 
@@ -414,6 +419,21 @@ int check_server(struct Client* cptr)
   attach_conf(cptr, n_conf);
   attach_conf(cptr, c_conf);
   attach_confs(cptr, cptr->name, CONF_HUB | CONF_LEAF);
+
+  if( !(n_conf->flags & CONF_FLAGS_LAZY_LINK) )
+    ClearCap(cptr,CAP_LL);
+
+  if( !(c_conf->flags & CONF_FLAGS_ZIP_LINK) )
+    ClearCap(cptr,CAP_ZIP);
+
+#ifdef HUB
+  /* n line with an H line, must be a typo */
+
+  if( ( n_conf->flags & CONF_FLAGS_LAZY_LINK ) &&
+      (find_conf_by_name(n_conf->name, CONF_HUB ) ) )
+    ClearCap(cptr,CAP_LL);
+#endif
+
   /*
    * if the C:line doesn't have an IP address assigned put the one from
    * the client socket there
@@ -429,9 +449,8 @@ int check_server(struct Client* cptr)
 /*
 ** send the CAPAB line to a server  -orabidoo
 *
-* modified, always send all capabilities -Dianora
 */
-void send_capabilities(struct Client* cptr, int use_zip)
+void send_capabilities(struct Client* cptr, int can_send)
 {
   struct Capability* cap;
   char  msgbuf[BUFSIZE];
@@ -440,20 +459,10 @@ void send_capabilities(struct Client* cptr, int use_zip)
 
   for (cap = captab; cap->name; ++cap)
     {
-      /* kludge to rhyme with sludge */
-
-      if (use_zip)
+      if (cap->cap & can_send)
         {
           strcat(msgbuf, cap->name);
           strcat(msgbuf, " ");
-        }
-      else
-        {
-          if(cap->cap != CAP_ZIP)
-            {
-              strcat(msgbuf, cap->name);
-              strcat(msgbuf, " ");
-            }
         }
     }
   sendto_one(cptr, "CAPAB :%s", msgbuf);
@@ -511,6 +520,14 @@ const char* show_capabilities(struct Client* acptr)
   return msgbuf;
 }
 
+/*
+ * server_estab
+ *
+ * inputs       - pointer to a struct Client
+ * output       -
+ * side effects -
+ */
+
 int server_estab(struct Client *cptr)
 {
   struct Channel*   chptr;
@@ -532,7 +549,7 @@ int server_estab(struct Client *cptr)
   if (!(n_conf = find_conf_name(cptr->confs, host, CONF_NOCONNECT_SERVER)))
     {
       ServerStats->is_ref++;
-      sendto_one(cptr,
+       sendto_one(cptr,
                  "ERROR :Access denied. No N line for server %s", inpath);
       sendto_ops("Access denied. No N line for server %s", inpath);
       return exit_client(cptr, cptr, cptr, "No N line for server");
@@ -593,10 +610,12 @@ int server_estab(struct Client *cptr)
       ** Pass my info to the new server
       */
 
-      send_capabilities(cptr,(c_conf->flags & CONF_FLAGS_ZIP_LINK));
+      send_capabilities(cptr,CAP_MASK|
+                      ((c_conf->flags & CONF_FLAGS_ZIP_LINK) ? CAP_ZIP : 0) |
+                      ((n_conf->flags & CONF_FLAGS_LAZY_LINK) ? CAP_LL : 0));
       sendto_one(cptr, "SERVER %s 1 :%s",
                  my_name_for_link(me.name, n_conf), 
-                 (me.info[0]) ? (me.info) : "IRCers United");
+                 (me.info[0]) ? (me.info) : "If you see this, your server is misconfigured");
     }
   else
     {
@@ -613,7 +632,6 @@ int server_estab(struct Client *cptr)
         }
     }
   
-
 #ifdef ZIP_LINKS
   if (IsCapable(cptr, CAP_ZIP) && (c_conf->flags & CONF_FLAGS_ZIP_LINK))
     {
@@ -659,11 +677,13 @@ int server_estab(struct Client *cptr)
   if (!set_sock_buffers(cptr->fd, READBUF_SIZE))
     report_error(SETBUF_ERROR_MSG, get_client_name(cptr, TRUE), errno);
 
+  cptr->serverMask = nextFreeMask();
+
   /* LINKLIST */
   /* add to server link list -Dianora */
   cptr->next_server_client = serv_cptr_list;
   serv_cptr_list = cptr;
-
+  
   fdlist_add(cptr->fd, FDL_SERVER | FDL_BUSY);
 
   nextping = CurrentTime;
@@ -781,45 +801,68 @@ int server_estab(struct Client *cptr)
       ** -orabidoo
       */
 
-  {
-    struct SLink* l;
-    static char   nickissent = 1;
-      
-    nickissent = 3 - nickissent;
-    /* flag used for each nick to check if we've sent it
-       yet - must be different each time and !=0, so we
-       alternate between 1 and 2 -orabidoo
-       */
-    for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
-      {
-        for (l = chptr->members; l; l = l->next)
-          {
-            acptr = l->value.cptr;
-            if (acptr->nicksent != nickissent)
-              {
-                acptr->nicksent = nickissent;
-                if (acptr->from != cptr)
-                  sendnick_TS(cptr, acptr);
-              }
-          }
-#if defined(PRESERVE_CHANNEL_ON_SPLIT) || defined(NO_JOIN_ON_SPLIT)
-        /* don't send 0 user channels on rejoin (Mortiis)
-         */
-        if(chptr->users != 0)
-#endif
-          send_channel_modes(cptr, chptr);
-      }
-    /*
-    ** also send out those that are not on any channel
-    */
-    for (acptr = &me; acptr; acptr = acptr->prev)
-      if (acptr->nicksent != nickissent)
-        {
-          acptr->nicksent = nickissent;
-          if (acptr->from != cptr)
-            sendnick_TS(cptr, acptr);
-        }
+#ifdef HUB
+  /* On a "lazy link" (version 1 at least) only send the nicks
+   * Leafs always have to send nicks plus channels
+   */
+  if (IsCapable(cptr, CAP_LL) && (n_conf->flags & CONF_FLAGS_LAZY_LINK))
+    {
+      for (acptr = &me; acptr; acptr = acptr->prev)
+        if (acptr->from != cptr)
+          sendnick_TS(cptr, acptr);
     }
+  else
+#endif
+    {
+      struct SLink* l;
+      static char   nickissent = 1;
+
+#ifndef HUB
+      if (IsCapable(cptr, CAP_LL))
+        {
+          for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
+            {
+              sendto_one(cptr,":%s CBURST %s ",
+                me.name, chptr->chname );
+            }
+        }
+#endif
+
+      nickissent = 3 - nickissent;
+      /* flag used for each nick to check if we've sent it
+       * yet - must be different each time and !=0, so we
+       * alternate between 1 and 2 -orabidoo
+       */
+      for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
+        {
+          for (l = chptr->members; l; l = l->next)
+            {
+              acptr = l->value.cptr;
+              if (acptr->nicksent != nickissent)
+                {
+                  acptr->nicksent = nickissent;
+                  if (acptr->from != cptr)
+                    sendnick_TS(cptr, acptr);
+                }
+            }
+#if defined(PRESERVE_CHANNEL_ON_SPLIT) || defined(NO_JOIN_ON_SPLIT)
+          /* don't send 0 user channels on rejoin (Mortiis)
+           */
+          if(chptr->users != 0)
+#endif
+            send_channel_modes(cptr, chptr);
+        }
+      /*
+      ** also send out those that are not on any channel
+      */
+      for (acptr = &me; acptr; acptr = acptr->prev)
+        if (acptr->nicksent != nickissent)
+          {
+            acptr->nicksent = nickissent;
+            if (acptr->from != cptr)
+              sendnick_TS(cptr, acptr);
+          }
+      }
 
   cptr->flags2 &= ~FLAGS2_CBURST;
 
@@ -919,3 +962,43 @@ void show_servers(struct Client *cptr)
              cptr->name, j, (j==1) ? "" : "s");
 }
 
+#ifdef HUB
+void initServerMask(void)
+{
+  freeMask = 0xFFFFFFFFL;
+}
+
+void restoreUnusedServerMask(unsigned long mask)
+{
+  struct Channel*   chptr;
+  unsigned long clear_mask;
+
+  freeMask |= mask;
+
+  clear_mask = ~mask;
+
+  for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
+    {
+      chptr->lazyLinkChannelExists &= clear_mask;
+    }
+}
+
+static unsigned long nextFreeMask()
+{
+  int i;
+  unsigned long mask;
+
+  mask = 1;
+
+  for(i=0;i<32;i++)
+    {
+      if( mask & freeMask )
+        {
+          freeMask &= ~mask;
+          return(mask);
+        }
+      mask <<= 1;
+    }
+  return 0L; /* watch this special case ... */
+}
+#endif

@@ -26,6 +26,7 @@
 #include "client.h"
 #include "irc_string.h"
 #include "s_serv.h"
+#include "s_conf.h"
 
 #include <assert.h>
 
@@ -116,7 +117,6 @@ int m_capab(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
             }
          }
     }
-  
   return 0;
 }
 

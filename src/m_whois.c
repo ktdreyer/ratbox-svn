@@ -164,7 +164,6 @@ int     m_whois(struct Client *cptr,
    * removing it totally. 
    * -Dianora 
    */
-
   /*  for (tmp = parv[1]; (nick = strtoken(&p, tmp, ",")); tmp = NULL) */
   nick = parv[1];
   p = strchr(parv[1],',');

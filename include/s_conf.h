@@ -24,6 +24,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.4  2000/01/02 05:34:53  db
+ * - Preliminary rough cut at Lazy Links, still a lot of mopping up to do
+ *   'n' in c/n's means try lazy link, 'N' means do normal.
+ *
  * Revision 7.3  1999/12/30 20:35:36  db
  * resync with current ircd-hybrid-6 tree
  *
@@ -284,6 +288,7 @@ typedef struct QlineItem {
 #define CONF_FLAGS_ALLOW_AUTO_CONN      0x0400
 #define CONF_FLAGS_ZIP_LINK             0x0800
 #define CONF_FLAGS_SPOOF_IP             0x1000
+#define CONF_FLAGS_LAZY_LINK            0x2000
 
 #ifdef LITTLE_I_LINES
 #define CONF_FLAGS_LITTLE_I_LINE        0x8000

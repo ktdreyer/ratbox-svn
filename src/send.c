@@ -811,7 +811,13 @@ sendto_match_servs(struct Channel *chptr, struct Client *from, const char *patte
     {
       if (cptr == from)
         continue;
-      
+#ifdef HUB
+      if(IsCapable(cptr,CAP_LL))
+        {
+          if( !(chptr->lazyLinkChannelExists & cptr->serverMask) )
+             continue;
+        }
+#endif      
       vsendto_one(cptr, pattern, args);
     }
 

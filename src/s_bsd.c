@@ -374,7 +374,9 @@ static int completed_connection(struct Client* cptr)
   if (!EmptyString(c_conf->passwd))
     sendto_one(cptr, "PASS %s :TS", c_conf->passwd);
   
-  send_capabilities(cptr, (c_conf->flags & CONF_FLAGS_ZIP_LINK));
+  send_capabilities(cptr, CAP_MASK|
+                   ((c_conf->flags & CONF_FLAGS_ZIP_LINK) ? CAP_ZIP : 0) |
+                   ((n_conf->flags & CONF_FLAGS_LAZY_LINK) ? CAP_LL : 0));
 
   sendto_one(cptr, "SERVER %s 1 :%s",
              my_name_for_link(me.name, n_conf), me.info);
