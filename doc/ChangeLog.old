@@ -1,3 +1,11 @@
+*** 20001025_2 by adrian
+
+
+Use the pre-munged poll flags for network IO, rather than creating
+our own set of POLL* flags.
+
+
+
 *** 20001025_1 by db
 - removed NO_JOIN_ON_SPLIT
 - cleaned up m_join.c a bit
