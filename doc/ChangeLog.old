@@ -1,3 +1,8 @@
+*** 20001222_4 by wcampbel
+1. Don't invalidate entire blocks just because they have an error
+2. Fixed SMALL bug with oper_admin
+
+
 *** 20001222_3 by wcampbel
 Document directed K-lines
 
