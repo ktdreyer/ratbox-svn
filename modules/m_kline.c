@@ -517,9 +517,9 @@ ms_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	{
 		if(remove_temp_kline(kuser, khost))
 		{
-			sendto_one(source_p,
-				   ":%s NOTICE %s :Un-klined [%s@%s] from temporary k-lines",
-				   me.name, parv[0], kuser, khost);
+			sendto_one_notice(source_p,
+					  ":Un-klined [%s@%s] from temporary k-lines",
+					  kuser, khost);
 
 			sendto_realops_flags(UMODE_ALL, L_ALL,
 					     "%s has removed the temporary K-Line for: [%s@%s]",
@@ -586,8 +586,8 @@ apply_tkline(struct Client *source_p, struct ConfItem *aconf,
 		     aconf->user, aconf->host, reason, oper_reason);
 	}
 
-	sendto_one(source_p, ":%s NOTICE %s :Added temporary %d min. K-Line [%s@%s]",
-		   me.name, source_p->name, tkline_time / 60, aconf->user, aconf->host);
+	sendto_one_notice(source_p, ":Added temporary %d min. K-Line [%s@%s]",
+			  tkline_time / 60, aconf->user, aconf->host);
 }
 
 /* valid_tkline()
@@ -787,10 +787,10 @@ already_placed_kline(struct Client *source_p, const char *luser, const char *lho
 			{
 				reason = aconf->passwd ? aconf->passwd : "<No Reason>";
 
-				sendto_one(source_p,
-					   ":%s NOTICE %s :[%s@%s] already K-Lined by [%s@%s] - %s",
-					   me.name, source_p->name, luser, lhost, aconf->user,
-					   aconf->host, reason);
+				sendto_one_notice(source_p,
+						  ":[%s@%s] already K-Lined by [%s@%s] - %s",
+						  luser, lhost, aconf->user,
+						  aconf->host, reason);
 				return 1;
 			}
 		}
@@ -823,16 +823,14 @@ remove_permkline_match(struct Client *source_p, const char *host, const char *us
 
 	if((in = fbopen(filename, "r")) == 0)
 	{
-		sendto_one(source_p, ":%s NOTICE %s :Cannot open %s", me.name, source_p->name,
-			   filename);
+		sendto_one_notice(source_p, ":Cannot open %s", filename);
 		return;
 	}
 
 	oldumask = umask(0);
 	if((out = fbopen(temppath, "w")) == 0)
 	{
-		sendto_one(source_p, ":%s NOTICE %s :Cannot open %s",
-			   me.name, source_p->name, temppath);
+		sendto_one_notice(source_p, ":Cannot open %s", temppath);
 		fbclose(in);
 		umask(oldumask);
 		return;
@@ -888,16 +886,14 @@ remove_permkline_match(struct Client *source_p, const char *host, const char *us
  */
 	if(error_on_write)
 	{
-		sendto_one(source_p,
-			   ":%s NOTICE %s :Couldn't write temp kline file, aborted",
-			   me.name, source_p->name);
+		sendto_one_notice(source_p, ":Couldn't write temp kline file, aborted");
 		return;
 	}
 	else if(!pairme)
 	{
 		if(!cluster)
-			sendto_one(source_p, ":%s NOTICE %s :No K-Line for %s@%s",
-				   me.name, source_p->name, user, host);
+			sendto_one_notice(source_p, ":No K-Line for %s@%s",
+					  user, host);
 
 		if(temppath != NULL)
 			(void) unlink(temppath);
@@ -910,8 +906,8 @@ remove_permkline_match(struct Client *source_p, const char *host, const char *us
 
 	if(!cluster)
 	{
-		sendto_one(source_p, ":%s NOTICE %s :K-Line for [%s@%s] is removed",
-			   me.name, source_p->name, user, host);
+		sendto_one_notice(source_p, ":K-Line for [%s@%s] is removed",
+				  user, host);
 	}
 
 	sendto_realops_flags(UMODE_ALL, L_ALL,
@@ -951,8 +947,8 @@ flush_write(struct Client *source_p, FBFILE * out, const char *buf, const char *
 
 	if(error_on_write)
 	{
-		sendto_one(source_p, ":%s NOTICE %s :Unable to write to %s",
-			   me.name, source_p->name, temppath);
+		sendto_one_notice(source_p, ":Unable to write to %s",
+				  temppath);
 		fbclose(out);
 		if(temppath != NULL)
 			(void) unlink(temppath);

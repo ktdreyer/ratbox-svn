@@ -35,6 +35,7 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "s_serv.h"
 
 static int mo_operwall(struct Client *, struct Client *, int, const char **);
 static int ms_operwall(struct Client *, struct Client *, int, const char **);
@@ -90,14 +91,12 @@ ms_operwall(struct Client *client_p, struct Client *source_p, int parc, const ch
 	const char *message = parv[1];
 
 	if(EmptyString(message))
-	{
-		if(MyClient(source_p))
-			sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-				   me.name, parv[0], "OPERWALL");
 		return 0;
-	}
 
-	sendto_server(client_p, NULL, NOCAPS, NOCAPS, ":%s OPERWALL :%s", parv[0], message);
+	sendto_server(client_p, NULL, CAP_TS6, NOCAPS, ":%s OPERWALL :%s",
+		      use_id(source_p), message);
+	sendto_server(client_p, NULL, NOCAPS, CAP_TS6, ":%s OPERWALL :%s",
+		      source_p->name, message);
 	sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", message);
 
 	return 0;

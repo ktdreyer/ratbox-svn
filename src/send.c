@@ -303,9 +303,9 @@ sendto_one(struct Client *target_p, const char *pattern, ...)
 
 /* sendto_one_prefix()
  *
- * inputs	- client to send to, source, va_args
+ * inputs	- client to send to, va_args
  * outputs	- client has message put into its queue
- * side effects - source/target is chosen based on TS6 capability
+ * side effects - source(us)/target is chosen based on TS6 capability
  */
 void
 sendto_one_prefix(struct Client *target_p, struct Client *source_p,
@@ -341,6 +341,46 @@ sendto_one_prefix(struct Client *target_p, struct Client *source_p,
 	_send_linebuf(dest_p, &linebuf);
 	linebuf_donebuf(&linebuf);
 }
+
+/* sendto_one_notice()
+ *
+ * inputs	- client to send to, va_args
+ * outputs	- client has a NOTICE put into its queue
+ * side effects - source(us)/target is chosen based on TS6 capability
+ */
+void
+sendto_one_notice(struct Client *target_p, const char *pattern, ...)
+{
+	struct Client *dest_p;
+	va_list args;
+	buf_head_t linebuf;
+
+	/* send remote if to->from non NULL */
+	if(target_p->from != NULL)
+		dest_p = target_p->from;
+	else
+		dest_p = target_p;
+
+	if(IsDeadorAborted(dest_p))
+		return;
+
+	if(IsMe(dest_p))
+	{
+		sendto_realops_flags(UMODE_ALL, L_ALL, "Trying to send to myself!");
+		return;
+	}
+
+	linebuf_newbuf(&linebuf);
+	va_start(args, pattern);
+	linebuf_putmsg(&linebuf, pattern, &args,
+		       ":%s NOTICE %s ",
+		       get_id(&me, target_p), get_id(target_p, target_p));
+	va_end(args);
+
+	_send_linebuf(dest_p, &linebuf);
+	linebuf_donebuf(&linebuf);
+}
+
 
 /* sendto_one_numeric()
  *

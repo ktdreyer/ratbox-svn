@@ -36,6 +36,7 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "s_serv.h"
 
 static int ms_wallops(struct Client *, struct Client *, int, const char **);
 static int mo_wallops(struct Client *, struct Client *, int, const char **);
@@ -98,7 +99,10 @@ ms_wallops(struct Client *client_p, struct Client *source_p, int parc, const cha
 	else
 		sendto_wallops_flags(UMODE_WALLOP, source_p, "%s", message);
 
-	sendto_server(client_p, NULL, NOCAPS, NOCAPS, ":%s WALLOPS :%s", parv[0], message);
+	sendto_server(client_p, NULL, CAP_TS6, NOCAPS, ":%s WALLOPS :%s", 
+		      use_id(source_p), message);
+	sendto_server(client_p, NULL, NOCAPS, CAP_TS6, ":%s WALLOPS :%s", 
+		      source_p->name, message);
 
 	return 0;
 }

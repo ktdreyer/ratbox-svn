@@ -503,8 +503,7 @@ static  const char *  replies[] = {
 /* 478 ERR_BANLISTFULL, */      ":%s 478 %s %s %s :Channel ban list is full",
 /* 479 ERR_BADCHANNAME */       "%s :Illegal channel name",
 /* 480 */       NULL,
-/* 481 ERR_NOPRIVILEGES, */
-                ":%s 481 %s :Permission Denied - You're not an IRC operator",
+/* 481 ERR_NOPRIVILEGES, */	":Permission Denied - You're not an IRC operator",
 /* 482 ERR_CHANOPRIVSNEEDED, */ ":%s 482 %s %s :You're not channel operator",
 /* 483 ERR_CANTKILLSERVER, */   ":You can't kill a server!",
 /* 484 ERR_RESTRICTED, */       ":%s 484 %s :You are restricted",
@@ -736,7 +735,7 @@ static  const char *  replies[] = {
 /* 710 RPL_KNOCK */		":%s 710 %s %s %s!%s@%s :has asked for an invite.",
 /* 711 RPL_KNOCKDLVR */		":%s 711 %s %s :Your KNOCK has been delivered.",
 /* 712 ERR_TOOMANYKNOCK */	":%s 712 %s %s :Too many KNOCKs (%s).",
-/* 713 ERR_CHANOPEN */		":%s 713 %s %s :Channel is open.",
+/* 713 ERR_CHANOPEN */		"%s :Channel is open.",
 /* 714 ERR_KNOCKONCHAN */	":%s 714 %s %s :You are already on that channel.",
 /* 715 ERR_KNOCKDISABLED */	":%s 715 %s :KNOCKs are disabled.",
 /* 716 RPL_TARGUMODEG */	":%s 716 %s %s :is in +g mode (server-side ignore.)",

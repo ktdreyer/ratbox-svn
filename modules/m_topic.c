@@ -109,9 +109,13 @@ m_topic(struct Client *client_p, struct Client *source_p, int parc, const char *
 					   source_p->name, source_p->username, source_p->host);
 				set_channel_topic(chptr, parv[2], topic_info, CurrentTime);
 
-				sendto_server(client_p, chptr, NOCAPS, NOCAPS,
+				sendto_server(client_p, chptr, CAP_TS6, NOCAPS,
 					      ":%s TOPIC %s :%s",
-					      parv[0], chptr->chname,
+					      use_id(source_p), chptr->chname,
+					      chptr->topic == NULL ? "" : chptr->topic);
+				sendto_server(client_p, chptr, NOCAPS, CAP_TS6,
+					      ":%s TOPIC %s :%s",
+					      source_p->name, chptr->chname,
 					      chptr->topic == NULL ? "" : chptr->topic);
 				sendto_channel_local(ALL_MEMBERS,
 						     chptr, ":%s!%s@%s TOPIC %s :%s",

@@ -55,12 +55,11 @@ static int
 ms_pong(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
-	const char *origin, *destination;
+	const char *destination;
 
 	if(parc < 2 || EmptyString(parv[1]))
 		return 0;
 
-	origin = parv[1];
 	destination = parv[2];
 	source_p->flags &= ~FLAGS_PINGSENT;
 
@@ -70,10 +69,13 @@ ms_pong(struct Client *client_p, struct Client *source_p, int parc, const char *
 	 * That being the case, we will route, but only for registered clients (a
 	 * case can be made to allow them only from servers). -Shadowfax
 	 */
-	if(!EmptyString(destination) && !match(destination, me.name))
+	if(!EmptyString(destination) && !match(destination, me.name) &&
+	   irccmp(destination, me.id))
 	{
 		if((target_p = find_client(destination)) || (target_p = find_server(destination)))
-			sendto_one(target_p, ":%s PONG %s %s", parv[0], origin, destination);
+			sendto_one(target_p, ":%s PONG %s %s", 
+				   get_id(source_p, target_p), parv[1], 
+				   get_id(target_p, target_p));
 		else
 		{
 			sendto_one_numeric(source_p, ERR_NOSUCHSERVER,

@@ -142,8 +142,9 @@ parse_knock(struct Client *client_p, struct Client *source_p,
 
 	if(IsMember(source_p, chptr))
 	{
-		sendto_one(source_p, form_str(ERR_KNOCKONCHAN),
-			   me.name, source_p->name, name);
+		if(MyClient(source_p))
+			sendto_one(source_p, form_str(ERR_KNOCKONCHAN),
+				   me.name, source_p->name, name);
 		return;
 	}
 
@@ -151,8 +152,8 @@ parse_knock(struct Client *client_p, struct Client *source_p,
 	     (chptr->mode.limit && 
 	      dlink_list_length(&chptr->members) >= chptr->mode.limit)))
 	{
-		sendto_one(source_p, form_str(ERR_CHANOPEN),
-			   me.name, source_p->name, name);
+		sendto_one_numeric(source_p, ERR_CHANOPEN,
+				   form_str(ERR_CHANOPEN), name);
 		return;
 	}
 
@@ -207,7 +208,9 @@ parse_knock(struct Client *client_p, struct Client *source_p,
 				     me.name, name, name, source_p->name,
 				     source_p->username, source_p->host);
 
-	sendto_server(client_p, chptr, CAP_KNOCK, NOCAPS,
+	sendto_server(client_p, chptr, CAP_KNOCK|CAP_TS6, NOCAPS,
+		      ":%s KNOCK %s", use_id(source_p), name);
+	sendto_server(client_p, chptr, CAP_KNOCK, CAP_TS6,
 		      ":%s KNOCK %s", source_p->name, name);
 	return;
 }

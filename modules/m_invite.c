@@ -180,8 +180,8 @@ m_invite(struct Client *client_p, struct Client *source_p, int parc, const char 
 	}
 	else if(target_p->from != client_p)
 	{
-		sendto_one(target_p->from, ":%s INVITE %s :%s", parv[0],
-			   target_p->name, chptr->chname);
+		sendto_one_prefix(target_p, source_p, "INVITE", ":%s",
+				  chptr->chname);
 	}
 
 	return 0;

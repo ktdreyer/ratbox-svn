@@ -180,7 +180,9 @@ ms_whois(struct Client *client_p, struct Client *source_p, int parc, const char 
 	 */
 	if(!MyClient(target_p) && !IsMe(target_p))
 	{
-		sendto_one(target_p->from, ":%s WHOIS %s :%s", parv[0], parv[1], parv[2]);
+		sendto_one(target_p, ":%s WHOIS %s :%s", 
+			   get_id(source_p, target_p), 
+			   get_id(target_p, target_p), parv[2]);
 		return 0;
 	}
 
@@ -316,7 +318,7 @@ single_whois(struct Client *source_p, struct Client *target_p, int glob)
 				   target_p->name, target_p->user->server,
 				   a2client_p ? a2client_p->info : "*Not On This Net*");
 	else
-		sendto_one_numeric(source_p, form_str(RPL_WHOISSERVER),
+		sendto_one_numeric(source_p, RPL_WHOISSERVER, form_str(RPL_WHOISSERVER),
 				   target_p->name,
 				   ServerInfo.network_name, ServerInfo.network_desc);
 

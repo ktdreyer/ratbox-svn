@@ -168,18 +168,18 @@ parse_resv(struct Client *source_p, const char *name,
 		if(find_channel_resv(name))
 		{
 			if(!cluster)
-				sendto_one(source_p,
-					   ":%s NOTICE %s :A RESV has already been placed on channel: %s",
-					   me.name, source_p->name, name);
+				sendto_one_notice(source_p,
+					":A RESV has already been placed on channel: %s",
+					name);
 			return;
 		}
 
 		if(strlen(name) > CHANNELLEN)
 		{
 			if(!cluster)
-				sendto_one(source_p,
-					   ":%s NOTICE %s :Invalid RESV length: %s",
-					   me.name, source_p->name, name);
+				sendto_one_notice(source_p,
+						  ":Invalid RESV length: %s",
+						  name);
 			return;
 		}
 
@@ -195,19 +195,18 @@ parse_resv(struct Client *source_p, const char *name,
 		if(strlen(name) > NICKLEN*2)
 		{
 			if(!cluster)
-				sendto_one(source_p,
-					   ":%s NOTICE %s :Invalid RESV length: %s",
-					   me.name, source_p->name, name);
+				sendto_one_notice(source_p,
+						   ":Invalid RESV length: %s",
+						   name);
 			return;
 		}
 
 		if(!valid_wild_card_simple(name))
 		{
 			if(!cluster)
-				sendto_one(source_p,
-					   ":%s NOTICE %s :Please include at least %d"
-					   " non-wildcard characters with the resv",
-					   me.name, source_p->name,
+				sendto_one_notice(source_p,
+					   ":Please include at least %d non-wildcard "
+					   "characters with the resv",
 					   ConfigFileEntry.min_nonwildcard_simple);
 			return;
 		}
@@ -215,9 +214,9 @@ parse_resv(struct Client *source_p, const char *name,
 		if(find_nick_resv(name))
 		{
 			if(!cluster)
-				sendto_one(source_p,
-					   ":%s NOTICE %s :A RESV has already been placed on nick: %s",
-					   me.name, source_p->name, name);
+				sendto_one_notice(source_p,
+					   ":A RESV has already been placed on nick: %s",
+					   name);
 			return;
 		}
 
@@ -227,9 +226,9 @@ parse_resv(struct Client *source_p, const char *name,
 			       NULL, NULL, 0);
 	}
 	else if(!cluster)
-		sendto_one(source_p,
-			   ":%s NOTICE %s :You have specified an invalid resv: [%s]",
-			   me.name, source_p->name, name);
+		sendto_one_notice(source_p,
+				  ":You have specified an invalid resv: [%s]",
+				  name);
 }
 
 /*
@@ -328,8 +327,7 @@ remove_resv(struct Client *source_p, const char *name, int cluster)
 
 	if((in = fbopen(filename, "r")) == NULL)
 	{
-		sendto_one(source_p, ":%s NOTICE %s :Cannot open %s",
-			   me.name, source_p->name, filename);
+		sendto_one_notice(source_p, ":Cannot open %s", filename);
 		return;
 	}
 
@@ -338,8 +336,7 @@ remove_resv(struct Client *source_p, const char *name, int cluster)
 	if((out = fbopen(temppath, "w")) == NULL)
 	{
 		if(!cluster)
-			sendto_one(source_p, ":%s NOTICE %s :Cannot open %s",
-				   me.name, source_p->name, temppath);
+			sendto_one_notice(source_p, ":Cannot open %s", temppath);
 		fbclose(in);
 		umask(oldumask);
 		return;
@@ -392,16 +389,13 @@ remove_resv(struct Client *source_p, const char *name, int cluster)
 	if(error_on_write)
 	{
 		if(!cluster)
-			sendto_one(source_p,
-				   ":%s NOTICE %s :Couldn't write temp resv file, aborted",
-				   me.name, source_p->name);
+			sendto_one_notice(source_p, ":Couldn't write temp resv file, aborted");
 		return;
 	}
 	else if(!found_resv)
 	{
 		if(!cluster)
-			sendto_one(source_p, ":%s NOTICE %s :No RESV for %s",
-				   me.name, source_p->name, name);
+			sendto_one_notice(source_p, ":No RESV for %s", name);
 
 		if(temppath != NULL)
 			(void) unlink(temppath);
@@ -413,8 +407,7 @@ remove_resv(struct Client *source_p, const char *name, int cluster)
 	rehash(0);
 
 	if(!cluster)
-		sendto_one(source_p, ":%s NOTICE %s :RESV for [%s] is removed",
-			   me.name, source_p->name, name);
+		sendto_one_notice(source_p, ":RESV for [%s] is removed", name);
 	sendto_realops_flags(UMODE_ALL, L_ALL,
 			     "%s has removed the RESV for: [%s]", get_oper_name(source_p), name);
 	ilog(L_NOTICE, "%s has removed the RESV for [%s]", get_oper_name(source_p), name);

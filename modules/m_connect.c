@@ -203,8 +203,8 @@ ms_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 
 	if((target_p = find_server(parv[1])))
 	{
-		sendto_one(source_p, ":%s NOTICE %s :Connect: Server %s %s %s.",
-			   me.name, parv[0], parv[1], "already exists from", target_p->from->name);
+		sendto_one_notice(source_p, ":Connect: Server %s already exists from %s.",
+				  parv[1], target_p->from->name);
 		return 0;
 	}
 
@@ -215,9 +215,8 @@ ms_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 	{
 		if(!(aconf = find_conf_by_host(parv[1], CONF_SERVER)))
 		{
-			sendto_one(source_p,
-				   ":%s NOTICE %s :Connect: Host %s not listed in ircd.conf",
-				   me.name, parv[0], parv[1]);
+			sendto_one_notice(source_p, ":Connect: Host %s not listed in ircd.conf",
+					  parv[1]);
 			return 0;
 		}
 	}
@@ -237,15 +236,13 @@ ms_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 			port = aconf->port;
 		else if(port <= 0)
 		{
-			sendto_one(source_p, ":%s NOTICE %s :Connect: Illegal port number",
-				   me.name, parv[0]);
+			sendto_one_notice(source_p, ":Connect: Illegal port number");
 			return 0;
 		}
 	}
 	else if(port <= 0 && (port = PORTNUM) <= 0)
 	{
-		sendto_one(source_p, ":%s NOTICE %s :Connect: missing port number",
-			   me.name, parv[0]);
+		sendto_one_notice(source_p, ":Connect: missing port number");
 		return 0;
 	}
 	/*
@@ -253,11 +250,14 @@ ms_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 	 */
 	sendto_wallops_flags(UMODE_WALLOP, &me,
 			     "Remote CONNECT %s %d from %s", parv[1], port, source_p->name);
-	sendto_server(NULL, NULL, NOCAPS, NOCAPS,
+	sendto_server(NULL, NULL, CAP_TS6, NOCAPS,
+		      ":%s WALLOPS :Remote CONNECT %s %d from %s",
+		      me.id, parv[1], port, source_p->name);
+	sendto_server(NULL, NULL, NOCAPS, CAP_TS6,
 		      ":%s WALLOPS :Remote CONNECT %s %d from %s",
 		      me.name, parv[1], port, source_p->name);
 
-	ilog(L_TRACE, "CONNECT From %s : %s %d", parv[0], parv[1], port);
+	ilog(L_TRACE, "CONNECT From %s : %s %d", source_p->name, parv[1], port);
 
 	aconf->port = port;
 	/*
@@ -265,11 +265,11 @@ ms_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 	 * C:line and a valid port in the C:line
 	 */
 	if(serv_connect(aconf, source_p))
-		sendto_one(source_p, ":%s NOTICE %s :*** Connecting to %s.%d",
-			   me.name, parv[0], aconf->name, aconf->port);
+		sendto_one_notice(source_p, ":*** Connecting to %s.%d",
+				  aconf->name, aconf->port);
 	else
-		sendto_one(source_p, ":%s NOTICE %s :*** Couldn't connect to %s.%d",
-			   me.name, parv[0], aconf->name, aconf->port);
+		sendto_one_notice(source_p, ":*** Couldn't connect to %s.%d",
+				  aconf->name, aconf->port);
 	/*
 	 * client is either connecting with all the data it needs or has been
 	 * destroyed

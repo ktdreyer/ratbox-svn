@@ -237,8 +237,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 			{
 				if(IsPerson(from))
 					sendto_one(from, form_str(ERR_UNKNOWNCOMMAND),
-						   me.name, ERR_UNKNOWNCOMMAND, 
-						   from->name, ch);
+						   me.name, from->name, ch);
 			}
 			ServerStats->is_unco++;
 			return;
@@ -776,7 +775,7 @@ do_numeric(char numeric[], struct Client *client_p, struct Client *source_p, int
 int
 m_not_oper(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	sendto_one(source_p, form_str(ERR_NOPRIVILEGES), me.name, source_p->name);
+	sendto_one_numeric(source_p, ERR_NOPRIVILEGES, form_str(ERR_NOPRIVILEGES));
 	return 0;
 }
 

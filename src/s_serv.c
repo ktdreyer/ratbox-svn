@@ -304,7 +304,8 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 	 * Assume it's me, if no server
 	 */
 	if(parc <= server || EmptyString(parv[server]) ||
-	   match(me.name, parv[server]) || match(parv[server], me.name))
+	   match(me.name, parv[server]) || match(parv[server], me.name) ||
+	   (strcmp(parv[server], me.id) == 0))
 		return (HUNTED_ISME);
 	
 	new = LOCAL_COPY(parv[server]);
@@ -369,12 +370,8 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 		if(IsMe(target_p) || MyClient(target_p))
 			return HUNTED_ISME;
 
-		if(!match(target_p->name, parv[server]))
-			parv[server] = target_p->name;
-
-		/* This is a little kludgy but should work... */
-		if(DoesTS6(target_p->from))
-			parv[0] = use_id(source_p);
+		parv[0] = get_id(source_p, target_p);
+		parv[server] = get_id(target_p, target_p);
 
 		sendto_one(target_p, command, parv[0],
 			   parv[1], parv[2], parv[3], parv[4], parv[5], parv[6], parv[7], parv[8]);

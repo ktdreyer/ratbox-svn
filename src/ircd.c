@@ -729,6 +729,7 @@ main(int argc, char *argv[])
 	me.serv->up = me.name;
 	me.lasttime = me.since = me.firsttime = CurrentTime;
 	add_to_client_hash(me.name, &me);
+	add_to_id_hash(me.id, &me);
 
 	dlinkAddAlloc(&me, &global_serv_list);
 

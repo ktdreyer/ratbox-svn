@@ -242,26 +242,26 @@ valid_xline(struct Client *source_p, const char *gecos,
 	{
 		if(warn)
 			sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-				   me.name, source_p->name, "XLINE");
+				   get_id(&me, source_p), 
+				   get_id(source_p, source_p), "XLINE");
 		return 0;
 	}
 
 	if(strchr(reason, ':') != NULL)
 	{
 		if(warn)
-			sendto_one(source_p,
-				   ":%s NOTICE %s :Invalid character ':' in comment",
-				   me.name, source_p->name);
+			sendto_one_notice(source_p,
+					  ":Invalid character ':' in comment");
 		return 0;
 	}
 
 	if(!valid_wild_card_simple(gecos))
 	{
 		if(warn)
-			sendto_one(source_p,
-				   ":%s NOTICE %s :Please include at least %d non-wildcard characters with the xline",
-				   me.name, source_p->name,
-				   ConfigFileEntry.min_nonwildcard_simple);
+			sendto_one_notice(source_p,
+					  ":Please include at least %d non-wildcard "
+					  "characters with the xline",
+					  ConfigFileEntry.min_nonwildcard_simple);
 		return 0;
 	}
 
@@ -310,8 +310,8 @@ write_xline(struct Client *source_p, const char *gecos,
 
 	sendto_realops_flags(UMODE_ALL, L_ALL, "%s added X-Line for [%s] [%s]",
 			     get_oper_name(source_p), xconf->name, xconf->reason);
-	sendto_one(source_p, ":%s NOTICE %s :Added X-Line for [%s] [%s]",
-		   me.name, source_p->name, xconf->name, xconf->reason);
+	sendto_one_notice(source_p, ":Added X-Line for [%s] [%s]",
+			  xconf->name, xconf->reason);
 	ilog(L_TRACE, "%s added X-Line for [%s] [%s]",
 	     get_oper_name(source_p), xconf->name, xconf->reason);
 
@@ -410,8 +410,7 @@ remove_xline(struct Client *source_p, const char *huntgecos, int warn)
 	if((in = fbopen(filename, "r")) == NULL)
 	{
 		if(warn)
-			sendto_one(source_p, ":%s NOTICE %s :Cannot open %s",
-				   me.name, source_p->name, filename);
+			sendto_one_notice(source_p, ":Cannot open %s", filename);
 		return;
 	}
 
@@ -420,8 +419,7 @@ remove_xline(struct Client *source_p, const char *huntgecos, int warn)
 	if((out = fbopen(temppath, "w")) == NULL)
 	{
 		if(warn)
-			sendto_one(source_p, ":%s NOTICE %s :Cannot open %s",
-				   me.name, source_p->name, temppath);
+			sendto_one_notice(source_p, ":Cannot open %s", temppath);
 		fbclose(in);
 		umask(oldumask);
 		return;
@@ -469,16 +467,14 @@ remove_xline(struct Client *source_p, const char *huntgecos, int warn)
 	if(error_on_write)
 	{
 		if(warn)
-			sendto_one(source_p,
-				   ":%s NOTICE %s :Couldn't write temp xline file, aborted",
-				   me.name, source_p->name);
+			sendto_one_notice(source_p,
+					  ":Couldn't write temp xline file, aborted");
 		return;
 	}
 	else if(found_xline == 0)
 	{
 		if(warn)
-			sendto_one(source_p, ":%s NOTICE %s :No X-Line for %s",
-				   me.name, source_p->name, huntgecos);
+			sendto_one_notice(source_p, ":No X-Line for %s", huntgecos);
 
 		if(temppath != NULL)
 			(void) unlink(temppath);
@@ -489,8 +485,7 @@ remove_xline(struct Client *source_p, const char *huntgecos, int warn)
 	rehash(0);
 
 	if(warn)
-		sendto_one(source_p, ":%s NOTICE %s :X-Line for [%s] is removed",
-			   me.name, source_p->name, huntgecos);
+		sendto_one_notice(source_p, ":X-Line for [%s] is removed", huntgecos);
 
 	sendto_realops_flags(UMODE_ALL, L_ALL,
 			     "%s has removed the X-Line for: [%s]",

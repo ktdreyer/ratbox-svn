@@ -244,8 +244,10 @@ ms_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(invalid_gline(acptr, user, host, (char *) reason))
 		return 0;
 
-	/* send in new form to compatable servers, hyb6 form to rest */
-	sendto_server(client_p, NULL, CAP_GLN, NOCAPS,
+	sendto_server(client_p, NULL, CAP_GLN|CAP_TS6, NOCAPS,
+		      ":%s GLINE %s %s :%s",
+		      use_id(acptr), user, host, reason);
+	sendto_server(client_p, NULL, CAP_GLN, CAP_TS6,
 		      ":%s GLINE %s %s :%s",
 		      acptr->name, user, host, reason);
 	sendto_server(client_p, NULL, NOCAPS, CAP_GLN,
