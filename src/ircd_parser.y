@@ -253,7 +253,8 @@ serverinfo_items:       serverinfo_items serverinfo_item |
 
 serverinfo_item:        serverinfo_name | serverinfo_vhost |
                         serverinfo_hub | serverinfo_description |
-                        serverinfo_network_name | serverinfo_network_desc 
+                        serverinfo_network_name | serverinfo_network_desc |
+			error
 
 serverinfo_name:        NAME '=' QSTRING ';' 
   {
@@ -314,7 +315,7 @@ admin_items:    admin_items admin_item |
                 admin_item
 
 admin_item:     admin_name | admin_description |
-                admin_email 
+                admin_email | error
 
 admin_name:     NAME '=' QSTRING ';' 
   {
@@ -341,7 +342,8 @@ logging_items:          logging_items logging_item |
                         logging_item 
 
 logging_item:           logging_path | logging_oper_log |
-                        logging_gline_log | logging_log_level
+                        logging_gline_log | logging_log_level |
+			error
 
 logging_path:           LOGPATH '=' QSTRING ';' 
                         {
@@ -410,7 +412,7 @@ oper_items:     oper_items oper_item |
 oper_item:      oper_name  | oper_user | oper_password |
                 oper_class | oper_global_kill | oper_remote |
                 oper_kline | oper_unkline | oper_gline | oper_nick_changes |
-                oper_die | oper_rehash | oper_admin
+                oper_die | oper_rehash | oper_admin | error
 
 oper_name:      NAME '=' QSTRING ';'
   {
@@ -485,7 +487,7 @@ oper_rehash: REHASH '=' TYES ';' { yy_aconf->port |= CONF_OPER_REHASH;}
 
 oper_admin: ADMIN '=' TYES ';' { yy_aconf->port |= CONF_OPER_ADMIN;}
             |
-            ADMIN '=' TNO ';' { yy_aconf->port &= ~CONF_OPER_ADMIN;}
+            ADMIN '=' TNO ';' { yy_aconf->port &= ~CONF_OPER_ADMIN;} ;
 
 /***************************************************************************
  *  section class
@@ -521,7 +523,8 @@ class_item:     class_name |
                 class_number_per_ip |
                 class_connectfreq |
                 class_max_number |
-                class_sendq
+                class_sendq |
+		error
 
 class_name:     NAME '=' QSTRING ';' 
   {
@@ -579,7 +582,7 @@ listen_entry:   LISTEN
 listen_items:   listen_items listen_item |
                 listen_item
 
-listen_item:    listen_name | listen_port | listen_address
+listen_item:    listen_name | listen_port | listen_address | error
 
 listen_name:    NAME '=' QSTRING ';' 
   {
@@ -645,7 +648,7 @@ auth_items:     auth_items auth_item |
 auth_item:      auth_user | auth_passwd | auth_class |
                 auth_kline_exempt | auth_have_ident |
                 auth_exceed_limit | auth_no_tilde | auth_spoof |
-                auth_redir_serv | auth_redir_port
+                auth_redir_serv | auth_redir_port | error
 
 auth_user:   USER '=' QSTRING ';'
   {
@@ -768,7 +771,7 @@ quarantine_entry:       QUARANTINE
 quarantine_items:       quarantine_items quarantine_item |
 			quarantine_item
 
-quarantine_item:        quarantine_name | quarantine_reason
+quarantine_item:        quarantine_name | quarantine_reason | error
 
 quarantine_name:        NAME '=' QSTRING ';'
   {
@@ -806,7 +809,7 @@ shared_entry:		SHARED
 shared_items:		shared_items shared_item |
 			shared_item
 
-shared_item:		shared_name | shared_user | shared_host
+shared_item:		shared_name | shared_user | shared_host | error
 
 shared_name:		NAME '=' QSTRING ';'
   {
@@ -934,7 +937,7 @@ connect_item:   connect_name | connect_host | connect_send_password |
                 connect_accept_password | connect_port |
                 connect_lazylink | connect_hub_mask |
                 connect_leaf_mask | connect_class |
-                connect_auto
+                connect_auto | error
 
 connect_name:   NAME '=' QSTRING ';'
   {
@@ -1070,7 +1073,7 @@ kill_entry:     KILL
 kill_items:     kill_items kill_item |
                 kill_item
 
-kill_item:      kill_user | kill_reason
+kill_item:      kill_user | kill_reason | error
 
 
 kill_user:      USER '=' QSTRING ';'
@@ -1132,7 +1135,7 @@ deny_entry:     DENY
 deny_items:     deny_items deny_item |
                 deny_item
 
-deny_item:      deny_ip | deny_reason
+deny_item:      deny_ip | deny_reason | error
 
 
 deny_ip:        IP '=' IP_TYPE ';'
@@ -1185,7 +1188,7 @@ gecos_entry:     GECOS
 gecos_items:     gecos_items gecos_item |
                  gecos_item
 
-gecos_item:      gecos_name | gecos_reason | gecos_action
+gecos_item:      gecos_name | gecos_reason | gecos_action | error
 
 
 gecos_name:    NAME '=' QSTRING ';' 
@@ -1237,7 +1240,8 @@ general_item:       general_failed_oper_notice | general_show_failed_oper_id |
                     general_glines | general_gline_time |
 		    general_idletime |
 		    general_hide_server | general_maximum_links |
-                    general_message_locale | general_client_exit
+                    general_message_locale | general_client_exit |
+		    error
 
 
 general_failed_oper_notice:   FAILED_OPER_NOTICE '=' TYES ';'
