@@ -1,3 +1,30 @@
+leeh        2002/11/24 02:01:15 UTC	(20021124_3)
+
+  Modified files:
+    contrib              m_clearchan.c 
+    doc                  example.conf example.efnet.conf 
+    include              newconf.h s_conf.h s_serv.h supported.h 
+    src                  channel_mode.c ircd.c newconf.c s_conf.c 
+                         s_serv.c 
+  Log:
+  - more vchan/anonops traces
+  
+  Revision  Changes    Path
+  1.43      +12 -17    ircd-ratbox/contrib/m_clearchan.c
+  7.191     +0 -9      ircd-ratbox/doc/example.conf
+  7.29      +0 -11     ircd-ratbox/doc/example.efnet.conf
+  7.23      +0 -1      ircd-ratbox/include/newconf.h
+  7.208     +0 -1      ircd-ratbox/include/s_conf.h
+  7.72      +1 -2      ircd-ratbox/include/s_serv.h
+  1.27      +1 -2      ircd-ratbox/include/supported.h
+  7.85      +1 -1      ircd-ratbox/src/channel_mode.c
+  7.260     +0 -3      ircd-ratbox/src/ircd.c
+  7.52      +0 -13     ircd-ratbox/src/newconf.c
+  7.364     +0 -5      ircd-ratbox/src/s_conf.c
+  7.297     +0 -1      ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2002/11/24 01:55:11 UTC	(20021124_2)
 
   Modified files:
