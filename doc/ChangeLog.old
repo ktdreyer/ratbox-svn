@@ -1,3 +1,7 @@
+*** 20001227_25 by ejb
+- check for socklen_t
+
+
 *** 20001227_24 by ejb
 - readd include/ to Makefile
 - make configure be rebuilt automatically when needed.
