@@ -1,3 +1,12 @@
+*** 20001207_12 by db
+- fixed two bugs. one bug in m_join.c prevented JOIN 0 from being 
+  detected.
+- second bug was one I introduced into send.c when I added lazylinks
+  I put a test for a NULL chptr into the wrong spot... This probably
+  affected other commands then just JOIN 0...
+
+
+
 *** 20001207_11 by db
 - class is a string not an int now (testline)
 - redid m_sjoin... erg we are going to have to do some serious sanity
