@@ -1,3 +1,21 @@
+androsyn    2002/08/21 00:01:31 EDT	(20020821_11)
+
+  Modified files:
+    include              tools.h 
+    src                  balloc.c channel.c s_serv.c s_user.c 
+  Log:
+  Roll things back a few revisions I messed something up and i dont want to
+  bother right now
+  
+  Revision  Changes    Path
+  1.31      +1 -12     ircd-ratbox/include/tools.h
+  7.41      +4 -2      ircd-ratbox/src/balloc.c
+  7.343     +6 -2      ircd-ratbox/src/channel.c
+  7.290     +16 -3     ircd-ratbox/src/s_serv.c
+  7.222     +2 -1      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2002/08/20 23:42:55 EDT	(20020821_10)
 
   Modified files:
