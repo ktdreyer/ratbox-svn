@@ -1,3 +1,17 @@
+leeh        2002/08/09 09:27:12 EDT	(20020809_5)
+
+  Modified files:
+    src                  event.c fdlist.c messages.tab 
+  Log:
+  - made stats E/F use RPL_STATSDEBUG instead of notices
+  
+  Revision  Changes    Path
+  7.29      +9 -11     ircd-ratbox/src/event.c
+  7.32      +4 -3      ircd-ratbox/src/fdlist.c
+  7.73      +1 -1      ircd-ratbox/src/messages.tab
+
+
+
 leeh        2002/08/09 08:49:55 EDT	(20020809_4)
 
   Modified files:
