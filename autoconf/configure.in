@@ -14,13 +14,29 @@ AC_SUBST(VERSION)
 dnl Checks for programs.
 AC_PROG_CC
 
+AC_MSG_CHECKING(if we are using TenDRA)
+case `$CC -version 2>&1` in
+  *TenDRA*)
+    AC_MSG_RESULT(success! Your compiler is not GNU.)
+    TenDRA=yes
+    ;;
+  *)
+    AC_MSG_RESULT(no)
+    TenDRA=no
+    ;;
+esac
+
 if test "x$GCC" = "xyes"; then
   IRC_CFLAGS="-O2 -g -ggdb -Wunused -Wall -Wshadow -Wmissing-declarations"
 else
-  IRC_CFLAGS="-g"
+  if test "x$TenDRA" = "xyes"; then
+    IRC_CFLAGS="-I/usr/include -Ylonglong -Yansi"
+  else
+    IRC_CFLAGS="-g"
+  fi
 fi
 
-AC_MSG_CHECKING(Checking how to generate dependancy info)
+AC_MSG_CHECKING(how to generate dependancy info)
 
 if test "x$GCC" = "xyes"; then
   MKDEP="$CC -MM"
@@ -645,10 +661,16 @@ else
 		AC_MSG_RESULT(gcc: -fPIC -DPIC -shared)
 		PICFLAGS="-fPIC -DPIC -shared"
 	fi
+	if test "$TenDRA" = "yes"; then
+		AC_MSG_RESULT(TenDRA: -KPIC -DPIC -G)
+		PICFLAGS="-KPIC -DPIC -G"
+	fi
 	case `uname -s` in
 	Darwin*)
-		AC_MSG_RESULT(Darwin or Mac OS X - Assuming you want to make Mach-O bundles: -fno-common -bundle -flat_namespace -undefined suppress)
-		PICFLAGS="-fno-common -bundle -flat_namespace -undefined suppress"
+		if test "$ac_cv_prog_gcc" = "yes"; then
+			AC_MSG_RESULT(Darwin or Mac OS X - Assuming you want to make Mach-O bundles: -fno-common -bundle -flat_namespace -undefined suppress)
+			PICFLAGS="-fno-common -bundle -flat_namespace -undefined suppress"
+		fi
 		;;
 	SunOS*)
 		if test -z "$PICFLAGS"; then
