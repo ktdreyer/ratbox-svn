@@ -1,3 +1,8 @@
+*** 20001110_3 by db
+- added missing m_list.c in Makefile.in
+
+
+
 *** 20001110_2 by db
 - channel specific stuff should stay in channel.c ya ya ya 
   anyway, m_join.so was having a nit pick fit over names_on_this_channel()
