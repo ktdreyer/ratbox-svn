@@ -1,3 +1,17 @@
+leeh        2005/01/12 20:40:58 EST	(20050113_0)
+
+  Modified files:
+    src                  s_chanserv.c 
+  Log:
+  - when a user crates a channel with noops, restrict ops, or they would
+    be banned, put chanserv in to stop them recreating the channel over and
+    over
+  
+  Revision  Changes    Path
+  1.40      +31 -6     rserv/src/s_chanserv.c
+
+
+
 leeh        2005/01/12 11:11:48 EST	(20050112_4)
 
   Modified files:
