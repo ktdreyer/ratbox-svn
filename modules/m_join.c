@@ -97,6 +97,8 @@ int     m_join(struct Client *cptr,
       return 0;
     }
 
+  if (parv[1] > CHANNELLEN) return 0;
+
   if (*parv[1] == '\0')
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
