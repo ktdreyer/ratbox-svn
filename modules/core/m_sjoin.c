@@ -74,7 +74,7 @@ static int pargs;
 static void set_final_mode(struct Mode *mode, struct Mode *oldmode);
 static void remove_our_modes(struct Channel *chptr, struct Client *source_p);
 static void remove_ban_list(struct Channel *chptr, struct Client *source_p,
-			    dlink_list *list, char c, int cap);
+			    dlink_list *list, char c, int cap, int mems);
 
 static int
 ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
@@ -474,15 +474,15 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		if(dlink_list_length(&chptr->banlist) > 0)
 			remove_ban_list(chptr, source_p, &chptr->banlist,
-					'b', NOCAPS);
+					'b', NOCAPS, ALL_MEMBERS);
 
 		if(dlink_list_length(&chptr->exceptlist) > 0)
 			remove_ban_list(chptr, source_p, &chptr->exceptlist,
-					'e', CAP_EX);
+					'e', CAP_EX, ONLY_CHANOPS);
 
 		if(dlink_list_length(&chptr->invexlist) > 0)
 			remove_ban_list(chptr, source_p, &chptr->invexlist,
-					'I', CAP_IE);
+					'I', CAP_IE, ONLY_CHANOPS);
 	}
 
 	
@@ -699,7 +699,7 @@ remove_our_modes(struct Channel *chptr, struct Client *source_p)
  */
 static void
 remove_ban_list(struct Channel *chptr, struct Client *source_p,
-		dlink_list *list, char c, int cap)
+		dlink_list *list, char c, int cap, int mems)
 {
 	static char lmodebuf[BUFSIZE];
 	static char lparabuf[BUFSIZE];
@@ -728,7 +728,7 @@ remove_ban_list(struct Channel *chptr, struct Client *source_p,
 			/* remove trailing space */
 			*(pbuf - 1) = '\0';
 
-			sendto_channel_local(ALL_MEMBERS, chptr, "%s %s",
+			sendto_channel_local(mems, chptr, "%s %s",
 					     lmodebuf, lparabuf);
 			sendto_server(source_p, chptr, cap, CAP_TS6,
 				      "%s %s", lmodebuf, lparabuf);
@@ -747,7 +747,7 @@ remove_ban_list(struct Channel *chptr, struct Client *source_p,
 	}
 
 	*(pbuf - 1) = '\0';
-	sendto_channel_local(ALL_MEMBERS, chptr, "%s %s", lmodebuf, lparabuf);
+	sendto_channel_local(mems, chptr, "%s %s", lmodebuf, lparabuf);
 	sendto_server(source_p, chptr, cap, CAP_TS6,
 		      "%s %s", lmodebuf, lparabuf);
 

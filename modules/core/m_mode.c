@@ -264,6 +264,7 @@ ms_bmask(struct Client *client_p, struct Client *source_p, int parc, const char 
 	int tlen;
 	int modecount = 0;
 	int needcap = NOCAPS;
+	int mems;
 
 	if(!IsChanPrefix(parv[2][0]) || !check_channel_name(parv[2]))
 		return 0;
@@ -280,18 +281,21 @@ ms_bmask(struct Client *client_p, struct Client *source_p, int parc, const char 
 		case 'b':
 			banlist = &chptr->banlist;
 			mode_type = CHFL_BAN;
+			mems = ALL_MEMBERS;
 			break;
 
 		case 'e':
 			banlist = &chptr->exceptlist;
 			mode_type = CHFL_EXCEPTION;
 			needcap = CAP_EX;
+			mems = ONLY_CHANOPS;
 			break;
 
 		case 'I':
 			banlist = &chptr->invexlist;
 			mode_type = CHFL_INVEX;
 			needcap = CAP_IE;
+			mems = ONLY_CHANOPS;
 			break;
 
 		/* maybe we should just blindly propagate this? */
@@ -326,7 +330,7 @@ ms_bmask(struct Client *client_p, struct Client *source_p, int parc, const char 
 			{
 				*mbuf = '\0';
 				*(pbuf - 1) = '\0';
-				sendto_channel_local(ALL_MEMBERS, chptr, "%s %s",
+				sendto_channel_local(mems, chptr, "%s %s",
 						     modebuf, parabuf);
 				sendto_server(client_p, chptr, needcap, CAP_TS6,
 					      "%s %s", modebuf, parabuf);
@@ -359,7 +363,7 @@ ms_bmask(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		*mbuf = '\0';
 		*(pbuf - 1) = '\0';
-		sendto_channel_local(ALL_MEMBERS, chptr, "%s %s",
+		sendto_channel_local(mems, chptr, "%s %s",
 				     modebuf, parabuf);
 		sendto_server(client_p, chptr, needcap, CAP_TS6,
 			      "%s %s", modebuf, parabuf);
