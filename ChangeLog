@@ -1,3 +1,27 @@
+leeh        2003/09/03 14:26:55 EDT	(20030903_6)
+
+  Modified files:
+    include              client.h packet.h s_serv.h send.h 
+    modules/core         m_nick.c m_server.c 
+    src                  client.c packet.c s_bsd.c s_serv.c send.c 
+  Log:
+  - revert the servlink removal..
+  
+  Revision  Changes    Path
+  7.224     +21 -0     ircd-ratbox/include/client.h
+  7.23      +1 -0      ircd-ratbox/include/packet.h
+  7.87      +40 -0     ircd-ratbox/include/s_serv.h
+  7.79      +1 -0      ircd-ratbox/include/send.h
+  1.132     +3 -1      ircd-ratbox/modules/core/m_nick.c
+  1.125     +7 -682    ircd-ratbox/modules/core/m_server.c
+  7.413     +7 -0      ircd-ratbox/src/client.c
+  7.122     +126 -0    ircd-ratbox/src/packet.c
+  7.211     +9 -0      ircd-ratbox/src/s_bsd.c
+  7.362     +1001 -5   ircd-ratbox/src/s_serv.c
+  7.259     +63 -0     ircd-ratbox/src/send.c
+
+
+
 leeh        2003/09/03 12:51:57 EDT	(20030903_5)
 
   Modified files:
