@@ -299,12 +299,49 @@ read_io(void)
 	}
 }
 
+static struct conf_server *
+next_autoconn(void)
+{
+        struct conf_server *conf_p = NULL;
+        struct conf_server *tmp_p;
+        dlink_node *ptr;
+
+        if(dlink_list_length(&conf_server_list) <= 0)
+                die("No servers to connect to");
+
+        DLINK_FOREACH(ptr, conf_server_list.head)
+        {
+                tmp_p = ptr->data;
+
+                /* negative port == no autoconn */
+                if(tmp_p->defport <= 0)
+                        continue;
+
+                if(conf_p == NULL || tmp_p->last_connect < conf_p->last_connect)
+                        conf_p = tmp_p;
+        }
+
+        if(conf_p != NULL)
+        {
+                conf_p->port = conf_p->defport;
+                conf_p->last_connect = CURRENT_TIME;
+        }
+
+        return conf_p;
+}
+
+/* connect_to_server()
+ *   Connects to given server, or next autoconn.
+ *
+ * inputs       - optional server to connect to
+ * outputs      -
+ * requirements - if target_server is specified, it must set the port
+ */
 void
 connect_to_server(void *target_server)
 {
 	struct conf_server *conf_p;
 	struct connection_entry *conn_p;
-	dlink_node *ptr;
 	int serv_fd;
 
 	if(server_p != NULL)
@@ -312,24 +349,15 @@ connect_to_server(void *target_server)
 
         if(target_server == NULL)
         {
-                if(dlink_list_length(&conf_server_list) <= 0)
-                        return;
-
-                /* use the head of the list as our server */
-                ptr = conf_server_list.head;
-                conf_p = ptr->data;
-
-                /* and move it to the tail if theres more than one */
-                if(dlink_list_length(&conf_server_list) > 1)
-                {
-                        dlink_delete(ptr, &conf_server_list);
-                        dlink_add_tail(conf_p, ptr, &conf_server_list);
-                }
+                /* no autoconnect? */
+                if((conf_p = next_autoconn()) == NULL)
+                        die("No server to autoconnect to.");
         }
         else
                 conf_p = target_server;
 
-	slog_send("Connection to server %s activated", conf_p->name);
+	slog_send("Connection to server %s/%d activated",
+                  conf_p->name, conf_p->port);
 
 	serv_fd = sock_open(conf_p->host, conf_p->port, conf_p->vhost, IO_HOST);
 
@@ -341,6 +369,7 @@ connect_to_server(void *target_server)
 	conn_p->fd = serv_fd;
 	conn_p->flags = CONN_CONNECTING;
 	conn_p->first_time = conn_p->last_time = CURRENT_TIME;
+        conn_p->pass = my_strdup(conf_p->pass);
 
 	conn_p->io_read = NULL;
 	conn_p->io_write = signon_server;
@@ -384,7 +413,7 @@ signon_server(struct connection_entry *conn_p)
 	conn_p->io_write = write_sendq;
 
 	/* ok, if connect() failed, this will cause an error.. */
-	sendto_server("PASS blah TS");
+	sendto_server("PASS %s TS", conn_p->pass);
 
 	/* ..so we need to return. */
 	if(conn_p->flags & CONN_DEAD)

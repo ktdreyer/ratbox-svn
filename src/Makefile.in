@@ -11,6 +11,7 @@ MAKE = make
 PROG = rserv
 
 SRCS = 			\
+        c_error.c       \
 	c_message.c	\
 	c_mode.c	\
 	channel.c	\
@@ -41,7 +42,7 @@ $(PROG): $(OBJS)
 build: $(PROG)
 
 clean:
-	$(RM) -f $(PROG) *.o
+	$(RM) -f $(PROG) $(PROG).exe *.o
 
 distclean: clean
 	$(RM) Makefile

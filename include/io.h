@@ -18,6 +18,7 @@ struct connection_entry
 	char *name;
         char *username;
         char *host;
+        char *pass;
 
 	int fd;
 	int flags;

@@ -40,8 +40,8 @@ struct timeval system_time;
 void
 die(const char *reason)
 {
-	sendto_server(":%s WALLOPS :DIED: %s", MYNAME, reason);
-	slog("DIED: %s", reason);
+	sendto_server(":%s WALLOPS :services terminated: %s", MYNAME, reason);
+	slog("ratbox-services terminated: (%s)", reason);
 	exit(1);
 }
 
@@ -174,10 +174,8 @@ main(int argc, char *argv[])
 				close(STDOUT_FILENO);
 				close(STDERR_FILENO);
 				if (setsid() == -1)
-				{
-					slog("DIED: setsid() error");
-					exit(4);
-				}
+					die("setsid() error");
+
 				break;
 			default:
 				printf("ratbox-services: pid %d\n", childpid);
@@ -197,6 +195,7 @@ main(int argc, char *argv[])
 	init_channel();
 
 	/* load specific commands */
+        add_scommand_handler(&error_command);
 	add_scommand_handler(&mode_command);
 	add_scommand_handler(&privmsg_command);
 

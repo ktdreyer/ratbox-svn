@@ -138,7 +138,7 @@ u_login(struct connection_entry *conn_p, char *parv[], int parc)
 static void
 u_connect(struct connection_entry *conn_p, char *parv[], int parc)
 {
-        struct conf_server *server;
+        struct conf_server *conf_p;
         int port = 0;
 
         if(parc < 2 || EmptyString(parv[1]))
@@ -147,7 +147,7 @@ u_connect(struct connection_entry *conn_p, char *parv[], int parc)
                 return;
         }
 
-        if((server = find_conf_server(parv[1])) == NULL)
+        if((conf_p = find_conf_server(parv[1])) == NULL)
         {
                 sendto_connection(conn_p, "No such server %s", parv[1]);
                 return;
@@ -155,13 +155,16 @@ u_connect(struct connection_entry *conn_p, char *parv[], int parc)
 
         if(parc > 2)
         {
-                port = atoi(parv[2]);
+                if((port = atoi(parv[2])) <= 0)
+                {
+                        sendto_connection(conn_p, "Invalid port %s", parv[2]);
+                        return;
+                }
 
-                if(port <= 0)
-                        port = 6667;
+                conf_p->port = port;
         }
         else
-                port = server->port;
+                conf_p->port = abs(conf_p->defport);
 
         if(server_p != NULL && (server_p->flags & CONN_DEAD) == 0)
         {
@@ -169,16 +172,16 @@ u_connect(struct connection_entry *conn_p, char *parv[], int parc)
 
                 sendto_connections("Connection to server %s disconnected by "
                                    "%s: (reroute to %s)",
-                                   server_p->name, conn_p->name, server->name);
+                                   server_p->name, conn_p->name, conf_p->name);
                 slog("Connection to server %s disconnected by %s: "
                      "(reroute to %s)",
-                     server_p->name, conn_p->name, server->name);
+                     server_p->name, conn_p->name, conf_p->name);
         }
 
         /* remove any pending events for connecting.. */
         eventDelete(connect_to_server, NULL);
 
-        eventAddOnce("connect_to_server", connect_to_server, server, 2);
+        eventAddOnce("connect_to_server", connect_to_server, conf_p, 2);
 }
 
 static void

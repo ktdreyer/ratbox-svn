@@ -151,7 +151,6 @@ parse_connect(char *line)
 	const char *server_port = getfield(NULL);
 	const char *server_pass = getfield(NULL);
 	const char *server_vhost = getfield(NULL);
-	int port;
 
 	if(EmptyString(server_name) || EmptyString(server_host) ||
 	   EmptyString(server_pass))
@@ -168,10 +167,11 @@ parse_connect(char *line)
 	if(server_vhost != NULL)
 		server->vhost = my_strdup(server_vhost);
 
-	if((port = atoi(server_port)))
-		server->port = port;
-	else
-		server->port = 6667;
+        server->defport = atoi(server_port);
+
+        /* if no port was specified, set it to 6667 with no a/c */
+        if(!server->defport)
+                server->defport = -6667;
 
 	dlink_add_tail_alloc(server, &conf_server_list);
 }

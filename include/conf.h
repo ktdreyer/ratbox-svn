@@ -29,6 +29,8 @@ struct conf_server
 	char *pass;
 	char *vhost;
 	int port;
+        int defport;
+        time_t last_connect;
 };
 
 struct conf_oper
