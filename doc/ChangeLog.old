@@ -1,3 +1,7 @@
+*** 20011126_4 by a1kmm
+- Let's initialise the resolver in the right place...
+
+
 *** 20011126_3 by davidt
 - Apply fix as discussed on mailing list and IRC.
   * Do not incorrectly terminate buffer simply because we ran out of data
