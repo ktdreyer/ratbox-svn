@@ -1,3 +1,20 @@
+androsyn    2001/12/14 10:48:22 EST	(20011214_9)
+
+  Modified files:
+    autoconf             acconfig.h configure.in 
+    src                  Makefile.in s_bsd_sigio.c s_serv.c 
+  Log:
+  Last of the changes for SIGIO i think...
+  
+  Revision  Changes    Path
+  7.18      +3 -0      ircd-hybrid-7/autoconf/acconfig.h
+  7.105     +20 -1     ircd-hybrid-7/autoconf/configure.in
+  7.105     +1 -0      ircd-hybrid-7/src/Makefile.in
+  7.7       +14 -4     ircd-hybrid-7/src/s_bsd_sigio.c
+  7.226     +16 -3     ircd-hybrid-7/src/s_serv.c
+
+
+
 leeh        2001/12/14 10:46:25 EST	(20011214_8)
 
   Modified files:
