@@ -1,3 +1,7 @@
+*** 20010626_12 by leeh
+- moved the is_resv() check down to accomodate #x,#y
+
+
 *** 20010626_11 by leeh
 - fixed a header in m_post.c
 - added RESV - h7's channel jupes
