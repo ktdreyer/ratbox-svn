@@ -1,3 +1,16 @@
+androsyn    2001/12/25 01:51:46 EST	(20011225_1)
+
+  Modified files:
+    src                  s_stats.c scache.c 
+  Log:
+  Fixed more bogus $Id$ tags..
+  
+  Revision  Changes    Path
+  7.18      +1 -1      ircd-hybrid-7/src/s_stats.c
+  7.11      +1 -1      ircd-hybrid-7/src/scache.c
+
+
+
 db          2001/12/25 01:48:44 EST	(20011225_0)
 
   Modified files:
