@@ -486,13 +486,13 @@ static int
 del_id(struct Channel *chptr, const char *banid, dlink_list *list,
        long mode_type)
 {
-	dlink_node *ptr;
+	dlink_node *ptr, *next;
 	struct Ban *banptr;
 
 	if(EmptyString(banid))
 		return 0;
 
-	DLINK_FOREACH(ptr, list->head)
+	DLINK_FOREACH_SAFE(ptr, next, list->head)
 	{
 		banptr = ptr->data;
 
