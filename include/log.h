@@ -10,6 +10,6 @@ extern void reopen_logfiles(void);
 
 extern void mlog(const char *format, ...);
 
-extern void slog(struct client *, const char *format, ...);
+extern void slog(struct client *, int level, const char *format, ...);
 
 #endif

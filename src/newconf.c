@@ -709,6 +709,11 @@ conf_set_service_flags(void *data)
 				service_flags_table, data);
 }
 
+static void
+conf_set_service_loglevel(void *data)
+{
+	yy_service->service->loglevel = *(unsigned int *) data;
+}
 
 static struct ConfEntry conf_serverinfo_table[] =
 {
@@ -757,6 +762,7 @@ static struct ConfEntry conf_service_table[] =
 	{ "username",	CF_QSTRING, conf_set_service_username,	0, NULL },
 	{ "host",	CF_QSTRING, conf_set_service_host,	0, NULL },
 	{ "realname",	CF_QSTRING, conf_set_service_realname,	0, NULL },
+	{ "loglevel",	CF_INT,     conf_set_service_loglevel,  0, NULL },
 	{ "flags",	CF_STRING|CF_FLIST, conf_set_service_flags, 0, NULL },
 	{ "\0", 0, NULL, 0, NULL }
 };

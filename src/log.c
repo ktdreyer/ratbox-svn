@@ -89,13 +89,16 @@ mlog(const char *format, ...)
 }
 
 void
-slog(struct client *service_p, const char *format, ...)
+slog(struct client *service_p, int loglevel, const char *format, ...)
 {
 	char buf[BUFSIZE];
 	char buf2[BUFSIZE];
 	va_list args;
 
 	if(service_p->service->logfile == NULL)
+		return;
+
+	if(service_p->service->loglevel < loglevel)
 		return;
 
 	va_start(args, format);

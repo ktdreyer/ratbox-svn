@@ -83,6 +83,8 @@ u_operbot_ojoin(struct connection_entry *conn_p, char *parv[], int parc)
 		return;
 	}
 
+	slog(operbot_p, 1, "%s - OJOIN %s", conn_p->name, parv[1]);
+
 	loc_sqlite_exec(NULL, "INSERT INTO operbot VALUES(%Q, %Q)",
 			parv[0], conn_p->name);
 
@@ -95,6 +97,8 @@ u_operbot_opart(struct connection_entry *conn_p, char *parv[], int parc)
 {
 	if(part_service(operbot_p, parv[1]))
 	{
+		slog(operbot_p, 1, "%s - OPART %s", conn_p->name, parv[1]);
+
 		loc_sqlite_exec(NULL, "DELETE FROM operbot WHERE chname = %Q",
 				parv[1]);
 		sendto_one(conn_p, "Operbot removed from %s", parv[1]);
@@ -116,6 +120,9 @@ s_operbot_ojoin(struct client *client_p, char *parv[], int parc)
 		return 1;
 	}
 
+	slog(operbot_p, 1, "%s - OJOIN %s",
+		client_p->user->oper->name, parv[0]);
+
 	loc_sqlite_exec(NULL, "INSERT INTO operbot VALUES(%Q, %Q)",
 			parv[0], client_p->name, 
 			client_p->user->oper->name);
@@ -131,6 +138,9 @@ s_operbot_opart(struct client *client_p, char *parv[], int parc)
 {
 	if(part_service(operbot_p, parv[0]))
 	{
+		slog(operbot_p, 1, "%s - OPART %s",
+			client_p->user->oper->name, parv[0]);
+
 		loc_sqlite_exec(NULL, "DELETE FROM operbot WHERE chname = %Q",
 				parv[0]);
 		service_error(operbot_p, client_p, 

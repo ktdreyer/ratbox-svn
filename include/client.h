@@ -85,6 +85,8 @@ struct service
         int flood_max;
         int flood_max_ignore;
 
+	int loglevel;
+
 	struct service_command *command;
         struct ucommand_handler *ucommand;
 

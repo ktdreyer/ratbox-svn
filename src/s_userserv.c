@@ -38,7 +38,7 @@ static int s_userserv_setemail(struct client *, char *parv[], int parc);
 
 static struct service_command userserv_command[] =
 {
-	{ "UDROP",	&s_userserv_udrop,	2, NULL, 1, 0L, 0, 0, CONF_OPER_US_ADMIN },
+	{ "UDROP",	&s_userserv_udrop,	1, NULL, 1, 0L, 0, 0, CONF_OPER_US_ADMIN },
 	{ "REGISTER",	&s_userserv_register,	2, NULL, 1, 0L, 0, 0, 0 },
 	{ "LOGIN",	&s_userserv_login,	2, NULL, 1, 0L, 0, 0, 0 },
 	{ "LOGOUT",	&s_userserv_logout,	0, NULL, 1, 0L, 1, 0, 0 },
@@ -176,6 +176,8 @@ u_userserv_udrop(struct connection_entry *conn_p, char *parv[], int parc)
 		return;
 	}
 
+	slog(userserv_p, 1, "%s - UDROP %s", conn_p->name, ureg_p->name);
+
 	loc_sqlite_exec(NULL, "DELETE FROM members WHERE username = %Q",
 			ureg_p->name);
 
@@ -208,6 +210,9 @@ s_userserv_udrop(struct client *client_p, char *parv[], int parc)
 
 	if((ureg_p = find_user_reg(client_p, parv[0])) == NULL)
 		return 1;
+
+	slog(userserv_p, 1, "%s - UDROP %s", 
+		client_p->user->oper->name, ureg_p->name);
 
 	loc_sqlite_exec(NULL, "DELETE FROM members WHERE username = %Q",
 			ureg_p->name);
@@ -292,6 +297,9 @@ s_userserv_register(struct client *client_p, char *parv[], int parc)
 			last_count++;
 	}
 
+	slog(userserv_p, 2, "%s - REGISTER %s %s",
+		client_p->user->mask, parv[0], 
+		EmptyString(parv[2]) ? "" : parv[2]);
 
 	reg_p = BlockHeapAlloc(user_reg_heap);
 	strcpy(reg_p->name, parv[0]);
@@ -340,6 +348,8 @@ s_userserv_login(struct client *client_p, char *parv[], int parc)
 		return 1;
 	}
 
+	slog(userserv_p, 5, "%s - LOGIN %s", client_p->user->mask, parv[0]);
+
 	client_p->user->user_reg = reg_p;
 	reg_p->last_time = CURRENT_TIME;
 	service_error(userserv_p, client_p, "Login successful");
@@ -375,6 +385,9 @@ s_userserv_setpass(struct client *client_p, char *parv[], int parc)
 		return 1;
 	}
 
+	slog(userserv_p, 3, "%s %s SETPASS",
+		client_p->user->mask, client_p->user->user_reg->name);
+
 	password = get_crypt(parv[1], NULL);
 	my_free(client_p->user->user_reg->password);
 	client_p->user->user_reg->password = my_strdup(password);
@@ -394,6 +407,10 @@ s_userserv_setemail(struct client *client_p, char *parv[], int parc)
 		service_error(userserv_p, client_p, "%s::SETEMAIL is disabled", userserv_p->name);
 		return 1;
 	}
+
+	slog(userserv_p, 3, "%s %s SETEMAIL %s",
+		client_p->user->mask, client_p->user->user_reg->name,
+		parv[0]);
 
 	my_free(client_p->user->user_reg->email);
 	client_p->user->user_reg->email = my_strdup(parv[0]);

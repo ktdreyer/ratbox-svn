@@ -259,6 +259,8 @@ u_jupeserv_jupe(struct connection_entry *conn_p, char *parv[], int parc)
 	jupe_p = make_jupe(parv[1]);
 	reason = rebuild_params((const char **) parv, parc, 2);
 
+	slog(jupeserv_p, 1, "%s - JUPE %s %s", conn_p->oper, parv[1], reason);
+
 	if(EmptyString(reason))
 		jupe_p->reason = my_strdup("No Reason");
 	else
@@ -288,6 +290,8 @@ u_jupeserv_unjupe(struct connection_entry *conn_p, char *parv[], int parc)
 		dlink_delete(&ajupe_p->node, &pending_jupes);
 		free_jupe(ajupe_p);
 	}
+
+	slog(jupeserv_p, 1, "%s - UNJUPE %s", conn_p->oper, parv[1]);
 
 	loc_sqlite_exec(NULL, "DELETE FROM jupes WHERE servername = %Q",
 			jupe_p->name);
@@ -332,6 +336,9 @@ s_jupeserv_jupe(struct client *client_p, char *parv[], int parc)
 	jupe_p = make_jupe(parv[0]);
 	reason = rebuild_params((const char **) parv, parc, 1);
 
+	slog(jupeserv_p, 1, "%s - JUPE %s %s",
+		client_p->user->oper->name, parv[0], reason);
+
 	if(EmptyString(reason))
 		jupe_p->reason = my_strdup("No Reason");
 	else
@@ -367,6 +374,9 @@ s_jupeserv_unjupe(struct client *client_p, char *parv[], int parc)
 		dlink_delete(&ajupe_p->node, &pending_jupes);
 		free_jupe(ajupe_p);
 	}
+
+	slog(jupeserv_p, 1, "%s - UNJUPE %s",
+		client_p->user->oper->name, parv[0]);
 
 	loc_sqlite_exec(NULL, "DELETE FROM jupes WHERE servername = %Q",
 			jupe_p->name);
@@ -433,12 +443,19 @@ s_jupeserv_calljupe(struct client *client_p, char *parv[], int parc)
 		}
 	}
 
+	slog(jupeserv_p, 1, "%s{%s} - CALLJUPE %s %s",
+		client_p->user->mask, client_p->user->servername,
+		parv[0], jupe_p->reason);
+
 	jupe_p->expire = CURRENT_TIME + config_file.pending_time;
 	jupe_p->points += config_file.oper_score;
 	dlink_add_alloc(my_strdup(client_p->user->servername), &jupe_p->servers);
 
 	if(jupe_p->points >= config_file.jupe_score)
 	{
+		slog(jupeserv_p, 1, "%s{%s} - TRIGGERJUPE %s",
+			client_p->user->mask, client_p->user->servername, parv[0]);
+
 		sendto_server(":%s WALLOPS :JUPE triggered on %s by %s!%s@%s on %s [%s]",
 				MYNAME, jupe_p->name, client_p->name,
 				client_p->user->username, client_p->user->host, 
@@ -482,11 +499,17 @@ s_jupeserv_callunjupe(struct client *client_p, char *parv[], int parc)
 		jupe_p->points = config_file.unjupe_score;
 	}
 
+	slog(jupeserv_p, 1, "%s{%s} - CALLUNJUPE %s",
+		client_p->user->mask, client_p->user->servername, parv[0]);
+
 	jupe_p->expire = CURRENT_TIME + config_file.pending_time;
 	jupe_p->points -= config_file.oper_score;
 
 	if(jupe_p->points <= 0)
 	{
+		slog(jupeserv_p, 1, "%s{%s} - TRIGGERUNJUPE %s",
+			client_p->user->mask, client_p->user->servername, parv[0]);
+
 		sendto_server(":%s WALLOPS :UNJUPE triggered on %s by %s!%s@%s on %s",
 				MYNAME, jupe_p->name, client_p->name,
 				client_p->user->username, client_p->user->host, 
@@ -527,6 +550,9 @@ s_jupeserv_pending(struct client *client_p, char *parv[], int parc)
 		service_error(jupeserv_p, client_p, "No pending jupes");
 		return 0;
 	}
+
+	slog(jupeserv_p, 3, "%s{%s} - PENDING",
+		client_p->user->mask, client_p->user->servername);
 
 	service_error(jupeserv_p, client_p, "Pending jupes:");
 
