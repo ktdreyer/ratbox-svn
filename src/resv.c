@@ -14,6 +14,7 @@
 #include "client.h"   
 #include "memory.h"
 #include "resv.h"
+#include "hash.h"
 #include "ircd_defs.h"
 
 #include <unistd.h>
@@ -27,7 +28,7 @@ struct Resv *create_resv(char *name, int type, int conf)
   int len;
 
   len = strlen(name);
-  
+
   if ((type == RESV_CHANNEL) && (len > CHANNELLEN))
   {
     len = CHANNELLEN;
@@ -39,11 +40,13 @@ struct Resv *create_resv(char *name, int type, int conf)
     *(name + NICKLEN) = '\0';
   }
 
-  if(resv_p = (struct Resv *)hash_find_resv(name, (struct Resv *)NULL, type))
+  resv_p = (struct Resv *)hash_find_resv(name, (struct Resv *)NULL, type);
+
+  if (resv_p)
     return NULL;
 
   resv_p = (struct Resv *)MyMalloc(sizeof(struct Resv) + len + 1);
-  
+
   strcpy(resv_p->name, name);
   resv_p->type = type;
   resv_p->conf = conf;
@@ -73,6 +76,7 @@ int clear_conf_resv()
     if(resv_p->conf)
       delete_resv(resv_p);
   }
+  return(0);
 }
 
 int delete_resv(struct Resv *resv_p)
@@ -81,7 +85,7 @@ int delete_resv(struct Resv *resv_p)
     return 0;
 
   del_from_resv_hash_table(resv_p->name, resv_p, resv_p->type);
-  
+
   if(resv_p->prev)
     resv_p->prev->next = resv_p->next;
   else
@@ -93,14 +97,16 @@ int delete_resv(struct Resv *resv_p)
   MyFree((char *)resv_p);
 
   return 1;
-}    
+}
 
 int find_resv(char *name, int type)
 {
   struct Resv *resv_p;
 
-  if(!(resv_p = (struct Resv *)hash_find_resv(name, (struct Resv *)NULL, type)))
+  resv_p = (struct Resv *) hash_find_resv(name, (struct Resv *)NULL, type);
+
+  if (!resv_p)
     return 0;
 
   return 1;
-}  
+}

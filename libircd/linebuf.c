@@ -34,7 +34,9 @@
 # endif
 #endif
 
-static int linebuf_initialised = 0;
+/* jdc -- linebuf_initialised seems to be unused */
+/* static int linebuf_initialised = 0; */
+
 static int bufline_count = 0;
 
 /*
@@ -46,7 +48,7 @@ buf_line_t *linebuf_freelist;
 #define MAXLINEBUFS 10000
 
 void
-linebuf_init()
+linebuf_init(void)
 {
   int i;
   buf_line_t *new;
@@ -60,7 +62,7 @@ linebuf_init()
 }
 
 buf_line_t *
-linebuf_allocate()
+linebuf_allocate(void)
 {
   buf_line_t *new;
 
