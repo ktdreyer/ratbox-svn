@@ -54,7 +54,6 @@ reject_exit(void *unused)
 	DLINK_FOREACH_SAFE(ptr, ptr_next, delay_exit.head)
 	{
 		client_p = ptr->data;
-		dlinkDestroy(ptr, &delay_exit);
 	  	if(IsDead(client_p))
                 	continue;
 		if(client_p->localClient->fd >= 0)
@@ -63,6 +62,9 @@ reject_exit(void *unused)
         	SetDead(client_p);
         	dlinkAddAlloc(client_p, &dead_list);
 	}
+
+        delay_exit.head = delay_exit.tail = NULL;
+        delay_exit.length = 0;
 }
 
 static void
