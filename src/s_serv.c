@@ -659,6 +659,9 @@ int check_server(const char *name, struct Client* client_p, int cryptlink)
   if (!(client_p->localClient->passwd))
     return -2;
 
+  if(strlen(name) > HOSTLEN)
+    return -4;
+
   /* loop through looking for all possible connect items that might work */
   for (aconf = ConfigItemList; aconf; aconf = aconf->next)
     {

@@ -164,6 +164,19 @@ static void mr_server(struct Client *client_p, struct Client *source_p,
       exit_client(client_p, client_p, client_p, "Invalid host.");
       return;
       break;
+    
+    /* servername is > HOSTLEN */
+    case -4:
+      sendto_realops_flags(FLAGS_ALL, L_ADMIN,
+                           "Invalid servername %s from %s",
+			   name, get_client_name(client_p, HIDE_IP));
+      sendto_realops_flags(FLAGS_ALL, L_OPER,
+		           "Invalid servername %s from %s",
+			   name, get_client_name(client_p, MASK_IP));
+
+      exit_client(client_p, client_p, client_p, "Invalid servername.");
+      return;
+      break;
   }
     
   if ((target_p = server_exists(name)))
@@ -228,7 +241,7 @@ static void mr_server(struct Client *client_p, struct Client *source_p,
    * C:line in client_p->name
    */
 
-  strlcpy(client_p->name, name, HOSTLEN);
+  strlcpy(client_p->name, name, HOSTLEN+1);
   set_server_gecos(client_p, info);
   client_p->hopcount = hop;
   server_estab(client_p);
@@ -464,14 +477,21 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
   target_p = make_client(client_p);
   make_server(target_p);
   target_p->hopcount = hop;
-  strlcpy(target_p->name, name, HOSTLEN);
-  if(name > HOSTLEN)
+
+  if(strlen(name) > HOSTLEN)
   {
-  	sendto_realops_flags(FLAGS_ALL, L_ADMIN,
-  	     	                        "Server %s was introducted with a name greater than HOSTLEN: %d > %d", 
-  	     	                        name, strlen(name), HOSTLEN);
+    sendto_realops_flags(FLAGS_ALL, L_ADMIN,
+ 		         "Link %s introduced server with invalid servername %s",
+		         get_client_name(client_p, HIDE_IP), name);
+    sendto_realops_flags(FLAGS_ALL, L_OPER,
+		         "Link %s introduced server with invalid servername %s",
+			 client_p->name, name);
+    
+    exit_client(NULL, client_p, &me, "Invalid servername introduced.");
+    return;
   }
 
+  strlcpy(target_p->name, name, HOSTLEN+1);
   
   set_server_gecos(target_p, info);
 

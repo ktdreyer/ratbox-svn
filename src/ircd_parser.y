@@ -489,7 +489,11 @@ serverinfo_name:        NAME '=' QSTRING ';'
   {
     /* this isn't rehashable */
     if(ServerInfo.name == NULL)
-      DupString(ServerInfo.name,yylval.string);
+    {
+      /* the ircd will exit() in main() if we dont set one */
+      if(strlen(yylval.string) <= HOSTLEN)
+        DupString(ServerInfo.name,yylval.string);
+    }
   };
 
 serverinfo_description: DESCRIPTION '=' QSTRING ';'
