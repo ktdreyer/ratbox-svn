@@ -1,6 +1,7 @@
 /***********************************************************************
  *   ircd-hybrid project - Internet Relay Chat
- *  hostmask.c: Find hosts for klines and auth{} etc...
+ *  hostmask.c: A consistant interface to network and DNS host address
+ *       parsing and mask matching.
  *  All parts of this program are Copyright(C) 2001(or later).
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,24 +18,304 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * $Id$ 
  */
-#include <unistd.h>
+ 
+#include <stdlib.h>
 #include <string.h>
-#include "irc_string.h"
 #include "memory.h"
+#include "ircd_defs.h"
 #include "s_conf.h"
 #include "hostmask.h"
-#include "sprintf_irc.h"
-#include "send.h"
 #include "numeric.h"
-#include "dline_conf.h"
-#include "ircd.h"
-#include <assert.h>
+#include "send.h"
 
-#define TH_MAX 0x1000
+#ifdef IPV6
+static int try_parse_v6_netmask(const char*, struct irc_inaddr*, int*);
+static unsigned long hash_ipv6(struct irc_inaddr*, int);
+#endif
+static int try_parse_v4_netmask(const char*, struct irc_inaddr*, int*);
+static unsigned long hash_ipv4(struct irc_inaddr*, int);
 
-static struct HostMaskEntry *first_miscmask = NULL, *first_mask = NULL;
-static struct HostMaskEntry *hmhash[TH_MAX-1];
-static unsigned long precedence = 0xFFFFFFF;
+/* The mask parser/type determination code... */
+
+/* int try_parse_v6_netmask(const char *, struct irc_inaddr *, int *);
+ * Input: An possible IPV6 address as a string.
+ * Output: An integer describing whether it is an IPV6 or hostmask,
+ *         an address(if it is IPV6), a bitlength(if it is IPV6).
+ * Side effects: None
+ * Comments: Called from parse_netmask
+ */
+#if IPV6
+static int
+try_parse_v6_netmask(const char *text, struct irc_inaddr *addr, int *b)
+{
+ const char *p;
+ char c;
+ int d[8]={0,0,0,0,0,0,0,0}, dp=0, nyble=4, finsert=-1, bits=0, deficit=0;
+ short dc[8];
+ for (p=text; (c=*p); p++)
+  if (c >= '0' && c <= '9')
+  {
+   if (nyble == 0)
+    return HM_HOST;
+   d[dp] |= (c-'0')<<(4*--nyble);
+  }
+  else if (c >= 'A' && c <= 'F')
+  {
+   if (nyble == 0)
+    return HM_HOST;
+   d[dp] |= (c-'A'+0xA)<<(4*--nyble);
+  }
+  else if (c >= 'a' && c <= 'f')
+  {
+   if (nyble == 0)
+    return HM_HOST;
+   d[dp] |= (c-'a'+0xA)<<(4*--nyble);
+  }
+  else if (c == ':')
+  {
+   if (p>text && *(p-1) == ':')
+   {
+    if (finsert>=0)
+     return HM_HOST;
+    finsert = dp;
+   }
+   else
+   {
+    /* If there were less than 4 hex digits, e.g. :ABC: shift right
+     * so we don't interpret it as ABC0 -A1kmm */
+    d[dp] = d[dp] >> 4*nyble;
+    nyble = 4;
+    if (++dp >= 8)
+     return HM_HOST;
+   }
+  }
+  else if (c == '*')
+  {
+   /* * must be last, and * is ambiguous if there is a ::... -A1kmm */
+   if (finsert >= 0 || *(p+1)|| dp==0 || *(p-1) != ':')
+    return HM_HOST;
+   bits = dp*16;
+  }
+  else if (c == '/')
+  {
+   char *after;
+   dp++;
+   if (p > text && *(p-1)==':')
+    return HM_HOST;
+   bits = strtoul(p+1, &after, 10);
+   if (bits==0 || *after)
+    return HM_HOST;
+   if (bits > dp*4 && !(finsert>=0 && bits<=128))
+    return HM_HOST;
+   break;
+  }
+  else
+   return HM_HOST;
+ if (c == 0)
+  dp++;
+ if (finsert < 0 && bits == 0)
+  bits = dp*16;
+ else if (bits == 0)
+  bits = 128;
+ /* How many bytes are missing? -A1kmm */
+ deficit = bits/16+((bits%16)?1:0)-dp;
+ /* Now fill in the gaps(from ::) in the copied table... -A1kmm */
+ for (dp=0,nyble=0; dp<8; dp++)
+ {
+  if (nyble == finsert && deficit)
+  {
+   dc[dp] = 0;
+   deficit--;
+  }
+  else
+   dc[dp] = d[nyble++];
+ }
+ /* Set unused bits to 0... -A1kmm*/
+ if (bits < 128 && (bits%16!=0) )
+  dc[bits/16] &= ~((1<<(16-bits%16))-1);
+ for (dp=bits/16+(bits%16?1:0); dp<8; dp++)
+  dc[dp] = 0;
+ /* And assign... -A1kmm */
+ if (addr)
+  for (dp=0; dp<16; dp++)
+   addr->sins.sin6.s6_addr[dp] = htonl(dc[dp]);
+ if (b)
+  *b = bits;
+ return HM_IPV6;
+}
+#endif
+
+/* int try_parse_v4_netmask(const char *, struct irc_inaddr *, int *);
+ * Input: An possible IPV4 address as a string.
+ * Output: An integer describing whether it is an IPV4 or hostmask,
+ *         an address(if it is IPV4), a bitlength(if it is IPV4).
+ * Side effects: None
+ * Comments: Called from parse_netmask
+ */
+static int
+try_parse_v4_netmask(const char *text, struct irc_inaddr *addr, int *b)
+{
+ const char *p;
+ const char *digits[4];
+ unsigned char addb[4];
+ int n = 0, bits = 0;
+ char c;
+ digits[n++] = text;
+ for (p=text; (c=*p); p++)
+  if (c >= '0' && c <= '9')
+   ;
+  else if (c == '.')
+  {
+   if (n >= 4)
+    return HM_HOST;
+   digits[n++] = p+1;
+  }
+  else if (c == '*')
+  {
+   if (*(p+1) || n==0 || *(p-1) != '.')
+    return HM_HOST;
+   bits = (n-1)*8;
+   break;
+  }
+  else if (c == '/')
+  {
+   char *after;
+   bits = strtoul(p+1, &after, 10);
+   if (!bits || *after)
+    return HM_HOST;
+   if (bits > n*8)
+    return HM_HOST;
+   break;
+  }
+  else
+   return HM_HOST;
+ if (n<4 && bits==0)
+  bits = n*8;
+ if (bits)
+  while (n < 4)
+   digits[n++] = "0";
+ for (n=0; n<4; n++)
+  addb[n] = strtoul(digits[n], NULL, 10);
+ if (bits == 0)
+  bits = 32;
+ /* Set unused bits to 0... -A1kmm*/
+ if (bits < 32 && bits%8)
+  addb[bits/8] &= ~((1<<(8-bits%8))-1);
+ for (n=bits/8+(bits%8?1:0); n<8; n++)
+  addb[n] = 0;
+ if (addr)
+  addr->sins.sin.s_addr =
+    htonl(addb[3] | addb[2]<<8 | addb[1]<<16 | addb[0]<<24);
+ if (b)
+  *b = bits;
+ return HM_IPV4;
+}
+
+/* int parse_netmask(const char *, struct irc_inaddr *, int *);
+ * Input: A hostmask, or an IPV4/6 address.
+ * Output: An integer describing whether it is an IPV4, IPV6 address or a
+           hostmask, an address(if it is an IP mask),
+           a bitlength(if it is IP mask).
+ * Side effects: None
+ */
+int
+parse_netmask(const char *text, struct irc_inaddr *addr, int *b)
+{
+#ifdef IPV6
+ if (strchr(text, ':'))
+  return try_parse_v6_netmask(text, addr, b);
+#endif
+ if (strchr(text, '.'))
+  return try_parse_v4_netmask(text, addr, b);
+ return HM_HOST;
+}
+
+/* The address matching stuff... */
+/* int match_ipv6(struct irc_inaddr *, struct irc_inaddr *, int)
+ * Input: An IP address, an IP mask, the number of bits in the mask.
+ * Output: if match, -1 else 0
+ * Side effects: None
+ */
+#ifdef IPV6
+int
+match_ipv6(struct irc_inaddr *addr, struct irc_inaddr *mask, int bits)
+{
+ int i, m, n = bits / 8;
+ for (i=0; i<n; i++)
+  if (addr->sins.sin6.s6_addr[i] != mask->sins.sin6.s6_addr[i])
+   return 0;
+ if ((m=bits % 8) == 0)
+  return -1;
+ if ((addr->sins.sin6.s6_addr[n] & ~((1<<(8-m)) - 1)) ==
+     mask->sins.sin6.s6_addr[n])
+  return -1;
+ return 0;
+}
+#endif
+
+/* int match_ipv4(struct irc_inaddr *, struct irc_inaddr *, int)
+ * Input: An IP address, an IP mask, the number of bits in the mask.
+ * Output: if match, -1 else 0
+ * Side Effects: None
+ */
+int
+match_ipv4(struct irc_inaddr *addr, struct irc_inaddr *mask, int bits)
+{
+ if ((ntohl(addr->sins.sin.s_addr)&~((1<<(32-bits))-1))!=
+     ntohl(mask->sins.sin.s_addr))
+  return 0;
+ return -1;
+}
+
+/* Hashtable stuff... -A1kmm */
+struct AddressRec *atable[ATABLE_SIZE];
+
+void
+init_host_hash(void)
+{
+ memset(&atable, 0, sizeof(atable));
+}
+
+/* unsigned long hash_ipv4(struct irc_inaddr*)
+ * Input: An IP address.
+ * Output: A hash value of the IP address.
+ * Side effects: None
+ */
+static unsigned long
+hash_ipv4(struct irc_inaddr *addr, int bits)
+{
+ unsigned long av = ntohl(addr->sins.sin.s_addr) & ~((1<<(32-bits))-1);
+ return (av^(av>>12)^(av>>24)) & (ATABLE_SIZE-1);
+}
+
+/* unsigned long hash_ipv6(struct irc_inaddr*)
+ * Input: An IP address.
+ * Output: A hash value of the IP address.
+ * Side effects: None
+ */
+#ifdef IPV6
+static unsigned long
+hash_ipv6(struct irc_inaddr *addr, int bits)
+{
+ unsigned long v = 0, n;
+ for (n=0; n<16; n++)
+ {
+  if (bits >= 8)
+  {
+   v ^= addr->sins.sin6.s6_addr[n];
+   bits -= 8;
+  }
+  else if (bits)
+  {
+   v ^= addr->sins.sin6.s6_addr[n] & ~((1<<(8-bits))-1);
+   return v & (ATABLE_SIZE-1);
+  }
+  else
+   return v & (ATABLE_SIZE-1);
+ }
+ return v & (ATABLE_SIZE-1);
+}
+#endif
 
 /* int hash_text(const char *start)
  * Input: The start of the text to hash.
@@ -50,358 +331,294 @@ hash_text(const char* start)
     {
       h = (h << 4) - (h + (unsigned char)ToLower(*p++));
     }
-  return(h & (TH_MAX - 1));
+  return(h & (ATABLE_SIZE - 1));
 }
 
-#if 0
-/* int hash_ipmask(const char *imask)
- * Input: The mask.
- * Output: The hash of the mask, or -1 if it isn't a valid ipmask.
- * Side-effects: -
- * XXX - this isn't finished yet...
- */
-static int
-hash_ipmask(const char *imask, int *bits, struct irc_inaddr *iia)
-{
- const char *p;
- unsigned int hash = 0, ipmask, ip_parts[16], i;
- if ((p = strchr(imask, '@')))
-   p++;
- else
-   p = imask;
- for (i=0; i<16; i++)
-   {
-    if (!IsDigit(*p))
-      return -1;
-    ip_parts[i] = strtoul(p, (char **)&p, 10);
-    if (ip_parts[i] > 0xFF)
-      return -1;
-    if (!IsDigit(*p))
-      switch (*p)
-        {
-         case ':':
-         case '.':
-          p++;
-          continue;
-         case 0:
-         case '*':
-          ipmask = (i+1) * 8;
-          break;
-         case '/':
-          ipmask = strtoul(++p, (char **)&p, 10);
-          if (ipmask > (i+1)*8)
-            ipmask = (i+1)*8;
-          break;
-         default:
-          return -1;
-        }
-   }
-#ifdef IPV6
- if (ipmask > 128)
-   return -1;
-#endif
- if (i > 4 || ipmask > 32)
-#ifndef IPV6
-   return -1;
-#else
-   for (i=ipmask/16; i; i--)
-     hash ^= ip_parts[i] | ip_parts[i+1]<<8;
- else
-#endif
-   for (i=ipmask/8; i; i--)
-     hash ^= (i&1) ? ip_parts[i] : ip_parts[i]<<8;
- *bits = ipmask;
- /* iia->sin. */
- return hash & (TH_MAX-1);
-}
-#endif
-
-/* int get_uhosthash(const char *uhost)
- * Input: A host-name, optionally with wildcards.
- * Output: The hash of the string from the start of the first . or @
- *         delimited token which contains no wildcards in or to the right
- *         of.
+/* unsigned long get_hash_mask(const char *)
+ * Input: The text to hash.
+ * Output: The hash of the string right of the first '.' past the last
+ *         wildcard in the string.
  * Side-effects: None.
- * Note: A return value of -1 means the host cannot be hashed and must
- *       be placed on the misc list.
  */
-static int
-get_uhosthash(const char *uhost)
+static unsigned long
+get_mask_hash(const char *text)
 {
-  const char *end, *lastdot = NULL;
-  int sig = 1;
-  char c = 0;
-
-  if (!*uhost)
-    return 0;
-
-  end = uhost + strlen(uhost) - 1;
-  while (sig && end >= uhost && (c = *end--))
-    switch (c)
-      {
-      case '*':
-      case '?':
-       sig--;
-       break;
-      case '!':
-      case '@':
-      case '.':
-       lastdot = end+2;
-     }
-
-  if ((c == '?' || c == '*') && (!lastdot || *lastdot == 0))
-    return -1;
-  
-  if (end < uhost)
-    return hash_text(uhost);
-
-  return hash_text(lastdot ? lastdot : uhost);
+ const char *hp = "", *p;
+ for (p=text+strlen(text); p>=text; p--)
+  if (*p == '*' || *p == '?')
+   return hash_text(hp);
+  else if (*p == '.')
+   hp = p+1;
+ return hash_text(text);
 }
 
+/* struct ConfItem* find_conf_by_address(const char*, struct irc_inaddr*,
+ *         int type, int fam, const char *username)
+ * Input: The hostname, the address, the type of mask to find, the address
+ *        family, the username.
+ * Output: The matching value with the highest precedence.
+ * Side-effects: None
+ * Note: Setting bit 0 of the type means that the username is ignored.
+ */
+struct ConfItem*
+find_conf_by_address(const char *name, struct irc_inaddr *addr, int type,
+                     int fam, const char *username)
+{
+ unsigned long hprecv = 0;
+ struct ConfItem *hprec = NULL;
+ struct AddressRec *arec;
+ int b;
+ if (username == NULL)
+  username = "";
+ if (addr)
+ {
+  /* Check for IPV6 matches... */
+#ifdef IPV6
+  if (fam == AF_INET6)
+  {
+   for (b=128; b>=0; b-=16)
+   {
+    for (arec = atable[hash_ipv6(addr, b)]; arec; arec=arec->next)
+     if (arec->type == (type&~0x1) &&
+         arec->masktype == HM_IPV6 &&
+         match_ipv6(addr, &arec->Mask.ipa.addr, arec->Mask.ipa.bits) &&
+         (type&0x1 || match(arec->username, username)) &&
+         arec->precedence > hprecv
+        )
+      {
+       hprecv = arec->precedence;
+       hprec = arec->aconf;
+      }
+   }
+  } else
+#endif
+  if (fam == AF_INET)
+  {
+   for (b=32; b>=0; b-=8)
+   {
+    for (arec = atable[hash_ipv4(addr, b)]; arec; arec=arec->next)
+     if (arec->type == (type&~0x1) &&
+         arec->masktype == HM_IPV4 &&
+         match_ipv4(addr, &arec->Mask.ipa.addr, arec->Mask.ipa.bits) &&
+         (type&0x1 || match(arec->username, username)) &&
+         arec->precedence > hprecv
+        )
+      {
+       hprecv = arec->precedence;
+       hprec = arec->aconf;
+      }
+   }
+  }
+ }
+ if (name != NULL)
+ {
+  const char *p;
+  for (p=name; p!=(char*)1; p=strchr(p, '.')+1)
+   for (arec=atable[hash_text(p)]; arec; arec=arec->next)
+    if ((arec->type == (type&~0x1)) &&
+        (arec->masktype == HM_HOST) &&
+        match(arec->Mask.hostname, name) &&
+        (type&0x1 || match(arec->username, username)) &&
+        (arec->precedence > hprecv)
+       )
+    {
+     hprecv = arec->precedence;
+     hprec = arec->aconf;
+    }
+  for (arec=atable[0]; arec; arec=arec->next)
+   if (arec->type == (type&~0x1) &&
+       arec->masktype == HM_HOST &&
+       match(arec->Mask.hostname, name) &&
+       (type&0x1 || match(arec->username, username)) &&
+       arec->precedence > hprecv
+      )
+   {
+    hprecv = arec->precedence;
+    hprec = arec->aconf;
+   }
+ }
+ return hprec;
+}
 
-/* void add_hostmask(const char *mask, int type, void *data)
- * Input: The mask, the type, a data value applicable to the type.
- * Output: -
- * Side-effects: Creates a HostMaskEntry for the mask and adds it to the
- *               hashtable.
+/* struct ConfItem* find_address_conf(const char*, const char*,
+                                      struct irc_inaddr*, int);
+ * Input: The hostname, username, address, address family.
+ * Output: The applicable ConfItem.
+ * Side-effects: None
+ */
+struct ConfItem*
+find_address_conf(const char *host, const char *user,
+                  struct irc_inaddr *ip, int aftype)
+{
+ struct ConfItem *iconf, *kconf;
+ /* Find the best I-line... If none, return NULL -A1kmm */
+ if (!(iconf = find_conf_by_address(host, ip, CONF_CLIENT, aftype, user)))
+  return NULL;
+ /* If they are exempt from K-lines, return the best I-line. -A1kmm */
+ if (IsConfElined(iconf))
+  return iconf;
+ /* Find the best K-line... -A1kmm */
+ kconf = find_conf_by_address(host, ip, CONF_KILL, aftype, user);
+ /* If they are K-lined, return the K-line. Otherwise, return the
+  * I-line. -A1kmm */
+ if (kconf)
+  return kconf;
+ return iconf;
+}
+
+/* struct ConfItem* find_dline(struct irc_inaddr*, int)
+ * Input: An address, an address family.
+ * Output: The best matching D-line or E-lining I-line.
+ * Side effects: None.
+ */
+struct ConfItem*
+find_dline(struct irc_inaddr *addr, int aftype)
+{
+ struct ConfItem *econf, *dconf;
+ econf = find_conf_by_address(NULL, addr, CONF_CLIENT|1, aftype, NULL);
+ dconf = find_conf_by_address(NULL, addr, CONF_DLINE|1, aftype, NULL);
+ if (econf && IsConfElined(econf))
+  return econf;
+ return dconf;
+}
+
+/* void add_conf_by_address(const char*, int, const char *,
+ *         struct ConfItem *aconf)
+ * Input: 
+ * Output: None
+ * Side-effects: Adds this entry to the hash table.
  */
 void
-add_hostmask(const char *mask, int type, void *data)
+add_conf_by_address(const char *address, int type, const char *username,
+                    struct ConfItem *aconf)
 {
-  struct HostMaskEntry *hme;
-  int subtype = HOST_IPCONF;
-  int hash = -1; /*hash_ipmask(mask);*/
-  if (hash < 0)
-    {
-     get_uhosthash(mask);
-     subtype = HOST_NAMECONF;
-    }
-  hme = MyMalloc(sizeof(*hme));
-
-  hme->data = data;
-  /* Just an ugly kludge so first entry in the conf file matches. 
-   * K-lines & D-lines have the special precedence value 0xFFFFFFFF
-   * which means that they will always overrule non-Elining I-lines.
-   */
-  if (type == HOST_CONFITEM &&
-      (((struct ConfItem*)data)->status & CONF_KILL))
-    hme->precedence = 0xFFFFFFFF;
-  else
-    hme->precedence = precedence--;
-  DupString(hme->hostmask, mask);
-  hme->type = type;
-  hme->subtype = subtype;
-  hme->next = first_mask;
-  first_mask = hme;
-
-  if (hash != -1)
-    {
-      hme->nexthash = hmhash[hash];
-      hmhash[hash] = hme;
-    }
-  else
-    {
-      hme->nexthash = first_miscmask;
-      first_miscmask = hme;
-    }
+ static unsigned long prec_value = 0xFFFFFFFF;
+ int masktype, bits;
+ unsigned long hv;
+ struct AddressRec *arec;
+ if (address == NULL)
+  address = "/NOMATCH!/";
+ arec = MyMalloc(sizeof(*arec));
+ masktype = parse_netmask(address, &arec->Mask.ipa.addr, &bits);
+ arec->Mask.ipa.bits = bits;
+ arec->masktype = masktype;
+#ifdef IPV6
+ if (masktype == HM_IPV6)
+ {
+  /* We have to do this, since we do not re-hash for every bit -A1kmm. */
+  bits -= bits%16;
+  arec->next = atable[(hv = hash_ipv6(&arec->Mask.ipa.addr, bits))];
+  atable[hv] = arec;
+ } else
+#endif
+ if (masktype == HM_IPV4)
+ {
+  /* We have to do this, since we do not re-hash for every bit -A1kmm. */
+  bits -= bits%8;
+  arec->next = atable[(hv = hash_ipv4(&arec->Mask.ipa.addr, bits))];
+  atable[hv] = arec;
+ } else
+ {
+  arec->Mask.hostname = address;
+  arec->next = atable[(hv = get_mask_hash(address))];
+  atable[hv] = arec;
+ }
+ arec->username = username;
+ arec->aconf = aconf;
+ arec->precedence = prec_value--;
+ arec->type = type;
 }
 
-/* const char * strcchr(const char *a, const char *b)
- *
- * Inputs:	a, the string to search in
- *		b, the characters to search for.
- * Output:	A pointer to character past the first occurrence of any
- *         	character from b in a, or NULL.
- * Side-effects: - none
+/* void delete_one_address(const char*, struct ConfItem*)
+ * Input: An address string, the associated ConfItem.
+ * Output: None
+ * Side effects: Deletes an address record. Frees the ConfItem if there
+ *               is nothing referencing it, sets it as illegal otherwise.
  */
-static const char*
-strcchr(const char *a, const char *b)
+void
+delete_one_address_conf(const char *address, struct ConfItem *aconf)
 {
-  const char *p = a, *q;
-  char c, d;
-  while ((c = *p++))
-    {
-      q = b;
-      while ((d = *q++))
-	if (c == d)
-	  return p;
-    }
-  return NULL;
+ int masktype, bits;
+ unsigned long hv;
+ struct AddressRec *arec, *arecl=NULL;
+ struct irc_inaddr addr;
+ masktype = parse_netmask(address, &addr, &bits);
+#ifdef IPV6
+ if (masktype == HM_IPV6)
+ {
+  /* We have to do this, since we do not re-hash for every bit -A1kmm. */
+  bits -= bits%16;
+  hv = hash_ipv6(&addr, bits);
+ } else
+#endif
+ if (masktype == HM_IPV4)
+ {
+  /* We have to do this, since we do not re-hash for every bit -A1kmm. */
+  bits -= bits%8;
+  hv = hash_ipv4(&addr, bits);
+ } else
+  hv = get_mask_hash(address);
+ for (arec = atable[hv]; arec; arec=arec->next)
+ {
+  if (arec->aconf == aconf)
+  {
+   if (arecl)
+    arecl->next = arec->next;
+   else
+    atable[hv] = arec->next;
+   aconf->flags |= CONF_ILLEGAL;
+   if (!aconf->clients)
+    free_conf(aconf);
+   MyFree(arec);
+   return;
+  }
+  arecl = arec;
+ }
 }
 
-/* struct HostMaskEntry *match_hostmask(const char *uhost, int type)
- * Input: a uhost to match, a type.
- * Output: a HostMaskEntry if one found, or NULL.
- * Side-effects: -
+/* void clear_out_address_conf(void)
+ * Input: None
+ * Output: None
+ * Side effects: Clears out all address records in the hash table,
+ *               frees them, and frees the ConfItems if nothing references
+ *               them, otherwise sets them as illegal.
  */
-struct HostMaskEntry*
-match_hostmask(const char *uhost, int type)
+void
+clear_out_address_conf(void)
 {
-  struct HostMaskEntry *hme = NULL;
-  struct HostMaskEntry *hmk = NULL;
-  struct HostMaskEntry *hmc = NULL;
-  unsigned long prec = 0;
-  unsigned int hash;
-  const char *pos;
-  /* First check those masks which cannot be hashed... */
-  for (hme = first_miscmask; hme; hme = hme->nexthash)
-    {
-      if (hme->type == type && match(hme->hostmask, uhost) &&
-          hme->precedence > prec)
-        {
-         if (hme->precedence != 0xFFFFFFFF)
-           prec = hme->precedence;
-         hmc = hme;
-         if ((hme->type == HOST_CONFITEM) &&
-             ((struct ConfItem*)hme->data)->status & CONF_KILL)
-           hmk = hme;
-         else
-           hmc = hme;
-        }
-    }
-  /* Now those in the hash by hostmask... */
-  for (pos = uhost; pos; pos = strcchr(pos, "@!."))
-    {
-      hash = hash_text(pos);
-      for (hme = hmhash[hash]; hme; hme=hme->nexthash)
-        if (hme->type == type && match(hme->hostmask, uhost) &&
-            hme->precedence > prec)
-          {
-           if (hme->precedence != 0xFFFFFFFF)
-             prec = hme->precedence;
-           if ((hme->type == HOST_CONFITEM) &&
-              ((struct ConfItem*)hme->data)->status & CONF_KILL)
-             hmk = hme;	
-           else
-             hmc = hme;
-          }
-    }
-  /* Now go by IP address... */
-  
-  if (!hmk)
-    return hmc;
-  return (hmc && hmc->type==HOST_CONFITEM) &&
-          IsConfElined(((struct ConfItem*)hmc->data)) ? hmc : hmk;
+ int i;
+ struct AddressRec *arec, *arecn;
+ for (i=0; i<ATABLE_SIZE; i++)
+ {
+  for (arec=atable[i]; arec; arec=arecn)
+  {
+   arecn = arec->next;
+   arec->aconf->flags |= CONF_ILLEGAL;
+   if (!arec->aconf->clients)
+    free_conf(arec->aconf);
+   MyFree(arec);
+  }
+  atable[i] = NULL;
+ }
 }
 
-/* struct ConfItem *find_matching_conf(const char *host, const char *user,
- *                                     struct irc_inaddr *ip)
- * Input: a hostname/username and/or ip address to match.
- * Output: The highest precedence matching I-line or K-line.
- * Side-effects: -
- * Note: precedence is not currently correctly implemented for IP Ilines
- *       and Klines. If no hostmask I/K-line is found, then and only then
- *       are IP lines searched for.
- */
-struct ConfItem *
-find_matching_conf(const char *host, const char *user,
-                   struct irc_inaddr *ip)
+void
+report_dlines(struct Client *client_p)
 {
-  struct HostMaskEntry *hm;
-  struct ConfItem *aconf = NULL, *aconf_k = NULL;
-  char buffer[HOSTLEN+USERLEN+1];
-
-  if (!host || !user)
-    return NULL;
-
-  ircsprintf(buffer, "%s@%s", user, host);
-
-  if ((hm = match_hostmask(buffer, HOST_CONFITEM)))
-   aconf = (struct ConfItem*)hm->data;
-
-  if (aconf && aconf->status == CONF_KILL)
-    {
-      aconf_k = aconf;
-      aconf = NULL;
-    }
-
-  if (!aconf)
-    {
-      aconf = match_ip_Iline(ip, user);
-    }
-
-  if (!aconf_k && ip)
-    {
-      aconf_k = match_ip_Kline(ip, user);
-    }
-
-  return (aconf_k && (!aconf || !IsConfElined(aconf))) ? aconf_k : aconf;
-}
-
-/* void add_conf(strcut ConfItem *aconf)
- * Inputs:	A hostmask I/K-line ConfItem to add.
- * Output:	NONE
- * Side-effects: The hostmask is added to the hashtable and the ConfItem
- *               is associated with it. The precedence is set with
- *               decreasing precedence on each call.
- */
-void add_conf(struct ConfItem *aconf)
-{
-  char buffer[HOSTLEN+USERLEN+1];
-
-  ircsprintf(buffer, "%s@%s",
-	     aconf->user ? aconf->user : "",
-	     aconf->host ? aconf->host : "");
-  add_hostmask(buffer, HOST_CONFITEM, aconf);
-}
-
-/* void clear_conf(void)
- * Inputs:	NONE
- * Output: 	NONE
- * Side-effects: All ConfItems on the linked list with no attached
- *               clients are freed. The remainder are moved onto a
- *               list of deferred masks to be deleted on future calls to
- *               this function.
- */
-void clear_conf(void)
-{
-  struct ConfItem *conf=NULL;
-  static struct HostMaskEntry *deferred_masks;
-  struct HostMaskEntry *hme=NULL, *hmen, *hmel = NULL;
-
-  for (hme = deferred_masks; hme; hme=hmen)
-    {
-      hmen = hme->next;
-      conf = ((struct ConfItem*)hme->data);
-      if (conf->clients == 0)
-	{
-	  if(hmel)
-	    hmel->next = hmen;
-	  else
-	    deferred_masks = hmen;
-	  conf->clients--;
-	  free_conf(conf);
-	  MyFree(hme->hostmask);
-	  MyFree(hme);
-	}
-      else
-	hmel = hme;
-    }
-
-  for (hme = first_mask; hme; hme = hmen)
-    {
-      hmen = hme->next;
-
-      /* We don't use types as of yet, but lets just check... -A1kmm. */
-      assert(hme->type == HOST_CONFITEM);
-      conf = (struct ConfItem*)hme->data;
-      if (conf->clients)
-	{
-	  conf->status |= CONF_ILLEGAL;
-	  hme->next = deferred_masks;
-	  deferred_masks = hme;
-	}
-      else
-	{
-	  conf->clients--;
-	  free_conf(conf);
-	  MyFree(hme->hostmask);
-	  MyFree(hme);
-	}
-    }
-  first_miscmask = NULL;
-  first_mask = NULL;
-  memset((void *)hmhash,0,sizeof(hmhash));
+ char *name, *host, *pass, *user, *classname;
+ struct AddressRec *arec;
+ struct ConfItem *aconf;
+ int i, port;
+ for (i=0; i<ATABLE_SIZE; i++)
+  for (arec=atable[i]; arec; arec=arec->next)
+   if (arec->type == CONF_DLINE)
+   {
+    aconf = arec->aconf;
+    get_printable_conf(aconf, &name, &host, &pass, &user, &port,
+                       &classname);
+    sendto_one(client_p, form_str(RPL_STATSDLINE), me.name,
+               client_p->name, 'D', host, pass);
+   }
 }
 
 /*
@@ -414,97 +631,79 @@ void clear_conf(void)
  * side effects - NONE
  */
 char *
-show_iline_prefix(struct Client *source_p,struct ConfItem *aconf,char *name)
+show_iline_prefix(struct Client *sptr,struct ConfItem *aconf,char *name)
 {
-  static char prefix_of_host[MAXPREFIX];
-  char *prefix_ptr;
-
-  prefix_ptr = prefix_of_host;
- 
-  if (IsNoTilde(aconf))
-    *prefix_ptr++ = '-';
-  if (IsLimitIp(aconf))
-    *prefix_ptr++ = '!';
-  if (IsNeedIdentd(aconf))
-    *prefix_ptr++ = '+';
-  if (IsPassIdentd(aconf))
-    *prefix_ptr++ = '$';
-  if (IsNoMatchIp(aconf))
-    *prefix_ptr++ = '%';
-  if (IsConfDoSpoofIp(aconf))
-    *prefix_ptr++ = '=';
-
-  if (IsOper(source_p))
-    if (IsConfElined(aconf))
-      *prefix_ptr++ = '^';
-
-  if (IsOper(source_p))
-    if (IsConfFlined(aconf))
-      *prefix_ptr++ = '>';
-
-  if (IsOper(source_p)) 
-    if (IsConfIdlelined(aconf))
-      *prefix_ptr++ = '<';
-
-  *prefix_ptr = '\0';
-
-  strncat(prefix_of_host, name, MAXPREFIX + prefix_ptr - prefix_of_host);
-  return prefix_of_host;
+ static char prefix_of_host[USERLEN+15];
+ char *prefix_ptr;
+ prefix_ptr = prefix_of_host;
+ if (IsNoTilde(aconf))
+  *prefix_ptr++ = '-';
+ if (IsLimitIp(aconf))
+  *prefix_ptr++ = '!';
+ if (IsNeedIdentd(aconf))
+  *prefix_ptr++ = '+';
+ if (IsPassIdentd(aconf))
+  *prefix_ptr++ = '$';
+ if (IsNoMatchIp(aconf))
+  *prefix_ptr++ = '%';
+ if (IsConfDoSpoofIp(aconf))
+  *prefix_ptr++ = '=';
+ if (IsOper(sptr) && IsConfElined(aconf))
+  *prefix_ptr++ = '^';
+ if (IsOper(sptr) && IsConfFlined(aconf))
+  *prefix_ptr++ = '>';
+ if (IsOper(sptr) && IsConfIdlelined(aconf))
+  *prefix_ptr++ = '<';
+ *prefix_ptr = '\0';
+ strncat(prefix_of_host,name,USERLEN);
+ return(prefix_of_host);
 }
 
-/* void report_hostmask_conf_links(struct Client *source_p, int flags)
- * Input: Client to send report to, flags on whether to report I/K lines.
- * Output: -
- * Side-effects: The client is sent a list of all ConfItems they are
- *               entitled to see of the type specified.
- */
+
 void
-report_hostmask_conf_links(struct Client *source_p, int flags)
+report_Ilines(struct Client *client_p)
 {
-  struct HostMaskEntry *mask;
-  struct ConfItem *aconf;
-  char *name, *host, *pass, *user, *classname;
-  int  port;
-
-  if (flags & CONF_CLIENT) /* Show I-lines... */
-    {
-      for (mask = first_mask; mask; mask = mask->next)
-	{
-	  if (mask->type != HOST_CONFITEM)
-	    continue;
-	  aconf = (struct ConfItem*)mask->data;
-	  if (!(aconf->status & CONF_CLIENT))
-	    continue;
-	  if (!(MyConnect(source_p) && IsOper(source_p)) &&
-	      IsConfDoSpoofIp(aconf))
-	    continue;
-	  get_printable_conf(aconf, &name, &host, &pass, &user, &port,
-			     &classname);
-	  sendto_one(source_p, form_str(RPL_STATSILINE), me.name, source_p->name,
-		     'I', name,
-		     show_iline_prefix(source_p,aconf,user),
-		     host, port, classname
-		     );
-	}
-      /* I-lines next... */
-      report_ip_Ilines(source_p);
-    }
-  else /* Show K-lines... */
-    {
-      /* IP K-lines first... */
-      report_ip_Klines(source_p);
-      for (mask = first_mask; mask; mask = mask->next)
-	{
-	  if (mask->type != HOST_CONFITEM)
-	    continue;
-	  aconf = (struct ConfItem*)mask->data;
-	  if (!(aconf->status & CONF_KILL))
-	    continue;
-	  get_printable_conf(aconf, &name, &host, &pass, &user, &port,
-			     &classname);
-	  sendto_one(source_p, form_str(RPL_STATSKLINE), me.name, source_p->name,
-		     'K', host, user, pass
-		     );
-	}
-    }
+ char *name, *host, *pass, *user, *classname;
+ struct AddressRec *arec;
+ struct ConfItem *aconf;
+ int i, port;
+ for (i=0; i<ATABLE_SIZE; i++)
+  for (arec=atable[i]; arec; arec=arec->next)
+   if (arec->type == CONF_CLIENT)
+   {
+    aconf = arec->aconf;
+    if (!(MyConnect(client_p) && IsOper(client_p)) &&
+        IsConfDoSpoofIp(aconf))
+     continue;
+    get_printable_conf(aconf, &name, &host, &pass, &user, &port,
+                       &classname);
+    sendto_one(client_p, form_str(RPL_STATSILINE), me.name,
+               client_p->name, 'I', name,
+               show_iline_prefix(client_p, aconf, user), host, port,
+               classname);
+   }
 }
+
+
+void
+report_Klines(struct Client *client_p)
+{
+ char *name, *host, *pass, *user, *classname, c;
+ struct AddressRec *arec;
+ struct ConfItem *aconf;
+ int i, port;
+ for (i=0; i<ATABLE_SIZE; i++)
+  for (arec=atable[i]; arec; arec=arec->next)
+   if (arec->type == CONF_KILL)
+   {
+    if ((aconf=arec->aconf)->flags & CONF_FLAGS_TEMPORARY)
+     c = 'k';
+    else
+     c = 'K';
+    get_printable_conf(aconf, &name, &host, &pass, &user, &port,
+                       &classname);
+    sendto_one(client_p, form_str(RPL_STATSKLINE), me.name,
+               client_p->name, c, host, user, pass);
+   }
+}
+

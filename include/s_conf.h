@@ -43,8 +43,9 @@ struct hostent;
 /* yacc/lex love globals!!! */
 
 struct ip_value {
-  unsigned long ip;
-  unsigned long ip_mask;
+  struct irc_inaddr ip;
+  int ip_mask;
+  int type;
 };
 
 extern FBFILE* conf_fbfile_in;
@@ -122,6 +123,7 @@ struct ConfItem
 #define CONF_FLAGS_ENCRYPTED            0x10000
 #define CONF_FLAGS_COMPRESSED		0x20000
 #define CONF_FLAGS_PERSISTANT		0x40000
+#define CONF_FLAGS_TEMPORARY		0x80000
 
 /* Macros for struct ConfItem */
 
@@ -294,7 +296,7 @@ extern struct ConfItem* find_conf_ip(dlink_list *list, char* ip, char* name,
 extern struct ConfItem* find_conf_by_name(const char* name, int status);
 extern struct ConfItem* find_conf_by_host(const char* host, int status);
 extern struct ConfItem* find_kill (struct Client *);
-extern int conf_connect_allowed(struct irc_inaddr *addr);
+extern int conf_connect_allowed(struct irc_inaddr *addr, int aftype);
 extern char *oper_flags_as_string(int);
 extern char *oper_privs_as_string(struct Client *, int);
 
@@ -302,9 +304,6 @@ extern int find_q_conf(char*, char*, char *);
 extern int find_u_conf(char*, char*, char *);
 extern struct ConfItem *find_x_conf(char*);
 
-extern struct ConfItem* find_is_klined(const char* host, 
-                                       const char* name,
-                                       struct irc_inaddr *ip);
 extern struct ConfItem* find_tkline(const char*, const char*, struct irc_inaddr *); 
 extern char* show_iline_prefix(struct Client *,struct ConfItem *,char *);
 extern void get_printable_conf(struct ConfItem *,
@@ -333,8 +332,6 @@ extern  void    show_temp_klines(struct Client *, dlink_list *);
 extern  void    cleanup_tklines(void *notused);
 
 extern  const   char *get_conf_name(KlineType);
-extern  int     is_address(char *,unsigned long *,unsigned long *); 
-extern  int     is_ipv6_address(char *,unsigned char *,unsigned char *); 
 extern  int     rehash (struct Client *, struct Client *, int);
 
 extern int  conf_add_server(struct ConfItem *,int);

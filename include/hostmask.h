@@ -18,6 +18,15 @@
  * $Id$ 
  */
 
+enum
+{
+ HM_HOST,
+ HM_IPV4
+#if IPV6
+ ,HM_IPV6
+#endif
+};
+
 struct HostMaskEntry
 {
   int type, subtype;
@@ -27,17 +36,46 @@ struct HostMaskEntry
   struct HostMaskEntry *next, *nexthash;
 };
 
-void add_hostmask(const char *mask, int type, void *data);
-struct HostMaskEntry *match_hostmask(const char *mask, int type);
-struct ConfItem *find_matching_conf(const char*, const char*,
-                                    struct irc_inaddr*);
-void add_conf(struct ConfItem *aconf);
-void clear_conf(void);
-void report_hostmask_conf_links(struct Client*, int);
+int parse_netmask(const char*, struct irc_inaddr*, int*);
+int match_ipv6(struct irc_inaddr*, struct irc_inaddr*, int);
+int match_ipv4(struct irc_inaddr*, struct irc_inaddr*, int);
+struct ConfItem* find_conf_by_address(const char*, struct irc_inaddr*,
+                                      int, int, const char*);
+void add_conf_by_address(const char*, int, const char*, struct ConfItem*);
+void delete_one_address_conf(const char*, struct ConfItem*);
+void clear_out_address_conf(void);
+void init_host_hash(void);
+struct ConfItem* find_address_conf(const char*, const char*,
+                                   struct irc_inaddr*, int);
+struct ConfItem* find_dline(struct irc_inaddr *, int);
 
-#define HOST_CONFITEM 1
-#define HOST_DLINE 2
-#define MAXPREFIX HOSTLEN+USERLEN+15
+void report_dlines(struct Client*);
+void report_Klines(struct Client*);
+void report_Ilines(struct Client*);
 
-#define HOST_IPCONF 1
-#define HOST_NAMECONF 2
+/* Hashtable stuff... */
+#define ATABLE_SIZE 0x1000
+
+struct AddressRec
+{
+ /* masktype: HM_HOST, HM_IPV4, HM_IPV6 -A1kmm */
+ int masktype;
+ union {
+  struct {
+   /* Pointer into ConfItem... -A1kmm */
+   struct irc_inaddr addr;
+   int bits;
+  } ipa;
+   /* Pointer into ConfItem... -A1kmm */
+  const char *hostname;
+ } Mask;
+ /* type: CONF_CLIENT, CONF_DLINE, CONF_KILL etc... -A1kmm */
+ int type;
+ /* Higher precedences overrule lower ones... */
+ unsigned long precedence;
+ /* Only checked if !(type & 1)... */
+ const char *username;
+ struct ConfItem *aconf;
+ /* The next record in this hash bucket. */
+ struct AddressRec *next;
+};

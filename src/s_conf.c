@@ -46,7 +46,6 @@
 #include "client.h"
 #include "common.h"
 #include "event.h"
-#include "dline_conf.h"
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"
@@ -182,7 +181,6 @@ struct ConfItem* make_conf()
   aconf = (struct ConfItem*) MyMalloc(sizeof(struct ConfItem));
   aconf->status       = CONF_ILLEGAL;
   aconf->aftype	      = AF_INET;
-/*  aconf->ipnum.s_addr = INADDR_NONE; */
   return (aconf);
 }
 
@@ -476,106 +474,81 @@ int check_client(struct Client *client_p, struct Client *source_p, char *usernam
  */
 int attach_Iline(struct Client* client_p, const char* username)
 {
-  struct ConfItem* aconf;
-  struct ConfItem* gkill_conf;
-  struct ConfItem* tkline_conf;
-  char       non_ident[USERLEN + 1];
-
-  if (IsGotId(client_p))
+ struct ConfItem* aconf;
+ struct ConfItem* gkill_conf;
+ char       non_ident[USERLEN + 1];
+ if (IsGotId(client_p))
+ {
+  aconf = find_address_conf(client_p->host,client_p->username,
+                            &client_p->localClient->ip,
+                            client_p->localClient->aftype);
+ } else
+ {
+  non_ident[0] = '~';
+  strncpy_irc(&non_ident[1],username, USERLEN - 1);
+  non_ident[USERLEN] = '\0';
+  aconf = find_address_conf(client_p->host,non_ident,
+                            &client_p->localClient->ip,
+                            client_p->localClient->aftype);
+ }
+ if (aconf != NULL)
+ {
+  if (aconf->status & CONF_CLIENT)
+  {
+   if (aconf->flags & CONF_FLAGS_REDIR)
+   {
+    sendto_one(client_p, form_str(RPL_REDIR), me.name, client_p->name,
+               aconf->name ? aconf->name : "", aconf->port);
+    return(NOT_AUTHORIZED);
+   }
+   if (ConfigFileEntry.glines)
+   {
+    if (!IsConfElined(aconf))
     {
-      aconf = find_matching_conf(client_p->host,client_p->username,
-                                       &client_p->localClient->ip);
-      if(aconf && !IsConfElined(aconf))
-        {
-          if( (tkline_conf = find_tkline(client_p->host,
-					 client_p->username,
-					 &client_p->localClient->ip)))
-            aconf = tkline_conf;
-        }
+     if (IsGotId(client_p))
+      gkill_conf = find_gkill(client_p, client_p->username);
+     else
+      gkill_conf = find_gkill(client_p, non_ident);
+     if (gkill_conf)
+     {
+      sendto_one(client_p, ":%s NOTICE %s :*** G-lined", me.name,
+                 client_p->name);
+      sendto_one(client_p, ":%s NOTICE %s :*** Banned %s",
+                 me.name, client_p->name, gkill_conf->passwd);
+      return(BANNED_CLIENT);
+     }
     }
-  else
+   }
+   if (IsConfDoIdentd(aconf))
+    SetNeedId(client_p);
+   if (IsConfRestricted(aconf))
+    SetRestricted(client_p);
+   /* Thanks for spoof idea amm */
+   if (IsConfDoSpoofIp(aconf))
+   {
+    if (IsConfSpoofNotice(aconf))
     {
-      non_ident[0] = '~';
-      strncpy_irc(&non_ident[1],username, USERLEN - 1);
-      non_ident[USERLEN] = '\0';
-      aconf = find_matching_conf(client_p->host,non_ident,
-                                 &client_p->localClient->ip);
-      if(aconf && !IsConfElined(aconf))
-        {
-          if((tkline_conf = find_tkline(client_p->host,
-					non_ident,
-					&client_p->localClient->ip)))
-            aconf = tkline_conf;
-        }
+     sendto_realops_flags(FLAGS_ADMIN,
+                          "%s spoofing: %s as %s", client_p->name,
+                          client_p->host, aconf->name);
     }
-
-  if(aconf != NULL)
-    {
-      if (aconf->status & CONF_CLIENT)
-        {
-	  if (aconf->flags & CONF_FLAGS_REDIR)
-	    {
-	      sendto_one(client_p, form_str(RPL_REDIR),
-			 me.name, client_p->name,
-			 aconf->name ? aconf->name : "", aconf->port);
-	      return(NOT_AUTHORIZED);
-	    }
-
-
-	  if (ConfigFileEntry.glines)
-	    {
-	      if (!IsConfElined(aconf))
-		{
-		  if (IsGotId(client_p))
-		    gkill_conf = find_gkill(client_p, client_p->username);
-		  else
-		    gkill_conf = find_gkill(client_p, non_ident);
-		  if (gkill_conf)
-		    {
-		      sendto_one(client_p, ":%s NOTICE %s :*** G-lined", me.name,
-				 client_p->name);
-		      sendto_one(client_p, ":%s NOTICE %s :*** Banned %s",
-				 me.name, client_p->name,
-				 gkill_conf->passwd);
-		      return(BANNED_CLIENT);
-		    }
-		}
-	    }
-
-	  if(IsConfDoIdentd(aconf))
-	    SetNeedId(client_p);
-
-	  if(IsConfRestricted(aconf))
-	    SetRestricted(client_p);
-
-	  /* Thanks for spoof idea amm */
-	  if(IsConfDoSpoofIp(aconf))
-	    {
-	      if(IsConfSpoofNotice(aconf))
-	      {
-	        sendto_realops_flags(FLAGS_ADMIN,
-				   "%s spoofing: %s as %s", client_p->name,
-				   client_p->host, aconf->name);
-	      }
-	      strncpy_irc(client_p->host, aconf->name, HOSTLEN);
-	      SetIPSpoof(client_p);
-	      SetIPHidden(client_p);
-	    }
-
-	  return(attach_iline(client_p, aconf));
-        }
-      else if(aconf->status & CONF_KILL)
-        {
-	  if(ConfigFileEntry.kline_with_reason)
-	    {
-	      sendto_one(client_p, ":%s NOTICE %s :*** Banned %s",
-			 me.name,client_p->name,aconf->passwd);
-	    }
-          return(BANNED_CLIENT);
-        }
-    }
-
-  return(NOT_AUTHORIZED);
+    strncpy_irc(client_p->host, aconf->name, HOSTLEN);
+    SetIPSpoof(client_p);
+    SetIPHidden(client_p);
+   }
+   return(attach_iline(client_p, aconf));
+  } else
+  if (aconf->status & CONF_KILL)
+  {
+   if (ConfigFileEntry.kline_with_reason)
+   {
+    sendto_one(client_p, ":%s NOTICE %s :*** Banned %s",
+               me.name,client_p->name,aconf->passwd);
+   }
+   return(BANNED_CLIENT);
+  }
+ }
+ return(NOT_AUTHORIZED);
 }
 
 /*
@@ -1568,9 +1541,9 @@ static void lookup_confhost(struct ConfItem* aconf)
 /*
  * conf_connect_allowed (untested)
  */
-int conf_connect_allowed(struct irc_inaddr *addr)
+int conf_connect_allowed(struct irc_inaddr *addr, int aftype)
 {
-  struct ConfItem *aconf = match_Dline(addr);
+  struct ConfItem *aconf = find_dline(addr, aftype);
 
   if (aconf && !IsConfElined(aconf))
     return 0;
@@ -1587,13 +1560,14 @@ int conf_connect_allowed(struct irc_inaddr *addr)
  */
 struct ConfItem *find_kill(struct Client* client_p)
 {
-  assert(0 != client_p);
-
-  /* If client is e-lined, then its not k-linable */
-  /* opers get that flag automatically, normal users do not */
-  return (IsElined(client_p)) ? 0 : find_is_klined(client_p->host, 
-                                               client_p->username, 
-                                               &client_p->localClient->ip);
+ struct ConfItem *aconf;
+ assert(0 != client_p);
+ aconf = find_address_conf(client_p->host, client_p->username,
+                           &client_p->localClient->ip,
+                           client_p->localClient->aftype);
+ if (aconf->status == CONF_KILL)
+  return aconf;
+ return NULL;
 }
 
 /*
@@ -1661,24 +1635,6 @@ struct ConfItem* find_tkline(const char* host, const char* user, struct irc_inad
  * WARNING, no sanity checking on length of name,host etc.
  * thats expected to be done by caller.... 
  */
-struct ConfItem *find_is_klined(const char* host, const char* name,
-				struct irc_inaddr *ip)
-{
-  struct ConfItem *found_aconf;
-
-  if( (found_aconf = find_tkline(host, name, ip)) )
-    return(found_aconf);
-
-  /* find_matching_mtrie_conf() can return either CONF_KILL,
-   * CONF_CLIENT or NULL, i.e. no I line at all.
-   */
-
-  found_aconf = find_matching_conf(host, name, ip);
-  if(found_aconf && (found_aconf->status & (CONF_ELINE|CONF_DLINE|CONF_KILL)))
-    return(found_aconf);
-
-  return NULL;
-}
 
 /* add_temp_kline
  *
@@ -1688,16 +1644,14 @@ struct ConfItem *find_is_klined(const char* host, const char* name,
  *                 temporary kline link list
  */
 
-void add_temp_kline(struct ConfItem *aconf)
+void
+add_temp_kline(struct ConfItem *aconf)
 {
-  dlink_node *kill_node;
-
-  kill_node = make_dlink_node();
-
-  if (aconf->ip == 0)
-    dlinkAdd(aconf, kill_node, &temporary_klines);
-  else 
-    dlinkAdd(aconf, kill_node, &temporary_ip_klines);
+ dlink_node *kill_node;
+ kill_node = make_dlink_node();
+ dlinkAdd(aconf, kill_node, &temporary_klines);
+ aconf->flags |= CONF_FLAGS_TEMPORARY;
+ add_conf_by_address(aconf->host, CONF_KILL, aconf->user, aconf);
 }
 
 /* report_temp_klines
@@ -1709,8 +1663,7 @@ void add_temp_kline(struct ConfItem *aconf)
  */
 void report_temp_klines(struct Client *source_p)
 {
-  show_temp_klines(source_p, &temporary_klines);
-  show_temp_klines(source_p, &temporary_ip_klines);
+ show_temp_klines(source_p, &temporary_klines);
 }
 
 /* show_temp_klines
@@ -1765,7 +1718,6 @@ void
 cleanup_tklines(void *notused)
 {
   expire_tklines(&temporary_klines);
-  expire_tklines(&temporary_ip_klines);
 
   eventAdd("cleanup_tklines", cleanup_tklines, NULL,
            CLEANUP_TKLINES_TIME, 0);
@@ -1781,22 +1733,21 @@ cleanup_tklines(void *notused)
 static void
 expire_tklines(dlink_list *tklist)
 {
-  dlink_node *kill_node;
-  dlink_node *next_node;
-  struct ConfItem *kill_ptr;
+ dlink_node *kill_node;
+ dlink_node *next_node;
+ struct ConfItem *kill_ptr;
+ for (kill_node = tklist->head; kill_node; kill_node = next_node)
+ {
+  kill_ptr = kill_node->data;
+  next_node = kill_node->next;
 
-  for (kill_node = tklist->head; kill_node; kill_node = next_node)
-    {
-      kill_ptr = kill_node->data;
-      next_node = kill_node->next;
-
-      if (kill_ptr->hold <= CurrentTime)
-        {
-          free_conf(kill_ptr);
-          dlinkDelete(kill_node, tklist);
-          free_dlink_node(kill_node);
-        }
-    }
+  if (kill_ptr->hold <= CurrentTime)
+  {
+   delete_one_address_conf(kill_ptr->host, kill_ptr);
+   dlinkDelete(kill_node, tklist);
+   free_dlink_node(kill_node);
+  }
+ }
 }
 
 /*
@@ -1958,160 +1909,6 @@ char *oper_flags_as_string(int flags)
   return(flags_out);
 }
 
-/* table used for is_address */
-unsigned long cidr_to_bitmask[]=
-{
-  /* 00 */ 0x00000000,
-  /* 01 */ 0x80000000,
-  /* 02 */ 0xC0000000,
-  /* 03 */ 0xE0000000,
-  /* 04 */ 0xF0000000,
-  /* 05 */ 0xF8000000,
-  /* 06 */ 0xFC000000,
-  /* 07 */ 0xFE000000,
-  /* 08 */ 0xFF000000,
-  /* 09 */ 0xFF800000,
-  /* 10 */ 0xFFC00000,
-  /* 11 */ 0xFFE00000,
-  /* 12 */ 0xFFF00000,
-  /* 13 */ 0xFFF80000,
-  /* 14 */ 0xFFFC0000,
-  /* 15 */ 0xFFFE0000,
-  /* 16 */ 0xFFFF0000,
-  /* 17 */ 0xFFFF8000,
-  /* 18 */ 0xFFFFC000,
-  /* 19 */ 0xFFFFE000,
-  /* 20 */ 0xFFFFF000,
-  /* 21 */ 0xFFFFF800,
-  /* 22 */ 0xFFFFFC00,
-  /* 23 */ 0xFFFFFE00,
-  /* 24 */ 0xFFFFFF00,
-  /* 25 */ 0xFFFFFF80,
-  /* 26 */ 0xFFFFFFC0,
-  /* 27 */ 0xFFFFFFE0,
-  /* 28 */ 0xFFFFFFF0,
-  /* 29 */ 0xFFFFFFF8,
-  /* 30 */ 0xFFFFFFFC,
-  /* 31 */ 0xFFFFFFFE,
-  /* 32 */ 0xFFFFFFFF
-};
-
-/*
- * is_address
- *
- * inputs        - hostname
- *               - pointer to ip result
- *               - pointer to ip_mask result
- * output        - YES if hostname is ip# only NO if its not
- * side effects        - NONE
- * 
- * Thanks Soleil
- *
- * BUGS
- */
-
-int        is_address(char *host,
-                   unsigned long *ip_ptr,
-                   unsigned long *ip_mask_ptr)
-{
-  unsigned long current_ip=0L;
-  unsigned int octet=0;
-  int found_mask=0;
-  int dot_count=0;
-  char c;
-
-  while( (c = *host) )
-    {
-      if(IsDigit(c))
-        {
-          octet *= 10;
-          octet += (*host & 0xF);
-        }
-      else if(c == '.')
-        {
-          current_ip <<= 8;
-          current_ip += octet;
-          if( octet > 255 )
-            return( 0 );
-          octet = 0;
-          dot_count++;
-        }
-      else if(c == '/')
-        {
-          if( octet > 255 )
-            return( 0 );
-          found_mask = 1;
-          current_ip <<= 8;
-          current_ip += octet;
-          octet = 0;
-          *ip_ptr = current_ip;
-          current_ip = 0L;
-        }
-      else if(c == '*')
-        {
-          if( (dot_count == 3) && (*(host+1) == '\0') && (*(host-1) == '.'))
-            {
-              current_ip <<= 8;
-              *ip_ptr = current_ip;
-              *ip_mask_ptr = 0xFFFFFF00L;
-              return( 1 );
-            }
-          else
-            return( 0 );
-        }
-      else
-        return( 0 );
-      host++;
-    }
-
-  if(octet > 255)
-    return( 0 );
-  current_ip <<= 8;
-  current_ip += octet;
-
-  if(found_mask)
-    {
-      if(current_ip>32)
-        return( 0 );
-      *ip_mask_ptr = cidr_to_bitmask[current_ip];
-    }
-  else
-    {
-      *ip_ptr = current_ip;
-      *ip_mask_ptr = 0xFFFFFFFFL;
-    }
-
-  return( 1 );
-}
-
-/*
- * is_ipv6_address
- *
- * inputs        - hostname
- *               - pointer to ip result
- *               - pointer to ip_mask result
- * output        - YES if hostname is ip# only NO if its not
- * side effects  - NONE
- * 
- */
-
-int        is_ipv6_address(char *host,
-			   unsigned char *ip_ptr,
-			   unsigned char *ip_mask_ptr)
-{
-  char *p;
-  int mask_value;
-
-  if((p = strchr(host,'/')))
-    {
-      *p = '\0';
-      mask_value = atoi(p+1);
-    }
-
-  /* XXX finish later, lie for now ... */
-  return 1;
-}
-
 /*
  * get_printable_conf
  *
@@ -2267,8 +2064,7 @@ static void clear_out_old_conf(void)
     for (cltmp = ClassList->next; cltmp; cltmp = cltmp->next)
       MaxLinks(cltmp) = -1;
 
-    clear_conf();
-    clear_Dline_table();
+    clear_out_address_conf();
     clear_special_conf(&x_conf);
     clear_special_conf(&u_conf);
     clear_special_conf(&q_conf);
@@ -2579,29 +2375,10 @@ int conf_add_server(struct ConfItem *aconf, int lcount)
 
 void conf_add_k_conf(struct ConfItem *aconf)
 {
-  unsigned long    ip;
-  unsigned long    ip_mask;
-
-  if (aconf->host)
-    {
-      if(is_address(aconf->host,&ip,&ip_mask))
-	{
-	  ip &= ip_mask;
-	  aconf->ip = ip;
-	  aconf->ip_mask = ip_mask;
-	  if(add_ip_Kline(aconf) < 0)
-	    {
-	      log(L_ERROR,"Invalid IP K line %s ignored",aconf->host);
-	      free_conf(aconf);
-	    }
-	}
-      else
-	{
-	  (void)collapse(aconf->host);
-	  (void)collapse(aconf->user);
-	  add_conf(aconf);
-	}
-    }
+ if (aconf->host)
+ {
+  add_conf_by_address(aconf->host, CONF_KILL, aconf->user, aconf);
+ }
 }
 
 /*
@@ -2610,37 +2387,21 @@ void conf_add_k_conf(struct ConfItem *aconf)
  * output       - NONE
  * side effects - Add a d/D line
  */
-
-void conf_add_d_conf(struct ConfItem *aconf)
+void
+conf_add_d_conf(struct ConfItem *aconf)
 {
-  unsigned long    ip;
-  unsigned long    ip_mask;
-
-  if (aconf->host)
-    {
-      DupString(aconf->user,aconf->host);
-      (void)is_address(aconf->host,&ip,&ip_mask);
-      ip &= ip_mask;
-      aconf->ip = ip;
-      aconf->ip_mask = ip_mask;
-
-      if(aconf->flags & CONF_FLAGS_E_LINED)
-	{
-	  if(add_Eline(aconf) < 0)
-	    {
-	      log(L_WARN,"Invalid Eline %s ignored",aconf->host);
-	      free_conf(aconf);
-	    }
-	}
-      else
-	{
-	  if(add_Dline(aconf) < 0)
-	    {
-	      log(L_WARN,"Invalid Dline %s ignored",aconf->host);
-	      free_conf(aconf);
-	    }
-	}
-    }
+ if (aconf->host == NULL)
+  return;
+ aconf->user = NULL;
+ /* XXX - Should 'd' ever be in the old conf? For new conf we don't
+  *       need this anyway, so I will disable it for now... -A1kmm */
+ if (parse_netmask(aconf->host, NULL, NULL) == HM_HOST)
+ {
+  log(L_WARN,"Invalid Dline %s ignored",aconf->host);
+      free_conf(aconf);
+  return;
+ }
+ add_conf_by_address(aconf->host, CONF_DLINE, NULL, aconf);
 }
 
 /*

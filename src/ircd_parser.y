@@ -44,6 +44,7 @@
 #include "memory.h"
 #include "modules.h"
 #include "s_serv.h" /* for CAP_LL / IsCapable */
+#include "hostmask.h"
 
 extern char *ip_string;
 
@@ -116,8 +117,6 @@ int   class_redirport_var;
 %token  HUB_MASK
 %token  IDLETIME
 %token  IP
-%token  IP_TYPE
-%token  IPV6_TYPE
 %token  KILL
 %token  KLINE
 %token  KLINE_EXEMPT
@@ -236,7 +235,6 @@ int   class_redirport_var;
 %left '*' '/'
 %left NEG
 
-%type   <ip_value> IP_TYPE
 %type   <string>   QSTRING
 %type   <number>   NUMBER
 %type   <number>   timespec
@@ -468,11 +466,14 @@ serverinfo_network_desc: NETWORK_DESC '=' QSTRING ';'
     DupString(ServerInfo.network_desc,yylval.string);
   };
 
-serverinfo_vhost:       VHOST '=' IP_TYPE ';'
+serverinfo_vhost:       VHOST '=' QSTRING ';'
   {
 #ifndef IPV6
 /* XXX: Broken for IPv6 */
-    IN_ADDR(ServerInfo.ip) = yylval.ip_entry.ip;
+    if (parse_netmask(yylval.string, &ServerInfo.ip, NULL) == HM_HOST)
+    {
+     log(L_ERROR, "Invalid netmask for server vhost(%s)", yylval.string);
+    }
     ServerInfo.specific_virtual_host = 1;
 #endif
   };
@@ -877,6 +878,7 @@ auth_entry:   AUTH
 
     yy_achead = yy_aprev = yy_aconf = make_conf();
     yy_aconf->status = CONF_CLIENT;
+    yy_achead->className = NULL;
     yy_acount = 0;
   }
  '{' auth_items '}' ';' 
@@ -903,29 +905,22 @@ auth_entry:   AUTH
       yy_next = yy_tmp->next; /* yy_tmp->next is used by conf_add_conf */
       yy_tmp->next = NULL;
 
-      if(yy_tmp->name == NULL)
-        DupString(yy_tmp->name,"NOMATCH");
+      if (yy_tmp->name == NULL)
+       DupString(yy_tmp->name,"NOMATCH");
 
       conf_add_class_to_conf(yy_tmp);
 
-      if(yy_tmp->user == NULL)
-        DupString(yy_tmp->user,"*");
+      if (yy_tmp->user == NULL)
+       DupString(yy_tmp->user,"*");
       else
-        (void)collapse(yy_tmp->user);
+       (void)collapse(yy_tmp->user);
 
-      if(yy_tmp->host == NULL)
-        DupString(yy_tmp->host,"*");
+      if (yy_tmp->host == NULL)
+       continue;
       else
         (void)collapse(yy_tmp->host);
 
-      if(yy_tmp->ip && yy_tmp->ip_mask)
-        {
-          add_ip_Iline(yy_tmp);
-        }
-      else
-        {
-          add_conf(yy_tmp);
-        }
+      add_conf_by_address(yy_tmp->host, CONF_CLIENT, yy_tmp->user, yy_tmp);
     }
     yy_achead = NULL;
     yy_aconf = NULL;
@@ -975,30 +970,7 @@ auth_user:   USER '=' QSTRING ';'
 	DupString(yy_aconf->user,"*");
       }
   };
-             |
-        IP '=' IP_TYPE ';'
-  {
-    char *p;
-
-    yy_aprev->ip = yylval.ip_entry.ip;
-    yy_aprev->ip_mask = yylval.ip_entry.ip_mask;
-    DupString(yy_aprev->host,ip_string);
-    if((p = strchr(yy_aprev->host, ';')))
-      *p = '\0';
-  }
-	     |
-        IP '=' IPV6_TYPE ';'
-  {
-    char *p;
-
-#if 0
-    yy_aconfs[yy_count-1]->ip = yylval.ip_entry.ip;
-    yy_aconfs[yy_count-1]->ip_mask = yylval.ip_entry.ip_mask;
-#endif
-    DupString(yy_aprev->host,ip_string);
-    if((p = strchr(yy_aprev->host, ';')))
-      *p = '\0';
-  };
+/* XXX - IP/IPV6 tags don't exist anymore - put IP/IPV6 into user. */
 
 auth_passwd:  PASSWORD '=' QSTRING ';' 
   {
@@ -1225,6 +1197,7 @@ connect_entry:  CONNECT
       }
 
     yy_aconf=make_conf();
+    yy_aconf->passwd = NULL;
     /* Finally we can do this -A1kmm. */
     yy_aconf->status = CONF_SERVER;
   }
@@ -1524,19 +1497,19 @@ deny_entry:     DENY
   }
 '{' deny_items '}' ';'
   {
-    if(yy_aconf->ip)
-      {
-	if(yy_aconf->passwd == NULL)
-	  {
-	    DupString(yy_aconf->passwd,"NO REASON");
-	  }
-        add_Dline(yy_aconf);
-      }
-    else
-      {
-        free_conf(yy_aconf);
-      }
-    yy_aconf = (struct ConfItem *)NULL;
+   if (yy_aconf->host &&
+      parse_netmask(yy_aconf->host, NULL, NULL) != HM_HOST)
+   {
+    if (yy_aconf->passwd == NULL)
+	{
+	 DupString(yy_aconf->passwd,"NO REASON");
+	}
+    add_conf_by_address(yy_aconf->host, CONF_DLINE, NULL, yy_aconf);
+   } else
+   {
+    free_conf(yy_aconf);
+   }
+   yy_aconf = (struct ConfItem *)NULL;
   }; 
 
 deny_items:     deny_items deny_item |
@@ -1545,16 +1518,10 @@ deny_items:     deny_items deny_item |
 deny_item:      deny_ip | deny_reason | error
 
 
-deny_ip:        IP '=' IP_TYPE ';'
+deny_ip:        IP '=' QSTRING ';'
   {
     char *p;
-
-    yy_aconf->ip = yylval.ip_entry.ip;
-    yy_aconf->ip_mask = yylval.ip_entry.ip_mask;
-    MyFree(yy_aconf->host);
-    DupString(yy_aconf->host,ip_string);
-    if((p = strchr(yy_aconf->host, ';')))
-      *p = '\0';
+    yy_aconf->host = yylval.string;
   };
 
 deny_reason:    REASON '=' QSTRING ';' 

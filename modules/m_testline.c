@@ -24,7 +24,6 @@
  */
 #include "handlers.h"
 #include "client.h"
-#include "dline_conf.h"
 #include "common.h"
 #include "irc_string.h"
 #include "ircd_defs.h"
@@ -82,54 +81,54 @@ static void mo_testline(struct Client *client_p, struct Client *source_p,
 {
   struct ConfItem *aconf;
   struct irc_inaddr ip;
-  unsigned long host_mask;
+  int host_mask;
   char *host, *pass, *user, *name, *classname, *given_host, *given_name, *p;
-  int port;
+  int port, t;
   
   if (parc > 1)
     {
       given_name = parv[1];
-      if(!(p = (char*)strchr(given_name,'@')))
-        {
-#ifndef IPV6 
-	  /* XXX: ipv6 doesn't work here */
-          IN_ADDR(ip) = 0L;
+      if (!(p = (char*)strchr(given_name,'@')))
+      {
+       if ((t=parse_netmask(given_name, &ip, &host_mask))!= HM_HOST)
+       {
+        aconf = find_dline(&ip,
+#ifdef IPV6
+                  (t==HM_IPV6) ? AF_INET6 : AF_INET
+#else
+                  AF_INET
 #endif
-          if(is_address(given_name,(unsigned long *)&IN_ADDR(ip),&host_mask))
-            {
-              aconf = match_Dline(&ip);    
-              if( aconf )
-                {
-                  get_printable_conf(aconf, &name, &host, &pass, &user, &port,&classname);
-                  sendto_one(source_p,
-                         ":%s NOTICE %s :D-line host [%s] pass [%s]",
-                         me.name, parv[0],
-                         host,
-                         pass);
-                }
-              else
-                sendto_one(source_p, ":%s NOTICE %s :No aconf found",
-                         me.name, parv[0]);
-            }
-          else
-          sendto_one(source_p, ":%s NOTICE %s :usage: user@host|ip",
-                     me.name, parv[0]);
-  
-          return;
-        }
-      
+         );
+        if (aconf)
+        {
+         get_printable_conf(aconf, &name, &host, &pass, &user, &port,&classname);
+         sendto_one(source_p,
+                    ":%s NOTICE %s :D-line host [%s] pass [%s]", me.name,
+                    parv[0], host, pass);
+        } else
+         sendto_one(source_p, ":%s NOTICE %s :No D-line found",
+                    me.name, parv[0]);
+       } else
+       {
+        sendto_one(source_p, ":%s NOTICE %s :usage: user@host|ip",
+                   me.name, parv[0]);
+       }
+       return;
+      }
       *p = '\0';
       p++;
       given_host = p;
-#ifndef IPV6
-      IN_ADDR(ip) = 0L;
+      if ((t=parse_netmask(given_host, &ip, &host_mask)) != HM_HOST)
+       aconf = find_address_conf(NULL, given_name, &ip,
+#ifdef IPV6
+          (t==HM_IPV6)?AF_INET6 : AF_INET
+#else
+          AF_INET
 #endif
-      (void)is_address(given_host,(unsigned long *)&IN_ADDR(ip),&host_mask);
-      
-      aconf = find_matching_conf(given_host,
-                                       given_name,
-                                       &ip);
-          
+         );
+      else
+       aconf = find_address_conf(given_host, given_name, NULL, 0);
+                 
       if(aconf)
         {
           get_printable_conf(aconf, &name, &host, &pass, &user, &port, &classname);
@@ -137,11 +136,10 @@ static void mo_testline(struct Client *client_p, struct Client *source_p,
           if(aconf->status & CONF_KILL)
             {
               sendto_one(source_p,
-                         ":%s NOTICE %s :K-line name [%s] host [%s] pass [%s]",
+                         ":%s NOTICE %s :%c-line name [%s] host [%s] pass [%s]",
                          me.name, parv[0],
-                         user,
-                         host, 
-                         pass);
+                         (aconf->flags & CONF_FLAGS_TEMPORARY) ? 'k' : 'K',
+                         user, host,  pass);
             }
           else if(aconf->status & CONF_CLIENT)
             {

@@ -27,7 +27,6 @@
 #include "class.h"       /* report_classes */
 #include "client.h"      /* Client */
 #include "common.h"      /* TRUE/FALSE */
-#include "dline_conf.h"  /* report_dlines */
 #include "irc_string.h"  /* strncpy_irc */
 #include "ircd.h"        /* me */
 #include "listener.h"    /* show_ports */
@@ -388,17 +387,17 @@ static void do_priv_stats(struct Client *source_p, char *name, char *target,
       break;
 
     case 'I' : case 'i' :
-      report_hostmask_conf_links(source_p, CONF_CLIENT);
+      report_Ilines(source_p);
       stats_spy(source_p,statchar);
       break;
 
     case 'K' :
-      report_hostmask_conf_links(source_p, CONF_KILL);
+      report_Klines(source_p);
       stats_spy(source_p,statchar);
       break;
 
     case 'k' :
-      report_temp_klines(source_p);
+      /* report_temp_klines(source_p); */
       stats_spy(source_p,statchar);
       break;
 

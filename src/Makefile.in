@@ -60,7 +60,6 @@ BASE_SRCS =                     \
   class.c                       \
   client.c                      \
   debug.c                       \
-  dline_conf.c                  \
   event.c                       \
   fdlist.c                      \
   fileio.c                      \
@@ -84,7 +83,6 @@ BASE_SRCS =                     \
   numeric.c                     \
   packet.c                      \
   parse.c                       \
-  patricia.c                    \
   rsa.c                         \
   restart.c                     \
   s_auth.c                      \

@@ -27,7 +27,6 @@
 #include "class.h"
 #include "channel.h"
 #include "common.h"
-#include "dline_conf.h"
 #include "event.h"
 #include "fdlist.h"
 #include "hash.h"
@@ -50,6 +49,7 @@
 #include "linebuf.h"
 #include "hash.h"
 #include "memory.h"
+#include "hostmask.h"
 
 #include <assert.h>
 #include <fcntl.h>
@@ -396,7 +396,8 @@ check_klines(void)
       if(IsMe(client_p))
 	continue;
 
-      if ((aconf = match_Dline(&client_p->localClient->ip)))
+      if ((aconf = find_dline(&client_p->localClient->ip,
+                              client_p->localClient->aftype)))
 	/* if there is a returned struct ConfItem then kill it */
 	{
 	  if(IsConfElined(aconf))

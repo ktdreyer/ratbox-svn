@@ -28,7 +28,6 @@
 #include "class.h"
 #include "client.h"
 #include "common.h"
-#include "dline_conf.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "hostmask.h"
@@ -99,19 +98,13 @@ static int valid_comment(struct Client *source_p, char *comment);
 static int valid_user_host(char *user, char *host);
 static int valid_wild_card(char *user, char *host);
 static int already_placed_kline(struct Client *source_p, char *user, char *host,
-                                time_t tkline_time, struct irc_inaddr *);
+                                time_t tkline_time);
 
-static int is_ip_kline(char *host,struct irc_inaddr *ip,
-                       unsigned long *ip_mask);
 static void apply_kline(struct Client *source_p, struct ConfItem *aconf,
-                        const char *reason, const char *current_date,
-                        int ip_kline, struct irc_inaddr *ip,
-                        unsigned long ip_mask);
+                        const char *reason, const char *current_date);
 
 static void apply_tkline(struct Client *source_p, struct ConfItem *aconf,
-                         const char *current_date, int temporary_kline_time,
-                         int ip_kline, struct irc_inaddr *ip,
-                         unsigned long ip_mask);
+                         const char *current_date, int temporary_kline_time);
 
 
 char buffer[IRCD_BUFSIZE];
@@ -139,41 +132,38 @@ static void mo_kline(struct Client *client_p,
   char *reason = "No Reason";
   const char* current_date;
   const char* target_server=NULL;
-  int  ip_kline = NO;
   struct ConfItem *aconf;
   time_t tkline_time=0;
-  struct irc_inaddr ip;
-  unsigned long ip_mask;
 
-  if(!IsSetOperK(source_p))
-    {
-      sendto_one(source_p,":%s NOTICE %s :You have no K flag",
-		 me.name,source_p->name);
-      return;
-    }
+  if (!IsSetOperK(source_p))
+  {
+   sendto_one(source_p,":%s NOTICE %s :You have no K flag",
+              me.name,source_p->name);
+   return;
+  }
 
   parv++;
   parc--;
 
   tkline_time = valid_tkline(source_p,*parv);
 
-  if( tkline_time == -1 )
-    return;
+  if (tkline_time == -1)
+   return;
   else if( tkline_time > 0 )
-    {
-      parv++;
-      parc--;
-    }
+  {
+   parv++;
+   parc--;
+  }
 
-  if(parc == 0)
-    {
-      sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-		 me.name, source_p->name, "KLINE");
-      return;
-    }
+  if (parc == 0)
+  {
+   sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+              me.name, source_p->name, "KLINE");
+   return;
+  }
 
   if ( find_user_host(source_p,*parv,user,host) == 0 )
-    return;
+   return;
   parc--;
   parv++;
 
@@ -215,9 +205,7 @@ static void mo_kline(struct Client *client_p,
        return;
     }
 
-  ip_kline = is_ip_kline(host,&ip,&ip_mask);
   current_date = smalldate((time_t) 0);
-
   aconf = make_conf();
   aconf->status = CONF_KILL;
   DupString(aconf->host, host);
@@ -240,14 +228,8 @@ static void mo_kline(struct Client *client_p,
 	return;
     }
 
-  if ( already_placed_kline(source_p, user, host, tkline_time, &ip))
-    return;
-
-  if (ip_kline)
-   { 
-     aconf->ip = (unsigned long) IN_ADDR(ip);
-     aconf->ip_mask = ip_mask;
-   }
+  if (already_placed_kline(source_p, user, host, tkline_time))
+   return;
 
   if(tkline_time)
     {
@@ -257,8 +239,7 @@ static void mo_kline(struct Client *client_p,
 		 reason,
 		 current_date);
       DupString(aconf->passwd, buffer );
-      apply_tkline(source_p, aconf, current_date, tkline_time,
-		   ip_kline, &ip, ip_mask);
+      apply_tkline(source_p, aconf, current_date, tkline_time);
     }
   else
     {
@@ -266,7 +247,7 @@ static void mo_kline(struct Client *client_p,
 		 reason,
 		 current_date);
       DupString(aconf->passwd, buffer );
-      apply_kline(source_p, aconf, reason, current_date, ip_kline, &ip, ip_mask);
+      apply_kline(source_p, aconf, reason, current_date);
     }
 } /* mo_kline() */
 
@@ -284,9 +265,6 @@ static void ms_kline(struct Client *client_p,
   struct Client *rclient_p=NULL;
   struct ConfItem *aconf=NULL;
   int    tkline_time;
-  int ip_kline = NO;
-  struct irc_inaddr ip;
-  unsigned long ip_mask;
   if(parc < 7)
     return;
 
@@ -335,7 +313,6 @@ static void ms_kline(struct Client *client_p,
        return;
      }
 
-  ip_kline = is_ip_kline(parv[5],&ip,&ip_mask);
   tkline_time = atoi(parv[3]);
 
   if(find_u_conf(source_p->name,rclient_p->username,rclient_p->host))
@@ -352,7 +329,7 @@ static void ms_kline(struct Client *client_p,
       /* We check if the kline already exists after we've announced its 
        * arrived, to avoid confusing opers - fl
        */
-      if ( already_placed_kline(source_p, parv[4], parv[5], (int)parv[3], &ip) )
+      if (already_placed_kline(source_p, parv[4], parv[5], (int)parv[3]))
         return;
 
       aconf = make_conf();
@@ -363,18 +340,10 @@ static void ms_kline(struct Client *client_p,
       DupString(aconf->passwd, parv[6]);
       current_date = smalldate((time_t) 0);
 
-      if(ip_kline)
-        {
-          aconf->ip = (unsigned long) IN_ADDR(ip);
-          aconf->ip_mask = ip_mask;
-        }
-
       if(tkline_time)
-          apply_tkline(rclient_p, aconf, current_date, tkline_time,
-                       ip_kline, &ip, ip_mask);
+          apply_tkline(rclient_p, aconf, current_date, tkline_time);
       else
-	apply_kline(rclient_p, aconf, aconf->passwd, current_date,
-                       ip_kline, &ip, ip_mask);	
+	apply_kline(rclient_p, aconf, aconf->passwd, current_date);	
 
       }
 } /* ms_kline() */
@@ -388,35 +357,13 @@ static void ms_kline(struct Client *client_p,
  *		  and conf file
  */
 static void apply_kline(struct Client *source_p, struct ConfItem *aconf,
-                        const char *reason, const char *current_date,
-                        int ip_kline, struct irc_inaddr *ip,
-			unsigned long ip_mask)
+                        const char *reason, const char *current_date)
 {
-  if(ip_kline)
-    {
-      aconf->ip = (unsigned long) PIN_ADDR(ip);
-      aconf->ip_mask = ip_mask;
-      if(add_ip_Kline(aconf) != 0)
-	{
-	  sendto_one(source_p,":%s NOTICE %s :Invalid IP Kline not placed",
-		     me.name,
-		     source_p->name);
-	  free_conf(aconf);
-	  return;
-	}
-    }
-  else
-    add_conf(aconf);
-
-  WriteKlineOrDline( KLINE_TYPE,
-		     source_p,
-		     aconf->user,
-		     aconf->host,
-		     reason,
-		     current_date);
-
-  /* Now, activate kline against current online clients */
-  check_klines();
+ add_conf_by_address(aconf->host, CONF_KILL, aconf->user, aconf);
+ WriteKlineOrDline(KLINE_TYPE, source_p, aconf->user, aconf->host,
+                   reason, current_date);
+ /* Now, activate kline against current online clients */
+ check_klines();
 }
 
 /*
@@ -427,20 +374,19 @@ static void apply_kline(struct Client *source_p, struct ConfItem *aconf,
  * side effects	- tkline as given is placed
  */
 static void apply_tkline(struct Client *source_p, struct ConfItem *aconf,
-                         const char *current_date, int tkline_time,
-                         int ip_kline, struct irc_inaddr * ip, unsigned long ip_mask)
+                         const char *current_date, int tkline_time)
 {
-  aconf->hold = CurrentTime + tkline_time;
-  add_temp_kline(aconf);
-  sendto_realops_flags(FLAGS_ALL,
-                       "%s added temporary %d min. K-Line for [%s@%s] [%s]",
-                       source_p->name, tkline_time/60, aconf->user, aconf->host,
-                       aconf->passwd);
-  sendto_one(source_p, ":%s NOTICE %s :Added temporary %d min. K-Line for [%s@%s]",
-             me.name, source_p->name, tkline_time/60, aconf->user, aconf->host);
-  log(L_TRACE, "%s added temporary %d min. K-Line for [%s@%s] [%s]",
-      source_p->name, tkline_time/60, aconf->user, aconf->host, aconf->passwd);
-  check_klines();
+ aconf->hold = CurrentTime + tkline_time;
+ add_temp_kline(aconf);
+ sendto_realops_flags(FLAGS_ALL,
+                      "%s added temporary %d min. K-Line for [%s@%s] [%s]",
+                      source_p->name, tkline_time/60, aconf->user, aconf->host,
+                      aconf->passwd);
+ sendto_one(source_p, ":%s NOTICE %s :Added temporary %d min. K-Line for [%s@%s]",
+            me.name, source_p->name, tkline_time/60, aconf->user, aconf->host);
+ log(L_TRACE, "%s added temporary %d min. K-Line for [%s@%s] [%s]",
+     source_p->name, tkline_time/60, aconf->user, aconf->host, aconf->passwd);
+ check_klines();
 }
 
 /*
@@ -614,19 +560,12 @@ static char *cluster(char *hostname)
 static void mo_dline(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
-#ifdef IPV6
-  sendto_one(source_p, ":%s NOTICE %s :Sorry, DLINE is currently not implemented for IPv6",
-             me.name, parv[0]);
-  return;
-#else
   char *dlhost, *reason;
   char *p;
   struct Client *target_p;
   char cidr_form_host[HOSTLEN + 1];
-  unsigned long ip_host;
-  unsigned long ip_mask;
-  struct irc_inaddr ipn;
   struct ConfItem *aconf;
+  int bits;
   char dlbuffer[1024];
   const char* current_date;
 
@@ -637,21 +576,16 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
     }
 
   dlhost = parv[1];
-  strncpy_irc(cidr_form_host, dlhost, 32);
-  cidr_form_host[32] = '\0';
+  strncpy_irc(cidr_form_host, dlhost, HOSTLEN);
+  cidr_form_host[HOSTLEN] = '\0';
 
-  if((p = strchr(cidr_form_host,'*')))
-    {
-      *p++ = '0';
-      *p++ = '/';
-      *p++ = '2';
-      *p++ = '4';
-      *p++ = '\0';
-      dlhost = cidr_form_host;
-    }
-
-  if(!is_address(dlhost,&ip_host,&ip_mask))
-    {
+  if (parse_netmask(dlhost, NULL, &bits) == HM_HOST)
+  {
+#ifdef IPV6
+   sendto_one(source_p, ":%s NOTICE %s :Sorry, please supply an address.",
+              &me.name, parv[0]);
+   return;
+#else
       if (!(target_p = find_chasing(source_p, parv[1], NULL)))
         return;
 
@@ -716,9 +650,9 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
       *p++ = '\0';
       dlhost = cidr_form_host;
 
-      ip_mask = 0xFFFFFF00L;
+      bits = 0xFFFFFF00L;
 /* XXX: Fix me for IPV6 */
-      ip_host = ntohl(IN_ADDR(target_p->localClient->ip));
+#endif
     }
 
 
@@ -736,17 +670,14 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
     reason = "No reason";
 
 
-  if((ip_mask & 0xFFFFFF00) ^ 0xFFFFFF00)
-    {
-      if(ip_mask != 0xFFFFFFFF)
-        {
-          sendto_one(source_p, ":%s NOTICE %s :Can't use a mask less than 24 with dline",
-                     me.name,
-                     parv[0]);
-          return;
-        }
-    }
-  IN_ADDR(ipn) = ip_host;
+  if (bits < 24)
+  {
+   sendto_one(source_p,
+              ":%s NOTICE %s :Can't use a mask less than 24 with dline.",
+              me.name, parv[0]);
+     return;
+  }
+#if 0
   if( ConfigFileEntry.non_redundant_klines && (aconf = match_Dline(&ipn)) )
      {
        char *creason;
@@ -765,7 +696,7 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
                       aconf->host,creason);
       return;
      }
-
+#endif
   current_date = smalldate((time_t) 0);
 
   ircsprintf(dlbuffer, "%s (%s)",reason,current_date);
@@ -775,31 +706,14 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
   DupString(aconf->host,dlhost);
   DupString(aconf->passwd,dlbuffer);
 
-  aconf->ip = ip_host;
-  aconf->ip_mask = ip_mask;
+  add_conf_by_address(aconf->host, CONF_DLINE, NULL, aconf);
+  /*
+   * Write dline to configuration file
+   */
+  WriteKlineOrDline(DLINE_TYPE, source_p, NULL, dlhost, reason,
+                    current_date);
 
-  if(add_Dline(aconf) == 0)
-    {
-      /*
-       * Write dline to configuration file
-       */
-      WriteKlineOrDline(DLINE_TYPE,
-			source_p,
-			NULL,
-			dlhost,
-			reason,
-			current_date);
-
-      check_klines();
-    }
-  else
-    {
-      sendto_one(source_p, ":%s NOTICE %s :Invalid Dline not placed",
-		 me.name,
-		 parv[0]);
-      free_conf(aconf);
-    }
-#endif
+  check_klines();
 } /* m_dline() */
 
 /*
@@ -1000,85 +914,30 @@ static int valid_comment(struct Client *source_p, char *comment)
  * side effects - NONE
  */
 static int already_placed_kline(struct Client *source_p, char *luser, char *lhost,
-                                time_t tkline_time, struct irc_inaddr *ip)
+                                time_t tkline_time)
 {
   char *reason;
   struct ConfItem *aconf;
   if(ConfigFileEntry.non_redundant_klines) 
     {
-      if ((aconf = find_matching_conf(lhost,luser,ip)) && 
-         (aconf->status & CONF_KILL))
-        {
-          reason = aconf->passwd ? aconf->passwd : "<No Reason>";
-
-          /* Remote servers can set klines, so if its a dupe we warn all 
-           * local opers and leave it at that
-           */
-          if(IsServer(source_p))
-            sendto_realops_flags(FLAGS_ALL, 
-                     "*** Remote K-Line [%s@%s] already K-Lined by [%s@%s] - %s",
-                     luser, lhost, aconf->user, aconf->host, reason);
-          else
-             sendto_one(source_p,
-                     ":%s NOTICE %s :[%s@%s] already K-Lined by [%s@%s] - %s",
-                     me.name, source_p->name, luser, lhost, aconf->user,
-                     aconf->host, reason);
-          return 1;
-        }
-
-      if (tkline_time && (aconf = find_tkline(lhost,luser,ip)))
-        {
-          reason = aconf->passwd ? aconf->passwd : "<No Reason>";
-          if(IsServer(source_p))
-            sendto_realops_flags(FLAGS_ALL,
-                    "*** Remote K-Line [%s@%s] already temp K-Lined by [%s@%s] - %s",
-                    luser, lhost, aconf->user, aconf->host, reason);
-          else
-            sendto_one(source_p,
-                    ":%s NOTICE %s :[%s@%s] already temp K-Lined by [%s@%s] - %s",
-                     me.name, source_p->name, luser, lhost, aconf->user,
-                     aconf->host, reason);
-          return 1;
-        }
+     if ((aconf = find_conf_by_address(lhost, NULL, 0, CONF_KILL, luser)))
+     {
+      reason = aconf->passwd ? aconf->passwd : "<No Reason>";
+      /* Remote servers can set klines, so if its a dupe we warn all 
+       * local opers and leave it at that
+       */
+      if (IsServer(source_p))
+       sendto_realops_flags(FLAGS_ALL, 
+             "*** Remote K-Line [%s@%s] already K-Lined by [%s@%s] - %s",
+             luser, lhost, aconf->user, aconf->host, reason);
+      else
+       sendto_one(source_p,
+             ":%s NOTICE %s :[%s@%s] already K-Lined by [%s@%s] - %s",
+              me.name, source_p->name, luser, lhost, aconf->user,
+              aconf->host, reason);
+      return 1;
+     }
     }
-
   return 0;
 }
 
-/*
- * is_ip_kline
- * inputs	- hostname (ip)
- * 		- pointer to where to put ip
- * 		- pointer to where to put ip_mask
- * output	- YES if valid ip_kline NO if not
- * side effects	- NONE
- */
-static int is_ip_kline(char *lhost,struct irc_inaddr *ip, unsigned long *ip_mask)
-{
-  char *p;
-
-  /* 
-  ** At this point, I know the user and the host to place the k-line on
-  ** I also know whether its supposed to be a temporary kline or not
-  ** I also know the reason field is clean
-  ** Now what I want to do, is find out if its a kline of the form
-  **
-  ** /quote kline *@192.168.0.*
-  **
-  */
-
-  if((is_address(lhost, (unsigned long *)&PIN_ADDR(ip), ip_mask)))
-     {
-       if( (p = strchr(lhost,'*')) )
-         {
-           *p++ = '0';
-           *p++ = '/';
-           *p++ = '2';
-           *p++ = '4';
-           *p++ = '\0';
-         }
-       return(YES);
-    }
-
-  return NO;
-}

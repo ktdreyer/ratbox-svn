@@ -47,7 +47,6 @@
 #include "class.h"
 #include "client.h"
 #include "common.h"
-#include "dline_conf.h"
 #include "event.h"
 #include "fdlist.h"
 #include "hash.h"
@@ -467,7 +466,7 @@ int main(int argc, char *argv[])
   
   clear_scache_hash_table();    /* server cache name table */
   clear_ip_hash_table();        /* client host ip hash table */
-  clear_Dline_table();          /* d line tree */
+  init_host_hash();             /* Host-hashtable. */
   clear_hash_parse();
 
   init_client();
