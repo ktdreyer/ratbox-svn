@@ -53,7 +53,7 @@
 #include <string.h>
 
 struct Message stats_msgtab = {
-  MSG_STATS, 0, 0, 0, MFLG_SLOW, 0,
+  MSG_STATS, 0, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_stats, ms_stats, mo_stats}
 };
 

@@ -137,8 +137,9 @@ report_glines(struct Client *sptr)
   char *name;
   char *reason;
 
-  sendto_one(sptr,":%s NOTICE %s :Pending G-lines",
-	     me.name, sptr->name);
+  if (dlink_list_length(&pending_glines) > 0)
+    sendto_one(sptr,":%s NOTICE %s :Pending G-lines",
+               me.name, sptr->name);
 
   for(pending_node = pending_glines.head; pending_node; pending_node = pending_node->next)
     {
@@ -176,8 +177,9 @@ report_glines(struct Client *sptr)
 	}
     }
 
-  sendto_one(sptr,":%s NOTICE %s :End of Pending G-lines",
-	     me.name, sptr->name);
+  if (dlink_list_length(&pending_glines) > 0)
+    sendto_one(sptr,":%s NOTICE %s :End of Pending G-lines",
+               me.name, sptr->name);
 
   for(gline_node = glines.head; gline_node; gline_node = gline_node->next)
     {
