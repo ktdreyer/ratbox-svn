@@ -1,3 +1,18 @@
+leeh        2005/01/19 18:05:20 EST	(20050119_1)
+
+  Modified files:
+    include              tools.h 
+    src                  s_chanserv.c tools.c 
+  Log:
+  - added my_strndup()
+  
+  Revision  Changes    Path
+  1.19      +1 -0      rserv/include/tools.h
+  1.43      +0 -2      rserv/src/s_chanserv.c
+  1.14      +18 -0     rserv/src/tools.c
+
+
+
 leeh        2005/01/19 16:52:14 EST	(20050119_0)
 
   Modified files:
