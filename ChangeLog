@@ -1,3 +1,25 @@
+leeh        2005/02/02 19:14:25 EST	(20050203_0)
+
+  Modified files:
+    include              numeric.h 
+    modules              Makefile.in 
+    src                  messages.tab 
+  Added files:
+    modules              m_cmessage.c 
+  Log:
+  - implemented CPRIVMSG/CNOTICE, stolen from undernet.  Take the form:
+    CPRIVMSG <nick> <channel> :<text>.  Work if sender is +ov in channel, and
+    nick is a member.  These bypass any target change limitations.
+  - added ERR_VOICENEEDED, numeric 489.
+  
+  Revision  Changes    Path
+  7.56      +2 -0      ircd-ratbox/include/numeric.h
+  1.117     +1 -0      ircd-ratbox/modules/Makefile.in
+  1.1       +122 -0    ircd-ratbox/modules/m_cmessage.c (new)
+  7.124     +1 -1      ircd-ratbox/src/messages.tab
+
+
+
 leeh        2005/02/02 16:58:16 EST	(20050202_4)
 
   Modified files:
