@@ -54,6 +54,7 @@
 #define HEAP_CHANNEL_REG	128
 #define HEAP_MEMBER_REG	256
 #define HEAP_BAN_REG	512
+#define HEAP_NICK_REG	256
 
 #endif
 /* $Id$ */

@@ -865,6 +865,12 @@ static struct ConfEntry conf_chanserv_table[] =
 	{ "\0", 0, NULL, 0, NULL }
 };
 
+static struct ConfEntry conf_nickserv_table[] =
+{
+	{ "max_nicks",		CF_INT,   NULL, 0, &config_file.nmax_nicks		},
+	{ "\0", 0, NULL, 0, NULL }
+};
+
 static struct ConfEntry conf_jupeserv_table[] =
 {
 	{ "oper_score",		CF_INT, NULL, 0, &config_file.oper_score	},
@@ -892,6 +898,7 @@ newconf_init()
 
 	add_conf_extension("service", "userserv", conf_userserv_table);
 	add_conf_extension("service", "chanserv", conf_chanserv_table);
+	add_conf_extension("service", "nickserv", conf_nickserv_table);
 	add_conf_extension("service", "jupeserv", conf_jupeserv_table);
 	add_conf_extension("service", "alis", conf_alis_table);
 }

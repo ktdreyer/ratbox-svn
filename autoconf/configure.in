@@ -28,6 +28,21 @@ AC_TYPE_SIGNAL
 AC_FUNC_STRFTIME
 AC_CHECK_FUNCS(select strlcpy strlcat gethostbyname mmap getaddrinfo)
 
+AC_MSG_CHECKING(Nickname Service)
+AC_ARG_ENABLE(nickserv,
+[ --enable-nickserv         Enable Nickname Service
+ --disable-nickserv        Disable Nickname Service],
+[ cf_enable_nickserv=$enableval ],[ cf_enable_nickserv=yes ])
+
+if test "X$cf_enable_nickserv" = "Xyes"; then
+	S_NICKSERV="s_nickserv.c"
+	AC_DEFINE(ENABLE_NICKSERV, 1, Nickname Service)
+	AC_MSG_RESULT(yes)
+else
+	S_NICKSERV=""
+	AC_MSG_RESULT(no)
+fi
+
 AC_MSG_CHECKING(Channel Service)
 AC_ARG_ENABLE(chanserv,
 [ --enable-chanserv         Enable Channel Service
@@ -50,6 +65,10 @@ AC_ARG_ENABLE(userserv,
 [ cf_enable_userserv=$enableval ],[ cf_enable_userserv=yes ])
 
 if test "X$cf_enable_chanserv" = "Xyes"; then
+	cf_enable_userserv=yes
+fi
+
+if test "X$cf_enable_nickserv" = "Xyes"; then
 	cf_enable_userserv=yes
 fi
 
@@ -185,6 +204,7 @@ AC_DEFINE_UNQUOTED(TOPICLEN, (${ac_cv_topiclen}+1), Topic Length)
 
 AC_SUBST(SQLITE_INCLUDES) 
 
+AC_SUBST(S_NICKSERV)
 AC_SUBST(S_CHANSERV)
 AC_SUBST(S_USERSERV)
 AC_SUBST(S_OPERSERV)
@@ -203,6 +223,7 @@ echo
 echo Compiling ratbox-services
 echo Installing into: $prefix
 echo
+echo Nickname Services ........ $cf_enable_nickserv
 echo User Services ............ $cf_enable_userserv
 echo Channel Services ......... $cf_enable_chanserv
 echo Oper Services ............ $cf_enable_operserv

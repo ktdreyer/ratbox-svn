@@ -42,7 +42,7 @@ BSRCS = 		\
         u_stats.c       \
 	ucommand.c
 
-SRCS = ${BSRCS} @S_USERSERV@ @S_CHANSERV@ @S_OPERSERV@ @S_ALIS@\
+SRCS = ${BSRCS} @S_NICKSERV@ @S_USERSERV@ @S_CHANSERV@ @S_OPERSERV@ @S_ALIS@\
 	@S_OPERBOT@ @S_JUPESERV@ @S_GLOBAL@
 
 OBJS=$(SRCS:.c=.o)

@@ -59,6 +59,9 @@ struct _config_file
 	int cexpireban_frequency;
 	int cenforcetopic_frequency;
 
+	/* nickserv */
+	int nmax_nicks;
+
 	/* jupeserv */
 	int oper_score;
 	int jupe_score;
@@ -119,6 +122,7 @@ struct conf_oper
 #define CONF_OPER_OPERBOT	0x0100000
 #define CONF_OPER_JUPESERV	0x0200000
 #define CONF_OPER_GLOBAL	0x0400000
+#define CONF_OPER_NICKSERV	0x0800000
 
 #define OperAdmin(x)	((x)->privs & CONF_OPER_ADMIN)
 #define CliOperAdmin(x)	((x)->user->oper && (x)->user->oper->flags & CONF_OPER_ADMIN)

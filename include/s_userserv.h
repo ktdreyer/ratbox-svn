@@ -22,6 +22,7 @@ struct user_reg
 	dlink_node node;
 	dlink_list channels;
 	dlink_list users;
+	dlink_list nicks;
 };
 
 /* Flags stored in the DB: 0xFFFF */

@@ -60,6 +60,9 @@
 /* Define if you have the sqlite library (-lsqlite).  */
 #undef HAVE_LIBSQLITE
 
+/* Nickname Service */
+#undef ENABLE_NICKSERV
+
 /* Channel Service */
 #undef ENABLE_CHANSERV
 

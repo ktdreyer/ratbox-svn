@@ -17,6 +17,7 @@
 #include "log.h"
 #include "s_chanserv.h"
 #include "s_userserv.h"
+#include "s_nickserv.h"
 #include "ucommand.h"
 #include "balloc.h"
 #include "conf.h"
@@ -116,6 +117,11 @@ free_user_reg(struct user_reg *ureg_p)
 		free_member_reg(ptr->data, 1);
 	}
 
+	DLINK_FOREACH_SAFE(ptr, next_ptr, ureg_p->nicks.head)
+	{
+		free_nick_reg(ptr->data, ureg_p);
+	}
+			
 	loc_sqlite_exec(NULL, "DELETE FROM users WHERE username = %Q",
 			ureg_p->name);
 

@@ -320,6 +320,9 @@ main(int argc, char *argv[])
 #ifdef ENABLE_GLOBAL
 	init_s_global();
 #endif
+#ifdef ENABLE_NICKSERV
+	init_s_nickserv();
+#endif
 
 	first_time = CURRENT_TIME;
 
