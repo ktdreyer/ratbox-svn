@@ -1,3 +1,5 @@
+Last tested version: hybrid-7beta8 20011030_2
+
 To compile ircd on VMS, simply execute the make.com script
 from the top-level ircd directory:
 
@@ -26,9 +28,13 @@ Known problems on VMS:
 
 It should work fine when started with RUN/DETACH.
 
-So far, IRCD is known to work on OpenVMS 7.2/Alpha systems.
+So far, IRCD is known to work on OpenVMS 7.2/Alpha using DEC C V6.0-001.
 
 If anyone gets ircd working on VMS (or has problems with it), please mail me
-(ejb@leguin.org.uk) with any comments you have.
+(ejb@drakenwood.ddts.net) with any comments you have.
+
+If you have problem compiling from source, or are on a slow system
+(building IRCD on a VAXstation 3000 takes about two hours),
+binary distributions are available on the FTP site.
 
 $Id$

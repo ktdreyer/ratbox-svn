@@ -45,6 +45,10 @@
 
 #include "s_log.h"
 
+#ifdef s_host
+# undef s_host
+#endif
+
 struct config_channel_entry ConfigChannel;
 struct Channel *GlobalChannelList = NULL;
 BlockHeap *channel_heap;

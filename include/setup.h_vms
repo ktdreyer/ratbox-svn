@@ -88,5 +88,6 @@ typedef unsigned long u_long;
 #define SELECT_TYPE "select"
 #define USE_SELECT
 
+#define inline
 #endif
 
