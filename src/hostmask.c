@@ -32,211 +32,288 @@
 
 #define TH_MAX 0x1000
 
-static struct HostMaskEntry *first_miscmask = NULL, *first_mask = NULL;
+static struct HostMaskEntry *first_miscmask = NULL;
 static struct HostMaskEntry *hmhash[TH_MAX-1];
 static unsigned long precedence = 0xFFFFFFF;
 
-static unsigned int
-hash_text(const char* start)
+/*
+ * hash_text
+ *
+ * inputs	- string to hash
+ * output	- hash value
+ * side effects	- none
+ */
+static int hash_text(const char* start)
 {
-  register const char *p = start;
-  register unsigned long h = 0;
+  const char *p = start;
+  unsigned long h = 0;
+
   while (*p)
     {
       h = (h << 4) - (h + (unsigned char)ToLower(*p++));
     }
+
   return(h & (TH_MAX - 1));
 }
 
 /*
- * Note: A return value of 0 means the host cannot be hashed and must
+ * get_uhosthash
+ *
+ * inputs	- pointer to host
+ * output	- 
+ * side effects	-
+ *
+ * Note: A return value of -1 means the host cannot be hashed and must
  *       be placed on the misc list.
  */
-static unsigned int
-get_uhosthash(const char *uhost)
+
+static int get_uhosthash(const char *uhost)
 {
- const char *end, *lastdot = NULL;
- int sig = 1;
- char c = 0;
- if (!*uhost)
-   return 0;
- end = uhost + strlen(uhost) - 1;
- while (sig && end >= uhost && (c = *end--))
-   switch (c)
-     {
+  const char *end, *lastdot = NULL;
+  int sig = 1;
+  char c = 0;
+  if (!*uhost)
+    return 0;
+
+  end = uhost + strlen(uhost) - 1;
+  while (sig && end >= uhost && (c = *end--))
+    switch (c)
+      {
       case '*':
       case '?':
-       sig--;
-       break;
+	sig--;
+	break;
       case '!':
       case '@':
       case '.':
-       lastdot = end+2;
-     }
- if ((c == '?' || c == '*') && (!lastdot || *lastdot == 0))
-   return 0;
- if (end < uhost)
-   return hash_text(uhost);
- return hash_text(lastdot ? lastdot : uhost);
+	lastdot = end+2;
+      }
+
+  if ((c == '?' || c == '*') && (!lastdot || *lastdot == 0))
+    return -1;
+
+  if (end < uhost)
+    {
+      return hash_text(uhost);
+    }
+
+  return hash_text(lastdot ? lastdot : uhost);
 }
 
-void
-add_hostmask(const char *mask, int type, void *data)
+/* 
+ * add_hostmask
+ *
+ * inputs	- pointer to hostmask
+ * 		- type KLINE etc.
+ * 		- pointer to ConfItem
+ * output	- NONE
+ * side effects -
+ */
+
+void add_hostmask(const char *mask, int type, void *data)
 {
- struct HostMaskEntry *hme;
- unsigned int hash = get_uhosthash(mask);
- hme = MyMalloc(sizeof(*hme));
- hme->data = data;
- /* Just an ugly kludge so first entry in the conf file matches. 
-  * Also so K-lines overrule I lines... */
- if (type == HOST_CONFITEM &&
-     (((struct ConfItem*)data)->status & CONF_KILL))
-   hme->precedence = 0xFFFFFFFF;
- else
-   hme->precedence = precedence--;
- DupString(hme->hostmask, mask);
- hme->type = type;
- hme->next = first_mask;
- first_mask = hme;
- if (hash)
-   {
-    hme->nexthash = hmhash[hash];
-    hmhash[hash] = hme;
-   }
- else
-   {
-    hme->nexthash = first_miscmask;
-    first_miscmask = hme;
-   }
+  struct HostMaskEntry *hme;
+  int hash = get_uhosthash(mask);
+
+  hme = MyMalloc(sizeof(*hme));
+  memset((void *)hme, 0, sizeof(*hme));
+
+  hme->data = data;
+
+  /* Just an ugly kludge so first entry in the conf file matches. 
+   * Also so K-lines overrule I lines...
+   */
+
+  if (type == HOST_CONFITEM &&
+      (((struct ConfItem*)data)->status & CONF_KILL))
+    hme->precedence = 0xFFFFFFFF;
+  else
+    hme->precedence = precedence--;
+
+  DupString(hme->hostmask, mask);
+  hme->type = type;
+
+  if (hash >= 0)
+    {
+      hme->next = hmhash[hash];
+      hmhash[hash] = hme;
+    }
+  else
+    {
+      hme->next = first_miscmask;
+      first_miscmask = hme;
+    }
 }
 
+/*
+ * strcchr
+ *
+ * inputs	-
+ * output	-
+ * side effects -
+ */
 static const char*
 strcchr(const char *a, const char *b)
 {
- const char *p = a, *q;
- char c, d;
- while ((c = *p++))
-   {
-     q = b;
-     while ((d = *q++))
-       if (c == d)
-         return p;
-   }
- return NULL;
+  const char *p = a, *q;
+  char c, d;
+  while ((c = *p++))
+    {
+      q = b;
+      while ((d = *q++))
+	if (c == d)
+	  return p;
+    }
+  return NULL;
 }
+
+/*
+ * match_hostmask
+ *
+ * inputs	- pointer to hostname
+ * 		- type to match KLINE or CONF
+ * output	- pointer to entry or NULL
+ * side effects	-
+ */
 
 struct HostMaskEntry*
 match_hostmask(const char *uhost, int type)
 {
- struct HostMaskEntry *hme, *hmk = NULL, *hmc = NULL;
- unsigned long prec = 0;
- unsigned int hash;
- const char *pos;
- for (hme = first_miscmask; hme; hme = hme->nexthash)
-   if (hme->type == type && match(hme->hostmask, uhost) &&
-       hme->precedence > prec)
-     {
-       ((hme->type == HOST_CONFITEM) &&
-        ((struct ConfItem*)hme->data)->status & CONF_KILL)
-       ? hmk : hmc = hme;
-       prec = hme->precedence;
-     }
- for (pos = uhost; pos; pos = strcchr(pos, "@!."))
-  {
-   hash = hash_text(pos);
-   for (hme = hmhash[hash]; hme; hme=hme->nexthash)
-     if (hme->type == type && match(hme->hostmask, uhost) &&
-         hme->precedence > prec)
-       {
-        ((hme->type == HOST_CONFITEM) &&
-         ((struct ConfItem*)hme->data)->status & CONF_KILL)
-        ? hmk : hmc = hme;
-        prec = hme->precedence;
-       }
-  }
- return (hmk && (!hmc || !IsConfElined((struct ConfItem*)hmc->data))) ?
-       hmk : hmc;
+  struct HostMaskEntry *hme, *hmk = NULL, *hmc = NULL;
+  unsigned long prec = 0;
+  unsigned int hash;
+  const char *pos;
+
+  for (hme = first_miscmask; hme; hme = hme->next)
+    {
+      if (hme->type == type && match(hme->hostmask, uhost) &&
+	  hme->precedence > prec)
+	{
+	  ((hme->type == HOST_CONFITEM) &&
+	   ((struct ConfItem*)hme->data)->status & CONF_KILL)
+	    ? hmk : hmc = hme;
+	  prec = hme->precedence;
+	}
+    }
+
+  for (pos = uhost; pos; pos = strcchr(pos, "@!."))
+    {
+      hash = hash_text(pos);
+      for (hme = hmhash[hash]; hme; hme=hme->next)
+	if (hme->type == type && match(hme->hostmask, uhost) &&
+	    hme->precedence > prec)
+	  {
+	    ((hme->type == HOST_CONFITEM) &&
+	     ((struct ConfItem*)hme->data)->status & CONF_KILL)
+	      ? hmk : hmc = hme;
+	    prec = hme->precedence;
+	  }
+    }
+
+  return (hmk && (!hmc || !IsConfElined((struct ConfItem*)hmc->data))) ?
+    hmk : hmc;
 }
+
+/*
+ * find_matching_conf
+ *
+ * inputs	- pointer to hostname
+ * 		- pointer to username
+ * 		- pointer to IP
+ * output	- matching ConfItem or NULL
+ * side effects	- None
+ */
 
 struct ConfItem *find_matching_conf(const char *host, const char *user,
                                     struct irc_inaddr *ip)
 {
- struct HostMaskEntry *hm;
- struct ConfItem *aconf = NULL, *aconf_k = NULL;
- char buffer[HOSTLEN+USERLEN+1];
- if (!host || !user)
-   return NULL;
- ircsprintf(buffer, "%s@%s", user, host);
- if ((hm = match_hostmask(buffer, HOST_CONFITEM)))
-   aconf = (struct ConfItem*)hm->data;
- if (aconf->status == CONF_KILL)
-   {
-    aconf_k = aconf;
-    aconf = NULL;
-   }
- if (!aconf)
-   {
-    aconf = match_ip_Iline(ip, user);
-   }
- if (!aconf_k)
-   {
-    aconf_k = match_ip_Kline(ip, user);
-   }
- return (aconf_k && (!aconf || !IsConfElined(aconf))) ? aconf_k : aconf;
+  struct HostMaskEntry *hm;
+  struct ConfItem *aconf = NULL, *aconf_k = NULL;
+  char buffer[HOSTLEN+USERLEN+1];
+  if (!host || !user)
+    return NULL;
+
+  ircsprintf(buffer, "%s@%s", user, host);
+
+  if ((hm = match_hostmask(buffer, HOST_CONFITEM)))
+    aconf = (struct ConfItem*)hm->data;
+
+  if (aconf->status == CONF_KILL)
+    {
+      aconf_k = aconf;
+      aconf = NULL;
+    }
+
+  if (aconf == NULL)
+    {
+      aconf = match_ip_Iline(ip, user);
+    }
+
+  if (aconf_k == NULL)
+    {
+      aconf_k = match_ip_Kline(ip, user);
+    }
+  return (aconf_k && (!aconf || !IsConfElined(aconf))) ? aconf_k : aconf;
 }
 
+/*
+ * add_conf
+ *
+ * inputs	- pointer to ConfItem to add
+ * output	- NONE
+ * side effects	- NONE
+ */
 void add_conf(struct ConfItem *aconf)
 {
- char buffer[HOSTLEN+USERLEN+1];
-
- ircsprintf(buffer, "%s@%s",
-	    aconf->user ? aconf->user : "",
-	    aconf->host ? aconf->host : "");
- add_hostmask(buffer, HOST_CONFITEM, aconf);
+  char buffer[HOSTLEN+USERLEN+1];
+  
+  ircsprintf(buffer, "%s@%s",
+	     aconf->user ? aconf->user : "",
+	     aconf->host ? aconf->host : "");
+  add_hostmask(buffer, HOST_CONFITEM, aconf);
 }
+
+/* 
+ * clear_conf
+ *
+ * inputs	- NONE
+ * output	- NONE
+ * side effects	- clear out all conf items 
+ */
 
 void clear_conf(void)
 {
- struct ConfItem *conf=NULL;
- static struct HostMaskEntry *deferred_masks;
- struct HostMaskEntry *hme=NULL, *hmen, *hmel = NULL;
+  struct ConfItem *conf=NULL;
+  struct HostMaskEntry *hme=NULL;
+  struct HostMaskEntry *next_hme;
+  int i;
 
- for (hme = deferred_masks; hme; hme=hmen)
-   {
-    hmen = hme->next;
-    conf = ((struct ConfItem*)hme->data);
-    if (!conf->clients)
-      {
-       hmel ? hmel->next : deferred_masks = hmen->next;          
-       free_conf(conf);
-       MyFree(hme->hostmask);
-       MyFree(hme);
-      }
-    else
-     hmel = hme;
-   }
- for (hme = first_mask; hme; hme = hmen)
-   {
-    hmen = hme->next;
-    /* We don't use types as of yet, but lets just check... -A1kmm. */
-    assert(hme->type == HOST_CONFITEM);
-    conf = (struct ConfItem*)hme->data;
-    if (conf->clients)
-      {
-       conf->status |= CONF_ILLEGAL;
-       hme->next = deferred_masks;
-       deferred_masks = hme;
-      }
-    else
-      {
-       free_conf(conf);
-       MyFree(hme->hostmask);
-       MyFree(hme);
-      }
-   }
- first_miscmask = NULL;
- first_mask = NULL;
- memset((void *)hmhash,0,sizeof(hmhash));
+  for (hme = first_miscmask; hme; hme=next_hme)
+    {
+      next_hme = hme->next;
+
+      conf = ((struct ConfItem*)hme->data);
+      free_conf(conf);
+      MyFree(hme->hostmask);
+      MyFree(hme);
+    }
+
+  first_miscmask = (struct HostMaskEntry *)NULL;
+
+  for (i = 0; i < TH_MAX; i++)
+    {
+      for (hme = hmhash[i]; hme; hme=next_hme)
+	{
+	  next_hme = hme->next;
+	  
+	  conf = ((struct ConfItem*)hme->data);
+	  free_conf(conf);
+	  MyFree(hme->hostmask);
+	  MyFree(hme);
+	}
+    }
+
+  memset((void *)hmhash,0,sizeof(hmhash));
 }
 
 /*
@@ -286,25 +363,37 @@ char *show_iline_prefix(struct Client *sptr,struct ConfItem *aconf,char *name)
   return(prefix_of_host);
 }
 
-void
-report_hostmask_conf_links(struct Client *sptr, int flags)
+/*
+ * report_hostmask_conf_links
+ *
+ * inputs	- pointer to client to report to
+ * 		- flags type of conf to show
+ * output	- NONE
+ * side effects -
+ */
+
+void report_hostmask_conf_links(struct Client *sptr, int flags)
 {
- struct HostMaskEntry *mask;
- struct ConfItem *aconf;
- char *name, *host, *pass, *user, *classname;
- int  port;
+  struct HostMaskEntry *mask;
+  int i;
+  struct ConfItem *aconf;
+  char *name, *host, *pass, *user, *classname;
+  int  port;
+
  if (flags & CONF_CLIENT) /* Show I-lines... */
    {
-    for (mask = first_mask; mask; mask = mask->next)
+    for (mask = first_miscmask; mask; mask = mask->next)
       {
        if (mask->type != HOST_CONFITEM)
          continue;
        aconf = (struct ConfItem*)mask->data;
        if (!(aconf->status & CONF_CLIENT))
          continue;
+
        if (!(MyConnect(sptr) && IsOper(sptr)) &&
            IsConfDoSpoofIp(aconf))
          continue;
+
        get_printable_conf(aconf, &name, &host, &pass, &user, &port,
                           &classname);
        sendto_one(sptr, form_str(RPL_STATSILINE), me.name, sptr->name,
@@ -313,6 +402,32 @@ report_hostmask_conf_links(struct Client *sptr, int flags)
                   host, port, classname
                  );
       }
+
+     for (i = 0; i < TH_MAX; i++)
+       {
+	 for (mask = hmhash[i]; mask; mask = mask->next)
+	   {
+	     if (mask->type != HOST_CONFITEM)
+	       continue;
+	     aconf = (struct ConfItem*)mask->data;
+	     if (!(aconf->status & CONF_CLIENT))
+	       continue;
+
+	     if (!(MyConnect(sptr) && IsOper(sptr)) &&
+		 IsConfDoSpoofIp(aconf))
+	       continue;
+
+	     get_printable_conf(aconf, &name, &host, &pass, &user, &port,
+				&classname);
+	     sendto_one(sptr, form_str(RPL_STATSILINE), me.name, sptr->name,
+			'I', name,
+			show_iline_prefix(sptr,aconf,user),
+			host, port, classname
+			);
+	   }
+       }
+
+
     /* I-lines next... */
     report_ip_Ilines(sptr);
    }
@@ -320,18 +435,44 @@ report_hostmask_conf_links(struct Client *sptr, int flags)
    {
     /* IP K-lines first... */
     report_ip_Klines(sptr);
-    for (mask = first_mask; mask; mask = mask->next)
+
+    for (mask = first_miscmask; mask; mask = mask->next)
       {
-       if (mask->type != HOST_CONFITEM)
-         continue;
-       aconf = (struct ConfItem*)mask->data;
-       if (!(aconf->status & CONF_KILL))
-         continue;
-       get_printable_conf(aconf, &name, &host, &pass, &user, &port,
-                          &classname);
-       sendto_one(sptr, form_str(RPL_STATSKLINE), me.name, sptr->name,
-                  'K', host, user, pass
-                 );
+	if (mask->type != HOST_CONFITEM)
+	  continue;
+	aconf = (struct ConfItem*)mask->data;
+	if (!(aconf->status & CONF_KILL))
+	  continue;
+	get_printable_conf(aconf, &name, &host, &pass, &user, &port,
+			   &classname);
+	sendto_one(sptr, form_str(RPL_STATSKLINE), me.name, sptr->name,
+		   'K', host, user, pass
+		   );
       }
+
+
+     for (i = 0; i < TH_MAX; i++)
+       {
+	 for (mask = hmhash[i]; mask; mask = mask->next)
+	   {
+	     if (mask->type != HOST_CONFITEM)
+	       continue;
+	     aconf = (struct ConfItem*)mask->data;
+	     if (!(aconf->status & CONF_KILL))
+	       continue;
+
+	     if (!(MyConnect(sptr) && IsOper(sptr)) &&
+		 IsConfDoSpoofIp(aconf))
+	       continue;
+
+	     get_printable_conf(aconf, &name, &host, &pass, &user, &port,
+				&classname);
+	     sendto_one(sptr, form_str(RPL_STATSKLINE), me.name, sptr->name,
+			'K', name,
+			show_iline_prefix(sptr,aconf,user),
+			host, port, classname
+			);
+	   }
+       }
    }
 }

@@ -20,11 +20,11 @@
 
 struct HostMaskEntry
 {
- int type;
- unsigned long precedence;
- char *hostmask;
- void *data;
- struct HostMaskEntry *next, *nexthash;
+  int type;
+  unsigned long precedence;
+  char *hostmask;
+  void *data;
+  struct HostMaskEntry *next;
 };
 
 void add_hostmask(const char *mask, int type, void *data);
