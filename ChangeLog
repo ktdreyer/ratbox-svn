@@ -1,3 +1,15 @@
+leeh        2004/08/02 19:37:03 EDT	(20040802_5)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  - fix a possible memleak with challenge
+  
+  Revision  Changes    Path
+  7.467     +3 -2      ircd-ratbox/src/client.c
+
+
+
 leeh        2004/08/02 18:15:32 EDT	(20040802_4)
 
   Modified files:
