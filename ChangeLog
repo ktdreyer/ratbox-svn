@@ -1,3 +1,16 @@
+leeh        2004/03/07 11:22:24 EST	(20040307_2)
+
+  Modified files:
+    src                  hash.c 
+  Log:
+  - bad androsyn! walking a buffer upto an arbitrary length is bad!
+    no supper for you tonight, you get alz instead :P
+  
+  Revision  Changes    Path
+  7.101     +2 -2      ircd-ratbox/src/hash.c
+
+
+
 leeh        2004/03/07 10:52:40 EST	(20040307_1)
 
   Modified files:
