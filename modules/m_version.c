@@ -74,9 +74,11 @@ int m_version(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 int mo_version(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 {
   if (hunt_server(cptr, sptr, ":%s VERSION :%s", 
-		  1, parc, parv) == HUNTED_ISME)
-    sendto_one(sptr, form_str(RPL_VERSION), me.name,
-	       parv[0], version, serno, debugmode, me.name, serveropts);
+		  1, parc, parv) != HUNTED_ISME)
+    return 0;
+    
+  sendto_one(sptr, form_str(RPL_VERSION), me.name, parv[0], version, 
+  	     serno, debugmode, me.name, serveropts);
 	       
   show_isupport(sptr);
   
