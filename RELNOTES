@@ -16,6 +16,8 @@ it is important you read this file before upgrading.
 - fixed LOCOPS to go over ENCAP when no CAP_CLUSTER is available
 - fix core on passworded auth when user doesnt send a password
 - added hash statistics via stats B
+- fixed the server ip hiding mess.  HIDE_SERVERS_IPS now either hides to
+  everyone or noone.
 
 -- ircd-ratbox-2.0b5
 - AWAYLEN added to 005, shows maximum length of an away message.  Default is
