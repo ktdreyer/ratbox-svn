@@ -2923,7 +2923,7 @@ do_channel_integrity_check(void)
       dlink_node *ptr2; \
       cl = (struct Client*)ptr->data; \
       for (ptr2=cl->user->channel.head; ptr2; ptr2=ptr2->next) \
-        if (ptr2->data == cl) \
+        if (ptr2->data == ch) \
         { \
           assert(matched == 0); \
           matched = -1; \
