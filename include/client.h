@@ -448,7 +448,7 @@ struct exit_client_hook
 #define MyOper(x)               (MyConnect(x) && IsOper(x))
 
 #define SetOper(x)              {(x)->umodes |= UMODE_OPER; \
-				 if (!IsServer((x))) (x)->handler = OPER_HANDLER;}
+				 if (MyClient((x))) (x)->handler = OPER_HANDLER;}
 
 #define ClearOper(x)            {(x)->umodes &= ~(UMODE_OPER|UMODE_ADMIN); \
 				 if (!IsOper((x)) && !IsServer((x))) \
