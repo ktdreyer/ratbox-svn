@@ -1,3 +1,7 @@
+*** 19990812_1 by tomh
+hash function fix
+
+
 *** 19990811_2 by lusky
 throttle accept errors in listener.c
 oper motd rehash bug fix from perly
