@@ -859,21 +859,20 @@ do_local_user(char* nick, struct Client* client_p, struct Client* source_p,
 
   strlcpy(source_p->info, realname, sizeof(source_p->info));
  
+  if (!IsGotId(source_p)) 
+  {
+     /* This is in this location for a reason..If there is no identd
+      * and ping cookies are enabled..we need to have a copy of this
+      */
+     strlcpy(source_p->username, username, sizeof(source_p->username));
+  }
+  
   if (source_p->name[0])
   { 
-    /* NICK already received, now I have USER... */
-    	return register_local_user(client_p, source_p, source_p->name, username);
+     /* NICK already received, now I have USER... */
+     return register_local_user(client_p, source_p, source_p->name, username);
   }
-  else
-    {
-      if (!IsGotId(source_p)) 
-        {
-          /*
-           * save the username in the client
-           */
-          strlcpy(source_p->username, username, sizeof(source_p->username));
-        }
-    }
+  
   return 0;
 }
 
