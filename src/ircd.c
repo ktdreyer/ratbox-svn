@@ -150,7 +150,7 @@ time_t  nextconnect = 1;        /* time for next try_connections call */
 /* Set to zero because it should be initialized later using
  * initialize_server_capabs
  */
-int     default_server_capabs = 0x00000000;
+int     default_server_capabs = CAP_MASK;
 
 int splitmode;
 int splitchecking;
@@ -439,9 +439,6 @@ static void initialize_message_files(void)
  */
 static void initialize_server_capabs(void)
 {
-  /* Default server CAPAB, as defined by CAP_MASK in s_serv.h */
-  default_server_capabs = CAP_MASK;
-
   /* If halfops support is disabled, remove the capab from the list. */
   if (ConfigChannel.use_halfops == 0)
   {
