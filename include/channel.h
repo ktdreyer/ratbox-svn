@@ -48,7 +48,6 @@ struct Mode
 struct Channel
 {
   dlink_node      node;
-  struct Channel* hnextch;
   struct Mode     mode;
   char            *topic;
   char            *topic_info;
