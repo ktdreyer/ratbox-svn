@@ -1,3 +1,15 @@
+a1kmm       2002/01/01 01:56:43 EST	(20020101_1)
+
+  Modified files:
+    include              channel.h 
+  Log:
+  - Turned off intensive debug. Hopefully all the channel bugs have gone.
+  
+  Revision  Changes    Path
+  7.100     +1 -1      ircd-hybrid-7/include/channel.h
+
+
+
 a1kmm       2002/01/01 00:08:38 EST	(20020101_0)
 
   Modified files:
