@@ -1,3 +1,44 @@
+leeh        2003/06/30 12:53:49 EDT	(20030630_2)
+
+  Modified files:
+    include              channel.h 
+    modules              .depend m_invite.c m_join.c m_knock.c 
+                         m_list.c m_names.c m_topic.c m_who.c 
+                         m_whois.c 
+    modules/core         m_kick.c m_message.c m_mode.c m_part.c 
+                         m_sjoin.c 
+    src                  .depend Makefile.in channel.c client.c 
+                         ircd.c s_serv.c s_user.c 
+  Log:
+  - moved most of channel_mode.c to m_mode.c, so its modular
+  - moved the rest to channel.c and killed channel_mode.{h|c}
+  
+  Revision  Changes    Path
+  7.142     +92 -0     ircd-ratbox/include/channel.h
+  1.26      +679 -719  ircd-ratbox/modules/.depend
+  1.69      +1 -2      ircd-ratbox/modules/core/m_kick.c
+  1.133     +1 -3      ircd-ratbox/modules/core/m_message.c
+  1.75      +1348 -2   ircd-ratbox/modules/core/m_mode.c
+  1.81      +1 -2      ircd-ratbox/modules/core/m_part.c
+  1.177     +1 -3      ircd-ratbox/modules/core/m_sjoin.c
+  1.67      +1 -2      ircd-ratbox/modules/m_invite.c
+  1.131     +1 -2      ircd-ratbox/modules/m_join.c
+  1.77      +1 -2      ircd-ratbox/modules/m_knock.c
+  1.67      +1 -2      ircd-ratbox/modules/m_list.c
+  1.72      +1 -2      ircd-ratbox/modules/m_names.c
+  1.78      +1 -2      ircd-ratbox/modules/m_topic.c
+  1.98      +1 -2      ircd-ratbox/modules/m_who.c
+  1.121     +1 -2      ircd-ratbox/modules/m_whois.c
+  7.27      +454 -454  ircd-ratbox/src/.depend
+  7.131     +0 -1      ircd-ratbox/src/Makefile.in
+  7.383     +278 -2    ircd-ratbox/src/channel.c
+  7.389     +0 -1      ircd-ratbox/src/client.c
+  7.296     +0 -1      ircd-ratbox/src/ircd.c
+  7.335     +0 -1      ircd-ratbox/src/s_serv.c
+  7.268     +0 -1      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2003/06/30 11:55:25 EDT	(20030630_1)
 
   Modified files:
