@@ -255,31 +255,7 @@ char* pick_vchan_id(struct Channel *chptr)
 {
   dlink_node *lp;
   struct Client *acptr;
-  static char topic_nick[NICKLEN+USERLEN+HOSTLEN+10];
-  char *p;
-
-  /* see if we can use the nick of who set the topic */
-
-  /* Can't since it has to be unique, this same nick may
-   * have moved to another subchannel
-   */
-#if 0
-  if (chptr->topic_info)
-    {
-      /* XXX */
-      strcpy(topic_nick, chptr->topic_info);
-
-      /* cut off anything after a '!' */
-      if ( (p = strchr(topic_nick, '!')) )
-	*p = '\0';
-
-      if ( (acptr = hash_find_client(topic_nick,(struct Client *)NULL)) &&
-           IsMember(acptr, chptr) )
-        {
-          return topic_nick;
-        }
-    }
-#endif
+  static char vchan_id[NICKLEN+USERLEN+HOSTLEN+10];
 
   for (lp = chptr->chanops.head; lp; lp = lp->next)
     if (!lp->next)
@@ -310,7 +286,10 @@ char* pick_vchan_id(struct Channel *chptr)
       }
 
   /* shouldn't get here! */
-  return NULL;
+
+  /* weak "solution" for now */
+  ircsprintf(vchan_id,"%lu",chptr->channelts);
+  return(vchan_id);
 }
 
 /* return matching vchan, from root and !key (nick)
