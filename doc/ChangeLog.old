@@ -1,3 +1,8 @@
+*** 20001222_2 by db
+- fixed logging botch for tklines
+
+
+
 *** 20001222_1 by db
 - modifed m_kline to add directed klines
 
