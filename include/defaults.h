@@ -38,7 +38,7 @@ error HARD_FDLIMIT_ undefined
 #define MASTER_MAX      (HARD_FDLIMIT - MAX_BUFFER)
 
 /* class {} default values */
-#define DEFAULT_SENDQ 7050000           /* default max SendQ */
+#define DEFAULT_SENDQ 9000000           /* default max SendQ */
 #define PORTNUM 6667                    /* default outgoing portnum */
 #define DEFAULT_PINGFREQUENCY    120    /* Default ping frequency */
 #define DEFAULT_CONNECTFREQUENCY 600    /* Default connect frequency */

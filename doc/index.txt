@@ -8,12 +8,14 @@ LazyLinks.txt		- The lazylinks leaf concept
 Persistent_Clients.txt  - A global UID and Persistent client (with cookies)
                           proposal
 README.TSora            - Description of the TS3 protocol
-Tao-of-IRC.940110
-blalloc.txt		- Outline of the block memory allocator
+README.openssl          - Information for users who have problems with
+                          Hybrid, OpenSSL, and their operating system
+Tao-of-IRC.940110       - No comment...
 challenge.txt           - Overview of the challenge/response system for
                           obtaining operator status
 cookies.txt             - ircd Cookie proposal
 cryptlink.txt		- Outline of CRYPTLINK protocol
+dline.conf              - A blank dline.conf file used by make install
 event.txt		- Outline of the event system
 example.conf            - An example ircd.conf file describing most of the
                           user settable options
@@ -26,12 +28,16 @@ index.txt		- This file
 ircd.8                  - The new revised manpage, read with the following
                           commands in the prefix directory:
                           man -M . ircd
+ircd.motd               - A default ircd.motd used by make install
 kline.conf              - A blank kline.conf file used by make install
 kline.txt               - Outline of the remote K-line protocol for both
                           opers and servers
 linebuf.txt		- Outline of the linebuf system (dbuf replacement)
 message-customisation.txt
                         - Outline of the message customization procedure
+                          for developers and advanced users
+messages.txt            - A general help file for users and admins to
+                          customize ircd's messages.
 modeg.txt               - An in depth description of the server side silence
                           user mode (+g)
 modes.txt               - A list of all user and channel modes
@@ -44,7 +50,8 @@ rfc1459.txt             - The IRC RFC
 send.txt                - Document on all of the send_to functions
 server-version-info     - Overview of the flags shown in /version
 simple.conf             - A simple ircd.conf useful for beginning admins
-users.txt		- New user and channel modes in hybrid
+users.txt		- New user and channel modes in hybrid, used in
+                          /quote HELP by users.
 vchans.txt              - The paper describing virtual channels
 whats-new.txt		- What new features are available
 whats-new-code.txt	- Whats changed in the code

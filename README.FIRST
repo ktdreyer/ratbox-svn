@@ -39,10 +39,10 @@ Feature Specific Requirements:
 *******************************************************************************
 
 - To report bugs in hybrid, use the `send-pr' script that should
-  be installed into bin/ along with the rest of ircd.
+  be installed into bin/ along with the rest of ircd, OR send the
+  bug report to ircd-hybrid@the-project.org
 
-- Known bugs are listed in the BUGS file and at http://bugs.efnow.net 
-  You may also report bugs on that site.
+- Known bugs are listed in the BUGS file
 
 - See the INSTALL document for info on configuring and compiling
   ircd-hybrid.
@@ -57,10 +57,6 @@ Feature Specific Requirements:
   things that were once in config.h are now specified in the 'general'
   block of ircd.conf.  Look at example.conf for more information about
   these options.
-
-- NEW DEBUGGING MODE: if you run ircd with the -s flag, it will send
-  errors that are normally syslogged to stderr.  This is very useful
-  if you don't have syslogging set up and ircd won't run.
 
 - There is now a mailing list for general discussion of Hybrid.  To subscribe
   to the Hybrid List, send email to listmanager@the-project.org with

@@ -1,5 +1,5 @@
 This directory contains modules that have been contributed
-by other people, or isn't suitable for including into the 
+by other people, or aren't suitable for including into the 
 hybrid tree.
 
 links_notice.c - A Hook to provide the old LINKS notice functionality
@@ -7,14 +7,17 @@ m_clearchan.c  - CLEARCHAN - clear a channel of all users and lock modes
                  Syntax:  CLEARCHAN <#channel>
 m_hash.c       - HASH - The old hash table debugging code, look at README.HASH
                  Syntax:  HASH <parameter>
-m_jupe.c       - JUPE - Jupe a server, this is as of yet unfinished
+m_jupe.c       - JUPE - Jupe a server
                  Syntax:  JUPE <juped-server> :<Reason>
+m_map.c        - MAP - Display the server routing graph in a visually pleasing
+                       format
+                 Syntax:  MAP
 m_opme.c       - OPME - op yourself on an opless channel
                  Syntax:  OPME <#channel>
 m_nickinfo.c   - NICKINFO - provide info on a nick, for debugging purposes.
                  Syntax:  NICKINFO <nick>
-m_mkpasswd.c   - MKPASSWD - generate a DES encryption of a password
-                 Syntax:  MKPASSWD <plaintext>
+m_mkpasswd.c   - MKPASSWD - generate a DES or MD5 encryption of a password
+                 Syntax:  MKPASSWD <plaintext> [MD5|DES]
 stats_notice.c - A Hook to provide the old STATS notice functionality
 whois_notice.c - A Hook to provide the old WHOIS notice functionality
 
