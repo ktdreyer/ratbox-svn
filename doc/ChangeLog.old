@@ -1,3 +1,14 @@
+*** 20001106_13 by adrian
+
+
+Make sure we remove the query from the pending DNS requets when we actually
+get the reply.
+
+I forgot this line when I ripped out some of the remaining DNS cache code
+:-)
+
+
+
 *** 20001106_12 by adrian
 
 
