@@ -1569,8 +1569,7 @@ chm_halfop(struct Client *client_p, struct Client *source_p,
   if ((dir == MODE_QUERY) || parc <= *parn)
     return;
 
-  if (MyClient(source_p) && alev < CHACCESS_CHANOP && 
-     (++mode_limit > MAXMODEPARAMS))
+  if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
     return;
 
   opnick = parv[(*parn)++];
