@@ -1,3 +1,15 @@
+androsyn    2002/05/24 19:39:15 EDT	(20020525_1)
+
+  Added files:
+    include              stdinc.h 
+  Log:
+  Add stdinc.h
+  
+  Revision  Changes    Path
+  1.1       +101 -0    ircd-hybrid-7/include/stdinc.h (new)
+
+
+
 androsyn    2002/05/24 19:35:09 EDT	(20020525_0)
 
   Modified files:
