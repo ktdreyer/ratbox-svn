@@ -393,13 +393,14 @@ sendto_one(struct Client *to, const char *pattern, ...)
 	va_list args;
 	buf_head_t linebuf;
 
-	if(!MyConnect(to))
-		return;		/* This socket has already been marked as dead */
 
 	/* send remote if to->from non NULL */
 	if(to->from)
 		to = to->from;
 
+	if(!MyConnect(to))
+		return;		/* This socket has already been marked as dead */
+	
 	linebuf_newbuf(&linebuf);
 
 	va_start(args, pattern);
@@ -428,14 +429,15 @@ sendto_one_prefix(struct Client *to, struct Client *prefix, const char *pattern,
 	struct Client *to_sendto;
 	buf_head_t linebuf;
 
-	if(!MyConnect(to))
-		return;		/* This socket has already been marked as dead */
 
 	/* send remote if to->from non NULL */
 	if(to->from)
 		to_sendto = to->from;
 	else
 		to_sendto = to;
+
+	if(!MyConnect(to))
+		return;		/* This socket has already been marked as dead */
 
 	if(IsMe(to))
 	{
@@ -1085,9 +1087,6 @@ sendto_anywhere(struct Client *to, struct Client *from, const char *pattern, ...
 {
 	va_list args;
 	buf_head_t linebuf;
-
-	if(!MyConnect(to))
-		return;
 
 	linebuf_newbuf(&linebuf);
 	va_start(args, pattern);
