@@ -138,16 +138,25 @@ void process_recvq(unsigned char *data, unsigned int datalen)
     in_state.zip_state.z_stream.avail_in = blen;
     in_state.zip_state.z_stream.next_out = tmp2_buf;
     in_state.zip_state.z_stream.avail_out = BUFLEN;
-    if ((ret = inflate(&in_state.zip_state.z_stream,
-                       Z_NO_FLUSH)) != Z_OK)
-      send_error("Inflate failed: %d");
-    assert(in_state.zip_state.z_stream.avail_out);
-    assert(in_state.zip_state.z_stream.avail_in == 0);
-    blen = BUFLEN - in_state.zip_state.z_stream.avail_out;
 
     buf = tmp2_buf;
+    while(in_state.zip_state.z_stream.avail_in)
+    {
+      if ((ret = inflate(&in_state.zip_state.z_stream,
+                         Z_NO_FLUSH)) != Z_OK)
+        send_error("Inflate failed: %d");
 
-    /* did that generate any decompressed input? */
+      blen = BUFLEN - in_state.zip_state.z_stream.avail_out;
+
+      if (in_state.zip_state.z_stream.avail_in)
+      {
+        send_data_blocking(LOCAL_FD_W, buf, blen);
+        blen = 0;
+        in_state.zip_state.z_stream.next_out = buf;
+        in_state.zip_state.z_stream.avail_out = BUFLEN;
+      }
+    }
+
     if (!blen)
       return;
   }
@@ -220,7 +229,6 @@ void send_error(unsigned char *message, ...)
 
   if (!sending_error)
   {
-
     sending_error = 1;
 
     if(ctrl_len) /* attempt to flush any data we have... */
@@ -525,12 +533,27 @@ void read_net(void)
       in_state.zip_state.z_stream.avail_in = ret;
       in_state.zip_state.z_stream.next_out = in_state.buf;
       in_state.zip_state.z_stream.avail_out = BUFLEN;
-      if ((ret2 = inflate(&in_state.zip_state.z_stream,
-                          Z_NO_FLUSH)) != Z_OK)
-        send_error("inflate failed: %d", ret2);
-      assert(in_state.zip_state.z_stream.avail_out);
-      assert(in_state.zip_state.z_stream.avail_in == 0);
-      blen = BUFLEN - in_state.zip_state.z_stream.avail_out;
+
+      while (in_state.zip_state.z_stream.avail_in)
+      {
+        if ((ret2 = inflate(&in_state.zip_state.z_stream,
+                            Z_NO_FLUSH)) != Z_OK)
+          send_error("inflate failed: %d", ret2);
+
+        blen = BUFLEN - in_state.zip_state.z_stream.avail_out;
+
+        if (in_state.zip_state.z_stream.avail_in)
+        {
+          if (blen)
+          {
+            send_data_blocking(LOCAL_FD_W, in_state.buf, BUFLEN);
+            blen = 0;
+          }
+
+          in_state.zip_state.z_stream.next_out = in_state.buf;
+          in_state.zip_state.z_stream.avail_out = BUFLEN;
+        }
+      }
 
       if (!blen)
         return; /* that didn't generate any decompressed input.. */

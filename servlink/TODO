@@ -1,7 +1,6 @@
 Servlink todo list
 ------------------
 
-Deal with avail_out = 0, then reduce the size of the buffer.
-	We won't usually hit 6x compression, but I just went over that..
-	We should deal gracefully with running out of output space...
+Fix any bugs that come up
 
+Think of improvements :)

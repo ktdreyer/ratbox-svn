@@ -52,7 +52,7 @@ extern char *fd_name[NUM_FDS];
 #define READLEN                  2048
 
 #ifdef HAVE_LIBZ
-#define BUFLEN                   READLEN * 8 /* allow for decompression */
+#define BUFLEN                   READLEN * 6 /* allow for decompression */
 #else
 #define BUFLEN                   READLEN
 #endif
