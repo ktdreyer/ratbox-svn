@@ -1,3 +1,17 @@
+androsyn    2002/05/16 01:53:14 EDT	(20020516_0)
+
+  Modified files:
+    src                  channel.c 
+  Log:
+  Fixed a bug where we would not fully take care of removing a user from a
+  channel.  Also added an assert if the usercount in a channel goes below 0
+  in sub1_from_channel
+  
+  Revision  Changes    Path
+  7.313     +6 -3      ircd-hybrid-7/src/channel.c
+
+
+
 leeh        2002/05/14 07:41:41 EDT	(20020514_1)
 
   Modified files:
