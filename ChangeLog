@@ -1,3 +1,15 @@
+androsyn    2002/10/30 02:56:42 UTC	(20021030_9)
+
+  Modified files:
+    src                  s_auth.c 
+  Log:
+  Cleanup auth_dns_callback a bit..
+  
+  Revision  Changes    Path
+  7.116     +6 -6      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2002/10/30 02:01:21 UTC	(20021030_8)
 
   Modified files:
