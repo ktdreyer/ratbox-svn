@@ -1,3 +1,9 @@
+*** 20010911_4 by db
+- corrected tiny typo. Our table size is still too large for yacc
+  We are going to have to require bison.
+
+
+
 *** 20010911_3 by db
 - first pass at making events static and recurring instead of one-shot.
   This saves a malloc each time an event is added and the need to 
