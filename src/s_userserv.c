@@ -196,6 +196,9 @@ valid_username(const char *name)
 	if(strlen(name) > USERREGNAME_LEN)
 		return 0;
 
+	if(IsDigit(*name) || *name == '-')
+		return 0;
+
 	for(; *name; name++)
 	{
 		if(!IsNickChar(*name))

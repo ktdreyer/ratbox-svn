@@ -309,14 +309,34 @@ parse_full_mode(struct channel *chptr, struct client *source_p,
 		case 'l':
 			if(dir)
 			{
+				const char *limit_s;
+				char *endptr;
+				int limit;
+
 				if(EmptyString(parv[start]))
 					return;
 
-				chptr->mode.mode |= MODE_LIMIT;
-				chptr->mode.limit = atoi(parv[start]);
-
-				/* XXX - modebuild */
+				limit_s = parv[start];
 				start++;
+
+				limit = strtol(limit_s, &endptr, 10);
+
+				if(limit <= 0)
+					return;
+
+				if(source_p)
+				{
+					/* we used what they passed as the
+					 * mode issued, so it has to be valid
+					 */
+					if(!EmptyString(endptr))
+						return;
+
+					modebuild_add(dir, "l", limit_s);
+				}
+
+				chptr->mode.mode |= MODE_LIMIT;
+				chptr->mode.limit = limit;
 			}
 			else
 			{

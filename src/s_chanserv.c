@@ -2706,9 +2706,6 @@ s_chan_info(struct client *client_p, char *parv[], int parc)
 
 	owner = find_owner(reg_p);
 
-	service_error(chanserv_p, client_p, "Channel %s registered to %s",
-			reg_p->name, owner ? owner : "???");
-
 	seconds = (CURRENT_TIME - reg_p->reg_time);
 
 	weeks = (int) (seconds / 604800);
@@ -2719,23 +2716,25 @@ s_chan_info(struct client *client_p, char *parv[], int parc)
 	seconds %= 3600;
 	minutes = (int) (seconds / 60);
 
-	service_error(chanserv_p, client_p, "Registered for %dw %dd %dh%dm",
+	service_error(chanserv_p, client_p, 
+			"[%s] Registered to %s for %dw %dd %dh%dm",
+			reg_p->name, owner ?  owner : "?unknown?",
 			weeks, days, hours, minutes);
 
 	if(reg_p->flags & CS_FLAGS_SUSPENDED)
 	{
-		service_error(chanserv_p, client_p, "Channel suspended by services admin");
-
-		if(CliOperCSAdmin(client_p))
-			service_error(chanserv_p, client_p, "Suspended by %s",
-					reg_p->suspender);
+		service_error(chanserv_p, client_p, "[%s] Suspended by %s",
+				reg_p->name,
+				CliOperCSAdmin(client_p) ? reg_p->suspender :
+				 "services admin");
 	}
 	else if((mreg_p = find_member_reg(client_p->user->user_reg, reg_p)) &&
 		!mreg_p->suspend)
 	{
 		if(reg_p->flags & CS_FLAGS_SHOW)
 			service_error(chanserv_p, client_p,
-				"Settings: %s%s%s%s",
+				"[%s] Settings: %s%s%s%s",
+				reg_p->name,
 				(reg_p->flags & CS_FLAGS_AUTOJOIN) ? 
 				 "AUTOJOIN " : "",
 				(reg_p->flags & CS_FLAGS_NOOPS) ? 
@@ -2747,7 +2746,13 @@ s_chan_info(struct client *client_p, char *parv[], int parc)
 
 		if(!EmptyString(reg_p->topic))
 			service_error(chanserv_p, client_p,
-				"Topic: %s", reg_p->topic);
+				"[%s] Topic: %s", reg_p->name, reg_p->topic);
+
+		if(reg_p->emode.mode)
+			service_error(chanserv_p,  client_p,
+				"[%s] Enforced modes: %s",
+				reg_p->name,
+				chmode_to_string(&reg_p->emode));
 	}
 
 	return 1;
