@@ -1,3 +1,22 @@
+androsyn    2004/12/06 00:23:59 EST	(20041206_1)
+
+  Modified files:
+    include              reject.h 
+    modules              Makefile.in 
+    src                  reject.c 
+  Added files:
+    modules              m_unreject.c 
+  Log:
+  Add unreject to the tree, thanks to Quai@EFNet for the idea
+  
+  Revision  Changes    Path
+  1.10      +1 -1      ircd-ratbox/include/reject.h
+  1.114     +1 -0      ircd-ratbox/modules/Makefile.in
+  1.1       +73 -0     ircd-ratbox/modules/m_unreject.c (new)
+  1.31      +24 -1     ircd-ratbox/src/reject.c
+
+
+
 androsyn    2004/12/05 23:18:36 EST	(20041206_0)
 
   Modified files:
