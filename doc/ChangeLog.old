@@ -1,3 +1,7 @@
+*** 20010118_19 by db
+- made buffer smaller at the suggestion of bysin, earlier syslogs could overflow
+
+
 *** 20010118_18 by wcampbel
 Updated my TODO list
 
