@@ -99,7 +99,6 @@ static void mo_unkline (struct Client *client_p,struct Client *source_p,
 {
   FBFILE *in, *out;
   int pairme=0,error_on_write = NO;
-  struct irc_inaddr hostip, khostip;
   char buf[BUFSIZE], buff[BUFSIZE], temppath[BUFSIZE], *user, *host, *p;
   const char  *filename;                /* filename to use for unkline */
   mode_t oldumask;
@@ -147,7 +146,7 @@ static void mo_unkline (struct Client *client_p,struct Client *source_p,
 		 me.name, parv[0],user, host);
       sendto_realops_flags(FLAGS_ALL,
 			   "%s has removed the temporary K-Line for: [%s@%s]",
-			   parv[0], user, host);
+			   get_oper_name(source_p), user, host);
       ilog(L_NOTICE, "%s removed temporary K-Line for [%s@%s]", parv[0], user,
 	   host);
       return;
@@ -174,7 +173,7 @@ static void mo_unkline (struct Client *client_p,struct Client *source_p,
 
   while (fbgets(buf, sizeof(buf), in)) 
     {
-      char *found_host, *found_user, *found_comment;
+      char *found_host, *found_user;
 
       strncpy_irc(buff, buf, BUFSIZE-1)[BUFSIZE-1] = 0;
 
@@ -243,7 +242,7 @@ static void mo_unkline (struct Client *client_p,struct Client *source_p,
              me.name, source_p->name, user,host);
   sendto_realops_flags(FLAGS_ALL,
 		       "%s has removed the K-Line for: [%s@%s]",
-		       source_p->name, user, host);
+		       get_oper_name(source_p), user, host);
 
   ilog(L_NOTICE, "%s removed K-Line for [%s@%s]",
        source_p->name, user, host);
@@ -384,8 +383,6 @@ mo_undline (struct Client *client_p, struct Client *source_p,
 
   while(fbgets(buf, sizeof(buf), in))
     {
-      char *found_cidr;
-
       strncpy_irc(buff, buf, BUFSIZE-1)[BUFSIZE-1] = 0;
 
       if ((p = strchr(buff,'\n')) != NULL)
@@ -445,8 +442,9 @@ mo_undline (struct Client *client_p, struct Client *source_p,
   sendto_one(source_p, ":%s NOTICE %s :D-Line for [%s] is removed",
 	     me.name, parv[0], cidr);
   sendto_realops_flags(FLAGS_ALL, "%s has removed the D-Line for: [%s]",
-		       parv[0], cidr);
-  ilog(L_NOTICE, "%s removed D-Line for [%s]", parv[0], cidr);
+		       get_oper_name(source_p), cidr);
+  ilog(L_NOTICE, "%s removed D-Line for [%s]", get_oper_name(source_p),
+       cidr);
 }
 
 /*
@@ -504,9 +502,9 @@ static void mo_ungline(struct Client *client_p, struct Client *source_p,
                  me.name, parv[0],user, host);
       sendto_realops_flags(FLAGS_ALL,
 			   "%s has removed the G-Line for: [%s@%s]",
-			   parv[0], user, host );
+			   get_oper_name(source_p), user, host );
       ilog(L_NOTICE, "%s removed G-Line for [%s@%s]",
-          parv[0], user, host);
+          get_oper_name(source_p), user, host);
       return;
     }
   else

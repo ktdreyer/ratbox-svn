@@ -1908,6 +1908,37 @@ char *oper_flags_as_string(int flags)
   return(flags_out);
 }
 
+
+/* const char* get_oper_name(struct Client *client_p)
+ * Input: A client to find the active oper{} name for.
+ * Output: The nick!user@host{oper} of the oper.
+ * Side effects: None.
+ */
+char*
+get_oper_name(struct Client *client_p)
+{
+ dlink_node *cnode;
+ static char buffer[NICKLEN+USERLEN+HOSTLEN+OPERNICKLEN+1];
+ if (MyConnect(client_p))
+ {
+  for (cnode=client_p->localClient->confs.head; cnode; cnode=cnode->next)
+   if (((struct ConfItem*)cnode->data)->status & CONF_OPERATOR)
+   {
+    ircsprintf(buffer, "%s!%s@%s{%s}", client_p->name,
+               client_p->username, client_p->host,
+               ((struct ConfItem*)cnode->data)->name
+              );
+    return buffer;
+   }
+  /* Probably should assert here for now. If there is an oper out there 
+   * with no oper{} block, it would be good for us to know... */
+  assert(0); /* Oper without oper conf! */
+ }
+ ircsprintf(buffer, "%s!%s@%s{%s}", client_p->name,
+            client_p->username, client_p->host, client_p->servptr->name);
+ return buffer;
+}
+
 /*
  * get_printable_conf
  *
@@ -2187,7 +2218,7 @@ void WriteKlineOrDline( KlineType type,
     {
       sendto_realops_flags(FLAGS_ALL,
 			   "%s added D-Line for [%s] [%s]",
-			   source_p->name, host, reason);
+			   get_oper_name(source_p), host, reason);
       sendto_one(source_p, ":%s NOTICE %s :Added D-Line [%s] to %s",
 		 me.name, source_p->name, host, filename);
 
@@ -2196,7 +2227,7 @@ void WriteKlineOrDline( KlineType type,
     {
       sendto_realops_flags(FLAGS_ALL,
 			   "%s added K-Line for [%s@%s] [%s]",
-			   source_p->name, user, host, reason);
+			   get_oper_name(source_p), user, host, reason);
       sendto_one(source_p, ":%s NOTICE %s :Added K-Line [%s@%s]",
 		 me.name, source_p->name, user, host);
     }
@@ -2209,19 +2240,19 @@ void WriteKlineOrDline( KlineType type,
     }
 
   if(type==KLINE_TYPE)
-    ircsprintf(buffer, "\"%s\",\"%s\",\"%s %s\",\"%s\",%d\n",
+    ircsprintf(buffer, "\"%s\",\"%s\",\"%s %s\",\"%s\",%ld\n",
                user,
 	       host,
                reason,
 	       current_date,
-	       source_p->name,
+	       get_oper_name(source_p),
                cur_time);
   else
-    ircsprintf(buffer, "\"%s\",\"%s %s\",\"%s\",%d\n",
+    ircsprintf(buffer, "\"%s\",\"%s %s\",\"%s\",%ld\n",
                host,
                reason,
 	       current_date,
-	       source_p->name,
+	       get_oper_name(source_p),
                cur_time);
 
 
@@ -2239,7 +2270,7 @@ void WriteKlineOrDline( KlineType type,
         source_p->name, user, host, reason);
   else
     ilog(L_TRACE, "%s added D-Line for [%s] [%s]",
-           source_p->name, host, reason);
+           get_oper_name(source_p), host, reason);
 }
 
 /* get_conf_name

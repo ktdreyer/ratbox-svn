@@ -360,7 +360,7 @@ static void ms_kline(struct Client *client_p,
  *
  * inputs	-
  * output	- NONE
- * side effects	- kline as given, is added to apropriate tree
+ * side effects	- kline as given, is added to the hashtable
  *		  and conf file
  */
 static void apply_kline(struct Client *source_p, struct ConfItem *aconf,

@@ -90,7 +90,8 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
       else if(irccmp(parv[1],"DNS") == 0)
         {
           sendto_one(source_p, form_str(RPL_REHASHING), me.name, parv[0], "DNS");
-          sendto_realops_flags(FLAGS_ALL,"%s is rehashing DNS", parv[0]);
+          sendto_realops_flags(FLAGS_ALL,"%s is rehashing DNS",
+                               get_oper_name(source_p));
           restart_resolver();   /* re-read /etc/resolv.conf AGAIN?
                                    and close/re-open res socket */
           found = YES;
@@ -98,14 +99,16 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
       else if(irccmp(parv[1],"MOTD") == 0)
         {
           sendto_realops_flags(FLAGS_ALL,
-		       "%s is forcing re-reading of MOTD file",parv[0]);
+		       "%s is forcing re-reading of MOTD file",
+		       get_oper_name(source_p));
           ReadMessageFile( &ConfigFileEntry.motd );
           found = YES;
         }
       else if(irccmp(parv[1],"OMOTD") == 0)
         {
           sendto_realops_flags(FLAGS_ALL,
-		       "%s is forcing re-reading of OPER MOTD file",parv[0]);
+		       "%s is forcing re-reading of OPER MOTD file",
+		       get_oper_name(source_p));
           ReadMessageFile( &ConfigFileEntry.opermotd );
           found = YES;
         }
@@ -133,8 +136,10 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
       sendto_one(source_p, form_str(RPL_REHASHING), me.name, parv[0],
                  ConfigFileEntry.configfile);
       sendto_realops_flags(FLAGS_ALL,
-			   "%s is rehashing server config file", parv[0]);
-      ilog(L_NOTICE, "REHASH From %s", get_client_name(source_p, SHOW_IP));
+			   "%s is rehashing server config file",
+			   get_oper_name(source_p));
+      ilog(L_NOTICE, "REHASH From %s[%s]", get_oper_name(source_p),
+           inetntoa(source_p->localClient->sockhost));
       rehash(client_p, source_p, 0);
       return;
     }

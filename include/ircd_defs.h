@@ -49,6 +49,7 @@
 #define BUFSIZE         512     /* WARNING: *DONT* CHANGE THIS!!!! */
 #define MAXRECIPIENTS   20
 #define MAXBANLENGTH    1024
+#define OPERNICKLEN     NICKLEN*2 /* Length of OPERNICKs. */
 
 #define OPERWALL_LEN    400     /* can be truncated on other servers */
 

@@ -387,6 +387,8 @@ extern void parse_k_file(FBFILE *fb);
 extern void parse_d_file(FBFILE *fb);
 extern char *getfield(char *newline);
 
+extern char *get_oper_name(struct Client *client_p);
+
 extern int yylex(void);
 
 extern unsigned long cidr_to_bitmask[];

@@ -33,6 +33,7 @@
 /* XXX */
 #define  WE_ARE_MEMORY_C
 
+#define YY_NO_UNPUT
 #include "config.h"
 #include "ircd.h"
 #include "tools.h"
@@ -735,7 +736,7 @@ oper_entry:     OPERATOR
       if (yy_achead->className)
         DupString(yy_tmp->className, yy_achead->className);
       if (yy_achead->name)
-        DupString(yy_tmp->name, yy_achead->name);
+       DupString(yy_tmp->name, yy_achead->name);
       if (yy_achead->passwd)
         DupString(yy_tmp->passwd, yy_achead->passwd);
       yy_tmp->port = yy_achead->port;
@@ -772,8 +773,11 @@ oper_item:      oper_name  | oper_user | oper_password |
 
 oper_name:      NAME '=' QSTRING ';'
   {
-    MyFree(yy_achead->name);
-    DupString(yy_achead->name, yylval.string);
+   int oname_len;
+   MyFree(yy_achead->name);
+   if ((oname_len = strlen(yylval.string)) > OPERNICKLEN)
+    yylval.string[OPERNICKLEN] = 0;
+   DupString(yy_achead->name, yylval.string);
   };
 
 oper_user:      USER '='  QSTRING ';'
