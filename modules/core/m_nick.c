@@ -55,11 +55,11 @@ static int ms_uid(struct Client *, struct Client *, int, const char **);
 
 struct Message nick_msgtab = {
 	"NICK", 0, 0, 0, MFLG_SLOW,
-	{{mr_nick, 0}, {m_nick, 0}, {mc_nick, 3}, {ms_nick, 9}, mg_ignore, {m_nick, 0}}
+	{{mr_nick, 0}, {m_nick, 0}, {mc_nick, 3}, {ms_nick, 8}, mg_ignore, {m_nick, 0}}
 };
 struct Message uid_msgtab = {
 	"UID", 0, 0, 0, MFLG_SLOW,
-	{mg_ignore, mg_ignore, mg_ignore, {ms_uid, 10}, mg_ignore}
+	{mg_ignore, mg_ignore, mg_ignore, {ms_uid, 9}, mg_ignore}
 };
 
 mapi_clist_av1 nick_clist[] = { &nick_msgtab, &uid_msgtab, NULL };
@@ -312,6 +312,9 @@ ms_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 	struct Client *target_p;
 	time_t newts = 0;
 
+	if(parc < 9)
+		return 0;
+
 	/* if nicks empty, erroneous, or too long, kill */
 	if(!clean_nick(parv[1], 0))
 	{
@@ -324,38 +327,33 @@ ms_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 		return 0;
 	}
 			      
-	if(parc == 9)
+	/* invalid username or host? */
+	if(!clean_username(parv[5]) || !clean_host(parv[6]))
 	{
-		/* invalid username or host? */
-		if(!clean_username(parv[5]) || !clean_host(parv[6]))
-		{
-			ServerStats->is_kill++;
-			sendto_realops_flags(UMODE_DEBUG, L_ALL,
-					     "Bad user@host: %s@%s From: %s(via %s)",
-					     parv[5], parv[6], parv[7],
-					     client_p->name);
-			sendto_one(client_p, ":%s KILL %s :%s (Bad user@host)",
-				   me.name, parv[1], me.name);
-			return 0;
-		}
-
-		/* check the length of the clients gecos */
-		if(strlen(parv[8]) > REALLEN)
-		{
-			char *s = LOCAL_COPY(parv[8]);
-			/* why exactly do we care? --fl */
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "Long realname from server %s for %s", parv[7],
-					     parv[1]);
-			
-			s[REALLEN] = '\0';
-			parv[8] = s;
-		}
-
-		newts = atol(parv[3]);
+		ServerStats->is_kill++;
+		sendto_realops_flags(UMODE_DEBUG, L_ALL,
+				"Bad user@host: %s@%s From: %s(via %s)",
+				parv[5], parv[6], parv[7],
+				client_p->name);
+		sendto_one(client_p, ":%s KILL %s :%s (Bad user@host)",
+				me.name, parv[1], me.name);
+		return 0;
 	}
-	else
-		newts = atol(parv[2]);
+
+	/* check the length of the clients gecos */
+	if(strlen(parv[8]) > REALLEN)
+	{
+		char *s = LOCAL_COPY(parv[8]);
+		/* why exactly do we care? --fl */
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+				"Long realname from server %s for %s", parv[7],
+				parv[1]);
+
+		s[REALLEN] = '\0';
+		parv[8] = s;
+	}
+
+	newts = atol(parv[3]);
 
 	target_p = find_client(parv[1]);
 
@@ -401,6 +399,9 @@ ms_uid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	time_t newts = 0;
 
 	newts = atol(parv[3]);
+
+	if(parc < 10)
+		return 0;
 
 	/* if nicks erroneous, or too long, kill */
 	if(!clean_nick(parv[1], 0))
