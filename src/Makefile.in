@@ -130,93 +130,6 @@ SRCS =                          \
   sprintf_irc.c                 \
   whowas.c
 
-#
-# Do it this way for Ultrix, and its portable at least
-# just make sure OBJ's match SRC's (pointed out by Ian)
-# Ultrix can't use gnu make????? feh --Bleep
-# 
-#OBJS = \
-#	blalloc.o \
-#	channel.o \
-#	class.o \
-#	client.o \
-#	dbuf.o \
-#	dline_conf.o \
-#	fdlist.o \
-#	fileio.o \
-#	hash.o \
-#	irc_string.o \
-#	ircd.o \
-#	ircd_signal.o \
-#	list.o \
-#	listener.o \
-#	m_admin.o \
-#	m_away.o \
-#	m_cburst.o \
-#	m_capab.o \
-#	m_close.o \
-#	m_connect.o \
-#	m_die.o \
-#	m_drop.o \
-#	m_error.o \
-#	m_gline.o \
-#	m_help.o \
-#	m_htm.o \
-#	m_info.o \
-#	m_kline.o \
-#	m_links.o \
-#	m_list.o \
-#	m_locops.o \
-#	m_ltrace.o \
-#	m_lusers.o \
-#	m_mode.o \
-#	m_operwall.o \
-#	m_pass.o \
-#	m_ping.o \
-#	m_pong.o \
-#	m_quit.o \
-#	m_rehash.o \
-#	m_restart.o \
-#	m_server.o \
-#	m_set.o \
-#	m_squit.o \
-#	m_stats.c \
-#	m_svinfo.o \
-#	m_time.o \
-#	m_trace.o \
-#	m_unkline.o \
-#	m_users.o \
-#	m_version.o \
-#	m_wallops.o \
-#	m_who.o \
-#	m_whois.o \
-#	match.o \
-#	motd.o \
-#	mtrie_conf.o \
-#	oratime.o \
-#	numeric.o \
-#	packet.o \
-#	oldparse.o \
-#	parse.o \
-#	res.o \
-#	s_auth.o \
-#	s_bsd.o \
-#	s_conf.o \
-#	s_debug.o \
-#	s_log.o \
-#	s_misc.o \
-#	s_numeric.o \
-#	s_serv.o \
-#	s_stats.o \
-#	s_user.o \
-#	s_zip.o \
-#	scache.o \
-#	send.o \
-#	sprintf_irc.o \
-#	support.o \
-#	whowas.o
-
-
 OBJS = ${SRCS:.c=.o}
 
 all: ircd
@@ -224,7 +137,7 @@ all: ircd
 build: all
 
 ircd: ${OBJS} nparse version.o
-	${CC} ${LDFLAGS} -o $@ ${OBJS} lex.yy.o y.tab.o version.o ${IRCDLIBS}
+	${CC} ${LDFLAGS} -o $@ ${OBJS} lex.yy.o y.tab.o version.o ${IRCDLIBS} -ll
 	mv version.c version.c.last
 
 install: build
