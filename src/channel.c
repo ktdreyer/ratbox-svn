@@ -616,13 +616,18 @@ int can_send(struct Channel *chptr, struct Client *who)
 
   if( lp = find_user_link(chptr->members, who) )
     {
-      if (ConfigFileEntry.quiet_on_ban)
-	if (is_banned(chptr, who))
-	  return MODE_BAN;
+      /* +o/+v can always talk */
+      if (lp->flags & CHFL_CHANOP|CHFL_VOICE)
+        return 0;
 
-      if (chptr->mode.mode & MODE_MODERATED &&
-	  (!(lp->flags & (CHFL_CHANOP|CHFL_VOICE))))
+      if (chptr->mode.mode & MODE_MODERATED)
 	return (MODE_MODERATED);
+
+      if (ConfigFileEntry.quiet_on_ban)
+        /* only check locals to save CPU, and avoid "desync" messages
+         * on mixed nets */
+        if (MyClient(who) && (is_banned(chptr, who) == CHFL_BAN))
+          return (MODE_BAN);
     }
   else
     {
@@ -730,7 +735,7 @@ static  void    send_mode_list(struct Client *cptr,
         }
       else if (*parabuf)
         send = 1;
-      if (count == 3)
+      if (count == MAXMODEPARAMS)
         send = 1;
       if (send)
         {
@@ -740,7 +745,7 @@ static  void    send_mode_list(struct Client *cptr,
           *parabuf = '\0';
           cp = modebuf;
           *cp++ = '+';
-          if (count != 3)
+          if (count != MAXMODEPARAMS)
             {
               (void)strcpy(parabuf, name);
               *cp++ = flag;
