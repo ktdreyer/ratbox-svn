@@ -89,6 +89,9 @@
 /* nicklen */
 #undef NICKLEN
 
+/* efnet */
+#undef EFNET
+
 /* max_clients */
 #undef MAX_CLIENTS
 
