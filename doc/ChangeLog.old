@@ -1,3 +1,7 @@
+*** 20010522_5 by davidt
+Directory /cvsroot/ircd-hybrid-7/servlink added to the repository
+
+
 *** 20010522_4 by toot
 . changed /list so vchan Id's show just before the topic, instead of 
   in the channel name
