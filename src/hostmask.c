@@ -446,8 +446,7 @@ void report_hostmask_conf_links(struct Client *sptr, int flags)
 	get_printable_conf(aconf, &name, &host, &pass, &user, &port,
 			   &classname);
 	sendto_one(sptr, form_str(RPL_STATSKLINE), me.name, sptr->name,
-		   'K', host, user, pass
-		   );
+		   'K', host, user, pass );
       }
 
 
@@ -468,10 +467,7 @@ void report_hostmask_conf_links(struct Client *sptr, int flags)
 	     get_printable_conf(aconf, &name, &host, &pass, &user, &port,
 				&classname);
 	     sendto_one(sptr, form_str(RPL_STATSKLINE), me.name, sptr->name,
-			'K', name,
-			show_iline_prefix(sptr,aconf,user),
-			host, port, classname
-			);
+			'K', host, user, pass );
 	   }
        }
    }
