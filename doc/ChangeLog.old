@@ -1,3 +1,8 @@
+*** 20011013_1 by a1kmm
+- Oops forgot to change > back to >= from Rain's patch.
+- Fixed a K&R style { after an if, found by fl.
+
+
 *** 20011012_2 by a1kmm
 - Changed back part of |Rain|'s patch: There is nothing wrong with comparing
   a pointer with an invalid pointer so long as you don't dereference the
