@@ -678,10 +678,8 @@ set_default_conf(void)
 	AdminInfo.email = NULL;
 	AdminInfo.description = NULL;
 
-	strlcpy(ConfigFileEntry.default_operstring, "is an IRC operator",
-		sizeof(ConfigFileEntry.default_operstring));
-	strlcpy(ConfigFileEntry.default_adminstring, "is a Server Administrator",
-		sizeof(ConfigFileEntry.default_adminstring));
+	DupString(ConfigFileEntry.default_operstring, "is an IRC operator");
+	DupString(ConfigFileEntry.default_adminstring, "is a Server Administrator");
 	
 	ConfigFileEntry.failed_oper_notice = YES;
 	ConfigFileEntry.anti_nick_flood = NO;
@@ -715,15 +713,15 @@ set_default_conf(void)
 	ConfigFileEntry.short_motd = NO;
 	ConfigFileEntry.no_oper_flood = NO;
 	ConfigFileEntry.default_invisible = NO;
-	ConfigFileEntry.fname_userlog[0] = '\0';
-	ConfigFileEntry.fname_fuserlog[0] = '\0';
-	ConfigFileEntry.fname_operlog[0] = '\0';
-	ConfigFileEntry.fname_foperlog[0] = '\0';
-	ConfigFileEntry.fname_serverlog[0] = '\0';
-	ConfigFileEntry.fname_glinelog[0] = '\0';
-	ConfigFileEntry.fname_klinelog[0] = '\0';
-	ConfigFileEntry.fname_operspylog[0] = '\0';
-	ConfigFileEntry.fname_ioerrorlog[0] = '\0';
+	ConfigFileEntry.fname_userlog = NULL;
+	ConfigFileEntry.fname_fuserlog = NULL;
+	ConfigFileEntry.fname_operlog = NULL;
+	ConfigFileEntry.fname_foperlog = NULL;
+	ConfigFileEntry.fname_serverlog = NULL;
+	ConfigFileEntry.fname_glinelog = NULL;
+	ConfigFileEntry.fname_klinelog = NULL;
+	ConfigFileEntry.fname_operspylog = NULL;
+	ConfigFileEntry.fname_ioerrorlog = NULL;
 	ConfigFileEntry.glines = NO;
 	ConfigFileEntry.use_egd = NO;
 	ConfigFileEntry.gline_time = 12 * 3600;

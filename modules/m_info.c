@@ -130,13 +130,13 @@ static struct InfoStruct info_table[] = {
 	},
 	{
 		"default_adminstring",
-		OUTPUT_STRING_PTR,
+		OUTPUT_STRING,
 		&ConfigFileEntry.default_adminstring,
 		"Default adminstring at startup.",
 	},
 	{
 		"default_operstring",
-		OUTPUT_STRING_PTR,
+		OUTPUT_STRING,
 		&ConfigFileEntry.default_operstring,
 		"Default operstring at startup.",
 	},
@@ -177,60 +177,57 @@ static struct InfoStruct info_table[] = {
 		"Inform opers if someone /oper's with the wrong password"
 	},
 	{
-		/* fname_userlog is a char [] */
 		"fname_userlog",
-		OUTPUT_STRING_PTR,
+		OUTPUT_STRING,
 		&ConfigFileEntry.fname_userlog,
 		"User log file"
 	},
 	{
 		"fname_fuserlog",
-		OUTPUT_STRING_PTR,
+		OUTPUT_STRING,
 		&ConfigFileEntry.fname_fuserlog,
 		"Failed user log file"
 	},
 
 	{
-		/* fname_operlog is a char [] */
 		"fname_operlog",
-		OUTPUT_STRING_PTR,
+		OUTPUT_STRING,
 		&ConfigFileEntry.fname_operlog,
 		"Operator log file"
 	},
 	{
-		/* fname_foperlog is a char [] */
 		"fname_foperlog",
-		OUTPUT_STRING_PTR,
+		OUTPUT_STRING,
 		&ConfigFileEntry.fname_foperlog,
 		"Failed operator log file"
 	},
 	{
 		"fname_serverlog",
-		OUTPUT_STRING_PTR,
+		OUTPUT_STRING,
 		&ConfigFileEntry.fname_serverlog,
 		"Server connect/disconnect log file"
 	},
 	{
 		"fname_klinelog",
-		OUTPUT_STRING_PTR,
+		OUTPUT_STRING,
 		&ConfigFileEntry.fname_klinelog,
 		"KLINE etc log file"
 	},
 	{
 		"fname_glinelog",
-		OUTPUT_STRING_PTR,
+		OUTPUT_STRING,
 		&ConfigFileEntry.fname_glinelog,
 		"GLINE log file"
 	},
 	{
 		"fname_operspylog",
-		OUTPUT_STRING_PTR,
+		OUTPUT_STRING,
 		&ConfigFileEntry.fname_operspylog,
 		"Oper spy log file"
 	},
 	{
 		"fname_ioerrorlog",
-		OUTPUT_STRING_PTR,
+		OUTPUT_STRING,
 		&ConfigFileEntry.fname_ioerrorlog,
 		"IO error log file"
 	},
@@ -284,7 +281,7 @@ static struct InfoStruct info_table[] = {
 	},
 	{
 		"kline_reason",
-		OUTPUT_STRING_PTR,
+		OUTPUT_STRING,
 		&ConfigFileEntry.kline_reason,
 		"K-lined clients sign off with this reason"
 	},
