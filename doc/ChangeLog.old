@@ -1,3 +1,7 @@
+*** 20011204_3 by leeh
+- dont send TOPICWHO if theyre not members
+
+
 *** 20011204_2 by db
 - added oper_reason to conf struct, nothing with it yet
 
