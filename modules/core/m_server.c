@@ -153,19 +153,34 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return exit_client(cptr, cptr, cptr, "Server Exists");
     }
 
-  if (ConfigFileEntry.hub)
+  if(ConfigFileEntry.hub && IsCapable(cptr, CAP_LL))
     {
-      if (IsCapable(cptr, CAP_LL) && IsCapable(cptr,CAP_HUB))
-        ClearCap(cptr,CAP_LL);
+      if(IsCapable(cptr, CAP_HUB))
+        {
+          ClearCap(cptr,CAP_LL);
+          sendto_realops_flags(FLAGS_ALL,
+               "*** LazyLinks to a hub from a hub, thats a no-no.");
+        }
       else
         {
-         cptr->localClient->serverMask = nextFreeMask();
-          if (!cptr->localClient->serverMask)
+          cptr->localClient->serverMask = nextFreeMask();
+
+          if(!cptr->localClient->serverMask)
             {
-             sendto_realops_flags(FLAGS_ALL, "serverMask is full!");
-             /* try and negotiate a non LL connect */
-             ClearCap(cptr,CAP_LL);
+              sendto_realops_flags(FLAGS_ALL,
+                                   "serverMask is full!");
+              /* try and negotiate a non LL connect */
+              ClearCap(cptr,CAP_LL);
             }
+        }
+    }
+  else if (IsCapable(cptr, CAP_LL))
+    {
+      if(!IsCapable(cptr, CAP_HUB))
+        {
+          ClearCap(cptr,CAP_LL);
+          sendto_realops_flags(FLAGS_ALL,
+               "*** LazyLinks to a leaf from a leaf, thats a no-no.");
         }
     }
 

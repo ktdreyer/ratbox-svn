@@ -396,30 +396,11 @@ int check_server(const char *name, struct Client* cptr)
   if( !(aconf->flags & CONF_FLAGS_LAZY_LINK) )
     ClearCap(cptr,CAP_LL);
 
-  if(ConfigFileEntry.hub)
-    {
-      if(IsCapable(cptr, CAP_LL))
-        {
-          if(hub || IsCapable(cptr, CAP_HUB))
-            {
-              ClearCap(cptr,CAP_LL);
-              sendto_realops_flags(FLAGS_ALL,
-		   "*** LazyLinks to a hub from a hub, thats a no-no.");
-            }
-          else
-            {
-              cptr->localClient->serverMask = nextFreeMask();
-
-              if(!cptr->localClient->serverMask)
-                {
-                  sendto_realops_flags(FLAGS_ALL,
-				       "serverMask is full!");
-                  /* try and negotiate a non LL connect */
-                  ClearCap(cptr,CAP_LL);
-                }
-            }
-       }
-    }
+  /*
+   * Don't unset CAP_HUB here even if the server isn't a hub,
+   * it only indicates if the server thinks it's lazylinks are
+   * leafs or not.. if you unset it, bad things will happen
+   */
 
   if (aconf->ipnum.s_addr == INADDR_NONE)
     aconf->ipnum.s_addr = cptr->localClient->ip.s_addr;
