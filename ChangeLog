@@ -1,3 +1,22 @@
+androsyn    2002/11/26 02:55:59 UTC	(20021126_1)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    src                  client.c s_conf.c s_user.c 
+  Log:
+  Add -Wwrite-strings to gcc flags.  Also removed some (void)'s stuck on the
+  front of exit_client().
+  
+  Revision  Changes    Path
+  7.161     +1 -1      ircd-ratbox/autoconf/configure.in
+  7.168     +1 -1      ircd-ratbox/configure
+  7.334     +3 -3      ircd-ratbox/src/client.c
+  7.374     +4 -4      ircd-ratbox/src/s_conf.c
+  7.241     +6 -6      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2002/11/26 02:02:59 UTC	(20021126_0)
 
   Modified files:
