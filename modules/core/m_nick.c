@@ -41,7 +41,6 @@
 #include "send.h"
 #include "channel.h"
 #include "s_log.h"
-#include "resv.h"
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"

@@ -30,7 +30,6 @@
 #include "s_conf.h"
 #include "s_newconf.h"
 #include "s_serv.h"
-#include "resv.h"
 #include "s_stats.h"
 #include "channel.h"
 #include "class.h"
@@ -1862,6 +1861,7 @@ clear_out_old_conf(void)
 	}
 
 	clear_out_address_conf();
+	clear_resvs();
 	clear_xlines();
 	clear_shared();
 	clear_clusters();
@@ -1890,9 +1890,6 @@ clear_out_old_conf(void)
 		ServerInfo.rsa_private_key_file = NULL;
 	}
 #endif
-
-	/* clean out old resvs from the conf */
-	clear_resv();
 
 	/* clean out AdminInfo */
 	MyFree(AdminInfo.name);

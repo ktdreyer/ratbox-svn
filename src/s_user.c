@@ -1249,7 +1249,7 @@ user_welcome(struct Client *source_p)
 static int
 check_X_line(struct Client *client_p, struct Client *source_p)
 {
-	struct xline *xconf;
+	struct rxconf *xconf;
 	const char *reason;
 
 	if(IsOper(source_p))

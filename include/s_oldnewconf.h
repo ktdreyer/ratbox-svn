@@ -38,15 +38,23 @@
 #include "handlers.h"
 #include "tools.h"
 
-/* how to store the xline (hash/dlink) */
-#define XLINE_PLAIN	0x010
-#define XLINE_WILD	0x020
+#define CONF_RESV	0x0001
+#define CONF_XLINE	0x0002
+#define XLINE_WILD	0x0020
+#define RESV_CHANNEL	0x0100
+#define RESV_NICK	0x0200
+#define RESV_NICKWILD	0x0400
+
+#define IsResv(x)	((x)->flags & CONF_RESV)
+#define IsXline(x)	((x)->flags & CONF_XLINE)
+#define IsResvChannel(x)	((x)->flags & RESV_CHANNEL)
+#define IsResvNick(x)		((x)->flags & RESV_NICK)
 
 #define ENCAP_PERM	0x001
 
-struct xline
+struct rxconf
 {
-	char *gecos;
+	char *name;
 	char *reason;
 	int type;
 	int flags;
@@ -71,12 +79,22 @@ extern void init_conf(void);
 
 extern dlink_list xline_list;
 extern dlink_list xline_hash_list;
+extern dlink_list resv_list;
+extern dlink_list resv_hash_list;
 
-extern struct xline *make_xline(const char *, const char *, int);
-extern void add_xline(struct xline *);
-extern void free_xline(struct xline *);
+extern struct rxconf *make_rxconf(const char *, const char *, int, int);
+extern int add_rxconf(struct rxconf *);
+extern void free_rxconf(struct rxconf *);
+
+extern struct rxconf *find_xline(const char *);
 extern void clear_xlines(void);
-extern struct xline *find_xline(const char *);
+
+extern int find_channel_resv(const char *);
+extern int find_nick_resv(const char *);
+extern void clear_resvs(void);
+
+extern int valid_wild_card_simple(const char *);
+extern int clean_resv_nick(const char *);
 
 extern dlink_list shared_list;
 extern struct shared *make_shared(void);

@@ -299,7 +299,7 @@
 #define	USER_HEAP_SIZE		1024
 #define	DNODE_HEAP_SIZE		2048
 #define TOPIC_HEAP_SIZE		1024
-#define XLINE_HEAP_SIZE         20
+#define RXCONF_HEAP_SIZE         20
 #define SHARED_HEAP_SIZE        10
 #else /* Small Net */
 #define CHANNEL_HEAP_SIZE	256
@@ -310,7 +310,7 @@
 #define	USER_HEAP_SIZE		128
 #define	DNODE_HEAP_SIZE		256
 #define TOPIC_HEAP_SIZE		256
-#define XLINE_HEAP_SIZE         20
+#define RXCONF_HEAP_SIZE         20
 #define SHARED_HEAP_SIZE        10
 #endif
 

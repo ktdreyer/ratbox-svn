@@ -53,7 +53,6 @@
 #include "modules.h"
 #include "s_conf.h"
 #include "s_newconf.h"
-#include "resv.h"
 #include "cluster.h"
 
 static int mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
@@ -90,7 +89,7 @@ DECLARE_MODULE_AV1(xline, NULL, NULL, xline_clist, NULL, NULL, NULL, "$Revision$
 static int
 mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	struct xline *xconf;
+	struct rxconf *xconf;
 	const char *reason;
 	const char *target_server = NULL;
 	int xtype = 1;
@@ -106,7 +105,7 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(xconf != NULL)
 	{
 		sendto_one(source_p, ":%s NOTICE %s :[%s] already X-Lined by [%s] - %s",
-			   me.name, source_p->name, parv[1], xconf->gecos, xconf->reason);
+			   me.name, source_p->name, parv[1], xconf->name, xconf->reason);
 		return 0;
 	}
 
@@ -176,7 +175,7 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 static int
 ms_xline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	struct xline *xconf;
+	struct rxconf *xconf;
 
 	if(parc != 5 || EmptyString(parv[4]))
 		return 0;
@@ -219,7 +218,7 @@ ms_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 		{
 			sendto_one(source_p, ":%s NOTICE %s :[%s] already X-Lined by [%s] - %s",
 				   me.name, source_p->name, parv[1], 
-				   xconf->gecos, xconf->reason);
+				   xconf->name, xconf->reason);
 			return 0;
 		}
 
@@ -281,28 +280,28 @@ write_xline(struct Client *source_p, const char *gecos,
 {
 	char buffer[BUFSIZE * 2];
 	FBFILE *out;
-	struct xline *xconf;
+	struct rxconf *xconf;
 	const char *filename;
 
-	xconf = make_xline(gecos, reason, xtype);
-	collapse(xconf->gecos);
+	xconf = make_rxconf(gecos, reason, xtype, CONF_XLINE);
+	collapse(xconf->name);
 
 	filename = ConfigFileEntry.xlinefile;
 
 	if((out = fbopen(filename, "a")) == NULL)
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem opening %s ", filename);
-		free_xline(xconf);
+		free_rxconf(xconf);
 		return;
 	}
 
 	ircsprintf(buffer, "\"%s\",\"%d\",\"%s\",\"%s\",%lu\n",
-		   xconf->gecos, xconf->type, xconf->reason, get_oper_name(source_p), CurrentTime);
+		   xconf->name, xconf->type, xconf->reason, get_oper_name(source_p), CurrentTime);
 
 	if(fbputs(buffer, out) == -1)
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem writing to %s", filename);
-		free_xline(xconf);
+		free_rxconf(xconf);
 		fbclose(out);
 		return;
 	}
@@ -310,13 +309,13 @@ write_xline(struct Client *source_p, const char *gecos,
 	fbclose(out);
 
 	sendto_realops_flags(UMODE_ALL, L_ALL, "%s added X-Line for [%s] [%s]",
-			     get_oper_name(source_p), xconf->gecos, xconf->reason);
+			     get_oper_name(source_p), xconf->name, xconf->reason);
 	sendto_one(source_p, ":%s NOTICE %s :Added X-Line for [%s] [%s]",
-		   me.name, source_p->name, xconf->gecos, xconf->reason);
+		   me.name, source_p->name, xconf->name, xconf->reason);
 	ilog(L_TRACE, "%s added X-Line for [%s] [%s]",
-	     get_oper_name(source_p), xconf->gecos, xconf->reason);
+	     get_oper_name(source_p), xconf->name, xconf->reason);
 
-	add_xline(xconf);
+	add_rxconf(xconf);
 	check_xlines();
 }
 

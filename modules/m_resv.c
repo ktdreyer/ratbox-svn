@@ -36,7 +36,6 @@
 #include "modules.h"
 #include "s_conf.h"
 #include "s_newconf.h"
-#include "resv.h"
 #include "hash.h"
 #include "s_log.h"
 #include "sprintf_irc.h"
@@ -164,9 +163,9 @@ parse_resv(struct Client *source_p, const char *name,
 {
 	if(IsChannelName(name))
 	{
-		struct ResvEntry *resv_p;
+		struct rxconf *resv_p;
 
-		resv_p = create_resv(name, reason, RESV_CHANNEL);
+		resv_p = make_rxconf(name, reason, RESV_CHANNEL, CONF_RESV);
 
 		if(resv_p == NULL)
 		{
@@ -177,12 +176,13 @@ parse_resv(struct Client *source_p, const char *name,
 			return;
 		}
 
+		add_rxconf(resv_p);
 		write_confitem(RESV_TYPE, source_p, NULL, resv_p->name, resv_p->reason,
 			       NULL, NULL, 0);
 	}
 	else if(clean_resv_nick(name))
 	{
-		struct ResvEntry *resv_p;
+		struct rxconf *resv_p;
 
 		if(!valid_wild_card_simple(name))
 		{
@@ -195,7 +195,7 @@ parse_resv(struct Client *source_p, const char *name,
 			return;
 		}
 
-		resv_p = create_resv(name, reason, RESV_NICK);
+		resv_p = make_rxconf(name, reason, RESV_NICK, CONF_RESV);
 
 		if(resv_p == NULL)
 		{
@@ -206,6 +206,7 @@ parse_resv(struct Client *source_p, const char *name,
 			return;
 		}
 
+		add_rxconf(resv_p);
 		write_confitem(RESV_TYPE, source_p, NULL, resv_p->name, resv_p->reason,
 			       NULL, NULL, 0);
 	}

@@ -33,7 +33,6 @@
 #include "client.h"
 #include "irc_string.h"
 #include "memory.h"
-#include "resv.h"
 
 /* conf_add_fields()
  * 
@@ -151,7 +150,7 @@ parse_d_file(FBFILE * file)
 void
 parse_x_file(FBFILE * file)
 {
-	struct xline *xconf;
+	struct rxconf *xconf;
 	char *reason_field = NULL;
 	char *host_field = NULL;
 	char *port_field = NULL;
@@ -178,14 +177,16 @@ parse_x_file(FBFILE * file)
 		if(EmptyString(reason_field))
 			continue;
 
-		xconf = make_xline(host_field, reason_field, atoi(port_field));
-		add_xline(xconf);
+		xconf = make_rxconf(host_field, reason_field, 
+				    atoi(port_field), CONF_XLINE);
+		add_rxconf(xconf);
 	}
 }
 
 void
 parse_resv_file(FBFILE * file)
 {
+	struct rxconf *rxptr;
 	char *reason_field;
 	char *host_field;
 	char line[BUFSIZE];
@@ -208,9 +209,15 @@ parse_resv_file(FBFILE * file)
 			continue;
 
 		if(IsChannelName(host_field))
-			create_resv(host_field, reason_field, RESV_CHANNEL);
+		{
+			rxptr = make_rxconf(host_field, reason_field, RESV_CHANNEL, CONF_RESV);
+			add_rxconf(rxptr);
+		}
 		else if(clean_resv_nick(host_field))
-			create_resv(host_field, reason_field, RESV_NICK);
+		{
+			rxptr = make_rxconf(host_field, reason_field, RESV_NICK, CONF_RESV);
+			add_rxconf(rxptr);
+		}
 	}
 }
 

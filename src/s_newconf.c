@@ -46,11 +46,13 @@
 #include "event.h"
 #include "hash.h"
 
-static BlockHeap *xline_heap = NULL;
+static BlockHeap *rxconf_heap = NULL;
 static BlockHeap *shared_heap = NULL;
 
 dlink_list xline_list;
 dlink_list xline_hash_list;
+dlink_list resv_list;
+dlink_list resv_hash_list;
 dlink_list shared_list;
 dlink_list encap_list;
 
@@ -63,7 +65,7 @@ dlink_list encap_list;
 static void
 conf_heap_gc(void *unused)
 {
-	BlockHeapGarbageCollect(xline_heap);
+	BlockHeapGarbageCollect(rxconf_heap);
 	BlockHeapGarbageCollect(shared_heap);
 }
 
@@ -76,79 +78,120 @@ conf_heap_gc(void *unused)
 void
 init_conf(void)
 {
-	xline_heap = BlockHeapCreate(sizeof(struct xline), XLINE_HEAP_SIZE);
+	rxconf_heap = BlockHeapCreate(sizeof(struct rxconf), RXCONF_HEAP_SIZE);
 	shared_heap = BlockHeapCreate(sizeof(struct shared), SHARED_HEAP_SIZE);
 	eventAddIsh("conf_heap_gc", conf_heap_gc, NULL, 600);
 }
 
-/* make_xline()
+/* make_rxconf()
  *
- * inputs       - gecos, reason, type
+ * inputs       - gecos, reason, type, flags
  * outputs      -
- * side effects - creates an xline based on information
+ * side effects - creates an xline/resv based on information
  */
-struct xline *
-make_xline(const char *gecos, const char *reason, int type)
+struct rxconf *
+make_rxconf(const char *name, const char *reason, int type, int flags)
 {
-	struct xline *xconf;
+	struct rxconf *rxptr;
 
-	xconf = BlockHeapAlloc(xline_heap);
-	memset(xconf, 0, sizeof(struct xline));
+	rxptr = BlockHeapAlloc(rxconf_heap);
+	memset(rxptr, 0, sizeof(struct rxconf));
 
-	if(!EmptyString(gecos))
-		DupString(xconf->gecos, gecos);
+	if(!EmptyString(name))
+		DupString(rxptr->name, name);
 
 	if(!EmptyString(reason))
-		DupString(xconf->reason, reason);
+		DupString(rxptr->reason, reason);
 
-	xconf->type = type;
-	xconf->flags = 0;
-	return xconf;
+	rxptr->type = type;
+	rxptr->flags = flags;
+	return rxptr;
 }
 
-/* add_xline()
+/* add_rxconf()
  *
- * inputs	- pointer to xline
+ * inputs	- pointer to resv/xline
  * outputs	-
- * side effects - adds the xline to either the hash, or dlink
+ * side effects - adds xline/resv to their respective hashes/dlinks
  */
-void
-add_xline(struct xline *xconf)
+int
+add_rxconf(struct rxconf *rxptr)
 {
-	/* no wildcards, add to the hash */
-	if((strchr(xconf->gecos, '?') == NULL) && 
-	   (strchr(xconf->gecos, '*') == NULL))
+	/* reasons too long, nuke it */
+	if(strlen(rxptr->reason) > REASONLEN)
 	{
-		xconf->flags = XLINE_PLAIN;
-		add_to_xline_hash(xconf->gecos, xconf);
-		dlinkAddAlloc(xconf, &xline_hash_list);
+		MyFree(rxptr->reason);
+		DupString(rxptr->reason, "No Reason");
 	}
 
-	/* otherwise it goes in the dlink */
-	else
+	if(IsResv(rxptr))
 	{
-		xconf->flags = XLINE_WILD;
-		dlinkAddAlloc(xconf, &xline_list);
+		if(IsResvChannel(rxptr))
+		{
+			if(find_channel_resv(rxptr->name))
+				return 0;
+
+			if(strlen(rxptr->name) > CHANNELLEN)
+				return 0;
+
+			add_to_resv_hash(rxptr->name, rxptr);
+			dlinkAddAlloc(rxptr, &resv_hash_list);
+		}
+		else if(IsResvNick(rxptr))
+		{
+			if(find_nick_resv(rxptr->name))
+				return 0;
+
+			if(strlen(rxptr->name) > NICKLEN*2)
+				return 0;
+
+			if((strchr(rxptr->name, '?') == NULL) &&
+			   (strchr(rxptr->name, '*') == NULL))
+			{
+				add_to_resv_hash(rxptr->name, rxptr);
+				dlinkAddAlloc(rxptr, &resv_hash_list);
+			}
+			else
+			{
+				rxptr->flags |= RESV_NICKWILD;
+				dlinkAddAlloc(rxptr, &resv_list);
+			}
+		}
 	}
+	else if(IsXline(rxptr))
+	{
+		if((strchr(rxptr->name, '?') == NULL) &&
+		   (strchr(rxptr->name, '*') == NULL))
+		{
+			add_to_xline_hash(rxptr->name, rxptr);
+			dlinkAddAlloc(rxptr, &xline_hash_list);
+		}
+		else
+		{
+			rxptr->flags |= XLINE_WILD;
+			dlinkAddAlloc(rxptr, &xline_list);
+		}
+	}
+
+	return 1;
 }
-	
-/* free_xline()
+
+/* free_rxconf()
  *
- * inputs       - pointer to xline to free
- * outputs      -
- * side effects - xline is freed
+ * inputs	- pointer to rxconf to free
+ * outputs	-
+ * side effects - rxconf is free'd
  */
 void
-free_xline(struct xline *xconf)
+free_rxconf(struct rxconf *rxptr)
 {
-	assert(xconf != NULL);
-	if(xconf == NULL)
+	s_assert(rxptr != NULL);
+	if(rxptr == NULL)
 		return;
 
-	MyFree(xconf->gecos);
-	MyFree(xconf->reason);
-
-	BlockHeapFree(xline_heap, xconf);
+	MyFree(rxptr->name);
+	MyFree(rxptr->reason);
+	BlockHeapFree(rxconf_heap, rxptr);
 }
 
 /* clear_xlines()
@@ -160,14 +203,14 @@ free_xline(struct xline *xconf)
 void
 clear_xlines(void)
 {
+	struct rxconf *rxptr;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
-	struct xline *xconf;
 
 	/* this is more optimised for clearing the whole list */
 	DLINK_FOREACH_SAFE(ptr, next_ptr, xline_list.head)
 	{
-		free_xline(ptr->data);
+		free_rxconf(ptr->data);
 		free_dlink_node(ptr);
 	}
 
@@ -176,10 +219,9 @@ clear_xlines(void)
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, xline_hash_list.head)
 	{
-		xconf = ptr->data;
-
-		del_from_xline_hash(xconf->gecos, xconf);
-		free_xline(ptr->data);
+		rxptr = ptr->data;
+		del_from_xline_hash(rxptr->name, rxptr);
+		free_rxconf(rxptr);
 		free_dlink_node(ptr);
 	}
 
@@ -187,35 +229,175 @@ clear_xlines(void)
 	xline_hash_list.length = 0;
 }
 
-/*
- * find_xline
+/* clear_resvs()
  *
- * inputs       - pointer to char string to find
- * output       - NULL or pointer to found xline
- * side effects - looks for a match on name field
+ * inputs	-
+ * outputs	-
+ * side effects - nukes list of resvs
  */
-struct xline *
+void
+clear_resvs(void)
+{
+	struct rxconf *rxptr;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, resv_list.head)
+	{
+		free_rxconf(ptr->data);
+		free_dlink_node(ptr);
+	}
+
+	resv_list.head = resv_list.tail = NULL;
+	resv_list.length = 0;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, resv_hash_list.head)
+	{
+		rxptr = ptr->data;
+		del_from_resv_hash(rxptr->name, rxptr);
+		free_rxconf(rxptr);
+		free_dlink_node(ptr);
+	}
+
+	resv_hash_list.head = resv_hash_list.tail = NULL;
+	resv_hash_list.length = 0;
+}
+
+/* find_xline()
+ *
+ * inputs	- gecos to find
+ * outputs	- NULL/pointer to found xline
+ * side effects -
+ */
+struct rxconf *
 find_xline(const char *gecos)
 {
-	struct xline *xconf;
+	struct rxconf *rxptr;
 	dlink_node *ptr;
 
-	/* first hunt the hash.. */
-	xconf = hash_find_xline(gecos);
-
-	if(xconf != NULL)
-		return xconf;
+	rxptr = hash_find_xline(gecos);
+	if(rxptr != NULL)
+		return rxptr;
 
 	/* then hunt the less efficient dlink list */
 	DLINK_FOREACH(ptr, xline_list.head)
 	{
-		xconf = ptr->data;
+		rxptr = ptr->data;
 
-		if(match_esc(xconf->gecos, gecos))
-			return xconf;
+		if(match_esc(rxptr->name, gecos))
+			return rxptr;
 	}
 
 	return NULL;
+}
+
+/* find_channel_resv()
+ *
+ * inputs	- channel to find
+ * outputs	- 1 if found, else 0
+ * side effects -
+ */
+int
+find_channel_resv(const char *name)
+{
+	struct rxconf *rxptr;
+
+	rxptr = hash_find_resv(name);
+	if(rxptr != NULL)
+		return 1;
+
+	return 0;
+}
+
+/* find_nick_resv()
+ *
+ * inputs	- resv to find
+ * output	- 1 if found, else 0
+ * side effects -
+ */
+int
+find_nick_resv(const char *name)
+{
+	struct rxconf *rxptr;
+	dlink_node *ptr;
+
+	rxptr = hash_find_resv(name);
+	if(rxptr != NULL)
+		return 1;
+
+	DLINK_FOREACH(ptr, resv_list.head)
+	{
+		rxptr = ptr->data;
+
+		if(match(rxptr->name, name))
+			return 1;
+	}
+
+	return 0;
+}
+
+/* clean_resv_nick()
+ *
+ * inputs	- nick
+ * outputs	- 1 if nick is vaild resv, 0 otherwise
+ * side effects -
+ */
+int
+clean_resv_nick(const char *nick)
+{
+	char tmpch;
+	int as = 0;
+	int q = 0;
+	int ch = 0;
+
+	if(*nick == '-' || IsDigit(*nick))
+		return 0;
+
+	while ((tmpch = *nick++))
+	{
+		if(tmpch == '?')
+			q++;
+		else if(tmpch == '*')
+			as++;
+		else if(IsNickChar(tmpch))
+			ch++;
+		else
+			return 0;
+	}
+
+	if(!ch && as)
+		return 0;
+
+	return 1;
+}
+
+/* valid_wild_card_simple()
+ *
+ * inputs	- "thing" to test
+ * outputs	- 1 if enough wildcards, else 0
+ * side effects -
+ */
+int
+valid_wild_card_simple(const char *data)
+{
+	const char *p;
+	char tmpch;
+	int nonwild = 0;
+
+	/* check the string for minimum number of nonwildcard chars */
+	p = data;
+
+	while((tmpch = *p++))
+	{
+		if(!IsMWildChar(tmpch))
+		{
+			/* if we have enough nonwildchars, return */
+			if(++nonwild >= ConfigFileEntry.min_nonwildcard_simple)
+				return 1;
+		}
+	}
+
+	return 0;
 }
 
 /* make_shared()

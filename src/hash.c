@@ -32,7 +32,6 @@
 #include "client.h"
 #include "common.h"
 #include "hash.h"
-#include "resv.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -296,11 +295,11 @@ add_to_hostname_hash(const char *hostname, struct Client *client_p)
  * adds a resv channel entry to the resv hash table
  */
 void
-add_to_resv_hash(const char *name, struct ResvEntry *resv_p)
+add_to_resv_hash(const char *name, struct rxconf *resv_p)
 {
 	unsigned int hashv;
 
-	s_assert(name != NULL);
+	s_assert(!EmptyString(name));
 	s_assert(resv_p != NULL);
 	if(EmptyString(name) || resv_p == NULL)
 		return;
@@ -317,7 +316,7 @@ add_to_resv_hash(const char *name, struct ResvEntry *resv_p)
  * adds an xline to the xline hash table
  */
 void
-add_to_xline_hash(const char *name, struct xline *xconf)
+add_to_xline_hash(const char *name, struct rxconf *xconf)
 {
 	unsigned int hashv;
 
@@ -489,9 +488,9 @@ del_from_hostname_hash(const char *hostname, struct Client *client_p)
  * removes a resv entry from the resv hash table
  */
 void
-del_from_resv_hash(const char *name, struct ResvEntry *resv_p)
+del_from_resv_hash(const char *name, struct rxconf *resv_p)
 {
-	struct ResvEntry *r2ptr;
+	struct rxconf *r2ptr;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 	unsigned int hashv;
@@ -525,9 +524,9 @@ del_from_resv_hash(const char *name, struct ResvEntry *resv_p)
  * removes an xline from the xline hash table
  */
 void
-del_from_xline_hash(const char *name, struct xline *xconf)
+del_from_xline_hash(const char *name, struct rxconf *xconf)
 {
-	struct xline *acptr;
+	struct rxconf *acptr;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 	unsigned int hashv;
@@ -806,10 +805,10 @@ get_or_create_channel(struct Client *client_p, const char *chname, int *isnew)
  *
  * hunts for a resv entry in the resv hash table
  */
-struct ResvEntry *
+struct rxconf *
 hash_find_resv(const char *name)
 {
-	struct ResvEntry *resv_p;
+	struct rxconf *resv_p;
 	dlink_node *ptr;
 	unsigned int hashv;
 
@@ -834,10 +833,10 @@ hash_find_resv(const char *name)
  *
  * hunts for an xline entry in the xline hash table
  */
-struct xline *
+struct rxconf *
 hash_find_xline(const char *name)
 {
-	struct xline *xconf;
+	struct rxconf *xconf;
 	dlink_node *ptr;
 	unsigned int hashv;
 
@@ -850,7 +849,7 @@ hash_find_xline(const char *name)
 	{
 		xconf = ptr->data;
 
-		if(irccmp(name, xconf->gecos) == 0)
+		if(irccmp(name, xconf->name) == 0)
 			return xconf;
 	}
 

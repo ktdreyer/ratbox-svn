@@ -51,7 +51,6 @@
 #include "parse.h"
 #include "modules.h"
 #include "hook.h"
-#include "resv.h"		/* report_resv */
 #include "s_newconf.h"
 #include "hash.h"
 
@@ -786,7 +785,8 @@ stats_ports (struct Client *source_p)
 static void
 stats_resv (struct Client *source_p)
 {
-	report_resv (source_p);
+#ifdef XXX_NEED_RESV_CODE
+#endif
 }
 
 static void
@@ -911,7 +911,7 @@ stats_servers (struct Client *source_p)
 static void
 stats_gecos (struct Client *source_p)
 {
-	struct xline *xconf;
+	struct rxconf *xconf;
 	dlink_node *ptr;
 
 	DLINK_FOREACH (ptr, xline_list.head)
@@ -919,7 +919,7 @@ stats_gecos (struct Client *source_p)
 		xconf = ptr->data;
 
 		sendto_one (source_p, form_str (RPL_STATSXLINE),
-			    me.name, source_p->name, xconf->type, xconf->gecos, xconf->reason);
+			    me.name, source_p->name, xconf->type, xconf->name, xconf->reason);
 	}
 
 	DLINK_FOREACH(ptr, xline_hash_list.head)
@@ -927,7 +927,7 @@ stats_gecos (struct Client *source_p)
 		xconf = ptr->data;
 
 		sendto_one(source_p, form_str(RPL_STATSXLINE),
-			   me.name, source_p->name, xconf->gecos, xconf->reason);
+			   me.name, source_p->name, xconf->type, xconf->name, xconf->reason);
 	}
 }
 

@@ -447,7 +447,7 @@ check_banned_lines(void)
 {
 	struct Client *client_p;	/* current local client_p being examined */
 	struct ConfItem *aconf = NULL;
-	struct xline *xconf;
+	struct rxconf *xconf;
 	dlink_node *ptr, *next_ptr;
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, lclient_list.head)
@@ -721,7 +721,7 @@ void
 check_xlines(void)
 {
 	struct Client *client_p;
-	struct xline *xconf;
+	struct rxconf *xconf;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 

@@ -89,7 +89,6 @@ BASE_SRCS =                     \
   rsa.c                         \
   reject.c			\
   restart.c                     \
-  resv.c			\
   s_auth.c                      \
   s_bsd.c                       \
   s_bsd_kqueue.c                \

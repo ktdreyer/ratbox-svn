@@ -23,7 +23,6 @@
 #include "modules.h"
 #include "listener.h"
 #include "hostmask.h"
-#include "resv.h"
 #include "s_serv.h"
 #include "event.h"
 #include "hash.h"
@@ -434,7 +433,7 @@ struct ConfItem *yy_aconf_next;
 
 struct Class *yy_class = NULL;
 
-static struct xline *yy_xconf = NULL;
+static struct rxconf *yy_rxconf = NULL;
 static struct shared *yy_uconf = NULL;
 static struct cluster *yy_cconf = NULL;
 
@@ -1345,10 +1344,10 @@ conf_set_resv_channel(void *data)
 {
 	if(IsChannelName((char *) data))
 	{
-		if(resv_reason)
-			create_resv(data, resv_reason, RESV_CHANNEL);
-		else
-			create_resv(data, "No Reason", RESV_CHANNEL);
+		yy_rxconf = make_rxconf(data, 
+					EmptyString(resv_reason) ? "No Reason" : resv_reason, 
+					RESV_CHANNEL, CONF_RESV);
+		add_rxconf(yy_rxconf);
 	}
 	else
 	{
@@ -1370,10 +1369,10 @@ conf_set_resv_nick(void *data)
 {
 	if(clean_resv_nick(data))
 	{
-		if(resv_reason)
-			create_resv(data, resv_reason, RESV_NICK);
-		else
-			create_resv(data, "No Reason", RESV_NICK);
+		yy_rxconf = make_rxconf(data,
+					EmptyString(resv_reason) ? "No Reason" : resv_reason,
+					RESV_NICK, CONF_RESV);
+		add_rxconf(yy_rxconf);
 	}
 	else
 	{
@@ -1990,24 +1989,24 @@ conf_set_exempt_ip(void *data)
 static int
 conf_begin_gecos(struct TopConf *tc)
 {
-	yy_xconf = make_xline(NULL, "No Reason", 0);
+	yy_rxconf = make_rxconf(NULL, "No Reason", 0, CONF_XLINE);
 	return 0;
 }
 
 static int
 conf_end_gecos(struct TopConf *tc)
 {
-	if(!EmptyString(yy_xconf->gecos))
+	if(!EmptyString(yy_rxconf->name))
 	{
-		add_xline(yy_xconf);
+		add_rxconf(yy_rxconf);
 	}
 	else
 	{
 		conf_report_error("Ignoring gecos -- invalid gecos::name.");
-		free_xline(yy_xconf);
+		free_rxconf(yy_rxconf);
 	}
 
-	yy_xconf = NULL;
+	yy_rxconf = NULL;
 
 	return 0;
 }
@@ -2015,16 +2014,16 @@ conf_end_gecos(struct TopConf *tc)
 static void
 conf_set_gecos_name(void *data)
 {
-	MyFree(yy_xconf->gecos);
-	DupString(yy_xconf->gecos, data);
-	collapse(yy_xconf->gecos);
+	MyFree(yy_rxconf->name);
+	DupString(yy_rxconf->name, data);
+	collapse(yy_rxconf->name);
 }
 
 static void
 conf_set_gecos_reason(void *data)
 {
-	MyFree(yy_xconf->reason);
-	DupString(yy_xconf->reason, data);
+	MyFree(yy_rxconf->reason);
+	DupString(yy_rxconf->reason, data);
 }
 
 static void
@@ -2033,11 +2032,11 @@ conf_set_gecos_action(void *data)
 	char *act = data;
 
 	if(strcasecmp(act, "warn") == 0)
-		yy_xconf->type = 0;
+		yy_rxconf->type = 0;
 	else if(strcasecmp(act, "reject") == 0)
-		yy_xconf->type = 1;
+		yy_rxconf->type = 1;
 	else if(strcasecmp(act, "silent") == 0)
-		yy_xconf->type = 2;
+		yy_rxconf->type = 2;
 	else
 		conf_report_error("Warning -- invalid gecos::action.");
 }
