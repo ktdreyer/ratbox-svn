@@ -493,7 +493,6 @@ BlockHeapGarbageCollect(BlockHeap * bh)
 		if((dlink_list_length(&walker->free_list) == bh->elemsPerBlock) != 0)
 		{
 			free_block(walker->elems, walker->alloc_size);
-			freed_count++;
 			if(last != NULL)
 			{
 				last->next = walker->next;
