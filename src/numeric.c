@@ -24,6 +24,10 @@
 
 #include <assert.h>
 
+#ifndef USE_GETTEXT
+#include "messages.tab"
+#endif
+
 /*
  * form_str
  *
@@ -37,8 +41,11 @@ const char* form_str(int numeric)
   assert(-1 < numeric);
   assert(numeric < ERR_LAST_ERR_MSG);
   assert(0 != replies[numeric]);
-  
+#ifdef USE_GETTEXT  
   return (const char *) getmsg( replies[numeric] );
+#else
+  return replies[numeric];
+#endif
 }
 
 

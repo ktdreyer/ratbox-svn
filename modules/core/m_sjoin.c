@@ -297,7 +297,7 @@ sendto_realops("Creating top_chptr for %s", (parv[2] + 1));
   *mbuf++ = '+';
 
   for (s = s0 = strtoken(&p, parv[args+4], " "); s;
-       s = s0 = strtoken(&p, (char *)NULL, " "))
+       				s = s0 = strtoken(&p, (char *)NULL, " "))
     {
       fl = 0;
 
@@ -609,20 +609,27 @@ void set_final_mode(struct Mode *mode,struct Mode *oldmode)
 /*
  * remove_our_modes
  *
- * inputs	-
+ * inputs	- hide from ops or not int flag
+ *		- pointer to channel to remove modes from
+ *		- if vchan basechannel pointer 
+ *		- client pointer
  * output	- NONE
  * side effects	- Go through the local members, remove all their
  *		  chanop modes etc., this side lost the TS.
  */
-  
 void remove_our_modes( int hide_or_not,
 		       struct Channel *chptr, struct Channel *top_chptr,
 		       struct Client *sptr)
 {
   int what;
+  int pargs;
   struct SLink *l;
+  char *para[4];
 
-  what = 0;
+  para[0] = para[1] = para[2] = para[3] = "";
+
+  pargs = what = 0;
+
   for (l = chptr->members; l && l->value.cptr; l = l->next)
     {
       if (l->flags & MODE_CHANOP)
@@ -635,9 +642,10 @@ void remove_our_modes( int hide_or_not,
 	      *mbuf++ = '-';
 	      what = -1;
 	    }
+
 	  *mbuf++ = 'o';
-	  strcat(parabuf, l->value.cptr->name);
-	  strcat(parabuf, " ");
+	  para[pargs] = l->value.cptr->name;
+
 	  pargs++;
 	  if (pargs >= MAXMODEPARAMS)
 	    {
@@ -645,24 +653,28 @@ void remove_our_modes( int hide_or_not,
 	      if(IsVchan(chptr) && top_chptr)
 		{
 		  sendto_channel_butserv(hide_or_not, chptr, sptr,
-					 ":%s MODE %s %s %s",
+					 ":%s MODE %s %s %s %s %s %s",
 					 sptr->name,
 					 top_chptr->chname,
-					 modebuf, parabuf );
+					 modebuf,
+					 para[0], para[1], para[2], para[3]);
 		}
 	      else
 		{
 		  sendto_channel_butserv(hide_or_not, chptr, sptr,
-					 ":%s MODE %s %s %s",
+					 ":%s MODE %s %s %s %s %s %s",
 					 sptr->name,
-					 chptr->chname, modebuf, parabuf );
+					 chptr->chname, modebuf,
+					 para[0], para[1], para[2], para[3]);
 		}
 	      mbuf = modebuf;
-	      *mbuf = parabuf[0] = '\0';
+	      *mbuf = '\0';
+	      para[0] = para[1] = para[2] = para[3] = "";
 	      pargs = what = 0;
 	    }
 	  l->flags &= ~MODE_CHANOP;
 	}
+
       if (l->flags & MODE_VOICE)
 	{
 	  if (what != -1)
@@ -671,8 +683,7 @@ void remove_our_modes( int hide_or_not,
 	      what = -1;
 	    }
 	  *mbuf++ = 'v';
-	  strcat(parabuf, l->value.cptr->name);
-	  strcat(parabuf, " ");
+	  para[pargs] = l->value.cptr->name;
 	  pargs++;
 	  if (pargs >= MAXMODEPARAMS)
 	    {
@@ -680,20 +691,23 @@ void remove_our_modes( int hide_or_not,
 	      if(IsVchan(chptr) && top_chptr)
 		{
 		  sendto_channel_butserv(hide_or_not, chptr, sptr,
-					 ":%s MODE %s %s %s",
+					 ":%s MODE %s %s %s %s %s %s",
 					 sptr->name,
 					 top_chptr->chname,
-					 modebuf, parabuf );
+					 modebuf,
+					 para[0], para[1], para[2], para[3]);
 		}
 	      else
 		{
 		  sendto_channel_butserv(hide_or_not, chptr, sptr,
-					 ":%s MODE %s %s %s",
+					 ":%s MODE %s %s %s %s %s %s",
 					 sptr->name,
-					 chptr->chname, modebuf, parabuf );
+					 chptr->chname, modebuf,
+					 para[0], para[1], para[2], para[3]);
 		}
 	      mbuf = modebuf;
-	      *mbuf = parabuf[0] = '\0';
+	      *mbuf = '\0';
+	      para[0] = para[1] = para[2] = para[3] = "";
 	      pargs = what = 0;
 	    }
 	  l->flags &= ~MODE_VOICE;
@@ -706,16 +720,18 @@ void remove_our_modes( int hide_or_not,
       if(IsVchan(chptr) && top_chptr)
 	{
 	  sendto_channel_butserv(hide_or_not, chptr, sptr,
-				 ":%s MODE %s %s %s",
+				 ":%s MODE %s %s %s %s %s %s",
 				 sptr->name,
-				 top_chptr->chname, modebuf, parabuf );
+				 top_chptr->chname, modebuf,
+				 para[0], para[1], para[2], para[3] );
 	}
       else
 	{
 	  sendto_channel_butserv(hide_or_not, chptr, sptr,
-				 ":%s MODE %s %s %s",
+				 ":%s MODE %s %s %s %s %s %s",
 				 sptr->name,
-				 chptr->chname, modebuf, parabuf );
+				 chptr->chname, modebuf,
+				 para[0], para[1], para[2], para[3] );
 	}
     }
 }

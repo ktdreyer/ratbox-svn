@@ -26,17 +26,6 @@
 #endif
 
 /* PLEASE READ SECTION:
- *
- * I have commented out WHOIS_NOTICE and STATS_NOTICE
- * Personally, I feel opers do not need to know the information
- * returned by having those two defines defined, it is an invasion
- * of privacy. The original need/use of showing STATS_NOTICE
- * it seems to me, was to find stats flooders. They no longer
- * can do much damage with stats flooding, so why show it?
- * whois notice is just an invasion of privacy. Who cares?
- * I personally hope you agree with me, and leave these undef'ed
- * but at least you have been warned.
- *
  */
 
 /***************** MAKE SURE THIS IS CORRECT!!!!!!!!! **************/
@@ -54,13 +43,6 @@
 #define HARD_FDLIMIT_   256
 #define INIT_MAXCLIENTS 200
 
-#if defined(__CYGWIN__)
-#undef HARD_FDLIMIT_
-#define HARD_FDLIMIT_ 25
-#undef INIT_MAXCLIENTS
-#define INIT_MAXCLIENTS 20
-#endif /* __CYGWIN__ */
-
 /*
  * This is how many 'buffer connections' we allow... 
  * Remember, MAX_BUFFER + MAX_CLIENTS can't exceed HARD_FDLIMIT :)
@@ -72,7 +54,7 @@
 #define MASTER_MAX      (HARD_FDLIMIT - MAX_BUFFER)
 /*******************************************************************/
 
-/* DPATH SPATH CPATH MPATH KPATH - directoy and files locations
+/* DPATH SPATH CPATH MPATH KPATH - directory and files locations
  * Full pathnames and defaults of irc system's support files. Please note that
  * these are only the recommended names and paths. Change as needed.
  * You must define these to something, even if you don't really want them.
@@ -445,11 +427,9 @@
 
 /* ANTI_DRONE_FLOOD - anti flooding code for drones
  * This code adds server side ignore for a client who gets
- * messaged more than drone_count times within drone_time seconds
- * unfortunately, its a great DOS, but at least the client won't flood off.
+ * messaged more than drone_count times within drone_time seconds.
  * I have no idea what to use for values here, trying 8 privmsgs
  * within 1 seconds. (I'm told it is usually that fast)
- * I'll do better next time, this is a Q&D -Dianora
  */
 #define ANTI_DRONE_FLOOD
 #define DEFAULT_DRONE_TIME 1

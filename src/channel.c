@@ -1182,10 +1182,6 @@ void set_channel_mode(struct Client *cptr,
           if (!(who = find_chasing(sptr, arg, NULL)))
             break;
 
-          /* there is always the remote possibility of picking up
-           * a bogus user, be nasty to core for that.
-           */
-
           if (!who->user)
             break;
 
