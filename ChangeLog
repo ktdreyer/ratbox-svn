@@ -1,3 +1,17 @@
+leeh        2005/03/21 21:08:25 UTC	(20050321_5)
+
+  Modified files:
+    modules/core         m_server.c 
+    src                  s_serv.c 
+  Log:
+  - move inet_socketpair() -> m_server.c
+  
+  Revision  Changes    Path
+  1.160     +61 -1     ircd-ratbox/modules/core/m_server.c
+  7.434     +0 -60     ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2005/03/21 20:42:58 UTC	(20050321_4)
 
   Modified files:
