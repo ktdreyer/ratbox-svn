@@ -1,3 +1,21 @@
+leeh        2004/11/19 17:39:32 EST	(20041119_6)
+
+  Modified files:
+    doc                  example.conf 
+    include              conf.h 
+    src                  conf.c newconf.c s_alis.c 
+  Log:
+  - added max_matches option to alis
+  
+  Revision  Changes    Path
+  1.19      +3 -0      rserv/doc/example.conf
+  1.25      +3 -0      rserv/include/conf.h
+  1.27      +7 -0      rserv/src/conf.c
+  1.28      +7 -0      rserv/src/newconf.c
+  1.25      +2 -3      rserv/src/s_alis.c
+
+
+
 leeh        2004/11/19 16:54:55 EST	(20041119_5)
 
   Modified files:
