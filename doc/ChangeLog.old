@@ -1,3 +1,8 @@
+*** 19991017_2 by db
+- missing mask check in IP kline code. no idea why.
+
+
+
 *** 19991017_1 by db
 - removed (+) cruft as this was a Tanerism
 
