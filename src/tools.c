@@ -60,6 +60,24 @@ my_strdup(const char *s)
     return n;
 }
 
+/* my_strndup()
+ *   wrapper for a size limited strdup() which is non portable
+ */
+char *
+my_strndup(const char *s, size_t len)
+{
+	char *n;
+
+	n = my_malloc(len);
+
+	if(n == NULL)
+		die("out of memory");
+
+	strlcpy(n, s, len);
+
+	return n;
+}
+
 /* get_duration()
  *   converts duration in seconds to a string form
  *

@@ -13,6 +13,7 @@ extern void init_tools(void);
 extern void *my_calloc(int, size_t);
 extern void my_free(void *);
 extern char *my_strdup(const char *s);
+extern char *my_strndup(const char *, size_t);
 
 extern const char *get_duration(time_t seconds);
 extern const char *get_time(time_t when);

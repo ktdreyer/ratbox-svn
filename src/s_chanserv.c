@@ -2218,9 +2218,7 @@ s_chan_set(struct client *client_p, char *parv[], int parc)
 		}
 
 		my_free(chreg_p->url);
-#if 0
 		chreg_p->url = my_strndup(arg, TOPICLEN);
-#endif
 
 		loc_sqlite_exec(NULL, "UPDATE channels SET url=%Q "
 				"WHERE chname=%Q",
