@@ -1,3 +1,15 @@
+androsyn    2003/02/04 09:25:19 UTC	(20030204_7)
+
+  Modified files:
+    servlink             servlink.h 
+  Log:
+  Fix compile warnings
+  
+  Revision  Changes    Path
+  1.21      +1 -1      ircd-ratbox/servlink/servlink.h
+
+
+
 androsyn    2003/02/04 09:23:28 UTC	(20030204_6)
 
   Modified files:
