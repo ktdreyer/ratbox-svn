@@ -107,10 +107,10 @@ poll_update_pollfds(int fd, short event, PF * handler)
 	      {
 		pf->fd = -1;
 		pf->revents = 0;
-		if(F->comm_index != used_count - 1)
+		if(comm_index != used_count - 1)
 		{
-		   index_to_fde[used_count - 1]->comm_index = F->comm_index;
-		   pfds[F->comm_index] = pfds[used_count - 1];
+		   index_to_fde[used_count - 1]->comm_index = comm_index;
+		   pfds[comm_index] = pfds[used_count - 1];
 		}
 		pfds[used_count - 1].fd = -1; 
 		F->comm_index = -1;
