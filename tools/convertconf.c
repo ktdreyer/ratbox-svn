@@ -54,6 +54,7 @@ static void PrintOutServers(FILE *out);
 static void PairUpServers(struct ConnectPair* );
 static void AddHubOrLeaf(int type,char* name,char* host);
 static void OperPrivsFromString(FILE* , char* );
+static char* ClientFlags(FILE* ,char* ,char* );
 
 int main(int argc,char *argv[])
 {
@@ -236,6 +237,8 @@ static void oldParseOneLine(FILE *out,char* line)
   char* user_field=(char *)NULL;
   char* passwd_field=(char *)NULL;
   char* host_field=(char *)NULL;
+  char*	spoof_field;
+  char* client_allow;
   char* port_field=(char *)NULL;
   char* class_field=(char *)NULL;
   struct ConnectPair* pair;
@@ -340,26 +343,69 @@ static void oldParseOneLine(FILE *out,char* line)
 
     case 'i': 
       fprintf(out,"\tclient {\n");
-      if(user_field)
-	fprintf(out,"\t\tname=\"%s\";\n", user_field);
+
+      spoof_field = (char *)NULL;
+      if(host_field)
+	{
+	  if( strcmp(host_field,"NOMATCH") && (*host_field != 'x'))
+	    {
+	      fprintf(out,"\t\tallow_host=\"%s\";\n", host_field);
+	    }
+	  else
+	    {
+	      spoof_field = host_field;
+	    }
+	}
       if(passwd_field)
 	fprintf(out,"\t\tpasswd=\"%s\";\n", passwd_field);	
       else
 	fprintf(out,"\t\tpasswd=\"*\";\n");	
+      if(user_field)
+	{
+	  client_allow = ClientFlags(out,spoof_field,user_field);
+	  if(client_allow)
+	    fprintf(out,"\t\tallow=\"%s\";\n", client_allow );
+	}
       if(class_field)
 	fprintf(out,"\t\tclass=\"%s\";\n", class_field);	
       fprintf(out,"\t\trestricted;\n");	
+
       fprintf(out,"\t};\n\n");
       break;
 
     case 'I': 
       fprintf(out,"\tclient {\n");
-      if(user_field)
-	fprintf(out,"\t\tname=\"%s\";\n", user_field);
+
+      spoof_field = (char *)NULL;
+      client_allow = (char *)NULL;
+
+      if(host_field)
+	{
+	  if( strcmp(host_field,"NOMATCH") && (*host_field != 'x'))
+	    {
+	      if( user_field && (*user_field == 'x'))
+		{
+		  client_allow = ClientFlags(out,NULL,host_field);
+		  if(client_allow)
+		    fprintf(out,"\t\tallow=\"%s\";\n", client_allow );
+		}
+	      else
+		spoof_field = host_field;
+	    }
+	}
+
       if(passwd_field)
 	fprintf(out,"\t\tpasswd=\"%s\";\n", passwd_field);	
       else
 	fprintf(out,"\t\tpasswd=\"*\";\n");	
+
+      if(!client_allow && user_field)
+	{
+	  client_allow = ClientFlags(out,spoof_field,user_field);
+	  if(client_allow)
+	    fprintf(out,"\t\tallow=\"%s\";\n", client_allow );
+	}
+
       if(class_field)
 	fprintf(out,"\t\tclass=\"%s\";\n", class_field);	
       fprintf(out,"\t};\n\n");
@@ -547,7 +593,7 @@ static void oldParseOneLine(FILE *out,char* line)
  */
 static void PrintOutServers(FILE* out)
 {
-  struct ConnectPair *p;
+  struct ConnectPair* p;
 
   for(p = base_ptr; p; p = p->next)
     {
@@ -568,12 +614,12 @@ static void PrintOutServers(FILE* out)
 
 	  if(p->hub_mask)
 	    {
-	      fprintf(out,"\t\thub \"%s\";\n",p->hub_mask);
+	      fprintf(out,"\t\thub_mask=\"%s\";\n",p->hub_mask);
 	    }
 	  else
 	    {
 	      if(p->leaf_mask)
-		fprintf(out,"\t\tleaf \"%s\";\n",p->leaf_mask);
+		fprintf(out,"\t\tleaf_mask=\"%s\";\n",p->leaf_mask);
 	    }
 
 	  if(p->class)
@@ -784,4 +830,53 @@ static void OperPrivsFromString(FILE* out, char *privs)
  	}
       privs++;
     }
+}
+
+/*
+ *
+ *
+ */
+
+static char* ClientFlags(FILE *out, char* spoof, char *tmp)
+{
+  for(;*tmp;tmp++)
+    {
+      switch(*tmp)
+        {
+        case '=':
+	  if(spoof)
+	    fprintf(out,"\t\tspoof=\"%s\";\n",spoof);	  
+          break;
+	case '!':
+	  fprintf(out,"\t\tlimit_ip;\n");
+	  break;
+        case '-':
+	  fprintf(out,"\t\tno_tilde;\n");	  
+          break;
+        case '+':
+	  fprintf(out,"\t\tneed_ident;\n");	  
+          break;
+        case '$':
+	  fprintf(out,"\t\thave_ident;\n");	  
+          break;
+        case '%':
+	  fprintf(out,"\t\tnomatch_ip;\n");	  
+          break;
+        case '^':        /* is exempt from k/g lines */
+	  fprintf(out,"\t\tkline_exempt;\n");	  
+          break;
+        case '&':        /* can run a bot */
+	  fprintf(out,"\t\tbot;\n");	  
+          break;
+        case '>':        /* can exceed max connects */
+	  fprintf(out,"\t\texceed_limit;\n");	  
+          break;
+        case '<':        /* can idle */
+	  fprintf(out,"\t\tcan_idle;\n");	  
+          break;
+        default:
+          return tmp;
+        }
+    }
+  return tmp;
 }
