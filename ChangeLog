@@ -1,3 +1,16 @@
+leeh        2005/02/11 11:05:20 EST	(20050211_0)
+
+  Modified files:
+    src                  s_userserv.c 
+  Log:
+  - remove special services oper privs from US::INFO, move them into
+    US::USERINFO
+  
+  Revision  Changes    Path
+  1.51      +81 -56    rserv/src/s_userserv.c
+
+
+
 leeh        2005/02/09 13:06:38 EST	(20050209_1)
 
   Modified files:
