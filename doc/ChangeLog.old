@@ -1,3 +1,7 @@
+*** 20010224_5 by fl_
+- Added riedel's ircd-dutch.po translation to the tree, updated makefile
+
+
 *** 20010224_4 by toot
 fixed modules="..."; in ircd.conf
 
