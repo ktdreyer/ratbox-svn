@@ -312,11 +312,11 @@ void	newconf_init()
 
 	add_top_conf("auth", conf_begin_auth, conf_end_auth);
 	add_conf_item("auth", "user", CF_QSTRING, conf_set_auth_user);
-	add_conf_item("auth", "passwd", CF_QSTRING, conf_set_auth_passwd);
+	add_conf_item("auth", "password", CF_QSTRING, conf_set_auth_passwd);
 	add_conf_item("auth", "class", CF_QSTRING, conf_set_auth_class);
 	add_conf_item("auth", "kline_exempt", CF_YESNO, conf_set_auth_kline_exempt);
 	add_conf_item("auth", "have_ident", CF_YESNO, conf_set_auth_have_ident);
-	add_conf_item("auth", "is_restricted", CF_YESNO,
+	add_conf_item("auth", "restricted", CF_YESNO,
 			conf_set_auth_is_restricted);
 	add_conf_item("auth", "exceed_limit", CF_YESNO,
 			conf_set_auth_exceed_limit);
@@ -325,8 +325,8 @@ void	newconf_init()
 	add_conf_item("auth", "spoof", CF_QSTRING, conf_set_auth_spoof);
 	add_conf_item("auth", "spoof_notice", CF_YESNO, conf_set_auth_spoof_notice);
 	add_conf_item("auth", "flood_exempt", CF_YESNO, conf_set_auth_flood_exempt);
-	add_conf_item("auth", "redir_serv", CF_YESNO, conf_set_auth_redir_serv);
-	add_conf_item("auth", "redir_port", CF_YESNO, conf_set_auth_redir_port);
+	add_conf_item("auth", "redirserv", CF_YESNO, conf_set_auth_redir_serv);
+	add_conf_item("auth", "redirport", CF_YESNO, conf_set_auth_redir_port);
 	
 	add_top_conf("resv", conf_begin_resv, conf_end_resv);
 	add_conf_item("resv", "reason", CF_QSTRING, conf_set_resv_reason);
