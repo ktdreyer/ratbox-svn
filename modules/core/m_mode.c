@@ -45,13 +45,23 @@
 #include "sprintf_irc.h"
 
 static int m_mode(struct Client *, struct Client *, int, const char **);
+static int ms_tmode(struct Client *, struct Client *, int, const char **);
+static int ms_bmask(struct Client *, struct Client *, int, const char **);
 
 struct Message mode_msgtab = {
 	"MODE", 0, 0, 2, 0, MFLG_SLOW, 0,
 	{m_unregistered, m_mode, m_mode, m_mode}
 };
+struct Message tmode_msgtab = {
+	"TMODE", 0, 0, 4, 0, MFLG_SLOW, 0,
+	{m_ignore, m_ignore, ms_tmode, m_ignore}
+};
+struct Message bmask_msgtab = {
+	"BMASK", 0, 0, 5, 0, MFLG_SLOW, 0,
+	{m_ignore, m_ignore, ms_bmask, m_ignore}
+};
 
-mapi_clist_av1 mode_clist[] = { &mode_msgtab, NULL };
+mapi_clist_av1 mode_clist[] = { &mode_msgtab, &tmode_msgtab, &bmask_msgtab, NULL };
 DECLARE_MODULE_AV1(mode, NULL, NULL, mode_clist, NULL, NULL, "$Revision$");
 
 /* bitmasks for error returns, so we send once per call */
@@ -69,6 +79,9 @@ DECLARE_MODULE_AV1(mode, NULL, NULL, mode_clist, NULL, NULL, "$Revision$");
 static void set_channel_mode(struct Client *, struct Client *,
 			     struct Channel *, struct membership *,
 			     int, const char **);
+
+static int add_id(struct Client *source_p, struct Channel *chptr, 
+		  const char *banid, dlink_list *list, long mode_type);
 
 static struct ChModeChange mode_changes[BUFSIZE];
 static int mode_count;
@@ -158,6 +171,186 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	return 0;
 }
 
+static int
+ms_tmode(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	struct Channel *chptr = NULL;
+	struct membership *msptr;
+
+	if(EmptyString(parv[3]))
+	{
+		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+			   me.name, source_p->id, "TMODE");
+		return 0;
+	}
+
+	/* Now, try to find the channel in question */
+	if(!IsChanPrefix(parv[2][0]) || !check_channel_name(parv[2]))
+	{
+		sendto_one(source_p, form_str(ERR_BADCHANNAME),
+			   me.name, source_p->id, (unsigned char *) parv[2]);
+		return 0;
+	}
+
+	chptr = find_channel(parv[2]);
+
+	if(chptr == NULL)
+	{
+		sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
+			   me.name, source_p->id, parv[2]);
+		return 0;
+	}
+
+	/* TS is higher, drop it. */
+	if(atol(parv[1]) > chptr->channelts)
+		return 0;
+
+	if(IsServer(source_p))
+	{
+		set_channel_mode(client_p, source_p, chptr, NULL,
+				 parc - 2, parv + 2);
+	}
+	else
+	{
+		msptr = find_channel_membership(chptr, source_p);
+
+		if(is_deop(msptr))
+			return 0;
+
+		set_channel_mode(client_p, source_p, chptr, msptr, 
+			         parc - 2, parv + 2);
+	}
+
+	return 0;
+}
+
+static int
+ms_bmask(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	static char modebuf[BUFSIZE];
+	static char parabuf[BUFSIZE];
+	struct Channel *chptr;
+	dlink_list *banlist;
+	const char *s;
+	char *t;
+	char *mbuf;
+	char *pbuf;
+	long mode_type;
+	int mlen;
+	int plen = 0;
+	int tlen;
+	int modecount = 0;
+	int needcap = NOCAPS;
+
+	if(!IsServer(source_p) || EmptyString(parv[4]))
+		return 0;
+
+	if(!IsChanPrefix(parv[2][0]) || !check_channel_name(parv[2]))
+		return 0;
+
+	if((chptr = find_channel(parv[2])) == NULL)
+		return 0;
+
+	/* TS is higher, drop it. */
+	if(atol(parv[1]) > chptr->channelts)
+		return 0;
+
+	switch(parv[3][0])
+	{
+		case 'b':
+			banlist = &chptr->banlist;
+			mode_type = CHFL_BAN;
+			break;
+
+		case 'e':
+			banlist = &chptr->exceptlist;
+			mode_type = CHFL_EXCEPTION;
+			needcap = CAP_EX;
+			break;
+
+		case 'I':
+			banlist = &chptr->invexlist;
+			mode_type = CHFL_INVEX;
+			needcap = CAP_IE;
+			break;
+
+		/* maybe we should just blindly propagate this? */
+		default:
+			return 0;
+	}
+
+	parabuf[0] = '\0';
+	s = LOCAL_COPY(parv[4]);
+
+	mlen = ircsprintf(modebuf, ":%s MODE %s +",
+			  source_p->name, chptr->chname);
+	mbuf = modebuf + mlen;
+	pbuf = parabuf;
+
+	if((t = strchr(s, ' ')) != NULL)
+		*t++ = '\0';
+
+	while(s != NULL)
+	{
+		tlen = strlen(s);
+
+		/* I dont even want to begin parsing this.. */
+		if(tlen > MODEBUFLEN)
+			break;
+
+		if(add_id(source_p, chptr, s, banlist, mode_type))
+		{
+			/* this new one wont fit.. */
+			if(mlen + MAXMODEPARAMS + plen + tlen > BUFSIZE - 4 ||
+			   modecount >= MAXMODEPARAMS)
+			{
+				*mbuf = '\0';
+				*(pbuf - 1) = '\0';
+				sendto_channel_local(ALL_MEMBERS, chptr, "%s %s",
+						     modebuf, parabuf);
+				sendto_server(client_p, chptr, needcap, CAP_TS6,
+					      "%s %s", modebuf, parabuf);
+
+				mbuf = modebuf + mlen;
+				pbuf = parabuf;
+				plen = modecount = 0;
+			}
+
+			*mbuf++ = parv[3][0];
+			plen = ircsprintf(pbuf, "%s ", s);
+			pbuf += plen;
+			modecount++;
+		}
+
+		s = t;
+
+		if(s != NULL)
+		{
+			/* trailing space marking the end. */
+			if(*s == '\0')
+				break;
+
+			if((t = strchr(s, ' ')) != NULL)
+				*t++ = '\0';
+		}
+	}
+
+	if(modecount)
+	{
+		*mbuf = '\0';
+		*(pbuf - 1) = '\0';
+		sendto_channel_local(ALL_MEMBERS, chptr, "%s %s",
+				     modebuf, parabuf);
+		sendto_server(client_p, chptr, needcap, CAP_TS6,
+			      "%s %s", modebuf, parabuf);
+	}
+
+	sendto_server(client_p, chptr, CAP_TS6|needcap, NOCAPS,
+		      ":%s BMASK %lu %s %s :%s",
+		      source_p->id, chptr->channelts, chptr->chname,
+		      parv[3], parv[4]);
+	return 0;
+}
 
 /* add_id()
  *
@@ -458,7 +651,7 @@ chm_simple(struct Client *source_p, struct Channel *chptr,
 	   struct membership *msptr, int parc, int *parn,
 	   const char **parv, int *errors, int dir, char c, long mode_type)
 {
-	if(!is_chanop(msptr))
+	if(!IsServer(source_p) && !is_chanop(msptr))
 	{
 		if(!(*errors & SM_ERR_NOOPS))
 			sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
@@ -596,7 +789,7 @@ chm_ban(struct Client *source_p, struct Channel *chptr,
 		return;
 	}
 
-	if(!is_chanop(msptr))
+	if(!IsServer(source_p) && !is_chanop(msptr))
 	{
 		if(!(*errors & SM_ERR_NOOPS))
 			sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
@@ -671,7 +864,7 @@ chm_op(struct Client *source_p, struct Channel *chptr,
 	const char *opnick;
 	struct Client *targ_p;
 
-	if(!is_chanop(msptr))
+	if(!IsServer(source_p) && !is_chanop(msptr))
 	{
 		if(!(*errors & SM_ERR_NOOPS))
 			sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
@@ -765,7 +958,7 @@ chm_voice(struct Client *source_p, struct Channel *chptr,
 	const char *opnick;
 	struct Client *targ_p;
 
-	if(!is_chanop(msptr))
+	if(!IsServer(source_p) && !is_chanop(msptr))
 	{
 		if(!(*errors & SM_ERR_NOOPS))
 			sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
@@ -844,7 +1037,7 @@ chm_limit(struct Client *source_p, struct Channel *chptr,
 	static char limitstr[30];
 	int limit;
 
-	if(!is_chanop(msptr))
+	if(!IsServer(source_p) && !is_chanop(msptr))
 	{
 		if(!(*errors & SM_ERR_NOOPS))
 			sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
@@ -900,7 +1093,7 @@ chm_key(struct Client *source_p, struct Channel *chptr,
 {
 	char *key;
 
-	if(!is_chanop(msptr))
+	if(!IsServer(source_p) && !is_chanop(msptr))
 	{
 		if(!(*errors & SM_ERR_NOOPS))
 			sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),

@@ -963,24 +963,25 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 	int cap;
 	int nocap;
 
-	mc = 0;
-	nc = 0;
-	pbl = 0;
-	parabuf[0] = 0;
-	dir = MODE_QUERY;
-
 	/* Now send to servers... */
 	for (j = 0; j < NCHCAP_COMBOS; j++)
 	{
 		if(chcap_combos[j].count == 0)
 			continue;
 
+		mc = 0;
+		nc = 0;
+		pbl = 0;
+		parabuf[0] = 0;
+		dir = MODE_QUERY;
+
 		cap = chcap_combos[j].cap_yes;
 		nocap = chcap_combos[j].cap_no;
 
 		if(cap & CAP_TS6)
-			mbl = ircsprintf(modebuf, ":%s MODE %s ",
-					 use_id(source_p), chptr->chname);
+			mbl = ircsprintf(modebuf, ":%s TMODE %lu %s ",
+					 use_id(source_p), chptr->channelts,
+					 chptr->chname);
 		else
 			mbl = ircsprintf(modebuf, ":%s MODE %s ",
 					 source_p->name, chptr->chname);
@@ -1020,8 +1021,9 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 				mc = 0;
 
 				if(cap & CAP_TS6)
-					mbl = ircsprintf(modebuf, ":%s MODE %s ",
-							 use_id(source_p), chptr->chname);
+					mbl = ircsprintf(modebuf, ":%s TMODE %lu %s ",
+							 use_id(source_p), chptr->channelts,
+							 chptr->chname);
 				else
 					mbl = ircsprintf(modebuf, ":%s MODE %s ",
 							 source_p->name, chptr->chname);
