@@ -1,3 +1,53 @@
+leeh        2003/08/15 17:55:16 EDT	(20030815_0)
+
+  Modified files:
+    include              numeric.h 
+    modules              m_accept.c m_away.c m_challenge.c 
+                         m_close.c m_etrace.c m_info.c m_invite.c 
+                         m_ison.c m_join.c m_links.c m_names.c 
+                         m_oper.c m_rehash.c m_stats.c m_time.c 
+                         m_topic.c m_trace.c m_userhost.c 
+                         m_users.c m_version.c m_who.c m_whois.c 
+                         m_whowas.c 
+    modules/core         m_message.c m_mode.c 
+    src                  adns.c cache.c messages.tab s_user.c 
+  Log:
+  - more numerics cleanup for TS6.  Done upto the start of the errors..
+  
+  Revision  Changes    Path
+  7.40      +0 -1      ircd-ratbox/include/numeric.h
+  1.138     +3 -3      ircd-ratbox/modules/core/m_message.c
+  1.87      +43 -10    ircd-ratbox/modules/core/m_mode.c
+  1.51      +5 -3      ircd-ratbox/modules/m_accept.c
+  1.50      +4 -3      ircd-ratbox/modules/m_away.c
+  1.60      +5 -4      ircd-ratbox/modules/m_challenge.c
+  1.38      +3 -3      ircd-ratbox/modules/m_close.c
+  1.6       +2 -2      ircd-ratbox/modules/m_etrace.c
+  1.92      +39 -59    ircd-ratbox/modules/m_info.c
+  1.73      +5 -4      ircd-ratbox/modules/m_invite.c
+  1.46      +2 -2      ircd-ratbox/modules/m_ison.c
+  1.136     +3 -3      ircd-ratbox/modules/m_join.c
+  1.55      +9 -10     ircd-ratbox/modules/m_links.c
+  1.74      +5 -3      ircd-ratbox/modules/m_names.c
+  1.74      +2 -2      ircd-ratbox/modules/m_oper.c
+  1.72      +2 -2      ircd-ratbox/modules/m_rehash.c
+  1.175     +34 -26    ircd-ratbox/modules/m_stats.c
+  1.41      +5 -3      ircd-ratbox/modules/m_time.c
+  1.80      +5 -5      ircd-ratbox/modules/m_topic.c
+  1.84      +10 -6     ircd-ratbox/modules/m_trace.c
+  1.53      +2 -2      ircd-ratbox/modules/m_userhost.c
+  1.39      +17 -15    ircd-ratbox/modules/m_users.c
+  1.58      +10 -10    ircd-ratbox/modules/m_version.c
+  1.101     +13 -7     ircd-ratbox/modules/m_who.c
+  1.125     +30 -32    ircd-ratbox/modules/m_whois.c
+  1.43      +14 -9     ircd-ratbox/modules/m_whowas.c
+  7.61      +2 -1      ircd-ratbox/src/adns.c
+  1.6       +4 -4      ircd-ratbox/src/cache.c
+  7.94      +34 -36    ircd-ratbox/src/messages.tab
+  7.287     +39 -36    ircd-ratbox/src/s_user.c
+
+
+
 leeh        2003/08/13 21:24:11 EDT	(20030814_1)
 
   Modified files:
