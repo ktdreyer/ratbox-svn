@@ -113,7 +113,8 @@ static int zero_fd = -1;
  *		 future allocations.
  */
  
-void initBlockHeap(void)
+void
+initBlockHeap(void)
 {
   zero_fd = open("/dev/zero", O_RDWR);
 
@@ -130,12 +131,15 @@ void initBlockHeap(void)
  * Output: Pointer to new block
  * Side Effects: None
  */
-static inline void *get_block(size_t size)
+static inline void *
+get_block(size_t size)
 {
   void *ptr;
   ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE, zero_fd, 0);
   if(ptr == MAP_FAILED)
-  	ptr = NULL;
+    {
+      ptr = NULL;
+    }
   return(ptr);
 }
 #else /* MAP_ANON */ 
@@ -147,7 +151,8 @@ static inline void *get_block(size_t size)
  * Input: None
  * Output: None
  */ 
-void initBlockHeap(void)
+void
+initBlockHeap(void)
 {
   return;
 }
@@ -161,12 +166,15 @@ void initBlockHeap(void)
  * Side Effects: None
  */
 
-static inline void *get_block(size_t size)
+static inline void *
+get_block(size_t size)
 {
   void *ptr;
   ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
   if(ptr == MAP_FAILED)
-  	ptr = NULL;
+    {
+      ptr = NULL;
+    }
   return(ptr);
 }
 
@@ -182,7 +190,8 @@ static inline void *get_block(size_t size)
  * Input: Size of block
  * Output: Pointer to the memory
  */
-static inline void *get_block(size_t size)
+static inline void *
+get_block(size_t size)
 {
   return(malloc(size));
 }
@@ -195,7 +204,8 @@ static inline void *get_block(size_t size)
  * Side Effects: Returns memory for the block back to the malloc heap
  */
 
-static inline void free_block(void *ptr, size_t unused)
+static inline void 
+free_block(void *ptr, size_t unused)
 {
   free(ptr);
 }
@@ -208,7 +218,8 @@ static inline void free_block(void *ptr, size_t unused)
  * Output: None
  */ 
 
-void initBlockHeap()
+void
+initBlockHeap()
 {
   return;
 
@@ -228,7 +239,8 @@ void initBlockHeap()
 /*    0 if successful, 1 if not                                             */
 /* ************************************************************************ */
 
-static int newblock(BlockHeap * bh)
+static int
+newblock(BlockHeap * bh)
 {
     MemBlock *newblk;
     Block *b;
@@ -238,7 +250,9 @@ static int newblock(BlockHeap * bh)
     /* Setup the initial data structure. */
     b = (Block *) calloc(1, sizeof(Block));
     if (b == NULL)
-        return 1;
+      {
+        return(1);
+      }
     b->freeElems = bh->elemsPerBlock;
     b->free_list.head = b->free_list.tail = NULL;
     b->used_list.head = b->used_list.tail = NULL;
@@ -249,7 +263,7 @@ static int newblock(BlockHeap * bh)
     b->elems = get_block(b->alloc_size);
     if (b->elems == NULL)
       {
-        return 1;
+        return(1);
       }
     offset = b->elems;
     /* Setup our blocks now */
@@ -268,7 +282,7 @@ static int newblock(BlockHeap * bh)
     bh->freeElems += bh->elemsPerBlock;
     bh->base = b;
 
-    return 0;
+    return(0);
 }
 
 
@@ -287,7 +301,8 @@ static int newblock(BlockHeap * bh)
 /* Returns:                                                                 */
 /*   Pointer to new BlockHeap, or NULL if unsuccessful                      */
 /* ************************************************************************ */
-BlockHeap *BlockHeapCreate(size_t elemsize, int elemsperblock)
+BlockHeap *
+BlockHeapCreate(size_t elemsize, int elemsperblock)
 {
     BlockHeap *bh;
     assert(elemsize > 0 && elemsperblock > 0);
@@ -308,6 +323,12 @@ BlockHeap *BlockHeapCreate(size_t elemsize, int elemsperblock)
 #ifdef MEMDEBUG
     elemsize += sizeof(MemoryEntry);
 #endif
+    if((elemsize % sizeof(void *)) != 0)
+      {
+	/* Pad to even pointer boundary */
+	elemsize += sizeof(void *);
+	elemsize &= ~(sizeof(void *) - 1);
+      }
 
     bh->elemSize = elemsize;
     bh->elemsPerBlock = elemsperblock;
@@ -328,7 +349,7 @@ BlockHeap *BlockHeapCreate(size_t elemsize, int elemsperblock)
         outofmemory();          /* die.. out of memory */
       }
 
-    return bh;
+    return(bh);
 }
 
 /* ************************************************************************ */
@@ -343,14 +364,17 @@ BlockHeap *BlockHeapCreate(size_t elemsize, int elemsperblock)
 /*    Pointer to a structure (void *), or NULL if unsuccessful.             */
 /* ************************************************************************ */
 
-void *_BlockHeapAlloc(BlockHeap * bh)
+void *
+_BlockHeapAlloc(BlockHeap * bh)
 {
     Block *walker;
     dlink_node *new_node;
 
     assert(bh != NULL);
     if (bh == NULL)
-        return ((void *) NULL);
+      {
+        return(NULL);
+      }
 
     if (bh->freeElems == 0)
       {   
@@ -384,7 +408,7 @@ void *_BlockHeapAlloc(BlockHeap * bh)
 	  }
       }
     assert(0 == 1);
-    return ((void *) NULL);     /* If you get here, something bad happened ! */
+    return(NULL);     /* If you get here, something bad happened ! */
 }
 
 
@@ -399,7 +423,8 @@ void *_BlockHeapAlloc(BlockHeap * bh)
 /* Returns:                                                                 */
 /*    0 if successful, 1 if element not contained within BlockHeap.         */
 /* ************************************************************************ */
-int _BlockHeapFree(BlockHeap * bh, void *ptr)
+int
+_BlockHeapFree(BlockHeap * bh, void *ptr)
 {
     Block *block;
     struct MemBlock *memblock;
@@ -411,13 +436,13 @@ int _BlockHeapFree(BlockHeap * bh, void *ptr)
       {
 
         ilog(L_NOTICE, "balloc.c:BlockHeapFree() bh == NULL");
-        return 1;
+        return(1);
       }
 
     if (ptr == NULL)
       {
         ilog(L_NOTICE, "balloc.BlockHeapFree() ptr == NULL");
-        return 1;
+        return(1);
       }
 
     memblock = (void *)((size_t)ptr - sizeof(MemBlock));
@@ -435,7 +460,7 @@ int _BlockHeapFree(BlockHeap * bh, void *ptr)
     mem_frob(ptr, bh->elemSize);
     dlinkDelete(&memblock->self, &block->used_list);
     dlinkAdd(ptr, &memblock->self, &block->free_list);
-    return 0;
+    return(0);
 }
 
 /* ************************************************************************ */
@@ -450,17 +475,20 @@ int _BlockHeapFree(BlockHeap * bh, void *ptr)
 /* Returns:                                                                 */
 /*   0 if successful, 1 if bh == NULL                                       */
 /* ************************************************************************ */
-int BlockHeapGarbageCollect(BlockHeap * bh)
+int
+BlockHeapGarbageCollect(BlockHeap * bh)
 {
     Block *walker, *last;
 
     if (bh == NULL)
-        return 1;
+      {
+        return(1);
+      }
 
     if (bh->freeElems < bh->elemsPerBlock || bh->blocksAllocated == 1)
       {
         /* There couldn't possibly be an entire free block.  Return. */
-        return 0;
+        return(0);
       }
 
     last = NULL;
@@ -494,7 +522,7 @@ int BlockHeapGarbageCollect(BlockHeap * bh)
             walker = walker->next;
 	  }
       }
-    return 0;
+    return(0);
 }
 
 /* ************************************************************************ */
@@ -507,22 +535,28 @@ int BlockHeapGarbageCollect(BlockHeap * bh)
 /* Returns:                                                                 */
 /*   0 if successful, 1 if bh == NULL                                       */
 /* ************************************************************************ */
-int BlockHeapDestroy(BlockHeap * bh)
+int
+BlockHeapDestroy(BlockHeap * bh)
 {
     Block *walker, *next;
 
     if (bh == NULL)
-        return 1;
+      {
+        return(1);
+      }
 
     for (walker = bh->base; walker != NULL; walker = next)
       {
         next = walker->next;
         free_block(walker->elems, walker->alloc_size);
-        if(walker)
+        if(walker != NULL)
           free(walker);
       }
-    if(walker)
-      free(bh);
-    return 0;
+
+    if(walker != NULL)
+      {
+	free(bh);
+      }
+    return(0);
 }
 #endif
