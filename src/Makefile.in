@@ -68,7 +68,6 @@ BASE_SRCS =                     \
   irc_string.c                  \
   ircd.c                        \
   ircd_signal.c                 \
-#  ircdauth.c                    \
   kdparse.c			\
   linebuf.c                     \
   list.c                        \
@@ -103,6 +102,7 @@ BASE_SRCS =                     \
   sprintf_irc.c                 \
   tools.c                       \
   whowas.c
+#  ircdauth.c                    \
 
 SRCS = ${BASE_SRCS}
 
