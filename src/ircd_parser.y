@@ -357,14 +357,26 @@ logging_gline_log:	GLINE_LOG '=' QSTRING ';'
                           yylval.string = (char *)NULL;
                         };
 
-logging_log_level:	LOG_LEVEL '='
-                          T_L_CRIT { set_log_level(L_CRIT); };
-                        | T_L_ERROR { set_log_level(L_ERROR); };
-                        | T_L_WARN {set_log_level(L_WARN); };
-                        | T_L_NOTICE {set_log_level(L_NOTICE); };
-                        | T_L_TRACE {set_log_level(L_TRACE); };
-                        | T_L_INFO {set_log_level(L_INFO); };
-                        | T_L_DEBUG {set_log_level(L_DEBUG); }; ';'
+logging_log_level:     LOG_LEVEL '=' T_L_CRIT ';'
+  { set_log_level(L_CRIT); }
+                       |
+                       LOG_LEVEL '=' T_L_ERROR ';'
+  { set_log_level(L_ERROR); }
+                       |
+                       LOG_LEVEL '=' T_L_WARN ';'
+  { set_log_level(L_WARN); }
+                       |
+                       LOG_LEVEL '=' T_L_NOTICE ';'
+  { set_log_level(L_NOTICE); }
+                       |
+                       LOG_LEVEL '=' T_L_TRACE ';'
+  { set_log_level(L_TRACE); }
+                       |
+                       LOG_LEVEL '=' T_L_INFO ';'
+  { set_log_level(L_INFO); }
+                       |
+                       LOG_LEVEL '=' T_L_DEBUG ';'
+  { set_log_level(L_DEBUG); };
 
 /***************************************************************************
  * oper section

@@ -5,9 +5,13 @@ PREFIXES
 ========
 
   Server prefixes are the ":%s" strings at the beginning of messages.
-They are used to route the message properly and by local clients to
-update their idea of who is whom. Typical prefix for a local client to
-a channel:
+They are used by servers to route the message properly and by servers to
+local clients to update their idea of who is whom.
+
+":nick!user@host" is a prefix ":name" where name is either a nick
+or name of a server is another valid prefix.
+
+Typical prefix for a local client to a channel:
 
 ":Dianora!db@irc.db.net"
 
@@ -34,6 +38,16 @@ onus of the prefix generation, is the users, not hidden in send.c
 This allows somewhat faster code to be written, as the prefix doesn't
 have to be regenerated over and over again.
 
+  Prefixes aren't sent in all cases, such as a new user using NICK
+A prefix is needed when it must be routed.
+
+i.e.
+
+NICK newnick
+
+  There is obviously no prefix needed from a locally connected client.
+
+
 
 FUNCTIONS
 =========
@@ -59,7 +73,7 @@ sendto_one()    - Should be used for _local_ clients only
                              acptr->name);
 
 sendto_channel_butone()
-                - This function sends a var args message to a channel globally
+                - This function sends a var args message to a channel globally,
                   except to the client specified as "one", the prefix
                   is built by this function on the fly as it has to
                   be sent both to local clients on this server and to
@@ -199,6 +213,14 @@ sendto_format() - Used to format a varargs buffer into given buffer
                   usage - sendto_format(char *sendbuf,
                                         const char *pattern, ... );
 
+send_trim()     - This local function simply trims a char string
+                  to fit inside 512 bytes as per rfc1459 adding
+                  a cr/lf pair as needed. It does not check to make
+                  sure original string has a cr/lf.
+    
+                  usage - int send_trim(char buffer, int len);
+                  returns length as modified or not,
+                  modifies buffer in-place.
 
 sendto_list_local()
                 - This local function sends given message to given dlink_list
@@ -227,13 +249,5 @@ sendto_channel_members()
                                               const char *remote_sendbuf,
                                               int remote_len);
 
-send_trim()     - This local function simply trims a char string
-                  to fit inside 512 bytes as per rfc1459 adding
-                  a cr/lf pair as needed. It does not check to make
-                  sure original string has a cr/lf.
-    
-                  usage - int send_trim(char buffer, int len);
-                  returns length as modified or not,
-                  modifies buffer in-place.
 
 -- Diane Bruce 
