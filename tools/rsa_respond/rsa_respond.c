@@ -41,10 +41,10 @@ int open_socket( void )
 
   s.sun_family = AF_UNIX;
   strcpy( s.sun_path, name );
-  s.sun_len = SUN_LEN( &s ) + 1;
+  /* s.sun_len = SUN_LEN( &s ) + 1; */
 
   fd = socket( AF_UNIX, SOCK_STREAM, 0 );
-  if( connect( fd, (struct sockaddr *) &s, s.sun_len ) < 0 )
+  if( connect( fd, (struct sockaddr *) &s, SUN_LEN(&s)+1 ) < 0 )
   {
     close( fd );
     return -1;

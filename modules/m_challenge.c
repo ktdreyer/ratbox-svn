@@ -23,6 +23,7 @@
  *   $Id$
  */
 #include <stdlib.h>
+#include <string.h>
 #include "handlers.h"
 #include "client.h"
 #include "ircd.h"
@@ -33,6 +34,10 @@
 #include "rsa.h"
 #include "msg.h"
 #include "parse.h"
+#include "irc_string.h"
+#include "s_log.h"
+
+int oper_up( struct Client *sptr, struct ConfItem *aconf );
 
 #ifndef OPENSSL
 /* Maybe this should be an error or something?-davidt */
@@ -54,10 +59,11 @@ char *_version = "20001122";
 #else
 
 static int m_challenge(struct Client*, struct Client*, int, char**);
+void binary_to_hex( unsigned char * bin, char * hex, int length );
 
 /* We have openssl support, so include /CHALLENGE */
 struct Message challenge_msgtab = {
-  "CHALLENGE", 0, 0, 0, MFLG_SLOW, 0,
+  "CHALLENGE", 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_challenge, m_ignore, m_challenge}
 };
 
@@ -73,31 +79,77 @@ _moddeinit(void)
   mod_del_cmd(&challenge_msgtab);
 }
 
-/* isn't this cute? :) */
-#define DESRT_IDENTITY "1024 35 129898254114702764644161311398742945367211656239843407101360565864933766487482427601420598335314129357193904532215504249652048024499002590622257138142186907550826986726417399616128993705932451404433561862389005312041126460533080690966003918873462732636475035659370143015664222562459185971059059633407429578727"
-
 char *_version = "20001122";
 
 /*
  * m_challenge - generate RSA challenge for wouldbe oper
  * parv[0] = sender prefix
+ * parv[1] = operator to challenge for, or +response
  *
  */
 static int m_challenge( struct Client *cptr, struct Client *sptr,
                         int parc, char *parv[] )
 {
   char * challenge;
-
-  if( !(sptr->user) )
+  struct ConfItem *aconf;
+  if(!(sptr->user) || !sptr->localClient)
     return 0;
-
-  if( sptr->user->RSA_response )
-    MyFree( sptr->user->RSA_response );
-
-  generate_challenge( &challenge, &(sptr->user->RSA_response), DESRT_IDENTITY );
-  sendto_one( sptr, form_str( RPL_RSACHALLENGE ), me.name, parv[0], challenge );
-  MyFree( challenge );
-
+  if (*parv[1] == '+')
+    {
+     /* Ignore it if we aren't expecting this... -A1kmm */
+     if (!sptr->user->response)
+       return 0;
+     if (strcasecmp(sptr->user->response, ++parv[1]))
+       {
+        sendto_one(sptr, form_str(ERR_PASSWDMISMATCH), me.name,
+                   sptr->name);
+        return 0;
+       }
+     if (!(aconf = find_conf_by_name(sptr->user->auth_oper, CONF_OPERATOR)))
+       {
+        sendto_one (sptr, form_str(ERR_NOOPERHOST), me.name, parv[0]);
+        return 0;
+       }
+     /* Now make them an oper and tell the realops... */
+     oper_up(sptr, aconf);
+     log(L_TRACE, "OPER %s by %s!%s@%s",
+	     sptr->user->auth_oper, sptr->name, sptr->username, sptr->host);
+     log_oper(sptr, sptr->user->auth_oper);
+     MyFree(sptr->user->response);
+     MyFree(sptr->user->auth_oper);
+     sptr->user->response = NULL;
+     sptr->user->auth_oper = NULL;
+     return 0;
+    }
+  if (sptr->user->response)
+    MyFree(sptr->user->response);
+  if (sptr->user->auth_oper)
+    MyFree(sptr->user->auth_oper);
+  /* XXX - better get the host matching working sometime... */
+  if (!(aconf = find_conf_by_name (parv[1], CONF_OPERATOR))
+      /*|| !(match(sptr->host, aconf->host) ||
+           memcmp(&sptr->localClient->ip, &aconf->ip,
+                  sizeof(struct irc_inaddr)))*/)
+    {
+     sendto_one (sptr, form_str(ERR_NOOPERHOST), me.name, parv[0]);
+     return 0;
+    }
+  if (!strchr(aconf->passwd, ' '))
+    {
+     sendto_one (sptr, ":%s NOTICE %s :I'm sorry, PK authentication "
+                 "is not enabled for your oper{} block.", me.name,
+                 parv[0]);
+     return 0;
+    }
+  if (
+   !generate_challenge (&challenge, &(sptr->user->response), aconf->passwd)
+     )
+    {
+     sendto_one (sptr, form_str(RPL_RSACHALLENGE), me.name, parv[0],
+                 challenge);
+    }
+  DupString(sptr->user->auth_oper, aconf->name);
+  MyFree(challenge);
   return 0;
 }
 

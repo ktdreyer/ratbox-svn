@@ -80,7 +80,8 @@ struct User
   int            refcnt;        /* Number of times this block is referenced */
   int            joined;        /* number of channels joined */
   const char*    server;        /* pointer to scached server name */
-  char*          RSA_response;  /* expected response from client */
+  char*          response;  /* expected response from client */
+  char*          auth_oper; /* Operator to become if they supply the response.*/
 	/* client ID, unique ID per client */
 	char id[IDLEN + 1];
 };

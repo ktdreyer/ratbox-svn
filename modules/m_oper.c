@@ -46,7 +46,7 @@
 
 static struct ConfItem *find_password_aconf(char *name, struct Client *sptr);
 static int match_oper_password(char *password, struct ConfItem *aconf);
-static int oper_up( struct Client *sptr, struct ConfItem *aconf );
+int oper_up( struct Client *sptr, struct ConfItem *aconf );
 #ifdef CRYPT_OPER_PASSWORD
 extern        char *crypt();
 #endif /* CRYPT_OPER_PASSWORD */
@@ -259,76 +259,4 @@ static int match_oper_password(char *password,
     return YES;
   else
     return NO;
-}
-
-/*
- * oper_up
- *
- * inputs	- pointer to given client to oper
- *		- pointer to ConfItem to use
- * output	- none
- * side effects	-
- * Blindly opers up given sptr, using aconf info
- * all checks on passwords have already been done.
- * This could also be used by rsa oper routines. 
- */
-
-static int oper_up( struct Client *sptr,
-                    struct ConfItem *aconf )
-{
-  int old = (sptr->umodes & ALL_UMODES);
-  char *operprivs=NULL;
-  dlink_node *ptr;
-  struct ConfItem *found_aconf;
-  dlink_node *m;
-
-  SetOper(sptr);
-  if((int)aconf->hold)
-    {
-      sptr->umodes |= ((int)aconf->hold & ALL_UMODES); 
-      if( !IsSetOperN(sptr) )
-	sptr->umodes &= ~FLAGS_NCHANGE;
-      
-      sendto_one(sptr, ":%s NOTICE %s :*** Oper flags set from conf",
-		 me.name,sptr->name);
-    }
-  else
-    {
-      sptr->umodes |= (OPER_UMODES);
-    }
-	
-  SetIPHidden(sptr);
-  Count.oper++;
-
-  SetElined(sptr);
-      
-  m = make_dlink_node();
-  dlinkAdd(sptr,m,&oper_list);
-
-  if(sptr->localClient->confs.head)
-    {
-      ptr = sptr->localClient->confs.head;
-      if(ptr)
-	{
-	  found_aconf = ptr->data;
-	  if(found_aconf)
-	    operprivs = oper_privs_as_string(sptr,found_aconf->port);
-	}
-    }
-  else
-    operprivs = "";
-
-  if (IsSetOperAdmin(sptr))
-    sptr->umodes |= FLAGS_ADMIN;
-
-  sendto_realops_flags(FLAGS_ALL,
-		       "%s (%s@%s) is now an operator", sptr->name,
-		       sptr->username, sptr->host);
-  send_umode_out(sptr, sptr, old);
-  sendto_one(sptr, form_str(RPL_YOUREOPER), me.name, sptr->name);
-  sendto_one(sptr, ":%s NOTICE %s :*** Oper privs are %s", me.name,
-             sptr->name, operprivs);
-  SendMessageFile(sptr, &ConfigFileEntry.opermotd);
-  
-  return 1;
 }

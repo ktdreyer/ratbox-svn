@@ -39,7 +39,7 @@ static RSA * str_to_RSApublic( char * key );
 
 static void binary_to_hex( unsigned char * bin, char * hex, int length )
 {
-  char * trans = "0123456789abcdef";
+  char * trans = "0123456789ABCDEF";
   int i;
 
   for( i = 0; i < length; i++ )
@@ -106,42 +106,30 @@ static RSA * str_to_RSApublic( char * key )
 int generate_challenge( char **, char **, char*);
 int generate_challenge( char ** r_challenge, char ** r_response, char * key )
 {
-  unsigned char secret[32], session[16], response[16], *tmp;
-  char * key2;
-  int length, ret;
-  MD5_CTX m;
-  RSA * rsa;
-
-  key2 = MyMalloc( strlen( key ) + 1 );
-  strcpy( key2, key );
-  rsa = str_to_RSApublic( key2 );
-  MyFree( key2 );
-
-  if( !rsa )
-    return -1;
-
-  memset( session, 0, 16 );
-  get_randomness( secret, 32 );
-
-  MD5_Init( &m );
-  MD5_Update( &m, secret, 32 );
-  MD5_Update( &m, session, 16 );
-  MD5_Final( response, &m );
-
-  *r_response = MyMalloc( 33 );
-  binary_to_hex( response, *r_response, 16 );
-
-  length = RSA_size( rsa );
-  tmp = MyMalloc( length );
-  ret = RSA_public_encrypt( 32, secret, tmp, rsa, RSA_PKCS1_PADDING );
+  unsigned char secret[32], *tmp;
+  unsigned long length, ret;
+  char *nkey;
+  RSA *rsa;
+  DupString(nkey, key);
+  if (!(rsa = str_to_RSApublic(nkey)))
+    {
+     *r_challenge = NULL;
+     *r_response = NULL;
+     MyFree(nkey);
+     return -1;
+    }
+  MyFree(nkey);
+  get_randomness(secret, 32);
+  *r_response = MyMalloc(65);
+  binary_to_hex(secret, *r_response, 32);
+  length = RSA_size(rsa);
+  tmp = MyMalloc(length);
+  ret = RSA_public_encrypt(32, secret, tmp, rsa,
+                           RSA_PKCS1_PADDING);
   *r_challenge = MyMalloc( (length << 1) + 1 );
   binary_to_hex( tmp, *r_challenge, length );
-
-  memset( tmp, 0, length );
-  MyFree( tmp );
-  memset( secret, 0, 32 );
-  memset( response, 0, 16 );
-
+  (*r_challenge)[length<<1] = 0;
+  MyFree(tmp);
   return (ret<0)?-1:0;
 }
 
