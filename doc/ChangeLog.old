@@ -1,3 +1,8 @@
+*** 20001202_5 by toot
+. let unregistered clients use /admin, but non hunting
+. non-opers can do /time locally.
+
+
 *** 20001202_4 by toot
 fixed some compile errors/typos
 
