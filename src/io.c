@@ -160,7 +160,7 @@ read_io(void)
 				if(server_p->client_p != NULL && 
 				   IsDead(server_p->client_p))
 				{
-					slog("Connection to server %s lost: (Server exited)",
+					slog_send("Connection to server %s lost: (Server exited)",
 						server_p->name);
 					(server_p->io_close)(server_p);
 				}
@@ -169,7 +169,7 @@ read_io(void)
 				else if((server_p->flags & CONN_CONNECTING) &&
 					((server_p->first_time + 30) <= CURRENT_TIME))
 				{
-					slog("Connection to server %s timed out",
+					slog_send("Connection to server %s timed out",
 						server_p->name);
 					(server_p->io_close)(server_p);
 				}
@@ -300,7 +300,7 @@ read_io(void)
 }
 
 void
-connect_to_server(void *unused)
+connect_to_server(void *target_server)
 {
 	struct conf_server *conf_p;
 	struct connection_entry *conn_p;
@@ -310,21 +310,26 @@ connect_to_server(void *unused)
 	if(server_p != NULL)
 		return;
 
-	if(dlink_list_length(&conf_server_list) <= 0)
-		return;
+        if(target_server == NULL)
+        {
+                if(dlink_list_length(&conf_server_list) <= 0)
+                        return;
 
-	/* use the head of the list as our server */
-	ptr = conf_server_list.head;
-	conf_p = ptr->data;
+                /* use the head of the list as our server */
+                ptr = conf_server_list.head;
+                conf_p = ptr->data;
 
-	/* and move it to the tail if theres more than one */
-	if(dlink_list_length(&conf_server_list) > 1)
-	{
-		dlink_delete(ptr, &conf_server_list);
-		dlink_add_tail(conf_p, ptr, &conf_server_list);
-	}
+                /* and move it to the tail if theres more than one */
+                if(dlink_list_length(&conf_server_list) > 1)
+                {
+                        dlink_delete(ptr, &conf_server_list);
+                        dlink_add_tail(conf_p, ptr, &conf_server_list);
+                }
+        }
+        else
+                conf_p = target_server;
 
-	slog("Connection to server %s activated", conf_p->name);
+	slog_send("Connection to server %s activated", conf_p->name);
 
 	serv_fd = sock_open(conf_p->host, conf_p->port, conf_p->vhost, IO_HOST);
 
@@ -345,7 +350,7 @@ connect_to_server(void *unused)
 }
 
 void
-connect_to_client(const char *name, const char *host, int port)
+connect_to_client(struct client *client_p, const char *host, int port)
 {
 	struct connection_entry *conn_p;
 	int client_fd;
@@ -356,7 +361,10 @@ connect_to_client(const char *name, const char *host, int port)
 		return;
 
 	conn_p = my_malloc(sizeof(struct connection_entry));
-	conn_p->name = my_strdup(name);
+	conn_p->name = my_strdup(client_p->name);
+        conn_p->username = my_strdup(client_p->user->username);
+        conn_p->host = my_strdup(client_p->user->host);
+
 	conn_p->fd = client_fd;
 	conn_p->flags = CONN_CONNECTING;
 	conn_p->first_time = conn_p->last_time = CURRENT_TIME;
@@ -376,13 +384,13 @@ signon_server(struct connection_entry *conn_p)
 	conn_p->io_write = write_sendq;
 
 	/* ok, if connect() failed, this will cause an error.. */
-	sendto_server("PASS test TS");
+	sendto_server("PASS blah TS");
 
 	/* ..so we need to return. */
 	if(conn_p->flags & CONN_DEAD)
 		return -1;
 
-	slog("Connection to server %s completed", conn_p->name);
+	slog_send("Connection to server %s completed", conn_p->name);
 
 	sendto_server("CAPAB :QS TB");
 	sendto_server("SERVER %s 1 :%s", MYNAME, config_file.my_gecos);
@@ -405,6 +413,8 @@ signon_client(struct connection_entry *conn_p)
 	if(conn_p->flags & CONN_DEAD)
 		return -1;
 
+        sendto_connection(conn_p, "Please login via .login <username> <password>");
+
 	return 1;
 }
 
@@ -421,10 +431,10 @@ read_server(struct connection_entry *conn_p)
 		if(conn_p == server_p)
 		{
 			if(ignore_errno(errno))
-				slog("Connection to server %s lost",
+				slog_send("Connection to server %s lost",
 					conn_p->name);
 			else
-				slog("Connection to server %s lost: (Read error: %s)",
+				slog_send("Connection to server %s lost: (Read error: %s)",
 					conn_p->name, strerror(errno));
 		}
 
@@ -460,6 +470,10 @@ string_to_array(char *string, char *parv[MAXPARA])
 	int x = 1;
 
 	parv[x] = NULL;
+
+        if(EmptyString(string))
+                return x;
+
 	while (*buf == ' ')	/* skip leading spaces */
 		buf++;
 	if(*buf == '\0')	/* ignore all-space args */
@@ -556,13 +570,13 @@ parse_server(char *buf, int len)
 	{
 		*s++ = '\0';
 		ch = s;
+
+        	while(*ch == ' ')
+	        	ch++;
+
 	}
-
-	while(*ch == ' ')
-		ch++;
-
-	if(EmptyString(ch))
-		return;
+        else
+                ch = NULL;
 
 	parc = string_to_array(ch, parv);
 
@@ -593,25 +607,28 @@ parse_client(struct connection_entry *conn_p, char *buf, int len)
 
 	parv[0] = conn_p->name;
 
-	if(*ch == '.')
-		ch++;
+	if(*ch != '.')
+                return;
+
+        ch++;
 
 	if(EmptyString(ch))
 		return;
 
 	command = ch;
 
+        /* command with params? */
 	if((s = strchr(ch, ' ')) != NULL)
 	{
 		*s++ = '\0';
 		ch = s;
+
+        	while(*ch == ' ')
+	        	ch++;
+
 	}
-
-	while(*ch == ' ')
-		ch++;
-
-	if(EmptyString(ch))
-		return;
+        else
+                ch = NULL;
 
 	parc = string_to_array(ch, parv);
 
@@ -641,7 +658,7 @@ sendto_server(const char *format, ...)
 
 	if(sock_write(server_p, buf, strlen(buf)) < 0)
 	{
-		slog("Connection to server %s lost: (Write error: %s)",
+		slog_send("Connection to server %s lost: (Write error: %s)",
 			server_p->name, strerror(errno));
 		(server_p->io_close)(server_p);
 	}
@@ -664,6 +681,29 @@ sendto_connection(struct connection_entry *conn_p, const char *format, ...)
 
 	if(sock_write(conn_p, buf, strlen(buf)) < 0)
 		(conn_p->io_close)(conn_p);
+}
+
+void
+sendto_connections(const char *format, ...)
+{
+        struct connection_entry *conn_p;
+        char buf[BUFSIZE];
+        dlink_node *ptr;
+        va_list args;
+
+        va_start(args, format);
+        vsnprintf(buf, sizeof(buf)-3, format, args);
+        va_end(args);
+
+        DLINK_FOREACH(ptr, connection_list.head)
+        {
+                conn_p = ptr->data;
+
+                if(conn_p->oper == NULL)
+                        continue;
+
+                sendto_connection(conn_p, "%s", buf);
+        }
 }
 
 /* write_sendq()
@@ -747,7 +787,7 @@ sock_open(const char *host, int port, const char *vhost, int type)
 
 	if(fd < 0)
 	{
-		slog("Connection to %s/%d failed: (socket(): %s)",
+		slog_send("Connection to %s/%d failed: (socket(): %s)",
 			host, port, strerror(errno));
 		return -1;
 	}
@@ -759,7 +799,7 @@ sock_open(const char *host, int port, const char *vhost, int type)
 
 	if(fcntl(fd, F_SETFL, flags) == -1)
 	{
-		slog("Connection to %s/%d failed: (fcntl(): %s)",
+		slog_send("Connection to %s/%d failed: (fcntl(): %s)",
 			host, port, strerror(errno));
 		return -1;
 	}
@@ -782,7 +822,7 @@ sock_open(const char *host, int port, const char *vhost, int type)
 
 			if(bind(fd, (struct sockaddr *)&addr, sizeof(struct sockaddr)) < 0)
 			{
-				slog("Connection to %s/%d failed: (unable to bind to %s: %s)",
+				slog_send("Connection to %s/%d failed: (unable to bind to %s: %s)",
 					host, port, vhost, strerror(errno));
 				return -1;
 			}
@@ -797,7 +837,7 @@ sock_open(const char *host, int port, const char *vhost, int type)
 	{
 		if((host_addr = gethostbyname(host)) == NULL)
 		{
-			slog("Connection to %s/%d failed: (unable to resolve: %s)",
+			slog_send("Connection to %s/%d failed: (unable to resolve: %s)",
 				host, port, host);
 			return -1;
 		}

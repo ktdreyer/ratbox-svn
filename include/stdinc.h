@@ -40,6 +40,7 @@ extern int errno;
 #include <strings.h>
 
 #include <time.h>
+#include <sys/time.h>
 
 #include "config.h"
 #include "tools.h"

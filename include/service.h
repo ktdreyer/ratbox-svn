@@ -3,6 +3,7 @@
 #define INCLUDED_service_h
 
 struct client;
+struct connection_entry;
 
 struct service_handler
 {
@@ -14,6 +15,7 @@ struct service_handler
 	int opered;
 
 	void (*func)(struct client *, char *text);
+        void (*stats)(struct connection_entry *, char *parv[], int parc);
 };
 
 extern dlink_list service_list;

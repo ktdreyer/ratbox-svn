@@ -60,6 +60,7 @@ add_service(struct service_handler *service)
 	strlcpy(client_p->info, service->info, sizeof(client_p->info));
 	strlcpy(client_p->service->id, service->id, sizeof(client_p->service->id));
 	client_p->service->func = service->func;
+        client_p->service->stats = service->stats;
 
 	dlink_add(client_p, &client_p->listnode, &service_list);
 	add_client(client_p);

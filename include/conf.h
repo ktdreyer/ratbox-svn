@@ -2,6 +2,8 @@
 #ifndef INCLUDED_conf_h
 #define INCLUDED_conf_h
 
+struct connection_entry;
+
 #define MYNAME config_file.my_name
 
 extern void conf_parse(void);
@@ -24,13 +26,26 @@ struct conf_server
 {
 	char *name;
 	char *host;
-	char *rpass;
-	char *spass;
+	char *pass;
 	char *vhost;
 	int port;
 };
 
+struct conf_oper
+{
+        char *name;
+        char *username;
+        char *host;
+        char *pass;
+};
+
 extern struct _config_file config_file;
 extern dlink_list conf_server_list;
+extern dlink_list conf_oper_list;
+
+extern struct conf_server *find_conf_server(const char *name);
+
+extern struct conf_oper *find_oper(struct connection_entry *conn_p, const char *name);
+extern int is_conf_oper(const char *username, const char *host);
 
 #endif

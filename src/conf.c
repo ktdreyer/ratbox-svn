@@ -16,11 +16,13 @@
 
 struct _config_file config_file;
 dlink_list conf_server_list;
+dlink_list conf_oper_list;
 
 static void parse_servinfo(char *line);
 static void parse_admin(char *line);
 static void parse_connect(char *line);
 static void parse_service(char *line);
+static void parse_oper(char *line);
 
 static void
 conf_error_fatal(const char *format, ...)
@@ -86,6 +88,9 @@ conf_parse(void)
 			case 'S':
 				parse_service(line+2);
 				break;
+                        case 'O':
+                                parse_oper(line+2);
+                                break;
 			default:
 				conf_error("%c: unknown configuration type", line[0]);
 				break;
@@ -144,13 +149,12 @@ parse_connect(char *line)
 	const char *server_name = getfield(line);
 	const char *server_host = getfield(NULL);
 	const char *server_port = getfield(NULL);
-	const char *server_rpass = getfield(NULL);
-	const char *server_spass = getfield(NULL);
+	const char *server_pass = getfield(NULL);
 	const char *server_vhost = getfield(NULL);
 	int port;
 
-	if(EmptyString(server_name) || EmptyString(server_name) ||
-	   EmptyString(server_rpass) || EmptyString(server_spass))
+	if(EmptyString(server_name) || EmptyString(server_host) ||
+	   EmptyString(server_pass))
 	{
 		conf_error("C: missing field");
 		return;
@@ -159,16 +163,15 @@ parse_connect(char *line)
 	server = my_calloc(1, sizeof(struct conf_server));
 	server->name = my_strdup(server_name);
 	server->host = my_strdup(server_host);
-	server->rpass = my_strdup(server_rpass);
-	server->spass = my_strdup(server_spass);
+	server->pass = my_strdup(server_pass);
 
 	if(server_vhost != NULL)
 		server->vhost = my_strdup(server_vhost);
 
-	if((port = atoi(server_port)) == 0)
-		server->port = 6667;
-	else
+	if((port = atoi(server_port)))
 		server->port = port;
+	else
+		server->port = 6667;
 
 	dlink_add_tail_alloc(server, &conf_server_list);
 }
@@ -238,4 +241,109 @@ parse_service(char *line)
 		add_client(client_p);
 		introduce_service(client_p);
 	}
+}
+
+static void
+split_user_host(const char *userhost, const char **user, const char **host)
+{
+        static const char star[] = "*";
+        static char uh[USERHOSTLEN+1];
+        char *p;
+
+        strlcpy(uh, userhost, sizeof(uh));
+
+        if((p = strchr(uh, '@')) != NULL)
+        {
+                *p++ = '\0';
+                *user = &uh[0];
+                *host = p;
+        }
+        else
+        {
+                *user = star;
+                *host = userhost;
+        }
+}
+
+
+static void
+parse_oper(char *line)
+{
+        struct conf_oper *oper_p;
+        const char *o_host = getfield(line);
+        const char *o_pass = getfield(NULL);
+        const char *o_name = getfield(NULL);
+        const char *os_username;
+        const char *os_host;
+
+        if(EmptyString(o_host) || EmptyString(o_pass) ||
+           EmptyString(o_name))
+        {
+                conf_error("O: missing fields");
+                return;
+        }
+
+        split_user_host(o_host, &os_username, &os_host);
+
+        oper_p = my_malloc(sizeof(struct conf_oper));
+        oper_p->username = my_strdup(os_username);
+        oper_p->host = my_strdup(os_host);
+        oper_p->name = my_strdup(o_name);
+        oper_p->pass = my_strdup(o_pass);
+
+	dlink_add_alloc(oper_p, &conf_oper_list);
+}
+
+struct conf_server *
+find_conf_server(const char *name)
+{
+        struct conf_server *server;
+        dlink_node *ptr;
+
+        DLINK_FOREACH(ptr, conf_server_list.head)
+        {
+                server = ptr->data;
+
+                if(!strcasecmp(name, server->name))
+                        return server;
+        }
+
+        return NULL;
+}
+
+struct conf_oper *
+find_oper(struct connection_entry *conn_p, const char *name)
+{
+        struct conf_oper *oper_p;
+        dlink_node *ptr;
+
+        DLINK_FOREACH(ptr, conf_oper_list.head)
+        {
+                oper_p = ptr->data;
+
+                if(!strcasecmp(conn_p->username, oper_p->username) &&
+                   !strcasecmp(conn_p->host, oper_p->host) &&
+                   !strcasecmp(name, oper_p->name))
+                        return oper_p;
+        }
+
+        return NULL;
+}
+
+int
+is_conf_oper(const char *username, const char *host)
+{
+        struct conf_oper *oper_p;
+        dlink_node *ptr;
+
+        DLINK_FOREACH(ptr, conf_oper_list.head)
+        {
+                oper_p = ptr->data;
+
+                if(!strcasecmp(username, oper_p->username) &&
+                   !strcasecmp(host, oper_p->host))
+                        return 1;
+        }
+
+        return 0;
 }

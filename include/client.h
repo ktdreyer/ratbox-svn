@@ -4,6 +4,7 @@
 #define HOSTLEN 63
 #define REALLEN 50
 
+#define USERHOSTLEN (USERLEN + HOSTLEN + 1)
 #define NICKUSERHOSTLEN	(NICKLEN + USERLEN + HOSTLEN + 2)
 
 #define MAX_NAME_HASH 65536
@@ -11,6 +12,8 @@
 extern dlink_list user_list;
 extern dlink_list server_list;
 extern dlink_list exited_list;
+
+struct connection_entry;
 
 struct client
 {
@@ -60,6 +63,7 @@ struct service
 	int floodcount;
 
 	void (*func)(struct client *, char *text);
+        void (*stats)(struct connection_entry *, char *parv[], int parc);
 };
 
 #define IsServer(x) ((x)->server != NULL)

@@ -86,7 +86,7 @@ check_pidfile(void)
 			if(!kill(filepid, 0))
 			{
 				printf("ratbox-services: daemon already running\n");
-				exit(-1);
+//				exit(-1);
 			}
 		}
 

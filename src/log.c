@@ -9,6 +9,7 @@
 #include "rserv.h"
 #include "fileio.h"
 #include "log.h"
+#include "io.h"
 
 static FBFILE *logfile;
 
@@ -63,4 +64,18 @@ slog(const char *format, ...)
 
 	snprintf(buf2, sizeof(buf2), "%s %s\n", smalldate(), buf);
 	fbputs(buf2, logfile);
+}
+
+void
+slog_send(const char *format, ...)
+{
+        char buf[BUFSIZE];
+        va_list args;
+
+        va_start(args, format);
+        vsnprintf(buf, sizeof(buf), format, args);
+        va_end(args);
+
+        slog("%s", buf);
+        sendto_connections("%s", buf);
 }

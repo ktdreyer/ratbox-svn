@@ -39,9 +39,11 @@
 static struct client *alis_p;
 
 static void s_alis(struct client *, char *text);
+static void s_alis_stats(struct connection_entry *conn_p, char *parv[], int parc);
 
 static struct service_handler alis_service = {
-	"ALIS", "ALIS", "alis", "services.alis", "Advanced List Service", 0, &s_alis
+	"ALIS", "ALIS", "alis", "services.alis", "Advanced List Service", 0,
+        &s_alis, &s_alis_stats
 };
 
 static const char *help_list[] =
@@ -514,4 +516,10 @@ s_alis(struct client *client_p, char *text)
 		sendto_server(":%s NOTICE %s :End of output.", MYNAME, client_p->name);
 		return;
 	}
+}
+
+void
+s_alis_stats(struct connection_entry *conn_p, char *parv[], int parc)
+{
+        sendto_connection(conn_p, "ALIS Stats:");
 }

@@ -31,7 +31,7 @@ c_message(struct client *client_p, char *parv[], int parc)
 	/* ctcp.. doesnt matter who its addressed to. */
 	if(parv[2][0] == '\001')
 	{
-		if(!ClientOper(client_p))
+		if(!is_conf_oper(client_p->user->username, client_p->user->host))
 			return;
 
 		/* dcc request.. \001DCC CHAT chat <HOST> <IP>\001 */
@@ -87,7 +87,7 @@ c_message(struct client *client_p, char *parv[], int parc)
 				return;
 			}
 
-			connect_to_client(client_p->name, host, port);
+			connect_to_client(client_p, host, port);
 		}
 
 		return;
