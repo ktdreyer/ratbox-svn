@@ -1,3 +1,10 @@
+*** 20001014_9 by db
+- fixed bug in add_vchan_to_client_cache, reversed two args while at it
+- made m_privmsg message right channel 
+- m_join also has to update cache
+
+
+
 *** 20001014_8 by db
 - added code to remove chan from client cache, not used yet
 - added checks to ensure client doesn't join twice a subchan, not tested yet
