@@ -668,7 +668,7 @@ remove_ban_list(struct Channel *chptr, struct Client *source_p,
 
 	pbuf = lparabuf;
 
-	cur_len = mlen = ircsprintf(lmodebuf, ":%s MODE %s +", 
+	cur_len = mlen = ircsprintf(lmodebuf, ":%s MODE %s -", 
 				    source_p->name, chptr->chname);
 	mbuf = lmodebuf + mlen;
 
