@@ -80,7 +80,7 @@ static void     read_conf(FBFILE*);
 static void     read_kd_lines(FBFILE*);
 static void     clear_out_old_conf(void);
 static void     flush_deleted_I_P(void);
-static void     expire_tklines(struct ConfItem *);
+static void     expire_tklines(void);
 
 FBFILE* conf_fbfile_in;
 char    conf_line_in[256];
@@ -2049,10 +2049,7 @@ show_temp_klines(struct Client *sptr, struct ConfItem *tklist)
 void
 cleanup_tklines(void *notused)
 {
-  if (temporary_klines)
-    expire_tklines(temporary_klines);
-  if (temporary_ip_klines)
-    expire_tklines(temporary_ip_klines);
+  expire_tklines();
 
   eventAdd("cleanup_tklines", cleanup_tklines, NULL,
            CLEANUP_TKLINES_TIME, 0);
@@ -2066,13 +2063,13 @@ cleanup_tklines(void *notused)
  * side effects - expire tklines
  */
 static void
-expire_tklines(struct ConfItem *tklist)
+expire_tklines()
 {
   struct ConfItem *kill_ptr;
   struct ConfItem *last_ptr = NULL;
   struct ConfItem *next_ptr;
 
-  for (kill_ptr = tklist; kill_ptr; kill_ptr = next_ptr)
+  for (kill_ptr = temporary_klines; kill_ptr; kill_ptr = next_ptr)
     {
       next_ptr = kill_ptr->next;
 
@@ -2081,8 +2078,27 @@ expire_tklines(struct ConfItem *tklist)
           if (last_ptr != NULL)
             last_ptr->next = next_ptr;
           else
-            tklist->next = next_ptr;
+            temporary_klines->next = next_ptr;
  
+          free_conf(kill_ptr);
+        }
+      else
+        last_ptr = kill_ptr;
+    }
+
+  last_ptr = NULL;
+
+  for (kill_ptr = temporary_ip_klines; kill_ptr; kill_ptr = next_ptr)
+    {
+      next_ptr = kill_ptr->next;
+
+      if (kill_ptr->hold <= CurrentTime)
+        {
+          if (last_ptr != NULL)
+            last_ptr->next = next_ptr;
+          else
+            temporary_ip_klines->next = next_ptr;
+
           free_conf(kill_ptr);
         }
       else

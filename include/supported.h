@@ -26,6 +26,7 @@
 #include "ircd_defs.h"
 
 #define FEATURES "KNOCK"\
+                " VCHANS" \
                 " MODES=%i" \
                 " MAXCHANNELS=%i" \
                 " MAXBANS=%i" \
