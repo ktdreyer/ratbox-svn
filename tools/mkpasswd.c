@@ -14,13 +14,26 @@
 #include <time.h>
 #include <unistd.h>
 
+#ifdef VMS
+# include descrip
+# include psldef
+# include iodef
+# include ssdef
+# include starlet
+#endif
+
 #define FLAG_MD5     0x00000001
 #define FLAG_DES     0x00000002
 #define FLAG_SALT    0x00000004
 #define FLAG_PASS    0x00000008
 #define FLAG_LENGTH  0x00000010
 
+#ifdef VMS
+static char *getpass();
+#else
 extern char *getpass();
+#endif
+
 extern char *crypt();
 
 char *make_des_salt();
@@ -29,19 +42,6 @@ char *make_md5_salt_para(char *);
 void usage();
 static char saltChars[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./";
 
-#ifdef VMS
-static char *
-mygetpass(prompt)
-        char *prompt;
-{
-        static char line[100];
-
-        printf("warning: input will be echoed to screen.\n");
-        printf("%s", prompt);
-        fgets(line, sizeof(line), stdin);
-        return line;
-}
-#endif
 int main(int argc, char *argv[])
 {
   char *plaintext = NULL;
@@ -54,6 +54,11 @@ int main(int argc, char *argv[])
   int length = 8;
 
   srandom(time(NULL));
+
+#ifdef VMS
+  /* always use MD5 on VMS */
+  flag |= FLAG_MD5;
+#endif
 
   while( (c=getopt(argc, argv, "mdh?l:s:p:")) != -1)
   {
@@ -121,11 +126,7 @@ int main(int argc, char *argv[])
   }
   else
   {
-#ifndef VMS
     plaintext = getpass("plaintext: ");
-#else
-    plaintext = mygetpass("plaintext: ");
-#endif
   }
 
   printf("%s\n", crypt(plaintext, salt));
@@ -189,3 +190,36 @@ void usage()
   printf("Example: mkpasswd -m -s 3dr -p test\n");
   exit(0);
 }
+
+/* getpass replacement for VMS */
+#ifdef VMS
+
+static char *
+getpass (prompt)
+	char *prompt;
+{
+  static char password[64];
+  int result;
+  int chan;
+  int promptlen;
+
+  $DESCRIPTOR(devnam,"SYS$INPUT");
+
+  struct {
+     short result;
+     short count;
+     int   info;
+  } iosb;
+
+  promptlen = strlen(prompt);
+
+  SYS$ASSIGN(&devnam, &chan, PSL$C_USER, 0, 0);
+  SYS$QIOW(0, chan, IO$_READPROMPT | IO$M_PURGE | IO$M_NOECHO, &iosb, 0, 0,
+                    password, 255, 0, 0, prompt, promptlen);
+  password[iosb.count] = '\0';
+  SYS$DASSGN(chan);
+
+  printf("\r");
+  return password;
+}
+#endif
