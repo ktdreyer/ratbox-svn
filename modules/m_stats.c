@@ -54,11 +54,12 @@
 #include <string.h>
 
 static void m_stats(struct Client*, struct Client*, int, char**);
+static void mo_stats(struct Client*, struct Client*, int, char**);
 static void ms_stats(struct Client*, struct Client*, int, char**);
 
 struct Message stats_msgtab = {
   "STATS", 0, 2, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_stats, ms_stats, m_stats}
+  {m_unregistered, m_stats, ms_stats, mo_stats}
 };
 
 #ifndef STATIC_MODULES
@@ -92,11 +93,10 @@ static void stats_L_spy(struct Client *, char *, char *);
 /* Heres our struct for the stats table */
 struct StatsStruct
 {
-  char *name;
+  char letter;
   void (*handler)();
   int  need_oper;
   int  need_admin;
-  char letter;
 };
 
 static void stats_adns_servers(struct Client *);
@@ -131,51 +131,51 @@ static void stats_ltrace(struct Client *, int, char**);
  * case only matters in the stats letter column.. -- fl_ */
 static struct StatsStruct stats_cmd_table[] =
 {
-  /* name	function  	need_oper need_admin  letter	*/
-  { "ADNS",	stats_adns_servers, 	1,	1,	'a',	},
-  { "DNS",	stats_adns_servers,	1,	1,	'A',	},
-  { "CONNECT",	stats_connect,		1,	0,	'c',	},
-  { "",		stats_connect,		1,	0,	'C',	},
-  { "DENY",	stats_deny,		1,	0,	'd',	},
-  { "",		stats_deny,		1,	0,	'D',	},
-  { "EXEMPT",	stats_exempt,		1,	0,	'e',	},
-  { "EVENTS",	stats_events,		1,	1,	'E',	},
-  { "FDS",	stats_fd,		1,	1,	'f',	},
-  { "",		stats_fd,		1,	1,	'F',	},
-  { "GLINE",	stats_glines,		1,	0,	'g',	},
-  { "GLINES",	stats_glines,		1,	0,	'G',	},
-  { "HUB",	stats_hubleaf,		1,	0,	'h',	},
-  { "LEAF",	stats_hubleaf,		1,	0,	'H',	},
-  { "AUTH",	stats_auth,		1,	0,	'i',	},
-  { "",		stats_auth,		1,	0,	'I',	},
-  { "TKLINE",	stats_tklines,		1,	0,	'k',	},
-  { "KLINE",	stats_klines,		1,	0,	'K',	},
-  { "LTRACE",	stats_ltrace,		1,	0,	'l',	},
-  { "",		stats_ltrace,		1,	0,	'L',	},
-  { "MESSAGES",	stats_messages,		1,	0,	'm',	},
-  { "",		stats_messages,		1,	0,	'M',	},
-  { "OPERS",	stats_oper,		0,	0,	'o',	},
-  { "OPER",	stats_oper,		0,	0,	'O',	},
-  { "OPERLIST",	stats_operedup,		0,	0,	'p',	},
-  { "PORTS",	stats_ports,		1,	0,	'P',	},
-  { "QUARANTINE", stats_quarantine,	1,	0,	'q',	},
-  { "", 	stats_quarantine,	1,	0,	'Q',	},
-  { "CPU",	stats_usage,		1,	0,	'r',	},
-  { "",		stats_usage,		1,	0,	'R',	},
-  { "TSTATS",	stats_tstats,		1,	0,	't',	},
-  { "",		stats_tstats,		1,	0,	'T',	},
-  { "UPTIME",	stats_uptime,		0,	0,	'u',	},
-  { "SHARED",	stats_shared,		1,	0,	'U',	},
-  { "MYLINKS",	stats_servers,		1,	0,	'v',	},
-  { "",		stats_servers,		1,	0,	'V',	},
-  { "GECOS",	stats_gecos,		1,	0,	'x'	},
-  { "",		stats_gecos,		1,	0,	'X',	},
-  { "CLASS",	stats_class,		1,	0,	'y',	},
-  { "CLASSES",	stats_class,		1,	0,	'Y',	},
-  { "MEMORY",	stats_memory,		1,	0,	'z',	},
-  { "",		stats_memory,		1,	0,	'Z',	},
-  { "SERVERS",	stats_servlinks,	1,	0,	'?',	},
-  { (char *) 0, 	(void (*)()) 0, 0,	0,	(char) 0, }
+  /* function  	need_oper need_admin  letter	*/
+  { 'a',	stats_adns_servers,	1,	1,	},
+  { 'A',	stats_adns_servers,	1,	1,	},
+  { 'c',	stats_connect,		1,	0,	},
+  { 'C',	stats_connect,		1,	0,	},
+  { 'd',	stats_deny,		1,	0,	},
+  { 'D',	stats_deny,		1,	0,	},
+  { 'e', 	stats_exempt,		1,	0,	},
+  { 'E',	stats_events,		1,	1,	},
+  { 'f',	stats_fd,		1,	1,	},
+  { 'F',	stats_fd,		1,	1,	},
+  { 'g',	stats_glines,		1,	0,	},
+  { 'G',	stats_glines,		1,	0,	},
+  { 'h',	stats_hubleaf,		1,	0,	},
+  { 'H',	stats_hubleaf,		1,	0,	},
+  { 'i',	stats_auth,		1,	0,	},
+  { 'I',	stats_auth,		1,	0,	},
+  { 'k',	stats_tklines,		1,	0,	},
+  { 'K',	stats_klines,		1,	0,	},
+  { 'l',	stats_ltrace,		1,	0,	},
+  { 'L',	stats_ltrace,		1,	0,	},
+  { 'm',	stats_messages,		1,	0,	},
+  { 'M',	stats_messages,		1,	0,	},
+  { 'o',	stats_oper,		0,	0,	},
+  { 'O',	stats_oper,		0,	0,	},
+  { 'p',	stats_operedup,		0,	0,	},
+  { 'P',	stats_ports,		1,	0,	},
+  { 'q',	stats_quarantine,	1,	0,	},
+  { 'Q',	stats_quarantine,	1,	0,	},
+  { 'r',	stats_usage,		1,	0,	},
+  { 'R',	stats_usage,		1,	0,	},
+  { 't',	stats_tstats,		1,	0,	},
+  { 'T',	stats_tstats,		1,	0,	},
+  { 'u',	stats_uptime,		0,	0,	},
+  { 'U',	stats_shared,		1,	0,	},
+  { 'v',	stats_servers,		1,	0,	},
+  { 'V',	stats_servers,		1,	0,	},
+  { 'x',	stats_gecos,		1,	0,	},
+  { 'X',	stats_gecos,		1,	0,	},
+  { 'y',	stats_class,		1,	0,	},
+  { 'Y',	stats_class,		1,	0,	},
+  { 'z',	stats_memory,		1,	0,	},
+  { 'Z',	stats_memory,		1,	0,	},
+  { '?',	stats_servlinks,	1,	0,	},
+  { (char) 0, 	(void (*)()) 0,		0,	0,	}
 };
 
 /*
@@ -208,75 +208,20 @@ static void m_stats(struct Client *client_p, struct Client *source_p,
       last_used = CurrentTime;
     }
 
-  /* We cannot pass along stats auth to hyb6.. itll just get parsed as stats a..
-   * nor can we format it anywhere but in m_stats.c.. so hunt_server is moved
-   * down a bit.. ideally it should be here though, before we search the tables,
-   * but what can you do? -- fl_ */
-#if 0
   /* Is the stats meant for us? */
   if (IsOper(source_p) || !GlobalSetOptions.hide_server)
     {
       if (hunt_server(client_p,source_p,":%s STATS %s :%s",2,parc,parv) != HUNTED_ISME)
         return;
     }
-#endif
 
   /* If theyre doing a stats ?, then we search the letter column.. else we search
    * the name column.. letter is case SENSITIVE, name is case INSENSITIVE -- fl_ */
-  if(strlen(parv[1]) > 1)
-  {
-    char *statstring;
-    for (i=0; stats_cmd_table[i].handler; i++)
-      {
-        if (!irccmp(stats_cmd_table[i].name, parv[1]))
-          {
-            /* OK this is a hack for now.. if someones doing stats auth for example,
-             * convert parv[1] to stats I and then call hunt_server(), as we cannot
-             * pass stats auth to anything but hyb7, and if were using hunt_server(),
-             * we have to pass that whatever we're sending.. we cant change it in
-             * huntserver().. -- fl_  */
-            /* XXX FIX THIS!.. find the target and send it ourselves? dunno.. */
-            statstring=parv[1];
-            parv[1][0]=stats_cmd_table[i].letter;             
-            parv[1][1]='\0';
-
-            if (hunt_server(client_p,source_p,":%s STATS %s :%s",2,parc,parv) != HUNTED_ISME)
-              return;
-
-            /* Well it is meant for here.. lets just put parv[1] back.. */
-            parv[1] = statstring;
-
-            /* Check if they have the relevant privs.. */
-            if((stats_cmd_table[i].need_oper && !IsOper(source_p)) ||
-                (stats_cmd_table[i].need_admin && !IsAdmin(source_p)))
-              {
-                sendto_one(source_p, form_str(ERR_NOPRIVILEGES),me.name,source_p->name);
-                break;
-              }
-
-            /* Stats L needs parc and parv passing to it.. nothing else does, so
-             * it can have its own little exception.. -- fl_ */
-            if(!irccmp(stats_cmd_table[i].name, "LTRACE"))
-              stats_cmd_table[i].handler(source_p, parc, parv);
-            else
-              stats_cmd_table[i].handler(source_p);
-          }
-      }
-  }
-  else
+  if(strlen(parv[1]) == 1)
   {
     char statchar;
     statchar=parv[1][0];
 
-    /* Check if the STATS is destined for us.. we're using a letter, so it doesnt
-     * need conversion for compatibility.. */
-    if (IsOper(source_p) || !GlobalSetOptions.hide_server)
-      {
-        if (hunt_server(client_p,source_p,":%s STATS %s :%s",2,parc,parv) != HUNTED_ISME)
-          return;
-      }
-
-    /* Its meant for here, so lets try and find it.. */
     for (i=0; stats_cmd_table[i].handler; i++)
       {
         if (stats_cmd_table[i].letter == statchar)
@@ -302,6 +247,55 @@ static void m_stats(struct Client *client_p, struct Client *source_p,
   sendto_one(source_p, form_str(RPL_ENDOFSTATS), me.name, parv[0], parv[1]);
   stats_spy(source_p, parv[1]);
 }
+
+/*
+ * mo_stats by fl_
+ *      parv[0] = sender prefix
+ *      parv[1] = stat letter/command
+ *      parv[2] = (if present) server/mask in stats L, or target
+ *
+ * This will search the tables for the appropriate stats letter,
+ * if found execute it.  
+ */
+
+static void mo_stats(struct Client *client_p, struct Client *source_p,
+                   int parc, char *parv[])
+{
+  int i;
+
+  if (hunt_server(client_p,source_p,":%s STATS %s :%s",2,parc,parv) != HUNTED_ISME)
+     return;
+
+  if(strlen(parv[1]) == 1)
+  {
+    char statchar;
+    statchar=parv[1][0];
+
+    for (i=0; stats_cmd_table[i].handler; i++)
+      {
+        if (stats_cmd_table[i].letter == statchar)
+          {
+            /* The stats table says what privs are needed, so check --fl_ */
+            if(stats_cmd_table[i].need_admin && !IsAdmin(source_p))
+              {
+                sendto_one(source_p, form_str(ERR_NOPRIVILEGES),me.name,source_p->name);
+                break;
+              }
+
+            /* Blah, stats L needs the parameters, none of the others do.. */
+            if(statchar == 'L' || statchar == 'l')
+              stats_cmd_table[i].handler(source_p, parc, parv);
+            else
+              stats_cmd_table[i].handler(source_p);
+          }
+       }
+   }
+
+  /* Send the end of stats notice, and the stats_spy */
+  sendto_one(source_p, form_str(RPL_ENDOFSTATS), me.name, parv[0], parv[1]);
+  stats_spy(source_p, parv[1]);
+}
+
 
 static void stats_adns_servers(struct Client *client_p)
 {

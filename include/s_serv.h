@@ -62,7 +62,6 @@ struct Capability
 #define CAP_CHW         0x00000010      /* Can do channel wall @# */
 #define CAP_LL          0x00000020      /* Can do lazy links */
 #define CAP_IE          0x00000040      /* Can do invite exceptions */
-#define CAP_VCHAN       0x00000080      /* Can do vchans */
 #define CAP_EOB	        0x00000100      /* Can do EOB message */
 #define CAP_KLN	        0x00000200      /* Can do KLINE message */
 #define CAP_GLN	        0x00000400      /* Can do GLINE message */
@@ -74,7 +73,7 @@ struct Capability
 #define CAP_CRYPT       0x00010000      /* Can do CRYPTlinks */
 
 #define CAP_MASK        CAP_QS|CAP_EX|CAP_CHW|\
-                        CAP_IE|CAP_VCHAN|CAP_EOB|CAP_KLN|CAP_GLN|\
+                        CAP_IE|CAP_EOB|CAP_KLN|CAP_GLN|\
                         CAP_HOPS|CAP_AOPS|CAP_UID
 
 #define DoesCAP(x)      ((x)->caps)
