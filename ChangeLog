@@ -1,3 +1,22 @@
+leeh        2002/08/08 07:23:35 EDT	(20020808_12)
+
+  Modified files:
+    include              client.h s_conf.h 
+    src                  ircd_parser.y packet.c s_conf.c s_user.c 
+  Log:
+  - fixed a gline bug
+  - moved flood_exempt = yes; to the auth {}; block.
+  
+  Revision  Changes    Path
+  7.155     +3 -4      ircd-ratbox/include/client.h
+  7.185     +8 -7      ircd-ratbox/include/s_conf.h
+  1.256     +10 -6     ircd-ratbox/src/ircd_parser.y
+  7.91      +2 -2      ircd-ratbox/src/packet.c
+  7.318     +1 -7      ircd-ratbox/src/s_conf.c
+  7.205     +19 -0     ircd-ratbox/src/s_user.c
+
+
+
 leeh        2002/08/08 05:58:54 EDT	(20020808_11)
 
   Modified files:
