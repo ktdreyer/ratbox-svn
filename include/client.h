@@ -400,40 +400,33 @@ struct LocalUser
 
 
 /* overflow flags */
-#define FLAGS2_EXEMPTGLINE  0x0001	/* client can't be G-lined */
-#define FLAGS2_EXEMPTKLINE  0x0002      /* client is exempt from kline */
-#define FLAGS2_NOLIMIT      0x0004      /* client is exempt from limits */
-#define FLAGS2_RESTRICTED   0x0008      /* client cannot op others */
-#define FLAGS2_EXEMPTFLOOD  0x0010
+#define OPER_GLOBAL_KILL        0x000001
+#define OPER_REMOTE             0x000002
+#define OPER_UNKLINE            0x000004
+#define OPER_GLINE              0x000008
+#define OPER_N                  0x000010
+#define OPER_K                  0x000020
+#define OPER_DIE                0x000040
+#define OPER_REHASH             0x000080
+#define OPER_ADMIN              0x000100
+#define OPER_XLINE              0x000200
+/*      OPER_SPY                0x000400 */
+/*                              0x000800 */
 
-/* oper priv flags */
-#define FLAGS2_OPER_GLOBAL_KILL 0x0020  /* oper can global kill */
-#define FLAGS2_OPER_REMOTE      0x0040  /* oper can do squits/connects */
-#define FLAGS2_OPER_UNKLINE     0x0080  /* oper can use unkline */
-#define FLAGS2_OPER_GLINE       0x0100  /* oper can use gline */
-#define FLAGS2_OPER_N           0x0200  /* oper can umode n */
-#define FLAGS2_OPER_K           0x0400  /* oper can kill/kline */
-#define FLAGS2_OPER_DIE         0x0800  /* oper can die */
-#define FLAGS2_OPER_REHASH      0x1000  /* oper can rehash */
-#define FLAGS2_OPER_ADMIN       0x2000  /* oper can set umode +a */
-#define FLAGS2_OPER_XLINE       0x4000  /* oper can xline */
-#define FLAGS2_OPER_FLAGS       (FLAGS2_OPER_GLOBAL_KILL | \
-                                 FLAGS2_OPER_REMOTE | \
-                                 FLAGS2_OPER_UNKLINE | \
-                                 FLAGS2_OPER_GLINE | \
-                                 FLAGS2_OPER_N | \
-                                 FLAGS2_OPER_K | \
-                                 FLAGS2_OPER_DIE | \
-                                 FLAGS2_OPER_REHASH| \
-				 FLAGS2_OPER_XLINE | \
-                                 FLAGS2_OPER_ADMIN)
-
-#define FLAGS2_CBURST		0x10000  /* connection burst being sent */
-#define FLAGS2_PING_COOKIE	0x20000		/* PING Cookie */
-#define FLAGS2_IDLE_LINED       0x40000
-#define FLAGS2_IP_SPOOFING      0x80000        /* client IP is spoofed */
-#define FLAGS2_FLOODDONE        0x200000      /* Flood grace period has
-                                               * been ended. */
+#define OPER_FLAGS      (OPER_GLOBAL_KILL | OPER_REMOTE | OPER_UNKLINE |\
+                         OPER_GLINE | OPER_N | OPER_K | OPER_DIE |\
+                         OPER_REHASH | OPER_ADMIN | OPER_XLINE | 0x000400)
+                                        
+#define FLAGS2_EXEMPTGLINE      0x001000
+#define FLAGS2_EXEMPTKLINE      0x002000
+#define FLAGS2_EXEMPTFLOOD      0x004000
+#define FLAGS2_NOLIMIT          0x008000
+#define FLAGS2_IDLE_LINED       0x010000
+#define FLAGS2_RESTRICTED       0x020000
+#define FLAGS2_CBURST           0x040000
+#define FLAGS2_PING_COOKIE      0x080000
+#define FLAGS2_IP_SPOOFING      0x100000
+#define FLAGS2_FLOODDONE        0x200000
 
 #define SEND_UMODES  (FLAGS_INVISIBLE | FLAGS_OPER | FLAGS_WALLOP | \
                       FLAGS_ADMIN)
@@ -533,26 +526,16 @@ struct LocalUser
 #define IsRestricted(x)         ((x)->flags2 &  FLAGS2_RESTRICTED)
 #define SetRestricted(x)        ((x)->flags2 |= FLAGS2_RESTRICTED)
 
-#define IsOperGlobalKill(x)     ((x)->flags2 & FLAGS2_OPER_GLOBAL_KILL)
-#define SetOperGlobalKill(x)    ((x)->flags2 |= FLAGS2_OPER_GLOBAL_KILL)
-#define IsOperRemote(x)         ((x)->flags2 & FLAGS2_OPER_REMOTE)
-#define SetOperRemote(x)        ((x)->flags2 |= FLAGS2_OPER_REMOTE)
-#define IsOperUnkline(x)        ((x)->flags2 & FLAGS2_OPER_UNKLINE)
-#define SetOperUnkline(x)       ((x)->flags2 |= FLAGS2_OPER_UNKLINE)
-#define IsOperGline(x)          ((x)->flags2 & FLAGS2_OPER_GLINE)
-#define SetOperGline(x)         ((x)->flags2 |= FLAGS2_OPER_GLINE)
-#define IsOperN(x)              ((x)->flags2 & FLAGS2_OPER_N)
-#define SetOperN(x)             ((x)->flags2 |= FLAGS2_OPER_N)
-#define IsOperK(x)              ((x)->flags2 & FLAGS2_OPER_K)
-#define SetOperK(x)             ((x)->flags2 |= FLAGS2_OPER_K)
-#define IsOperXline(x)          ((x)->flags2 & FLAGS2_OPER_XLINE)
-#define SetOperXline(x)         ((x)->flags2 |= FLAGS2_OPER_XLINE)
-#define IsOperDie(x)            ((x)->flags2 & FLAGS2_OPER_DIE)
-#define SetOperDie(x)           ((x)->flags2 |= FLAGS2_OPER_DIE)
-#define IsOperRehash(x)         ((x)->flags2 & FLAGS2_OPER_REHASH)
-#define SetOperRehash(x)        ((x)->flags2 |= FLAGS2_OPER_REHASH)
-#define IsOperAdmin(x)          ((x)->flags2 & FLAGS2_OPER_ADMIN)
-#define SetOperAdmin(x)         ((x)->flags2 |= FLAGS2_OPER_ADMIN)
+#define IsOperGlobalKill(x)     ((x)->flags2 & OPER_GLOBAL_KILL)
+#define IsOperRemote(x)         ((x)->flags2 & OPER_REMOTE)
+#define IsOperUnkline(x)        ((x)->flags2 & OPER_UNKLINE)
+#define IsOperGline(x)          ((x)->flags2 & OPER_GLINE)
+#define IsOperN(x)              ((x)->flags2 & OPER_N)
+#define IsOperK(x)              ((x)->flags2 & OPER_K)
+#define IsOperXline(x)          ((x)->flags2 & OPER_XLINE)
+#define IsOperDie(x)            ((x)->flags2 & OPER_DIE)
+#define IsOperRehash(x)         ((x)->flags2 & OPER_REHASH)
+#define IsOperAdmin(x)          ((x)->flags2 & OPER_ADMIN)
 
 #define IsFloodDone(x)          ((x)->flags2 & FLAGS2_FLOODDONE)
 #define SetFloodDone(x)         ((x)->flags2 |= FLAGS2_FLOODDONE)

@@ -45,7 +45,10 @@
 #include "modules.h"
 #include "newconf.h"
 
-#define CONF_OPER_SPY 0x0400
+#ifndef OPER_SPY
+#define OPER_SPY 0x000400
+#define IsOperSpy(x) ((x)->flags2 & OPER_SPY)
+#endif
 
 static void conf_set_oper_spy(void *);
 static void mo_olist(struct Client*, struct Client*, int, char**);
@@ -86,6 +89,12 @@ static void mo_olist(struct Client *client_p,
                    int parc,
                    char *parv[])
 {
+  if(!IsOperSpy(source_p))
+  {
+    sendto_one(source_p, ":%s NOTICE %s :You need oper_spy = yes;",
+               me.name, source_p->name);
+    return;
+  }
 
   /* If no arg, do all channels *whee*, else just one channel */
   if (parc < 2 || BadPtr(parv[1]))
@@ -183,7 +192,7 @@ conf_set_oper_spy(void *data)
   int yesno = *(int*) data;
 
   if(yesno)
-    yy_achead->port |= CONF_OPER_SPY;
+    yy_achead->port |= OPER_SPY;
   else
-    yy_achead->port &= ~CONF_OPER_SPY;
+    yy_achead->port &= ~OPER_SPY;
 }

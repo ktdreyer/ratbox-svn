@@ -321,7 +321,7 @@ ms_kline(struct Client *client_p, struct Client *source_p,
   tkline_time = atoi(parv[2]);
 
   if (find_u_conf((char *)source_p->user->server,
-		  source_p->username, source_p->host, CONF_OPER_K))
+		  source_p->username, source_p->host, OPER_K))
     {
       sendto_realops_flags(FLAGS_ALL, L_ALL,
 			   "*** Received K-Line for [%s@%s] [%s], from %s!%s@%s on %s",

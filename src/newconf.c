@@ -173,17 +173,13 @@ int 	add_conf_item(char *topconf, char *name, int type, void (*func)(void*))
 		return -1;
 
         if((cf = find_conf_item(tc, name)) != NULL)
-        {
-                cf->cf_count++;
-                return 0;
-        }
+                return -1;
 
 	cf = MyMalloc(sizeof(struct ConfEntry));
 
 	DupString(cf->cf_name, name);
 	cf->cf_type = type;
 	cf->cf_func = func;
-        cf->cf_count = 1;
 
 	n = make_dlink_node();
 	dlinkAdd(cf, n, &tc->tc_items);
@@ -203,12 +199,6 @@ int     remove_conf_item(char *topconf, char *name)
         if((cf = find_conf_item(tc, name)) == NULL)
                 return -1;
         
-        if(cf->cf_count > 1)
-        {
-                cf->cf_count--;
-                return 0;
-        }
-
         if((ptr = dlinkFind(&tc->tc_items, cf)) == NULL)
                 return -1;
 
@@ -862,16 +852,16 @@ struct mode_table umode_table[] = {
 };
 
 struct mode_table flag_table[] = {
-	{"global_kill",		CONF_OPER_GLOBAL_KILL},
-	{"remote",		CONF_OPER_REMOTE},
-	{"kline",		CONF_OPER_K},
-	{"unkline",		CONF_OPER_UNKLINE},
-	{"gline",		CONF_OPER_GLINE},
-	{"nick_changes",	CONF_OPER_N},
-	{"rehash",		CONF_OPER_REHASH},
-	{"die",			CONF_OPER_DIE},
-	{"admin",		CONF_OPER_ADMIN},
-	{"xline",		CONF_OPER_XLINE},
+	{"global_kill",		OPER_GLOBAL_KILL},
+	{"remote",		OPER_REMOTE},
+	{"kline",		OPER_K},
+	{"unkline",		OPER_UNKLINE},
+	{"gline",		OPER_GLINE},
+	{"nick_changes",	OPER_N},
+	{"rehash",		OPER_REHASH},
+	{"die",			OPER_DIE},
+	{"admin",		OPER_ADMIN},
+	{"xline",		OPER_XLINE},
 	{NULL}
 };
 
@@ -1128,9 +1118,9 @@ void	conf_set_oper_global_kill(void *data)
 	int yesno = *(int*)data;
 
 	if (yesno)
-		yy_achead->port |= CONF_OPER_GLOBAL_KILL;
+		yy_achead->port |= OPER_GLOBAL_KILL;
 	else
-		yy_achead->port &= ~CONF_OPER_GLOBAL_KILL;
+		yy_achead->port &= ~OPER_GLOBAL_KILL;
 }
 
 void	conf_set_oper_remote(void *data)
@@ -1138,9 +1128,9 @@ void	conf_set_oper_remote(void *data)
 	int yesno = *(int*)data;
 	
 	if (yesno)
-		yy_achead->port |= CONF_OPER_REMOTE;
+		yy_achead->port |= OPER_REMOTE;
 	else
-		yy_achead->port &= ~CONF_OPER_REMOTE;
+		yy_achead->port &= ~OPER_REMOTE;
 }
 
 void	conf_set_oper_kline(void *data)
@@ -1148,9 +1138,9 @@ void	conf_set_oper_kline(void *data)
 	int yesno = *(int*)data;
 
 	if (yesno)
-		yy_achead->port |= CONF_OPER_K;
+		yy_achead->port |= OPER_K;
 	else	
-		yy_achead->port &= ~CONF_OPER_K;
+		yy_achead->port &= ~OPER_K;
 }
 
 void	conf_set_oper_unkline(void *data)
@@ -1158,9 +1148,9 @@ void	conf_set_oper_unkline(void *data)
 	int yesno = *(int*) data;
 
 	if (yesno)
-		yy_achead->port |= CONF_OPER_UNKLINE;
+		yy_achead->port |= OPER_UNKLINE;
 	else
-		yy_achead->port &= ~CONF_OPER_UNKLINE;
+		yy_achead->port &= ~OPER_UNKLINE;
 }
 
 void	conf_set_oper_xline(void *data)
@@ -1168,9 +1158,9 @@ void	conf_set_oper_xline(void *data)
 	int yesno = *(int*) data;
 
 	if (yesno)
-		yy_achead->port |= CONF_OPER_XLINE;
+		yy_achead->port |= OPER_XLINE;
 	else
-		yy_achead->port &= ~CONF_OPER_XLINE;
+		yy_achead->port &= ~OPER_XLINE;
 }
 
 void	conf_set_oper_gline(void *data)
@@ -1178,9 +1168,9 @@ void	conf_set_oper_gline(void *data)
 	int yesno = *(int*) data;
 
 	if (yesno)
-		yy_achead->port |= CONF_OPER_GLINE;
+		yy_achead->port |= OPER_GLINE;
 	else
-		yy_achead->port &= ~CONF_OPER_GLINE;
+		yy_achead->port &= ~OPER_GLINE;
 }
 
 void	conf_set_oper_nick_changes(void *data)
@@ -1188,9 +1178,9 @@ void	conf_set_oper_nick_changes(void *data)
 	int yesno = *(int*) data;
 
 	if (yesno)
-		yy_achead->port |= CONF_OPER_N;
+		yy_achead->port |= OPER_N;
 	else
-		yy_achead->port &= ~CONF_OPER_N;
+		yy_achead->port &= ~OPER_N;
 }
 
 void	conf_set_oper_die(void *data)
@@ -1198,9 +1188,9 @@ void	conf_set_oper_die(void *data)
 	int yesno = *(int*) data;
 
 	if (yesno)
-		yy_achead->port |= CONF_OPER_DIE;
+		yy_achead->port |= OPER_DIE;
 	else
-		yy_achead->port &= ~CONF_OPER_DIE; 
+		yy_achead->port &= ~OPER_DIE; 
 }
 
 void	conf_set_oper_rehash(void *data)
@@ -1208,9 +1198,9 @@ void	conf_set_oper_rehash(void *data)
 	int yesno = *(int*) data;
 
 	if (yesno)
-		yy_achead->port |= CONF_OPER_REHASH;
+		yy_achead->port |= OPER_REHASH;
 	else
-		yy_achead->port &= ~CONF_OPER_REHASH;
+		yy_achead->port &= ~OPER_REHASH;
 }
 
 void	conf_set_oper_admin(void *data)
@@ -1218,9 +1208,9 @@ void	conf_set_oper_admin(void *data)
 	int yesno = *(int*) data;
 
 	if (yesno)
-		yy_achead->port |= CONF_OPER_ADMIN;
+		yy_achead->port |= OPER_ADMIN;
 	else
-		yy_achead->port &= ~CONF_OPER_ADMIN;
+		yy_achead->port &= ~OPER_ADMIN;
 }
 
 int	conf_begin_class(struct TopConf *tc)
@@ -1623,7 +1613,7 @@ int	conf_begin_shared(struct TopConf *tc)
 	yy_aconf->name = NULL;
 	yy_aconf->user = NULL;
 	yy_aconf->host = NULL;
-	yy_aconf->port = CONF_OPER_K;
+	yy_aconf->port = OPER_K;
 	return 0;
 }
 
@@ -1665,9 +1655,9 @@ void	conf_set_shared_kline(void *data)
 	int yesno = *(unsigned int*) data;
 
 	if (yesno)
-		yy_aconf->port |= CONF_OPER_K; 
+		yy_aconf->port |= OPER_K; 
 	else
-		yy_aconf->port &= ~CONF_OPER_K; 
+		yy_aconf->port &= ~OPER_K; 
 }
 
 void	conf_set_shared_unkline(void *data)
@@ -1675,9 +1665,9 @@ void	conf_set_shared_unkline(void *data)
 	int yesno = *(unsigned int*) data;
 
 	if (yesno)
-		yy_aconf->port |= CONF_OPER_UNKLINE; 
+		yy_aconf->port |= OPER_UNKLINE; 
 	else
-		yy_aconf->port &= ~CONF_OPER_UNKLINE;
+		yy_aconf->port &= ~OPER_UNKLINE;
 }
 
 int	conf_begin_connect(struct TopConf *tc)

@@ -42,8 +42,9 @@
 #include "modules.h"
 #include "newconf.h"
 
-#ifndef CONF_OPER_SPY
-#define CONF_OPER_SPY 0x0400
+#ifndef OPER_SPY
+#define OPER_SPY 0x0400
+#define IsOperSpy(x) ((x)->flags2 & OPER_SPY)
 #endif
 
 static void conf_set_oper_spy(void *);
@@ -112,6 +113,13 @@ static void m_owho(struct Client *client_p,
   struct Channel *mychannel = NULL;
   char  flags[NUMLISTS][2];
   int   server_oper = parc > 2 ? (*parv[2] == 'o' ): 0; /* Show OPERS only */
+
+  if(!IsOperSpy(source_p))
+  {
+    sendto_one(source_p, ":%s NOTICE %s :You need oper_spy = yes;",
+               me.name, source_p->name);
+    return;
+  }
 
   /* See if mask is there, collapse it or return if not there */
 
@@ -527,7 +535,7 @@ conf_set_oper_spy(void *data)
   int yesno = *(int*) data;
 
   if(yesno)
-    yy_achead->port |= CONF_OPER_SPY;
+    yy_achead->port |= OPER_SPY;
   else
-    yy_achead->port &= ~CONF_OPER_SPY;
+    yy_achead->port &= ~OPER_SPY;
 }

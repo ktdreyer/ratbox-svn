@@ -1864,93 +1864,58 @@ oper_privs_as_string(struct Client *client_p,int port)
   privs_ptr = privs_out;
   *privs_ptr = '\0';
 
-  if (port & CONF_OPER_GLINE)
-    {
-      if(client_p)
-        SetOperGline(client_p);
-      *privs_ptr++ = 'G';
-    }
+  if(client_p != NULL)
+    client_p->flags2 |= port;
+
+  if(port & OPER_GLINE)
+    *privs_ptr++ = 'G';
   else
     *privs_ptr++ = 'g';
 
-  if(port & CONF_OPER_K)
-    {
-      if(client_p)
-        SetOperK(client_p);
-      *privs_ptr++ = 'K';
-    }
+  if(port & OPER_K)
+    *privs_ptr++ = 'K';
   else
     *privs_ptr++ = 'k';
 
-  if(port & CONF_OPER_XLINE)
-  {
-    if(client_p)
-      SetOperXline(client_p);
+  if(port & OPER_XLINE)
     *privs_ptr++ = 'X';
-  }
   else
     *privs_ptr++ = 'x';
-
-  if(port & CONF_OPER_N)
-    {
-      if(client_p)
-        SetOperN(client_p);
-      *privs_ptr++ = 'N';
-    }
-
-  if(port & CONF_OPER_GLOBAL_KILL)
-    {
-      if(client_p)
-        SetOperGlobalKill(client_p);
-      *privs_ptr++ = 'O';
-    }
+    
+  if(port & OPER_GLOBAL_KILL)
+    *privs_ptr++ = 'O';
   else
     *privs_ptr++ = 'o';
 
-  if(port & CONF_OPER_REMOTE)
-    {
-      if(client_p)
-        SetOperRemote(client_p);
-      *privs_ptr++ = 'R';
-    }
+  if(port & OPER_REMOTE)
+    *privs_ptr++ = 'R';
   else
     *privs_ptr++ = 'r';
-  
-  if(port & CONF_OPER_UNKLINE)
-    {
-      if(client_p)
-        SetOperUnkline(client_p);
-      *privs_ptr++ = 'U';
-    }
+ 
+  if(port & OPER_UNKLINE)
+    *privs_ptr++ = 'U';
   else
     *privs_ptr++ = 'u';
 
-  if(port & CONF_OPER_REHASH)
-    {
-      if(client_p)
-        SetOperRehash(client_p);
-      *privs_ptr++ = 'H';
-    }
+  if(port & OPER_REHASH)
+    *privs_ptr++ = 'H';
   else
     *privs_ptr++ = 'h';
 
-  if(port & CONF_OPER_DIE)
-    {
-      if(client_p)
-        SetOperDie(client_p);
-      *privs_ptr++ = 'D';
-    }
+  if(port & OPER_DIE)
+    *privs_ptr++ = 'D';
   else
     *privs_ptr++ = 'd';
 
-  if (port & CONF_OPER_ADMIN)
-    {
-      if (client_p)
-	SetOperAdmin(client_p);
-      *privs_ptr++ = 'A';
-    }
+  if(port & OPER_ADMIN)
+    *privs_ptr++ = 'A';
   else
     *privs_ptr++ = 'a';
+
+  if(port & OPER_N)
+    *privs_ptr++ = 'N';
+  else
+    *privs_ptr++ = 'n';
 
   *privs_ptr = '\0';
 

@@ -48,8 +48,9 @@
 #include "hook.h"
 #include "newconf.h"
 
-#ifndef CONF_OPER_SPY
-#define CONF_OPER_SPY 0x0400
+#ifndef OPER_SPY
+#define OPER_SPY 0x0400
+#define IsOperSpy(x) ((x)->flags2 & OPER_SPY)
 #endif
 
 static void conf_set_oper_spy(void *);
@@ -97,6 +98,13 @@ static void mo_owhois(struct Client *client_p,
                     int parc,
                     char *parv[])
 {
+  if(!IsOperSpy(source_p))
+  {
+    sendto_one(source_p, ":%s NOTICE %s :You need oper_spy = yes;",
+               me.name, source_p->name);
+    return;
+  }
+
   if(parc < 2)
     {
       sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
@@ -385,7 +393,7 @@ conf_set_oper_spy(void *data)
   int yesno = *(int*) data;
 
   if(yesno)
-    yy_achead->port |= CONF_OPER_SPY;
+    yy_achead->port |= OPER_SPY;
   else
-    yy_achead->port &= ~CONF_OPER_SPY;
+    yy_achead->port &= ~OPER_SPY;
 }

@@ -1005,7 +1005,7 @@ user_mode(struct Client *client_p, struct Client *source_p, int parc, char *parv
                 {
                   dlink_node *dm;
 
-		  source_p->flags2 &= ~FLAGS2_OPER_FLAGS;
+		  source_p->flags2 &= ~OPER_FLAGS;
 		  dm = dlinkFind(&oper_list,source_p);
 		  if(dm != NULL)
 		    {

@@ -199,7 +199,7 @@ static void ms_unkline(struct Client *client_p, struct Client *source_p,
     return;
 
   if(find_u_conf((char *)source_p->user->server, source_p->username,
-                 source_p->host, CONF_OPER_UNKLINE))
+                 source_p->host, OPER_UNKLINE))
   {
     sendto_realops_flags(FLAGS_ALL, L_ALL,
 	       "*** Received Un-kline for [%s@%s], from %s",

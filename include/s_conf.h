@@ -155,19 +155,7 @@ struct ConfItem
 #define IsConfCompressed(x)     ((x)->flags & CONF_FLAGS_COMPRESSED)
 #define IsConfCryptLink(x)      ((x)->flags & CONF_FLAGS_CRYPTLINK)
 
-/* port definitions for Opers */
-
-#define CONF_OPER_GLOBAL_KILL   0x0001
-#define CONF_OPER_REMOTE        0x0002
-#define CONF_OPER_UNKLINE       0x0004
-#define CONF_OPER_GLINE         0x0008
-#define CONF_OPER_N             0x0010
-#define CONF_OPER_K             0x0020
-#define CONF_OPER_REHASH        0x0040
-#define CONF_OPER_DIE           0x0080
-#define CONF_OPER_ADMIN         0x0100
-#define CONF_OPER_XLINE		0x0200
-/*      CONF_OPER_SPY           0x0400 */
+/* flag definitions for opers now in client.h */
 
 struct config_file_entry
 {
