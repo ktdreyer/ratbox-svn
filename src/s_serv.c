@@ -1119,7 +1119,12 @@ server_estab(struct Client *client_p)
 	/* Show the real host/IP to admins */
 	sendto_realops_flags(UMODE_ALL, L_ADMIN,
 			     "Link with %s established: (%s) link",
-			     inpath_ip, show_capabilities(client_p));
+#ifdef HIDE_SERVERS_IPS
+			     client_p->name,
+#else
+			     inpath_ip, 
+#endif
+			     show_capabilities(client_p));
 
 	/* Now show the masked hostname/IP to opers */
 	sendto_realops_flags(UMODE_ALL, L_OPER,
