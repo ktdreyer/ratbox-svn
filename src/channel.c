@@ -4042,7 +4042,10 @@ void cleanup_channels(void *unused)
    eventAdd("cleanup_channels", cleanup_channels, NULL,
             CLEANUP_CHANNELS_TIME, 0 );
 
-   assert (MyConnect(uplink) == 1);
+   if (uplink != NULL)
+     {
+       assert (MyConnect(uplink) == 1);
+     }
 
    if (!MyConnect(uplink))
      {
