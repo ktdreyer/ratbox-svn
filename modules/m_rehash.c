@@ -39,8 +39,10 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "hostmask.h"
 
 static void mo_rehash(struct Client*, struct Client*, int, char**);
+static void clear_temps(dlink_list *);
 
 struct Message rehash_msgtab = {
   "REHASH", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -111,6 +113,26 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
           ReadMessageFile( &ConfigFileEntry.opermotd );
           found = YES;
         }
+      else if(irccmp(parv[1], "GLINES") == 0)
+      {
+        sendto_realops_flags(FLAGS_ALL, L_ALL,
+                             "%s is clearing G-lines",
+                             source_p->name);
+        clear_temps(&glines);
+        found = YES;
+      }
+      else if(irccmp(parv[1], "TKLINES") == 0)
+      {
+        sendto_realops_flags(FLAGS_ALL, L_ALL,
+                             "%s is clearing temp klines",
+                             source_p->name);
+        clear_temps(&temporary_min);
+        clear_temps(&temporary_hour);
+        clear_temps(&temporary_day);
+        clear_temps(&temporary_week);
+        found = YES;
+      }
+         
       if(found)
         {
           ilog(L_NOTICE, "REHASH %s From %s\n", parv[1], 
@@ -119,7 +141,9 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
         }
       else
         {
-          sendto_one(source_p,":%s NOTICE %s :rehash one of :CHANNELS DNS MOTD OMOTD" ,me.name,source_p->name);
+          sendto_one(source_p,":%s NOTICE %s :rehash one of: "
+                     "GLINES TKLINES CHANNELS DNS MOTD OMOTD",
+                     me.name, source_p->name);
           return;
         }
     }
@@ -137,3 +161,20 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
     }
 }
 
+static void
+clear_temps(dlink_list *tlist)
+{
+  dlink_node *ptr;
+  dlink_node *next_ptr;
+  struct ConfItem *aconf;
+
+  for(ptr = tlist->head; ptr; ptr = next_ptr)
+  {
+    next_ptr = ptr->next;
+    aconf = ptr->data;
+
+    delete_one_address_conf(aconf->host, aconf);
+    dlinkDelete(ptr, tlist);
+    free_dlink_node(ptr);
+  }
+}

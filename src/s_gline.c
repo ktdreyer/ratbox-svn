@@ -78,7 +78,7 @@ add_gline(struct ConfItem *aconf)
  * side effects -
  */
 struct ConfItem*
-find_is_glined(const char* host, const char* name)
+find_is_glined(const char* host, const char *user)
 {
   dlink_node *gline_node;
   struct ConfItem *kill_ptr; 
@@ -86,9 +86,8 @@ find_is_glined(const char* host, const char* name)
   for(gline_node = glines.head; gline_node; gline_node = gline_node->next)
     {
       kill_ptr = gline_node->data;
-      if( (kill_ptr->name && (!name || match(kill_ptr->name,name)))
-	  &&
-	  (kill_ptr->host && (!host || match(kill_ptr->host,host))))
+      if((kill_ptr->user && (!user || match(kill_ptr->user, user))) &&
+	 (kill_ptr->host && (!host || match(kill_ptr->host, host))))
         {
           return(kill_ptr);
         }
