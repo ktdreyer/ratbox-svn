@@ -30,6 +30,7 @@ Oper
 - oper reasons are now more fully supported
 - opers can now be hidden from stats p, by flag "invisible"
 - XLINEs no longer contain a type field, theyll now all just silently reject
+- temp xlines and resvs
 
 Channels
 --------
