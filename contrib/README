@@ -39,8 +39,15 @@ m_ojoin.c      - OJOIN - Join a channel through any modes or limits with
                          an optional status (@%+)
                  Syntax: OJOIN [status]<channel>
 
+m_olist.c      - OLIST - Lists channels like LIST, but shows hidden
+                         channels. Oper only of course.
+
 m_opme.c       - OPME - Allows an admin to op themselves in an opless channel
                  Syntax: OPME <channel>
+
+m_owhois.c     - OWHOIS - Allows an oper to do a whois on any user and see
+		          all channels they are in. The syntax is the same
+			  as WHOIS
 
 m_tburst.c     - TBURST - module that will make servers send channel topics
                           to each other after a netsplit/restart.
