@@ -1,3 +1,7 @@
+*** 20010525_1 by ejb
+- fix compile on freebsd.
+
+
 *** 20010524_25 by ejb
 - add the version.c stuff also.
 
