@@ -610,11 +610,17 @@ destroy_channel(struct Channel *chptr)
    */
 
   delete_members(chptr, &chptr->chanops);
+#ifdef REQUIRE_OANDV
+  delete_members(chptr, &chptr->chanops_voiced);
+#endif
   delete_members(chptr, &chptr->voiced);
   delete_members(chptr, &chptr->peons);
   delete_members(chptr, &chptr->halfops);
 
   delete_members(chptr, &chptr->locchanops);
+#ifdef REQUIRE_OANDV
+  delete_members(chptr, &chptr->locchanops_voiced);
+#endif
   delete_members(chptr, &chptr->locvoiced);
   delete_members(chptr, &chptr->locpeons);
   delete_members(chptr, &chptr->lochalfops);

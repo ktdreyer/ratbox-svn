@@ -41,6 +41,7 @@
 
 #define MSG_CLEARCHAN "CLEARCHAN"
 
+extern BlockHeap *ban_heap;
 
 static void mo_clearchan(struct Client *client_p, struct Client *source_p,
                          int parc, char *parv[]);
@@ -351,7 +352,7 @@ static void free_channel_list(dlink_list *list)
       actualBan = ptr->data;
       MyFree(actualBan->banstr);
       MyFree(actualBan->who);
-      MyFree(actualBan);
+      BlockHeapFree(ban_heap, actualBan);
 
       free_dlink_node(ptr);
     }
