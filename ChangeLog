@@ -1,3 +1,17 @@
+leeh        2005/04/06 10:59:44 UTC	(20050406_1)
+
+  Modified files:
+    adns                 resolver.c 
+    src                  dns.c 
+  Log:
+  - fix some compilation warnings
+  
+  Revision  Changes    Path
+  1.8       +1 -1      ircd-ratbox/adns/resolver.c
+  7.8       +5 -5      ircd-ratbox/src/dns.c
+
+
+
 androsyn    2005/04/06 04:00:34 UTC	(20050406_0)
 
   Modified files:
