@@ -1,3 +1,32 @@
+leeh        2004/02/27 08:56:50 EST	(20040227_1)
+
+  Modified files:
+    .                    configure configure.ac 
+    include              hash.h s_conf.h s_newconf.h setup.h.in 
+    modules              m_stats.c 
+    src                  client.c hash.c ircd.c newconf.c s_conf.c 
+                         s_newconf.c 
+  Log:
+  - first half of the ND code.. this will add things to the hash and expire
+    them when needed, also adds nick_delay config option to general {};
+  
+  Revision  Changes    Path
+  7.197     +12 -2     ircd-ratbox/configure
+  7.11      +4 -2      ircd-ratbox/configure.ac
+  7.44      +5 -0      ircd-ratbox/include/hash.h
+  7.269     +1 -0      ircd-ratbox/include/s_conf.h
+  7.23      +14 -0     ircd-ratbox/include/s_newconf.h
+  7.75      +10 -5     ircd-ratbox/include/setup.h.in
+  1.199     +19 -1     ircd-ratbox/modules/m_stats.c
+  7.427     +1 -1      ircd-ratbox/src/client.c
+  7.94      +33 -0     ircd-ratbox/src/hash.c
+  7.326     +1 -0      ircd-ratbox/src/ircd.c
+  7.133     +11 -0     ircd-ratbox/src/newconf.c
+  7.449     +1 -0      ircd-ratbox/src/s_conf.c
+  7.24      +53 -0     ircd-ratbox/src/s_newconf.c
+
+
+
 leeh        2004/02/27 08:04:16 EST	(20040227_0)
 
   Modified files:
