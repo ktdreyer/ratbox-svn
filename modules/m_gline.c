@@ -489,11 +489,12 @@ check_majority_gline(struct Client *source_p,
 		     const char *host,
 		     const char *reason)
 {
+  /* set the actual gline in majority_gline() so we can pull the
+   * initial reason and use that as the trigger reason. --fl
+   */
   if(majority_gline(source_p,oper_nick,oper_user, oper_host,
 		    oper_server, user, host, reason))
   {
-    set_local_gline(oper_nick,oper_user,oper_host,oper_server,
-		    user,host,reason);
     cleanup_glines();
   }
 }
@@ -838,6 +839,10 @@ majority_gline(struct Client *source_p,
               log_gline(source_p,gline_pending_ptr,
                         oper_nick,oper_user,oper_host,oper_server,
                         user,host,reason);
+
+              /* trigger the gline using the original reason --fl */
+              set_local_gline(oper_nick, oper_user, oper_host, oper_server,
+		              user, host, gline_pending_ptr->reason1);
               return YES;
             }
           else
