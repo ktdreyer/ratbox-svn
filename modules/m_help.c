@@ -126,16 +126,22 @@ dohelp(struct Client *source_p, const char *hpath, const char *topic, const char
 {
 	char path[MAXPATHLEN + 1];
 	char ntopic[25];
+	char *p;
 	struct stat sb;
 	unsigned int i;
 
-	if(topic != NULL)
+	p = ntopic;
+
+	if(!EmptyString(topic))
 	{
 		/* convert to lower case */
 		for (i = 0; topic[i] != '\0' && i < sizeof(ntopic) - 1; i++)
 		{
-			ntopic[i] = ToLower(topic[i]);
+			*p++ = ToLower(topic[i]);
 		}
+
+		*p = '\0';
+		
 	}
 	else
 		strcpy(ntopic, "index");	/* list available help topics */
