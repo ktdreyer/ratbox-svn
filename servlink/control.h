@@ -1,5 +1,5 @@
 /************************************************************************
- *   IRC - Internet Relay Chat, servlink/src/control.h
+ *   IRC - Internet Relay Chat, servlink/control.h
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by

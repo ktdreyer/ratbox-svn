@@ -1,5 +1,5 @@
 /************************************************************************
- *   IRC - Internet Relay Chat, servlink/src/servlink.h
+ *   IRC - Internet Relay Chat, servlink/servlink.h
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -32,6 +32,25 @@
 #define LOCAL_FD_W              LOCAL_FD_R
 #define REMOTE_FD_W             REMOTE_FD_R
 #define NUM_FDS                 3       /* nfds for select */
+#endif
+
+#define SERVLINK_DEBUG_GDB      0x01
+#define SERVLINK_DEBUG_LOGS     0x02
+
+/* #define SERVLINK_DEBUG  SERVLINK_DEBUG_GDB|SERVLINK_DEBUG_LOGS */
+#undef SERVLINK_DEBUG 
+
+#if SERVLINK_DEBUG & SERVLINK_DEBUG_LOGS
+#define CIL 0
+#define DIL 1
+#define NIL 2
+#define DOL 3
+#define NOL 4
+
+extern FILE *logs[5];
+#define LOG_IO(log, data, len)  assert(fwrite(data, 1, len, logs[log]) == len);
+#else
+#define LOG_IO(log, data, len)
 #endif
 
 #define READLEN                  2048
@@ -94,6 +113,8 @@ struct slink_state
 #endif
 };
 
+
+extern int checkError(int);
 
 typedef void (io_callback)(void);
 

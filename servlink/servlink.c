@@ -1,5 +1,5 @@
 /************************************************************************
- *   IRC - Internet Relay Chat, servlink/src/servlink.c
+ *   IRC - Internet Relay Chat, servlink/servlink.c
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include <sys/time.h>
 
 #include <assert.h>
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -45,6 +46,10 @@ static void usage(void);
 
 struct slink_state       in_state;
 struct slink_state       out_state;
+
+#if SERVLINK_DEBUG & SERVLINK_DEBUG_LOG
+FILE *logs[7];
+#endif
 
 struct fd_table          fds[NUM_FDS] =
         {
@@ -76,14 +81,30 @@ int main(int argc, char *argv[])
   fd_set rfds;
   fd_set wfds;
   int i;
-
-#if 1
+#if SERVLINK_DEBUG & SERVLINK_DEBUG_LOG
+  pid_t pid = getpid();
+  char logfile[512] = "";
+  char lognames[5][8] = { "cin", "din", "nin",
+                                 "dout", "nout"
+                        };
+#endif
+  
+#if SERVLINK_DEBUG & SERVLINK_DEBUG_GDB
   int GDBAttached = 0;
 
   while (!GDBAttached)
     sleep(1);
 #endif
 
+#if SERVLINK_DEBUG & SERVLINK_DEBUG_LOG
+  for(i = 0; i < 5; i++)
+  {
+    sprintf(logfile, "%s/slink-%lu-%s.log",
+            "/usr/local/ircd/logs", pid, lognames[i]);
+    assert(logs[i] = fopen(logfile, "w"));
+  }
+#endif
+  
   /* Make sure we are running under hybrid.. */
   if (isatty(0) || argc != 1 || strcmp(argv[0], "-slink"))
     usage(); /* exits */
@@ -190,8 +211,8 @@ void process_command(struct ctrl_command *cmd)
         case CIPHER_RC5_16:
           in_state.crypt_state.cipher = EVP_rc5_32_12_16_cfb();
           in_state.crypt_state.rounds = 16;
-#endif
           break;
+#endif
         default:
           exit(1); /* invalid cipher */
           break;
@@ -253,8 +274,8 @@ void process_command(struct ctrl_command *cmd)
         case CIPHER_RC5_16:
           out_state.crypt_state.cipher = EVP_rc5_32_12_16_cfb();
           out_state.crypt_state.rounds = 16;
-#endif
           break;
+#endif
         default:
           exit(1); /* invalid cipher */
           break;
@@ -422,5 +443,31 @@ void process_command(struct ctrl_command *cmd)
       exit(1);
       break;
   }
+}
 
+int checkError(int ret)
+{
+  if (ret > 0) /* no error */
+    return ret;
+  if (ret == 0) /* EOF */
+    exit(1);
+  
+  /* ret == -1.. */
+  switch (errno) {
+    case EINPROGRESS:
+    case EWOULDBLOCK:
+#if EAGAIN != EWOULDBLOCK
+    case EAGAIN:
+#endif
+    case EALREADY:
+    case EINTR:
+#ifdef ERESTART
+    case ERESTART:
+#endif
+      /* non-fatal error, 0 bytes read */
+      return 0;
+  }
+
+  /* fatal error */
+  exit(1);
 }

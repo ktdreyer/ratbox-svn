@@ -1,5 +1,5 @@
 /************************************************************************
- *   IRC - Internet Relay Chat, servlink/src/io.c
+ *   IRC - Internet Relay Chat, servlink/io.c
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@
 #include "../include/setup.h"
 
 #include <assert.h>
-#include <errno.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
@@ -62,17 +61,16 @@ void send_data_blocking(int fd, unsigned char *data, int datalen)
       data += ret;
       datalen -= ret;
     }
-    if (ret == 0 || errno != EAGAIN)
-      exit(1);
+
+    ret = checkError(ret);
 
     FD_ZERO(&wfds);
     FD_SET(fd, &wfds);
 
     /* block until we can write to the fd */
-    while((ret = select(fd+1, NULL, &wfds, NULL, NULL)) == 0)
+    /* check error exits on fatal error, else 1/0 for success/fail */
+    while(!(ret = checkError(select(fd+1, NULL, &wfds, NULL, NULL))))
       ;
-    if (ret == -1)
-      exit(1);
   }
 }
 
@@ -88,6 +86,7 @@ void process_sendq(unsigned char *data, int datalen)
    * to any other fds anyway
    */
   send_data_blocking(REMOTE_FD_W, data, datalen);
+  LOG_IO(NOL, data, datalen);
 }
 
 /*
@@ -141,6 +140,7 @@ void process_recvq(unsigned char *data, int datalen)
   assert(blen);
   
   send_data_blocking(LOCAL_FD_W, buf, blen);
+  LOG_IO(DOL, buf, blen);
 }
 
 /* read_ctrl
@@ -160,11 +160,10 @@ void read_ctrl(void)
       cmd.data = NULL;
 
       /* read the command */
-      ret = read(CONTROL_FD_R, &cmd.command, 1);
-      if (ret == -1 && errno == EAGAIN)
+      if (!(ret = checkError(read(CONTROL_FD_R, &cmd.command, 1))))
         return;
-      else if (ret <= 0)
-        exit(1);
+
+      LOG_IO(CIL,&cmd.command,1);
     }
 
     /* read datalen for commands including data */
@@ -183,23 +182,19 @@ void read_ctrl(void)
       case CMD_INJECT_SENDQ:
         if (cmd.gotdatalen == 0)
         {
-          ret = read(CONTROL_FD_R, &tmp, 1);
-          if (ret == -1 && errno == EAGAIN)
+          if (!(ret = checkError(read(CONTROL_FD_R, &tmp, 1))))
             return;
-          else if (ret <= 0)
-            exit(1);
+          LOG_IO(CIL, &tmp, 1);
 
           cmd.datalen = tmp << 8;
           cmd.gotdatalen = 1;
         }
         if (cmd.gotdatalen == 1)
         {
-          ret = read(CONTROL_FD_R, &tmp, 1);
-          if (ret == -1 && errno == EAGAIN)
+          if (!(ret = checkError(read(CONTROL_FD_R, &tmp, 1))))
             return;
-          else if (ret <= 0)
-            exit(1);
-
+          LOG_IO(CIL, &tmp, 1);
+          
           cmd.datalen |= tmp;
           cmd.gotdatalen = 2;
 
@@ -232,16 +227,14 @@ void read_ctrl(void)
 
     if (cmd.readdata < cmd.datalen) /* try to get any remaining data */
     {
-      ret = read(CONTROL_FD_R, (cmd.data + cmd.readdata),
-                 cmd.datalen - cmd.readdata);
+      if (!(ret = checkError(read(CONTROL_FD_R,
+                                  (cmd.data + cmd.readdata),
+                                  cmd.datalen - cmd.readdata))))
+        return;
 
-      if (ret == 0 || (ret == -1 && errno != EAGAIN))
-        exit(1); /* EOF or error */
-      else if (ret == -1)
-        return; /* no data */
+      LOG_IO(CIL,(cmd.data+cmd.readdata),ret);
 
       cmd.readdata += ret;
-
       if (cmd.readdata < cmd.datalen)
         return;
     }
@@ -269,9 +262,10 @@ void read_data(void)
     buf = tmp_buf;
 #endif
     
-  while ((ret = read(LOCAL_FD_R, buf, READLEN)) > 0)
+  while ((ret = checkError(read(LOCAL_FD_R, buf, READLEN))))
   {
     blen = ret;
+    LOG_IO(DIL, buf, ret);
 #ifdef HAVE_LIBZ
     if (out_state.zip)
     {
@@ -307,15 +301,9 @@ void read_data(void)
 #endif
     
     assert(blen);
-    ret = write(REMOTE_FD_W, out_state.buf, blen);
-    if (ret <= 0)
-    {
-      if (ret == -1 && errno == EAGAIN)
-        ret = 0;
-      else
-        exit(1);
-    }
+    ret = checkError(write(REMOTE_FD_W, out_state.buf, blen));
 
+    LOG_IO(NOL,out_state.buf,blen);
     if (ret < blen)
     {
       /* write incomplete, register write cb */
@@ -327,10 +315,6 @@ void read_data(void)
       return;
     }
   }
-
-  /* read failed */
-  if (ret == 0 || errno != EAGAIN)
-    exit(1); /* EOF or error */
 }
 
 void write_net(void)
@@ -340,12 +324,10 @@ void write_net(void)
   if (!out_state.len)
     exit(1);
 
-  ret = write(REMOTE_FD_W, (out_state.buf + out_state.ofs), out_state.len);
-
-  if (ret == -1 && errno == EAGAIN)
-    return;
-  else if (ret <= 0)
-    exit(1);
+  if (!(ret = checkError(write(REMOTE_FD_W,
+                               (out_state.buf + out_state.ofs),
+                               out_state.len))))
+    return; /* no data waiting */
 
   out_state.len -= ret;
 
@@ -378,9 +360,10 @@ void read_net(void)
     buf = tmp_buf;
 #endif
 
-  while ((ret = read(REMOTE_FD_R, buf, READLEN)) > 0)
+  while ((ret = checkError(read(REMOTE_FD_R, buf, READLEN))))
   {
     blen = ret;
+    LOG_IO(NIL,buf,ret);
 #ifdef HAVE_LIBCRYPTO
     if (in_state.crypt)
     {
@@ -417,14 +400,8 @@ void read_net(void)
 
     assert(blen);
     
-    ret = write(LOCAL_FD_W, in_state.buf, blen);
-    if (ret <= 0)
-    {
-      if (ret == -1 && errno == EAGAIN)
-        ret = 0;
-      else
-        exit(1);
-    }
+    ret = checkError(write(LOCAL_FD_W, in_state.buf, blen));
+    LOG_IO(DOL,in_state.buf,blen);
 
     if (ret < blen)
     {
@@ -437,9 +414,6 @@ void read_net(void)
       return;
     }
   }
-
-  if (ret == 0 || errno != EAGAIN)
-    exit(1); /* EOF or error */
 }
 
 void write_data(void)
@@ -449,12 +423,10 @@ void write_data(void)
   if (!in_state.len)
     exit(1);
 
-  ret = write(LOCAL_FD_W, (in_state.buf + in_state.ofs), in_state.len);
-
-  if (ret == -1 && errno == EAGAIN)
+  if (!(ret = checkError(write(LOCAL_FD_W,
+                               (in_state.buf + in_state.ofs),
+                               in_state.len))))
     return;
-  else if (ret <= 0)
-    exit(1);
 
   in_state.len -= ret;
   assert(in_state.len >= 0);
