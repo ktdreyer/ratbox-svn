@@ -63,6 +63,15 @@ static int event_count = 0;
 static time_t event_time_min = -1;
 
 
+/*
+ * void eventAdd(const char *name, EVH *func, void *arg, time_t when)
+ *
+ * Input: Name of event, function to call, arguments to pass, and frequency
+ *	  of the event.
+ * Output: None
+ * Side Effects: Adds the event to the event list.
+ */
+
 void
 eventAdd(const char *name, EVH *func, void *arg, time_t when)
 {
@@ -87,6 +96,14 @@ eventAdd(const char *name, EVH *func, void *arg, time_t when)
     event_time_min = event_table[i].when;
 }
 
+/*
+ * void eventDelete(EVH *func, void *arg)
+ *
+ * Input: Function handler, argument that was passed.
+ * Output: None
+ * Side Effects: Removes the event from the event list
+ */
+
 void
 eventDelete(EVH *func, void *arg)
 {
@@ -103,7 +120,16 @@ eventDelete(EVH *func, void *arg)
   event_table[i].active = 0;
 }
 
-/* same as eventAdd but adds a random offset within +-1/3 of delta_ish */
+/* 
+ * void eventAddIsh(const char *name, EVH *func, void *arg, time_t delta_isa)
+ *
+ * Input: Name of event, function to call, arguments to pass, and frequency
+ *	  of the event.
+ * Output: None
+ * Side Effects: Adds the event to the event list within +- 1/3 of the
+ *	         specified frequency.
+ */
+ 
 void
 eventAddIsh(const char *name, EVH *func, void *arg, time_t delta_ish)
 {
@@ -118,6 +144,14 @@ eventAddIsh(const char *name, EVH *func, void *arg, time_t delta_ish)
     }
   eventAdd(name, func, arg, delta_ish);
 }
+
+/*
+ * void eventRun(void)
+ *
+ * Input: None
+ * Output: None
+ * Side Effects: Runs pending events in the event list
+ */
 
 void
 eventRun(void)
@@ -140,6 +174,14 @@ eventRun(void)
 }
 
 
+/*
+ * time_t eventNextTime(void)
+ * 
+ * Input: None
+ * Output: Specifies the next time eventRun() should be run
+ * Side Effects: None
+ */
+ 
 time_t
 eventNextTime(void)
 {
@@ -158,11 +200,26 @@ eventNextTime(void)
   return event_time_min;
 }
 
+/*
+ * void eventInit(void)
+ *
+ * Input: None
+ * Output: None
+ * Side Effects: Initializes the event system. 
+ */
 void
 eventInit(void)
 {
   last_event_ran = NULL;
 }
+
+/*
+ * int eventFind(EVH *func, void *arg)
+ *
+ * Input: Event function and the argument passed to it
+ * Output: Index to the slow in the event_table
+ * Side Effects: None
+ */
 
 int
 eventFind(EVH *func, void *arg)
@@ -177,6 +234,14 @@ eventFind(EVH *func, void *arg)
     }
   return -1;
 }
+
+/* 
+ * void show_events(struct Client *source_p)
+ *
+ * Input: Client requesting the event
+ * Output: List of events
+ * Side Effects: None
+ */
 
 void
 show_events(struct Client *source_p)
@@ -205,7 +270,8 @@ show_events(struct Client *source_p)
   sendto_one(source_p, ":%s NOTICE %s :*** Finished", me.name, source_p->name);
 }
 
-/* void set_back_events(time_t by)
+/* 
+ * void set_back_events(time_t by)
  * Input: Time to set back events by.
  * Output: None.
  * Side-effects: Sets back all events by "by" seconds.
