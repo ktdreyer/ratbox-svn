@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "getopt.h"
+#include "ircd_getopt.h"
 #include "debug.h"
 #include "config.h"
 

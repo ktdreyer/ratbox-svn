@@ -37,12 +37,6 @@
 #include "setup.h"
 #include "config.h"
 
-#if 0
-#if defined(HAVE_GETOPT_H)
-#include <getopt.h>
-#endif /* HAVE_GETOPT_H */
-#endif
-
 #ifdef USE_GETTEXT
 #include <libintl.h>
 #endif
@@ -86,27 +80,7 @@
 #include "memory.h"
 #include "hook.h"
 #include "debug.h"
-/* XXX perhaps should call this lgetopts.h instead? */
-#include "getopts.h"
-
-/*
- * XXX Is this a redundant comment now?
- * for getopt
- * XXX this is going to need confirmation on other OS's
- *
- * #include <getopt.h>
- * Solaris has getopt.h, you should too... hopefully
- * BSD declares them in stdlib.h
- * extern char *optarg;
- * 
- * for FreeBSD the following are defined:
- *
- * extern char *optarg;
- * extern int optind;
- * extern in optopt;
- * extern int opterr;
- * extern in optreset;
- */
+#include "ircd_getopt.h"
 
 /*
  * Try and find the correct name to use with getrlimit() for setting the max.
