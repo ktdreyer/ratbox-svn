@@ -1,3 +1,17 @@
+androsyn    2002/07/14 00:10:35 EDT	(20020714_2)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+  Log:
+  Remove -W flags from the build for upcoming release
+  
+  Revision  Changes    Path
+  7.147     +3 -1      ircd-hybrid-7/autoconf/configure.in
+  7.150     +211 -209  ircd-hybrid-7/configure
+
+
+
 androsyn    2002/07/13 21:30:29 EDT	(20020714_1)
 
   Modified files:
