@@ -1,3 +1,7 @@
+*** 20010921_1 by wcampbel
+Do not use TAB's in any text that is sent to a client.
+
+
 *** 20010920_3 by wcampbel
 Fixed my typo'ed ChangeLog entry...# is not legal, dns is legal
 
