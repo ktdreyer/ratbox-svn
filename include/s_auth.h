@@ -26,7 +26,7 @@
 #ifndef INCLUDED_config_h
 #include "config.h"
 #endif
-
+#include "res.h"
 /* 
  * How many auth allocations to allocate in a block. I'm guessing that
  * a good number here is 64, because these are temporary and don't live
@@ -39,6 +39,7 @@ struct Client;
 
 struct AuthRequest {
   struct Client*      client;    /* pointer to client struct for request */
+  struct DNSQuery     query;     /* DNS query */
   unsigned int        flags;     /* current state of request */
   int                 fd;        /* file descriptor for auth queries */
   time_t              timeout;   /* time when query expires */

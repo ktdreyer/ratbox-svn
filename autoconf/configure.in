@@ -24,6 +24,7 @@ AC_PATH_PROG(CP, cp)
 AC_PATH_PROG(MV, mv)
 AC_PATH_PROG(SED, sed)
 AC_PATH_PROG(YACC, yacc)
+AC_PATH_PROG(AR, ar)
 AC_PROG_INSTALL
 AC_PROG_LEX
 
@@ -314,6 +315,7 @@ AC_OUTPUT(                   \
  iauth/source/Makefile       \
  contrib/Makefile            \
  src/Makefile                \
+ adns/Makefile		     \
  include/Makefile            \
  messages/Makefile           \
  modules/Makefile            \

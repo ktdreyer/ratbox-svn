@@ -161,7 +161,9 @@ do { \
 #define PIN_ADDR(x) x->sins.sin.s_addr 
 #define IN_ADDR(x) x.sins.sin.s_addr
 
-
+#ifndef AF_INET6
+#define AF_INET6 10 /* Dummy AF_INET6 declaration */
+#endif 
 #define DEF_FAM AF_INET
 
 #endif

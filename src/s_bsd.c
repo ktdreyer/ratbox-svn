@@ -82,7 +82,7 @@ static const char *comm_err_str[] = { "Comm OK", "Error during bind()",
 
 static void comm_connect_callback(int fd, int status);
 static PF comm_connect_timeout;
-static void comm_connect_dns_callback(void *vptr, struct DNSReply *reply);
+static void comm_connect_dns_callback(void *vptr, adns_answer *reply);
 static PF comm_connect_tryconnect;
 
 /* close_all_connections() can be used *before* the system come up! */
@@ -275,11 +275,13 @@ void close_connection(struct Client *cptr)
   else
     ServerStats->is_ni++;
   
+#if 0
   if (cptr->localClient->dns_reply)
     {
       --cptr->localClient->dns_reply->ref_count;
       cptr->localClient->dns_reply = 0;
     }
+#endif
   if (-1 < cptr->fd)
     {
       /* attempt to flush any pending dbufs. Evil, but .. -- adrian */
@@ -355,6 +357,17 @@ void add_connection(struct Listener* listener, int fd)
   new_client->localClient->port = ntohs(S_PORT(irn));
   copy_s_addr(IN_ADDR(new_client->localClient->ip),  S_ADDR(irn));
   inetntop(DEF_FAM, &IN_ADDR(new_client->localClient->ip), new_client->localClient->sockhost, HOSTIPLEN);
+#ifdef IPV6
+  if(!IN6_IS_ADDR_V4MAPPED(&IN_ADDR(new_client->localClient->ip)))
+  	new_client->localClient->aftype = AF_INET6;
+  else
+  {
+	memmove(&new_client->localClient->ip.sins.sin.s_addr,&IN_ADDR(new_client->localClient->ip)[12], sizeof(unsigned long));
+	new_client->localClient->aftype = AF_INET;  	
+  }
+#else
+  new_client->localClient->aftype = AF_INET;
+#endif
   strcpy(new_client->host, new_client->localClient->sockhost);
 
   new_client->fd        = fd;
@@ -554,10 +567,8 @@ comm_checktimeouts(void *notused)
  */
 void
 comm_connect_tcp(int fd, const char *host, u_short port, 
-    struct sockaddr *clocal, int socklen, CNCB *callback, void *data)
+    struct sockaddr *clocal, int socklen, CNCB *callback, void *data, int aftype)
 {
-    struct DNSQuery query;
-
     fd_table[fd].flags.called_connect = 1;
     fd_table[fd].connect.callback = callback;
     fd_table[fd].connect.data = data;
@@ -586,9 +597,9 @@ comm_connect_tcp(int fd, const char *host, u_short port,
     if(!inetpton(DEF_FAM, host, S_ADDR(&fd_table[fd].connect.hostaddr)))
     {
         /* Send the DNS request, for the next level */
-        query.vptr = &fd_table[fd];
-        query.callback = comm_connect_dns_callback;
-        gethost_byname(host, &query);
+        fd_table[fd].dns_query.ptr = &fd_table[fd];
+        fd_table[fd].dns_query.callback = comm_connect_dns_callback;
+	adns_gethost(host, aftype, &fd_table[fd].dns_query);
     } else {
         /* We have a valid IP, so we just call tryconnect */
         /* Make sure we actually set the timeout here .. */
@@ -641,12 +652,12 @@ comm_connect_timeout(int fd, void *notused)
  * otherwise we initiate the connect()
  */
 static void
-comm_connect_dns_callback(void *vptr, struct DNSReply *reply)
+comm_connect_dns_callback(void *vptr, adns_answer *reply)
 {
     fde_t *F = vptr;
 
     /* Error ? */
-    if (reply == NULL)
+    if (reply->status != adns_s_ok)
       {
         /* Yes, callback + return */
         comm_connect_callback(F->fd, COMM_ERR_DNS);
@@ -662,8 +673,20 @@ comm_connect_dns_callback(void *vptr, struct DNSReply *reply)
      * the DNS record around, and the DNS cache is gone anyway.. 
      *     -- adrian
      */
-    memcpy(&S_ADDR(F->connect.hostaddr), reply->hp->h_addr, sizeof(struct irc_inaddr));
-
+#ifdef IPV6
+    if(reply->rrs.addr->addr.sa.sa_family == AF_INET6) {
+	copy_s_addr(S_ADDR(F->connect.hostaddr), reply->rrs.addr->addr.inet6.sin6_addr.s6_addr);
+    } 
+    else {
+	/* IPv4 mapped address */
+	/* This is lazy... */
+    	memset(&F->connect.hostaddr.sins.sin6.sin6_addr.s6_addr, 0x0000, 10); 
+	memset(&F->connect.hostaddr.sins.sin6.sin6_addr.s6_addr[10], 0xffff, 2);
+	memcpy(&F->connect.hostaddr.sins.sin6.sin6_addr.s6_addr[12], &reply->rrs.addr->addr.inet.sin_addr.s_addr, 4);
+    }
+#else
+	F->connect.hostaddr.sins.sin.sin_addr.s_addr = reply->rrs.addr->addr.inet.sin_addr.s_addr;
+#endif
     /* Now, call the tryconnect() routine to try a connect() */
     comm_connect_tryconnect(F->fd, NULL);
 }

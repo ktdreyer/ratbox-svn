@@ -112,14 +112,14 @@ int     get_client_ping(struct Client *acptr)
   int   ping = 0;
   int   ping2;
   struct ConfItem       *aconf;
-  dlink_node		*link;
+  dlink_node		*nlink;
 
 
   if(acptr->localClient->confs.head != NULL)
     {
-      for(link = acptr->localClient->confs.head; link; link = link->next)
+      for(nlink = acptr->localClient->confs.head; nlink; nlink = nlink->next)
 	{
-	  aconf = link->data;
+	  aconf = nlink->data;
 	  if (aconf->status & (CONF_CLIENT|CONF_SERVER))
 	    {
 	      ping2 = get_conf_ping(aconf);

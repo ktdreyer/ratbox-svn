@@ -364,7 +364,7 @@ static time_t io_loop(time_t delay)
 
   /* Do IO events */
   comm_select(delay);
-
+  /* Do DNS events */
   /*
    * Free up dead clients
    */
@@ -523,7 +523,9 @@ int main(int argc, char *argv[])
 
   init_sys(bootDaemon);
   init_log(logFileName);
+
   init_netio();		/* This needs to be setup early ! -- adrian */
+  init_resolver();	/* Needs to be setup before the io loop */
 
   initialize_message_files();
 
@@ -547,7 +549,6 @@ int main(int argc, char *argv[])
 
   initServerMask();
 
-  init_resolver();
 
   init_auth();			/* Initialise the auth code */
 

@@ -1,47 +1,32 @@
 /*
- * include/res.h (C)opyright 1992 Darren Reed.
- *
- * $Id$
+ * $Id$ 
+ * New res.h
+ * Aaron Sethman <androsyn@ratbox.org>
  */
-#ifndef INCLUDED_res_h
-#define INCLUDED_res_h
 
-#ifndef INCLUDED_sys_types_h
-#include <sys/types.h>       /* time_t */
-#define INCLUDED_sys_types_h
-#endif
+#ifndef _RES_H_INCLUDED
+#define _RES_H_INCLUDED 1
 
-struct Client;
-struct hostent;
+#include "config.h"
+#include "ircd_defs.h"
+#include "../adns/adns.h"
 
-struct DNSReply {
-  struct hostent* hp;        /* hostent struct  */
-  int             ref_count; /* reference count */
-};
 
 struct DNSQuery {
-  void* vptr;               /* pointer used by callback to identify request */
-  void (*callback)(void* vptr, struct DNSReply* reply); /* callback to call */
+	void *ptr;
+	adns_query query;
+	adns_answer answer;
+	void (*callback)(void* vptr, adns_answer *reply);
 };
 
-extern void get_res(void);
-extern void gethost_byname(const char* name, const struct DNSQuery* req);
-extern void gethost_byaddr(struct irc_inaddr *in, const struct DNSQuery* req);
-extern int             init_resolver(void);
-extern void            restart_resolver(void);
-extern void            timeout_resolver(void *);
-extern void            delete_resolver_queries(const void* vptr);
-extern unsigned long   cres_mem(struct Client* cptr);
+void init_resolver(void);
+void restart_resolver(void);
+void timeout_adns (void * );
+void dns_writeable (int fd , void *ptr );
+void dns_readable (int fd , void *ptr );
+void dns_do_callbacks(void);
+void dns_select (void);
+void adns_gethost (const char *name , int aftype , struct DNSQuery *req );
+void adns_getaddr (struct irc_inaddr *addr , int aftype , struct DNSQuery *req );
 
-/*
- * add_local_domain - append local domain suffix to hostnames that 
- * don't contain a dot '.'
- * name - string to append to
- * len  - total length of the buffer
- * name is modified only if there is enough space in the buffer to hold
- * the suffix
- */
-extern void add_local_domain(char* name, int len);
-
-#endif /* INCLUDED_res_h */
-
+#endif

@@ -204,55 +204,30 @@ static void release_auth_client(struct Client* client)
  * set the client on it's way to a connection completion, regardless
  * of success of failure
  */
-static void auth_dns_callback(void* vptr, struct DNSReply* reply)
+static void auth_dns_callback(void* vptr, adns_answer* reply)
 {
-  struct AuthRequest* auth = (struct AuthRequest*) vptr;
-
-  ClearDNSPending(auth);
-  if (reply)
-    {
-      struct hostent* hp = reply->hp;
-      int i;
-      /*
-       * Verify that the host to ip mapping is correct both ways and that
-       * the ip#(s) for the socket is listed for the host.
-       */
-      for (i = 0; hp->h_addr_list[i]; ++i)
+	  
+	struct AuthRequest* auth = (struct AuthRequest*) vptr;
+	ClearDNSPending(auth);
+	if(reply && reply->status == adns_s_ok)
 	{
-
-	  if (0 == memcmp(hp->h_addr_list[i],
-			  IN_ADDR(&auth->client->localClient->ip),
-			  sizeof(struct irc_inaddr)))
-	    break;
+		assert(reply != 0);
+		strncpy_irc(auth->client->host, *reply->rrs.str, HOSTLEN);
+		sendheader(auth->client, REPORT_FIN_DNS);
+	} else {
+		strcpy(auth->client->host, auth->client->localClient->sockhost);
+		sendheader(auth->client, REPORT_FAIL_DNS);
 	}
-      if (!hp->h_addr_list[i])
-	sendheader(auth->client, REPORT_IP_MISMATCH);
-      else
+	
+	if (!IsDoingAuth(auth))
 	{
-	  ++reply->ref_count;
-	  auth->client->localClient->dns_reply = reply;
-	  strncpy_irc(auth->client->host, hp->h_name, HOSTLEN);
-	  sendheader(auth->client, REPORT_FIN_DNS);
-	}
-    }
-  else
-    {
-      /*
-       * this should have already been done by s_bsd.c in add_connection
-       */
-      strcpy(auth->client->host, auth->client->localClient->sockhost);
-      sendheader(auth->client, REPORT_FAIL_DNS);
-    }
-  auth->client->host[HOSTLEN] = '\0';
-  if (!IsDoingAuth(auth))
-    {
-      release_auth_client(auth->client);
-      unlink_auth_request(auth, &auth_poll_list);
+		release_auth_client(auth->client);
+		unlink_auth_request(auth, &auth_poll_list);
 #ifdef USE_IAUTH
-      link_auth_request(auth, &auth_client_list);
+		link_auth_request(auth, &auth_client_list);
 #endif
-      free_auth_request(auth);
-    }
+		free_auth_request(auth);
+	}
 }
 
 /*
@@ -330,8 +305,9 @@ static int start_auth_query(struct AuthRequest* auth)
 
   auth->fd = fd;
   SetAuthConnect(auth);
+  
   comm_connect_tcp(fd, auth->client->localClient->sockhost, 113, 
-    (struct sockaddr *)&SOCKADDR(localaddr), locallen, auth_connect_callback, auth);
+    (struct sockaddr *)&SOCKADDR(localaddr), locallen, auth_connect_callback, auth, DEF_FAM);
   return 1; /* We suceed here for now */
 }
 
@@ -401,9 +377,7 @@ static char* GetValidIdent(char *buf)
  */
 void start_auth(struct Client* client)
 {
-  struct DNSQuery     query;
   struct AuthRequest* auth = 0;
-
   assert(0 != client);
   auth = make_auth_request(client);
 
@@ -436,16 +410,17 @@ void start_auth(struct Client* client)
 	/* IAuthQuery(client); */
 #endif /* 0 */
 
-  query.vptr     = auth;
-  query.callback = auth_dns_callback;
-
+  client->localClient->dns_query.ptr = auth;
+  client->localClient->dns_query.callback = auth_dns_callback;
   sendheader(client, REPORT_DO_DNS);
 
   /* No DNS cache now, remember? -- adrian */
-  gethost_byaddr(&client->localClient->ip, &query);
+  adns_getaddr(&client->localClient->ip, client->localClient->aftype, &client->localClient->dns_query);
   SetDNSPending(auth);
+#if 1
   start_auth_query(auth);
   link_auth_request(auth, &auth_poll_list);
+#endif
 }
 
 /*
@@ -473,7 +448,8 @@ timeout_auth_queries_event(void *notused)
 	    sendheader(auth->client, REPORT_FAIL_ID);
 	  if (IsDNSPending(auth))
 	    {
-	      delete_resolver_queries(auth);
+	      adns_cancel(auth->client->localClient->dns_query.query);	
+	      auth->client->localClient->dns_query.query = NULL;
 	      sendheader(auth->client, REPORT_FAIL_DNS);
 	    }
 	  log(L_INFO, "DNS/AUTH timeout %s",

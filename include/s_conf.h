@@ -69,6 +69,8 @@ struct ConfItem
   time_t           hold;     /* Hold action until this time (calendar time) */
   char*		   className;   /* Name of class */
   struct Class*    c_class;     /* Class of connection */
+  struct DNSQuery  dns_query;
+  int		   aftype;
   int              dns_pending; /* 1 if dns query pending, 0 otherwise */
 };
 

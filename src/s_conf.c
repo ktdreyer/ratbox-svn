@@ -37,6 +37,7 @@
 #include <assert.h>
 
 #include "config.h"
+#include "ircd_defs.h"
 #include "tools.h"
 #include "s_conf.h"
 #include "s_stats.h"
@@ -53,7 +54,6 @@
 #include "listener.h"
 #include "hostmask.h"
 #include "numeric.h"
-#include "res.h"    /* gethost_byname, gethost_byaddr */
 #include "fdlist.h"
 #include "s_bsd.h"
 #include "s_log.h"
@@ -138,13 +138,17 @@ struct ConfItem        *u_conf = ((struct ConfItem *)NULL);
  * a non-null pointer, otherwise hp will be null.
  * if successful save hp in the conf item it was called with
  */
-static void conf_dns_callback(void* vptr, struct DNSReply* reply)
+static void conf_dns_callback(void* vptr, adns_answer *reply)
 {
-  struct ConfItem* aconf = (struct ConfItem*) vptr;
-  aconf->dns_pending = 0;
-  if (reply)
-	    
-    memcpy(&IN_ADDR(aconf->ipnum), reply->hp->h_addr, sizeof(struct irc_inaddr));
+  struct ConfItem *aconf = (struct ConfItem *) vptr;
+  if(reply->status == adns_s_ok)
+  {
+#ifdef IPV6
+	copy_s_addr(IN_ADDR(aconf->ipnum), reply->rrs.in6addr->s6_addr);
+#else
+	copy_s_addr(IN_ADDR(aconf->ipnum), reply->rrs.inaddr->s_addr);
+#endif
+  } 
 }
 
 /*
@@ -156,10 +160,9 @@ void conf_dns_lookup(struct ConfItem* aconf)
 {
   if (!aconf->dns_pending)
     {
-      struct DNSQuery query;
-      query.vptr     = aconf;
-      query.callback = conf_dns_callback;
-      gethost_byname(aconf->host, &query);
+      aconf->dns_query.ptr = aconf;
+      aconf->dns_query.callback = conf_dns_callback;
+      adns_gethost(aconf->host, aconf->aftype, &aconf->dns_query);
       aconf->dns_pending = 1;
     }
 }
@@ -200,7 +203,7 @@ void free_conf(struct ConfItem* aconf)
   assert(0 != aconf);
 
   if (aconf->dns_pending)
-    delete_resolver_queries(aconf);
+    adns_cancel(aconf->dns_query.query);
   MyFree(aconf->host);
   if (aconf->passwd)
     memset(aconf->passwd, 0, strlen(aconf->passwd));
@@ -450,7 +453,9 @@ int check_client(struct Client *cptr, struct Client *sptr, char *username)
 
     case 0:
     default:
+#if 0
       release_client_dns_reply(sptr);
+#endif
       break;
     }
   return(i);
@@ -1380,7 +1385,9 @@ int rehash(struct Client *cptr,struct Client *sptr, int sig)
   }
 
   close_listeners();
+#if 0
   restart_resolver();
+#endif
   read_conf_files(NO);
 
   if (ServerInfo.description != NULL)

@@ -85,6 +85,7 @@ accept_password { return ACCEPT_PASSWORD; }
 action		{ return ACTION; }
 admin		{ return ADMIN; }
 administrator	{ return ADMIN; }
+aftype		{ return AFTYPE; }
 auth		{ return AUTH; }
 autoconn	{ return AUTOCONN; }
 caller_id_wait	{ return CALLER_ID_WAIT; }
@@ -117,6 +118,8 @@ hub_mask	{ return HUB_MASK; }
 idletime        { return IDLETIME; }
 include		{ return INCLUDE; }
 ip		{ return IP; }
+ipv4            { return T_IPV4; }
+ipv6            { return T_IPV6; }
 kill		{ return KILL; }
 kline		{ return KLINE; }
 kline_exempt	{ return KLINE_EXEMPT; }

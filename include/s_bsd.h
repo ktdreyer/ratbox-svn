@@ -70,7 +70,7 @@ extern void  comm_settimeout(int, time_t, PF *, void *);
 extern void  comm_setflush(int, time_t, PF *, void *);
 extern void  comm_checktimeouts(void *);
 extern void  comm_connect_tcp(int, const char *, u_short,
-                 struct sockaddr *, int, CNCB *, void *);
+                 struct sockaddr *, int, CNCB *, void *, int);
 extern const char * comm_errstr(int status);
 extern int   comm_open(int family, int sock_type, int proto,
                  const char *note);

@@ -17,7 +17,7 @@
 #include <netinet/in.h>
 #include "config.h"
 #include "ircd_defs.h"
-
+#include "res.h"
 #define FD_DESC_SZ 32
 
 /*
@@ -94,6 +94,7 @@ struct _fde {
     PF *flush_handler;
     void *flush_data;
     time_t flush_timeout;
+    struct DNSQuery dns_query;
     struct {
         unsigned int open:1;
         unsigned int close_request:1;

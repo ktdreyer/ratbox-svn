@@ -79,6 +79,7 @@ int   class_redirport_var;
 %token  ACCEPT_PASSWORD
 %token  ACTION
 %token  ADMIN
+%token  AFTYPE
 %token  AUTH
 %token  AUTOCONN
 %token  CLASS
@@ -151,6 +152,8 @@ int   class_redirport_var;
 %token  SPOOF
 %token  SPOOF_NOTICE
 %token  TREJECT
+%token  T_IPV4
+%token  T_IPV6
 %token  TNO
 %token  TYES
 %token  T_L_CRIT
@@ -1049,7 +1052,7 @@ connect_items:  connect_items connect_item |
                 connect_item
 
 connect_item:   connect_name | connect_host | connect_send_password |
-                connect_accept_password | connect_port |
+                connect_accept_password | connect_port | connect_aftype |
                 connect_lazylink | connect_hub_mask | connect_leaf_mask |
                 connect_class | connect_auto | connect_encrypted |
                 error
@@ -1085,6 +1088,19 @@ connect_accept_password: ACCEPT_PASSWORD '=' QSTRING ';'
   };
 
 connect_port:   PORT '=' NUMBER ';' { yy_aconf->port = yylval.number; };
+
+
+connect_aftype: 	AFTYPE '=' T_IPV4 ';'
+  {
+    yy_aconf->aftype = AF_INET;
+#ifdef IPV6
+  }
+			|
+			AFTYPE '=' T_IPV6 ';'
+  {
+    yy_aconf->aftype = AF_INET6;
+#endif
+  };
 
 connect_lazylink:       LAZYLINK '=' TYES ';'
   {

@@ -38,7 +38,6 @@
 #include "s_gline.h"
 #include "numeric.h"
 #include "packet.h"
-#include "res.h"
 #include "s_auth.h"
 #include "s_bsd.h"
 #include "s_conf.h"
@@ -205,8 +204,9 @@ void _free_client(struct Client* cptr)
       if (-1 < cptr->fd)
 	fd_close(cptr->fd);
 
-      if (cptr->localClient->dns_reply)
-	--cptr->localClient->dns_reply->ref_count;
+
+//      if (cptr->localClient->dns_reply)
+//	--cptr->localClient->dns_reply->ref_count;
 
       mem_frob(cptr->localClient, sizeof(struct LocalUser));
       if(BlockHeapFree(localUserFreeList, cptr->localClient))
@@ -925,6 +925,7 @@ int check_registered(struct Client* client)
  * release_client_dns_reply - remove client dns_reply references
  *
  */
+#if 0
 void release_client_dns_reply(struct Client* client)
 {
   assert(0 != client);
@@ -934,7 +935,7 @@ void release_client_dns_reply(struct Client* client)
       client->localClient->dns_reply = 0;
     }
 }
-
+#endif
 /*
  * get_client_name -  Return the name of the client
  *    for various tracking and
@@ -1004,7 +1005,7 @@ const char* get_client_host(struct Client* client)
 
   if (!MyConnect(client))
     return client->name;
-  if (!client->localClient->dns_reply)
+  if (client->localClient->dns_query.answer.status != adns_s_ok)
     return get_client_name(client, HIDE_IP);
   else
     {
@@ -1318,7 +1319,8 @@ const char* comment         /* Reason for the exit */
       if(sptr->flags & FLAGS_IPHASH)
       remove_one_ip(&sptr->localClient->ip);
 
-      delete_resolver_queries(sptr);
+      if(sptr->localClient->dns_query.query != NULL)
+	      adns_cancel(sptr->localClient->dns_query.query);
       delete_identd_queries(sptr);
 
       /* This sptr could have status of one of STAT_UNKNOWN, STAT_CONNECTING

@@ -386,8 +386,9 @@ void count_memory(struct Client *sptr)
              dbuf_used_count, dbuf_used, DBufMaxAllocated );
 #endif
 
+#if 0
   rm = cres_mem(sptr);
-
+#endif
   count_scache(&number_servers_cached,&mem_servers_cached);
 
   sendto_one(sptr, ":%s %d %s :scache %u(%lu)",
