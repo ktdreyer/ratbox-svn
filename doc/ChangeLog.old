@@ -1,3 +1,8 @@
+*** 20010213_6 by androsyn
+Fixed adns for non gcc compilers.
+
+
+
 *** 20010213_5 by db
 - updated TODO list
 
