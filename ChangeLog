@@ -1,3 +1,15 @@
+leeh        2004/03/29 15:25:42 EST	(20040329_7)
+
+  Modified files:
+    src                  balloc.c 
+  Log:
+  - blockheap_fail() doesnt take printf args..
+  
+  Revision  Changes    Path
+  7.71      +1 -1      ircd-ratbox/src/balloc.c
+
+
+
 androsyn    2004/03/29 15:15:58 EST	(20040329_6)
 
   Modified files:
