@@ -1,3 +1,16 @@
+ejb         2002/08/10 10:47:21 EDT	(20020810_23)
+
+  Modified files:
+    src                  newconf.c 
+  Log:
+  - inverse the meaning of spoof_notice since it's inversed again
+    in conf_end_auth.
+  
+  Revision  Changes    Path
+  7.13      +4 -2      ircd-ratbox/src/newconf.c
+
+
+
 ejb         2002/08/10 10:38:27 EDT	(20020810_22)
 
   Modified files:
