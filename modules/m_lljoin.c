@@ -158,8 +158,7 @@ int     ms_lljoin(struct Client *cptr,
   {
     if (chptr)
     {
-      if ( (vchan_chptr = select_vchan(chptr, cptr, acptr, vkey, chname)) )
-        return 0;
+      vchan_chptr = select_vchan(chptr, cptr, acptr, vkey, chname);
     }
     else
     {
@@ -167,9 +166,6 @@ int     ms_lljoin(struct Client *cptr,
       flags = CHFL_CHANOP;
     }
     
-    if (!chptr)
-      return 0;
-      
     if (vchan_chptr != chptr)
     {
       root_vchan = chptr;
@@ -177,6 +173,9 @@ int     ms_lljoin(struct Client *cptr,
     }
     else
       root_vchan = chptr;
+
+    if(!chptr || !root_vchan)
+      return 0;
 
     if (chptr->users == 0)
       flags = CHFL_CHANOP;
