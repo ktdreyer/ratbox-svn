@@ -916,13 +916,10 @@ chm_ban(struct Client *client_p, struct Client *source_p,
     mask = raw_mask;
   else
     mask = pretty_mask(raw_mask);
-    
-  /* Cant do this - older servers dont.. it WILL cause a desync, but should
-   * be limited by our input buffer anyway --fl_
-   * 
-   * if (strlen(mask) > HOSTLEN+NICKLEN+USERLEN)
-   *   return;
-   */
+
+  /* we'd have problems parsing this, hyb6 does it too */
+  if(strlen(mask) > (MODEBUFLEN - 2))
+    return;
 
   /* if we're adding a NEW id */
   if (dir == MODE_ADD) 
@@ -1020,6 +1017,9 @@ chm_except(struct Client *client_p, struct Client *source_p,
     mask = raw_mask;
   else
     mask = pretty_mask(raw_mask);
+
+  if(strlen(mask) > (MODEBUFLEN - 2))
+    return;
 
   /* If we're adding a NEW id */
   if (dir == MODE_ADD)
@@ -1122,6 +1122,9 @@ chm_invex(struct Client *client_p, struct Client *source_p,
     mask = raw_mask;
   else
     mask = pretty_mask(raw_mask);
+
+  if(strlen(mask) > (MODEBUFLEN - 2))
+    return;
 
   if(dir == MODE_ADD)
   {
