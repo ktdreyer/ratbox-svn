@@ -1,3 +1,38 @@
+leeh        2003/08/31 20:46:53 EDT	(20030901_0)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              client.h rsa.h s_conf.h s_serv.h tools.h 
+    modules              Makefile.in m_capab.c 
+    modules/core         m_server.c 
+    src                  newconf.c rsa.c s_conf.c s_serv.c tools.c 
+  Removed files:
+    doc/technical        README.openssl 
+    modules              m_cryptlink.c 
+  Log:
+  - removed encrypted links
+  
+  Revision  Changes    Path
+  7.224     +0 -55     ircd-ratbox/doc/example.conf
+  7.60      +0 -55     ircd-ratbox/doc/example.efnet.conf
+  1.8       +0 -247    ircd-ratbox/doc/technical/README.openssl (dead)
+  7.221     +0 -20     ircd-ratbox/include/client.h
+  7.16      +0 -3      ircd-ratbox/include/rsa.h
+  7.254     +0 -10     ircd-ratbox/include/s_conf.h
+  7.85      +3 -118    ircd-ratbox/include/s_serv.h
+  1.47      +0 -4      ircd-ratbox/include/tools.h
+  1.84      +0 -1      ircd-ratbox/modules/Makefile.in
+  1.122     +2 -2      ircd-ratbox/modules/core/m_server.c
+  1.42      +7 -44     ircd-ratbox/modules/m_capab.c
+  1.61      +0 -524    ircd-ratbox/modules/m_cryptlink.c (dead)
+  7.110     +2 -155    ircd-ratbox/src/newconf.c
+  7.33      +0 -100    ircd-ratbox/src/rsa.c
+  7.430     +1 -34     ircd-ratbox/src/s_conf.c
+  7.358     +14 -277   ircd-ratbox/src/s_serv.c
+  7.41      +0 -148    ircd-ratbox/src/tools.c
+
+
+
 androsyn    2003/08/29 11:14:36 EDT	(20030829_1)
 
   Modified files:
