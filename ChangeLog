@@ -1,3 +1,23 @@
+androsyn    2002/08/10 12:48:42 EDT	(20020810_24)
+
+  Modified files:
+    include              channel.h 
+    modules              m_list.c m_names.c 
+    src                  channel.c hash.c s_debug.c s_serv.c 
+  Log:
+  GlobalChannelList is now a dlink_list as well
+  
+  Revision  Changes    Path
+  7.120     +2 -4      ircd-ratbox/include/channel.h
+  1.46      +4 -3      ircd-ratbox/modules/m_list.c
+  1.48      +6 -4      ircd-ratbox/modules/m_names.c
+  7.331     +6 -13     ircd-ratbox/src/channel.c
+  7.48      +1 -5      ircd-ratbox/src/hash.c
+  7.70      +11 -18    ircd-ratbox/src/s_debug.c
+  7.276     +2 -1      ircd-ratbox/src/s_serv.c
+
+
+
 ejb         2002/08/10 10:47:21 EDT	(20020810_23)
 
   Modified files:
