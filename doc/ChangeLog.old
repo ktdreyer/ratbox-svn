@@ -1,3 +1,8 @@
+*** 20000111_7 by db
+- added preliminary yacc/lex test parser code
+
+
+
 *** 20000111_6 by db
 Directory /usr/hybrid/ircd-hybrid-7/src/test/newconf added to the repository
 
