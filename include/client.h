@@ -411,9 +411,8 @@ struct LocalUser
 #define FLAGS_UNAUTH       0x8000 /* show unauth connects here */
 #define FLAGS_DRONE        0x10000 /* show drone connects */
 #define FLAGS_LOCOPS       0x20000 /* show locops */
-#define FLAGS_PERSISTANT   0x100000 /* persist on close. */
-#define FLAGS_SERVADMIN	   0x200000
-#define FLAGS_SERVOPER	   0x400000
+#define FLAGS_SERVADMIN	   0x100000 /* servnotices for admins only */
+#define FLAGS_SERVOPER	   0x200000 /* servnotices for non-admins only */
 
 /* user information flags, only settable by remote mode or local oper */
 #define FLAGS_OPER         0x40000 /* Operator */
@@ -454,19 +453,17 @@ struct LocalUser
 #define FLAGS2_IP_SPOOFING      0x80000        /* client IP is spoofed */
 #define FLAGS2_IP_HIDDEN        0x100000        /* client IP should be hidden
                                                    from non opers */
-#define FLAGS2_PERSISTING       0x200000      /* They have no valid socket
-                                               * but are persisting. */
-#define FLAGS2_FLOODDONE        0x400000      /* Flood grace period has
+#define FLAGS2_FLOODDONE        0x200000      /* Flood grace period has
                                                * been ended. */
 
 #define SEND_UMODES  (FLAGS_INVISIBLE | FLAGS_OPER | FLAGS_WALLOP | \
-                      FLAGS_ADMIN|FLAGS_PERSISTANT)
+                      FLAGS_ADMIN)
 #define ALL_UMODES   (SEND_UMODES | FLAGS_SERVNOTICE | FLAGS_CCONN | \
                       FLAGS_REJ | FLAGS_SKILL | FLAGS_FULL | FLAGS_SPY | \
                       FLAGS_NCHANGE | FLAGS_OPERWALL | FLAGS_DEBUG | \
                       FLAGS_BOTS | FLAGS_EXTERNAL | FLAGS_DRONE | \
  		      FLAGS_ADMIN | FLAGS_UNAUTH | FLAGS_CALLERID | \
-                      FLAGS_LOCOPS | FLAGS_PERSISTANT)
+                      FLAGS_LOCOPS)
 
 #define FLAGS_ID     (FLAGS_NEEDID | FLAGS_GOTID)
 
@@ -526,8 +523,6 @@ struct LocalUser
 #define SetIpHash(x)            ((x)->flags |= FLAGS_IPHASH)
 #define ClearIpHash(x)          ((x)->flags &= ~FLAGS_IPHASH)
 #define IsIpHash(x)             ((x)->flags & FLAGS_IPHASH)
-#define IsPersistant(x)             ((x)->umodes & FLAGS_PERSISTANT)
-#define IsPersisting(x)             ((x)->flags2 & FLAGS2_PERSISTING)
 
 #define SetNeedId(x)            ((x)->flags |= FLAGS_NEEDID)
 #define IsNeedId(x)             (((x)->flags & FLAGS_NEEDID) != 0)
@@ -597,7 +592,6 @@ extern void           del_client_from_llist(struct Client** list,
                                             struct Client* client);
 extern int            exit_client(struct Client*, struct Client*, 
                                   struct Client*, const char* comment);
-extern int            detach_client(struct Client*, const char* comment);
 
 
 extern void     count_local_client_memory(int *count, int *memory);

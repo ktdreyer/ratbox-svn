@@ -96,7 +96,6 @@ extern dlink_list lclient_list;
 extern dlink_list serv_list;
 extern dlink_list oper_list;
 extern dlink_list dead_list;
-extern dlink_list persist_list;
 
 extern dlink_list lazylink_channels;
 extern dlink_list lazylink_nicks;

@@ -476,7 +476,7 @@ void error_exit_client(struct Client* client_p, int error)
   fd_close(client_p->fd);
   client_p->fd = -1;
   
-  detach_client(client_p, errmsg);
+  exit_client(client_p, client_p, &me, errmsg);
 }
 
 /*

@@ -191,8 +191,6 @@ int   class_redirport_var;
 %token  PACE_WAIT
 %token  PASSWORD
 %token  PATH
-%token  PERSISTANT
-%token  PERSISTANT_EXPIRE_TIME
 %token  PING_TIME
 %token  PORT
 %token  QSTRING
@@ -1070,7 +1068,7 @@ auth_item:      auth_user | auth_passwd | auth_class |
                 auth_kline_exempt | auth_have_ident | auth_is_restricted |
                 auth_exceed_limit | auth_no_tilde | auth_gline_exempt |
                 auth_spoof | auth_spoof_notice |
-                auth_redir_serv | auth_redir_port | auth_persistant |
+                auth_redir_serv | auth_redir_port |
                 error
 
 auth_user:   USER '=' QSTRING ';'
@@ -1218,14 +1216,6 @@ auth_class:   CLASS '=' QSTRING ';'
     DupString(yy_achead->className, yylval.string);
   };
 
-auth_persistant: PERSISTANT '=' TYES ';'
-  {
-   yy_achead->flags |= CONF_FLAGS_PERSISTANT;
-  }
-  |            PERSISTANT '=' TNO ';'
-  {
-   yy_achead->flags &= CONF_FLAGS_PERSISTANT;
-  };
 
 /***************************************************************************
  *  section resv
@@ -1933,7 +1923,7 @@ general_item:       general_failed_oper_notice |
                     general_use_egd | general_egdpool_path |
                     general_links_delay | general_oper_umodes |
                     general_caller_id_wait | general_default_floodcount |
-                    general_persistant_expire_time | general_min_nonwildcard |
+                    general_min_nonwildcard |
                     general_servlink_path |
                     general_default_cipher_preference |
                     general_compression_level | general_client_flood |
@@ -2436,10 +2426,6 @@ umode_item:	T_BOTS
     ConfigFileEntry.oper_only_umodes |= FLAGS_DRONE;
   } ;
 
-general_persistant_expire_time:  PERSISTANT_EXPIRE_TIME '=' timespec ';'
-  {
-    ConfigFileEntry.persist_expire = $3;  
-  };
 general_min_nonwildcard:    MIN_NONWILDCARD '=' expr ';'
   {
     ConfigFileEntry.min_nonwildcard = $3;

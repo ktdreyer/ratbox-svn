@@ -187,8 +187,6 @@ oper_log        { return OPER_LOG; }
 operator	{ return OPERATOR; }
 passwd		{ return PASSWORD; }
 password	{ return PASSWORD; }
-persistant     { return PERSISTANT; }
-persistant_expire_time { return PERSISTANT_EXPIRE_TIME; }
 ping_time	{ return PING_TIME; }
 port		{ return PORT; }
 quiet_on_ban    { return QUIET_ON_BAN; }
