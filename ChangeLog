@@ -1,3 +1,22 @@
+leeh        2004/05/25 06:50:00 EDT	(20040525_0)
+
+  Modified files:
+    include              s_conf.h s_log.h 
+    modules/core         m_kill.c 
+    src                  newconf.c s_log.c 
+  Log:
+  - split kills out into their own logfile, fname_killlog in log {}; and made
+    the formatting of them better
+  
+  Revision  Changes    Path
+  7.276     +1 -0      ircd-ratbox/include/s_conf.h
+  7.25      +1 -0      ircd-ratbox/include/s_log.h
+  1.102     +14 -5     ircd-ratbox/modules/core/m_kill.c
+  7.151     +8 -0      ircd-ratbox/src/newconf.c
+  7.69      +2 -0      ircd-ratbox/src/s_log.c
+
+
+
 androsyn    2004/05/23 17:36:00 EDT	(20040523_2)
 
   Modified files:
