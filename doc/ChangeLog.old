@@ -1,3 +1,6 @@
+*** 20001227_28 by davidt
+Fix ping to prevent servers throwing 402 nosuchserver numerics at each other
+
 *** 20001227_27 by db
 - committed flames m_kline.c fix
 
