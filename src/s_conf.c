@@ -2666,10 +2666,10 @@ void yyerror(char *msg)
   strip_tabs(newlinebuf, (const unsigned char *)linebuf, strlen(linebuf));
 
   sendto_realops_flags(FLAGS_ALL,"%d: %s on line: %s",
-		       lineno, msg, newlinebuf);
+		       lineno + 1, msg, newlinebuf);
 
   log(L_WARN, "%d: %s on line: %s",
-      lineno, msg, newlinebuf);
+      lineno + 1, msg, newlinebuf);
 }
 
 int conf_fbgets(char *lbuf,int max_size, FBFILE *fb)
