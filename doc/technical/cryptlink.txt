@@ -304,6 +304,4 @@
          administrators/opers on the server of the key mismatch.
     14.  Server #1 closes the socket.
 
-
-
-Last modified:	2001-07-02
+$Id$
