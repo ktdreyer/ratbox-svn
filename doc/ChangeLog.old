@@ -1,3 +1,16 @@
+*** 20010703_4 by leeh
+- quarantine{}; no longer exists.  its been replaced by:
+  
+  resv {
+    reason="no services on this network";
+    nick="chanserv";
+    nick="nickserv";
+    channel="#services";
+  };
+  
+  you can still list them by doing stats Q
+
+
 *** 20010703_3 by leeh
 - report_qlines -> report_resv
   (s_conf.c)    -> (resv.c)
