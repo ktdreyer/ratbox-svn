@@ -1,3 +1,8 @@
+*** 20001214_3 by db
+- trivial move of basename() to save a free() if not an admin
+
+
+
 *** 20001214_2 by toot
 cleaned some PATH stuff a bit
 
