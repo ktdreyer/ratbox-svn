@@ -67,6 +67,7 @@ extern void free_channel(struct channel *chptr);
 extern struct channel *find_channel(const char *name);
 
 extern const char *chmode_to_string(struct channel *chptr);
+extern const char *chmode_to_string_simple(struct channel *chptr);
 
 extern void add_chmember(struct channel *chptr, struct client *target_p, int flags);
 extern void del_chmember(struct chmember *mptr);

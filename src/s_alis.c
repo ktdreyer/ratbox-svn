@@ -236,13 +236,13 @@ print_channel(struct client *client_p, struct channel *chptr,
 	if(query->show_mode && query->show_topicwho)
 		sendto_server(":%s NOTICE %s :%-50s %-8s %3d :%s (%s)",
 				MYNAME, client_p->name, chptr->name,
-				chmode_to_string(chptr),
+				chmode_to_string_simple(chptr),
 				dlink_list_length(&chptr->users),
 				chptr->topic, chptr->topicwho);
 	else if(query->show_mode)
 		sendto_server(":%s NOTICE %s :%-50s %-8s %3d :%s",
 				MYNAME, client_p->name, chptr->name,
-				chmode_to_string(chptr),
+				chmode_to_string_simple(chptr),
 				dlink_list_length(&chptr->users),
 				chptr->topic);
 	else if(query->show_topicwho)

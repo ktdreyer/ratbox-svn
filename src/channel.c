@@ -489,6 +489,45 @@ chmode_to_string(struct channel *chptr)
 	return buf;
 }
 
+/* chmode_to_string_string()
+ *   converts a channels mode into a simple string (doesnt contain key/limit)
+ *
+ * inputs	- channel to get modes for
+ * outputs	- string version of modes
+ */
+const char *
+chmode_to_string_simple(struct channel *chptr)
+{
+	static char buf[10];
+	char *p;
+
+	p = buf;
+
+	*p++ = '+';
+
+	if(chptr->mode.mode & MODE_INVITEONLY)
+		*p++ = 'i';
+	if(chptr->mode.mode & MODE_MODERATED)
+		*p++ = 'm';
+	if(chptr->mode.mode & MODE_NOEXTERNAL)
+		*p++ = 'n';
+	if(chptr->mode.mode & MODE_PRIVATE)
+		*p++ = 'p';
+	if(chptr->mode.mode & MODE_SECRET)
+		*p++ = 's';
+	if(chptr->mode.mode & MODE_TOPIC)
+		*p++ = 't';
+	if(chptr->mode.limit)
+		*p++ = 'l';
+	if(chptr->mode.key[0])
+		*p++ = 'k';
+
+	*p = '\0';
+
+	return buf;
+}
+
+
 /* c_sjoin()
  *   the SJOIN handler
  */
