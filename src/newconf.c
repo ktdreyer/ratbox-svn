@@ -1980,23 +1980,6 @@ conf_set_general_max_targets(void *data)
 }
 
 static void
-conf_set_general_htm_messages(void *data)
-{
-	ConfigFileEntry.htm_messages = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_htm_interval(void *data)
-{
-	ConfigFileEntry.htm_interval = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_htm_trigger(void *data)
-{
-	ConfigFileEntry.htm_trigger = *(unsigned int *) data;
-}
-static void
 conf_set_general_servlink_path(void *data)
 {
 	MyFree(ConfigFileEntry.servlink_path);
@@ -2635,9 +2618,6 @@ newconf_init()
 	add_conf_item("general", "disable_auth", CF_YESNO, conf_set_general_disable_auth);
 	add_conf_item("general", "connect_timeout", CF_TIME, conf_set_general_connect_timeout);
 	add_conf_item("general", "burst_away", CF_YESNO, conf_set_general_burst_away);
-	add_conf_item("general", "htm_messages", CF_YESNO, conf_set_general_htm_messages);
-	add_conf_item("general", "htm_interval", CF_TIME, conf_set_general_htm_interval);
-	add_conf_item("general", "htm_trigger", CF_INT, conf_set_general_htm_trigger);
 	add_conf_item("general", "reject_ban_time", CF_TIME, conf_set_general_reject_ban_time);
 	add_conf_item("general", "reject_after_count", CF_INT, conf_set_general_reject_after_count);
 	add_conf_item("general", "reject_duration", CF_TIME, conf_set_general_reject_duration);

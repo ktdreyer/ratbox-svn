@@ -724,9 +724,6 @@ set_default_conf(void)
 	ConfigFileEntry.egdpool_path = NULL;
 	ConfigFileEntry.use_whois_actually = YES;
 	ConfigFileEntry.burst_away = NO;
-	ConfigFileEntry.htm_messages = NO;
-	ConfigFileEntry.htm_trigger = 40;
-	ConfigFileEntry.htm_interval = 5;
 
 #ifdef HAVE_LIBZ
 	ConfigFileEntry.compression_level = 6;

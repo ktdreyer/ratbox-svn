@@ -237,9 +237,6 @@ struct config_file_entry
 	int disable_auth;
 	int connect_timeout;
 	int burst_away;
-	int htm_messages;
-	int htm_interval;
-	int htm_trigger;
 	int reject_ban_time;
 	int reject_after_count;
 	int reject_duration;

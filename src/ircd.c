@@ -293,75 +293,6 @@ set_time(void)
 	SystemTime.tv_usec = newtime.tv_usec;
 }
 
-static time_t lasttime = 0;
-static long last_recvK = 0;
-static long last_sendK = 0;
-static int htm_mode = 0;
-static float in_curr_bandwidth = 0.0;
-static float out_curr_bandwidth = 0.0;
-
-void
-get_current_bandwidth(struct Client *source_p, struct Client *target_p)
-{
-	if(ConfigFileEntry.htm_messages == 0)
-	{
-		sendto_one(source_p, ":%s NOTICE %s :HTM mode is disabled",
-			   me.name, source_p->name);
-		return;
-	}
-	sendto_one(source_p,
-		   ":%s NOTICE %s :Current traffic: - In (%.1fK/s) Out (%.1fK/s)",
-		   me.name, source_p->name, in_curr_bandwidth, out_curr_bandwidth);
-
-}
-
-static void
-check_htm(void)
-{
-	long htm_trigger = (long) ConfigFileEntry.htm_trigger;
-	long htm_check = (long) ConfigFileEntry.htm_interval;
-	long htm_combined = htm_trigger * htm_check;
-
-	if(CurrentTime - lasttime < ConfigFileEntry.htm_interval)
-		return;
-
-	in_curr_bandwidth = ((float) me.localClient->receiveK - (float) last_recvK) / (CurrentTime - lasttime);
-	out_curr_bandwidth = ((float) me.localClient->sendK - (float) last_sendK) / (CurrentTime - lasttime);
-
-	lasttime = CurrentTime;
-
-
-
-	if((long) me.localClient->receiveK - htm_combined > last_recvK ||
-	   (long) me.localClient->sendK - htm_combined > last_sendK)
-
-	{
-		if(!htm_mode)
-		{
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "Entering high-traffic mode - In (%.1fK/s) Out(%.1fK/s)",
-					     in_curr_bandwidth, out_curr_bandwidth);
-		}
-		else
-		{
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "Still in high-traffic mode - In(%.1fK/s) Out(%.1fK/s)",
-					     in_curr_bandwidth, out_curr_bandwidth);
-		}
-		htm_mode = 1;
-	}
-	else
-	{
-		if(htm_mode)
-		{
-			sendto_realops_flags(UMODE_ALL, L_ALL, "Exiting high traffic mode");
-			htm_mode = 0;
-		}
-	}
-	last_recvK = (long) me.localClient->receiveK;
-	last_sendK = (long) me.localClient->sendK;
-}
-
 static void
 io_loop(void)
 {
@@ -380,8 +311,6 @@ io_loop(void)
 
 
 		comm_select(500);
-		if(ConfigFileEntry.htm_messages)
-			check_htm();
 
 		/*
 		 * Check to see whether we have to rehash the configuration ..
