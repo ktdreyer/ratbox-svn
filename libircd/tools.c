@@ -64,6 +64,7 @@ dlinkAdd(void *data, dlink_node * m, dlink_list * list)
  else if (list->tail == NULL)
    list->tail = m;
  list->head = m;
+ list->length++;
 }
 
 void
@@ -78,7 +79,9 @@ dlinkAddBefore(dlink_node *b, void *data, dlink_node *m, dlink_list *list)
         m->prev = b->prev;
         b->prev = m; 
         m->next = b;
+        list->length++;
     }
+    
 }
 
 void
@@ -93,6 +96,7 @@ dlinkAddTail(void *data, dlink_node *m, dlink_list *list)
  else if (list->head == NULL)
    list->head = m;
  list->tail = m;
+ list->length++;
 }
 
 /* Execution profiles show that this function is called the most
@@ -114,24 +118,10 @@ dlinkDelete(dlink_node *m, dlink_list *list)
    list->head = m->next;
  /* Set this to NULL does matter */
  m->next = m->prev = NULL;
+ list->length--;
 }
 
 
-/* 
- * dlink_list_length
- * inputs	- pointer to a dlink_list
- * output	- return the length (>=0) of a chain of links.
- * side effects	-
- */
-extern int dlink_list_length(dlink_list *list)
-{
-  dlink_node *ptr;
-  int   count = 0;
-
-  for (ptr = list->head; ptr; ptr = ptr->next)
-    count++;
-  return count;
-}
 
 /*
  * dlinkFind
@@ -144,7 +134,7 @@ dlink_node *dlinkFind(dlink_list *list, void * data )
 {
   dlink_node *ptr;
 
-  for (ptr = list->head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, list->head)
     {
       if (ptr->data == data)
 	return (ptr);
@@ -178,7 +168,8 @@ dlinkMoveList(dlink_list *from, dlink_list *to)
     to->head->prev = from->tail;
     to->head = from->head;
     from->head = from->tail = NULL;
-
+    to->length += from->length;
+    from->length = 0;
   /* I think I got that right */
 }
 
@@ -197,6 +188,7 @@ dlinkFindDelete(void *data, dlink_list *list)
      else
          list->head = m->next;
      m->next = m->prev = NULL;
+     list->length--;
      return m;
   }
   return NULL;

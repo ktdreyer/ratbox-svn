@@ -42,6 +42,7 @@ struct _dlink_node {
 struct _dlink_list {
     dlink_node *head;
     dlink_node *tail;
+    unsigned long length;
 };
 
 void
@@ -61,9 +62,6 @@ dlinkFindDelete(void *data, dlink_list *list);
 
 void
 dlinkMoveList(dlink_list *from, dlink_list *to);
-
-int
-dlink_list_length(dlink_list *m);
 
 dlink_node *
 dlinkFind(dlink_list *m, void *data);
@@ -96,6 +94,9 @@ void mem_frob(void *data, int len);
 #define DLINK_FOREACH_PREV(pos, head) for (pos = (head); pos != NULL; pos = pos->prev)
               		                  	
 
+/* Returns the list length */
+#define dlink_list_length(list) (list)->length
+
 /*
  * The functions below are included for the sake of inlining
  * hopefully this will speed up things just a bit
@@ -122,6 +123,7 @@ dlinkAdd(void *data, dlink_node * m, dlink_list * list)
  else if (list->tail == NULL)
    list->tail = m;
  list->head = m;
+ list->length++;
 }
 
 extern inline void
@@ -136,6 +138,7 @@ dlinkAddBefore(dlink_node *b, void *data, dlink_node *m, dlink_list *list)
         m->prev = b->prev;
         b->prev = m; 
         m->next = b;
+        list->length++;
     }
 }
 
@@ -151,6 +154,7 @@ dlinkAddTail(void *data, dlink_node *m, dlink_list *list)
  else if (list->head == NULL)
    list->head = m;
  list->tail = m;
+ list->length++;
 }
 
 /* Execution profiles show that this function is called the most
@@ -172,6 +176,7 @@ dlinkDelete(dlink_node *m, dlink_list *list)
    list->head = m->next;
  /* XXX - does this ever matter? */
  m->next = m->prev = NULL;
+ list->length--;
 }
 
 extern inline dlink_node * 
@@ -189,27 +194,12 @@ dlinkFindDelete(void *data, dlink_list *list)
      else
          list->head = m->next;
      m->next = m->prev = NULL;
+     list->length--;
      return m;
   }
   return NULL;
 }  
 
-
-/* 
- * dlink_list_length
- * inputs	- pointer to a dlink_list
- * output	- return the length (>=0) of a chain of links.
- * side effects	-
- */
-extern inline int dlink_list_length(dlink_list *list)
-{
-  dlink_node *ptr;
-  int   count = 0;
-
-  DLINK_FOREACH(ptr, list->head)
-    count++;
-  return count;
-}
 
 /*
  * dlinkFind
@@ -256,7 +246,8 @@ dlinkMoveList(dlink_list *from, dlink_list *to)
     to->head->prev = from->tail;
     to->head = from->head;
     from->head = from->tail = NULL;
-
+    to->length += from->length;
+    from->length = 0;
   /* I think I got that right */
 }
 #endif /* __GNUC__ */
