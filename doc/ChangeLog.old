@@ -1,3 +1,11 @@
+*** 20001102_9 by adrian
+
+
+Fix the timeout code so its added when we do a non-DNS connect(), and
+cleared when we call the callback so it doesn't trigger wrongly.
+
+
+
 *** 20001102_8 by bill
 
 
