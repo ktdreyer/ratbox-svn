@@ -1,3 +1,17 @@
+androsyn    2003/01/27 18:10:35 UTC	(20030127_1)
+
+  Modified files:
+    src                  s_serv.c 
+  Log:
+  From hybrid
+    - set TCPNODELAY before sending SERVER during handshake to make sure
+      zipped data doesn't get slammed into the same packet
+  
+  Revision  Changes    Path
+  7.318     +8 -0      ircd-ratbox/src/s_serv.c
+
+
+
 androsyn    2003/01/27 18:03:21 UTC	(20030127_0)
 
   Modified files:
