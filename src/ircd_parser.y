@@ -58,6 +58,10 @@ int   class_sendq_var;
         struct ip_value ip_entry;
 }
 
+%type   <ip_value> IP
+%type   <string>   QSTRING
+%type   <number>   NUMBER
+
 %token  ACCEPT
 %token  ACCEPT_PASSWORD
 %token  ACTION
@@ -376,8 +380,7 @@ oper_user:      USER '='  QSTRING ';'
       {
 	yy_aconf->host = yylval.string;
         yylval.string = (char *)NULL;
-	yy_aconf->user[0] = '*';
-        yy_aconf->user[1] = '\0';
+	DupString(yy_aconf->user,"*");
       }
   };
 
@@ -606,8 +609,7 @@ auth_user:   USER '=' QSTRING ';'
       {
 	yy_aconf->host = yylval.string;
         yylval.string = (char *)NULL;
-	yy_aconf->user[0] = '*';
-        yy_aconf->user[1] = '\0';
+	DupString(yy_aconf->user,"*");
       }
   };
              |
@@ -831,26 +833,23 @@ connect_name:   NAME '=' QSTRING ';'
     if(yy_cconf->user)
       {
 	sendto_realops("*** Multiple connect entry");
-        MyFree(yylval.string);
-        yylval.string = (char *)NULL;
       }
     else
       {
-        yy_cconf->user = yylval.string;
-        yylval.string = (char *)NULL;
+        DupString(yy_cconf->user,yylval.string);
       }
 
     if(yy_nconf->user)
       {
 	sendto_realops("*** Multiple connect accept entry");
-        MyFree(yylval.string);
-        yylval.string = (char *)NULL;
       }
     else
       {
-        yy_nconf->user = yylval.string;
-        yylval.string = (char *)NULL;
+        DupString(yy_nconf->user,yylval.string);
       }
+
+    MyFree(yylval.string);
+    yylval.string = (char *)NULL;
   };
 
 connect_host:   HOST '=' QSTRING ';' 
@@ -1002,8 +1001,7 @@ kill_user:      USER '=' QSTRING ';'
       {
 	yy_aconf->host = yylval.string;
         yylval.string = (char *)NULL;
-	yy_aconf->user[0] = '*';
-	yy_aconf->user[1] = '\0';
+	DupString(yy_aconf->user,"*");
       }
   };
 
