@@ -870,4 +870,5 @@ const char *adns_errtypeabbrev(adns_status st);
  * not returned by the same adns library.
  */
 
+int adns__rereadconfig(adns_state st);
 #endif

@@ -50,6 +50,8 @@ static void addserver(adns_state ads, struct in_addr addr)
   int i;
   struct server *ss;
   
+  if(addr.s_addr == 0)
+  	addr.s_addr = INADDR_LOOPBACK;
   for (i=0; i<ads->nservers; i++)
     {
       if (ads->servers[i].addr.s_addr == addr.s_addr)
@@ -567,7 +569,7 @@ int adns_init(adns_state *ads_r, adns_initflags flags, FBFILE *diagfile) {
   ccf_options(ads,"RES_OPTIONS",-1,res_options);
   ccf_options(ads,"ADNS_RES_OPTIONS",-1,adns_res_options);
 
-  readconfig(ads,"/etc/resolv.conf",1);
+  readconfig(ads,"/etc/resolv.conf",0);
   readconfig(ads,"/etc/resolv-adns.conf",0);
   readconfigenv(ads,"RES_CONF");
   readconfigenv(ads,"ADNS_RES_CONF");
@@ -671,4 +673,16 @@ adns_query adns_forallqueries_next(adns_state ads, void **context_r) {
   ads->forallnext= nqu;
   if (context_r) *context_r= qu->ctx.ext;
   return qu;
+}
+
+int adns__rereadconfig(adns_state ads)
+{
+  int r;
+  ads->nservers = 0;	
+  readconfig(ads,"/etc/resolv.conf",0);
+  r= init_finish(ads);
+  if (r) 
+    return r;
+  adns__consistency(ads,0,cc_entex);
+  return 0;
 }
