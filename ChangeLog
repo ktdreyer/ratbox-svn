@@ -1,3 +1,19 @@
+leeh        2005/02/03 10:19:09 EST	(20050203_0)
+
+  Modified files:
+    include              service.h 
+    src                  s_global.c s_jupeserv.c 
+  Log:
+  - changed OPER_NAME to take client_p, conn_p
+  - merged JUPESERV::JUPE with .jupe, and JUPESERV::UNJUPE with .unjupe
+  
+  Revision  Changes    Path
+  1.24      +1 -1      rserv/include/service.h
+  1.12      +1 -1      rserv/src/s_global.c
+  1.27      +32 -108   rserv/src/s_jupeserv.c
+
+
+
 leeh        2005/02/02 16:27:05 EST	(20050202_1)
 
   Modified files:
