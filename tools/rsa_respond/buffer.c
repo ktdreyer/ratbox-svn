@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ */
+
 #include <openssl/des.h>
 #include <openssl/md5.h>
 #include <sys/types.h>

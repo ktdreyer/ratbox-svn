@@ -1,3 +1,6 @@
+/*
+ * $Id$
+ */
 #include "buffer.h"
 #include <openssl/md5.h>
 #include <openssl/rsa.h>

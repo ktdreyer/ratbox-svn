@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ */
+
 #include <openssl/bn.h>
 
 typedef struct
