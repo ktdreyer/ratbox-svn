@@ -106,7 +106,6 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
   char  *tname;
   int   doall, link_s[MAXCONNECTIONS], link_u[MAXCONNECTIONS];
   int   cnt = 0, wilds, dow;
-  static time_t now;
   dlink_node *ptr;
   char *looking_for = parv[0];
 
@@ -149,8 +148,7 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
   wilds = !parv[1] || strchr(tname, '*') || strchr(tname, '?');
   dow = wilds || doall;
   
-  now = time(NULL);
-
+  set_time();
   if(!IsOper(source_p) || !dow) /* non-oper traces must be full nicks */
                               /* lets also do this for opers tracing nicks */
     {
@@ -173,8 +171,8 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
                      me.name, parv[0], class_name, name, 
                      MyOper(source_p) ? ipaddr :
 		     (IsIPSpoof(target_p) ? "255.255.255.255" : ipaddr),
-                     now - target_p->lasttime,
-                     (target_p->user) ? (now - target_p->user->last) : 0);
+                     CurrentTime - target_p->lasttime,
+                     (target_p->user) ? (CurrentTime - target_p->user->last) : 0);
         }
         else
         {
@@ -182,8 +180,8 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
                      me.name, parv[0], class_name, name, 
                      MyOper(source_p) ? ipaddr : 
 		     (IsIPSpoof(target_p) ? "255.255.255.255" : ipaddr),
-                     now - target_p->lasttime,
-                     (target_p->user)?(now - target_p->user->last):0);
+                     CurrentTime - target_p->lasttime,
+                     (target_p->user)?(CurrentTime - target_p->user->last):0);
         }
       }
       
@@ -320,13 +318,12 @@ static int report_this_status(struct Client *source_p, struct Client *target_p,
   const char* class_name;
   char  ip[HOSTIPLEN];
   int cnt=0;
-  static time_t now;
 
   inetntop(target_p->localClient->aftype, &IN_ADDR(target_p->localClient->ip), ip, HOSTIPLEN);
   name = get_client_name(target_p, HIDE_IP);
   class_name = get_client_class(target_p);
 
-  now = time(NULL);  
+  set_time();
 
   switch(target_p->status)
     {
@@ -365,24 +362,24 @@ static int report_this_status(struct Client *source_p, struct Client *target_p,
 	    sendto_one(source_p, form_str(RPL_TRACEOPERATOR),
                        me.name, source_p->name, class_name, name,
                        IsOperAdmin(source_p) ? ip : "255.255.255.255",
-                       now - target_p->lasttime,
-                       (target_p->user) ? (now - target_p->user->last) : 0);
+                       CurrentTime - target_p->lasttime,
+                       (target_p->user) ? (CurrentTime - target_p->user->last) : 0);
 		       
 	  else if (IsOper(target_p))
 	    sendto_one(source_p, form_str(RPL_TRACEOPERATOR),
 		       me.name, source_p->name, class_name, name, 
 		       MyOper(source_p) ? ip : 
 		       (IsIPSpoof(target_p) ? "255.255.255.255" : ip),
-		       now - target_p->lasttime,
-		       (target_p->user)?(now - target_p->user->last):0);
+		       CurrentTime - target_p->lasttime,
+		       (target_p->user)?(CurrentTime - target_p->user->last):0);
 		       
 	  else
 	    sendto_one(source_p, form_str(RPL_TRACEUSER),
 		       me.name, source_p->name, class_name, name,
 		       MyOper(source_p) ? ip : 
 		       (IsIPSpoof(target_p) ? "255.255.255.255" : ip),
-		       now - target_p->lasttime,
-		       (target_p->user)?(now - target_p->user->last):0);
+		       CurrentTime - target_p->lasttime,
+		       (target_p->user)?(CurrentTime - target_p->user->last):0);
 	  cnt++;
 	}
       break;
@@ -394,7 +391,7 @@ static int report_this_status(struct Client *source_p, struct Client *target_p,
 		 me.name, source_p->name, class_name, link_s_p,
 		 link_u_p, name, *(target_p->serv->by) ?
 		 target_p->serv->by : "*", "*",
-		 me.name, now - target_p->lasttime);
+		 me.name, CurrentTime - target_p->lasttime);
       cnt++;
       break;
       

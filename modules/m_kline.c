@@ -204,8 +204,8 @@ static void mo_kline(struct Client *client_p,
 
   if(!valid_comment(source_p, reason))
     return;
-    
-  cur_time = time(NULL);
+  set_time();  
+  cur_time = CurrentTime;
   current_date = smalldate(cur_time);
   aconf = make_conf();
   aconf->status = CONF_KILL;
@@ -351,8 +351,8 @@ static void ms_kline(struct Client *client_p,
       DupString(aconf->host, khost);
       DupString(aconf->passwd, kreason);
       current_date = smalldate((time_t) 0);
-
-      cur_time = time(NULL);
+      set_time();
+      cur_time = CurrentTime;
 
       if(tkline_time)
 	apply_tkline(source_p, aconf, current_date, tkline_time);
@@ -728,7 +728,8 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
                me.name, parv[0], dlhost, aconf->host, creason);
    return;
   }
-  cur_time = time(0);
+  set_time();
+  cur_time = CurrentTime;
   current_date = smalldate(cur_time);
 
   aconf = make_conf();
