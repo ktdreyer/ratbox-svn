@@ -42,7 +42,7 @@
 #endif
 
 
-#ifdef MEMDEBUG
+#undef MEMDEBUG
 /* Hopefully this debugger will work better than the existing one...
  * -A1kmm. */
 
@@ -120,8 +120,10 @@ _MyRealloc(void *what, size_t size, char *file, int line)
   mme = (MemoryEntry*)((char *)what - sizeof(MemoryEntry));
   mme = realloc(mme, size+sizeof(MemoryEntry));
   mme->size = size;
-  mme->next->last = mme;
-  mme->last->next = mme; 
+  if (mme->next != NULL)
+    mme->next->last = mme;
+  if (mme->last != NULL)
+    mme->last->next = mme; 
   return DATA(mme);
 }
 
