@@ -216,7 +216,13 @@ static void
 print_channel(struct client *client_p, struct channel *chptr,
 	     struct alis_query *query)
 {
-	if(query->show_mode && query->show_topicwho)
+	int show_topicwho = query->show_topicwho;
+
+        /* cant show a topicwho, when a channel has no topic. */
+        if(chptr->topic[0] == '\0')
+                show_topicwho = 0;
+
+	if(query->show_mode && show_topicwho)
 		service_error(alis_p, client_p, "%-50s %-8s %3d :%s (%s)",
 			chptr->name, chmode_to_string_simple(&chptr->mode),
 			dlink_list_length(&chptr->users),
@@ -226,7 +232,7 @@ print_channel(struct client *client_p, struct channel *chptr,
 			chptr->name, chmode_to_string_simple(&chptr->mode),
 			dlink_list_length(&chptr->users),
 			chptr->topic);
-	else if(query->show_topicwho)
+	else if(show_topicwho)
 		service_error(alis_p, client_p, "%-50s %3d :%s (%s)",
 			chptr->name, dlink_list_length(&chptr->users),
 			chptr->topic, chptr->topicwho);
@@ -271,10 +277,6 @@ show_channel(struct channel *chptr, struct alis_query *query)
                                 return 0;
                 }
         }
-
-        /* cant show a topicwho, when a channel has no topic. */
-        if(chptr->topic[0] == '\0')
-                query->show_topicwho = 0;
 
         if(!match(query->mask, chptr->name))
                 return 0;
