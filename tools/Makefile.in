@@ -30,7 +30,7 @@ localstatedir	= @localstatedir@
 moduledir	= @prefix@/modules
 automoduledir	= @prefix@/modules/autoload
 
-PROGS		= viconf mkpasswd fixklines convertconf
+PROGS		= viconf mkpasswd fixklines convertconf md5mkpasswd
 CONFS		=
 
 mkpasswd_SOURCES = mkpasswd.c
@@ -41,9 +41,11 @@ fixklines_SOURCES = fixklines.c
 fixklines_OBJECTS = fixklines.o
 convertconf_SOURCES = convertconf.c
 convertconf_OBJECTS = convertconf.o
+md5mkpasswd_SOURCES = md5mkpasswd.c
+md5mkpasswd_OBJECTS = md5mkpasswd.o
 
 all_OBJECTS = $(viconf_OBJECTS) $(mkpasswd_OBJECTS) $(fixklines_OBJECTS)\
-	$(convertconf_OBJECTS)
+	$(convertconf_OBJECTS) $(md5mkpasswd_OBJECTS)
 
 all: $(PROGS)
 
@@ -51,6 +53,9 @@ build: all
 
 mkpasswd: $(mkpasswd_OBJECTS)
 	$(CC) $(LDFLAGS) -o mkpasswd $(mkpasswd_OBJECTS) $(IRCDLIBS)
+
+md5mkpasswd: $(md5mkpasswd_OBJECTS)
+	$(CC) $(LDFLAGS) -o md5mkpasswd $(md5mkpasswd_OBJECTS) $(IRCDLIBS)
 
 viconf: $(viconf_OBJECTS)
 	$(CC) $(LDFLAGS) -o viconf $(viconf_OBJECTS) $(IRCDLIBS)
@@ -62,7 +67,7 @@ convertconf: convertconf.o $(IRCDLIBS)
 	$(CC) $(LDFLAGS) -o convertconf $(convertconf_OBJECTS) $(IRCDLIBS)
 
 clean:
-	$(RM) -f $(all_OBJECTS) convertconf fixklines viconf chkconf mkpasswd *~ core *.exe
+	$(RM) -f $(all_OBJECTS) convertconf fixklines viconf chkconf mkpasswd md5mkpasswd *~ core *.exe
 
 distclean: clean
 	$(RM) -f Makefile
@@ -72,8 +77,6 @@ distclean: clean
 
 # DO NOT DELETE
 
-mkpasswd.o: ../include/setup.h 
-mkpasswd.o:
 viconf.o: ../include/config.h ../include/setup.h
 viconf.o:
 
