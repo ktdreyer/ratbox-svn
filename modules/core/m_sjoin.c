@@ -111,18 +111,6 @@ int     ms_sjoin(struct Client *cptr,
   int hide_or_not;
   dlink_node *m;
 
-  if(HasSentEob(cptr))
-    {
-      sendto_realops_flags(FLAGS_ALL,
-			   "*** HACK %s doing SJOIN after EOB!",
-			   cptr->name);
-
-      sendto_serv_butone(NULL, ":%s WALLOPS :%s",
-			 me.name, "*** HACK %s doing SJOIN after EOB!",
-			 cptr->name);
-
-    }
-
   if(GlobalSetOptions.hide_chanops)
     hide_or_not = ONLY_CHANOPS;
   else

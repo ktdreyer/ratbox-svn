@@ -458,9 +458,6 @@ int check_server(struct Client* cptr)
             }
           else
             {
-              /* its full folks, 32 leaves? wow. I never thought I'd
-               * see the day. Now this will have to be recoded!
-               */
               cptr->localClient->serverMask = nextFreeMask();
 
               if(!cptr->localClient->serverMask)
