@@ -51,7 +51,7 @@ _modinit(void)
   mod_add_cmd(MSG_PART, &part_msgtab);
 }
 
-void part_one_client(struct Client *cptr,
+static void part_one_client(struct Client *cptr,
 			    struct Client *sptr,
 			    char *name);
 

@@ -46,7 +46,7 @@
 
 int nick_from_server(struct Client *, struct Client *, int, char **, time_t, char *);
 
-int set_initial_nick(struct Client *cptr, struct Client *sptr,
+static int set_initial_nick(struct Client *cptr, struct Client *sptr,
 			    char *nick);
 int change_nick( struct Client *cptr, struct Client *sptr,
 			char *nick);
@@ -833,7 +833,7 @@ int nick_from_server(struct Client *cptr, struct Client *sptr, int parc,
  * client. 
  */
 
-int static set_initial_nick(struct Client *cptr, struct Client *sptr,
+static int set_initial_nick(struct Client *cptr, struct Client *sptr,
 			    char *nick)
 {
   char buf[USERLEN + 1];
@@ -944,6 +944,19 @@ int change_nick( struct Client *cptr, struct Client *sptr,
   del_from_client_hash_table(sptr->name, sptr);
   strcpy(sptr->name, nick);
   add_to_client_hash_table(nick, sptr);
+
+  /*
+   * .. and update the new nick in the fd note.
+   * XXX should use IsLocal() ! -- adrian
+   */
+  if (sptr->fd > -1)
+    {
+      char nickbuf[NICKLEN + 10];
+      strcpy(nickbuf, "Nick: ");
+      /* XXX nick better be the right length! -- adrian */
+      strncat(nickbuf, nick, NICKLEN);
+      fd_note(cptr->fd, nickbuf);
+    }
 
   return 1;
 }
