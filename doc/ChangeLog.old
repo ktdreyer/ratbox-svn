@@ -1,3 +1,7 @@
+*** 20010102_15 by wcampbel
+Updated a number of docs
+
+
 *** 20010102_14 by fl_
 - fixes for davidt's patch
 - use hide_or_not instead of ALL_CHANOPS in another case
