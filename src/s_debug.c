@@ -188,25 +188,25 @@ void count_memory(struct Client *source_p)
   int channel_except = 0;
   int channel_invex = 0;
 
-  int wwu = 0;          /* whowas users */
-  int cl = 0;           /* classes */
-  int co = 0;           /* conf lines */
-  int usi = 0;          /* users invited */
-  int usc = 0;          /* users in channels */
-  int aw = 0;           /* aways set */
+  int wwu = 0;                  /* whowas users */
+  int class_count = 0;          /* classes */
+  int conf_count = 0;           /* conf lines */
+  int usi = 0;                  /* users invited */
+  int user_channels = 0;        /* users in channels */
+  int aw = 0;                   /* aways set */
   int number_ips_stored;        /* number of ip addresses hashed */
-  int number_servers_cached; /* number of servers cached by scache */
+  int number_servers_cached;    /* number of servers cached by scache */
 
   u_long channel_memory = 0;
   u_long channel_ban_memory = 0;
   u_long channel_except_memory = 0;
   u_long channel_invex_memory = 0;
 
-  u_long awm = 0;       /* memory used by aways */
-  u_long wwm = 0;       /* whowas array memory used */
-  u_long com = 0;       /* memory used by conf lines */
-  u_long mem_servers_cached; /* memory used by scache */
-  u_long mem_ips_stored; /* memory used by ip address hash */
+  u_long awm = 0;               /* memory used by aways */
+  u_long wwm = 0;               /* whowas array memory used */
+  u_long conf_memory = 0;       /* memory used by conf lines */
+  u_long mem_servers_cached;    /* memory used by scache */
+  u_long mem_ips_stored;        /* memory used by ip address hash */
 
   int linebuf_count =0;
   u_long linebuf_memory_used = 0;
@@ -231,7 +231,7 @@ void count_memory(struct Client *source_p)
 
   u_long tot = 0;
 
-  count_whowas_memory(&wwu, &wwm);      /* no more away memory to count */
+  count_whowas_memory(&wwu, &wwm);
 
   for (target_p = GlobalClientList; target_p; target_p = target_p->next)
     {
@@ -250,7 +250,7 @@ void count_memory(struct Client *source_p)
             usi++;
           for (dlink = target_p->user->channel.head; dlink;
                dlink = dlink->next)
-            usc++;
+            user_channels++;
           if (target_p->user->away)
             {
               aw++;
@@ -258,6 +258,8 @@ void count_memory(struct Client *source_p)
             }
         }
     }
+
+  /* Count up all channels, ban lists, except lists, Invex lists */
 
   for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
     {
@@ -316,17 +318,21 @@ void count_memory(struct Client *source_p)
         }
     }
 
+  /* count up all config items */
+
   for (aconf = ConfigItemList; aconf; aconf = aconf->next)
     {
-      co++;
-      com += aconf->host ? strlen(aconf->host)+1 : 0;
-      com += aconf->passwd ? strlen(aconf->passwd)+1 : 0;
-      com += aconf->name ? strlen(aconf->name)+1 : 0;
-      com += sizeof(struct ConfItem);
+      conf_count++;
+      conf_memory += aconf->host ? strlen(aconf->host)+1 : 0;
+      conf_memory += aconf->passwd ? strlen(aconf->passwd)+1 : 0;
+      conf_memory += aconf->name ? strlen(aconf->name)+1 : 0;
+      conf_memory += sizeof(struct ConfItem);
     }
 
+  /* count up all classes */
+
   for (cltmp = ClassList; cltmp; cltmp = cltmp->next)
-    cl++;
+    class_count++;
 
   count_linebuf_memory(&linebuf_count, &linebuf_memory_used);
 
@@ -335,16 +341,20 @@ void count_memory(struct Client *source_p)
 	     us, us*sizeof(struct User), usi,
              usi * sizeof(dlink_node));
   sendto_one(source_p, ":%s %d %s :User channels %u(%u) Aways %u(%d)",
-             me.name, RPL_STATSDEBUG, source_p->name, usc, usc*sizeof(dlink_node),
+             me.name, RPL_STATSDEBUG, source_p->name,
+	     user_channels, user_channels*sizeof(dlink_node),
              aw, (int)awm);
   sendto_one(source_p, ":%s %d %s :Attached confs %u(%u)",
-             me.name, RPL_STATSDEBUG, source_p->name, lcc, lcc*sizeof(dlink_node));
+             me.name, RPL_STATSDEBUG, source_p->name,
+	     lcc, lcc*sizeof(dlink_node));
 
   sendto_one(source_p, ":%s %d %s :Conflines %u(%d)",
-             me.name, RPL_STATSDEBUG, source_p->name, co, (int)com);
+             me.name, RPL_STATSDEBUG, source_p->name,
+	     conf_count, (int)conf_memory);
 
   sendto_one(source_p, ":%s %d %s :Classes %u(%u)",
-             me.name, RPL_STATSDEBUG, source_p->name, cl, cl*sizeof(struct Class));
+             me.name, RPL_STATSDEBUG, source_p->name,
+	     class_count, class_count*sizeof(struct Class));
 
   sendto_one(source_p, ":%s %d %s :Channels %u(%d)",
              me.name, RPL_STATSDEBUG, source_p->name,
@@ -405,15 +415,14 @@ void count_memory(struct Client *source_p)
              number_ips_stored,
              (int)mem_ips_stored);
 
-  tot = totww + totch + com + cl*sizeof(struct Class);
+  tot = totww + totch + conf_memory + class_count * sizeof(struct Class);
   tot += client_hash_table_size;
   tot += channel_hash_table_size;
 
   tot += mem_servers_cached;
   sendto_one(source_p, ":%s %d %s :Total: ww %d ch %d cl %d co %d",
              me.name, RPL_STATSDEBUG, source_p->name, (int)totww, (int)totch,
-             (int)totcl, (int)com);
-
+             (int)totcl, (int)conf_memory);
 
   count_local_client_memory( &local_client_count,
 			     (int *)&local_client_memory_used );
