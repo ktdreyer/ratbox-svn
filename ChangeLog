@@ -1,3 +1,15 @@
+androsyn    2003/02/08 04:31:47 UTC	(20030208_0)
+
+  Modified files:
+    src                  patricia.c 
+  Log:
+  Fix a buglet with ipv4.
+  
+  Revision  Changes    Path
+  7.17      +1 -0      ircd-ratbox/src/patricia.c
+
+
+
 androsyn    2003/02/05 22:52:35 UTC	(20030205_4)
 
   Modified files:
