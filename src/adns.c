@@ -75,12 +75,6 @@ void init_resolver(void)
    ilog(L_CRIT, "Error opening /etc/resolv.conf: %s; r = %d", strerror(errno), r);
    exit(76);
  }
- 
- if(bind(dns_state->udpsocket, (struct sockaddr *)&ServerInfo.dns_host, sizeof(struct sockaddr_in)) == -1)
- {
- 	sendto_realops_flags(FLAGS_ALL, L_ALL, "Attempt to bind DNS port failed..using generic options");
- } 
-   
  eventAdd("timeout_adns", timeout_adns, NULL, 2);
  dns_select();
 }

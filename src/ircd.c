@@ -607,6 +607,7 @@ int main(int argc, char *argv[])
   setup_signals();
   /* We need this to initialise the fd array before anything else */
   fdlist_init();
+  init_resolver();      /* Needs to be setup before the io loop */
   init_netio();         /* This needs to be setup early ! -- adrian */
   /* Check if there is pidfile and daemon already running */
   check_pidfile(pidFileName);
@@ -640,7 +641,6 @@ int main(int argc, char *argv[])
   initServerMask();
   init_auth();                  /* Initialise the auth code */
   read_conf_files(YES);         /* cold start init conf files */
-  init_resolver();      /* Needs to be setup before the io loop */
 
   initialize_server_capabs();   /* Set up default_server_capabs */
   initialize_global_set_options();

@@ -123,8 +123,6 @@ int   class_redirport_var;
 %token  DESCRIPTION
 %token  DIE
 %token  DISABLE_REMOTE_COMMANDS
-%token  DNS_HOST
-%token  DNS_PORT
 %token  DOT_IN_IP6_ADDR
 %token  DOTS_IN_IDENT
 %token  EGDPOOL_PATH
@@ -418,8 +416,7 @@ serverinfo_item:        serverinfo_name | serverinfo_vhost |
                         serverinfo_network_name | serverinfo_network_desc |
                         serverinfo_max_clients | 
                         serverinfo_rsa_private_key_file | serverinfo_vhost6 |
-                        serverinfo_max_buffer | serverinfo_dns_host |
-			serverinfo_dns_port |
+                        serverinfo_max_buffer | 
 			error
 
 serverinfo_rsa_private_key_file: RSA_PRIVATE_KEY_FILE '=' QSTRING ';'
@@ -580,22 +577,6 @@ serverinfo_hub:         HUB '=' TYES ';'
     else
       ServerInfo.hub = 0;
   } ;
-
-serverinfo_dns_port: DNS_PORT '=' NUMBER ';'
-  {
-       if($3 < 1024 || $3 > 65535)
-       {
-	  sendto_realops_flags(FLAGS_ALL, L_ALL, "Ignoring invalid dns_port number: (%d)", $3);
-       }  else {  
-       ServerInfo.dns_host.sin_port = htons($3);
-       }
-  };
-
-serverinfo_dns_host: DNS_HOST '=' QSTRING ';'
-  {
-	ServerInfo.dns_host.sin_family = AF_INET;
-	inetpton(AF_INET, yylval.string, &ServerInfo.dns_host.sin_addr);
-  };
 
 
 /***************************************************************************
