@@ -21,6 +21,7 @@
  */
 #include "s_debug.h"
 #include "channel.h"
+#include "blalloc.h"
 #include "class.h"
 #include "client.h"
 #include "common.h"
@@ -459,4 +460,52 @@ void count_memory(struct Client *cptr,char *nick)
              ":%s %d %s :TOTAL: %d Available:  Current max RSS: %u",
              me.name, RPL_STATSDEBUG, nick, tot, get_maxrss());
 
+}
+
+/*
+ * debug function
+ * 
+ * dump the actual client link lists, then the block allocator
+ * link lists
+ */
+
+/* defined in client.c *blah* */
+
+extern BlockHeap*        localClientFreeList;
+extern BlockHeap*        remoteClientFreeList;
+
+void dump_addresses()
+{
+  struct Client *acptr;
+  int fd_lc_dump;
+  int fd_rc_dump;
+  int fd_lba_dump;
+  int fd_rba_dump;
+  char buffer[512];
+
+  fd_lc_dump = open("local_client_list.txt",O_WRONLY|O_TRUNC|O_CREAT,0755);
+  fd_rc_dump = open("remote_client_list.txt",O_WRONLY|O_TRUNC|O_CREAT,0755);
+  fd_lba_dump = open("local_block_allocator_client_list.txt",O_WRONLY|O_TRUNC|O_CREAT,0755);
+  fd_rba_dump = open("remote_block_allocator_client_list.txt",O_WRONLY|O_TRUNC|O_CREAT,0755);
+
+  for (acptr = GlobalClientList; acptr; acptr = acptr->next)
+    {
+      sprintf(buffer,"%lX\n", (unsigned long)acptr );
+      if (MyConnect(acptr))
+        {
+	  write(fd_lc_dump, buffer, strlen(buffer) );
+        }
+      else
+	{
+	  write(fd_rc_dump, buffer, strlen(buffer) );
+	}
+    }
+
+  BlockHeapDump(localClientFreeList,fd_lba_dump);
+  BlockHeapDump(remoteClientFreeList,fd_rba_dump);
+
+  close(fd_rc_dump);
+  close(fd_lc_dump);
+  close(fd_lba_dump);
+  close(fd_rba_dump);
 }

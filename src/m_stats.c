@@ -421,6 +421,16 @@ int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       valid_stats++;
       break;
 
+    case '$':
+      if(IsOper(sptr))
+	 {
+	   sendto_one(sptr,":%s NOTICE %s :dump_addresses",
+		      me.name, parv[0]);
+	   dump_addresses();
+	   valid_stats++;
+	 }
+      break;
+
     default :
       stat = '*';
       break;

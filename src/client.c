@@ -67,8 +67,8 @@
 /* 
  * for Wohali's block allocator 
  */
-static BlockHeap*        localClientFreeList;
-static BlockHeap*        remoteClientFreeList;
+BlockHeap*        localClientFreeList;
+BlockHeap*        remoteClientFreeList;
 static const char* const BH_FREE_ERROR_MESSAGE = \
         "client.c BlockHeapFree failed for cptr = %p";
 
