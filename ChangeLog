@@ -1,3 +1,49 @@
+leeh        2002/08/18 09:57:52 EDT	(20020818_5)
+
+  Modified files:
+    .                    README.FIRST 
+    contrib              m_clearchan.c m_force.c m_jupe.c 
+                         m_ojoin.c m_opme.c m_tburst.c 
+    include              send.h 
+    modules              m_away.c m_connect.c m_gline.c m_join.c 
+                         m_kline.c m_knock.c m_oper.c m_operwall.c 
+                         m_topic.c m_unkline.c m_wallops.c 
+    modules/core         m_kick.c m_nick.c m_part.c m_squit.c 
+    src                  channel_mode.c client.c send.c 
+  Log:
+  - removed a reference to README.PLATFORMS
+  - got rid of two more LL parameters from sendto_server()
+  
+  Revision  Changes    Path
+  7.36      +0 -3      ircd-ratbox/README.FIRST
+  1.36      +5 -5      ircd-ratbox/contrib/m_clearchan.c
+  1.17      +4 -4      ircd-ratbox/contrib/m_force.c
+  1.39      +3 -3      ircd-ratbox/contrib/m_jupe.c
+  1.15      +4 -4      ircd-ratbox/contrib/m_ojoin.c
+  1.35      +6 -6      ircd-ratbox/contrib/m_opme.c
+  1.13      +2 -2      ircd-ratbox/contrib/m_tburst.c
+  7.61      +2 -3      ircd-ratbox/include/send.h
+  1.50      +2 -2      ircd-ratbox/modules/core/m_kick.c
+  1.99      +2 -2      ircd-ratbox/modules/core/m_nick.c
+  1.61      +5 -5      ircd-ratbox/modules/core/m_part.c
+  1.53      +2 -2      ircd-ratbox/modules/core/m_squit.c
+  1.33      +5 -5      ircd-ratbox/modules/m_away.c
+  1.41      +2 -2      ircd-ratbox/modules/m_connect.c
+  1.90      +7 -7      ircd-ratbox/modules/m_gline.c
+  1.100     +6 -6      ircd-ratbox/modules/m_join.c
+  1.115     +3 -3      ircd-ratbox/modules/m_kline.c
+  1.61      +2 -2      ircd-ratbox/modules/m_knock.c
+  1.50      +2 -2      ircd-ratbox/modules/m_oper.c
+  1.32      +3 -3      ircd-ratbox/modules/m_operwall.c
+  1.60      +2 -2      ircd-ratbox/modules/m_topic.c
+  1.56      +3 -3      ircd-ratbox/modules/m_unkline.c
+  1.32      +3 -3      ircd-ratbox/modules/m_wallops.c
+  7.67      +2 -2      ircd-ratbox/src/channel_mode.c
+  7.315     +2 -2      ircd-ratbox/src/client.c
+  7.217     +4 -12     ircd-ratbox/src/send.c
+
+
+
 leeh        2002/08/18 07:22:53 EDT	(20020818_4)
 
   Modified files:
