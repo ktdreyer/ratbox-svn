@@ -199,7 +199,7 @@ exit_user(struct client *target_p)
 
 #ifdef ENABLE_USERSERV
 	if(target_p->user->user_reg)
-		target_p->user->user_reg->refcount--;
+		dlink_find_destroy(target_p, &target_p->user->user_reg->users);
 #endif
 
 	if(target_p->user->oper)

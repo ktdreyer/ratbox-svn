@@ -18,10 +18,10 @@ struct user_reg
 	time_t last_time;
 
 	int flags;
-	int refcount;
 
 	dlink_node node;
 	dlink_list channels;
+	dlink_list users;
 };
 
 #define US_FLAGS_SUSPENDED	0x0001

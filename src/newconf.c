@@ -53,6 +53,7 @@ static struct mode_table service_flags_table[] = {
 	{ "msg_self",	SERVICE_MSGSELF		},
 	{ "disabled",	SERVICE_DISABLED	},
 	{ "short_help",	SERVICE_SHORTHELP	},
+	{ "stealth",	SERVICE_STEALTH		},
 	{ "\0",		0			}
 };
 
@@ -799,6 +800,7 @@ static struct ConfEntry conf_userserv_table[] =
 	{ "expire_time",	CF_TIME,  NULL, 0, &config_file.uexpire_time		},
 	{ "allow_setpass",	CF_YESNO, NULL, 0, &config_file.allow_setpass		},
 	{ "allow_setemail",	CF_YESNO, NULL, 0, &config_file.allow_setemail		},
+	{ "max_logins",		CF_INT,   NULL, 0, &config_file.umax_logins		},
 	{ "\0", 0, NULL, 0, NULL }
 };
 

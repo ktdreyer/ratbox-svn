@@ -6,7 +6,7 @@ INSTALL=@INSTALL@
 INSTALL_DATA=@INSTALL_DATA@
 PREFIX=@prefix@
 
-SUBDIRS=alis main operbot chanserv userserv jupeserv
+SUBDIRS=alis main operbot chanserv userserv jupeserv operserv
 
 install: 
 	$(INSTALL) -m 750 -d $(PREFIX)/help

@@ -270,6 +270,9 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 
         if(!strcasecmp(text, "HELP"))
         {
+		if(ServiceStealth(service_p) && !client_p->user->oper)
+			return;
+
                 service_p->service->flood++;
 
                 if(parc < 1 || EmptyString(parv[0]))
@@ -460,6 +463,8 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 		return;
 	}
 
+	if(ServiceStealth(service_p) && !client_p->user->oper)
+		return;
 
         for(i = 0; cmd_table[i].cmd[0] != '\0'; i++)
         {

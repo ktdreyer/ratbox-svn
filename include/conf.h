@@ -36,6 +36,7 @@ struct _config_file
 	int uexpire_time;
 	int allow_setpass;
 	int allow_setemail;
+	int umax_logins;
 
 	/* chanserv */
 	int disable_cregister;

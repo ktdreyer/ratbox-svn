@@ -209,24 +209,17 @@ static void
 logout_user_reg(struct user_reg *ureg_p)
 {
 	struct client *target_p;
-	dlink_node *ptr;
+	dlink_node *ptr, *next_ptr;
 
-	if(!ureg_p->refcount)
+	if(!dlink_list_length(&ureg_p->users))
 		return;
 
-	/* log out anyone using this nickname */
-	DLINK_FOREACH(ptr, user_list.head)
+	DLINK_FOREACH_SAFE(ptr, next_ptr, ureg_p->users.head)
 	{
 		target_p = ptr->data;
 
-		if(target_p->user->user_reg == ureg_p)
-		{
-			target_p->user->user_reg = NULL;
-			ureg_p->refcount--;
-
-			if(!ureg_p->refcount)
-				return;
-		}
+		target_p->user->user_reg = NULL;
+		dlink_destroy(ptr, &ureg_p->users);
 	}
 }
 
@@ -245,7 +238,7 @@ e_user_expire(void *unused)
 			continue;
 
 		/* if theyre logged in, reset the expiry */
-		if(ureg_p->refcount)
+		if(dlink_list_length(&ureg_p->users))
 		{
 			ureg_p->last_time = CURRENT_TIME;
 			continue;
@@ -640,8 +633,8 @@ s_user_register(struct client *client_p, char *parv[], int parc)
 		reg_p->email = my_strdup(parv[2]);
 
 	reg_p->reg_time = reg_p->last_time = CURRENT_TIME;
-	reg_p->refcount++;
 
+	dlink_add_alloc(client_p, &reg_p->users);
 	client_p->user->user_reg = reg_p;
 	add_user_reg(reg_p);
 
@@ -673,6 +666,15 @@ s_user_login(struct client *client_p, char *parv[], int parc)
 	if((reg_p = find_user_reg(client_p, parv[0])) == NULL)
 		return 1;
 
+	if(config_file.umax_logins && 
+	   dlink_list_length(&reg_p->users) >= config_file.umax_logins)
+	{
+		service_error(userserv_p, client_p,
+			"Login failed, username has %d logged in users",
+			config_file.umax_logins);
+		return 1;
+	}
+
 	password = get_crypt(parv[1], reg_p->password);
 
 	if(strcmp(password, reg_p->password))
@@ -685,7 +687,7 @@ s_user_login(struct client *client_p, char *parv[], int parc)
 
 	client_p->user->user_reg = reg_p;
 	reg_p->last_time = CURRENT_TIME;
-	reg_p->refcount++;
+	dlink_add_alloc(client_p, &reg_p->users);
 	service_error(userserv_p, client_p, "Login successful");
 
 	return 1;
@@ -694,7 +696,7 @@ s_user_login(struct client *client_p, char *parv[], int parc)
 static int
 s_user_logout(struct client *client_p, char *parv[], int parc)
 {
-	client_p->user->user_reg->refcount--;
+	dlink_find_destroy(client_p, &client_p->user->user_reg->users);
 	client_p->user->user_reg = NULL;
 	service_error(userserv_p, client_p, "Logout successful");
 
