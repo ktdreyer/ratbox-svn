@@ -42,6 +42,54 @@ void init_confmatch(void)
 	memset(hostconf, 0, sizeof(hostconf));
 }
 
+static int 
+wildcard_to_cidr(const char *host, struct irc_inaddr *in, int *cidr)
+{
+	uint32_t current_ip=0L;
+	unsigned int octet=0;
+	int dot_count=0;
+	char c;
+	
+#ifdef IPV6
+	uint32_t *ip = &((uint32_t *)PIN_ADDR(in))[3];
+	((uint32_t *)PIN_ADDR(in))[0] = 0;
+	((uint32_t *)PIN_ADDR(in))[1] = 0;
+	((uint32_t *)PIN_ADDR(in))[2] = htonl(0xffff);
+#else
+	uint32_t *ip = PIN_ADDR(in);
+#endif	
+
+	while( (c = *host))
+	{
+		if(IsDigit(c))
+		{
+			octet *= 10;
+			octet += (*host & 0xF);
+		}
+		else if(c == '.')
+		{
+			current_ip <<= 8;   
+			current_ip += octet;
+			if( octet > 255 )
+				return( 0 );
+			octet = 0;  
+			dot_count++;
+		}
+		else if(c == '*' && (*(host+1) == '\0' || *(host+1) == '.') && dot_count > 0)
+		{
+			current_ip <<= 32-(8*dot_count);
+			*ip = current_ip;
+			*cidr = 8*dot_count;
+			return( 1 );
+		} 
+		else
+        		return( 0 );
+      		host++;
+    	}
+
+	return 0;
+}
+
 static int
 hash_text (const char *start)
 {
@@ -110,6 +158,16 @@ parse_netmask(const char *address, struct irc_inaddr *addr, int *bits)
 			*bits += 96;	
 #endif
 		
+	} 
+	else if((p = strchr(address, '*')) != NULL)
+	{
+		if(wildcard_to_cidr(address, addr, bits))
+		{
+#ifdef IPV6
+			*bits += 96;			
+#endif
+			return 1;
+		}
 	}
 	
 	if(inetpton(DEF_FAM, address, addr) == 0)
