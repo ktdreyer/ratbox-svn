@@ -7,13 +7,14 @@ interested in maintaining Hybrid on that platform. Below is a list of
 people who have jumped up and taken responsibility for Hybrid, including 
 making sure it compiles, runs, and doesn't crash.
 
-ARCHITECTURE	COMPILER	SYSTEM	MAINTAINER
-============	========	======	==========
-PowerPC		Apple gcc	OS X	Joseph Mallett <jmallett@newgold.net>
-SPARC		gcc		OpenBSD	Joseph Mallett <jmallett@newgold.net>
-SPARC		gcc		NetBSD	Joseph Mallett <jmallett@newgold.net>
-x86		TenDRA		FreeBSD	Joseph Mallett <jmallett@newgold.net>
-SPARC		Forte C v6,v7	Solaris	Joan Touzet <joant@ieee.org>
-SPARC		gcc		Solaris	Joan Touzet <joant@ieee.org>
+ARCHITECTURE COMPILER         SYSTEM	 MAINTAINER
+============ ================ ========== =====================================
+PowerPC      Apple gcc        Darwin     Joseph Mallett <jmallett@newgold.net>
+PowerPC      Apple gcc        Mac OS X   Joseph Mallett <jmallett@newgold.net>
+SPARC        gcc              OpenBSD    Joseph Mallett <jmallett@newgold.net>
+SPARC        gcc              NetBSD     Joseph Mallett <jmallett@newgold.net>
+x86          TenDRA           FreeBSD    Joseph Mallett <jmallett@newgold.net>
+SPARC        Forte C v6,v7    Solaris    Joan Touzet <joant@ieee.org>
+SPARC        gcc              Solaris    Joan Touzet <joant@ieee.org>
 
 $Id$
