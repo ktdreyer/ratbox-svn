@@ -75,7 +75,7 @@ struct Channel *GlobalChannelList = NullChn;
 
 static  int     add_id (struct Client *, struct Channel *, char *, int);
 static  int     del_id (struct Channel *, char *, int);
-static  void    free_bans_exceptions_denies(struct Channel *);
+static  void    free_channel_masks(struct Channel *);
 static  void    sub1_from_channel (struct Channel *);
 
 
@@ -2456,7 +2456,7 @@ static  void    sub1_from_channel(struct Channel *chptr)
             del_invite(tmp->value.cptr, chptr);
 
 	  /* free all bans/exceptions/denies */
-	  free_bans_exceptions_denies( chptr );
+	  free_channel_masks( chptr );
 
 #ifdef FLUD
           free_fluders(NULL, chptr);
@@ -2692,20 +2692,19 @@ void clear_bans_exceptions_denies(struct Client *sptr, struct Channel *chptr)
                            ":%s MODE %s %s %s %s %s %s",
                            sptr->name,chptr->chname,modebuf,b1,b2,b3,b4);
 
-
   /* free all bans/exceptions/denies */
-  free_bans_exceptions_denies(chptr);
+  free_channel_masks(chptr);
 }
 
 /*
- * free_bans_exceptions_denies
+ * free_channel_masks
  *
  * inputs	- pointer to channel structure
  * output	- none
  * side effects	- all bans/exceptions denies are freed for channel
  */
 
-static void free_bans_exceptions_denies(struct Channel *chptr)
+static void free_channel_masks(struct Channel *chptr)
 {
   struct SLink *ban;
   struct SLink *next_ban;
@@ -2729,6 +2728,15 @@ static void free_bans_exceptions_denies(struct Channel *chptr)
     }
 
   for(ban = chptr->denylist; ban; ban = next_ban)
+    {
+      next_ban = ban->next;
+      MyFree(ban->value.banptr->banstr);
+      MyFree(ban->value.banptr->who);
+      MyFree(ban->value.banptr);
+      free_link(ban);
+    }
+
+  for(ban = chptr->invexlist; ban; ban = next_ban)
     {
       next_ban = ban->next;
       MyFree(ban->value.banptr->banstr);
@@ -2836,30 +2844,9 @@ void remove_empty_channels()
        */
       while ((tmp = empty_channel_list->invites))
         del_invite(tmp->value.cptr, empty_channel_list);
-      
-      tmp = empty_channel_list->banlist;
-      while (tmp)
-        {
-          obtmp = tmp;
-          tmp = tmp->next;
-          MyFree(obtmp->value.banptr->banstr);
-          MyFree(obtmp->value.banptr->who);
-          MyFree(obtmp->value.banptr);
-          free_link(obtmp);
-        }
 
-      tmp = empty_channel_list->exceptlist;
-      while (tmp)
-        {
-          obtmp = tmp;
-          tmp = tmp->next;
-          MyFree(obtmp->value.banptr->banstr);
-          MyFree(obtmp->value.banptr->who);
-          MyFree(obtmp->value.banptr);
-          free_link(obtmp);
-        }
-      empty_channel_list->banlist = empty_channel_list->exceptlist = NULL;
-      
+      free_channel_masks(empty_channel_list);      
+
       if (empty_channel_list->prevch)
         empty_channel_list->prevch->nextch = empty_channel_list->nextch;
       else
@@ -2978,7 +2965,7 @@ static void destroy_channel(struct Channel *chptr)
     del_invite(tmp->value.cptr, chptr);
 
   /* free all bans/exceptions/denies */
-  free_bans_exceptions_denies( chptr );
+  free_channel_masks( chptr );
 
   if (chptr->prevch)
     chptr->prevch->nextch = chptr->nextch;
