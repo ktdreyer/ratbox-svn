@@ -1,3 +1,9 @@
+*** 20010225_5 by androsyn
+Made listener.c use adns instead of gethostbyaddr() which should kill the
+last of the libresolv code.  Also I think I've fixed vhosting for IPv6, but
+alas I have not tested this just yet.
+
+
 *** 20010225_4 by toot
 reduced startup_connections_time from 5mins to 1min
 surely that's long enough? :)
