@@ -359,6 +359,24 @@ find_address_conf(const char *host, const char *user, struct sockaddr_storage *i
 	if(kconf)
 		return kconf;
 
+	/* if theres a spoof, check it against klines.. */
+	if(!EmptyString(iconf->name))
+	{
+		char *p = strchr(iconf->name, '@');
+
+		if(p)
+		{
+			*p = '\0';
+			kconf = find_conf_by_address(p+1, ip, CONF_KILL, aftype, iconf->name);
+			*p = '@';
+		}
+		else
+			kconf = find_conf_by_address(iconf->name, ip, CONF_KILL, aftype, user);
+
+		if(kconf)
+			return kconf;
+	}
+
 	/* hunt for a gline */
 	if(ConfigFileEntry.glines)
 	{
