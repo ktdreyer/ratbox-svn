@@ -27,6 +27,7 @@
  */
 
 #include "fileio.h"
+#include "s_log.h"
 #include "memory.h"
 #include <stdlib.h>
 #include <unistd.h>
@@ -40,24 +41,18 @@
 
 /* Core diagnostic functions */
 
+#define LOG_BUFSIZE 2000
+
+#if 0
 void adns__vdiag(adns_state ads, const char *pfx, adns_initflags prevent,
-		 int serv, adns_query qu, const char *fmt, va_list al) {
+		 int serv, adns_query qu, const char *fmt, va_list al)
+{
 
 /* Fix this to log to the ircd log interface */
 #if 0
   const char *bef, *aft;
   vbuf vb;
   
-  if (!ads->diagfile ||
-      (!(ads->iflags & adns_if_debug) && (!prevent || (ads->iflags & prevent))))
-    return;
-
-  if (ads->iflags & adns_if_logpid) {
-    fprintf(ads->diagfile,"adns%s [%ld]: ",pfx,(long)getpid());
-  } else {
-    fprintf(ads->diagfile,"adns%s: ",pfx);
-  }
-
   vfprintf(ads->diagfile,fmt,al);
 
   bef= " (";
@@ -84,29 +79,51 @@ void adns__vdiag(adns_state ads, const char *pfx, adns_initflags prevent,
   fputs(aft,ads->diagfile);
 #endif
 }
+#endif
 
 void adns__debug(adns_state ads, int serv, adns_query qu, const char *fmt, ...) {
+  char    buf[LOG_BUFSIZE];
   va_list al;
 
   va_start(al,fmt);
+  vsprintf(buf, fmt, al);
+#if 0
   adns__vdiag(ads," debug",0,serv,qu,fmt,al);
+#endif
   va_end(al);
+
+  /* redundant calls to vsprintf() but what can you do,
+   * when you live in a shoe?
+   */
+  log(L_DEBUG, "%s", buf);
 }
 
 void adns__warn(adns_state ads, int serv, adns_query qu, const char *fmt, ...) {
+  char    buf[LOG_BUFSIZE];
   va_list al;
 
   va_start(al,fmt);
+  vsprintf(buf, fmt, al);
+#if 0
   adns__vdiag(ads," warning",adns_if_noerrprint|adns_if_noserverwarn,serv,qu,fmt,al);
+#endif
   va_end(al);
+
+  log(L_WARN, "%s", buf);
 }
 
 void adns__diag(adns_state ads, int serv, adns_query qu, const char *fmt, ...) {
+  char    buf[LOG_BUFSIZE];
   va_list al;
 
   va_start(al,fmt);
+  vsprintf(buf, fmt, al);
+#if 0
   adns__vdiag(ads,"",adns_if_noerrprint,serv,qu,fmt,al);
+#endif
   va_end(al);
+
+  log(L_DEBUG, "%s", buf);
 }
 
 /* vbuf functions */
