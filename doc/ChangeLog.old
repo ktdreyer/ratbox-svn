@@ -1,3 +1,12 @@
+*** 20001030_3 by db
+- moved events reporting from /quote events to /stats E
+  I think it belongs there since /stats z is memory report
+  I'd eventually like to have oper only /stats such as
+  /stats events, /stats memory , /stats memory klines
+  This could lend itself well to gersh's new malloc memory reporting code...
+
+
+
 *** 20001030_2 by db
 - reworked m_stats.c some more. no need for valid_stats flag. ick
 
