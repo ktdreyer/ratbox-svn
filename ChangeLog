@@ -1,3 +1,17 @@
+leeh        2004/02/26 16:34:23 EST	(20040226_4)
+
+  Modified files:
+    modules              m_dline.c m_kline.c 
+  Log:
+  - make kline/dline use valid_temp_time() rather than own valid_tkline()
+  - rework kline to use parv[loc] rather than parv++; parc--;
+  
+  Revision  Changes    Path
+  1.30      +4 -51     ircd-ratbox/modules/m_dline.c
+  1.173     +14 -73    ircd-ratbox/modules/m_kline.c
+
+
+
 androsyn    2004/02/26 13:28:31 EST	(20040226_3)
 
   Modified files:
