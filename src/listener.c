@@ -28,7 +28,6 @@
 #include "s_conf.h"
 #include "s_stats.h"
 #include "send.h"
-#include "struct.h"
 
 #include <assert.h>
 #include <string.h>

@@ -26,7 +26,6 @@
 #include "dbuf.h"
 #include "common.h"
 #include "irc_string.h"
-#include "struct.h"
 
 #include <stdio.h>
 #include <stdlib.h>

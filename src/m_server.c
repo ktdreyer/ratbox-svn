@@ -35,7 +35,6 @@
 #include "s_stats.h"     /* ServerStats */
 #include "scache.h"      /* find_or_add */
 #include "send.h"        /* sendto_one */
-#include "struct.h"      /* bleah */
 
 #include <string.h>
 #include <stdlib.h>

@@ -14,7 +14,6 @@
 #include "s_serv.h"
 #include "s_user.h"
 #include "send.h"
-#include "struct.h"
 
 #include <time.h>
 #include <string.h>

@@ -51,7 +51,6 @@
 #include "s_zip.h"
 #include "scache.h"
 #include "send.h"
-#include "struct.h"
 #include "whowas.h"
 
 #include <stdlib.h>

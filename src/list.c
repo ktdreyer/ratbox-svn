@@ -21,14 +21,13 @@
  *
  * $Id$
  */
-#include "struct.h"
+#include "list.h"
 #include "blalloc.h"
 #include "channel.h"
 #include "class.h"
 #include "client.h"
 #include "common.h"
 #include "irc_string.h"
-#include "list.h"
 #include "mtrie_conf.h"
 #include "numeric.h"
 #include "res.h"

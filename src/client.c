@@ -42,7 +42,6 @@
 #include "s_misc.h"
 #include "s_serv.h"
 #include "send.h"
-#include "struct.h"
 #include "whowas.h"
 
 #include <assert.h>

@@ -55,7 +55,6 @@
 #include "numeric.h"
 #include "s_conf.h"
 #include "send.h"
-#include "struct.h"
 
 #include <string.h>
 #include <stdlib.h>

@@ -31,7 +31,6 @@
 // #include "s_serv.h"
 #include "send.h"
 #include "channel.h"
-#include "struct.h"
 #include "blalloc.h"
 #include "s_stats.h"
 

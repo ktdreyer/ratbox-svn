@@ -27,7 +27,6 @@
 #include "client.h"
 #include "channel.h"
 #include "hash.h"
-#include "struct.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "s_serv.h"

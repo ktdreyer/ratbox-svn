@@ -27,7 +27,6 @@
 #include "list.h"
 #include "parse.h"
 #include "s_zip.h"
-#include "struct.h"
 
 
 

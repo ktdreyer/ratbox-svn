@@ -37,7 +37,6 @@
 #include "s_log.h"
 #include "s_misc.h"
 #include "send.h"
-#include "struct.h"
 
 #include <stdio.h>
 #include <time.h>

@@ -12,7 +12,6 @@
 #include "numeric.h"
 #include "s_conf.h"
 #include "send.h"
-#include "struct.h"
 
 #include <fcntl.h>
 #include <sys/wait.h>

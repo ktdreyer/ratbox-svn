@@ -36,7 +36,6 @@
 #include "s_log.h"
 #include "s_misc.h"
 #include "send.h"
-#include "struct.h"
 
 #include <stdlib.h>
 #include <unistd.h>

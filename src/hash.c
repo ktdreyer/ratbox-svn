@@ -27,7 +27,6 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
-#include "struct.h"
 
 #include <assert.h>
 #include <fcntl.h>     /* O_RDWR ... */

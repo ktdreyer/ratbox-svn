@@ -26,7 +26,6 @@
 #include "numeric.h"
 #include "s_conf.h"
 #include "send.h"
-#include "struct.h"
 
 #define BAD_CONF_CLASS          -1
 #define BAD_PING                -2
