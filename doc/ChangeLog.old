@@ -1,3 +1,8 @@
+*** 20010220_8 by wcampbel
+Updated (and corrected one small glitch in) swedish.po, created the Makefile.in
+for it, and added it to autoconf
+
+
 *** 20010220_7 by wcampbel
 Added trbz's Swedish translation
 
