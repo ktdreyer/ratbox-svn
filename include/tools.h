@@ -86,7 +86,7 @@ void mem_frob(void *data, int len);
  * which is mine.
  *   -- adrian
  */
-extern void
+extern inline void
 dlinkAdd(void *data, dlink_node * m, dlink_list * list)
 {
  m->data = data;
@@ -99,7 +99,7 @@ dlinkAdd(void *data, dlink_node * m, dlink_list * list)
  list->head = m;
 }
 
-extern void
+extern inline void
 dlinkAddBefore(dlink_node *b, void *data, dlink_node *m, dlink_list *list)
 {
     /* Shortcut - if its the first one, call dlinkAdd only */
@@ -114,7 +114,7 @@ dlinkAddBefore(dlink_node *b, void *data, dlink_node *m, dlink_list *list)
     }
 }
 
-extern void
+extern inline void
 dlinkAddTail(void *data, dlink_node *m, dlink_list *list)
 {
  m->data = data;
@@ -131,7 +131,7 @@ dlinkAddTail(void *data, dlink_node *m, dlink_list *list)
 /* Execution profiles show that this function is called the most
  * often of all non-spontaneous functions. So it had better be
  * efficient. */
-extern void
+extern inline void
 dlinkDelete(dlink_node *m, dlink_list *list)
 {
  /* Assumption: If m->next == NULL, then list->tail == m
