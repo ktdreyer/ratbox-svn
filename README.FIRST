@@ -91,8 +91,7 @@ Feature Specific Requirements:
   2.95.3 to fall flat on its face in at least one known location 
   reproducably. If it is possible, you should build with SunPro or check
   to see if the bug exists with newer GCC. We will make a note when GCC
-  has been fixed for this problem when we become aware of a fix. It is of
-  note that NetBSD's version of egcs-1.1.2 does NOT seem to be affected.
+  has been fixed for this problem when we become aware of a fix.
 
 - DARWIN AND MACOS X USERS: You must be using at least the December 2001
   Development Tools from Apple to build ircd-hybrid with shared modules.
