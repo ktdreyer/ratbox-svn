@@ -285,7 +285,7 @@ static void mo_forcepart(struct Client *client_p, struct Client *source_p,
   if (!IsMember(target_p, chptr))
   {
     sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL),
-               me.name, parv[0], parv[2], parv[1]);
+               me.name, parv[0], parv[1], parv[2]);
     return;
   }
   
