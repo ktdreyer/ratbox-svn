@@ -58,18 +58,6 @@ extern int ircncmp(const char *s1, const char *s2, int n);
 extern char* canonize(char *);
 #endif
 /*
- * ircsprintf - optimized sprintf
- */
-#ifdef __GNUC__
-int ircsprintf(char*, const char*, ...)
-           __attribute__ ((format(printf, 2, 3)));
-int ircsnprintf(char*, int, const char*,
-                       ...) __attribute__ ((format(printf, 3, 4)));
-#else
-int ircsprintf(char *str, const char *format, ...);
-int ircsnprintf(char*, int, const char*);
-#endif
-/*
  * inetntoa - optimized inet_ntoa
  */
 const char* inetntoa(const char* in_addr);

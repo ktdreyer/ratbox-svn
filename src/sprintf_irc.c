@@ -447,8 +447,7 @@ vsprintf_irc(char *str, const char *format, va_list args)
 } /* vsprintf_irc() */
 
 int
-ircsprintf(char *str, char *format, ...)
-
+ircsprintf(char *str, const char *format, ...)
 {
   va_list args;
   int bytes;
