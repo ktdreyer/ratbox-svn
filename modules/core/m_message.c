@@ -497,24 +497,27 @@ msg_channel_flags(int p_or_n, const char *command, struct Client *client_p,
 }
 
 static void
-add_tgchange(struct sockaddr *ip, const char *host)
+add_tgchange(struct Client *client_p)
 {
 	patricia_node_t *pnode;
 	tgchange *target;
+	int bitlen = 32;
 
 	target = MyMalloc(sizeof(tgchange));
 
-	/* XXX - this should depend on the aftype */
 #ifdef IPV6
-	pnode = make_and_lookup_ip(tgchange_tree, ip, 128);
-#else
-	pnode = make_and_lookup_ip(tgchange_tree, ip, 32);
+	if(client_p->localClient->ip.ss_family == AF_INET6)
+		bitlen = 128;
 #endif
+
+	pnode = make_and_lookup_ip(tgchange_tree,
+			(struct sockaddr *) &client_p->localClient->ip, 
+			bitlen);
 
 	pnode->data = target;
 	target->pnode = pnode;
 
-	DupString(target->host, host);
+	DupString(target->host, client_p->sockhost);
 	target->expiry = CurrentTime + ConfigFileEntry.tgchange_expiry;
 	target->last_global = CurrentTime;
 
@@ -591,8 +594,7 @@ add_target(struct Client *source_p, struct Client *target_p)
 			}
 			else
 			{
-				add_tgchange((struct sockaddr *)&source_p->localClient->ip,
-						source_p->sockhost);
+				add_tgchange(source_p);
 				send_tgchange++;
 			}
 
