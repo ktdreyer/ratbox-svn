@@ -1,3 +1,15 @@
+leeh        2004/09/06 20:49:26 EDT	(20040907_0)
+
+  Modified files:
+    src                  newconf.c 
+  Log:
+  - make parser ignore foo = ""; rather than calling the handling func
+  
+  Revision  Changes    Path
+  7.178     +4 -1      ircd-ratbox/src/newconf.c
+
+
+
 leeh        2004/09/06 16:07:54 EDT	(20040906_0)
 
   Modified files:
