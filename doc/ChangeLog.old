@@ -1,3 +1,15 @@
+androsyn    2002/03/09 19:08:34 EST	(20020310_1)
+
+  Modified files:
+    src                  s_conf.c 
+  Log:
+  Removed a dead variable..
+  
+  Revision  Changes    Path
+  7.296     +0 -27     ircd-hybrid-7/src/s_conf.c
+
+
+
 androsyn    2002/03/09 19:03:14 EST	(20020310_0)
 
   Modified files:
