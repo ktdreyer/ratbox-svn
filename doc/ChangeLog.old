@@ -1,3 +1,15 @@
+wcampbel    2002/01/31 23:13:20 EST	(20020201_0)
+
+  Modified files:
+    doc                  challenge.txt 
+  Log:
+  Updated the challenge/response document from the SGML source.
+  
+  Revision  Changes    Path
+  1.8       +60 -20    ircd-hybrid-7/doc/challenge.txt
+
+
+
 leeh        2002/01/30 10:00:02 EST	(20020130_1)
 
   Modified files:
