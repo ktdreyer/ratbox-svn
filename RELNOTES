@@ -8,6 +8,21 @@ NOTE: THIS IS BETA CODE.  It is run at your own risk.  By running this
 doc/whats-new.txt contains important lists of changes between 2.0 and 1.4 -
 it is important you read this file before upgrading.
 
+-- ircd-ratbox-2.0rc7
+- try to autoconnect on startup
+- nick resvs now allow @ and # like xlines do
+- refix poll() brokeness
+- fix redundant dline checking
+- fix fuserlog and failed connection notices to show where a user is identd
+  or not
+- rename invisible to hidden_oper for 1.x compatability
+- remove restricted flag from auth {};
+- add support for make DESTDIR and configure allowing more configurable 
+  paths for modules, helpfiles, etc..
+- fix resource exhaustion issue with unregistered clients
+- fix stats Z counter rollerover issue, report kB instead of bytes
+
+
 -- ircd-ratbox-2.0rc6
 - we werent opening logfiles properly on boot
 - stats T shows how many clients are in delayed exit
