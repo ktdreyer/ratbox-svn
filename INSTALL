@@ -60,7 +60,14 @@ ratbox-services installation guide
    parts.  eg, if you installed sqlite (as above) to /home/youruser/sqlite:
         ./configure --with-sqlite=/home/youruser/sqlite
 
-   See ./configure --help for more information.
+   If your nick or topic length set in ircd are different to 9 and 160
+   respectively, then:
+   	./configure --with-nicklen=LENGTH
+	./configure --with-topiclen=LENGTH
+   where LENGTH is a number.
+
+   See ./configure --help for more information.  Naturally, options should
+   be combined so ./configure is only run once.
 
 5. Run make
 

@@ -81,3 +81,9 @@
 /* Global Messaging Service */
 #undef ENABLE_GLOBAL
 
+/* Nick Length */
+#undef NICKLEN
+
+/* Topic Length */
+#undef TOPICLEN
+
