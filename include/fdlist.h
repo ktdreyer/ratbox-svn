@@ -43,7 +43,8 @@ enum {
     COMM_ERR_DNS,
     COMM_ERR_TIMEOUT,
     COMM_ERR_CONNECT,
-    COMM_ERROR
+    COMM_ERROR,
+    COMM_ERR_MAX
 };
 
 typedef struct _fde fde_t;

@@ -83,6 +83,10 @@ int            highest_fd = -1;
 static struct sockaddr_in mysk;
 static char               readBuf[READBUF_SIZE];
 
+static const char *comm_errstr[] = { "Comm OK", "Error during bind()",
+  "Error during DNS lookup", "connect timeout", "Error during connect()",
+  "Comm Error" };
+
 static void comm_connect_callback(int fd, int status);
 static PF comm_connect_timeout;
 static void comm_connect_dns_callback(void *vptr, struct DNSReply *reply);
@@ -1161,4 +1165,16 @@ comm_connect_tryconnect(int fd, void *notused)
 
     /* If we get here, we've suceeded, so call with COMM_OK */
     comm_connect_callback(fd, COMM_OK);
+}
+
+
+/*
+ * comm_error_str() - return an error string for the given error condition
+ */
+const char *
+comm_error_str(int error)
+{
+    if (error < 0 || error >= COMM_ERR_MAX)
+        return "Invalid error number!";
+    return comm_errstr[error];
 }
