@@ -759,10 +759,15 @@ get_or_create_channel(struct Client *client_p, char *chname, int *isnew)
 
     if(irccmp(chname, chptr->chname) == 0)
     {
+      if(isnew != NULL)
+        *isnew = 0;
       return chptr;
     }
   }
   
+  if(isnew != NULL)
+    *isnew = 1;
+
   chptr = BlockHeapAlloc(channel_heap);
   memset(chptr, 0, sizeof(struct Channel));
   strlcpy(chptr->chname, chname, CHANNELLEN+1);
