@@ -1,3 +1,20 @@
+leeh        2001/12/16 06:36:48 EST	(20011216_15)
+
+  Modified files:
+    include              hostmask.h 
+    modules              m_stats.c 
+    src                  hostmask.c 
+  Log:
+  - report_Ilines -> report_auth
+  - moved the masked stats I code into m_stats.c
+  
+  Revision  Changes    Path
+  1.17      +2 -2      ircd-hybrid-7/include/hostmask.h
+  1.97      +29 -4     ircd-hybrid-7/modules/m_stats.c
+  7.60      +8 -28     ircd-hybrid-7/src/hostmask.c
+
+
+
 leeh        2001/12/16 06:04:02 EST	(20011216_14)
 
   Modified files:
