@@ -70,7 +70,6 @@ static const char *core_module_table[] = {
 	"m_part",
 	"m_quit",
 	"m_server",
-	"m_sjoin",
 	"m_squit",
 	NULL
 };
