@@ -1,3 +1,15 @@
+androsyn    2003/09/09 15:23:09 EDT	(20030909_2)
+
+  Modified files:
+    src                  s_serv.c 
+  Log:
+  Add a socketpair() replacement for systems that don't have it
+  
+  Revision  Changes    Path
+  7.369     +68 -0     ircd-ratbox/src/s_serv.c
+
+
+
 androsyn    2003/09/09 12:10:34 EDT	(20030909_1)
 
   Modified files:
