@@ -1,3 +1,23 @@
+androsyn    2003/06/05 19:10:55 UTC	(20030605_0)
+
+  Modified files:
+    include              reject.h s_conf.h 
+    modules              m_info.c m_rehash.c 
+    src                  newconf.c reject.c 
+  Log:
+  Port forward a bunch of changes from stable.  Including the newest
+  incarnation of the reject code.  Also change cidr_amount to number_per_cidr
+  
+  Revision  Changes    Path
+  1.2       +27 -2     ircd-ratbox/include/reject.h
+  7.236     +2 -0      ircd-ratbox/include/s_conf.h
+  1.85      +19 -1     ircd-ratbox/modules/m_info.c
+  1.64      +11 -1     ircd-ratbox/modules/m_rehash.c
+  7.84      +17 -2     ircd-ratbox/src/newconf.c
+  1.2       +64 -16    ircd-ratbox/src/reject.c
+
+
+
 androsyn    2003/05/28 10:45:27 UTC	(20030528_0)
 
   Modified files:
