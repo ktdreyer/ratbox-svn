@@ -209,9 +209,9 @@ struct EncCapability
 #define SLINKCMD_ZIPSTATS                    17
 
 #ifdef MISSING_SOCKPAIR
-#define LAST_SLINK_FD   4
+#define LAST_SLINK_FD   7
 #else
-#define LAST_SLINK_FD   2
+#define LAST_SLINK_FD   5
 #endif
 
 #define SLINKRPL_FLAG_DATA      0x0001  /* reply has data following */

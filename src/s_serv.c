@@ -1312,18 +1312,18 @@ int fork_server(struct Client *server)
     return -1;
   else if (ret == 0)
   {
-    /* Child - use dup2 to override 0/1/2, then close everything else */
-    if(dup2(ctrl_pipe[0], 0) < 0)
+    /* Child - use dup2 to override 3/4/5, then close everything else */
+    if(dup2(ctrl_pipe[0], 3) < 0)
       exit(1);
-    if(dup2(data_pipe[0], 1) < 0)
+    if(dup2(data_pipe[0], 4) < 0)
       exit(1);
-    if(dup2(server->fd, 2) < 0)
+    if(dup2(server->fd, 5) < 0)
       return -1;
 #ifdef MISSING_SOCKPAIR
-    /* only uni-directional pipes, so use 3/4 for writing */
-    if(dup2(ctrl_pipe2[1], 3) < 0)
+    /* only uni-directional pipes, so use 6/7 for writing */
+    if(dup2(ctrl_pipe2[1], 6) < 0)
       exit(1);
-    if(dup2(data_pipe2[1], 4) < 0)
+    if(dup2(data_pipe2[1], 7) < 0)
       exit(1);
 #endif
 

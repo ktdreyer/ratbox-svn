@@ -20,21 +20,22 @@
 
 #include <stdio.h>
 
-#define CONTROL_FD_R            0
-#define LOCAL_FD_R              1
-#define REMOTE_FD_R             2
+/* do not use stdin/out/err, as it seems to break on solaris */
+#define CONTROL_FD_R            3
+#define LOCAL_FD_R              4
+#define REMOTE_FD_R             5
 
 #ifdef MISSING_SOCKPAIR
 /* uni-directional pipes, so we need 2 extra fds... */
-#define CONTROL_FD_W            3
-#define LOCAL_FD_W              4
+#define CONTROL_FD_W            6
+#define LOCAL_FD_W              7
 #define REMOTE_FD_W             REMOTE_FD_R 
-#define NUM_FDS                 5       /* nfds for select */
+#define NUM_FDS                 8       /* nfds for select */
 #else
 #define CONTROL_FD_W            CONTROL_FD_R
 #define LOCAL_FD_W              LOCAL_FD_R
 #define REMOTE_FD_W             REMOTE_FD_R
-#define NUM_FDS                 3       /* nfds for select */
+#define NUM_FDS                 6       /* nfds for select */
 #endif
 
 #define IO_READ                 0
@@ -43,7 +44,7 @@
 
 #define IO_TYPE(io)     (((io==2)?"select":((io==1)?"write":"read")))
 
-#define FD_NAME(fd)     (fd_name[fd])
+#define FD_NAME(fd)     (fd_name[fd-3])
 extern char *fd_name[NUM_FDS];
 
 /* #define SERVLINK_DEBUG */

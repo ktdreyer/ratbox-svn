@@ -51,6 +51,9 @@ struct slink_state       out_state;
 
 struct fd_table          fds[NUM_FDS] =
         {
+          {      NULL, NULL }, /* stdin */
+          {      NULL, NULL }, /* stdout */
+          {      NULL, NULL }, /* stderr */
           { read_ctrl, NULL },
           {      NULL, NULL },
 #ifdef MISSING_SOCKPAIR
@@ -110,9 +113,12 @@ int main(int argc, char *argv[])
 
   /* The following FDs should be open:
    *
-   * 0 - bi-directional pipe for control commands
-   * 1 - bi-directional pipe for data
-   * 2 - bi-directional socket connected to remote server
+   * 3 - bi/uni-directional pipe for control commands
+   * 4 - bi/uni-directional pipe for data
+   * 5 - bi-directional socket connected to remote server
+   * maybe:
+   * 6 - uni-directional (write) pipe for control commands
+   * 7 - uni-directional (write) pipe for data
    */
 
   /* loop forever */
@@ -121,7 +127,7 @@ int main(int argc, char *argv[])
     FD_ZERO(&rfds);
     FD_ZERO(&wfds);
     
-    for (i = 0; i < 3; i++)
+    for (i = 3; i < 6; i++)
     {
       if (fds[i].read_cb)
         FD_SET(i, &rfds);
@@ -132,7 +138,7 @@ int main(int argc, char *argv[])
     }
 
 #ifdef MISSING_SOCKPAIR
-    for (i = 3; i < 6; i++)
+    for (i = 6; i < 8; i++)
     {
       if (fds[i].write_cb)
         FD_SET(i, &wfds);
