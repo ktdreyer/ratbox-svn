@@ -1,3 +1,12 @@
+*** 20001110_1 by db
+- nasty DoS 
+  if user enters long prefix, it puts the parser into an infinite loop
+
+:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa bb
+will hang the ircd
+
+
+
 *** 20001109_7 by ejb
 
 some fixes in makefile
