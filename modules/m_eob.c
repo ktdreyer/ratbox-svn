@@ -66,4 +66,9 @@ int ms_eob(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   else
     sendto_realops_flags(FLAGS_ALL,"*** End of burst from %s",
 			 sptr->name);
+
+  if(!IsCapable(cptr, CAP_LL))
+    {
+      SetEob(cptr);
+    }
 }

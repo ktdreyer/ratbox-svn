@@ -128,6 +128,7 @@ struct Client
   int               hopcount;   /* number of servers to this 0 = local */
   unsigned short    status;     /* Client type */
   unsigned char     handler;    /* Handler index */
+  char              eob;	/* server eob has been received */
   unsigned long     serial;	/* used to enforce 1 send per nick */
 
   /*
@@ -239,7 +240,6 @@ struct LocalUser
   char              passwd[PASSWDLEN + 1];
   int               caps;       /* capabilities bit-field */
 
-
   /*
    * Anti-flood stuff. We track how many messages were parsed and how
    * many we were allowed in the current second, and apply a simple decay
@@ -300,6 +300,9 @@ struct LocalUser
 
 #define PARSE_AS_CLIENT(x)      ((x)->status & STAT_CLIENT_PARSE)
 #define PARSE_AS_SERVER(x)      ((x)->status & STAT_SERVER_PARSE)
+
+#define SetEob(x)		((x)->eob = 1)
+#define HasSentEob(x)		((x)->eob)
 
 /*
  * ts stuff

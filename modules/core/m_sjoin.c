@@ -40,6 +40,7 @@
 #include <string.h>
 #include <assert.h>
 
+
 struct Message sjoin_msgtab = {
   MSG_SJOIN, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_ignore, ms_sjoin, m_ignore}
@@ -109,6 +110,18 @@ int     ms_sjoin(struct Client *cptr,
   char    *p;
   int hide_or_not;
   dlink_node *m;
+
+  if(HasSentEob(cptr))
+    {
+      sendto_realops_flags(FLAGS_ALL,
+			   "*** HACK %s doing SJOIN after EOB!",
+			   cptr->name);
+
+      sendto_serv_butone(NULL, ":%s WALLOPS :%s",
+			 me.name, "*** HACK %s doing SJOIN after EOB!",
+			 cptr->name);
+
+    }
 
   if(GlobalSetOptions.hide_chanops)
     hide_or_not = ONLY_CHANOPS;
@@ -750,12 +763,3 @@ void remove_a_mode( int hide_or_not,
 
     }
 }
-
-
-
-
-
-
-
-
-

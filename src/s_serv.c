@@ -553,19 +553,31 @@ const char* show_capabilities(struct Client* acptr)
 {
   static char        msgbuf[BUFSIZE];
   struct Capability* cap;
+  char *t;
+  int  tl;
 
-  strcpy(msgbuf,"TS ");
+  t = msgbuf;
+  tl = ircsprintf(msgbuf,"TS ");
+  t += tl;
+
   if (!acptr->localClient->caps)        /* short circuit if no caps */
-    return msgbuf;
+    {
+      msgbuf[2] = '\0';
+      return msgbuf;
+    }
 
   for (cap = captab; cap->cap; ++cap)
     {
       if(cap->cap & acptr->localClient->caps)
         {
-          strcat(msgbuf, cap->name);
-          strcat(msgbuf, " ");
+          tl = ircsprintf(t, "%s ", cap->name);
+	  t += tl;
         }
     }
+
+  t--;
+  *t = '\0';
+
   return msgbuf;
 }
 
