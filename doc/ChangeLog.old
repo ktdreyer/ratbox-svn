@@ -1,3 +1,9 @@
+*** 20001130_3 by db
+- committed the chanop hiding code. wheeee
+  still needs testing
+
+
+
 *** 20001130_2 by db
 - server names should not be given in /squit messages if
   server hide is turned on
