@@ -1,3 +1,8 @@
+*** 20010718_9 by androsyn
+Changed char *version to char *ircd_version to prevent clash with openssl headers..
+
+
+
 *** 20010718_8 by androsyn
 Fixed some issues with 64bit version and remove some drain bamage as well.
 
