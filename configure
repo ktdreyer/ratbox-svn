@@ -2373,6 +2373,10 @@ cat >>confdefs.h <<\_ACEOF
 _ACEOF
 
 	;;
+	AIX*)
+		echo "$as_me:$LINENO: result: AIX - We're sorry you poor bastard..really we are" >&5
+echo "${ECHO_T}AIX - We're sorry you poor bastard..really we are" >&6
+		IRC_CFLAGS="$IRC_CFLAGS -Wl,-brtl"
 	*)
 		echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
@@ -9495,7 +9499,7 @@ if test "$shared_modules" = yes; then
 	hold_ldflags=$LDFLAGS
 	echo "$as_me:$LINENO: checking for the ld -export-dynamic flag" >&5
 echo $ECHO_N "checking for the ld -export-dynamic flag... $ECHO_C" >&6
-	LDFLAGS="${LDFLAGS} -Wl,-export-dynamic"
+	LDFLAGS="${LDFLAGS} -Wl,-export-dynamic -Werror"
 	cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
@@ -9546,6 +9550,11 @@ rm -f conftest.err conftest.$ac_objext \
 	if expr "`uname -s`" : ^IRIX >/dev/null 2>&1; then
 		found="no, IRIX ld uses -B,dynamic"
 		LDFLAGS="${LDFLAGS} -Wl,-B,dynamic"
+	fi
+
+	if expr "`uname -s`" : ^AIX >/dev/null 2>&1; then
+		found="no, AIX ld uses -G"
+		LDFLAGS="${LDFLAGS} -Wl,-G"
 	fi
 
 	echo "$as_me:$LINENO: result: $found" >&5

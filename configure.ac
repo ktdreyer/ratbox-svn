@@ -102,6 +102,9 @@ case "$OSNAME" in
 		AC_MSG_RESULT(SunOS or Solaris)
 		AC_DEFINE(__EXTENSIONS__, 1, [This is needed to use strtok_r on Solaris.])
 	;;
+	AIX*)
+		AC_MSG_RESULT(AIX - We're sorry you poor bastard..really we are)
+		IRC_CFLAGS="$IRC_CFLAGS -Wl,-brtl"
 	*)
 		AC_MSG_RESULT(no)
 	;;
@@ -1013,13 +1016,18 @@ if test "$shared_modules" = yes; then
 	# all symbols visible in the dynamic symbol table.
 	hold_ldflags=$LDFLAGS
 	AC_MSG_CHECKING(for the ld -export-dynamic flag)
-	LDFLAGS="${LDFLAGS} -Wl,-export-dynamic"
+	LDFLAGS="${LDFLAGS} -Wl,-export-dynamic -Werror"
 	AC_LINK_IFELSE(AC_LANG_PROGRAM([],[int i;]), found=yes, found=no)
 	LDFLAGS=$hold_ldflags
 
 	if expr "`uname -s`" : ^IRIX >/dev/null 2>&1; then
 		found="no, IRIX ld uses -B,dynamic"
 		LDFLAGS="${LDFLAGS} -Wl,-B,dynamic"
+	fi
+	
+	if expr "`uname -s`" : ^AIX >/dev/null 2>&1; then
+		found="no, AIX ld uses -G"
+		LDFLAGS="${LDFLAGS} -Wl,-G"
 	fi
 
 	AC_MSG_RESULT($found)
