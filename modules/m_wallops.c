@@ -76,7 +76,7 @@ static int mo_wallops(struct Client *cptr, struct Client *sptr,
       return 0;
     }
 
-  sendto_realops_flags_opers(FLAGS_OPERWALL, sptr, "%s", message);
+  sendto_wallops_flags(FLAGS_OPERWALL, sptr, "%s", message);
   sendto_ll_serv_butone(NULL, sptr, 1,
                         ":%s WALLOPS :%s", parv[0], message);
 
@@ -103,9 +103,9 @@ static int ms_wallops(struct Client *cptr, struct Client *sptr,
     }
 
   if(IsClient(sptr))
-    sendto_realops_flags_opers(FLAGS_OPERWALL, sptr, "%s", message);
+    sendto_wallops_flags(FLAGS_OPERWALL, sptr, "%s", message);
   else
-    sendto_realops_flags_opers(FLAGS_WALLOP, sptr, "%s", message); 
+    sendto_wallops_flags(FLAGS_WALLOP, sptr, "%s", message); 
 
   sendto_ll_serv_butone(cptr, sptr, 1,
                         ":%s WALLOPS :%s", parv[0], message);

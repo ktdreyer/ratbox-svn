@@ -136,7 +136,7 @@ static int ms_squit(struct Client *cptr, struct Client *sptr,
       */
       if (MyConnect(found_squit->acptr))
 	{
-	  sendto_realops_flags_opers(FLAGS_WALLOP, &me,
+	  sendto_wallops_flags(FLAGS_WALLOP, &me,
 				 "Remote SQUIT %s from %s (%s)",
 				 found_squit->server_name,
 				 get_client_name(sptr, HIDE_IP), comment);

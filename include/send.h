@@ -103,7 +103,8 @@ extern  void sendto_match_butone(struct Client *, struct Client *,
                                  char *, int, const char *, ...);
 
 extern  void sendto_realops_flags(int, const char *, ...);
-extern  void sendto_realops_flags_opers(int, struct Client *, const char *, ...);
+
+extern  void sendto_wallops_flags(int, struct Client *, const char *, ...);
 
 extern  void sendto_ops_butone(struct Client *, struct Client *, 
                                const char *, ...);
@@ -143,7 +144,7 @@ extern  void sendto_match_butone(struct Client *, struct Client *,
 extern  void sendto_realops_flags(int, const char *, ...)
 	    __attribute__((format (printf, 2, 3)));
 
-extern  void sendto_realops_flags_opers(int, struct Client *, const char *, ...)
+extern  void sendto_wallops_flags(int, struct Client *, const char *, ...)
             __attribute__((format (printf, 3, 4)));
 
 extern  void sendto_ops_butone(struct Client *, struct Client *, 

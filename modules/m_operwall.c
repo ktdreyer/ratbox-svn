@@ -76,7 +76,7 @@ static int mo_operwall(struct Client *cptr, struct Client *sptr,
 
   sendto_ll_serv_butone(NULL, sptr, 1,
                         ":%s OPERWALL :%s", parv[0], message);
-  sendto_realops_flags_opers(FLAGS_OPERWALL, sptr, "%s", message);
+  sendto_wallops_flags(FLAGS_OPERWALL, sptr, "%s", message);
   return 0;
 }
 
@@ -102,7 +102,7 @@ static int ms_operwall(struct Client *cptr, struct Client *sptr,
 
   sendto_ll_serv_butone(cptr, sptr, 1, ":%s OPERWALL :%s",
                      parv[0], message);
-  sendto_realops_flags_opers(FLAGS_OPERWALL, sptr, "%s", message);
+  sendto_wallops_flags(FLAGS_OPERWALL, sptr, "%s", message);
   return 0;
 }
 

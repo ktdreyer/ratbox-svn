@@ -1404,17 +1404,17 @@ sendto_realops_flags(int flags, const char *pattern, ...)
 } /* sendto_realops_flags() */
 
 /*
- * sendto_realops_flags_opers
+ * sendto_wallops_flags
  *
  * inputs       - flag types of messages to show to real opers
  *              - client sending request
  *              - var args input message
  * output       - NONE
- * side effects - Send to *local* ops only but NOT +s nonopers.
+ * side effects - Send a wallops to local opers
  */
 
 void
-sendto_realops_flags_opers(int flags, struct Client *sptr,
+sendto_wallops_flags(int flags, struct Client *sptr,
                            const char *pattern, ...)
 {
   char prefix[NICKLEN + USERLEN + HOSTLEN + 5];
@@ -1435,22 +1435,17 @@ sendto_realops_flags_opers(int flags, struct Client *sptr,
   else
     (void)ircsprintf(prefix, ":%s", sptr->name);
 
-  if (flags == FLAGS_WALLOP || flags == FLAGS_OPERWALL || flags  == FLAGS_LOCOPS)
+  for (ptr = oper_list.head; ptr; ptr = ptr->next)
     {
-      for (ptr = oper_list.head; ptr; ptr = ptr->next)
-        {
-          cptr = ptr->data;
+      cptr = ptr->data;
 
-          if(cptr->umodes & flags)
-            {
-              len =ircsprintf(sendbuf, "%s WALLOPS :%s",
-                               prefix,
-                               nbuf);
-              len = send_trim(sendbuf,len);
-              send_message(cptr, (char *)sendbuf, len);
-            }
-         }
-    }
+      if(cptr->umodes & flags)
+        {
+          len =ircsprintf(sendbuf, "%s WALLOPS :%s", prefix, nbuf);
+          len = send_trim(sendbuf,len);
+          send_message(cptr, (char *)sendbuf, len);
+        }
+     }
 }
 /*
  * ts_warn
