@@ -1,3 +1,10 @@
+*** 20001207_4 by db
+- Like a surgeon who leaves a scalpel inside a patient, I left some
+  debugging code inside m_names.c ... some extra sendto_realops...
+  *blush* at least the patient hasn't died ...
+
+
+
 *** 20001207_3 by db
 - added example of new style conf file (finally)
 - renamed old ircd.conf example as ircd_old.conf
