@@ -12,7 +12,7 @@ RM		= @RM@
 LEX		= @LEX@
 LEXLIB		= @LEXLIB@
 CFLAGS		= @CFLAGS@ -DIRCD_PREFIX=\"@prefix@\"
-LDFLAGS   	= -Wl,-export-dynamic @LDFLAGS_EXTRA@
+LDFLAGS   	= @LDFLAGS@
 MKDEP		= ${CC} -MM
 MV		= @MV@
 RM		= @RM@
