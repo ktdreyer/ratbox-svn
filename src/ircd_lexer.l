@@ -128,6 +128,7 @@ lazylink	{ return LAZYLINK; }
 leaf		{ return LEAF; }
 leaf_mask	{ return LEAF_MASK; }
 listen		{ return LISTEN; }
+links_notice    { return LINKS_NOTICE; }
 log_level	{ return LOG_LEVEL; }
 logging         { return LOGGING; }
 logpath         { return T_LOGPATH; }

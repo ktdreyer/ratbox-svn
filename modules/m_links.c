@@ -87,7 +87,7 @@ int m_links(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (*mask)       /* only necessary if there is a mask */
     mask = collapse(clean_string(clean_mask, mask, 2 * HOSTLEN));
 
-  if (MyConnect(sptr))
+  if (ConfigFileEntry.links_notice && MyConnect(sptr))
     sendto_realops_flags(FLAGS_SPY,
                        "LINKS '%s' requested by %s (%s@%s) [%s]",
                        mask, sptr->name, sptr->username,

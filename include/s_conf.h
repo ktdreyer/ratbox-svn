@@ -218,7 +218,7 @@ typedef struct
   int         maximum_links;
 	int       oper_only_umodes;
 	int       max_targets;
-
+	int       links_notice;
 } ConfigFileEntryType;
 
 /* bleh. have to become global. */
