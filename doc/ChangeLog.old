@@ -1,3 +1,9 @@
+*** 20010716_5 by leeh
+- IsSetOperAdmin != IsAdmin
+
+  stats l * needs to mask stuff too.. 
+
+
 *** 20010716_4 by leeh
 - server ips in stats P are admin only.
 
