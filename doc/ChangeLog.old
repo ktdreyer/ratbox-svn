@@ -1,3 +1,8 @@
+*** 20010716_1 by spookey
+modified ircd-hybrid-7/autoconf/configure.in to check properly for sys/event.h if kqueue is selected and to properly discard prepend underscore checking in shared libraries when nlist.h cannot be found
+updated configure from autoconf/configure.in
+
+
 *** 20010715_2 by leeh
 - added ipv6/pace_connect to /info
 
