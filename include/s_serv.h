@@ -41,7 +41,6 @@ struct Capability
 
 #define CAP_CAP         0x00000001      /* received a CAP to begin with */
 #define CAP_QS          0x00000002      /* Can handle quit storm removal */
-#define CAP_ZIP         0x00000004      /* Can do server compresion */
 #define CAP_EX          0x00000008      /* Can do channel +e exemptions */
 #define CAP_CHW         0x00000010      /* Can do channel wall @# */
 #define CAP_DE          0x00000020      /* Can do channel +d (regex deny) */
@@ -98,7 +97,7 @@ extern int         hunt_server(struct Client* cptr, struct Client* sptr,
                                char* command, int server, 
                                int parc, char** parv);
 extern const char* my_name_for_link(const char* name, struct ConfItem* conf);
-extern void        send_capabilities(struct Client* client, int use_zip);
+extern void        send_capabilities(struct Client* client, int can_send);
 extern int         server_estab(struct Client* cptr);
 extern void        set_autoconn(struct Client *,char *,char *,int);
 extern const char* show_capabilities(struct Client* client);

@@ -99,10 +99,6 @@ void oldParseOneLine(char* line,struct ConfItem* aconf,
       conf_add_conf(aconf);
       break;
 
-    case 'c':
-      aconf->flags |= CONF_FLAGS_ZIP_LINK;
-      /* drop into normal C line code */
-
     case 'C':
       aconf->status = CONF_CONNECT_SERVER;
       ++*pccount;

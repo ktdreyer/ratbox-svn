@@ -71,7 +71,6 @@ int   class_sendq_var;
 %token  AUTH
 %token  AUTOCONN
 %token  CLASS
-%token  COMPRESSED
 %token  CONNECT
 %token  DENY
 %token  DESCRIPTION
@@ -842,9 +841,9 @@ connect_items:  connect_items connect_item |
 
 connect_item:   connect_name | connect_host | connect_send_password |
                 connect_accept_password | connect_port |
-                connect_compressed | connect_lazylink |
-                connect_hub_mask | connect_leaf_mask |
-		connect_class | connect_auto
+                connect_lazylink | connect_hub_mask |
+                connect_leaf_mask | connect_class |
+                connect_auto
 
 connect_name:   NAME '=' QSTRING ';'
   {
@@ -890,16 +889,6 @@ connect_accept_password: ACCEPT_PASSWORD '=' QSTRING ';'
   };
 
 connect_port:   PORT '=' NUMBER ';' { yy_cconf->port = yylval.number; };
-
-connect_compressed:     COMPRESSED '=' TYES ';'
-  {
-    yy_cconf->flags |= CONF_FLAGS_ZIP_LINK;
-  }
-                        |
-                        COMPRESSED '='  TNO ';'
-  {
-    yy_cconf->flags &= ~CONF_FLAGS_ZIP_LINK;
-  };
 
 connect_lazylink:       LAZYLINK '=' TYES ';'
   {

@@ -26,7 +26,6 @@
 #include "ircd.h"
 #include "list.h"
 #include "parse.h"
-#include "s_zip.h"
 #include "irc_string.h"
 
 #include <assert.h>
@@ -38,12 +37,6 @@
 **      buffer - pointr to the buffer containing the newly read data
 **      length - number of valid bytes of data in the buffer
 **
-**      The buffer might be partially or totally zipped.
-**      At the beginning of the compressed flow, it is possible that
-**      an uncompressed ERROR message will be found.  This occurs when
-**      the connection fails on the other server before switching
-**      to compressed mode.
-**
 ** Note:
 **      It is implicitly assumed that dopacket is called only
 **      with cptr of "local" variation, which contains all the
@@ -54,8 +47,6 @@ int dopacket(struct Client *cptr, char *buffer, size_t length)
   char  *ch1;
   char  *ch2;
   register char *cptrbuf;
-  int  zipped = NO;
-  int  done_unzip = NO;
 
   cptrbuf = cptr->buffer;
   me.receiveB += length; /* Update bytes received */
@@ -75,38 +66,6 @@ int dopacket(struct Client *cptr, char *buffer, size_t length)
   ch1 = cptrbuf + cptr->count;
   ch2 = buffer;
 
-  if (cptr->flags2 & FLAGS2_ZIPFIRST)
-    {
-      if (*ch2 == '\n' || *ch2 == '\r')
-        {
-          ch2++;
-          length--;
-        }
-      cptr->flags2 &= ~FLAGS2_ZIPFIRST;
-    }
-  else
-    done_unzip = YES;
-
-  if (cptr->flags2 & FLAGS2_ZIP)
-    {
-      /* uncompressed buffer first */
-      zipped = length;
-      cptr->zip->inbuf[0] = '\0';    /* unnecessary but nicer for debugging */
-      cptr->zip->incount = 0;
-      ch2 = unzip_packet(cptr, ch2, &zipped);
-      length = zipped;
-      zipped = 1;
-      if (length == -1)
-        return exit_client(cptr, cptr, &me,
-                           "fatal error in unzip_packet(1)");
-    }
-
-  /* While there is "stuff" in the compressed input to deal with,
-   * keep loop parsing it. I have to go through this loop at least once.
-   * -Dianora
-   */
-  do
-    {
       /* While there is "stuff" in uncompressed input to deal with
        * loop around parsing it. -Dianora
        */
@@ -157,59 +116,11 @@ int dopacket(struct Client *cptr, char *buffer, size_t length)
                                     "Local kill by /list (so many channels!)" :
                                    "SendQ exceeded") : "Dead socket");
 
-              if ((cptr->flags2 & FLAGS2_ZIP) && (zipped == 0) &&
-                  (length > 0))
-                {
-                  /*
-                  ** beginning of server connection, the buffer
-                  ** contained PASS/CAPAB/SERVER and is now 
-                  ** zipped!
-                  ** Ignore the '\n' that should be here.
-                  */
-                  /* Checked RFC1950: \r or \n can't start a
-                  ** zlib stream  -orabidoo
-                  */
-
-                  zipped = length;
-                  if (zipped > 0 && (*ch2 == '\n' || *ch2 == '\r'))
-                    {
-                      ch2++;
-                      zipped--;
-                    }
-                  cptr->flags2 &= ~FLAGS2_ZIPFIRST;
-                  ch2 = unzip_packet(cptr, ch2, &zipped);
-                  length = zipped;
-                  zipped = 1;
-                  if (length == -1)
-                    return exit_client(cptr, cptr, &me,
-                                       "fatal error in unzip_packet(2)");
-                }
               ch1 = cptrbuf;
             }
           else if (ch1 < cptrbuf + (sizeof(cptr->buffer)-1))
             ch1++; /* There is always room for the null */
         }
-      /* Now see if anything is left uncompressed in the input
-       * If so, uncompress it and continue to parse
-       * -Dianora
-       */
-          if((cptr->flags2 & FLAGS2_ZIP) && cptr->zip->incount)
-            {
-              /* This call simply finishes unzipping whats left
-               * second parameter is not used. -Dianora
-               */
-              ch2 = unzip_packet(cptr, (char *)NULL, &zipped);
-              length = zipped;
-              zipped = 1;
-              if (length == -1)
-                return exit_client(cptr, cptr, &me,
-                                   "fatal error in unzip_packet(1)");
-              ch1 = ch2 + length;
-              done_unzip = NO;
-            }
-          else
-            done_unzip = YES;
-    }while(!done_unzip);
 
   cptr->count = ch1 - cptrbuf;
   return 1;
@@ -222,12 +133,6 @@ int dopacket(struct Client *cptr, char *buffer, size_t length)
  *             applies.
  *      buffer - pointr to the buffer containing the newly read data
  *      length - number of valid bytes of data in the buffer
- *
- *      The buffer might be partially or totally zipped.
- *      At the beginning of the compressed flow, it is possible that
- *      an uncompressed ERROR message will be found.  This occurs when
- *      the connection fails on the other server before switching
- *      to compressed mode.
  *
  * Note:
  *      It is implicitly assumed that dopacket is called only

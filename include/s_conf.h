@@ -24,7 +24,21 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.22  2000/11/06 16:12:00  adrian
+ * I hate doing it, but here it is. One blind commit to rip out ziplinks
+ * from hybrid-7, as they will be re-implemented later on as an external
+ * process rather than be in the code.
+ *
+ * the actual zip files haven't been removed, since I'm probably going to
+ * reuse them very soon now.
+ *
+ * This hasn't been tested. It compiles. I will do more testing this evening,
+ * and probably do some much needed tidyups to the client/server send and
+ * receive code.
+ *
  * Revision 7.21  2000/11/06 13:48:14  adrian
+ *
+ *
  * Finally kill the DNS cache code altogether from the API. gethost_byname()
  * and gethost_byaddr() now are void functions, rather than struct DNSReply *
  * functions. If we want to implement a DNS cache, we can do it later with
@@ -404,7 +418,6 @@ typedef struct QlineItem {
 #define CONF_FLAGS_IDLE_LINED           0x0100
 #define CONF_FLAGS_DO_IDENTD            0x0200
 #define CONF_FLAGS_ALLOW_AUTO_CONN      0x0400
-#define CONF_FLAGS_ZIP_LINK             0x0800
 #define CONF_FLAGS_SPOOF_IP             0x1000
 #define CONF_FLAGS_LAZY_LINK            0x2000
 #define CONF_FLAGS_LITTLE_I_LINE        0x8000

@@ -226,13 +226,6 @@
 #define NO_WHOIS_WILDCARDS
 
 /*
- * The compression level used for zipped links. (Suggested values: 1 to 5)
- * Above 4 will only give a rather marginal increase in compression for a
- * large increase in CPU usage.
- */
-#define ZIP_LEVEL       2
-
-/*
  * OPER_UMODES LOCOP_UMODES - set these to be the initial umodes when OPER'ing
  * These can be over-ridden in ircd.conf file, with flags in last O field
  */

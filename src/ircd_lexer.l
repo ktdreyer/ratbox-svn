@@ -80,7 +80,6 @@ allow_bots	{ return ALLOW_BOTS; }
 auth		{ return AUTH; }
 autoconn	{ return AUTOCONN; }
 class		{ return CLASS; }
-compressed	{ return COMPRESSED; }
 connect		{ return CONNECT; }
 deny		{ return DENY; }
 description	{ return DESCRIPTION; }

@@ -40,7 +40,6 @@
 #include "s_log.h"
 #include "s_stats.h"
 #include "s_user.h"
-#include "s_zip.h"
 #include "scache.h"
 #include "send.h"
 #include "client.h"
@@ -69,7 +68,6 @@ int MaxClientCount     = 1;
  */
 struct Capability captab[] = {
 /*  name        cap     */ 
-  { "ZIP",      CAP_ZIP }, 
   { "QS",       CAP_QS },
   { "EX",       CAP_EX },
   { "CHW",      CAP_CHW },
@@ -436,9 +434,6 @@ int check_server(struct Client* cptr)
   if( !(n_conf->flags & CONF_FLAGS_LAZY_LINK) )
     ClearCap(cptr,CAP_LL);
 
-  if( !(c_conf->flags & CONF_FLAGS_ZIP_LINK) )
-    ClearCap(cptr,CAP_ZIP);
-
   if(ConfigFileEntry.hub)
     {
       if( n_conf->flags & CONF_FLAGS_LAZY_LINK )
@@ -647,7 +642,6 @@ int server_estab(struct Client *cptr)
       */
 
       send_capabilities(cptr,CAP_MASK|
-                      ((c_conf->flags & CONF_FLAGS_ZIP_LINK) ? CAP_ZIP : 0) |
                       ((n_conf->flags & CONF_FLAGS_LAZY_LINK) ? CAP_LL : 0));
       sendto_one(cptr, "SERVER %s 1 :%s",
                  my_name_for_link(me.name, n_conf), 
@@ -667,21 +661,6 @@ int server_estab(struct Client *cptr)
           return exit_client(cptr, cptr, cptr, "Bad User");
         }
     }
-  
-  if (IsCapable(cptr, CAP_ZIP) && (c_conf->flags & CONF_FLAGS_ZIP_LINK))
-    {
-      if (zip_init(cptr) == -1)
-        {
-          zip_free(cptr);
-          sendto_realops("Unable to setup compressed link for %s",
-                      get_client_name(cptr, TRUE));
-          return exit_client(cptr, cptr, &me, "zip_init() failed");
-        }
-
-      cptr->flags2 |= (FLAGS2_ZIP|FLAGS2_ZIPFIRST);
-    }
-  else
-    ClearCap(cptr, CAP_ZIP);
 
   sendto_one(cptr,"SVINFO %d %d 0 :%lu", TS_CURRENT, TS_MIN, CurrentTime);
   
@@ -943,17 +922,6 @@ static void server_burst(struct Client *cptr)
       }
 
   cptr->flags2 &= ~FLAGS2_CBURST;
-
-  /*
-  ** some stats about the connect burst,
-  ** they are slightly incorrect because of cptr->zip->outbuf.
-  */
-  if ((cptr->flags2 & FLAGS2_ZIP) && cptr->zip->out->total_in)
-    sendto_realops("Connect burst to %s: %lu, compressed: %lu (%3.1f%%)",
-                get_client_name(cptr, TRUE),
-                cptr->zip->out->total_in,cptr->zip->out->total_out,
-                (100.0*(float)cptr->zip->out->total_out) /
-                (float)cptr->zip->out->total_in);
 
   /* Always send a PING after connect burst is done */
   sendto_one(cptr, "PING :%s", me.name);
@@ -1253,7 +1221,6 @@ serv_connect_callback(int fd, int status, void *data)
         sendto_one(cptr, "PASS %s :TS", c_conf->passwd);
 
     send_capabilities(cptr, CAP_MASK|
-      ((c_conf->flags & CONF_FLAGS_ZIP_LINK) ? CAP_ZIP : 0) |
       ((n_conf->flags & CONF_FLAGS_LAZY_LINK) ? CAP_LL : 0));
 
     sendto_one(cptr, "SERVER %s 1 :%s",

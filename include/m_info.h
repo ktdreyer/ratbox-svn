@@ -362,9 +362,6 @@ Info MyInformation[] = {
   { "WINTRHAWK", "OFF", 0, "Enable Wintrhawk Styling" },
 #endif /* WINTRHAWK */
 
-  { "ZIP_LEVEL", "", ZIP_LEVEL, "Compression Value for Zipped Links" },
-  { "ZIP_LINKS", "ON", 0, "Compress Server to Server Links" },
-
   /*
    * since we don't want to include the world here, NULL probably
    * isn't defined by the time we read this, just use plain 0 instead

@@ -45,7 +45,6 @@
 #include "s_log.h"
 #include "s_serv.h"
 #include "s_stats.h"
-#include "s_zip.h"
 #include "send.h"
 #include "s_debug.h"
 #include "s_bsd.h"
@@ -184,9 +183,7 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
                FD_SET(i, read_set);
             }
 
-          if (DBufLength(&cptr->sendQ) || IsConnecting(cptr)
-              || ((cptr->flags2 & FLAGS2_ZIP) && (cptr->zip->outcount > 0))
-              )
+          if (DBufLength(&cptr->sendQ) || IsConnecting(cptr))
             {
                FD_SET(i, write_set);
             }

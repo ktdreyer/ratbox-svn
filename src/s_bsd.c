@@ -40,7 +40,6 @@
 #include "s_log.h"
 #include "s_serv.h"
 #include "s_stats.h"
-#include "s_zip.h"
 #include "send.h"
 #include "s_debug.h"
 
@@ -362,13 +361,6 @@ void close_connection(struct Client *cptr)
     fd_close(cptr->fd);
     cptr->fd = -1;
   }
-
-    /*
-     * the connection might have zip data (even if
-     * FLAGS2_ZIP is not set)
-     */
-  if (IsServer(cptr))
-    zip_free(cptr);
 
   DBufClear(&cptr->sendQ);
   DBufClear(&cptr->recvQ);

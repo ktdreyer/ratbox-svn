@@ -133,7 +133,6 @@ typedef struct MessageTree MESSAGE_TREE;
 #define MSG_GLINE    "GLINE"    /* GLINE */
 #define MSG_KNOCK    "KNOCK"    /* KNOCK */
 #define MSG_OPERWALL "OPERWALL" /* OPERWALL */
-#define MSG_ZIP      "ZIP"      /* ZIP */
 
 /*
  * Constants

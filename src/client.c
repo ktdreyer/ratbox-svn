@@ -145,7 +145,6 @@ struct Client* make_client(struct Client* from)
 
 #ifdef NULL_POINTER_NOT_ZERO
       cptr->fluders   = NULL;
-      cptr->zip       = NULL;
       cptr->listener  = NULL;
       cptr->confs     = NULL;
 

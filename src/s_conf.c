@@ -290,8 +290,6 @@ void report_configured_links(struct Client* sptr, int mask)
             char c;
 
             c = p->conf_char;
-            if(tmp->flags & CONF_FLAGS_ZIP_LINK)
-              c = 'c';
             if(tmp->flags & CONF_FLAGS_LAZY_LINK)
               c = 'n';
 

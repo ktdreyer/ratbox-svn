@@ -31,7 +31,6 @@
 #include "fdlist.h"
 #include "s_bsd.h"
 #include "s_serv.h"
-#include "s_zip.h"
 #include "sprintf_irc.h"
 #include "s_conf.h"
 #include "list.h"
@@ -145,15 +144,6 @@ send_message(struct Client *to, char *msg, int len)
     }
   else
     {
-      /*
-      ** data is first stored in to->zip->outbuf until
-      ** it's big enough to be compressed and stored in the sendq.
-      ** send_queued is then responsible to never let the sendQ
-      ** be empty and to->zip->outbuf not empty.
-      */
-      if (to->flags2 & FLAGS2_ZIP)
-        msg = zip_buffer(to, msg, &len, 0);
-
       if (len && !dbuf_put(&to->sendQ, msg, len))
         return dead_link(to, "Buffer allocation error for %s");
     }
@@ -202,28 +192,6 @@ send_queued_write(int fd, void *data)
     return;
   } /* if (IsDead(to)) */
 
-  /*
-  ** Here, we must make sure than nothing will be left in to->zip->outbuf
-  ** This buffer needs to be compressed and sent if all the sendQ is sent
-  */
-  if ((to->flags2 & FLAGS2_ZIP) && to->zip->outcount) {
-    if (DBufLength(&to->sendQ) > 0)
-      more = 1;
-    else {
-      msg = zip_buffer(to, NULL, &len, 1);
-
-      if (len == -1) {
-        dead_link(to, "fatal error in zip_buffer()");
-        return;
-      }
-
-      if (!dbuf_put(&to->sendQ, msg, len)) {
-        dead_link(to, "Buffer allocation error for %s");
-        return;
-      }
-    }
-  } /* if ((to->flags2 & FLAGS2_ZIP) && to->zip->outcount) */
-
   while (DBufLength(&to->sendQ) > 0) {
     msg = dbuf_map(&to->sendQ, &len);
 
@@ -255,17 +223,10 @@ send_queued_write(int fd, void *data)
 
     if (DBufLength(&to->sendQ) == 0 && more) {
       /*
-      ** The sendQ is now empty, compress what's left
-      ** uncompressed and try to send it too
-      */
-      more = 0;
-      msg = zip_buffer(to, NULL, &len, 1);
-
-      if (len == -1) {
-        dead_link(to, "fatal error in zip_buffer()");
-        return;
-      }
-
+       * The sendQ is now emptry, to try send whats left
+       * XXX uhm, huh? :-) This is a leftover from ziplinks .. :(
+       *   -- adrian
+       */
       if (!dbuf_put(&to->sendQ, msg, len)) {
         dead_link(to, "Buffer allocation error for %s");
         return;

@@ -49,7 +49,6 @@
 #include "s_misc.h"
 #include "s_serv.h"      /* try_connections */
 #include "s_stats.h"
-#include "s_zip.h"
 #include "scache.h"
 #include "send.h"
 #include "setup.h"
@@ -311,9 +310,7 @@ static void parse_command_line(int argc, char* argv[])
       bootDaemon = 0; 
       break;
     case 'v':
-      printf("ircd %s\n\tzlib %s\n\tircd_dir: %s\n", version,
-              zlib_version,
-              ConfigFileEntry.dpath);
+      printf("ircd %s\n\tircd_dir: %s\n", version, ConfigFileEntry.dpath);
       exit(0);
       break;   /* NOT REACHED */
     case 'x':
@@ -555,21 +552,6 @@ int main(int argc, char *argv[])
       exit(5);
     }
 #endif /*CHROOTDIR*/
-
-  if (zlib_version[0] == '0')
-    {
-      fprintf(stderr, "zlib version 1.0 or higher required\n");
-      exit(1);
-    }
-  if (zlib_version[0] != ZLIB_VERSION[0])
-    {
-      fprintf(stderr, "incompatible zlib version\n");
-      exit(1);
-    }
-  if (strcmp(zlib_version, ZLIB_VERSION) != 0)
-    {
-      fprintf(stderr, "warning: different zlib version\n");
-    }
 
   myargv = argv;
   umask(077);                /* better safe than sorry --SRB */
