@@ -1,5 +1,6 @@
 /*   contrib/m_opme.c
  *   Copyright (C) 2002 Hybrid Development Team
+ *   Copyright (C) 2004 ircd-ratbox development team
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -19,7 +20,6 @@
  */
 #include "stdinc.h"
 #include "tools.h"
-#include "handlers.h"
 #include "channel.h"
 #include "client.h"
 #include "ircd.h"
@@ -34,130 +34,94 @@
 #include "parse.h"
 #include "modules.h"
 
-
-static void mo_opme(struct Client *client_p, struct Client *source_p,
-                    int parc, char *parv[]);
-static int chan_is_opless(struct Channel *chptr);
+static int mo_opme(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
 
 struct Message opme_msgtab = {
-  "OPME", 0, 0, 2, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_not_oper, m_ignore, mo_opme}
+	"OPME", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, mg_ignore, {mo_opme, 1}}
 };
 
-void
-_modinit(void)
-{
-  mod_add_cmd(&opme_msgtab);
-}
+mapi_clist_av1 opme_clist[] = { &opme_msgtab, NULL };
 
-void
-_moddeinit(void)
-{
-  mod_del_cmd(&opme_msgtab);
-}
-
-char *_version = "$Revision$";
-
-static int chan_is_opless(struct Channel *chptr)
-{
-  if (chptr->chanops.head)
-	  return 0;
-  else
-	  return 1;
-}
+DECLARE_MODULE_AV1(opme, NULL, NULL, opme_clist, NULL, NULL, "$Revision$");
 
 /*
 ** mo_opme
 **      parv[0] = sender prefix
 **      parv[1] = channel
 */
-static void mo_opme(struct Client *client_p, struct Client *source_p,
-                    int parc, char *parv[])
+static int
+mo_opme(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-  struct Channel *chptr;
-  dlink_node *ptr;
-  dlink_node *locptr;
+	struct Channel *chptr;
+	struct membership *msptr;
+	dlink_node *ptr;
   
-  /* admins only */
-  if (!IsAdmin(source_p))
-    {
-      sendto_one(source_p, ":%s NOTICE %s :You have no A flag", me.name,
-                 parv[0]);
-      return;
-    }
+	//is this even working?
+	sendto_one(source_p, ":%s NOTICE %s :blah", 
+			   me.name, parv[0]);
+			   
+	/* admins only */
+	if (!IsAdmin(source_p))
+	{
+		sendto_one(source_p, ":%s NOTICE %s :You have no A flag", 
+			   me.name, parv[0]);
+		return 0;
+	}
 
-  /* XXX - we might not have CBURSTed this channel if we are a lazylink
-   * yet. */
-  chptr= find_channel(parv[1]);
+	chptr = find_channel(parv[1]);
   
-  if( chptr == NULL )
-    {
-      sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
-		 me.name, parv[0], parv[1]);
-      return;
-    }
+	if(chptr == NULL)
+	{
+		sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
+			   me.name, parv[0], parv[1]);
+		return 0;
+	}
 
-  if (!chan_is_opless(chptr))
-  {
-    sendto_one(source_p, ":%s NOTICE %s :%s Channel is not opless",
-               me.name, parv[0], parv[1]);
-    return;
-  }
+	DLINK_FOREACH(ptr, chptr->members.head)
+	{
+		msptr = ptr->data;
 
-  if ((ptr = find_user_link(&chptr->peons, source_p)))
-	  dlinkDelete(ptr, &chptr->peons);
-  else if ((ptr = find_user_link(&chptr->voiced, source_p)))
-	  dlinkDelete(ptr, &chptr->voiced);
-  else if ((ptr = find_user_link(&chptr->chanops, source_p)))
-	  dlinkDelete(ptr, &chptr->chanops);
-  else if((ptr = find_user_link(&chptr->chanops_voiced, source_p)))
-    dlinkDelete(ptr, &chptr->chanops_voiced);
-  else
-    {
-       /* Theyre not even on the channel, bail. */
-       return;      
-    }
+		if(is_chanop(msptr))
+		{
+			sendto_one(source_p, ":%s NOTICE %s :%s Channel is not opless",
+					me.name, parv[0], parv[1]);
+			return 0;
+		}
+	}
 
-  if((locptr = find_user_link(&chptr->locpeons, source_p)))
-    dlinkDelete(locptr, &chptr->locpeons);
-  else if((locptr = find_user_link(&chptr->locvoiced, source_p)))
-    dlinkDelete(locptr, &chptr->locvoiced);
-  else if((locptr = find_user_link(&chptr->locchanops, source_p)))
-    dlinkDelete(locptr, &chptr->locchanops);
-  else if((locptr = find_user_link(&chptr->locchanops_voiced, source_p)))
-    dlinkDelete(locptr, &chptr->locchanops_voiced);
-  else
-    return;
+	msptr = find_channel_membership(chptr, source_p);
 
-  dlinkAdd(source_p, ptr, &chptr->chanops);
-  dlinkAdd(source_p, locptr, &chptr->locchanops);
+	if(msptr == NULL)
+		return 0;
 
-  sendto_wallops_flags(UMODE_WALLOP, &me,
-                       "OPME called for [%s] by %s!%s@%s",
-                       parv[1], source_p->name, source_p->username,
-                       source_p->host);
-  sendto_server(NULL, NULL, NOCAPS, NOCAPS, 
-                ":%s WALLOPS :OPME called for [%s] by %s!%s@%s",
-                me.name, parv[1], source_p->name, source_p->username,
-                source_p->host);
-  ilog(L_NOTICE, "OPME called for [%s] by %s!%s@%s",
-                parv[1], source_p->name, source_p->username,
-                source_p->host);
+	msptr->flags |= CHFL_CHANOP;
 
-  sendto_server(NULL, chptr, CAP_UID, NOCAPS, 
-                 ":%s PART %s", ID(source_p), parv[1]);
-  sendto_server(NULL, chptr, NOCAPS, CAP_UID, 
-                ":%s PART %s", source_p->name, parv[1]);
-  sendto_server(NULL, chptr, CAP_UID, NOCAPS, 
-                ":%s SJOIN %ld %s + :@%s",
-                me.name, (signed long) chptr->channelts,
-                parv[1],
-                source_p->name /* XXX ID(source_p) */ );
-  sendto_server(NULL, chptr, NOCAPS, CAP_UID, 
-                ":%s SJOIN %ld %s + :@%s",
-                me.name, (signed long) chptr->channelts,
-                parv[1], source_p->name);
-  sendto_channel_local(ALL_MEMBERS, chptr,
-                       ":%s MODE %s +o %s",
-                       me.name, parv[1], source_p->name);
+	sendto_wallops_flags(UMODE_WALLOP, &me,
+			     "OPME called for [%s] by %s!%s@%s",
+			     parv[1], source_p->name, source_p->username,
+			     source_p->host);
+	ilog(L_MAIN, "OPME called for [%s] by %s!%s@%s",
+	     parv[1], source_p->name, source_p->username, source_p->host);
+
+	/* dont send stuff for local channels remotely. */
+	if(*chptr->chname != '&')
+	{
+		sendto_server(NULL, NULL, NOCAPS, NOCAPS, 
+			      ":%s WALLOPS :OPME called for [%s] by %s!%s@%s",
+			      me.name, parv[1], source_p->name, source_p->username,
+			      source_p->host);
+		sendto_server(NULL, chptr, NOCAPS, NOCAPS, 
+			      ":%s PART %s", source_p->name, parv[1]);
+		sendto_server(NULL, chptr, NOCAPS, NOCAPS, 
+			      ":%s SJOIN %ld %s + :@%s",
+			      me.name, (signed long) chptr->channelts,
+			      parv[1], source_p->name);
+	}
+
+	sendto_channel_local(ALL_MEMBERS, chptr,
+			     ":%s MODE %s +o %s",
+			     me.name, parv[1], source_p->name);
+	
+	return 0;
 }

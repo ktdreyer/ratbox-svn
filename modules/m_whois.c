@@ -300,7 +300,7 @@ single_whois(struct Client *source_p, struct Client *target_p)
 	 * be careful of this when writing whois hooks
 	 */
 	if(MyClient(source_p))
-		hook_call_event(doing_whois_local_hook, &hd);
+		hook_call_event(doing_whois_hook, &hd);
 	else
 		hook_call_event(doing_whois_global_hook, &hd);
 
