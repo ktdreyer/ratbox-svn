@@ -1,3 +1,6 @@
+*** 20010101_31 by davidt
+Don't allow servers to JOIN channels, eugh
+
 *** 20010101_30 by davidt
 Eliminate race condition from s_serv.c, where we could add a server to serv_list (for SJOINS, etc) without first bursting it)
 
