@@ -1,3 +1,20 @@
+leeh        2002/11/24 21:49:36 UTC	(20021124_19)
+
+  Modified files:
+    modules              m_kline.c 
+    src                  kdparse.c s_conf.c 
+  Log:
+  - allow a permanent kline to be placed even if a temporary kline already
+    exists.  it wont remove the temp kline however..
+  - fix an ugly bug allowing a kline of \0@\0
+  
+  Revision  Changes    Path
+  1.130     +28 -19    ircd-ratbox/modules/m_kline.c
+  7.14      +21 -11    ircd-ratbox/src/kdparse.c
+  7.367     +4 -6      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2002/11/24 20:54:43 UTC	(20021124_18)
 
   Modified files:
