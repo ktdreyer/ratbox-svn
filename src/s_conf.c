@@ -2493,8 +2493,9 @@ conf_add_class_to_conf(struct ConfItem *aconf)
 	else if (aconf->status == CONF_SERVER || aconf->status == CONF_OPERATOR)
 	{
 		sendto_realops_flags(FLAGS_ALL, L_ALL,
-			"Warning -- Using default class for missing class \"%s\" in auth{} for %s",
-			aconf->className, aconf->name);
+			"Warning -- Using default class for missing class \"%s\" in %s{} for %s",
+			aconf->className, aconf->status == CONF_SERVER ? "connect" : "operator",
+			aconf->name);
 	}
 	
       MyFree(aconf->className);
