@@ -74,7 +74,22 @@ GETTING IT TO WORK
 
 SERVER CONFIGURATION
 ====================
-  To be done.
+  Step 1:  Create your private and public keys.  Read how in the
+           example.conf file, or use the tools/mkkeypair utility.
+  Step 2:  Place the keys where your IRC daemon can access them.
+  Step 3:  Provide your *PUBLIC* key to another server.
+  Step 4:  Obtain another servers' *PUBLIC* key and place it in a
+           file where your IRC daemon can access it.
+  Step 5:  Edit ircd.conf and specify your private key location via
+           the "rsa_private_key_file" directive in serverinfo {}.
+  Step 6:  Edit ircd.conf and specify the public key location via
+           the "rsa_public_key_file" directive in the appropriate
+           connect {} block.
+  Step 7:  /REHASH or send a SIGHUP to the daemon
+  Step 8:  Check ircd.log to make sure no errors showed up.
+  Step 9:  Try to connect to one another.
+
+  More to come later.
 
 
 OPENSSL VERSION REQUIREMENT
@@ -163,28 +178,33 @@ CIPHERS
 
   hybrid-7 chooses and checks ciphers in the following order:
 
-    BF/256      -- Blowfish (256-bit)
-    BF/128      -- Blowfish (128-bit)
-    CAST/128    -- CAST (128-bit)
-    IDEA/128    -- IDEA (128-bit)
-    RC5.16/128  -- RC5 16 round (128-bit
-    RC5.12/128  -- RC5 12 round (128-bit)
-    RC5.8/128   -- RC5 8 round  (128-bit)
-    3DES/168    -- 3DES (168-bit)
-    DES/56      -- Standard DES (56-bit)
+    Name           Cipher type        Cipher information
+    ----------------------------------------------------
+    BF/256         Blowfish           256-bit
+    BF/128         Blowfish           128-bit
+    CAST/128       CAST               128-bit
+    IDEA/128       IDEA               128-bit
+    RC5.16/128     RC5 16 round       128-bit
+    RC5.12/128     RC5 12 round       128-bit
+    RC5.8/128      RC5 8 round        128-bit
+    3DES/168       3DES               168-bit
+    DES/56         Standard DES       56-bit
+    ----------------------------------------------------
 
-  On most systems, Blowfish will be fastest and secure enough for most
-  general transmissions.  Use the "encspeed" (tools/encspeed) utility
-  provided with hybrid-7 to find out which cipher may be fastest on your
-  system.  And, naturally in some cases, you may want to pick a more
+  On most systems, Blowfish will be secure and fast enough for most
+  IRC networks and general transmissions.  Use the "encspeed" utility
+  (tools/encspeed) provided with hybrid-7 to find out which cipher may
+  work best on your system.  Naturally, you may want to pick a more
   secure cipher depending upon the sensitivity of the data being
-  transmitted/received.
+  transmitted/received.  Also, be sure to pick something the remote
+  end (server) is able to handle well as well.  Communicate with your
+  administrators!
 
-  Some systems may lack the IDEA cipher (such is the case with FreeBSD).
-  The reason for this is simple: there are licensing issues regarding
-  the IDEA cipher, and (I believe?) export regulations.  Henceforth, it
-  cannot be provided with stock FreeBSD systems.  Other systems may
-  differ.
+  Some systems may lack the IDEA cipher (such is the case with FreeBSD
+  versions which originate in the USA).  The reason for this is simple:
+  there are licensing issues regarding this cipher (export regulations).
+  OpenSSL does support the IDEA cipher, but it cannot be provided with
+  this system for legal reasons.
 
 
 SOLARIS CAVEATS
