@@ -1,3 +1,15 @@
+db          2001/12/31 10:22:54 EST	(20011231_4)
+
+  Modified files:
+    modules              Makefile.in 
+  Log:
+  - missing -c
+  
+  Revision  Changes    Path
+  1.59      +1 -1      ircd-hybrid-7/modules/Makefile.in
+
+
+
 db          2001/12/31 09:06:59 EST	(20011231_3)
 
   Modified files:
