@@ -445,12 +445,10 @@ void count_memory(struct Client *source_p)
              (int)remote_client_memory_used);
 
   count_user_memory( &user_count, (int *)&user_memory_used );
-
-/*  assert (users_counted == user_count); */
-  if(users_counted != user_count)
-    sendto_realops_flags(FLAGS_ALL, L_ALL, "*** WARNING: Users counted: %d != User count: %d",
-                           users_counted, user_count);
-  
+  total_memory += user_memory_used;
+  sendto_one(source_p, ":%s %d %s :User Memory in use: %d(%d)",
+             me.name, RPL_STATSDEBUG, source_p->name,
+	     user_count, (int)user_memory_used);
 
   count_links_memory( &links_count, (int *)&links_memory_used );
   total_memory += links_memory_used;
