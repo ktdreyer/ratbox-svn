@@ -50,7 +50,7 @@
  * systems may require kernel patches, configuration tweaks, or ulimit
  * adjustments in order to exceed certain limits (e.g. 1024, 4096 fds).
  */
-#define HARD_FDLIMIT_    65536
+#define HARD_FDLIMIT_    384
 
 /* XXX - MAX_BUFFER is mostly ignored. */
 /*
@@ -63,8 +63,8 @@
  * 10 file descriptors are reserved for logging, DNS lookups, etc.,
  * so MAX_CLIENTS + MAX_BUFFER + 10 must not exceed HARD_FDLIMIT.
  */
-#define MAX_CLIENTS     65000
-#define MAX_BUFFER      500
+#define MAX_CLIENTS     200
+#define MAX_BUFFER      60
 
 #ifdef VMS
 /* *PATH - directory locations and filenames for VMS.
