@@ -1,3 +1,15 @@
+leeh        2002/11/11 23:23:26 UTC	(20021111_4)
+
+  Modified files:
+    modules              m_stats.c 
+  Log:
+  - added stats d, to list temp dlines.
+  
+  Revision  Changes    Path
+  1.126     +40 -2     ircd-ratbox/modules/m_stats.c
+
+
+
 leeh        2002/11/11 23:14:01 UTC	(20021111_3)
 
   Modified files:
