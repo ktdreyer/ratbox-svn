@@ -136,7 +136,7 @@ struct Client* GlobalClientList = 0; /* Pointer to beginning of Client list */
 /* unknown/client pointer lists */ 
 dlink_list unknown_list;        /* unknown clients ON this server only */
 dlink_list lclient_list;        /* local clients only ON this server */
-dlink_list serv_list;           /* local servers know to this server ONLY */
+dlink_list serv_list;           /* local servers to this server ONLY */
 dlink_list oper_list;           /* our opers, duplicated in lclient_list */
 dlink_list dead_list;           /* clients that have exited, to be freed */
 
