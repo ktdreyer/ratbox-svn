@@ -1,3 +1,42 @@
+leeh        2002/05/14 07:41:41 EDT	(20020514_1)
+
+  Modified files:
+    include              channel.h vchannel.h 
+    modules              m_cjoin.c m_invite.c m_join.c m_knock.c 
+                         m_list.c m_lljoin.c m_names.c m_topic.c 
+                         m_who.c m_whois.c 
+    modules/core         m_kick.c m_message.c m_mode.c m_part.c 
+                         m_sjoin.c 
+    src                  channel.c ircd_parser.y s_serv.c 
+                         vchannel.c 
+  Log:
+  - put vchans under #ifdef VCHANS
+  
+  Revision  Changes    Path
+  7.112     +4 -0      ircd-hybrid-7/include/channel.h
+  7.19      +7 -0      ircd-hybrid-7/include/vchannel.h
+  1.42      +3 -1      ircd-hybrid-7/modules/core/m_kick.c
+  1.91      +6 -3      ircd-hybrid-7/modules/core/m_message.c
+  1.52      +6 -2      ircd-hybrid-7/modules/core/m_mode.c
+  1.55      +3 -1      ircd-hybrid-7/modules/core/m_part.c
+  1.138     +14 -6     ircd-hybrid-7/modules/core/m_sjoin.c
+  1.50      +5 -1      ircd-hybrid-7/modules/m_cjoin.c
+  1.44      +11 -2     ircd-hybrid-7/modules/m_invite.c
+  1.84      +17 -6     ircd-hybrid-7/modules/m_join.c
+  1.49      +17 -4     ircd-hybrid-7/modules/m_knock.c
+  1.41      +12 -4     ircd-hybrid-7/modules/m_list.c
+  1.56      +22 -4     ircd-hybrid-7/modules/m_lljoin.c
+  1.41      +13 -3     ircd-hybrid-7/modules/m_names.c
+  1.51      +7 -2      ircd-hybrid-7/modules/m_topic.c
+  1.59      +14 -3     ircd-hybrid-7/modules/m_who.c
+  1.76      +6 -2      ircd-hybrid-7/modules/m_whois.c
+  7.312     +13 -1     ircd-hybrid-7/src/channel.c
+  1.249     +5 -1      ircd-hybrid-7/src/ircd_parser.y
+  7.254     +12 -2     ircd-hybrid-7/src/s_serv.c
+  7.63      +3 -0      ircd-hybrid-7/src/vchannel.c
+
+
+
 leeh        2002/05/13 19:34:06 EDT	(20020514_0)
 
   Modified files:
