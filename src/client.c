@@ -1491,10 +1491,10 @@ int exit_client(
         }
     }
   /* The client *better* be off all of the lists */
-  assert(dlinkFind(&unknown_list, client_p) == NULL);
-  assert(dlinkFind(&lclient_list, client_p) == NULL);
-  assert(dlinkFind(&serv_list, client_p) == NULL);
-  assert(dlinkFind(&oper_list, client_p) == NULL);
+  assert(dlinkFind(&unknown_list, source_p) == NULL);
+  assert(dlinkFind(&lclient_list, source_p) == NULL);
+  assert(dlinkFind(&serv_list, source_p) == NULL);
+  assert(dlinkFind(&oper_list, source_p) == NULL);
   
     
   exit_one_client(client_p, source_p, from, comment);
