@@ -1,3 +1,11 @@
+*** 20010103_16 by adrian
+
+
+put the asserts back in. These catch real bugs in the code, and when
+they get triggered they mean we need to fix something.
+
+
+
 *** 20010103_15 by adrian
 
 
