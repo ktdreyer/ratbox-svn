@@ -51,7 +51,7 @@ static int bufline_count = 0;
 static void linebuf_garbage_collect(void *unused)
 {
   BlockHeapGarbageCollect(linebuf_heap);
-  eventAdd("linebuf_garbage_collect", linebuf_garbage_collect, NULL, 30, 0);
+  eventAddIsh("linebuf_garbage_collect", linebuf_garbage_collect, NULL, 30, 0);
 }
       
 
@@ -59,7 +59,7 @@ void
 linebuf_init(void)
 {
   linebuf_heap  = BlockHeapCreate(sizeof(buf_line_t), 2048);
-  eventAdd("linebuf_garbage_collect", linebuf_garbage_collect, NULL, 30, 0);
+  eventAddIsh("linebuf_garbage_collect", linebuf_garbage_collect, NULL, 30, 0);
 }
 
 inline buf_line_t *
