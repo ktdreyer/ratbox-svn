@@ -1,3 +1,12 @@
+*** 20010830_2 by davidt
+- Attempt to flush sendq of exiting clients
+- When flushing a sendq, attempt to flush as many lines as possible, instead
+  of one line per call of send_queued_write.
+- Close fds 0/1/2 for slink process on non solaris platforms.
+- Zero localClient after allocating it.
+
+
+
 *** 20010830_1 by leeh
 - allow unregged clients to see the motd, but then drop them.
 
