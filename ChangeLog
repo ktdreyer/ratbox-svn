@@ -1,3 +1,30 @@
+androsyn    2002/12/08 02:03:56 UTC	(20021208_3)
+
+  Modified files:
+    include              balloc.h client.h linebuf.h scache.h 
+                         whowas.h 
+    src                  balloc.c client.c linebuf.c s_debug.c 
+                         scache.c whowas.c 
+  Log:
+  Change the way we do some counting..In some cases the block heap knows
+  enough about the counts that we don't need to track them otherwise.  Also
+  change some variables to use size_t instead of unsigned long
+  
+  Revision  Changes    Path
+  1.15      +1 -1      ircd-ratbox/include/balloc.h
+  7.183     +2 -2      ircd-ratbox/include/client.h
+  1.26      +1 -1      ircd-ratbox/include/linebuf.h
+  7.9       +1 -1      ircd-ratbox/include/scache.h
+  7.11      +1 -1      ircd-ratbox/include/whowas.h
+  7.48      +23 -0     ircd-ratbox/src/balloc.c
+  7.340     +12 -22    ircd-ratbox/src/client.c
+  7.99      +2 -3      ircd-ratbox/src/linebuf.c
+  7.83      +21 -21    ircd-ratbox/src/s_debug.c
+  7.18      +1 -1      ircd-ratbox/src/scache.c
+  7.22      +4 -4      ircd-ratbox/src/whowas.c
+
+
+
 androsyn    2002/12/08 01:22:58 UTC	(20021208_2)
 
   Modified files:
