@@ -182,9 +182,14 @@ void conf_dns_lookup(struct ConfItem* aconf)
 }
 
 /*
- * make_conf - create a new conf entry
+ * make_conf
+ *
+ * inputs	- none
+ * output	- pointer to new conf entry
+ * side effects	- none
  */
-struct ConfItem* make_conf()
+struct ConfItem* 
+make_conf()
 {
   struct ConfItem* aconf;
 
@@ -195,9 +200,14 @@ struct ConfItem* make_conf()
 }
 
 /*
- * delist_conf - remove conf item from ConfigItemList
+ * delist_conf
+ *
+ * inputs	- pointer to conf item to delist
+ * output	- none
+ * side effects	- remove conf item from ConfigItemList
  */
-static void delist_conf(struct ConfItem* aconf)
+static void 
+delist_conf(struct ConfItem* aconf)
 {
   if (aconf == ConfigItemList)
   {
@@ -218,6 +228,13 @@ static void delist_conf(struct ConfItem* aconf)
   aconf->next = NULL;
 }
 
+/*
+ * free_conf
+ *
+ * inputs	- pointer to conf to free
+ * output	- none
+ * side effects	-
+ */
 void free_conf(struct ConfItem* aconf)
 {
   assert(0 != aconf);
@@ -284,7 +301,8 @@ static struct LinkReport {
  * output	- NONE
  * side effects	-
  */
-void report_configured_links(struct Client* source_p, int mask)
+void 
+report_configured_links(struct Client* source_p, int mask)
 {
   struct ConfItem*   tmp;
   struct LinkReport* p;
@@ -388,7 +406,8 @@ void report_configured_links(struct Client* source_p, int mask)
  * output       - none
  * side effects -
  */
-void report_specials(struct Client* source_p, int flags, int numeric)
+void 
+report_specials(struct Client* source_p, int flags, int numeric)
 {
   struct ConfItem* this_conf;
   struct ConfItem* aconf;
@@ -791,8 +810,8 @@ remove_one_ip(struct irc_inaddr *ip_in)
  * side effects - hopefully, none
  */
 
-static 
-int hash_ip(struct irc_inaddr *addr)
+static int 
+hash_ip(struct irc_inaddr *addr)
 {
 #ifndef IPV6
   int hash;
@@ -1057,21 +1076,18 @@ attach_confs(struct Client* client_p, const char* name, int statmask)
 }
 
 /*
- * attach_cn_lines
+ * attach_connect_block
  *
- * inputs	- pointer to server to attach c/ns to
+ * inputs	- pointer to server to attach
  * 		- name of server
  *		- hostname of server
  * output	- true (1) if both are found, otherwise return false (0)
- * side effects -
- * attach_cn_lines - find C/N lines and attach them to connecting client
- * NOTE: this requires an exact match between the name on the C:line and
- * the name on the N:line
- * C/N lines are completely gone now, the name exists only for historical
- * reasons - A1kmm.
+ * side effects - find connect block and attach them to connecting client
  */
 int 
-attach_cn_lines(struct Client *client_p, const char* name, const char* host)
+attach_connect_block(struct Client *client_p,
+		     const char* name,
+		     const char* host)
 {
   struct ConfItem* ptr;
 
@@ -1408,8 +1424,8 @@ clear_special_conf(struct ConfItem **this_conf)
  * as a result of an operator issuing this command, else assume it has been
  * called as a result of the server receiving a HUP signal.
  */
-int rehash
-(struct Client *client_p,struct Client *source_p, int sig)
+int 
+rehash (struct Client *client_p,struct Client *source_p, int sig)
 {
   if (sig)
     {
@@ -1445,7 +1461,8 @@ int rehash
 #define YES     1
 #define NO      0
 
-static void set_default_conf(void)
+static void 
+set_default_conf(void)
 {
   class0 = find_class("default");       /* which one is the default class ? */
 
@@ -2432,7 +2449,8 @@ conf_add_class_to_conf(struct ConfItem *aconf)
  * side effects - delist old conf (if present)
  */
 
-void conf_delist_old_conf(struct ConfItem *aconf)
+void 
+conf_delist_old_conf(struct ConfItem *aconf)
 {
   struct ConfItem *bconf;
 
@@ -2454,15 +2472,18 @@ void conf_delist_old_conf(struct ConfItem *aconf)
     }
 }
 
-#define MAXCONFLINKS 150                                                        
+#define MAXCONFLINKS 150
 
 /*
  * conf_add_server
+ *
  * inputs       - pointer to config item
+ *		- pointer to link count already on this conf
  * output       - NONE
  * side effects - Add a connect block
  */
-int conf_add_server(struct ConfItem *aconf, int lcount)
+int 
+conf_add_server(struct ConfItem *aconf, int lcount)
 {
   conf_add_class_to_conf(aconf);
 
@@ -2494,17 +2515,19 @@ int conf_add_server(struct ConfItem *aconf, int lcount)
 
 /*
  * conf_add_k_conf
+ *
  * inputs       - pointer to config item
  * output       - NONE
  * side effects - Add a K line
  */
 
-void conf_add_k_conf(struct ConfItem *aconf)
+void 
+conf_add_k_conf(struct ConfItem *aconf)
 {
- if (aconf->host)
- {
-  add_conf_by_address(aconf->host, CONF_KILL, aconf->user, aconf);
- }
+  if (aconf->host != NULL)
+    {
+      add_conf_by_address(aconf->host, CONF_KILL, aconf->user, aconf);
+    }
 }
 
 /*

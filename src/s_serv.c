@@ -2157,14 +2157,10 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
     }
 
     /*
-     * NOTE: if we're here we have a valid C:Line and the client should
-     * have started the connection and stored the remote address/port and
-     * ip address name in itself
-     *
      * Attach config entries to client here rather than in
      * serv_connect_callback(). This to avoid null pointer references.
      */
-    if (!attach_cn_lines(client_p, aconf->name, aconf->host))
+    if (!attach_connect_block(client_p, aconf->name, aconf->host))
       {
         sendto_realops_flags(FLAGS_ALL, L_ALL,
 			   "Host %s is not enabled for connecting:no C/N-line",
