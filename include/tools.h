@@ -102,7 +102,34 @@ void mem_frob(void *data, int len);
  *   -- adrian
  */
 
-static inline void
+/* I hate C sometimes */
+#if __GNUC_PREREQ (2, 7) && defined __OPTIMIZE__ \
+    && !defined __OPTIMIZE_SIZE__ && !defined __NO_INLINE__
+#define INLINE_FUNC extern inline
+#define NEED_INLINES
+#else
+#undef INLINE_FUNC
+#define INLINE_FUNC
+#endif
+
+#ifdef TOOLS_C
+#undef INLINE_FUNC
+#define INLINE_FUNC
+#endif 
+
+void dlinkMoveNode(dlink_node * m, dlink_list * oldlist, dlink_list * newlist);
+void dlinkAdd(void *data, dlink_node * m, dlink_list * list);
+void dlinkAddBefore(dlink_node * b, void *data, dlink_node * m, dlink_list * list);
+void dlinkMoveTail(dlink_node *m, dlink_list *list);
+void dlinkAddTail(void *data, dlink_node * m, dlink_list * list);
+void dlinkDelete(dlink_node * m, dlink_list * list);
+dlink_node *dlinkFindDelete(void *data, dlink_list *list);
+int dlinkFindDestroy(void *data, dlink_list *list);
+dlink_node *dlinkFind(void *data, dlink_list *list);
+void dlinkMoveList(dlink_list * from, dlink_list * to);
+
+#if defined(NEED_INLINES) || defined(TOOLS_C)
+INLINE_FUNC void
 dlinkMoveNode(dlink_node * m, dlink_list * oldlist, dlink_list * newlist)
 {
 	/* Assumption: If m->next == NULL, then list->tail == m
@@ -134,7 +161,7 @@ dlinkMoveNode(dlink_node * m, dlink_list * oldlist, dlink_list * newlist)
 	newlist->length++;
 }
 
-static inline void
+INLINE_FUNC void
 dlinkAdd(void *data, dlink_node * m, dlink_list * list)
 {
 	assert(data != NULL);
@@ -153,7 +180,7 @@ dlinkAdd(void *data, dlink_node * m, dlink_list * list)
 	list->length++;
 }
 
-static inline void
+INLINE_FUNC void
 dlinkAddBefore(dlink_node * b, void *data, dlink_node * m, dlink_list * list)
 {
 	assert(b != NULL);
@@ -177,7 +204,7 @@ dlinkAddBefore(dlink_node * b, void *data, dlink_node * m, dlink_list * list)
 	}
 }
 
-static inline void
+INLINE_FUNC void
 dlinkMoveTail(dlink_node *m, dlink_list *list)
 {
 	if(list->tail == m)
@@ -200,7 +227,7 @@ dlinkMoveTail(dlink_node *m, dlink_list *list)
 	list->tail = m;
 }
 
-static inline void
+INLINE_FUNC void
 dlinkAddTail(void *data, dlink_node * m, dlink_list * list)
 {
 	assert(m != NULL);
@@ -223,7 +250,7 @@ dlinkAddTail(void *data, dlink_node * m, dlink_list * list)
 /* Execution profiles show that this function is called the most
  * often of all non-spontaneous functions. So it had better be
  * efficient. */
-static inline void
+INLINE_FUNC void
 dlinkDelete(dlink_node * m, dlink_list * list)
 {
 	assert(m != NULL);
@@ -246,7 +273,7 @@ dlinkDelete(dlink_node * m, dlink_list * list)
 	list->length--;
 }
 
-static inline dlink_node *
+INLINE_FUNC dlink_node *
 dlinkFindDelete(void *data, dlink_list *list)
 {
 	dlink_node *m;
@@ -276,7 +303,7 @@ dlinkFindDelete(void *data, dlink_list *list)
 	return NULL;
 }
 
-static inline int
+INLINE_FUNC int
 dlinkFindDestroy(void *data, dlink_list *list)
 {
 	void *ptr;
@@ -301,7 +328,7 @@ dlinkFindDestroy(void *data, dlink_list *list)
  * output	- pointer to link or NULL if not found
  * side effects	- Look for ptr in the linked listed pointed to by link.
  */
-static inline dlink_node *
+INLINE_FUNC dlink_node *
 dlinkFind(void *data, dlink_list *list)
 {
 	dlink_node *ptr;
@@ -316,7 +343,7 @@ dlinkFind(void *data, dlink_list *list)
 	return (NULL);
 }
 
-static inline void
+INLINE_FUNC void
 dlinkMoveList(dlink_list * from, dlink_list * to)
 {
 	assert(from != NULL);
@@ -346,5 +373,6 @@ dlinkMoveList(dlink_list * from, dlink_list * to)
 	to->length += from->length;
 	from->length = 0;
 }
+#endif
 
 #endif /* __TOOLS_H__ */

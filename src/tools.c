@@ -32,7 +32,9 @@
  */
 
 #include "stdinc.h"
+#define TOOLS_C
 #include "tools.h"
+#undef TOOLS_C
 #include "balloc.h"
 
 #ifndef NDEBUG
