@@ -1,14 +1,3 @@
-androsyn    2002/05/26 01:37:31 EDT	(20020526_0)
-
-  Added files:           (Branch: WIN32_WIP)
-    src                  win32.c 
-  Log:
-  Misc functions for native win32 support
-  
-  Revision  Changes    Path
-  1.1.2.1   +39 -0     ircd-hybrid-7/src/win32.c (new)
-
-
 
 androsyn    2002/05/25 05:05:56 EDT	(20020525_13)
 
