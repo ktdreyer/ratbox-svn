@@ -1,3 +1,18 @@
+androsyn    2002/03/06 23:22:32 EST	(20020307_0)
+
+  Modified files:
+    autoconf             configure.in 
+    .                    configure 
+  Log:
+  RT Sigio isn't really experimental anymore it seems to have proven itself
+  pretty stable these days.
+  
+  Revision  Changes    Path
+  7.125     +1 -1      ircd-hybrid-7/autoconf/configure.in
+  7.128     +1 -1      ircd-hybrid-7/configure
+
+
+
 lusky       2002/03/05 23:41:46 EST	(20020306_0)
 
   Modified files:
