@@ -1,3 +1,15 @@
+leeh        2003/02/02 00:19:20 UTC	(20030202_0)
+
+  Modified files:
+    include              s_bsd.h 
+  Log:
+  - update the header file too..
+  
+  Revision  Changes    Path
+  7.43      +1 -1      ircd-ratbox/include/s_bsd.h
+
+
+
 androsyn    2003/01/28 21:51:57 UTC	(20030128_0)
 
   Modified files:
