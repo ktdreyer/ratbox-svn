@@ -54,36 +54,43 @@
 #define MASTER_MAX      (HARD_FDLIMIT - MAX_BUFFER)
 /*******************************************************************/
 
-/* DPATH SPATH CPATH MPATH KPATH - directory and files locations
+/* *PATH - directory and files locations
+ *
  * Full pathnames and defaults of irc system's support files. Please note that
  * these are only the recommended names and paths. Change as needed.
- * You must define these to something, even if you don't really want them.
  *
- * DPATH = directory,
- * SPATH = server executable,
- * MODPATH = directory of module to load automatically,
- * CPATH = conf file,
- * MPATH = MOTD,
- * KPATH = kline conf file,
- * DLPATH = dline conf file,
- * RPATH = RSA keyfile,
- * OMOTD = path to MOTD for opers,
- * MSGPATH = path to gettext message files
+ * DPATH   = root directory of installation,
+ * MODPATH = path to module directory,
+ * MSGPATH = path to directory containing .mo message files,
+ * SPATH   = server executable,
+ * CPATH   = conf file,
+ * KPATH   = kline conf file,
+ * DLPATH  = dline conf file,
+ * RPATH   = RSA keyfile,
+ * MPATH   = MOTD,
+ * PPATH   = pid file,
+ * HPATH   = oper help file as seen by /quote help, 
+ * OMOTD   = path to MOTD for opers.
  * 
  * For /restart to work, SPATH needs to be a full pathname
  * (unless "." is in your exec path). -Rodder
+ *
  * Leave KPATH undefined if you want klines in main conf file.
- * HPATH is the opers help file, seen by opers on /quote help.
  * -Dianora
  *
- * DPATH must have a trailing /
+ * Leave MSGPATH undefined if you don't want to include gettext() support
+ * for alternate message files -dt
+ *
+ * All other *PATHs should be defined.
+ * DPATH, MODPATH and MSGPATH must have a trailing /'s
  * Do not use ~'s in any of these paths
  *
  */
 
 #define DPATH   "/usr/local/ircd/"
-#define SPATH   "/usr/local/ircd/ircd"
 #define MODPATH "/usr/local/ircd/modules/autoload/"
+#define MSGPATH "/usr/local/ircd/messages/"
+#define SPATH   "/usr/local/ircd/ircd"
 #define CPATH   "ircd.conf"
 #define KPATH   "kline.conf"
 #define DLPATH  "kline.conf"
@@ -93,7 +100,6 @@
 #define PPATH   "ircd.pid"
 #define HPATH   "opers.txt"
 #define OPATH   "opers.motd"
-#define MSGPATH "/usr/local/ircd/messages/"
 
 /* TS_MAX_DELTA_DEFAULT and TS_WARN_DELTA_DEFAULT -
  * allowed delta for TS when another server connects.
@@ -112,14 +118,6 @@
 #define TS_MAX_DELTA_DEFAULT  600
 #define TS_WARN_DELTA_MIN     10
 #define TS_WARN_DELTA_DEFAULT 30
-
-/* SLAVE_SERVERS - Use this to send LOCOPS and KLINES to servers you define
- * uses U: lines in ircd.conf, each server defined in an U: line
- * is sent a copy of the locally placed K-line, and will also
- * accept K-lines from those servers.
- * This is useful for sites with more than one client server.
- */
-#undef SLAVE_SERVERS
 
 /* FNAME_USERLOG and FNAME_OPERLOG - logs of local USERS and OPERS
  * Define this filename to maintain a list of persons who log
