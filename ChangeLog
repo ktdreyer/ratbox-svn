@@ -1,3 +1,18 @@
+leeh        2005/01/25 13:10:56 EST	(20050125_3)
+
+  Modified files:
+    doc                  example.conf 
+    src                  newconf.c 
+  Log:
+  - rename 'type' to 'flags' in cluster {};
+  - add stacking of servers in cluster {}; documented in example.conf
+  
+  Revision  Changes    Path
+  7.256     +18 -10    ircd-ratbox/doc/example.conf
+  7.194     +39 -7     ircd-ratbox/src/newconf.c
+
+
+
 alz         2005/01/25 12:48:54 EST	(20050125_2)
 
   Modified files:
