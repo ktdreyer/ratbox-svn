@@ -10,6 +10,18 @@
 #include <string.h>
 
 extern void outofmemory(void);
+#ifndef WE_ARE_MEMORY_C
+#undef strdup
+#undef malloc
+#undef realloc
+#undef calloc
+#undef free
+#define malloc do_not_call_old_memory_functions!call_My*functions
+#define calloc do_not_call_old_memory_functions!call_My*functions
+#define realloc do_not_call_old_memory_functions!call_My*functions
+#define strdup do_not_call_old_memory_functions!call_My*functions
+#define free do_not_call_old_memory_functions!call_My*functions
+#endif
 
 
 #ifdef MEMDEBUG
@@ -24,42 +36,10 @@ extern void        _DupString(char**, const char*, char*, int);
 #else /* MEMDEBUG */
 
 
-extern inline void *
-_MyMalloc(size_t size)
-{
-  void* ret = malloc(size);
-  if (ret == NULL)
-    outofmemory();
-  else
-    memset(ret, 0, size);
-  return ret;
-}
- 
-/*
- * MyRealloc - reallocate memory, call outofmemory on failure
- */
-extern inline void*
-_MyRealloc(void* x, size_t y)
-{
-  char *ret = realloc(x, y);
-
-  if (!ret)
-    outofmemory();
-  return ret;
-}
- 
-extern inline void
-_MyFree(void *x)
-{
-  if ((x))
-    free((x));
-}
- 
-extern inline void 
-_DupString(char **x, const char *y) {
-  (*x) = _MyMalloc(strlen(y) + 1);
-  strcpy((*x), y);
-}
+extern void * _MyMalloc(size_t size);
+extern void* _MyRealloc(void* x, size_t y);
+extern inline void _MyFree(void *x);
+extern inline void _DupString(char **x, const char *y);
 
 #define MyMalloc(x) _MyMalloc(x)
 #define MyRealloc(x,y) _MyRealloc(x, y)
@@ -67,18 +47,6 @@ _DupString(char **x, const char *y) {
 #define DupString(x,y) _DupString(&x, y)
 #endif /* !MEMDEBUG */
 
-#ifndef WE_ARE_MEMORY_C
-#undef strdup
-#undef malloc
-#undef realloc
-#undef calloc
-#undef free
-#define malloc do_not_call_old_memory_functions!call_My*functions
-#define calloc do_not_call_old_memory_functions!call_My*functions
-#define realloc do_not_call_old_memory_functions!call_My*functions
-#define strdup do_not_call_old_memory_functions!call_My*functions
-#define free do_not_call_old_memory_functions!call_My*functions
-#endif
 
 
 #endif /* _I_MEMORY_H */
