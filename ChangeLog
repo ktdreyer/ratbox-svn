@@ -1,3 +1,15 @@
+androsyn    2004/01/21 14:48:39 EST	(20040121_1)
+
+  Modified files:
+    doc                  schema.txt 
+  Log:
+  A schema that'll actually load in sqlite now ;)
+  
+  Revision  Changes    Path
+  1.2       +5 -5      rserv/doc/schema.txt
+
+
+
 androsyn    2004/01/21 13:46:42 EST	(20040121_0)
 
   Added files:
