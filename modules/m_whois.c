@@ -274,7 +274,7 @@ void whois_person(struct Client *sptr,struct Client *acptr)
   sendto_one(sptr, form_str(RPL_WHOISUSER), me.name,
 	 sptr->name, acptr->name,
 	 acptr->username, acptr->host, acptr->info);
-  server_name = acptr->user->server;
+  server_name = (char *)acptr->user->server;
 
   mlen = strlen(me.name) + strlen(sptr->name) + 6 + strlen(acptr->name);
 
