@@ -82,6 +82,7 @@ SRCS =                          \
   numeric.c                     \
   packet.c                      \
   parse.c                       \
+  patricia.c                    \
   res.c                         \
   rsa.c                         \
   restart.c                     \
