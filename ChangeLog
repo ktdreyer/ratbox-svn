@@ -1,3 +1,15 @@
+leeh        2003/06/30 14:28:04 EDT	(20030630_3)
+
+  Modified files:
+    modules/core         m_mode.c 
+  Log:
+  - cleanups to m_mode.c
+  
+  Revision  Changes    Path
+  1.76      +163 -299  ircd-ratbox/modules/core/m_mode.c
+
+
+
 leeh        2003/06/30 12:53:49 EDT	(20030630_2)
 
   Modified files:
