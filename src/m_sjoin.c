@@ -61,6 +61,9 @@ static  char    *mbuf;
 static  int     pargs;
 
 void set_final_mode(struct Mode *mode,struct Mode *oldmode);
+static void remove_our_modes( struct Channel *chptr, struct Channel *top_chptr,
+			      struct Client *sptr);
+
 
 int     ms_sjoin(struct Client *cptr,
                 struct Client *sptr,
@@ -74,9 +77,8 @@ int     ms_sjoin(struct Client *cptr,
   time_t        oldts;
   time_t        tstosend;
   static        struct Mode mode, *oldmode;
-  struct SLink  *l;
   int   args = 0, keep_our_modes = 1, keep_new_modes = 1;
-  int   doesop = 0, what = 0, fl, people = 0, isnew;
+  int   doesop = 0, fl, people = 0, isnew;
   register      char *s, *s0;
   static        char sjbuf[BUFSIZE];
   char    *t = sjbuf;
@@ -302,108 +304,21 @@ sendto_realops("ZZZ Creating top_chptr for %s", (parv[2] + 1));
   set_final_mode(&mode,oldmode);
   chptr->mode = mode;
 
+  /* Lost the TS, other side wins, so remove modes on this side */
   if (!keep_our_modes)
     {
-      what = 0;
-      for (l = chptr->members; l && l->value.cptr; l = l->next)
-        {
-          if (l->flags & MODE_CHANOP)
-            {
-              if( chptr->opcount )
-                chptr->opcount--;
-
-              if (what != -1)
-                {
-                  *mbuf++ = '-';
-                  what = -1;
-                }
-              *mbuf++ = 'o';
-              strcat(parabuf, l->value.cptr->name);
-              strcat(parabuf, " ");
-              pargs++;
-              if (pargs >= MAXMODEPARAMS)
-                {
-                  *mbuf = '\0';
-		  if(IsVchan(chptr) && top_chptr)
-		    {
-		      sendto_channel_butserv(chptr, sptr,
-					     ":%s MODE %s %s %s", parv[0],
-					     top_chptr->chname,
-					     modebuf, parabuf );
-		    }
-		  else
-		    {
-		      sendto_channel_butserv(chptr, sptr,
-					     ":%s MODE %s %s %s", parv[0],
-					     chptr->chname, modebuf, parabuf );
-		    }
-                  mbuf = modebuf;
-                  *mbuf = parabuf[0] = '\0';
-                  pargs = what = 0;
-                }
-              l->flags &= ~MODE_CHANOP;
-            }
-          if (l->flags & MODE_VOICE)
-            {
-              if (what != -1)
-                {
-                  *mbuf++ = '-';
-                  what = -1;
-                }
-              *mbuf++ = 'v';
-              strcat(parabuf, l->value.cptr->name);
-              strcat(parabuf, " ");
-              pargs++;
-              if (pargs >= MAXMODEPARAMS)
-                {
-                  *mbuf = '\0';
-		  if(IsVchan(chptr) && top_chptr)
-		    {
-		      sendto_channel_butserv(chptr, sptr,
-					     ":%s MODE %s %s %s", parv[0],
-					     top_chptr->chname,
-					     modebuf, parabuf );
-		    }
-		  else
-		    {
-		      sendto_channel_butserv(chptr, sptr,
-					     ":%s MODE %s %s %s", parv[0],
-					     chptr->chname, modebuf, parabuf );
-		    }
-                  mbuf = modebuf;
-                  *mbuf = parabuf[0] = '\0';
-                  pargs = what = 0;
-                }
-              l->flags &= ~MODE_VOICE;
-            }
-        }
+      remove_our_modes(chptr,top_chptr,sptr);
       if(IsVchan(chptr) && top_chptr)
 	{
 	  sendto_channel_butserv(chptr, &me,
-	 ":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to %lu",
-            me.name, top_chptr->chname, top_chptr->chname, oldts, newts);
+	  ":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to %lu",
+          me.name, top_chptr->chname, top_chptr->chname, oldts, newts);
 	}
       else
 	{
 	  sendto_channel_butserv(chptr, &me,
-	 ":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to %lu",
-            me.name, chptr->chname, chptr->chname, oldts, newts);
-	}
-    }
-  if (mbuf != modebuf)
-    {
-      *mbuf = '\0';
-      if(IsVchan(chptr) && top_chptr)
-	{
-	  sendto_channel_butserv(chptr, sptr,
-				 ":%s MODE %s %s %s", parv[0],
-				 top_chptr->chname, modebuf, parabuf );
-	}
-      else
-	{
-	  sendto_channel_butserv(chptr, sptr,
-				 ":%s MODE %s %s %s", parv[0],
-				 chptr->chname, modebuf, parabuf );
+	  ":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to %lu",
+          me.name, chptr->chname, chptr->chname, oldts, newts);
 	}
     }
 
@@ -456,7 +371,12 @@ sendto_realops("ZZZ Creating top_chptr for %s", (parv[2] + 1));
       if (!IsMember(acptr, chptr))
         {
           add_user_to_channel(chptr, acptr, fl);
-	  if(IsVchan(chptr) && top_chptr)
+	  /* XXX ZZZ vchan stuff */
+
+	  if( top_chptr )
+	    add_vchan_to_client_cache(sptr,top_chptr, chptr);
+
+	  if( top_chptr )
 	    {
 	      sendto_channel_butserv(chptr, acptr, ":%s JOIN :%s",
 				     s, top_chptr->chname);
@@ -725,4 +645,116 @@ set_final_mode(struct Mode *mode,struct Mode *oldmode)
       pargs++;
     }
 }
+
+/*
+ * remove_our_modes
+ *
+ * inputs	-
+ * output	- NONE
+ * side effects	- Go through our local members, remove all their
+ *		  chanop modes etc. We've lost the TS.
+ */
   
+static void remove_our_modes( struct Channel *chptr, struct Channel *top_chptr,
+			      struct Client *sptr)
+{
+  int what;
+  struct SLink *l;
+
+  what = 0;
+  for (l = chptr->members; l && l->value.cptr; l = l->next)
+    {
+      if (l->flags & MODE_CHANOP)
+	{
+	  if( chptr->opcount )
+	    chptr->opcount--;
+	  
+	  if (what != -1)
+	    {
+	      *mbuf++ = '-';
+	      what = -1;
+	    }
+	  *mbuf++ = 'o';
+	  strcat(parabuf, l->value.cptr->name);
+	  strcat(parabuf, " ");
+	  pargs++;
+	  if (pargs >= MAXMODEPARAMS)
+	    {
+	      *mbuf = '\0';
+	      if(IsVchan(chptr) && top_chptr)
+		{
+		  sendto_channel_butserv(chptr, sptr,
+					 ":%s MODE %s %s %s",
+					 sptr->name,
+					 top_chptr->chname,
+					 modebuf, parabuf );
+		}
+	      else
+		{
+		  sendto_channel_butserv(chptr, sptr,
+					 ":%s MODE %s %s %s",
+					 sptr->name,
+					 chptr->chname, modebuf, parabuf );
+		}
+	      mbuf = modebuf;
+	      *mbuf = parabuf[0] = '\0';
+	      pargs = what = 0;
+	    }
+	  l->flags &= ~MODE_CHANOP;
+	}
+      if (l->flags & MODE_VOICE)
+	{
+	  if (what != -1)
+	    {
+	      *mbuf++ = '-';
+	      what = -1;
+	    }
+	  *mbuf++ = 'v';
+	  strcat(parabuf, l->value.cptr->name);
+	  strcat(parabuf, " ");
+	  pargs++;
+	  if (pargs >= MAXMODEPARAMS)
+	    {
+	      *mbuf = '\0';
+	      if(IsVchan(chptr) && top_chptr)
+		{
+		  sendto_channel_butserv(chptr, sptr,
+					 ":%s MODE %s %s %s",
+					 sptr->name,
+					 top_chptr->chname,
+					 modebuf, parabuf );
+		}
+	      else
+		{
+		  sendto_channel_butserv(chptr, sptr,
+					 ":%s MODE %s %s %s",
+					 sptr->name,
+					 chptr->chname, modebuf, parabuf );
+		}
+	      mbuf = modebuf;
+	      *mbuf = parabuf[0] = '\0';
+	      pargs = what = 0;
+	    }
+	  l->flags &= ~MODE_VOICE;
+	}
+    }
+
+  if (mbuf != modebuf)
+    {
+      *mbuf = '\0';
+      if(IsVchan(chptr) && top_chptr)
+	{
+	  sendto_channel_butserv(chptr, sptr,
+				 ":%s MODE %s %s %s",
+				 sptr->name,
+				 top_chptr->chname, modebuf, parabuf );
+	}
+      else
+	{
+	  sendto_channel_butserv(chptr, sptr,
+				 ":%s MODE %s %s %s",
+				 sptr->name,
+				 chptr->chname, modebuf, parabuf );
+	}
+    }
+}

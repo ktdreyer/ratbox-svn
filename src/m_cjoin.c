@@ -145,9 +145,7 @@ int     m_cjoin(struct Client *cptr,
 
   name = parv[1];
   if ( (p = strchr(name,',')) )
-    {
-      *p = '\0';
-    }
+    *p = '\0';
 
   if (!check_channel_name(name))
     {

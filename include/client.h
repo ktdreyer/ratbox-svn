@@ -188,6 +188,13 @@ struct Client
    */
   char              info[REALLEN + 1]; /* Free form additional client info */
   struct SLink*     fludees;
+
+/* cache table of mappings between top level chan and sub vchan client
+ * is on. client cannot have any more than MAXCHANNELSPERUSER vchans
+ */
+
+  struct	    Vchan_map vchan_map[MAXCHANNELSPERUSER];
+
   /*
    * The following fields are allocated only for local clients
    * (directly connected to *this* server with a socket.
@@ -258,11 +265,6 @@ struct Client
   char              passwd[PASSWDLEN + 1];
   int               caps;       /* capabilities bit-field */
 
-/* cache table of mappings between top level chan and sub vchan client
- * is on. client cannot have any more than MAXCHANNELSPERUSER vchans
- */
-
-  struct	    Vchan_map vchan_map[MAXCHANNELSPERUSER];
 };
 
 /*
