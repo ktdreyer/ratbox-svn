@@ -174,3 +174,18 @@ Little things to be done given enough time and initiative
    auth database.  This would make ircd an awesome instant messaging
    backend.
 
+
+-- Diane's list
+
+* (Isomer promised this)
+  break /accept link when target changes nick (I can do that instead if
+  need be )
+
+* add logging to ircd.log of possible channel floods
+
+* add code to log a minute worth of flooding if the ircd gets n possible
+  flood messages on a channel in t seconds.. This log would be available
+  to hand to authorities if requested.
+
+
+  
