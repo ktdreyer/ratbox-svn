@@ -374,7 +374,7 @@ int register_local_user(struct Client *cptr, struct Client *sptr,
 
   /* password check */
   if (!BadPtr(aconf->passwd) &&
-      !strcmp(sptr->localClient->passwd, aconf->passwd))
+      strcmp(sptr->localClient->passwd, aconf->passwd))
     {
       ServerStats->is_ref++;
       sendto_one(sptr, form_str(ERR_PASSWDMISMATCH),
