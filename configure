@@ -2067,7 +2067,7 @@ else
 fi
 
 
-echo "$ac_t"""Setting NICKLEN to $ac_cv_nicklen"" 1>&6
+echo "$ac_t"""checking nick length... $ac_cv_nicklen"" 1>&6
 cat >> confdefs.h <<EOF
 #define NICKLEN (${ac_cv_nicklen}+1)
 EOF
@@ -2082,7 +2082,7 @@ else
 fi
 
 
-echo "$ac_t"""Setting TOPICLEN to $ac_cv_topiclen"" 1>&6
+echo "$ac_t"""checking topic length... $ac_cv_topiclen"" 1>&6
 cat >> confdefs.h <<EOF
 #define TOPICLEN (${ac_cv_topiclen}+1)
 EOF
@@ -2493,4 +2493,7 @@ echo Jupe Services ............ $cf_enable_jupe
 echo Oper invite/op bot ....... $cf_enable_operbot
 echo Global Message Service ... $cf_enable_global
 echo List Service ............. $cf_enable_alis
+echo
+echo Nick Length .............. $ac_cv_nicklen
+echo Topic Length ............. $ac_cv_topiclen
 echo
