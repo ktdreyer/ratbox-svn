@@ -1,3 +1,10 @@
+*** 20010604_3 by davidt
+- Check select() return value for errors.
+- Minor fixes for errors introduced with the new servlink code to avoid
+  using dup2().
+- Fix for order of ciphers in s_serv.c
+
+
 *** 20010604_2 by db
 - oops forgot a node = next in the for
 
