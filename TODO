@@ -6,7 +6,6 @@ then the bug number should appear in brackets (ie (#15)) - madmax
 - ircd -s doesn't work through a restart
 - re-implement first param in m_lusers()
 - trie' channel name list
-- one time oper passwords (challenge/response, done)
 - SSL support
 - finish RFC'ing m_message.c
 
@@ -27,11 +26,9 @@ is-'s TODO list
 madmax's TODO
 
 - Fix /links *mask* for non-opers/server_hide output (#4)
-\ Make /links from file server_hide only (#6)
+\ Make /links from file server_hide only (#6) (done?)
 - Make stats p just notice opers, rather than return a list, when
   server_hide is on (#13)
-- Idle time should never be sent if local whois for nonops on shide, but a 
-  remote whois should show idle time, with a forced delay if local (#12)
 - Split up server_hide into parts (#17)
 - Client UIDs (ts4 style?) for cookies (later for persistent nicks)
 - Definable server region or 'global' (open I) for /links output (#20)
@@ -69,15 +66,6 @@ Adrian's TODO list
 
 db-->>ummm aconf->ipnum is used for IP based klines only, not for DNS
 
-* find what causes this
-
-[cacheboy]  Link with irc.vchan[unknown@255.255.255.255] established: (TS )
-            link
-
-thats INADDR_NONE. Find, fix.
-
-db-->> FIXED
-    
 * Add the IRCnet(?) split logic for nick collisions - on a nick collision,
   change to "%d-%s", random, nick
 
@@ -113,8 +101,6 @@ Little things to be done given enough time and initiative -Hwy
 .  Fix tools/fixklines.c and tools/klineParse.c for the new kline.conf
    format.
 .  Update tools/mkconf as well.
-.  Create some make release or something for rsa_respond 
-   (DONE, make rsa_respond)
 .  Fix convertconf more
 .  Do we still need start_ircd.c and ircd_start.c?
 .  Look to see what other STATS commands can be made optionally oper-only
@@ -127,14 +113,12 @@ Little things to be done given enough time and initiative -Hwy
 .  Do we still need ircd_start.c and start_ircd.c?
 .  Re-add the ability to set usermodes from the conf (oldconf field after the
    O: line class)
-.  Randomize the order of WHO #channel and NAMES #channel in +a mode.
 .  Add in exemptions to D lines into the conf (old d: lines)
 .  <Riedel> walter : have you implemented the motd= thing in the auth block ?
 .  <mopi> still haven't made default chan flags configurable, eh? :/
 .  Fix topic bursting to LL servers (broke lately for some reason)
 .  Other places that the number formats were replaced with that damn %lu
 .  Fix TRACE on IPv6
-.  JOIN #channel,0 joins #channel0, #2,000 joins #20... STRANGE
 .  Unconfirmed reports of DNS lookups failing on the first connection to
    a server, while working fine on subsequent connections.
 .  Somehow fix the bug that causes cores when an in-use message file is
@@ -159,9 +143,6 @@ Little things to be done given enough time and initiative -Hwy
    be "successful" or "unsuccessful" (eg. "STATS i requested by <nick>
    [unsuccessful]" vs. "STATS i requested by <nick>").
 *  Clean up m_stats.c regarding it's STATS L and STATS u code.
-*  Come up with a solution to the dual-notice issue with server connects
-   and disconnects (re: opers get one notice, admins get two).
-
 
 -- Diane's list
 
