@@ -4,7 +4,9 @@
 - fixed a bug with internal channel structures that could core the ircd
 - flood_exempt can now be specified via flags=...; in auth {};
 - fix a bug inherented from hyb7 that would allow a NULL nick
-
+- removed the unused config option maximum_links
+- added option to general {}; - tkline_expire_notices = [yes|no];
+  which controls whether tkline expiration notices are shown
 
 -- ircd-ratbox-1.0-rc1
 o) Temp dline support has been added.
