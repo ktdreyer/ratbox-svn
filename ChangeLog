@@ -1,3 +1,15 @@
+androsyn    2003/03/19 22:52:07 UTC	(20030319_4)
+
+  Modified files:
+    src                  hostmask.c 
+  Log:
+  Fix parse_netmask not to dump core when some arguments are NULL.
+  
+  Revision  Changes    Path
+  7.86      +19 -5     ircd-ratbox/src/hostmask.c
+
+
+
 androsyn    2003/03/19 22:17:53 UTC	(20030319_3)
 
   Modified files:
