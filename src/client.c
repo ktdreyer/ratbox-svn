@@ -1305,7 +1305,7 @@ int exit_client(
        * read/write.
        */
       if(IsClosing(source_p))
-        return;
+        return 0;
 
       SetClosing(source_p);
       
