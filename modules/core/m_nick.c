@@ -373,12 +373,20 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
 
 
 	  /* XXX UID */
+	  sendto_one(client_p, ":%s KILL %s :%s (Bad Nickname)",
+	  	     me.name, parv[1], me.name);
+#if 0		     
           sendto_one(client_p, ":%s KILL %s :%s (%s <- %s[%s])",
                      me.name, parv[1], me.name, parv[1],
                      nick, client_p->name);
+#endif		     
           /* When the hell is this ever triggered?! */
           if (source_p != client_p) /* bad nick change */
             {
+	      kill_client_ll_serv_butone(client_p, source_p,
+	      				 "%s (Bad Nickname)",
+					  me.name);
+#if 0					  
               kill_client_ll_serv_butone(client_p, source_p,
 					 "%s (%s <- %s!%s@%s)",
 					 me.name,
@@ -387,16 +395,8 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
 					 source_p->username,
 					 source_p->user ?
 					 source_p->user->server : client_p->name);
-#if 0
-              sendto_ll_serv_butone(client_p, source_p, 0,
-                                 ":%s KILL %s :%s (%s <- %s!%s@%s)",
-                                 me.name, parv[0], me.name,
-                                 get_client_name(client_p, HIDE_IP),
-                                 parv[0],
-                                 source_p->username,
-                                 source_p->user ? source_p->user->server :
-                                 client_p->name);
-#endif
+#endif					 
+					 
               source_p->flags |= FLAGS_KILLED;
               exit_client(client_p,source_p,&me,"BadNick");
               return;
@@ -489,7 +489,11 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
             /* If we got the message from a LL, ensure it gets the kill */
             if (ServerInfo.hub && IsCapable(client_p,CAP_LL))
               add_lazylinkclient(client_p, target_p);
-            
+
+	    kill_client_ll_serv_butone(NULL, target_p,
+	    			       "%s (No Username)",
+				       me.name);
+#if 0				       
 	    kill_client_ll_serv_butone(NULL, target_p,
 				       "%s (%s(NOUSER) <- %s!%s@%s)(TS:%s)",
 				       me.name,
@@ -498,18 +502,7 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
 				       parv[5],
 				       parv[6],
 				       client_p->name);
-#if 0
-	    sendto_ll_serv_butone(NULL, target_p, 0, /* all servers */
-		       ":%s KILL %s :%s (%s(NOUSER) <- %s!%s@%s)(TS:%s)",
-			       me.name,
-			       target_p->name,
-			       me.name,
-			       target_p->from->name,
-			       parv[1],
-			       parv[5],
-			       parv[6],
-			       client_p->name);
-#endif
+#endif				       
 #endif
 
             target_p->flags |= FLAGS_KILLED;
@@ -565,21 +558,15 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
           if (ServerInfo.hub && IsCapable(client_p,CAP_LL))
             add_lazylinkclient(client_p, target_p);
 
+	   kill_client_ll_serv_butone(NULL, target_p,
+	   			      "%s (Nick collision)",
+				      me.name);
+#if 0
           kill_client_ll_serv_butone(NULL, target_p,
 				     "%s (%s <- %s)",
 				     me.name,
 				     target_p->from->name,
 				     client_p->name);
-#if 0
-          sendto_ll_serv_butone(NULL, target_p, 0,/* all servers */
-			     ":%s KILL %s :%s (%s <- %s)",
-			     me.name, target_p->name, me.name,
-			     target_p->from->name,
-			     /* NOTE: Cannot use get_client_name twice
-			     ** here, it returns static string pointer:
-			     ** the other info would be lost
-			     */
-			     get_client_name(client_p, HIDE_IP));
 #endif
 #endif
           ServerStats->is_kill++;
@@ -623,18 +610,15 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
               /* If it came from a LL server, it'd have been source_p,
                * so we don't need to mark target_p as known
 	       */
-
+	      kill_client_ll_serv_butone(source_p, target_p,
+	      				 "%s (Nick collision)",
+					 me.name);
+#if 0
 	      kill_client_ll_serv_butone(source_p, target_p,
 					 "%s (%s <- %s)",
 					 me.name,
 					 target_p->from->name,
 					 client_p->name);
-#if 0
-	      sendto_ll_serv_butone(source_p, target_p, 0, /* all servers but source_p */
-				 ":%s KILL %s :%s (%s <- %s)",
-				 me.name, target_p->name, me.name,
-				 target_p->from->name,
-				 get_client_name(client_p, HIDE_IP));
 #endif
 #endif
 
@@ -668,16 +652,15 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
          about source_p already */
 
       kill_client_ll_serv_butone(NULL, source_p,
+      				 "%s (Nick change collision)",
+				 me.name);
+#if 0
+      kill_client_ll_serv_butone(NULL, source_p,
 				 "%s (%s(%s) <- %s)",
 				 me.name,
 				 target_p->from->name,
 				 target_p->name,
 				 client_p->name);
-#if 0
-      sendto_ll_serv_butone(NULL, source_p, 0, /* KILL old from outgoing servers */
-			 ":%s KILL %s :%s (%s(%s) <- %s)",
-			 me.name, source_p->name, me.name, target_p->from->name,
-			 target_p->name, get_client_name(client_p, HIDE_IP));
 #endif
 #endif
 
@@ -689,16 +672,15 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
         add_lazylinkclient(client_p, target_p);
 
       kill_client_ll_serv_butone(NULL, target_p,
+      				 "%s (Nick change collision)",
+				 me.name);
+#if 0				 
+      kill_client_ll_serv_butone(NULL, target_p,
 				 "%s (%s <- %s(%s))",
 				 me.name,
 				 target_p->from->name,
 				 client_p->name,
 				 source_p->name);
-#if 0
-      sendto_ll_serv_butone(NULL, target_p, 0, /* Kill new from incoming link */
-			 ":%s KILL %s :%s (%s <- %s(%s))",
-			 me.name, target_p->name, me.name, target_p->from->name,
-			 get_client_name(client_p, HIDE_IP), source_p->name);
 #endif
 #endif
 
@@ -732,18 +714,16 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
           /* this won't go back to the incoming link, so it doesn't
            * matter if it is an LL */
 
-	  kill_client_ll_serv_butone(client_p, source_p,
+	 kill_client_ll_serv_butone(client_p, source_p,
+	 			    "%s (Nick change collision)",
+				    me.name);
+#if 0
+         kill_client_ll_serv_butone(client_p, source_p,
 				     /* KILL old from outgoing servers */
 				     "%s (%s(%s) <- %s)",
 				     me.name, target_p->from->name,
 				     target_p->name,
 				     client_p->name);
-#if 0
-
-	  sendto_ll_serv_butone(client_p, source_p, 0, /* KILL old from outgoing servers */
-			     ":%s KILL %s :%s (%s(%s) <- %s)",
-			     me.name, source_p->name, me.name, target_p->from->name,
-			     target_p->name, get_client_name(client_p, HIDE_IP));
 #endif
 #endif
 
@@ -772,16 +752,14 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
            * matter if it's an LL
 	   */
 	  kill_client_ll_serv_butone(source_p, target_p,
+	  			     "%s (Nick collision)",
+				     me.name);
+#if 0				     
+	  kill_client_ll_serv_butone(source_p, target_p,
 				     "%s (%s <- %s)",
 				     me.name,
 				     target_p->from->name,
 				     client_p->name);
-#if 0
-	  sendto_ll_serv_butone(source_p, target_p, 0, /* all servers but source_p */
-			     ":%s KILL %s :%s (%s <- %s)",
-			     me.name, target_p->name, me.name,
-			     target_p->from->name,
-			     get_client_name(client_p, HIDE_IP));
 #endif
 #endif
 
