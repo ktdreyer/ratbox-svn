@@ -58,8 +58,9 @@ static  void vsendto_prefix_one(register struct Client *,
 static  void vsendto_one(struct Client *, const char *, va_list);
 static  void vsendto_realops(const char *, va_list);
 
-static  unsigned long sentalong[MAXCONNECTIONS];
-static unsigned long current_serial=0L;
+/* global for now *sigh* */
+unsigned long current_serial=0L;
+
 static void sendto_common_channel( dlink_list *list,
 				   struct Client *user,
 				   const char *pattern , va_list args);
@@ -328,9 +329,6 @@ sendto_channel_butone(struct Client *one, struct Client *from,
   va_list    args;
   dlink_node *lp;
   struct Client *acptr;
-  int index; /* index of sentalong[] to flag client
-	      * as having received message
-	      */
 
   va_start(args, pattern);
 
@@ -360,11 +358,13 @@ send_channel_members(struct Client *one, struct Client *from,
       if (acptr->from == one)
         continue;
       
-      index = acptr->from->fd;
       if (MyConnect(acptr) && IsRegisteredUser(acptr))
         {
-          vsendto_prefix_one(acptr, from, pattern, args);
-          sentalong[index] = current_serial;
+          if(acptr->serial != current_serial)
+	    {
+	      vsendto_prefix_one(acptr, from, pattern, args);
+	      acptr->serial = current_serial;
+	    }
         }
       else
         {
@@ -372,15 +372,18 @@ send_channel_members(struct Client *one, struct Client *from,
            * Now check whether a message has been sent to this
            * remote link already
            */
-          if(sentalong[index] != current_serial)
+          if(acptr->from->serial != current_serial)
             {
               vsendto_prefix_one(acptr, from, pattern, args);
-              sentalong[index] = current_serial;
+              acptr->from->serial = current_serial;
             }
         }
     }
 }
 
+/* XXX THIS FUNCTION MUST DIE 
+ *  it can be replaced fairly easily removing more bloat
+ */
 void
 sendto_channel_type(struct Client *one, struct Client *from,
 		    dlink_list *list,
@@ -403,7 +406,6 @@ sendto_channel_type(struct Client *one, struct Client *from,
       if (acptr->from == one)
         continue;
 
-      i = acptr->from->fd;
       if (MyConnect(acptr) && IsRegisteredUser(acptr))
         {
           sendto_prefix_one(acptr, from,
@@ -421,23 +423,22 @@ sendto_channel_type(struct Client *one, struct Client *from,
               /* Send it individually to each opered or voiced
                * client on channel
                */
-              if (sentalong[i] != current_serial)
+              if (acptr->serial != current_serial)
                 {
-		  acptr = ptr->data;
                   sendto_prefix_one(acptr, from,
                     ":%s NOTICE %s :%s",
                     from->name,
                     acptr->name, /* target name */
                     message);
                 }
-              sentalong[i] = current_serial;
+              acptr->serial = current_serial;
             }
           else
             {
               /* Now check whether a message has been sent to this
                * remote link already
                */
-              if (sentalong[i] != current_serial)
+              if (acptr->serial != current_serial)
                 {
                   sendto_prefix_one(acptr, from,
                   ":%s NOTICE %c%s :%s",
@@ -445,7 +446,7 @@ sendto_channel_type(struct Client *one, struct Client *from,
                   char_type,
                   nick,
                   message);
-                  sentalong[i] = current_serial;
+		  acptr->serial = current_serial;
                 }
             }
         }
@@ -530,8 +531,6 @@ sendto_common_channels(struct Client *user, const char *pattern, ...)
   va_start(args, pattern);
   
   ++current_serial;
-  if (user->fd >= 0)
-    sentalong[user->fd] = current_serial;
 
   if (user->user)
     {
@@ -564,11 +563,13 @@ sendto_common_channel( dlink_list *list, struct Client *user,
     {
       cptr = users->data;
 
-      if (!MyConnect(cptr) || (cptr->fd < 0) ||
-	  (sentalong[cptr->fd] == current_serial))
+      if (!MyConnect(cptr) || (cptr->fd < 0) )
 	continue;
-            
-      sentalong[cptr->fd] = current_serial;
+
+      if(cptr->serial == current_serial)
+	continue;
+
+      cptr->serial = current_serial;
       
       vsendto_prefix_one(cptr, user, pattern, args);
     }
@@ -923,7 +924,6 @@ sendto_prefix_one(register struct Client *to, register struct Client *from,
  * 
  * -wnder
  */
-
 static void
 vsendto_prefix_one(register struct Client *to, register struct Client *from,
                    const char *pattern, va_list args)

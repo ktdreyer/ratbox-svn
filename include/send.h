@@ -18,6 +18,9 @@ struct Client;
 struct Channel;
 struct dlink_list;
 
+/* The nasty global also used in s_serv.c for server bursts */
+unsigned long current_serial;
+
 /* send.c prototypes */
 
 extern void send_queued_write(int fd, void *data);

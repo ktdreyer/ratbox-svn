@@ -87,7 +87,7 @@ struct Capability captab[] = {
 static unsigned long nextFreeMask();
 static unsigned long freeMask;
 static void server_burst(struct Client *cptr);
-static void burst_members(struct Client *cptr, dlink_list *list, int nicksent);
+static void burst_members(struct Client *cptr, dlink_list *list);
 static CNCB serv_connect_callback;
 
 
@@ -820,7 +820,6 @@ static void server_burst(struct Client *cptr)
 {
   struct Client*    acptr;
   dlink_node *l;
-  static char   nickissent = 1;
   struct Channel*   chptr;
   struct Channel*   vchan; 
   dlink_node *ptr;
@@ -859,11 +858,9 @@ static void server_burst(struct Client *cptr)
 	}
     }
 
-  nickissent = 3 - nickissent;
-  /* flag used for each nick to check if we've sent it
-   * yet - must be different each time and !=0, so we
-   * alternate between 1 and 2 -orabidoo
-   */
+  /* serial counter borrowed from send.c */
+  current_serial++;
+
   for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
     {
       /* Don't send vchannels twice; vchannels will be
@@ -873,10 +870,10 @@ static void server_burst(struct Client *cptr)
       if(IsVchan(chptr))
 	continue;
 	  
-      burst_members(cptr,&chptr->chanops, nickissent);
-      burst_members(cptr,&chptr->voiced, nickissent);
-      burst_members(cptr,&chptr->halfops, nickissent);
-      burst_members(cptr,&chptr->peons, nickissent);
+      burst_members(cptr,&chptr->chanops);
+      burst_members(cptr,&chptr->voiced);
+      burst_members(cptr,&chptr->halfops);
+      burst_members(cptr,&chptr->peons);
       send_channel_modes(cptr, chptr);
 
       if(IsVchanTop(chptr))
@@ -885,10 +882,10 @@ static void server_burst(struct Client *cptr)
 		ptr = ptr->next)
 	    {
 	      vchan = ptr->data;
-	      burst_members(cptr,&vchan->chanops, nickissent);
-	      burst_members(cptr,&vchan->voiced, nickissent);
-	      burst_members(cptr,&vchan->halfops, nickissent);
-	      burst_members(cptr,&vchan->peons, nickissent);
+	      burst_members(cptr,&vchan->chanops);
+	      burst_members(cptr,&vchan->voiced);
+	      burst_members(cptr,&vchan->halfops);
+	      burst_members(cptr,&vchan->peons);
 	      send_channel_modes(cptr, vchan);
 	    }
 	}
@@ -899,9 +896,9 @@ static void server_burst(struct Client *cptr)
   */
   for (acptr = &me; acptr; acptr = acptr->prev)
     {
-      if (acptr->nicksent != nickissent)
+      if (acptr->serial != current_serial)
 	{
-	  acptr->nicksent = nickissent;
+	  acptr->serial = current_serial;
 	  if (acptr->from != cptr)
 	    sendnick_TS(cptr, acptr);
 	}
@@ -921,11 +918,10 @@ static void server_burst(struct Client *cptr)
  * burst_members
  * inputs	- pointer to server to send members to
  * 		- dlink_list pointer to membership list to send
- * 		- current nicksent flag
- * output	- current nicksent flag
+ * output	- NONE
  * side effects	-
  */
-static void burst_members(struct Client *cptr, dlink_list *list, int nickissent)
+static void burst_members(struct Client *cptr, dlink_list *list)
 {
   struct Client *acptr;
   dlink_node *ptr;
@@ -933,9 +929,9 @@ static void burst_members(struct Client *cptr, dlink_list *list, int nickissent)
   for (ptr = list->head; ptr; ptr = ptr->next)
     {
       acptr = ptr->data;
-      if (acptr->nicksent != nickissent)
+      if (acptr->serial != current_serial)
 	{
-	  acptr->nicksent = nickissent;
+	  acptr->serial = current_serial;
 	  if (acptr->from != cptr)
 	    sendnick_TS(cptr, acptr);
 	}

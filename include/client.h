@@ -129,7 +129,7 @@ struct Client
   int               hopcount;   /* number of servers to this 0 = local */
   unsigned short    status;     /* Client type */
   unsigned char     handler;    /* Handler index */
-  char              nicksent;
+  unsigned long     serial;	/* used to enforce 1 send per nick */
 
   /*
    * client->name is the unique name for a client nick or host
