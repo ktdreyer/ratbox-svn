@@ -11,7 +11,7 @@ ratbox-services installation guide
    as root you must first:
    	mkdir /usr/local/ratbox-services
 	chown youruser:yourgroup /usr/local/ratbox-services
-   Then install as normal from your username.
+   Then install as normal from your username.  Services will not run as root.
 
    If you wish to install it to a different directory include the 
    --prefix option:

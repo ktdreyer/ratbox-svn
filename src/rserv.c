@@ -128,7 +128,7 @@ write_pidfile(void)
 static void
 print_help(void)
 {
-	printf("rserv [-h|-v|-f]\n");
+	printf("ratbox-services [-h|-v|-f]\n");
 	printf(" -h show this help\n");
 	printf(" -v show version\n");
 	printf(" -f foreground mode\n");
@@ -150,6 +150,12 @@ main(int argc, char *argv[])
 	char c;
 	int nofork = 0;
 	int childpid;
+
+	if(geteuid() == 0)
+	{
+		printf("ratbox-services will not run as root\n");
+		return -1;
+	}
 
 	check_md5_crypt();
 
