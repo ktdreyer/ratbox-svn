@@ -1,3 +1,9 @@
+*** 20001229_1 by db
+- ok. this is the first cut at building an user readable /links
+  from doing our own /links and storing in a file for off line use.
+
+
+
 *** 20001228_38 by fl_
 
 1. Added error message if user is unopped, and does a /mode #chan +e
