@@ -1,3 +1,9 @@
+*** 20001222_9 by wcampbel
+1. Cleaned up a comment and trailing blank lines from m_oper.c
+2. Added an md5 based mkpasswd.c, which works on FreeBSD 3.x/4.x and Linux
+   glibc.  Known NOT to work on Solaris 2.6 and Cygwin.
+
+
 *** 20001222_8 by wcampbel
 1. Added an example of user and host in the shared section
 2. Updated opers.txt some more
