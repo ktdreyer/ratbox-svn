@@ -131,6 +131,7 @@ struct  Message
 #define MSG_LOCOPS   "LOCOPS"   /* LOCOPS */
 #define MSG_LTRACE   "LTRACE"   /* LTRACE */
 #define MSG_SVINFO   "SVINFO"   /* SVINFO */
+#define MSG_MODLIST  "MODLIST"  /* MODLIST */
 #define MSG_MODLOAD  "MODLOAD"  /* MODLOAD */
 #define MSG_MODUNLOAD  "MODUNLOAD"  /* MODUNLOAD */
 
