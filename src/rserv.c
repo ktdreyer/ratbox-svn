@@ -303,3 +303,21 @@ void check_rehash(void *unused)
 		need_rehash = 0;
 	}
 }
+
+void
+loc_sqlite_exec(db_callback cb, const char *format, ...)
+{
+	va_list args;
+	char *errmsg;
+	int i;
+
+	va_start(args, format);
+	if((i = sqlite_exec_vprintf(rserv_db, format, cb, NULL, &errmsg, args)))
+	{
+		slog("fatal error: problem with db file: %s", errmsg);
+		die("problem with db file");
+	}
+	va_end(args);
+}
+
+

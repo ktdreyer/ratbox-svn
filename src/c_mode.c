@@ -84,7 +84,8 @@ add_ban(const char *banstr, dlink_list *list)
 		if(match((const char *) ptr->data, banstr))
 			return;
 	}
-	
+
+	ban = my_strdup(banstr);
 	dlink_add_alloc(ban, list);
 }
 

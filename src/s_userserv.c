@@ -25,8 +25,6 @@ static BlockHeap *user_reg_heap;
 
 dlink_list user_reg_table[MAX_USER_REG_HASH];
 
-static void load_user_db(void);
-
 static int s_userserv_register(struct client *, char *parv[], int parc);
 static int s_userserv_login(struct client *, char *parv[], int parc);
 static int s_userserv_logout(struct client *, char *parv[], int parc);
@@ -44,13 +42,16 @@ static struct service_handler userserv_service = {
 	30, 50, userserv_command, NULL, NULL
 };
 
+static int user_db_callback(void *db, int argc, char **argv, char **colnames);
+
 void
 init_s_userserv(void)
 {
 	user_reg_heap = BlockHeapCreate(sizeof(struct user_reg), HEAP_USER_REG);
 
 	userserv_p = add_service(&userserv_service);
-	load_user_db();
+
+	loc_sqlite_exec(user_db_callback, "SELECT * FROM users");
 }
 
 static void
@@ -83,33 +84,6 @@ user_db_callback(void *db, int argc, char **argv, char **colnames)
 	add_user_reg(reg_p);
 
 	return 0;
-}
-
-static void
-load_user_db(void)
-{
-	char **errmsg;
-	int i;
-
-	if((i = sqlite_exec(rserv_db, "SELECT * FROM users", user_db_callback, NULL, errmsg)))
-	{
-		slog("ERR: Problem parsing db file: %s", *errmsg);
-		die("Problem parsing db file");
-	}
-}
-
-static void
-write_user_db_entry(struct user_reg *reg_p)
-{
-	int i;
-
-	if((i = sqlite_exec_printf(rserv_db, "INSERT INTO users VALUES(%Q, %Q, %lu, %lu, %u)", NULL, NULL, NULL,
-				reg_p->name, reg_p->password, reg_p->reg_time, reg_p->last_time,
-				reg_p->flags)))
-	{
-		slog("ERR: Problem writing to db file");
-		die("Problem writing to db file");
-	}
 }
 
 struct user_reg *
@@ -185,7 +159,9 @@ s_userserv_register(struct client *client_p, char *parv[], int parc)
 	client_p->user->user_reg = reg_p;
 	add_user_reg(reg_p);
 
-	write_user_db_entry(reg_p);
+	loc_sqlite_exec(NULL, "INSERT INTO users VALUES(%Q, %Q, %lu, %lu, %u)",
+			reg_p->name, reg_p->password, reg_p->reg_time, reg_p->last_time,
+			reg_p->flags);
 
 	service_error(userserv_p, client_p, "Registration successful");
 

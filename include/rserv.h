@@ -17,8 +17,9 @@ extern void die(const char *reason);
 
 extern int have_md5_crypt;
 
-extern struct sqlite *rserv_db;
-
 const char *get_crypt(const char *password, const char *csalt);
+
+typedef int (*db_callback) (void *, int, char **, char **);
+void loc_sqlite_exec(db_callback cb, const char *format, ...);
 
 #endif

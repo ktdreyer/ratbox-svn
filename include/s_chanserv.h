@@ -39,8 +39,11 @@ struct ban_reg
 {
 	char *mask;
 	char *reason;
+	char *username;
 	int level;
 	time_t hold;
+
+	dlink_node channode;
 };
 
 extern void load_chan_db(void);

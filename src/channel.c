@@ -217,6 +217,20 @@ find_chmember(struct channel *chptr, struct client *target_p)
 	return NULL;
 }
 
+int
+find_exempt(struct channel *chptr, struct client *target_p)
+{
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, chptr->excepts.head)
+	{
+		if(match((const char *) ptr->data, target_p->user->mask))
+			return 1;
+	}
+
+	return 0;
+}
+
 /* count_topics()
  *   counts the number of channels which have a topic
  *

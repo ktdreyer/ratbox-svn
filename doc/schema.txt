@@ -30,12 +30,13 @@ CREATE TABLE members (
 );
 
 
-CREATE TABLE chan_bans (
-	chname text,
-	ban_mask text,
-	ban_reason text,
-	level int4,
-	hold unixtime,
+CREATE TABLE bans (
+	chname TEXT,
+	mask TEXT,
+	reason TEXT,
+	username TEXT,
+	level INTEGER,
+	hold TIMESTAMP,
 	FOREIGN KEY(chname) REFERENCES channels (chname) MATCH FULL
 );
 

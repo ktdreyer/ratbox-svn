@@ -23,14 +23,18 @@
 #define S_C_OWNER	200
 #define S_C_MANAGER	190
 #define S_C_USERLIST	150
-#define S_C_CLEAR	100
-#define S_C_SUSPEND	80
+#define S_C_CLEAR	140
+#define S_C_SUSPEND	100
 #define S_C_OP		50
-#define S_C_VOICE	20
+#define S_C_REGULAR	10
+#define S_C_USER	1
+
+#define REASON_MAGIC	50
 
 static struct client *chanserv_p;
 static BlockHeap *channel_reg_heap;
 static BlockHeap *member_reg_heap;
+static BlockHeap *ban_reg_heap;
 
 static dlink_list channel_reg_table[MAX_CHANNEL_TABLE];
 
@@ -40,7 +44,13 @@ static int s_chanserv_register(struct client *, char *parv[], int parc);
 static int s_chanserv_adduser(struct client *, char *parv[], int parc);
 static int s_chanserv_deluser(struct client *, char *parv[], int parc);
 static int s_chanserv_moduser(struct client *, char *parv[], int parc);
+static int s_chanserv_suspend(struct client *, char *parv[], int parc);
+static int s_chanserv_unsuspend(struct client *, char *parv[], int parc);
 static int s_chanserv_invite(struct client *, char *parv[], int parc);
+static int s_chanserv_op(struct client *, char *parv[], int parc);
+static int s_chanserv_voice(struct client *, char *parv[], int parc);
+static int s_chanserv_addban(struct client *, char *parv[], int parc);
+static int s_chanserv_delban(struct client *, char *parv[], int parc);
 
 static struct service_command chanserv_command[] =
 {
@@ -48,7 +58,13 @@ static struct service_command chanserv_command[] =
 	{ "ADDUSER",	&s_chanserv_adduser,	3, NULL, 0, 1, 1, 0L },
 	{ "DELUSER",	&s_chanserv_deluser,	2, NULL, 0, 1, 1, 0L },
 	{ "MODUSER",	&s_chanserv_moduser,	3, NULL, 0, 1, 1, 0L },
+	{ "SUSPEND",	&s_chanserv_suspend,	3, NULL, 0, 1, 1, 0L },
+	{ "UNSUSPEND",	&s_chanserv_unsuspend,	2, NULL, 0, 1, 1, 0L },
 	{ "INVITE",	&s_chanserv_invite,	1, NULL, 0, 1, 1, 0L },
+	{ "OP",		&s_chanserv_op,		1, NULL, 0, 1, 1, 0L },
+	{ "VOICE",	&s_chanserv_voice,	1, NULL, 0, 1, 1, 0L },
+	{ "ADDBAN",	&s_chanserv_addban,	4, NULL, 0, 1, 1, 0L },
+	{ "DELBAN",	&s_chanserv_delban,	2, NULL, 0, 1, 1, 0L },
 	{ "\0", NULL, 0, NULL, 0, 0, 0, 0L }
 };
 
@@ -62,6 +78,7 @@ init_s_chanserv(void)
 {
 	channel_reg_heap = BlockHeapCreate(sizeof(struct chan_reg), HEAP_CHANNEL_REG);
 	member_reg_heap = BlockHeapCreate(sizeof(struct member_reg), HEAP_MEMBER_REG);
+	ban_reg_heap = BlockHeapCreate(sizeof(struct ban_reg), HEAP_BAN_REG);
 
 	chanserv_p = add_service(&chanserv_service);
 	load_channel_db();
@@ -228,23 +245,59 @@ member_db_callback(void *db, int argc, char **argv, char **colnames)
 	return 0;
 }
 
-typedef int (*db_callback) (void *, int, char **, char **);
+static struct ban_reg *
+make_ban_reg(struct chan_reg *chreg_p, const char *mask, const char *reason,
+              const char *username, int level, int hold)
+{
+	struct ban_reg *banreg_p = BlockHeapAlloc(ban_reg_heap);
 
+	banreg_p->mask = my_strdup(mask);
+	banreg_p->reason = my_strdup(EmptyString(reason) ? "No Reason" : reason);
+	banreg_p->username = my_strdup(EmptyString(username) ? "unknown" : username);
+	banreg_p->level = level;
+	banreg_p->hold = hold;
+
+#if 0
+	collapse(banreg_p->mask);
+#endif
+
+	dlink_add(banreg_p, &banreg_p->channode, &chreg_p->bans);
+	return banreg_p;
+}
 
 static void
-loc_sqlite_exec(db_callback cb, const char *format, ...)
+free_ban_reg(struct chan_reg *chreg_p, struct ban_reg *banreg_p)
 {
-	va_list args;
-	char *errmsg;
-	int i;
+	dlink_delete(&banreg_p->channode, &chreg_p->bans);
 
-	va_start(args, format);
-	if((i = sqlite_exec_vprintf(rserv_db, format, cb, NULL, &errmsg, args)))
-	{
-		slog("fatal error: problem with db file: %s", errmsg);
-		die("problem with db file");
-	}
-	va_end(args);
+	my_free(banreg_p->mask);
+	my_free(banreg_p->reason);
+	my_free(banreg_p->username);
+
+	BlockHeapFree(ban_reg_heap, banreg_p);
+}
+
+static int
+ban_db_callback(void *db, int argc, char **argv, char **colnames)
+{
+	struct chan_reg *chreg_p;
+	struct ban_reg *banreg_p;
+	int level, hold;
+
+	if(argc < 6)
+		return 0;
+
+	if(EmptyString(argv[0]) || EmptyString(argv[1]))
+		return 0;
+
+	if((chreg_p = find_channel_reg(NULL, argv[0])) == NULL)
+		return 0;
+
+	level = atoi(argv[4]);
+	hold = atoi(argv[5]);
+	banreg_p = make_ban_reg(chreg_p, argv[1], argv[2], argv[3], level, hold);
+
+	return 0;
 }
 
 static void
@@ -252,6 +305,7 @@ load_channel_db(void)
 {
 	loc_sqlite_exec(channel_db_callback, "SELECT * FROM channels");
 	loc_sqlite_exec(member_db_callback, "SELECT * FROM members");
+	loc_sqlite_exec(ban_db_callback, "SELECT * FROM bans");
 }
 
 static void
@@ -260,15 +314,6 @@ write_channel_db_entry(struct chan_reg *reg_p)
 	loc_sqlite_exec(NULL, "INSERT INTO channels (chname, reg_time, last_time, flags) VALUES(%Q, %lu, %lu, 0)",
 			reg_p->name, reg_p->reg_time, reg_p->last_time);
 }
-
-#if 0
-static void
-update_channel_db_entry(struct chan_reg *reg_p, const char *field)
-{
-	loc_sqlite_exec(NULL, "UPDATE channels SET %s WHERE chname = %Q",
-			field, reg_p->name);
-}
-#endif
 
 static void
 write_member_db_entry(struct member_reg *reg_p)
@@ -283,6 +328,14 @@ delete_member_db_entry(struct member_reg *reg_p)
 {
 	loc_sqlite_exec(NULL, "DELETE FROM members WHERE chname = %Q AND username = %Q",
 			reg_p->channel_reg->name, reg_p->user_reg->name);
+}
+
+static void
+write_ban_db_entry(struct ban_reg *reg_p, const char *chname)
+{
+	loc_sqlite_exec(NULL, "INSERT INTO bans VALUES(%Q, %Q, %Q, %Q, %d, %lu)",
+			chname, reg_p->mask, reg_p->reason, reg_p->username,
+			reg_p->level, reg_p->hold);
 }
 
 static int
@@ -453,7 +506,197 @@ s_chanserv_moduser(struct client *client_p, char *parv[], int parc)
 
 	return 1;
 }
+
+static int
+s_chanserv_suspend(struct client *client_p, char *parv[], int parc)
+{
+	struct user_reg *ureg_p;
+	struct member_reg *mreg_p;
+	struct member_reg *mreg_tp;
+	int level;
+
+	if((mreg_p = verify_member_reg_name(client_p, NULL, parv[0], S_C_SUSPEND)) == NULL)
+		return 1;
+
+	if((ureg_p = find_user_reg_nick(client_p, parv[1])) == NULL)
+		return 1;
+
+	if((mreg_tp = find_member_reg(ureg_p, mreg_p->channel_reg)) == NULL)
+	{
+		service_error(chanserv_p, client_p, "User %s on %s does not have access",
+				ureg_p->name, mreg_p->channel_reg->name);
+		return 1;
+	}
+
+	if(mreg_p->level <= mreg_tp->level)
+	{
+		service_error(chanserv_p, client_p, "User %s on %s access level equal or higher",
+				ureg_p->name, mreg_p->channel_reg->name);
+		return 1;
+	}
+
+	/* suspended already at a higher level? */
+	if(mreg_tp->suspend > mreg_p->level)
+	{
+		service_error(chanserv_p, client_p, "User %s on %s suspend level higher",
+				ureg_p->name, mreg_p->channel_reg->name);
+		return 1;
+	}
+
+	level = atoi(parv[2]);
+
+	if(level < 1 || level > mreg_p->level)
+	{
+		service_error(chanserv_p, client_p, "Suspend level %d invalid", level);
+		return 1;
+	}
+
+	mreg_tp->suspend = level;
+	my_free(mreg_tp->lastmod);
+	mreg_tp->lastmod = my_strdup(mreg_p->user_reg->name);
+
+	service_error(chanserv_p, client_p, "User %s on %s suspend %d set",
+			mreg_tp->user_reg->name, mreg_tp->channel_reg->name, level);
+
+	loc_sqlite_exec(NULL, "UPDATE members SET suspend = %d WHERE chname = %Q AND username = %Q",
+			level, mreg_tp->channel_reg->name, mreg_tp->user_reg->name);
+
+	return 1;
+}
+
+static int
+s_chanserv_unsuspend(struct client *client_p, char *parv[], int parc)
+{
+	struct user_reg *ureg_p;
+	struct member_reg *mreg_p;
+	struct member_reg *mreg_tp;
+
+	if((mreg_p = verify_member_reg_name(client_p, NULL, parv[0], S_C_SUSPEND)) == NULL)
+		return 1;
+
+	if((ureg_p = find_user_reg_nick(client_p, parv[1])) == NULL)
+		return 1;
+
+	if((mreg_tp = find_member_reg(ureg_p, mreg_p->channel_reg)) == NULL)
+	{
+		service_error(chanserv_p, client_p, "User %s on %s does not have access",
+				ureg_p->name, mreg_p->channel_reg->name);
+		return 1;
+	}
+
+	/* suspended at a higher level?  we allow the user level being
+	 * higher here, as the suspend level dictates who can unsuspend
+	 */
+	if(mreg_tp->suspend > mreg_p->level)
+	{
+		service_error(chanserv_p, client_p, "User %s on %s suspend level higher",
+				ureg_p->name, mreg_p->channel_reg->name);
+		return 1;
+	}
+
+	mreg_tp->suspend = 0;
+	my_free(mreg_tp->lastmod);
+	mreg_tp->lastmod = my_strdup(mreg_p->user_reg->name);
+
+	service_error(chanserv_p, client_p, "User %s on %s unsuspended",
+			 mreg_tp->user_reg->name, mreg_tp->channel_reg->name);
+
+	loc_sqlite_exec(NULL, "UPDATE members SET suspend = 0 WHERE chname = %Q AND username = %Q",
+			mreg_tp->channel_reg->name, mreg_tp->user_reg->name);
+
+	return 1;
+}
+
+#if 0
+/* This will only work if chanserv is on the channel itself.. */
+static int
+s_chanserv_topic(struct client *client_p, char *parv[], int parc)
+{
+	static char buf[BUFSIZE];
+	struct member_reg *reg_p;
+	struct channel *chptr;
+	int i = 0;
+
+	if((reg_p = verify_member_reg_name(client_p, &chptr, parv[0], S_C_REGULAR)) == NULL)
+		return 1;
+
+	if(!EmptyString(reg_p->channel_reg->topic))
+	{
+		service_error(chanserv_p, client_p, "Channel %s has an enforced topic",
+				parv[0]);
+		return 1;
+	}
+
+	buf[0] = '\0';
+
+	while(++i < parc)
+		strlcat(buf, parv[i], sizeof(buf));
+		
+	sendto_server(":%s TOPIC %s :[%s] %s",
+			MYNAME, parv[0], reg_p->user_reg->name, buf);
+
+	return 1;
 			
+}
+#endif
+
+static int
+s_chanserv_op(struct client *client_p, char *parv[], int parc)
+{
+	struct member_reg *reg_p;
+	struct channel *chptr;
+	struct chmember *msptr;
+
+	if((reg_p = verify_member_reg_name(client_p, &chptr, parv[0], S_C_OP)) == NULL)
+		return 1;
+
+	if((msptr = find_chmember(chptr, client_p)) == NULL)
+	{
+		service_error(chanserv_p, client_p, "You are not on %s", parv[0]);
+		return 1;
+	}
+
+	if(is_opped(msptr))
+	{
+		service_error(chanserv_p, client_p, "You are already opped on %s", parv[0]);
+		return 1;
+	}
+
+	msptr->flags |= MODE_OPPED;
+	sendto_server(":%s MODE %s +o %s",
+			chanserv_p->name, parv[0], client_p->name);
+	return 1;
+}
+
+static int
+s_chanserv_voice(struct client *client_p, char *parv[], int parc)
+{
+	struct member_reg *reg_p;
+	struct channel *chptr;
+	struct chmember *msptr;
+
+	if((reg_p = verify_member_reg_name(client_p, &chptr, parv[0], S_C_USER)) == NULL)
+		return 1;
+
+	if((msptr = find_chmember(chptr, client_p)) == NULL)
+	{
+		service_error(chanserv_p, client_p, "You are not on %s", parv[0]);
+		return 1;
+	}
+
+	if(is_voiced(msptr))
+	{
+		service_error(chanserv_p, client_p, "You are already voiced on %s", parv[0]);
+		return 1;
+	}
+
+	msptr->flags |= MODE_VOICED;
+	sendto_server(":%s MODE %s +v %s",
+			chanserv_p->name, parv[0], client_p->name);
+	return 1;
+}
+
+
 static int
 s_chanserv_invite(struct client *client_p, char *parv[], int parc)
 {
@@ -477,5 +720,195 @@ s_chanserv_invite(struct client *client_p, char *parv[], int parc)
 
 	sendto_server(":%s INVITE %s %s",
 			chanserv_p->name, client_p->name, chptr->name);
+	return 1;
+}
+
+static int
+s_chanserv_addban(struct client *client_p, char *parv[], int parc)
+{
+	static char reason[BUFSIZE];
+	struct channel *chptr;
+	struct chmember *msptr;
+	struct member_reg *mreg_p;
+	struct member_reg *mreg_tp;
+	struct ban_reg *banreg_p;
+	dlink_node *ptr, *next_ptr;
+	const char *mask;
+	char *endptr;
+	int duration;
+	int level;
+	int loc = 1;
+
+	if((mreg_p = verify_member_reg_name(client_p, &chptr, parv[0], S_C_REGULAR)) == NULL)
+		return 1;
+
+	duration = (int) strtol(parv[1], &endptr, 10);
+
+	/* valid duration.. */
+	if(EmptyString(endptr))
+		loc++;
+	else
+		duration = 0;
+
+	mask = parv[loc++];
+
+	DLINK_FOREACH(ptr, mreg_p->channel_reg->bans.head)
+	{
+		banreg_p = ptr->data;
+
+		if(!irccmp(banreg_p->mask, mask))
+		{
+			service_error(chanserv_p, client_p, "Ban %s on %s already set",
+					mask, mreg_p->channel_reg->name);
+			return 1;
+		}
+	}
+
+	level = (int) strtol(parv[loc], &endptr, 10);
+
+	if(!EmptyString(endptr))
+	{
+		service_error(chanserv_p, client_p, "Access level %s invalid",
+				parv[loc]);
+		return 1;
+	}
+	
+	loc++;
+
+	/* we only require 4 params (chname, mask, level, reason) - but if a
+	 * time was specified there may not be a reason..
+	 */
+	if(loc >= parc)
+	{
+		service_error(chanserv_p, client_p, "Insufficient parameters to CHANSERV::ADDBAN");
+		return 1;
+	}
+
+	reason[0] = '\0';
+
+	while(loc < parc)
+	{
+		if(strlcat(reason, parv[loc], sizeof(reason)) >= REASON_MAGIC)
+		{
+			reason[REASON_MAGIC] = '\0';
+			break;
+		}
+
+		loc++;
+	}
+
+	banreg_p = make_ban_reg(mreg_p->channel_reg, mask, reason, mreg_p->user_reg->name, level, duration);
+	write_ban_db_entry(banreg_p, mreg_p->channel_reg->name);
+
+	service_error(chanserv_p, client_p, "Ban %s on %s added",
+			mask, mreg_p->channel_reg->name);
+
+	if(chptr == NULL)
+		return 1;
+
+	loc = 0;
+
+	/* now enforce the ban.. */
+	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->users.head)
+	{
+		msptr = ptr->data;
+
+		if(match(mask, msptr->client_p->user->mask))
+		{
+			/* matching +e */
+			if(find_exempt(chptr, msptr->client_p))
+				continue;
+
+			/* dont kick people who have access to the channel,
+			 * this prevents an unban, join, ban cycle.
+			 */
+			if(msptr->client_p->user->user_reg &&
+			   (mreg_tp = find_member_reg(msptr->client_p->user->user_reg,
+						      mreg_p->channel_reg)))
+			{
+				if(!mreg_tp->suspend)
+					continue;
+			}
+
+			if(!loc)
+			{
+				char *banstr = my_strdup(mask);
+
+				sendto_server(":%s MODE %s +b %s",
+						chanserv_p->name, chptr->name, mask);
+				dlink_add_alloc(banstr, &chptr->bans);
+				loc++;
+			}
+
+			sendto_server(":%s KICK %s %s :%s",
+					chanserv_p->name, chptr->name, msptr->client_p->name,
+					reason);
+			del_chmember(msptr);
+		}
+	}
+
+	return 1;
+}
+
+static int
+s_chanserv_delban(struct client *client_p, char *parv[], int parc)
+{
+	struct channel *chptr;
+	struct member_reg *mreg_p;
+	struct ban_reg *banreg_p;
+	dlink_node *ptr;
+	int found = 0;
+
+	if((mreg_p = verify_member_reg_name(client_p, &chptr, parv[0], S_C_REGULAR)) == NULL)
+		return 1;
+
+	DLINK_FOREACH(ptr, mreg_p->channel_reg->bans.head)
+	{
+		banreg_p = ptr->data;
+
+		if(!irccmp(banreg_p->mask, parv[1]))
+		{
+			found++;
+			break;
+		}
+	}
+
+	if(!found)
+	{
+		service_error(chanserv_p, client_p, "Ban %s on %s not found",
+				parv[1], mreg_p->channel_reg->name);
+		return 1;
+	}
+
+	if(banreg_p->level > mreg_p->level)
+	{
+		service_error(chanserv_p, client_p, "Ban %s on %s higher level",
+				parv[1], mreg_p->channel_reg->name);
+		return 1;
+	}
+
+	service_error(chanserv_p, client_p, "Ban %s on %s removed",
+			parv[1], mreg_p->channel_reg->name);
+
+	loc_sqlite_exec(NULL, "DELETE FROM bans WHERE chname = %Q AND mask = %Q",
+			mreg_p->channel_reg->name, parv[1]);
+
+	free_ban_reg(mreg_p->channel_reg, banreg_p);
+
+	if(chptr == NULL)
+		return 1;
+
+	DLINK_FOREACH(ptr, chptr->bans.head)
+	{
+		if(!irccmp((const char *) ptr->data, parv[1]))
+		{
+			sendto_server(":%s MODE %s -b %s",
+					chanserv_p->name, chptr->name, parv[1]);
+			my_free(ptr->data);
+			dlink_destroy(ptr, &chptr->bans);
+			return 1;
+		}
+	}
+
 	return 1;
 }

@@ -270,7 +270,10 @@ void
 free_client(struct client *target_p)
 {
         if(target_p->user != NULL)
+	{
+		my_free(target_p->user->mask);
                 BlockHeapFree(user_heap, target_p->user);
+	}
 
 	if(target_p->server != NULL)
 	        BlockHeapFree(server_heap, target_p->server);
@@ -366,6 +369,7 @@ umode_to_string(int umode)
 void
 c_nick(struct client *client_p, const char *parv[], int parc)
 {
+	static char buf[BUFSIZE];
 	struct client *target_p;
 	struct client *uplink_p;
 	time_t newts;
@@ -431,6 +435,11 @@ c_nick(struct client *client_p, const char *parv[], int parc)
 		target_p->user->servername = uplink_p->name;
 		target_p->user->tsinfo = newts;
 		target_p->user->umode = string_to_umode(parv[4], 0);
+
+		snprintf(buf, sizeof(buf), "%s!%s@%s",
+			target_p->name, target_p->user->username, 
+			target_p->user->host);
+		target_p->user->mask = my_strdup(buf);
 
 		add_client(target_p);
 		dlink_add(target_p, &target_p->listnode, &user_list);
