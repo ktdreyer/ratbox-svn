@@ -55,6 +55,7 @@ void restart_resolver(void)
 {
   fd_close(dns_state->udpsocket);
   adns_globalsystemfailure(dns_state);
+  eventDelete(timeout_adns, NULL);
   init_resolver();
 }
 
