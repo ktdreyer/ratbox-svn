@@ -1,3 +1,8 @@
+*** 20001125_2 by ryan
+
+added RPATH for ircd.rsa (for oper keyfiles)
+
+
 *** 20001125_1 by toot
 . moved mo_testline into a module
 . added idletime setting for use in ircd.conf
