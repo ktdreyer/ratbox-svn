@@ -43,17 +43,10 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <time.h>
-/* XXX - This breaks Cygwin, and APPEARS to not be needed...someone please
- * check for me though...
- */
-#ifndef __CYGWIN32__
-#include <arpa/nameser.h>
-#endif
 
-#if defined(VMS) || defined(__CYGWIN32__)
-# define INADDRSZ 4
+#ifndef INADDRSZ 
+#define INADDRSZ sizeof(struct in_addr)
 #endif
-
 /*
  * myctime - This is like standard ctime()-function, but it zaps away
  *   the newline from the end of that string. Also, it takes
