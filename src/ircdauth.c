@@ -108,7 +108,7 @@ ConnectToIAuth()
 	iAuth.socket = comm_open(AF_INET, SOCK_STREAM, 0, "iAuth socket");
 	if (iAuth.socket < 0)
 	{
-    report_error("ConnectToIAuth(): Unable to open stream socket to %s: %s",
+    report_error(L_ALL, "ConnectToIAuth(): Unable to open stream socket to %s: %s",
       iAuth.hostname,
       errno);
 		iAuth.socket = NOSOCK;

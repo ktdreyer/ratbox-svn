@@ -1174,7 +1174,7 @@ int server_estab(struct Client *client_p)
    * XXX - this should be in s_bsd
    */
   if (!set_sock_buffers(client_p->fd, READBUF_SIZE))
-    report_error(SETBUF_ERROR_MSG, get_client_name(client_p, SHOW_IP), errno);
+    report_error(L_ALL, SETBUF_ERROR_MSG, get_client_name(client_p, SHOW_IP), errno);
 
   /* Hand the server off to servlink now */
 
@@ -1589,14 +1589,32 @@ int fork_server(struct Client *server)
 #endif
 
     if (!set_non_blocking(server->fd))
-        report_error(NONB_ERROR_MSG, get_client_name(server, SHOW_IP), errno);
+    {
+      report_error(L_ADMIN, NONB_ERROR_MSG, get_client_name(server, SHOW_IP), errno);
+      report_error(L_OPER, NONB_ERROR_MSG, get_client_name(server, MASK_IP), errno);
+    }
     if (!set_non_blocking(server->localClient->ctrlfd))
-        report_error(NONB_ERROR_MSG, get_client_name(server, SHOW_IP), errno);
+    {
+      report_error(L_ADMIN, NONB_ERROR_MSG, 
+                   get_client_name(server, SHOW_IP), errno);
+      report_error(L_OPER, NONB_ERROR_MSG, 
+                   get_client_name(server, MASK_IP), errno);
+    }
 #ifndef HAVE_SOCKETPAIR
     if (!set_non_blocking(server->fd_r))
-        report_error(NONB_ERROR_MSG, get_client_name(server, SHOW_IP), errno);
+    {
+      report_error(L_ADMIN, NONB_ERROR_MSG, 
+                   get_client_name(server, SHOW_IP), errno);
+      report_error(L_OPER, NONB_ERROR_MSG,
+                   get_client_name(server, MASK_IP), errno);
+    }
     if (!set_non_blocking(server->localClient->ctrlfd_r))
-        report_error(NONB_ERROR_MSG, get_client_name(server, SHOW_IP), errno);
+    {
+      report_error(L_ADMIN, NONB_ERROR_MSG, 
+                   get_client_name(server, SHOW_IP), errno);
+      report_error(L_OPER, NONB_ERROR_MSG,
+                   get_client_name(server, MASK_IP), errno);
+    }
 #endif
 
 #ifdef HAVE_SOCKETPAIR
@@ -2117,7 +2135,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
     if ((fd = comm_open(DEF_FAM, SOCK_STREAM, 0, NULL)) < 0)
       {
         /* Eek, failure to create the socket */
-        report_error("opening stream socket to %s: %s", aconf->name, errno);
+        report_error(L_ALL, "opening stream socket to %s: %s", aconf->name, errno);
         return 0;
       }
 
@@ -2140,10 +2158,16 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
      */
 
     if (!set_non_blocking(client_p->fd))
-        report_error(NONB_ERROR_MSG, get_client_name(client_p, SHOW_IP), errno);
+    {
+      report_error(L_ADMIN, NONB_ERROR_MSG, get_client_name(client_p, SHOW_IP), errno);
+      report_error(L_OPER, NONB_ERROR_MSG, get_client_name(client_p, MASK_IP), errno);
+    }
 
     if (!set_sock_buffers(client_p->fd, READBUF_SIZE))
-        report_error(SETBUF_ERROR_MSG, get_client_name(client_p, SHOW_IP), errno);
+    {
+      report_error(L_ADMIN, SETBUF_ERROR_MSG, get_client_name(client_p, SHOW_IP), errno);
+      report_error(L_OPER, SETBUF_ERROR_MSG, get_client_name(client_p, MASK_IP), errno);
+    }
 
     /*
      * NOTE: if we're here we have a valid C:Line and the client should

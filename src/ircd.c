@@ -297,7 +297,7 @@ set_time(void)
 		(unsigned long) newtime,
 		(unsigned long) CurrentTime);
 
-  report_error(to_send, me.name, 0);
+  report_error(L_ALL, to_send, me.name, 0);
   set_back_events(CurrentTime - newtime);
  }
  CurrentTime = newtime;

@@ -160,11 +160,11 @@ int get_sockerr(int fd)
  * Actually stderr is still there IFF ircd was run with -s --Rodder
  */
 
-void report_error(const char* text, const char* who, int error) 
+void report_error(int level, const char* text, const char* who, int error) 
 {
   who = (who) ? who : "";
 
-  sendto_realops_flags(FLAGS_DEBUG, L_ALL, text, who, strerror(error));
+  sendto_realops_flags(FLAGS_DEBUG, level, text, who, strerror(error));
 
   ilog(L_ERROR, text, who, strerror(error));
 }
@@ -375,7 +375,7 @@ void add_connection(struct Listener* listener, int fd)
   new_client = make_client(NULL);
   if (getpeername(fd, (struct sockaddr *)&SOCKADDR(irn), (unsigned int *)&len))
     {
-      report_error("Failed in adding new connection %s :%s", 
+      report_error(L_ALL, "Failed in adding new connection %s :%s", 
 		   get_listener_name(listener), errno);
       ServerStats->is_ref++;
       fd_close(fd);
@@ -411,9 +411,9 @@ void add_connection(struct Listener* listener, int fd)
   ++listener->ref_count;
 
   if (!set_non_blocking(new_client->fd))
-    report_error(NONB_ERROR_MSG, get_client_name(new_client, SHOW_IP), errno);
+    report_error(L_ALL, NONB_ERROR_MSG, get_client_name(new_client, SHOW_IP), errno);
   if (!disable_sock_options(new_client->fd))
-    report_error(OPT_ERROR_MSG, get_client_name(new_client, SHOW_IP), errno);
+    report_error(L_ALL, OPT_ERROR_MSG, get_client_name(new_client, SHOW_IP), errno);
   start_auth(new_client);
 }
 
@@ -455,8 +455,11 @@ void error_exit_client(struct Client* client_p, int error)
         }
       else
 	{
-	  report_error("Lost connection to %s: %d",
+	  report_error(L_ADMIN, "Lost connection to %s: %d",
 	               get_client_name(client_p, SHOW_IP),
+		       current_error);
+	  report_error(L_OPER, "Lost connection to %s: %d",
+	               get_client_name(client_p, MASK_IP),
 		       current_error);
 
 	}
