@@ -369,15 +369,6 @@ static void stats_events(struct Client *client_p)
   show_events(client_p);
 }
 
-/* jdc -- seems to be unused right now */
-#if 0
-static void stats_fd(struct Client *client_p)
-{
-  fd_dump(client_p);
-}
-#endif
-
-
 /* stats_glines()
  *
  * input	- client pointer
