@@ -158,7 +158,6 @@ char*   debugmode  = "";        /*  -"-    -"-   -"-  */
 int     rehashed = YES;
 int     dline_in_progress = NO; /* killing off matching D lines ? */
 time_t  nextconnect = 1;        /* time for next try_connections call */
-time_t  nextping = 1;           /* same as above for check_pings() */
 
 /* code added by mika nystrom (mnystrom@mit.edu) */
 /* this flag is used to signal globally that the server is heavily loaded,
@@ -444,10 +443,6 @@ static time_t io_loop(time_t delay)
   if (nextconnect && CurrentTime >= nextconnect)
     nextconnect = try_connections(CurrentTime);
   /*
-   * DNS checks, use smaller of resolver delay or next ping
-   */
-  delay = IRCD_MIN(delay, (nextping - CurrentTime));
-  /*
   ** take the smaller of the two 'timed' event times as
   ** the time of next event (stops us being late :) - avalon
   ** WARNING - nextconnect can return 0!
@@ -517,19 +512,6 @@ static time_t io_loop(time_t delay)
   read_message(delay, FDL_ALL); /*  check everything! */
   flush_server_connections();
 #endif
-
-  /*
-  ** ...perhaps should not do these loops every time,
-  ** but only if there is some chance of something
-  ** happening (but, note that conf->hold times may
-  ** be changed elsewhere--so precomputed next event
-  ** time might be too far away... (similarly with
-  ** ping times) --msa
-  */
-
-  if (CurrentTime >= nextping) {
-    nextping = check_pings(CurrentTime);
-  }
 
   if (dorehash && !GlobalSetOptions.lifesux)
     {

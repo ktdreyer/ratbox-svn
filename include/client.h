@@ -558,7 +558,6 @@ struct Client
 #define SHOW_IP 1
 #define MASK_IP 2
 
-extern time_t         check_pings(time_t current);
 extern void           check_klines(void);
 extern const char*    get_client_name(struct Client* client, int show_ip);
 extern const char*    get_client_host(struct Client* client);

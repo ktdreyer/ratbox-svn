@@ -84,6 +84,8 @@ static struct die_client dying_clients[MAXCONNECTIONS];
 
 static void exit_marked_for_death_clients(struct die_client dying_clients[]);
 
+static EVH check_pings;
+
 /*
  * init_client_heap - initialize client free memory
  */
@@ -100,6 +102,11 @@ void init_client_heap(void)
    */
   localClientFreeList = 
     BlockHeapCreate((size_t) CLIENT_LOCAL_SIZE, MAXCONNECTIONS);
+
+  /*
+   * start off the check ping event ..  -- adrian
+   */
+  eventAdd("check_pings", check_pings, NULL, 1, 0);
 }
 
 void clean_client_heap(void)
@@ -251,16 +258,29 @@ void _free_client(struct Client* cptr)
  * then a limit check is going to have to be added as well
  * -Dianora
  */
-time_t check_pings(time_t currenttime)
+
+/*
+ * Addon from adrian. We used to call this after nextping seconds,
+ * however I've changed it to run once a second. This is only for
+ * PING timeouts, not K/etc-line checks (thanks dianora!). Having it
+ * run once a second makes life a lot easier - when a new client connects
+ * and they need a ping in 4 seconds, if nextping was set to 20 seconds
+ * we end up waiting 20 seconds. This is stupid. :-)
+ * I will optimise (hah!) check_pings() once I've finished working on
+ * tidying up other network IO evilnesses.
+ *     -- adrian
+ */
+static void
+check_pings(void *notused)
 {               
   struct Client *cptr;          /* current local cptr being examined */
   int           ping = 0;               /* ping time value from client */
   int           i;                      /* used to index through fd/cptr's */
-  time_t        oldest = 0;             /* next ping time */
   time_t        timeout;                /* found necessary ping time */
   int           die_index=0;            /* index into list */
 
-  dying_clients[0].client = (struct Client *)NULL;   /* mark first one empty */
+  /* mark first client empty */
+  dying_clients[0].client = (struct Client *)NULL;
 
   /*
    * I re-wrote the way klines are handled. Instead of rescanning
@@ -354,7 +374,7 @@ time_t check_pings(time_t currenttime)
       else
         ping = get_client_ping(cptr);
 
-      if (ping < (currenttime - cptr->lasttime))
+      if (ping < (CurrentTime - cptr->lasttime))
         {
           /*
            * If the server hasnt talked to us in 2*ping seconds
@@ -362,7 +382,7 @@ time_t check_pings(time_t currenttime)
            * If the client is a user and a KILL line was found
            * to be active, close this connection too.
            */
-          if (((currenttime - cptr->lasttime) >= (2 * ping) &&
+          if (((CurrentTime - cptr->lasttime) >= (2 * ping) &&
                (cptr->flags & FLAGS_PINGSENT)))
             {
               if (IsServer(cptr) || IsConnecting(cptr) ||
@@ -397,16 +417,14 @@ time_t check_pings(time_t currenttime)
                */
               cptr->flags |= FLAGS_PINGSENT;
               /* not nice but does the job */
-              cptr->lasttime = currenttime - ping;
+              cptr->lasttime = CurrentTime - ping;
               sendto_one(cptr, "PING :%s", me.name);
             }
         }
       /* ping_timeout: */
       timeout = cptr->lasttime + ping;
-      while (timeout <= currenttime)
+      while (timeout <= CurrentTime)
         timeout += ping;
-      if (timeout < oldest || !oldest)
-        oldest = timeout;
 
       /*
        * Check UNKNOWN connections - if they have been in this state
@@ -429,12 +447,8 @@ time_t check_pings(time_t currenttime)
 
   exit_marked_for_death_clients(dying_clients);
 
-  if (!oldest || oldest < currenttime)
-    oldest = currenttime + PINGFREQUENCY;
-  Debug((DEBUG_NOTICE, "Next check_ping() call at: %s, %d %d %d",
-         myctime(oldest), ping, oldest, currenttime));
-  
-  return (oldest);
+  /* Reschedule a new address */
+  eventAdd("check_pings", check_pings, NULL, 1, 0);
 }
 
 

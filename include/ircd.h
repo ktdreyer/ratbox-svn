@@ -92,7 +92,6 @@ extern struct Counter Count;
 extern time_t         CurrentTime;
 extern time_t         LCF;
 extern time_t         nextconnect;
-extern time_t         nextping;
 
 
 extern struct Client* LocalClientList;
