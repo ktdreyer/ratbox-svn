@@ -1,3 +1,16 @@
+leeh        2002/08/16 19:23:30 EDT	(20020816_11)
+
+  Modified files:
+    src                  client.c s_user.c 
+  Log:
+  - made the +c notices take account of spoofs.
+  
+  Revision  Changes    Path
+  7.312     +5 -1      ircd-ratbox/src/client.c
+  7.218     +3 -0      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2002/08/16 17:46:55 EDT	(20020816_10)
 
   Modified files:
