@@ -1,3 +1,8 @@
+*** 20001212_2 by db
+- don't core if a server is not found on the serv_list
+
+
+
 *** 20001212_1 by db
 - fixed m_trace.c so as to not use local[]
 
