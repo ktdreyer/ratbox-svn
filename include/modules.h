@@ -30,6 +30,7 @@
 #include "setup.h"
 #include "parse.h"
 
+#define MAPI_RATBOX 1
 
 #if defined(HAVE_SHL_LOAD)
 #include <dl.h>
