@@ -218,7 +218,6 @@ init_sys(void)
                         (long) limit.rlim_cur);
           exit(EXIT_FAILURE);
         }
-      printf("Value of NOFILE is %d\n", NOFILE);
     }
 #endif        /* RLIMIT_FD_MAX */
 }
