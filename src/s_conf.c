@@ -1932,13 +1932,9 @@ get_oper_name(struct Client *client_p)
                ((struct ConfItem*)cnode->data)->name);
     return buffer;
    }
-#if 0
   /* Probably should assert here for now. If there is an oper out there 
-   * with no oper{} block, it would be good for us to know... */
-  /* or not - the ircd.conf might have just been altererd, removing
-     the block. */
+   * with no oper{} conf attached, it would be good for us to know... */
   assert(0); /* Oper without oper conf! */
-#endif
  }
  ircsprintf(buffer, "%s!%s@%s{%s}", client_p->name,
             client_p->username, client_p->host, client_p->servptr->name);
