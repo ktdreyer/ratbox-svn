@@ -133,12 +133,19 @@ static void ms_version(struct Client* client_p, struct Client* source_p,
  */
 static char* confopts(struct Client *source_p)
 {
-  static char result[4];
+  static char result[15];
 
   result[0] = '\0';
 
+#ifdef DEBUGMODE
+  strcat(result, "D");
+#endif
+
+  if(ConfigChannel.use_except)
+    strcat(result, "e");
+    
   if (ConfigFileEntry.glines)
-    strcat(result, "G");
+    strcat(result, "gG");
 
   /* might wanna hide this :P */
   if (ServerInfo.hub && 
@@ -146,6 +153,32 @@ static char* confopts(struct Client *source_p)
     {
       strcat(result, "H");
     }
+
+  if(ConfigChannel.use_invex)
+    strcat(result, "I");
+
+  if(ConfigChannel.use_knock)
+    strcat(result, "K");
+    
+  strcat(result, "M");
+
+#ifdef CRYPT_OPER_PASSWORD
+  strcat(result, "p");
+#endif
+
+  strcat(result, "T");
+
+#ifdef USE_SYSLOG
+  strcat(result, "Y");
+#endif
+
+#ifdef HAVE_LIBZ
+  strcat(result, "Z");
+#endif
+
+#ifdef IPV6
+  strcat(result, "6");
+#endif  
 
   return result;
 }

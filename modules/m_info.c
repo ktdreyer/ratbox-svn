@@ -93,7 +93,7 @@ struct InfoStruct
 #define OUTPUT_DECIMAL     0x0004   /* Output option as decimal (%d) */
 #define OUTPUT_BOOLEAN     0x0008   /* Output option as "ON" or "OFF" */
 #define OUTPUT_BOOLEAN_YN  0x0010   /* Output option as "YES" or "NO" */
-
+#define OUTPUT_BOOLEAN2	   0x0020   /* Output option as "YES/NO/MASKED" */
 
 static struct InfoStruct info_table[] =
 {
@@ -121,6 +121,12 @@ static struct InfoStruct info_table[] =
     OUTPUT_BOOLEAN,
     &ConfigFileEntry.client_exit,
     "Prepend 'Client Exit:' to user QUIT messages"
+  },
+  {
+    "client_flood",
+    OUTPUT_BOOLEAN,
+    &ConfigFileEntry.client_flood,
+    "Number of lines before a client Excess Flood's",
   },
   {
     "dots_in_ident",
@@ -210,6 +216,12 @@ static struct InfoStruct info_table[] =
     "Links rehash delay"
   },
   {
+    "max_accept",
+    OUTPUT_DECIMAL,
+    &ConfigFileEntry.max_accept,
+    "Maximum nicknames on accept list",
+  },
+  {
     "max_chans_per_user",
     OUTPUT_DECIMAL,
     &ConfigChannel.max_chans_per_user,
@@ -246,6 +258,12 @@ static struct InfoStruct info_table[] =
     "Class default maximum links count",
   },
   {
+    "min_nonwildcard",
+    OUTPUT_DECIMAL,
+    &ConfigFileEntry.min_nonwildcard,
+    "Minimum non-wildcard chars in K/G lines",
+  },
+  {
     "network_name",
     OUTPUT_STRING,
     &ServerInfo.network_name,
@@ -270,12 +288,6 @@ static struct InfoStruct info_table[] =
     "Check for and disallow redundant K-lines"
   },
   {
-    "stats_o_oper_only",
-    OUTPUT_BOOLEAN_YN,
-    &ConfigFileEntry.stats_o_oper_only,
-    "STATS o output is only shown to operators"
-  },
-  {
     "pace_wait",
     OUTPUT_DECIMAL,
     &ConfigFileEntry.pace_wait,
@@ -292,6 +304,24 @@ static struct InfoStruct info_table[] =
     OUTPUT_BOOLEAN_YN,
     &ConfigFileEntry.short_motd,
     "Do not show MOTD; only tell clients they should read it"
+  },
+  {
+    "stats_i_oper_only",
+    OUTPUT_BOOLEAN2,
+    &ConfigFileEntry.stats_i_oper_only,
+    "STATS I output is only shown to operators",
+  },
+  {
+    "stats_k_oper_only",
+    OUTPUT_BOOLEAN2,
+    &ConfigFileEntry.stats_k_oper_only,
+    "STATS K output is only shown to operators",
+  },
+  {
+    "stats_o_oper_only",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigFileEntry.stats_o_oper_only,
+    "STATS O output is only shown to operators"
   },
   {
     "ts_max_delta",
@@ -411,20 +441,29 @@ static void ms_info(struct Client *client_p, struct Client *source_p,
                    int parc, char *parv[])
 
 {
-  if(IsServer(source_p))
+  if(!IsClient(source_p))
       return;
   
   if (hunt_server(client_p,source_p,":%s INFO :%s",1,parc,parv) == HUNTED_ISME)
-    {
-      if(IsOper(source_p))
-      {
-	mo_info(client_p,source_p,parc,parv);
-      }
-      else
-      {
-	m_info(client_p,source_p,parc,parv);
-      }
-    }
+  {
+    sendto_realops_flags(FLAGS_SPY, L_ADMIN,
+                    "info requested by %s (%s@%s) [%s]",
+	            source_p->name, source_p->username, source_p->host,
+	            source_p->user->server);
+ 
+    /* I dont see sending Hybrid-team as anything but a waste of bandwidth..
+     * so its disabled for now. --fl_
+     */
+    /* send_info_text(source_p); */
+
+    /* I dont see why remote opers need this, but.. */
+    if(IsOper(source_p))
+      send_conf_options(source_p);
+      
+    send_birthdate_online_time(source_p);
+    sendto_one(source_p, form_str(RPL_ENDOFINFO),
+               me.name, parv[0]);
+  }
 } /* ms_info() */
 
 

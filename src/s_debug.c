@@ -63,15 +63,6 @@
  * Option string.  Must be before #ifdef DEBUGMODE.
  */
 const char serveropts[] = {
-#ifdef  DEBUGMODE
-  'D',
-#endif
-#ifdef  CRYPT_OPER_PASSWORD
-  'p',
-#endif
-#ifdef  USE_SYSLOG
-  'Y',
-#endif
   ' ',
   'T',
   'S',
