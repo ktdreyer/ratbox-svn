@@ -1,3 +1,26 @@
+leeh        2005/02/01 18:23:54 EST	(20050201_7)
+
+  Modified files:
+    include              service.h 
+    src                  s_alis.c s_chanserv.c s_global.c 
+                         s_jupeserv.c s_operbot.c s_operserv.c 
+                         s_userserv.c service.c 
+  Log:
+  - unify service_command handlers to take struct lconn *
+  
+  Revision  Changes    Path
+  1.21      +1 -1      rserv/include/service.h
+  1.33      +2 -2      rserv/src/s_alis.c
+  1.55      +55 -55    rserv/src/s_chanserv.c
+  1.9       +2 -2      rserv/src/s_global.c
+  1.25      +10 -10    rserv/src/s_jupeserv.c
+  1.29      +8 -8      rserv/src/s_operbot.c
+  1.9       +8 -8      rserv/src/s_operserv.c
+  1.45      +18 -18    rserv/src/s_userserv.c
+  1.43      +1 -1      rserv/src/service.c
+
+
+
 leeh        2005/02/01 18:11:42 EST	(20050201_6)
 
   Modified files:
