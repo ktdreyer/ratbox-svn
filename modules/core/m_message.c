@@ -539,23 +539,26 @@ void msg_client(int n_or_p, char *command,
 	  /* Here is the anti-flood bot/spambot code -db */
 	  if(accept_message(sptr,acptr))
 	    {
-	      sendto_prefix_one(acptr, sptr, ":%s %s %s :%s",
-				sptr->name, command, acptr->name, text);
+	      sendto_one(acptr, ":%s!%s@%s %s %s :%s",
+			 sptr->name,
+			 sptr->username,
+			 sptr->host,
+			 command, acptr->name, text);
 	    }
 	  else
 	    {
 	      /* check for accept, flag recipient incoming message */
-	      sendto_prefix_one(sptr, acptr,
-		":%s NOTICE %s :*** I'm in +g mode (server side ignore).",
-			    acptr->name, sptr->name);
+	      sendto_anywhere(sptr, acptr,
+	"NOTICE %s :*** I'm in +g mode (server side ignore).",
+			      sptr->name);
 	      /* XXX hard coded 60 ick fix -db */
 	      if((acptr->localClient->last_caller_id_time + 60) < CurrentTime)
 		{
-		  sendto_prefix_one(sptr, acptr,
-		    ":%s NOTICE %s :*** I've been informed you messaged me.",
-				    acptr->name, sptr->name);
+		  sendto_anywhere(sptr, acptr,
+	    "NOTICE %s :*** I've been informed you messaged me.",
+				  sptr->name);
 
-		  sendto_prefix_one(acptr, sptr,
+		  sendto_one(acptr,
       ":%s NOTICE %s :*** Client %s [%s@%s] is messaging you and you are +g",
 				    me.name, acptr->name,
 				    sptr->name, sptr->username,
@@ -571,14 +574,14 @@ void msg_client(int n_or_p, char *command,
       else
 	{
 	  if(!flood_attack_client(sptr,acptr))
-	    sendto_prefix_one(acptr, sptr, ":%s %s %s :%s",
-			      sptr->name, command, acptr->name, text);
+	    sendto_anywhere(acptr, sptr, "%s %s :%s",
+			    command, acptr->name, text);
 	}
     }
   else
     if(!flood_attack_client(sptr,acptr))
-      sendto_prefix_one(acptr, sptr, ":%s %s %s :%s",
-			sptr->name, command, acptr->name, text);
+      sendto_anywhere(acptr, sptr, "%s %s :%s",
+		      command, acptr->name, text);
   return;
 }
       
@@ -748,12 +751,14 @@ void handle_opers(int p_or_n,
 		     me.name, sptr->name, nick);
 	  return;
 	}
-      sendto_match_butone(IsServer(cptr) ? cptr : NULL, 
-			  sptr, nick + 1,
-			  (*nick == '#') ? MATCH_HOST :
-			  MATCH_SERVER,
-			  ":%s %s %s :%s", sptr->name,
-			  "PRIVMSG", nick, text);
+      sendto_match_butone(IsServer(cptr) ? cptr : NULL, sptr,
+			  nick + 1, (*nick == '#') ? MATCH_HOST : MATCH_SERVER,
+			  ":%s!%s@%s PRIVMSG %s :%s",
+			  sptr->name,
+			  sptr->username,
+			  sptr->host,
+			  nick,
+			  text);
       return;
     }
   /*
@@ -792,10 +797,10 @@ void handle_opers(int p_or_n,
       if (acptr)
 	{
 	  if (count == 1)
-	    sendto_prefix_one(acptr, sptr,
-			      ":%s %s %s :%s",
-			      sptr->name, "PRIVMSG",
-			      nick, text);
+	    sendto_anywhere(acptr, sptr,
+			    "%s %s :%s",
+			    "PRIVMSG",
+			    nick, text);
 	  else 
 	    sendto_one(sptr,
 		       form_str(ERR_TOOMANYTARGETS),

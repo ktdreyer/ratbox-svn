@@ -227,14 +227,8 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   ** anyway (as this user don't exist there any more either)
   */
   if (MyConnect(acptr))
-    sendto_prefix_one(acptr, sptr,":%s KILL %s :%s",
-                      parv[0], acptr->name, reason);
-
-  /* XXX old code showed too much */
-  /*
-    sendto_prefix_one(acptr, sptr,":%s KILL %s :%s!%s",
-                      parv[0], acptr->name, inpath, path);
-    */
+    sendto_one(acptr, ":%s KILL %s :%s",
+	       sptr->name, acptr->name, reason);
 
   /*
   ** Set FLAGS_KILLED. This prevents exit_one_client from sending
@@ -440,14 +434,10 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   ** anyway (as this user don't exist there any more either)
   */
   if (MyConnect(acptr))
-    sendto_prefix_one(acptr, sptr,":%s KILL %s :%s",
-                      parv[0], acptr->name, reason);
-
-  /* XXX old code showed too much */
-  /*
-    sendto_prefix_one(acptr, sptr,":%s KILL %s :%s!%s",
-                      parv[0], acptr->name, inpath, path);
-    */
+    {
+      sendto_one(acptr, ":%s KILL %s :%s",
+		 sptr->name, acptr->name, reason);
+    }
 
   /*
   ** Set FLAGS_KILLED. This prevents exit_one_client from sending

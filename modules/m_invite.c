@@ -223,8 +223,11 @@ int     m_invite(struct Client *cptr,
 
   if (!ConfigFileEntry.invite_plus_i_only || 
 	  (ConfigFileEntry.invite_plus_i_only && need_invite)) 
-	  sendto_prefix_one(acptr, sptr, ":%s INVITE %s :%s",
-						parv[0], acptr->name, parv[2]);
+	  sendto_anywhere(acptr, sptr, ":%s!%s@%s INVITE %s :%s",
+			  sptr->name,
+			  sptr->username,
+			  sptr->host,
+			  acptr->name, parv[2]);
   return 0;
 }
 

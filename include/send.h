@@ -56,8 +56,8 @@ extern  void sendto_wallops_butone(struct Client *, struct Client *,
                                    const char *, ...);
 extern  void ts_warn(const char *, ...);
 
-extern  void sendto_prefix_one(struct Client *, struct Client *, 
-                               const char *, ...);
+extern  void sendto_anywhere(struct Client *, struct Client *, 
+			     const char *, ...);
 
 /* used when sending to #mask or $mask */
 

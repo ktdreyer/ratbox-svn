@@ -50,22 +50,25 @@
 #define LOG_BUFSIZE 2048
 
 static  char    sendbuf[2048];
-static  int     send_message (struct Client *, char *, int);
 
-static  void vsendto_prefix_one(register struct Client *,
-				register struct Client *,
-				const char *, va_list);
+static  int
+send_message (struct Client *, char *, int);
+
+static void
+send_message_remote(struct Client *to, struct Client *from,
+		    const char *sendbuf, int len);
+
 
 /* global for now *sigh* */
 unsigned long current_serial=0L;
 
 static void
-sendto_list(dlink_list *list, const char *sendbuf, int len);
+sendto_list_local(dlink_list *list, const char *sendbuf, int len);
 
 void
 send_channel_members(struct Client *one, struct Client *from,
 		     dlink_list *list,
-		     const char *pattern, va_list args);
+		     const char *sendbuf, int len);
 
 static int
 send_format(char *sendbuf, const char *pattern, va_list args);
@@ -119,6 +122,9 @@ dead_link(struct Client *to, char *notice)
 static int
 send_message(struct Client *to, char *msg, int len)
 {
+  /* XXX send_message could become send_message_local
+   * to->from shouldn't be non NULL in that case
+   */
   if (to->from)
     to = to->from; /* shouldn't be necessary */
 
@@ -169,6 +175,101 @@ send_message(struct Client *to, char *msg, int len)
       send_queued_write, to, 0);
     return 0;
 } /* send_message() */
+
+/*
+ * send_message_remote
+ * 
+ */
+static void
+send_message_remote(struct Client *to, struct Client *from,
+		    const char *sendbuf, int len)
+
+{
+  if(to->from)
+    to = to->from;
+
+/* Optimize by checking if (from && to) before everything */
+  if (!MyClient(from) && IsPerson(to) && (to->from == from->from))
+    {
+      if (IsServer(from))
+        {
+          sendto_realops_flags(FLAGS_ALL,
+		      "Send message to %s[%s] dropped from %s(Fake Dir)",
+			      to->name, to->from->name, from->name);
+          return;
+        }
+
+      sendto_realops_flags(FLAGS_ALL,
+			   "Ghosted: %s[%s@%s] from %s[%s@%s] (%s)",
+			   to->name, to->username, to->host,
+			   from->name, from->username, from->host,
+			   to->from->name);
+      
+      sendto_serv_butone(NULL, ":%s KILL %s :%s (%s[%s@%s] Ghosted %s)",
+                         me.name, to->name, me.name, to->name,
+                         to->username, to->host, to->from->name);
+
+      to->flags |= FLAGS_KILLED;
+
+      if (IsPerson(from))
+        sendto_one(from, form_str(ERR_GHOSTEDCLIENT),
+                   me.name, from->name, to->name, to->username,
+                   to->host, to->from);
+
+      exit_client(NULL, to, &me, "Ghosted client");
+      
+      return;
+    } /* if (!MyClient(from) && IsPerson(to) && (to->from == from->from)) */
+  
+  Debug((DEBUG_SEND,"Sending [%s] to %s",sendbuf,to->name));
+
+  /* XXX This stuff below should(?) be a common function
+   * called by send_message() and send_message_remote()
+   * lets think about it, its late...
+   */
+  if (to->fd < 0)
+    return; /* Thou shalt not write to closed descriptors */
+
+  if (IsDead(to))
+    return; /* This socket has already been marked as dead */
+
+  if (linebuf_len(&to->localClient->buf_sendq) > get_sendq(to))
+    {
+      if (IsServer(to))
+        sendto_realops_flags(FLAGS_ALL,
+			     "Max SendQ limit exceeded for %s: %d > %d",
+			     get_client_name(to, FALSE),
+          linebuf_len(&to->localClient->buf_sendq), get_sendq(to));
+      if (IsClient(to))
+	{
+	  to->flags |= FLAGS_SENDQEX;
+	  dead_link(to, "Max Sendq exceeded");
+	}
+      return;
+    }
+  else
+    {
+      if (len)
+          linebuf_put(&to->localClient->buf_sendq, sendbuf, len);
+    }
+    /*
+    ** Update statistics. The following is slightly incorrect
+    ** because it counts messages even if queued, but bytes
+    ** only really sent. Queued bytes get updated in SendQueued.
+    */
+    to->localClient->sendM += 1;
+    me.localClient->sendM += 1;
+
+    /*
+     * Now we register a write callback. We *could* try to write some
+     * data to the FD, it'd be an optimisation, and we can deal with it
+     * later.
+     *     -- adrian
+     */
+    comm_setselect(to->fd, FDLIST_IDLECLIENT, COMM_SELECT_WRITE,
+      send_queued_write, to, 0);
+    return;
+} /* send_message_remote() */
 
 /*
 ** send_queued_write
@@ -240,6 +341,7 @@ sendto_one(struct Client *to, const char *pattern, ...)
   int len;
   va_list args;
 
+  /* send remote if to->from non NULL */
   if (to->from)
     to = to->from;
   
@@ -260,10 +362,17 @@ sendto_one(struct Client *to, const char *pattern, ...)
   len = send_format(sendbuf, pattern, args);
   va_end(args);
 
-  (void)send_message(to, sendbuf, len);
+  (void)send_message(to, (char *)sendbuf, len);
   Debug((DEBUG_SEND,"Sending [%s] to %s",sendbuf,to->name));
 } /* sendto_one() */
 
+/*
+ * sendto_channel_butone
+ *
+ * inputs	-
+ * output	- NONE
+ * side effects	-
+ */
 void
 sendto_channel_butone(struct Client *one, struct Client *from,
 		      struct Channel *chptr, 
@@ -272,23 +381,25 @@ sendto_channel_butone(struct Client *one, struct Client *from,
   va_list    args;
   dlink_node *lp;
   struct Client *acptr;
+  int len;
 
   va_start(args, pattern);
+  len = send_format(sendbuf,pattern,args);
+  va_end(args);
 
   ++current_serial;
   
-  send_channel_members(one,from,&chptr->chanops, pattern, args);
-  send_channel_members(one,from,&chptr->voiced, pattern, args);
-  send_channel_members(one,from,&chptr->halfops, pattern, args);
-  send_channel_members(one,from,&chptr->peons, pattern, args);
+  send_channel_members(one, from, &chptr->chanops, sendbuf, len);
+  send_channel_members(one, from, &chptr->voiced,  sendbuf, len);
+  send_channel_members(one, from, &chptr->halfops, sendbuf, len);
+  send_channel_members(one, from, &chptr->peons,   sendbuf, len);
 
-  va_end(args);
 } /* sendto_channel_butone() */
 
 void
 send_channel_members(struct Client *one, struct Client *from,
 		     dlink_list *list,
-		     const char *pattern, va_list args)
+		     const char *sendbuf, int len)
 {
   dlink_node *ptr;
   struct Client *acptr;
@@ -305,7 +416,7 @@ send_channel_members(struct Client *one, struct Client *from,
         {
           if(acptr->serial != current_serial)
 	    {
-	      vsendto_prefix_one(acptr, from, pattern, args);
+	      send_message(acptr, (char *)sendbuf, len);
 	      acptr->serial = current_serial;
 	    }
         }
@@ -317,7 +428,7 @@ send_channel_members(struct Client *one, struct Client *from,
            */
           if(acptr->from->serial != current_serial)
             {
-              vsendto_prefix_one(acptr, from, pattern, args);
+	      send_message_remote(acptr, from, (char *)sendbuf, len);
               acptr->from->serial = current_serial;
             }
         }
@@ -334,7 +445,7 @@ sendto_serv_butone(struct Client *one, const char *pattern, ...)
 {
   int len;
   va_list args;
-  register struct Client *cptr;
+  struct Client *cptr;
   dlink_node *ptr;
 
   va_start(args, pattern);
@@ -348,7 +459,7 @@ sendto_serv_butone(struct Client *one, const char *pattern, ...)
       if (one && (cptr == one->from))
         continue;
       
-      send_message(cptr, sendbuf, len);
+      send_message(cptr, (char *)sendbuf, len);
     }
 } /* sendto_serv_butone() */
 
@@ -362,7 +473,7 @@ sendto_cap_serv_butone(int cap, struct Client *one, const char *pattern, ...)
 {
   int len;
   va_list args;
-  register struct Client *cptr;
+  struct Client *cptr;
   dlink_node *ptr;
 
   va_start(args, pattern);
@@ -377,7 +488,7 @@ sendto_cap_serv_butone(int cap, struct Client *one, const char *pattern, ...)
         continue;
       
       if (IsCapable(cptr,cap))
-	send_message(cptr, sendbuf, len);
+	send_message(cptr, (char *)sendbuf, len);
     }
 } /* sendto_cap_serv_butone() */
 
@@ -412,10 +523,10 @@ sendto_common_channels_local(struct Client *user, const char *pattern, ...)
 	{
 	  chptr = ptr->data;
 
-	  sendto_list(&chptr->chanops, sendbuf, len);
-	  sendto_list(&chptr->halfops, sendbuf, len);
-	  sendto_list(&chptr->voiced, sendbuf, len);
-	  sendto_list(&chptr->peons, sendbuf, len);
+	  sendto_list_local(&chptr->chanops, sendbuf, len);
+	  sendto_list_local(&chptr->halfops, sendbuf, len);
+	  sendto_list_local(&chptr->voiced, sendbuf, len);
+	  sendto_list_local(&chptr->peons, sendbuf, len);
 	}
     }
 } /* sendto_common_channels() */
@@ -447,44 +558,44 @@ sendto_channel_local(int type,
     {
     default:
     case ALL_MEMBERS:
-      sendto_list(&chptr->chanops, sendbuf, len);
-      sendto_list(&chptr->halfops, sendbuf, len);
-      sendto_list(&chptr->voiced, sendbuf, len);
-      sendto_list(&chptr->peons, sendbuf, len);
+      sendto_list_local(&chptr->chanops, sendbuf, len);
+      sendto_list_local(&chptr->halfops, sendbuf, len);
+      sendto_list_local(&chptr->voiced,  sendbuf, len);
+      sendto_list_local(&chptr->peons,   sendbuf, len);
       break;
 
     case NON_CHANOPS:
-      sendto_list(&chptr->peons, sendbuf, len);
+      sendto_list_local(&chptr->peons,   sendbuf, len);
       break;
 
     case ONLY_CHANOPS_VOICED:
-      sendto_list(&chptr->chanops, sendbuf, len);
-      sendto_list(&chptr->halfops, sendbuf, len);
-      sendto_list(&chptr->voiced, sendbuf, len);
+      sendto_list_local(&chptr->chanops, sendbuf, len);
+      sendto_list_local(&chptr->halfops, sendbuf, len);
+      sendto_list_local(&chptr->voiced,  sendbuf, len);
       break;
 
     case ONLY_CHANOPS:
-      sendto_list(&chptr->chanops, sendbuf, len);
-      sendto_list(&chptr->halfops, sendbuf, len);
+      sendto_list_local(&chptr->chanops, sendbuf, len);
+      sendto_list_local(&chptr->halfops, sendbuf, len);
       break;
     }
 
 } /* sendto_channel_local() */
 
 /*
- * sendto_list
+ * sendto_list_local
  *
- * inputs	- pointer to all members of this list a send buffer
+ * inputs	- pointer to all members of this list
  *		- buffer to send
  *		- length of buffer
  * output	- NONE
- * side effects	- all members of given list are sent
- * 		  given message. Right now, its always a channel list
+ * side effects	- all members who are locally on this server on given list
+ *		  are sent given message. Right now, its always a channel list
  *		  but there is no reason we could not use another dlink
  *		  list to send a message to a group of people.
  */
 static void
-sendto_list(dlink_list *list, const char *sendbuf, int len)
+sendto_list_local(dlink_list *list, const char *sendbuf, int len)
 {
   dlink_node *ptr;
   struct Client *acptr;
@@ -505,7 +616,6 @@ sendto_list(dlink_list *list, const char *sendbuf, int len)
       if (acptr && MyConnect(acptr))
 	send_message(acptr, (char *)sendbuf, len);
     }  
-
 } /* sendto_list() */
 
 /*
@@ -530,12 +640,10 @@ match_it(const struct Client *one, const char *mask, int what)
  *
  * send to all servers the channel given, except for "from"
  */
-
 void
 sendto_channel_remote(struct Channel *chptr,
 		      struct Client *from,
 		      const char *pattern, ...)
-
 {
   int len;
   va_list args;
@@ -565,7 +673,7 @@ sendto_channel_remote(struct Channel *chptr,
              continue;
         }
 
-      send_message (cptr, sendbuf, len);
+      send_message (cptr, (char *)sendbuf, len);
     }
 } /* sendto_channel_remote() */
 
@@ -579,11 +687,10 @@ sendto_channel_remote(struct Channel *chptr,
 void
 sendto_match_cap_servs(struct Channel *chptr, struct Client *from, int cap, 
                        const char *pattern, ...)
-
 {
   int len;
   va_list args;
-  register struct Client *cptr;
+  struct Client *cptr;
   dlink_node *ptr;
 
   if (chptr)
@@ -606,7 +713,7 @@ sendto_match_cap_servs(struct Channel *chptr, struct Client *from, int cap,
       if(!IsCapable(cptr, cap))
         continue;
       
-      send_message (cptr, sendbuf, len);
+      send_message (cptr, (char *)sendbuf, len);
     }
 } /* sendto_match_cap_servs() */
 
@@ -615,18 +722,22 @@ sendto_match_cap_servs(struct Channel *chptr, struct Client *from, int cap,
  *
  * Send to all clients which match the mask in a way defined on 'what';
  * either by user hostname or user servername.
+ *
+ * ugh. ONLY used by m_message.c to send an "oper magic" message. ugh.
  */
-
 void
-sendto_match_butone(struct Client *one, struct Client *from, char *mask, 
-                    int what, const char *pattern, ...)
-
+sendto_match_butone(struct Client *one, struct Client *from,
+		    char *mask, int what,
+		    const char *pattern, ...)
 {
+  int len;
   va_list args;
-  register struct Client *cptr;
+  struct Client *cptr;
   dlink_node *ptr;
 
   va_start(args, pattern);
+  len = send_format(sendbuf, pattern, args);
+  va_end(args);
 
   /* scan the local clients */
   for(ptr = lclient_list.head; ptr; ptr = ptr->next)
@@ -637,7 +748,7 @@ sendto_match_butone(struct Client *one, struct Client *from, char *mask,
         continue;
       
       if (match_it(cptr, mask, what))
-        vsendto_prefix_one(cptr, from, pattern, args);
+	send_message(cptr, (char *)sendbuf, len);
     }
 
   /* Now scan servers */
@@ -673,10 +784,10 @@ sendto_match_butone(struct Client *one, struct Client *from, char *mask,
        * -wnder
        */
 
-      vsendto_prefix_one(cptr, from, pattern, args);
+      send_message_remote(cptr, from, sendbuf, len);
     }
 
-  va_end(args);
+
 } /* sendto_match_butone() */
 
 /*
@@ -740,133 +851,65 @@ send_operwall(struct Client *from, char *type_message, ...)
     }
 } /* send_operwall() */
 
+
 /*
- * to - destination client
- * from - client which message is from
+ * sendto_anywhere
  *
- * NOTE: NEITHER OF THESE SHOULD *EVER* BE NULL!!
- * -avalon
- *
+ * inputs	- pointer to dest client
+ * 		- pointer to from client
+ * 		- varags
+ * output	- NONE
+ * side effects	- less efficient than sendto_remote and sendto_one
+ * 		  but useful when one does not know where target "lives"
  */
-
 void
-sendto_prefix_one(register struct Client *to, register struct Client *from, 
-                  const char *pattern, ...)
-
+sendto_anywhere(struct Client *to, struct Client *from,
+		const char *pattern, ...)
 {
+  int len;
   va_list args;
+  char prefix[NICKLEN+HOSTLEN+USERLEN+5];	/* same as USERHOST_REPLYLEN */
+  char buf[1024];
 
   va_start(args, pattern);
-
-  vsendto_prefix_one(to, from, pattern, args);
-
+  len = send_format(buf, pattern, args);
   va_end(args);
-} /* sendto_prefix_one() */
 
-/*
- * vsendto_prefix_one()
- * Backend to sendto_prefix_one(). stdarg.h does not work
- * well when variadic functions pass their arguments to other
- * variadic functions, so we can call this function in those
- * situations.
- *  This function must ALWAYS be passed a string of the form:
- * ":%s COMMAND <other args>"
- * 
- * -wnder
- */
-static void
-vsendto_prefix_one(register struct Client *to, register struct Client *from,
-                   const char *pattern, va_list args)
-
-{
-  static char sender[HOSTLEN + NICKLEN + USERLEN + 5];
-  char* par = 0;
-  register int parlen;
-  register int len;
-
-  assert(0 != to);
-  assert(0 != from);
-
-/* Optimize by checking if (from && to) before everything */
-  if (!MyClient(from) && IsPerson(to) && (to->from == from->from))
+  if(MyClient(to))
     {
-      if (IsServer(from))
-        {
-          sendto_realops_flags(FLAGS_ALL,
-		      "Send message to %s[%s] dropped from %s(Fake Dir)",
-			      to->name, to->from->name, from->name);
-          return;
-        }
-
-      sendto_realops_flags(FLAGS_ALL,
-			   "Ghosted: %s[%s@%s] from %s[%s@%s] (%s)",
-			   to->name, to->username, to->host,
-			   from->name, from->username, from->host,
-			   to->from->name);
-      
-      sendto_serv_butone(NULL, ":%s KILL %s :%s (%s[%s@%s] Ghosted %s)",
-                         me.name, to->name, me.name, to->name,
-                         to->username, to->host, to->from->name);
-
-      to->flags |= FLAGS_KILLED;
-
-      if (IsPerson(from))
-        sendto_one(from, form_str(ERR_GHOSTEDCLIENT),
-                   me.name, from->name, to->name, to->username,
-                   to->host, to->from);
-
-      exit_client(NULL, to, &me, "Ghosted client");
-      
-      return;
-    } /* if (!MyClient(from) && IsPerson(to) && (to->from == from->from)) */
-  
-  par = va_arg(args, char *);
-  if (MyClient(to) && IsPerson(from) && !irccmp(par, from->name))
-    {
-      strcpy(sender, from->name);
-      
-      if (*from->username)
-        {
-          strcat(sender, "!");
-          strcat(sender, from->username);
-        }
-
-      if (*from->host)
-        {
-          strcat(sender, "@");
-          strcat(sender, from->host);
-        }
-      
-      par = sender;
-    } /* if (user) */
-
-  *sendbuf = ':';
-  strncpy_irc(sendbuf + 1, par, sizeof(sendbuf) - 2);
-
-  parlen = strlen(par) + 1;
-  sendbuf[parlen++] = ' ';
-
-  len = parlen;
-  len += vsprintf_irc(sendbuf + parlen, &pattern[4], args);
-
-  if (len > 510)
-  {
-    sendbuf[IRCD_BUFSIZE-2] = '\r';
-    sendbuf[IRCD_BUFSIZE-1] = '\n';
-    sendbuf[IRCD_BUFSIZE] = '\0';
-    len = IRCD_BUFSIZE;
-  }
+      if(IsServer(from))
+	{
+	  ircsprintf(prefix,":%s ",
+		     from->name);
+	}
+      else
+	{
+	  ircsprintf(prefix,":%s!%s@%s ",
+		     from->name,
+		     from->username,
+		     from->host);
+	}
+    }
   else
-  {
-    sendbuf[len++] = '\r';
-    sendbuf[len++] = '\n';
-    sendbuf[len] = '\0';
-  }
+    {
+      ircsprintf(prefix,":%s ", from->name);
+    }
 
-  Debug((DEBUG_SEND,"Sending [%s] to %s",sendbuf,to->name));
+  len = ircsprintf(sendbuf,"%s%s", prefix,buf);
 
-  send_message(to, sendbuf, len);
-} /* vsendto_prefix_one() */
+  if(len > 510)
+    {
+      sendbuf[IRCD_BUFSIZE-2] = '\r';
+      sendbuf[IRCD_BUFSIZE-1] = '\n';
+      sendbuf[IRCD_BUFSIZE] = '\0';
+      len = IRCD_BUFSIZE;
+    }
+      
+  if(MyClient(to))
+    send_message(to, (char *)sendbuf, len);
+  else
+    send_message_remote(to, from, (char *)sendbuf, len);
+}
 
 /*
  * sendto_realops_flags
@@ -909,7 +952,7 @@ sendto_realops_flags(int flags, const char *pattern, ...)
 			       nbuf);
 
 	      len = strlen(sendbuf);	/* XXX *sigh* */
-	      send_message(cptr,sendbuf,len);
+	      send_message(cptr, (char *)sendbuf, len);
 	    }
 	}
     }
@@ -926,7 +969,7 @@ sendto_realops_flags(int flags, const char *pattern, ...)
 			       cptr->name,
 			       nbuf);
 
-	      send_message(cptr,sendbuf,len);
+	      send_message(cptr, (char *)sendbuf, len);
 	    }
 	}
     }
