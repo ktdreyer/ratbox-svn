@@ -1,3 +1,7 @@
+*** 20010425_6 by fl_
+- ifdef 0 -> if 0
+
+
 *** 20010425_5 by kreator
 - missing "" for vhost in convertconf, together with missing `;' in
   oper_umodes line.
