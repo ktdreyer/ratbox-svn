@@ -780,7 +780,7 @@ find_chasing(struct Client *source_p, char *user, int *chasing)
     {
       sendto_one(source_p, form_str(ERR_NOSUCHNICK),
                  me.name, source_p->name, user);
-      return ((struct Client *)NULL);
+      return (NULL);
     }
   if (chasing)
     *chasing = 1;
