@@ -1,3 +1,43 @@
+androsyn    2004/09/15 14:32:24 EDT	(20040915_0)
+
+  Modified files:
+    .                    configure configure.ac 
+    adns                 adns.h check.c dlist.h event.c general.c 
+                         internal.h parse.c query.c reply.c 
+                         setup.c transmit.c tvarith.h types.c 
+    include              res.h s_conf.h 
+    src                  adns.c newconf.c s_auth.c s_conf.c 
+  Log:
+  A few things in one big commit:
+  1) update autoconf with more useful heap sizes
+  2) merge in adns from upstream
+  3) remove ip6.int fallback code
+  
+  Revision  Changes    Path
+  1.13      +3 -2      ircd-ratbox/adns/adns.h
+  1.9       +11 -27    ircd-ratbox/adns/check.c
+  1.6       +13 -18    ircd-ratbox/adns/dlist.h
+  1.26      +51 -43    ircd-ratbox/adns/event.c
+  1.16      +91 -43    ircd-ratbox/adns/general.c
+  1.14      +23 -19    ircd-ratbox/adns/internal.h
+  1.10      +10 -12    ircd-ratbox/adns/parse.c
+  1.21      +59 -64    ircd-ratbox/adns/query.c
+  1.12      +9 -9      ircd-ratbox/adns/reply.c
+  1.39      +84 -101   ircd-ratbox/adns/setup.c
+  1.14      +12 -21    ircd-ratbox/adns/transmit.c
+  1.4       +2 -2      ircd-ratbox/adns/tvarith.h
+  1.15      +36 -122   ircd-ratbox/adns/types.c
+  7.235     +11 -11    ircd-ratbox/configure
+  7.49      +13 -12    ircd-ratbox/configure.ac
+  7.31      +1 -1      ircd-ratbox/include/res.h
+  7.299     +0 -4      ircd-ratbox/include/s_conf.h
+  7.71      +1 -14     ircd-ratbox/src/adns.c
+  7.180     +0 -3      ircd-ratbox/src/newconf.c
+  7.183     +0 -38     ircd-ratbox/src/s_auth.c
+  7.494     +0 -4      ircd-ratbox/src/s_conf.c
+
+
+
 androsyn    2004/09/14 12:43:46 EDT	(20040914_0)
 
   Modified files:
