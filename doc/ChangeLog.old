@@ -1,3 +1,11 @@
+*** 20001104_5 by ryan
+
+
+Added initial RSA support (challenge/response stuff)
+nothing is actually built without specifying --enable-openssl (which results
+in rsa.c compiling and the ircd being linked with -lcrypto)
+
+
 *** 20001104_4 by ryan
 
 Modified configure.in and regenerated ./configure, Modified Makefile.in
