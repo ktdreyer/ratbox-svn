@@ -1,3 +1,19 @@
+leeh        2004/10/10 11:35:58 EDT	(20041010_1)
+
+  Modified files:
+    include              conf.h 
+    src                  newconf.c s_chanserv.c s_userserv.c 
+  Log:
+  - add rate limiting of n registers per m seconds
+  
+  Revision  Changes    Path
+  1.18      +4 -0      rserv/include/conf.h
+  1.15      +4 -0      rserv/src/newconf.c
+  1.9       +22 -0     rserv/src/s_chanserv.c
+  1.6       +23 -0     rserv/src/s_userserv.c
+
+
+
 leeh        2004/10/10 11:13:49 EDT	(20041010_0)
 
   Modified files:
