@@ -38,32 +38,33 @@ static int newblock(BlockHeap * bh);
 
 static inline void free_block(void *ptr, size_t size)
 {
-	munmap(ptr, size);
+  munmap(ptr, size);
 }
 
 #ifndef MAP_ANON
 static int zero_fd = -1;
 void initBlockHeap(void)
 {
-    zero_fd = open("/dev/zero", O_RDWR);
-    if (zero_fd < 0)
-        outofmemory();
-    fd_open(zero_fd, FD_FILE, "Anonymous mmap()");
+  zero_fd = open("/dev/zero", O_RDWR);
+
+  if (zero_fd < 0)
+    outofmemory();
+  fd_open(zero_fd, FD_FILE, "Anonymous mmap()");
 }
 
 static inline void *get_block(size_t size)
 {
-    return (mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE, zero_fd, 0));
+  return (mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE, zero_fd, 0));
 }
 #else /* MAP_ANON */
 
 void initBlockHeap(void)
 {
-    return;
+  return;
 }
 static inline void *get_block(size_t size)
 {
-    return (mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0));
+  return (mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0));
 }
 
 #endif /* MAP_ANON */
@@ -72,17 +73,17 @@ static inline void *get_block(size_t size)
 /* Poor bastards don't even have mmap() */
 static inline void *get_block(size_t size)
 {
-    return(malloc(size));
+  return(malloc(size));
 }
 
 static inline void free_block(void *ptr, size_t unused)
 {
-	free(ptr);
+  free(ptr);
 }
 
 void initBlockHeap()
 {
-	return;
+  return;
 }
 #endif /* HAVE_MMAP */
 
@@ -118,12 +119,14 @@ static int newblock(BlockHeap * bh)
     b->alloc_size = (bh->elemsPerBlock + 1) * (bh->elemSize + sizeof(MemBlock));
 
     b->elems = get_block(b->alloc_size);
-    if (b->elems == NULL) {
+    if (b->elems == NULL)
+      {
         return 1;
-    }
+      }
     offset = b->elems;
     /* Setup our blocks now */
-    for (i = 0; i < bh->elemsPerBlock; i++) {
+    for (i = 0; i < bh->elemsPerBlock; i++)
+      {
         void *data;
         newblk = (void *)offset;
         newblk->block = b;
@@ -132,7 +135,7 @@ static int newblock(BlockHeap * bh)
         newblk->data = data;
         dlinkAdd(data, &newblk->self, &b->free_list);
         offset = (unsigned char *)((unsigned char *)offset + bh->elemSize + sizeof(MemBlock));
-    }
+      }
 
     ++bh->blocksAllocated;
     bh->freeElems += bh->elemsPerBlock;
@@ -161,16 +164,20 @@ BlockHeap *BlockHeapCreate(size_t elemsize, int elemsperblock)
 {
     BlockHeap *bh;
     assert(elemsize > 0 && elemsperblock > 0);
+
     /* Catch idiotic requests up front */
-    if ((elemsize <= 0) || (elemsperblock <= 0)) {
+    if ((elemsize <= 0) || (elemsperblock <= 0))
+      {
         outofmemory();          /* die.. out of memory */
-    }
+      }
 
     /* Allocate our new BlockHeap */
     bh = (BlockHeap *) MyMalloc(sizeof(BlockHeap));
-    if (bh == NULL) {
+    if (bh == NULL)
+      {
         outofmemory();          /* die.. out of memory */
-    }
+      }
+
 #ifdef MEMDEBUG
     elemsize += sizeof(MemoryEntry);
 #endif
@@ -182,14 +189,16 @@ BlockHeap *BlockHeapCreate(size_t elemsize, int elemsperblock)
     bh->base = NULL;
 
     /* Be sure our malloc was successful */
-    if (newblock(bh)) {
+    if (newblock(bh))
+      {
         MyFree(bh);
         outofmemory();          /* die.. out of memory */
-    }
+      }
 
-    if (bh == NULL) {
+    if (bh == NULL)
+      {
         outofmemory();          /* die.. out of memory */
-    }
+      }
 
     return bh;
 }
@@ -215,12 +224,14 @@ void *_BlockHeapAlloc(BlockHeap * bh)
     if (bh == NULL)
         return ((void *) NULL);
 
-    if (bh->freeElems == 0) {   /* Allocate new block and assign */
+    if (bh->freeElems == 0)
+      {   /* Allocate new block and assign */
         /* newblock returns 1 if unsuccessful, 0 if not */
 
-        if (newblock(bh)) {
+        if (newblock(bh))
+	  {
             return ((void *) NULL);
-        }
+	  }
         walker = bh->base;
         walker->freeElems--;
         bh->freeElems--;
@@ -229,10 +240,12 @@ void *_BlockHeapAlloc(BlockHeap * bh)
         dlinkAdd(new_node->data, new_node, &walker->used_list);
         assert(new_node->data != NULL);
         return (new_node->data);
-    }
+      }
 
-    for (walker = bh->base; walker != NULL; walker = walker->next) {
-        if (walker->freeElems > 0) {
+    for (walker = bh->base; walker != NULL; walker = walker->next)
+      {
+        if (walker->freeElems > 0)
+	  {
             bh->freeElems--;
             walker->freeElems--;
             new_node = walker->free_list.head;
@@ -240,8 +253,8 @@ void *_BlockHeapAlloc(BlockHeap * bh)
             dlinkAdd(new_node->data, new_node, &walker->used_list);
             assert(new_node->data != NULL);
             return (new_node->data);
-        }
-    }
+	  }
+      }
     assert(0 == 1);
     return ((void *) NULL);     /* If you get here, something bad happened ! */
 }
@@ -265,16 +278,19 @@ int _BlockHeapFree(BlockHeap * bh, void *ptr)
     
     assert(bh != NULL);
     assert(ptr != NULL);
-    if (bh == NULL) {
+
+    if (bh == NULL)
+      {
 
         ilog(L_NOTICE, "balloc.c:BlockHeapFree() bh == NULL");
         return 1;
-    }
+      }
 
-    if (ptr == NULL) {
+    if (ptr == NULL)
+      {
         ilog(L_NOTICE, "balloc.BlockHeapFree() ptr == NULL");
         return 1;
-    }
+      }
 
     memblock = ptr - sizeof(MemBlock);
     assert(memblock->block != NULL);
@@ -306,33 +322,41 @@ int BlockHeapGarbageCollect(BlockHeap * bh)
     if (bh == NULL)
         return 1;
 
-    if (bh->freeElems < bh->elemsPerBlock || bh->blocksAllocated == 1) {
+    if (bh->freeElems < bh->elemsPerBlock || bh->blocksAllocated == 1)
+      {
         /* There couldn't possibly be an entire free block.  Return. */
         return 0;
-    }
+      }
 
     last = NULL;
     walker = bh->base;
 
-    while (walker) {
-        if (walker->freeElems == bh->elemsPerBlock) {
+    while (walker)
+      {
+        if (walker->freeElems == bh->elemsPerBlock)
+	  {
             free_block(walker->elems, walker->alloc_size);
-            if (last) {
+            if (last)
+	      {
                 last->next = walker->next;
                 MyFree(walker);
                 walker = last->next;
-            } else {
+	      }
+	    else
+	      {
                 bh->base = walker->next;
                 MyFree(walker);
                 walker = bh->base;
-            }
+	      }
             bh->blocksAllocated--;
             bh->freeElems -= bh->elemsPerBlock;
-        } else {
+	  }
+	else
+	  {
             last = walker;
             walker = walker->next;
-        }
-    }
+	  }
+      }
     return 0;
 }
 
@@ -349,13 +373,16 @@ int BlockHeapGarbageCollect(BlockHeap * bh)
 int BlockHeapDestroy(BlockHeap * bh)
 {
     Block *walker, *next;
+
     if (bh == NULL)
         return 1;
-    for (walker = bh->base; walker != NULL; walker = next) {
+
+    for (walker = bh->base; walker != NULL; walker = next)
+      {
         next = walker->next;
         free_block(walker->elems, walker->alloc_size);
         MyFree(walker);
-    }
+      }
     MyFree(bh);
     return 0;
 }

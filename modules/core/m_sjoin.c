@@ -116,8 +116,9 @@ static void ms_sjoin(struct Client *client_p,
   int		 num_prefix=0;
   int            vc_ts = 0;
   int            isnew;
+  int		 buflen = 0;
   register       char *s, *hops, *nhops;
-  static         char buf[BUFSIZE]; /* buffer for modes and prefix */
+  static         char buf[2*BUFSIZE]; /* buffer for modes and prefix */
   static         char sjbuf_hops[BUFSIZE]; /* buffer with halfops as % */
   static         char sjbuf_nhops[BUFSIZE]; /* buffer with halfops as @ */
   char           *p; /* pointer used making sjbuf */
@@ -358,10 +359,18 @@ static void ms_sjoin(struct Client *client_p,
       modebuf[1] = '\0';
     }
 
-  ircsprintf(buf, ":%s SJOIN %lu %s %s %s :",
-	parv[0],
-	(unsigned long) tstosend,
-	parv[2], modebuf, parabuf);
+  buflen = ircsprintf(buf, ":%s SJOIN %lu %s %s %s :",
+		      parv[0],
+		      (unsigned long) tstosend,
+		      parv[2], modebuf, parabuf);
+
+  if (buflen >= (BUFSIZE - 5 - NICKLEN))
+    {
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
+			   "Long SJOIN from server: %s(via %s) (ignored)",
+			   source_p->name, client_p->name);
+      return;
+    }
 
   mbuf = modebuf;
   para[0] = para[1] = para[2] = para[3] = "";
