@@ -16,8 +16,10 @@ AC_SUBST(VERSION)
 OLD_CFLAGS="$CFLAGS"
 dnl Checks for programs.
 AC_PROG_CC
+
 dnl Make sure autoconf doesnt interfere with cflags -jmallett
 CFLAGS="$OLD_CFLAGS"
+
 
 dnl Check for various compilers. -jmallett
 SGS=no
@@ -93,7 +95,7 @@ dnl and then do the check for whether -g works... Hrrm. -jmallett
 if test -z "$IRC_CFLAGS"; then
   if test "x$GCC" = "xyes"; then
 #  Use this for development..
-      IRC_CFLAGS="-O2 -g -Wunused -Wall -Wwrite-strings -Wshadow -Wmissing-declarations"
+      IRC_CFLAGS="-O2 -g -Wunused -Wall -Wwrite-strings -Wshadow -Wmissing-declarations -D_GNU_SOURCE"
 #     IRC_CFLAGS="-O2 -g "
   else
   if test "x$TenDRA" = "xyes"; then
