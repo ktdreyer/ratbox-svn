@@ -293,27 +293,19 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
 
   mptr->count++;
 
-  /* patch to avoid server flooding from unregistered connects */
-  /* check allow_unregistered_use flag I've set up instead of function
-     comparing *yech* - Dianora
-     PART OF THIS PATCH IS NOW OBSCELETE BY HANDLER CODE BELOW - Pie-Man 07/24/2000  */
+  /* New patch to avoid server flooding from unregistered connects
+     - Pie-Man 07/27/2000 */
 
   if (!IsRegistered(cptr))
-    {
+  {
       /* if its from a possible server connection
        * ignore it.. more than likely its a header thats sneaked through
        */
 
-      if(IsHandshake(cptr) || IsConnecting(cptr) || IsServer(cptr))
+      if((IsHandshake(cptr) || IsConnecting(cptr) || IsServer(cptr))
+	   && !(mptr->flags & MFLG_UNREG))
         return -1;
-/*
-      sendto_one(from,
-                 ":%s %d %s %s :Register first.",
-                 me.name, ERR_NOTREGISTERED,
-                 from->name, ch);
-      return -1;  */
-    }
-
+  }
 
   /* Again, instead of function address comparing, see if
    * this function resets idle time as given from mptr
@@ -361,6 +353,10 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
      Should never happen and something we need to fix if it does - Pie-Man */
        return -1;
   }
+
+ if (handle_idx != cptr->handler)
+        log(L_ERROR,"Handler for client '%s' performing '%s' is incorrect"
+         ,cptr->name,mptr->cmd);             
 
   handler = mptr->handlers[handle_idx];
   return (*handler)(cptr, from, i, para);
@@ -488,7 +484,7 @@ struct Message msgtab[] = {
     MSG_NOTICE,
     0,
     MAXPARA, 
-    MFLG_SLOW | MFLG_UNREG,
+    MFLG_SLOW,
     0L,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_notice, ms_notice, mo_notice }
@@ -894,10 +890,10 @@ struct Message msgtab[] = {
     MSG_CAPAB,
     0,
     MAXPARA,
-    MFLG_SLOW,
+    MFLG_SLOW | MFLG_UNREG,
     0,
     /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_error, ms_capab, m_error }
+    { ms_capab, m_error, ms_capab, m_error }
   },
   {
     MSG_OPERWALL,

@@ -47,6 +47,9 @@
 #ifndef INCLUDED_dbuf_h
 #include "dbuf.h"
 #endif
+#ifndef INCLUDED_ircd_handler_h
+#include "ircd_handler.h"
+#endif
 
 #define HOSTIPLEN       16      /* Length of dotted quad form of IP        */
                                 /* - Dianora                               */
@@ -144,6 +147,7 @@ struct Client
   int               fd;         /* >= 0, for local clients */
   int               hopcount;   /* number of servers to this 0 = local */
   unsigned short    status;     /* Client type */
+  unsigned char     handler;    /* Handler index */
   char              nicksent;
   unsigned char     local_flag; /* if this is 1 this client is local */
   short    listprogress;        /* where were we when the /list blocked? */
@@ -274,12 +278,24 @@ struct Client
 #define IsGlobalOper(x)		((x)->umodes & FLAGS_OPER)
 #define IsLocalOper(x)		((x)->umodes & FLAGS_LOCOP)
 
-#define SetConnecting(x)        ((x)->status = STAT_CONNECTING)
-#define SetHandshake(x)         ((x)->status = STAT_HANDSHAKE)
-#define SetMe(x)                ((x)->status = STAT_ME)
-#define SetUnknown(x)           ((x)->status = STAT_UNKNOWN)
-#define SetServer(x)            ((x)->status = STAT_SERVER)
-#define SetClient(x)            ((x)->status = STAT_CLIENT)
+#define SetConnecting(x)        {(x)->status = STAT_CONNECTING; \
+				 (x)->handler = UNREGISTERED_HANDLER; }
+
+#define SetHandshake(x)         {(x)->status = STAT_HANDSHAKE; \
+				 (x)->handler = UNREGISTERED_HANDLER; }
+
+#define SetMe(x)                {(x)->status = STAT_ME; \
+				 (x)->handler = UNREGISTERED_HANDLER; }
+
+#define SetUnknown(x)           {(x)->status = STAT_UNKNOWN; \
+				 (x)->handler = UNREGISTERED_HANDLER; }
+
+#define SetServer(x)            {(x)->status = STAT_SERVER; \
+				 (x)->handler = SERVER_HANDLER; }
+
+#define SetClient(x)            {(x)->status = STAT_CLIENT; \
+				 (x)->handler = IsAnOper((x)) ? \
+					OPER_HANDLER : CLIENT_HANDLER; }
 
 #define STAT_CLIENT_PARSE (STAT_UNKNOWN | STAT_CLIENT)
 #define STAT_SERVER_PARSE (STAT_CONNECTING | STAT_HANDSHAKE | STAT_SERVER)
@@ -356,7 +372,7 @@ struct Client
                                  FLAGS2_OPER_DIE | \
                                  FLAGS2_OPER_REHASH)
 
-#define FLAGS2_ZIP           0x4000  /* (server) link is zipped */
+#define FLAGS2_ZIP           0x4000  /* (server) zipped link */
 #define FLAGS2_ZIPFIRST      0x8000  /* start of zip (ignore any CR/LF) */
 #define FLAGS2_CBURST       0x10000  /* connection burst being sent */
 
@@ -369,7 +385,6 @@ struct Client
 #define FLAGS2_IP_HIDDEN        0x200000        /* client IP should be hidden
                                                    from non opers */
 #define FLAGS2_SENDQ_POP  0x400000  /* sendq exceeded (during list) */
-
 
 #define SEND_UMODES  (FLAGS_INVISIBLE | FLAGS_OPER | FLAGS_WALLOP)
 #define ALL_UMODES   (SEND_UMODES | FLAGS_SERVNOTICE | FLAGS_CCONN | \
@@ -407,10 +422,21 @@ struct Client
 #define IsOper(x)               ((x)->umodes & FLAGS_OPER)
 #define IsLocOp(x)              ((x)->umodes & FLAGS_LOCOP)
 #define IsAnOper(x)             ((x)->umodes & (FLAGS_OPER|FLAGS_LOCOP))
-#define SetOper(x)              ((x)->umodes |= FLAGS_OPER)
-#define SetLocOp(x)             ((x)->umodes |= FLAGS_LOCOP)
-#define ClearOper(x)            ((x)->umodes &= ~FLAGS_OPER)
-#define ClearLocOp(x)           ((x)->umodes &= ~FLAGS_LOCOP)
+
+#define SetOper(x)              {(x)->umodes |= FLAGS_OPER; \
+				 if (!IsServer((x))) (x)->handler = OPER_HANDLER;}
+
+#define SetLocOp(x)             {(x)->umodes |= FLAGS_LOCOP; \
+				 if (!IsServer((x))) (x)->handler = OPER_HANDLER;}
+
+#define ClearOper(x)            {(x)->umodes &= ~FLAGS_OPER; \
+				 if (!IsAnOper((x)) && !IsServer((x))) \
+				  (x)->handler = CLIENT_HANDLER; }
+
+#define ClearLocOp(x)           {(x)->umodes &= ~FLAGS_LOCOP; \
+				 if (!IsAnOper((x)) && !IsServer((x))) \
+				  (x)->handler = CLIENT_HANDLER; }
+
 #define IsPrivileged(x)         (IsAnOper(x) || IsServer(x))
 
 /* umode flags */

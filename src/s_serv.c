@@ -67,7 +67,7 @@ int MaxClientCount     = 1;
  */
 struct Capability captab[] = {
 /*  name        cap     */ 
-  { "ZIP",      CAP_ZIP },
+  { "ZIP",      CAP_ZIP }, 
   { "QS",       CAP_QS },
   { "EX",       CAP_EX },
   { "CHW",      CAP_CHW },
@@ -652,6 +652,7 @@ int server_estab(struct Client *cptr)
                       get_client_name(cptr, TRUE));
           return exit_client(cptr, cptr, &me, "zip_init() failed");
         }
+
       cptr->flags2 |= (FLAGS2_ZIP|FLAGS2_ZIPFIRST);
     }
   else

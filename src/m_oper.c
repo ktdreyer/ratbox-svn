@@ -126,6 +126,9 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   
   if ((IsServer(cptr) || IsMe(cptr)) && !IsOper(sptr))
     {
+      if (sptr->status == STAT_CLIENT)
+	sptr->handler = OPER_HANDLER;
+
       sptr->flags |= FLAGS_OPER;
       Count.oper++;
       sendto_serv_butone(cptr, ":%s MODE %s :+o", parv[0], parv[0]);
@@ -320,6 +323,9 @@ int mo_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   
   if ((IsServer(cptr) || IsMe(cptr)) && !IsOper(sptr))
     {
+      if (sptr->status == STAT_CLIENT)
+	sptr->handler = OPER_HANDLER;
+
       sptr->flags |= FLAGS_OPER;
       Count.oper++;
       sendto_serv_butone(cptr, ":%s MODE %s :+o", parv[0], parv[0]);
@@ -514,6 +520,9 @@ int ms_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   
   if ((IsServer(cptr) || IsMe(cptr)) && !IsOper(sptr))
     {
+      if (sptr->status == STAT_CLIENT)
+	sptr->handler = OPER_HANDLER;
+
       sptr->flags |= FLAGS_OPER;
       Count.oper++;
       sendto_serv_butone(cptr, ":%s MODE %s :+o", parv[0], parv[0]);

@@ -318,7 +318,7 @@
  * need not be the same for both, as long as hte opposite end has the
  * right password in the opposite line.
  */
-#undef  CRYPT_LINK_PASSWORD
+#define  CRYPT_LINK_PASSWORD
 
 /* IDLE_FROM_MSG - Idle-time reset only from privmsg
  * Idle-time reset only from privmsg, if undefined idle-time
