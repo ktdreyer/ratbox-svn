@@ -602,12 +602,20 @@ static void mo_dline(struct Client *cptr, struct Client *sptr,
 
   if((p = strchr(cidr_form_host,'*')))
     {
-      *p++ = '0';
-      *p++ = '/';
-      *p++ = '2';
-      *p++ = '4';
-      *p++ = '\0';
-      dlhost = cidr_form_host;
+      /* Toss if its not the last '*' */
+      if(p[1] == '\0')
+	{
+	  *p++ = '0';
+	  *p++ = '/';
+	  *p++ = '2';
+	  *p++ = '4';
+	  *p++ = '\0';
+	  dlhost = cidr_form_host;
+	}
+      else
+	{
+	  return;
+	}
     }
 
   if(!is_address(dlhost,&ip_host,&ip_mask))
