@@ -18,11 +18,6 @@ struct service_command
         int help_penalty;
         unsigned long cmd_use;
 };
-struct service_error
-{
-        int error;
-        const char *text;
-};
 
 struct service_handler
 {
@@ -37,7 +32,6 @@ struct service_handler
         int flood_max_ignore;
 
 	struct service_command *command;
-        struct service_error *error;
         struct ucommand_handler *ucommand;
 
         void (*stats)(struct connection_entry *, char *parv[], int parc);
@@ -58,7 +52,7 @@ extern void update_service_floodcount(void *unused);
 extern void handle_service(struct client *service_p, struct client *client_p,
                            char *text);
 extern void service_error(struct client *service_p, struct client *client_p,
-                          int error);
+                          const char *, ...);
 
 extern void service_stats(struct client *service_p, struct connection_entry *);
 

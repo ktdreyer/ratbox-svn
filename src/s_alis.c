@@ -24,13 +24,6 @@
 #define DIR_SET		1
 #define DIR_EQUAL	2
 
-#define ALIS_ERR_PARAM		1
-#define ALIS_ERR_MODE		2
-#define ALIS_ERR_UNKNOWN	3
-#define ALIS_ERR_MIN		4
-#define ALIS_ERR_MAX		5
-#define ALIS_ERR_SKIP		6
-
 static struct client *alis_p;
 
 static int s_alis_list(struct client *, char *parv[], int parc);
@@ -41,20 +34,9 @@ static struct service_command alis_command[] =
         { "\0",		NULL,		0, NULL, 0, 0, 0, 0 }
 };
 
-static struct service_error alis_error[] =
-{
-        { ALIS_ERR_PARAM,       "Missing parameters."   },
-        { ALIS_ERR_MODE,        "Invalid -mode option." },
-        { ALIS_ERR_UNKNOWN,     "Unknown option."       },
-        { ALIS_ERR_MIN,         "Invalid -min option."  },
-        { ALIS_ERR_MAX,         "Invalid -max option."  },
-        { ALIS_ERR_SKIP,        "Invalid -skip option." },
-        { 0,                    NULL                    }
-};
-
 static struct service_handler alis_service = {
 	"ALIS", "ALIS", "alis", "services.alis", "Advanced List Service", 0,
-        60, 80, alis_command, alis_error, NULL, NULL
+        60, 80, alis_command, NULL, NULL
 };
 
 void
@@ -135,7 +117,7 @@ parse_alis(struct client *client_p, struct alis_query *query,
 	{
 		if(param >= parc || EmptyString(parv[param]))
 		{
-			service_error(alis_p, client_p, ALIS_ERR_PARAM);
+			service_error(alis_p, client_p, "Missing parameters");
 			return 0;
 		}
 
@@ -143,7 +125,7 @@ parse_alis(struct client *client_p, struct alis_query *query,
 		{
 			if((query->min = atoi(parv[param])) < 1)
 			{
-				service_error(alis_p, client_p, ALIS_ERR_MIN);
+				service_error(alis_p, client_p, "Invalid -min option");
 				return 0;
 			}
 		}
@@ -151,7 +133,7 @@ parse_alis(struct client *client_p, struct alis_query *query,
 		{
 			if((query->max = atoi(parv[param])) < 1)
 			{
-				service_error(alis_p, client_p, ALIS_ERR_MAX);
+				service_error(alis_p, client_p, "Invalid -max option");
 				return 0;
 			}
 		}
@@ -159,7 +141,7 @@ parse_alis(struct client *client_p, struct alis_query *query,
 		{
 			if((query->skip = atoi(parv[param])) < 1)
 			{
-				service_error(alis_p, client_p, ALIS_ERR_SKIP);
+				service_error(alis_p, client_p, "Invalid -skip option");
 				return 0;
 			}
 		}
@@ -202,7 +184,7 @@ parse_alis(struct client *client_p, struct alis_query *query,
 					query->mode_dir = DIR_EQUAL;
 					break;
 				default:
-					service_error(alis_p, client_p, ALIS_ERR_MODE);
+					service_error(alis_p, client_p, "Invalid -mode option");
 					return 0;
 			}
 
@@ -212,13 +194,13 @@ parse_alis(struct client *client_p, struct alis_query *query,
 
 			if(query->mode == -1)
 			{
-				service_error(alis_p, client_p, ALIS_ERR_MODE);
+				service_error(alis_p, client_p, "Invalid -mode option");
 				return 0;
 			}
 		}
 		else
 		{
-			service_error(alis_p, client_p, ALIS_ERR_UNKNOWN);
+			service_error(alis_p, client_p, "Invalid option %s", parv[i]);
 			return 0;
 		}
 

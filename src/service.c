@@ -64,7 +64,6 @@ add_service(struct service_handler *service)
 	strlcpy(client_p->info, service->info, sizeof(client_p->info));
 	strlcpy(client_p->service->id, service->id, sizeof(client_p->service->id));
 	client_p->service->command = service->command;
-        client_p->service->error = service->error;
         client_p->service->ucommand = service->ucommand;
         client_p->service->stats = service->stats;
 
@@ -395,27 +394,18 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 }
 
 void
-service_error(struct client *service_p, struct client *client_p, int error)
+service_error(struct client *service_p, struct client *client_p,
+		const char *format, ...)
 {
-        struct service_error *error_table;
-        int i;
+	static char buf[BUFSIZE];
+	va_list args;
 
-        error_table = service_p->service->error;
+	va_start(args, format);
+	vsnprintf(buf, sizeof(buf), format, args);
+	va_end(args);
 
-        s_assert(error_table != NULL);
-        if(error_table == NULL)
-                return;
-
-        for(i = 0; error_table[i].error; i++)
-        {
-                if(error_table[i].error == error)
-                {
-                        sendto_server(":%s NOTICE %s :%s",
-                                      MYNAME, client_p->name,
-                                      error_table[i].text);
-                        return;
-                }
-        }
+	sendto_server(":%s NOTICE %s :%s",
+			MYNAME, client_p->name, buf);
 }
 
 void

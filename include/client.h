@@ -22,7 +22,6 @@ extern dlink_list exited_list;
 
 struct connection_entry;
 struct service_command;
-struct service_error;
 struct ucommand_handler;
 
 struct client
@@ -83,7 +82,6 @@ struct service
 	int reintroduce;		/* needs reintroducing */
 
 	struct service_command *command;
-        struct service_error *error;
         struct ucommand_handler *ucommand;
 
         unsigned long help_count;

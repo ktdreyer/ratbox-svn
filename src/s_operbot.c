@@ -37,16 +37,10 @@ static struct service_command operbot_command[] =
 	{ "\0",		NULL,			0, NULL, 0, 0, 0, 0L }
 };
 
-static struct service_error operbot_message[] =
-{
-	{ OPERBOT_ERR_CHANNEL,	"Invalid channel."		},
-	{ 0,			"\0"				}
-};
-
 static struct service_handler operbot_service = {
 	"OPERBOT", "operbot", "operbot", "services.operbot",
 	"Oper invitation/op services", 1, 60, 80, 
-	operbot_command, operbot_message, NULL, NULL
+	operbot_command, NULL, NULL
 };
 
 void
@@ -63,13 +57,13 @@ s_operbot_invite(struct client *client_p, char *parv[], int parc)
 
 	if((chptr = find_channel(parv[0])) == NULL)
 	{
-		service_error(operbot_p, client_p, OPERBOT_ERR_CHANNEL);
+		service_error(operbot_p, client_p, "Invalid channel");
 		return 1;
 	}
 
 	if(dlink_find(&operbot_p->service->channels, chptr) == NULL)
 	{
-		service_error(operbot_p, client_p, OPERBOT_ERR_CHANNEL);
+		service_error(operbot_p, client_p, "Invalid channel");
 		return 1;
 	}
 
@@ -89,13 +83,13 @@ s_operbot_op(struct client *client_p, char *parv[], int parc)
 
 	if((chptr = find_channel(parv[0])) == NULL)
 	{
-		service_error(operbot_p, client_p, OPERBOT_ERR_CHANNEL);
+		service_error(operbot_p, client_p, "Invalid channel");
 		return 1;
 	}
 
 	if(dlink_find(&operbot_p->service->channels, chptr) == NULL)
 	{
-		service_error(operbot_p, client_p, OPERBOT_ERR_CHANNEL);
+		service_error(operbot_p, client_p, "Invalid channel");
 		return 1;
 	}
 
