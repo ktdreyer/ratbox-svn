@@ -1,3 +1,9 @@
+*** 20001130_10 by db
+- added two new parms to parser hide_server hide_chanops yes or no
+- added possible fix (untested by adrian?) to parse.
+
+
+
 *** 20001130_9 by adrian
 
 
