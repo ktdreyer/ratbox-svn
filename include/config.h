@@ -326,16 +326,6 @@
  */
 #define MAXCHANNELSPERUSER  15  /* Recommended value: 15 */
 
-/*
- * anti flood code
- * The defaults =should= be fine for the initial timers/counters etc.
- * they are all changeable at run time anyway
- *
- * 8 messages in 1 second on a target is a possible flood 
- */
-#define DEFAULT_FLOOD_TIME 1
-#define DEFAULT_FLOOD_COUNT 8
-
 /* 
  * anti spambot code
  * The defaults =should= be fine for the initial timers/counters etc.
