@@ -1,3 +1,7 @@
+*** 20010813_5 by androsyn
+Getting pages via /dev/zero actually compiles and works now.
+
+
 *** 20010813_4 by androsyn
 Added support for getting anonymous pages via the /dev/zero method
 
