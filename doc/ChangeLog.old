@@ -1,3 +1,8 @@
+*** 20010727_7 by leeh
+- #undef'd USE_TABLE_CODE
+  this is *fucked*.
+
+
 *** 20010727_6 by androsyn
 This ain't the right fix..but this thing needs rewritten..badly..
 
