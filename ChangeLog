@@ -1,3 +1,15 @@
+androsyn    2002/11/27 15:33:59 UTC	(20021127_8)
+
+  Modified files:
+    src                  s_bsd_poll.c 
+  Log:
+  Even some more tidying
+  
+  Revision  Changes    Path
+  7.63      +3 -3      ircd-ratbox/src/s_bsd_poll.c
+
+
+
 androsyn    2002/11/27 15:31:11 UTC	(20021127_7)
 
   Modified files:
