@@ -1,3 +1,19 @@
+db          2002/07/07 01:45:09 EDT	(20020707_0)
+
+  Modified files:
+    contrib              m_ltrace.c 
+    modules              m_trace.c 
+  Log:
+  - m_ltrace.c was missing the previously global next_client_double()
+    I've simply cut and pasted that code. That should shut up that error.
+  - m_trace.c I simply tidied up the prototype, no need to split it into two lines.
+  
+  Revision  Changes    Path
+  1.3       +35 -1     ircd-hybrid-7/contrib/m_ltrace.c
+  1.50      +2 -3      ircd-hybrid-7/modules/m_trace.c
+
+
+
 lusky       2002/07/06 18:25:11 EDT	(20020706_6)
 
   Modified files:
