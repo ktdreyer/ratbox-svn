@@ -1,3 +1,16 @@
+androsyn    2004/03/04 15:38:07 EST	(20040304_4)
+
+  Modified files:
+    .                    configure configure.ac 
+  Log:
+  Fix IPv6 detection support for openbsd..I think this is right..
+  
+  Revision  Changes    Path
+  7.211     +7 -6      ircd-ratbox/configure
+  7.24      +5 -4      ircd-ratbox/configure.ac
+
+
+
 leeh        2004/03/04 12:12:30 EST	(20040304_3)
 
   Modified files:
