@@ -1,3 +1,22 @@
+jmallett    2002/01/10 11:00:03 EST	(20020110_5)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    src                  Makefile.in snprintf.c 
+  Log:
+  Conditionalise src/snprintf.c on whether or not we actually need it using
+  configure! This also means we don't need to produce a bogus non-empty
+  translation unit for strict compilers like TenDRA, Forte, and aCC.
+  
+  Revision  Changes    Path
+  7.109     +13 -3     ircd-hybrid-7/autoconf/configure.in
+  7.112     +160 -111  ircd-hybrid-7/configure
+  7.107     +1 -1      ircd-hybrid-7/src/Makefile.in
+  1.5       +0 -4      ircd-hybrid-7/src/snprintf.c
+
+
+
 androsyn    2002/01/10 09:05:36 EST	(20020110_4)
 
   Modified files:
