@@ -13,6 +13,11 @@
 /* How big we want a buffer - 510 data bytes, plus space for a '\0' */
 #define BUF_DATA_SIZE		511
 
+#define LINEBUF_COMPLETE        0
+#define LINEBUF_PARTIAL         1
+#define LINEBUF_PARSED          0
+#define LINEBUF_RAW             1
+
 struct _buf_line;
 struct _buf_head;
 
@@ -23,7 +28,7 @@ struct _buf_line {
     char buf[BUF_DATA_SIZE+2];
     unsigned int  terminated;	/* Whether we've terminated the buffer */
     unsigned int  flushing;     /* Whether we're flushing .. */
-    unsigned int  binary;       /* Whether this linebuf may hold 8-bit data */
+    unsigned int  raw;          /* Whether this linebuf may hold 8-bit data */
     int  len;			/* How much data we've got */
     int  refcount;              /* how many linked lists are we in? */
     struct _buf_line *next;     /* next in free list */

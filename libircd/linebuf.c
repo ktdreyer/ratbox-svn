@@ -98,6 +98,7 @@ linebuf_new_line(buf_head_t *bufhead)
   bufline->len = 0;
   bufline->terminated = 0;
   bufline->flushing = 0;
+  bufline->raw = 0;
 
   /* Stick it at the end of the buf list */
   dlinkAddTail(bufline, node, &bufhead->list);
@@ -262,7 +263,7 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
 
   /* If its full or terminated, ignore it */
 
-  bufline->binary = 0;
+  bufline->raw = 0;
   assert(bufline->len < BUF_DATA_SIZE);
   if (bufline->terminated == 1)
     return 0;
@@ -316,7 +317,7 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
 }
 
 /*
- * linebuf_copy_binary
+ * linebuf_copy_raw
  *
  * Copy as much data as possible directly into a linebuf,
  * splitting at \r\n, but without altering any data.
@@ -324,8 +325,8 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
  * -David-T
  */
 static int
-linebuf_copy_binary(buf_head_t *bufhead, buf_line_t *bufline,
-                    char *data, int len)
+linebuf_copy_raw(buf_head_t *bufhead, buf_line_t *bufline,
+                 char *data, int len)
 {
   register char *ch = data;	/* Pointer to where we are in the read data */
   register char *bufch = bufline->buf + bufline->len;
@@ -374,7 +375,7 @@ linebuf_copy_binary(buf_head_t *bufhead, buf_line_t *bufline,
   *bufch = '\0';
 
   /* Tell linebuf_get that it might need to clean up the buffer */
-  bufline->binary = 1;
+  bufline->raw = 1;
   bufline->len += clen;
   bufhead->len += clen;
   return clen;
@@ -398,7 +399,7 @@ linebuf_copy_binary(buf_head_t *bufhead, buf_line_t *bufline,
  *   to dodge copious copies.
  */
 int
-linebuf_parse(buf_head_t *bufhead, char *data, int len, int binary)
+linebuf_parse(buf_head_t *bufhead, char *data, int len, int raw)
 {
   buf_line_t *bufline;
   int cpylen;
@@ -411,8 +412,8 @@ linebuf_parse(buf_head_t *bufhead, char *data, int len, int binary)
       bufline = bufhead->list.tail->data;
       assert(!bufline->flushing);
       /* just try, the worst it could do is *reject* us .. */
-      if (binary) /* if we could be dealing with 8-bit data */
-        cpylen = linebuf_copy_binary(bufhead, bufline, data, len);
+      if (raw) /* if we could be dealing with 8-bit data */
+        cpylen = linebuf_copy_raw(bufhead, bufline, data, len);
       else
         cpylen = linebuf_copy_line(bufhead, bufline, data, len);
       linecnt++;
@@ -433,8 +434,8 @@ linebuf_parse(buf_head_t *bufhead, char *data, int len, int binary)
         bufline = linebuf_new_line(bufhead);
         
         /* And parse */
-        if (binary) /* if we could be dealing with 8-bit data */
-          cpylen = linebuf_copy_binary(bufhead, bufline, data, len);
+        if (raw) /* if we could be dealing with 8-bit data */
+          cpylen = linebuf_copy_raw(bufhead, bufline, data, len);
         else
           cpylen = linebuf_copy_line(bufhead, bufline, data, len);
         len -= cpylen;
@@ -454,11 +455,11 @@ linebuf_parse(buf_head_t *bufhead, char *data, int len, int binary)
  */
 int
 linebuf_get(buf_head_t *bufhead, char *buf, int buflen, int partial,
-            int binary)
+            int raw)
 {
   buf_line_t *bufline;
   int cpylen;
-  char *ch;
+  char *start, *ch;
 
   /* make sure we have a line */
   if (bufhead->list.head == NULL)
@@ -475,25 +476,28 @@ linebuf_get(buf_head_t *bufhead, char *buf, int buflen, int partial,
   assert(cpylen + 1 <= buflen);
 
   /* Copy it */
-  ch = bufline->buf;
-  if (bufline->binary && !binary)
+  start = bufline->buf;
+
+  /* if we left extraneous '\r\n' characters in the string,
+   * and we don't want to read the raw data, clean up the string.
+   */
+  if (bufline->raw && !raw)
   {
     /* skip leading EOL characters */
-    while(cpylen && (*ch == '\r' || *ch == '\n'))
+    while(cpylen && (*start == '\r' || *start == '\n'))
     {
-      ch++;
+      start++;
       cpylen--;
     }
     /* skip trailing EOL characters */
-    ch = &ch[cpylen-1];
+    ch = &start[cpylen-1];
     while(cpylen && (*ch == '\r' || *ch == '\n'))
     {
       ch--;
       cpylen--;
     }
-      
   }
-  memcpy(buf, bufline->buf, cpylen+1);
+  memcpy(buf, start, cpylen+1);
 
   /* convert CR/LF to NUL */
   buf[cpylen] = '\0';

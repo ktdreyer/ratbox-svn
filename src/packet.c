@@ -55,7 +55,8 @@ parse_client_queued(struct Client *client_p)
  if (IsServer(client_p))
  {
   while ((dolen = linebuf_get(&client_p->localClient->buf_recvq,
-                              readBuf, READBUF_SIZE, 0, 0)) > 0)
+                              readBuf, READBUF_SIZE, LINEBUF_COMPLETE,
+                              LINEBUF_PARSED)) > 0)
   {
    if (!IsDead(client_p))
     client_dopacket(client_p, readBuf, dolen);
@@ -83,7 +84,7 @@ parse_client_queued(struct Client *client_p)
    if (checkflood && (lclient_p->sent_parsed > lclient_p->allow_read))
     break;
    dolen = linebuf_get(&client_p->localClient->buf_recvq, readBuf,
-                       READBUF_SIZE, 0, 0);
+                       READBUF_SIZE, LINEBUF_COMPLETE, LINEBUF_PARSED);
    if (!dolen)
     break;
    client_dopacket(client_p, readBuf, dolen);
