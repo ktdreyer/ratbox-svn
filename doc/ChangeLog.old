@@ -1,3 +1,7 @@
+*** 20010104_35 by ejb
+- make set_channel_mode support IDs (not fully tested)
+
+
 *** 20010104_34 by davidt
 Got rid of the insane list of MSG_* defines from msg.h
 
