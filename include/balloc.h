@@ -82,8 +82,6 @@ extern void *BlockHeapAlloc(BlockHeap * bh);
 extern BlockHeap *BlockHeapCreate(size_t elemsize, int elemsperblock);
 extern int BlockHeapDestroy(BlockHeap * bh);
 
-
-extern int BlockHeapGarbageCollect(BlockHeap *);
 extern void initBlockHeap(void);
 extern void BlockHeapUsage(BlockHeap * bh, size_t * bused, size_t * bfree, size_t * bmemusage);
 

@@ -43,7 +43,6 @@
 #include "s_serv.h"
 #include "send.h"
 #include "balloc.h"
-#include "event.h"
 #include "hash.h"
 
 static BlockHeap *rxconf_heap = NULL;
@@ -56,19 +55,6 @@ dlink_list resv_hash_list;
 dlink_list shared_list;
 dlink_list encap_list;
 
-/* conf_heap_gc()
- *
- * inputs       -
- * outputs      -
- * side effects - garbage collection of blockheaps
- */
-static void
-conf_heap_gc(void *unused)
-{
-	BlockHeapGarbageCollect(rxconf_heap);
-	BlockHeapGarbageCollect(shared_heap);
-}
-
 /* init_conf()
  *
  * inputs       -
@@ -80,7 +66,6 @@ init_conf(void)
 {
 	rxconf_heap = BlockHeapCreate(sizeof(struct rxconf), RXCONF_HEAP_SIZE);
 	shared_heap = BlockHeapCreate(sizeof(struct shared), SHARED_HEAP_SIZE);
-	eventAddIsh("conf_heap_gc", conf_heap_gc, NULL, 600);
 }
 
 /* make_rxconf()

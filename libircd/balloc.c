@@ -83,8 +83,8 @@
 #endif
 #endif
 
-
 static int newblock(BlockHeap * bh);
+static int BlockHeapGarbageCollect(BlockHeap *);
 static void block_heap_gc(void *unused);
 static dlink_list heap_lists;
 
@@ -421,7 +421,7 @@ BlockHeapFree(BlockHeap * bh, void *ptr)
 /* Returns:                                                                 */
 /*   0 if successful, 1 if bh == NULL                                       */
 /* ************************************************************************ */
-int
+static int
 BlockHeapGarbageCollect(BlockHeap * bh)
 {
 	Block *walker, *last;
