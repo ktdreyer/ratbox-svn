@@ -1,3 +1,16 @@
+wcampbel    2002/02/01 11:48:48 EST	(20020201_1)
+
+  Modified files:
+    .                    README.FIRST 
+  Log:
+  Document the requirement that /etc/ services, protocols, and resolv.conf
+  must be readable by the ircd user in order for the server to start.
+  
+  Revision  Changes    Path
+  7.24      +5 -0      ircd-hybrid-7/README.FIRST
+
+
+
 wcampbel    2002/01/31 23:13:20 EST	(20020201_0)
 
   Modified files:
