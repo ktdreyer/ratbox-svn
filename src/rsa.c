@@ -32,15 +32,17 @@
 #include <openssl/bn.h>
 #include <openssl/evp.h>
 #include <openssl/err.h>
-
 #include <assert.h>
 #include <string.h>
+#endif
 
 #include "memory.h"
 #include "rsa.h"
 #include "s_conf.h"
 #include "s_log.h"
 #include "client.h" /* CIPHERKEYLEN .. eww */
+
+#ifdef HAVE_LIBCRYPTO
 
 void report_crypto_errors(void);
 int verify_private_key(void);

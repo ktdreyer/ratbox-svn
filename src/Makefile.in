@@ -162,13 +162,8 @@ version.c: version.c.SH
 
 .PHONY: depend clean distclean
 depend:
-	@${MKDEP} ${CPPFLAGS} ${BASE_SRCS} ${EXTRA_SRCS} > .depend.tmp
-	@sed -e '/^# DO NOT DELETE THIS LINE/,$$d' <Makefile >Makefile.depend
-	@echo '# DO NOT DELETE THIS LINE!!!' >>Makefile.depend
-	@echo '# make depend needs it.' >>Makefile.depend
-	@cat .depend.tmp >>Makefile.depend
-	@mv Makefile.depend Makefile
-	@rm -f .depend.tmp
+	echo "# $Id$" > .depend
+	@${MKDEP} ${CPPFLAGS} ${BASE_SRCS} ${EXTRA_SRCS} >> .depend
 
 clean:
 	${RM} -f *.o *.exe *~ y.tab.* lex.yy.c ircd.core core ircd 
@@ -179,5 +174,4 @@ lint:
 distclean: clean
 	${RM} -f Makefile version.c.last
 
-# DO NOT DELETE THIS LINE!!!
-# make depend needs it.
+include .depend

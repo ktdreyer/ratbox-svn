@@ -715,9 +715,6 @@ AC_OUTPUT(                      \
  help/Makefile                  \
 )
 
-echo "Building dependencies..."
-${MAKE-make} depend
-
 if test "X${cf_openssl_ciphers}" != "X"; then
   echo ""
   echo "Available cryptlinks ciphers:"
