@@ -258,7 +258,7 @@ static int ms_connect(struct Client* cptr, struct Client* sptr,
   /*
    * Notify all operators about remote connect requests
    */
-  sendto_all_local_opers( &me, NULL,
+  sendto_realops_flags_opers(FLAGS_WALLOP, &me,
 			  "Remote CONNECT %s %s from %s",
 			  parv[1], parv[2] ? parv[2] : "",
 			  get_client_name(sptr, MASK_IP));

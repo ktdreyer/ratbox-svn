@@ -107,7 +107,7 @@ int mo_jupe(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
     
-  sendto_all_local_opers(sptr, NULL, "JUPE for %s requested by %s!%s@%s: %s",
+  sendto_realops_flags_opers(FLAGS_WALLOP, &me, "JUPE for %s requested by %s!%s@%s: %s",
 			 parv[1], sptr->name, sptr->username,
                          sptr->host, parv[2]);
   sendto_ll_serv_butone(NULL, sptr, 1,

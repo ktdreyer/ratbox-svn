@@ -133,7 +133,8 @@ int mo_opme(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   
   if (!on_vchan)
     {
-     sendto_all_local_opers(sptr, NULL, "OPME called for [%s] by %s!%s@%s",
+     sendto_realops_flags_opers(FLAGS_WALLOP, &me,
+              "OPME called for [%s] by %s!%s@%s",
               parv[1], sptr->name, sptr->username, sptr->host);
      sendto_ll_serv_butone(NULL, sptr, 1,
             ":%s WALLOPS :OPME called for [%s] by %s!%s@%s",
@@ -143,7 +144,8 @@ int mo_opme(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     }
   else
     {
-     sendto_all_local_opers(sptr, NULL, "OPME called for [%s %s] by %s!%s@%s",
+     sendto_realops_flags_opers(FLAGS_WALLOP, &me,
+               "OPME called for [%s %s] by %s!%s@%s",
                parv[1], parv[2], sptr->name, sptr->username, sptr->host);
      sendto_ll_serv_butone(NULL, sptr, 1,
             ":%s WALLOPS :OPME called for [%s %s] by %s!%s@%s",
