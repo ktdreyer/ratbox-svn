@@ -2549,7 +2549,7 @@ void read_conf_files(int cold)
     }
 
   dfilename = get_conf_name(DLINE_TYPE);
-  if (irccmp(filename, dfilename) && irccmp(kfilename, dfilename)
+  if (irccmp(filename, dfilename) && irccmp(kfilename, dfilename))
     {
       if ((file = openconf(dfilename)) == 0)
 	{

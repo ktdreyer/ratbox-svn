@@ -383,7 +383,7 @@ void    do_who(struct Client *sptr,
 {
   char  status[5];
 
-  if(GlobalSetOptions.hide_chanops && !is_chan_op(chptr,sptr))
+  if(GlobalSetOptions.hide_chanops && !is_any_op(chptr,sptr))
     {
       ircsprintf(status,"%c%s", 
 		 acptr->user->away ? 'G' : 'H',

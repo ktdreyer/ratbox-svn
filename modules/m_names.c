@@ -166,7 +166,7 @@ void names_all_visible_channels(struct Client *sptr)
 	  else
 	    chname = chptr->chname;
 
-	  if(GlobalSetOptions.hide_chanops && !is_chan_op(chptr,sptr))
+	  if(GlobalSetOptions.hide_chanops && !is_any_op(chptr,sptr))
 	    {
 	      show_ops_flag = "";
 	      show_voiced_flag = "";

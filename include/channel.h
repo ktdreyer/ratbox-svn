@@ -105,6 +105,8 @@ extern int     can_send (struct Channel *chptr, struct Client *who);
 extern int     is_banned (struct Channel *chptr, struct Client *who);
 
 extern int     is_chan_op (struct Channel *chptr,struct Client *who);
+extern int     is_any_op (struct Channel *chptr,struct Client *who);
+extern int     is_half_op (struct Channel *chptr,struct Client *who);
 
 extern void    send_channel_modes (struct Client *, struct Channel *);
 extern int     check_channel_name(const char* name);

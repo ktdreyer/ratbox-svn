@@ -547,6 +547,46 @@ int is_chan_op(struct Channel *chptr, struct Client *who )
 }
 
 /*
+ * is_any_op
+ *
+ * inputs	- pointer to channel to check for chanop or halfops on
+ *		- pointer to client struct being checked
+ * output	- yes if anyop no if not
+ * side effects -
+ */
+int is_any_op(struct Channel *chptr, struct Client *who )
+{
+  if (chptr)
+    {
+      if ((find_user_link(&chptr->chanops, who)))
+	return (1);
+      if ((find_user_link(&chptr->halfops, who)))
+	return (1);
+    }
+  
+  return 0;
+}
+
+/*
+ * is_half_op
+ *
+ * inputs	- pointer to channel to check for chanop or halfops on
+ *		- pointer to client struct being checked
+ * output	- yes if anyop no if not
+ * side effects -
+ */
+int is_half_op(struct Channel *chptr, struct Client *who )
+{
+  if (chptr)
+    {
+      if ((find_user_link(&chptr->halfops, who)))
+	return (1);
+    }
+  
+  return 0;
+}
+
+/*
  * channel_modes
  * inputs	- pointer to channel
  * 		- pointer to client
@@ -629,7 +669,7 @@ static  void    send_mode_list(struct Client *cptr,
   for (lp = top->head; lp; lp = lp->next)
     {
       banptr = lp->data;
-      tlen = strlen(banptr);
+      tlen = strlen(banptr->banstr);
       tlen++;
 
       if ((count >= MAXMODEPARAMS) || ((cur_len + tlen) > BUFSIZE))
@@ -930,9 +970,9 @@ void set_channel_mode(struct Client *cptr,
 
   int   ischop;
   int   isok;
+  int   isok_c;
   int   isdeop;
   int   chan_op;
-  int   self_lose_ops;
   int   type;
 
   dlink_node *ptr;
@@ -944,15 +984,11 @@ void set_channel_mode(struct Client *cptr,
   /* has ops or is a server */
   ischop = IsServer(sptr) || chan_op;
 
-  /* is client marked as deopped */
-  /*  isdeop = !ischop && !IsServer(sptr) && (user_mode & CHFL_DEOPPED); */
-  /* XXX */
   isdeop = 0;
 
   /* is an op or server or remote user on a TS channel */
   isok = ischop || (!isdeop && IsServer(cptr) && chptr->channelts);
-
-  /* isok_c calculated later, only if needed */
+  isok_c = isok || is_half_op(chptr,sptr);
 
   /* parc is the number of _remaining_ args (where <0 means 0);
   ** parv points to the first remaining argument
@@ -1000,8 +1036,6 @@ void set_channel_mode(struct Client *cptr,
           break;
 
 	case 'h':
-	  break;
-
         case 'o' :
         case 'v' :
           if (MyClient(sptr))
@@ -1060,6 +1094,11 @@ void set_channel_mode(struct Client *cptr,
 	      the_mode = MODE_VOICE;
 	      to_list = &chptr->voiced;
 	    }
+	  else if (c == 'h')
+	    {
+	      the_mode = MODE_HALFOP;
+	      to_list = &chptr->halfops;
+	    }
 
 	  if(whatt == MODE_DEL)
 	    to_list = &chptr->peons;
@@ -1093,6 +1132,10 @@ void set_channel_mode(struct Client *cptr,
           *pbufw++ = ' ';
           len += tmp + 1;
           opcnt++;
+
+	  /* ignore attempts to "demote" a full op to halfop */
+	  if((to_list == &chptr->halfops) && is_chan_op(chptr,who))
+	    break;
 
           if(change_channel_membership(chptr,to_list, who))
 	    {
@@ -1492,7 +1535,8 @@ void set_channel_mode(struct Client *cptr,
           if (MyClient(sptr) && opcnt >= MAXMODEPARAMS)
             break;
 
-          if (!isok)
+	  /* allow ops and halfops to set bans */
+          if (!isok_c)
             {
               if (!errsent(SM_ERR_NOOPS, &errors_sent) && MyClient(sptr))
                 sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED),
@@ -2335,7 +2379,7 @@ void channel_member_names( struct Client *sptr,
   mlen = strlen(buf);
   cur_len = mlen;
 
-  if(GlobalSetOptions.hide_chanops && !is_chan_op(chptr,sptr))
+  if(GlobalSetOptions.hide_chanops && !is_any_op(chptr,sptr))
     {
       show_ops_flag = "";
       show_voiced_flag = "";

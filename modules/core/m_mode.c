@@ -155,7 +155,8 @@ int m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   else
     if (!chptr)
       {
-	sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL), me.name, parv[0], parv[1]);
+	sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
+		   me.name, parv[0], parv[1]);
 	return 0;
       }
 
