@@ -1,3 +1,15 @@
+androsyn    2002/12/16 08:36:50 UTC	(20021216_17)
+
+  Modified files:
+    src                  s_serv.c 
+  Log:
+  Caught some more places where MyConnect() needed to be placed..
+  
+  Revision  Changes    Path
+  7.312     +2 -2      ircd-ratbox/src/s_serv.c
+
+
+
 androsyn    2002/12/16 08:30:55 UTC	(20021216_16)
 
   Modified files:
