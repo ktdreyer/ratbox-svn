@@ -1,3 +1,15 @@
+androsyn    2003/06/25 19:36:29 UTC	(20030625_3)
+
+  Modified files:
+    include              handlers.h 
+  Log:
+  /me undebugs fl
+  
+  Revision  Changes    Path
+  7.47      +0 -4      ircd-ratbox/include/handlers.h
+
+
+
 leeh        2003/06/25 08:49:35 UTC	(20030625_2)
 
   Modified files:
