@@ -1,3 +1,8 @@
+*** 20010212_6 by jdc
+- Logic for spoof_notice was backwards.  Oops.
+
+
+
 *** 20010212_5 by db
 - make it compile at least for now
 
