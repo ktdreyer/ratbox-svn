@@ -19,6 +19,9 @@ is-'s TODO list
 - modularise channel, network code etc (not just commands)
     we can use override_function() or similar for this
 - username/passwords (iauth ?)
+- channel modes to allow/prevent talking on channel
+  by hostmasks. 
+
 ------------------------------------------------------------------------------
 
 Adrian's TODO list
