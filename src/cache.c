@@ -191,6 +191,7 @@ load_help(void)
 		add_to_help_hash(cacheptr->name, cacheptr);
 	}
 
+	closedir(helpfile_dir);
 	helpfile_dir = opendir(UHPATH);
 
 	if(helpfile_dir == NULL)
