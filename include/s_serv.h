@@ -57,11 +57,13 @@ struct Capability
 #define CAP_EOB	        0x00000200      /* Can do EOB message */
 #define CAP_KLN	        0x00000400      /* Can do KLINE message */
 #define CAP_GLN	        0x00000800      /* Can do GLINE message */
-#define CAP_HOPS        0x00001000      /* can do half ops +h */
+#define CAP_HOPS        0x00001000      /* can do half ops (+h) */
 #define CAP_HUB         0x00002000      /* This server is a HUB */
+#define CAP_ANONOPS     0x00004000      /* Can do anon ops (+a) */
+
 #define CAP_MASK        CAP_QS|CAP_EX|CAP_CHW|\
                         CAP_DE|CAP_IE|CAP_VCHAN|CAP_EOB|CAP_KLN|CAP_GLN|\
-                        CAP_HOPS
+                        CAP_HOPS|CAP_ANONOPS
 
 #define DoesCAP(x)      ((x)->caps)
 

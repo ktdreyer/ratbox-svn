@@ -1057,27 +1057,29 @@ void set_channel_mode(struct Client *cptr,
   struct Client *who;
   char  *curr = parv[0], c, *arg, plus = '+', *tmpc;
   char  numeric[16];
-  /* mbufw gets the `simple' mode chars, which nonops can see
+  /* mbufw gets the non-capab mode chars, which nonops can see
    * on a +a channel (+smntilk)
    * pbufw gets the params.
-   * mbuf2w gets the other mode chars, always with their sign
-   * pbuf2w gets the other params, no ID's
+   * mbuf2w gets the other non-capab mode chars, always with their sign
+   * pbuf2w gets the other non-capab params
    */
 
-  char  modebuf_ex[MODEBUFLEN];
-  char  parabuf_ex[MODEBUFLEN];
+  char  modebuf_ex[MODEBUFLEN] = "";
+  char  parabuf_ex[MODEBUFLEN] = "";
 
-  char  modebuf_de[MODEBUFLEN];
-  char  parabuf_de[MODEBUFLEN];
+  char  modebuf_de[MODEBUFLEN] = "";
+  char  parabuf_de[MODEBUFLEN] = "";
 
-  char  modebuf_invex[MODEBUFLEN];
-  char  parabuf_invex[MODEBUFLEN];
+  char  modebuf_invex[MODEBUFLEN] = "";
+  char  parabuf_invex[MODEBUFLEN] = "";
 
-  char modebuf_hops[MODEBUFLEN];
-  char parabuf_hops[MODEBUFLEN];
+  char  modebuf_hops[MODEBUFLEN] = "";
+  char  parabuf_hops[MODEBUFLEN] = "";
+
+  char  modebuf_aops[MODEBUFLEN] = ""; /* +a doesn't take params */
   
-  char  *mbufw = modebuf, *mbuf2w = modebuf2;
-  char  *pbufw = parabuf, *pbuf2w = parabuf2;
+  char *mbufw = modebuf, *mbuf2w = modebuf2;
+  char *pbufw = parabuf, *pbuf2w = parabuf2;
 
   char  *mbufw_ex = modebuf_ex;
   char  *pbufw_ex = parabuf_ex;
@@ -1090,6 +1092,8 @@ void set_channel_mode(struct Client *cptr,
 
   char *mbufw_hops = modebuf_hops;
   char *pbufw_hops = parabuf_hops;
+
+  char *mbufw_aops = modebuf_aops;
 
   int   ischop;
   int   isok;
@@ -1651,7 +1655,7 @@ void set_channel_mode(struct Client *cptr,
 				 me.name, cptr->name,
 				 chname,
 				 banptr->banstr,
-				 "<hidden>",
+				 me.name,
 				 banptr->when);
 		    }
 		}
@@ -1731,7 +1735,7 @@ void set_channel_mode(struct Client *cptr,
 				 me.name, cptr->name,
 					 chname,
 				 banptr->banstr,
-				 "<hidden>",
+				 me.name,
 				 banptr->when);
 		    }
 		}
@@ -1779,11 +1783,11 @@ void set_channel_mode(struct Client *cptr,
                ((whatt & MODE_DEL) && !del_id(chptr, arg, CHFL_BAN))))
           break;
 
-          *mbuf2w++ = plus;
-          *mbuf2w++ = 'b';
-          strcpy(pbuf2w, arg);
-          pbuf2w += strlen(pbuf2w);
-          *pbuf2w++ = ' ';
+          *mbufw++ = plus;
+          *mbufw++ = 'b';
+          strcpy(pbufw, arg);
+          pbufw += strlen(pbufw);
+          *pbufw++ = ' ';
           len += tmp + 1;
           opcnt++;
 
@@ -2017,8 +2021,8 @@ void set_channel_mode(struct Client *cptr,
               if (len + 2 >= MODEBUFLEN)
 		break;
               chptr->mode.mode |= MODE_HIDEOPS;
-              *mbufw++ = '+';
-              *mbufw++ = 'a';
+              *mbufw_aops++ = '+';
+              *mbufw_aops++ = 'a';
               len += 2;
               sync_channel_oplists(chptr, 1);
 	    }
@@ -2028,8 +2032,8 @@ void set_channel_mode(struct Client *cptr,
 		break;
 	      
 	      chptr->mode.mode &= ~MODE_HIDEOPS;
-	      *mbufw++ = '-';
-	      *mbufw++ = 'a';
+	      *mbufw_aops++ = '-';
+	      *mbufw_aops++ = 'a';
 	      len += 2;
               sync_channel_oplists(chptr, 0);
 	    }
@@ -2183,13 +2187,17 @@ void set_channel_mode(struct Client *cptr,
   collapse_signs(modebuf_de);
   collapse_signs(modebuf_invex);
   collapse_signs(modebuf_hops);
-  
+  /* modebuf_aops only ever holds one mode */
+
   if(chptr->mode.mode & MODE_HIDEOPS)
     type = ONLY_CHANOPS;
   else
     type = ALL_MEMBERS;
 
-  /* User generated prefixes */
+  /* 
+   * Standard modes, seen by everyone
+   * on +a channels pretend its a server mode to nonops
+   */
   if(*modebuf)
     {
       if(IsServer(sptr))
@@ -2200,7 +2208,8 @@ void set_channel_mode(struct Client *cptr,
 			     chname,
 			     modebuf, parabuf);
       else
-	sendto_channel_local(ALL_MEMBERS,
+      {
+	sendto_channel_local(type,
 			     chptr,
 			     ":%s!%s@%s MODE %s %s %s", 
 			     sptr->name,
@@ -2208,12 +2217,25 @@ void set_channel_mode(struct Client *cptr,
 			     sptr->host,
 			     chname,
 			     modebuf, parabuf);
+        if(chptr->mode.mode & MODE_HIDEOPS)
+          sendto_channel_local(NON_CHANOPS,
+                               chptr,
+                               ":%s MODE %s %s %s",
+                               me.name,
+                               chname,
+                               modebuf, parabuf);
+      }
 
       sendto_channel_remote(chptr, cptr, ":%s MODE %s %s %s",
 			    sptr->name, chptr->chname,
 			    modebuf, parabuf);
     }
 
+  /*
+   * Hidden modes (currently +o, [also +h see modebuf_hops])
+   * Seen by everyone on -a channels
+   * Seen only by chanops/halfops on +a channels
+   */
   if(*modebuf2)
     {
       if(IsServer(sptr)) 
@@ -2223,6 +2245,7 @@ void set_channel_mode(struct Client *cptr,
                              me.name,
                              chname,
                              modebuf2, parabuf2);
+      else
         sendto_channel_local(type,
                              chptr,
                              ":%s!%s@%s MODE %s %s %s",
@@ -2231,11 +2254,17 @@ void set_channel_mode(struct Client *cptr,
                              sptr->host,
                              chname,
                              modebuf2, parabuf2);
+      
         sendto_channel_remote(chptr, cptr, ":%s MODE %s %s %s",
                               sptr->name, chptr->chname,
                               modebuf2, parabuf2);
     }
 
+  /*
+   * mode +e, seen by everyone.
+   * Only send remotely to servers with EX
+   * On +a channels pretend to nonops that it's a server mode.
+   */
   if(*modebuf_ex)
     {
       if(IsServer(sptr))
@@ -2246,19 +2275,34 @@ void set_channel_mode(struct Client *cptr,
 			     chname,
 			     modebuf_ex, parabuf_ex);
       else
-	sendto_channel_local(ONLY_CHANOPS,
-			     chptr,
-			     ":%s!%s@%s MODE %s %s %s", 
-			     sptr->name,
-			     sptr->username,
-			     sptr->host,
-			     chname,
-			     modebuf_ex, parabuf_ex);
+      {
+        sendto_channel_local(type,
+                             chptr,
+                             ":%s!%s@%s MODE %s %s %s",
+                             sptr->name,
+                             sptr->username,
+                             sptr->host,
+                             chname,
+                             modebuf_ex, parabuf_ex);
+        if(chptr->mode.mode & MODE_HIDEOPS)
+          sendto_channel_local(NON_CHANOPS,
+                               chptr,
+                               ":%s MODE %s %s %s",
+                               me.name,
+                               chname,
+                               modebuf_ex, parabuf_ex);
+      }
 
       sendto_match_cap_servs(chptr, cptr, CAP_EX, ":%s MODE %s %s %s",
                              sptr->name, chptr->chname,
                              modebuf_ex, parabuf_ex);
     }
+
+  /*
+   * mode +d, seen by everyone.
+   * Only send remotely to servers with DE
+   * On +a channels pretend to nonops that it's a server mode.
+   */
   if(*modebuf_de)
     {
       if(IsServer(sptr))
@@ -2269,19 +2313,34 @@ void set_channel_mode(struct Client *cptr,
 			     chname,
 			     modebuf_de, parabuf_de);
       else
-	sendto_channel_local(type,
-			     chptr,
-			     ":%s!%s@%s MODE %s %s %s",
-			     sptr->name,
-			     sptr->username,
-			     sptr->host,
-			     chname,
-			     modebuf_de, parabuf_de);
+      {
+        sendto_channel_local(type,
+                             chptr,
+                             ":%s!%s@%s MODE %s %s %s",
+                             sptr->name,
+                             sptr->username,
+                             sptr->host,
+                             chname,
+                             modebuf_de, parabuf_de);
+        if(chptr->mode.mode & MODE_HIDEOPS)
+          sendto_channel_local(NON_CHANOPS,
+                               chptr,
+                               ":%s MODE %s %s %s",
+                               me.name,
+                               chname,
+                               modebuf_de, parabuf_de);
+      }
 
       sendto_match_cap_servs(chptr, cptr, CAP_DE, ":%s MODE %s %s %s",
                              sptr->name, chptr->chname,
                              modebuf_de, parabuf_de);
     }
+
+  /*
+   * mode +I, seen by everyone.
+   * Only send remotely to servers with IE
+   * On +a channels pretend to nonops that it's a server mode.
+   */
   if(*modebuf_invex)
     {
       if(IsServer(sptr))
@@ -2292,20 +2351,33 @@ void set_channel_mode(struct Client *cptr,
 			     chname,
 			     modebuf_invex, parabuf_invex);
       else
-	sendto_channel_local(ONLY_CHANOPS,
-			     chptr,
-			     ":%s!%s@%s MODE %s %s %s",
-			     sptr->name,
-			     sptr->username,
-			     sptr->host,
-			     chname,
-			     modebuf_invex, parabuf_invex);
+      {
+        sendto_channel_local(type,
+                             chptr,
+                             ":%s!%s@%s MODE %s %s %s",
+                             sptr->name,
+                             sptr->username,
+                             sptr->host,
+                             chname,
+                             modebuf_invex, parabuf_invex);
+        if(chptr->mode.mode & MODE_HIDEOPS)
+          sendto_channel_local(NON_CHANOPS,
+                               chptr,
+                               ":%s MODE %s %s %s",
+                               me.name,
+                               chname,
+                               modebuf_invex, parabuf_invex);
+      }
 
       sendto_match_cap_servs(chptr, cptr, CAP_IE, ":%s MODE %s %s %s",
 			     sptr->name, chptr->chname,
 			     modebuf_invex, parabuf_invex);
     }	
-                     
+
+  /*
+   * mode +h, seen only by chanops/halfops on +a channels
+   * Only send remotely to servers with HOPS
+   */
   if(*modebuf_hops)
     {
       if(IsServer(sptr))
@@ -2329,6 +2401,45 @@ void set_channel_mode(struct Client *cptr,
 			     sptr->name, chptr->chname,
 			     modebuf_hops, parabuf_hops);
     }	
+
+  /*
+   * mode +a, seen by everyone.
+   * Only send remotely to servers with ANONOPS
+   * On +a channels pretend to nonops that it's a server mode.
+   */
+  if(*modebuf_aops)
+    {
+      if(IsServer(sptr))
+        sendto_channel_local(ALL_MEMBERS,
+                             chptr,
+                             ":%s MODE %s %s",
+                             me.name,
+                             chname,
+                             modebuf_aops);
+      else
+      {
+        sendto_channel_local(type,
+                             chptr,
+                             ":%s!%s@%s MODE %s %s",
+                             sptr->name,
+                             sptr->username,
+                             sptr->host,
+                             chname,
+                             modebuf_aops);
+        if(chptr->mode.mode & MODE_HIDEOPS)
+          sendto_channel_local(NON_CHANOPS,
+                               chptr,
+                               ":%s MODE %s %s",
+                               me.name,
+                               chname,
+                               modebuf_aops);
+      }
+
+      sendto_match_cap_servs(chptr, cptr, CAP_ANONOPS,
+                             ":%s MODE %s %s",
+                             sptr->name, chptr->chname,
+                             modebuf_aops);
+    }
 
   return;
 }

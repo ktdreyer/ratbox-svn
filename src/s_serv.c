@@ -92,6 +92,7 @@ struct Capability captab[] = {
   { "GLN",      CAP_GLN },
   { "HOPS",     CAP_HOPS },
   { "HUB",      CAP_HUB },
+  { "ANONOPS",  CAP_ANONOPS },
   { 0,   0 }
 };
 

@@ -693,6 +693,7 @@ sendto_channel_local(int type,
       break;
 
     case NON_CHANOPS:
+      sendto_list_local(&chptr->voiced,   sendbuf, len);
       sendto_list_local(&chptr->peons,   sendbuf, len);
       break;
 
