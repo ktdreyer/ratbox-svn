@@ -543,6 +543,30 @@ int register_user(struct Client *cptr, struct Client *sptr,
 		     sptr->username, sptr->host, user->server,
 		     sptr->info);
 
+#if 0
+  /* 1) This is broken [at least, it exposes other bugs with
+   *    missing introductions]
+   * 2) We're trying to cut a beta, not introduce more bugs.
+   *
+   * so I'll leave it commented out for now.
+   *
+   * -davidt
+   */
+
+  /*
+   * We now introduce nicks "on the fly" in SJOIN anyway --
+   * you _need_ to if you aren't going to burst everyone initially.
+   *
+   * Only send to non CAP_LL servers
+   * -davidt
+   */
+
+  sendto_nocap_serv_butone(CAP_LL, cptr,
+                            ":%s NICK %s %d %lu %s %s %s %s :%s",
+                            me.name, nick, sptr->hopcount+1, sptr->tsinfo,
+                            ubuf, sptr->username, sptr->host, user->server,
+                            sptr->info);
+#endif
   
   if (ubuf[1])
     send_umode_out(cptr, sptr, 0);
