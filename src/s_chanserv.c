@@ -42,15 +42,11 @@ static BlockHeap *ban_reg_heap;
 
 static dlink_list chan_reg_table[MAX_CHANNEL_TABLE];
 
-static int u_chan_chanregister(struct client *, struct lconn *, const char **, int);
-static int u_chan_chandrop(struct client *, struct lconn *, const char **, int);
-static int u_chan_chansuspend(struct client *, struct lconn *, const char **, int);
-static int u_chan_chanunsuspend(struct client *, struct lconn *, const char **, int);
+static int o_chan_chanregister(struct client *, struct lconn *, const char **, int);
+static int o_chan_chandrop(struct client *, struct lconn *, const char **, int);
+static int o_chan_chansuspend(struct client *, struct lconn *, const char **, int);
+static int o_chan_chanunsuspend(struct client *, struct lconn *, const char **, int);
 
-static int s_chan_chanregister(struct client *, struct lconn *, const char **, int);
-static int s_chan_chandrop(struct client *, struct lconn *, const char **, int);
-static int s_chan_chansuspend(struct client *, struct lconn *, const char **, int);
-static int s_chan_chanunsuspend(struct client *, struct lconn *, const char **, int);
 static int s_chan_register(struct client *, struct lconn *, const char **, int);
 static int s_chan_set(struct client *, struct lconn *, const char **, int);
 static int s_chan_adduser(struct client *, struct lconn *, const char **, int);
@@ -77,10 +73,10 @@ static int s_chan_info(struct client *, struct lconn *, const char **, int);
 
 static struct service_command chanserv_command[] =
 {
-	{ "CHANREGISTER",	&s_chan_chanregister,	2, NULL, 1, 0L, 0, 0, CONF_OPER_CREGISTER, 0 },
-	{ "CHANDROP",		&s_chan_chandrop,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CHANSERV, 0 },
-	{ "CHANSUSPEND",	&s_chan_chansuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CHANSERV, 0 },
-	{ "CHANUNSUSPEND",	&s_chan_chanunsuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CHANSERV, 0 },
+	{ "CHANREGISTER",	&o_chan_chanregister,	2, NULL, 1, 0L, 0, 0, CONF_OPER_CREGISTER, 0 },
+	{ "CHANDROP",		&o_chan_chandrop,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CHANSERV, 0 },
+	{ "CHANSUSPEND",	&o_chan_chansuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CHANSERV, 0 },
+	{ "CHANUNSUSPEND",	&o_chan_chanunsuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CHANSERV, 0 },
 	{ "REGISTER",	&s_chan_register,	1, NULL, 1, 0L, 1, 0, 0, UMODE_REGISTER	},
 	{ "SET",	&s_chan_set,		2, NULL, 1, 0L, 1, 0, 0, 0 },
 	{ "ADDUSER",	&s_chan_adduser,	3, NULL, 1, 0L, 1, 0, 0, 0 },
@@ -108,10 +104,10 @@ static struct service_command chanserv_command[] =
 
 static struct ucommand_handler chanserv_ucommand[] =
 {
-	{ "chanregister",	u_chan_chanregister,	CONF_OPER_CREGISTER,	2, 1, NULL },
-	{ "chandrop",		u_chan_chandrop,	CONF_OPER_CHANSERV,	1, 1, NULL },
-	{ "chansuspend",	u_chan_chansuspend,	CONF_OPER_CHANSERV,	1, 1, NULL },
-	{ "chanunsuspend",	u_chan_chanunsuspend,	CONF_OPER_CHANSERV,	1, 1, NULL },
+	{ "chanregister",	o_chan_chanregister,	CONF_OPER_CREGISTER,	2, 1, NULL },
+	{ "chandrop",		o_chan_chandrop,	CONF_OPER_CHANSERV,	1, 1, NULL },
+	{ "chansuspend",	o_chan_chansuspend,	CONF_OPER_CHANSERV,	1, 1, NULL },
+	{ "chanunsuspend",	o_chan_chanunsuspend,	CONF_OPER_CHANSERV,	1, 1, NULL },
 	{ "\0",			NULL,			0,			0, 0, NULL }
 };
 
@@ -1177,215 +1173,122 @@ h_chanserv_user_login(void *v_client_p, void *unused)
 }
 
 static int
-u_chan_chanregister(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+o_chan_chanregister(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
-	struct chan_reg *reg_p;
+	struct chan_reg *chreg_p;
 	struct user_reg *ureg_p;
 	struct member_reg *mreg_p;
 
-	if((reg_p = find_channel_reg(NULL, parv[0])))
+	if((chreg_p = find_channel_reg(NULL, parv[0])))
 	{
-		sendto_one(conn_p, "Channel %s is already registered", parv[0]);
+		service_send(chanserv_p, client_p, conn_p,
+				"Channel %s is already registered", parv[0]);
 		return 0;
 	}
 
 	if((ureg_p = find_user_reg_nick(NULL, parv[1])) == NULL)
 	{
 		if(*parv[1] == '=')
-			sendto_one(conn_p, "Nickname %s is not logged in", parv[1]);
+			service_send(chanserv_p, client_p, conn_p,
+					"Nickname %s is not logged in", parv[1]);
 		else
-			sendto_one(conn_p, "Username %s is not registered", parv[1]);
+			service_send(chanserv_p, client_p, conn_p,
+					"Username %s is not registered", parv[1]);
 
 		return 0;
 	}
 
 	slog(chanserv_p, 1, "%s - CHANREGISTER %s %s",
-		conn_p->name, parv[0], ureg_p->name);
+		OPER_NAME(client_p, conn_p), parv[0], ureg_p->name);
 
-	reg_p = BlockHeapAlloc(channel_reg_heap);
-	init_channel_reg(reg_p, parv[0]);
+	chreg_p = BlockHeapAlloc(channel_reg_heap);
+	init_channel_reg(chreg_p, parv[0]);
 
-	mreg_p = make_member_reg(ureg_p, reg_p, conn_p->name, 200);
+	mreg_p = make_member_reg(ureg_p, chreg_p, OPER_NAME(client_p, conn_p), 200);
 	write_member_db_entry(mreg_p);
 
-	sendto_one(conn_p, "Channel %s registered to %s",
-			reg_p->name, ureg_p->name);
+	service_send(chanserv_p, client_p, conn_p,
+			"Channel %s registered to %s",
+			chreg_p->name, ureg_p->name);
 	return 0;
 }
 
 static int
-u_chan_chandrop(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+o_chan_chandrop(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct chan_reg *reg_p;
 
 	if((reg_p = find_channel_reg(NULL, parv[0])) == NULL)
 	{
-		sendto_one(conn_p, "Channel %s is not registered", parv[0]);
+		service_send(chanserv_p, client_p, conn_p,
+				"Channel %s is not registered", parv[0]);
 		return 0;
 	}
-
-	slog(chanserv_p, 1, "%s - CHANDROP %s", conn_p->name, parv[0]);
-
-	destroy_channel_reg(reg_p);
-
-	sendto_one(conn_p, "Channel %s registration dropped", parv[0]);
-	return 0;
-}
-
-static int
-u_chan_chansuspend(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
-{
-	struct chan_reg *reg_p;
-
-	if((reg_p = find_channel_reg(NULL, parv[0])) == NULL)
-	{
-		sendto_one(conn_p, "Channel %s is not registered", parv[0]);
-		return 0;
-	}
-
-	if(reg_p->flags & CS_FLAGS_SUSPENDED)
-	{
-		sendto_one(conn_p, "Channel %s is already suspended", parv[0]);
-		return 0;
-	}
-
-	slog(chanserv_p, 1, "%s - CHANSUSPEND %s", conn_p->name, parv[0]);
-
-	reg_p->flags |= CS_FLAGS_SUSPENDED;
-	reg_p->suspender = my_strdup(conn_p->name);
-
-	loc_sqlite_exec(NULL, "UPDATE channels SET flags=%d, suspender=%Q WHERE chname = %Q",
-			reg_p->flags, reg_p->suspender, reg_p->name);
-
-	sendto_one(conn_p, "Channel %s suspended", parv[0]);
-	return 0;
-}
-
-static int
-u_chan_chanunsuspend(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
-{
-	struct chan_reg *reg_p;
-
-	if((reg_p = find_channel_reg(NULL, parv[0])) == NULL)
-	{
-		sendto_one(conn_p, "Channel %s is not registered", parv[0]);
-		return 0;
-	}
-
-	if((reg_p->flags & CS_FLAGS_SUSPENDED) == 0)
-	{
-		sendto_one(conn_p, "Channel %s is not suspended", parv[0]);
-		return 0;
-	}
-
-	slog(chanserv_p, 1, "%s - CHANUNSUSPEND %s", conn_p->name, parv[0]);
-
-	reg_p->flags &= ~CS_FLAGS_SUSPENDED;
-	my_free(reg_p->suspender);
-	reg_p->suspender = NULL;
-
-	loc_sqlite_exec(NULL, "UPDATE channels SET flags = %d, suspender = NULL WHERE chname = %Q",
-			reg_p->flags, reg_p->name);
-
-	sendto_one(conn_p, "Channel %s unsuspended", parv[0]);
-	return 0;
-}
-
-static int
-s_chan_chanregister(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
-{
-	struct chan_reg *reg_p;
-	struct user_reg *ureg_p;
-	struct member_reg *mreg_p;
-
-	if((reg_p = find_channel_reg(NULL, parv[0])))
-	{
-		service_error(chanserv_p, client_p, "Channel %s is already registered", parv[0]);
-		return 1;
-	}
-
-	if((ureg_p = find_user_reg_nick(client_p, parv[1])) == NULL)
-		return 1;
-
-	slog(chanserv_p, 1, "%s - CHANREGISTER %s %s",
-		client_p->user->oper->name, parv[0], ureg_p->name);
-
-	reg_p = BlockHeapAlloc(channel_reg_heap);
-	init_channel_reg(reg_p, parv[0]);
-
-	mreg_p = make_member_reg(ureg_p, reg_p, client_p->name, 200);
-	write_member_db_entry(mreg_p);
-
-	service_error(chanserv_p, client_p, "Channel %s registered to %s",
-			reg_p->name, ureg_p->name);
-
-	return 5;
-}
-
-static int
-s_chan_chandrop(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
-{
-	struct chan_reg *reg_p;
-
-	if((reg_p = find_channel_reg(client_p, parv[0])) == NULL)
-		return 0;
 
 	slog(chanserv_p, 1, "%s - CHANDROP %s", 
-		client_p->user->oper->name, parv[0]);
+		OPER_NAME(client_p, conn_p), parv[0]);
 
 	destroy_channel_reg(reg_p);
 
-	service_error(chanserv_p, client_p, "Channel %s registration dropped",
-			parv[0]);
-
+	service_send(chanserv_p, client_p, conn_p,
+			"Channel %s registration dropped", parv[0]);
 	return 0;
 }
 
 static int
-s_chan_chansuspend(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+o_chan_chansuspend(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct chan_reg *reg_p;
 
-	if((reg_p = find_channel_reg(client_p, parv[0])) == NULL)
+	if((reg_p = find_channel_reg(NULL, parv[0])) == NULL)
+	{
+		service_send(chanserv_p, client_p, conn_p,
+				"Channel %s is not registered", parv[0]);
 		return 0;
+	}
 
 	if(reg_p->flags & CS_FLAGS_SUSPENDED)
 	{
-		service_error(chanserv_p, client_p, "Channel %s is already suspended",
-				parv[0]);
+		service_send(chanserv_p, client_p, conn_p,
+				"Channel %s is already suspended", parv[0]);
 		return 0;
 	}
 
 	slog(chanserv_p, 1, "%s - CHANSUSPEND %s",
-		client_p->user->oper->name, parv[0]);
+		OPER_NAME(client_p, conn_p), parv[0]);
 
 	reg_p->flags |= CS_FLAGS_SUSPENDED;
-	reg_p->suspender = my_strdup(client_p->user->oper->name);
+	reg_p->suspender = my_strdup(OPER_NAME(client_p, conn_p));
 
 	loc_sqlite_exec(NULL, "UPDATE channels SET flags=%d, suspender=%Q WHERE chname = %Q",
 			reg_p->flags, reg_p->suspender, reg_p->name);
 
-	service_error(chanserv_p, client_p, "Channel %s suspended", parv[0]);
+	service_send(chanserv_p, client_p, conn_p,
+			"Channel %s suspended", parv[0]);
 	return 0;
 }
 
 static int
-s_chan_chanunsuspend(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+o_chan_chanunsuspend(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct chan_reg *reg_p;
 
-	if((reg_p = find_channel_reg(client_p, parv[0])) == NULL)
+	if((reg_p = find_channel_reg(NULL, parv[0])) == NULL)
+	{
+		service_send(chanserv_p, client_p, conn_p,
+				"Channel %s is not registered", parv[0]);
 		return 0;
+	}
 
 	if((reg_p->flags & CS_FLAGS_SUSPENDED) == 0)
 	{
-		service_error(chanserv_p, client_p, "Channel %s is not suspended",
-				parv[0]);
+		service_send(chanserv_p, client_p, conn_p,
+				"Channel %s is not suspended", reg_p->name);
 		return 0;
 	}
 
 	slog(chanserv_p, 1, "%s - CHANUNSUSPEND %s",
-		client_p->user->oper->name, parv[0]);
+		OPER_NAME(client_p, conn_p), reg_p->name);
 
 	reg_p->flags &= ~CS_FLAGS_SUSPENDED;
 	my_free(reg_p->suspender);
@@ -1394,7 +1297,8 @@ s_chan_chanunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 	loc_sqlite_exec(NULL, "UPDATE channels SET flags = %d, suspender = NULL WHERE chname = %Q",
 			reg_p->flags, reg_p->name);
 
-	service_error(chanserv_p, client_p, "Channel %s unsuspended", parv[0]);
+	service_send(chanserv_p, client_p, conn_p,
+			"Channel %s unsuspended", reg_p->name);
 	return 0;
 }
 

@@ -381,7 +381,7 @@ o_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 	reg_p->suspender = my_strdup(OPER_NAME(client_p, conn_p));
 
 	loc_sqlite_exec(NULL, "UPDATE users SET flags=%d, suspender=%Q WHERE username=%Q",
-			reg_p->flags, OPER_NAME(client_p, conn_p), reg_p->name);
+			reg_p->flags, reg_p->suspender, reg_p->name);
 
 	service_send(userserv_p, client_p, conn_p,
 			"Username %s suspended", reg_p->name);
