@@ -65,7 +65,7 @@ int main(int argc, char * argv[]) {
   double elapsed;
   
   EVP_CIPHER_CTX  ctx;
-  EVP_CIPHER   *cipher;
+  const EVP_CIPHER   *cipher;
   
   printf("Encryption speed test\n\n");
 
