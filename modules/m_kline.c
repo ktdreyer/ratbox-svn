@@ -299,9 +299,9 @@ int ms_kline(struct Client *cptr,
   if(find_u_conf(sptr->name,rcptr->username,rcptr->host))
     {
       sendto_realops_flags(FLAGS_ALL,
-			   "*** Received kline from %s!%s@%s on %s",
+			   "*** Received K-Line from %s!%s@%s on %s",
 			   rcptr->name,
-			   rcptr->user,
+			   rcptr->username,
 			   rcptr->host,
 			   sptr->name);
       aconf = make_conf();
