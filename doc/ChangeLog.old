@@ -1,3 +1,7 @@
+*** 20001021_6 by toot
+free topic_info when the channel's deleted
+
+
 *** 20001021_5 by toot
 . renamed free_bans_exceptions_denies to free_channel_masks, and had it
   free invite exceptions too.
