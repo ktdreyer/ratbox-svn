@@ -1,3 +1,19 @@
+leeh        2003/07/08 05:56:10 EDT	(20030708_1)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    src                  newconf.c 
+  Log:
+  - removed the individual flags specification lines in the conf.
+    hi kids, use flags = ...;
+  
+  Revision  Changes    Path
+  7.214     +0 -6      ircd-ratbox/doc/example.conf
+  7.49      +0 -12     ircd-ratbox/doc/example.efnet.conf
+  7.97      +0 -209    ircd-ratbox/src/newconf.c
+
+
+
 leeh        2003/07/08 05:46:27 EDT	(20030708_0)
 
   Modified files:
