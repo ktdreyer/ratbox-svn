@@ -1,3 +1,15 @@
+androsyn    2004/10/21 12:19:07 EDT	(20041021_0)
+
+  Modified files:
+    adns                 parse.c 
+  Log:
+  fix silly compile errors
+  
+  Revision  Changes    Path
+  1.11      +1 -1      ircd-ratbox/adns/parse.c
+
+
+
 androsyn    2004/10/13 14:20:48 EDT	(20041013_1)
 
   Modified files:
