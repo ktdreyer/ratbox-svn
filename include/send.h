@@ -37,8 +37,6 @@ struct dlink_list;
 /* The nasty global also used in s_serv.c for server bursts */
 extern unsigned long current_serial;
 
-/* send.c prototypes */
-
 extern void send_queued_write(int fd, void *data);
 extern void send_queued_slink_write(int fd, void *data);
 
@@ -46,26 +44,27 @@ extern void sendto_one(struct Client *target_p, const char *, ...) AFP(2, 3);
 extern void sendto_one_prefix(struct Client *target_p, struct Client *source_p,
 			      const char *command, const char *, ...) AFP(4, 5);
 
-extern void sendto_channel_flags(struct Client *one, int type, struct Client *source_p,
-				 struct Channel *chptr, const char *, ...) AFP(5, 6);
-
-extern void sendto_common_channels_local(struct Client *, const char *, ...) AFP(2, 3);
-extern void sendto_channel_local(int type, struct Channel *, const char *, ...) AFP(3, 4);
-
 extern void sendto_server(struct Client *one, struct Channel *chptr,
 			  unsigned long caps, unsigned long nocaps,
 			  const char *format, ...) AFP(5, 6);
+
+extern void sendto_channel_flags(struct Client *one, int type, struct Client *source_p,
+				 struct Channel *chptr, const char *, ...) AFP(5, 6);
+
+extern void sendto_channel_local(int type, struct Channel *, const char *, ...) AFP(3, 4);
+extern void sendto_common_channels_local(struct Client *, const char *, ...) AFP(2, 3);
+
 
 extern void sendto_match_butone(struct Client *, struct Client *,
 				const char *, int, const char *, ...) AFP(5, 6);
 extern void sendto_match_servs(struct Client *source_p, const char *mask, 
 				int capab, const char *, ...) AFP(4, 5);
 
-extern void sendto_realops_flags(int, int, const char *, ...) AFP(3, 4);
-extern void sendto_wallops_flags(int, struct Client *, const char *, ...) AFP(3, 4);
-
 extern void sendto_anywhere(struct Client *, struct Client *, const char *,
 			    const char *, ...) AFP(4, 5);
+
+extern void sendto_realops_flags(int, int, const char *, ...) AFP(3, 4);
+extern void sendto_wallops_flags(int, struct Client *, const char *, ...) AFP(3, 4);
 
 extern void kill_client(struct Client *client_p, struct Client *diedie,
 			 const char *pattern, ...) AFP(3, 4);
