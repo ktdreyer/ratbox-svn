@@ -31,12 +31,15 @@
 #include "send.h"
 #include "msg.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
 
 static void m_admin(struct Client*, struct Client*, int, char**);
 static void mr_admin(struct Client*, struct Client*, int, char**);
 static void ms_admin(struct Client*, struct Client*, int, char**);
 static void do_admin( struct Client *source_p );
+
+static void admin_spy(struct Client *);
 
 struct Message admin_msgtab = {
   "ADMIN", 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0, 
@@ -46,12 +49,14 @@ struct Message admin_msgtab = {
 void
 _modinit(void)
 {
+  hook_add_event("doing_admin");
   mod_add_cmd(&admin_msgtab);
 }
 
 void
 _moddeinit(void)
 {
+  hook_del_event("doing_admin");
   mod_del_cmd(&admin_msgtab);
 }
 char *_version = "20001202";
@@ -134,9 +139,7 @@ static void do_admin( struct Client *source_p )
   char *nick;
 
   if (IsPerson(source_p))
-    sendto_realops_flags(FLAGS_SPY, L_ADMIN,
-                         "ADMIN requested by %s (%s@%s) [%s]", source_p->name,
-                         source_p->username, source_p->host, source_p->user->server);
+    admin_spy(source_p);
 
   nick = BadPtr(source_p->name) ? "*" : source_p->name;
 
@@ -151,4 +154,19 @@ static void do_admin( struct Client *source_p )
   if (AdminInfo.email != NULL)
     sendto_one(source_p, form_str(RPL_ADMINEMAIL),
 	       me.name, nick, AdminInfo.email);
+}
+
+/* admin_spy()
+ *
+ * input	- pointer to client
+ * output	- none
+ * side effects - event doing_admin is called
+ */
+static void admin_spy(struct Client *source_p)
+{
+  struct hook_spy_data data;
+
+  data.source_p = source_p;
+
+  hook_call_event("doing_admin", &data);
 }

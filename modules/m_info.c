@@ -34,6 +34,7 @@
 #include "common.h"
 #include "irc_string.h"
 #include "ircd.h"
+#include "hook.h"
 #include "numeric.h"
 #include "s_serv.h"
 #include "s_user.h"
@@ -47,6 +48,7 @@
 static void send_conf_options(struct Client *source_p);
 static void send_birthdate_online_time(struct Client *source_p);
 static void send_info_text(struct Client *source_p);
+static void info_spy(struct Client *);
 
 static void m_info(struct Client*, struct Client*, int, char**);
 static void ms_info(struct Client*, struct Client*, int, char**);
@@ -61,12 +63,14 @@ struct Message info_msgtab = {
 void
 _modinit(void)
 {
+  hook_add_event("doing_info");
   mod_add_cmd(&info_msgtab);
 }
 
 void
 _moddeinit(void)
 {
+  hook_del_event("doing_info");
   mod_del_cmd(&info_msgtab);
 }
 char *_version = "20010530";
@@ -390,10 +394,7 @@ static void m_info(struct Client *client_p, struct Client *source_p,
     }
   }
 
-  sendto_realops_flags(FLAGS_SPY, L_ADMIN,
-    "info requested by %s (%s@%s) [%s]",
-    source_p->name, source_p->username, source_p->host,
-    source_p->user->server);
+  info_spy(source_p);
 
   send_info_text(source_p);
   send_birthdate_online_time(source_p);
@@ -413,11 +414,8 @@ static void mo_info(struct Client *client_p, struct Client *source_p,
 {
   if (hunt_server(client_p,source_p,":%s INFO :%s",1,parc,parv) == HUNTED_ISME)
   {
-    sendto_realops_flags(FLAGS_SPY, L_ADMIN,
-      "info requested by %s (%s@%s) [%s]",
-      source_p->name, source_p->username, source_p->host,
-      source_p->user->server);
-
+    info_spy(source_p);
+  
     send_info_text(source_p);
     send_conf_options(source_p);
     send_birthdate_online_time(source_p);
@@ -440,10 +438,7 @@ static void ms_info(struct Client *client_p, struct Client *source_p,
   
   if (hunt_server(client_p,source_p,":%s INFO :%s",1,parc,parv) == HUNTED_ISME)
   {
-    sendto_realops_flags(FLAGS_SPY, L_ADMIN,
-                    "info requested by %s (%s@%s) [%s]",
-	            source_p->name, source_p->username, source_p->host,
-	            source_p->user->server);
+    info_spy(source_p);
  
     /* I dont see sending Hybrid-team as anything but a waste of bandwidth..
      * so its disabled for now. --fl_
@@ -667,3 +662,17 @@ static void send_conf_options(struct Client *source_p)
   sendto_one(source_p, form_str(RPL_INFO), me.name, source_p->name, "");
 }
 
+/* info_spy()
+ * 
+ * input        - pointer to client
+ * output       - none
+ * side effects - hook doing_info is called
+ */
+static void info_spy(struct Client *source_p)
+{
+  struct hook_spy_data data;
+
+  data.source_p = source_p;
+
+  hook_call_event("doing_info", &data);
+}

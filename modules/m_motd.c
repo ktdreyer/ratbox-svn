@@ -29,6 +29,7 @@
 #include "send.h"
 #include "numeric.h"
 #include "handlers.h"
+#include "hook.h"
 #include "msg.h"
 #include "s_serv.h"     /* hunt_server */
 #include "parse.h"
@@ -43,6 +44,8 @@ static void mr_motd(struct Client *, struct Client *, int, char **);
 static void m_motd(struct Client*, struct Client*, int, char**);
 static void mo_motd(struct Client*, struct Client*, int, char**);
 
+static void motd_spy(struct Client *);
+
 struct Message motd_msgtab = {
   "MOTD", 0, 0, 1, MFLG_SLOW, 0,
   {mr_motd, m_motd, mo_motd, mo_motd}
@@ -51,12 +54,14 @@ struct Message motd_msgtab = {
 void
 _modinit(void)
 {
+  hook_add_event("doing_motd");
   mod_add_cmd(&motd_msgtab);
 }
 
 void
 _moddeinit(void)
 {
+  hook_del_event("doing_motd");
   mod_del_cmd(&motd_msgtab);
 }
 
@@ -102,11 +107,8 @@ static void m_motd(struct Client *client_p, struct Client *source_p,
 	return;
     }
 
-  sendto_realops_flags(FLAGS_SPY, L_ADMIN,
-                     "motd requested by %s (%s@%s) [%s]",
-                     source_p->name, source_p->username, source_p->host,
-                     source_p->user->server);
-
+  motd_spy(source_p);
+  
   SendMessageFile(source_p,&ConfigFileEntry.motd);
 }
 
@@ -124,11 +126,23 @@ static void mo_motd(struct Client *client_p, struct Client *source_p,
   if (hunt_server(client_p, source_p, ":%s MOTD :%s", 1,parc,parv)!=HUNTED_ISME)
     return;
 
-  sendto_realops_flags(FLAGS_SPY, L_ADMIN,
-                     "motd requested by %s (%s@%s) [%s]",
-                     source_p->name, source_p->username, source_p->host,
-                     source_p->user->server);
-
+  motd_spy(source_p);
+  
   SendMessageFile(source_p,&ConfigFileEntry.motd);
+}
+
+/* motd_spy()
+ *
+ * input        - pointer to client
+ * output       - none
+ * side effects - hook doing_motd is called
+ */
+static void motd_spy(struct Client *source_p)
+{
+  struct hook_spy_data data;
+
+  data.source_p = source_p;
+
+  hook_call_event("doing_motd", &data);
 }
 

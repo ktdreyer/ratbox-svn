@@ -41,6 +41,11 @@ struct hook_links_data
 	char *mask;
 };
 
+struct hook_spy_data
+{
+	struct Client *source_p;
+};
+
 struct hook_io_data
 {
         struct Client *connection;

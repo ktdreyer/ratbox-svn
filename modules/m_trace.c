@@ -24,6 +24,7 @@
  */
 #include "handlers.h"
 #include "class.h"
+#include "hook.h"
 #include "client.h"
 #include "hash.h"       /* for find_client() */
 #include "common.h"
@@ -45,6 +46,8 @@
 static void ms_trace(struct Client*, struct Client*, int, char**);
 static void mo_trace(struct Client*, struct Client*, int, char**);
 
+static void trace_spy(struct Client *);
+
 struct Message trace_msgtab = {
   "TRACE", 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_ignore, ms_trace, mo_trace}
@@ -54,12 +57,14 @@ struct Message trace_msgtab = {
 void
 _modinit(void)
 {
+  hook_add_event("doing_trace");
   mod_add_cmd(&trace_msgtab);
 }
 
 void
 _moddeinit(void)
 {
+  hook_del_event("doing_trace");
   mod_del_cmd(&trace_msgtab);
 }
 char *_version = "20010109";
@@ -116,12 +121,8 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
       return;
     }
 
-  if(MyClient(source_p))
-    sendto_realops_flags(FLAGS_SPY, L_ADMIN,
-                       "trace requested by %s (%s@%s) [%s]",
-                       source_p->name, source_p->username, source_p->host,
-                       source_p->user->server);
-
+  if(IsClient(source_p))
+    trace_spy(source_p);
 
   doall = (parv[1] && (parc > 1)) ? match(tname, me.name): TRUE;
   wilds = !parv[1] || strchr(tname, '*') || strchr(tname, '?');
@@ -386,3 +387,19 @@ static int report_this_status(struct Client *source_p, struct Client *target_p,
 
   return(cnt);
 }
+
+/* trace_spy()
+ *
+ * input        - pointer to client
+ * output       - none
+ * side effects - hook event doing_trace is called
+ */
+static void trace_spy(struct Client *source_p)
+{
+  struct hook_spy_data data;
+
+  data.source_p = source_p;
+
+  hook_call_event("doing_trace", &data);
+}
+
