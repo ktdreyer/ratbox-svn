@@ -81,23 +81,25 @@ STATS e now shows events.
 STATS f now shows active file descriptors.
 
 List of CAPAB's:
-TS    - Support the TS protocol
-QS    - Remove the QUIT storm on splits
-EX    - Support +e exceptions in channels
-CHW   - Support PRIVMSG/NOTICE @#channel messages
-DE    - Support channel mode +d - block based on the realname field
-LL    - LazyLink server
-IE    - Invite Exceptions - +I on channels - All nick!user@hosts listed in 
-        a +I are exempt from having to be invited to the channel before JOINing
-VCHAN - Support Virtual Channels
-EOB   - End of Burst - Servers with this enabled cannot issue burst commands
-        after it sends and receives an EOB command, thereby preventing op
-        hacking
-KLN   - Support remote K-lines
-GLN   - Support G-lines
-HOPS  - Support half-ops
-HUB   - Is a hub server (used to prevent two LL hubs from linking in that 
-        state)
+TS      - Support the TS protocol
+QS      - Remove the QUIT storm on splits
+EX      - Support +e exceptions in channels
+CHW     - Support PRIVMSG/NOTICE @#channel messages
+DE      - Support channel mode +d - block based on the realname field
+LL      - LazyLink server
+IE      - Invite Exceptions - +I on channels - All nick!user@hosts listed in 
+          a +I are exempt from having to be invited to the channel before 
+          JOINing
+VCHAN   - Support Virtual Channels
+EOB     - End of Burst - Servers with this enabled cannot issue burst commands
+          after it sends and receives an EOB command, thereby preventing op
+          hacking
+KLN     - Support remote K-lines
+GLN     - Support G-lines
+HOPS    - Support half-ops
+HUB     - Is a hub server (used to prevent two LL hubs from linking in that 
+          state)
+ANONOPS - Supports anonymous channel ops (channel mode +a)
 
 K-lines can now be sent to and accepted from other servers.  The shared {}
 block in the conf file is used to specify which servers are trusted.
