@@ -1,3 +1,9 @@
+*** 20010708_2 by androsyn
+When adding new modules, you really need to update modules.c so that the
+having thoses modules compiled statically works right.
+
+
+
 *** 20010708_1 by a1kmm
 - If we get a small TS on a non-existant channel, set the newts to 800000000
   not 0.
