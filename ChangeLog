@@ -1,3 +1,17 @@
+androsyn    2002/09/04 22:11:47 EDT	(20020905_0)
+
+  Modified files:
+    include              s_stats.h 
+    src                  s_stats.c 
+  Log:
+  Remove some unused vars..
+  
+  Revision  Changes    Path
+  7.8       +0 -3      ircd-ratbox/include/s_stats.h
+  7.22      +2 -4      ircd-ratbox/src/s_stats.c
+
+
+
 leeh        2002/09/04 11:09:01 EDT	(20020904_2)
 
   Modified files:
