@@ -57,8 +57,8 @@ struct Listener* make_listener(int port, struct irc_inaddr *addr)
 
   listener->name        = me.name;
   listener->fd          = -1;
+  copy_s_addr(&IN_ADDR(listener->addr),PIN_ADDR(addr));
   listener->port        = port;
-  copy_s_addr(&IN_ADDR(listener->addr),&PIN_ADDR(addr));
 
   listener->next = NULL;
   return listener;
@@ -249,7 +249,7 @@ static int inetport(struct Listener* listener)
     struct DNSQuery query;	
     query.callback = listener_dns_callback;
     query.ptr = listener;
-    adns_getaddr(&listener->addr, DEF_FAM, &query);
+//    adns_getaddr(&listener->addr, DEF_FAM, &query);
   }
   return 1;
 }
