@@ -226,6 +226,7 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 	const char *name;
 	struct Client *target_p;
 	struct remote_conf *hub_p;
+	hook_data_client hdata;
 	int hop;
 	int hlined = 0;
 	int llined = 0;
@@ -412,6 +413,10 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 	/* quick, dirty EOB.  you know you love it. */
 	sendto_one(target_p, ":%s PING %s %s",
 			get_id(&me, target_p), me.name, target_p->name);
+
+	hdata.client = source_p;
+	hdata.target = target_p;
+	call_hook(h_server_introduced, &hdata);
 
 	return 0;
 }

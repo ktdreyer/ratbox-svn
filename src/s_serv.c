@@ -990,6 +990,7 @@ server_estab(struct Client *client_p)
 {
 	struct Client *target_p;
 	struct server_conf *server_p;
+	hook_data_client hdata;
 	char *host;
 	dlink_node *ptr;
 
@@ -1131,6 +1132,10 @@ server_estab(struct Client *client_p)
 
 	ilog(L_SERVER, "Link with %s established: (%s) link",
 	     log_client_name(client_p, SHOW_IP), show_capabilities(client_p));
+
+	hdata.client = &me;
+	hdata.target = client_p;
+	call_hook(h_server_introduced, &hdata);
 
 	if(HasServlink(client_p))
 	{

@@ -72,6 +72,16 @@ server.
 			  hdata->client = server we are bursting to
 
 
+Server Hooks
+------------
+The following hooks are called during server connects/exits.
+
+"server_introduced"	- Sent after a server is introduced to the network,
+			  local or remote.
+			  Passes hook_data_client:
+			  hdata->client = uplink server (&me if local)
+			  hdata->target = server being introduced
+
 The following are for debugging and take struct hook_io_data for arguments. 
 These can be used for a variety of purposes, but are aimed at the developer
 community.

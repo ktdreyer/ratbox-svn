@@ -52,9 +52,7 @@
 static int me_su(struct Client *, struct Client *, int, const char **);
 static int me_login(struct Client *, struct Client *, int, const char **);
 
-#if 0
-static int h_server_link(struct Client *);
-#endif
+static void h_svc_server_introduced(hook_data_client *);
 static void h_svc_burst_client(hook_data_client *);
 static void h_svc_whois(hook_data_client *);
 
@@ -72,19 +70,11 @@ mapi_hfn_list_av1 services_hfnlist[] = {
 	{ "doing_whois",	(hookfn) h_svc_whois },
 	{ "doing_whois_global",	(hookfn) h_svc_whois },
 	{ "burst_client",	(hookfn) h_svc_burst_client },
-#if 0
-	{ "server_link",	(hookfn) h_server_link },
-#endif
+	{ "server_introduced",	(hookfn) h_svc_server_introduced },
 	{ NULL, NULL }
 };
 
-DECLARE_MODULE_AV1(services, NULL, NULL, services_clist, NULL, 
-#if 0
-		services_hfnlist, 
-#else
-		NULL,
-#endif
-		"$Revision$");
+DECLARE_MODULE_AV1(services, NULL, NULL, services_clist, NULL, services_hfnlist, "$Revision$");
 
 static int
 me_su(struct Client *client_p, struct Client *source_p,
@@ -139,24 +129,20 @@ h_svc_burst_client(hook_data_client *hdata)
 			hdata->target->user->suser);
 }
 
-#if 0
-static int
-h_server_link(struct Client *target_p)
+static void
+h_svc_server_introduced(hook_data_client *hdata)
 {
 	dlink_node *ptr;
 
 	DLINK_FOREACH(ptr, service_list.head)
 	{
-		if(!irccmp((const char *) ptr->data, target_p->name))
+		if(!irccmp((const char *) ptr->data, hdata->target->name))
 		{
-			target_p->flags |= FLAGS_SERVICE;
-			return 0;
+			hdata->target->flags |= FLAGS_SERVICE;
+			return;
 		}
 	}
-
-	return 0;
 }
-#endif
 
 static void
 h_svc_whois(hook_data_client *data)

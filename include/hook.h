@@ -22,6 +22,7 @@ int h_iorecvctrl_id;
 int h_burst_client;
 int h_burst_channel;
 int h_burst_finished;
+int h_server_introduced;
 
 void init_hook(void);
 int register_hook(const char *name);

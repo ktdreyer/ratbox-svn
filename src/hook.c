@@ -58,6 +58,7 @@ int h_iorecvctrl_id;
 int h_burst_client;
 int h_burst_channel;
 int h_burst_finished;
+int h_server_introduced;
 
 void
 init_hook(void)
@@ -73,6 +74,7 @@ init_hook(void)
 	h_burst_client = register_hook("burst_client");
 	h_burst_channel = register_hook("burst_channel");
 	h_burst_finished = register_hook("burst_finished");
+	h_server_introduced = register_hook("server_introduced");
 }
 
 /* grow_hooktable()
