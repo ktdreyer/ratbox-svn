@@ -129,7 +129,7 @@ int     m_topic(struct Client *cptr,
 	      sendto_channel_remote(chptr, cptr,":%s TOPIC %s :%s",
 				 parv[0], name,
 				 chptr->topic);
-	      if(GlobalSetOptions.hide_chanops)
+	      if(chptr->mode.mode & MODE_HIDEOPS)
 		{
 		  sendto_channel_local(ONLY_CHANOPS,
 				       chptr, ":%s!%s@%s TOPIC %s :%s",
@@ -170,7 +170,7 @@ int     m_topic(struct Client *cptr,
               sendto_one(sptr, form_str(RPL_TOPIC),
                          me.name, parv[0],
                          name, chptr->topic);
-              if (!GlobalSetOptions.hide_chanops)
+              if (!chptr->mode.mode & MODE_HIDEOPS)
                 {
                   sendto_one(sptr, form_str(RPL_TOPICWHOTIME),
                              me.name, parv[0], name,

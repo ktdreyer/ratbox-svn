@@ -113,7 +113,7 @@ int     ms_sjoin(struct Client *cptr,
   int hide_or_not;
   dlink_node *m;
 
-  if(GlobalSetOptions.hide_chanops)
+  if(chptr->mode.mode & MODE_HIDEOPS)
     hide_or_not = ONLY_CHANOPS;
   else
     hide_or_not = ALL_MEMBERS;

@@ -183,7 +183,7 @@ int     ms_lljoin(struct Client *cptr,
       chptr->mode.mode |= MODE_TOPICLIMIT;
       chptr->mode.mode |= MODE_NOPRIVMSGS;
       
-      if(GlobalSetOptions.hide_chanops)
+      if(chptr->mode.mode & MODE_HIDEOPS)
 	{
 	  sendto_channel_local(ONLY_CHANOPS,chptr,
 			       ":%s MODE %s +nt",

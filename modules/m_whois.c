@@ -325,7 +325,7 @@ void whois_person(struct Client *sptr,struct Client *acptr)
 
       if (ShowChannel(sptr, chptr))
 	{
-	  if (GlobalSetOptions.hide_chanops && !is_any_op(chptr,sptr))
+	  if (chptr->mode.mode & MODE_HIDEOPS && !is_any_op(chptr,sptr))
 	    {
 	      ircsprintf(t,"%s ",chname);
 	    }

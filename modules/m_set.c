@@ -98,7 +98,6 @@ static struct SetStruct set_cmd_table[] =
   { "SPAMNUM",		quote_spamnum,		0 },
   { "SPAMTIME",		quote_spamtime,		0 },
   { "SHIDE",		quote_shide,		0 },
-  { "CHIDE",		quote_chide,		0 },
   /* ---------------------------------------------------- */
   { (char *) 0,		(int (*)()) 0,		0 }
 };
@@ -344,27 +343,6 @@ int quote_spamtime( struct Client *sptr, int newval )
 		 me.name, sptr->name, GlobalSetOptions.spam_time);
     }
   return(0);
-}
-
-int quote_chide( struct Client *sptr, int newval )
-{
-  if(newval >= 0)
-    {
-      if(newval)
-	GlobalSetOptions.hide_chanops = 1;
-      else
-	GlobalSetOptions.hide_chanops = 0;
-
-      sendto_realops_flags(FLAGS_ALL,"%s has changed CHIDE to %i",
-			   sptr->name, GlobalSetOptions.hide_chanops);
-    }
-  else
-    {
-      sendto_one(sptr, ":%s NOTICE %s :CHIDE is currently %i",
-		 me.name, sptr->name, GlobalSetOptions.hide_chanops);
-
-    }
-  return 0;
 }
 
 int quote_shide( struct Client *sptr, int newval )
