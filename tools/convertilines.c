@@ -35,6 +35,29 @@
 
 #define BUFSIZE 512
 
+#define FLAGS_RESTRICTED	0x001
+#define FLAGS_EXCEEDLIMIT	0x002
+#define FLAGS_KLINEEXEMPT	0x004
+#define FLAGS_GLINEEXEMPT	0x008
+#define FLAGS_NEEDIDENT		0x010
+#define FLAGS_NOTILDE		0x020
+
+struct flag_table_struct
+{
+	const char *name;
+	int flag;
+};
+static struct flag_table_struct flag_table[] =
+{
+	{ "restricted",		FLAGS_RESTRICTED	},
+	{ "exceed_limit",	FLAGS_EXCEEDLIMIT	},
+	{ "kline_exempt",	FLAGS_KLINEEXEMPT	},
+	{ "gline_exempt",	FLAGS_GLINEEXEMPT	},
+	{ "need_ident",		FLAGS_NEEDIDENT		},
+	{ "no_tilde",		FLAGS_NOTILDE		},
+	{ NULL, 0 }
+};
+
 struct AuthBlock
 {
     struct AuthBlock *next;
@@ -45,13 +68,7 @@ struct AuthBlock
     char *spoof;
     char *passwd;
     int class;
-    
-    int restricted;
-    int exceed_limit;
-    int kline_exempt;
-    int gline_exempt;
-    int require_ident;
-    int no_tilde;
+    int flags;
 
     /* indicates one of above */
     int special;
@@ -312,7 +329,7 @@ static void oldParseOneLine(FILE *out,char* line)
 
 	if(conf_letter == 'i')
 	{
-	    tempptr->restricted = 1;
+	    tempptr->flags |= FLAGS_RESTRICTED;
 	    tempptr->specialk = 1;
 	}
 
@@ -401,6 +418,7 @@ static void write_auth_entries(FILE *out)
 static void write_specific(FILE *out, struct AuthBlock *ptr)
 {
     int i;
+    int prev = 0;
 
     fprintf(out, "auth {\n");
 
@@ -413,23 +431,23 @@ static void write_specific(FILE *out, struct AuthBlock *ptr)
     if(ptr->passwd)
 	fprintf(out, "\tpassword = \"%s\";\n", ptr->passwd);
 
-    if(ptr->exceed_limit)
-	fprintf(out, "\texceed_limit = yes;\n");
+    if(ptr->flags)
+    {
+	    fprintf(out, "\tflags = ");
 
-    if(ptr->kline_exempt)
-	fprintf(out, "\tkline_exempt = yes;\n");
+	    for(i = 0; flag_table[i].flag; i++)
+	    {
+		    if(ptr->flags & flag_table[i].flag)
+		    {
+			    fprintf(out, "%s%s", 
+					prev ? ", " : "", 
+					flag_table[i].name);
+			    prev = 1;
+		    }
+	    }
 
-    if(ptr->gline_exempt)
-	fprintf(out, "\tgline_exempt = yes;\n");
-
-    if(ptr->no_tilde)
-	fprintf(out, "\tno_tilde = yes;\n");
-
-    if(ptr->require_ident)
-	fprintf(out, "\thave_ident = yes;\n");
-
-    if(ptr->restricted)
-	fprintf(out, "\trestricted = yes;\n");
+	    fprintf(out, ";\n");
+    }
 
     fprintf(out, "\tclass = \"%d\";\n", ptr->class);
     fprintf(out, "};\n");
@@ -503,12 +521,7 @@ struct AuthBlock *find_matching_conf(struct AuthBlock *acptr)
 static int match(struct AuthBlock *ptr, struct AuthBlock *acptr)
 {
     if((ptr->class == acptr->class) &&
-       (ptr->restricted == acptr->restricted) &&
-       (ptr->require_ident == acptr->require_ident) &&
-       (ptr->exceed_limit == acptr->exceed_limit) &&
-       (ptr->kline_exempt == acptr->kline_exempt) &&
-       (ptr->gline_exempt == acptr->gline_exempt) &&
-       (ptr->no_tilde == acptr->no_tilde))
+       (ptr->flags == acptr->flags))
     {
 	const char *p1, *p2;
 	
@@ -560,27 +573,27 @@ void set_flags(struct AuthBlock *ptr, const char *user_field, const char *host_f
               break;
 
           case '-':
-	      ptr->no_tilde = 1;
+	      ptr->flags |= FLAGS_NOTILDE;
 	      ptr->special = 1;
               break;
 
           case '+':
-	      ptr->require_ident = 1;
+	      ptr->flags |= FLAGS_NEEDIDENT;
 	      ptr->specialk = 1;
               break;
 
           case '^':        /* is exempt from k/g lines */
-	      ptr->kline_exempt = 1;
+	      ptr->flags |= FLAGS_KLINEEXEMPT;
 	      ptr->special = 1;
               break;
 
 	  case '>':
-	      ptr->exceed_limit = 1;
+	      ptr->flags |= FLAGS_EXCEEDLIMIT;
 	      ptr->special = 1;
 	      break;
 
 	  case '_':
-	      ptr->gline_exempt = 1;
+	      ptr->flags |= FLAGS_GLINEEXEMPT;
 	      ptr->special = 1;
 	      break;
 
