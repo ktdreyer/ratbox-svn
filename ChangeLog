@@ -1,3 +1,18 @@
+androsyn    2005/03/22 21:40:02 UTC	(20050322_2)
+
+  Modified files:
+    modules              Makefile.am 
+  Removed files:
+    modules              instdso.sh 
+  Log:
+  backout last change
+  
+  Revision  Changes    Path
+  1.5       +4 -2      ircd-ratbox/modules/Makefile.am
+  1.2       +0 -94     ircd-ratbox/modules/instdso.sh (dead)
+
+
+
 androsyn    2005/03/22 20:13:55 UTC	(20050322_1)
 
   Modified files:
