@@ -1,3 +1,13 @@
+*** 20001031_1 by adrian
+
+
+We should be registering a COMM_SELECT_READ, not WRITE.
+The only reason this was working was because the socket was ready
+for writing also at the correct time it was ready for reading ..
+uhm, sad. :-)
+
+
+
 *** 20001030_11 by db
 - more mods to clean up m_stats.c
 - slight cleanup in m_user.c
