@@ -1,3 +1,8 @@
+*** 20010120_9 by fl_
+- the sjoin part to the vchan bug.. altho its still possible to make
+  fake vchans if youre timing is right :/
+
+
 *** 20010120_8 by davidt
 - Tidy up m_part.c (merge vchan/nonvchan stuff into the same code, so we
   aren't duplicating stuff everywhere)
