@@ -165,7 +165,7 @@ msgstr	""
 
 #: ../src/messages.tab:278
 #, c-format
-msgid	":%s 250 %s :Highest connection count: %d (%d clients)"
+msgid	":%s 250 %s :Highest connection count: %d (%d clients) (%d since server was (re)started)"
 msgstr	""
 
 #: ../src/messages.tab:280

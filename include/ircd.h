@@ -66,7 +66,7 @@ struct Counter {
   int     unknown;        /* unknown connections */
   int     max_loc;        /* MAX local clients */
   int     max_tot;        /* MAX global clients */
-  unsigned long total_client_count; /* Total client count ever */
+  unsigned long totalrestartcount; /* Total client count ever */
 };
 
 extern struct SetOptions GlobalSetOptions;  /* defined in ircd.c */

@@ -1,5 +1,5 @@
 /************************************************************************
- *   IRC - Internet Relay Chat, src/m_sjoin.c
+ *   IRC - Internet Relay Chat, modules/m_sjoin.c
  *   Copyright (C) 1990 Jarkko Oikarinen and
  *                      University of Oulu, Computing Center
  *
@@ -75,10 +75,8 @@ char *_version = "20001122";
 char    modebuf[MODEBUFLEN];
 char    parabuf[MODEBUFLEN];
 char    *para[MAXMODEPARAMS];
-char    *server_nick[MAXMODEPARAMS];
 char    *mbuf;
 int     pargs;
-int     server_nick_count;
 
 void set_final_mode(struct Mode *mode,struct Mode *oldmode);
 void remove_our_modes(int type,
@@ -105,7 +103,9 @@ int     ms_sjoin(struct Client *cptr,
   int   args = 0, keep_our_modes = 1, keep_new_modes = 1;
   int   doesop = 0, fl, people = 0, isnew;
   register      char *s, *s0;
+  static        char buf[BUFSIZE];
   static        char sjbuf[BUFSIZE];
+  char          *nick_pointer;
   char    *p;
   int hide_or_not;
   dlink_node *m;
@@ -289,14 +289,13 @@ int     ms_sjoin(struct Client *cptr,
       modebuf[1] = '\0';
     }
 
-  ircsprintf(sjbuf, ":%s SJOIN %lu %s %s %s :", parv[0], tstosend, parv[2],
+  ircsprintf(buf, ":%s SJOIN %lu %s %s %s :", parv[0], tstosend, parv[2],
           modebuf, parabuf);
 
   mbuf = modebuf;
   para[0] = para[1] = para[2] = para[3] = "";
-  server_nick[0] = server_nick[1] = server_nick[2] = server_nick[3] = "";
   pargs = 0;
-  server_nick_count = 0;
+  nick_pointer = sjbuf;
 
   *mbuf++ = '+';
 
@@ -366,9 +365,11 @@ int     ms_sjoin(struct Client *cptr,
        *  if this is ever a possibility...
        */
       if (keep_new_modes)
-	server_nick[server_nick_count++] = s0;
+	ircsprintf(nick_pointer,"%s ", s0);
       else
-	server_nick[server_nick_count++] = s;
+	ircsprintf(nick_pointer,"%s ", s);
+
+      nick_pointer += strlen(nick_pointer);
 
       if (fl & MODE_CHANOP)
         {
@@ -444,7 +445,7 @@ int     ms_sjoin(struct Client *cptr,
 				 parv[0],
 				 top_chptr->chname,
 				 modebuf,
-				 para[0],para[1],para[2],para[3] );
+				 para[0], para[1], para[2], para[3]);
 	}
       else
 	{
@@ -453,20 +454,13 @@ int     ms_sjoin(struct Client *cptr,
 				 parv[0],
 				 chptr->chname,
 				 modebuf,
-				 para[0],para[1],para[2],para[3] );
+				 para[0], para[1], para[2], para[3]);
 	}
     }
 
   if (people)
-    {
-      sendto_match_servs(chptr, cptr, "%s %s %s %s",
-			 sjbuf,
-			 server_nick[0],
-			 server_nick[1],
-			 server_nick[2],
-			 server_nick[3]
-			 );
-    }
+    sendto_match_servs(chptr, cptr, "%s %s", buf, sjbuf);
+
   return 0;
 }
 

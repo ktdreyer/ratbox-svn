@@ -249,7 +249,7 @@ int show_lusers(struct Client *sptr)
   sendto_one(sptr, form_str(RPL_GLOBALUSERS), me.name, sptr->name,
              Count.total, Count.max_tot);
   sendto_one(sptr, form_str(RPL_STATSCONN), me.name, sptr->name,
-             MaxConnectionCount, MaxClientCount);
+             MaxConnectionCount, MaxClientCount,Count.totalrestartcount);
 
   if (Count.local > MaxClientCount)
     MaxClientCount = Count.local;
@@ -443,7 +443,7 @@ int register_user(struct Client *cptr, struct Client *sptr,
 
   if (MyConnect(sptr))
     {
-      Count.total_client_count++;
+      Count.totalrestartcount++;
       user_welcome(sptr);
     }
   else if (IsServer(cptr))
