@@ -1,3 +1,21 @@
+leeh        2002/11/11 23:14:01 UTC	(20021111_3)
+
+  Modified files:
+    include              s_conf.h 
+    modules              m_rehash.c m_stats.c m_unkline.c 
+    src                  s_conf.c 
+  Log:
+  - my attempt at fixing the tkline bug
+  
+  Revision  Changes    Path
+  7.205     +9 -4      ircd-ratbox/include/s_conf.h
+  1.49      +12 -15    ircd-ratbox/modules/m_rehash.c
+  1.125     +5 -5      ircd-ratbox/modules/m_stats.c
+  1.63      +128 -22   ircd-ratbox/modules/m_unkline.c
+  7.361     +106 -66   ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2002/11/11 20:35:40 UTC	(20021111_2)
 
   Modified files:
