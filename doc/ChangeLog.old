@@ -1,3 +1,7 @@
+*** 20010617_1 by toot
+finished formatting channel.c
+
+
 *** 20010616_10 by a1kmm
 - Changed an irccmp to a match so we don't break host = "*.blah";
 
