@@ -830,19 +830,18 @@ void channel_modes(struct Channel *chptr, struct Client *client_p,
     *mbuf++ = 'n';
   if (chptr->mode.mode & MODE_HIDEOPS)
     *mbuf++ = 'a';
-  
   if (chptr->mode.limit)
-  {
-    *mbuf++ = 'l';
-    if (IsMember(client_p, chptr) || IsServer(client_p))
-      ircsprintf(pbuf, "%d ", chptr->mode.limit);
-  }
+    {
+      *mbuf++ = 'l';
+      if (IsMember(client_p, chptr) || IsServer(client_p))
+         ircsprintf(pbuf, "%d ", chptr->mode.limit);
+    }
   if (*chptr->mode.key)
-  {
-    *mbuf++ = 'k';
-    if (IsMember(client_p, chptr) || IsServer(client_p))
-      (void)strcat(pbuf, chptr->mode.key);
-  }
+    {
+      *mbuf++ = 'k';
+      if (IsMember(client_p, chptr) || IsServer(client_p))
+        (void)strcat(pbuf, chptr->mode.key);
+    }
 
   *mbuf++ = '\0';
   return;
@@ -1444,66 +1443,75 @@ chm_except(struct Client *client_p,struct Client *source_p,
            struct Channel *chptr, int parc, int *parn,
            char **parv, int *errors, int alev, int dir, char c, void *d)
 {
- int i;
- dlink_node *ptr;
- struct Ban *banptr;
- char *mask;
- if (alev < CHACCESS_HALFOP)
- {
-  if (!(*errors & SM_ERR_NOOPS))
-   sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
-              source_p->name, chptr->chname);
-  *errors |= SM_ERR_NOOPS;
-  return;
- }
- if (dir == 0 || parc <= *parn)
- {
-  if ((*errors & SM_ERR_RPL_E) != 0)
-   return;
-  *errors |= SM_ERR_RPL_E;
-  for (ptr = chptr->exceptlist.head; ptr; ptr = ptr->next)
-  {
-   banptr = ptr->data;
-   sendto_one(client_p, form_str(RPL_EXCEPTLIST),
-              me.name, client_p->name, chptr->chname,
-              banptr->banstr, banptr->who, banptr->when);
-  }
-  sendto_one(source_p, form_str(RPL_ENDOFEXCEPTLIST), me.name,
+  int i;
+  dlink_node *ptr;
+  struct Ban *banptr;
+  char *mask;
+
+  if (alev < CHACCESS_HALFOP)
+    {
+      if (!(*errors & SM_ERR_NOOPS))
+        sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
+                   source_p->name, chptr->chname);
+      *errors |= SM_ERR_NOOPS;
+      return;
+    }
+
+  if (dir == 0 || parc <= *parn)
+    {
+      if ((*errors & SM_ERR_RPL_E) != 0)
+        return;
+      *errors |= SM_ERR_RPL_E;
+
+      for (ptr = chptr->exceptlist.head; ptr; ptr = ptr->next)
+        {
+          banptr = ptr->data;
+          sendto_one(client_p, form_str(RPL_EXCEPTLIST),
+                     me.name, client_p->name, chptr->chname,
+          banptr->banstr, banptr->who, banptr->when);
+        }
+      sendto_one(source_p, form_str(RPL_ENDOFEXCEPTLIST), me.name,
              source_p->name, chptr->chname);
-  return;
- }
- if (!IsServer(source_p) && !MyConnect(source_p) && mode_limit++ > 4)
-  return;
- mask = pretty_mask(parv[(*parn)++]);
- if (dir <0 && add_id(source_p, chptr, mask, CHFL_EXCEPTION)==0)
- {
-  for (i=0; i<mode_count_minus; i++)
-   if (mode_changes_minus[i].letter == c &&
-       !irccmp(mode_changes_minus[i].arg, mask))
-   {
-    mode_changes_minus[i].letter = 0;
+      return;
+    }
+
+  if (!IsServer(source_p) && !MyConnect(source_p) && mode_limit++ > 4)
     return;
-   }
-  mode_changes_plus[mode_count_plus].letter = c;
-  mode_changes_plus[mode_count_plus].caps = 0;
-  mode_changes_plus[mode_count_plus].nocaps = 0;
-  mode_changes_plus[mode_count_plus].mems = ALL_MEMBERS;
-  mode_changes_plus[mode_count_plus++].arg = mask;
- } else if (dir > 0 && del_id(chptr, mask, CHFL_EXCEPTION)==0)
- {
-  for (i=0; i<mode_count_plus; i++)
-   if (mode_changes_plus[i].letter == c &&
-       !irccmp(mode_changes_plus[i].arg, mask))
-   {
-    mode_changes_plus[i].letter = 0;
-    return;
-   }
-  mode_changes_minus[mode_count_minus].letter = c;
-  mode_changes_minus[mode_count_minus].caps = 0;
-  mode_changes_minus[mode_count_minus].nocaps = 0;
-  mode_changes_minus[mode_count_minus].mems = ALL_MEMBERS;
-  mode_changes_minus[mode_count_minus++].arg = mask;
- }
+
+  mask = pretty_mask(parv[(*parn)++]);
+
+  if (dir <0 && add_id(source_p, chptr, mask, CHFL_EXCEPTION)==0)
+    {
+      for (i=0; i<mode_count_minus; i++)
+        if (mode_changes_minus[i].letter == c &&
+            !irccmp(mode_changes_minus[i].arg, mask))
+          {
+            mode_changes_minus[i].letter = 0;
+            return;
+          }
+
+       mode_changes_plus[mode_count_plus].letter = c;
+       mode_changes_plus[mode_count_plus].caps = 0;
+       mode_changes_plus[mode_count_plus].nocaps = 0;
+       mode_changes_plus[mode_count_plus].mems = ALL_MEMBERS;
+       mode_changes_plus[mode_count_plus++].arg = mask;
+    }
+  else if (dir > 0 && del_id(chptr, mask, CHFL_EXCEPTION)==0)
+    {
+      for (i=0; i<mode_count_plus; i++)
+        if (mode_changes_plus[i].letter == c &&
+            !irccmp(mode_changes_plus[i].arg, mask))
+          {
+            mode_changes_plus[i].letter = 0;
+            return;
+          }
+
+      mode_changes_minus[mode_count_minus].letter = c;
+      mode_changes_minus[mode_count_minus].caps = 0;
+      mode_changes_minus[mode_count_minus].nocaps = 0;
+      mode_changes_minus[mode_count_minus].mems = ALL_MEMBERS;
+      mode_changes_minus[mode_count_minus++].arg = mask;
+    }
 }
 
 static void
@@ -1511,67 +1519,76 @@ chm_invex(struct Client *client_p,struct Client *source_p,
            struct Channel *chptr, int parc, int *parn,
            char **parv, int *errors, int alev, int dir, char c, void *d)
 {
- int i;
- char *mask;
- dlink_node *ptr;
- struct Ban *banptr;
- if (alev < CHACCESS_HALFOP)
- {
-  if (!(*errors & SM_ERR_NOOPS))
-   sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
-              source_p->name, chptr->chname);
-  *errors |= SM_ERR_NOOPS;
-  return;
- }
+  int i;
+  char *mask;
+  dlink_node *ptr;
+  struct Ban *banptr;
+
+  if (alev < CHACCESS_HALFOP)
+    {
+      if (!(*errors & SM_ERR_NOOPS))
+        sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
+                   source_p->name, chptr->chname);
+      *errors |= SM_ERR_NOOPS;
+      return;
+    }
+
  if (dir == 0 || parc <= *parn)
- {
-  if ((*errors & SM_ERR_RPL_I) != 0)
-   return;
-  *errors |= SM_ERR_RPL_I;
-  for (ptr = chptr->invexlist.head; ptr; ptr = ptr->next)
-  {
-   banptr = ptr->data;
-   sendto_one(client_p, form_str(RPL_INVITELIST), me.name, client_p->name,
-              chptr->chname, banptr->banstr, banptr->who, banptr->when);
-  }
-  sendto_one(source_p, form_str(RPL_ENDOFINVITELIST), me.name,
-             source_p->name, chptr->chname);
-  return;
- }
- if (!IsServer(source_p) && !MyConnect(source_p) && mode_limit++ > 4)
-  return;
- mask = pretty_mask(parv[(*parn)++]);
- if (dir <0 && add_id(source_p, chptr, mask, CHFL_INVEX)==0)
- {
-  for (i=0; i<mode_count_minus; i++)
-   if (mode_changes_minus[i].letter == c &&
-       !irccmp(mode_changes_minus[i].arg, mask))
    {
-    /* It cancels out, just return... */
-    mode_changes_minus[i].letter = 0;
-    return;
+     if ((*errors & SM_ERR_RPL_I) != 0)
+       return;
+     *errors |= SM_ERR_RPL_I;
+
+     for (ptr = chptr->invexlist.head; ptr; ptr = ptr->next)
+       {
+         banptr = ptr->data;
+           sendto_one(client_p, form_str(RPL_INVITELIST), me.name,
+                      client_p->name, chptr->chname, banptr->banstr,
+                      banptr->who, banptr->when);
+       }
+     sendto_one(source_p, form_str(RPL_ENDOFINVITELIST), me.name,
+                source_p->name, chptr->chname);
+     return;
    }
-  mode_changes_plus[mode_count_plus].letter = c;
-  mode_changes_plus[mode_count_plus].caps = 0;
-  mode_changes_plus[mode_count_plus].nocaps = 0;
-  mode_changes_plus[mode_count_plus].mems = ALL_MEMBERS;
-  mode_changes_plus[mode_count_plus++].arg = mask;
- } else if (dir > 0 && del_id(chptr, mask, CHFL_INVEX)==0)
- {
-  for (i=0; i<mode_count_plus; i++)
-   if (mode_changes_plus[i].letter == c &&
-       !irccmp(mode_changes_plus[i].arg, mask))
-   {
-    /* It cancels out, so just return... */
-    mode_changes_plus[i].letter = 0;
+
+  if (!IsServer(source_p) && !MyConnect(source_p) && mode_limit++ > 4)
     return;
-   }
-  mode_changes_minus[mode_count_minus].letter = c;
-  mode_changes_minus[mode_count_minus].caps = 0;
-  mode_changes_minus[mode_count_minus].nocaps = 0;
-  mode_changes_minus[mode_count_minus].mems = ALL_MEMBERS;
-  mode_changes_minus[mode_count_minus++].arg = mask;
- }
+
+  mask = pretty_mask(parv[(*parn)++]);
+  if (dir <0 && add_id(source_p, chptr, mask, CHFL_INVEX)==0)
+    {
+      for (i=0; i<mode_count_minus; i++)
+        if (mode_changes_minus[i].letter == c &&
+            !irccmp(mode_changes_minus[i].arg, mask))
+          {
+            /* It cancels out, just return... */
+            mode_changes_minus[i].letter = 0;
+            return;
+          }
+
+      mode_changes_plus[mode_count_plus].letter = c;
+      mode_changes_plus[mode_count_plus].caps = 0;
+      mode_changes_plus[mode_count_plus].nocaps = 0;
+      mode_changes_plus[mode_count_plus].mems = ALL_MEMBERS;
+      mode_changes_plus[mode_count_plus++].arg = mask;
+    }
+ else if (dir > 0 && del_id(chptr, mask, CHFL_INVEX)==0)
+    {
+      for (i=0; i<mode_count_plus; i++)
+        if (mode_changes_plus[i].letter == c &&
+            !irccmp(mode_changes_plus[i].arg, mask))
+          {
+            /* It cancels out, so just return... */
+            mode_changes_plus[i].letter = 0;
+            return;
+          }
+
+       mode_changes_minus[mode_count_minus].letter = c;
+       mode_changes_minus[mode_count_minus].caps = 0;
+       mode_changes_minus[mode_count_minus].nocaps = 0;
+       mode_changes_minus[mode_count_minus].mems = ALL_MEMBERS;
+       mode_changes_minus[mode_count_minus++].arg = mask;
+    }
 }
 
 static void
@@ -1579,154 +1596,178 @@ chm_op(struct Client *client_p,struct Client *source_p,
        struct Channel *chptr, int parc, int *parn,
        char **parv, int *errors, int alev, int dir, char c, void *d)
 {
- int i;
- /* Note on was_opped etc...
-  * The was_opped variable is set to -1 if they were set -o in this mode,
-  * was implies that previously they were +o, so we should not send a
-  * +o out. wasnt_opped is set to -1 if they were +o in this mode, which
-  * implies they were previously -o so we don't send -o out. Note that
-  * was_hopped and was_voiced are along with is_half_op/is_voiced to
-  * decide if we need to -h/-v first to support servers/clients that
-  * allow more than one +h/+v/+o at a time.
-  * -A1kmm.
-  */
- int was_opped=0, was_hopped=0, was_voiced=0, wasnt_opped = 0,
-     wasnt_hopped = 0, t_op, t_voice, t_hop;
- char *opnick;
- struct Client *targ_p;
- if (alev < CHACCESS_CHANOP)
- {
-  if (!(*errors & SM_ERR_NOOPS))
-   sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
-              source_p->name, chptr->chname);
-  *errors |= SM_ERR_NOOPS;
-  return;
- }
- if (dir == 0 || parc <= *parn)
-  return;
- opnick = parv[(*parn)++];
- if ((targ_p = find_client(opnick, NULL)) == NULL)
- {
-  if (!(*errors & SM_ERR_NOTONCHANNEL))
-   sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name,
-              source_p->name, opnick);
-  *errors |= SM_ERR_NOTONCHANNEL;
-  return;
- }
- if (!IsMember(targ_p, chptr))
- {
-  if (!(*errors & SM_ERR_NOTONCHANNEL))
-   sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL), me.name,
-              source_p->name, chptr->chname, opnick);
-  *errors |= SM_ERR_NOTONCHANNEL;
-  return;
- }
- if ((t_op = is_chan_op(chptr, targ_p)) != 0)
- {
-  t_voice = 0;
-  t_hop = 0;
- }
- else if ((t_hop = is_half_op(chptr, targ_p)) != 0)
-  t_voice = 0;
- else
-  t_voice = is_voiced(chptr, targ_p);
- if ((dir < 0 && t_op) || (dir > 0 && !t_op))
-  return;
- if (!IsServer(source_p) && MyConnect(source_p) && mode_limit++ > 4)
-  return;
- /* Cancel mode changes... */
- for (i=0; i<mode_count_plus; i++)
-  if ((mode_changes_plus[i].letter == 'o' ||
-      mode_changes_plus[i].letter == 'h' ||
-      mode_changes_plus[i].letter == 'v')
-      && !irccmp(mode_changes_plus[i].arg, opnick))
-  {
-   if (mode_changes_plus[i].letter == 'o')
-    wasnt_opped = -1;
-   else if (mode_changes_plus[i].letter == 'o')
-    wasnt_hopped = -1;
-   mode_changes_plus[i].letter = 0;
-  }
- for (i=0; i<mode_count_minus; i++)
-  if ((mode_changes_minus[i].letter == 'o' ||
-      mode_changes_minus[i].letter == 'h' ||
-      mode_changes_minus[i].letter == 'v')
-      && !irccmp(mode_changes_minus[i].arg, opnick))
-  {
-   if (mode_changes_minus[i].letter == 'o')
-    was_opped = -1;
-   else if (mode_changes_minus[i].letter == 'v')
-    was_voiced = -1;
-   else if (mode_changes_minus[i].letter == 'h')
-    was_hopped = -1;
-  }
- if (dir < 0)
- {
-  if (was_voiced || t_voice)
-  {
-   mode_changes_minus[mode_count_minus].letter = 'v';
-   mode_changes_minus[mode_count_minus].caps = 0;
-   mode_changes_minus[mode_count_minus].nocaps = 0;
-   mode_changes_minus[mode_count_minus].mems = ONLY_CHANOPS_HALFOPS;
-   mode_changes_minus[mode_count_minus++].arg = targ_p->name;
-  } else if (was_hopped || t_hop)
-  {
-   mode_changes_minus[mode_count_minus].letter = 'h';
-   mode_changes_minus[mode_count_minus].caps = CAP_HOPS;
-   mode_changes_minus[mode_count_minus].nocaps = 0;
-   mode_changes_minus[mode_count_minus].mems = ONLY_CHANOPS_HALFOPS;
-   mode_changes_minus[mode_count_minus++].arg = targ_p->name;
-  }
-  change_channel_membership(chptr, &chptr->chanops, &chptr->locchanops,
-                            targ_p);
-  if (was_opped == 0)
-  {
-   mode_changes_plus[mode_count_plus].letter = c;
-   mode_changes_plus[mode_count_plus].caps = 0;
-   mode_changes_plus[mode_count_plus].nocaps = 0;
-   mode_changes_plus[mode_count_plus].mems = ONLY_CHANOPS_HALFOPS;
-   mode_changes_plus[mode_count_plus++].arg = targ_p->name;
-  }
-  if (MyConnect(targ_p) && chptr->mode.mode & MODE_HIDEOPS)
-   sync_oplists(chptr, targ_p, 0, chptr->chname);
- }
- else
- {
-  /* Converting -o to -h... */
-  if (t_hop)
-  {
-   if (IsServer(source_p) || !MyConnect(source_p))
+  int i;
+  /* Note on was_opped etc...
+   * The was_opped variable is set to -1 if they were set -o in this mode,
+   * was implies that previously they were +o, so we should not send a
+   * +o out. wasnt_opped is set to -1 if they were +o in this mode, which
+   * implies they were previously -o so we don't send -o out. Note that
+   * was_hopped and was_voiced are along with is_half_op/is_voiced to
+   * decide if we need to -h/-v first to support servers/clients that
+   * allow more than one +h/+v/+o at a time.
+   * -A1kmm.
+   */
+  int was_opped=0, was_hopped=0, was_voiced=0, wasnt_opped = 0,
+      wasnt_hopped = 0, t_op, t_voice, t_hop;
+  char *opnick;
+  struct Client *targ_p;
+
+  if (alev < CHACCESS_CHANOP)
+    {
+      if (!(*errors & SM_ERR_NOOPS))
+        sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
+                   source_p->name, chptr->chname);
+      *errors |= SM_ERR_NOOPS;
+      return;
+    }
+
+  if (dir == 0 || parc <= *parn)
     return;
-   if (wasnt_hopped == 0)
-   {
-    mode_changes_minus[mode_count_minus].letter = 'h';
-    mode_changes_minus[mode_count_minus].caps = CAP_HOPS;
-    mode_changes_minus[mode_count_minus].nocaps = 0;
-    mode_changes_minus[mode_count_minus].mems = ONLY_CHANOPS_HALFOPS;
-    mode_changes_minus[mode_count_minus++].arg = targ_p->name;
-   }
-   change_channel_membership(chptr, &chptr->peons, &chptr->locpeons,
-                             targ_p);
-  } else
-  {
-   if (wasnt_opped == 0)
-   {
-    mode_changes_minus[mode_count_minus].letter = c;
-    mode_changes_minus[mode_count_minus].caps = 0;
-    mode_changes_minus[mode_count_minus].nocaps = 0;
-    mode_changes_minus[mode_count_minus].mems = ONLY_CHANOPS_HALFOPS;
-    mode_changes_minus[mode_count_minus++].arg = targ_p->name;
-   }
-   change_channel_membership(chptr, &chptr->peons, &chptr->locpeons,
-                             targ_p);
-  }
-  if (MyConnect(targ_p) && chptr->mode.mode & MODE_HIDEOPS)
-  {
-   sendto_one(targ_p, ":%s MODE %s -o %s", me.name, chptr->chname,
-              targ_p->name);
-   sync_oplists(chptr, targ_p, 1, chptr->chname);
-  }
- }
+
+  opnick = parv[(*parn)++];
+
+  if ((targ_p = find_client(opnick, NULL)) == NULL)
+    {
+      if (!(*errors & SM_ERR_NOTONCHANNEL))
+        sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name,
+                   source_p->name, opnick);
+      *errors |= SM_ERR_NOTONCHANNEL;
+      return;
+    }
+
+  if (!IsMember(targ_p, chptr))
+    {
+      if (!(*errors & SM_ERR_NOTONCHANNEL))
+        sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL), me.name,
+                   source_p->name, chptr->chname, opnick);
+      *errors |= SM_ERR_NOTONCHANNEL;
+      return;
+    }
+
+  if ((t_op = is_chan_op(chptr, targ_p)) != 0)
+    {
+      t_voice = 0;
+      t_hop = 0;
+    }
+  else if ((t_hop = is_half_op(chptr, targ_p)) != 0)
+    t_voice = 0;
+  else
+    t_voice = is_voiced(chptr, targ_p);
+
+  if ((dir < 0 && t_op) || (dir > 0 && !t_op))
+    return;
+
+  if (!IsServer(source_p) && MyConnect(source_p) && mode_limit++ > 4)
+   return;
+
+  /* Cancel mode changes... */
+  for (i=0; i<mode_count_plus; i++)
+    if ((mode_changes_plus[i].letter == 'o' ||
+         mode_changes_plus[i].letter == 'h' ||
+         mode_changes_plus[i].letter == 'v')
+         && !irccmp(mode_changes_plus[i].arg, opnick))
+      {
+        if (mode_changes_plus[i].letter == 'o')
+          wasnt_opped = -1;
+        else if (mode_changes_plus[i].letter == 'o')
+          wasnt_hopped = -1;
+        mode_changes_plus[i].letter = 0;
+      }
+
+  for (i=0; i<mode_count_minus; i++)
+    if ((mode_changes_minus[i].letter == 'o' ||
+         mode_changes_minus[i].letter == 'h' ||
+         mode_changes_minus[i].letter == 'v')
+         && !irccmp(mode_changes_minus[i].arg, opnick))
+      {
+        if (mode_changes_minus[i].letter == 'o')
+          was_opped = -1;
+        else if (mode_changes_minus[i].letter == 'v')
+          was_voiced = -1;
+        else if (mode_changes_minus[i].letter == 'h')
+          was_hopped = -1;
+      }
+
+  if (dir < 0)
+    {
+      if (was_voiced || t_voice)
+        {
+          mode_changes_minus[mode_count_minus].letter = 'v';
+          mode_changes_minus[mode_count_minus].caps = 0;
+          mode_changes_minus[mode_count_minus].nocaps = 0;
+          mode_changes_minus[mode_count_minus].mems =
+                                     ONLY_CHANOPS_HALFOPS;
+          mode_changes_minus[mode_count_minus++].arg = targ_p->name;
+        }
+      else if (was_hopped || t_hop)
+        {
+          mode_changes_minus[mode_count_minus].letter = 'h';
+          mode_changes_minus[mode_count_minus].caps = CAP_HOPS;
+          mode_changes_minus[mode_count_minus].nocaps = 0;
+          mode_changes_minus[mode_count_minus].mems =
+                                     ONLY_CHANOPS_HALFOPS;
+          mode_changes_minus[mode_count_minus++].arg = targ_p->name;
+        }
+
+      change_channel_membership(chptr, &chptr->chanops,
+                                &chptr->locchanops, targ_p);
+
+      if (was_opped == 0)
+        {
+          mode_changes_plus[mode_count_plus].letter = c;
+          mode_changes_plus[mode_count_plus].caps = 0;
+          mode_changes_plus[mode_count_plus].nocaps = 0;
+          mode_changes_plus[mode_count_plus].mems = ONLY_CHANOPS_HALFOPS;
+          mode_changes_plus[mode_count_plus++].arg = targ_p->name;
+        }
+
+      if (MyConnect(targ_p) && chptr->mode.mode & MODE_HIDEOPS)
+        sync_oplists(chptr, targ_p, 0, chptr->chname);
+    }
+  else
+    {
+      /* Converting -o to -h... */
+      if (t_hop)
+        {
+          if (IsServer(source_p) || !MyConnect(source_p))
+            return;
+
+          if (wasnt_hopped == 0)
+            {
+              mode_changes_minus[mode_count_minus].letter = 'h';
+              mode_changes_minus[mode_count_minus].caps = CAP_HOPS;
+              mode_changes_minus[mode_count_minus].nocaps = 0;
+              mode_changes_minus[mode_count_minus].mems =
+                                         ONLY_CHANOPS_HALFOPS;
+              mode_changes_minus[mode_count_minus++].arg = targ_p->name;
+            }
+
+          change_channel_membership(chptr, &chptr->peons,
+                                    &chptr->locpeons, targ_p);
+        }
+      else
+        {
+          if (wasnt_opped == 0)
+            {
+              mode_changes_minus[mode_count_minus].letter = c;
+              mode_changes_minus[mode_count_minus].caps = 0;
+              mode_changes_minus[mode_count_minus].nocaps = 0;
+              mode_changes_minus[mode_count_minus].mems =
+                                         ONLY_CHANOPS_HALFOPS;
+              mode_changes_minus[mode_count_minus++].arg = targ_p->name;
+            }
+
+          change_channel_membership(chptr, &chptr->peons,
+                                    &chptr->locpeons, targ_p);
+        }
+
+      if (MyConnect(targ_p) && chptr->mode.mode & MODE_HIDEOPS)
+        {
+          sendto_one(targ_p, ":%s MODE %s -o %s", me.name, chptr->chname,
+                     targ_p->name);
+          sync_oplists(chptr, targ_p, 1, chptr->chname);
+        }
+    }
 }
 
 static void
