@@ -1,3 +1,17 @@
+androsyn    2003/10/06 15:05:08 EDT	(20031006_0)
+
+  Modified files:
+    src                  class.c messages.tab 
+  Log:
+  Make /STATS Y report the number of connections in the class.  We might want
+  to change the formatting on this later though.
+  
+  Revision  Changes    Path
+  7.55      +6 -2      ircd-ratbox/src/class.c
+  7.99      +1 -1      ircd-ratbox/src/messages.tab
+
+
+
 leeh        2003/10/04 06:15:07 EDT	(20031004_0)
 
   Modified files:
