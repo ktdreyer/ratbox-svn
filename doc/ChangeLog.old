@@ -1,3 +1,7 @@
+*** 20010515_1 by toot
+removed a fixed bug from BUGS
+
+
 *** 20010514_4 by androsyn
 Fixed borked version of configure that was built with a beta version of autoconf.
 It broke IPV6 support..go figure..
