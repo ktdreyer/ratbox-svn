@@ -648,6 +648,16 @@ void stats_spy(struct Client *sptr,char stat)
     }
 }
 
+/* 
+ * stats_L_spy
+ * 
+ * inputs	- pointer to sptr, client doing stats L
+ *		- stat that they are doing 'L' 'l'
+ * 		- any name argument they have given
+ * output	- NONE
+ * side effects	- a notice is sent to opers, IF spy mode is configured
+ * 		  in the conf file.
+ */
 void stats_L_spy(struct Client *sptr, char stat, char *name)
 {
   if (ConfigFileEntry.stats_notice)
@@ -674,6 +684,14 @@ void stats_L_spy(struct Client *sptr, char stat, char *name)
     }
 }
 
+/* 
+ * stats_p_spy
+ * 
+ * inputs	- pointer to sptr, client doing stats p
+ * output	- NONE
+ * side effects	- a notice is sent to opers, IF spy mode is configured
+ * 		  in the conf file.
+ */
 void stats_p_spy(struct Client *sptr)
 {
   sendto_realops_flags(FLAGS_SPY,
@@ -694,7 +712,6 @@ void stats_p_spy(struct Client *sptr)
  * common parse routine for m_stats args
  * 
  */
-
 char *parse_stats_args(int parc,char *parv[],int *doall,int *wilds)
 {
   char *name;

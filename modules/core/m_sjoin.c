@@ -325,6 +325,16 @@ int     ms_sjoin(struct Client *cptr,
 	  fl |= MODE_CHANOP;
 	  s++;
 	}
+      
+      /* Lets think about this one for a bit... 
+       * if seen it should be respected.. but not necessarily
+       * ever sent!
+       */
+      if (*s == '%')
+	{
+	  fl |= MODE_HALFOP;
+	  s++;
+	}
 
       if (!keep_new_modes)
        {

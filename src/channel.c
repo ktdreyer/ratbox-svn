@@ -757,7 +757,11 @@ void send_channel_modes(struct Client *cptr, struct Channel *chptr)
   channel_modes(chptr, cptr, modebuf, parabuf);
 
   send_members(cptr,modebuf,parabuf,chptr,&chptr->chanops,"@");
+#if 0
   send_members(cptr,modebuf,parabuf,chptr,&chptr->halfops,"%");
+#endif
+  /* Ok, halfops can still generate a kick, they'll just looked unopped */
+  send_members(cptr,modebuf,parabuf,chptr,&chptr->halfops,"");
   send_members(cptr,modebuf,parabuf,chptr,&chptr->voiced,"+");
   send_members(cptr,modebuf,parabuf,chptr,&chptr->peons,"");
 

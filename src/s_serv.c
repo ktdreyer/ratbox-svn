@@ -511,6 +511,14 @@ void send_capabilities(struct Client* cptr, int can_send)
 }
 
 
+/*
+ * sendnick_TS
+ * 
+ * inputs	- client (server) to send nick towards
+ * 		- client to send nick for
+ * output	- NONE
+ * side effects	- NICK message is sent towards given cptr
+ */
 void sendnick_TS(struct Client *cptr, struct Client *acptr)
 {
   static char ubuf[12];
