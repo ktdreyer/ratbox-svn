@@ -1,3 +1,20 @@
+*** 20001211_8 by db
+- renamed send_channel_members to sendto_list_anywhere, to remain consistent
+  in send.c with sendto_list_local. This really means we =could= set up
+  the "GROUP" idea Roger postulated ages ago... Roger suggested something
+  like this "NGROUP foo" "GROUP foo nick1,nick2,nick3" privmsg to 
+  foo, sends to nick1,nick2,nick3 ... I suppose foo would have to have 
+  disambiguitating prefix like $ so one could set up a group of users
+  you wanted to talk to often..
+
+- fixed s_stats.c to be consistent in only needing the client pointer
+  passed, not both a client pointer and a nick.
+
+- reverted to old CC options in modules -g -O2 etc.
+  
+
+
+
 *** 20001211_7 by db
 - removed some unused variables
 
