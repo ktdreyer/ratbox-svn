@@ -30,6 +30,7 @@ SRCS =                          \
   m_connect.c \
   m_die.c \
   m_drop.c \
+  m_error.c \
   m_gline.c \
   m_help.c \
   m_info.c \
