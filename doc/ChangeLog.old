@@ -1,3 +1,8 @@
+*** 20011130_7 by db
+- Well, that definition is obsolete.
+
+
+
 *** 20011130_6 by androsyn
 Made topic_info a part of struct Channel and not just a pointer
 
