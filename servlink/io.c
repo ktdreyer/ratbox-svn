@@ -18,11 +18,12 @@
  *   $Id$
  */
 
-#include "../include/setup.h"                                                   
+#include "../include/setup.h"
 
 #include <assert.h>
 #include <errno.h>
 #include <unistd.h>
+#include <string.h>
 
 #include <openssl/evp.h>
 #ifdef HAVE_LIBZ
