@@ -15,20 +15,17 @@ The core team as, of this major release:
 A1kmm, Andrew Miller <a1kmm@mware.virtualave.net>
 adrian, Adrian Chadd <adrian@creative.net.au>
 AndroSyn, Aaron Sethman <androsyn@ratbox.org>
-billy-jon, Bill Jonus <proggy@earthling.net>
+billy-jon, Bill Jonus <bill@mu.org>
 cosine, Patrick Alken <wnder@uwns.underworld.net>
 David-T, David Taylor <davidt@yadt.co.uk>
 Dianora, Diane Bruce <db@db.net>
 einride, Erik S. Johansen, <einride@einride.org>
 fl_, Lee Hardy <lee@leeh.co.uk>
-Habeeb, David Supuran <habeeb@cfl.rr.com>
 Hwy101, W. Campbell <wcampbel@botbay.net>
 larne, Edward Brocklesby <ejb@sdf.lonestar.org>
 isomer, Perry Lorier <perry@coders.net>
 jmallett, Juli Mallett <jmallett@FreeBSD.org>
 k9, Jeremy Chadwick <yoshi@parodius.com>
-madmax, Paul Lomax <madmax@efnet.org>
-Neph|l|m, Adel Mezibra <adel@cybercable.fr>
 Rodder, Jon Lusky <lusky@blown.net>
 toot, Toby Verrall <to7@antipope.fsnet.co.uk>
 Wohali, Joan Touzet <joant@ieee.org>
@@ -39,16 +36,14 @@ this release of hybrid, in nick alphabetical order:
  
 bysin, Ben Kittridge <bkittridge@cfl.rr.com>
 desrt, Ryan Lortie <desertangel@mindless.com>
-jv, Jakub Vlasek <jv@pilsedu.cz>
+Habeeb, David Supuran <habeeb@cfl.rr.com>
 kre, Dinko Korunic <kreator@fly.srk.fer.hr>
-LarZ, Matthew Ramsey <mjr@blackened.com>
-orabidoo, Roger Espel Llima <espel@unix.bigots.org>
+madmax, Paul Lomax <madmax@efnet.org>
+Neph|l|m, Adel Mezibra <adel@cybercable.fr>
 Riedel, Dennis Vink, <vink@vuurwerk.nl>
-Seaner, Sean McVeigh <sdlmcvei@uwaterloo.ca>
 spookey, David Colburn <spookey@spookey.org>
 vulture, Sean Stanek <vulture@cs.iastate.edu>
 vx0, Mark Miller <mark@vx0.net>
-WintrHawk, Jake Khuon <khuon@GCtr.Net>
 zb^3, Alfred Perlstein <alfred@freebsd.org>
  
 Others are welcome.  Always.  And if we left anyone off the above list,
