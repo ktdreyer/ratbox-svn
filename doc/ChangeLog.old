@@ -1,3 +1,9 @@
+*** 20011011_5 by davidt
+- Prevent use_halfops from being changed at runtime, as that would Break
+  Stuff(TM).
+- Add use_* to m_info.c
+
+
 *** 20011011_4 by wcampbel
 Completed repo move/cleanup.  It will now build again, you MAY have to do
 a clean checkout after this...
