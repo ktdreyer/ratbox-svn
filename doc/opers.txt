@@ -26,6 +26,7 @@ Usermodes: (* designates that the umode is oper only)
        * +x     - Can see new server introduction and split messages.
        * +b     - Can see possible bot warnings.
        * +a     - Is marked as a server admin in whois.
+       * +e     - Can see possible drone warnings
          +g     - "caller id" mode only allow accept clients to message you
 
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -73,7 +74,7 @@ COMMAND         - USAGE and DESCRIPTION
                   * U - Shows shared blocks (Old U: lines)
                     u - Shows server uptime
                   * v - Shows connected servers and their idle times
-                  * X - Shows gecos bans (Old X: lines)
+                  * x - Shows gecos bans (Old X: lines)
                   * y - Shows Y lines
                   * z - Shows memory stats
                   * ? - Shows connected servers and sendq info about them
@@ -87,7 +88,8 @@ COMMAND         - USAGE and DESCRIPTION
 
                   When [port] is used, the connection will be attempted
                   to [port].
-                  When [port] is not used, 6667 is used as a default.
+                  When [port] is not used, 6667 is used as a default,
+                  unless the port is specified in the conf file.
 
 + WALLOPS       - WALLOPS :<message>
                   Sends a WALLOPS message of <message> to all opers
@@ -129,14 +131,14 @@ COMMAND         - USAGE and DESCRIPTION
                     OMOTD   - Re-reads Oper MOTD file
                     HELP    - Re-reads this HELP file
 
-  RESTART       - RESTART
+  RESTART       - RESTART server.name :[reason]
                   Restarts the IRC server.
 
-  CLOSE         - CLOSE
++ CLOSE         - CLOSE
                   Close any connections from clients who have not fully
                   registered yet.
 
-  DIE           - DIE server.name [reason]
+  DIE           - DIE server.name :[reason]
                   Terminates the IRC server with optional reason 
                   [reason]
 

@@ -9,6 +9,8 @@ now set in the config file.
 
 Unauthorized connection notices have been moved to the +u user mode.
 
+A new drone warning mode has been added... +e.
+
 Server side ignore is included for all users.  Setting user mode +g will
 make you ignore all private messages.  Channel messages are not affected.
 People who you wish to communicate with can be permitted with the
@@ -70,8 +72,9 @@ been removed. (/msg nick1,nick2,nick3 message)
 
 Nearly all commands are now modules.  MODLIST will list all loaded modules, 
 MODUNLOAD will remove a module from the ircd, and MODLOAD will load a new
-module into the ircd.  All of these commands are documented in opers.txt 
-and are restricted to admins only.
+module into the ircd.  MODRELOAD will unload then load the module in one
+simple command.  All of these commands are documented in opers.txt and are 
+restricted to admins only.
 
 LazyLinks are now included.  These enable a leaf server to only need 
 information about channels that it's local users are on, and nicks that have
@@ -103,6 +106,7 @@ HOPS    - Support half-ops
 HUB     - Is a hub server (used to prevent two LL hubs from linking in that 
           state)
 AOPS    - Supports anonymous channel ops (channel mode +a)
+UID     - Unique user-ID support
 
 K-lines can now be sent to and accepted from other servers.  The shared {}
 block in the conf file is used to specify which servers are trusted.

@@ -110,5 +110,4 @@ recompile all applications that use libcrypto to use the system one.
 This may be kludged in the future.
 
 --------------------------------------------------------------------------------
-$Id: INSTALL,v 7.7 2000/12/30 02:01:45
-wcampbel Exp $
+$Id$
