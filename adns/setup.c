@@ -49,7 +49,7 @@
 
 /* For some reason BSD/OS doesn't define INADDR_LOOPBACK */
 #ifndef INADDR_LOOPBACK
-#define INADDR_LOOPBACK inet_addr("127.0.0.1")
+#define INADDR_LOOPBACK 0x7f000001
 #endif
 
 
