@@ -1,3 +1,11 @@
+*** 20001031_5 by adrian
+
+
+Remove the unneeded nextdnscheck variable, as we've turned it into a
+periodic event now.
+
+
+
 *** 20001031_4 by adrian
 
 
