@@ -42,7 +42,7 @@
 
 struct Message list_msgtab = {
   MSG_LIST, 0, 0, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_list, ms_list, m_list}
+  {m_unregistered, m_list, ms_list, mo_list}
 };
 
 void
@@ -228,26 +228,33 @@ int list_named_channel(struct Client *sptr,char *name)
       return 0;
     }
 
+  if (HasVchans(chptr))
+    ircsprintf(vname, "%s<!%s>", chptr->chname,
+               pick_vchan_id(chptr));
+  else
+    ircsprintf(vname, "%s", chptr->chname);
+               
+  if (ShowChannel(sptr, chptr))
+    sendto_one(sptr, form_str(RPL_LIST), me.name, sptr->name,
+               vname, chptr->users, chptr->topic);
+      
+  /* Deal with subvchans */
+  
   for (ptr = chptr->vchan_list.head; ptr; ptr = ptr->next)
     {
       tmpchptr = ptr->data;
 
-      if (ShowChannel(sptr, tmpchptr) && sptr->user)
+      if (ShowChannel(sptr, tmpchptr))
 	{
-	  if( (IsVchan(tmpchptr) || HasVchans(tmpchptr)) )
-	    {
-	      root_chptr = find_bchan(chptr);
-	      if(root_chptr != NULL)
-		ircsprintf(vname, "%s<!%s>", root_chptr->chname,
-			   pick_vchan_id(tmpchptr));
-	    }
-	  else
-	    ircsprintf(vname, "%s", chptr->chname);
-
-	  sendto_one(sptr, form_str(RPL_LIST), me.name, sptr->name,
-		     vname, tmpchptr->users, tmpchptr->topic);
-	}
+          root_chptr = find_bchan(tmpchptr);
+          if(root_chptr != NULL)
+            ircsprintf(vname, "%s<!%s>", root_chptr->chname,
+                       pick_vchan_id(tmpchptr));
+          sendto_one(sptr, form_str(RPL_LIST), me.name, sptr->name,
+                     vname, tmpchptr->users, tmpchptr->topic);
+        }
     }
+  
   sendto_one(sptr, form_str(RPL_LISTEND), me.name, sptr->name);
   return 0;
 }
