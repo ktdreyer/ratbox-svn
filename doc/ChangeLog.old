@@ -1,3 +1,8 @@
+*** 20010523_10 by davidt
+- MISSING_SOCKPAIR support, for systems which don't support SOCKPAIR,
+  use individual (unidirectional) pipes to communicate with servlink.
+
+
 *** 20010523_9 by davidt
 - fix non-openssl build
 
