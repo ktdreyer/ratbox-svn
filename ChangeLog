@@ -1,3 +1,17 @@
+leeh        2002/09/17 00:09:58 UTC	(20020917_0)
+
+  Modified files:
+    include              resv.h 
+    src                  resv.c 
+  Log:
+  - resv speedups, use irccmp() where possible, match() otherwise
+  
+  Revision  Changes    Path
+  1.12      +1 -0      ircd-ratbox/include/resv.h
+  7.20      +13 -2     ircd-ratbox/src/resv.c
+
+
+
 leeh        2002/09/16 18:46:46 UTC	(20020916_1)
 
   Modified files:
