@@ -1,3 +1,15 @@
+androsyn    2003/10/08 11:58:05 EDT	(20031008_5)
+
+  Modified files:
+    modules/core         m_nick.c 
+  Log:
+  /me beats lee with a =
+  
+  Revision  Changes    Path
+  1.135     +2 -2      ircd-ratbox/modules/core/m_nick.c
+
+
+
 leeh        2003/10/08 11:55:33 EDT	(20031008_4)
 
   Modified files:
