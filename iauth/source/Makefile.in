@@ -21,6 +21,8 @@ SOURCES =     \
   auth.c      \
   conf.c      \
   iauth.c     \
+  misc.c      \
+  res.c       \
   sock.c
 
 OBJECTS = ${SOURCES:.c=.o}

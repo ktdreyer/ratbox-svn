@@ -35,6 +35,8 @@
 #include "auth.h"
 #include "conf.h"
 #include "iauth.h"
+#include "misc.h"
+#include "res.h"
 #include "sock.h"
 #include "setup.h"
 

@@ -15,4 +15,10 @@ build: all
 clean:
 	@cd source ; $(MAKE) clean
 
+distclean: clean
+	rm -f Makefile source/Makefile
+
+depend:
+	@cd source ; $(MAKE) depend
+
 # End of Makefile

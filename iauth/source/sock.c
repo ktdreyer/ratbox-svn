@@ -20,6 +20,9 @@
 
 #include "headers.h"
 
+#define BSD_COMP /* needed on Solaris for FIONBIO */
+#include <sys/ioctl.h>
+
 AuthPort *PortList = NULL; /* list of listen ports */
 
 /*
@@ -35,6 +38,7 @@ static void ProcessData(int sockfd, int paramc, char **paramv);
 static int EstablishConnection(AuthPort *portptr);
 static void AddServer(Server *sptr);
 static void DelServer(Server *sptr);
+static void DoDNSAsync();
 
 static struct AuthCommandTable
 {
@@ -275,6 +279,12 @@ CheckConnections()
 				FD_SET(auth->identfd, &readfds);
 		}
 
+		/*
+		 * Check dns resolver
+		 */
+		if (ResolverFileDescriptor >= 0)
+			FD_SET(ResolverFileDescriptor, &readfds);
+
 		activefds = select(FD_SETSIZE, &readfds, &writefds, 0, &TimeOut);
 
 		if (activefds > 0)
@@ -335,6 +345,10 @@ CheckConnections()
 				else if (FD_ISSET(auth->identfd, &readfds))
 					ReadIdentReply(auth);
 			}
+
+			if ((-1 < ResolverFileDescriptor) &&
+					FD_ISSET(ResolverFileDescriptor, &readfds))
+				DoDNSAsync();
 		}
 		else if ((activefds == (-1)) && (errno != EINTR))
 		{
@@ -560,3 +574,23 @@ DelServer(Server *sptr)
 
 	free(sptr);
 } /* DelServer() */
+
+/*
+ * DoDNSAsync - called when the fd returned from init_resolver() has 
+ * been selected for reading.
+ */
+static void
+DoDNSAsync()
+
+{
+  int bytes = 0;
+  int packets = 0;
+
+  do
+  {
+    get_res();
+    if (ioctl(ResolverFileDescriptor, FIONREAD, &bytes) == -1)
+      bytes = 0;
+    packets++;
+  }  while ((bytes > 0) && (packets < 10)); 
+} /* DoDNSAsync() */

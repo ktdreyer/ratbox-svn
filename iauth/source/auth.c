@@ -19,6 +19,9 @@
  */
 
 #include "headers.h"
+#include "res.h"
+
+#include <netdb.h>
 
 static struct AuthRequest *CreateAuthRequest();
 static void FreeAuthRequest(struct AuthRequest *request);
@@ -27,6 +30,9 @@ static void UnlinkAuthRequest(struct AuthRequest *request, struct AuthRequest **
 
 static int BeginIdentQuery(struct AuthRequest *auth);
 static char *GetValidIdent(char *buf);
+
+static void BeginDNSQuery(struct AuthRequest *auth);
+static void AuthDNSCallback(void* vptr, struct DNSReply* reply);
 
 static void CompleteAuthRequest(struct AuthRequest *auth);
 
@@ -91,6 +97,11 @@ StartAuth(int sockfd, int parc, char **parv)
 	auth->localport = (unsigned int) atoi(parv[4]);
 
 	auth->serverfd = sockfd;
+
+	/*
+	 * Begin dns query
+	 */
+	BeginDNSQuery(auth);
 
 	/*
 	 * Begin ident query
@@ -433,6 +444,88 @@ GetValidIdent(char *buf)
   colon3Ptr++;
   return(colon3Ptr);
 } /* GetValidIdent() */
+
+/*
+BeginDNSQuery()
+ Initiate a non-blocking dns query for auth->ip
+*/
+
+static void
+BeginDNSQuery(struct AuthRequest *auth)
+
+{
+	struct DNSQuery query;
+
+	assert(auth != 0);
+
+	query.vptr = auth;
+	query.callback = AuthDNSCallback;
+
+	auth->dns_reply = gethost_byaddr((char *) &auth->ip, &query);
+	if (auth->dns_reply)
+	{
+		/*
+		 * The client's ip was cached
+		 */
+		strncpy_irc(auth->hostname, auth->dns_reply->hp->h_name, HOSTLEN);
+	}
+	else
+		SetDNSPending(auth);
+} /* BeginDNSQuery() */
+
+/*
+ * AuthDNSCallback - called when resolver query finishes
+ * if the query resulted in a successful search, hp will contain
+ * a non-null pointer, otherwise hp will be null.
+ * set the client on it's way to a connection completion, regardless
+ * of success of failure
+ */
+static void
+AuthDNSCallback(void* vptr, struct DNSReply* reply)
+
+{
+  struct AuthRequest* auth = (struct AuthRequest*) vptr;
+
+  ClearDNSPending(auth);
+
+  if (reply)
+  {
+    struct hostent* hp = reply->hp;
+    int i;
+
+    /*
+     * Verify that the host to ip mapping is correct both ways and that
+     * the ip#(s) for the socket is listed for the host.
+     */
+    for (i = 0; hp->h_addr_list[i]; ++i)
+    {
+      if (0 == memcmp(hp->h_addr_list[i], (char*) &auth->ip, sizeof(struct in_addr)))
+         break;
+    }
+
+    if (hp->h_addr_list[i])
+    {
+      auth->dns_reply = reply;
+      strncpy_irc(auth->hostname, hp->h_name, HOSTLEN);
+    }
+    /* else IP Mismatch */
+  }
+  else
+  {
+    /*
+     * DNS query failed - use the ip address as their hostname
+     */
+    strcpy(auth->hostname, inet_ntoa(auth->ip));
+  }
+
+  auth->hostname[HOSTLEN] = '\0';
+
+  if (!IsDoingAuth(auth))
+  {
+    UnlinkAuthRequest(auth, &AuthIncompleteList);
+    FreeAuthRequest(auth);
+  }
+} /* AuthDNSCallback() */
 
 /*
 CompleteAuthRequest()

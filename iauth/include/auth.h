@@ -16,6 +16,9 @@ struct AuthRequest
 	char         clientid[IDLEN + 1];  /* unique client ID */
 
 	struct in_addr ip;       /* ip address of client */
+
+	struct DNSReply *dns_reply; /* result from resolver query */
+
 	unsigned int remoteport; /* client's remote port */
 	unsigned int localport;  /* server's local port */
 

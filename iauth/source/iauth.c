@@ -22,6 +22,8 @@
 
 static void SetupSignals();
 
+time_t CurrentTime; /* current system timestamp */
+
 /*
 SetupSignals()
  Set up signal handlers
@@ -81,6 +83,8 @@ main()
 
 	/* Initialize listening ports */
 	InitListenPorts();
+
+	init_resolver();
 
 	/*
 	 * Enter this loop constantly waiting for incoming data
