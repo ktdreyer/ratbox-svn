@@ -131,8 +131,8 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
                               /* lets also do this for opers tracing nicks */
     {
       const char* name;
-      const char* ip;
       const char* class_name;
+      char ipaddr[HOSTIPLEN];
 
       target_p = hash_find_client(tname,(struct Client *)NULL);
       if(!target_p || !IsPerson(target_p)) 
@@ -144,7 +144,7 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
           return;
         }
       name = get_client_name(target_p, HIDE_IP);
-      ip = inetntoa((char*) &target_p->localClient->ip);
+      inetntop(target_p->localClient->aftype, &IN_ADDR(target_p->localClient->ip), ipaddr, HOSTIPLEN);
 
       class_name = get_client_class(target_p);
 
@@ -153,7 +153,7 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
           sendto_one(source_p, form_str(RPL_TRACEOPERATOR),
                      me.name, parv[0], class_name,
                      name, 
-                     IsOper(source_p)?ip:(IsIPHidden(target_p)?"127.0.0.1":ip),
+                     IsOper(source_p)?ipaddr:(IsIPHidden(target_p)?"127.0.0.1":ipaddr),
                      now - target_p->lasttime,
                      (target_p->user)?(now - target_p->user->last):0);
         }
@@ -162,7 +162,7 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
           sendto_one(source_p,form_str(RPL_TRACEUSER),
                      me.name, parv[0], class_name,
                      name, 
-                     IsOper(source_p)?ip:(IsIPHidden(target_p)?"127.0.0.1":ip),
+                     IsOper(source_p)?ipaddr:(IsIPHidden(target_p)?"127.0.0.1":ipaddr),
                      now - target_p->lasttime,
                      (target_p->user)?(now - target_p->user->last):0);
         }
@@ -299,7 +299,7 @@ static int report_this_status(struct Client *source_p, struct Client *target_p,
   int cnt=0;
   static time_t now;
 
-  inetntop(DEF_FAM, &IN_ADDR(target_p->localClient->ip), ip, HOSTIPLEN);
+  inetntop(target_p->localClient->aftype, &IN_ADDR(target_p->localClient->ip), ip, HOSTIPLEN);
   name = get_client_name(target_p, HIDE_IP);
   class_name = get_client_class(target_p);
 
