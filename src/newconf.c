@@ -323,8 +323,8 @@ split_user_host(const char *userhost, const char **user, const char **host)
 static void
 conf_set_serverinfo_name(void *data)
 {
-        my_free(config_file.name);
-        config_file.name = my_strdup(data);
+	if(config_file.name == NULL)
+	        config_file.name = my_strdup(data);
 }
 
 static void
@@ -620,43 +620,49 @@ conf_end_service(struct TopConf *tc)
 static void
 conf_set_service_nick(void *data)
 {
-	if(yy_service == NULL)
+	if(yy_service == NULL || !strcmp(yy_service->name, (const char *) data))
 		return;
 
 	del_client(yy_service);
 	strlcpy(yy_service->name, (const char *) data,
 		sizeof(yy_service->name));
 	add_client(yy_service);
+	yy_service->service->reintroduce = 1;
 }
 
 static void
 conf_set_service_username(void *data)
 {
-	if(yy_service == NULL)
+	if(yy_service == NULL ||
+	   !strcmp(yy_service->service->username, (const char *) data))
 		return;
 
 	strlcpy(yy_service->service->username, (const char *) data,
 		sizeof(yy_service->service->username));
+	yy_service->service->reintroduce = 1;
 }
 
 static void
 conf_set_service_host(void *data)
 {
-	if(yy_service == NULL)
+	if(yy_service == NULL ||
+	   !strcmp(yy_service->service->host, (const char *) data))
 		return;
 
 	strlcpy(yy_service->service->host, (const char *) data,
 		sizeof(yy_service->service->host));
+	yy_service->service->reintroduce = 1;
 }
 
 static void
 conf_set_service_realname(void *data)
 {
-	if(yy_service == NULL)
+	if(yy_service == NULL || !strcmp(yy_service->info, (const char *) data))
 		return;
 
 	strlcpy(yy_service->info, (const char *) data,
 		sizeof(yy_service->info));
+	yy_service->service->reintroduce = 1;
 }
 
 void

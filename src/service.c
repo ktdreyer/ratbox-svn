@@ -151,6 +151,13 @@ introduce_services(void)
 }
 
 void
+reintroduce_service(struct client *target_p)
+{
+	sendto_server(":%s QUIT :Updating information", target_p->name);
+	introduce_service(target_p);
+}
+
+void
 update_service_floodcount(void *unused)
 {
 	struct client *client_p;

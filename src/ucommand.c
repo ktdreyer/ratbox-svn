@@ -39,6 +39,7 @@ static void u_events(struct connection_entry *, char *parv[], int parc);
 static void u_flags(struct connection_entry *conn_p, char *parv[], int parc);
 static void u_help(struct connection_entry *, char *parv[], int parc);
 static void u_quit(struct connection_entry *, char *parv[], int parc);
+static void u_rehash(struct connection_entry *, char *parv[], int parc);
 static void u_service(struct connection_entry *, char *parv[], int parc);
 static void u_status(struct connection_entry *, char *parv[], int parc);
 
@@ -50,6 +51,7 @@ static struct ucommand_handler ucommands[] =
         { "flags",      u_flags,        0, NULL },
         { "help",       u_help,         0, NULL },
         { "quit",       u_quit,         0, NULL },
+	{ "rehash",	u_rehash,	0, NULL },
         { "service",    u_service,      0, NULL },
         { "status",     u_status,       0, NULL },
         { "\0",         NULL,           0, NULL }
@@ -189,8 +191,12 @@ u_login(struct connection_entry *conn_p, char *parv[], int parc)
         /* set them as 'logged in' */
         SetUserAuth(conn_p);
         conn_p->flags |= UMODE_DEFAULT;
+	conn_p->oflags = oper_p->flags;
 
         sendto_one(conn_p, "Login successful, for available commands see .help");
+
+	deallocate_conf_oper(oper_p);
+	conn_p->oper = NULL;
 }
 
 static void
@@ -268,6 +274,15 @@ u_quit(struct connection_entry *conn_p, char *parv[], int parc)
 {
 	sendto_one(conn_p, "Goodbye.");
 	(conn_p->io_close)(conn_p);
+}
+
+static void
+u_rehash(struct connection_entry *conn_p, char *parv[], int parc)
+{
+	slog("services rehashing: %s reloading config file", conn_p->name);
+	sendto_all(0, "services rehashing: %s reloading config file", conn_p->name);
+
+	rehash(0);
 }
 
 static void

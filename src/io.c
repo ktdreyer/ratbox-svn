@@ -41,6 +41,10 @@ fd_set writefds;
 static int signon_server(struct connection_entry *conn_p);
 static void signon_client_in(struct connection_entry *conn_p);
 static int signon_client_out(struct connection_entry *conn_p);
+
+static void signoff_server(struct connection_entry *conn_p);
+static void signoff_client(struct connection_entry *conn_p);
+
 static void read_server(struct connection_entry *conn_p);
 static void read_client(struct connection_entry *conn_p);
 static int write_sendq(struct connection_entry *conn_p);
@@ -436,7 +440,7 @@ connect_to_server(void *target_server)
 
 	conn_p->io_read = NULL;
 	conn_p->io_write = signon_server;
-	conn_p->io_close = sock_close;
+	conn_p->io_close = signoff_server;
 
 	SetConnConnecting(conn_p);
 
@@ -463,14 +467,16 @@ connect_to_client(struct client *client_p, struct conf_oper *oper_p,
 
 	conn_p = my_malloc(sizeof(struct connection_entry));
 	conn_p->name = my_strdup(client_p->name);
+
 	conn_p->oper = oper_p;
+	oper_p->refcount++;
 
 	conn_p->fd = client_fd;
 	conn_p->first_time = conn_p->last_time = CURRENT_TIME;
 
 	conn_p->io_read = NULL;
 	conn_p->io_write = signon_client_out;
-	conn_p->io_close = sock_close;
+	conn_p->io_close = signoff_client;
 
 	SetConnConnecting(conn_p);
 	SetConnDccOut(conn_p);
@@ -536,7 +542,7 @@ connect_from_client(struct client *client_p, struct conf_oper *oper_p,
 	conn_p->first_time = conn_p->last_time = CURRENT_TIME;
 
 	conn_p->io_read = signon_client_in;
-	conn_p->io_close = sock_close;
+	conn_p->io_close = signoff_client;
 
 	SetConnConnecting(conn_p);
 	SetConnDccIn(conn_p);
@@ -652,6 +658,42 @@ signon_client_out(struct connection_entry *conn_p)
 
 	return 1;
 }
+
+static void
+signoff_client(struct connection_entry *conn_p)
+{
+	if(ConnDead(conn_p))
+		return;
+
+	if(UserAuth(conn_p))
+                sendto_all(UMODE_AUTH, "%s has disconnected", conn_p->name);
+
+	if(conn_p->oper != NULL)
+		deallocate_conf_oper(conn_p->oper);
+
+	sock_close(conn_p);
+	SetConnDead(conn_p);
+}
+
+static void
+signoff_server(struct connection_entry *conn_p)
+{
+	if(ConnDead(conn_p))
+		return;
+
+	if(conn_p == server_p)
+	{
+		eventAddOnce("connect_to_server", connect_to_server, NULL, 
+				config_file.reconnect_time);
+
+		if(server_p->client_p != NULL)
+			exit_client(server_p->client_p);
+	}
+
+	sock_close(conn_p);
+	SetConnDead(conn_p);
+}
+
 
 /* read_server()
  *   reads some data from the server, exiting it on read error
@@ -1387,24 +1429,9 @@ sock_write(struct connection_entry *conn_p, const char *buf, int len)
 void
 sock_close(struct connection_entry *conn_p)
 {
-	if(ConnDead(conn_p))
-		return;
-
-	if(conn_p == server_p)
-	{
-		eventAddOnce("connect_to_server", connect_to_server, NULL, 
-				config_file.reconnect_time);
-
-		if(server_p->client_p != NULL)
-			exit_client(server_p->client_p);
-	}
-	else if(UserAuth(conn_p))
-                sendto_all(UMODE_AUTH, "%s has disconnected", conn_p->name);
-
 	close(conn_p->fd);
 	conn_p->fd = -1;
 
-	SetConnDead(conn_p);
 }
 
 #ifdef HAVE_GETADDRINFO

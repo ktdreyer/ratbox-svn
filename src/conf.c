@@ -50,18 +50,88 @@ validate_conf(void)
 		config_file.gecos = my_strdup("ratbox services");
 }
 
+static void
+clear_old_conf(void)
+{
+	struct conf_oper *oper_p;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, conf_oper_list.head)
+	{
+		oper_p = ptr->data;
+
+		/* still in use */
+		if(oper_p->refcount)
+			SetConfDead(oper_p);
+		else
+			free_conf_oper(oper_p);
+
+		dlink_destroy(ptr, &conf_oper_list);
+	}
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, conf_server_list.head)
+	{
+		free_conf_server(ptr->data);
+	}	
+}
 
 void
-conf_parse(void)
+conf_parse(int cold)
 {
-        if((conf_fbfile_in = fbopen(CONF_PATH, "r")) == NULL)
-                die("Failed to open config file");
+	struct client *target_p;
+	dlink_node *ptr;
 
-	set_default_conf();
+        if((conf_fbfile_in = fbopen(CONF_PATH, "r")) == NULL)
+	{
+		if(!cold)
+		{
+			slog("Failed to open config file");
+			sendto_all(0, "Failed to open config file");
+			return;
+		}
+		else
+	                die("Failed to open config file");
+	}
+
+	if(!cold)
+		clear_old_conf();
+	else
+		set_default_conf();
+
         yyparse();
 	validate_conf();
 
+	DLINK_FOREACH(ptr, service_list.head)
+	{
+		target_p = ptr->data;
+
+		if(target_p->service->reintroduce)
+		{
+			/* not linked anywhere.. so dont have to! */
+			if(finished_bursting)
+				reintroduce_service(ptr->data);
+
+			target_p->service->reintroduce = 0;
+		}
+	}
+			
         fbclose(conf_fbfile_in);
+}
+
+void
+rehash(int sig)
+{
+	if(sig)
+	{
+		slog("services rehashing: got SIGHUP");
+		sendto_all(0, "services rehashing: got SIGHUP");
+	}
+
+	close_logfile();
+	open_logfile();
+
+	conf_parse(0);
 }
 
 void
@@ -73,6 +143,25 @@ free_conf_oper(struct conf_oper *conf_p)
 	my_free(conf_p->host);
 	my_free(conf_p->server);
 	my_free(conf_p);
+}
+
+void
+free_conf_server(struct conf_server *conf_p)
+{
+	my_free(conf_p->name);
+	my_free(conf_p->host);
+	my_free(conf_p->pass);
+	my_free(conf_p->vhost);
+}
+
+void
+deallocate_conf_oper(struct conf_oper *conf_p)
+{
+	conf_p->refcount--;
+
+	/* marked as dead, now unused, free. */
+	if(ConfDead(conf_p) && !conf_p->refcount)
+		free_conf_oper(conf_p);
 }
 
 struct conf_server *

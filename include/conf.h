@@ -7,7 +7,6 @@ struct FileBuf;
 
 #define MYNAME config_file.name
 
-extern void conf_parse(void);
 extern time_t first_time;
 
 struct _config_file
@@ -48,10 +47,17 @@ struct conf_oper
         char *pass;
 	char *server;
         int flags;
+	int refcount;
 };
 
-#define CONF_OPER_ENCRYPTED     0x0001
-#define CONF_OPER_DCC		0x0002
+#define CONF_DEAD		0x0001
+
+#define ConfDead(x)		((x)->flags & CONF_DEAD)
+#define SetConfDead(x)		((x)->flags |= CONF_DEAD)
+#define ClearConfDead(x)	((x)->flags &= ~CONF_DEAD)
+
+#define CONF_OPER_ENCRYPTED     0x0010
+#define CONF_OPER_DCC		0x0020
 
 #define ConfOperEncrypted(x)	((x)->flags & CONF_OPER_ENCRYPTED)
 #define ConfOperDcc(x)		((x)->flags & CONF_OPER_DCC)
@@ -65,11 +71,19 @@ extern dlink_list conf_server_list;
 extern dlink_list conf_oper_list;
 extern struct FileBuf *conf_fbfile_in;
 
+extern void conf_parse(int cold);
+
 extern int lineno;
 extern void yyerror(const char *msg);
 extern int conf_fbgets(char *lbuf, int max_size);
 
+extern void rehash(int sig);
+
 extern void free_conf_oper(struct conf_oper *conf_p);
+extern void deallocate_conf_oper(struct conf_oper *conf_p);
+
+extern void free_conf_server(struct conf_server *conf_p);
+
 extern struct conf_server *find_conf_server(const char *name);
 
 extern struct conf_oper *find_conf_oper(const char *username, const char *host,

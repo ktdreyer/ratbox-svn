@@ -48,6 +48,8 @@ extern struct client *add_service();
 extern struct client *find_service_id(const char *name);
 extern void introduce_service(struct client *client_p);
 extern void introduce_services(void);
+extern void reintroduce_service(struct client *client_p);
+
 extern void update_service_floodcount(void *unused);
 
 extern void handle_service(struct client *service_p, struct client *client_p,

@@ -242,6 +242,7 @@ join_service(struct client *service_p, const char *chname)
 {
 	struct channel *chptr;
 
+	/* channel doesnt exist, have to join it */
 	if((chptr = find_channel(chname)) == NULL)
 	{
 		chptr = BlockHeapAlloc(channel_heap);
@@ -254,6 +255,9 @@ join_service(struct client *service_p, const char *chname)
 
 		add_channel(chptr);
 	}
+	/* may already be joined.. */
+	else if(dlink_find(&chptr->services, service_p) != NULL)
+		return;
 
 	dlink_add_alloc(service_p, &chptr->services);
 	dlink_add_alloc(chptr, &service_p->service->channels);

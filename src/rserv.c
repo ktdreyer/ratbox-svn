@@ -252,7 +252,7 @@ main(int argc, char *argv[])
 	first_time = CURRENT_TIME;
 
 	/* must be done after adding services. */
-	conf_parse();
+	conf_parse(1);
 
 	eventAdd("update_service_floodcount", update_service_floodcount, NULL, 1);
 

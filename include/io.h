@@ -20,6 +20,7 @@ struct connection_entry
 
 	int fd;
 	int flags;
+	int oflags;		/* privs as an oper */
 	time_t first_time;
 	time_t last_time;
 
@@ -61,21 +62,21 @@ extern dlink_list connection_list;
 #define ClearConnSentPing(x)	((x)->flags &= ~CONN_SENTPING)
 
 /* server flags */
-#define FLAGS_UNTERMINATED	0x0100
-#define FLAGS_EOB               0x0200
+#define FLAGS_UNTERMINATED	0x00100
+#define FLAGS_EOB               0x00200
 
 #define finished_bursting	((server_p) && (server_p->flags & FLAGS_EOB))
 
 /* user flags */
-#define FLAGS_AUTH		0x0100
+#define FLAGS_AUTH		0x01000
 
 #define UserAuth(x)	((x)->flags & FLAGS_AUTH)
 #define SetUserAuth(x)	((x)->flags |= FLAGS_AUTH)
 
 /* usermodes */
-#define UMODE_CHAT              0x1000
-#define UMODE_AUTH              0x2000
-#define UMODE_SERVER            0x4000
+#define UMODE_CHAT              0x10000
+#define UMODE_AUTH              0x20000
+#define UMODE_SERVER            0x40000
 
 #define UMODE_ALL               (UMODE_CHAT|UMODE_AUTH|UMODE_SERVER)
 #define UMODE_DEFAULT           UMODE_ALL

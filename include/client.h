@@ -84,6 +84,8 @@ struct service
         int flood_max;
         int flood_max_ignore;
 
+	int reintroduce;		/* needs reintroducing */
+
 	struct service_command *command;
         struct service_error *error;
         struct ucommand_handler *ucommand;
