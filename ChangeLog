@@ -1,3 +1,32 @@
+leeh        2005/02/02 16:27:05 EST	(20050202_1)
+
+  Modified files:
+    doc                  schema.txt 
+    include              channel.h s_chanserv.h service.h 
+    src                  channel.c io.c s_chanserv.c s_operbot.c 
+                         s_operserv.c scommand.c service.c 
+  Log:
+  - patch via jilles:
+    - store channelts for channels within the db
+    - join services when we send our burst, rather than when our uplink
+      has finished
+    - fix a segfault with OPERSERV::TAKEOVER
+  
+  Revision  Changes    Path
+  1.17      +3 -0      rserv/doc/schema.txt
+  1.24      +1 -1      rserv/include/channel.h
+  1.24      +1 -0      rserv/include/s_chanserv.h
+  1.23      +6 -2      rserv/include/service.h
+  1.38      +8 -5      rserv/src/channel.c
+  1.38      +1 -0      rserv/src/io.c
+  1.57      +52 -27    rserv/src/s_chanserv.c
+  1.31      +34 -7     rserv/src/s_operbot.c
+  1.11      +53 -8     rserv/src/s_operserv.c
+  1.29      +0 -1      rserv/src/scommand.c
+  1.45      +19 -0     rserv/src/service.c
+
+
+
 leeh        2005/02/01 20:22:40 EST	(20050202_0)
 
   Modified files:
