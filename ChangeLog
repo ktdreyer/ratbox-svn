@@ -1,3 +1,17 @@
+androsyn    2002/12/16 06:22:07 UTC	(20021216_4)
+
+  Modified files:
+    include              client.h 
+    src                  client.c 
+  Log:
+  Break up and simplify exit_client and exit_one_client
+  
+  Revision  Changes    Path
+  7.188     +0 -4      ircd-ratbox/include/client.h
+  7.350     +261 -318  ircd-ratbox/src/client.c
+
+
+
 androsyn    2002/12/16 06:19:18 UTC	(20021216_3)
 
   Modified files:
