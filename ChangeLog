@@ -1,3 +1,57 @@
+leeh        2003/04/27 16:22:07 UTC	(20030427_2)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf modes.txt 
+    help/opers           umode 
+    include              numeric.h s_conf.h s_serv.h 
+    modules              Makefile.in 
+    modules/core         m_nick.c m_server.c 
+    src                  channel_mode.c hostmask.c irc_string.c 
+                         messages.tab newconf.c s_conf.c s_serv.c 
+                         s_user.c 
+  Added files:
+    modules              m_encap.c m_etrace.c 
+  Log:
+  - penultimate stable port, this brings up to sync apart from remote
+    resv/unresv:
+    - added ETRACE, a version of trace that will give gecos info.
+    - fix for an invalid nick change coming from a server [via hybrid]
+    - added ENCAP, server command to propagate things this server doesnt
+      understand.
+    - channel mode fix [via hybrid]
+    - strlcat update
+    - fix for long limits in mode +l [via hybrid]
+    - fix for hash_ipv4 [via hybrid]
+    - dont allow servers to set redundant +beI's, that way we save bandwidth
+      on a burst by not broadcasting the bans we already have to a channel.
+    - fixed bug reported by winter, we were allowing "mode #channel +k :", and
+      ending up with a +k, but no key.  this applied to *everything* that
+      takes a parameter, so added various EmptyString() tests.
+  
+  Revision  Changes    Path
+  7.204     +1 -1      ircd-ratbox/doc/example.conf
+  7.39      +1 -1      ircd-ratbox/doc/example.efnet.conf
+  7.11      +1 -1      ircd-ratbox/doc/modes.txt
+  1.2       +1 -1      ircd-ratbox/help/opers/umode
+  7.39      +2 -0      ircd-ratbox/include/numeric.h
+  7.233     +1 -1      ircd-ratbox/include/s_conf.h
+  7.80      +2 -1      ircd-ratbox/include/s_serv.h
+  1.81      +2 -0      ircd-ratbox/modules/Makefile.in
+  1.116     +3 -2      ircd-ratbox/modules/core/m_nick.c
+  1.109     +7 -7      ircd-ratbox/modules/core/m_server.c
+  1.1       +106 -0    ircd-ratbox/modules/m_encap.c (new)
+  1.1       +108 -0    ircd-ratbox/modules/m_etrace.c (new)
+  7.101     +54 -7     ircd-ratbox/src/channel_mode.c
+  7.87      +8 -2      ircd-ratbox/src/hostmask.c
+  7.66      +1 -1      ircd-ratbox/src/irc_string.c
+  7.83      +1 -1      ircd-ratbox/src/messages.tab
+  7.80      +1 -0      ircd-ratbox/src/newconf.c
+  7.404     +5 -5      ircd-ratbox/src/s_conf.c
+  7.329     +14 -13    ircd-ratbox/src/s_serv.c
+  7.261     +3 -3      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2003/04/27 14:51:40 UTC	(20030427_1)
 
   Modified files:
