@@ -108,7 +108,7 @@ ms_ping(struct Client *client_p, struct Client *source_p, int parc, const char *
 	}
 	else
 		sendto_one(source_p, ":%s PONG %s :%s", 
-			   get_id(&me, source_p), (destination) ? destination : me.name, 
+			   get_id(&me, source_p), me.name, 
 			   get_id(source_p, source_p));
 
 	return 0;
