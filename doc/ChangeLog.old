@@ -1,3 +1,7 @@
+*** 20010401_7 by toot
+removed some old stuff from the parser
+
+
 *** 20010401_6 by toot
 somemore ugly %lu's changed back to %d.
 
