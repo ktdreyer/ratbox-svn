@@ -38,12 +38,14 @@ static unsigned long hash_ipv6(struct irc_inaddr *, int);
 static int try_parse_v4_netmask(const char *, struct irc_inaddr *, int *);
 static unsigned long hash_ipv4(struct irc_inaddr *, int);
 
-#define DigitParse(ch) if (ch >= '0' && ch <= '9') \
+#define DigitParse(ch) do { \
+                       if (ch >= '0' && ch <= '9') \
                          ch = ch - '0'; \
                        else if (ch >= 'A' && ch <= 'F') \
-                         ch = ch - 'A' + '0'; \
+                         ch = ch - 'A' + 10; \
                        else if (ch >= 'a' && ch <= 'f') \
-                         ch = ch - 'a' + '0';
+                         ch = ch - 'a' + 10; \
+                       } while(0);
 
 /* The mask parser/type determination code... */
 
@@ -54,6 +56,10 @@ static unsigned long hash_ipv4(struct irc_inaddr *, int);
  * Side effects: None
  * Comments: Called from parse_netmask
  */
+/* Fixed so ::/0 (any IPv6 address) is valid 
+   Also a bug in DigitParse above.
+   -Gozem 2002-07-19 gozem@linux.nu
+*/
 #ifdef IPV6
 static int
 try_parse_v6_netmask(const char *text, struct irc_inaddr *addr, int *b)
@@ -103,10 +109,8 @@ try_parse_v6_netmask(const char *text, struct irc_inaddr *addr, int *b)
 
       d[dp] = d[dp] >> 4 * nyble;
       dp++;
-      if (p > text && *(p - 1) == ':')
-        return HM_HOST;
       bits = strtoul(p + 1, &after, 10);
-      if (bits == 0 || *after)
+      if (bits < 0 || *after)
         return HM_HOST;
       if (bits > dp * 4 && !(finsert >= 0 && bits <= 128))
         return HM_HOST;
@@ -120,8 +124,6 @@ try_parse_v6_netmask(const char *text, struct irc_inaddr *addr, int *b)
     dp++;
   if (finsert < 0 && bits == 0)
     bits = dp * 16;
-  else if (bits == 0)
-    bits = 128;
   /* How many words are missing? -A1kmm */
   deficit = bits / 16 + ((bits % 16) ? 1 : 0) - dp;
   /* Now fill in the gaps(from ::) in the copied table... -A1kmm */
