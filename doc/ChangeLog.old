@@ -1,3 +1,15 @@
+leeh        2002/05/09 07:06:55 EDT	(20020509_1)
+
+  Modified files:
+    contrib              temp-dline.diff 
+  Log:
+  - max tdlines at 7days, same as hyb6 patch
+  
+  Revision  Changes    Path
+  1.2       +2 -2      ircd-hybrid-7/contrib/temp-dline.diff
+
+
+
 leeh        2002/05/09 06:06:35 EDT	(20020509_0)
 
   Modified files:
