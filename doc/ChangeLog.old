@@ -1,3 +1,7 @@
+*** 20010613_7 by leeh
+- slight updates
+
+
 *** 20010613_6 by leeh
 - started removing server names in collisions..
   the old ones are wrapped in #if 0 for now
