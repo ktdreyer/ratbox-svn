@@ -327,6 +327,9 @@ int     ms_join(struct Client *cptr,
 {
   char *name;
   
+  if (!(sptr->user))
+    return 0;
+  
   name = parv[1];
 
   /*
