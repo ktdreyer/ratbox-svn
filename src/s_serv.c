@@ -271,7 +271,7 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 	else
 		target_p = find_client(parv[server]);
 
-	if(target_p == NULL)
+	if(target_p)
 		if(target_p->from == source_p->from && !MyConnect(target_p))
 			target_p = NULL;
 
