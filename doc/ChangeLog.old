@@ -1,3 +1,13 @@
+*** 20010222_7 by fl_
+- dont flood limit remote clients..
+  in doing this however.. we dont actually need to check if the client is
+  flooding or not.. it seems a waste just to generate an error message.
+- dont flood limit opers in private, in channels where theyre unopped,
+  they shouldnt be given preferential treatment, so limit them with users
+- RFC says we dont reply to notices.. if a client is flooding with a
+  notice, dont tell them theyre message didnt arrive
+
+
 *** 20010222_6 by wcampbel
 Edited the readme some more
 
