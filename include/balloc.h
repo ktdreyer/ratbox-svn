@@ -28,19 +28,11 @@
 #define INCLUDED_blalloc_h
 
 #include "setup.h"
-
-
 #include "tools.h"
 #include "memory.h"
 #include "ircd_defs.h"
 
-
-/* 
- * Block contains status information for an allocated block in our
- * heap.
- */
-
-
+/* status information for an allocated block in heap */
 struct Block
 {
 	size_t alloc_size;
@@ -49,7 +41,6 @@ struct Block
 	dlink_list free_list;
 	dlink_list used_list;
 };
-
 typedef struct Block Block;
 
 struct MemBlock
@@ -59,10 +50,7 @@ struct MemBlock
 };
 typedef struct MemBlock MemBlock;
 
-/* 
- * BlockHeap contains the information for the root node of the
- * memory heap.
- */
+/* information for the root node of the heap */
 struct BlockHeap
 {
 	dlink_node hlist;
@@ -72,9 +60,7 @@ struct BlockHeap
 	unsigned long freeElems;		/* Number of free elements */
 	Block *base;		/* Pointer to first block */
 };
-
 typedef struct BlockHeap BlockHeap;
-
 
 extern int BlockHeapFree(BlockHeap * bh, void *ptr);
 extern void *BlockHeapAlloc(BlockHeap * bh);
@@ -84,5 +70,33 @@ extern int BlockHeapDestroy(BlockHeap * bh);
 
 extern void initBlockHeap(void);
 extern void BlockHeapUsage(BlockHeap * bh, size_t * bused, size_t * bfree, size_t * bmemusage);
+
+/* balloc allocation sizes */
+#ifndef SMALL_NET
+#define CHANNEL_HEAP_SIZE	1024
+#define BAN_HEAP_SIZE		1024
+#define CLIENT_HEAP_SIZE	1024
+#define LCLIENT_HEAP_SIZE	512
+#define LINEBUF_HEAP_SIZE	1024
+#define	USER_HEAP_SIZE		1024
+#define	DNODE_HEAP_SIZE		2048
+#define TOPIC_HEAP_SIZE		1024
+#define MEMBER_HEAP_SIZE	1024
+#else /* Small Net */
+#define CHANNEL_HEAP_SIZE	256
+#define BAN_HEAP_SIZE		128
+#define CLIENT_HEAP_SIZE	256
+#define LCLIENT_HEAP_SIZE	128
+#define LINEBUF_HEAP_SIZE	128
+#define	USER_HEAP_SIZE		128
+#define	DNODE_HEAP_SIZE		256
+#define TOPIC_HEAP_SIZE		256
+#define MEMBER_HEAP_SIZE	256
+#endif
+
+#define RXCONF_HEAP_SIZE        64
+#define SHARED_HEAP_SIZE        8
+#define CACHEFILE_HEAP_SIZE	32
+#define CACHELINE_HEAP_SIZE	64
 
 #endif /* INCLUDED_blalloc_h */

@@ -157,11 +157,11 @@ show_ports(struct Client *source_p)
  * returns true (1) if successful false (0) on error.
  *
  * If the operating system has a define for SOMAXCONN, use it, otherwise
- * use HYBRID_SOMAXCONN
+ * use RATBOX_SOMAXCONN
  */
 #ifdef SOMAXCONN
-#undef HYBRID_SOMAXCONN
-#define HYBRID_SOMAXCONN SOMAXCONN
+#undef RATBOX_SOMAXCONN
+#define RATBOX_SOMAXCONN SOMAXCONN
 #endif
 
 static int
@@ -237,7 +237,7 @@ inetport(struct Listener *listener)
 		return 0;
 	}
 
-	if(listen(fd, HYBRID_SOMAXCONN))
+	if(listen(fd, RATBOX_SOMAXCONN))
 	{
 		report_error(L_ALL, "listen failed for %s:%s", get_listener_name(listener), errno);
 		fd_close(fd);

@@ -31,12 +31,6 @@
 #include "channel.h"
 #include "ircd_defs.h"
 
-#ifndef USE_ASCII_CASEMAP
-#define CASEMAP "rfc1459"
-#else
-#define CASEMAP "ascii"
-#endif
-
 #define FEATURES "STD=i-d"	\
 		" STATUSMSG=@+"	\
                 "%s%s%s" 	\
@@ -59,7 +53,7 @@
                   " PREFIX=(ov)@+" \
 		  " CHANMODES=%s%s%s" \
 		  " NETWORK=%s" \
-		  " CASEMAPPING=%s" \
+		  " CASEMAPPING=rfc1459" \
 		  " CHARSET=ascii" \
 		  " CALLERID" \
 		  " WALLCHOPS" \
@@ -69,7 +63,7 @@
                         ConfigChannel.use_except ? "e" : "", \
                         ConfigChannel.use_invex ? "I" : "", \
                         "b,k,l,imnpst", \
-                        ServerInfo.network_name, CASEMAP
+                        ServerInfo.network_name
 
 /*
  * - from mirc's versions.txt

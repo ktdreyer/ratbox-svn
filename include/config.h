@@ -29,51 +29,6 @@
 
 #include "setup.h"
 
-
-/*
- * IRCD-HYBRID-7 COMPILE TIME CONFIGURATION OPTIONS
- *
- * Most of the items which used to be configurable in here have
- * been moved into the new improved ircd.conf file.
- * If you can't find something, look in doc/example.conf
- *
- * -davidt
- */
-
-/*
- * File Descriptor limit
- *
- * These limits are ultra-low to guarantee the server will work properly
- * in as many environments as possible.  They can probably be increased
- * significantly, if you know what you are doing.
- *
- * Note that HARD_FDLIMIT_ is modified with the maxclients setting in
- * configure.  You should only touch this if you know what you are doing!!!
- *
- * If you are using select for the IO loop, you may also need to increase
- * the value of FD_SETSIZE by editting the Makefile.  However, using
- * --enable-kqueue, --enable-devpoll, or --enable-poll if at all possible,
- * is highly recommended.
- *
- * VMS should be able to use any suitable value here, other operating
- * systems may require kernel patches, configuration tweaks, or ulimit
- * adjustments in order to exceed certain limits (e.g. 1024, 4096 fds).
- */
-#define HARD_FDLIMIT_    MAX_CLIENTS + 60 + 20
-
-/* XXX - MAX_BUFFER is mostly ignored. */
-/*
- * Maximum number of connections to allow.
- *
- * MAX_BUFFER  is the number of fds to reserve, e.g. for clients
- *             exempt from limit.
- *
- * 10 file descriptors are reserved for logging, DNS lookups, etc.,
- * so MAX_CLIENTS + MAX_BUFFER + 10 must not exceed HARD_FDLIMIT.
- * NOTE: MAX_CLIENTS is set with configure now
- */
-#define MAX_BUFFER      60
-
 #ifndef __vms
 /* 
  * Directory paths and filenames for UNIX systems.
@@ -191,18 +146,6 @@
  */
 #define TS5_ONLY
 
-/* USE_ASCII_CASEMAP
- *
- * Under rfc1459, the characters {}|~ are the lowercase of []\^ so a
- * nick of [foo] is the same as {foo} and a channel #[] is the same as
- * #{}.  If this is defined they will no longer be treated as lowercase
- * of each other, so [foo] and {foo} could be two seperate people.
- *
- * Note: this must be the same network wide or you will have problems.
- *       Your locale(1) must also be set to "C".
- */
-#undef USE_ASCII_CASEMAP
-
 /* USE_LOGFILE - log errors and such to LPATH
  * If you wish to have the server send 'vital' messages about server
  * to a logfile, define USE_LOGFILE.
@@ -256,6 +199,7 @@
 #else
 #define NICKNAMEHISTORYLENGTH 1500
 #endif
+
 /* HANGONGOODLINK and HANGONGOODLINK
  * Often net breaks for a short time and it's useful to try to
  * establishing the same connection again faster than CONNECTFREQUENCY
@@ -266,7 +210,6 @@
  * other end of the connection has time to notice it broke too.
  * 1997/09/18 recommended values by ThemBones for modern EFnet
  */
-
 #define HANGONRETRYDELAY 60	/* Recommended value: 30-60 seconds */
 #define HANGONGOODLINK 3600	/* Recommended value: 30-60 minutes */
 
@@ -276,56 +219,35 @@
  */
 #define KILLCHASETIMELIMIT 90	/* Recommended value: 90 */
 
-/*
- * If the OS has SOMAXCONN use that value, otherwise
- * Use the value in HYBRID_SOMAXCONN for the listen(); backlog
- * try 5 or 25. 5 for AIX and SUNOS, 25 should work better for other OS's
-*/
-#define HYBRID_SOMAXCONN 25
-
-/* END OF CONFIGURABLE OPTIONS */
-
-/* 
- * Default pre-allocations for various things...
+/* RATBOX_SOMAXCONN
+ * Use SOMAXCONN if OS has it, otherwise use this value for the 
+ * listen(); backlog.  5 for AIX/SUNOS, 25 for other OSs.
  */
-#ifndef SMALL_NET		/* Normal net */
-#define CHANNEL_HEAP_SIZE	1024
-#define BAN_HEAP_SIZE		1024
-#define CLIENT_HEAP_SIZE	1024
-#define LCLIENT_HEAP_SIZE	512
-#define LINEBUF_HEAP_SIZE	1024
-#define	USER_HEAP_SIZE		1024
-#define	DNODE_HEAP_SIZE		2048
-#define TOPIC_HEAP_SIZE		1024
-#define MEMBER_HEAP_SIZE	1024
-#else /* Small Net */
-#define CHANNEL_HEAP_SIZE	256
-#define BAN_HEAP_SIZE		128
-#define CLIENT_HEAP_SIZE	256
-#define LCLIENT_HEAP_SIZE	128
-#define LINEBUF_HEAP_SIZE	128
-#define	USER_HEAP_SIZE		128
-#define	DNODE_HEAP_SIZE		256
-#define TOPIC_HEAP_SIZE		256
-#define MEMBER_HEAP_SIZE	256
-#endif
+#define RATBOX_SOMAXCONN 25
 
-#define RXCONF_HEAP_SIZE        20
-#define SHARED_HEAP_SIZE        10
-#define CACHEFILE_HEAP_SIZE	20
-#define CACHELINE_HEAP_SIZE	50
+/* ----------------------------------------------------------------
+ * STOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOP
+ * ----------------------------------------------------------------
+ * The options below this line should NOT be modified.
+ * ----------------------------------------------------------------
+ */
+
+/* MAX_BUFFER
+ * The amount of fds to reserve for clients exempt from limits
+ * and dns lookups.
+ */
+#define MAX_BUFFER      60
+
+/* HARD_FDLIMIT_
+ * The maximum amount of FDs to use.  MAX_CLIENTS is set in ./configure.
+ */
+#define HARD_FDLIMIT_    MAX_CLIENTS + MAX_BUFFER + 20
 
 /* DEBUGMODE is used mostly for internal development, it is likely
  * to make your client server very sluggish.
  * You usually shouldn't need this. -Dianora
 */
 #undef  DEBUGMODE		/* define DEBUGMODE to enable debugging mode. */
-
-/*
- * this checks for various things that should never happen, but
- * might do due to bugs.  ircd might be slightly more efficient with 
- * these disabled, who knows. keep this enabled during development.
- */
 
 #define CONFIG_RATBOX_LEVEL_2
 

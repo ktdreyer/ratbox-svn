@@ -100,10 +100,10 @@ Info MyInformation[] = {
 #endif /* UH PATH */
 
 #ifdef SOMAXCONN
-	{"HYBRID_SOMAXCONN", "", SOMAXCONN,
+	{"RATBOX_SOMAXCONN", "", SOMAXCONN,
 	 "Maximum Queue Length of Pending Connections"},
 #else
-	{"HYBRID_SOMAXCONN", "", HYBRID_SOMAXCONN,
+	{"RATBOX_SOMAXCONN", "", RATBOX_SOMAXCONN,
 	 "Maximum Queue Length of Pending Connections"},
 #endif /* SOMAXCONN */
 
