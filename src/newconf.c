@@ -47,6 +47,7 @@ static struct server_conf *yy_server = NULL;
 static dlink_list yy_aconf_list;
 static dlink_list yy_oper_list;
 static dlink_list yy_shared_list;
+static dlink_list yy_cluster_list;
 static struct oper_conf *yy_oper = NULL;
 
 static char *resv_reason;
@@ -1543,12 +1544,22 @@ conf_set_gecos_reason(void *data)
 }
 
 static int
-conf_begin_cluster(struct TopConf *tc)
+conf_cleanup_cluster(struct TopConf *tc)
 {
-	if(yy_shared != NULL)
-		free_remote_conf(yy_shared);
+	dlink_node *ptr, *next_ptr;
 
-	yy_shared = make_remote_conf();
+	DLINK_FOREACH_SAFE(ptr, next_ptr, yy_cluster_list.head)
+	{
+		free_remote_conf(ptr->data);
+		dlinkDestroy(ptr, &yy_cluster_list);
+	}
+
+	if(yy_shared != NULL)
+	{
+		free_remote_conf(yy_shared);
+		yy_shared = NULL;
+	}
+
 	return 0;
 }
 
@@ -1570,16 +1581,37 @@ conf_end_cluster(struct TopConf *tc)
 static void
 conf_set_cluster_name(void *data)
 {
-	MyFree(yy_shared->server);
+	if(yy_shared != NULL)
+		free_remote_conf(yy_shared);
+
+	yy_shared = make_remote_conf();
 	DupString(yy_shared->server, data);
+	dlinkAddAlloc(yy_shared, &yy_cluster_list);
+
+	yy_shared = NULL;
 }
 
 static void
-conf_set_cluster_type(void *data)
+conf_set_cluster_flags(void *data)
 {
 	conf_parm_t *args = data;
+	int flags;
+	dlink_node *ptr, *next_ptr;
 
-	set_modes_from_table(&yy_shared->flags, "flag", cluster_table, args);
+	if(yy_shared != NULL)
+		free_remote_conf(yy_shared);
+
+	set_modes_from_table(&flags, "flag", cluster_table, args);
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, yy_cluster_list.head)
+	{
+		yy_shared = ptr->data;
+		yy_shared->flags = flags;
+		dlinkAddTail(yy_shared, &yy_shared->node, &cluster_conf_list);
+		dlinkDestroy(ptr, &yy_cluster_list);
+	}
+
+	yy_shared = NULL;
 }
 
 static void
@@ -2174,9 +2206,9 @@ newconf_init()
 	add_conf_item("gecos", "name", CF_QSTRING, conf_set_gecos_name);
 	add_conf_item("gecos", "reason", CF_QSTRING, conf_set_gecos_reason);
 
-	add_top_conf("cluster", conf_begin_cluster, conf_end_cluster, NULL);
+	add_top_conf("cluster", conf_cleanup_cluster, conf_cleanup_cluster, NULL);
 	add_conf_item("cluster", "name", CF_QSTRING, conf_set_cluster_name);
-	add_conf_item("cluster", "type", CF_STRING | CF_FLIST, conf_set_cluster_type);
+	add_conf_item("cluster", "flags", CF_STRING | CF_FLIST, conf_set_cluster_flags);
 
 	add_top_conf("general", NULL, NULL, conf_general_table);
 	add_top_conf("channel", NULL, NULL, conf_channel_table);
