@@ -589,8 +589,8 @@ int adns_init(adns_state *ads_r, adns_initflags flags, FBFILE *diagfile) {
   readconfig(ads,"/etc/resolv.conf",0);
   readconfig(ads,"/etc/resolv-adns.conf",0);
 #else
-  ilog(L_CRIT, "Opening []RESOLV.CONF (VMS)");
-  readconfig(ads,"[]RESOLV.CONF",0);
+  ilog(L_CRIT, "Opening IRCD$CONFDIR:RESOLV.CONF (VMS)");
+  readconfig(ads,"IRCD$CONFDIR:RESOLV.CONF",0);
 #endif
   readconfigenv(ads,"RES_CONF");
   readconfigenv(ads,"ADNS_RES_CONF");

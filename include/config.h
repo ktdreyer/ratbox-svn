@@ -91,29 +91,31 @@
  * MSGPATH     = directory for gettext message files (disabled in VMS).
  */
 
-#define IRCD_PREFIX     "DISK$USER:[EBROCKLESBY.IRCD"
-#define DPATH           IRCD_PREFIX "]"
-#define BINPATH         IRCD_PREFIX ".BIN"
-#define ETCPATH         IRCD_PREFIX ".ETC"
-#define LOGPATH         IRCD_PREFIX ".LOGS"
+/* IRCD_PREFIX not needed in VMS -larne */
+/*#define IRCD_PREFIX     "IRCD$BASEDIR:"*/
+#define DPATH           "IRCD$BASEDIR:"
+#define BINPATH         "IRCD$BINDIR:"
+#define ETCPATH         "IRCD$CONFDIR:"
+#define LOGPATH         "IRCD$LOGDIR:"
+
 #undef  MODPATH
 #undef  AUTOMODPATH
 #undef  MSGPATH
 
-#define SPATH   BINPATH "]IRCD.EXE"              /* server executable */
-#define SLPATH  BINPATH "]SERVLINK.EXE"          /* servlink executable */
-#define CPATH   ETCPATH "]IRCD.CONF"             /* config file */
-#define KPATH   ETCPATH "]KLINE.CONF"            /* kline file */
-#define DLPATH  ETCPATH "]DLINE.CONF"            /* dline file */
-#define GPATH   LOGPATH "]GLINE.LOG"             /* gline logfile */
-#define RPATH   ETCPATH "]IRCD.RSA"              /* RSA private key file */
-#define MPATH   ETCPATH "]IRCD.MOTD"             /* MOTD filename */
-#define LPATH   LOGPATH "]IRCD.LOG"              /* logfile */
-#define PPATH   ETCPATH "]IRCD.PID"              /* pid file */
-#define HPATH   ETCPATH "]OPERS.TXT"             /* oper help file */
-#define UHPATH  ETCPATH "]USERS.TXT"             /* user help file */
-#define OPATH   ETCPATH "]OPERS.MOTD"            /* oper MOTD file */
-#define LIPATH  ETCPATH "]LINKS.TXT"             /* cached LINKS file */
+#define SPATH   BINPATH "IRCD.EXE"              /* server executable */
+#define SLPATH  BINPATH "SERVLINK.EXE"          /* servlink executable */
+#define CPATH   ETCPATH "IRCD.CONF"             /* config file */
+#define KPATH   ETCPATH "KLINE.CONF"            /* kline file */
+#define DLPATH  ETCPATH "DLINE.CONF"            /* dline file */
+#define GPATH   LOGPATH "GLINE.LOG"             /* gline logfile */
+#define RPATH   ETCPATH "IRCD.RSA"              /* RSA private key file */
+#define MPATH   ETCPATH "IRCD.MOTD"             /* MOTD filename */
+#define LPATH   LOGPATH "IRCD.LOG"              /* logfile */
+#define PPATH   ETCPATH "IRCD.PID"              /* pid file */
+#define HPATH   ETCPATH "OPERS.TXT"             /* oper help file */
+#define UHPATH  ETCPATH "USERS.TXT"             /* user help file */
+#define OPATH   ETCPATH "OPERS.MOTD"            /* oper MOTD file */
+#define LIPATH  ETCPATH "LINKS.TXT"             /* cached LINKS file */
 #else /* VMS */
 /* 
  * Directory paths and filenames for UNIX systems.
