@@ -549,3 +549,26 @@ BlockHeapDestroy(BlockHeap * bh)
     free(bh);
     return(0);
 }
+
+void
+BlockHeapUsage(BlockHeap *bh, size_t *bused, size_t *bfree, size_t *bmemusage)
+{
+  size_t used;
+  size_t freem;
+  size_t memusage;
+  if(bh == NULL)
+  {
+    return;
+  }
+  
+  freem = bh->freeElems;
+  used = (bh->blocksAllocated * bh->elemsPerBlock) - bh->freeElems;
+  memusage = used * (bh->elemSize+sizeof(MemBlock));
+  
+  if(bused != NULL)
+    *bused = used;
+  if(bfree != NULL)
+    *bfree = freem;
+  if(bmemusage != NULL)
+    *bmemusage = memusage;
+}

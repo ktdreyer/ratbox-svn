@@ -171,31 +171,31 @@ void count_memory(struct Client *source_p)
   int aways_counted = 0;   
   int number_servers_cached;    /* number of servers cached by scache */
 
-  u_long channel_memory = 0;
-  u_long channel_ban_memory = 0;
-  u_long channel_except_memory = 0;
-  u_long channel_invex_memory = 0;
+  size_t channel_memory = 0;
+  size_t channel_ban_memory = 0;
+  size_t channel_except_memory = 0;
+  size_t channel_invex_memory = 0;
 
-  u_long away_memory = 0;       /* memory used by aways */
-  u_long wwm = 0;               /* whowas array memory used */
-  u_long conf_memory = 0;       /* memory used by conf lines */
-  u_long mem_servers_cached;    /* memory used by scache */
+  size_t away_memory = 0;       /* memory used by aways */
+  size_t wwm = 0;               /* whowas array memory used */
+  size_t conf_memory = 0;       /* memory used by conf lines */
+  size_t mem_servers_cached;    /* memory used by scache */
 
-  int linebuf_count =0;
-  u_long linebuf_memory_used = 0;
+  size_t linebuf_count =0;
+  size_t linebuf_memory_used = 0;
 
-  u_long client_hash_table_size = 0;
-  u_long channel_hash_table_size = 0;
-  u_long total_channel_memory = 0;
-  u_long totww = 0;
+  size_t client_hash_table_size = 0;
+  size_t channel_hash_table_size = 0;
+  size_t total_channel_memory = 0;
+  size_t totww = 0;
 
   int local_client_count = 0;
-  u_long local_client_memory_used = 0;
+  size_t local_client_memory_used = 0;
 
   int remote_client_count = 0;
-  u_long remote_client_memory_used = 0;
+  size_t remote_client_memory_used = 0;
 
-  u_long total_memory = 0;
+  size_t total_memory = 0;
 
   count_whowas_memory(&wwu, &wwm);
 
@@ -352,7 +352,7 @@ void count_memory(struct Client *source_p)
   client_hash_table_size  = hash_get_client_table_size();
   channel_hash_table_size = hash_get_channel_table_size();
 
-  sendto_one(source_p, ":%s %d %s :Hash: client %u(%lu) chan %u(%lu)",
+  sendto_one(source_p, ":%s %d %s :Hash: client %u(%u) chan %u(%u)",
              me.name, RPL_STATSDEBUG, source_p->name,
              U_MAX, client_hash_table_size,
              CH_MAX, channel_hash_table_size);

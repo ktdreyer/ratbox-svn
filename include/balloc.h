@@ -42,7 +42,6 @@
 
 
 struct Block {
-	int		freeElems;		/* Number of available elems */
 	size_t		alloc_size;
 	struct Block*	next;			/* Next in our chain of blocks */
 	void*		elems;			/* Points to allocated memory */
@@ -82,5 +81,6 @@ extern int        BlockHeapDestroy(BlockHeap *bh);
 
 extern int        BlockHeapGarbageCollect(BlockHeap *);
 extern void	  initBlockHeap(void);
+extern void       BlockHeapUsage(BlockHeap *bh, size_t *bused, size_t *bfree, size_t *bmemusage);
 
 #endif /* INCLUDED_blalloc_h */

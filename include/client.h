@@ -564,8 +564,8 @@ extern int            exit_client(struct Client*, struct Client*,
                                   struct Client*, const char*);
 
 
-extern void     count_local_client_memory(int *count, int *memory);
-extern void     count_remote_client_memory(int *count, int *memory);
+extern void     count_local_client_memory(size_t *count, size_t *memory);
+extern void     count_remote_client_memory(size_t *count, size_t *memory);
 
 extern struct Client* find_chasing (struct Client *, char *, int *);
 extern struct Client* find_person (char *);

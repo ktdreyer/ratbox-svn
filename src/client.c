@@ -65,9 +65,6 @@ static void qs_client(struct Client *, const char *);
 
 static EVH check_pings;
 
-static int remote_client_count=0;
-static int local_client_count=0;
-
 static BlockHeap *client_heap = NULL;
 static BlockHeap *lclient_heap = NULL;
 
@@ -105,8 +102,6 @@ static void client_heap_gc(void *unused)
  */
 void init_client(void)
 {
-  remote_client_count = 0;
-  local_client_count = 0;
   /*
    * start off the check ping event ..  -- adrian
    * Every 30 seconds is plenty -- db
@@ -155,13 +150,11 @@ struct Client* make_client(struct Client* from)
 #endif      
       /* as good a place as any... */
       dlinkAddAlloc(client_p, &unknown_list);
-      ++local_client_count;
     }
   else
     { /* from is not NULL */
       client_p->localClient = NULL;
       client_p->from = from; /* 'from' of local client is self! */
-      ++remote_client_count;
     }
 
   client_p->status = STAT_UNKNOWN;
@@ -195,12 +188,6 @@ void free_client(struct Client* client_p)
 	fd_close(client_p->localClient->fd);
 
       BlockHeapFree(lclient_heap, client_p->localClient);
-      --local_client_count;
-      assert(local_client_count >= 0);
-    }
-  else
-    {
-      --remote_client_count;
     }
 
   BlockHeapFree(client_heap, client_p);
@@ -1482,22 +1469,25 @@ int exit_client(
  */
 
 /* XXX one common Client list now */
-void count_local_client_memory(int *count,
-			       int *local_client_memory_used)
+void count_local_client_memory(size_t *count,
+			       size_t *local_client_memory_used)
 {
-  *count = local_client_count;
-  *local_client_memory_used = local_client_count *
-    (sizeof(struct Client) + sizeof(struct LocalUser));
+  size_t lusage;
+  BlockHeapUsage(lclient_heap, count, NULL, &lusage);
+  *local_client_memory_used = lusage + (*count*(sizeof(MemBlock)+sizeof(struct Client)));
 }
 
 /*
  * Count up remote client memory
  */
-void count_remote_client_memory(int *count,
-				int *remote_client_memory_used)
+void count_remote_client_memory(size_t *count,
+				size_t *remote_client_memory_used)
 {
-  *count = remote_client_count;
-  *remote_client_memory_used = remote_client_count * sizeof(struct Client);
+  size_t lcount, rcount;
+  BlockHeapUsage(lclient_heap, &lcount, NULL, NULL);
+  BlockHeapUsage(client_heap, &rcount, NULL, NULL); 
+  *count = rcount-lcount;
+  *remote_client_memory_used = *count * (sizeof(MemBlock)+sizeof(struct Client));
 }
 
 

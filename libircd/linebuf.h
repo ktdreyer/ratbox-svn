@@ -81,5 +81,5 @@ extern void linebuf_putmsg(buf_head_t *, const char *, va_list *,
                            const char *, ...);
 extern int linebuf_flush(int, buf_head_t *);
 extern void linebuf_attach(buf_head_t *, buf_head_t *);
-extern void count_linebuf_memory(int *, u_long *);
+extern void count_linebuf_memory(size_t *, size_t *);
 #endif

@@ -97,7 +97,7 @@ struct Client *get_history (char *, time_t);
 /*
 ** for debugging...counts related structures stored in whowas array.
 */
-void    count_whowas_memory (int *, u_long *);
+void    count_whowas_memory (size_t *, size_t *);
 
 /* XXX m_whowas.c in modules needs these */
 extern struct Whowas WHOWAS[];

@@ -134,13 +134,13 @@ struct Client *get_history(char *nick,time_t timelimit)
   return NULL;
 }
 
-void    count_whowas_memory(int *wwu,
-                            u_long *wwum)
+void    count_whowas_memory(size_t *wwu,
+                            size_t *wwum)
 {
   struct Whowas *tmp;
   int i;
-  int     u = 0;
-  u_long  um = 0;
+  size_t  u = 0;
+  size_t  um = 0;
 
   /* count the number of used whowas structs in 'u' */
   /* count up the memory used of whowas structs in um */

@@ -112,7 +112,7 @@ const char* find_or_add(const char* name)
  * output	- NONE
  * side effects	-
  */
-void count_scache(int *number_servers_cached,u_long *mem_servers_cached)
+void count_scache(size_t *number_servers_cached,size_t *mem_servers_cached)
 {
   SCACHE *scache_ptr;
   int i;
