@@ -475,12 +475,14 @@ linebuf_putmsg(buf_head_t *bufhead, const char *format, va_list va_args,
   while ((bufline->buf[len] == '\r') || (bufline->buf[len] == '\n'))
     len--;
 
-  bufline->buf[len++] = '\r';
-  bufline->buf[len++] = '\n';
-  bufline->buf[len++] = '\0'; /* this restores len to correct length */
+  bufline->buf[++len] = '\r';
+  bufline->buf[++len] = '\n';
+  bufline->buf[++len] = '\0'; /* this restores len to correct length */
 
   bufline->len  = len;
   bufhead->len += len;
+
+  bufline->terminated = 1;
 }
 
 /*
