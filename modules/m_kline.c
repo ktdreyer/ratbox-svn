@@ -117,7 +117,7 @@ char host[HOSTLEN+2];
  *		- parameter count
  *		- parameter list
  * output	-
- * side effects - D line is added
+ * side effects - k line is added
  *
  */
 int mo_kline(struct Client *cptr,
@@ -218,7 +218,7 @@ int mo_kline(struct Client *cptr,
     {
       ircsprintf(buffer,
 		 "Temporary K-line %d min. - %s (%s)",
-		 tkline_time,
+		 tkline_time/60,
 		 reason,
 		 current_date);
       DupString(aconf->passwd, buffer );
@@ -367,10 +367,10 @@ void apply_tkline(struct Client *sptr, struct ConfItem *aconf,
   add_temp_kline(aconf);
   sendto_realops_flags(FLAGS_ALL,
                        "%s added temporary %d min. K-Line for [%s@%s] [%s]",
-                       sptr->name, tkline_time, aconf->user, aconf->host,
+                       sptr->name, tkline_time/60, aconf->user, aconf->host,
                        aconf->passwd);
   log(L_TRACE, "%s added temporary %d min. K-Line for [%s@%s] [%s]",
-      sptr->name, tkline_time, aconf->user, aconf->host, aconf->passwd);
+      sptr->name, tkline_time/60, aconf->user, aconf->host, aconf->passwd);
   check_klines();
 }
 
@@ -410,7 +410,9 @@ time_t valid_tkline(struct Client *sptr, char *p)
   if(result > (24*60))
     result = (24*60); /* Max it at 24 hours */
 
-  return((time_t)result);
+  result = (time_t)result * (time_t)60;  /* turn it into minutes */
+
+  return(result);
 }
 
 /*
@@ -946,14 +948,13 @@ int already_placed_kline(struct Client *sptr, char *user, char *host,
   if(ConfigFileEntry.non_redundant_klines) 
     {
       if ((aconf = find_matching_mtrie_conf(host,user,ip)) && 
-         (aconf->status & CONF_KILL))
+         (aconf->status & CONF_KILL) && !IsServer(sptr))
         {
           reason = aconf->passwd ? aconf->passwd : "<No Reason>";
-          if(!IsServer(sptr))
-            sendto_one(sptr,
-                       ":%s NOTICE %s :[%s@%s] already K-lined by [%s@%s] - %s",
-                       me.name, sptr->name, user, host, aconf->user,
-                       aconf->host, reason);
+          sendto_one(sptr,
+                     ":%s NOTICE %s :[%s@%s] already K-lined by [%s@%s] - %s",
+                     me.name, sptr->name, user, host, aconf->user,
+                     aconf->host, reason);
           return 1;
         }
 
