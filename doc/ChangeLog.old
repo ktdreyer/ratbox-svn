@@ -1,3 +1,9 @@
+*** 20001117_1 by toot
+. made a separate ircd.conf setting to block nickchanges when banned,
+  and block them in +m chans too, unless opped
+. fixed a typo i made in can_send() :P
+
+
 *** 20001116_7 by toot
 (quiet_on_ban stuff)
   +o/+v should be able to speak even if banned
