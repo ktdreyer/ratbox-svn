@@ -1,3 +1,15 @@
+leeh        2002/02/23 07:58:32 EST	(20020223_2)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  - only check/set IsClosing/IsDead for local connections..
+  
+  Revision  Changes    Path
+  7.235     +4 -6      ircd-hybrid-7/src/client.c
+
+
+
 leeh        2002/02/23 06:23:15 EST	(20020223_1)
 
   Modified files:
