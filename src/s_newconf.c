@@ -487,6 +487,16 @@ find_server_conf(const char *name)
 void
 attach_server_conf(struct Client *client_p, struct server_conf *server_p)
 {
+	/* already have an attached conf */
+	if(client_p->localClient->att_sconf)
+	{
+		/* short circuit this special case :) */
+		if(client_p->localClient->att_sconf == server_p)
+			return;
+
+		detach_server_conf(client_p);
+	}
+
 	client_p->localClient->att_sconf = server_p;
 	server_p->servers++;
 }

@@ -358,7 +358,7 @@ try_connections(void *unused)
 	{
 		tmp_p = ptr->data;
 
-		if((tmp_p->flags & SERVER_AUTOCONN) == 0)
+		if(ServerConfIllegal(tmp_p) || !ServerConfAutoconn(tmp_p))
 			continue;
 
 		cltmp = tmp_p->class;
@@ -454,7 +454,7 @@ check_server(const char *name, struct Client *client_p)
 	{
 		tmp_p = ptr->data;
 
-		if(tmp_p->flags & SERVER_ILLEGAL)
+		if(ServerConfIllegal(tmp_p))
 			continue;
 
 		if(!match(name, tmp_p->name))

@@ -88,27 +88,27 @@ static int mo_modrestart(struct Client *, struct Client *, int, const char **);
 
 struct Message modload_msgtab = {
 	"MODLOAD", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, {mo_modload, 2}}
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, mg_ignore, {mo_modload, 2}}
 };
 
 struct Message modunload_msgtab = {
 	"MODUNLOAD", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, {mo_modunload, 2}}
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, mg_ignore, {mo_modunload, 2}}
 };
 
 struct Message modreload_msgtab = {
 	"MODRELOAD", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, {mo_modreload, 2}}
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, mg_ignore, {mo_modreload, 2}}
 };
 
 struct Message modlist_msgtab = {
 	"MODLIST", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, {mo_modlist, 0}}
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, mg_ignore, {mo_modlist, 0}}
 };
 
 struct Message modrestart_msgtab = {
 	"MODRESTART", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, {mo_modrestart, 0}}
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, mg_ignore, {mo_modrestart, 0}}
 };
 
 extern struct Message error_msgtab;

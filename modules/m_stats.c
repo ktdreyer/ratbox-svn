@@ -292,10 +292,8 @@ stats_connect(struct Client *source_p)
 	{
 		server_p = ptr->data;
 
-#ifndef LEEH
 		if(ServerConfIllegal(server_p))
 			continue;
-#endif
 
 		buf[0] = '\0';
 		s = buf;

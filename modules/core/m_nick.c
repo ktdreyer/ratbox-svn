@@ -70,6 +70,7 @@ static int change_remote_nick(struct Client *, struct Client *, int, const char 
 static int clean_nick(const char *, int loc_client);
 static int clean_username(const char *);
 static int clean_host(const char *);
+static int clean_uid(const char *uid);
 
 static void set_initial_nick(struct Client *client_p, struct Client *source_p, char *nick);
 static void change_local_nick(struct Client *client_p, struct Client *source_p, char *nick);
@@ -408,7 +409,7 @@ ms_uid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 				     parv[1], source_p->name,
 				     client_p->name);
 		sendto_one(client_p, ":%s KILL %s :%s (Bad Nickname)",
-			   me.name, parv[8], me.name);
+			   me.id, parv[8], me.name);
 		return 0;
 	}
 
@@ -420,7 +421,19 @@ ms_uid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 				     parv[5], parv[6], source_p->name,
 				     client_p->name);
 		sendto_one(client_p, ":%s KILL %s :%s (Bad user@host)",
-			   me.name, parv[8], me.name);
+			   me.id, parv[8], me.name);
+		return 0;
+	}
+
+	if(!clean_uid(parv[8]))
+	{
+		ServerStats->is_kill++;
+		sendto_realops_flags(UMODE_DEBUG, L_ALL,
+					"Bad UID: %s From: %s(via %s)",
+					parv[8], source_p->name,
+					client_p->name);
+		sendto_one(client_p, ":%s KILL %s :%s (Bad UID)",
+				me.id, parv[8], me.name);
 		return 0;
 	}
 
@@ -529,6 +542,28 @@ clean_host(const char *host)
 	}
 
 	if(len > HOSTLEN)
+		return 0;
+
+	return 1;
+}
+
+static int
+clean_uid(const char *uid)
+{
+	int len = 1;
+
+	if(!IsDigit(*uid++))
+		return 0;
+
+	for(; *uid; uid++)
+	{
+		len++;
+
+		if(!IsIdChar(*uid))
+			return 0;
+	}
+
+	if(len != IDLEN-1)
 		return 0;
 
 	return 1;
