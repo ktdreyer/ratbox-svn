@@ -249,7 +249,7 @@ static void increase_modlist(void)
     return;
 
   new_modlist = (struct module **)MyMalloc ( sizeof (struct module) *
-					     (num_mods + MODS_INCREMENT));
+					     (max_mods + MODS_INCREMENT));
   memcpy((void *)new_modlist,
 	 (void *)modlist, sizeof(struct module) * num_mods);
 
