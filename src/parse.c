@@ -630,6 +630,12 @@ struct Message msgtab[] = {
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_time, m_time, m_time }
   },
+#ifdef OPENSSL
+  {MSG_CHALLENGE, 0, 0, MFLG_SLOW, 0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_challenge, m_ignore, m_challenge }
+  },
+#endif /* OPENSSL */
   {MSG_OPER, 0, 2, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_oper, ms_oper, mo_oper }

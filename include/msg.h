@@ -98,6 +98,7 @@ typedef struct MessageTree MESSAGE_TREE;
 #define MSG_PING     "PING"     /* PING */
 #define MSG_PONG     "PONG"     /* PONG */
 #define MSG_OPER     "OPER"     /* OPER */
+#define MSG_CHALLENGE "CHALLENGE" /* CHALLENGE */
 #define MSG_PASS     "PASS"     /* PASS */
 #define MSG_WALLOPS  "WALLOPS"  /* WALL */
 #define MSG_TIME     "TIME"     /* TIME */

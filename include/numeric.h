@@ -279,6 +279,7 @@ extern const char* form_str(int);
 #define RPL_REHASHING        382
 #define RPL_MYPORTIS         384
 #define RPL_NOTOPERANYMORE   385
+#define RPL_RSACHALLENGE     386
 
 #define RPL_TIME             391
 #define RPL_USERSSTART       392

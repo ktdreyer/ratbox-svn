@@ -84,6 +84,7 @@ struct User
   int            joined;        /* number of channels joined */
   char           id[IDLEN + 1]; /* for future use *hint* */
   const char*    server;        /* pointer to scached server name */
+  char*          RSA_response;  /* expected response from client */
   /*
   ** In a perfect world the 'server' name
   ** should not be needed, a pointer to the

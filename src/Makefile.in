@@ -50,6 +50,7 @@ SRCS =                          \
   m_away.c                      \
   m_capab.c                     \
   m_cburst.c                    \
+  m_challenge.c                 \
   m_cjoin.c                     \
   m_close.c                     \
   m_connect.c                   \
