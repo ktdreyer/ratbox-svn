@@ -1,3 +1,16 @@
+wcampbel    2001/12/16 00:10:18 EST	(20011216_1)
+
+  Modified files:
+    doc                  example.conf 
+  Log:
+  Document Jeremy's issue with mismatched forward/reverse in connect {}'s
+  host entry.
+  
+  Revision  Changes    Path
+  7.145     +4 -0      ircd-hybrid-7/doc/example.conf
+
+
+
 wcampbel    2001/12/15 23:53:29 EST	(20011216_0)
 
   Modified files:
