@@ -1,3 +1,15 @@
+leeh        2002/06/07 10:22:46 EDT	(20020607_0)
+
+  Modified files:
+    contrib              m_force.c 
+  Log:
+  - diff by adx for forcepart param thingy
+  
+  Revision  Changes    Path
+  1.12      +2 -2      ircd-hybrid-7/contrib/m_force.c
+
+
+
 leeh        2002/06/06 15:28:51 EDT	(20020606_0)
 
   Modified files:
