@@ -1,3 +1,17 @@
+leeh        2002/05/27 18:48:15 EDT	(20020527_1)
+
+  Removed files:
+    contrib              vms_lex_yy.c vms_y_tab.c vms_y_tab.h 
+  Log:
+  - removed for larne
+  
+  Revision  Changes    Path
+  1.4       +0 -3530   ircd-hybrid-7/contrib/vms_lex_yy.c (dead)
+  1.5       +0 -4454   ircd-hybrid-7/contrib/vms_y_tab.c (dead)
+  1.4       +0 -195    ircd-hybrid-7/contrib/vms_y_tab.h (dead)
+
+
+
 leeh        2002/05/27 08:14:54 EDT	(20020527_0)
 
   Modified files:
