@@ -109,7 +109,7 @@ char *alloca ();
 extern int errno;
 #endif
 
-#ifdef VMS
+#ifdef __vms
 #include <sys/ioctl.h>
 #endif
 
@@ -127,6 +127,10 @@ extern int errno;
 # define __unused __attribute__((__unused__))
 # define __printf(x) __attribute__((__format__ (__printf__, x, x + 1)))
 # define __noreturn __attribute__((__noreturn__))
+#else
+# define __unused
+# define __printf
+# define __noreturn
 #endif
 
 

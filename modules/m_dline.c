@@ -55,7 +55,7 @@ struct Message dline_msgtab = {
 };
 
 mapi_clist_av1 dline_clist[] = { &dline_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, dline_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(dline, NULL, NULL, dline_clist, NULL, NULL, "$Revision$");
 
 /* Local function prototypes */
 

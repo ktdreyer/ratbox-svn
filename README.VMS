@@ -1,13 +1,12 @@
-Last tested version: hybrid-7beta9 20020205_1
+Last tested version: ircd-ratbox 2.0beta2
 
 To compile ircd on VMS, simply execute the make.com script
 from the top-level ircd directory:
 
-  $ SET DEF [.IRCD-HYBRID-7]
+  $ SET DEF [.IRCD-RATBOX]
   $ @MAKE
 
-This should build [.SRC]IRCD.EXE (servlink is not yet supported
-for VMS). 
+This should build [.SRC]IRCD.EXE and the releated tools.
 
 You may want to edit [.INCLUDE]CONFIG.H, but there is no longer
 anything very interesting there.

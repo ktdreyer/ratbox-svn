@@ -46,13 +46,17 @@
 /* now it is	-larne	*/
 static int	challenge_load(void)
 {
+#ifndef STATIC_MODULES
 	sendto_realops_flags(UMODE_ALL, L_ALL, 
 		"Challenge module not loaded because OpenSSL is not available.");
 	ilog(L_WARN, "Challenge module not loaded because OpenSSL is not available.");
 	return -1;
+#else
+	return 0;
+#endif
 }
 
-DECLARE_MODULE_AV1(challenge_load, NULL, NULL, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(challenge, challenge_load, NULL, NULL, NULL, NULL, "$Revision$");
 #else
 
 static int m_challenge(struct Client *, struct Client *, int, const char **);
@@ -65,7 +69,7 @@ struct Message challenge_msgtab = {
 };
 
 mapi_clist_av1 challenge_clist[] = { &challenge_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, challenge_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(challenge, NULL, NULL, challenge_clist, NULL, NULL, "$Revision$");
 
 /*
  * m_challenge - generate RSA challenge for wouldbe oper

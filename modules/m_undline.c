@@ -53,7 +53,7 @@ struct Message undline_msgtab = {
 };
 
 mapi_clist_av1 undline_clist[] = { &undline_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, undline_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(undline, NULL, NULL, undline_clist, NULL, NULL, "$Revision$");
 
 static int flush_write(struct Client *, FBFILE *, char *, char *);
 static int remove_temp_dline(const char *);

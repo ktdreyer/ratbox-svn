@@ -55,7 +55,7 @@ struct Message unkline_msgtab = {
 };
 
 mapi_clist_av1 unkline_clist[] = { &unkline_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, unkline_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(unkline, NULL, NULL, unkline_clist, NULL, NULL, "$Revision$");
 
 static void remove_permkline_match(struct Client *, const char *, const char *, int);
 static int flush_write(struct Client *, FBFILE *, const char *, const char *);

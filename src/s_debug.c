@@ -91,7 +91,9 @@ debug(int level, char *format, ...)
 void
 send_usage(struct Client *source_p)
 {
+#ifndef __VMS
 	struct rusage rus;
+#endif
 	time_t secs;
 	time_t rup;
 #ifdef  hz
@@ -104,7 +106,7 @@ send_usage(struct Client *source_p)
 # endif
 #endif
 
-#ifdef VMS
+#ifdef __VMS
 	sendto_one(source_p, 
 		   ":%s NOTICE %s :getrusage not supported on this system",
 		   me.name, source_p->name);
@@ -147,7 +149,7 @@ send_usage(struct Client *source_p)
 		   ":%s %d %s R :Signals %d Context Vol. %d Invol %d", me.name,
 		   RPL_STATSDEBUG, source_p->name, (int) rus.ru_nsignals,
 		   (int) rus.ru_nvcsw, (int) rus.ru_nivcsw);
-#endif /* VMS */
+#endif /* __VMS */
 }
 
 void

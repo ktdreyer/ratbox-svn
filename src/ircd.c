@@ -28,7 +28,7 @@
 #include "setup.h"
 #include "config.h"
 
-#ifdef VMS
+#ifdef __VMS
 # include descrip
 # include starlet
 #endif
@@ -165,7 +165,7 @@ get_vm_top(void)
 	 * offset from 0 (NULL), so the result of sbrk is cast to a size_t and 
 	 * returned. We really shouldn't be using it here but...
 	 */
-#ifndef VMS
+#ifndef __VMS
 	void *vptr = sbrk(0);
 	return (unsigned long) vptr;
 #else
@@ -204,7 +204,7 @@ print_startup(int pid)
 static void
 init_sys(void)
 {
-#if defined(RLIMIT_FD_MAX) && !defined(VMS) && defined(HAVE_SYS_RLIMIT_H)
+#if defined(RLIMIT_FD_MAX) && !defined(__VMS) && defined(HAVE_SYS_RLIMIT_H)
 	struct rlimit limit;
 
 	if(!getrlimit(RLIMIT_FD_MAX, &limit))
@@ -232,7 +232,7 @@ init_sys(void)
 static int
 make_daemon(void)
 {
-#ifndef VMS
+#ifndef __VMS
 	int pid;
 
 	if((pid = fork()) < 0)
@@ -253,7 +253,7 @@ make_daemon(void)
 #else
 	/* if we get here, assume we've been detached.
 	   better set a process name. */
-	$DESCRIPTOR(myname, "IRCD-HYBRID-7");
+	$DESCRIPTOR(myname, "IRCD-RATBOX");
 	SYS$SETPRN(&myname);
 #endif
 	return 0;
@@ -592,7 +592,7 @@ check_pidfile(const char *filename)
 static void
 setup_corefile(void)
 {
-#if !defined(VMS) && defined(HAVE_SYS_RESOURCE_H)
+#if !defined(__VMS) && defined(HAVE_SYS_RESOURCE_H)
 	struct rlimit rlim;	/* resource limits */
 
 	/* Set corefilesize to maximum */

@@ -52,7 +52,7 @@ struct Message sjoin_msgtab = {
 };
 
 mapi_clist_av1 sjoin_clist[] = { &sjoin_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, sjoin_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(sjoin, NULL, NULL, sjoin_clist, NULL, NULL, "$Revision$");
 
 /*
  * ms_sjoin

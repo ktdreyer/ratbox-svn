@@ -20,10 +20,10 @@
  *
  */
 #include "stdinc.h"
-#include "irc_string.h"
 #include "config.h"
 #include "client.h"
 #include "ircd.h"
+#include "irc_string.h"
 
 /* match()
  * 

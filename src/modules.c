@@ -549,6 +549,9 @@ mo_modrestart(struct Client *client_p, struct Client *source_p, int parc, const 
 void
 load_all_modules(int warn)
 {
+#ifdef __vms
+	load_core_static_modules();
+#endif
 	load_static_modules();
 }
 

@@ -180,7 +180,7 @@ save_random()
 	{
 		write(fd, seed_char, 16);
 /* by default on VMS, files can only be read by their owner */
-#ifndef VMS
+#ifndef __VMS
 		fchmod(fd, 0600);
 #endif
 		close(fd);

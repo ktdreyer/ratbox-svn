@@ -93,15 +93,13 @@ struct mapi_mheader_av1
 };
 
 #ifndef STATIC_MODULES
-# define DECLARE_MODULE_AV1(reg,unreg,cl,hl,hfnlist, v) \
+# define DECLARE_MODULE_AV1(name,reg,unreg,cl,hl,hfnlist, v) \
 	struct mapi_mheader_av1 _mheader = { MAPI_V1, reg, unreg, cl, hl, hfnlist, v}
 #else
-# define DECLARE_MODULE_AV1(reg,unreg,cl,hl,hfnlist, v) \
-	struct mapi_mheader_av1 MODNAME  = { MAPI_V1, reg, unreg, cl, hl, hfnlist, v}
+# define DECLARE_MODULE_AV1(name,reg,unreg,cl,hl,hfnlist, v) \
+	struct mapi_mheader_av1 name ## _mheader = { MAPI_V1, reg, unreg, cl, hl, hfnlist, v}
 void load_static_modules();
 #endif
-
-#define _modinit ERROR DO_NOT_USE_MODINIT_WITH_NEW_MAPI_IT_WILL_NOT_WORK
 
 /* add a path */
 void mod_add_path(const char *path);

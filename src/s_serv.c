@@ -137,7 +137,7 @@ struct SlinkRplDef slinkrpltab[] = {
 unsigned long nextFreeMask();
 static unsigned long freeMask;
 static void server_burst(struct Client *client_p);
-#ifndef VMS
+#ifndef __VMS
 static int fork_server(struct Client *client_p);
 #endif
 
@@ -985,7 +985,7 @@ server_estab(struct Client *client_p)
 
 	/* Hand the server off to servlink now */
 
-#ifndef VMS
+#ifndef __VMS
 	if(IsCapable(client_p, CAP_ENC) || IsCapable(client_p, CAP_ZIP))
 	{
 		if(fork_server(client_p) < 0)
@@ -1234,7 +1234,7 @@ start_io(struct Client *server)
 	send_queued_slink_write(server->localClient->ctrlfd, server);
 }
 
-#ifndef VMS
+#ifndef __VMS
 /*
  * fork_server
  *
@@ -1330,7 +1330,7 @@ fork_server(struct Client *server)
 			}
 			else
 			{
-#if defined(VMS) || defined(__CYGWIN__)
+#if defined(__VMS) || defined(__CYGWIN__)
 				if(i > 2)	/* don't close std* */
 #endif
 					close(i);

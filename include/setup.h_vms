@@ -119,5 +119,6 @@ typedef unsigned long u_long;
 #define FD_SETSIZE 2048
 
 #define inline
+#define TOPICLEN 120
 #endif
 

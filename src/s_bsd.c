@@ -87,7 +87,7 @@ close_all_connections(void)
 	/* XXX someone tell me why we care about 4 fd's ? */
 	/* XXX btw, fd 3 is used for profiler ! */
 #if 0
-#ifndef VMS
+#ifndef __VMS
 	for (i = 0; i < MAXCONNECTIONS; ++i)
 #else
 	for (i = 3; i < MAXCONNECTIONS; ++i)
@@ -198,7 +198,7 @@ set_sock_buffers(int fd, int size)
 int
 set_non_blocking(int fd)
 {
-#ifndef VMS
+#ifndef __VMS
 	int nonb = 0;
 	int res;
 
@@ -840,7 +840,7 @@ comm_open(int family, int sock_type, int proto, const char *note)
 		ilog(L_CRIT, "comm_open: Couldn't set FD %d non blocking: %s", fd, strerror(errno));
 		/* if VMS, we might be opening a file (ircd.conf, resolv.conf).
 		   VMS doesn't let us set non-blocking on a file, so it might fail. */
-#ifndef VMS
+#ifndef __VMS
 		close(fd);
 		return -1;
 #endif

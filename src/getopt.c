@@ -28,7 +28,7 @@
 
 #include "ircd_getopt.h"
 
-#ifndef VMS
+#ifndef __VMS
 # define OPTCHAR '-'
 #else
 # define OPTCHAR '/'

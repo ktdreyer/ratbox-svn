@@ -148,7 +148,7 @@ hook_del_hook(const char *event, hookfn  fn)
 
 	DLINK_FOREACH_SAFE(node, nnode, h->hooks.head)
 	{
-		if(fn == node->data)
+		if(fn == (hookfn) node->data)
 		{
 			dlinkDestroy(node, &h->hooks);
 		}

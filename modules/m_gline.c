@@ -91,7 +91,7 @@ struct Message gline_msgtab = {
 };
 
 mapi_clist_av1 gline_clist[] = { &gline_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, gline_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(gline, NULL, NULL, gline_clist, NULL, NULL, "$Revision$");
 
 /*
  * mo_gline()

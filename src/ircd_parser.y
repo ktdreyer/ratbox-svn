@@ -35,7 +35,7 @@ static struct {
 	const char *	name;
 	const char *	plural;
 	time_t 	val;
-} times[] = {
+} ircd_times[] = {
 	{"second",     "seconds",    1},
 	{"minute",     "minutes",    60},
 	{"hour",       "hours",      60 * 60},
@@ -60,11 +60,11 @@ time_t conf_find_time(char *name)
 {
   int i;
 
-  for (i = 0; times[i].name; i++)
+  for (i = 0; ircd_times[i].name; i++)
     {
-      if (strcasecmp(times[i].name, name) == 0 ||
-	  (times[i].plural && strcasecmp(times[i].plural, name) == 0))
-	return times[i].val;
+      if (strcasecmp(ircd_times[i].name, name) == 0 ||
+	  (ircd_times[i].plural && strcasecmp(ircd_times[i].plural, name) == 0))
+	return ircd_times[i].val;
     }
 
   return 0;

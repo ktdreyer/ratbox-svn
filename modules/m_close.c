@@ -45,7 +45,7 @@ struct Message close_msgtab = {
 };
 
 mapi_clist_av1 close_clist[] = { &close_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, close_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(close, NULL, NULL, close_clist, NULL, NULL, "$Revision$");
 
 /*
  * mo_close - CLOSE message handler

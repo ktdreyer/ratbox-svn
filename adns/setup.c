@@ -179,7 +179,7 @@ static void ccf_sortlist(adns_state ads, const char *fn, int lno, const char *bu
   if (!buf) return;
   
   ads->nsortlist= 0;
-  while (nextword(&buf,&word,&l)) {
+  while (nextword(&buf,&word,(int*)&l)) {
     if (ads->nsortlist >= MAXSORTLIST) {
       adns__diag(ads,-1,0,"too many sortlist entries, ignoring %.*s onwards",l,word);
       return;
@@ -565,7 +565,7 @@ int adns_init(adns_state *ads_r, adns_initflags flags, FBFILE *diagfile) {
   ccf_options(ads,"RES_OPTIONS",-1,res_options);
   ccf_options(ads,"ADNS_RES_OPTIONS",-1,adns_res_options);
 
-#ifndef VMS
+#ifndef __VMS
   readconfig(ads,"/etc/resolv.conf",0);
   readconfig(ads,"/etc/resolv-adns.conf",0);
 #else
@@ -682,7 +682,7 @@ int adns__rereadconfig(adns_state ads)
   struct in_addr ia;
   adns__consistency(ads,0,cc_entex);
   ads->nservers = 0;	
-#ifndef VMS
+#ifndef __VMS
   readconfig(ads,"/etc/resolv.conf",0);
 #else
   readconfig(ads,"[]resolv.conf",0);

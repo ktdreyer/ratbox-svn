@@ -2,6 +2,8 @@ $!
 $! VERSION.COM
 $! Written By:  Robert Alan Byer
 $!              byer@mail.ourservers.net
+$! Modifications by Edward Brocklesby.
+$! $Id$
 $!
 $!
 $! Tell The User What's Going On.
@@ -37,9 +39,7 @@ $! Let's Get Our Hardware Type.
 $!
 $ HARDWARE_TYPE = F$GETSYI("HW_NAME")
 $!
-$! Extract Just The Date For The Creation Date.
-$!
-$ CREATION_DATE = F$EXTRACT(0,F$LOCATE(" ",F$TIME()),F$TIME())
+$ CREATION_DATE = F$TIME()
 $!
 $! Let's Open Our Output File.
 $!
@@ -81,7 +81,7 @@ $ WRITE FILE "char *serno = SERIALNUM;
 $ WRITE FILE ""
 $ WRITE FILE "char *infotext[] ="
 $ WRITE FILE "{"
-$ WRITE FILE " ""$package --"","
+$ WRITE FILE " ""IRC --"","
 $ WRITE FILE "  ""Based on the original code written by Jarkko Oikarinen"","
 $ WRITE FILE "  ""Copyright 1988, 1989, 1990, 1991 University of Oulu, Computing Center"","
 $ WRITE FILE "  """","
