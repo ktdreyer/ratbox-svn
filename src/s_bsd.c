@@ -242,7 +242,8 @@ void close_connection(struct Client *client_p)
 {
   struct ConfItem *aconf;
   assert(NULL != client_p);
-
+  if(client_p == NULL)
+    return;
   if (IsServer(client_p))
     {
       ServerStats->is_sv++;

@@ -624,6 +624,7 @@ void
 remove_client_from_list(struct Client* client_p)
 {
   assert(NULL != client_p);
+
   if(client_p == NULL)
     return;
   /* A client made with make_client()
@@ -1058,7 +1059,6 @@ static void exit_one_client(struct Client *client_p,
 	  del_from_id_hash_table(source_p->user->id, source_p);
   
         /* again, this is all that is needed */
-        }
     }
   
   /* 

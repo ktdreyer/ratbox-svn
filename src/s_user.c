@@ -286,8 +286,14 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
   dlink_node *m;
   char *id;
   assert(NULL != source_p);
-  assert(NULL != source_p->localClient);
+  assert(MyClient(source_p));
   assert(source_p->username != username);
+  
+  if(source_p == NULL)
+    return -1;
+  
+  if(!MyClient(source_p))
+    return -1;
 
   if(ConfigFileEntry.ping_cookie)
   {
@@ -467,9 +473,16 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
   m = dlinkFind(&unknown_list, source_p);
 
   assert(m != NULL);
-  dlinkDelete(m, &unknown_list);
-  dlinkAdd(source_p, m, &lclient_list);
-
+  if(m == NULL)
+  {
+    dlinkDelete(m, &unknown_list);
+    dlinkAdd(source_p, m, &lclient_list);
+  } else {
+     sendto_realops_flags(FLAGS_ALL, L_ADMIN, "Tried to register %s (%s@%s) but I couldn't find it?!?", 
+     			  nick, source_p->username, source_p->host);
+     exit_client(client_p, source_p, &me, "Client exited");
+     return CLIENT_EXITED;
+  }
   user_welcome(source_p);
 
   return (introduce_client(client_p, source_p, user, nick));
@@ -491,6 +504,9 @@ int register_remote_user(struct Client *client_p, struct Client *source_p,
   
   assert(NULL != source_p);
   assert(source_p->username != username);
+  
+  if(source_p == NULL)
+    return -1;
 
   user->last = CurrentTime;
 
@@ -670,6 +686,9 @@ static int valid_hostname(const char* hostname)
   const char* p     = hostname;
 
   assert(NULL != p);
+  
+  if(hostname == NULL)
+    return NO;
 
   if ('.' == *p)
     return NO;
@@ -701,6 +720,9 @@ static int valid_username(const char* username)
   const char *p = username;
 
   assert(NULL != p);
+  
+  if(username == NULL)
+    return NO;
 
   if ('~' == *p)
     ++p;
@@ -791,6 +813,9 @@ int do_local_user(char* nick, struct Client* client_p, struct Client* source_p,
 
   assert(NULL != source_p);
   assert(source_p->username != username);
+  
+  if(source_p == NULL)
+    return 0;
 
   user = make_user(source_p);
 
@@ -842,6 +867,8 @@ int do_remote_user(char* nick, struct Client* client_p, struct Client* source_p,
   assert(NULL != source_p);
   assert(source_p->username != username);
 
+  if(source_p == NULL)
+    return 0;
   user = make_user(source_p);
 
   oflags = source_p->flags;

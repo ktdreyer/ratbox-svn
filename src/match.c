@@ -291,7 +291,7 @@ int irccmp(const char *s1, const char *s2)
 
   assert(s1 != NULL);
   assert(s2 != NULL);
-
+  
   while ((res = ToUpper(*str1) - ToUpper(*str2)) == 0)
   {
     if (*str1 == '\0')

@@ -120,6 +120,8 @@ void ilog(int priority, const char* fmt, ...)
   char    buf[LOG_BUFSIZE];
   va_list args;
   assert(-1 < priority);
+  if(fmt == NULL)
+    return;
   assert(0 != fmt);
 
   if (priority > logLevel)

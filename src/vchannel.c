@@ -222,6 +222,9 @@ add_vchan_to_client_cache(struct Client *source_p,
 
   assert(source_p != NULL);
 
+  if(source_p == NULL)
+    return;
+
   /* oops its the top channel of the subchans */
   if (root_chan == vchan)
     return;
@@ -249,6 +252,9 @@ del_vchan_from_client_cache(struct Client *source_p, struct Channel *vchan)
   struct Vchan_map *vchan_info;
 
   assert(source_p != NULL);
+  
+  if(source_p == NULL)
+    return;
 
   for (vchanmap_node = source_p->vchan_map.head; vchanmap_node;
        vchanmap_node = vchanmap_node->next)
@@ -279,6 +285,8 @@ on_sub_vchan(struct Channel *chptr, struct Client *source_p)
   struct Vchan_map *vchan_info;
 
   assert(source_p != NULL);
+  if(source_p == NULL);
+    return NO;
 
   /* they are in the root chan */
   if (IsMember(source_p, chptr))
@@ -311,6 +319,9 @@ map_vchan(struct Channel *chptr, struct Client *source_p)
   struct Vchan_map *vchan_info;
 
   assert(source_p != NULL);
+  
+  if(source_p == NULL)
+    return NULL;
 
   /* they're in the root chan */
   if (IsMember(source_p, chptr))

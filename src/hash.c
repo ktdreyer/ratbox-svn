@@ -291,7 +291,9 @@ add_to_client_hash_table(const char* name, struct Client* client_p)
   unsigned int hashv;
   assert(name != NULL);
   assert(client_p != NULL);
-
+  if(name == NULL || client_p == NULL)
+    return;
+  
   hashv = hash_nick_name(name);
   client_p->hnext = (struct Client*) clientTable[hashv].list;
   clientTable[hashv].list = (void*) client_p;
@@ -308,6 +310,9 @@ add_to_resv_hash_table(const char *name, struct ResvChannel *resv_p)
   unsigned int hashv;
   assert(name != NULL);
   assert(resv_p != NULL);
+  
+  if(name == NULL || resv_p == NULL)
+    return;
 
   hashv = hash_resv_channel(name);
 
@@ -331,6 +336,9 @@ del_from_id_hash_table(const char* id, struct Client* client_p)
 
   assert(id != NULL);
   assert(client_p != NULL);
+  
+  if(id == NULL || client_p == NULL)
+    return;
 
   hashv = hash_id(id);
   found_client = (struct Client*) idTable[hashv].list;
@@ -370,6 +378,9 @@ del_from_client_hash_table(const char* name, struct Client* client_p)
   unsigned int   hashv;
   assert(name != NULL);
   assert(client_p != NULL);
+  
+  if(name == NULL || client_p == NULL)
+    return;
 
   hashv = hash_nick_name(name);
   found_client = (struct Client*) clientTable[hashv].list;
@@ -409,6 +420,9 @@ del_from_channel_hash_table(const char* name, struct Channel* chptr)
   assert(name != NULL);
   assert(chptr != NULL);
 
+  if(name == NULL || chptr == NULL)
+    return;
+    
   hashv = hash_channel_name(name);
   found_chptr = (struct Channel*) channelTable[hashv].list;
 
@@ -444,6 +458,9 @@ del_from_resv_hash_table(const char *name, struct ResvChannel *rptr)
   assert(name != NULL);
   assert(rptr != NULL);
 
+  if(name == NULL || rptr == NULL)
+    return;
+    
   hashv = hash_resv_channel(name);
 
   found_chptr = (struct ResvChannel *) resvTable[hashv].list;
@@ -511,6 +528,8 @@ find_client(const char* name)
   unsigned int   hashv;
 
   assert(name != NULL);
+  if(name == NULL)
+    return NULL;
 
   if (*name == '.') /* it's an ID .. */
     return (find_id(name));
@@ -630,6 +649,8 @@ hash_find_channel(const char* name)
   unsigned int hashv;
   
   assert(name != NULL);
+  if(name == NULL)
+    return NULL;
   hashv = hash_channel_name(name);
 
   found_chptr = (struct Channel*) channelTable[hashv].list;
@@ -740,7 +761,8 @@ hash_find_resv(const char *name)
   unsigned int hashv;
 
   assert(name != NULL);
-  
+  if(name == NULL)
+    return NULL;
   hashv = hash_resv_channel(name);
 
   found_chptr = (struct ResvChannel *) resvTable[hashv].list;

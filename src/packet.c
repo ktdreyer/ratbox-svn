@@ -194,8 +194,10 @@ read_ctrl_packet(int fd, void *data)
 #ifndef NDEBUG
   struct hook_io_data hdata;
 #endif
-
+ 
+ 
   assert(lserver != NULL);
+    
   reply = &lserver->slinkrpl;
 
   if(IsDead(server))
@@ -445,6 +447,8 @@ void client_dopacket(struct Client *client_p, char *buffer, size_t length)
   assert(client_p != NULL);
   assert(buffer != NULL);
 
+  if(client_p == NULL || buffer == NULL)
+    return;
   /* 
    * Update messages received
    */

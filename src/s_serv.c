@@ -158,7 +158,7 @@ void slink_error(unsigned int rpl, unsigned int len, unsigned char *data,
                  struct Client *server_p)
 {
   assert(rpl == SLINKRPL_ERROR);
-
+  
   assert(len < 256);
   data[len-1] = '\0';
 
@@ -647,6 +647,9 @@ int check_server(const char *name, struct Client* client_p, int cryptlink)
 
   assert(NULL != client_p);
 
+  if(client_p == NULL)
+    return error;
+   
   if (!(client_p->localClient->passwd))
     return -2;
 
@@ -937,6 +940,8 @@ int server_estab(struct Client *client_p)
   dlink_node        *ptr;
 
   assert(NULL != client_p);
+  if(client_p == NULL)
+    return -1;
   ClearAccess(client_p);
 
   strcpy(inpath_ip, get_client_name(client_p, SHOW_IP));
@@ -1749,7 +1754,10 @@ add_lazylinkchannel(struct Client *client_p, struct Channel *chptr)
 {
   dlink_node *m;
 
-  assert(client_p->localClient != NULL);
+  assert(MyClient(client_p));
+ 
+  if(!MyClient(client_p))
+    return;
 
   chptr->lazyLinkChannelExists |= client_p->localClient->serverMask;
 
@@ -1773,7 +1781,9 @@ add_lazylinkchannel(struct Client *client_p, struct Channel *chptr)
 void
 add_lazylinkclient(struct Client *client_p, struct Client *source_p)
 {
- assert(client_p->localClient != NULL);
+ assert(MyClient(client_p));
+ if(!MyClient(client_p))
+   return;
  source_p->lazyLinkClientExists |= client_p->localClient->serverMask;
 }
 
@@ -1985,6 +1995,8 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
     char buf[HOSTIPLEN];
     /* Make sure aconf is useful */
     assert(aconf != NULL);
+    if(aconf == NULL)
+      return 0;
 
     /* log */
     inetntop(DEF_FAM, &IN_ADDR(aconf->ipnum), buf, HOSTIPLEN);
@@ -2165,7 +2177,10 @@ serv_connect_callback(int fd, int status, void *data)
     /* First, make sure its a real client! */
     assert(client_p != NULL);
     assert(client_p->localClient->fd == fd);
-
+    
+    if(client_p == NULL)
+      return;
+      
     /* Next, for backward purposes, record the ip of the server */
     copy_s_addr(IN_ADDR(client_p->localClient->ip), S_ADDR(fd_table[fd].connect.hostaddr));
     /* Check the status */

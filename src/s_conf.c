@@ -201,6 +201,8 @@ void
 free_conf(struct ConfItem* aconf)
 {
   assert(aconf != NULL);
+  if(aconf == NULL)
+    return;
   assert(!(aconf->status & CONF_CLIENT) ||
          (aconf->host && strcmp(aconf->host, "NOMATCH")) ||
          (aconf->clients == -1));
@@ -1062,6 +1064,8 @@ attach_connect_block(struct Client *client_p,
 
   assert(client_p != NULL);
   assert(host != NULL);
+  if(client_p == NULL || host == NULL)
+    return 0;
 
   for (ptr = ConfigItemList; ptr; ptr = ptr->next)
     {
@@ -1162,7 +1166,8 @@ find_conf_by_name(const char* name, int status)
 {
   struct ConfItem* conf;
   assert(name != NULL);
- 
+  if(name == NULL)
+    return NULL;
   for (conf = ConfigItemList; conf; conf = conf->next)
     {
       if (conf->status == status && conf->name &&
@@ -1187,7 +1192,8 @@ find_conf_by_host(const char* host, int status)
 {
   struct ConfItem* conf;
   assert(host != NULL);
- 
+  if(host == NULL)
+    return NULL;
   for (conf = ConfigItemList; conf; conf = conf->next)
     {
       if (conf->status == status && conf->host &&
@@ -1627,6 +1633,8 @@ find_kill(struct Client* client_p)
 {
   struct ConfItem *aconf;
   assert(client_p != NULL);
+  if(client_p == NULL)
+    return NULL;
   aconf = find_address_conf(client_p->host, client_p->username,
 			    &client_p->localClient->ip,
 			    client_p->localClient->aftype);
@@ -2061,6 +2069,7 @@ void clear_out_old_conf(void)
    * for deletion. The table is cleaned up by check_class. - avalon
    */
   assert(ClassList != NULL);
+  
   for (cltmp = ClassList->next; cltmp; cltmp = cltmp->next)
     MaxLinks(cltmp) = -1;
 

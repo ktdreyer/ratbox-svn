@@ -135,6 +135,8 @@ void parse(struct Client *client_p, char *pbuffer, char *bufend)
 
   assert(!IsDead(client_p));
   assert(client_p->localClient->fd >= 0);
+  if(IsDead(client_p) || client_p->localClient->fd < 0)
+    return;
 
   assert((bufend-pbuffer) < 512);
 
@@ -378,7 +380,9 @@ mod_add_cmd(struct Message *msg)
   int    msgindex;
 
   assert(msg != NULL);
-
+  if(msg == NULL)
+    return;
+    
   msgindex = hash(msg->cmd);
 
   for(ptr = msg_hash_table[msgindex]; ptr; ptr = ptr->next )
@@ -417,7 +421,9 @@ void mod_del_cmd(struct Message *msg)
   int    msgindex;
 
   assert(msg != NULL);
-
+  if(msg == NULL)
+    return;
+    
   msgindex = hash(msg->cmd);
 
   for(ptr = msg_hash_table[msgindex]; ptr; ptr = ptr->next )
