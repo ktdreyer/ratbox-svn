@@ -42,22 +42,19 @@
 
 	auth {
 		passwd="";
-		user="*";
-		host="*ppp*";
+		user="*@*ppp*";
 		class="3";
 	};
 
 	auth {
 		passwd="";
-		user="*";
-		host="*slip*";
+		user="*@*slip*";
 		class="3";
 	};
 
 	auth {
 		passwd="";
-		user="*";
-		host="*ts*";
+		user="*@*ts*";
 		class="3";
 	};
 
@@ -67,8 +64,7 @@
 		allow_bots=yes;
 		have_ident;
 		no_tilde;
-		user="db";
-		host="*db.net";
+		user="db@*db.net";
 		class="3";
 	};
 
@@ -79,8 +75,7 @@
 		allow_bots=yes;
 		have_ident;
 		no_tilde;
-		user="db";
-		host="home.db.net";
+		user="db@home.db.net";
 		class="3";
 	};
 
