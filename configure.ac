@@ -634,7 +634,7 @@ AC_ARG_ENABLE(epoll, AC_HELP_STRING([--enable-epoll],[Force sys_epoll usage (Lin
 AC_ARG_ENABLE(rtsigio, AC_HELP_STRING([--enable-rtsigio],
 [Force SIGIO with RT Signals (Linux only).]),
 [ if test $enableval = yes; then 
-	SELECT_TYPE_EXPLICIT="rtsigio"
+	SELECT_TYPE_EXPLICIT="sigio"
   else
   	use_rtsigio=no
   fi
@@ -740,8 +740,6 @@ main(int argc, char **argv)
 fi
 
 fi
-
-
 
 fi
 

@@ -7835,7 +7835,7 @@ fi;
 if test "${enable_rtsigio+set}" = set; then
   enableval="$enable_rtsigio"
    if test $enableval = yes; then
-	SELECT_TYPE_EXPLICIT="rtsigio"
+	SELECT_TYPE_EXPLICIT="sigio"
   else
   	use_rtsigio=no
   fi
@@ -8576,8 +8576,6 @@ fi
 fi
 
 fi
-
-
 
 fi
 
