@@ -1,3 +1,9 @@
+*** 20010608_1 by db
+- unkline and undline now work with the new formats
+- Exceptions to D and K lines MUST only be in ircd.conf now.
+
+
+
 *** 20010607_4 by db
 - write the current_date to the reason field
 - dline.conf cannot be == kline.conf now
