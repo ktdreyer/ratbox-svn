@@ -69,7 +69,7 @@ try_parse_v6_netmask(const char *text, struct irc_inaddr *addr, int *b)
   int d[8] = { 0, 0, 0, 0, 0, 0, 0, 0 }, dp = 0, nyble = 4, finsert =
     -1, bits = 0, deficit = 0;
   short dc[8];
-
+  
   for (p = text; (c = *p); p++)
     if (IsXDigit(c))
     {
@@ -232,6 +232,9 @@ try_parse_v4_netmask(const char *text, struct irc_inaddr *addr, int *b)
 int
 parse_netmask(const char *text, struct irc_inaddr *addr, int *b)
 {
+  /* If they pass us crap..
+  if(text == NULL || addr == NULL || b == NULL)
+    return HM_HOST;
 #ifdef IPV6
   if (strchr(text, ':'))
     return try_parse_v6_netmask(text, addr, b);
