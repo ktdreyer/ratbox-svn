@@ -223,7 +223,7 @@ static void add_accept(struct Client *source_p,
   m = make_dlink_node();
   dlinkAdd(target_p, m, &source_p->allow_list);
 
-  m = make_dlink_node()
+  m = make_dlink_node();
   dlinkAdd(source_p, m, &target_p->on_allow_list);
 }
   
