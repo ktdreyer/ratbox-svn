@@ -1,3 +1,15 @@
+androsyn    2004/03/02 15:04:34 EST	(20040302_11)
+
+  Modified files:
+    servlink             control.h 
+  Log:
+  Missed some cryptlink removals
+  
+  Revision  Changes    Path
+  1.7       +5 -11     ircd-ratbox/servlink/control.h
+
+
+
 leeh        2004/03/02 14:58:47 EST	(20040302_10)
 
   Modified files:
