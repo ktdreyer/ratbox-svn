@@ -42,7 +42,8 @@ options that were in config.h, to be changed with a /rehash.
 
   The command CJOIN and vchans are configurable in the config file:
        vchans_oper_only=yes; will make CJOIN oper only
-       disable_vchans=yes;   will stop vchans being recognised on this server
+       use_vchans=no;        will stop vchans from being recognised on
+                             this server
 
 - Channels that have existed for at least 30 minutes are now preserved for 30
   minutes if they are empty or split.  If a channel was +i before a split, it

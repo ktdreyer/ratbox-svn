@@ -122,7 +122,6 @@ int   class_redirport_var;
 %token  DESCRIPTION
 %token  DIE
 %token  DISABLE_REMOTE_COMMANDS
-%token  DISABLE_VCHANS
 %token  DOT_IN_IP6_ADDR
 %token  DOTS_IN_IDENT
 %token  EGDPOOL_PATH
@@ -270,6 +269,7 @@ int   class_redirport_var;
 %token  USE_HALFOPS
 %token  USE_INVEX
 %token  USE_KNOCK
+%token  USE_VCHANS
 %token  VCHANS_OPER_ONLY
 %token  VHOST
 %token  VHOST6
@@ -2408,8 +2408,8 @@ channel_item:       channel_use_except |
                     channel_use_halfops |
                     channel_use_invex |
                     channel_use_knock |
+                    channel_use_vchans |
 		    channel_vchans_oper_only |
-		    channel_disable_vchans |
                     channel_maxbans |
                     channel_knock_delay |
                     channel_max_chans_per_user |
@@ -2478,25 +2478,20 @@ channel_use_knock:   USE_KNOCK '=' TYES ';'
     ConfigChannel.use_knock = 0;
   } ;
 
+
+channel_use_vchans: USE_VCHANS '=' TYES ';'
+  { ConfigChannel.use_vchans = 1; }
+    |
+    USE_VCHANS '=' TNO ';'
+  { ConfigChannel.use_vchans = 0; };
+
+
 channel_vchans_oper_only: VCHANS_OPER_ONLY '=' TYES ';'
-  {
-    ConfigChannel.vchans_oper_only = 1;
-  }
+  { ConfigChannel.vchans_oper_only = 1; }
     |
     VCHANS_OPER_ONLY '=' TNO ';'
-  {
-    ConfigChannel.vchans_oper_only = 0;
-  };
+  { ConfigChannel.vchans_oper_only = 0; };
 
-channel_disable_vchans: DISABLE_VCHANS '=' TNO ';'
-  {
-    ConfigChannel.disable_vchans = 0;
-  }
-    |
-    DISABLE_VCHANS '=' TYES ';'
-  {
-    ConfigChannel.disable_vchans = 1;
-  };  
 
 channel_knock_delay: KNOCK_DELAY '=' timespec ';'
    {

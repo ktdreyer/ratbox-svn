@@ -1580,7 +1580,7 @@ YY_RULE_SETUP
 case 31:
 YY_RULE_SETUP
 #line 131 "ircd_lexer.l"
-{ return DISABLE_VCHANS; }
+{ return USE_VCHANS; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP

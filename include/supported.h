@@ -37,9 +37,9 @@
                 " CHANTYPES=%s" \
                 " PREFIX=%s" \
                 " CHANMODES=%s"
-                 
+
 #define FEATURESVALUES ConfigChannel.use_knock ? " KNOCK" : "", \
-        ConfigChannel.disable_vchans ? "" : " VCHANS", \
+        ConfigChannel.use_vchans ? " VCHANS" : "", \
         ConfigChannel.use_except ? " EXCEPTS" : "", \
         ConfigChannel.use_invex ? " INVEX" : "", \
         MAXMODEPARAMS,ConfigChannel.max_chans_per_user, \

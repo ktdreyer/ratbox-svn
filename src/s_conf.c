@@ -1552,13 +1552,13 @@ set_default_conf(void)
   ConfigFileEntry.throttle_time = 10;
 
   ConfigChannel.vchans_oper_only = NO;
-  ConfigChannel.disable_vchans = NO;
 
   ConfigChannel.use_except  = YES;
   /* ConfigChannel.use_halfops = YES; */ /* Don't set, as this can't
                                             be changed at runtime */
   ConfigChannel.use_invex   = NO;
   ConfigChannel.use_knock   = YES;
+  ConfigChannel.use_vchans = NO;
   ConfigChannel.knock_delay = 300;
   ConfigChannel.max_chans_per_user = 15;
   ConfigChannel.maxbans = 25;

@@ -31,7 +31,7 @@ typedef union {
 #define	DENY	282
 #define	DESCRIPTION	283
 #define	DIE	284
-#define	DISABLE_VCHANS	285
+#define	USE_VCHANS	285
 #define	DOTS_IN_IDENT	286
 #define	EGDPOOL_PATH	287
 #define	EMAIL	288

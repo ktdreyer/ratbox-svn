@@ -126,7 +126,6 @@ deny		{ return DENY; }
 description	{ return DESCRIPTION; }
 die		{ return DIE; }
 disable_remote_commands	{ return DISABLE_REMOTE_COMMANDS; }
-disable_vchans  { return DISABLE_VCHANS; }
 dot_in_ip6_addr { return DOT_IN_IP6_ADDR; }
 dots_in_ident   { return DOTS_IN_IDENT; }
 egdpool_path        { return EGDPOOL_PATH; }
@@ -224,6 +223,7 @@ use_except	{ return USE_EXCEPT; }
 use_halfops     { return USE_HALFOPS; }
 use_invex	{ return USE_INVEX; }
 use_knock	{ return USE_KNOCK; }
+use_vchans      { return USE_VCHANS; }
 throttle_time { return THROTTLE_TIME; }
 user		{ return USER;} 
 vchans_oper_only { return VCHANS_OPER_ONLY; }

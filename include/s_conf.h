@@ -247,9 +247,9 @@ struct config_channel_entry
   int           use_halfops;
   int           use_invex;
   int           use_knock;
+  int           use_vchans;
   int           knock_delay;
   int           vchans_oper_only;
-  int           disable_vchans;
   int           maxbans;
   int           max_chans_per_user;
   int           quiet_on_ban;

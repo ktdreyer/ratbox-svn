@@ -89,14 +89,14 @@ static void m_cjoin(struct Client *client_p,
       return;
     }
 
-  if ((ConfigChannel.vchans_oper_only && !IsOper(source_p)) || 
-       ConfigChannel.disable_vchans)
+  if ( (ConfigChannel.vchans_oper_only && !IsOper(source_p)) ||
+       (ConfigChannel.use_vchans == 0) )
     {
       sendto_one(source_p, form_str(ERR_NOPRIVILEGES),
                  me.name, parv[0]);
       return;
     }
-      
+
   if (*parv[1] == '\0')
     {
       sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),

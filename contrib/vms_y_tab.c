@@ -32,7 +32,7 @@
 #define	DENY	282
 #define	DESCRIPTION	283
 #define	DIE	284
-#define	DISABLE_VCHANS	285
+#define	USE_VCHANS	285
 #define	DOTS_IN_IDENT	286
 #define	EGDPOOL_PATH	287
 #define	EMAIL	288
@@ -629,7 +629,7 @@ static const char * const yytname[] = {   "$","error","$undefined.","ACCEPT_PASS
 "AUTOCONN","BYTES","KBYTES","MBYTES","GBYTES","TBYTES","CALLER_ID_WAIT","CHANNEL",
 "CIPHER_PREFERENCE","CLASS","CLIENT_EXIT","COMPRESSED","COMPRESSION_LEVEL","CONNECT",
 "CONNECTFREQ","CRYPTLINK","DEFAULT_CIPHER_PREFERENCE","DEFAULT_FLOODCOUNT","DENY",
-"DESCRIPTION","DIE","DISABLE_VCHANS","DOTS_IN_IDENT","EGDPOOL_PATH","EMAIL",
+"DESCRIPTION","DIE","USE_VCHANS","DOTS_IN_IDENT","EGDPOOL_PATH","EMAIL",
 "ENCRYPTED","EXCEED_LIMIT","EXEMPT","FAILED_OPER_NOTICE","FAKENAME","FNAME_FOPERLOG",
 "FNAME_OPERLOG","FNAME_USERLOG","GECOS","GENERAL","GLINE","GLINES","GLINE_EXEMPT",
 "GLINE_LOG","GLINE_TIME","GLOBAL_KILL","HAVE_IDENT","HAVENT_READ_CONF","HIDESERVER",
@@ -697,7 +697,7 @@ static const char * const yytname[] = {   "$","error","$undefined.","ACCEPT_PASS
 "umode_oitem","general_oper_only_umodes","@13","umode_items","umode_item","general_min_nonwildcard",
 "general_default_floodcount","general_client_flood","channel_entry","channel_items",
 "channel_item","channel_use_invex","channel_use_except","channel_use_knock",
-"channel_vchans_oper_only","channel_disable_vchans","channel_knock_delay","channel_max_chans_per_user",
+"channel_vchans_oper_only","channel_use_vchans","channel_knock_delay","channel_max_chans_per_user",
 "channel_quiet_on_ban","channel_maxbans","channel_persist_time", NULL
 };
 #endif
@@ -4184,13 +4184,13 @@ case 502:
 case 503:
 #line 2524 "ircd_parser.y"
 {
-    ConfigChannel.disable_vchans = 0;
+    ConfigChannel.use_vchans = 1;
   ;
     break;}
 case 504:
 #line 2529 "ircd_parser.y"
 {
-    ConfigChannel.disable_vchans = 1;
+    ConfigChannel.use_vchans = 0;
   ;
     break;}
 case 505:
