@@ -1,3 +1,7 @@
+*** 20010513_3 by leeh
+- unregged clients wont have a nick..
+
+
 *** 20010513_2 by davidt
 Fix core on /close
 
