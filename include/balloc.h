@@ -32,7 +32,7 @@
 #include "memory.h"
 #include "ircd_defs.h"
 
-#define DEBUG_BALLOC
+#undef DEBUG_BALLOC
 
 #ifdef DEBUG_BALLOC
 #define BALLOC_MAGIC 0x3d3a3c3d
