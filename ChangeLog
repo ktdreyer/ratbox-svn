@@ -1,3 +1,16 @@
+leeh        2004/04/06 15:57:52 EDT	(20040406_3)
+
+  Modified files:
+    src                  ircd.c 
+  Log:
+  - remove the warning when the clock runs backwards, this is natural as a
+    result of ntpdate.
+  
+  Revision  Changes    Path
+  7.335     +1 -7      ircd-ratbox/src/ircd.c
+
+
+
 leeh        2004/04/06 07:57:18 EDT	(20040406_2)
 
   Modified files:
