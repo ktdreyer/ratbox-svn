@@ -1,3 +1,9 @@
+*** 20001104_9 by ryan
+
+RSA implimented.  /quote CHALLENGE (with --enable-openssl)
+now we just need some clever way to make /oper accept the response :)
+
+
 *** 20001104_8 by db
 - added vchans.txt doc
 
