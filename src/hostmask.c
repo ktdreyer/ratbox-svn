@@ -159,7 +159,10 @@ struct ConfItem *find_matching_conf(const char *host, const char *user,
 void add_conf(struct ConfItem *aconf)
 {
  char buffer[HOSTLEN+USERLEN+1];
- ircsprintf(buffer, "%s@%s", aconf->user, aconf->host);
+
+ ircsprintf(buffer, "%s@%s",
+	    aconf->user ? aconf->user : "",
+	    aconf->host ? aconf->host : "");
  add_hostmask(buffer, HOST_CONFITEM, aconf);
 }
 

@@ -72,6 +72,15 @@ qstring		\"[^\"\n]*[\"\n]
           }
 	 }
 
+([0-9][a-f]{0,4}\:){1,7}[0-9][1-f]{0,4}(\/[0-9]+)?  {
+
+	if(is_ipv6_address(yytext,&yylval.ip_entry.ip,&yylval.ip_entry.ip_mask))
+          {
+            ip_string = yytext;
+	    return( IPV6_TYPE );
+          }
+	 }
+
 {qstring}	{ yylval.string = yytext+1;
 		  if(yylval.string[yyleng-2] != '"')
 		    fprintf(stderr,"Unterminated character string\n");

@@ -2076,6 +2076,25 @@ int        is_address(char *host,
 }
 
 /*
+ * is_ipv6_address
+ *
+ * inputs        - hostname
+ *               - pointer to ip result
+ *               - pointer to ip_mask result
+ * output        - YES if hostname is ip# only NO if its not
+ * side effects  - NONE
+ * 
+ */
+
+int        is_ipv6_address(char *host,
+			   unsigned char *ip_ptr,
+			   unsigned char *ip_mask_ptr)
+{
+  /* lie */
+  return 1;
+}
+
+/*
  * get_printable_conf
  *
  * inputs        - struct ConfItem
