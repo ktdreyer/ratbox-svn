@@ -52,13 +52,14 @@ static int sysLogLevel[] = {
 };
 
 static const char *sysLogLevelToString[] =
-{ "LOG_CRIT",
-  "LOG_ERR",
-  "LOG_WARNING",
-  "LOG_NOTICE",
-  "LOG_INFO",
-  "LOG_INFO",
-  "LOG_INFO"};
+{ "L_CRIT",
+  "L_ERROR",
+  "L_WARN",
+  "L_NOTICE",
+  "L_TRACE",
+  "L_INFO",
+  "L_DEBUG"
+};
 
 /*
  * open_log - open ircd logging file
@@ -136,8 +137,10 @@ int get_log_level(void)
 
 const char *get_log_level_as_string(int level)
 {
-  if(level > LOG_DEBUG)
-    level = LOG_DEBUG;
+  if(level > L_DEBUG)
+    level = L_DEBUG;
+  else if(level < L_ERROR)
+    level = L_ERROR;
 
   return(sysLogLevelToString[level]);
 }
