@@ -556,7 +556,7 @@ ac_configure=$ac_aux_dir/configure # This should be Cygnus configure.
 
 
 PACKAGE=ircd-hybrid
-VERSION=6.0
+VERSION=7.0
 
 
 
@@ -2488,8 +2488,7 @@ trap 'rm -fr `echo "\
  messages/Makefile           \
  modules/Makefile            \
  tools/Makefile              \
- zlib/Makefile               \
- include/setup.h zlib/setup.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
+ include/setup.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
 
@@ -2601,7 +2600,6 @@ CONFIG_FILES=\${CONFIG_FILES-"\
  messages/Makefile           \
  modules/Makefile            \
  tools/Makefile              \
- zlib/Makefile               \
 "}
 EOF
 cat >> $CONFIG_STATUS <<\EOF
@@ -2683,7 +2681,7 @@ ac_eD='%g'
 if test "${CONFIG_HEADERS+set}" != set; then
 EOF
 cat >> $CONFIG_STATUS <<EOF
-  CONFIG_HEADERS="include/setup.h zlib/setup.h"
+  CONFIG_HEADERS="include/setup.h"
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 fi
