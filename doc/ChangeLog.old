@@ -1,3 +1,8 @@
+*** 19991022_1 by db
+- disallow -ve limit on mode #channel +l 
+
+
+
 *** 19991017_2 by db
 - missing mask check in IP kline code. no idea why.
 
