@@ -58,16 +58,18 @@ Info MyInformation[] = {
   { "CRYPT_OPER_PASSWORD", "OFF", 0, "Encrypt Operator Passwords" },
 #endif /* CRYPT_OPER_PASSWORD */
 
+#if 0
 #ifdef CRYPT_LINK_PASSWORD
   { "CRYPT_LINK_PASSWORD", "ON", 0, "Encrypt Server Passwords" },
 #else
   { "CRYPT_LINK_PASSWORD", "OFF", 0, "Encrypt Server Passwords" },
 #endif /* CRYPT_LINK_PASSWORD */
+#endif /* #if 0 */
 
 #ifdef DEBUGMODE
-  { "DEBUGMODE", "ON", 0, "Debugging Mode" },
+  { "DEBUGMODE", "ON", 0, "Support for debugging mode" },
 #else
-  { "DEBUGMODE", "OFF", 0, "Debugging Mode" },
+  { "DEBUGMODE", "OFF", 0, "Support for debugging mode" },
 #endif /* DEBUGMODE */
 
 #ifdef DPATH

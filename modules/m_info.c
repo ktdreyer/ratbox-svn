@@ -67,13 +67,265 @@ _moddeinit(void)
 {
   mod_del_cmd(&info_msgtab);
 }
-char *_version = "20010109";
+char *_version = "20010530";
 #endif
 
 void send_info_text(struct Client *source_p);
 void send_birthdate_online_time(struct Client *source_p);
 void send_conf_options(struct Client *source_p);
 
+
+/*
+ * jdc -- Structure for our configuration value table
+ */
+struct InfoStruct
+{
+  char *         name;              /* Displayed variable name */
+  unsigned int   output_type;       /* See below #defines */
+  void *         option;            /* Pointer reference to the value */
+  char *         desc;              /* ASCII description of the variable */
+};
+/* Types for output_type in InfoStruct */
+#define OUTPUT_STRING      0x0001   /* Output option as %s w/ dereference */
+#define OUTPUT_STRING_PTR  0x0002   /* Output option as %s w/out deference */
+#define OUTPUT_DECIMAL     0x0004   /* Output option as decimal (%d) */
+#define OUTPUT_BOOLEAN     0x0008   /* Output option as "ON" or "OFF" */
+#define OUTPUT_BOOLEAN_YN  0x0010   /* Output option as "YES" or "NO" */
+
+
+static struct InfoStruct info_table[] =
+{
+  /* --[  START OF TABLE  ]-------------------------------------------- */
+  {
+    "anti_nick_flood",
+    OUTPUT_BOOLEAN,
+    &ConfigFileEntry.anti_nick_flood,
+    "NICK flood protection"
+  },
+  {
+    "anti_spam_exit_message_time",
+    OUTPUT_DECIMAL,
+    &ConfigFileEntry.anti_spam_exit_message_time,
+    "Duration a client must be connected for to have an exit message"
+  },
+  {
+    "caller_id_wait",
+    OUTPUT_DECIMAL,
+    &ConfigFileEntry.caller_id_wait,
+    "Minimum delay between notifying UMODE +g users of messages"
+  },
+  {
+    "client_exit",
+    OUTPUT_BOOLEAN,
+    &ConfigFileEntry.client_exit,
+    "Prepend 'Client Exit:' to user QUIT messages"
+  },
+  {
+    "dots_in_ident",
+    OUTPUT_DECIMAL,
+    &ConfigFileEntry.dots_in_ident,
+    "Number of permissable dots in an ident"
+  },
+  {
+    "failed_oper_notice",
+    OUTPUT_BOOLEAN,
+    &ConfigFileEntry.failed_oper_notice,
+    "Inform opers if someone /oper's with the wrong password"
+  },
+  {
+    /* fname_operlog is a char [] */
+    "fname_operlog",
+    OUTPUT_STRING_PTR,
+    &ConfigFileEntry.fname_operlog,
+    "Operator log file"
+  },
+  {
+    /* fname_foperlog is a char [] */
+    "fname_foperlog",
+    OUTPUT_STRING_PTR,
+    &ConfigFileEntry.fname_foperlog,
+    "Failed operator log file"
+  },
+  {
+    /* fname_userlog is a char [] */
+    "fname_userlog",
+    OUTPUT_STRING_PTR,
+    &ConfigFileEntry.fname_userlog,
+    "User log file"
+  },
+  {
+    "glines",
+    OUTPUT_BOOLEAN,
+    &ConfigFileEntry.glines,
+    "G-line (network-wide K-line) support"
+  },
+  {
+    "gline_time",
+    OUTPUT_DECIMAL,
+    &ConfigFileEntry.gline_time,
+    "Expiry time for G-lines"
+  },
+  {
+    "hide_server",
+    OUTPUT_BOOLEAN_YN,
+    &GlobalSetOptions.hide_server,
+    "Hide all references to servers from clients"
+  },
+  {
+    "hub",
+    OUTPUT_BOOLEAN_YN,
+    &ServerInfo.hub,
+    "Server is a hub"
+  },
+  {
+    "idletime",
+    OUTPUT_DECIMAL,
+    &ConfigFileEntry.idletime,
+    "Number of minutes before a client is considered idle"
+  },
+  {
+    "kline_with_connection_closed",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigFileEntry.kline_with_connection_closed,
+    "K-lined clients sign off with 'Connection closed'"
+  },
+  {
+    "kline_with_reason",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigFileEntry.kline_with_reason,
+    "Display K-line reason to client on disconnect"
+  },
+  {
+    "knock_delay",
+    OUTPUT_DECIMAL,
+    &ConfigFileEntry.knock_delay,
+    "Delay between KNOCK attempts"
+  },
+  {
+    "links_delay",
+    OUTPUT_DECIMAL,
+    &ConfigFileEntry.links_delay,
+    "Links rehash delay"
+  },
+  {
+    "max_chans_per_user",
+    OUTPUT_DECIMAL,
+    &ConfigFileEntry.max_chans_per_user,
+    "Maximum number of channels a user can join"
+  },
+  {
+    "max_nick_changes",
+    OUTPUT_DECIMAL,
+    &ConfigFileEntry.max_nick_changes,
+    "NICK change threshhold setting"
+  },
+  {
+    "max_nick_time",
+    OUTPUT_DECIMAL,
+    &ConfigFileEntry.max_nick_time,
+    "NICK flood protection time interval"
+  },
+  {
+    "max_targets",
+    OUTPUT_DECIMAL,
+    &ConfigFileEntry.max_targets,
+    "The maximum number of PRIVMSG/NOTICE targets"
+  },
+  {
+    "maximum_links",
+    OUTPUT_DECIMAL,
+    &ConfigFileEntry.maximum_links,
+    "Class default maximum links count",
+  },
+  {
+    "network_name",
+    OUTPUT_STRING,
+    &ServerInfo.network_name,
+    "Network name"
+  },
+  {
+    "network_desc",
+    OUTPUT_STRING,
+    &ServerInfo.network_desc,
+    "Network description"
+  },
+  {
+    "no_oper_flood",
+    OUTPUT_BOOLEAN,
+    &ConfigFileEntry.no_oper_flood,
+    "Disable flood control for operators",
+  },
+  {
+    "non_redundant_klines",
+    OUTPUT_BOOLEAN,
+    &ConfigFileEntry.non_redundant_klines,
+    "Check for and disallow redundant K-lines"
+  },
+  {
+    "o_lines_oper_only",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigFileEntry.o_lines_oper_only,
+    "STATS o output is only shown to operators"
+  },
+  {
+    "pace_wait",
+    OUTPUT_DECIMAL,
+    &ConfigFileEntry.pace_wait,
+    "Minimum delay between uses of certain commands"
+  },
+  {
+    "quiet_on_ban",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigFileEntry.quiet_on_ban,
+    "Banned users may not send text to a channel"
+  },
+  {
+    "short_motd",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigFileEntry.short_motd,
+    "Do not show MOTD; only tell clients they should read it"
+  },
+  {
+    "ts_max_delta",
+    OUTPUT_DECIMAL,
+    &ConfigFileEntry.ts_max_delta,
+    "Maximum permitted TS delta from another server"
+  },
+  {
+    "ts_warn_delta",
+    OUTPUT_DECIMAL,
+    &ConfigFileEntry.ts_warn_delta,
+    "Maximum permitted TS delta before displaying a warning"
+  },
+  {
+    "vchans_oper_only",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigFileEntry.vchans_oper_only,
+    "Restrict use of /CJOIN to opers"
+  },
+  {
+    "warn_no_nline",
+    OUTPUT_BOOLEAN,
+    &ConfigFileEntry.warn_no_nline,
+    "Display warning if connecting server lacks N-line"
+  },
+  {
+    "whois_wait",
+    OUTPUT_DECIMAL,
+    &ConfigFileEntry.whois_wait,
+    "Delay (in seconds) between remote WHOIS requests"
+  },
+  /* --[  END OF TABLE  ]---------------------------------------------- */
+  {
+    (char *) 0,
+    (unsigned int) 0,
+    (void *) 0,
+    (char *) 0
+  }
+};
+
+/*
+*/
 
 /*
 ** m_info
@@ -87,23 +339,28 @@ static void m_info(struct Client *client_p, struct Client *source_p,
   static time_t last_used=0L;
 
   if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
-    {
-      /* safe enough to give this on a local connect only */
-      sendto_one(source_p,form_str(RPL_LOAD2HI),me.name,parv[0]);
-      return;
-    }
-      else
-        last_used = CurrentTime;
+  {
+    /* safe enough to give this on a local connect only */
+    sendto_one(source_p,form_str(RPL_LOAD2HI),me.name,parv[0]);
+    return;
+  }
+  else
+  {
+    last_used = CurrentTime;
+  }
 
   if (!GlobalSetOptions.hide_server)
+  {
+    if (hunt_server(client_p,source_p,
+        ":%s INFO :%s", 1, parc, parv) != HUNTED_ISME)
     {
-      if (hunt_server(client_p,source_p,":%s INFO :%s",1,parc,parv) != HUNTED_ISME)
-        return;
+      return;
     }
+  }
 
   sendto_realops_flags(FLAGS_SPY, "info requested by %s (%s@%s) [%s]",
-      source_p->name, source_p->username, source_p->host,
-      source_p->user->server);
+    source_p->name, source_p->username, source_p->host,
+    source_p->user->server);
 
   send_info_text(source_p);
   send_birthdate_online_time(source_p);
@@ -132,7 +389,7 @@ static void mo_info(struct Client *client_p, struct Client *source_p,
     send_birthdate_online_time(source_p);
 
     sendto_one(source_p, form_str(RPL_ENDOFINFO), me.name, parv[0]);
-  } /* if (hunt_server(client_p,source_p,":%s INFO :%s",1,parc,parv) == HUNTED_ISME) */
+  }
 } /* mo_info() */
 
 /*
@@ -147,9 +404,13 @@ static void ms_info(struct Client *client_p, struct Client *source_p,
   if (hunt_server(client_p,source_p,":%s INFO :%s",1,parc,parv) == HUNTED_ISME)
     {
       if(IsOper(source_p))
+      {
 	mo_info(client_p,source_p,parc,parv);
+      }
       else
+      {
 	m_info(client_p,source_p,parc,parv);
+      }
     }
 } /* ms_info() */
 
@@ -166,8 +427,10 @@ static void send_info_text(struct Client *source_p)
   char **text = infotext;
 
   while (*text)
+  {
     sendto_one(source_p, form_str(RPL_INFO), me.name, source_p->name, *text++);
-  
+  }
+
   sendto_one(source_p, form_str(RPL_INFO), me.name, source_p->name, "");
 }
 
@@ -206,15 +469,16 @@ static void send_birthdate_online_time(struct Client *source_p)
 static void send_conf_options(struct Client *source_p)
 {
   Info *infoptr;
+  int i = 0;
 
   /*
    * Now send them a list of all our configuration options
    * (mostly from config.h)
    */
-  
   for (infoptr = MyInformation; infoptr->name; infoptr++)
     {
       if (infoptr->intvalue)
+      {
 	sendto_one(source_p,
 		   ":%s %d %s :%-30s %-5d [%-30s]",
 		   me.name,
@@ -223,7 +487,9 @@ static void send_conf_options(struct Client *source_p)
 		   infoptr->name,
 		   infoptr->intvalue,
 		   infoptr->desc);
+      }
       else
+      {
 	sendto_one(source_p,
 		   ":%s %d %s :%-30s %-5s [%-30s]",
 		   me.name,
@@ -232,262 +498,111 @@ static void send_conf_options(struct Client *source_p)
 		   infoptr->name,
 		   infoptr->strvalue,
 		   infoptr->desc);
+      }
     }
 
-   /* now ircd.conf options */
-   /* This DESPERATELY needs tabularized... */
+   /*
+    * Parse the info_table[] and do the magic.
+    */
+   for (i = 0; info_table[i].name; i++)
+   {
+     switch (info_table[i].output_type)
+     {
+       /*
+        * For "char *" references
+        */
+       case OUTPUT_STRING:
+       {
+         char *option = *((char **) info_table[i].option);
 
-   sendto_one(source_p,
-              ":%s %d %s :%-30s %-5s [%-30s]",
-              me.name,
-              RPL_INFO,
-              source_p->name,
-              "network_name",
-              ServerInfo.network_name ? 
-                ServerInfo.network_name :
-                NETWORK_NAME_DEFAULT,
-              "Name of the Network");
-   sendto_one(source_p,
-              ":%s %d %s :%-30s %-5s [%-30s]",
-              me.name,
-              RPL_INFO,
-              source_p->name,
-              "network_desc",
-              ServerInfo.network_desc ?
-                ServerInfo.network_desc :
-                NETWORK_DESC_DEFAULT,
-              "Description of the network");
-   sendto_one(source_p,
-              ":%s %d %s :%-30s %-5s [%-30s]",
-              me.name,
-              RPL_INFO,
-              source_p->name,
-              "fname_operlog",
-              ConfigFileEntry.fname_operlog ?
-                ConfigFileEntry.fname_operlog :
-                "NONE",
-              "Oper Log File");
-   sendto_one(source_p,
-              ":%s %d %s :%-30s %-5s [%-30s]",
-              me.name,
-              RPL_INFO,
-              source_p->name,
-              "fname_foperlog",
-              ConfigFileEntry.fname_foperlog ?
-                ConfigFileEntry.fname_foperlog :
-                "NONE",
-              "Failed Oper Log File");
-   sendto_one(source_p,
-              ":%s %d %s :%-30s %-5s [%-30s]",
-              me.name,
-              RPL_INFO,
-              source_p->name,
-              "fname_userlog",
-              ConfigFileEntry.fname_userlog ?
-                ConfigFileEntry.fname_userlog :
-                "NONE",
-              "User Log File");
-   sendto_one(source_p,
-              ":%s %d %s :%-30s %-5s [%-30s]",
-              me.name,
-              RPL_INFO,
-              source_p->name,
-              "hub",
-              ServerInfo.hub ? "ON" : "OFF",
-              "Server can connect to more than one server");
-   sendto_one(source_p,
-              ":%s %d %s :%-30s %-5s [%-30s]",
-              me.name,
-              RPL_INFO,
-              source_p->name,
-              "failed_oper_notice",
-              ConfigFileEntry.failed_oper_notice ? "ON" : "OFF",
-              "Show opers a notice if someone uses oper with the wrong password or id");
-   sendto_one(source_p,
-              ":%s %d %s :%-30s %-5d [%-30s]",
-              me.name,
-              RPL_INFO,
-              source_p->name,
-              "dots_in_ident",
-              ConfigFileEntry.dots_in_ident,
-              "How many dots are allowed in idents");
-   sendto_one(source_p,
-              ":%s %d %s :%-30s %-5s [%-30s]",
-              me.name,
-              RPL_INFO,
-              source_p->name,
-              "anti_nick_flood",
-              ConfigFileEntry.anti_nick_flood ? "ON" : "OFF",
-              "Enable anti nick flood code");
-   sendto_one(source_p,
-              ":%s %d %s :%-30s %-5d [%-30s]",
-              me.name,
-              RPL_INFO,
-              source_p->name,
-              "max_nick_time",
-              ConfigFileEntry.max_nick_time,
-              "Anti nick flood time setting");
-   sendto_one(source_p,
-              ":%s %d %s :%-30s %-5d [%-30s]",
-              me.name,
-              RPL_INFO,
-              source_p->name,
-              "max_nick_changes",
-              ConfigFileEntry.max_nick_changes,
-              "How many nick changes to allow");
-   sendto_one(source_p,
-              ":%s %d %s :%-30s %-5d [%-30s]",
-              me.name,
-              RPL_INFO,
-              source_p->name,
-              "max_chans_per_user",
-              ConfigFileEntry.max_chans_per_user,
-              "Maximum number of channels a client can join");
-    sendto_one(source_p,
-              ":%s %d %s :%-30s %-5d [%-30s]",
-              me.name, 
-              RPL_INFO,
-              source_p->name,
-              "anti_spam_exit_message_time",
-              ConfigFileEntry.anti_spam_exit_message_time,
-              "How long a client must be connected to have an exit message");
-    sendto_one(source_p,
-              ":%s %d %s :%-30s %-5d [%-30s]",
-              me.name,
-              RPL_INFO,
-              source_p->name,
-              "links_delay",
-              ConfigFileEntry.links_delay,
-              "How often the links file is rehashed");
-  sendto_one(source_p,
-              ":%s %d %s :%-30s %-5d [%-30s]",
-              me.name,
-              RPL_INFO,
-              source_p->name,
-              "ts_max_delta",
-              ConfigFileEntry.ts_max_delta ?
-                ConfigFileEntry.ts_max_delta :
-                TS_MAX_DELTA_DEFAULT,
-              "Maximum Allowed TS Delta from another Server");
-  sendto_one(source_p,
-              ":%s %d %s :%-30s %-5d [%-30s]",
-              me.name,
-              RPL_INFO,
-              source_p->name,
-              "ts_warn_delta",
-              ConfigFileEntry.ts_warn_delta ?
-                ConfigFileEntry.ts_warn_delta :
-                TS_WARN_DELTA_DEFAULT,
-              "Maximum TS Delta before Sending Warning");
-  sendto_one(source_p,
-              ":%s %d %s :%-30s %-5s [%-30s]",
-              me.name,
-              RPL_INFO,
-              source_p->name,
-              "vchans_oper_only",
-              ConfigFileEntry.vchans_oper_only ? "YES" : "NO",
-              "Restrict use of /CJOIN to opers");
-  sendto_one(source_p,
-              ":%s %d %s :%-30s %-5s [%-30s]",
-              me.name,
-              RPL_INFO,
-              source_p->name,
-              "kline_with_reason",
-              ConfigFileEntry.kline_with_reason ? "YES" : "NO",
-              "Show K-line Reason to Client on Exit");
-  sendto_one(source_p,
-              ":%s %d %s :%-30s %-5s [%-30s]",
-              me.name,
-              RPL_INFO,
-              source_p->name,
-              "kline_with_connection_closed",
-              ConfigFileEntry.kline_with_connection_closed ? "YES" : "NO",
-              "Signoff reason: Connection closed");
-  sendto_one(source_p,
-              ":%s %d %s :%-30s %-5s [%-30s]",
-              me.name, RPL_INFO, source_p->name, "non_redundant_klines",
-              ConfigFileEntry.non_redundant_klines ? "YES" : "NO",
-              "Check for and Disallow Redundant K-lines");
-  sendto_one(source_p,
-              ":%s %d %s :%-30s %-5s [%-30s]",
-              me.name, RPL_INFO, source_p->name, "warn_no_nline",
-              ConfigFileEntry.warn_no_nline ? "YES" : "NO",
-              "Show Notices of Servers Connecting Without an N: line");
-  sendto_one(source_p,
-              ":%s %d %s :%-30s %-5s [%-30s]",
-              me.name, RPL_INFO, source_p->name, "o_lines_oper_only",
-              ConfigFileEntry.o_lines_oper_only ? "YES" : "NO",
-              "Only Allow Operators to see STATS o");
-  sendto_one(source_p,
-              ":%s %d %s :%-30s %-5s [%-30s]",
-              me.name, RPL_INFO, source_p->name, "glines",
-              ConfigFileEntry.glines ? "YES" : "NO",
-              "Network wide K-lines");
-  sendto_one(source_p,
-              ":%s %d %s :%-30s %-5d [%-30s]",
-              me.name, RPL_INFO, source_p->name, "gline_time",
-              ConfigFileEntry.gline_time,
-              "Expire Time for Glines");
-  sendto_one(source_p,
-              ":%s %d %s :%-30s %-5d [%-30s]",
-              me.name, RPL_INFO, source_p->name, "knock_delay",
-              ConfigFileEntry.knock_delay,
-              "Delay between KNOCK Attempts");
-  sendto_one(source_p,
-              ":%s %d %s :%-30s %-5s [%-30s]",
-              me.name, RPL_INFO, source_p->name, "short_motd",
-              ConfigFileEntry.short_motd ? "YES" : "NO",
-              "Notice Clients They should Read MOTD");
-  sendto_one(source_p,
-              ":%s %d %s :%-30s %-5s [%-30s]",
-              me.name, RPL_INFO, source_p->name, "client_exit",
-              ConfigFileEntry.client_exit ? "YES" : "NO",
-              "Prepend 'Client Exit:' to User QUIT Message");
-  sendto_one(source_p,
-              ":%s %d %s :%-30s %-5s [%-30s]",
-              me.name, RPL_INFO, source_p->name, "hide_server",
-              GlobalSetOptions.hide_server ? "YES" : "NO",
-              "Hide server info in WHOIS, netsplits, and hide topology");
-  sendto_one(source_p,
-              ":%s %d %s :%-30s %-5s [%-30s]",
-              me.name, RPL_INFO, source_p->name, "quiet_on_ban",
-              ConfigFileEntry.quiet_on_ban ? "YES" : "NO",
-              "Banned users may not send text to a channel");
-  sendto_one(source_p,
-              ":%s %d %s :%-30s %-5d [%-30s]",
-              me.name, RPL_INFO, source_p->name, "max_targets",
-              ConfigFileEntry.max_targets,
-              "The maximum number of PRIVMSG/NOTICE targets");
-  sendto_one(source_p,
-              ":%s %d %s :%-30s %-5d [%-30s]",
-              me.name, RPL_INFO, source_p->name, "maximum_links",
-              ConfigFileEntry.maximum_links,
-              "Maximum Links for Class default");
-  sendto_one(source_p,
-              ":%s %d %s :%-30s %-5d [%-30s]",
-              me.name, RPL_INFO, source_p->name, "idletime",
-              ConfigFileEntry.idletime,
-              "Delay (in minutes) before a client is considered idle");
-  sendto_one(source_p,
-              ":%s %d %s :%-30s %-5d [%-30s]",
-              me.name, RPL_INFO, source_p->name, "no_oper_flood",
-              ConfigFileEntry.no_oper_flood,
-              "Disable Flood Control for Operators");
-  sendto_one(source_p,
-              ":%s %d %s :%-30s %-5d [%-30s]",
-              me.name, RPL_INFO, source_p->name, "pace_wait",
-              ConfigFileEntry.pace_wait,
-              "Minimum Delay between uses of certain commands");
-  sendto_one(source_p,
-              ":%s %d %s :%-30s %-5d [%-30s]",
-              me.name, RPL_INFO, source_p->name, "caller_id_wait",
-              ConfigFileEntry.caller_id_wait,
-              "Minimum Delay between notifying +g users of messages");
-  sendto_one(source_p,
-              ":%s %d %s :%-30s %-5d [%-30s]",
-              me.name, RPL_INFO, source_p->name, "whois_wait",
-              ConfigFileEntry.whois_wait,
-              "Delay between Remote uses of WHOIS");
+         sendto_one(source_p,
+           ":%s %d %s :%-30s %-5s [%-30s]",
+           me.name,
+           RPL_INFO,
+           source_p->name,
+           info_table[i].name,
+           option ? option : "NONE",
+           info_table[i].desc ? info_table[i].desc : "<none>");
+
+         break;
+       }
+       /*
+        * For "char foo[]" references
+        */
+       case OUTPUT_STRING_PTR:
+       {
+         char *option = (char *) info_table[i].option;
+
+         sendto_one(source_p,
+           ":%s %d %s :%-30s %-5s [%-30s]",
+           me.name,
+           RPL_INFO,
+           source_p->name,
+           info_table[i].name,
+           option ? option : "NONE",
+           info_table[i].desc ? info_table[i].desc : "<none>");
+
+         break;
+       }
+       /*
+        * Output info_table[i].option as a decimal value.
+        */
+       case OUTPUT_DECIMAL:
+       {
+         int option = *((int *) info_table[i].option);
+
+         sendto_one(source_p,
+           ":%s %d %s :%-30s %-5d [%-30s]",
+           me.name,
+           RPL_INFO,
+           source_p->name,
+           info_table[i].name,
+           option,
+           info_table[i].desc ? info_table[i].desc : "<none>");
+
+         break;
+       }
+
+       /*
+        * Output info_table[i].option as "ON" or "OFF"
+        */
+       case OUTPUT_BOOLEAN:
+       {
+         int option = *((int *) info_table[i].option);
+
+         sendto_one(source_p,
+           ":%s %d %s :%-30s %-5s [%-30s]",
+           me.name,
+           RPL_INFO,
+           source_p->name,
+           info_table[i].name,
+           option ? "ON" : "OFF",
+           info_table[i].desc ? info_table[i].desc : "<none>");
+
+         break;
+       }
+       /*
+        * Output info_table[i].option as "YES" or "NO"
+        */
+       case OUTPUT_BOOLEAN_YN:
+       {
+         int option = *((int *) info_table[i].option);
+
+         sendto_one(source_p,
+           ":%s %d %s :%-30s %-5s [%-30s]",
+           me.name,
+           RPL_INFO,
+           source_p->name,
+           info_table[i].name,
+           option ? "YES" : "NO",
+           info_table[i].desc ? info_table[i].desc : "<none>");
+
+         break;
+       }
+     } /* switch (info_table[i].output_type) */
+   } /* forloop */
+
+
   /* Don't send oper_only_umodes...it's a bit mask, we will have to decode it
   ** in order for it to show up properly to opers who issue INFO
   */
