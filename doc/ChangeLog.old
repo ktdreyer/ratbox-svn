@@ -1,3 +1,10 @@
+*** 20010110_5 by db
+- this removes the last remnant of bogus ban removal code..
+  this should be done using another cleaner mechanism. blah.
+- cleaned up mtrie_conf.c slightly 
+
+
+
 *** 20010110_4 by wcampbel
 Removed a reference to md5mkpasswd
 
