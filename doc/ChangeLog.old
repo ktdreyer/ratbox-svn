@@ -1,3 +1,7 @@
+*** 20010531_7 by davidt
+- Fix contrib for the new send.c
+
+
 *** 20010531_6 by davidt
 - Replace sendto_*serv* with sendto_server.
   sendto_server(one, NULL, NULL, NOCAPS, NOCAPS, NOFLAGS, format, ...)
