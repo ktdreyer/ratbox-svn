@@ -1,3 +1,8 @@
+*** 20001227_24 by ejb
+- readd include/ to Makefile
+- make configure be rebuilt automatically when needed.
+
+
 *** 20001227_23 by wcampbel
 Added Reidel's operguide.txt (Currently for Hyb5/6, in progress for Hyb7)
 
