@@ -1,3 +1,8 @@
+*** 20001022_2 by toot
+bysin's patch to check for a overly long channel name in /join too.
+or you could end up with a channel you couldn't /cjoin..
+
+
 *** 20001022_1 by db
 - ok, sub1_from_channel went through all the work to figure out if the
   root channel could be removed if a sub channel was removed, only it uh
