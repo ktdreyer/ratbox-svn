@@ -1,3 +1,10 @@
+*** 20001026_6 by adrian
+
+
+Add an explanation to errno ..
+
+
+
 *** 20001026_5 by db
 - check_klines() has to be called after placing tklines as well
 
