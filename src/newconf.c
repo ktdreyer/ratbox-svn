@@ -445,52 +445,53 @@ struct mode_table
 	int mode;
 };
 
+/* *INDENT-OFF* */
 static struct mode_table umode_table[] = {
-	{"bots", UMODE_BOTS},
-	{"cconn", UMODE_CCONN},
-	{"debug", UMODE_DEBUG},
-	{"full", UMODE_FULL},
-	{"callerid", UMODE_CALLERID},
-	{"invisible", UMODE_INVISIBLE},
-	{"skill", UMODE_SKILL},
-	{"locops", UMODE_LOCOPS},
-	{"nchange", UMODE_NCHANGE},
-	{"rej", UMODE_REJ},
-	{"servnotice", UMODE_SERVNOTICE},
-	{"unauth", UMODE_UNAUTH},
-	{"wallop", UMODE_WALLOP},
-	{"external", UMODE_EXTERNAL},
-	{"spy", UMODE_SPY},
-	{"operwall", UMODE_OPERWALL},
+	{"bots",	UMODE_BOTS	},
+	{"cconn",	UMODE_CCONN	},
+	{"debug",	UMODE_DEBUG	},
+	{"full",	UMODE_FULL	},
+	{"callerid",	UMODE_CALLERID	},
+	{"invisible",	UMODE_INVISIBLE	},
+	{"skill",	UMODE_SKILL	},
+	{"locops",	UMODE_LOCOPS	},
+	{"nchange",	UMODE_NCHANGE	},
+	{"rej",		UMODE_REJ	},
+	{"servnotice",	UMODE_SERVNOTICE},
+	{"unauth",	UMODE_UNAUTH	},
+	{"wallop",	UMODE_WALLOP	},
+	{"external",	UMODE_EXTERNAL	},
+	{"spy",		UMODE_SPY	},
+	{"operwall",	UMODE_OPERWALL	},
 	{NULL}
 };
 
 static struct mode_table flag_table[] = {
-	{"global_kill", OPER_GLOBAL_KILL},
-	{"remote", OPER_REMOTE},
-	{"kline", OPER_K},
-	{"unkline", OPER_UNKLINE},
-	{"gline", OPER_GLINE},
-	{"nick_changes", OPER_N},
-	{"rehash", OPER_REHASH},
-	{"die", OPER_DIE},
-	{"admin", OPER_ADMIN},
-	{"hidden_admin", OPER_HIDDENADMIN},
-	{"xline", OPER_XLINE},
-	{"operwall", OPER_OPERWALL},
+	{"global_kill",		OPER_GLOBAL_KILL	},
+	{"remote",		OPER_REMOTE		},
+	{"kline",		OPER_K			},
+	{"unkline",		OPER_UNKLINE		},
+	{"gline",		OPER_GLINE		},
+	{"nick_changes",	OPER_N			},
+	{"rehash",		OPER_REHASH		},
+	{"die",			OPER_DIE		},
+	{"admin",		OPER_ADMIN		},
+	{"hidden_admin",	OPER_HIDDENADMIN	},
+	{"xline",		OPER_XLINE		},
+	{"operwall",		OPER_OPERWALL		},
 	{NULL}
 };
 
 static struct mode_table auth_table[] = {
-	{"no_spoof_notice", CONF_FLAGS_NO_SPOOF_NOTICE},
-	{"exceed_limit", CONF_FLAGS_NOLIMIT},
-	{"kline_exempt", CONF_FLAGS_EXEMPTKLINE},
-	{"gline_exempt", CONF_FLAGS_EXEMPTGLINE},
-	{"flood_exempt", CONF_FLAGS_EXEMPTFLOOD},
-	{"no_tilde", CONF_FLAGS_NO_TILDE},
-	{"restricted", CONF_FLAGS_RESTRICTED},
-	{"need_ident", CONF_FLAGS_NEED_IDENTD},
-	{"have_ident", CONF_FLAGS_NEED_IDENTD},
+	{"spoof_notice",	CONF_FLAGS_SPOOF_NOTICE	},
+	{"exceed_limit",	CONF_FLAGS_NOLIMIT	},
+	{"kline_exempt",	CONF_FLAGS_EXEMPTKLINE	},
+	{"gline_exempt",	CONF_FLAGS_EXEMPTGLINE	},
+	{"flood_exempt",	CONF_FLAGS_EXEMPTFLOOD	},
+	{"no_tilde",		CONF_FLAGS_NO_TILDE	},
+	{"restricted",		CONF_FLAGS_RESTRICTED	},
+	{"need_ident",		CONF_FLAGS_NEED_IDENTD	},
+	{"have_ident",		CONF_FLAGS_NEED_IDENTD	},
 	{NULL}
 };
 
@@ -515,6 +516,7 @@ static struct mode_table shared_table[] =
 	{ "all",	OPER_K|OPER_UNKLINE|OPER_XLINE },
 	{NULL}
 };
+/* *INDENT-ON* */
 
 static int
 find_umode(struct mode_table *tab, char *name)
@@ -1072,7 +1074,6 @@ conf_begin_auth(struct TopConf *tc)
 	yy_aprev = NULL;
 	yy_achead = yy_aprev = yy_aconf = make_conf();
 	yy_aconf->status = CONF_CLIENT;
-	yy_achead->flags |= CONF_FLAGS_NO_SPOOF_NOTICE;
 
 	return 0;
 }
@@ -1182,14 +1183,14 @@ conf_set_auth_encrypted(void *data)
 }
 
 static void
-conf_set_auth_no_spoof_notice(void *data)
+conf_set_auth_spoof_notice(void *data)
 {
 	int yesno = *(unsigned int *) data;
 
 	if(yesno)
-		yy_achead->flags |= CONF_FLAGS_NO_SPOOF_NOTICE;
+		yy_achead->flags |= CONF_FLAGS_SPOOF_NOTICE;
 	else
-		yy_achead->flags &= ~CONF_FLAGS_NO_SPOOF_NOTICE;
+		yy_achead->flags &= ~CONF_FLAGS_SPOOF_NOTICE;
 }
 
 static void
@@ -2948,7 +2949,7 @@ newconf_init()
 	add_conf_item("auth", "no_tilde", CF_YESNO, conf_set_auth_no_tilde);
 	add_conf_item("auth", "gline_exempt", CF_YESNO, conf_set_auth_gline_exempt);
 	add_conf_item("auth", "spoof", CF_QSTRING, conf_set_auth_spoof);
-	add_conf_item("auth", "no_spoof_notice", CF_YESNO, conf_set_auth_no_spoof_notice);
+	add_conf_item("auth", "spoof_notice", CF_YESNO, conf_set_auth_spoof_notice);
 	add_conf_item("auth", "flood_exempt", CF_YESNO, conf_set_auth_flood_exempt);
 	add_conf_item("auth", "redirserv", CF_QSTRING, conf_set_auth_redir_serv);
 	add_conf_item("auth", "redirport", CF_INT, conf_set_auth_redir_port);

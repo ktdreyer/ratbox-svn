@@ -522,16 +522,19 @@ verify_access(struct Client *client_p, const char *username)
 			/* Thanks for spoof idea amm */
 			if(IsConfDoSpoofIp(aconf))
 			{
-#ifndef HIDE_SPOOF_IPS
-				if(!IsConfNoSpoofNotice(aconf))
+				if(IsConfSpoofNotice(aconf))
 				{
-					sendto_realops_flags(UMODE_ALL,
-							     L_ADMIN,
+					sendto_realops_flags(UMODE_ALL, L_ALL,
 							     "%s spoofing: %s as %s",
 							     client_p->name,
-							     client_p->host, aconf->name);
-				}
+#ifdef HIDE_SPOOF_IPS
+							     aconf->name,
+#else
+							     client_p->host,
 #endif
+							     aconf->name);
+				}
+
 				strlcpy(client_p->host, aconf->name, sizeof(client_p->host));
 				SetIPSpoof(client_p);
 			}

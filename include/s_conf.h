@@ -125,7 +125,7 @@ struct ConfItem
 #define CONF_FLAGS_NOLIMIT              0x00000080
 #define CONF_FLAGS_IDLE_LINED           0x00000100
 #define CONF_FLAGS_SPOOF_IP             0x00000200
-#define CONF_FLAGS_NO_SPOOF_NOTICE      0x00000400
+#define CONF_FLAGS_SPOOF_NOTICE		0x00000400
 #define CONF_FLAGS_REDIR                0x00000800
 #define CONF_FLAGS_EXEMPTGLINE          0x00001000
 #define CONF_FLAGS_RESTRICTED           0x00002000
@@ -152,7 +152,7 @@ struct ConfItem
 #define IsConfIdlelined(x)      ((x)->flags & CONF_FLAGS_IDLE_LINED)
 #define IsConfDoIdentd(x)       ((x)->flags & CONF_FLAGS_DO_IDENTD)
 #define IsConfDoSpoofIp(x)      ((x)->flags & CONF_FLAGS_SPOOF_IP)
-#define IsConfNoSpoofNotice(x)    ((x)->flags & CONF_FLAGS_NO_SPOOF_NOTICE)
+#define IsConfSpoofNotice(x)    ((x)->flags & CONF_FLAGS_SPOOF_NOTICE)
 #define IsConfRestricted(x)     ((x)->flags & CONF_FLAGS_RESTRICTED)
 #define IsConfEncrypted(x)      ((x)->flags & CONF_FLAGS_ENCRYPTED)
 #define IsConfCompressed(x)     ((x)->flags & CONF_FLAGS_COMPRESSED)

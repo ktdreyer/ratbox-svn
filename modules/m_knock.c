@@ -179,7 +179,8 @@ parse_knock(struct Client *client_p, struct Client *source_p,
 		 * allow one knock per user per knock_delay
 		 * allow one knock per channel per knock_delay_channel
 		 */
-		if((source_p->localClient->last_knock + ConfigChannel.knock_delay) > CurrentTime)
+		if(!IsOper(source_p) && 
+		   (source_p->localClient->last_knock + ConfigChannel.knock_delay) > CurrentTime)
 		{
 			sendto_one(source_p, form_str(ERR_TOOMANYKNOCK),
 					me.name, source_p->name, name, "user");
