@@ -1,3 +1,206 @@
+leeh        2002/11/21 21:18:30 UTC	(20021121_1)
+
+  Modified files:
+    .                    INSTALL Makefile.in configure make.com 
+    autoconf             configure.in 
+    contrib              README m_jupe.c m_ltrace.c m_map.c 
+                         m_mkpasswd.c m_okick.c m_olist.c m_owho.c 
+                         m_owhois.c spy_admin_notice.c 
+                         spy_info_notice.c spy_links_notice.c 
+                         spy_motd_notice.c spy_stats_notice.c 
+                         spy_stats_p_notice.c spy_trace_notice.c 
+                         spy_whois_notice.c 
+                         spy_whois_notice_global.c 
+    doc                  example.conf example.efnet.conf 
+                         server-version-info whats-new.txt 
+    include              Makefile.in balloc.h channel.h 
+                         channel_mode.h class.h client.h common.h 
+                         config.h config.h.dist defaults.h event.h 
+                         fdlist.h fileio.h handlers.h hash.h 
+                         hook.h hostmask.h irc_string.h ircd.h 
+                         ircd_defs.h ircd_getopt.h ircd_handler.h 
+                         ircd_signal.h linebuf.h listener.h 
+                         m_info.h m_kline.h md5.h memory.h 
+                         modules.h motd.h msg.h numeric.h packet.h 
+                         parse.h patchlevel.h res.h restart.h 
+                         resv.h rsa.h s_auth.h s_bsd.h s_conf.h 
+                         s_debug.h s_gline.h s_log.h s_misc.h 
+                         s_serv.h s_stats.h s_user.h s_zip.h 
+                         scache.h send.h setup.h_vms sprintf_irc.h 
+                         stdinc.h supported.h tools.h whowas.h 
+    modules              m_accept.c m_admin.c m_away.c m_capab.c 
+                         m_challenge.c m_close.c m_connect.c 
+                         m_cryptlink.c m_eob.c m_gline.c m_help.c 
+                         m_info.c m_invite.c m_ison.c m_join.c 
+                         m_kline.c m_knock.c m_links.c m_list.c 
+                         m_locops.c m_lusers.c m_motd.c m_names.c 
+                         m_oper.c m_operwall.c m_pass.c m_ping.c 
+                         m_pong.c m_post.c m_rehash.c m_restart.c 
+                         m_resv.c m_set.c m_stats.c m_svinfo.c 
+                         m_testline.c m_time.c m_topic.c m_trace.c 
+                         m_unkline.c m_user.c m_userhost.c 
+                         m_users.c m_version.c m_wallops.c m_who.c 
+                         m_whois.c m_whowas.c m_xline.c 
+    modules/core         m_die.c m_kick.c m_kill.c m_message.c 
+                         m_mode.c m_nick.c m_part.c m_quit.c 
+                         m_server.c m_sjoin.c m_squit.c 
+    servlink             servlink.c 
+  Log:
+  - removed include/ from the build
+  - fixed the dumb (C) EVERYONE IN THE WORLD header to one more sensible.
+  - cleaned various references claiming this was ircd-hybrid, its not.
+  
+  Revision  Changes    Path
+  7.34      +14 -14    ircd-ratbox/INSTALL
+  7.40      +1 -1      ircd-ratbox/Makefile.in
+  7.156     +1 -1      ircd-ratbox/autoconf/configure.in
+  7.163     +1 -1      ircd-ratbox/configure
+  1.26      +2 -1      ircd-ratbox/contrib/README
+  1.43      +2 -2      ircd-ratbox/contrib/m_jupe.c
+  1.8       +2 -2      ircd-ratbox/contrib/m_ltrace.c
+  1.15      +2 -2      ircd-ratbox/contrib/m_map.c
+  1.10      +2 -2      ircd-ratbox/contrib/m_mkpasswd.c
+  1.3       +2 -2      ircd-ratbox/contrib/m_okick.c
+  1.7       +2 -2      ircd-ratbox/contrib/m_olist.c
+  1.7       +2 -2      ircd-ratbox/contrib/m_owho.c
+  1.11      +2 -2      ircd-ratbox/contrib/m_owhois.c
+  1.8       +2 -2      ircd-ratbox/contrib/spy_admin_notice.c
+  1.8       +2 -2      ircd-ratbox/contrib/spy_info_notice.c
+  1.13      +2 -2      ircd-ratbox/contrib/spy_links_notice.c
+  1.8       +2 -2      ircd-ratbox/contrib/spy_motd_notice.c
+  1.14      +2 -2      ircd-ratbox/contrib/spy_stats_notice.c
+  1.6       +2 -2      ircd-ratbox/contrib/spy_stats_p_notice.c
+  1.8       +2 -2      ircd-ratbox/contrib/spy_trace_notice.c
+  1.13      +2 -2      ircd-ratbox/contrib/spy_whois_notice.c
+  1.2       +2 -2      ircd-ratbox/contrib/spy_whois_notice_global.c
+  7.188     +2 -0      ircd-ratbox/doc/example.conf
+  7.26      +3 -3      ircd-ratbox/doc/example.efnet.conf
+  7.14      +2 -3      ircd-ratbox/doc/server-version-info
+  7.38      +3 -3      ircd-ratbox/doc/whats-new.txt
+  1.6       +2 -2      ircd-ratbox/include/Makefile.in
+  1.13      +4 -2      ircd-ratbox/include/balloc.h
+  7.129     +4 -2      ircd-ratbox/include/channel.h
+  7.13      +4 -2      ircd-ratbox/include/channel_mode.h
+  7.12      +4 -2      ircd-ratbox/include/class.h
+  7.180     +4 -2      ircd-ratbox/include/client.h
+  7.4       +4 -2      ircd-ratbox/include/common.h
+  7.151     +4 -2      ircd-ratbox/include/config.h
+  7.64      +1 -1      ircd-ratbox/include/config.h.dist
+  7.8       +4 -2      ircd-ratbox/include/defaults.h
+  1.14      +4 -2      ircd-ratbox/include/event.h
+  7.27      +4 -2      ircd-ratbox/include/fdlist.h
+  7.12      +4 -2      ircd-ratbox/include/fileio.h
+  7.40      +4 -2      ircd-ratbox/include/handlers.h
+  7.23      +4 -2      ircd-ratbox/include/hash.h
+  1.15      +4 -2      ircd-ratbox/include/hook.h
+  1.26      +4 -2      ircd-ratbox/include/hostmask.h
+  7.40      +4 -2      ircd-ratbox/include/irc_string.h
+  7.56      +4 -2      ircd-ratbox/include/ircd.h
+  7.33      +4 -2      ircd-ratbox/include/ircd_defs.h
+  1.4       +4 -2      ircd-ratbox/include/ircd_getopt.h
+  7.6       +4 -2      ircd-ratbox/include/ircd_handler.h
+  7.3       +4 -2      ircd-ratbox/include/ircd_signal.h
+  1.25      +4 -2      ircd-ratbox/include/linebuf.h
+  7.11      +4 -2      ircd-ratbox/include/listener.h
+  7.44      +4 -2      ircd-ratbox/include/m_info.h
+  7.8       +4 -2      ircd-ratbox/include/m_kline.h
+  1.7       +4 -2      ircd-ratbox/include/md5.h
+  7.38      +4 -2      ircd-ratbox/include/memory.h
+  7.35      +4 -2      ircd-ratbox/include/modules.h
+  7.11      +4 -2      ircd-ratbox/include/motd.h
+  7.42      +4 -2      ircd-ratbox/include/msg.h
+  7.35      +5 -3      ircd-ratbox/include/numeric.h
+  7.18      +4 -2      ircd-ratbox/include/packet.h
+  7.16      +4 -2      ircd-ratbox/include/parse.h
+  7.44      +4 -2      ircd-ratbox/include/patchlevel.h
+  7.22      +4 -2      ircd-ratbox/include/res.h
+  7.5       +4 -2      ircd-ratbox/include/restart.h
+  1.13      +4 -2      ircd-ratbox/include/resv.h
+  7.12      +4 -2      ircd-ratbox/include/rsa.h
+  7.19      +4 -2      ircd-ratbox/include/s_auth.h
+  7.37      +4 -2      ircd-ratbox/include/s_bsd.h
+  7.207     +4 -2      ircd-ratbox/include/s_conf.h
+  7.5       +4 -2      ircd-ratbox/include/s_debug.h
+  7.13      +4 -2      ircd-ratbox/include/s_gline.h
+  7.12      +4 -2      ircd-ratbox/include/s_log.h
+  7.8       +4 -2      ircd-ratbox/include/s_misc.h
+  7.71      +4 -2      ircd-ratbox/include/s_serv.h
+  7.9       +4 -2      ircd-ratbox/include/s_stats.h
+  7.19      +4 -2      ircd-ratbox/include/s_user.h
+  7.6       +4 -2      ircd-ratbox/include/s_zip.h
+  7.8       +4 -2      ircd-ratbox/include/scache.h
+  7.64      +4 -2      ircd-ratbox/include/send.h
+  7.11      +1 -1      ircd-ratbox/include/setup.h_vms
+  7.10      +4 -2      ircd-ratbox/include/sprintf_irc.h
+  1.2       +1 -1      ircd-ratbox/include/stdinc.h
+  1.26      +4 -2      ircd-ratbox/include/supported.h
+  1.39      +4 -2      ircd-ratbox/include/tools.h
+  7.10      +4 -2      ircd-ratbox/include/whowas.h
+  1.8       +2 -2      ircd-ratbox/make.com
+  1.26      +5 -3      ircd-ratbox/modules/core/m_die.c
+  1.52      +5 -3      ircd-ratbox/modules/core/m_kick.c
+  1.71      +5 -3      ircd-ratbox/modules/core/m_kill.c
+  1.112     +5 -3      ircd-ratbox/modules/core/m_message.c
+  1.60      +5 -3      ircd-ratbox/modules/core/m_mode.c
+  1.106     +5 -3      ircd-ratbox/modules/core/m_nick.c
+  1.66      +5 -3      ircd-ratbox/modules/core/m_part.c
+  1.27      +5 -3      ircd-ratbox/modules/core/m_quit.c
+  1.98      +5 -3      ircd-ratbox/modules/core/m_server.c
+  1.153     +5 -3      ircd-ratbox/modules/core/m_sjoin.c
+  1.56      +5 -3      ircd-ratbox/modules/core/m_squit.c
+  1.37      +5 -3      ircd-ratbox/modules/m_accept.c
+  1.36      +5 -3      ircd-ratbox/modules/m_admin.c
+  1.35      +5 -3      ircd-ratbox/modules/m_away.c
+  1.29      +5 -3      ircd-ratbox/modules/m_capab.c
+  1.42      +6 -4      ircd-ratbox/modules/m_challenge.c
+  1.26      +5 -3      ircd-ratbox/modules/m_close.c
+  1.45      +5 -3      ircd-ratbox/modules/m_connect.c
+  1.39      +6 -4      ircd-ratbox/modules/m_cryptlink.c
+  1.33      +5 -3      ircd-ratbox/modules/m_eob.c
+  1.97      +5 -3      ircd-ratbox/modules/m_gline.c
+  1.35      +5 -3      ircd-ratbox/modules/m_help.c
+  1.66      +5 -3      ircd-ratbox/modules/m_info.c
+  1.52      +5 -3      ircd-ratbox/modules/m_invite.c
+  1.34      +5 -3      ircd-ratbox/modules/m_ison.c
+  1.109     +5 -3      ircd-ratbox/modules/m_join.c
+  1.126     +5 -3      ircd-ratbox/modules/m_kline.c
+  1.63      +4 -3      ircd-ratbox/modules/m_knock.c
+  1.39      +5 -3      ircd-ratbox/modules/m_links.c
+  1.52      +5 -3      ircd-ratbox/modules/m_list.c
+  1.29      +5 -3      ircd-ratbox/modules/m_locops.c
+  1.25      +5 -3      ircd-ratbox/modules/m_lusers.c
+  1.32      +5 -3      ircd-ratbox/modules/m_motd.c
+  1.53      +5 -3      ircd-ratbox/modules/m_names.c
+  1.57      +5 -3      ircd-ratbox/modules/m_oper.c
+  1.36      +5 -3      ircd-ratbox/modules/m_operwall.c
+  1.25      +5 -3      ircd-ratbox/modules/m_pass.c
+  1.33      +5 -3      ircd-ratbox/modules/m_ping.c
+  1.30      +5 -3      ircd-ratbox/modules/m_pong.c
+  1.13      +5 -3      ircd-ratbox/modules/m_post.c
+  1.50      +5 -3      ircd-ratbox/modules/m_rehash.c
+  1.26      +5 -3      ircd-ratbox/modules/m_restart.c
+  1.23      +3 -2      ircd-ratbox/modules/m_resv.c
+  1.48      +5 -3      ircd-ratbox/modules/m_set.c
+  1.127     +5 -3      ircd-ratbox/modules/m_stats.c
+  1.37      +5 -3      ircd-ratbox/modules/m_svinfo.c
+  1.26      +5 -3      ircd-ratbox/modules/m_testline.c
+  1.27      +5 -3      ircd-ratbox/modules/m_time.c
+  1.63      +5 -3      ircd-ratbox/modules/m_topic.c
+  1.61      +5 -3      ircd-ratbox/modules/m_trace.c
+  1.64      +5 -3      ircd-ratbox/modules/m_unkline.c
+  1.24      +5 -3      ircd-ratbox/modules/m_user.c
+  1.40      +5 -3      ircd-ratbox/modules/m_userhost.c
+  1.26      +5 -3      ircd-ratbox/modules/m_users.c
+  1.43      +5 -3      ircd-ratbox/modules/m_version.c
+  1.34      +5 -3      ircd-ratbox/modules/m_wallops.c
+  1.72      +5 -3      ircd-ratbox/modules/m_who.c
+  1.97      +5 -3      ircd-ratbox/modules/m_whois.c
+  1.29      +5 -3      ircd-ratbox/modules/m_whowas.c
+  1.6       +3 -2      ircd-ratbox/modules/m_xline.c
+  1.25      +3 -3      ircd-ratbox/servlink/servlink.c
+
+
+
 leeh        2002/11/21 20:16:33 UTC	(20021121_0)
 
   Modified files:
