@@ -68,6 +68,7 @@ DECLARE_MODULE_AV1(names, NULL, NULL, names_clist, NULL, NULL, NULL, "$Revision$
 static int
 m_names(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
+	static time_t last_used = 0;
 	struct Channel *chptr = NULL;
 	char *s;
 	const char *para = parc > 1 ? parv[1] : NULL;
@@ -92,6 +93,15 @@ m_names(struct Client *client_p, struct Client *source_p, int parc, const char *
 	}
 	else
 	{
+		if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
+		{
+			sendto_one(source_p, form_str(RPL_LOAD2HI),
+				   me.name, source_p->name, "NAMES");
+			return 0;
+		}
+		else
+			last_used = CurrentTime;
+
 		names_global(source_p);
 		sendto_one(source_p, form_str(RPL_ENDOFNAMES), me.name, parv[0], "*");
 	}

@@ -95,7 +95,8 @@ m_help(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	if((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
 	{
 		/* safe enough to give this on a local connect only */
-		sendto_one(source_p, form_str(RPL_LOAD2HI), me.name, parv[0]);
+		sendto_one(source_p, form_str(RPL_LOAD2HI), 
+			   me.name, parv[0], "HELP");
 		return 0;
 	}
 	else

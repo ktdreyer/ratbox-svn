@@ -91,9 +91,8 @@ m_whois(struct Client *client_p, struct Client *source_p, int parc, const char *
 		/* seeing as this is going across servers, we should limit it */
 		if((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
 		{
-			if(MyClient(source_p))
-				sendto_one(source_p, form_str(RPL_LOAD2HI), me.name,
-					   source_p->name);
+			sendto_one(source_p, form_str(RPL_LOAD2HI),
+				   me.name, source_p->name, "WHOIS");
 			return 0;
 		}
 		else

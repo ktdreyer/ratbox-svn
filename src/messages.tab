@@ -287,7 +287,7 @@ static  const char *  replies[] = {
 /* 261 RPL_TRACELOG, */         ":%s 261 %s File %s %d",
 /* 262 RPL_ENDOFTRACE, */       ":%s 262 %s %s :End of TRACE",
 /* 263 RPL_LOAD2HI, */          
-":%s 263 %s :Server load is temporarily too heavy. Please wait a while and try again.",
+":%s 263 %s %s :Server load is temporarily too heavy. Please wait a while and try again.",
 /* 264 */       NULL,
 /* 265 RPL_LOCALUSERS, */       ":%s 265 %s :Current local  users: %d  Max: %d",
 /* 266 RPL_GLOBALUSERS, */      ":%s 266 %s :Current global users: %d  Max: %d",

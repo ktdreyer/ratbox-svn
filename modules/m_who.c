@@ -72,6 +72,7 @@ static void do_who(struct Client *source_p,
 static int
 m_who(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
+	static time_t last_used = 0;
 	struct Client *target_p;
 	struct membership *msptr;
 	char *mask;
@@ -100,6 +101,15 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 	{
 		if(!IsFloodDone(source_p))
 			flood_endgrace(source_p);
+
+		if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
+		{
+			sendto_one(source_p, form_str(RPL_LOAD2HI),
+				   me.name, source_p->name, "WHO");
+			return 0;
+		}
+		else
+			last_used = CurrentTime;
 
 		who_global(source_p, mask, server_oper);
 		sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], "*");
@@ -180,9 +190,31 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 
 	/* '/who 0' */
 	if((*(mask + 1) == '\0') && (*mask == '0'))
+	{
+		if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
+		{
+			sendto_one(source_p, form_str(RPL_LOAD2HI),
+				   me.name, source_p->name, "WHO");
+			return 0;
+		}
+		else
+			last_used = CurrentTime;
+
 		who_global(source_p, NULL, server_oper);
+	}
 	else
+	{
+		if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
+		{
+			sendto_one(source_p, form_str(RPL_LOAD2HI),
+				   me.name, source_p->name, "WHO");
+			return 0;
+		}
+		else
+			last_used = CurrentTime;
+
 		who_global(source_p, mask, server_oper);
+	}
 
 	/* Wasn't a nick, wasn't a channel, wasn't a '*' so ... */
 	sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], mask);

@@ -208,14 +208,12 @@ m_stats(struct Client *client_p, struct Client *source_p, int parc, const char *
 	if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
 	{
 		/* safe enough to give this on a local connect only */
-		if(MyClient (source_p))
-			sendto_one (source_p, form_str (RPL_LOAD2HI), me.name, parv[0]);
+		sendto_one(source_p, form_str (RPL_LOAD2HI),
+			   me.name, parv[0], "STATS");
 		return 0;
 	}
 	else
-	{
 		last_used = CurrentTime;
-	}
 
 	/* Is the stats meant for us? */
 	if(!ConfigServerHide.disable_remote)
