@@ -1,3 +1,24 @@
+*** 20001106_3 by db
+- even more cleanups
+  removed a pile of unused #ifdef's lets move these into runtime config
+  or EVEN better loadable modules. (hint is- hint hint hint)
+
+  And oh yes, show oper passwords on failure wasn't is-'s fault. happy now?
+
+  Ok, sjoin from remote server for a vchan is going to be interesting.
+currently our vchan map is only kept for local clients. duh.
+find_vchan() won't work on a remote client. duh. (vhan_map)
+The question now is, do we extend vchan_map to remote clients as well
+and fill in the map on sjoins? or figure out its a remote client
+and walk the vchan link list instead for remote clients?
+*sigh* The map is definitely faster for local clients, as it is filled
+in in m_join and m_part etc....
+Actually, the idea of caching them as found for remote clients 
+sounds like the best compromise...
+
+  
+
+
 *** 20001106_2 by db
 - removed prototype that no longer existed
 - fixed comment in hash.c
