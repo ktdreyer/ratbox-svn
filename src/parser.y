@@ -4,6 +4,7 @@
  */
 
 %{
+#include <sys/types.h>
 #include <netinet/in.h>
 
 #define WE_ARE_MEMORY_C

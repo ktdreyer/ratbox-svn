@@ -18,6 +18,9 @@ MAKE = make
 SERVICEDIRS=s_userserv s_chanserv
 SERVICELIBS=s_userserv.a s_chanserv.a
 
+# Anything marked with the .PHONY attribute is always considered "out of date"
+.PHONY: $(BIN)
+
 SRCS = 			\
         balloc.c        \
         c_error.c       \

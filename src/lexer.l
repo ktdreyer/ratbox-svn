@@ -23,6 +23,7 @@
 %option nounput
 
 %{
+#include <sys/types.h>
 #include <netinet/in.h>
 #include <limits.h>
 
