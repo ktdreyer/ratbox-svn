@@ -144,9 +144,10 @@ AC_EGREP_HEADER(RLIMIT_OPEN_MAX, sys/resource.h,
 		cf_rlimit_type="RLIMIT_OPEN_MAX")
 CPPFLAGS="$cpp_flags_backup"
 unset cpp_flags_backup
-AC_DEFINE_UNQUOTED(RLIMIT_FD_MAX, $cf_rlimit_type)
-AC_MSG_RESULT($cf_rlimit_type)
-
+if test "x$cf_rlimit_type" != "x"; then
+	AC_DEFINE_UNQUOTED(RLIMIT_FD_MAX, $cf_rlimit_type)
+	AC_MSG_RESULT($cf_rlimit_type)
+fi
 
 dnl OpenSSL support
 AC_MSG_CHECKING(for OpenSSL)

@@ -15,78 +15,6 @@
 /* Define if you have the ANSI C header files.  */
 #undef STDC_HEADERS
 
-/* Define if you have zlib available. */
-#undef HAVE_LIBZ
-
-/* Define if you have openssl available. */
-#undef HAVE_LIBCRYPTO
-
-/* Define if you have the EVP_bf_cfb function.  */
-#undef HAVE_EVP_BF_CFB
-
-/* Define if you have the EVP_cast5_cfb function.  */
-#undef HAVE_EVP_CAST5_CFB
-
-/* Define if you have the EVP_rc5_32_12_16_cfb function.  */
-#undef HAVE_EVP_RC5_32_12_16_CFB
-
-/* Define if you have the EVP_des_cfb function.  */
-#undef HAVE_EVP_DES_CFB
-
-/* Define if you have the EVP_des_ede3_cfb function.  */
-#undef HAVE_EVP_DES_EDE3_CFB
-
-/* Define if you have the EVP_idea_cfb function.  */
-#undef HAVE_EVP_IDEA_CFB
-
-/* Define if you have the gettext function.  */
-#undef HAVE_GETTEXT
-
-/* Define if you have the strlcat function.  */
-#undef HAVE_STRLCAT
-
-/* Define if you have the strlcpy function.  */
-#undef HAVE_STRLCPY
-
-/* Define if you have the socketpair function. */
-#undef HAVE_SOCKETPAIR
-
-/* Define if you have the <errno.h> header file.  */
-#undef HAVE_ERRNO_H
-
-/* Define if you have the <getopt.h> header file.  */
-#undef HAVE_GETOPT_H
-
-/* Define if you have the <stddef.h> header file.  */
-#undef HAVE_STDDEF_H
-
-/* Define if you have the <stdlib.h> header file.  */
-#undef HAVE_STDLIB_H
-
-/* Define if you have the <string.h> header file.  */
-#undef HAVE_STRING_H
-
-/* Define if you have the <strings.h> header file.  */
-#undef HAVE_STRINGS_H
-
-/* Define if you have the <sys/param.h> header file.  */
-#undef HAVE_SYS_PARAM_H
-
-/* Define if you have the <sys/syslog.h> header file.  */
-#undef HAVE_SYS_SYSLOG_H
-
-/* Define if you have the <unistd.h> header file.  */
-#undef HAVE_UNISTD_H
-
-/* Define if you have the descrypt library (-ldescrypt).  */
-#undef HAVE_LIBDESCRYPT
-
-/* Define if you have the dl library (-ldl).  */
-#undef HAVE_LIBDL
-
-/* Define if you have the socket library (-lsocket).  */
-#undef HAVE_LIBSOCKET
-
 /* Define if you have the poll() system call.  */
 #undef USE_POLL
 
@@ -95,6 +23,7 @@
 
 /* Define if we are going to use /dev/poll for network IO */
 #undef HAVE_DEVPOLL
+
 #undef USE_DEVPOLL
 
 /* Using kqueue */
@@ -132,3 +61,81 @@
 
 /* static modules */
 #undef STATIC_MODULES
+
+/* Define if you have the EVP_bf_cfb function.  */
+#undef HAVE_EVP_BF_CFB
+
+/* Define if you have the EVP_cast5_cfb function.  */
+#undef HAVE_EVP_CAST5_CFB
+
+/* Define if you have the EVP_des_cfb function.  */
+#undef HAVE_EVP_DES_CFB
+
+/* Define if you have the EVP_des_ede3_cfb function.  */
+#undef HAVE_EVP_DES_EDE3_CFB
+
+/* Define if you have the EVP_idea_cfb function.  */
+#undef HAVE_EVP_IDEA_CFB
+
+/* Define if you have the EVP_rc5_32_12_16_cfb function.  */
+#undef HAVE_EVP_RC5_32_12_16_CFB
+
+/* Define if you have the gettext function.  */
+#undef HAVE_GETTEXT
+
+/* Define if you have the socketpair function.  */
+#undef HAVE_SOCKETPAIR
+
+/* Define if you have the strlcat function.  */
+#undef HAVE_STRLCAT
+
+/* Define if you have the strlcpy function.  */
+#undef HAVE_STRLCPY
+
+/* Define if you have the <errno.h> header file.  */
+#undef HAVE_ERRNO_H
+
+/* Define if you have the <getopt.h> header file.  */
+#undef HAVE_GETOPT_H
+
+/* Define if you have the <stddef.h> header file.  */
+#undef HAVE_STDDEF_H
+
+/* Define if you have the <stdlib.h> header file.  */
+#undef HAVE_STDLIB_H
+
+/* Define if you have the <string.h> header file.  */
+#undef HAVE_STRING_H
+
+/* Define if you have the <strings.h> header file.  */
+#undef HAVE_STRINGS_H
+
+/* Define if you have the <sys/param.h> header file.  */
+#undef HAVE_SYS_PARAM_H
+
+/* Define if you have the <sys/syslog.h> header file.  */
+#undef HAVE_SYS_SYSLOG_H
+
+/* Define if you have the <unistd.h> header file.  */
+#undef HAVE_UNISTD_H
+
+/* Define if you have the crypto library (-lcrypto).  */
+#undef HAVE_LIBCRYPTO
+
+/* Define if you have the descrypt library (-ldescrypt).  */
+#undef HAVE_LIBDESCRYPT
+
+/* Define if you have the dl library (-ldl).  */
+#undef HAVE_LIBDL
+
+/* Define if you have the nsl library (-lnsl).  */
+#undef HAVE_LIBNSL
+
+/* Define if you have the resolv library (-lresolv).  */
+#undef HAVE_LIBRESOLV
+
+/* Define if you have the socket library (-lsocket).  */
+#undef HAVE_LIBSOCKET
+
+/* Define if you have the z library (-lz).  */
+#undef HAVE_LIBZ
