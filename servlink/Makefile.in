@@ -77,6 +77,6 @@ lint:
 	lint -aacgprxhH $(CPPFLAGS) -DIRCD_PREFIX=\"@prefix@\" $(SOURCES) >>../lint.out
 
 distclean: clean
-	${RM} -f Makefile setup.h
+	${RM} -f Makefile
 
 # End of Makefile
