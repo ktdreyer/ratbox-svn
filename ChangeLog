@@ -1,3 +1,16 @@
+androsyn    2004/04/29 10:51:12 EDT	(20040429_3)
+
+  Modified files:
+    src                  s_conf.c 
+  Log:
+  Send I line exceed message prefixed with ***. This message should be updated
+  to the fact that I lines are a serious misnomer now :P
+  
+  Revision  Changes    Path
+  7.464     +2 -1      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2004/04/29 08:40:52 EDT	(20040429_2)
 
   Modified files:
