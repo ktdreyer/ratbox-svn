@@ -1,3 +1,9 @@
+*** 20010122_6 by fl_
+- fixes opers@server and ident%host@server..
+- I didnt add users@server, as we if people really want it, they can
+  use notice $server..
+
+
 *** 20010122_5 by fl_
 - documented the double notice "feature".. IMO admins can live with
   it, it should be the least of their worries..
