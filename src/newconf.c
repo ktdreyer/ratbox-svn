@@ -1056,17 +1056,6 @@ conf_set_auth_encrypted(void *data)
 }
 
 static void
-conf_set_auth_spoof_notice(void *data)
-{
-	int yesno = *(unsigned int *) data;
-
-	if(yesno)
-		yy_achead->flags |= CONF_FLAGS_SPOOF_NOTICE;
-	else
-		yy_achead->flags &= ~CONF_FLAGS_SPOOF_NOTICE;
-}
-
-static void
 conf_set_auth_spoof(void *data)
 {
 	char *p;
@@ -2748,18 +2737,6 @@ newconf_init()
 	add_conf_item("operator", "user", CF_QSTRING, conf_set_oper_user);
 	add_conf_item("operator", "password", CF_QSTRING, conf_set_oper_password);
 	add_conf_item("operator", "class", CF_QSTRING, conf_set_oper_class);
-	add_conf_item("operator", "global_kill", CF_YESNO, conf_set_oper_global_kill);
-	add_conf_item("operator", "remote", CF_YESNO, conf_set_oper_remote);
-	add_conf_item("operator", "kline", CF_YESNO, conf_set_oper_kline);
-	add_conf_item("operator", "xline", CF_YESNO, conf_set_oper_xline);
-	add_conf_item("operator", "unkline", CF_YESNO, conf_set_oper_unkline);
-	add_conf_item("operator", "gline", CF_YESNO, conf_set_oper_gline);
-	add_conf_item("operator", "operwall", CF_YESNO, conf_set_oper_operwall);
-	add_conf_item("operator", "nick_changes", CF_YESNO, conf_set_oper_nick_changes);
-	add_conf_item("operator", "die", CF_YESNO, conf_set_oper_die);
-	add_conf_item("operator", "rehash", CF_YESNO, conf_set_oper_rehash);
-	add_conf_item("operator", "admin", CF_YESNO, conf_set_oper_admin);
-	add_conf_item("operator", "hidden_admin", CF_YESNO, conf_set_oper_hidden_admin);
 	add_conf_item("operator", "encrypted", CF_YESNO, conf_set_oper_encrypted);
 	add_conf_item("operator", "rsa_public_key_file", CF_QSTRING,
 		      conf_set_oper_rsa_public_key_file);
@@ -2787,16 +2764,7 @@ newconf_init()
 	add_conf_item("auth", "password", CF_QSTRING, conf_set_auth_passwd);
 	add_conf_item("auth", "encrypted", CF_YESNO, conf_set_auth_encrypted);
 	add_conf_item("auth", "class", CF_QSTRING, conf_set_auth_class);
-	add_conf_item("auth", "kline_exempt", CF_YESNO, conf_set_auth_kline_exempt);
-	add_conf_item("auth", "need_ident", CF_YESNO, conf_set_auth_need_ident);
-	add_conf_item("auth", "have_ident", CF_YESNO, conf_set_auth_need_ident);
-	add_conf_item("auth", "restricted", CF_YESNO, conf_set_auth_is_restricted);
-	add_conf_item("auth", "exceed_limit", CF_YESNO, conf_set_auth_exceed_limit);
-	add_conf_item("auth", "no_tilde", CF_YESNO, conf_set_auth_no_tilde);
-	add_conf_item("auth", "gline_exempt", CF_YESNO, conf_set_auth_gline_exempt);
 	add_conf_item("auth", "spoof", CF_QSTRING, conf_set_auth_spoof);
-	add_conf_item("auth", "spoof_notice", CF_YESNO, conf_set_auth_spoof_notice);
-	add_conf_item("auth", "flood_exempt", CF_YESNO, conf_set_auth_flood_exempt);
 	add_conf_item("auth", "redirserv", CF_QSTRING, conf_set_auth_redir_serv);
 	add_conf_item("auth", "redirport", CF_INT, conf_set_auth_redir_port);
 	add_conf_item("auth", "flags", CF_STRING | CF_FLIST, conf_set_auth_flags);
