@@ -185,7 +185,7 @@ read_packet(int fd, void *data)
   if(IsDead(client_p))return;
 
   if (length <= 0) {
-    if(errno == EAGAIN) {
+    if(ignoreErrno(errno)) {
       comm_setselect(fd_r, FDLIST_IDLECLIENT, COMM_SELECT_READ,
       		read_packet, client_p, 0);
       return;

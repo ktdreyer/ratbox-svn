@@ -24,6 +24,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
+#include <socket.h>
 
 #ifdef HAVE_LIBCRYPTO
 #include <openssl/evp.h>
