@@ -100,7 +100,7 @@ do_local_user(struct Client *client_p, struct Client *source_p,
 	if(source_p->name[0])
 	{
 		/* NICK already received, now I have USER... */
-		return register_local_user(client_p, source_p, source_p->name, username);
+		return register_local_user(client_p, source_p, username);
 	}
 
 	return 0;

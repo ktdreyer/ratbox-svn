@@ -332,7 +332,7 @@ cap_end(struct Client *source_p, const char *arg)
 	{
 		char buf[USERLEN+1];
 		strlcpy(buf, source_p->username, sizeof(buf));
-		register_local_user(source_p, source_p, source_p->name, buf);
+		register_local_user(source_p, source_p, buf);
 	}
 }
 

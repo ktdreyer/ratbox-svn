@@ -279,7 +279,7 @@ show_isupport(struct Client *source_p)
 */
 
 int
-register_local_user(struct Client *client_p, struct Client *source_p, const char *nick, const char *username)
+register_local_user(struct Client *client_p, struct Client *source_p, const char *username)
 {
 	struct ConfItem *aconf;
 	struct User *user = source_p->user;
@@ -447,7 +447,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 	    ((unsigned long)GlobalSetOptions.maxclients - 5)) && !(IsExemptLimits(source_p)))
 	{
 		sendto_realops_flags(UMODE_FULL, L_ALL,
-				     "Too many clients, rejecting %s[%s].", nick, source_p->host);
+				     "Too many clients, rejecting %s[%s].", source_p->name, source_p->host);
 
 		ServerStats->is_ref++;
 		exit_client(client_p, source_p, &me, "Sorry, server is full - try later");
@@ -460,7 +460,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 	{
 		sendto_realops_flags(UMODE_REJ, L_ALL,
 				     "Invalid username: %s (%s@%s)",
-				     nick, source_p->username, source_p->host);
+				     source_p->name, source_p->username, source_p->host);
 		ServerStats->is_ref++;
 		ircsprintf(tmpstr2, "Invalid username [%s]", source_p->username);
 		exit_client(client_p, source_p, &me, tmpstr2);
@@ -486,7 +486,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 
 	sendto_realops_flags(UMODE_CCONN, L_ALL,
 			     "Client connecting: %s (%s@%s) [%s] {%s} [%s]",
-			     nick, source_p->username, source_p->host,
+			     source_p->name, source_p->username, source_p->host,
 #ifdef HIDE_SPOOF_IPS
 			     IsIPSpoof(source_p) ? "255.255.255.255" :
 #endif
@@ -494,7 +494,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 
 	sendto_realops_flags(UMODE_CCONNEXT, L_ALL,
 			"CLICONN %s %s %s %s %s %s 0 %s",
-			nick, source_p->username, source_p->host,
+			source_p->name, source_p->username, source_p->host,
 #ifdef HIDE_SPOOF_IPS
 			IsIPSpoof(source_p) ? "255.255.255.255" :
 #endif
@@ -543,7 +543,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 
 	hash_check_watch(source_p, RPL_LOGON);
 	user_welcome(source_p);
-	return (introduce_client(client_p, source_p, user, nick));
+	return (introduce_client(client_p, source_p, user, source_p->name));
 }
 
 /*

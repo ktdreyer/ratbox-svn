@@ -595,7 +595,7 @@ set_initial_nick(struct Client *client_p, struct Client *source_p, char *nick)
 		strlcpy(buf, source_p->username, sizeof(buf));
 
 		/* got user, heres nick. */
-		register_local_user(client_p, source_p, nick, buf);
+		register_local_user(client_p, source_p, buf);
 
 	}
 }
