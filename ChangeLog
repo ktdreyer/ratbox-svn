@@ -1,3 +1,15 @@
+androsyn    2003/01/27 18:21:44 UTC	(20030127_4)
+
+  Modified files:
+    modules              m_testline.c 
+  Log:
+  Get another missing ifdef
+  
+  Revision  Changes    Path
+  1.34      +3 -1      ircd-ratbox/modules/m_testline.c
+
+
+
 androsyn    2003/01/27 18:20:33 UTC	(20030127_3)
 
   Modified files:
