@@ -297,7 +297,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
       return;
     }
 
-  if (handle_command(mptr, client_p, from, i, para) < 0) 
+  if (handle_command(mptr, client_p, from, i, para) < -1) 
     {
       char *p;
       for (p = pbuffer; p <= end; p +=8)
@@ -322,7 +322,8 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
  *		- pointer to client message is from
  *		- count of number of args
  *		- pointer to argv[] array
- * output	- -1 if error 1 if ok
+ * output	- -1 if error from client
+ *              - -2 if error from server
  * side effects	-
  */
 static int
@@ -372,7 +373,7 @@ handle_command(struct Message *mptr, struct Client *client_p,
       
       exit_client(client_p, client_p, client_p,
 		  "Not enough arguments to server command.");
-      return(-1);
+      return(-2);
     }
 
   (*handler)(client_p, from, i, hpara);
