@@ -1,3 +1,8 @@
+*** 20010208_5 by db
+- this at least prevents exit_client from exiting an already dead client twice.
+
+
+
 *** 20010208_4 by db
 - if an fd from accept is -1 don't add it ! 
 
