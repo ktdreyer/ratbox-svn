@@ -1,3 +1,7 @@
+*** 20010429_1 by androsyn
+Fixed to make solaris 8 compile properly for IPv6
+
+
 *** 20010428_9 by a1kmm
 - Added some more asserts to fd code to try and catch fl_'s core at an
   earlier and more useful stage.
