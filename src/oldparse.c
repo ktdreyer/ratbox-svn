@@ -44,7 +44,7 @@ static  char *set_conf_flags(struct ConfItem *,char *);
  * Side Effects - Parse one old style conf line.
  */
 
-struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
+void oldParseOneLine(char* line,struct ConfItem* aconf,
                             int* pccount,int* pncount)
 {
   char conf_letter;
@@ -58,7 +58,7 @@ struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
 
   tmp = getfield(line);
   if (!tmp)
-    return aconf;
+    return;
 
   conf_letter = *tmp;
 
@@ -95,6 +95,7 @@ struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
     case 'A':case 'a': /* Name, e-mail address of administrator */
       aconf->status = CONF_ADMIN;
       conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
+      conf_add_conf(aconf);
       break;
 
     case 'c':
@@ -107,6 +108,7 @@ struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
       aconf->flags |= CONF_FLAGS_ALLOW_AUTO_CONN;
       conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
       aconf = conf_add_server(aconf,class_field,*pncount,*pccount);
+      conf_add_conf(aconf);
       break;
 
     case 'd':
@@ -114,14 +116,12 @@ struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
       aconf->flags = CONF_FLAGS_E_LINED;
       conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
       conf_add_d_line(aconf);
-      aconf = NULL;
       break;
 
     case 'D': /* Deny lines (immediate refusal) */
       aconf->status = CONF_DLINE;
       conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
       conf_add_d_line(aconf);
-      aconf = NULL;
       break;
 
     case 'H': /* Hub server line */
@@ -129,6 +129,7 @@ struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
       aconf->status = CONF_HUB;
       conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
       conf_add_hub_or_leaf(aconf);
+      conf_add_conf(aconf);
       break;
 
     case 'i': /* Just plain normal irc client trying  */
@@ -156,7 +157,6 @@ struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
 	}
 
       conf_add_i_line(aconf,class_field);
-      aconf = NULL;
       break;
       
     case 'K': /* Kill user line on irc.conf           */
@@ -164,7 +164,6 @@ struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
       aconf->status = CONF_KILL;
       conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
       conf_add_k_line(aconf);
-      aconf = NULL;
       break;
 
     case 'L': /* guaranteed leaf server */
@@ -172,6 +171,7 @@ struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
       aconf->status = CONF_LEAF;
       conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
       conf_add_hub_or_leaf(aconf);
+      conf_add_conf(aconf);
       break;
 
       /* Me. Host field is name used for this host */
@@ -187,6 +187,7 @@ struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
           if(*port_field == '1')
             ConfigFileEntry.hub = 1;
 	}
+      conf_add_conf(aconf);
       break;
 
     case 'n': /* connect in case of lp failures     */
@@ -199,6 +200,7 @@ struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
       ++*pncount;
       conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
       aconf = conf_add_server(aconf,class_field,*pncount,*pccount);
+      conf_add_conf(aconf);
       break;
 
       /* Operator. Line should contain at least */
@@ -215,6 +217,7 @@ struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
       if ((tmp = getfield(NULL)) != NULL)
 	aconf->hold = oper_flags_from_string(tmp);
       aconf = conf_add_o_line(aconf,class_field);
+      conf_add_conf(aconf);
       break;
 
       /* Local Operator, (limited privs --SRB) */
@@ -227,6 +230,7 @@ struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
       if ((tmp = getfield(NULL)) != NULL)
 	aconf->hold = oper_flags_from_string(tmp);
       aconf = conf_add_o_line(aconf,class_field);
+      conf_add_conf(aconf);
       break;
 
     case 'P': /* listen port line */
@@ -234,6 +238,7 @@ struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
       aconf->status = CONF_LISTEN_PORT;
       conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
       conf_add_port(aconf);
+      conf_add_conf(aconf);
       break;
 
     case 'Q': /* reserved nicks */
@@ -241,7 +246,6 @@ struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
       aconf->status = CONF_QUARANTINED_NICK;
       conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
       conf_add_q_line(aconf);
-      aconf = NULL;
       break;
 
     case 'U': /* Uphost, ie. host where client reading */
@@ -249,7 +253,6 @@ struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
       aconf->status = CONF_ULINE;
       conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
       conf_add_u_line(aconf);
-      aconf = NULL;
       break;
 
     case 'X': /* rejected gecos */
@@ -257,7 +260,6 @@ struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
       aconf->status = CONF_XLINE;
       conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
       conf_add_x_line(aconf);
-      aconf = NULL;
       break;
 
     case 'Y':
@@ -267,14 +269,14 @@ struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
       if(class_field)
 	sendq = atoi(class_field);
       conf_add_class(aconf,sendq);
+      conf_add_conf(aconf);
       break;
       
     default:
+      free_conf(aconf);
       log(L_ERROR, "Error in config file: %s", line);
       break;
     }
-
-  return aconf;
 }
 
 /*

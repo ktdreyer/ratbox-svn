@@ -1734,9 +1734,10 @@ static void initconf(FBFILE* file)
   char*            p;
   int              ccount = 0;
   int              ncount = 0;
-  struct ConfItem* aconf = NULL;
+  struct ConfItem* aconf;
 
   class0 = find_class(0);       /* which one is class 0 ? */
+  aconf = NULL;
 
   while (fbgets(line, sizeof(line), file))
     {
@@ -1787,33 +1788,9 @@ static void initconf(FBFILE* file)
 
       /* Could we test if it's conf line at all?        -Vesa */
       if (quotedLine[1] == ':')
-        aconf = oldParseOneLine(quotedLine,aconf,&ccount,&ncount);
+        oldParseOneLine(quotedLine,aconf,&ccount,&ncount);
 
-      if (aconf)
-	{
-	  (void)collapse(aconf->host);
-	  (void)collapse(aconf->user);
-	  Debug((DEBUG_NOTICE,
-		 "Read Init: (%d) (%s) (%s) (%s) (%d) (%d)",
-		 aconf->status, 
-		 aconf->host ? aconf->host : "<NULL>",
-		 aconf->passwd ? aconf->passwd : "<NULL>",
-		 aconf->user ? aconf->user : "<NULL>",
-		 aconf->port,
-		 aconf->c_class ? ConfClassType(aconf): 0 ));
-	  aconf->next = ConfigItemList;
-	  ConfigItemList = aconf;
-	  aconf = NULL;
-	}
-
-      if (aconf)
-        free_conf(aconf);
-      aconf = NULL;
     }
-
-  if (aconf)
-    free_conf(aconf);
-  aconf = NULL;
 
   fbclose(file);
   check_class();
@@ -1824,6 +1801,29 @@ static void initconf(FBFILE* file)
       log(L_CRIT, "Server has no M: line");
       exit(-1);
     }
+}
+
+/*
+ * conf_add_conf
+ * Inputs	- ConfItem
+ * Output	- none
+ * Side effects	- add given conf to link list
+ */
+
+void conf_add_conf(struct ConfItem *aconf)
+{
+  (void)collapse(aconf->host);
+  (void)collapse(aconf->user);
+  Debug((DEBUG_NOTICE,
+	 "Read Init: (%d) (%s) (%s) (%s) (%d) (%d)",
+	 aconf->status, 
+	 aconf->host ? aconf->host : "<NULL>",
+	 aconf->passwd ? aconf->passwd : "<NULL>",
+	 aconf->user ? aconf->user : "<NULL>",
+	 aconf->port,
+	 aconf->c_class ? ConfClassType(aconf): 0 ));
+  aconf->next = ConfigItemList;
+  ConfigItemList = aconf;
 }
 
 /*
