@@ -276,7 +276,7 @@ static void send_knock(struct Client *cptr, struct Client *sptr,
       ircsprintf(message,"KNOCK: %s (%s [%s@%s] has asked for an invite)",
                  name, sptr->name, sptr->username, sptr->host);
 
-      sendto_channel_local(ONLY_CHANOPS,
+      sendto_channel_local(ONLY_CHANOPS_HALFOPS,
                           chptr,
                           ":%s!%s@%s NOTICE %s :%s",
                           sptr->name,

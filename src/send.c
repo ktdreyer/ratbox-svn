@@ -205,6 +205,13 @@ send_message_remote(struct Client *to, struct Client *from,
   if(to->from)
     to = to->from;
 
+  if(ConfigFileEntry.hub && IsCapable(to, CAP_LL))
+    {
+      if(((from->lazyLinkClientExists &
+           to->localClient->serverMask) == 0))
+        client_burst_if_needed(to, from);
+    }
+
 /* Optimize by checking if (from && to) before everything */
   if (!MyClient(from) && IsPerson(to) && (to->from == from->from))
     {
@@ -454,7 +461,7 @@ sendto_one_prefix(struct Client *to, struct Client *prefix,
  */
 void
 sendto_channel_butone(struct Client *one, struct Client *from,
-		      struct Channel *chptr, 
+		      struct Channel *chptr, char *command,
                       const char *pattern, ...)
 {
   va_list    args;
@@ -465,18 +472,22 @@ sendto_channel_butone(struct Client *one, struct Client *from,
 
   if(IsServer(from))
     {
-      (void)ircsprintf(local_prefix,":%s ",
-		       from->name);
+      (void)ircsprintf(local_prefix,":%s %s %s ",
+		       from->name, command,
+                       RootChan(chptr)->chname);
     }
   else
     {
-      (void)ircsprintf(local_prefix,":%s!%s@%s ",
+      (void)ircsprintf(local_prefix,":%s!%s@%s %s %s ",
 		       from->name,
 		       from->username,
-		       from->host);
+		       from->host,
+                       command,
+                       RootChan(chptr)->chname);
     }
 
-  (void)ircsprintf(remote_prefix,":%s ", from->name);
+  (void)ircsprintf(remote_prefix,":%s %s %s ", from->name,
+                   command, chptr->chname);
 
   remote_len = ircsprintf(remote_sendbuf, "%s%s",remote_prefix,buf);
   remote_len = send_trim(remote_sendbuf, remote_len);
@@ -788,19 +799,20 @@ sendto_channel_local(int type,
       sendto_list_local(&chptr->peons,   sendbuf, len);
       break;
 
-    case ONLY_CHANOPS_VOICED:
+    case ONLY_CHANOPS_HALFOPS_VOICED:
       sendto_list_local(&chptr->chanops, sendbuf, len);
       sendto_list_local(&chptr->halfops, sendbuf, len);
       sendto_list_local(&chptr->voiced,  sendbuf, len);
       break;
 
-    case ONLY_CHANOPS:
+    case ONLY_CHANOPS_HALFOPS:
       sendto_list_local(&chptr->chanops, sendbuf, len);
       sendto_list_local(&chptr->halfops, sendbuf, len);
       break;
+
+    case ONLY_CHANOPS:
+      sendto_list_local(&chptr->chanops, sendbuf, len);
     }
-
-
 } /* sendto_channel_local() */
 
 /*
@@ -847,7 +859,6 @@ sendto_list_local(dlink_list *list, const char *lsendbuf, int len)
  *              - var args pattern
  * output       - NONE
  * side effects - send to all servers the channel given, except for "from"
- *		  This code is only used in m_join.c,m_sjoin.c
  */
 void
 sendto_channel_remote(struct Channel *chptr,

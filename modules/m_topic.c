@@ -159,7 +159,7 @@ static int m_topic(struct Client *cptr,
 				 chptr->topic);
 	      if(chptr->mode.mode & MODE_HIDEOPS)
 		{
-		  sendto_channel_local(ONLY_CHANOPS,
+		  sendto_channel_local(ONLY_CHANOPS_HALFOPS,
 				       chptr, ":%s!%s@%s TOPIC %s :%s",
 				       sptr->name,
 				       sptr->username,
@@ -268,7 +268,7 @@ static int ms_topic(struct Client *cptr,
 
       if(chptr->mode.mode & MODE_HIDEOPS)
 	{
-	  sendto_channel_local(ONLY_CHANOPS,
+	  sendto_channel_local(ONLY_CHANOPS_HALFOPS,
 			       chptr, ":%s!%s@%s TOPIC %s :%s",
 			       me.name,
 			       sptr->username,

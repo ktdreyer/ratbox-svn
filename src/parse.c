@@ -35,6 +35,7 @@
 #include "ircd_handler.h"
 #include "msg.h"
 #include "s_conf.h"
+#include "vchannel.h"
 
 #include <assert.h>
 #include <string.h>
@@ -715,9 +716,10 @@ static int     do_numeric(
       return 0;
       }
       else if ((chptr = hash_find_channel(parv[1], (struct Channel *)NULL)))
-        sendto_channel_butone(cptr,sptr,chptr,":%s %s %s%s",
+        sendto_channel_local(ALL_MEMBERS, chptr,
+                             ":%s %s %s %s",
                               sptr->name,
-                              numeric, chptr->chname, buffer);
+                              numeric, RootChan(chptr)->chname, buffer);
   return 0;
 }
 

@@ -193,7 +193,7 @@ static int m_kick(struct Client *cptr,
 			       who->name,
 			       name, who->name, comment);
 
-	  sendto_channel_local(ONLY_CHANOPS, chptr,
+	  sendto_channel_local(ONLY_CHANOPS_HALFOPS, chptr,
 			       ":%s!%s@%s KICK %s %s :%s",
 			       sptr->name,
 			       sptr->username,

@@ -43,9 +43,6 @@
 
 #include <string.h>
 
-/* XXX Lazylinks */
-/* XXX vchans */
-
 struct entity {
   void *ptr;
   int type;
@@ -225,7 +222,16 @@ static int m_message(int p_or_n,
   ntargets = build_target_list(p_or_n,command,
 			       cptr,sptr,parv[1],&target_table,parv[2]);
   target_table_size = ntargets;
-  
+ 
+  if(ntargets < 0)
+  {
+    /* Sigh.  We need to relay this command to the hub */
+    sendto_one(uplink, ":%s %s %s :%s",
+               sptr->name,
+               command,
+               parv[1],
+               parv[2]);
+  }
   for(i = 0; i < ntargets ; i++)
     {
       switch (target_table[i]->type)
@@ -289,8 +295,19 @@ static int build_target_list(int p_or_n,
   char *nick;
   struct Channel *chptr;
   struct Client *acptr;
+  char ncbuf[BUFSIZE];
+  char *target_list;
 
-  for (nick = strtoken(&p, nicks_channels, ","); nick; 
+  /* Sigh, we can't mutilate parv[1] incase we need it to send to a hub */
+  if(!ConfigFileEntry.hub && uplink && IsCapable(uplink, CAP_LL))
+  {
+    strncpy(ncbuf, nicks_channels, BUFSIZE);
+    target_list = ncbuf;
+  }
+  else
+    target_list = nicks_channels;
+  
+  for (nick = strtoken(&p, target_list, ","); nick; 
        nick = strtoken(&p, (char *)NULL, ","))
     {
       /*
@@ -317,7 +334,9 @@ static int build_target_list(int p_or_n,
 	    }
 	  else
 	    {
-	      if(p_or_n != NOTICE)
+              if(!ConfigFileEntry.hub && uplink && IsCapable(uplink, CAP_LL))
+                return -1;
+              else if(p_or_n != NOTICE)
 		sendto_one(sptr, form_str(ERR_NOSUCHNICK), me.name,
 			   sptr->name, nick );
 	      continue;
@@ -327,24 +346,25 @@ static int build_target_list(int p_or_n,
       /* @#channel or +#channel message ? */
 
       type = 0;
-      if(*nick == '@')
-	type = MODE_CHANOP;
-      else if(*nick == '+')
-	type = MODE_CHANOP|MODE_VOICE;
+
+      /*  allow %+@ if someone wants to do that */
+      for(;;)
+      {
+        if(*nick == '@')
+          type |= MODE_CHANOP;
+        else if(*nick == '%')
+          type |= MODE_CHANOP|MODE_HALFOP;
+        else if(*nick == '+')
+          type |= MODE_CHANOP|MODE_HALFOP|MODE_VOICE;
+        else
+          break;
+        nick++;
+      }
 
       if(type)
 	{
-	  /* Strip if using DALnet chanop/voice prefix. */
-	  if ((*(nick+1) == '@' && (type & MODE_VOICE)) ||
-              (*(nick+1) == '+' && !(type & MODE_VOICE)))
-            {
-              nick++;
-              *nick = '+';
-              type = MODE_CHANOP|MODE_VOICE;
-            }
-
 	  /* suggested by Mortiis */
-	  if(!*(nick+1))   /* if its a '\0' dump it, there is no recipient */
+	  if(!*nick)   /* if its a '\0' dump it, there is no recipient */
 	    {
 	      sendto_one(sptr, form_str(ERR_NORECIPIENT),
 			 me.name, sptr->name, command);
@@ -359,8 +379,8 @@ static int build_target_list(int p_or_n,
 	    {
 	      if( !duplicate_ptr(chptr, *targets, i) )
 		{
-			*targets = realloc(*targets, sizeof(struct entity *) * (i + 1));
-			(*targets)[i] = malloc (sizeof (struct entity));
+                  *targets = realloc(*targets, sizeof(struct entity *) * (i + 1));
+                  (*targets)[i] = malloc (sizeof (struct entity));
 		  (*targets)[i]->ptr = (void *)chptr;
 		  (*targets)[i]->type = ENTITY_CHANOPS_ON_CHANNEL;
 		  (*targets)[i++]->flags = type;
@@ -372,7 +392,9 @@ static int build_target_list(int p_or_n,
 	    }
 	  else
 	    {
-	      if(p_or_n != NOTICE)
+              if(!ConfigFileEntry.hub && uplink && IsCapable(uplink, CAP_LL))
+                return -1;
+              else if(p_or_n != NOTICE)
 		sendto_one(sptr, form_str(ERR_NOSUCHNICK), me.name,
 			   sptr->name, nick );
 	      continue;
@@ -405,7 +427,9 @@ static int build_target_list(int p_or_n,
 	}
       else
 	{
-	  if(p_or_n != NOTICE)
+          if(!ConfigFileEntry.hub && uplink && IsCapable(uplink, CAP_LL))
+            return -1;
+          else if(p_or_n != NOTICE)
 	    sendto_one(sptr, form_str(ERR_NOSUCHNICK), me.name,
 		       sptr->name, nick );
 	  continue;
@@ -457,17 +481,19 @@ static void msg_channel( int p_or_n, char *command,
                          struct Channel *chptr,
                          char *text)
 {
-  struct Channel *vchan;
+  struct Channel *vchan = NULL;
   char *chname=NULL;
   int result;
 
-  chname = chptr->chname;
+  chname = RootChan(chptr)->chname;
 
-  if ( (HasVchans(chptr)) && (vchan = map_vchan(chptr,sptr)) )
-    {
-      chptr = vchan;
-    }
+  if(HasVchans(chptr))
+     vchan = map_vchan(chptr, sptr);
 
+  if(!vchan)
+    vchan = chptr;
+    
+     
   if(MyClient(sptr))
     {
       if(sptr->user)
@@ -475,20 +501,13 @@ static void msg_channel( int p_or_n, char *command,
     }
 
   /* chanops and voiced can flood their own channel with impunity */
-  if( (result = can_send(chptr,sptr)) )
+  if( (result = can_send(vchan,sptr)) )
     {
-      if (result == CAN_SEND_OPV)
+      if (result == CAN_SEND_OPV || 
+          !flood_attack_channel(sptr, vchan, chname))
 	{
-	  sendto_channel_butone(cptr, sptr, chptr,
-				"%s %s :%s",
-				command, chname, text);
-	}
-      else
-	{
-	  if(!flood_attack_channel(sptr, chptr, chname))
-	    sendto_channel_butone(cptr, sptr, chptr,
-				  "%s %s :%s",
-				  command, chname, text);
+          sendto_channel_butone(cptr, sptr, vchan,
+                                command, ":%s", text);
 	}
     }
   else
@@ -520,23 +539,25 @@ static void msg_channel_flags( int p_or_n, char *command,
                                int flags,
                                char *text)
 {
-  struct Channel *vchan;
+  struct Channel *vchan = NULL;
   char *chname=NULL;
   int type;
 
-  chname = chptr->chname;
-
-  /* XXX halfops ? */
   if (flags & MODE_VOICE)
-    type = ONLY_CHANOPS_VOICED;
+    type = ONLY_CHANOPS_HALFOPS_VOICED;
+  else if (flags & MODE_HALFOP)
+    type = ONLY_CHANOPS_HALFOPS;
   else
     type = ONLY_CHANOPS;
+  
+  chname = RootChan(chptr)->chname;
 
-  if (HasVchans(chptr) && (vchan = map_vchan(chptr,sptr)))
-    {
-      chptr = vchan;
-    }
+  if (HasVchans(chptr))
+    vchan = map_vchan(chptr, sptr);
 
+  if(!vchan)
+    vchan = chptr;
+      
   if(MyClient(sptr))
     {
       if(sptr->user)
@@ -550,7 +571,7 @@ static void msg_channel_flags( int p_or_n, char *command,
 		       sptr->username,
 		       sptr->host,
 		       command,
-                       ((type == ONLY_CHANOPS) ? '@' : '+'),
+                       ((type == ONLY_CHANOPS_HALFOPS) ? '@' : '+'),
 		       chname,
 		       text);
 
@@ -558,8 +579,8 @@ static void msg_channel_flags( int p_or_n, char *command,
 			 ":%s %s %c%s :%s",
 			 sptr->name,
 			 command,
-			 ((type == ONLY_CHANOPS) ? '@' : '+'),
-			 chname,
+			 ((type == ONLY_CHANOPS_HALFOPS) ? '@' : '+'),
+			 chptr->chname,
 			 text);
 }
 

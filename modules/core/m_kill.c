@@ -28,6 +28,7 @@
 #include "numeric.h"
 #include "s_log.h"
 #include "s_serv.h"
+#include "s_conf.h"
 #include "send.h"
 #include "whowas.h"
 #include "irc_string.h"
@@ -41,6 +42,8 @@ static char buf[BUFSIZE], buf2[BUFSIZE];
 
 static int ms_kill(struct Client*, struct Client*, int, char**);
 static int mo_kill(struct Client*, struct Client*, int, char**);
+static void relay_kill(struct Client *, struct Client *, struct Client *,
+                       const char *, const char *);
 
 struct Message kill_msgtab = {
   "KILL", 0, 2, 0, MFLG_SLOW, 0,
@@ -196,8 +199,7 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   */
   if (!MyConnect(acptr) || !MyConnect(sptr) || !IsOper(sptr))
     {
-      sendto_ll_serv_butone(cptr, sptr, 1, ":%s KILL %s :%s!%s",
-                         parv[0], acptr->name, inpath, path);
+      relay_kill(cptr, sptr, acptr, inpath, path);
       if (chasing && IsServer(cptr))
         sendto_one(cptr, ":%s KILL %s :%s!%s",
                    me.name, acptr->name, inpath, path);
@@ -241,7 +243,7 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 }
 
 /*
-** m_kill
+** ms_kill
 **      parv[0] = sender prefix
 **      parv[1] = kill victim
 **      parv[2] = kill path
@@ -385,8 +387,7 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   */
   if (!MyConnect(acptr) || !MyConnect(sptr) || !IsOper(sptr))
     {
-      sendto_ll_serv_butone(cptr, sptr, 1, ":%s KILL %s :%s!%s",
-                         parv[0], acptr->name, inpath, path);
+      relay_kill(cptr, sptr, acptr, inpath, path);
       if (chasing && IsServer(cptr))
         sendto_one(cptr, ":%s KILL %s :%s!%s",
                    me.name, acptr->name, inpath, path);
@@ -429,5 +430,62 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       ircsprintf(buf2, "Killed by %s", killer);
     }
   return exit_client(cptr, acptr, sptr, buf2);
+}
+
+static void relay_kill(struct Client *one, struct Client *sptr,
+                       struct Client *acptr,
+                       const char *inpath,
+                       const char *path)
+{
+  dlink_node *ptr;
+  struct Client *cptr;
+  int introduce_killed_client;
+  
+  /* LazyLinks:
+   * Check if each lazylink knows about acptr.
+   *   If it does, send the kill, introducing sptr if required.
+   *   If it doesn't either:
+   *     a) don't send the kill (risk ghosts)
+   *     b) introduce the client (and sptr, if required)
+   *        [rather redundant]
+   *
+   * Use a) if IsServer(sptr), but if an oper kills someone,
+   * ensure we blow away any ghosts.
+   *
+   * -davidt
+   */
+
+  if(IsServer(sptr))
+    introduce_killed_client = 0;
+  else
+    introduce_killed_client = 1;
+
+  for( ptr = serv_list.head; ptr; ptr = ptr->next )
+  {
+    cptr = (struct Client *) ptr->data;
+    
+    if( !cptr || cptr == one )
+      continue;
+
+    if( !introduce_killed_client )
+    {
+      if( ConfigFileEntry.hub && IsCapable(cptr, CAP_LL) )
+      {
+        if(((cptr->localClient->serverMask &
+             acptr->lazyLinkClientExists) == 0))
+        {
+          /* target isn't known to lazy leaf, skip it */
+          continue;
+        }
+      }
+    }
+    else
+      client_burst_if_needed(cptr, acptr);
+
+    client_burst_if_needed(cptr, sptr);
+
+    sendto_one(cptr, ":%s KILL %s :%s!%s", sptr->name, acptr->name,
+               inpath, path);
+  }
 }
 

@@ -306,7 +306,7 @@ static int m_join(struct Client *cptr,
 	  chptr->mode.mode |= MODE_TOPICLIMIT;
 	  chptr->mode.mode |= MODE_NOPRIVMSGS;
 
-	  sendto_channel_local(ONLY_CHANOPS,chptr,
+	  sendto_channel_local(ONLY_CHANOPS_HALFOPS,chptr,
 			       ":%s MODE %s +nt",
 			       me.name,
 			       root_chptr->chname);

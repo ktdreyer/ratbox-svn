@@ -1160,6 +1160,8 @@ void set_channel_mode(struct Client *cptr,
   int   target_was_hop;
   int   target_was_voice;
 
+  int halfop_deop_self;
+
   dlink_node *ptr;
   dlink_list *to_list=NULL;
   struct Ban *banptr;
@@ -1183,6 +1185,7 @@ void set_channel_mode(struct Client *cptr,
 
   for ( ; ; )
     {
+      halfop_deop_self = 0;
       if (BadPtr(curr))
         {
           /*
@@ -1318,19 +1321,12 @@ void set_channel_mode(struct Client *cptr,
 
           /* Allow users to -h themselves */
           if (whatt == MODE_DEL && target_was_hop && (c == 'h') &&
-            (who->name == sptr->name))
-              { 
-                change_channel_membership(chptr,&chptr->peons, who);
-                sendto_one(who, "%s!%s@%s MODE %s -h %s",
-                           who->name, who->username, who->host,
-                           chptr->chname, who->name);
-                sendto_channel_butone(who, cptr, chptr, "MODE %s -h %s",
-                                      chptr->chname, who->name);
-                sync_oplists(chptr, who, 1, chname);
-                break;
-              }
+              (who == sptr))
+          {
+            halfop_deop_self = 1;
+          }
 
-          if (!isok)
+          if (!isok && !halfop_deop_self)
             {
               if (MyClient(sptr) && !errsent(SM_ERR_NOOPS, &errors_sent))
                 sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
@@ -1357,12 +1353,12 @@ void set_channel_mode(struct Client *cptr,
             *mbufw_hops++ = plus;
             *mbufw_hops++ = c;
             strcpy(pbufw_hops, who->name);
-			pbufw_hops += strlen(pbufw_hops);
+            pbufw_hops += strlen(pbufw_hops);
             *pbufw_hops++ = ' ';
-			strcpy(pbufw_hops_id, who->user->id);
-			pbufw_hops_id += strlen(pbufw_hops_id);
-			*pbufw_hops_id = ' ';
-		  }
+            strcpy(pbufw_hops_id, who->user->id);
+            pbufw_hops_id += strlen(pbufw_hops_id);
+            *pbufw_hops_id = ' ';
+          }
           else 
           {
             *mbuf2w++ = plus;
@@ -1370,14 +1366,14 @@ void set_channel_mode(struct Client *cptr,
             strcpy(pbuf2w, who->name);
             pbuf2w += strlen(pbuf2w);
             *pbuf2w++ = ' ';
-			strcpy(pbuf2w_id, HasID(who) ? who->user->id : who->name);
-			pbuf2w_id += strlen(pbuf2w_id);
-			*pbuf2w_id++ = ' ';
-		  }
+            strcpy(pbuf2w_id, HasID(who) ? who->user->id : who->name);
+            pbuf2w_id += strlen(pbuf2w_id);
+            *pbuf2w_id++ = ' ';
+          }
 
           len += tmp + 1;
           opcnt++;
-		  
+
           if(change_channel_membership(chptr,to_list, who))
           {
 	    if((to_list == &chptr->chanops) && (whatt == MODE_ADD))
@@ -1408,6 +1404,7 @@ void set_channel_mode(struct Client *cptr,
           }
 
 /*
+ * XXX
  * This could take up a sizeable amount of bandwidth,
  * and once opped the clients can just /mode #chan +eI,
  * Disabled for now.. but *shrug*
@@ -1499,7 +1496,7 @@ void set_channel_mode(struct Client *cptr,
 	      if(chptr->mode.mode & MODE_HIDEOPS)
 		{
 		  if (IsServer(sptr)) 
-		  sendto_channel_local(ONLY_CHANOPS,
+		  sendto_channel_local(ONLY_CHANOPS_HALFOPS,
 				       chptr,
 				       ":%s!%s@%s MODE %s -k %s", 
 				       me.name,
@@ -1508,7 +1505,7 @@ void set_channel_mode(struct Client *cptr,
 				       chname,
 				       chptr->mode.key);
 		  else
-		     sendto_channel_local(ONLY_CHANOPS, 
+		     sendto_channel_local(ONLY_CHANOPS_HALFOPS, 
                                        chptr,
                                        ":%s!%s@%s MODE %s -k %s",
                                        sptr->name,   
@@ -2299,7 +2296,7 @@ void set_channel_mode(struct Client *cptr,
   /* modebuf_aops only ever holds one mode */
 
   if(chptr->mode.mode & MODE_HIDEOPS)
-    type = ONLY_CHANOPS;
+    type = ONLY_CHANOPS_HALFOPS;
   else
     type = ALL_MEMBERS;
 
@@ -2387,7 +2384,7 @@ void set_channel_mode(struct Client *cptr,
   if(*modebuf_ex)
     {
       if(IsServer(sptr))
-	sendto_channel_local(ONLY_CHANOPS,
+	sendto_channel_local(ONLY_CHANOPS_HALFOPS,
 			     chptr,
 			     ":%s MODE %s %s %s", 
 			     me.name,
@@ -2395,7 +2392,7 @@ void set_channel_mode(struct Client *cptr,
 			     modebuf_ex, parabuf_ex);
       else
       {
-        sendto_channel_local(ONLY_CHANOPS,
+        sendto_channel_local(ONLY_CHANOPS_HALFOPS,
                              chptr,
                              ":%s!%s@%s MODE %s %s %s",
                              sptr->name,
@@ -2469,14 +2466,14 @@ void set_channel_mode(struct Client *cptr,
   if(*modebuf_invex)
     {
       if(IsServer(sptr))
-	sendto_channel_local(ONLY_CHANOPS,
+	sendto_channel_local(ONLY_CHANOPS_HALFOPS,
 			     chptr,
 			     ":%s MODE %s %s %s",
 			     me.name,
 			     chname,
 			     modebuf_invex, parabuf_invex);
       else
-        sendto_channel_local(ONLY_CHANOPS,
+        sendto_channel_local(ONLY_CHANOPS_HALFOPS,
                              chptr,
                              ":%s!%s@%s MODE %s %s %s",
                              sptr->name,
@@ -2680,7 +2677,7 @@ void clear_bans_exceptions_denies(struct Client *sptr, struct Channel *chptr)
   int type;
 
   if(chptr->mode.mode & MODE_HIDEOPS)
-    type = ONLY_CHANOPS;
+    type = ONLY_CHANOPS_HALFOPS;
   else
     type = ALL_MEMBERS;
 

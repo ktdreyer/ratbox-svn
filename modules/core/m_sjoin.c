@@ -291,7 +291,7 @@ static int ms_sjoin(struct Client *cptr,
     }
 
   if(mode.mode & MODE_HIDEOPS)
-    hide_or_not = ONLY_CHANOPS;
+    hide_or_not = ONLY_CHANOPS_HALFOPS;
   else
     hide_or_not = ALL_MEMBERS;
 
