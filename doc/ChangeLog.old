@@ -1,3 +1,10 @@
+*** 20001104_6 by db
+- cleaned up m_nick.c a bit. ms_nick still needs a lot more work
+  but at least its not doggie doo-doo any more. ms_nick is still too long.
+  The fd_note function looks expensive to use in production... adrian?
+
+
+
 *** 20001104_5 by ryan
 
 
