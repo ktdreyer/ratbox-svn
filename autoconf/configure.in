@@ -257,14 +257,9 @@ fi
 dnl Check for stdarg.h - if we can't find it, halt configure
 AC_CHECK_HEADER(stdarg.h, , AC_MSG_ERROR(** stdarg.h could not be found - ircd-ratbox will not compile without it **))
 
-dnl Checks for the existance of strlcat
-AC_CHECK_FUNCS(strlcat strlcpy)
+dnl check for various library functions
+AC_CHECK_FUNCS(strlcat strlcpy socketpair strdup mmap)
 
-dnl check for socketpair
-AC_CHECK_FUNCS(socketpair)
-
-dnl check for strdup
-AC_CHECK_FUNCS(strdup)
 
 AC_FUNC_ALLOCA
 
@@ -290,9 +285,6 @@ if test -z "$have_vsnprintf"; then
 	SNPRINTF_C="snprintf.c"
 fi
 AC_SUBST(SNPRINTF_C)
-
-dnl check for mmap
-AC_CHECK_FUNCS(mmap)
 
 dnl check for nanosleep
 AC_CHECK_FUNC(nanosleep,,[AC_CHECK_LIB(rt,nanosleep, 
