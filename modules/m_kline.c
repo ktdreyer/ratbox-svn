@@ -265,16 +265,16 @@ int ms_kline(struct Client *cptr,
 
   if(!find_special_conf(sptr->name,CONF_ULINE))
     {
-      sendto_realops("received Unauthorized kline from %s",sptr->name);
+      sendto_realops("*** Received Unauthorized kline from %s",sptr->name);
     }
   else
     {
-      sendto_realops("received kline from %s", sptr->name);
+      sendto_realops("*** Received kline from %s", sptr->name);
       aconf = make_conf();
 
       aconf->status = CONF_KILL;
-      DupString(aconf->host, parv[2]);
-      DupString(aconf->user, parv[3]);
+      DupString(aconf->user, parv[2]);
+      DupString(aconf->host, parv[3]);
       DupString(aconf->passwd, parv[4]);
 
       current_date = smalldate((time_t) 0);
