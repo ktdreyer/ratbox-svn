@@ -1,3 +1,21 @@
+leeh        2002/08/18 06:15:00 EDT	(20020818_2)
+
+  Modified files:
+    include              hash.h 
+    src                  hash.c newconf.c s_conf.c s_debug.c 
+  Log:
+  - made use_global_limits switchable after start, just clear the hash if
+    we disable it.
+  
+  Revision  Changes    Path
+  7.21      +2 -0      ircd-ratbox/include/hash.h
+  7.56      +1 -1      ircd-ratbox/src/hash.c
+  7.23      +14 -5     ircd-ratbox/src/newconf.c
+  7.336     +1 -4      ircd-ratbox/src/s_conf.c
+  7.73      +6 -8      ircd-ratbox/src/s_debug.c
+
+
+
 leeh        2002/08/18 05:52:19 EDT	(20020818_1)
 
   Modified files:
