@@ -69,8 +69,6 @@ _moddeinit(void)
 char *_version = "20001122";
 
 #endif
-static void build_list_of_channels( struct Client *source_p,
-                                    char *jbuf, char *given_names);
 static void do_join_0(struct Client *client_p, struct Client *source_p);
 void check_spambot_warning(struct Client *source_p, const char *name);
 
@@ -87,7 +85,6 @@ static void m_join(struct Client *client_p,
                   int parc,
                   char *parv[])
 {
-  static char   jbuf[BUFSIZE];
   struct Channel *chptr = NULL;
   struct Channel *vchan_chptr = NULL;
   struct Channel *root_chptr = NULL;
@@ -99,20 +96,12 @@ static void m_join(struct Client *client_p,
   int   vc_ts;
   int   successful_join_count = 0; /* Number of channels successfully joined */
   
-  if (!(source_p->user) || IsServer(source_p))
-    {
-      /* something is *fucked* - bail */
-      return;
-    }
-
   if (*parv[1] == '\0')
     {
       sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "JOIN");
       return;
     }
-
-  build_list_of_channels( source_p, jbuf , parv[1] );
 
   if (parc > 3)
     {
@@ -125,11 +114,19 @@ static void m_join(struct Client *client_p,
       vkey = key;
     }
 
-  for (name = strtoken(&p, jbuf, ","); name;
+  for (name = strtoken(&p, parv[1], ","); name;
          key = (key) ? strtoken(&p2, NULL, ",") : NULL,
          vkey = (parc>3) ? ((vkey) ? strtoken(&p3, NULL, ",") : NULL) : key,
          name = strtoken(&p, NULL, ","))
     {
+
+      if(!check_channel_name(name))
+      {
+        sendto_one(source_p, form_str(ERR_BADCHANNAME),
+	           me.name, source_p->name, (unsigned char*)name);
+        continue;
+      }
+
       /*
       ** JOIN 0 sends out a part for all channels a user
       ** has joined.
@@ -139,13 +136,31 @@ static void m_join(struct Client *client_p,
       ** used these days :/ --is
       */
       if (*name == '0' && !atoi(name))
-        {
-          if (source_p->user->channel.head == NULL)
-            continue;
-	  do_join_0(&me,source_p);
-	  continue;
-	}
-	
+      {
+        if (source_p->user->channel.head == NULL)
+          continue;
+	  
+        do_join_0(&me,source_p);
+	continue;
+      }
+      
+      /* check it begins with # or & */
+      else if(!IsChannelName(name))
+      {
+        sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
+	           me.name, source_p->name, name);
+	continue;
+      }
+
+      /* check the length */
+      if (strlen(name) > CHANNELLEN)
+      {
+        sendto_one(source_p, form_str(ERR_BADCHANNAME),
+	           me.name, source_p->name, name);
+	continue;
+      }
+      
+      /* see if its resv'd */
       if(find_channel_resv(name))
 	{
 	  sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
@@ -153,7 +168,7 @@ static void m_join(struct Client *client_p,
 	  continue;
 	}
 
-
+      /* look for the channel */
       if( (chptr = hash_find_channel(name, NullChn)) != NULL )
 	{
           /* Check if they want to join a subchan or something */
@@ -409,74 +424,6 @@ static void ms_join(struct Client *client_p,
 	{
 	  ts_warn("User on %s remotely JOINing new channel with no TS", 
 		  source_p->user->server);
-	}
-    }
-}
-
-/*
- * build_list_of_channels
- *
- * inputs	- pointer to client joining
- *		- pointer buffer for new list of channel names
- *		- pointer to list of channel names coming in
- * output	- NONE
- * side effects - jbuf is modified to contain valid list of channel names,
- *		  with all bogus or overlong names removed as seen
- *		  in given_names string.
- *		  note that "JOIN 0" short circuits everything.
- */
-static void build_list_of_channels( struct Client *source_p,
-				    char *jbuf, char *given_names)
-{
-  char *name;
-  char *p;
-  char *jptr;
-  int len_name = 0;
-  int cur_len = 0;
-
-  *jbuf = '\0';
-  jptr = jbuf;
-
-  for (name = strtoken(&p, given_names, ","); name;
-       name = strtoken(&p, (char *)NULL, ","))
-    {
-      if (!check_channel_name(name))
-        {
-          sendto_one(source_p, form_str(ERR_BADCHANNAME),
-                       me.name, source_p->name, (unsigned char*) name);
-          continue;
-        }
-      if (*name == '0' && (atoi(name) == 0))
-	{
-	  strcpy(jbuf,"0");
-	  return;
-	}
-      else if (!IsChannelName(name))
-        {
-	  sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
-		     me.name, source_p->name, name);
-          continue;
-        }
-
-      if ((len_name = strlen(name)) > CHANNELLEN)
-        {
-          sendto_one(source_p, form_str(ERR_BADCHANNAME),
-		     me.name,source_p->name,name);
-          continue;
-        }
-
-      if ((len_name + cur_len) > (BUFSIZE-5))
-	return;
-
-      if (*jbuf)
-	{
-	  jptr += ircsprintf(jptr,",%s",name);
-	  cur_len += (len_name + 1);
-	}
-      else
-	{
-	  jptr += ircsprintf(jptr,"%s",name);
-	  cur_len += len_name;
 	}
     }
 }
