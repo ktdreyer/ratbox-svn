@@ -1,3 +1,8 @@
+*** 20010831_3 by leeh
+- modlist/modrestart dont require params, modrestart doesnt take them,
+  theyre optional in modlist
+
+
 *** 20010831_2 by leeh
 - updated example.conf
 
