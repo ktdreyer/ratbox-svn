@@ -823,6 +823,16 @@ msgstr	""
 msgid	":%s 504 %s %s :User is not on this server"
 msgstr	""
 
+#: ../src/messages.tab:537
+#, c-format
+msgid   ":%s 506 %s :Virtual Channels are disabled"
+msgstr  ""
+
+#: ../src/messages.tab:538
+#, c-format
+msgid   ":%s 507 %s %s :You are already on a subchan"
+msgstr  ""
+
 #: ../src/messages.tab:555
 #, c-format
 msgid  ":%s 524 %s %s :Help not found"

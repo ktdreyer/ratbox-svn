@@ -825,6 +825,16 @@ msgstr	":%s 503 %s :Beskjeden kunne ikke bli levert til %s"
 msgid	":%s 504 %s %s :User is not on this server"
 msgstr	":%s 504 %s %s :Bruker er ikke p\345 denne serveren"
 
+#: ../src/messages.tab:537
+#, c-format
+msgid   ":%s 506 %s :Virtual Channels are disabled"
+msgstr  ""
+
+#: ../src/messages.tab:538
+#, c-format
+msgid   ":%s 507 %s %s :You are already on a subchan"
+msgstr  ""
+
 #: ../src/messages.tab:555
 #, c-format
 msgid  ":%s 524 %s %s :Help not found"

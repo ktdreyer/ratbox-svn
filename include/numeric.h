@@ -275,6 +275,13 @@ extern const char* form_str(int);
 
 #define ERR_USERNOTONSERV    504
 
+/* #define ERR_LAST_ERR_MSG 505 
+ * moved to 999
+ */
+
+#define ERR_VCHANDISABLED    506
+#define ERR_ALREADYONVCHAN   507
+
 #define ERR_HELPNOTFOUND     524
 
 #define RPL_MODLIST          702

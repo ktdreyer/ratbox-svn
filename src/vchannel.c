@@ -71,11 +71,8 @@ cjoin_channel(struct Channel *root, struct Client *source_p, char *name)
 
   if (on_sub_vchan(root, source_p))
     {
-      sendto_one(source_p,
-                 ":%s NOTICE %s :*** You are on a sub chan of %s already",
+      sendto_one(source_p, form_str(ERR_ALREADYONVCHAN),
                  me.name, source_p->name, name);
-      sendto_one(source_p, form_str(ERR_BADCHANNAME), me.name, source_p->name,
-                 name);
       return NULL;
     }
 
