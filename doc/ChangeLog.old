@@ -1,3 +1,10 @@
+*** 20010514_2 by toot
+. unregged clients can have a nick sometimes (NICK before USER), so changed
+  m_admin back and fixed it.
+. names with no params was showing the ENDOFNAMES numeric for each channel
+  it should just show it once, at the end with a * ..
+
+
 *** 20010514_1 by a1kmm
 - Fixed "ievil's core".
 
