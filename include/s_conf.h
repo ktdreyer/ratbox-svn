@@ -209,11 +209,7 @@ struct server_info
   char        *network_name;
   char        *network_desc;
   int         hub;
-#ifdef IPV6
-  struct in6_addr ip;
-#else
-  struct in_addr ip;
-#endif
+  struct      irc_inaddr ip;
   int         max_clients;
   int         no_hack_ops;
 };

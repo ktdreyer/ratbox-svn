@@ -141,7 +141,7 @@ struct LocalUser meLocalUser;	/* That's also part of me */
 struct Client* GlobalClientList = 0; /* Pointer to beginning of Client list */
 
 /* Virtual host */
-struct sockaddr *vserv;
+struct irc_inaddr  vserv;
 int                specific_virtual_host = 0;
 
 /* unknown/client pointer lists */ 
@@ -571,21 +571,13 @@ int main(int argc, char *argv[])
    * for IPv6 -- aaron
    */
 #ifdef IPV6
-  if(!IN6_IS_ADDR_UNSPECIFIED(&ServerInfo.ip))
-  {
-    vserv = calloc(sizeof(struct sockaddr_in6), 1);
-    vserv = (struct sockaddr *)&ServerInfo.ip;
-    specific_virtual_host = 1;
-  }
+  if(!IN6_IS_ADDR_UNSPECIFIED(&IN_ADDR(ServerInfo.ip)))
 #else
-//  if((ServerInfo.ip.sin_addr.s_addr != 0)
-    if(0)
-    {
-      vserv = calloc(sizeof(struct sockaddr_in), 1);
-      vserv = (struct sockaddr *)&ServerInfo.ip;
-      specific_virtual_host = 1;
-    }
+  if(IN_ADDR(ServerInfo.ip) != 0)
 #endif
+    {
+	copy_s_addr(IN_ADDR(vserv), IN_ADDR(ServerInfo.ip));
+    }
 
 
 
