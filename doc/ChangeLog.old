@@ -1,3 +1,6 @@
+*** 20010101_49 by davidt
+Fix join 0 on vchans, and fix that stupid compiler warning for m_challenge.c
+
 *** 20010101_48 by db
 - parv[1] might be longer than max channel len if two channel names
   are catenated. better to check in build_channel_names
