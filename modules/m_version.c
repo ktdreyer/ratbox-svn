@@ -77,6 +77,9 @@ int mo_version(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 		  1, parc, parv) == HUNTED_ISME)
     sendto_one(sptr, form_str(RPL_VERSION), me.name,
 	       parv[0], version, serno, debugmode, me.name, serveropts);
+	       
+  show_isupport(sptr);
+  
   return 0;
 }
 
