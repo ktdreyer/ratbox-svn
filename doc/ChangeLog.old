@@ -1,3 +1,8 @@
+*** 20010501_1 by db
+- removed bogus assert() its trying to call that callback, it can't be NULL
+
+
+
 *** 20010430_9 by fl_
 - %c -> %s
 
