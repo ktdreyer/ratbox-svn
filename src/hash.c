@@ -399,7 +399,11 @@ struct Client* hash_find_server(const char* name)
 }
 
 /*
- * find_channel
+ * hash_find_channel
+ * inputs	- pointer to name
+ * 		- pointer to channel
+ * output	- 
+ * side effects	-
  */
 struct Channel* hash_find_channel(const char* name, struct Channel* chptr)
 {

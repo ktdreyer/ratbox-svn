@@ -106,8 +106,6 @@ void cleanup_channels(void *);
 /* Maximum mode changes allowed per client, per server is different */
 #define MAXMODEPARAMS   4
 
-extern struct Channel* find_channel (char *, struct Channel *);
-
 extern struct SLink*   find_channel_link(struct SLink *,
 					 struct Channel *chptr); 
 extern void    add_user_to_channel(struct Channel *chptr,
@@ -120,7 +118,6 @@ extern int     is_banned (struct Channel *chptr, struct Client *who);
 
 extern int     is_chan_op (struct Channel *chptr,struct Client *who);
 extern int     user_channel_mode (struct Channel *chptr, struct Client *who);
-extern int     count_channels (struct Client *);
 
 extern int     m_names(struct Client *, struct Client *,int, char **);
 extern void    names_on_this_channel( struct Client *sptr,
@@ -129,7 +126,8 @@ extern void    names_on_this_channel( struct Client *sptr,
 
 extern void    send_channel_modes (struct Client *, struct Channel *);
 extern int     check_channel_name(const char* name);
-extern void    channel_modes(struct Client *, char *, char *, struct Channel*);
+extern void    channel_modes(struct Channel *chptr, struct Client *who,
+			     char *, char *);
 extern void    set_channel_mode(struct Client *, struct Client *, 
                                 struct Channel *, int, char **, char *);
 extern struct Channel* get_channel(struct Client *,char*,int );

@@ -163,7 +163,7 @@ int m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	  vchan = map_vchan(chptr,sptr);
 	  if(vchan == 0)
 	    {
-	      channel_modes(sptr, modebuf, parabuf, chptr);
+	      channel_modes(chptr, sptr, modebuf, parabuf);
 	      sendto_one(sptr, form_str(RPL_CHANNELMODEIS), me.name, parv[0],
 			 chptr->chname, modebuf, parabuf);
 	      sendto_one(sptr, form_str(RPL_CREATIONTIME), me.name, parv[0],
@@ -171,7 +171,7 @@ int m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	    }
 	  else
 	    {
-	      channel_modes(sptr, modebuf, parabuf, vchan);
+	      channel_modes(vchan, sptr, modebuf, parabuf);
 	      sendto_one(sptr, form_str(RPL_CHANNELMODEIS), me.name, parv[0],
 			 chptr->chname, modebuf, parabuf);
 	      sendto_one(sptr, form_str(RPL_CREATIONTIME), me.name, parv[0],
@@ -180,7 +180,7 @@ int m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	}
       else
 	{
-	  channel_modes(sptr, modebuf, parabuf, chptr);
+	  channel_modes(chptr, sptr, modebuf, parabuf);
 	  sendto_one(sptr, form_str(RPL_CHANNELMODEIS), me.name, parv[0],
 		     chptr->chname, modebuf, parabuf);
 	  sendto_one(sptr, form_str(RPL_CREATIONTIME), me.name, parv[0],
@@ -278,7 +278,7 @@ int ms_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	  vchan = map_vchan(chptr,sptr);
 	  if(vchan == 0)
 	    {
-	      channel_modes(sptr, modebuf, parabuf, chptr);
+	      channel_modes(chptr, sptr, modebuf, parabuf);
 	      sendto_one(sptr, form_str(RPL_CHANNELMODEIS), me.name, parv[0],
 			 chptr->chname, modebuf, parabuf);
 	      sendto_one(sptr, form_str(RPL_CREATIONTIME), me.name, parv[0],
@@ -286,7 +286,7 @@ int ms_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	    }
 	  else
 	    {
-	      channel_modes(sptr, modebuf, parabuf, vchan);
+	      channel_modes(vchan, sptr, modebuf, parabuf);
 	      sendto_one(sptr, form_str(RPL_CHANNELMODEIS), me.name, parv[0],
 			 chptr->chname, modebuf, parabuf);
 	      sendto_one(sptr, form_str(RPL_CREATIONTIME), me.name, parv[0],
@@ -295,7 +295,7 @@ int ms_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	}
       else
 	{
-	  channel_modes(sptr, modebuf, parabuf, chptr);
+	  channel_modes(chptr, sptr, modebuf, parabuf);
 	  sendto_one(sptr, form_str(RPL_CHANNELMODEIS), me.name, parv[0],
 		     chptr->chname, modebuf, parabuf);
 	  sendto_one(sptr, form_str(RPL_CREATIONTIME), me.name, parv[0],

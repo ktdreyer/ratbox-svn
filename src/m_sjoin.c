@@ -409,7 +409,7 @@ sendto_realops("ZZZ Creating top_chptr for %s", (parv[2] + 1));
 
   *modebuf = *parabuf = '\0';
   if (parv[3][0] != '0' && keep_new_modes)
-    channel_modes(sptr, modebuf, parabuf, chptr);
+    channel_modes(chptr, sptr, modebuf, parabuf);
   else
     {
       modebuf[0] = '0';
