@@ -183,6 +183,7 @@ non_redundant_klines    { return NON_REDUNDANT_KLINES; }
 
 e_lines_oper_only       { return E_LINES_OPER_ONLY; }
 f_lines_oper_only       { return F_LINES_OPER_ONLY; }
+o_lines_oper_only       { return O_LINES_OPER_ONLY; }
 stats_notice            { return STATS_NOTICE; }
 whois_wait              { return WHOIS_WAIT; }
 pace_wait               { return PACE_WAIT; }

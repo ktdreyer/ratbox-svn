@@ -69,7 +69,7 @@ _moddeinit(void)
   mod_del_cmd(&stats_msgtab);
 }
 
-char *_version = "20001122";
+char *_version = "20001228";
 
 /*
  * m_stats - STATS message handler
@@ -294,8 +294,16 @@ void do_non_priv_stats(struct Client *sptr, char *name, char *target,
       break;
 
     case 'o' : case 'O' :
-      report_configured_links(sptr, CONF_OPS);
-      stats_spy(sptr,stat);
+      if (ConfigFileEntry.o_lines_oper_only && IsOper(sptr))
+        {
+          report_configured_links(sptr, CONF_OPS);
+          stats_spy(sptr,stat);
+        }
+      else
+        {
+          sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, sptr->name);
+          stats_spy(sptr,stat);
+        }
       break;
 
     case 'p' :

@@ -168,6 +168,7 @@ int   class_redirport_var;
 %token  NON_REDUNDANT_KLINES
 %token  E_LINES_OPER_ONLY
 %token  F_LINES_OPER_ONLY
+%token  O_LINES_OPER_ONLY
 %token  STATS_NOTICE
 %token  WHOIS_WAIT
 %token  PACE_WAIT
@@ -1260,6 +1261,7 @@ general_item:       general_failed_oper_notice | general_show_failed_oper_id |
                     general_warn_no_nline |
                     general_non_redundant_klines | general_dots_in_ident |
                     general_e_lines_oper_only | general_f_lines_oper_only |
+                    general_o_lines_oper_only |
                     general_stats_notice | general_pace_wait |
                     general_whois_wait | 
                     general_knock_delay |
@@ -1394,6 +1396,16 @@ general_f_lines_oper_only: F_LINES_OPER_ONLY '=' TYES ';'
     F_LINES_OPER_ONLY '=' TNO ';'
   {
     ConfigFileEntry.f_lines_oper_only = 0;
+  } ;
+
+general_o_lines_oper_only: O_LINES_OPER_ONLY '=' TYES ';'
+  {
+    ConfigFileEntry.o_lines_oper_only = 1;
+  }
+    |
+    O_LINES_OPER_ONLY '=' TNO ';'
+  {
+    ConfigFileEntry.o_lines_oper_only = 0;
   } ;
 
 general_stats_notice: STATS_NOTICE '=' TYES ';'

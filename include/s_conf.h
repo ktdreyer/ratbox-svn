@@ -201,6 +201,7 @@ typedef struct
   int         non_redundant_klines;
   int         e_lines_oper_only;
   int         f_lines_oper_only;
+  int         o_lines_oper_only;
   int         stats_notice;
   int         whois_notice;
   int         pace_wait;
