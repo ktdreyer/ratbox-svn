@@ -1,3 +1,6 @@
+*** 20010104_11 by davidt
+oops, forgot to cvs add this..
+
 *** 20010104_10 by davidt
 Mass move of m_* prototypes from includes/handlers.h into the individual
 m_*.c file.  There's no reason for them to be in a header file, since
