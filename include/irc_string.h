@@ -38,14 +38,22 @@
 /*
  * match - compare name with mask, mask may contain * and ? as wildcards
  * match - returns 1 on successful match, 0 otherwise
+ *
+ * match_esc - compare with support for escaping chars
  */
 extern int match(const char *mask, const char *name);
+extern int match_esc(const char *mask, const char *name);
+
 /*
  * collapse - collapse a string in place, converts multiple adjacent *'s 
  * into a single *.
  * collapse - modifies the contents of pattern 
+ *
+ * collapse_esc() - collapse with support for escaping chars
  */
 extern char* collapse(char *pattern);
+extern char *collapse_esc(char *pattern);
+
 /*
  * irccmp - case insensitive comparison of s1 and s2
  */

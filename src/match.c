@@ -16,12 +16,6 @@
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * Changes:
- * Thomas Helvey <tomh@inxpress.net> June 23, 1999
- * Const correctness changes
- * Cleanup of collapse and match
- * Moved static calls variable to match
- * Added asserts for null pointers
  * $Id$
  *
  */
@@ -33,40 +27,97 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include "ircd.h"
-/*
-**  Compare if a given string (name) matches the given
-**  mask (which can contain wild cards: '*' - match any
-**  number of chars, '?' - match any single character.
-**
-**      return  1, if match
-**              0, if no match
-*/
-/*
-** match()
-** Iterative matching function, rather than recursive.
-** Written by Douglas A Lewis (dalewis@acsu.buffalo.edu)
-*/
-/* behavior change - (Thomas Helvey <tomh@inxpress.net>)
- * removed escape handling, none of the masks used with this
- * function should contain an escape '\\' unless you are searching
- * for one, it is no longer possible to escape * and ?. 
+
+/* match()
+ * 
+ *  Compare if a given string (name) matches the given
+ *  mask (which can contain wild cards: '*' - match any
+ *  number of chars, '?' - match any single character.
  *
- * - This is no longer the case. We can use match on gecos which we could
- * legitimately want to use an escape. So I re-enabled escaping - A1kmm.
+ *      return  1, if match
+ *              0, if no match
  *
- * Moved calls rollup to function body, since match isn't recursive
- * there isn't any reason to have it exposed to the file, this change
- * also has the added benefit of making match reentrant. :)
- * Added asserts, mask and name cannot be null.
- * Changed ma and na to unsigned to get rid of casting.
- *
- * NOTICE: match is now a boolean operation, not a lexical comparison
- * if a line matches a mask, true (1) is returned, otherwise false (0)
- * is returned.
+ *  Originally by Douglas A Lewis (dalewis@acsu.buffalo.edu)
  */
 #define MATCH_MAX_CALLS 512  /* ACK! This dies when it's less that this
                                 and we have long lines to parse */
 int match(const char *mask, const char *name)
+{
+  const unsigned char* m = (const unsigned char*)  mask;
+  const unsigned char* n = (const unsigned char*)  name;
+  const unsigned char* ma = (const unsigned char*) mask;
+  const unsigned char* na = (const unsigned char*) name;
+  int   wild  = 0;
+  int   calls = 0;
+
+  assert(mask != NULL);
+  assert(name != NULL);
+
+  if (!mask || !name)
+    return 0;
+
+  while (calls++ < MATCH_MAX_CALLS)
+  {
+    if (*m == '*')
+    {
+      /*
+       * XXX - shouldn't need to spin here, the mask should have been
+       * collapsed before match is called
+       */
+      while (*m == '*')
+        m++;
+      wild = 1;
+      ma = m;
+      na = n;
+    }
+
+    if (!*m)
+    {
+      if (!*n)
+        return 1;
+      for (m--; (m > (const unsigned char*) mask) && (*m == '?'); m--)
+        ;
+      if (*m == '*' && (m > (const unsigned char*) mask))
+        return 1;
+      if (!wild)
+        return 0;
+      m = ma;
+      n = ++na;
+    }
+    else if (!*n)
+    {
+      /*
+       * XXX - shouldn't need to spin here, the mask should have been
+       * collapsed before match is called
+       */
+      while (*m == '*')
+        m++;
+      return (*m == 0);
+    }
+    if (ToLower(*m) != ToLower(*n) && *m != '?')
+    {
+      if (!wild)
+        return 0;
+      m = ma;
+      n = ++na;
+    }
+    else
+    {
+      if (*m)
+        m++;
+      if (*n)
+        n++;
+    }
+  }
+  return 0;
+}
+
+/* match_esc()
+ *
+ * The match() function with support for escaping characters such
+ * as '*' and '?'
+ */
+int match_esc(const char *mask, const char *name)
 {
   const unsigned char* m = (const unsigned char*)  mask;
   const unsigned char* n = (const unsigned char*)  name;
@@ -159,12 +210,44 @@ int match(const char *mask, const char *name)
   return 0;
 }
 
-/*
- * Rewritten to work properly with escaping, and hopefully to run faster
- * in most cases... -A1kmm.
+/* collapse()
+ *
+ * collapses a string containing multiple *'s.
  */
 char *
 collapse(char *pattern)
+{
+  char *p = pattern, *po = pattern;
+  char c;
+  int f = 0;
+
+  if (p == NULL)
+    return NULL;
+ 
+  while ((c = *p++))
+  {
+    if (c == '*')
+    {
+      if (!(f & 1))
+        *po++ = '*';
+      f |= 1;
+    }
+    else
+    {
+      *po++ = c;
+      f &= ~1;
+    }
+  }
+  *po++ = 0;
+
+  return pattern;
+}
+
+/* collapse_esc()
+ *
+ * The collapse() function with support for escaping characters
+ */
+char *collapse_esc(char *pattern)
 {
  char *p = pattern, *po = pattern;
  char c;

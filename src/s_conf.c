@@ -1225,7 +1225,7 @@ find_x_conf(char *to_find)
       if (BadPtr(aconf->name))
           continue;
 
-      if(match(aconf->name,to_find))
+      if(match_esc(aconf->name,to_find))
         return(aconf);
 
     }

@@ -1887,6 +1887,7 @@ gecos_name:    NAME '=' QSTRING ';'
   {
     MyFree(yy_aconf->host);
     DupString(yy_aconf->host, yylval.string);
+    (void)collapse(yy_aconf->host);
   };
 
 gecos_reason:    REASON '=' QSTRING ';' 
