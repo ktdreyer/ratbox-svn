@@ -1,3 +1,15 @@
+leeh        2004/03/05 11:34:09 EST	(20040305_2)
+
+  Modified files:
+    src                  hostmask.c 
+  Log:
+  - check spoofs against klines too..
+  
+  Revision  Changes    Path
+  7.90      +18 -0     ircd-ratbox/src/hostmask.c
+
+
+
 leeh        2004/03/05 10:17:34 EST	(20040305_1)
 
   Modified files:
