@@ -1,3 +1,16 @@
+leeh        2003/08/24 06:16:29 EDT	(20030824_0)
+
+  Modified files:
+    src                  packet.c s_serv.c 
+  Log:
+  - couple of compile fixes.
+  
+  Revision  Changes    Path
+  7.120     +3 -3      ircd-ratbox/src/packet.c
+  7.356     +0 -1      ircd-ratbox/src/s_serv.c
+
+
+
 androsyn    2003/08/22 10:50:36 EDT	(20030822_1)
 
   Modified files:
