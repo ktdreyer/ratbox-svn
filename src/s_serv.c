@@ -91,6 +91,7 @@ struct Capability captab[] = {
   { "KLN",      CAP_KLN },
   { "GLN",      CAP_GLN },
   { "HOPS",     CAP_HOPS },
+  { "HUB",      CAP_HUB },
   { 0,   0 }
 };
 
@@ -465,12 +466,13 @@ int check_server(struct Client* cptr)
     {
       if( n_conf->flags & CONF_FLAGS_LAZY_LINK )
         {
-          if(find_conf_by_name(n_conf->name, CONF_HUB))
+          if(find_conf_by_name(n_conf->name, CONF_HUB) 
+	     ||
+	     IsCapable(cptr,CAP_HUB))
             {
-              /* n line with an H line, must be a typo */
               ClearCap(cptr,CAP_LL);
               sendto_realops_flags(FLAGS_ALL,
-				   "n line with H oops lets not do LazyLink" );
+		   "*** LazyLinks to a hub from a hub, thats a no-no.");
             }
           else
             {
@@ -721,11 +723,18 @@ int server_estab(struct Client *cptr)
       if (c_conf->passwd[0])
         sendto_one(cptr,"PASS %s :TS", c_conf->passwd);
       /*
-      ** Pass my info to the new server
-      */
+       * Pass my info to the new server
+       *
+       * If trying to negotiate LazyLinks, pass on CAP_LL
+       * If this is a HUB, pass on CAP_HUB
+       */
 
-      send_capabilities(cptr,CAP_MASK|
-                      ((n_conf->flags & CONF_FLAGS_LAZY_LINK) ? CAP_LL : 0));
+      send_capabilities(cptr,CAP_MASK
+			|
+			((n_conf->flags & CONF_FLAGS_LAZY_LINK) ? CAP_LL : 0)
+			|
+			(ConfigFileEntry.hub ? CAP_HUB : 0) );
+
       sendto_one(cptr, "SERVER %s 1 :%s",
                  my_name_for_link(me.name, n_conf), 
                  (me.info[0]) ? (me.info) : "IRCers United");
@@ -1566,8 +1575,18 @@ serv_connect_callback(int fd, int status, void *data)
     if (!EmptyString(c_conf->passwd))
         sendto_one(cptr, "PASS %s :TS", c_conf->passwd);
 
-    send_capabilities(cptr, CAP_MASK|
-      ((n_conf->flags & CONF_FLAGS_LAZY_LINK) ? CAP_LL : 0));
+    /*
+     * Pass my info to the new server
+     *
+     * If trying to negotiate LazyLinks, pass on CAP_LL
+     * If this is a HUB, pass on CAP_HUB
+     */
+
+    send_capabilities(cptr,CAP_MASK
+		      |
+		      ((n_conf->flags & CONF_FLAGS_LAZY_LINK) ? CAP_LL : 0)
+		      |
+		      (ConfigFileEntry.hub ? CAP_HUB : 0) );
 
     sendto_one(cptr, "SERVER %s 1 :%s",
       my_name_for_link(me.name, n_conf), me.info);
