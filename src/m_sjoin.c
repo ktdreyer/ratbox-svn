@@ -22,7 +22,7 @@
  *
  *   $Id$
  */
-#include "m_commands.h"
+#include "handlers.h"
 #include "channel.h"
 #include "client.h"
 #include "hash.h"
@@ -38,7 +38,7 @@
 #include <assert.h>
 
 /*
- * m_sjoin
+ * ms_sjoin
  * parv[0] - sender
  * parv[1] - TS
  * parv[2] - channel
@@ -53,7 +53,7 @@
 
 
 
-int     m_sjoin(struct Client *cptr,
+int     ms_sjoin(struct Client *cptr,
                 struct Client *sptr,
                 int parc,
                 char *parv[])

@@ -22,7 +22,7 @@
  *
  *   $Id$
  */
-#include "m_commands.h"
+#include "handlers.h"
 #include "client.h"
 #include "irc_string.h"
 #include "ircd.h"
@@ -101,6 +101,106 @@
  *      parv[2] = servername mask
  */
 int m_links(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+{
+  const char*    mask = "";
+  struct Client* acptr;
+  char           clean_mask[2 * HOSTLEN + 1];
+  char*          p;
+  static time_t  last_used = 0L;
+
+  if (parc > 2)
+    {
+      if (hunt_server(cptr, sptr, ":%s LINKS %s :%s", 1, parc, parv)
+          != HUNTED_ISME)
+        return 0;
+      mask = parv[2];
+    }
+  else if (parc == 2)
+    mask = parv[1];
+
+  assert(0 != mask);
+
+  if(!IsAnOper(sptr))
+    {
+      /* reject non local requests */
+      if(!MyClient(sptr))
+        return 0;
+
+      if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
+        {
+          /* safe enough to give this on a local connect only */
+          sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);
+          return 0;
+        }
+      else
+        {
+          last_used = CurrentTime;
+        }
+    }
+
+  /*
+   * *sigh* Before the kiddies find this new and exciting way of 
+   * annoying opers, lets clean up what is sent to all opers
+   * -Dianora
+   */
+  if (*mask)       /* only necessary if there is a mask */
+    mask = collapse(clean_string(clean_mask, mask, 2 * HOSTLEN));
+
+  if (MyConnect(sptr))
+    sendto_realops_flags(FLAGS_SPY,
+                       "LINKS '%s' requested by %s (%s@%s) [%s]",
+                       mask, sptr->name, sptr->username,
+                       sptr->host, sptr->user->server);
+  
+  for (acptr = GlobalClientList; acptr; acptr = acptr->next) 
+    {
+      if (!IsServer(acptr) && !IsMe(acptr))
+        continue;
+      if (*mask && !match(mask, acptr->name))
+        continue;
+      if(IsAnOper(sptr))
+         sendto_one(sptr, form_str(RPL_LINKS),
+                    me.name, parv[0], acptr->name, acptr->serv->up,
+                    acptr->hopcount, (acptr->info[0] ? acptr->info :
+                                      "(Unknown Location)"));
+      else
+        {
+          if(acptr->info[0])
+            {
+              /* kludge, you didn't see this nor am I going to admit
+               * that I coded this.
+               */
+              p = strchr(acptr->info,']');
+              if(p)
+                p += 2; /* skip the nasty [IP] part */
+              else
+                p = acptr->info;
+            }
+          else
+            p = "(Unknown Location)";
+
+          sendto_one(sptr, form_str(RPL_LINKS),
+                    me.name, parv[0], acptr->name, acptr->serv->up,
+                    acptr->hopcount, p);
+        }
+
+    }
+  
+  sendto_one(sptr, form_str(RPL_ENDOFLINKS), me.name, parv[0],
+             EmptyString(mask) ? "*" : mask);
+  return 0;
+}
+
+/*
+ * ms_links - LINKS message handler
+ *      parv[0] = sender prefix
+ *      parv[1] = servername mask
+ * or
+ *      parv[0] = sender prefix
+ *      parv[1] = server to query 
+ *      parv[2] = servername mask
+ */
+int ms_links(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   const char*    mask = "";
   struct Client* acptr;

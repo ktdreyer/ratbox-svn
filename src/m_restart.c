@@ -22,7 +22,7 @@
  *
  *   $Id$
  */
-#include "m_commands.h"
+#include "handlers.h"
 #include "client.h"
 #include "common.h"
 #include "irc_string.h"
@@ -90,10 +90,10 @@
  */
 
 /*
- * m_restart
+ * mo_restart
  *
  */
-int     m_restart(struct Client *cptr,
+int     mo_restart(struct Client *cptr,
                   struct Client *sptr,
                   int parc,
                   char *parv[])

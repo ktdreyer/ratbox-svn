@@ -22,7 +22,7 @@
  *
  *   $Id$
  */
-#include "m_commands.h"
+#include "handlers.h"
 #include "channel.h"
 #include "client.h"
 #include "hash.h"
@@ -95,6 +95,105 @@
 **      parv[1] = topic text
 */
 int     m_topic(struct Client *cptr,
+                struct Client *sptr,
+                int parc,
+                char *parv[])
+{
+  struct Channel *chptr = NullChn;
+  char  *topic = (char *)NULL, *name, *p = (char *)NULL;
+  
+  if (parc < 2)
+    {
+      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
+                 me.name, parv[0], "TOPIC");
+      return 0;
+    }
+
+  p = strchr(parv[1],',');
+  if(p)
+    *p = '\0';
+  name = parv[1]; /* strtoken(&p, parv[1], ","); */
+
+  /* multi channel topic's are now known to be used by cloners
+   * trying to flood off servers.. so disable it *sigh* - Dianora
+   */
+
+  if (name && IsChannelName(name))
+    {
+      chptr = hash_find_channel(name, NullChn);
+      if (!chptr)
+        {
+          sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL), me.name, parv[0],
+              name);
+          return 0;
+        }
+
+      if (!IsMember(sptr, chptr))
+        {
+          sendto_one(sptr, form_str(ERR_NOTONCHANNEL), me.name, parv[0],
+              name);
+          return 0;
+        }
+
+      if (parc > 2) /* setting topic */
+        topic = parv[2];
+
+      if(topic) /* a little extra paranoia never hurt */
+        {
+          if ((chptr->mode.mode & MODE_TOPICLIMIT) == 0 ||
+               is_chan_op(sptr, chptr))
+            {
+              /* setting a topic */
+              /*
+               * chptr zeroed
+               */
+              strncpy_irc(chptr->topic, topic, TOPICLEN);
+
+              /*
+               * XXX - this truncates the topic_nick if
+               * strlen(sptr->name) > NICKLEN
+               */
+              strncpy_irc(chptr->topic_nick, sptr->name, NICKLEN);
+              chptr->topic_time = CurrentTime;
+
+              sendto_match_servs(chptr, cptr,":%s TOPIC %s :%s",
+                                 parv[0], chptr->chname,
+                                 chptr->topic);
+              sendto_channel_butserv(chptr, sptr, ":%s TOPIC %s :%s",
+                                     parv[0],
+                                     chptr->chname, chptr->topic);
+            }
+          else
+            sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED),
+                       me.name, parv[0], chptr->chname);
+        }
+      else  /* only asking  for topic  */
+        {
+          if (chptr->topic[0] == '\0')
+            sendto_one(sptr, form_str(RPL_NOTOPIC),
+                       me.name, parv[0], chptr->chname);
+          else
+            {
+              sendto_one(sptr, form_str(RPL_TOPIC),
+                         me.name, parv[0],
+                         chptr->chname, chptr->topic);
+              sendto_one(sptr, form_str(RPL_TOPICWHOTIME),
+                         me.name, parv[0], chptr->chname,
+                         chptr->topic_nick,
+                         chptr->topic_time);
+            }
+        }
+    }
+  else
+    {
+      sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
+                 me.name, parv[0], name);
+    }
+
+  return 0;
+}
+
+int     ms_topic(struct Client *cptr,
                 struct Client *sptr,
                 int parc,
                 char *parv[])

@@ -23,7 +23,7 @@
  *   $Id$
  */
 
-#include "m_commands.h"
+#include "handlers.h"
 #include "client.h"
 #include "channel.h"
 #include "hash.h"

@@ -22,7 +22,7 @@
  *
  *   $Id$
  */
-#include "m_commands.h"
+#include "handlers.h"
 #include "class.h"
 #include "client.h"
 #include "common.h"
@@ -101,6 +101,572 @@
 **      parv[1] = servername
 */
 int m_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+{
+  int   i;
+  struct Client       *acptr = NULL;
+  struct Class        *cltmp;
+  char  *tname;
+  int   doall, link_s[MAXCONNECTIONS], link_u[MAXCONNECTIONS];
+  int   cnt = 0, wilds, dow;
+#ifdef PACE_TRACE
+  static time_t last_trace=0L;
+  static time_t last_used=0L;
+#endif
+  static time_t now;
+
+  now = time(NULL);  
+  if (parc > 2)
+    if (hunt_server(cptr, sptr, ":%s TRACE %s :%s", 2, parc, parv))
+      return 0;
+  
+  if (parc > 1)
+    tname = parv[1];
+  else
+    {
+      tname = me.name;
+    }
+
+  switch (hunt_server(cptr, sptr, ":%s TRACE :%s", 1, parc, parv))
+    {
+    case HUNTED_PASS: /* note: gets here only if parv[1] exists */
+      {
+        struct Client *ac2ptr;
+        
+        ac2ptr = next_client_double(GlobalClientList, tname);
+        if (ac2ptr)
+          sendto_one(sptr, form_str(RPL_TRACELINK), me.name, parv[0],
+                     version, debugmode, tname, ac2ptr->from->name);
+        else
+          sendto_one(sptr, form_str(RPL_TRACELINK), me.name, parv[0],
+                     version, debugmode, tname, "ac2ptr_is_NULL!!");
+        return 0;
+      }
+    case HUNTED_ISME:
+      break;
+    default:
+      return 0;
+    }
+
+  if(!IsAnOper(sptr))
+    {
+      /* pacing for /trace is problemmatical */
+#if PACE_TRACE
+      if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
+        {
+          /* safe enough to give this on a local connect only */
+          if(MyClient(sptr))
+            sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);
+          return 0;
+        }
+      else
+        {
+          last_used = CurrentTime;
+        }
+#endif
+
+      if (parv[1] && !strchr(parv[1],'.') && (strchr(parv[1], '*')
+          || strchr(parv[1], '?'))) /* bzzzt, no wildcard nicks for nonopers */
+        {
+          sendto_one(sptr, form_str(RPL_ENDOFTRACE),me.name,
+                     parv[0], parv[1]);
+          return 0;
+        }
+    }
+
+  if(MyClient(sptr))
+    sendto_realops_flags(FLAGS_SPY, "trace requested by %s (%s@%s) [%s]",
+                       sptr->name, sptr->username, sptr->host,
+                       sptr->user->server);
+
+
+  doall = (parv[1] && (parc > 1)) ? match(tname, me.name): TRUE;
+  wilds = !parv[1] || strchr(tname, '*') || strchr(tname, '?');
+  dow = wilds || doall;
+  
+  if(!IsAnOper(sptr) || !dow) /* non-oper traces must be full nicks */
+                              /* lets also do this for opers tracing nicks */
+    {
+      const char* name;
+      const char* ip;
+      const char* class_name;
+
+      acptr = hash_find_client(tname,(struct Client *)NULL);
+      if(!acptr || !IsPerson(acptr)) 
+        {
+          /* this should only be reached if the matching
+             target is this server */
+          sendto_one(sptr, form_str(RPL_ENDOFTRACE),me.name,
+                     parv[0], tname);
+          return 0;
+        }
+      name = get_client_name(acptr, FALSE);
+      ip = inetntoa((char*) &acptr->ip);
+
+      class_name = get_client_class(acptr);
+
+      if (IsAnOper(acptr))
+        {
+          sendto_one(sptr, form_str(RPL_TRACEOPERATOR),
+                     me.name, parv[0], class_name,
+                     name, 
+                     IsAnOper(sptr)?ip:(IsIPHidden(acptr)?"127.0.0.1":ip),
+                     now - acptr->lasttime,
+                     (acptr->user)?(now - acptr->user->last):0);
+        }
+      else
+        {
+          sendto_one(sptr,form_str(RPL_TRACEUSER),
+                     me.name, parv[0], class_name,
+                     name, 
+                     IsAnOper(sptr)?ip:(IsIPHidden(acptr)?"127.0.0.1":ip),
+                     now - acptr->lasttime,
+                     (acptr->user)?(now - acptr->user->last):0);
+        }
+      sendto_one(sptr, form_str(RPL_ENDOFTRACE),me.name,
+                 parv[0], tname);
+      return 0;
+    }
+
+  if (dow && GlobalSetOptions.lifesux && !IsOper(sptr))
+    {
+      sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);
+      return 0;
+    }
+
+  memset((void *)link_s,0,sizeof(link_s));
+  memset((void *)link_u,0,sizeof(link_u));
+
+  /*
+   * Count up all the servers and clients in a downlink.
+   */
+  if (doall)
+   {
+    for (acptr = GlobalClientList; acptr; acptr = acptr->next)
+     {
+#ifdef  SHOW_INVISIBLE_LUSERS
+      if (IsPerson(acptr))
+        {
+          link_u[acptr->from->fd]++;
+        }
+#else
+      if (IsPerson(acptr) &&
+        (!IsInvisible(acptr) || IsAnOper(sptr)))
+        {
+          link_u[acptr->from->fd]++;
+        }
+#endif
+      else
+        {
+          if (IsServer(acptr))
+            {
+              link_s[acptr->from->fd]++;
+            }
+        }
+     }
+   }
+  /* report all direct connections */
+  for (i = 0; i <= highest_fd; i++)
+    {
+      const char* name;
+      const char* ip;
+      const char* class_name;
+      
+      if (!(acptr = local[i])) /* Local Connection? */
+        continue;
+      if (IsInvisible(acptr) && dow &&
+          !(MyConnect(sptr) && IsAnOper(sptr)) &&
+          !IsAnOper(acptr) && (acptr != sptr))
+        continue;
+      if (!doall && wilds && !match(tname, acptr->name))
+        continue;
+      if (!dow && irccmp(tname, acptr->name))
+        continue;
+      name = get_client_name(acptr, FALSE);
+      ip = inetntoa((const char*) &acptr->ip);
+
+      class_name = get_client_class(acptr);
+      
+      switch(acptr->status)
+        {
+        case STAT_CONNECTING:
+          sendto_one(sptr, form_str(RPL_TRACECONNECTING), me.name,
+                     parv[0], class_name, name);
+          cnt++;
+          break;
+        case STAT_HANDSHAKE:
+          sendto_one(sptr, form_str(RPL_TRACEHANDSHAKE), me.name,
+                     parv[0], class_name, name);
+          cnt++;
+          break;
+        case STAT_ME:
+          break;
+        case STAT_UNKNOWN:
+/* added time -Taner */
+          sendto_one(sptr, form_str(RPL_TRACEUNKNOWN),
+                     me.name, parv[0], class_name, name, ip,
+                     acptr->firsttime ? CurrentTime - acptr->firsttime : -1);
+          cnt++;
+          break;
+        case STAT_CLIENT:
+          /* Only opers see users if there is a wildcard
+           * but anyone can see all the opers.
+           */
+          if ((IsAnOper(sptr) &&
+              (MyClient(sptr) || !(dow && IsInvisible(acptr))))
+              || !dow || IsAnOper(acptr))
+            {
+              if (IsAnOper(acptr))
+                sendto_one(sptr,
+                           form_str(RPL_TRACEOPERATOR),
+                           me.name,
+                           parv[0], class_name,
+                           name, IsAnOper(sptr)?ip:(IsIPHidden(acptr)?"127.0.0.1":ip),
+                           now - acptr->lasttime,
+                           (acptr->user)?(now - acptr->user->last):0);
+              else
+                sendto_one(sptr,form_str(RPL_TRACEUSER),
+                           me.name, parv[0], class_name,
+                           name,
+                           IsAnOper(sptr)?ip:(IsIPHidden(acptr)?"127.0.0.1":ip),
+                           now - acptr->lasttime,
+                           (acptr->user)?(now - acptr->user->last):0);
+              cnt++;
+            }
+          break;
+        case STAT_SERVER:
+            sendto_one(sptr, form_str(RPL_TRACESERVER),
+                       me.name, parv[0], class_name, link_s[i],
+                       link_u[i], name, *(acptr->serv->by) ?
+                       acptr->serv->by : "*", "*",
+                       me.name, now - acptr->lasttime);
+          cnt++;
+          break;
+        default: /* ...we actually shouldn't come here... --msa */
+          sendto_one(sptr, form_str(RPL_TRACENEWTYPE), me.name,
+                     parv[0], name);
+          cnt++;
+          break;
+        }
+    }
+  /*
+   * Add these lines to summarize the above which can get rather long
+   * and messy when done remotely - Avalon
+   */
+  if (!SendWallops(sptr) || !cnt)
+    {
+      if (cnt)
+        {
+          sendto_one(sptr, form_str(RPL_ENDOFTRACE),me.name,
+                     parv[0],tname);
+          return 0;
+        }
+      /* let the user have some idea that its at the end of the
+       * trace
+       */
+      sendto_one(sptr, form_str(RPL_TRACESERVER),
+                 me.name, parv[0], 0, link_s[me.fd],
+                 link_u[me.fd], me.name, "*", "*", me.name);
+      sendto_one(sptr, form_str(RPL_ENDOFTRACE),me.name,
+                 parv[0],tname);
+      return 0;
+    }
+  for (cltmp = ClassList; doall && cltmp; cltmp = cltmp->next)
+    if (Links(cltmp) > 0)
+      sendto_one(sptr, form_str(RPL_TRACECLASS), me.name,
+                 parv[0], ClassName(cltmp), Links(cltmp));
+  sendto_one(sptr, form_str(RPL_ENDOFTRACE),me.name, parv[0],tname);
+  return 0;
+}
+
+/*
+** mo_trace
+**      parv[0] = sender prefix
+**      parv[1] = servername
+*/
+int mo_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+{
+  int   i;
+  struct Client       *acptr = NULL;
+  struct Class        *cltmp;
+  char  *tname;
+  int   doall, link_s[MAXCONNECTIONS], link_u[MAXCONNECTIONS];
+  int   cnt = 0, wilds, dow;
+#ifdef PACE_TRACE
+  static time_t last_trace=0L;
+  static time_t last_used=0L;
+#endif
+  static time_t now;
+
+  now = time(NULL);  
+  if (parc > 2)
+    if (hunt_server(cptr, sptr, ":%s TRACE %s :%s", 2, parc, parv))
+      return 0;
+  
+  if (parc > 1)
+    tname = parv[1];
+  else
+    {
+      tname = me.name;
+    }
+
+  switch (hunt_server(cptr, sptr, ":%s TRACE :%s", 1, parc, parv))
+    {
+    case HUNTED_PASS: /* note: gets here only if parv[1] exists */
+      {
+        struct Client *ac2ptr;
+        
+        ac2ptr = next_client_double(GlobalClientList, tname);
+        if (ac2ptr)
+          sendto_one(sptr, form_str(RPL_TRACELINK), me.name, parv[0],
+                     version, debugmode, tname, ac2ptr->from->name);
+        else
+          sendto_one(sptr, form_str(RPL_TRACELINK), me.name, parv[0],
+                     version, debugmode, tname, "ac2ptr_is_NULL!!");
+        return 0;
+      }
+    case HUNTED_ISME:
+      break;
+    default:
+      return 0;
+    }
+
+  if(!IsAnOper(sptr))
+    {
+      /* pacing for /trace is problemmatical */
+#if PACE_TRACE
+      if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
+        {
+          /* safe enough to give this on a local connect only */
+          if(MyClient(sptr))
+            sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);
+          return 0;
+        }
+      else
+        {
+          last_used = CurrentTime;
+        }
+#endif
+
+      if (parv[1] && !strchr(parv[1],'.') && (strchr(parv[1], '*')
+          || strchr(parv[1], '?'))) /* bzzzt, no wildcard nicks for nonopers */
+        {
+          sendto_one(sptr, form_str(RPL_ENDOFTRACE),me.name,
+                     parv[0], parv[1]);
+          return 0;
+        }
+    }
+
+  if(MyClient(sptr))
+    sendto_realops_flags(FLAGS_SPY, "trace requested by %s (%s@%s) [%s]",
+                       sptr->name, sptr->username, sptr->host,
+                       sptr->user->server);
+
+
+  doall = (parv[1] && (parc > 1)) ? match(tname, me.name): TRUE;
+  wilds = !parv[1] || strchr(tname, '*') || strchr(tname, '?');
+  dow = wilds || doall;
+  
+  if(!IsAnOper(sptr) || !dow) /* non-oper traces must be full nicks */
+                              /* lets also do this for opers tracing nicks */
+    {
+      const char* name;
+      const char* ip;
+      const char* class_name;
+
+      acptr = hash_find_client(tname,(struct Client *)NULL);
+      if(!acptr || !IsPerson(acptr)) 
+        {
+          /* this should only be reached if the matching
+             target is this server */
+          sendto_one(sptr, form_str(RPL_ENDOFTRACE),me.name,
+                     parv[0], tname);
+          return 0;
+        }
+      name = get_client_name(acptr, FALSE);
+      ip = inetntoa((char*) &acptr->ip);
+
+      class_name = get_client_class(acptr);
+
+      if (IsAnOper(acptr))
+        {
+          sendto_one(sptr, form_str(RPL_TRACEOPERATOR),
+                     me.name, parv[0], class_name,
+                     name, 
+                     IsAnOper(sptr)?ip:(IsIPHidden(acptr)?"127.0.0.1":ip),
+                     now - acptr->lasttime,
+                     (acptr->user)?(now - acptr->user->last):0);
+        }
+      else
+        {
+          sendto_one(sptr,form_str(RPL_TRACEUSER),
+                     me.name, parv[0], class_name,
+                     name, 
+                     IsAnOper(sptr)?ip:(IsIPHidden(acptr)?"127.0.0.1":ip),
+                     now - acptr->lasttime,
+                     (acptr->user)?(now - acptr->user->last):0);
+        }
+      sendto_one(sptr, form_str(RPL_ENDOFTRACE),me.name,
+                 parv[0], tname);
+      return 0;
+    }
+
+  if (dow && GlobalSetOptions.lifesux && !IsOper(sptr))
+    {
+      sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);
+      return 0;
+    }
+
+  memset((void *)link_s,0,sizeof(link_s));
+  memset((void *)link_u,0,sizeof(link_u));
+
+  /*
+   * Count up all the servers and clients in a downlink.
+   */
+  if (doall)
+   {
+    for (acptr = GlobalClientList; acptr; acptr = acptr->next)
+     {
+#ifdef  SHOW_INVISIBLE_LUSERS
+      if (IsPerson(acptr))
+        {
+          link_u[acptr->from->fd]++;
+        }
+#else
+      if (IsPerson(acptr) &&
+        (!IsInvisible(acptr) || IsAnOper(sptr)))
+        {
+          link_u[acptr->from->fd]++;
+        }
+#endif
+      else
+        {
+          if (IsServer(acptr))
+            {
+              link_s[acptr->from->fd]++;
+            }
+        }
+     }
+   }
+  /* report all direct connections */
+  for (i = 0; i <= highest_fd; i++)
+    {
+      const char* name;
+      const char* ip;
+      const char* class_name;
+      
+      if (!(acptr = local[i])) /* Local Connection? */
+        continue;
+      if (IsInvisible(acptr) && dow &&
+          !(MyConnect(sptr) && IsAnOper(sptr)) &&
+          !IsAnOper(acptr) && (acptr != sptr))
+        continue;
+      if (!doall && wilds && !match(tname, acptr->name))
+        continue;
+      if (!dow && irccmp(tname, acptr->name))
+        continue;
+      name = get_client_name(acptr, FALSE);
+      ip = inetntoa((const char*) &acptr->ip);
+
+      class_name = get_client_class(acptr);
+      
+      switch(acptr->status)
+        {
+        case STAT_CONNECTING:
+          sendto_one(sptr, form_str(RPL_TRACECONNECTING), me.name,
+                     parv[0], class_name, name);
+          cnt++;
+          break;
+        case STAT_HANDSHAKE:
+          sendto_one(sptr, form_str(RPL_TRACEHANDSHAKE), me.name,
+                     parv[0], class_name, name);
+          cnt++;
+          break;
+        case STAT_ME:
+          break;
+        case STAT_UNKNOWN:
+/* added time -Taner */
+          sendto_one(sptr, form_str(RPL_TRACEUNKNOWN),
+                     me.name, parv[0], class_name, name, ip,
+                     acptr->firsttime ? CurrentTime - acptr->firsttime : -1);
+          cnt++;
+          break;
+        case STAT_CLIENT:
+          /* Only opers see users if there is a wildcard
+           * but anyone can see all the opers.
+           */
+          if ((IsAnOper(sptr) &&
+              (MyClient(sptr) || !(dow && IsInvisible(acptr))))
+              || !dow || IsAnOper(acptr))
+            {
+              if (IsAnOper(acptr))
+                sendto_one(sptr,
+                           form_str(RPL_TRACEOPERATOR),
+                           me.name,
+                           parv[0], class_name,
+                           name, IsAnOper(sptr)?ip:(IsIPHidden(acptr)?"127.0.0.1":ip),
+                           now - acptr->lasttime,
+                           (acptr->user)?(now - acptr->user->last):0);
+              else
+                sendto_one(sptr,form_str(RPL_TRACEUSER),
+                           me.name, parv[0], class_name,
+                           name,
+                           IsAnOper(sptr)?ip:(IsIPHidden(acptr)?"127.0.0.1":ip),
+                           now - acptr->lasttime,
+                           (acptr->user)?(now - acptr->user->last):0);
+              cnt++;
+            }
+          break;
+        case STAT_SERVER:
+            sendto_one(sptr, form_str(RPL_TRACESERVER),
+                       me.name, parv[0], class_name, link_s[i],
+                       link_u[i], name, *(acptr->serv->by) ?
+                       acptr->serv->by : "*", "*",
+                       me.name, now - acptr->lasttime);
+          cnt++;
+          break;
+        default: /* ...we actually shouldn't come here... --msa */
+          sendto_one(sptr, form_str(RPL_TRACENEWTYPE), me.name,
+                     parv[0], name);
+          cnt++;
+          break;
+        }
+    }
+  /*
+   * Add these lines to summarize the above which can get rather long
+   * and messy when done remotely - Avalon
+   */
+  if (!SendWallops(sptr) || !cnt)
+    {
+      if (cnt)
+        {
+          sendto_one(sptr, form_str(RPL_ENDOFTRACE),me.name,
+                     parv[0],tname);
+          return 0;
+        }
+      /* let the user have some idea that its at the end of the
+       * trace
+       */
+      sendto_one(sptr, form_str(RPL_TRACESERVER),
+                 me.name, parv[0], 0, link_s[me.fd],
+                 link_u[me.fd], me.name, "*", "*", me.name);
+      sendto_one(sptr, form_str(RPL_ENDOFTRACE),me.name,
+                 parv[0],tname);
+      return 0;
+    }
+  for (cltmp = ClassList; doall && cltmp; cltmp = cltmp->next)
+    if (Links(cltmp) > 0)
+      sendto_one(sptr, form_str(RPL_TRACECLASS), me.name,
+                 parv[0], ClassName(cltmp), Links(cltmp));
+  sendto_one(sptr, form_str(RPL_ENDOFTRACE),me.name, parv[0],tname);
+  return 0;
+}
+
+/*
+** ms_trace
+**      parv[0] = sender prefix
+**      parv[1] = servername
+*/
+int ms_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   int   i;
   struct Client       *acptr = NULL;

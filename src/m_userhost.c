@@ -23,7 +23,7 @@
  *   $Id$
  */
 
-#include "m_commands.h"
+#include "handlers.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"

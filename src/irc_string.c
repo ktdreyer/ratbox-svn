@@ -92,29 +92,34 @@ void* MyRealloc(void* x, size_t y)
  * clean_string - clean up a string possibly containing garbage
  *
  * *sigh* Before the kiddies find this new and exciting way of 
- * annoying opers, lets clean up what is sent to all opers
+ * annoying opers, lets clean up what is sent to local opers
  * -Dianora
  */
 char* clean_string(char* dest, const char* src, size_t len)
 {
   char* d    = dest; 
-  char* endp = dest + len - 1;
   assert(0 != dest);
   assert(0 != src);
 
-  while (d < endp && *src)
+  len -= 3;  /* allow for worst case, '^A\0' */
+
+  while (*src && (len > 0))
     {
-      if (*src < ' ')             /* Is it a control character? */
+      if(*src & 0x80)             /* if high bit is set */
+        {
+          *d++ = '.';
+          --len;
+        }
+      else if(!IsPrint(*src))       /* if NOT printable */
         {
           *d++ = '^';
-          if (d < endp)
-            *d++ = 0x40 + *src;   /* turn it into a printable */
+          --len;
+          *d++ = 0x40 + *src;   /* turn it into a printable */
         }
-      else if (*src > '~')
-        *d++ = '.';
       else
         *d++ = *src;
       ++src;
+      --len;
     }
   *d = '\0';
   return dest;

@@ -22,7 +22,7 @@
  *
  *   $Id$
  */
-#include "m_commands.h"
+#include "handlers.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -148,3 +148,114 @@ int     m_pong(struct Client *cptr,
 #endif
   return 0;
 }
+
+int     ms_pong(struct Client *cptr,
+               struct Client *sptr,
+               int parc,
+               char *parv[])
+{
+  struct Client *acptr;
+  char  *origin, *destination;
+
+  if (parc < 2 || *parv[1] == '\0')
+    {
+      sendto_one(sptr, form_str(ERR_NOORIGIN), me.name, parv[0]);
+      return 0;
+    }
+
+  origin = parv[1];
+  destination = parv[2];
+  cptr->flags &= ~FLAGS_PINGSENT;
+  sptr->flags &= ~FLAGS_PINGSENT;
+
+#ifdef NEED_SPLITCODE
+#ifdef SPLIT_PONG
+  if (IsServer(cptr))
+    got_server_pong = 1;
+#endif
+#endif
+
+  /* Now attempt to route the PONG, comstud pointed out routable PING
+   * is used for SPING.  routable PING should also probably be left in
+   *        -Dianora
+   * That being the case, we will route, but only for registered clients (a
+   * case can be made to allow them only from servers). -Shadowfax
+   */
+  if (!EmptyString(destination) && irccmp(destination, me.name) != 0
+                && IsRegistered(sptr))
+    {
+      if ((acptr = find_client(destination, NULL)) ||
+          (acptr = find_server(destination)))
+        sendto_one(acptr,":%s PONG %s %s",
+                   parv[0], origin, destination);
+      else
+        {
+          sendto_one(sptr, form_str(ERR_NOSUCHSERVER),
+                     me.name, parv[0], destination);
+          return 0;
+        }
+    }
+
+#ifdef  DEBUGMODE
+  else
+    Debug((DEBUG_NOTICE, "PONG: %s %s", origin,
+           destination ? destination : "*"));
+#endif
+  return 0;
+}
+
+int     mr_pong(struct Client *cptr,
+               struct Client *sptr,
+               int parc,
+               char *parv[])
+{
+  struct Client *acptr;
+  char  *origin, *destination;
+
+  if (parc < 2 || *parv[1] == '\0')
+    {
+      sendto_one(sptr, form_str(ERR_NOORIGIN), me.name, parv[0]);
+      return 0;
+    }
+
+  origin = parv[1];
+  destination = parv[2];
+  cptr->flags &= ~FLAGS_PINGSENT;
+  sptr->flags &= ~FLAGS_PINGSENT;
+
+#ifdef NEED_SPLITCODE
+#ifdef SPLIT_PONG
+  if (IsServer(cptr))
+    got_server_pong = 1;
+#endif
+#endif
+
+  /* Now attempt to route the PONG, comstud pointed out routable PING
+   * is used for SPING.  routable PING should also probably be left in
+   *        -Dianora
+   * That being the case, we will route, but only for registered clients (a
+   * case can be made to allow them only from servers). -Shadowfax
+   */
+  if (!EmptyString(destination) && irccmp(destination, me.name) != 0
+                && IsRegistered(sptr))
+    {
+      if ((acptr = find_client(destination, NULL)) ||
+          (acptr = find_server(destination)))
+        sendto_one(acptr,":%s PONG %s %s",
+                   parv[0], origin, destination);
+      else
+        {
+          sendto_one(sptr, form_str(ERR_NOSUCHSERVER),
+                     me.name, parv[0], destination);
+          return 0;
+        }
+    }
+
+#ifdef  DEBUGMODE
+  else
+    Debug((DEBUG_NOTICE, "PONG: %s %s", origin,
+           destination ? destination : "*"));
+#endif
+  return 0;
+}
+

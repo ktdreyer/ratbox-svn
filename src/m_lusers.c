@@ -22,7 +22,7 @@
  *
  *   $Id$
  */
-#include "m_commands.h"
+#include "handlers.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -98,6 +98,45 @@
  * to cause a force
  */
 int m_lusers(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+{
+  static time_t last_used = 0;
+
+  if (!IsAnOper(sptr))
+    {
+      if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
+        {
+          /* safe enough to give this on a local connect only */
+          if (MyClient(sptr))
+            sendto_one(sptr, form_str(RPL_LOAD2HI), me.name, parv[0]);
+          return 0;
+        }
+      else
+        {
+          last_used = CurrentTime;
+        }
+    }
+
+  if (parc > 2)
+    {
+      if(hunt_server(cptr, sptr, ":%s LUSERS %s :%s", 2, parc, parv)
+       != HUNTED_ISME)
+        {
+          return 0;
+        }
+    }
+  return show_lusers(cptr,sptr,parc,parv);
+}
+
+/*
+ * ms_lusers - LUSERS message handler
+ * parv[0] = sender
+ * parv[1] = host/server mask.
+ * parv[2] = server to query
+ * 
+ * 199970918 JRL hacked to ignore parv[1] completely and require parc > 3
+ * to cause a force
+ */
+int ms_lusers(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   static time_t last_used = 0;
 

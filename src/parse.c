@@ -20,8 +20,9 @@
  *   $Id$
  */
 #include "parse.h"
-#include "channel.h"
 #include "client.h"
+#include "channel.h"
+#include "handlers.h"
 #include "common.h"
 #include "hash.h"
 #include "irc_string.h"
@@ -31,10 +32,8 @@
 #include "s_stats.h"
 #include "send.h"
 #include "s_debug.h"
-
-#define MSGTAB
+#include "ircd_handler.h"
 #include "msg.h"
-#undef MSGTAB
 
 #include <assert.h>
 #include <string.h>
@@ -59,6 +58,8 @@ static struct Message *tree_parse(char *);
 
 static char buffer[1024];  /* ZZZ must this be so big? must it be here? */
 
+struct MessageTree* msg_tree_root;
+
 /*
  * parse a buffer.
  *
@@ -66,16 +67,16 @@ static char buffer[1024];  /* ZZZ must this be so big? must it be here? */
  */
 int parse(struct Client *cptr, char *buffer, char *bufend)
 {
-  struct Client *from = cptr;
-  char  *ch;
-  char  *s;
-  int   i;
-  char* numeric = 0;
-  int   paramcount;
-  struct Message *mptr;
+  struct Client*  from = cptr;
+  char*           ch;
+  char*           s;
+  int             i;
+  int             paramcount;
+  char*           numeric = 0;
+  struct Message* mptr;
+  MessageHandler  handler = 0;
 
-  Debug((DEBUG_DEBUG, "Parsing %s: %s",
-         get_client_name(cptr, TRUE), buffer));
+  Debug((DEBUG_DEBUG, "Parsing %s:", buffer));
 
   if (IsDead(cptr))
     return -1;
@@ -295,7 +296,7 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
   /* check allow_unregistered_use flag I've set up instead of function
      comparing *yech* - Dianora */
 
-  if (!IsRegistered(cptr) && !mptr->allow_unregistered_use )
+  if (!IsRegistered(cptr)) /*  && !mptr->allow_unregistered_use ) */
     {
       /* if its from a possible server connection
        * ignore it.. more than likely its a header thats sneaked through
@@ -319,6 +320,7 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
    * - Dianora
    */
 
+#if 0
 #ifdef IDLE_FROM_MSG
   if (IsRegisteredUser(cptr) && mptr->reset_idle)
     from->user->last = CurrentTime;
@@ -326,12 +328,18 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
   if (IsRegisteredUser(cptr) && !mptr->reset_idle)
     from->user->last = CurrentTime;
 #endif
+#endif
   
   /* don't allow other commands while a list is blocked. since we treat
      them specially with respect to sendq. */
+#if 0
   if ((IsDoingList(cptr)) && (*mptr->func != m_list))
       return -1;
-  return (*mptr->func)(cptr, from, i, para);
+#endif
+
+  /* HACK */
+  handler = mptr->handlers[CLIENT_HANDLER];
+  return (*handler)(cptr, from, i, para);
 }
 
 /* for qsort'ing the msgtab in place -orabidoo */
@@ -441,6 +449,552 @@ static struct Message *do_msg_tree(MESSAGE_TREE *mtree, char *prefix,
       exit(1);
     }
 }
+
+struct Message msgtab[] = {
+  {
+    MSG_PRIVMSG,
+    0,
+    MAXPARA,
+    MFLG_SLOW | MFLG_UNREG,
+    0L,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_privmsg, ms_privmsg, mo_privmsg }
+  },
+  {
+    MSG_NOTICE,
+    0,
+    MAXPARA, 
+    MFLG_SLOW | MFLG_UNREG,
+    0L,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_notice, ms_notice, mo_notice }
+  },
+  {
+    MSG_JOIN,
+    0,
+    MAXPARA,
+    MFLG_SLOW | MFLG_UNREG,
+    0L,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_join, ms_join, m_join }
+  },
+  {
+    MSG_CBURST,
+    0,
+    MAXPARA,
+    MFLG_SLOW | MFLG_UNREG,
+    0L,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_error, ms_cburst, m_error }
+  },
+  {
+    MSG_DROP,
+    0,
+    MAXPARA,
+    MFLG_SLOW | MFLG_UNREG,
+    0L,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_error, ms_drop, m_error }
+  },
+  {
+    MSG_LLJOIN,
+    0,
+    MAXPARA,
+    MFLG_SLOW | MFLG_UNREG,
+    0L,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_error, ms_lljoin, m_error }
+  },
+  {
+    MSG_JOIN,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_join, ms_join, m_join }
+  },
+  {
+    MSG_MODE,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_mode, ms_mode, m_mode }
+  },
+  {
+    MSG_QUIT,
+    0,
+    MAXPARA,
+    MFLG_SLOW | MFLG_UNREG,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_quit, m_quit, ms_quit, m_quit }
+  },
+  {
+    MSG_PART,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_part, ms_part, m_part }
+  },
+  {
+    MSG_KNOCK,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_part, ms_part, m_part }
+  },
+  {
+    MSG_TOPIC,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_topic, ms_topic, m_topic}
+  },
+  {
+    MSG_INVITE,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_invite, ms_invite, m_invite }
+  },
+  {
+    MSG_KICK,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_kick, ms_kick, m_kick }
+  },
+  {
+    MSG_WALLOPS,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_not_oper, ms_wallops, mo_wallops }
+  },
+  {
+    MSG_PING,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_ping, ms_ping, m_ping }
+  },
+  {
+    MSG_PONG,
+    0,
+    MAXPARA,
+    MFLG_SLOW | MFLG_UNREG,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { mr_pong, m_ignore, ms_pong, m_ignore }
+  },
+  {
+    MSG_ERROR,
+    0,
+    MAXPARA, 
+    MFLG_SLOW | MFLG_UNREG,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { mr_error, m_ignore, ms_error, m_ignore }
+  },
+  {
+    MSG_KILL,
+    0,
+    MAXPARA, 
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_not_oper, ms_kill, mo_kill }
+  },
+  {
+    MSG_USER,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_user, m_registered, m_ignore, m_registered }
+  },
+  {
+    MSG_AWAY,
+    0,
+    MAXPARA, 
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_away, ms_away, m_away }
+  },
+  {
+    MSG_ISON,
+    0,
+    1,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_ison, m_ignore, m_ison }
+  },
+  {
+    MSG_SERVER,
+    0,
+    MAXPARA, 
+    MFLG_SLOW | MFLG_UNREG,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { mr_server, m_registered, ms_server, m_registered }
+  },
+  {
+    MSG_SQUIT,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_not_oper, ms_squit, mo_squit }
+  },
+  {
+    MSG_WHOIS,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_whois, m_whois, m_whois }
+  },
+  {
+    MSG_WHO,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_who, m_ignore, m_who }
+  },
+  {
+    MSG_WHOWAS,
+    0,
+    MAXPARA, 
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_whowas, m_whowas, m_whowas }
+  },
+  {
+    MSG_LIST,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_list, m_ignore, m_list }
+  },
+  {
+    MSG_NAMES,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_names, ms_names, m_names }
+  },
+  {
+    MSG_USERHOST,
+    0,
+    1,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_userhost, m_ignore, m_userhost }
+  },
+#if 0
+  {
+    MSG_USERIP,
+    0,
+    1,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_userip, m_ignore, m_userip }
+  },
+#endif
+  {
+    MSG_TRACE,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_trace, ms_trace, mo_trace }
+  },
+  {
+    MSG_PASS,
+    0,
+    MAXPARA,
+    MFLG_SLOW | MFLG_UNREG,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_pass, m_registered, m_ignore, m_registered }
+  },
+  {
+    MSG_LUSERS,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_lusers, ms_lusers, m_lusers }
+  },
+  {
+    MSG_TIME,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_time, m_time, m_time }
+  },
+  {
+    MSG_OPER,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_oper, ms_oper, mo_oper }
+  },
+  {
+    MSG_CONNECT,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_not_oper, ms_connect, mo_connect }
+  },
+  {
+    MSG_VERSION,
+    0,
+    MAXPARA,
+    MFLG_SLOW | MFLG_UNREG,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_version, m_version, ms_version, m_version }
+  },
+  {
+    MSG_STATS,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_stats, ms_stats, mo_stats }
+  },
+  {
+    MSG_LINKS,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_links, ms_links, m_links }
+  },
+  {
+    MSG_ADMIN,
+    0,
+    MAXPARA,
+    MFLG_SLOW | MFLG_UNREG,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_admin, m_admin, ms_admin, m_admin }
+  },
+  {
+    MSG_HELP,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_help, m_ignore, m_help }
+  },
+  {
+    MSG_INFO,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_info, ms_info, mo_info }
+  },
+  {
+    MSG_MOTD,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_motd, m_motd, m_motd }
+  },
+  {
+    MSG_SJOIN,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_error, ms_sjoin, m_error }
+  },
+  {
+    MSG_CAPAB,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_error, ms_capab, m_error }
+  },
+  {
+    MSG_OPERWALL,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_not_oper, ms_operwall, mo_operwall }
+  },
+  {
+    MSG_CLOSE,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_not_oper, m_ignore, mo_close }
+  },
+  {
+    MSG_KLINE,
+    0,
+    MAXPARA, 
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_not_oper, ms_kline, mo_kline }
+  },
+  {
+    MSG_UNKLINE,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_not_oper, m_error, mo_unkline }
+  },
+  {
+    MSG_DLINE,
+    0, 
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_not_oper, m_error, mo_dline }
+  },
+  {
+    MSG_GLINE,
+    0,
+    MAXPARA, 
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_not_oper, ms_gline, mo_gline }
+  },
+  {
+    MSG_HASH,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_hash, m_hash, m_hash }
+  },
+  {
+    MSG_DNS,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_dns, m_dns, m_dns }
+  },
+  {
+    MSG_REHASH,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_not_oper, m_ignore, mo_rehash }
+  },
+  {
+    MSG_RESTART,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_not_oper, m_ignore, mo_restart }
+  },
+  {
+    MSG_DIE,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_not_oper, m_ignore, mo_die }
+  },
+  {
+    MSG_HTM,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_not_oper, m_ignore, mo_die }
+  },
+  {
+    MSG_SET,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_not_oper, m_error, mo_set }
+  },
+  {
+    MSG_TESTLINE,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_not_oper, m_error, mo_testline }
+  },
+  { 0 }
+}; 
 
 /*
  * tree_parse()
@@ -698,3 +1252,34 @@ static int     do_numeric(
     }
   return 0;
 }
+
+
+/* stick these here for now, to get it to compile
+ * will go into m_defaults.c just like ircu (thanks bleep!)
+ */
+int m_not_oper(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
+{
+  sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
+  return 0;
+}
+
+int m_unregistered(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
+{
+  sendto_one(cptr, ":%s %d * %s :Register first.",
+             me.name, ERR_NOTREGISTERED, parv[0]);
+  return 0;
+}
+
+int m_registered(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
+{
+  /*  return send_error_to_client(sptr, ERR_ALREADYREGISTRED); */
+  sendto_one(cptr, ":%s NOTICE %s :Already registered",
+	     me.name,cptr->name);
+  return 0;
+}
+
+int m_ignore(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
+{
+  return 0;
+}
+

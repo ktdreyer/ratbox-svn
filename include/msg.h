@@ -25,6 +25,11 @@
 #include "config.h"
 #endif
 
+#ifndef INCLUDED_ircd_handler_h
+#define INCLUDED_ircd_handler_h
+#include "ircd_handler.h"
+#endif
+
 struct Client;
 
 /* 
@@ -33,22 +38,22 @@ struct Client;
 struct  Message
 {
   char  *cmd;
-  int   (* func)();
   unsigned int  count;                  /* number of times command used */
-  int   parameters;
-  char  flags;
-  /* bit 0 set means that this command is allowed to be used
-   * only on the average of once per 2 seconds -SRB */
-
-  /* I could have defined other bit maps to above instead of the next two
-     flags that I added. so sue me. -Dianora */
-
-  char    allow_unregistered_use;       /* flag if this command can be
-                                           used if unregistered */
-
-  char    reset_idle;                   /* flag if this command causes
-                                           idle time to be reset */
-  unsigned long bytes;
+  unsigned int  parameters;
+  unsigned int  flags;  /* bit 0 set means that this command is allowed
+			   to be used only on the average of once per 2
+			   seconds -SRB */
+  unsigned long bytes;  /* bytes received for this message */
+  /*
+   * cptr = Connected client ptr
+   * sptr = Source client ptr
+   * parc = parameter count
+   * parv = parameter variable array
+   */
+  /* handlers:
+   * UNREGISTERED, CLIENT, SERVER, OPER, LAST
+   */
+  MessageHandler handlers[LAST_HANDLER_TYPE];
 };
 
 struct MessageTree
@@ -63,8 +68,8 @@ typedef struct MessageTree MESSAGE_TREE;
 #ifdef DBOP
 #define MSG_DBOP     "DBOP"
 #endif
-#define MSG_PRIVMSG  "PRIVMSG"  /* PRIV */
 
+#define MSG_PRIVMSG  "PRIVMSG"  /* PRIV */
 #define MSG_CBURST   "CBURST"   /* LazyLink channel burst */
 #define MSG_DROP     "DROP"     /* LazyLink channel drop */
 #define MSG_LLJOIN   "LLJOIN"   /* LazyLink join */
@@ -123,147 +128,24 @@ typedef struct MessageTree MESSAGE_TREE;
 #define MSG_DLINE    "DLINE"    /* DLINE */
 #define MSG_HTM      "HTM"      /* HTM */
 #define MSG_SET      "SET"      /* SET */
-
 #define MSG_GLINE    "GLINE"    /* GLINE */
+#define MSG_KNOCK    "KNOCK"    /* KNOCK */
+#define MSG_OPERWALL "OPERWALL" /* OPERWALL */
 
-
-#define MSG_LOCOPS   "LOCOPS"   /* LOCOPS */
-#ifdef LWALLOPS
-#define MSG_LWALLOPS "LWALLOPS" /* Same as LOCOPS */
-#endif /* LWALLOPS */
-#define MSG_KNOCK          "KNOCK"  /* KNOCK */
-
+/*
+ * Constants
+ */
+#define   MFLG_SLOW              0x01   /* Command can be executed roughly    *
+                                         * once per 2 seconds.                */
+#define   MFLG_UNREG             0x02   /* Command available to unregistered  *
+                                         * clients.                           */
+#define   MFLG_IGNORE            0x04   /* silently ignore command from
+                                         * unregistered clients */
 #define MAXPARA    15 
 
 #define MSG_TESTLINE "TESTLINE"
 
-#ifdef MSGTAB
-#ifndef INCLUDED_m_commands_h
-#include "m_commands.h"       /* m_xxx */
-#endif
-struct Message msgtab[] = {
-#ifdef IDLE_FROM_MSG    /* reset idle time only if privmsg used */
-#ifdef IDLE_CHECK       /* reset idle time only if valid target for privmsg
-                           and target is not source */
-
-  /*                                        |-- allow use even when unreg.
-                                            v   yes/no                  */
-  { MSG_PRIVMSG, m_privmsg,  0, MAXPARA, 1, 0, 0, 0L },
-#else
-  { MSG_PRIVMSG, m_privmsg,  0, MAXPARA, 1, 0, 1, 0L },
-#endif
-
-  /*                                           ^
-                                               |__ reset idle time when 1 */
-#else   /* IDLE_FROM_MSG */
-#ifdef  IDLE_CHECK      /* reset idle time on anything but privmsg */
-  { MSG_PRIVATE, m_private,  0, MAXPARA, 1, 0, 1, 0L },
-#else
-  { MSG_PRIVATE, m_private,  0, MAXPARA, 1, 0, 0, 0L },
-  /*                                           ^
-                                               |__ reset idle time when 0 */
-#endif  /* IDLE_CHECK */
-#endif  /* IDLE_FROM_MSG */
-
-  { MSG_NICK,    m_nick,     0, MAXPARA, 1, 1, 0, 0L },
-  { MSG_NOTICE,  m_notice,   0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_JOIN,    m_join,     0, MAXPARA, 1, 0, 0, 0L },
-#ifdef DBOP
-  { MSG_DBOP,    m_dbop,     0, MAXPARA, 1, 0, 0, 0L },
-#endif
-  { MSG_CBURST,  m_cburst,   0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_DROP,    m_drop,     0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_LLJOIN,  m_lljoin,   0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_MODE,    m_mode,     0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_QUIT,    m_quit,     0, MAXPARA, 1, 1, 0, 0L },
-  { MSG_PART,    m_part,     0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_KNOCK,   m_knock,    0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_TOPIC,   m_topic,    0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_INVITE,  m_invite,   0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_KICK,    m_kick,     0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_WALLOPS, m_wallops,  0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_LOCOPS,  m_locops,   0, MAXPARA, 1, 0, 0, 0L },
-#ifdef LWALLOPS
-  { MSG_LWALLOPS,m_locops,   0, MAXPARA, 1, 0, 0, 0L },
-#endif /* LWALLOPS */
-
-#ifdef IDLE_FROM_MSG
-
-  /* Only m_private has reset idle flag set */
-  { MSG_PONG,    m_pong,     0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_PING,    m_ping,     0, MAXPARA, 1, 0, 0, 0L },
-
-#else
-
-  /* else for IDLE_FROM_MSG */
-  /* reset idle flag sense is reversed, only reset idle time
-   * when its 0, for IDLE_FROM_MSG ping/pong do not reset idle time
-   */
-
-  { MSG_PONG,    m_pong,     0, MAXPARA, 1, 0, 1, 0L },
-  { MSG_PING,    m_ping,     0, MAXPARA, 1, 0, 1, 0L },
-
-#endif  /* IDLE_FROM_MSG */
-
-  { MSG_ERROR,   m_error,    0, MAXPARA, 1, 1, 0, 0L },
-  { MSG_KILL,    m_kill,     0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_USER,    m_user,     0, MAXPARA, 1, 1, 0, 0L },
-  { MSG_AWAY,    m_away,     0, MAXPARA, 1, 0, 0, 0L },
-#ifdef IDLE_FROM_MSG
-  { MSG_ISON,    m_ison,     0, 1,       1, 0, 0, 0L },
-#else
-  /* ISON should not reset idle time ever
-   * remember idle flag sense is reversed when IDLE_FROM_MSG is undefined
-   */
-  { MSG_ISON,    m_ison,     0, 1,       1, 0, 1, 0L },
-#endif /* !IDLE_FROM_MSG */
-  { MSG_SERVER,  m_server,   0, MAXPARA, 1, 1, 0, 0L },
-  { MSG_SQUIT,   m_squit,    0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_WHOIS,   m_whois,    0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_WHO,     m_who,      0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_WHOWAS,  m_whowas,   0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_LIST,    m_list,     0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_NAMES,   m_names,    0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_USERHOST,m_userhost, 0, 1,       1, 0, 0, 0L },
-  { MSG_TRACE,   m_trace,    0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_PASS,    m_pass,     0, MAXPARA, 1, 1, 0, 0L },
-  { MSG_LUSERS,  m_lusers,   0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_TIME,    m_time,     0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_OPER,    m_oper,     0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_CONNECT, m_connect,  0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_VERSION, m_version,  0, MAXPARA, 1, 1, 0, 0L },
-  { MSG_STATS,   m_stats,    0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_LINKS,   m_links,    0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_ADMIN,   m_admin,    0, MAXPARA, 1, 1, 0, 0L },
-  { MSG_USERS,   m_users,    0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_HELP,    m_help,     0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_INFO,    m_info,     0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_MOTD,    m_motd,     0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_SVINFO,  m_svinfo,   0, MAXPARA, 1, 1, 0, 0L },
-  { MSG_SJOIN,   m_sjoin,    0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_CAPAB,   m_capab,    0, MAXPARA, 1, 1, 0, 0L },
-  { MSG_CLOSE,   m_close,    0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_KLINE,   m_kline,    0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_UNKLINE, m_unkline,  0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_DLINE,   m_dline,    0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_GLINE,   m_gline,    0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_HASH,    m_hash,     0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_DNS,     m_dns,      0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_REHASH,  m_rehash,   0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_RESTART, m_restart,  0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_DIE, m_die,          0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_HTM,    m_htm,       0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_SET,    m_set,       0, MAXPARA, 1, 0, 0, 0L },
-  { MSG_TESTLINE,       m_testline,          0, MAXPARA, 1, 0, 0, 0L },
-  { (char *) 0, (int (*)()) 0 , 0, 0,    0, 0, 0, 0L }
-};
-
-struct MessageTree* msg_tree_root;
-
-#else
-extern struct Message       msgtab[];
-extern struct MessageTree*  msg_tree_root;
-#endif
+extern struct Message msgtab[];
 
 #endif /* INCLUDED_msg_h */
 

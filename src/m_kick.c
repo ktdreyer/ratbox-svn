@@ -22,7 +22,7 @@
  *
  *   $Id$
  */
-#include "m_commands.h"
+#include "handlers.h"
 #include "channel.h"
 #include "client.h"
 #include "irc_string.h"
@@ -111,6 +111,141 @@
  * -Dianora
  */
 int     m_kick(struct Client *cptr,
+               struct Client *sptr,
+               int parc,
+               char *parv[])
+{
+  struct Client *who;
+  struct Channel *chptr;
+  int   chasing = 0;
+  char  *comment;
+  char  *name;
+  char  *p = (char *)NULL;
+  char  *user;
+  static char     buf[BUFSIZE];
+
+  if (parc < 3 || *parv[1] == '\0')
+    {
+      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
+                 me.name, parv[0], "KICK");
+      return 0;
+    }
+  if (IsServer(sptr))
+    sendto_ops("KICK from %s for %s %s",
+               parv[0], parv[1], parv[2]);
+  comment = (BadPtr(parv[3])) ? parv[0] : parv[3];
+  if (strlen(comment) > (size_t) TOPICLEN)
+    comment[TOPICLEN] = '\0';
+
+  *buf = '\0';
+  p = strchr(parv[1],',');
+  if(p)
+    *p = '\0';
+  name = parv[1]; /* strtoken(&p, parv[1], ","); */
+
+  chptr = get_channel(sptr, name, !CREATE);
+  if (!chptr)
+    {
+      sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
+                 me.name, parv[0], name);
+      return(0);
+    }
+
+  /* You either have chan op privs, or you don't -Dianora */
+  /* orabidoo and I discussed this one for a while...
+   * I hope he approves of this code, (he did) users can get quite confused...
+   *    -Dianora
+   */
+
+  if (!IsServer(sptr) && !is_chan_op(sptr, chptr) ) 
+    { 
+      /* was a user, not a server, and user isn't seen as a chanop here */
+      
+      if(MyConnect(sptr))
+        {
+          /* user on _my_ server, with no chanops.. so go away */
+          
+          sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED),
+                     me.name, parv[0], chptr->chname);
+          return(0);
+        }
+
+      if(chptr->channelts == 0)
+        {
+          /* If its a TS 0 channel, do it the old way */
+          
+          sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED),
+                     me.name, parv[0], chptr->chname);
+          return(0);
+        }
+
+      /* Its a user doing a kick, but is not showing as chanop locally
+       * its also not a user ON -my- server, and the channel has a TS.
+       * There are two cases we can get to this point then...
+       *
+       *     1) connect burst is happening, and for some reason a legit
+       *        op has sent a KICK, but the SJOIN hasn't happened yet or 
+       *        been seen. (who knows.. due to lag...)
+       *
+       *     2) The channel is desynced. That can STILL happen with TS
+       *        
+       *     Now, the old code roger wrote, would allow the KICK to 
+       *     go through. Thats quite legit, but lets weird things like
+       *     KICKS by users who appear not to be chanopped happen,
+       *     or even neater, they appear not to be on the channel.
+       *     This fits every definition of a desync, doesn't it? ;-)
+       *     So I will allow the KICK, otherwise, things are MUCH worse.
+       *     But I will warn it as a possible desync.
+       *
+       *     -Dianora
+       */
+
+      /*          sendto_one(sptr, form_str(ERR_DESYNC),
+       *           me.name, parv[0], chptr->chname);
+       */
+
+      /*
+       * After more discussion with orabidoo...
+       *
+       * The code was sound, however, what happens if we have +h (TS4)
+       * and some servers don't understand it yet? 
+       * we will be seeing servers with users who appear to have
+       * no chanops at all, merrily kicking users....
+       * -Dianora
+       */
+    }
+
+  p = strchr(parv[2],',');
+  if(p)
+    *p = '\0';
+  user = parv[2]; /* strtoken(&p2, parv[2], ","); */
+
+  if (!(who = find_chasing(sptr, user, &chasing)))
+    {
+      sendto_one(sptr, form_str(ERR_NOSUCHNICK),
+                 me.name, parv[0], user, name);
+      return(0);
+    }
+
+  if (IsMember(who, chptr))
+    {
+      sendto_channel_butserv(chptr, sptr,
+                             ":%s KICK %s %s :%s", parv[0],
+                             name, who->name, comment);
+      sendto_match_servs(chptr, cptr,
+                         ":%s KICK %s %s :%s",
+                         parv[0], name,
+                         who->name, comment);
+      remove_user_from_channel(who, chptr, 1);
+    }
+  else
+    sendto_one(sptr, form_str(ERR_USERNOTINCHANNEL),
+               me.name, parv[0], user, name);
+
+  return (0);
+}
+
+int     ms_kick(struct Client *cptr,
                struct Client *sptr,
                int parc,
                char *parv[])

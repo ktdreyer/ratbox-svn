@@ -22,7 +22,7 @@
  *
  *   $Id$
  */
-#include "m_commands.h"
+#include "handlers.h"
 #include "client.h"
 #include "irc_string.h"
 #include "ircd.h"
@@ -159,10 +159,10 @@ static int set_parser(const char* parsethis)
 }
 
 /*
- * m_set - SET command handler
+ * mo_set - SET command handler
  * set options while running
  */
-int m_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+int mo_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   char *command;
   int cnum;

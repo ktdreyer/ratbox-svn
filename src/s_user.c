@@ -35,6 +35,7 @@
 #include "list.h"
 #include "listener.h"
 #include "motd.h"
+#include "ircd_handler.h"
 #include "msg.h"
 #include "numeric.h"
 #include "s_bsd.h"

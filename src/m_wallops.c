@@ -22,7 +22,7 @@
  *
  *   $Id$
  */
-#include "m_commands.h"
+#include "handlers.h"
 #include "client.h"
 #include "ircd.h"
 #include "irc_string.h"
@@ -90,11 +90,65 @@
 
  
 /*
- * m_wallops (write to *all* opers currently online)
+ * mo_wallops (write to *all* opers currently online)
  *      parv[0] = sender prefix
  *      parv[1] = message text
  */
-int m_wallops(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+int mo_wallops(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+{ 
+  char* message;
+
+  message = parc > 1 ? parv[1] : NULL;
+  
+  if (EmptyString(message))
+    {
+      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
+                 me.name, parv[0], "WALLOPS");
+      return 0;
+    }
+
+  if (!IsServer(sptr) && MyConnect(sptr) && !IsAnOper(sptr))
+    {
+      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
+      return(0);
+    }
+
+  /* If its coming from a server, do the normal thing
+     if its coming from an oper, send the wallops along
+     and only send the wallops to our local opers (those who are +oz)
+     -Dianora
+  */
+
+  if(!IsServer(sptr))   /* If source of message is not a server, i.e. oper */
+    {
+
+      if( ConfigFileEntry.pace_wallops && MyClient(sptr) )
+        {
+          if( (LastUsedWallops + ConfigFileEntry.wallops_wait) > CurrentTime )
+            { 
+          	sendto_one(sptr, ":%s NOTICE %s :Oh, one of those annoying opers who doesn't know how to use a channel",
+                     me.name,parv[0]);
+          	return 0;
+            }
+          LastUsedWallops = CurrentTime;
+        }
+
+      send_operwall(sptr, "WALLOPS", message);
+      sendto_serv_butone( IsServer(cptr) ? cptr : NULL,
+                          ":%s WALLOPS :%s", parv[0], message);
+    }
+  else                  /* its a server wallops */
+    sendto_wallops_butone(IsServer(cptr) ? cptr : NULL, sptr,
+                            ":%s WALLOPS :%s", parv[0], message);
+  return 0;
+}
+
+/*
+ * ms_wallops (write to *all* opers currently online)
+ *      parv[0] = sender prefix
+ *      parv[1] = message text
+ */
+int ms_wallops(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 { 
   char* message;
 

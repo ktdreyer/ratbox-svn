@@ -22,7 +22,7 @@
  *
  *   $Id$
  */
-#include "m_commands.h"
+#include "handlers.h"
 #include "channel.h"
 #include "client.h"
 #include "hash.h"
@@ -97,6 +97,90 @@
  * parv[1] - channel
  */
 int m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+{
+  struct Channel* chptr;
+  static char     modebuf[MODEBUFLEN];
+  static char     parabuf[MODEBUFLEN];
+
+  /* Now, try to find the channel in question */
+  if (parc > 1)
+    {
+      if( IsChanPrefix(parv[1][0]) )
+        {
+          /* Don't do any of this stuff at all
+           * unless it looks like a channel name 
+           */
+
+          if (!check_channel_name(parv[1]))
+            { 
+              sendto_one(sptr, form_str(ERR_BADCHANNAME),
+                         me.name, parv[0], (unsigned char *)parv[1]);
+              return 0;
+            }
+
+          chptr = hash_find_channel(parv[1], NullChn);
+	  if(!chptr)
+	    {
+	      /* LazyLinks */
+	      if ( !ConfigFileEntry.hub && IsCapable( serv_cptr_list, CAP_LL) )
+		{
+		  /* cache the channel if it exists on uplink */
+		  /* nasty possibility of a DoS here... ?
+		   * nefarious user purposefully mode's non existent
+		   * channel hoping to create a lot of traffic...
+		   */
+
+		  sendto_one( serv_cptr_list, ":%s CBURST %s",
+			      me.name, parv[1] );
+
+		  /* meanwhile, ask for channel mode */
+		  sendto_one( serv_cptr_list, ":%s MODE %s",
+			      sptr->name, parv[1] );
+		  return 0;
+		}
+	      else
+		{
+		  sendto_one(sptr, form_str(ERR_BADCHANNAME),
+			     me.name, parv[0], (unsigned char *)parv[1]);
+		  return 0;
+		}
+	    }
+        }
+      else
+        {
+          /* if here, it has to be a non-channel name */
+          return user_mode(cptr, sptr, parc, parv);
+        }
+    }
+  else
+    {
+      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
+                 me.name, parv[0], "MODE");
+      return 0;
+    }
+
+  if (parc < 3)
+    {
+      *modebuf = *parabuf = '\0';
+      modebuf[1] = '\0';
+      channel_modes(sptr, modebuf, parabuf, chptr);
+      sendto_one(sptr, form_str(RPL_CHANNELMODEIS), me.name, parv[0],
+                 chptr->chname, modebuf, parabuf);
+      sendto_one(sptr, form_str(RPL_CREATIONTIME), me.name, parv[0],
+                 chptr->chname, chptr->channelts);
+      return 0;
+    }
+
+  /* LazyLinks - can't do mode "#channel +o" unless user is on channel
+   * and in that case, channel has been cached using CBURST
+   */
+
+  set_channel_mode(cptr, sptr, chptr, parc - 2, parv + 2);
+
+  return 0;
+}
+
+int ms_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   struct Channel* chptr;
   static char     modebuf[MODEBUFLEN];

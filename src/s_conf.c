@@ -2566,7 +2566,7 @@ char    *parv, *filename;
 
 
 /*
- * m_testline
+ * mo_testline
  *
  * inputs       - pointer to physical connection request is coming from
  *              - pointer to source connection request is comming from
@@ -2580,7 +2580,7 @@ char    *parv, *filename;
  *
  */
 
-int m_testline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+int mo_testline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   struct ConfItem *aconf;
   unsigned long ip;

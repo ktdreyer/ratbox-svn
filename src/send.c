@@ -26,7 +26,7 @@
 #include "common.h"
 #include "irc_string.h"
 #include "ircd.h"
-#include "m_commands.h"
+#include "handlers.h"
 #include "numeric.h"
 #include "s_bsd.h"
 #include "s_serv.h"

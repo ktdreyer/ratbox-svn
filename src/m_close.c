@@ -22,7 +22,7 @@
  *
  *   $Id$
  */
-#include "m_commands.h"
+#include "handlers.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -88,10 +88,10 @@
 
 
 /*
- * m_close - CLOSE message handler
+ * mo_close - CLOSE message handler
  *  - added by Darren Reed Jul 13 1992.
  */
-int m_close(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+int mo_close(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   struct Client* acptr;
   int            i;

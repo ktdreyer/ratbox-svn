@@ -22,7 +22,7 @@
  *
  *  $Id$
  */
-#include "m_commands.h"  /* m_pass prototype */
+#include "handlers.h"  /* m_pass prototype */
 #include "client.h"      /* client struct */
 #include "irc_string.h"  /* strncpy_irc */
 #include "send.h"        /* sendto_one */

@@ -33,6 +33,7 @@
 #include "list.h"
 #include "m_gline.h"
 #include "motd.h"
+#include "ircd_handler.h"
 #include "msg.h"         /* msgtab */
 #include "mtrie_conf.h"
 #include "numeric.h"

@@ -23,7 +23,7 @@
  *
  *   $Id$
  */
-#include "m_commands.h"
+#include "handlers.h"
 #include "channel.h"
 #include "client.h"
 #include "common.h"
@@ -49,7 +49,7 @@ static int flush_write(struct Client *, FBFILE* , char *, char *);
 static int remove_tkline_match(char *,char *);
 
 /*
-** m_unkline
+** mo_unkline
 ** Added Aug 31, 1997 
 ** common (Keith Fralick) fralick@gate.net
 **
@@ -63,7 +63,7 @@ static int remove_tkline_match(char *,char *);
 * Added comstuds SEPARATE_QUOTE_KLINES_BY_DATE
 *
 */
-int m_unkline (struct Client *cptr,struct Client *sptr,int parc,char *parv[])
+int mo_unkline (struct Client *cptr,struct Client *sptr,int parc,char *parv[])
 {
   FBFILE* in;
   FBFILE* out;

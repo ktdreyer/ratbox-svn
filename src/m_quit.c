@@ -22,7 +22,7 @@
  *
  *   $Id$
  */
-#include "m_commands.h"
+#include "handlers.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -92,6 +92,25 @@
 **      parv[1] = comment
 */
 int     m_quit(struct Client *cptr,
+               struct Client *sptr,
+               int parc,
+               char *parv[])
+{
+  char *comment = (parc > 1 && parv[1]) ? parv[1] : cptr->name;
+
+  sptr->flags |= FLAGS_NORMALEX;
+  if (strlen(comment) > (size_t) TOPICLEN)
+    comment[TOPICLEN] = '\0';
+
+#ifdef ANTI_SPAM_EXIT_MESSAGE
+  if( !IsServer(sptr) && MyConnect(sptr) &&
+     (sptr->firsttime + ANTI_SPAM_EXIT_MESSAGE_TIME) > CurrentTime)
+    comment = "Client Quit";
+#endif
+  return IsServer(sptr) ? 0 : exit_client(cptr, sptr, sptr, comment);
+}
+
+int     ms_quit(struct Client *cptr,
                struct Client *sptr,
                int parc,
                char *parv[])

@@ -76,7 +76,7 @@ static int majority_gline(struct Client*, const char *,const char *, const char 
 #endif
 
 /*
- * m_gline()
+ * mo_gline()
  *
  * inputs       - The usual for a m_ function
  * output       -
@@ -89,7 +89,269 @@ static int majority_gline(struct Client*, const char *,const char *, const char 
  * GLINES is not defined.
  */
 
-int     m_gline(struct Client *cptr,
+int     mo_gline(struct Client *cptr,
+                struct Client *sptr,
+                int parc,
+                char *parv[])
+{
+  char *oper_name;              /* nick of oper requesting GLINE */
+  char *oper_username;          /* username of oper requesting GLINE */
+  char *oper_host;              /* hostname of oper requesting GLINE */
+  const char* oper_server;      /* server of oper requesting GLINE */
+  char *user, *host;            /* user and host of GLINE "victim" */
+  char *reason;                 /* reason for "victims" demise */
+  char *p;
+  register char tmpch;
+  register int nonwild;
+#ifdef GLINES
+  char buffer[IRCD_BUFSIZE];
+  const char *current_date;
+  char tempuser[USERLEN + 2];
+  char temphost[HOSTLEN + 1];
+  struct ConfItem *aconf;
+#endif
+
+  if(!IsServer(sptr)) /* allow remote opers to apply g lines */
+    {
+#ifdef GLINES
+      /* Only globals can apply Glines */
+      if (!IsOper(sptr))
+        {
+          sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
+          return 0;
+        }
+
+      if (!IsSetOperGline(sptr))
+        {
+          sendto_one(sptr,":%s NOTICE %s :You have no G flag",me.name,parv[0]);
+          return 0;
+        }
+
+      if ( parc < 3 )
+        {
+          sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
+                     me.name, parv[0], "GLINE");
+          return 0;
+        }
+      
+      if ( (host = strchr(parv[1], '@')) || *parv[1] == '*' )
+        {
+          /* Explicit user@host mask given */
+          
+          if(host)                      /* Found user@host */
+            {
+              user = parv[1];   /* here is user part */
+              *(host++) = '\0'; /* and now here is host */
+            }
+          else
+            {
+              user = "*";               /* no @ found, assume its *@somehost */
+              host = parv[1];
+            }
+
+          if (!*host)           /* duh. no host found, assume its '*' host */
+            host = "*";
+
+          strncpy_irc(tempuser, user, USERLEN + 1);     /* allow for '*' */
+          tempuser[USERLEN + 1] = '\0';
+          strncpy_irc(temphost, host, HOSTLEN);
+          temphost[HOSTLEN] = '\0';
+          user = tempuser;
+          host = temphost;
+        }
+      else
+        {
+          sendto_one(sptr, ":%s NOTICE %s :Can't G-Line a nick use user@host",
+                     me.name,
+                     parv[0]);
+          return 0;
+        }
+
+      if(strchr(parv[2], ':'))
+        {
+          sendto_one(sptr,
+                     ":%s NOTICE %s :Invalid character ':' in comment",
+                     me.name, parv[2]);
+          return 0;
+        }
+
+  /*
+   * Now we must check the user and host to make sure there
+   * are at least NONWILDCHARS non-wildcard characters in
+   * them, otherwise assume they are attempting to gline
+   * *@* or some variant of that. This code will also catch
+   * people attempting to gline *@*.tld, as long as NONWILDCHARS
+   * is greater than 3. In that case, there are only 3 non-wild
+   * characters (tld), so if NONWILDCHARS is 4, the gline will
+   * be disallowed.
+   * -wnder
+   */
+
+  nonwild = 0;
+  p = user;
+  while ((tmpch = *p++))
+  {
+    if (!IsKWildChar(tmpch))
+    {
+      /*
+       * If we find enough non-wild characters, we can
+       * break - no point in searching further.
+       */
+      if (++nonwild >= NONWILDCHARS)
+        break;
+    }
+  }
+
+  if (nonwild < NONWILDCHARS)
+  {
+    /*
+     * The user portion did not contain enough non-wild
+     * characters, try the host.
+     */
+    p = host;
+    while ((tmpch = *p++))
+    {
+      if (!IsKWildChar(tmpch))
+        if (++nonwild >= NONWILDCHARS)
+          break;
+    }
+  }
+
+  if (nonwild < NONWILDCHARS)
+  {
+    /*
+     * Not enough non-wild characters were found, assume
+     * they are trying to gline *@*.
+     */
+    if (MyClient(sptr))
+      sendto_one(sptr,
+        ":%s NOTICE %s :Please include at least %d non-wildcard characters with the user@host",
+        me.name,
+        parv[0],
+        NONWILDCHARS);
+
+    return 0;
+  }
+
+      reason = parv[2];
+
+      if (sptr->user && sptr->user->server)
+        oper_server = sptr->user->server;
+      else
+        return 0;
+
+      oper_name     = sptr->name;
+      oper_username = sptr->username;
+      oper_host     = sptr->host;
+
+
+      sendto_serv_butone(NULL, ":%s GLINE %s %s %s %s %s %s :%s",
+                         me.name,
+                         oper_name,
+                         oper_username,
+                         oper_host,
+                         oper_server,
+                         user,
+                         host,
+                         reason);
+#else
+      sendto_one(sptr,":%s NOTICE %s :GLINE disabled",me.name,parv[0]);  
+#endif
+    }
+  else
+    {
+      if(!IsServer(sptr))
+        return(0);
+
+      /* Always good to be paranoid about arguments */
+      if(parc < 8)
+        return 0;
+
+      oper_name = parv[1];
+      oper_username = parv[2];
+      oper_host = parv[3];
+      oper_server = parv[4];
+      user = parv[5];
+      host = parv[6];
+      reason = parv[7];
+
+      sendto_serv_butone(sptr, ":%s GLINE %s %s %s %s %s %s :%s",
+                         sptr->name,
+                         oper_name,oper_username,oper_host,oper_server,
+                         user,
+                         host,
+                         reason);
+    }
+#ifdef GLINES
+   log_gline_request(oper_name,oper_username,oper_host,oper_server,
+                     user,host,reason);
+
+   sendto_realops("%s!%s@%s on %s is requesting gline for [%s@%s] [%s]",
+                  oper_name,
+                  oper_username,
+                  oper_host,
+                  oper_server,
+                  user,
+                  host,
+                  reason);
+
+  /* If at least 3 opers agree this user should be G lined then do it */
+  if(majority_gline(sptr,
+                    oper_name,
+                    oper_username,
+                    oper_host,
+                    oper_server,
+                    user,
+                    host,
+                    reason))
+    {
+      current_date = smalldate((time_t) 0);
+          
+      aconf = make_conf();
+      aconf->status = CONF_KILL;
+      DupString(aconf->host, host);
+
+      ircsprintf(buffer, "%s (%s)",reason,current_date);
+      
+      DupString(aconf->passwd, buffer);
+      DupString(aconf->name, user);
+      aconf->hold = CurrentTime + GLINE_TIME;
+      add_gline(aconf);
+      
+      sendto_realops("%s!%s@%s on %s has triggered gline for [%s@%s] [%s]",
+                     oper_name,
+                     oper_username,
+                     oper_host,
+                     oper_server,
+                     user,
+                     host,
+                     reason);
+      
+      rehashed = YES;
+      dline_in_progress = NO;
+      nextping = CurrentTime;
+
+      return 0;
+    }
+#endif  
+  return 0;
+}
+
+/*
+ * ms_gline()
+ *
+ * inputs       - The usual for a m_ function
+ * output       -
+ * side effects -
+ *
+ * Place a G line if 3 opers agree on the identical user@host
+ * 
+ */
+/* Allow this server to pass along GLINE if received and
+ * GLINES is not defined.
+ */
+
+int     ms_gline(struct Client *cptr,
                 struct Client *sptr,
                 int parc,
                 char *parv[])

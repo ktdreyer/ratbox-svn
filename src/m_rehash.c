@@ -22,7 +22,7 @@
  *
  *   $Id$
  */
-#include "m_commands.h"
+#include "handlers.h"
 #include "client.h"
 #include "common.h"
 #include "irc_string.h"
@@ -93,10 +93,10 @@
  */
 
 /*
- * m_rehash - REHASH message handler
+ * mo_rehash - REHASH message handler
  *
  */
-int m_rehash(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+int mo_rehash(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   int found = NO;
 

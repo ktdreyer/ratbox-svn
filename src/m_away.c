@@ -22,7 +22,7 @@
  *
  *   $Id$
  */
-#include "m_commands.h"
+#include "handlers.h"
 #include "client.h"
 #include "irc_string.h"
 #include "ircd.h"
@@ -106,6 +106,71 @@
 **      parv[1] = away message
 */
 int     m_away(struct Client *cptr,
+               struct Client *sptr,
+               int parc,
+               char *parv[])
+{
+  char  *away, *awy2 = parv[1];
+
+  /* make sure the user exists */
+  if (!(sptr->user))
+    {
+      sendto_realops_flags(FLAGS_DEBUG,
+                           "Got AWAY from nil user, from %s (%s)\n",cptr->name,sptr->name);
+      return 0;
+    }
+
+  away = sptr->user->away;
+
+  if (parc < 2 || !*awy2)
+    {
+      /* Marking as not away */
+      
+      if (away)
+        {
+          MyFree(away);
+          sptr->user->away = NULL;
+        }
+/* some lamers scripts continually do a /away, hence making a lot of
+   unnecessary traffic. *sigh* so... as comstud has done, I've
+   commented out this sendto_serv_butone() call -Dianora */
+/*      sendto_serv_butone(cptr, ":%s AWAY", parv[0]); */
+      if (MyConnect(sptr))
+        sendto_one(sptr, form_str(RPL_UNAWAY),
+                   me.name, parv[0]);
+      return 0;
+    }
+
+  /* Marking as away */
+  
+  if (strlen(awy2) > (size_t) TOPICLEN)
+    awy2[TOPICLEN] = '\0';
+/* some lamers scripts continually do a /away, hence making a lot of
+   unnecessary traffic. *sigh* so... as comstud has done, I've
+   commented out this sendto_serv_butone() call -Dianora */
+/*  sendto_serv_butone(cptr, ":%s AWAY :%s", parv[0], awy2); */
+
+  /* don't use realloc() -Dianora */
+
+  if (away)
+    MyFree(away);
+
+  away = (char *)MyMalloc(strlen(awy2)+1);
+  strcpy(away,awy2);
+
+  sptr->user->away = away;
+
+  if (MyConnect(sptr))
+    sendto_one(sptr, form_str(RPL_NOWAWAY), me.name, parv[0]);
+  return 0;
+}
+
+/*
+** ms_away
+**      parv[0] = sender prefix
+**      parv[1] = away message
+*/
+int     ms_away(struct Client *cptr,
                struct Client *sptr,
                int parc,
                char *parv[])

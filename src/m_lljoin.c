@@ -44,7 +44,7 @@
 * the requested client to the given channel, or ignore it
 * if there is an error.
 */
-int     m_lljoin(struct Client *cptr,
+int     ms_lljoin(struct Client *cptr,
                struct Client *sptr,
                int parc,
                char *parv[])

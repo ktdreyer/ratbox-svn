@@ -22,7 +22,7 @@
  *
  *   $Id$
  */
-#include "m_commands.h"
+#include "handlers.h"
 #include "client.h"
 #include "ircd.h"
 #include "irc_string.h"
@@ -89,9 +89,9 @@
  */
 
 /*
- * m_die - DIE command handler
+ * mo_die - DIE command handler
  */
-int m_die(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+int mo_die(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   struct Client* acptr;
   int      i;

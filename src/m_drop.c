@@ -38,7 +38,7 @@
 /* Only HUB's need drop */
 
 /*
-** m_drop
+** ms_drop
 **      parv[0] = sender prefix
 **      parv[1] = channel
 **      parv[2] = channel password (key)
@@ -46,7 +46,7 @@
 **      "drop" a channel from consideration on a lazy link
 */
 
-int     m_drop(struct Client *cptr,
+int     ms_drop(struct Client *cptr,
                struct Client *sptr,
                int parc,
                char *parv[])

@@ -78,6 +78,7 @@ SRCS =                          \
   m_nick.c			\
   m_notice.c			\
   m_oper.c                      \
+  m_operwall.c                  \
   m_part.c                      \
   m_pass.c                      \
   m_ping.c                      \

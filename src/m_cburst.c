@@ -52,7 +52,7 @@
  * stating the nick can join, otherwise a non join message is sent.
  */
 
-int     m_cburst(struct Client *cptr,
+int     ms_cburst(struct Client *cptr,
                  struct Client *sptr,
                  int parc,
                  char *parv[])

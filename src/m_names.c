@@ -23,7 +23,7 @@
  *   $Id$
  */
 
-#include "m_commands.h"
+#include "handlers.h"
 #include "channel.h"
 #include "client.h"
 #include "common.h"   /* bleah */
@@ -115,6 +115,210 @@
 #define TRUNCATED_NAMES 20
 
 int     m_names( struct Client *cptr,
+                 struct Client *sptr,
+                 int parc,
+                 char *parv[])
+{ 
+  struct Channel *chptr;
+  struct Client *c2ptr;
+  struct SLink  *lp;
+  struct Channel *ch2ptr = NULL;
+  int   idx, flag = 0, len, mlen;
+  char  *s, *para = parc > 1 ? parv[1] : NULL;
+  int comma_count=0;
+  int char_count=0;
+  char buf[BUFSIZE];
+
+  /* Don't route names, no need for it -Dianora */
+  /*
+  if (parc > 1 &&
+      hunt_server(cptr, sptr, ":%s NAMES %s %s", 2, parc, parv))
+    return 0;
+    */
+
+  /* And throw away non local names requests that do get here -Dianora */
+  if(!MyConnect(sptr))
+    return 0;
+
+  /*
+   * names is called by m_join() when client joins a channel,
+   * hence I cannot easily rate limit it.. perhaps that won't
+   * be necessary now that remote names is prohibited.
+   *
+   * -Dianora
+   */
+
+  mlen = strlen(me.name) + NICKLEN + 7;
+
+  if (!BadPtr(para))
+    {
+      /* Here is the lamer detection code
+       * P.S. meta, GROW UP
+       * -Dianora 
+       */
+      for(s = para; *s; s++)
+        {
+          char_count++;
+          if(*s == ',')
+            comma_count++;
+          if(comma_count > 1)
+            {
+              if(char_count > TRUNCATED_NAMES)
+                para[TRUNCATED_NAMES] = '\0';
+              else
+                {
+                  s++;
+                  *s = '\0';
+                }
+              sendto_realops("POSSIBLE /names abuser %s [%s]",
+                             para,
+                             get_client_name(sptr,FALSE));
+              sendto_one(sptr, form_str(ERR_TOOMANYTARGETS),
+                         me.name, sptr->name, "NAMES");
+              return 0;
+            }
+        }
+
+      s = strchr(para, ',');
+      if (s)
+        *s = '\0';
+      if (!check_channel_name(para))
+        { 
+          sendto_one(sptr, form_str(ERR_BADCHANNAME),
+                     me.name, parv[0], (unsigned char *)para);
+          return 0;
+        }
+
+      ch2ptr = hash_find_channel(para, NULL);
+    }
+
+  *buf = '\0';
+  
+  /* 
+   *
+   * First, do all visible channels (public and the one user self is)
+   */
+
+  for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
+    {
+      if ((chptr != ch2ptr) && !BadPtr(para))
+        continue; /* -- wanted a specific channel */
+      if (!MyConnect(sptr) && BadPtr(para))
+        continue;
+      if (!ShowChannel(sptr, chptr))
+        continue; /* -- users on this are not listed */
+      
+      /* Find users on same channel (defined by chptr) */
+
+      (void)strcpy(buf, "* ");
+      len = strlen(chptr->chname);
+      (void)strcpy(buf + 2, chptr->chname);
+      (void)strcpy(buf + 2 + len, " :");
+
+      if (PubChannel(chptr))
+        *buf = '=';
+      else if (SecretChannel(chptr))
+        *buf = '@';
+      idx = len + 4;
+      flag = 1;
+      for (lp = chptr->members; lp; lp = lp->next)
+        {
+          c2ptr = lp->value.cptr;
+          if (IsInvisible(c2ptr) && !IsMember(sptr,chptr))
+            continue;
+          if (lp->flags & CHFL_CHANOP)
+            {
+              strcat(buf, "@");
+              idx++;
+            }
+          else if (lp->flags & CHFL_VOICE)
+            {
+              strcat(buf, "+");
+              idx++;
+            }
+          strncat(buf, c2ptr->name, NICKLEN);
+          idx += strlen(c2ptr->name) + 1;
+          flag = 1;
+          strcat(buf," ");
+          if (mlen + idx + NICKLEN > BUFSIZE - 3)
+            {
+              sendto_one(sptr, form_str(RPL_NAMREPLY),
+                         me.name, parv[0], buf);
+              strncpy_irc(buf, "* ", 3);
+              strncpy_irc(buf + 2, chptr->chname, len + 1);
+              strcat(buf, " :");
+              if (PubChannel(chptr))
+                *buf = '=';
+              else if (SecretChannel(chptr))
+                *buf = '@';
+              idx = len + 4;
+              flag = 0;
+            }
+        }
+      if (flag)
+        sendto_one(sptr, form_str(RPL_NAMREPLY),
+                   me.name, parv[0], buf);
+    }
+  if (!BadPtr(para))
+    {
+      sendto_one(sptr, form_str(RPL_ENDOFNAMES), me.name, parv[0],
+                 para);
+      return(1);
+    }
+
+  /* Second, do all non-public, non-secret channels in one big sweep */
+
+  strncpy_irc(buf, "* * :", 6);
+  idx = 5;
+  flag = 0;
+  for (c2ptr = GlobalClientList; c2ptr; c2ptr = c2ptr->next)
+    {
+      struct Channel *ch3ptr;
+      int       showflag = 0, secret = 0;
+
+      if (!IsPerson(c2ptr) || IsInvisible(c2ptr))
+        continue;
+      lp = c2ptr->user->channel;
+      /*
+       * dont show a client if they are on a secret channel or
+       * they are on a channel sptr is on since they have already
+       * been show earlier. -avalon
+       */
+      while (lp)
+        {
+          ch3ptr = lp->value.chptr;
+          if (PubChannel(ch3ptr) || IsMember(sptr, ch3ptr))
+            showflag = 1;
+          if (SecretChannel(ch3ptr))
+            secret = 1;
+          lp = lp->next;
+        }
+      if (showflag) /* have we already shown them ? */
+        continue;
+      if (secret) /* on any secret channels ? */
+        continue;
+      (void)strncat(buf, c2ptr->name, NICKLEN);
+      idx += strlen(c2ptr->name) + 1;
+      (void)strcat(buf," ");
+      flag = 1;
+      if (mlen + idx + NICKLEN > BUFSIZE - 3)
+        {
+          sendto_one(sptr, form_str(RPL_NAMREPLY),
+                     me.name, parv[0], buf);
+          strncpy_irc(buf, "* * :", 6);
+          idx = 5;
+          flag = 0;
+        }
+    }
+
+  if (flag)
+    sendto_one(sptr, form_str(RPL_NAMREPLY), me.name, parv[0], buf);
+
+  sendto_one(sptr, form_str(RPL_ENDOFNAMES), me.name, parv[0], "*");
+  return(1);
+}
+
+int     ms_names( struct Client *cptr,
                  struct Client *sptr,
                  int parc,
                  char *parv[])

@@ -22,7 +22,7 @@
  *
  *   $Id$
  */
-#include "m_commands.h"
+#include "handlers.h"
 #include "client.h"
 #include "irc_string.h"
 #include "s_serv.h"
@@ -88,11 +88,11 @@
  */
 
 /*
- * m_capab - CAPAB message handler
+ * ms_capab - CAPAB message handler
  *      parv[0] = sender prefix
  *      parv[1] = space-separated list of capabilities
  */
-int m_capab(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+int ms_capab(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   struct Capability *cap;
   char* p;

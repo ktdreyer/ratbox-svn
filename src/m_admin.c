@@ -22,7 +22,7 @@
  *
  *   $Id$
  */
-#include "m_commands.h"
+#include "handlers.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -93,6 +93,61 @@
  *      parv[1] = servername
  */
 int m_admin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+{
+  struct ConfItem *aconf;
+  static time_t last_used=0L;
+
+  if(!IsAnOper(sptr))
+    {
+      if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
+        {
+          /* safe enough to give this on a local connect only */
+          if(MyClient(sptr))
+            sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);
+          return 0;
+        }
+      else
+        last_used = CurrentTime;
+    }
+
+  if (hunt_server(cptr,sptr,":%s ADMIN :%s",1,parc,parv) != HUNTED_ISME)
+    return 0;
+
+  if (IsPerson(sptr))
+    sendto_realops_flags(FLAGS_SPY,
+                         "ADMIN requested by %s (%s@%s) [%s]", sptr->name,
+                         sptr->username, sptr->host, sptr->user->server);
+  if ((aconf = find_admin()))
+    {
+      sendto_one(sptr, form_str(RPL_ADMINME),
+                 me.name, parv[0], me.name);
+      sendto_one(sptr, form_str(RPL_ADMINLOC1),
+                 me.name, parv[0], aconf->host);
+      sendto_one(sptr, form_str(RPL_ADMINLOC2),
+                 me.name, parv[0], aconf->passwd);
+      sendto_one(sptr, form_str(RPL_ADMINEMAIL),
+                 me.name, parv[0], aconf->user);
+    }
+  else
+    sendto_one(sptr, form_str(ERR_NOADMININFO),
+               me.name, parv[0], me.name);
+
+  if(ConfigFileEntry.hub)
+    sendto_one(sptr, ":%s NOTICE %s :Server is a HUB",
+                     me.name,parv[0]);
+  else
+    sendto_one(sptr, ":%s NOTICE %s :Server is a LEAF",
+                     me.name,parv[0]);
+
+  return 0;
+}
+
+/*
+ * ms_admin - ADMIN command handler
+ *      parv[0] = sender prefix
+ *      parv[1] = servername
+ */
+int ms_admin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   struct ConfItem *aconf;
   static time_t last_used=0L;
