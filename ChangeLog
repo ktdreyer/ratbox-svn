@@ -1,3 +1,22 @@
+leeh        2004/07/27 22:19:57 EDT	(20040728_1)
+
+  Modified files:
+    modules              .depend Makefile.in m_topic.c 
+    src                  .depend 
+  Removed files:
+    modules              m_tb.c 
+  Log:
+  - merge m_tb.c into m_topic.c
+  
+  Revision  Changes    Path
+  1.40      +0 -10     ircd-ratbox/modules/.depend
+  1.99      +0 -1      ircd-ratbox/modules/Makefile.in
+  1.8       +0 -115    ircd-ratbox/modules/m_tb.c (dead)
+  1.88      +69 -2     ircd-ratbox/modules/m_topic.c
+  7.43      +2 -2      ircd-ratbox/src/.depend
+
+
+
 leeh        2004/07/27 22:17:51 EDT	(20040728_0)
 
   Modified files:
