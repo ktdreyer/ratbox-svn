@@ -1,3 +1,13 @@
+*** 20001213_11 by db
+- Ok the mystery of the missing NICK has been solved. (hwy/toot?)
+  If you weren't on a channel and you did a nick change, you never got
+  a nick change from the server. oops. 
+  Its poorly documented in the old sources... ick... sendto_common_channel
+  says its not supposed to send to the originator, but yet it does ...
+  *sigh*
+
+
+
 *** 20001213_10 by db
 - when msgtab went away, due to the hash table replacement,
   m_stats.c, m_help.c had to be rewritten. I had to add a new 
