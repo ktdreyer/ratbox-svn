@@ -17,6 +17,7 @@
 #include "common.h"
 #include "s_log.h"
 #include "s_conf.h"
+#include "s_user.h"
 #include "s_newconf.h"
 #include "send.h"
 #include "setup.h"
@@ -1196,21 +1197,62 @@ conf_set_auth_spoof_notice(void *data)
 static void
 conf_set_auth_spoof(void *data)
 {
-	MyFree(yy_achead->name);
-	if(strlen(data) < HOSTLEN)
+	char *p;
+	char *user = NULL;
+	char *host = NULL;
+
+	host = data;
+
+	/* user@host spoof */
+	if((p = strchr(host, '@')) != NULL)
 	{
-		if(strchr(data, '.') != NULL)
+		*p = '\0';
+		user = data;
+		host = p+1;
+
+		if(EmptyString(user))
 		{
-			DupString(yy_achead->name, data);
-			yy_achead->flags |= CONF_FLAGS_SPOOF_IP;
+			conf_report_error("Warning -- spoof ident empty.");
+			return;
 		}
-		else
-			conf_report_error("Warning -- spoof must contain a '.'; ignoring.");
+
+		if(strlen(user) >= USERLEN)
+		{
+			conf_report_error("Warning -- spoof ident length invalid.");
+			return;
+		}
+
+		if(!valid_username(user))
+		{
+			conf_report_error("Warning -- invalid spoof (ident).");
+			return;
+		}
+
+		/* this must be restored! */
+		*p = '@';
 	}
-	else
-		conf_report_error
-			("Warning -- spoof length must be less than %d characters; ignoring this.",
-			 HOSTLEN);
+
+	if(EmptyString(host))
+	{
+		conf_report_error("Warning -- spoof host empty.");
+		return;
+	}
+
+	if(strlen(host) >= HOSTLEN)
+	{
+		conf_report_error("Warning -- spoof host length invalid.");
+		return;
+	}
+
+	if(!valid_hostname(host) || (strchr(host, '.') == NULL))
+	{
+		conf_report_error("Warning -- invalid spoof (host).");
+		return;
+	}
+
+	MyFree(yy_achead->name);
+	DupString(yy_achead->name, data);
+	yy_achead->flags |= CONF_FLAGS_SPOOF_IP;
 }
 
 static void

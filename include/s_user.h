@@ -33,6 +33,8 @@ struct Client;
 struct ConfItem;
 extern time_t LastUsedWallops;
 
+extern int valid_hostname(const char *hostname);
+extern int valid_username(const char *username);
 
 extern int user_mode(struct Client *, struct Client *, int, const char **);
 extern void send_umode(struct Client *, struct Client *, int, int, char *);

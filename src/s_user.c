@@ -56,8 +56,6 @@
 #include "packet.h"
 #include "reject.h"
 
-static int valid_hostname(const char *hostname);
-static int valid_username(const char *username);
 static void report_and_set_user_flags(struct Client *, struct ConfItem *);
 static int check_X_line(struct Client *client_p, struct Client *source_p);
 void user_welcome(struct Client *source_p);
@@ -698,7 +696,7 @@ introduce_client(struct Client *client_p, struct Client *source_p, struct User *
  * NOTE: this doesn't allow a hostname to begin with a dot and
  * will not allow more dots than chars.
  */
-static int
+int
 valid_hostname(const char *hostname)
 {
 	const char *p = hostname;
@@ -732,7 +730,7 @@ valid_hostname(const char *hostname)
  * Allow '.' in username to allow for "first.last"
  * style of username
  */
-static int
+int
 valid_username(const char *username)
 {
 	int dots = 0;

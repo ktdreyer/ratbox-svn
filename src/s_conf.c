@@ -501,68 +501,85 @@ verify_access(struct Client *client_p, const char *username)
 		aconf = find_address_conf(client_p->host, non_ident, &client_p->localClient->ip,client_p->localClient->ip.ss_family);
 	}
 
-	if(aconf != NULL)
+	if(aconf == NULL)
+		return NOT_AUTHORISED;
+
+	if(aconf->status & CONF_CLIENT)
 	{
-		if(aconf->status & CONF_CLIENT)
+		if(aconf->flags & CONF_FLAGS_REDIR)
 		{
-			if(aconf->flags & CONF_FLAGS_REDIR)
+			sendto_one(client_p, form_str(RPL_REDIR),
+					me.name, client_p->name,
+					aconf->name ? aconf->name : "", aconf->port);
+			return (NOT_AUTHORISED);
+		}
+
+
+		if(IsConfDoIdentd(aconf))
+			SetNeedId(client_p);
+		if(IsConfRestricted(aconf))
+			SetRestricted(client_p);
+
+		/* Thanks for spoof idea amm */
+		if(IsConfDoSpoofIp(aconf))
+		{
+			char *p;
+
+			if(IsConfSpoofNotice(aconf))
 			{
-				sendto_one(client_p, form_str(RPL_REDIR),
-					   me.name, client_p->name,
-					   aconf->name ? aconf->name : "", aconf->port);
-				return (NOT_AUTHORISED);
-			}
-
-
-			if(IsConfDoIdentd(aconf))
-				SetNeedId(client_p);
-			if(IsConfRestricted(aconf))
-				SetRestricted(client_p);
-
-			/* Thanks for spoof idea amm */
-			if(IsConfDoSpoofIp(aconf))
-			{
-				if(IsConfSpoofNotice(aconf))
-				{
-					sendto_realops_flags(UMODE_ALL, L_ALL,
-							     "%s spoofing: %s as %s",
-							     client_p->name,
+				sendto_realops_flags(UMODE_ALL, L_ALL,
+						"%s spoofing: %s as %s",
+						client_p->name,
 #ifdef HIDE_SPOOF_IPS
-							     aconf->name,
+						aconf->name,
 #else
-							     client_p->host,
+						client_p->host,
 #endif
-							     aconf->name);
-				}
-
-				strlcpy(client_p->host, aconf->name, sizeof(client_p->host));
-				SetIPSpoof(client_p);
+						aconf->name);
 			}
-			return (attach_iline(client_p, aconf));
-		}
-		else if(aconf->status & CONF_KILL)
-		{
-			if(ConfigFileEntry.kline_with_reason)
+
+			/* user@host spoof */
+			if((p = strchr(aconf->name, '@')) != NULL)
 			{
-				sendto_one(client_p,
-					   ":%s NOTICE %s :*** Banned %s",
-					   me.name, client_p->name, aconf->passwd);
+				char *host = p+1;
+				*p = '\0';
+
+				strlcpy(client_p->username, aconf->name,
+					sizeof(client_p->username));
+				strlcpy(client_p->host, host,
+					sizeof(client_p->host));
+				*p = '@';
 			}
-			return (BANNED_CLIENT);
-		}
-		else if(aconf->status & CONF_GLINE)
-		{
-			sendto_one(client_p, ":%s NOTICE %s :*** G-lined", me.name, client_p->name);
+			else
+				strlcpy(client_p->host, aconf->name, sizeof(client_p->host));
 
-			if(ConfigFileEntry.kline_with_reason)
-				sendto_one(client_p,
-					   ":%s NOTICE %s :*** Banned %s",
-					   me.name, client_p->name, aconf->passwd);
-
-			return (BANNED_CLIENT);
+			SetIPSpoof(client_p);
 		}
+		return (attach_iline(client_p, aconf));
 	}
-	return (NOT_AUTHORISED);
+	else if(aconf->status & CONF_KILL)
+	{
+		if(ConfigFileEntry.kline_with_reason)
+		{
+			sendto_one(client_p,
+					":%s NOTICE %s :*** Banned %s",
+					me.name, client_p->name, aconf->passwd);
+		}
+		return (BANNED_CLIENT);
+	}
+	else if(aconf->status & CONF_GLINE)
+	{
+		sendto_one(client_p, ":%s NOTICE %s :*** G-lined", me.name, client_p->name);
+
+		if(ConfigFileEntry.kline_with_reason)
+			sendto_one(client_p,
+					":%s NOTICE %s :*** Banned %s",
+					me.name, client_p->name, aconf->passwd);
+
+		return (BANNED_CLIENT);
+	}
+
+	return NOT_AUTHORISED;
 }
 
 
