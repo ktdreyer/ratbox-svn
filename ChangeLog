@@ -1,3 +1,16 @@
+androsyn    2004/08/16 15:25:14 EDT	(20040816_5)
+
+  Modified files:
+    src                  s_serv.c s_user.c 
+  Log:
+  Remove useless prototypes for crypt()
+  
+  Revision  Changes    Path
+  7.414     +0 -2      ircd-ratbox/src/s_serv.c
+  7.330     +0 -2      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2004/08/16 12:10:15 EDT	(20040816_4)
 
   Modified files:
