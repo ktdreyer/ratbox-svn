@@ -22,6 +22,17 @@
  * $Id$
  */
 
+#include "config.h"
+
+#ifdef HAVE_LIBCRYPTO
+#include <openssl/pem.h>
+#include <openssl/rand.h>
+#include <openssl/rsa.h>
+#include <openssl/md5.h>
+#include <openssl/bn.h>
+#include <openssl/evp.h>
+#include <openssl/err.h>
+
 #include <assert.h>
 #include <string.h>
 
@@ -31,21 +42,9 @@
 #include "s_log.h"
 #include "client.h" /* CIPHERKEYLEN .. eww */
 
-#ifdef HAVE_LIBCRYPTO
-#include <openssl/rand.h>
-#include <openssl/rsa.h>
-#include <openssl/md5.h>
-#include <openssl/bn.h>
-#include <openssl/evp.h>
-#include <openssl/err.h>
 void report_crypto_errors(void);
 int verify_private_key(void);
 static void binary_to_hex( unsigned char * bin, char * hex, int length );
-
-/* For some strange reason we can't include pem.h in here..why I don't know */
-/* But this is the correct prototype.. */
-typedef int pem_password_cb(char *buf, int size, int rwflag, void *userdata);
-extern RSA *PEM_read_bio_RSAPrivateKey(BIO *bp, char **x, pem_password_cb *cb, void *u);
 
         
 
