@@ -415,30 +415,48 @@ check_klines(void)
     {
       next_ptr = ptr->next;
       client_p = ptr->data;
+      
       if (IsMe(client_p))
 	continue;
+	
       /* if there is a returned struct ConfItem then kill it */
       if ((aconf = find_dline(&client_p->localClient->ip,
 			      client_p->localClient->aftype)))
 	{
 	  if (aconf->status & CONF_EXEMPTDLINE)
 	    continue;
+	    
 	  sendto_realops_flags(FLAGS_ALL, L_ALL,"DLINE active for %s",
 			       get_client_name(client_p, HIDE_IP));
-	  if (ConfigFileEntry.kline_with_connection_closed)
+			       
+	  if (ConfigFileEntry.kline_with_connection_closed &&
+	      ConfigFileEntry.kline_with_reason)
+	  {
 	    reason = "Connection closed";
+
+	    if(IsPerson(client_p))
+  	      sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
+  	                 me.name, client_p->name,
+	 	         aconf->passwd ? aconf->passwd : "D-lined");
+            else
+	      sendto_one(client_p, "NOTICE DLINE :*** You have been D-lined");
+	  }
 	  else
-	    {
-	      if (ConfigFileEntry.kline_with_reason && aconf->passwd)
-		reason = aconf->passwd;
-	      else
-		reason = "D-lined";
-	    }
-	  if (IsPerson(client_p)) 
-	    sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
-		       me.name, client_p->name, reason);
-	  else
-	    sendto_one(client_p, "NOTICE DLINE :*** You have been D-lined");
+	  {
+	    if(ConfigFileEntry.kline_with_connection_closed)
+	      reason = "Connection closed";
+	    else if(ConfigFileEntry.kline_with_reason && aconf->passwd)
+	      reason = aconf->passwd;
+	    else
+	      reason = "D-lined";
+
+            if(IsPerson(client_p))
+	      sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
+	                 me.name, client_p->name, reason);
+            else
+	      sendto_one(client_p, "NOTICE DLINE :*** You have been D-lined");
+	  }
+	    
 	  (void)exit_client(client_p, client_p, &me, reason );
 	  continue; /* and go examine next fd/client_p */
 	}
@@ -467,24 +485,28 @@ check_klines(void)
 	      sendto_realops_flags(FLAGS_ALL, L_ALL, "GLINE active for %s",
 				   get_client_name(client_p, HIDE_IP));
 			    
-	      if (ConfigFileEntry.kline_with_connection_closed)
-		{
-		  /* We use a generic non-descript message here on 
-		   * purpose so as to prevent other users seeing the
-		   * client disconnect from harassing the IRCops
-		   */
+	      if(ConfigFileEntry.kline_with_connection_closed &&
+	         ConfigFileEntry.kline_with_reason)
+ 	      {
 		  reason = "Connection closed";
-		} 
+
+		  sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
+		             me.name, client_p->name,
+			     aconf->passwd ? aconf->passwd : "G-lined");
+	      } 
 	      else 
-		{
-		  if (ConfigFileEntry.kline_with_reason && aconf->passwd)
-		    reason = aconf->passwd;
-		  else
-		    reason = "G-lined";
-		}
+	      {
+	        if(ConfigFileEntry.kline_with_connection_closed)
+		  reason = "Connection closed";
+		else if(ConfigFileEntry.kline_with_reason && aconf->passwd)
+		  reason = aconf->passwd;
+		else
+		  reason = "G-lined";
+
+		sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
+		           me.name, client_p->name, reason);
+	      }
 	
-	      sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP), me.name,
-			 client_p->name, reason);
 	      (void)exit_client(client_p, client_p, &me, reason);
 	      /* and go examine next fd/client_p */    
 	      continue;
@@ -502,18 +524,29 @@ check_klines(void)
 
 	      sendto_realops_flags(FLAGS_ALL, L_ALL, "KLINE active for %s",
 				   get_client_name(client_p, HIDE_IP));
-	      if (ConfigFileEntry.kline_with_connection_closed)
-		reason = "Connection closed";
+
+              if(ConfigFileEntry.kline_with_connection_closed &&
+	          ConfigFileEntry.kline_with_reason)
+	      {
+	        reason = "Connection closed";
+
+		sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
+		           me.name, client_p->name, 
+			   aconf->passwd ? aconf->passwd : "K-lined");
+              }
 	      else
-		{
-		  if (ConfigFileEntry.kline_with_reason && aconf->passwd)
-		    reason = aconf->passwd;
-		  else
-		    reason = "K-lined";
-		}
-	
-	      sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP), me.name,
-			 client_p->name, reason);
+	      {
+	        if(ConfigFileEntry.kline_with_connection_closed)
+		  reason = "Connection closed";
+		else if(ConfigFileEntry.kline_with_reason && aconf->passwd)
+		  reason = aconf->passwd;
+		else
+		  reason = "K-lined";
+
+		sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
+		           me.name, client_p->name, reason);
+              }
+	      
 	      (void)exit_client(client_p, client_p, &me, reason);
 	      continue; 
 	    }
