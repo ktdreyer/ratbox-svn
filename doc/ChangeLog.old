@@ -1,3 +1,7 @@
+*** 20010111_7 by a1kmm
+- Fixed DNS to work(and leak :( ) again.
+
+
 *** 20010111_6 by a1kmm
 - Fixed dependencies and ensure we never mix debug and non-debug BlockHeap code.
 
