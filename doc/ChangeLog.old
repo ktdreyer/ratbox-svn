@@ -1,3 +1,8 @@
+*** 20010820_6 by androsyn
+Check for strtok_r()...if it exists, use it instead of strtoken().  If strtok_r
+is found, we define a macro to call strtok_r() instead...
+
+
 *** 20010820_5 by db
 - a little more cleanup
 
