@@ -848,18 +848,13 @@ sendto_ll_channel_remote(struct Channel *chptr,
               {
                 continue;
               }
-              /* Uhm.  We shouldn't get here.
-               * Since the server obviously knows about the channel,
-               * it really should know about all the nicks that exist
-               * on the channel...
-               */
-              assert( 0 ); /* XXX -dt */
-	      if ((sptr->lazyLinkClientExists & cptr->localClient->serverMask)
-		  == 0)
-		{
-		  sendnick_TS(cptr,sptr);
-		  add_lazylinkclient(cptr,sptr);
-		}
+	      if (sptr &&
+                  ((sptr->lazyLinkClientExists &
+                   cptr->localClient->serverMask) == 0))
+              {
+                sendnick_TS(cptr,sptr);
+                add_lazylinkclient(cptr,sptr);
+              }
 	    }
 	}
 
