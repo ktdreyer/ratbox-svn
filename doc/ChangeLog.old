@@ -1,3 +1,19 @@
+davidt      2001/12/28 12:00:21 EST	(20011228_3)
+
+  Modified files:
+    help                 Makefile.in 
+    help/users           index 
+    help/opers           index 
+  Log:
+  - Convert index to uppercase, and columnise.
+  
+  Revision  Changes    Path
+  1.13      +17 -3     ircd-hybrid-7/help/Makefile.in
+  1.2       +23 -82    ircd-hybrid-7/help/opers/index
+  1.2       +13 -41    ircd-hybrid-7/help/users/index
+
+
+
 davidt      2001/12/28 11:41:49 EST	(20011228_2)
 
   Modified files:
