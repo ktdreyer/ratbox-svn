@@ -1,3 +1,12 @@
+*** 20010821_4 by davidt
+- Ahem, 'make install' is needed for testing, 'make' doesn't help much.
+  Anyway, now that I'm testing the actual changes, this _does_ help
+  improve burst times (on a hub, that needs to relay the burst elsewhere)
+  by up to 12.5% (this was measured on a localhost->localhost burst, if
+  there's a bandwidth bottleneck, the bandwidth will probably be the
+  major bottleneck anyway).
+
+
 *** 20010821_3 by davidt
 - Create linebuf_putmsg, which essentially replaces linebuf_put, since we no
   longer use linebuf_put anywhere.  This get rids of a few needless copies
