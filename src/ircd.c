@@ -117,6 +117,7 @@ static const char * pidFileName = PPATH;
 
 char**  myargv;
 int     dorehash   = 0;
+int     doremotd   = 0;
 int     debuglevel = -1;        /* Server debug level */
 char*   debugmode  = "";        /*  -"-    -"-   -"-  */
 time_t  nextconnect = 1;        /* time for next try_connections call */
@@ -345,6 +346,13 @@ io_loop(void)
 	  rehash(1);
 	  dorehash = 0;
 	}
+      if (doremotd)
+        {
+          ReadMessageFile( &ConfigFileEntry.motd );
+          sendto_realops_flags(UMODE_ALL, L_ALL,
+                               "Got signal SIGUSR1, reloading ircd motd file");
+          doremotd = 0;
+        }
     }
 }
 
