@@ -221,7 +221,7 @@ static void ms_sjoin(struct Client *client_p,
 	  *subp = '\0';	/* fugly hack for now ... */
 
 	  /* + 1 skip the extra '#' in the name */
-	  if ((top_chptr = hash_find_channel((parv[2] + 1), NULL)))
+	  if ((top_chptr = hash_find_channel(parv[2] + 1)) != NULL)
 	    {
 	      /* If the vchan is already in the vchan_list for this
 	       * root, don't re-add it.
@@ -238,7 +238,7 @@ static void ms_sjoin(struct Client *client_p,
           /* check TS before creating a root channel */
 	  else if (newts == vc_ts)
 	    {
-	      top_chptr = get_channel(source_p, (parv[2] + 1), CREATE);
+	      top_chptr = get_or_create_channel(source_p, (parv[2] + 1), NULL);
 	      m = make_dlink_node();
 	      dlinkAdd(chptr, m, &top_chptr->vchan_list);
 	      chptr->root_chptr=top_chptr;

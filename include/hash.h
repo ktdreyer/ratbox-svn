@@ -78,8 +78,7 @@ extern void   add_to_channel_hash_table(const char* name,
                                         struct Channel* chan);
 extern void   del_from_channel_hash_table(const char* name, 
                                           struct Channel* chan);
-extern struct Channel* hash_find_channel(const char* name, 
-                                         struct Channel* chan);
+extern struct Channel* hash_find_channel(const char* name);
 extern struct Client* find_client(const char* name, 
                                        struct Client* client);
 extern struct Client* hash_find_server(const char* name);
@@ -88,8 +87,7 @@ extern void add_to_resv_hash_table(const char *name,
                                    struct ResvChannel *resv_p);
 extern void del_from_resv_hash_table(const char *name,
                                      struct ResvChannel *resv_p);
-extern struct ResvChannel *hash_find_resv(const char *name,
-                                   struct ResvChannel *resv_p);
+extern struct ResvChannel *hash_find_resv(const char *name);
 
 #endif  /* INCLUDED_hash_h */
 

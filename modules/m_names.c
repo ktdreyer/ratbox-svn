@@ -108,7 +108,7 @@ static void m_names(struct Client *client_p,
           return;
         }
 
-      if( (ch2ptr = hash_find_channel(para, NULL)) )
+      if ((ch2ptr = hash_find_channel(para)) != NULL)
         {
           if (HasVchans(ch2ptr))
             {

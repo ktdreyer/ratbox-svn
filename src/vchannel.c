@@ -107,10 +107,10 @@ cjoin_channel(struct Channel *root, struct Client *source_p, char *name)
         }
 
       ircsprintf(vchan_name, "##%s_%u", name + 1, vchan_ts);
-      vchan_chptr = hash_find_channel(vchan_name, NULL);
+      vchan_chptr = hash_find_channel(vchan_name);
   } while (vchan_chptr);
 
-  vchan_chptr = get_channel(source_p, vchan_name, CREATE);
+  vchan_chptr = get_or_create_channel(source_p, vchan_name, NULL);
 
   if (vchan_chptr == NULL)
     {

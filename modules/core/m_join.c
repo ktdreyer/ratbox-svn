@@ -81,10 +81,11 @@ void check_spambot_warning(struct Client *source_p, const char *name);
  *      parv[2] = channel password (key) (or vkey for vchans)
  *      parv[3] = vkey
  */
-static void m_join(struct Client *client_p,
-                  struct Client *source_p,
-                  int parc,
-                  char *parv[])
+static void
+m_join(struct Client *client_p,
+       struct Client *source_p,
+       int parc,
+       char *parv[])
 {
   struct Channel *chptr = NULL;
   struct Channel *vchan_chptr = NULL;
@@ -170,7 +171,7 @@ static void m_join(struct Client *client_p,
 	}
 
       /* look for the channel */
-      if( (chptr = hash_find_channel(name, NULL)) != NULL )
+      if((chptr = hash_find_channel(name)) != NULL)
 	{
           /* Check if they want to join a subchan or something */
 	  vchan_chptr = select_vchan(chptr, client_p, source_p, vkey, name);
@@ -228,7 +229,7 @@ static void m_join(struct Client *client_p,
 
       if(!chptr)        /* If I already have a chptr, no point doing this */
 	{
-	  chptr = get_channel(source_p, name, CREATE);
+	  chptr = get_or_create_channel(source_p, name, NULL);
 	  root_chptr = chptr;
 	}
       
@@ -398,10 +399,11 @@ static void m_join(struct Client *client_p,
  *		  and use it for the TimeStamp on a new channel.
  */
 
-static void ms_join(struct Client *client_p,
-                   struct Client *source_p,
-                   int parc,
-                   char *parv[])
+static void 
+ms_join(struct Client *client_p,
+	struct Client *source_p,
+	int parc,
+	char *parv[])
 {
   char *name;
   int new_ts;

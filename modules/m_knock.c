@@ -161,7 +161,7 @@ static struct Channel *parse_knock_args(struct Client *client_p,
   if( (p = strchr(name,',')) )
     *p = '\0';
 
-  if (!IsChannelName(name) || !(chptr = hash_find_channel(name, NULL)))
+  if (!IsChannelName(name) || !(chptr = hash_find_channel(name)))
     {
       sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL), me.name, parv[0],
                  name);

@@ -139,7 +139,7 @@ static void m_cjoin(struct Client *client_p,
 
   (void)strncpy(jbuf, name, sizeof(jbuf) - 1);
 
-  if( (chptr = hash_find_channel(name, NULL)) == NULL )
+  if ((chptr = hash_find_channel(name)) == NULL)
     {
       /* if chptr isn't found locally, it =could= exist
        * on the uplink. So ask.

@@ -93,8 +93,6 @@ extern  struct  Channel *GlobalChannelList;
 void init_channels(void);
 void cleanup_channels(void *);
 
-#define CREATE 1        /* whether a channel should be
-                           created or just tested for existence */
 
 extern int     can_send (struct Channel *chptr, struct Client *who);
 extern int     is_banned (struct Channel *chptr, struct Client *who);
@@ -111,8 +109,6 @@ extern void    add_user_to_channel(struct Channel *chptr,
 				   struct Client *who, int flags);
 extern void    remove_user_from_channel(struct Channel *chptr,
 					struct Client *who, int perm);
-
-extern struct  Channel* get_channel(struct Client *,char*,int );
 
 extern int     check_channel_name(const char* name);
 

@@ -35,6 +35,7 @@
 #include "msg.h"
 #include "modules.h"
 #include "parse.h"
+#include "hash.h"
 
 #include <string.h>
 
@@ -99,7 +100,7 @@ static void m_kick(struct Client *client_p,
 
   name = parv[1];
 
-  chptr = get_channel(source_p, name, !CREATE);
+  chptr = hash_find_channel(name);
   if (!chptr)
     {
       sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),

@@ -85,7 +85,7 @@ static void ms_drop(struct Client *client_p,
   sendto_realops(FLAGS_ALL, "DROP called by %s for %s", client_p->name, name );
 #endif
 
-  if(!(chptr=hash_find_channel(name, NULL)))
+  if((chptr=hash_find_channel(name)) == NULL)
     return;
 
   if(client_p->localClient->serverMask) /* JIC */

@@ -85,7 +85,7 @@ static void m_topic(struct Client *client_p,
 
   if (parv[1] && IsChannelName(parv[1]))
     {
-      chptr = hash_find_channel(parv[1], NULL);
+      chptr = hash_find_channel(parv[1]);
 
       if(chptr == NULL)
       {
@@ -267,7 +267,7 @@ static void ms_topic(struct Client *client_p,
 
   if (parv[1] && IsChannelName(parv[1]))
     {
-      if ( (chptr = hash_find_channel(parv[1], NULL)) == NULL )
+      if ((chptr = hash_find_channel(parv[1])) == NULL)
 	return;
 
       strncpy_irc(chptr->topic, parv[4], TOPICLEN);

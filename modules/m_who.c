@@ -167,8 +167,8 @@ static void m_who(struct Client *client_p,
       /*
        * List all users on a given channel
        */
-      chptr = hash_find_channel(mask, NULL);
-      if (chptr)
+      chptr = hash_find_channel(mask);
+      if (chptr != NULL)
 	{
 	  if (HasVchans(chptr))
 	    {

@@ -25,7 +25,8 @@
 struct ResvChannel *ResvChannelList;
 struct ResvNick *ResvNickList;
 
-struct ResvChannel *create_channel_resv(char *name, char *reason, int conf)
+struct ResvChannel *
+create_channel_resv(char *name, char *reason, int conf)
 {
   struct ResvChannel *resv_p;
   int len;
@@ -41,18 +42,19 @@ struct ResvChannel *create_channel_resv(char *name, char *reason, int conf)
   if(strlen(reason) > TOPICLEN)
     reason[TOPICLEN] = '\0';
 
-  resv_p = (struct ResvChannel *)hash_find_resv(name, (struct ResvChannel *)NULL);
+  resv_p = (struct ResvChannel *)hash_find_resv(name);
 
-  if (resv_p)
+  if (resv_p != NULL)
     return NULL;
 
-  resv_p = (struct ResvChannel *)MyMalloc(sizeof(struct ResvChannel) + len + strlen(reason) + 1);
+  resv_p = (struct ResvChannel *)MyMalloc(sizeof(struct ResvChannel) + len
+					  + strlen(reason) + 1);
 
   strcpy(resv_p->name, name);
   DupString(resv_p->reason, reason);
   resv_p->conf = conf;
 
-  if(ResvChannelList)
+  if(ResvChannelList != NULL)
     ResvChannelList->prev = resv_p;
 
   resv_p->next = ResvChannelList;
@@ -65,7 +67,8 @@ struct ResvChannel *create_channel_resv(char *name, char *reason, int conf)
   return resv_p;
 }
 
-struct ResvNick *create_nick_resv(char *name, char *reason, int conf)
+struct ResvNick *
+create_nick_resv(char *name, char *reason, int conf)
 {
   struct ResvNick *resv_p;
   int len;
@@ -84,7 +87,8 @@ struct ResvNick *create_nick_resv(char *name, char *reason, int conf)
   if(find_nick_resv(name))
     return NULL;
 
-  resv_p = (struct ResvNick *)MyMalloc(sizeof(struct ResvNick) + len + strlen(reason) + 1);
+  resv_p = (struct ResvNick *)MyMalloc(sizeof(struct ResvNick) + len
+				       + strlen(reason) + 1);
 
   strcpy(resv_p->name, name);
   DupString(resv_p->reason, reason);
@@ -101,7 +105,8 @@ struct ResvNick *create_nick_resv(char *name, char *reason, int conf)
   return resv_p;
 }
 
-int clear_conf_resv()
+int 
+clear_conf_resv()
 {
   struct ResvChannel *resv_cp;
   struct ResvChannel *next_cp;
@@ -127,7 +132,8 @@ int clear_conf_resv()
   return 0;
 }
 
-int delete_channel_resv(struct ResvChannel *resv_p)
+int 
+delete_channel_resv(struct ResvChannel *resv_p)
 {
   if(!(resv_p))
     return 0;
@@ -147,7 +153,8 @@ int delete_channel_resv(struct ResvChannel *resv_p)
   return 1;
 }
 
-int delete_nick_resv(struct ResvNick *resv_p)
+int 
+delete_nick_resv(struct ResvNick *resv_p)
 {
   if(!(resv_p))
     return 0;
@@ -165,19 +172,21 @@ int delete_nick_resv(struct ResvNick *resv_p)
   return 1;
 }
 
-int find_channel_resv(char *name)
+int
+find_channel_resv(char *name)
 {
   struct ResvChannel *resv_p;
 
-  resv_p = (struct ResvChannel *)hash_find_resv(name, (struct ResvChannel *)NULL);
+  resv_p = (struct ResvChannel *)hash_find_resv(name);
 
-  if (!resv_p)
+  if (resv_p == NULL)
     return 0;
 
   return 1;
 }
 
-int find_nick_resv(char *name)
+int 
+find_nick_resv(char *name)
 {
   struct ResvNick *resv_p;
 
@@ -190,7 +199,8 @@ int find_nick_resv(char *name)
   return 0;
 }
 
-struct ResvNick *return_nick_resv(char *name)
+struct ResvNick *
+return_nick_resv(char *name)
 {
   struct ResvNick *resv_p;
 
@@ -203,7 +213,8 @@ struct ResvNick *return_nick_resv(char *name)
   return NULL;
 }
 
-void report_resv(struct Client *source_p)
+void 
+report_resv(struct Client *source_p)
 {
   struct ResvChannel *resv_cp;
   struct ResvNick *resv_np;
@@ -221,7 +232,8 @@ void report_resv(struct Client *source_p)
 	       resv_np->name, resv_np->reason);
 }	       
 
-int clean_resv_nick(char *nick)
+int
+clean_resv_nick(char *nick)
 {
   char tmpch;
   int as=0;
