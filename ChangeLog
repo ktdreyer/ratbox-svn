@@ -1,3 +1,15 @@
+leeh        2004/03/17 10:15:53 EST	(20040317_1)
+
+  Modified files:
+    src                  newconf.c 
+  Log:
+  - dont copy a password that doesnt exist between O:'s
+  
+  Revision  Changes    Path
+  7.144     +4 -1      ircd-ratbox/src/newconf.c
+
+
+
 leeh        2004/03/17 10:14:19 EST	(20040317_0)
 
   Modified files:
