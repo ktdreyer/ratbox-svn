@@ -1,3 +1,15 @@
+androsyn    2003/03/20 02:00:14 UTC	(20030320_1)
+
+  Modified files:
+    src                  channel.c 
+  Log:
+  doing a MyFree() on something that doesn't come from MyMalloc()
+  
+  Revision  Changes    Path
+  7.370     +0 -2      ircd-ratbox/src/channel.c
+
+
+
 androsyn    2003/03/20 00:27:30 UTC	(20030320_0)
 
   Modified files:
