@@ -187,18 +187,17 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, int type)
   struct Ban *actualBan;
 
   /* dont let local clients overflow the banlist */
-  if ((!IsServer(client_p)) && (chptr->num_mask >= ConfigChannel.max_bans))
+  if(MyClient(client_p))
   {
-    if (MyClient(client_p))
+    if(chptr->num_mask >= ConfigChannel.max_bans)
     {
       sendto_one(client_p, form_str(ERR_BANLISTFULL),
                  me.name, client_p->name, chptr->chname, banid);
       return 0;
     }
-  }
 
-  if (MyClient(client_p))
     collapse(banid);
+  }
 
   switch (type)
   {
@@ -1165,6 +1164,9 @@ chm_op(struct Client *client_p, struct Client *source_p,
 
   if (dir == MODE_ADD)
   {
+    if(targ_p == source_p)
+      return;
+
     mode_changes[mode_count].letter = c;
     mode_changes[mode_count].dir = MODE_ADD;
     mode_changes[mode_count].caps = 0;
@@ -1281,13 +1283,6 @@ chm_limit(struct Client *client_p, struct Client *source_p,
 
     ircsprintf(lstr, "%d", limit);
 
-    /* if somebody sets MODE #channel +ll 1 2, accept latter --fl */
-    for (i = 0; i < mode_count; i++)
-    {
-      if (mode_changes[i].letter == c && mode_changes[i].dir == MODE_ADD)
-        mode_changes[i].letter = 0;
-    }
-
     mode_changes[mode_count].letter = c;
     mode_changes[mode_count].dir = MODE_ADD;
     mode_changes[mode_count].caps = 0;
@@ -1347,13 +1342,6 @@ chm_key(struct Client *client_p, struct Client *source_p,
 
     assert(key[0] != ' ');
     strlcpy(chptr->mode.key, key, sizeof(chptr->mode.key));
-
-    /* if somebody does MODE #channel +kk a b, accept latter --fl */
-    for (i = 0; i < mode_count; i++)
-    {
-      if (mode_changes[i].letter == c && mode_changes[i].dir == MODE_ADD)
-        mode_changes[i].letter = 0;
-    }
 
     mode_changes[mode_count].letter = c;
     mode_changes[mode_count].dir = MODE_ADD;
