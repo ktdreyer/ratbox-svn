@@ -1,3 +1,16 @@
+db          2002/02/16 19:54:10 EST	(20020217_1)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  - We have a macro that does what the old code did, so lets use it.
+  - cosmetic change only
+  
+  Revision  Changes    Path
+  7.226     +2 -3      ircd-hybrid-7/src/client.c
+
+
+
 androsyn    2002/02/16 19:46:02 EST	(20020217_0)
 
   Modified files:
