@@ -321,7 +321,7 @@ load_core_modules(int warn)
  * side effects -
  */
 int
-load_one_module (char *path)
+load_one_module (char *path, int coremodule)
 {
   char modpath[MAXPATHLEN];
   dlink_node *pathst;
@@ -341,7 +341,10 @@ load_one_module (char *path)
 		 if(S_ISREG(statbuf.st_mode))
 		    {
 		       /* Regular files only please */
-		       return load_a_module(modpath, 1, 0);
+                       if(coremodule)
+                         return load_a_module(modpath, 1, 1);
+                       else
+		         return load_a_module(modpath, 1, 0);
 		    }
 	      }
 	    
@@ -376,7 +379,7 @@ mo_modload (struct Client *client_p, struct Client *source_p, int parc, char **p
     return;
   }
 
-  load_one_module (parv[1]);
+  load_one_module (parv[1], 0);
 
   MyFree(m_bn);
 }
@@ -458,7 +461,7 @@ mo_modreload (struct Client *client_p, struct Client *source_p, int parc, char *
       return;
     }
 
-  if((load_one_module(parv[1]) == -1) && check_core)
+  if((load_one_module(parv[1], check_core) == -1) && check_core)
   {
     sendto_realops_flags(UMODE_ALL, L_ALL,
                          "Error reloading core module: %s: terminating ircd",

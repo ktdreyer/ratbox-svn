@@ -744,7 +744,7 @@ void	conf_set_modules_module(void *data)
 	if (findmodule_byname(m_bn) != -1)
 		return;
 
-	load_one_module((char*) data);
+	load_one_module((char*) data, 0);
 
 	MyFree(m_bn);
 #else
