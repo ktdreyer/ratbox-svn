@@ -264,7 +264,7 @@ static void send_knock(struct Client *client_p, struct Client *source_p,
 
   chptr->last_knock = CurrentTime;
 
-  sendto_one(source_p, ":%s NOTICE %s :*** Notice -- Your KNOCK has been delivered",
+  sendto_one(source_p, form_str(RPL_KNOCKDLVR),
              me.name, source_p->name);
 
   /* using &me and me.name won't deliver to clients not on this server
@@ -278,20 +278,19 @@ static void send_knock(struct Client *client_p, struct Client *source_p,
    * -Dianora
    */
 
-  /* bit of paranoid, be a shame if it cored for this -Dianora */
-  if(source_p->user)
+  if(source_p->user != NULL)
     {
       ircsprintf(message,"KNOCK: %s (%s [%s@%s] has asked for an invite)",
                  name, source_p->name, source_p->username, source_p->host);
 
       sendto_channel_local(ONLY_CHANOPS_HALFOPS,
-                          chptr,
-                          ":%s!%s@%s NOTICE %s :%s",
-                          source_p->name,
-                          source_p->username,
-                          source_p->host,
-                          name,
-                          message);
+			   chptr,
+			   form_str(RPL_KNOCK),
+			   me.name,
+			   name,
+			   source_p->name,
+			   source_p->username,
+			   source_p->host);
 
       /* XXX for future enhancement. 
        * negotiate a KNOCK CAPAB, send a KNOCK to remote servers

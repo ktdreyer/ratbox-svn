@@ -49,7 +49,12 @@ const char* form_str(int numeric)
   assert(-1 < numeric);
   assert(numeric < ERR_LAST_ERR_MSG);
   assert(0 != replies[numeric]);
-  
+
+  if (numeric > ERR_LAST_ERR_MSG)
+    numeric = ERR_LAST_ERR_MSG;
+  if (numeric < 0)
+    numeric = ERR_LAST_ERR_MSG;
+
   return (const char *) _(replies[numeric]);
 }
 

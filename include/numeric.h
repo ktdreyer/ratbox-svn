@@ -291,6 +291,9 @@ extern const char* form_str(int);
 #define RPL_HELPTXT          705
 #define RPL_ENDOFHELP        706
 
+#define RPL_KNOCK	     710
+#define RPL_KNOCKDLVR	     711
+
 #define ERR_LAST_ERR_MSG     999
 
 #endif /* INCLUDED_numeric_h */
