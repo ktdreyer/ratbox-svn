@@ -1,3 +1,26 @@
+androsyn    2002/10/19 00:51:57 UTC	(20021019_0)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              newconf.h res.h s_auth.h s_conf.h 
+    src                  adns.c newconf.c s_auth.c 
+  Log:
+  Added support for ip6.arpa and added configurable support for falling back
+  to ip6.int.  Its a little bit of a hack but it works.
+  
+  Revision  Changes    Path
+  7.186     +7 -0      ircd-ratbox/doc/example.conf
+  7.23      +8 -0      ircd-ratbox/doc/example.efnet.conf
+  7.20      +1 -0      ircd-ratbox/include/newconf.h
+  7.21      +1 -1      ircd-ratbox/include/res.h
+  7.18      +3 -0      ircd-ratbox/include/s_auth.h
+  7.204     +3 -0      ircd-ratbox/include/s_conf.h
+  7.46      +17 -7     ircd-ratbox/src/adns.c
+  7.47      +11 -1     ircd-ratbox/src/newconf.c
+  7.112     +12 -1     ircd-ratbox/src/s_auth.c
+
+
+
 leeh        2002/10/18 13:38:30 UTC	(20021018_0)
 
   Modified files:
