@@ -40,7 +40,7 @@
 #include <dlfcn.h>
 #endif
 
-#include "ircd_handler.h"
+#include "handlers.h"
 #include "msg.h"
 #include "memory.h"
 #include "hook.h"

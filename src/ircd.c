@@ -43,7 +43,7 @@
 #include "sprintf_irc.h"
 #include "s_gline.h"
 #include "motd.h"
-#include "ircd_handler.h"
+#include "handlers.h"
 #include "md5.h"
 #include "msg.h"		/* msgtab */
 #include "hostmask.h"

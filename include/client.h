@@ -34,7 +34,7 @@
 #endif
 
 #include "ircd_defs.h"
-#include "ircd_handler.h"
+#include "handlers.h"
 #include "linebuf.h"
 #include "channel.h"
 #include "res.h"

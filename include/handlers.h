@@ -27,6 +27,29 @@
 #ifndef INCLUDED_handlers_h
 #define INCLUDED_handlers_h
 
+struct Client;
+
+/* MessageHandler */
+typedef enum HandlerType
+{
+	UNREGISTERED_HANDLER,
+	CLIENT_HANDLER,
+	SERVER_HANDLER,
+	OPER_HANDLER,
+	LAST_HANDLER_TYPE
+}
+HandlerType;
+
+/*
+ * MessageHandler function
+ * Params:
+ * struct Client* client_p   - connection message originated from
+ * struct Client* source_p   - source of message, may be different from client_p
+ * int            parc   - parameter count
+ * char*          parv[] - parameter vector
+ */
+typedef int (*MessageHandler) (struct Client *, struct Client *, int, const char *[]);
+
 /*
  * m_functions execute protocol messages on this server:
  * int m_func(struct Client* client_p, struct Client* source_p, int parc, char* parv[]);
@@ -85,8 +108,6 @@
  *            note:   it is guaranteed that parv[0]..parv[parc-1] are all
  *                    non-NULL pointers.
  */
-
-struct Client;
 
 /* generic handlers */
 extern int ms_error(struct Client *, struct Client *, int, const char **);

@@ -28,7 +28,7 @@
 #define INCLUDED_msg_h
 
 #include "config.h"
-#include "ircd_handler.h"
+#include "handlers.h"
 
 struct Client;
 

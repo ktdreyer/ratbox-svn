@@ -34,7 +34,6 @@
 #include "ircd.h"		/* me */
 #include "listener.h"		/* show_ports */
 #include "s_gline.h"
-#include "ircd_handler.h"
 #include "msg.h"		/* Message */
 #include "hostmask.h"		/* report_mtrie_conf_links */
 #include "numeric.h"		/* ERR_xxx */

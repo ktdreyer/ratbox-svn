@@ -29,7 +29,6 @@
 #include "client.h"
 #include "ircd.h"
 #include "motd.h"
-#include "ircd_handler.h"
 #include "msg.h"
 #include "numeric.h"
 #include "send.h"

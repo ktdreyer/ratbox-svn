@@ -35,7 +35,7 @@
 #ifndef INCLUDED_newconf_h
 #define INCLUDED_newconf_h
 
-#include "ircd_handler.h"
+#include "handlers.h"
 #include "tools.h"
 
 /* how to store the xline (hash/dlink) */

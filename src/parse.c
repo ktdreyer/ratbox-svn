@@ -39,7 +39,6 @@
 #include "s_stats.h"
 #include "send.h"
 #include "s_debug.h"
-#include "ircd_handler.h"
 #include "msg.h"
 #include "s_conf.h"
 #include "memory.h"

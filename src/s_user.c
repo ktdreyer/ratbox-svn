@@ -39,7 +39,7 @@
 #include "ircd.h"
 #include "listener.h"
 #include "motd.h"
-#include "ircd_handler.h"
+#include "handlers.h"
 #include "msg.h"
 #include "numeric.h"
 #include "s_bsd.h"
