@@ -1,3 +1,16 @@
+db          2001/12/12 13:23:48 EST	(20011212_3)
+
+  Modified files:
+    src                  ircd.c 
+  Log:
+  - make buff 32 bytes long in both write_pidfile and check_pidfile. purely
+    cosmetic. Just for consistency.
+  
+  Revision  Changes    Path
+  7.203     +1 -1      ircd-hybrid-7/src/ircd.c
+
+
+
 db          2001/12/12 02:41:33 EST	(20011212_2)
 
   Modified files:
