@@ -1,3 +1,15 @@
+androsyn    2004/03/02 13:24:32 EST	(20040302_4)
+
+  Modified files:
+    servlink             io.c 
+  Log:
+  Fix an #ifdef bit of stupidity..
+  
+  Revision  Changes    Path
+  1.40      +0 -2      ircd-ratbox/servlink/io.c
+
+
+
 androsyn    2004/03/01 22:08:06 EST	(20040302_3)
 
   Modified files:
