@@ -1,3 +1,8 @@
+*** 20001115_3 by db
+- removed /rehash dump for one reason... and one reason only BLOAT
+
+
+
 *** 20001115_2 by lusky
 added missing commit comments
 
