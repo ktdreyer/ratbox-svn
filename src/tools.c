@@ -20,6 +20,9 @@
  *  USA
  *
  *  $Id$
+ *
+ * When you update these functions make sure you update the ones in tools.h
+ * as well!!!
  */
 
 #include "stdinc.h"
@@ -179,5 +182,4 @@ dlinkMoveList(dlink_list *from, dlink_list *to)
 
   /* I think I got that right */
 }
-
 
