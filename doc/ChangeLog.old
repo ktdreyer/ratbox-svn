@@ -1,3 +1,9 @@
+*** 20001227_2 by db
+- topic change from server should appear to come from local server
+  always.
+
+
+
 *** 20001227_1 by db
 - pathological case would cause a core. If someone fed back the
   same server as the server as "me" it would core since there would be
