@@ -1442,7 +1442,7 @@ conf_set_generic_string(void *data, int len, void *location)
 	char **loc = location;
 	char *input = data;
 
-	if(strlen(input) > len)
+	if(len > 0 && strlen(input) > len)
 		input[len] = '\0';
 
 	MyFree(*loc);
