@@ -1,3 +1,8 @@
+*** 20010103_27 by davidt
+Fix problems found by adrian where we were referencing free'd client data.
+
+
+
 *** 20010103_26 by db
 - return CLIENT_EXITED in all cases that a client is exited. things
   are then rosy again for banned clients.
