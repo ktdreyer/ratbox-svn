@@ -857,7 +857,7 @@ find_conf_exact(const char *name, const char *user, const char *host, int statma
 			continue;
 
 		strlcpy(addr, tmp->host, sizeof(addr));
-		if(parse_netmask(addr, &ip, &bits) && parse_netmask(host, &cip, &cbits))
+		if(parse_netmask(addr, &ip, &bits) == parse_netmask(host, &cip, &cbits))
 		{
 			if(ip.ss_family != cip.ss_family)
 				continue;
@@ -2185,7 +2185,7 @@ conf_add_d_conf(struct ConfItem *aconf)
 	 *       need this anyway, so I will disable it for now... -A1kmm
 	 */
 
-	if(!parse_netmask(aconf->host, NULL, NULL))
+	if(parse_netmask(aconf->host, NULL, NULL) == HM_HOST)
 	{
 		ilog(L_WARN, "Invalid Dline %s ignored", aconf->host);
 		free_conf(aconf);

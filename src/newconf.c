@@ -1888,7 +1888,7 @@ conf_begin_deny(struct TopConf *tc)
 static int
 conf_end_deny(struct TopConf *tc)
 {
-	if(yy_aconf->host && parse_netmask(yy_aconf->host, NULL, NULL))
+	if(yy_aconf->host && parse_netmask(yy_aconf->host, NULL, NULL) != HM_HOST)
 	{
 		add_conf_by_address(yy_aconf->host, CONF_DLINE, NULL, yy_aconf);
 	}
@@ -1934,7 +1934,7 @@ conf_begin_exempt(struct TopConf *tc)
 static int
 conf_end_exempt(struct TopConf *tc)
 {
-	if(yy_aconf->host && parse_netmask(yy_aconf->host, NULL, NULL))
+	if(yy_aconf->host && parse_netmask(yy_aconf->host, NULL, NULL) != HM_HOST)
 	{
 		add_conf_by_address(yy_aconf->host, CONF_EXEMPTDLINE, NULL, yy_aconf);
 	}
