@@ -1,0 +1,9 @@
+$Id$
+
+The ratbox-services CVS repository is available for anonymous access:
+
+cvs -d :pserver:cvs@cvs.ratbox.org:/cvsroot login
+
+Type enter when prompted for a password.
+
+cvs -d :pserver:cvs@cvs.ratbox.org:/cvsroot co rserv

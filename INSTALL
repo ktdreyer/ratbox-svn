@@ -5,6 +5,7 @@ ratbox-services installation guide
 
 1. Decide which services you dont want compiled in.  By default all 
    will be compiled in, as they can be disabled in the config file.
+   These can be listed via ./configure --help
 
 2. Ensure you have a grammar/lexical parser installed.  Bison and flex are
    recommended, though yacc and lex should do.
@@ -27,12 +28,12 @@ ratbox-services installation guide
       2. tar -zxf sqlite-2.8.x.tar.gz
       3. cd sqlite
       
-      If you have root access:
+      If you have root access and want to install in /usr/local/ratbox-services
         4a. ./configure --prefix=/usr/local
         4b. make
         4c. su to root user
-        4d. cd /path/to/source/sqlite
-        4e. make install
+	4d. cd /path/to/sqlite/source
+	4e. make install
 
       If you do not have root access:
         5a. ./configure --prefix=/home/yourusername/sqlite
@@ -44,7 +45,9 @@ ratbox-services installation guide
    as root you must first:
    	mkdir /usr/local/ratbox-services
 	chown youruser:yourgroup /usr/local/ratbox-services
-   Then install as normal from your username.  Services will not run as root.
+   Then install as normal from your username.  Services will not run as
+   root, nor should you run make install as root.
+   
 
    If you wish to install it to a different directory include the 
    --prefix option:
@@ -77,8 +80,12 @@ ratbox-services installation guide
 
 8. Edit example.conf and save it as services.conf.
 
-9. Build the initial services database by:
+9. Initialise your database.  If you are not converting from hybserv, then
+   build the initial services database by:
 	sqlite services.db < schema.txt
+
+   If you are converting from hybserv, see the website for more information.
+   http://services.ircd-ratbox.org/
 
 10. Run ./ratbox-services
 
