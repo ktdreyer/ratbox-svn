@@ -1062,17 +1062,17 @@ chm_except(struct Client *client_p, struct Client *source_p,
   struct Ban *banptr;
   char *mask, *raw_mask;
 
-  if(!ConfigChannel.use_except && MyClient(source_p))
+  /* if we have +e disabled, allow local clients to do anything but
+   * set the mode.  This prevents the abuse of +e when just a few
+   * servers support it. --fl
+   */
+  if(!ConfigChannel.use_except && MyClient(source_p) && 
+    ((dir == MODE_ADD) && (parc > *parn)))
   {
     if ((*errors & SM_ERR_RPL_E) != 0)
       return;
 
     *errors |= SM_ERR_RPL_E;
-    
-    if(dir == MODE_QUERY || parc <= *parn)
-      sendto_one(client_p, form_str(RPL_ENDOFEXCEPTLIST),
-		 me.name, source_p->name, chname);
-		 
     return;
   }
 
@@ -1180,18 +1180,17 @@ chm_invex(struct Client *client_p, struct Client *source_p,
   dlink_node *ptr;
   struct Ban *banptr;
 
-  /* if its our client setting a +I, drop it. */
-  if(!ConfigChannel.use_invex && MyClient(source_p))
+  /* if we have +I disabled, allow local clients to do anything but
+   * set the mode.  This prevents the abuse of +I when just a few
+   * servers support it --fl
+   */
+  if(!ConfigChannel.use_invex && MyClient(source_p) && 
+    (dir == MODE_ADD) && (parc > *parn))
   {
     if((*errors & SM_ERR_RPL_I) != 0)
       return;
     
     *errors |= SM_ERR_RPL_I;
-    
-    if(dir == MODE_QUERY || parc <= *parn)
-      sendto_one(source_p, form_str(RPL_ENDOFINVITELIST),
-		 me.name, source_p->name, chname);
-
     return;
   }
 
