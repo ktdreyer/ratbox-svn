@@ -1,3 +1,28 @@
+leeh        2002/07/31 12:24:11 EDT	(20020731_0)
+
+  Modified files:
+    modules              m_admin.c m_away.c m_invite.c m_join.c 
+                         m_links.c m_lusers.c m_motd.c m_names.c 
+                         m_stats.c m_whois.c 
+  Log:
+  - allow opers to join channels on split to be consistent with hyb6 (ugh)
+  - audited the ms_*() functions for stuff coming from hacked servers that
+    should never happen.
+  
+  Revision  Changes    Path
+  1.35      +3 -2      ircd-hybrid-7/modules/m_admin.c
+  1.31      +4 -9      ircd-hybrid-7/modules/m_away.c
+  1.47      +2 -3      ircd-hybrid-7/modules/m_invite.c
+  1.88      +4 -3      ircd-hybrid-7/modules/m_join.c
+  1.37      +12 -9     ircd-hybrid-7/modules/m_links.c
+  1.23      +4 -2      ircd-hybrid-7/modules/m_lusers.c
+  1.30      +2 -2      ircd-hybrid-7/modules/m_motd.c
+  1.43      +3 -2      ircd-hybrid-7/modules/m_names.c
+  1.111     +3 -2      ircd-hybrid-7/modules/m_stats.c
+  1.78      +4 -1      ircd-hybrid-7/modules/m_whois.c
+
+
+
 leeh        2002/07/30 07:12:43 EDT	(20020730_3)
 
   Modified files:
