@@ -26,6 +26,7 @@ it is important you read this file before upgrading.
 - fix coming out of splitmode when we use split_delay and we arent
   out of split anymore when the delay ends
 - fix a possible double exit of aborted clients
+- prefix the exempt notice for Y: properly
 
 -- ircd-ratbox-2.0rc3
 - dont allow external messages to a +m channel
