@@ -1,3 +1,15 @@
+leeh        2005/01/10 16:34:02 EST	(20050110_3)
+
+  Modified files:
+    src                  service.c 
+  Log:
+  - introduce services with +D(eaf)
+  
+  Revision  Changes    Path
+  1.38      +1 -1      rserv/src/service.c
+
+
+
 leeh        2005/01/10 15:28:17 EST	(20050110_2)
 
   Modified files:
