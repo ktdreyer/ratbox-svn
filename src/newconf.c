@@ -37,17 +37,14 @@ static char *conf_cur_block_name;
 
 static dlink_list conf_items;
 
-/* XXX This _really_ needs to go away */
-static struct ConfItem *yy_achead = NULL;
 static struct ConfItem *yy_aconf = NULL;
-static struct ConfItem *yy_aprev = NULL;
-static int yy_acount = 0;
 
 static struct Class *yy_class = NULL;
 
 static struct remote_conf *yy_shared = NULL;
 static struct server_conf *yy_server = NULL;
 
+static dlink_list yy_aconf_list;
 static dlink_list yy_oper_list;
 static struct oper_conf *yy_oper = NULL;
 
@@ -605,7 +602,7 @@ conf_end_oper(struct TopConf *tc)
 		dlinkMoveNode(ptr, &yy_oper_list, &oper_conf_list);
 	}
 
-	free_oper_conf(yy_oper);
+	dlinkAddAlloc(yy_oper, &oper_conf_list);
 	yy_oper = NULL;
 
 	return 0;
@@ -626,7 +623,10 @@ conf_set_oper_user(void *data)
 	char *p;
 	char *host = (char *) data;
 
-	yy_tmpoper = make_oper_conf();
+	if(EmptyString(yy_oper->host))
+		yy_tmpoper = yy_oper;
+	else
+		yy_tmpoper = make_oper_conf();
 
 	if((p = strchr(host, '@')))
 	{
@@ -645,11 +645,21 @@ conf_set_oper_user(void *data)
 	if(EmptyString(yy_tmpoper->username) || EmptyString(yy_tmpoper->host))
 	{
 		conf_report_error("Ignoring user -- missing username/host");
-		free_oper_conf(yy_tmpoper);
+
+		if(yy_oper == yy_tmpoper)
+		{
+			MyFree(yy_tmpoper->username);
+			MyFree(yy_tmpoper->host);
+			yy_tmpoper->username = yy_tmpoper->host = NULL;
+		}
+		else
+			free_oper_conf(yy_tmpoper);
+
 		return;
 	}
 
-	dlinkAddAlloc(yy_tmpoper, &yy_oper_list);
+	if(yy_oper != yy_tmpoper)
+		dlinkAddAlloc(yy_tmpoper, &yy_oper_list);
 }
 
 static void
@@ -848,20 +858,19 @@ conf_set_listen_address(void *data)
 static int
 conf_begin_auth(struct TopConf *tc)
 {
-	struct ConfItem *yy_tmp;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
 
-	yy_tmp = yy_achead;
-	while (yy_tmp)
-	{
-		yy_aconf = yy_tmp;
-		yy_tmp = yy_tmp->next;
-		yy_aconf->next = NULL;
+	if(yy_aconf)
 		free_conf(yy_aconf);
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, yy_aconf_list.head)
+	{
+		free_conf(ptr->data);
+		dlinkDestroy(ptr, &yy_aconf_list);
 	}
-	yy_achead = NULL;
-	yy_aconf = NULL;
-	yy_aprev = NULL;
-	yy_achead = yy_aprev = yy_aconf = make_conf();
+
+	yy_aconf = make_conf();
 	yy_aconf->status = CONF_CLIENT;
 
 	return 0;
@@ -871,93 +880,86 @@ static int
 conf_end_auth(struct TopConf *tc)
 {
 	struct ConfItem *yy_tmp;
-	struct ConfItem *yy_next;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
 
-	/* copy over settings from first struct */
-	for (yy_tmp = yy_achead->next; yy_tmp; yy_tmp = yy_tmp->next)
+	if(EmptyString(yy_aconf->name))
+		DupString(yy_aconf->name, "NOMATCH");
+
+	/* so the stacking works in order.. */
+	collapse(yy_aconf->user);
+	collapse(yy_aconf->host);
+	conf_add_class_to_conf(yy_aconf);
+	add_conf_by_address(yy_aconf->host, CONF_CLIENT, yy_aconf->user, yy_aconf);
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, yy_aconf_list.head)
 	{
-		if(yy_achead->passwd)
-			DupString(yy_tmp->passwd, yy_achead->passwd);
-		if(yy_achead->name)
-			DupString(yy_tmp->name, yy_achead->name);
-		if(yy_achead->className)
-			DupString(yy_tmp->className, yy_achead->className);
+		yy_tmp = ptr->data;
 
-		yy_tmp->flags = yy_achead->flags;
-		yy_tmp->port = yy_achead->port;
-	}
+		if(yy_aconf->passwd)
+			DupString(yy_tmp->passwd, yy_aconf->passwd);
 
-	for (yy_tmp = yy_achead; yy_tmp; yy_tmp = yy_next)
-	{
-		yy_next = yy_tmp->next;
-		yy_tmp->next = NULL;
+		/* this will always exist.. */
+		DupString(yy_tmp->name, yy_aconf->name);
 
-		if(yy_tmp->name == NULL)
-			DupString(yy_tmp->name, "NOMATCH");
+		if(yy_aconf->className)
+			DupString(yy_tmp->className, yy_aconf->className);
 
-		if(yy_tmp->user == NULL)
-			DupString(yy_tmp->user, "*");
-		else
-			collapse(yy_tmp->user);
+		yy_tmp->flags = yy_aconf->flags;
+		yy_tmp->port = yy_aconf->port;
 
-		if(yy_tmp->host == NULL)
-			continue;
-		else
-			collapse(yy_tmp->host);
+		collapse(yy_tmp->user);
+		collapse(yy_tmp->host);
 
 		conf_add_class_to_conf(yy_tmp);
 
 		add_conf_by_address(yy_tmp->host, CONF_CLIENT, yy_tmp->user, yy_tmp);
+		dlinkDestroy(ptr, &yy_aconf_list);
 	}
 
-	yy_achead = NULL;
 	yy_aconf = NULL;
-	yy_aprev = NULL;
-	yy_acount = 0;
 	return 0;
 }
 
 static void
 conf_set_auth_user(void *data)
 {
+	struct ConfItem *yy_tmp;
 	char *p;
-	char *new_user;
-	char *new_host;
 
 	/* The first user= line doesn't allocate a new conf */
-	if(yy_acount++)
+	if(!EmptyString(yy_aconf->host))
 	{
-		yy_aprev = yy_aconf;
-		yy_aconf = (yy_aconf->next = make_conf());
-		yy_aconf->status = CONF_CLIENT;
+		yy_tmp = make_conf();
+		yy_tmp->status = CONF_CLIENT;
 	}
+	else
+		yy_tmp = yy_aconf;
 
 	if((p = strchr(data, '@')))
 	{
-		*p = '\0';
-		DupString(new_user, data);
-		MyFree(yy_aconf->user);
-		yy_aconf->user = new_user;
-		p++;
-		MyFree(yy_aconf->host);
-		DupString(new_host, p);
-		yy_aconf->host = new_host;
+		*p++ = '\0';
+
+		DupString(yy_tmp->user, data);
+		DupString(yy_tmp->host, p);
 	}
 	else
 	{
-		MyFree(yy_aconf->host);
-		DupString(yy_aconf->host, data);
-		DupString(yy_aconf->user, "*");
+		DupString(yy_tmp->user, "*");
+		DupString(yy_tmp->host, data);
 	}
+
+	if(yy_aconf != yy_tmp)
+		dlinkAddAlloc(yy_tmp, &yy_aconf_list);
 }
 
 static void
 conf_set_auth_passwd(void *data)
 {
-	if(yy_achead->passwd)
-		memset(yy_achead->passwd, 0, strlen(yy_achead->passwd));
-	MyFree(yy_achead->passwd);
-	DupString(yy_achead->passwd, data);
+	if(yy_aconf->passwd)
+		memset(yy_aconf->passwd, 0, strlen(yy_aconf->passwd));
+	MyFree(yy_aconf->passwd);
+	DupString(yy_aconf->passwd, data);
 }
 
 static void
@@ -966,9 +968,9 @@ conf_set_auth_encrypted(void *data)
 	int yesno = *(unsigned int *) data;
 
 	if(yesno)
-		yy_achead->flags |= CONF_FLAGS_ENCRYPTED;
+		yy_aconf->flags |= CONF_FLAGS_ENCRYPTED;
 	else
-		yy_achead->flags &= ~CONF_FLAGS_ENCRYPTED;
+		yy_aconf->flags &= ~CONF_FLAGS_ENCRYPTED;
 }
 
 static void
@@ -1027,9 +1029,9 @@ conf_set_auth_spoof(void *data)
 		return;
 	}
 
-	MyFree(yy_achead->name);
-	DupString(yy_achead->name, data);
-	yy_achead->flags |= CONF_FLAGS_SPOOF_IP;
+	MyFree(yy_aconf->name);
+	DupString(yy_aconf->name, data);
+	yy_aconf->flags |= CONF_FLAGS_SPOOF_IP;
 }
 
 static void
@@ -1037,15 +1039,15 @@ conf_set_auth_flags(void *data)
 {
 	conf_parm_t *args = data;
 
-	set_modes_from_table((int *) &yy_achead->flags, "flag", auth_table, args);
+	set_modes_from_table((int *) &yy_aconf->flags, "flag", auth_table, args);
 }
 
 static void
 conf_set_auth_redir_serv(void *data)
 {
-	yy_achead->flags |= CONF_FLAGS_REDIR;
-	MyFree(yy_achead->name);
-	DupString(yy_achead->name, data);
+	yy_aconf->flags |= CONF_FLAGS_REDIR;
+	MyFree(yy_aconf->name);
+	DupString(yy_aconf->name, data);
 }
 
 static void
@@ -1053,15 +1055,15 @@ conf_set_auth_redir_port(void *data)
 {
 	int port = *(unsigned int *) data;
 
-	yy_achead->flags |= CONF_FLAGS_REDIR;
-	yy_achead->port = port;
+	yy_aconf->flags |= CONF_FLAGS_REDIR;
+	yy_aconf->port = port;
 }
 
 static void
 conf_set_auth_class(void *data)
 {
-	MyFree(yy_achead->className);
-	DupString(yy_achead->className, data);
+	MyFree(yy_aconf->className);
+	DupString(yy_aconf->className, data);
 }
 
 static int
