@@ -68,10 +68,17 @@ void send_data_blocking(int fd, unsigned char *data, int datalen)
     FD_ZERO(&wfds);
     FD_SET(fd, &wfds);
 
-    /* block until we can write to the fd */
-    /* check error exits on fatal error, else 1/0 for success/fail */
-    while(!(ret = checkError(select(fd+1, NULL, &wfds, NULL, NULL))))
-      ;
+    /* sleep until we can write to the fd */
+    while(1)
+    {
+      ret = select(fd+1, NULL, &wfds, NULL, NULL);
+      
+      if (ret > 0) /* break out so we can write */
+        break;
+
+      if (ret < 0) /* error ? */
+        checkError(ret); /* exit on a fatal error, else just loop */
+    }
   }
 }
 
@@ -83,9 +90,6 @@ void send_data_blocking(int fd, unsigned char *data, int datalen)
  */
 void process_sendq(unsigned char *data, unsigned int datalen)
 {
-  /* we can 'block' here, as we don't have to listen
-   * to any other fds anyway
-   */
   send_data_blocking(REMOTE_FD_W, data, datalen);
 }
 
@@ -109,13 +113,11 @@ void process_recvq(unsigned char *data, unsigned int datalen)
 #ifdef HAVE_LIBCRYPTO
   if (in_state.crypt)
   {
-    LOG_IO(BDL,data,datalen);
     assert(EVP_DecryptUpdate(&in_state.crypt_state.ctx,
                              tmp_buf, &blen,
                              data, datalen));
     assert(blen == datalen);
     buf = tmp_buf;
-    LOG_IO(PDL,tmp_buf,blen);
   }
 #endif
 
@@ -255,8 +257,7 @@ void read_data(void)
   unsigned char *buf = out_state.buf;
   int  blen;
   
-  if (out_state.len)
-    exit(1);
+  assert(!out_state.len);
 
 #if defined(HAVE_LIBZ) || defined(HAVE_LIBCRYPTO)
   if (out_state.zip || out_state.crypt)
@@ -298,18 +299,15 @@ void read_data(void)
     {
       /* encrypt data */
       ret = blen;
-      LOG_IO(BEL,buf,ret);
       assert( EVP_EncryptUpdate(&out_state.crypt_state.ctx,
                                 out_state.buf, &blen,
                                 buf, ret) );
       assert(blen == ret);
-      LOG_IO(PEL,out_state.buf,blen);
     }
 #endif
     
     assert(blen);
     ret = checkError(write(REMOTE_FD_W, out_state.buf, blen));
-    LOG_IO(NOL, out_state.buf, ret);
     if (ret < blen)
     {
       /* write incomplete, register write cb */
@@ -327,15 +325,13 @@ void write_net(void)
 {
   int ret;
 
-  if (!out_state.len)
-    exit(1);
+  assert(out_state.len);
 
   if (!(ret = checkError(write(REMOTE_FD_W,
                                (out_state.buf + out_state.ofs),
                                out_state.len))))
     return; /* no data waiting */
 
-  LOG_IO(NOL,(out_state.buf+out_state.ofs),ret);
   out_state.len -= ret;
 
   if (!out_state.len)
@@ -357,8 +353,7 @@ void read_net(void)
   unsigned char *buf = in_state.buf;
   int  blen;
 
-  if (in_state.len)
-    exit(1);
+  assert(!in_state.len);
 
 #if defined(HAVE_LIBCRYPTO) || defined(HAVE_LIBZ)
   if (in_state.crypt || in_state.zip)
@@ -367,7 +362,6 @@ void read_net(void)
 
   while ((ret = checkError(read(REMOTE_FD_R, buf, READLEN))))
   {
-    LOG_IO(NIL,buf,ret);
     blen = ret;
 #ifdef HAVE_LIBCRYPTO
     if (in_state.crypt)
@@ -378,12 +372,10 @@ void read_net(void)
       if (in_state.zip)
         buf = tmp2_buf;
 #endif
-      LOG_IO(BDL,tmp_buf,ret);
       assert(EVP_DecryptUpdate(&in_state.crypt_state.ctx,
                                buf, &blen,
                                tmp_buf, ret));
       assert(blen == ret);
-      LOG_IO(PDL,buf,blen);
 
 #if defined(HAVE_LIBCRYPTO) || defined(HAVE_LIBZ)
       if (in_state.crypt || in_state.zip)
@@ -399,25 +391,19 @@ void read_net(void)
       in_state.zip_state.z_stream.next_in = buf;
       in_state.zip_state.z_stream.avail_in = ret;
       in_state.zip_state.z_stream.next_out = in_state.buf;
-      in_state.zip_state.z_stream.avail_out = BUFLEN*2;
+      in_state.zip_state.z_stream.avail_out = BUFLEN;
       if ((ret2 = inflate(&in_state.zip_state.z_stream,
                           Z_NO_FLUSH)) != Z_OK)
-      {
-        assert(0);
         exit(ret2);
-      }
       assert(in_state.zip_state.z_stream.avail_out);
       assert(in_state.zip_state.z_stream.avail_in == 0);
-      blen = (BUFLEN*2) - in_state.zip_state.z_stream.avail_out;
+      blen = BUFLEN - in_state.zip_state.z_stream.avail_out;
 
-      assert(blen >= 0);
       if (!blen)
         return; /* that didn't generate any decompressed input.. */
     }
 #endif
 
-    assert(blen);
-    
     ret = checkError(write(LOCAL_FD_W, in_state.buf, blen));
 
     if (ret < blen)
@@ -437,8 +423,7 @@ void write_data(void)
 {
   int ret;
 
-  if (!in_state.len)
-    exit(1);
+  assert(in_state.len);
 
   if (!(ret = checkError(write(LOCAL_FD_W,
                                (in_state.buf + in_state.ofs),

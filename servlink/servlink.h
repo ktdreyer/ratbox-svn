@@ -25,6 +25,7 @@
 #define REMOTE_FD_R             2
 
 #ifdef MISSING_SOCKPAIR
+/* uni-directional pipes, so we need 2 extra fds... */
 #define CONTROL_FD_W            3
 #define LOCAL_FD_W              4
 #define REMOTE_FD_W             REMOTE_FD_R 
@@ -36,26 +37,8 @@
 #define NUM_FDS                 3       /* nfds for select */
 #endif
 
-#define SERVLINK_DEBUG_GDB      0x01
-#define SERVLINK_DEBUG_LOGS     0x02
 
-/* #define SERVLINK_DEBUG  SERVLINK_DEBUG_GDB|SERVLINK_DEBUG_LOGS */
-#undef SERVLINK_DEBUG
-/* #define SERVLINK_DEBUG  SERVLINK_DEBUG_LOGS */
-
-#if SERVLINK_DEBUG & SERVLINK_DEBUG_LOGS
-#define BEL 0
-#define PEL 1
-#define BDL 2
-#define PDL 3
-#define NIL 4
-#define NOL 5
-
-extern FILE *logs[6];
-#define LOG_IO(log, data, len)  assert(fwrite(data, 1, len, logs[log]) == len);
-#else
-#define LOG_IO(log, data, len)
-#endif
+/* #define SERVLINK_DEBUG */
 
 #define READLEN                  2048
 

@@ -47,10 +47,6 @@ static void usage(void);
 struct slink_state       in_state;
 struct slink_state       out_state;
 
-#if SERVLINK_DEBUG & SERVLINK_DEBUG_LOGS
-FILE *logs[6];
-#endif
-
 struct fd_table          fds[NUM_FDS] =
         {
           { read_ctrl, NULL },
@@ -81,28 +77,13 @@ int main(int argc, char *argv[])
   fd_set rfds;
   fd_set wfds;
   int i;
-#if SERVLINK_DEBUG & SERVLINK_DEBUG_LOGS
-  pid_t pid = getpid();
-  char logfile[512] = "";
-  char lognames[6][8] = { "be", "pe", "bd", "pd", "ni", "no" };
-#endif
-  
-#if SERVLINK_DEBUG & SERVLINK_DEBUG_GDB
+#ifdef SERVLINK_DEBUG
   int GDBAttached = 0;
 
   while (!GDBAttached)
     sleep(1);
 #endif
 
-#if SERVLINK_DEBUG & SERVLINK_DEBUG_LOGS
-  for(i = 0; i < 6; i++)
-  {
-    sprintf(logfile, "%s/slink-%u-%s.log",
-            "/usr/local/ircd/logs", pid, lognames[i]);
-    assert(logs[i] = fopen(logfile, "w"));
-  }
-#endif
-  
   /* Make sure we are running under hybrid.. */
   if (isatty(0) || argc != 1 || strcmp(argv[0], "-slink"))
     usage(); /* exits */
