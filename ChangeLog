@@ -1,3 +1,15 @@
+androsyn    2003/02/17 00:14:05 UTC	(20030217_0)
+
+  Modified files:
+    include              fdlist.h 
+  Log:
+  Remove an unneeded ifdef
+  
+  Revision  Changes    Path
+  7.32      +0 -2      ircd-ratbox/include/fdlist.h
+
+
+
 leeh        2003/02/16 16:56:21 UTC	(20030216_1)
 
   Modified files:
