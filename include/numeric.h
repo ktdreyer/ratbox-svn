@@ -314,6 +314,8 @@ extern const char *form_str(int);
 
 #define ERR_NOPRIVS		723
 
+#define RPL_TESTMASK		724
+
 #define ERR_LAST_ERR_MSG     999
 
 #endif /* INCLUDED_numeric_h */
