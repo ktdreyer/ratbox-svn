@@ -83,6 +83,7 @@ struct Capability captab[] = {
 static unsigned long nextFreeMask();
 static unsigned long freeMask;
 static void server_burst(struct Client *cptr);
+static CNCB serv_connect_callback;
 
 /*
  * my_name_for_link - return wildcard name of my server name 
@@ -311,7 +312,7 @@ time_t try_connections(time_t currenttime)
         }
       else
         {
-          if (connect_server(con_conf, 0, 0))
+          if (serv_connect(con_conf, 0))
             sendto_ops("Connection to %s[%s] activated.",
                        con_conf->name, con_conf->host);
         }
@@ -345,6 +346,12 @@ int check_server(struct Client* cptr)
       return 0;
     }
   lp = cptr->confs;
+  /*
+   * This code is from the old world order. It should eventually be
+   * duplicated somewhere else later!
+   *   -- adrian
+   */
+#if 0
   if (cptr->dns_reply)
     {
       int             i;
@@ -376,6 +383,7 @@ int check_server(struct Client* cptr)
                                   cptr->username, CONF_NOCONNECT_SERVER);
         }
     }
+#endif
   /*
    * Check for C and N lines with the hostname portion the ip number
    * of the host the server runs on. This also checks the case where
@@ -1056,3 +1064,215 @@ static unsigned long nextFreeMask()
   return 0L; /* watch this special case ... */
 }
 
+/*
+ * New server connection code
+ * Based upon the stuff floating about in s_bsd.c
+ *   -- adrian
+ */
+
+/*
+ * serv_connect() - initiate a server connection
+ *
+ * This code initiates a connection to a server. It first checks to make
+ * sure the given server exists. If this is the case, it creates a socket,
+ * creates a client, saves the socket information in the client, and
+ * initiates a connection to the server through comm_connect_tcp(). The
+ * completion of this goes through serv_completed_connection().
+ *
+ * We return 1 if the connection is attempted, since we don't know whether
+ * it suceeded or not, and 0 if it fails in here somewhere.
+ */
+int
+serv_connect(struct ConfItem *aconf, struct Client *by)
+{
+    struct Client *cptr;
+    int fd;
+
+    /* Make sure aconf is useful */
+    assert(aconf != NULL);
+
+    /* log */
+    log(L_NOTICE, "Connect to %s[%s] @%s", aconf->user, aconf->host,
+        inetntoa((char *)&aconf->ipnum));
+
+    /*
+     * Make sure this server isn't already connected
+     * Note: aconf should ALWAYS be a valid C: line
+     */
+    if ((cptr = find_server(aconf->name))) { 
+        sendto_realops("Server %s already present from %s",
+          aconf->name, get_client_name(cptr, TRUE));
+        if (by && IsPerson(by) && !MyClient(by))
+            sendto_one(by, ":%s NOTICE %s :Server %s already present from %s",
+              me.name, by->name, aconf->name,
+              get_client_name(cptr, TRUE));
+      return 0;
+    }
+
+    /* XXX we should make sure we're not already connected! */
+
+    /* create a socket for the server connection */ 
+    if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        /* Eek, failure to create the socket */
+        report_error("opening stream socket to %s: %s", aconf->name, errno);
+        return 0;
+    }
+    if (fd >= (HARD_FDLIMIT - 10)) {
+        sendto_realops("No more connections allowed (%s)", aconf->name);
+        close(fd); /* Haven't fd_open()ed yet */
+        return 0;
+    }
+
+    /* Tag it in the FD tracking code */
+    fd_open(fd, FD_SOCKET, aconf->name);
+
+    /* Create a client */
+    cptr = make_client(NULL);
+
+    /* Copy in the server, hostname, fd */
+    strncpy_irc(cptr->name, aconf->name, HOSTLEN);
+    strncpy_irc(cptr->host, aconf->host, HOSTLEN);
+    cptr->fd = fd;
+
+    /*
+     * Set up the initial server evilness, ripped straight from
+     * connect_server(), so don't blame me for it being evil.
+     *   -- adrian
+     */
+    strncpy_irc(cptr->sockhost, inetntoa((const char*) &cptr->ip.s_addr),
+      HOSTIPLEN);
+
+    if (!set_non_blocking(cptr->fd))
+        report_error(NONB_ERROR_MSG, get_client_name(cptr, TRUE), errno);
+
+    if (!set_sock_buffers(cptr->fd, READBUF_SIZE))
+        report_error(SETBUF_ERROR_MSG, get_client_name(cptr, TRUE), errno);
+
+  /*
+   * NOTE: if we're here we have a valid C:Line and the client should
+   * have started the connection and stored the remote address/port and
+   * ip address name in itself
+   *
+   * Attach config entries to client here rather than in
+   * completed_connection. This to avoid null pointer references
+   */
+  if (!attach_cn_lines(cptr, aconf->host))
+    {
+      sendto_ops("Host %s is not enabled for connecting:no C/N-line",
+                 aconf->host);
+      if (by && IsPerson(by) && !MyClient(by))  
+        sendto_one(by, ":%s NOTICE %s :Connect to host %s failed.",
+                   me.name, by->name, cptr);
+      det_confs_butmask(cptr, 0);
+      
+      free_client(cptr);
+      return 0;
+    }
+  /*
+   * at this point we have a connection in progress and C/N lines
+   * attached to the client, the socket info should be saved in the
+   * client and it should either be resolved or have a valid address.
+   *
+   * The socket has been connected or connect is in progress.
+   */
+  make_server(cptr);
+  if (by && IsPerson(by))
+    {
+      strcpy(cptr->serv->by, by->name);
+      if (cptr->serv->user)
+        free_user(cptr->serv->user, NULL);
+      cptr->serv->user = by->user;
+      by->user->refcnt++;
+    }
+  else
+    {
+      strcpy(cptr->serv->by, "AutoConn.");
+      if (cptr->serv->user)
+        free_user(cptr->serv->user, NULL);
+      cptr->serv->user = NULL;
+    }
+  cptr->serv->up = me.name;
+
+  local[cptr->fd] = cptr;
+
+  SetConnecting(cptr);
+
+  add_client_to_list(cptr);
+  fdlist_add(cptr->fd, FDL_DEFAULT);
+
+    /* Now, initiate the connection */
+    comm_connect_tcp(cptr->fd, aconf->host, aconf->port, NULL, 0, 
+        serv_connect_callback, cptr);
+
+    return 1;
+}
+
+/*
+ * serv_connect_callback() - complete a server connection.
+ * 
+ * This routine is called after the server connection attempt has
+ * completed. If unsucessful, an error is sent to ops and the client
+ * is closed. If sucessful, it goes through the initialisation/check
+ * procedures, the capabilities are sent, and the socket is then
+ * marked for reading.
+ */
+static void
+serv_connect_callback(int fd, int status, void *data)
+{
+    struct Client *cptr = data;
+    struct ConfItem *c_conf;
+    struct ConfItem *n_conf;
+
+    /* First, make sure its a real client! */
+    assert(cptr != NULL);
+    assert(cptr->fd == fd);
+
+    /* Next, for backward purposes, record the ip of the server */
+    cptr->ip = fd_table[fd].connect.hostaddr;
+
+    /* Check the status */
+    if (status != COMM_OK) {
+        /* We have an error, so report it and quit */
+        exit_client(cptr, cptr, &me, comm_errstr(status));
+        return;
+    }
+
+    /* COMM_OK, so continue the connection procedure */
+    /* Get the C/N lines */
+    c_conf = find_conf_name(cptr->confs, cptr->name, CONF_CONNECT_SERVER);
+    if (!c_conf) { 
+        sendto_realops("Lost C-Line for %s", get_client_name(cptr,FALSE));
+        exit_client(cptr, cptr, &me, "Lost C-line");
+        return;
+    }
+    n_conf = find_conf_name(cptr->confs, cptr->name, CONF_NOCONNECT_SERVER);
+    if (!n_conf) { 
+        sendto_realops("Lost N-Line for %s", get_client_name(cptr,FALSE));
+        exit_client(cptr, cptr, &me, "Lost N-Line");
+    }
+
+    /* Next, send the initial handshake */
+    SetHandshake(cptr);
+
+    if (!EmptyString(c_conf->passwd))
+        sendto_one(cptr, "PASS %s :TS", c_conf->passwd);
+
+    send_capabilities(cptr, CAP_MASK|
+      ((c_conf->flags & CONF_FLAGS_ZIP_LINK) ? CAP_ZIP : 0) |
+      ((n_conf->flags & CONF_FLAGS_LAZY_LINK) ? CAP_LL : 0));
+
+    sendto_one(cptr, "SERVER %s 1 :%s",
+      my_name_for_link(me.name, n_conf), me.info);
+
+    /* 
+     * If we've been marked dead because a send failed, just exit
+     * here now and save everyone the trouble of us ever existing.
+     */
+    if (IsDead(cptr)) {
+        exit_client(cptr, cptr, &me, "Went dead during handshake");
+        return;
+    }
+
+    /* If we get here, we're ok, so lets start reading some data */
+    comm_setselect(fd, COMM_SELECT_READ, read_packet, cptr, 0);
+}

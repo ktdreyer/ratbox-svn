@@ -65,6 +65,7 @@ extern void  comm_settimeout(int, time_t, PF *, void *);
 extern void  comm_checktimeouts(void *);
 extern void  comm_connect_tcp(int, const char *, u_short,
                  struct sockaddr *, int, CNCB *, void *);
+extern const char * comm_errstr(int status);
 
 /* These must be defined in the network IO loop code of your choice */
 extern void  comm_setselect(int fd, unsigned int type, PF *handler, 

@@ -401,15 +401,6 @@ static time_t io_loop(time_t delay)
     delay = 1;
   else
     delay = IRCD_MIN(delay, TIMESEC);
-  /*
-   * We want to read servers on every io_loop, as well
-   * as "busy" clients (which again, includes servers.
-   * If "lifesux", then we read servers AGAIN, and then
-   * flush any data to servers.
-   *    -Taner
-   */
-
-  read_message(0, FDL_ALL); /*  check everything! */
 
   if (dorehash && !GlobalSetOptions.lifesux)
     {

@@ -80,10 +80,9 @@ struct Client* local[MAXCONNECTIONS];
 /* Its -1 because at startup, we don't have any FDs opened -- adrian */
 int            highest_fd = -1;
 
-static struct sockaddr_in mysk;
 static char               readBuf[READBUF_SIZE];
 
-static const char *comm_errstr[] = { "Comm OK", "Error during bind()",
+static const char *comm_err_str[] = { "Comm OK", "Error during bind()",
   "Error during DNS lookup", "connect timeout", "Error during connect()",
   "Comm Error" };
 
@@ -155,24 +154,6 @@ void report_error(const char* text, const char* who, int error)
   sendto_realops_flags(FLAGS_DEBUG, text, who, strerror(error));
 
   log(L_ERROR, text, who, strerror(error));
-}
-
-/*
- * connect_dns_callback - called when resolver query finishes
- * if the query resulted in a successful search, reply will contain
- * a non-null pointer, otherwise reply will be null.
- * if successful start the connection, otherwise notify opers
- */
-void connect_dns_callback(void* vptr, struct DNSReply* reply)
-{
-  struct ConfItem* aconf = (struct ConfItem*) vptr;
-  aconf->dns_pending = 0;
-  if (reply) {
-    memcpy(&aconf->ipnum, reply->hp->h_addr, sizeof(struct in_addr));
-    connect_server(aconf, 0, reply);
-  }
-  else
-    sendto_ops("Connect to %s failed: host lookup", aconf->host);
 }
 
 /*
@@ -299,269 +280,6 @@ int deliver_it(struct Client* cptr, const char* str, int len)
         }
     }
   return(retval);
-}
-
-/*
- * completed_connection - Complete non-blocking connect-sequence. 
- * Check access and terminate connection, if trouble detected.
- *
- * Return         TRUE, if successfully completed
- *                FALSE, if failed and ClientExit
- */
-int completed_connection(struct Client* cptr)
-{
-  struct ConfItem* c_conf;
-  struct ConfItem* n_conf;
-
-  c_conf = find_conf_name(cptr->confs, cptr->name, CONF_CONNECT_SERVER);
-  if (!c_conf)
-    {
-      sendto_realops("Lost C-Line for %s", get_client_name(cptr,FALSE));
-      return 0;
-    }
-  n_conf = find_conf_name(cptr->confs, cptr->name, CONF_NOCONNECT_SERVER);
-  if (!n_conf)
-    {
-      sendto_realops("Lost N-Line for %s", get_client_name(cptr,FALSE));
-      return 0;
-    }
-  
-  SetHandshake(cptr);
-
-  if (!EmptyString(c_conf->passwd))
-    sendto_one(cptr, "PASS %s :TS", c_conf->passwd);
-  
-  send_capabilities(cptr, CAP_MASK|
-                   ((c_conf->flags & CONF_FLAGS_ZIP_LINK) ? CAP_ZIP : 0) |
-                   ((n_conf->flags & CONF_FLAGS_LAZY_LINK) ? CAP_LL : 0));
-
-  sendto_one(cptr, "SERVER %s 1 :%s",
-             my_name_for_link(me.name, n_conf), me.info);
-
-  return (IsDead(cptr)) ? 0 : 1;
-}
-
-/*
- * connect_inet - open a socket and connect to another server
- * returns true (1) if successful, false (0) otherwise
- */
-int connect_inet(struct ConfItem *aconf, struct Client *cptr)
-{
-  static struct sockaddr_in sin;
-  assert(0 != aconf);
-  assert(0 != cptr);
-  /*
-   * Might as well get sockhost from here, the connection is attempted
-   * with it so if it fails its useless.
-   */
-  cptr->fd = socket(AF_INET, SOCK_STREAM, 0);
-
-  if (cptr->fd == -1)
-    {
-      report_error("opening stream socket to server %s:%s", cptr->name, errno);
-      return 0;
-    }
-  fd_open(cptr->fd, FD_SOCKET, "connect to ..");
-  if (cptr->fd >= (HARD_FDLIMIT - 10))
-    {
-      sendto_realops("No more connections allowed (%s)", cptr->name);
-      return 0;
-    }
-
-  mysk.sin_port   = 0;
-  mysk.sin_family = AF_INET;
-
-  memset(&sin, 0, sizeof(sin));
-  sin.sin_family  = AF_INET;
-
-  /*
-   * Bind to a local IP# (with unknown port - let unix decide) so
-   * we have some chance of knowing the IP# that gets used for a host
-   * with more than one IP#.
-   * 
-   * No we don't bind it, not all OS's can handle connecting with
-   * an already bound socket, different ip# might occur anyway
-   * leading to a freezing select() on this side for some time.
-   */
-  if (specific_virtual_host)
-    {
-      mysk.sin_addr = vserv.sin_addr;
-
-      /*
-       * No, we do bind it if we have virtual host support. If we don't
-       * explicitly bind it, it will default to IN_ADDR_ANY and we lose
-       * due to the other server not allowing our base IP --smg
-       */        
-      if (bind(cptr->fd, (struct sockaddr*) &mysk, sizeof(mysk)))
-        {
-          report_error("error binding to local port for %s:%s", 
-                       cptr->name, errno);
-          return 0;
-        }
-    }
-  sin.sin_addr.s_addr = aconf->ipnum.s_addr;
-  sin.sin_port        = htons(aconf->port);
-  /*
-   * save connect info in client
-   */
-  cptr->ip.s_addr     = aconf->ipnum.s_addr;
-  cptr->port          = aconf->port;
-  strncpy_irc(cptr->sockhost, inetntoa((const char*) &cptr->ip.s_addr), 
-              HOSTIPLEN);
-
-  if (!set_non_blocking(cptr->fd))
-    report_error(NONB_ERROR_MSG, get_client_name(cptr, TRUE), errno);
-
-  if (!set_sock_buffers(cptr->fd, READBUF_SIZE))
-    report_error(SETBUF_ERROR_MSG, get_client_name(cptr, TRUE), errno);
-
-  if (connect(cptr->fd, (const struct sockaddr*) &sin, sizeof(sin)) && 
-      errno != EINPROGRESS)
-    {
-      int errtmp = errno; /* other system calls may eat errno */
-      report_error("Connect to host %s failed: %s",
-                   get_client_name(cptr, TRUE), errno);
-      errno = errtmp;
-      return 0;
-    }
-  return 1;
-}
-
-/*
- * connect_server - start or complete a connection to another server
- * returns true (1) if successful, false (0) otherwise
- *
- * aconf must point to a valid C:line
- * m_connect            calls this with a valid by client and a null reply
- * try_connections      calls this with a null by client, and a null reply
- * connect_dns_callback call this with a null by client, and a valid reply
- *
- * XXX - if this comes from an m_connect message and a dns query needs to
- * be done, we loose the information about who started the connection and
- * it's considered an auto connect.
- */
-int connect_server(struct ConfItem* aconf, 
-                   struct Client* by, struct DNSReply* reply)
-{
-  struct Client* cptr;
-
-  assert(0 != aconf);
-  if (aconf->dns_pending)
-    return 0;
-
-  log(L_NOTICE, "Connect to %s[%s] @%s",
-      aconf->user, aconf->host, inetntoa((char*)&aconf->ipnum));
-
-  /*
-   * if this is coming from m_connect, we have just checked this
-   * NOTE: aconf should ALWAYS be a valid C:line
-   */
-  if ((cptr = find_server(aconf->name)))
-    {
-      sendto_realops("Server %s already present from %s",
-                 aconf->name, get_client_name(cptr, TRUE));
-      if (by && IsPerson(by) && !MyClient(by))
-        sendto_one(by, ":%s NOTICE %s :Server %s already present from %s",
-                   me.name, by->name, aconf->name,
-                   get_client_name(cptr, TRUE));
-      return 0;
-    }
-
-  /*
-   * If we dont know the IP# for this host and it is a hostname and
-   * not a ip# string, then try and find the appropriate host record.
-   *
-   * NOTE: if this is called from connect_dns_callback, the aconf ip
-   * address will have been set so we don't need to worry about 
-   * looping dns queries.
-   */
-  if (INADDR_NONE == aconf->ipnum.s_addr) {
-    assert(0 == reply);
-    if ((aconf->ipnum.s_addr = inet_addr(aconf->host)) == INADDR_NONE) {
-      struct DNSQuery  query;
-      
-      query.vptr     = aconf;
-      query.callback = connect_dns_callback;
-      reply = gethost_byname(aconf->host, &query);
-
-      if (!reply) {
-        aconf->dns_pending = 1;
-        return 0;
-      }
-      memcpy(&aconf->ipnum, reply->hp->h_addr, sizeof(struct in_addr));
-    }
-  }
-  cptr = make_client(NULL);
-  if (reply) 
-    ++reply->ref_count;
-  cptr->dns_reply = reply;
-  
-  /*
-   * Copy these in so we have something for error detection.
-   */
-  strncpy_irc(cptr->name, aconf->name, HOSTLEN);
-  strncpy_irc(cptr->host, aconf->host, HOSTLEN);
-
-  if (!connect_inet(aconf, cptr)) {
-    if (by && IsPerson(by) && !MyClient(by))
-      sendto_one(by, ":%s NOTICE %s :Connect to host %s failed.",
-                 me.name, by->name, cptr);
-    free_client(cptr);
-    return 0;
-  }
-  /*
-   * NOTE: if we're here we have a valid C:Line and the client should
-   * have started the connection and stored the remote address/port and
-   * ip address name in itself
-   * 
-   * Attach config entries to client here rather than in
-   * completed_connection. This to avoid null pointer references
-   */
-  if (!attach_cn_lines(cptr, aconf->host))
-    {
-      sendto_ops("Host %s is not enabled for connecting:no C/N-line",
-                 aconf->host);
-      if (by && IsPerson(by) && !MyClient(by))
-        sendto_one(by, ":%s NOTICE %s :Connect to host %s failed.",
-                   me.name, by->name, cptr);
-      det_confs_butmask(cptr, 0);
-
-      free_client(cptr);
-      return 0;
-    }
-  /* 
-   * at this point we have a connection in progress and C/N lines
-   * attached to the client, the socket info should be saved in the
-   * client and it should either be resolved or have a valid address.
-   *
-   * The socket has been connected or connect is in progress.
-   */
-  make_server(cptr);
-  if (by && IsPerson(by))
-    {
-      strcpy(cptr->serv->by, by->name);
-      if (cptr->serv->user) 
-        free_user(cptr->serv->user, NULL);
-      cptr->serv->user = by->user;
-      by->user->refcnt++;
-    } 
-  else
-    {
-      strcpy(cptr->serv->by, "AutoConn.");
-      if (cptr->serv->user)
-        free_user(cptr->serv->user, NULL);
-      cptr->serv->user = NULL;
-    }
-  cptr->serv->up = me.name;
-
-  local[cptr->fd] = cptr;
-
-  SetConnecting(cptr);
-
-  add_client_to_list(cptr);
-  fdlist_add(cptr->fd, FDL_DEFAULT);
-
-  return 1;
 }
 
 /*
@@ -1017,7 +735,11 @@ comm_connect_tcp(int fd, const char *host, u_short port,
     struct DNSReply *reply;
     struct DNSQuery query;
 
-    /* First, attempt to bind */
+    fd_table[fd].flags.called_connect = 1;
+    fd_table[fd].connect.callback = callback;
+    fd_table[fd].connect.data = data;
+    fd_table[fd].connect.port = port;
+
     /*
      * Note that we're using a passed sockaddr here. This is because
      * generally you'll be bind()ing to a sockaddr grabbed from
@@ -1026,18 +748,12 @@ comm_connect_tcp(int fd, const char *host, u_short port,
      * virtual host IP, for completeness.
      *   -- adrian
      */
-    if (bind(fd, local, socklen) < 0) { 
+    if ((local != NULL) && (bind(fd, local, socklen) < 0)) { 
         /* Failure, call the callback with COMM_ERR_BIND */
         comm_connect_callback(fd, COMM_ERR_BIND);
         /* ... and quit */
         return;
     }
-
-    /* If we get here, we're on our way to connecting .. */
-    fd_table[fd].flags.called_connect = 1;
-    fd_table[fd].connect.callback = callback;
-    fd_table[fd].connect.data = data;
-    fd_table[fd].connect.port = port;
 
     /*
      * Next, if we have been given an IP, get the addr and skip the
@@ -1172,9 +888,9 @@ comm_connect_tryconnect(int fd, void *notused)
  * comm_error_str() - return an error string for the given error condition
  */
 const char *
-comm_error_str(int error)
+comm_errstr(int error)
 {
     if (error < 0 || error >= COMM_ERR_MAX)
         return "Invalid error number!";
-    return comm_errstr[error];
+    return comm_err_str[error];
 }

@@ -108,6 +108,7 @@ extern time_t      try_connections(time_t currenttime);
 extern void        initServerMask(void);
 extern void        restoreUnusedServerMask(unsigned long);
 extern void	   sendnick_TS(struct Client*, struct Client* );
+extern int         serv_connect(struct ConfItem *, struct Client *);
 
 #define CLEANUP_CHANNELS_TIME (15*60)
 
