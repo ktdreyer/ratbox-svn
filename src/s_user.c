@@ -541,12 +541,22 @@ int register_user(struct Client *cptr, struct Client *sptr,
 #endif
             {
               ServerStats->is_ref++;
-              sendto_realops_flags(FLAGS_CCONN, "%s from %s [%s].",
+	/* jdc - lists server name & port connections are on */
+	/*       a purely cosmetical change */
+              sendto_realops_flags(FLAGS_CCONN,
+				 "%s from %s [%s] on [%s/%u].",
                                  "Unauthorized client connection",
                                  get_client_host(sptr),
-                                 inetntoa((char *)&sptr->ip));
-              log(L_INFO,"Unauthorized client connection from %s.",
-                  get_client_host(sptr));
+                                 inetntoa((char *)&sptr->ip),
+				 sptr->listener->name,
+				 sptr->listener->port
+				 );
+              log(L_INFO,
+		  "Unauthorized client connection from %s on [%s/%u].",
+                  get_client_host(sptr),
+		  sptr->listener->name,
+		  sptr->listener->port
+		  );
 
               ServerStats->is_ref++;
               return exit_client(cptr, sptr, &me,

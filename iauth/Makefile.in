@@ -2,11 +2,8 @@
 # $Id$
 
 CC = @CC@
-CFLAGS = @CFLAGS@ -Wall
+CFLAGS = @CFLAGS@
 RM = @RM@
-
-# Debugging CFLAGS
-#CFLAGS = -g -Wall
 
 all: source
 	@cd source ; $(MAKE) "CC=$(CC)" "CFLAGS=$(CFLAGS)"

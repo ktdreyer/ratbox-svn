@@ -16,18 +16,21 @@
 #*   along with this program; if not, write to the Free Software
 #*   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #*
-#* $Id$
+#*   $Id$
 #*/
 
 RM=@RM@
 
 # Default CFLAGS
-# CFLAGS = -DNDEBUG -g -O2
+# CFLAGS = -g -O2 -DNDEBUG
+
+# Default make flags - you may want to uncomment this on a multicpu machine
+#MFLAGS = -j 4
 
 #
 # For developers
-CFLAGS= -g -Wall
-#
+CFLAGS= -g -O2 -Wall
+
 # You may need to define the FD_SETSIZE in order to overrule
 # the system one.
 #CFLAGS= -DNDEBUG -g -O2 -D"FD_SETSIZE=1024"
@@ -76,15 +79,10 @@ CFLAGS= -g -Wall
 
 
 SHELL=/bin/sh
-
-SUBDIRS =          \
- zlib              \
- src               \
- tools
-
+SUBDIRS=zlib src tools
 # ZSUBDIRS=zlib $(SUBDIRS)
 
-MAKE = make 'CFLAGS=${CFLAGS}' 'INSTALL=${INSTALL}' 'LDFLAGS=${LDFLAGS}'
+MAKE = make ${MFLAGS} 'CFLAGS=${CFLAGS}' 'INSTALL=${INSTALL}' 'LDFLAGS=${LDFLAGS}'
 # ZMAKE = make 'CFLAGS=${CFLAGS}' 'INSTALL=${INSTALL}' 'LDFLAGS=${LDFLAGS}'
 
 all:	build

@@ -1,6 +1,7 @@
 /*
  * contributed by mjr
  * $Id$
+ * $Id$
  */
 
 #include <stdio.h>

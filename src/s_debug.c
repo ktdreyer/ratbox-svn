@@ -365,7 +365,7 @@ void count_memory(struct Client *cptr,char *nick)
 
   totch = chm + chbm + chu*sizeof(struct SLink) + chi*sizeof(struct SLink);
 
-  sendto_one(cptr, ":%s %d %s :Whowas users %d(%d))",
+  sendto_one(cptr, ":%s %d %s :Whowas users %d(%d)",
              me.name, RPL_STATSDEBUG, nick, wwu, wwu*sizeof(struct User));
 
   sendto_one(cptr, ":%s %d %s :Whowas array %d(%d)",

@@ -1453,6 +1453,11 @@ void set_channel_mode(struct Client *cptr,
                              me.name, sptr->name, 
                              chptr->chname);
                 }
+              else
+                {
+                  sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
+                               sptr->name, chptr->chname);
+                }
               break;
             }
           arg = check_string(*parv++);
@@ -1836,14 +1841,14 @@ void set_channel_mode(struct Client *cptr,
               if (whatt == MODE_ADD)
                 {
                   chptr->mode.mode |= MODE_JUPED;
-                  sendto_realops("%s!%s@%s juping locally Channel %s",
+                  sendto_realops("%s!%s@%s locally juping channel %s",
                                  sptr->name, sptr->username,
                                  sptr->host, chptr->chname);
                 }
               else if(whatt == MODE_DEL)
                 {
                   chptr->mode.mode &= ~MODE_JUPED;
-                  sendto_realops("%s!%s@%s unjuping locally Channel %s",
+                  sendto_realops("%s!%s@%s locally unjuping channel %s",
                                  sptr->name, sptr->username,
                                  sptr->host, chptr->chname);
                 }
@@ -2226,7 +2231,7 @@ int     can_join(struct Client *sptr, struct Channel *chptr, char *key, int *fla
   if( chptr->mode.mode & MODE_JUPED )
     {
       sendto_ops_flags(FLAGS_SPY,
-             "User %s (%s@%s) is attemping to join locally juped channel %s",
+             "User %s (%s@%s) is attempting to join locally juped channel %s",
                      sptr->name,
                      sptr->username, sptr->host,chptr->chname);
       return (ERR_BADCHANNAME);

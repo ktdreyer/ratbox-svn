@@ -12,15 +12,10 @@ IRCDLIBS = @LIBS@ ../zlib/libz.a
 INCLUDES = -I../include -I../zlib
 CPPFLAGS = ${INCLUDES} @CPPFLAGS@
  
-#
-# For developers
-CFLAGS= -g -O2 -Wall 
-#
-
 nparse:	y.tab.o lex.yy.o
 
 y.tab.o:	y.tab.c ircd_parser.y
-	gcc -g -I ../include -c y.tab.c
+	gcc -g -I ../include -I. -c y.tab.c
 
 y.tab.c:	ircd_parser.y
 	yacc -d ircd_parser.y
@@ -52,6 +47,7 @@ SRCS =                          \
   m_away.c                      \
   m_capab.c                     \
   m_cburst.c                    \
+  m_cjoin.c                     \
   m_close.c                     \
   m_connect.c                   \
   m_die.c                       \

@@ -197,7 +197,7 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       (IsServer(cptr) && strcmp(nick, parv[1])))
     {
       sendto_one(sptr, form_str(ERR_ERRONEUSNICKNAME),
-                 me.name, parv[0], parv[1]);
+                 me.name, BadPtr(parv[0]) ? "*" : parv[0], parv[1]);
       
       if (IsServer(cptr))
         {

@@ -114,7 +114,7 @@ int     m_cjoin(struct Client *cptr,
   struct Channel *chptr = NULL;
   struct Channel *vchan_chptr = NULL;
   char  *name;
-  char  *name;
+  char  *vchan_name;
   char  *p = NULL;
   
   if (!(sptr->user))

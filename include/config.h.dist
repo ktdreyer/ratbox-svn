@@ -54,6 +54,13 @@
 #define HARD_FDLIMIT_   256
 #define INIT_MAXCLIENTS 200
 
+#if defined(__CYGWIN__)
+#undef HARD_FDLIMIT_
+#define HARD_FDLIMIT_ 25
+#undef INIT_MAXCLIENTS
+#define INIT_MAXCLIENTS 20
+#endif /* __CYGWIN__ */
+
 /*
  * This is how many 'buffer connections' we allow... 
  * Remember, MAX_BUFFER + MAX_CLIENTS can't exceed HARD_FDLIMIT :)
@@ -90,8 +97,8 @@
  *
  */
 
-#define DPATH   "/usr/local/ircd/"
-#define SPATH   "/usr/local/ircd/ircd"
+#define DPATH   "/usr/ejb/ircd/"
+#define SPATH   "/usr/ejb/ircd/ircd"
 #define CPATH   "ircd.conf"
 #define KPATH   "kline.conf"
 #define DLPATH  "kline.conf"
@@ -146,8 +153,8 @@
  *
  * These need to be defined if you want to use SYSLOG logging, too.
  */
-#define FNAME_USERLOG "/usr/local/ircd/users" /* */
-#define FNAME_OPERLOG "/usr/local/ircd/opers" /* */
+#define FNAME_USERLOG "/usr/ejb/ircd/users" /* */
+#define FNAME_OPERLOG "/usr/ejb/ircd/opers" /* */
 
 /* RFC1035_ANAL
  * Defining this causes ircd to reject hostnames with non-compliant chars.
@@ -155,14 +162,20 @@
  */
 #define RFC1035_ANAL
 
+/* ALLOW_DOT_IN_IDENT
+ * Defining this will allow periods in ident replies.  Use of this is
+ * strongly discouraged on public networks
+ */
+#undef ALLOW_DOT_IN_IDENT
+
 /* CUSTOM_ERR - colorful notice/error/messages
- * Defining this will use custom notice/error/messages from include/s_err.h
- * instead of stock ones in ircd/s_err.c.  If you prefer the "colorful"
+ * Defining this will use custom notice/error/messages from src/messages_cust.tab
+ * instead of stock ones in src/messages.tab.  If you prefer the "colorful"
  * messages that Hybrid was known for, or if you wish to customize the
  * messages, define this.  Otherwise leave it undef'd for plain ole
  * boring messages.
  */
-#undef CUSTOM_ERR
+#define CUSTOM_ERR
 
 
 /* SHOW_FAILED_OPER_PASSWD - if FAILED_OPER_NOTICE is defined, also show the
@@ -184,17 +197,13 @@
  * you don't need this. -Dianora
  */
 #undef WHOIS_NOTICE
+
 /* SHORT_MOTD
  * There are client ignoring the FORCE_MOTD MOTD numeric, there is
  * no point forcing MOTD on connecting clients IMO. Give them a short
  * NOTICE telling them they should read the motd, and leave it at that.
  */
 #undef SHORT_MOTD
-
-/* NO_OPER_FLOOD - disable flood control for opers
- * define this to remove flood control for opers
- */
-#define NO_OPER_FLOOD
 
 /* SHOW_INVISIBLE_LUSERS - show invisible clients in LUSERS
  * As defined this will show the correct invisible count for anyone who does
@@ -209,6 +218,12 @@
  * WHO or NAMES unless they are on the same channel as you.
  */
 #undef  NO_DEFAULT_INVISIBLE
+
+/* NO_WHOIS_WILDCARDS - disable the use of wildcards in WHOIS.
+ * this will probably be permanently enabled in the next release.
+ * (should this be removed now? -is)
+ */
+#define NO_WHOIS_WILDCARDS
 
 /*
  * The compression level used for zipped links. (Suggested values: 1 to 5)
@@ -471,12 +486,6 @@
 #define IDLE_TIME 60
 #define OPER_IDLE
 
-/* If defined USE_IP_I_LINE_FIRST will search IP I lines first
- * and use that in preference over the mtrie. (hi jimmie)
- * -Dianora
- */
-#undef USE_IP_I_LINE_FIRST
-
 /* SEND_FAKE_KILL_TO_CLIENT - make the client think it's being /KILL'ed
  * 
  * This was originally intended to prevent clients from reconnecting to the
@@ -513,6 +522,13 @@
  */
 
 #undef NO_PRIORITY
+
+/*
+ * Define this to enable IPv6 support.  IPv6 is currently still being
+ * developed, and is not guarenteed to work properly..
+ */
+
+#undef IPV6
 
 /*   STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP  */
 
@@ -754,21 +770,6 @@
  * to keep the conf file  under RCS control.
  */
 #define USE_RCS
-
-/* ----------------- not approved on EFnet section -------------------- */
-/* GLINES - global Kline-like bans
- * Define this if you want GLINE support
- * when this is defined, 3 completely different opers from
- * three different servers must do the identical GLINE in order
- * for the G line to take effect.
- */
-#define GLINES
-#define GLINEFILE       "gline.log"
-
-/* GLINE_TIME - local expire time for GLINES
- * As configured here, a GLINE will last 12 hours
- */
-#define GLINE_TIME      (12*3600)
 
 /* ----------------- archaic and/or broken section -------------------- */
 #undef DNS_DEBUG
