@@ -1,3 +1,8 @@
+*** 20001206_4 by db
+- "CAP_KLN" string was missing in s_serv.c
+
+
+
 *** 20001206_3 by db
 - added mr_capab to handlers.h 
 - changed m_capab to use mr_capab, remember capabilities are sent
