@@ -117,7 +117,9 @@ kq_update_events(int fd, short filter, PF * handler)
 
         kep->ident = (u_long) fd;
         kep->filter = filter;
+#ifdef NOTE_LOWAT
 	kep->fflags = NOTE_LOWAT;
+#endif
 	kep->data = 1;
         kep->flags = handler ? (EV_ADD | EV_ONESHOT) : EV_DELETE;
 	if (kqoff == kqmax) {
