@@ -23,8 +23,9 @@ INCLUDES	= -I../include
 CPPFLAGS	= ${INCLUDES} @SSL_DEFINE@ @CPPFLAGS@
 
 SRCS =                          \
-  m_clearchan.c          \
-  m_jupe.c
+  m_clearchan.c			\
+  m_jupe.c			\
+  m_hash.c
 
 OBJS = ${SRCS:.c=.so}
 

@@ -1,3 +1,7 @@
 This directory contains modules that hve been contributed
 by other people, or isn't suitable for including into the 
 hybrid tree.
+
+m_clearchan.c - CLEARCHAN - clear a channel of all users and lock modes
+m_hash.c - HASH - The old hash table debugging code, look at README.HASH
+m_jupe.c - JUPE - Jupe a server, this is as of yet unfinished
