@@ -383,135 +383,113 @@ check_unknowns_list(dlink_list *list)
 void 
 check_klines(void)
 {               
-  struct Client *client_p;          /* current local client_p being examined */
-  struct ConfItem     *aconf = (struct ConfItem *)NULL;
-  char          *reason;                /* pointer to reason string */
-  dlink_node    *ptr, *next_ptr;
+ struct Client *client_p;          /* current local client_p being examined */
+ struct ConfItem     *aconf = (struct ConfItem *)NULL;
+ char          *reason;                /* pointer to reason string */
+ dlink_node    *ptr, *next_ptr;
 
-  for (ptr = lclient_list.head; ptr; ptr = next_ptr)
+ for (ptr = lclient_list.head; ptr; ptr = next_ptr)
+ {
+  next_ptr = ptr->next;
+  client_p = ptr->data;
+  if (IsMe(client_p))
+   continue;
+  /* if there is a returned struct ConfItem then kill it */
+  if ((aconf = find_dline(&client_p->localClient->ip,
+                          client_p->localClient->aftype)))
+  {
+   if (aconf->status & CONF_EXEMPTDLINE)
+   {
+    sendto_realops_flags(FLAGS_ALL,
+                         "DLINE over-ruled for %s, client is kline_exempt",
+                         get_client_name(client_p, HIDE_IP));
+    continue;
+   }
+   sendto_realops_flags(FLAGS_ALL,"DLINE active for %s",
+                        get_client_name(client_p, HIDE_IP));
+   if (ConfigFileEntry.kline_with_connection_closed)
+    reason = "Connection closed";
+   else
+   {
+    if (ConfigFileEntry.kline_with_reason && aconf->passwd)
+     reason = aconf->passwd;
+    else
+     reason = "D-lined";
+   }
+   if (IsPerson(client_p)) 
+    sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
+               me.name, client_p->name, reason);
+   else
+    sendto_one(client_p, "NOTICE DLINE :*** You have been D-lined");
+   (void)exit_client(client_p, client_p, &me, reason );
+   continue; /* and go examine next fd/client_p */
+  }
+  if (IsPerson(client_p))
+  {
+   if (ConfigFileEntry.glines &&
+       (aconf = find_gkill(client_p, client_p->username)))
+   {
+    if (IsExemptKline(client_p))
     {
-      next_ptr = ptr->next;
-      client_p = ptr->data;
-
-      if(IsMe(client_p))
-	continue;
-
-      if ((aconf = find_dline(&client_p->localClient->ip,
-                              client_p->localClient->aftype)))
-	/* if there is a returned struct ConfItem then kill it */
-	{
-	  if(aconf->status & CONF_EXEMPTDLINE)
-	    {
-	      sendto_realops_flags(FLAGS_ALL,
-			   "DLINE over-ruled for %s, client is kline_exempt",
-				   get_client_name(client_p, HIDE_IP));
-	      continue;
-	    }
-	  sendto_realops_flags(FLAGS_ALL,"DLINE active for %s",
-			 get_client_name(client_p, HIDE_IP));
-	      
-	  if(ConfigFileEntry.kline_with_connection_closed)
-	    reason = "Connection closed";
-	  else
-	    {
-	      if (ConfigFileEntry.kline_with_reason && aconf->passwd)
-		reason = aconf->passwd;
-	      else
-		reason = "D-lined";
-	    }
-
-	  if (IsPerson(client_p)) 
-            sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
-                       me.name, client_p->name, reason);
-          else
-            sendto_one(client_p, "NOTICE DLINE :*** You have been D-lined");
-
-	  (void)exit_client(client_p, client_p, &me, reason );
-
-	  continue; /* and go examine next fd/client_p */
-	}
-
-      if(IsPerson(client_p))
-	{
-	  if( ConfigFileEntry.glines && (aconf = find_gkill(client_p, client_p->username)) )
-	    {
-	      if(IsExemptKline(client_p))
-		{
-		  sendto_realops_flags(FLAGS_ALL,
-		       "GLINE over-ruled for %s, client is kline_exempt",
-				       get_client_name(client_p, HIDE_IP));
-		  continue;
-		}
-	      
-	      if(IsExemptGline(client_p))
-		{
-		  sendto_realops_flags(FLAGS_ALL,
-		       "GLINE over-ruled for %s, client is gline_exempt",
-				       get_client_name(client_p, HIDE_IP));
-		  continue;
-		}
-
-	      sendto_realops_flags(FLAGS_ALL,
-				   "GLINE active for %s",
-				   get_client_name(client_p, HIDE_IP));
-		  
-	      if (ConfigFileEntry.kline_with_connection_closed)
-		{
-		  /*
-		   * We use a generic non-descript message here on 
-		   * purpose so as to prevent other users seeing the
-		   * client disconnect from harassing the IRCops
-		   */
-		  reason = "Connection closed";
-		}
-	      else
-		{
-		  if (ConfigFileEntry.kline_with_reason && aconf->passwd)
-		    reason = aconf->passwd;
-		  else
-		    reason = "G-lined";
-		}
-
-	      sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
-			 me.name, client_p->name, reason);
-
-	      (void)exit_client(client_p, client_p, &me, reason);
-
-	      continue;         /* and go examine next fd/client_p */
-	    }
-	  else
-	    if((aconf = find_kill(client_p))) /* if there is a returned
-					     struct ConfItem.. then kill it */
-	      {
-		if(aconf->status & CONF_EXEMPTKLINE)
-		  {
-		    sendto_realops_flags(FLAGS_ALL,
-			 "KLINE over-ruled for %s, client is kline_exmpt",
-					 get_client_name(client_p, HIDE_IP));
-		    continue;
-		  }
-		    
-		sendto_realops_flags(FLAGS_ALL,
-				     "KLINE active for %s",
-				     get_client_name(client_p, HIDE_IP));
-
-		if (ConfigFileEntry.kline_with_connection_closed)
-		  reason = "Connection closed";
-		else
-		  {
-		    if (ConfigFileEntry.kline_with_reason && aconf->passwd)
-		      reason = aconf->passwd;
-		    else
-		      reason = "K-lined";
-		  }
-
-		sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
-			   me.name, client_p->name, reason);
-		(void)exit_client(client_p, client_p, &me, reason);
-		continue; 
-	      }
-	}
+     sendto_realops_flags(FLAGS_ALL,
+                       "GLINE over-ruled for %s, client is kline_exempt",
+                       get_client_name(client_p, HIDE_IP));
+     continue;
     }
+    if (IsExemptGline(client_p))
+    {
+     sendto_realops_flags(FLAGS_ALL,
+      "GLINE over-ruled for %s, client is gline_exempt",
+      get_client_name(client_p, HIDE_IP));
+     continue;
+    }
+    sendto_realops_flags(FLAGS_ALL, "GLINE active for %s",
+                         get_client_name(client_p, HIDE_IP));
+    if (ConfigFileEntry.kline_with_connection_closed)
+    {
+     /* We use a generic non-descript message here on 
+      * purpose so as to prevent other users seeing the
+      * client disconnect from harassing the IRCops
+      */
+     reason = "Connection closed";
+    } else {
+     if (ConfigFileEntry.kline_with_reason && aconf->passwd)
+      reason = aconf->passwd;
+     else
+      reason = "G-lined";
+    }
+    sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP), me.name,
+               client_p->name, reason);
+    (void)exit_client(client_p, client_p, &me, reason);
+    /* and go examine next fd/client_p */    
+    continue;
+   } else if((aconf = find_kill(client_p))) {
+    /* if there is a returned struct ConfItem.. then kill it */
+    if (IsExemptKline(client_p))
+    {
+     sendto_realops_flags(FLAGS_ALL,
+       "KLINE over-ruled for %s, client is kline_exmpt",
+       get_client_name(client_p, HIDE_IP));
+     continue;
+    }
+    sendto_realops_flags(FLAGS_ALL, "KLINE active for %s",
+                         get_client_name(client_p, HIDE_IP));
+    if (ConfigFileEntry.kline_with_connection_closed)
+     reason = "Connection closed";
+    else
+    {
+     if (ConfigFileEntry.kline_with_reason && aconf->passwd)
+      reason = aconf->passwd;
+     else
+      reason = "K-lined";
+    }
+    sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP), me.name,
+               client_p->name, reason);
+    (void)exit_client(client_p, client_p, &me, reason);
+    continue; 
+   }
+  }
+ }
 }
 
 /*
