@@ -92,7 +92,7 @@
 #include "hook.h"
 #include "debug.h"
 #include "ircd_getopt.h"
-
+#include "balloc.h"
 /*
  * Try and find the correct name to use with getrlimit() for setting the max.
  * number of files allowed to be open by this process.
@@ -575,6 +575,7 @@ int main(int argc, char *argv[])
  if (!server_state.foreground)
    close_all_connections();
  init_log(logFileName);
+ initBlockHeap();
  init_netio();		/* This needs to be setup early ! -- adrian */
  init_resolver();	/* Needs to be setup before the io loop */
  initialize_message_files();

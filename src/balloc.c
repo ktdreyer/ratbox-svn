@@ -29,6 +29,35 @@
 #include <sys/mman.h>
 static int newblock(BlockHeap * bh);
 
+#ifndef MAP_ANON
+int zero_fd = -1;
+void initBlockHeap(void)
+{
+  fd_open(zero_fd, "/dev/zero", "Anonymous mmap()");
+  if(fd < 0)
+    outofmemory();
+}
+
+static inline void *get_block(size_t size)
+{
+  return(mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_PRIVATE, fd, 0));
+}
+#else
+void initBlockHeap(void)
+{
+	return;
+}
+
+static inline void *get_block(size_t size)
+{
+  return(mmap(NULL,size,PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANON, -1, 0));
+
+}
+#endif
+
+
+
+
 /* ************************************************************************ */
 /* FUNCTION DOCUMENTATION:                                                  */
 /*    newblock                                                              */
@@ -39,6 +68,7 @@ static int newblock(BlockHeap * bh);
 /* Returns:                                                                 */
 /*    0 if successful, 1 if not                                             */
 /* ************************************************************************ */
+
 static int newblock(BlockHeap * bh)
 {
   MemBlock *newblk;
@@ -55,12 +85,9 @@ static int newblock(BlockHeap * bh)
 
   b->alloc_size = (bh->elemsPerBlock + 1) * (bh->elemSize + sizeof(MemBlock));
 	
-  b->elems = mmap(NULL, b->alloc_size,
-		  PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, 
-		  -1, getpagesize());
+  b->elems = get_block(b->alloc_size);
   if(b->elems == NULL)
     {
-      free(b);
       return 1;
     }
 #if 0
