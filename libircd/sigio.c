@@ -350,6 +350,7 @@ int comm_select(unsigned long delay)
                 hdl(fd, F->write_data);
         }
     }
+    mask_our_signal(sigio_signal);
     return 0;
 }
 
