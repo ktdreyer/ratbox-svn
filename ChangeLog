@@ -1,3 +1,21 @@
+androsyn    2005/02/26 19:10:17 EST	(20050227_0)
+
+  Modified files:
+    .                    configure configure.ac 
+    include              stdinc.h 
+  Log:
+  Doh these changes got put on RATBOX_2_0 when they were meant for
+  head..oops...
+  Also merged in the monitor heap size stuff, not that i think monitor has
+  been moved to head
+  
+  Revision  Changes    Path
+  7.245     +12 -3     ircd-ratbox/configure
+  7.59      +11 -3     ircd-ratbox/configure.ac
+  1.18      +57 -20    ircd-ratbox/include/stdinc.h
+
+
+
 androsyn    2005/02/26 18:52:24 EST	(20050226_0)
 
   Modified files:
