@@ -230,9 +230,10 @@ auth_dns_callback(void *vptr, adns_answer * reply)
 	if(!IsDoingAuth(auth))
 	{
 		struct Client *client_p = auth->client;
-		unlink_auth_request(auth, &auth_poll_list);
-		free_auth_request(auth);
+		client_p->localClient->auth_request = NULL;
+		remove_auth_request(auth);
 		release_auth_client(client_p);
+		
 	}
 
 }
@@ -255,9 +256,10 @@ auth_error(struct AuthRequest *auth)
 		
 	if(!IsDNSPending(auth))
 	{
-		unlink_auth_request(auth, &auth_poll_list);
+		struct Client *client_p = auth->client;
+		client_p->localClient->auth_request = NULL;
+		remove_auth_request(auth);
 		release_auth_client(auth->client);
-		free_auth_request(auth);
 	}
 }
 
@@ -444,6 +446,7 @@ timeout_auth_queries_event(void *notused)
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 	struct AuthRequest *auth;
+	struct Client *client_p;
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, auth_poll_list.head)
 	{
@@ -472,8 +475,10 @@ timeout_auth_queries_event(void *notused)
 
 			auth->client->since = CurrentTime;
 			dlinkDestroy(ptr, &auth_poll_list);
-			release_auth_client(auth->client);
-			free_auth_request(auth);
+			client_p = auth->client;
+			client_p->localClient->auth_request = NULL;
+			remove_auth_request(auth);
+			release_auth_client(client_p);
 		}
 	}
 }
@@ -609,9 +614,10 @@ read_auth_reply(int fd, void *data)
 
 	if(!IsDNSPending(auth))
 	{
-		unlink_auth_request(auth, &auth_poll_list);
-		release_auth_client(auth->client);
-		free_auth_request(auth);
+		struct Client *client_p = auth->client;
+		client_p->localClient->auth_request = NULL;
+		remove_auth_request(auth);
+		release_auth_client(client_p);
 	}
 }
 
@@ -639,10 +645,12 @@ delete_identd_queries(struct Client *target_p)
 {
 	struct AuthRequest *auth = target_p->localClient->auth_request;
 
-	if(auth == NULL)
+	if(auth == NULL || !IsAuthPending(target_p))
 		return;
 
 	if(auth->fd >= 0)
 		fd_close(auth->fd);
-	free_auth_request(auth);
+	
+	target_p->localClient->auth_request = NULL;
+	remove_auth_request(auth);
 }

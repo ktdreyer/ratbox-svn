@@ -1118,14 +1118,15 @@ exit_generic_client(struct Client *client_p, struct Client *source_p, struct Cli
 {
 	dlink_node *lp, *next_lp;
 	
-	sendto_common_channels_local(source_p, ":%s!%s@%s QUIT :%s",
-				     source_p->name,
-				     source_p->username, source_p->host, comment);
-
 	DLINK_FOREACH_SAFE(lp, next_lp, source_p->user->channel.head)
 	{
 		remove_user_from_channel(lp->data, source_p);
 	}
+
+	sendto_common_channels_local(source_p, ":%s!%s@%s QUIT :%s",
+				     source_p->name,
+				     source_p->username, source_p->host, comment);
+
 
 	/* Should not be in any channels now */
 	assert(source_p->user->channel.head == NULL);
