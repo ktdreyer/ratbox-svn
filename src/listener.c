@@ -255,10 +255,10 @@ static int inetport(struct Listener* listener)
 #else
   if (INADDR_ANY != listener->addr.sins.sin.s_addr) {
 #endif
-    struct DNSQuery query;	
+    static struct DNSQuery query;	
     query.callback = listener_dns_callback;
     query.ptr = listener;
-//    adns_getaddr(&listener->addr, DEF_FAM, &query);
+    adns_getaddr(&listener->addr, DEF_FAM, (void *)&query);
   }
   return 1;
 }
