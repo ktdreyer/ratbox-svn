@@ -2155,6 +2155,7 @@ void set_channel_mode(struct Client *cptr,
   *mbufw_hops = *pbufw_hops = '\0';
 
   collapse_signs(modebuf);
+  collapse_signs(modebuf2);
   collapse_signs(modebuf_ex);
   collapse_signs(modebuf_de);
   collapse_signs(modebuf_invex);
