@@ -20,6 +20,12 @@ it is important you read this file before upgrading.
 - update of manpage via Jeremy
 - raise default split_delay to 60s
 - add rehash TXLINES/TRESVS
+- fix reject cache free()'ing a dlink_node it doesnt allocate
+- all /quote set options now use n!u@h{oper} instead of nick
+- fix a couple of tests for deadness after parsing data
+- fix coming out of splitmode when we use split_delay and we arent
+  out of split anymore when the delay ends
+- fix a possible double exit of aborted clients
 
 -- ircd-ratbox-2.0rc3
 - dont allow external messages to a +m channel
