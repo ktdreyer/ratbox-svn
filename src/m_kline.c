@@ -734,9 +734,6 @@ mo_kline(struct Client *cptr,
 	  aconf->ip_mask = ip_mask;
 	}
       add_temp_kline(aconf);
-      rehashed = YES;
-      dline_in_progress = NO;
-      nextping = CurrentTime;
       sendto_realops("%s added temporary %d min. K-Line for [%s@%s] [%s]",
         parv[0],
         temporary_kline_time,
@@ -843,9 +840,7 @@ mo_kline(struct Client *cptr,
     current_date);
 #endif
 
-  rehashed = YES;
-  dline_in_progress = NO;
-  nextping = CurrentTime;
+  check_klines();
   return 0;
 } /* mo_kline() */
 
@@ -1231,9 +1226,6 @@ ms_kline(struct Client *cptr,
       DupString(aconf->passwd, buffer );
       aconf->hold = CurrentTime + temporary_kline_time_seconds;
       add_temp_kline(aconf);
-      rehashed = YES;
-      dline_in_progress = NO;
-      nextping = CurrentTime;
       sendto_realops("%s added temporary %d min. K-Line for [%s@%s] [%s]",
         parv[0],
         temporary_kline_time,
@@ -1340,9 +1332,7 @@ ms_kline(struct Client *cptr,
     current_date);
 #endif
 
-  rehashed = YES;
-  dline_in_progress = NO;
-  nextping = CurrentTime;
+  check_klines();
   return 0;
 } /* ms_kline() */
 
@@ -1757,15 +1747,14 @@ mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                 reason,
                 current_date);
 
-  /*
-  ** I moved the following 2 lines up here
-  ** because we still want the server to
-  ** hunt for 'targetted' clients even if
-  ** there are problems adding the D-line
-  ** to the appropriate file. -ThemBones
-  */
-  rehashed = YES;
-  dline_in_progress = YES;
-  nextping = CurrentTime;
+	/*
+	** I moved the following 2 lines up here
+	** because we still want the server to
+	** hunt for 'targetted' clients even if
+	** there are problems adding the D-line
+	** to the appropriate file. -ThemBones
+	*/
+
+  check_klines();
   return 0;
 } /* m_dline() */
