@@ -1062,8 +1062,8 @@ server_estab(struct Client *client_p)
 		 */
 
 		send_capabilities(client_p, aconf, default_server_capabs
-				  | IsConfCompressed(aconf) ? CAP_ZIP_SUPPORTED : 0
-				  | IsConfTburst(aconf) ? CAP_TB : 0);
+				  | (IsConfCompressed(aconf) ? CAP_ZIP_SUPPORTED : 0)
+				  | (IsConfTburst(aconf) ? CAP_TB : 0));
 
 		sendto_one(client_p, "SERVER %s 1 :%s%s",
 			   me.name,
@@ -1800,8 +1800,8 @@ serv_connect_callback(int fd, int status, void *data)
 	 */
 
 	send_capabilities(client_p, aconf, default_server_capabs
-			  | IsConfCompressed(aconf) ? CAP_ZIP_SUPPORTED : 0
-			  | IsConfTburst(aconf) ? CAP_TB : 0);
+			  | (IsConfCompressed(aconf) ? CAP_ZIP_SUPPORTED : 0)
+			  | (IsConfTburst(aconf) ? CAP_TB : 0));
 
 	sendto_one(client_p, "SERVER %s 1 :%s%s",
 		   me.name,
