@@ -31,51 +31,45 @@
 #include "channel.h"
 #include "ircd_defs.h"
 
-#define FEATURES "STATUSMSG=@+"		\
-                "%s%s%s"		\
-                " MODES=%i"		\
-                " MAXCHANNELS=%i"	\
-                " MAXBANS=%i"		\
-                " MAXTARGETS=%i"	\
-                " NICKLEN=%i"		\
-                " TOPICLEN=%i"		\
-                " KICKLEN=%i"		\
-		" AWAYLEN=%i"		\
-		" CHANNELLEN=%i"
-
-#define FEATURESVALUES ConfigChannel.use_knock ? " KNOCK" : "", \
-        ConfigChannel.use_except ? " EXCEPTS" : "", \
-        ConfigChannel.use_invex ? " INVEX" : "", \
-        MAXMODEPARAMS,ConfigChannel.max_chans_per_user, \
-        ConfigChannel.max_bans, \
-        ConfigFileEntry.max_targets,NICKLEN-1,TOPICLEN,REASONLEN, \
-	AWAYLEN, LOC_CHANNELLEN
-
-/* HACK HACK HACK HACK HACK HACK HACK HACK HACK -- anfl */
-#ifdef ENABLE_SERVICES
-#define SIMPLE_MODES "r"
-#else
-#define SIMPLE_MODES ""
-#endif
-
-#define FEATURES2 "CHANTYPES=#&"	\
-		" PREFIX=(ov)@+" 	\
-		" CHANMODES=%s%sb,k,l,imnpst%s"	\
+#define FEATURES "CHANTYPES=&#"		\
+		"%s%s"			\
+		" CHANMODES=%s%sb,k,l,imnpst"	\
+		" CHANLIMIT=&#:%i"	\
+		" PREFIX=(ov)@+"	\
+		" MAXLIST=b%s%s:%i"	\
 		" NETWORK=%s"		\
+		" MODES=%i"		\
+		" STATUSMSG=@+"		\
+		"%s"			\
+		" CALLERID=g"		\
+		" NICKLEN=%i"
+
+#define FEATURESVALUES \
+	ConfigChannel.use_except ? " EXCEPTS" : "", \
+	ConfigChannel.use_invex ? " INVEX" : "", \
+	ConfigChannel.use_except ? "e" : "", \
+	ConfigChannel.use_invex ? "I" : "", \
+	ConfigChannel.max_chans_per_user, \
+	ConfigChannel.use_except ? "e" : "", \
+	ConfigChannel.use_invex ? "I" : "", \
+	ConfigChannel.max_bans, ServerInfo.network_name, \
+	MAXMODEPARAMS, ConfigChannel.use_knock ? " KNOCK" : "", NICKLEN-1
+
+#define FEATURES2 " SAFELIST"		\
+		" ELIST=U"		\
 		" CASEMAPPING=rfc1459"	\
 		" CHARSET=ascii"	\
-		" CALLERID"		\
-		" WALLCHOPS"		\
+		" CHANNELLEN=%i"	\
+		" TOPICLEN=%i"		\
+		" KICKLEN=%i"		\
 		" ETRACE"		\
-		" SAFELIST"		\
-		" ELIST=U"		\
+		" CPRIVMSG"		\
+		" CNOTICE"		\
 		" DEAF=D"		\
 		" WATCH=%i"
 
-#define FEATURES2VALUES ConfigChannel.use_except ? "e" : "", \
-                        ConfigChannel.use_invex ? "I" : "", \
-			SIMPLE_MODES, ServerInfo.network_name, \
-			ConfigFileEntry.max_watch
+#define FEATURES2VALUES \
+	LOC_CHANNELLEN, TOPICLEN, REASONLEN, ConfigFileEntry.max_watch
 
 /*
  * - from mirc's versions.txt

@@ -547,7 +547,7 @@ add_target(struct Client *source_p, struct Client *target_p)
 			source_p->localClient->target_last = CurrentTime;
 		}
 		/* clear as many targets as we can */
-		else if(i = (CurrentTime - source_p->localClient->target_last) / 60))
+		else if((i = (CurrentTime - source_p->localClient->target_last) / 60))
 		{
 			if(i > USED_TARGETS(source_p))
 				USED_TARGETS(source_p) = 0;
