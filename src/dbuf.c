@@ -60,6 +60,9 @@ struct DBufBuffer {
 int DBufAllocCount = 0;
 int DBufUsedCount  = 0;
 
+/* For convenience, log the maximum number of malloc() dbuf */
+int DBufMaxAllocated = 0;
+
 static struct DBufBuffer* dbufFreeList = NULL;
 
 void count_dbuf_memory(size_t* allocated, size_t* used)
@@ -148,6 +151,10 @@ static struct DBufBuffer* dbuf_malloc()
   assert(0 != db);
   ++DBufAllocCount;
   ++DBufUsedCount;
+
+  /* Count what the maximum number of malloc'ed dbuf's is */
+  if(DBufAllocCount > DBufMaxAllocated)
+    DBufMaxAllocated = DBufAllocCount;
 
   db->next  = 0;
   db->start = db->end = db->data;

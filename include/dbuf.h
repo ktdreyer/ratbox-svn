@@ -51,6 +51,7 @@ struct DBuf {
 
 extern int DBufAllocCount;
 extern int DBufUsedCount;
+extern int DBufMaxAllocated;
 
 /*
 ** dbuf_put
