@@ -1,3 +1,38 @@
+leeh        2004/04/04 22:38:06 EDT	(20040405_2)
+
+  Modified files:
+    .                    configure configure.ac 
+    contrib              m_clearchan.c m_force.c m_ojoin.c 
+                         m_opme.c 
+    include              setup.h.in 
+    modules              m_stats.c m_svinfo.c m_tb.c 
+    modules/core         m_join.c m_mode.c m_nick.c m_sjoin.c 
+    src                  channel.c s_serv.c s_user.c 
+  Log:
+  - removal of PRIdMAX/intmax_t code -- using typecasted (long) and %ld for
+    time_t usage [via koitsu]
+  
+  Revision  Changes    Path
+  7.221     +2 -146    ircd-ratbox/configure
+  7.34      +2 -16     ircd-ratbox/configure.ac
+  1.51      +3 -3      ircd-ratbox/contrib/m_clearchan.c
+  1.27      +5 -5      ircd-ratbox/contrib/m_force.c
+  1.24      +7 -7      ircd-ratbox/contrib/m_ojoin.c
+  1.44      +3 -3      ircd-ratbox/contrib/m_opme.c
+  7.84      +0 -6      ircd-ratbox/include/setup.h.in
+  1.151     +21 -26    ircd-ratbox/modules/core/m_join.c
+  1.107     +3 -5      ircd-ratbox/modules/core/m_mode.c
+  1.152     +7 -12     ircd-ratbox/modules/core/m_nick.c
+  1.199     +13 -14    ircd-ratbox/modules/core/m_sjoin.c
+  1.215     +3 -3      ircd-ratbox/modules/m_stats.c
+  1.61      +7 -7      ircd-ratbox/modules/m_svinfo.c
+  1.7       +5 -5      ircd-ratbox/modules/m_tb.c
+  7.411     +2 -2      ircd-ratbox/src/channel.c
+  7.398     +16 -16    ircd-ratbox/src/s_serv.c
+  7.317     +6 -6      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2004/04/04 21:55:07 EDT	(20040405_1)
 
   Modified files:
