@@ -131,6 +131,21 @@ slow_list_length(dlink_list *list)
 	return count;
 }
 
+static void
+bh_sanity_check_block(BlockHeap *bh, Block *block)
+{
+	unsigned long s_used, s_free;
+	s_used = slow_list_length(&block->used_list);
+	s_free = slow_list_length(&block->free_list);
+	if(s_used != dlink_list_length(&block->used_list))
+		blockheap_fail("used link count doesn't match head count");
+	if(s_free != dlink_list_length(&block->free_list))
+		blockheap_fail("free link count doesn't match head count");
+	
+	if(dlink_list_length(&block->used_list) + dlink_list_length(&block->free_list) != bh->elemsPerBlock)
+		blockheap_fail("used_list + free_list != elemsPerBlock");
+}
+
 /* See how confused we are */
 static void
 bh_sanity_check(BlockHeap *bh)
@@ -499,8 +514,8 @@ BlockHeapFree(BlockHeap * bh, void *ptr)
 	bh->freeElems++;
 	mem_frob(ptr, bh->elemSize);
 	dlinkMoveNode(&memblock->self, &block->used_list, &block->free_list);
-#ifdef DEBUG_BALLOC_HARDER
-	bh_sanity_check(bh);
+#ifdef DEBUG_BALLOC
+	bh_sanity_check_block(bh, block);
 #endif
 	return (0);
 }
