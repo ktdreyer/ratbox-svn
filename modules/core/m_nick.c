@@ -709,8 +709,12 @@ nick_from_server(struct Client *cptr, struct Client *sptr, int parc,
           if (sptr->user)
             {
               add_history(sptr,1);
-              sendto_serv_butone(cptr, ":%s NICK %s :%lu",
-				    parv[0], nick, sptr->tsinfo);
+              if (ConfigFileEntry.hub)
+                sendto_ll_serv_butone(cptr, sptr, 0, ":%s NICK %s :%lu",
+                                      parv[0], nick, sptr->tsinfo);
+              else
+                sendto_serv_butone(cptr, ":%s NICK %s :%lu",
+                                   parv[0], nick, sptr->tsinfo);
             }
     }
 
@@ -781,7 +785,7 @@ set_initial_nick(struct Client *cptr, struct Client *sptr,
    */
 
   strcpy(nickbuf, "Nick: ");
-  /* XXX nick better be the right length! -- adrian */
+  /* nick better be the right length! -- adrian */
   strncat(nickbuf, nick, NICKLEN);
   fd_note(cptr->fd, nickbuf);
 
@@ -863,7 +867,7 @@ int change_local_nick(struct Client *cptr, struct Client *sptr,
    * .. and update the new nick in the fd note.
    */
   strcpy(nickbuf, "Nick: ");
-  /* XXX nick better be the right length! -- adrian */
+  /* nick better be the right length! -- adrian */
   strncat(nickbuf, nick, NICKLEN);
   fd_note(cptr->fd, nickbuf);
 
