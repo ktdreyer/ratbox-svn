@@ -1,3 +1,9 @@
+*** 20010929_9 by db
+added ':' to RPL_STATSQLINE DLINE KLINE as per discussion with walter
+online, originally suggested by Chris Behrens
+
+
+
 *** 20010929_8 by db
 - We have no more /rehash GC, so removed that from help
 
