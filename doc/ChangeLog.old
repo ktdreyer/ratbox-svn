@@ -1,3 +1,10 @@
+*** 20001225_1 by db
+- numeric sent to server should be announced what it is ...
+- nick change while not on channel would not be propogated to a LL server
+  causing those mysterious nick collides. oops.
+
+
+
 *** 20001224_23 by db
 - extra '\n' in log() not needed
 
