@@ -203,6 +203,7 @@ int   class_redirport_var;
 %token  WARN
 %token  SILENT
 %token  GENERAL
+%token  CHANNEL
 %token  FAILED_OPER_NOTICE
 %token  ANTI_NICK_FLOOD
 %token  ANTI_SPAM_EXIT_MESSAGE_TIME
@@ -261,6 +262,9 @@ int   class_redirport_var;
 %token  SECONDS MINUTES HOURS DAYS WEEKS MONTHS YEARS DECADES CENTURIES MILLENNIA
 %token  BYTES KBYTES MBYTES GBYTES TBYTES
 %token  TWODOTS
+%token  USE_INVEX
+%token  USE_EXCEPT
+%token  USE_KNOCK
 
 %left '-' '+'
 %left '*' '/'
@@ -280,6 +284,7 @@ conf:
 conf_item:        admin_entry
                 | logging_entry
                 | oper_entry
+		| channel_entry
                 | class_entry 
                 | listen_entry
                 | auth_entry
@@ -2500,3 +2505,49 @@ general_client_flood: T_CLIENT_FLOOD '=' expr ';'
   {
     ConfigFileEntry.client_flood = $3;
   };
+
+
+/***************************************************************************
+ *  section channel
+ ***************************************************************************/
+
+channel_entry:      CHANNEL
+  '{' channel_items '}' ';'
+
+channel_items:      channel_items channel_item |
+                    channel_item
+
+channel_item:       channel_use_invex |
+                    channel_use_except |
+                    channel_use_knock
+
+channel_use_invex:   USE_INVEX '=' TYES ';'
+  {
+    ConfigFileEntry.use_invex = 1;
+  }
+                        |
+                     USE_INVEX '=' TNO ';'
+  {
+    ConfigFileEntry.use_invex = 0;
+  } ;
+
+channel_use_except:   USE_EXCEPT '=' TYES ';'
+  {
+    ConfigFileEntry.use_except = 1;
+  }
+                        |
+                      USE_EXCEPT '=' TNO ';'
+  {
+    ConfigFileEntry.use_except = 0;
+  } ;
+
+channel_use_knock:   USE_KNOCK '=' TYES ';'
+  {
+    ConfigFileEntry.use_knock = 1;
+  }
+                        |
+                      USE_KNOCK '=' TNO ';'
+  {
+    ConfigFileEntry.use_knock = 0;
+  } ;
+

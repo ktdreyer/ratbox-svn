@@ -234,8 +234,10 @@ typedef struct config_file_entry
   int           min_nonwildcard;
   int           default_floodcount;
   int           client_flood;
+  /* XXX Consider moving these into a ConfigChannel struct see s_conf.c */
   int		use_invex;
   int           use_except;
+  int           use_knock;
 #ifdef HAVE_LIBCRYPTO
   struct EncPreference *default_cipher_preference;
 #endif

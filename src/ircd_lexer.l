@@ -107,6 +107,7 @@ aftype		{ return AFTYPE; }
 auth		{ return AUTH; }
 autoconn	{ return AUTOCONN; }
 caller_id_wait	{ return CALLER_ID_WAIT; }
+channel		{ return CHANNEL; }
 cipher_preference { return CIPHER_PREFERENCE; }
 class		{ return CLASS; }
 client_exit     { return CLIENT_EXIT; }
@@ -208,6 +209,9 @@ short_motd      { return SHORT_MOTD; }
 spoof		{ return SPOOF; }
 spoof_notice	{ return SPOOF_NOTICE; }
 unkline		{ return UNKLINE; }
+use_invex	{ return USE_INVEX; }
+use_except	{ return USE_EXCEPT; }
+use_knock	{ return USE_KNOCK; }
 user		{ return USER;} 
 vchans_oper_only { return VCHANS_OPER_ONLY; }
 disable_vchans  { return DISABLE_VCHANS; }
