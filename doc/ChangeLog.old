@@ -1,3 +1,8 @@
+*** 20000105_6 by db
+- committing the split out m_cburst.c m_drop.c m_lljoin.c
+
+
+
 *** 20000105_5 by db
 - split out m_drop.c m_cburst.c m_lljoin.c
 
