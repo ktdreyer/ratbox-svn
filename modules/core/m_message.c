@@ -500,11 +500,20 @@ msg_channel_flags(int p_or_n, char *command, struct Client *client_p,
     /* idletime shouldnt be reset by notice --fl */
     if ((p_or_n != NOTICE) && source_p->user)
       source_p->user->last = CurrentTime;
-  }
 
-  sendto_channel_local_butone(source_p, type, chptr, ":%s!%s@%s %s %c%s :%s",
-                              source_p->name, source_p->username,
-                              source_p->host, command, c, chptr->chname, text);
+    sendto_channel_local_butone(source_p, type, chptr, ":%s!%s@%s %s %c%s :%s",
+                                source_p->name, source_p->username,
+                                source_p->host, command, c, chptr->chname, text);
+  }
+  else
+  {
+    /* use a speedier version for remote senders, they wont be on
+     * any local lists
+     */
+    sendto_channel_local(type, chptr, ":%s!%s@%s %s %c%s :%s",
+                         source_p->name, source_p->username,
+                         source_p->host, command, c, chptr->chname, text);
+  }
 
   if (chptr->chname[0] == '&')
     return;
