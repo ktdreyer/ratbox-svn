@@ -264,4 +264,12 @@ sendto_list_anywhere()
                                               int remote_len);
 
 
+send_message()
+                - This local function does the actual send of message
+                  
+                  usage: send_message(struct Client *to, char *msg, int len);
+
+                  The message has to be pre-formatted and the length
+                  must be pre-calculated. 
+
 -- Diane Bruce 

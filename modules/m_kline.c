@@ -223,7 +223,6 @@ int mo_kline(struct Client *cptr,
 		 current_date);
       DupString(aconf->passwd, buffer );
     }
-  ClassPtr(aconf) = find_class(0);
 
   sendto_cap_serv_butone(CAP_KLN, &me,
 			 ":%s KLINE %s %s %s : %s",

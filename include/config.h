@@ -530,13 +530,6 @@ error CLIENT_FLOOD undefined.
 #define _(a)       (a)
 #endif
 
-
-/* tuck this here for now, it will go away eventually...
- * but meanwhile, at least it will compile a server that works -db
- */
-
-#define LLVER1
-
 #define CONFIG_H_LEVEL_7
 
 #endif /* INCLUDED_config_h */

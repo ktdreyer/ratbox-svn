@@ -216,8 +216,10 @@ struct Class  *find_class(char* classname)
 {
   struct Class *cltmp;
 
-  if(!classname)
-    return NULL;
+  if(classname == NULL)
+    {
+      return(ClassList);	/* return class 0 */
+    }
 
   for (cltmp = ClassList; cltmp; cltmp = cltmp->next)
     if (!strcmp(ClassName(cltmp),classname))

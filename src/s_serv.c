@@ -87,7 +87,6 @@ struct Capability captab[] = {
 static unsigned long nextFreeMask();
 static unsigned long freeMask;
 static void server_burst(struct Client *cptr);
-static void burst_members(struct Client *cptr, dlink_list *list);
 static CNCB serv_connect_callback;
 
 
@@ -866,24 +865,27 @@ static void server_burst(struct Client *cptr)
   /* On a "lazy link" (version 1 at least) only send the nicks
    * Leafs always have to send nicks plus channels
    */
-  if (ConfigFileEntry.hub && IsCapable(cptr, CAP_LL))
+  if(IsCapable(cptr, CAP_LL))
     {
-     /* LazyLinks version 2, don't send nicks! */
-#ifdef LLVER1
-      for (acptr = &me; acptr; acptr = acptr->prev)
-        if (acptr->from != cptr)
-          sendnick_TS(cptr, acptr);
-#endif
-      return;
-    }
-
-  if (!ConfigFileEntry.hub && IsCapable(cptr, CAP_LL))
-    {
-      for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
+      if (ConfigFileEntry.hub)
 	{
-	  sendto_one(cptr,":%s CBURST %s",
-		     me.name, chptr->chname );
+	  for (acptr = &me; acptr; acptr = acptr->prev)
+	    if (acptr->from != cptr)
+	      sendnick_TS(cptr, acptr);
 	}
+      else 
+	{
+	  for (acptr = &me; acptr; acptr = acptr->prev)
+	    if (acptr->from != cptr)
+	      sendnick_TS(cptr, acptr);
+
+	  for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
+	    {
+	      sendto_one(cptr,":%s CBURST %s",
+			 me.name, chptr->chname );
+	    }
+	}
+      return;
     }
 
   /* serial counter borrowed from send.c */
@@ -949,7 +951,7 @@ static void server_burst(struct Client *cptr)
  * output	- NONE
  * side effects	-
  */
-static void burst_members(struct Client *cptr, dlink_list *list)
+void burst_members(struct Client *cptr, dlink_list *list)
 {
   struct Client *acptr;
   dlink_node *ptr;
