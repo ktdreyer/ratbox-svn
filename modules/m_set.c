@@ -548,15 +548,15 @@ mo_set(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 				if((n - 1) > parc)
 				{
-					if(parc > 2)
-						sendto_one(source_p,
-							   ":%s NOTICE %s :SET %s expects (\"%s%s\") args",
-							   me.name, source_p->name,
-							   set_cmd_table[i].name,
-							   (set_cmd_table[i].
-							    wants_char ? "string, " : ""),
-							   (set_cmd_table[i].
-							    wants_char ? "int" : ""));
+					sendto_one(source_p,
+						   ":%s NOTICE %s :SET %s expects (\"%s%s\") args",
+						   me.name, source_p->name,
+						   set_cmd_table[i].name,
+						   (set_cmd_table[i].
+						    wants_char ? "string, " : ""),
+						   (set_cmd_table[i].
+						    wants_char ? "int" : ""));
+					return 0;
 				}
 
 				if(parc <= 2)

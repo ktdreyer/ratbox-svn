@@ -641,6 +641,8 @@ main(int argc, char *argv[])
 		comm_close_all();
 	}
 
+	init_netio();		/* This needs to be setup early ! -- adrian */
+
 	/* Check if there is pidfile and daemon already running */
 	if(!testing_conf)
 	{
@@ -653,8 +655,6 @@ main(int argc, char *argv[])
 		else
 			print_startup(getpid());
 	}
-
-	init_netio();		/* This needs to be setup early ! -- adrian */
 
 	/* Init the event subsystem */
 	eventInit();
