@@ -1,3 +1,8 @@
+*** 20011113_6 by leeh
+- added ERR_VCHANDISABLED (when vchans are disabled)
+  ERR_ALREADYONVCHAN (client tries to create two vchans)
+
+
 *** 20011113_5 by leeh
 - added proper comments to vchannel.c
 - removed a couple of places we passed client_p and source_p, but never used
