@@ -41,5 +41,6 @@ struct MessageHash
 extern  int     parse (struct Client *, char *, char *);
 extern  void    clear_hash_parse (void);
 extern  int     mod_del_cmd(char *cmd);
+extern  void    report_messages(struct Client *);
 
 #endif /* INCLUDED_parse_h_h */

@@ -57,8 +57,7 @@ static int do_numeric (char [], struct Client *,
 static int hash(char *p);
 static struct Message *hash_parse(char *);
 
-struct MessageHash *msg_tree_root[MAX_MSG_HASH];
-
+struct MessageHash *msg_hash_table[MAX_MSG_HASH+10];
 
 static char buffer[1024];
 
@@ -347,7 +346,7 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
  */
 void clear_hash_parse()
 {
-  memset(msg_tree_root,0,sizeof(msg_tree_root));
+  memset(msg_hash_table,0,sizeof(msg_hash_table));
 }
 
 /* mod_add_cmd
@@ -356,6 +355,8 @@ void clear_hash_parse()
  *		- pointer to struct Message
  * output	- none
  * side effects - load this one command name
+ *		  msg->count msg->bytes is modified in place, in
+ *		  modules address space. Might not want to do that...
  */
 void
 mod_add_cmd(char *cmd, struct Message *msg)
@@ -367,7 +368,9 @@ mod_add_cmd(char *cmd, struct Message *msg)
 
   index = hash(cmd);
 
-  for(ptr = msg_tree_root[index]; ptr; ptr = ptr->next )
+  assert(msg != NULL);
+
+  for(ptr = msg_hash_table[index]; ptr; ptr = ptr->next )
     {
       if (strcasecmp(cmd,ptr->cmd) == 0)
 	return;				/* Its already added */
@@ -380,8 +383,11 @@ mod_add_cmd(char *cmd, struct Message *msg)
   DupString(new_ptr->cmd,cmd);
   new_ptr->msg = msg;
 
+  msg->count = 0;
+  msg->bytes = 0;
+
   if(last_ptr == NULL)
-    msg_tree_root[index] = new_ptr;
+    msg_hash_table[index] = new_ptr;
   else
     last_ptr->next = new_ptr;
 }
@@ -400,7 +406,7 @@ int mod_del_cmd(char *cmd)
 
   index = hash(cmd);
 
-  for(ptr = msg_tree_root[index]; ptr; ptr = ptr->next )
+  for(ptr = msg_hash_table[index]; ptr; ptr = ptr->next )
     {
       if(strcasecmp(cmd,ptr->cmd) == 0)
 	{
@@ -408,7 +414,7 @@ int mod_del_cmd(char *cmd)
 	  if(last_ptr != NULL)
 	    last_ptr->next = ptr->next;
 	  else
-	    msg_tree_root[index] = ptr->next;
+	    msg_hash_table[index] = ptr->next;
 	  MyFree(ptr);
 	  return;
 	}
@@ -428,7 +434,7 @@ struct Message *hash_parse(char *cmd)
 
   index = hash(cmd);
 
-  for(ptr = msg_tree_root[index]; ptr; ptr = ptr->next )
+  for(ptr = msg_hash_table[index]; ptr; ptr = ptr->next )
     {
       if(strcasecmp(cmd,ptr->cmd) == 0)
 	{
@@ -461,6 +467,31 @@ hash(char *p)
   return(hash_val % MAX_MSG_HASH);
 }
 
+/*
+ * report_messages
+ *
+ * inputs	- pointer to client to report to
+ * output	- NONE
+ * side effects	- NONE
+ */
+void report_messages(struct Client *sptr)
+{
+  int i;
+  struct MessageHash *ptr;
+
+  for (i = 0; i < MAX_MSG_HASH; i++)
+    {
+      for (ptr = msg_hash_table[i]; ptr; ptr = ptr->next)
+	{
+	  assert(ptr->msg != NULL);
+	  assert(ptr->cmd != NULL);
+	  
+	  sendto_one(sptr, form_str(RPL_STATSCOMMANDS),
+		     me.name, sptr->name, ptr->cmd,
+		     ptr->msg->count, ptr->msg->bytes);
+	}
+    }
+}
 
 /*
  * cancel_clients

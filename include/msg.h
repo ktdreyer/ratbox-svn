@@ -147,8 +147,6 @@ struct  Message
 
 #define MSG_TESTLINE "TESTLINE"
 
-extern struct Message *msgtab;
-extern int num_msgs;
 
 #endif /* INCLUDED_msg_h */
 

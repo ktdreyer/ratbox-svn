@@ -32,7 +32,6 @@
 #include "send.h"
 #include "s_conf.h"
 #include "parse.h"
-#include "msg.h"
 
 struct Message help_msgtab = {
   MSG_HELP, 0, 0, MFLG_SLOW, 0,
@@ -74,9 +73,8 @@ int m_help(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       last_used = CurrentTime;
     }
 
-  for (i = 0; i < num_msgs; i++)
-    sendto_one(sptr,":%s NOTICE %s :%s",
-	       me.name, parv[0], msgtab[i].cmd);
+  report_messages(sptr);
+
   return 0;
 }
 

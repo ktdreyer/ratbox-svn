@@ -47,7 +47,6 @@
 #include "s_stats.h"     /* tstats */
 #include "s_user.h"      /* show_opers */
 #include "event.h"	 /* events */
-#include "msg.h"
 #include "linebuf.h"
 
 #include <string.h>
@@ -426,10 +425,7 @@ void do_priv_stats(struct Client *sptr, char *name, char *target,
       break;
 
     case 'M' : case 'm' :
-      for (mptr = msgtab; mptr->cmd; mptr++)
-          sendto_one(sptr, form_str(RPL_STATSCOMMANDS),
-                     me.name, sptr->name, mptr->cmd,
-                     mptr->count, mptr->bytes);
+      report_messages(sptr);
       stats_spy(sptr,stat);
       break;
 
