@@ -56,37 +56,53 @@ static void PrintOutServers(FILE *out);
 static void PairUpServers(struct ConnectPair* );
 static void AddHubOrLeaf(int type,char* name,char* host);
 static void OperPrivsFromString(FILE* , char* );
+static int basic = 0;
 
 int main(int argc,char *argv[])
 {
   FILE *in;
   FILE *out;
   char line[BUFSIZE];
+  char *filein, *fileout;
 
   if(argc < 3)
     usage();
 
-  if (( in = fopen(argv[1],"r")) == (FILE *)NULL )
+  if(argc > 3)
+  {
+    if((argv[1][0] == '-') && argv[1][1] && (argv[1][1] == 'b'))
+      basic = 1;
+
+    filein = argv[2];
+    fileout = argv[3];
+  }
+  else
+  {
+    filein = argv[1];
+    fileout = argv[2];
+  }
+
+  if ((in = fopen(filein, "r")) == NULL)
     {
-      fprintf(stderr,"Can't open %s for reading\n", argv[1]);
+      fprintf(stderr,"Can't open %s for reading\n", filein);
       usage();
     }
 
-  if (( out = fopen(argv[2],"w")) == (FILE *)NULL )
+  if ((out = fopen(fileout, "w")) == NULL)
     {
-      fprintf(stderr,"Can't open %s for writing\n", argv[2]);
+      fprintf(stderr,"Can't open %s for writing\n", fileout);
       usage();
     }
   
   ConvertConf(in,out);
 
-  if((in = fopen(CONFPATH, "r")) == NULL)
+  if(!basic && ((in = fopen(CONFPATH, "r")) == NULL))
   {
     fprintf(stderr, "Can't open %s for reading\n", CONFPATH);
     puts("You must use the example.conf in the ircd-hybrid-7 source to get the\n"
 	 "general {}; logging {}; channel {}; serverhide {}; modules {}; blocks.\n");
   }
-  else
+  else if(!basic)
   {
     while (fgets(line, sizeof(line), in))
       fprintf(out, line);
@@ -97,15 +113,18 @@ int main(int argc,char *argv[])
   puts("The config file has been converted however you MUST rearrange and check the config:\n"
        "   o class blocks (Y:) must be before anything that uses then\n"
        "   o auth blocks (I:) have NOT been converted, please use convertilines\n"
-       "     to convert them\n"
-       "   o the general/channel/serverhide parts will need to be edited\n");
+       "     to convert them\n");
+  if(!basic)
+    puts("   o the general/channel/serverhide parts will need to be edited\n");
 
   return 0;
 }
 
 static void usage()
 {
-  fprintf(stderr,"convertconf ircd.conf.old ircd.conf.new\n");
+  fprintf(stderr,"convertconf [-b] ircd.conf.old ircd.conf.new\n");
+  fprintf(stderr, "   -b - this will run in 'basic' mode and not add extra blocks\n");
+  fprintf(stderr, "        such as general{}, channel{} etc.\n");
   exit(-1);
 }
 
