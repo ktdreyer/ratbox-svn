@@ -1,3 +1,15 @@
+androsyn    2002/02/10 12:26:35 EST	(20020210_2)
+
+  Modified files:
+    src                  ircd.c 
+  Log:
+  Forgot to remove a debugging fprintf().
+  
+  Revision  Changes    Path
+  7.219     +0 -2      ircd-hybrid-7/src/ircd.c
+
+
+
 androsyn    2002/02/10 03:49:58 EST	(20020210_1)
 
   Modified files:
