@@ -1,3 +1,8 @@
+*** 20010424_8 by androsyn
+This hack will map ::1 to 127.0.0.1 along with any other IPv6 addresses that
+have the upper 96bits set to 0.
+
+
 *** 20010424_7 by androsyn
 Fixed coredump if /etc/resolv.conf is unreadable.  We log the event to the
 logfile right now.  I need to move the dns init up further in the init
