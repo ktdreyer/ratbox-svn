@@ -1,3 +1,8 @@
+*** 20001119_1 by davidt
+fixes for poll.  It seems to work, although there's probably a bug lurking
+in there somewhere...
+
+
 *** 20001118_3 by toot
 removed all those OLD_* defines in set_mode()
 
