@@ -1,3 +1,15 @@
+androsyn    2003/02/08 07:20:20 UTC	(20030208_7)
+
+  Modified files:
+    modules              m_ungline.c 
+  Log:
+  Fix a name clash with m_gline.c
+  
+  Revision  Changes    Path
+  1.11      +3 -3      ircd-ratbox/modules/m_ungline.c
+
+
+
 androsyn    2003/02/08 07:14:54 UTC	(20030208_6)
 
   Modified files:
