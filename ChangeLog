@@ -1,3 +1,16 @@
+leeh        2002/11/24 22:58:21 UTC	(20021124_21)
+
+  Modified files:
+    modules              m_kline.c m_stats.c 
+  Log:
+  - fix some int/time_t problems
+  
+  Revision  Changes    Path
+  1.131     +2 -2      ircd-ratbox/modules/m_kline.c
+  1.131     +2 -2      ircd-ratbox/modules/m_stats.c
+
+
+
 leeh        2002/11/24 22:42:36 UTC	(20021124_20)
 
   Modified files:
