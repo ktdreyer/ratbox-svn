@@ -579,7 +579,7 @@ add_target(struct Client *source_p, struct Client *target_p)
 			tgchange *target;
 			int send_tgchange = 0;
 
-			if((target = find_tgchange(&source_p->localClient->ip)))
+			if((target = find_tgchange((struct sockaddr *)&source_p->localClient->ip)))
 			{
 				target->expiry = CurrentTime + 900;
 
@@ -591,7 +591,7 @@ add_target(struct Client *source_p, struct Client *target_p)
 			}
 			else
 			{
-				add_tgchange(&source_p->localClient->ip,
+				add_tgchange((struct sockaddr *)&source_p->localClient->ip,
 						source_p->sockhost);
 				send_tgchange++;
 			}
