@@ -1,3 +1,15 @@
+db          2001/12/30 00:55:12 EST	(20011230_1)
+
+  Modified files:
+    include              s_conf.h 
+  Log:
+  - removed two struct elements no longer used in struct ConfItem
+  
+  Revision  Changes    Path
+  7.171     +0 -2      ircd-hybrid-7/include/s_conf.h
+
+
+
 db          2001/12/29 23:19:51 EST	(20011230_0)
 
   Modified files:
