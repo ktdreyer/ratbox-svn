@@ -1,3 +1,10 @@
+*** 20010105_22 by toot
+. made +a umode propagate and admins can -a/+a themselves too, again.
+  everything except /whois uses the conf flags as a check, rather than the umode.
+. for local connects, always show idle time if shide is off, and always show opers,
+  and show your Own idle time.
+
+
 *** 20010105_21 by wcampbel
 Document the usermode 'drone' '+e' and add support in oper_only_umodes
 for it.
