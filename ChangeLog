@@ -1,3 +1,20 @@
+androsyn    2002/11/13 05:16:00 UTC	(20021113_6)
+
+  Modified files:
+    src                  s_bsd_devpoll.c s_bsd_epoll.c 
+                         s_bsd_kqueue.c s_bsd_poll.c s_bsd_sigio.c 
+  Log:
+  Changed "courtesy of of squid" to "courtesy of squid" in the comments
+  
+  Revision  Changes    Path
+  7.19      +1 -1      ircd-ratbox/src/s_bsd_devpoll.c
+  1.4       +1 -1      ircd-ratbox/src/s_bsd_epoll.c
+  1.32      +1 -1      ircd-ratbox/src/s_bsd_kqueue.c
+  7.58      +1 -1      ircd-ratbox/src/s_bsd_poll.c
+  7.27      +1 -1      ircd-ratbox/src/s_bsd_sigio.c
+
+
+
 androsyn    2002/11/13 04:49:16 UTC	(20021113_5)
 
   Modified files:
