@@ -1,3 +1,7 @@
+*** 20010104_22 by a1kmm
+- Fixing a whole lot of compile-warnings.
+
+
 *** 20010104_21 by toot
 . corrected a couple of comments/headers
 . added /part reasons to m_part.c.. only work if the chan is -m (or you're opped)
