@@ -67,7 +67,8 @@ static void lookup_confhost(struct ConfItem* aconf);
 static void do_include_conf(void);
 static int  SplitUserHost( struct ConfItem * );
 static char *getfield(char *newline);
-
+static struct ConfItem* oldParseOneLine(char* ,struct ConfItem*,int*,int*);
+static void ReplaceQuotes(char* quotedLine,char* line);
 
 static struct ConfItem* conf_add_server(struct ConfItem *,char *,int ,int );
 static struct ConfItem* conf_add_o_line(struct ConfItem *,char *);
@@ -1805,6 +1806,120 @@ static char *set_conf_flags(struct ConfItem *aconf,char *tmp)
 
 static void initconf(FBFILE* file, int use_include)
 {
+  char             line[BUFSIZE];
+  char             quotedLine[2*BUFSIZE];
+  char*            p;
+  int              ccount = 0;
+  int              ncount = 0;
+  struct ConfItem* aconf = NULL;
+  struct ConfItem* include_conf = NULL;
+
+  class0 = find_class(0);       /* which one is class 0 ? */
+
+  while (fbgets(line, sizeof(line), file))
+    {
+      if ((p = strchr(line, '\n')))
+        *p = '\0';
+
+      ReplaceQuotes(quotedLine,line);
+
+      if (!*quotedLine || quotedLine[0] == '#' || quotedLine[0] == '\n' ||
+          quotedLine[0] == ' ' || quotedLine[0] == '\t')
+        continue;
+
+      /* Horrible kludge to do .include "filename" */
+
+      if(use_include && (quotedLine[0] == '.'))
+        {
+          char *filename;
+          char *back;
+
+          if(!ircncmp(quotedLine+1,"include ",8))
+            {
+              if( (filename = strchr(quotedLine+8,'"')) )
+                filename++;
+              else
+                {
+                  log(L_ERROR, "Bad config line: %s", quotedLine);
+                  continue;
+                }
+
+              if( (back = strchr(filename,'"')) )
+                *back = '\0';
+              else
+                {
+                  log(L_ERROR, "Bad config line: %s", quotedLine);
+                  continue;
+                }
+              include_conf = make_conf();
+              DupString(include_conf->name,filename);
+              include_conf->next = include_list;
+              include_list = include_conf;
+            }
+          /* 
+           * A line consisting of the first char '.' will now
+           * be treated as a comment line.
+           * a line `.include "file"' will result in an included
+           * portion of the conf file.
+           */
+          continue;
+        }
+
+      aconf = make_conf();
+
+      /* Could we test if it's conf line at all?        -Vesa */
+      if (quotedLine[1] == ':')
+        aconf = oldParseOneLine(quotedLine,aconf,&ccount,&ncount);
+
+      if (aconf)
+	{
+	  (void)collapse(aconf->host);
+	  (void)collapse(aconf->user);
+	  Debug((DEBUG_NOTICE,
+		 "Read Init: (%d) (%s) (%s) (%s) (%d) (%d)",
+		 aconf->status, 
+		 aconf->host ? aconf->host : "<NULL>",
+		 aconf->passwd ? aconf->passwd : "<NULL>",
+		 aconf->user ? aconf->user : "<NULL>",
+		 aconf->port,
+		 aconf->c_class ? ConfClassType(aconf): 0 ));
+	  aconf->next = ConfigItemList;
+	  ConfigItemList = aconf;
+	  aconf = NULL;
+	}
+
+      if (aconf)
+        free_conf(aconf);
+      aconf = NULL;
+    }
+
+  if (aconf)
+    free_conf(aconf);
+  aconf = NULL;
+
+  fbclose(file);
+  check_class();
+  nextping = nextconnect = time(NULL);
+
+  if(me.name[0] == '\0')
+    {
+      log(L_CRIT, "Server has no M: line");
+      exit(-1);
+    }
+}
+
+/*
+ * ReplaceQuotes
+ * Inputs       - input line to quote
+ * Output       - quoted line
+ * Side Effects - All quoted chars in input are replaced
+ *                with quoted values in output, # chars replaced with '\0'
+ *                otherwise input is copied to output.
+ */
+static void ReplaceQuotes(char* quotedLine,char *inputLine)
+{
+  char *in;
+  char *out;
   static char  quotes[] = {
     0,    /*  */
     0,    /* a */
@@ -1836,340 +1951,264 @@ static void initconf(FBFILE* file, int use_include)
     0,0,0,0,0,0 
     };
 
-  char*            tmp;
-  char*            user_field;  /* user field portion of line */
-  char*            host_field;  /* host field portion of line */
-  char*            port_field;  /* port field portion of line */
-  char*            class_field; /* class field portion of line */
-  char             conf_letter;
-  char*            s;
-  char             line[BUFSIZE];
-  int              ccount = 0;
-  int              ncount = 0;
-  struct ConfItem* aconf = NULL;
-  struct ConfItem* include_conf = NULL;
-  int              sendq = 0;
-
-  class0 = find_class(0);       /* which one is class 0 ? */
-
-  while (fbgets(line, sizeof(line), file))
+  /*
+   * Do quoting of characters and # detection.
+   */
+  for (out = quotedLine,in = inputLine; *in; out++, in++)
     {
-      user_field = host_field = port_field = class_field = (char *)NULL;
-      if ((tmp = strchr(line, '\n')))
-        *tmp = '\0';
-
-      /*
-       * Do quoting of characters and # detection.
-       */
-      for (tmp = line; *tmp; tmp++)
-        {
-          if (*tmp == '\\')
-	    {
-	      if ( *(tmp+1) == '\\' )
-                *tmp = '\\';
-	      else
-                *tmp = quotes[ (unsigned int) (*(tmp+1) & 0x1F) ];
-	      for (s = tmp; (*s = *(s+1)); s++)
-		;
-            }
-          else if (*tmp == '#')
-            *tmp = '\0';
-        }
-      if (!*line || line[0] == '#' || line[0] == '\n' ||
-          line[0] == ' ' || line[0] == '\t')
-        continue;
-
-      /* Horrible kludge to do .include "filename" */
-
-      if(use_include && (line[0] == '.'))
-        {
-          char *filename;
-          char *back;
-
-          if(!ircncmp(line+1,"include ",8))
-            {
-              if( (filename = strchr(line+8,'"')) )
-                filename++;
-              else
-                {
-                  log(L_ERROR, "Bad config line: %s", line);
-                  continue;
-                }
-
-              if( (back = strchr(filename,'"')) )
-                *back = '\0';
-              else
-                {
-                  log(L_ERROR, "Bad config line: %s", line);
-                  continue;
-                }
-              include_conf = make_conf();
-              DupString(include_conf->name,filename);
-              include_conf->next = include_list;
-              include_list = include_conf;
-            }
-          /* 
-           * A line consisting of the first char '.' will now
-           * be treated as a comment line.
-           * a line `.include "file"' will result in an included
-           * portion of the conf file.
-           */
-          continue;
-        }
-
-      /* Could we test if it's conf line at all?        -Vesa */
-      if (line[1] != ':')
-        {
-          log(L_ERROR, "Bad config line: %s", line);
-          continue;
-        }
-      if (aconf)
-        free_conf(aconf);
-      aconf = make_conf();
-
-      tmp = getfield(line);
-      if (!tmp)
-        continue;
-      conf_letter = *tmp;
-
-      for (;;) /* Fake loop, that I can use break here --msa */
-        {
-	  /* host field */
-          if ((host_field = getfield(NULL)) == NULL)
-            break;
-
-	  /* pass field */
-          if ((tmp = getfield(NULL)) == NULL)
-            break;
-          DupString(aconf->passwd, tmp);
-
-	  /* user field */
-          if ((user_field = getfield(NULL)) == NULL)
-            break;
-
-          /* port field */
-          if ((port_field = getfield(NULL)) == NULL)
-                break;
-
-	  /* class field */
-          if ((class_field = getfield(NULL)) == NULL)
-            break;
-
-          break;
-          /* NOTREACHED */
-        }
-
-      aconf->flags = 0;
-
-      switch( conf_letter )
+      if (*in == '\\')
 	{
-        case 'A':case 'a': /* Name, e-mail address of administrator */
-          aconf->status = CONF_ADMIN;
-          add_host_user_port_fields(aconf,host_field,user_field,port_field);
-          break;
+          in++;
+          if(*in == '\\')
+            *out = '\\';
+	  else
+	    *out = quotes[ (unsigned int) (*in & 0x1F) ];
+	}
+      else if (*in == '#')
+        {
+	  *out = '\0';
+          return;
+	}
+      else
+        *out = *in;
+    }
+  *out = '\0';
+}
 
-        case 'c':
-          aconf->flags |= CONF_FLAGS_ZIP_LINK;
-          /* drop into normal C line code */
+/*
+ * oldParseOneLine
+ * Inputs       - pointer to line to parse
+ *              - pointer to conf item to add
+ * Output       - pointer to aconf if aconf to be added
+ *                to link list or NULL if not
+ * Side Effects - Parse one old style conf line.
+ */
 
-        case 'C':
-          aconf->status = CONF_CONNECT_SERVER;
-          ccount++;
-          aconf->flags |= CONF_FLAGS_ALLOW_AUTO_CONN;
-          add_host_user_port_fields(aconf,host_field,user_field,port_field);
-          aconf = conf_add_server(aconf,class_field,ncount,ccount);
-          break;
+static struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
+                            int* pccount,int* pncount)
+{
+  char conf_letter;
+  char* tmp;
+  char* user_field=(char *)NULL;
+  char* host_field=(char *)NULL;
+  char* port_field=(char *)NULL;
+  char* class_field=(char *)NULL;
+  int   sendq = 0;
 
-        case 'd':
-          aconf->status = CONF_DLINE;
-          aconf->flags = CONF_FLAGS_E_LINED;
-          add_host_user_port_fields(aconf,host_field,user_field,port_field);
-          conf_add_d_line(aconf);
-          aconf = NULL;
-          break;
+  tmp = getfield(line);
+  if (!tmp)
+    return aconf;
 
-        case 'D': /* Deny lines (immediate refusal) */
-          aconf->status = CONF_DLINE;
-          add_host_user_port_fields(aconf,host_field,user_field,port_field);
-          conf_add_d_line(aconf);
-          aconf = NULL;
-          break;
+  conf_letter = *tmp;
 
-        case 'H': /* Hub server line */
-        case 'h':
-          aconf->status = CONF_HUB;
-          add_host_user_port_fields(aconf,host_field,user_field,port_field);
-          conf_add_hub_or_leaf(aconf);
-	  break;
+  for (;;) /* Fake loop, that I can use break here --msa */
+    {
+      /* host field */
+      if ((host_field = getfield(NULL)) == NULL)
+	break;
+      
+      /* pass field */
+      if ((tmp = getfield(NULL)) == NULL)
+	break;
+      DupString(aconf->passwd, tmp);
 
-        case 'i': /* Just plain normal irc client trying  */
+      /* user field */
+      if ((user_field = getfield(NULL)) == NULL)
+	break;
+
+      /* port field */
+      if ((port_field = getfield(NULL)) == NULL)
+	break;
+
+      /* class field */
+      if ((class_field = getfield(NULL)) == NULL)
+	break;
+      
+      break;
+      /* NOTREACHED */
+    }
+
+  aconf->flags = 0;
+
+  switch( conf_letter )
+    {
+    case 'A':case 'a': /* Name, e-mail address of administrator */
+      aconf->status = CONF_ADMIN;
+      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      break;
+
+    case 'c':
+      aconf->flags |= CONF_FLAGS_ZIP_LINK;
+      /* drop into normal C line code */
+
+    case 'C':
+      aconf->status = CONF_CONNECT_SERVER;
+      ++*pccount;
+      aconf->flags |= CONF_FLAGS_ALLOW_AUTO_CONN;
+      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      aconf = conf_add_server(aconf,class_field,*pncount,*pccount);
+      break;
+
+    case 'd':
+      aconf->status = CONF_DLINE;
+      aconf->flags = CONF_FLAGS_E_LINED;
+      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      conf_add_d_line(aconf);
+      aconf = NULL;
+      break;
+
+    case 'D': /* Deny lines (immediate refusal) */
+      aconf->status = CONF_DLINE;
+      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      conf_add_d_line(aconf);
+      aconf = NULL;
+      break;
+
+    case 'H': /* Hub server line */
+    case 'h':
+      aconf->status = CONF_HUB;
+      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      conf_add_hub_or_leaf(aconf);
+      break;
+
+    case 'i': /* Just plain normal irc client trying  */
                   /* to connect to me */
 
-        /* drop into normal I line code */
+      /* drop into normal I line code */
 
 #ifdef LITTLE_I_LINES
-          aconf->flags |= CONF_FLAGS_LITTLE_I_LINE;
+      aconf->flags |= CONF_FLAGS_LITTLE_I_LINE;
 #endif
-        case 'I': /* Just plain normal irc client trying  */
-                  /* to connect to me */
-          aconf->status = CONF_CLIENT;
+    case 'I': /* Just plain normal irc client trying  */
+      /* to connect to me */
+      aconf->status = CONF_CLIENT;
+      
+      if(host_field)
+	{
+	  host_field = set_conf_flags(aconf, host_field);
+	  DupString(aconf->host, host_field);
+	}
+      
+      if(user_field)
+	{
+	  user_field = set_conf_flags(aconf, user_field);
+	  DupString(aconf->user, user_field);
+	}
 
-          if(host_field)
-            {
-              host_field = set_conf_flags(aconf, host_field);
-              DupString(aconf->host, host_field);
-            }
+      conf_add_i_line(aconf,class_field);
+      aconf = NULL;
+      break;
+      
+    case 'K': /* Kill user line on irc.conf           */
+    case 'k':
+      aconf->status = CONF_KILL;
+      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      conf_add_k_line(aconf);
+      aconf = NULL;
+      break;
 
-          if(user_field)
-            {
-              user_field = set_conf_flags(aconf, user_field);
-              DupString(aconf->user, user_field);
-	    }
+    case 'L': /* guaranteed leaf server */
+    case 'l':
+      aconf->status = CONF_LEAF;
+      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      conf_add_hub_or_leaf(aconf);
+      break;
 
-          conf_add_i_line(aconf,class_field);
-          aconf = NULL;
-          break;
+      /* Me. Host field is name used for this host */
+      /* and port number is the number of the port */
+    case 'M':
+    case 'm':
+      aconf->status = CONF_ME;
+      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      conf_add_me(aconf);
+      break;
 
-        case 'K': /* Kill user line on irc.conf           */
-        case 'k':
-          aconf->status = CONF_KILL;
-          add_host_user_port_fields(aconf,host_field,user_field,port_field);
-          conf_add_k_line(aconf);
-          aconf = NULL;
-          break;
+    case 'n': /* connect in case of lp failures     */
+      aconf->flags |= CONF_FLAGS_LAZY_LINK;
+      /* drop into normal N line code */
 
-        case 'L': /* guaranteed leaf server */
-        case 'l':
-          aconf->status = CONF_LEAF;
-          add_host_user_port_fields(aconf,host_field,user_field,port_field);
-          conf_add_hub_or_leaf(aconf);
-	  break;
+    case 'N': /* Server where I should NOT try to     */
+      /* but which tries to connect ME        */
+      aconf->status = CONF_NOCONNECT_SERVER;
+      ++*pncount;
+      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      aconf = conf_add_server(aconf,class_field,*pncount,*pccount);
+      break;
 
-        /* Me. Host field is name used for this host */
-        /* and port number is the number of the port */
-        case 'M':
-        case 'm':
-          aconf->status = CONF_ME;
-          add_host_user_port_fields(aconf,host_field,user_field,port_field);
-          conf_add_me(aconf);
-          break;
+      /* Operator. Line should contain at least */
+      /* password and host where connection is  */
+    case 'O':
+      aconf->status = CONF_OPERATOR;
+      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      /* defaults */
+      aconf->port = 
+	CONF_OPER_GLOBAL_KILL|CONF_OPER_REMOTE|CONF_OPER_UNKLINE|
+	CONF_OPER_K|CONF_OPER_GLINE|CONF_OPER_REHASH;
+      if(port_field)
+	aconf->port = oper_privs_from_string(aconf->port,port_field);
+      if ((tmp = getfield(NULL)) != NULL)
+	aconf->hold = oper_flags_from_string(tmp);
+      aconf = conf_add_o_line(aconf,class_field);
+      break;
 
-        case 'n': /* connect in case of lp failures     */
-          aconf->flags |= CONF_FLAGS_LAZY_LINK;
-	  /* drop into normal N line code */
+      /* Local Operator, (limited privs --SRB) */
+    case 'o':
+      aconf->status = CONF_LOCOP;
+      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      aconf->port = CONF_OPER_UNKLINE|CONF_OPER_K;
+      if(port_field)
+	aconf->port = oper_privs_from_string(aconf->port,port_field);
+      if ((tmp = getfield(NULL)) != NULL)
+	aconf->hold = oper_flags_from_string(tmp);
+      aconf = conf_add_o_line(aconf,class_field);
+      break;
 
-        case 'N': /* Server where I should NOT try to     */
-          /* but which tries to connect ME        */
-          aconf->status = CONF_NOCONNECT_SERVER;
-          ++ncount;
-          add_host_user_port_fields(aconf,host_field,user_field,port_field);
-          aconf = conf_add_server(aconf,class_field,ncount,ccount);
-          break;
+    case 'P': /* listen port line */
+    case 'p':
+      aconf->status = CONF_LISTEN_PORT;
+      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      conf_add_port(aconf);
+      break;
 
-        /* Operator. Line should contain at least */
-        /* password and host where connection is  */
-        case 'O':
-          aconf->status = CONF_OPERATOR;
-          add_host_user_port_fields(aconf,host_field,user_field,port_field);
-          /* defaults */
-          aconf->port = 
-            CONF_OPER_GLOBAL_KILL|CONF_OPER_REMOTE|CONF_OPER_UNKLINE|
-            CONF_OPER_K|CONF_OPER_GLINE|CONF_OPER_REHASH;
-          if(port_field)
-              aconf->port = oper_privs_from_string(aconf->port,port_field);
-          if ((tmp = getfield(NULL)) != NULL)
-            aconf->hold = oper_flags_from_string(tmp);
-          aconf = conf_add_o_line(aconf,class_field);
-          break;
+    case 'Q': /* reserved nicks */
+    case 'q': 
+      aconf->status = CONF_QUARANTINED_NICK;
+      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      conf_add_q_line(aconf);
+      aconf = NULL;
+      break;
 
-        /* Local Operator, (limited privs --SRB) */
-        case 'o':
-          aconf->status = CONF_LOCOP;
-          add_host_user_port_fields(aconf,host_field,user_field,port_field);
-          aconf->port = CONF_OPER_UNKLINE|CONF_OPER_K;
-          if(port_field)
-            aconf->port = oper_privs_from_string(aconf->port,port_field);
-          if ((tmp = getfield(NULL)) != NULL)
-            aconf->hold = oper_flags_from_string(tmp);
-          aconf = conf_add_o_line(aconf,class_field);
-          break;
+    case 'U': /* Uphost, ie. host where client reading */
+    case 'u': /* this should connect.                  */
+      aconf->status = CONF_ULINE;
+      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      conf_add_u_line(aconf);
+      aconf = NULL;
+      break;
 
-        case 'P': /* listen port line */
-        case 'p':
-          aconf->status = CONF_LISTEN_PORT;
-          add_host_user_port_fields(aconf,host_field,user_field,port_field);
-          conf_add_port(aconf);
-          break;
+    case 'X': /* rejected gecos */
+    case 'x': 
+      aconf->status = CONF_XLINE;
+      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      conf_add_x_line(aconf);
+      aconf = NULL;
+      break;
 
-        case 'Q': /* reserved nicks */
-        case 'q': 
-          aconf->status = CONF_QUARANTINED_NICK;
-          add_host_user_port_fields(aconf,host_field,user_field,port_field);
-          conf_add_q_line(aconf);
-          aconf = NULL;
-          break;
-
-        case 'U': /* Uphost, ie. host where client reading */
-        case 'u': /* this should connect.                  */
-          aconf->status = CONF_ULINE;
-          add_host_user_port_fields(aconf,host_field,user_field,port_field);
-          conf_add_u_line(aconf);
-          aconf = NULL;
-          break;
-
-        case 'X': /* rejected gecos */
-        case 'x': 
-          aconf->status = CONF_XLINE;
-          add_host_user_port_fields(aconf,host_field,user_field,port_field);
-          conf_add_x_line(aconf);
-          aconf = NULL;
-          break;
-
-        case 'Y':
-        case 'y':
-          aconf->status = CONF_CLASS;
-          add_host_user_port_fields(aconf,host_field,user_field,port_field);
-          if(class_field)
-            sendq = atoi(class_field);
-          conf_add_class(aconf,sendq);
-          break;
-
-        default:
-          log(L_ERROR, "Error in config file: %s", line);
-          break;
-        }
-
-      if (aconf)
-        {
-          (void)collapse(aconf->host);
-          (void)collapse(aconf->user);
-          Debug((DEBUG_NOTICE,
-                 "Read Init: (%d) (%s) (%s) (%s) (%d) (%d)",
-                 aconf->status, 
-                 aconf->host ? aconf->host : "<NULL>",
-                 aconf->passwd ? aconf->passwd : "<NULL>",
-                 aconf->user ? aconf->user : "<NULL>",
-                 aconf->port,
-                 aconf->c_class ? ConfClassType(aconf): 0 ));
-          aconf->next = ConfigItemList;
-          ConfigItemList = aconf;
-          aconf = NULL;
-        }
+    case 'Y':
+    case 'y':
+      aconf->status = CONF_CLASS;
+      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      if(class_field)
+	sendq = atoi(class_field);
+      conf_add_class(aconf,sendq);
+      break;
+      
+    default:
+      log(L_ERROR, "Error in config file: %s", line);
+      break;
     }
 
-  if (aconf)
-    free_conf(aconf);
- aconf = NULL;
-
-  fbclose(file);
-  check_class();
-  nextping = nextconnect = time(NULL);
-
-  if(me.name[0] == '\0')
-    {
-      log(L_CRIT, "Server has no M: line");
-      exit(-1);
-    }
+  return aconf;
 }
 
 /*
