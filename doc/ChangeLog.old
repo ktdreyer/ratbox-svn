@@ -1,3 +1,20 @@
+leeh        2002/04/14 05:39:33 EDT	(20020414_2)
+
+  Modified files:
+    src                  channel_mode.c 
+  Log:
+  - commited a1kmms fix for mode changes:
+  
+    Looking at that code it seems that nc and mc are mixed up in
+    some places. nc should be the number of modes, mc should be
+    the number of parameters, so should only get incremented
+    when there is an argument to the mode.
+  
+  Revision  Changes    Path
+  7.28      +10 -12    ircd-hybrid-7/src/channel_mode.c
+
+
+
 lusky       2002/04/13 23:28:19 EDT	(20020414_1)
 
   Modified files:
