@@ -1,3 +1,20 @@
+leeh        2004/10/04 15:38:19 EDT	(20041004_2)
+
+  Modified files:
+    include              client.h conf.h 
+    src                  conf.c service.c ucommand.c 
+  Log:
+  - allow logging in over irc
+  
+  Revision  Changes    Path
+  1.22      +1 -0      rserv/include/client.h
+  1.14      +2 -0      rserv/include/conf.h
+  1.21      +1 -1      rserv/src/conf.c
+  1.19      +74 -14    rserv/src/service.c
+  1.14      +2 -2      rserv/src/ucommand.c
+
+
+
 leeh        2004/10/04 15:37:24 EDT	(20041004_1)
 
   Modified files:
