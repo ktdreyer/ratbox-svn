@@ -1,0 +1,3 @@
+ OSJOIN        - Joins operserv to the given channel
+ OSPART        - Parts operserv from the given channel
+ TAKEOVER      - Joins channel with TS-1, removing ops and simple modes

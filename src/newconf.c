@@ -44,6 +44,7 @@ static struct mode_table privs_table[] = {
 	{ "operbot",	CONF_OPER_OPERBOT	},
 	{ "jupeserv",	CONF_OPER_JUPESERV	},
 	{ "global",	CONF_OPER_GLOBAL	},
+	{ "operserv",	CONF_OPER_OPERSERV	},
 	{ "\0",		0			}
 };
 

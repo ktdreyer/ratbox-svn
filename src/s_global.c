@@ -16,6 +16,7 @@
 #include "c_init.h"
 #include "conf.h"
 #include "ucommand.h"
+#include "log.h"
 
 static struct client *global_p;
 
@@ -67,6 +68,8 @@ u_global_netmsg(struct connection_entry *conn_p, char *parv[], int parc)
 		sendto_server(":%s NOTICE $$%s :[NETWORK MESSAGE] %s",
 				global_p->name, target_p->name, data);
 	}
+
+	slog(global_p, 1, "%s - NETMSG %s", conn_p->name, data);
 }
 
 static int

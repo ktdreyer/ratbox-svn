@@ -216,7 +216,7 @@ add_ban(const char *banstr, dlink_list *list)
 
 	DLINK_FOREACH(ptr, list->head)
 	{
-		if(match((const char *) ptr->data, banstr))
+		if(!irccmp((const char *) ptr->data, banstr))
 			return;
 	}
 
@@ -367,7 +367,6 @@ c_mode(struct client *client_p, const char *parv[], int parc)
 				args++;
 				break;
 
-			/* we dont need to parse these at this point */
 			case 'b':
 				if(EmptyString(parv[3+args]))
 					return;

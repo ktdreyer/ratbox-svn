@@ -318,6 +318,9 @@ main(int argc, char *argv[])
 	init_s_chanserv();
 #endif
 #endif
+#ifdef ENABLE_OPERSERV
+	init_s_operserv();
+#endif
 #ifdef ENABLE_JUPESERV
 	init_s_jupeserv();
 #endif

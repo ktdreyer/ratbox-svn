@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # This code builds two files per directory, index and index-admin.
 # It takes the first word of each file in each directory, pads it
@@ -6,7 +6,7 @@
 #
 # If the second line is marked [ADMIN] it goes in index-admin
 
-SUBDIRS="alis operbot chanserv userserv jupeserv"
+SUBDIRS="alis operbot chanserv userserv jupeserv operserv"
 
 for i in $SUBDIRS; do
 	rm -f $i/index;

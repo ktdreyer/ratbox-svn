@@ -24,6 +24,7 @@ extern void init_s_userserv(void);
 extern void init_s_chanserv(void);
 
 void init_s_jupeserv(void);
+void init_s_operserv(void);
 
 void init_s_global(void);
 

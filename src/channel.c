@@ -494,7 +494,7 @@ c_tb(struct client *client_p, const char *parv[], int parc)
  * inputs	- channel to remove modes from
  * outputs	-
  */
-static void
+void
 remove_our_modes(struct channel *chptr)
 {
 	struct chmember *msptr;

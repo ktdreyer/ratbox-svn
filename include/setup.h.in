@@ -63,6 +63,9 @@
 /* User Service */
 #undef ENABLE_USERSERV
 
+/* Oper Service */
+#undef ENABLE_OPERSERV
+
 /* List Service */
 #undef ENABLE_ALIS
 

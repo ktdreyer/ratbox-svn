@@ -1,0 +1,4 @@
+TAKEOVER <channel> [-full]
+[ADMIN] Joins channel with TS-1, removing ops and simple modes
+  <channel>: Channel to takeover
+  [-full]  : When specified, also clears +beI lists

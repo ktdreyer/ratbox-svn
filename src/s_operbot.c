@@ -20,22 +20,20 @@
 #include "ucommand.h"
 #include "newconf.h"
 
-#define OPERBOT_ERR_CHANNEL	2
-
 static struct client *operbot_p;
 
-static void u_operbot_ojoin(struct connection_entry *, char *parv[], int parc);
-static void u_operbot_opart(struct connection_entry *, char *parv[], int parc);
+static void u_operbot_objoin(struct connection_entry *, char *parv[], int parc);
+static void u_operbot_obpart(struct connection_entry *, char *parv[], int parc);
 
-static int s_operbot_ojoin(struct client *, char *parv[], int parc);
-static int s_operbot_opart(struct client *, char *parv[], int parc);
+static int s_operbot_objoin(struct client *, char *parv[], int parc);
+static int s_operbot_obpart(struct client *, char *parv[], int parc);
 static int s_operbot_invite(struct client *, char *parv[], int parc);
 static int s_operbot_op(struct client *, char *parv[], int parc);
 
 static struct service_command operbot_command[] =
 {
-	{ "OJOIN",	&s_operbot_ojoin,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OPERBOT, 0 },
-	{ "OPART",	&s_operbot_opart,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OPERBOT, 0 },
+	{ "OBJOIN",	&s_operbot_objoin,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OPERBOT, 0 },
+	{ "OBPART",	&s_operbot_obpart,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OPERBOT, 0 },
 	{ "INVITE",	&s_operbot_invite,	1, NULL, 1, 0L, 0, 1, 0, 0 },
 	{ "OP",		&s_operbot_op,		0, NULL, 1, 0L, 0, 1, 0, 0 },
 	{ "\0",		NULL,			0, NULL, 0, 0L, 0, 0, 0, 0 }
@@ -43,8 +41,8 @@ static struct service_command operbot_command[] =
 
 static struct ucommand_handler operbot_ucommand[] =
 {
-	{ "ojoin",	u_operbot_ojoin,	CONF_OPER_OPERBOT, 2, 1, NULL },
-	{ "opart",	u_operbot_opart,	CONF_OPER_OPERBOT, 2, 1, NULL },
+	{ "objoin",	u_operbot_objoin,	CONF_OPER_OPERBOT, 2, 1, NULL },
+	{ "obpart",	u_operbot_obpart,	CONF_OPER_OPERBOT, 2, 1, NULL },
 	{ "\0",		NULL,			0, 0, 0, NULL }
 };
 
@@ -72,7 +70,7 @@ operbot_db_callback(void *db, int argc, char **argv, char **colnames)
 }
 
 static void
-u_operbot_ojoin(struct connection_entry *conn_p, char *parv[], int parc)
+u_operbot_objoin(struct connection_entry *conn_p, char *parv[], int parc)
 {
 	struct channel *chptr;
 
@@ -83,21 +81,21 @@ u_operbot_ojoin(struct connection_entry *conn_p, char *parv[], int parc)
 		return;
 	}
 
-	slog(operbot_p, 1, "%s - OJOIN %s", conn_p->name, parv[1]);
+	slog(operbot_p, 1, "%s - OBJOIN %s", conn_p->name, parv[1]);
 
 	loc_sqlite_exec(NULL, "INSERT INTO operbot VALUES(%Q, %Q)",
-			parv[0], conn_p->name);
+			parv[1], conn_p->name);
 
 	join_service(operbot_p, parv[1], NULL);
 	sendto_one(conn_p, "Operbot joined to %s", parv[1]);
 }
 
 static void
-u_operbot_opart(struct connection_entry *conn_p, char *parv[], int parc)
+u_operbot_obpart(struct connection_entry *conn_p, char *parv[], int parc)
 {
 	if(part_service(operbot_p, parv[1]))
 	{
-		slog(operbot_p, 1, "%s - OPART %s", conn_p->name, parv[1]);
+		slog(operbot_p, 1, "%s - OBPART %s", conn_p->name, parv[1]);
 
 		loc_sqlite_exec(NULL, "DELETE FROM operbot WHERE chname = %Q",
 				parv[1]);
@@ -108,7 +106,7 @@ u_operbot_opart(struct connection_entry *conn_p, char *parv[], int parc)
 }
 
 static int
-s_operbot_ojoin(struct client *client_p, char *parv[], int parc)
+s_operbot_objoin(struct client *client_p, char *parv[], int parc)
 {
 	struct channel *chptr;
 
@@ -120,12 +118,11 @@ s_operbot_ojoin(struct client *client_p, char *parv[], int parc)
 		return 1;
 	}
 
-	slog(operbot_p, 1, "%s - OJOIN %s",
+	slog(operbot_p, 1, "%s - OBJOIN %s",
 		client_p->user->oper->name, parv[0]);
 
 	loc_sqlite_exec(NULL, "INSERT INTO operbot VALUES(%Q, %Q)",
-			parv[0], client_p->name, 
-			client_p->user->oper->name);
+			parv[0], client_p->user->oper->name);
 			
 	join_service(operbot_p, parv[0], NULL);
 	service_error(operbot_p, client_p, 
@@ -134,11 +131,11 @@ s_operbot_ojoin(struct client *client_p, char *parv[], int parc)
 }
 
 static int
-s_operbot_opart(struct client *client_p, char *parv[], int parc)
+s_operbot_obpart(struct client *client_p, char *parv[], int parc)
 {
 	if(part_service(operbot_p, parv[0]))
 	{
-		slog(operbot_p, 1, "%s - OPART %s",
+		slog(operbot_p, 1, "%s - OBPART %s",
 			client_p->user->oper->name, parv[0]);
 
 		loc_sqlite_exec(NULL, "DELETE FROM operbot WHERE chname = %Q",
