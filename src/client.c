@@ -1013,7 +1013,7 @@ recurse_send_quits(struct Client *client_p, struct Client *source_p,
 	if(IsCapable(to, CAP_QS))
 	{
 		sendto_one(to, "SQUIT %s :%s",
-			   get_uid(source_p, to), me.name);
+			   get_id(source_p, to), me.name);
 	}
 	else
 	{
