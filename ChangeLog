@@ -1,3 +1,30 @@
+leeh        2003/06/28 11:38:55 EDT	(20030628_4)
+
+  Modified files:
+    include              channel.h s_conf.h 
+    modules/core         m_sjoin.c 
+    src                  channel.c channel_mode.c client.c ircd.c 
+                         newconf.c s_conf.c 
+  Log:
+  - ported remove_user_from_channels() from -STABLE
+  - removed persistent channels, their job is done well enough by
+    no_create_on_split et al.
+  - removed the "chname" parameter from channel_mode.c, its not needed when
+    we dont have vchans.
+  
+  Revision  Changes    Path
+  7.141     +1 -2      ircd-ratbox/include/channel.h
+  7.242     +0 -1      ircd-ratbox/include/s_conf.h
+  1.176     +1 -22     ircd-ratbox/modules/core/m_sjoin.c
+  7.382     +28 -45    ircd-ratbox/src/channel.c
+  7.108     +52 -50    ircd-ratbox/src/channel_mode.c
+  7.386     +1 -4      ircd-ratbox/src/client.c
+  7.295     +0 -2      ircd-ratbox/src/ircd.c
+  7.94      +0 -7      ircd-ratbox/src/newconf.c
+  7.417     +0 -3      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2003/06/28 11:18:57 EDT	(20030628_3)
 
   Modified files:
