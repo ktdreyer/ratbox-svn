@@ -1,3 +1,9 @@
+*** 20010720_2 by wcampbel
+UHELP command added, this lets an oper view the user help file without
+deopering.  UHELP for non-opers just does a regular HELP for non-opers (paced)
+UHELP for opers is not paced.
+
+
 *** 20010720_1 by leeh
 - added UHPATH to /info
 - needed case UHELP_MOTD: in motd.c, for a blind commit hwy, it was a nice
