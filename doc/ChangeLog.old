@@ -1,3 +1,9 @@
+*** 20001215_5 by db
+- I didn't get it right. 
+  So for now, just set the eob flag for later use. 
+
+
+
 *** 20001215_4 by db
 - I think I got this right.
   EOB message now sets flag in server struct saying its sent EOB,
