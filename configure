@@ -1,5 +1,4 @@
 #! /bin/sh
-# $Id$
 
 # Guess values for system-dependent variables and create Makefiles.
 # Generated automatically using autoconf version 2.13 
@@ -2028,7 +2027,14 @@ done
 ac_given_srcdir=$srcdir
 ac_given_INSTALL="$INSTALL"
 
-trap 'rm -fr `echo "Makefile src/Makefile tools/Makefile zlib/Makefile include/setup.h zlib/setup.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
+trap 'rm -fr `echo "\
+ Makefile                    \
+ iauth/Makefile              \
+ iauth/source/Makefile       \
+ src/Makefile                \
+ tools/Makefile              \
+ zlib/Makefile               \
+ include/setup.h zlib/setup.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
 
@@ -2126,7 +2132,14 @@ EOF
 
 cat >> $CONFIG_STATUS <<EOF
 
-CONFIG_FILES=\${CONFIG_FILES-"Makefile src/Makefile tools/Makefile zlib/Makefile"}
+CONFIG_FILES=\${CONFIG_FILES-"\
+ Makefile                    \
+ iauth/Makefile              \
+ iauth/source/Makefile       \
+ src/Makefile                \
+ tools/Makefile              \
+ zlib/Makefile               \
+"}
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 for ac_file in .. $CONFIG_FILES; do if test "x$ac_file" != x..; then
@@ -2303,6 +2316,4 @@ EOF
 chmod +x $CONFIG_STATUS
 rm -fr confdefs* $ac_clean_files
 test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
-
-
 
