@@ -1,3 +1,8 @@
+*** 20010608_4 by db
+- valid_comment() should only toss away " for now... could escape it in future
+
+
+
 *** 20010608_3 by db
 - what was this 0 length file doing here?
 
