@@ -1,3 +1,18 @@
+androsyn    2004/08/02 22:04:08 EDT	(20040803_6)
+
+  Modified files:
+    modules              Makefile.in 
+  Added files:
+    modules/core         registration.c 
+  Log:
+  Helps if i add the files
+  
+  Revision  Changes    Path
+  1.104     +1 -1      ircd-ratbox/modules/Makefile.in
+  1.1       +1225 -0   ircd-ratbox/modules/core/registration.c (new)
+
+
+
 androsyn    2004/08/02 22:02:46 EDT	(20040803_5)
 
   Modified files:
