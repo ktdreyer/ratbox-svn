@@ -1,3 +1,7 @@
+*** 20001202_11 by toot
+small bugfix in m_who
+
+
 *** 20001202_10 by toot
 made vchan_map in to a dlink_list,
 not tested loads, but it seems to work
