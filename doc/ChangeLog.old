@@ -1,3 +1,8 @@
+*** 20010103_19 by davidt
+Added some more info about problems with gettext.
+
+
+
 *** 20010103_18 by davidt
 Eeek, client_burst_if_needed should only check capabilities of local connections
 
