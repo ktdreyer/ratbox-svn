@@ -27,7 +27,6 @@
 
 #include "config.h"
 
-#ifdef USE_DEVPOLL
 #include "stdinc.h"
 #include <sys/devpoll.h>
 
@@ -313,4 +312,3 @@ comm_select(unsigned long delay)
 	return 0;
 }
 
-#endif /* USE_DEVPOLL */
