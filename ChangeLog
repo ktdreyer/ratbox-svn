@@ -1,3 +1,15 @@
+androsyn    2004/08/07 10:13:46 EDT	(20040807_2)
+
+  Modified files:
+    src                  version.c.SH 
+  Log:
+  Remove the platform info
+  
+  Revision  Changes    Path
+  7.27      +1 -4      ircd-ratbox/src/version.c.SH
+
+
+
 leeh        2004/08/07 09:45:34 EDT	(20040807_1)
 
   Modified files:
