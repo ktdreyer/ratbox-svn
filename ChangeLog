@@ -1,3 +1,15 @@
+androsyn    2002/09/07 06:32:11 UTC	(20020907_2)
+
+  Modified files:
+    src                  channel.c 
+  Log:
+  Clean up some strlcpys
+  
+  Revision  Changes    Path
+  7.354     +1 -1      ircd-ratbox/src/channel.c
+
+
+
 androsyn    2002/09/07 06:24:13 UTC	(20020907_1)
 
   Modified files:
