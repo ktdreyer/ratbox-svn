@@ -65,7 +65,10 @@ static void do_who_on_channel(struct Client *source_p,
 			      int server_oper, int member);
 
 static void do_who_list(struct Client *source_p, struct Channel *chptr,
-                        dlink_list *list, char *chname, char *op_flags);
+                        dlink_list *chanops_list, dlink_list *peons_list,
+                        dlink_list *halfops_list, dlink_list *voiced_list,
+                        char *chanop_flag, char *halfop_flag, char *voiced_flag,
+                        char *chname);
 
 static void who_global(struct Client *source_p, char *mask, int server_oper);
 
@@ -424,22 +427,83 @@ static void do_who_on_channel(struct Client *source_p,
       voiced_flag = "+";
     }
 
-  do_who_list(source_p, chptr, &chptr->chanops, chname, chanop_flag);
-  do_who_list(source_p, chptr, &chptr->halfops, chname, halfop_flag);
-  do_who_list(source_p, chptr, &chptr->voiced,  chname, voiced_flag);
-  do_who_list(source_p, chptr, &chptr->peons,   chname, "");
+  do_who_list(source_p, chptr,
+              &chptr->peons,
+              &chptr->chanops,
+              &chptr->halfops,
+              &chptr->voiced,
+              chanop_flag,
+              halfop_flag,
+              voiced_flag,
+              chname);
+
 }
 
 static void do_who_list(struct Client *source_p, struct Channel *chptr,
-                        dlink_list *list, char *chname, char *op_flags)
+			dlink_list *peons_list,
+                        dlink_list *chanops_list, 
+			dlink_list *halfops_list,
+			dlink_list *voiced_list,
+			char *chanop_flag,
+			char *halfop_flag,
+			char *voiced_flag,
+			char *chname)
 {
-  dlink_node *ptr;
+  dlink_node *chanops_ptr;
+  dlink_node *peons_ptr;
+  dlink_node *halfops_ptr;
+  dlink_node *voiced_ptr;
   struct Client *target_p;
+  int done=0;
 
-  for(ptr = list->head; ptr; ptr = ptr->next)
+  peons_ptr   = peons_list->head;
+  chanops_ptr = chanops_list->head;
+  halfops_ptr = halfops_list->head;
+  voiced_ptr  = voiced_list->head;
+
+  while (done != 4)
     {
-      target_p = ptr->data;
-      do_who(source_p, target_p, chname, op_flags);
+      done = 0;
+
+      if(peons_ptr != NULL)
+        {
+          target_p = peons_ptr->data;
+          do_who(source_p, target_p, chname, "");
+          peons_ptr = peons_ptr->next;
+        }
+      else
+        done++;
+
+      if(chanops_ptr != NULL)
+        {
+          target_p = chanops_ptr->data;
+          do_who(source_p, target_p, chname, chanop_flag);
+          chanops_ptr = chanops_ptr->next;
+        }
+      else
+        done++;
+
+      if(halfops_ptr != NULL)
+        {
+          target_p = halfops_ptr->data;
+          do_who(source_p, target_p, chname, halfop_flag);
+          halfops_ptr = halfops_ptr->next;
+        }
+      else
+        done++;
+
+      if(voiced_ptr != NULL)
+        {
+          target_p = voiced_ptr->data;
+          if(target_p == source_p && is_voiced(chptr, source_p) &&
+             chptr->mode.mode & MODE_HIDEOPS)
+             do_who(source_p, target_p, chname, "+");
+          else
+            do_who(source_p, target_p, chname, voiced_flag);
+          voiced_ptr = voiced_ptr->next;
+        }
+      else
+        done++;
     }
 }
 
