@@ -1,3 +1,18 @@
+leeh        2003/06/18 10:22:12 UTC	(20030618_3)
+
+  Modified files:
+    modules              m_resv.c 
+    src                  kdparse.c newconf.c 
+  Log:
+  - fix resvs
+  
+  Revision  Changes    Path
+  1.38      +3 -3      ircd-ratbox/modules/m_resv.c
+  7.28      +4 -2      ircd-ratbox/src/kdparse.c
+  7.90      +2 -2      ircd-ratbox/src/newconf.c
+
+
+
 leeh        2003/06/18 10:12:27 UTC	(20030618_2)
 
   Modified files:
