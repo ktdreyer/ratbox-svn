@@ -59,7 +59,6 @@ void InitMessageFile(MotdType motdType, char *fileName, MessageFile *motd)
 **
 ** This function split off so a server notice could be generated on a
 ** user requested motd, but not on each connecting client.
-** -Dianora
 */
 
 int SendMessageFile(struct Client *sptr, MessageFile *motdToPrint)
@@ -130,7 +129,10 @@ int SendMessageFile(struct Client *sptr, MessageFile *motdToPrint)
 
 /*
  * ReadMessageFile() - original From CoMSTuD, added Aug 29, 1996
- * modified by -Dianora
+ *
+ * inputs	- poiner to MessageFileptr
+ * output	-
+ * side effects	-
  */
 
 int ReadMessageFile(MessageFile *MessageFileptr)

@@ -16,9 +16,6 @@
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *
- *      I kind of modernized this code a bit. -Dianora
- *
  *   $Id$
  */
 #include "numeric.h"
@@ -33,14 +30,13 @@
 #include "messages.tab"
 #endif
 
-
 /*
- * The observant will note that err_str and rpl_str
- * could be replaced by one function now. 
- * -Dianora
- * ok. done. ;-)
+ * form_str
+ *
+ * inputs	- numeric
+ * output	- corresponding string
+ * side effects	- NONE
  */
-
 const char* form_str(int numeric)
 {
 

@@ -162,7 +162,6 @@ int hunt_server(struct Client *cptr, struct Client *sptr, char *command,
   /*
    * Again, if there are no wild cards involved in the server
    * name, use the hash lookup
-   * - Dianora
    */
   if (!acptr)
     {
@@ -448,7 +447,7 @@ int check_server(struct Client* cptr)
           else
             {
               /* its full folks, 32 leaves? wow. I never thought I'd
-               * see the day. Now this will have to be recoded! -Dianora
+               * see the day. Now this will have to be recoded!
                */
               cptr->serverMask = nextFreeMask();
 
@@ -623,8 +622,6 @@ int server_estab(struct Client *cptr)
     {
       /* Its easy now, if there is a server in my link list
        * and I'm not a HUB, I can't grow the linklist more than 1
-       *
-       * -Dianora
        */
       if (serv_cptr_list)   
         {
@@ -693,7 +690,6 @@ int server_estab(struct Client *cptr)
     report_error(SETBUF_ERROR_MSG, get_client_name(cptr, TRUE), errno);
 
   /* LINKLIST */
-  /* add to server link list -Dianora */
   cptr->next_server_client = serv_cptr_list;
   serv_cptr_list = cptr;
   

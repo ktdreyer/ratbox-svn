@@ -41,26 +41,23 @@
 /*
  * re-written to use Wohali (joant@cadence.com)
  * block allocator routines. very nicely done Wohali
- *
- * -Dianora
- *
  */
 
 /* Number of struct SLink's to pre-allocate at a time 
    for Efnet 1000 seems reasonable, 
-   for smaller nets who knows? -Dianora
+   for smaller nets who knows?
    */
 
 #define LINK_PREALLOCATE 1024
 
 /* Number of struct Client structures to preallocate at a time
-   for Efnet 1024 is reasonable 
-   for smaller nets who knows? -Dianora
-   */
+ * for Efnet 1024 is reasonable 
+ * for smaller nets who knows?
+ */
 
 /* This means you call MyMalloc 30 some odd times,
-   rather than 30k times -Dianora
-*/
+ * rather than 30k times 
+ */
 
 #define USERS_PREALLOCATE 1024
 
@@ -93,7 +90,6 @@ void initlists()
  *                report can be made. If I was already here (was_here)
  *                then I got called twice, and more drastic measures
  *                are in order. I'll try to just abort() at least.
- *                -Dianora
  */
 void outofmemory()
 {

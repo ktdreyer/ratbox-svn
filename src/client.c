@@ -58,10 +58,10 @@
 /* 
  * Number of struct Client structures to preallocate at a time
  * for Efnet 1024 is reasonable 
- * for smaller nets who knows? -Dianora
+ * for smaller nets who knows?
  *
  * This means you call MyMalloc 30 some odd times,
- * rather than 30k times -Dianora
+ * rather than 30k times 
  */
 #define CLIENTS_PREALLOCATE 1024
 
@@ -254,6 +254,14 @@ void _free_client(struct Client* cptr)
  * tidying up other network IO evilnesses.
  *     -- adrian
  */
+/* Instead of rescanning the local[] array and calling exit_client()
+ * right away, mark the client thats dying by placing a pointer to its
+ * struct Client into dying_clients[]. When all have examined  in local[],
+ * then examine the dying_clients[] for struct Client's to exit.
+ * This saves the rescan on k-lines, also greatly simplifies the code,
+ *
+ * This is done in both check_pings and check_klines.
+ */
 static void
 check_pings(void *notused)
 {               
@@ -266,17 +274,6 @@ check_pings(void *notused)
   /* mark first client empty */
   dying_clients[0].client = (struct Client *)NULL;
 
-  /*
-   * I re-wrote the way klines are handled. Instead of rescanning
-   * the local[] array and calling exit_client() right away, I
-   * mark the client thats dying by placing a pointer to its struct Client
-   * into dying_clients[]. When I have examined all in local[],
-   * I then examine the dying_clients[] for struct Client's to exit.
-   * This saves the rescan on k-lines, also greatly simplifies the code,
-   *
-   * Jan 28, 1998
-   * -Dianora
-   */
 
   for (i = 0; i <= highest_fd; i++)
     {
@@ -658,7 +655,6 @@ void check_klines(void)
 
   exit_marked_for_death_clients(dying_clients);
 }
-
 
 /* exit_marked_for_death_clients
  * inputs	- array of marked for death clients

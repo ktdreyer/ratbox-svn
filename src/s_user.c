@@ -508,12 +508,19 @@ static int valid_hostname(const char* hostname)
     {
       if (!IsHostChar(*p))
         return NO;
-      if ('.' == *p++)
+
+      if ('.' == *p)
         ++dots;
       else
         ++chars;
+
+      p++;
     }
-  return (0 == dots || chars < dots) ? NO : YES;
+
+  if( dots == 0 )
+    return NO;
+
+  return ( (dots > chars) ? NO : YES);
 }
 
 /* 
@@ -541,7 +548,6 @@ static int valid_username(const char* username)
    * i.e. reject jokers who have '-@somehost' or '.@somehost'
    * or "-hi-@somehost", "h-----@somehost" would still be accepted.
    *
-   * -Dianora
    */
   if (!IsAlNum(*p))
     return NO;
@@ -694,7 +700,7 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   char  **p, *m;
   struct Client *acptr;
   int   what, setflags;
-  int   badflag = NO;   /* Only send one bad flag notice -Dianora */
+  int   badflag = NO;		/* Only send one bad flag notice */
   char  buf[BUFSIZE];
 
   what = MODE_ADD;
@@ -928,8 +934,7 @@ void send_umode(struct Client *cptr, struct Client *sptr, int old, int sendmask,
 /*
  * extra argument evenTS added to send to TS servers or not -orabidoo
  *
- * extra argument evenTS no longer needed with TS only th+hybrid
- * server -Dianora
+ * extra argument evenTS no longer needed with TS only th+hybrid server
  */
 void send_umode_out(struct Client *cptr,
                        struct Client *sptr,

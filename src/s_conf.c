@@ -531,14 +531,13 @@ int attach_Iline(struct Client* cptr, const char* username)
 
 	  /* Thanks for spoof idea amm */
 	  if(IsConfDoSpoofIp(aconf))
-	  {
-	    /* abuse it, lose it. */
-	    sendto_realops("%s spoofing: %s as %s", cptr->name,
+	    {
+	      sendto_realops("%s spoofing: %s as %s", cptr->name,
 			   cptr->host, aconf->name);
-	    strncpy_irc(cptr->host, aconf->name, HOSTLEN);
-	    SetIPSpoof(cptr);
-	    SetIPHidden(cptr);
-	  }
+	      strncpy_irc(cptr->host, aconf->name, HOSTLEN);
+	      SetIPSpoof(cptr);
+	      SetIPHidden(cptr);
+	    }
 
 #ifdef LIMIT_UH
 	return(attach_iline(cptr, aconf, username));

@@ -180,7 +180,7 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
   ** numerics must have parameters and thus a space after the command
   ** code. -avalon
   *
-  * ummm???? - Dianora
+  * ummm????
   */
 
   if( *(ch + 3) == ' ' && /* ok, lets see if its a possible numeric.. */

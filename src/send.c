@@ -400,8 +400,6 @@ sendto_channel_type(struct Client *one, struct Client *from, struct Channel *chp
            * If the target's server can do CAP_CHW, only
            * one send is needed, otherwise, I do a bunch of
            * send's to each target on that server. (kludge)
-           *
-           * -Dianora
            */
           if(!IsCapable(acptr->from,CAP_CHW))
             {
@@ -451,13 +449,6 @@ sendto_serv_butone(struct Client *one, const char *pattern, ...)
 {
   va_list args;
   register struct Client *cptr;
-
-  /*
-   * USE_VARARGS IS BROKEN someone volunteer to fix it :-) -Dianora
-   *
-   * fixed! :-)
-   * -wnder
-   */
 
   va_start(args, pattern);
   

@@ -382,8 +382,6 @@ static int oper_privs_from_string(int int_privs,char *privs)
  * inputs        - flags as string
  * output        - flags as bit mask
  * side effects -
- *
- * -Dianora
  */
 
 static int oper_flags_from_string(char *flags)

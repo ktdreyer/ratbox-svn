@@ -418,8 +418,6 @@ static void find_or_add_user_piece(DOMAIN_PIECE *piece_ptr,
    * being added. The flags in piece_ptr will have already been set
    * but OR them in again anyway. aconf->status will also already have
    * the right flags. hint, these are optimization places for later.
-   *
-   * -Dianora
    */
 
   for( ptr = piece_ptr; ptr; ptr = ptr->next_piece)
@@ -761,7 +759,7 @@ struct ConfItem* find_matching_mtrie_conf(const char* host, const char* user,
     iline_aconf = find_wild_card_iline(user);
 
   /* If there is no I line, there is no point checking for a K line now
-   * is there? -Dianora
+   * is there?
    */
 
   if(!iline_aconf)
@@ -779,7 +777,7 @@ struct ConfItem* find_matching_mtrie_conf(const char* host, const char* user,
    * call me paranoid.
    * Remember again, if any of the I lines
    * found also had an E line, I've already returned it
-   * and not bothering with the K line search - Dianora
+   * and not bothering with the K line search
    */
 
   /* ok, if there is a trie to use...
@@ -787,7 +785,6 @@ struct ConfItem* find_matching_mtrie_conf(const char* host, const char* user,
    * I'll have a first_kline_trie_list saved.
    * its possible there won't be a branch of possible klines
    * in which case, I will have to start from the top of the tree again.
-   * - Dianora
    */
 
   kline_aconf = (struct ConfItem *)NULL;
@@ -914,7 +911,6 @@ static struct ConfItem *find_sub_mtrie(DOMAIN_LEVEL *cur_level,
  * an ordered list yields 0 (yes, a piece of Soleil)
  *
  * a little bit rewritten, and yes. I tested it. it is faster.
- *      - Dianora
  *
  * modified for use with mtrie_conf.c
  */
@@ -931,7 +927,7 @@ static int sortable(char *tokenized,char *p)
                                  * -Sol
                                  *
                                  * uh, if its NULL then nothing can be done
-                                 * with it -Dianora
+                                 * with it
                                  */
 
   if (strchr(p, '?'))

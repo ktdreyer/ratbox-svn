@@ -88,10 +88,6 @@ void add_history(struct Client* cptr, int online)
   strcpy(who->hostname, cptr->host);
   strcpy(who->realname, cptr->info);
 
-  /* Its not string copied, a pointer to the scache hash is copied
-     -Dianora
-   */
-  /*  strncpy_irc(who->servername, cptr->user->server, HOSTLEN); */
   who->servername = cptr->user->server;
 
   if (online)

@@ -116,8 +116,6 @@ int m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       *modebuf = *parabuf = '\0';
       modebuf[1] = '\0';
 
-      /* was returning chan modes for empty & MODE_JUPED channels.  -pro */
-      if (!chptr->members) return 0;
       if (HasVchans(chptr))
 	{
 	  vchan = map_vchan(chptr,sptr);

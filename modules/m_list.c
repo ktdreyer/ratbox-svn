@@ -218,7 +218,7 @@ int list_named_channel(struct Client *sptr,char *name)
   chptr = hash_find_channel(name, NullChn);
   root_chptr = find_bchan(chptr);
   for (tmpchptr = root_chptr; tmpchptr; tmpchptr = tmpchptr->next_vchan)
-    if (ShowChannel(sptr, tmpchptr) && tmpchptr->members && sptr->user)
+    if (ShowChannel(sptr, tmpchptr) && sptr->user)
       {
         if( (IsVchan(tmpchptr) || HasVchans(tmpchptr)) &&
 	    (root_chptr->members || root_chptr->next_vchan->next_vchan) )

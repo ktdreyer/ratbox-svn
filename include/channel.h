@@ -59,11 +59,8 @@ struct Channel
   time_t          topic_time;
   int             users;      /* user count */
   int             opcount;    /* number of chanops */
-  /* Only needed for lazy links and hubs */
   unsigned long   lazyLinkChannelExists;
-  /* Only needed for lazy links and leafs */
-  int             locusers;
-  time_t          locusers_last;
+  time_t          users_last;		/* when last user was in channel */
   time_t          last_knock;           /* don't allow knock to flood */
   struct Channel* next_vchan;           /* Link list of sub channels */
   struct Channel* prev_vchan;           /* Link list of sub channels */
@@ -75,8 +72,6 @@ struct Channel
   struct SLink*   invexlist;
   int             num_bed;          /* number of bans+exceptions+denies */
   time_t          channelts;
-  char            locally_created;  /* used to flag a locally created channel*/
-  char            keep_their_modes; /* used only on mode after sjoin */
   char            chname[1];
 };
 
@@ -222,6 +217,9 @@ typedef struct Ban      /* also used for exceptions -orabidoo */
   char *who;
   time_t when;
 } aBan;
+
+#define CLEANUP_CHANNELS_TIME (15*60)
+#define MAX_VCHAN_TIME (60*60)
 
 #endif  /* INCLUDED_channel_h */
 

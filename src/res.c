@@ -911,13 +911,11 @@ static int proc_answer(ResRQ* request, HEADER* header,
 	    return answer_count;
 	  }
       /*
-       * This comment is based on analysis by Shadowfax, Wohali and johan, 
-       * not me.  (Dianora) I am only commenting it.
+       * This comment is based on analysis by Shadowfax, Wohali and johan. 
        *
        * dn_expand is guaranteed to not return more than sizeof(hostbuf)
        * but do all implementations of dn_expand also guarantee
        * buffer is terminated with null byte? Lets not take chances.
-       *  -Dianora
        */
       hostbuf[HOSTLEN] = '\0';
       current += (size_t) n;
@@ -1076,8 +1074,6 @@ res_readreply(int fd, void *data)
 	{
 	  /*
 	   * got a name and address response, client resolved
-	   *
-	   * I liked the undernet comment better:
 	   *
 	   * XXX - Bug found here by Dianora -
 	   * make_cache() occasionally returns a NULL pointer when a

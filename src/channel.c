@@ -262,7 +262,7 @@ static  int     del_id(struct Channel *chptr, char *banid, int type)
  * that kick on matching ban. It will also stop apparent "desyncs."
  * It's not the long term answer, but it will tide us over.
  *
- * modified from orabidoo - Dianora
+ * modified from orabidoo 
  */
 static void del_matching_exception(struct Client *cptr,struct Channel *chptr)
 {
@@ -299,8 +299,6 @@ static void del_matching_exception(struct Client *cptr,struct Channel *chptr)
            * Kickee gets to see the -e removal by the server
            * since they have not yet been removed from the channel.
            * I don't think thats a biggie.
-           *
-           * -Dianora
            */
 
           sendto_channel_butserv(chptr,
@@ -416,14 +414,7 @@ void    add_user_to_channel(struct Channel *chptr, struct Client *who,
       chptr->users++;
       if(flags & MODE_CHANOP)
         chptr->opcount++;
-
-      /* LazyLink code */
-      if(MyClient(who))
-        {
-          chptr->locusers++;
-          chptr->locusers_last = CurrentTime;
-        }
-
+      chptr->users_last = CurrentTime;
       ptr = make_link();
       ptr->value.chptr = chptr;
       ptr->next = who->user->channel;
@@ -454,12 +445,8 @@ void    remove_user_from_channel(struct Channel *chptr,struct Client *who,
         if((tmp->flags & MODE_CHANOP) && chptr->opcount)
           chptr->opcount--;
 
-        /* LazyLink code */
-        if(MyClient(who) && chptr->locusers)
-          {
-            chptr->locusers--;
-            chptr->locusers_last = CurrentTime;
-	  }
+	chptr->users_last = CurrentTime;
+
         /* User was kicked, but had an exception.
          * so, to reduce chatter I'll remove any
          * matching exception now.
@@ -1007,8 +994,6 @@ static  int     errsent(int err, int *errs)
  * later addition.
  * For example, isok could be replaced witout half ops, with ischop() or
  * chan_op depending.
- *
- * -Dianora
  */
 
 void set_channel_mode(struct Client *cptr,
@@ -1032,16 +1017,11 @@ void set_channel_mode(struct Client *cptr,
    * pbufw gets the params, in ID form whenever possible
    * pbuf2w gets the params, no ID's
    */
-  /* no ID code at the moment
-   * pbufw gets the params, no ID's
-   * grrrr for now I'll stick the params into pbufw without ID's
-   * -Dianora
-   */
   /* *sigh* FOR YOU Roger, and ONLY for you ;-)
    * lets stick mode/params that only the newer servers will understand
    * into modebuf_new/parabuf_new 
    * even worse!  nodebuf_newer/parabuf_newer <-- for CAP_DE       
-	 * "£$"£*(!!! <-- CAP_IE
+   * "£$"£*(!!! <-- CAP_IE
    */
 
   char  modebuf_invex[MODEBUFLEN];
@@ -1085,9 +1065,6 @@ void set_channel_mode(struct Client *cptr,
 
   /* is an op or server or remote user on a TS channel */
   isok = ischop || (!isdeop && IsServer(cptr) && chptr->channelts);
-
-  if(isok)
-    chptr->keep_their_modes = YES;
 
   /* isok_c calculated later, only if needed */
 
@@ -1181,7 +1158,7 @@ void set_channel_mode(struct Client *cptr,
             break;
 
           /* there is always the remote possibility of picking up
-           * a bogus user, be nasty to core for that. -Dianora
+           * a bogus user, be nasty to core for that.
            */
 
           if (!who->user)
@@ -1361,7 +1338,6 @@ void set_channel_mode(struct Client *cptr,
            * I added another parameter buf and mode buf for "new"
            * capabilities.
            *
-           * -Dianora
            */
 
         case 'I':
@@ -1403,15 +1379,6 @@ void set_channel_mode(struct Client *cptr,
               break;
             }
           
-          if(MyClient(sptr))
-            chptr->keep_their_modes = YES;
-          else if(!chptr->keep_their_modes)
-            {
-              parc--;
-              parv++;
-              break;
-            }
-
           /* user-friendly ban mask generation, taken
           ** from Undernet's ircd  -orabidoo
           */
@@ -1434,16 +1401,9 @@ void set_channel_mode(struct Client *cptr,
             break;
 
           /* This stuff can go back in when all servers understand +e 
-           * with the pbufw_new nonsense removed -Dianora
+           * with the pbufw_new nonsense removed
            */
 
-          /*
-          *mbufw++ = plus;
-          *mbufw++ = 'I';
-          strcpy(pbufw, arg);
-          pbufw += strlen(pbufw);
-          *pbufw++ = ' ';
-          */
           len += tmp + 1;
           opcnt++;
 
@@ -1463,7 +1423,6 @@ void set_channel_mode(struct Client *cptr,
            * I added another parameter buf and mode buf for "new"
            * capabilities.
            *
-           * -Dianora
            */
 
         case 'e':
@@ -1511,15 +1470,6 @@ void set_channel_mode(struct Client *cptr,
               break;
             }
           
-          if(MyClient(sptr))
-            chptr->keep_their_modes = YES;
-          else if(!chptr->keep_their_modes)
-            {
-              parc--;
-              parv++;
-              break;
-            }
-
           /* user-friendly ban mask generation, taken
           ** from Undernet's ircd  -orabidoo
           */
@@ -1542,7 +1492,7 @@ void set_channel_mode(struct Client *cptr,
             break;
 
           /* This stuff can go back in when all servers understand +e 
-           * with the pbufw_new nonsense removed -Dianora
+           * with the pbufw_new nonsense removed 
            */
 
           len += tmp + 1;
@@ -1565,7 +1515,6 @@ void set_channel_mode(struct Client *cptr,
            * I added another parameter buf and mode buf for "new"
            * capabilities.
            *
-           * -Dianora
            */
 
         case 'd':
@@ -1601,15 +1550,6 @@ void set_channel_mode(struct Client *cptr,
               break;
             }
           
-          if(MyClient(sptr))
-            chptr->keep_their_modes = YES;
-          else if(!chptr->keep_their_modes)
-            {
-              parc--;
-              parv++;
-              break;
-            }
-
           if(*arg == ':')
             {
               parc--;
@@ -1626,7 +1566,7 @@ void set_channel_mode(struct Client *cptr,
             break;
 
           /* This stuff can go back in when all servers understand +e 
-           * with the pbufw_new nonsense removed -Dianora
+           * with the pbufw_new nonsense removed
            */
 
           len += tmp + 1;
@@ -1662,15 +1602,6 @@ void set_channel_mode(struct Client *cptr,
               break;
             }
 
-          if(MyClient(sptr))
-            chptr->keep_their_modes = YES;
-          else if(!chptr->keep_their_modes)
-            {
-              parc--;
-              parv++;
-              break;
-            }
-
           arg = check_string(*parv++);
 
           if (MyClient(sptr) && opcnt >= MAXMODEPARAMS)
@@ -1699,7 +1630,6 @@ void set_channel_mode(struct Client *cptr,
            * His code is more efficient though ;-/ Perhaps
            * when we've all upgraded this code can be moved up.
            *
-           * -Dianora
            */
 
           /* user-friendly ban mask generation, taken
@@ -1794,8 +1724,6 @@ void set_channel_mode(struct Client *cptr,
            * statement keeping it all sane
            *
            * The disadvantage is a lot more code duplicated ;-/
-           *
-           * -Dianora
            */
 
         case 'i' :
@@ -2185,9 +2113,6 @@ struct Channel* get_channel(struct Client *cptr, char *chname, int flag)
       chptr->prevch = NULL;
       chptr->nextch = GlobalChannelList;
       GlobalChannelList = chptr;
-      if (Count.myserver == 0)
-        chptr->locally_created = YES;
-      chptr->keep_their_modes = YES;
       chptr->channelts = CurrentTime;     /* doesn't hurt to set it here */
       add_to_channel_hash_table(chname, chptr);
       Count.chan++;
@@ -2210,6 +2135,7 @@ static  void    sub1_from_channel(struct Channel *chptr)
                          * It should never happen but...
                          */
 
+#if 0
       /*
        * Now, find all invite links from channel structure
        */
@@ -2276,6 +2202,8 @@ static  void    sub1_from_channel(struct Channel *chptr)
 	      Count.chan--;
 	    }
 	}
+#endif
+
     }
 }
 
@@ -2513,11 +2441,8 @@ static void free_channel_masks(struct Channel *chptr)
  *
  * inputs	- not used
  * output	- none
- * Only leaves need to remove channels that have no local members
- * If a channel has 0 LOCAL users and is NOT the top of a set of
- * vchans, remove it.
+ * side effects	- persistent channels... vchans get a long long timeout
  */
-
 void cleanup_channels(void *unused)
 {
    struct Channel *chptr;
@@ -2525,36 +2450,52 @@ void cleanup_channels(void *unused)
  
    if(!ConfigFileEntry.hub)
      eventAdd("cleanup_channels", cleanup_channels, NULL,
-       CLEANUP_CHANNELS_TIME, 0 );
-
-   sendto_realops_flags(FLAGS_DEBUG, "*** Cleaning up local channels...");
-   
-   next_chptr = NULL;
+	      CLEANUP_CHANNELS_TIME, 0 );
 
    for(chptr = GlobalChannelList; chptr; chptr = next_chptr)
      {
        next_chptr = chptr->nextch;
 
-       if( (CurrentTime - chptr->locusers_last >= CLEANUP_CHANNELS_TIME)
-	   && (chptr->locusers == 0) )
-         {
-	   /* If it is a vchan top, ignore the fact it has 0 users */
-
+       if ( IsVchan(chptr) )
+	 {
 	   if ( IsVchanTop(chptr) )
 	     {
-	       chptr->locusers_last = CurrentTime;
+	       chptr->users_last = CurrentTime;
 	     }
 	   else
 	     {
-	       if(IsCapable(serv_cptr_list, CAP_LL))
+	       if( (CurrentTime - chptr->users_last >= MAX_VCHAN_TIME) )
 		 {
-		   sendto_one(serv_cptr_list,":%s DROP %s",
-			      me.name, chptr->chname);
+		   if(chptr->users == 0)
+		     {
+		       if(IsCapable(serv_cptr_list, CAP_LL))
+			 sendto_one(serv_cptr_list,":%s DROP %s",
+				    me.name, chptr->chname);
+
+		       destroy_channel(chptr);
+		     }
+		   else
+		     chptr->users_last = CurrentTime;
 		 }
-	       if(!chptr->locusers)
-		 destroy_channel(chptr);
 	     }
-         }
+	 }
+       else
+	 {
+	   if( (CurrentTime - chptr->users_last >= CLEANUP_CHANNELS_TIME) )
+	     {
+	       if(chptr->users == 0)
+		 {
+		   if(IsCapable(serv_cptr_list, CAP_LL))
+		     {
+		       sendto_one(serv_cptr_list,":%s DROP %s",
+				  me.name, chptr->chname);
+		     }
+		   destroy_channel(chptr);
+		 }
+	       else
+		 chptr->users_last = CurrentTime;
+	     }
+	 }
      }
 }    
 

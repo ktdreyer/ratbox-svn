@@ -133,7 +133,7 @@ int     ServerRunning;          /* GLOBAL - server execution state */
 struct Client me;                     /* That's me */
 
 struct Client* GlobalClientList = 0; /* Pointer to beginning of Client list */
-/* client pointer lists -Dianora */ 
+/* client pointer lists */ 
 struct Client *LocalClientList = NULL;
 struct Client *oper_cptr_list  = NULL;
 struct Client *serv_cptr_list  = NULL;

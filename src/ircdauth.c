@@ -659,7 +659,7 @@ GreetUser(struct Client *client)
 	}
   
   /* LINKLIST 
-   * add to local client link list -Dianora
+   * add to local client link list
    * I really want to move this add to link list
    * inside the if (MyConnect(client)) up above
    * but I also want to make sure its really good and registered
@@ -667,7 +667,7 @@ GreetUser(struct Client *client)
    *
    * double link list only for clients, traversing
    * a small link list for opers/servers isn't a big deal
-   * but it is for clients -Dianora
+   * but it is for clients
    */
 
 	if (LocalClientList)

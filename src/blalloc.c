@@ -208,7 +208,6 @@ void *BlockHeapAlloc (BlockHeap *bh)
                     * base address is converted into the same number of
                     * bits in an integer type, that has at least
                     * sizeof(unsigned long) at least == sizeof(void *)
-                    * -Dianora 
                     */
 
                    return ( (void *) (
@@ -326,7 +325,6 @@ int BlockHeapGarbageCollect(BlockHeap *bh)
    last = NULL;
    walker = bh->base;
 
-   /* This section rewritten Dec 10 1998 - Dianora */
    while(walker)
      {
        int i;
@@ -401,7 +399,6 @@ void BlockHeapDump(BlockHeap *bh,int fd)
 		* base address is converted into the same number of
 		* bits in an integer type, that has at least
 		* sizeof(unsigned long) at least == sizeof(void *)
-		* -Dianora 
 		*/
 
                    addr =  ( (unsigned long) (

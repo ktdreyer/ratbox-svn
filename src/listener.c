@@ -118,7 +118,7 @@ void show_ports(struct Client* sptr)
  * returns true (1) if successful false (0) on error.
  *
  * If the operating system has a define for SOMAXCONN, use it, otherwise
- *   use HYBRID_SOMAXCONN -Dianora
+ * use HYBRID_SOMAXCONN 
  */
 #ifdef SOMAXCONN
 #undef HYBRID_SOMAXCONN
