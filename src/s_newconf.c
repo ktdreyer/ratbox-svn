@@ -154,8 +154,8 @@ clear_s_newconf_bans(void)
 		if(aconf->hold)
 			continue;
 
+		dlinkDelete(ptr, &xline_conf_list);
 		free_conf(aconf);
-		dlinkDestroy(ptr, &xline_conf_list);
 	}
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, resv_conf_list.head)
@@ -166,8 +166,8 @@ clear_s_newconf_bans(void)
 		if(aconf->hold)
 			continue;
 
+		dlinkDelete(ptr, &resv_conf_list);
 		free_conf(aconf);
-		dlinkDestroy(ptr, &resv_conf_list);
 	}
 
 	clear_resv_hash();
@@ -185,22 +185,22 @@ add_temp_kline(struct ConfItem *aconf)
 {
 	if(aconf->hold >= CurrentTime + (10080 * 60))
 	{
-		dlinkAddAlloc(aconf, &temp_klines[TEMP_WEEK]);
+		dlinkAdd(aconf, &aconf->dnode, &temp_klines[TEMP_WEEK]);
 		aconf->port = TEMP_WEEK;
 	}
 	else if(aconf->hold >= CurrentTime + (1440 * 60))
 	{
-		dlinkAddAlloc(aconf, &temp_klines[TEMP_DAY]);
+		dlinkAdd(aconf, &aconf->dnode, &temp_klines[TEMP_DAY]);
 		aconf->port = TEMP_DAY;
 	}
 	else if(aconf->hold >= CurrentTime + (60 * 60))
 	{
-		dlinkAddAlloc(aconf, &temp_klines[TEMP_HOUR]);
+		dlinkAdd(aconf, &aconf->dnode, &temp_klines[TEMP_HOUR]);
 		aconf->port = TEMP_HOUR;
 	}
 	else
 	{
-		dlinkAddAlloc(aconf, &temp_klines[TEMP_MIN]);
+		dlinkAdd(aconf, &aconf->dnode, &temp_klines[TEMP_MIN]);
 		aconf->port = TEMP_MIN;
 	}
 
@@ -219,22 +219,22 @@ add_temp_dline(struct ConfItem *aconf)
 {
 	if(aconf->hold >= CurrentTime + (10080 * 60))
 	{
-		dlinkAddAlloc(aconf, &temp_dlines[TEMP_WEEK]);
+		dlinkAdd(aconf, &aconf->dnode, &temp_dlines[TEMP_WEEK]);
 		aconf->port = TEMP_WEEK;
 	}
 	else if(aconf->hold >= CurrentTime + (1440 * 60))
 	{
-		dlinkAddAlloc(aconf, &temp_dlines[TEMP_DAY]);
+		dlinkAdd(aconf, &aconf->dnode, &temp_dlines[TEMP_DAY]);
 		aconf->port = TEMP_DAY;
 	}
 	else if(aconf->hold >= CurrentTime + (60 * 60))
 	{
-		dlinkAddAlloc(aconf, &temp_dlines[TEMP_HOUR]);
+		dlinkAdd(aconf, &aconf->dnode, &temp_dlines[TEMP_HOUR]);
 		aconf->port = TEMP_HOUR;
 	}
 	else
 	{
-		dlinkAddAlloc(aconf, &temp_dlines[TEMP_MIN]);
+		dlinkAdd(aconf, &aconf->dnode, &temp_dlines[TEMP_MIN]);
 		aconf->port = TEMP_MIN;
 	}
 
@@ -262,8 +262,8 @@ expire_temp_kd(void *list)
 						     (aconf->user) ? aconf->
 						     user : "*", (aconf->host) ? aconf->host : "*");
 
+			dlinkDelete(ptr, list);
 			delete_one_address_conf(aconf->host, aconf);
-			dlinkDestroy(ptr, list);
 		}
 	}
 }
@@ -317,7 +317,7 @@ expire_glines(void *unused)
 		if(aconf->hold > CurrentTime)
 			break;
 
-		dlinkDestroy(ptr, &glines);
+		dlinkDelete(ptr, &glines);
 		delete_one_address_conf(aconf->host, aconf);
 	}
 }
@@ -893,8 +893,8 @@ expire_temp_rxlines(void *unused)
 				sendto_realops_flags(UMODE_ALL, L_ALL,
 						"Temporary RESV for [%s] expired",
 						aconf->name);
+			dlinkDelete(ptr, &resv_conf_list);
 			free_conf(aconf);
-			dlinkDestroy(ptr, &resv_conf_list);
 		}
 	}
 
@@ -908,8 +908,8 @@ expire_temp_rxlines(void *unused)
 				sendto_realops_flags(UMODE_ALL, L_ALL,
 						"Temporary X-line for [%s] expired",
 						aconf->name);
+			dlinkDelete(ptr, &xline_conf_list);
 			free_conf(aconf);
-			dlinkDestroy(ptr, &xline_conf_list);
 		}
 	}
 }

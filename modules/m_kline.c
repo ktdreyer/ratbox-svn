@@ -868,7 +868,7 @@ remove_temp_kline(const char *user, const char *host)
 							  && comp_with_mask_sock(&addr,
 									    &caddr, bits)))
 			{
-				dlinkDestroy(ptr, &temp_klines[i]);
+				dlinkDelete(ptr, &temp_klines[i]);
 				delete_one_address_conf(aconf->host, aconf);
 				return YES;
 			}

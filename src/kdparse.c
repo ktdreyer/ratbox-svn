@@ -187,7 +187,7 @@ parse_x_file(FILE * file)
 		DupString(aconf->name, gecos_field);
 		DupString(aconf->passwd, reason_field);
 
-		dlinkAddAlloc(aconf, &xline_conf_list);
+		dlinkAdd(aconf, &aconf->dnode, &xline_conf_list);
 	}
 }
 
@@ -238,7 +238,7 @@ parse_resv_file(FILE * file)
 
 			DupString(aconf->name, host_field);
 			DupString(aconf->passwd, reason_field);
-			dlinkAddAlloc(aconf, &resv_conf_list);
+			dlinkAdd(aconf, &aconf->dnode, &resv_conf_list);
 		}
 	}
 }

@@ -290,7 +290,7 @@ add_to_resv_hash(const char *name, struct ConfItem *aconf)
 		return;
 
 	hashv = hash_resv(name);
-	dlinkAddAlloc(aconf, &resvTable[hashv]);
+	dlinkAdd(aconf, &aconf->dnode, &resvTable[hashv]);
 }
 
 void
@@ -401,7 +401,7 @@ del_from_resv_hash(const char *name, struct ConfItem *aconf)
 
 	hashv = hash_resv(name);
 
-	dlinkFindDestroy(&resvTable[hashv], aconf);
+	dlinkDelete(&aconf->dnode, &resvTable[hashv]);
 }
 
 void
@@ -798,8 +798,8 @@ clear_resv_hash(void)
 		if(aconf->hold)
 			continue;
 
+		dlinkDelete(ptr, &resvTable[i]);
 		free_conf(ptr->data);
-		dlinkDestroy(ptr, &resvTable[i]);
 	}
 	HASH_WALK_END
 }

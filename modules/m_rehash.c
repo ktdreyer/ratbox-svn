@@ -116,8 +116,8 @@ rehash_glines(struct Client *source_p)
 	{
 		aconf = ptr->data;
 
+		dlinkDelete(ptr, &glines);
 		delete_one_address_conf(aconf->host, aconf);
-		dlinkDestroy(ptr, &glines);
 	}
 
 }
@@ -159,8 +159,8 @@ rehash_tklines(struct Client *source_p)
 		{
 			aconf = ptr->data;
 
+			dlinkDelete(ptr, &temp_klines[i]);
 			delete_one_address_conf(aconf->host, aconf);
-			dlinkDestroy(ptr, &temp_klines[i]);
 		}
 	}
 }
@@ -177,12 +177,12 @@ rehash_tdlines(struct Client *source_p)
 
 	for(i = 0; i < LAST_TEMP_TYPE; i++)
 	{
-		DLINK_FOREACH_SAFE(ptr, next_ptr, temp_klines[i].head)
+		DLINK_FOREACH_SAFE(ptr, next_ptr, temp_dlines[i].head)
 		{
 			aconf = ptr->data;
 
+			dlinkDelete(ptr, &temp_dlines[i]);
 			delete_one_address_conf(aconf->host, aconf);
-			dlinkDestroy(ptr, &temp_klines[i]);
 		}
 	}
 
@@ -205,8 +205,8 @@ rehash_txlines(struct Client *source_p)
 		if(!aconf->hold)
 			continue;
 
+		dlinkDelete(ptr, &xline_conf_list);
 		free_conf(aconf);
-		dlinkDestroy(ptr, &xline_conf_list);
 	}
 }
 
@@ -228,8 +228,8 @@ rehash_tresvs(struct Client *source_p)
 		if(!aconf->hold)
 			continue;
 
+		dlinkDelete(ptr, &resvTable[i]);
 		free_conf(aconf);
-		dlinkDestroy(ptr, &resvTable[i]);
 	}
 	HASH_WALK_END
 
@@ -240,8 +240,8 @@ rehash_tresvs(struct Client *source_p)
 		if(!aconf->hold)
 			continue;
 
+		dlinkDelete(ptr, &resv_conf_list);
 		free_conf(aconf);
-		dlinkDestroy(ptr, &resv_conf_list);
 	}
 }
 

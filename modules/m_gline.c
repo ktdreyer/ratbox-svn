@@ -592,7 +592,7 @@ set_local_gline(struct Client *source_p, const char *user,
 	DupString(aconf->user, user);
 	DupString(aconf->host, host);
 	aconf->hold = CurrentTime + ConfigFileEntry.gline_time;
-	dlinkAddTailAlloc(aconf, &glines);
+	dlinkAddTail(aconf, &aconf->dnode, &glines);
 	add_conf_by_address(aconf->host, CONF_GLINE, aconf->user, aconf);
 
 	sendto_realops_flags(UMODE_ALL, L_ALL,
@@ -743,7 +743,7 @@ remove_temp_gline(const char *user, const char *host)
 		if(!irccmp(aconf->host, host) && bits == cbits &&
 		   comp_with_mask_sock(&addr, &caddr, bits))
 		{
-			dlinkDestroy(ptr, &glines);
+			dlinkDelete(ptr, &glines);
 			delete_one_address_conf(aconf->host, aconf);
 			return YES;
 		}

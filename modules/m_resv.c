@@ -258,7 +258,7 @@ parse_resv(struct Client *source_p, const char *name,
 		aconf->status = CONF_RESV_NICK;
 		DupString(aconf->name, name);
 		DupString(aconf->passwd, reason);
-		dlinkAddAlloc(aconf, &resv_conf_list);
+		dlinkAdd(aconf, &aconf->dnode, &resv_conf_list);
 
 		if(temp_time > 0)
 		{
@@ -459,7 +459,7 @@ remove_temp_resv(struct Client *source_p, const char *name)
 			return 0;
 
 		/* already have ptr from the loop above.. */
-		dlinkDestroy(ptr, &resv_conf_list);
+		dlinkDelete(ptr, &resv_conf_list);
 		free_conf(aconf);
 	}
 

@@ -300,7 +300,7 @@ apply_xline(struct Client *source_p, const char *name, const char *reason,
 			get_oper_name(source_p), name, reason);
 	}
 
-	dlinkAddAlloc(aconf, &xline_conf_list);
+	dlinkAdd(aconf, &aconf->dnode, &xline_conf_list);
 	check_xlines();
 }
 
@@ -504,8 +504,8 @@ remove_temp_xline(struct Client *source_p, const char *name)
 			ilog(L_KLINE, "UX %s %s", 
 				get_oper_name(source_p), name);
 			
+			dlinkDelete(ptr, &xline_conf_list);
 			free_conf(aconf);
-			dlinkDestroy(ptr, &xline_conf_list);
 			return 1;
 		}
 	}

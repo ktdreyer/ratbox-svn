@@ -74,6 +74,7 @@ struct ConfItem
 	char *className;	/* Name of class */
 	struct Class *c_class;	/* Class of connection */
 	patricia_node_t *pnode;	/* Our patricia node */
+	dlink_node dnode;
 };
 
 #define CONF_ILLEGAL            0x80000000
