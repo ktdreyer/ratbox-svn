@@ -1,3 +1,8 @@
+*** 20010105_48 by a1kmm
+- Cleaned up m_server a bit to squit the right client on error.
+- We now support a leaf{} block.
+
+
 *** 20010105_47 by ejb
 - fix IDs for parse()
 - added sendto_channel_remote_prefix()
