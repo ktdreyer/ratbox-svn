@@ -460,16 +460,6 @@ static int ms_whois(struct Client *cptr,
                  me.name, parv[0]);
       return 0;
     }
-
-  /* If its running as a hub, and linked with lazy links
-   * then allow leaf to use normal client m_whois()
-   * other wise, ignore it.
-   */
-  if( !IsOper(sptr) && GlobalSetOptions.hide_server
-      && !IsCapable(cptr->from,CAP_LL) )
-    {
- 	return 0;
-    }
  
   return( m_whois(cptr,sptr,parc,parv) );
 }
