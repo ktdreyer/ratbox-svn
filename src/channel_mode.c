@@ -1,4 +1,4 @@
-/*
+a/*
  *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
  *  channel_mode.c: Controls modes on channels.
  *
@@ -430,6 +430,9 @@ change_channel_membership(struct Channel *chptr,
  * output       - NONE
  * side effects - write the "simple" list of channel modes for channel
  * chptr onto buffer mbuf with the parameters in pbuf.
+ *
+ * NOTE: m_join.c uses this function and depends on the trailing spaces
+ *       in pbuf if there is a key or limit.
  */
 void
 channel_modes(struct Channel *chptr, struct Client *client_p,

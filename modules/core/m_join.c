@@ -241,61 +241,57 @@ m_join(struct Client *client_p,
 	  continue;
 	}
 
-      /*
-      **  Complete user entry to the new channel (if any)
-      */
-      
+      /* add the user to the channel */
       add_user_to_channel(chptr, source_p, flags);
 
-
-      /*
-      **  Set timestamp if appropriate, and propagate
-      */
-
-      if (flags & CHFL_CHANOP)
-	{
-	  chptr->channelts = CurrentTime;
-
-	  sendto_server(client_p, source_p, chptr, NOCAPS, NOCAPS,
-                        
-                        ":%s SJOIN %lu %s + :@%s",
-                        me.name,
-                        (unsigned long) chptr->channelts,
-                        chptr->chname,
-                        parv[0]);
-	}
-      else
-	{
-	  sendto_server(client_p, source_p, chptr, NOCAPS, NOCAPS,
-                        
-                        ":%s SJOIN %lu %s + :%s",
-                        me.name,
-                        (unsigned long) chptr->channelts,
-                        chptr->chname,
-                        parv[0]);
-        }
-
-      /*
-      ** notify all other users on the new channel
-      */
+      /* we send the user their join here, because we could have to
+       * send a mode out next.
+       */
       sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s JOIN :%s",
 			   source_p->name,
 			   source_p->username,
 			   source_p->host,
 			   chptr->chname);
-      
-      if( flags & CHFL_CHANOP )
+
+      /* if theyre joining opped (ie, new chan or joining one thats
+       * persisting) then set timestamp to current, set +nt and
+       * broadcast the sjoin with its old modes, or +nt.
+       */
+      if (flags & CHFL_CHANOP)
 	{
-	  chptr->mode.mode |= MODE_TOPICLIMIT;
-	  chptr->mode.mode |= MODE_NOPRIVMSGS;
+          char mbuf[MODEBUFLEN];
+          char pbuf[MODEBUFLEN];
+
+	  chptr->channelts = CurrentTime;
+          chptr->mode.mode |= MODE_TOPICLIMIT;
+          chptr->mode.mode |= MODE_NOPRIVMSGS;
 
 	  sendto_channel_local(ONLY_CHANOPS, chptr, ":%s MODE %s +nt",
 			       me.name, chptr->chname);
-	  
-	  sendto_server(client_p, source_p, chptr, NOCAPS, NOCAPS, 
-                        ":%s MODE %s +nt", 
-                        me.name, chptr->chname);
+
+          channel_modes(chptr, source_p, mbuf, pbuf);
+
+          strlcat(mbuf, " ", sizeof(mbuf));
+
+          if(pbuf[0] != '\0')
+            strlcat(mbuf, pbuf, sizeof(mbuf));
+
+          /* note: mbuf here will have a trailing space.  we add one above,
+           * and channel_modes() will leave a trailing space on pbuf if
+           * its used --fl
+           */
+	  sendto_server(client_p, source_p, chptr, NOCAPS, NOCAPS,
+                        ":%s SJOIN %lu %s %s:@%s",
+                        me.name, (unsigned long) chptr->channelts, 
+                        chptr->chname, mbuf, parv[0]);
 	}
+      else
+	{
+	  sendto_server(client_p, source_p, chptr, NOCAPS, NOCAPS,
+                        ":%s SJOIN %lu %s + :%s",
+                        me.name, (unsigned long) chptr->channelts,
+                        chptr->chname, parv[0]);
+        }
 
       del_invite(chptr, source_p);
       
