@@ -84,6 +84,7 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   char*            host;
   struct Client*   acptr;
   struct Client*   bcptr;
+  struct ConfItem *aconf;
   int              hop;
 
   if ( (host = parse_server_args(parv, parc, info, &hop)) == NULL )
@@ -100,14 +101,30 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
    * When SERVER command (like now) has prefix. -avalon
    * 
    */
-  if (find_conf_by_name(host, CONF_NOCONNECT_SERVER) == NULL)
+  if ((aconf = find_conf_by_name(host, CONF_NOCONNECT_SERVER)) == NULL)
     {
       if (ConfigFileEntry.warn_no_nline)
-	sendto_realops_flags(FLAGS_ALL,"Link %s Server %s dropped, no N: line",
+	sendto_realops_flags(FLAGS_ALL,"Link %s Server %s dropped, no "
+	             "connect block.",
 			     get_client_name(cptr, TRUE), host);
-      return exit_client(cptr, cptr, cptr, "NO N line");
+      return exit_client(cptr, cptr, cptr, "No connect block.");
     }
-
+  /* We have to do this to prevent recently connected servers being
+   * dropped by kiddies below by a dormat unregistered connection...
+   * Also stops probes to find out which servers are connected.
+   * -A1kmm
+   */
+  if ( !match(aconf->host, cptr->host) &&
+       memcmp((void*)&aconf->ipnum, (void*)&cptr->localClient->ip,
+              sizeof(struct in_addr))
+     )
+   {
+    sendto_realops_flags(FLAGS_ALL, "Link %s Server %s dropped, invalid "
+                 "hostname.",
+                 get_client_name(cptr, TRUE), host);
+    return exit_client(cptr, cptr, cptr, "Invalid host.");
+   }
+  
   if ((acptr = find_server(host)))
     {
       /*
@@ -150,6 +167,8 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       exit_client(bcptr, bcptr, &me, "Server Exists");
     }
 
+/* We shouldn't have a problem here, we call check_host above... -A1kmm */
+#if 0
   if ( strchr(host,'.') == NULL )
     {
       /*
@@ -165,6 +184,7 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           get_client_name(cptr,FALSE), host);
       return exit_client(cptr, cptr, cptr, "Nick as Server");
     }
+#endif
 
   if (!IsUnknown(cptr) && !IsHandshake(cptr))
     return 0;
@@ -196,9 +216,10 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     return server_estab(cptr);
 
   ++ServerStats->is_ref;
-  sendto_realops_flags(FLAGS_ALL,"Received unauthorized connection from %s.",
-		       get_client_host(cptr));
-  return exit_client(cptr, cptr, cptr, "No C/N conf lines");
+  sendto_realops_flags(FLAGS_ALL,
+      "Unauthorised attempt from %s to connect as server %s.",
+		       get_client_host(cptr), cptr->name);
+  return exit_client(cptr, cptr, cptr, "No connect block.");
 }
 
 /*
