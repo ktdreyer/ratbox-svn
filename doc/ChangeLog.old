@@ -1,3 +1,7 @@
+*** 20001228_5 by toot
+. check /set, rather than ircd.conf option for hide_server in m_whois
+
+
 *** 20001228_4 by db
 - oops. I broke remote topic
 
