@@ -28,8 +28,9 @@
 #include <stdlib.h>
 
 #include "memory.h"
+#include "fileio.h"
 #include "internal.h"
-#include "memory.h"    
+
 void adns__procdgram(adns_state ads, const byte *dgram, int dglen,
 		     int serv, int viatcp, struct timeval now) {
   int cbyte, rrstart, wantedrrs, rri, foundsoa, foundns, cname_here;

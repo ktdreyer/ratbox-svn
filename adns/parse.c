@@ -25,6 +25,7 @@
  *  Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. 
  */
 
+#include "fileio.h"
 #include "internal.h"
 
 int vbuf__append_quoted1035(vbuf *vb, const byte *buf, int len) {

@@ -26,6 +26,7 @@
  *  Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. 
  */
 
+#include "fileio.h"
 #include "memory.h"
 #include <stdlib.h>
 #include <unistd.h>
@@ -36,7 +37,7 @@
 #include <arpa/inet.h>
 
 #include "internal.h"
-#include "memory.h"
+
 /* Core diagnostic functions */
 
 void adns__vdiag(adns_state ads, const char *pfx, adns_initflags prevent,
@@ -335,31 +336,3 @@ void adns__isort(void *array, int nobjs, int sz, void *tempbuf,
   }
 }
 
-/* SIGPIPE protection. */
-
-void adns__sigpipe_protect(adns_state ads) {
-  sigset_t toblock;
-  struct sigaction sa;
-  int r;
-
-  if (ads->iflags & adns_if_nosigpipe) return;
-
-  sigfillset(&toblock);
-  sigdelset(&toblock,SIGPIPE);
-
-  sa.sa_handler= SIG_IGN;
-  sigfillset(&sa.sa_mask);
-  sa.sa_flags= 0;
-  
-  r= sigprocmask(SIG_SETMASK,&toblock,&ads->stdsigmask); assert(!r);
-  r= sigaction(SIGPIPE,&sa,&ads->stdsigpipe); assert(!r);
-}
-
-void adns__sigpipe_unprotect(adns_state ads) {
-  int r;
-
-  if (ads->iflags & adns_if_nosigpipe) return;
-
-  r= sigaction(SIGPIPE,&ads->stdsigpipe,0); assert(!r);
-  r= sigprocmask(SIG_SETMASK,&ads->stdsigmask,0); assert(!r);
-}

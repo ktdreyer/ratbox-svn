@@ -76,6 +76,7 @@ struct adns_pollfd { int fd; short events; short revents; };
 #define ADNS_POLLOUT 4
 
 
+
 /* All struct in_addr anywhere in adns are in NETWORK byte order. */
 
 typedef struct adns__state *adns_state;
@@ -371,10 +372,10 @@ typedef struct {
  */
 
 int adns_init(adns_state *newstate_r, adns_initflags flags,
-	      FILE *diagfile /*0=>stderr*/);
+	      FBFILE *diagfile /*0=>stderr*/);
 
 int adns_init_strcfg(adns_state *newstate_r, adns_initflags flags,
-		     FILE *diagfile /*0=>discard*/, const char *configtext);
+		     FBFILE *diagfile /*0=>discard*/, const char *configtext);
 
 /* Configuration:
  *  adns_init reads /etc/resolv.conf, which is expected to be (broadly

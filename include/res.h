@@ -9,6 +9,8 @@
 
 #include "config.h"
 #include "ircd_defs.h"
+/* I hate this *blah* db */
+#include "fileio.h"
 #include "../adns/adns.h"
 
 

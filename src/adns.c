@@ -4,6 +4,7 @@
  *
  * Written by Aaron Sethman <androsyn@ratbox.org>
  */
+#include "fileio.h"
 #include "res.h"
 #include "s_bsd.h"
 #include "event.h"

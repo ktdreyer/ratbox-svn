@@ -32,6 +32,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include "config.h"
+#include "fileio.h"
 #include "irc_string.h"
 #include "internal.h"
 

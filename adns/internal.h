@@ -282,7 +282,7 @@ struct query_queue { adns_query head, tail; };
 
 struct adns__state {
   adns_initflags iflags;
-  FILE *diagfile;
+  FBFILE *diagfile;
   int configerrno;
   struct query_queue udpw, tcpw, childw, output;
   adns_query forallnext;
@@ -299,8 +299,6 @@ struct adns__state {
    * we are idle (ie, tcpw queue is empty), in which case it is the
    * absolute time when we will close the connection.
    */
-  struct sigaction stdsigpipe;
-  sigset_t stdsigmask;
   struct adns_pollfd pollfds_buf[MAX_POLLFDS];
   struct server {
     struct in_addr addr;
