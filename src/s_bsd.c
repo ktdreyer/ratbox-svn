@@ -645,7 +645,9 @@ static void
 comm_connect_callback(int fd, int status)
 {
  CNCB *hdl;
-  
+ /* This check is gross..but probably necessary */
+ if(fd_table[fd].connect.callback == NULL)
+ 	return;
  /* Clear the connect flag + handler */
  hdl = fd_table[fd].connect.callback;
  fd_table[fd].connect.callback = NULL;
