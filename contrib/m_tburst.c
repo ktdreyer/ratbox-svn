@@ -134,7 +134,9 @@ static void set_topic(struct Client *source_p, struct Channel *chptr,
   sendto_server(source_p, NULL, chptr, CAP_TBURST, NOCAPS, NOFLAGS,
 		":%s TBURST %ld %s %ld %s :%s",
 		source_p->name, chptr->channelts, chptr->chname,
-		chptr->topic_time, chptr->topic_info == NULL ? "" : chptr->topic , chptr->topic == NULL ? "" : chptr->topic);
+		chptr->topic_time, 
+                chptr->topic_info == NULL ? "" : chptr->topic_info,
+                chptr->topic == NULL ? "" : chptr->topic);
 #endif
 }
 
