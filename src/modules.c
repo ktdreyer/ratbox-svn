@@ -939,9 +939,6 @@ increase_modlist(void)
 void
 load_all_modules(int warn)
 {
-#ifdef __vms
-	load_core_static_modules();
-#endif
 	load_static_modules();
 }
 

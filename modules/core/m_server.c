@@ -875,8 +875,6 @@ server_estab(struct Client *client_p)
 			     log_client_name(client_p, SHOW_IP), errno);
 
 	/* Hand the server off to servlink now */
-
-#ifndef __VMS
 	if(IsCapable(client_p, CAP_ZIP))
 	{
 		if(fork_server(client_p) < 0)
@@ -890,7 +888,6 @@ server_estab(struct Client *client_p)
 		start_io(client_p);
 		SetServlink(client_p);
 	}
-#endif
 
 	sendto_one(client_p, "SVINFO %d %d 0 :%ld", TS_CURRENT, TS_MIN, CurrentTime);
 
@@ -1556,7 +1553,6 @@ inet_socketpair(int d, int type, int protocol, int sv[2])
 static int
 fork_server(struct Client *server)
 {
-#ifndef __VMS
 	int ret;
 	int i;
 	int ctrl_fds[2];
@@ -1605,7 +1601,7 @@ fork_server(struct Client *server)
 			}
 			else
 			{
-#if defined(__VMS) || defined(__CYGWIN__)
+#if defined(__CYGWIN__)
 				if(i > 2)	/* don't close std* */
 #endif
 					close(i);
@@ -1672,5 +1668,4 @@ fork_server(struct Client *server)
 	close(ctrl_fds[0]);
 	close(ctrl_fds[1]);
 	return -1;
-#endif
 }

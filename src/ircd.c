@@ -138,12 +138,8 @@ get_vm_top(void)
 	 * offset from 0 (NULL), so the result of sbrk is cast to a size_t and 
 	 * returned. We really shouldn't be using it here but...
 	 */
-#ifndef __VMS
 	void *vptr = sbrk(0);
 	return (unsigned long) vptr;
-#else
-	return 0;
-#endif
 }
 
 /*
@@ -178,7 +174,7 @@ print_startup(int pid)
 static void
 init_sys(void)
 {
-#if defined(RLIMIT_FD_MAX) && !defined(__VMS) && defined(HAVE_SYS_RLIMIT_H)
+#if defined(RLIMIT_FD_MAX) && defined(HAVE_SYS_RLIMIT_H)
 	struct rlimit limit;
 
 	if(!getrlimit(RLIMIT_FD_MAX, &limit))
@@ -206,7 +202,6 @@ init_sys(void)
 static int
 make_daemon(void)
 {
-#ifndef __VMS
 	int pid;
 
 	if((pid = fork()) < 0)
@@ -224,12 +219,6 @@ make_daemon(void)
 	/*  fclose(stdin);
 	   fclose(stdout);
 	   fclose(stderr); */
-#else
-	/* if we get here, assume we've been detached.
-	   better set a process name. */
-	$DESCRIPTOR(myname, "IRCD-RATBOX");
-	SYS$SETPRN(&myname);
-#endif
 	return 0;
 }
 
@@ -290,7 +279,7 @@ static void
 io_loop(void)
 {
 	time_t delay;
-#ifndef __vms
+
 	while (ServerRunning)
 
 	{
@@ -329,9 +318,6 @@ io_loop(void)
 			doremotd = 0;
 		}
 	}
-#else
-	comm_select(0);
-#endif
 }
 
 /*
@@ -474,7 +460,7 @@ check_pidfile(const char *filename)
 static void
 setup_corefile(void)
 {
-#if !defined(__VMS) && defined(HAVE_SYS_RESOURCE_H)
+#if defined(HAVE_SYS_RESOURCE_H)
 	struct rlimit rlim;	/* resource limits */
 
 	/* Set corefilesize to maximum */
@@ -577,9 +563,7 @@ main(int argc, char *argv[])
 	/* Check if there is pidfile and daemon already running */
 	if(!testing_conf)
 	{
-#ifndef __vms
 		check_pidfile(pidFileName);
-#endif
 
 		if(!server_state_foreground)
 			make_daemon();

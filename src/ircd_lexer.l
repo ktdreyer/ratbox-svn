@@ -42,11 +42,7 @@
 #include "s_conf.h"
 #include "newconf.h"
 
-#ifndef __vms
 # include "y.tab.h"
-#else
-# include "ircd_parser_tab.h"
-#endif
 
 int yylex(void);
 

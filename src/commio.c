@@ -94,11 +94,7 @@ comm_close_all(void)
 	/* XXX someone tell me why we care about 4 fd's ? */
 	/* XXX btw, fd 3 is used for profiler ! */
 #if 0
-#ifndef __VMS
 	for (i = 0; i < MAXCONNECTIONS; ++i)
-#else
-	for (i = 3; i < MAXCONNECTIONS; ++i)
-#endif
 #endif
 
 		for (i = 4; i < MAXCONNECTIONS; ++i)
@@ -176,7 +172,6 @@ comm_set_buffers(int fd, int size)
 int
 comm_set_nb(int fd)
 {
-#ifndef __VMS
 	int nonb = 0;
 	int res;
 
@@ -187,17 +182,6 @@ comm_set_nb(int fd)
 
 	fd_table[fd].flags.nonblocking = 1;
 	return 1;
-#else
-	int val = 1;
-	int res;
-
-	res = ioctl(fd, FIONBIO, &val);
-	if(res == -1)
-		return 0;
-
-	fd_table[fd].flags.nonblocking = 1;
-	return 1;
-#endif
 }
 
 
@@ -596,12 +580,8 @@ comm_open(int family, int sock_type, int proto, const char *note)
 	if(!comm_set_nb(fd))
 	{
 		ilog(L_IOERROR, "comm_open: Couldn't set FD %d non blocking: %s", fd, strerror(errno));
-		/* if VMS, we might be opening a file (ircd.conf, resolv.conf).
-		   VMS doesn't let us set non-blocking on a file, so it might fail. */
-#ifndef __VMS
 		close(fd);
 		return -1;
-#endif
 	}
 
 	/* Next, update things in our fd tracking */
