@@ -61,6 +61,25 @@ if test $found = yes; then
 	LDFLAGS="${LDFLAGS} -Wl,-export-dynamic"
 fi
 
+AC_MSG_CHECKING(for compiler option to produce PIC)
+if test "$ac_cv_prog_gcc" = "yes"; then
+	AC_MSG_RESULT(gcc: -fPIC -DPIC -shared)
+	PICFLAGS="-fPIC -DPIC -shared"
+else
+	case `uname -s` in
+	SunOS*) 
+		AC_MSG_RESULT(SunOS - Assuming Sun Workshop compiler: -KPIC -DPIC -G)
+		PICFLAGS="-KPIC -DPIC -G"
+	;;
+	*)
+		AC_MSG_RESULT(no)
+		AC_MSG_ERROR(could not find a way to produce position independent code.)
+	;;
+	esac
+fi
+
+AC_SUBST(PICFLAGS)
+
 AC_CHECK_FUNC(crypt,, AC_CHECK_LIB(descrypt, crypt,,AC_CHECK_LIB(crypt, crypt,,)))
 
 dnl Check for gettext, but it's ok if we don't have it.

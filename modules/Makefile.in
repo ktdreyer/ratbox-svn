@@ -9,6 +9,7 @@ SED             = @SED@
 LEX		= @LEX@
 LEXLIB		= @LEXLIB@
 CFLAGS		= @CFLAGS@ -DIRCD_PREFIX=\"@prefix@\"
+PICFLAGS	= @PICFLAGS@
 MKDEP		= ${CC} -MM
 INSTALL		= @INSTALL@
 INSTALL_PROGRAM	= @INSTALL_PROGRAM@
@@ -104,7 +105,7 @@ install: all
 .SUFFIXES: .so
 
 .c.so:
-	${CC} -DPIC -fPIC -shared ${CPPFLAGS} $(CFLAGS) $< -o $@
+	${CC} ${PICFLAGS} ${CPPFLAGS} $(CFLAGS) $< -o $@
 
 .PHONY: depend clean distclean
 depend:
