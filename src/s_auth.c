@@ -222,8 +222,10 @@ static void auth_dns_callback(void* vptr, adns_answer* reply)
         sendheader(auth->client, REPORT_FAIL_DNS);
       } else 
 #endif
-      strlcat(str, auth->client->localClient->sockhost,HOSTLEN+1); 
-      sendheader(auth->client, REPORT_FAIL_DNS);
+      {
+        strlcat(str, auth->client->localClient->sockhost,HOSTLEN+1); 
+        sendheader(auth->client, REPORT_FAIL_DNS);
+      }
     }
 
   MyFree(reply);
