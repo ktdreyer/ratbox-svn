@@ -1,3 +1,10 @@
+*** 20011023_2 by androsyn
+Changed challenge to use standard PEM format keys similiar to those used for
+cryptlinks in hybrid.  Removed the genkey utility as well, as the standard
+openssl command is capable of generating the keys that are necessary.
+
+
+
 *** 20011023_1 by wcampbel
 Minor doc update
 
