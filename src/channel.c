@@ -1043,7 +1043,7 @@ static  char    *fix_key_old(char *arg)
   for (s = t = (u_char *)arg; (c = *s); s++)
     { 
       c &= 0x7f;
-      if ((c != 0x0a) && (c != ':'))
+      if ((c != 0x0a) && (c != ':') && (c != 0x0d))
         *t++ = c;
     }
   *t = '\0';
