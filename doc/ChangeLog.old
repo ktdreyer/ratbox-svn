@@ -1,3 +1,8 @@
+*** 20001227_36 by ejb
+- make ocnifugre should run conifgure as well as building it
+- make /restart require server name
+
+
 *** 20001227_35 by davidt
 Oops, do not use sendto_ll_.. for sjoin
 
