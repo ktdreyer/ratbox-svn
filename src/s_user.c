@@ -510,10 +510,10 @@ int register_remote_user(struct Client *client_p, struct Client *source_p,
 			   source_p->host, user->server,
 			   target_p->name, target_p->from->name);
       kill_client(client_p, source_p,
-		 ":%s (%s != %s[%s] USER from wrong direction)",
+		 ":%s (%s != %s USER from wrong direction)",
 		  me.name,
 		  user->server,
-		  target_p->from->name, target_p->from->host);
+		  target_p->from->name);
 
 #if 0
       sendto_one(client_p,
