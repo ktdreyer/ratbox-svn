@@ -1,3 +1,26 @@
+leeh        2004/09/05 18:40:10 EDT	(20040905_4)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    help/opers           xline 
+    include              s_conf.h 
+    modules/core         channels.c 
+    src                  newconf.c s_conf.c 
+  Log:
+  - new config option to channel {}; invite_ops_only = yes|no; default yes
+    controls whether unopped users may issue invites to a -i channel
+  
+  Revision  Changes    Path
+  7.248     +5 -0      ircd-ratbox/doc/example.conf
+  7.80      +5 -0      ircd-ratbox/doc/example.efnet.conf
+  1.5       +2 -1      ircd-ratbox/help/opers/xline
+  7.297     +1 -0      ircd-ratbox/include/s_conf.h
+  1.11      +4 -3      ircd-ratbox/modules/core/channels.c
+  7.176     +4 -3      ircd-ratbox/src/newconf.c
+  7.491     +1 -0      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2004/09/05 18:17:08 EDT	(20040905_3)
 
   Modified files:
