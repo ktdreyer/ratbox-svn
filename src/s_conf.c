@@ -1345,16 +1345,18 @@ static void clear_special_conf(struct ConfItem **this_conf)
 int rehash(struct Client *cptr,struct Client *sptr, int sig)
 {
   if (sig)
-    sendto_realops_flags(FLAGS_ALL,
-			 "Got signal SIGHUP, reloading ircd conf. file");
+  {
+    sendto_realops_flags(FLAGS_ALL,"Got signal SIGHUP, reloading ircd conf. file");
+  }
 
   close_listeners();
+  restart_resolver();
   read_conf_files(NO);
 
   if (ServerInfo.description != NULL)
-    {
-      strncpy_irc(me.info, ServerInfo.description, REALLEN);
-    }
+  {
+    strncpy_irc(me.info, ServerInfo.description, REALLEN);
+  }
 
   flush_deleted_I_P();
   return 0;
