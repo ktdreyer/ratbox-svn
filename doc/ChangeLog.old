@@ -1,3 +1,8 @@
+*** 20010226_9 by fl_
+- This fixes EOB timing.. we rely on the remote server to calculate
+  the time spent, may be some issues with TS deltas which ill fix later
+
+
 *** 20010226_8 by androsyn
 Half a fix for Sun's CC.
 
