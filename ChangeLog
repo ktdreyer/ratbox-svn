@@ -1,3 +1,15 @@
+androsyn    2004/08/19 15:41:00 EDT	(20040819_0)
+
+  Modified files:
+    modules/core         m_server.c 
+  Log:
+  Have our little name hack use LOCAL_COPY
+  
+  Revision  Changes    Path
+  1.146     +2 -2      ircd-ratbox/modules/core/m_server.c
+
+
+
 androsyn    2004/08/18 10:28:04 EDT	(20040818_1)
 
   Modified files:
