@@ -50,7 +50,7 @@ static int ms_bmask(struct Client *, struct Client *, int, const char **);
 
 struct Message mode_msgtab = {
 	"MODE", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, {m_mode, 2}, {ms_mode, 3}, {ms_mode, 3}, {m_mode, 2}}
+	{mg_unreg, {m_mode, 2}, {m_mode, 3}, {ms_mode, 3}, {m_mode, 2}}
 };
 struct Message tmode_msgtab = {
 	"TMODE", 0, 0, 0, MFLG_SLOW,
@@ -148,7 +148,7 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			return 0;
 
 		/* Finish the flood grace period... */
-		if(!IsFloodDone(source_p))
+		if(MyClient(source_p) && !IsFloodDone(source_p))
 		{
 			if(!((parc == 3) && (parv[2][0] == 'b') && (parv[2][1] == '\0')))
 				flood_endgrace(source_p);
@@ -165,7 +165,6 @@ static int
 ms_mode(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Channel *chptr;
-	struct membership *msptr;
 
 	chptr = find_channel(parv[1]);
 
@@ -176,21 +175,8 @@ ms_mode(struct Client *client_p, struct Client *source_p, int parc, const char *
 		return 0;
 	}
 
-	if(IsServer(source_p))
-	{
-		set_channel_mode(client_p, source_p, chptr, NULL,
-				 parc - 2, parv + 2);
-	}
-	else
-	{
-		msptr = find_channel_membership(chptr, source_p);
-
-		if(is_deop(msptr))
-			return 0;
-
-		set_channel_mode(client_p, source_p, chptr, msptr,
-				 parc - 2, parv + 2);
-	}
+	set_channel_mode(client_p, source_p, chptr, NULL,
+			 parc - 2, parv + 2);
 
 	return 0;
 }
