@@ -1,3 +1,21 @@
+leeh        2004/03/29 07:40:24 EST	(20040329_1)
+
+  Modified files:
+    include              config.h 
+    modules              m_svinfo.c 
+    modules/core         m_server.c 
+  Log:
+  - HIDE_SERVERS_IPS now means hide from everyone if defined, hide from noone
+    if undefined.
+  - replaced some calls to get_client_name() with get_server_name()
+  
+  Revision  Changes    Path
+  7.172     +2 -4      ircd-ratbox/include/config.h
+  1.133     +45 -101   ircd-ratbox/modules/core/m_server.c
+  1.59      +5 -13     ircd-ratbox/modules/m_svinfo.c
+
+
+
 leeh        2004/03/29 07:17:02 EST	(20040329_0)
 
   Modified files:
