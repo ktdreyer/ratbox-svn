@@ -258,8 +258,8 @@ adns_gethost(const char *name, int aftype, struct DNSQuery *req)
 int
 adns_getaddr(struct sockaddr_storage *addr, int aftype, struct DNSQuery *req, int arpa_type)
 {
-	assert(dns_state->nservers > 0);
 	int result;
+	assert(dns_state->nservers > 0);
 #ifdef IPV6
 	if(addr->ss_family == AF_INET6)
 	{
