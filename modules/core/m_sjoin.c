@@ -117,13 +117,17 @@ static void ms_sjoin(struct Client *cptr,
   register       char *s, *s0, *sh;
   static         char buf[BUFSIZE];
   static         char sjbuf[BUFSIZE];
-  char           sjbuf_nh[BUFSIZE];
+  static         char sjbuf_nh[BUFSIZE];
   char           *nick_pointer;
   char    *p;
   int hide_or_not;
   int i;
   dlink_node *m;
 
+  *buf = '\0';
+  *sjbuf = '\0';
+  *sjbuf_nh = '\0';
+  
   if (IsClient(sptr) || parc < 5)
     return;
   if (!IsChannelName(parv[2]))
