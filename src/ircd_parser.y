@@ -1034,14 +1034,14 @@ connect_item:   connect_name | connect_host | connect_send_password |
 
 connect_name:   NAME '=' QSTRING ';'
   {
-    if(yy_aconf->user)
+    if(yy_aconf->name)
       {
 	sendto_realops_flags(FLAGS_ALL,"*** Multiple connect accept entry");
       }
     else
       {
-	MyFree(yy_aconf->user);
-	DupString(yy_aconf->user, yylval.string);
+	MyFree(yy_aconf->name);
+	DupString(yy_aconf->name, yylval.string);
       }
   };
 
