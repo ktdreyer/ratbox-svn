@@ -1,3 +1,8 @@
+*** 20010103_2 by db
+- yet another obsolete prototype gone
+
+
+
 *** 20010103_1 by vx0
 - modules.c:279 'char *err;' >-> 'const char *err;'
 
