@@ -1,3 +1,24 @@
+leeh        2004/03/16 11:57:17 EST	(20040316_0)
+
+  Removed files:
+    doc/old              Etiquette README example.conf.trillian 
+                         example_old.conf simple.conf 
+    doc/old/US-Admin     Networking Operators README 
+  Log:
+  - remove some old docs that are completely irrelevant now
+  
+  Revision  Changes    Path
+  7.1       +0 -0      ircd-ratbox/doc/old/Etiquette (dead)
+  7.1       +0 -0      ircd-ratbox/doc/old/README (dead)
+  7.1       +0 -0      ircd-ratbox/doc/old/US-Admin/Networking (dead)
+  7.1       +0 -0      ircd-ratbox/doc/old/US-Admin/Operators (dead)
+  7.1       +0 -0      ircd-ratbox/doc/old/US-Admin/README (dead)
+  1.2       +0 -369    ircd-ratbox/doc/old/example.conf.trillian (dead)
+  1.2       +0 -477    ircd-ratbox/doc/old/example_old.conf (dead)
+  1.2       +0 -62     ircd-ratbox/doc/old/simple.conf (dead)
+
+
+
 androsyn    2004/03/15 16:18:17 EST	(20040315_3)
 
   Modified files:
