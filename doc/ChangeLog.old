@@ -1,3 +1,7 @@
+*** 20010603_4 by davidt
+- fix servlink problem with dup2() closing the server fd.
+
+
 *** 20010603_3 by davidt
 - Set hopcount correctly for cryptlinks
 
