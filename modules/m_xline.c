@@ -53,23 +53,32 @@
 #include "s_conf.h"
 
 static void mo_xline(struct Client *client_p, struct Client *source_p,
-                    int parc, char *parv[]);
+                     int parc, char *parv[]);
+static void mo_unxline(struct Client *client_p, struct Client *source_p,
+                       int parc, char *parv[]);
 
 struct Message xline_msgtab = {
   "XLINE", 0, 0, 3, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, m_ignore, mo_xline}
 };
 
+struct Message unxline_msgtab = {
+  "UNXLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
+  {m_unregistered, m_not_oper, m_ignore, mo_unxline}
+};
+
 void
 _modinit(void)
 {
   mod_add_cmd(&xline_msgtab);
+  mod_add_cmd(&unxline_msgtab);
 }
 
 void
 _moddeinit(void)
 {
   mod_del_cmd(&xline_msgtab);
+  mod_del_cmd(&unxline_msgtab);
 }
 
 char *_version = "$Revision$";
@@ -126,3 +135,119 @@ mo_xline(struct Client *client_p, struct Client *source_p,
                  NULL, NULL, aconf->port);
   conf_add_x_conf(aconf);
 }
+
+/* mo_unxline()
+ *
+ * parv[1] - thing to unxline
+ */
+static void
+mo_unxline(struct Client *client_p, struct Client *source_p,
+           int parc, char *parv[])
+{
+  FBFILE *in, *out;
+  char buf[BUFSIZE];
+  char buff[BUFSIZE];
+  char temppath[BUFSIZE];
+  const char *filename;
+  const char *gecos;
+  mode_t oldumask;
+  char *p;
+  int error_on_write = 0;
+  int found_xline = 0;
+  
+  if(BadPtr(parv[1]))
+  {
+    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+               me.name, source_p->name, "UNXLINE");
+    return;
+  }
+
+  filename = get_conf_name(XLINE_TYPE);
+  ircsprintf(temppath, "%s.tmp", ConfigFileEntry.xlinefile);
+
+  if((in = fbopen(filename, "r")) == NULL)
+  {
+    sendto_one(source_p, ":%s NOTICE %s :Cannot open %s",
+               me.name, source_p->name, filename);
+    return;
+  }
+
+  oldumask = umask(0);
+
+  if((out = fbopen(temppath, "w")) == NULL)
+  {
+    sendto_one(source_p, ":%s NOTICE %s :Cannot open %s",
+               me.name, source_p->name, temppath);
+    fbclose(in);
+    umask(oldumask);
+    return;
+  }
+
+  umask(oldumask);
+
+  while(fbgets(buf, sizeof(buf), in))
+  {
+    if(error_on_write)
+    {
+      if(temppath != NULL)
+        (void) unlink(temppath);
+
+      break;
+    }
+
+    strlcpy(buff, buf, sizeof(buff));
+
+    if((p = strchr(buff, '\n')) != NULL)
+      *p = '\0';
+
+    if((*buff == '\0') || (*buff == '#'))
+    {
+      error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
+      continue;
+    }
+
+    if((gecos = getfield(buff)) == NULL)
+    {
+      error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
+      continue;
+    }
+
+    /* matching.. */
+    if(irccmp(gecos, parv[1]) == 0)
+      found_xline++;
+    else
+      error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
+  }
+
+  fbclose(in);
+  fbclose(out);
+
+  if(error_on_write)
+  {
+    sendto_one(source_p,
+               ":%s NOTICE %s :Couldn't write temp xline file, aborted",
+               me.name, source_p->name);
+    return;
+  }
+  else
+  {
+    (void) rename(temppath, filename);
+    rehash(0);
+  }
+
+  if(found_xline == 0)
+  {
+    sendto_one(source_p, ":%s NOTICE %s :No XLINE for %s",
+               me.name, source_p->name, parv[1]);
+    return;
+  }
+
+  sendto_one(source_p, ":%s NOTICE %s :XLINE for [%s] is removed",
+             me.name, source_p->name, parv[1]);
+  sendto_realops_flags(UMODE_ALL, L_ALL,
+                       "%s has removed the XLINE for: [%s]",
+                       get_oper_name(source_p), parv[1]);
+  ilog(L_NOTICE, "%s has removed the XLINE for [%s]",
+       get_oper_name(source_p), parv[1]);
+}
+  
