@@ -58,15 +58,47 @@ static void increase_modlist(void);
 
 static struct module_path *mod_paths = NULL;
 
+struct Message modload_msgtab = {
+  MSG_MODLOAD, 0, 2, 0, MFLG_SLOW, 0,
+  {m_unregistered, m_not_oper, m_ignore, mo_modload}
+};
+
+struct Message modunload_msgtab = {
+  MSG_MODUNLOAD, 0, 2, 0, MFLG_SLOW, 0,
+  {m_unregistered, m_not_oper, m_ignore, mo_modunload}
+};
+
+struct Message modlist_msgtab = {
+  MSG_MODLIST, 0, 1, 0, MFLG_SLOW, 0,
+  {m_unregistered, m_not_oper, m_ignore, mo_modlist}
+};
+
+struct Message hash_msgtab = {
+  MSG_HASH, 0, 1, 0, MFLG_SLOW, 0,
+  {m_unregistered, m_not_oper, m_ignore, mo_hash}
+};
+
+void
+modules_init(void)
+{
+	mod_paths = malloc (sizeof (struct module_path));
+	mod_paths->prev = mod_paths->next = NULL;
+
+	mod_add_cmd(&modload_msgtab);
+	mod_add_cmd(&modunload_msgtab);
+	mod_add_cmd(&modlist_msgtab);
+	mod_add_cmd(&hash_msgtab);
+}
+
 static struct module_path *
 mod_find_path(char *path)
 {
-  struct module_path *pathst = mod_paths;
+  struct module_path *pathst = mod_paths->next;
 
   if (!pathst)
     return NULL;
 
-  for (pathst = mod_paths; pathst; pathst = pathst->next)
+  for (; pathst; pathst = pathst->next)
     if (!strcmp(path, pathst->path))
       return pathst;
   return NULL;
@@ -80,16 +112,15 @@ mod_add_path(char *path)
   if (mod_find_path(path))
     return;
 
-  if (!mod_paths)
-  {
-    mod_paths = malloc (sizeof (struct module_path));
-    mod_paths->prev = NULL;
-    mod_paths->next = NULL;
-  }
-
   for (pathst = mod_paths; pathst->next; pathst = pathst->next)
     ;
 
+  pathst->next = malloc (sizeof (struct module_path));
+  pathst->next->prev = pathst;
+  pathst->next->next = NULL;
+
+  pathst = pathst->next;
+  
   strcpy(pathst->path, path);
 }
 
@@ -159,26 +190,6 @@ int unload_one_module (char *name)
   return 0;
 }
 
-struct Message modload_msgtab = {
-  MSG_MODLOAD, 0, 2, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_not_oper, m_ignore, mo_modload}
-};
-
-struct Message modunload_msgtab = {
-  MSG_MODUNLOAD, 0, 2, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_not_oper, m_ignore, mo_modunload}
-};
-
-struct Message modlist_msgtab = {
-  MSG_MODLIST, 0, 1, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_not_oper, m_ignore, mo_modlist}
-};
-
-struct Message hash_msgtab = {
-  MSG_HASH, 0, 1, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_not_oper, m_ignore, mo_hash}
-};
-
 /* load all modules from MPATH */
 void
 load_all_modules (void)
@@ -187,14 +198,12 @@ load_all_modules (void)
   struct dirent  *ldirent = NULL;
   char            module_fq_name[PATH_MAX + 1];
 
+  modules_init();
+  
   modlist = (struct module **)MyMalloc ( sizeof (struct module) *
                                          (MODS_INCREMENT));
-  max_mods = MODS_INCREMENT;
 
-  mod_add_cmd(&modload_msgtab);
-  mod_add_cmd(&modunload_msgtab);
-  mod_add_cmd(&modlist_msgtab);
-  mod_add_cmd(&hash_msgtab);
+  max_mods = MODS_INCREMENT;
 
   system_module_dir = opendir (MODPATH);
 
@@ -230,8 +239,11 @@ load_one_module (char *path)
 
 	if (strchr(path, '/')) /* absolute path, try it */
 		return load_a_module(modpath);
+
+	/* skip the head node */
+	pathst = mod_paths->next;
 	
-	for (pathst = mod_paths; pathst; pathst = pathst->next)
+	for (; pathst; pathst = pathst->next)
 	{
 		snprintf(modpath, MAXPATHLEN, "%s/%s", pathst->path, path);
 		if (stat(modpath, &statbuf) == 0)

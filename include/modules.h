@@ -37,7 +37,7 @@ struct module {
 struct module_path
 {
 	struct module_path *next;
-	struct module_pathx *prev;
+	struct module_path *prev;
 	char path[MAXPATHLEN];
 };
 
@@ -57,5 +57,6 @@ extern int unload_one_module (char *);
 extern int load_one_module (char *);
 extern int load_a_module (char *);
 extern int  findmodule_byname (char *);
+extern void modules_init(void);
 
 #endif
