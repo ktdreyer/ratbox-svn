@@ -10,7 +10,9 @@ exec_prefix=	@execprefix@
 uhelpdir=	${prefix}/help/users
 ohelpdir=	${prefix}/help/opers
 
-SYMLINKS=	topic accept cjoin cmode
+SYMLINKS=	topic accept cjoin cmode admin names links away whowas \
+                version kick who invite quit join list nick oper part \
+                time
 
 all:
 build:
