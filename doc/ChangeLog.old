@@ -1,3 +1,11 @@
+*** 20010121_6 by db
+- removed some unused definitions notably NONL was not used due to 
+  adrians new line parse code.
+- added gline_exempt to parser, not fully implemented, but europe efnet
+  want support for it.
+
+
+
 *** 20010121_5 by davidt
 updated depend, removed unused 'serverMask' from struct Channel (lazyLinksChannelExists is what everything should (and does) use....
 
