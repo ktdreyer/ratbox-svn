@@ -2230,7 +2230,6 @@ static void clear_out_old_conf(void)
     for (cltmp = ClassList->next; cltmp; cltmp = cltmp->next)
       MaxLinks(cltmp) = -1;
 
-    /*clear_mtrie_conf_links();*/
     clear_conf();
     
     zap_Dlines();

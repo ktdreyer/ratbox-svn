@@ -29,7 +29,6 @@ struct HostMaskEntry
 
 void add_hostmask(const char *mask, int type, void *data);
 struct HostMaskEntry *match_hostmask(const char *mask, int type);
-void add_ip_Iline(struct ConfItem *aconf);
 struct ConfItem *find_matching_conf(const char*, const char*,
                                     struct irc_inaddr*);
 void add_conf(struct ConfItem *aconf);

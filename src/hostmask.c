@@ -28,11 +28,11 @@
 #include "numeric.h"
 #include "dline_conf.h"
 #include "ircd.h"
+
 #define TH_MAX 0x1000
 
 static struct HostMaskEntry *first_miscmask = NULL, *first_mask = NULL;
 static struct HostMaskEntry *hmhash[TH_MAX-1];
-static struct ConfItem *ip_i_lines=(struct ConfItem *)NULL;
 static unsigned long precedence = 0xFFFFFFF;
 
 static unsigned int
@@ -145,32 +145,6 @@ match_hostmask(const char *uhost, int type)
  return hmc;
 }
 
-/*
- * add_ip_Iline() - We will change this later, but for now, use the
- *   code borrowed from mtrie_conf(so ipv6 is still broken for now)
- * inputs       -
- * output       - NONE
- * side effects -
- */
-void add_ip_Iline( struct ConfItem *aconf )
-{
-  aconf->next = ip_i_lines;
-  ip_i_lines = aconf;
-}
-
-static struct ConfItem *find_matching_ip_i_line(struct irc_inaddr *host_ip)
-{
-  struct ConfItem *aconf;
-  /* XXX: This is broken for IPv6 */
-  
-  for( aconf = ip_i_lines; aconf; aconf = aconf->next)
-    {
-      if(( ((struct sockaddr_in *)host_ip)->sin_addr.s_addr & aconf->ip_mask) == aconf->ip)
-        return(aconf);
-    }
-  return((struct ConfItem *)NULL);
-}
-
 struct ConfItem *find_matching_conf(const char *host, const char *user,
                                     struct irc_inaddr *ip)
 {
@@ -179,7 +153,7 @@ struct ConfItem *find_matching_conf(const char *host, const char *user,
  ircsprintf(buffer, "%s@%s", user, host);
  if ((hm = match_hostmask(buffer, HOST_CONFITEM)))
    return (struct ConfItem*)hm->data;
- return find_matching_ip_i_line(ip);
+ return match_ip_Iline(ip,user);
 }
 
 void add_conf(struct ConfItem *aconf)
@@ -191,16 +165,9 @@ void add_conf(struct ConfItem *aconf)
 
 void clear_conf(void)
 {
- struct ConfItem *conf=NULL, *nconf;
+ struct ConfItem *conf=NULL;
  struct HostMaskEntry *hme=NULL, *hmen;
- for (conf = ip_i_lines; conf; conf = nconf)
-   {
-    nconf = conf->next;
-    if (conf->clients)
-      conf->status |= CONF_ILLEGAL;
-    else
-      free_conf(conf);
-   }
+
  for (hme = first_mask; hme; hme = hmen)
    {
     hmen = hme->next;
@@ -215,7 +182,6 @@ void clear_conf(void)
    }
  first_mask = NULL;
  first_miscmask = NULL;
- ip_i_lines = NULL;
 }
 
 /*
@@ -292,41 +258,18 @@ report_hostmask_conf_links(struct Client *sptr, int flags)
                   host, port, classname
                  );
       }
-    for (aconf = ip_i_lines; aconf; aconf = aconf->next)
-      {
-       if (!(aconf->status & CONF_CLIENT))
-         continue;
-       if (!(MyConnect(sptr) && IsOper(sptr)) &&
-           IsConfDoSpoofIp(aconf))
-         continue;
-       get_printable_conf(aconf, &name, &host, &pass, &user, &port,
-                          &classname);
-       sendto_one(sptr, form_str(RPL_STATSILINE), me.name, sptr->name,
-                  'I', name,
-                  show_iline_prefix(sptr,aconf,user),
-                  host, port, classname
-                 );
-      }
+    /* I-lines next... */
+    report_ip_Ilines(sptr);
    }
  else /* Show K-lines... */
    {
-    /* D-lines first... */
+    /* IP K-lines first... */
     report_ip_Klines(sptr);
     for (mask = first_mask; mask; mask = mask->next)
       {
        if (mask->type != HOST_CONFITEM)
          continue;
        aconf = (struct ConfItem*)mask->data;
-       if (!(aconf->status & CONF_KILL))
-         continue;
-       get_printable_conf(aconf, &name, &host, &pass, &user, &port,
-                          &classname);
-       sendto_one(sptr, form_str(RPL_STATSKLINE), me.name, sptr->name,
-                  'K', host, user, pass
-                 );
-      }
-    for (aconf = ip_i_lines; aconf; aconf = aconf->next)
-      {
        if (!(aconf->status & CONF_KILL))
          continue;
        get_printable_conf(aconf, &name, &host, &pass, &user, &port,
