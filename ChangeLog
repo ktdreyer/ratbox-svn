@@ -1,3 +1,15 @@
+leeh        2005/01/25 13:21:17 EST	(20050125_4)
+
+  Modified files:
+    src                  newconf.c 
+  Log:
+  - make conf_set_generic_string() test len exists before it uses it.
+  
+  Revision  Changes    Path
+  7.195     +1 -1      ircd-ratbox/src/newconf.c
+
+
+
 leeh        2005/01/25 13:10:56 EST	(20050125_3)
 
   Modified files:
