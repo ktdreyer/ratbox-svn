@@ -1,3 +1,7 @@
+*** 20001006_2 by lusky
+deleted ChangeLog.old and include/defs.h
+
+
 *** 20001006_1 by lusky
 updated Makefile.in's to support parallel make ala -6
 fixed up cjoin a little so it would compile
