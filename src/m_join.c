@@ -292,11 +292,26 @@ int     m_join(struct Client *cptr,
              {
                flags = CHFL_CHANOP;
 #ifndef HUB
-               if( serv_cptr_list && IsCapable( serv_cptr_list, CAP_LL) )
+               if( (*name != '&') && serv_cptr_list
+                     && IsCapable( serv_cptr_list, CAP_LL) )
                  {
-                   sendto_realops("This is where we ask for %s", name );
-                   sendto_one(serv_cptr_list,":%s CBURST %s :%s",
-                     me.name,name,sptr->name);
+#ifdef DEBUGLL
+                   sendto_realops("This is where we ask for %s %s %s",
+                                   name,
+                                   sptr->name,
+                                   key ? key : "" );
+#endif
+                   if(key)
+                     sendto_one(serv_cptr_list,":%s CBURST %s :%s %s",
+                       me.name,name,sptr->name,key);
+                   else
+                     sendto_one(serv_cptr_list,":%s CBURST %s :%s",
+                       me.name,name,sptr->name);
+#ifdef DEBUGLL
+                   sendto_realops("Waiting for LLJOIN");
+#endif
+                   /* And wait for LLJOIN */
+                   return 0;
                  }
 #endif
              }

@@ -68,6 +68,8 @@ typedef struct MessageTree MESSAGE_TREE;
 #ifdef HUB
 #define MSG_CBURST   "CBURST"   /* channel burst */
 #define MSG_DROP     "DROP"     /* channel burst */
+#else
+#define MSG_LLJOIN   "LLJOIN"   /* Lazy Link join */
 #endif
 
 #define MSG_WHO      "WHO"      /* WHO  -> WHOC */
@@ -177,6 +179,9 @@ struct Message msgtab[] = {
 #ifdef HUB
   { MSG_CBURST,  m_cburst,   0, MAXPARA, 1, 0, 0, 0L },
   { MSG_DROP,    m_drop,     0, MAXPARA, 1, 0, 0, 0L },
+#endif
+#ifndef HUB
+ { MSG_LLJOIN,   m_lljoin,   0, MAXPARA, 1, 0, 0, 0L },
 #endif
   { MSG_MODE,    m_mode,     0, MAXPARA, 1, 0, 0, 0L },
   { MSG_QUIT,    m_quit,     0, MAXPARA, 1, 1, 0, 0L },

@@ -653,6 +653,12 @@ void    add_user_to_channel(struct Channel *chptr, struct Client *who, int flags
       chptr->users++;
       if(flags & MODE_CHANOP)
         chptr->opcount++;
+
+         /* ZZZZ LL */
+#ifndef HUB
+      if(MyClient(who))
+        chptr->locusers++;
+#endif
       ptr = make_link();
       ptr->value.chptr = chptr;
       ptr->next = who->user->channel;
@@ -672,6 +678,11 @@ void    remove_user_from_channel(struct Client *sptr,struct Channel *chptr,int w
         if((tmp->flags & MODE_CHANOP) && chptr->opcount)
           chptr->opcount--;
 
+         /* ZZZZ LL */
+#ifndef HUB
+        if(MyClient(sptr) && chptr->locusers)
+          chptr->locusers--;
+#endif
         /* User was kicked, but had an exception.
          * so, to reduce chatter I'll remove any
          * matching exception now.
@@ -1002,133 +1013,6 @@ void send_channel_modes(struct Client *cptr, struct Channel *chptr)
     sendto_one(cptr, ":%s MODE %s %s %s",
                me.name, chptr->chname, modebuf, parabuf);
 }
-
-/*
-** m_cburst
-**      parv[0] = sender prefix
-**      parv[1] = channel
-**      parv[2] = channel password (key)
-*/
-int     m_cburst(struct Client *cptr,
-               struct Client *sptr,
-               int parc,
-               char *parv[])
-{
-  char *name;
-  char *nick;
-  struct Client *acptr;
-  struct Channel *chptr;
-
-   if(parc < 2 || *parv[1] == '\0')
-     return 0;
-
-  name = parv[1];
-  nick = NULL;
-
-  if( parc > 2 )
-    nick = parv[2];
-
-#ifdef DEBUGLL
-  sendto_realops("CBURST locally called for %s nick %s", name,
-    nick ? nick : "<NULL>" );
-#endif
-
-  if(!(chptr=hash_find_channel(name, NullChn)))
-    {
-#ifdef DEBUGLL
-      sendto_realops(
-        "CBURST %s does not exist",
-        name );
-#endif
-      return -1;
-    }
-
-#ifdef DEBUGLL
-   if(chptr->lazyLinkChannelExists & cptr->serverMask )
-     {
-        sendto_realops("CBURST bit already set for %s", name );
-     }
-#endif
-
-   chptr->lazyLinkChannelExists = cptr->serverMask;
-
-#if 0
-  /* If client attempting to join on a CBURST request
-   * is banned or the channel is +i etc. reject client "noisily"
-   * using a KICK... This is a kludge. I admit it.
-   * -Dianora
-   */
-  /* oops problem is, the CBURST request comes just before
-   * the leaf sends an SJOIN
-   */
-  if( nick && (acptr = hash_find_client(nick,(struct Client *)NULL)))
-    {
-      if( (is_banned(acptr, chptr) == CHFL_BAN) ||
-          (chptr->mode.mode & MODE_INVITEONLY) ||
-          (*chptr->mode.key))
-        {
-          sendto_channel_butserv(chptr, sptr,
-                             ":%s KICK %s %s :LL",
-                             me.name, name, nick);
-          sendto_one(cptr,":%s KICK %s %s :LL kick",
-                         me.name, name, nick); 
-          remove_user_from_channel(acptr, chptr, 1);
-        }
-    }
-#endif
-  if(IsCapable(cptr,CAP_LL))
-    {
-      send_channel_modes(cptr, chptr);
-       /* Send the topic */
-      sendto_one(cptr, ":%s TOPIC %s :%s",
-         chptr->topic_nick, chptr->chname, chptr->topic);
-    }
-  else
-    {
-      sendto_realops("*** CBURST request received from non LL capable server!");
-    }
-  return 0;
-}
-
-/*
-** m_drop
-**      parv[0] = sender prefix
-**      parv[1] = channel
-**      parv[2] = channel password (key)
-**
-**      "drop" a channel from consideration on a lazy link
-*/
-
-int     m_drop(struct Client *cptr,
-               struct Client *sptr,
-               int parc,
-               char *parv[])
-{
-  char *name;
-  struct Channel *chptr;
-
-   if(parc < 2 || *parv[1] == '\0')
-     return 0;
-
-  name = parv[1];
-
-#ifdef DEBUGLL
-  sendto_realops("DROP locally called for %s nick %s", name);
-#endif
-
-  if(!(chptr=hash_find_channel(name, NullChn)))
-    {
-#ifdef DEBUGLL
-      sendto_realops(
-        "DROP %s does not exist",
-        name );
-#endif
-      return -1;
-    }
-  chptr->lazyLinkChannelExists &= ~cptr->serverMask;
-  return 0;
-}
-
 
 /* stolen from Undernet's ircd  -orabidoo
  *
@@ -3045,6 +2929,361 @@ int     count_channels(struct Client *sptr)
     count++;
   return (count);
 }
+
+/* All the LazyLink code */
+
+/* Only HUB's need cburst */
+
+#ifdef HUB
+
+/*
+** m_cburst
+**      parv[0] = sender prefix
+**      parv[1] = channel
+**      parv[2] = nick if present
+**      parv[3] = channel key (EVENTUALLY)
+*/
+/*
+ * This function will "burst" the given channel onto
+ * the given LL capable server.
+ * If the nick is given as well, then I also check ot
+ * see if that nick can join the given channel. If
+ * the nick can join, a LLJOIN message is sent back to leaf
+ * stating the nick can join, otherwise a non join message is sent.
+ * Eventually, the channel key will also be checked.
+ */
+
+int     m_cburst(struct Client *cptr,
+                 struct Client *sptr,
+                 int parc,
+                 char *parv[])
+{
+  char *name;
+  char *nick;
+  char *key;
+  struct Client *acptr;
+  struct Channel *chptr;
+
+  if( parc < 2 || *parv[1] == '\0' )
+     return 0;
+
+  /* If not a server just ignore it */
+  if ( !IsServer(cptr) )
+    return 0;
+
+  name = parv[1];
+  nick = NULL;
+
+  if( parc > 2 )
+    nick = parv[2];
+
+  key = NULL;
+
+  if( parc > 3 )
+    key = parv[3];
+
+#ifdef DEBUGLL
+  sendto_realops("CBURST locally called for %s %s %s",
+    name,
+    nick ? nick : "",
+    key ? key : "" );
+#endif
+
+  if(!(chptr=hash_find_channel(name, NullChn)))
+    {
+#ifdef DEBUGLL
+      sendto_realops(
+        "CBURST %s does not exist",
+        name );
+#endif
+     /* I don't know about this channel here, let leaf deal with it */
+     if(nick)
+       sendto_one(cptr,":%s LLJOIN %s %s :J",
+                        me.name, name, nick);
+      return 0;
+    }
+
+#ifdef DEBUGLL
+   if(chptr->lazyLinkChannelExists & cptr->serverMask )
+     {
+        sendto_realops("CBURST bit already set for %s", name );
+     }
+#endif
+
+  if(IsCapable(cptr,CAP_LL))
+    {
+      chptr->lazyLinkChannelExists = cptr->serverMask;
+      send_channel_modes(cptr, chptr);
+       /* Send the topic */
+      sendto_one(cptr, ":%s TOPIC %s :%s",
+         chptr->topic_nick, chptr->chname, chptr->topic);
+    }
+  else
+    {
+      sendto_realops("*** CBURST request received from non LL capable server!");
+      return 0;
+    }
+
+  /* If client attempting to join on a CBURST request
+   * is banned or the channel is +i etc. reject client
+   * -Dianora
+   */
+
+  if ( !nick )
+    return 0;
+
+  if( (acptr = hash_find_client(nick,(struct Client *)NULL)) )
+    {
+      if( (is_banned(acptr, chptr) == CHFL_BAN) )
+        {
+          sendto_one(cptr,":%s LLJOIN %s %s :B",
+                           me.name, name, nick);
+          return 0;
+	}
+
+      if( (chptr->mode.mode & MODE_INVITEONLY) )
+        {
+          sendto_one(cptr,":%s LLJOIN %s %s :I",
+                          me.name, name, nick);
+          return 0;
+        }
+       
+      if (key && 
+        (*chptr->mode.key && (BadPtr(key) || irccmp(chptr->mode.key, key))))
+
+        {
+          sendto_one(cptr,":%s LLJOIN %s %s :K",
+                          me.name, name, nick);
+          return 0;
+        }
+
+      if (chptr->mode.limit && chptr->users >= chptr->mode.limit)
+        {
+          sendto_one(cptr,":%s LLJOIN %s %s :F",
+                          me.name, name, nick);
+          return 0;
+        }
+
+       sendto_one(cptr,":%s LLJOIN %s %s :J",
+                        me.name, name, nick);
+       return 0;
+    }
+
+  /* No client found , no join possible */
+  sendto_one(cptr,":%s LLJOIN %s %s :N",
+                  me.name, name, nick);
+  return 0;
+}
+
+/* Only HUB's need drop */
+
+/*
+** m_drop
+**      parv[0] = sender prefix
+**      parv[1] = channel
+**      parv[2] = channel password (key)
+**
+**      "drop" a channel from consideration on a lazy link
+*/
+
+int     m_drop(struct Client *cptr,
+               struct Client *sptr,
+               int parc,
+               char *parv[])
+{
+  char *name;
+  struct Channel *chptr;
+
+  if(parc < 2 || *parv[1] == '\0')
+    return 0;
+
+  /* If not a server just ignore it */
+  if ( !IsServer(cptr) )
+    return 0;
+
+  name = parv[1];
+
+#ifdef DEBUGLL
+  sendto_realops("DROP locally called for %s nick %s", name);
+#endif
+
+  if(!(chptr=hash_find_channel(name, NullChn)))
+    {
+#ifdef DEBUGLL
+      sendto_realops(
+        "DROP %s does not exist",
+        name );
+#endif
+      return -1;
+    }
+  chptr->lazyLinkChannelExists &= ~cptr->serverMask;
+  return 0;
+}
+#endif
+
+#ifndef HUB
+/* Only leaves need lljoin */
+/*
+** m_lljoin
+**      parv[0] = sender prefix
+**      parv[1] = channel
+*/
+int     m_lljoin(struct Client *cptr,
+               struct Client *sptr,
+               int parc,
+               char *parv[])
+{
+  char *name;
+  char *nick;
+  char can_join_flag;
+  int  flags;
+  struct Client *acptr;
+  struct Channel *chptr;
+
+#ifdef DEBUGLL
+  sendto_realops("LLJOIN received");
+#endif
+
+  if( parc < 4 )
+    {
+#ifdef DEBUGLL
+       sendto_realops("LLJOIN parc < 4");
+#endif
+      return 0;
+    }
+
+  /* If not a server just ignore it */
+  if ( !IsServer(cptr) )
+    {
+#ifdef DEBUGLL
+       sendto_realops("LLJOIN received LLJOIN from non server");
+#endif
+      return 0;
+    }
+
+  name = parv[1];
+  if(!name)
+    {
+#ifdef DEBUGLL
+       sendto_realops("LLJOIN NULL name");
+#endif
+       return 0;
+    }
+
+  nick = parv[2];
+  if(!nick)
+    {
+#ifdef DEBUGLL
+       sendto_realops("LLJOIN NULL nick");
+#endif
+       return 0;
+    }
+
+  can_join_flag = parv[3][0];
+
+  flags = 0;
+
+  acptr = hash_find_client(nick,(struct Client *)NULL);
+
+  if( !acptr )
+    {
+#ifdef DEBUGLL
+      sendto_realops("nonexistent client ");
+#endif
+      return 0;
+    }
+
+  if( !MyClient(acptr) )
+    {
+#ifdef DEBUGLL
+      sendto_realops("attempted to LLJOIN non local client ");
+#endif
+      return 0;
+    }
+
+  if(!(chptr=hash_find_channel(name, NullChn)))
+    {
+#ifdef DEBUGLL
+      sendto_realops(
+        "LLJOIN %s does not exist creating it",
+        name );
+#endif
+      flags = CHFL_CHANOP;
+      chptr = get_channel( acptr, name, CREATE );
+    }
+
+  if(serv_cptr_list && IsCapable(serv_cptr_list,CAP_LL))
+    {
+      switch(can_join_flag)
+        {
+        case 'J':
+          if(flags == CHFL_CHANOP)
+            {
+              sendto_one(serv_cptr_list,
+                                 ":%s SJOIN %lu %s + :@%s", me.name,
+                                 chptr->channelts, name, nick);
+            }
+          else
+            {
+              sendto_one(serv_cptr_list,
+                                 ":%s SJOIN %lu %s + :%s", me.name,
+                                 chptr->channelts, name, nick);
+            }
+
+          add_user_to_channel(chptr, acptr, flags);
+ 
+          sendto_channel_butserv(chptr, acptr, ":%s JOIN :%s",
+                                 nick, name);
+      
+          if( flags & CHFL_CHANOP )
+            {
+              chptr->mode.mode |= MODE_TOPICLIMIT;
+              chptr->mode.mode |= MODE_NOPRIVMSGS;
+
+              sendto_channel_butserv(chptr, sptr,
+                                     ":%s MODE %s +nt",
+                                     me.name, chptr->chname);
+
+              sendto_one(serv_cptr_list, 
+                                 ":%s MODE %s +nt",
+                                 me.name, chptr->chname);
+            }
+        break;
+
+        case 'I':
+           sendto_one(acptr, form_str(ERR_INVITEONLYCHAN),
+                      me.name, parv[0], name);
+        break;
+
+        case 'B':
+           sendto_one(acptr, form_str(ERR_BANNEDFROMCHAN),
+                      me.name, parv[0], name);
+        break;
+
+        case 'F':
+           sendto_one(acptr, form_str(ERR_CHANNELISFULL),
+                      me.name, parv[0], name);
+        break;
+
+        case 'K':
+           sendto_one(acptr, form_str(ERR_BADCHANNELKEY),
+                      me.name, parv[0], name);
+        break;
+      
+        default:
+#ifdef DEBUGLL
+          sendto_realops("Unknown LLJOIN flag %c", can_join_flag );
+#endif
+        break;
+	}
+    }
+  else
+    {
+      sendto_realops("*** LLJOIN request received from non LL capable server!");
+    }
+  return 0;
+}
+#endif
 
 
 

@@ -1448,7 +1448,7 @@ const char* comment        /* Reason for the exit */
           Count.myserver--;
           fdlist_delete(sptr->fd, FDL_SERVER | FDL_BUSY);
 #ifdef HUB
-          restoreUnusedServerMask(cptr->serverMask);
+          restoreUnusedServerMask(sptr->serverMask);
 #endif
           /* LINKLIST */
           /* oh for in-line functions... */

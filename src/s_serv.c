@@ -41,6 +41,7 @@
 #include "s_zip.h"
 #include "scache.h"
 #include "send.h"
+#include "client.h"
 #include "s_debug.h"
 
 #include <assert.h>
@@ -677,7 +678,12 @@ int server_estab(struct Client *cptr)
   if (!set_sock_buffers(cptr->fd, READBUF_SIZE))
     report_error(SETBUF_ERROR_MSG, get_client_name(cptr, TRUE), errno);
 
+#ifdef HUB
   cptr->serverMask = nextFreeMask();
+#ifdef DEBUGLL
+  sendto_realops("Adding serverMask %X", cptr->serverMask );
+#endif
+#endif
 
   /* LINKLIST */
   /* add to server link list -Dianora */

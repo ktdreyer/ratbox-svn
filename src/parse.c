@@ -247,12 +247,6 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
 
   /* Note initially true: s==NULL || *(s-1) == '\0' !! */
 
-  /* ZZZ hmmmmmmmm whats this then? */
-#if 0
-  if (me.user)
-    para[0] = sender;
-#endif
-
   i = 1;
 
   if (s)
