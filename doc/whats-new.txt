@@ -86,9 +86,6 @@ options that were in config.h, to be changed with a /rehash.
 
 - Unauthorized connection notices have been moved to the +u user mode.
 
-- A new drone warning mode has been added... +e.  Setting +e will show the
-  gecos ("Real Name") field in a notice similar to the +c connection notice.
-
 - The server can now differentiate between admins and opers.  This helps
   to hide the IPs of servers, by only showing them to admins:
      (indicated by umode +a and admin=yes; in oper block)

@@ -88,7 +88,6 @@ static struct flag_item user_modes[] =
   {FLAGS_BOTS,  'b'},
   {FLAGS_CCONN, 'c'},
   {FLAGS_DEBUG, 'd'},
-  {FLAGS_DRONE, 'e'},
   {FLAGS_FULL,  'f'},
   {FLAGS_CALLERID, 'g'},
   {FLAGS_INVISIBLE, 'i'},
@@ -147,7 +146,7 @@ int user_modes_from_c_to_bitmask[] =
   FLAGS_BOTS,   /* b */
   FLAGS_CCONN,  /* c */
   FLAGS_DEBUG,  /* d */
-  FLAGS_DRONE,  /* e */
+  0,            /* e */
   FLAGS_FULL,   /* f */
   FLAGS_CALLERID,  /* g */
   0,            /* h */
@@ -462,16 +461,10 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
   inetntop(source_p->localClient->aftype, &IN_ADDR(source_p->localClient->ip), 
   				ipaddr, HOSTIPLEN);
   sendto_realops_flags(FLAGS_CCONN, L_ALL,
-		       "Client connecting: %s (%s@%s) [%s] {%s}",
+		       "Client connecting: %s (%s@%s) [%s] {%s} [%s]",
 		       nick, source_p->username, source_p->host,
 		       ipaddr,
-		       get_client_class(source_p));
-  
-  sendto_realops_flags(FLAGS_DRONE, L_ALL,
-		       "Cn: %s (%s@%s) [%s] [%s]",
-		       nick, source_p->username, source_p->host,
-		       ipaddr,
-		       source_p->info);
+		       get_client_class(source_p), source_p->info);
   
   if ((++Count.local) > Count.max_loc)
     {

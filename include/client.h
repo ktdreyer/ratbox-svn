@@ -409,12 +409,11 @@ struct LocalUser
 #define FLAGS_EXTERNAL     0x1000 /* show servers introduced and splitting */
 #define FLAGS_CALLERID     0x4000 /* block unless caller id's */
 #define FLAGS_UNAUTH       0x8000 /* show unauth connects here */
-#define FLAGS_DRONE        0x10000 /* show drone connects */
-#define FLAGS_LOCOPS       0x20000 /* show locops */
+#define FLAGS_LOCOPS       0x10000 /* show locops */
 
 /* user information flags, only settable by remote mode or local oper */
-#define FLAGS_OPER         0x40000 /* Operator */
-#define FLAGS_ADMIN        0x80000 /* Admin on server */
+#define FLAGS_OPER         0x20000 /* Operator */
+#define FLAGS_ADMIN        0x40000 /* Admin on server */
 
 #define FLAGS_ALL	   FLAGS_SERVNOTICE
 
@@ -459,9 +458,8 @@ struct LocalUser
 #define ALL_UMODES   (SEND_UMODES | FLAGS_SERVNOTICE | FLAGS_CCONN | \
                       FLAGS_REJ | FLAGS_SKILL | FLAGS_FULL | FLAGS_SPY | \
                       FLAGS_NCHANGE | FLAGS_OPERWALL | FLAGS_DEBUG | \
-                      FLAGS_BOTS | FLAGS_EXTERNAL | FLAGS_DRONE | \
- 		      FLAGS_ADMIN | FLAGS_UNAUTH | FLAGS_CALLERID | \
-                      FLAGS_LOCOPS)
+                      FLAGS_BOTS | FLAGS_EXTERNAL | FLAGS_LOCOPS | \
+ 		      FLAGS_ADMIN | FLAGS_UNAUTH | FLAGS_CALLERID)
 
 #define FLAGS_ID     (FLAGS_NEEDID | FLAGS_GOTID)
 

@@ -1844,8 +1844,6 @@ char *oper_flags_as_string(int flags)
     *flags_ptr++ = 'u';
   if(flags & FLAGS_BOTS)
     *flags_ptr++ = 'b';
-  if(flags & FLAGS_DRONE)
-    *flags_ptr++ = 'e';
   if(flags & FLAGS_LOCOPS)
     *flags_ptr++ = 'l';
   if(flags & FLAGS_CALLERID)

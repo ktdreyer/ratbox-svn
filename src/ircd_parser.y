@@ -2348,11 +2348,7 @@ umode_oitem:     T_BOTS
               | T_LOCOPS
   {
     ConfigFileEntry.oper_umodes |= FLAGS_LOCOPS;
-  }
-              | T_DRONE
-  {
-    ConfigFileEntry.oper_umodes |= FLAGS_DRONE;
-  } ;
+  };
 
 general_oper_only_umodes: OPER_ONLY_UMODES 
   {
@@ -2426,11 +2422,7 @@ umode_item:	T_BOTS
               | T_LOCOPS
   {
     ConfigFileEntry.oper_only_umodes |= FLAGS_LOCOPS;
-  }
-              | T_DRONE
-  {
-    ConfigFileEntry.oper_only_umodes |= FLAGS_DRONE;
-  } ;
+  };
 
 general_min_nonwildcard:    MIN_NONWILDCARD '=' expr ';'
   {
