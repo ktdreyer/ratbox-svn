@@ -76,6 +76,9 @@ extern  void sendto_channel_local(int type,
 #ifndef __GNUC__
 extern  void sendto_channel_remote(struct Channel *, struct Client *cptr, 
 				   const char *, ...);
+extern  void sendto_channel_remote_prefix(struct Channel *, struct Client *cptr,
+										  struct Client *prefix, const char *, ...);
+
 extern  void sendto_ll_channel_remote(struct Channel *, struct Client *cptr, 
 				      struct Client *sptr,
 				      const char *, ...);
@@ -106,6 +109,9 @@ extern  void sendto_anywhere(struct Client *, struct Client *,
 extern  void sendto_channel_remote(struct Channel *, struct Client *cptr, 
 				   const char *, ...)
 	    __attribute__((format (printf, 3, 4)));
+extern  void sendto_channel_remote_prefix(struct Channel *, struct Client *cptr, 
+				   struct Client *prefix, const char *, ...)
+	    __attribute__((format (printf, 4, 5)));
 				   
 extern  void sendto_ll_channel_remote(struct Channel *, struct Client *cptr, 
 				      struct Client *sptr,

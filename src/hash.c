@@ -136,7 +136,6 @@ static  unsigned int
 hash_id(const char *nname)
 {
 	unsigned int h = 0;
-	char *n = nname;
 	
 	while (*nname) {
 		h = (h << 4) - (h + (unsigned char)*nname++);

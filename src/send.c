@@ -835,6 +835,67 @@ sendto_channel_remote(struct Channel *chptr,
 } /* sendto_channel_remote() */
 
 /*
+ * sendto_channel_remote
+ *
+ * inputs	- pointer to channel
+ *              - from pointer
+ *              - var args pattern
+ * output       - NONE
+ * side effects - send to all servers the channel given, except for "from"
+ *		  This code is only used in m_join.c,m_sjoin.c
+ */
+void
+sendto_channel_remote_prefix(struct Channel *chptr,
+		      struct Client *from,
+							 struct Client *prefix,
+		      const char *pattern, ...)
+{
+  int ilen, llen;
+  va_list args;
+  struct Client *cptr;
+  dlink_node *ptr;
+  char lbuf[IRCD_BUFSIZE + 1];
+  char ibuf[IRCD_BUFSIZE + 1];
+  
+  if (chptr != NULL)
+    {
+      if (*chptr->chname == '&')
+        return;
+    }
+  else
+	  return;
+
+  va_start(args, pattern);
+  send_format(sendbuf,pattern,args);
+  va_end(args);
+
+  /* with ID */
+  ilen = ircsprintf(ibuf, ":%s %s", ID(prefix), sendbuf);
+  /* without ID */
+  llen = sprintf(lbuf, ":%s %s", prefix->name, sendbuf);
+  
+  for(ptr = serv_list.head; ptr; ptr = ptr->next)
+    {
+      cptr = ptr->data;
+
+      if (cptr == from)
+        continue;
+
+      if (ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
+	{
+	  if( !(RootChan(chptr)->lazyLinkChannelExists &
+		cptr->localClient->serverMask) )
+	    continue;
+	}
+	  if (IsCapable(cptr, CAP_UID)) 
+		  sendto_one (cptr, ibuf, ilen);
+	  else
+		  sendto_one (cptr, lbuf, llen);
+	  
+    }
+} /* sendto_channel_remote() */
+
+/*
  * sendto_ll_channel_remote
  *
  * inputs	- pointer to channel

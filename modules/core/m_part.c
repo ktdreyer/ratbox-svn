@@ -195,8 +195,7 @@ static void part_one_client(struct Client *cptr,
        */
       if (reason[0] && (can_send(chptr, cptr) > 0))
         {
-          sendto_channel_remote(vchan, cptr, ":%s PART %s :%s",
-                                sptr->name,
+          sendto_channel_remote_prefix(vchan, cptr, sptr, "PART %s :%s",
                                 vchan->chname,
                                 reason);
           sendto_channel_local(ALL_MEMBERS,
@@ -209,8 +208,7 @@ static void part_one_client(struct Client *cptr,
         }
       else
         {
-          sendto_channel_remote(vchan, cptr, ":%s PART %s", sptr->name,
-                                vchan->chname);
+          sendto_channel_remote_prefix(vchan, cptr, sptr, "PART %s", vchan->chname);
           sendto_channel_local(ALL_MEMBERS,
                                vchan, ":%s!%s@%s PART %s",
                                sptr->name,
@@ -235,9 +233,7 @@ static void part_one_client(struct Client *cptr,
        */
       if (reason[0] && (can_send(chptr, sptr) > 0))
         {
-          sendto_channel_remote(chptr, cptr, ":%s PART %s :%s",
-                                sptr->name,
-                                name, reason);
+          sendto_channel_remote_prefix(chptr, cptr, sptr, "PART %s :%s", name, reason);
           sendto_channel_local(ALL_MEMBERS,
                                chptr, ":%s!%s@%s PART %s :%s",
                                sptr->name,
@@ -247,9 +243,7 @@ static void part_one_client(struct Client *cptr,
         }
       else
         {
-          sendto_channel_remote(chptr, cptr, ":%s PART %s",
-                                sptr->name,
-                                name);
+			sendto_channel_remote_prefix(chptr, cptr, sptr, "PART %s", name);
           sendto_channel_local(ALL_MEMBERS,
                                chptr, ":%s!%s@%s PART %s",
                                sptr->name,
