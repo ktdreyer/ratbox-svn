@@ -130,7 +130,6 @@ make_client(struct Client *from)
 	struct LocalUser *localClient;
 
 	client_p = BlockHeapAlloc(client_heap);
-	memset(client_p, 0, sizeof(struct Client));
 
 	if(from == NULL)
 	{
@@ -138,7 +137,6 @@ make_client(struct Client *from)
 		client_p->since = client_p->lasttime = client_p->firsttime = CurrentTime;
 
 		localClient = (struct LocalUser *) BlockHeapAlloc(lclient_heap);
-		memset(localClient, 0, sizeof(struct LocalUser));
 		SetMyConnect(client_p);
 		client_p->localClient = localClient;
 
@@ -1876,7 +1874,6 @@ make_user(struct Client *client_p)
 	if(!user)
 	{
 		user = (struct User *) BlockHeapAlloc(user_heap);
-		memset(user, 0, sizeof(struct User));
 		user->refcnt = 1;
 		client_p->user = user;
 	}

@@ -114,7 +114,6 @@ cache_file(const char *filename, const char *shortname, int flags)
 	}
 
 	cacheptr = BlockHeapAlloc(cachefile_heap);
-	memset(cacheptr, 0, sizeof(struct cachefile));
 
 	strlcpy(cacheptr->name, shortname, sizeof(cacheptr->name));
 	cacheptr->flags = flags;

@@ -712,7 +712,7 @@ add_nd_entry(const char *name)
 		return;
 
 	nd = BlockHeapAlloc(nd_heap);
-
+	
 	strlcpy(nd->name, name, sizeof(nd->name));
 	nd->expire = CurrentTime + ConfigFileEntry.nick_delay;
 

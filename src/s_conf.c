@@ -109,7 +109,6 @@ make_conf()
 	struct ConfItem *aconf;
 
 	aconf = BlockHeapAlloc(confitem_heap);
-	memset(aconf, 0, sizeof(struct ConfItem));
 	aconf->status = CONF_ILLEGAL;
 	return (aconf);
 }

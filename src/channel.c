@@ -84,7 +84,6 @@ allocate_channel(void)
 {
 	struct Channel *chptr;
 	chptr = BlockHeapAlloc(channel_heap);
-	memset(chptr, 0, sizeof(struct Channel));
 	return(chptr);
 }
 
@@ -99,7 +98,6 @@ allocate_ban(void)
 {
 	struct Ban *bptr;
 	bptr = BlockHeapAlloc(ban_heap);
-	memset(bptr, 0, sizeof(struct Ban));
 	return(bptr);
 }
 
@@ -179,7 +177,6 @@ add_user_to_channel(struct Channel *chptr, struct Client *client_p, int flags)
 		return;
 
 	msptr = BlockHeapAlloc(member_heap);
-	memset(msptr, 0, sizeof(struct membership));
 
 	msptr->chptr = chptr;
 	msptr->client_p = client_p;
