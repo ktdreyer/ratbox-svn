@@ -1,3 +1,18 @@
+leeh        2004/04/26 19:02:36 EDT	(20040426_3)
+
+  Modified files:
+    include              s_newconf.h 
+    src                  ircd.c s_newconf.c 
+  Log:
+  - make expire_nd_entries() and expire_temp_rxlines() static
+  
+  Revision  Changes    Path
+  7.30      +0 -3      ircd-ratbox/include/s_newconf.h
+  7.337     +0 -1      ircd-ratbox/src/ircd.c
+  7.39      +5 -1      ircd-ratbox/src/s_newconf.c
+
+
+
 leeh        2004/04/26 18:58:25 EDT	(20040426_2)
 
   Modified files:
