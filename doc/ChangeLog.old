@@ -1,3 +1,8 @@
+*** 20011030_3 by ejb
+- couple more VMS fixes, and updated README.VMS.
+
+
+
 *** 20011030_2 by bill
 
 - this is new src/crypt.c
