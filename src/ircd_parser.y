@@ -1002,10 +1002,10 @@ connect_entry:  CONNECT
     if(yy_aconf->host && yy_aconf->passwd
        && yy_aconf->spasswd)
       {
-        ++scount;
         if( conf_add_server(yy_aconf, scount) >= 0 )
 	  {
 	    conf_add_conf(yy_aconf);
+	    ++scount;
 	  }
 	else
 	  {
