@@ -79,12 +79,12 @@ static void m_whowas(struct Client *client_p,
 {
   static time_t last_used=0L;
 
-  if (parc < 2)
-    {
-      sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
-                 me.name, parv[0]);
-      return;
-    }
+  if (parc < 2 || BadPtr(parv[1]))
+  { 
+    sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
+               me.name, parv[0]);
+    return;
+  }
 
   if((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
     {
@@ -122,7 +122,7 @@ static int whowas_do(struct Client *client_p, struct Client *source_p,
   int     max = -1, found = 0;
   char    *p, *nick;
 
-  if (parc < 2)
+  if (parc < 2 || BadPtr(parv[1]))
     {
       sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
                  me.name, parv[0]);

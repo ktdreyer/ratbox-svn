@@ -487,34 +487,22 @@ static void ms_whois(struct Client *client_p,
   {
     struct Client *target_p;
     
-    /* check if parv[1] is a client.. (most common) */
+    /* check if parv[1] exists */
     if((target_p = find_client(parv[1])) == NULL)
     {
-      /* ok, parv[1] isnt a client, is it a server? */
-      if((target_p = find_server(parv[1])) == NULL)
-      {
-        /* its not a server either.. theyve sent a bad whois */
-        sendto_one(source_p, form_str(ERR_NOSUCHSERVER), me.name,
-	           parv[0], parv[1]);
-        return;
-      }
+      sendto_one(source_p, form_str(ERR_NOSUCHSERVER), me.name,
+                 parv[0], parv[1]);
+      return;
     }
-
-    /* its been found as a client.. to save extra work later, change
-     * target_p to be the clients uplink.. you cant check if a client
-     * supports being a LL :P
-     */
-    else
-      target_p = target_p->servptr;
 
     /* if parv[1] isnt my client, or me, someone else is supposed
      * to be handling the request.. so send it to them 
      */
     if(!MyClient(target_p) && !IsMe(target_p))
     {
-        sendto_one(target_p->from, ":%s WHOIS %s :%s", parv[0], parv[1],
-                   parv[2]);
-        return;	       
+      sendto_one(target_p->from, ":%s WHOIS %s :%s", parv[0], parv[1],
+                 parv[2]);
+      return;	       
     }
 
   /* ok, the target is either us, or a client on our server, so perform the whois

@@ -278,7 +278,7 @@ static void mo_forcepart(struct Client *client_p, struct Client *source_p,
   if((chptr = hash_find_channel(parv[2])) == NULL)
   {
     sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
-               me.name, parv[0], parv[1]);
+               me.name, parv[0], parv[2]);
     return;
   }
 
