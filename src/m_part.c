@@ -24,6 +24,7 @@
  */
 #include "handlers.h"
 #include "channel.h"
+#include "vchannel.h"
 #include "client.h"
 #include "common.h"   /* bleah */
 #include "hash.h"
@@ -106,6 +107,7 @@ int     m_part(struct Client *cptr,
                char *parv[])
 {
   struct Channel *chptr;
+  struct Channel *vchan;
   char  *p, *name;
 
   name = strtoken( &p, parv[1], ",");
@@ -164,21 +166,67 @@ int     m_part(struct Client *cptr,
           continue;
         }
 
-      if (!IsMember(sptr, chptr))
-        {
-          sendto_one(sptr, form_str(ERR_NOTONCHANNEL),
-                     me.name, parv[0], name);
-          name = strtoken(&p, (char *)NULL, ",");
-          continue;
-        }
-      /*
-      **  Remove user from the old channel (if any)
-      */
+      if (HasVchans(chptr))
+	{
+	  vchan = map_vchan(chptr,sptr);
+	  if(vchan == 0)
+	    {
+	      if (!IsMember(sptr, chptr))
+		{
+		  sendto_one(sptr, form_str(ERR_NOTONCHANNEL),
+			     me.name, parv[0], name);
+		  name = strtoken(&p, (char *)NULL, ",");
+		  continue;
+		}
+	      /*
+	      **  Remove user from the old channel (if any)
+	      */
             
-      sendto_match_servs(chptr, cptr, ":%s PART %s", parv[0], name);
+	      sendto_match_servs(chptr, cptr, ":%s PART %s", parv[0], name);
             
-      sendto_channel_butserv(chptr, sptr, ":%s PART %s", parv[0], name);
-      remove_user_from_channel(sptr, chptr, 0);
+	      sendto_channel_butserv(chptr, sptr, ":%s PART %s", parv[0],
+				     name);
+	      remove_user_from_channel(sptr, chptr, 0);
+	    }
+	  else
+	    {
+	      if (!IsMember(sptr, vchan))
+		{
+		  sendto_one(sptr, form_str(ERR_NOTONCHANNEL),
+			     me.name, parv[0], name);
+		  name = strtoken(&p, (char *)NULL, ",");
+		  continue;
+		}
+	      /*
+	      **  Remove user from the old channel (if any)
+	      */
+            
+	      sendto_match_servs(chptr, cptr, ":%s PART %s", parv[0], name);
+            
+	      sendto_channel_butserv(vchan, sptr, ":%s PART %s", parv[0],
+				     name);
+	      remove_user_from_channel(sptr, vchan, 0);
+	    }
+	}
+      else
+	{
+	  if (!IsMember(sptr, chptr))
+	    {
+	      sendto_one(sptr, form_str(ERR_NOTONCHANNEL),
+			 me.name, parv[0], name);
+	      name = strtoken(&p, (char *)NULL, ",");
+	      continue;
+	    }
+	  /*
+	  **  Remove user from the old channel (if any)
+	  */
+
+	  sendto_match_servs(chptr, cptr, ":%s PART %s", parv[0], name);
+            
+	  sendto_channel_butserv(chptr, sptr, ":%s PART %s", parv[0], name);
+	  remove_user_from_channel(sptr, chptr, 0);
+	}
+            
       name = strtoken(&p, (char *)NULL, ",");
     }
   return 0;
