@@ -38,6 +38,7 @@
 #include "modules.h"
 #include "monitor.h"
 #include "numeric.h"
+#include "s_conf.h"
 
 static int m_monitor(struct Client *, struct Client *, int, const char **);
 
@@ -77,6 +78,27 @@ add_monitor(struct Client *client_p, const char *nicks)
 	{
 		if(EmptyString(name) || strlen(name) > NICKLEN-1)
 			continue;
+
+		if(dlink_list_length(&client_p->localClient->monitor_list) >=
+			ConfigFileEntry.max_monitor)
+		{
+			char buf[100];
+
+			if(cur_onlen != mlen)
+				sendto_one(client_p, "%s", onbuf);
+			if(cur_offlen != mlen)
+				sendto_one(client_p, "%s", offbuf);
+
+			if(p)
+				snprintf(buf, sizeof(buf), "%s,%s", name, p);
+			else
+				snprintf(buf, sizeof(buf), "%s", name);
+
+			sendto_one(client_p, form_str(ERR_MONLISTFULL),
+					me.name, client_p->name,
+					ConfigFileEntry.max_monitor, buf);
+			return;
+		}
 
 		monptr = find_monitor(name, 1);
 
@@ -200,6 +222,72 @@ list_monitor(struct Client *client_p)
 			me.name, client_p->name);
 }
 
+static void
+show_monitor_status(struct Client *client_p)
+{
+	char onbuf[BUFSIZE], offbuf[BUFSIZE];
+	struct Client *target_p;
+	struct monitor *monptr;
+	char *onptr, *offptr;
+	int cur_onlen, cur_offlen;
+	int mlen, arglen;
+	dlink_node *ptr;
+
+	mlen = cur_onlen = sprintf(onbuf, form_str(RPL_MONONLINE),
+					me.name, client_p->name, "");
+	cur_offlen = sprintf(offbuf, form_str(RPL_MONOFFLINE),
+				me.name, client_p->name, "");
+
+	onptr = onbuf + mlen;
+	offptr = offbuf + mlen;
+
+	DLINK_FOREACH(ptr, client_p->localClient->monitor_list.head)
+	{
+		monptr = ptr->data;
+
+		if((target_p = find_person(monptr->name)) != NULL)
+		{
+			if(cur_onlen + strlen(target_p->name) + 
+			   strlen(target_p->username) + strlen(target_p->host) + 3 >= BUFSIZE-3)
+			{
+				sendto_one(client_p, "%s", onbuf);
+				cur_onlen = mlen;
+				onptr = onbuf + mlen;
+			}
+
+			if(cur_onlen != mlen)
+				*onptr++ = ',';
+
+			arglen = sprintf(onptr, "%s!%s@%s",
+					target_p->name, target_p->username,
+					target_p->host);
+			onptr += arglen;
+			cur_onlen += arglen;
+		}
+		else
+		{
+			if(cur_offlen + strlen(monptr->name) + 1 >= BUFSIZE-3)
+			{
+				sendto_one(client_p, "%s", offbuf);
+				cur_offlen = mlen;
+				offptr = offbuf + mlen;
+			}
+
+			if(cur_offlen != mlen)
+				*offptr++ = ',';
+
+			arglen = sprintf(offptr, "%s", monptr->name);
+			offptr += arglen;
+			cur_offlen += arglen;
+		}
+	}
+
+	if(cur_onlen != mlen)
+		sendto_one(client_p, "%s", onbuf);
+	if(cur_offlen != mlen)
+		sendto_one(client_p, "%s", offbuf);
+}
+
 static int
 m_monitor(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
@@ -238,6 +326,7 @@ m_monitor(struct Client *client_p, struct Client *source_p, int parc, const char
 
 		case 'S':
 		case 's':
+			show_monitor_status(source_p);
 			break;
 
 		default:
