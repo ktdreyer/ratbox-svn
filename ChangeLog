@@ -1,3 +1,15 @@
+leeh        2005/02/22 14:51:30 EST	(20050222_1)
+
+  Modified files:
+    src                  s_chanserv.c 
+  Log:
+  - make sure we part_service() when we destroy a channel registration
+  
+  Revision  Changes    Path
+  1.67      +2 -0      rserv/src/s_chanserv.c
+
+
+
 leeh        2005/02/22 14:38:38 EST	(20050222_0)
 
   Modified files:
