@@ -106,7 +106,9 @@ char* clean_string(char* dest, const unsigned char* src, size_t len);
  */
 char *strip_tabs(char *dest, const unsigned char *src, size_t len);
 
+#ifdef DEAD_CODE 
 unsigned long textip_to_ul(const char *ip);
+#endif
 const char* myctime(time_t);
 char*       strtoken(char** save, char* str, char* fs);
 
