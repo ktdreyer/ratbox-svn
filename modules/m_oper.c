@@ -81,7 +81,7 @@ mapi_clist_av1 oper_clist[] = { &oper_msgtab,
 DECLARE_MODULE_AV1(oper, NULL, NULL, oper_clist, NULL, NULL, "$Revision$");
 
 static int match_oper_password(const char *password, struct oper_conf *oper_p);
-static int oper_up(struct Client *source_p, struct oper_conf *oper_p);
+static void oper_up(struct Client *source_p, struct oper_conf *oper_p);
 extern char *crypt();
 
 /*
@@ -204,7 +204,7 @@ match_oper_password(const char *password, struct oper_conf *oper_p)
  * output	- none
  * side effects	- opers up source_p using aconf for reference
  */
-static int
+static void
 oper_up(struct Client *source_p, struct oper_conf *oper_p)
 {
 	int old = (source_p->umodes & ALL_UMODES);
@@ -241,7 +241,7 @@ oper_up(struct Client *source_p, struct oper_conf *oper_p)
 		   source_p->name, get_oper_privs(oper_p->flags));
 	send_oper_motd(source_p);
 
-	return (1);
+	return;
 }
 
 #ifdef HAVE_LIBCRYPTO
