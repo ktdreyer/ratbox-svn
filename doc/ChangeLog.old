@@ -1,3 +1,7 @@
+*** 20001223_50 by ejb
+- cleanup and fix of parse.c, should fix a couple of bugs.
+
+
 *** 20001223_49 by ejb
 - documented max_targets, and made it default to 4.
 
