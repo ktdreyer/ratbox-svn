@@ -91,7 +91,8 @@ static void m_challenge( struct Client *client_p, struct Client *source_p,
                         int parc, char *parv[] )
 {
   char * challenge;
-  struct ConfItem *aconf;
+  dlink_node *ptr;
+  struct ConfItem *aconf, *oconf;
   if(!(source_p->user) || !source_p->localClient)
     return;
   
@@ -113,6 +114,21 @@ static void m_challenge( struct Client *client_p, struct Client *source_p,
          sendto_one (source_p, form_str(ERR_NOOPERHOST), me.name, parv[0]);
          return;
        }
+
+    ptr = source_p->localClient->confs.head;
+    oconf = ptr->data;
+    detach_conf(source_p,oconf);
+
+    if(attach_conf(source_p, aconf) != 0)
+      {
+	sendto_one(source_p,":%s NOTICE %s :Can't attach conf!",
+                   me.name,source_p->name);   
+	sendto_realops_flags(FLAGS_ALL, L_ALL,
+	                     "Failed OPER attempt by %s (%s@%s) can't attach conf!",
+	                     source_p->name, source_p->username, source_p->host);
+	attach_conf(source_p, oconf);
+	return;
+      }
      
      /* Now make them an oper and tell the realops... */
      oper_up(source_p, aconf);
