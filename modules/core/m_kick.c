@@ -222,7 +222,7 @@ static void m_kick(struct Client *client_p,
 			    ":%s KICK %s %s :%s",
 			    parv[0], chptr->chname,
 			    who->name, comment);
-      remove_user_from_channel(chptr, who);
+      remove_user_from_channel(chptr, who, 0);
     }
   else
     sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL),

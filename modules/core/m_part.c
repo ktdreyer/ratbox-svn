@@ -195,5 +195,5 @@ static void part_one_client(struct Client *client_p,
                            source_p->host,
                            bchan->chname);
     }
-  remove_user_from_channel(chptr, source_p);
+  remove_user_from_channel(chptr, source_p, 0);
 }

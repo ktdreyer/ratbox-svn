@@ -50,7 +50,7 @@ static  int     add_id (struct Client *, struct Channel *, char *, int);
 static  int     del_id (struct Channel *, char *, int);
 
 static  void    free_channel_list(dlink_list *list);
-static  void    sub1_from_channel (struct Channel *);
+static  void    sub1_from_channel (struct Channel *, int);
 static  void    destroy_channel(struct Channel *);
 
 static void send_mode_list(struct Client *, char *, dlink_list *,
@@ -428,12 +428,14 @@ void add_user_to_channel(struct Channel *chptr, struct Client *who, int flags)
  * 
  * inputs	- pointer to channel to remove client from
  *		- pointer to client (who) to remove
+ *              - integer: 1 - make persistant
+ *                         0 - dont make persistant
  * output	- none
  * side effects - deletes an user from a channel by removing a link in the
  *		  channels member chain.
  *                sets a vchan_id if the last user is just leaving
  */
-void remove_user_from_channel(struct Channel *chptr,struct Client *who)
+void remove_user_from_channel(struct Channel *chptr,struct Client *who, int perm)
 {
   dlink_node *ptr;
   dlink_node *next_ptr;
@@ -481,7 +483,7 @@ void remove_user_from_channel(struct Channel *chptr,struct Client *who)
       if(chptr->locusers > 0)
 	chptr->locusers--;
     }
-  sub1_from_channel(chptr);
+  sub1_from_channel(chptr, perm);
 }
 
 /*
@@ -923,33 +925,6 @@ static void send_members(struct Client *client_p,
     {
       sendto_one(client_p, "%s", buf);
     }
-}
-
-/*
- * send_perm_channel
- *
- * inputs       - pointer to client client_p
- *              - pointer to channel pointer
- * output       - NONE
- * side effects - send "client_p" a full list of the modes for permanent channel chptr.
- */
-void send_perm_channel(struct Client *client_p, struct Channel *chptr)
-{
-  *modebuf = *parabuf = '\0';
-  channel_modes(chptr, client_p, modebuf, parabuf);
-
-  /* Send a blank SJOIN */
-  ircsprintf(buf, ":%s SJOIN %lu %s %s %s :", me.name,
-             chptr->channelts, chptr->chname, modebuf, parabuf);
-
-  sendto_one(client_p, "%s", buf);
-  send_mode_list(client_p, chptr->chname, &chptr->banlist, 'b', 0);
-
-  if(IsCapable(client_p, CAP_EX))
-    send_mode_list(client_p, chptr->chname, &chptr->exceptlist, 'e', 0);
-
-  if (IsCapable(client_p, CAP_IE))
-    send_mode_list(client_p, chptr->chname, &chptr->invexlist, 'I', 0);
 }
 
 /*
@@ -2537,7 +2512,7 @@ struct Channel* get_channel(struct Client *client_p, char *chname, int flag)
 **  Subtract one user from channel (and free channel
 **  block, if channel became empty).
 */
-static  void    sub1_from_channel(struct Channel *chptr)
+static  void    sub1_from_channel(struct Channel *chptr, int perm)
 {
   if (--chptr->users <= 0)
     {
@@ -2550,7 +2525,7 @@ static  void    sub1_from_channel(struct Channel *chptr)
       /* channel has to exist for at least 30 minutes before 
        * being made persistent 
        */
-      if((chptr->channelts + (30*60)) > CurrentTime)
+      if(perm == 0 || (chptr->channelts + (30*60)) > CurrentTime)
         destroy_channel(chptr);
     }
 }

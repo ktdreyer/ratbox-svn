@@ -1041,9 +1041,6 @@ burst_all(struct Client *client_p)
           burst_members(client_p,&chptr->peons);
           send_channel_modes(client_p, chptr);
         }
-      /* Send blank channels if they support them, if the channels blank, we dont need to burst users */
-      else if ((*chptr->chname == '#') && IsCapable(client_p, CAP_VCHAN))
-        send_perm_channel(client_p, chptr);
 
       if(IsVchanTop(chptr))
 	{
@@ -1059,8 +1056,6 @@ burst_all(struct Client *client_p)
                   burst_members(client_p,&vchan->peons);
                   send_channel_modes(client_p, vchan);
                 }
-              else if ((*vchan->chname == '#') && IsCapable(client_p, CAP_VCHAN))
-                send_perm_channel(client_p, chptr);
 	    }
 	}
     }
