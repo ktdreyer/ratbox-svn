@@ -157,8 +157,8 @@ mod_clear_paths(void)
       next = node->next;
       pathst = (struct module_path *)node->data;
       dlinkDelete(node, &mod_paths);
+      free_dlink_node(node);
       MyFree(pathst);
-      MyFree(node);
     }
 }
 
