@@ -195,9 +195,6 @@ void count_memory(struct Client *source_p)
   int remote_client_count = 0;
   u_long remote_client_memory_used = 0;
 
-  int    user_count = 0;
-  u_long user_memory_used = 0;
-
   u_long total_memory = 0;
 
   count_whowas_memory(&wwu, &wwm);
