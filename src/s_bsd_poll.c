@@ -69,6 +69,13 @@
 /*
  * Stuff for poll()
  */
+#ifdef linux
+# include <features.h>
+# if ((__GLIBC__ == 2) && (__GLIBC_MINOR__ < 1))
+#  define POLLRDNORM  0x0040
+# endif
+#endif
+
 #define __USE_XOPEN    /* XXXX had to add this define to make it compile -toby */
 #include <sys/poll.h>
 #define CONNECTFAST

@@ -8,10 +8,10 @@ RM		= @RM@
 LEX		= @LEX@
 LEXLIB		= @LEXLIB@
 CFLAGS		= @CFLAGS@
-LDFLAGS   = -Wl,-export-dynamic
+LDFLAGS   	= -Wl,-export-dynamic
 MKDEP		= ${CC} -MM
 
-IRCDLIBS	= @LIBS@ @SSL_LIBS@
+IRCDLIBS	= @LIBS@ @SSL_LIBS@ @DL_DEFINE@
 
 INCLUDES	= -I../include
 CPPFLAGS	= ${INCLUDES} @SSL_DEFINE@ @CPPFLAGS@

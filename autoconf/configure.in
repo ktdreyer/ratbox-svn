@@ -25,9 +25,17 @@ dnl Replace `main' with a function in -lnsl:
 AC_CHECK_LIB(nsl, gethostbyname)
 AC_CHECK_FUNC(res_mkquery,, AC_CHECK_LIB(resolv, res_mkquery))
 AC_CHECK_LIB(socket, socket)
-AC_CHECK_FUNC(dlopen,, AC_CHECK_LIB(dl, dlopen,,AC_MSG_ERROR(**
-dlopen could not be found - ircd-hybrid will not compile without it **)))
 AC_CHECK_FUNC(crypt,, AC_CHECK_LIB(descrypt, crypt,,AC_CHECK_LIB(crypt, crypt,,)))
+
+case "$target" in
+  *linux*)
+    DL_DEFINE="-ldl"
+    ;;
+  *)
+    DL_DEFINE=""    
+    ;;
+esac
+AC_SUBST(DL_DEFINE)
 
 dnl Checks for header files.
 AC_HEADER_STDC
@@ -111,7 +119,7 @@ esac
 dnl Checks for library functions.
 AC_PROG_GCC_TRADITIONAL
 
-dnl checl for openssl
+dnl check for openssl
 AC_CHECK_FUNC(openssl, ac_cv_func_openssl='yes',)
 
 dnl check for poll() call
