@@ -1,3 +1,7 @@
+*** 19990831_7 by tomh
+cleanup dbuf interface, code will follow
+
+
 *** 19990831_6 by tomh
 break out m_nick
 
