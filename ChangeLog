@@ -1,3 +1,36 @@
+leeh        2005/01/27 12:46:57 EST	(20050127_0)
+
+  Modified files:
+    include              scommand.h 
+    src                  c_error.c c_message.c c_mode.c channel.c 
+                         client.c io.c s_chanserv.c s_global.c 
+                         s_jupeserv.c s_operbot.c s_operserv.c 
+                         s_userserv.c scommand.c u_stats.c 
+                         ucommand.c 
+  Log:
+  - stop putting the sender prefix as parv[0], sync the code so the arguments
+    start at parv[0] everywhere.
+  
+  Revision  Changes    Path
+  1.5       +1 -1      rserv/include/scommand.h
+  1.7       +3 -3      rserv/src/c_error.c
+  1.17      +9 -9      rserv/src/c_message.c
+  1.26      +8 -8      rserv/src/c_mode.c
+  1.37      +30 -30    rserv/src/channel.c
+  1.33      +25 -25    rserv/src/client.c
+  1.35      +5 -6      rserv/src/io.c
+  1.46      +26 -26    rserv/src/s_chanserv.c
+  1.5       +2 -2      rserv/src/s_global.c
+  1.21      +13 -13    rserv/src/s_jupeserv.c
+  1.25      +13 -13    rserv/src/s_operbot.c
+  1.5       +25 -25    rserv/src/s_operserv.c
+  1.40      +20 -22    rserv/src/s_userserv.c
+  1.28      +46 -45    rserv/src/scommand.c
+  1.11      +3 -3      rserv/src/u_stats.c
+  1.24      +22 -22    rserv/src/ucommand.c
+
+
+
 leeh        2005/01/25 19:52:58 EST	(20050126_0)
 
   Modified files:
