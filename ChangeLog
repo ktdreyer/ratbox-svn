@@ -1,3 +1,16 @@
+leeh        2004/01/19 11:06:10 EST	(20040119_0)
+
+  Modified files:
+    src                  c_mode.c 
+  Log:
+  - build a dlink_list of services deopped in a mode, so we only rejoin
+    a service once per mode command, rather than once per -o
+  
+  Revision  Changes    Path
+  1.13      +20 -1     rserv/src/c_mode.c
+
+
+
 leeh        2004/01/18 11:36:43 EST	(20040118_1)
 
   Modified files:
