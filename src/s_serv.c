@@ -1123,7 +1123,6 @@ server_estab(struct Client *client_p)
 
 	if(IsUnknown(client_p) && !IsConfCryptLink(aconf))
 	{
-		int opt = 1;
 		/*
 		 * jdc -- 1.  Use EmptyString(), not [0] index reference.
 		 *        2.  Check aconf->spasswd, not aconf->passwd.
