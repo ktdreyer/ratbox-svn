@@ -1,3 +1,25 @@
+leeh        2004/03/07 11:34:22 EST	(20040307_3)
+
+  Modified files:
+    contrib              m_clearchan.c m_flags.c m_force.c 
+                         m_mkpasswd.c m_ojoin.c m_okick.c 
+                         m_olist.c m_omode.c m_opme.c 
+  Log:
+  - alzs patch to fix contrib/
+  
+  Revision  Changes    Path
+  1.46      +122 -241  ircd-ratbox/contrib/m_clearchan.c
+  1.13      +28 -35    ircd-ratbox/contrib/m_flags.c
+  1.23      +77 -76    ircd-ratbox/contrib/m_force.c
+  1.11      +24 -29    ircd-ratbox/contrib/m_mkpasswd.c
+  1.19      +32 -39    ircd-ratbox/contrib/m_ojoin.c
+  1.9       +38 -34    ircd-ratbox/contrib/m_okick.c
+  1.11      +38 -73    ircd-ratbox/contrib/m_olist.c
+  1.4       +87 -88    ircd-ratbox/contrib/m_omode.c
+  1.40      +13 -17    ircd-ratbox/contrib/m_opme.c
+
+
+
 leeh        2004/03/07 11:22:24 EST	(20040307_2)
 
   Modified files:
