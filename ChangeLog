@@ -1,3 +1,19 @@
+androsyn    2003/08/11 10:54:48 EDT	(20030811_4)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    include              setup.h.in 
+  Log:
+  Update the default compile flags
+  
+  Revision  Changes    Path
+  7.175     +1 -1      ircd-ratbox/autoconf/configure.in
+  7.182     +1 -1      ircd-ratbox/configure
+  7.68      +1 -1      ircd-ratbox/include/setup.h.in
+
+
+
 androsyn    2003/08/11 10:04:50 EDT	(20030811_3)
 
   Modified files:
