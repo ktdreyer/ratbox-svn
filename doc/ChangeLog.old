@@ -1,3 +1,7 @@
+*** 20010127_3 by androsyn
+Fixed vhosts for outgoing connections finally.
+
+
 *** 20010127_2 by lusky
 - fixed some more sol26 compile warnings
 
