@@ -119,8 +119,8 @@ int     m_privmsg(struct Client *cptr,
   struct Channel *vchan;
   int type=0;
 
-/* this is no longer required with arg handling in parse() --is */
-/*  if (parc < 2 || *parv[1] == '\0')
+  /* privmsg gives different errors, so this still needs to be checked */
+  if (parc < 2 || *parv[1] == '\0')
     {
       sendto_one(sptr, form_str(ERR_NORECIPIENT),
                  me.name, parv[0], "PRIVMSG");
@@ -131,7 +131,7 @@ int     m_privmsg(struct Client *cptr,
     {
       sendto_one(sptr, form_str(ERR_NOTEXTTOSEND), me.name, parv[0]);
       return -1;
-	  } */
+    }
 
   if (MyConnect(sptr))
     {
@@ -400,8 +400,7 @@ int     mo_privmsg(struct Client *cptr,
   struct Channel *chptr;
   int type=0;
 
-/*  this isn't needed now arg handling is done in parse() --is */
-/*  if (parc < 2 || *parv[1] == '\0')
+  if (parc < 2 || *parv[1] == '\0')
     {
       sendto_one(sptr, form_str(ERR_NORECIPIENT),
                  me.name, parv[0], "PRIVMSG");
@@ -412,7 +411,7 @@ int     mo_privmsg(struct Client *cptr,
     {
       sendto_one(sptr, form_str(ERR_NOTEXTTOSEND), me.name, parv[0]);
       return -1;
-	  } */
+    }
 
   if (MyConnect(sptr))
     {
@@ -699,8 +698,7 @@ int     ms_privmsg(struct Client *cptr,
   struct Channel *chptr;
   int type=0;
 
-/* this isn't needed now arg stuff is handled in parse() --is */
-  /* if (parc < 2 || *parv[1] == '\0')
+  if (parc < 2 || *parv[1] == '\0')
     {
       sendto_one(sptr, form_str(ERR_NORECIPIENT),
                  me.name, parv[0], "PRIVMSG");
@@ -711,7 +709,7 @@ int     ms_privmsg(struct Client *cptr,
     {
       sendto_one(sptr, form_str(ERR_NOTEXTTOSEND), me.name, parv[0]);
       return -1;
-	  } */
+    }
 
   if (MyConnect(sptr))
     {
