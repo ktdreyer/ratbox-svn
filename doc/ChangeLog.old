@@ -1,3 +1,12 @@
+*** 19991109_1 by db
+- changes to sendto_one_type to not send @# style of message to non
+  CHW servers
+- m_userhost old behaviour restored, but rewritten. Need to support
+  up to 5 userhost requests, this fixes ircle clients which depend on
+  this behaviour.
+
+
+
 *** 19991022_1 by db
 - disallow -ve limit on mode #channel +l 
 
