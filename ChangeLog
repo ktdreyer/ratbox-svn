@@ -1,3 +1,17 @@
+leeh        2002/11/14 18:54:57 UTC	(20021114_1)
+
+  Modified files:
+    modules              m_kline.c 
+    modules/core         m_part.c 
+  Log:
+  - removed an extra ':' and an extra ' ', via hybrid.
+  
+  Revision  Changes    Path
+  1.65      +2 -2      ircd-ratbox/modules/core/m_part.c
+  1.125     +2 -2      ircd-ratbox/modules/m_kline.c
+
+
+
 androsyn    2002/11/14 05:51:43 UTC	(20021114_0)
 
   Modified files:
