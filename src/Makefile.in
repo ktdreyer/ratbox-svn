@@ -85,6 +85,7 @@ BASE_SRCS =                     \
   numeric.c                     \
   packet.c                      \
   parse.c                       \
+  patricia.c			\
   rsa.c                         \
   restart.c                     \
   resv.c			\
