@@ -13,7 +13,7 @@ c_message.o: c_message.c ../include/stdinc.h ../include/setup.h \
 c_mode.o: c_mode.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/c_init.h \
   ../include/client.h ../include/s_userserv.h ../include/channel.h \
-  ../include/scommand.h ../include/log.h
+  ../include/scommand.h ../include/log.h ../include/hook.h
 cache.o: cache.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/rserv.h \
   ../include/balloc.h ../include/cache.h ../include/fileio.h \
@@ -22,7 +22,7 @@ channel.o: channel.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/rserv.h \
   ../include/client.h ../include/s_userserv.h ../include/conf.h \
   ../include/channel.h ../include/scommand.h ../include/log.h \
-  ../include/balloc.h ../include/io.h
+  ../include/balloc.h ../include/io.h ../include/hook.h
 client.o: client.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/rserv.h \
   ../include/client.h ../include/s_userserv.h ../include/channel.h \
@@ -37,6 +37,8 @@ event.o: event.c ../include/stdinc.h ../include/setup.h \
   ../include/event.h ../include/io.h
 fileio.o: fileio.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/fileio.h
+hook.o: hook.c ../include/stdinc.h ../include/setup.h ../include/config.h \
+  ../include/tools.h ../include/rserv.h ../include/hook.h
 io.o: io.c ../include/stdinc.h ../include/setup.h ../include/config.h \
   ../include/tools.h ../include/scommand.h ../include/ucommand.h \
   ../include/rserv.h ../include/io.h ../include/event.h ../include/conf.h \

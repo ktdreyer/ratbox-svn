@@ -18,7 +18,7 @@ hook_add(hook_func func, int hook)
 	if(hook >= HOOK_LAST_HOOK)
 		return;
 
-	dlink_add_alloc(func, &hooks[hook]);
+	dlink_add_tail_alloc(func, &hooks[hook]);
 }
 
 void

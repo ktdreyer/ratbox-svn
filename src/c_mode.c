@@ -12,12 +12,14 @@
 #include "channel.h"
 #include "scommand.h"
 #include "log.h"
+#include "hook.h"
 
 static void c_mode(struct client *, const char *parv[], int parc);
 struct scommand_handler mode_command = { "MODE", c_mode, 0, DLINK_EMPTY };
 
 /* linked list of services that were deopped */
 dlink_list deopped_list;
+dlink_list opped_list;
 
 /* change_chmember_status()
  *   changes a channel members +ov status
@@ -57,6 +59,7 @@ change_chmember_status(struct channel *chptr, const char *nick,
 		{
 			mptr->flags &= ~MODE_DEOPPED;
 			mptr->flags |= MODE_OPPED;
+			dlink_add_alloc(mptr, &opped_list);
 		}
 		else
 			mptr->flags &= ~MODE_OPPED;
@@ -109,6 +112,8 @@ c_mode(struct client *client_p, const char *parv[], int parc)
 {
 	struct client *target_p;
 	struct channel *chptr;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
 	const char *p;
 	int args = 0;
 	int dir = 1;
@@ -267,12 +272,20 @@ c_mode(struct client *client_p, const char *parv[], int parc)
 		p++;
 	}
 
+	if(dlink_list_length(&opped_list))
+		hook_call(HOOK_MODE_OP, &opped_list, NULL);
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, opped_list.head)
+	{
+		free_dlink_node(ptr);
+	}
+
+	opped_list.head = opped_list.tail = NULL;
+	opped_list.length = 0;
+
 	/* some services were deopped.. */
 	if(dlink_list_length(&deopped_list))
 	{
-		dlink_node *ptr;
-		dlink_node *next_ptr;
-
 		DLINK_FOREACH_SAFE(ptr, next_ptr, deopped_list.head)
 		{
 			target_p = ptr->data;
