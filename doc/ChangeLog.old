@@ -1,3 +1,7 @@
+*** 20010225_19 by androsyn
+Fixed broken /rehash dns
+
+
 *** 20010225_18 by androsyn
 Fixed more weirdness..this was from my half assed attempt at fixing /dns
 rehash
