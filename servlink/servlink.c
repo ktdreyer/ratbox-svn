@@ -100,7 +100,9 @@ int main(int argc, char *argv[])
     sleep(1);
 #endif
 
+#ifdef HAVE_LIBCRYPTO
   ERR_load_crypto_strings();
+#endif
 
   /* Make sure we are running under hybrid.. */
   if (isatty(0) || argc != 1 || strcmp(argv[0], "-slink"))
