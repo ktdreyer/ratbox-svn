@@ -90,7 +90,7 @@ int mo_jupe(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   dlink_node *m;
   char reason[REALLEN];
 
-  if(!ConfigFileEntry.hub)
+  if(!ServerInfo.hub)
     return 0;
 
   if(!IsSetOperAdmin(sptr))
