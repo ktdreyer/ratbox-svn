@@ -140,7 +140,7 @@ static int ms_squit(struct Client *cptr, struct Client *sptr,
 				 found_squit->server_name,
 				 get_client_name(sptr,FALSE), comment);
 
-          sendto_serv_butone(NULL,
+          sendto_serv_butone(&me,
 			     ":%s WALLOPS :Remote SQUIT %s from %s (%s)",
 			     me.name, found_squit->server_name,
 			     get_client_name(sptr,FALSE),comment);

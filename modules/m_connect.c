@@ -262,7 +262,7 @@ static int ms_connect(struct Client* cptr, struct Client* sptr,
 			  "Remote CONNECT %s %s from %s",
 			  parv[1], parv[2] ? parv[2] : "",
 			  get_client_name(sptr, MASK_IP));
-  sendto_serv_butone(NULL,
+  sendto_serv_butone(&me,
 		     ":%s WALLOPS :Remote CONNECT %s %s from %s",
 		     me.name, parv[1], parv[2] ? parv[2] : "",
 		     get_client_name(sptr, MASK_IP));
