@@ -138,6 +138,7 @@ int   class_redirport_var;
 %token  OPERATOR
 %token  OPER_LOG
 %token  PASSWORD
+%token  PERSISTANT
 %token  PING_TIME
 %token  PORT
 %token  QSTRING
@@ -741,7 +742,8 @@ auth_item:      auth_user | auth_passwd | auth_class |
                 auth_kline_exempt | auth_have_ident | auth_is_restricted |
                 auth_exceed_limit | auth_no_tilde | auth_gline_exempt |
                 auth_spoof | auth_spoof_notice |
-                auth_redir_serv | auth_redir_port | error
+                auth_redir_serv | auth_redir_port | auth_persistant |
+                error
 
 auth_user:   USER '=' QSTRING ';'
   {
@@ -896,6 +898,14 @@ auth_class:   CLASS '=' QSTRING ';'
       {
 	DupString(yy_aconf->className, yylval.string);
       }
+  };
+
+auth_persistant: PERSISTANT '=' TYES ';'
+  {
+   yy_aconf->flags |= CONF_FLAGS_PERSISTANT
+  } |            PERSISTANT '=' TNO ';'
+  {
+   yy_aconf->flags &= CONF_FLAGS_PERSISTANT
   };
 
 /***************************************************************************

@@ -121,6 +121,7 @@ struct ConfItem
 #define CONF_FLAGS_LAZY_LINK            0x08000
 #define CONF_FLAGS_ENCRYPTED            0x10000
 #define CONF_FLAGS_COMPRESSED		0x20000
+#define CONF_FLAGS_PERSISTANT		0x40000
 
 /* Macros for struct ConfItem */
 

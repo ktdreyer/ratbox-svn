@@ -124,6 +124,7 @@ gline_exempt    { return GLINE_EXEMPT; }
 gline_time      { return GLINE_TIME; }
 gline_log       { return GLINE_LOG; }
 global_kill	{ return GLOBAL_KILL; }
+persistant     { return PERSISTANT; }
 have_ident	{ return HAVE_IDENT; }
 hide_server	{ return HIDESERVER; }
 host		{ return HOST; }

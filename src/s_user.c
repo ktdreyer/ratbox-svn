@@ -1106,6 +1106,28 @@ int user_mode(struct Client *client_p, struct Client *source_p, int parc, char *
       source_p->umodes &= ~FLAGS_NCHANGE; /* only tcm's really need this */
     }
 
+#ifdef PERSISTANT_CLIENTS
+  if (MyConnect(source_p) && (source_p->umodes & ~setflags &
+      FLAGS_PERSISTANT))
+    {
+     for (ptr=source_p->localClient->confs.head; ptr; ptr=ptr->next)
+       {
+        aconf = (struct ConfItem*)ptr->data;
+        if ((aconf->status & CONF_CLIENT))
+          {
+           if (!(aconf->flags & CONF_FLAGS_PERSISTANT))
+             {
+              sendto_one(source_p,
+                ":%s NOTICE %s :Your auth block does not allow +p",
+                me.name, source_p->name);
+              source_p->umodes &= ~FLAGS_PERSISTANT;
+             }
+           break;
+          }
+       }
+    }
+#endif
+
   if (MyConnect(source_p) && (source_p->umodes & FLAGS_ADMIN) && !IsSetOperAdmin(source_p))
     {
       sendto_one(source_p,":%s NOTICE %s :*** You need oper and A flag for +a",
