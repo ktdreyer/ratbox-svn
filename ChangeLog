@@ -1,3 +1,28 @@
+leeh        2004/10/15 19:57:04 EDT	(20041015_0)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    include              config.h setup.h.in 
+    src                  Makefile.in rserv.c s_alis.c s_jupeserv.c 
+                         s_operbot.c 
+  Log:
+  - add some configure magic, --enable-alis etc to determine which services
+    are built
+  
+  Revision  Changes    Path
+  1.12      +85 -0     rserv/autoconf/configure.in
+  1.12      +210 -65   rserv/configure
+  1.20      +0 -26     rserv/include/config.h
+  1.6       +17 -1     rserv/include/setup.h.in
+  1.27      +1 -1      rserv/src/Makefile.in
+  1.32      +7 -6      rserv/src/rserv.c
+  1.22      +1 -1      rserv/src/s_alis.c
+  1.4       +3 -0      rserv/src/s_jupeserv.c
+  1.12      +1 -1      rserv/src/s_operbot.c
+
+
+
 leeh        2004/10/12 19:51:30 EDT	(20041012_0)
 
   Modified files:
