@@ -1,3 +1,20 @@
+androsyn    2003/10/06 16:47:55 EDT	(20031006_1)
+
+  Modified files:
+    src                  adns.c epoll.c poll.c send.c 
+  Log:
+  Update poll.c to work a bit more efficently, as well as epoll.c.  Fixed a
+  buglet in adns.c when hosts might not get resolved because we never register
+  events for the resolver, oops...
+  
+  Revision  Changes    Path
+  7.67      +3 -1      ircd-ratbox/src/adns.c
+  1.23      +4 -8      ircd-ratbox/src/epoll.c
+  7.74      +64 -82    ircd-ratbox/src/poll.c
+  7.266     +1 -3      ircd-ratbox/src/send.c
+
+
+
 androsyn    2003/10/06 15:05:08 EDT	(20031006_0)
 
   Modified files:
