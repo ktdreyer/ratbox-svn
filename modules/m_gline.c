@@ -291,8 +291,9 @@ static void ms_gline(struct Client *client_p,
   if(!IsServer(source_p))
     return;
 
-  /* Always good to be paranoid about arguments */
-  if(parc < 5)
+  /* Hyb7 sends 5 parcs.. hyb6 sends 8 and will gline the wrong host,
+   * so check the param count -- fl_ */
+  if(parc != 5)
     return;
 
   oper_nick = parv[1];
