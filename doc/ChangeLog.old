@@ -1,3 +1,15 @@
+leeh        2002/01/27 14:05:07 EST	(20020127_0)
+
+  Modified files:
+    modules              Makefile.in 
+  Log:
+  - commited hwys fix for the makefile
+  
+  Revision  Changes    Path
+  1.65      +2 -2      ircd-hybrid-7/modules/Makefile.in
+
+
+
 db          2002/01/26 15:17:01 EST	(20020126_0)
 
   Modified files:
