@@ -1,3 +1,8 @@
+*** 20001212_3 by db
+- oops. forgot to generate a prefix in sendnick_TS in s_serv.c
+
+
+
 *** 20001212_2 by db
 - don't core if a server is not found on the serv_list
 
