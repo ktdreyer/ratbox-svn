@@ -1,3 +1,27 @@
+jmallett    2002/02/05 16:38:53 EST	(20020205_7)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+  Log:
+  Teach configure to determine whether $CC is SVR4 Source Generation System
+  compliant, so we can use a shared interface, such as is done for PICFLAGS
+  here. Since I had to add checks for Sun WorkShop anyway, I removed the
+  SunOS checks... They didn't really make sense anyway in my opinion. I ran
+  this by a few people (both the patches and the idea), and it looked sane
+  to them.
+  
+  Right now we recognize the following SGS-ish compilers:
+          o) MIPSpro
+          o) Sun WorkShop
+          o) TenDRA
+  
+  Revision  Changes    Path
+  7.118     +36 -32    ircd-hybrid-7/autoconf/configure.in
+  7.121     +217 -210  ircd-hybrid-7/configure
+
+
+
 ejb         2002/02/05 16:34:02 EST	(20020205_6)
 
   Modified files:
