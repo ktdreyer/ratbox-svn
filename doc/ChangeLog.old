@@ -1,3 +1,16 @@
+leeh        2002/07/31 13:30:59 EDT	(20020731_1)
+
+  Modified files:
+    src                  hostmask.c 
+  Log:
+  - dont show kline exempt status to remote opers.
+  - show spoofed I:, just put the u@h as user@255.255.255.255
+  
+  Revision  Changes    Path
+  7.69      +7 -8      ircd-hybrid-7/src/hostmask.c
+
+
+
 leeh        2002/07/31 12:24:11 EDT	(20020731_0)
 
   Modified files:
