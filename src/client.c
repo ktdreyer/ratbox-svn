@@ -406,12 +406,7 @@ check_klines(void)
                            client_p->localClient->aftype)))
    {
      if (aconf->status & CONF_EXEMPTDLINE)
-     {
-       sendto_realops_flags(FLAGS_ALL,
-                           "DLINE over-ruled for %s, client is kline_exempt",
-                           get_client_name(client_p, HIDE_IP));
        continue;
-     }
      sendto_realops_flags(FLAGS_ALL,"DLINE active for %s",
                         get_client_name(client_p, HIDE_IP));
      if (ConfigFileEntry.kline_with_connection_closed)

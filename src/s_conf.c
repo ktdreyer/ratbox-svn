@@ -1649,7 +1649,7 @@ int conf_connect_allowed(struct irc_inaddr *addr, int aftype)
  struct ConfItem *aconf = find_dline(addr, aftype);
  
  /* DLINE exempt also gets you out of static limits/pacing... */
- if (aconf && aconf->status & CONF_EXEMPTDLINE)
+ if (aconf && (aconf->status & CONF_EXEMPTDLINE))
   return 0;
  
  if (aconf)

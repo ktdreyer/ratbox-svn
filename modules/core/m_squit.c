@@ -111,6 +111,11 @@ static void mo_squit(struct Client *client_p, struct Client *source_p,
       exit_client(client_p, found_squit->target_p, source_p, comment);
       return;
     }
+  else
+    {
+	    sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
+		       me.name, parv[0], parv[1]);
+    }
 }
 
 /*
@@ -126,7 +131,10 @@ static void ms_squit(struct Client *client_p, struct Client *source_p,
   char  *comment = (parc > 2 && parv[2]) ? parv[2] : client_p->name;
 
   if(parc < 2)
-    return;
+    {
+      exit_client(client_p, client_p, source_p, comment);
+      return;
+    }
 
   if( (found_squit = find_squit(client_p, source_p, parv[1])) )
     {
@@ -179,20 +187,17 @@ static struct squit_parms *find_squit(struct Client *client_p,
   ** name is expanded if the incoming mask is the same as
   ** the server name for that link to the name of link.
   */
-  while ((*server == '*') && IsServer(client_p))
+  if ((*server == '*') && IsServer(client_p))
     {
       aconf = client_p->serv->sconf;
-      if (!aconf)
-	break;
-
-      if (!irccmp(server, my_name_for_link(me.name, aconf)))
-	{
-	  found_squit.server_name = client_p->name;
-	  found_squit.target_p = client_p;
+      if (aconf)
+        {
+	  if (!irccmp(server, my_name_for_link(me.name, aconf)))
+	    {
+	       found_squit.server_name = client_p->name;
+	       found_squit.target_p = client_p;
+	    }
 	}
-
-      break; /* WARNING is normal here */
-      /* NOTREACHED */
     }
 
   /*
@@ -211,8 +216,17 @@ static struct squit_parms *find_squit(struct Client *client_p,
 
   if (target_p && IsMe(target_p))
     {
-      found_squit.target_p = target_p;
-      found_squit.server_name = client_p->host;
+       if (IsClient(client_p))
+         {
+		 sendto_one(source_p,":%s NOTICE %s :You are trying to squit me.",me.name,client_p->name);
+	         found_squit.target_p = NULL;
+         }
+       else
+         {
+           found_squit.target_p = client_p;
+           found_squit.server_name = client_p->host;
+         }
+       
     }
 
   if(found_squit.target_p != NULL)

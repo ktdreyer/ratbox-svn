@@ -364,6 +364,18 @@ static void accept_connection(int pfd, void *data)
   fd = comm_accept(listener->fd, &sai);
 
   copy_s_addr(IN_ADDR(addr), S_ADDR(sai));  
+
+#ifdef IPV6
+  if((IN6_IS_ADDR_V4MAPPED(&IN_ADDR2(addr))) ||
+  	(IN6_IS_ADDR_V4COMPAT(&IN_ADDR2(addr))))
+  {
+   memmove(&addr.sins.sin.s_addr,
+           addr.sins.sin6.in6_u.u6_addr8+12,
+           sizeof(struct in_addr));
+   sai.sins.sin.sin_family = AF_INET;  	
+  }
+#endif
+
   if (fd < 0)
     {
 #if 0

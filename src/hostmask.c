@@ -476,11 +476,12 @@ find_address_conf(const char *host, const char *user,
 struct ConfItem*
 find_dline(struct irc_inaddr *addr, int aftype)
 {
- struct ConfItem *eline, *dline;
+ struct ConfItem *eline;
  eline = find_conf_by_address(NULL, addr, CONF_EXEMPTDLINE|1, aftype,
                               NULL);
- dline = find_conf_by_address(NULL, addr, CONF_DLINE|1, aftype, NULL);
- return dline ? (eline ? eline : dline) : NULL;
+ if (eline)
+  return eline;
+ return find_conf_by_address(NULL, addr, CONF_DLINE|1, aftype, NULL);
 }
 
 /* void add_conf_by_address(const char*, int, const char *,
