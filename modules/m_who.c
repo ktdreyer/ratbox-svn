@@ -178,11 +178,15 @@ static void m_who(struct Client *client_p,
 
           member = IsMember(source_p, chptr);
           if (isinvis && !member)
+          {
+            chptr = NULL;
             continue;
+          }
           if (member || (!isinvis && PubChannel(chptr)))
             {
               break;
             }
+	  chptr = NULL;	 /* Must be NULL if we don't loop again */    
 	}
 
       if (chptr != NULL)
