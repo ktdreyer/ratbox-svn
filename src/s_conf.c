@@ -3199,6 +3199,13 @@ void conf_add_fields(struct ConfItem *aconf,
     DupString(aconf->className, class_field);
 }
 
+/*
+ * yyerror
+ *
+ * inputs	- message from parser
+ * output	- none
+ * side effects	- message to opers and log file entry is made
+ */
 void yyerror(char *msg)
 {
   char newlinebuf[BUFSIZE];
@@ -3207,6 +3214,9 @@ void yyerror(char *msg)
 
   sendto_realops_flags(FLAGS_ALL,"%d: %s on line: %s",
 		       lineno, msg, newlinebuf);
+
+  log(L_WARN, "%d: %s on line: %s",
+      lineno, msg, newlinebuf);
 }
 
 int conf_fbgets(char *buf,int max_size, FBFILE *fb)

@@ -1534,7 +1534,7 @@ serv_connect_callback(int fd, int status, void *data)
     /* COMM_OK, so continue the connection procedure */
     /* Get the C/N lines */
     c_conf = find_conf_name(&cptr->localClient->confs,
-			    cptr->name, CONF_CONNECT_SERVER);
+			    cptr->name, CONF_CONNECT_SERVER); 
     if (!c_conf)
       { 
         sendto_realops_flags(FLAGS_ALL,

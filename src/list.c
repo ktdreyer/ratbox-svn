@@ -94,9 +94,13 @@ void outofmemory()
 
         
 /*
-** 'make_user' add's an User information block to a client
-** if it was not previously allocated.
-*/
+ * make_user
+ *
+ * inputs	- pointer to client struct
+ * output	- pointer to struct User
+ * side effects - add's an User information block to a client
+ *                if it was not previously allocated.
+ */
 struct User* make_user(struct Client *cptr)
 {
   struct User        *user;
@@ -120,7 +124,14 @@ struct User* make_user(struct Client *cptr)
   return user;
 }
 
-
+/*
+ * make_server
+ *
+ * inputs	- pointer to client struct
+ * output	- pointer to struct Server
+ * side effects - add's an Server information block to a client
+ *                if it was not previously allocated.
+ */
 struct Server *make_server(struct Client *cptr)
 {
   struct Server* serv = cptr->serv;
@@ -145,10 +156,14 @@ struct Server *make_server(struct Client *cptr)
 }
 
 /*
-** free_user
-**      Decrease user reference count by one and release block,
-**      if count reaches 0
-*/
+ * free_user
+ * 
+ * inputs	- pointer to user struct
+ *		- pointer to client struct
+ * output	- none
+ * side effects - Decrease user reference count by one and release block,
+ *                if count reaches 0
+ */
 void _free_user(struct User* user, struct Client* cptr)
 {
   if (--user->refcnt <= 0)
@@ -185,7 +200,13 @@ void _free_user(struct User* user, struct Client* cptr)
     }
 }
 
-
+/*
+ * make_dlink_node
+ *
+ * inputs	- NONE
+ * output	- pointer to new dlink_node
+ * side effects	- NONE
+ */
 dlink_node *make_dlink_node()
 {
   dlink_node *lp;
@@ -197,12 +218,17 @@ dlink_node *make_dlink_node()
   lp->next = NULL;
   lp->prev = NULL;
 
-#ifdef DEBUG_DLINK
-lp->ref_count = 0;
-#endif
   return lp;
 }
 
+/*
+ * _free_dlink_node
+ *
+ * inputs	- pointer to dlink_node
+ * output	- NONE
+ * side effects	- free given pointer, put back on block allocator
+ *		  for dlink_node's
+ */
 void _free_dlink_node(dlink_node *ptr)
 {
   if(BlockHeapFree(free_dlink_nodes,ptr))
@@ -215,15 +241,14 @@ void _free_dlink_node(dlink_node *ptr)
 
 
 /*
-Attempt to free up some block memory
-
-list_garbage_collect
-
-inputs          - NONE
-output          - NONE
-side effects    - memory is possibly freed up
-*/
-
+ * Attempt to free up some block memory
+ *
+ * block_garbage_collect
+ *
+ * inputs          - NONE
+ * output          - NONE
+ * side effects    - memory is possibly freed up
+ */
 void block_garbage_collect()
 {
   BlockHeapGarbageCollect(free_dlink_nodes);
@@ -232,6 +257,12 @@ void block_garbage_collect()
 }
 
 /*
+ * count_user_memory
+ *
+ * inputs	- pointer to user memory actually used
+ *		- pointer to user memory allocated total in block allocator
+ * output	- NONE
+ * side effects	- NONE
  */
 void count_user_memory(int *user_memory_used,
                        int *user_memory_allocated )
@@ -242,6 +273,12 @@ void count_user_memory(int *user_memory_used,
 }
 
 /*
+ * count_links_memory
+ *
+ * inputs	- pointer to dlinks memory actually used
+ *		- pointer to dlinks memory allocated total in block allocator
+ * output	- NONE
+ * side effects	- NONE
  */
 void count_links_memory(int *links_memory_used,
                        int *links_memory_allocated )

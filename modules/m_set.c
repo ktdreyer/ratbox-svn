@@ -385,7 +385,7 @@ int mo_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        */
       for (i=0; set_cmd_table[i].handler; i++)
 	{
-	  if (!strcasecmp(set_cmd_table[i].name, parv[1]))
+	  if (!irccmp(set_cmd_table[i].name, parv[1]))
 	    {
 	      /*
 	       * Command found; now execute the code

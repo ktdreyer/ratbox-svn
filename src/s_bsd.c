@@ -149,7 +149,11 @@ void report_error(const char* text, const char* who, int error)
 
 /*
  * set_sock_buffers - set send and receive buffers for socket
- * returns true (1) if successful, false (0) otherwise
+ * 
+ * inputs	- fd file descriptor
+ * 		- size to set
+ * output       - returns true (1) if successful, false (0) otherwise
+ * side effects -
  */
 int set_sock_buffers(int fd, int size)
 {
@@ -160,8 +164,12 @@ int set_sock_buffers(int fd, int size)
 }
 
 /*
- * disable_sock_options - if remote has any socket options set, disable them 
- * returns true (1) if successful, false (0) otherwise
+ * disable_sock_options
+ * 
+ * inputs	- fd
+ * output	- returns true (1) if successful, false (0) otherwise
+ * side effects - disable_sock_options - if remote has any socket options set,
+ *                disable them 
  */
 int disable_sock_options(int fd)
 {
@@ -174,44 +182,26 @@ int disable_sock_options(int fd)
 
 /*
  * set_non_blocking - Set the client connection into non-blocking mode. 
- * If your system doesn't support this, you're screwed, ircd will run like
- * crap.
- * returns true (1) if successful, false (0) otherwise
+ *
+ * inputs	- fd to set into non blocking mode
+ * output	- 1 if successful 0 if not
+ * side effects - use POSIX compliant non blocking and
+ *                be done with it.
  */
 int set_non_blocking(int fd)
 {
-  /*
-   * NOTE: consult ALL your relevant manual pages *BEFORE* changing
-   * these ioctl's.  There are quite a few variations on them,
-   * as can be seen by the PCS one.  They are *NOT* all the same.
-   * Heed this well. - Avalon.
-   */
-  /* This portion of code might also apply to NeXT.  -LynX */
-#ifdef NBLOCK_SYSV
-  int res = 1;
-
-  if (ioctl(fd, FIONBIO, &res) == -1)
-    return 0;
-
-#else /* !NBLOCK_SYSV */
   int nonb = 0;
   int res;
 
-#ifdef NBLOCK_POSIX
   nonb |= O_NONBLOCK;
-#endif
-#ifdef NBLOCK_BSD
-  nonb |= O_NDELAY;
-#endif
 
   res = fcntl(fd, F_GETFL, 0);
   if (-1 == res || fcntl(fd, F_SETFL, res | nonb) == -1)
     return 0;
-#endif /* !NBLOCK_SYSV */
+
   fd_table[fd].flags.nonblocking = 1;
   return 1;
 }
-
 
 /*
  * close_connection

@@ -197,7 +197,7 @@ void log_user_exit(struct Client *sptr)
 	  on_for / 3600, (on_for % 3600)/60,
 	  on_for % 60, sptr->name,
 	  sptr->username, sptr->host,
-	  sptr->sendK, sptr->receiveK);
+	  sptr->localClient->sendK, sptr->localClient->receiveK);
     }
 
 #else

@@ -144,7 +144,7 @@ int mo_kline(struct Client *cptr,
   parv++;
   parc--;
 
-  if(parc == 0)
+  if(0 == parc)
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
 		 me.name, sptr->name, "KLINE");
@@ -161,7 +161,7 @@ int mo_kline(struct Client *cptr,
       parc--;
     }
 
-  if(parc == 0)
+  if(0 == parc)
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
 		 me.name, sptr->name, "KLINE");
@@ -173,13 +173,13 @@ int mo_kline(struct Client *cptr,
   parc--;
   parv++;
 
-  if(parc != 0)
+  if(0 != parc)
     {
-      if(match(*parv,"ON"))
+      if(0 == irccmp(*parv,"ON"))
 	{
 	  parc--;
 	  parv++;
-	  if(parc == 0)
+	  if(0 == parc)
 	    {
 	      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
 			 me.name, sptr->name, "KLINE");
@@ -191,7 +191,7 @@ int mo_kline(struct Client *cptr,
 	}
     }
 
-  if(parc != 0)
+  if(0 != parc)
     reason = *parv;
 
   if( valid_user_host(sptr,user,host) == 0 )

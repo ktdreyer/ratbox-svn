@@ -186,7 +186,7 @@ void    add_class(char *classname,
   t = find_class(classname);
   if (t == ClassList)
     {
-      p = (struct Class *)make_class();
+      p = make_class();
       p->next = t->next;
       t->next = p;
     }
@@ -197,6 +197,7 @@ void    add_class(char *classname,
          classname, p, t, confreq, ping, maxli, sendq));
 
   /* classname already known to be non NULL */
+  MyFree(ClassName(p));
   DupString(ClassName(p),classname);
   ConFreq(p) = confreq;
   PingFreq(p) = ping;
@@ -267,7 +268,7 @@ void    check_class()
  */
 void    initclass()
 {
-  ClassList = (struct Class *)make_class();
+  ClassList = make_class();
 
   ClassType(ClassList) = 0;
   DupString(ClassName(ClassList),"default");
