@@ -18,6 +18,7 @@
  *
  *  $Id$
  */
+#include "config.h"
 #include "listener.h"
 #include "client.h"
 #include "fdlist.h"
@@ -29,7 +30,6 @@
 #include "s_conf.h"
 #include "s_stats.h"
 #include "send.h"
-#include "config.h"
 #include "memory.h"
 
 #include <assert.h>
@@ -49,7 +49,7 @@ static PF accept_connection;
 
 static struct Listener* ListenerPollList = NULL;
 
-struct Listener* make_listener(int port, struct in_addr addr)
+struct Listener* make_listener(int port, struct irc_inaddr *addr)
 {
   struct Listener* listener = 
     (struct Listener*) MyMalloc(sizeof(struct Listener));
@@ -58,7 +58,7 @@ struct Listener* make_listener(int port, struct in_addr addr)
   listener->name        = me.name;
   listener->fd          = -1;
   listener->port        = port;
-  listener->addr.s_addr = addr.s_addr;
+  copy_s_addr(&IN_ADDR(listener->addr),&PIN_ADDR(addr));
 
   listener->next = NULL;
   return listener;
@@ -137,6 +137,20 @@ void show_ports(struct Client* sptr)
 #define HYBRID_SOMAXCONN SOMAXCONN
 #endif
 
+static void listener_dns_callback(void *ptr, adns_answer *reply)
+{
+  struct Listener *listener;
+  listener = (struct Listener *)ptr;
+  if(reply && (reply->status == adns_s_ok))
+  {
+   	if(strlen(*reply->rrs.str) < HOSTLEN)
+   	{
+   	 	strcpy(listener->vhost, *reply->rrs.str);
+  	 	listener->name = listener->vhost;
+        }	                                 
+  }
+}  
+
 static int inetport(struct Listener* listener)
 {
 #ifdef IPV6
@@ -196,26 +210,6 @@ static int inetport(struct Listener* listener)
 
 
 #ifdef IPV6
-  if (!IN6_ARE_ADDR_EQUAL((struct in6_addr *)&listener->addr, &in6addr_any)) {
-#else
-  if (INADDR_ANY != listener->addr.s_addr) {
-#endif
-    struct hostent* hp;
-    /*
-     * XXX - blocking call to gethostbyaddr
-     */
-    if ((hp = gethostbyaddr((char*) &listener->addr, 
-#ifdef IPV6
-			    sizeof(struct sockaddr_in6), AF_INET6))) {
-#else
-                            sizeof(struct sockaddr_in), AF_INET))) {
-#endif
-      strncpy_irc(listener->vhost, hp->h_name, HOSTLEN);
-      listener->name = listener->vhost;
-    }
-  }
-
-#ifdef IPV6
   if (bind(fd, (struct sockaddr*) &lsin6, sizeof(lsin6))) {
 #else
   if (bind(fd, (struct sockaddr*) &lsin, sizeof(lsin))) {
@@ -242,20 +236,33 @@ static int inetport(struct Listener* listener)
   listener->fd = fd;
 
   /* Listen completion events are READ events .. */
+  
+
   comm_setselect(fd, FDLIST_SERVICE, COMM_SELECT_READ, accept_connection,
     listener, 0);
 
+#ifdef IPV6
+  if (!IN6_ARE_ADDR_EQUAL((struct in6_addr *)&listener->addr, &in6addr_any)) {
+#else
+  if (INADDR_ANY != listener->addr.s_addr) {
+#endif
+    struct DNSQuery query;	
+    query.callback = listener_dns_callback;
+    query.ptr = listener;
+    adns_getaddr(&listener->addr, DEF_FAM, &query);
+  }
   return 1;
 }
 
-static struct Listener* find_listener(int port, struct in_addr addr)
+static struct Listener* find_listener(int port, struct irc_inaddr *addr)
 {
   struct Listener* listener = NULL;
   struct Listener* last_closed = NULL;
   
   for (listener = ListenerPollList; listener; listener = listener->next)
   {
-    if (port == listener->port && addr.s_addr == listener->addr.s_addr)
+    
+    if (port == listener->port && memcmp(PIN_ADDR(addr), IN_ADDR(listener->addr), sizeof(struct irc_inaddr)))
     {
       /* Try to return an open listener, otherwise reuse a closed one */
       if (listener->fd == -1)
@@ -277,7 +284,7 @@ static struct Listener* find_listener(int port, struct in_addr addr)
 void add_listener(int port, const char* vhost_ip) 
 {
   struct Listener* listener;
-  struct in_addr   vaddr;
+  struct irc_inaddr   vaddr;
 
   /*
    * if no port in conf line, don't bother
@@ -285,22 +292,24 @@ void add_listener(int port, const char* vhost_ip)
   if (0 == port)
     return;
 
-  vaddr.s_addr = INADDR_ANY;
-
+#ifdef IPV6
+  copy_s_addr(IN_ADDR(vaddr), &in6addr_any);
+#else
+  copy_s_addr(IN_ADDR(vaddr), INADDR_ANY);
+#endif
   if (vhost_ip) {
-    vaddr.s_addr = inet_addr(vhost_ip);
-    if (INADDR_NONE == vaddr.s_addr)
+    if(inetpton(DEF_FAM, vhost_ip, &IN_ADDR(vaddr)) <= 0)
       return;
   }
 
-  if ((listener = find_listener(port, vaddr)))
+  if ((listener = find_listener(port, &vaddr)))
   {
     if (listener->fd > -1)
       return;
   }
   else
   {
-    listener = make_listener(port, vaddr);
+    listener = make_listener(port, &vaddr);
     listener->next = ListenerPollList;
     ListenerPollList = listener;
   }
