@@ -854,6 +854,7 @@ int do_remote_user(char* nick, struct Client* cptr, struct Client* sptr,
    */
   user->server = find_or_add(server);
   strncpy_irc(sptr->host, host, HOSTLEN); 
+  strncpy_irc(sptr->info, realname, REALLEN);
   return register_remote_user(cptr, sptr, sptr->name, username);
 }
 
