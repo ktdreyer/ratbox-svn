@@ -1,3 +1,9 @@
+*** 20010816_1 by androsyn
+Removed the binary flag from linebuf_copy_line(). First we are not doing
+ziplinks within ircd, second, the ziplink code never actually generates
+a \r or \n, so this code was likely a mute point in the first place.
+
+
 *** 20010815_2 by leeh
 - updated the docs to cover the multi accept system
 
