@@ -214,13 +214,6 @@ conf_set_serverinfo_sid(void *data)
 }
 
 static void
-conf_set_serverinfo_description(void *data)
-{
-	MyFree(ServerInfo.description);
-	DupString(ServerInfo.description, (char *) data);
-}
-
-static void
 conf_set_serverinfo_network_name(void *data)
 {
 	char *p;
@@ -230,13 +223,6 @@ conf_set_serverinfo_network_name(void *data)
 
 	MyFree(ServerInfo.network_name);
 	DupString(ServerInfo.network_name, (char *) data);
-}
-
-static void
-conf_set_serverinfo_network_desc(void *data)
-{
-	MyFree(ServerInfo.network_desc);
-	DupString(ServerInfo.network_desc, (char *) data);
 }
 
 static void
@@ -269,25 +255,6 @@ conf_set_serverinfo_vhost6(void *data)
 }
 
 static void
-conf_set_serverinfo_hub(void *data)
-{
-	int hub = *(int *) data;
-
-	ServerInfo.hub = hub;
-}
-
-static void
-conf_set_serverinfo_use_ts6(void *data)
-{
-	int use_ts6 = *(int *) data;
-
-	/* note, it doesnt matter if this is disabled when we have TS6
-	 * links, because its only checked when a new server links --fl
-	 */
-	ServerInfo.use_ts6 = use_ts6;
-}
-
-static void
 conf_set_modules_module(void *data)
 {
 #ifndef STATIC_MODULES
@@ -314,27 +281,6 @@ conf_set_modules_path(void *data)
 #else
 	conf_report_error("Ignoring modules::path -- loadable module support net present.");
 #endif
-}
-
-static void
-conf_set_admin_name(void *data)
-{
-	MyFree(AdminInfo.name);
-	DupString(AdminInfo.name, (char *) data);
-}
-
-static void
-conf_set_admin_email(void *data)
-{
-	MyFree(AdminInfo.email);
-	DupString(AdminInfo.email, (char *) data);
-}
-
-static void
-conf_set_admin_description(void *data)
-{
-	MyFree(AdminInfo.description);
-	DupString(AdminInfo.description, (char *) data);
 }
 
 struct mode_table
@@ -1644,6 +1590,31 @@ remove_conf_item(const char *topconf, const char *name)
 }
 #endif
 
+/* *INDENT-OFF* */
+static struct ConfEntry conf_serverinfo_table[] =
+{
+	{ "description", 	CF_QSTRING, NULL, 0, &ServerInfo.description	},
+	{ "network_desc", 	CF_QSTRING, NULL, 0, &ServerInfo.network_desc	},
+	{ "hub", 		CF_YESNO,   NULL, 0, &ServerInfo.hub		},
+	{ "use_ts6", 		CF_YESNO,   NULL, 0, &ServerInfo.use_ts6	},
+
+	{ "network_name", 	CF_QSTRING, conf_set_serverinfo_network_name,	0, NULL },
+	{ "name", 		CF_QSTRING, conf_set_serverinfo_name,	0, NULL },
+	{ "sid", 		CF_QSTRING, conf_set_serverinfo_sid,	0, NULL },
+	{ "vhost", 		CF_QSTRING, conf_set_serverinfo_vhost,	0, NULL },
+	{ "vhost6", 		CF_QSTRING, conf_set_serverinfo_vhost6,	0, NULL },
+
+	{ "\0",	0, NULL, 0, NULL },
+};
+
+static struct ConfEntry conf_admin_table[] =
+{
+	{ "name",	CF_QSTRING, NULL, 200, &AdminInfo.name		},
+	{ "description",CF_QSTRING, NULL, 200, &AdminInfo.description	},
+	{ "email",	CF_QSTRING, NULL, 200, &AdminInfo.email		},
+	{ "\0",	0, NULL, 0, NULL },
+};
+
 static struct ConfEntry conf_log_table[] =
 {
 	{ "fname_userlog", 	CF_QSTRING, NULL, MAXPATHLEN, &ConfigFileEntry.fname_userlog	},
@@ -1661,6 +1632,15 @@ static struct ConfEntry conf_log_table[] =
 
 static struct ConfEntry conf_general_table[] =
 {
+	{ "oper_only_umodes", 	CF_STRING | CF_FLIST, conf_set_general_oper_only_umodes, 0, NULL },
+	{ "oper_umodes", 	CF_STRING | CF_FLIST, conf_set_general_oper_umodes,	 0, NULL },
+	{ "compression_level", 	CF_INT,    conf_set_general_compression_level,	0, NULL },
+	{ "havent_read_conf", 	CF_YESNO,  conf_set_general_havent_read_conf,	0, NULL },
+	{ "hide_error_messages",CF_STRING, conf_set_general_hide_error_messages,0, NULL },
+	{ "kline_delay", 	CF_TIME,   conf_set_general_kline_delay,	0, NULL },
+	{ "stats_k_oper_only", 	CF_STRING, conf_set_general_stats_k_oper_only,	0, NULL },
+	{ "stats_i_oper_only", 	CF_STRING, conf_set_general_stats_i_oper_only,	0, NULL },
+
 	{ "default_operstring",	CF_QSTRING, NULL, REALLEN,    &ConfigFileEntry.default_operstring },
 	{ "default_adminstring",CF_QSTRING, NULL, REALLEN,    &ConfigFileEntry.default_adminstring },
 	{ "egdpool_path",	CF_QSTRING, NULL, MAXPATHLEN, &ConfigFileEntry.egdpool_path },
@@ -1751,6 +1731,7 @@ static struct ConfEntry conf_serverhide_table[] =
 	{ "links_delay",	CF_TIME,  NULL, 0, &ConfigServerHide.links_delay	},
 	{ "\0", 		0, 	  NULL, 0, NULL }
 };
+/* *INDENT-ON* */
 
 void
 newconf_init()
@@ -1759,22 +1740,8 @@ newconf_init()
 	add_conf_item("modules", "path", CF_QSTRING, conf_set_modules_path);
 	add_conf_item("modules", "module", CF_QSTRING, conf_set_modules_module);
 
-	add_top_conf("serverinfo", NULL, NULL, NULL);
-	add_conf_item("serverinfo", "name", CF_QSTRING, conf_set_serverinfo_name);
-	add_conf_item("serverinfo", "sid", CF_QSTRING, conf_set_serverinfo_sid);
-	add_conf_item("serverinfo", "description", CF_QSTRING, conf_set_serverinfo_description);
-	add_conf_item("serverinfo", "network_name", CF_QSTRING, conf_set_serverinfo_network_name);
-	add_conf_item("serverinfo", "network_desc", CF_QSTRING, conf_set_serverinfo_network_desc);
-	add_conf_item("serverinfo", "vhost", CF_QSTRING, conf_set_serverinfo_vhost);
-	add_conf_item("serverinfo", "vhost6", CF_QSTRING, conf_set_serverinfo_vhost6);
-	add_conf_item("serverinfo", "hub", CF_YESNO, conf_set_serverinfo_hub);
-	add_conf_item("serverinfo", "use_ts6", CF_YESNO, conf_set_serverinfo_use_ts6);
-
-	add_top_conf("admin", NULL, NULL, NULL);
-	add_conf_item("admin", "name", CF_QSTRING, conf_set_admin_name);
-	add_conf_item("admin", "description", CF_QSTRING, conf_set_admin_description);
-	add_conf_item("admin", "email", CF_QSTRING, conf_set_admin_email);
-
+	add_top_conf("serverinfo", NULL, NULL, conf_serverinfo_table);
+	add_top_conf("admin", NULL, NULL, conf_admin_table);
 	add_top_conf("log", NULL, NULL, conf_log_table);
 
 	add_top_conf("operator", conf_begin_oper, conf_end_oper, NULL);
@@ -1839,21 +1806,6 @@ newconf_init()
 	add_conf_item("cluster", "type", CF_STRING | CF_FLIST, conf_set_cluster_type);
 
 	add_top_conf("general", NULL, NULL, conf_general_table);
-
-	add_conf_item("general", "stats_k_oper_only", CF_STRING,
-		      conf_set_general_stats_k_oper_only);
-	add_conf_item("general", "stats_i_oper_only", CF_STRING,
-		      conf_set_general_stats_i_oper_only);
-	add_conf_item("general", "hide_error_messages", CF_STRING,
-		      conf_set_general_hide_error_messages);
-	add_conf_item("general", "oper_only_umodes", CF_STRING | CF_FLIST,
-		      conf_set_general_oper_only_umodes);
-	add_conf_item("general", "oper_umodes", CF_STRING | CF_FLIST, conf_set_general_oper_umodes);
-	add_conf_item("general", "compression_level", CF_INT, conf_set_general_compression_level);
-	add_conf_item("general", "havent_read_conf", CF_YESNO, conf_set_general_havent_read_conf);
-	add_conf_item("general", "kline_delay", CF_TIME, conf_set_general_kline_delay);
-	
-
 	add_top_conf("channel", NULL, NULL, conf_channel_table);
 	add_top_conf("serverhide", NULL, NULL, conf_serverhide_table);
 }
