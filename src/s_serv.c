@@ -441,6 +441,16 @@ int check_server(struct Client* cptr)
        else
          {
            cptr->serverMask = nextFreeMask();
+           /* its full folks, 32 leaves? wow. I never thought I'd
+            * see the day. Now this will have to be recoded! -Dianora
+            */
+           if(!cptr->serverMask)
+             {
+               sendto_realops("serverMask is full!");
+
+               /* try and negotiate a non LL connect */
+               ClearCap(cptr,CAP_LL);
+             }
 #ifdef DEBUGLL
            sendto_realops("s_serv.c: Adding serverMask %X", cptr->serverMask );
 #endif
