@@ -1107,6 +1107,12 @@ dead_link(struct Client *client_p)
 		ircsprintf(abt->notice, "Write error: %s", strerror(errno));
 	}
 
+	if(client_p->localClient->fd >= 0)
+	{
+		/* We are as good as useless anyways */
+		fd_close(client_p->localClient->fd);
+		client_p->localClient->fd = -1;
+	}
 	Debug((DEBUG_ERROR, "Closing link to %s: %s", get_client_name(client_p, HIDE_IP), notice));
 	dlinkAdd(abt, &abt->node, &abort_list);
 }
@@ -1191,7 +1197,8 @@ exit_unknown_client(struct Client *client_p, struct Client *source_p, struct Cli
 	client_flush_input(source_p);
 	dlinkFindDestroy(&unknown_list, source_p);
 	log_user_exit(source_p);
-	sendto_one(source_p, "ERROR :Closing Link: %s (%s)", source_p->host, comment);
+	if(source_p->localClient->fd >= 0)
+		sendto_one(source_p, "ERROR :Closing Link: %s (%s)", source_p->host, comment);
 	close_connection(source_p);
 
 	if((source_p->flags & FLAGS_KILLED) == 0)
