@@ -1,3 +1,11 @@
+*** 20010101_26 by madmax
+The last patch broke /whois
+(You could only whois people on the same server if your uplink didnt forward
+the numerics - not something we want..)
+Just commented out A1kmm's code.
+We can come back to this once we've cut a beta
+
+
 *** 20010101_25 by toot
 'already registered' should be a numeric, not a notice
 
