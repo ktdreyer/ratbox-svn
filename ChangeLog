@@ -1,3 +1,24 @@
+leeh        2002/11/24 15:21:17 UTC	(20021124_16)
+
+  Modified files:
+    modules              .depend m_gline.c m_kline.c 
+    src                  .depend s_gline.c 
+  Removed files:
+    include              m_kline.h 
+  Log:
+  - we dont queue klines to write to a file anymore, include/m_kline.h is
+    as useful as giving a goldfish a shopping list.
+  
+  Revision  Changes    Path
+  7.9       +0 -46     ircd-ratbox/include/m_kline.h (dead)
+  1.16      +16 -16    ircd-ratbox/modules/.depend
+  1.99      +1 -2      ircd-ratbox/modules/m_gline.c
+  1.128     +1 -2      ircd-ratbox/modules/m_kline.c
+  7.17      +5 -6      ircd-ratbox/src/.depend
+  1.31      +0 -1      ircd-ratbox/src/s_gline.c
+
+
+
 leeh        2002/11/24 15:11:08 UTC	(20021124_15)
 
   Modified files:
