@@ -1,3 +1,8 @@
+*** 20010128_8 by jdc
+No throttling/"load" check for opers when setting /AWAY.
+
+
+
 *** 20010128_7 by jdc
 Grumble grumble.  Put the code back in; apparently mIRC and
 others use the "feature" to obtain the clients' local IP.
