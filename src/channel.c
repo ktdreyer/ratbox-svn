@@ -44,7 +44,7 @@
 #include "memory.h"
 #include "balloc.h"
 #include "s_log.h"
-#include "s_newconf.h"
+#include "s_oldnewconf.h"
 
 struct config_channel_entry ConfigChannel;
 dlink_list global_channel_list;

@@ -28,7 +28,7 @@
 #include "ircd_defs.h"
 #include "tools.h"
 #include "s_conf.h"
-#include "s_newconf.h"
+#include "s_oldnewconf.h"
 #include "s_serv.h"
 #include "s_stats.h"
 #include "channel.h"
@@ -51,7 +51,6 @@
 #include "memory.h"
 #include "balloc.h"
 #include "patricia.h"
-#include "cluster.h"
 #include "reject.h"
 #include "cache.h"
 
@@ -1773,8 +1772,7 @@ clear_out_old_conf(void)
 	clear_out_address_conf();
 	clear_resvs();
 	clear_xlines();
-	clear_shared();
-	clear_clusters();
+	clear_shared_conf();
 
 	/* clean out module paths */
 #ifndef STATIC_MODULES

@@ -45,6 +45,7 @@
 #include "common.h"
 #include "packet.h"
 #include "scache.h"
+#include "s_oldnewconf.h"
 
 static int mr_nick(struct Client *, struct Client *, int, const char **);
 static int m_nick(struct Client *, struct Client *, int, const char **);

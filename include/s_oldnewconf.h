@@ -32,8 +32,8 @@
  * $Id$
  */
 
-#ifndef INCLUDED_newconf_h
-#define INCLUDED_newconf_h
+#ifndef INCLUDED_s_oldnewconf_h
+#define INCLUDED_s_oldnewconf_h
 
 #include "tools.h"
 
@@ -85,13 +85,6 @@ extern void clear_resvs(void);
 
 extern int valid_wild_card_simple(const char *);
 extern int clean_resv_nick(const char *);
-
-extern dlink_list shared_list;
-extern struct shared *make_shared(void);
-extern void free_shared(struct shared *);
-extern void clear_shared(void);
-extern int find_shared(const char *username, const char *host, 
-			const char *servername, int type);
 
 #endif
 

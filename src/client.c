@@ -54,7 +54,7 @@
 #include "balloc.h"
 #include "listener.h"
 #include "hook.h"
-#include "s_newconf.h"
+#include "s_oldnewconf.h"
 #include "msg.h"
 
 static void check_pings_list(dlink_list * list);

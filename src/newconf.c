@@ -18,7 +18,7 @@
 #include "s_log.h"
 #include "s_conf.h"
 #include "s_user.h"
-#include "s_newconf.h"
+#include "s_oldnewconf.h"
 #include "send.h"
 #include "setup.h"
 #include "modules.h"
@@ -27,7 +27,6 @@
 #include "s_serv.h"
 #include "event.h"
 #include "hash.h"
-#include "cluster.h"
 #include "cache.h"
 #include "ircd.h"
 
@@ -53,8 +52,8 @@ static struct ConfItem *yy_aconf_next;
 static struct Class *yy_class = NULL;
 
 static struct rxconf *yy_rxconf = NULL;
-static struct shared *yy_uconf = NULL;
-static struct cluster *yy_cconf = NULL;
+
+static struct shared_conf *yy_uconf = NULL;
 
 static char *resv_reason;
 
@@ -443,24 +442,26 @@ static struct mode_table auth_table[] = {
 };
 
 static struct mode_table cluster_table[] = {
-	{ "kline",	CLUSTER_KLINE	},
-	{ "unkline",	CLUSTER_UNKLINE	},
-	{ "locops",	CLUSTER_LOCOPS	},
-	{ "xline",	CLUSTER_XLINE	},
-	{ "unxline",	CLUSTER_UNXLINE	},
-	{ "resv",	CLUSTER_RESV	},
-	{ "unresv",	CLUSTER_UNRESV	},
+	{ "kline",	SHARED_KLINE	},
+	{ "unkline",	SHARED_UNKLINE	},
+	{ "locops",	SHARED_LOCOPS	},
+	{ "xline",	SHARED_XLINE	},
+	{ "unxline",	SHARED_UNXLINE	},
+	{ "resv",	SHARED_RESV	},
+	{ "unresv",	SHARED_UNRESV	},
 	{ "all",	CLUSTER_ALL	},
 	{NULL, 0}
 };
 
 static struct mode_table shared_table[] =
 {
-	{ "kline",	OPER_K		},
-	{ "unkline",	OPER_UNKLINE	},
-	{ "xline",	OPER_XLINE	},
-	{ "resv",	OPER_RESV	},
-	{ "all",	OPER_K|OPER_UNKLINE|OPER_XLINE },
+	{ "kline",	SHARED_KLINE	},
+	{ "unkline",	SHARED_UNKLINE	},
+	{ "xline",	SHARED_XLINE	},
+	{ "unxline",	SHARED_UNXLINE	},
+	{ "resv",	SHARED_RESV	},
+	{ "unresv",	SHARED_UNRESV	},
+	{ "all",	SHARED_ALL	},
 	{NULL, 0}
 };
 /* *INDENT-ON* */
@@ -1163,24 +1164,36 @@ conf_set_resv_nick(void *data)
 static int
 conf_begin_shared(struct TopConf *tc)
 {
-	yy_uconf = make_shared();
-	yy_uconf->flags = OPER_K;
+	if(yy_uconf != NULL)
+		free_shared_conf(yy_uconf);
+
+	yy_uconf = make_shared_conf();
 	return 0;
 }
 
 static int
 conf_end_shared(struct TopConf *tc)
 {
+	if(EmptyString(yy_uconf->server))
+		DupString(yy_uconf->server, "*");
+
+	if(EmptyString(yy_uconf->username))
+		DupString(yy_uconf->username, "*");
+
+	if(EmptyString(yy_uconf->host))
+		DupString(yy_uconf->host, "*");
+
 	dlinkAddAlloc(yy_uconf, &shared_list);
 	yy_uconf = NULL;
+
 	return 0;
 }
 
 static void
 conf_set_shared_name(void *data)
 {
-	MyFree(yy_uconf->servername);
-	DupString(yy_uconf->servername, data);
+	MyFree(yy_uconf->server);
+	DupString(yy_uconf->server, data);
 }
 
 static void
@@ -1197,28 +1210,6 @@ conf_set_shared_user(void *data)
 		MyFree(yy_uconf->host);
 		DupString(yy_uconf->host, p);
 	}
-}
-
-static void
-conf_set_shared_kline(void *data)
-{
-	int yesno = *(unsigned int *) data;
-
-	if(yesno)
-		yy_uconf->flags |= OPER_K;
-	else
-		yy_uconf->flags &= ~OPER_K;
-}
-
-static void
-conf_set_shared_unkline(void *data)
-{
-	int yesno = *(unsigned int *) data;
-
-	if(yesno)
-		yy_uconf->flags |= OPER_UNKLINE;
-	else
-		yy_uconf->flags &= ~OPER_UNKLINE;
 }
 
 static void
@@ -1778,32 +1769,33 @@ conf_set_gecos_action(void *data)
 static int
 conf_begin_cluster(struct TopConf *tc)
 {
-	yy_cconf = make_cluster();
+	if(yy_uconf != NULL)
+		free_shared_conf(yy_uconf);
+
+	yy_uconf = make_shared_conf();
 	return 0;
 }
 
 static int
 conf_end_cluster(struct TopConf *tc)
 {
-	if(!EmptyString(yy_cconf->name))
-	{
-		dlinkAddAlloc(yy_cconf, &cluster_list);
-	}
-	else
+	if(EmptyString(yy_uconf->server))
 	{
 		conf_report_error("Ignoring cluster -- invalid cluster::server");
-		free_cluster(yy_cconf);
+		free_shared_conf(yy_uconf);
 	}
+	else
+		dlinkAddAlloc(yy_uconf, &cluster_list);
 
-	yy_cconf = NULL;
+	yy_uconf = NULL;
 	return 0;
 }
 
 static void
 conf_set_cluster_name(void *data)
 {
-	MyFree(yy_cconf->name);
-	DupString(yy_cconf->name, data);
+	MyFree(yy_uconf->server);
+	DupString(yy_uconf->server, data);
 }
 
 static void
@@ -1811,7 +1803,7 @@ conf_set_cluster_type(void *data)
 {
 	conf_parm_t *args = data;
 
-	set_modes_from_table(&yy_cconf->type, "flag", cluster_table, args);
+	set_modes_from_table(&yy_uconf->flags, "flag", cluster_table, args);
 }
 
 static void
@@ -2653,8 +2645,6 @@ newconf_init()
 	add_top_conf("shared", conf_begin_shared, conf_end_shared);
 	add_conf_item("shared", "name", CF_QSTRING, conf_set_shared_name);
 	add_conf_item("shared", "user", CF_QSTRING, conf_set_shared_user);
-	add_conf_item("shared", "kline", CF_YESNO, conf_set_shared_kline);
-	add_conf_item("shared", "unkline", CF_YESNO, conf_set_shared_unkline);
 	add_conf_item("shared", "type", CF_STRING | CF_FLIST, conf_set_shared_type);
 
 	add_top_conf("connect", conf_begin_connect, conf_end_connect);

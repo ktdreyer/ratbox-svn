@@ -36,7 +36,6 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
-#include "cluster.h"
 #include "s_serv.h"
 
 static int m_locops(struct Client *, struct Client *, int, const char **);
@@ -61,8 +60,10 @@ m_locops(struct Client *client_p, struct Client *source_p, int parc, const char 
 {
 	sendto_wallops_flags(UMODE_LOCOPS, source_p, "LOCOPS - %s", parv[1]);
 
+#ifdef XXX_BROKEN_CLUSTER
 	if(dlink_list_length(&cluster_list) > 0)
 		cluster_locops(source_p, parv[1]);
+#endif
 
 	return 0;
 }
@@ -78,7 +79,7 @@ ms_locops(struct Client *client_p, struct Client *source_p, int parc, const char
 	if(!match(parv[1], me.name))
 		return 0;
 
-	if(find_cluster(source_p->user->server, CLUSTER_LOCOPS))
+	if(find_shared_conf("*", "*", source_p->user->server, SHARED_LOCOPS))
 		sendto_wallops_flags(UMODE_LOCOPS, source_p, "SLOCOPS - %s", parv[2]);
 
 	return 0;

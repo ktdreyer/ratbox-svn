@@ -35,10 +35,10 @@
 #include "modules.h"
 #include "s_conf.h"
 #include "s_newconf.h"
+#include "s_oldnewconf.h"
 #include "hash.h"
 #include "s_log.h"
 #include "sprintf_irc.h"
-#include "cluster.h"
 
 static int mo_resv(struct Client *, struct Client *, int, const char **);
 static int ms_resv(struct Client *, struct Client *, int, const char **);
@@ -96,11 +96,12 @@ mo_resv(struct Client *client_p, struct Client *source_p, int parc, const char *
 		if(match(parv[3], me.name) == 0)
 			return 0;
 	}
-
+#ifdef XXX_BROKEN_CLUSTER
 	else if(dlink_list_length(&cluster_list) > 0)
 	{
 		cluster_resv(source_p, parv[1], reason);
 	}
+#endif
 
 	parse_resv(source_p, parv[1], reason);
 
@@ -130,9 +131,8 @@ ms_resv(struct Client *client_p, struct Client *source_p,
 	if(!IsPerson(source_p))
 		return 0;
 
-	if(find_cluster(source_p->user->server, CLUSTER_RESV) ||
-	   find_shared(source_p->username, source_p->host, 
-			source_p->user->server, OPER_RESV))
+	if(find_shared_conf(source_p->username, source_p->host,
+				source_p->user->server, SHARED_RESV))
 	{
 		parse_resv(source_p, parv[2], parv[3]);
 	}
@@ -232,10 +232,12 @@ mo_unresv(struct Client *client_p, struct Client *source_p, int parc, const char
 		if(match(parv[3], me.name) == 0)
 			return 0;
 	}
+#ifdef XXX_BROKEN_CLUSTER
 	else if(dlink_list_length(&cluster_list) > 0)
 	{
 		cluster_unresv(source_p, parv[1]);
 	}
+#endif
 
 	remove_resv(source_p, parv[1]);
 	return 0;
@@ -262,9 +264,8 @@ ms_unresv(struct Client *client_p, struct Client *source_p, int parc, const char
 	if(!IsPerson(source_p))
 		return 0;
 
-	if(find_cluster(source_p->user->server, CLUSTER_UNRESV) ||
-	   find_shared(source_p->username, source_p->host,
-			    source_p->user->server, OPER_RESV))
+	if(find_shared_conf(source_p->username, source_p->host,
+				source_p->user->server, SHARED_UNRESV))
 	{
 		remove_resv(source_p, parv[2]);
 	}

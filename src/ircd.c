@@ -62,7 +62,7 @@
 #include "balloc.h"
 #include "newconf.h"
 #include "patricia.h"
-#include "s_newconf.h"
+#include "s_oldnewconf.h"
 #include "reject.h"
 #include "s_conf.h"
 #include "cache.h"

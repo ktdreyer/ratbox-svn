@@ -48,9 +48,8 @@
 #include "parse.h"
 #include "modules.h"
 #include "hook.h"
-#include "s_newconf.h"
+#include "s_oldnewconf.h"
 #include "hash.h"
-#include "cluster.h"
 
 static int m_stats (struct Client *, struct Client *, int, const char **);
 
@@ -822,23 +821,15 @@ struct shared_flags
 	char has;
 	char hasnt;
 };
-static struct shared_flags shared_flagtable[] = {
-	{ OPER_K,	'K', 'k' },
-	{ OPER_UNKLINE,	'U', 'u' },
-	{ OPER_XLINE,	'X', 'x' },
-	{ OPER_XLINE,	'Y', 'y' },
-	{ OPER_RESV,	'Q', 'q' },
-	{ OPER_RESV,	'R', 'r' },
-	{ 0,		'\0', '\0' }
-};
-static struct shared_flags cluster_flagtable[] = {
-	{ CLUSTER_KLINE,	'K', 'k' },
-	{ CLUSTER_UNKLINE,	'U', 'u' },
-	{ CLUSTER_XLINE,	'X', 'x' },
-	{ CLUSTER_UNXLINE,	'Y', 'y' },
-	{ CLUSTER_RESV,		'Q', 'q' },
-	{ CLUSTER_UNRESV,	'R', 'r' },
-	{ CLUSTER_LOCOPS,	'L', 'l' },
+static struct shared_flags shared_flagtable[] =
+{
+	{ SHARED_KLINE,		'K', 'k' },
+	{ SHARED_UNKLINE,	'U', 'u' },
+	{ SHARED_XLINE,		'X', 'x' },
+	{ SHARED_UNXLINE,	'Y', 'y' },
+	{ SHARED_RESV,		'Q', 'q' },
+	{ SHARED_UNRESV,	'R', 'r' },
+	{ SHARED_LOCOPS,	'L', 'l' },
 	{ 0,			'\0', '\0' }
 };
 
@@ -846,16 +837,15 @@ static struct shared_flags cluster_flagtable[] = {
 static void
 stats_shared (struct Client *source_p)
 {
-	struct shared *uconf;
-	struct cluster *clptr;
+	struct shared_conf *shared_p;
 	dlink_node *ptr;
 	char buf[9];
 	char *p;
 	int i;
 
-	DLINK_FOREACH (ptr, shared_list.head)
+	DLINK_FOREACH(ptr, shared_list.head)
 	{
-		uconf = ptr->data;
+		shared_p = ptr->data;
 
 		p = buf;
 
@@ -863,43 +853,41 @@ stats_shared (struct Client *source_p)
 
 		for(i = 0; shared_flagtable[i].flag != 0; i++)
 		{
-			if(uconf->flags & shared_flagtable[i].flag)
+			if(shared_p->flags & shared_flagtable[i].flag)
 				*p++ = shared_flagtable[i].has;
 			else
 				*p++ = shared_flagtable[i].hasnt;
 		}
 
-		*p++ = 'l';
 		*p = '\0';
 
 		sendto_one_numeric(source_p, RPL_STATSULINE, 
-				   form_str (RPL_STATSULINE),
-				   EmptyString (uconf->servername) ? "*" : uconf->servername,
-				   EmptyString (uconf->username) ? "*" : uconf->username,
-				   EmptyString (uconf->host) ? "*" : uconf->host, buf);
+					form_str(RPL_STATSULINE),
+					shared_p->server, shared_p->username,
+					shared_p->host, buf);
 	}
 
 	DLINK_FOREACH(ptr, cluster_list.head)
 	{
-		clptr = ptr->data;
+		shared_p = ptr->data;
 
 		p = buf;
 
 		*p++ = 'C';
 
-		for(i = 0; cluster_flagtable[i].flag != 0; i++)
+		for(i = 0; shared_flagtable[i].flag != 0; i++)
 		{
-			if(clptr->type & cluster_flagtable[i].flag)
-				*p++ = cluster_flagtable[i].has;
+			if(shared_p->flags & shared_flagtable[i].flag)
+				*p++ = shared_flagtable[i].has;
 			else
-				*p++ = cluster_flagtable[i].hasnt;
+				*p++ = shared_flagtable[i].hasnt;
 		}
 
 		*p = '\0';
 
-		sendto_one_numeric(source_p, RPL_STATSULINE,
-				   form_str(RPL_STATSULINE),
-				   clptr->name, "*", "*", buf);
+		sendto_one_numeric(source_p, RPL_STATSULINE, 
+					form_str(RPL_STATSULINE),
+					shared_p->server, "*", "*", buf);
 	}
 }
 

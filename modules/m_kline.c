@@ -45,7 +45,6 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
-#include "cluster.h"
 #include "event.h"
 
 static int mo_kline(struct Client *, struct Client *, int, const char **);
@@ -168,11 +167,13 @@ mo_kline(struct Client *client_p, struct Client *source_p,
 		if(!match(target_server, me.name))
 			return 0;
 	}
+#ifdef XXX_BROKEN_CLUSTER
 	/* if we have cluster servers, send it to them.. */
 	else if(dlink_list_length(&cluster_list) > 0)
 	{
 		cluster_kline(source_p, tkline_time, user, host, reason);
 	}
+#endif
 
 	if(!valid_user_host(source_p, user, host) || 
 	   !valid_wild_card(source_p, user, host) ||
@@ -263,9 +264,8 @@ ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	khost = parv[4];
 	kreason = LOCAL_COPY(parv[5]);
 
-	if(find_cluster(source_p->user->server, CLUSTER_KLINE) ||
-	   find_shared(source_p->username, source_p->host,
-		       source_p->user->server, OPER_K))
+	if(find_shared_conf(source_p->username, source_p->host,
+				source_p->user->server, SHARED_KLINE))
 	{
 		if(!valid_user_host(source_p, kuser, khost) || 
 		   !valid_wild_card(source_p, kuser, khost) ||
@@ -368,10 +368,12 @@ mo_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 		if(match(parv[3], me.name) == 0)
 			return 0;
 	}
+#ifdef XXX_BROKEN_CLUSTER
 	else if(dlink_list_length(&cluster_list) > 0)
 	{
 		cluster_unkline(source_p, user, host);
 	}
+#endif
 
 	if(remove_temp_kline(user, host))
 	{
@@ -416,22 +418,8 @@ ms_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	if(!IsPerson(source_p))
 		return 0;
 
-	if(find_cluster(source_p->user->server, CLUSTER_UNKLINE))
-	{
-		if(remove_temp_kline(kuser, khost))
-		{
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "%s has removed the temporary K-Line for: [%s@%s]",
-					     get_oper_name(source_p), kuser, khost);
-			ilog(L_KLINE, "%s removed temporary K-Line for [%s@%s]",
-			     source_p->name, kuser, khost);
-			return 0;
-		}
-
-		remove_permkline_match(source_p, khost, kuser);
-	}
-	else if(find_shared(source_p->username, source_p->host,
-			    source_p->user->server, OPER_UNKLINE))
+	if(find_shared_conf(source_p->username, source_p->host,
+				source_p->user->server, SHARED_UNKLINE))
 	{
 		if(remove_temp_kline(kuser, khost))
 		{

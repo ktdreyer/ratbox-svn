@@ -1,6 +1,6 @@
 /*
  * ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
- * s_newconf.c - code for dealing with conf stuff like k/d/x lines
+ * s_oldnewconf.c - code for dealing with conf stuff like k/d/x lines
  *
  * Copyright (C) 2002-2003 Lee Hardy <lee@leeh.co.uk>
  * Copyright (C) 2002-2003 ircd-ratbox development team
@@ -36,7 +36,7 @@
 #include "ircd_defs.h"
 #include "common.h"
 #include "s_conf.h"
-#include "s_newconf.h"
+#include "s_oldnewconf.h"
 #include "tools.h"
 #include "client.h"
 #include "memory.h"
@@ -46,13 +46,11 @@
 #include "hash.h"
 
 static BlockHeap *rxconf_heap = NULL;
-static BlockHeap *shared_heap = NULL;
 
 dlink_list xline_list;
 dlink_list xline_hash_list;
 dlink_list resv_list;
 dlink_list resv_hash_list;
-dlink_list shared_list;
 dlink_list encap_list;
 
 static int is_wildcard_esc(const char *);
@@ -68,7 +66,6 @@ void
 init_conf(void)
 {
 	rxconf_heap = BlockHeapCreate(sizeof(struct rxconf), RXCONF_HEAP_SIZE);
-	shared_heap = BlockHeapCreate(sizeof(struct shared), SHARED_HEAP_SIZE);
 }
 
 /* make_rxconf()
@@ -436,93 +433,5 @@ strip_escapes(const char *data)
 
 	*s = '\0';
 	return buf;
-}
-
-/* make_shared()
- *
- * inputs       -
- * outputs      -
- * side effects - creates a shared block
- */
-struct shared *
-make_shared(void)
-{
-	struct shared *uconf;
-
-	uconf = BlockHeapAlloc(shared_heap);
-	memset(uconf, 0, sizeof(struct shared));
-
-	return uconf;
-}
-
-/* free_shared()
- *
- * inputs       - shared block to free
- * outputs      -
- * side effects - shared block is freed.
- */
-void
-free_shared(struct shared *uconf)
-{
-	assert(uconf != NULL);
-	if(uconf == NULL)
-		return;
-
-	MyFree(uconf->username);
-	MyFree(uconf->host);
-	MyFree(uconf->servername);
-	BlockHeapFree(shared_heap, uconf);
-}
-
-/* clear_shared()
- *
- * inputs       -
- * outputs      -
- * side effects - shared blocks are nuked
- */
-void
-clear_shared(void)
-{
-	struct shared *uconf;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, shared_list.head)
-	{
-		uconf = ptr->data;
-
-		free_shared(uconf);
-		dlinkDestroy(ptr, &shared_list);
-	}
-}
-
-/* find_shared()
- *
- * inputs       - username, hostname, servername, type to find shared for
- * outputs      - YES if one found, else NO
- * side effects -
- */
-int
-find_shared(const char *username, const char *host, const char *servername, int flags)
-{
-	struct shared *uconf;
-	dlink_node *ptr;
-
-	DLINK_FOREACH(ptr, shared_list.head)
-	{
-		uconf = ptr->data;
-
-		if((uconf->flags & flags) == 0)
-			continue;
-
-		if((EmptyString(uconf->servername)
-		    || match(uconf->servername, servername))
-		   && (EmptyString(uconf->username)
-		       || match(uconf->username, username))
-		   && (EmptyString(uconf->host) || match(uconf->host, host)))
-			return YES;
-	}
-
-	return NO;
 }
 

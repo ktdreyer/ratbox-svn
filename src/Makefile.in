@@ -58,7 +58,6 @@ BASE_SRCS =                     \
   channel.c                     \
   class.c                       \
   client.c                      \
-  cluster.c			\
   commio.c			\
   event.c                       \
   getopt.c                      \
@@ -83,7 +82,8 @@ BASE_SRCS =                     \
   restart.c                     \
   s_auth.c                      \
   s_conf.c                      \
-  s_newconf.c                   \
+  s_newconf.c			\
+  s_oldnewconf.c                \
   s_gline.c                     \
   s_log.c                       \
   s_serv.c                      \

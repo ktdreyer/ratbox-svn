@@ -52,7 +52,7 @@
 #include "modules.h"
 #include "s_conf.h"
 #include "s_newconf.h"
-#include "cluster.h"
+#include "s_oldnewconf.h"
 
 static int mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
 static int ms_xline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
@@ -153,8 +153,10 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 		if(!match(target_server, me.name))
 			return 0;
 	}
+#ifdef XXX_BROKEN_CLUSTER
 	else if(dlink_list_length(&cluster_list) > 0)
 		cluster_xline(source_p, parv[1], xtype, reason);
+#endif
 
 	if(!valid_xline(source_p, parv[1], reason))
 		return 0;
@@ -187,10 +189,8 @@ ms_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(!match(parv[1], me.name))
 		return 0;
 
-	/* first look to see if we're clustering with the server */
-	if(find_cluster(source_p->user->server, CLUSTER_XLINE) ||
-	   find_shared(source_p->username, source_p->host, 
-		       source_p->user->server, OPER_XLINE))
+	if(find_shared_conf(source_p->username, source_p->host,
+				source_p->user->server, SHARED_XLINE))
 	{
 		if(!valid_xline(source_p, parv[2], parv[4]))
 			return 0;
@@ -337,9 +337,8 @@ ms_unxline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	if(!IsPerson(source_p))
 		return 0;
 
-	if(find_cluster(source_p->user->server, CLUSTER_UNXLINE) ||
-	   find_shared(source_p->username, source_p->host, 
-		       source_p->user->server, OPER_XLINE))
+	if(find_shared_conf(source_p->username, source_p->host,
+				source_p->user->server, SHARED_UNXLINE))
 	{
 		remove_xline(source_p, parv[2]);
 	}

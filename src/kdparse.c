@@ -28,7 +28,7 @@
 #include "tools.h"
 #include "s_log.h"
 #include "s_conf.h"
-#include "s_newconf.h"
+#include "s_oldnewconf.h"
 #include "hostmask.h"
 #include "client.h"
 #include "irc_string.h"

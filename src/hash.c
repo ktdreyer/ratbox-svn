@@ -38,7 +38,7 @@
 #include "send.h"
 #include "memory.h"
 #include "msg.h"
-#include "s_newconf.h"
+#include "s_oldnewconf.h"
 #include "cache.h"
 
 /* New hash code */
