@@ -1,3 +1,10 @@
+*** 20010323_1 by ejb
+- support for saying '20 megabytes' and '5 hours' and such like
+  in ircd.conf.  for some reason 'sendq=100;' to mean 100kb isn't
+  working.. should be fixed before release.
+
+
+
 *** 20010322_4 by ejb
 - commit send.h as well..
 
