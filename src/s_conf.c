@@ -2388,6 +2388,8 @@ static void initconf(FBFILE* file, int use_include)
           MyFree(aconf->user);
           aconf->name = aconf->host;
           aconf->host = (char *)NULL;
+          if(!aconf->passwd)
+             DupString(aconf->passwd,"*");
           aconf->next = u_conf;
           u_conf = aconf;
         }
