@@ -1,3 +1,7 @@
+*** 20010526_10 by davidt
+- oops, most people probably don't want debugging enabled...
+
+
 *** 20010526_9 by davidt
 - oops, commit regened configure. (strange cvs conflict must've deleted
   the copy i was testing.. weird..)
