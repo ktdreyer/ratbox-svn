@@ -384,6 +384,7 @@ struct exit_client_hook
 #define OPER_RESV		0x000800 /* XXX - only here for shared {}; */
 #define OPER_OPERWALL		0x001000
 #define OPER_HIDDENADMIN        0x002000
+#define OPER_INVIS		0x004000
 #define OPER_FLAGS      (OPER_GLOBAL_KILL | OPER_REMOTE | OPER_UNKLINE |\
                          OPER_GLINE | OPER_N | OPER_K | OPER_DIE |\
                          OPER_REHASH | OPER_ADMIN | OPER_XLINE | OPER_OPERWALL|\
@@ -519,6 +520,9 @@ struct exit_client_hook
                                  ((x)->flags2 & OPER_HIDDENADMIN))
 #define IsOperOperwall(x)	((x)->flags2 & OPER_OPERWALL)
 #define IsOperSpy(x)		((x)->flags2 & OPER_SPY)
+
+#define IsOperInvis(x)		((x)->flags2 & OPER_INVIS)
+#define SetOperInvis(x)		((x)->flags2 |= OPER_INVIS)
 
 #define IsFloodDone(x)          ((x)->flags2 & FLAGS2_FLOODDONE)
 #define SetFloodDone(x)         ((x)->flags2 |= FLAGS2_FLOODDONE)

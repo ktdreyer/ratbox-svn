@@ -662,6 +662,8 @@ stats_operedup (struct Client *source_p)
 	DLINK_FOREACH (oper_ptr, oper_list.head)
 	{
 		target_p = oper_ptr->data;
+		if(IsOperInvis(target_p))
+			continue;
 
 		if(MyClient (source_p) && IsOper (source_p))
 		{
