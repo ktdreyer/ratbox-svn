@@ -51,7 +51,8 @@ mapi_clist_av1 user_clist[] = { &user_msgtab, NULL };
 DECLARE_MODULE_AV1(user, NULL, NULL, user_clist, NULL, NULL, "$Revision$");
 
 static int do_local_user(struct Client *client_p, struct Client *source_p,
-			 const char *username, const char *realname)
+			 const char *username, const char *realname);
+
 /* mr_user()
  *      parv[1] = username (login name, account)
  *      parv[2] = client host name (ignored)

@@ -49,9 +49,9 @@
         ConfigChannel.max_bans, \
         ConfigFileEntry.max_targets,NICKLEN-1,TOPICLEN,TOPICLEN
 
-#define FEATURES2 "CHANTYPES=%s" \
+#define FEATURES2 "CHANTYPES=#&" \
                   " PREFIX=(ov)@+" \
-		  " CHANMODES=%s%s%s" \
+		  " CHANMODES=%s%sb,k,l,imnpst" \
 		  " NETWORK=%s" \
 		  " CASEMAPPING=rfc1459" \
 		  " CHARSET=ascii" \
@@ -59,10 +59,8 @@
 		  " WALLCHOPS" \
 		  " ETRACE"
 
-#define FEATURES2VALUES ConfigServerHide.disable_local_channels ? "#" : "#&", \
-                        ConfigChannel.use_except ? "e" : "", \
+#define FEATURES2VALUES ConfigChannel.use_except ? "e" : "", \
                         ConfigChannel.use_invex ? "I" : "", \
-                        "b,k,l,imnpst", \
                         ServerInfo.network_name
 
 /*
