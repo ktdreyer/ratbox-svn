@@ -1,3 +1,21 @@
+androsyn    2003/09/30 14:11:05 EDT	(20030930_1)
+
+  Modified files:
+    .                    configure configure.ac 
+    include              setup.h.in 
+    src                  epoll.c listener.c 
+  Log:
+  Minor cleanups..
+  
+  Revision  Changes    Path
+  7.188     +26 -11    ircd-ratbox/configure
+  7.2       +21 -8     ircd-ratbox/configure.ac
+  7.72      +3 -3      ircd-ratbox/include/setup.h.in
+  1.21      +5 -30     ircd-ratbox/src/epoll.c
+  7.99      +0 -5      ircd-ratbox/src/listener.c
+
+
+
 androsyn    2003/09/30 12:54:55 EDT	(20030930_0)
 
   Modified files:
