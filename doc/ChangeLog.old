@@ -1,3 +1,6 @@
+*** 20010101_7 by davidt
+Fix vchan part to work properly
+
 *** 20010101_6 by davidt
 stop collapse() coring on a null pattern
 
