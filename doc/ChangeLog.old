@@ -1,3 +1,11 @@
+*** 20001204_4 by db
+- fixed vchan support, added new back pointer to channel struct
+  only set non NULL on sub vchans. This makes it easy ...
+- Bugs, what happens when a vchan is peristently kept? There is no longer
+  an unique ID to use,since it has no users.
+
+
+
 *** 20001204_3 by db
 - fixed stupid in channel.c where a non op could generate a mode -o
   message on channel, but it didnt' do anything. Mis-placed if...
