@@ -1568,7 +1568,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 	copy_s_addr(S_ADDR(ipn), htonl(IN_ADDR(vserv)));
 #endif
 	comm_connect_tcp(cptr->fd, aconf->host, aconf->port,
-			 (struct sockaddr *)&SOCKADDR(ipn), sizeof(struct irc_sockaddr), 
+3			 (struct sockaddr *)&SOCKADDR(ipn), sizeof(struct irc_sockaddr), 
 			 serv_connect_callback, cptr, aconf->aftype);
       }
     else
@@ -1606,7 +1606,6 @@ serv_connect_callback(int fd, int status, void *data)
       {
         /* We have an error, so report it and quit */
 	/* Admins get to see any IP, mere opers don't *sigh*
-	 * N.B. admins see the message twice
 	 */
         sendto_realops_flags(FLAGS_ADMIN,
 			     "Error connecting to %s[%s]: %s", cptr->name,
@@ -1614,6 +1613,7 @@ serv_connect_callback(int fd, int status, void *data)
 	sendto_realops_flags(FLAGS_NOTADMIN,
 			     "Error connecting to %s: %s",
 			     cptr->name, comm_errstr(status));
+	cptr->flags |= FLAGS_DEADSOCKET;
         exit_client(cptr, cptr, &me, comm_errstr(status));
         return;
       }
