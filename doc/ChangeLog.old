@@ -1,3 +1,13 @@
+*** 20001207_14 by adrian
+
+
+Use linebuf_alloclen() rather than linebuf_len() for flood tracking.
+This should be done anyway, to stop people taking up inordinate amounts of
+memory by flooding lines with only a few characters, which can be just
+as annoying.
+
+
+
 *** 20001207_13 by db
 - non op trying to set a channel limit should get a not chanop message
 
