@@ -28,7 +28,6 @@
 #include "tools.h"
 #include "channel.h"
 #include "channel_mode.h"
-#include "vchannel.h"
 #include "client.h"
 #include "common.h"
 #include "hash.h"
@@ -2445,9 +2444,9 @@ sync_channel_oplists(struct Channel *chptr, int dir)
   dlink_node *ptr;
 
   for (ptr=chptr->locpeons.head; ptr!=NULL && ptr->data!=NULL; ptr=ptr->next)
-    sync_oplists(chptr, ptr->data, MODE_ADD, RootChan(chptr)->chname);
+    sync_oplists(chptr, ptr->data, MODE_ADD, chptr->chname);
   for (ptr=chptr->locvoiced.head; ptr!=NULL && ptr->data!=NULL; ptr = ptr->next)
-    sync_oplists(chptr, ptr->data, MODE_ADD, RootChan(chptr)->chname);
+    sync_oplists(chptr, ptr->data, MODE_ADD, chptr->chname);
 }
 
 #endif
@@ -2515,7 +2514,7 @@ static void update_channel_info(struct Channel *chptr)
       {
         mode_get_status(chptr, ptr->data, &t_op, &t_hop, &t_voice, 0);
         if (!t_hop && !t_op)
-          sync_oplists(chptr, ptr->data, MODE_DEL, RootChan(chptr)->chname);
+          sync_oplists(chptr, ptr->data, MODE_DEL, chptr->chname);
       }
 
       for (ptr = chptr->locvoiced.head; ptr != NULL && ptr->data != NULL;
@@ -2523,7 +2522,7 @@ static void update_channel_info(struct Channel *chptr)
       {
         mode_get_status(chptr, ptr->data, &t_op, &t_hop, &t_voice, 0);
         if (!t_hop && !t_op)
-          sync_oplists(chptr, ptr->data, MODE_DEL, RootChan(chptr)->chname);
+          sync_oplists(chptr, ptr->data, MODE_DEL, chptr->chname);
       }
 
 #ifdef HALFOPS
@@ -2531,7 +2530,7 @@ static void update_channel_info(struct Channel *chptr)
       {
         mode_get_status(chptr, ptr->data, &t_op, &t_hop, &t_voice, 1);
         if(!t_hop && !t_op)
-          sync_oplists(chptr, ptr->data, MODE_DEL, RootChan(chptr)->chname);
+          sync_oplists(chptr, ptr->data, MODE_DEL, chptr->chname);
       }
 #endif
 
@@ -2540,7 +2539,7 @@ static void update_channel_info(struct Channel *chptr)
       {
         mode_get_status(chptr, ptr->data, &t_op, &t_hop, &t_voice, 1);
         if(!t_hop && !t_op)
-          sync_oplists(chptr, ptr->data, MODE_DEL, RootChan(chptr)->chname);
+          sync_oplists(chptr, ptr->data, MODE_DEL, chptr->chname);
       }
 #endif
 
@@ -2548,7 +2547,7 @@ static void update_channel_info(struct Channel *chptr)
       {
         mode_get_status(chptr, ptr->data, &t_op, &t_hop, &t_voice, 1);
         if(!t_hop && !t_op)
-          sync_oplists(chptr, ptr->data, MODE_DEL, RootChan(chptr)->chname);
+          sync_oplists(chptr, ptr->data, MODE_DEL, chptr->chname);
       }
     }
     else
@@ -2608,14 +2607,14 @@ static void update_channel_info(struct Channel *chptr)
     for (ptr=deopped.head; ptr != NULL && ptr->data != NULL; ptr=ptr_next)
     {
       ptr_next = ptr->next;
-      sync_oplists(chptr, ptr->data, MODE_DEL, RootChan(chptr)->chname);
+      sync_oplists(chptr, ptr->data, MODE_DEL, chptr->chname);
       free_dlink_node(ptr);
     }
 
     for(ptr = opped.head; ptr != NULL; ptr = ptr_next)
     {
       ptr_next = ptr->next;
-      sync_oplists(chptr, ptr->data, MODE_ADD, RootChan(chptr)->chname);
+      sync_oplists(chptr, ptr->data, MODE_ADD, chptr->chname);
       free_dlink_node(ptr);
     }
   }

@@ -39,7 +39,6 @@
 #include "ircd_handler.h"
 #include "msg.h"
 #include "s_conf.h"
-#include "vchannel.h"
 #include "memory.h"
 #include "s_serv.h"
 
@@ -842,7 +841,7 @@ do_numeric(char numeric[],
     sendto_channel_local(ALL_MEMBERS, chptr,
 			 ":%s %s %s %s",
 			 source_p->name,
-			 numeric, RootChan(chptr)->chname, buffer);
+			 numeric, chptr->chname, buffer);
 }
 
 

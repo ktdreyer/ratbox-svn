@@ -42,7 +42,6 @@
 #include "list.h"
 #include "s_debug.h"
 #include "s_log.h"
-#include "vchannel.h"
 #include "memory.h"
 #include "hook.h"
 
@@ -513,11 +512,11 @@ sendto_channel_butone(struct Client *one, struct Client *from,
 
   if(IsServer(from))
     linebuf_putmsg(&local_linebuf, pattern, &args, ":%s %s %s ",
-                   from->name, command, RootChan(chptr)->chname);
+                   from->name, command, chptr->chname);
   else
     linebuf_putmsg(&local_linebuf, pattern, &args, ":%s!%s@%s %s %s ",
                    from->name, from->username, from->host,
-                   command, RootChan(chptr)->chname);
+                   command, chptr->chname);
 
   linebuf_putmsg(&remote_linebuf, pattern, &args, ":%s %s %s ",
                  from->name, command, chptr->chname);

@@ -32,7 +32,6 @@
 #include "tools.h"
 #include "s_serv.h"
 #include "channel_mode.h"
-#include "vchannel.h"
 #include "class.h"
 #include "client.h"
 #include "common.h"
