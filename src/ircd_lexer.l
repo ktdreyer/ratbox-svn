@@ -84,6 +84,7 @@ kill		{ return KILL; }
 deny		{ return DENY; }
 global_kill	{ return GLOBAL_KILL; }
 remote		{ return REMOTE; }
+kline		{ return KLINE; }
 unkline		{ return UNKLINE; }
 gline		{ return GLINE; }
 nick_changes	{ return NICK_CHANGES; }

@@ -66,6 +66,7 @@ static struct ConfItem *yy_aconf;
 %token  IP_TYPE
 %token  GLOBAL_KILL
 %token  REMOTE
+%token  KLINE
 %token  UNKLINE
 %token  GLINE
 %token  NICK_CHANGES
@@ -182,8 +183,8 @@ oper_items:	oper_items oper_item |
 
 oper_item:	oper_name  | oper_user | oper_host | oper_password |
 		oper_class | oper_global | oper_global_kill | oper_remote |
-		oper_unkline | oper_gline | oper_nick_changes | oper_die |
-		oper_rehash 
+		oper_kline | oper_unkline | oper_gline | oper_nick_changes |
+		oper_die | oper_rehash 
 
 oper_name:	NAME '=' QSTRING ';' {
   DupString(yy_aconf->name,yylval.string);
@@ -217,6 +218,11 @@ oper_remote: REMOTE '=' YES ';' {
 	yy_aconf->port |= CONF_OPER_REMOTE;}|
 	REMOTE '=' NO ';' {
 	yy_aconf->port &= ~CONF_OPER_REMOTE; } ;
+
+oper_kline: KLINE '=' YES ';' {
+	yy_aconf->port |= CONF_OPER_K;}|
+	KLINE '=' NO ';' {
+	yy_aconf->port &= ~CONF_OPER_K; } ;
 
 oper_unkline: UNKLINE '=' YES ';' {
 	yy_aconf->port |= CONF_OPER_UNKLINE;}|
