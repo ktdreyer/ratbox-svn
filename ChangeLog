@@ -1,3 +1,15 @@
+androsyn    2002/12/08 01:22:58 UTC	(20021208_2)
+
+  Modified files:
+    src                  s_auth.c 
+  Log:
+  Removed a stray debugging fprintf
+  
+  Revision  Changes    Path
+  7.119     +0 -1      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2002/12/08 00:48:01 UTC	(20021208_1)
 
   Modified files:
