@@ -522,18 +522,6 @@ cleanup_channels(void *unused)
   struct Channel *chptr;
   struct Channel *next_chptr;
 
-  if (uplink != NULL)
-  {
-    /* XXX The assert disapears when NDEBUG is set */
-    assert(MyConnect(uplink) == 1);
-
-    if (!MyConnect(uplink))
-    {
-      ilog(L_ERROR, "non-local uplink [%s]", uplink->name);
-      uplink = NULL;
-    }
-  }
-
   for (chptr = GlobalChannelList; chptr; chptr = next_chptr)
   {
     next_chptr = chptr->nextch;

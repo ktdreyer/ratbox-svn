@@ -144,14 +144,11 @@ struct Client
   unsigned char     handler;    /* Handler index */
   char              eob;	/* server eob has been received */
   unsigned long     serial;	/* used to enforce 1 send per nick */
-  unsigned long     lazyLinkClientExists; /* This client exists on the
-					   * bit mapped lazylink servers 
-					   * mapped here
-					   */
   /*
    * client->name is the unique name for a client nick or host
    */
   char              name[HOSTLEN + 1]; 
+
   /*
    * client->llname is used to store the clients requested nick
    * temporarily for new connections.

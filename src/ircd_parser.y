@@ -553,7 +553,6 @@ serverinfo_max_buffer: T_MAX_BUFFER '=' NUMBER ';'
 serverinfo_hub:         HUB '=' TYES ';' 
   {
       ServerInfo.hub = 1;
-      uplink = NULL;
   }
                         |
                         HUB '=' TNO ';'

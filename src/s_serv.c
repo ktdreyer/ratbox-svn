@@ -71,8 +71,6 @@ int MaxConnectionCount = 1;
 int MaxClientCount     = 1;
 int refresh_user_links = 0;
 
-struct Client *uplink=NULL;
-
 static void        start_io(struct Client *server);
 static void        burst_members(struct Client *client_p, dlink_list *list);
  
@@ -1140,11 +1138,6 @@ int server_estab(struct Client *client_p)
         }
     }
   
-  if((ServerInfo.hub == 0) && MyConnect(client_p))
-    {
-      uplink = client_p;
-    }
-
   server_burst(client_p);
 
   return 0;

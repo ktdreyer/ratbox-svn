@@ -205,10 +205,6 @@ m_message(int p_or_n,
   if (build_target_list(p_or_n, command, client_p, source_p, parv[1],
                         parv[2]) < 0)
   {
-    /* Sigh.  We need to relay this command to the hub */
-    if (!ServerInfo.hub && (uplink != NULL))
-      sendto_one(uplink, ":%s %s %s :%s",
-		 source_p->name, command, parv[1], parv[2]);
     return;
   }
 

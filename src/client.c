@@ -1319,8 +1319,6 @@ int exit_client(
       if (IsServer(source_p))
         {
           Count.myserver--;
-	  if(!ServerInfo.hub)
-	    uplink = NULL;
         }
 
       if (IsPerson(source_p))

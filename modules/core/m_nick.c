@@ -109,10 +109,9 @@ const char *_version = "$Revision$";
 static void mr_nick(struct Client *client_p, struct Client *source_p, 
                     int parc, char *parv[])
 {
-  struct   Client *target_p, *uclient_p;
-  char     nick[NICKLEN];
+  struct   Client *target_p;
+  char nick[NICKLEN];
   char*    s;
-  dlink_node *ptr;
    
   if(parc < 2)
   {
@@ -146,39 +145,8 @@ static void mr_nick(struct Client *client_p, struct Client *source_p,
 
   if ((target_p = find_client(nick)) == NULL)
   {
-    if(!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
-    {
-      /* We don't know anyone called nick, but our hub might */
-      for(ptr = unknown_list.head; ptr; ptr = ptr->next)
-      {
-        uclient_p = ptr->data;
-
-	if(!strcmp(nick, uclient_p->llname))
-	{
-	
-	  /* We're already waiting for a reply about this nick
-	   * for someone else. */
-
-	  sendto_one(source_p, form_str(ERR_NICKNAMEINUSE), me.name, "*", nick);
-	  return;
-	}
-      }
-
-      /* Set their llname so we can find them later */
-      strcpy(source_p->llname, nick);
-
-      /* Ask the hub about their requested name */
-      sendto_one(uplink, ":%s NBURST %s %s !%s", me.name, nick,
-                 nick, nick);
-
-      /* wait for LLNICK */
-      return;
-    }
-    else
-    {
-      set_initial_nick(client_p, source_p, nick);
-      return;
-    }
+    set_initial_nick(client_p, source_p, nick);
+    return;
   }
   else if(source_p == target_p)
   {
@@ -278,18 +246,8 @@ static void mr_nick(struct Client *client_p, struct Client *source_p,
   }
   else
   {
-    if(!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
-    {
-      /* The uplink might know someone by this name already. */
-      sendto_one(uplink, ":%s NBURST %s %s %s", me.name, nick,
-                 nick, source_p->name);
-      return;
-    }
-    else
-    {
-      change_local_nick(client_p,source_p,nick);
-      return;
-    }
+    change_local_nick(client_p,source_p,nick);
+    return;
   }
 }
 

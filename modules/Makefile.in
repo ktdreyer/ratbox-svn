@@ -58,7 +58,6 @@ SRCS =                          \
   m_connect.c \
   m_cryptlink.c \
   m_dmem.c \
-  m_drop.c \
   m_eob.c \
   m_gline.c \
   m_help.c \

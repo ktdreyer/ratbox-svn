@@ -524,7 +524,6 @@ static void ms_whois(struct Client *client_p,
     return;
   }
 
-  /* parc == 2, so its a lazylink client asking us about a nick, so do it */
-  do_whois(client_p, source_p, parc, parv);
+  /* shouldnt happen */
   return;
 }

@@ -59,10 +59,6 @@ struct Message knock_msgtab = {
   "KNOCK", 0, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_knock, ms_knock, m_knock}
 };
-struct Message knockll_msgtab = {
-  "KNOCKLL", 0, 0, 2, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_ignore, m_knock, m_ignore}
-};
 
 #ifndef STATIC_MODULES
 
@@ -70,14 +66,12 @@ void
 _modinit(void)
 {
   mod_add_cmd(&knock_msgtab);
-  mod_add_cmd(&knockll_msgtab);
 }
 
 void
 _moddeinit(void)
 {
   mod_del_cmd(&knock_msgtab);
-  mod_del_cmd(&knockll_msgtab);
 }
 
 const char *_version = "$Revision$";
