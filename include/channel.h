@@ -77,7 +77,7 @@ struct Channel
   int             received_number_of_privmsgs;
   int             flood_noticed;
 
-  int             num_bed;              /* number of bans+exceptions+denies */
+  int             num_mask;              /* number of bans+exceptions+invite exceptions */
   time_t          channelts;
   char            chname[1];
 };
