@@ -1,3 +1,15 @@
+jmallett    2002/01/13 02:11:13 EST	(20020113_2)
+
+  Modified files:
+    contrib              spy_whois_notice.c 
+  Log:
+  Make spy_whois_notice.c's _version use #Revision#
+  
+  Revision  Changes    Path
+  1.8       +1 -1      ircd-hybrid-7/contrib/spy_whois_notice.c
+
+
+
 jmallett    2002/01/13 02:02:37 EST	(20020113_1)
 
   Modified files:
