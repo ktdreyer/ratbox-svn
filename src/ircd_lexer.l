@@ -86,6 +86,7 @@ connect		{ return CONNECT; }
 deny		{ return DENY; }
 description	{ return DESCRIPTION; }
 die		{ return DIE; }
+dots_in_ident   { return DOTS_IN_IDENT; }
 email		{ return EMAIL; }
 exceed_limit    { return EXCEED_LIMIT; }
 gecos		{ return GECOS; }

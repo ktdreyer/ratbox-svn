@@ -76,6 +76,7 @@ int   class_sendq_var;
 %token  DENY
 %token  DESCRIPTION
 %token  DIE
+%token  DOTS_IN_IDENT
 %token  EMAIL
 %token  EXCEED_LIMIT
 %token  GECOS
@@ -1177,7 +1178,7 @@ general_item:       general_failed_oper_notice | general_show_failed_oper_id |
 		    general_kline_with_reason |
                     general_kline_with_connection_closed |
 	            general_warn_no_nline |
-                    general_non_redundant_klines |
+                    general_non_redundant_klines | general_dots_in_ident |
                     general_e_lines_oper_only | general_f_lines_oper_only |
 	            general_stats_notice |
                     general_whois_notice | general_pace_wait |
@@ -1405,6 +1406,11 @@ general_gline_time: GLINE_TIME '=' NUMBER ';'
 general_idletime: IDLETIME '=' NUMBER ';'
 {
         ConfigFileEntry.idletime = yylval.number;
+} ;
+
+general_dots_in_ident: DOTS_IN_IDENT '=' NUMBER ';'
+{
+        ConfigFileEntry.dots_in_ident = yylval.number;
 } ;
 
 general_hide_server: HIDESERVER '=' TYES ';'

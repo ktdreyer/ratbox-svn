@@ -1366,10 +1366,6 @@ char *show_iline_prefix(struct Client *sptr,struct ConfItem *aconf,char *name)
     if (IsConfElined(aconf))
       *prefix_ptr++ = '^';
 
-  if((ConfigFileEntry.b_lines_oper_only && IsAnyOper(sptr)) || !ConfigFileEntry.b_lines_oper_only)
-    if (IsConfBlined(aconf))
-      *prefix_ptr++ = '&';
-
   if((ConfigFileEntry.f_lines_oper_only && IsAnyOper(sptr)) || !ConfigFileEntry.f_lines_oper_only)
     if (IsConfFlined(aconf))
       *prefix_ptr++ = '>';

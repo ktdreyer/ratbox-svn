@@ -24,6 +24,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.41  2000/12/15 03:32:16  toot
+ * . moved dots_in_ident to an ircd.conf option
+ * . removed some d_line remains..
+ *
  * Revision 7.40  2000/12/14 21:55:34  toot
  * removed some unused things (quiet_on_ban, and moderate_nick_change left overs)
  *
@@ -519,7 +523,6 @@ typedef struct QlineItem {
 #define CONF_FLAGS_PASS_IDENTD          0x0008
 #define CONF_FLAGS_NOMATCH_IP           0x0010
 #define CONF_FLAGS_E_LINED              0x0020
-#define CONF_FLAGS_B_LINED              0x0040
 #define CONF_FLAGS_F_LINED              0x0080
 #define CONF_FLAGS_IDLE_LINED           0x0100
 #define CONF_FLAGS_DO_IDENTD            0x0200
@@ -536,7 +539,6 @@ typedef struct QlineItem {
 #define IsPassIdentd(x)         ((x)->flags & CONF_FLAGS_PASS_IDENTD)
 #define IsNoMatchIp(x)          ((x)->flags & CONF_FLAGS_NOMATCH_IP)
 #define IsConfElined(x)         ((x)->flags & CONF_FLAGS_E_LINED)
-#define IsConfBlined(x)         ((x)->flags & CONF_FLAGS_B_LINED)
 #define IsConfFlined(x)         ((x)->flags & CONF_FLAGS_F_LINED)
 #define IsConfIdlelined(x)      ((x)->flags & CONF_FLAGS_IDLE_LINED)
 #define IsConfDoIdentd(x)       ((x)->flags & CONF_FLAGS_DO_IDENTD)
@@ -574,7 +576,8 @@ typedef struct
   MessageFile motd;
   MessageFile opermotd;
 
-  int         hub; /* YES or NO */
+  int         hub;
+  int         dots_in_ident;
   int         failed_oper_notice;
   int         show_failed_oper_id;
   int         anti_nick_flood;
@@ -586,7 +589,6 @@ typedef struct
   int         kline_with_connection_closed;
   int         warn_no_nline;
   int         non_redundant_klines;
-  int         b_lines_oper_only;
   int         e_lines_oper_only;
   int         f_lines_oper_only;
   int         stats_notice;

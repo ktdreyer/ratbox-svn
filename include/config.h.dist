@@ -145,12 +145,6 @@
  */
 #define RFC1035_ANAL
 
-/* ALLOW_DOT_IN_IDENT
- * Defining this will allow periods in ident replies.  Use of this is
- * strongly discouraged on public networks
- */
-#undef ALLOW_DOT_IN_IDENT
-
 /*
  * OPER_UMODES LOCOP_UMODES - set these to be the initial umodes when OPER'ing
  * These can be over-ridden in ircd.conf file, with flags in last O field
