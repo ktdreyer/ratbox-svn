@@ -425,7 +425,7 @@ burst_mode_list(char *chname, dlink_list *banlist, char flag, int cap)
   dlink_node *ptr;
   char buf[BUFSIZE];
   char mbuf[MAXMODEPARAMS + 1];
-  char pbuf[MODEBUFLEN];
+  char pbuf[BUFSIZE];
   int mlen;
   int tlen;
   int cur_len = 0;
@@ -442,7 +442,7 @@ burst_mode_list(char *chname, dlink_list *banlist, char flag, int cap)
   {
     banptr = ptr->data;
 
-    tlen = strlen(banptr->banstr) + 1;
+    tlen = strlen(banptr->banstr) + 3;
 
     if(tlen > MODEBUFLEN)
       continue;

@@ -340,7 +340,7 @@ send_mode_list(struct Client *client_p, char *chname,
   dlink_node *lp;
   struct Ban *banptr;
   char mbuf[MODEBUFLEN];
-  char pbuf[MODEBUFLEN];
+  char pbuf[BUFSIZE];
   int tlen;
   int mlen;
   int cur_len;
@@ -357,7 +357,7 @@ send_mode_list(struct Client *client_p, char *chname,
   DLINK_FOREACH(lp, top->head)
   {
     banptr = lp->data;
-    tlen = strlen(banptr->banstr) + 1;
+    tlen = strlen(banptr->banstr) + 3;
 
     /* uh oh */
     if(tlen > MODEBUFLEN)
