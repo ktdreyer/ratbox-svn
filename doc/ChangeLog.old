@@ -1,3 +1,12 @@
+*** 20010524_11 by davidt
+- use checkError instead of a bunch of tests against EAGAIN/-1/0/etc,
+  the code should now: a) work on VMS, b) look slightly cleaner
+- add optional (#define'able) IO logging in an attempt to track down this
+  evil bug where decryption fails for random blocks of data.
+- add asserts to try to find said bug.
+- move two break;s inside an #endif
+
+
 *** 20010524_10 by androsyn
 Fixed for a very stupid buglet that would treat 3ffe:x:x::1 as ::1
 
