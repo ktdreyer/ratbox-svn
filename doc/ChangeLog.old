@@ -1,3 +1,7 @@
+*** 20010529_10 by ejb
+- set a process name on VMS.
+
+
 *** 20010529_9 by leeh
 - eob has a problem with negative deltas.. just use the time connected
   (its only a rough gauge anyway)
