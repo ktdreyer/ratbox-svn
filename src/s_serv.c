@@ -1644,19 +1644,30 @@ serv_connect_callback(int fd, int status, void *data)
 	/* Check the status */
 	if(status != COMM_OK)
 	{
-		/* We have an error, so report it and quit */
-		/* Admins get to see any IP, mere opers don't *sigh*
+		/* COMM_ERR_TIMEOUT wont have an errno associated with it,
+		 * the others will.. --fl
 		 */
-#ifndef HIDE_SERVERS_IPS
-		sendto_realops_flags(UMODE_ALL, L_ALL,
-				     "Error connecting to %s[%s]: %s",
-				     client_p->name, client_p->host,
-				     comm_errstr(status));
+		if(status == COMM_ERR_TIMEOUT)
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					"Error connecting to %s[%s]: %s",
+					client_p->name, 
+#ifdef HIDE_SERVERS_IPS
+					"255.255.255.255",
 #else
-		sendto_realops_flags(UMODE_ALL, L_ALL,
-				     "Error connecting to %s: %s",
-				     client_p->name, comm_errstr(status));
+					client_p->host,
 #endif
+					comm_errstr(status));
+		else
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					"Error connecting to %s[%s]: %s (%s)",
+					client_p->name,
+#ifdef HIDE_SERVERS_IPS
+					"255.255.255.255",
+#else
+					client_p->host,
+#endif
+					comm_errstr(status), strerror(errno));
+
 		exit_client(client_p, client_p, &me, comm_errstr(status));
 		return;
 	}
