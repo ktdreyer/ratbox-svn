@@ -73,8 +73,7 @@ char *_version = "20001122";
  */
 static void m_topic(struct Client *client_p,
                    struct Client *source_p,
-                   int parc,
-                   char *parv[])
+                   int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
   struct Channel *root_chan, *vchan;
@@ -90,26 +89,10 @@ static void m_topic(struct Client *client_p,
       if(chptr == NULL)
       {
         /* if chptr isn't found locally, it =could= exist
-         * on the uplink. So ask.
+         * on the uplink. so forward reqeuest
          */
-
-        /* LazyLinks */
-        /* this was segfaulting if we had no servers linked.
-         *  -pro
-         */
-        if ( !ServerInfo.hub && uplink &&
-           IsCapable(uplink, CAP_LL) )
+        if(!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
         {
-#if 0
-          /* cache the channel if it exists on uplink
-           * If the channel as seen by the uplink, has vchans,
-           * the uplink will have to SJOIN all of those.
-           */
-          sendto_one(uplink, ":%s CBURST %s",
-                      me.name, parv[1]);
-
-	  /* Lets not for now -db */
-#endif
           sendto_one(uplink, ":%s TOPIC %s %s",
                      source_p->name, parv[1],
                      ((parc > 2) ? parv[2] : ""));
@@ -134,9 +117,9 @@ static void m_topic(struct Client *client_p,
       else if (IsVchan(chptr))
         root_chan = RootChan(chptr);
           
-
+      /* setting topic */
       if (parc > 2)
-	{ /* setting topic */
+	{
 
 	  if (!IsMember(source_p, chptr))
 	    {
@@ -210,9 +193,6 @@ static void m_topic(struct Client *client_p,
                          me.name, parv[0],
                          root_chan->chname, chptr->topic);
 
-              /* only send topic to members */
-              if(IsMember(source_p, chptr))
-	      { 
                 if(!(chptr->mode.mode & MODE_HIDEOPS) ||
                   is_any_op(chptr,source_p))
                 {
@@ -240,7 +220,6 @@ static void m_topic(struct Client *client_p,
                              me.name,
                              chptr->topic_time);
                 }
-              }
             }
         }
     }
