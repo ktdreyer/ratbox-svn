@@ -1,3 +1,11 @@
+*** 20001031_3 by adrian
+
+
+Whatever the crack was that convinced me calling eventAdd()
+from somewhere *before* eventInit() was called, never ever
+come close to me again.
+
+
 *** 20001031_2 by adrian
 
 
