@@ -1,3 +1,9 @@
+*** 20001207_5 by db
+- missed committing new conf file because I forgot to rename it from
+  ircd.conf to example.conf grrr
+
+
+
 *** 20001207_4 by db
 - Like a surgeon who leaves a scalpel inside a patient, I left some
   debugging code inside m_names.c ... some extra sendto_realops...
