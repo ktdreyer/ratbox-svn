@@ -1,3 +1,15 @@
+androsyn    2003/02/04 20:15:54 UTC	(20030204_16)
+
+  Modified files:
+    include              modules.h 
+  Log:
+  Fix compile errors
+  
+  Revision  Changes    Path
+  7.44      +4 -3      ircd-ratbox/include/modules.h
+
+
+
 androsyn    2003/02/04 20:07:40 UTC	(20030204_15)
 
   Modified files:
