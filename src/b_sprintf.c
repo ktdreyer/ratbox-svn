@@ -513,6 +513,10 @@ numbers:
 				}
 				while ('0' == *pdtmpbuf)
 					pdtmpbuf++;
+				
+				if(!isdigit(*pdtmpbuf)) /* We've gone too far */
+					pdtmpbuf--;
+					
 				if ( hash )
 				{
 					if ( radix == 16 )
