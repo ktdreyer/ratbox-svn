@@ -495,7 +495,7 @@ oper_rehash: REHASH '=' TYES ';' { yy_aconf->port |= CONF_OPER_REHASH;}
 
 oper_admin: ADMIN '=' TYES ';' { yy_aconf->port |= CONF_OPER_ADMIN;}
             |
-            ADMIN '=' TNO ';' { yy_aconf->port |= CONF_OPER_ADMIN;}
+            ADMIN '=' TNO ';' { yy_aconf->port &= ~CONF_OPER_ADMIN;}
 
 /***************************************************************************
  *  section class
