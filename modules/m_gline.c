@@ -466,9 +466,23 @@ static int invalid_gline(struct Client *source_p, char *luser, char *lhost,
 /*
  * check_majority_gline
  *
- * inputs	- ...
+ * inputs	- pointer to source client
+ * 		- name of operator requesting gline
+ * 		- username of operator requesting gline
+ * 		- hostname of operator requesting gline
+ * 		- servername of operator requesting gline
+ * 		- username covered by the gline
+ * 		- hostname covered by the gline
+ * 		- reason for the gline
  * output	- NONE
  * side effects	- if a majority agree, place the gline locally
+ * Note that because of how gline "votes" are done, we take a
+ * number of strings as input to easily check for duplicated
+ * votes. Also since we don't necessarily have a client to
+ * match the target of the gline too, we use user@host type
+ * inputs here to figure out who is the target. This function
+ * checks to make sure that given the above, a majority of
+ * people accept placement of the gline.
  */
 static void
 check_majority_gline(struct Client *source_p,
@@ -707,10 +721,21 @@ log_gline(struct Client *source_p,
 /*
  * add_new_majority_gline
  * 
- * inputs       - 
+ * inputs       - name of operator requesting gline
+ * 		- username of operator requesting gline
+ * 		- hostname of operator requesting gline
+ * 		- servername of operator requesting gline
+ * 		- username covered by the gline
+ * 		- hostname covered by the gline
+ * 		- reason for the gline
  * output       - NONE
  * side effects -
- *
+ * This function is called once a majority of opers
+ * have agreed on a gline, and it can be placed. The
+ * information about an operator being passed to us
+ * happens to be the operator who pushed us over the
+ * "majority" level needed. See check_majority_gline()
+ * for more information.
  */
 static void
 add_new_majority_gline(const char* oper_nick,
