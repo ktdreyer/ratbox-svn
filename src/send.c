@@ -525,8 +525,6 @@ sendto_channel_butone(struct Client *one, struct Client *from,
 	linebuf_donebuf(&uid_linebuf);
 }
 
-
-
 /*
  * sendto_server
  * 
@@ -634,7 +632,7 @@ sendto_common_channels_local(struct Client *user, const char *pattern, ...)
 
 		DLINK_FOREACH_SAFE(uptr, next_uptr, chptr->locmembers.head)
 		{
-			msptr = ptr->data;
+			msptr = uptr->data;
 			target_p = msptr->client_p;
 
 			if(IsDeadorAborted(target_p) ||

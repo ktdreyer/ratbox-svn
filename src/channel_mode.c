@@ -1381,8 +1381,7 @@ static struct ChannelMode ModeTable[255] =
  * Side-effects: None.
  */
 static int
-get_channel_access(struct Client *source_p, struct Channel *chptr,
-		   struct membership *msptr)
+get_channel_access(struct Client *source_p, struct membership *msptr)
 {
 	/* Let hacked servers in for now... */
 	if(!MyClient(source_p))
@@ -1627,7 +1626,7 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
 	mode_count = 0;
 	mode_limit = 0;
 
-	alevel = get_channel_access(source_p, chptr, msptr);
+	alevel = get_channel_access(source_p, msptr);
 
 	for (; (c = *ml) != 0; ml++)
 		switch (c)
