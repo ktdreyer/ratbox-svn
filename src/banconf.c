@@ -104,7 +104,7 @@ getfields(char *line)
 }
 
 void
-read_kline_conf(const char *filename, int warn)
+read_kline_conf(const char *filename, int perm)
 {
 	FILE *in;
 	struct ConfItem *aconf;
@@ -114,7 +114,7 @@ read_kline_conf(const char *filename, int warn)
 
 	if((in = fopen(filename, "r")) == NULL)
 	{
-		if(warn)
+		if(!perm)
 		{
 			sendto_realops_flags(UMODE_ALL, L_ALL,
 					"Can't open %s file klines could be missing!",
@@ -143,6 +143,9 @@ read_kline_conf(const char *filename, int warn)
 		aconf = make_conf();
 		aconf->status = CONF_KILL;
 
+		if(perm)
+			aconf->flags |= CONF_FLAGS_PERMANENT;
+
 		DupString(aconf->user, args[0]);
 		DupString(aconf->host, args[1]);
 		DupString(aconf->passwd, args[2]);
@@ -157,7 +160,7 @@ read_kline_conf(const char *filename, int warn)
 }
 
 void
-read_dline_conf(const char *filename, int warn)
+read_dline_conf(const char *filename, int perm)
 {
 	FILE *in;
 	struct ConfItem *aconf;
@@ -167,7 +170,7 @@ read_dline_conf(const char *filename, int warn)
 
 	if((in = fopen(filename, "r")) == NULL)
 	{
-		if(warn)
+		if(!perm)
 		{
 			sendto_realops_flags(UMODE_ALL, L_ALL,
 					"Can't open %s file dlines could be missing!",
@@ -194,6 +197,9 @@ read_dline_conf(const char *filename, int warn)
 		aconf = make_conf();
 		aconf->status = CONF_DLINE;
 
+		if(perm)
+			aconf->flags |= CONF_FLAGS_PERMANENT;
+
 		DupString(aconf->host, args[0]);
 		DupString(aconf->passwd, args[1]);
 
@@ -213,7 +219,7 @@ read_dline_conf(const char *filename, int warn)
 }
 
 void
-read_xline_conf(const char *filename, int warn)
+read_xline_conf(const char *filename, int perm)
 {
 	FILE *in;
 	struct ConfItem *aconf;
@@ -223,7 +229,7 @@ read_xline_conf(const char *filename, int warn)
 
 	if((in = fopen(filename, "r")) == NULL)
 	{
-		if(warn)
+		if(!perm)
 		{
 			sendto_realops_flags(UMODE_ALL, L_ALL,
 					"Can't open %s file xlines could be missing!",
@@ -254,6 +260,9 @@ read_xline_conf(const char *filename, int warn)
 		aconf = make_conf();
 		aconf->status = CONF_XLINE;
 
+		if(perm)
+			aconf->flags |= CONF_FLAGS_PERMANENT;
+
 		DupString(aconf->name, args[0]);
 		DupString(aconf->passwd, args[2]);
 
@@ -264,7 +273,7 @@ read_xline_conf(const char *filename, int warn)
 }
 
 void
-read_resv_conf(const char *filename, int warn)
+read_resv_conf(const char *filename, int perm)
 {
 	FILE *in;
 	struct ConfItem *aconf;
@@ -274,7 +283,7 @@ read_resv_conf(const char *filename, int warn)
 
 	if((in = fopen(filename, "r")) == NULL)
 	{
-		if(warn)
+		if(!perm)
 		{
 			sendto_realops_flags(UMODE_ALL, L_ALL,
 					"Can't open %s file resvs could be missing!",
@@ -307,6 +316,9 @@ read_resv_conf(const char *filename, int warn)
 			aconf = make_conf();
 			aconf->status = CONF_RESV_CHANNEL;
 
+			if(perm)
+				aconf->flags |= CONF_FLAGS_PERMANENT;
+
 			DupString(aconf->name, args[0]);
 			DupString(aconf->passwd, args[1]);
 			add_to_resv_hash(aconf->name, aconf);
@@ -318,6 +330,10 @@ read_resv_conf(const char *filename, int warn)
 
 			aconf = make_conf();
 			aconf->status = CONF_RESV_NICK;
+
+			if(perm)
+				aconf->flags |= CONF_FLAGS_PERMANENT;
+
 			DupString(aconf->name, args[0]);
 			DupString(aconf->passwd, args[1]);
 			dlinkAdd(aconf, &aconf->dnode, &resv_conf_list);

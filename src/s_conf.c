@@ -614,14 +614,14 @@ read_ban_confs(int cold)
 	if(!cold)
 		clear_ban_confs();
 
-	read_kline_conf(KLINEPATH, 1);
-	read_kline_conf(KLINEPATHPERM, 0);
-	read_dline_conf(DLINEPATH, 1);
-	read_dline_conf(DLINEPATHPERM, 0);
-	read_xline_conf(XLINEPATH, 1);
-	read_xline_conf(XLINEPATHPERM, 0);
-	read_resv_conf(RESVPATH, 1);
-	read_resv_conf(RESVPATHPERM, 0);
+	read_kline_conf(KLINEPATH, 0);
+	read_kline_conf(KLINEPATHPERM, 1);
+	read_dline_conf(DLINEPATH, 0);
+	read_dline_conf(DLINEPATHPERM, 1);
+	read_xline_conf(XLINEPATH, 0);
+	read_xline_conf(XLINEPATHPERM, 1);
+	read_resv_conf(RESVPATH, 0);
+	read_resv_conf(RESVPATHPERM, 1);
 }
 
 /* write_confitem()

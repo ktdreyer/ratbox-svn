@@ -101,6 +101,7 @@ struct ConfItem
 /* Generic flags... */
 /* access flags... */
 #define CONF_FLAGS_DO_IDENTD            0x00000001
+#define CONF_FLAGS_PERMANENT		0x00000002	/* perm kline */
 #define CONF_FLAGS_NO_TILDE             0x00000004
 #define CONF_FLAGS_NEED_IDENTD          0x00000008
 #define CONF_FLAGS_EXEMPTKLINE          0x00000040
