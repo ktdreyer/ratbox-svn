@@ -1,3 +1,25 @@
+*** 20010313_1 by adrian
+
+
+initial /dev/poll support, again ripped from my devpoll code in a
+squid branch.
+
+/dev/poll is the solaris solution to the suckiness of poll/select
+on large/active FD sets. Its kind of like kqueue but using a poll
+interface. My (quick) tests show that its actually rather nifty
+with large FD sets, so this should make hybrid-7 Not Suck(tm) under
+Solaris 7/8.
+
+I believe there's a linux patchset to give the kernel /dev/poll,
+but I hear its crap. heh.
+
+This code isn't guaranteed to even compile on a solaris box yet,
+but I wanted to get it in anyway. It doesn't break a "default"
+build (ie without --enable-devpoll). I promise to fix it in a few
+hours. :)
+
+
+
 *** 20010312_3 by androsyn
 semicolons are our friends. I like semicolons, don't you :P
 
