@@ -393,7 +393,7 @@ void error_exit_client(struct Client* cptr, int error)
       if (error == 0)
         {
 	  /* Admins get the real IP */
-	  sendto_realops_flags(FLAGS_ADMINS,
+	  sendto_realops_flags(FLAGS_ADMIN,
 				"Server %s closed the connection",
 				get_client_name(cptr, SHOW_IP));
 
