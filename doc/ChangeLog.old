@@ -1,3 +1,7 @@
+*** 20010905_3 by leeh
+- moved the rest of the FLAGS_SPY stuff to contrib/
+
+
 *** 20010905_2 by leeh
 - *_notice.c -> spy_*_notice.c
 
