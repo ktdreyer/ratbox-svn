@@ -99,7 +99,7 @@ add_reject(struct Client *client_p)
 
 	if((pnode = match_ip(reject_tree, &client_p->localClient->ip)) != NULL)
 	{
-		rdate = pnode->data;
+		rdata = pnode->data;
 		rdata->time = CurrentTime;
 		rdata->count++;
 	}

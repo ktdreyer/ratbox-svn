@@ -464,26 +464,6 @@ initialize_message_files(void)
 	InitMessageFile(OPER_MOTD, OPATH, &ConfigFileEntry.opermotd);
 	InitMessageFile(USER_LINKS, LIPATH, &ConfigFileEntry.linksfile);
 
-	/* memset( &ConfigChannel, 0, sizeof(ConfigChannel)); */
-
-	/* End of global set options */
-
-}
-
-/*
- * initialize_message_files
- *
- * inputs       - none
- * output       - none
- * side effects - Set up all message files needed, motd etc.
- */
-static void
-initialize_message_files(void)
-{
-	InitMessageFile(USER_MOTD, MPATH, &ConfigFileEntry.motd);
-	InitMessageFile(OPER_MOTD, OPATH, &ConfigFileEntry.opermotd);
-	InitMessageFile(USER_LINKS, LIPATH, &ConfigFileEntry.linksfile);
-
 	ReadMessageFile(&ConfigFileEntry.motd);
 	ReadMessageFile(&ConfigFileEntry.opermotd);
 	ReadMessageFile(&ConfigFileEntry.linksfile);

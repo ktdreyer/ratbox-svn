@@ -1009,9 +1009,9 @@ set_default_conf(void)
 	set_log_level(L_NOTICE);
 
 	strlcpy(ConfigFileEntry.default_operstring, "is an IRC operator",
-		sizeof(ConfigFileEntry.default_operstring);
+		sizeof(ConfigFileEntry.default_operstring));
 	strlcpy(ConfigFileEntry.default_adminstring, "is a Server Administrator",
-		sizeof(ConfigFileEntry.default_adminstring);
+		sizeof(ConfigFileEntry.default_adminstring));
 	
 	ConfigFileEntry.failed_oper_notice = YES;
 	ConfigFileEntry.anti_nick_flood = NO;
@@ -1901,9 +1901,6 @@ clear_out_old_conf(void)
 	AdminInfo.email = NULL;
 	MyFree(AdminInfo.description);
 	AdminInfo.description = NULL;
-
-	MyFree(ConfigFileEntry.default_operstring);
-	ConfigFileEntry.default_operstring = NULL;
 
 	/* operator{} and class{} blocks are freed above */
 	/* clean out listeners */

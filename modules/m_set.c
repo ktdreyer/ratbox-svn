@@ -366,14 +366,6 @@ quote_spamnum(struct Client *source_p, int newval)
 	{
 		if(newval == 0)
 		{
-/* SET SPAMNUM */
-static void
-quote_spamnum(struct Client *source_p, int newval)
-{
-	if(newval > 0)
-	{
-		if(newval == 0)
-		{
 			sendto_realops_flags(UMODE_ALL, L_ALL,
 					     "%s has disabled ANTI_SPAMBOT", source_p->name);
 			GlobalSetOptions.spam_num = newval;
