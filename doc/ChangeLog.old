@@ -1,3 +1,15 @@
+leeh        2001/12/13 20:30:06 EST	(20011214_0)
+
+  Modified files:
+    src                  send.c 
+  Log:
+  - removed a dodgy deprintf..
+  
+  Revision  Changes    Path
+  7.167     +0 -2      ircd-hybrid-7/src/send.c
+
+
+
 leeh        2001/12/13 15:10:04 EST	(20011213_7)
 
   Modified files:
