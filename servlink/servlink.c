@@ -55,8 +55,8 @@ struct fd_table fds[3] = {
 static void
 usage(void)
 {
-	fprintf(stderr, "ircd-ratbox server link v1.1\n");
-	fprintf(stderr, "2003-09-25\n");
+	fprintf(stderr, "ircd-ratbox server link v1.2\n");
+	fprintf(stderr, "2004-03-02\n");
 	fprintf(stderr, "\n");
 	fprintf(stderr, "This program is called by the ircd-ratbox ircd.\n");
 	fprintf(stderr, "It cannot be used on its own.\n");

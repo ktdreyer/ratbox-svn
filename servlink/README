@@ -41,63 +41,21 @@ Commands:
 		all data not yet read from the slink program will be
 		decompressed before reading
 
-004 - SET_CRYPT_IN_CIPHER
-	data: <u8 cipher id>
-
-	001 - BLOWFISH
-	002 -     CAST
-	003 -      DES
-	004 -     3DES
-	005 -     IDEA
-	006 -      RC5 ( 8 rounds)
-	007 -      RC5 (12 rounds)
-	008 -      RC5 (16 rounds)
-
-	cannot be called whilst decryption is active.
-
-005 - SET_CRYPT_IN_KEY
-	data: <key>
-
-	cannot be called whilst decryption is active.
-	
-006 - START_CRYPT_IN
-
-007 - SET_CRYPT_OUT_CIPHER
-	data: <u8 cipher id>
-
-        001 - BLOWFISH
-        002 -     CAST
-        003 -      DES
-        004 -     3DES
-        005 -     IDEA
-        006 -      RC5 ( 8 rounds)
-        007 -      RC5 (12 rounds)
-        008 -      RC5 (16 rounds)
-
-	cannot be called whilst encryption is active.
-
-008 - SET_CRYPT_OUT_KEY
-	data: <key>
-
-	cannot be called whilst encryption is active.
-
-009 - START_CRYPT_OUT
-
-010 - INJECT_RECVQ
+004 - INJECT_RECVQ
 	data: recvq
 
 	Used before INIT to inject any data read from the server fd which
 	should be pre-processed by servlink before being sent back
 	to the LOCAL_FD through the data fd.
 
-011 - INJECT_SENDQ
+005 - INJECT_SENDQ
 	data: sendq
 
 	As above, but sent to remote server without processing.
 
-012 - INIT
+006 - INIT
 
-013 - ZIPSTATS
+007 - ZIPSTATS
 	request to send ziplinks statistics reply.
 
 replies
