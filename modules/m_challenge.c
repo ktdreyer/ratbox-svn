@@ -106,40 +106,52 @@ static void m_challenge( struct Client *client_p, struct Client *source_p,
   }
 
   if (*parv[1] == '+')
+  {
+    /* Ignore it if we aren't expecting this... -A1kmm */
+    if (!source_p->user->response)
+      return;
+     
+    if (irccmp(source_p->user->response, ++parv[1]))
     {
-     /* Ignore it if we aren't expecting this... -A1kmm */
-     if (!source_p->user->response)
-       return;
+      sendto_one(source_p, form_str(ERR_PASSWDMISMATCH), 
+                 me.name, source_p->name);
+      log_foper(source_p, source_p->user->auth_oper);
+
+      if(ConfigFileEntry.failed_oper_notice)
+        sendto_realops_flags(UMODE_ALL, L_ALL,
+                             "Failed OPER attempt by %s (%s@%s)",
+                             source_p->name, source_p->username, source_p->host);
+      return;
+    }
      
-     if (irccmp(source_p->user->response, ++parv[1]))
-       {
-         sendto_one(source_p, form_str(ERR_PASSWDMISMATCH), me.name,
-                    source_p->name);
-         return;
-       }
-     
-     if (!(aconf = find_conf_by_name(source_p->user->auth_oper, CONF_OPERATOR)))
-       {
-         sendto_one (source_p, form_str(ERR_NOOPERHOST), me.name, parv[0]);
-         log_foper(source_p, source_p->user->auth_oper);
-         return;
-       }
+    if ((aconf = find_conf_by_name(source_p->user->auth_oper, CONF_OPERATOR)) == NULL)
+    {
+      sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, parv[0]);
+      log_foper(source_p, source_p->user->auth_oper);
+
+      if(ConfigFileEntry.failed_oper_notice)
+        sendto_realops_flags(UMODE_ALL, L_ALL,
+                             "Failed OPER attempt - host mismatch by %s (%s@%s)",
+                             source_p->name, source_p->username, source_p->host);
+      return;
+    }
 
     ptr = source_p->localClient->confs.head;
     oconf = ptr->data;
     detach_conf(source_p,oconf);
 
     if(attach_conf(source_p, aconf) != 0)
-      {
-	sendto_one(source_p,":%s NOTICE %s :Can't attach conf!",
-                   me.name,source_p->name);   
-	sendto_realops_flags(UMODE_ALL, L_ALL,
-	                     "Failed OPER attempt by %s (%s@%s) can't attach conf!",
-	                     source_p->name, source_p->username, source_p->host);
-	attach_conf(source_p, oconf);
-        log_foper(source_p, source_p->user->auth_oper);
-	return;
-      }
+    {
+      sendto_one(source_p,":%s NOTICE %s :Can't attach conf!",
+                 me.name,source_p->name);
+      sendto_realops_flags(UMODE_ALL, L_ALL,
+                           "Failed OPER attempt by %s (%s@%s) can't attach conf!",
+	                   source_p->name, source_p->username, source_p->host);
+      log_foper(source_p, source_p->user->auth_oper);
+
+      attach_conf(source_p, oconf);
+      return;
+    }
      
     oper_up(source_p, aconf);
 
@@ -148,12 +160,12 @@ static void m_challenge( struct Client *client_p, struct Client *source_p,
          source_p->host);
     log_oper(source_p, source_p->user->auth_oper);
 
-     MyFree(source_p->user->response);
-     MyFree(source_p->user->auth_oper);
-     source_p->user->response = NULL;
-     source_p->user->auth_oper = NULL;
-     return;
-    }
+    MyFree(source_p->user->response);
+    MyFree(source_p->user->auth_oper);
+    source_p->user->response = NULL;
+    source_p->user->auth_oper = NULL;
+    return;
+  }
   
   MyFree(source_p->user->response);
   MyFree(source_p->user->auth_oper);
@@ -165,25 +177,30 @@ static void m_challenge( struct Client *client_p, struct Client *source_p,
   	!(aconf = find_conf_exact(parv[1], source_p->username,
                                 source_p->localClient->sockhost,
                                 CONF_OPERATOR)))
-    {
-      sendto_one (source_p, form_str(ERR_NOOPERHOST), me.name, parv[0]);
-      log_foper(source_p, source_p->user->auth_oper);
-      return;
-    }
-  if (!aconf->rsa_public_key)
-    {
-     sendto_one (source_p, ":%s NOTICE %s :I'm sorry, PK authentication "
-                 "is not enabled for your oper{} block.", me.name,
-                 parv[0]);
-     return;
-    }
-  if (
-   !generate_challenge (&challenge, &(source_p->user->response), aconf->rsa_public_key)
-     )
-    {
-     sendto_one (source_p, form_str(RPL_RSACHALLENGE), me.name, parv[0],
-                 challenge);
-    }
+  {
+    sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, parv[0]);
+    log_foper(source_p, source_p->user->auth_oper);
+
+    if(ConfigFileEntry.failed_oper_notice)
+      sendto_realops_flags(UMODE_ALL, L_ALL,
+                           "Failed OPER attempt - host mismatch by %s (%s@%s)",
+                           source_p->name, source_p->username, source_p->host);
+    return;
+  }
+
+  if(!aconf->rsa_public_key)
+  {
+    sendto_one(source_p, ":%s NOTICE %s :I'm sorry, PK authentication "
+               "is not enabled for your oper{} block.", me.name, parv[0]);
+    return;
+  }
+
+  if(!generate_challenge(&challenge, &(source_p->user->response), aconf->rsa_public_key))
+  {
+    sendto_one(source_p, form_str(RPL_RSACHALLENGE), 
+               me.name, parv[0], challenge);
+  }
+
   DupString(source_p->user->auth_oper, aconf->name);
   MyFree(challenge);
   return;
