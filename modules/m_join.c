@@ -441,7 +441,7 @@ static void build_list_of_channels( struct Client *source_p,
         }
       if (*name == '0' && (atoi(name) == 0))
 	{
-	  strcat(jbuf,"0");
+	  strcpy(jbuf,"0");
 	  continue;
 	}
       else if (!IsChannelName(name))
