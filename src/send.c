@@ -54,7 +54,6 @@
 #include "s_log.h"
 #include "vchannel.h"
 #include "memory.h"
-#include "debug.h"
 #include "hook.h"
 
 #define LOG_BUFSIZE 2048
