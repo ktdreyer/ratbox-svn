@@ -1,3 +1,8 @@
+*** 20010323_6 by ejb
+- add support for decades, centuries, millannia,
+  and terabytes in the parser.
+
+
 *** 20010323_5 by toot
 couple of fixes for fussy compilers
 
