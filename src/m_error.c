@@ -104,7 +104,7 @@ ms_error(struct Client *client_p, struct Client *source_p, int parc, const char 
 #ifndef HIDE_SERVERS_IPS
 				     L_ALL,
 #else
-				     L_ADMIN
+				     L_ADMIN,
 #endif
 				     "ERROR :from %s -- %s",
 				     get_client_name(client_p, MASK_IP), para);
