@@ -83,7 +83,7 @@ static const char *logLevelToString[] =
 
 static int open_log(const char* filename)
 {
-  logFile = fbopen(filename, "an");
+  logFile = fbopen(filename, "a");
   if (logFile == NULL) {
 #ifdef USE_SYSLOG
     syslog(LOG_ERR, "Unable to open log file: %s: %s",

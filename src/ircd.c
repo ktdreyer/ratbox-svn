@@ -361,7 +361,7 @@ static void write_pidfile(void)
 {
   FBFILE* fd;
   char buff[20];
-  if ((fd = fbopen(PPATH, "wt")))
+  if ((fd = fbopen(PPATH, "w")))
     {
       ircsprintf(buff,"%d\n", (int)getpid());
       if ((fbputs(buff, fd) == -1))
@@ -378,9 +378,6 @@ static void write_pidfile(void)
 int main(int argc, char *argv[])
 {
   time_t      delay = 0;
-
-  printf("ircd version %s\n", version);
-  printf("ircd: pid %d\n", (int)getpid());
 
   /*
    * save server boot time right away, so getrusage works correctly
@@ -436,7 +433,7 @@ int main(int argc, char *argv[])
 
   if (printVersion) 
     {
-      printf("\tircd_dir: %s\n", ConfigFileEntry.dpath);
+      printf("ircd: version %s\n", version);
       exit(EXIT_SUCCESS);
     }
 
@@ -446,8 +443,16 @@ int main(int argc, char *argv[])
       exit(EXIT_FAILURE);
     }
 
-  printf("ircd: running in %s mode from %s\n", !noDetach ? "background" : "foreground",
-	 ConfigFileEntry.dpath);
+  if (!noDetach)
+    {
+      daemon(1,1);
+      putchar('\n');
+    }
+
+  printf("ircd: version %s\n", version);
+  printf("ircd: pid %d\n", (int)getpid());
+  printf("ircd: running in %s mode from %s\n", !noDetach ? "background"
+         : "foreground", ConfigFileEntry.dpath);
  
   setup_signals();
 
@@ -550,9 +555,6 @@ int main(int argc, char *argv[])
   write_pidfile();
 
   log(L_NOTICE, "Server Ready");
-
-  if (!noDetach)
-    daemon(1,1);
 
   eventAdd("cleanup_channels", cleanup_channels, NULL,
 	   CLEANUP_CHANNELS_TIME, 0);
