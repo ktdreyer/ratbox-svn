@@ -293,16 +293,17 @@ find_oper_conf(const char *username, const char *host, const char *locip, const 
 
 		if(parse_netmask(addr, (struct sockaddr *)&ip, &bits) != HM_HOST)
 		{
-			if(ip.ss_family != cip.ss_family)
-				continue;
-
-			if(!comp_with_mask_sock((struct sockaddr *)&ip, (struct sockaddr *)&cip, bits))
-				continue;
+			if(ip.ss_family == cip.ss_family &&
+			   comp_with_mask_sock((struct sockaddr *)&ip, (struct sockaddr *)&cip, bits))
+				return oper_p;
 		}
-		else if(!match(oper_p->host, host))
-			continue;
 
-		return oper_p;
+		/* we have to compare against the host as well, because its
+		 * valid to set a spoof to an IP, which if we only compare
+		 * in ip form to sockhost will not necessarily match --anfl
+		 */
+		if(match(oper_p->host, host))
+			return oper_p;
 	}
 
 	return NULL;
