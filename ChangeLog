@@ -1,3 +1,19 @@
+androsyn    2004/08/04 16:32:40 EDT	(20040804_1)
+
+  Modified files:
+    modules              Makefile.in m_lusers.c 
+  Removed files:
+    modules              m_users.c 
+  Log:
+  Merge m_users into m_lusers
+  
+  Revision  Changes    Path
+  1.105     +0 -1      ircd-ratbox/modules/Makefile.in
+  1.44      +34 -2     ircd-ratbox/modules/m_lusers.c
+  1.44      +0 -69     ircd-ratbox/modules/m_users.c (dead)
+
+
+
 androsyn    2004/08/04 16:27:45 EDT	(20040804_0)
 
   Modified files:
