@@ -1,3 +1,9 @@
+*** 20011003_2 by androsyn
+Well..its useful to stick in setup.h before trying to grab stuff autoconf
+defined..
+
+
+
 *** 20011003_1 by androsyn
 A misplaced define broken --disable-balloc
 
