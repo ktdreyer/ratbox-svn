@@ -841,7 +841,7 @@ majority_gline(struct Client *source_p,
               DupString(gline_pending_ptr->reason2, reason);
               gline_pending_ptr->oper_server2 = find_or_add(oper_server);
               gline_pending_ptr->last_gline_time = CurrentTime;
-              gline_pending_ptr->time_request1 = CurrentTime;
+              gline_pending_ptr->time_request2 = CurrentTime;
               return NO;
             }
         }
