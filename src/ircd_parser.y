@@ -190,6 +190,7 @@ int   class_redirport_var;
 %token  T_DRONE
 %token  T_FULL
 %token  T_SKILL
+%token  T_LOCOPS
 %token  T_NCHANGE
 %token  T_REJ
 %token  T_UNAUTH
@@ -1816,6 +1817,10 @@ umode_item:	T_BOTS
               | T_CALLERID
   {
     ConfigFileEntry.oper_only_umodes |= FLAGS_CALLERID;
+  }
+              | T_LOCOPS
+  {
+    ConfigFileEntry.oper_only_umodes |= FLAGS_LOCOPS;
   }
               | T_DRONE
   {

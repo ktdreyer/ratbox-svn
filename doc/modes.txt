@@ -13,6 +13,7 @@ User Modes:
 +i - invisible  - Not shown in NAMES or WHO unless you share a
                   a channel
 +k - skill      - See server generated KILL messages
++l - locops     - See LOCOPS messages
 +n - nchange    - See client nick changes
 +o - oper       - Operator status
 +r - rej        - See rejected client notices

@@ -168,6 +168,13 @@ CHANTYPES=%s   - The types of channels supported (currently '#&')
 PREFIX=%s      - The allowed PRIVMSG/NOTICE channel prefixes (server based
                  /onotice, NOTICE @%#channel :message)
 
+There are hooks in the code, that loadable modules can plug into.  These
+hooks provide interfaces for user enhancement.  There are some hook modules
+provided in contrib, providing WHOIS notice, STATS notice, and LINKS notice.
+Others will be added as the ircd matures.
+
+Usermode +l is provided in order to see LOCOPS
+
 # complete me
 
 # $Id$

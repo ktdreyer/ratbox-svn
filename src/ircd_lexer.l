@@ -218,6 +218,7 @@ invisible               { return T_INVISIBLE; }
 wallop                  { return T_WALLOP; }
 callerid                { return T_CALLERID; }
 drone                   { return T_DRONE; }
+locops                  { return T_LOCOPS; }
 .		        { return yytext[0]; }
 
 %%
