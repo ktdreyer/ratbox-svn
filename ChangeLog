@@ -1,3 +1,22 @@
+androsyn    2004/10/07 16:54:10 EDT	(20041007_2)
+
+  Modified files:
+    modules/core         users.c 
+  Added files:
+    include              watch.h 
+    modules              m_watch.c 
+    src                  watch.c 
+  Log:
+  Helps if i add the watch sources themselves
+  
+  Revision  Changes    Path
+  7.1       +53 -0     ircd-ratbox/include/watch.h (new)
+  1.22      +2 -2      ircd-ratbox/modules/core/users.c
+  1.1       +231 -0    ircd-ratbox/modules/m_watch.c (new)
+  1.1       +242 -0    ircd-ratbox/src/watch.c (new)
+
+
+
 androsyn    2004/10/07 16:50:29 EDT	(20041007_1)
 
   Modified files:
