@@ -433,11 +433,7 @@ struct LocalUser
  */
 #define IsPerson(x)             (IsClient(x) && (x)->user)
 #define DoAccess(x)             ((x)->flags & FLAGS_CHKACCESS)
-#define IsDead(x)               ((x)->flags & FLAGS_DEADSOCKET)
-#define SetDead(x)              ((x)->flags |= FLAGS_DEADSOCKET)
 #define SetAccess(x)            ((x)->flags |= FLAGS_CHKACCESS)
-#define IsClosing(x)		((x)->flags & FLAGS_CLOSING)
-#define SetClosing(x)		((x)->flags |= FLAGS_CLOSING)
 #define ClearAccess(x)          ((x)->flags &= ~FLAGS_CHKACCESS)
 #define IsCryptIn(x)            ((x)->flags &  FLAGS_CRYPTIN)
 #define SetCryptIn(x)           ((x)->flags |= FLAGS_CRYPTIN)

@@ -61,7 +61,11 @@ static void check_unknowns_list(dlink_list * list);
 static void free_exited_clients(void *unused);
 static void exit_aborted_clients(void *unused);
 
-static void qs_client(struct Client *, const char *);
+static int exit_remote_client(struct Client *, struct Client *, struct Client *,const char *);
+static int exit_remote_server(struct Client *, struct Client *, struct Client *,const char *);
+static int exit_local_client(struct Client *, struct Client *, struct Client *,const char *);
+static int exit_unknown_client(struct Client *, struct Client *, struct Client *,const char *);
+static int exit_local_server(struct Client *, struct Client *, struct Client *,const char *);
 
 static EVH check_pings;
 
@@ -373,7 +377,7 @@ check_unknowns_list(dlink_list * list)
 
 		if(client_p->firsttime ? ((CurrentTime - client_p->firsttime) > 30) : 0)
 		{
-			exit_client(client_p, client_p, &me, "Connection timed out");
+			exit_unknown_client(client_p, client_p, &me, "Connection timed out");
 		}
 	}
 }
@@ -920,145 +924,6 @@ free_exited_clients(void *unused)
 }
 
 /*
-** Exit one client, local or remote. Assuming all dependents have
-** been already removed, and socket closed for local client.
-*/
-static void
-exit_one_client(struct Client *client_p,
-		struct Client *source_p, struct Client *from, const char *comment)
-{
-	struct Client *target_p;
-	dlink_node *lp;
-	dlink_node *next_lp;
-
-	if(IsServer(source_p))
-	{
-		if(source_p->servptr && source_p->servptr->serv)
-			dlinkDelete(&source_p->lnode, &source_p->servptr->serv->servers);
-		else
-			ts_warn("server %s without servptr!", source_p->name);
-
-		if(!IsMe(source_p))
-			remove_server_from_list(source_p);
-	}
-	else if(source_p->servptr && source_p->servptr->serv)
-	{
-		dlinkDelete(&source_p->lnode, &source_p->servptr->serv->users);
-		source_p->servptr->serv->usercnt--;
-	}
-	/* there are clients w/o a servptr: unregistered ones */
-
-	/*
-	 **  For a server or user quitting, propogate the information to
-	 **  other servers (except to the one where is came from (client_p))
-	 */
-	if(IsMe(source_p))
-	{
-		sendto_realops_flags(UMODE_ALL, L_ALL, "ERROR: tried to exit me! : %s", comment);
-		return;		/* ...must *never* exit self!! */
-	}
-	else if(IsServer(source_p))
-	{
-		/*
-		 ** Old sendto_serv_but_one() call removed because we now
-		 ** need to send different names to different servers
-		 ** (domain name matching)
-		 */
-		/*
-		 ** The bulk of this is done in remove_dependents now, all
-		 ** we have left to do is send the SQUIT upstream.  -orabidoo
-		 */
-		if(MyConnect(source_p))
-		{
-			if(source_p->localClient->ctrlfd > -1)
-			{
-				fd_close(source_p->localClient->ctrlfd);
-				source_p->localClient->ctrlfd = -1;
-
-#ifndef HAVE_SOCKETPAIR
-				fd_close(source_p->localClient->ctrlfd_r);
-				fd_close(source_p->localClient->fd_r);
-
-				source_p->localClient->ctrlfd_r = -1;
-				source_p->localClient->fd_r = -1;
-#endif
-			}
-		}
-
-		target_p = source_p->from;
-		if(target_p && IsServer(target_p) && target_p != client_p
-		   && !IsMe(target_p) && (source_p->flags & FLAGS_KILLED) == 0)
-			sendto_one(target_p, ":%s SQUIT %s :%s", from->name,
-				   source_p->name, comment);
-	}
-	else if(IsPerson(source_p))	/* ...just clean all others with QUIT... */
-	{
-		/*
-		 ** If this exit is generated from "m_kill", then there
-		 ** is no sense in sending the QUIT--KILL's have been
-		 ** sent instead.
-		 */
-		if((source_p->flags & FLAGS_KILLED) == 0)
-		{
-			sendto_server(client_p, NULL, NOCAPS, NOCAPS,
-				      ":%s QUIT :%s", source_p->name, comment);
-		}
-		/*
-		 ** If a person is on a channel, send a QUIT notice
-		 ** to every client (person) on the same channel (so
-		 ** that the client can show the "**signoff" message).
-		 ** (Note: The notice is to the local clients *only*)
-		 */
-		sendto_common_channels_local(source_p, ":%s!%s@%s QUIT :%s",
-					     source_p->name,
-					     source_p->username, source_p->host, comment);
-
-		DLINK_FOREACH_SAFE(lp, next_lp, source_p->user->channel.head)
-		{
-			remove_user_from_channel(lp->data, source_p);
-		}
-
-		/* Should not be in any channels now */
-		assert(source_p->user->channel.head == NULL);
-
-		/* Clean up invitefield */
-		DLINK_FOREACH_SAFE(lp, next_lp, source_p->user->invited.head)
-		{
-			del_invite(lp->data, source_p);
-		}
-
-		/* Clean up allow lists */
-		del_all_accepts(source_p);
-
-		add_history(source_p, 0);
-		off_history(source_p);
-
-		if(HasID(source_p))
-			del_from_id_hash_table(source_p->user->id, source_p);
-
-		del_from_hostname_hash_table(source_p->host, source_p);
-
-
-	}
-
-	/* 
-	 * Remove source_p from the client lists
-	 */
-	del_from_client_hash_table(source_p->name, source_p);
-
-	/* remove from global client list */
-	remove_client_from_list(source_p);
-
-	/* Check to see if the client isn't already on the dead list */
-	assert(dlinkFind(&dead_list, source_p) == NULL);
-
-
-	/* add to dead client dlist */
-
-	dlinkAddAlloc(source_p, &dead_list);
-}
-
-/*
 ** Recursively send QUITs and SQUITs for source_p and all its dependent clients
 ** and servers to those servers that need them.  A server needs the client
 ** QUITs if it can't figure them out from the SQUIT (ie pre-TS4) or if it
@@ -1137,7 +1002,7 @@ recurse_remove_clients(struct Client *source_p, const char *comment)
 
 		/* XXX - this next line can probably go now --fl */
 		target_p->flags |= FLAGS_KILLED;
-		qs_client(target_p, comment);
+		exit_remote_client(NULL, target_p, &me, me.name);		
 	}
 
 	DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->serv->servers.head)
@@ -1145,65 +1010,8 @@ recurse_remove_clients(struct Client *source_p, const char *comment)
 		target_p = (struct Client *) ptr->data;
 		recurse_remove_clients(target_p, comment);
 		target_p->flags |= FLAGS_KILLED;
-		exit_one_client(NULL, target_p, &me, me.name);
+		exit_remote_server(NULL, target_p, &me, me.name);
 	}
-}
-
-/* qs_client()
- *
- * inputs       - client to remove, reason
- * outputs      -
- * side effects - client is 'quitstormed' off the network
- */
-static void
-qs_client(struct Client *source_p, const char *comment)
-{
-	dlink_node *ptr;
-	dlink_node *next_ptr;
-
-	if(source_p->servptr && source_p->servptr->serv)
-	{
-		dlinkDelete(&source_p->lnode, &source_p->servptr->serv->users);
-		source_p->servptr->serv->usercnt--;
-	}
-
-	sendto_common_channels_local(source_p, ":%s!%s@%s QUIT :%s",
-				     source_p->name, source_p->username, source_p->host, comment);
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, source_p->user->channel.head)
-	{
-		qs_user_from_channel(ptr->data, source_p);
-	}
-
-	/* shouldnt be in any channels */
-	assert(source_p->user->channel.head == NULL);
-
-	/* clean up various lists */
-	DLINK_FOREACH_SAFE(ptr, next_ptr, source_p->user->invited.head)
-	{
-		del_invite(ptr->data, source_p);
-	}
-
-	del_all_accepts(source_p);
-
-	/* add to whowas */
-	add_history(source_p, 0);
-	off_history(source_p);
-
-	if(HasID(source_p))
-		del_from_id_hash_table(source_p->user->id, source_p);
-
-	del_from_hostname_hash_table(source_p->host, source_p);
-	del_from_client_hash_table(source_p->name, source_p);
-
-	/* remove from global client list */
-	remove_client_from_list(source_p);
-
-	/* Check to see if the client isn't already on the dead list */
-	assert(dlinkFind(&dead_list, source_p) == NULL);
-
-	/* this stops them being sent things like channel messages */
-	dlinkAddAlloc(source_p, &dead_list);
 }
 
 /*
@@ -1264,7 +1072,7 @@ exit_aborted_clients(void *unused)
 	{
 		struct abort_client *abt = ptr->data;
 		dlinkDelete(ptr, &abort_list);
-		if(!IsPerson(abt->client) && !IsUnknown(abt->client) && !IsClosing(abt->client))
+		if(!IsPerson(abt->client) && !IsUnknown(abt->client))
 		{
 			sendto_realops_flags(UMODE_ALL, L_ADMIN,
 					     "Closing link to %s: %s",
@@ -1304,6 +1112,245 @@ dead_link(struct Client *client_p)
 }
 
 
+/* This does the remove of the user from channels..local or remote */
+static inline void
+exit_generic_client(struct Client *client_p, struct Client *source_p, struct Client *from,
+		   const char *comment)
+{
+	dlink_node *lp, *next_lp;
+	
+	if((source_p->flags & FLAGS_KILLED) == 0)
+	{
+		sendto_server(client_p, NULL, NOCAPS, NOCAPS, ":%s QUIT :%s",
+			      source_p->name, comment)	;
+	}
+	
+	sendto_common_channels_local(source_p, ":%s!%s@%s QUIT :%s",
+				     source_p->name,
+				     source_p->username, source_p->host, comment);
+
+	DLINK_FOREACH_SAFE(lp, next_lp, source_p->user->channel.head)
+	{
+		remove_user_from_channel(lp->data, source_p);
+	}
+
+	/* Should not be in any channels now */
+	assert(source_p->user->channel.head == NULL);
+
+	/* Clean up invitefield */
+	DLINK_FOREACH_SAFE(lp, next_lp, source_p->user->invited.head)
+	{
+		del_invite(lp->data, source_p);
+	}
+
+	/* Clean up allow lists */
+	del_all_accepts(source_p);
+
+	add_history(source_p, 0);
+	off_history(source_p);
+
+	if(HasID(source_p))
+		del_from_id_hash_table(source_p->user->id, source_p);
+
+	del_from_hostname_hash_table(source_p->host, source_p);
+	del_from_client_hash_table(source_p->name, source_p);
+	remove_client_from_list(source_p);
+	assert(dlinkFind(&dead_list, source_p) == NULL);
+
+	dlinkAddAlloc(source_p, &dead_list);
+
+}
+/* 
+ * Assumes IsPerson(source_p) && !MyConnect(source_p)
+ */
+
+static int
+exit_remote_client(struct Client *client_p, struct Client *source_p, struct Client *from,
+		   const char *comment)
+{
+	if(source_p->servptr && source_p->servptr->serv)
+	{
+		dlinkDelete(&source_p->lnode, &source_p->servptr->serv->users);
+		source_p->servptr->serv->usercnt--;
+	}
+
+	exit_generic_client(client_p, source_p, from, comment);
+	return(CLIENT_EXITED);
+}
+
+/*
+ * This assumes IsUnknown(source_p) == TRUE and MyConnect(source_p) == TRUE
+ */
+
+static int
+exit_unknown_client(struct Client *client_p, struct Client *source_p, struct Client *from,
+		  const char *comment)
+{
+	delete_adns_queries(source_p->localClient->dns_query);
+	delete_identd_queries(source_p);
+	client_flush_input(source_p);
+	dlinkFindDestroy(&unknown_list, source_p);
+	log_user_exit(source_p);
+	sendto_one(source_p, "ERROR :Closing Link: %s (%s)", source_p->host, comment);
+	close_connection(source_p);
+
+	if((source_p->flags & FLAGS_KILLED) == 0)
+	{
+		sendto_server(client_p, NULL, NOCAPS, NOCAPS, ":%s QUIT :%s",
+			      source_p->name, comment);
+	}
+	del_from_hostname_hash_table(source_p->host, source_p);
+	del_from_client_hash_table(source_p->name, source_p);
+	remove_client_from_list(source_p);
+	dlinkAddAlloc(source_p, &dead_list);
+	/* Note that we don't need to add unknowns to the dead_list */
+	return(CLIENT_EXITED);
+}
+
+static int
+exit_remote_server(struct Client *client_p, struct Client *source_p, struct Client *from, 
+		  const char *comment)
+{
+	static char comment1[(HOSTLEN*2)+2];
+	struct Client *target_p;
+	if(ConfigServerHide.hide_servers)
+	{
+		ircsprintf(comment1, "%s *.split", me.name);
+	}
+	
+	if((source_p->serv) && (source_p->serv->up))
+		 strcpy(comment1, source_p->serv->up);
+	else
+		strcpy(comment1, "<Unknown>");
+	
+	strcat(comment1, " ");
+	strcat(comment1, source_p->name);							        		                		                                                                      		
+	if(source_p->serv != NULL)
+		remove_dependents(client_p, source_p, from, comment, comment1);
+
+	if(source_p->servptr && source_p->servptr->serv)
+		dlinkDelete(&source_p->lnode, &source_p->servptr->serv->servers);
+	else
+		ts_warn("server %s without servptr!", source_p->name);
+
+	remove_server_from_list(source_p);
+	target_p = source_p->from;
+	
+	if(target_p != NULL && IsServer(target_p) && target_p != client_p &&
+	   !IsMe(target_p) && (source_p->flags & FLAGS_KILLED) == 0)
+	{
+		sendto_one(target_p, ":%s SQUIT %s :%s", from->name, source_p->name, comment);
+	}
+	
+	del_from_client_hash_table(source_p->name, source_p);
+	remove_client_from_list(source_p);  
+	dlinkAddAlloc(source_p, &dead_list);	
+	return 0;
+}
+
+static int
+exit_local_server(struct Client *client_p, struct Client *source_p, struct Client *from, 
+		  const char *comment)
+{
+	static char comment1[(HOSTLEN*2)+2];
+	unsigned int sendk, recvk;
+
+	dlinkFindDestroy(&serv_list, source_p);
+	remove_server_from_list(source_p);
+	
+	Count.myserver--;
+	unset_chcap_usage_counts(source_p);
+	sendk = source_p->localClient->sendK;
+	recvk = source_p->localClient->receiveK;
+
+	if(client_p != NULL && source_p != client_p && source_p->localClient->fd >= 0)
+	{
+		sendto_one(source_p, "ERROR :Closing Link: %s %s (%s)",
+			   source_p->host, source_p->name, comment);
+	}
+	
+	if(source_p->localClient->ctrlfd >= 0)
+	{
+		fd_close(source_p->localClient->ctrlfd);
+		source_p->localClient->ctrlfd = -1;
+#ifndef HAVE_SOCKETPAIR
+		fd_close(source_p->localClient->ctrlfd_r);
+		fd_close(source_p->localClient->fd_r);
+		source_p->localClient->ctrlfd_r = -1;
+		source_p->localClient->fd_r = -1;
+#endif
+	}
+
+	if(source_p->servptr && source_p->servptr->serv)
+		dlinkDelete(&source_p->lnode, &source_p->servptr->serv->servers);
+	else
+		ts_warn("server %s without servptr!", source_p->name);
+
+
+	close_connection(source_p);
+	
+	if(ConfigServerHide.hide_servers)
+	{
+		ircsprintf(comment1, "%s *.split", me.name);
+	}
+	
+	if((source_p->serv) && (source_p->serv->up))
+		 strcpy(comment1, source_p->serv->up);
+	else
+		strcpy(comment1, "<Unknown>");
+	
+	strcat(comment1, " ");
+	strcat(comment1, source_p->name);							        		                		                                                                      		
+
+	if(source_p->serv != NULL)
+		remove_dependents(client_p, source_p, from, comment, comment1);
+
+	sendto_realops_flags(UMODE_ALL, L_ALL, "%s was connected for %ld seconds.  %d/%d sendK/recvK.",
+			     source_p->name, CurrentTime - source_p->firsttime, sendk, recvk);
+
+	ilog(L_NOTICE, "%s was connected for %ld seconds.  %d/%d sendK/recvK.", source_p->name, 
+	     CurrentTime - source_p->firsttime, sendk, recvk);
+        
+	del_from_client_hash_table(source_p->name, source_p);
+	remove_client_from_list(source_p);  
+	dlinkAddAlloc(source_p, &dead_list);
+	return 0;
+}
+
+
+/* 
+ * This assumes IsPerson(source_p) == TRUE && MyConnect(source_p) == TRUE
+ */
+
+static int
+exit_local_client(struct Client *client_p, struct Client *source_p, struct Client *from,
+		  const char *comment)
+{
+	assert(IsPerson(source_p));
+	client_flush_input(source_p);
+	Count.local--;
+	dlinkFindDestroy(&lclient_list, source_p);
+	if(IsOper(source_p))
+		dlinkFindDestroy(&oper_list, source_p);
+	
+	
+	sendto_realops_flags(UMODE_CCONN, L_ALL,
+			     "Client exiting: %s (%s@%s) [%s] [%s]",
+			     source_p->name,
+			     source_p->username, source_p->host, comment,
+#ifdef HIDE_SPOOF_IPS
+                             IsIPSpoof(source_p) ? "255.255.255.255" :
+#endif
+			     source_p->localClient->sockhost);
+
+	log_user_exit(source_p);
+	sendto_one(source_p, "ERROR :Closing Link: %s (%s)", source_p->host, comment);
+	close_connection(source_p);
+	exit_generic_client(client_p, source_p, from, comment);
+	return(CLIENT_EXITED);
+}
+
+
 /*
 ** exit_client - This is old "m_bye". Name  changed, because this is not a
 **        protocol function, but a general server utility function.
@@ -1337,128 +1384,24 @@ exit_client(struct Client *client_p,	/* The local client originating the
 	    const char *comment	/* Reason for the exit */
 	)
 {
-	unsigned int sendk = 0, recvk = 0;
-	char comment1[HOSTLEN + HOSTLEN + 2];
 	if(MyConnect(source_p))
 	{
-		delete_adns_queries(source_p->localClient->dns_query);
-		delete_identd_queries(source_p);
-		client_flush_input(source_p);
-
-		/* This source_p could have status of one of STAT_UNKNOWN, STAT_CONNECTING
-		 * STAT_HANDSHAKE or STAT_UNKNOWN
-		 * all of which are lumped together into unknown_list
-		 *
-		 * In all above cases IsRegistered() will not be true.
-		 */
-		if(!IsRegistered(source_p))
-		{
-			dlinkFindDestroy(&unknown_list, source_p);
-		}
-		if(IsOper(source_p))
-		{
-			dlinkFindDestroy(&oper_list, source_p);
-		}
-		if(IsClient(source_p))
-		{
-			Count.local--;
-
-			if(IsPerson(source_p))	/* a little extra paranoia */
-			{
-				dlinkFindDestroy(&lclient_list, source_p);
-			}
-		}
-
-		/* As soon as a client is known to be a server of some sort
-		 * it has to be put on the serv_list, or SJOIN's to this new server
-		 * from the connect burst will not be seen.
-		 */
-		if(IsAnyServer(source_p))
-		{
-			dlinkFindDestroy(&serv_list, source_p);
-		}
-
-		if(IsServer(source_p))
-		{
-			Count.myserver--;
-			unset_chcap_usage_counts(source_p);
-			sendk = source_p->localClient->sendK;
-			recvk = source_p->localClient->receiveK;
-		}
-
+		/* Local clients of various types */
 		if(IsPerson(source_p))
-			sendto_realops_flags(UMODE_CCONN, L_ALL,
-					     "Client exiting: %s (%s@%s) [%s] [%s]",
-					     source_p->name,
-					     source_p->username, source_p->host, comment,
-#ifdef HIDE_SPOOF_IPS
-					     IsIPSpoof(source_p) ? "255.255.255.255" :
-#endif
-					     source_p->localClient->sockhost);
-
-		log_user_exit(source_p);
-
-		if(source_p->localClient->fd >= 0)
-		{
-			if(client_p != NULL && source_p != client_p)
-				sendto_one(source_p,
-					   "ERROR :Closing Link: %s %s (%s)",
-					   source_p->host, source_p->name, comment);
-			else
-				sendto_one(source_p,
-					   "ERROR :Closing Link: %s (%s)", source_p->host, comment);
-		}
-		close_connection(source_p);
-
-	}
-
-	if(IsServer(source_p))
+			return exit_local_client(client_p, source_p, from, comment);
+		if(IsUnknown(source_p))
+			return exit_unknown_client(client_p, source_p, from, comment);
+		if(IsServer(source_p))
+			return exit_local_server(client_p, source_p, from, comment);
+	} else
 	{
-		if(ConfigServerHide.hide_servers)
-		{
-			/* set netsplit message to "me.name *.split" to still show 
-			 * that its a split, but hide the servers splitting
-			 */
-			ircsprintf(comment1, "%s *.split", me.name);
-		}
-		else
-		{
-			if((source_p->serv) && (source_p->serv->up))
-				strcpy(comment1, source_p->serv->up);
-			else
-				strcpy(comment1, "<Unknown>");
-
-			strcat(comment1, " ");
-			strcat(comment1, source_p->name);
-		}
-
-		if(source_p->serv != NULL)	/* XXX Why does this happen */
-			remove_dependents(client_p, source_p, from, comment, comment1);
-
-		if(source_p->servptr == &me)
-		{
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "%s was connected for %d seconds.  %d/%d sendK/recvK.",
-					     source_p->name,
-					     (int) (CurrentTime -
-						    source_p->firsttime), sendk, recvk);
-			ilog(L_NOTICE,
-			     "%s was connected for %d seconds.  %d/%d sendK/recvK.",
-			     source_p->name,
-			     CurrentTime - source_p->firsttime,
-			     sendk, recvk);
-		}
+		/* Remotes */
+		if(IsPerson(source_p))
+			return exit_remote_client(client_p, source_p, from, comment);
+		if(IsServer(source_p))
+			return exit_remote_server(client_p, source_p, from, comment);
 	}
-
-	/* The client *better* be off all of the lists */
-	assert(dlinkFind(&unknown_list, source_p) == NULL);
-	assert(dlinkFind(&lclient_list, source_p) == NULL);
-	assert(dlinkFind(&serv_list, source_p) == NULL);
-	assert(dlinkFind(&oper_list, source_p) == NULL);
-
-
-	exit_one_client(client_p, source_p, from, comment);
-	return client_p == source_p ? CLIENT_EXITED : 0;
+	return -1;
 }
 
 /*
