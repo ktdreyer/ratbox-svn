@@ -1,3 +1,19 @@
+leeh        2004/04/27 14:10:16 EDT	(20040427_1)
+
+  Modified files:
+    .                    RELNOTES 
+    src                  packet.c 
+  Log:
+  - change a couple of tests when parsing messages to IsAnyDead() rather than
+    MyConnect()
+  - dont call comm_setflush() on something thats died after parsing
+  
+  Revision  Changes    Path
+  1.100     +14 -1     ircd-ratbox/RELNOTES
+  7.127     +5 -2      ircd-ratbox/src/packet.c
+
+
+
 androsyn    2004/04/27 07:35:35 EDT	(20040427_0)
 
   Modified files:
