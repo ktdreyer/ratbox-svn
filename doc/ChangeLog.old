@@ -1,3 +1,8 @@
+*** 20010718_4 by leeh
+- IRCD_CFLAGS -> IRC_CFLAGS (or whatever it was ;p)
+- removed an ugly hack in m_jupe.c I added when not thinking
+
+
 *** 20010718_3 by leeh
 - make install will rm m_client.so if it exists
 
