@@ -241,6 +241,13 @@ int     ms_sjoin(struct Client *cptr,
 
   oldmode = &chptr->mode;
 
+  if (newts < 800000000)
+    {
+      sendto_realops_flags(FLAGS_ALL,"*** Bogus TS %lu from %s ignored",
+			   newts, cptr->name, newts);
+      newts = oldts;
+    }
+
   if (isnew)
     chptr->channelts = tstosend = newts;
   else if (newts == 0 || oldts == 0)
