@@ -1,3 +1,8 @@
+*** 20010129_8 by jdc
+Typo fix (FLAGS_ADMINS --> FLAGS_ADMIN).
+
+
+
 *** 20010129_7 by jdc
 Changed all get_client_name() references, respectively, from
 TRUE/FALSE to SHOW_IP/HIDE_IP.  Also changed HIDEME to MASK_IP.
