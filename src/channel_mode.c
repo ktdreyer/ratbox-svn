@@ -1546,6 +1546,7 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 
       pbl = 0;
       parabuf[0] = 0;
+      dir = MODE_QUERY;
     }
 
     if(dir != mode_changes[i].dir)
@@ -1643,6 +1644,7 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
 
       pbl = 0;
       parabuf[0] = '\0';
+      dir = MODE_QUERY;
     }
 
     if(dir != mode_changes[i].dir)
