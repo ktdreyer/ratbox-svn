@@ -74,16 +74,15 @@ static int m_quit(struct Client *cptr,
     comment[TOPICLEN] = '\0';
 
   if (ConfigFileEntry.client_exit)
-  {
-	  snprintf(reason, TOPICLEN, "Client Exit: %s", comment);
-	  comment = reason;
-  }
+    {
+      snprintf(reason, TOPICLEN, "Client Exit: %s", comment);
+      comment = reason;
+    }
   
-#ifdef ANTI_SPAM_EXIT_MESSAGE
   if( !IsServer(sptr) && MyConnect(sptr) &&
      (sptr->firsttime + ANTI_SPAM_EXIT_MESSAGE_TIME) > CurrentTime)
     comment = "Client Quit";
-#endif
+
   return exit_client(cptr, sptr, sptr, comment);
 }
 /*
@@ -118,10 +117,10 @@ static int mo_quit(struct Client *cptr,
     comment[TOPICLEN] = '\0';
 
   if (ConfigFileEntry.client_exit)
-  {
-	  snprintf(reason, TOPICLEN, "Client Exit: %s", comment);
-	  comment = reason;
-  }
+    {
+      snprintf(reason, TOPICLEN, "Client Exit: %s", comment);
+      comment = reason;
+    }
 
   return exit_client(cptr, sptr, sptr, comment);
 }

@@ -340,7 +340,7 @@
 #define MAXCHANNELSPERUSER  15  /* Recommended value: 15 */
 
 /*
- * ANTI_FLOOD code
+ * anti flood code
  * The defaults =should= be fine for the initial timers/counters etc.
  * they are all changeable at run time anyway
  *
@@ -350,7 +350,7 @@
 #define DEFAULT_FLOOD_COUNT 8
 
 /* 
- * ANTI_SPAMBOT code.
+ * anti spambot code
  * The defaults =should= be fine for the initial timers/counters etc.
  * they are all changeable at run time anyway
  *
@@ -364,16 +364,13 @@
 #define OPER_SPAM_COUNTDOWN   5 
 #define JOIN_LEAVE_COUNT_EXPIRE_TIME 120
 
-/* ANTI_SPAM_EXIT_MESSAGE
- *
- * If this is defined, do not allow the clients exit message to be
+/* Doo not allow the clients exit message to be
  * sent to a channel if the client has been on for less than
  * ANTI_SPAM_EXIT_MESSAGE_TIME.
  * The idea is, some spambots exit with their spam, thus advertising
  * this way.
  * (idea due to ThaDragon, I just couldn't find =his= code)
  */
-#undef ANTI_SPAM_EXIT_MESSAGE
 /* 300 is five minutes, seems reasonable */
 #define ANTI_SPAM_EXIT_MESSAGE_TIME 300
 
@@ -400,6 +397,12 @@
  */
 #define USE_RCS
 
+/*
+ * this checks for various things that should never happen, but
+ * might do due to bugs.  ircd might be slightly more efficient with 
+ * these disabled, who knows. keep this enabled during development.
+ */
+#define INVARIANTS
 /* ----------------- archaic and/or broken section -------------------- */
 #undef DNS_DEBUG
 
@@ -421,8 +424,6 @@ error CLIENT_FLOOD undefined.
 #  define Debug(x) ;
 #  define LOGFILE "/dev/null"
 #endif
-
-#define REPORT_DLINE_TO_USER
 
 #define MIN_SPAM_NUM 5
 #define MIN_SPAM_TIME 60

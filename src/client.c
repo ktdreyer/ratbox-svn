@@ -462,10 +462,7 @@ check_klines(void)
 	  if (IsPerson(cptr)) 
             sendto_one(cptr, form_str(ERR_YOUREBANNEDCREEP),
                        me.name, cptr->name, reason);
-#ifdef REPORT_DLINE_TO_USER
-          else
-            sendto_one(cptr, "NOTICE DLINE :*** You have been D-lined");
-#endif
+
 
           cptr->flags2 |= FLAGS2_ALREADY_EXITED;
 	  (void)exit_client(cptr, cptr, &me, reason );
