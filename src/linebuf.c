@@ -97,7 +97,6 @@ linebuf_new_line(buf_head_t *bufhead)
   
   bufline->len = 0;
   bufline->terminated = 0;
-  bufline->overflow = 0;
   bufline->flushing = 0;
 
   /* Stick it at the end of the buf list */
@@ -253,12 +252,13 @@ linebuf_donebuf(buf_head_t *bufhead)
  */
 static int
 linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
-  char *data, int len)
+                  char *data, int len)
 {
   register int cpylen = 0;	/* how many bytes we've copied */
   register char *ch = data;	/* Pointer to where we are in the read data */
   register char *bufch = &bufline->buf[bufline->len];
-  int clen = 0;
+  int clen = 0;                 /* how many bytes we've processed,
+                                   and don't ever want to see again.. */
 
   /* If its full or terminated, ignore it */
 
@@ -268,31 +268,33 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
   clen = cpylen = linebuf_skip_crlf(ch, len);
 
   /* This is the ~overflow case..This doesn't happen often.. */
-  if(cpylen > BUF_DATA_SIZE - bufline->len)
+  if(cpylen > (BUF_DATA_SIZE - bufline->len - 1))
     {
-      cpylen = BUF_DATA_SIZE - bufline->len - 1;
-      memcpy(bufch, ch, cpylen);
-      bufch += cpylen-1;
+      memcpy(bufch, ch, (BUF_DATA_SIZE - bufline->len - 1));
+      bufline->buf[BUF_DATA_SIZE-1] = '\0';
+      bufch = &bufline->buf[BUF_DATA_SIZE-2];
       while(cpylen && (*bufch == '\r' || *bufch == '\n'))
-	{
-	  *bufch = '\0';
-	  cpylen--;
-	  bufch--;
-	}
-      bufline->overflow = 1;
+        {
+          *bufch = '\0';
+          cpylen--;
+          bufch--;
+        }
       bufline->terminated = 1;
       bufline->len = cpylen;
       bufhead->len += bufline->len;
       return clen;
     }
+
   memcpy(bufch, ch, cpylen);
-  bufch += cpylen-1;
-  
- /* If no linefeed.. bail for the next time */
+  bufch += cpylen;
+  *bufch = '\0';
+  bufch--;
+
   if(*bufch != '\r' && *bufch != '\n')
     { 
-      *(bufch+1) = 0;
-      bufhead->len += bufline->len += cpylen;
+      /* No linefeed, bail for the next time */
+      bufhead->len += cpylen;
+      bufline->len += cpylen;
       bufline->terminated = 0;
       return clen;
     }
@@ -306,7 +308,8 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
     }
   
   bufline->terminated = 1;
-  bufhead->len += bufline->len += cpylen;
+  bufhead->len += cpylen;
+  bufline->len += cpylen;
   return clen;
 }
 
@@ -476,10 +479,7 @@ linebuf_putmsg(buf_head_t *bufhead, const char *format, va_list va_args,
   
   /* Truncate the data if required */
   if (len > 510)
-  {
     len = 510;
-    bufline->overflow = 1;
-  }
 
   /* Chop trailing CRLF's .. */
   len--; /* change len to index of last char */
@@ -522,10 +522,7 @@ linebuf_put(buf_head_t *bufhead, char *buf, int buflen)
 
   /* Truncate the data if required */
   if (buflen > BUF_DATA_SIZE)
-    {
-      buflen = BUF_DATA_SIZE;
-      bufline->overflow = 1;
-    }
+    buflen = BUF_DATA_SIZE;
 
   /* Chop trailing CRLF's .. */
   assert(buf[buflen] == '\0');

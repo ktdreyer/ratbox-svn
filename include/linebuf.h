@@ -10,9 +10,8 @@
 #include <stdarg.h>
 #include "tools.h"
 
-/* How big we want a buffer - we ignore the CRLF at the end */
-/* XXX Hrm. Should do magic with another #define ! -- adrian */
-#define BUF_DATA_SIZE		512
+/* How big we want a buffer - 510 data bytes, plus space for a '\0' */
+#define BUF_DATA_SIZE		511
 
 struct _buf_line;
 struct _buf_head;
@@ -21,10 +20,9 @@ typedef struct _buf_line buf_line_t;
 typedef struct _buf_head buf_head_t;
 
 struct _buf_line {
-    char buf[BUF_DATA_SIZE+3];  /* we need space for the CR/LF/NUL.. */
+    char buf[BUF_DATA_SIZE];
     int  terminated;		/* Whether we've terminated the buffer */
     int  flushing;		/* Whether we're flushing .. */
-    int  overflow;
     int  len;			/* How much data we've got */
     int  refcount;              /* how many linked lists are we in? */
     struct _buf_line *next;     /* next in free list */
