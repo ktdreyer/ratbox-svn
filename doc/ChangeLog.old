@@ -1,3 +1,27 @@
+a1kmm       2001/12/18 03:42:19 EST	(20011218_1)
+
+  Modified files:
+    src                  s_auth.c s_bsd.c 
+  Log:
+  - Made s_auth reschedule if no data is read on the first pass. This is
+    needed for sigio to work properly as we need to try reading at once to
+    tell the kernel to send the signal next time. Note that if any auth
+    data is received, it still must all be received in the same packet. This
+    should be a non-risky commit.
+  - Changed an assert() to an if () return; This was needed because with SIGIO
+    a call to comm_setselect from a handler that was not called by comm_setselect
+    can result in a call to the handler, which caused re-entrancy problems with
+    the assert. As the assert() should never happen, this should not affect the
+    rest of the ircd. Additionally, it is a better action in the case it does
+    happen if NDEBUG is defined, as that would otherwise result in the ircd
+    coring(probably).
+  
+  Revision  Changes    Path
+  7.78      +8 -1      ircd-hybrid-7/src/s_auth.c
+  7.153     +4 -2      ircd-hybrid-7/src/s_bsd.c
+
+
+
 a1kmm       2001/12/18 02:20:09 EST	(20011218_0)
 
   Modified files:
