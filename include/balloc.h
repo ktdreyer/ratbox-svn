@@ -48,7 +48,7 @@ typedef struct BlockHeap BlockHeap;
  
 #else
 
-#define DEBUG_BALLOC 1
+#undef DEBUG_BALLOC
 
 #ifdef DEBUG_BALLOC
 #define BALLOC_MAGIC 0x3d3a3c3d

@@ -1111,6 +1111,7 @@ server_estab(struct Client *client_p)
 	{
 		DupString(client_p->serv->fullcaps, client_p->localClient->fullcaps);
 		MyFree(client_p->localClient->fullcaps);
+		client_p->localClient->fullcaps = NULL;
 	}
 
 	/* add it to scache */
