@@ -1,3 +1,18 @@
+androsyn    2004/03/01 14:04:59 EST	(20040301_6)
+
+  Modified files:
+    .                    configure configure.ac 
+    include              ircd_defs.h 
+  Log:
+  More crap
+  
+  Revision  Changes    Path
+  7.201     +17 -15    ircd-ratbox/configure
+  7.15      +14 -4     ircd-ratbox/configure.ac
+  7.44      +24 -8     ircd-ratbox/include/ircd_defs.h
+
+
+
 androsyn    2004/03/01 13:40:54 EST	(20040301_5)
 
   Modified files:
