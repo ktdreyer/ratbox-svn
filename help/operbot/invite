@@ -1,0 +1,2 @@
+INVITE <#channel>
+  <#channel>: Channel to request an invitation to.

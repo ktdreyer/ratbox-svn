@@ -25,7 +25,7 @@ add_service(struct service_handler *service)
 {
 	struct client *client_p;
 
-	if(strchr(client_p->name, '.') != NULL)
+	if(strchr(service->name, '.') != NULL)
 	{
 		slog("ERR: Invalid service name %s", client_p->name);
 		return NULL;
@@ -90,7 +90,7 @@ add_service(struct service_handler *service)
                         strlcat(filename, lcase(scommand[i].cmd),
                                 sizeof(filename));
 
-                        scommand->helpfile = cache_file(filename, scommand[i].cmd);
+                        scommand[i].helpfile = cache_file(filename, scommand[i].cmd);
                 }
         }
 
@@ -256,11 +256,6 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 
                         buf[0] = '\0';
 
-                        sendto_server(":%s NOTICE %s :%s Help Index.  Use "
-                                      "HELP <command> for more information.",
-                                      MYNAME, client_p->name,
-                                      service_p->name);
-
                         for(i = 0; cmd_table[i].cmd[0] != '\0'; i++)
                         {
                                 if(cmd_table[i].operonly && !is_oper(client_p))
@@ -270,8 +265,19 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
                                 strlcat(buf, " ", sizeof(buf));
                         }
 
-                        sendto_server(":%s NOTICE %s :Topics: %s",
-                                      MYNAME, client_p->name, buf);
+			if(buf[0] != '\0')
+			{
+	                        sendto_server(":%s NOTICE %s :%s Help Index.  Use "
+        	                              "HELP <command> for more information.",
+                	                      MYNAME, client_p->name,
+                        	              service_p->name);
+	                        sendto_server(":%s NOTICE %s :Topics: %s",
+        	                              MYNAME, client_p->name, buf);
+			}
+			else
+				sendto_server(":%s NOTICE %s :No help is available for this service.",
+						MYNAME, client_p->name);
+
                         service_p->service->help_count++;
                         return;
                 }

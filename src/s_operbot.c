@@ -20,8 +20,7 @@
 #include "newconf.h"
 
 #define OPERBOT_ERR_PARAM	1
-#define OPERBOT_ERR_ACCESS	2
-#define OPERBOT_ERR_CHANNEL	3
+#define OPERBOT_ERR_CHANNEL	2
 
 static struct client *operbot_p;
 
@@ -34,15 +33,14 @@ static int s_operbot_op(struct client *, char *parv[], int parc);
 
 static struct service_command operbot_command[] =
 {
-	{ "INVITE",	&s_operbot_invite,	NULL, 0, 1, 0L },
-	{ "OP",		&s_operbot_op,		NULL, 0, 1, 0L },
+	{ "INVITE",	&s_operbot_invite,	NULL, 1, 1, 0L },
+	{ "OP",		&s_operbot_op,		NULL, 1, 1, 0L },
 	{ "\0",		NULL,			NULL, 0, 0, 0L }
 };
 
 static struct service_error operbot_message[] =
 {
 	{ OPERBOT_ERR_PARAM,	"Missing parameters."		},
-	{ OPERBOT_ERR_ACCESS,	"No access."			},
 	{ OPERBOT_ERR_CHANNEL,	"Invalid channel."		},
 	{ 0,			"\0"				}
 };
@@ -68,12 +66,6 @@ s_operbot_invite(struct client *client_p, char *parv[], int parc)
 	if(parc < 1 || EmptyString(parv[0]))
 	{
 		service_error(operbot_p, client_p, OPERBOT_ERR_PARAM);
-		return 1;
-	}
-
-	if(!is_oper(client_p))
-	{
-		service_error(operbot_p, client_p, OPERBOT_ERR_ACCESS);
 		return 1;
 	}
 
@@ -105,12 +97,6 @@ s_operbot_op(struct client *client_p, char *parv[], int parc)
 	if(parc < 1 || EmptyString(parv[0]))
 	{
 		service_error(operbot_p, client_p, OPERBOT_ERR_PARAM);
-		return 1;
-	}
-
-	if(!is_oper(client_p))
-	{
-		service_error(operbot_p, client_p, OPERBOT_ERR_ACCESS);
 		return 1;
 	}
 
