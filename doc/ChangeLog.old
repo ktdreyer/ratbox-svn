@@ -1,3 +1,7 @@
+*** 20010311_4 by a1kmm
+- Added numeric 20 for "Your ID and key is" so we can have clients read them.
+
+
 *** 20010311_3 by a1kmm
 - Added a flag "persistant=yes" to CONF_CLIENT(auth{} blocks). Without this flag, you cannot become +p.
 
