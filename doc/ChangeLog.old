@@ -1,3 +1,9 @@
+*** 20010226_5 by ejb
+- fix to make ircd_parser.y work
+- notes on Solaris compile.
+
+
+
 *** 20010226_4 by db
 - don't frob memory if NDEBUG is set
 
