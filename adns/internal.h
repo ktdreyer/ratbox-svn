@@ -186,7 +186,7 @@ struct adns__query {
   struct { allocnode *head, *tail; } allocations;
   int interim_allocd, preserved_allocd;
   void *final_allocspace;
-
+  int cname_recurse_count;
   const typeinfo *typei;
   byte *query_dgram;
   int query_dglen;
@@ -211,7 +211,7 @@ struct adns__query {
   byte *cname_dgram;
   int cname_dglen, cname_begin;
   /* If non-0, has been allocated using . */
-
+  int cname_count;
   vbuf search_vb;
   int search_origlen, search_pos, search_doneabs;
   /* Used by the searching algorithm.  The query domain in textual form
