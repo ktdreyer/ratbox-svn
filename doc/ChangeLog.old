@@ -1,3 +1,13 @@
+*** 20010817_1 by davidt
+- Instead of polling SERVICES,SERVERS,/*BUSYCLIENTS*/,IDLECLIENTS, and
+  delaying on IDLECLIENTS (which means we _should_ always delay for the full
+  x ms, if they are really idle clients), do it in reverse:
+  poll IDLECLIENTS, /*BUSYCLIENTS*/, SERVICES, then delay on SERVERS, so
+  we delay on (presumably) the busiest links, and we'll wake up if anything
+  happens.
+  I fail to see how the multi-list stuff really helps us...
+
+
 *** 20010816_11 by androsyn
 Changed a few eventAdd()'s to eventAddIsh() which keeps some of the events
 from running all at once.  We should look into making some of the events
