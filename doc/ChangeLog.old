@@ -1,3 +1,9 @@
+*** 20010617_2 by toot
+added .indent.pro to use in other dirs
+"-gnu -nut -npcs -cdw" seems close to what we use.. 
+feel free to change stuff :)
+
+
 *** 20010617_1 by toot
 finished formatting channel.c
 
