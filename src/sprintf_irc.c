@@ -259,7 +259,7 @@ static char scratch_buffer[32];
  * --Run
  */
 
-inline int
+int
 vsprintf_irc(register char *str, register const char *format,
              register va_list args)
 

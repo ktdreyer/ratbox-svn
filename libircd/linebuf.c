@@ -62,7 +62,7 @@ linebuf_init(void)
   eventAddIsh("linebuf_garbage_collect", linebuf_garbage_collect, NULL, 30);
 }
 
-inline buf_line_t *
+buf_line_t *
 linebuf_allocate(void)
 {
   buf_line_t *t;
@@ -72,7 +72,7 @@ linebuf_allocate(void)
   return(t);
 }
 
-inline void
+void
 linebuf_free(buf_line_t *p)
 {
    BlockHeapFree(linebuf_heap, p);
