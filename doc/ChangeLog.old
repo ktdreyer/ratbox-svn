@@ -1,3 +1,8 @@
+*** 20010418_6 by fl_
+- beginnings of a file we can dump to users on /help.. currently
+  only covers usermodes/channelmodes.. additions are welcome :P
+
+
 *** 20010418_5 by a1kmm
 - Fixed hostmask code to work with exempt{} blocks.
 
