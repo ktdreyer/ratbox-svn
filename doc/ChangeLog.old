@@ -1,3 +1,7 @@
+*** 20010208_3 by androsyn
+Keeps adns from splattering crud on fd=2
+
+
 *** 20010208_2 by toot
 should use irccmp rather than strcmp when checking
 vchan_id
