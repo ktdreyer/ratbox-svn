@@ -316,7 +316,7 @@ match_cidr(const char *s1, const char *s2)
 
 	inetpton(aftype, ip, &ipptr);
 	inetpton(aftype, ipmask, &maskptr);
-	if(comp_with_mask(ipptr, maskptr, cidrlen) && match(mask, address))
+	if(comp_with_mask(&ipptr, &maskptr, cidrlen) && match(mask, address))
 		return 1;
 	else
 		return 0;
