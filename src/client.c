@@ -1470,6 +1470,7 @@ exit_local_client(struct Client *client_p, struct Client *source_p, struct Clien
 	s_assert(IsPerson(source_p));
 	client_flush_input(source_p);
 	dlinkDelete(&source_p->localClient->tnode, &lclient_list);
+	dlinkDelete(&source_p->lnode, &me.serv->users);
 	if(IsOper(source_p))
 		dlinkFindDestroy(&oper_list, source_p);
 
