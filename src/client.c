@@ -885,7 +885,13 @@ get_client_name(struct Client* client, int showip)
         return client->name;
 
 #ifdef HIDE_SERVERS_IPS
-      showip = MASK_IP;
+      if(showip == SHOW_IP && (IsServer(client) || IsConnecting(client)
+			      || IsHandshake(client)))
+        showip = MASK_IP;
+#endif
+#ifdef HIDE_SPOOF_IPS
+      if(showip == SHOW_IP && IsIPSpoof(client))
+        showip = MASK_IP;
 #endif
 
       /* And finally, let's get the host information, ip or name */
@@ -1220,9 +1226,11 @@ void dead_link(struct Client *client_p)
   if (!IsPerson(client_p) && !IsUnknown(client_p) && !IsClosing(client_p))
   {
     sendto_realops_flags(FLAGS_ALL, L_ADMIN,
-                         notice, get_client_name(client_p, HIDE_IP));
+		         "Closing link to %s: %s",
+                         get_client_name(client_p, HIDE_IP), notice);
     sendto_realops_flags(FLAGS_ALL, L_OPER,
-                         notice, get_client_name(client_p, MASK_IP));
+		         "Closing link to %s: %s",
+                         get_client_name(client_p, MASK_IP), notice);
   }
   Debug((DEBUG_ERROR, notice, get_client_name(to, HIDE_IP)));
   assert(dlinkFind(&abort_list, client_p) == NULL);
