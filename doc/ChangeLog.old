@@ -1,3 +1,7 @@
+*** 20011001_6 by a1kmm
+- Fixed the 513 vs 511 issue in the linebuf code.
+
+
 *** 20011001_5 by db
 - If fixklines.c is missing in tools, it shouldn't be in Makefile
 
