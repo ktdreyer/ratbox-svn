@@ -710,6 +710,7 @@ void    remove_user_from_channel(struct Client *sptr,struct Channel *chptr,int w
     if (tmp->value.chptr == chptr)
       {
         *curr = tmp->next;
+	/* ZZZZZZZZ blalloc elemsize 12 already free bug here */
         free_link(tmp);
         break;
       }
@@ -3021,7 +3022,7 @@ int     m_cburst(struct Client *cptr,
       sendto_realops("cburst: chptr->lazyLinkChannelExists %X cptr->serverMask %X",
                      chptr->lazyLinkChannelExists,cptr->serverMask );
 #endif
-
+ 
       send_channel_modes(cptr, chptr);
        /* Send the topic */
       sendto_one(cptr, ":%s TOPIC %s :%s",
@@ -3367,37 +3368,43 @@ void cleanup_channels(void)
 static void destroy_channel(struct Channel *chptr)
 {
   struct SLink  *tmp;
-  struct SLink  *current;
-  struct SLink  *nextCurrent;
-  struct SLink  *currentMember;
-  struct SLink  *nextCurrentMember;
-  struct SLink  *lastMember;
+
+  struct SLink  **current;
+  struct SLink  **nextCurrent;
+  struct SLink  *tmpCurrent;
+
+  struct SLink  **currentClient;
+  struct SLink  **nextCurrentClient;
+  struct SLink  *tmpCurrentClient;
+
   struct Client *sptr;
 
-  /* free all SLink's referenced to by member structure */
-  for (current = chptr->members; current; current = nextCurrent )
+  /* Walk through all the struct SLink's pointing to members of this chanel,
+   * then walk through each client found from each SLink, removing
+   * any reference it has to this channel.
+   * Finally, free now unused SLink's
+   */
+  for (current = &chptr->members;
+        (tmpCurrent = *current);
+          current = nextCurrent )
     {
-      nextCurrent = current->next;
-      sptr = current->value.cptr;
+      nextCurrent = &tmpCurrent->next;
+      sptr = tmpCurrent->value.cptr;
 
-      for (lastMember = NULL,currentMember = sptr->user->channel;
-            currentMember;
-              currentMember = nextCurrentMember )
+      for (currentClient = &sptr->user->channel;
+            (tmpCurrentClient = *currentClient);
+              currentClient = nextCurrentClient )
         {
-          nextCurrentMember = currentMember->next;
-          if( currentMember->value.chptr == chptr)
-            {
-              if(lastMember)
-                lastMember->next = nextCurrentMember;
-              else
-                sptr->user->channel->next = nextCurrentMember;
+          nextCurrentClient = &tmpCurrentClient->next;
 
-              free_link(currentMember);
-              break;
+          if( tmpCurrentClient->value.chptr == chptr)
+            {
+              *currentClient = tmpCurrentClient->next;
+              free_link(tmpCurrentClient);
             }
-          lastMember = currentMember;
         }
-      free_link(current);
+      *current = tmpCurrent->next;
+      free_link(tmpCurrent);
     }
 
   while ((tmp = chptr->invites))

@@ -491,18 +491,6 @@ time_t check_pings(time_t currenttime)
       else
         ping = get_client_ping(cptr);
 
-      /*
-       * Ok, so goto's are ugly and can be avoided here but this code
-       * is already indented enough so I think its justified. -avalon
-       */
-       /*  if (!rflag &&
-               (ping >= currenttime - cptr->lasttime))
-              goto ping_timeout; */
-
-      /*
-       * *sigh* I think not -Dianora
-       */
-
       if (ping < (currenttime - cptr->lasttime))
         {
 
