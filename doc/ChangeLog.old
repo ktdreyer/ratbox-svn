@@ -1,3 +1,7 @@
+*** 20010123_4 by wcampbel
+Fixed spelling errors (Noticed by Jonathan Roes)
+
+
 *** 20010123_3 by db
 - removed the loop unrolling ... made it hard to read, also hid a bug
   and loop unrolling is for the compiler to do.
