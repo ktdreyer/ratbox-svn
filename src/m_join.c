@@ -298,16 +298,16 @@ int     m_join(struct Client *cptr,
                 * but not if it was a subchan's realname they specified */
                if (IsVchanTop(chptr))
                  {
+                   if( on_sub_vchan(chptr,sptr) )
+                     {
+                       sendto_one(sptr,":%s NOTICE %s :*** You are on a sub chan of %s already",
+                                  me.name, sptr->name, name);
+                       sendto_one(sptr, form_str(ERR_BADCHANNAME),
+                               me.name, parv[0], (unsigned char*) name);
+                       return 0;
+                     }
                    if (key && key[0] == '!')
                      {
-                       if( on_sub_vchan(chptr,sptr) )
-                        {
-                         sendto_one(sptr,":%s NOTICE %s :*** You are on a sub chan of %s already",
-                                    me.name, sptr->name, name);
-                         sendto_one(sptr, form_str(ERR_BADCHANNAME),
-                                 me.name, parv[0], (unsigned char*) name);
-                         return 0;
-                        }
                        /* found a matching vchan? let them join it */
                        if ((vchan_chptr = find_vchan(chptr, key)))
                          {
@@ -324,8 +324,21 @@ int     m_join(struct Client *cptr,
                      }
                    else
                      {
-                       show_vchans(cptr, sptr, chptr);
-                       return 0;
+                       /* one special case here i think..
+                        * if there's only one vchan, and the root is empty
+                        * let them join that vchan */
+                       if( (!chptr->members) && (!chptr->next_vchan->next_vchan) )
+                         {
+                           root_chptr = chptr;
+                           chptr = chptr->next_vchan;
+                           joining_vchan = 1;
+                         }
+                       /* otherwise, they get a list of inhabited channels */
+                       else
+                        {
+                          show_vchans(cptr, sptr, chptr);
+                          return 0;
+                        }
                      }
                  }
                /* trying to join a sub chans 'real' name
@@ -572,7 +585,7 @@ int     m_join(struct Client *cptr,
                          chptr->topic_time);
             }
           if (joining_vchan)
-	    (void)names_on_this_channel(sptr, vchan_chptr,root_chptr->chname);
+	    (void)names_on_this_channel(sptr, chptr, root_chptr->chname);
           else
             (void)names_on_this_channel(sptr, chptr, name);
         }
@@ -1117,16 +1130,16 @@ int     mo_join(struct Client *cptr,
                /* there's subchans so check those */
                if (IsVchanTop(chptr))
                  {
+                   if( on_sub_vchan(chptr,sptr) )    
+                     {   
+                       sendto_one(sptr,":%s NOTICE %s :*** You are on a sub chan of %s already",  
+                                  me.name, sptr->name, name);  
+                       sendto_one(sptr, form_str(ERR_BADCHANNAME),  
+                               me.name, parv[0], (unsigned char*) name);  
+                       return 0;  
+                     }   
                    if (key && key[0] == '!')
                      {
-                       if( on_sub_vchan(chptr,sptr) )
-                        {
-                         sendto_one(sptr,":%s NOTICE %s :*** You are on a sub chan of %s already",
-                                    me.name, sptr->name, name);
-                         sendto_one(sptr, form_str(ERR_BADCHANNAME),
-                                 me.name, parv[0], (unsigned char*) name);
-                         return 0;
-                        }
                        /* found a matching vchan? let them join it */
                        if ((vchan_chptr = find_vchan(chptr, key)))
                          {
@@ -1143,9 +1156,22 @@ int     mo_join(struct Client *cptr,
                      }
                    else
                      {
-                       show_vchans(cptr, sptr, chptr);
-                       return 0;
-                     }
+                       /* one special case here i think..
+                        * if there's only one vchan, and the root is empty
+                        * let them join that vchan */
+                       if( (!chptr->members) && (!chptr->next_vchan->next_vchan) )
+                         {
+                           root_chptr = chptr;
+                           chptr = chptr->next_vchan;
+                           joining_vchan = 1;
+                         }
+                       /* otherwise, they get a list of inhabited channels */
+                       else
+                        {
+                          show_vchans(cptr, sptr, chptr);
+                          return 0;
+                        }
+                     }   
                  }
                /* trying to join a sub chans 'real' name               
                 * don't allow that */
@@ -1286,16 +1312,9 @@ int     mo_join(struct Client *cptr,
                          chptr->topic_time);
             }
           if (joining_vchan)
-            {
-              parv[1] = chptr->chname;
-              parv[2] = root_chptr->chname;
-              (void)m_names(cptr, sptr, 3, parv);
-            }
+            (void)names_on_this_channel(sptr, chptr, root_chptr->chname);
           else
-            {
-              parv[1] = name;
-              (void)m_names(cptr, sptr, 2, parv);
-            }
+            (void)names_on_this_channel(sptr, chptr, name);
         }
     }
   return 0;

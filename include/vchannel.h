@@ -48,6 +48,7 @@ extern void	del_vchan_from_client_cache(struct Client *sptr,
 
 extern struct Channel* map_vchan(struct Channel *chptr, struct Client *sptr);
 extern struct Channel* map_bchan(struct Channel *chptr, struct Client *sptr);
+extern struct Channel* find_bchan(struct Channel *chptr);
 
 extern void	show_vchans(struct Client *cptr,
 			    struct Client *sptr,
