@@ -1,3 +1,21 @@
+androsyn    2002/08/14 13:36:04 EDT	(20020814_5)
+
+  Modified files:
+    modules              .depend 
+    src                  .depend 
+  Removed files:
+    contrib              cidr_bans.diff 
+  Log:
+  Update .depend and remove the cidr_bans.diff as it got merged in.  Also I
+  ended up doing a repo move on README.cidr_bans into doc/
+  
+  Revision  Changes    Path
+  1.3       +0 -144    ircd-ratbox/contrib/cidr_bans.diff (dead)
+  1.10      +246 -257  ircd-ratbox/modules/.depend
+  7.10      +133 -139  ircd-ratbox/src/.depend
+
+
+
 androsyn    2002/08/14 13:32:02 EDT	(20020814_4)
 
   Modified files:
