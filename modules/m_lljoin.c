@@ -157,7 +157,10 @@ int     ms_lljoin(struct Client *cptr,
   else
   {
     if (chptr)
-      vchan_chptr = select_vchan(chptr, cptr, acptr, vkey, chname);
+    {
+      if ( (vchan_chptr = select_vchan(chptr, cptr, acptr, vkey, chname)) )
+        return 0;
+    }
     else
     {
       chptr = vchan_chptr = get_channel( acptr, chname, CREATE );
