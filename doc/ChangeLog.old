@@ -1,3 +1,7 @@
+*** 20010308_1 by androsyn
+Removed an #if 0'd relic that was pointing to a function in what was res.c
+
+
 *** 20010307_9 by jdc
 * Lacking list.h include; _free_dlink_node was implicit.
 
