@@ -70,7 +70,11 @@ char *_version = "20001122";
 int m_links(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
 
-
+  if (!GlobalSetOptions.hide_server)
+    {
+     mo_links(cptr, sptr, parc, parv);
+     return 0;
+    }
   SendMessageFile(sptr, &ConfigFileEntry.linksfile);
 
     
