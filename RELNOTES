@@ -20,19 +20,13 @@ NOTE: THIS IS BETA CODE.  It is run at your own risk.  By running this
 - optimization for moving clients between local lists. no more dlinkFind()
   call here(ick)
 - added reject cache code
-- added etrace
 - various vms cleanups
 - soft asserts, basically scream loudly on assert fail instead of core dump
 - added operstring/adminstring vanity stuff
-- added remove resv/unresv
-- modified burst order to send nicks then channels reducing collisions on
-  the remote
+- modified burst order to send nicks then channels
 - added support for VMS ast i/o
-- fixed whois flooding bug
-- added encap support
-- misc glines cleanups
-- removed wildcard whois completely
-- merged struct ResvEntry and struct xline together
+- misc code cleanups
+- all fixes done to -stable
 
 -- ircd-ratbox-2.0beta2 
 - added UNXLINE, controlled via xline=yes; in operator {};

@@ -277,7 +277,7 @@ ms_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(check_wild_gline(user, host))
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL,
-				"%s!%s@%s on %s is requesting a gline without"
+				"%s!%s@%s on %s is requesting a gline without "
 				"%d non-wildcard characters for [%s@%s] [%s]",
 				oper_nick, oper_user, oper_host, oper_server,
 				ConfigFileEntry.min_nonwildcard, user, host, reason);

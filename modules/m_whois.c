@@ -231,8 +231,6 @@ do_whois(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if((p = strchr(parv[1], ',')))
 		*p = '\0';
 
-	(void) collapse(nick);
-
 	if((target_p = find_client(nick)) != NULL && IsPerson(target_p))
 	{
 		/* im being asked to reply to a client that isnt mine..
