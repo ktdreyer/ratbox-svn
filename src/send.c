@@ -667,8 +667,6 @@ sendto_match_servs(struct Channel *chptr, struct Client *from, const char *patte
       if (*chptr->chname == '&')
         return;
     }
-  else
-    return; /* an ooopsies */
 
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
@@ -677,7 +675,7 @@ sendto_match_servs(struct Channel *chptr, struct Client *from, const char *patte
       if (cptr == from)
         continue;
 
-      if(ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
+      if(chptr && ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
         {
           if( !(chptr->lazyLinkChannelExists & cptr->localClient->serverMask) )
              continue;

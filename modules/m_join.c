@@ -60,7 +60,7 @@ _moddeinit(void)
 }
 
 void build_list_of_channels( struct Client *sptr,
-                				    char *jbuf, char *given_names);
+               				    char *jbuf, char *given_names);
 void do_join_0(struct Client *cptr, struct Client *sptr);
 void check_spambot_warning( struct Client *sptr, char *name );
 int can_join (struct Client *, struct Channel *, char *);
@@ -106,7 +106,6 @@ int     m_join(struct Client *cptr,
   p = NULL;
   if (parv[2])
     key = strtoken(&p2, parv[2], ",");
-  parv[2] = NULL;       /* for m_names call later, parv[parc] must == NULL */
 
   for (name = strtoken(&p, jbuf, ","); name;
        key = (key) ? strtoken(&p2, NULL, ",") : NULL,
@@ -366,7 +365,7 @@ int     ms_join(struct Client *cptr,
   ** complain for remote JOINs to existing channels
   ** (they should be SJOINs) -orabidoo
   */
-  if ((name[1] == '0') && (name[1] == '\0'))
+  if ((name[0] == '0') && (name[1] == '\0'))
     {
       do_join_0( cptr, sptr );
     }
@@ -537,7 +536,7 @@ int can_join(struct Client *sptr, struct Channel *chptr, char *key)
   dlink_node  *lp;
   int ban_or_exception;
 
-  if ( (ban_or_exception = is_banned(chptr,sptr)) == CHFL_BAN)
+  if ((ban_or_exception = is_banned(chptr,sptr)) == CHFL_BAN)
     return (ERR_BANNEDFROMCHAN);
 
   if (chptr->mode.mode & MODE_INVITEONLY)
