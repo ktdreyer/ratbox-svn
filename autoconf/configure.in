@@ -109,7 +109,9 @@ fi
 
 dnl Try to find SQLite.
 SQLITE_INCLUDES=""
-AC_ARG_WITH([sqlite], [], [SQLITE_DIR=$withval], [SQLITE_DIR="/usr"])
+AC_ARG_WITH([sqlite],
+[ --with-sqlite=DIR         Path to search for sqlite], 
+[SQLITE_DIR=$withval], [SQLITE_DIR="/usr"])
 
 AC_CHECK_HEADER(sqlite.h, [], [
 	AC_MSG_CHECKING(for sqlite.h in given path)

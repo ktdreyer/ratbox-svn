@@ -28,7 +28,7 @@ ac_help="$ac_help
  --enable-operbot          Enable Operbot Service
  --disable-operbot         Disable Operbot Service"
 ac_help="$ac_help
-"
+ --with-sqlite=DIR         Path to search for sqlite"
 
 # Initialize some variables set by options.
 # The variables have the same names as the options, with
