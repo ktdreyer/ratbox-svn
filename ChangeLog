@@ -1,3 +1,31 @@
+leeh        2004/08/02 18:15:32 EDT	(20040802_4)
+
+  Modified files:
+    doc                  ircd.motd 
+    include              client.h 
+    modules              m_away.c m_oper.c m_stats.c m_trace.c 
+                         m_whois.c 
+    modules/core         m_message.c m_nick.c 
+    src                  client.c s_user.c 
+  Log:
+  - move last_away, last, response and auth_oper from struct User to
+    struct Localuser
+  
+  Revision  Changes    Path
+  7.3       +2 -2      ircd-ratbox/doc/ircd.motd
+  7.247     +7 -4      ircd-ratbox/include/client.h
+  1.148     +7 -7      ircd-ratbox/modules/core/m_message.c
+  1.155     +1 -2      ircd-ratbox/modules/core/m_nick.c
+  1.58      +11 -8     ircd-ratbox/modules/m_away.c
+  1.86      +17 -17    ircd-ratbox/modules/m_oper.c
+  1.225     +3 -6      ircd-ratbox/modules/m_stats.c
+  1.98      +3 -5      ircd-ratbox/modules/m_trace.c
+  1.141     +2 -2      ircd-ratbox/modules/m_whois.c
+  7.466     +1 -1      ircd-ratbox/src/client.c
+  7.327     +1 -1      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2004/08/02 17:11:46 EDT	(20040802_3)
 
   Modified files:
