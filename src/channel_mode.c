@@ -2745,8 +2745,18 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
  * output       - none
  * side effects -
  */
+#ifdef REQUIRE_OANDV
+#define NUMLISTS 5
+#else
+#define NUMLISTS 4
+#endif
 void
-set_channel_mode_flags(char flags_ptr[4][2],
+set_channel_mode_flags(
+#ifdef REQUIRE_OANDV 
+		       char flags_ptr[5][2],
+#elif
+		       char flags_ptr[MAX_SUBLISTS][2],
+#endif
                        struct Channel *chptr, struct Client *source_p)
 {
   if (chptr->mode.mode & MODE_HIDEOPS && !is_any_op(chptr, source_p))
@@ -2755,6 +2765,9 @@ set_channel_mode_flags(char flags_ptr[4][2],
     flags_ptr[1][0] = '\0';
     flags_ptr[2][0] = '\0';
     flags_ptr[3][0] = '\0';
+#ifdef REQUIRE_OANDV
+    flags_ptr[4][0] = '\0';
+#endif
   }
   else
   {
@@ -2762,10 +2775,16 @@ set_channel_mode_flags(char flags_ptr[4][2],
     flags_ptr[1][0] = '%';
     flags_ptr[2][0] = '+';
     flags_ptr[3][0] = '\0';
+#ifdef REQUIRE_OANDV
+    flags_ptr[4][0] = '@';
+#endif
 
     flags_ptr[0][1] = '\0';
     flags_ptr[1][1] = '\0';
     flags_ptr[2][1] = '\0';
+#ifdef REQUIRE_OANDV
+    flags_ptr[4][1] = '\0';
+#endif
   }
 }
 

@@ -704,6 +704,12 @@ channel_member_names(struct Client *source_p,
                      struct Channel *chptr,
                      char *name_of_channel, int show_eon)
 {
+#ifdef REQUIRE_OANDV
+#define NUMLISTS 5
+#else
+#define NUMLISTS 4
+#endif
+
   int mlen;
   int sublists_done = 0;
   int tlen;
@@ -711,8 +717,8 @@ channel_member_names(struct Client *source_p,
   char lbuf[BUFSIZE];
   char *t;
   int reply_to_send = NO;
-  dlink_node *members_ptr[MAX_SUBLISTS];
-  char show_flags[MAX_SUBLISTS][2];
+  dlink_node *members_ptr[NUMLISTS];
+  char show_flags[NUMLISTS][2];
   struct Client *who;
   int is_member;
   int i;
@@ -732,6 +738,9 @@ channel_member_names(struct Client *source_p,
     members_ptr[1] = chptr->halfops.head;
     members_ptr[2] = chptr->voiced.head;
     members_ptr[3] = chptr->peons.head;
+#ifdef REQUIRE_OANDV
+    members_ptr[4] = chptr->chanops_voiced.head;
+#endif
     is_member = IsMember(source_p, chptr);
 
     /* Note: This code will show one chanop followed by one voiced followed
@@ -739,9 +748,9 @@ channel_member_names(struct Client *source_p,
      * XXX - this is very predictable, randomise it later.
      */
 
-    while (sublists_done != (1 << MAX_SUBLISTS) - 1)
+    while (sublists_done != (1 << NUMLISTS) - 1)
     {
-      for (i = 0; i < MAX_SUBLISTS; i++)
+      for (i = 0; i < NUMLISTS; i++)
       {
         if (members_ptr[i] != NULL)
         {
@@ -756,7 +765,7 @@ channel_member_names(struct Client *source_p,
           if (who == source_p && is_voiced(chptr, who)
               && chptr->mode.mode & MODE_HIDEOPS)
             ircsprintf(t, "+%s ", who->name);
-          else
+          else 
             ircsprintf(t, "%s%s ", show_flags[i], who->name);
           tlen = strlen(t);
           cur_len += tlen;
