@@ -488,7 +488,7 @@ void send_capabilities(struct Client* cptr, int can_send)
 }
 
 
-static void sendnick_TS(struct Client *cptr, struct Client *acptr)
+void sendnick_TS(struct Client *cptr, struct Client *acptr)
 {
   static char ubuf[12];
 
@@ -496,11 +496,9 @@ static void sendnick_TS(struct Client *cptr, struct Client *acptr)
     {
       send_umode(NULL, acptr, 0, SEND_UMODES, ubuf);
       if (!*ubuf)
-        { /* trivial optimization - Dianora */
-          
+        {
           ubuf[0] = '+';
           ubuf[1] = '\0';
-          /*    original was    strcpy(ubuf, "+"); */
         }
 
       sendto_one(cptr, "NICK %s %d %lu %s %s %s %s :%s", acptr->name, 

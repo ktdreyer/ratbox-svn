@@ -100,6 +100,17 @@ int     m_cburst(struct Client *cptr,
 
   if(IsCapable(cptr,CAP_LL))
     {
+      /* for version 2 of LazyLinks, also have to send nicks on channel */
+#ifndef LLVER1
+      struct SLink* l;
+
+      for (l = chptr->members; l; l = l->next)
+	{
+	  acptr = l->value.cptr;
+	  if (acptr->from != cptr)
+	    sendnick_TS(cptr, acptr);
+	}
+#endif
       chptr->lazyLinkChannelExists = cptr->serverMask;
       send_channel_modes(cptr, chptr);
        /* Send the topic */

@@ -282,7 +282,8 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   
 
   if (!(acptr = find_client(nick, NULL)))
-    return(nickkilldone(cptr,sptr,parc,parv,newts,nick));  /* No collisions,
+    return(nickkilldone(cptr,sptr,parc,parv,newts,nick));
+                                                      /* No collisions,
                                                        * all clear...
                                                        */
 
@@ -400,10 +401,11 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           sendto_ops("Nick collision on %s(%s <- %s)(both killed)",
                      acptr->name, acptr->from->name,
                      get_client_name(cptr, HIDE_IP));
+
 #ifndef LLVER1
           if(ConfigFileEntry.hub &&
-	     IsCapable(cptr,CAP_LL) ) /* && MyConnect(cptr)) */
-          /* CAP_LL will never be seen *unless* MyConnect(cptr) ! */
+	     IsCapable(sptr,CAP_LL) ) /* && MyConnect(sptr)) */
+          /* CAP_LL will never be seen *unless* MyConnect(sptr) ! */
 	    {
 	      sendto_one(cptr, ":%s KILL %s :%s (%s <- %s)",
 			 me.name, acptr->name, me.name,
@@ -411,6 +413,7 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 			 get_client_name(cptr, HIDE_IP));
 	    }
 #endif
+
           ServerStats->is_kill++;
           sendto_one(acptr, form_str(ERR_NICKCOLLISION),
                      me.name, acptr->name, acptr->name);
@@ -443,7 +446,7 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
 #ifndef LLVER1
 	      if(ConfigFileEntry.hub &&
-                 IsCapable(cptr,CAP_LL)) /* && MyConnect(cptr)) */
+                 IsCapable(sptr,CAP_LL)) /* && MyConnect(sptr)) */
 		{
 		  sendto_one(cptr, ":%s KILL %s :%s (%s <- %s)",
 			     me.name, acptr->name, me.name,
@@ -520,7 +523,6 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                      me.name, acptr->name, acptr->name);
           acptr->flags |= FLAGS_KILLED;
           (void)exit_client(cptr, acptr, &me, "Nick collision");
-          /* goto nickkilldone; */
         }
     }
   return(nickkilldone(cptr,sptr,parc,parv,newts,nick));
