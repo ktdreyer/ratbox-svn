@@ -592,7 +592,6 @@ conf_end_oper(struct TopConf *tc)
 				conf_report_error("Ignoring operator block for %s -- "
 						"rsa_public_key_file key invalid; check syntax",
 						yy_tmpoper->name);
-
 				return 0;
 			}
 		}
@@ -602,7 +601,6 @@ conf_end_oper(struct TopConf *tc)
 		dlinkMoveNode(ptr, &yy_oper_list, &oper_conf_list);
 	}
 
-	dlinkAddAlloc(yy_oper, &oper_conf_list);
 	yy_oper = NULL;
 
 	return 0;
@@ -623,10 +621,7 @@ conf_set_oper_user(void *data)
 	char *p;
 	char *host = (char *) data;
 
-	if(EmptyString(yy_oper->host))
-		yy_tmpoper = yy_oper;
-	else
-		yy_tmpoper = make_oper_conf();
+	yy_tmpoper = make_oper_conf();
 
 	if((p = strchr(host, '@')))
 	{
@@ -645,21 +640,11 @@ conf_set_oper_user(void *data)
 	if(EmptyString(yy_tmpoper->username) || EmptyString(yy_tmpoper->host))
 	{
 		conf_report_error("Ignoring user -- missing username/host");
-
-		if(yy_oper == yy_tmpoper)
-		{
-			MyFree(yy_tmpoper->username);
-			MyFree(yy_tmpoper->host);
-			yy_tmpoper->username = yy_tmpoper->host = NULL;
-		}
-		else
-			free_oper_conf(yy_tmpoper);
-
+		free_oper_conf(yy_tmpoper);
 		return;
 	}
 
-	if(yy_oper != yy_tmpoper)
-		dlinkAddAlloc(yy_tmpoper, &yy_oper_list);
+	dlinkAddAlloc(yy_tmpoper, &yy_oper_list);
 }
 
 static void
