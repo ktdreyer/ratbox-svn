@@ -414,16 +414,12 @@ void msg_channel( int p_or_n, char *command,
   char *channel_name=NULL;
   int result;
 
-  if (HasVchans(chptr))
+  channel_name = chptr->chname;
+
+  if ( (HasVchans(chptr)) && (vchan = map_vchan(chptr,sptr)) )
     {
-      if( (vchan = map_vchan(chptr,sptr)) )
-	{
-	  channel_name = chptr->chname;
-	  chptr = vchan;
-	}
+      chptr = vchan;
     }
-  else
-    channel_name = chptr->chname;
 
   if(MyClient(sptr))
     {
