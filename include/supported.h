@@ -35,9 +35,48 @@
                 " TOPICLEN=%i" \
                 " KICKLEN=%i" \
                 " CHANTYPES=%s" \
-                " PREFIX=%s"
+                " PREFIX=%s" \
+                " CHANMODES=%s"
                  
 #define FEATURESVALUES MAXMODEPARAMS,MAXCHANNELSPERUSER,MAXBANS, \
-        ConfigFileEntry.max_targets,NICKLEN,TOPICLEN,TOPICLEN,"#&","@+%"
+        ConfigFileEntry.max_targets,NICKLEN,TOPICLEN,TOPICLEN,"#&","(ovh)@+%", \
+        "beI,,kl,imnpsta"
+
+/*
+ * - from mirc's versions.txt
+ *
+ *  mIRC now supports the numeric 005 tokens: CHANTYPES=# and
+ *  PREFIX=(ohv)@%+ and can handle a dynamic set of channel and
+ *  nick prefixes.
+ *
+ *  mIRC assumes that @ is supported on all networks, any mode
+ *  left of @ is assumed to have at least equal power to @, and
+ *  any mode right of @ has less power.
+ *
+ *  mIRC has internal support for @%+ modes.
+ *
+ *  $nick() can now handle all mode letters listed in PREFIX.
+ *
+ *  Also added support for CHANMODES=A,B,C,D token (not currently
+ *  supported by any servers), which lists all modes supported
+ *  by a channel, where:
+ *
+ *    A = modes that take a parameter, and add or remove nicks
+ *        or addresses to a list, such as +bIe for the ban,
+ *        invite, and exception lists.
+ *
+ *    B = modes that change channel settings, but which take
+ *        a parameter when they are set and unset, such as
+ *        +k key, and -k key.
+ *
+ *    C = modes that change channel settings, but which take
+ *        a parameter only when they are set, such as +l N,
+ *        and -l.
+ *
+ *    D = modes that change channel settings, such as +imnpst
+ *        and take no parameters.
+ *
+ *  All unknown/unlisted modes are treated as type D.
+ */
 
 #endif /* INCLUDED_supported_h */
