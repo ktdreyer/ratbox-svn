@@ -394,14 +394,22 @@ static void whois_person(struct Client *source_p,struct Client *target_p, int gl
 
       if (ShowChannel(source_p, chptr))
 	{
+
+          if ((cur_len + strlen(chname) + 2) > (BUFSIZE - 4))
+            {
+              sendto_one(source_p, "%s", buf);
+              cur_len = mlen;
+              t = buf + mlen;
+            }
+
 	  if (chptr->mode.mode & MODE_HIDEOPS && !is_any_op(chptr,source_p))
-	    {
-	      ircsprintf(t,"%s ",chname);
-	    }
-	  else
-	    {
-	      ircsprintf(t,"%s%s ", channel_chanop_or_voice(chptr,target_p),
-			 chname);
+            {
+              ircsprintf(t,"%s ",chname);
+            }
+          else
+            {
+              ircsprintf(t,"%s%s ", channel_chanop_or_voice(chptr,target_p),
+                       chname);
 	    }
 
 	  tlen = strlen(t);
@@ -409,13 +417,6 @@ static void whois_person(struct Client *source_p,struct Client *target_p, int gl
 	  cur_len += tlen;
 	  reply_to_send = YES;
 
-	  if ((cur_len + NICKLEN) > (BUFSIZE - 4))
-	    {
-	      sendto_one(source_p, "%s", buf);
-	      cur_len = mlen;
-	      t = buf + mlen;
-	      reply_to_send = NO;
-	    }
 	}
     }
 
