@@ -1,3 +1,7 @@
+*** 20010117_4 by fl_
+- fixed a bug toyota found with +v not showing up in /names on anon chans
+
+
 *** 20010117_3 by db
 - ping time out should use %d not %lu, cast it to int
 
