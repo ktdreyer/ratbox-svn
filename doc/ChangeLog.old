@@ -1,3 +1,7 @@
+*** 20010608_8 by a1kmm
+- Improved logging of oper activities to include opernick or operserver.
+
+
 *** 20010608_7 by leeh
 - extended valid_comment() to be in mo_kline() and ms_kline()
 
