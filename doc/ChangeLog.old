@@ -1,3 +1,10 @@
+*** 20010824_7 by wcampbel
+Added a basic m_mkpasswd module to contrib, this generates DES passwords
+only, and you cannot specify a salt.  This is also at present available
+to regular users, and paced.  Please provide a valid reason before removing
+support for regular users.
+
+
 *** 20010824_6 by davidt
 - Fix configure[.in] so --enable-assert/--disable-assert do what they claim,
   not the opposite.
