@@ -260,7 +260,7 @@ static void ms_sjoin(struct Client *client_p,
 			chptr->chname,
 			client_p->name);
 
-      newts = oldts;
+      newts = (oldts==0) ? oldts : 800000000;
     }
 
   /*
