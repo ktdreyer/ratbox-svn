@@ -1,3 +1,9 @@
+*** 20001208_5 by toot
+. added 'h' to MYINFO mode list
+. made network_name/desc an ircd.conf option.
+. fixed the reading of idletime, hide_chanops and hide_server from ircd.conf
+
+
 *** 20001208_4 by db
 - UNGLINE was missing from init for m_unkline.c
 
