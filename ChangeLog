@@ -1,3 +1,24 @@
+leeh        2003/05/15 13:36:10 UTC	(20030515_2)
+
+  Modified files:
+    modules              m_connect.c m_cryptlink.c m_invite.c 
+                         m_ping.c m_pong.c 
+    modules/core         m_message.c m_nick.c m_server.c 
+  Log:
+  - cleaned up usages of foo[0] == '\0' to EmptyString(foo)
+  
+  Revision  Changes    Path
+  1.127     +3 -3      ircd-ratbox/modules/core/m_message.c
+  1.118     +2 -2      ircd-ratbox/modules/core/m_nick.c
+  1.110     +2 -2      ircd-ratbox/modules/core/m_server.c
+  1.54      +3 -3      ircd-ratbox/modules/m_connect.c
+  1.53      +3 -3      ircd-ratbox/modules/m_cryptlink.c
+  1.62      +2 -2      ircd-ratbox/modules/m_invite.c
+  1.42      +2 -2      ircd-ratbox/modules/m_ping.c
+  1.39      +3 -3      ircd-ratbox/modules/m_pong.c
+
+
+
 leeh        2003/05/15 13:26:25 UTC	(20030515_1)
 
   Modified files:
