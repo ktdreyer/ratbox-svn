@@ -1,3 +1,7 @@
+*** 20010606_3 by androsyn
+Fixed stuff that was breaking the compile of ircd.c on solaris.
+
+
 *** 20010606_2 by leeh
 - FLAGS_ALL -> FLAGS_NOTADMIN
 - m_error -> m_ignore
