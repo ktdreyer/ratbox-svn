@@ -1,3 +1,33 @@
+leeh        2005/01/04 15:55:24 EST	(20050104_14)
+
+  Modified files:
+    doc                  example.conf 
+    include              conf.h event.h s_chanserv.h tools.h 
+    src                  conf.c event.c newconf.c rserv.c 
+                         s_chanserv.c tools.c 
+  Log:
+  - fixed bans in chanserv, we now test levels when applying bans and doing
+    an unban
+  - cache unban results, invalidated on MODBAN/DELBAN
+  - added CHANSERV::SET::TOPIC, enforced every n seconds.
+  - added eventUpdate(), so events that are timed from config options are
+    updated properly
+  
+  Revision  Changes    Path
+  1.29      +7 -2      rserv/doc/example.conf
+  1.35      +5 -1      rserv/include/conf.h
+  1.4       +1 -0      rserv/include/event.h
+  1.20      +2 -0      rserv/include/s_chanserv.h
+  1.18      +1 -0      rserv/include/tools.h
+  1.37      +2 -4      rserv/src/conf.c
+  1.5       +23 -0     rserv/src/event.c
+  1.39      +41 -1     rserv/src/newconf.c
+  1.44      +5 -7      rserv/src/rserv.c
+  1.34      +219 -87   rserv/src/s_chanserv.c
+  1.12      +13 -0     rserv/src/tools.c
+
+
+
 leeh        2005/01/04 15:01:26 EST	(20050104_13)
 
   Modified files:
