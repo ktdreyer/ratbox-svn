@@ -620,9 +620,9 @@ burst_away(struct Client *server_p, struct Client *client_p)
    if(client_p->user->away == NULL) /* Not away..skip */
      return;
    
-    sendto_server(client_p, NULL, CAP_UID, NOCAPS,
+    sendto_server(server_p, NULL, CAP_UID, NOCAPS,
                    ":%s AWAY :%s", ID(client_p), client_p->user->away);
-    sendto_server(client_p, NULL, NOCAPS, CAP_UID,
+    sendto_server(server_p, NULL, NOCAPS, CAP_UID,
                    ":%s AWAY :%s", client_p->name, client_p->user->away);
    
 }
