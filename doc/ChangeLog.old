@@ -1,3 +1,8 @@
+*** 20010102_16 by davidt
+- Fix SJOIN halfop handling for lazylinks..
+- Fix clear_ban_lists to prevent spewing random memory at clients
+
+
 *** 20010102_15 by wcampbel
 Updated a number of docs
 
