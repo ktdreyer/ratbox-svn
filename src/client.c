@@ -1197,8 +1197,7 @@ exit_aborted_clients(void *unused)
  		s_assert(*((unsigned long*)abt->client) != 0xdeadbeef); /* This is lame but its a debug thing */
  	 	dlinkDelete(ptr, &abort_list);
 
-	 	 	
- 	 	if(!IsPerson(abt->client) && !IsUnknown(abt->client))
+ 	 	if(IsAnyServer(abt->client))
  	 	 	sendto_realops_flags(UMODE_ALL, L_ALL,
   	 	 	                     "Closing link to %s: %s",
    	 	 	                     get_server_name(abt->client, HIDE_IP), abt->notice);
