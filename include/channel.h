@@ -124,7 +124,6 @@ extern void    channel_modes(struct Channel *chptr, struct Client *who,
 extern void    set_channel_mode(struct Client *, struct Client *, 
                                 struct Channel *, int, char **, char *);
 extern struct  Channel* get_channel(struct Client *,char*,int );
-extern void    clear_bans_exceptions_denies(struct Client *,struct Channel *);
 
 extern void    channel_member_names( struct Client *sptr,
 				     struct Channel *chptr,

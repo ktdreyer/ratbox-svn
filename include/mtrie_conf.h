@@ -63,5 +63,11 @@ typedef struct domain_level
   struct domain_piece *piece_list[MAX_PIECE_LIST];
 } DOMAIN_LEVEL;
 
+#define MAXPREFIX (HOSTLEN + USERLEN + 15)
+
+extern char *show_iline_prefix(struct Client *,struct ConfItem *,char *);
+
+
+
 #endif /* INCLUDED_mtrie_conf_h */
 

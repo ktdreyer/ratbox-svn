@@ -61,33 +61,6 @@
 #include <assert.h>
 #include "memdebug.h"
 
-#define MAXPREFIX (HOSTLEN + USERLEN + 15)
-
-/* internally defined functions */
-
-static void report_dup(char,struct ConfItem *);
-static int sortable(char *,char *);
-static void tokenize_and_stack(char* tokenized_out, const char* host);
-static void create_sub_mtrie(DOMAIN_LEVEL *,struct ConfItem *,int,char *);
-static struct ConfItem *find_sub_mtrie(DOMAIN_LEVEL *, const char* host,
-                                 const char* user, int);
-char *show_iline_prefix(struct Client *,struct ConfItem *,char *);
-static DOMAIN_PIECE *find_or_add_host_piece(DOMAIN_LEVEL *,int,char *);
-static DOMAIN_PIECE *find_host_piece(DOMAIN_LEVEL *,int,char *,
-                                     const char* host);
-static struct ConfItem *find_wild_host_piece(DOMAIN_LEVEL *,int,char *, 
-                                       const char* user);
-static void find_or_add_user_piece(DOMAIN_PIECE *,struct ConfItem *,int,char *);
-static struct ConfItem *find_user_piece(DOMAIN_PIECE *,int,char *, const char* user);
-
-static struct ConfItem* look_in_unsortable_ilines(const char* host, const char* user);
-static struct ConfItem* look_in_unsortable_klines(const char* host, const char* user);
-static struct ConfItem* find_wild_card_iline(const char* user);
-
-static void report_sub_mtrie(struct Client *sptr,int,DOMAIN_LEVEL *);
-static void clear_sub_mtrie(DOMAIN_LEVEL *);
-static struct ConfItem *find_matching_ip_i_line(unsigned long);
-
 static int stack_pointer;              /* dns piece stack */
 static char *dns_stack[MAX_TLD_STACK];
 
@@ -101,6 +74,35 @@ static struct ConfItem *unsortable_list_ilines = (struct ConfItem *)NULL;
 static struct ConfItem *unsortable_list_klines = (struct ConfItem *)NULL;
 static struct ConfItem *wild_card_ilines = (struct ConfItem *)NULL;
 static struct ConfItem *ip_i_lines=(struct ConfItem *)NULL;
+
+/* internally defined functions */
+
+static void report_dup(char,struct ConfItem *);
+static int sortable(char *,char *);
+static void tokenize_and_stack(char* tokenized_out, const char* host);
+static void create_sub_mtrie(DOMAIN_LEVEL *,struct ConfItem *,int,char *);
+static struct ConfItem *find_sub_mtrie(DOMAIN_LEVEL *, const char* host,
+                                 const char* user, int);
+
+static DOMAIN_PIECE *find_or_add_host_piece(DOMAIN_LEVEL *,int,char *);
+static DOMAIN_PIECE *find_host_piece(DOMAIN_LEVEL *,int,char *,
+                                     const char* host);
+static struct ConfItem *find_wild_host_piece(DOMAIN_LEVEL *,int,char *, 
+                                       const char* user);
+static void find_or_add_user_piece(DOMAIN_PIECE *,struct ConfItem *,
+				   int,char *);
+static struct ConfItem *find_user_piece(DOMAIN_PIECE *,int,char *,
+					const char* user);
+
+static struct ConfItem* look_in_unsortable_ilines(const char* host,
+						  const char* user);
+static struct ConfItem* look_in_unsortable_klines(const char* host,
+						  const char* user);
+static struct ConfItem* find_wild_card_iline(const char* user);
+
+static void report_sub_mtrie(struct Client *sptr,int,DOMAIN_LEVEL *);
+static void clear_sub_mtrie(DOMAIN_LEVEL *);
+static struct ConfItem *find_matching_ip_i_line(unsigned long);
 
 /* add_mtrie_conf_entry
  *
@@ -229,21 +231,6 @@ static void create_sub_mtrie(DOMAIN_LEVEL *cur_level,
       last_piece->next_level = cur_level;
     }
   create_sub_mtrie(cur_level,aconf,flags,host);
-}
-
-/*
- * add_ip_Iline()
- *
- * tiny function to keep the interface clean...
- *
- * inputs       -
- * output       - NONE
- * side effects -
- */
-void add_ip_Iline( struct ConfItem *aconf )
-{
-  aconf->next = ip_i_lines;
-  ip_i_lines = aconf;
 }
 
 
@@ -462,213 +449,11 @@ static void find_or_add_user_piece(DOMAIN_PIECE *piece_ptr,
     }
   else
     {
-      /*
-       */
       sendto_realops_flags(FLAGS_ALL,"Bug in mtrie_conf.c last_ptr found NULL");
     }
 
   return;
 }
-
-/* find_user_piece
- *
- * inputs       - pointer to current level 
- *              - int flags
- *              - piece of domain name being looked for
- *              - username
- * output       - pointer to next DOMAIN_LEVEL to use
- * side effects -
- *
- */
-
-static struct ConfItem *find_user_piece(DOMAIN_PIECE *piece_ptr, int flags,
-                     char *host_piece, const char* user)
-{
-  DOMAIN_PIECE *ptr;
-  struct ConfItem *aconf=NULL;
-  struct ConfItem *first_aconf=NULL;
-  struct ConfItem *wild_aconf=NULL;
-
-  wild_aconf = piece_ptr->wild_conf_ptr;
-
-  for(ptr=piece_ptr; ptr; ptr=ptr->next_piece)
-    {
-      if((aconf=ptr->conf_ptr))
-        {
-          if( (match(ptr->host_piece,host_piece)) &&
-              (aconf->status & flags) )
-            {
-              if(match(aconf->user,user))
-                {
-                  first_aconf = aconf;
-                  if(first_aconf->status & CONF_ELINE)
-                    break;
-                }
-
-            }
-        }
-    }
-
-  /* Propogate a kill "downwards" from *@*.host.tld if found,
-   * unless an aconf is found with an E line 
-   */
-  if(wild_aconf)
-    {
-      if (wild_aconf->status & CONF_KILL)
-        {
-          if(first_aconf && (first_aconf->status & CONF_ELINE))
-            {
-              return(first_aconf);
-            }
-        }
-      /* Ditto with E line.
-       * Propogate an E line "downwards" from *@*.host.tld if found.
-       */
-      else if(wild_aconf->status & CONF_ELINE)
-        {
-          if(first_aconf && (first_aconf->status & CONF_KILL))
-            {
-              first_aconf->status &= ~CONF_KILL;
-              first_aconf->status |= CONF_ELINE;
-              return(first_aconf);
-            }
-        }
-      return(wild_aconf);
-    }
-  /* its up to first_aconf, since wild_aconf is NULL */
-  return(first_aconf);
-}
-
-/* find_host_piece
- *
- * inputs       - pointer to current level 
- *              - piece of domain name being looked for
- *              - usename
- * output       - pointer to next DOMAIN_LEVEL to use
- * side effects -
- *
- */
-
-static DOMAIN_PIECE *find_host_piece(DOMAIN_LEVEL *level_ptr,int flags,
-                                     char *host_piece, const char* user)
-{
-  DOMAIN_PIECE *ptr;
-  DOMAIN_PIECE *piece_ptr;
-  int pieceindex;
-
-  if(!level_ptr)
-    return((DOMAIN_PIECE *)NULL);
-  
-  pieceindex = *host_piece&(MAX_PIECE_LIST-1);
-  piece_ptr = level_ptr->piece_list[pieceindex];
-
-  for(ptr=piece_ptr;ptr;ptr=ptr->next_piece)
-    {
-      if(!irccmp(ptr->host_piece,host_piece) && (ptr->flags & flags))
-        {
-          return(ptr);
-        }
-    }
-
-  return((DOMAIN_PIECE *)NULL);
-}
-
-/* find_wild_host_piece
- *
- * inputs       - pointer to current level 
- *              - piece of domain name being looked for
- *              - usename
- * output       - struct ConfItem or NULL
- * side effects -
- * 
- * Eventually the mtrie code could be extended to deal with
- * such cases as "*foo*.some.host.com" ,
- * the mtrie handling the sortable portion down to the "*foo*"
- * portion, this would reduce the length of the unsortable link list,
- * speeding up this code. I'll do that later, or someone else can.
- * This would necessitate logic changes in sortable()
- *
- */
-static struct ConfItem *find_wild_host_piece(DOMAIN_LEVEL *level_ptr,int flags,
-                                     char *host_piece, const char* user)
-{
-  struct ConfItem *first_aconf=NULL;
-  struct ConfItem *wild_aconf=NULL;
-  struct ConfItem *aconf=NULL;
-  DOMAIN_PIECE *ptr;
-  DOMAIN_PIECE *pptr;
-  DOMAIN_PIECE *piece_ptr;
-  int pieceindex;
-  
-  pieceindex = '*'&(MAX_PIECE_LIST-1);
-  piece_ptr = level_ptr->piece_list[pieceindex];
-  
-  for(ptr=piece_ptr;ptr;ptr=ptr->next_piece)
-    {
-      if(match(ptr->host_piece,host_piece) && (ptr->flags & flags))
-        {
-          first_aconf = (struct ConfItem *)NULL;
-          wild_aconf = (struct ConfItem *)NULL;
-
-          for(pptr = ptr; pptr; pptr=pptr->next_piece)
-            {
-              if(pptr->conf_ptr)
-                {
-                  aconf= pptr->conf_ptr;
-                  if( (aconf->status & flags) &&
-                      (match(pptr->host_piece,host_piece)) )
-
-                    {
-                      if(match(aconf->user,user))
-                        first_aconf = aconf;
-                    }
-                }
-
-              if(pptr->wild_conf_ptr)
-                {
-                  aconf= pptr->wild_conf_ptr;
-                  if( (aconf->status & flags) &&
-                      (match(pptr->host_piece,host_piece)) )
-                      
-		    {
-                       wild_aconf = aconf;
-		    }
-		}
-            }
-        }
-    }
-  
-  /* Propogate a kill "downwards" from *@*.host.tld if found,
-   * unless an aconf is found with an E line 
-   */
-  if(wild_aconf)
-    {
-      if (wild_aconf->status & CONF_KILL)
-        {
-          if(first_aconf && (first_aconf->status & CONF_ELINE))
-            {
-              return(first_aconf);
-            }
-        }
-      /* Ditto with E line.
-       * Propogate an E line "downwards" from *@*.host.tld if found.
-       */
-      else if(wild_aconf->status & CONF_ELINE)
-        {
-          if(first_aconf)
-            {
-              first_aconf->status &= ~CONF_KILL;
-              first_aconf->status |= CONF_ELINE;
-              return(first_aconf);
-            }
-        }
-      return(wild_aconf);
-    }
-  /* its up to first_aconf since wild_aconf is NULL */
-
-  return(first_aconf);
-}
-
 
 /* find_matching_mtrie_conf
  *
@@ -888,6 +673,206 @@ static struct ConfItem *find_sub_mtrie(DOMAIN_LEVEL *cur_level,
   return((struct ConfItem *)NULL);
 }
 
+/* find_user_piece
+ *
+ * inputs       - pointer to current level 
+ *              - int flags
+ *              - piece of domain name being looked for
+ *              - username
+ * output       - pointer to next DOMAIN_LEVEL to use
+ * side effects -
+ *
+ */
+
+static struct ConfItem *find_user_piece(DOMAIN_PIECE *piece_ptr, int flags,
+                     char *host_piece, const char* user)
+{
+  DOMAIN_PIECE *ptr;
+  struct ConfItem *aconf=NULL;
+  struct ConfItem *first_aconf=NULL;
+  struct ConfItem *wild_aconf=NULL;
+
+  wild_aconf = piece_ptr->wild_conf_ptr;
+
+  for(ptr=piece_ptr; ptr; ptr=ptr->next_piece)
+    {
+      if((aconf=ptr->conf_ptr))
+        {
+          if( (match(ptr->host_piece,host_piece)) &&
+              (aconf->status & flags) )
+            {
+              if(match(aconf->user,user))
+                {
+                  first_aconf = aconf;
+                  if(first_aconf->status & CONF_ELINE)
+                    break;
+                }
+
+            }
+        }
+    }
+
+  /* Propogate a kill "downwards" from *@*.host.tld if found,
+   * unless an aconf is found with an E line 
+   */
+  if(wild_aconf)
+    {
+      if (wild_aconf->status & CONF_KILL)
+        {
+          if(first_aconf && (first_aconf->status & CONF_ELINE))
+            {
+              return(first_aconf);
+            }
+        }
+      /* Ditto with E line.
+       * Propogate an E line "downwards" from *@*.host.tld if found.
+       */
+      else if(wild_aconf->status & CONF_ELINE)
+        {
+          if(first_aconf && (first_aconf->status & CONF_KILL))
+            {
+              first_aconf->status &= ~CONF_KILL;
+              first_aconf->status |= CONF_ELINE;
+              return(first_aconf);
+            }
+        }
+      return(wild_aconf);
+    }
+  /* its up to first_aconf, since wild_aconf is NULL */
+  return(first_aconf);
+}
+
+/* find_host_piece
+ *
+ * inputs       - pointer to current level 
+ *              - piece of domain name being looked for
+ *              - usename
+ * output       - pointer to next DOMAIN_LEVEL to use
+ * side effects -
+ *
+ */
+
+static DOMAIN_PIECE *find_host_piece(DOMAIN_LEVEL *level_ptr,int flags,
+                                     char *host_piece, const char* user)
+{
+  DOMAIN_PIECE *ptr;
+  DOMAIN_PIECE *piece_ptr;
+  int pieceindex;
+
+  if(!level_ptr)
+    return((DOMAIN_PIECE *)NULL);
+  
+  pieceindex = *host_piece&(MAX_PIECE_LIST-1);
+  piece_ptr = level_ptr->piece_list[pieceindex];
+
+  for(ptr=piece_ptr;ptr;ptr=ptr->next_piece)
+    {
+      if(!irccmp(ptr->host_piece,host_piece) && (ptr->flags & flags))
+        {
+          return(ptr);
+        }
+    }
+
+  return((DOMAIN_PIECE *)NULL);
+}
+
+/* find_wild_host_piece
+ *
+ * inputs       - pointer to current level 
+ *              - piece of domain name being looked for
+ *              - usename
+ * output       - struct ConfItem or NULL
+ * side effects -
+ * 
+ * Eventually the mtrie code could be extended to deal with
+ * such cases as "*foo*.some.host.com" ,
+ * the mtrie handling the sortable portion down to the "*foo*"
+ * portion, this would reduce the length of the unsortable link list,
+ * speeding up this code. I'll do that later, or someone else can.
+ * This would necessitate logic changes in sortable()
+ *
+ */
+static struct ConfItem *find_wild_host_piece(DOMAIN_LEVEL *level_ptr,int flags,
+                                     char *host_piece, const char* user)
+{
+  struct ConfItem *first_aconf=NULL;
+  struct ConfItem *wild_aconf=NULL;
+  struct ConfItem *aconf=NULL;
+  DOMAIN_PIECE *ptr;
+  DOMAIN_PIECE *pptr;
+  DOMAIN_PIECE *piece_ptr;
+  int pieceindex;
+  
+  pieceindex = '*'&(MAX_PIECE_LIST-1);
+  piece_ptr = level_ptr->piece_list[pieceindex];
+  
+  for(ptr=piece_ptr;ptr;ptr=ptr->next_piece)
+    {
+      if(match(ptr->host_piece,host_piece) && (ptr->flags & flags))
+        {
+          first_aconf = (struct ConfItem *)NULL;
+          wild_aconf = (struct ConfItem *)NULL;
+
+          for(pptr = ptr; pptr; pptr=pptr->next_piece)
+            {
+              if(pptr->conf_ptr)
+                {
+                  aconf= pptr->conf_ptr;
+                  if( (aconf->status & flags) &&
+                      (match(pptr->host_piece,host_piece)) )
+
+                    {
+                      if(match(aconf->user,user))
+                        first_aconf = aconf;
+                    }
+                }
+
+              if(pptr->wild_conf_ptr)
+                {
+                  aconf= pptr->wild_conf_ptr;
+                  if( (aconf->status & flags) &&
+                      (match(pptr->host_piece,host_piece)) )
+                      
+		    {
+                       wild_aconf = aconf;
+		    }
+		}
+            }
+        }
+    }
+  
+  /* Propogate a kill "downwards" from *@*.host.tld if found,
+   * unless an aconf is found with an E line 
+   */
+  if(wild_aconf)
+    {
+      if (wild_aconf->status & CONF_KILL)
+        {
+          if(first_aconf && (first_aconf->status & CONF_ELINE))
+            {
+              return(first_aconf);
+            }
+        }
+      /* Ditto with E line.
+       * Propogate an E line "downwards" from *@*.host.tld if found.
+       */
+      else if(wild_aconf->status & CONF_ELINE)
+        {
+          if(first_aconf)
+            {
+              first_aconf->status &= ~CONF_KILL;
+              first_aconf->status |= CONF_ELINE;
+              return(first_aconf);
+            }
+        }
+      return(wild_aconf);
+    }
+  /* its up to first_aconf since wild_aconf is NULL */
+
+  return(first_aconf);
+}
+
+
 
 /*
  * This function decides whether a string may be used with ordered lists.
@@ -1030,51 +1015,6 @@ static void tokenize_and_stack(char* tokenized, const char* p)
   dns_stack[stack_pointer++] = tokenized;
 }
 
-/*
- * look_in_unsortable_ilines()
- *
- * inputs       - host name
- *              - username
- * output       - struct ConfItem pointer or NULL
- * side effects - scan the link list of unsortable iline patterns
- */
-
-static struct ConfItem *look_in_unsortable_ilines(const char* host, const char* user)
-{
-  struct ConfItem *found_conf;
-
-  for(found_conf=unsortable_list_ilines;found_conf;found_conf=found_conf->next)
-    {
-      if(match(found_conf->host,host) &&
-         match(found_conf->user,user))
-        {
-            return(found_conf);
-        }
-    }
-  return((struct ConfItem *)NULL);
-}
-
-/*
- * look_in_unsortable_klines()
- *
- * inputs       - host name
- *              - username
- * output       - struct ConfItem pointer or NULL
- * side effects - scan the link list of unsortable kline patterns
- */
-
-static struct ConfItem *look_in_unsortable_klines(const char* host, const char* user)
-{
-  struct ConfItem *found_conf;
-
-  for(found_conf=unsortable_list_klines;found_conf;found_conf=found_conf->next)
-    {
-      if(match(found_conf->host,host) &&
-         match(found_conf->user,user))
-        return(found_conf);
-    }
-  return((struct ConfItem *)NULL);
-}
 
 /*
  * find_wild_card_iline()
@@ -1514,4 +1454,63 @@ static void report_dup(char type,struct ConfItem *aconf)
 
   sendto_realops_flags(FLAGS_ALL,"DUP: %c: (%s@%s) pass %s name %s port %d",
                  type,user,host,pass,name,port);
+}
+
+/*
+ * add_ip_Iline()
+ *
+ * inputs       -
+ * output       - NONE
+ * side effects -
+ */
+void add_ip_Iline( struct ConfItem *aconf )
+{
+  aconf->next = ip_i_lines;
+  ip_i_lines = aconf;
+}
+
+/*
+ * look_in_unsortable_ilines()
+ *
+ * inputs       - host name
+ *              - username
+ * output       - struct ConfItem pointer or NULL
+ * side effects - scan the link list of unsortable iline patterns
+ */
+
+static struct ConfItem *look_in_unsortable_ilines(const char* host, const char* user)
+{
+  struct ConfItem *found_conf;
+
+  for(found_conf=unsortable_list_ilines;found_conf;found_conf=found_conf->next)
+    {
+      if(match(found_conf->host,host) &&
+         match(found_conf->user,user))
+        {
+            return(found_conf);
+        }
+    }
+  return((struct ConfItem *)NULL);
+}
+
+/*
+ * look_in_unsortable_klines()
+ *
+ * inputs       - host name
+ *              - username
+ * output       - struct ConfItem pointer or NULL
+ * side effects - scan the link list of unsortable kline patterns
+ */
+
+static struct ConfItem *look_in_unsortable_klines(const char* host, const char* user)
+{
+  struct ConfItem *found_conf;
+
+  for(found_conf=unsortable_list_klines;found_conf;found_conf=found_conf->next)
+    {
+      if(match(found_conf->host,host) &&
+         match(found_conf->user,user))
+        return(found_conf);
+    }
+  return((struct ConfItem *)NULL);
 }

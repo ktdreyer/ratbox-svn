@@ -260,8 +260,6 @@ static int ms_sjoin(struct Client *cptr,
       if (doesop)
         keep_our_modes = NO;
 
-      clear_bans_exceptions_denies(sptr,chptr);
-
       if (chptr->opcount && !doesop)
           tstosend = oldts;
       else
