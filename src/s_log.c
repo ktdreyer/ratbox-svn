@@ -163,7 +163,9 @@ void init_log(const char* filename)
 #ifdef USE_SYSLOG
   openlog("ircd", LOG_PID | LOG_NDELAY, LOG_FACILITY);
 #endif
+#ifndef SYSLOG_USERS
   eventAdd("user_log_resync", user_log_resync, NULL, 60);
+#endif
 }
 
 void set_log_level(int level)
@@ -227,8 +229,6 @@ void log_user_exit(struct Client *source_p)
      * This conditional makes the logfile active only after
      * it's been created - thus logging can be turned off by
      * removing the file.
-     *
-     * Keep the logfile open, syncing it every 10 seconds
      * -Taner
      */
     if (IsPerson(source_p))
