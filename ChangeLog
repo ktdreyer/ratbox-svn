@@ -1,3 +1,20 @@
+leeh        2004/12/03 20:10:01 EST	(20041204_1)
+
+  Modified files:
+    help/opers           xline 
+    src                  client.c 
+  Log:
+  - via 2.0:
+    - tack the kline/gline/xline a user matches onto the end of the exempt
+      notice
+    - fix misleading xline documentation
+  
+  Revision  Changes    Path
+  1.6       +1 -1      ircd-ratbox/help/opers/xline
+  7.484     +12 -8     ircd-ratbox/src/client.c
+
+
+
 leeh        2004/12/03 20:05:47 EST	(20041204_0)
 
   Modified files:
