@@ -1,3 +1,18 @@
+androsyn    2004/03/02 13:26:24 EST	(20040302_5)
+
+  Modified files:
+    servlink             Makefile.in 
+  Removed files:
+    servlink             setup.h.in 
+  Log:
+  I don't think anything has used setup.h in servlink/ for a few years...
+  
+  Revision  Changes    Path
+  1.18      +1 -1      ircd-ratbox/servlink/Makefile.in
+  1.3       +0 -28     ircd-ratbox/servlink/setup.h.in (dead)
+
+
+
 androsyn    2004/03/02 13:24:32 EST	(20040302_4)
 
   Modified files:
