@@ -1246,12 +1246,7 @@ conf_end_connect(struct TopConf *tc)
 		return 0;
 	}
 
-#ifdef HAVE_LIBCRYPTO
-	if((EmptyString(yy_server->passwd) || EmptyString(yy_server->spasswd)) &&
-		!yy_server->rsa_pubkey)
-#else
 	if(EmptyString(yy_server->passwd) || EmptyString(yy_server->spasswd))
-#endif
 	{
 		conf_report_error("Ignoring connect block for %s -- missing password.",
 					yy_server->name);
@@ -1350,44 +1345,6 @@ conf_set_connect_encrypted(void *data)
 		yy_server->flags |= SERVER_ENCRYPTED;
 	else
 		yy_server->flags &= ~SERVER_ENCRYPTED;
-}
-
-static void
-conf_set_connect_rsa_public_key_file(void *data)
-{
-#ifdef HAVE_LIBCRYPTO
-	BIO *file;
-
-	if(yy_server->rsa_pubkey)
-	{
-		RSA_free(yy_server->rsa_pubkey);
-		yy_server->rsa_pubkey = NULL;
-	}
-
-	file = BIO_new_file(data, "r");
-
-	if(file == NULL)
-	{
-		conf_report_error
-			("Ignoring connect::rsa_public_key_file %s -- couldn't open file.", data);
-		return;
-	}
-
-	yy_server->rsa_pubkey = (RSA *) PEM_read_bio_RSA_PUBKEY(file, NULL, 0, NULL);
-
-	if(yy_server->rsa_pubkey == NULL)
-	{
-		conf_report_error
-			("Ignoring connect::rsa_public_key_file -- Key invalid; check syntax.");
-		return;
-	}
-
-	BIO_set_close(file, BIO_CLOSE);
-	BIO_free(file);
-#else
-	conf_report_error
-		("Ignoring connect::rsa_public_key_file -- OpenSSL support not available.");
-#endif
 }
 
 static void
@@ -2579,8 +2536,6 @@ newconf_init()
 	add_conf_item("connect", "encrypted", CF_YESNO, conf_set_connect_encrypted);
 	add_conf_item("connect", "compressed", CF_YESNO, conf_set_connect_compressed);
 	add_conf_item("connect", "topicburst", CF_YESNO, conf_set_connect_topicburst);
-	add_conf_item("connect", "rsa_public_key_file", CF_QSTRING,
-		      conf_set_connect_rsa_public_key_file);
 
 	add_top_conf("kill", conf_begin_kill, conf_end_kill);
 	add_conf_item("kill", "user", CF_QSTRING, conf_set_kill_user);
