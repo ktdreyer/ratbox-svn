@@ -33,6 +33,7 @@
 typedef struct
 {
 	char *name;
+	int id;
 	dlink_list hooks;
 }
 hook;
@@ -87,11 +88,16 @@ struct hook_burst_channel
 };
 
 
-int hook_add_event(const char *);
+int hook_add_event(const char *, int *);
 int hook_add_hook(const char *, hookfn *);
-int hook_call_event(const char *, void *);
+int hook_call_event(int id, void *);
 int hook_del_event(const char *);
 int hook_del_hook(const char *event, hookfn * fn);
 void init_hooks(void);
+
+extern int h_iosend_id;
+extern int h_iorecv_id;
+extern int h_iorecvctrl_id;
+extern int h_burst_channel_id;
 
 #endif

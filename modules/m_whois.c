@@ -60,15 +60,18 @@ struct Message whois_msgtab = {
 	{m_unregistered, m_whois, ms_whois, mo_whois}
 };
 
+int doing_whois_local_hook;
+int doing_whois_global_hook;
+
 #ifndef STATIC_MODULES
 mapi_clist_av1 whois_clist[] = { &whois_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, whois_clist, NULL, "$Revision$");
-/* XXX MAPI need hooks 
-	hook_add_event("doing_whois_local");
-	hook_add_event("doing_whois_global");
-	hook_del_event("doing_whois_local");
-	hook_del_event("doing_whois_global");
-*/
+mapi_hlist_av1 whois_hlist[] = {
+	{ "doing_whois_local",	&doing_whois_local_hook },
+	{ "doing_whois_global",	&doing_whois_global_hook },
+	{ NULL }
+};
+
+DECLARE_MODULE_AV1(NULL, NULL, whois_clist, whois_hlist, "$Revision$");
 #endif
 
 /*
@@ -426,9 +429,9 @@ whois_person(struct Client *source_p, struct Client *target_p, int glob)
 /* although we should fill in parc and parv, we don't ..
 	 be careful of this when writing whois hooks */
 	if(MyClient(source_p))
-		hook_call_event("doing_whois_local", &hd);
+		hook_call_event(doing_whois_local_hook, &hd);
 	else
-		hook_call_event("doing_whois_global", &hd);
+		hook_call_event(doing_whois_global_hook, &hd);
 
 	return;
 }

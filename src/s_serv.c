@@ -1533,7 +1533,7 @@ burst_all(struct Client *client_p)
 			send_channel_modes(client_p, chptr);
 			hinfo.chptr = chptr;
 			hinfo.client = client_p;
-			hook_call_event("burst_channel", &hinfo);
+			hook_call_event(h_burst_channel_id, &hinfo);
 		}
 	}
 

@@ -34,34 +34,52 @@
 
 dlink_list hooks;
 
+static hook* find_hook_byname(const char *);
+
+#ifndef NDEBUG
+int h_iosend_id;
+int h_iorecv_id;
+int h_iorecvctrl_id;
+#endif
+int h_burst_channel_id;
+
 void
 init_hooks(void)
 {
 	memset(&hooks, 0, sizeof(hooks));
 #ifndef NDEBUG
-	hook_add_event("iosend");
-	hook_add_event("iorecv");
-	hook_add_event("iorecvctrl");
+	hook_add_event("iosend", &h_iosend_id);
+	hook_add_event("iorecv", &h_iorecv_id);
+	hook_add_event("iorecvctrl", &h_iorecvctrl_id);
 #endif
-	hook_add_event("burst_channel");
+	hook_add_event("burst_channel", &h_burst_channel_id);
 }
 
+static int hook_curid = 0;
+
 static hook *
-new_hook(const char *name)
+new_hook(const char *name, int *id)
 {
 	hook *h;
 
 	h = MyMalloc(sizeof(hook));
 	DupString(h->name, name);
+
+	h->id = *id = hook_curid++;
 	return h;
 }
 
 int
-hook_add_event(const char *name)
+hook_add_event(const char *name, int* id)
 {
 	hook *newhook;
+	if ((newhook = find_hook_byname(name)) != NULL)
+	{
+		*id = newhook->id;
+		return 0;
+	}
 
-	newhook = new_hook(name);
+	newhook = new_hook(name, id);
 
 	dlinkAddAlloc(newhook, &hooks);
 	return 0;
@@ -88,7 +106,7 @@ hook_del_event(const char *name)
 }
 
 static hook *
-find_hook(const char *name)
+find_hook_byname(const char *name)
 {
 	dlink_node *node;
 	hook *h;
@@ -103,12 +121,28 @@ find_hook(const char *name)
 	return NULL;
 }
 
+static hook *
+find_hook_byid(int id)
+{
+	dlink_node *node;
+	hook *h;
+
+	DLINK_FOREACH(node, hooks.head)
+	{
+		h = node->data;
+
+		if (h->id == id)
+			return h;
+	}
+	return NULL;
+}
+
 int
 hook_del_hook(const char *event, hookfn * fn)
 {
 	hook *h;
 	dlink_node *node, *nnode;
-	h = find_hook(event);
+	h = find_hook_byname(event);
 	if(!h)
 		return -1;
 
@@ -127,7 +161,7 @@ hook_add_hook(const char *event, hookfn * fn)
 {
 	hook *h;
 
-	h = find_hook(event);
+	h = find_hook_byname(event);
 	if(!h)
 		return -1;
 
@@ -136,13 +170,13 @@ hook_add_hook(const char *event, hookfn * fn)
 }
 
 int
-hook_call_event(const char *event, void *data)
+hook_call_event(int id, void *data)
 {
 	hook *h;
 	dlink_node *node;
 	hookfn fn;
 
-	h = find_hook(event);
+	h = find_hook_byid(id);
 	if(!h)
 		return -1;
 

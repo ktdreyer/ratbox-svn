@@ -64,9 +64,20 @@ struct Message stats_msgtab = {
 	{m_unregistered, m_stats, ms_stats, mo_stats}
 };
 
+int doing_stats_hook;
+int doing_stats_p_hook;
+int doing_stats_L_hook;
+
 #ifndef STATIC_MODULES
 mapi_clist_av1 stats_clist[] = { &stats_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, stats_clist, NULL, "$Revision$");
+mapi_hlist_av1 stats_hlist[] = {
+	{ "doing_stats",	&doing_stats_hook },
+	{ "doing_stats_p",	&doing_stats_p_hook },
+	{ "doing_stats_L",	&doing_stats_L_hook },
+	{ NULL }
+};
+
+DECLARE_MODULE_AV1(NULL, NULL, stats_clist, stats_hlist, "$Revision$");
 #endif
 
 const char *Lformat = ":%s %d %s %s %u %u %u %u %u :%u %u %s";
@@ -1131,7 +1142,7 @@ stats_spy (struct Client *source_p, char statchar)
 	data.statchar = statchar;
 	data.name = NULL;
 
-	hook_call_event ("doing_stats", &data);
+	hook_call_event (doing_stats_hook, &data);
 }
 
 /* stats_p_spy()
@@ -1149,7 +1160,7 @@ stats_p_spy (struct Client *source_p)
 	data.name = NULL;
 	data.statchar = 'p';
 
-	hook_call_event ("doing_stats_p", &data);
+	hook_call_event (doing_stats_p_hook, &data);
 }
 
 /* 
@@ -1171,7 +1182,7 @@ stats_L_spy (struct Client *source_p, char statchar, char *name)
 	data.statchar = statchar;
 	data.name = name;
 
-	hook_call_event ("doing_stats", &data);
+	hook_call_event (doing_stats_L_hook, &data);
 }
 
 /*

@@ -49,8 +49,15 @@ struct Message links_msgtab = {
 	{m_unregistered, m_links, ms_links, mo_links}
 };
 
+int doing_links_hook;
+
 #ifndef STATIC_MODULES
 mapi_clist_av1 links_clist[] = { &links_msgtab, NULL };
+mapi_hlist_av1 links_hlist[] = {
+	{ "doing_links",	&doing_links_hook },
+	{ NULL }
+};
+
 DECLARE_MODULE_AV1(NULL, NULL, links_clist, NULL, "$Revision$");
 #endif
 
@@ -122,7 +129,7 @@ mo_links(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 	hd.parc = parc;
 	hd.parv = parv;
 
-	hook_call_event("doing_links", &hd);
+	hook_call_event(doing_links_hook, &hd);
 
 	DLINK_FOREACH(ptr, global_serv_list.head)
 	{

@@ -48,16 +48,17 @@ struct Message admin_msgtab = {
 	"ADMIN", 0, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
 	{mr_admin, m_admin, ms_admin, ms_admin}
 };
+
+int doing_admin_hook;
+
 #ifndef STATIC_MODULES
 mapi_clist_av1 admin_clist[] = { &admin_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, admin_clist, NULL, "$Revision$");
+mapi_hlist_av1 admin_hlist[] = { 
+	{ "doing_admin",	&doing_admin_hook },
+	{ NULL }
+};
 
-/* XXX MAPI need hook list */
-
-/*
-	hook_add_event("doing_admin");
-	hook_del_event("doing_admin");
-*/
+DECLARE_MODULE_AV1(NULL, NULL, admin_clist, admin_hlist, "$Revision$");
 #endif
 
 /*
@@ -166,5 +167,5 @@ admin_spy(struct Client *source_p)
 
 	data.source_p = source_p;
 
-	hook_call_event("doing_admin", &data);
+	hook_call_event(doing_admin_hook, &data);
 }

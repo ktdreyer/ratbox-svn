@@ -284,7 +284,7 @@ send_queued_write(int fd, void *data)
 			/* We have some data written .. update counters */
 #ifndef NDEBUG
 			hdata.len = retlen;
-			hook_call_event("iosend", &hdata);
+			hook_call_event(h_iosend_id, &hdata);
 			if(to->localClient->buf_sendq.list.head)
 				hdata.data =
 					((buf_line_t *) to->localClient->

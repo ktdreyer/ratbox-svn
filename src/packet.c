@@ -310,7 +310,7 @@ read_ctrl_packet(int fd, void *data)
 	hdata.connection = server;
 	hdata.len = reply->command;
 	hdata.data = NULL;
-	hook_call_event("iorecvctrl", &hdata);
+	hook_call_event(h_iorecvctrl_id, &hdata);
 #endif
 
 	/* we now have the command and any data, pass it off to the handler */
@@ -380,7 +380,7 @@ read_packet(int fd, void *data)
 	hdata.connection = client_p;
 	hdata.data = readBuf;
 	hdata.len = length;
-	hook_call_event("iorecv", &hdata);
+	hook_call_event(h_iorecv_id, &hdata);
 #endif
 
 	if(client_p->lasttime < CurrentTime)

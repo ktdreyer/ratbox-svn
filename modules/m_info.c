@@ -57,8 +57,15 @@ struct Message info_msgtab = {
 	{m_unregistered, m_info, ms_info, mo_info}
 };
 
+int doing_info_hook;
+
 #ifndef STATIC_MODULES
 mapi_clist_av1 info_clist[] = { &info_msgtab, NULL };
+mapi_hlist_av1 info_hlist[] = {
+	{ "doing_hook",		&doing_info_hook },
+	{ NULL }
+};
+
 DECLARE_MODULE_AV1(NULL, NULL, info_clist, NULL, "$Revision$");
 #endif
 
@@ -748,5 +755,5 @@ info_spy(struct Client *source_p)
 
 	data.source_p = source_p;
 
-	hook_call_event("doing_info", &data);
+	hook_call_event(doing_info_hook, &data);
 }

@@ -53,13 +53,15 @@ struct Message trace_msgtab = {
 	{m_unregistered, m_trace, m_trace, m_trace}
 };
 
+int doing_trace_hook;
+
 #ifndef STATIC_MODULES
 mapi_clist_av1 trace_clist[] = { &trace_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, trace_clist, NULL, "$Revision$");
-/* XXX MAPI need hooks
-	hook_add_event("doing_trace");
-	hook_del_event("doing_trace");
-*/
+mapi_hlist_av1 trace_hlist[] = {
+	{ "doing_trace",	&doing_trace_hook },
+	{ NULL }
+};
+DECLARE_MODULE_AV1(NULL, NULL, trace_clist, trace_hlist, "$Revision$");
 #endif
 
 static int report_this_status(struct Client *source_p, struct Client *target_p, int dow,
@@ -429,5 +431,5 @@ trace_spy(struct Client *source_p)
 
 	data.source_p = source_p;
 
-	hook_call_event("doing_trace", &data);
+	hook_call_event(doing_trace_hook, &data);
 }

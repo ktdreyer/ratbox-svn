@@ -51,8 +51,15 @@ struct Message motd_msgtab = {
 	{mr_motd, m_motd, mo_motd, mo_motd}
 };
 
+int doing_motd_hook;
+
 #ifndef STATIC_MODULES
 mapi_clist_av1 motd_clist[] = { &motd_msgtab, NULL };
+mapi_hlist_av1 motd_hlist[] = {
+	{ "doing_motd",	&doing_motd_hook },
+	{ NULL }
+};
+
 DECLARE_MODULE_AV1(NULL, NULL, motd_clist, NULL, "$Revision$");
 #endif
 
@@ -131,5 +138,5 @@ motd_spy(struct Client *source_p)
 
 	data.source_p = source_p;
 
-	hook_call_event("doing_motd", &data);
+	hook_call_event(doing_motd_hook, &data);
 }

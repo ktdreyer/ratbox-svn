@@ -69,7 +69,8 @@ typedef struct Message* mapi_clist_av1;
 
 typedef struct
 {
-	/* XXX */
+	const char *	hapi_name;
+	int *		hapi_id;
 } mapi_hlist_av1;
 
 struct mapi_mheader_av1
