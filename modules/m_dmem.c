@@ -72,7 +72,10 @@ static void
 mo_dmem(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 #ifdef MEMDEBUG
-  ReportAllocated(source_p);
+  if (parc < 2)
+    ReportAllocated(source_p);
+  else
+    log_memory();
 #else
   sendto_one(source_p, ":%s NOTICE %s :Compiled without memory debugging",
     me.name, source_p->name);

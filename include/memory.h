@@ -6,6 +6,7 @@
 #undef MEMDEBUG
 
 #include "ircd_defs.h"
+#include "balloc.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -23,16 +24,40 @@ extern void outofmemory(void);
 #define free do_not_call_old_memory_functions!call_My*functions
 #endif
 
-
 #ifdef MEMDEBUG
-extern void*       _MyMalloc(size_t size, char * file, int line);
+void *memlog(void *m, int s, char *f, int l);
+void memulog(void *m);
+
+extern void*       _MyMalloc(size_t size, char *file, int line);
 extern void*       _MyRealloc(void* p, size_t size, char * file, int line);
 extern void        _MyFree(void* p, char * file, int line);
 extern void        _DupString(char**, const char*, char*, int);
+extern int         _BlockHeapFree(BlockHeap *bh, void *ptr);
+extern void *	  _BlockHeapAlloc(BlockHeap *bh);
 #define MyMalloc(x) _MyMalloc(x, __FILE__, __LINE__)
 #define MyRealloc(x,y) _MyRealloc(x, y, __FILE__, __LINE__)
 #define MyFree(x) _MyFree(x, __FILE__, __LINE__)
 #define DupString(x,y) _DupString(&x, y, __FILE__, __LINE__)
+#define BlockHeapAlloc(x) memlog(_BlockHeapAlloc(x), \
+                                 x->elemSize-sizeof(MemoryEntry), \
+                                 __FILE__, __LINE__)
+#define BlockHeapFree(x, y) memulog(y); \
+                            _BlockHeapFree(x, \
+                            ((char*)y)-sizeof(MemoryEntry))
+void log_memory(void);
+
+
+typedef struct _MemEntry
+{
+  size_t size;
+  time_t ts;
+  char file[50];
+  int line;
+  struct _MemEntry *next, *last;
+  /* Data follows... */
+} MemoryEntry;
+extern MemoryEntry *first_mem_entry;
+
 #else /* MEMDEBUG */
 
 
@@ -40,15 +65,16 @@ extern void * _MyMalloc(size_t size);
 extern void* _MyRealloc(void* x, size_t y);
 extern inline void _MyFree(void *x);
 extern inline void _DupString(char **x, const char *y);
+extern int         _BlockHeapFree(BlockHeap *bh, void *ptr);
+extern void *	  _BlockHeapAlloc(BlockHeap *bh);
 
 #define MyMalloc(x) _MyMalloc(x)
 #define MyRealloc(x,y) _MyRealloc(x, y)
 #define MyFree(x) _MyFree(x)
 #define DupString(x,y) _DupString(&x, y)
+#define BlockHeapAlloc(x) _BlockHeapAlloc(x)
+#define BlockHeapFree(x, y) _BlockHeapFree(x, y)
 #endif /* !MEMDEBUG */
-
-
-
 
 #endif /* _I_MEMORY_H */
 

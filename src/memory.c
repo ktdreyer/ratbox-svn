@@ -48,59 +48,62 @@
 
 #define DATA(me) (void*)(((char*)me)+sizeof(MemoryEntry))
 
-typedef struct _MemEntry
+void*
+memlog(void *d, int s, char *f, int l)
 {
-  size_t size;
-  time_t ts;
-  char file[50];
-  int line;
-  struct _MemEntry *next, *last;
-  /* Data follows... */
-} MemoryEntry;
+ MemoryEntry *mme;
+ mme = (MemoryEntry*)d;
+ d += sizeof(MemoryEntry);
+ mme->next = first_mem_entry;
+ mme->last = NULL;
+ if (first_mem_entry != NULL)
+  first_mem_entry->last = mme;
+ first_mem_entry = mme;
+ if (l > 0)
+  mme->line = l;
+ else
+  *mme->file = 0;
+ strncpy(mme->file, f, sizeof(mme->file)-1)[sizeof(mme->file)-1] = 0;
+ mme->ts = CurrentTime;
+ mme->size = s;
+ return d;
+}
+
+void
+memulog(void *m)
+{
+ MemoryEntry *mme;
+ m -= sizeof(MemoryEntry);
+ mme = (MemoryEntry*)m;
+ if (mme->last != NULL)
+  mme->last->next = mme->next;
+ if (mme->next != NULL)
+  mme->next->last = mme->last;
+ if (first_mem_entry == mme)
+  first_mem_entry = mme->next;
+}
+
 MemoryEntry *first_mem_entry = NULL;
 
 void*
-_MyMalloc(size_t length, char *file, int line)
+_MyMalloc(size_t size, char *file, int line)
 {
-  MemoryEntry *mem_entry;
-  mem_entry = malloc(sizeof(MemoryEntry)+length);
-  if (!mem_entry)
-    outofmemory();
-  else
-    memset(mem_entry, 0, length+sizeof(MemoryEntry));
-  mem_entry->size = length;
-  mem_entry->ts = CurrentTime;
-  if (line > 0)
-    strncpy_irc(mem_entry->file, file, 50)[49] = 0;
-  else
-    *mem_entry->file = 0;
-  mem_entry->line = line;
-  mem_entry->next = first_mem_entry;
-  if (first_mem_entry)
-    first_mem_entry->last = mem_entry;
-  first_mem_entry = mem_entry;
-  return DATA(mem_entry);
+ void *what = malloc(size + sizeof(MemoryEntry));
+ if (what == NULL)
+  outofmemory();
+ /* XXX we should consider getting rid of this... */
+ memset(what, 0, size + sizeof(MemoryEntry));
+ return memlog(what, size, file, line);
 }
 
 void
 _MyFree(void *what, char *file, int line)
 {
-  MemoryEntry *mme;
-  if (!what)
-    return;
-  mme = (MemoryEntry*)((char *)what - sizeof(MemoryEntry));
-  if (mme->last)
-    mme->last->next = mme->next;
-  else
-    first_mem_entry = mme->next;
-  if (mme->next)
-    mme->next->last = mme->last;
-
-#ifndef NDEBUG
-  mem_frob(mme, mme->size+sizeof(MemoryEntry));
-#endif
-
- free(mme);
+ if (what != NULL)
+ {
+  memulog(what);
+  free(what-sizeof(MemoryEntry));
+ }
 }
 
 void*
@@ -171,9 +174,10 @@ log_memory(void)
 void*
 _MyMalloc(size_t size)
 {
-  void *ret = calloc(1, size);
+  void *ret = malloc(size);
   if (ret == NULL)
     outofmemory();
+  memset(ret, 0, size);
   return ret;
 }
 

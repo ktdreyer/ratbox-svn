@@ -68,8 +68,12 @@ typedef struct BlockHeap BlockHeap;
 
 extern BlockHeap* BlockHeapCreate(size_t elemsize, int elemsperblock);
 extern int        BlockHeapDestroy(BlockHeap *bh);
+
+#if 0 /* These are in memory.h... */
 extern int        BlockHeapFree(BlockHeap *bh, void *ptr);
 extern void *	  BlockHeapAlloc(BlockHeap *bh);
+#endif
+
 extern int        BlockHeapGarbageCollect(BlockHeap *);
 
 extern void       BlockHeapCountMemory(BlockHeap *bh,int *, int *);

@@ -11,7 +11,6 @@
  * $Id$
  */
 
-#define WE_ARE_MEMORY_C
 #include <stdio.h>
 #include <unistd.h>
 #include <assert.h>
@@ -79,7 +78,7 @@ static int newblock(BlockHeap * bh)
   void *offset;
 
   /* Setup the initial data structure. */
-  b = (Block *) calloc(1, sizeof(Block));
+  b = (Block *) MyMalloc(sizeof(Block));
   if (b == NULL)
     return 1;
   b->freeElems = bh->elemsPerBlock;
@@ -143,11 +142,15 @@ BlockHeap *BlockHeapCreate(size_t elemsize, int elemsperblock)
     }
 
   /* Allocate our new BlockHeap */
-  bh = (BlockHeap *) calloc(1, sizeof(BlockHeap));
+  bh = (BlockHeap *) MyMalloc(sizeof(BlockHeap));
   if (bh == NULL)
     {
       outofmemory();	/* die.. out of memory */
     }
+
+#ifdef MEMDEBUG
+  elemsize += sizeof(MemoryEntry);
+#endif
 
   bh->elemSize = elemsize;
   bh->elemsPerBlock = elemsperblock;
@@ -158,7 +161,7 @@ BlockHeap *BlockHeapCreate(size_t elemsize, int elemsperblock)
   /* Be sure our malloc was successful */
   if (newblock(bh))
     {
-      free(bh);
+      MyFree(bh);
       outofmemory();	/* die.. out of memory */
     }
 
@@ -182,7 +185,7 @@ BlockHeap *BlockHeapCreate(size_t elemsize, int elemsperblock)
 /*    Pointer to a structure (void *), or NULL if unsuccessful.             */
 /* ************************************************************************ */
 
-void *BlockHeapAlloc(BlockHeap * bh)
+void *_BlockHeapAlloc(BlockHeap * bh)
 {
   Block *walker;
   dlink_node *new_node;
@@ -206,9 +209,7 @@ void *BlockHeapAlloc(BlockHeap * bh)
       dlinkDelete(new_node, &walker->free_list);
       dlinkAddTail(new_node->data, new_node, &walker->used_list);
       assert(new_node->data != NULL);
-#if 0
       memset(new_node->data, 0, bh->elemSize);
-#endif
       return (new_node->data);
     }
 
@@ -222,13 +223,11 @@ void *BlockHeapAlloc(BlockHeap * bh)
 	  dlinkDelete(new_node, &walker->free_list);
 	  dlinkAddTail(new_node->data, new_node, &walker->used_list);
 	  assert(new_node->data != NULL);
-#if 0
 	  memset(new_node->data, 0, bh->elemSize);
-#endif
 	  return(new_node->data);
 	} 
     }
-  assert(0 != 1);
+  assert(0 == 1);
   return ((void *) NULL);	/* If you get here, something bad happened ! */
 }
 
@@ -244,7 +243,7 @@ void *BlockHeapAlloc(BlockHeap * bh)
 /* Returns:                                                                 */
 /*    0 if successful, 1 if element not contained within BlockHeap.         */
 /* ************************************************************************ */
-int BlockHeapFree(BlockHeap * bh, void *ptr)
+int _BlockHeapFree(BlockHeap * bh, void *ptr)
 {
   Block *block;
   struct MemBlock *memblock;
@@ -311,13 +310,13 @@ int BlockHeapGarbageCollect(BlockHeap * bh)
 	  if (last)
 	    {
 	      last->next = walker->next;
-	      free(walker);
+	      MyFree(walker);
 	      walker = last->next;
 	    }
 	  else
 	    {
 	      bh->base = walker->next;
-	      free(walker);
+	      MyFree(walker);
 	      walker = bh->base;
 	    }
 	  bh->blocksAllocated--;
@@ -351,9 +350,9 @@ int BlockHeapDestroy(BlockHeap * bh)
     {
       next = walker->next;
       munmap(walker->elems, walker->alloc_size);
-      free(walker);
+      MyFree(walker);
     }
-  free(bh);
+  MyFree(bh);
   return 0;
 }
 

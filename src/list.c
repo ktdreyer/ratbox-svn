@@ -194,7 +194,6 @@ _make_dlink_node(void)
 
   lp->next = NULL;
   lp->prev = NULL;
-
   return lp;
 }
 #else
@@ -207,7 +206,7 @@ _make_dlink_node(const char *file, int line)
  strcpy(nambuf, DLINK_DBG_PREFIX);
  strncpy_irc(nambuf+sizeof(DLINK_DBG_PREFIX)-1, file,
              sizeof(nambuf)-sizeof(DLINK_DBG_PREFIX));
- lp = _MyMalloc(sizeof(*lp), nambuf, line);
+ lp = memlog(_BlockHeapAlloc(dnode_heap), sizeof(*lp), nambuf, line);
  lp->next = NULL;
  lp->prev = NULL;
  ++links_count;
