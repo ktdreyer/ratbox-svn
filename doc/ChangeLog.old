@@ -1,3 +1,9 @@
+*** 20001220_1 by db
+- don't send on a nick change if the nick hasnt' been seen on a lazy
+  link server...
+
+
+
 *** 20001219_11 by db
 - fixed double free in invites
 - fixed prefix botch in m_invite() using sendto_anywhere()
