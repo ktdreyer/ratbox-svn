@@ -1,3 +1,7 @@
+*** 20011118_2 by androsyn
+Documented the undocumented functions in event.c
+
+
 *** 20011118_1 by kreator
 - fix broken build for balloc.c (one extra c comment ending)
 
