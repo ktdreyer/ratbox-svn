@@ -39,9 +39,15 @@
 struct Client;
 struct Channel;
 
-extern void    add_vchan_to_client_cache(struct Client *sptr,
-					 struct Channel *vchan,
-					 struct Channel *base_chan);
+extern void	add_vchan_to_client_cache(struct Client *sptr,
+					  struct Channel *vchan,
+					  struct Channel *base_chan);
+
+extern void	show_vchans(struct Client *cptr,
+			    struct Client *sptr,
+			    struct Channel *chptr);
+
+extern struct Channel* find_vchan(struct Channel *chptr, char *key);
 
 #endif  /* INCLUDED_vchannel_h */
 
