@@ -1,3 +1,7 @@
+*** 20011008_1 by androsyn
+Removed the macro for strtoken()
+
+
 *** 20011007_2 by db
 - Look sorry, I know, but this code was just too stupid for words...
 
