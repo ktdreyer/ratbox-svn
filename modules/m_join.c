@@ -300,7 +300,17 @@ int     m_join(struct Client *cptr,
 				   chptr->chname,
 				   parv[0]);
 	}
-      else 
+      else if ((flags & CHFL_HALFOP) && (IsCapable(sptr,CAP_HOPS)))
+	{
+	  chptr->channelts = CurrentTime;
+	  sendto_ll_channel_remote(chptr, cptr, sptr,
+				   ":%s SJOIN %lu %s + :\%%s",
+				   me.name,
+				   chptr->channelts,
+				   chptr->chname,
+				   parv[0]);
+	}
+      else
 	{
 	  sendto_ll_channel_remote(chptr, cptr, sptr,
 				   ":%s SJOIN %lu %s + :%s",

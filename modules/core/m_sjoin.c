@@ -37,6 +37,7 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "s_serv.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -353,9 +354,14 @@ int     ms_sjoin(struct Client *cptr,
 	  s++;
 	}
       
-      if (*s == '%')
+      if ((*s == '%') && IsCapable(sptr, CAP_HOPS))
 	{
 	  fl |= MODE_HALFOP;
+	  s++;
+	}
+      else if (*s == '%')
+	{
+	  fl |= MODE_CHANOP;
 	  s++;
 	}
 
