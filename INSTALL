@@ -19,6 +19,13 @@
    |   The old kline format WILL NOT WORK. Please see point 7!              |
    +------------------------------------------------------------------------+
 
+   ***** EFNET NOTE *****
+   You should run ./configure with the option '--enable-efnet' to tweak
+   some options to be EFNet based.  You must also use the example.efnet.conf
+   instead of example.conf.  Please see note 7 for information about
+   converting old configs to new.
+   **********************
+
      ----------------------------------------------------------------------
 
                                   HOW TO BUILD
@@ -159,6 +166,10 @@
        There is a utility to convert your old config file to the new format.
        In prefix/bin there is something called "convertconf". Its usage is:
        ./convertconf (old config file to convert) (converted file name)
+
+       Convertconf will NOT convert I: lines.  You must use "convertilines"
+       for this which contains a much superior method of conversion and
+       will group I: together under one auth {};.
 
        Once this is done, move your new config to prefix/etc/ircd.conf and
        EDIT IT! There are still things that need changing in the config,
