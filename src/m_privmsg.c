@@ -38,8 +38,6 @@
 
 #include <string.h>
 
-#define MSG_PRIVMSG "PRIVMSG"
-
 /*
  * m_functions execute protocol messages on this server:
  *
@@ -122,7 +120,7 @@ int     m_privmsg(struct Client *cptr,
   if (parc < 2 || *parv[1] == '\0')
     {
       sendto_one(sptr, form_str(ERR_NORECIPIENT),
-                 me.name, parv[0], MSG_PRIVMSG);
+                 me.name, parv[0], "PRIVMSG");
       return -1;
     }
 
@@ -153,7 +151,7 @@ int     m_privmsg(struct Client *cptr,
   if((strchr(nick,',')))
     {
       sendto_one(sptr, form_str(ERR_TOOMANYTARGETS),
-                     me.name, parv[0], MSG_PRIVMSG);
+                     me.name, parv[0], "PRIVMSG");
       return -1;
     }
 
@@ -177,7 +175,7 @@ int     m_privmsg(struct Client *cptr,
       if (can_send(sptr, chptr) == 0)
         sendto_channel_butone(cptr, sptr, chptr,
                               ":%s %s %s :%s",
-                              parv[0], MSG_PRIVMSG, nick,
+                              parv[0], "PRIVMSG", nick,
                               parv[2]);
       else
         sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN),
@@ -208,7 +206,7 @@ int     m_privmsg(struct Client *cptr,
       if(!*nick)        /* if its a '\0' dump it, there is no recipient */
         {
           sendto_one(sptr, form_str(ERR_NORECIPIENT),
-                     me.name, parv[0], MSG_PRIVMSG);
+                     me.name, parv[0], "PRIVMSG");
           return -1;
         }
 
@@ -244,7 +242,7 @@ int     m_privmsg(struct Client *cptr,
                                   chptr,
                                   type,
                                   nick+1,
-                                  MSG_PRIVMSG,
+                                  "PRIVMSG",
                                   parv[2]);
             }
         }
@@ -352,7 +350,7 @@ int     m_privmsg(struct Client *cptr,
                    parv[0], acptr->name,
                    acptr->user->away);
       sendto_prefix_one(acptr, sptr, ":%s %s %s :%s",
-                        parv[0], MSG_PRIVMSG, nick, parv[2]);
+                        parv[0], "PRIVMSG", nick, parv[2]);
 
 #ifdef  IDLE_CHECK
       /* reset idle time for message only if its not to self */
@@ -412,7 +410,7 @@ int     m_privmsg(struct Client *cptr,
                           (*nick == '#') ? MATCH_HOST :
                           MATCH_SERVER,
                           ":%s %s %s :%s", parv[0],
-                          MSG_PRIVMSG, nick, parv[2]);
+                          "PRIVMSG", nick, parv[2]);
       return 0;
     }
         
@@ -441,7 +439,7 @@ int     m_privmsg(struct Client *cptr,
       if (!IsMe(acptr))
         {
           sendto_one(acptr,":%s %s %s :%s", parv[0],
-                     MSG_PRIVMSG, nick, parv[2]);
+                     "PRIVMSG", nick, parv[2]);
           return 0;
         }
 
@@ -472,7 +470,7 @@ int     m_privmsg(struct Client *cptr,
           if (count == 1)
             sendto_prefix_one(acptr, sptr,
                               ":%s %s %s :%s",
-                              parv[0], MSG_PRIVMSG,
+                              parv[0], "PRIVMSG",
                               nick, parv[2]);
           else 
             sendto_one(sptr,
