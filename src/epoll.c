@@ -30,7 +30,7 @@
 #ifdef USE_EPOLL
 #include "stdinc.h"
 
-#include <sys/poll.h>
+#include <sys/epoll.h>
 
 #include "fdlist.h"
 #include "s_bsd.h"
@@ -58,54 +58,6 @@
 #define EPOLL_LENGTH 256
 
 static int ep;			/* epoll file descriptor */
-
-
-
-/* XXX: This ifdef needs to be fixed once epoll is rolled into glibc someday */
-
-#ifndef HAVE_EPOLL_LIB
-
-
-#include <linux/version.h>
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,5,49)
-#error "epoll support requires kernel headers newer than 2.5.49..try rtsigio instead"
-#endif
-
-
-#include <linux/unistd.h>
-
-#define EPOLL_CTL_ADD 1
-#define EPOLL_CTL_DEL 2
-#define EPOLL_CTL_MOD 3
-
-#define EPOLLIN POLLIN
-#define EPOLLOUT POLLOUT
-#define EPOLLERR POLLERR
-#define EPOLLHUP POLLHUP
-
-typedef union epoll_data
-{
-	void *ptr;
-	int fd;
-	__uint32_t u32;
-	__uint64_t u64;
-}
-epoll_data_t;
-
-struct epoll_event
-{
-	__uint32_t events;
-	epoll_data_t data;
-};
-
-
-static _syscall1(int, epoll_create, int, maxfds);
-static _syscall4(int, epoll_ctl, int, epfd, int, op, int, fd, struct epoll_event *, events);
-static _syscall4(int, epoll_wait, int, epfd, struct epoll_event *, pevents,
-		 int, maxevents, int, timeout);
-
-#endif /* HAVE_EPOLL_LIB */
-
 
 /*
  * init_netio
