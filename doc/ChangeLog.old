@@ -1,3 +1,11 @@
+*** 20001228_18 by adrian
+
+
+* fix typo
+* add 'active' because stats f displays active fd's, not all of them.
+
+
+
 *** 20001228_17 by bill
 
 - working on that MODE problem between servers still
