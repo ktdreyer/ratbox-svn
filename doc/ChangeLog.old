@@ -1,3 +1,23 @@
+androsyn    2002/03/01 09:30:25 EST	(20020301_4)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    include              setup.h.in 
+    src                  ircd.c 
+  Log:
+  Add a check for nanosleep(). If nanosleep() isn't found we fall back to
+  using select() for the delay.  The main reason for this is the fact that
+  usleep() tends to be implemented via SIGALRM.
+  
+  Revision  Changes    Path
+  7.123     +2 -0      ircd-hybrid-7/autoconf/configure.in
+  7.126     +164 -109  ircd-hybrid-7/configure
+  7.47      +4 -2      ircd-hybrid-7/include/setup.h.in
+  7.221     +16 -1     ircd-hybrid-7/src/ircd.c
+
+
+
 jmallett    2002/03/01 03:52:38 EST	(20020301_3)
 
   Modified files:
