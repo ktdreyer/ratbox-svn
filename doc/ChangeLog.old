@@ -1,3 +1,7 @@
+*** 20010912_2 by leeh
+- only kill long usernames/hostnames, warn about erroneous ones
+
+
 *** 20010912_1 by leeh
 - added checks for bad usernames/hostnames too..
   we cant just chop them off at hostlen, else you have a different host
