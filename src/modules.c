@@ -120,7 +120,6 @@ modules_init(void)
 	mod_add_cmd(&modreload_msgtab);
 	mod_add_cmd(&modlist_msgtab);
 	mod_add_cmd(&modrestart_msgtab);
-	mod_add_cmd(&error_msgtab);
 }
 
 /* mod_find_path()
