@@ -1,3 +1,7 @@
+*** 20010117_2 by ejb
+- fix problem with hooks, need init_hooks() *before* load_all_modules().
+
+
 *** 20010117_1 by toot
 fixed timestamp in ircd.log
 
