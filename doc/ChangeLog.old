@@ -1,3 +1,29 @@
+leeh        2002/02/28 11:12:22 EST	(20020228_6)
+
+  Modified files:
+    .                    INSTALL RELNOTES 
+    doc                  example.conf example.conf.efnet 
+    src                  ircd_parser.y 
+  Log:
+  - added a b12 specific section in RELNOTES, noting the recent config change
+    I did, also moved the convertklines stuff into there.
+  
+    we should probably mention that RELNOTES now contains this when we release
+    b12, and people should update it when they change something that people
+    upgrading to the next beta need to know, such as config file option
+    changes, kline format changes etc
+  - updated the confs to reflect whois_wait -> pace_wait_simple
+  - modified the ilog() for havent_read_conf=yes; slightly.
+  
+  Revision  Changes    Path
+  7.23      +8 -3      ircd-hybrid-7/INSTALL
+  1.14      +9 -8      ircd-hybrid-7/RELNOTES
+  7.153     +2 -2      ircd-hybrid-7/doc/example.conf
+  7.6       +4 -2      ircd-hybrid-7/doc/example.conf.efnet
+  1.238     +3 -1      ircd-hybrid-7/src/ircd_parser.y
+
+
+
 androsyn    2002/02/28 10:54:02 EST	(20020228_5)
 
   Modified files:
