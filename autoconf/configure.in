@@ -154,30 +154,40 @@ AC_MSG_RESULT($cf_enable_openssl)
 dnl If we want openssl, check for it
 if test "X$cf_enable_openssl" = "Xyes"; then
     dnl Check for ciphers supported by OpenSSL crypto lib
-    AC_CHECK_LIB(crypto, RSA_free)
-    if test "X$ac_cv_lib_crypto_RSA_free" = "Xyes"; then
-        AC_MSG_CHECKING(for required OpenSSL version)
-        AC_TRY_RUN(
-        [
+    AC_MSG_CHECKING(for required OpenSSL version)
+    AC_TRY_RUN(
+    [
 #include <openssl/opensslv.h>
 int main() {
   if (OPENSSL_VERSION_NUMBER < 0x00906000)
     exit(1);
   exit(0);
 }
-        ],, ac_cv_lib_crypto_RSA_free='no', ac_cv_lib_crypto_RSA_free='no')
-
+    ], cf_openssl_version_ok='yes',
+       cf_openssl_version_ok='no',
+       cf_openssl_version_ok='no')
+    
+    if test "X$cf_openssl_version_ok" = "Xyes"; then
+        AC_MSG_RESULT(ok)
+        dnl do all the HAVE_LIBCRYPTO magic
+        AC_CHECK_LIB(crypto, RSA_free)
         if test "X$ac_cv_lib_crypto_RSA_free" = "Xyes"; then
-            AC_MSG_RESULT(ok)
-            AC_CHECK_FUNCS(EVP_bf_cfb)
-            AC_CHECK_FUNCS(EVP_cast5_cfb)
-            AC_CHECK_FUNCS(EVP_des_cfb)
-            AC_CHECK_FUNCS(EVP_des_ede3_cfb)
-            AC_CHECK_FUNCS(EVP_idea_cfb)
-            AC_CHECK_FUNCS(EVP_rc5_32_12_16_cfb)
-        else
-            AC_MSG_RESULT(OpenSSL version below 0.9.6 - OpenSSL support disabled)
+            cf_openssl_ciphers=''
+            AC_CHECK_FUNCS(EVP_bf_cfb,
+                cf_openssl_ciphers="${cf_openssl_ciphers}BF/128 BF/256 ")
+            AC_CHECK_FUNCS(EVP_cast5_cf,
+                cf_openssl_ciphers="${cf_openssl_ciphers}CAST/128 ")
+            AC_CHECK_FUNCS(EVP_des_cfb,
+                cf_openssl_ciphers="${cf_openssl_ciphers}DES/56 ")
+            AC_CHECK_FUNCS(EVP_des_ede3_cfb,
+                cf_openssl_ciphers="${cf_openssl_ciphers}3DES/168 ")
+            AC_CHECK_FUNCS(EVP_idea_cfb,
+                cf_openssl_ciphers="${cf_openssl_ciphers}IDEA/128 ")
+            AC_CHECK_FUNCS(EVP_rc5_32_12_16_cfb,
+                cf_openssl_ciphers="${cf_openssl_ciphers}RC5.8/128 RC5.12/128 RC5.16/128")
         fi
+    else
+        AC_MSG_RESULT(OpenSSL version below 0.9.6 - OpenSSL support disabled)
     fi
 fi
 
@@ -344,7 +354,7 @@ if test "$ac_cv_shared_modules" = "no"; then
 	AC_DEFINE(STATIC_MODULES)
 else
 	echo "Checking for shared module support"
-	MODULES_DEFINE=""
+	ODULES_DEFINE=""
 	MODULES_LIBS=""
 	MOD_TARGET="shared_modules"
 	
@@ -475,3 +485,10 @@ AC_OUTPUT(                      \
  gnats/Makefile                 \
  gnats/send-pr                  \
 )
+
+if test "X${cf_openssl_ciphers}" != "X"; then
+  echo 
+  echo "Available cryptlinks ciphers:"
+  echo "    ${cf_openssl_ciphers}"
+  echo
+fi
