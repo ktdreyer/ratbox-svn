@@ -311,6 +311,8 @@
  */
 #define SHOW_INVISIBLE_LUSERS
 
+#define ZIP_LINKS               /* compress server-to-server links */
+
 /* NO_DEFAULT_INVISIBLE - clients not +i by default
  * When defined, your users will not automatically be attributed with user
  * mode "i" (i == invisible). Invisibility means people dont showup in
@@ -376,6 +378,18 @@
  */
 #define CMDLINE_CONFIG
 
+/* INIT_LOG_LEVEL - what level of information is logged to ircd.log
+ * options are:
+ *   L_CRIT, L_ERROR, L_WARN, L_NOTICE, L_TRACE, L_INFO, L_DEBUG
+ */
+#define INIT_LOG_LEVEL L_NOTICE
+
+/* USE_LOGFILE - log errors and such to LPATH
+ * If you wish to have the server send 'vital' messages about server
+ * to a logfile, define USE_LOGFILE.
+ */
+#define USE_LOGFILE
+
 /* USE_SYSLOG - log errors and such to syslog()
  * If you wish to have the server send 'vital' messages about server
  * through syslog, define USE_SYSLOG. Only system errors and events critical
@@ -383,9 +397,6 @@
  * syslog() is used instead of the above file. It is not recommended that
  * this option is used unless you tell the system administrator beforehand
  * and obtain their permission to send messages to the system log files.
- *
- * IT IS STRONGLY RECOMMENDED THAT YOU *DO* USE SYSLOG.  Many fatal ircd errors
- * are only logged to syslog.
  */
 #define USE_SYSLOG
 
@@ -437,12 +448,12 @@
 /* MAXSENDQLENGTH - Max amount of internal send buffering
  * Max amount of internal send buffering when socket is stuck (bytes)
  */
-#define MAXSENDQLENGTH 5050000    /* Recommended value: 5050000 for efnet */
+#define MAXSENDQLENGTH 7050000    /* Recommended value: 7050000 for efnet */
 
 /*  BUFFERPOOL - the maximum size of the total of all sendq's.
- *  Recommended value is four times MAXSENDQLENGTH.
+ *  Recommended value is 4 times MAXSENDQLENGTH.
  */
-#define BUFFERPOOL     (4 * MAXSENDQLENGTH)
+#define BUFFERPOOL (MAXSENDQLENGTH * 4)
 
 /* IRC_UID IRC_GID - user and group id ircd should switch to if run as root
  * If you start the server as root but wish to have it run as another user,
@@ -497,7 +508,8 @@
  * NO_JOIN_ON_SPLIT
  *
  * When this is defined, users will not be allowed to join channels
- * that were present before a split.
+ * that were present before a split. THIS IS BROKEN - DO NOT USE
+ * ON A PRODUCTION SERVER --Rodder
  */
 #undef NO_JOIN_ON_SPLIT
 
@@ -950,6 +962,11 @@ error CLIENT_FLOOD undefined.
         defined(NO_JOIN_ON_SPLIT) || defined(NO_JOIN_ON_SPLIT_SIMPLE)
 #define NEED_SPLITCODE
 #endif
+
+#ifdef FLUD
+void    free_fluders();
+void    free_fludees();
+#endif /* FLUD */
 
 #ifdef ANTI_SPAMBOT
 #define MIN_SPAM_NUM 5

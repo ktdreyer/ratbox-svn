@@ -28,16 +28,18 @@
 #error Incorrect config.h for this revision of ircd.
 #endif
 #ifndef INCLUDED_sys_types_h
-#include <sys/types.h>       /* size_t, time_t */
+#include <sys/types.h>       /* time_t */
 #define INCLUDED_sys_types_h
 #endif
 #ifndef INCLUDED_netinet_in_h
 #include <netinet/in.h>      /* in_addr */
 #define INCLUDED_netinet_in_h
 #endif
-#ifndef INCLUDED_stddef_h
-#include <stddef.h>        /* offsetof */
-#define INCLUDED_stddef_h
+#if defined(HAVE_STDDEF_H)
+# ifndef INCLUDED_stddef_h
+#  include <stddef.h>        /* offsetof */
+#  define INCLUDED_stddef_h
+# endif
 #endif
 #ifndef INCLUDED_ircd_defs_h
 # include "ircd_defs.h"
@@ -64,12 +66,6 @@ struct Zdata;
 struct DNSReply;
 struct Listener;
 struct Client;
-
-/*
- * NOTE: Just because something is declared as a global doesn't
- * mean we want to keep it that way forever. --Bleep
- */
-extern struct Client* LocalClientList;  /* GLOBAL - Local client list */
 
 /*
  * Client structures
@@ -113,6 +109,7 @@ struct Client
   struct Client*    next;
   struct Client*    prev;
   struct Client*    hnext;
+  struct Client*    idhnext;
 
 /* QS */
 
@@ -120,6 +117,13 @@ struct Client
   struct Client*    lprev;      /* Used for Server->servers/users */
 
 /* LINKLIST */
+  /* N.B. next_local_client, and previous_local_client
+   * duplicate the link list referenced to by struct Server -> users
+   * someday, we'll rationalize this... -Dianora
+   */
+
+  struct Client*    next_local_client;      /* keep track of these */
+  struct Client*    previous_local_client;
 
   struct Client*    next_server_client;
   struct Client*    next_oper_client;
@@ -137,12 +141,13 @@ struct Client
   unsigned int      umodes;     /* opers, normal users subset */
   unsigned int      flags;      /* client flags */
   unsigned int      flags2;     /* ugh. overflow */
+  int               fd;         /* >= 0, for local clients */
   int               hopcount;   /* number of servers to this 0 = local */
   unsigned short    status;     /* Client type */
-  char              nicksent;   /* set if nick sent for burst */
+  char              nicksent;
   unsigned char     local_flag; /* if this is 1 this client is local */
-  int      listprogress2;       /* where in the current bucket were we? */
   short    listprogress;        /* where were we when the /list blocked? */
+  int      listprogress2;       /* where in the current bucket were we? */
 
   /*
    * client->name is the unique name for a client nick or host
@@ -179,22 +184,32 @@ struct Client
    * these fields, if (from != self).
    */
   int               count;       /* Amount of data in buffer */
-
-  int               fd;         /* >= 0, for local clients */
-  /*
-   * N.B. next_local, and prev_local
-   * duplicate the link list referenced to by struct Server -> users
-   * someday, we'll rationalize this... -Dianora
-   */
-  struct Client*    next_local;      /* keep track of these */
-  struct Client*    prev_local;
-
+#ifdef BOTCHECK
+  unsigned char     isbot;      /* non 0 if its a type of bot */
+#endif
+#ifdef FLUD
+  time_t            fludblock;
+  struct fludbot*   fluders;
+#endif
+#ifdef ANTI_SPAMBOT
+  time_t            last_join_time;   /* when this client last 
+                                         joined a channel */
+  time_t            last_leave_time;  /* when this client last 
+                                       * left a channel */
+  int               join_leave_count; /* count of JOIN/LEAVE in less than 
+                                         MIN_JOIN_LEAVE_TIME seconds */
+  int               oper_warn_count_down; /* warn opers of this possible 
+                                          spambot every time this gets to 0 */
+#endif
+#ifdef ANTI_DRONE_FLOOD
+  time_t            first_received_message_time;
+  int               received_number_of_privmsgs;
+  int               drone_noticed;
+#endif
   char  buffer[CLIENT_BUFSIZE]; /* Incoming message buffer */
-
+#ifdef ZIP_LINKS
   struct Zdata*     zip;        /* zip data */
-
-  unsigned short    port;       /* and the remote port# too :-) */
-
+#endif
   short             lastsq;     /* # of 2k blocks when sendqueued called last*/
   struct DBuf       sendQ;      /* Outgoing message queue--if socket full */
   struct DBuf       recvQ;      /* Hold for data incoming yet to be parsed */
@@ -219,7 +234,12 @@ struct Client
   struct Listener*  listener;   /* listener accepted from */
   struct SLink*     confs;      /* Configuration record associated */
   struct in_addr    ip;         /* keep real ip# too */
+  unsigned short    port;       /* and the remote port# too :-) */
   struct DNSReply*  dns_reply;  /* result returned from resolver query */
+#ifdef ANTI_NICK_FLOOD
+  time_t            last_nick_change;
+  int               number_of_nick_changes;
+#endif
   time_t            last_knock; /* don't allow knock to flood */
   /*
    * client->sockhost contains the ip address gotten from the socket as a
@@ -234,33 +254,6 @@ struct Client
    */
   char              passwd[PASSWDLEN + 1];
   int               caps;       /* capabilities bit-field */
-
-#ifdef ANTI_NICK_FLOOD
-  time_t            last_nick_change;
-  int               number_of_nick_changes;
-#endif
-#ifdef BOTCHECK
-  unsigned char     isbot;      /* non 0 if its a type of bot */
-#endif
-#ifdef FLUD
-  time_t            fludblock;
-  struct fludbot*   fluders;
-#endif
-#ifdef ANTI_SPAMBOT
-  time_t            last_join_time;   /* when this client last 
-                                         joined a channel */
-  time_t            last_leave_time;  /* when this client last 
-                                       * left a channel */
-  int               join_leave_count; /* count of JOIN/LEAVE in less than 
-                                         MIN_JOIN_LEAVE_TIME seconds */
-  int               oper_warn_count_down; /* warn opers of this possible 
-                                          spambot every time this gets to 0 */
-#endif
-#ifdef ANTI_DRONE_FLOOD
-  time_t            first_received_message_time;
-  int               received_number_of_privmsgs;
-  int               drone_noticed;
-#endif
 };
 
 /*
@@ -313,7 +306,7 @@ struct Client
 #define FLAGS_BLOCKED      0x0008 /* socket is in a blocked condition */
 #define FLAGS_REJECT_HOLD  0x0010 /* client has been klined */
 #define FLAGS_CLOSING      0x0020 /* set when closing to suppress errors */
-/* #define FLAGS_CHKACCESS 0x0040 UNUSED */
+#define FLAGS_CHKACCESS    0x0040 /* ok to check clients access if set */
 #define FLAGS_GOTID        0x0080 /* successful ident lookup achieved */
 #define FLAGS_NEEDID       0x0100 /* I-lines say must use ident return */
 #define FLAGS_NONL         0x0200 /* No \n in buffer */
@@ -402,9 +395,12 @@ struct Client
  * flags macros.
  */
 #define IsPerson(x)             (IsClient(x) && (x)->user)
+#define DoAccess(x)             ((x)->flags & FLAGS_CHKACCESS)
 #define IsLocal(x)              ((x)->flags & FLAGS_LOCAL)
 #define IsDead(x)               ((x)->flags & FLAGS_DEADSOCKET)
+#define SetAccess(x)            ((x)->flags |= FLAGS_CHKACCESS)
 #define NoNewLine(x)            ((x)->flags & FLAGS_NONL)
+#define ClearAccess(x)          ((x)->flags &= ~FLAGS_CHKACCESS)
 #define MyConnect(x)            ((x)->local_flag != 0)
 #define MyClient(x)             (MyConnect(x) && IsClient(x))
 
@@ -534,8 +530,8 @@ extern void           del_client_from_llist(struct Client** list,
 extern int            exit_client(struct Client*, struct Client*, 
                                   struct Client*, const char* comment);
 
-extern void     count_local_client_memory(size_t* used, size_t* allocated);
-extern void     count_remote_client_memory(size_t* used, size_t* allocated);
+extern void     count_local_client_memory(int *, int *);
+extern void     count_remote_client_memory(int *, int *);
 extern  int     check_registered (struct Client *);
 extern  int     check_registered_user (struct Client *);
 

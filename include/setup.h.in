@@ -1,6 +1,20 @@
-/* ../include/setup.h.in.  Generated automatically from configure.in by autoheader. 
- * $Id$
- */
+/* include/setup.h.in.  Generated automatically from configure.in by autoheader.  */
+
+/* Define if you need to in order for stat and other things to work.  */
+#undef _POSIX_SOURCE
+
+/* Define if you have the ANSI C header files.  */
+#undef STDC_HEADERS
+
+/* Define only one of POSIX, BSD, or SYSV signals.  */
+/* Define if your system has reliable POSIX signals.  */
+#undef POSIX_SIGNALS
+
+/* Define if your system has reliable BSD signals.  */
+#undef BSD_RELIABLE_SIGNALS
+
+/* Define if your system has unreliable SYSV signals.  */
+#undef SYSV_UNRELIABLE_SIGNALS
 
 /* Define if you have the poll() system call.  */
 #undef USE_POLL
@@ -15,23 +29,29 @@
 /* Define if you have SYSV non-blocking sockets (FIONBIO) */
 #undef NBLOCK_SYSV
 
-/* Define if you have the getrusage function.  */
-#undef HAVE_GETRUSAGE
+/* Define if you have the mmap() function.  */
+#undef USE_MMAP
 
-/* Define if you have the inet_ntoa function.  */
-#undef HAVE_INET_NTOA
+/* Define if you are running SOLARIS2.  */
+#undef OS_SOLARIS2
 
-/* Define if you have the lrand48 function.  */
-#undef HAVE_LRAND48
+/* Define if you have the <errno.h> header file.  */
+#undef HAVE_ERRNO_H
 
-/* Define if you have the strtok function.  */
-#undef HAVE_STRTOK
+/* Define if you have the <stddef.h> header file.  */
+#undef HAVE_STDDEF_H
 
-/* Define if you have the strtoken function.  */
-#undef HAVE_STRTOKEN
+/* Define if you have the <stdlib.h> header file.  */
+#undef HAVE_STDLIB_H
 
-/* Define if you have the times function.  */
-#undef HAVE_TIMES
+/* Define if you have the <string.h> header file.  */
+#undef HAVE_STRING_H
+
+/* Define if you have the <sys/param.h> header file.  */
+#undef HAVE_SYS_PARAM_H
+
+/* Define if you have the <unistd.h> header file.  */
+#undef HAVE_UNISTD_H
 
 /* Define if you have the descrypt library (-ldescrypt).  */
 #undef HAVE_LIBDESCRYPT

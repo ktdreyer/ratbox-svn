@@ -38,10 +38,6 @@ extern time_t LastUsedWallops;
 #endif
 
 
-#ifdef BOTCHECK
-extern int bot_check(const char* host);
-#endif
-
 extern int   user_mode(struct Client *, struct Client *, int, char **);
 extern void  send_umode (struct Client *, struct Client *,
                          int, int, char *);
@@ -49,13 +45,5 @@ extern void  send_umode_out (struct Client*, struct Client *, int);
 extern int   show_lusers(struct Client *, struct Client *, int, char **);
 extern void  show_opers(struct Client* client);
 
-extern int do_user(char* nick, struct Client* cptr, struct Client* sptr,
-                   char* username, char *host, char *server, char *realname);
 
-extern int clean_nick_name(char* nick);
-extern int nickkilldone(struct Client *cptr, struct Client *sptr, int parc,
-                        char *parv[], time_t newts,char *nick);
-
-#endif /* INCLUDED_s_user_h */
-
-
+#endif

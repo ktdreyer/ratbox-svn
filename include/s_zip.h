@@ -34,6 +34,7 @@
 
 struct Client;
 
+#ifdef ZIP_LINKS
 /* the minimum amount of data needed to trigger compression */
 #define ZIP_MINIMUM     4096
 
@@ -48,6 +49,8 @@ struct Zdata {
   int         incount;        /* size of inbuf content */
   int         outcount;       /* size of outbuf content */
 };
+
+#endif /* ZIP_LINKS */
 
 
 extern int     zip_init (struct Client *);

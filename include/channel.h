@@ -16,8 +16,6 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- * $Id$
  */
 
 #ifndef INCLUDED_channel_h
@@ -81,9 +79,8 @@ struct Channel
 };
 
 typedef struct  Channel aChannel;
-extern  struct  Channel* GlobalChannelList;
 
-extern const char* const PartFmt;
+extern  struct  Channel *GlobalChannelList;
 
 #define CREATE 1        /* whether a channel should be
                            created or just tested for existance */
@@ -97,13 +94,15 @@ extern const char* const PartFmt;
 /* Maximum mode changes allowed per client, per server is different */
 #define MAXMODEPARAMS   4
 
-extern void    sync_channels(time_t t);
 extern struct Channel* find_channel (char *, struct Channel *);
 extern struct SLink*   find_channel_link(struct SLink *, struct Channel *);
 extern void    remove_user_from_channel(struct Client *,struct Channel *,int);
 extern void    del_invite (struct Client *, struct Channel *);
 extern void    send_user_joins (struct Client *, struct Client *);
 extern int     can_send (struct Client *, struct Channel *);
+extern int     can_join (struct Client *, struct Channel *, char *,int *);
+extern int     is_banned(struct Client *cptr,struct Channel *chptr);
+extern void    add_user_to_channel(struct Channel *chptr, struct Client *who, int flags);
 extern int     is_chan_op (struct Client *, struct Channel *);
 extern int     has_voice (struct Client *, struct Channel *);
 extern int     user_channel_mode(struct Client *, struct Channel *);
@@ -115,22 +114,9 @@ extern int     check_channel_name(const char* name);
 extern void    channel_modes(struct Client *, char *, char *, struct Channel*);
 extern void    set_channel_mode(struct Client *, struct Client *, 
                                 struct Channel *, int, char **);
-
-extern struct Channel* get_channel(struct Client* cptr, 
-                                   char* chname, int flag);
-
-extern int     can_join(struct Client* client, struct Channel* chan, 
-                        char* key, int* flags);
-
-extern void    add_user_to_channel(struct Channel* chptr, 
-                                   struct Client* who, int flags);
-extern void add_invite(struct Client *cptr, struct Channel *chptr);
-extern void clear_bans_exceptions_denies(struct Client *sptr, 
-                                         struct Channel *chptr);
-extern void sjoin_sendit(struct Client *cptr, struct Client *sptr,
-                         struct Channel *chptr, char *from);
-extern int is_banned(struct Client *cptr, struct Channel *chptr);
-extern void check_still_split(void);
+extern struct Channel* get_channel(struct Client *,char*,int );
+extern void    add_invite (struct Client *, struct Channel *);
+extern void    clear_bans_exceptions_denies(struct Client *,struct Channel *);
 
 /* this should eliminate a lot of ifdef's in the main code... -orabidoo */
 #ifdef BAN_INFO

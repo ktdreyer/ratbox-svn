@@ -40,8 +40,7 @@ extern const char* const NONB_ERROR_MSG;
 extern const char* const SETBUF_ERROR_MSG;
 
 extern void  add_connection(struct Listener* listener, int fd);
-extern int   check_client(struct Client* client, const char* username,
-                          char** reason_out);
+extern int   check_client(struct Client* client, char *,char **);
 extern void  close_connection(struct Client* client);
 extern void  close_all_connections(void);
 extern int   connect_server(struct ConfItem* conf, struct Client* cptr, 

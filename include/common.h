@@ -56,19 +56,4 @@
 #define IRCD_MAX(a, b)  ((a) > (b) ? (a) : (b))
 #define IRCD_MIN(a, b)  ((a) < (b) ? (a) : (b))
 
-#if 0
-extern struct SLink *find_user_link(/* struct SLink *, struct Client * */);
-#endif
-
-/* 
- * argh where should this go? who uses it? ;-)
- */
-
-typedef struct
-{
-  int mode;
-  char letter;
-} FLAG_ITEM;
-
-
 #endif /* INCLUDED_common_h */

@@ -66,7 +66,6 @@ extern const char* myctime(time_t);
 extern char*       strtoken(char** save, char* str, char* fs);
 extern void*       MyMalloc(size_t size);
 extern void*       MyRealloc(void* p, size_t size);
-
 /* MyFree is defined as a macro in ircd_defs.h */
 /* extern void MyFree(void* p); */
 
@@ -131,6 +130,6 @@ extern const unsigned int CharAttrs[];
                                            (CNTRL_C | ALPHA_C | DIGIT_C)))
 
 #define IsNonEOS(c) (CharAttrs[(unsigned char)(c)] & NONEOS_C)
-#define IsEol(c)    (CharAttrs[(unsigned char)(c)] & EOL_C)
+#define IsEol(c) (CharAttrs[(unsigned char)(c)] & EOL_C)
 
 #endif /* INCLUDED_irc_string_h */

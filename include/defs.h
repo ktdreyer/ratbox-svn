@@ -1,8 +1,3 @@
-/*
- * $Id$
- */
-
-
 #ifndef INCLUDED_defs_h
 #define INCLUDED_defs_h
 

@@ -1,6 +1,4 @@
-/* dline_conf.h  -- lets muse over dlines, shall we?
- * $Id$
- */
+/* dline_conf.h  -- lets muse over dlines, shall we? */
 #ifndef INCLUDED_dline_conf_h
 #define INCLUDED_dline_conf_h
 

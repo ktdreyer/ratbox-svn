@@ -45,7 +45,7 @@ extern unsigned long   cres_mem(struct Client* cptr);
  * name is modified only if there is enough space in the buffer to hold
  * the suffix
  */
-extern void add_local_domain(char* name, size_t len);
+extern void add_local_domain(char* name, int len);
 
 #endif /* INCLUDED_res_h */
 
