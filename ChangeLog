@@ -1,3 +1,15 @@
+leeh        2005/02/03 10:25:18 EST	(20050203_1)
+
+  Modified files:
+    src                  s_operbot.c 
+  Log:
+  - merged objoin and obpart down to one handler each
+  
+  Revision  Changes    Path
+  1.32      +20 -64    rserv/src/s_operbot.c
+
+
+
 leeh        2005/02/03 10:19:09 EST	(20050203_0)
 
   Modified files:
