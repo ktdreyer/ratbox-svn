@@ -1,3 +1,15 @@
+leeh        2002/02/05 06:42:25 EST	(20020205_3)
+
+  Modified files:
+    src                  ircd_parser.y 
+  Log:
+  - dont allow spaces in network name (breaks 005)
+  
+  Revision  Changes    Path
+  1.235     +5 -0      ircd-hybrid-7/src/ircd_parser.y
+
+
+
 wcampbel    2002/02/04 23:04:53 EST	(20020205_2)
 
   Modified files:
