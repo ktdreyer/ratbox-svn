@@ -1,3 +1,10 @@
+*** 20001111_4 by ejb
+- fix up Makefiles a bit so they actually work
+- finally remove src/m_*.c
+- remove /list sendq crud
+
+
+
 *** 20001111_3 by db
 - simplified mo_dline a bit
 
