@@ -1,3 +1,40 @@
+leeh        2003/08/18 17:39:05 EDT	(20030818_0)
+
+  Modified files:
+    include              parse.h reject.h s_stats.h 
+    modules              m_stats.c 
+    modules/core         m_kick.c m_kill.c m_message.c m_mode.c 
+                         m_squit.c 
+    src                  client.c event.c fdlist.c messages.tab 
+                         parse.c reject.c s_conf.c s_serv.c 
+                         s_stats.c s_user.c 
+  Log:
+  - some more TS6 cleanups..
+  - removed list_commands(), its not used anymore
+  
+  Revision  Changes    Path
+  7.21      +0 -1      ircd-ratbox/include/parse.h
+  1.5       +0 -2      ircd-ratbox/include/reject.h
+  7.16      +1 -0      ircd-ratbox/include/s_stats.h
+  1.72      +9 -4      ircd-ratbox/modules/core/m_kick.c
+  1.88      +9 -10     ircd-ratbox/modules/core/m_kill.c
+  1.140     +14 -9     ircd-ratbox/modules/core/m_message.c
+  1.89      +4 -1      ircd-ratbox/modules/core/m_mode.c
+  1.71      +4 -3      ircd-ratbox/modules/core/m_squit.c
+  1.178     +121 -134  ircd-ratbox/modules/m_stats.c
+  7.402     +12 -5     ircd-ratbox/src/client.c
+  7.38      +9 -8      ircd-ratbox/src/event.c
+  7.41      +3 -2      ircd-ratbox/src/fdlist.c
+  7.97      +6 -6      ircd-ratbox/src/messages.tab
+  7.167     +7 -26     ircd-ratbox/src/parse.c
+  1.8       +2 -2      ircd-ratbox/src/reject.c
+  7.427     +27 -54    ircd-ratbox/src/s_conf.c
+  7.352     +5 -8      ircd-ratbox/src/s_serv.c
+  7.30      +119 -105  ircd-ratbox/src/s_stats.c
+  7.289     +4 -4      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2003/08/17 08:24:33 EDT	(20030817_0)
 
   Modified files:
