@@ -1,3 +1,7 @@
+*** 20010802_2 by spookey
+ - show /who user when user is +i  ..  thanks poptix
+
+
 *** 20010802_1 by leeh
 - changed report_error -> sendto_realops_flags() 
   allows us to show IP to admins, not to opers..
