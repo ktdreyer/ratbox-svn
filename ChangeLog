@@ -1,3 +1,15 @@
+androsyn    2005/02/26 18:52:24 EST	(20050226_0)
+
+  Modified files:
+    include              stdinc.h 
+  Log:
+  Add more robust alloca checking
+  
+  Revision  Changes    Path
+  1.17      +20 -11    ircd-ratbox/include/stdinc.h
+
+
+
 leeh        2005/02/24 15:27:17 EST	(20050224_9)
 
   Modified files:
