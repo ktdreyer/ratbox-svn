@@ -256,7 +256,7 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
 {
   register int cpylen = 0;	/* how many bytes we've copied */
   register char *ch = data;	/* Pointer to where we are in the read data */
-  register char *bufch = &bufline->buf[bufline->len];
+  register char *bufch = bufline->buf + bufline->len;
   int clen = 0;                 /* how many bytes we've processed,
                                    and don't ever want to see again.. */
 
@@ -272,7 +272,7 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
     {
       memcpy(bufch, ch, (BUF_DATA_SIZE - bufline->len - 1));
       bufline->buf[BUF_DATA_SIZE-1] = '\0';
-      bufch = &bufline->buf[BUF_DATA_SIZE-2];
+      bufch = bufline->buf + BUF_DATA_SIZE - 2;
       while(cpylen && (*bufch == '\r' || *bufch == '\n'))
         {
           *bufch = '\0';
@@ -280,8 +280,8 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
           bufch--;
         }
       bufline->terminated = 1;
-      bufline->len = cpylen;
-      bufhead->len += bufline->len;
+      bufline->len = BUF_DATA_SIZE - 1;
+      bufhead->len += BUF_DATA_SIZE - 1;
       return clen;
     }
 
