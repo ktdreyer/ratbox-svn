@@ -21,6 +21,7 @@
 #include "config.h"
 #include "tools.h"
 #include "irc_string.h"
+#include "client.h"
 #include "list.h"
 #include "memory.h"
 #include "setup.h"
@@ -394,9 +395,11 @@ inet_ntop6(const unsigned char *src, char *dst, unsigned int size)
 		*tp++ = ':';
 /* XXX: This is probably broken */
 	*tp++ = '.';
+#if 0
 	*tp++ = 'i';
 	*tp++ = 'p';
 	*tp++ = '6';
+#endif
 	*tp++ = '\0';
 
 	/*
@@ -430,6 +433,7 @@ const char *inetntop(int af, const void *src, char *dst, unsigned int size)
 		else {
 			return(inet_ntop4((unsigned char *)&((struct in6_addr *)src)->s6_addr32[3], dst, size));
 		}
+
 #endif
 	default:
 		return (NULL);
@@ -615,7 +619,15 @@ inetpton(af, src, dst)
 		return (inet_pton4(src, dst));
 #ifdef IPV6
 	case AF_INET6:
-		return (inet_pton6(src, dst));
+		/* Somebody might have passed as an IPv4 address this is sick but it works */
+		if(inet_pton4(src, dst))
+		{
+			char tmp[HOSTIPLEN];
+			ircsprintf(tmp, "::ffff:%s", src);
+			return (inet_pton6(tmp, dst));
+		}
+		else
+			return (inet_pton6(src, dst));
 #endif
 	default:
 		return (-1);
