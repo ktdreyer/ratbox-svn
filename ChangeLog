@@ -1,3 +1,19 @@
+androsyn    2002/08/13 10:51:02 EDT	(20020813_5)
+
+  Modified files:
+    contrib              Makefile.in 
+  Added files:
+    contrib              m_owhois.c 
+  Log:
+  Add m_owhois.c.  Basically owhois shows all the channels the user is in
+  regardless of modes.
+  
+  Revision  Changes    Path
+  1.34      +1 -0      ircd-ratbox/contrib/Makefile.in
+  1.1       +373 -0    ircd-ratbox/contrib/m_owhois.c (new)
+
+
+
 androsyn    2002/08/13 10:30:34 EDT	(20020813_4)
 
   Modified files:
