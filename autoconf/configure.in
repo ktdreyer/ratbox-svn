@@ -221,6 +221,24 @@ AC_DEFUN(CHECK_SOCKLEN_T,
 
 CHECK_SOCKLEN_T
 
+
+AC_CACHE_CHECK([for struct sockaddr_storage], ac_cv_have_struct_sockaddr_storage, [
+        AC_TRY_COMPILE(
+                [
+#include <sys/types.h>
+#include <sys/socket.h>
+                ],
+                [ struct sockaddr_storage s; ],
+                [ ac_cv_have_struct_sockaddr_storage="yes" ],
+                [ ac_cv_have_struct_sockaddr_storage="no" ]  
+        )
+])
+if test "x$ac_cv_have_struct_sockaddr_storage" = "xyes" ; then
+        AC_DEFINE(HAVE_STRUCT_SOCKADDR_STORAGE)
+fi
+  
+
+
 dnl Check for stdarg.h - if we can't find it, halt configure
 AC_CHECK_HEADER(stdarg.h, , AC_MSG_ERROR(** stdarg.h could not be found - ircd-ratbox will not compile without it **))
 

@@ -285,13 +285,17 @@ struct server_info
 	RSA *rsa_private_key;
 #endif
 	int hub;
-	struct sockaddr_storage ip;
-	struct sockaddr_storage ip6;
+	struct sockaddr_in ip;
+#ifdef IPV6
+	struct sockaddr_in6 ip6;
+#endif
 	int max_clients;
 	int max_buffer;
 	int no_hack_ops;
 	int specific_ipv4_vhost;
+#ifdef IPV6
 	int specific_ipv6_vhost;
+#endif
 	struct sockaddr_in dns_host;
 };
 

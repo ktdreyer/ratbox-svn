@@ -76,3 +76,5 @@
 /* topiclen */
 #undef TOPICLEN
 
+/* struct sockaddr_storage */
+#undef HAVE_STRUCT_SOCKADDR_STORAGE

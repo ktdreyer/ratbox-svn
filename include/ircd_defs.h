@@ -69,29 +69,32 @@
 #define CLIENT_PARSE_ERROR -1
 #define CLIENT_OK	1
 
-
 #ifdef IPV6
-
 #ifndef AF_INET6
 #error "AF_INET6 not defined"
 #endif
 
-
 #define DEF_FAM AF_INET6
 
-
-#else
-
+#else /* #ifdef IPV6 */
 
 #ifndef AF_INET6
 #define AF_INET6 10		/* Dummy AF_INET6 declaration */
 #endif
 #define DEF_FAM AF_INET
+#endif /* #ifdef IPV6 */
 
 
-#endif
+#ifndef HAVE_STRUCT_SOCKADDR_STORAGE
+# define	_SS_MAXSIZE	128	/* Implementation specific max size */
+# define	_SS_PADSIZE	(_SS_MAXSIZE - sizeof (struct sockaddr))
 
-
-
+struct sockaddr_storage {
+	struct  sockaddr ss_sa;
+	char		__ss_pad2[_SS_PADSIZE];
+};
+# define ss_family ss_sa.sa_family
+#endif /* !HAVE_STRUCT_SOCKADDR_STORAGE */
+		
 
 #endif /* INCLUDED_ircd_defs_h */
