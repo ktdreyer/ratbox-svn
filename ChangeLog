@@ -1,3 +1,15 @@
+androsyn    2004/03/01 15:11:18 EST	(20040301_12)
+
+  Modified files:
+    src                  listener.c 
+  Log:
+  Looks like freebsd likes a memset on the struct sockaddr_storage...
+  
+  Revision  Changes    Path
+  7.106     +1 -1      ircd-ratbox/src/listener.c
+
+
+
 androsyn    2004/03/01 14:49:52 EST	(20040301_11)
 
   Modified files:
