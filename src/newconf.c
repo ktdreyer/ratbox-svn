@@ -642,7 +642,7 @@ void	conf_set_serverinfo_network_name(void *data)
 	char *p;
 
 	if((p = strchr((char *)data, ' ')))
-		p = '\0';
+		*p = '\0';
 
 	MyFree(ServerInfo.network_name);
 	DupString(ServerInfo.network_name, (char*)data);
