@@ -156,7 +156,7 @@ dlinkDelete(dlink_node *m, dlink_list *list)
  * output	- return the length (>=0) of a chain of links.
  * side effects	-
  */
-extern int dlink_list_length(dlink_list *list)
+extern inline int dlink_list_length(dlink_list *list)
 {
   dlink_node *ptr;
   int   count = 0;
@@ -173,7 +173,7 @@ extern int dlink_list_length(dlink_list *list)
  * output	- pointer to link or NULL if not found
  * side effects	- Look for ptr in the linked listed pointed to by link.
  */
-extern dlink_node *dlinkFind(dlink_list *list, void * data )
+extern inline dlink_node *dlinkFind(dlink_list *list, void * data )
 {
   dlink_node *ptr;
 
@@ -185,7 +185,7 @@ extern dlink_node *dlinkFind(dlink_list *list, void * data )
   return (NULL);
 }
 
-extern void
+extern inline void
 dlinkMoveList(dlink_list *from, dlink_list *to)
 {
   /* There are three cases */
