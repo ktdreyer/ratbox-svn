@@ -214,13 +214,13 @@ void slink_zipstats(unsigned int rpl, unsigned int len, unsigned char *data,
        server_p->localClient->zipstats.in_wire) &&
       ((out_wire + server_p->localClient->zipstats.out_wire) >=
        server_p->localClient->zipstats.out_wire)))
-  {
-    /* overflow, so start again */
-    server_p->localClient->zipstats.in = 0;
-    server_p->localClient->zipstats.out = 0;
-    server_p->localClient->zipstats.in_wire = 0;
-    server_p->localClient->zipstats.out_wire = 0;
-  }
+    {
+      /* overflow, so start again */
+      server_p->localClient->zipstats.in = 0;
+      server_p->localClient->zipstats.out = 0;
+      server_p->localClient->zipstats.in_wire = 0;
+      server_p->localClient->zipstats.out_wire = 0;
+    }
 
   server_p->localClient->zipstats.in += in;
   server_p->localClient->zipstats.out += out;
@@ -237,33 +237,46 @@ void slink_zipstats(unsigned int rpl, unsigned int len, unsigned char *data,
       (double)server_p->localClient->zipstats.out) * 100.00);
 }
 
+void start_collect_zipstats(void)
+{
+  static struct ev_entry event;
+
+  collect_zipstats(NULL);
+  event.name = "collect_zipstats";
+  event.func = collect_zipstats;
+  event.arg = NULL;
+  event.frequency = ZIPSTATS_TIME;
+  event.weight = 0;
+  event.static_event = 1;
+  createEventIsh(&event, 0);
+}
+
 void collect_zipstats(void *unused)
 {
   dlink_node *ptr;
   struct Client *target_p;
 
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
-  {
-    target_p = ptr->data;
-    if (IsCapable(target_p, CAP_ZIP))
     {
-      /* only bother if we haven't already got something queued... */
-      if (!target_p->localClient->slinkq)
-      {
-        target_p->localClient->slinkq = MyMalloc(1); /* sigh.. */
-        target_p->localClient->slinkq[0] = SLINKCMD_ZIPSTATS;
-        target_p->localClient->slinkq_ofs = 0;
-        target_p->localClient->slinkq_len = 1;
+      target_p = ptr->data;
+      if (IsCapable(target_p, CAP_ZIP))
+        {
+          /* only bother if we haven't already got something queued... */
+          if (!target_p->localClient->slinkq)
+            {
+              target_p->localClient->slinkq = MyMalloc(1); /* sigh.. */
+              target_p->localClient->slinkq[0] = SLINKCMD_ZIPSTATS;
+              target_p->localClient->slinkq_ofs = 0;
+              target_p->localClient->slinkq_len = 1;
 
-        /* schedule a write */
-        comm_setselect(target_p->localClient->ctrlfd, FDLIST_IDLECLIENT,
-                       COMM_SELECT_WRITE, send_queued_slink_write,
-                       target_p, 0);
-      }
+              /* schedule a write */
+              comm_setselect(target_p->localClient->ctrlfd, FDLIST_IDLECLIENT,
+                             COMM_SELECT_WRITE, send_queued_slink_write,
+                             target_p, 0);
+            }
+        }
     }
-  }
-  eventAddIsh("collect_zipstats", collect_zipstats, NULL,
-      ZIPSTATS_TIME, 0);
+
 }
 
 

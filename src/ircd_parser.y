@@ -276,15 +276,10 @@ int   class_redirport_var;
 %token  WARN_NO_NLINE
 %token  WHOIS_WAIT
 
-%left '-' '+'
-%left '*' '/'
-%left NEG
-
 %type   <string>   QSTRING
 %type   <number>   NUMBER
 %type   <number>   timespec
 %type   <number>   sizespec
-%type   <number>   expr
 
 %%
 conf:   
@@ -314,51 +309,29 @@ conf_item:        admin_entry
         ;
 
 
-timespec:	expr 
+timespec:	NUMBER 
 		= {
 			$$ = $1;
 		}
-		| expr SECONDS
+		| NUMBER SECONDS
 		= {
 			$$ = $1;
 		}
-		| expr MINUTES
+		| NUMBER MINUTES
 		= {
 			$$ = $1 * 60;
 		}
-		| expr HOURS
+		| NUMBER HOURS
 		= {
 			$$ = $1 * 60 * 60;
 		}
-		| expr DAYS
+		| NUMBER DAYS
 		= {
 			$$ = $1 * 60 * 60 * 24;
 		}
-		| expr WEEKS
+		| NUMBER WEEKS
 		= {
 			$$ = $1 * 60 * 60 * 24 * 7;
-		}
-		| expr MONTHS
-		= {
-			/* a month has 28 days, or 4 weeks */
-			$$ = $1 * 60 * 60 * 24 * 7 * 4;
-		}
-		| expr YEARS
-		= {
-			/* a year has 365 days, *not* 12 months */
-			$$ = $1 * 60 * 60 * 24 * 365;
-		}
-		| expr DECADES
-		= {
-			$$ = $1 * 60 * 60 * 24 * 365 * 10;
-		}
-		| expr CENTURIES
-		= {
-			$$ = $1 * 60 * 60 * 24 * 365 * 10 * 10;
-		}
-		| expr MILLENNIA
-		= {
-			$$ = $1 * 60 * 60 * 24 * 365 * 10 * 10 * 10;
 		}
 		| timespec timespec
 		= {
@@ -367,63 +340,24 @@ timespec:	expr
 		}
 		;
 
-sizespec:	expr	
+sizespec:	NUMBER	
 		= {
 			$$ = $1;
 		}
-		| expr BYTES
+		| NUMBER BYTES
 		= { 
 			$$ = $1;
 		}
-		| expr KBYTES
+		| NUMBER KBYTES
 		= {
 			$$ = $1 * 1024;
 		}
-		| expr MBYTES
+		| NUMBER MBYTES
 		= {
 			$$ = $1 * 1024 * 1024;
 		}
-		| expr GBYTES
-		= {
-			$$ = $1 * 1024 * 1024 * 1024;
-		}
-		| expr TBYTES
-		= {
-			$$ = $1 * 1024 * 1024 * 1024;
-		}
 		;
 
-/* this is an arithmatic expression */
-expr:		NUMBER
-		= { 
-			$$ = $1;
-		}
-		| expr '+' expr
-		= { 
-			$$ = $1 + $3;
-		}
-		| expr '-' expr
-		= { 
-			$$ = $1 - $3;
-		}
-		| expr '*' expr
-		= { 
-			$$ = $1 * $3;
-		}
-		| expr '/' expr
-		= { 
-			$$ = $1 / $3;
-		}
-/* leave this out until we find why it makes BSD yacc dump core -larne */
-		| '-' expr  %prec NEG
-		= {
-			$$ = -$2;
-		}
-		| '(' expr ')'
-		= {
-			$$ = $2;
-		}
-		;
 
 /***************************************************************************
  *  section modules
@@ -586,7 +520,7 @@ serverinfo_vhost6:	VHOST6 '=' QSTRING ';'
 #endif
   };
    
-serverinfo_max_clients: T_MAX_CLIENTS '=' expr ';'
+serverinfo_max_clients: T_MAX_CLIENTS '=' NUMBER ';'
   {
     if (MAX_CLIENTS >= $3)
     {
@@ -599,7 +533,7 @@ serverinfo_max_clients: T_MAX_CLIENTS '=' expr ';'
     }
   };
 
-serverinfo_max_buffer: T_MAX_BUFFER '=' expr ';'
+serverinfo_max_buffer: T_MAX_BUFFER '=' NUMBER ';'
   {
     ServerInfo.max_buffer = $3;
   };
@@ -928,7 +862,7 @@ class_ping_time:        PING_TIME '=' timespec ';'
     class_ping_time_var = $3;
   };
 
-class_number_per_ip:    NUMBER_PER_IP '=' expr ';'
+class_number_per_ip:    NUMBER_PER_IP '=' NUMBER ';'
   {
     class_number_per_ip_var = $3;
   };
@@ -938,7 +872,7 @@ class_connectfreq:     CONNECTFREQ '=' timespec ';'
     class_number_per_ip_var = $3;
   };
 
-class_max_number:       MAX_NUMBER '=' expr ';'
+class_max_number:       MAX_NUMBER '=' NUMBER ';'
   {
     class_max_number_var = $3;
   };
@@ -1211,7 +1145,7 @@ auth_redir_serv:    REDIRSERV '=' QSTRING ';'
     DupString(yy_achead->name, yylval.string);
   };
 
-auth_redir_port:    REDIRPORT '=' expr ';'
+auth_redir_port:    REDIRPORT '=' NUMBER ';'
   {
     yy_achead->flags |= CONF_FLAGS_REDIR;
     yy_achead->port = $3;
@@ -1482,7 +1416,7 @@ connect_accept_password: ACCEPT_PASSWORD '=' QSTRING ';'
     DupString(yy_aconf->passwd, yylval.string);
   };
 
-connect_port:   PORT '=' expr ';' { yy_aconf->port = $3; };
+connect_port:   PORT '=' NUMBER ';' { yy_aconf->port = $3; };
 
 
 connect_aftype: 	AFTYPE '=' T_IPV4 ';'
@@ -1963,12 +1897,12 @@ general_max_nick_time:    MAX_NICK_TIME '=' timespec ';'
     ConfigFileEntry.max_nick_time = $3; 
   } ;
 
-general_max_nick_changes:  MAX_NICK_CHANGES '=' expr ';'
+general_max_nick_changes:  MAX_NICK_CHANGES '=' NUMBER ';'
   {
     ConfigFileEntry.max_nick_changes = $3;
   } ;
 
-general_max_accept:  MAX_ACCEPT '=' expr ';'
+general_max_accept:  MAX_ACCEPT '=' NUMBER ';'
   {
     ConfigFileEntry.max_accept = $3;
   } ;
@@ -1988,7 +1922,7 @@ general_ts_max_delta: TS_MAX_DELTA '=' timespec ';'
     ConfigFileEntry.ts_max_delta = $3;
   } ;
 
-general_havent_read_conf:  HAVENT_READ_CONF '=' expr ';'
+general_havent_read_conf:  HAVENT_READ_CONF '=' NUMBER ';'
 {
   if($3 > 0)
   {
@@ -2138,7 +2072,7 @@ general_iauth_server: IAUTH_SERVER '=' QSTRING ';'
 #endif
 } ;
 
-general_iauth_port: IAUTH_PORT '=' expr ';'
+general_iauth_port: IAUTH_PORT '=' NUMBER ';'
 {
 #if 0
     iAuth.port = $3;
@@ -2192,17 +2126,17 @@ general_idletime: IDLETIME '=' timespec ';'
     ConfigFileEntry.idletime = $3;
   } ;
 
-general_dots_in_ident: DOTS_IN_IDENT '=' expr ';'
+general_dots_in_ident: DOTS_IN_IDENT '=' NUMBER ';'
   {
     ConfigFileEntry.dots_in_ident = $3;
   } ;
 
-general_maximum_links: MAXIMUM_LINKS '=' expr ';'
+general_maximum_links: MAXIMUM_LINKS '=' NUMBER ';'
   {
     ConfigFileEntry.maximum_links = $3;
   } ;
 
-general_max_targets: MAX_TARGETS '=' expr ';'
+general_max_targets: MAX_TARGETS '=' NUMBER ';'
   {
     ConfigFileEntry.max_targets = $3;
   } ;
@@ -2248,7 +2182,7 @@ general_default_cipher_preference: DEFAULT_CIPHER_PREFERENCE '=' QSTRING ';'
 #endif
   } ;
 
-general_compression_level: COMPRESSION_LEVEL '=' expr ';'
+general_compression_level: COMPRESSION_LEVEL '=' NUMBER ';'
   {
     ConfigFileEntry.compression_level = $3;
 #ifndef HAVE_LIBZ
@@ -2436,16 +2370,16 @@ umode_item:	T_BOTS
     ConfigFileEntry.oper_only_umodes |= FLAGS_LOCOPS;
   };
 
-general_min_nonwildcard:    MIN_NONWILDCARD '=' expr ';'
+general_min_nonwildcard:    MIN_NONWILDCARD '=' NUMBER ';'
   {
     ConfigFileEntry.min_nonwildcard = $3;
   };
-general_default_floodcount:    DEFAULT_FLOODCOUNT '=' expr ';'
+general_default_floodcount:    DEFAULT_FLOODCOUNT '=' NUMBER ';'
   {
     ConfigFileEntry.default_floodcount = $3;
   };
 
-general_client_flood: T_CLIENT_FLOOD '=' expr ';'
+general_client_flood: T_CLIENT_FLOOD '=' NUMBER ';'
   {
     ConfigFileEntry.client_flood = $3;
   };
@@ -2536,7 +2470,7 @@ channel_knock_delay: KNOCK_DELAY '=' timespec ';'
      ConfigChannel.knock_delay = $3;
    } ;
 
-channel_max_chans_per_user:  MAX_CHANS_PER_USER '=' expr ';'
+channel_max_chans_per_user:  MAX_CHANS_PER_USER '=' NUMBER ';'
    {
      ConfigChannel.max_chans_per_user = $3;
    } ;
@@ -2551,7 +2485,7 @@ channel_quiet_on_ban : QUIET_ON_BAN '=' TYES ';'
      ConfigChannel.quiet_on_ban = 0;
    } ;
 
-channel_maxbans: MAXBANS '=' expr ';'
+channel_maxbans: MAXBANS '=' NUMBER ';'
    {
       ConfigChannel.maxbans = $3;
    } ;

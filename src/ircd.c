@@ -281,61 +281,63 @@ struct lgetopt myopts[] = {
 void
 set_time(void)
 {
- static char to_send[200];
- time_t newtime = time(NULL);
+  static char to_send[200];
+  time_t newtime = time(NULL);
  
- if (newtime == -1)
- {
-  ilog(L_ERROR, "Clock Failure (%d)", errno);
-  sendto_realops_flags(FLAGS_ALL, L_ALL,
-                       "Clock Failure (%d), TS can be corrupted", errno);
-  restart("Clock Failure");
- }
- if (newtime < CurrentTime)
- {
-  ircsprintf(to_send, "System clock is running backwards - (%lu < %lu)",
-		(unsigned long) newtime,
-		(unsigned long) CurrentTime);
+  if (newtime == -1)
+    {
+      ilog(L_ERROR, "Clock Failure (%d)", errno);
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
+			   "Clock Failure (%d), TS can be corrupted", errno);
+      restart("Clock Failure");
+    }
+  if (newtime < CurrentTime)
+    {
+      ircsprintf(to_send, "System clock is running backwards - (%lu < %lu)",
+		 (unsigned long) newtime,
+		 (unsigned long) CurrentTime);
 
-  report_error(L_ALL, to_send, me.name, 0);
-  set_back_events(CurrentTime - newtime);
- }
- CurrentTime = newtime;
+      report_error(L_ALL, to_send, me.name, 0);
+      set_back_events(CurrentTime - newtime);
+    }
+  CurrentTime = newtime;
 }
 
 static void
 io_loop(void)
 {
- int empty_cycles=0, st=0, delay;
- while (ServerRunning)
- {
-  /* Run pending events, then get the number of seconds to the next
-   * event */
-  delay = eventNextTime();
-  if (delay <= CurrentTime)
-   eventRun();
+  int empty_cycles=0, st=0, delay;
+  while (ServerRunning)
+    {
+      /* Run pending events, then get the number of seconds to the next
+       * event
+       */
+
+      delay = eventNextTime();
+      if (delay <= CurrentTime)
+	eventRun();
   
-  /* Check on the last activity, sleep for up to 1/2s if we are idle... */
-  if (callbacks_called > 0)
-   empty_cycles = 0;
+      /* Check on the last activity, sleep for up to 1/2s if we are idle... */
+      if (callbacks_called > 0)
+	empty_cycles = 0;
   
-  /* Reset the callback counter... */
-  callbacks_called = 0;
-     
-  if (empty_cycles++ > 10)
-   comm_select((st=((empty_cycles-10)*10)>500 ? 500 : st));
-  else
-   comm_select(0);
+      /* Reset the callback counter... */
+      callbacks_called = 0;
+      
+      if (empty_cycles++ > 10)
+	comm_select((st=((empty_cycles-10)*10)>500 ? 500 : st));
+      else
+	comm_select(0);
   
-  /*
-   * Check to see whether we have to rehash the configuration ..
-   */
-  if (dorehash)
-  {
-   rehash(&me, &me, 1);
-   dorehash = 0;
-  }
- }
+      /*
+       * Check to see whether we have to rehash the configuration ..
+       */
+      if (dorehash)
+	{
+	  rehash(&me, &me, 1);
+	  dorehash = 0;
+	}
+    }
 }
 
 /*
@@ -372,19 +374,19 @@ static void initialize_global_set_options(void)
  * side effects - Set up all message files needed, motd etc.
  */
 static void initialize_message_files(void)
-  {
-    InitMessageFile( HELP_MOTD, HPATH, &ConfigFileEntry.helpfile );
-    InitMessageFile( UHELP_MOTD, UHPATH, &ConfigFileEntry.uhelpfile );
-    InitMessageFile( USER_MOTD, MPATH, &ConfigFileEntry.motd );
-    InitMessageFile( OPER_MOTD, OPATH, &ConfigFileEntry.opermotd );
-    InitMessageFile( USER_LINKS, LIPATH, &ConfigFileEntry.linksfile );
+{
+  InitMessageFile( HELP_MOTD, HPATH, &ConfigFileEntry.helpfile );
+  InitMessageFile( UHELP_MOTD, UHPATH, &ConfigFileEntry.uhelpfile );
+  InitMessageFile( USER_MOTD, MPATH, &ConfigFileEntry.motd );
+  InitMessageFile( OPER_MOTD, OPATH, &ConfigFileEntry.opermotd );
+  InitMessageFile( USER_LINKS, LIPATH, &ConfigFileEntry.linksfile );
 
-    ReadMessageFile( &ConfigFileEntry.helpfile );
-    ReadMessageFile( &ConfigFileEntry.uhelpfile );
-    ReadMessageFile( &ConfigFileEntry.motd );
-    ReadMessageFile( &ConfigFileEntry.opermotd );
-    ReadMessageFile( &ConfigFileEntry.linksfile );
-  }
+  ReadMessageFile( &ConfigFileEntry.helpfile );
+  ReadMessageFile( &ConfigFileEntry.uhelpfile );
+  ReadMessageFile( &ConfigFileEntry.motd );
+  ReadMessageFile( &ConfigFileEntry.opermotd );
+  ReadMessageFile( &ConfigFileEntry.linksfile );
+}
 
 /*
  * write_pidfile
@@ -427,30 +429,30 @@ static void check_pidfile(const char *filename)
 
   /* Don't do logging here, since we don't have log() initialised */
   if ((fd = fbopen(filename, "r")))
-  {
-    if (fbgets(buff, 20, fd) == NULL)
     {
-      /*
-      log(L_ERROR, "Error reading from pid file %s (%s)", filename,
-          strerror(errno));
-       */
+      if (fbgets(buff, 20, fd) == NULL)
+	{
+	  /*
+	    log(L_ERROR, "Error reading from pid file %s (%s)", filename,
+	    strerror(errno));
+	  */
+	}
+      else
+	{
+	  pidfromfile = atoi(buff);
+	  if (!kill(pidfromfile, 0))
+	    {
+	      /* log(L_ERROR, "Server is already running"); */
+	      printf("ircd: daemon is already running\n");
+	      exit(-1);
+	    }
+	}
+      fbclose(fd);
     }
-    else
-    {
-      pidfromfile = atoi(buff);
-      if (!kill(pidfromfile, 0))
-      {
-        /* log(L_ERROR, "Server is already running"); */
-        printf("ircd: daemon is already running\n");
-        exit(-1);
-      }
-    }
-    fbclose(fd);
-  }
   else
-  {
-    /* log(L_ERROR, "Error opening pid file %s", filename); */
-  }
+    {
+      /* log(L_ERROR, "Error opening pid file %s", filename); */
+    }
 }
 
 /*
@@ -467,10 +469,10 @@ static void setup_corefile(void)
 
   /* Set corefilesize to maximum */
   if (!getrlimit(RLIMIT_CORE, &rlim))
-  {
-    rlim.rlim_cur = rlim.rlim_max;
-    setrlimit(RLIMIT_CORE, &rlim);
-  }
+    {
+      rlim.rlim_cur = rlim.rlim_max;
+      setrlimit(RLIMIT_CORE, &rlim);
+    }
 }
 
 /*
@@ -490,206 +492,205 @@ static void cleanup_zombies(void *unused)
 int main(int argc, char *argv[])
 {
 
- /*
-  * save server boot time right away, so getrusage works correctly
-  */
- set_time();
+  /*
+   * save server boot time right away, so getrusage works correctly
+   */
+  set_time();
 
- /*
-  * Setup corefile size immediately after boot -kre
-  */
- setup_corefile();
+  /*
+   * Setup corefile size immediately after boot -kre
+   */
+  setup_corefile();
  
- /* 
-  * set initialVMTop before we allocate any memory
-  */
- initialVMTop = get_vm_top();
+  /* 
+   * set initialVMTop before we allocate any memory
+   */
+  initialVMTop = get_vm_top();
  
- ServerRunning = 0;
+  ServerRunning = 0;
  
- memset(&me, 0, sizeof(me));
- memset(&meLocalUser, 0, sizeof(meLocalUser));
- me.localClient = &meLocalUser;
+  memset(&me, 0, sizeof(me));
+  memset(&meLocalUser, 0, sizeof(meLocalUser));
+  me.localClient = &meLocalUser;
  
- /* Make sure all lists are zeroed */
- memset(&unknown_list, 0, sizeof(unknown_list));
- memset(&lclient_list, 0, sizeof(lclient_list));
- memset(&serv_list, 0, sizeof(serv_list));
- memset(&global_serv_list, 0, sizeof(global_serv_list));
- memset(&oper_list, 0, sizeof(oper_list));
- memset(&lazylink_channels, 0, sizeof(lazylink_channels));
- memset(&lazylink_nicks, 0, sizeof(lazylink_nicks));
+  /* Make sure all lists are zeroed */
+  memset(&unknown_list, 0, sizeof(unknown_list));
+  memset(&lclient_list, 0, sizeof(lclient_list));
+  memset(&serv_list, 0, sizeof(serv_list));
+  memset(&global_serv_list, 0, sizeof(global_serv_list));
+  memset(&oper_list, 0, sizeof(oper_list));
+  memset(&lazylink_channels, 0, sizeof(lazylink_channels));
+  memset(&lazylink_nicks, 0, sizeof(lazylink_nicks));
  
- lclient_list.head = lclient_list.tail = NULL;
- oper_list.head = oper_list.tail = NULL;
- serv_list.head = serv_list.tail = NULL;
- global_serv_list.head = global_serv_list.tail = NULL;
+  lclient_list.head = lclient_list.tail = NULL;
+  oper_list.head = oper_list.tail = NULL;
+  serv_list.head = serv_list.tail = NULL;
+  global_serv_list.head = global_serv_list.tail = NULL;
  
- GlobalClientList = &me;       /* Pointer to beginning of Client list */
+  GlobalClientList = &me;       /* Pointer to beginning of Client list */
 
- memset((void *)&Count, 0, sizeof(Count));
- memset((void *)&server_state, 0, sizeof(server_state));
+  memset((void *)&Count, 0, sizeof(Count));
+  memset((void *)&server_state, 0, sizeof(server_state));
 
- Count.server = 1;     /* us */
- memset((void *)&ServerInfo, 0, sizeof(ServerInfo));
- memset((void *)&AdminInfo, 0, sizeof(AdminInfo));
-
+  Count.server = 1;     /* us */
+  memset((void *)&ServerInfo, 0, sizeof(ServerInfo));
+  memset((void *)&AdminInfo, 0, sizeof(AdminInfo));
+  
 #ifdef USE_TABLE_MODE
- /* Initialise the channel capability usage counts... */
- init_chcap_usage_counts();
+  /* Initialise the channel capability usage counts... */
+  init_chcap_usage_counts();
 #endif 
 
- ConfigFileEntry.dpath = DPATH;
- ConfigFileEntry.configfile = CPATH;   /* Server configuration file */
- ConfigFileEntry.klinefile = KPATH;    /* Server kline file */
- ConfigFileEntry.dlinefile = DLPATH;   /* dline file */
- ConfigFileEntry.glinefile = GPATH;    /* gline log file */
+  ConfigFileEntry.dpath = DPATH;
+  ConfigFileEntry.configfile = CPATH;   /* Server configuration file */
+  ConfigFileEntry.klinefile = KPATH;    /* Server kline file */
+  ConfigFileEntry.dlinefile = DLPATH;   /* dline file */
+  ConfigFileEntry.glinefile = GPATH;    /* gline log file */
 
- myargv = argv;
- umask(077);                /* better safe than sorry --SRB */
+  myargv = argv;
+  umask(077);                /* better safe than sorry --SRB */
  
- parseargs(&argc, &argv, myopts);
+  parseargs(&argc, &argv, myopts);
   
- if (printVersion) 
- {
-  printf("ircd: version %s\n", ircd_version);
-  exit(EXIT_SUCCESS);
- }
+  if (printVersion) 
+    {
+      printf("ircd: version %s\n", ircd_version);
+      exit(EXIT_SUCCESS);
+    }
   
- if (chdir(ConfigFileEntry.dpath))
- {
-  perror("chdir");
-  exit(EXIT_FAILURE);
- }
+  if (chdir(ConfigFileEntry.dpath))
+    {
+      perror("chdir");
+      exit(EXIT_FAILURE);
+    }
  
- if (!server_state.foreground)
-   make_daemon();
- else
-   print_startup(getpid());
- setup_signals();
- /* We need this to initialise the fd array before anything else */
- fdlist_init();
- /* Check if there is pidfile and daemon already running */
- check_pidfile(pidFileName);
- /* Init the event subsystem */
- eventInit();
- init_sys();
- if (!server_state.foreground)
-   close_all_connections();
- init_log(logFileName);
- initBlockHeap();
- init_dlink_nodes();
- init_netio();		/* This needs to be setup early ! -- adrian */
- init_resolver();	/* Needs to be setup before the io loop */
- initialize_message_files();
- linebuf_init();	/* set up some linebuf stuff to control paging */
- init_hash();
- id_init();
- clear_scache_hash_table();    /* server cache name table */
- clear_ip_hash_table();        /* client host ip hash table */
- init_host_hash();             /* Host-hashtable. */
- clear_hash_parse();
- init_client();
- initUser();
- init_channels();
- initclass();
- initwhowas();
- init_stats();
- init_hooks();
- load_all_modules(1);
- initServerMask();
- init_auth();			/* Initialise the auth code */
- read_conf_files(YES);         /* cold start init conf files */
- initialize_global_set_options();
- if (ServerInfo.name == NULL)
- {
-  fprintf(stderr, "Error: No server name specified\n");
-  ilog(L_CRIT,"You need a server name to run.");
-  exit(EXIT_FAILURE);
- }
+  if (!server_state.foreground)
+    make_daemon();
+  else
+    print_startup(getpid());
+  setup_signals();
+  /* We need this to initialise the fd array before anything else */
+  fdlist_init();
+  /* Check if there is pidfile and daemon already running */
+  check_pidfile(pidFileName);
+  /* Init the event subsystem */
+  eventInit();
+  init_sys();
+  if (!server_state.foreground)
+    close_all_connections();
+  init_log(logFileName);
+  initBlockHeap();
+  init_dlink_nodes();
+  init_netio();		/* This needs to be setup early ! -- adrian */
+  init_resolver();	/* Needs to be setup before the io loop */
+  initialize_message_files();
+  linebuf_init();	/* set up some linebuf stuff to control paging */
+  init_hash();
+  id_init();
+  clear_scache_hash_table();    /* server cache name table */
+  clear_ip_hash_table();        /* client host ip hash table */
+  init_host_hash();             /* Host-hashtable. */
+  clear_hash_parse();
+  init_client();
+  initUser();
+  init_channels();
+  initclass();
+  initwhowas();
+  init_stats();
+  init_hooks();
+  load_all_modules(1);
+  initServerMask();
+  init_auth();			/* Initialise the auth code */
+  read_conf_files(YES);         /* cold start init conf files */
+  initialize_global_set_options();
+  if (ServerInfo.name == NULL)
+    {
+      fprintf(stderr, "Error: No server name specified\n");
+      ilog(L_CRIT,"You need a server name to run.");
+      exit(EXIT_FAILURE);
+    }
 
- /* Can't use strncpy_irc here because we didn't malloc enough... -A1kmm */
- strncpy(me.name, ServerInfo.name, HOSTLEN);
+  /* Can't use strncpy_irc here because we didn't malloc enough... -A1kmm */
+  strncpy(me.name, ServerInfo.name, HOSTLEN);
 
- if (ServerInfo.description != NULL)
-  strncpy(me.info, ServerInfo.description, REALLEN);
+  if (ServerInfo.description != NULL)
+    strncpy(me.info, ServerInfo.description, REALLEN);
  
 #ifdef USE_GETTEXT
- /*
-  * For 'locale' try (in this order):
-  *    Config entry "msglocale" (yyparse() will overwrite LANGUAGE)
-  *    Env variable "LANGUAGE"
-  *    Default of "" (so don't overwrite LANGUAGE here)
-  */
+  /*
+   * For 'locale' try (in this order):
+   *    Config entry "msglocale" (yyparse() will overwrite LANGUAGE)
+   *    Env variable "LANGUAGE"
+   *    Default of "" (so don't overwrite LANGUAGE here)
+   */
  
- if (!getenv("LANGUAGE"))
- { 
-  putenv("LANGUAGE=");
- }
- 
- textdomain("ircd-hybrid");
- bindtextdomain("ircd-hybrid" , MSGPATH);
+  if (!getenv("LANGUAGE"))
+    { 
+      putenv("LANGUAGE=");
+    }
+  
+  textdomain("ircd-hybrid");
+  bindtextdomain("ircd-hybrid" , MSGPATH);
 #endif
   
 #ifdef USE_IAUTH
- iAuth.flags = 0;
+  iAuth.flags = 0;
  
- ConnectToIAuth();
+  ConnectToIAuth();
  
- if (iAuth.socket == NOSOCK)
- {
-  fprintf(stderr, "Unable to connect to IAuth server\n");
-  exit (EXIT_FAILURE);
+  if (iAuth.socket == NOSOCK)
+    {
+      fprintf(stderr, "Unable to connect to IAuth server\n");
+      exit (EXIT_FAILURE);
  }
 #endif
 
- me.fd = -1;
- me.from = &me;
- me.servptr = &me;
- SetMe(&me);
- make_server(&me);
- me.serv->up = me.name;
- me.lasttime = me.since = me.firsttime = CurrentTime;
- add_to_client_hash_table(me.name, &me);
+  me.fd = -1;
+  me.from = &me;
+  me.servptr = &me;
+  SetMe(&me);
+  make_server(&me);
+  me.serv->up = me.name;
+  me.lasttime = me.since = me.firsttime = CurrentTime;
+  add_to_client_hash_table(me.name, &me);
   
- add_server_to_list(&me); /* add ourselves to global_serv_list */
+  add_server_to_list(&me); /* add ourselves to global_serv_list */
+  
+  check_class();
+  write_pidfile(pidFileName);
+  
+  ilog(L_NOTICE, "Server Ready");
+  
+  eventAdd("cleanup_channels", cleanup_channels, NULL,
+	   CLEANUP_CHANNELS_TIME, 0);
 
- check_class();
- write_pidfile(pidFileName);
+  eventAdd("cleanup_glines", cleanup_glines, NULL, CLEANUP_GLINES_TIME, 0);
   
- ilog(L_NOTICE, "Server Ready");
-  
- eventAdd("cleanup_channels", cleanup_channels, NULL,
-          CLEANUP_CHANNELS_TIME, 0);
-
- eventAdd("cleanup_glines", cleanup_glines, NULL, CLEANUP_GLINES_TIME, 0);
-  
- eventAdd("cleanup_tklines", cleanup_tklines, NULL, CLEANUP_TKLINES_TIME,
-          0);
+  eventAdd("cleanup_tklines", cleanup_tklines, NULL, CLEANUP_TKLINES_TIME,
+	   0);
   
 #if 0 && defined(HAVE_LIBCRYPTO)
- eventAdd("cryptlink_regen_key", cryptlink_regen_key, NULL,
-          CRYPTLINK_REGEN_TIME, 0);
+  eventAdd("cryptlink_regen_key", cryptlink_regen_key, NULL,
+	   CRYPTLINK_REGEN_TIME, 0);
 #endif
    
- /* We want try_connections to be called as soon as possible now! -- adrian */
- /* No, 'cause after a restart it would cause all sorts of nick collides */
- eventAdd("try_connections", try_connections, NULL,
-          STARTUP_CONNECTIONS_TIME, 0);
+  /* We want try_connections to be called as soon as possible now! -- adrian */
+  /* No, 'cause after a restart it would cause all sorts of nick collides */
+  eventAdd("try_connections", try_connections, NULL,
+	   STARTUP_CONNECTIONS_TIME, 0);
 
- eventAddIsh("collect_zipstats", collect_zipstats, NULL,
-          ZIPSTATS_TIME, 0);
+  start_collect_zipstats();
 
- /* Setup the timeout check. I'll shift it later :)  -- adrian */
- eventAdd("comm_checktimeouts", comm_checktimeouts, NULL, 1, 0);
+  /* Setup the timeout check. I'll shift it later :)  -- adrian */
+  eventAdd("comm_checktimeouts", comm_checktimeouts, NULL, 1, 0);
 
- eventAdd("cleanup_zombies", cleanup_zombies, NULL, 30, 0); 
+  eventAdd("cleanup_zombies", cleanup_zombies, NULL, 30, 0); 
 #ifdef PACE_CONNECT
- eventAdd("flush_expired_ips", flush_expired_ips, NULL, 30, 0);
+  eventAdd("flush_expired_ips", flush_expired_ips, NULL, 30, 0);
 #endif
- ServerRunning = 1;
- io_loop();
- return 0;
+  ServerRunning = 1;
+  io_loop();
+  return 0;
 }
 
 

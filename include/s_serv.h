@@ -274,6 +274,7 @@ extern int         server_estab(struct Client* client_p);
 extern void        set_autoconn(struct Client *,char *,char *,int);
 extern const char* show_capabilities(struct Client* client);
 extern void        try_connections(void *unused);
+extern void        start_collect_zipstats(void);
 extern void        collect_zipstats(void *unused);
 
 extern void	   add_server_to_list(struct Client *);

@@ -59,28 +59,28 @@
 #include "send.h"
 #include "memory.h"
 
-/* The list of event processes */
-struct ev_entry
-{
-  EVH *func;
-  void *arg;
-  const char *name;
-  time_t when;
-  struct ev_entry *next;
-  int weight;
-  int id;
-};
 
 static struct ev_entry *tasks = NULL;
 static int run_id = 0;
 static const char *last_event_ran = NULL;
 
 void
-eventAdd(const char *name, EVH * func, void *arg, time_t when, int weight)
+createEvent(struct ev_entry *new_event)
+{
+  new_event->id = run_id;
+  new_event->when = CurrentTime + new_event->frequency;
+  new_event->static_event = 1;
+  new_event->mem_free = 0;
+
+  new_event->next = tasks;
+  tasks = new_event;
+
+}
+
+void eventAdd(const char *name, EVH * func, void *arg, time_t when, int weight)
 {
   struct ev_entry *new_event = (struct ev_entry *)MyMalloc(sizeof(struct ev_entry));
   struct ev_entry *cur_event;
-  struct ev_entry *last_event = NULL;
 
   new_event->func = func;
   new_event->arg = arg;
@@ -88,26 +88,32 @@ eventAdd(const char *name, EVH * func, void *arg, time_t when, int weight)
   new_event->when = CurrentTime + when;
   new_event->weight = weight;
   new_event->id = run_id;
+  new_event->static_event = 0;
+  new_event->mem_free = 0;
+  new_event->next = NULL;
 
-  /* Insert after the last event with the same or earlier time */
+  new_event->next = tasks;
+  tasks = new_event;
 
-  for (cur_event = tasks; cur_event; cur_event = cur_event->next)
+}
+
+/* same as createEvent but adds a random offset within +-1/3 of delta_ish */
+void
+createEventIsh(struct ev_entry *new_event, time_t delta_ish)
+{
+  /* XXX someone finish this */
+#if 0
+  if (delta_ish >= 3.0)
     {
-      if (cur_event->when > new_event->when)
-        {
-          new_event->next = cur_event;
-          if (last_event == NULL)
-            tasks = new_event;
-          else
-            last_event->next = new_event;
-          return;
-        }
-      last_event = cur_event;
+      const time_t two_third = (2 * delta_ish) / 3;
+      delta_ish = two_third + ((random() % 1000) * two_third) / 1000;
+      /*
+       * XXX I hate the above magic, I don't even know if its right.
+       * Grr. -- adrian
+       */
     }
-  if (last_event == NULL)
-    tasks = new_event;
-  else
-    last_event->next = new_event;
+#endif
+  createEvent(new_event);
 }
 
 /* same as eventAdd but adds a random offset within +-1/3 of delta_ish */
@@ -134,7 +140,8 @@ eventDelete(EVH * func, void *arg)
 
   for (event = tasks; event; event = event->next)
     {
-      if ((event->func == func) && (event->arg == arg))
+      if ((event->func == func) && (event->arg == arg) &&
+	  (event->static_event == 0))
         {
           if (last_event != NULL)
             {
@@ -157,38 +164,66 @@ void
 eventRun(void)
 {
   struct ev_entry *event = NULL;
+  struct ev_entry *last_event = NULL;
+  struct ev_entry *next_event;
   EVH *func;
   void *arg;
-  int weight = 0;
 
   if (tasks == NULL)
     return;
-  if (tasks->when > CurrentTime)
-    return;
+
   run_id++;
 
-  while ((event = tasks))
+  for (event = tasks; event; event = next_event)
     {
-      int valid = 1;
-      if (event->when > CurrentTime)
-        break;
-      if (event->id == run_id)        /* was added during this run */
-        break;
-      if (weight)
-        break;
-      func = event->func;
-      arg = event->arg;
-      event->func = NULL;
-      event->arg = NULL;
-      tasks = event->next;
-      if (valid)
+      next_event = event->next;
+
+      if ((event->when <= CurrentTime) && (event->id != run_id))
         {
-          weight += event->weight;
-          /* XXX assumes ->name is static memory! */
-          last_event_ran = event->name;
-          func(arg);
+          func = event->func;
+          arg = event->arg;
+
+          if (event->static_event == 0)
+	    {
+	      func = event->func;
+	      arg = event->arg;
+
+	      /* XXX assumes ->name is static memory! */
+	      last_event_ran = event->name;
+	      func(arg);
+	      event->mem_free = 1;
+            }
+	  else
+	    {
+	      func = event->func;
+	      arg = event->arg;
+
+	      /* XXX assumes ->name is static memory! */
+	      last_event_ran = event->name;
+	      func(arg);
+
+	      event->when = CurrentTime + event->frequency;
+	      event->id = run_id;	      
+	    }
         }
-      MyFree(event);
+    }
+
+  for (event = tasks; event; event = next_event)
+    {
+      next_event = event->next;
+      if (event->mem_free != 0)
+	{
+	  if (last_event != NULL)
+	    last_event->next = event->next;
+	  else
+	    {
+	      tasks = event->next;
+	      last_event = tasks;
+	    }
+	  MyFree(event);
+	}
+      else
+	last_event = event;
     }
 }
 
@@ -203,18 +238,8 @@ eventNextTime(void)
 void
 eventInit(void)
 {
- 
-}
-
-void
-eventFreeMemory(void)
-{
-  struct ev_entry *event;
-  while ((event = tasks))
-    {
-      tasks = event->next;
-      MyFree(event);
-    }
+  tasks = NULL; 
+  last_event_ran = NULL;
 }
 
 int
@@ -269,3 +294,12 @@ set_back_events(time_t by)
     else
       e->when = 0;
 }
+
+
+
+
+
+
+
+
+
