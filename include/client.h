@@ -211,7 +211,6 @@ struct LocalUser
 	struct ConfItem *att_conf;	/* attached conf */
 
 	struct sockaddr_storage ip;
-	struct DNSQuery *dns_query;	/* result returned from resolver query */
 	unsigned long serverMask;	/* Only used for Lazy Links */
 	time_t last_nick_change;
 	int number_of_nick_changes;

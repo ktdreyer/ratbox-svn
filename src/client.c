@@ -1274,8 +1274,7 @@ exit_unknown_client(struct Client *client_p, struct Client *source_p, struct Cli
 	if(IsDead(source_p))
 		return -1;
 		
-	delete_adns_queries(source_p->localClient->dns_query);
-	delete_identd_queries(source_p);
+	delete_auth_queries(source_p);
 	client_flush_input(source_p);
 	dlinkDelete(&source_p->localClient->tnode, &unknown_list);
 	log_user_exit(source_p);

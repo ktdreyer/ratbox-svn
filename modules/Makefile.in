@@ -198,8 +198,11 @@ install_hpux_shared: install-mkdirs
 
 .PHONY: depend clean distclean
 depend:
-	${MKDEP} ${INCLUDES} ${ALL_SRCS} > .depend
-
+	@rm -f .depend
+	@for file in $(ALL_SRCS); do \
+		$(MKDEP) $(CPPFLAGS) $(INCLUDES) $$file >> .depend; \
+	done
+	
 clean:
 	${RM} -f *.so *.sl *~ *.o *.a
 	${RM} -f core/*.so core/*.sl core/*~ core/*.o

@@ -21,8 +21,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
  *
- *  $Id$
- */
+ *  $Id$ */
 
 /*
  * Changes:
@@ -85,10 +84,9 @@ typedef enum
 ReportType;
 
 #define sendheader(c, r) sendto_one(c, HeaderMessages[(r)]) 
-/*
- */
-dlink_list auth_poll_list;
 
+static dlink_list auth_poll_list;
+static BlockHeap *auth_heap;
 static EVH timeout_auth_queries_event;
 
 static PF read_auth_reply;
@@ -106,6 +104,7 @@ init_auth(void)
 	hook_add_event("new_local_client", &h_new_local_client);
 	memset(&auth_poll_list, 0, sizeof(auth_poll_list));
 	eventAddIsh("timeout_auth_queries_event", timeout_auth_queries_event, NULL, 1);
+	auth_heap = BlockHeapCreate(sizeof(struct AuthRequest), LCLIENT_HEAP_SIZE);
 }
 
 /*
@@ -114,7 +113,7 @@ init_auth(void)
 static struct AuthRequest *
 make_auth_request(struct Client *client)
 {
-	struct AuthRequest *request = (struct AuthRequest *) MyMalloc(sizeof(struct AuthRequest));
+	struct AuthRequest *request = BlockHeapAlloc(auth_heap);
 	client->localClient->auth_request = request;
 	request->fd = -1;
 	request->client = client;
@@ -128,27 +127,8 @@ make_auth_request(struct Client *client)
 static void
 free_auth_request(struct AuthRequest *request)
 {
-	MyFree(request);
+	BlockHeapFree(auth_heap, request);
 }
-
-/*
- * unlink_auth_request - remove auth request from a list
- */
-static void
-unlink_auth_request(struct AuthRequest *request, dlink_list * list)
-{
-	dlinkFindDestroy(list,request);
-}
-
-/*
- * link_auth_request - add auth request to a list
- */
-static void
-link_auth_request(struct AuthRequest *request, dlink_list * list)
-{
-	dlinkAddAlloc(request, list);
-}
-
 
 /*
  * release_auth_client - release auth client from auth system
@@ -156,8 +136,16 @@ link_auth_request(struct AuthRequest *request, dlink_list * list)
  * the main io processing loop
  */
 static void
-release_auth_client(struct Client *client)
+release_auth_client(struct AuthRequest *auth)
 {
+	struct Client *client = auth->client;
+	
+	if(IsDNSPending(auth) || IsDoingAuth(auth))
+		return;
+
+	dlinkDelete(&auth->node, &auth_poll_list);
+	free_auth_request(auth);	
+	client->localClient->auth_request = NULL;
 	if(client->localClient->fd > highest_fd)
 		highest_fd = client->localClient->fd;
 
@@ -166,7 +154,6 @@ release_auth_client(struct Client *client)
 	 * us. This is what read_packet() does.
 	 *     -- adrian
 	 */
-	delete_adns_queries(client->localClient->dns_query);
 	client->localClient->allow_read = MAX_FLOOD;
 	comm_setflush(client->localClient->fd, 1000, flood_recalc, client);
 	dlinkAddTail(client, &client->node, &global_client_list);
@@ -197,6 +184,7 @@ auth_dns_callback(void *vptr, adns_answer * reply)
 		else {
 			sendheader(auth->client, REPORT_HOST_TOOLONG);
 		}
+		MyFree(reply);
 	}
 	else
 	{
@@ -207,32 +195,20 @@ auth_dns_callback(void *vptr, adns_answer * reply)
 			struct Client *client = auth->client;
 			auth->ip6_int = 1;
 			MyFree(reply);
-			if(!adns_getaddr(&client->localClient->ip,
-				     client->localClient->ip.ss_family,
-				     client->localClient->dns_query, 1))
+			if(adns_getaddr(&client->localClient->ip, client->localClient->ip.ss_family, &auth->dns_query, 1))
 			{
+				ClearDNSPending(auth);
+				sendheader(auth->client, REPORT_FAIL_DNS);
+			} else {
 				SetDNSPending(auth);
+				return;
 			}
-			sendheader(auth->client, REPORT_FAIL_DNS);
-			return;
-		}
+		} else
 #endif
 		sendheader(auth->client, REPORT_FAIL_DNS);
 	}
 
-	MyFree(reply);
-	MyFree(auth->client->localClient->dns_query);
-
-	auth->client->localClient->dns_query = NULL;
-	if(!IsDoingAuth(auth))
-	{
-		struct Client *client_p = auth->client;
-		unlink_auth_request(auth, &auth_poll_list);
-		free_auth_request(auth);
-		client_p->localClient->auth_request = NULL;
-		release_auth_client(client_p);
-	}
-
+	release_auth_client(auth);
 }
 
 /*
@@ -249,13 +225,7 @@ auth_error(struct AuthRequest *auth)
 	ClearAuth(auth);
 	sendheader(auth->client, REPORT_FAIL_ID);
 		
-	if(!IsDNSPending(auth))
-	{
-		unlink_auth_request(auth, &auth_poll_list);
-		auth->client->localClient->auth_request = NULL;
-		release_auth_client(auth->client);
-		free_auth_request(auth);
-	}
+	release_auth_client(auth);
 }
 
 /*
@@ -408,25 +378,38 @@ start_auth(struct Client *client)
 		return;
 	auth = make_auth_request(client);
 
-	client->localClient->dns_query = MyMalloc(sizeof(struct DNSQuery));
-	client->localClient->dns_query->ptr = auth;
-	client->localClient->dns_query->callback = auth_dns_callback;
+	auth->dns_query.ptr = auth;
+	auth->dns_query.callback = auth_dns_callback;
 
 	sendheader(client, REPORT_DO_DNS);
 
-#ifndef LEEH
 	/* No DNS cache now, remember? -- adrian */
-	if(!adns_getaddr(&client->localClient->ip, client->localClient->ip.ss_family,
-		     client->localClient->dns_query, 0))
+	if(adns_getaddr(&client->localClient->ip, client->localClient->ip.ss_family,
+		     &auth->dns_query, 0))
 	{
-		SetDNSPending(auth);
-	}
+#ifdef IPV6
+		if(auth->client->localClient->ip.ss_family == AF_INET6
+		   && ConfigFileEntry.fallback_to_ip6_int == 1 && auth->ip6_int == 0)
+		{
+			struct Client *client = auth->client;
+			auth->ip6_int = 1;
+			SetDNSPending(auth);
+			if(adns_getaddr(&client->localClient->ip, client->localClient->ip.ss_family, &auth->dns_query, 1))
+			{
+				ClearDNSPending(auth);
+				sendheader(auth->client, REPORT_FAIL_DNS);
+			} else
+				return;
+		} else
 #endif
+		sendheader(auth->client, REPORT_FAIL_DNS);
+	} else 
+		SetDNSPending(auth);
 
 	if(ConfigFileEntry.disable_auth == 0)
 		start_auth_query(auth);
 
-	link_auth_request(auth, &auth_poll_list);
+	dlinkAdd(auth, &auth->node, &auth_poll_list);
 }
 
 /*
@@ -451,21 +434,22 @@ timeout_auth_queries_event(void *notused)
 
 			if(IsDoingAuth(auth))
 			{
+				ClearAuth(auth);
 				sendheader(auth->client, REPORT_FAIL_ID);
 				auth->client->localClient->auth_request = NULL;
 			}
 			if(IsDNSPending(auth))
 			{
-				delete_adns_queries(auth->client->localClient->dns_query);
-				auth->client->localClient->dns_query->query = NULL;
+				ClearDNSPending(auth);
+				delete_adns_queries(&auth->dns_query);
+				auth->dns_query.query = NULL;
 				sendheader(auth->client, REPORT_FAIL_DNS);
 			}
 			ilog(L_INFO, "DNS/AUTH timeout %s", log_client_name(auth->client, SHOW_IP));
 
 			auth->client->since = CurrentTime;
 			dlinkDestroy(ptr, &auth_poll_list);
-			release_auth_client(auth->client);
-			free_auth_request(auth);
+			release_auth_client(auth);
 		}
 	}
 }
@@ -594,30 +578,32 @@ read_auth_reply(int fd, void *data)
 		SetGotId(auth->client);
 	}
 
-	if(!IsDNSPending(auth))
-	{
-		unlink_auth_request(auth, &auth_poll_list);
-		auth->client->localClient->auth_request = NULL;
-		release_auth_client(auth->client);
-		free_auth_request(auth);
-	}
+	release_auth_client(auth);
 }
 
+
+
 /*
- * delete_identd_queries()
+ * delete_auth_queries()
  *
  */
 void
-delete_identd_queries(struct Client *target_p)
+delete_auth_queries(struct Client *target_p)
 {
 	struct AuthRequest *auth = target_p->localClient->auth_request;
 	if(auth == NULL)
 		return;
+	
 	target_p->localClient->auth_request = NULL;
+	
+	if(IsDNSPending(auth))
+	{
+		delete_adns_queries(&auth->dns_query);
+	}
 
 	if(auth->fd >= 0)
 		fd_close(auth->fd);
 		
-	unlink_auth_request(auth, &auth_poll_list);
+	dlinkDelete(&auth->node, &auth_poll_list);
 	free_auth_request(auth);
 }
