@@ -58,6 +58,9 @@ static struct Message *tree_parse(char *);
 
 static char buffer[1024];  /* ZZZ must this be so big? must it be here? */
 
+static char xx_dummy = 0;
+static void* msgTreeSentinel = &xx_dummy;
+
 /*
  * parse a buffer.
  *
@@ -115,7 +118,7 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
       */
       if (*sender && IsServer(cptr))
         {
-          from = find_client(sender, (struct Client *) NULL);
+          from = find_client(sender, NULL);
           if (!from || !match(from->name, sender))
             from = find_server(sender);
 
@@ -171,7 +174,7 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
   if( *(ch + 3) == ' ' && /* ok, lets see if its a possible numeric.. */
       IsDigit(*ch) && IsDigit(*(ch + 1)) && IsDigit(*(ch + 2)) )
     {
-      mptr = (struct Message *)NULL;
+      mptr = NULL;
       numeric = ch;
       paramcount = MAXPARA;
       ServerStats->is_num++;
@@ -291,7 +294,7 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
     }
 
   para[i] = NULL;
-  if (mptr == (struct Message *)NULL)
+  if (mptr == NULL)
     return (do_numeric(numeric, cptr, from, i, para));
 
   mptr->count++;
@@ -406,8 +409,7 @@ static struct Message *do_msg_tree(MESSAGE_TREE *mtree, char *prefix,
           /* ambigous -> make new entries for each of the letters that match */
           if (!irccmp(mptr->cmd, prefix))
             {
-              /* fucking OPERWALL blows me */
-              mtree->final = (void *)1;
+              mtree->final = msgTreeSentinel;
               mtree->msg = mptr;
               mptr++;
             }
@@ -471,7 +473,8 @@ static struct Message *tree_parse(char *cmd)
       mtree = mtree->pointers[r - 'A'];
       if (!mtree)
         return NULL;
-      if (mtree->final == (void *)1)
+
+      if (mtree->final == msgTreeSentinel)
         {
           if (!*cmd)
             return mtree->msg;
@@ -480,7 +483,7 @@ static struct Message *tree_parse(char *cmd)
         if (mtree->final && !irccmp(mtree->final, cmd))
           return mtree->msg;
     }
-  return ((struct Message *)NULL);
+  return NULL;
 }
 
 static  int     cancel_clients(struct Client *cptr,
@@ -662,15 +665,15 @@ static int     do_numeric(
     {
       for (i = 2; i < (parc - 1); i++)
         {
-          (void)strcat(buffer, " ");
-          (void)strcat(buffer, parv[i]);
+          strcat(buffer, " ");
+          strcat(buffer, parv[i]);
         }
-      (void)strcat(buffer, " :");
-      (void)strcat(buffer, parv[parc-1]);
+      strcat(buffer, " :");
+      strcat(buffer, parv[parc-1]);
     }
   for (; (nick = strtoken(&p, parv[1], ",")); parv[1] = NULL)
     {
-      if ((acptr = find_client(nick, (struct Client *)NULL)))
+      if ((acptr = find_client(nick, NULL)))
         {
           /*
           ** Drop to bit bucket if for me...
@@ -696,7 +699,7 @@ static int     do_numeric(
             sendto_prefix_one(acptr, sptr,":%s %s %s%s",
                               parv[0], numeric, nick, buffer);
         }
-      else if ((chptr = hash_find_channel(nick, (struct Channel *)NULL)))
+      else if ((chptr = hash_find_channel(nick, NULL)))
         sendto_channel_butone(cptr,sptr,chptr,":%s %s %s%s",
                               parv[0],
                               numeric, chptr->chname, buffer);
