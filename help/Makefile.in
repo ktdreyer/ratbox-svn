@@ -41,6 +41,7 @@ index:
 		| sed -e 's|^users/||' \
 		| tr a-z A-Z \
 		| column -c 65 -x \
+		| expand \
 		>> users/index
 	rm -f users/index.tmp
 	rm -f opers/index.tmp
@@ -55,7 +56,8 @@ index:
 		| sort -u \
 		| sed -e 's|^opers/||' \
 		| tr a-z A-Z \
-		| column -c 65 -x \
+		| column -c 65 -s ' ' -x \
+		| expand \
 		>> opers/index
 	rm -f opers/index.tmp
 
