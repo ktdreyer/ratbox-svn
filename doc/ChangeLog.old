@@ -1,3 +1,8 @@
+*** 20001014_1 by db
+- fixed cjoin so you actually look like you are joining the subchan now
+
+
+
 *** 20001013_3 by db
 - numeric 247 (uptime) got trashed in table. (HOW?) would cause server
   to core on /stats u
