@@ -322,6 +322,17 @@ conf_set_serverinfo_hub(void *data)
 }
 
 static void
+conf_set_serverinfo_use_ts6(void *data)
+{
+	int use_ts6 = *(int *) data;
+
+	/* note, it doesnt matter if this is disabled when we have TS6
+	 * links, because its only checked when a new server links --fl
+	 */
+	ServerInfo.use_ts6 = use_ts6;
+}
+
+static void
 conf_set_modules_module(void *data)
 {
 #ifndef STATIC_MODULES
@@ -2726,6 +2737,7 @@ newconf_init()
 	add_conf_item("serverinfo", "vhost", CF_QSTRING, conf_set_serverinfo_vhost);
 	add_conf_item("serverinfo", "vhost6", CF_QSTRING, conf_set_serverinfo_vhost6);
 	add_conf_item("serverinfo", "hub", CF_YESNO, conf_set_serverinfo_hub);
+	add_conf_item("serverinfo", "use_ts6", CF_YESNO, conf_set_serverinfo_use_ts6);
 
 	add_top_conf("admin", NULL, NULL);
 	add_conf_item("admin", "name", CF_QSTRING, conf_set_admin_name);

@@ -985,6 +985,8 @@ set_default_conf(void)
 	memset(&ServerInfo.ip6, 0, sizeof(ServerInfo.ip6));
 	ServerInfo.specific_ipv6_vhost = 0;
 #endif
+	ServerInfo.use_ts6 = YES;
+
 	/* Don't reset hub, as that will break lazylinks */
 	/* ServerInfo.hub = NO; */
 	AdminInfo.name = NULL;

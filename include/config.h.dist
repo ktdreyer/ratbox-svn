@@ -139,20 +139,11 @@
  */
 #define HIDE_SPOOF_IPS
 
-/* USE_TS6
- *
- * if this is defined, the TS6 protocol will be used, else the TS5 protocol
- * will be used.  You should avoid having a mixed TS network.
- */
-#define USE_TS6
-
 /* TS6_ONLY
  *
  * If this is defined only TS6 servers may link to the network.  See
  * doc/TS6.txt for more information.  If your network has old servers
  * (hyb7.0, ircd-ratbox-1.x, +CSr) or hybserv you should NOT define this.
- *
- * NOTE: If USE_TS6 is undefined, defining this will enforce TS5_ONLY.
  */
 #define TS6_ONLY
 

@@ -320,18 +320,10 @@ struct exit_client_hook
 /*
  * ts stuff
  */
-#ifdef USE_TS6
 #define TS_CURRENT	6
-#else
-#define TS_CURRENT	5
-#endif
 
 #ifdef TS6_ONLY
-#ifdef USE_TS6
 #define TS_MIN          6
-#else
-#define TS_MIN		5
-#endif
 #else
 #define TS_MIN          3
 #endif

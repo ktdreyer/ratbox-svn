@@ -180,9 +180,6 @@ struct config_file_entry
 	char *servlink_path;
 	char *egdpool_path;
 
-	char *network_name;
-	char *network_desc;
-
 	char default_operstring[REALLEN];
 	char default_adminstring[REALLEN];
 
@@ -192,7 +189,6 @@ struct config_file_entry
 	char fname_operspylog[MAXPATHLEN];
 	char fname_operspyremotelog[MAXPATHLEN];
 
-	int hub;
 	unsigned char compression_level;
 	int dot_in_ip6_addr;
 	int dots_in_ident;
@@ -298,6 +294,7 @@ struct server_info
 	RSA *rsa_private_key;
 #endif
 	int hub;
+	int use_ts6;
 	struct sockaddr_in ip;
 #ifdef IPV6
 	struct sockaddr_in6 ip6;
