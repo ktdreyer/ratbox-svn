@@ -1,3 +1,18 @@
+db          2002/01/13 11:22:15 EST	(20020113_7)
+
+  Modified files:
+    src                  channel.c 
+  Log:
+  Smokey the coder says, only you can stop cute wrong code!
+  <   if (who)
+  ---
+  >   if (who != NULL)
+  
+  Revision  Changes    Path
+  7.294     +1 -1      ircd-hybrid-7/src/channel.c
+
+
+
 jmallett    2002/01/13 10:02:22 EST	(20020113_6)
 
   Modified files:
