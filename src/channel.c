@@ -651,8 +651,6 @@ static  void    send_mode_list(struct Client *cptr,
   char  *mp;
   char  *pp;
   int   count;
-  char modebuf[MODEBUFLEN];
-  char parabuf[MODEBUFLEN];
 
   mp = modebuf;
   *mp++ = '+';
@@ -693,7 +691,6 @@ static  void    send_mode_list(struct Client *cptr,
 
   if(count != 0)
     sendto_one(cptr, "%s %s %s", buf, modebuf, parabuf);
-
 }
 
 /*
@@ -2083,47 +2080,56 @@ static void clear_channel_list(int type, struct Channel *chptr,
 			       struct Client *sptr,
 			       dlink_list *list, char flag)
 {
-  int count=0;
-  char *para[MAXMODEPARAMS];
-  dlink_node *tofree[MAXMODEPARAMS];
-  char modebuf[MODEBUFLEN];
-  char *mp;
   dlink_node *ptr;
   struct Ban *banptr;
+  int   tlen;
+  int   mlen;
+  int   cur_len;
+  char  *mp;
+  char  *pp;
+  int   count;
 
-  para[0] = para[1] = para[2] = "";
+  mp = modebuf;
+  *mp++ = '-';
+  *mp   = '\0';
 
-  for(ptr = list->head; ptr; ptr = ptr->next)
+  pp = parabuf;
+
+  ircsprintf(buf, ":%s MODE %s ", sptr->name, chptr->chname);
+  mlen = strlen(buf);
+  mlen += 4;		/* account for + plus two spaces plus '\0' */
+  cur_len = mlen;
+  count = 0;
+
+  for (ptr = list->head; ptr; ptr = ptr->next)
     {
       banptr = ptr->data;
-      para[count++] = banptr->banstr;
-      *mp++ = flag;
-      *mp++ = '\0';
+      tlen = strlen(banptr->banstr);
+      tlen++;
 
-      if(count >= MAXMODEPARAMS)
-	{
-          sendto_channel_butserv(type, chptr, &me,
-                                 ":%s MODE %s %s %s %s %s",
-                                 sptr->name,chptr->chname,
-				 modebuf,
-				 para[0], para[1], para[2]);
-
+      if ((count >= MAXMODEPARAMS) || ((cur_len + tlen) > BUFSIZE))
+        {
+	  sendto_channel_butserv(type, chptr, &me,
+				 "%s %s %s", buf, modebuf, parabuf);
           mp = modebuf;
-	  *mp = '-';
+          *mp++ = '-';
           *mp = '\0';
+	  pp = parabuf;
+	  cur_len = mlen;
 	  count = 0;
-	  para[0] = para[1] = para[2] = "";
 	}
+
+      *mp++ = flag;
+      *mp = '\0';
+      ircsprintf(pp,"%s ",banptr);
+      pp += tlen;
+      cur_len += tlen;
+      count++;
     }
 
-  if(count)
-    {
-      sendto_channel_butserv(type, chptr, &me,
-			     ":%s MODE %s %s %s %s %s ",
-			     sptr->name,chptr->chname,
-			     modebuf,
-			     para[0], para[1], para[2]);
-    }
+  if(count != 0)
+    sendto_channel_butserv(type, chptr, &me,
+			   "%s %s %s", buf, modebuf, parabuf);
 }
 
 /*
