@@ -1,3 +1,8 @@
+*** 20010105_34 by toot
+. put quiet_on_ban option back in
+. got rid of ircd.c compile warning
+
+
 *** 20010105_33 by toot
 fixed vchans for /knock.. still needs to send a notice to remote
 chan members though
