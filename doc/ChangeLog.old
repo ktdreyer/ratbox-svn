@@ -1,3 +1,8 @@
+*** 20010530_2 by db
+- this log(L_CRIT is left over from debugging
+
+
+
 *** 20010530_1 by ejb
 - removed negative number support in the yacc grammar for now.
 
