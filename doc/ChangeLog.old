@@ -1,3 +1,15 @@
+androsyn    2002/03/12 22:28:09 EST	(20020313_0)
+
+  Modified files:
+    include              s_serv.h 
+  Log:
+  Remove TBURST from the mask as we don't technically support it yet.
+  
+  Revision  Changes    Path
+  7.65      +1 -1      ircd-hybrid-7/include/s_serv.h
+
+
+
 androsyn    2002/03/10 20:51:48 EST	(20020311_1)
 
   Modified files:
