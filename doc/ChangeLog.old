@@ -1,3 +1,9 @@
+*** 20001225_6 by db
+- sending channel_member_names() to a server is not useful, sending it to the
+  client that just joined, might be.
+
+
+
 *** 20001225_5 by toot
 . made glines and pending_glines into dlink_lists
 . couple of minor cleanups/cosmetic changes to m_nick
