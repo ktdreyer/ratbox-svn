@@ -1,3 +1,7 @@
+*** 20010924_5 by leeh
+- added ID checks to parse()
+
+
 *** 20010924_4 by leeh
 - missing ;, preume the break; was meant to be return; ? ;)
 
