@@ -1,3 +1,7 @@
+*** 20001215_3 by toot
+fixed some bent logic in whowas
+
+
 *** 20001215_2 by db
 - removed obsolete BUFFERPOOL from config.h and m_info.h
 
