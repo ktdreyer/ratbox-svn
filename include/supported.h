@@ -40,7 +40,7 @@
                 " CHANMODES=%s"
                  
 #define FEATURESVALUES ConfigFileEntry.disable_vchans ? "" : " VCHANS", \
-        MAXMODEPARAMS,MAXCHANNELSPERUSER,MAXBANS, \
+        MAXMODEPARAMS,ConfigFileEntry.max_chans_per_user,MAXBANS, \
         ConfigFileEntry.max_targets,NICKLEN,TOPICLEN,TOPICLEN,"#&","(ohv)@%+", \
         "beI,k,l,imnpsta"
 

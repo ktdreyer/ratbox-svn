@@ -1452,6 +1452,9 @@ static void read_conf(FBFILE* file)
   if (!ConfigFileEntry.max_accept)
      ConfigFileEntry.max_accept = 20;
 
+  if (!ConfigFileEntry.max_chans_per_user)
+     ConfigFileEntry.max_chans_per_user = 15;
+
   GlobalSetOptions.idletime = (ConfigFileEntry.idletime * 60);
 
   if (!ConfigFileEntry.links_delay)

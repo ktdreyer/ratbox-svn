@@ -3007,7 +3007,8 @@ void add_invite(struct Channel *chptr, struct Client *who)
   /*
    * delete last link in chain if the list is max length
    */
-  if (dlink_list_length(&who->user->invited) >= MAXCHANNELSPERUSER)
+  if (dlink_list_length(&who->user->invited)  >=
+      ConfigFileEntry.max_chans_per_user)
     {
       del_invite(chptr,who);
     }

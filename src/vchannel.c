@@ -78,8 +78,9 @@ struct Channel* cjoin_channel(struct Channel *root,
     return NULL;
   }
 
-  if ((source_p->user->joined >= MAXCHANNELSPERUSER) &&
-      (!IsOper(source_p) || (source_p->user->joined >= MAXCHANNELSPERUSER*3)))
+  if ((source_p->user->joined >= ConfigFileEntry.max_chans_per_user) &&
+      (!IsOper(source_p) || (source_p->user->joined >=
+                             ConfigFileEntry.max_chans_per_user*3)))
   {
     sendto_one(source_p, form_str(ERR_TOOMANYCHANNELS),
                me.name, source_p->name, name);

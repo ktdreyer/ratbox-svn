@@ -179,8 +179,7 @@ options that were in config.h, to be changed with a /rehash.
     KNOCK          - Support KNOCK
     VCHANS         - Support Virtual Channels
     MODES=%i       - The number of channel modes accepted per MODE command
-    MAXCHANNELS=%i - The compiled in maximum channels per user (Note that this
-                     may become controlled in class {} in the future)
+    MAXCHANNELS=%i - The compiled in maximum channels per user
     MAXBANS=%i     - The compiled in limit on the number of bans per channel
     MAXTARGETS=%i  - The number of users that may be chained together in a
                      PRIVMSG or NOTICE (user1,user2,user3...)

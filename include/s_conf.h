@@ -186,7 +186,7 @@ typedef struct config_file_entry
   char fname_operlog[MAXPATHLEN];
   char fname_userlog[MAXPATHLEN];
   char fname_foperlog[MAXPATHLEN];
-	
+
   MessageFile helpfile;
   MessageFile motd;
   MessageFile opermotd;
@@ -194,6 +194,7 @@ typedef struct config_file_entry
 
   int           hub;
   unsigned char compression_level;
+  int           max_chans_per_user;
   int           dots_in_ident;
   int           failed_oper_notice;
   int           anti_nick_flood;
@@ -216,7 +217,7 @@ typedef struct config_file_entry
   int           glines;
   int           gline_time;
   int           idletime;
-  int	        hide_server;
+  int           hide_server;
   int           client_exit;
   int           maximum_links;
   int           oper_only_umodes;

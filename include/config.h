@@ -343,11 +343,6 @@
  */
 #define KILLCHASETIMELIMIT 90   /* Recommended value: 90 */
 
-/* MAXCHANNELSPERUSER -
- * Max number of channels a user is allowed to join.
- */
-#define MAXCHANNELSPERUSER  15  /* Recommended value: 15 */
-
 /* 
  * anti spambot code
  * The defaults =should= be fine for the initial timers/counters etc.
