@@ -1,3 +1,8 @@
+*** 20001224_21 by db
+- bufend was already there, so use it...
+
+
+
 *** 20001224_20 by wcampbel
 Add a little more documentation to is-'s oper_only_umodes
 
