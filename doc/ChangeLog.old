@@ -1,3 +1,28 @@
+db          2001/12/30 02:45:18 EST	(20011230_3)
+
+  Modified files:
+    include              s_conf.h 
+    src                  ircd_lexer.l ircd_parser.y s_bsd.c 
+                         s_conf.c s_serv.c 
+  Removed files:
+    doc                  LazyLinks.as.implemented.txt 
+  Log:
+  - added the ability to specify a specific IP to bind to for outgoing
+    connects. in connect block
+  - removed really really bad doc. If this is still needed, I have a local
+    copy.
+  
+  Revision  Changes    Path
+  1.5       +0 -99     ircd-hybrid-7/doc/LazyLinks.as.implemented.txt (dead)
+  7.173     +2 -1      ircd-hybrid-7/include/s_conf.h
+  1.132     +1 -0      ircd-hybrid-7/src/ircd_lexer.l
+  1.230     +6 -0      ircd-hybrid-7/src/ircd_parser.y
+  7.154     +2 -1      ircd-hybrid-7/src/s_bsd.c
+  7.289     +4 -3      ircd-hybrid-7/src/s_conf.c
+  7.229     +17 -1     ircd-hybrid-7/src/s_serv.c
+
+
+
 db          2001/12/30 01:32:18 EST	(20011230_2)
 
   Modified files:
