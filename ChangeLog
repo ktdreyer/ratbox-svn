@@ -1,3 +1,17 @@
+leeh        2004/04/03 19:06:10 EST	(20040404_0)
+
+  Modified files:
+    .                    configure configure.ac 
+  Log:
+  - fixed (well, hacked) the time_t stuff for fbsd, added cases for darwin and
+    obsd
+  
+  Revision  Changes    Path
+  7.219     +40 -9     ircd-ratbox/configure
+  7.32      +30 -12    ircd-ratbox/configure.ac
+
+
+
 leeh        2004/04/03 17:47:08 EST	(20040403_4)
 
   Modified files:
