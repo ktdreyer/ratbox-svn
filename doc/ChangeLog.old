@@ -1,3 +1,12 @@
+*** 20010202_6 by jdc
+- Blah.  Okay, *finally* fixed passwords.  I shouldn't have changed
+  the strcmp()s like I did earlier.  The *REAL* bug was that one of
+  the sendto_one()'s was sending aconf->passwd, not spasswd.
+- Encrypted passwords are still up in the air, but they might work.
+  Someone please try them, or work with me regarding it.
+
+
+
 *** 20010202_5 by jdc
 - Attempt #2...  God this stuff is evil!
 - Fixed bug where connect failed when send_password and accept_password
