@@ -137,8 +137,12 @@ struct sockaddr_storage {
 # define ss_family ss_sa.sa_family
 #endif /* !HAVE_STRUCT_SOCKADDR_STORAGE */
 
+#ifdef SOCKADDR_IN_HAS_LEN
+#define SET_SS_LEN(x, y) x.sa_len = y
+#define GET_SS_LEN(x) x.sa_len
+#else
+#define SET_SS_LEN(x, y)
 #define GET_SS_LEN(x) x.ss_family == AF_INET ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_storage)
-
-		
+#endif
 
 #endif /* INCLUDED_ircd_defs_h */

@@ -508,6 +508,7 @@ check_server(const char *name, struct Client *client_p)
 			memcpy(&((struct sockaddr_in6 *)&server_p->ipnum)->sin6_addr, 
 				&((struct sockaddr_in6 *)&client_p->localClient->ip)->sin6_addr, 
 				sizeof(struct in6_addr)); 
+			SET_SS_LEN(server_p->ipnum, sizeof(struct sockaddr_in6));
 		} 
 	}
 	else
@@ -518,6 +519,7 @@ check_server(const char *name, struct Client *client_p)
 			((struct sockaddr_in *)&server_p->ipnum)->sin_addr.s_addr = 
 				((struct sockaddr_in *)&client_p->localClient->ip)->sin_addr.s_addr;
 		}
+		SET_SS_LEN(server_p->ipnum, sizeof(struct sockaddr_in));
 	}
 
 	return 0;
@@ -1574,6 +1576,7 @@ serv_connect(struct server_conf *server_p, struct Client *by)
 		memcpy(&myipnum, &ServerInfo.ip, sizeof(myipnum));
 		((struct sockaddr_in *)&myipnum)->sin_port = 0;
 		myipnum.ss_family = AF_INET;
+		SET_SS_LEN(myipnum, sizeof(struct sockaddr_in));
 	}
 	
 #ifdef IPV6
@@ -1582,6 +1585,7 @@ serv_connect(struct server_conf *server_p, struct Client *by)
 		memcpy(&myipnum, &ServerInfo.ip6, sizeof(myipnum));
 		((struct sockaddr_in6 *)&myipnum)->sin6_port = 0;
 		myipnum.ss_family = AF_INET6;
+		SET_SS_LEN(myipnum, sizeof(struct sockaddr_in6));
 	}
 #endif
 	else
@@ -1630,12 +1634,17 @@ serv_connect_callback(int fd, int status, void *data)
 		struct sockaddr_in6 *lip = (struct sockaddr_in6 *)&client_p->localClient->ip;
 		struct sockaddr_in6 *hip = (struct sockaddr_in6 *)&fd_table[fd].connect.hostaddr;	
 		memcpy(&lip->sin6_addr, &hip->sin6_addr, sizeof(struct in6_addr));
+		SET_SS_LEN(client_p->localClient->ip, sizeof(struct sockaddr_in6));
+		SET_SS_LEN(fd_table[fd].connect.hostaddr, sizeof(struct sockaddr_in6));
+
 	} else
 #else
 	{
 		struct sockaddr_in *lip = (struct sockaddr_in *)&client_p->localClient->ip;
 		struct sockaddr_in *hip = (struct sockaddr_in *)&fd_table[fd].connect.hostaddr;	
 		lip->sin_addr.s_addr = hip->sin_addr.s_addr;
+		SET_SS_LEN(client_p->localClient->ip, sizeof(struct sockaddr_in));
+		SET_SS_LEN(fd_table[fd].connect.hostaddr, sizeof(struct sockaddr_in));
 	}	
 #endif	
 	
