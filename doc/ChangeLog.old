@@ -1,3 +1,17 @@
+androsyn    2002/02/28 09:03:51 EST	(20020228_3)
+
+  Modified files:
+    src                  s_auth.c s_user.c 
+  Log:
+  Fixed bug with unknown in username and cleaned up some string abuses that
+  were still around from strncpy_irc()
+  
+  Revision  Changes    Path
+  7.87      +1 -1      ircd-hybrid-7/src/s_auth.c
+  7.191     +2 -8      ircd-hybrid-7/src/s_user.c
+
+
+
 leeh        2002/02/28 06:46:46 EST	(20020228_2)
 
   Modified files:
