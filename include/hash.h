@@ -81,6 +81,7 @@ extern void   del_from_channel_hash_table(const char* name,
 extern struct Channel* hash_find_channel(const char* name);
 extern struct Client* find_client(const char* name, 
                                        struct Client* client);
+extern struct Client* find_server(const char* name);
 extern struct Client* hash_find_server(const char* name);
 
 extern void add_to_resv_hash_table(const char *name,

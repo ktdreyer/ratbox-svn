@@ -238,7 +238,7 @@ delist_conf(struct ConfItem* aconf)
  */
 void free_conf(struct ConfItem* aconf)
 {
-  assert(0 != aconf);
+  assert(aconf != NULL);
   assert(!(aconf->status & CONF_CLIENT) ||
          (aconf->host && strcmp(aconf->host, "NOMATCH")) ||
          (aconf->clients == -1));
@@ -475,11 +475,11 @@ check_client(struct Client *client_p, struct Client *source_p, char *username)
     case TOO_MANY:
       sendto_realops_flags(FLAGS_FULL, L_ALL, 
                            "Too many on IP for %s (%s).",
-			   get_client_host(source_p),
+			   get_client_name(source_p, SHOW_IP),
 			   source_p->localClient->sockhost);
 			   
       ilog(L_INFO,"Too many connections on IP from %s.",
-	   get_client_host(source_p));
+	   get_client_name(source_p, SHOW_IP));
       
       ServerStats->is_ref++;
       (void)exit_client(client_p, source_p, &me, 
@@ -489,10 +489,11 @@ check_client(struct Client *client_p, struct Client *source_p, char *username)
     case I_LINE_FULL:
       sendto_realops_flags(FLAGS_FULL, L_ALL,
                            "I-line is full for %s (%s).",
-			   get_client_host(source_p),
+			   get_client_name(source_p, SHOW_IP),
 			   source_p->localClient->sockhost);
 			   
-      ilog(L_INFO,"Too many connections from %s.", get_client_host(source_p));
+      ilog(L_INFO,"Too many connections from %s.",
+	   get_client_name(source_p, SHOW_IP));
       
       ServerStats->is_ref++;
       (void)exit_client(client_p, source_p, &me, 
@@ -508,14 +509,14 @@ check_client(struct Client *client_p, struct Client *source_p, char *username)
       inetntop(source_p->localClient->aftype, &IN_ADDR(source_p->localClient->ip), ipaddr, HOSTIPLEN);
       sendto_realops_flags(FLAGS_UNAUTH, L_ALL,
 			   "Unauthorised client connection from %s [%s] on [%s/%u].",
-			   get_client_host(source_p),
+			   get_client_name(source_p, SHOW_IP),
 			   ipaddr,
 			   source_p->localClient->listener->name,
 			   source_p->localClient->listener->port);
 			   
       ilog(L_INFO,
 	  "Unauthorized client connection from %s on [%s/%u].",
-	  get_client_host(source_p),
+	  get_client_name(source_p, SHOW_IP),
 	  source_p->localClient->listener->name,
 	  source_p->localClient->listener->port);
 	  
@@ -1092,8 +1093,8 @@ attach_connect_block(struct Client *client_p,
 {
   struct ConfItem* ptr;
 
-  assert(0 != client_p);
-  assert(0 != host);
+  assert(client_p != NULL);
+  assert(host != NULL);
 
   for (ptr = ConfigItemList; ptr; ptr = ptr->next)
     {
@@ -1253,7 +1254,7 @@ struct ConfItem*
 find_conf_by_name(const char* name, int status)
 {
   struct ConfItem* conf;
-  assert(0 != name);
+  assert(name != NULL);
  
   for (conf = ConfigItemList; conf; conf = conf->next)
     {
@@ -1281,7 +1282,7 @@ struct ConfItem*
 find_conf_by_host(const char* host, int status)
 {
   struct ConfItem* conf;
-  assert(0 != host);
+  assert(host != NULL);
  
   for (conf = ConfigItemList; conf; conf = conf->next)
     {
@@ -1757,7 +1758,7 @@ struct ConfItem *
 find_kill(struct Client* client_p)
 {
   struct ConfItem *aconf;
-  assert(0 != client_p);
+  assert(client_p != NULL);
   aconf = find_address_conf(client_p->host, client_p->username,
 			    &client_p->localClient->ip,
 			    client_p->localClient->aftype);
@@ -2181,10 +2182,10 @@ void clear_out_old_conf(void)
   }
 
   /*
-   * We don't delete the class table, rather mark all entries
+   * don't delete the class table, rather mark all entries
    * for deletion. The table is cleaned up by check_class. - avalon
    */
-  assert(0 != ClassList);
+  assert(ClassList != NULL);
   for (cltmp = ClassList->next; cltmp; cltmp = cltmp->next)
     MaxLinks(cltmp) = -1;
 

@@ -700,26 +700,6 @@ struct Client *find_userhost(char *user, char *host,
 }
 
 /*
- *  find_server - find server by name.
- *
- *      This implementation assumes that server and user names
- *      are unique, no user can have a server name and vice versa.
- *      One should maintain separate lists for users and servers,
- *      if this restriction is removed.
- *
- *  *Note*
- *      Semantics of this function has been changed from
- *      the old. 'name' is now assumed to be a null terminated
- *      string.
- */
-struct Client* find_server(const char* name)
-{
-  if (name)
-    return hash_find_server(name);
-  return 0;
-}
-
-/*
  * next_client - find the next matching client. 
  * The search can be continued from the specified client entry. 
  * Normal usage loop is:
@@ -802,9 +782,10 @@ struct Client *find_person(char *name, struct Client *client_p)
  *      an error message (NO SUCH NICK) is generated. If the client was found
  *      through the history, chasing will be 1 and otherwise 0.
  */
-struct Client *find_chasing(struct Client *source_p, char *user, int *chasing)
+struct Client *
+find_chasing(struct Client *source_p, char *user, int *chasing)
 {
-  struct Client *who = find_client(user, (struct Client *)NULL);
+  struct Client *who = find_client(user, NULL);
   
   if (chasing)
     *chasing = 0;
@@ -837,7 +818,8 @@ struct Client *find_chasing(struct Client *source_p, char *user, int *chasing)
  * error message should be restricted to local clients and some
  * other thing generated for remotes...
  */
-int check_registered_user(struct Client* client)
+int
+check_registered_user(struct Client* client)
 {
   if (!IsRegisteredUser(client))
     {
@@ -852,7 +834,8 @@ int check_registered_user(struct Client* client)
  * registered (e.g. we don't know yet whether a server
  * or user)
  */
-int check_registered(struct Client* client)
+int
+check_registered(struct Client* client)
 {
   if (!IsRegistered(client))
     {
@@ -881,7 +864,8 @@ int check_registered(struct Client* client)
  *        to modify what it points!!!
  */
 
-const char* get_client_name(struct Client* client, int showip)
+const char* 
+get_client_name(struct Client* client, int showip)
 {
   static char nbuf[HOSTLEN * 2 + USERLEN + 5];
 
@@ -914,36 +898,6 @@ const char* get_client_name(struct Client* client, int showip)
    * Neph|l|m@EFnet. Was missing a return here.
    */
   return client->name;
-}
-
-/*
- * get_client_host
- *
- * inputs	- pointer to client struct
- * output	- pointer to static char string with client hostname
- * side effects	-
- */
-const char* get_client_host(struct Client* client)
-{
-  assert(0 != client);
-  return get_client_name(client, HIDE_IP);
-#if 0
-  static char nbuf[HOSTLEN * 2 + USERLEN + 5];
-  
-  assert(0 != client);
-
-  if (!MyConnect(client))
-    return client->name;
-  if (client->localClient->dns_query->answer.status != adns_s_ok)
-    return get_client_name(client, HIDE_IP);
-  else
-    {
-      ircsprintf(nbuf, "%s[%-.*s@%-.*s]",
-                 client->name, USERLEN, client->username,
-                 HOSTLEN, client->host);
-    }
-  return nbuf;
-#endif
 }
 
 static void
