@@ -393,7 +393,7 @@ BlockHeapFree(BlockHeap * bh, void *ptr)
 
 	block = memblock->block;
 	bh->freeElems++;
-	mem_frob(ptr, bh->elemSize);
+//	mem_frob(ptr, bh->elemSize);
 	dlinkMoveNode(&memblock->self, &block->used_list, &block->free_list);
 	return (0);
 }

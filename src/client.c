@@ -936,6 +936,7 @@ free_exited_clients(void *unused)
 			dlinkDestroy(ptr, &dead_list);
 			continue;
 		}
+		assert(dlinkFind(&abort_list, target_p) == NULL);
 		release_client_state(target_p);
 		free_client(target_p);
 		dlinkDestroy(ptr, &dead_list);
@@ -1108,10 +1109,12 @@ exit_aborted_clients(void *unused)
  	DLINK_FOREACH_SAFE(ptr, next, abort_list.head)
  	{
  	 	abt = ptr->data;
+ 		assert(*((unsigned long*)abt->client) != 0xdeadbeef); /* This is lame but its a debug thing */
  	 	dlinkDelete(ptr, &abort_list);
+
+	 	 	
  	 	if(!IsPerson(abt->client) && !IsUnknown(abt->client))
  	 	{
- 	 		
  	 	 	sendto_realops_flags(UMODE_ALL, L_ADMIN,
   	 	 	                     "Closing link to %s: %s",
    	 	 	                     get_client_name(abt->client, HIDE_IP), abt->notice);
@@ -1192,6 +1195,8 @@ exit_generic_client(struct Client *client_p, struct Client *source_p, struct Cli
 	del_from_client_hash_table(source_p->name, source_p);
 	remove_client_from_list(source_p);
 	assert(dlinkFind(&dead_list, source_p) == NULL);
+	assert(dlinkFind(&abort_list, source_p) == NULL);
+	
 	SetDead(source_p);
 	dlinkAddAlloc(source_p, &dead_list);
 }
@@ -1248,7 +1253,7 @@ exit_unknown_client(struct Client *client_p, struct Client *source_p, struct Cli
 	del_from_client_hash_table(source_p->name, source_p);
 	remove_client_from_list(source_p);
 	assert(dlinkFind(&dead_list, source_p) == NULL);
-
+	assert(dlinkFind(&abort_list, source_p) == NULL);
 	SetDead(source_p);
 	dlinkAddAlloc(source_p, &dead_list);
 
@@ -1299,7 +1304,8 @@ exit_remote_server(struct Client *client_p, struct Client *source_p, struct Clie
 	del_from_client_hash_table(source_p->name, source_p);
 	remove_client_from_list(source_p);  
 	assert(dlinkFind(&dead_list, source_p) == NULL);
-
+	assert(dlinkFind(&abort_list, source_p) == NULL);
+	
 	SetDead(source_p);
 	dlinkAddAlloc(source_p, &dead_list);	
 	return 0;
@@ -1374,7 +1380,8 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 	del_from_client_hash_table(source_p->name, source_p);
 	remove_client_from_list(source_p);  
 	assert(dlinkFind(&dead_list, source_p) == NULL);
-
+	assert(dlinkFind(&abort_list, source_p) == NULL);
+	
 	SetDead(source_p);
 	dlinkAddAlloc(source_p, &dead_list);
 	return 0;
