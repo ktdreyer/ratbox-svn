@@ -1,0 +1,5 @@
+DEOP <#channel> [nicks]
+ACCESS:100 Makes services deop yourself/users
+  <#channel>: Registered channel to perform deops in
+  [nicks]   : Nicknames of people to deop.  If this is not specified it
+              will deop yourself.

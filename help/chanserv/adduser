@@ -1,0 +1,5 @@
+ADDUSER <#channel> <username> <level>
+ACCESS:150 Adds a user to a channels access list
+  <#channel>: Channel to add user to
+  <username>: Username to add to channel
+  <level>   : Level of access to give user

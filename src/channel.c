@@ -270,8 +270,16 @@ join_service(struct client *service_p, const char *chname)
 }
 
 void
-part_service(struct client *service_p, struct channel *chptr)
+part_service(struct client *service_p, const char *chname)
 {
+	struct channel *chptr;
+
+	if((chptr = find_channel(chname)) == NULL)
+		return;
+
+	if(dlink_find(&chptr->services, service_p) == NULL)
+		return;
+
 	dlink_find_destroy(&chptr->services, service_p);
 	dlink_find_destroy(&service_p->service->channels, chptr);
 

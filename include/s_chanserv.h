@@ -3,7 +3,7 @@
 #define INCLUDED_s_chanserv_h
 
 struct user_reg;
-struct chmod;
+struct chmode;
 
 #define MAX_CHAN_REG_HASH	16384
 

@@ -1,0 +1,3 @@
+REGISTER <#channel>
+Registers the given channel under your current username
+  <#channel>: Channel to register

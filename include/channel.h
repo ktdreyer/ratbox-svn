@@ -82,7 +82,7 @@ extern struct chmember *find_chmember(struct channel *chptr, struct client *targ
 extern unsigned long count_topics(void);
 
 extern void join_service(struct client *service_p, const char *chname);
-extern void part_service(struct client *service_p, struct channel *chptr);
+extern void part_service(struct client *service_p, const char *chname);
 extern void rejoin_service(struct client *service_p, struct channel *chptr);
 
 #endif

@@ -85,6 +85,7 @@ static int
 s_operbot_op(struct client *client_p, char *parv[], int parc)
 {
 	struct channel *chptr;
+	struct chmember *mptr;
 
 	if((chptr = find_channel(parv[0])) == NULL)
 	{
@@ -98,13 +99,12 @@ s_operbot_op(struct client *client_p, char *parv[], int parc)
 		return 1;
 	}
 
-	if(find_chmember(chptr, client_p) == NULL)
+	if((mptr = find_chmember(chptr, client_p)) == NULL)
 		return 1;
 
+	mptr->flags |= MODE_OPPED;
 	sendto_server(":%s MODE %s +o %s",
 			operbot_p->name, chptr->name, client_p->name);
-	return 1;
-
 	return 1;
 }
 
