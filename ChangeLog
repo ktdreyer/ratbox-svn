@@ -1,3 +1,15 @@
+androsyn    2002/08/25 22:18:02 EDT	(20020826_6)
+
+  Modified files:
+    src                  ircd_parser.y 
+  Log:
+  Remove the %expect 1 line.  It breaks solaris yacc
+  
+  Revision  Changes    Path
+  1.265     +0 -2      ircd-ratbox/src/ircd_parser.y
+
+
+
 leeh        2002/08/25 22:17:59 EDT	(20020826_5)
 
   Modified files:
