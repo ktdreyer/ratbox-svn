@@ -41,6 +41,7 @@
 #include "memory.h"
 #include "msg.h"
 #include "handlers.h"
+#include "list.h"
 
 /* New hash code */
 /*
@@ -256,10 +257,12 @@ int
 add_to_id_hash_table(char *name, struct Client *client_p)
 {
   unsigned int     hashv;
+  dlink_node *m;
 
   hashv = hash_id(name);
-  client_p->idhnext = (struct Client *)idTable[hashv].list;
-  idTable[hashv].list = (void *)client_p;
+  m = make_dlink_node();
+  dlinkAdd(client_p, m, &idTable[hashv].list);
+
   idTable[hashv].links++;
   idTable[hashv].hits++;
   return 0;
@@ -272,14 +275,17 @@ void
 add_to_client_hash_table(const char* name, struct Client* client_p)
 {
   unsigned int hashv;
+  dlink_node *m;
+
   assert(name != NULL);
   assert(client_p != NULL);
   if(name == NULL || client_p == NULL)
     return;
   
   hashv = hash_nick_name(name);
-  client_p->hnext = (struct Client*) clientTable[hashv].list;
-  clientTable[hashv].list = (void*) client_p;
+  m = make_dlink_node();
+  dlinkAdd(client_p, m, &clientTable[hashv].list);
+
   ++clientTable[hashv].links;
   ++clientTable[hashv].hits;
 }
@@ -288,6 +294,7 @@ void
 add_to_hostname_hash_table(const char *hostname, struct Client *client_p)
 {
   unsigned int hashv;
+  dlink_node *m;
 
   assert(hostname != NULL);
   assert(client_p != NULL);
@@ -296,8 +303,8 @@ add_to_hostname_hash_table(const char *hostname, struct Client *client_p)
     return;
 
   hashv = hash_hostname(hostname);
-  client_p->hostnext = (struct Client *)hostTable[hashv].list;
-  hostTable[hashv].list = (void *)client_p;
+  m = make_dlink_node();
+  dlinkAdd(client_p, m, &hostTable[hashv].list);
   hostTable[hashv].links++;
   hostTable[hashv].hits++;
 }
@@ -309,6 +316,8 @@ void
 add_to_resv_hash_table(const char *name, struct ResvChannel *resv_p)
 {
   unsigned int hashv;
+  dlink_node *m;
+
   assert(name != NULL);
   assert(resv_p != NULL);
   
@@ -316,9 +325,8 @@ add_to_resv_hash_table(const char *name, struct ResvChannel *resv_p)
     return;
 
   hashv = hash_resv_channel(name);
-
-  resv_p->hnext = (struct ResvChannel *) resvTable[hashv].list;
-  resvTable[hashv].list = (void*)resv_p;
+  m = make_dlink_node();
+  dlinkAdd(resv_p, m, &resvTable[hashv].list);
   ++resvTable[hashv].links;
   ++resvTable[hashv].hits;
 }
@@ -331,9 +339,10 @@ add_to_resv_hash_table(const char *name, struct ResvChannel *resv_p)
 void
 del_from_id_hash_table(const char* id, struct Client* client_p)
 {
-  struct Client* found_client;
-  struct Client* prev = NULL;
+  struct Client *target_p;
   unsigned int   hashv;
+  dlink_node *ptr;
+  dlink_node *tempptr;
 
   assert(id != NULL);
   assert(client_p != NULL);
@@ -342,25 +351,23 @@ del_from_id_hash_table(const char* id, struct Client* client_p)
     return;
 
   hashv = hash_id(id);
-  found_client = (struct Client*) idTable[hashv].list;
 
-  for ( ; found_client; found_client = found_client->idhnext)
+  DLINK_FOREACH_SAFE(ptr, tempptr, idTable[hashv].list.head)
+  {
+    target_p = ptr->data;
+
+    if (target_p == client_p)
     {
-      if (found_client == client_p)
-        {
-          if (prev)
-            prev->idhnext = found_client->idhnext;
-          else
-            idTable[hashv].list = (void*) found_client->idhnext;
-          found_client->idhnext = NULL;
+      dlinkDelete(ptr, &idTable[hashv].list);
+      free_dlink_node(ptr);
 
-          assert(idTable[hashv].links > 0);
-          if (idTable[hashv].links > 0)
-            --idTable[hashv].links;
-          return;
-        }
-      prev = found_client;
+      assert(idTable[hashv].links > 0);
+      if (idTable[hashv].links > 0)
+        --idTable[hashv].links;
+      return;
     }
+  }
+
   Debug((DEBUG_ERROR, "%#x !in tab %s[%s] %#x %#x %#x %d %d %#x",
          client_p, client_p->name, client_p->from ? client_p->from->host : "??host",
          client_p->from, client_p->next, client_p->prev, client_p->localClient->fd, 
@@ -374,9 +381,11 @@ del_from_id_hash_table(const char* id, struct Client* client_p)
 void
 del_from_client_hash_table(const char* name, struct Client* client_p)
 {
-  struct Client* found_client;
-  struct Client* prev = NULL;
+  struct Client *target_p;
   unsigned int   hashv;
+  dlink_node *ptr;
+  dlink_node *tempptr;
+
   assert(name != NULL);
   assert(client_p != NULL);
   
@@ -384,25 +393,23 @@ del_from_client_hash_table(const char* name, struct Client* client_p)
     return;
 
   hashv = hash_nick_name(name);
-  found_client = (struct Client*) clientTable[hashv].list;
+  
+  DLINK_FOREACH_SAFE(ptr, tempptr, clientTable[hashv].list.head)
+  {
+    target_p = ptr->data;
 
-  for ( ; found_client; found_client = found_client->hnext)
+    if(client_p == target_p)
     {
-      if (found_client == client_p)
-        {
-          if (prev)
-            prev->hnext = found_client->hnext;
-          else
-            clientTable[hashv].list = (void*) found_client->hnext;
-          found_client->hnext = NULL;
-
-          assert(clientTable[hashv].links > 0);
-          if (clientTable[hashv].links > 0)
-            --clientTable[hashv].links;
-          return;
-        }
-      prev = found_client;
+      dlinkDelete(ptr, &clientTable[hashv].list);
+      free_dlink_node(ptr);
+      
+      assert(clientTable[hashv].links > 0);
+      if (clientTable[hashv].links > 0)
+        --clientTable[hashv].links;
+      return;
     }
+  }
+
   Debug((DEBUG_ERROR, "%#x !in tab %s[%s] %#x %#x %#x %d %d %#x",
          client_p, client_p->name, client_p->from ? client_p->from->host : "??host",
          client_p->from, client_p->next, client_p->prev, client_p->localClient->fd, 
@@ -415,9 +422,11 @@ del_from_client_hash_table(const char* name, struct Client* client_p)
 void 
 del_from_channel_hash_table(const char* name, struct Channel* chptr)
 {
-  struct Channel* found_chptr;
-  struct Channel* prev = NULL;
+  struct Channel *ch2ptr;
+  dlink_node *ptr;
+  dlink_node *tempptr;
   unsigned int    hashv;
+
   assert(name != NULL);
   assert(chptr != NULL);
 
@@ -425,55 +434,50 @@ del_from_channel_hash_table(const char* name, struct Channel* chptr)
     return;
     
   hashv = hash_channel_name(name);
-  found_chptr = (struct Channel*) channelTable[hashv].list;
 
-  for ( ; found_chptr; found_chptr = found_chptr->hnextch)
+  DLINK_FOREACH_SAFE(ptr, tempptr, channelTable[hashv].list.head)
+  {
+    ch2ptr = ptr->data;
+
+    if(chptr == ch2ptr)
     {
-      if (found_chptr == chptr)
-        {
-          if (prev)
-            prev->hnextch = found_chptr->hnextch;
-          else
-            channelTable[hashv].list = (void*) found_chptr->hnextch;
-          found_chptr->hnextch = NULL;
+      dlinkDelete(ptr, &channelTable[hashv].list);
+      free_dlink_node(ptr);
 
-          assert(channelTable[hashv].links > 0);
-          if (channelTable[hashv].links > 0)
-            --channelTable[hashv].links;
-          return;
-        }
-      prev = found_chptr;
+      assert(channelTable[hashv].links > 0);
+      if (channelTable[hashv].links > 0)
+        --channelTable[hashv].links;
+      return;
     }
+  }
 }
 
 void
 del_from_hostname_hash_table(const char *hostname, struct Client *client_p)
 {
   struct Client *target_p;
-  struct Client *last_p = NULL;
+  dlink_node *ptr;
+  dlink_node *tempptr;
   unsigned int hashv;
 
   if(hostname == NULL || client_p == NULL)
     return;
 
   hashv = hash_hostname(hostname);
-  for(target_p = (struct Client *)hostTable[hashv].list; target_p;
-      target_p = target_p->hostnext)
+
+  DLINK_FOREACH_SAFE(ptr, tempptr, hostTable[hashv].list.head)
   {
+    target_p = ptr->data;
     if(target_p == client_p)
     {
-      if(last_p)
-        last_p->hostnext = client_p->hostnext;
-      else
-        hostTable[hashv].list = (void *)client_p->hostnext;
+      dlinkDelete(ptr, &hostTable[hashv].list);
+      free_dlink_node(ptr);
 
       if(hostTable[hashv].links > 0)
         hostTable[hashv].links--;
 
       return;
     }
-
-    last_p = target_p;
   }
 }
   
@@ -483,8 +487,9 @@ del_from_hostname_hash_table(const char *hostname, struct Client *client_p)
 void 
 del_from_resv_hash_table(const char *name, struct ResvChannel *rptr)
 {
-  struct ResvChannel *found_chptr;
-  struct ResvChannel *prev=NULL;
+  struct ResvChannel *r2ptr;
+  dlink_node *ptr;
+  dlink_node *tempptr;
   unsigned int hashv;
 
   assert(name != NULL);
@@ -495,18 +500,14 @@ del_from_resv_hash_table(const char *name, struct ResvChannel *rptr)
     
   hashv = hash_resv_channel(name);
 
-  found_chptr = (struct ResvChannel *) resvTable[hashv].list;
-
-  for( ; found_chptr; found_chptr = found_chptr->hnext)
+  DLINK_FOREACH_SAFE(ptr, tempptr, resvTable[hashv].list.head)
   {
-    if(found_chptr == rptr)
+    r2ptr = ptr->data;
+    
+    if(rptr == r2ptr)
     {
-      if(prev)
-        prev->hnext = found_chptr->hnext;
-      else
-        resvTable[hashv].list = (void*)found_chptr->hnext;
-
-      found_chptr->hnext=NULL;
+      dlinkDelete(ptr, &resvTable[hashv].list);
+      free_dlink_node(ptr);
 
       assert(resvTable[hashv].links > 0);
       --resvTable[hashv].links;
@@ -522,29 +523,27 @@ del_from_resv_hash_table(const char *name, struct ResvChannel *rptr)
 struct Client *
 find_id(const char *name)
 {
-  struct Client *found_client;
+  struct Client *target_p;
+  dlink_node *ptr;
   unsigned int hashv;
 	
   if (name == NULL)
     return NULL;
 
   hashv = hash_id(name);
-  found_client = (struct Client *)idTable[hashv].list;
 
-  /*
-   * Got the bucket, now search the chain.
-   */
-  for (; found_client; found_client = found_client->idhnext)
+  DLINK_FOREACH(ptr, idTable[hashv].list.head)
   {
-    if (found_client->user && strcmp(name, found_client->user->id) == 0)
+    target_p = ptr->data;
+
+    if(target_p->user && strcmp(name, target_p->user->id) == 0)
     {
-      return(found_client);
+      return target_p;
     }
   }
-	
-  return (NULL);
-}
 
+  return NULL;
+}
 
 /*
  * find_client
@@ -556,7 +555,8 @@ find_id(const char *name)
 struct Client* 
 find_client(const char* name)
 {
-  struct Client* found_client;
+  struct Client *target_p;
+  dlink_node *ptr;
   unsigned int   hashv;
 
   assert(name != NULL);
@@ -567,35 +567,44 @@ find_client(const char* name)
     return (find_id(name));
 
   hashv = hash_nick_name(name);
-  found_client = (struct Client*) clientTable[hashv].list;
 
-  for ( ; found_client; found_client = found_client->hnext)
-    if (irccmp(name, found_client->name) == 0)
-      {
-        return (found_client);
-      }
-  
-  return (NULL);
+  DLINK_FOREACH(ptr, clientTable[hashv].list.head)
+  {
+    target_p = ptr->data;
+    
+    if(irccmp(name, target_p->name) == 0)
+    {
+      return target_p;
+    }
+  }
+
+  return NULL;
 }
 
-struct Client *
+dlink_node *
 find_hostname(const char *hostname)
 {
-  struct Client *target_p;
   unsigned int hashv;
 
   if(hostname == NULL)
     return NULL;
 
   hashv = hash_hostname(hostname);
-  for(target_p = (struct Client *)hostTable[hashv].list; target_p;
-      target_p = target_p->hostnext)
+
+  return hostTable[hashv].list.head;
+#if 0
+  DLINK_FOREACH(ptr, hostTable[hashv].list.head)
   {
-    if(irccmp(target_p->host, hostname) == 0)
+    target_p = ptr->data;
+
+    if(irccmp(hostname, target_p->host) == 0)
+    {
       return target_p;
+    }
   }
 
   return NULL;
+#endif
 }
 
 /*
@@ -649,25 +658,30 @@ hash_find_masked_server(const char* name)
 struct Client* 
 find_server(const char* name)
 {
-  struct Client* found_server;
-  unsigned int   hashv;
+  struct Client *target_p;
+  dlink_node *ptr;
+  unsigned int hashv;
 
   if (name == NULL)
     return(NULL);
 
   hashv = hash_nick_name(name);
-  found_server = (struct Client*) clientTable[hashv].list;
 
-  for ( ; found_server; found_server = found_server->hnext)
+  DLINK_FOREACH(ptr, clientTable[hashv].list.head)
+  {
+    target_p = ptr->data;
+
+    if(!IsServer(target_p) && !IsMe(target_p))
     {
-      if (!IsServer(found_server) && !IsMe(found_server))
-        continue;
-      if (irccmp(name, found_server->name) == 0)
-        {
-          return (found_server);
-        }
+      continue;
     }
-
+    
+    if(irccmp(name, target_p->name) == 0)
+    {
+      return target_p;
+    }
+  }
+  
   return hash_find_masked_server(name);
 }
 
@@ -680,24 +694,27 @@ find_server(const char* name)
 struct Channel* 
 hash_find_channel(const char* name)
 {
-  struct Channel* found_chptr;
+  struct Channel *chptr;
+  dlink_node *ptr;
   unsigned int hashv;
   
   assert(name != NULL);
   if(name == NULL)
     return NULL;
+
   hashv = hash_channel_name(name);
 
-  found_chptr = (struct Channel*) channelTable[hashv].list;
+  DLINK_FOREACH(ptr, channelTable[hashv].list.head)
+  {
+    chptr = ptr->data;
 
-  for ( ; found_chptr; found_chptr = found_chptr->hnextch)
-  
-    if (irccmp(name, found_chptr->chname) == 0)
-      {
-        return(found_chptr);
-      }
+    if(irccmp(name, chptr->chname) == 0)
+    {
+      return chptr;
+    }
+  }
 
-  return(NULL);
+  return NULL;
 }
 
 /*
@@ -715,7 +732,7 @@ struct Channel *
 get_or_create_channel(struct Client *client_p, char *chname, int *isnew)
 {
   struct Channel *chptr;
-  struct Channel *found_chptr;
+  dlink_node *ptr;
   unsigned int hashv;
   int len;
 
@@ -740,20 +757,16 @@ get_or_create_channel(struct Client *client_p, char *chname, int *isnew)
 
   hashv = hash_channel_name(chname);
 
-  for ( found_chptr = (struct Channel*) channelTable[hashv].list;
-	found_chptr; found_chptr = found_chptr->hnextch)
+  DLINK_FOREACH(ptr, channelTable[hashv].list.head)
+  {
+    chptr = ptr->data;
+
+    if(irccmp(chname, chptr->chname) == 0)
     {
-      if (irccmp(chname, found_chptr->chname) == 0)
-	{
-	  if(isnew != NULL)
-	    *isnew = 0;
-	  return(found_chptr);
-	}
+      return chptr;
     }
-
-  if(isnew != NULL)
-    *isnew = 1;
-
+  }
+  
   chptr = BlockHeapAlloc(channel_heap);
   memset(chptr, 0, sizeof(struct Channel));
   strlcpy(chptr->chname, chname, CHANNELLEN+1);
@@ -766,8 +779,8 @@ get_or_create_channel(struct Client *client_p, char *chname, int *isnew)
   GlobalChannelList = chptr;
   chptr->channelts = CurrentTime;     /* doesn't hurt to set it here */
 
-  chptr->hnextch = (struct Channel*) channelTable[hashv].list;
-  channelTable[hashv].list = (void*) chptr;
+  ptr = make_dlink_node();
+  dlinkAdd(chptr, ptr, &channelTable[hashv].list);
   ++channelTable[hashv].links;
   ++channelTable[hashv].hits;
 
@@ -781,26 +794,28 @@ get_or_create_channel(struct Client *client_p, char *chname, int *isnew)
 struct ResvChannel *
 hash_find_resv(const char *name)
 {
-  struct ResvChannel *found_chptr;
+  struct ResvChannel *rptr;
+  dlink_node *ptr;
   unsigned int hashv;
 
   assert(name != NULL);
   if(name == NULL)
     return NULL;
+
   hashv = hash_resv_channel(name);
 
-  found_chptr = (struct ResvChannel *) resvTable[hashv].list;
-
-  for( ; found_chptr; found_chptr = found_chptr->hnext)
+  DLINK_FOREACH(ptr, resvTable[hashv].list.head)
   {
-    if(!irccmp(name, found_chptr->name))
+    rptr = ptr->data;
+
+    if(irccmp(name, rptr->name) == 0)
     {
-      return(found_chptr);
+      return rptr;
     }
   }
-  
-  return(NULL);
-}  
+
+  return NULL;
+} 
 
 #ifdef FL_DEBUG
 void

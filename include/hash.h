@@ -25,38 +25,27 @@
 #ifndef INCLUDED_hash_h
 #define INCLUDED_hash_h
 
-/* 
- * Client hash table size
- *
- * used in hash.c, s_debug.c
- */
+/* Client hash table size, used in hash.c/s_debug.c */
 #define U_MAX 65536
 
-/* 
- * Channel hash table size
- *
- * used in hash.c, s_debug.c
- */
+/* Channel hash table size, hash.c/s_debug.c */
 #define CH_MAX 16384
 
 /* hostname hash table size */
 #define HOST_MAX 131072
 
-/*
- * RESV hash table size
- *
- * used in hash.c
- */
+/* RESV hash table size, used in hash.c */
 #define R_MAX 1024
 
 struct Client;
 struct Channel;
 struct ResvChannel;
 
-struct HashEntry {
+struct HashEntry
+{
   int    hits;
   int    links;
-  void*  list;
+  dlink_list list;
 };
 
 struct Client *find_id(const char *name);
@@ -83,7 +72,7 @@ extern struct Client* find_client(const char* name);
 extern struct Client* find_server(const char* name);
 extern struct Client* hash_find_server(const char* name);
 
-struct Client *find_hostname(const char *);
+dlink_node *find_hostname(const char *);
 void del_from_hostname_hash_table(const char *, struct Client *);
 void add_to_hostname_hash_table(const char *, struct Client *);
 

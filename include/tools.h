@@ -88,8 +88,7 @@ void mem_frob(void *data, int len);
  * n is another list head for temporary storage
  * head is your list head
  */
-#define DLINK_FOREACH_SAFE(pos, n, head) for (pos = (head)->next, n = pos->next; pos != (head); pos = n, n = pos->next)
-                
+#define DLINK_FOREACH_SAFE(pos, n, head) for (pos = (head), n = pos->next; pos != NULL; pos = n, n = pos->next)
 	        
 #define DLINK_FOREACH_PREV(pos, head) for (pos = (head); pos != NULL; pos = pos->prev)
               		                  	

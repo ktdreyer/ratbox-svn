@@ -126,7 +126,8 @@ struct Client* make_client(struct Client* from)
   client_p = BlockHeapAlloc(client_heap);
   if(client_p == NULL)
     return NULL;
-  memset(client_p, 0, sizeof(struct Client)); 
+  memset(client_p, 0, sizeof(struct Client));
+
   if (from == NULL)
     {
       client_p->from  = client_p; /* 'from' of local client is self! */
@@ -157,23 +158,7 @@ struct Client* make_client(struct Client* from)
 
   client_p->status = STAT_UNKNOWN;
   strcpy(client_p->username, "unknown");
-#if 0
-  client_p->name[0] = '\0';
-  client_p->flags   = 0;
-  client_p->next    = NULL;
-  client_p->prev    = NULL;
-  client_p->hnext   = NULL;
-  client_p->lnext   = NULL;
-  client_p->lprev   = NULL;
-  client_p->user    = NULL;
-  client_p->serv    = NULL;
-  client_p->servptr = NULL;
-  client_p->whowas  = NULL;
-  client_p->allow_list.head = NULL;
-  client_p->allow_list.tail = NULL;
-  client_p->on_allow_list.head = NULL;
-  client_p->on_allow_list.tail = NULL;
-#endif
+
   return client_p;
 }
 

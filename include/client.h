@@ -115,10 +115,7 @@ struct ZipStats
 struct Client
 {
   dlink_node        node;
-  struct Client*    hnext;
-  struct Client*    idhnext;
-  struct Client*    hostnext;
-	
+
   struct Client*    lnext;      /* Used for Server->servers/users */
   struct Client*    lprev;      /* Used for Server->servers/users */
 

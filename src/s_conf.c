@@ -628,6 +628,7 @@ int attach_iline(struct Client *client_p, struct ConfItem *aconf)
   if(ConfigFileEntry.use_global_limits)
   {
     struct Client *target_p;
+    dlink_node *ptr;
     int local_count = 0;
     int global_count = 0;
     int ident_count = 0;
@@ -639,9 +640,14 @@ int attach_iline(struct Client *client_p, struct ConfItem *aconf)
     if(*client_p->username == '~')
       unidented = 1;
 
+    /* find_hostname() returns the head of the list to search */
+    DLINK_FOREACH(ptr, find_hostname(client_p->host))
+    {
+      target_p = ptr->data;
+#if 0
     for(target_p = find_hostname(client_p->host); target_p;
         target_p = target_p->hostnext)
-    {
+#endif
       if(irccmp(client_p->host, target_p->host) != 0)
         continue;
 
