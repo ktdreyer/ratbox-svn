@@ -830,10 +830,6 @@ int attach_iline(struct Client *client_p, struct ConfItem *aconf)
   int unidented = 0;
 
   
-  if(!add_ip_limit(client_p, aconf))
-  {
-    return(TOO_MANY_LOCAL);
-  }
 
   
   if(IsConfExemptLimits(aconf))
@@ -942,6 +938,14 @@ attach_conf(struct Client *client_p,struct ConfItem *aconf)
 
   if ((aconf->status & CONF_OPERATOR) == 0)
   {
+    if(ClassPtr(aconf))
+    {
+      if(!add_ip_limit(client_p, aconf))
+      {
+        return(TOO_MANY_LOCAL);
+      }
+    }
+
     if ((aconf->status & CONF_CLIENT) &&
         ConfCurrUsers(aconf) >= ConfMaxUsers(aconf) && ConfMaxUsers(aconf) > 0)
     {
