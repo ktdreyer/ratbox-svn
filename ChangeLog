@@ -1,3 +1,16 @@
+leeh        2004/04/03 17:06:03 EST	(20040403_3)
+
+  Modified files:
+    src                  reject.c 
+  Log:
+  - make the reject list ordered by time so we can quit when we hit the first
+    one that doesnt expire
+  
+  Revision  Changes    Path
+  1.15      +7 -7      ircd-ratbox/src/reject.c
+
+
+
 leeh        2004/04/03 14:48:38 EST	(20040403_2)
 
   Modified files:
