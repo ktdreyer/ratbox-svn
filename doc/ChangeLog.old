@@ -1,3 +1,16 @@
+db          2002/05/17 14:58:53 EDT	(20020517_3)
+
+  Modified files:
+    src                  send.c 
+  Log:
+  ptr->next should be ptr_next
+  one never knows when a client will go dead underneath us in a send
+  
+  Revision  Changes    Path
+  7.189     +21 -7     ircd-hybrid-7/src/send.c
+
+
+
 db          2002/05/17 14:09:18 EDT	(20020517_2)
 
   Modified files:
