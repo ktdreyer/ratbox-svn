@@ -110,10 +110,6 @@ int     m_whois(struct Client *cptr,
  */
 
  return(do_whois(cptr,sptr,parc,parv));
- 
- 
-
->>>>>>> 1.39
 }
 
 /*
