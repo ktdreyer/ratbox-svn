@@ -1,3 +1,15 @@
+androsyn    2004/06/14 23:57:37 EDT	(20040615_2)
+
+  Modified files:
+    modules              m_dline.c 
+  Log:
+  Make redundant dlines useful...
+  
+  Revision  Changes    Path
+  1.35      +4 -4      ircd-ratbox/modules/m_dline.c
+
+
+
 androsyn    2004/06/14 23:46:20 EDT	(20040615_1)
 
   Modified files:
