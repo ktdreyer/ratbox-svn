@@ -1,3 +1,10 @@
+*** 20010524_7 by db
+- removed the SYSLOG for the debug block allocator, there is no more
+  block allocator
+- fixed typo in TODO
+
+
+
 *** 20010524_6 by davidt
 - Fix buffer overflow in s_serv.c setting fd_note stuff
 - Tidy up servlink code more in an attempt to find the weird and
