@@ -1,3 +1,25 @@
+leeh        2002/04/16 22:25:47 EDT	(20020417_2)
+
+  Modified files:
+    contrib              m_tburst.c 
+    doc                  modes.txt 
+    include              channel_mode.h 
+    modules              m_invite.c 
+  Log:
+  - documented in modes.txt that +p also restricts halfops +/-h'ing
+  - I commited some debugging stuff to m_tburst.c, removed
+  - added macro ParanoidChannel, checks +pi, not just +p
+  - made invite use above macro.
+  - biscuits.
+  
+  Revision  Changes    Path
+  1.7       +1 -5      ircd-hybrid-7/contrib/m_tburst.c
+  7.8       +3 -2      ircd-hybrid-7/doc/modes.txt
+  7.6       +3 -0      ircd-hybrid-7/include/channel_mode.h
+  1.43      +3 -3      ircd-hybrid-7/modules/m_invite.c
+
+
+
 leeh        2002/04/16 21:02:22 EDT	(20020417_1)
 
   Modified files:
