@@ -1,3 +1,18 @@
+leeh        2002/04/22 13:26:57 EDT	(20020422_0)
+
+  Modified files:
+    src                  channel_mode.c 
+  Log:
+  - re-enabled mode counting for +v
+  - moved the post increments to pre increments, to bring the limit back
+    down to MAXMODEPARAMS
+  - took a couple of magic numbers out back and shot them.
+  
+  Revision  Changes    Path
+  7.30      +7 -8      ircd-hybrid-7/src/channel_mode.c
+
+
+
 androsyn    2002/04/21 13:18:23 EDT	(20020421_1)
 
   Modified files:
