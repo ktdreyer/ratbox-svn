@@ -85,6 +85,7 @@ static void mo_jupe(struct Client *client_p, struct Client *source_p,
 {
   struct Client *target_p;
   struct Client *ajupe;
+  dlink_node *m;
   char reason[REALLEN+2];
 
   if(!ServerInfo.hub)
@@ -136,6 +137,13 @@ static void mo_jupe(struct Client *client_p, struct Client *source_p,
 		       parv[1]);
 
   ajupe = make_client(NULL);
+
+  /* make_client() adds client to unknown_list */
+  m = dlinkFind(&unknown_list, ajupe);
+  if(m != NULL)
+    dlinkDelete(m, &unknown_list);
+  free_dlink_node(m);
+
   make_server(ajupe);
   ajupe->hopcount = 1;
   strlcpy(ajupe->name,parv[1],HOSTLEN);
