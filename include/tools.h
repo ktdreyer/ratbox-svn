@@ -256,7 +256,6 @@ dlinkFindDelete(dlink_list * list, void *data)
 static inline int
 dlinkFindDestroy(dlink_list * list, void *data)
 {
-	extern void free_dlink_node(dlink_node * ptr);
 	void *ptr;
 
 	assert(list != NULL);
