@@ -64,40 +64,55 @@ char *_version = "20001122";
 * If a lljoin is received, from our uplink, join
 * the requested client to the given channel, or ignore it
 * if there is an error.
+*
+*   Ok, the way this works. Leaf client tries to join a channel, 
+* it doesn't exist so the join does a cburst request on behalf of the
+* client, and aborts that join. The cburst sjoin's the channel if it
+* exists on the hub, and sends back an LLJOIN to the leaf. Thats where
+* this is now..
+*
 */
 int     ms_lljoin(struct Client *cptr,
                struct Client *sptr,
                int parc,
                char *parv[])
 {
-  char *name;
+  char *chname;
   char *nick;
-  char can_join_flag;
+  char *key;
   int  flags;
+  int  i;
   struct Client *acptr;
   struct Channel *chptr;
+
   /* XXX global uplink */
   dlink_node *ptr;
   struct Client *uplink=NULL;
   if( ptr = serv_list.head )
     uplink = ptr->data;
 
+  if(uplink && !IsCapable(uplink,CAP_LL))
+    {
+      sendto_realops_flags(FLAGS_ALL,
+			   "*** LLJOIN requested from non LL server %s",
+			   cptr->name);
+      return 0;
+    }
+
   if( parc < 4 )
     return 0;
 
-  /* If not a server just ignore it */
-  if ( !IsServer(cptr) )
-    return 0;
-
-  name = parv[1];
-  if(!name)
+  chname = parv[1];
+  if(chname == NULL)
     return 0;
 
   nick = parv[2];
-  if(!nick)
+  if(nick == NULL)
     return 0;
 
-  can_join_flag = parv[3][0];
+  key = parv[3];
+  if(key == NULL)
+    return 0;
 
   flags = 0;
 
@@ -109,100 +124,85 @@ int     ms_lljoin(struct Client *cptr,
   if( !MyClient(acptr) )
     return 0;
 
-  if(!(chptr=hash_find_channel(name, NullChn)))
+  if( (chptr = hash_find_channel(chname, NullChn)) == NULL)
     {
       flags = CHFL_CHANOP;
-      chptr = get_channel( acptr, name, CREATE );
-    }
-
-  if(uplink && IsCapable(uplink,CAP_LL))
-    {
-      switch(can_join_flag)
-        {
-        case 'J':
-
-          if ((acptr->user->joined >= MAXCHANNELSPERUSER) &&
-             (!IsAnyOper(acptr) || (acptr->user->joined >= MAXCHANNELSPERUSER*3)))
-            {
-              sendto_one(acptr, form_str(ERR_TOOMANYCHANNELS),
-                         me.name, parv[0], name );
-              return 0;
-            }
-
-          if(flags == CHFL_CHANOP)
-            {
-              sendto_one(uplink,
-			 ":%s SJOIN %lu %s + :@%s", me.name,
-			 chptr->channelts, name, nick);
-            }
-          else
-            {
-              sendto_one(uplink,
-			 ":%s SJOIN %lu %s + :%s", me.name,
-			 chptr->channelts, name, nick);
-            }
-
-          add_user_to_channel(chptr, acptr, flags);
- 
-          sendto_channel_local(ALL_MEMBERS, chptr,
-			       ":%s!%s@%s JOIN :%s",
-			       acptr->name,
-			       acptr->username,
-			       acptr->host,
-			       name);
-      
-          if( flags & CHFL_CHANOP )
-            {
-              chptr->mode.mode |= MODE_TOPICLIMIT;
-              chptr->mode.mode |= MODE_NOPRIVMSGS;
-
-	      if(GlobalSetOptions.hide_chanops)
-		{
-		  sendto_channel_local(ONLY_CHANOPS,chptr,
-				       ":%s MODE %s +nt",
-				       me.name, chptr->chname);
-		}
-	      else
-		{
-		  sendto_channel_local(ALL_MEMBERS,chptr,
-				       ":%s MODE %s +nt",
-				       me.name, chptr->chname);
-		}
-
-              sendto_one(uplink, 
-			 ":%s MODE %s +nt",
-			 me.name, chptr->chname);
-            }
-        break;
-
-        case 'I':
-           sendto_one(acptr, form_str(ERR_INVITEONLYCHAN),
-                      me.name, parv[0], name);
-        break;
-
-        case 'B':
-           sendto_one(acptr, form_str(ERR_BANNEDFROMCHAN),
-                      me.name, parv[0], name);
-        break;
-
-        case 'F':
-           sendto_one(acptr, form_str(ERR_CHANNELISFULL),
-                      me.name, parv[0], name);
-        break;
-
-        case 'K':
-           sendto_one(acptr, form_str(ERR_BADCHANNELKEY),
-                      me.name, parv[0], name);
-        break;
-      
-        default:
-        break;
-	}
+      chptr = get_channel( acptr, chname, CREATE );
     }
   else
     {
-      sendto_realops_flags(FLAGS_ALL,
-		   "*** LLJOIN request received from non LL capable server!");
+      /* XXX code needs to be added to deal with vchans 
+       * simplest solution for now, would be to "punt"
+       * tell use to try rejoining. *sigh*
+       */
+
+      if (HasVchans(chptr))
+	{
+	  sendto_one(sptr,":%s NOTICE %s :This channel has vchans",
+		     me.name,sptr->name);
+	  return 0;
+	}
+
+      if ( (i = can_join(sptr, chptr, key)) )
+	{
+	  sendto_one(sptr,
+		     form_str(i), me.name, parv[0], chname);
+	  return 0;
+	}
     }
+
+  if ((acptr->user->joined >= MAXCHANNELSPERUSER) &&
+      (!IsAnyOper(acptr) || (acptr->user->joined >= MAXCHANNELSPERUSER*3)))
+    {
+      sendto_one(acptr, form_str(ERR_TOOMANYCHANNELS),
+		 me.name, parv[0], chname );
+      return 0;
+    }
+  
+  if(flags == CHFL_CHANOP)
+    {
+      sendto_one(uplink,
+		 ":%s SJOIN %lu %s + :@%s", me.name,
+		 chptr->channelts, chname, nick);
+    }
+  else
+    {
+      sendto_one(uplink,
+		 ":%s SJOIN %lu %s + :%s", me.name,
+		 chptr->channelts, chname, nick);
+    }
+
+  add_user_to_channel(chptr, acptr, flags);
+ 
+  sendto_channel_local(ALL_MEMBERS, chptr,
+		       ":%s!%s@%s JOIN :%s",
+		       acptr->name,
+		       acptr->username,
+		       acptr->host,
+		       chname);
+  
+  if( flags & CHFL_CHANOP )
+    {
+      chptr->mode.mode |= MODE_TOPICLIMIT;
+      chptr->mode.mode |= MODE_NOPRIVMSGS;
+      
+      if(GlobalSetOptions.hide_chanops)
+	{
+	  sendto_channel_local(ONLY_CHANOPS,chptr,
+			       ":%s MODE %s +nt",
+			       me.name, chptr->chname);
+	}
+      else
+	{
+	  sendto_channel_local(ALL_MEMBERS,chptr,
+			       ":%s MODE %s +nt",
+			       me.name, chptr->chname);
+	}
+
+      sendto_one(uplink, 
+		 ":%s MODE %s +nt",
+		 me.name, chptr->chname);
+    }
+  
   return 0;
 }

@@ -88,15 +88,16 @@ int     ms_cburst(struct Client *cptr,
      return 0;
 
   name = parv[1];
-  nick = NULL;
 
   if( parc > 2 )
     nick = parv[2];
-
-  key = NULL;
+  else
+    nick = NULL;
 
   if( parc > 3 )
     key = parv[3];
+  else
+    key = "";
 
 #ifdef DEBUGLL
   sendto_realops_flags(FLAGS_ALL, "CBURST called by %s for %s %s %s",
@@ -110,14 +111,15 @@ int     ms_cburst(struct Client *cptr,
     {
      /* I don't know about this channel here, let leaf deal with it */
      if(nick)
-       sendto_one(cptr,":%s LLJOIN %s %s :J",
-                        me.name, name, nick);
+       sendto_one(cptr,":%s LLJOIN %s %s %s", me.name, name, nick, key);
       return 0;
     }
 
   if(IsCapable(cptr,CAP_LL))
     {
       sjoin_channel(cptr,chptr);
+      if(nick)
+	sendto_one(cptr,":%s LLJOIN %s %s %s", me.name, name, nick, key);
     }
   else
     {
@@ -126,61 +128,5 @@ int     ms_cburst(struct Client *cptr,
       return 0;
     }
 
-  /* If client attempting to join on a CBURST request
-   * is banned or the channel is +i etc. reject client
-   * -Dianora
-   */
-
-  if ( !nick )
-    return 0;
-
-  if( (acptr = hash_find_client(nick,(struct Client *)NULL)) )
-    {
-      if( (is_banned(chptr,acptr) == CHFL_BAN) )
-        {
-          sendto_one(cptr,":%s LLJOIN %s %s :B",
-                           me.name, name, nick);
-          return 0;
-	}
-
-      if( (chptr->mode.mode & MODE_INVITEONLY) )
-        {
-          sendto_one(cptr,":%s LLJOIN %s %s :I",
-                          me.name, name, nick);
-          return 0;
-        }
-
-      if(*chptr->mode.key)
-        {
-          if(!key)
-            {
-              sendto_one(cptr,":%s LLJOIN %s %s :K",
-                               me.name, name, nick);
-              return 0;
-	    }
-
-          if(irccmp(chptr->mode.key, key))
-            {
-              sendto_one(cptr,":%s LLJOIN %s %s :K",
-                               me.name, name, nick);
-              return 0;
-	    }
-        }
-
-      if (chptr->mode.limit && chptr->users >= chptr->mode.limit)
-        {
-          sendto_one(cptr,":%s LLJOIN %s %s :F",
-                          me.name, name, nick);
-          return 0;
-        }
-
-       sendto_one(cptr,":%s LLJOIN %s %s :J",
-                        me.name, name, nick);
-       return 0;
-    }
-
-  /* No client found , no join possible */
-  sendto_one(cptr,":%s LLJOIN %s %s :N",
-                  me.name, name, nick);
   return 0;
 }

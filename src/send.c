@@ -351,7 +351,6 @@ send_queued_write(int fd, void *data)
  * output	- NONE
  * side effects	- send message to single client
  */
-
 void
 sendto_one(struct Client *to, const char *pattern, ...)
 
@@ -501,7 +500,11 @@ sendto_list_anywhere(struct Client *one, struct Client *from,
 /*
  * sendto_serv_butone
  *
- * Send a message to all connected servers except the client 'one'.
+ * inputs	- pointer to client to not send to
+ *		- var arg pattern to send
+ * output	- NONE
+ * side effects	- Send a message to all connected servers
+ *                except the client 'one'.
  */
 void
 sendto_serv_butone(struct Client *one, const char *pattern, ...)
