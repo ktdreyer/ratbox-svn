@@ -1,3 +1,9 @@
+*** 20010124_5 by fl_
+- removed a remote rate limit in lusers.. this should only be done
+  locally..
+- if shide is on, we always report theres 1 server
+
+
 *** 20010124_4 by wcampbel
 Ran all the docs through ispell
 
