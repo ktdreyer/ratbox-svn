@@ -1,3 +1,6 @@
+*** 20010106_15 by davidt
+Fix for changing hub at runtime with active lazylinks
+
 *** 20010106_14 by davidt
 Uh.  what happened to check_server?
 Restored the lazylink code..
