@@ -456,6 +456,7 @@ comm_connect_dns_callback(void *vptr, adns_answer * reply)
 		comm_connect_callback(F->fd, COMM_ERR_DNS);
 		MyFree(reply);
 		MyFree(F->dns_query);
+		F->dns_query = NULL;
 		return;
 	}
 
@@ -760,6 +761,13 @@ fd_close(int fd)
 	}
 	comm_setselect(F->fd, FDLIST_NONE, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL, 0);
 
+	if (F->dns_query != NULL)
+	{
+		delete_adns_queries(F->dns_query);	
+		MyFree(F->dns_query);
+		F->dns_query = NULL;
+	}
+	
 	F->flags.open = 0;
 	fdlist_update_biggest(fd, 0);
 	number_fd--;
