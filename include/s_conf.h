@@ -24,6 +24,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.19  2000/11/05 15:51:21  adrian
+ * Kill #ifdef IDLE_CHECK, since someone did it in mtrie.conf ..
+ *
  * Revision 7.18  2000/11/05 07:51:51  db
  * - fixed stupid in m_oper.c, it wouldn't have honoured O from other servers..
  *
@@ -379,11 +382,7 @@ typedef struct QlineItem {
 #define CONF_FLAGS_E_LINED              0x0020
 #define CONF_FLAGS_B_LINED              0x0040
 #define CONF_FLAGS_F_LINED              0x0080
-
-#ifdef IDLE_CHECK
 #define CONF_FLAGS_IDLE_LINED           0x0100
-#endif
-
 #define CONF_FLAGS_DO_IDENTD            0x0200
 #define CONF_FLAGS_ALLOW_AUTO_CONN      0x0400
 #define CONF_FLAGS_ZIP_LINK             0x0800
@@ -406,10 +405,7 @@ typedef struct QlineItem {
 #define IsConfElined(x)         ((x)->flags & CONF_FLAGS_E_LINED)
 #define IsConfBlined(x)         ((x)->flags & CONF_FLAGS_B_LINED)
 #define IsConfFlined(x)         ((x)->flags & CONF_FLAGS_F_LINED)
-
-#ifdef IDLE_CHECK
 #define IsConfIdlelined(x)      ((x)->flags & CONF_FLAGS_IDLE_LINED)
-#endif
 
 #define IsConfDoIdentd(x)       ((x)->flags & CONF_FLAGS_DO_IDENTD)
 #define IsConfDoSpoofIp(x)      ((x)->flags & CONF_FLAGS_SPOOF_IP)
