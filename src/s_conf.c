@@ -1617,6 +1617,8 @@ static void lookup_confhost(struct ConfItem* aconf)
       return;
     }
 
+  if (strchr(aconf->host, '*') || strchr(aconf->host, '?'))
+    return;
   /*
   ** Do name lookup now on hostnames given and store the
   ** ip numbers in conf structure.
