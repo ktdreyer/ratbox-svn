@@ -78,7 +78,7 @@ static void add_new_majority_gline(const char *, const char *, const char *,
 				   const char *, const char *, const char *, const char *);
 
 static int check_wild_gline(const char *, const char *);
-static int invalid_gline(struct Client *, const char *, const char *, const char *);
+static int invalid_gline(struct Client *, const char *, const char *, char *);
 
 static char *small_file_date(void);
 
@@ -393,7 +393,7 @@ check_wild_gline(const char *user, const char *host)
  * outputs	- 1 if invalid, 0 if valid
  */
 static int
-invalid_gline(struct Client *source_p, const char *luser, const char *lhost, const char *lreason)
+invalid_gline(struct Client *source_p, const char *luser, const char *lhost, char *lreason)
 {
 	if(strchr(luser, '!'))
 	{
@@ -401,6 +401,9 @@ invalid_gline(struct Client *source_p, const char *luser, const char *lhost, con
 			   me.name, source_p->name);
 		return 1;
 	}
+
+	if(strlen(lreason) > REASONLEN)
+		lreason[REASONLEN] = '\0';
 
 	return 0;
 }
@@ -476,7 +479,7 @@ set_local_gline(const char *oper_nick,
 	aconf->status = CONF_GLINE;
 	aconf->flags |= CONF_FLAGS_TEMPORARY;
 
-	ircsprintf(buffer, "%s (%s)", reason, current_date);
+	snprintf(buffer, sizeof(buffer), "%s (%s)", reason, current_date);
 
 	DupString(aconf->passwd, buffer);
 	DupString(aconf->user, (char *) user);
@@ -513,7 +516,8 @@ log_gline_request(const char *oper_nick,
 		return;
 	}
 
-	ircsprintf(filenamebuf, "%s.%s", ConfigFileEntry.glinefile, small_file_date());
+	snprintf(filenamebuf, sizeof(filenamebuf), 
+		 "%s.%s", ConfigFileEntry.glinefile, small_file_date());
 	if((out = fbopen(filenamebuf, "+a")) == NULL)
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem opening %s: %s",
@@ -524,7 +528,7 @@ log_gline_request(const char *oper_nick,
 	tmptr = localtime((const time_t *) &CurrentTime);
 	strftime(timebuffer, MAX_DATE_STRING, "%Y/%m/%d %H:%M:%S", tmptr);
 
-	ircsprintf(buffer,
+	snprintf(buffer, sizeof(buffer),
 		   "#Gline for %s@%s [%s] requested by %s!%s@%s on %s at %s\n",
 		   user, host, reason, oper_nick, oper_user, oper_host, oper_server, timebuffer);
 
@@ -560,7 +564,8 @@ log_gline(struct Client *source_p,
 		return;
 	}
 
-	ircsprintf(filenamebuf, "%s.%s", ConfigFileEntry.glinefile, small_file_date());
+	snprintf(filenamebuf, sizeof(filenamebuf),
+		 "%s.%s", ConfigFileEntry.glinefile, small_file_date());
 
 	if((out = fbopen(filenamebuf, "a")) == NULL)
 	{
@@ -571,7 +576,8 @@ log_gline(struct Client *source_p,
 	tmptr = localtime((const time_t *) &CurrentTime);
 	strftime(timebuffer, MAX_DATE_STRING, "%Y/%m/%d %H:%M:%S", tmptr);
 
-	ircsprintf(buffer, "#Gline for %s@%s %s added by the following\n", user, host, timebuffer);
+	snprintf(buffer, sizeof(buffer),
+		 "#Gline for %s@%s %s added by the following\n", user, host, timebuffer);
 
 	if(fbputs(buffer, out) == -1)
 	{
@@ -580,7 +586,7 @@ log_gline(struct Client *source_p,
 		return;
 	}
 
-	ircsprintf(buffer, "#%s!%s@%s on %s [%s]\n",
+	snprintf(buffer, sizeof(buffer), "#%s!%s@%s on %s [%s]\n",
 		   gline_pending_ptr->oper_nick1,
 		   gline_pending_ptr->oper_user1,
 		   gline_pending_ptr->oper_host1,
@@ -593,7 +599,7 @@ log_gline(struct Client *source_p,
 		return;
 	}
 
-	ircsprintf(buffer, "#%s!%s@%s on %s [%s]\n",
+	snprintf(buffer, sizeof(buffer), "#%s!%s@%s on %s [%s]\n",
 		   gline_pending_ptr->oper_nick2,
 		   gline_pending_ptr->oper_user2,
 		   gline_pending_ptr->oper_host2,
@@ -607,7 +613,7 @@ log_gline(struct Client *source_p,
 		return;
 	}
 
-	ircsprintf(buffer, "#%s!%s@%s on %s [%s]\n",
+	snprintf(buffer, sizeof(buffer), "#%s!%s@%s on %s [%s]\n",
 		   oper_nick, oper_user, oper_host, oper_server, (reason) ? reason : "No reason");
 
 	if(fbputs(buffer, out) == -1)
@@ -617,7 +623,7 @@ log_gline(struct Client *source_p,
 		return;
 	}
 
-	ircsprintf(buffer, "\"%s\",\"%s\",\"%s %s\",\"%s\",%lu\n",
+	snprintf(buffer, sizeof(buffer), "\"%s\",\"%s\",\"%s %s\",\"%s\",%lu\n",
 		   user, host, reason, timebuffer, oper_nick, (unsigned long) CurrentTime);
 
 	if(fbputs(buffer, out) == -1)

@@ -231,7 +231,8 @@ remove_permkline_match(struct Client *source_p, const char *host, const char *us
 	mode_t oldumask;
 	char *p;
 
-	ircsprintf(temppath, "%s.tmp", ConfigFileEntry.klinefile);
+	snprintf(temppath, sizeof(temppath),
+		 "%s.tmp", ConfigFileEntry.klinefile);
 
 	filename = get_conf_name(KLINE_TYPE);
 

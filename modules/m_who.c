@@ -123,7 +123,7 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 			return 0;
 		}
 
-		do_who_on_channel(source_p, mychannel, "*", NO, YES);
+		do_who_on_channel(source_p, mychannel, "*", server_oper, YES);
 
 		sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], "*");
 		return 0;
@@ -140,9 +140,9 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 		if(chptr != NULL)
 		{
 			if(IsMember(source_p, chptr))
-				do_who_on_channel(source_p, chptr, chptr->chname, NO, YES);
+				do_who_on_channel(source_p, chptr, chptr->chname, server_oper, YES);
 			else if(!SecretChannel(chptr))
-				do_who_on_channel(source_p, chptr, chptr->chname, NO, NO);
+				do_who_on_channel(source_p, chptr, chptr->chname, server_oper, NO);
 		}
 		sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], mask);
 		return 0;
@@ -349,6 +349,9 @@ do_who_on_channel(struct Client *source_p, struct Channel *chptr,
 	{
 		target_p = ptr->data;
 
+		if(server_oper && !IsOper(target_p))
+			continue;
+
 		if(member || !IsInvisible(target_p))
 			do_who(source_p, target_p, chname, channel_flags[3]);
 	}
@@ -356,6 +359,9 @@ do_who_on_channel(struct Client *source_p, struct Channel *chptr,
 	DLINK_FOREACH(ptr, chptr->voiced.head)
 	{
 		target_p = ptr->data;
+
+		if(server_oper && !IsOper(target_p))
+			continue;
 
 		if(member || !IsInvisible(target_p))
 			do_who(source_p, target_p, chname, channel_flags[2]);
@@ -365,6 +371,9 @@ do_who_on_channel(struct Client *source_p, struct Channel *chptr,
 	{
 		target_p = ptr->data;
 
+		if(server_oper && !IsOper(target_p))
+			continue;
+
 		if(member || !IsInvisible(target_p))
 			do_who(source_p, target_p, chname, channel_flags[1]);
 	}
@@ -372,6 +381,9 @@ do_who_on_channel(struct Client *source_p, struct Channel *chptr,
 	DLINK_FOREACH(ptr, chptr->chanops.head)
 	{
 		target_p = ptr->data;
+
+		if(server_oper && !IsOper(target_p))
+			continue;
 
 		if(member || !IsInvisible(target_p))
 			do_who(source_p, target_p, chname, channel_flags[0]);

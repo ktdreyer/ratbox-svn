@@ -67,7 +67,7 @@ static time_t valid_tkline(struct Client *source_p, const char *string);
 static char *format_kline(char *);
 static int find_user_host(struct Client *source_p, const char *user_host_or_nick, char *user, char *host);
 
-static int valid_comment(const char *comment);
+static int valid_comment(char *comment);
 static int valid_user_host(const char *user, const char *host);
 static int valid_wild_card(const char *user, const char *host);
 
@@ -99,7 +99,8 @@ char host[HOSTLEN + 2];
 static int
 mo_kline(struct Client *client_p, struct Client *source_p, int parc, const char **parv)
 {
-	const char *reason = "No Reason";
+	char def[] = "No Reason";
+	char *reason = def;
 	char *oper_reason;
 	const char *current_date;
 	const char *target_server = NULL;
@@ -217,7 +218,7 @@ mo_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if(tkline_time)
 	{
-		ircsprintf(buffer,
+		snprintf(buffer, sizeof(buffer),
 			   "Temporary K-line %d min. - %s (%s)",
 			   (int) (tkline_time / 60), reason, current_date);
 		DupString(aconf->passwd, buffer);
@@ -225,7 +226,7 @@ mo_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	}
 	else
 	{
-		ircsprintf(buffer, "%s (%s)", reason, current_date);
+		snprintf(buffer, sizeof(buffer), "%s (%s)", reason, current_date);
 		DupString(aconf->passwd, buffer);
 		apply_kline(source_p, aconf, reason, oper_reason, current_date);
 	}
@@ -760,10 +761,13 @@ valid_wild_card(const char *luser, const char *lhost)
  * side effects - NONE
  */
 static int
-valid_comment(const char *comment)
+valid_comment(char *comment)
 {
 	if(strchr(comment, '"'))
 		return 0;
+
+	if(strlen(comment) > REASONLEN)
+		comment[REASONLEN] = '\0';
 
 	return 1;
 }

@@ -1314,6 +1314,8 @@ oper_up(struct Client *source_p, struct ConfItem *aconf)
 
 	if(IsOperAdmin(source_p) && !IsOperHiddenAdmin(source_p))
 		source_p->umodes |= UMODE_ADMIN;
+	if(!IsOperN(source_p))
+		source_p->umodes &= ~UMODE_NCHANGE;
 
 	sendto_realops_flags(UMODE_ALL, L_ALL,
 			     "%s (%s@%s) is now an operator", source_p->name,

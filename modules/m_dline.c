@@ -60,7 +60,7 @@ DECLARE_MODULE_AV1(dline, NULL, NULL, dline_clist, NULL, NULL, "$Revision$");
 /* Local function prototypes */
 
 static time_t valid_tkline(struct Client *source_p, const char *string);
-static int valid_comment(const char *comment);
+static int valid_comment(char *comment);
 
 char user[USERLEN + 2];
 char host[HOSTLEN + 2];
@@ -79,15 +79,16 @@ char host[HOSTLEN + 2];
 static int
 mo_dline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
+	char def[] = "No Reason";
 	const char *dlhost;
 	char *oper_reason;
-	const char *reason = "<No Reason>";
+	char *reason = def;
 	struct Client *target_p;
 	struct sockaddr_storage daddr;
 	char cidr_form_host[HOSTLEN + 1];
 	struct ConfItem *aconf;
 	int bits;
-	char dlbuffer[1024];
+	char dlbuffer[IRCD_BUFSIZE];
 	const char *current_date;
 	int tdline_time = 0;
 	int loc = 0;
@@ -247,8 +248,9 @@ mo_dline(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if(tdline_time)
 	{
-		ircsprintf(dlbuffer, "Temporary D-line %d min. - %s (%s)",
-			   (int) (tdline_time / 60), reason, current_date);
+		snprintf(dlbuffer, sizeof(dlbuffer), 
+			 "Temporary D-line %d min. - %s (%s)",
+			 (int) (tdline_time / 60), reason, current_date);
 		DupString(aconf->passwd, dlbuffer);
 		aconf->hold = CurrentTime + tdline_time;
 		add_temp_dline(aconf);
@@ -277,7 +279,7 @@ mo_dline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	}
 	else
 	{
-		ircsprintf(dlbuffer, "%s (%s)", reason, current_date);
+		snprintf(dlbuffer, sizeof(dlbuffer), "%s (%s)", reason, current_date);
 		DupString(aconf->passwd, dlbuffer);
 		add_conf_by_address(aconf->host, CONF_DLINE, NULL, aconf);
 		write_confitem(DLINE_TYPE, source_p, NULL, aconf->host, reason,
@@ -338,10 +340,13 @@ valid_tkline(struct Client *source_p, const char *p)
  * side effects - NONE
  */
 static int
-valid_comment(const char *comment)
+valid_comment(char *comment)
 {
 	if(strchr(comment, '"'))
 		return 0;
+
+	if(strlen(comment) > REASONLEN)
+		comment[REASONLEN] = '\0';
 
 	return 1;
 }

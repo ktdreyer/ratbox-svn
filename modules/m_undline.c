@@ -74,7 +74,7 @@ mo_undline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	int pairme = NO, error_on_write = NO;
 	mode_t oldumask;
 
-	ircsprintf(temppath, "%s.tmp", ConfigFileEntry.dlinefile);
+	snprintf(temppath, sizeof(temppath), "%s.tmp", ConfigFileEntry.dlinefile);
 
 	if(!IsOperUnkline(source_p))
 	{

@@ -202,7 +202,7 @@ ms_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 			return 0;
 
 		/* already xlined */
-		if((xconf = find_xline(parv[1])) != NULL)
+		if((xconf = find_xline(parv[2])) != NULL)
 			return 0;
 
 		write_xline(source_p, parv[2], parv[4], atoi(parv[3]));
@@ -215,7 +215,7 @@ ms_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 			return 0;
 
 		/* already xlined */
-		if((xconf = find_xline(parv[1])) != NULL)
+		if((xconf = find_xline(parv[2])) != NULL)
 		{
 			sendto_one(source_p, ":%s NOTICE %s :[%s] already X-Lined by [%s] - %s",
 				   me.name, source_p->name, parv[1], 
@@ -405,7 +405,8 @@ remove_xline(struct Client *source_p, const char *huntgecos, int warn)
 	int found_xline = 0;
 
 	filename = ConfigFileEntry.xlinefile;
-	ircsprintf(temppath, "%s.tmp", ConfigFileEntry.xlinefile);
+	snprintf(temppath, sizeof(temppath),
+		 "%s.tmp", ConfigFileEntry.xlinefile);
 
 	if((in = fbopen(filename, "r")) == NULL)
 	{

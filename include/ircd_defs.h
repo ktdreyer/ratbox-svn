@@ -91,6 +91,8 @@
 #define KILLLEN         90
 #define CHANNELLEN      200
 
+#define REASONLEN	120
+
 /* 23+1 for \0 */
 #define KEYLEN          24
 #define BUFSIZE         512	/* WARNING: *DONT* CHANGE THIS!!!! */
