@@ -559,7 +559,6 @@ load_all_modules(int warn)
         mod_add_cmd(&cryptlink_msgtab);
 #endif
         mod_add_cmd(&die_msgtab);
-	mod_add_cmd(&dmem_msgtab);
 	mod_add_cmd(&eob_msgtab);
 	mod_add_cmd(&gline_msgtab);
 	mod_add_cmd(&help_msgtab);
