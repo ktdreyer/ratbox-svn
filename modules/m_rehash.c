@@ -82,6 +82,7 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
         {
           sendto_realops_flags(FLAGS_ALL, L_ALL,
                        "%s is forcing cleanup of channels",parv[0]);
+	  cleanup_channels(NULL);
           found = YES;
         }
       else if(irccmp(parv[1],"DNS") == 0)
