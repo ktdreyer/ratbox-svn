@@ -62,6 +62,7 @@ extern  int     get_client_ping (struct Client *);
 extern  void    add_class(int, int, int, int, long);
 extern  void    check_class(void);
 extern  void    initclass(void);
+extern  struct  Class* make_class(void);
 extern  void    free_class(struct Class* );
 extern  void    add_class (int, int, int, int, long);
 extern  void    fix_class (struct ConfItem *, struct ConfItem *);

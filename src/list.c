@@ -250,18 +250,6 @@ void _free_link(struct SLink *lp)
     }
 }
 
-struct Class *make_class()
-{
-  struct Class        *tmp;
-
-  tmp = (struct Class *)MyMalloc(sizeof(struct Class));
-  return tmp;
-}
-
-void free_class(struct Class *tmp)
-{
-  MyFree((char *)tmp);
-}
 
 /*
 Attempt to free up some block memory

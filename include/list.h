@@ -59,7 +59,6 @@ extern  void    _free_link (struct SLink *);
 extern  void    _free_user (struct User *, struct Client *);
 extern  struct SLink    *make_link (void);
 extern  struct User     *make_user (struct Client *);
-extern  struct Class* make_class(void);
 extern  struct Server   *make_server (struct Client *);
 extern  struct SLink    *find_user_link (struct SLink *, struct Client *);
 extern  void    initlists (void);
