@@ -1,3 +1,15 @@
+leeh        2002/04/26 06:52:12 EDT	(20020426_1)
+
+  Modified files:
+    modules/core         m_sjoin.c 
+  Log:
+  - added back the notices for TS change in SJOIN that ran away from home.
+  
+  Revision  Changes    Path
+  1.134     +15 -1     ircd-hybrid-7/modules/core/m_sjoin.c
+
+
+
 leeh        2002/04/25 20:47:37 EDT	(20020426_0)
 
   Modified files:
