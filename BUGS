@@ -49,6 +49,9 @@
     numeric 461 errors (ERR_NEEDMOREPARAMS) and KILL's for the clients with
     that IP.
 
+7.  /etc/resolv.conf MUST be readable to the user that the ircd runs under.
+    Currently if it is not readable, it will core on startup.
+
 For more information see http://bugs.efnow.net
 
 BUG REPORTS: If you run this code and encounter problems, you must report
