@@ -1,3 +1,20 @@
+androsyn    2003/08/22 08:57:20 EDT	(20030822_0)
+
+  Modified files:
+    include              client.h 
+    src                  client.c packet.c s_bsd.c s_serv.c 
+  Log:
+  remove non-socketpair servlink code, it never worked anyways
+  
+  Revision  Changes    Path
+  7.218     +0 -6      ircd-ratbox/include/client.h
+  7.408     +1 -10     ircd-ratbox/src/client.c
+  7.119     +4 -25     ircd-ratbox/src/packet.c
+  7.208     +0 -6      ircd-ratbox/src/s_bsd.c
+  7.354     +1 -72     ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2003/08/21 18:31:41 EDT	(20030821_2)
 
   Modified files:
