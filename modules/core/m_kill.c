@@ -295,6 +295,6 @@ relay_kill(struct Client *one, struct Client *source_p,
 
 		sendto_one(client_p, ":%s KILL %s :%s",
 			   get_id(source_p, client_p),
-			   get_id(target_p, client_p));
+			   get_id(target_p, client_p), buffer);
 	}
 }
