@@ -1,3 +1,8 @@
+*** 20010208_4 by db
+- if an fd from accept is -1 don't add it ! 
+
+
+
 *** 20010208_3 by androsyn
 Keeps adns from splattering crud on fd=2
 
