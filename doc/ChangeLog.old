@@ -1,3 +1,7 @@
+*** 19990802_8 by tomh
+missed one
+
+
 *** 19990802_7 by tomh
 remove struct.h includes, new .depend
 
