@@ -1,3 +1,7 @@
+*** 20010103_24 by ejb
+- made modules.c use dlink
+
+
 *** 20010103_23 by davidt
 Remove prefix from NICK message during connect burst
 
