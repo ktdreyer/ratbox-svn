@@ -1027,9 +1027,6 @@ server_estab(struct Client *client_p)
 	dlinkAdd(client_p, &client_p->lnode, &me.serv->servers);
 	dlinkMoveNode(&client_p->localClient->tnode, &unknown_list, &serv_list);
 
-	Count.server++;
-	Count.myserver++;
-
 	add_server_to_list(client_p);
 	add_to_client_hash(client_p->name, client_p);
 	/* doesnt duplicate client_p->serv if allocated this struct already */

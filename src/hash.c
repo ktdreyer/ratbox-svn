@@ -809,7 +809,6 @@ get_or_create_channel(struct Client *client_p, const char *chname, int *isnew)
 
 	dlinkAddAlloc(chptr, &channelTable[hashv]);
 
-	Count.chan++;
 	return chptr;
 }
 

@@ -623,7 +623,6 @@ main(int argc, char *argv[])
 	memset((void *) &Count, 0, sizeof(Count));
 	memset((void *) &server_state, 0, sizeof(server_state));
 
-	Count.server = 1;	/* us */
 	memset((void *) &ServerInfo, 0, sizeof(ServerInfo));
 	memset((void *) &AdminInfo, 0, sizeof(AdminInfo));
 

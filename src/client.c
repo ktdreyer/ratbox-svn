@@ -749,7 +749,6 @@ update_client_exit_stats(struct Client *client_p)
 {
 	if(IsServer(client_p))
 	{
-		--Count.server;
 		sendto_realops_flags(UMODE_EXTERNAL, L_ALL,
 				     "Server %s split from %s",
 				     client_p->name, client_p->servptr->name);
@@ -1366,7 +1365,6 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 	dlinkDelete(&source_p->localClient->tnode, &serv_list);
 	remove_server_from_list(source_p);
 	
-	Count.myserver--;
 	unset_chcap_usage_counts(source_p);
 	sendk = source_p->localClient->sendK;
 	recvk = source_p->localClient->receiveK;
@@ -1444,7 +1442,6 @@ exit_local_client(struct Client *client_p, struct Client *source_p, struct Clien
 			
 	s_assert(IsPerson(source_p));
 	client_flush_input(source_p);
-	Count.local--;
 	dlinkDelete(&source_p->localClient->tnode, &lclient_list);
 	if(IsOper(source_p))
 		dlinkFindDestroy(&oper_list, source_p);

@@ -305,16 +305,18 @@ quote_max(struct Client *source_p, int newval)
 		GlobalSetOptions.maxclients = newval;
 
 		sendto_realops_flags(UMODE_ALL, L_ALL,
-				     "%s!%s@%s set new MAXCLIENTS to %d (%d current)",
+				     "%s!%s@%s set new MAXCLIENTS to %d (%lu current)",
 				     source_p->name, source_p->username, source_p->host,
-				     GlobalSetOptions.maxclients, Count.local);
+				     GlobalSetOptions.maxclients, 
+				     dlink_list_length(&lclient_list));
 
 		return;
 	}
 	else
 	{
-		sendto_one(source_p, ":%s NOTICE %s :Current Maxclients = %d (%d)",
-			   me.name, source_p->name, GlobalSetOptions.maxclients, Count.local);
+		sendto_one(source_p, ":%s NOTICE %s :Current Maxclients = %d (%lu)",
+			   me.name, source_p->name, GlobalSetOptions.maxclients,
+			   dlink_list_length(&lclient_list));
 	}
 }
 

@@ -449,7 +449,6 @@ destroy_channel(struct Channel *chptr)
 	dlinkDelete(&chptr->node, &global_channel_list);
 	del_from_channel_hash(chptr->chname, chptr);
 	BlockHeapFree(channel_heap, chptr);
-	Count.chan--;
 }
 
 /* channel_pub_or_secret()
@@ -829,8 +828,9 @@ check_splitmode(void *unused)
 {
 	if(splitchecking && (ConfigChannel.no_join_on_split || ConfigChannel.no_create_on_split))
 	{
-		if(!splitmode && ((Count.server < split_servers) ||
-				  (Count.total < split_users)))
+		if(!splitmode && 
+		   ((dlink_list_length(&global_serv_list) < split_servers) ||
+		    (Count.total < split_users)))
 		{
 			splitmode = 1;
 
@@ -838,7 +838,8 @@ check_splitmode(void *unused)
 					     "Network split, activating splitmode");
 			eventAddIsh("check_splitmode", check_splitmode, NULL, 10);
 		}
-		else if(splitmode && (Count.server >= split_servers) &&
+		else if(splitmode && 
+			(dlink_list_length(&global_serv_list) >= split_servers) &&
 			(Count.total >= split_users))
 		{
 			/* splitmode ended, if we're delaying the

@@ -196,27 +196,34 @@ show_lusers(struct Client *source_p)
 	if(!ConfigServerHide.hide_servers || IsOper(source_p))
 		sendto_one(source_p, form_str(RPL_LUSERCLIENT), me.name,
 			   source_p->name, (Count.total - Count.invisi),
-			   Count.invisi, Count.server);
+			   Count.invisi, 
+			   dlink_list_length(&global_serv_list));
 	else
 		sendto_one(source_p, form_str(RPL_LUSERCLIENT), me.name,
 			   source_p->name, (Count.total - Count.invisi), Count.invisi, 1);
 	if(Count.oper > 0)
 		sendto_one(source_p, form_str(RPL_LUSEROP), me.name, source_p->name, Count.oper);
 
-	if(Count.unknown > 0)
-		sendto_one(source_p, form_str(RPL_LUSERUNKNOWN), me.name,
-			   source_p->name, Count.unknown);
+	if(dlink_list_length(&unknown_list) > 0)
+		sendto_one(source_p, form_str(RPL_LUSERUNKNOWN),
+			   me.name, source_p->name, 
+			   dlink_list_length(&unknown_list));
 
-	if(Count.chan > 0)
+	if(dlink_list_length(&global_channel_list) > 0)
 		sendto_one(source_p, form_str(RPL_LUSERCHANNELS),
-			   me.name, source_p->name, Count.chan);
+			   me.name, source_p->name, 
+			   dlink_list_length(&global_channel_list));
 
 	if(!ConfigServerHide.hide_servers || IsOper(source_p))
 	{
 		sendto_one(source_p, form_str(RPL_LUSERME),
-			   me.name, source_p->name, Count.local, Count.myserver);
-		sendto_one(source_p, form_str(RPL_LOCALUSERS), me.name,
-			   source_p->name, Count.local, Count.max_loc);
+			   me.name, source_p->name,
+			   dlink_list_length(&lclient_list),
+			   dlink_list_length(&serv_list));
+		sendto_one(source_p, form_str(RPL_LOCALUSERS),
+			   me.name, source_p->name, 
+			   dlink_list_length(&lclient_list),
+			   Count.max_loc);
 	}
 	else
 	{
@@ -234,11 +241,13 @@ show_lusers(struct Client *source_p)
 			   source_p->name, MaxConnectionCount,
 			   MaxClientCount, Count.totalrestartcount);
 
-	if(Count.local > MaxClientCount)
-		MaxClientCount = Count.local;
+	if(dlink_list_length(&lclient_list) > MaxClientCount)
+		MaxClientCount = dlink_list_length(&lclient_list);
 
-	if((Count.local + Count.myserver) > MaxConnectionCount)
-		MaxConnectionCount = Count.local + Count.myserver;
+	if((dlink_list_length(&lclient_list) + dlink_list_length(&serv_list)) >
+	   MaxConnectionCount)
+		MaxConnectionCount = dlink_list_length(&lclient_list) + 
+					dlink_list_length(&serv_list);
 
 	return 0;
 }
@@ -436,9 +445,10 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 	 *   -Taner
 	 */
 	/* Except "F:" clients */
-	if(((Count.local + 1) >= (GlobalSetOptions.maxclients + MAX_BUFFER)
-	    ||
-	    (Count.local + 1) >= (GlobalSetOptions.maxclients - 5)) && !(IsExemptLimits(source_p)))
+	if(((dlink_list_length(&lclient_list) + 1) >= 
+	   (GlobalSetOptions.maxclients + MAX_BUFFER) ||
+           (dlink_list_length(&lclient_list) + 1) >= 
+	    (GlobalSetOptions.maxclients - 5)) && !(IsExemptLimits(source_p)))
 	{
 		sendto_realops_flags(UMODE_FULL, L_ALL,
 				     "Too many clients, rejecting %s[%s].", nick, source_p->host);
@@ -499,14 +509,6 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 
 	Count.invisi++;
 
-	if((++Count.local) > Count.max_loc)
-	{
-		Count.max_loc = Count.local;
-		if(!(Count.max_loc % 10))
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "New Max Local Clients: %d", Count.max_loc);
-	}
-
 	SetClient(source_p);
 
 	/* XXX source_p->servptr is &me, since local client */
@@ -521,8 +523,16 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 
 	dlinkMoveNode(&source_p->localClient->tnode, &unknown_list, &lclient_list);
 	s_assert(source_p->localClient != NULL);
-	user_welcome(source_p);
 
+	if(dlink_list_length(&lclient_list) > Count.max_loc)
+	{
+		Count.max_loc = dlink_list_length(&lclient_list);
+		if(!(Count.max_loc % 10))
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					     "New Max Local Clients: %d", Count.max_loc);
+	}
+
+	user_welcome(source_p);
 	return (introduce_client(client_p, source_p, user, nick));
 }
 

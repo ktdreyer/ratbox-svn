@@ -62,7 +62,8 @@ m_users(struct Client *client_p, struct Client *source_p, int parc, const char *
 	}
 
 	sendto_one(source_p, form_str(RPL_LOCALUSERS), me.name, parv[0],
-		   ConfigServerHide.hide_servers ? Count.total : Count.local,
+		   ConfigServerHide.hide_servers ? Count.total : 
+		    dlink_list_length(&lclient_list),
 		   ConfigServerHide.hide_servers ? Count.max_tot : Count.max_loc);
 
 	sendto_one(source_p, form_str(RPL_GLOBALUSERS), me.name, parv[0],
@@ -85,8 +86,10 @@ mo_users(struct Client *client_p, struct Client *source_p, int parc, const char 
 			sendto_one(source_p, form_str(RPL_LOCALUSERS), me.name, parv[0],
 				   Count.total, Count.max_tot);
 		else
-			sendto_one(source_p, form_str(RPL_LOCALUSERS), me.name, parv[0],
-				   Count.local, Count.max_loc);
+			sendto_one(source_p, form_str(RPL_LOCALUSERS),
+				   me.name, parv[0],
+				   dlink_list_length(&lclient_list), 
+				   Count.max_loc);
 
 		sendto_one(source_p, form_str(RPL_GLOBALUSERS), me.name, parv[0],
 			   Count.total, Count.max_tot);
