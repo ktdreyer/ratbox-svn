@@ -109,8 +109,6 @@ dlink_list serv_list;		/* local servers to this server ONLY */
 dlink_list global_serv_list;	/* global servers on the network */
 dlink_list oper_list;		/* our opers, duplicated in lclient_list */
 
-int callbacks_called;		/* A measure of server load... */
-
 static unsigned long initialVMTop = 0;	/* top of virtual memory at init */
 const char *logFileName = LPATH;
 const char *pidFileName = PPATH;
@@ -396,20 +394,7 @@ io_loop(void)
 			eventRun();
 
 
-		if(callbacks_called > 0)
-			empty_cycles = 0;
-		else
-			empty_cycles++;
-
-		/* Reset the callback counter... */
-		callbacks_called = 0;
-		st = (empty_cycles + 1) * 15000;
-		if(st > 250000)
-			st = 250000;
-
-		irc_sleep(st);
-
-		comm_select(0);
+		comm_select(250);
 		if(ConfigFileEntry.htm_messages)
 			check_htm();
 

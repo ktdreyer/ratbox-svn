@@ -190,7 +190,6 @@ comm_select(unsigned long delay)
 		return -1;
 		/* NOTREACHED */
 	}
-	callbacks_called += num;
 	set_time();
 
 	if(num == 0)

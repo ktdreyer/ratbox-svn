@@ -232,7 +232,6 @@ comm_select(unsigned long delay)
 
 	/* update current time again, eww.. */
 	set_time();
-	callbacks_called += num;
 
 	if(num == 0)
 		return 0;

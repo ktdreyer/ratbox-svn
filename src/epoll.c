@@ -228,7 +228,6 @@ comm_select(unsigned long delay)
 		fde_t *F = pfd[i].data.ptr;
 		if(pfd[i].events & (EPOLLIN | EPOLLHUP | EPOLLERR))
 		{
-			callbacks_called++;
 			hdl = F->read_handler;
 			if(hdl)
 				hdl(F->fd, F->read_data);
@@ -243,7 +242,6 @@ comm_select(unsigned long delay)
 		}
 		if(pfd[i].events & (EPOLLOUT | EPOLLHUP | EPOLLERR))
 		{
-			callbacks_called++;
 			hdl = F->write_handler;
 			if(hdl)
 				hdl(F->fd, F->write_data);

@@ -252,7 +252,6 @@ comm_select(unsigned long delay)
 		set_time();
 		if(num == 0)
 			continue;
-		callbacks_called += num;
 
 		for (i = 0; i < num; i++)
 		{
