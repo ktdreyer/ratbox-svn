@@ -7,6 +7,8 @@
  * $Id$
  */
 #include "stdinc.h"
+
+#ifdef ALIS_SERVICE
 #include "service.h"
 #include "client.h"
 #include "channel.h"
@@ -381,3 +383,5 @@ s_alis_list(struct client *client_p, char *parv[], int parc)
         sendto_server(":%s NOTICE %s :End of output.", MYNAME, client_p->name);
         return 3;
 }
+
+#endif

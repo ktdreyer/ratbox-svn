@@ -9,6 +9,7 @@
 #include "tools.h"
 #include "log.h"
 #include "conf.h"
+#include "service.h"
 
 #define CF_TYPE(x) ((x) & CF_MTYPE)
 
@@ -20,6 +21,8 @@ static dlink_list conf_items;
 struct conf_server *yy_server;
 struct conf_oper *yy_oper;
 static dlink_list yy_oper_list;
+
+struct client *yy_service;
 
 struct mode_table
 {
@@ -55,7 +58,7 @@ conf_strtype(int type)
 	}
 }
 
-static int
+int
 add_top_conf(const char *name, int (*sfunc) (struct TopConf *), int (*efunc) (struct TopConf *))
 {
 	struct TopConf *tc;
@@ -588,6 +591,70 @@ conf_set_oper_dcc(void *data)
                 yy_oper->flags &= ~CONF_OPER_DCC;
 }
 
+static int
+conf_begin_service(struct TopConf *tc)
+{
+	if(conf_cur_block_name == NULL)
+	{
+		conf_report_error("Ignoring service block, missing service id");
+		yy_service = NULL;
+	}
+
+	yy_service = find_service_id(conf_cur_block_name);
+
+	if(yy_service == NULL)
+		conf_report_error("Ignoring service block, unknown service id %s",
+				conf_cur_block_name);
+
+	return 0;
+}
+
+static int
+conf_end_service(struct TopConf *tc)
+{
+	yy_service = NULL;
+	return 0;
+}
+
+static void
+conf_set_service_nick(void *data)
+{
+	if(yy_service == NULL)
+		return;
+
+	strlcpy(yy_service->name, (const char *) data,
+		sizeof(yy_service->name));
+}
+
+static void
+conf_set_service_username(void *data)
+{
+	if(yy_service == NULL)
+		return;
+
+	strlcpy(yy_service->service->username, (const char *) data,
+		sizeof(yy_service->service->username));
+}
+
+static void
+conf_set_service_host(void *data)
+{
+	if(yy_service == NULL)
+		return;
+
+	strlcpy(yy_service->service->host, (const char *) data,
+		sizeof(yy_service->service->host));
+}
+
+static void
+conf_set_service_realname(void *data)
+{
+	if(yy_service == NULL)
+		return;
+
+	strlcpy(yy_service->info, (const char *) data,
+		sizeof(yy_service->info));
+}
 
 void
 newconf_init()
@@ -639,4 +706,14 @@ newconf_init()
                       conf_set_oper_encrypted);
         add_conf_item("oper", "dcc", CF_YESNO,
                       conf_set_oper_dcc);
+
+	add_top_conf("service", conf_begin_service, conf_end_service);
+	add_conf_item("service", "nick", CF_QSTRING,
+			conf_set_service_nick);
+	add_conf_item("service", "username", CF_QSTRING,
+			conf_set_service_username);
+	add_conf_item("service", "host", CF_QSTRING,
+			conf_set_service_host);
+	add_conf_item("service", "realname", CF_QSTRING,
+			conf_set_service_realname);
 }

@@ -267,6 +267,11 @@ join_service(struct client *service_p, const char *chname)
 void
 part_service(struct client *service_p, struct channel *chptr)
 {
+	dlink_find_destroy(&chptr->services, service_p);
+	dlink_find_destroy(&service_p->service->channels, chptr);
+
+	if(finished_bursting)
+		sendto_server(":%s PART %s", service_p->name, chptr->name);
 }
 
 void

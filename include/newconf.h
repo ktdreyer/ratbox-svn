@@ -54,7 +54,7 @@ struct ConfEntry
 extern struct TopConf *conf_cur_block;
 
 int read_config(char *);
-
+int add_top_conf(const char *name, int (*sfunc) (struct TopConf *), int (*efunc) (struct TopConf *));
 int add_conf_item(const char *, const char *, int, void (*)(void *));
 int remove_conf_item(const char *, const char *);
 void conf_report_error(const char *, ...);

@@ -217,9 +217,15 @@ main(int argc, char *argv[])
         add_ucommand_handler(&stats_ucommand, NULL);
 
 	/* load our services.. */
+#ifdef ALIS_SERVICE
 	init_s_alis();
+#endif
+#ifdef HOSTSTAT_SERVICE
 	init_s_hoststat();
+#endif
+#ifdef OPERBOT_SERVICE
 	init_s_operbot();
+#endif
 
 	first_time = CURRENT_TIME;
 

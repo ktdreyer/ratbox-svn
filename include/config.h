@@ -16,6 +16,22 @@
  */
 #define SMALL_NETWORK
 
+/* ALIS_SERVICE
+ * Controls whether the ALIS (Advanced List Service) is enabled
+ */
+#define ALIS_SERVICE
+
+/* HOSTSTAT_SERVICE
+ * Controls whether the Host Statistics service is enabled
+ */
+#define HOSTSTAT_SERVICE
+
+/* OPERBOT_SERVICE
+ * Controls whether the oper bot service is enabled
+ */
+#define OPERBOT_SERVICE
+
+
 /*              ---------------------------             */
 /*              END OF CONFIGURABLE OPTIONS             */
 /*              ---------------------------             */
@@ -25,7 +41,7 @@
 
 #define MAX_FD		1000
 
-#define RSERV_VERSION		"1.0rc1"
+#define RSERV_VERSION		"1.0beta"
 
 #ifdef SMALL_NETWORK
 #define HEAP_CHANNEL    64

@@ -7,6 +7,8 @@
  * $Id$
  */
 #include "stdinc.h"
+
+#ifdef HOSTSTAT_SERVICE
 #include "service.h"
 #include "client.h"
 #include "channel.h"
@@ -191,3 +193,5 @@ s_hoststat_testmask(struct client *client_p, char *parv[], int parc)
 			MYNAME, client_p->name, count, username, host);
 	return 1;
 }
+
+#endif
