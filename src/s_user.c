@@ -488,7 +488,7 @@ register_local_user(struct Client *client_p, struct Client *source_p,
   assert(m != NULL);
   if(m != NULL)
   {
-    dlinkMoveList(m, &unknown_list, &lclient_list);
+    dlinkMoveNode(m, &unknown_list, &lclient_list);
   } else {
      sendto_realops_flags(UMODE_ALL, L_ADMIN, "Tried to register %s (%s@%s) but I couldn't find it?!?", 
      			  nick, source_p->username, source_p->host);
