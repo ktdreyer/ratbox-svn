@@ -1,3 +1,7 @@
+*** 20010821_1 by androsyn
+Diane's optimizations of the SJOIN code and some of the linebuf code.
+
+
 *** 20010820_7 by androsyn
 Kill one memset()
 
