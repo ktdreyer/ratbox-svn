@@ -1,3 +1,20 @@
+ejb         2002/08/10 09:24:21 EDT	(20020810_21)
+
+  Modified files:
+    src                  ircd_lexer.l ircd_parser.y newconf.c 
+                         s_conf.c 
+  Log:
+  - fix parser; had 7 r/r conflicts and 6 s/r,
+    now only 4 s/r.
+  
+  Revision  Changes    Path
+  1.149     +1 -0      ircd-ratbox/src/ircd_lexer.l
+  1.262     +84 -50    ircd-ratbox/src/ircd_parser.y
+  7.11      +18 -5     ircd-ratbox/src/newconf.c
+  7.326     +2 -2      ircd-ratbox/src/s_conf.c
+
+
+
 ejb         2002/08/10 08:33:28 EDT	(20020810_20)
 
   Modified files:
