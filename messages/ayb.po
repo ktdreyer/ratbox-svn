@@ -16,7 +16,7 @@ msgstr	"Project-Id-Version: ircd-hybrid-7\n"
 #: ../src/messages.tab:24
 #, c-format
 msgid	":%s 001 %s :Welcome to the %s Internet Relay Chat Network %s"
-msgstr	""
+msgstr	":%s 001 %s :ALL YOUR BASE ARE BELONG TO %s, %s!!!"
 
 #: ../src/messages.tab:25
 #, c-format
@@ -26,7 +26,7 @@ msgstr	""
 #: ../src/messages.tab:26
 #, c-format
 msgid	":%s 003 %s :This server was created %s"
-msgstr	""
+msgstr	":%s 003 %s :Someone set up us the server %s"
 
 #: ../src/messages.tab:27
 #, c-format
@@ -36,12 +36,12 @@ msgstr	""
 #: ../src/messages.tab:28
 #, c-format
 msgid	":%s 005 %s %s :are supported by this server"
-msgstr	""
+msgstr	":%s 005 %s %s :are moved for great justice"
 
 #: ../src/messages.tab:33
 #, c-format
 msgid	":%s 010 %s %s %d :Please use this Server/Port instead"
-msgstr	""
+msgstr	":%s 010 %s %s %d :You have no chance to survive make this Server/Port instead. Ha ha ha."
 
 #: ../src/messages.tab:223
 #, c-format
@@ -156,7 +156,7 @@ msgstr	""
 #: ../src/messages.tab:265
 #, c-format
 msgid	":%s 242 %s :Server Up %d days, %d:%02d:%02d"
-msgstr	""
+msgstr	":%s 242 %s :Someone set up us the bomb %d days, %d:%02d:%02d ago"
 
 #: ../src/messages.tab:266
 #, c-format
@@ -192,7 +192,7 @@ msgstr	""
 #: ../src/messages.tab:278
 #, c-format
 msgid	":%s 252 %s %d :IRC Operators online"
-msgstr	":%s 252 %s %d :Smurf Targets (IRC Operators) online"
+msgstr	":%s 252 %s %d :Zigs online"
 
 #: ../src/messages.tab:279
 #, c-format
@@ -299,7 +299,7 @@ msgstr	":%s 306 %s :OK, you're /away now. Hurry back!"
 #: ../src/messages.tab:335
 #, c-format
 msgid	":%s 308 %s %s :is a Server Administrator"
-msgstr	":%s 308 %s %s :is a Goon Gumpa (Server Admin)"
+msgstr	":%s 308 %s %s :is a Master Zig (Server Admin)"
 
 #: ../src/messages.tab:338
 #, c-format
@@ -314,7 +314,7 @@ msgstr	""
 #: ../src/messages.tab:340
 #, c-format
 msgid	":%s 313 %s %s :is an IRC Operator"
-msgstr	":%s 313 %s %s :is a Smurf Target (IRC Operator)"
+msgstr	":%s 313 %s %s :is a Zig for Great Justice"
 
 #: ../src/messages.tab:341
 #, c-format
@@ -494,7 +494,7 @@ msgstr	""
 #: ../src/messages.tab:408
 #, c-format
 msgid	":%s 381 %s :You have entered... the Twilight Zone!."
-msgstr	":%s 381 %s :You are now one bad motherfucker - Go /kill someone."
+msgstr	":%s 381 %s :SOMEONE SET YOU UP THE /KILL FOR GREAT JUSTICE!"
 
 #: ../src/messages.tab:409
 #, c-format
@@ -680,7 +680,7 @@ msgstr	":%s 464 %s :BZZT!! Wrong password, homez. Are you sure you know what "
 
 #: ../src/messages.tab:494
 #, c-format
-msgid	":%s 465 %s :You are banned from this server- %s"
+msgid	":%s 465 %s :SOMEONE SET YOU UP THE KLINE - %s"
 msgstr	""
 
 #: ../src/messages.tab:496

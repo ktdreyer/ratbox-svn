@@ -4,7 +4,8 @@ RM=	@RM@
 default: all
 
 SRCS = \
-  custom.po
+  custom.po \
+  ayb.po
 
 OBJS = ${SRCS:.po=.mo}
 
