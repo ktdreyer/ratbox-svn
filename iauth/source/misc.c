@@ -39,8 +39,8 @@ char *
 strncpy_irc(char* s1, const char* s2, size_t n)
 
 {
-  register char* endp = s1 + n;
-  register char* s = s1;
+  char* endp = s1 + n;
+  char* s = s1;
   while (s < endp && (*s++ = *s2++))
     ;
   return s1;

@@ -370,8 +370,8 @@ ReadData(struct Server *sptr)
 
 {
   int length; /* number of bytes we read */
-  register char *ch;
-  register char *linech;
+  char *ch;
+  char *linech;
 
   /* read in a line */
   length = recv(sptr->sockfd, buffer, BUFSIZE, 0);
@@ -424,7 +424,7 @@ ReadData(struct Server *sptr)
 
   while (*ch)
   {
-    register char tmp;
+    char tmp;
 
     tmp = *ch;
     if (IsEol(tmp))
@@ -552,7 +552,7 @@ ReadData(struct Server *sptr)
 
 {
   int length; /* number of bytes we read */
-  register char *ch;
+  char *ch;
 
   length = recv(sptr->sockfd, buffer, sizeof(buffer) - 1, 0);
 
@@ -591,7 +591,7 @@ ReadData(struct Server *sptr)
 
   while (*ch)
   {
-    register char tmp;
+    char tmp;
 
     tmp = *ch;
 
