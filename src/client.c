@@ -1297,6 +1297,7 @@ int exit_client(
 {
   char comment1[HOSTLEN + HOSTLEN + 2];
   dlink_node *m;
+  SetClosing(source_p);
   if (MyConnect(source_p))
     {
       /* Attempt to flush any queued data */
@@ -1372,8 +1373,6 @@ int exit_client(
 	  else
 	    uplink = NULL;
         }
-
-      SetClosing(source_p);
 
       if (IsPerson(source_p))
         sendto_realops_flags(FLAGS_CCONN, L_ALL,

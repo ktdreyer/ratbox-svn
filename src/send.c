@@ -129,7 +129,8 @@ dead_link(struct Client *to, char *notice)
   }
   Debug((DEBUG_ERROR, notice, get_client_name(to, HIDE_IP)));
   SetDead(to);
-  exit_client(to, to, &me, notice);
+  if (!IsClosing(to))
+    exit_client(to, to, &me, notice);
   return (-1);
 } /* dead_link() */
 
