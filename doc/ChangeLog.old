@@ -1,3 +1,8 @@
+*** 20010806_2 by db
+- missing set of last_ptr. oops. 
+
+
+
 *** 20010806_1 by ejb
 - fixed VMS support; appears to work (compile + link)
 
