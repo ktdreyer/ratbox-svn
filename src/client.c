@@ -438,8 +438,9 @@ check_banned_lines(void)
 			if(IsExemptKline(client_p))
 			{
 				sendto_realops_flags(UMODE_ALL, L_ALL,
-						"KLINE over-ruled for %s, client is kline_exempt",
-						get_client_name(client_p, HIDE_IP));
+						"KLINE over-ruled for %s, client is kline_exempt [%s@%s]",
+						get_client_name(client_p, HIDE_IP),
+						aconf->user, aconf->host);
 				continue;
 			}
 
@@ -454,16 +455,18 @@ check_banned_lines(void)
 			if(IsExemptKline(client_p))
 			{
 				sendto_realops_flags(UMODE_ALL, L_ALL,
-						"GLINE over-ruled for %s, client is kline_exempt",
-						get_client_name(client_p, HIDE_IP));
+						"GLINE over-ruled for %s, client is kline_exempt [%s@%s]",
+						get_client_name(client_p, HIDE_IP),
+						aconf->user, aconf->host);
 				continue;
 			}
 
 			if(IsExemptGline(client_p))
 			{
 				sendto_realops_flags(UMODE_ALL, L_ALL,
-						"GLINE over-ruled for %s, client is gline_exempt",
-						get_client_name(client_p, HIDE_IP));
+						"GLINE over-ruled for %s, client is gline_exempt [%s@%s]",
+						get_client_name(client_p, HIDE_IP),
+						aconf->user, aconf->host);
 				continue;
 			}
 
@@ -479,8 +482,9 @@ check_banned_lines(void)
 			if(IsExemptKline(client_p))
 			{
 				sendto_realops_flags(UMODE_ALL, L_ALL,
-						"XLINE over-ruled for %s, client is kline_exempt",
-						get_client_name(client_p, HIDE_IP));
+						"XLINE over-ruled for %s, client is kline_exempt [%s]",
+						get_client_name(client_p, HIDE_IP),
+						aconf->name);
 				continue;
 			}
 

@@ -2,7 +2,7 @@ XLINE [time] <gecos> :<reason>
 
 Bans by gecos (aka 'real name') field.  If [time] is not specified
 this is added to xline.conf, otherwise is temporary for [time] 
-minutes.  If you need to, use ? in place of spaces in the <gecos>.
+minutes.
 
 Eg. /quote xline eggdrop?bot :no bots
 
