@@ -77,9 +77,7 @@ Patches
 -------
 
 The following are the patches contained in contrib.  A short description
-of the patch is contained here, if you want to apply the patch, you 
-should read the the patch itself which contains information you will
-need.
+of the patch is contained here, along with any notes.
 
 To apply a patch, first change to the ircd-hybrid-7 root directory, 
 the directory one level above contrib/.  If you have already compiled 
@@ -90,6 +88,10 @@ remote-unkline.diff type:
 You must then run 'make' and 'make install' again, and restart your ircd.
 The following patches are included:
 
-remote-unkline.diff: This patch adds support for remote unklines.
-temp-dline.diff:     This patch adds support for temporary dlines and
-                     attempts to make both more efficient.
+lmh.diff 	- This patch adds remote unkline support, temp dline support,
+                  better temp klines, /quote xline and global user@host
+		  limits.
+
+		  Please read README.LMH for more information as this patch
+		  requires different methods to be applied and adds multiple
+		  config options.
