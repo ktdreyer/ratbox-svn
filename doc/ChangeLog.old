@@ -1,3 +1,17 @@
+*** 20001228_38 by fl_
+
+1. Added error message if user is unopped, and does a /mode #chan +e
+2. +b/+d modes are no longer shown to be removed/placed when a user is
+   deopped/opped in a +a channel, they can see the lists anyway so they
+   dont need us to keep them in sync..
+3. If you -h'd someone on a +a channel, they didnt see the -h: fixed
+4. If the channel is +a, /mode #chan +d wont tell you who set the ban if
+   youre unopped, same as +b
+
+I wanted to remove the +e/+I mode from the sync too.. need to wait to
+talk to david first tho. :)
+
+
 *** 20001228_37 by wcampbel
 1. Updated my TODO list
 2. Update INFO to show HAVE_GETTEXT and SELECT_TYPE
