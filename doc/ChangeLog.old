@@ -1,3 +1,20 @@
+ejb         2002/07/19 09:22:05 EDT	(20020719_4)
+
+  Modified files:
+    src                  hostmask.c 
+  Log:
+  - commited gozem's patch to hostmask.c that should fix the
+    ipv6 iline bug.
+  
+  Submitted by:   Gozem <gozem@linux.nu>
+  Reviewed by:    ejb db
+  Approved by:    db
+  
+  Revision  Changes    Path
+  7.68      +10 -8     ircd-hybrid-7/src/hostmask.c
+
+
+
 leeh        2002/07/19 08:31:49 EDT	(20020719_3)
 
   Modified files:
