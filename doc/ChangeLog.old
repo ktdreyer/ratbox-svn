@@ -1,3 +1,7 @@
+*** 20010528_11 by a1kmm
+- Fixed the same bug in CRYPTSERV as was in PASS.
+
+
 *** 20010528_10 by androsyn
 Changed ipv4_vhost/ipv6_vhost to vhost and vhost6 respectively.
 
