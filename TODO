@@ -92,6 +92,8 @@ db-->>ummm aconf->ipnum is used for IP based klines only, not for DNS
 
 thats INADDR_NONE. Find, fix.
 
+db-->> FIXED
+    
 * Add the IRCnet(?) split logic for nick collisions - on a nick collision,
   change to "%d-%s", random, nick
 
@@ -225,3 +227,5 @@ Little things to be done given enough time and initiative -Hwy
   # *.alaska.edu, I would use a 2 (to strip off the first two parts).  If you
 
   We'd have hostmask="*.alaska.edu";
+
+-->> fixed by AndoSyn
