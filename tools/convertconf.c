@@ -81,20 +81,20 @@ int main(int argc,char *argv[])
   
   ConvertConf(in,out);
 
-  puts("Adding the logging/general/modules blocks to your config..");
+  puts("Adding the logging/general/modules blocks to your config..\n");
   AddLoggingBlock(out);
   AddGeneralBlock(out);
   AddModulesBlock(out);
 
-  puts("The config file has been converted however you MUST rearrange the config:"
-       "   o class blocks must be before anything that uses then (auth/connect)"
-       "   o auth blocks must be listed in order of importance"
-       "        - spoofs etc first"
-       "        - *@* last"
-       "     if this is NOT done, chances are spoofs wont work."
-       "   o the general/logging/modules parts will need to be edited"
-       "   o the config file needs to be checked manually.. as this"
-       "     doesnt have human brains ;P");
+  puts("The config file has been converted however you MUST rearrange the config:\n"
+       "   o class blocks must be before anything that uses then (auth/connect)\n"
+       "   o auth blocks must be listed in order of importance\n"
+       "        - spoofs etc first\n"
+       "        - *@* last\n"
+       "     if this is NOT done, chances are spoofs wont work.\n"
+       "   o the general/logging/modules parts will need to be edited\n"
+       "   o the config file needs to be checked manually.. as this\n"
+       "     doesnt have human brains ;P\n");
   return 0;
 }
 
