@@ -1,3 +1,8 @@
+*** 20001209_11 by db
+- ummmm no check for parc in mo_undline leads to core if no args given
+
+
+
 *** 20001209_10 by bill
 
 - added duration to EOB snotice
