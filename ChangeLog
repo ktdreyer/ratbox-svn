@@ -1,3 +1,31 @@
+leeh        2002/08/08 05:54:23 EDT	(20020808_10)
+
+  Modified files:
+    include              channel.h client.h config.h config.h.dist 
+                         numeric.h s_conf.h supported.h 
+    modules              m_info.c m_join.c m_knock.c m_lljoin.c 
+    src                  balloc.c messages.tab s_conf.c 
+  Log:
+  - removed vchan traces
+  
+  Revision  Changes    Path
+  7.118     +0 -8      ircd-ratbox/include/channel.h
+  7.154     +0 -15     ircd-ratbox/include/client.h
+  7.143     +0 -1      ircd-ratbox/include/config.h
+  7.60      +0 -2      ircd-ratbox/include/config.h.dist
+  7.28      +0 -7      ircd-ratbox/include/numeric.h
+  7.184     +0 -2      ircd-ratbox/include/s_conf.h
+  1.24      +1 -2      ircd-ratbox/include/supported.h
+  1.59      +1 -13     ircd-ratbox/modules/m_info.c
+  1.93      +3 -13     ircd-ratbox/modules/m_join.c
+  1.53      +25 -111   ircd-ratbox/modules/m_knock.c
+  1.59      +2 -3      ircd-ratbox/modules/m_lljoin.c
+  7.39      +1 -0      ircd-ratbox/src/balloc.c
+  7.71      +5 -5      ircd-ratbox/src/messages.tab
+  7.317     +0 -3      ircd-ratbox/src/s_conf.c
+
+
+
 androsyn    2002/08/08 04:41:16 EDT	(20020808_9)
 
   Modified files:
