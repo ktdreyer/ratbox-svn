@@ -1,3 +1,7 @@
+*** 20010101_12 by bysin
+I fixed a buffer overflow in this.  Right before its gunna be released.  I hope this works.
+
+
 *** 20010101_11 by db
 - added isomer and riedel
 
