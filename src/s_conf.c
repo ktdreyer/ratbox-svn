@@ -81,6 +81,7 @@ static void conf_add_d_line(struct ConfItem *);
 static void conf_add_x_line(struct ConfItem *);
 static void conf_add_u_line(struct ConfItem *);
 static void conf_add_q_line(struct ConfItem *);
+static void add_host_user_port_fields(struct ConfItem*, char*, char*, char *);
 
 static FBFILE*  openconf(const char* filename);
 static void     initconf(FBFILE*, int);
@@ -1964,12 +1965,7 @@ static void initconf(FBFILE* file, int use_include)
           ccount++;
           aconf->status = CONF_CONNECT_SERVER;
           aconf->flags = CONF_FLAGS_ALLOW_AUTO_CONN;
-          if(host_field)
-            DupString(aconf->host, host_field);
-          if(user_field)
-            DupString(aconf->user, user_field);
-          if(port_field)
-            aconf->port = atoi(port_field);
+          add_host_user_port_fields(aconf,host_field,user_field,port_field);
           aconf = conf_add_server(aconf,class_field,ncount,ccount);
           break;
 
@@ -1977,32 +1973,21 @@ static void initconf(FBFILE* file, int use_include)
           ccount++;
           aconf->status = CONF_CONNECT_SERVER;
           aconf->flags = CONF_FLAGS_ALLOW_AUTO_CONN|CONF_FLAGS_ZIP_LINK;
-          if(host_field)
-            DupString(aconf->host, host_field);
-          if(user_field)
-            DupString(aconf->user, user_field);
-          if(port_field)
-            aconf->port = atoi(port_field);
+          add_host_user_port_fields(aconf,host_field,user_field,port_field);
           aconf = conf_add_server(aconf,class_field,ncount,ccount);
           break;
 
         case 'd':
           aconf->status = CONF_DLINE;
           aconf->flags = CONF_FLAGS_E_LINED;
-          if(host_field)
-            DupString(aconf->host, host_field);
-          if(user_field)
-            DupString(aconf->user, user_field);
+          add_host_user_port_fields(aconf,host_field,user_field,port_field);
           conf_add_d_line(aconf);
           aconf = NULL;
           break;
 
         case 'D': /* Deny lines (immediate refusal) */
           aconf->status = CONF_DLINE;
-          if(host_field)
-            DupString(aconf->host, host_field);
-          if(user_field)
-            DupString(aconf->user, user_field);
+          add_host_user_port_fields(aconf,host_field,user_field,port_field);
           conf_add_d_line(aconf);
           aconf = NULL;
           break;
@@ -2082,10 +2067,7 @@ static void initconf(FBFILE* file, int use_include)
         case 'K': /* Kill user line on irc.conf           */
         case 'k':
           aconf->status = CONF_KILL;
-          if(host_field)
-            DupString(aconf->host, host_field);
-          if(user_field)
-            DupString(aconf->user, user_field);
+          add_host_user_port_fields(aconf,host_field,user_field,port_field);
           conf_add_k_line(aconf);
           aconf = NULL;
           break;
@@ -2093,10 +2075,7 @@ static void initconf(FBFILE* file, int use_include)
         case 'L': /* guaranteed leaf server */
         case 'l':
           aconf->status = CONF_LEAF;
-          if(host_field)
-            DupString(aconf->host, host_field);
-          if(user_field)
-            DupString(aconf->user, user_field);
+          add_host_user_port_fields(aconf,host_field,user_field,port_field);
           conf_add_hub_or_leaf(aconf);
 	  break;
 
@@ -2105,10 +2084,7 @@ static void initconf(FBFILE* file, int use_include)
         case 'M':
         case 'm':
           aconf->status = CONF_ME;
-          if(host_field)
-            DupString(aconf->host, host_field);
-          if(user_field)
-            DupString(aconf->user, user_field);
+          add_host_user_port_fields(aconf,host_field,user_field,port_field);
           conf_add_me(aconf);
           break;
 
@@ -2117,10 +2093,7 @@ static void initconf(FBFILE* file, int use_include)
           /* but which tries to connect ME        */
           ++ncount;
           aconf->status = CONF_NOCONNECT_SERVER;
-          if(host_field)
-            DupString(aconf->host, host_field);
-          if(user_field)
-            DupString(aconf->user, user_field);
+          add_host_user_port_fields(aconf,host_field,user_field,port_field);
           aconf = conf_add_server(aconf,class_field,ncount,ccount);
           break;
 
@@ -2128,10 +2101,7 @@ static void initconf(FBFILE* file, int use_include)
         /* password and host where connection is  */
         case 'O':
           aconf->status = CONF_OPERATOR;
-          if(host_field)
-            DupString(aconf->host, host_field);
-          if(user_field)
-            DupString(aconf->user, user_field);
+          add_host_user_port_fields(aconf,host_field,user_field,port_field);
           /* defaults */
           aconf->port = 
             CONF_OPER_GLOBAL_KILL|CONF_OPER_REMOTE|CONF_OPER_UNKLINE|
@@ -2146,10 +2116,7 @@ static void initconf(FBFILE* file, int use_include)
         /* Local Operator, (limited privs --SRB) */
         case 'o':
           aconf->status = CONF_LOCOP;
-          if(host_field)
-            DupString(aconf->host, host_field);
-          if(user_field)
-            DupString(aconf->user, user_field);
+          add_host_user_port_fields(aconf,host_field,user_field,port_field);
           aconf->port = CONF_OPER_UNKLINE|CONF_OPER_K;
           if(port_field)
             aconf->port = oper_privs_from_string(aconf->port,port_field);
@@ -2161,22 +2128,14 @@ static void initconf(FBFILE* file, int use_include)
         case 'P': /* listen port line */
         case 'p':
           aconf->status = CONF_LISTEN_PORT;
-          if(host_field)
-            DupString(aconf->host, host_field);
-          if(user_field)
-            DupString(aconf->user, user_field);
-          if(port_field)
-            aconf->port = atoi(port_field);
+          add_host_user_port_fields(aconf,host_field,user_field,port_field);
           conf_add_port(aconf);
           break;
 
         case 'Q': /* reserved nicks */
         case 'q': 
           aconf->status = CONF_QUARANTINED_NICK;
-          if(host_field)
-            DupString(aconf->host, host_field);
-          if(user_field)
-            DupString(aconf->user, user_field);
+          add_host_user_port_fields(aconf,host_field,user_field,port_field);
           conf_add_q_line(aconf);
           aconf = NULL;
           break;
@@ -2184,10 +2143,7 @@ static void initconf(FBFILE* file, int use_include)
         case 'U': /* Uphost, ie. host where client reading */
         case 'u': /* this should connect.                  */
           aconf->status = CONF_ULINE;
-          if(host_field)
-            DupString(aconf->host, host_field);
-          if(user_field)
-            DupString(aconf->user, user_field);
+          add_host_user_port_fields(aconf,host_field,user_field,port_field);
           conf_add_u_line(aconf);
           aconf = NULL;
           break;
@@ -2195,10 +2151,7 @@ static void initconf(FBFILE* file, int use_include)
         case 'X': /* rejected gecos */
         case 'x': 
           aconf->status = CONF_XLINE;
-          if(host_field)
-            DupString(aconf->host, host_field);
-          if(user_field)
-            DupString(aconf->user, user_field);
+          add_host_user_port_fields(aconf,host_field,user_field,port_field);
           conf_add_x_line(aconf);
           aconf = NULL;
           break;
@@ -2206,12 +2159,7 @@ static void initconf(FBFILE* file, int use_include)
         case 'Y':
         case 'y':
           aconf->status = CONF_CLASS;
-          if(host_field)
-            DupString(aconf->host, host_field);
-          if(user_field)
-            DupString(aconf->user, user_field);
-          if(port_field)
-            aconf->port = atoi(port_field);
+          add_host_user_port_fields(aconf,host_field,user_field,port_field);
           if(class_field)
             sendq = atoi(class_field);
           conf_add_class(aconf,sendq);
@@ -3947,4 +3895,27 @@ static void conf_add_q_line(struct ConfItem *aconf)
   /* nick, reason, user@host */
           
   add_q_line(aconf);
+}
+
+/*
+ * add_host_user_port_fields
+ * inputs       - pointer to config item
+ *              - pointer to host_field
+ *              - pointer to user_field
+ *              - pointer to port_field
+ * output       - NONE
+ * side effects - update host/user/port fields of given aconf
+ */
+
+static void add_host_user_port_fields(struct ConfItem *aconf,
+                               char *host_field,
+                               char *user_field,
+                               char *port_field)
+{
+  if(host_field)
+    DupString(aconf->host, host_field);
+  if(user_field)
+    DupString(aconf->user, user_field);
+  if(port_field)
+    aconf->port = atoi(port_field);
 }

@@ -254,7 +254,7 @@ int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       report_configured_links(sptr, CONF_CONNECT_SERVER|CONF_NOCONNECT_SERVER);
       valid_stats++;
       break;
-
+ 
     case 'B' : case 'b' :
       sendto_one(sptr,":%s NOTICE %s Use stats I instead", me.name, parv[0]);
       break;
