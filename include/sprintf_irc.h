@@ -28,27 +28,24 @@
 #define SPRINTF_IRC
 
 #include <stdarg.h>
-#include "client.h"
 
 /*=============================================================================
  * Proto types
  */
 
 
-extern int irc_vsprintf(struct Client *, char *, const char *, va_list ap);
-
 /*
  * ircsprintf - optimized sprintf
  */
 #ifdef __GNUC__
-extern int ircsprintf(char *, const char *, ...) __attribute__ ((format(printf, 2, 3)));
-extern int irc_sprintf(struct Client *, char *, const char *, ...)
-	__attribute__ ((format(printf, 3, 4)));
-
+int ircsprintf(char *str, const char *fmt, ...) __attribute((format(printf, 2, 3)));
+int ircsnprintf(char *str, const size_t size, const char *, ...) __attribute__ ((format(printf, 3, 4)));
 #else
-extern int ircsprintf(char *str, const char *format, ...);
-extern int irc_sprintf(struct Client *, char *, const char *, ...);
-
+int ircsprintf(char *str, const char *format, ...);
+int ircsnprintf(char *str, const size_t size, const char *, ...);
 #endif
+
+int ircvsnprintf(char *str, const size_t size, const char *fmt, va_list args);
+int ircvsprintf(char *str, const char *fmt, va_list args);
 
 #endif /* SPRINTF_IRC */

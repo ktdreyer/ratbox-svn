@@ -2385,7 +2385,7 @@ conf_report_error(const char *fmt, ...)
 	char msg[IRCD_BUFSIZE + 1] = { 0 };
 
 	va_start(ap, fmt);
-	vsnprintf(msg, IRCD_BUFSIZE, fmt, ap);
+	ircvsnprintf(msg, IRCD_BUFSIZE, fmt, ap);
 	va_end(ap);
 
 	ilog(L_ERROR, "\"%s\", line %d: %s", conffilebuf, lineno + 1, msg);

@@ -404,7 +404,7 @@ remove_xline(struct Client *source_p, const char *huntgecos, int warn)
 	int found_xline = 0;
 
 	filename = ConfigFileEntry.xlinefile;
-	snprintf(temppath, sizeof(temppath),
+	ircsnprintf(temppath, sizeof(temppath),
 		 "%s.tmp", ConfigFileEntry.xlinefile);
 
 	if((in = fbopen(filename, "r")) == NULL)

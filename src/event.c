@@ -82,7 +82,7 @@ ircd$schdast(unsigned int msec, int tid, void (*astadr)(__unknown_params))
 	delay_mins = (delay/1000) / 60;
 	delay_secs = (delay/1000) - (60 * delay_mins);
 
-	sprintf(asctim, "0 :%d:%2.2f", delay_mins, delay_secs);
+	ircsprintf(asctim, "0 :%d:%2.2f", delay_mins, delay_secs);
 	asctim_desc.dsc$w_length = strlen(asctim);
 	sys$bintim(&asctim_desc, tim);
 	sys$setimr(0, tim, astadr, tid, 0);

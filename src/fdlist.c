@@ -172,7 +172,7 @@ fd_note(int fd, const char *format, ...)
 	if(format)
 	{
 		va_start(args, format);
-		vsnprintf(fd_table[fd].desc, FD_DESC_SZ, format, args);
+		ircvsnprintf(fd_table[fd].desc, FD_DESC_SZ, format, args);
 		va_end(args);
 	}
 	else

@@ -273,19 +273,6 @@ AC_TRY_COMPILE([#include <sys/socket.h>],
 		[ AC_MSG_RESULT(no)   ]
 	)
 
-dnl check for snprintf
-AC_CHECK_FUNCS(snprintf, [have_snprintf=1])
-dnl check for vsnprintf
-AC_CHECK_FUNCS(vsnprintf, [have_vsnprintf=1])
-dnl Tell src/Makefile.in if we need its snprintf.c
-if test -z "$have_snprintf"; then
-	SNPRINTF_C="snprintf.c"
-fi
-if test -z "$have_vsnprintf"; then
-	SNPRINTF_C="snprintf.c"
-fi
-AC_SUBST(SNPRINTF_C)
-
 dnl check for nanosleep
 AC_CHECK_FUNC(nanosleep,,[AC_CHECK_LIB(rt,nanosleep, 
 		LIBS="${LIBS} -lrt",

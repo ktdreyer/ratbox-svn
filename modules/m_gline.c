@@ -456,7 +456,7 @@ set_local_gline(struct Client *source_p, const char *user,
 			DupString(aconf->spasswd, oper_reason);
 	}
 
-	snprintf(buffer, sizeof(buffer), "%s (%s)", reason, current_date);
+	ircsnprintf(buffer, sizeof(buffer), "%s (%s)", reason, current_date);
 
 	DupString(aconf->passwd, buffer);
 	DupString(aconf->user, (char *) user);
@@ -493,7 +493,7 @@ log_gline_request(struct Client *source_p, const char *user,
 		return;
 	}
 
-	snprintf(filenamebuf, sizeof(filenamebuf), "%s.%s",
+	ircsnprintf(filenamebuf, sizeof(filenamebuf), "%s.%s",
 		 ConfigFileEntry.glinefile, small_file_date());
 
 	if((out = fbopen(filenamebuf, "+a")) == NULL)
@@ -506,7 +506,7 @@ log_gline_request(struct Client *source_p, const char *user,
 	tmptr = localtime((const time_t *) &CurrentTime);
 	strftime(timebuffer, MAX_DATE_STRING, "%Y/%m/%d %H:%M:%S", tmptr);
 
-	snprintf(buffer, sizeof(buffer),
+	ircsnprintf(buffer, sizeof(buffer),
 		   "#Gline for %s@%s [%s] requested by %s!%s@%s on %s at %s\n",
 		   user, host, reason, source_p->name, source_p->username, 
 		   source_p->host, source_p->user->server, timebuffer);
@@ -539,7 +539,7 @@ log_gline(struct Client *source_p, struct gline_pending *pending,
 		return;
 	}
 
-	snprintf(filenamebuf, sizeof(filenamebuf),
+	ircsnprintf(filenamebuf, sizeof(filenamebuf),
 		 "%s.%s", ConfigFileEntry.glinefile, small_file_date());
 
 	if((out = fbopen(filenamebuf, "a")) == NULL)
@@ -551,7 +551,7 @@ log_gline(struct Client *source_p, struct gline_pending *pending,
 	tmptr = localtime((const time_t *) &CurrentTime);
 	strftime(timebuffer, MAX_DATE_STRING, "%Y/%m/%d %H:%M:%S", tmptr);
 
-	snprintf(buffer, sizeof(buffer),
+	ircsnprintf(buffer, sizeof(buffer),
 		 "#Gline for %s@%s %s added by the following\n", user, host, timebuffer);
 
 	if(fbputs(buffer, out) == -1)
@@ -561,7 +561,7 @@ log_gline(struct Client *source_p, struct gline_pending *pending,
 		return;
 	}
 
-	snprintf(buffer, sizeof(buffer), "#%s!%s@%s on %s [%s]\n",
+	ircsnprintf(buffer, sizeof(buffer), "#%s!%s@%s on %s [%s]\n",
 		 pending->oper_nick1, pending->oper_user1,
 		 pending->oper_host1, pending->oper_server1,
 		 pending->reason1 ? pending->reason1 : "No reason");
@@ -572,7 +572,7 @@ log_gline(struct Client *source_p, struct gline_pending *pending,
 		return;
 	}
 
-	snprintf(buffer, sizeof(buffer), "#%s!%s@%s on %s [%s]\n",
+	ircsnprintf(buffer, sizeof(buffer), "#%s!%s@%s on %s [%s]\n",
 		 pending->oper_nick2, pending->oper_user2,
 		 pending->oper_host2, pending->oper_server2,
 		 pending->reason2 ? pending->reason2 : "No reason");
@@ -584,7 +584,7 @@ log_gline(struct Client *source_p, struct gline_pending *pending,
 		return;
 	}
 
-	snprintf(buffer, sizeof(buffer), "#%s!%s@%s on %s [%s]\n",
+	ircsnprintf(buffer, sizeof(buffer), "#%s!%s@%s on %s [%s]\n",
 		 source_p->name, source_p->username, source_p->host,
 		 source_p->user->server, (reason) ? reason : "No reason");
 
@@ -595,7 +595,7 @@ log_gline(struct Client *source_p, struct gline_pending *pending,
 		return;
 	}
 
-	snprintf(buffer, sizeof(buffer),
+	ircsnprintf(buffer, sizeof(buffer),
 		 "\"%s\",\"%s\",\"%s %s\",\"%s\",%lu\n",
 		 user, host, reason, timebuffer, source_p->name,
 		 (unsigned long) CurrentTime);

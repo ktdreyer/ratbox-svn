@@ -89,7 +89,7 @@ ms_encap(struct Client *client_p, struct Client *source_p, int parc, const char 
 		if((size_t)(cur_len + len) >= sizeof(buffer))
 			return 0;
 
-		snprintf(ptr, sizeof(buffer) - cur_len, "%s ", parv[i]);
+		ircsnprintf(ptr, sizeof(buffer) - cur_len, "%s ", parv[i]);
 		cur_len += len;
 		ptr += len;
 	}
@@ -98,9 +98,9 @@ ms_encap(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	/* if its a command without parameters, dont prepend a ':' */
 	if(parc == 3)
-		snprintf(ptr, sizeof(buffer) - cur_len, "%s", parv[2]);
+		ircsnprintf(ptr, sizeof(buffer) - cur_len, "%s", parv[2]);
 	else
-		snprintf(ptr, sizeof(buffer) - cur_len, ":%s", parv[parc-1]);
+		ircsnprintf(ptr, sizeof(buffer) - cur_len, ":%s", parv[parc-1]);
 
 	/* add a trailing \0 if it was too long */
 	if((cur_len + len) >= BUFSIZE)
@@ -148,7 +148,7 @@ ms_operspy(struct Client *client_p, struct Client *source_p,
 			if((size_t)(cur_len + len) >= sizeof(buffer))
 				return 0;
 
-			snprintf(ptr, sizeof(buffer) - cur_len, "%s ",
+			ircsnprintf(ptr, sizeof(buffer) - cur_len, "%s ",
 				 parv[i]);
 			ptr += len;
 			cur_len += len;

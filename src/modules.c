@@ -273,7 +273,7 @@ load_all_modules(int warn)
 		   (ldirent->d_name[len - 2] == 's') &&
 		   ((ldirent->d_name[len - 1] == 'o') || (ldirent->d_name[len - 1] == 'l')))
 		{
-			(void) sprintf(module_fq_name, "%s/%s", AUTOMODPATH, ldirent->d_name);
+			(void) ircsprintf(module_fq_name, "%s/%s", AUTOMODPATH, ldirent->d_name);
 			(void) load_a_module(module_fq_name, warn, 0);
 		}
 	}
@@ -299,7 +299,7 @@ load_core_modules(int warn)
 
 	for (i = 0; core_module_table[i]; i++)
 	{
-		sprintf(module_name, "%s/%s%c", MODPATH, core_module_table[i], hpux ? 'l' : 'o');
+		ircsprintf(module_name, "%s/%s%c", MODPATH, core_module_table[i], hpux ? 'l' : 'o');
 
 		if(load_a_module(module_name, warn, 1) == -1)
 		{
@@ -330,7 +330,7 @@ load_one_module(const char *path, int coremodule)
 	{
 		mpath = pathst->data;
 
-		sprintf(modpath, "%s/%s", mpath->path, path);
+		ircsprintf(modpath, "%s/%s", mpath->path, path);
 		if((strstr(modpath, "../") == NULL) && (strstr(modpath, "/..") == NULL))
 		{
 			if(stat(modpath, &statbuf) == 0)

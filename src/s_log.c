@@ -108,7 +108,7 @@ write_log(const char *message)
 	if(logFile == NULL)
 		return;
 
-	snprintf(buf, LOG_BUFSIZE, "[%s] %s\n", smalldate(), message);
+	ircsnprintf(buf, LOG_BUFSIZE, "[%s] %s\n", smalldate(), message);
 	fbputs(buf, logFile);
 }
 #endif
@@ -154,7 +154,7 @@ ilog(int priority, const char *fmt, ...)
 		return;
 
 	va_start(args, fmt);
-	vsprintf(buf, fmt, args);
+	ircvsprintf(buf, fmt, args);
 	va_end(args);
 
 #ifdef USE_SYSLOG
@@ -429,7 +429,7 @@ log_operspy(struct Client *source_p, const char *token, const char *arg)
 
 	if(operspy_fb != NULL)
 	{
-		snprintf(linebuf, sizeof(linebuf),
+		ircsnprintf(linebuf, sizeof(linebuf),
 			 "%s OPERSPY %s %s %s\n",
 			 smalldate(), get_oper_name(source_p),
 			 token, arg ? arg : "");

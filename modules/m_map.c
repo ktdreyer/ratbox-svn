@@ -101,7 +101,7 @@ dump_map(struct Client *client_p, struct Client *root_p, char *pbuf)
 		}
 	}
 
-	snprintf(buf + USER_COL, BUFSIZE - USER_COL,
+	ircsnprintf(buf + USER_COL, BUFSIZE - USER_COL,
 		 " | Users: %5lu (%4.1f%%)", dlink_list_length(&root_p->serv->users),
 		 100 * (float) dlink_list_length(&root_p->serv->users) / (float) Count.total);
 
