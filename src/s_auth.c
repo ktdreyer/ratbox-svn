@@ -143,6 +143,7 @@ release_auth_client(struct AuthRequest *auth)
 	if(IsDNSPending(auth) || IsDoingAuth(auth))
 		return;
 
+	client->localClient->auth_request = NULL;
 	dlinkDelete(&auth->node, &auth_poll_list);
 	free_auth_request(auth);	
 	client->localClient->auth_request = NULL;
@@ -589,16 +590,17 @@ read_auth_reply(int fd, void *data)
 void
 delete_auth_queries(struct Client *target_p)
 {
-	struct AuthRequest *auth = target_p->localClient->auth_request;
-	if(auth == NULL)
+	struct AuthRequest *auth;
+
+	if(target_p == NULL || target_p->localClient == NULL ||
+	   target_p->localClient->auth_request == NULL)
 		return;
 	
+	auth = target_p->localClient->auth_request;
 	target_p->localClient->auth_request = NULL;
-	
+
 	if(IsDNSPending(auth))
-	{
 		delete_adns_queries(&auth->dns_query);
-	}
 
 	if(auth->fd >= 0)
 		fd_close(auth->fd);
