@@ -844,7 +844,7 @@ if test -n "$ac_init_help"; then
 Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --enable-ipv6           Enable IPv6 support
+  --disable-ipv6          Disable IPv6 support
   --enable-openssl=DIR  Enable OpenSSL support (DIR optional).
   --disable-openssl       Disable OpenSSL support.
   --disable-zlib          Disable ziplinks support
@@ -1998,13 +1998,13 @@ if test "$ac_test_CFLAGS" = set; then
   CFLAGS=$ac_save_CFLAGS
 elif test $ac_cv_prog_cc_g = yes; then
   if test "$GCC" = yes; then
-    CFLAGS="-g -O0"
+    CFLAGS="-g -O2"
   else
     CFLAGS="-g"
   fi
 else
   if test "$GCC" = yes; then
-    CFLAGS="-O0"
+    CFLAGS="-O2"
   else
     CFLAGS=
   fi
@@ -2320,7 +2320,7 @@ echo "${ECHO_T}Sun Workshop/Forte" >&6
 *Tru64*)
 	echo "$as_me:$LINENO: result: Tru64 cc" >&5
 echo "${ECHO_T}Tru64 cc" >&6
-	IRC_CFLAGS="-O0"
+	IRC_CFLAGS="-O2"
 	CPPFLAGS="-I/usr/local/include"
 	Tru=yes
 ;;
@@ -2386,7 +2386,7 @@ echo $ECHO_N "checking if $CC is Apple GCC... $ECHO_C" >&6
 	echo "$as_me:$LINENO: result: $AppleGCC" >&5
 echo "${ECHO_T}$AppleGCC" >&6
 
-	IRC_CFLAGS="$IRC_CFLAGS -O0 -Wall"
+	IRC_CFLAGS="$IRC_CFLAGS -O2 -Wall"
 fi
 
 if test "$ac_cv_prog_cc_g" = yes; then
@@ -4695,16 +4695,15 @@ rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
 
 fi
 
-
 # Check whether --enable-ipv6 or --disable-ipv6 was given.
 if test "${enable_ipv6+set}" = set; then
   enableval="$enable_ipv6"
   ipv6=$enableval
 else
-  ipv6=no
+  ipv6=yes
 fi;
 
-if test $ipv6 = no; then
+if test $ipv6 != yes; then
 	have_v6="no"
 else
 echo "$as_me:$LINENO: checking for core IPv6 support" >&5
