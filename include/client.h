@@ -370,6 +370,7 @@ struct exit_client_hook
 #define FLAGS_MYCONNECT	   0x100000	/* MyConnect */
 #define FLAGS_IOERROR      0x200000	/* IO error */
 #define FLAGS_SERVICE	   0x400000
+#define FLAGS_TGCHANGE     0x800000	/* we're allowed to clear something */
 /* umodes, settable flags */
 
 #define UMODE_SERVNOTICE   0x0001	/* server notices such as kill */
@@ -460,6 +461,9 @@ struct exit_client_hook
 #define IsIOError(x)		((x)->flags & FLAGS_IOERROR)
 #define SetIOError(x)		((x)->flags |= FLAGS_IOERROR)
 #define IsAnyDead(x)		(IsIOError(x) || IsDead(x) || IsClosing(x))
+#define IsTGChange(x)		((x)->flags & FLAGS_TGCHANGE)
+#define SetTGChange(x)		((x)->flags |= FLAGS_TGCHANGE)
+#define ClearTGChange(x)	((x)->flags &= ~FLAGS_TGCHANGE)
 
 /* oper flags */
 #define MyOper(x)               (MyConnect(x) && IsOper(x))

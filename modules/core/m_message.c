@@ -538,8 +538,16 @@ add_target(struct Client *source_p, struct Client *target_p)
 				return 1;
 		}
 
+		/* first message after connect, we may only start clearing
+		 * slots after this message --anfl
+		 */
+		if(!IsTGChange(source_p))
+		{
+			SetTGChange(source_p);
+			source_p->localClient->target_last = CurrentTime;
+		}
 		/* clear as many targets as we can */
-		if((i = (CurrentTime - source_p->localClient->target_last) / 60))
+		else if(i = (CurrentTime - source_p->localClient->target_last) / 60))
 		{
 			if(i > USED_TARGETS(source_p))
 				USED_TARGETS(source_p) = 0;
@@ -559,7 +567,10 @@ add_target(struct Client *source_p, struct Client *target_p)
 	 * abuse a long idle to get targets back more quickly
 	 */
 	else
+	{
 		source_p->localClient->target_last = CurrentTime;
+		SetTGChange(source_p);
+	}
 
 	source_p->localClient->targets[FREE_TARGET(source_p)] = target_p;
 	NEXT_TARGET(FREE_TARGET(source_p));
