@@ -1,3 +1,18 @@
+leeh        2004/04/05 19:53:57 EDT	(20040405_5)
+
+  Modified files:
+    modules/core         m_join.c m_sjoin.c 
+  Log:
+  - set all elements upto MAXMODEPARAMS to NULL when removing modes on
+    SJOIN/JOIN, not just 0-3
+  - fix a buffer overflow when removing bans
+  
+  Revision  Changes    Path
+  1.152     +10 -4     ircd-ratbox/modules/core/m_join.c
+  1.200     +13 -6     ircd-ratbox/modules/core/m_sjoin.c
+
+
+
 leeh        2004/04/05 16:01:28 EDT	(20040405_4)
 
   Modified files:
