@@ -24,7 +24,6 @@ void delete_adns_queries(struct DNSQuery *q)
 	{
 		if(q->query != NULL)
 		{
-			q->query->ads = dns_state;
 			adns_cancel(q->query);
 		}
 	}
