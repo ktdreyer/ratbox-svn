@@ -1303,83 +1303,114 @@ static void start_io(struct Client *server)
  */
 int fork_server(struct Client *server)
 {
-  int ret;
-  int i;
-  int ctrl_pipe[2];
-  int data_pipe[2];
-#ifndef HAVE_SOCKETPAIR
-  int ctrl_pipe2[2];
-  int data_pipe2[2];
-#endif
-  int ctrlfd;
-  int datafd;
-  char *kid_argv[] = { "-slink", NULL };
+  int  ret;
+  int  i;
+  int  fd_temp[2];
+  int  slink_fds[2][2][2] = { { { 0, 0 }, { 0, 0 } }, 
+                             { { 0, 0 }, { 0, 0 } } };
+                        /* [0][y][z] - ctrl  | [1][y][z] - data  
+                         * [x][0][z] - child | [x][1][z] - parent
+                         * [x][y][0] - read  | [x][y][1] - write
+                         */
+  char  fd_str[5][6];   /* store 5x '6' '5' '5' '3' '5' '\0' */
+  char *kid_argv[7];
   
-
-  /* XXX XXX - on error, close successfully opened fds */
 #ifdef HAVE_SOCKETPAIR
-  if (socketpair(AF_UNIX, SOCK_STREAM, 0, ctrl_pipe) < 0)
-    return -1;
-  if (socketpair(AF_UNIX, SOCK_STREAM, 0, data_pipe) < 0)
-    return -1;
+  /* ctrl */
+  if (socketpair(AF_UNIX, SOCK_STREAM, 0, fd_temp) < 0)
+    goto fork_error;
+
+  slink_fds[0][0][0] = fd_temp[0];
+  slink_fds[0][1][1] = fd_temp[1];
+  slink_fds[0][0][1] = fd_temp[0];
+  slink_fds[0][1][0] = fd_temp[1];
+
+  /* data */
+  if (socketpair(AF_UNIX, SOCK_STREAM, 0, fd_temp) < 0)
+    goto fork_error;
+
+  slink_fds[1][0][0] = fd_temp[0];
+  slink_fds[1][1][1] = fd_temp[1];
+  slink_fds[1][0][1] = fd_temp[0];
+  slink_fds[1][1][0] = fd_temp[1];
 #else
-  if (pipe(ctrl_pipe) < 0)
-    return -1;
-  if (pipe(data_pipe) < 0)
-    return -1;
-  if (pipe(ctrl_pipe2) < 0)
-    return -1;
-  if (pipe(data_pipe2) < 0)
-    return -1;
+  /* ctrl parent -> child */
+  if (pipe(fd_temp) < 0)
+    goto fork_error;
+  slink_fds[0][0][0] = fd_temp[0];
+  slink_fds[0][1][1] = fd_temp[1];
+
+  /* ctrl child -> parent */
+  if (pipe(fd_temp) < 0)
+    goto fork_error;
+  slink_fds[0][1][0] = fd_temp[0];
+  slink_fds[0][0][1] = fd_temp[1];
+
+  /* data parent -> child */
+  if (pipe(fd_temp) < 0)
+    goto fork_error;
+  slink_fds[1][0][0] = fd_temp[0];
+  slink_fds[1][1][1] = fd_temp[1];
+
+  /* data child -> parent */
+  if (pipe(fd_temp) < 0)
+    goto fork_error;
+  slink_fds[1][1][0] = fd_temp[0];
+  slink_fds[1][0][1] = fd_temp[1];
 #endif
 
-  if ((ret = fork()) < 0)
-    return -1;
+  if ((ret = vfork()) < 0)
+    goto fork_error;
   else if (ret == 0)
   {
-    /* Child - use dup2 to override 3/4/5, then close everything else */
-    if(dup2(ctrl_pipe[0], 3) < 0)
-      exit(1);
-    if(dup2(data_pipe[0], 4) < 0)
-      exit(1);
-    if(dup2(server->fd, 5) < 0)
-      exit(1);
-#ifndef HAVE_SOCKETPAIR
-    /* only uni-directional pipes, so use 6/7 for writing */
-    if(dup2(ctrl_pipe2[1], 6) < 0)
-      exit(1);
-    if(dup2(data_pipe2[1], 7) < 0)
-      exit(1);
-#endif
+    /* set our fds as non blocking and close everything else */
+    for(i = 0; i < HARD_FDLIMIT; i++)
+    {
+      if ((i == slink_fds[0][0][0]) || (i == slink_fds[0][0][1]) ||
+          (i == slink_fds[0][0][0]) || (i == slink_fds[1][0][1]) ||
+          (i == server->fd))
+        set_non_blocking(i);
+      else if (i > 2) /* don't close std*, it upsets solaris */
+        close(i);
+    }
 
-    for(i = 3; i <= LAST_SLINK_FD; i++)
-      if(!set_non_blocking(i))
-        exit(1);
-    for(i = (LAST_SLINK_FD + 1); i < MAXCONNECTIONS; i++)
-      close(i);
+    sprintf(fd_str[0], "%d", slink_fds[0][0][0]); /* ctrl read */
+    sprintf(fd_str[1], "%d", slink_fds[0][0][1]); /* ctrl write */
+    sprintf(fd_str[2], "%d", slink_fds[1][0][0]); /* data read */
+    sprintf(fd_str[3], "%d", slink_fds[1][0][1]); /* data write */
+    sprintf(fd_str[4], "%d", server->fd);         /* network read/write */
+    
+    kid_argv[0] = "-slink";
+    kid_argv[1] = fd_str[0];
+    kid_argv[2] = fd_str[1];
+    kid_argv[3] = fd_str[2];
+    kid_argv[4] = fd_str[3];
+    kid_argv[5] = fd_str[4];
+    kid_argv[6] = NULL;
 
     /* exec servlink program */
     execv( ConfigFileEntry.servlink_path, kid_argv );
 
-    /* XXX - can we send messages here? it seems dangerous... */
     /* We're still here, abort. */
-    exit(1);
+    _exit(1);
   }
   else
   {
     fd_close( server->fd );
-    close( ctrl_pipe[0] );
-    close( data_pipe[0] );
+
+    /* close the childs end of the pipes */
+    close(slink_fds[0][0][0]);
+    close(slink_fds[0][0][1]);
+    close(slink_fds[1][0][0]);
+    close(slink_fds[1][0][1]);
 
     assert(server->localClient);
-    ctrlfd = server->localClient->ctrlfd = ctrl_pipe[1];
-    datafd = server->fd = data_pipe[1];
+    server->localClient->ctrlfd = slink_fds[0][1][1];
+    server->fd = slink_fds[1][1][1];
 
 #ifndef HAVE_SOCKETPAIR
-    close(ctrl_pipe2[1]);
-    close(data_pipe2[1]);
-    ctrlfd = server->localClient->ctrlfd_r = ctrl_pipe2[0];
-    datafd = server->fd_r = data_pipe2[0];
+    server->localClient->ctrlfd_r = slink_fds[0][1][0];
+    server->fd_r = slink_fds[1][1][0];
 #endif
 
     if (!set_non_blocking(server->fd))
@@ -1403,12 +1434,26 @@ int fork_server(struct Client *server)
     fd_open(server->fd_r, FD_PIPE, NULL);
 #endif
 
-    comm_setselect(datafd, FDLIST_SERVER, COMM_SELECT_READ, read_packet,
-                   server, 0);
-    comm_setselect(ctrlfd, FDLIST_SERVER, COMM_SELECT_READ, read_ctrl_packet,
-                   server, 0);
-    return 0;
+    comm_setselect(slink_fds[0][1][0], FDLIST_SERVER, COMM_SELECT_READ,
+                   read_ctrl_packet, server, 0);
+    comm_setselect(slink_fds[1][1][0], FDLIST_SERVER, COMM_SELECT_READ,
+                   read_packet, server, 0);
   }
+
+  return 0;
+
+fork_error:
+  /* this is ugly, but nicer than repeating
+   * about 50 close() statements everywhre... */
+  close(slink_fds[0][0][0]);
+  close(slink_fds[0][0][1]);
+  close(slink_fds[0][1][0]);
+  close(slink_fds[0][1][1]);
+  close(slink_fds[1][0][0]);
+  close(slink_fds[1][0][1]);
+  close(slink_fds[1][1][0]);
+  close(slink_fds[1][1][1]);
+  return -1;
 }
 #endif
 

@@ -26,6 +26,3 @@
 
 /* Define if you have the EVP_idea_cfb function.  */
 #undef HAVE_EVP_IDEA_CFB
-
-/* Define if you have the socketpair function. */
-#undef HAVE_SOCKETPAIR

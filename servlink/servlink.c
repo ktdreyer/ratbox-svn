@@ -47,18 +47,13 @@ static void usage(void);
 struct slink_state       in_state;
 struct slink_state       out_state;
 
-struct fd_table          fds[NUM_FDS] =
+struct fd_table          fds[5] =
         {
-          {      NULL, NULL }, /* stdin */
-          {      NULL, NULL }, /* stdout */
-          {      NULL, NULL }, /* stderr */
-          { read_ctrl, NULL },
-          {      NULL, NULL },
-#ifndef HAVE_SOCKETPAIR
-          {      NULL, NULL },
-          {      NULL, NULL },
-#endif
-          {      NULL, NULL }
+          { 0,  read_ctrl, NULL },
+          { 0,       NULL, NULL },
+          { 0,       NULL, NULL },
+          { 0,       NULL, NULL },
+          { 0,       NULL, NULL }
         };
 
 
@@ -80,6 +75,7 @@ int main(int argc, char *argv[])
 {
   fd_set rfds;
   fd_set wfds;
+  int max_fd = 0;
   int i;
 #ifdef SERVLINK_DEBUG
   int GDBAttached = 0;
@@ -94,13 +90,22 @@ int main(int argc, char *argv[])
 #endif
 
   /* Make sure we are running under hybrid.. */
-  if (argc != 1 || strcmp(argv[0], "-slink"))
+  if (argc != 6 || strcmp(argv[0], "-slink"))
     usage(); /* exits */
- 
-  /* set file descriptors to nonblocking mode */
-  for (i = 0; i < 3; i++)
+
+  for (i = 0; i < 5; i++ )
   {
-    fcntl(i, F_SETFL, O_NONBLOCK);
+    fds[i].fd = atoi(argv[i+1]);
+    if (fds[i].fd < 0)
+      exit(1);
+    if (fds[i].fd > max_fd)
+      max_fd = fds[i].fd;
+  }
+  
+  /* set file descriptors to nonblocking mode */
+  for (i = 0; i < 5; i++)
+  {
+    fcntl(fds[i].fd, F_SETFL, O_NONBLOCK);
   }
 
   /* The following FDs should be open:
@@ -119,29 +124,19 @@ int main(int argc, char *argv[])
     FD_ZERO(&rfds);
     FD_ZERO(&wfds);
     
-    for (i = 3; i < 6; i++)
+    for (i = 0; i < 5; i++)
     {
       if (fds[i].read_cb)
         FD_SET(i, &rfds);
-#ifdef HAVE_SOCKETPAIR
-      if (fds[i].write_cb)
-        FD_SET(i, &wfds);
-#endif
-    }
-
-#ifndef HAVE_SOCKETPAIR
-    for (i = 6; i < 8; i++)
-    {
       if (fds[i].write_cb)
         FD_SET(i, &wfds);
     }
-#endif
       
-    /* we have <=6 fds ever, so I don't think select is too painful */
-    if (select(NUM_FDS, &rfds, &wfds, NULL, NULL))
+    /* we have <6 fds ever, so I don't think select is too painful */
+    if (select((max_fd + 1), &rfds, &wfds, NULL, NULL))
     {
-      /* call any callbacks */
-      for (i = 0; i < NUM_FDS; i++)
+     /* call any callbacks */
+      for (i = 0; i <= max_fd; i++)
       {
         if (FD_ISSET(i, &rfds) && fds[i].read_cb)
           (*fds[i].read_cb)();

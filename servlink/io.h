@@ -30,7 +30,7 @@
 #define IO_TYPE(io)     ((io==IO_SELECT)?"select": \
                          ((io==IO_WRITE)?"write":"read"))
 
-#define FD_NAME(fd)     (fd_name[fd-3])
+#define FD_NAME(fd)     (fd_name(fd))
 
 extern void write_data(void);
 extern void read_data(void);
