@@ -53,6 +53,13 @@ struct hook_io_data
         unsigned int len;
 };
 
+struct hook_burst_channel
+{
+	struct Client *client;
+	struct Channel *chptr;
+};
+
+
 int hook_add_event(char *);
 int hook_add_hook(char *, hookfn *);
 int hook_call_event(char *, void *);

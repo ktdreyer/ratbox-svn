@@ -69,6 +69,7 @@
 #include "s_debug.h"
 #include "memory.h"
 #include "channel.h" /* chcap_usage_counts stuff...*/
+#include "hook.h"
 
 extern char *crypt();
 
@@ -1704,7 +1705,8 @@ burst_all(struct Client *client_p)
 {
   struct Client*    target_p;
   struct Channel*   chptr;
-  struct Channel*   vchan; 
+  struct Channel*   vchan;
+  struct hook_burst_channel hinfo; 
   dlink_node *ptr;
 
   /* serial counter borrowed from send.c */
@@ -1726,6 +1728,9 @@ burst_all(struct Client *client_p)
           burst_members(client_p,&chptr->halfops);
           burst_members(client_p,&chptr->peons);
           send_channel_modes(client_p, chptr);
+          hinfo.chptr = chptr;
+          hinfo.client = client_p;
+          hook_call_event("burst_channel", &hinfo);
         }
 
       if(IsVchanTop(chptr))
@@ -1741,6 +1746,9 @@ burst_all(struct Client *client_p)
                   burst_members(client_p,&vchan->halfops);
                   burst_members(client_p,&vchan->peons);
                   send_channel_modes(client_p, vchan);
+	          hinfo.chptr = chptr;
+        	  hinfo.client = client_p;
+          	  hook_call_event("burst_channel", &hinfo);
                 }
 	    }
 	}

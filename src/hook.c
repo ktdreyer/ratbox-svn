@@ -43,6 +43,7 @@ init_hooks(void)
         hook_add_event("iorecv");
         hook_add_event("iorecvctrl");
 #endif
+	hook_add_event("burst_channel");
 }
 
 static hook *
