@@ -690,17 +690,19 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 			newmode.mode |= MODE_REGONLY;
 			break;
 		case 'k':
+			newmode.mode |= MODE_KEY;
 			strlcpy(newmode.key, parv[3+args], sizeof(newmode.key));
 			args++;
 			
-			if(parc < 5+args)
+			if(parc < 4+args)
 				return;
 			break;
 		case 'l':
+			newmode.mode |= MODE_LIMIT;
 			newmode.limit = atoi(parv[3+args]);
 			args++;
 
-			if(parc < 5+args)
+			if(parc < 4+args)
 				return;
 			break;
 		default:
@@ -723,8 +725,6 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 				rejoin_service(ptr->data, chptr, 1);
 			}
 		}
-
-		hook_call(HOOK_SJOIN_LOWERTS, chptr, NULL);
 	}
 
 	if(keep_new_modes)
@@ -739,6 +739,10 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 				sizeof(chptr->mode.key));
 
 	}
+
+	/* this must be done after we've updated the modes */
+	if(!keep_old_modes)
+		hook_call(HOOK_SJOIN_LOWERTS, chptr, NULL);
 
 	if(EmptyString(parv[3+args]))
 		return;

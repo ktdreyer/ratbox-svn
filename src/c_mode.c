@@ -493,7 +493,7 @@ c_mode(struct client *client_p, const char *parv[], int parc)
 	struct chmember *msptr;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
-	int oldmode;
+	struct chmode oldmode;
 
 	if(parc < 1 || EmptyString(parv[0]))
 		return;
@@ -528,14 +528,20 @@ c_mode(struct client *client_p, const char *parv[], int parc)
 	   (msptr->flags & MODE_DEOPPED))
 		return;
 
-	oldmode = chptr->mode.mode;
+	oldmode.mode = chptr->mode.mode;
+	oldmode.limit = chptr->mode.limit;
+	if(EmptyString(chptr->mode.key))
+		oldmode.key[0] = '\0';
+	else
+		strlcpy(oldmode.key, chptr->mode.key, sizeof(chptr->mode.key));
 
 	parse_full_mode(chptr, NULL, (const char **) parv, parc, 1);
 
 	if(dlink_list_length(&opped_list))
 		hook_call(HOOK_MODE_OP, chptr, &opped_list);
 
-	if(oldmode != chptr->mode.mode)
+	if(oldmode.mode != chptr->mode.mode || oldmode.limit != chptr->mode.limit ||
+	   strcasecmp(oldmode.key, chptr->mode.key))
 		hook_call(HOOK_MODE_SIMPLE, chptr, NULL);
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, opped_list.head)

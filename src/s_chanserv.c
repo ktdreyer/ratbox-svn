@@ -852,30 +852,33 @@ h_chanserv_mode_simple(void *v_chptr, void *v_chreg)
 	/* the modes it has in common.. */
 	i = chptr->mode.mode & chreg_p->emode.mode;
 
-	if(i == chreg_p->emode.mode)
-		return 0;
-
-	/* to the modes it doesnt have in common */
-	mode.mode = chreg_p->emode.mode & ~i;
-	chptr->mode.mode |= mode.mode;
-
-	if(mode.mode & MODE_LIMIT)
+	if(i != chreg_p->emode.mode)
 	{
+		/* to the modes it doesnt have in common */
+		mode.mode = chreg_p->emode.mode & ~i;
+		chptr->mode.mode |= mode.mode;
+	}
+
+	if(chptr->mode.limit != chreg_p->emode.limit)
+	{
+		mode.mode |= MODE_LIMIT;
 		chptr->mode.limit = chreg_p->emode.limit;
 		mode.limit = chreg_p->emode.limit;
 	}
-
-	if(mode.mode & MODE_KEY)
+		
+	if(strcasecmp(chptr->mode.key, chreg_p->emode.key))
 	{
+		mode.mode |= MODE_KEY;
 		strlcpy(chptr->mode.key, chreg_p->emode.key,
 			sizeof(chptr->mode.key));
 		strlcpy(mode.key, chreg_p->emode.key, sizeof(mode.key));
 	}
 
 	/* we simply issue a mode of what it doesnt have in common */
-	sendto_server(":%s MODE %s %s",
-			chanserv_p->name, chptr->name,
-			chmode_to_string(&mode));
+	if(mode.mode)
+		sendto_server(":%s MODE %s %s",
+				chanserv_p->name, chptr->name,
+				chmode_to_string(&mode));
 	return 0;
 }
 
