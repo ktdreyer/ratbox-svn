@@ -1,3 +1,9 @@
+*** 20010424_7 by androsyn
+Fixed coredump if /etc/resolv.conf is unreadable.  We log the event to the
+logfile right now.  I need to move the dns init up further in the init
+process so we can output to standard error.
+
+
 *** 20010424_6 by habeeb
 Changed daemon() to make_daemon() to fix printing of startup messages,
 removed code to check for daemon() in configure, cleaned up a few things.
