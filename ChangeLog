@@ -1,3 +1,22 @@
+androsyn    2003/08/05 18:08:38 EDT	(20030805_0)
+
+  Modified files:
+    include              client.h s_auth.h 
+    modules              .depend Makefile.in 
+    src                  client.c s_auth.c 
+  Log:
+  Auth fix.  Also fix make depend for modules/core
+  
+  Revision  Changes    Path
+  7.209     +0 -1      ircd-ratbox/include/client.h
+  7.23      +3 -1      ircd-ratbox/include/s_auth.h
+  1.29      +662 -661  ircd-ratbox/modules/.depend
+  1.83      +5 -2      ircd-ratbox/modules/Makefile.in
+  7.393     +1 -2      ircd-ratbox/src/client.c
+  7.151     +63 -77    ircd-ratbox/src/s_auth.c
+
+
+
 leeh        2003/07/30 13:51:35 EDT	(20030730_1)
 
   Modified files:
