@@ -152,13 +152,13 @@ dohelp(struct Client *source_p, const char *hpath, const char *topic, const char
 	else
 		strcpy(ntopic, "index");	/* list available help topics */
 
-	if(strchr(topic, '/'))
+	if(strchr(ntopic, '/'))
 	{
 		sendto_one(source_p, form_str(ERR_HELPNOTFOUND), me.name, nick, ntopic);
 		return;
 	}
 
-	if(strlen(hpath) + strlen(topic) + 1 > MAXPATHLEN)
+	if(strlen(hpath) + strlen(ntopic) + 1 > MAXPATHLEN)
 	{
 		sendto_one(source_p, form_str(ERR_HELPNOTFOUND), me.name, nick, ntopic);
 		return;
