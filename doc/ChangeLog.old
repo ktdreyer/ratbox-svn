@@ -1,3 +1,24 @@
+androsyn    2002/03/09 16:57:11 EST	(20020309_3)
+
+  Modified files:
+    src                  .depend Makefile.in m_error.c send.c 
+  Removed files:
+    include              debug.h 
+    src                  debug.c 
+  Log:
+  Removed debug.c completely.  It was only being used three times so, we just
+  replace it with ilog()
+  
+  Revision  Changes    Path
+  1.4       +0 -45     ircd-hybrid-7/include/debug.h (dead)
+  7.5       +6 -6      ircd-hybrid-7/src/.depend
+  7.109     +0 -1      ircd-hybrid-7/src/Makefile.in
+  7.7       +0 -275    ircd-hybrid-7/src/debug.c (dead)
+  7.23      +3 -4      ircd-hybrid-7/src/m_error.c
+  7.184     +0 -1      ircd-hybrid-7/src/send.c
+
+
+
 androsyn    2002/03/09 16:48:46 EST	(20020309_2)
 
   Modified files:
