@@ -124,7 +124,6 @@ void adns__tcp_tryconnect(adns_state ads, struct timeval now) {
     if (errno == EWOULDBLOCK || errno == EINPROGRESS) {
       ads->tcptimeout= now;
       timevaladd(&ads->tcptimeout,TCPCONNMS);
-      dns_select();
       return;
     }
     adns__tcp_broken(ads,"connect",strerror(errno));
@@ -371,7 +370,7 @@ int adns_processreadable(adns_state ads, int fd, const struct timeval *now) {
 	ads->tcprecv.used+= r;
       } else {
 	if (r) {
-	  if (errno==EAGAIN || errno==EWOULDBLOCK) { r= 0; dns_select(); goto xit; }
+	  if (errno==EAGAIN || errno==EWOULDBLOCK) { r= 0; goto xit; }
 	  if (errno==EINTR) continue;
 	  if (errno_resources(errno)) { r= errno; goto xit; }
 	}
