@@ -1,3 +1,7 @@
+*** 20011206_5 by leeh
+- missing knockll_msgtab
+
+
 *** 20011206_4 by androsyn
 Minor cleanups in s_bsd_sigio.c
 
