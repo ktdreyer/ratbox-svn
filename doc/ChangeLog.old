@@ -1,3 +1,15 @@
+androsyn    2002/06/11 20:53:38 EDT	(20020612_0)
+
+  Modified files:
+    src                  s_user.c 
+  Log:
+  Make that not so ugly
+  
+  Revision  Changes    Path
+  7.200     +6 -10     ircd-hybrid-7/src/s_user.c
+
+
+
 leeh        2002/06/11 17:37:10 EDT	(20020611_9)
 
   Modified files:
