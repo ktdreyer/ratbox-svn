@@ -1,3 +1,21 @@
+leeh        2004/06/15 00:42:23 EDT	(20040615_5)
+
+  Modified files:
+    .                    RELNOTES 
+    doc                  whats-new.txt 
+    src                  s_conf.c 
+  Log:
+  - update some docs
+  - fix the fuserlog and failed connection notices to accurately show whether
+    a user is idented or not
+  
+  Revision  Changes    Path
+  1.105     +2 -0      ircd-ratbox/RELNOTES
+  7.48      +2 -3      ircd-ratbox/doc/whats-new.txt
+  7.466     +41 -29    ircd-ratbox/src/s_conf.c
+
+
+
 androsyn    2004/06/15 00:14:45 EDT	(20040615_4)
 
   Modified files:
