@@ -572,6 +572,7 @@ conf_end_oper(struct TopConf *tc)
 		DupString(yy_tmpoper->passwd, yy_oper->passwd);
 
 		yy_tmpoper->flags = yy_oper->flags;
+		yy_tmpoper->umodes = yy_oper->umodes;
 
 #ifdef HAVE_LIBCRYPTO
 		if(yy_oper->rsa_pubkey_file)
@@ -686,6 +687,12 @@ conf_set_oper_encrypted(void *data)
 		yy_oper->flags |= OPER_ENCRYPTED;
 	else
 		yy_oper->flags &= ~OPER_ENCRYPTED;
+}
+
+static void
+conf_set_oper_umodes(void *data)
+{
+	set_modes_from_table(&yy_oper->umodes, "umode", umode_table, data);
 }
 
 static int
@@ -2499,6 +2506,7 @@ newconf_init()
 	add_conf_item("operator", "rsa_public_key_file", CF_QSTRING,
 		      conf_set_oper_rsa_public_key_file);
 	add_conf_item("operator", "flags", CF_STRING | CF_FLIST, conf_set_oper_flags);
+	add_conf_item("operator", "umodes", CF_STRING | CF_FLIST, conf_set_oper_umodes);
 
 	add_top_conf("class", conf_begin_class, conf_end_class);
 	add_conf_item("class", "name", CF_QSTRING, conf_set_class_name);

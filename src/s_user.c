@@ -1120,7 +1120,10 @@ oper_up(struct Client *source_p, struct oper_conf *oper_p)
 	int old = (source_p->umodes & ALL_UMODES);
 
 	SetOper(source_p);
-	if(ConfigFileEntry.oper_umodes)
+
+	if(oper_p->umodes)
+		source_p->umodes |= oper_p->umodes & ALL_UMODES;
+	else if(ConfigFileEntry.oper_umodes)
 		source_p->umodes |= ConfigFileEntry.oper_umodes & ALL_UMODES;
 	else
 		source_p->umodes |= DEFAULT_OPER_UMODES & ALL_UMODES;

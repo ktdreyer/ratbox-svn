@@ -83,6 +83,7 @@ struct oper_conf
 	char *passwd;
 
 	int flags;
+	int umodes;
 
 #ifdef HAVE_LIBCRYPTO
 	char *rsa_pubkey_file;
