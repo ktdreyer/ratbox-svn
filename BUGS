@@ -68,6 +68,5 @@ BUG REPORTS: If you run this code and encounter problems, you must report
  Please include a gdb backtrace and a copy of your config.h and ircd.conf
  with any report  (with passwords and other sensitive information masked).
 
-
 --------------------------------------------------------------------------------
 $Id$
