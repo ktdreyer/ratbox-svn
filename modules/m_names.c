@@ -181,7 +181,7 @@ void names_all_visible_channels(struct Client *sptr)
 	  ircsprintf(buf,form_str(RPL_NAMREPLY),
 		     me.name, sptr->name,channel_pub_or_secret(chptr));
 	  mlen = strlen(buf);
-	  ircsprintf(buf + mlen," %s : ", chname);
+	  ircsprintf(buf + mlen," %s :", chname);
 	  mlen = strlen(buf);
 	  cur_len = mlen;
 
