@@ -12,10 +12,11 @@
  */
 
 
-#ifdef DEBUGMEM
 #include <stdlib.h>
 #include <stdio.h>
 #include "s_log.h"
+
+#ifdef DEBUGMEM
 
 #ifndef DEBUGMEM_TABLE_BLOCKSIZE
 #define DEBUGMEM_TABLE_BLOCKSIZE 1024

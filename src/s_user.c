@@ -844,7 +844,7 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
               if (MyConnect(sptr))
                 {
-                  dlink_node *m;
+                  dlink_node *dm;
 
 		  ptr = sptr->localClient->confs.head;
 		  aconf = ptr->data;
@@ -858,11 +858,11 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                                     FLAGS2_OPER_K|
                                     FLAGS2_OPER_ADMIN);
 
-		  m = dlinkFind(&oper_list,sptr);
-		  if(m != NULL)
+		  dm = dlinkFind(&oper_list,sptr);
+		  if(dm != NULL)
 		    {
-		      dlinkDelete(m,&oper_list);
-		      free_dlink_node(m);
+		      dlinkDelete(dm,&oper_list);
+		      free_dlink_node(dm);
 		    }
 
 		  /*

@@ -33,8 +33,6 @@
 #include "memdebug.h"
 
 static char *getfield(char *newline);
-static  int  oper_privs_from_string(int,char *);
-static  int  oper_flags_from_string(char *);
 
 /*
  * oldParseOneLine
@@ -64,7 +62,6 @@ void oldParseOneLine(char* line,struct ConfItem* aconf,
   char* host_field=(char *)NULL;
   char* port_field=(char *)NULL;
   char* class_field=(char *)NULL;
-  int   sendq = 0;
 
   tmp = getfield(line);
   if (!tmp)
@@ -157,98 +154,5 @@ static char *getfield(char *newline)
     line = end + 1;
   *end = '\0';
   return(field);
-}
-
-/* oper_privs_from_string
- *
- * inputs        - default privs
- *               - privs as string
- * output        - default privs as modified by privs string
- * side effects -
- *
- */
-
-static int oper_privs_from_string(int int_privs,char *privs)
-{
-  while(*privs)
-    {
-      if(*privs == 'O')                     /* allow global kill */
-        int_privs |= CONF_OPER_GLOBAL_KILL;
-      else if(*privs == 'o')                /* disallow global kill */
-        int_privs &= ~CONF_OPER_GLOBAL_KILL;
-      else if(*privs == 'U')                /* allow unkline */
-        int_privs |= CONF_OPER_UNKLINE;
-      else if(*privs == 'u')                /* disallow unkline */
-        int_privs &= ~CONF_OPER_UNKLINE;
-      else if(*privs == 'R')                /* allow remote squit/connect etc.*/
-        int_privs |= CONF_OPER_REMOTE;        
-      else if(*privs == 'r')                /* disallow remote squit/connect etc.*/
-        int_privs &= ~CONF_OPER_REMOTE;
-      else if(*privs == 'N')                /* allow +n see nick changes */
-        int_privs |= CONF_OPER_N;
-      else if(*privs == 'n')                /* disallow +n see nick changes */
-        int_privs &= ~CONF_OPER_N;
-      else if(*privs == 'K')                /* allow kill and kline privs */
-        int_privs |= CONF_OPER_K;
-      else if(*privs == 'k')                /* disallow kill and kline privs */
-        int_privs &= ~CONF_OPER_K;
-      else if(ConfigFileEntry.glines && *privs == 'G')                /* allow gline */
-        int_privs |= CONF_OPER_GLINE;
-      else if(ConfigFileEntry.glines && *privs == 'g')                /* disallow gline */
-        int_privs &= ~CONF_OPER_GLINE;
-      else if(*privs == 'H')                /* allow rehash */
-        int_privs |= CONF_OPER_REHASH;
-      else if(*privs == 'h')                /* disallow rehash */
-        int_privs &= ~CONF_OPER_REHASH;
-      else if(*privs == 'D')
-        int_privs |= CONF_OPER_DIE;         /* allow die */
-      else if(*privs == 'd')
-        int_privs &= ~CONF_OPER_DIE;        /* disallow die */
-      else if(*privs == 'A')
-        int_privs |= CONF_OPER_ADMIN;       
-      else if(*privs == 'a')
-	int_privs &= ~CONF_OPER_ADMIN;
-      privs++;
-    }
-  return(int_privs);
-}
-
-/* oper_flags_from_string
- *
- * inputs        - flags as string
- * output        - flags as bit mask
- * side effects -
- */
-
-static int oper_flags_from_string(char *flags)
-{
-  int int_flags=0;
-
-  while(*flags)
-    {
-      if(*flags == 'i')                        /* invisible */
-        int_flags |= FLAGS_INVISIBLE;
-      else if(*flags == 'w')                /* see wallops */
-        int_flags |= FLAGS_WALLOP;
-      else if(*flags == 's')
-        int_flags |= FLAGS_SERVNOTICE;
-      else if(*flags == 'c')
-        int_flags |= FLAGS_CCONN;
-      else if(*flags == 'r')
-        int_flags |= FLAGS_REJ;
-      else if(*flags == 'k')
-        int_flags |= FLAGS_SKILL;
-      else if(*flags == 'f')
-        int_flags |= FLAGS_FULL;
-      else if(*flags == 'y')
-        int_flags |= FLAGS_SPY;
-      else if(*flags == 'd')
-        int_flags |= FLAGS_DEBUG;
-      else if(*flags == 'n')
-        int_flags |= FLAGS_NCHANGE;
-      flags++;
-    }
-
-  return(int_flags);
 }
 

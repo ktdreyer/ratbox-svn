@@ -282,17 +282,17 @@ static DOMAIN_PIECE *find_or_add_host_piece(DOMAIN_LEVEL *level_ptr,
   DOMAIN_PIECE *new_ptr;
   DOMAIN_PIECE *last_ptr;
   DOMAIN_PIECE *ptr;
-  int index;
+  int pieceindex;
 
-  index = *host_piece&(MAX_PIECE_LIST-1);
-  piece_ptr = level_ptr->piece_list[index];
+  pieceindex = *host_piece&(MAX_PIECE_LIST-1);
+  piece_ptr = level_ptr->piece_list[pieceindex];
 
   if(piece_ptr == (DOMAIN_PIECE *)NULL)
     {
       cur_piece = (DOMAIN_PIECE *)MyMalloc(sizeof(DOMAIN_PIECE));
       memset((void *)cur_piece,0,sizeof(DOMAIN_PIECE));
       DupString(cur_piece->host_piece,host_piece);
-      level_ptr->piece_list[index] = cur_piece;
+      level_ptr->piece_list[pieceindex] = cur_piece;
       cur_piece->flags |= flags;
       return(cur_piece);
     }
@@ -571,13 +571,13 @@ static DOMAIN_PIECE *find_host_piece(DOMAIN_LEVEL *level_ptr,int flags,
 {
   DOMAIN_PIECE *ptr;
   DOMAIN_PIECE *piece_ptr;
-  int index;
+  int pieceindex;
 
   if(!level_ptr)
     return((DOMAIN_PIECE *)NULL);
   
-  index = *host_piece&(MAX_PIECE_LIST-1);
-  piece_ptr = level_ptr->piece_list[index];
+  pieceindex = *host_piece&(MAX_PIECE_LIST-1);
+  piece_ptr = level_ptr->piece_list[pieceindex];
 
   for(ptr=piece_ptr;ptr;ptr=ptr->next_piece)
     {
@@ -615,10 +615,10 @@ static struct ConfItem *find_wild_host_piece(DOMAIN_LEVEL *level_ptr,int flags,
   DOMAIN_PIECE *ptr;
   DOMAIN_PIECE *pptr;
   DOMAIN_PIECE *piece_ptr;
-  int index;
+  int pieceindex;
   
-  index = '*'&(MAX_PIECE_LIST-1);
-  piece_ptr = level_ptr->piece_list[index];
+  pieceindex = '*'&(MAX_PIECE_LIST-1);
+  piece_ptr = level_ptr->piece_list[pieceindex];
   
   for(ptr=piece_ptr;ptr;ptr=ptr->next_piece)
     {

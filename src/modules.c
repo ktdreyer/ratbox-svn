@@ -21,6 +21,7 @@
 
 #include <dlfcn.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #include <dirent.h>
@@ -35,6 +36,7 @@
 #include "send.h"
 #include "handlers.h"
 #include "numeric.h"
+#include "parse.h"
 #include "ircd_defs.h"
 #include "irc_string.h"
 #include "memdebug.h"
@@ -66,6 +68,7 @@ mod_find_path(char *path)
 	for (pathst = mod_paths; pathst; pathst = pathst->next)
 		if (!strcmp(path, pathst->path))
 			return pathst;
+	return NULL;
 }
 			  
 void
@@ -127,24 +130,24 @@ findmodule_byname (char *name)
  */
 int unload_one_module (char *name)
 {
-  int index;
+  int modindex;
   void (*deinitfunc)(void) = NULL;
 
-  if ((index = findmodule_byname (name)) == -1) 
+  if ((modindex = findmodule_byname (name)) == -1) 
     return -1;
 
-  deinitfunc = (void (*)(void))dlsym (modlist[index]->address, "_moddeinit");
+  deinitfunc = (void (*)(void))dlsym (modlist[modindex]->address, "_moddeinit");
 
   if( deinitfunc != NULL )
     {
       deinitfunc ();
     }
 
-  dlclose(modlist[index]->address);
+  dlclose(modlist[modindex]->address);
   
-  MyFree(modlist[index]->name);
-  memcpy( &modlist[index], &modlist[index+1],
-	  sizeof(struct module) * ((num_mods-1) - index) );
+  MyFree(modlist[modindex]->name);
+  memcpy( &modlist[modindex], &modlist[modindex+1],
+	  sizeof(struct module) * ((num_mods-1) - modindex) );
 
   if(num_mods != 0)
     num_mods--;
@@ -236,12 +239,12 @@ load_all_modules (void)
 int
 load_one_module (char *path)
 {
-  void *tmpptr;
+  void *tmpptr = NULL;
   char *mod_basename;
   void (*initfunc)(void) = NULL;
   char **verp;
   char *ver;
-  char realpath[MAXPATHLEN];
+  char realmodpath[MAXPATHLEN];
   struct module_path *pathst;
 
   mod_basename = irc_basename(path);
@@ -266,9 +269,9 @@ load_one_module (char *path)
   {
 	  /* non-absolute path, try all module paths */
 	  for (pathst = mod_paths; pathst; pathst = pathst->next) {
-		  sprintf(realpath, "%s/%s", pathst->path, path);
+		  sprintf(realmodpath, "%s/%s", pathst->path, path);
 		  errno = 0;
-		  tmpptr = dlopen (realpath, RTLD_NOW);
+		  tmpptr = dlopen (realmodpath, RTLD_NOW);
 		  
 		  if (tmpptr == NULL)
 		  {

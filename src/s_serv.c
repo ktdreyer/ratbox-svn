@@ -512,7 +512,7 @@ int check_server(struct Client* cptr)
  * side effects	- send the CAPAB line to a server  -orabidoo
  *
  */
-void send_capabilities(struct Client* cptr, int can_send)
+void send_capabilities(struct Client* cptr, int lcan_send)
 {
   struct Capability* cap;
   char  msgbuf[BUFSIZE];
@@ -523,7 +523,7 @@ void send_capabilities(struct Client* cptr, int can_send)
 
   for (cap = captab; cap->name; ++cap)
     {
-      if (cap->cap & can_send)
+      if (cap->cap & lcan_send)
         {
           tl = ircsprintf(t, "%s ", cap->name);
 	  t += tl;
@@ -1054,7 +1054,6 @@ burst_channel(struct Client *cptr, struct Channel *chptr)
 {
   dlink_node        *ptr;
   struct Channel*   vchan;
-  struct Client*    acptr;
 
   burst_ll_members(cptr,&chptr->chanops);
   burst_ll_members(cptr,&chptr->voiced);

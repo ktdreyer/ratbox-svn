@@ -127,9 +127,9 @@ void show_ports(struct Client* sptr)
 static int inetport(struct Listener* listener)
 {
 #ifdef IPV6
-  struct sockaddr_in6 sin6;
+  struct sockaddr_in6 lsin6;
 #else
-  struct sockaddr_in sin;
+  struct sockaddr_in lsin;
 #endif
   int                fd;
   int                opt = 1;
@@ -171,15 +171,15 @@ static int inetport(struct Listener* listener)
    * else assume it is already open and try get something from it.
    */
 #ifdef IPV6
-  memset(&sin6, 0, sizeof(sin6));
-  sin6.sin6_family = AF_INET6;
-  memcpy(&sin6.sin6_addr.s6_addr, &in6addr_any, sizeof(in6addr_any));
-  sin6.sin6_port = htons(listener->port);
+  memset(&lsin6, 0, sizeof(lsin6));
+  lsin6.sin6_family = AF_INET6;
+  memcpy(&lsin6.sin6_addr.s6_addr, &in6addr_any, sizeof(in6addr_any));
+  lsin6.sin6_port = htons(listener->port);
 #else
-  memset(&sin, 0, sizeof(sin));
-  sin.sin_family = AF_INET;
-  sin.sin_addr   = listener->addr;
-  sin.sin_port   = htons(listener->port);
+  memset(&lsin, 0, sizeof(lsin));
+  lsin.sin_family = AF_INET;
+  lsin.sin_addr   = listener->addr;
+  lsin.sin_port   = htons(listener->port);
 #endif
 
 #ifndef IPV6
@@ -197,9 +197,9 @@ static int inetport(struct Listener* listener)
 #endif
 
 #ifdef IPV6
-  if (bind(fd, (struct sockaddr*) &sin6, sizeof(sin6))) {
+  if (bind(fd, (struct sockaddr*) &lsin6, sizeof(lsin6))) {
 #else
-  if (bind(fd, (struct sockaddr*) &sin, sizeof(sin))) {
+  if (bind(fd, (struct sockaddr*) &lsin, sizeof(lsin))) {
 #endif
     report_error("binding listener socket %s:%s", 
                  get_listener_name(listener), errno);
@@ -335,7 +335,7 @@ static void accept_connection(int pfd, void *data)
 {
   static time_t      last_oper_notice = 0;
   struct sockaddr_in addr;
-  int                addrlen = sizeof(struct sockaddr_in);
+  socklen_t          addrlen = sizeof(struct sockaddr_in);
   int                fd;
   struct Listener *  listener = data;
 

@@ -869,8 +869,8 @@ void send_channel_modes(struct Client *cptr, struct Channel *chptr)
  * side effects	-
  */
 static void send_members(struct Client *cptr,
-			 char *modebuf,
-			 char *parabuf,
+			 char *lmodebuf,
+			 char *lparabuf,
 			 struct Channel *chptr,
 			 dlink_list *list,
 			 char *op_flag )
@@ -884,7 +884,7 @@ static void send_members(struct Client *cptr,
   char *t;		/* temp char pointer */
 
   ircsprintf(buf, ":%s SJOIN %lu %s %s %s:", me.name,
-	     chptr->channelts, chptr->chname, modebuf, parabuf);
+	     chptr->channelts, chptr->chname, lmodebuf, lparabuf);
 
   cur_len = mlen = strlen(buf);
   t = buf + mlen;
@@ -2404,7 +2404,7 @@ struct Channel* get_channel(struct Client *cptr, char *chname, int flag)
 */
 static  void    sub1_from_channel(struct Channel *chptr)
 {
-  struct Client *lastuser;
+  struct Client *lastuser=NULL;
 
   if (--chptr->users <= 0)
     {
@@ -2795,7 +2795,7 @@ void channel_member_names( struct Client *sptr,
 {
   int mlen;
   int cur_len;
-  char buf[BUFSIZE];
+  char lbuf[BUFSIZE];
   char *show_ops_flag;
   char *show_voiced_flag;
   char *show_halfops_flag;
@@ -2803,12 +2803,12 @@ void channel_member_names( struct Client *sptr,
 
   /* Find users on same channel (defined by chptr) */
 
-  ircsprintf(buf, form_str(RPL_NAMREPLY),
+  ircsprintf(lbuf, form_str(RPL_NAMREPLY),
 	     me.name, sptr->name,
 	     channel_pub_or_secret(chptr));
-  mlen = strlen(buf);
-  ircsprintf(buf + mlen, " %s :", name_of_channel);
-  mlen = strlen(buf);
+  mlen = strlen(lbuf);
+  ircsprintf(lbuf + mlen, " %s :", name_of_channel);
+  mlen = strlen(lbuf);
   cur_len = mlen;
 
   if(chptr->mode.mode & MODE_HIDEOPS && !is_any_op(chptr,sptr))
@@ -2826,21 +2826,21 @@ void channel_member_names( struct Client *sptr,
 
   channel_member_list(sptr,
 		      &chptr->chanops, show_ops_flag,
-		      buf, mlen, &cur_len, &reply_to_send);
+		      lbuf, mlen, &cur_len, &reply_to_send);
 
   channel_member_list(sptr,
 		      &chptr->voiced, show_voiced_flag,
-		      buf, mlen, &cur_len, &reply_to_send);
+		      lbuf, mlen, &cur_len, &reply_to_send);
 
   channel_member_list(sptr,
 		      &chptr->halfops, show_halfops_flag,
-		      buf, mlen, &cur_len, &reply_to_send);
+		      lbuf, mlen, &cur_len, &reply_to_send);
 
   channel_member_list(sptr, &chptr->peons, "",
-		      buf, mlen, &cur_len, &reply_to_send);
+		      lbuf, mlen, &cur_len, &reply_to_send);
 
   if(reply_to_send)
-    sendto_one(sptr, "%s", buf);
+    sendto_one(sptr, "%s", lbuf);
 
   sendto_one(sptr, form_str(RPL_ENDOFNAMES),
              me.name, sptr->name, name_of_channel);
@@ -2863,7 +2863,7 @@ void
 channel_member_list(struct Client *sptr,
 			 dlink_list *list,
 			 char *show_flag,
-			 char *buf,
+			 char *lbuf,
 			 int mlen,
 			 int *cur_len,
 			 int *reply_to_send)
@@ -2873,7 +2873,7 @@ channel_member_list(struct Client *sptr,
   char *t;
   int tlen;
 
-  t = buf + *cur_len;
+  t = lbuf + *cur_len;
 
   for (ptr = list->head; ptr; ptr = ptr->next)
     {
@@ -2886,10 +2886,10 @@ channel_member_list(struct Client *sptr,
 
       if ((*cur_len + NICKLEN) > (BUFSIZE - 3))
 	{
-	  sendto_one(sptr, "%s", buf);
+	  sendto_one(sptr, "%s", lbuf);
 	  *reply_to_send = NO;
 	  *cur_len = mlen;
-	  t = buf + mlen;
+	  t = lbuf + mlen;
 	}
     }
 }

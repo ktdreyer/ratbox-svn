@@ -24,6 +24,7 @@
 #include "s_log.h"
 #include "send.h"
 #include "s_debug.h"
+#include "handlers.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -206,7 +207,7 @@ static void     query_name(const char* name,
 static int      send_res_msg(const char* buf, int len, int count);
 static void     resend_query(ResRQ* request);
 static int      proc_answer(ResRQ* request, HEADER* header, 
-                                    char*, char *);
+                                    char *, char *);
 static ResRQ*   find_id(int);
 
 static struct cache* make_cache(ResRQ* request);
@@ -667,7 +668,7 @@ static void query_name(const char* name, int query_class,
 
   memset(buf, 0, sizeof(buf));
   if ((request_len = res_mkquery(QUERY, name, query_class, type, 
-                                 NULL, 0, NULL, buf, sizeof(buf))) > 0)
+                                 NULL, 0, NULL, (unsigned char *)buf, sizeof(buf))) > 0)
     {
       HEADER* header = (HEADER*) buf;
 #ifndef LRAND48
@@ -747,7 +748,7 @@ static int proc_answer(ResRQ* request, HEADER* header,
   assert(0 != buf);
   assert(0 != eob);
   
-  current = buf + sizeof(HEADER);
+  current = (unsigned char *)buf + sizeof(HEADER);
   hp = &(request->he.h);
   /*
    * lazy allocation of request->he.buf, we don't allocate a buffer
@@ -814,7 +815,7 @@ static int proc_answer(ResRQ* request, HEADER* header,
    */ 
   for (; header->qdcount > 0; --header->qdcount)
     {
-      if ((n = dn_skipname(current, eob)) < 0)
+      if ((n = dn_skipname(current, (unsigned char *)eob)) < 0)
 	break;
       current += (size_t) n + QFIXEDSZ;
     }
@@ -823,7 +824,7 @@ static int proc_answer(ResRQ* request, HEADER* header,
    */
   while (header->ancount-- > 0 && (char *) current < eob && name < endp)
     {
-      n = dn_expand(buf, eob, current, hostbuf, sizeof(hostbuf));
+      n = dn_expand((unsigned char *)buf, (unsigned char *)eob, current, hostbuf, sizeof(hostbuf));
       if (n < 0)
 	{
 	  /*
@@ -897,7 +898,7 @@ static int proc_answer(ResRQ* request, HEADER* header,
 	++answer_count;
 	break;
       case T_PTR:
-	n = dn_expand(buf, eob, current, hostbuf, sizeof(hostbuf));
+	n = dn_expand((unsigned char *)buf, (unsigned char *)eob, current, hostbuf, sizeof(hostbuf));
 	if (n < 0)
 	  {
 	    /*
@@ -969,11 +970,11 @@ res_readreply(int fd, void *data)
   int                rc;
   int                answer_count;
   int                len = sizeof(struct sockaddr_in);
-  struct sockaddr_in sin;
+  struct sockaddr_in lsin;
 
   assert(fd == ResolverFileDescriptor);
   rc = recvfrom(ResolverFileDescriptor, buf, sizeof(buf), 0, 
-                (struct sockaddr*) &sin, &len);
+                (struct sockaddr*) &lsin, &len);
   /*
    * Re-schedule a read *after* recvfrom, or we'll be registering
    * interest where it'll instantly be ready for read :-) -- adrian
@@ -1006,7 +1007,7 @@ res_readreply(int fd, void *data)
   /*
    * check against possibly fake replies
    */
-  if (!res_ourserver(&_res, &sin))
+  if (!res_ourserver(&_res, &lsin))
     {
       ++reinfo.re_unkrep;
       return;

@@ -32,7 +32,7 @@
 #include "fdlist.h"
 
 #ifndef HAVE_SOCKLEN_T
-typedef unsigned int socklen_t;
+typedef int socklen_t;
 #endif
 
 #define READBUF_SIZE    16384   /* used in s_bsd *AND* s_zip.c ! */
@@ -82,6 +82,9 @@ extern void  comm_setselect(int fd, fdlist_t list, unsigned int type,
 extern void  init_netio(void);
 extern int   read_message (time_t, unsigned char);
 extern int   comm_select(time_t);
+extern int   comm_select_fdlist(fdlist_t, time_t);
+extern int   disable_sock_options(int);
+
 
 #endif /* INCLUDED_s_bsd_h */
 

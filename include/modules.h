@@ -53,4 +53,7 @@ extern void load_all_modules(void);
 extern void _modinit(void);
 extern void _moddeinit(void);
 
+extern int unload_one_module (char *);
+extern int load_one_module (char *);
+
 #endif

@@ -48,8 +48,10 @@ static
 int parse_client_queued(struct Client *cptr)
 { 
     int dolen  = 0;
+#if 0
     struct LocalUser *lcptr = cptr->localClient;
     int checkflood = 1; /* Whether we're checking or not */
+#endif
 
 #if 0
     if (IsServer(cptr))

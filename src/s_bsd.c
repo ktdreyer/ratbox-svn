@@ -538,7 +538,7 @@ comm_checktimeouts(void *notused)
  */
 void
 comm_connect_tcp(int fd, const char *host, u_short port, 
-    struct sockaddr *local, int socklen, CNCB *callback, void *data)
+    struct sockaddr *clocal, int socklen, CNCB *callback, void *data)
 {
     struct DNSQuery query;
 
@@ -555,7 +555,7 @@ comm_connect_tcp(int fd, const char *host, u_short port,
      * virtual host IP, for completeness.
      *   -- adrian
      */
-    if ((local != NULL) && (bind(fd, local, socklen) < 0)) { 
+    if ((clocal != NULL) && (bind(fd, clocal, socklen) < 0)) { 
         /* Failure, call the callback with COMM_ERR_BIND */
         comm_connect_callback(fd, COMM_ERR_BIND);
         /* ... and quit */
@@ -662,15 +662,15 @@ static void
 comm_connect_tryconnect(int fd, void *notused)
 {
     int retval;
-    struct sockaddr_in sin;
+    struct sockaddr_in lsin;
 
     /* We *COULD* cache this in the fd_table for extra speed .. --adrian */
-    sin.sin_addr.s_addr = fd_table[fd].connect.hostaddr.s_addr;
-    sin.sin_port = htons(fd_table[fd].connect.port);
-    sin.sin_family = AF_INET;
+    lsin.sin_addr.s_addr = fd_table[fd].connect.hostaddr.s_addr;
+    lsin.sin_port = htons(fd_table[fd].connect.port);
+    lsin.sin_family = AF_INET;
 
     /* Try the connect() */
-    retval = connect(fd, (struct sockaddr *)&sin, sizeof(sin));
+    retval = connect(fd, (struct sockaddr *)&lsin, sizeof(lsin));
 
     /* Error? */
     if (retval < 0) {

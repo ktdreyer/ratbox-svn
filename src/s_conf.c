@@ -28,6 +28,7 @@
 #include "class.h"
 #include "client.h"
 #include "common.h"
+#include "event.h"
 #include "dline_conf.h"
 #include "hash.h"
 #include "irc_string.h"
@@ -214,14 +215,14 @@ void free_conf(struct ConfItem* aconf)
  */
 void det_confs_butmask(struct Client* cptr, int mask)
 {
-  dlink_node *link;
+  dlink_node *dlink;
   dlink_node *link_next;
   struct ConfItem *aconf;
 
-  for (link = cptr->localClient->confs.head; link; link = link_next)
+  for (dlink = cptr->localClient->confs.head; dlink; dlink = link_next)
     {
-      link_next = link->next;
-      aconf = link->data;
+      link_next = dlink->next;
+      aconf = dlink->data;
 
       if ((aconf->status & mask) == 0)
         detach_conf(cptr, aconf);
@@ -1615,7 +1616,6 @@ int              ncount = 0;
 
 static void read_conf(FBFILE* file)
 {
-  struct ConfItem* aconf;
   ccount = ncount = lineno = 0;
 
   class0 = find_class("default");       /* which one is the default class ? */
@@ -2820,11 +2820,11 @@ void conf_delist_old_conf(struct ConfItem *aconf)
  * side effects - Add a C or N line
  */
 struct ConfItem *conf_add_server(struct ConfItem *aconf,
-                                        int ncount, int ccount )
+                                        int lncount, int lccount )
 {
   conf_add_class_to_conf(aconf);
 
-  if (ncount > MAXCONFLINKS || ccount > MAXCONFLINKS ||
+  if (lncount > MAXCONFLINKS || lccount > MAXCONFLINKS ||
       !aconf->host || !aconf->user)
     {
       sendto_realops_flags(FLAGS_ALL,"Bad C/N line");
@@ -3041,7 +3041,7 @@ void yyerror(char *msg)
 {
   char newlinebuf[BUFSIZE];
 
-  strip_tabs(newlinebuf, linebuf, strlen(linebuf));
+  strip_tabs(newlinebuf, (const unsigned char *)linebuf, strlen(linebuf));
 
   sendto_realops_flags(FLAGS_ALL,"%d: %s on line: %s",
 		       lineno, msg, newlinebuf);
@@ -3050,16 +3050,16 @@ void yyerror(char *msg)
       lineno, msg, newlinebuf);
 }
 
-int conf_fbgets(char *buf,int max_size, FBFILE *fb)
+int conf_fbgets(char *lbuf,int max_size, FBFILE *fb)
 {
   char* buff;
 
-  buff = fbgets(buf,max_size,fb);
+  buff = fbgets(lbuf,max_size,fb);
 
   if(!buff)
     return 0;
   else
-    return(strlen(buf));
+    return(strlen(lbuf));
 }
 
 int conf_yy_fatal_error(char *msg)

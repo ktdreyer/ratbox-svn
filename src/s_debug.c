@@ -167,7 +167,7 @@ void count_memory(struct Client *sptr)
   struct Channel *chptr;
   struct ConfItem *aconf;
   struct Class *cltmp;
-  dlink_node *link;
+  dlink_node *dlink;
 
   int lc = 0;           /* local clients */
   int ch = 0;           /* channels */
@@ -199,9 +199,11 @@ void count_memory(struct Client *sptr)
   u_long mem_ips_stored; /* memory used by ip address hash */
 
   size_t dbuf_allocated          = 0;
+#if 0
   size_t dbuf_used               = 0;
   size_t dbuf_alloc_count        = 0;
   size_t dbuf_used_count         = 0;
+#endif
 
   size_t client_hash_table_size = 0;
   size_t channel_hash_table_size = 0;
@@ -230,8 +232,8 @@ void count_memory(struct Client *sptr)
       if (MyConnect(acptr))
         {
           lc++;
-          for (link = acptr->localClient->confs.head;
-	       link; link = link->next)
+          for (dlink = acptr->localClient->confs.head;
+	       dlink; dlink = dlink->next)
             lcc++;
         }
       else
@@ -239,11 +241,11 @@ void count_memory(struct Client *sptr)
       if (acptr->user)
         {
           us++;
-          for (link = acptr->user->invited.head; link;
-               link = link->next)
+          for (dlink = acptr->user->invited.head; dlink;
+               dlink = dlink->next)
             usi++;
-          for (link = acptr->user->channel.head; link;
-               link = link->next)
+          for (dlink = acptr->user->channel.head; dlink;
+               dlink = dlink->next)
             usc++;
           if (acptr->user->away)
             {
@@ -264,30 +266,30 @@ void count_memory(struct Client *sptr)
       ch++;
       chm += (strlen(chptr->chname) + sizeof(struct Channel));
 
-      for (link = chptr->peons.head; link; link = link->next)
+      for (dlink = chptr->peons.head; dlink; dlink = dlink->next)
         chu++;
-      for (link = chptr->chanops.head; link; link = link->next)
+      for (dlink = chptr->chanops.head; dlink; dlink = dlink->next)
         chu++;
-      for (link = chptr->voiced.head; link; link = link->next)
+      for (dlink = chptr->voiced.head; dlink; dlink = dlink->next)
         chu++;
-      for (link = chptr->halfops.head; link; link = link->next)
+      for (dlink = chptr->halfops.head; dlink; dlink = dlink->next)
         chu++;
 
-      for (link = chptr->invites.head; link; link = link->next)
+      for (dlink = chptr->invites.head; dlink; dlink = dlink->next)
         chi++;
 
       /* XXX invex deny except */
-      for (link = chptr->banlist.head; link; link = link->next)
+      for (dlink = chptr->banlist.head; dlink; dlink = dlink->next)
         {
           chb++;
 
 	  /* XXX */
 #if 0
-          chbm += (strlen(link->data)+1+sizeof(dlink_node));
-          if (link->value.banptr->banstr)
-            chbm += strlen(link->value.banptr->banstr);
-          if (link->value.banptr->who)
-            chbm += strlen(link->value.banptr->who);
+          chbm += (strlen(dlink->data)+1+sizeof(dlink_node));
+          if (dlink->value.banptr->banstr)
+            chbm += strlen(dlink->value.banptr->banstr);
+          if (dlink->value.banptr->who)
+            chbm += strlen(dlink->value.banptr->who);
 #endif
         }
     }

@@ -244,6 +244,8 @@ dlink_list temporary_ip_klines;
 
 extern void clear_ip_hash_table(void);
 extern void iphash_stats(struct Client *,struct Client *,int,char **,FBFILE*);
+extern void count_ip_hash(int *, u_long *);
+
 
 void remove_one_ip(unsigned long);
 
@@ -267,6 +269,7 @@ extern struct ConfItem* find_admin(void);
 extern void             det_confs_butmask (struct Client *, int);
 extern int              detach_conf (struct Client *, struct ConfItem *);
 extern struct ConfItem* det_confs_butone (struct Client *, struct ConfItem *);
+extern struct ConfItem *find_conf_entry(struct ConfItem *, int);
 extern struct ConfItem* find_conf_exact(const char* name, const char* user, 
                                         const char* host, int statmask);
 extern struct ConfItem* find_conf_name(dlink_list *list, const char* name, 
@@ -297,6 +300,10 @@ extern void get_printable_conf(struct ConfItem *,
 extern void report_configured_links(struct Client* cptr, int mask);
 extern void report_specials(struct Client* sptr, int flags, int numeric);
 extern void report_qlines(struct Client* cptr);
+
+extern void yyerror(char *);
+extern int conf_yy_fatal_error(char *);
+extern int conf_fbgets(char *, int, FBFILE *);
 
 typedef enum {
   CONF_TYPE,

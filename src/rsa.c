@@ -22,14 +22,15 @@
  * $Id$
  */
 
+#include <string.h>
+#include "memdebug.h"
+
 #ifdef OPENSSL
 
 #include <openssl/rand.h>
 #include <openssl/rsa.h>
 #include <openssl/md5.h>
 #include <openssl/bn.h>
-#include <string.h>
-#include "memdebug.h"
 
 void binary_to_hex( unsigned char * bin, char * hex, int length )
 {
