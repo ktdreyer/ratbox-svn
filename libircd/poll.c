@@ -273,10 +273,7 @@ comm_select_fdlist(fdlist_t fdlist, time_t delay)
     pollfd_list_t *pf = &pollfd_lists[fdlist];
 
     /* update current time */
-    if ((CurrentTime = time(0)) == -1) {
-        log(L_CRIT, "Clock Failure");
-        restart("Clock failed");
-    }   
+    set_time();
 
     for (;;) {
         /* XXX kill that +1 later ! -- adrian */

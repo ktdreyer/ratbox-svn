@@ -267,6 +267,18 @@ show_events(struct Client *source_p)
 }
 #endif
 
-
-
-
+/* void set_back_events(time_t by)
+ * Input: Time to set back events by.
+ * Output: None.
+ * Side-effects: Sets back all events by "by" seconds.
+ */
+void
+set_back_events(time_t by)
+{
+ struct ev_entry *e;
+ for (e = tasks; e; e=e->next)
+  if (e->when > by)
+   e->when -= by;
+  else
+   e->when = 0;
+}

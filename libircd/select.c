@@ -180,10 +180,7 @@ comm_select(time_t delay)
     struct timeval to;
 
     /* update current time */
-    if ((CurrentTime = time(0)) == -1) {
-        log(L_CRIT, "Clock Failure");
-        restart("Clock failed");
-    }   
+    set_time();
 
     /* Copy over the read/write sets so we don't have to rebuild em */
     bcopy(&select_readfds, &tmpreadfds, sizeof(fd_set));

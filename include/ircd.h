@@ -95,5 +95,6 @@ extern dlink_list lazylink_channels;
 extern dlink_list lazylink_nicks;
 
 extern size_t   get_maxrss(void);
+extern void set_time();
 
 #endif

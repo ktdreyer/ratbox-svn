@@ -24,6 +24,7 @@ extern void eventDelete(EVH * func, void *arg);
 extern void eventInit(void);
 extern void eventFreeMemory(void);
 extern int eventFind(EVH *, void *);
+extern void set_back_events(time_t);
 
 extern int show_events( struct Client *source_p );
 

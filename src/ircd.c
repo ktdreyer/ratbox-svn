@@ -254,27 +254,32 @@ struct lgetopt myopts[] = {
    USAGE, "Print this text"},
 };
 
+void
+set_time(void)
+{
+ static char   to_send[200];
+ time_t newtime = time(NULL);
+ if (newtime == -1)
+ {
+  log(L_ERROR, "Clock Failure (%d)", errno);
+  sendto_realops_flags(FLAGS_ALL,
+                       "Clock Failure (%d), TS can be corrupted", errno);
+  restart("Clock Failure");
+ }
+ if (newtime < CurrentTime)
+ {
+  ircsprintf(to_send, "System clock is running backwards - (%lu < %lu)",
+             newtime, CurrentTime);
+  report_error(to_send, me.name, 0);
+  set_back_events(CurrentTime - newtime);
+ }
+ CurrentTime = newtime;
+}
+
 static time_t io_loop(time_t delay)
 {
-  static char   to_send[200];
-  time_t        lasttimeofday;
 
-  lasttimeofday = CurrentTime;
-  if ((CurrentTime = time(NULL)) == -1)
-    {
-      log(L_ERROR, "Clock Failure (%d)", errno);
-      sendto_realops_flags(FLAGS_ALL,
-			   "Clock Failure (%d), TS can be corrupted", errno);
-      restart("Clock Failure");
-    }
-
-  if (CurrentTime < lasttimeofday)
-    {
-      ircsprintf(to_send, "System clock is running backwards - (%lu < %lu)",
-                 CurrentTime, lasttimeofday);
-      report_error(to_send, me.name, 0);
-    }
-
+  set_time();
   /* Run pending events, then get the number of seconds to the next event */
   eventRun();
   delay = eventNextTime();
