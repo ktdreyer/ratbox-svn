@@ -139,10 +139,10 @@ void send_usage(struct Client *source_p)
              me.name, RPL_STATSDEBUG, source_p->name, (int)(secs/60), (int)(secs%60),
              (int)(rus.ru_utime.tv_sec/60), (int)(rus.ru_utime.tv_sec%60),
              (int)(rus.ru_stime.tv_sec/60), (int)(rus.ru_stime.tv_sec%60));
-  sendto_one(source_p, ":%s %d %s :RSS %d ShMem %d Data %d Stack %d",
-             me.name, RPL_STATSDEBUG, source_p->name, (int)rus.ru_maxrss,
-             (int)(rus.ru_ixrss / rup), (int)(rus.ru_idrss / rup),
-             (int)(rus.ru_isrss / rup));
+  sendto_one(source_p, ":%s %d %s :RSS %ld ShMem %ld Data %ld Stack %ld",
+             me.name, RPL_STATSDEBUG, source_p->name, rus.ru_maxrss,
+             (rus.ru_ixrss / rup), (rus.ru_idrss / rup),
+             (rus.ru_isrss / rup));
   sendto_one(source_p, ":%s %d %s :Swaps %d Reclaims %d Faults %d",
              me.name, RPL_STATSDEBUG, source_p->name, (int)rus.ru_nswap,
              (int)rus.ru_minflt, (int)rus.ru_majflt);
