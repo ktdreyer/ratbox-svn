@@ -1,3 +1,7 @@
+*** 20010302_1 by a1kmm
+- Fixed a potential buffer overflow where strncat is used incorrectly.
+
+
 *** 20010301_13 by db
 - missing #ifdef USE_SYSLOG on #include
   replaced this for now  /* XXX #ifdef HAVE_SYSLOG_H */
