@@ -1,3 +1,10 @@
+*** 20001228_28 by davidt
+Try to keep +a channels synced up with the clients.
+When a channel goes +a, tell everyone that the channel has been massdeoped
+When it goes -a, tell everyone that the ops have been mass oped..
+When an individual user is opped/deoped, tell only them.
+
+
 *** 20001228_27 by db
 - local array shoud be static. bad Diane bad bad bad
 
