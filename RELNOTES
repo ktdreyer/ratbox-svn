@@ -5,6 +5,8 @@
   By default they are written to IRCD_PREFIX/etc/resv.conf which 
   means if you have ircd.conf style resv {}; in this file it must
   be renamed.
+- added rehash tdlines, fixed behaviour of rehash tklines to not
+  clear temp dlines too
 
 -- ircd-ratbox-1.0-rc3
 - PRIVMSG was not giving ERR_NOSUCHNICK for non-existant chans/users

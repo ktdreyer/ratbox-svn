@@ -41,7 +41,7 @@
 #include "hostmask.h"
 
 static void mo_rehash(struct Client*, struct Client*, int, char**);
-static void clear_temps(dlink_list *);
+static void clear_temps(dlink_list *, int);
 
 struct Message rehash_msgtab = {
   "REHASH", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -70,9 +70,7 @@ const char *_version = "$Revision$";
 static void mo_rehash(struct Client *client_p, struct Client *source_p,
                      int parc, char *parv[])
 {
-  int found = NO;
-
-  if ( !IsOperRehash(source_p) )
+  if (!IsOperRehash(source_p))
     {
       sendto_one(source_p,":%s NOTICE %s :You need rehash = yes;", me.name, parv[0]);
       return;
@@ -85,7 +83,6 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
           sendto_realops_flags(UMODE_ALL, L_ALL,
                        "%s is forcing cleanup of channels",parv[0]);
 	  cleanup_channels(NULL);
-          found = YES;
         }
       else if(irccmp(parv[1],"DNS") == 0)
         {
@@ -94,7 +91,6 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
                                get_oper_name(source_p));
           restart_resolver();   /* re-read /etc/resolv.conf AGAIN?
                                    and close/re-open res socket */
-          found = YES;
         }
       else if(irccmp(parv[1],"MOTD") == 0)
         {
@@ -102,7 +98,6 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
 		       "%s is forcing re-reading of MOTD file",
 		       get_oper_name(source_p));
           ReadMessageFile( &ConfigFileEntry.motd );
-          found = YES;
         }
       else if(irccmp(parv[1],"OMOTD") == 0)
         {
@@ -110,41 +105,45 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
 		       "%s is forcing re-reading of OPER MOTD file",
 		       get_oper_name(source_p));
           ReadMessageFile( &ConfigFileEntry.opermotd );
-          found = YES;
         }
       else if(irccmp(parv[1], "GLINES") == 0)
       {
         sendto_realops_flags(UMODE_ALL, L_ALL,
                              "%s is clearing G-lines",
                              source_p->name);
-        clear_temps(&glines);
-        found = YES;
+        clear_temps(&glines, CONF_GLINE);
       }
       else if(irccmp(parv[1], "TKLINES") == 0)
       {
         sendto_realops_flags(UMODE_ALL, L_ALL,
                              "%s is clearing temp klines",
                              source_p->name);
-        clear_temps(&temporary_min);
-        clear_temps(&temporary_hour);
-        clear_temps(&temporary_day);
-        clear_temps(&temporary_week);
-        found = YES;
+        clear_temps(&temporary_min, CONF_KILL);
+        clear_temps(&temporary_hour, CONF_KILL);
+        clear_temps(&temporary_day, CONF_KILL);
+        clear_temps(&temporary_week, CONF_KILL);
+      }
+      else if(irccmp(parv[1], "TDLINES") == 0)
+      {
+        sendto_realops_flags(UMODE_ALL, L_ALL,
+                             "%s is clearing temp dlines",
+                             source_p->name);
+        clear_temps(&temporary_min, CONF_DLINE);
+        clear_temps(&temporary_hour, CONF_DLINE);
+        clear_temps(&temporary_day, CONF_DLINE);
+        clear_temps(&temporary_week, CONF_DLINE);
+      }
+      else
+      {
+        sendto_one(source_p,":%s NOTICE %s :rehash one of: "
+                   "GLINES TKLINES TDLINES CHANNELS DNS MOTD OMOTD",
+                   me.name, source_p->name);
+        return;
       }
          
-      if(found)
-        {
-          ilog(L_NOTICE, "REHASH %s From %s\n", parv[1], 
-	       get_client_name(source_p, HIDE_IP));
-          return;
-        }
-      else
-        {
-          sendto_one(source_p,":%s NOTICE %s :rehash one of: "
-                     "GLINES TKLINES CHANNELS DNS MOTD OMOTD",
-                     me.name, source_p->name);
-          return;
-        }
+      ilog(L_NOTICE, "REHASH %s From %s\n", parv[1], 
+           get_client_name(source_p, HIDE_IP));
+      return;
     }
   else
     {
@@ -161,7 +160,7 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
 }
 
 static void
-clear_temps(dlink_list *tlist)
+clear_temps(dlink_list *tlist, int type)
 {
   dlink_node *ptr;
   dlink_node *next_ptr;
@@ -170,6 +169,9 @@ clear_temps(dlink_list *tlist)
   DLINK_FOREACH_SAFE(ptr, next_ptr, tlist->head)
   {
     aconf = ptr->data;
+
+    if(aconf->status != type)
+      continue;
 
     delete_one_address_conf(aconf->host, aconf);
     dlinkDestroy(ptr, tlist);

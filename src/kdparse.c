@@ -148,7 +148,6 @@ parse_x_file(FBFILE *file)
 void
 parse_resv_file(FBFILE *file)
 {
-  struct ConfItem *aconf;
   char *reason_field;
   char *host_field;
   char line[BUFSIZE];
