@@ -1,3 +1,15 @@
+androsyn    2002/12/16 07:07:24 UTC	(20021216_7)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Fix netsplit quit messages
+  
+  Revision  Changes    Path
+  7.353     +3 -2      ircd-ratbox/src/client.c
+
+
+
 androsyn    2002/12/16 06:48:37 UTC	(20021216_6)
 
   Modified files:
