@@ -112,7 +112,7 @@ dlinkDelete(dlink_node *m, dlink_list *list)
    m->prev->next = m->next;
  else
    list->head = m->next;
- /* XXX - does this ever matter? */
+ /* Set this to NULL does matter */
  m->next = m->prev = NULL;
 }
 
