@@ -102,7 +102,7 @@ static struct FlagTable flag_table[] =
   { "SWALLOPS",		UMODE_WALLOP,		0 },
   { "STATSNOTICES",	UMODE_SPY,		1 },
     /* We don't have a separate OKILL and SKILL modes */
-  { "OKILLS",		UMODE_SKILL,		0 },
+  { "OKILLS",		UMODE_SERVNOTICE,	0 },
   { "SKILLS",		UMODE_SKILL,		0 },
   { "SNOTICES",		UMODE_SERVNOTICE,	0 },
     /* We don't have separate client connect and disconnect modes */

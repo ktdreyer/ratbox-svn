@@ -1,6 +1,6 @@
 -- ircd-ratbox-1.0 RELNOTES 
 
--- ircd-ratbox-1.0-rc8
+-- ircd-ratbox-1.0
 - add experimental support for linux epoll, requires linux 2.5.46
   or newer
 - added contrib/spy_whois_notice_global.c which will show global
@@ -9,6 +9,8 @@
   user parts/quits
 - fixed a bug with multiple user=""; lines in operator {};
 - fixed a bug allowing core modules to be unloaded
+- added no_oper_resvs = yes|no; to channel {};, controlling whether
+  opers can join/talk through channel resvs or not.
 
 -- ircd-ratbox-1.0-rc7
 - fix for the temp kline/dline problems

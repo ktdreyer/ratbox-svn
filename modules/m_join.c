@@ -41,7 +41,7 @@
 #include "parse.h"
 #include "modules.h"
 #include "sprintf_irc.h"
-
+#include "packet.h"
 
 static void m_join(struct Client*, struct Client*, int, char**);
 static void ms_join(struct Client*, struct Client*, int, char**);
@@ -155,7 +155,8 @@ m_join(struct Client *client_p,
       }
       
       /* see if its resv'd */
-      if(find_channel_resv(name))
+      if(find_channel_resv(name) && 
+         (!IsOper(source_p) || !ConfigChannel.no_oper_resvs))
 	{
 	  sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
 		     me.name, source_p->name, name);

@@ -1250,7 +1250,6 @@ static void recurse_remove_clients(struct Client* source_p, const char* comment)
 static void
 qs_client(struct Client *source_p, const char *comment)
 {
-  struct Client* target_p;
   dlink_node *ptr;
   dlink_node *next_ptr;
 

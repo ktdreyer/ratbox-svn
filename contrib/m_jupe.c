@@ -43,6 +43,7 @@
 #include "class.h"
 #include "common.h"
 #include "event.h"
+#include "channel_mode.h"
 
 #include "fdlist.h"
 #include "s_conf.h"
@@ -157,6 +158,8 @@ static void mo_jupe(struct Client *client_p, struct Client *source_p,
   ajupe->serv->up = me.name;
   ajupe->servptr = &me;
   SetServer(ajupe);
+  set_chcap_usage_counts(ajupe);
+
   SetDead(ajupe);
   
   Count.server++;

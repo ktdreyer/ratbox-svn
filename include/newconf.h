@@ -299,6 +299,7 @@ extern 	char *		conf_cur_block_name;
 	void	conf_set_channel_default_split_server_count	(void *data);
 	void	conf_set_channel_no_create_on_split		(void *data);
 	void	conf_set_channel_no_join_on_split		(void *data);
+        void    conf_set_channel_no_oper_resvs                  (void *data);
 	void	conf_set_serverhide_flatten_links		(void *data);
 	void	conf_set_serverhide_hide_servers		(void *data);
 	void	conf_set_serverhide_disable_remote_commands	(void *data);

@@ -572,6 +572,8 @@ void	newconf_init()
 			conf_set_channel_no_create_on_split);
 	add_conf_item("channel", "no_join_on_split", CF_YESNO,
 			conf_set_channel_no_join_on_split);
+	add_conf_item("channel", "no_oper_resvs", CF_YESNO,
+			conf_set_channel_no_oper_resvs);
 	
 	add_top_conf("serverhide", NULL, NULL);
 	add_conf_item("serverhide", "flatten_links", CF_YESNO, 
@@ -2688,6 +2690,11 @@ void	conf_set_channel_no_create_on_split(void *data)
 void	conf_set_channel_no_join_on_split(void *data)
 {
 	ConfigChannel.no_join_on_split = *(unsigned int*)data;
+}
+
+void	conf_set_channel_no_oper_resvs(void *data)
+{
+	ConfigChannel.no_oper_resvs = *(unsigned int*) data;
 }
 
 void	conf_set_serverhide_flatten_links(void *data)

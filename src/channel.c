@@ -1078,7 +1078,8 @@ is_voiced(struct Channel *chptr, struct Client *who)
 int
 can_send(struct Channel *chptr, struct Client *source_p)
 {
-  if(MyClient(source_p) && find_channel_resv(chptr->chname))
+  if(MyClient(source_p) && find_channel_resv(chptr->chname) &&
+     (!IsOper(source_p) || !ConfigChannel.no_oper_resvs))
     return CAN_SEND_NO;
     
   if (is_chan_op(chptr, source_p))

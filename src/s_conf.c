@@ -1462,6 +1462,7 @@ set_default_conf(void)
   ConfigChannel.knock_delay_channel = 60;
   ConfigChannel.max_chans_per_user = 15;
   ConfigChannel.max_bans = 25;
+  ConfigChannel.no_oper_resvs = NO;
 
   /* 60 * 30 = 1800 = 30 minutes */
   ConfigChannel.persist_time = 1800;
