@@ -1,3 +1,6 @@
+*** 20010101_6 by davidt
+stop collapse() coring on a null pattern
+
 *** 20010101_5 by toot
 only hide remote numeric origins if shide is on
 
