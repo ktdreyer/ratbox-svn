@@ -1,3 +1,7 @@
+*** 20001014_11 by toot
+another fix to m_names call in m*_join
+
+
 *** 20001014_10 by toot
 . move add_vchan_to_client lower down, incase of bans etc in m_join
 . hopefully m_names works now after /join #chan !id
