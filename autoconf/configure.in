@@ -151,6 +151,24 @@ dnl Do the actual time_t size check
 AC_CHECK_SIZEOF_TIME_T
 
 
+dnl Look for definitions such as RLIMIT_FDMAX, RLIMIT_NOFILE, and
+dnl RLIMIT_OPEN_MAX.  These are used for getrlimit().
+dnl NOTE: It seems stock autoconf doesn't use the -dM flag for cpp.
+dnl       We need this for the following tests to work.
+cpp_flags_backup="$CPPFLAGS"
+CPPFLAGS="$CPPFLAGS -dM"
+AC_MSG_CHECKING(for getrlimit max open files parameter)
+AC_EGREP_HEADER(RLIMIT_FDMAX, sys/resource.h,
+		cf_rlimit_type="RLIMIT_FDMAX")
+AC_EGREP_HEADER(RLIMIT_NOFILE, sys/resource.h,
+		cf_rlimit_type="RLIMIT_NOFILE")
+AC_EGREP_HEADER(RLIMIT_OPEN_MAX, sys/resource.h,
+		cf_rlimit_type="RLIMIT_OPEN_MAX")
+CPPFLAGS="$cpp_flags_backup"
+unset cpp_flags_backup
+AC_DEFINE_UNQUOTED(RLIMIT_FD_MAX, $cf_rlimit_type)
+AC_MSG_RESULT($cf_rlimit_type)
+
 
 dnl openssl?
 AC_MSG_CHECKING(if you want to try to use OpenSSL)
