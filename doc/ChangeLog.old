@@ -1,3 +1,15 @@
+leeh        2002/04/20 13:47:50 EDT	(20020420_2)
+
+  Modified files:
+    include              channel.h 
+  Log:
+  - redefine REQUIRE_OANDV
+  
+  Revision  Changes    Path
+  7.109     +1 -1      ircd-hybrid-7/include/channel.h
+
+
+
 leeh        2002/04/20 13:47:17 EDT	(20020420_1)
 
   Modified files:
