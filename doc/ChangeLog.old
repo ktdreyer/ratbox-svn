@@ -1,3 +1,8 @@
+*** 20001217_4 by bill
+
+- added _k9_ (jeremy, wowsers.) to credits as a contributer
+
+
 *** 20001217_3 by db
 - I ran it through lint, discovered a pile of unused variables unused
   parameters. Removed... and made a function static in channel.c
