@@ -1,3 +1,7 @@
+*** 20010101_50 by a1kmm
+Don't reload modules if they are already loaded and we see a module= in the config file.
+
+
 *** 20010101_49 by davidt
 Fix join 0 on vchans, and fix that stupid compiler warning for m_challenge.c
 
