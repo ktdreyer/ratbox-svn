@@ -1,3 +1,8 @@
+*** 20011017_2 by jdc
+* Someone please fix this.  We lack the IsSetOperGlobalKill() macro.
+  This is commited just to make things build.
+
+
 *** 20011017_1 by jdc
 * CONF CHANGE: channel {} "disable_vchans"  renamed to  "use_vchans".
 
