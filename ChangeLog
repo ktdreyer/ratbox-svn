@@ -1,3 +1,19 @@
+leeh        2004/07/27 22:42:28 EDT	(20040728_2)
+
+  Modified files:
+    include              channel.h 
+    modules              m_topic.c 
+    src                  channel.c 
+  Log:
+  - move allocate_topic() and set_channel_topic() to m_topic.c
+  
+  Revision  Changes    Path
+  7.153     +4 -3      ircd-ratbox/include/channel.h
+  1.89      +59 -1     ircd-ratbox/modules/m_topic.c
+  7.418     +2 -56     ircd-ratbox/src/channel.c
+
+
+
 leeh        2004/07/27 22:19:57 EDT	(20040728_1)
 
   Modified files:
