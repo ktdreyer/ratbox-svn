@@ -43,6 +43,7 @@
 
 int mo_opme(struct Client *cptr, struct Client *sptr,
 		 int parc, char *parv[]);
+int chan_is_opless(struct Channel *chptr);
 
 struct Message opme_msgtab = {
   "OPME", 0, 2, 0, MFLG_SLOW, 0,
