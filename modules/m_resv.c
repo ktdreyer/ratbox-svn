@@ -49,9 +49,6 @@ _moddeinit(void)
 char *_version = "20010626";
 #endif
 
-#define RESV_CHANNEL 0
-#define RESV_NICK 1
-
 /*
  * mo_resv()
  *      parv[0] = sender prefix
