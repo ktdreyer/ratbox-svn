@@ -15,11 +15,8 @@ MV		= @MV@
 RM		= @RM@
 LN              = @LN@
 
-SSL_LIBS	= @SSL_LIBS@
-SSL_INCLUDES	= @SSL_INCLUDES@
-
-IRCDLIBS	= @LIBS@ $(SSL_LIBS)
-INCLUDES	= -I../include $(SSL_INCLUDES)
+IRCDLIBS	= @LIBS@ 
+INCLUDES	= -I../include 
 CPPFLAGS	= ${INCLUDES} @CPPFLAGS@
 
 prefix		= @prefix@
@@ -29,14 +26,12 @@ libexecdir	= @libexecdir@
 sysconfdir	= @sysconfdir@
 localstatedir	= @localstatedir@
 
-PROGS		= viconf mkpasswd convertconf convertilines convertklines encspeed
+PROGS		= viconf mkpasswd convertconf convertilines convertklines 
 
 all: $(PROGS)
 
 build: all
 
-encspeed:
-	$(CC) $(CFLAGS) $(LDFLAGS) $(INCLUDES) encspeed.c -o encspeed $(IRCDLIBS)
 mkpasswd:
 	$(CC) $(CFLAGS) $(LDFLAGS) $(INCLUDES) mkpasswd.c -o mkpasswd $(IRCDLIBS)
 
