@@ -431,7 +431,9 @@ msg_channel(int p_or_n, const char *command,
 		if(result == CAN_SEND_OPV ||
 		   !flood_attack_channel(p_or_n, source_p, chptr, chptr->chname))
 		{
-			sendto_channel_butone(client_p, source_p, chptr, command, ":%s", text);
+			sendto_channel_butone(client_p, source_p, chptr, 
+					      "%s %s :%s",
+					      command, chptr->chname, text);
 		}
 	}
 	else
@@ -474,36 +476,15 @@ msg_channel_flags(int p_or_n, const char *command, struct Client *client_p,
 		c = '@';
 	}
 
-
 	if(MyClient(source_p))
 	{
 		/* idletime shouldnt be reset by notice --fl */
 		if((p_or_n != NOTICE) && source_p->user)
 			source_p->user->last = CurrentTime;
-
-		sendto_channel_local_butone(source_p, type, chptr, ":%s!%s@%s %s %c%s :%s",
-					    source_p->name, source_p->username,
-					    source_p->host, command, c, chptr->chname, text);
-	}
-	else
-	{
-		/* use a speedier version for remote senders, they wont be on
-		 * any local lists
-		 */
-		sendto_channel_local(type, chptr, ":%s!%s@%s %s %c%s :%s",
-				     source_p->name, source_p->username,
-				     source_p->host, command, c, chptr->chname, text);
 	}
 
-	if(chptr->chname[0] == '&')
-		return;
-
-	sendto_channel_remote(source_p, client_p, type, CAP_CHW, CAP_UID, chptr,
-			      ":%s %s %c%s :%s", source_p->name, command, c, chptr->chname, text);
-	sendto_channel_remote(source_p, client_p, type, CAP_CHW | CAP_UID, NOCAPS, chptr,
-			      ":%s %s %c%s :%s", ID(source_p), command, c, chptr->chname, text);
-
-	/* non CAP_CHW servers? */
+	sendto_channel_flags(client_p, type, source_p, chptr, "%s %c%s :%s",
+			     command, c, chptr->chname, text);
 }
 
 /*
@@ -582,15 +563,14 @@ msg_client(int p_or_n, const char *command,
 			 * and flooding    -- fl */
 			if(!MyClient(source_p) || IsOper(source_p) ||
 			   (MyClient(source_p) && !flood_attack_client(p_or_n, source_p, target_p)))
-				sendto_anywhere(target_p, source_p, "%s %s :%s",
-						command, target_p->name, text);
+				sendto_anywhere(target_p, source_p, command,
+						":%s", text);
 		}
 	}
-	else
-		/* The target is a remote user.. same things apply  -- fl */
-	if(!MyClient(source_p) || IsOper(source_p) ||
+	else if(!MyClient(source_p) || IsOper(source_p) ||
 		   (MyClient(source_p) && !flood_attack_client(p_or_n, source_p, target_p)))
-		sendto_anywhere(target_p, source_p, "%s %s :%s", command, target_p->name, text);
+		sendto_anywhere(target_p, source_p, command, ":%s", text);
+
 	return;
 }
 
@@ -792,8 +772,8 @@ handle_special(int p_or_n, const char *command, struct Client *client_p,
 				*--host = '%';
 
 			if(count == 1)
-				sendto_anywhere(target_p, source_p, "%s %s :%s", command,
-						nick, text);
+				sendto_anywhere(target_p, source_p, command, 
+						":%s", text);
 			else
 				sendto_one(source_p, form_str(ERR_TOOMANYTARGETS),
 					   me.name, source_p->name, nick);

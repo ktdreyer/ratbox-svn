@@ -45,12 +45,9 @@
 #endif
 #define PASSWDLEN       20
 #define CIPHERKEYLEN    64	/* 512bit */
-
-#define IDLEN           12	/* this is the maximum length, not the actual
-				   generated length; DO NOT CHANGE! */
-#define COOKIELEN       IDLEN
-
 #define CLIENT_BUFSIZE 512	/* must be at least 512 bytes */
+
+#define IDLEN		10
 
 /*
  * pre declare structs
@@ -76,7 +73,6 @@ struct User
 	const char *server;	/* pointer to scached server name */
 	char *response;		/* expected response from client */
 	char *auth_oper;	/* Operator to become if they supply the response. */
-	char id[IDLEN + 1];	/* client ID, unique ID per client */
 };
 
 struct Server
@@ -87,6 +83,7 @@ struct Server
 	struct ConfItem *sconf;	/* connect{} pointer for this server */
 	dlink_list servers;
 	dlink_list users;
+	int tsver;
 };
 
 struct SlinkRpl
@@ -149,11 +146,9 @@ struct Client
 	 * considered a read-only field after the client has registered.
 	 */
 	char host[HOSTLEN + 1];	/* client's hostname */
-	/*
-	 * client->info for unix clients will normally contain the info from the 
-	 * gcos field in /etc/passwd but anything can go here.
-	 */
 	char info[REALLEN + 1];	/* Free form additional client info */
+
+	char id[IDLEN + 1];	/* UID/SID, unique on the network */
 
 	/* caller ID allow list */
 	/* This has to be here, since a client on an on_allow_list could
@@ -287,10 +282,15 @@ struct exit_client_hook
 #define STAT_SERVER             0x10
 #define STAT_CLIENT             0x20
 
-#define HasID(x) (!IsServer(x) && (x)->user && (x)->user->id[0] != '\0')
-#define ID(source_p) (HasID(source_p) ? source_p->user->id : source_p->name)
+#define IsTS6(x)	((x)->serv->tsver == 6)
 
-#define ID_or_name(x,client_p) (IsCapable(client_p,CAP_UID)?(x)->user->id:(x)->name)
+/* use the id if it has one */
+#define use_id(source)	(source->id[0] != '\0' ? source->id : source->name)
+
+/* if target is TS6, use id if it has one, else name */
+#define get_id(source, target) ((IsServer(target) && IsTS6(target)) ? \
+				use_id(source) : source->name)
+
 
 #define IsRegisteredUser(x)     ((x)->status == STAT_CLIENT)
 #define IsRegistered(x)         ((x)->status  > STAT_UNKNOWN)
@@ -334,15 +334,24 @@ struct exit_client_hook
 /*
  * ts stuff
  */
-#define TS_CURRENT      5	/* current TS protocol version */
-#ifdef TS5_ONLY
-#define TS_MIN          5
+#ifdef USE_TS6
+#define TS_CURRENT	6
 #else
-#define TS_MIN          3	/* minimum supported TS protocol version */
+#define TS_CURRENT	5
 #endif
+
+#ifdef TS6_ONLY
+#ifdef USE_TS6
+#define TS_MIN          6
+#else
+#define TS_MIN		5
+#endif
+#else
+#define TS_MIN          3
+#endif
+
 #define TS_DOESTS       0x20000000
 #define DoesTS(x)       ((x)->tsinfo == TS_DOESTS)
-
 
 /* housekeeping flags */
 

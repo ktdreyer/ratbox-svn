@@ -56,29 +56,27 @@ struct Capability
 	unsigned int cap;	/* mask value */
 };
 
-#define CAP_CAP         0x00000001	/* received a CAP to begin with */
-#define CAP_QS          0x00000002	/* Can handle quit storm removal */
-#define CAP_EX          0x00000008	/* Can do channel +e exemptions */
-#define CAP_CHW         0x00000010	/* Can do channel wall @# */
-#define CAP_IE          0x00000040	/* Can do invite exceptions */
-#define CAP_EOB	        0x00000100	/* Can do EOB message */
-#define CAP_KLN	        0x00000200	/* Can do KLINE message */
-#define CAP_GLN	        0x00000400	/* Can do GLINE message */
-#define CAP_UID         0x00004000	/* Can do UIDs */
-#define CAP_ZIP         0x00008000	/* Can do ZIPlinks */
-#define CAP_ENC         0x00010000	/* Can do ENCrypted links */
-
-#define CAP_KNOCK	0x00020000	/* supports KNOCK */
-
-#define CAP_TBURST	0x00040000	/* supports TBURST */
-#define CAP_UNKLN       0x00100000	/* supports remote unkline */
-#define CAP_CLUSTER     0x00200000	/* supports cluster stuff */
-#define CAP_ENCAP	0x00400000	/* supports ENCAP */
+#define CAP_CAP         0x00001	/* received a CAP to begin with */
+#define CAP_QS          0x00002	/* Can handle quit storm removal */
+#define CAP_EX          0x00004	/* Can do channel +e exemptions */
+#define CAP_CHW         0x00008	/* Can do channel wall @# */
+#define CAP_IE          0x00010	/* Can do invite exceptions */
+#define CAP_EOB	        0x00020	/* Can do EOB message */
+#define CAP_KLN	        0x00040	/* Can do KLINE message */
+#define CAP_GLN	        0x00080	/* Can do GLINE message */
+#define CAP_ZIP         0x00100	/* Can do ZIPlinks */
+#define CAP_ENC         0x00200	/* Can do ENCrypted links */
+#define CAP_KNOCK	0x00400	/* supports KNOCK */
+#define CAP_TBURST	0x00800	/* supports TBURST */
+#define CAP_UNKLN       0x01000	/* supports remote unkline */
+#define CAP_CLUSTER     0x02000	/* supports cluster stuff */
+#define CAP_ENCAP	0x04000	/* supports ENCAP */
+#define CAP_TS6		0x08000 /* supports TS6 or above */
 
 #define CAP_MASK        (CAP_QS  | CAP_EX   | CAP_CHW  | \
                          CAP_IE  | CAP_EOB  | CAP_KLN  | \
                          CAP_GLN | CAP_CLUSTER | CAP_ENCAP | \
-                         CAP_UID | CAP_ZIP  | CAP_ENC | \
+                         CAP_ZIP  | CAP_ENC | \
                          CAP_KNOCK  | CAP_UNKLN)
 
 #ifdef HAVE_LIBZ

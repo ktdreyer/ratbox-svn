@@ -49,7 +49,7 @@
 static char *sender;
 static char *para[MAXPARA + 1];
 
-static int cancel_clients(struct Client *, struct Client *, char *);
+static void cancel_clients(struct Client *, struct Client *, char *);
 static void remove_unknown(struct Client *, char *, char *);
 
 static void do_numeric(char[], struct Client *, struct Client *, int, char **);
@@ -114,10 +114,9 @@ string_to_array(char *string, char *parv[MAXPARA])
 	return x;
 }
 
-/*
- * parse a buffer.
+/* parse()
  *
- * NOTE: parse() should not be called recusively by any other functions!
+ * given a raw buffer, parses it and generates parv, parc and sender
  */
 void
 parse(struct Client *client_p, char *pbuffer, char *bufend)
@@ -126,7 +125,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 	char *ch;
 	char *s;
 	char *end;
-	int i;
+	int i = 1;
 	int paramcount, mpara = 0;
 	char *numeric = 0;
 	struct Message *mptr;
@@ -147,11 +146,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 	{
 		ch++;
 
-		/*
-		 * Copy the prefix to 'sender' assuming it terminates
-		 * with SPACE (or NULL, which is an error, though).
-		 */
-
+		/* point sender to the sender param */
 		sender = ch;
 
 		if((s = strchr(ch, ' ')))
@@ -161,24 +156,11 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 			ch = s;
 		}
 
-		i = 0;
-
 		if(*sender && IsServer(client_p))
 		{
-			from = find_client(sender);
-			if(from == NULL)
-			{
-				from = find_server(sender);
-				if(from == NULL)
-					from = find_id(sender);
-			}
+			from = find_any_client(sender);
 
-			/* Hmm! If the client corresponding to the
-			 * prefix is not found--what is the correct
-			 * action??? Now, I will ignore the message
-			 * (old IRC just let it through as if the
-			 * prefix just wasn't there...) --msa
-			 */
+			/* didnt find any matching client, issue a kill */
 			if(from == NULL)
 			{
 				ServerStats->is_unpf++;
@@ -188,6 +170,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 
 			para[0] = from->name;
 
+			/* fake direction, hmm. */
 			if(from->from != client_p)
 			{
 				ServerStats->is_wrdi++;
@@ -204,6 +187,8 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 		ServerStats->is_empt++;
 		return;
 	}
+
+	/* at this point there must be some sort of command parameter */
 
 	/*
 	 * Extract the command code from the packet.  Point s to the end
@@ -273,8 +258,6 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 		*end-- = '\0';
 	if(*end == '\r')
 		*end = '\0';
-
-	i = 0;
 
 	if(s != NULL)
 		i = string_to_array(s, para);
@@ -517,10 +500,9 @@ hash_parse(const char *cmd)
 	for (ptr = msg_hash_table[msgindex]; ptr; ptr = ptr->next)
 	{
 		if(strcasecmp(cmd, ptr->cmd) == 0)
-		{
 			return (ptr->msg);
-		}
 	}
+
 	return NULL;
 }
 
@@ -596,38 +578,19 @@ list_commands(struct Client *source_p)
 	}
 }
 
-/*
- * cancel_clients
+/* cancel_clients()
  *
- * inputs	- 
- * output	- 
- * side effects	- 
+ * inputs	- client who sent us the message, client with fake
+ *		  direction, command
+ * outputs	- a given warning about the fake direction
+ * side effects -
  */
-static int
+static void
 cancel_clients(struct Client *client_p, struct Client *source_p, char *cmd)
 {
-	/*
-	 * kill all possible points that are causing confusion here,
-	 * I'm not sure I've got this all right...
-	 * - avalon
-	 *
-	 * knowing avalon, probably not.
-	 */
-
-	/*
-	 * with TS, fake prefixes are a common thing, during the
-	 * connect burst when there's a nick collision, and they
-	 * must be ignored rather than killed because one of the
-	 * two is surviving.. so we don't bother sending them to
-	 * all ops everytime, as this could send 'private' stuff
-	 * from lagged clients. we do send the ones that cause
-	 * servers to be dropped though, as well as the ones from
-	 * non-TS servers -orabidoo
-	 */
-	/*
-	 * Incorrect prefix for a server from some connection.  If it is a
-	 * client trying to be annoying, just QUIT them, if it is a server
-	 * then the same deal.
+	/* ok, fake prefix happens naturally during a burst on a nick
+	 * collision with TS5, we cant kill them because one client has to
+	 * survive, so we just send an error.
 	 */
 	if(IsServer(source_p) || IsMe(source_p))
 	{
@@ -640,103 +603,45 @@ cancel_clients(struct Client *client_p, struct Client *source_p, char *cmd)
 				     "Message for %s[%s] from %s",
 				     source_p->name, source_p->from->name,
 				     get_client_name(client_p, MASK_IP));
-
-		if(IsServer(client_p))
-		{
-			sendto_realops_flags(UMODE_DEBUG, L_ALL,
-					     "Not dropping server %s (%s) for Fake Direction",
-					     client_p->name, source_p->name);
-			return -1;
-		}
-
-		if(IsClient(client_p))
-			sendto_realops_flags(UMODE_DEBUG, L_ALL,
-					     "Would have dropped client %s (%s@%s) [%s from %s]",
-					     client_p->name,
-					     client_p->username,
-					     client_p->host,
-					     client_p->user->server, client_p->from->name);
-		return -1;
-
-		/*
-		   return exit_client(client_p, client_p, &me, "Fake Direction");
-		 */
 	}
-	/*
-	 * Ok, someone is trying to impose as a client and things are
-	 * confused.  If we got the wrong prefix from a server, send out a
-	 * kill, else just exit the lame client.
-	 */
-	if(IsServer(client_p))
+	else
 	{
-		/*
-		 * If the fake prefix is coming from a TS server, discard it
-		 * silently -orabidoo
-		 *
-		 * all servers must be TS these days --is
-		 */
-		if(source_p->user)
-		{
-			sendto_realops_flags(UMODE_DEBUG, L_ADMIN,
-					     "Message for %s[%s@%s!%s] from %s (TS, ignored)",
-					     source_p->name,
-					     source_p->username,
-					     source_p->host,
-					     source_p->from->name,
-					     get_client_name(client_p, SHOW_IP));
+		sendto_realops_flags(UMODE_DEBUG, L_ADMIN,
+				     "Message for %s[%s@%s!%s] from %s (TS, ignored)",
+				     source_p->name,
+				     source_p->username,
+				     source_p->host,
+				     source_p->from->name,
+				     get_client_name(client_p, SHOW_IP));
 
-			sendto_realops_flags(UMODE_DEBUG, L_OPER,
-					     "Message for %s[%s@%s!%s] from %s (TS, ignored)",
-					     source_p->name,
-					     source_p->username,
-					     source_p->host,
-					     source_p->from->name,
-					     get_client_name(client_p, MASK_IP));
-		}
-
-		return 0;
+		sendto_realops_flags(UMODE_DEBUG, L_OPER,
+				     "Message for %s[%s@%s!%s] from %s (TS, ignored)",
+				     source_p->name,
+				     source_p->username,
+				     source_p->host,
+				     source_p->from->name,
+				     get_client_name(client_p, MASK_IP));
 	}
-	return exit_client(client_p, client_p, &me, "Fake prefix");
 }
 
-/*
- * remove_unknown
+/* remove_unknown()
  *
- * inputs	- 
+ * inputs	- client who gave us message, supposed sender, buffer
  * output	- 
- * side effects	- 
+ * side effects	- kills issued for clients, squits for servers
  */
 static void
 remove_unknown(struct Client *client_p, char *lsender, char *lbuffer)
 {
-	if(!IsRegistered(client_p))
-		return;
+	int slen = strlen(lsender);
 
-	if(IsClient(client_p))
-	{
-		sendto_realops_flags(UMODE_DEBUG, L_ALL,
-				     "Weirdness: Unknown client prefix (%s) from %s, Ignoring %s",
-				     lbuffer, get_client_name(client_p, HIDE_IP), lsender);
-		return;
-	}
-
-	/*
-	 * Not from a server so don't need to worry about it.
+	/* meepfoo	is a nickname (KILL)
+	 * #XXXXXXXX	is a UID (KILL)
+	 * #XX		is a SID (SQUIT)
+	 * meep.foo	is a server (SQUIT)
 	 */
-	if(!IsServer(client_p))
-		return;
-	/*
-	 * Do kill if it came from a server because it means there is a ghost
-	 * user on the other server which needs to be removed. -avalon
-	 * Tell opers about this. -Taner
-	 */
-	/* '.something'      is an ID      (KILL)
-	 * 'nodots'          is a nickname (KILL)
-	 * 'no.dot.at.start' is a server   (SQUIT)
-	 */
-	if((lsender[0] == '.') || !strchr(lsender, '.'))
-		sendto_one(client_p, ":%s KILL %s :%s (Unknown Client)", me.name, lsender, me.name);
-	else
+	if((IsDigit(lsender[0]) && slen == 3) || 
+	   (strchr(lsender, '.') != NULL))
 	{
 		sendto_realops_flags(UMODE_DEBUG, L_ADMIN,
 				     "Unknown prefix (%s) from %s, Squitting %s",
@@ -750,6 +655,8 @@ remove_unknown(struct Client *client_p, char *lsender, char *lbuffer)
 			   ":%s SQUIT %s :(Unknown prefix (%s) from %s)",
 			   me.name, lsender, lbuffer, client_p->name);
 	}
+	else
+		sendto_one(client_p, ":%s KILL %s :%s (Unknown Client)", me.name, lsender, me.name);
 }
 
 

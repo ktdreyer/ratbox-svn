@@ -639,7 +639,7 @@ nick_from_server(struct Client *client_p, struct Client *source_p, int parc,
 		else
 		{
 			newts = source_p->tsinfo = CurrentTime;
-			ts_warn("Remote nick %s (%s) introduced without a TS", nick, parv[0]);
+			s_assert(0);
 		}
 
 		/* copy the nick in place */

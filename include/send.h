@@ -30,9 +30,6 @@
 #include "ircd_defs.h"
 #include "config.h"		/* HAVE_STDARG_H */
 
-/*
- * struct decls
- */
 struct Client;
 struct Channel;
 struct dlink_list;
@@ -45,22 +42,15 @@ extern unsigned long current_serial;
 extern void send_queued_write(int fd, void *data);
 extern void send_queued_slink_write(int fd, void *data);
 
-extern void sendto_one(struct Client *, const char *, ...) AFP(2, 3);
+extern void sendto_one(struct Client *target_p, const char *, ...) AFP(2, 3);
+extern void sendto_one_prefix(struct Client *target_p, struct Client *source_p,
+			      const char *command, const char *, ...) AFP(4, 5);
 
-extern void sendto_channel_butone(struct Client *one, struct Client *from,
-				  struct Channel *chptr, const char *command, 
-				  const char *pattern, ...) AFP(5, 6);
-
-extern void sendto_one_prefix(struct Client *, struct Client *, 
-				const char *, ...) AFP(3, 4);
+extern void sendto_channel_flags(struct Client *one, int type, struct Client *source_p,
+				 struct Channel *chptr, const char *, ...) AFP(5, 6);
 
 extern void sendto_common_channels_local(struct Client *, const char *, ...) AFP(2, 3);
 extern void sendto_channel_local(int type, struct Channel *, const char *, ...) AFP(3, 4);
-extern void sendto_channel_local_butone(struct Client *, int,
-					struct Channel *, const char *, ...) AFP(4, 5);
-extern void sendto_channel_remote(struct Client *one, struct Client *from, 
-				  int type, int caps, int nocaps,
-				  struct Channel *chptr, const char *pattern, ...) AFP(7, 8);
 
 extern void sendto_server(struct Client *one, struct Channel *chptr,
 			  unsigned long caps, unsigned long nocaps,
@@ -74,9 +64,8 @@ extern void sendto_match_servs(struct Client *source_p, const char *mask,
 extern void sendto_realops_flags(int, int, const char *, ...) AFP(3, 4);
 extern void sendto_wallops_flags(int, struct Client *, const char *, ...) AFP(3, 4);
 
-extern void ts_warn(const char *, ...) AFP(1, 2);
-
-extern void sendto_anywhere(struct Client *, struct Client *, const char *, ...) AFP(3, 4);
+extern void sendto_anywhere(struct Client *, struct Client *, const char *,
+			    const char *, ...) AFP(4, 5);
 
 extern void kill_client(struct Client *client_p, struct Client *diedie,
 			 const char *pattern, ...) AFP(3, 4);

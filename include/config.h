@@ -115,7 +115,8 @@
 
 #endif /* !__vms */
 
-/* Ignore bogus timestamps from other servers. Yes this will desync
+/* IGNORE_BOGUS_TS
+ * Ignore bogus timestamps from other servers. Yes this will desync
  * the network, but it will allow chanops to resync with a valid non TS 0
  *
  * This should be enabled network wide, or not at all.
@@ -138,13 +139,22 @@
  */
 #define HIDE_SPOOF_IPS
 
-/* TS5_ONLY
+/* USE_TS6
  *
- * If this is defined only TS5 servers may link to the network.  See
- * doc/ts5.txt for more information.  If your network has old servers
- * (hyb5, hyb6.0, +CSr) or hybserv you should NOT define this.
+ * if this is defined, the TS6 protocol will be used, else the TS5 protocol
+ * will be used.  You should avoid having a mixed TS network.
  */
-#define TS5_ONLY
+#define USE_TS6
+
+/* TS6_ONLY
+ *
+ * If this is defined only TS6 servers may link to the network.  See
+ * doc/TS6.txt for more information.  If your network has old servers
+ * (hyb7.0, ircd-ratbox-1.x, +CSr) or hybserv you should NOT define this.
+ *
+ * NOTE: If USE_TS6 is undefined, defining this will enforce TS5_ONLY.
+ */
+#define TS6_ONLY
 
 /* USE_LOGFILE - log errors and such to LPATH
  * If you wish to have the server send 'vital' messages about server

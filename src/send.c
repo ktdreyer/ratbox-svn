@@ -47,88 +47,19 @@
 
 #define LOG_BUFSIZE 2048
 
-static int _send_linebuf(struct Client *, buf_head_t *);
-
-static void send_linebuf_remote(struct Client *, struct Client *, buf_head_t *);
-
 /* send the message to the link the target is attached to */
-#define send_linebuf(a,b) _send_linebuf((a->from?a->from:a),b)
+#define send_linebuf(a,b) _send_linebuf((a->from ? a->from : a) ,b)
 
-/* global for now *sigh* */
 unsigned long current_serial = 0L;
 
-/*
- * send_trim
+/* send_linebuf()
  *
- * inputs	- pointer to buffer to trim
- *		- length of buffer
- * output	- new length of buffer if modified otherwise original len
- * side effects	- input buffer is trimmed if needed
- */
-static inline int
-send_trim(char *lsendbuf, int len)
-{
-	/*
-	 * from rfc1459
-	 *
-	 * IRC messages are always lines of characters terminated with a CR-LF
-	 * (Carriage Return - Line Feed) pair, and these messages shall not
-	 * exceed 512 characters in length,  counting all characters 
-	 * including the trailing CR-LF.
-	 * Thus, there are 510 characters maximum allowed
-	 * for the command and its parameters.  There is no provision for
-	 * continuation message lines.  See section 7 for more details about
-	 * current implementations.
-	 */
-
-	/*
-	 * We have to get a \r\n\0 onto sendbuf[] somehow to satisfy
-	 * the rfc. We must assume sendbuf[] is defined to be 513
-	 * bytes - a maximum of 510 characters, the CR-LF pair, and
-	 * a trailing \0, as stated in the rfc. Now, if len is greater
-	 * than the third-to-last slot in the buffer, an overflow will
-	 * occur if we try to add three more bytes, if it has not
-	 * already occured. In that case, simply set the last three
-	 * bytes of the buffer to \r\n\0. Otherwise, we're ok. My goal
-	 * is to get some sort of vsnprintf() function operational
-	 * for this routine, so we never again have a possibility
-	 * of an overflow.
-	 * -wnder
-	 */
-
-	if(len > 510)
-	{
-		lsendbuf[IRCD_BUFSIZE - 2] = '\r';
-		lsendbuf[IRCD_BUFSIZE - 1] = '\n';
-		lsendbuf[IRCD_BUFSIZE] = '\0';
-		return (IRCD_BUFSIZE);
-	}
-	return len;
-}
-
-/*
- * send_format
- *
- * inputs	- buffer to format into
- *		- format pattern to use
- *		- var args
- * output	- number of bytes formatted output
- * side effects	- modifies sendbuf
- */
-static inline int
-send_format(char *lsendbuf, const char *pattern, va_list args)
-{
-	return (irc_vsprintf(NULL, lsendbuf, pattern, args));
-}
-
-
-/*
- ** send_linebuf
- **      Internal utility which attaches one linebuf to the sockets
- **      sendq.
+ * inputs	- client to send to, linebuf to attach
+ * outputs	-
+ * side effects - linebuf is attached to client
  */
 static int
-_send_linebuf(struct Client *to, buf_head_t * linebuf)
+_send_linebuf(struct Client *to, buf_head_t *linebuf)
 {
 	if(IsMe(to))
 	{
@@ -146,30 +77,34 @@ _send_linebuf(struct Client *to, buf_head_t * linebuf)
 			sendto_realops_flags(UMODE_ALL, L_ADMIN,
 					     "Max SendQ limit exceeded for %s: %u > %lu",
 					     get_client_name(to, HIDE_IP),
-					     linebuf_len(&to->localClient->
-							 buf_sendq), get_sendq(to));
-			sendto_realops_flags(UMODE_ALL, L_ALL,
+					     linebuf_len(&to->localClient->buf_sendq), 
+					     get_sendq(to));
+			sendto_realops_flags(UMODE_ALL, L_OPER,
 					     "Max SendQ limit exceeded for %s: %u > %lu",
 					     get_client_name(to, MASK_IP),
-					     linebuf_len(&to->localClient->
-							 buf_sendq), get_sendq(to));
-			ilog(L_NOTICE,
-			     "Max SendQ limit exceeded for %s: %u > %lu",
+					     linebuf_len(&to->localClient->buf_sendq), 
+					     get_sendq(to));
+
+			ilog(L_NOTICE, "Max SendQ limit exceeded for %s: %u > %lu",
 			     log_client_name(to, SHOW_IP),
-			     linebuf_len(&to->localClient->buf_sendq), get_sendq(to));
+			     linebuf_len(&to->localClient->buf_sendq), 
+			     get_sendq(to));
 		}
 
 		if(IsClient(to))
 			to->flags |= FLAGS_SENDQEX;
+
 		dead_link(to);
 		return -1;
 	}
 	else
 	{
 		/* just attach the linebuf to the sendq instead of
-		 * generating a new one */
+		 * generating a new one
+		 */
 		linebuf_attach(&to->localClient->buf_sendq, linebuf);
 	}
+
 	/*
 	 ** Update statistics. The following is slightly incorrect
 	 ** because it counts messages even if queued, but bytes
@@ -180,21 +115,21 @@ _send_linebuf(struct Client *to, buf_head_t * linebuf)
 
 	send_queued_write(to->localClient->fd, to);
 	return 0;
-}				/* send_linebuf() */
+}
 
-/*
- * send_linebuf_remote
- * 
+/* send_linebuf_remote()
+ *
+ * inputs	- client to attach to, sender, linebuf
+ * outputs	-
+ * side effects - client has linebuf attached
  */
 static void
-send_linebuf_remote(struct Client *to, struct Client *from, buf_head_t * linebuf)
+send_linebuf_remote(struct Client *to, struct Client *from, buf_head_t *linebuf)
 {
 	if(to->from)
 		to = to->from;
 
-	/* Optimize by checking if (from && to) before everything */
-	/* we set to->from up there.. */
-
+	/* test for fake direction */
 	if(!MyClient(from) && IsPerson(to) && (to == from->from))
 	{
 		if(IsServer(from))
@@ -209,11 +144,9 @@ send_linebuf_remote(struct Client *to, struct Client *from, buf_head_t * linebuf
 				     "Ghosted: %s[%s@%s] from %s[%s@%s] (%s)",
 				     to->name, to->username, to->host,
 				     from->name, from->username, from->host, to->from->name);
-
-		sendto_server(NULL, NULL, NOCAPS, NOCAPS,
-			      ":%s KILL %s :%s (%s[%s@%s] Ghosted %s)",
-			      me.name, to->name, me.name, to->name,
-			      to->username, to->host, to->from->name);
+		kill_client_serv_butone(NULL, to, "%s (%s[%s@%s] Ghosted %s)",
+					me.name, to->name, to->username,
+					to->host, to-.from->name);
 
 		to->flags |= FLAGS_KILLED;
 
@@ -222,44 +155,28 @@ send_linebuf_remote(struct Client *to, struct Client *from, buf_head_t * linebuf
 				   me.name, from->name, to->name, to->username, to->host, to->from);
 
 		exit_client(NULL, to, &me, "Ghosted client");
-
 		return;
 	}
 
 	_send_linebuf(to, linebuf);
 	return;
-}				/* send_linebuf_remote() */
+}
 
-/*
- ** send_queued_write
- **      This is called when there is a chance the some output would
- **      be possible. This attempts to empty the send queue as far as
- **      possible, and then if any data is left, a write is rescheduled.
+/* send_queued_write()
+ *
+ * inputs	- fd to have queue sent, client we're sending to
+ * outputs	- contents of queue
+ * side effects - write is rescheduled if queue isnt emptied
  */
 void
 send_queued_write(int fd, void *data)
 {
 	struct Client *to = data;
 	int retlen;
-#ifndef NDEBUG
-	struct hook_io_data hdata;
-#endif
 
-	/*
-	 ** Once socket is marked dead, we cannot start writing to it,
-	 ** even if the error is removed...
-	 */
+	/* cant write anything to a dead socket. */
 	if(IsDeadorAborted(to))
 		return;
-
-	/* Next, lets try to write some data */
-#ifndef NDEBUG
-	hdata.connection = to;
-	if(to->localClient->buf_sendq.list.head)
-		hdata.data =
-			((buf_line_t *) to->localClient->buf_sendq.list.head->
-			 data)->buf + to->localClient->buf_sendq.writeofs;
-#endif
 
 	if(linebuf_len(&to->localClient->buf_sendq))
 	{
@@ -267,15 +184,6 @@ send_queued_write(int fd, void *data)
 			linebuf_flush(to->localClient->fd, &to->localClient->buf_sendq)) > 0)
 		{
 			/* We have some data written .. update counters */
-#ifndef NDEBUG
-			hdata.len = retlen;
-			hook_call_event(h_iosend_id, &hdata);
-			if(to->localClient->buf_sendq.list.head)
-				hdata.data =
-					((buf_line_t *) to->localClient->
-					 buf_sendq.list.head->data)->buf +
-					to->localClient->buf_sendq.writeofs;
-#endif
 			to->localClient->sendB += retlen;
 			me.localClient->sendB += retlen;
 			if(to->localClient->sendB > 1023)
@@ -297,16 +205,17 @@ send_queued_write(int fd, void *data)
 		}
 	}
 
-	/* Finally, if we have any more data, reschedule a write */
+	/* if we have any more data, reschedule a write */
 	if(linebuf_len(&to->localClient->buf_sendq))
-		comm_setselect(fd, FDLIST_IDLECLIENT, COMM_SELECT_WRITE, send_queued_write, to, 0);
-}				/* send_queued_write() */
+		comm_setselect(fd, FDLIST_IDLECLIENT, COMM_SELECT_WRITE,
+			       send_queued_write, to, 0);
+}
 
-/*
- ** send_queued_slink_write
- **      This is called when there is a chance the some output would
- **      be possible. This attempts to empty the send queue as far as
- **      possible, and then if any data is left, a write is rescheduled.
+/* send_queued_slink_write()
+ *
+ * inputs	- fd to have queue sent, client we're sending to
+ * outputs	- contents of queue
+ * side effects - write is rescheduled if queue isnt emptied
  */
 void
 send_queued_slink_write(int fd, void *data)
@@ -324,9 +233,10 @@ send_queued_slink_write(int fd, void *data)
 	/* Next, lets try to write some data */
 	if(to->localClient->slinkq)
 	{
-		retlen = send(to->localClient->ctrlfd,
-			      to->localClient->slinkq +
-			      to->localClient->slinkq_ofs, to->localClient->slinkq_len, SEND_FLAGS);
+	i	retlen = send(to->localClient->ctrlfd,
+			      to->localClient->slinkq + to->localClient->slinkq_ofs,
+			      to->localClient->slinkq_len, SEND_FLAGS);
+
 		if(retlen < 0)
 		{
 			/* If we have a fatal error */
@@ -336,9 +246,9 @@ send_queued_slink_write(int fd, void *data)
 				return;
 			}
 		}
+		/* 0 bytes is an EOF .. */
 		else if(retlen == 0)
 		{
-			/* 0 bytes is an EOF .. */
 			dead_link(to);
 			return;
 		}
@@ -358,33 +268,30 @@ send_queued_slink_write(int fd, void *data)
 		}
 	}
 
-	/* Finally, if we have any more data, reschedule a write */
+	/* if we have any more data, reschedule a write */
 	if(to->localClient->slinkq_len)
 		comm_setselect(to->localClient->ctrlfd, FDLIST_IDLECLIENT,
 			       COMM_SELECT_WRITE, send_queued_slink_write, to, 0);
-}				/* send_queued_slink_write() */
+}
 
-/*
- * sendto_one
+/* sendto_one()
  *
- * inputs	- pointer to destination client
- *		- var args message
- * output	- NONE
- * side effects	- send message to single client
+ * inputs	- client to send to, va_args
+ * outputs	- client has message put into its queue
+ * side effects - 
  */
 void
-sendto_one(struct Client *to, const char *pattern, ...)
+sendto_one(struct Client *target_p, const char *pattern, ...)
 {
 	va_list args;
 	buf_head_t linebuf;
 
-
 	/* send remote if to->from non NULL */
-	if(to->from)
-		to = to->from;
+	if(target_p->from != NULL)
+		target_p = target_p->from;
 
-	if(IsDeadorAborted(to))
-		return;		/* This socket has already been marked as dead */
+	if(IsDeadorAborted(target_p))
+		return;
 
 	linebuf_newbuf(&linebuf);
 
@@ -392,39 +299,33 @@ sendto_one(struct Client *to, const char *pattern, ...)
 	linebuf_putmsg(&linebuf, pattern, &args, NULL);
 	va_end(args);
 
-	send_linebuf(to, &linebuf);
+	_send_linebuf(target_p, &linebuf);
 
 	linebuf_donebuf(&linebuf);
 
-}				/* sendto_one() */
+}
 
-/*
- * sendto_one_prefix
+/* sendto_one_prefix()
  *
- * inputs	- pointer to destination client
- *		- pointer to client to form prefix from
- *		- var args message
- * output	- NONE
- * side effects	- send message to single client
+ * inputs	- client to send to, source, va_args
+ * outputs	- client has message put into its queue
+ * side effects - source/target is chosen based on TS6 capability
  */
 void
-sendto_one_prefix(struct Client *to, struct Client *prefix, const char *pattern, ...)
+sendto_one_prefix(struct Client *target_p, struct Client *source_p,
+		  const char *command, const char *pattern, ...)
 {
 	va_list args;
-	struct Client *to_sendto;
 	buf_head_t linebuf;
 
-
 	/* send remote if to->from non NULL */
-	if(to->from)
-		to_sendto = to->from;
-	else
-		to_sendto = to;
+	if(target_p->from != NULL)
+		target_p = target_p->from;
 
-	if(IsDeadorAborted(to))
-		return;		/* This socket has already been marked as dead */
+	if(IsDeadorAborted(target_p))
+		return;
 
-	if(IsMe(to))
+	if(IsMe(target_p))
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL, "Trying to send to myself!");
 		return;
@@ -432,96 +333,14 @@ sendto_one_prefix(struct Client *to, struct Client *prefix, const char *pattern,
 
 	linebuf_newbuf(&linebuf);
 	va_start(args, pattern);
-
-	if(IsServer(to_sendto) && IsCapable(to->from, CAP_UID))
-		linebuf_putmsg(&linebuf, pattern, &args, ":%s ", ID(prefix));
-	else
-		linebuf_putmsg(&linebuf, pattern, &args, ":%s ", prefix->name);
-
+	linebuf_putmsg(&linebuf, pattern, &args,
+		       ":%s %s %s ",
+		       get_id(source_p, target_p),
+		       command, get_id(target_p, target_p));
 	va_end(args);
-	send_linebuf(to_sendto, &linebuf);
+
+	_send_linebuf(to_sendto, &linebuf);
 	linebuf_donebuf(&linebuf);
-}				/* sendto_one() */
-
-/*
- * sendto_channel_butone
- *
- * inputs	- pointer to client(server) to NOT send message to
- *		- pointer to client that is sending this message
- *		- pointer to channel being sent to
- *		- vargs message
- * output	- NONE
- * side effects	- message as given is sent to given channel members.
- */
-void
-sendto_channel_butone(struct Client *one, struct Client *from,
-		      struct Channel *chptr, const char *command, const char *pattern, ...)
-{
-	va_list args;
-	buf_head_t local_linebuf;
-	buf_head_t remote_linebuf;
-	buf_head_t uid_linebuf;
-	struct Client *target_p;
-	struct membership *msptr;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
-
-	linebuf_newbuf(&local_linebuf);
-	linebuf_newbuf(&remote_linebuf);
-	linebuf_newbuf(&uid_linebuf);
-	va_start(args, pattern);
-
-	if(IsServer(from))
-		linebuf_putmsg(&local_linebuf, pattern, &args, ":%s %s %s ",
-			       from->name, command, chptr->chname);
-	else
-		linebuf_putmsg(&local_linebuf, pattern, &args,
-			       ":%s!%s@%s %s %s ", from->name,
-			       from->username, from->host, command, chptr->chname);
-
-	linebuf_putmsg(&remote_linebuf, pattern, &args, ":%s %s %s ",
-		       from->name, command, chptr->chname);
-
-	linebuf_putmsg(&uid_linebuf, pattern, &args, ":%s %s %s ",
-		       ID(from), command, chptr->chname);
-
-	va_end(args);
-
-	++current_serial;
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->members.head)
-	{
-		msptr = ptr->data;
-		target_p = msptr->client_p;
-
-		if(target_p->from == one)
-			continue;
-
-		if(MyConnect(target_p) && IsRegisteredUser(target_p))
-		{
-			if(target_p->serial != current_serial)
-			{
-				send_linebuf(target_p, &local_linebuf);
-				target_p->serial = current_serial;
-			}
-		}
-		else
-		{
-			/* sent already? */
-			if(target_p->from->serial != current_serial)
-			{
-				if(IsCapable(target_p->from, CAP_UID))
-					send_linebuf_remote(target_p, from, &uid_linebuf);
-				else
-					send_linebuf_remote(target_p, from, &remote_linebuf);
-				target_p->from->serial = current_serial;
-			}
-		}
-	}
-
-	linebuf_donebuf(&local_linebuf);
-	linebuf_donebuf(&remote_linebuf);
-	linebuf_donebuf(&uid_linebuf);
 }
 
 /*
@@ -546,23 +365,18 @@ sendto_server(struct Client *one, struct Channel *chptr, unsigned long caps,
 	      unsigned long nocaps, const char *format, ...)
 {
 	va_list args;
-	struct Client *client_p;
+	struct Client *target_p;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 	buf_head_t linebuf;
 
-	if(dlink_list_length(&serv_list) == 0) /* Nobody to send to */
+	/* noone to send to.. */
+	if(dlink_list_length(&serv_list) == 0)
 		return;
 
-	/* Length is 1 AND one is a server, lets skip them */	
-	if(dlink_list_length(&serv_list) == 1 && (one != NULL && IsServer(one))) 
-		return;
-
-	if(chptr != NULL)
-	{
-		if(*chptr->chname != '#')
+	if(chptr != NULL && *chptr->chname != '#')
 			return;
-	}
+
 	linebuf_newbuf(&linebuf);
 	va_start(args, format);
 	linebuf_putmsg(&linebuf, format, &args, NULL);
@@ -570,22 +384,141 @@ sendto_server(struct Client *one, struct Channel *chptr, unsigned long caps,
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, serv_list.head)
 	{
-		client_p = ptr->data;
+		target_p = ptr->data;
 
 		/* check against 'one' */
-		if(one && (client_p == one->from))
-			continue;
-		/* check we have required capabs */
-		if((client_p->localClient->caps & caps) != caps)
-			continue;
-		/* check we don't have any forbidden capabs */
-		if((client_p->localClient->caps & nocaps) != 0)
+		if(one != NULL && (target_p == one->from))
 			continue;
 
-		send_linebuf(client_p, &linebuf);
+		/* check we have required capabs */
+		if((target_p->localClient->caps & caps) != caps)
+			continue;
+
+		/* check we don't have any forbidden capabs */
+		if((target_p->localClient->caps & nocaps) != 0)
+			continue;
+
+		_send_linebuf(target_p, &linebuf);
 	}
+
 	linebuf_donebuf(&linebuf);
 
+}
+
+/* sendto_channel_flags()
+ *
+ * inputs	- server not to send to, flags needed, source, channel, va_args
+ * outputs	- message is sent to channel members
+ * side effects -
+ */
+void
+sendto_channel_flags(struct Client *one, int type, struct Client *source_p,
+		     struct Channel *chptr, const char *pattern, ...)
+{
+	va_list args;
+	buf_head_t linebuf_local;
+	buf_head_t linebuf_name;
+	buf_head_t linebuf_id;
+	struct Client *target_p;
+	struct membership *msptr;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+
+	linebuf_newbuf(&linebuf_local);
+	linebuf_newbuf(&linebuf_name);
+	linebuf_newbuf(&linebuf_id);
+
+	current_serial++;
+
+	va_start(args, pattern);
+
+	if(IsServer(source_p))
+		linebuf_putmsg(&linebuf_local, pattern, &args,
+			       ":%s ", source_p->name);
+	else
+		linebuf_putmsg(&linebuf_local, pattern, &args,
+			       ":%s!%s@%s ",
+			       source_p->name, source_p->username, 
+			       source_p->host);
+
+	linebuf_putmsg(&linebuf_name, pattern, &args, ":%s ", source_p->name);
+	linebuf_putmsg(&linebuf_id, pattern, &args, ":%s ", use_id(source_p));
+	va_end(args);
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->members.head)
+	{
+		msptr = ptr->data;
+		target_p = msptr->client_p;
+
+		if(IsDeadorAborted(target_p->from) || target_p->from == one)
+			continue;
+
+		if(type && ((msptr->flags & type) == 0))
+			continue;
+
+		if(!MyClient(target_p))
+		{
+			/* if we've got a specific type, target must support
+			 * CHW.. --fl
+			 */
+			if(type && !IsCapable(target_p->from, CAP_CHW))
+				continue;
+
+			if(target_p->from->serial != current_serial)
+			{
+				if(IsTS6(target_p->from))
+					send_linebuf_remote(target_p, source_p, &linebuf_id);
+				else
+					send_linebuf_remote(target_p, source_p, &linebuf_name);
+
+				target_p->from->serial = current_serial;
+			}
+		}
+		else
+			_send_linebuf(target_p, &linebuf_local);
+	}
+
+	linebuf_donebuf(&linebuf_local);
+	linebuf_donebuf(&linebuf_name);
+	linebuf_donebuf(&linebuf_id);
+}
+
+
+/* sendto_channel_local()
+ *
+ * inputs	- flags to send to, channel to send to, va_args
+ * outputs	- message to local channel members
+ * side effects -
+ */
+void
+sendto_channel_local(int type, struct Channel *chptr, const char *pattern, ...)
+{
+	va_list args;
+	buf_head_t linebuf;
+	struct membership *msptr;
+	struct Client *target_p;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+	
+	va_start(args, pattern);
+	linebuf_putmsg(&linebuf, pattern, &args, NULL);
+	va_end(args);
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->locmembers.head)
+	{
+		msptr = ptr->data;
+		target_p = msptr->client_p;
+
+		if(IsDeadorAborted(target_p))
+			continue;
+
+		if(type && ((msptr->flags & type) == 0))
+			continue;
+
+		_send_linebuf(target_p, &linebuf);
+	}
+
+	linebuf_donebuf(&linebuf);
 }
 
 /*
@@ -619,11 +552,6 @@ sendto_common_channels_local(struct Client *user, const char *pattern, ...)
 
 	++current_serial;
 
-	if(user->user == NULL)
-	{
-		linebuf_donebuf(&linebuf);
-		return;
-	}
 	DLINK_FOREACH_SAFE(ptr, next_ptr, user->user->channel.head)
 	{
 		mscptr = ptr->data;
@@ -649,253 +577,82 @@ sendto_common_channels_local(struct Client *user, const char *pattern, ...)
 	linebuf_donebuf(&linebuf);
 }
 
-/*
- * sendto_channel_local
+/* sendto_match_butone()
  *
- * inputs	- int type, i.e. ALL_MEMBERS, NON_CHANOPS,
- *                ONLY_CHANOPS_VOICED, ONLY_CHANOPS
- *              - pointer to channel to send to
- *              - var args pattern
- * output	- NONE
- * side effects - Send a message to all members of a channel that are
- *		  locally connected to this server.
+ * inputs	- server not to send to, source, mask, type of mask, va_args
+ * output	-
+ * side effects - message is sent to matching clients
  */
 void
-sendto_channel_local(int type, struct Channel *chptr, const char *pattern, ...)
-{
-	va_list args;
-	buf_head_t linebuf;
-	struct Client *target_p;
-	struct membership *msptr;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
-
-	linebuf_newbuf(&linebuf);
-	va_start(args, pattern);
-	linebuf_putmsg(&linebuf, pattern, &args, NULL);
-	va_end(args);
-
-	++current_serial;
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->locmembers.head)
-	{
-		msptr = ptr->data;
-		target_p = msptr->client_p;
-
-		if(IsDeadorAborted(target_p) ||
-		   target_p->serial == current_serial)
-			continue;
-
-		if(type && ((msptr->flags & type) == 0))
-			continue;
-
-		target_p->serial = current_serial;
-		send_linebuf(target_p, &linebuf);
-	}
-
-	linebuf_donebuf(&linebuf);
-}
-
-/*
- * sendto_channel_local_butone
- *
- * inputs	- pointer to client not to send to
- *              - int type, i.e. ALL_MEMBERS, NON_CHANOPS,
- *                ONLY_CHANOPS_VOICED, ONLY_CHANOPS
- *              - pointer to channel to send to
- *              - var args pattern
- * output	- NONE
- * side effects - Send a message to all members of a channel that are
- *		  locally connected to this server except one
- */
-void
-sendto_channel_local_butone(struct Client *one, int type,
-			    struct Channel *chptr, const char *pattern, ...)
-{
-	va_list args;
-	buf_head_t linebuf;
-	struct Client *target_p;
-	struct membership *msptr;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
-
-	linebuf_newbuf(&linebuf);
-	va_start(args, pattern);
-	linebuf_putmsg(&linebuf, pattern, &args, NULL);
-	va_end(args);
-
-	/* Serial number checking isn't strictly necessary, but won't hurt */
-	++current_serial;
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->locmembers.head)
-	{
-		msptr = ptr->data;
-		target_p = msptr->client_p;
-
-		if(IsDeadorAborted(target_p) || target_p == one ||
-		   target_p->serial == current_serial)
-			continue;
-
-		if(type && ((msptr->flags & type) == 0))
-			continue;
-
-		target_p->serial = current_serial;
-		send_linebuf(target_p, &linebuf);
-	}
-
-	linebuf_donebuf(&linebuf);
-}
-
-/*
- * sendto_channel_remote
- *
- * inputs	- Client not to send towards
- *		- Client from whom message is from
- *		- int type, i.e. ALL_MEMBERS, NON_CHANOPS,
- *                ONLY_CHANOPS_VOICED, ONLY_CHANOPS
- *              - pointer to channel to send to
- *              - var args pattern
- * output	- NONE
- * side effects - Send a message to all members of a channel that are
- *		  remote to this server.
- */
-void
-sendto_channel_remote(struct Client *one,
-		      struct Client *from, int type, int caps,
-		      int nocaps, struct Channel *chptr, const char *pattern, ...)
-{
-	va_list args;
-	buf_head_t linebuf;
-	struct Client *target_p;
-	struct membership *msptr;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
-
-	linebuf_newbuf(&linebuf);
-	va_start(args, pattern);
-	linebuf_putmsg(&linebuf, pattern, &args, NULL);
-	va_end(args);
-
-	++current_serial;
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->members.head)
-	{
-		msptr = ptr->data;
-		target_p = msptr->client_p;
-
-		if(MyConnect(target_p))
-			continue;
-
-		if(target_p->from == one->from)	/* must skip the origin! */
-			continue;
-
-		if(((target_p->from->localClient->caps & caps) != caps) ||
-		   ((target_p->from->localClient->caps & nocaps) != 0))
-			continue;
-		if(target_p->from->serial == current_serial)
-			continue;
-
-		if(type && ((msptr->flags & type) == 0))
-			continue;
-
-		target_p->from->serial = current_serial;
-		send_linebuf(target_p, &linebuf);
-	}
-
-	linebuf_donebuf(&linebuf);
-}
-
-/*
- ** match_it() and sendto_match_butone() ARE only used
- ** to send a msg to all ppl on servers/hosts that match a specified mask
- ** (used for enhanced PRIVMSGs) for opers
- **
- ** addition -- Armin, 8jun90 (gruner@informatik.tu-muenchen.de)
- **
- */
-
-/*
- * match_it
- *
- * inputs	- client pointer to match on
- *		- actual mask to match
- *		- what to match on, HOST or SERVER
- * output	- 1 or 0 if match or not
- * side effects	- NONE
- */
-static int
-match_it(const struct Client *one, const char *mask, int what)
-{
-	if(what == MATCH_HOST)
-		return match(mask, one->host);
-
-	return match(mask, one->user->server);
-}				/* match_it() */
-
-/*
- * sendto_match_butone
- *
- * Send to all clients which match the mask in a way defined on 'what';
- * either by user hostname or user servername.
- *
- * ugh. ONLY used by m_message.c to send an "oper magic" message. ugh.
- */
-void
-sendto_match_butone(struct Client *one, struct Client *from,
+sendto_match_butone(struct Client *one, struct Client *source_p,
 		    const char *mask, int what, const char *pattern, ...)
 {
 	va_list args;
-	struct Client *client_p;
+	struct Client *target_p;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
-	buf_head_t local_linebuf;
-	buf_head_t remote_linebuf;
+	buf_head_t linebuf_local;
+	buf_head_t linebuf_name;
+	buf_head_t linebuf_id;
 
-	linebuf_newbuf(&local_linebuf);
+	linebuf_newbuf(&linebuf_local);
 	linebuf_newbuf(&remote_linebuf);
 	va_start(args, pattern);
 
-	linebuf_putmsg(&remote_linebuf, pattern, &args, ":%s ", from->name);
-	linebuf_putmsg(&local_linebuf, pattern, &args, ":%s!%s@%s ",
-		       from->name, from->username, from->host);
+	if(IsServer(source_p))
+		linebuf_putmsg(&linebuf_local, pattern, &args, ":%s ", 
+			       source_p->name);
+	else
+		linebuf_putmsg(&linebuf_local, pattern, &args, ":%s!%s@%s ",
+			       source_p->name, source_p->username, source_p->host);
 
+	linebuf_putmsg(&linebuf_name, pattern, &args, ":%s ", source_p->name);
+	linebuf_putmsg(&linebuf_id, pattern, &args, ":%s ", use_id(source_p));
 	va_end(args);
 
-	/* scan the local clients */
-	DLINK_FOREACH_SAFE(ptr, next_ptr, lclient_list.head)
+	if(what == MATCH_HOST)
 	{
-		client_p = ptr->data;
+		DLINK_FOREACH_SAFE(ptr, next_ptr, lclient_list.head)
+		{
+			target_p = ptr->data;
 
-		if(client_p == one)	/* must skip the origin !! */
-			continue;
-
-		if(match_it(client_p, mask, what))
-			send_linebuf(client_p, &local_linebuf);
+			if(match(mask, target_p->host))
+				_send_linebuf(target_p, &linebuf_local);
+		}
+	}
+	/* what = MATCH_SERVER, if it doesnt match us, just send remote */
+	else if(match(mask, me.name))
+	{
+		DLINK_FOREACH_SAFE(ptr, next_ptr, lclient_list.head)
+		{
+			target_p = ptr->data;
+			_send_linebuf(target_p, &linebuf_local);
+		}
 	}
 
-	/* Now scan servers */
 	DLINK_FOREACH(ptr, serv_list.head)
 	{
-		client_p = ptr->data;
+		target_p = ptr->data;
 
-		if(client_p == one)	/* must skip the origin !! */
+		if(target_p == one)
 			continue;
 
-		send_linebuf_remote(client_p, from, &remote_linebuf);
+		if(IsTS6(target_p))
+			send_linebuf_remote(target_p, source_p, &linebuf_id);
+		else
+			send_linebuf_remote(target_p, source_p, &linebuf_name);
 	}
-	linebuf_donebuf(&local_linebuf);
-	linebuf_donebuf(&remote_linebuf);
 
-}				/* sendto_match_butone() */
+	linebuf_donebuf(&linebuf_local);
+	linebuf_donebuf(&linebuf_id);
+	linebuf_donebuf(&linebuf_name);
+}
 
 /* sendto_match_servs()
  *
- * inputs       - source client
- *              - mask to send to
- *              - capab needed
- *              - data
- * outputs      - data sent to servers matching with capab
- * side effects -
+ * inputs       - source, mask to send to, caps needed, va_args
+ * outputs      - 
+ * side effects - message is sent to matching servers with caps.
  */
 void
 sendto_match_servs(struct Client *source_p, const char *mask, int cap, const char *pattern, ...)
@@ -903,16 +660,19 @@ sendto_match_servs(struct Client *source_p, const char *mask, int cap, const cha
 	va_list args;
 	dlink_node *ptr;
 	struct Client *target_p;
-	buf_head_t linebuf_ptr;
+	buf_head_t linebuf_id;
+	buf_head_t linebuf_name;
 	int found = 0;
 
 	if(EmptyString(mask))
 		return;
 
-	linebuf_newbuf(&linebuf_ptr);
+	linebuf_newbuf(&linebuf_id);
+	linebuf_newbuf(&linebuf_name);
 
 	va_start(args, pattern);
-	linebuf_putmsg(&linebuf_ptr, pattern, &args, ":%s ", source_p->name);
+	linebuf_putmsg(&linebuf_id, pattern, &args, ":%s ", use_id(source_p));
+	linebuf_putmsg(&linebuf_name, pattern, &args, ":%s ", source_p->name);
 	va_end(args);
 
 	current_serial++;
@@ -939,11 +699,12 @@ sendto_match_servs(struct Client *source_p, const char *mask, int cap, const cha
 			if(!IsCapable(target_p->from, cap))
 				continue;
 
-			send_linebuf(target_p->from, &linebuf_ptr);
+			_send_linebuf(target_p->from, &linebuf_ptr);
 		}
 	}
 
-	linebuf_donebuf(&linebuf_ptr);
+	linebuf_donebuf(&linebuf_id);
+	linebuf_donebuf(&linebuf_name);
 
 	/* didnt find any matching servers to send to, if the target
 	 * doesnt include us, error.
@@ -954,62 +715,56 @@ sendto_match_servs(struct Client *source_p, const char *mask, int cap, const cha
 			   me.name, source_p->name, mask);
 }
 
-/*
- * sendto_anywhere
+/* sendto_anywhere()
  *
- * inputs	- pointer to dest client
- * 		- pointer to from client
- * 		- varags
- * output	- NONE
- * side effects	- less efficient than sendto_remote and sendto_one
- * 		  but useful when one does not know where target "lives"
+ * inputs	- target, source, va_args
+ * outputs	-
+ * side effects - client is sent message with correct prefix.
  */
 void
-sendto_anywhere(struct Client *to, struct Client *from, const char *pattern, ...)
+sendto_anywhere(struct Client *target_p, struct Client *source_p, 
+		const char *command, const char *pattern, ...)
 {
 	va_list args;
 	buf_head_t linebuf;
 
 	linebuf_newbuf(&linebuf);
+
 	va_start(args, pattern);
 
-
-	if(MyClient(to))
+	if(MyClient(target_p))
 	{
-		if(IsServer(from))
-			linebuf_putmsg(&linebuf, pattern, &args, ":%s ", from->name);
+		if(IsServer(source_p))
+			linebuf_putmsg(&linebuf, pattern, &args, ":%s %s %s ",
+				       source_p->name, command, 
+				       target_p->name);
 		else
-			linebuf_putmsg(&linebuf, pattern, &args,
-				       ":%s!%s@%s ", from->name, from->username, from->host);
+			linebuf_putmsg(&linebuf, pattern, &args, 
+				       ":%s!%s@%s %s %s ", 
+				       source_p->name, source_p->username,
+				       source_p->host, command,
+				       target_p->name);
 	}
 	else
-	{
-		if(IsCapable(to->from, CAP_UID))
-			linebuf_putmsg(&linebuf, pattern, &args, ":%s ", ID(from));
-		else
-			linebuf_putmsg(&linebuf, pattern, &args, ":%s ", from->name);
-
-	}
+		linebuf_putmsg(&linebuf, pattern, &args, ":%s %s %s ",
+			       get_id(source_p, target_p), command,
+			       get_id(target_p, target_p));
 	va_end(args);
 
 	if(MyClient(to))
-		send_linebuf(to, &linebuf);
+		_send_linebuf(to, &linebuf);
 	else
 		send_linebuf_remote(to, from, &linebuf);
 
 	linebuf_donebuf(&linebuf);
 }
 
-/*
- * sendto_realops_flags
+/* sendto_realops_flags()
  *
- * inputs	- flag types of messages to show to real opers
- *		- flag indicating opers/admins
- *		- var args input message
- * output	- NONE
- * side effects	- Send to *local* ops only but NOT +s nonopers.
+ * inputs	- umode needed, level (opers/admin), va_args
+ * output	-
+ * side effects - message is sent to opers with matching umodes
  */
-
 void
 sendto_realops_flags(int flags, int level, const char *pattern, ...)
 {
@@ -1021,7 +776,7 @@ sendto_realops_flags(int flags, int level, const char *pattern, ...)
 	buf_head_t linebuf;
 
 	va_start(args, pattern);
-	send_format(nbuf, pattern, args);
+	irc_vsprintf(NULL, nbuf, pattern, args);
 	va_end(args);
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, oper_list.head)
@@ -1058,7 +813,6 @@ sendto_realops_flags(int flags, int level, const char *pattern, ...)
  * output       - NONE
  * side effects - Send a wallops to local opers
  */
-
 void
 sendto_wallops_flags(int flags, struct Client *source_p, const char *pattern, ...)
 {
@@ -1092,66 +846,18 @@ sendto_wallops_flags(int flags, struct Client *source_p, const char *pattern, ..
 		if(client_p->umodes & flags)
 			send_linebuf(client_p, &linebuf);
 	}
+
 	linebuf_donebuf(&linebuf);
 }
 
-/*
- * ts_warn
- * inputs	- var args message
- * output	- NONE
- * side effects	- Call sendto_realops_flags, with some flood checking
- *		  (at most 5 warnings every 5 seconds)
- */
-
-void
-ts_warn(const char *pattern, ...)
-{
-	va_list args;
-	char lbuf[LOG_BUFSIZE];
-	static time_t last = 0;
-	static int warnings = 0;
-
-	/*
-	 ** if we're running with TS_WARNINGS enabled and someone does
-	 ** something silly like (remotely) connecting a nonTS server,
-	 ** we'll get a ton of warnings, so we make sure we don't send
-	 ** more than 5 every 5 seconds.  -orabidoo
-	 */
-
-	if(CurrentTime - last < 5)
-	{
-		if(++warnings > 5)
-			return;
-	}
-	else
-	{
-		last = CurrentTime;
-		warnings = 0;
-	}
-
-	va_start(args, pattern);
-	(void) send_format(lbuf, pattern, args);
-	va_end(args);
-
-	sendto_realops_flags(UMODE_ALL, L_ALL, "%s", lbuf);
-	ilog(L_CRIT, "%s", lbuf);
-}				/* ts_warn() */
-
-
-
-
-/*
- * kill_client
+/* kill_client()
  *
- * inputs	- client to send kill towards
- * 		- pointer to client to kill
- * 		- reason for kill
- * output	- NONE
- * side effects	- NONE
+ * input	- client to send kill to, client to kill, va_args
+ * output	-
+ * side effects - we issue a kill for the client
  */
-
 void
-kill_client(struct Client *client_p, struct Client *diedie, const char *pattern, ...)
+kill_client(struct Client *target_p, struct Client *diedie, const char *pattern, ...)
 {
 	va_list args;
 	buf_head_t linebuf;
@@ -1159,12 +865,8 @@ kill_client(struct Client *client_p, struct Client *diedie, const char *pattern,
 	linebuf_newbuf(&linebuf);
 
 	va_start(args, pattern);
-
-	if(HasID(diedie) && IsCapable(client_p, CAP_UID))
-		linebuf_putmsg(&linebuf, pattern, &args, ":%s KILL %s :", me.name, ID(diedie));
-	else
-		linebuf_putmsg(&linebuf, pattern, &args, ":%s KILL %s :", me.name, diedie->name);
-
+	linebuf_putmsg(&linebuf, pattern, &args, ":%s KILL %s :",
+		      get_id(&me, target_p), get_id(diedie, target_p));
 	va_end(args);
 
 	send_linebuf(client_p, &linebuf);
@@ -1184,45 +886,39 @@ kill_client(struct Client *client_p, struct Client *diedie, const char *pattern,
  *		  client being unknown to leaf, as in lazylink...
  */
 void
-kill_client_serv_butone(struct Client *one, struct Client *source_p, const char *pattern, ...)
+kill_client_serv_butone(struct Client *one, struct Client *target_p, const char *pattern, ...)
 {
 	va_list args;
 	int have_uid = 0;
 	struct Client *client_p;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
-	buf_head_t linebuf_uid;
-	buf_head_t linebuf_nick;
+	buf_head_t linebuf_id;
+	buf_head_t linebuf_name;
 
+	linebuf_newbuf(&linebuf_name);
+	linebuf_newbuf(&linebuf_id);
+	
 	va_start(args, pattern);
-
-	if(HasID(source_p))
-	{
-		have_uid = 1;
-		linebuf_newbuf(&linebuf_uid);
-		linebuf_putmsg(&linebuf_uid, pattern, &args, ":%s KILL %s :",
-			       me.name, ID(source_p));
-	}
-
-	linebuf_newbuf(&linebuf_nick);
-	linebuf_putmsg(&linebuf_nick, pattern, &args, ":%s KILL %s :", me.name, source_p->name);
-
+	linebuf_putmsg(&linebuf_name, patter, &args, ":%s KILL %s :",
+		       me.name, target_p->name);
+	linebuf_putmsg(&linebuf_id, patter, &args, ":%s KILL %s :",
+		       use_id(&me), use_id(target_p));
 	va_end(args);
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, serv_list.head)
 	{
 		client_p = ptr->data;
 
-		if(one && (client_p == one->from))
+		if(one != NULL) && (client_p == one->from))
 			continue;
 
-		if(have_uid && IsCapable(client_p, CAP_UID))
-			send_linebuf(client_p, &linebuf_uid);
+		if(IsTS6(client_p))
+			_send_linebuf(client_p, &linebuf_id);
 		else
-			send_linebuf(client_p, &linebuf_nick);
+			_send_linebuf(client_p, &linebuf_name);
 	}
 
-	if(have_uid)
-		linebuf_donebuf(&linebuf_uid);
-	linebuf_donebuf(&linebuf_nick);
+	linebuf_donebuf(&linebuf_id);
+	linebuf_donebuf(&linebuf_name);
 }

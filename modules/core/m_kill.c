@@ -41,7 +41,6 @@
 #include "parse.h"
 #include "modules.h"
 
-
 static char buf[BUFSIZE];
 
 static int ms_kill(struct Client *, struct Client *, int, const char **);
@@ -290,9 +289,6 @@ relay_kill(struct Client *one, struct Client *source_p,
 {
 	dlink_node *ptr;
 	struct Client *client_p;
-	char *user;
-
-
 
 	DLINK_FOREACH(ptr, serv_list.head)
 	{
@@ -301,23 +297,14 @@ relay_kill(struct Client *one, struct Client *source_p,
 		if(!client_p || client_p == one)
 			continue;
 
-		/* check the server supports UID */
-		if(IsCapable(client_p, CAP_UID))
-			user = ID(target_p);
-		else
-			user = target_p->name;
-
 		if(MyClient(source_p))
-		{
 			sendto_one(client_p, ":%s KILL %s :%s!%s!%s!%s (%s)",
-				   source_p->name, user,
+				   source_p->name, get_id(target_p, client_p),
 				   me.name, source_p->host, source_p->username,
 				   source_p->name, reason);
-		}
 		else
-		{
 			sendto_one(client_p, ":%s KILL %s :%s %s",
-				   source_p->name, user, inpath, reason);
-		}
+				   source_p->name, get_id(target_p, client_p),
+				   user, inpath, reason);
 	}
 }

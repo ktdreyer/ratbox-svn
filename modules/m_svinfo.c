@@ -61,23 +61,14 @@ ms_svinfo(struct Client *client_p, struct Client *source_p, int parc, const char
 {
 	time_t deltat;
 	time_t theirtime;
+	int tsver = atoi(parv[1]);
 
-	if(MyConnect(source_p) && IsUnknown(source_p))
-	{
-		exit_client(source_p, source_p, source_p, "Need SERVER before SVINFO");
-		return 0;
-	}
-
-	if(!IsServer(source_p) || !MyConnect(source_p) || parc < 5)
+	if(!IsServer(source_p) || !MyConnect(source_p))
 		return 0;
 
-	if(TS_CURRENT < atoi(parv[2]) || atoi(parv[1]) < TS_MIN)
+	if(TS_CURRENT < atoi(parv[2]) || tsver < TS_MIN)
 	{
-		/*
-		 * a server with the wrong TS version connected; since we're
-		 * TS_ONLY we can't fall back to the non-TS protocol so
-		 * we drop the link  -orabidoo
-		 */
+		/* TS version is too low on one of the sides, drop the link */
 		sendto_realops_flags(UMODE_ALL, L_ADMIN,
 				     "Link %s dropped, wrong TS protocol version (%s,%s)",
 				     get_client_name(source_p, SHOW_IP), parv[1], parv[2]);
@@ -120,6 +111,12 @@ ms_svinfo(struct Client *client_p, struct Client *source_p, int parc, const char
 				     "Link %s notable TS delta (my TS=%lu, their TS=%lu, delta=%d)",
 				     source_p->name, CurrentTime, theirtime, (int) deltat);
 	}
+
+	client_p->serv->tsver = tsver;
+
+	/* kludge for sendto_server() */
+	if(tsver >= 6)
+		client_p->localClient->caps |= CAP_TS6;
 
 	return 0;
 }

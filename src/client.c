@@ -1324,7 +1324,7 @@ exit_remote_server(struct Client *client_p, struct Client *source_p, struct Clie
 	if(source_p->servptr && source_p->servptr->serv)
 		dlinkDelete(&source_p->lnode, &source_p->servptr->serv->servers);
 	else
-		ts_warn("server %s without servptr!", source_p->name);
+		s_assert(0);
 
 	dlinkFindDestroy(&global_serv_list, source_p);
 	target_p = source_p->from;
@@ -1383,7 +1383,7 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 	if(source_p->servptr && source_p->servptr->serv)
 		dlinkDelete(&source_p->lnode, &source_p->servptr->serv->servers);
 	else
-		ts_warn("server %s without servptr!", source_p->name);
+		s_assert(0);
 
 
 	close_connection(source_p);

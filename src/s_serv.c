@@ -89,7 +89,6 @@ struct Capability captab[] = {
 	{ "KLN",	CAP_KLN},
 	{ "GLN",	CAP_GLN},
 	{ "KNOCK",	CAP_KNOCK},
-	{ "UID",	CAP_UID},
 	{ "ZIP",	CAP_ZIP},
 	{ "TBURST",	CAP_TBURST},
 	{ "UNKLN",	CAP_UNKLN},

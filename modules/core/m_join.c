@@ -340,8 +340,7 @@ ms_join(struct Client *client_p, struct Client *source_p, int parc, const char *
 		}
 		else
 		{
-			ts_warn("User on %s remotely JOINing new channel with no TS",
-				source_p->user->server);
+			s_assert(0);
 		}
 	}
 
