@@ -1,3 +1,15 @@
+androsyn    2004/03/02 14:41:22 EST	(20040302_9)
+
+  Modified files:
+    src                  poll.c 
+  Log:
+  Revert to poll() code from stable
+  
+  Revision  Changes    Path
+  7.75      +79 -62    ircd-ratbox/src/poll.c
+
+
+
 androsyn    2004/03/02 14:27:23 EST	(20040302_8)
 
   Modified files:
