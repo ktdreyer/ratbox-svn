@@ -1,3 +1,15 @@
+androsyn    2002/09/21 22:13:55 UTC	(20020921_2)
+
+  Modified files:
+    modules              m_ison.c 
+  Log:
+  Add hash.h include
+  
+  Revision  Changes    Path
+  1.32      +2 -1      ircd-ratbox/modules/m_ison.c
+
+
+
 androsyn    2002/09/21 22:11:28 UTC	(20020921_1)
 
   Modified files:
