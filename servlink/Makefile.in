@@ -24,9 +24,12 @@ libexecdir      = @libexecdir@
 sysconfdir      = @sysconfdir@
 localstatedir   = @localstatedir@
 
-IRCDLIBS        = @LIBS@
+SSL_LIBS	= @SSL_LIBS@
+SSL_INCLUDES	= @SSL_LIBS@
 
-INCLUDES        = -I.
+IRCDLIBS        = @LIBS@ @SSL_LIBS@
+
+INCLUDES        = -I. @SSL_LIBS@
 CPPFLAGS        = ${INCLUDES} @CPPFLAGS@
 
 PROGS		= servlink
