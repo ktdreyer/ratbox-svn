@@ -1,3 +1,51 @@
+leeh        2005/01/20 06:04:41 EST	(20050120_0)
+
+  Modified files:
+    .                    ChangeLog RELNOTES 
+    include              config.h config.h.dist memory.h 
+                         patchlevel.h 
+    modules              m_stats.c 
+    src                  commio.c crypt.c getopt.c ircd.c s_serv.c 
+  Removed files:
+    .                    README.VMS clean.com make.com 
+    include              setup.h_vms 
+    modules              descrip.mms static_modules_c.com 
+    modules/core         descrip.mms 
+    src                  descrip.mms qio.c version.com 
+    tools                descrip.mms mkpasswd_vms.c 
+  Log:
+  - clean changelog, relnotes
+  - mark patchlevel as 2.1.0beta
+  - remove VMS support
+  
+  Revision  Changes    Path
+  1.1613    +0 -27165  ircd-ratbox/ChangeLog
+  7.2       +0 -46     ircd-ratbox/README.VMS (dead)
+  1.111     +1 -348    ircd-ratbox/RELNOTES
+  7.2       +0 -10     ircd-ratbox/clean.com (dead)
+  7.182     +0 -42     ircd-ratbox/include/config.h
+  7.79      +0 -42     ircd-ratbox/include/config.h.dist
+  7.50      +0 -4      ircd-ratbox/include/memory.h
+  7.69      +1 -6      ircd-ratbox/include/patchlevel.h
+  7.16      +0 -124    ircd-ratbox/include/setup.h_vms (dead)
+  7.2       +0 -58     ircd-ratbox/make.com (dead)
+  1.5       +0 -24     ircd-ratbox/modules/core/descrip.mms (dead)
+  1.10      +0 -33     ircd-ratbox/modules/descrip.mms (dead)
+  1.239     +1 -10     ircd-ratbox/modules/m_stats.c
+  1.6       +0 -125    ircd-ratbox/modules/static_modules_c.com (dead)
+  1.24      +7 -30     ircd-ratbox/src/commio.c
+  7.12      +0 -4      ircd-ratbox/src/crypt.c
+  7.15      +0 -44     ircd-ratbox/src/descrip.mms (dead)
+  7.24      +0 -4      ircd-ratbox/src/getopt.c
+  7.366     +4 -19     ircd-ratbox/src/ircd.c
+  7.8       +0 -221    ircd-ratbox/src/qio.c (dead)
+  7.421     +1 -8      ircd-ratbox/src/s_serv.c
+  7.8       +0 -101    ircd-ratbox/src/version.com (dead)
+  7.9       +0 -25     ircd-ratbox/tools/descrip.mms (dead)
+  7.4       +0 -458    ircd-ratbox/tools/mkpasswd_vms.c (dead)
+
+
+
 androsyn    2005/01/18 11:55:13 EST	(20050118_7)
 
   Modified files:
