@@ -164,7 +164,8 @@ check_reject(struct Client *client_p)
 	return 0;
 }
 
-void flush_reject(void)
+void 
+flush_reject(void)
 {
 	dlink_node *ptr, *next;
 	patricia_node_t *pnode;
@@ -179,3 +180,25 @@ void flush_reject(void)
 		patricia_remove(reject_tree, pnode);
 	}
 }
+
+int 
+remove_reject(const char *ip)
+{
+	patricia_node_t *pnode;
+	
+	/* Reject is disabled */
+	if(ConfigFileEntry.reject_after_count == 0 || ConfigFileEntry.reject_ban_time == 0 ||
+	   ConfigFileEntry.reject_duration == 0)
+		return -1;
+
+	if((pnode = match_string(reject_tree, ip)) != NULL)
+	{
+		struct reject_data *rdata = pnode->data;
+		dlinkDelete(&rdata->rnode, &reject_list);
+		MyFree(rdata);
+		patricia_remove(reject_tree, pnode);
+		return 1;
+	}
+	return 0;
+}
+
