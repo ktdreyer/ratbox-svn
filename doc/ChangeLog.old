@@ -1,3 +1,7 @@
+*** 20001221_20 by ejb
+- RFC1035_ANAL is always defined now.
+
+
 *** 20001221_19 by db
 - stats v should not be shown to users
 - neither should stats h
