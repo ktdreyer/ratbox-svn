@@ -1,3 +1,8 @@
+*** 20000110_2 by db
+- updated Makefile, fleshed out convertconf more
+
+
+
 *** 20000110_1 by db
 - small cleanup to s_conf.c before the bigger one
 
