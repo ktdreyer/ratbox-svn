@@ -1,3 +1,15 @@
+androsyn    2002/05/30 20:32:24 EDT	(20020531_6)
+
+  Modified files:
+    src                  channel.c 
+  Log:
+  Add non-assert failure code..
+  
+  Revision  Changes    Path
+  7.317     +3 -1      ircd-hybrid-7/src/channel.c
+
+
+
 androsyn    2002/05/30 20:29:47 EDT	(20020531_5)
 
   Modified files:
