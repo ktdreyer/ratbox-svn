@@ -8,6 +8,22 @@ NOTE: THIS IS BETA CODE.  It is run at your own risk.  By running this
 doc/whats-new.txt contains important lists of changes between 2.0 and 1.4 -
 it is important you read this file before upgrading.
 
+-- ircd-ratbox-2.0rc6
+- we werent opening logfiles properly on boot
+- stats T shows how many clients are in delayed exit
+- fix a core with logging glines from hyb6 servers
+- add a "client_auth" hook so people can hook into clients connecting
+- add back io send debug hooks
+- nick delay length is now in stats z
+- kills are now in their own logfile, fname_killlog and formatted nicer
+- kline log has been rewritten to be machine parsable
+  see doc/logfiles.txt
+- unresv over encap had wrong parc count
+- add operspy/hidden_oper to shown operprivs
+- fix for poll() issues with cpu
+- contrib/m_olist.c now has operspy logging
+- cleaned up how we test and mark clients as dead to (hopefully) fix a core
+
 -- ircd-ratbox-2.0rc5
 - fix rejected clients sometimes also ending up on the abort_list
 - append reason to joining juped channel notice
