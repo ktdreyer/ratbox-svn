@@ -1,4 +1,5 @@
 MSGFMT = @MSGFMT@
+RM=	@RM@
 
 default: all
 
@@ -21,11 +22,14 @@ install: build
 	@echo "Please do a make install from the top level directory"
 
 depend:
+
 clean:
+
 distclean:
+	${RM} -f Makefile
 
 mrclean:
-	rm *.mo
+	${RM} -f *.mo
 
 mrupdate:
 	@for i in $(SRCS); do \

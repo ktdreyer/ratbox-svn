@@ -69,4 +69,4 @@ build:
 clean:
 
 distclean:
-
+	${RM} -f Makefile
