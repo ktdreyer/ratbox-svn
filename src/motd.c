@@ -67,6 +67,7 @@ int SendMessageFile(struct Client *source_p, MessageFile *motdToPrint)
 {
   MessageFileLine *linePointer;
   MotdType motdType;
+  char *nick;
 
   if(motdToPrint != NULL)
     motdType = motdToPrint->motdType;
@@ -76,23 +77,24 @@ int SendMessageFile(struct Client *source_p, MessageFile *motdToPrint)
   switch(motdType)
     {
     case USER_MOTD:
-
+      nick = BadPtr(source_p->name) ? "*" : source_p->name;
+      
       if (motdToPrint->contentsOfFile == (MessageFileLine *)NULL)
         {
-          sendto_one(source_p, form_str(ERR_NOMOTD), me.name, source_p->name);
+          sendto_one(source_p, form_str(ERR_NOMOTD), me.name, nick);
           return 0;
         }
 
-      sendto_one(source_p, form_str(RPL_MOTDSTART), me.name, source_p->name, me.name);
+      sendto_one(source_p, form_str(RPL_MOTDSTART), me.name, nick, me.name);
 
       for(linePointer = motdToPrint->contentsOfFile;linePointer;
           linePointer = linePointer->next)
         {
           sendto_one(source_p,
                      form_str(RPL_MOTD),
-                     me.name, source_p->name, linePointer->line);
+                     me.name, nick, linePointer->line);
         }
-      sendto_one(source_p, form_str(RPL_ENDOFMOTD), me.name, source_p->name);
+      sendto_one(source_p, form_str(RPL_ENDOFMOTD), me.name, nick);
       return 0;
       /* NOT REACHED */
       break;

@@ -39,12 +39,13 @@
 #include <stdlib.h>
 #include <time.h>
 
+static void mr_motd(struct Client *, struct Client *, int, char **);
 static void m_motd(struct Client*, struct Client*, int, char**);
 static void mo_motd(struct Client*, struct Client*, int, char**);
 
 struct Message motd_msgtab = {
   "MOTD", 0, 0, 1, MFLG_SLOW, 0,
-  {m_unregistered, m_motd, mo_motd, mo_motd}
+  {mr_motd, m_motd, mo_motd, mo_motd}
 };
 #ifndef STATIC_MODULES
 void
@@ -61,6 +62,19 @@ _moddeinit(void)
 
 char *_version = "20001122";
 #endif
+
+/* mr_motd()
+ *
+ * parv[0] = sender prefix
+ */
+static void mr_motd(struct Client *client_p, struct Client *source_p,
+                    int parc, char *parv[])
+{
+  /* allow unregistered clients to see the motd, but exit them */
+  SendMessageFile(source_p,&ConfigFileEntry.motd);
+  exit_client(client_p, source_p, source_p, "Client Exit after MOTD");
+}
+
 /*
 ** m_motd
 **      parv[0] = sender prefix
