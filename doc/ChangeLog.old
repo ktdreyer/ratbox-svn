@@ -1,3 +1,9 @@
+*** 20010103_14 by davidt
+Yet another cleanup of lazylink stuff.
+Attempt to introduce clients where appropriate, before sending
+things from them...
+
+
 *** 20010103_13 by ejb
 - rewrote load_*_module to make it work.
 
