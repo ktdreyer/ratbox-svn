@@ -470,8 +470,15 @@ add_connection(struct Listener *listener, int fd, struct sockaddr_storage *sai)
 
 	*new_client->host = '\0';
 #ifdef IPV6
+	/* ':' at beginning of sockhost would break things like ips in UID, 
+	 * rebuild it with a leading '0' --fl
+	 */
 	if(*new_client->sockhost == ':')
-		strlcat(new_client->host, "0", sizeof(new_client->host));
+	{
+		char *foo = LOCAL_COPY(new_client->sockhost);
+		ircsnprintf(new_client->sockhost, sizeof(new_client->sockhost),
+				"0%s", foo);
+	}
 
 	if(new_client->localClient->ip.ss_family == AF_INET6 && ConfigFileEntry.dot_in_ip6_addr == 1)
 	{
