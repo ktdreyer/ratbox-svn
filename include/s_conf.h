@@ -35,7 +35,7 @@
 #include "ircd_defs.h"
 #include "motd.h"               /* MessageFile */
 #include "class.h"
-
+#include "client.h"
 struct Client;
 struct DNSReply;
 struct hostent;

@@ -22,18 +22,18 @@
  *
  *   $Id$
  */
+#include "client.h"
 #include "tools.h"
 #include "motd.h"
 #include "ircd.h"
-#include "s_conf.h"
 #include "send.h"
 #include "numeric.h"
-#include "client.h"
 #include "handlers.h"
 #include "msg.h"
 #include "s_serv.h"     /* hunt_server */
 #include "parse.h"
 #include "modules.h"
+#include "s_conf.h"
 
 #include <string.h>
 #include <stdlib.h>
