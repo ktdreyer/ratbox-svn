@@ -1,3 +1,36 @@
+leeh        2001/12/27 06:38:22 EST	(20011227_1)
+
+  Modified files:
+    contrib              Makefile.in README example_module.c 
+                         m_flags.c m_jupe.c m_map.c m_mkpasswd.c 
+                         spy_admin_notice.c spy_info_notice.c 
+                         spy_links_notice.c spy_motd_notice.c 
+                         spy_stats_notice.c spy_trace_notice.c 
+  Added files:
+    contrib              spy_stats_p_notice.c 
+  Log:
+  - added the Revision stuff to the _version strings in contrib/
+  - inverted an if() to make it cleaner
+  - added stats_p_notice spying..
+  
+  Revision  Changes    Path
+  1.29      +1 -0      ircd-hybrid-7/contrib/Makefile.in
+  1.13      +12 -7     ircd-hybrid-7/contrib/README
+  1.3       +21 -22    ircd-hybrid-7/contrib/example_module.c
+  1.4       +2 -2      ircd-hybrid-7/contrib/m_flags.c
+  1.23      +1 -1      ircd-hybrid-7/contrib/m_jupe.c
+  1.8       +2 -2      ircd-hybrid-7/contrib/m_map.c
+  1.4       +2 -2      ircd-hybrid-7/contrib/m_mkpasswd.c
+  1.2       +8 -9      ircd-hybrid-7/contrib/spy_admin_notice.c
+  1.2       +8 -9      ircd-hybrid-7/contrib/spy_info_notice.c
+  1.7       +9 -11     ircd-hybrid-7/contrib/spy_links_notice.c
+  1.2       +8 -9      ircd-hybrid-7/contrib/spy_motd_notice.c
+  1.9       +5 -4      ircd-hybrid-7/contrib/spy_stats_notice.c
+  1.1       +38 -0     ircd-hybrid-7/contrib/spy_stats_p_notice.c (new)
+  1.2       +8 -9      ircd-hybrid-7/contrib/spy_trace_notice.c
+
+
+
 db          2001/12/26 21:36:33 EST	(20011227_0)
 
   Modified files:
