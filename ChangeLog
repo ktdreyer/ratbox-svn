@@ -1,3 +1,27 @@
+androsyn    2003/02/08 23:14:35 UTC	(20030208_12)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    include              memory.h modules.h setup.h.in stdinc.h 
+    modules              m_away.c 
+    src                  memory.c 
+  Log:
+  Add checks for strdup and use it if present.  Also add autoconf checks for
+  alloca.  Also detect for strdupa and use that if present as well.
+  
+  Revision  Changes    Path
+  7.169     +5 -0      ircd-ratbox/autoconf/configure.in
+  7.176     +504 -200  ircd-ratbox/configure
+  7.42      +6 -1      ircd-ratbox/include/memory.h
+  7.49      +1 -1      ircd-ratbox/include/modules.h
+  7.66      +25 -0     ircd-ratbox/include/setup.h.in
+  1.8       +22 -2     ircd-ratbox/include/stdinc.h
+  1.43      +2 -3      ircd-ratbox/modules/m_away.c
+  7.44      +2 -1      ircd-ratbox/src/memory.c
+
+
+
 androsyn    2003/02/08 18:23:24 UTC	(20030208_11)
 
   Modified files:
