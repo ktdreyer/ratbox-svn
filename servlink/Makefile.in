@@ -75,6 +75,9 @@ depend:
 clean:
 	${RM} -f *.o *~ *.core core servlink
 
+lint:
+	lint -aacgprxhH $(CPPFLAGS) $(SOURCES) >>../lint.out
+
 distclean: clean
 	${RM} -f Makefile setup.h
 

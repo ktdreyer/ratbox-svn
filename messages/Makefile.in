@@ -61,6 +61,8 @@ distclean: clean
 clean:
 	${RM} -f *.mo
 
+lint:
+
 mrupdate:
 	@for i in $(SRCS); do \
                 echo "Updating $$i"; \

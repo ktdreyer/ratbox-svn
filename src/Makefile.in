@@ -170,6 +170,9 @@ depend:
 clean:
 	${RM} -f *.o *.exe *~ y.tab.* lex.yy.c ircd.core core ircd 
 
+lint:
+	lint -aacgprxhH $(CPPFLAGS) $(SRCS) >>../lint.out
+
 distclean: clean
 	${RM} -f Makefile version.c.last
 

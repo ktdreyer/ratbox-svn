@@ -164,5 +164,8 @@ depend:
 clean:
 	${RM} -f *.so *~ *.o *.a
 
+lint:
+	lint -aacgprxhH $(CFLAGS) $(SRCS) >../lint.out
+
 distclean: clean
 	${RM} -f Makefile

@@ -95,6 +95,13 @@ depend:
 		${MAKE} depend; cd ..;\
 	done
 
+lint:
+	@for i in $(SUBDIRS); do \
+		echo "lint ==> $$i";\
+		cd $$i;\
+		${MAKE} lint; cd ..;\
+	done
+
 install: all
 	@for i in $(SUBDIRS); do \
 		echo "install ==> $$i";\

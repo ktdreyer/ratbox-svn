@@ -80,5 +80,7 @@ clean:
 
 depend:
 
+lint:
+
 distclean:
 	${RM} -f Makefile

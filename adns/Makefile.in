@@ -72,6 +72,8 @@ depend:
 clean:
 	${RM} -f *.o *.exe *~ libadns.a
 
+lint:
+
 distclean: clean
 	${RM} -f Makefile version.c.last
 
