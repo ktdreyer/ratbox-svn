@@ -1,3 +1,7 @@
+*** 19990902_2 by wnder
+IAuth updates: Got ident query working
+
+
 *** 19990902_1 by lusky
 added check for '#' in username and hostname of /quote kline
 
