@@ -11,6 +11,7 @@ Usermodes: (* designates that the umode is oper only)
        * +a     - Is marked as a server admin in whois.
        * +b     - Can see possible bot warnings.
        * +c     - Can see client connections and exits.
+       * +C     - Can see extended client connections and exits.
        * +d     - Can see server debug messages.
        * +f     - Can see 'I-line is full' notices.
        * +k     - Can see server kill messages.
@@ -23,4 +24,4 @@ Usermodes: (* designates that the umode is oper only)
        * +x     - Can see new server introduction and split messages.
        * +y     - Can see stats/links/admin requests to name a few.
        * +z     - Can see oper wallops.
-       * +Z	- Can see operspy notices
+       * +Z     - Can see operspy notices

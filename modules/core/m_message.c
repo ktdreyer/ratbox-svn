@@ -43,10 +43,12 @@
 #include "packet.h"
 #include "send.h"
 #include "event.h"
+#include "hostmask.h"
 
 static int m_message(int, const char *, struct Client *, struct Client *, int, const char **);
 static int m_privmsg(struct Client *, struct Client *, int, const char **);
 static int m_notice(struct Client *, struct Client *, int, const char **);
+static int me_tgch(struct Client *, struct Client *, int, const char **);
 
 static void expire_tgchange(void *unused);
 
@@ -72,8 +74,12 @@ struct Message notice_msgtab = {
 	"NOTICE", 0, 0, 0, MFLG_SLOW,
 	{mg_unreg, {m_notice, 0}, {m_notice, 0}, {m_notice, 0}, mg_ignore, {m_notice, 0}}
 };
+struct Message tgch_msgtab = {
+	"TGCH", 0, 0, 0, MFLG_SLOW,
+	{mg_ignore, mg_ignore, mg_ignore, mg_ignore, {me_tgch, 2}, mg_ignore}
+};
 
-mapi_clist_av1 message_clist[] = { &privmsg_msgtab, &notice_msgtab, NULL };
+mapi_clist_av1 message_clist[] = { &privmsg_msgtab, &notice_msgtab, &tgch_msgtab, NULL };
 DECLARE_MODULE_AV1(message, modinit, moddeinit, message_clist, NULL, NULL, "$Revision$");
 
 struct entity
@@ -498,27 +504,19 @@ msg_channel_flags(int p_or_n, const char *command, struct Client *client_p,
 }
 
 static void
-add_tgchange(struct Client *client_p)
+add_tgchange(const char *host, struct sockaddr *addr, int bitlen)
 {
 	patricia_node_t *pnode;
 	tgchange *target;
-	int bitlen = 32;
 
 	target = MyMalloc(sizeof(tgchange));
 
-#ifdef IPV6
-	if(client_p->localClient->ip.ss_family == AF_INET6)
-		bitlen = 128;
-#endif
-
-	pnode = make_and_lookup_ip(tgchange_tree,
-			(struct sockaddr *) &client_p->localClient->ip, 
-			bitlen);
+	pnode = make_and_lookup_ip(tgchange_tree, addr, bitlen);
 
 	pnode->data = target;
 	target->pnode = pnode;
 
-	DupString(target->host, client_p->sockhost);
+	DupString(target->host, host);
 	target->expiry = CurrentTime + ConfigFileEntry.tgchange_expiry;
 	target->last_global = CurrentTime;
 
@@ -585,7 +583,7 @@ add_target(struct Client *source_p, struct Client *target_p)
 
 			if((target = find_tgchange((struct sockaddr *)&source_p->localClient->ip)))
 			{
-				target->expiry = CurrentTime + 900;
+				target->expiry = CurrentTime + ConfigFileEntry.tgchange_expiry;
 
 				if(target->last_global + ConfigFileEntry.tgchange_remote < CurrentTime)
 				{
@@ -595,7 +593,12 @@ add_target(struct Client *source_p, struct Client *target_p)
 			}
 			else
 			{
-				add_tgchange(source_p);
+				add_tgchange((const char *) source_p->sockhost, 
+						&source_p->localClient->ip,
+#ifdef IPV6
+					client_p->localClient->ip.ss_family == AF_INET6 ? 128 :
+#endif
+					32);
 				send_tgchange++;
 			}
 
@@ -614,7 +617,32 @@ add_target(struct Client *source_p, struct Client *target_p)
 	++USED_TARGETS(source_p);
 	return 1;
 }
-		
+
+static int
+me_tgch(struct Client *client_p, struct Client *source_p,
+	int parc, const char *parv[])
+{
+	tgchange *target;
+	struct irc_sockaddr_storage addr;
+	int bits;
+
+	/* CIDR? we shouldnt be getting this */
+	if(strchr(parv[1], '/'))
+		return 0;
+
+	if((parse_netmask(parv[1], (struct sockaddr *) &addr, &bits)) == HM_HOST)
+		return 0;
+
+	if((target = find_tgchange(&addr)))
+	{
+		target->expiry = CurrentTime + ConfigFileEntry.tgchange_expiry;
+		return 0;
+	}
+
+	add_tgchange(parv[1], (struct sockaddr *) &addr, bits);
+	return 0;
+}
+
 /*
  * msg_client
  *
