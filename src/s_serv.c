@@ -24,6 +24,7 @@
  */
 #include "s_serv.h"
 #include "channel.h"
+#include "vchannel.h"
 #include "class.h"
 #include "client.h"
 #include "common.h"
@@ -81,6 +82,7 @@ struct Capability captab[] = {
 
 static unsigned long nextFreeMask();
 static unsigned long freeMask;
+static void server_burst(struct Client *cptr);
 
 /*
  * my_name_for_link - return wildcard name of my server name 
@@ -542,7 +544,6 @@ const char* show_capabilities(struct Client* acptr)
 
 int server_estab(struct Client *cptr)
 {
-  struct Channel*   chptr;
   struct Client*    acptr;
   struct ConfItem*  n_conf;
   struct ConfItem*  c_conf;
@@ -805,7 +806,28 @@ int server_estab(struct Client *cptr)
         }
     }
   
- 
+  server_burst(cptr);
+
+  return 0;
+}
+
+
+/*
+ * server_burst
+ *
+ * inputs       - struct Client pointer server
+ *              -
+ * output       - none
+ * side effects - send a server burst
+ * bugs		- still too long
+ */
+static void server_burst(struct Client *cptr)
+{
+  struct Client*    acptr;
+  struct SLink* l;
+  static char   nickissent = 1;
+  struct Channel*   chptr;
+  struct Channel*   vchan; 
       /*
       ** Send it in the shortened format with the TS, if
       ** it's a TS server; walk the list of channels, sending
@@ -831,9 +853,6 @@ int server_estab(struct Client *cptr)
     }
   else
     {
-      struct SLink* l;
-      static char   nickissent = 1;
-
       if (!ConfigFileEntry.hub && IsCapable(cptr, CAP_LL))
         {
           for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
@@ -850,22 +869,51 @@ int server_estab(struct Client *cptr)
        */
       for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
         {
-          for (l = chptr->members; l; l = l->next)
-            {
-              acptr = l->value.cptr;
-              if (acptr->nicksent != nickissent)
-                {
-                  acptr->nicksent = nickissent;
-                  if (acptr->from != cptr)
-                    sendnick_TS(cptr, acptr);
-                }
-            }
-#ifdef PRESERVE_CHANNEL_ON_SPLIT
+	  /* Don't send vchannels twice; vchannels will be
+	   * sent along as subchannels of the top channel
+	   */
+
+	  if(IsVchan(chptr))
+	    continue;
+	  
+	  for (l = chptr->members; l; l = l->next)
+	    {
+	      acptr = l->value.cptr;
+	      if (acptr->nicksent != nickissent)
+		{
+		  acptr->nicksent = nickissent;
+		  if (acptr->from != cptr)
+		    sendnick_TS(cptr, acptr);
+		}
+	    }
+
           /* don't send 0 user channels on rejoin (Mortiis)
            */
-          if(chptr->users != 0)
-#endif
-            send_channel_modes(cptr, chptr);
+
+	  if(IsVchanTop(chptr))
+	    {
+	      send_channel_modes(cptr, chptr);
+
+	      for ( vchan = chptr->next_vchan; vchan;
+		    vchan = chptr->next_vchan)
+		{
+		  for (l = vchan->members; l; l = l->next)
+		    {
+		      acptr = l->value.cptr;
+		      if (acptr->nicksent != nickissent)
+			{
+			  acptr->nicksent = nickissent;
+			  if (acptr->from != cptr)
+			    sendnick_TS(cptr, acptr);
+			}
+		    }
+		  send_channel_modes(cptr, vchan);
+		}
+	    }
+	  else if(chptr->users != 0)
+	    {
+	      send_channel_modes(cptr, chptr);
+	    }
         }
       /*
       ** also send out those that are not on any channel
@@ -894,8 +942,6 @@ int server_estab(struct Client *cptr)
 
   /* Always send a PING after connect burst is done */
   sendto_one(cptr, "PING :%s", me.name);
-
-  return 0;
 }
 
 /*
