@@ -83,6 +83,10 @@ int on_sub_vchan(struct Channel *chptr, struct Client *sptr)
 
   assert(sptr != NULL);
 
+  /* they are in the root chan */
+  if (IsMember(sptr, chptr))
+    return YES;
+
   for(i=0;sptr->vchan_map[i].base_chan;i++)
     {
       if( sptr->vchan_map[i].base_chan == chptr )
@@ -109,7 +113,6 @@ struct Channel* map_vchan(struct Channel *chptr, struct Client *sptr)
 }
 
 /* show info on vchans, XXXX this needs to be improved! */
-
 void show_vchans(struct Client *cptr,
                         struct Client *sptr,
                         struct Channel *chptr)
