@@ -1,164 +1,195 @@
-/*
- *  ircd-ratbox: A slightly useful ircd.
- *  m_testline.c: Tests a hostmask to see what will happen to it.
+/* modules/m_testline.c
+ * 
+ *  Copyright (C) 2004 Lee Hardy <lee@leeh.co.uk>
+ *  Copyright (C) 2004 ircd-ratbox development team
  *
- *  Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center
- *  Copyright (C) 1996-2002 Hybrid Development Team
- *  Copyright (C) 2002-2004 ircd-ratbox development team
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ * 1.Redistributions of source code must retain the above copyright notice,
+ *   this list of conditions and the following disclaimer.
+ * 2.Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in the
+ *   documentation and/or other materials provided with the distribution.
+ * 3.The name of the author may not be used to endorse or promote products
+ *   derived from this software without specific prior written permission.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- *  USA
- *
- *  $Id$
+ * $Id$
  */
-
 #include "stdinc.h"
-#include "client.h"
-#include "common.h"
-#include "irc_string.h"
-#include "ircd_defs.h"
-#include "ircd.h"
-#include "restart.h"
-#include "s_conf.h"
+#include "tools.h"
 #include "send.h"
+#include "client.h"
+#include "modules.h"
 #include "msg.h"
 #include "hostmask.h"
 #include "numeric.h"
-#include "parse.h"
-#include "modules.h"
+#include "s_conf.h"
+#include "s_newconf.h"
+#include "sprintf_irc.h"
 
 static int mo_testline(struct Client *, struct Client *, int, const char **);
+static int mo_testgecos(struct Client *, struct Client *, int, const char **);
 
 struct Message testline_msgtab = {
 	"TESTLINE", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, mg_ignore, {mo_testline, 2}}
+	{mg_unreg, mg_ignore, mg_ignore, mg_ignore, mg_ignore, {mo_testline, 2}}
+};
+struct Message testgecos_msgtab = {
+	"TESTGECOS", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_ignore, mg_ignore, mg_ignore, mg_ignore, {mo_testgecos, 2}}
 };
 
-mapi_clist_av1 testline_clist[] = { &testline_msgtab, NULL };
+mapi_clist_av1 testline_clist[] = { &testline_msgtab, &testgecos_msgtab, NULL };
 DECLARE_MODULE_AV1(testline, NULL, NULL, testline_clist, NULL, NULL, "$Revision$");
 
-/*
- * mo_testline
- *
- * inputs       - pointer to physical connection request is coming from
- *              - pointer to source connection request is comming from
- *              - parc arg count
- *              - parv actual arguments   
- *   
- * output       - always 0
- * side effects - command to test I/K lines on server
- *   
- * i.e. /quote testline user@host,ip
- *
- */
 static int
 mo_testline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct ConfItem *aconf;
+	struct ConfItem *resv_p;
 	struct sockaddr_storage ip;
-	int host_mask, t;
-	char *host, *pass, *user, *name, *classname, *given_host, *given_name, *p;
-	int port;
+	const char *name = NULL;
+	const char *username = NULL;
+	const char *host = NULL;
+	char *mask;
+	char *p;
+	int host_mask;
+	int type;
 
-	given_name = LOCAL_COPY(parv[1]);
-	if(!(p = (char *) strchr(given_name, '@')))
+	mask = LOCAL_COPY(parv[1]);
+
+	if((p = strchr(mask, '!')))
 	{
-		if((t = parse_netmask(given_name, &ip, &host_mask)) != HM_HOST)
-		{
-#ifdef IPV6
-			if(t == HM_IPV6)
-				t = AF_INET6;
-			else
-#endif
-				t = AF_INET;
+		*p++ = '\0';
+		name = mask;
+		mask = p;
 
-			aconf = find_dline(&ip,t);
-
-			if(aconf == NULL)
-			{
-				sendto_one(source_p, ":%s NOTICE %s :No D-line found",
-					   me.name, source_p->name);
-				return 0;
-			}
-
-			get_printable_conf(aconf, &name, &host, &pass, &user, &port, &classname);
-			if(aconf->status & CONF_EXEMPTDLINE)
-			{
-				sendto_one(source_p,
-						":%s NOTICE %s :Exempt D-line host [%s] pass [%s]",
-						me.name, parv[0], host, pass);
-			}
-			else
-			{
-				sendto_one(source_p,
-						":%s NOTICE %s :D-line host [%s] pass [%s]",
-						me.name, parv[0], host, pass);
-			}
-		}
-		else
-		{
-			sendto_one(source_p, ":%s NOTICE %s :usage: user@host|ip",
-					me.name, parv[0]);
-		}
-		return 0;
+		if(EmptyString(mask))
+			return 0;
 	}
 
-	*p = '\0';
-	p++;
-	given_host = p;
-
-	if((t = parse_netmask(given_host, &ip, &host_mask)) != HM_HOST)
+	if((p = strchr(mask, '@')))
 	{
-#ifdef IPV6
-		if(t == HM_IPV6)
-			t = AF_INET6;
-		else
-#endif
-			t = AF_INET;
+		*p++ = '\0';
+		username = mask;
+		host = p;
 
-		aconf = find_address_conf(given_host, given_name, &ip,t);
+		if(EmptyString(host))
+			return 0;
 	}
 	else
-		aconf = find_address_conf(given_host, given_name, NULL, 0);
+		host = mask;
 
-	if(aconf == NULL)
+	/* parses as an IP, check for a dline */
+	if((type = parse_netmask(host, &ip, &host_mask)) != HM_HOST)
 	{
-		sendto_one(source_p, ":%s NOTICE %s :No aconf found", me.name, parv[0]);
+		if(type == HM_IPV6)
+			aconf = find_dline(&ip, AF_INET6);
+		else
+			aconf = find_dline(&ip, AF_INET);
+
+		if(aconf && aconf->status & CONF_DLINE)
+		{
+			sendto_one(source_p, form_str(RPL_TESTLINE),
+				me.name, source_p->name,
+				(aconf->flags & CONF_FLAGS_TEMPORARY) ? 'd' : 'D',
+				(aconf->flags & CONF_FLAGS_TEMPORARY) ? 
+				 (long) ((aconf->hold - CurrentTime) / 60) : 0L, 
+				aconf->host, aconf->passwd);
+
+			return 0;
+		}
+	}
+
+	/* now look for a matching I/K/G */
+	if((aconf = find_address_conf(host, username ? username : "dummy",
+				(type != HM_HOST) ? &ip : NULL,
+				(type != HM_HOST) ? 
+				 ((type == HM_IPV6) ? AF_INET6 : AF_INET) : 0)))
+	{
+		static char buf[HOSTLEN+USERLEN+2];
+
+		if(aconf->status & CONF_KILL)
+		{
+			ircsnprintf(buf, sizeof(buf), "%s@%s", 
+					aconf->user, aconf->host);
+			sendto_one(source_p, form_str(RPL_TESTLINE),
+				me.name, source_p->name,
+				(aconf->flags & CONF_FLAGS_TEMPORARY) ? 'k' : 'K',
+				(aconf->flags & CONF_FLAGS_TEMPORARY) ? 
+				 (long) ((aconf->hold - CurrentTime) / 60) : 0L,
+				buf, aconf->passwd);
+			return 0;
+		}
+		else if(aconf->status & CONF_GLINE)
+		{
+			ircsnprintf(buf, sizeof(buf), "%s@%s",
+					aconf->user, aconf->host);
+			sendto_one(source_p, form_str(RPL_TESTLINE),
+				me.name, source_p->name,
+				'G', (long) ((aconf->hold - CurrentTime) / 60),
+				buf, aconf->passwd);
+			return 0;
+		}
+	}
+
+	/* they asked us to check a nick, so hunt for resvs.. */
+	if(name && (resv_p = find_nick_resv(name)))
+	{
+		sendto_one(source_p, form_str(RPL_TESTLINE),
+				me.name, source_p->name,
+				resv_p->hold ? 'q' : 'Q',
+				resv_p->hold ? (long) ((resv_p->hold - CurrentTime) / 60) : 0L,
+				resv_p->name, resv_p->passwd);
 		return 0;
 	}
 
-	get_printable_conf(aconf, &name, &host, &pass, &user, &port, &classname);
-
-	if(aconf->status & CONF_KILL)
+	/* no matching resv, we can print the I: if it exists */
+	if(aconf && aconf->status & CONF_CLIENT)
 	{
-		sendto_one(source_p,
-				":%s NOTICE %s :%c-line name [%s] host [%s] pass [%s]",
-				me.name, parv[0],
-				(aconf->flags & CONF_FLAGS_TEMPORARY) ? 'k' : 'K',
-				user, host, pass);
-	}
-	else if(aconf->status & CONF_CLIENT)
-	{
-		sendto_one(source_p,
-				":%s NOTICE %s :I-line mask [%s] prefix [%s] name [%s] host [%s] port [%d] class [%s]",
-				me.name, parv[0],
-				name,
-				show_iline_prefix(source_p, aconf, user),
-				user, host, port, classname);
-
+		sendto_one_numeric(source_p, RPL_STATSILINE, form_str(RPL_STATSILINE),
+				(IsConfRestricted(aconf)) ? 'i' : 'I',
+				aconf->name, show_iline_prefix(source_p, aconf, aconf->user),
+				aconf->host, aconf->port, aconf->className);
+		return 0;
 	}
 
+	/* nothing matches.. */
+	sendto_one(source_p, form_str(RPL_NOTESTLINE),
+			me.name, source_p->name, parv[1]);
+	return 0;
+}
+
+static int
+mo_testgecos(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	struct ConfItem *aconf;
+
+	if(!(aconf = find_xline(parv[1], 0)))
+	{
+		sendto_one(source_p, form_str(RPL_NOTESTLINE),
+				me.name, source_p->name, parv[1]);
+		return 0;
+	}
+
+	sendto_one(source_p, form_str(RPL_TESTLINE),
+			me.name, source_p->name,
+			aconf->hold ? 'x' : 'X',
+			aconf->hold ? (long) ((aconf->hold - CurrentTime) / 60) : 0L,
+			aconf->name, aconf->passwd);
 	return 0;
 }
