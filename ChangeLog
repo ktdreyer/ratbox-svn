@@ -1,3 +1,16 @@
+ejb         2003/02/04 19:33:54 UTC	(20030204_12)
+
+  Modified files:
+    src                  dynlink.c 
+  Log:
+  - don't call mapi_register twice()
+  - load hooks in the right place
+  
+  Revision  Changes    Path
+  7.14      +7 -10     ircd-ratbox/src/dynlink.c
+
+
+
 ejb         2003/02/04 14:33:52 UTC	(20030204_11)
 
   Modified files:
