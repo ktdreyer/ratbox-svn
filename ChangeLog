@@ -1,3 +1,15 @@
+leeh        2002/11/24 12:14:58 UTC	(20021124_13)
+
+  Modified files:
+    src                  s_serv.c 
+  Log:
+  - moved the away check up a bit
+  
+  Revision  Changes    Path
+  7.299     +4 -6      ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2002/11/24 11:10:08 UTC	(20021124_12)
 
   Modified files:
