@@ -1,3 +1,15 @@
+leeh        2002/01/02 17:19:33 EST	(20020102_7)
+
+  Modified files:
+    src                  modules-dld.c 
+  Log:
+  - ported to modules-dld
+  
+  Revision  Changes    Path
+  1.14      +36 -13    ircd-hybrid-7/src/modules-dld.c
+
+
+
 leeh        2002/01/02 17:08:34 EST	(20020102_6)
 
   Modified files:
