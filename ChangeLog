@@ -1,3 +1,25 @@
+leeh        2005/01/24 18:57:02 EST	(20050124_6)
+
+  Modified files:
+    src                  newconf.c 
+  Log:
+  - rework shared {};, the format is now:
+    shared {
+        oper = "flame@*.leeh.co.uk", "*.lan";
+        flags = kline;
+    };
+  
+    With no privs:
+    shared {
+        oper = "flame@*.leeh.co.uk", "*.lan";
+        flags = none;
+    };
+  
+  Revision  Changes    Path
+  7.191     +55 -23    ircd-ratbox/src/newconf.c
+
+
+
 leeh        2005/01/24 17:25:58 EST	(20050124_5)
 
   Modified files:
