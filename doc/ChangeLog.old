@@ -1,3 +1,11 @@
+*** 20010707_2 by a1kmm
+- Actually set the key/limit to 0 on -k / -l as join requires this, turning
+  off the mode flag is not enough.
+- Adding some of the code which will eventually be used to allow a test-suite
+  module.
+
+
+
 *** 20010707_1 by leeh
 - added docs for resv
 
