@@ -1,3 +1,17 @@
+leeh        2002/06/27 11:16:40 EDT	(20020627_3)
+
+  Modified files:
+    include              config.h 
+    src                  client.c 
+  Log:
+  - well fix the QS stuff in 7.1 (agreed with andro)
+  
+  Revision  Changes    Path
+  7.139     +0 -6      ircd-hybrid-7/include/config.h
+  7.285     +15 -60    ircd-hybrid-7/src/client.c
+
+
+
 androsyn    2002/06/26 22:14:40 EDT	(20020627_2)
 
   Modified files:
