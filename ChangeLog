@@ -1,3 +1,25 @@
+leeh        2004/03/29 19:24:32 EST	(20040330_0)
+
+  Modified files:
+    include              client.h 
+    src                  channel.c client.c send.c 
+  Log:
+  - IsAborted() is now IsIOError(), and used for both read/write errors
+  - IsIODead() tests IsDead || IsIOError
+  - IsAnyDead() test IsIODead || IsClosing
+  - SetClosing() is now set at the top of exit_client(), we have to do this
+    because during an exit_client(), we can get a write error, so we need to
+    be able to know if we're already in exit_client(), in which case we cant
+    add something to the abort list..
+  
+  Revision  Changes    Path
+  7.240     +6 -5      ircd-ratbox/include/client.h
+  7.405     +2 -2      ircd-ratbox/src/channel.c
+  7.449     +10 -3     ircd-ratbox/src/client.c
+  7.278     +10 -10    ircd-ratbox/src/send.c
+
+
+
 leeh        2004/03/29 16:35:57 EST	(20040329_9)
 
   Modified files:
