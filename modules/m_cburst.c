@@ -107,18 +107,24 @@ int     ms_cburst(struct Client *cptr,
     key ? key : "" );
 #endif
 
-  if((chptr=hash_find_channel(name, NullChn)) == NULL)
+  if( (chptr = hash_find_channel(name, NullChn)) == NULL)
     {
-     /* I don't know about this channel here, let leaf deal with it */
-     if(nick)
-       sendto_one(cptr,":%s LLJOIN %s %s %s", me.name, name, nick, key);
+      chptr = get_channel(sptr, name, CREATE);
+      chptr->channelts = (time_t)(-1); /* ! highest possible TS so its always
+					* over-ruled
+					*/
+      chptr->users_last = CurrentTime;
+
+      chptr->lazyLinkChannelExists |= cptr->localClient->serverMask;
+
+      if(nick)
+	sendto_one(cptr,":%s LLJOIN %s %s %s", me.name, name, nick, key);
       return 0;
     }
 
   if(IsCapable(cptr,CAP_LL))
     {
       sjoin_channel(cptr,chptr);
-
 
       if(nick)
 	sendto_one(cptr,":%s LLJOIN %s %s %s", me.name, name, nick, key);

@@ -41,11 +41,10 @@ struct ConfItem;
 
 extern struct ConfItem* find_gkill(struct Client* client, char *);
 extern struct ConfItem* find_is_glined(const char* host, const char* name);
-extern void   flush_glines(void);             
 extern void   report_glines(struct Client *); 
 extern int    remove_gline_match(const char *user, const char *host);
-extern void   expire_pending_glines();
-extern void   expire_glines();
+extern void   cleanup_glines(void *notused);
+extern void   add_gline(struct ConfItem *);
 
 typedef struct gline_pending
 {
@@ -71,10 +70,13 @@ typedef struct gline_pending
 }gline_pending_t;
 
 /* how long a pending G line can be around
- *   10 minutes should be plenty
+ * 10 minutes should be plenty
  */
 
 #define GLINE_PENDING_EXPIRE 600
+#define CLEANUP_GLINES_TIME  1800
+
+
 
 extern gline_pending_t *pending_glines;
 

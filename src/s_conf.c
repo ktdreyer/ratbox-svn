@@ -56,8 +56,6 @@
 #include <fcntl.h>
 #include <assert.h>
 
-struct ConfItem *glines = NULL;
-
 extern int yyparse(); /* defined in yy.tab.c */
 extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */
 extern int lineno;

@@ -289,14 +289,6 @@ int     m_join(struct Client *cptr,
       if (joining_vchan)
 	{
 	  add_vchan_to_client_cache(sptr,root_chptr,chptr);
-
-	  if(IsCapable(cptr,CAP_LL))
-	    root_chptr->lazyLinkChannelExists |= cptr->localClient->serverMask;
-	}
-      else
-	{
-	  if(IsCapable(cptr,CAP_LL))
-	    chptr->lazyLinkChannelExists |= cptr->localClient->serverMask;
 	}
 
       /*

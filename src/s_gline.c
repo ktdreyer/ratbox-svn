@@ -53,43 +53,12 @@
 #include <time.h>
 #include <fcntl.h>
 
-void add_gline(struct ConfItem *);
+static struct ConfItem *glines=NULL;
+static struct gline_pending *pending_glines=NULL;
 
-struct ConfItem *glines;
-struct gline_pending *pending_glines;
+static void expire_glines(void);
+static void expire_pending_glines(void);
 
-/*
- * expire_glines
- * 
- * inputs       - NONE
- * output       - NONE
- * side effects -
- *
- * Go through the gline list, expire any needed.
- */
-void expire_glines()
-{
-  struct ConfItem *kill_ptr;
-  struct ConfItem *last_ptr = NULL;
-  struct ConfItem *next_ptr;
-
-  for(kill_ptr = glines; kill_ptr; kill_ptr = next_ptr)
-    {
-      next_ptr = kill_ptr->next;
-
-      if(kill_ptr->hold <= CurrentTime)
-	{
-	  if(last_ptr != NULL)
-	    last_ptr->next = next_ptr;
-	  else
-	    glines->next = next_ptr;
-
-	  free_conf(kill_ptr);
-	}
-      else
-	last_ptr = kill_ptr;
-    }
-}
 
 /* add_gline
  *
@@ -97,7 +66,6 @@ void expire_glines()
  * output       - none
  * Side effects - links in given struct ConfItem into gline link list
  */
-
 void
 add_gline(struct ConfItem *aconf)
 {
@@ -111,8 +79,8 @@ add_gline(struct ConfItem *aconf)
  * output       - struct ConfItem pointer if a gline was found for this client
  * side effects - none
  */
-
-struct ConfItem *find_gkill(struct Client* cptr, char* username)
+struct ConfItem*
+find_gkill(struct Client* cptr, char* username)
 {
   assert(0 != cptr);
   return (IsElined(cptr)) ? 0 : find_is_glined(cptr->host, username);
@@ -125,8 +93,8 @@ struct ConfItem *find_gkill(struct Client* cptr, char* username)
  * output       - pointer to struct ConfItem if user@host glined
  * side effects -
  */
-
-struct ConfItem* find_is_glined(const char* host, const char* name)
+struct ConfItem*
+find_is_glined(const char* host, const char* name)
 {
   struct ConfItem *kill_ptr; 
 
@@ -150,7 +118,8 @@ struct ConfItem* find_is_glined(const char* host, const char* name)
  *
  * report pending glines, and placed glines.
  */
-void report_glines(struct Client *sptr)
+void
+report_glines(struct Client *sptr)
 {
   struct gline_pending *glp_ptr;
   struct ConfItem *kill_ptr;
@@ -159,10 +128,6 @@ void report_glines(struct Client *sptr)
   char *host;
   char *name;
   char *reason;
-
-  /* XXX This should be in an event handler .. */
-  expire_pending_glines();
-  expire_glines();
 
   sendto_one(sptr,":%s NOTICE %s :Pending G-lines",
 	     me.name, sptr->name);
@@ -258,6 +223,58 @@ remove_gline_match(const char* user, const char* host)
 }
 
 /*
+ * cleanup_glines
+ *
+ * inputs	- NONE
+ * output	- NONE
+ * side effects - expire gline lists
+ *                This is an event started off in ircd.c
+ */
+void
+cleanup_glines(void *notused)
+{
+  expire_glines();
+  expire_pending_glines();
+
+  eventAdd("cleanup_glines", cleanup_glines, NULL,
+	   CLEANUP_GLINES_TIME, 0);
+}
+
+/*
+ * expire_glines
+ * 
+ * inputs       - NONE
+ * output       - NONE
+ * side effects -
+ *
+ * Go through the gline list, expire any needed.
+ */
+static void
+expire_glines()
+{
+  struct ConfItem *kill_ptr;
+  struct ConfItem *last_ptr = NULL;
+  struct ConfItem *next_ptr;
+
+  for(kill_ptr = glines; kill_ptr; kill_ptr = next_ptr)
+    {
+      next_ptr = kill_ptr->next;
+
+      if(kill_ptr->hold <= CurrentTime)
+	{
+	  if(last_ptr != NULL)
+	    last_ptr->next = next_ptr;
+	  else
+	    glines->next = next_ptr;
+
+	  free_conf(kill_ptr);
+	}
+      else
+	last_ptr = kill_ptr;
+    }
+}
+
+/*
  * expire_pending_glines
  * 
  * inputs       - NONE
@@ -267,8 +284,7 @@ remove_gline_match(const char* user, const char* host)
  * Go through the pending gline list, expire any that haven't had
  * enough "votes" in the time period allowed
  */
-
-void
+static void
 expire_pending_glines()
 {
   struct gline_pending *glp_ptr;
@@ -297,3 +313,8 @@ expire_pending_glines()
 	last_glp_ptr = glp_ptr;
     }
 }
+
+
+
+
+

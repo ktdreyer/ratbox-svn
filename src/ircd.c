@@ -670,6 +670,9 @@ int main(int argc, char *argv[])
   eventAdd("cleanup_channels", cleanup_channels, NULL,
 	   CLEANUP_CHANNELS_TIME, 0 );
 
+  eventAdd("cleanup_glines", cleanup_glines, NULL,
+	   CLEANUP_GLINES_TIME, 0 );
+
   /* Setup the timeout check. I'll shift it later :)  -- adrian */
   eventAdd("comm_checktimeouts", comm_checktimeouts, NULL, 1, 0);
 

@@ -144,10 +144,6 @@ int mo_gline(struct Client *cptr,
 
   if (ConfigFileEntry.glines)
     {
-      /* XXX This should be in an event handler .. */
-      expire_pending_glines();
-      expire_glines();
-
       /* Only globals can apply Glines */
       if (!IsGlobalOper(sptr))
 	{
@@ -357,10 +353,6 @@ int     ms_gline(struct Client *cptr,
 
   if (ConfigFileEntry.glines)
     {
-      /* XXX This should be in an event handler .. */
-      expire_pending_glines();
-      expire_glines();
-
       log_gline_request(oper_nick,oper_user,oper_host,oper_server,
 			user,host,reason);
 
@@ -649,7 +641,6 @@ add_new_majority_gline(const char* oper_nick,
  *      See if there is a majority agreement on a GLINE on the given user
  *      There must be at least 3 different opers agreeing on this GLINE
  *
- *      Expire old entries.
  */
 int
 majority_gline(struct Client *sptr,
@@ -671,8 +662,6 @@ majority_gline(struct Client *sptr,
                              user, host, reason);
       return NO;
     }
-
-  expire_pending_glines();
 
   for (gline_pending_ptr = pending_glines;
       gline_pending_ptr; gline_pending_ptr = gline_pending_ptr->next)
