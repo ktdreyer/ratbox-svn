@@ -1045,10 +1045,11 @@ s_chan_moduser(struct client *client_p, char *parv[], int parc)
 	service_error(chanserv_p, client_p, "User %s on %s level %d set",
 			mreg_tp->user_reg->name, mreg_tp->channel_reg->name, level);
 
-	loc_sqlite_exec(NULL, "UPDATE members SET level = %d WHERE chname = %Q AND username = %Q",
-			level, mreg_tp->channel_reg->name, mreg_tp->user_reg->name);
-	loc_sqlite_exec(NULL, "UPDATE members SET lastmod = %Q WHERE chname = %Q AND username = %Q",
-			mreg_p->user_reg->name, mreg_tp->channel_reg->name, mreg_tp->user_reg->name);
+	loc_sqlite_exec(NULL, 
+			"UPDATE members SET level = %d, lastmod = %Q "
+			"WHERE chname = %Q AND username = %Q",
+			level, mreg_p->user_reg->name, 
+			mreg_tp->channel_reg->name, mreg_tp->user_reg->name);
 
 	return 1;
 }
@@ -1138,8 +1139,10 @@ s_chan_suspend(struct client *client_p, char *parv[], int parc)
 	service_error(chanserv_p, client_p, "User %s on %s suspend %d set",
 			mreg_tp->user_reg->name, mreg_tp->channel_reg->name, level);
 
-	loc_sqlite_exec(NULL, "UPDATE members SET suspend = %d WHERE chname = %Q AND username = %Q",
-			level, mreg_tp->channel_reg->name, mreg_tp->user_reg->name);
+	loc_sqlite_exec(NULL, "UPDATE members SET suspend = %d, lastmod = %Q "
+			"WHERE chname = %Q AND username = %Q",
+			level, mreg_p->user_reg->name, 
+			mreg_tp->channel_reg->name, mreg_tp->user_reg->name);
 
 	return 1;
 }
@@ -1185,7 +1188,9 @@ s_chan_unsuspend(struct client *client_p, char *parv[], int parc)
 	service_error(chanserv_p, client_p, "User %s on %s unsuspended",
 			 mreg_tp->user_reg->name, mreg_tp->channel_reg->name);
 
-	loc_sqlite_exec(NULL, "UPDATE members SET suspend = 0 WHERE chname = %Q AND username = %Q",
+	loc_sqlite_exec(NULL, "UPDATE members SET suspend = 0, lastmod = %Q "
+			"WHERE chname = %Q AND username = %Q",
+			mreg_p->user_reg->name, 
 			mreg_tp->channel_reg->name, mreg_tp->user_reg->name);
 
 	return 1;
