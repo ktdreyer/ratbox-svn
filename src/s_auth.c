@@ -211,16 +211,15 @@ static void auth_dns_callback(void* vptr, adns_answer* reply)
 	  
 	struct AuthRequest* auth = (struct AuthRequest*) vptr;
 	ClearDNSPending(auth);
-	if(reply && reply->status == adns_s_ok)
+	if(reply && (reply->status == adns_s_ok))
 	{
-		assert(reply != 0);
-		if(reply->rrs.str <= HOSTLEN)
+		if(strlen(*reply->rrs.str) < HOSTLEN)
 		{
 			strncpy_irc(auth->client->host, *reply->rrs.str, HOSTLEN);
 			sendheader(auth->client, REPORT_FIN_DNS);
-		} else
+		} else {
 			strcpy(auth->client->host, auth->client->localClient->sockhost);
-			sendheader(auth->client, REPORT_HOST_TOOLONG);	
+			sendheader(auth->client, REPORT_HOST_TOOLONG);
 		}
 	} else {
 		strcpy(auth->client->host, auth->client->localClient->sockhost);
