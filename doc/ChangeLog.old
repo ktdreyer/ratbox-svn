@@ -1,3 +1,8 @@
+*** 20001220_13 by ejb
+- added note about using `send-pr' to report bugs
+- added note that cygwin is no longer support.
+
+
 *** 20001220_12 by ejb
 added GNATS support for ircd.
 currently using a gnats db hosted on leguin.org.uk, can be changed
