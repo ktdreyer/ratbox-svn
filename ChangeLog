@@ -1,3 +1,49 @@
+androsyn    2002/08/12 12:15:36 EDT	(20020812_2)
+
+  Modified files:
+    adns                 adns.h parse.c query.c types.c 
+    include              sprintf_irc.h 
+    src                  Makefile.in channel.c channel_mode.c 
+                         client.c ircd.c listener.c motd.c 
+                         newconf.c parse.c s_auth.c s_bsd.c 
+                         s_conf.c s_log.c s_misc.c s_serv.c 
+                         s_user.c send.c 
+  Added files:
+    src                  b_sprintf.c 
+  Removed files:
+    src                  sprintf_irc.c 
+  Log:
+  Add bleeth's ircsprintf().  Also fixed some headers.  It seems that most
+  of the code was relying on adns.h to pull in sprintf_irc.h. Go figure.
+  
+  Revision  Changes    Path
+  1.8       +0 -1      ircd-ratbox/adns/adns.h
+  1.6       +1 -0      ircd-ratbox/adns/parse.c
+  1.13      +1 -1      ircd-ratbox/adns/query.c
+  1.7       +1 -0      ircd-ratbox/adns/types.c
+  7.9       +11 -9     ircd-ratbox/include/sprintf_irc.h
+  7.115     +1 -1      ircd-ratbox/src/Makefile.in
+  7.1       +704 -0    ircd-ratbox/src/b_sprintf.c (new)
+  7.334     +1 -0      ircd-ratbox/src/channel.c
+  7.61      +1 -0      ircd-ratbox/src/channel_mode.c
+  7.305     +1 -0      ircd-ratbox/src/client.c
+  7.247     +1 -0      ircd-ratbox/src/ircd.c
+  7.71      +1 -0      ircd-ratbox/src/listener.c
+  7.26      +1 -0      ircd-ratbox/src/motd.c
+  7.16      +1 -0      ircd-ratbox/src/newconf.c
+  7.139     +1 -0      ircd-ratbox/src/parse.c
+  7.101     +1 -0      ircd-ratbox/src/s_auth.c
+  7.172     +1 -0      ircd-ratbox/src/s_bsd.c
+  7.330     +1 -0      ircd-ratbox/src/s_conf.c
+  7.44      +1 -0      ircd-ratbox/src/s_log.c
+  7.30      +1 -0      ircd-ratbox/src/s_misc.c
+  7.281     +1 -0      ircd-ratbox/src/s_serv.c
+  7.211     +1 -0      ircd-ratbox/src/s_user.c
+  7.213     +1 -5      ircd-ratbox/src/send.c
+  7.16      +0 -472    ircd-ratbox/src/sprintf_irc.c (dead)
+
+
+
 leeh        2002/08/12 12:12:06 EDT	(20020812_1)
 
   Modified files:
