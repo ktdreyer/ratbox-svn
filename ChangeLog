@@ -1,3 +1,18 @@
+leeh        2005/01/13 10:23:14 EST	(20050113_3)
+
+  Modified files:
+    src                  client.c s_userserv.c 
+  Log:
+  - logout users on USERDROP/USERSUSPEND
+  - logout users when we get a LOGIN for an unknown username
+  - dont put our "SU" stuff under a capability test
+  
+  Revision  Changes    Path
+  1.32      +1 -2      rserv/src/client.c
+  1.38      +12 -6     rserv/src/s_userserv.c
+
+
+
 leeh        2005/01/13 08:16:38 EST	(20050113_2)
 
   Modified files:
