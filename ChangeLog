@@ -1,3 +1,15 @@
+androsyn    2003/11/20 14:38:32 EST	(20031120_1)
+
+  Modified files:
+    modules/core         m_error.c 
+  Log:
+  I think this should clear up the ERROR stuff for unregistered clients..
+  
+  Revision  Changes    Path
+  1.4       +12 -7     ircd-ratbox/modules/core/m_error.c
+
+
+
 androsyn    2003/11/20 14:27:34 EST	(20031120_0)
 
   Modified files:
