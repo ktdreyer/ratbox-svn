@@ -65,12 +65,9 @@ extern int m_whois(struct Client *,struct Client *,int,char **);
 extern int m_dbop(struct Client *,struct Client *,int,char **);
 #endif
 extern int m_server(struct Client *,struct Client *,int,char **);
-#ifdef HUB
 extern int m_cburst(struct Client *,struct Client *,int,char **);
 extern int m_drop(struct Client *,struct Client *,int,char **);
-#else
 extern int m_lljoin(struct Client *,struct Client *,int,char **);
-#endif
 extern int m_user(struct Client *,struct Client *,int, char **);
 extern int m_links(struct Client *,struct Client *,int,char **);
 extern int m_summon(struct Client *,struct Client *,int,char **);
