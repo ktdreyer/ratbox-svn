@@ -73,6 +73,7 @@ clear_old_conf(void)
 	DLINK_FOREACH_SAFE(ptr, next_ptr, conf_server_list.head)
 	{
 		free_conf_server(ptr->data);
+		dlink_destroy(ptr, &conf_server_list);
 	}	
 }
 

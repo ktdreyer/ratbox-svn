@@ -516,7 +516,7 @@ conf_end_oper(struct TopConf *tc)
 	}
 
 	free_conf_oper(yy_oper);
-        yy_oper = NULL;
+        yy_oper = yy_tmpoper = NULL;
 
         return 0;
 }

@@ -38,6 +38,11 @@ struct timeval system_time;
 
 int have_md5_crypt;
 
+static int need_rehash = 0;
+static void sig_hup(int);
+static void sig_term(int);
+static void check_rehash(void *);
+
 void
 die(const char *reason)
 {
@@ -207,6 +212,12 @@ main(int argc, char *argv[])
 
 	slog("ratbox-services started");
 
+	signal(SIGHUP, sig_hup);
+	signal(SIGTERM, sig_term);
+
+	signal(SIGTRAP, SIG_IGN); /* Needed on FreeBSD and possibly others */
+	signal(SIGPIPE, SIG_IGN);
+
 	init_events();
 
 	/* balloc requires events */
@@ -255,6 +266,7 @@ main(int argc, char *argv[])
 	conf_parse(1);
 
 	eventAdd("update_service_floodcount", update_service_floodcount, NULL, 1);
+	eventAdd("check_rehash", check_rehash, NULL, 2);
 
 	connect_to_server(NULL);
 
@@ -262,4 +274,24 @@ main(int argc, char *argv[])
 	read_io();
 
 	return 0;
+}
+
+void sig_hup(int sig)
+{
+	need_rehash = 1;
+	signal(SIGHUP, sig_hup);
+}
+
+void sig_term(int sig)
+{
+	die("Got signal SIGTERM");
+}
+
+void check_rehash(void *unused)
+{
+	if (need_rehash)
+	{
+		rehash(1); /* Caught a signal */
+		need_rehash = 0;
+	}
 }

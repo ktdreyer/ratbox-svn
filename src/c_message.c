@@ -62,9 +62,16 @@ c_message(struct client *client_p, const char *parv[], int parc)
 	/* ctcp.. doesnt matter who its addressed to. */
 	if(parv[2][0] == '\001')
 	{
-		struct conf_oper *oper_p = find_conf_oper(client_p->user->username,
-							  client_p->user->host,
-							  client_p->user->servername);
+		struct conf_oper *oper_p;
+
+		/* some ctcp we dont care about */
+		if(strncasecmp(parv[2], "\001CHAT\001", 6) &&
+		   strncasecmp(parv[2], "\001DCC CHAT ", 10))
+			return;
+
+		oper_p = find_conf_oper(client_p->user->username,
+					client_p->user->host,
+					client_p->user->servername);
 
 		if(oper_p == NULL || !ConfOperDcc(oper_p))
 		{
