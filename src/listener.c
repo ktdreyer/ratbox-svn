@@ -244,15 +244,7 @@ static struct Listener* find_listener(int port, struct irc_inaddr *addr)
   for (listener = ListenerPollList; listener; listener = listener->next)
   {
     
-    /* jdc -- this breaks shit when addr is irc_inaddr but not in listener.h */
-    /*
     if (port == listener->port && memcmp(PIN_ADDR(addr), IN_ADDR(listener->addr), sizeof(struct irc_inaddr)))
-    */
-    if ( (port == listener->port) &&
-         (!memcmp(&PIN_ADDR(addr),
-                 &IN_ADDR(listener->addr),
-                 sizeof(struct irc_inaddr)))
-       )
     {
       /* Try to return an open listener, otherwise reuse a closed one */
       if (listener->fd == -1)
