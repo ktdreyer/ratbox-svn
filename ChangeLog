@@ -1,3 +1,25 @@
+leeh        2004/01/26 07:35:02 EST	(20040126_0)
+
+  Modified files:
+    src/s_chanserv       Makefile.in s_c_admin.c s_c_local.h 
+                         s_c_op.c s_chanserv.c 
+  Added files:
+    src/s_chanserv       s_c_suspend.c 
+  Log:
+  - added "INVITE" to s_c_op.c
+  - added "SUSPEND", "UNSUSPEND" to s_c_suspend.c
+  - added checking of suspended level to verify_member_access()
+  
+  Revision  Changes    Path
+  1.5       +2 -1      rserv/src/s_chanserv/Makefile.in
+  1.5       +16 -0     rserv/src/s_chanserv/s_c_admin.c
+  1.7       +3 -0      rserv/src/s_chanserv/s_c_local.h
+  1.4       +39 -2     rserv/src/s_chanserv/s_c_op.c
+  1.1       +119 -0    rserv/src/s_chanserv/s_c_suspend.c (new)
+  1.10      +7 -3      rserv/src/s_chanserv/s_chanserv.c
+
+
+
 leeh        2004/01/25 18:12:47 EST	(20040125_1)
 
   Modified files:
