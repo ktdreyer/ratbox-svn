@@ -496,7 +496,7 @@ static int register_user(struct Client *cptr, struct Client *sptr,
 
   if (MyConnect(sptr))
     {
-   #if 0
+   #ifndef USE_IAUTH
       switch( check_client(sptr,username,&reason))
         {
         case SOCKET_ERROR:
@@ -716,7 +716,7 @@ static int register_user(struct Client *cptr, struct Client *sptr,
             }
         }
 
-     #endif /* 0 */
+     #endif /* USE_IAUTH */
 
 
       sendto_realops_flags(FLAGS_CCONN,
@@ -1217,15 +1217,16 @@ int nickkilldone(struct Client *cptr, struct Client *sptr, int parc,
           ** --must test this and exit m_nick too!!!
           */
 
+				#ifdef USE_IAUTH
           /*
            * Send the client to the iauth module for verification
            */
           BeginAuthorization(sptr);
+        #else
 
-          #ifdef bingo
-            if (register_user(cptr, sptr, nick, buf) == CLIENT_EXITED)
-              return CLIENT_EXITED;
-          #endif /* bingo */
+          if (register_user(cptr, sptr, nick, buf) == CLIENT_EXITED)
+            return CLIENT_EXITED;
+        #endif
         }
     }
 
@@ -1317,6 +1318,7 @@ int do_user(char* nick, struct Client* cptr, struct Client* sptr,
 
   if (sptr->name[0]) /* NICK already received, now I have USER... */
   {
+  #ifdef USE_IAUTH
     /*
      * Now that we have both the NICK and USER, send the
      * client to the iauth module for verification
@@ -1324,10 +1326,10 @@ int do_user(char* nick, struct Client* cptr, struct Client* sptr,
     #if 0
     begin_authorization();
     #endif
+ 	#else
 
-  #ifdef bingo
     return register_user(cptr, sptr, sptr->name, username);
-  #endif /* bingo */
+  #endif
   }
   else
     {

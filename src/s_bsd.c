@@ -725,6 +725,7 @@ void add_connection(struct Listener* listener, int fd)
 
   assert(0 != listener);
 
+#ifdef USE_IAUTH
   if (iAuth.socket == NOSOCK)
   {
     send(fd,
@@ -734,6 +735,7 @@ void add_connection(struct Listener* listener, int fd)
     close(fd);
     return;
   }
+#endif
 
   /* 
    * get the client socket name from the socket
@@ -961,8 +963,10 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
       FD_ZERO(read_set);
       FD_ZERO(write_set);
 
+		#ifdef USE_IAUTH
       if (iAuth.socket != NOSOCK)
         FD_SET(iAuth.socket, read_set);
+    #endif
 
       for (auth = AuthPollList; auth; auth = auth->next) {
         assert(-1 < auth->fd);
@@ -1062,6 +1066,7 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
       accept_connection(listener);
   }
 
+#ifdef USE_IAUTH
   /*
    * Check IAuth
    */
@@ -1077,6 +1082,7 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
         iAuth.socket = NOSOCK;
       }
     }
+#endif
 
   for (i = 0; i <= highest_fd; i++) {
     if (!(GlobalFDList[i] & mask) || !(cptr = local[i]))

@@ -440,8 +440,11 @@ void start_auth(struct Client* client)
   else if (IsDNSPending(auth))
     link_auth_request(auth, &AuthIncompleteList);
   else {
+  #ifdef USE_IAUTH
   	link_auth_request(auth, &AuthClientList);
-    /*free_auth_request(auth);*/
+  #else
+    free_auth_request(auth);
+  #endif
     release_auth_client(client);
   }
 }
@@ -472,8 +475,11 @@ void timeout_auth_queries(time_t now)
       auth->client->since = now;
       release_auth_client(auth->client);
       unlink_auth_request(auth, &AuthPollList);
-      link_auth_request(auth, &AuthClientList);
-      /*free_auth_request(auth);*/
+  #ifdef USE_IAUTH
+  	link_auth_request(auth, &AuthClientList);
+  #else
+    free_auth_request(auth);
+  #endif
     }
   }
   for (auth = AuthIncompleteList; auth; auth = auth_next) {
@@ -486,8 +492,11 @@ void timeout_auth_queries(time_t now)
       auth->client->since = now;
       release_auth_client(auth->client);
       unlink_auth_request(auth, &AuthIncompleteList);
-      link_auth_request(auth, &AuthClientList);
-      /*free_auth_request(auth);*/
+  #ifdef USE_IAUTH
+  	link_auth_request(auth, &AuthClientList);
+  #else
+    free_auth_request(auth);
+  #endif
     }
   }
 }
@@ -583,8 +592,11 @@ void read_auth_reply(struct AuthRequest* auth)
     link_auth_request(auth, &AuthIncompleteList);
   else {
     release_auth_client(auth->client);
-    link_auth_request(auth, &AuthClientList);
-    /*free_auth_request(auth);*/
+  #ifdef USE_IAUTH
+  	link_auth_request(auth, &AuthClientList);
+  #else
+    free_auth_request(auth);
+  #endif
   }
 }
 
