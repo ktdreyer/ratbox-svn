@@ -1,3 +1,19 @@
+leeh        2003/06/10 11:57:00 UTC	(20030610_0)
+
+  Modified files:
+    include              s_newconf.h 
+    modules              m_encap.c 
+    src                  s_newconf.c 
+  Log:
+  - first revision of the actual encap handling code..
+  
+  Revision  Changes    Path
+  7.7       +16 -0     ircd-ratbox/include/s_newconf.h
+  1.5       +7 -2      ircd-ratbox/modules/m_encap.c
+  7.7       +105 -0    ircd-ratbox/src/s_newconf.c
+
+
+
 androsyn    2003/06/09 22:38:16 UTC	(20030609_0)
 
   Modified files:
