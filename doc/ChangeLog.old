@@ -1,3 +1,7 @@
+*** 20010819_1 by leeh
+- removed an unneeded variable
+
+
 *** 20010818_2 by davidt
 - Add m_map.c to contrib/, since it was in TODO and I was bored.
 
