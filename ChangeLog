@@ -1,3 +1,22 @@
+leeh        2004/10/27 14:15:34 EDT	(20041027_3)
+
+  Modified files:
+    include              channel.h conf.h 
+    src                  channel.c newconf.c 
+  Log:
+  - added a config option named ratbox, for a ratbox only network
+  - simply have the server op us if we lose ops and network is ratbox
+  - move the services reop on sjoin to just below when we remove our modes,
+    before we start parsing the nicklist
+  
+  Revision  Changes    Path
+  1.16      +1 -1      rserv/include/channel.h
+  1.22      +1 -0      rserv/include/conf.h
+  1.29      +23 -13    rserv/src/channel.c
+  1.19      +1 -0      rserv/src/newconf.c
+
+
+
 leeh        2004/10/27 14:05:41 EDT	(20041027_2)
 
   Modified files:
