@@ -167,8 +167,16 @@ conf_set_serverinfo_name(void *data)
 			return;
 		}
 
+		s = data;
+
+		if(IsDigit(*s))
+		{
+			conf_report_error("Ignoring serverinfo::name -- cannot begin with digit.");
+			return;
+		}
+
 		/* the ircd will exit() in main() if we dont set one */
-		if(strlen((char *) data) <= HOSTLEN)
+		if(strlen(s) <= HOSTLEN)
 			DupString(ServerInfo.name, (char *) data);
 	}
 }
