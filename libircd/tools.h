@@ -108,7 +108,7 @@ void mem_frob(void *data, int len);
 #define dlinkDestroy(m, list) do { dlinkDelete(m, list); free_dlink_node(m); } while(0);
 
 /* Allocate and add the dlink_node to the list */
-#define dlinkAddAlloc(data, list) dlinkAdd(data, make_dlink_node(); list)
+#define dlinkAddAlloc(data, list) dlinkAdd(data, make_dlink_node(), list)
 
 /*
  * The functions below are included for the sake of inlining
