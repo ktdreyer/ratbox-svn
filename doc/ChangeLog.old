@@ -1,3 +1,8 @@
+*** 20001229_18 by davidt
+Stop LL leafs replying to MODEs from servers with another MODE..
+this should never happen, but it is currently (see bug #7 on hybzilla).
+
+
 *** 20001229_17 by fl_
 - removed the sendto_match_noncap_servs(), as its now redundant
 - if a user sets mode +h nick, and hes on a server that doesnt support
