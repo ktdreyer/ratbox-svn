@@ -6,9 +6,6 @@ convertconf - converts a Hybrid 5 or 6 conf file to the new
               style
 
 mkpasswd - makes password for O lines
-md5mkpasswd - makes MD5 passwords for O lines
-              NOTE:  Works fine on FreeBSD 3.x/4.x and Linux glibc
-                     Known NOT to work on Cygwin or Solaris 2.6
 
 start_ircd.c - start program for fbsd and bsd/os systems
 ircd_start.c - start program for solaris

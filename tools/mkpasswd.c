@@ -2,6 +2,8 @@
  * copyright 1991, all rights reserved.
  * You can use this code as long as my name stays with it.
  *
+ * md5 patch by Walter Campbell <wcampbel@botbay.net>
+ * Modernization, getopt, etc for the Hybrid IRCD team
  *
  * $Id$
  */
@@ -9,38 +11,130 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 
+#define FLAG_MD5     0x00000001
+#define FLAG_DES     0x00000002
+#define FLAG_SALT    0x00000004
+#define FLAG_PASS    0x00000008
 
 extern char *getpass();
 extern char *crypt();
-/* extern long random(); */
-/* extern int srandom(unsigned); */
+
+
+char *make_des_salt();
+char *make_md5_salt();
+char *make_md5_salt_para(char *);
+void usage();
+static char saltChars[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./";
 
 int main(argc, argv)
 int argc;
 char *argv[];
 {
-  static char saltChars[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./";
-  char salt[3];
-  char * plaintext;
+  char *plaintext = NULL;
+  extern char *optarg;
+  extern int optind;
+  int c;
+  char *saltpara = NULL;
+  char *salt;
+  int flag = 0;
 
-  if (argc < 2) {
-    srandom(time(0));		/* may not be the BEST salt, but its close */
-    salt[0] = saltChars[random() % 64];
-    salt[1] = saltChars[random() % 64];
-    salt[2] = 0;
-  }
-  else {
-    salt[0] = argv[1][0];
-    salt[1] = argv[1][1];
-    salt[2] = '\0';
-    if ((strchr(saltChars, salt[0]) == NULL) || (strchr(saltChars, salt[1]) == NULL))
-      fprintf(stderr, "illegal salt %s\n", salt), exit(1);
+  srandom(time(NULL));
+
+  while( (c=getopt(argc, argv, "mdhs:p:")) != -1)
+  {
+    switch(c)
+    {
+      case 'm':
+        flag |= FLAG_MD5;
+        break;
+      case 'd':
+        flag |= FLAG_DES;
+        break;
+      case 's':
+        flag |= FLAG_SALT;
+        saltpara = optarg;
+        break;
+      case 'p':
+        flag |= FLAG_PASS;
+        plaintext = optarg;
+        break;
+      case 'h':
+        usage();
+        break;
+      default:
+        break;
+    }
   }
 
-  plaintext = getpass("plaintext: ");
+  if (flag & FLAG_MD5) {
+    if (flag & FLAG_SALT)
+      salt = make_md5_salt_para(saltpara);
+    else
+      salt = make_md5_salt();
+  } else {
+    if (flag & FLAG_SALT)
+      salt = saltpara;
+    else
+      salt = make_des_salt();
+  }
+
+  if (flag & FLAG_PASS) {
+    if (!plaintext)
+      printf("Please enter a valid password\n");
+  } else {
+    plaintext = getpass("plaintext: ");
+  }
 
   printf("%s\n", crypt(plaintext, salt));
   return 0;
 }
 
+char *make_des_salt()
+{
+  static char salt[3];
+  char* saltptr=salt;
+  salt[0] = saltChars[random() % 64];
+  salt[1] = saltChars[random() % 64];
+  salt[2] = '\0';
+  return saltptr;
+}
+
+char *make_md5_salt_para(char *saltpara)
+{
+  static char salt[8];
+  char* saltptr=salt;
+  if (saltpara) {
+    sprintf(salt, "$1$%s$", saltpara);
+    return saltptr;
+  }
+  printf("Invalid Salt, please use 3 random alphanumeric characters\n");
+  exit(1);
+}
+  
+char *make_md5_salt()
+{
+  static char salt[8];
+  char* saltptr=salt;
+  salt[0] = '$';
+  salt[1] = '1';
+  salt[2] = '$';
+  salt[3] = saltChars[random() % 64];
+  salt[4] = saltChars[random() % 64];
+  salt[5] = saltChars[random() % 64];
+  salt[6] = '$';
+  salt[7] = '\0';
+  return saltptr;
+}
+
+void usage()
+{
+  printf("mkpasswd [-m|-d] [-s salt] [-p plaintext]\n");
+  printf("-m Generate an MD5 password\n");
+  printf("-d Generate a DES password\n");
+  printf("-s Specify a salt, 2 alphanumeric characters for DES, 3 for MD5\n");
+  printf("-p Specify a plaintext password to use\n");
+  printf("Example: mkpasswd -m -s 3dr -p test\n");
+  exit(0);
+}
