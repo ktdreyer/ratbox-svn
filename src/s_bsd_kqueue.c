@@ -71,11 +71,15 @@
 #include <arpa/inet.h>
 
 
-#define KE_LENGTH	16
+#define KE_LENGTH	128
 
 static void kq_update_events(int, short, PF *);
 static int kq;
 static struct timespec zero_timespec;
+
+static struct kevent *kqlst;	/* kevent buffer */
+static int kqmax;		/* max structs to buffer */
+static int kqoff;		/* offset into the buffer */
 
 
 /* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
@@ -107,22 +111,28 @@ kq_update_events(int fd, short filter, PF * handler)
         update_required++;
 
     if (update_required) {
-        struct kevent ke;
+        struct kevent *kep;
 
-        ke.ident = (u_long) fd;
-        ke.filter = filter;
-	ke.fflags = NOTE_LOWAT;
-	ke.data = 1;
-        ke.flags = handler ? (EV_ADD | EV_ONESHOT) : EV_DELETE;
+	kep = kqlst + kqoff;
 
-        retval = kevent(kq, &ke, 1, NULL, 0, &zero_timespec);
+        kep->ident = (u_long) fd;
+        kep->filter = filter;
+	kep->fflags = NOTE_LOWAT;
+	kep->data = 1;
+        kep->flags = handler ? (EV_ADD | EV_ONESHOT) : EV_DELETE;
+	if (kqoff == kqmax) {
+		kevent(kq, kqlst, kqoff, NULL, 0, &zero_timespec);
+		kqoff == 0;
+	} else {
+		kqoff++;
+	}
 #if 0
         if (retval < 0)
             /* Error! */
-#endif
         if (ke.flags & EV_ERROR) {
             errno = ke.data;
         }
+#endif
     }
 }
 
@@ -145,6 +155,8 @@ void init_netio(void)
         log(L_CRIT, "init_netio: Couldn't open kqueue fd!\n");
         exit(115); /* Whee! */
     }
+    kqmax = getdtablesize();
+    kqlst = MyMalloc(sizeof(*kqlst) * kqmax);
     zero_timespec.tv_sec = 0;
     zero_timespec.tv_nsec = 0;
 }
@@ -200,7 +212,7 @@ int
 comm_select(time_t delay)
 {
     int num, i;
-    struct kevent ke[KE_LENGTH];
+    static struct kevent ke[KE_LENGTH];
     struct timespec poll_time;
 
     do {
@@ -212,7 +224,8 @@ comm_select(time_t delay)
         poll_time.tv_sec = (time_t) delay;
         poll_time.tv_nsec = (long) 0;
         for (;;) {
-            num = kevent(kq, NULL, 0, ke,  KE_LENGTH, &poll_time);
+            num = kevent(kq, kqlst, kqoff, ke,  KE_LENGTH, &poll_time);
+	    kqoff = 0;
             if (num >= 0)
                 break;
             if (ignoreErrno(errno))
