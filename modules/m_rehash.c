@@ -131,27 +131,7 @@ int mo_rehash(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           ReadMessageFile( &ConfigFileEntry.helpfile );
           found = YES;
         }
-      else if(irccmp(parv[1],"dump") == 0)
-        {
-          sendto_ops("%s is dumping conf file",parv[0]);
-          rehash_dump(sptr);
-          found = YES;
-        }
-      else if(irccmp(parv[1],"dlines") == 0)
-        {
-          sendto_one(sptr, form_str(RPL_REHASHING), me.name, parv[0],
-                     ConfigFileEntry.configfile);
-          /* this does a full rehash right now, so report it as such */
-#ifdef CUSTOM_ERR
-          sendto_ops("%s is rehashing dlines from server config file while whistling innocently",
-#else
-          sendto_ops("%s is rehashing dlines from server config file",
-#endif
-                     parv[0]);
-          log(L_NOTICE, "REHASH From %s\n", get_client_name(sptr, HIDE_IP));
-          dline_in_progress = 1;
-          return rehash(cptr, sptr, 0);
-        }
+
       if(found)
         {
           log(L_NOTICE, "REHASH %s From %s\n", parv[1], 
@@ -160,11 +140,10 @@ int mo_rehash(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         }
       else
         {
-
 	if (ConfigFileEntry.glines)
-          sendto_one(sptr,":%s NOTICE %s : rehash one of :DNS TKLINES GLINES GC MOTD OMOTD DUMP" ,me.name,sptr->name);
+          sendto_one(sptr,":%s NOTICE %s : rehash one of :DNS TKLINES GLINES GC MOTD OMOTD" ,me.name,sptr->name);
 	else
-	  sendto_one(sptr,":%s NOTICE %s : rehash one of :DNS TKLINES GC MOTD OMOTD DUMP" ,me.name,sptr->name);
+	  sendto_one(sptr,":%s NOTICE %s : rehash one of :DNS TKLINES GC MOTD OMOTD" ,me.name,sptr->name);
           return(0);
         }
     }

@@ -24,7 +24,12 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.23  2000/11/15 07:51:39  db
+ * - removed /rehash dump for one reason... and one reason only BLOAT
+ *
  * Revision 7.22  2000/11/06 16:12:00  adrian
+ *
+ *
  * I hate doing it, but here it is. One blind commit to rip out ziplinks
  * from hybrid-7, as they will be re-implemented later on as an external
  * process rather than be in the code.
@@ -560,7 +565,6 @@ extern struct ConfItem* find_kill (struct Client *);
 extern int conf_connect_allowed(struct in_addr addr);
 extern char *oper_flags_as_string(int);
 extern char *oper_privs_as_string(struct Client *, int);
-extern int rehash_dump(struct Client *);
 extern int find_q_line(char*, char*, char *);
 extern struct ConfItem* find_special_conf(char *,int );
 extern struct ConfItem* find_is_klined(const char* host, 
