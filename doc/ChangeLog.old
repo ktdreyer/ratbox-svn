@@ -1,3 +1,11 @@
+*** 20010530_5 by jdc
+* m_info.c information is now in table form.  Hooray.  There are still
+  some remaining entries (particularly in m_info.h) which should be
+  moved (or better yet, removed!) in the future.  I'll be adding more
+  ConfigFileEntry variables to m_info.c in the near future.
+
+
+
 *** 20010530_4 by leeh
 - check for spoofed glines coming in from hyb6 servers
 
