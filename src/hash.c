@@ -30,7 +30,9 @@
 #include "send.h"
 #include "s_debug.h"
 #include "fdlist.h"
+#include "fileio.h"
 
+#include <errno.h>
 #include <assert.h>
 #include <fcntl.h>     /* O_RDWR ... */
 #include <string.h>
@@ -454,7 +456,7 @@ int mo_hash(struct Client *cptr, struct Client *sptr,int parc,char *parv[])
   int   totlink = 0;
   int   size = U_MAX;
   char        ch;
-  int   out = 0;
+  FBFILE*    out;
   int        link_pop[10];
   char  result_buf[256];
   char  hash_log_file[256];
@@ -465,7 +467,7 @@ int mo_hash(struct Client *cptr, struct Client *sptr,int parc,char *parv[])
     {
       if(!irccmp(parv[1],"iphash"))
         {
-          iphash_stats(cptr,sptr,parc,parv,-1);
+          iphash_stats(cptr,sptr,parc,parv,NULL);
           return 0;
         }
       else if(!irccmp(parv[1],"Diphash"))
@@ -475,9 +477,9 @@ int mo_hash(struct Client *cptr, struct Client *sptr,int parc,char *parv[])
           (void)sprintf(hash_log_file,"%s/hash/iphash.%s",
                         DPATH,timebuffer);
 
-          if ((out = file_open(hash_log_file, O_RDWR | O_APPEND | O_CREAT,0664))==-1)
-              sendto_one(sptr, ":%s NOTICE %s :Problem opening %s ",
-                         me.name, parv[0], hash_log_file);
+          if (!(out = fbopen(hash_log_file, "a")))
+              sendto_one(sptr, ":%s NOTICE %s :Problem opening %s (%s)",
+                         me.name, parv[0], hash_log_file, strerror(errno));
           else
             sendto_one(sptr, ":%s NOTICE %s :Writing hash log to %s ",
                        me.name, parv[0], hash_log_file);
@@ -489,8 +491,7 @@ int mo_hash(struct Client *cptr, struct Client *sptr,int parc,char *parv[])
       ch = *parv[1];
       if (IsLower(ch))
         {
-          table = clientTable;
-          
+          table = clientTable;          
         }
       else
         {
@@ -504,9 +505,9 @@ int mo_hash(struct Client *cptr, struct Client *sptr,int parc,char *parv[])
           sprintf(hash_log_file,"%s/hash/%cdump.%s",
                         DPATH,ch,timebuffer);
           showlist = 1;
-          if ((out = file_open(hash_log_file, O_RDWR|O_APPEND|O_CREAT,0664))==-1)
-              sendto_one(sptr, ":%s NOTICE %s :Problem opening %s ",
-                         me.name, parv[0], hash_log_file);
+          if (!(out = fbopen(hash_log_file, "a")))
+              sendto_one(sptr, ":%s NOTICE %s :Problem opening %s (%s)",
+                         me.name, parv[0], hash_log_file, strerror(errno));
           else
             sendto_one(sptr, ":%s NOTICE %s :Writing hash log to %s ",
                        me.name, parv[0], hash_log_file);
@@ -531,11 +532,11 @@ int mo_hash(struct Client *cptr, struct Client *sptr,int parc,char *parv[])
           sendto_one(sptr,
           "NOTICE %s :Hash Entry:%6d Hits:%7d Links:%6d",
           parv[0], i, tab->hits, l); */
-          if(out >= 0)
+          if(out != NULL)
             {
               sprintf(result_buf,"Hash Entry:%6d Hits;%7d Links:%6d\n",
                             i, tab->hits, l);
-              write(out,result_buf,strlen(result_buf));
+              fbputs(result_buf,out);
             }
         }
 
@@ -567,8 +568,8 @@ int mo_hash(struct Client *cptr, struct Client *sptr,int parc,char *parv[])
             }
         }
     }
-  if(showlist && (out >= 0))
-     file_close(out);
+  if(showlist && (out != NULL))
+     fbclose(out);
 
   switch((int)ch)
     {

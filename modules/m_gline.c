@@ -54,6 +54,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <fcntl.h>
+#include <errno.h>
 
 /* external variables */
 extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */
@@ -474,7 +475,11 @@ log_gline_request(
   char        filenamebuf[PATH_MAX + 1];
   static char timebuffer[MAX_DATE_STRING];
   struct tm*  tmptr;
+<<<<<<< m_gline.c
+  FBFILE*     out;
+=======
   FBFILE      *out;
+>>>>>>> 1.20
 
   if(ConfigFileEntry.glinefile == NULL)
     {
@@ -484,10 +489,10 @@ log_gline_request(
 
   ircsprintf(filenamebuf, "%s.%s", 
              ConfigFileEntry.glinefile, small_file_date((time_t)0));
-
-  if ((out = fbopen(filenamebuf, "a")) == NULL)
+  if (!(out = fbopen(filenamebuf, "+a")))
     {
-      sendto_realops_flags(FLAGS_ALL,"*** Problem opening %s",filenamebuf);
+      sendto_realops_flags(FLAGS_ALL,"*** Problem opening %s",filenamebuf,
+				     strerror(errno));
       return;
     }
 
@@ -500,9 +505,14 @@ log_gline_request(
            oper_nick,oper_user,oper_host,oper_server,
            timebuffer);
 
+<<<<<<< m_gline.c
+  if (fbputs(buffer, out) == -1)
+=======
   if (fbputs(buffer, out) == NULL)
+>>>>>>> 1.20
     {
-      sendto_realops_flags(FLAGS_ALL,"*** Problem writing to %s",filenamebuf);
+      sendto_realops_flags(FLAGS_ALL,"*** Problem writing to %s (%s)",
+				     filenamebuf, strerror(errno));
     }
   fbclose(out);
 }

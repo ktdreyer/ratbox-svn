@@ -222,11 +222,11 @@ static void init_sys(int boot_daemon)
         exit(0);
 #ifdef TIOCNOTTY
       { /* scope */
-        int fd;
-        if ((fd = file_open("/dev/tty", O_RDWR)) >= 0)
+        FBFILE* fd;
+        if ((fd = fbopen("/dev/tty", "+")))
           {
-            ioctl(fd, TIOCNOTTY, NULL);
-            file_close(fd);
+            ioctl(fd->fd, TIOCNOTTY, NULL);
+            fbclose(fd);
           }
       }
 #endif
@@ -439,14 +439,15 @@ static void initialize_message_files(void)
 
 static void write_pidfile(void)
 {
-  int fd;
+  FBFILE* fd;
   char buff[20];
-  if ((fd = file_open(PPATH, O_CREAT|O_WRONLY, 0600))>=0)
+  if ((fd = fbopen(PPATH, "wt")))
     {
       ircsprintf(buff,"%d\n", (int)getpid());
-      if (write(fd, buff, strlen(buff)) == -1)
-        log(L_ERROR,"Error writing to pid file %s", PPATH);
-      file_close(fd);
+      if ((fbputs(buff, fd) == -1))
+        log(L_ERROR,"Error writing to pid file %s (%s)", PPATH,
+		    strerror(errno));
+      fbclose(fd);
       return;
     }
   else

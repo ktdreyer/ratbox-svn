@@ -24,6 +24,13 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.42  2000/12/18 05:42:49  bill
+ * - changed all file_open() and file_close() calls to fbopen() and fbclose()
+ * - changed all write()s to fbputs()s
+ * - updated dependancy file
+ * - added strerror() msgs to failed file i/o logs/server notices
+ * - moved FBFILE struct from fileio.c to fileio.h
+ *
  * Revision 7.41  2000/12/15 03:32:16  toot
  * . moved dots_in_ident to an ircd.conf option
  * . removed some d_line remains..
@@ -626,7 +633,7 @@ extern struct ConfItem *temporary_ip_klines;
 extern ConfigFileEntryType ConfigFileEntry;    /* GLOBAL - defined in ircd.c */
 
 extern void clear_ip_hash_table(void);
-extern void iphash_stats(struct Client *,struct Client *,int,char **,int);
+extern void iphash_stats(struct Client *,struct Client *,int,char **,FBFILE*);
 
 #ifdef LIMIT_UH
 void remove_one_ip(struct Client *);

@@ -30,6 +30,20 @@
 #define INCLUDED_sys_stat_h
 #endif
 
+#include <stdio.h>    /* BUFSIZ */
+
+#define FB_EOF  0x01
+#define FB_FAIL 0x02
+
+struct FileBuf {
+  int   fd;           /* file descriptor */
+  char* endp;         /* one past the end */
+  char* ptr;          /* current read pos */
+  char* pbptr;        /* pointer to push back char */
+  int   flags;        /* file state */
+  char  buf[BUFSIZ];  /* buffer */
+  char  pbuf[BUFSIZ+1]; /* push back buffer */
+};
 
 /* XXX This shouldn't be here */
 struct Client;

@@ -35,19 +35,6 @@
 #include <assert.h> /* assert */
 #include <sys/errno.h>
 
-#define FB_EOF  0x01
-#define FB_FAIL 0x02
-
-struct FileBuf {
-  int   fd;           /* file descriptor */
-  char* endp;         /* one past the end */
-  char* ptr;          /* current read pos */
-  char* pbptr;        /* pointer to push back char */
-  int   flags;        /* file state */
-  char  buf[BUFSIZ];  /* buffer */
-  char  pbuf[BUFSIZ+1]; /* push back buffer */
-};
-
 /*
  * Wrappers around open() / close() for fileio, since a whole bunch of
  * code that should be using the fbopen() / fbclose() code isn't.

@@ -19,7 +19,7 @@
 #include "numeric.h"
 #include "restart.h"
 #include "fdlist.h"
-#include "fileio.h" /* for file_open / file_close */
+#include "fileio.h" /* for fbopen / fbclose / fbputs */
 #include "s_bsd.h"
 #include "s_log.h"
 #include "send.h"
@@ -182,7 +182,8 @@ static int    ResolverFileDescriptor = -1;
  * This is definitely needed for Solaris which uses an unsigned char to
  * hold the file descriptor.
  */ 
-static int         spare_fd = -1;
+
+static FBFILE*         spare_fd;
 
 static ResRQ*      requestListHead;     /* head of resolver request list */
 static ResRQ*      requestListTail;     /* tail of resolver request list */
@@ -271,18 +272,18 @@ static void start_resolver(void)
    * close the spare file descriptor so res_init can read resolv.conf
    * successfully. Needed on Solaris
    */
-  if (spare_fd > -1)
-    file_close(spare_fd);
+  if (spare_fd != NULL)
+    fbclose(spare_fd);
 
   res_init();      /* res_init always returns 0 */
   /*
    * make sure we have a valid file descriptor below 256 so we can
    * do this again. Needed on Solaris
    */
-  spare_fd = file_open("/dev/null",O_RDONLY,0);
-  if ((spare_fd < 0) || (spare_fd > 255))
+  spare_fd = fbopen("/dev/null","r");
+  if ((spare_fd->fd < 0) || (spare_fd->fd > 255))
     {
-      ircsprintf(sparemsg,"invalid spare_fd %d",spare_fd);
+      ircsprintf(sparemsg,"invalid spare_fd %d",spare_fd->fd);
       restart(sparemsg);
     }
 
