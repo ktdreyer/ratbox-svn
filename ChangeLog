@@ -1,3 +1,31 @@
+androsyn    2002/08/12 12:23:23 EDT	(20020812_3)
+
+  Modified files:
+    modules              m_accept.c m_gline.c m_ison.c m_kline.c 
+                         m_restart.c m_set.c m_topic.c m_unkline.c 
+                         m_userhost.c m_who.c m_whois.c m_xline.c 
+    modules/core         m_kill.c m_sjoin.c 
+  Log:
+  Fixed missing includes..
+  
+  Revision  Changes    Path
+  1.69      +2 -1      ircd-ratbox/modules/core/m_kill.c
+  1.147     +2 -1      ircd-ratbox/modules/core/m_sjoin.c
+  1.34      +3 -2      ircd-ratbox/modules/m_accept.c
+  1.87      +2 -1      ircd-ratbox/modules/m_gline.c
+  1.30      +2 -1      ircd-ratbox/modules/m_ison.c
+  1.111     +2 -1      ircd-ratbox/modules/m_kline.c
+  1.25      +2 -1      ircd-ratbox/modules/m_restart.c
+  1.46      +3 -2      ircd-ratbox/modules/m_set.c
+  1.59      +2 -1      ircd-ratbox/modules/m_topic.c
+  1.52      +2 -1      ircd-ratbox/modules/m_unkline.c
+  1.39      +2 -1      ircd-ratbox/modules/m_userhost.c
+  1.67      +2 -1      ircd-ratbox/modules/m_who.c
+  1.86      +2 -1      ircd-ratbox/modules/m_whois.c
+  1.2       +2 -1      ircd-ratbox/modules/m_xline.c
+
+
+
 androsyn    2002/08/12 12:15:36 EDT	(20020812_2)
 
   Modified files:
