@@ -288,7 +288,7 @@ read_packet(int fd, void *data)
     return;
   }
 
-#ifdef MISSING_SOCKPAIR
+#ifndef HAVE_SOCKETPAIR
   if (HasServlink(client_p))
   {
     assert(client_p->fd_r > -1);
@@ -351,7 +351,7 @@ read_packet(int fd, void *data)
 
   /* server fd may have changed */
   fd_r = client_p->fd;
-#ifdef MISSING_SOCKPAIR
+#ifndef HAVE_SOCKETPAIR
   if (HasServlink(client_p))
   {
     assert(client_p->fd_r > -1);

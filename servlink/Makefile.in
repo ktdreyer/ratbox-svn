@@ -26,7 +26,7 @@ localstatedir   = @localstatedir@
 
 IRCDLIBS        = @LIBS@
 
-INCLUDES        = -I../include
+INCLUDES        = -I.
 CPPFLAGS        = ${INCLUDES} @CPPFLAGS@
 
 PROGS		= servlink
@@ -73,6 +73,6 @@ clean:
 	${RM} -f *.o *~ *.core core servlink
 
 distclean: clean
-	${RM} -f Makefile
+	${RM} -f Makefile setup.h
 
 # End of Makefile

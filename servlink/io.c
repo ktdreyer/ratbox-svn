@@ -18,7 +18,7 @@
  *   $Id$
  */
 
-#include "../include/setup.h"
+#include "setup.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -46,7 +46,7 @@
 static int check_error(int, int, int);
 
 static char *fd_name[NUM_FDS] =
-#ifdef MISSING_SOCKPAIR
+#ifndef HAVE_SOCKETPAIR
   {
     "control read", "data read", "net read",
     "control write", "data write"
@@ -185,6 +185,7 @@ void process_recvq(struct ctrl_command *cmd)
 
 void send_zipstats(struct ctrl_command *unused)
 {
+#ifdef HAVE_ZLIB
   int i = 0;
   int ret;
 
@@ -232,6 +233,9 @@ void send_zipstats(struct ctrl_command *unused)
     ctrl_len = i - ret;
     return;
   }
+#else
+  send_error("can't send_zipstats -- no zlib support!");
+#endif
 }
 
 /* send_error
@@ -270,7 +274,7 @@ void send_error(unsigned char *message, ...)
 
   send_data_blocking(CONTROL_FD_W, in_state.buf, len);
 
-#ifndef MISSING_SOCKPAIR /* only do this to a socket :) */
+#ifdef HAVE_SOCKETPAIR /* only do this to a socket :) */
   /* XXX - is this portable? */
   setsockopt(CONTROL_FD_W, SOL_SOCKET, SO_LINGER, &linger_opt,
              sizeof(struct linger));

@@ -152,7 +152,7 @@ struct Client
   unsigned int      flags;      /* client flags */
   unsigned int      flags2;     /* ugh. overflow */
   int               fd;         /* >= 0, for local clients */
-#ifdef MISSING_SOCKPAIR
+#ifndef HAVE_SOCKETPAIR
   int               fd_r;       /* fd for reading */
 #endif
 
@@ -289,7 +289,7 @@ struct LocalUser
   int               ctrlfd;     /* For servers:
                                    control fd used for sending commands
                                    to servlink */
-#ifdef MISSING_SOCKPAIR
+#ifndef HAVE_SOCKETPAIR
   int              ctrlfd_r;    /* control fd for reading */
 #endif
 

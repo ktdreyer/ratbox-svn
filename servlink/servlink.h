@@ -21,7 +21,7 @@
 #ifndef INCLUDED_servlink_servlink_h
 #define INCLUDED_servlink_servlink_h
 
-#include "../include/setup.h"
+#include "setup.h"
 
 #ifdef HAVE_LIBCRYPTO
 #include <openssl/evp.h>
@@ -35,7 +35,7 @@
 #define LOCAL_FD_R              4
 #define REMOTE_FD_R             5
 
-#ifdef MISSING_SOCKPAIR
+#ifndef HAVE_SOCKETPAIR
 /* uni-directional pipes, so we need 2 extra fds... */
 #define CONTROL_FD_W            6
 #define LOCAL_FD_W              7

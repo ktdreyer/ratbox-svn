@@ -114,7 +114,7 @@ struct Client* make_client(struct Client* from)
       client_p->localClient = localClient;
 
       client_p->localClient->ctrlfd = -1;
-#ifdef MISSING_SOCKPAIR
+#ifndef HAVE_SOCKETPAIR
       client_p->localClient->ctrlfd_r = -1;
 #endif      
       /* as good a place as any... */
@@ -130,7 +130,7 @@ struct Client* make_client(struct Client* from)
 
   client_p->status = STAT_UNKNOWN;
   client_p->fd = -1;
-#ifdef MISSING_SOCKPAIR
+#ifndef HAVE_SOCKETPAIR
   client_p->fd_r = -1;
 #endif
   strcpy(client_p->username, "unknown");

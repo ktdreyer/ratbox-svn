@@ -1,3 +1,7 @@
+Servlink protocol documentation.
+$Id$
+--------------
+
 After negotiating an incoming/outgoing server connection, the ircd will
 fork, then execve servlink, with fd 0 as one end of a control pipe and
 fd 1 as one end of a data pipe. fd 2 will be the socket connected to

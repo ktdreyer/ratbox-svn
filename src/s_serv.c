@@ -1087,7 +1087,7 @@ int server_estab(struct Client *client_p)
       /* we won't overflow FD_DESC_SZ here, as it can hold
        * client_p->name + 64
        */
-#ifndef MISSING_SOCKPAIR
+#ifdef HAVE_SOCKETPAIR
       fd_note(client_p->fd, "slink data: %s", client_p->name);
       fd_note(client_p->localClient->ctrlfd, "slink ctrl: %s",
               client_p->name);
@@ -1283,7 +1283,7 @@ int fork_server(struct Client *server)
   int i;
   int ctrl_pipe[2];
   int data_pipe[2];
-#ifdef MISSING_SOCKPAIR
+#ifndef HAVE_SOCKETPAIR
   int ctrl_pipe2[2];
   int data_pipe2[2];
 #endif
@@ -1292,7 +1292,7 @@ int fork_server(struct Client *server)
   char *kid_argv[] = { "-slink", NULL };
   
 
-#ifndef MISSING_SOCKPAIR
+#ifdef HAVE_SOCKETPAIR
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, ctrl_pipe) < 0)
     return -1;
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, data_pipe) < 0)
@@ -1319,7 +1319,7 @@ int fork_server(struct Client *server)
       exit(1);
     if(dup2(server->fd, 5) < 0)
       exit(1);
-#ifdef MISSING_SOCKPAIR
+#ifndef HAVE_SOCKETPAIR
     /* only uni-directional pipes, so use 6/7 for writing */
     if(dup2(ctrl_pipe2[1], 6) < 0)
       exit(1);
@@ -1350,7 +1350,7 @@ int fork_server(struct Client *server)
     ctrlfd = server->localClient->ctrlfd = ctrl_pipe[1];
     datafd = server->fd = data_pipe[1];
 
-#ifdef MISSING_SOCKPAIR
+#ifndef HAVE_SOCKETPAIR
     close(ctrl_pipe2[1]);
     close(data_pipe2[1]);
     ctrlfd = server->localClient->ctrlfd_r = ctrl_pipe2[0];
@@ -1361,14 +1361,14 @@ int fork_server(struct Client *server)
         report_error(NONB_ERROR_MSG, get_client_name(server, SHOW_IP), errno);
     if (!set_non_blocking(server->localClient->ctrlfd))
         report_error(NONB_ERROR_MSG, get_client_name(server, SHOW_IP), errno);
-#ifdef MISSING_SOCKPAIR
+#ifndef HAVE_SOCKETPAIR
     if (!set_non_blocking(server->fd_r))
         report_error(NONB_ERROR_MSG, get_client_name(server, SHOW_IP), errno);
     if (!set_non_blocking(server->localClient->ctrlfd_r))
         report_error(NONB_ERROR_MSG, get_client_name(server, SHOW_IP), errno);
 #endif
 
-#ifndef MISSING_SOCKPAIR
+#ifdef HAVE_SOCKETPAIR
     fd_open(server->localClient->ctrlfd, FD_SOCKET, NULL);
     fd_open(server->fd, FD_SOCKET, NULL);
 #else

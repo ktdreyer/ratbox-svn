@@ -18,7 +18,7 @@
  *   $Id$
  */
 
-#include "../include/setup.h"                                                   
+#include "setup.h"                                                   
 
 #include <sys/types.h>
 

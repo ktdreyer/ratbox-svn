@@ -18,7 +18,7 @@
  *   $Id$
  */
 
-#include "../include/setup.h"                                                   
+#include "setup.h"                                                   
 
 #include <sys/types.h>
 #include <sys/time.h>
@@ -54,7 +54,7 @@ struct fd_table          fds[NUM_FDS] =
           {      NULL, NULL }, /* stderr */
           { read_ctrl, NULL },
           {      NULL, NULL },
-#ifdef MISSING_SOCKPAIR
+#ifndef HAVE_SOCKETPAIR
           {      NULL, NULL },
           {      NULL, NULL },
 #endif
@@ -123,13 +123,13 @@ int main(int argc, char *argv[])
     {
       if (fds[i].read_cb)
         FD_SET(i, &rfds);
-#ifndef MISSING_SOCKPAIR
+#ifdef HAVE_SOCKETPAIR
       if (fds[i].write_cb)
         FD_SET(i, &wfds);
 #endif
     }
 
-#ifdef MISSING_SOCKPAIR
+#ifndef HAVE_SOCKETPAIR
     for (i = 6; i < 8; i++)
     {
       if (fds[i].write_cb)

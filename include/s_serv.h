@@ -204,7 +204,7 @@ struct EncCapability
 #define SLINKCMD_INIT                        12
 #define SLINKCMD_ZIPSTATS                    13
 
-#ifdef MISSING_SOCKPAIR
+#ifndef HAVE_SOCKETPAIR
 #define LAST_SLINK_FD   7
 #else
 #define LAST_SLINK_FD   5

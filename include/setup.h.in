@@ -48,6 +48,9 @@
 /* Define if you have the strlcpy function.  */
 #undef HAVE_STRLCPY
 
+/* Define if you have the socketpair function. */
+#undef HAVE_SOCKETPAIR
+
 /* Define if you have the <errno.h> header file.  */
 #undef HAVE_ERRNO_H
 
