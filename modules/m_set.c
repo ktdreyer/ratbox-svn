@@ -152,7 +152,7 @@ list_quote_commands(struct Client *source_p)
 static void
 quote_autoconn(struct Client *source_p, char *arg, int newval)
 {
-	set_autoconn(source_p, source_p->name, arg, newval);
+	set_server_conf_autoconn(source_p, arg, newval);
 }
 
 /* SET AUTOCONNALL */

@@ -80,7 +80,6 @@ struct Server
 	const char *up;		/* Pointer to scache name */
 	const char *upid;
 	char by[NICKLEN];
-	struct ConfItem *sconf;	/* connect{} pointer for this server */
 	dlink_list servers;
 	dlink_list users;
 };
@@ -204,6 +203,7 @@ struct LocalUser
 	int priority;
 	struct Listener *listener;	/* listener accepted from */
 	struct ConfItem *att_conf;	/* attached conf */
+	struct server_conf *att_sconf;
 
 	struct sockaddr_storage ip;
 	unsigned long serverMask;	/* Only used for Lazy Links */

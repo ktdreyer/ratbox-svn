@@ -248,8 +248,6 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 	/* same size as in s_misc.c */
 	const char *name;
 	struct Client *target_p;
-	struct Client *bclient_p;
-	struct ConfItem *aconf;
 	struct remote_conf *hub_p;
 	int hop;
 	int hlined = 0;
@@ -441,34 +439,10 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 	add_to_client_hash(target_p->name, target_p);
 	dlinkAdd(target_p, &target_p->lnode, &target_p->servptr->serv->servers);
 
-
-	/*
-	 * Old sendto_serv_but_one() call removed because we now
-	 * need to send different names to different servers
-	 * (domain name matching)
-	 */
-	DLINK_FOREACH(ptr, serv_list.head)
-	{
-		bclient_p = ptr->data;
-
-		if(bclient_p == client_p)
-			continue;
-		if(!(aconf = bclient_p->serv->sconf))
-		{
-			sendto_realops_flags(UMODE_ALL, L_ADMIN,
-					     "Lost N-line for %s on %s. Closing",
-					     get_client_name(client_p, HIDE_IP), name);
-			sendto_realops_flags(UMODE_ALL, L_OPER,
-					     "Lost N-line for %s on %s. Closing",
-					     get_client_name(client_p, MASK_IP), name);
-			exit_client(client_p, client_p, client_p, "Lost N line");
-			return 0;
-		}
-
-		sendto_one(bclient_p, ":%s SERVER %s %d :%s%s",
-			   parv[0], target_p->name, hop + 1,
-			   IsHidden(target_p) ? "(H) " : "", target_p->info);
-	}
+	sendto_server(client_p, NULL, NOCAPS, CAP_TS6,
+		      ":%s SERVER %s %d :%s%s",
+		      source_p->name, target_p->name, target_p->hopcount + 1,
+		      IsHidden(target_p) ? "(H) " : "", target_p->info);
 
 	sendto_realops_flags(UMODE_EXTERNAL, L_ALL,
 			     "Server %s being introduced by %s", target_p->name, source_p->name);
@@ -594,7 +568,7 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	make_server(target_p);
 
 	strlcpy(target_p->name, parv[1], sizeof(target_p->name));
-	target_p->hopcount = atoi(parv[2]) + 1;
+	target_p->hopcount = atoi(parv[2]);
 	strcpy(target_p->id, parv[3]);
 	set_server_gecos(target_p, parv[4]);
 
@@ -614,12 +588,12 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 	sendto_server(client_p, NULL, CAP_TS6, NOCAPS,
 		      ":%s SID %s %d %s :%s%s",
-		      source_p->id, target_p->name, target_p->hopcount,
+		      source_p->id, target_p->name, target_p->hopcount + 1,
 		      target_p->id,
 		      IsHidden(target_p) ? "(H) " : "", target_p->info);
 	sendto_server(client_p, NULL, NOCAPS, CAP_TS6,
 		      ":%s SERVER %s %d :%s%s",
-		      source_p->name, target_p->name, target_p->hopcount,
+		      source_p->name, target_p->name, target_p->hopcount + 1,
 		      IsHidden(target_p) ? "(H) " : "", target_p->info);
 
 	sendto_realops_flags(UMODE_EXTERNAL, L_ALL,

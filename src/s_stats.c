@@ -158,7 +158,6 @@ count_memory(struct Client *source_p)
 {
 	struct Client *target_p;
 	struct Channel *chptr;
-	struct ConfItem *aconf;
 	struct Ban *actualBan;
 	dlink_node *dlink;
 	dlink_node *ptr;
@@ -260,17 +259,6 @@ count_memory(struct Client *source_p)
 
 			channel_invex_memory += (sizeof(dlink_node) + sizeof(struct Ban));
 		}
-	}
-
-	/* count up all config items */
-
-	for (aconf = ConfigItemList; aconf; aconf = aconf->next)
-	{
-		conf_count++;
-		conf_memory += aconf->host ? strlen(aconf->host) + 1 : 0;
-		conf_memory += aconf->passwd ? strlen(aconf->passwd) + 1 : 0;
-		conf_memory += aconf->name ? strlen(aconf->name) + 1 : 0;
-		conf_memory += sizeof(struct ConfItem);
 	}
 
 	/* count up all classes */

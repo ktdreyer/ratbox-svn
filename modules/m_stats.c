@@ -39,7 +39,7 @@
 #include "scache.h"		/* list_scache */
 #include "send.h"		/* sendto_one */
 #include "commio.h"		/* highest_fd */
-#include "s_conf.h"		/* ConfItem, report_configured_links */
+#include "s_conf.h"		/* ConfItem */
 #include "s_serv.h"		/* hunt_server */
 #include "s_stats.h"		/* tstats */
 #include "s_user.h"		/* show_opers */
@@ -255,15 +255,53 @@ stats_adns_servers (struct Client *source_p)
 }
 
 static void
-stats_connect (struct Client *source_p)
+stats_connect(struct Client *source_p)
 {
+	static char buf[5];
+	struct server_conf *server_p;
+	char *s = buf;
+	dlink_node *ptr;
+
 	if((ConfigFileEntry.stats_c_oper_only || 
 	    (ConfigServerHide.flatten_links && !IsExemptShide(source_p))) &&
 	    !IsOper(source_p))
+	{
 		sendto_one_numeric(source_p, ERR_NOPRIVILEGES,
-				   form_str (ERR_NOPRIVILEGES));
-	else
-	  report_configured_links (source_p, CONF_SERVER);
+				   form_str(ERR_NOPRIVILEGES));
+		return;
+	}
+
+	DLINK_FOREACH(ptr, server_conf_list.head)
+	{
+		server_p = ptr->data;
+
+		buf[0] = '\0';
+
+		if(IsOper(source_p))
+		{
+			if(server_p->flags & SERVER_AUTOCONN)
+				*s++ = 'A';
+			if(server_p->flags & SERVER_ENCRYPTED)
+				*s++ = 'E';
+			if(server_p->flags & SERVER_TB)
+				*s++ = 'T';
+			if(server_p->flags & SERVER_COMPRESSED)
+				*s++ = 'Z';
+		}
+
+		if(!buf[0])
+			*s++ = '*';
+
+		*s = '\0';
+
+		sendto_one_numeric(source_p, RPL_STATSCLINE, 
+				form_str(RPL_STATSCLINE),
+#ifndef HIDE_SERVERS_IPS
+				IsOperAdmin(source_p) ? server_p->host :
+#endif
+				"*@127.0.0.1", buf, server_p->name,
+				server_p->port, server_p->class_name);
+	}
 }
 
 /* stats_tdeny()

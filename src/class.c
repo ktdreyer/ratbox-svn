@@ -34,6 +34,7 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "s_conf.h"
+#include "s_newconf.h"
 #include "send.h"
 #include "irc_string.h"
 #include "memory.h"
@@ -102,11 +103,19 @@ get_conf_ping(struct ConfItem *aconf)
 const char *
 get_client_class(struct Client *target_p)
 {
-	struct ConfItem *aconf;
 	const char *retc = "unknown";
 
-	if((target_p != NULL) && !IsMe(target_p))
+	if(target_p == NULL || IsMe(target_p))
+		return retc;
+
+	if(IsServer(target_p))
 	{
+		struct server_conf *server_p = target_p->localClient->att_sconf;
+		return server_p->class_name;
+	}
+	else
+	{
+		struct ConfItem *aconf;
 		aconf = target_p->localClient->att_conf;
 
 		if((aconf == NULL) || (aconf->className == NULL))
@@ -129,24 +138,31 @@ int
 get_client_ping(struct Client *target_p)
 {
 	int ping = 0;
-	struct ConfItem *aconf;
 
-	aconf = target_p->localClient->att_conf;
-
-	if(aconf != NULL)
+	if(IsServer(target_p))
 	{
-		if(aconf->status & (CONF_CLIENT | CONF_SERVER))
-			ping = get_conf_ping(aconf);
+		struct server_conf *server_p = target_p->localClient->att_sconf;
+		ping = PingFreq(server_p->class);
 	}
 	else
 	{
-		ping = DEFAULT_PINGFREQUENCY;
+		struct ConfItem *aconf;
+
+		aconf = target_p->localClient->att_conf;
+
+		if(aconf != NULL)
+		{
+			if(aconf->status & CONF_CLIENT)
+				ping = get_conf_ping(aconf);
+		}
+		else
+			ping = DEFAULT_PINGFREQUENCY;
 	}
 
 	if(ping <= 0)
 		ping = DEFAULT_PINGFREQUENCY;
 
-	return (ping);
+	return ping;
 }
 
 /*
@@ -318,23 +334,25 @@ report_classes(struct Client *source_p)
 long
 get_sendq(struct Client *client_p)
 {
-	struct ConfItem *aconf;
+	if(client_p == NULL || IsMe(client_p))
+		return DEFAULT_SENDQ;
 
-	if((client_p != NULL) && !IsMe(client_p))
+	if(IsServer(client_p))
 	{
-		aconf = client_p->localClient->att_conf;
+		struct server_conf *server_p;
+		server_p = client_p->localClient->att_sconf;
 
-		if(aconf != NULL)
-		{
-			if(aconf->status & (CONF_CLIENT | CONF_SERVER))
-			{
-				/* never true for clients */
-				if(HasSentEob(client_p))
-					return ConfMaxSendqEob(aconf);
+		if(HasSentEob(client_p))
+			return MaxSendqEob(server_p->class);
 
-				return ConfMaxSendq(aconf);
-			}
-		}
+		return MaxSendq(server_p->class);
+	}
+	else
+	{
+		struct ConfItem *aconf = client_p->localClient->att_conf;
+
+		if(aconf != NULL && aconf->status & CONF_CLIENT)
+			return ConfMaxSendq(aconf);
 	}
 
 	return DEFAULT_SENDQ;

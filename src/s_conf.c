@@ -59,7 +59,6 @@ struct config_server_hide ConfigServerHide;
 
 extern int yyparse();		/* defined in y.tab.c */
 extern char linebuf[];
-int scount = 0;			/* used by yyparse(), etc */
 
 #ifndef INADDR_NONE
 #define INADDR_NONE ((unsigned int) 0xffffffff)
@@ -76,15 +75,10 @@ dlink_list tdline_day;
 dlink_list tdline_week;
 
 /* internally defined functions */
-
-static void lookup_confhost(struct ConfItem *aconf);
-static int SplitUserHost(struct ConfItem *aconf);
-
 static void set_default_conf(void);
 static void validate_conf(void);
 static void read_conf(FBFILE *);
 static void clear_out_old_conf(void);
-static void flush_deleted_I_P(void);
 
 static void expire_tkline(dlink_list *, int);
 static void expire_tdline(dlink_list *, int);
@@ -94,65 +88,6 @@ extern char yytext[];
 
 static int verify_access(struct Client *client_p, const char *username);
 static int attach_iline(struct Client *, struct ConfItem *);
-
-/* general conf items link list root */
-struct ConfItem *ConfigItemList = NULL;
-
-/*
- * conf_dns_callback
- * inputs	- pointer to struct ConfItem
- *		- pointer to adns reply
- * output	- none
- * side effects	- called when resolver query finishes
- * if the query resulted in a successful search, hp will contain
- * a non-null pointer, otherwise hp will be null.
- * if successful save hp in the conf item it was called with
- */
-static void
-conf_dns_callback(void *vptr, adns_answer * reply)
-{
-	struct ConfItem *aconf = (struct ConfItem *) vptr;
-
-	if(reply && reply->status == adns_s_ok)
-	{
-#ifdef IPV6
-		if(reply->type ==  adns_r_addr6)
-		{
-			struct sockaddr_in6 *in6 = (struct sockaddr_in6 *)&aconf->ipnum;
-			in6->sin6_family = AF_INET6;
-			in6->sin6_port = 0;
-			memcpy(&in6->sin6_addr, &reply->rrs.addr->addr.inet6.sin6_addr, sizeof(struct in6_addr));
-		} else
-#endif
-		{
-			struct sockaddr_in *in = (struct sockaddr_in *)&aconf->ipnum;
-			in->sin_family = AF_INET;
-			in->sin_port = 0;
-			in->sin_addr.s_addr = reply->rrs.addr->addr.inet.sin_addr.s_addr;
-		}		
-		MyFree(reply);
-	}
-
-	MyFree(aconf->dns_query);
-	aconf->dns_query = NULL;
-}
-
-/*
- * conf_dns_lookup - do a nameserver lookup of the conf host
- * if the conf entry is currently doing a ns lookup do nothing, otherwise
- * allocate a dns_query and start ns lookup.
- */
-static void
-conf_dns_lookup(struct ConfItem *aconf)
-{
-	if(aconf->dns_query == NULL)
-	{
-		aconf->dns_query = MyMalloc(sizeof(struct DNSQuery));
-		aconf->dns_query->ptr = aconf;
-		aconf->dns_query->callback = conf_dns_callback;
-		adns_gethost(aconf->host, aconf->aftype, aconf->dns_query);
-	}
-}
 
 /*
  * make_conf
@@ -211,94 +146,6 @@ free_conf(struct ConfItem *aconf)
 	MyFree(aconf->rsa_public_key_file);
 #endif
 	MyFree((char *) aconf);
-}
-
-
-static struct LinkReport
-{
-	int conf_type;
-	int rpl_stats;
-	int conf_char;
-}
-/* *INDENT-OFF* */
-report_array[] =
-{
-	{ CONF_SERVER,	 RPL_STATSCLINE, 'C'},
-	{ 0, 0, '\0'}
-};
-/* *INDENT-ON* */
-
-/*
- * report_configured_links
- *
- * inputs	- pointer to client to report to
- *		- type of line to report
- * output	- NONE
- * side effects	-
- */
-void
-report_configured_links(struct Client *source_p, int mask)
-{
-	struct ConfItem *tmp;
-	struct LinkReport *p;
-	char *host;
-	char *pass;
-	char *user;
-	char *name;
-	char *classname;
-	int port;
-
-	for (tmp = ConfigItemList; tmp; tmp = tmp->next)
-	{
-		if(tmp->status & mask)
-		{
-			for (p = &report_array[0]; p->conf_type; p++)
-				if(p->conf_type == (int)tmp->status)
-					break;
-
-			if(p->conf_type == 0)
-				return;
-
-			get_printable_conf(tmp, &name, &host, &pass, &user, &port, &classname);
-
-			if(mask & CONF_SERVER)
-			{
-				static char buf[5];
-				char *s = buf;
-
-				buf[0] = '\0';
-
-				if(IsOper(source_p))
-				{
-					if(tmp->flags & CONF_FLAGS_ALLOW_AUTO_CONN)
-						*s++ = 'A';
-					if(tmp->flags & CONF_FLAGS_COMPRESSED)
-						*s++ = 'Z';
-				}
-
-				if(!buf[0])
-					*s++ = '*';
-
-				*s = '\0';
-
-				/* Allow admins to see actual ips */
-				/* except if HIDE_SERVERS_IPS is defined */
-				sendto_one_numeric(source_p, p->rpl_stats,
-						   form_str(p->rpl_stats),
-#ifndef HIDE_SERVERS_IPS
-						   IsOperAdmin(source_p) ? host :
-#endif
-						   "*@127.0.0.1", buf, name, port,
-						   classname);
-
-			}
-			else
-				sendto_one_numeric(source_p, p->rpl_stats,
-						   form_str(p->rpl_stats),
-						   p->conf_char, host, 
-						   name, port, classname);
-		}
-	}
 }
 
 /*
@@ -755,115 +602,6 @@ attach_conf(struct Client *client_p, struct ConfItem *aconf)
 }
 
 /*
- * attach_connect_block
- *
- * inputs	- pointer to server to attach
- * 		- name of server
- *		- hostname of server
- * output	- true (1) if both are found, otherwise return false (0)
- * side effects - find connect block and attach them to connecting client
- */
-int
-attach_connect_block(struct Client *client_p, const char *name, const char *host)
-{
-	struct ConfItem *ptr;
-
-	s_assert(client_p != NULL);
-	s_assert(host != NULL);
-	if(client_p == NULL || host == NULL)
-		return (0);
-
-	for (ptr = ConfigItemList; ptr; ptr = ptr->next)
-	{
-		if(IsIllegal(ptr))
-			continue;
-		if(ptr->status != CONF_SERVER)
-			continue;
-		if((match(name, ptr->name) == 0) || (match(ptr->host, host) == 0))
-			continue;
-		attach_conf(client_p, ptr);
-		return (-1);
-	}
-	return (0);
-}
-
-/*
- * find_conf_exact
- *
- * inputs	- pointer to name to find
- *		- pointer to username to find
- *		- pointer to host to find
- *		- int mask of type of conf to find
- * output	- NULL or pointer to conf found
- * side effects	- find a conf entry which matches the hostname
- *		  and has the same name.
- */
-struct ConfItem *
-find_conf_exact(const char *name, const char *user, const char *host, int statmask)
-{
-	struct ConfItem *tmp;
-	struct sockaddr_storage ip, cip;
-	char addr[HOSTLEN + 1];
-	int bits, cbits;
-
-	for (tmp = ConfigItemList; tmp; tmp = tmp->next)
-	{
-		if(!(tmp->status & statmask) || !tmp->name || !tmp->host || irccmp(tmp->name, name))
-			continue;
-		/*
-		 ** Accept if the *real* hostname (usually sockethost)
-		 ** socket host) matches *either* host or name field
-		 ** of the configuration.
-		 */
-		if(!match(tmp->user, user) || irccmp(tmp->name, name))
-			continue;
-
-		strlcpy(addr, tmp->host, sizeof(addr));
-		if(parse_netmask(addr, &ip, &bits) != HM_HOST &&  parse_netmask(host, &cip, &cbits) != HM_HOST)
-		{
-			if(ip.ss_family != cip.ss_family)
-				continue;
-			if(!comp_with_mask_sock(&ip, &cip, bits))
-				continue;
-
-		}
-		else if(!match(tmp->host, host))
-		{
-			continue;
-		}
-
-		return (tmp);
-	}
-	return (NULL);
-}
-
-/*
- * find_conf_by_name
- *
- * inputs	- pointer to name to match on
- *		- int mask of type of conf to find
- * output	- NULL or pointer to conf found
- * side effects	- find a conf entry which matches the name
- *		  and has the given mask.
- *
- */
-struct ConfItem *
-find_conf_by_name(const char *name, int status)
-{
-	struct ConfItem *conf;
-	s_assert(name != NULL);
-	if(name == NULL)
-		return (NULL);
-
-	for (conf = ConfigItemList; conf; conf = conf->next)
-	{
-		if((int)conf->status == status && conf->name && match(name, conf->name))
-			return (conf);
-	}
-	return (NULL);
-}
-
-/*
  * rehash
  *
  * Actual REHASH service routine. Called with sig == 0 if it has been called
@@ -888,7 +626,6 @@ rehash(int sig)
 		strlcpy(me.info, ServerInfo.description, sizeof(me.info));
 	}
 
-	flush_deleted_I_P();
 	check_banned_lines();
 	sync_logfiles();
 	return (0);
@@ -1045,7 +782,7 @@ set_default_conf(void)
 static void
 read_conf(FBFILE * file)
 {
-	scount = lineno = 0;
+	lineno = 0;
 
 	set_default_conf();	/* Set default values prior to conf parsing */
 	yyparse();		/* Load the values from the conf */
@@ -1080,82 +817,10 @@ validate_conf(void)
 }
 
 /*
- * conf_add_conf
- * Inputs	- ConfItem
- * Output	- none
- * Side effects	- add given conf to link list
- */
-void
-conf_add_conf(struct ConfItem *aconf)
-{
-	(void) collapse(aconf->host);
-	(void) collapse(aconf->user);
-
-	aconf->next = ConfigItemList;
-	ConfigItemList = aconf;
-}
-
-/*
- * SplitUserHost
- *
- * inputs	- struct ConfItem pointer
- * output	- return 1/0 true false or -1 for error
- * side effects - splits user@host found in a name field of conf given
- *		  stuff the user into ->user and the host into ->host
- */
-static int
-SplitUserHost(struct ConfItem *aconf)
-{
-	char *p;
-	char *new_user;
-	char *new_host;
-
-	if((p = strchr(aconf->host, '@')))
-	{
-		*p = '\0';
-		DupString(new_user, aconf->host);
-		MyFree(aconf->user);
-		aconf->user = new_user;
-		p++;
-		DupString(new_host, p);
-		MyFree(aconf->host);
-		aconf->host = new_host;
-	}
-	else
-	{
-		DupString(aconf->user, "*");
-	}
-	return (1);
-}
-
-/*
  * lookup_confhost - start DNS lookups of all hostnames in the conf
  * line and convert an IP addresses in a.b.c.d number for to IP#s.
  *
  */
-static void
-lookup_confhost(struct ConfItem *aconf)
-{
-	if(EmptyString(aconf->host) || EmptyString(aconf->name))
-	{
-		ilog(L_MAIN, "Host/server name error: (%s) (%s)", aconf->host, aconf->name);
-		return;
-	}
-
-	if(strchr(aconf->host, '*') || strchr(aconf->host, '?'))
-		return;
-	/*
-	 ** Do name lookup now on hostnames given and store the
-	 ** ip numbers in conf structure.
-	 */
-
-	if(inetpton_sock(aconf->host, &aconf->ipnum) > 0)
-	{
-		return;
-	}
-
-	conf_dns_lookup(aconf);
-}
 
 /*
  * conf_connect_allowed
@@ -1591,40 +1256,8 @@ read_conf_files(int cold)
 static void
 clear_out_old_conf(void)
 {
-	struct ConfItem **tmp = &ConfigItemList;
-	struct ConfItem *tmp2;
 	struct Class *cltmp;
 	dlink_node *ptr;
-
-	/*
-	 * We only need to free anything allocated by yyparse() here.
-	 * Reseting structs, etc, is taken care of by set_default_conf().
-	 */
-	while ((tmp2 = *tmp))
-	{
-		if(tmp2->clients)
-		{
-			/*
-			 ** Configuration entry is still in use by some
-			 ** local clients, cannot delete it--mark it so
-			 ** that it will be deleted when the last client
-			 ** exits...
-			 */
-			if(!(tmp2->status & CONF_CLIENT))
-			{
-				*tmp = tmp2->next;
-				tmp2->next = NULL;
-			}
-			else
-				tmp = &tmp2->next;
-			tmp2->status |= CONF_ILLEGAL;
-		}
-		else
-		{
-			*tmp = tmp2->next;
-			free_conf(tmp2);
-		}
-	}
 
 	/*
 	 * don't delete the class table, rather mark all entries
@@ -1641,6 +1274,7 @@ clear_out_old_conf(void)
 	clear_xlines();
 	clear_remote_conf();
 	clear_oper_conf();
+	clear_server_conf();
 
 	/* clean out module paths */
 #ifndef STATIC_MODULES
@@ -1678,36 +1312,6 @@ clear_out_old_conf(void)
 	/* OK, that should be everything... */
 }
 
-/*
- * flush_deleted_I_P
- *
- * inputs       - none
- * output       - none
- * side effects - This function removes I/P conf items
- */
-
-static void
-flush_deleted_I_P(void)
-{
-	struct ConfItem **tmp = &ConfigItemList;
-	struct ConfItem *tmp2;
-
-	/*
-	 * flush out deleted I and P lines although still in use.
-	 */
-	for (tmp = &ConfigItemList; (tmp2 = *tmp);)
-	{
-		if(!(tmp2->status & CONF_ILLEGAL))
-			tmp = &tmp2->next;
-		else
-		{
-			*tmp = tmp2->next;
-			tmp2->next = NULL;
-			if(!tmp2->clients)
-				free_conf(tmp2);
-		}
-	}
-}
 
 /* write_confitem()
  *
@@ -1883,12 +1487,6 @@ conf_add_class_to_conf(struct ConfItem *aconf)
 					     "Warning -- Using default class for missing class \"%s\" in auth{} for %s@%s",
 					     aconf->className, aconf->user, aconf->host);
 		}
-		else if(aconf->status == CONF_SERVER)
-		{
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "Warning -- Using default class for missing class \"%s\" in connect{} for %s",
-					     aconf->className, aconf->name);
-		}
 
 		MyFree(aconf->className);
 		DupString(aconf->className, "default");
@@ -1902,45 +1500,6 @@ conf_add_class_to_conf(struct ConfItem *aconf)
 		DupString(aconf->className, "default");
 		return;
 	}
-}
-
-#define MAXCONFLINKS 150
-
-/*
- * conf_add_server
- *
- * inputs       - pointer to config item
- *		- pointer to link count already on this conf
- * output       - NONE
- * side effects - Add a connect block
- */
-int
-conf_add_server(struct ConfItem *aconf, int lcount)
-{
-	conf_add_class_to_conf(aconf);
-
-	if(lcount > MAXCONFLINKS || !aconf->host || !aconf->name)
-	{
-		sendto_realops_flags(UMODE_ALL, L_ALL, "Bad connect block");
-		ilog(L_MAIN, "Bad connect block");
-		return (-1);
-	}
-
-	if(EmptyString(aconf->passwd))
-	{
-		sendto_realops_flags(UMODE_ALL, L_ALL, "Bad connect block, name %s", aconf->name);
-		ilog(L_MAIN, "Bad connect block, host %s", aconf->name);
-		return (-1);
-	}
-
-	if(SplitUserHost(aconf) < 0)
-	{
-		sendto_realops_flags(UMODE_ALL, L_ALL, "Bad connect block, name %s", aconf->name);
-		ilog(L_MAIN, "Bad connect block, name %s", aconf->name);
-		return (-1);
-	}
-	lookup_confhost(aconf);
-	return (0);
 }
 
 /*

@@ -43,11 +43,13 @@
 #include "s_serv.h"
 #include "send.h"
 #include "hostmask.h"
+#include "newconf.h"
 
 dlink_list shared_conf_list;
 dlink_list cluster_conf_list;
 dlink_list oper_conf_list;
 dlink_list hubleaf_conf_list;
+dlink_list server_conf_list;
 
 struct remote_conf *
 make_remote_conf(void)
@@ -252,5 +254,203 @@ get_oper_privs(int flags)
 	*p = '\0';
 
 	return buf;
+}
+
+struct server_conf *
+make_server_conf(void)
+{
+	struct server_conf *server_p = MyMalloc(sizeof(struct server_conf));
+	return server_p;
+}
+
+void
+free_server_conf(struct server_conf *server_p)
+{
+	s_assert(server_p != NULL);
+	if(server_p == NULL)
+		return;
+
+	if(!EmptyString(server_p->passwd))
+	{
+		memset(server_p->passwd, 0, strlen(server_p->passwd));
+		MyFree(server_p->passwd);
+	}
+
+	if(!EmptyString(server_p->spasswd))
+	{
+		memset(server_p->spasswd, 0, strlen(server_p->spasswd));
+		MyFree(server_p->spasswd);
+	}
+
+	delete_adns_queries(server_p->dns_query);
+
+#ifdef HAVE_LIBCRYPTO
+	if(server_p->rsa_pubkey)
+		RSA_free(server_p->rsa_pubkey);
+#endif
+
+	MyFree(server_p->name);
+	MyFree(server_p->host);
+	MyFree(server_p->class_name);
+	MyFree(server_p);
+}
+
+void
+clear_server_conf(void)
+{
+	struct server_conf *server_p;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, server_conf_list.head)
+	{
+		server_p = ptr->data;
+
+		if(!server_p->servers)
+		{
+			dlinkDelete(ptr, &server_conf_list);
+			free_server_conf(ptr->data);
+		}
+		else
+			server_p->flags |= SERVER_ILLEGAL;
+	}
+}
+
+/*
+ * conf_dns_callback
+ * inputs	- pointer to struct ConfItem
+ *		- pointer to adns reply
+ * output	- none
+ * side effects	- called when resolver query finishes
+ * if the query resulted in a successful search, hp will contain
+ * a non-null pointer, otherwise hp will be null.
+ * if successful save hp in the conf item it was called with
+ */
+static void
+conf_dns_callback(void *vptr, adns_answer * reply)
+{
+	struct server_conf *server_p = (struct server_conf *) vptr;
+
+	if(reply && reply->status == adns_s_ok)
+	{
+#ifdef IPV6
+		if(reply->type ==  adns_r_addr6)
+		{
+			struct sockaddr_in6 *in6 = (struct sockaddr_in6 *)&server_p->ipnum;
+			in6->sin6_family = AF_INET6;
+			in6->sin6_port = 0;
+			memcpy(&in6->sin6_addr, &reply->rrs.addr->addr.inet6.sin6_addr, sizeof(struct in6_addr));
+		}
+		else
+#endif
+		{
+			struct sockaddr_in *in = (struct sockaddr_in *)&server_p->ipnum;
+			in->sin_family = AF_INET;
+			in->sin_port = 0;
+			in->sin_addr.s_addr = reply->rrs.addr->addr.inet.sin_addr.s_addr;
+		}
+		MyFree(reply);
+	}
+
+	MyFree(server_p->dns_query);
+	server_p->dns_query = NULL;
+}
+
+
+void
+add_server_conf(struct server_conf *server_p)
+{
+	if(EmptyString(server_p->class_name))
+	{
+		DupString(server_p->class_name, "default");
+		server_p->class = default_class;
+		return;
+	}
+
+	server_p->class = find_class(server_p->class_name);
+
+	if(server_p->class == default_class)
+	{
+		conf_report_error("Warning connect::class invalid for %s",
+				server_p->name);
+
+		MyFree(server_p->class_name);
+		DupString(server_p->class_name, "default");
+		return;
+	}
+
+	if(strchr(server_p->host, '*') || strchr(server_p->host, '?'))
+		return;
+
+	if(inetpton_sock(server_p->host, &server_p->ipnum) > 0)
+		return;
+
+	server_p->dns_query = MyMalloc(sizeof(struct DNSQuery));
+	server_p->dns_query->ptr = server_p;
+	server_p->dns_query->callback = conf_dns_callback;
+	adns_gethost(server_p->host, server_p->aftype, server_p->dns_query);
+}
+
+struct server_conf *
+find_server_conf(const char *name)
+{
+	struct server_conf *server_p;
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, server_conf_list.head)
+	{
+		server_p = ptr->data;
+
+		if(match(name, server_p->name))
+			return server_p;
+	}
+
+	return NULL;
+}
+
+void
+attach_server_conf(struct Client *client_p, struct server_conf *server_p)
+{
+	client_p->localClient->att_sconf = server_p;
+	server_p->servers++;
+}
+
+void
+detach_server_conf(struct Client *client_p)
+{
+	struct server_conf *server_p = client_p->localClient->att_sconf;
+
+	if(server_p == NULL)
+		return;
+
+	client_p->localClient->att_sconf = NULL;
+	server_p->servers--;
+
+	if(ServerConfIllegal(server_p) && !server_p->servers)
+	{
+		dlinkDelete(&server_p->node, &server_conf_list);
+		free_server_conf(server_p);
+	}
+}
+
+void
+set_server_conf_autoconn(struct Client *source_p, char *name, int newval)
+{
+	struct server_conf *server_p;
+
+	if((server_p = find_server_conf(name)) != NULL)
+	{
+		if(newval)
+			server_p->flags |= SERVER_AUTOCONN;
+		else
+			server_p->flags &= ~SERVER_AUTOCONN;
+
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+				"%s has changed AUTOCONN for %s to %i",
+				get_oper_name(source_p), name, newval);
+	}
+	else
+		sendto_one(source_p, ":%s NOTICE %s :Can't find %s",
+				me.name, source_p->name, name);
 }
 

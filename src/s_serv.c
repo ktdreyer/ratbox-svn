@@ -46,6 +46,7 @@
 #include "res.h"
 #include "commio.h"
 #include "s_conf.h"
+#include "s_newconf.h"
 #include "s_log.h"
 #include "s_stats.h"
 #include "s_user.h"
@@ -344,23 +345,24 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 void
 try_connections(void *unused)
 {
-	struct ConfItem *aconf;
 	struct Client *client_p;
+	struct server_conf *server_p = NULL;
+	struct server_conf *tmp_p;
+	struct Class *cltmp;
+	dlink_node *ptr;
 	int connecting = FALSE;
 	int confrq;
 	time_t next = 0;
-	struct Class *cltmp;
-	struct ConfItem *con_conf = NULL;
 
-	for (aconf = ConfigItemList; aconf; aconf = aconf->next)
+	DLINK_FOREACH(ptr, server_conf_list.head)
 	{
-		/*
-		 * Also when already connecting! (update holdtimes) --SRB 
-		 */
-		if(!(aconf->status & CONF_SERVER) || aconf->port <= 0 ||
-		   !(aconf->flags & CONF_FLAGS_ALLOW_AUTO_CONN))
+		tmp_p = ptr->data;
+
+		if((tmp_p->flags & SERVER_AUTOCONN) == 0)
 			continue;
-		cltmp = ClassPtr(aconf);
+
+		cltmp = tmp_p->class;
+
 		/*
 		 * Skip this entry if the use of it is still on hold until
 		 * future. Otherwise handle this entry (and set it on hold
@@ -368,88 +370,77 @@ try_connections(void *unused)
 		 * made one successfull connection... [this algorithm is
 		 * a bit fuzzy... -- msa >;) ]
 		 */
-		if(aconf->hold > CurrentTime)
+		if(tmp_p->hold > CurrentTime)
 		{
-			if(next > aconf->hold || next == 0)
-				next = aconf->hold;
+			if(next > tmp_p->hold || next == 0)
+				next = tmp_p->hold;
 			continue;
 		}
 
 		if((confrq = get_con_freq(cltmp)) < MIN_CONN_FREQ)
 			confrq = MIN_CONN_FREQ;
 
-		aconf->hold = CurrentTime + confrq;
+		tmp_p->hold = CurrentTime + confrq;
 		/*
 		 * Found a CONNECT config with port specified, scan clients
 		 * and see if this server is already connected?
 		 */
-		client_p = find_server(aconf->name);
+		client_p = find_server(tmp_p->name);
 
 		if(!client_p && (CurrUsers(cltmp) < MaxUsers(cltmp)) && !connecting)
 		{
-			con_conf = aconf;
+			server_p = tmp_p;
+
 			/* We connect only one at time... */
 			connecting = TRUE;
 		}
-		if((next > aconf->hold) || (next == 0))
-			next = aconf->hold;
-	}
 
+		if((next > tmp_p->hold) || (next == 0))
+			next = tmp_p->hold;
+	}
 
 	/* TODO: change this to set active flag to 0 when added to event! --Habeeb */
 	if(GlobalSetOptions.autoconn == 0)
 		return;
 
-	if(connecting)
-	{
-		if(con_conf->next)	/* are we already last? */
-		{
-			struct ConfItem **pconf;
-			for (pconf = &ConfigItemList; (aconf = *pconf); pconf = &(aconf->next))
-				/* 
-				 * put the current one at the end and
-				 * make sure we try all connections
-				 */
-				if(aconf == con_conf)
-					*pconf = aconf->next;
-			(*pconf = con_conf)->next = 0;
-		}
+	if(!connecting)
+		return;
 
-		if(con_conf->flags & CONF_FLAGS_ALLOW_AUTO_CONN)
-		{
-			/*
-			 * We used to only print this if serv_connect() actually
-			 * suceeded, but since comm_tcp_connect() can call the callback
-			 * immediately if there is an error, we were getting error messages
-			 * in the wrong order. SO, we just print out the activated line,
-			 * and let serv_connect() / serv_connect_callback() print an
-			 * error afterwards if it fails.
-			 *   -- adrian
-			 */
+	/* move this connect entry to end.. */
+	dlinkDelete(&server_p->node, &server_conf_list);
+	dlinkAddTail(server_p, &server_p->node, &server_conf_list);
+
+	/*
+	 * We used to only print this if serv_connect() actually
+	 * suceeded, but since comm_tcp_connect() can call the callback
+	 * immediately if there is an error, we were getting error messages
+	 * in the wrong order. SO, we just print out the activated line,
+	 * and let serv_connect() / serv_connect_callback() print an
+	 * error afterwards if it fails.
+	 *   -- adrian
+	 */
 #ifndef HIDE_SERVERS_IPS
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "Connection to %s[%s] activated.",
-					     con_conf->name, con_conf->host);
+	sendto_realops_flags(UMODE_ALL, L_ALL,
+			"Connection to %s[%s] activated.",
+			server_p->name, server_p->host);
 #else
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-			    		     "Connection to %s activated",
-					     con_conf->name);
+	sendto_realops_flags(UMODE_ALL, L_ALL,
+			"Connection to %s activated",
+			server_p->name);
 #endif
 
-			serv_connect(con_conf, 0);
-		}
-	}
+	serv_connect(server_p, 0);
 }
 
 int
 check_server(const char *name, struct Client *client_p)
 {
-	struct ConfItem *aconf = NULL;
-	struct ConfItem *server_aconf = NULL;
+	struct server_conf *server_p = NULL;
+	struct server_conf *tmp_p;
+	dlink_node *ptr;
 	int error = -1;
 
 	s_assert(NULL != client_p);
-
 	if(client_p == NULL)
 		return error;
 
@@ -459,81 +450,76 @@ check_server(const char *name, struct Client *client_p)
 	if(strlen(name) > HOSTLEN)
 		return -4;
 
-	/* loop through looking for all possible connect items that might work */
-	for (aconf = ConfigItemList; aconf; aconf = aconf->next)
+	DLINK_FOREACH(ptr, server_conf_list.head)
 	{
-		if((aconf->status & CONF_SERVER) == 0)
+		tmp_p = ptr->data;
+
+		if(tmp_p->flags & SERVER_ILLEGAL)
 			continue;
 
-		if(!match(name, aconf->name))
+		if(!match(name, tmp_p->name))
 			continue;
 
 		error = -3;
 
 		/* XXX: Fix me for IPv6 */
 		/* XXX sockhost is the IPv4 ip as a string */
-
-		if(match(aconf->host, client_p->host) ||
-		   match(aconf->host, client_p->sockhost))
+		if(match(tmp_p->host, client_p->host) ||
+		   match(tmp_p->host, client_p->sockhost))
 		{
 			error = -2;
 
-			if(IsConfEncrypted(aconf))
+			if(tmp_p->flags & SERVER_ENCRYPTED)
 			{
-				if(strcmp(aconf->passwd,
-					  crypt(client_p->
-						localClient->passwd, aconf->passwd)) == 0)
-					server_aconf = aconf;
+				if(!strcmp(tmp_p->passwd, crypt(client_p->localClient->passwd,
+								tmp_p->passwd)))
+				{
+					server_p = tmp_p;
+					break;
+				}
 			}
-			else
+			else if(!strcmp(tmp_p->passwd, client_p->localClient->passwd))
 			{
-				if(strcmp
-				   (aconf->passwd, client_p->localClient->passwd) == 0)
-					server_aconf = aconf;
+				server_p = tmp_p;
+				break;
 			}
 		}
 	}
 
-	if(server_aconf == NULL)
+	if(server_p == NULL)
 		return error;
 
-	/* XXX -- is this detach_conf() needed? --fl */
-	detach_conf(client_p);
-	attach_conf(client_p, server_aconf);
+	attach_server_conf(client_p, server_p);
 
-#ifdef HAVE_LIBZ		/* otherwise, cleait unconditionally */
-	if(!(server_aconf->flags & CONF_FLAGS_COMPRESSED))
+	/* clear ZIP/TB if they support but we dont want them */
+#ifdef HAVE_LIBZ
+	if((server_p->flags & SERVER_COMPRESSED) == 0)
 #endif
 		ClearCap(client_p, CAP_ZIP);
 
-	/* if server has announced it supports TB, but we dont want to burst
-	 * topics, disable the capability. --fl
-	 */
-	if(!IsConfTburst(server_aconf))
+	if((server_p->flags & SERVER_TB) == 0)
 		ClearCap(client_p, CAP_TB);
 
-	if(aconf != NULL)
-	{
 #ifdef IPV6
-		if(client_p->localClient->ip.ss_family == AF_INET6)
+	if(client_p->localClient->ip.ss_family == AF_INET6)
+	{
+		if(IN6_IS_ADDR_UNSPECIFIED(&((struct sockaddr_in6 *)&server_p->ipnum)->sin6_addr))
 		{
-			if(IN6_IS_ADDR_UNSPECIFIED(&((struct sockaddr_in6 *)&aconf->ipnum)->sin6_addr))
-			{
-				memcpy(&((struct sockaddr_in6 *)&aconf->ipnum)->sin6_addr, 
-					&((struct sockaddr_in6 *)&client_p->localClient->ip)->sin6_addr, 
-					sizeof(struct in6_addr)); 
-			} 
-		} else
+			memcpy(&((struct sockaddr_in6 *)&server_p->ipnum)->sin6_addr, 
+				&((struct sockaddr_in6 *)&client_p->localClient->ip)->sin6_addr, 
+				sizeof(struct in6_addr)); 
+		} 
+	}
+	else
 #endif
+	{
+		if(((struct sockaddr_in *)&server_p->ipnum)->sin_addr.s_addr == INADDR_NONE)
 		{
-			if(((struct sockaddr_in *)&aconf->ipnum)->sin_addr.s_addr == INADDR_NONE)
-			{
-				((struct sockaddr_in *)&aconf->ipnum)->sin_addr.s_addr = 
-					((struct sockaddr_in *)&client_p->localClient->ip)->sin_addr.s_addr;
-			}
-
+			((struct sockaddr_in *)&server_p->ipnum)->sin_addr.s_addr = 
+				((struct sockaddr_in *)&client_p->localClient->ip)->sin_addr.s_addr;
 		}
 	}
+
 	return 0;
 }
 
@@ -547,8 +533,7 @@ check_server(const char *name, struct Client *client_p)
  *
  */
 void
-send_capabilities(struct Client *client_p, struct ConfItem *aconf,
-		  int cap_can_send)
+send_capabilities(struct Client *client_p, int cap_can_send)
 {
 	struct Capability *cap;
 	char msgbuf[BUFSIZE];
@@ -568,6 +553,7 @@ send_capabilities(struct Client *client_p, struct ConfItem *aconf,
 
 	t--;
 	*t = '\0';
+
 	sendto_one(client_p, "CAPAB :%s", msgbuf);
 }
 
@@ -988,12 +974,11 @@ show_capabilities(struct Client *target_p)
  * output       -
  * side effects -
  */
-
 int
 server_estab(struct Client *client_p)
 {
 	struct Client *target_p;
-	struct ConfItem *aconf;
+	struct server_conf *server_p;
 	const char *inpath;
 	static char inpath_ip[HOSTLEN * 2 + USERLEN + 5];
 	char *host;
@@ -1008,10 +993,7 @@ server_estab(struct Client *client_p)
 	inpath = get_client_name(client_p, MASK_IP);	/* "refresh" inpath with host */
 	host = client_p->name;
 
-	aconf = client_p->localClient->att_conf;
-
-	if((aconf == NULL) || ((aconf->status & CONF_SERVER) == 0) ||
-	   irccmp(aconf->name, client_p->name) || !match(aconf->name, client_p->name))
+	if((server_p = client_p->localClient->att_sconf) == NULL)
 	{
 		/* This shouldn't happen, better tell the ops... -A1kmm */
 		sendto_realops_flags(UMODE_ALL, L_ALL,
@@ -1022,7 +1004,7 @@ server_estab(struct Client *client_p)
 	/* We shouldn't have to check this, it should already done before
 	 * server_estab is called. -A1kmm
 	 */
-	memset((void *) client_p->localClient->passwd, 0, sizeof(client_p->localClient->passwd));
+	memset(client_p->localClient->passwd, 0, sizeof(client_p->localClient->passwd));
 
 	/* Its got identd , since its a server */
 	SetGotId(client_p);
@@ -1044,29 +1026,25 @@ server_estab(struct Client *client_p)
 	{
 		/*
 		 * jdc -- 1.  Use EmptyString(), not [0] index reference.
-		 *        2.  Check aconf->spasswd, not aconf->passwd.
+		 *        2.  Check ->spasswd, not ->passwd.
 		 */
-		if(!EmptyString(aconf->spasswd))
+		if(!EmptyString(server_p->spasswd))
 		{
 			/* kludge, if we're not using TS6, dont ever send
 			 * ourselves as being TS6 capable.
 			 */
 			if(ServerInfo.use_ts6)
 				sendto_one(client_p, "PASS %s TS %d :%s", 
-					   aconf->spasswd, TS_CURRENT, me.id);
+					   server_p->spasswd, TS_CURRENT, me.id);
 			else
 				sendto_one(client_p, "PASS %s :TS",
-					   aconf->spasswd);
+					   server_p->spasswd);
 		}
 
-		/*
-		 * Pass my info to the new server
-		 *
-		 */
-
-		send_capabilities(client_p, aconf, default_server_capabs
-				  | (IsConfCompressed(aconf) ? CAP_ZIP_SUPPORTED : 0)
-				  | (IsConfTburst(aconf) ? CAP_TB : 0));
+		/* pass info to new server */
+		send_capabilities(client_p, default_server_capabs
+				  | (ServerConfCompressed(server_p) ? CAP_ZIP_SUPPORTED : 0)
+				  | (ServerConfTb(server_p) ? CAP_TB : 0));
 
 		sendto_one(client_p, "SERVER %s 1 :%s%s",
 			   me.name,
@@ -1147,8 +1125,6 @@ server_estab(struct Client *client_p)
 	ilog(L_SERVER, "Link with %s established: (%s) link",
 	     log_client_name(client_p, SHOW_IP), show_capabilities(client_p));
 
-	client_p->serv->sconf = aconf;
-
 	if(HasServlink(client_p))
 	{
 		/* we won't overflow FD_DESC_SZ here, as it can hold
@@ -1200,7 +1176,6 @@ server_estab(struct Client *client_p)
 	 **    see previous *WARNING*!!! (Also, original inpath
 	 **    is destroyed...)
 	 */
-
 	DLINK_FOREACH(ptr, global_serv_list.head)
 	{
 		target_p = ptr->data;
@@ -1448,43 +1423,6 @@ fork_server(struct Client *server)
 #endif
 
 /*
- * set_autoconn - set autoconnect mode
- *
- * inputs       - struct Client pointer to oper requesting change
- *              -
- * output       - none
- * side effects -
- */
-void
-set_autoconn(struct Client *source_p, char *parv0, char *name, int newval)
-{
-	struct ConfItem *aconf;
-
-	if(name && (aconf = find_conf_by_name(name, CONF_SERVER)))
-	{
-		if(newval)
-			aconf->flags |= CONF_FLAGS_ALLOW_AUTO_CONN;
-		else
-			aconf->flags &= ~CONF_FLAGS_ALLOW_AUTO_CONN;
-
-		sendto_realops_flags(UMODE_ALL, L_ALL,
-				     "%s has changed AUTOCONN for %s to %i", parv0, name, newval);
-		sendto_one(source_p,
-			   ":%s NOTICE %s :AUTOCONN for %s is now set to %i",
-			   me.name, parv0, name, newval);
-	}
-	else if(name)
-	{
-		sendto_one(source_p, ":%s NOTICE %s :Can't find %s", me.name, parv0, name);
-	}
-	else
-	{
-		sendto_one(source_p,
-			   ":%s NOTICE %s :Please specify a server name!", me.name, parv0);
-	}
-}
-
-/*
  * New server connection code
  * Based upon the stuff floating about in s_bsd.c
  *   -- adrian
@@ -1508,56 +1446,55 @@ set_autoconn(struct Client *source_p, char *parv0, char *name, int newval)
  * it suceeded or not, and 0 if it fails in here somewhere.
  */
 int
-serv_connect(struct ConfItem *aconf, struct Client *by)
+serv_connect(struct server_conf *server_p, struct Client *by)
 {
 	struct Client *client_p;
 	struct sockaddr_storage myipnum; 
 	int fd;
-	/* Make sure aconf is useful */
-	s_assert(aconf != NULL);
-	if(aconf == NULL)
+
+	s_assert(server_p != NULL);
+	if(server_p == NULL)
 		return 0;
 
 	/* log */
-	inetntop_sock(&aconf->ipnum, buf, sizeof(buf));
-	ilog(L_SERVER, "Connect to %s[%s] @%s", aconf->user, aconf->host, buf);
+	inetntop_sock(&server_p->ipnum, buf, sizeof(buf));
+	ilog(L_SERVER, "Connect to *[%s] @%s", server_p->host, buf);
 
 	/*
 	 * Make sure this server isn't already connected
-	 * Note: aconf should ALWAYS be a valid C: line
 	 */
-	if((client_p = find_server(aconf->name)))
+	if((client_p = find_server(server_p->name)))
 	{
 		sendto_realops_flags(UMODE_ALL, L_ADMIN,
 				     "Server %s already present from %s",
-				     aconf->name, get_client_name(client_p, SHOW_IP));
+				     server_p->name, get_client_name(client_p, SHOW_IP));
 		sendto_realops_flags(UMODE_ALL, L_OPER,
 				     "Server %s already present from %s",
-				     aconf->name, get_client_name(client_p, MASK_IP));
+				     server_p->name, get_client_name(client_p, MASK_IP));
 		if(by && IsPerson(by) && !MyClient(by))
 			sendto_one_notice(by, ":Server %s already present from %s",
-					  aconf->name, get_client_name(client_p, MASK_IP));
+					  server_p->name, get_client_name(client_p, MASK_IP));
 		return 0;
 	}
 
 	/* create a socket for the server connection */
-	if((fd = comm_open(aconf->ipnum.ss_family, SOCK_STREAM, 0, NULL)) < 0)
+	if((fd = comm_open(server_p->ipnum.ss_family, SOCK_STREAM, 0, NULL)) < 0)
 	{
 		/* Eek, failure to create the socket */
 		report_error("opening stream socket to %s: %s", 
-			     aconf->name, aconf->name, errno);
+			     server_p->name, server_p->name, errno);
 		return 0;
 	}
 
 	/* servernames are always guaranteed under HOSTLEN chars */
-	fd_note(fd, "Server: %s", aconf->name);
+	fd_note(fd, "Server: %s", server_p->name);
 
 	/* Create a local client */
 	client_p = make_client(NULL);
 
 	/* Copy in the server, hostname, fd */
-	strlcpy(client_p->name, aconf->name, sizeof(client_p->name));
-	strlcpy(client_p->host, aconf->host, sizeof(client_p->host));
+	strlcpy(client_p->name, server_p->name, sizeof(client_p->name));
+	strlcpy(client_p->host, server_p->host, sizeof(client_p->host));
 	strlcpy(client_p->sockhost, buf, sizeof(client_p->sockhost));
 	client_p->localClient->fd = fd;
 
@@ -1595,18 +1532,8 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 	 * Attach config entries to client here rather than in
 	 * serv_connect_callback(). This to avoid null pointer references.
 	 */
-	if(!attach_connect_block(client_p, aconf->name, aconf->host))
-	{
-		sendto_realops_flags(UMODE_ALL, L_ALL,
-				     "Host %s is not enabled for connecting:no C/N-line",
-				     aconf->name);
-		if(by && IsPerson(by) && !MyClient(by))
-			sendto_one_notice(by, ":Connect to host %s failed.",
-					  client_p->name);
-		detach_conf(client_p);
-		free_client(client_p);
-		return 0;
-	}
+	attach_server_conf(client_p, server_p);
+
 	/*
 	 * at this point we have a connection in progress and C/N lines
 	 * attached to the client, the socket info should be saved in the
@@ -1635,15 +1562,14 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 	SetConnecting(client_p);
 	dlinkAddTail(client_p, &client_p->node, &global_client_list);
 
-
-	if(IsConfVhosted(aconf))
+	if(server_p->flags & SERVER_VHOSTED)
 	{
-		memcpy(&myipnum, &aconf->my_ipnum, sizeof(myipnum));
+		memcpy(&myipnum, &server_p->my_ipnum, sizeof(myipnum));
 		((struct sockaddr_in *)&myipnum)->sin_port = 0;
-		myipnum.ss_family = aconf->my_ipnum.ss_family;
+		myipnum.ss_family = server_p->my_ipnum.ss_family;
 				
 	}
-	else if(aconf->aftype == AF_INET && ServerInfo.specific_ipv4_vhost)
+	else if(server_p->aftype == AF_INET && ServerInfo.specific_ipv4_vhost)
 	{
 		memcpy(&myipnum, &ServerInfo.ip, sizeof(myipnum));
 		((struct sockaddr_in *)&myipnum)->sin_port = 0;
@@ -1651,7 +1577,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 	}
 	
 #ifdef IPV6
-	else if((aconf->aftype == AF_INET6) && ServerInfo.specific_ipv6_vhost)
+	else if((server_p->aftype == AF_INET6) && ServerInfo.specific_ipv6_vhost)
 	{
 		memcpy(&myipnum, &ServerInfo.ip6, sizeof(myipnum));
 		((struct sockaddr_in6 *)&myipnum)->sin6_port = 0;
@@ -1660,15 +1586,15 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 #endif
 	else
 	{
-		comm_connect_tcp(client_p->localClient->fd, aconf->host,
-				 aconf->port, NULL, 0, serv_connect_callback, 
-				 client_p, aconf->aftype, 
+		comm_connect_tcp(client_p->localClient->fd, server_p->host,
+				 server_p->port, NULL, 0, serv_connect_callback, 
+				 client_p, server_p->aftype, 
 				 ConfigFileEntry.connect_timeout);
 		 return 1;
 	}
 
-	comm_connect_tcp(client_p->localClient->fd, aconf->host,
-			 aconf->port, (struct sockaddr *) &myipnum,
+	comm_connect_tcp(client_p->localClient->fd, server_p->host,
+			 server_p->port, (struct sockaddr *) &myipnum,
 			 GET_SS_LEN(myipnum), serv_connect_callback, client_p,
 			 myipnum.ss_family, ConfigFileEntry.connect_timeout);
 
@@ -1688,7 +1614,7 @@ static void
 serv_connect_callback(int fd, int status, void *data)
 {
 	struct Client *client_p = data;
-	struct ConfItem *aconf;
+	struct server_conf *server_p;
 
 	/* First, make sure its a real client! */
 	s_assert(client_p != NULL);
@@ -1732,10 +1658,7 @@ serv_connect_callback(int fd, int status, void *data)
 
 	/* COMM_OK, so continue the connection procedure */
 	/* Get the C/N lines */
-	aconf = client_p->localClient->att_conf;
-
-	if((aconf == NULL) || ((aconf->status & CONF_SERVER) == 0) ||
-	   irccmp(aconf->name, client_p->name) || !match(aconf->name, client_p->name))
+	if((server_p = client_p->localClient->att_sconf) == NULL)
 	{
 		sendto_realops_flags(UMODE_ALL, L_ADMIN, "Lost connect{} block for %s",
 #ifdef HIDE_SERVERS_IPS
@@ -1753,30 +1676,23 @@ serv_connect_callback(int fd, int status, void *data)
 	/* Next, send the initial handshake */
 	SetHandshake(client_p);
 
-	/*
-	 * jdc -- Check and send spasswd, not passwd.
+	/* kludge, if we're not using TS6, dont ever send
+	 * ourselves as being TS6 capable.
 	 */
-	if(!EmptyString(aconf->spasswd))
+	if(!EmptyString(server_p->spasswd))
 	{
-		/* kludge, if we're not using TS6, dont ever send
-		 * ourselves as being TS6 capable.
-		 */
 		if(ServerInfo.use_ts6)
 			sendto_one(client_p, "PASS %s TS %d :%s", 
-				   aconf->spasswd, TS_CURRENT, me.id);
+				   server_p->spasswd, TS_CURRENT, me.id);
 		else
 			sendto_one(client_p, "PASS %s :TS",
-				   aconf->spasswd);
+				   server_p->spasswd);
 	}
 
-	/*
-	 * Pass my info to the new server
-	 *
-	 */
-
-	send_capabilities(client_p, aconf, default_server_capabs
-			  | (IsConfCompressed(aconf) ? CAP_ZIP_SUPPORTED : 0)
-			  | (IsConfTburst(aconf) ? CAP_TB : 0));
+	/* pass my info to the new server */
+	send_capabilities(client_p, default_server_capabs
+			  | (ServerConfCompressed(server_p) ? CAP_ZIP_SUPPORTED : 0)
+			  | (ServerConfTb(server_p) ? CAP_TB : 0));
 
 	sendto_one(client_p, "SERVER %s 1 :%s%s",
 		   me.name,

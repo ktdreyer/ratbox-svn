@@ -42,6 +42,12 @@
 #include <openssl/rsa.h>
 #endif
 
+extern dlink_list cluster_conf_list;
+extern dlink_list shared_conf_list;
+extern dlink_list oper_conf_list;
+extern dlink_list hubleaf_conf_list;
+extern dlink_list server_conf_list;
+
 /* shared/cluster/hub/leaf confs */
 struct remote_conf
 {
@@ -129,11 +135,6 @@ struct oper_conf
 #define IsOperSpy(x)            ((x)->flags2 & OPER_SPY)
 #define IsOperInvis(x)          ((x)->flags2 & OPER_INVIS)
 
-extern dlink_list cluster_conf_list;
-extern dlink_list shared_conf_list;
-extern dlink_list oper_conf_list;
-extern dlink_list hubleaf_conf_list;
-
 extern struct remote_conf *make_remote_conf(void);
 extern void free_remote_conf(struct remote_conf *);
 extern void clear_remote_conf(void);
@@ -150,5 +151,55 @@ extern struct oper_conf *find_oper_conf(const char *username, const char *host,
 
 extern const char *get_oper_privs(int flags);
 
+struct server_conf
+{
+	char *name;
+	char *host;
+	char *passwd;
+	char *spasswd;
+	int port;
+	int aftype;
+	int flags;
+	int servers;
+	time_t hold;
+
+	struct sockaddr_storage ipnum;
+	struct sockaddr_storage my_ipnum;
+
+	char *class_name;
+	struct Class *class;
+	struct DNSQuery *dns_query;
+	dlink_node node;
+
+#ifdef HAVE_LIBCRYPTO
+	RSA *rsa_pubkey;
+#endif
+};
+
+#define SERVER_ILLEGAL		0x0001
+#define SERVER_VHOSTED		0x0002
+#define SERVER_ENCRYPTED	0x0004
+#define SERVER_COMPRESSED	0x0008
+#define SERVER_TB		0x0010
+#define SERVER_AUTOCONN		0x0020
+
+#define ServerConfIllegal(x)	((x)->flags & SERVER_ILLEGAL)
+#define ServerConfVhosted(x)	((x)->flags & SERVER_VHOSTED)
+#define ServerConfEncrypted(x)	((x)->flags & SERVER_ENCRYPTED)
+#define ServerConfCompressed(x)	((x)->flags & SERVER_COMPRESSED)
+#define ServerConfTb(x)		((x)->flags & SERVER_TB)
+#define ServerConfAutoconn(x)	((x)->flags & SERVER_AUTOCONN)
+
+extern struct server_conf *make_server_conf(void);
+extern void free_server_conf(struct server_conf *);
+extern void clear_server_conf(void);
+extern void add_server_conf(struct server_conf *);
+
+extern struct server_conf *find_server_conf(const char *name);
+
+extern void attach_server_conf(struct Client *, struct server_conf *);
+extern void detach_server_conf(struct Client *);
+extern void set_server_conf_autoconn(struct Client *source_p, char *name, 
+					int newval);
 #endif
 

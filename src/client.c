@@ -41,6 +41,7 @@
 #include "s_auth.h"
 #include "commio.h"
 #include "s_conf.h"
+#include "s_newconf.h"
 #include "s_log.h"
 #include "s_serv.h"
 #include "s_stats.h"
@@ -1929,7 +1930,6 @@ generate_uid(void)
 void
 close_connection(struct Client *client_p)
 {
-	struct ConfItem *aconf;
 	s_assert(client_p != NULL);
 	if(client_p == NULL)
 		return;
@@ -1940,6 +1940,8 @@ close_connection(struct Client *client_p)
 	
 	if(IsServer(client_p))
 	{
+		struct server_conf *server_p;
+
 		ServerStats->is_sv++;
 		ServerStats->is_sbs += client_p->localClient->sendB;
 		ServerStats->is_sbr += client_p->localClient->receiveB;
@@ -1956,13 +1958,12 @@ close_connection(struct Client *client_p)
 			ServerStats->is_skr += (ServerStats->is_sbr >> 10);
 			ServerStats->is_sbr &= 0x3ff;
 		}
+
 		/*
 		 * If the connection has been up for a long amount of time, schedule
 		 * a 'quick' reconnect, else reset the next-connect cycle.
 		 */
-		if((aconf =
-		    find_conf_exact(client_p->name, client_p->username,
-				    client_p->host, CONF_SERVER)))
+		if((server_p = find_server_conf(client_p->name)) != NULL)
 		{
 			/*
 			 * Reschedule a faster reconnect, if this was a automatically
@@ -1970,12 +1971,12 @@ close_connection(struct Client *client_p)
 			 * a rehash in between, the status has been changed to
 			 * CONF_ILLEGAL). But only do this if it was a "good" link.
 			 */
-			aconf->hold = time(NULL);
-			aconf->hold +=
-				(aconf->hold - client_p->since >
-				 HANGONGOODLINK) ? HANGONRETRYDELAY : ConfConFreq(aconf);
-			if(nextconnect > aconf->hold)
-				nextconnect = aconf->hold;
+			server_p->hold = time(NULL);
+			server_p->hold +=
+				(server_p->hold - client_p->since >
+				 HANGONGOODLINK) ? HANGONRETRYDELAY : ConFreq(server_p->class);
+			if(nextconnect > server_p->hold)
+				nextconnect = server_p->hold;
 		}
 
 	}
@@ -2022,6 +2023,10 @@ close_connection(struct Client *client_p)
 	linebuf_donebuf(&client_p->localClient->buf_recvq);
 	memset(client_p->localClient->passwd, 0, sizeof(client_p->localClient->passwd));
 	detach_conf(client_p);
+
+	/* XXX shouldnt really be done here. */
+	detach_server_conf(client_p);
+
 	client_p->from = NULL;	/* ...this should catch them! >:) --msa */
 	ClearMyConnect(client_p);
 }

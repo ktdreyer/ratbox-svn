@@ -67,7 +67,7 @@ mo_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 {
 	int port;
 	int tmpport;
-	struct ConfItem *aconf;
+	struct server_conf *server_p;
 	struct Client *target_p;
 
 	/* always privileged with handlers */
@@ -92,12 +92,12 @@ mo_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 	/*
 	 * try to find the name, then host, if both fail notify ops and bail
 	 */
-	if(!(aconf = find_conf_by_name(parv[1], CONF_SERVER)))
+	if((server_p = find_server_conf(parv[1])) == NULL)
 	{
 		sendto_one(source_p,
 			   "NOTICE %s :Connect: Host %s not listed in ircd.conf",
 			   parv[0], parv[1]);
-			return 0;
+		return 0;
 	}
 
 	/*
@@ -105,7 +105,7 @@ mo_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 	 * use the default form configuration structure. If missing
 	 * from there, then use the precompiled default.
 	 */
-	tmpport = port = aconf->port;
+	tmpport = port = server_p->port;
 	if(parc > 2 && !EmptyString(parv[2]))
 	{
 		if((port = atoi(parv[2])) <= 0)
@@ -126,34 +126,35 @@ mo_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 
 	ilog(L_SERVER, "CONNECT From %s : %s %s", parv[0], parv[1], parc > 2 ? parv[2] : "");
 
-	aconf->port = port;
+	server_p->port = port;
 	/*
 	 * at this point we should be calling connect_server with a valid
 	 * C:line and a valid port in the C:line
 	 */
-	if(serv_connect(aconf, source_p))
+	if(serv_connect(server_p, source_p))
 	{
 #ifndef HIDE_SERVERS_IPS
 		if(IsOperAdmin(source_p))
 			sendto_one(source_p, ":%s NOTICE %s :*** Connecting to %s[%s].%d",
-				   me.name, parv[0], aconf->host, aconf->name, aconf->port);
+				   me.name, parv[0], server_p->host, server_p->name, server_p->port);
 		else
 #endif
 			sendto_one(source_p, ":%s NOTICE %s :*** Connecting to %s.%d",
-				   me.name, parv[0], aconf->name, aconf->port);
+				   me.name, parv[0], server_p->name, server_p->port);
 
 	}
 	else
 	{
 		sendto_one(source_p, ":%s NOTICE %s :*** Couldn't connect to %s.%d",
-			   me.name, parv[0], aconf->name, aconf->port);
+			   me.name, parv[0], server_p->name, server_p->port);
 
 	}
+
 	/*
 	 * client is either connecting with all the data it needs or has been
 	 * destroyed
 	 */
-	aconf->port = tmpport;
+	server_p->port = tmpport;
 	return 0;
 }
 
@@ -173,7 +174,7 @@ ms_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 {
 	int port;
 	int tmpport;
-	struct ConfItem *aconf;
+	struct server_conf *server_p;
 	struct Client *target_p;
 
 	if(hunt_server(client_p, source_p, ":%s CONNECT %s %s :%s", 3, parc, parv) != HUNTED_ISME)
@@ -189,7 +190,7 @@ ms_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 	/*
 	 * try to find the name, then host, if both fail notify ops and bail
 	 */
-	if(!(aconf = find_conf_by_name(parv[1], CONF_SERVER)))
+	if((server_p = find_server_conf(parv[1])) == NULL)
 	{
 		sendto_one_notice(source_p, ":Connect: Host %s not listed in ircd.conf",
 				  parv[1]);
@@ -201,13 +202,13 @@ ms_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 	 * use the default form configuration structure. If missing
 	 * from there, then use the precompiled default.
 	 */
-	tmpport = aconf->port;
+	tmpport = server_p->port;
 
 	port = atoi(parv[2]);
 
 	/* if someone sends port 0, and we have a config port.. use it */
-	if(port == 0 && aconf->port)
-		port = aconf->port;
+	if(port == 0 && server_p->port)
+		port = server_p->port;
 	else if(port <= 0)
 	{
 		sendto_one_notice(source_p, ":Connect: Illegal port number");
@@ -229,21 +230,21 @@ ms_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 
 	ilog(L_SERVER, "CONNECT From %s : %s %d", source_p->name, parv[1], port);
 
-	aconf->port = port;
+	server_p->port = port;
 	/*
 	 * at this point we should be calling connect_server with a valid
 	 * C:line and a valid port in the C:line
 	 */
-	if(serv_connect(aconf, source_p))
+	if(serv_connect(server_p, source_p))
 		sendto_one_notice(source_p, ":*** Connecting to %s.%d",
-				  aconf->name, aconf->port);
+				  server_p->name, server_p->port);
 	else
 		sendto_one_notice(source_p, ":*** Couldn't connect to %s.%d",
-				  aconf->name, aconf->port);
+				  server_p->name, server_p->port);
 	/*
 	 * client is either connecting with all the data it needs or has been
 	 * destroyed
 	 */
-	aconf->port = tmpport;
+	server_p->port = tmpport;
 	return 0;
 }

@@ -49,6 +49,7 @@ static struct Class *yy_class = NULL;
 static struct rxconf *yy_rxconf = NULL;
 
 static struct remote_conf *yy_shared = NULL;
+static struct server_conf *yy_server = NULL;
 
 static dlink_list yy_oper_list;
 static struct oper_conf *yy_oper = NULL;
@@ -890,7 +891,7 @@ conf_end_auth(struct TopConf *tc)
 
 	for (yy_tmp = yy_achead; yy_tmp; yy_tmp = yy_next)
 	{
-		yy_next = yy_tmp->next;	/* yy_tmp->next is used by conf_add_conf */
+		yy_next = yy_tmp->next;
 		yy_tmp->next = NULL;
 
 		if(yy_tmp->name == NULL)
@@ -1201,19 +1202,17 @@ conf_set_shared_type(void *data)
 static int
 conf_begin_connect(struct TopConf *tc)
 {
-	if(yy_aconf)
+	if(yy_server)
 	{
-		free_conf(yy_aconf);
-		yy_aconf = NULL;
+		free_server_conf(yy_server);
+		yy_server = NULL;
 	}
 
-	yy_aconf = make_conf();
-	yy_aconf->passwd = NULL;
-	yy_aconf->status = CONF_SERVER;
-	yy_aconf->port = PORTNUM;
+	yy_server = make_server_conf();
+	yy_server->port = PORTNUM;
 
 	if(conf_cur_block_name != NULL)
-		DupString(yy_aconf->name, conf_cur_block_name);
+		DupString(yy_server->name, conf_cur_block_name);
 
 	return 0;
 }
@@ -1221,89 +1220,86 @@ conf_begin_connect(struct TopConf *tc)
 static int
 conf_end_connect(struct TopConf *tc)
 {
-	if(EmptyString(yy_aconf->name))
+	if(EmptyString(yy_server->name))
 	{
 		conf_report_error("Ignoring connect block -- missing name.");
 		return 0;
 	}
 
-	if(yy_aconf->host && yy_aconf->passwd && yy_aconf->spasswd)
+	if((EmptyString(yy_server->passwd) || EmptyString(yy_server->spasswd)) &&
+		!yy_server->rsa_pubkey)
 	{
-		if(conf_add_server(yy_aconf, scount) >= 0)
-		{
-			conf_add_conf(yy_aconf);
-			++scount;
-		}
-		else
-		{
-			free_conf(yy_aconf);
-			yy_aconf = NULL;
-		}
-	}
-	else
-	{
-		if(yy_aconf->name)
-		{
-			if(!yy_aconf->host)
-				conf_report_error
-					("Ignoring connect block for %s -- missing host.",
-					 yy_aconf->name);
-			else if(!yy_aconf->passwd || !yy_aconf->spasswd)
-				conf_report_error
-					("Ignoring connect block for %s -- missing password.",
-					 yy_aconf->name);
-		}
-
-		free_conf(yy_aconf);
-		yy_aconf = NULL;
+		conf_report_error("Ignoring connect block for %s -- missing password.",
+					yy_server->name);
+		return 0;
 	}
 
-	yy_aconf = NULL;
+	if(EmptyString(yy_server->host))
+	{
+		conf_report_error("Ignoring connect block for %s -- missing host.",
+					yy_server->name);
+		return 0;
+	}
+
+	add_server_conf(yy_server);
+	dlinkAdd(yy_server, &yy_server->node, &server_conf_list);
+
+	yy_server = NULL;
 	return 0;
 }
 
 static void
 conf_set_connect_host(void *data)
 {
-	MyFree(yy_aconf->host);
-	DupString(yy_aconf->host, data);
+	MyFree(yy_server->host);
+	DupString(yy_server->host, data);
 }
 
 static void
 conf_set_connect_vhost(void *data)
 {
-	if(inetpton_sock(data, &yy_aconf->my_ipnum) <= 0)
+	if(inetpton_sock(data, &yy_server->my_ipnum) <= 0)
 	{
 		conf_report_error("Invalid netmask for server vhost (%s)",
 		    		  (char *) data);
 		return;
 	}
 
-	yy_aconf->flags |= CONF_FLAGS_VHOSTED;
+	yy_server->flags |= SERVER_VHOSTED;
 }
 
 static void
 conf_set_connect_send_password(void *data)
 {
-	if(yy_aconf->spasswd)
-		memset(yy_aconf->spasswd, 0, strlen(yy_aconf->spasswd));
-	MyFree(yy_aconf->spasswd);
-	DupString(yy_aconf->spasswd, data);
+	if(yy_server->spasswd)
+	{
+		memset(yy_server->spasswd, 0, strlen(yy_server->spasswd));
+		MyFree(yy_server->spasswd);
+	}
+
+	DupString(yy_server->spasswd, data);
 }
 
 static void
 conf_set_connect_accept_password(void *data)
 {
-	if(yy_aconf->passwd)
-		memset(yy_aconf->passwd, 0, strlen(yy_aconf->passwd));
-	MyFree(yy_aconf->passwd);
-	DupString(yy_aconf->passwd, data);
+	if(yy_server->passwd)
+	{
+		memset(yy_server->passwd, 0, strlen(yy_server->passwd));
+		MyFree(yy_server->passwd);
+	}
+	DupString(yy_server->passwd, data);
 }
 
 static void
 conf_set_connect_port(void *data)
 {
-	yy_aconf->port = *(unsigned int *) data;
+	int port = *(unsigned int *) data;
+
+	if(port < 1)
+		port = PORTNUM;
+
+	yy_server->port = port;
 }
 
 static void
@@ -1312,10 +1308,10 @@ conf_set_connect_aftype(void *data)
 	char *aft = data;
 
 	if(strcasecmp(aft, "ipv4") == 0)
-		yy_aconf->aftype = AF_INET;
+		yy_server->aftype = AF_INET;
 #ifdef IPV6
 	else if(strcasecmp(aft, "ipv6") == 0)
-		yy_aconf->aftype = AF_INET6;
+		yy_server->aftype = AF_INET6;
 #endif
 	else
 		conf_report_error("connect::aftype '%s' is unknown.", aft);
@@ -1327,9 +1323,9 @@ conf_set_connect_encrypted(void *data)
 	int yesno = *(unsigned int *) data;
 
 	if(yesno)
-		yy_aconf->flags |= CONF_FLAGS_ENCRYPTED;
+		yy_server->flags |= SERVER_ENCRYPTED;
 	else
-		yy_aconf->flags &= ~CONF_FLAGS_ENCRYPTED;
+		yy_server->flags &= ~SERVER_ENCRYPTED;
 }
 
 static void
@@ -1338,19 +1334,11 @@ conf_set_connect_rsa_public_key_file(void *data)
 #ifdef HAVE_LIBCRYPTO
 	BIO *file;
 
-	if(yy_aconf->rsa_public_key)
+	if(yy_server->rsa_pubkey)
 	{
-		RSA_free(yy_aconf->rsa_public_key);
-		yy_aconf->rsa_public_key = NULL;
+		RSA_free(yy_server->rsa_pubkey);
+		yy_server->rsa_pubkey = NULL;
 	}
-
-	if(yy_aconf->rsa_public_key_file)
-	{
-		MyFree(yy_aconf->rsa_public_key_file);
-		yy_aconf->rsa_public_key_file = NULL;
-	}
-
-	DupString(yy_aconf->rsa_public_key_file, data);
 
 	file = BIO_new_file(data, "r");
 
@@ -1361,9 +1349,9 @@ conf_set_connect_rsa_public_key_file(void *data)
 		return;
 	}
 
-	yy_aconf->rsa_public_key = (RSA *) PEM_read_bio_RSA_PUBKEY(file, NULL, 0, NULL);
+	yy_server->rsa_pubkey = (RSA *) PEM_read_bio_RSA_PUBKEY(file, NULL, 0, NULL);
 
-	if(yy_aconf->rsa_public_key == NULL)
+	if(yy_server->rsa_pubkey == NULL)
 	{
 		conf_report_error
 			("Ignoring connect::rsa_public_key_file -- Key invalid; check syntax.");
@@ -1385,9 +1373,9 @@ conf_set_connect_compressed(void *data)
 	int yesno = *(unsigned int *) data;
 
 	if(yesno)
-		yy_aconf->flags |= CONF_FLAGS_COMPRESSED;
+		yy_server->flags |= SERVER_COMPRESSED;
 	else
-		yy_aconf->flags &= ~CONF_FLAGS_COMPRESSED;
+		yy_server->flags &= ~SERVER_COMPRESSED;
 #else
 	conf_report_error("Ignoring connect::compressed -- zlib not available.");
 #endif
@@ -1399,9 +1387,9 @@ conf_set_connect_topicburst(void *data)
 	int yesno = *(unsigned int *) data;
 
 	if(yesno)
-		yy_aconf->flags |= CONF_FLAGS_TB;
+		yy_server->flags |= SERVER_TB;
 	else
-		yy_aconf->flags &= ~CONF_FLAGS_TB;
+		yy_server->flags &= ~SERVER_TB;
 }
 
 static void
@@ -1410,9 +1398,9 @@ conf_set_connect_auto(void *data)
 	int yesno = *(unsigned int *) data;
 
 	if(yesno)
-		yy_aconf->flags |= CONF_FLAGS_ALLOW_AUTO_CONN;
+		yy_server->flags |= SERVER_AUTOCONN;
 	else
-		yy_aconf->flags &= ~CONF_FLAGS_ALLOW_AUTO_CONN;
+		yy_server->flags &= ~SERVER_AUTOCONN;
 }
 
 static void
@@ -1420,14 +1408,14 @@ conf_set_connect_hub_mask(void *data)
 {
 	struct remote_conf *yy_hub;
 
-	if(EmptyString(yy_aconf->name))
+	if(EmptyString(yy_server->name))
 		return;
 
 	yy_hub = make_remote_conf();
 	yy_hub->flags = CONF_HUB;
 
 	DupString(yy_hub->host, data);
-	DupString(yy_hub->server, yy_aconf->name);
+	DupString(yy_hub->server, yy_server->name);
 	dlinkAdd(yy_hub, &yy_hub->node, &hubleaf_conf_list);
 }
 
@@ -1436,22 +1424,22 @@ conf_set_connect_leaf_mask(void *data)
 {
 	struct remote_conf *yy_leaf;
 
-	if(EmptyString(yy_aconf->name))
+	if(EmptyString(yy_server->name))
 		return;
 
 	yy_leaf = make_remote_conf();
 	yy_leaf->flags = CONF_LEAF;
 
 	DupString(yy_leaf->host, data);
-	DupString(yy_leaf->server, yy_aconf->name);
+	DupString(yy_leaf->server, yy_server->name);
 	dlinkAdd(yy_leaf, &yy_leaf->node, &hubleaf_conf_list);
 }
 
 static void
 conf_set_connect_class(void *data)
 {
-	MyFree(yy_aconf->className);
-	DupString(yy_aconf->className, data);
+	MyFree(yy_server->class_name);
+	DupString(yy_server->class_name, data);
 }
 
 static int

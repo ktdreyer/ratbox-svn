@@ -304,11 +304,7 @@ struct admin_info
 	char *email;
 };
 
-/* bleh. have to become global. */
-extern int scount;
-
 /* All variables are GLOBAL */
-extern struct ConfItem *ConfigItemList;	/* conf list head */
 extern int specific_ipv4_vhost;	/* used in s_bsd.c */
 extern int specific_ipv6_vhost;
 extern struct config_file_entry ConfigFileEntry;	/* defined in ircd.c */
@@ -339,14 +335,10 @@ extern void free_conf(struct ConfItem *);
 extern void read_conf_files(int cold);
 
 extern int attach_conf(struct Client *, struct ConfItem *);
-extern int attach_connect_block(struct Client *client, const char *name, const char *host);
 extern int check_client(struct Client *client_p, struct Client *source_p, const char *);
 
 extern int detach_conf(struct Client *);
 
-extern struct ConfItem *find_conf_exact(const char *name, const char *user,
-					const char *host, int statmask);
-extern struct ConfItem *find_conf_by_name(const char *name, int status);
 extern struct ConfItem *find_kill(struct Client *);
 extern int conf_connect_allowed(struct sockaddr_storage *addr, int);
 
@@ -356,7 +348,6 @@ extern void get_printable_conf(struct ConfItem *,
 			       char **, char **, char **, char **, int *, char **);
 extern void get_printable_kline(struct Client *, struct ConfItem *,
 				char **, char **, char **, char **);
-extern void report_configured_links(struct Client *client_p, int mask);
 
 extern void yyerror(const char *);
 extern int conf_yy_fatal_error(const char *);
@@ -392,7 +383,6 @@ extern void conf_add_class_to_conf(struct ConfItem *);
 extern void conf_add_me(struct ConfItem *);
 extern void conf_add_class(struct ConfItem *, int);
 extern void conf_add_d_conf(struct ConfItem *);
-extern void conf_add_conf(struct ConfItem *);
 extern void flush_expired_ips(void *);
 
 

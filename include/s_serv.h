@@ -46,7 +46,7 @@
 #define STARTUP_CONNECTIONS_TIME 60
 
 struct Client;
-struct ConfItem;
+struct server_conf;
 struct Channel;
 
 /* Capabilities */
@@ -155,8 +155,7 @@ extern int refresh_user_links;
 extern int hunt_server(struct Client *client_pt,
 		       struct Client *source_pt,
 		       const char *command, int server, int parc, const char **parv);
-extern void send_capabilities(struct Client *, struct ConfItem *conf, int);
-extern void set_autoconn(struct Client *, char *, char *, int);
+extern void send_capabilities(struct Client *, int);
 extern const char *show_capabilities(struct Client *client);
 extern void try_connections(void *unused);
 extern void start_collect_zipstats(void);
@@ -165,6 +164,6 @@ extern void collect_zipstats(void *unused);
 extern int check_server(const char *name, struct Client *server);
 extern int server_estab(struct Client *client_p);
 
-extern int serv_connect(struct ConfItem *, struct Client *);
+extern int serv_connect(struct server_conf *, struct Client *);
 
 #endif /* INCLUDED_s_serv_h */
