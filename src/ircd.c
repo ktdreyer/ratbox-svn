@@ -557,7 +557,8 @@ int main(int argc, char *argv[])
   initialVMTop = get_vm_top();
 
   ServerRunning = 0;
-
+  /* It ain't random, but it ought to be a little harder to guess */
+  srandom((SystemTime.tv_sec / SystemTime.tv_usec+1) * getpid() );
   memset(&me, 0, sizeof(me));
   memset(&meLocalUser, 0, sizeof(meLocalUser));
   me.localClient = &meLocalUser;

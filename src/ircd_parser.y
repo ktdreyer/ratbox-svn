@@ -201,6 +201,7 @@ int   class_redirport_var;
 %token  PASSWORD
 %token  PATH
 %token  PERSIST_TIME
+%token  PING_COOKIE
 %token  PING_TIME
 %token  PORT
 %token  QSTRING
@@ -1934,7 +1935,7 @@ general_item:       general_failed_oper_notice |
                     general_default_cipher_preference |
                     general_compression_level | general_client_flood |
                     general_throttle_time | general_havent_read_conf |
-                    general_dot_in_ip6_addr |
+                    general_dot_in_ip6_addr | general_ping_cookie |
                     error
 
 general_failed_oper_notice:   FAILED_OPER_NOTICE '=' TYES ';'
@@ -2280,6 +2281,15 @@ general_egdpool_path: EGDPOOL_PATH '=' QSTRING ';'
   {
     MyFree(ConfigFileEntry.egdpool_path);
     DupString(ConfigFileEntry.egdpool_path, yylval.string);
+  } ;
+
+general_ping_cookie: PING_COOKIE '=' TYES ';'
+  {
+    ConfigFileEntry.ping_cookie = 1;
+  } |
+    PING_COOKIE '=' TNO ';'
+  {
+    ConfigFileEntry.ping_cookie = 0;
   } ;
 
 general_throttle_time: THROTTLE_TIME '=' timespec ';'

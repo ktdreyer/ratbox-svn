@@ -289,6 +289,16 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
   assert(0 != source_p->localClient);
   assert(source_p->username != username);
 
+
+  /* If the user  */
+  if(ConfigFileEntry.ping_cookie && !(source_p->flags2 & FLAGS2_PING_COOKIE) && !source_p->random_ping)
+  {
+    source_p->random_ping = (unsigned long)random();
+    sendto_one(source_p, "PING :%lu", (unsigned long)source_p->random_ping);
+    source_p->flags |= FLAGS_PINGSENT;
+    return 0;
+  } 
+
   user->last = CurrentTime;
   /* Straight up the maximum rate of flooding... */
   source_p->localClient->allow_read = MAX_FLOOD_PER_SEC_I;
@@ -803,10 +813,12 @@ int do_local_user(char* nick, struct Client* client_p, struct Client* source_p,
   user->server = me.name;
 
   strncpy_irc(source_p->info, realname, REALLEN);
-  
+ 
   if (source_p->name[0])
+  { 
     /* NICK already received, now I have USER... */
-    return register_local_user(client_p, source_p, source_p->name, username);
+    	return register_local_user(client_p, source_p, source_p->name, username);
+  }
   else
     {
       if (!IsGotId(source_p)) 

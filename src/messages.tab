@@ -541,7 +541,7 @@ static  char *  replies[] = {
 /* 510 */	NULL,
 /* 511 */	NULL,
 /* 512 */	NULL,
-/* 513 */	NULL,
+/* 513 ERR_WRONGPONG */		"%s 513 %s :To connect type /QUOTE PONG %lu",
 /* 514 */	NULL,
 /* 515 */	NULL,
 /* 516 */	NULL,

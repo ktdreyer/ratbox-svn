@@ -209,7 +209,9 @@ struct Client
    */
   dlink_list	allow_list;	/* clients I'll allow to talk to me */
   dlink_list	on_allow_list;	/* clients that have =me= on their allow list*/
-
+  
+  unsigned long random_ping;
+  
   struct LocalUser *localClient;
 };
 
@@ -446,8 +448,8 @@ struct LocalUser
                                  FLAGS2_OPER_REHASH| \
                                  FLAGS2_OPER_ADMIN)
 
-#define FLAGS2_CBURST       0x10000  /* connection burst being sent */
-
+#define FLAGS2_CBURST		0x10000  /* connection burst being sent */
+#define FLAGS2_PING_COOKIE	0x20000		/* PING Cookie */
 #define FLAGS2_IDLE_LINED       0x40000
 #define FLAGS2_IP_SPOOFING      0x80000        /* client IP is spoofed */
 #define FLAGS2_FLOODDONE        0x200000      /* Flood grace period has

@@ -236,6 +236,7 @@ struct config_file_entry
   /* 0 == don't use throttle... */
   int           throttle_time;
   int           use_egd;
+  int		ping_cookie;
 #ifdef HAVE_LIBCRYPTO
   struct EncCapability *default_cipher_preference;
 #endif

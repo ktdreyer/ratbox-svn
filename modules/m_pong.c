@@ -23,6 +23,8 @@
  *   $Id$
  */
 #include "handlers.h"
+#include "s_conf.h"
+#include "s_user.h"
 #include "client.h"
 #include "hash.h"       /* for find_client() */
 #include "ircd.h"
@@ -110,11 +112,29 @@ static void mr_pong(struct Client *client_p,
                     int parc,
                     char *parv[])
 {
-  if (parc < 2 || *parv[1] == '\0')
+  if (parc == 2 && *parv[1] != '\0')
     {
-      sendto_one(source_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
-      return;
-    }
+      if(ConfigFileEntry.ping_cookie && source_p->user && source_p->name[0])
+      {
+	unsigned long incoming_ping = strtoul(parv[1], (char **)NULL, 10);
+	if(incoming_ping)
+	{
+	  if(source_p->random_ping == incoming_ping)
+	  {
+		char buf[USERLEN+1];
+		strlcpy(buf, source_p->username, USERLEN);
+		source_p->flags2 |= FLAGS2_PING_COOKIE;
+		register_local_user(client_p, source_p, source_p->name, buf);
+	  } else
+	  {
+		sendto_one(source_p, form_str(ERR_WRONGPONG), me.name, source_p->name, source_p->random_ping);
+		return;
+	  }
+	}
+      }
+     
+    } else
+    	sendto_one(source_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
   
   source_p->flags &= ~FLAGS_PINGSENT;
 }
