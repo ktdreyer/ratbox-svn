@@ -1,3 +1,7 @@
+*** 20010611_2 by androsyn
+Fixed a bit of code that gcc 3 whined about. Apparently VMS's compiler whined too..
+
+
 *** 20010611_1 by androsyn
 Fixed /dev/poll to do something useful other than eat cpu..
 
