@@ -86,6 +86,8 @@ m_whois(struct Client *client_p, struct Client *source_p, int parc, const char *
 			{
 				sendto_one(source_p, form_str(RPL_LOAD2HI),
 					   me.name, source_p->name, "WHOIS");
+				sendto_one_numeric(source_p, RPL_ENDOFWHOIS, 
+						   form_str(RPL_ENDOFWHOIS), parv[1]);
 				return 0;
 			}
 			else

@@ -2409,13 +2409,12 @@ conf_report_error(const char *fmt, ...)
 
 	if (testing_conf)
 	{
-		fprintf(stderr, "\"%s\", line %d: %s\n", conffilebuf, lineno + 1, msg);
+		fprintf(stderr, "\"%s\", line %d: %s\n", current_file, lineno + 1, msg);
 		return;
 	}
 
-	ilog(L_MAIN, "\"%s\", line %d: %s", conffilebuf, lineno + 1, msg);
-
-	sendto_realops_flags(UMODE_ALL, L_ALL, "\"%s\", line %d: %s", conffilebuf, lineno + 1, msg);
+	ilog(L_MAIN, "\"%s\", line %d: %s", current_file, lineno + 1, msg);
+	sendto_realops_flags(UMODE_ALL, L_ALL, "\"%s\", line %d: %s", current_file, lineno + 1, msg);
 }
 
 int

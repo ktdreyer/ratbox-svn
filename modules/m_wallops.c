@@ -37,29 +37,30 @@
 #include "modules.h"
 #include "s_serv.h"
 
-static int mo_wallops(struct Client *, struct Client *, int, const char **);
+static int mo_operwall(struct Client *, struct Client *, int, const char **);
+static int ms_operwall(struct Client *, struct Client *, int, const char **);
 static int ms_wallops(struct Client *, struct Client *, int, const char **);
 
 struct Message wallops_msgtab = {
 	"WALLOPS", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, {mo_wallops, 2}, {ms_wallops, 2}, {mo_wallops, 2}}
+	{mg_unreg, mg_not_oper, {ms_wallops, 2}, {ms_wallops, 2}, {mo_operwall, 2}}
 };
 struct Message operwall_msgtab = {
 	"OPERWALL", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, {mo_wallops, 2}, mg_ignore, {mo_wallops, 2}}
+	{mg_unreg, mg_not_oper, {ms_operwall, 2}, mg_ignore, {mo_operwall, 2}}
 };
 
 mapi_clist_av1 wallops_clist[] = { &wallops_msgtab, &operwall_msgtab, NULL };
 DECLARE_MODULE_AV1(wallops, NULL, NULL, wallops_clist, NULL, NULL, "$Revision$");
 
 /*
- * mo_wallops (write to *all* opers currently online)
+ * mo_operwall (write to *all* opers currently online)
  *      parv[1] = message text
  */
 static int
-mo_wallops(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+mo_operwall(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	if(MyClient(source_p) && !IsOperOperwall(source_p))
+	if(!IsOperOperwall(source_p))
 	{
 		sendto_one(source_p, ":%s NOTICE %s :You need operwall = yes;",
 			   me.name, source_p->name);
@@ -76,13 +77,34 @@ mo_wallops(struct Client *client_p, struct Client *source_p, int parc, const cha
 }
 
 /*
+ * ms_operwall - OPERWALL message handler
+ *  (write to *all* local opers currently online)
+ *      parv[0] = sender prefix
+ *      parv[1] = message text
+ */
+static int
+ms_operwall(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	sendto_server(client_p, NULL, CAP_TS6, NOCAPS, ":%s OPERWALL :%s",
+		      use_id(source_p), parv[1]);
+	sendto_server(client_p, NULL, NOCAPS, CAP_TS6, ":%s OPERWALL :%s",
+		      source_p->name, parv[1]);
+	sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", parv[1]);
+
+	return 0;
+}
+
+/*
  * ms_wallops (write to *all* opers currently online)
  *      parv[1] = message text
  */
 static int
 ms_wallops(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	sendto_wallops_flags(UMODE_WALLOP, source_p, "%s", parv[1]);
+	if(IsPerson(source_p))
+		sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", parv[1]);
+	else
+		sendto_wallops_flags(UMODE_WALLOP, source_p, "%s", parv[1]);
 
 	sendto_server(client_p, NULL, CAP_TS6, NOCAPS, ":%s WALLOPS :%s", 
 		      use_id(source_p), parv[1]);

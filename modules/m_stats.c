@@ -193,14 +193,18 @@ m_stats(struct Client *client_p, struct Client *source_p, int parc, const char *
 	int i;
 	char statchar;
 
+	statchar = parv[1][0];
+
 	if(MyClient(source_p) && !IsOper(source_p))
 	{
 		/* Check the user is actually allowed to do /stats, and isnt flooding */
 		if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
 		{
 			/* safe enough to give this on a local connect only */
-			sendto_one(source_p, form_str (RPL_LOAD2HI),
+			sendto_one(source_p, form_str(RPL_LOAD2HI),
 				   me.name, source_p->name, "STATS");
+			sendto_one_numeric(source_p, RPL_ENDOFSTATS, 
+					   form_str(RPL_ENDOFSTATS), statchar);
 			return 0;
 		}
 		else
@@ -209,8 +213,6 @@ m_stats(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 	if(hunt_server (client_p, source_p, ":%s STATS %s :%s", 2, parc, parv) != HUNTED_ISME)
 		return 0;
-
-	statchar = parv[1][0];
 
 	for (i = 0; stats_cmd_table[i].handler; i++)
 	{

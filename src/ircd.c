@@ -632,22 +632,22 @@ main(int argc, char *argv[])
 	/* We need this to initialise the fd array before anything else */
 	fdlist_init();
 	init_netio();		/* This needs to be setup early ! -- adrian */
-	/* Check if there is pidfile and daemon already running */
-#ifndef __vms
-	check_pidfile(pidFileName);
-#endif
 
 #ifdef __CYGWIN__
 	server_state_foreground = 1;
 #endif
 
-	if(!server_state_foreground)
+	/* Check if there is pidfile and daemon already running */
+	if(!testing_conf)
 	{
-		make_daemon();
-	}
-	else
-	{
-		print_startup(getpid());
+#ifndef __vms
+		check_pidfile(pidFileName);
+#endif
+
+		if(!server_state_foreground)
+			make_daemon();
+		else
+			print_startup(getpid());
 	}
 
 	/* Init the event subsystem */
@@ -686,7 +686,7 @@ main(int argc, char *argv[])
 	init_resolver();	/* Needs to be setup before the io loop */
 
 	if (testing_conf)
-		fprintf(stderr, "\nBeginning config test\n\n");
+		fprintf(stderr, "\nBeginning config test\n");
 	read_conf_files(YES);	/* cold start init conf files */
 #ifndef STATIC_MODULES
 

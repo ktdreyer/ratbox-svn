@@ -69,9 +69,9 @@ DECLARE_MODULE_AV1(kline, NULL, NULL, kline_clist, NULL, NULL, "$Revision$");
 /* Local function prototypes */
 static time_t valid_tkline(struct Client *source_p, const char *string);
 static int find_user_host(struct Client *source_p, const char *userhost, char *user, char *host);
-static int valid_comment(char *comment);
-static int valid_user_host(const char *user, const char *host);
-static int valid_wild_card(const char *user, const char *host);
+static int valid_comment(struct Client *source_p, char *comment);
+static int valid_user_host(struct Client *source_p, const char *user, const char *host);
+static int valid_wild_card(struct Client *source_p, const char *user, const char *host);
 
 static void apply_kline(struct Client *source_p, struct ConfItem *aconf,
 			const char *reason, const char *oper_reason, const char *current_date);
@@ -79,7 +79,7 @@ static void apply_tkline(struct Client *source_p, struct ConfItem *aconf,
 			 const char *, const char *, const char *, int);
 static int already_placed_kline(struct Client *, const char *, const char *, int);
 
-static void remove_permkline_match(struct Client *, const char *, const char *, int);
+static void remove_permkline_match(struct Client *, const char *, const char *);
 static int flush_write(struct Client *, FBFILE *, const char *, const char *);
 static int remove_temp_kline(const char *, const char *);
 
@@ -158,29 +158,6 @@ mo_kline(struct Client *client_p, struct Client *source_p,
 	if(parc != 0)
 		reason = LOCAL_COPY(*parv);
 
-	if(!valid_user_host(user, host))
-	{
-		sendto_one(source_p, ":%s NOTICE %s :Invalid K-Line",
-			   me.name, source_p->name);
-		return 0;
-	}
-
-	if(!valid_wild_card(user, host))
-	{
-		sendto_one(source_p,
-			   ":%s NOTICE %s :Please include at least %d non-wildcard characters with the user@host",
-			   me.name, source_p->name, ConfigFileEntry.min_nonwildcard);
-		return 0;
-	}
-
-	if(!valid_comment(reason))
-	{
-		sendto_one(source_p,
-			   ":%s NOTICE %s :Invalid character '\"' in comment",
-			   me.name, source_p->name);
-		return 0;
-	}
-
 	if(target_server != NULL)
 	{
 		sendto_match_servs(source_p, target_server, CAP_KLN,
@@ -196,6 +173,11 @@ mo_kline(struct Client *client_p, struct Client *source_p,
 	{
 		cluster_kline(source_p, tkline_time, user, host, reason);
 	}
+
+	if(!valid_user_host(source_p, user, host) || 
+	   !valid_wild_card(source_p, user, host) ||
+	   !valid_comment(source_p, reason))
+		return 0;
 
 	if(already_placed_kline(source_p, user, host, tkline_time))
 		return 0;
@@ -281,13 +263,19 @@ ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	khost = parv[4];
 	kreason = LOCAL_COPY(parv[5]);
 
-	if(find_cluster(source_p->user->server, CLUSTER_KLINE))
+	if(find_cluster(source_p->user->server, CLUSTER_KLINE) ||
+	   find_shared(source_p->username, source_p->host,
+		       source_p->user->server, OPER_K))
 	{
-		if(!valid_user_host(kuser, khost) || !valid_wild_card(kuser, khost) ||
-		   !valid_comment(kreason))
+		if(!valid_user_host(source_p, kuser, khost) || 
+		   !valid_wild_card(source_p, kuser, khost) ||
+		   !valid_comment(source_p, kreason))
 			return 0;
 
 		tkline_time = atoi(parv[2]);
+
+		if(already_placed_kline(source_p, kuser, khost, tkline_time))
+			return 0;
 
 		aconf = make_conf();
 
@@ -303,61 +291,6 @@ ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 			if(!EmptyString(oper_reason))
 				DupString(aconf->spasswd, oper_reason);
-		}
-
-		DupString(aconf->passwd, kreason);
-		current_date = smalldate();
-
-		if(tkline_time)
-			apply_tkline(source_p, aconf, kreason, oper_reason,
-				     current_date, tkline_time);
-		else
-			apply_kline(source_p, aconf, aconf->passwd, oper_reason, current_date);
-	}
-	else if(find_shared(source_p->username, source_p->host, source_p->user->server, OPER_K))
-	{
-		if(!valid_user_host(kuser, khost))
-		{
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "*** %s!%s@%s on %s is requesting an Invalid K-Line for [%s@%s] [%s]",
-					     source_p->name, source_p->username, source_p->host,
-					     source_p->user->server, kuser, khost, kreason);
-			return 0;
-		}
-
-		if(!valid_wild_card(kuser, khost))
-		{
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "*** %s!%s@%s on %s is requesting a K-Line without %d wildcard chars for [%s@%s] [%s]",
-					     source_p->name, source_p->username, source_p->host,
-					     source_p->user->server,
-					     ConfigFileEntry.min_nonwildcard, kuser, khost,
-					     kreason);
-			return 0;
-		}
-
-		if(!valid_comment(kreason))
-			return 0;
-
-		tkline_time = atoi(parv[2]);
-
-		/* We check if the kline already exists after we've announced its 
-		 * arrived, to avoid confusing opers - fl
-		 */
-		if(already_placed_kline(source_p, kuser, khost, tkline_time))
-			return 0;
-
-		aconf = make_conf();
-
-		aconf->status = CONF_KILL;
-		DupString(aconf->user, kuser);
-		DupString(aconf->host, khost);
-
-		/* Look for an oper reason */
-		if((oper_reason = strchr(kreason, '|')) != NULL)
-		{
-			*oper_reason = '\0';
-			oper_reason++;
 		}
 
 		DupString(aconf->passwd, kreason);
@@ -452,7 +385,7 @@ mo_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 		return 0;
 	}
 
-	remove_permkline_match(source_p, host, user, 0);
+	remove_permkline_match(source_p, host, user);
 
 	return 0;
 }
@@ -495,7 +428,7 @@ ms_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 			return 0;
 		}
 
-		remove_permkline_match(source_p, khost, kuser, 1);
+		remove_permkline_match(source_p, khost, kuser);
 	}
 	else if(find_shared(source_p->username, source_p->host,
 			    source_p->user->server, OPER_UNKLINE))
@@ -515,7 +448,7 @@ ms_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 			return 0;
 		}
 
-		remove_permkline_match(source_p, khost, kuser, 0);
+		remove_permkline_match(source_p, khost, kuser);
 	}
 
 	return 0;
@@ -660,11 +593,14 @@ find_user_host(struct Client *source_p, const char *userhost, char *luser, char 
  * side effects -
  */
 static int
-valid_user_host(const char *luser, const char *lhost)
+valid_user_host(struct Client *source_p, const char *luser, const char *lhost)
 {
 	/* # is invalid, as is '!' (n!u@h kline) */
 	if(strchr(lhost, '#') || strchr(luser, '#') || strchr(luser, '!'))
+	{
+		sendto_one_notice(source_p, ":Invalid K-Line");
 		return 0;
+	}
 
 	return 1;
 }
@@ -676,7 +612,7 @@ valid_user_host(const char *luser, const char *lhost)
  * side effects -
  */
 static int
-valid_wild_card(const char *luser, const char *lhost)
+valid_wild_card(struct Client *source_p, const char *luser, const char *lhost)
 {
 	const char *p;
 	char tmpch;
@@ -688,12 +624,9 @@ valid_wild_card(const char *luser, const char *lhost)
 	{
 		if(!IsKWildChar(tmpch))
 		{
-			/*
-			 * If we find enough non-wild characters, we can
-			 * break - no point in searching further.
-			 */
+			/* found enough chars, return */
 			if(++nonwild >= ConfigFileEntry.min_nonwildcard)
-				break;
+				return 1;
 		}
 	}
 
@@ -703,13 +636,14 @@ valid_wild_card(const char *luser, const char *lhost)
 	{
 		if(!IsKWildChar(tmpch))
 			if(++nonwild >= ConfigFileEntry.min_nonwildcard)
-				break;
+				return 1;
 	}
 
-	if(nonwild < ConfigFileEntry.min_nonwildcard)
-		return 0;
-
-	return 1;
+	sendto_one_notice(source_p,
+		   	  ":Please include at least %d non-wildcard "
+			  "characters with the user@host",
+			  ConfigFileEntry.min_nonwildcard);
+	return 0;
 }
 
 /*
@@ -720,10 +654,13 @@ valid_wild_card(const char *luser, const char *lhost)
  * side effects - NONE
  */
 static int
-valid_comment(char *comment)
+valid_comment(struct Client *source_p, char *comment)
 {
 	if(strchr(comment, '"'))
+	{
+		sendto_one_notice(source_p, ":Invalid character '\"' in comment");
 		return 0;
+	}
 
 	if(strlen(comment) > REASONLEN)
 		comment[REASONLEN] = '\0';
@@ -789,7 +726,7 @@ already_placed_kline(struct Client *source_p, const char *luser, const char *lho
  * hunts for a permanent kline, and removes it.
  */
 static void
-remove_permkline_match(struct Client *source_p, const char *host, const char *user, int cluster)
+remove_permkline_match(struct Client *source_p, const char *host, const char *user)
 {
 	FBFILE *in, *out;
 	int pairme = 0;
@@ -876,9 +813,8 @@ remove_permkline_match(struct Client *source_p, const char *host, const char *us
 	}
 	else if(!pairme)
 	{
-		if(!cluster)
-			sendto_one_notice(source_p, ":No K-Line for %s@%s",
-					  user, host);
+		sendto_one_notice(source_p, ":No K-Line for %s@%s",
+				  user, host);
 
 		if(temppath != NULL)
 			(void) unlink(temppath);
@@ -889,11 +825,8 @@ remove_permkline_match(struct Client *source_p, const char *host, const char *us
 	(void) rename(temppath, filename);
 	rehash(0);
 
-	if(!cluster)
-	{
-		sendto_one_notice(source_p, ":K-Line for [%s@%s] is removed",
-				  user, host);
-	}
+	sendto_one_notice(source_p, ":K-Line for [%s@%s] is removed",
+			  user, host);
 
 	sendto_realops_flags(UMODE_ALL, L_ALL,
 			     "%s has removed the K-Line for: [%s@%s]",

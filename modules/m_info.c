@@ -541,12 +541,11 @@ m_info(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		/* safe enough to give this on a local connect only */
 		sendto_one(source_p, form_str(RPL_LOAD2HI),
 			   me.name, source_p->name, "INFO");
+		sendto_one_numeric(source_p, RPL_ENDOFINFO, form_str(RPL_ENDOFINFO));
 		return 0;
 	}
 	else
-	{
 		last_used = CurrentTime;
-	}
 
 	if(hunt_server(client_p, source_p, ":%s INFO :%s", 1, parc, parv) != HUNTED_ISME)
 		return 0;

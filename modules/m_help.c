@@ -69,6 +69,9 @@ m_help(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		/* safe enough to give this on a local connect only */
 		sendto_one(source_p, form_str(RPL_LOAD2HI), 
 			   me.name, source_p->name, "HELP");
+		sendto_one(source_p, form_str(RPL_ENDOFHELP),
+			   me.name, source_p->name,
+			   (parc > 1 && !EmptyString(parv[1])) ? parv[1] : "index");
 		return 0;
 	}
 	else

@@ -278,7 +278,7 @@ send_user_motd(struct Client *source_p)
 	struct cacheline *lineptr;
 	dlink_node *ptr;
 	const char *myname = get_id(&me, source_p);
-	const char *nick = EmptyString(source_p->name) ? "*" : get_id(source_p, source_p);
+	const char *nick = get_id(source_p, source_p);
 
 	if(user_motd == NULL || dlink_list_length(&user_motd->contents) == 0)
 	{

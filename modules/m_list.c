@@ -68,6 +68,7 @@ m_list(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	{
 		sendto_one(source_p, form_str(RPL_LOAD2HI),
 			   me.name, source_p->name, "LIST");
+		sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
 		return 0;
 	}
 	else

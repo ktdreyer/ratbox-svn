@@ -80,7 +80,7 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 
 	mask = LOCAL_COPY(parv[1]);
 
-	(void) collapse(mask);
+	collapse(mask);
 
 	/* '/who *' */
 	if((*(mask + 1) == '\0') && (*mask == '*'))
@@ -162,6 +162,8 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 		{
 			sendto_one(source_p, form_str(RPL_LOAD2HI),
 					me.name, source_p->name, "WHO");
+			sendto_one(source_p, form_str(RPL_ENDOFWHO),
+				   me.name, source_p->name, "*");
 			return 0;
 		}
 		else

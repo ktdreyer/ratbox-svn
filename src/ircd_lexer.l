@@ -76,6 +76,7 @@ int ieof(void);
 int lineno_stack[MAX_INCLUDE_DEPTH];
 char conffile_stack[MAX_INCLUDE_DEPTH][IRCD_BUFSIZE];
 char conffilebuf[IRCD_BUFSIZE+1];
+char *current_file = conffilebuf;
 
 FBFILE *inc_fbfile_in[MAX_INCLUDE_DEPTH];
 
@@ -229,6 +230,8 @@ void cinclude(void)
     lineno_stack[include_stack_ptr] = lineno;
     lineno = 1;
     inc_fbfile_in[include_stack_ptr] = conf_fbfile_in;
+    strcpy(conffile_stack[include_stack_ptr], c);
+    current_file = conffile_stack[include_stack_ptr];
     include_stack[include_stack_ptr++] = YY_CURRENT_BUFFER;
     conf_fbfile_in = tmp_fbfile_in;
     yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
@@ -251,7 +254,12 @@ int ieof(void)
   yy_delete_buffer(YY_CURRENT_BUFFER);
   lineno = lineno_stack[include_stack_ptr];
   conf_fbfile_in = inc_fbfile_in[include_stack_ptr];
-  strlcpy(conffilebuf, conffile_stack[include_stack_ptr], IRCD_BUFSIZE); 
+
+  if(include_stack_ptr)
+    current_file = conffile_stack[include_stack_ptr];
+  else
+    current_file = conffilebuf;
+
   yy_switch_to_buffer(include_stack[include_stack_ptr]);
   return 0;
 }

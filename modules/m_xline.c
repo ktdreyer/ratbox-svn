@@ -71,10 +71,10 @@ struct Message unxline_msgtab = {
 mapi_clist_av1 xline_clist[] =  { &xline_msgtab, &unxline_msgtab, NULL };
 DECLARE_MODULE_AV1(xline, NULL, NULL, xline_clist, NULL, NULL, "$Revision$");
 
-static int valid_xline(struct Client *, const char *, const char *, int warn);
+static int valid_xline(struct Client *, const char *, const char *);
 static void write_xline(struct Client *source_p, const char *gecos, 
 			const char *reason, int xtype);
-static void remove_xline(struct Client *source_p, const char *gecos, int warn);
+static void remove_xline(struct Client *source_p, const char *gecos);
 
 
 /* m_xline()
@@ -98,8 +98,7 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 		return 0;
 	}
 
-	xconf = find_xline(parv[1]);
-	if(xconf != NULL)
+	if((xconf = find_xline(parv[1])) != NULL)
 	{
 		sendto_one(source_p, ":%s NOTICE %s :[%s] already X-Lined by [%s] - %s",
 			   me.name, source_p->name, parv[1], xconf->name, xconf->reason);
@@ -145,9 +144,6 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 		return 0;
 	}
 
-	if(!valid_xline(source_p, parv[1], reason, 1))
-		return 0;
-	
 	if(target_server != NULL)
 	{
 		sendto_match_servs(source_p, target_server, CAP_CLUSTER,
@@ -160,6 +156,9 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	else if(dlink_list_length(&cluster_list) > 0)
 		cluster_xline(source_p, parv[1], xtype, reason);
 
+	if(!valid_xline(source_p, parv[1], reason))
+		return 0;
+	
 	write_xline(source_p, parv[1], reason, xtype);
 
 	return 0;
@@ -181,7 +180,6 @@ ms_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 			   "XLINE %s %s %s :%s",
 			   parv[1], parv[2], parv[3], parv[4]);
 
-
 	if(!IsPerson(source_p))
 		return 0;
 
@@ -190,22 +188,11 @@ ms_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 		return 0;
 
 	/* first look to see if we're clustering with the server */
-	if(find_cluster(source_p->user->server, CLUSTER_XLINE))
+	if(find_cluster(source_p->user->server, CLUSTER_XLINE) ||
+	   find_shared(source_p->username, source_p->host, 
+		       source_p->user->server, OPER_XLINE))
 	{
-		if(!valid_xline(source_p, parv[2], parv[4], 0))
-			return 0;
-
-		/* already xlined */
-		if((xconf = find_xline(parv[2])) != NULL)
-			return 0;
-
-		write_xline(source_p, parv[2], parv[4], atoi(parv[3]));
-	}
-
-	/* then look for a shared block allowing them to xline.. */
-	else if(find_shared(source_p->username, source_p->host, source_p->user->server, OPER_XLINE))
-	{
-		if(!valid_xline(source_p, parv[2], parv[4], 1))
+		if(!valid_xline(source_p, parv[2], parv[4]))
 			return 0;
 
 		/* already xlined */
@@ -231,32 +218,29 @@ ms_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
  */
 static int
 valid_xline(struct Client *source_p, const char *gecos,
-	    const char *reason, int warn)
+	    const char *reason)
 {
 	if(EmptyString(reason))
 	{
-		if(warn)
-			sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-				   get_id(&me, source_p), 
-				   get_id(source_p, source_p), "XLINE");
+		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+			   get_id(&me, source_p), 
+			   get_id(source_p, source_p), "XLINE");
 		return 0;
 	}
 
 	if(strchr(reason, ':') != NULL)
 	{
-		if(warn)
-			sendto_one_notice(source_p,
-					  ":Invalid character ':' in comment");
+		sendto_one_notice(source_p,
+				  ":Invalid character ':' in comment");
 		return 0;
 	}
 
 	if(!valid_wild_card_simple(gecos))
 	{
-		if(warn)
-			sendto_one_notice(source_p,
-					  ":Please include at least %d non-wildcard "
-					  "characters with the xline",
-					  ConfigFileEntry.min_nonwildcard_simple);
+		sendto_one_notice(source_p,
+				  ":Please include at least %d non-wildcard "
+				  "characters with the xline",
+				  ConfigFileEntry.min_nonwildcard_simple);
 		return 0;
 	}
 
@@ -328,7 +312,7 @@ mo_unxline(struct Client *client_p, struct Client *source_p, int parc, const cha
 		return 0;
 	}
 
-	remove_xline(source_p, parv[1], 1);
+	remove_xline(source_p, parv[1]);
 
 	return 0;
 }
@@ -353,13 +337,11 @@ ms_unxline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	if(!IsPerson(source_p))
 		return 0;
 
-	if(find_cluster(source_p->user->server, CLUSTER_UNXLINE))
+	if(find_cluster(source_p->user->server, CLUSTER_UNXLINE) ||
+	   find_shared(source_p->username, source_p->host, 
+		       source_p->user->server, OPER_XLINE))
 	{
-		remove_xline(source_p, parv[2], 0);
-	}
-	else if(find_shared(source_p->username, source_p->host, source_p->user->server, OPER_XLINE))
-	{
-		remove_xline(source_p, parv[2], 1);
+		remove_xline(source_p, parv[2]);
 	}
 
 	return 0;
@@ -372,7 +354,7 @@ ms_unxline(struct Client *client_p, struct Client *source_p, int parc, const cha
  * side effects - removes xline from conf, if exists
  */
 static void
-remove_xline(struct Client *source_p, const char *huntgecos, int warn)
+remove_xline(struct Client *source_p, const char *huntgecos)
 {
 	FBFILE *in, *out;
 	char buf[BUFSIZE];
@@ -391,8 +373,7 @@ remove_xline(struct Client *source_p, const char *huntgecos, int warn)
 
 	if((in = fbopen(filename, "r")) == NULL)
 	{
-		if(warn)
-			sendto_one_notice(source_p, ":Cannot open %s", filename);
+		sendto_one_notice(source_p, ":Cannot open %s", filename);
 		return;
 	}
 
@@ -400,8 +381,7 @@ remove_xline(struct Client *source_p, const char *huntgecos, int warn)
 
 	if((out = fbopen(temppath, "w")) == NULL)
 	{
-		if(warn)
-			sendto_one_notice(source_p, ":Cannot open %s", temppath);
+		sendto_one_notice(source_p, ":Cannot open %s", temppath);
 		fbclose(in);
 		umask(oldumask);
 		return;
@@ -448,15 +428,13 @@ remove_xline(struct Client *source_p, const char *huntgecos, int warn)
 
 	if(error_on_write)
 	{
-		if(warn)
-			sendto_one_notice(source_p,
-					  ":Couldn't write temp xline file, aborted");
+		sendto_one_notice(source_p,
+				  ":Couldn't write temp xline file, aborted");
 		return;
 	}
 	else if(found_xline == 0)
 	{
-		if(warn)
-			sendto_one_notice(source_p, ":No X-Line for %s", huntgecos);
+		sendto_one_notice(source_p, ":No X-Line for %s", huntgecos);
 
 		if(temppath != NULL)
 			(void) unlink(temppath);
@@ -466,9 +444,7 @@ remove_xline(struct Client *source_p, const char *huntgecos, int warn)
 	(void) rename(temppath, filename);
 	rehash(0);
 
-	if(warn)
-		sendto_one_notice(source_p, ":X-Line for [%s] is removed", huntgecos);
-
+	sendto_one_notice(source_p, ":X-Line for [%s] is removed", huntgecos);
 	sendto_realops_flags(UMODE_ALL, L_ALL,
 			     "%s has removed the X-Line for: [%s]",
 			     get_oper_name(source_p), huntgecos);

@@ -38,13 +38,12 @@
 #include "s_conf.h"
 #include "cache.h"
 
-static int mr_motd(struct Client *, struct Client *, int, const char **);
 static int m_motd(struct Client *, struct Client *, int, const char **);
 static int mo_motd(struct Client *, struct Client *, int, const char **);
 
 struct Message motd_msgtab = {
 	"MOTD", 0, 0, 0, MFLG_SLOW,
-	{{mr_motd, 0}, {m_motd, 0}, {mo_motd, 0}, mg_ignore, {mo_motd, 0}}
+	{mg_unreg, {m_motd, 0}, {mo_motd, 0}, mg_ignore, {mo_motd, 0}}
 };
 
 int doing_motd_hook;
@@ -58,20 +57,6 @@ mapi_hlist_av1 motd_hlist[] = {
 DECLARE_MODULE_AV1(motd, NULL, NULL, motd_clist, NULL, NULL, "$Revision$");
 
 static void motd_spy(struct Client *);
-
-/* mr_motd()
- *
- * parv[0] = sender prefix
- */
-static int
-mr_motd(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
-{
-	/* allow unregistered clients to see the motd, but exit them */
-	send_user_motd(source_p);
-	exit_client(client_p, source_p, source_p, "Client Exit after MOTD");
-
-	return 0;
-}
 
 /*
 ** m_motd
@@ -88,6 +73,8 @@ m_motd(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		/* safe enough to give this on a local connect only */
 		sendto_one(source_p, form_str(RPL_LOAD2HI),
 			   me.name, source_p->name, "MOTD");
+		sendto_one(source_p, form_str(RPL_ENDOFMOTD),
+			   me.name, source_p->name);
 		return 0;
 	}
 	else

@@ -60,6 +60,8 @@ struct ConfEntry
 
 extern struct TopConf *conf_cur_block;
 
+extern char *current_file;
+
 int read_config(char *);
 int conf_start_block(char *, char *);
 int conf_end_block(struct TopConf *);
