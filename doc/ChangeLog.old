@@ -1,3 +1,8 @@
+*** 20010608_10 by jdc
+* Fixed time_t vs. long warnings (typecasted properly as '(long)').
+
+
+
 *** 20010608_9 by leeh
 - added convertklines to convert klines from old format -> new format
 
