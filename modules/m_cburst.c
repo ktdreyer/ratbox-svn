@@ -41,7 +41,7 @@
 #include <stdlib.h>
 
 struct Message cburst_msgtab = {
-  MSG_CBURST, 0, 1, MFLG_SLOW | MFLG_UNREG, 0L,
+  MSG_CBURST, 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0L,
   {m_unregistered, m_error, ms_cburst, m_error}
 };
 

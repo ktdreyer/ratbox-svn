@@ -41,7 +41,7 @@
 #include "memdebug.h"
 
 struct Message whowas_msgtab = {
-  MSG_WHOWAS, 0, 1, MFLG_SLOW, 0L,
+  MSG_WHOWAS, 0, 1, 0, MFLG_SLOW, 0L,
   {m_unregistered, m_whowas, mo_whowas, m_whowas}
 };
 

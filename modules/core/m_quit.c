@@ -34,7 +34,7 @@
 #include "s_conf.h"
 
 struct Message quit_msgtab = {
-  MSG_QUIT, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
+  MSG_QUIT, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
   {m_quit, m_quit, ms_quit, mo_quit}
 };
 

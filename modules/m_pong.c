@@ -35,7 +35,7 @@
 #include "modules.h"
 
 struct Message pong_msgtab = {
-  MSG_PONG, 0, 1, MFLG_SLOW | MFLG_UNREG, 0,
+  MSG_PONG, 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0,
   {mr_pong, m_ignore, ms_pong, m_ignore}
 };
 

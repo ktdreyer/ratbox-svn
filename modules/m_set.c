@@ -42,7 +42,7 @@
 #include <stdlib.h>  /* atoi */
 
 struct Message set_msgtab = {
-  MSG_SET, 0, 0, MFLG_SLOW, 0,
+  MSG_SET, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, m_error, mo_set}
 };
 

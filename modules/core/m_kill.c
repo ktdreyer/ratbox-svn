@@ -40,7 +40,7 @@
 static char buf[BUFSIZE], buf2[BUFSIZE];
 
 struct Message kill_msgtab = {
-  MSG_KILL, 0, 2, MFLG_SLOW, 0,
+  MSG_KILL, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, ms_kill, mo_kill}
 };
 

@@ -40,7 +40,7 @@
 #include <time.h>
 
 struct Message motd_msgtab = {
-  MSG_MOTD, 1, 1, MFLG_SLOW, 0,
+  MSG_MOTD, 1, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_motd, m_motd, m_motd}
 };
 

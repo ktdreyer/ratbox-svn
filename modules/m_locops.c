@@ -36,7 +36,7 @@
 #include "modules.h"
 
 struct Message locops_msgtab = {
-  MSG_LOCOPS, 0, 1, MFLG_SLOW, 0,
+  MSG_LOCOPS, 0, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, m_ignore, m_locops}
 };
 

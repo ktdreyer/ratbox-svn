@@ -38,7 +38,7 @@
 #include <string.h>
 
 struct Message links_msgtab = {
-  MSG_LINKS, 0, 0, MFLG_SLOW, 0,
+  MSG_LINKS, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_links, ms_links, m_links}
 };
 

@@ -39,7 +39,7 @@
 #define UFLAGS  (FLAGS_INVISIBLE|FLAGS_WALLOP|FLAGS_SERVNOTICE)
 
 struct Message user_msgtab = {
-  MSG_USER, 0, 1, MFLG_SLOW, 0L, {m_user, m_registered, m_ignore, m_registered}
+  MSG_USER, 0, 1, 0, MFLG_SLOW, 0L, {m_user, m_registered, m_ignore, m_registered}
 };
 
 void

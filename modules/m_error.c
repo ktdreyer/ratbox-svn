@@ -34,7 +34,7 @@
 #include "modules.h"
 
 struct Message error_msgtab = {
-  MSG_ERROR, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
+  MSG_ERROR, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
   {mr_error, m_ignore, ms_error, m_ignore}
 };
 

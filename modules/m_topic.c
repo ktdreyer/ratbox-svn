@@ -41,7 +41,7 @@
 #include <stdlib.h>
 
 struct Message topic_msgtab = {
-  MSG_TOPIC, 0, 1, MFLG_SLOW, 0,
+  MSG_TOPIC, 0, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_topic, m_topic, m_topic}
 };
 

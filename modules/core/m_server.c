@@ -44,7 +44,7 @@
 #include <stdlib.h>
 
 struct Message server_msgtab = {
-  MSG_SERVER, 0, 3, MFLG_SLOW | MFLG_UNREG, 0,
+  MSG_SERVER, 0, 3, 0, MFLG_SLOW | MFLG_UNREG, 0,
   {mr_server, m_registered, ms_server, m_registered}
 };
 

@@ -48,7 +48,7 @@ void names_all_visible_channels(struct Client *sptr);
 void names_non_public_non_secret(struct Client *sptr);
 
 struct Message names_msgtab = {
-  MSG_NAMES, 0, 0, MFLG_SLOW, 0,
+  MSG_NAMES, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_names, ms_names, m_names}
 };
 

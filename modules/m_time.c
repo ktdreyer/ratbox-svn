@@ -35,7 +35,7 @@
 #include "modules.h"
 
 struct Message time_msgtab = {
-  MSG_TIME, 0, 0, MFLG_SLOW, 0,
+  MSG_TIME, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_time, ms_time, mo_time}
 };
 

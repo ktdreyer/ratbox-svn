@@ -34,7 +34,7 @@
 #include <assert.h>
 
 struct Message capab_msgtab = {
-  MSG_CAPAB, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
+  MSG_CAPAB, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
   {mr_capab, m_error, mr_capab, m_error}
 };
 

@@ -38,7 +38,7 @@
 static char buf[BUFSIZE];
 
 struct Message userhost_msgtab = {
-  MSG_USERHOST, 0, 2, MFLG_SLOW, 0,
+  MSG_USERHOST, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_userhost, m_ignore, m_userhost}
 };
 

@@ -41,7 +41,7 @@
 #include <stdlib.h>
 
 struct Message lljoin_msgtab = {
-  MSG_LLJOIN, 0, 3, MFLG_SLOW | MFLG_UNREG, 0L,
+  MSG_LLJOIN, 0, 3, 0, MFLG_SLOW | MFLG_UNREG, 0L,
   {m_unregistered, m_error, ms_lljoin, m_error}
 };
 

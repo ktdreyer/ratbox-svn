@@ -44,7 +44,7 @@
 #include <assert.h>
 
 struct Message part_msgtab = {
-  MSG_PART, 1, 1, MFLG_SLOW, 0,
+  MSG_PART, 1, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_part, ms_part, mo_part}
 };
 

@@ -45,7 +45,7 @@
 #include <assert.h>
 
 struct Message cjoin_msgtab = {
-  MSG_CJOIN, 0, 1, MFLG_SLOW, 0,
+  MSG_CJOIN, 0, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_cjoin, m_error, m_cjoin}
 };
 

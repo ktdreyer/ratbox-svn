@@ -36,7 +36,7 @@
 #include "modules.h"
 
 struct Message restart_msgtab = {
-  MSG_RESTART, 0, 0, MFLG_SLOW, 0,
+  MSG_RESTART, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, m_ignore, mo_restart}
 };
 

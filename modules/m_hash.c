@@ -34,7 +34,7 @@
 #include "msg.h"
 
 struct Message hash_msgtab = {
-  MSG_HASH, 0, 2, MFLG_SLOW, 0,
+  MSG_HASH, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, mo_hash, mo_hash}
 };
 

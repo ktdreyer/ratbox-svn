@@ -40,7 +40,7 @@
 #include <assert.h>
 
 struct Message squit_msgtab = {
-  MSG_SQUIT, 0, 1, MFLG_SLOW, 0,
+  MSG_SQUIT, 0, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, ms_squit, mo_squit}
 };
 

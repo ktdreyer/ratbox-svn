@@ -35,7 +35,7 @@
 #include "modules.h"
 
 struct Message close_msgtab = {
-  MSG_CLOSE, 0, 1, MFLG_SLOW, 0,
+  MSG_CLOSE, 0, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, m_ignore, mo_close}
 };
 

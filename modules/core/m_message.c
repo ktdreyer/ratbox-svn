@@ -93,12 +93,12 @@ void handle_opers(int p_or_n, char *command,
 		  char *text);
 
 struct Message privmsg_msgtab = {
-  MSG_PRIVMSG, 0, 1, MFLG_SLOW | MFLG_UNREG, 0L,
+  MSG_PRIVMSG, 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0L,
   {m_unregistered, m_privmsg, m_privmsg, m_privmsg}
 };
 
 struct Message notice_msgtab = {
-  MSG_NOTICE, 0, 1, MFLG_SLOW | MFLG_UNREG, 0L,
+  MSG_NOTICE, 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0L,
   {m_unregistered, m_notice, m_notice, m_notice}
 };
 

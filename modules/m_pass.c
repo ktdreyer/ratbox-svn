@@ -33,7 +33,7 @@
 #include "modules.h"
 
 struct Message pass_msgtab = {
-  MSG_PASS, 0, 1, MFLG_SLOW | MFLG_UNREG, 0,
+  MSG_PASS, 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0,
   {m_pass, m_registered, m_ignore, m_registered}
 };
 

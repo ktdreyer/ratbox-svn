@@ -39,7 +39,7 @@
 #include "modules.h"
 
 struct Message dmem_msgtab = {
-  MSG_DMEM, 0, 0, MFLG_SLOW, 0,
+  MSG_DMEM, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, m_ignore, mo_dmem}
 };
 

@@ -34,7 +34,7 @@
 #include "modules.h"
 
 struct Message operwall_msgtab = {
-  MSG_OPERWALL, 0, 1, MFLG_SLOW, 0,
+  MSG_OPERWALL, 0, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, ms_operwall, mo_operwall}
 };
 

@@ -33,7 +33,7 @@
 #include "modules.h"
 
 struct Message ping_msgtab = {
-  MSG_PING, 0, 1, MFLG_SLOW, 0,
+  MSG_PING, 0, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_ping, ms_ping, m_ping}
 };
 

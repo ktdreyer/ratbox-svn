@@ -41,7 +41,7 @@
 #include <stdlib.h>
 
 struct Message drop_msgtab = {
-  MSG_DROP, 0, 2, MFLG_SLOW | MFLG_UNREG, 0L,
+  MSG_DROP, 0, 2, 0, MFLG_SLOW | MFLG_UNREG, 0L,
   {m_unregistered, m_error, ms_drop, m_error}
 };
 

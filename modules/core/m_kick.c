@@ -38,7 +38,7 @@
 #include <string.h>
 
 struct Message kick_msgtab = {
-  MSG_KICK, 0, 2, MFLG_SLOW, 0,
+  MSG_KICK, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_kick, ms_kick, m_kick}
 };
 

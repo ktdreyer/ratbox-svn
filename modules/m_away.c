@@ -35,7 +35,7 @@
 #include <stdlib.h>
 
 struct Message away_msgtab = {
-  MSG_AWAY, 0, 0, MFLG_SLOW, 0,
+  MSG_AWAY, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_away, m_away, m_away}
 };
 

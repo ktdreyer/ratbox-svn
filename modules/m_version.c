@@ -33,7 +33,7 @@
 #include "modules.h"
 
 struct Message version_msgtab = {
-  MSG_VERSION, 0, 0, MFLG_SLOW, 0,
+  MSG_VERSION, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_version, ms_version, m_version}
 };
 

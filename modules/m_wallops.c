@@ -35,7 +35,7 @@
 #include "modules.h"
 
 struct Message wallops_msgtab = {
-  MSG_WALLOPS, 0, 1, MFLG_SLOW, 0,
+  MSG_WALLOPS, 0, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, ms_wallops, mo_wallops}
 };
 

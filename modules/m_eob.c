@@ -36,7 +36,7 @@
 void do_eob( struct Client *sptr );
 
 struct Message eob_msgtab = {
-  MSG_EOB, 0, 0, MFLG_SLOW | MFLG_UNREG, 0, 
+  MSG_EOB, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0, 
   {m_unregistered, m_error, ms_eob, m_error}
 };
 

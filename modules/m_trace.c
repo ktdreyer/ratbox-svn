@@ -42,7 +42,7 @@
 #include <time.h>
 
 struct Message trace_msgtab = {
-  MSG_TRACE, 0, 0, MFLG_SLOW, 0,
+  MSG_TRACE, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_ignore, ms_trace, mo_trace}
 };
 

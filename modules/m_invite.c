@@ -40,7 +40,7 @@
 #include "modules.h"
 
 struct Message invite_msgtab = {
-  MSG_INVITE, 0, 2, MFLG_SLOW, 0,
+  MSG_INVITE, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_invite, ms_invite, m_invite}
 };
 

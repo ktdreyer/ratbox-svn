@@ -39,7 +39,7 @@
 #include <stdlib.h>
 
 struct Message svinfo_msgtab = {
-  MSG_SVINFO, 0, 4, MFLG_SLOW, 0,
+  MSG_SVINFO, 0, 4, 0, MFLG_SLOW, 0,
   {m_unregistered, m_ignore, m_svinfo, m_ignore}
 };
 

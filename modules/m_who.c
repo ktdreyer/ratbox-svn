@@ -42,7 +42,7 @@
 #include "modules.h"
 
 struct Message who_msgtab = {
-  MSG_WHO, 0, 1, MFLG_SLOW, 0,
+  MSG_WHO, 0, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_who, ms_who, m_who}
 };
 

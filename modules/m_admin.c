@@ -36,7 +36,7 @@
 void do_admin( struct Client *sptr );
 
 struct Message admin_msgtab = {
-  MSG_ADMIN, 0, 0, MFLG_SLOW | MFLG_UNREG, 0, 
+  MSG_ADMIN, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0, 
   {mr_admin, m_admin, ms_admin, ms_admin}
 };
 

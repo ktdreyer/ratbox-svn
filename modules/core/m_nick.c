@@ -55,7 +55,7 @@ int clean_nick_name(char* nick);
 
 
 struct Message nick_msgtab = {
-  MSG_NICK, 0, 1, MFLG_SLOW, 0,
+  MSG_NICK, 0, 1, 0, MFLG_SLOW, 0,
   {mr_nick, m_nick, ms_nick, m_nick}
 };
 

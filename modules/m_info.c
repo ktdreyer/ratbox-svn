@@ -43,7 +43,7 @@
 #include <string.h>
 
 struct Message info_msgtab = {
-  MSG_INFO, 0, 0, MFLG_SLOW, 0,
+  MSG_INFO, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_info, ms_info, mo_info}
 };
 

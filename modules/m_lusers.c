@@ -35,7 +35,7 @@
 #include "modules.h"
 
 struct Message lusers_msgtab = {
-  MSG_LUSERS, 0, 0, MFLG_SLOW, 0,
+  MSG_LUSERS, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_lusers, ms_lusers, m_lusers}
 };
 

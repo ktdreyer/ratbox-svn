@@ -50,7 +50,7 @@ void whois_person(struct Client *sptr,struct Client *acptr);
 int global_whois(struct Client *sptr, char *nick, int wilds);
 
 struct Message whois_msgtab = {
-  MSG_WHOIS, 0, 1, MFLG_SLOW, 0L, {m_unregistered, m_whois, ms_whois, mo_whois}
+  MSG_WHOIS, 0, 1, 0, MFLG_SLOW, 0L, {m_unregistered, m_whois, ms_whois, mo_whois}
 };
 
 void
