@@ -40,10 +40,17 @@ DECLARE_MODULE_AV1(trace_spy, NULL, NULL, NULL, NULL, trace_hfnlist, "$Revision$
 int
 show_trace(struct hook_spy_data *data)
 {
-	sendto_realops_flags(UMODE_SPY, L_ALL,
-			     "trace requested by %s (%s@%s) [%s]",
-			     data->source_p->name, data->source_p->username,
-			     data->source_p->host, data->source_p->user->server);
+	if(data->name)
+		sendto_realops_flags(UMODE_SPY, L_ALL,
+				"trace requested by %s (%s@%s) [%s] on %s",
+				data->source_p->name, data->source_p->username,
+				data->source_p->host, data->source_p->user->server,
+				data->name);
+	else
+		sendto_realops_flags(UMODE_SPY, L_ALL,
+				"trace requested by %s (%s@%s) [%s]",
+				data->source_p->name, data->source_p->username,
+				data->source_p->host, data->source_p->user->server);
 
 	return 0;
 }

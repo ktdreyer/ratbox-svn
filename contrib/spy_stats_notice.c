@@ -28,7 +28,7 @@
 #include "ircd.h"
 #include "send.h"
 
-int show_stats(struct hook_stats_data *);
+int show_stats(struct hook_spy_data *);
 
 mapi_hfn_list_av1 stats_hfnlist[] = {
 	{"doing_stats", (hookfn) show_stats},
@@ -38,7 +38,7 @@ mapi_hfn_list_av1 stats_hfnlist[] = {
 DECLARE_MODULE_AV1(stats_spy, NULL, NULL, NULL, NULL, stats_hfnlist, "$Revision$");
 
 int
-show_stats(struct hook_stats_data *data)
+show_stats(struct hook_spy_data *data)
 {
 	if((data->statchar == 'L') || (data->statchar == 'l'))
 	{

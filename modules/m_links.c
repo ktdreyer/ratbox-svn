@@ -84,7 +84,7 @@ mo_links(struct Client *client_p, struct Client *source_p, int parc, const char 
 	const char *mask = "";
 	struct Client *target_p;
 	char clean_mask[2 * HOSTLEN + 4];
-	struct hook_links_data hd;
+	struct hook_spy_data hd;
 
 	dlink_node *ptr;
 
@@ -103,11 +103,9 @@ mo_links(struct Client *client_p, struct Client *source_p, int parc, const char 
 		mask = collapse(clean_string
 				(clean_mask, (const unsigned char *) mask, 2 * HOSTLEN));
 
-	hd.client_p = client_p;
 	hd.source_p = source_p;
-	hd.mask = mask;
-	hd.parc = parc;
-	hd.parv = parv;
+	hd.name = mask;
+	hd.statchar = '\0';
 
 	hook_call_event(doing_links_hook, &hd);
 

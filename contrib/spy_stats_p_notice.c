@@ -28,7 +28,7 @@
 #include "ircd.h"
 #include "send.h"
 
-int show_stats_p(struct hook_stats_data *);
+int show_stats_p(struct hook_spy_data *);
 
 mapi_hfn_list_av1 stats_p_hfnlist[] = {
 	{"doing_stats_p", (hookfn) show_stats_p},
@@ -38,7 +38,7 @@ mapi_hfn_list_av1 stats_p_hfnlist[] = {
 DECLARE_MODULE_AV1(stats_p_spy, NULL, NULL, NULL, NULL, stats_p_hfnlist, "$Revision$");
 
 int
-show_stats_p(struct hook_stats_data *data)
+show_stats_p(struct hook_spy_data *data)
 {
 	sendto_realops_flags(UMODE_SPY, L_ALL,
 			     "STATS p requested by %s (%s@%s) [%s]",

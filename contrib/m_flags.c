@@ -76,46 +76,48 @@ DECLARE_MODULE_AV1(test, NULL, NULL, test_clist, NULL, NULL, "$Revision$");
 
 struct FlagTable
 {
-	char *name;
+	const char *name;
 	int mode;
 	int oper;
 };
 
+/* *INDENT-OFF* */
 static struct FlagTable flag_table[] = {
 	/* name               mode it represents      oper only? */
-	{"OWALLOPS", UMODE_OPERWALL, 1},
-	{"SWALLOPS", UMODE_WALLOP, 0},
-	{"STATSNOTICES", UMODE_SPY, 1},
+	{ "OWALLOPS",		UMODE_OPERWALL,		1 },
+	{ "SWALLOPS",		UMODE_WALLOP,		0 },
+	{ "STATSNOTICES",	UMODE_SPY,		1 },
 	/* We don't have a separate OKILL and SKILL modes */
-	{"OKILLS", UMODE_SERVNOTICE, 0},
-	{"SKILLS", UMODE_SKILL, 0},
-	{"SNOTICES", UMODE_SERVNOTICE, 0},
+	{ "OKILLS",		UMODE_SERVNOTICE,	0 },
+	{ "SKILLS",		UMODE_SKILL,		0 },
+	{ "SNOTICES",		UMODE_SERVNOTICE,	0 },
 	/* We don't have separate client connect and disconnect modes */
-	{"CLICONNECTS", UMODE_CCONN, 1},
-	{"CLIDISCONNECTS", UMODE_CCONN, 1},
+	{ "CLICONNECTS",	UMODE_CCONN,		1 },
+	{ "CLIDISCONNECTS",	UMODE_CCONN,		1 },
 	/* I'm taking a wild guess here... */
-	{"THROTTLES", UMODE_REJ, 1},
+	{ "THROTTLES",		UMODE_REJ,		1 },
 #if 0
 	/* This one is special...controlled via an oper block option */
-	{"NICKCHANGES", UMODE_NCHANGE, 1},
+	{ "NICKCHANGES",	UMODE_NCHANGE,		1 },
 	/* NICKCHANGES must be checked for separately */
 #endif
 	/* I'm assuming this is correct... */
-	{"IPMISMATCHES", UMODE_UNAUTH, 1},
-	{"LWALLOPS", UMODE_LOCOPS, 1},
+	{ "IPMISMATCHES",	UMODE_UNAUTH,		1 },
+	{ "LWALLOPS",		UMODE_LOCOPS,		1 },
 	/* These aren't separate on Hybrid */
-	{"CONNECTS", UMODE_EXTERNAL, 1},
-	{"SQUITS", UMODE_EXTERNAL, 1},
+	{ "CONNECTS",		UMODE_EXTERNAL,		1 },
+	{ "SQUITS",		UMODE_EXTERNAL,		1 },
 	/* Now we have our Hybrid specific flags */
-	{"FULL", UMODE_FULL, 1},
+	{ "FULL",		UMODE_FULL,		1 },
 	/* Not in CS, but we might as well put it here */
-	{"INVISIBLE", UMODE_INVISIBLE, 0},
-	{"BOTS", UMODE_BOTS, 1},
-	{"CALLERID", UMODE_CALLERID, 0},
-	{"UNAUTH", UMODE_UNAUTH, 1},
-	{"DEBUG", UMODE_DEBUG, 1},
-	{NULL, 0, 0}
+	{ "INVISIBLE",		UMODE_INVISIBLE,	0 },
+	{ "BOTS",		UMODE_BOTS,		1 },
+	{ "CALLERID",		UMODE_CALLERID,		0 },
+	{ "UNAUTH",		UMODE_UNAUTH,		1 },
+	{ "DEBUG",		UMODE_DEBUG,		1 },
+	{ NULL, 0, 0}
 };
+/* *INDENT-ON* */
 
 /* We won't control CALLERID or INVISIBLE in here */
 

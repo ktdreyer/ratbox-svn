@@ -831,6 +831,8 @@ info_spy(struct Client *source_p)
 	struct hook_spy_data data;
 
 	data.source_p = source_p;
+	data.name = NULL;
+	data.statchar = '\0';
 
 	hook_call_event(doing_info_hook, &data);
 }

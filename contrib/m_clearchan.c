@@ -123,7 +123,6 @@ mo_clearchan(struct Client *client_p, struct Client *source_p, int parc, const c
 		chptr->channelts--;
 
 	chptr->mode.mode = MODE_SECRET | MODE_TOPICLIMIT | MODE_INVITEONLY | MODE_NOPRIVMSGS;
-	free_topic(chptr);
 	chptr->mode.key[0] = '\0';
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->members.head)

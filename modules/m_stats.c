@@ -1323,7 +1323,7 @@ stats_l_client(struct Client *source_p, struct Client *target_p,
 static void
 stats_spy(struct Client *source_p, char statchar, const char *name)
 {
-	struct hook_stats_data data;
+	struct hook_spy_data data;
 
 	data.source_p = source_p;
 	data.statchar = statchar;
@@ -1341,7 +1341,7 @@ stats_spy(struct Client *source_p, char statchar, const char *name)
 static void
 stats_p_spy (struct Client *source_p)
 {
-	struct hook_stats_data data;
+	struct hook_spy_data data;
 
 	data.source_p = source_p;
 	data.name = NULL;

@@ -52,26 +52,11 @@ struct hook_mfunc_data
 	char **parv;
 };
 
-struct hook_stats_data
-{
-	struct Client *source_p;
-	char statchar;
-	const char *name;
-};
-
-struct hook_links_data
-{
-	struct Client *client_p;
-	struct Client *source_p;
-	int parc;
-	const char **parv;
-	const char statchar;
-	const char *mask;
-};
-
 struct hook_spy_data
 {
 	struct Client *source_p;
+	const char *name;
+	char statchar;
 };
 
 struct hook_io_data

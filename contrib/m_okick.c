@@ -93,29 +93,36 @@ mo_okick(struct Client *client_p, struct Client *source_p, int parc, const char 
 	chptr = find_channel(name);
 	if(!chptr)
 	{
-	sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
-				   form_str(ERR_NOSUCHCHANNEL, name); return 0;}
+		sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL, form_str(ERR_NOSUCHCHANNEL), name);
+		return 0;
+	}
 
 
-			   if((p = strchr(parv[2], ','))) * p = '\0'; user = LOCAL_COPY(parv[2]);	// strtoken(&p2, parv[2], ","); 
-			   if(!(who = find_chasing(source_p, user, &chasing)))
-			   {
-			   return 0;}
+	if((p = strchr(parv[2], ',')))
+		*p = '\0';
+	user = LOCAL_COPY(parv[2]);	// strtoken(&p2, parv[2], ","); 
+	if(!(who = find_chasing(source_p, user, &chasing)))
+	{
+		return 0;
+	}
 
-			   if((target_p = find_client(user)) == NULL)
-			   {
-			   sendto_one(source_p, form_str(ERR_NOSUCHNICK),
-				      me.name, parv[0], user); return 0;}
+	if((target_p = find_client(user)) == NULL)
+	{
+		sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name, parv[0], user);
+		return 0;
+	}
 
-			   if((msptr = find_channel_membership(chptr, target_p)) == NULL)
-			   {
-			   sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL),
-				      me.name, parv[0], parv[1], parv[2]); return 0;}
+	if((msptr = find_channel_membership(chptr, target_p)) == NULL)
+	{
+		sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL),
+			   me.name, parv[0], parv[1], parv[2]);
+		return 0;
+	}
 
-			   sendto_channel_local(ALL_MEMBERS, chptr, ":%s KICK %s %s :%s",
-						me.name, chptr->chname, who->name, comment);
-			   sendto_server(&me, chptr, NOCAPS, NOCAPS,
-					 ":%s KICK %s %s :%s",
-					 me.name, chptr->chname,
-					 who->name, comment);
-			   remove_user_from_channel(msptr); return 0;}
+	sendto_channel_local(ALL_MEMBERS, chptr, ":%s KICK %s %s :%s",
+			     me.name, chptr->chname, who->name, comment);
+	sendto_server(&me, chptr, NOCAPS, NOCAPS,
+		      ":%s KICK %s %s :%s", me.name, chptr->chname, who->name, comment);
+	remove_user_from_channel(msptr);
+	return 0;
+}
