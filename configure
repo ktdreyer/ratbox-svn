@@ -843,6 +843,7 @@ if test -n "$ac_init_help"; then
 Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
+  --enable-ipv6           Enable IPv6 support
   --enable-openssl=DIR  Enable OpenSSL support (DIR optional).
   --disable-openssl       Disable OpenSSL support.
   --disable-zlib          Disable ziplinks support
@@ -3862,7 +3863,8 @@ done
 
 
 
-for ac_header in crypt.h sys/resource.h sys/param.h errno.h sys/syslog.h stddef.h libgen.h sys/wait.h wait.h
+
+for ac_header in crypt.h sys/resource.h sys/param.h errno.h sys/syslog.h stddef.h libgen.h sys/wait.h wait.h sys/epoll.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if eval "test \"\${$as_ac_Header+set}\" = set"; then
@@ -4383,6 +4385,17 @@ rm -f conftest.$ac_objext conftest.$ac_ext
 
 fi
 
+# Check whether --enable-ipv6 or --disable-ipv6 was given.
+if test "${enable_ipv6+set}" = set; then
+  enableval="$enable_ipv6"
+  ipv6=maybe
+else
+  ipv6=no
+fi;
+
+
+if test $ipv6 = "maybe"; then
+
 echo "$as_me:$LINENO: checking for core IPv6 support" >&5
 echo $ECHO_N "checking for core IPv6 support... $ECHO_C" >&6
 
@@ -4494,6 +4507,9 @@ echo "${ECHO_T}no" >&6
 have_v6="no"
 fi
 rm -f conftest.$ac_objext conftest.$ac_ext
+else
+	have_v6="no"
+fi
 
 echo "$as_me:$LINENO: checking for library containing crypt" >&5
 echo $ECHO_N "checking for library containing crypt... $ECHO_C" >&6
@@ -6743,6 +6759,7 @@ LIBS="$save_LIBS"
 
 
 
+
 # Check whether --with-zlib-path or --without-zlib-path was given.
 if test "${with_zlib_path+set}" = set; then
   withval="$with_zlib_path"
@@ -7669,7 +7686,9 @@ if test "x$havekqueue" = "xyes" ; then
 fi
 
 haveepollsyscall=no
-if test "x$haveepoll" = "xno" ; then
+
+if test "x$ac_cv_header_sys_epoll_h" = "xyes"; then
+	if test "x$haveepoll" = "xno" ; then
                 echo "$as_me:$LINENO: checking for epoll system call" >&5
 echo $ECHO_N "checking for epoll system call... $ECHO_C" >&6
                 if test "$cross_compiling" = yes; then
@@ -7686,6 +7705,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <stdint.h>
 #include <sys/param.h>
 #include <sys/types.h>
+#include <sys/epoll.h>
 #include <sys/syscall.h>
 #include <unistd.h>
 
@@ -7723,11 +7743,6 @@ cat >>confdefs.h <<\_ACEOF
 _ACEOF
 
     SELECT_TYPE="epoll"
-
-cat >>confdefs.h <<\_ACEOF
-#define NEED_SYS_EPOLL 1
-_ACEOF
-
 else
   echo "$as_me: program exited with status $ac_status" >&5
 echo "$as_me: failed program was:" >&5
@@ -7739,8 +7754,8 @@ echo "${ECHO_T}no" >&6
 fi
 rm -f core *.core gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
 fi
+	fi
 fi
-
 
 
 
@@ -10696,5 +10711,5 @@ echo
 echo "Configured limits:"
 echo "NICKLEN ................. $NICKLEN"
 echo "TOPICLEN ................ $TOPICLEN"
-echo "MAX_CLIENTS ................. $MAX_CLIENTS"
+echo "MAX_CLIENTS ............. $MAX_CLIENTS"
 echo

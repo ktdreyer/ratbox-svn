@@ -41,11 +41,6 @@
 #include "s_auth.h"
 #include "reject.h"
 
-#ifdef HAVE_LIBCRYPTO
-#include <openssl/bio.h>
-#endif
-
-
 #ifndef INADDR_NONE
 #define INADDR_NONE ((unsigned int) 0xffffffff)
 #endif

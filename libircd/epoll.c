@@ -28,7 +28,7 @@
 
 #include "config.h"
 #include "stdinc.h"
-#include <sys/poll.h>
+#include <sys/epoll.h>
 
 #include "commio.h"
 #include "class.h"
@@ -58,37 +58,12 @@ static int ep;			/* epoll file descriptor */
 
 
 #ifndef HAVE_EPOLL_CTL /* bah..glibc doesn't support epoll yet.. */
-
+#include <sys/epoll.h>
 #include <sys/syscall.h>
 
-#define EPOLL_CTL_ADD 1
-#define EPOLL_CTL_DEL 2
-#define EPOLL_CTL_MOD 3
-
-#define EPOLLIN POLLIN
-#define EPOLLOUT POLLOUT
-#define EPOLLERR POLLERR
-#define EPOLLHUP POLLHUP
-
-typedef union epoll_data
-{
-	void *ptr;
-	int fd;
-	uint32_t u32;
-	uint64_t u64;
-}
-epoll_data_t;
-
-struct epoll_event
-{
-	uint32_t events;
-	epoll_data_t data;
-};
-
-
-static _syscall1(int, epoll_create, int, maxfds);
-static _syscall4(int, epoll_ctl, int, epfd, int, op, int, fd, struct epoll_event *, events);
-static _syscall4(int, epoll_wait, int, epfd, struct epoll_event *, pevents,
+_syscall1(int, epoll_create, int, maxfds);
+_syscall4(int, epoll_ctl, int, epfd, int, op, int, fd, struct epoll_event *, events);
+_syscall4(int, epoll_wait, int, epfd, struct epoll_event *, pevents,
 		 int, maxevents, int, timeout);
 
 #endif /* HAVE_EPOLL_CTL */

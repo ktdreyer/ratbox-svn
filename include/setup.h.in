@@ -147,6 +147,9 @@
 /* Define to 1 if you have the <sys/devpoll.h> header file. */
 #undef HAVE_SYS_DEVPOLL_H
 
+/* Define to 1 if you have the <sys/epoll.h> header file. */
+#undef HAVE_SYS_EPOLL_H
+
 /* Define to 1 if you have the <sys/param.h> header file. */
 #undef HAVE_SYS_PARAM_H
 
@@ -197,9 +200,6 @@
 
 /* Define this to disable debugging support. */
 #undef NDEBUG
-
-/* Define if glibc does not support epoll */
-#undef NEED_SYS_EPOLL
 
 /* Nickname length */
 #undef NICKLEN

@@ -225,7 +225,7 @@ fi
 dnl Checks for header files.
 AC_HEADER_STDC
 
-AC_CHECK_HEADERS([crypt.h sys/resource.h sys/param.h errno.h sys/syslog.h stddef.h libgen.h sys/wait.h wait.h])
+AC_CHECK_HEADERS([crypt.h sys/resource.h sys/param.h errno.h sys/syslog.h stddef.h libgen.h sys/wait.h wait.h sys/epoll.h])
 
 dnl Networking Functions
 dnl ====================
@@ -265,6 +265,13 @@ AC_COMPILE_IFELSE(
 
 fi
 
+AC_ARG_ENABLE(ipv6,
+AC_HELP_STRING([--enable-ipv6],[Enable IPv6 support]),
+[ipv6=maybe],[ipv6=no])
+
+
+if test $ipv6 = "maybe"; then
+
 AC_MSG_CHECKING([for core IPv6 support])
 
 AC_COMPILE_IFELSE(
@@ -301,6 +308,9 @@ AC_COMPILE_IFELSE(
 ],
 [AC_MSG_RESULT(no)
 have_v6="no"])
+else
+	have_v6="no"
+fi
 
 AC_SEARCH_LIBS(crypt, [crypt descrypt],,)
 
@@ -551,6 +561,7 @@ LIBS="$save_LIBS"
 
 dnl End OpenSSL detection
 
+
 dnl Specialized functions and libraries
 dnl ===================================
 
@@ -645,12 +656,15 @@ if test "x$havekqueue" = "xyes" ; then
 fi
 
 haveepollsyscall=no
-if test "x$haveepoll" = "xno" ; then
+
+if test "x$ac_cv_header_sys_epoll_h" = "xyes"; then
+	if test "x$haveepoll" = "xno" ; then
                 AC_MSG_CHECKING(for epoll system call)
                 AC_TRY_RUN(
 #include <stdint.h>
 #include <sys/param.h>
 #include <sys/types.h>
+#include <sys/epoll.h>
 #include <sys/syscall.h>
 #include <unistd.h>     
 
@@ -670,11 +684,10 @@ main(int argc, char **argv)
 }, [AC_MSG_RESULT(yes)
     AC_DEFINE(HAVE_EPOLL, 1,
         [Define if your system supports the epoll system calls])
-    SELECT_TYPE="epoll"
-    AC_DEFINE(NEED_SYS_EPOLL, 1, [Define if glibc does not support epoll])], 
+    SELECT_TYPE="epoll"], 
     AC_MSG_RESULT(no), AC_MSG_RESULT(no))
+	fi
 fi
-
 
 
 
@@ -1072,5 +1085,5 @@ echo
 echo "Configured limits:"
 echo "NICKLEN ................. $NICKLEN"
 echo "TOPICLEN ................ $TOPICLEN"
-echo "MAX_CLIENTS ................. $MAX_CLIENTS"
+echo "MAX_CLIENTS ............. $MAX_CLIENTS"
 echo
