@@ -329,7 +329,7 @@ int     m_join(struct Client *cptr,
 			       me.name,
 			       chptr->chname);
 	  
-	  sendto_ll_channel_remote(chptr, cptr, sptr, 
+	  sendto_ll_channel_remote(chptr, cptr, sptr,
 				   ":%s MODE %s +nt",
 				   me.name,
 				   chptr->chname);

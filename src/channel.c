@@ -1425,7 +1425,8 @@ void set_channel_mode(struct Client *cptr,
           if (len + tmp + 2 >= MODEBUFLEN)
             break;
 
-          if (!(((whatt & MODE_ADD) && !add_id(sptr, chptr, arg, CHFL_INVEX)) ||
+          if (!(((whatt & MODE_ADD) && !add_id(sptr, chptr, arg, CHFL_INVEX))
+		||
                 ((whatt & MODE_DEL) && !del_id(chptr, arg, CHFL_INVEX))))
             break;
 

@@ -1601,44 +1601,6 @@ static void initconf(FBFILE* file)
 
       ReplaceQuotes(quotedLine,line);
 
-      if(quotedLine[0] == '.')
-        {
-          char *filename;
-          char *back;
-	  FBFILE* includeFile;
-
-          if(!ircncmp(quotedLine+1,"include ",8))
-            {
-              if( (filename = strchr(quotedLine+8,'"')) )
-                filename++;
-              else
-                {
-                  log(L_ERROR, "Bad config line: %s", quotedLine);
-                  continue;
-                }
-
-              if( (back = strchr(filename,'"')) )
-                *back = '\0';
-              else
-                {
-                  log(L_ERROR, "Bad config line: %s", quotedLine);
-                  continue;
-                }
-
-	      if( (includeFile = openconf(filename)) == 0 )
-		{
-                  log(L_ERROR, "Can't open: %s", filename);
-                  continue;
-		}
-	      else
-		{
-		  initconf(includeFile);
-		  fbclose(includeFile);
-		  continue;
-		}
-	    }
-	}
-
       aconf = make_conf();
 
       /* Could we test if it's conf line at all?        -Vesa */

@@ -505,13 +505,20 @@ int register_user(struct Client *cptr, struct Client *sptr,
       dlinkDelete(m, &unknown_list);
       dlinkAdd(sptr, m, &lclient_list);
     }
-  
+
+  /* arghhh one could try not introducing new nicks to ll leafs
+   * but then you have to introduce them "on the fly" in SJOIN
+   * not fun.
+   * Its not going to cost much more bandwidth to simply let new
+   * nicks just ride on through.
+   */
   sendto_ll_serv_butone(cptr, sptr,
 			":%s NICK %s %d %lu %s %s %s %s :%s",
 			me.name,
 			nick, sptr->hopcount+1, sptr->tsinfo, ubuf,
 			sptr->username, sptr->host, user->server,
 			sptr->info);
+
   if (ubuf[1])
     send_umode_out(cptr, sptr, 0);
   return 0;
@@ -984,17 +991,8 @@ void send_umode_out(struct Client *cptr,
 
       if((acptr != cptr) && (acptr != sptr) && (*buf))
         {
-	  if (IsCapable(acptr,CAP_LL)) 
-	    {
-	      if( (sptr->lazyLinkClientExists
-		   &
-		   acptr->localClient->serverMask) != 0)
-		sendto_one(acptr, ":%s MODE %s :%s",
-			   sptr->name, sptr->name, buf);
-	    }
-	  else
-	    sendto_one(acptr, ":%s MODE %s :%s",
-		       sptr->name, sptr->name, buf);
+	  sendto_one(acptr, ":%s MODE %s :%s",
+		     sptr->name, sptr->name, buf);
         }
     }
 

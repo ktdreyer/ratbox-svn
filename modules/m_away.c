@@ -94,7 +94,7 @@ int     m_away(struct Client *cptr,
       if (away)
         {
 	  /* we now send this only if they were away before --is */
-	  sendto_ll_serv_butone(cptr, sptr, ":%s AWAY", parv[0]);
+	  sendto_serv_butone(cptr, ":%s AWAY", parv[0]);
 	  
           MyFree(away);
           sptr->user->away = NULL;
@@ -112,7 +112,7 @@ int     m_away(struct Client *cptr,
 
   /* we now send this only if they weren't away already --is */
   if (!away)
-    sendto_ll_serv_butone(cptr, sptr, ":%s AWAY :%s", parv[0], awy2); 
+    sendto_serv_butone(cptr, ":%s AWAY :%s", parv[0], awy2); 
 
   if (away)
     MyFree(away);

@@ -563,8 +563,10 @@ sendto_ll_serv_butone(struct Client *one, struct Client *sptr,
       if (IsCapable(cptr,CAP_LL))
 	{
 	  if( ( sptr->lazyLinkClientExists &
-		cptr->localClient->serverMask) != 0)
-	    send_message(cptr, (char *)sendbuf, len);
+		cptr->localClient->serverMask) == 0)
+	    sptr->lazyLinkClientExists |= cptr->localClient->serverMask;
+
+	  send_message(cptr, (char *)sendbuf, len);
 	}
       else
 	send_message(cptr, (char *)sendbuf, len);
@@ -746,7 +748,7 @@ sendto_list_local(dlink_list *list, const char *sendbuf, int len)
  *              - var args pattern
  * output       - NONE
  * side effects - send to all servers the channel given, except for "from"
- *		  This code is only used in m_join.c
+ *		  This code is only used in m_join.c,m_sjoin.c
  */
 void
 sendto_channel_remote(struct Channel *chptr,
@@ -796,7 +798,7 @@ sendto_channel_remote(struct Channel *chptr,
  *              - var args pattern
  * output       - NONE
  * side effects - send to all servers the channel given, except for "from"
- *		  This code is only used in m_join.c
+ *		  This code is only used in m_join.c,m_sjoin.c
  *		  It will introduce the client 'sptr' if it is unknown
  *		  to the leaf.
  */
