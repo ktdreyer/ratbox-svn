@@ -1,3 +1,7 @@
+*** 20010104_15 by a1kmm
+- Use GNU format checking features if __GNUC__ is defined - helps us find bugs in printf like send functions.
+
+
 *** 20010104_14 by a1kmm
 - Re-added missing templates in m_server.c
 - #ifdef out id stuff for now - it breaks non-openssl builds.
