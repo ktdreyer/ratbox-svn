@@ -1442,12 +1442,12 @@ const char* comment         /* Reason for the exit */
       if( GlobalSetOptions.hide_server )
 	{
           /* 
-          ** Replaces the name of the splitting server with net.split
+          ** Replaces the name of the splitting server with
+          ** a.server.on.<networkname>.net        
           ** when a client exits from a split, in an attempt to 
-          ** hide topology without breaking too many clients..
+          ** hide topology but let clients detect a split still.
           */
-          strcpy(comment1, me.name);         
-          strcat(comment1, " net.split");
+	  ircsprintf(comment1,"%s a.server.on.%s.net",me.name, ServerInfo.network_name);
 	}
       else
 	{
