@@ -3,9 +3,10 @@
 #
 # $Id$
 #
-CC = @CC@
-RM = @RM@
-MKDEP = ${CC} -MM
+CC	= @CC@
+RM	= @RM@
+CFLAGS	= @IRC_CFLAGS@
+MKDEP	= ${CC} -MM
 
 SSL_LIBS     = @SSL_LIBS@
 SSL_INCLUDES = @SSL_INCLUDES@
@@ -17,7 +18,7 @@ CPPFLAGS = ${INCLUDES} @CPPFLAGS@
  
 #
 # For developers
-# CFLAGS= -g -O2 -Wall 
+# CFLAGS= -g -O2 -Wall
 #
 
 SOURCES =     \

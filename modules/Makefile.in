@@ -155,10 +155,10 @@ install_shared_modules: install-mkdirs
 .SUFFIXES: .so .o
 
 .c.o:
-	${CC} ${CPPFLAGS} $(CFLAGS) -c $< -o $@
+	${CC} ${CPPFLAGS} ${CFLAGS} -c $< -o $@
 
 .c.so:
-	${CC} ${PICFLAGS} ${CPPFLAGS} $(CFLAGS) $< -o $@
+	${CC} ${PICFLAGS} ${CPPFLAGS} ${CFLAGS} $< -o $@
 
 .PHONY: depend clean distclean
 depend:
@@ -174,7 +174,7 @@ clean:
 	${RM} -f *.so *~ *.o *.a
 
 lint:
-	lint -aacgprxhH $(CFLAGS) $(SRCS) >../lint.out
+	lint -aacgprxhH ${CFLAGS} $(SRCS) >../lint.out
 
 distclean: clean
 	${RM} -f Makefile
