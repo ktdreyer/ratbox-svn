@@ -1,3 +1,15 @@
+androsyn    2002/12/16 08:04:50 UTC	(20021216_12)
+
+  Modified files:
+    src                  s_user.c 
+  Log:
+  Save another expensive dlinkFind here..
+  
+  Revision  Changes    Path
+  7.248     +1 -15     ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2002/12/16 08:02:46 UTC	(20021216_11)
 
   Modified files:
