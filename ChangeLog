@@ -1,3 +1,32 @@
+leeh        2004/11/18 12:21:27 EST	(20041118_1)
+
+  Modified files:
+    help                 Makefile.in 
+  Added files:
+    help/jupeserv        calljupe callunjupe jupe pending unjupe 
+    help/userserv        login logout register udrop 
+  Removed files:
+    help/hoststat        clones host testmask 
+  Log:
+  - add help for various commands
+  
+  Revision  Changes    Path
+  1.3       +2 -2      rserv/help/Makefile.in
+  1.3       +0 -3      rserv/help/hoststat/clones (dead)
+  1.3       +0 -3      rserv/help/hoststat/host (dead)
+  1.3       +0 -3      rserv/help/hoststat/testmask (dead)
+  1.1       +4 -0      rserv/help/jupeserv/calljupe (new)
+  1.1       +3 -0      rserv/help/jupeserv/callunjupe (new)
+  1.1       +4 -0      rserv/help/jupeserv/jupe (new)
+  1.1       +2 -0      rserv/help/jupeserv/pending (new)
+  1.1       +3 -0      rserv/help/jupeserv/unjupe (new)
+  1.1       +4 -0      rserv/help/userserv/login (new)
+  1.1       +2 -0      rserv/help/userserv/logout (new)
+  1.1       +6 -0      rserv/help/userserv/register (new)
+  1.1       +3 -0      rserv/help/userserv/udrop (new)
+
+
+
 leeh        2004/11/17 19:05:13 EST	(20041118_0)
 
   Modified files:
