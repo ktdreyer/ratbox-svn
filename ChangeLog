@@ -1,3 +1,15 @@
+androsyn    2002/12/16 06:32:02 UTC	(20021216_5)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Add a few assert()'s
+  
+  Revision  Changes    Path
+  7.351     +7 -0      ircd-ratbox/src/client.c
+
+
+
 androsyn    2002/12/16 06:22:07 UTC	(20021216_4)
 
   Modified files:
