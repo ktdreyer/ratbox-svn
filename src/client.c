@@ -143,6 +143,8 @@ struct Client* make_client(struct Client* from)
   client_p->serv    = NULL;
   client_p->servptr = NULL;
   client_p->whowas  = NULL;
+  client_p->servnext = NULL;
+  client_p->servprev = NULL;
   return client_p;
 }
 
@@ -978,6 +980,9 @@ static void exit_one_client(struct Client *client_p, struct
                                     source_p);
       else
         ts_warn("server %s without servptr!", source_p->name);
+
+      if(!IsMe(source_p))
+        remove_server_from_list(source_p);
     }
   else if (source_p->servptr && source_p->servptr->serv)
       del_client_from_llist(&(source_p->servptr->serv->users), source_p);

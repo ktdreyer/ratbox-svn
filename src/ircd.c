@@ -117,6 +117,7 @@ struct Client me;               /* That's me */
 struct LocalUser meLocalUser;	/* That's also part of me */
 
 struct Client* GlobalClientList = 0; /* Pointer to beginning of Client list */
+struct Client* GlobalServerList = 0; /* Global list of servers */
 
 struct JupedChannel *JupedChannelList = 0;
 
@@ -523,6 +524,7 @@ int main(int argc, char *argv[])
  serv_list.head = serv_list.tail = NULL;
  
  GlobalClientList = &me;       /* Pointer to beginning of Client list */
+ GlobalServerList = &me;
  memset((void *)&Count, 0, sizeof(Count));
  memset((void *)&server_state, 0, sizeof(server_state));
 

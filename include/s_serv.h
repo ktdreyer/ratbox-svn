@@ -273,7 +273,10 @@ extern const char* show_capabilities(struct Client* client);
 extern void        show_servers(struct Client *);
 extern void        try_connections(void *unused);
 extern void        collect_zipstats(void *unused);
-  
+
+extern void	   add_server_to_list(struct Client *);
+extern void	   remove_server_from_list(struct Client *);
+
 extern void        initServerMask(void);
 extern void        burst_channel(struct Client *client_p, struct Channel *chptr);
 extern void	   sendnick_TS(struct Client*, struct Client* );

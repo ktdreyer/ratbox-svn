@@ -283,6 +283,48 @@ const char* my_name_for_link(const char* name, struct ConfItem* aconf)
 }
 
 /*
+ * add_server_to_list()
+ * input	- pointer to client
+ * output	- none
+ * side effects - server is added to GlobalServerList
+ */
+void add_server_to_list(struct Client *client_p)
+{
+  client_p->servnext = GlobalServerList;
+  GlobalServerList = client_p;
+  if(client_p->servnext)
+    client_p->servnext->servprev = client_p;
+
+  return;
+}
+
+/*
+ * remove_server_from_list()
+ *
+ * input	- pointer to client
+ * output	- none
+ * side effects	- server is removed from GlocalServerList
+ */
+void remove_server_from_list(struct Client *client_p)
+{
+  if(!client_p->servnext && !client_p->servprev)
+    return;
+
+  if(client_p->servprev)
+    client_p->servprev->servnext = client_p->servnext;
+  else
+  {
+    GlobalServerList = client_p->servnext;
+    GlobalServerList->servprev = NULL;
+  }
+
+  if(client_p->servnext)
+    client_p->servnext->servprev = client_p->servprev;
+
+  client_p->servnext = client_p->servprev = NULL;
+}
+  
+/*
  * hunt_server - Do the basic thing in delivering the message (command)
  *      across the relays to the specific server (server) for
  *      actions.
@@ -1100,6 +1142,7 @@ int server_estab(struct Client *client_p)
   ilog(L_NOTICE, "Link with %s established: (%s) link",
       inpath_ip, show_capabilities(client_p));
 
+  add_server_to_list(client_p);
   add_to_client_hash_table(client_p->name, client_p);
   /* doesnt duplicate client_p->serv if allocated this struct already */
   make_server(client_p);

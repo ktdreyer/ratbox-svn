@@ -86,6 +86,7 @@ extern int            cold_start;
 extern int            dorehash;
 extern struct Client  me;
 extern struct Client* GlobalClientList;
+extern struct Client* GlobalServerList;
 extern struct Client* local[];
 extern struct Counter Count;
 extern time_t         CurrentTime;

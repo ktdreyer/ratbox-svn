@@ -432,6 +432,7 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
   Count.server++;
 
   add_client_to_list(target_p);
+  add_server_to_list(target_p);
   add_to_client_hash_table(target_p->name, target_p);
   add_client_to_llist(&(target_p->servptr->serv->servers), target_p);
 
