@@ -1,3 +1,19 @@
+leeh        2004/03/03 08:16:50 EST	(20040303_2)
+
+  Modified files:
+    src                  hash.c 
+  Removed files:
+    doc                  messages.txt 
+  Log:
+  - as pointed out by Beeth, double ';;' in the hash funcs
+  - remove doc/messages.txt - we dont have them anymore. :)
+  
+  Revision  Changes    Path
+  1.4       +0 -99     ircd-ratbox/doc/messages.txt (dead)
+  7.97      +3 -3      ircd-ratbox/src/hash.c
+
+
+
 androsyn    2004/03/03 07:29:02 EST	(20040303_1)
 
   Modified files:
