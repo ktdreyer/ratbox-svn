@@ -1,3 +1,9 @@
+*** 20010417_1 by toot
+this fixes the coredump if you did /trace with any "unknown" connections
+
+get_class_name needed to default to something rather than NULL :)
+
+
 *** 20010416_1 by fl_
 - minor updates
 
