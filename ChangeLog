@@ -1,3 +1,16 @@
+androsyn    2004/04/01 12:44:36 EST	(20040401_2)
+
+  Modified files:
+    .                    configure configure.ac 
+  Log:
+  Remove message about cryptlinks from configure
+  
+  Revision  Changes    Path
+  7.217     +3 -3      ircd-ratbox/configure
+  7.30      +3 -3      ircd-ratbox/configure.ac
+
+
+
 leeh        2004/04/01 08:02:21 EST	(20040401_1)
 
   Modified files:
