@@ -1,3 +1,7 @@
+*** 20010821_9 by androsyn
+Changed the arguments and make string_to_array work right
+
+
 *** 20010821_8 by androsyn
 This has a hopefully faster version of string_to_array()
 
