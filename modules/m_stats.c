@@ -109,6 +109,7 @@ static void stats_deny(struct Client *);
 static void stats_exempt(struct Client *);
 static void stats_events(struct Client *);
 static void stats_glines(struct Client *);
+static void stats_pending_glines(struct Client *);
 static void stats_hubleaf(struct Client *);
 static void stats_auth(struct Client *);
 static void stats_tklines(struct Client *);
@@ -148,7 +149,7 @@ static struct StatsStruct stats_cmd_table[] =
   { 'E',	stats_events,		1,	1,	},
   { 'f',	fd_dump,		1,	1,	},
   { 'F',	fd_dump,		1,	1,	},
-  { 'g',	stats_glines,		1,	0,	},
+  { 'g',	stats_pending_glines,	1,	0,	},
   { 'G',	stats_glines,		1,	0,	},
   { 'h',	stats_hubleaf,		1,	0,	},
   { 'H',	stats_hubleaf,		1,	0,	},
@@ -378,26 +379,20 @@ static void stats_events(struct Client *source_p)
   show_events(source_p);
 }
 
-/* stats_glines()
+/* stats_pending_glines()
  *
  * input	- client pointer
  * output	- none
- * side effects - client is shown list of glines
+ * side effects - client is shown list of pending glines
  */
-static void stats_glines(struct Client *source_p)
+static void stats_pending_glines(struct Client *source_p)
 {
   if(ConfigFileEntry.glines)
   {
     dlink_node *pending_node;
-    dlink_node *gline_node;
     struct gline_pending *glp_ptr;
-    struct ConfItem *kill_ptr;
     char timebuffer[MAX_DATE_STRING];
     struct tm *tmptr;
-
-    if (dlink_list_length(&pending_glines) > 0)
-      sendto_one(source_p, ":%s NOTICE %s :Pending G-lines",
-                 me.name, source_p->name);
 
     DLINK_FOREACH(pending_node, pending_glines.head)
     {
@@ -429,6 +424,24 @@ static void stats_glines(struct Client *source_p)
     if (dlink_list_length(&pending_glines) > 0)
       sendto_one(source_p, ":%s NOTICE %s :End of Pending G-lines",
                  me.name, source_p->name);
+  } else
+    sendto_one(source_p, ":%s NOTICE %s :This server does not support G-Lines",
+               me.name, source_p->name); 
+  
+}
+
+/* stats_glines()
+ *
+ * input	- client pointer
+ * output	- none
+ * side effects - client is shown list of glines
+ */
+static void stats_glines(struct Client *source_p)
+{
+  if(ConfigFileEntry.glines)
+  {
+    dlink_node *gline_node;
+    struct ConfItem *kill_ptr;
 
     DLINK_FOREACH(gline_node, glines.head)
     {
