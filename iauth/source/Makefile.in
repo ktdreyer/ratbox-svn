@@ -21,6 +21,8 @@ SOURCES =     \
   auth.c      \
   conf.c      \
   iauth.c     \
+  log.c       \
+  match.c     \
   misc.c      \
   res.c       \
   sock.c
@@ -48,7 +50,8 @@ clean:
 	${RM} -f *.o *~ *.core core iauth
 
 distclean: clean
-	${RM} -f Makefile version.c.last
+	${RM} -f Makefile
 
 include .depend
 
+# End of Makefile

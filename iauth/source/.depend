@@ -1,18 +1,10 @@
-auth.o: auth.c ../include/headers.h ../include/auth.h \
- ../include/sock.h ../include/conf.h ../include/iauth.h \
- ../include/res.h ../include/setup.h
-conf.o: conf.c ../include/headers.h ../include/auth.h \
- ../include/sock.h ../include/conf.h ../include/iauth.h \
- ../include/res.h ../include/setup.h
-iauth.o: iauth.c ../include/headers.h ../include/auth.h \
- ../include/sock.h ../include/conf.h ../include/iauth.h \
- ../include/res.h ../include/setup.h
-misc.o: misc.c ../include/headers.h ../include/auth.h \
- ../include/sock.h ../include/conf.h ../include/iauth.h \
- ../include/res.h ../include/setup.h
-res.o: res.c ../include/headers.h ../include/auth.h ../include/sock.h \
- ../include/conf.h ../include/iauth.h ../include/res.h \
- ../include/setup.h
-sock.o: sock.c ../include/headers.h ../include/auth.h \
- ../include/sock.h ../include/conf.h ../include/iauth.h \
- ../include/res.h ../include/setup.h
+auth.o: auth.c ../include/auth.h ../include/sock.h ../include/iauth.h \
+ ../include/misc.h ../include/res.h ../include/setup.h
+conf.o: conf.c ../include/auth.h ../include/sock.h ../include/misc.h
+iauth.o: iauth.c ../include/conf.h ../include/iauth.h ../include/res.h \
+ ../include/sock.h
+misc.o: misc.c
+res.o: res.c ../include/iauth.h ../include/misc.h ../include/res.h \
+ ../include/sock.h
+sock.o: sock.c ../include/auth.h ../include/sock.h ../include/iauth.h \
+ ../include/misc.h ../include/res.h

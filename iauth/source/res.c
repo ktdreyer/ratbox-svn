@@ -1,5 +1,5 @@
 /*
- * src/res.c (C)opyright 1992 Darren Reed. All rights reserved.
+ * iauth/res.c (C)opyright 1992 Darren Reed. All rights reserved.
  * This file may not be distributed without the author's permission in any
  * shape or form. The author takes no responsibility for any damage or loss
  * of property which results from the use of this software.
@@ -10,9 +10,6 @@
  *     added callbacks and reference counting of returned hostents.
  *     --Bleep (Thomas Helvey <tomh@inxpress.net>)
  */
-
-#include "headers.h"
-#include "res.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -29,6 +26,17 @@
 #include <arpa/inet.h>
 
 #include <limits.h>
+
+#include "iauth.h"
+#include "log.h"
+#include "misc.h"
+#include "res.h"
+#include "sock.h"
+
+#ifndef dn_skipname  /* some systems don't define this */
+#define dn_skipname __dn_skipname
+#endif
+
 #if (CHAR_BIT != 8)
 #error this code needs to be able to address individual octets 
 #endif
@@ -289,8 +297,6 @@ res_ourserver(const struct __res_state* statp, const struct sockaddr_in *inp)
  */
 static void start_resolver(void)
 {
-  char sparemsg[80];
-
   /*
    * close the spare file descriptor so res_init can read resolv.conf
    * successfully. Needed on Solaris
@@ -568,10 +574,8 @@ static int send_res_msg(const char* msg, int len, int rcount)
       ++reinfo.re_sent;
       ++sent;
     }
-  #ifdef bingo
     else
       log(L_ERROR, "Resolver: send failed %s", strerror(errno));
- 	#endif
   }
   return sent;
 }
@@ -1575,10 +1579,8 @@ static void rem_cache(struct CacheEntry* ocp)
 
   if (0 < ocp->reply.ref_count) {
     ocp->expireat = CurrentTime + AR_TTL;
-  #ifdef bingo
     log(L_INFO, "Resolver: referenced cache entry not removed for: %s",
         ocp->he.h.h_name);
-  #endif
     return;
   }
   /*

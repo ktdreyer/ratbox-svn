@@ -18,10 +18,24 @@
  *   $Id$
  */
 
-#include "headers.h"
-#include "res.h"
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <ctype.h>
+#include <string.h>
+#include <sys/time.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
 #include <netdb.h>
+#include <assert.h>
+
+#include "auth.h"
+#include "conf.h"
+#include "iauth.h"
+#include "log.h"
+#include "misc.h"
+#include "res.h"
+#include "setup.h"
 
 static struct AuthRequest *CreateAuthRequest();
 static void FreeAuthRequest(struct AuthRequest *request);
@@ -51,19 +65,21 @@ StartAuth()
  Begin the authentication process
 
  parv[0] = "DoAuth"
- parv[1] = Client ID
- parv[2] = Client IP Address in unsigned int format
- parv[3] = Client's remote port
- parv[4] = Server's local port
+ parv[1] = client id
+ parv[2] = client nickname
+ parv[3] = client username
+ parv[4] = client hostname
+ parv[5] = Client IP Address in unsigned int format
+ parv[6] = optional password
 */
 
 void
-StartAuth(int sockfd, int parc, char **parv)
+StartAuth(struct Server *sptr, int parc, char **parv)
 
 {
 	struct AuthRequest *auth;
 
-	if (parc < 5)
+	if (parc < 6)
 		return; /* paranoia */
 
 	auth = CreateAuthRequest();
@@ -77,13 +93,15 @@ StartAuth(int sockfd, int parc, char **parv)
 	 */
 	strcpy(auth->hostname, inet_ntoa(auth->ip));
 
+	auth->server = sptr;
+
 	if (strlen(parv[1]) > IDLEN)
 	{
 		/*
 		 * This should never happen, but just to be paranoid,
 		 * cancel the auth request
 		 */
-		tosock(auth->serverfd,
+		tosock(auth->server->sockfd,
 			"DoneAuth %s ~ %s\n",
 			parv[1],
 			auth->hostname);
@@ -93,16 +111,20 @@ StartAuth(int sockfd, int parc, char **parv)
 	}
 
 	strcpy(auth->clientid, parv[1]);
+
+#if 0
 	auth->remoteport = (unsigned int) atoi(parv[3]);
 	auth->localport = (unsigned int) atoi(parv[4]);
+#endif /* 0 */
 
-	auth->serverfd = sockfd;
-
+#if 0
 	/*
 	 * Begin dns query
 	 */
 	BeginDNSQuery(auth);
+#endif /* 0 */
 
+#if 0
 	/*
 	 * Begin ident query
 	 */
@@ -115,6 +137,16 @@ StartAuth(int sockfd, int parc, char **parv)
 		CompleteAuthRequest(auth);
 		FreeAuthRequest(auth);
 	}
+#endif /* 0 */
+
+	strncpy_irc(auth->nickname, parv[2], NICKLEN);
+	strncpy_irc(auth->username, parv[3], USERLEN);
+	strncpy_irc(auth->hostname, parv[4], HOSTLEN);
+
+	if (parc >= 7)
+		strncpy_irc(auth->password, parv[6], PASSLEN);
+
+	CompleteAuthRequest(auth);
 } /* StartAuth() */
 
 /*
@@ -129,7 +161,7 @@ CreateAuthRequest()
 {
 	struct AuthRequest *request;
 
-	request = (struct AuthRequest *) malloc(sizeof(struct AuthRequest));
+	request = (struct AuthRequest *) MyMalloc(sizeof(struct AuthRequest));
 
 	memset(request, 0, sizeof(struct AuthRequest));
 
@@ -148,7 +180,7 @@ static void
 FreeAuthRequest(struct AuthRequest *request)
 
 {
-	free(request);
+	MyFree(request);
 } /* FreeAuthRequest() */
 
 /*
@@ -204,20 +236,17 @@ BeginIdentQuery(struct AuthRequest *auth)
 
 	if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	{
-	#ifdef bingo
 		log(L_ERROR,
 			"BeginIdentQuery(): Unable to open stream socket: %s",
 			strerror(errno));
-	#endif
 		return 0;
 	}
 
 	if (!SetNonBlocking(fd))
 	{
-	#ifdef bingo
-		log("BeginIdentQuery(): Unable to set socket [%d] non-blocking",
+		log(L_ERROR,
+			"BeginIdentQuery(): Unable to set socket [%d] non-blocking",
 			fd);
-	#endif
 		close(fd);
 		return 0;
 	}
@@ -229,11 +258,10 @@ BeginIdentQuery(struct AuthRequest *auth)
 
 	if (bind(fd, (struct sockaddr *) &localaddr, sizeof(localaddr)) < 0)
 	{
-	#ifdef bingo
-		log("BeginIdentQuery(): Unable to bind socket [%d]: %s",
+		log(L_ERROR,
+			"BeginIdentQuery(): Unable to bind socket [%d]: %s",
 			fd,
 			strerror(errno));
-	#endif
 		close(fd);
 		return 0;
 	}
@@ -249,11 +277,10 @@ BeginIdentQuery(struct AuthRequest *auth)
 	if ((connect(fd, (struct sockaddr *) &remoteaddr, sizeof(remoteaddr)) == (-1)) &&
 			(errno != EINPROGRESS))
 	{
-	#ifdef bingo
-		log("BeginIdentQuery(): Unable to connect to ident port of %s: %s",
+		log(L_ERROR,
+			"BeginIdentQuery(): Unable to connect to ident port of %s: %s",
 			inet_ntoa(auth->ip),
 			strerror(errno));
-	#endif
 		close(fd);
 		return 0;
 	}
@@ -311,10 +338,9 @@ SendIdentQuery(struct AuthRequest *auth)
 
 	if (send(auth->identfd, authbuf, strlen(authbuf), 0) == (-1))
 	{
-	#ifdef bingo
-		log("SendIdentQuery(): Error sending ident request: %s",
+		log(L_ERROR,
+			"SendIdentQuery(): Error sending ident request: %s",
 			strerror(errno));
-	#endif
 		IdentError(auth);
 		return;
 	}
@@ -554,14 +580,87 @@ CompleteAuthRequest(struct AuthRequest *auth)
 
 {
 	int badauth = 0;
+	int len;
 	char buf[BUFSIZE],
 	     reason[BUFSIZE];
+	struct ServerBan *kptr;
+	struct Quarantine *qptr;
 
 	*reason = '\0';
 
+	switch (CheckIline(auth->username, auth->hostname, auth->password))
+	{
+		/*
+		 * There was no I-line found for this client
+		 */
+		case IL_ERR_NOTAUTHORIZED:
+		{
+			badauth = 1;
+			sprintf(reason,
+				"*** You are not authorized to use this server");
+
+			break;
+		} /* case IL_ERR_NOTAUTHORIZED */
+
+		/*
+		 * The I-line is full - the number of users specified
+		 * in the corresponding Y: line has been reached.
+		 */
+		case IL_ERR_FULL:
+		{
+			badauth = 1;
+			sprintf(reason,
+				"*** No more clients allowed in your connection class");
+
+			break;
+		} /* case IL_ERR_FULL */
+
+		case IL_ERR_NEEDIDENT:
+		{
+			badauth = 1;
+			sprintf(reason,
+				"*** You need to install identd to use this server");
+
+			break;
+		} /* case IL_ERR_NOIDENT */
+
+		case IL_ERR_BADPASS:
+		{
+			badauth = 1;
+			sprintf(reason,
+				"*** Bad Password");
+
+			break;
+		} /* case IL_ERR_BADPASS */
+
+		/*
+		 * They have an acceptable I-line
+		 */
+		default:
+			break;
+	}
+
+	if ((kptr = FindServerBan(auth->username, auth->hostname)))
+	{
+		/*
+		 * They are K-lined
+		 */
+		badauth = 1;
+		sprintf(reason,
+			"*** Banned: %s",
+			kptr->reason);
+	}
+	else if ((qptr = FindQuarantine(auth->nickname, auth->username, auth->hostname)))
+	{
+		badauth = 1;
+		sprintf(reason,
+			"*** Quarantined Nickname: %s",
+			qptr->reason);
+	}
+
 	if (badauth)
 	{
-		sprintf(buf, "BadAuth %s :%s\n",
+		len = sprintf(buf, "BadAuth %s :%s\n",
 			auth->clientid,
 			reason);
 	}
@@ -575,11 +674,11 @@ CompleteAuthRequest(struct AuthRequest *auth)
 		if (!*auth->username)
 			strcpy(auth->username, "~");
 
-		sprintf(buf, "DoneAuth %s %s %s\n",
+		len = sprintf(buf, "DoneAuth %s %s %s\n",
 			auth->clientid,
 			auth->username,
 			auth->hostname);
 	}
 
-	send(auth->serverfd, buf, strlen(buf), 0);
+	send(auth->server->sockfd, buf, len, 0);
 } /* CompleteAuthRequest() */

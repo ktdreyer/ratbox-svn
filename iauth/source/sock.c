@@ -18,26 +18,39 @@
  *   $Id$
  */
 
-#include "headers.h"
+#include <stdio.h>
+#include <unistd.h>
+#include <stdarg.h>
+#include <sys/time.h>
+#include <assert.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <string.h>
 
 #define BSD_COMP /* needed on Solaris for FIONBIO */
 #include <sys/ioctl.h>
 
-AuthPort *PortList = NULL; /* list of listen ports */
+#include "auth.h"
+#include "log.h"
+#include "iauth.h"
+#include "match.h"
+#include "misc.h"
+#include "res.h"
+#include "sock.h"
 
 /*
  * List of all connected ircd servers
  */
-Server *ServerList = NULL;
+struct Server *ServerList = NULL;
 
-static void DoListen(AuthPort *portptr);
+static void DoListen(struct Port *portptr);
 static void SetSocketOptions(int sockfd);
 
-static int ReadData(int sockfd);
-static void ProcessData(int sockfd, int paramc, char **paramv);
-static int EstablishConnection(AuthPort *portptr);
-static void AddServer(Server *sptr);
-static void DelServer(Server *sptr);
+static int ReadData(struct Server *sptr);
+static void ProcessData(struct Server *sptr, int paramc, char **paramv);
+static int EstablishConnection(struct Port *portptr);
+static void AddServer(struct Server *sptr);
+static void DelServer(struct Server *sptr);
 static void DoDNSAsync();
 
 static struct AuthCommandTable
@@ -69,7 +82,6 @@ tosock(int sockfd, char *format, ...)
 
 	va_end(args);
 
-	fprintf(stderr, "sending %s", buf);
 	send(sockfd, buf, len, 0);
 } /* tosock() */
 
@@ -79,7 +91,7 @@ DoListen()
 */
 
 static void
-DoListen(AuthPort *portptr)
+DoListen(struct Port *portptr)
 
 {
 	struct sockaddr_in sockname;
@@ -93,10 +105,8 @@ DoListen(AuthPort *portptr)
 
 	if ((portptr->sockfd = socket(PF_INET, SOCK_STREAM, 6)) < 0)
 	{
-	#ifdef bingo
 		log(L_ERROR, "Unable to create stream socket: %s",
 			strerror(errno));
-	#endif
 		portptr->sockfd = NOSOCK;
 		return;
 	}
@@ -106,11 +116,9 @@ DoListen(AuthPort *portptr)
 
 	if (bind(portptr->sockfd, (struct sockaddr *)&sockname, sizeof(sockname)) < 0)
 	{
-	#ifdef bingo
 		log(L_ERROR, "Unable to bind port %d: %s",
 			portptr->port,
 			strerror(errno));
-	#endif
 		close(portptr->sockfd);
 		portptr->sockfd = NOSOCK;
 		return;
@@ -118,11 +126,9 @@ DoListen(AuthPort *portptr)
 
 	if (listen(portptr->sockfd, 4) < 0)
 	{
-	#ifdef bingo
 		log(L_ERROR, "Unable to listen on port %d: %s",
 			portptr->port,
 			strerror(errno));
-	#endif
 		close(portptr->sockfd);
 		portptr->sockfd = NOSOCK;
 		return;
@@ -130,10 +136,8 @@ DoListen(AuthPort *portptr)
 
 	if (!SetNonBlocking(portptr->sockfd))
 	{
-	#ifdef bingo
 		log(L_ERROR, "Unable to set socket [%d] non-blocking",
 			portptr->sockfd);
-	#endif
 		close(portptr->sockfd);
 		portptr->sockfd = NOSOCK;
 		return;
@@ -149,7 +153,7 @@ void
 InitListenPorts()
 
 {
-	AuthPort *portptr;
+	struct Port *portptr;
 
 	for (portptr = PortList; portptr; portptr = portptr->next)
 		DoListen(portptr);
@@ -174,10 +178,8 @@ SetSocketOptions(int sockfd)
 	 */
 	if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (char *) &option, sizeof(option)) < 0)
 	{
-	#ifdef bingo
 		log(L_ERROR, "SetSocketOptions(): setsockopt(SO_REUSEADDR) failed: %s",
 			strerror(errno));
-	#endif
 		return;
 	}
 } /* SetSocketOptions() */
@@ -198,25 +200,21 @@ SetNonBlocking(int socket)
 
 	if ((flags = fcntl(socket, F_GETFL, 0)) == -1)
 	{
-	#ifdef bingo
 		log(L_ERROR,
 			"SetNonBlocking: fcntl(%d, F_GETFL, 0) failed: %s",
 			socket,
 			strerror(errno));
-	#endif
 		return 0;
 	}
 	else
 	{
 		if (fcntl(socket, F_SETFL, flags | O_NONBLOCK) == -1)
 		{
-	#ifdef bingo
 			log(L_ERROR,
 				"SetNonBlocking: fcntl(%d, F_SETFL, %d) failed: %s",
 				socket,
 				flags | O_NONBLOCK,
 				strerror(errno));
-	#endif
 			return 0;
 		}
 	}
@@ -239,9 +237,9 @@ CheckConnections()
 	fd_set readfds,
 	       writefds;
 	struct timeval TimeOut;
-	AuthPort *portptr;
-	Server *sptr,
-	       *tmp;
+	struct Port *portptr;
+	struct Server *sptr,
+	              *tmp;
 	struct AuthRequest *auth,
 	                   *auth_next;
 
@@ -271,7 +269,7 @@ CheckConnections()
 		 */
 		for (auth = AuthPollList; auth; auth = auth->next)
 		{
-			assert (-1 < auth->identfd);
+			assert (NOSOCK != auth->identfd);
 
 			if (IsIdentConnect(auth))
 				FD_SET(auth->identfd, &writefds);
@@ -295,12 +293,13 @@ CheckConnections()
 			{
 				if (FD_ISSET(sptr->sockfd, &readfds))
 				{
-					fprintf(stderr, "socket [%d] is ready\n", sptr->sockfd);
-					if (!ReadData(sptr->sockfd))
+					fprintf(stderr, "READING DATA\n");
+					if (!ReadData(sptr))
 					{
 						/*
 						 * Connection has been closed
 						 */
+						fprintf(stderr, "CONNECTION CLOSED\n");
 
 						close(sptr->sockfd);
 
@@ -325,6 +324,7 @@ CheckConnections()
 
 				if (FD_ISSET(portptr->sockfd, &readfds))
 				{
+					fprintf(stderr, "GOT CONNECTION\n");
 					/*
 					 * We have received a new connection, possibly
 					 * from an ircd - accept it
@@ -338,7 +338,7 @@ CheckConnections()
 			{
 				auth_next = auth->next;
 
-				assert(-1 < auth->identfd);
+				assert(NOSOCK != auth->identfd);
 
 				if (IsIdentConnect(auth) && FD_ISSET(auth->identfd, &writefds))
 					SendIdentQuery(auth);
@@ -361,7 +361,7 @@ CheckConnections()
 
 /*
 ReadData()
- Read and parse any incoming data from sockfd
+ Read and parse any incoming data from sptr->sockfd
 
 Return: 0 if unsuccessful
         1 if successful
@@ -369,7 +369,7 @@ Return: 0 if unsuccessful
 */
 
 static int
-ReadData(int sockfd)
+ReadData(struct Server *sptr)
 
 {
 	int length; /* number of bytes we read */
@@ -378,7 +378,7 @@ ReadData(int sockfd)
 	char *paramv[MAXPARAMS + 1];
 	int paramc;
 
-	length = recv(sockfd, buffer, sizeof(buffer) - 1, 0);
+	length = recv(sptr->sockfd, buffer, sizeof(buffer) - 1, 0);
 
 	if ((length == (-1)) &&
 			((errno == EWOULDBLOCK) || (errno == EAGAIN)))
@@ -389,10 +389,8 @@ ReadData(int sockfd)
 		/*
 		 * Connection closed
 		 */
-	#ifdef bingo
 		log(L_ERROR, "IAuth: Read error from server: %s",
 			strerror(errno));
-	#endif
 		return 0;
 	}
 
@@ -421,7 +419,7 @@ ReadData(int sockfd)
 
 		tmp = *ch;
 
-		if ((tmp == '\n') || (tmp == '\r'))
+		if (IsEol(tmp))
 		{
 			/*
 			 * We've reached the end of our line - process it
@@ -430,7 +428,7 @@ ReadData(int sockfd)
 			*ch = '\0';
 
 			if (paramc)
-				ProcessData(sockfd, paramc, paramv);
+				ProcessData(sptr, paramc, paramv);
 
 			break;
 		}
@@ -439,6 +437,11 @@ ReadData(int sockfd)
 			if (tmp == ' ')
 			{
 				*ch++ = '\0';
+				while (IsSpace(*ch) && !IsEol(*ch))
+					++ch;
+
+				if (IsEol(*ch))
+					continue;
 				paramv[paramc++] = ch;
 			}
 		}
@@ -454,7 +457,7 @@ ReadData(int sockfd)
 
 /*
 ProcessData()
- Inputs: sockfd - socket we read data from
+ Inputs: sptr - ircd server we read data from
          paramc - number of parameters in paramv[]
          paramv - array of pointers to individual parameters
                   sent by the parent ircd process
@@ -466,7 +469,7 @@ ProcessData()
 */
 
 static void
-ProcessData(int sockfd, int paramc, char **paramv)
+ProcessData(struct Server *sptr, int paramc, char **paramv)
 
 {
 	struct AuthCommandTable *cmdptr;
@@ -478,7 +481,7 @@ ProcessData(int sockfd, int paramc, char **paramv)
 			/*
 			 * Call the corresponding function
 			 */
-			(*cmdptr->func)(sockfd, paramc, paramv);
+			(*cmdptr->func)(sptr, paramc, paramv);
 			break;
 		}
 	}
@@ -491,39 +494,33 @@ most likely from an ircd connection
 */
 
 static int
-EstablishConnection(AuthPort *portptr)
+EstablishConnection(struct Port *portptr)
 
 {
 	struct sockaddr_in ClientAddr;
 	int clientlen;
-	Server *newconn;
+	struct Server *newconn;
 
 	assert(portptr != 0);
 
-	fprintf(stderr, "Got connection\n");
-
-	newconn = (Server *) malloc(sizeof(Server));
+	newconn = (struct Server *) MyMalloc(sizeof(struct Server));
 
 	clientlen = sizeof(ClientAddr);
 	newconn->sockfd = accept(portptr->sockfd, (struct sockaddr *) &ClientAddr, &clientlen);
 
 	if (newconn->sockfd < 0)
 	{
-	#ifdef bingo
 		log(L_ERROR, "EstablishConnection(): Error accepting connection: %s",
 			strerror(errno));
-	#endif
-		free(newconn);
+		MyFree(newconn);
 		return 0;
 	}
 
 	if (!SetNonBlocking(newconn->sockfd))
 	{
-	#ifdef bingo
 		log(L_ERROR, "EstablishConnection(): Unable to set socket [%d] non-blocking",
 			newconn->sockfd);
-	#endif
-		free(newconn);
+		MyFree(newconn);
 		return 0;
 	}
 
@@ -542,7 +539,7 @@ AddServer()
 */
 
 static void
-AddServer(Server *sptr)
+AddServer(struct Server *sptr)
 
 {
 	assert(sptr != 0);
@@ -560,7 +557,7 @@ DelServer()
 */
 
 static void
-DelServer(Server *sptr)
+DelServer(struct Server *sptr)
 
 {
 	assert(sptr != 0);
@@ -572,7 +569,7 @@ DelServer(Server *sptr)
 	else
 		ServerList = sptr->next;
 
-	free(sptr);
+	MyFree(sptr);
 } /* DelServer() */
 
 /*

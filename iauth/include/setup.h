@@ -1,6 +1,14 @@
 #ifndef INCLUDED_setup_h
 #define INCLUDED_setup_h
 
+/*
+ * CONFFILE - Path to IAuth configuration file
+ * LOGFILE  - Path to the IAuth log file
+ */
+
+#define CONFFILE     "iauth.conf"
+#define LOGFILE      "iauth.log"
+
 #define DEBUGMODE
 
 /* CONNECTTIMEOUT -

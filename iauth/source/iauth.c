@@ -18,11 +18,21 @@
  *   $Id$
  */
 
-#include "headers.h"
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/time.h>
+#include <signal.h>
+
+#include "conf.h"
+#include "iauth.h"
+#include "log.h"
+#include "res.h"
+#include "setup.h"
+#include "sock.h"
 
 static void SetupSignals();
 
-time_t CurrentTime; /* current system timestamp */
+time_t         CurrentTime;            /* current system timestamp */
 
 /*
 SetupSignals()
@@ -45,6 +55,8 @@ main()
 #endif
 
 	LoadConfig(ICONF);
+
+	InitLog(LOGFILE);
 
 #ifndef DEBUGMODE
 
@@ -76,7 +88,7 @@ main()
 
 #endif /* !DEBUGMODE */
 
-	fprintf(stderr, "IAuth loaded\n");
+	log(L_INFO, "IAuth Loaded");
 
 	/* Initialize signals */
 	SetupSignals();

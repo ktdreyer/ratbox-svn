@@ -1,8 +1,9 @@
 /*
- * ircd/iauth/res.h (C)opyright 1992 Darren Reed.
+ * iauth/res.h (C)opyright 1992 Darren Reed.
  *
  * $Id$
  */
+
 #ifndef INCLUDED_res_h
 #define INCLUDED_res_h
 

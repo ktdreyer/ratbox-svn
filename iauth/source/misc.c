@@ -18,7 +18,13 @@
  *   $Id$
  */
 
-#include "headers.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+
+#include "iauth.h"
+#include "log.h"
+#include "misc.h"
 
 static void outofmemory();
 
@@ -52,7 +58,19 @@ MyMalloc(size_t x)
   if (!ret)
     outofmemory();
   return ret;
-}
+} /* MyMalloc() */
+
+char *
+MyStrdup(char *str)
+
+{
+	char *final;
+
+	final = (char *) MyMalloc(strlen(str) + 1);
+	strcpy(final, str);
+
+	return (final);
+} /* MyStrdup() */
 
 /*
 MyFree()
@@ -63,16 +81,17 @@ void
 MyFree(void *ptr)
 
 {
-	free(ptr);
-	ptr = NULL;
+	if (ptr)
+	{
+		free(ptr);
+		ptr = NULL;
+	}
 } /* MyFree() */
 
 static void
 outofmemory()
 
 {
-#ifdef bingo
-	log("Out of memory, exiting");
-#endif
+	log(L_INFO, "Out of memory, exiting");
 	exit (-1);
 } /* outofmemory() */
