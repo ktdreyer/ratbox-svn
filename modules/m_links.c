@@ -131,10 +131,8 @@ static void mo_links(struct Client *client_p, struct Client *source_p,
   
   hook_call_event("doing_links", &hd);
   
-  for (target_p = GlobalClientList; target_p; target_p = target_p->next) 
+  for (target_p = GlobalServerList; target_p; target_p = target_p->servnext) 
     {
-      if (!IsServer(target_p) && !IsMe(target_p))
-        continue;
       if (*mask && !match(mask, target_p->name))
         continue;
     
