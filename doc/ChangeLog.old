@@ -1,3 +1,14 @@
+*** 20001231_17 by db
+- optimized can_join a bit
+  No need to generate an expensive to generate string twice, so added
+  check_banned as a helper function for is_banned that way can share
+  the strings from can_join
+- make_nick_user_host was being called, then strcpy'ed. dumb. why not
+  tell it where to generate the string in the first place? and remove
+  a dumb strcpy?
+
+
+
 *** 20001231_16 by spookey
  - fixes flood control... >= not >
 
