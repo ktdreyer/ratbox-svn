@@ -1,3 +1,16 @@
+androsyn    2002/10/06 00:12:23 UTC	(20021006_0)
+
+  Modified files:
+    modules              m_who.c 
+  Log:
+  Fix a bug in WHO that would leak a channel the user was in regardless of
+  +s/+p or +i modes.
+  
+  Revision  Changes    Path
+  1.71      +5 -1      ircd-ratbox/modules/m_who.c
+
+
+
 androsyn    2002/10/02 04:16:14 UTC	(20021002_0)
 
   Modified files:
