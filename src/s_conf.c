@@ -2484,9 +2484,19 @@ conf_add_class_to_conf(struct ConfItem *aconf)
 
   if(ClassPtr(aconf) == class0)
     {
-      sendto_realops_flags(FLAGS_ALL, L_ALL,
-	   "Warning *** Defaulting to default class for missing class \"%s\"",
-			   aconf->className);
+	if (aconf->status == CONF_CLIENT)
+	{
+		sendto_realops_flags(FLAGS_ALL, L_ALL,
+			"Warning -- Using default class for missing class \"%s\" in auth{} for %s@%s",
+			aconf->className, aconf->user, aconf->host);
+	}
+	else if (aconf->status == CONF_SERVER)
+	{
+		sendto_realops_flags(FLAGS_ALL, L_ALL,
+			"Warning -- Using default class for missing class \"%s\" in auth{} for %s",
+			aconf->className, aconf->name);
+	}
+	
       MyFree(aconf->className);
       DupString(aconf->className,"default");
       return;
