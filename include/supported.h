@@ -52,6 +52,7 @@
 		  " CHANMODES=%s" \
 		  " NETWORK=%s" \
 		  " CHARSET=rfc1459" \
+		  " CASEMAPPING=rfc1459" \
 		  " CALLERID"
 
 #define FEATURES2VALUES ConfigServerHide.disable_local_channels ? "#" : "#&", \
