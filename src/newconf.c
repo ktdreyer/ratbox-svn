@@ -45,7 +45,7 @@ static char*	conf_strtype(int type)
 	case CF_QSTRING:
 		return "quoted string";
 	case CF_TIME:
-		return "time value";
+		return "time/size value";
 	default:
 		return "unknown type";
 	}
@@ -94,6 +94,7 @@ int 	conf_end_block(struct TopConf *tc)
         if (tc->tc_efunc)
                 return tc->tc_efunc(tc);
 
+	MyFree(conf_cur_block_name);
         return 0;
 }
 

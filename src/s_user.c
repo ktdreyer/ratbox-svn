@@ -1185,17 +1185,8 @@ user_welcome(struct Client *source_p)
 {
   sendto_one(source_p, form_str(RPL_WELCOME), me.name, source_p->name, 
              ServerInfo.network_name, source_p->name );
-  /* This is a duplicate of the NOTICE but see below...*/
   sendto_one(source_p, form_str(RPL_YOURHOST), me.name, source_p->name,
 	     get_listener_name(source_p->localClient->listener), ircd_version);
-  
-  /*
-  ** Don't mess with this one - IRCII needs it! -Avalon
-  */
-  sendto_one(source_p,
-	     "NOTICE %s :*** Your host is %s, running version %s",
-	     source_p->name, get_listener_name(source_p->localClient->listener),
-	     ircd_version);
   
   sendto_one(source_p, form_str(RPL_CREATED),me.name,source_p->name,creation);
   sendto_one(source_p, form_str(RPL_MYINFO), me.name, source_p->name,
