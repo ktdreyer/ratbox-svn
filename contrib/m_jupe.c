@@ -104,7 +104,14 @@ static void mo_jupe(struct Client *client_p, struct Client *source_p,
                  me.name, parv[0], parv[1]);
       return;
     }
-    
+
+  if(match(parv[1], me.name))
+  {
+    sendto_one(source_p, ":%s NOTICE %s :I cant jupe myself!",
+	       me.name, source_p->name);
+    return;
+  }
+
   sendto_wallops_flags(FLAGS_WALLOP, &me,
                        "JUPE for %s requested by %s: %s",
 			 parv[1], get_oper_name(source_p), parv[2]);

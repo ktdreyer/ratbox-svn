@@ -215,6 +215,7 @@ options that were in config.h, to be changed with a /rehash.
 		     /notice +#channel will notice only voices/halfops/ops
 
 		     privmsg is also supported.
+    CALLERID       - Server supports the +g usermode for server-side ignore.
     MODES=%i       - The number of channel modes accepted per MODE command
     MAXCHANNELS=%i - The maximum channels per user
     MAXBANS=%i     - The limit on the total number of bans, excepts and invite

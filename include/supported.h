@@ -51,7 +51,8 @@
                   " PREFIX=%s" \
 		  " CHANMODES=%s" \
 		  " NETWORK=%s" \
-		  " CHARSET=rfc1459"
+		  " CHARSET=rfc1459" \
+		  " CALLERID"
 
 #define FEATURES2VALUES ConfigServerHide.disable_local_channels ? "#" : "#&", \
                         "(ohv)@%+", "beI,k,l,imnpsta", \
