@@ -70,6 +70,7 @@ typedef struct MessageTree MESSAGE_TREE;
 #define MSG_DBOP     "DBOP"
 #endif
 
+#define MSG_ACCEPT   "ACCEPT"   /* ACCEPT */
 #define MSG_PRIVMSG  "PRIVMSG"  /* PRIV */
 #define MSG_CBURST   "CBURST"   /* LazyLink channel burst */
 #define MSG_DROP     "DROP"     /* LazyLink channel drop */

@@ -24,6 +24,14 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.28  2000/11/29 07:57:52  db
+ * - I removed isbot tests. those are quite obsolete and were BLOAT
+ * - I added skeleton for server side ignore new user mode +u
+ * - This adds a new command module "m_accept"
+ *   This code needs to be finished...
+ * - removed rehash gline rehash tkline BLOAT
+ * - tidied up linebuf.c to use \r and \n like K&R intended
+ *
  * Revision 7.27  2000/11/26 03:35:35  db
  * - tempoary check in (still works) of another massive cleanup...
  *   more to come
@@ -502,7 +510,6 @@ typedef struct
   int         kline_with_connection_closed;
   int         warn_no_nline;
   int         non_redundant_klines;
-  int         botcheck;
   int         b_lines_oper_only;
   int         e_lines_oper_only;
   int         f_lines_oper_only;

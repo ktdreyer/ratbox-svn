@@ -76,7 +76,6 @@ accept_password { return ACCEPT_PASSWORD; }
 action		{ return ACTION; }
 admin		{ return ADMIN; }
 administrator	{ return ADMIN; }
-allow_bots	{ return ALLOW_BOTS; }
 auth		{ return AUTH; }
 autoconn	{ return AUTOCONN; }
 class		{ return CLASS; }
@@ -161,7 +160,6 @@ kline_with_connection_closed { return KLINE_WITH_CONNECTION_CLOSED; }
 kline_with_reason       { return KLINE_WITH_REASON; }
 warn_no_nline           { return WARN_NO_NLINE; }
 non_redundant_klines    { return NON_REDUNDANT_KLINES; }
-botcheck { return BOTCHECK; }
 
 b_lines_oper_only       { return B_LINES_OPER_ONLY; }
 e_lines_oper_only       { return E_LINES_OPER_ONLY; }

@@ -74,50 +74,16 @@ int mo_rehash(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       if (irccmp(parv[1],"DNS") == 0)
         {
           sendto_one(sptr, form_str(RPL_REHASHING), me.name, parv[0], "DNS");
-#ifdef CUSTOM_ERR
-          sendto_realops("%s is rehashing DNS while whistling innocently",
-#else
-          sendto_realops("%s is rehashing DNS",
-#endif
-                 parv[0]);
+          sendto_realops("%s is rehashing DNS", parv[0]);
           restart_resolver();   /* re-read /etc/resolv.conf AGAIN?
                                    and close/re-open res socket */
-          found = YES;
-        }
-      else if(irccmp(parv[1],"TKLINES") == 0)
-        {
-          sendto_one(sptr, form_str(RPL_REHASHING), me.name, parv[0], "temp klines");
-          flush_temp_klines();
-#ifdef CUSTOM_ERR
-          sendto_realops("%s is clearing temp klines while whistling innocently",
-#else
-          sendto_realops("%s is clearing temp klines",
-#endif
-                 parv[0]);
-          found = YES;
-        }
-      else if(irccmp(parv[1],"GLINES") == 0)
-        {
-          sendto_one(sptr, form_str(RPL_REHASHING), me.name, parv[0], "g-lines");
-          flush_glines();
-#ifdef CUSTOM_ERR
-          sendto_realops("%s is clearing G-lines while whistling innocently",
-#else
-          sendto_realops("%s is clearing G-lines",
-#endif
-                 parv[0]);
           found = YES;
         }
       else if(irccmp(parv[1],"GC") == 0)
         {
           sendto_one(sptr, form_str(RPL_REHASHING), me.name, parv[0], "garbage collecting");
           block_garbage_collect();
-#ifdef CUSTOM_ERR
-          sendto_realops("%s is garbage collecting while whistling innocently",
-#else
-          sendto_realops("%s is garbage collecting",
-#endif
-                 parv[0]);
+          sendto_realops("%s is garbage collecting", parv[0]);
           found = YES;
         }
       else if(irccmp(parv[1],"MOTD") == 0)
@@ -148,9 +114,9 @@ int mo_rehash(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       else
         {
 	if (ConfigFileEntry.glines)
-          sendto_one(sptr,":%s NOTICE %s : rehash one of :DNS TKLINES GLINES GC MOTD OMOTD" ,me.name,sptr->name);
+          sendto_one(sptr,":%s NOTICE %s :rehash one of :DNS GC MOTD OMOTD" ,me.name,sptr->name);
 	else
-	  sendto_one(sptr,":%s NOTICE %s : rehash one of :DNS TKLINES GC MOTD OMOTD" ,me.name,sptr->name);
+	  sendto_one(sptr,":%s NOTICE %s :rehash one of :DNS GC MOTD OMOTD" ,me.name,sptr->name);
           return(0);
         }
     }
@@ -158,12 +124,7 @@ int mo_rehash(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     {
       sendto_one(sptr, form_str(RPL_REHASHING), me.name, parv[0],
                  ConfigFileEntry.configfile);
-#ifdef CUSTOM_ERR
-      sendto_realops("%s is rehashing server config file while whistling innocently",
-#else
-      sendto_realops("%s is rehashing server config file",
-#endif
-                 parv[0]);
+      sendto_realops("%s is rehashing server config file", parv[0]);
       log(L_NOTICE, "REHASH From %s\n", get_client_name(sptr, SHOW_IP));
       return rehash(cptr, sptr, 0);
     }

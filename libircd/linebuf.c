@@ -98,14 +98,14 @@ linebuf_skip_crlf(char *ch, int len)
      int cpylen = 0;
 
      /* First, skip until the first non-CRLF */
-     while (len && (*ch != '\012') && (*ch != '\015')) {
+     while (len && (*ch != '\n') && (*ch != '\r')) {
          ch++;
          len--;
          cpylen++;
      }
 
      /* Then, skip until the last CRLF */
-     while (len && ((*ch == '\012') || (*ch == '\015'))) {
+     while (len && ((*ch == '\n') || (*ch == '\r'))) {
          ch++;
          len--;
          cpylen++;
@@ -121,9 +121,9 @@ linebuf_skip_crlf(char *ch, int len)
 static void
 linebuf_terminate_crlf(buf_head_t *bufhead, buf_line_t *bufline)
 {
-    bufline->buf[bufline->len++] = '\015';
-    bufline->buf[bufline->len++] = '\012';
-    bufline->buf[bufline->len] = '\000';
+    bufline->buf[bufline->len++] = '\r';
+    bufline->buf[bufline->len++] = '\n';
+    bufline->buf[bufline->len] = '\0';
     bufhead->len += 2;
 }
 

@@ -528,9 +528,47 @@ void msg_client(int n_or_p, char *command,
 	       sptr->name, acptr->name,
 	       acptr->user->away);
 
-  sendto_prefix_one(acptr, sptr, ":%s %s %s :%s",
-		    sptr->name, command, acptr->name, text);
+  if(MyClient(acptr))
+    {
+      if(IsSetCallerId(acptr))
+	{
+	  /* check for accept, flag recipient incoming message */
+	  sendto_prefix_one(sptr, acptr,
+		    ":%s NOTICE %s :*** I'm in +u mode (server side ignore).",
+			    acptr->name, sptr->name);
 
+	  /* Here is the anti-drone bot/spambot bloat^H^H^H^H^Hcode -db */
+	  if(accept_message(sptr,acptr))
+	    {
+	      sendto_prefix_one(acptr, sptr, ":%s %s %s :%s",
+				sptr->name, command, acptr->name, text);
+	    }
+	  else
+	    {
+	      /* XXX hard coded 60 ick fix -db */
+	      if( (acptr->last_caller_id_time + 60) < CurrentTime )
+		{
+		  sendto_prefix_one(sptr, acptr,
+		    ":%s NOTICE %s :*** I've been informed you messaged me.",
+				    acptr->name, sptr->name);
+
+		  sendto_prefix_one(acptr, sptr,
+		    ":%s NOTICE %s :*** Client %s [%s@%s] is messaging you",
+				    me.name, acptr->name,
+				    sptr->name, sptr->username,
+				    sptr->host );
+
+		  acptr->last_caller_id_time = CurrentTime;
+		}
+	    }
+	}
+      else
+	sendto_prefix_one(acptr, sptr, ":%s %s %s :%s",
+			  sptr->name, command, acptr->name, text);
+    }
+  else
+    sendto_prefix_one(acptr, sptr, ":%s %s %s :%s",
+		      sptr->name, command, acptr->name, text);
   return;
 }
       
@@ -556,8 +594,7 @@ int drone_attack(struct Client *sptr,struct Client *acptr)
 	}
       else
 	{
-	  if(acptr->received_number_of_privmsgs > 
-	     GlobalSetOptions.dronecount)
+	  if(acptr->received_number_of_privmsgs > GlobalSetOptions.dronecount)
 	    {
 	      if(acptr->drone_noticed == 0) /* tiny FSM */
 		{
@@ -567,41 +604,8 @@ int drone_attack(struct Client *sptr,struct Client *acptr)
 				       sptr->host,
 				       sptr->user->server, acptr->name);
 		  acptr->drone_noticed = 1;
+		  return 1;
 		}
-	      /* heuristic here, if target has been getting a lot
-	       * of privmsgs from clients, and sendq is above halfway up
-	       * its allowed sendq, then throw away the privmsg, otherwise
-	       * let it through. This adds some protection, yet doesn't
-	       * DoS the client.
-	       * -Dianora
-	       */
-	      if(linebuf_len(&acptr->buf_sendq) > (get_sendq(acptr)/2L))
-		{
-		  if(acptr->drone_noticed == 1) /* tiny FSM */
-		    {
-		      sendto_realops_flags(FLAGS_BOTS,
-		       "anti_drone_flood SendQ protection activated for %s",
-					   acptr->name);
-
-		      sendto_one(acptr,     
- ":%s NOTICE %s :*** Notice -- Server drone flood protection activated for %s",
-				 me.name, acptr->name, acptr->name);
-		      acptr->drone_noticed = 2;
-		    }
-		}
-
-	      if(linebuf_len(&acptr->buf_sendq) <= (get_sendq(acptr)/4L))
-		{
-		  if(acptr->drone_noticed == 2)
-		    {
-		      sendto_one(acptr,     
-				 ":%s NOTICE %s :*** Notice -- Server drone flood protection de-activated for %s",
-				 me.name, acptr->name, acptr->name);
-		      acptr->drone_noticed = 1;
-		    }
-		}
-	      if(acptr->drone_noticed > 1)
-		return 1;
 	    }
 	  else
 	    acptr->received_number_of_privmsgs++;
@@ -620,10 +624,14 @@ int drone_attack(struct Client *sptr,struct Client *acptr)
  *		- nick stuff to grok for opers
  *		- text to send if grok
  * output	- none
- * side effects	- all the classic icky oper type messages are parsed
- *		  i.e. privmsg #some.host 
- *		  for the moment, oper NOTICE to this icky stuff
- *		  is translated to privmsg. deal for now.
+ * side effects	- all the traditional oper type messages are parsed here.
+ *		  i.e. "/msg #some.host."
+ *		  However, syntax has been changed.
+ *		  previous syntax "/msg #some.host.mask"
+ *		  now becomes     "/msg $#some.host.mask"
+ *		  previous syntax "/msg $some.server.mask"
+ *		  now becomes	  "/msg $$some.server.mask"
+ *		  This disambiguates the syntax.
  */
 void handle_opers(int p_or_n,
 		  char *command,
@@ -642,11 +650,7 @@ void handle_opers(int p_or_n,
    * as pointed out by Mortiis, user%host.name@server.name 
    * syntax could be used to flood without FLUD protection
    * its also a delightful way for non-opers to find users who
-   * have changed nicks -Dianora
-   *
-   * Grrr it was pointed out to me that x@service is valid
-   * for non-opers too, and wouldn't allow for flooding/stalking
-   * -Dianora
+   * have changed nicks
    */
 
   /*

@@ -17,6 +17,7 @@ INCLUDES	= -I../include
 CPPFLAGS	= ${INCLUDES} @SSL_DEFINE@ @CPPFLAGS@
 
 SRCS =                          \
+  m_accept.c \
   m_admin.c \
   m_away.c \
   m_capab.c \

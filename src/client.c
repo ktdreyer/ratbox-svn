@@ -246,14 +246,6 @@ void _free_client(struct Client* cptr)
  *
  * Client/Server ping outs are handled.
  *
- * -Dianora
- */
-
-/* Note, that dying_clients really doesn't need to be
- * any where near as long as MAXCONNECTIONS
- * but I made it this long for now. If its made shorter,
- * then a limit check is going to have to be added as well
- * -Dianora
  */
 
 /*
@@ -448,9 +440,11 @@ check_pings(void *notused)
 
 
 /*
- * Check all connections for a pending kline against the client,
- * exit the client if a kline matches.
- * -Dianora
+ * check_klines
+ * inputs	- NONE
+ * output	- NONE
+ * side effects - Check all connections for a pending kline against the
+ * 		  client, exit the client if a kline matches.
  */
 
 void check_klines(void)
@@ -490,7 +484,6 @@ void check_klines(void)
            * to prevent this cptr from being marked again for exit.
            * If you don't, you could cause exit_client() to be called twice
            * for the same cptr. i.e. bad news
-           * -Dianora
            */
 	  
           dying_clients[die_index].client = cptr;
@@ -699,10 +692,11 @@ void check_klines(void)
 }
 
 
-/* Now exit clients marked for exit above.
- * it doesn't matter if local[] gets re-arranged now
+/* exit_marked_for_death_clients
+ * inputs	- array of marked for death clients
+ * output	- NONE
+ * side effects	- Now exit clients marked for exit above.
  *
- * -Dianora
  */
 
 static void exit_marked_for_death_clients(struct die_client dying_clients[])
@@ -1018,11 +1012,6 @@ struct Client* find_server_by_name(const char* name)
   if (!strchr(name, '*'))
     return cptr;
 
-  /* hmmm hot spot for host masked servers (ick)
-   * a separate link list for all servers would help here
-   * instead of having to scan 50k client structs. (ick)
-   * -Dianora
-   */
   for (cptr = GlobalClientList; cptr; cptr = cptr->next)
     {
       if (!IsServer(cptr) && !IsMe(cptr))
@@ -1148,10 +1137,6 @@ void release_client_dns_reply(struct Client* client)
  *        Function return either a pointer to the structure (sptr) or
  *        to internal buffer (nbuf). *NEVER* use the returned pointer
  *        to modify what it points!!!
- */
-/* Apparently, the use of (+) for idented clients
- * is unstandard. As it is a pain to parse, I'm just as happy
- * to remove it. It also simplifies the code a bit. -Dianora
  */
 
 const char* get_client_name(struct Client* client, int showip)
@@ -1316,7 +1301,7 @@ static void recurse_send_quits(struct Client *cptr, struct Client *sptr, struct 
   struct Client *acptr;
 
   /* If this server can handle quit storm (QS) removal
-   * of dependents, just send the SQUIT -Dianora
+   * of dependents, just send the SQUIT
    */
 
   if (IsCapable(to,CAP_QS))
@@ -1349,7 +1334,7 @@ static void recurse_send_quits(struct Client *cptr, struct Client *sptr, struct 
 ** actually removing things off llists.   tweaked from +CSr31  -orabidoo
 */
 /*
- * added sanity test code.... sptr->serv might be NULL... -Dianora
+ * added sanity test code.... sptr->serv might be NULL...
  */
 static void recurse_remove_clients(struct Client* sptr, const char* comment)
 {
@@ -1658,7 +1643,6 @@ const char* comment         /* Reason for the exit */
 
   if(IsServer(sptr))
     {        
-      /* I'm paranoid -Dianora */
       if((sptr->serv) && (sptr->serv->up))
         strcpy(comment1, sptr->serv->up);
       else
@@ -1733,4 +1717,17 @@ void count_remote_client_memory(int *remote_client_memory_used,
   BlockHeapCountMemory( remoteClientFreeList,
                         remote_client_memory_used,
                         remote_client_memory_allocated);
+}
+
+
+/*
+ * accept_message
+ *
+ * inputs	- pointer to source client
+ * 		- pointer to target client
+ * output	- 1 if accept this message 0 if not
+ * side effects -
+ */
+int accept_message(struct Client *source, struct Client *target)
+{
 }

@@ -198,7 +198,6 @@ struct Client
    * these fields, if (from != self).
    */
   int               count;       /* Amount of data in buffer */
-  unsigned char     isbot;      /* non 0 if its a type of bot */
   time_t            last_join_time;   /* when this client last 
                                          joined a channel */
   time_t            last_leave_time;  /* when this client last 
@@ -207,6 +206,7 @@ struct Client
                                          MIN_JOIN_LEAVE_TIME seconds */
   int               oper_warn_count_down; /* warn opers of this possible 
                                           spambot every time this gets to 0 */
+  time_t            last_caller_id_time;
   time_t            first_received_message_time;
   int               received_number_of_privmsgs;
   int               drone_noticed;
@@ -353,7 +353,8 @@ struct Client
 /* user information flags, only settable by remote mode or local oper */
 #define FLAGS_OPER         0x4000 /* Operator */
 #define FLAGS_LOCOP        0x8000 /* Local operator -- SRB */
-#define FLAGS_ADMIN        0x10000 /* server administrator */
+#define FLAGS_ADMIN        0x10000 /* block unless caller id's */
+#define FLAGS_CALLERID     0x20000 /* block unless caller id's */
 
 /* *sigh* overflow flags */
 #define FLAGS2_RESTRICTED   0x0001      /* restricted client */
@@ -393,7 +394,8 @@ struct Client
 #define ALL_UMODES   (SEND_UMODES | FLAGS_SERVNOTICE | FLAGS_CCONN | \
                       FLAGS_REJ | FLAGS_SKILL | FLAGS_FULL | FLAGS_SPY | \
                       FLAGS_NCHANGE | FLAGS_OPERWALL | FLAGS_DEBUG | \
-                      FLAGS_BOTS | FLAGS_EXTERNAL | FLAGS_LOCOP | FLAGS_ADMIN)
+                      FLAGS_BOTS | FLAGS_EXTERNAL | FLAGS_LOCOP | \
+ 		      FLAGS_ADMIN | FLAGS_CALLERID)
 
 #ifndef OPER_UMODES
 #define OPER_UMODES  (FLAGS_OPER | FLAGS_WALLOP | FLAGS_SERVNOTICE | \
@@ -456,7 +458,8 @@ struct Client
 #define SendDebugNotice(x)      ((x)->umodes & FLAGS_DEBUG)
 #define SendNickChange(x)       ((x)->umodes & FLAGS_NCHANGE)
 #define SetWallops(x)           ((x)->umodes |= FLAGS_WALLOP)
-
+#define SetCallerId(x)		((x)->umodes |= FLAGS_CALLERID)
+#define IsSetCallerId(x)	((x)->umodes |= FLAGS_CALLERID)
 
 #define IsRejectHeld(x)         ((x)->flags & FLAGS_REJECT_HOLD)
 #define SetRejectHold(x)        ((x)->flags |= FLAGS_REJECT_HOLD)
@@ -509,7 +512,6 @@ struct Client
 #define SetOperAdmin(x)         ((x)->flags2 |= FLAGS2_OPER_ADMIN)
 #define IsSetOperAdmin(x)       ((x)->flags2 & FLAGS2_OPER_ADMIN)
 #define CBurst(x)               ((x)->flags2 & FLAGS2_CBURST)
-
 /*
  * 'offsetof' is defined in ANSI-C. The following definition
  * is not absolutely portable (I have been told), but so far
@@ -562,5 +564,6 @@ extern struct Client* next_client(struct Client* next, const char* name);
 extern struct Client* next_client_double(struct Client* next, 
                                          const char* name);
 
+extern int accept_message(struct Client *source, struct Client *target);
 
 #endif /* INCLUDED_client_h */

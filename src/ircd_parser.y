@@ -1165,7 +1165,7 @@ general_item:       general_quiet_on_ban | general_moderate_nickchange |
                     general_anti_nick_flood | general_max_nick_time | general_max_nick_changes |
                     general_ts_warn_delta | general_ts_max_delta | general_kline_with_reason |
                     general_kline_with_connection_closed | general_warn_no_nline |
-                    general_non_redundant_klines | general_botcheck | general_b_lines_oper_only |
+                    general_non_redundant_klines | general_b_lines_oper_only |
                     general_e_lines_oper_only | general_f_lines_oper_only | general_stats_notice |
                     general_whois_notice | general_pace_wait | general_whois_wait | 
                     general_knock_delay |
@@ -1281,16 +1281,6 @@ general_non_redundant_klines: NON_REDUNDANT_KLINES '=' TYES ';'
     NON_REDUNDANT_KLINES '=' TNO ';'
   {
     ConfigFileEntry.non_redundant_klines = 0;
-  } ;
-
-general_botcheck: BOTCHECK '=' TYES ';'
-  {
-    ConfigFileEntry.botcheck = 1;
-  }
-    |
-    BOTCHECK '=' TNO ';'
-  {
-    ConfigFileEntry.botcheck = 0;
   } ;
 
 general_b_lines_oper_only: B_LINES_OPER_ONLY '=' TYES ';'

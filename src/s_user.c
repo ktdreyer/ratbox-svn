@@ -84,6 +84,7 @@ static struct flag_item user_modes[] =
   {FLAGS_LOCOP, 'O'},
   {FLAGS_REJ, 'r'},
   {FLAGS_SERVNOTICE, 's'},
+  {FLAGS_CALLERID, 'u'},
   {FLAGS_WALLOP, 'w'},
   {FLAGS_EXTERNAL, 'x'},
   {FLAGS_SPY, 'y'},
@@ -148,7 +149,7 @@ int user_modes_from_c_to_bitmask[] =
   FLAGS_REJ,    /* r */
   FLAGS_SERVNOTICE, /* s */
   0,            /* t */
-  0,            /* u */
+  FLAGS_CALLERID,  /* u */
   0,            /* v */
   FLAGS_WALLOP, /* w */
   FLAGS_EXTERNAL, /* x */
@@ -164,15 +165,6 @@ int user_modes_from_c_to_bitmask[] =
   /* 0xD0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0xDF */
   /* 0xE0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0xEF */
   /* 0xF0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0  /* 0xFF */
-};
-
-/* internally defined functions */
-const char *type_of_bot[]={
-  "NONE",
-  "eggdrop",
-  "vald/com/joh bot",
-  "spambot",
-  "annoy/ojnkbot"
 };
 
 unsigned long my_rand(void);    /* provided by orabidoo */
@@ -641,12 +633,11 @@ int register_user(struct Client *cptr, struct Client *sptr,
        *   -Taner
        */
       /* Except "F:" clients */
-      if ( (ConfigFileEntry.botcheck && (
-          !sptr->isbot &&
-          ((Count.local + 1) >= (
-				 GlobalSetOptions.maxclients+MAX_BUFFER)))) ||
-            (((Count.local +1) >= (GlobalSetOptions.maxclients - 5)) &&
-	     !(IsFlined(sptr))))
+      if ( ( (Count.local + 1) >= (GlobalSetOptions.maxclients+MAX_BUFFER)
+	     ||
+	     (Count.local +1) >= (GlobalSetOptions.maxclients - 5) )
+	   &&
+	   !(IsFlined(sptr)) )
         {
           sendto_realops_flags(FLAGS_FULL,
                                "Too many clients, rejecting %s[%s].",
@@ -655,29 +646,6 @@ int register_user(struct Client *cptr, struct Client *sptr,
           return exit_client(cptr, sptr, &me,
                              "Sorry, server is full - try later");
         }
-      /* botcheck */
-      if(ConfigFileEntry.botcheck) {
-        if(sptr->isbot)
-          {
-            if(IsBlined(sptr))
-              {
-                sendto_realops_flags(FLAGS_BOTS,
-                                   "Possible %s: %s (%s@%s) [B-lined]",
-                                   type_of_bot[sptr->isbot],
-                                   sptr->name, sptr->username, sptr->host);
-              }
-            else
-              {
-                sendto_realops_flags(FLAGS_BOTS, "Rejecting %s: %s",
-                                   type_of_bot[sptr->isbot],
-                                   get_client_name(sptr,FALSE));
-                ServerStats->is_ref++;
-                return exit_client(cptr, sptr, sptr, type_of_bot[sptr->isbot] );
-              }
-          }
-      }
-      /* End of botcheck */
-
       /* valid user name check */
 
       if (!valid_username(sptr->username))
@@ -1046,15 +1014,6 @@ report_and_set_user_flags(struct Client *sptr,struct ConfItem *aconf)
                  me.name,sptr->name);
     }
 
-  /* If this user can run bots set it "B lined" */
-  if(IsConfBlined(aconf))
-    {
-      SetBlined(sptr);
-      sendto_one(sptr,
-                 ":%s NOTICE %s :*** You can run bots here. congrats.",
-                 me.name,sptr->name);
-    }
-
   /* If this user is exempt from user limits set it F lined" */
   if(IsConfFlined(aconf))
     {
@@ -1258,7 +1217,7 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                                     FLAGS2_OPER_GLINE|
                                     FLAGS2_OPER_N|
                                     FLAGS2_OPER_K|
-					                FLAGS2_OPER_ADMIN);
+                                    FLAGS2_OPER_ADMIN);
                   while(cur_cptr)
                     {
                       if(sptr == cur_cptr) 
@@ -1311,11 +1270,13 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                  me.name,parv[0]);
       sptr->umodes &= ~FLAGS_NCHANGE; /* only tcm's really need this */
     }
-  if ((sptr->umodes & FLAGS_ADMIN) && !IsSetOperAdmin(sptr)) {
-	  sendto_one(sptr, ":%s NOTICE %s :*** You need oper and A flag for +a",
-				 me.name, parv[0]);
-	  sptr->umodes &= ~FLAGS_ADMIN;  /* shouldn't let normal opers set this */
-  }
+
+  if ((sptr->umodes & FLAGS_ADMIN) && !IsSetOperAdmin(sptr))
+    {
+      sendto_one(sptr, ":%s NOTICE %s :*** You need oper and A flag for +a",
+		 me.name, parv[0]);
+      sptr->umodes &= ~FLAGS_ADMIN;  /* shouldn't let normal opers set this */
+    }
   
   if (!(setflags & FLAGS_INVISIBLE) && IsInvisible(sptr))
     ++Count.invisi;
