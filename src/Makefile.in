@@ -30,6 +30,7 @@ SRCS = 			\
 	scommand.c	\
 	service.c	\
 	tools.c		\
+	u_flags.c	\
         u_help.c        \
         u_stats.c       \
 	ucommand.c
