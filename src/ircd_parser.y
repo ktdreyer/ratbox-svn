@@ -298,7 +298,9 @@ oneitem: qstring
 loadmodule:
 	  LOADMODULE QSTRING
             {
+#ifndef STATIC_MODULES
 	      load_one_module($2);
+#endif
 	    }
 	  ';'
           ;
