@@ -1,3 +1,7 @@
+*** 20010401_6 by toot
+somemore ugly %lu's changed back to %d.
+
+
 *** 20010401_5 by toot
 fixes a couple of compile warnings in ircd.c..
 
