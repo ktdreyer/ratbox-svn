@@ -1325,7 +1325,7 @@ void report_qlines(struct Client *source_p)
       get_printable_conf(aconf, &name, &host, &pass, &user, &port,&classname);
           
       sendto_one(source_p, form_str(RPL_STATSQLINE),
-		 me.name, source_p->name, name, pass, user, host);
+		 me.name, source_p->name, name, pass, "*", "*");
     }
 }
 
