@@ -94,7 +94,8 @@ extern dlink_list persist_list;
 extern dlink_list lazylink_channels;
 extern dlink_list lazylink_nicks;
 
-extern size_t   get_maxrss(void);
+extern int make_daemon(void);
+extern size_t get_maxrss(void);
 extern void set_time();
 
 #endif
