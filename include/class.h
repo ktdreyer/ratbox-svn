@@ -54,7 +54,7 @@ extern struct Class* ClassList;  /* GLOBAL - class list */
 
 extern  long    get_sendq(struct Client *);
 extern  int     get_con_freq(struct Class* );
-extern  aClass  *find_class(int);
+extern  struct Class  *find_class(int);
 extern  int     get_conf_class (struct ConfItem *);
 extern  int     get_client_class (struct Client *);
 extern  int     get_client_ping (struct Client *);
