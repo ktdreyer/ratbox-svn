@@ -262,7 +262,16 @@ dnl check for mmap
 AC_CHECK_FUNCS(mmap)
 
 dnl check for nanosleep
-AC_CHECK_FUNCS(nanosleep)
+AC_CHECK_FUNC(nanosleep,,[AC_CHECK_LIB(rt,nanosleep, 
+		LIBS="${LIBS} -lrt",
+		[AC_CHECK_LIB(posix4,nanosleep, LIBS="${LIBS} -lposix4"
+      		)])])
+if test x$ac_cv_func_nanosleep = x && test x$ac_cv_lib_posix4_nanosleep = xno  && x$ac_cv_lib_rt_nanosleep
+then	
+	AC_MSG_RESULT("nanosleep not found..using select for delay")
+else
+	AC_DEFINE(HAVE_NANOSLEEP)
+fi
 
 dnl Look for definitions such as RLIMIT_FDMAX, RLIMIT_NOFILE, and
 dnl RLIMIT_OPEN_MAX.  These are used for getrlimit().

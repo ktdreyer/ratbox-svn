@@ -66,3 +66,6 @@
 
 /* Gettext support */
 #undef HAVE_GETTEXT
+
+/* nanosleep */
+#undef HAVE_NANOSLEEP
