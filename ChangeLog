@@ -1,3 +1,26 @@
+leeh        2004/08/07 10:42:18 EDT	(20040807_5)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              ircd.h s_conf.h 
+    modules              m_info.c m_set.c 
+    src                  client.c newconf.c s_conf.c 
+  Log:
+  - remove idletime
+  
+  Revision  Changes    Path
+  7.246     +0 -5      ircd-ratbox/doc/example.conf
+  7.78      +0 -5      ircd-ratbox/doc/example.efnet.conf
+  7.79      +0 -2      ircd-ratbox/include/ircd.h
+  7.291     +0 -1      ircd-ratbox/include/s_conf.h
+  1.113     +1 -7      ircd-ratbox/modules/m_info.c
+  1.78      +1 -30     ircd-ratbox/modules/m_set.c
+  7.474     +0 -27     ircd-ratbox/src/client.c
+  7.168     +0 -1      ircd-ratbox/src/newconf.c
+  7.485     +0 -3      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2004/08/07 10:38:40 EDT	(20040807_4)
 
   Modified files:
