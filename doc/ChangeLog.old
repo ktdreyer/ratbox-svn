@@ -1,3 +1,10 @@
+*** 20010610_2 by db
+- don't make uplink a non local server. this really should NOT happen...
+- assert if uplink is a non local server, furthermore whine to logging
+  if it is.
+
+
+
 *** 20010610_1 by a1kmm
 - Cleaned up + optimised the USE_TABLE_MODE stuff.
 
