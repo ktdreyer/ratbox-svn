@@ -1,3 +1,16 @@
+androsyn    2003/06/24 19:56:29 UTC	(20030624_2)
+
+  Modified files:
+    adns                 event.c 
+  Log:
+  A better fix for the adns bug.  This pretty much straight from Ian Jackson,
+  the author of adns.
+  
+  Revision  Changes    Path
+  1.20      +18 -21    ircd-ratbox/adns/event.c
+
+
+
 leeh        2003/06/24 12:20:33 UTC	(20030624_1)
 
   Modified files:
