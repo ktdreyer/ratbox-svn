@@ -140,10 +140,6 @@ struct LocalUser meLocalUser;	/* That's also part of me */
 
 struct Client* GlobalClientList = 0; /* Pointer to beginning of Client list */
 
-/* Virtual host */
-struct irc_inaddr  vserv;
-int                specific_virtual_host = 0;
-
 /* unknown/client pointer lists */ 
 dlink_list unknown_list;        /* unknown clients ON this server only */
 dlink_list lclient_list;        /* local clients only ON this server */
@@ -566,20 +562,6 @@ int main(int argc, char *argv[])
     {
       strncpy_irc(me.info, ServerInfo.description, REALLEN);
     }
-
-  /* Do virtual host setup here */
-  /* We really should have some way of specifying an IPv4 address even if we are compiled
-   * for IPv6 -- aaron
-   */
-#ifdef IPV6
-  if(!IN6_IS_ADDR_UNSPECIFIED(&ServerInfo.ip.sins.sin6))
-#else
-  if(IN_ADDR(ServerInfo.ip) != 0)
-#endif
-    {
-	copy_s_addr(IN_ADDR(vserv), IN_ADDR(ServerInfo.ip));
-    }
-
 
 
 #ifdef USE_GETTEXT

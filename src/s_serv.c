@@ -69,8 +69,6 @@ extern char *crypt();
 #define INADDR_NONE ((unsigned int) 0xffffffff)
 #endif
 
-extern struct irc_inaddr vserv;               /* defined in ircd.c */
-
 int MaxConnectionCount = 1;
 int MaxClientCount     = 1;
 
@@ -1564,9 +1562,9 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 	S_FAM(ipn) = DEF_FAM;
 	S_PORT(ipn) = 0;
 #ifdef IPV6
-	copy_s_addr(S_ADDR(ipn), IN_ADDR(vserv));
+	copy_s_addr(S_ADDR(ipn), IN_ADDR(ServerInfo.ip));
 #else
-	copy_s_addr(S_ADDR(ipn), htonl(IN_ADDR(vserv)));
+	copy_s_addr(S_ADDR(ipn), htonl(IN_ADDR(ServerInfo.ip)));
 #endif
 	comm_connect_tcp(client_p->fd, aconf->host, aconf->port,
 			 (struct sockaddr *)&SOCKADDR(ipn), sizeof(struct irc_sockaddr), 
