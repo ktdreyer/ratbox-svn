@@ -1,6 +1,6 @@
 -- ircd-ratbox-2.0 RELNOTES 
 
--- ircd-ratbox-2.0beta2
+-- ircd-ratbox-2.0beta2 
 - added UNXLINE, controlled via xline=yes; in operator {};
 
 --------------------------------------------------------------------------------
