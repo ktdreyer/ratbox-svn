@@ -1,3 +1,10 @@
+*** 20010319_3 by androsyn
+Adds our own definition of INADDR_LOOPBACK if it wasn't defined by the OS
+headers. Don't you love hacks around hacks. The first being the hack
+checking if the nameserver was 0.0.0.0, if so, set the nameserver to
+127.0.0.1.
+
+
 *** 20010319_2 by toot
 restored some stuff in config.h that'd been changed..  and synced config.h.dist
 
