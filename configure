@@ -852,8 +852,8 @@ Optional Features:
   --enable-select         Force select() usage.
   --enable-kqueue         Force kqueue() usage.
   --enable-devpoll        Force usage of /dev/poll.
-  --enable-epoll          Enable sys_epoll support (Linux only)
-  --enable-rtsigio        Enable SIGIO with RT Signals (Linux only)
+  --enable-epoll          Force sys_epoll usage (Linux only).
+  --enable-rtsigio        Force SIGIO with RT Signals (Linux only).
   --enable-assert         Enable assert(). Choose between soft(warnings) and
                           hard(aborts the daemon)
   --enable-profile        Enable profiling
@@ -4693,14 +4693,14 @@ fi
 # Check whether --enable-ipv6 or --disable-ipv6 was given.
 if test "${enable_ipv6+set}" = set; then
   enableval="$enable_ipv6"
-  ipv6=maybe
+  ipv6=$enableval
 else
   ipv6=no
 fi;
 
-
-if test $ipv6 = "maybe"; then
-
+if test $ipv6 = no; then
+	have_v6="no"
+else
 echo "$as_me:$LINENO: checking for core IPv6 support" >&5
 echo $ECHO_N "checking for core IPv6 support... $ECHO_C" >&6
 
@@ -4711,7 +4711,7 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 #define IN_AUTOCONF
-	#include "include/stdinc.h"
+	#include "netinet/in.h"
 int
 main ()
 {
@@ -4828,8 +4828,6 @@ echo "${ECHO_T}no" >&6
 have_v6="no"
 fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-else
-	have_v6="no"
 fi
 
 echo "$as_me:$LINENO: checking for library containing crypt" >&5
@@ -7631,26 +7629,41 @@ fi
 # Check whether --enable-poll or --disable-poll was given.
 if test "${enable_poll+set}" = set; then
   enableval="$enable_poll"
-  SELECT_TYPE_EXPLICIT="poll"; echo "Forcing poll() to be enabled"
+   if test $enableval = yes; then
+	SELECT_TYPE_EXPLICIT="poll"
+  else
+  	use_poll=no
+  fi
+
 fi;
 
 # Check whether --enable-select or --disable-select was given.
 if test "${enable_select+set}" = set; then
   enableval="$enable_select"
-  SELECT_TYPE_EXPLICIT="select"; echo "Forcing select() to be enabled"
+   if test $enableval = yes; then
+	SELECT_TYPE_EXPLICIT="select"
+  else
+  	use_select=no
+  fi
+
 fi;
 
 # Check whether --enable-kqueue or --disable-kqueue was given.
 if test "${enable_kqueue+set}" = set; then
   enableval="$enable_kqueue"
-  SELECT_TYPE_EXPLICIT="kqueue"; echo "Forcing kqueue() to be enabled"
+   if test $enableval = yes; then
+	SELECT_TYPE_EXPLICIT="kqueue"
+  else
+  	use_kqueue=no
+  fi
+
 fi;
 
 # Check whether --enable-devpoll or --disable-devpoll was given.
 if test "${enable_devpoll+set}" = set; then
   enableval="$enable_devpoll"
-  SELECT_TYPE_EXPLICIT="devpoll"
-echo "Forcing /dev/poll to be enabled"
+   if test $enableval = yes; then
+	SELECT_TYPE_EXPLICIT="devpoll"
 
 
 for ac_header in sys/devpoll.h devpoll.h
@@ -7801,25 +7814,40 @@ fi
 
 done
 
+  else
+  	use_devpoll=no;
+  fi
+
 fi;
 
 # Check whether --enable-epoll or --disable-epoll was given.
 if test "${enable_epoll+set}" = set; then
   enableval="$enable_epoll"
-  SELECT_TYPE_EXPLICIT="epoll"; echo "Forcing Linux sys_epoll support to be enabled"
+   if test $enableval = yes; then
+	SELECT_TYPE_EXPLICIT="epoll"
+  else
+  	use_epoll=no
+  fi
+
 fi;
 
 # Check whether --enable-rtsigio or --disable-rtsigio was given.
 if test "${enable_rtsigio+set}" = set; then
   enableval="$enable_rtsigio"
-  SELECT_TYPE_EXPLICIT="sigio"; echo "Forcing Linux RT Sigio to be enabled"
+   if test $enableval = yes; then
+	SELECT_TYPE_EXPLICIT="rtsigio"
+  else
+  	use_rtsigio=no
+  fi
+
 fi;
 
 if test ! -z "$SELECT_TYPE_EXPLICIT"; then
-	SELECT_TYPE="$SELECT_TYPE_EXPLICIT"
+	SELECT_TYPE="$SELECT_TYPE_EXPLICIT";
+	echo "Forcing $SELECT_TYPE to be enabled"
 else
 
-haveselect=no
+if test ! "x$use_select" = "xno"; then
 
 for ac_func in select
 do
@@ -7918,14 +7946,17 @@ if test `eval echo '${'$as_ac_var'}'` = yes; then
 #define `echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
  haveselect=yes
+else
+  haveselect=no
 fi
 done
 
-if test "x$haveselect" = "xyes" ; then
-	SELECT_TYPE="select"
+	if test "x$haveselect" = "xyes" ; then
+		SELECT_TYPE="select"
+	fi
 fi
 
-havepoll=no
+if test ! "x$use_poll" = "xno"; then
 
 for ac_func in poll
 do
@@ -8024,185 +8055,21 @@ if test `eval echo '${'$as_ac_var'}'` = yes; then
 #define `echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
  havepoll=yes
+else
+  havepoll=no
 fi
 done
 
-if test "x$havepoll" = "xyes" ; then
-	SELECT_TYPE="poll"
-fi
-
-haveepoll=no
-
-for ac_func in epoll_ctl
-do
-as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`
-echo "$as_me:$LINENO: checking for $ac_func" >&5
-echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
-if eval "test \"\${$as_ac_var+set}\" = set"; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-/* Define $ac_func to an innocuous variant, in case <limits.h> declares $ac_func.
-   For example, HP-UX 11i <limits.h> declares gettimeofday.  */
-#define $ac_func innocuous_$ac_func
-
-/* System header to define __stub macros and hopefully few prototypes,
-    which can conflict with char $ac_func (); below.
-    Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
-    <limits.h> exists even on freestanding compilers.  */
-
-#ifdef __STDC__
-# include <limits.h>
-#else
-# include <assert.h>
-#endif
-
-#undef $ac_func
-
-/* Override any gcc2 internal prototype to avoid an error.  */
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-/* We use char because int might match the return type of a gcc2
-   builtin and then its argument prototype would still apply.  */
-char $ac_func ();
-/* The GNU C library defines this for functions which it implements
-    to always fail with ENOSYS.  Some functions are actually named
-    something starting with __ and the normal name is an alias.  */
-#if defined (__stub_$ac_func) || defined (__stub___$ac_func)
-choke me
-#else
-char (*f) () = $ac_func;
-#endif
-#ifdef __cplusplus
-}
-#endif
-
-int
-main ()
-{
-return f != $ac_func;
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  eval "$as_ac_var=yes"
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-eval "$as_ac_var=no"
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-fi
-echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_var'}'`" >&5
-echo "${ECHO_T}`eval echo '${'$as_ac_var'}'`" >&6
-if test `eval echo '${'$as_ac_var'}'` = yes; then
-  cat >>confdefs.h <<_ACEOF
-#define `echo "HAVE_$ac_func" | $as_tr_cpp` 1
-_ACEOF
- haveepoll=yes
-fi
-done
-
-
-if test "x$ac_cv_header_sys_epoll_h" = "xyes"; then
-	if test "x$haveepoll" = "xyes" ; then
-                echo "$as_me:$LINENO: checking for epoll support in kernel" >&5
-echo $ECHO_N "checking for epoll support in kernel... $ECHO_C" >&6
-                if test "$cross_compiling" = yes; then
-  echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-else
-  cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <stdint.h>
-#include <sys/param.h>
-#include <sys/types.h>
-#include <sys/epoll.h>
-#include <sys/syscall.h>
-#include <unistd.h>
-
-int
-main(int argc, char **argv)
-{
-        int epfd;
-
-        epfd = epoll_create(256);
-        exit (epfd == -1 ? 1 : 0);
-}
-_ACEOF
-rm -f conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_EPOLL 1
-_ACEOF
-
-    SELECT_TYPE="epoll"
-else
-  echo "$as_me: program exited with status $ac_status" >&5
-echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-( exit $ac_status )
-echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-fi
-rm -f core *.core gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
-fi
+	if test "x$havepoll" = "xyes" ; then
+		SELECT_TYPE="poll"
 	fi
 fi
 
-
-havedevpoll=no
-echo "$as_me:$LINENO: checking for /dev/poll" >&5
+if test ! "x$use_devpoll" = "xno"; then
+	echo "$as_me:$LINENO: checking for /dev/poll" >&5
 echo $ECHO_N "checking for /dev/poll... $ECHO_C" >&6
-if test -c "/dev/poll"; then
-        echo "$as_me:$LINENO: result: yes" >&5
+	if test -c "/dev/poll"; then
+	        echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
 
 
@@ -8354,13 +8221,14 @@ fi
 
 done
 
-        SELECT_TYPE="devpoll"
-else
-	echo "$as_me:$LINENO: result: no" >&5
+	        SELECT_TYPE="devpoll"
+	else
+		echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
+	fi
 fi
 
-havekqueue=no
+if test ! "x$use_kqueue" = "xno"; then
 
 for ac_func in kevent
 do
@@ -8459,12 +8327,182 @@ if test `eval echo '${'$as_ac_var'}'` = yes; then
 #define `echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
  havekqueue=yes
+else
+  havekqueue=no
 fi
 done
 
-if test "x$havekqueue" = "xyes" ; then
-	SELECT_TYPE="kqueue"
+	if test "x$havekqueue" = "xyes" ; then
+		SELECT_TYPE="kqueue"
+	fi
 fi
+
+if test ! "x$use_epoll" = "xno"; then
+
+for ac_func in epoll_ctl
+do
+as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`
+echo "$as_me:$LINENO: checking for $ac_func" >&5
+echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
+if eval "test \"\${$as_ac_var+set}\" = set"; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+/* Define $ac_func to an innocuous variant, in case <limits.h> declares $ac_func.
+   For example, HP-UX 11i <limits.h> declares gettimeofday.  */
+#define $ac_func innocuous_$ac_func
+
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char $ac_func (); below.
+    Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
+    <limits.h> exists even on freestanding compilers.  */
+
+#ifdef __STDC__
+# include <limits.h>
+#else
+# include <assert.h>
+#endif
+
+#undef $ac_func
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char $ac_func ();
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_$ac_func) || defined (__stub___$ac_func)
+choke me
+#else
+char (*f) () = $ac_func;
+#endif
+#ifdef __cplusplus
+}
+#endif
+
+int
+main ()
+{
+return f != $ac_func;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  eval "$as_ac_var=yes"
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+eval "$as_ac_var=no"
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_var'}'`" >&5
+echo "${ECHO_T}`eval echo '${'$as_ac_var'}'`" >&6
+if test `eval echo '${'$as_ac_var'}'` = yes; then
+  cat >>confdefs.h <<_ACEOF
+#define `echo "HAVE_$ac_func" | $as_tr_cpp` 1
+_ACEOF
+ haveepoll=yes
+else
+  haveepoll=no
+fi
+done
+
+	if test "x$ac_cv_header_sys_epoll_h" = "xyes"; then
+		if test "x$haveepoll" = "xyes" ; then
+                	echo "$as_me:$LINENO: checking for epoll support in kernel" >&5
+echo $ECHO_N "checking for epoll support in kernel... $ECHO_C" >&6
+	                if test "$cross_compiling" = yes; then
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <stdint.h>
+#include <sys/param.h>
+#include <sys/types.h>
+#include <sys/epoll.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+
+int
+main(int argc, char **argv)
+{
+        int epfd;
+
+        epfd = epoll_create(256);
+        exit (epfd == -1 ? 1 : 0);
+}
+_ACEOF
+rm -f conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_EPOLL 1
+_ACEOF
+
+	    SELECT_TYPE="epoll"
+else
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+( exit $ac_status )
+echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+rm -f core *.core gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
+		fi
+	fi
 
 haveepollsyscall=no
 
@@ -8537,6 +8575,7 @@ fi
 	fi
 fi
 
+fi
 
 
 

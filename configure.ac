@@ -269,17 +269,17 @@ fi
 
 AC_ARG_ENABLE(ipv6,
 AC_HELP_STRING([--enable-ipv6],[Enable IPv6 support]),
-[ipv6=maybe],[ipv6=no])
+[ipv6=$enableval],[ipv6=no])
 
-
-if test $ipv6 = "maybe"; then
-
+if test $ipv6 = no; then
+	have_v6="no"
+else
 AC_MSG_CHECKING([for core IPv6 support])
 
 AC_COMPILE_IFELSE(
 [AC_LANG_PROGRAM(
 	[[#define IN_AUTOCONF
-	#include "include/stdinc.h"]],
+	#include "netinet/in.h"]],
 	[[struct sockaddr_in6 s; 
 	  struct sockaddr_storage t;
 	  s.sin6_family = 0;]]
@@ -310,8 +310,6 @@ AC_COMPILE_IFELSE(
 ],
 [AC_MSG_RESULT(no)
 have_v6="no"])
-else
-	have_v6="no"
 fi
 
 AC_SEARCH_LIBS(crypt, [crypt descrypt],,)
@@ -591,56 +589,100 @@ fi
 dnl IO Loop Selection
 dnl =================
 
-AC_ARG_ENABLE(poll,
-AC_HELP_STRING([--enable-poll],[Force poll() usage.]),
-[SELECT_TYPE_EXPLICIT="poll"; echo "Forcing poll() to be enabled"],)
+AC_ARG_ENABLE(poll, AC_HELP_STRING([--enable-poll],[Force poll() usage.]),
+[ if test $enableval = yes; then 
+	SELECT_TYPE_EXPLICIT="poll"
+  else
+  	use_poll=no
+  fi
+],)
 
-AC_ARG_ENABLE(select,
-AC_HELP_STRING([--enable-select],[Force select() usage.]),
-[SELECT_TYPE_EXPLICIT="select"; echo "Forcing select() to be enabled"],)
-    
-AC_ARG_ENABLE(kqueue,
-AC_HELP_STRING([--enable-kqueue],[Force kqueue() usage.]),
-[SELECT_TYPE_EXPLICIT="kqueue"; echo "Forcing kqueue() to be enabled"],)
+AC_ARG_ENABLE(select, AC_HELP_STRING([--enable-select],[Force select() usage.]),
+[ if test $enableval = yes; then 
+	SELECT_TYPE_EXPLICIT="select" 
+  else
+  	use_select=no
+  fi
+],)
 
-AC_ARG_ENABLE(devpoll,
-AC_HELP_STRING([--enable-devpoll],[Force usage of /dev/poll.]),
-[SELECT_TYPE_EXPLICIT="devpoll"
-echo "Forcing /dev/poll to be enabled"
-dnl These need to be defined or not defined
-AC_CHECK_HEADERS([sys/devpoll.h devpoll.h])],)
+AC_ARG_ENABLE(kqueue, AC_HELP_STRING([--enable-kqueue],[Force kqueue() usage.]),
+[ if test $enableval = yes; then 
+	SELECT_TYPE_EXPLICIT="kqueue"
+  else
+  	use_kqueue=no
+  fi
+],)
 
-AC_ARG_ENABLE(epoll,
-AC_HELP_STRING([--enable-epoll],[Enable sys_epoll support (Linux only)]),
-[SELECT_TYPE_EXPLICIT="epoll"; echo "Forcing Linux sys_epoll support to be enabled"],)
+AC_ARG_ENABLE(devpoll,AC_HELP_STRING([--enable-devpoll],[Force usage of /dev/poll.]),
+[ if test $enableval = yes; then 
+	SELECT_TYPE_EXPLICIT="devpoll" 
+	dnl These need to be defined or not defined
+	AC_CHECK_HEADERS([sys/devpoll.h devpoll.h])
+  else
+  	use_devpoll=no;
+  fi
+],)
 
-AC_ARG_ENABLE(rtsigio,
-AC_HELP_STRING([--enable-rtsigio],[Enable SIGIO with RT Signals (Linux only)]),
-[SELECT_TYPE_EXPLICIT="sigio"; echo "Forcing Linux RT Sigio to be enabled"],)
+AC_ARG_ENABLE(epoll, AC_HELP_STRING([--enable-epoll],[Force sys_epoll usage (Linux only).]),
+[ if test $enableval = yes; then 
+	SELECT_TYPE_EXPLICIT="epoll"
+  else
+  	use_epoll=no
+  fi
+],)
+
+AC_ARG_ENABLE(rtsigio, AC_HELP_STRING([--enable-rtsigio],
+[Force SIGIO with RT Signals (Linux only).]),
+[ if test $enableval = yes; then 
+	SELECT_TYPE_EXPLICIT="rtsigio"
+  else
+  	use_rtsigio=no
+  fi
+],)
 
 if test ! -z "$SELECT_TYPE_EXPLICIT"; then
-	SELECT_TYPE="$SELECT_TYPE_EXPLICIT"
+	SELECT_TYPE="$SELECT_TYPE_EXPLICIT";
+	echo "Forcing $SELECT_TYPE to be enabled"
 else
 
-haveselect=no
-AC_CHECK_FUNCS(select, [haveselect=yes], )
-if test "x$haveselect" = "xyes" ; then
-	SELECT_TYPE="select"
+if test ! "x$use_select" = "xno"; then
+	AC_CHECK_FUNCS(select, [haveselect=yes], [haveselect=no])
+	if test "x$haveselect" = "xyes" ; then
+		SELECT_TYPE="select"
+	fi
 fi
 
-havepoll=no
-AC_CHECK_FUNCS(poll, [havepoll=yes], )
-if test "x$havepoll" = "xyes" ; then
-	SELECT_TYPE="poll"
+if test ! "x$use_poll" = "xno"; then
+	AC_CHECK_FUNCS(poll, [havepoll=yes], [havepoll=no])
+	if test "x$havepoll" = "xyes" ; then
+		SELECT_TYPE="poll"
+	fi
 fi
 
-haveepoll=no
-AC_CHECK_FUNCS(epoll_ctl, [haveepoll=yes], )
+if test ! "x$use_devpoll" = "xno"; then
+	AC_MSG_CHECKING(for /dev/poll)
+	if test -c "/dev/poll"; then
+	        AC_MSG_RESULT(yes)
+		AC_CHECK_HEADERS([devpoll.h sys/devpoll.h])
+	        SELECT_TYPE="devpoll"
+	else
+		AC_MSG_RESULT(no)	
+	fi
+fi
 
-if test "x$ac_cv_header_sys_epoll_h" = "xyes"; then
-	if test "x$haveepoll" = "xyes" ; then
-                AC_MSG_CHECKING(for epoll support in kernel)
-                AC_TRY_RUN(
+if test ! "x$use_kqueue" = "xno"; then
+	AC_CHECK_FUNCS(kevent, [havekqueue=yes], [havekqueue=no])
+	if test "x$havekqueue" = "xyes" ; then
+		SELECT_TYPE="kqueue"
+	fi
+fi
+
+if test ! "x$use_epoll" = "xno"; then
+	AC_CHECK_FUNCS(epoll_ctl, [haveepoll=yes], [haveepoll=no])
+	if test "x$ac_cv_header_sys_epoll_h" = "xyes"; then
+		if test "x$haveepoll" = "xyes" ; then
+                	AC_MSG_CHECKING(for epoll support in kernel)
+	                AC_TRY_RUN(
 #include <stdint.h>
 #include <sys/param.h>
 #include <sys/types.h>
@@ -656,29 +698,12 @@ main(int argc, char **argv)
         epfd = epoll_create(256);
         exit (epfd == -1 ? 1 : 0);
 }, [AC_MSG_RESULT(yes)
-    AC_DEFINE(HAVE_EPOLL, 1,
-        [Define if your system supports the epoll system calls])
-    SELECT_TYPE="epoll"], 
-    AC_MSG_RESULT(no), AC_MSG_RESULT(no))
+	    AC_DEFINE(HAVE_EPOLL, 1,
+	        [Define if your system supports the epoll system calls])
+	    SELECT_TYPE="epoll"], 
+	    AC_MSG_RESULT(no), AC_MSG_RESULT(no))
+		fi
 	fi
-fi
-
-
-havedevpoll=no
-AC_MSG_CHECKING(for /dev/poll)
-if test -c "/dev/poll"; then
-        AC_MSG_RESULT(yes)
-	AC_CHECK_HEADERS([devpoll.h sys/devpoll.h])
-        SELECT_TYPE="devpoll"
-else
-	AC_MSG_RESULT(no)	
-fi
-
-havekqueue=no
-AC_CHECK_FUNCS(kevent, [havekqueue=yes], )
-if test "x$havekqueue" = "xyes" ; then
-	SELECT_TYPE="kqueue"
-fi
 
 haveepollsyscall=no
 
@@ -714,6 +739,7 @@ main(int argc, char **argv)
 	fi
 fi
 
+fi
 
 
 

@@ -113,6 +113,9 @@ install-mkdirs:
 	-@if test ! -d $(mandir); then \
 		mkdir $(mandir); \
 	fi
+	-@if test ! -d $(prefix)/logs; then \
+		mkdir $(prefix)/logs; \
+	fi
 	
 install: install-mkdirs all
 	@for i in $(SUBDIRS); do \
