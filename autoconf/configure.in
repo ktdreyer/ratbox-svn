@@ -261,6 +261,8 @@ AC_SUBST(SNPRINTF_C)
 dnl check for mmap
 AC_CHECK_FUNCS(mmap)
 
+dnl check for nanosleep
+AC_CHECK_FUNCS(nanosleep)
 
 dnl Look for definitions such as RLIMIT_FDMAX, RLIMIT_NOFILE, and
 dnl RLIMIT_OPEN_MAX.  These are used for getrlimit().
