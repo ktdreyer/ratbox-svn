@@ -1,3 +1,20 @@
+leeh        2002/06/19 16:17:49 EDT	(20020619_0)
+
+  Modified files:
+    include              config.h config.h.dist 
+    src                  client.c 
+  Log:
+  - I think I was on craq when I did the HIDE_SERVERS_IPS define.  fixed it.
+  - added HIDE_SPOOF_IPS, for efnut.
+  - fixed the dead link/sendq notice for servers
+  
+  Revision  Changes    Path
+  7.136     +10 -0     ircd-hybrid-7/include/config.h
+  7.58      +13 -0     ircd-hybrid-7/include/config.h.dist
+  7.277     +11 -3     ircd-hybrid-7/src/client.c
+
+
+
 leeh        2002/06/18 15:16:00 EDT	(20020618_3)
 
   Modified files:
