@@ -887,7 +887,9 @@ general {
 	 */
 	ping_cookie = no;
 
-	/* Set to "yes" to disable flood control for opers. */
+	/* Set to yes to increase the flood limits for opers.
+	 * This will not disable flood control, just raise it.
+	 */
 	no_oper_flood = yes;
 
 	/* Enable G-lines */
