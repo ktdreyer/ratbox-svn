@@ -137,8 +137,8 @@ void	id_init()
   } st;
 
   gettimeofday(&st.tv, NULL);
-  st.pid = getpid();
-  st.ppid = getppid();
+  st.pid = rand();
+  st.ppid = rand();
   id_reseed((char *)&st, sizeof(st));
 
 #ifdef RPATH
