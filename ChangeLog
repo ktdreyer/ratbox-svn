@@ -1,3 +1,15 @@
+androsyn    2004/08/07 10:16:10 EDT	(20040807_3)
+
+  Modified files:
+    include              ircd.h 
+  Log:
+  remove platform from here too
+  
+  Revision  Changes    Path
+  7.77      +0 -1      ircd-ratbox/include/ircd.h
+
+
+
 androsyn    2004/08/07 10:13:46 EDT	(20040807_2)
 
   Modified files:
