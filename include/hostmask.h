@@ -84,3 +84,4 @@ struct AddressRec
  /* The next record in this hash bucket. */
  struct AddressRec *next;
 };
+

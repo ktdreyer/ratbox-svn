@@ -554,8 +554,10 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
   char *dlhost, *reason;
+#ifndef IPV6
   char *p;
   struct Client *target_p;
+#endif
   struct irc_inaddr daddr;
   char cidr_form_host[HOSTLEN + 1];
   struct ConfItem *aconf;
@@ -577,7 +579,7 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
   {
 #ifdef IPV6
    sendto_one(source_p, ":%s NOTICE %s :Sorry, please supply an address.",
-              &me.name, parv[0]);
+              me.name, parv[0]);
    return;
 #else
       if (!(target_p = find_chasing(source_p, parv[1], NULL)))

@@ -2250,11 +2250,11 @@ void set_channel_mode(struct Client *client_p,
                                modebuf, parabuf);
       }
 
-      sendto_match_nocap_servs(chptr, client_p, CAP_UID, ":%s MODE %s %s %s",
+      sendto_match_nocap_servs(chptr, source_p, CAP_UID, ":%s MODE %s %s %s",
 			       source_p->name, chptr->chname,
 			       modebuf, parabuf);
 	  
-      sendto_match_cap_servs(chptr, client_p, CAP_UID, ":%s MODE %s %s %s",
+      sendto_match_cap_servs(chptr, source_p, CAP_UID, ":%s MODE %s %s %s",
 			     HasID(source_p) ? source_p->user->id : source_p->name,
 			     chptr->chname,
 			     modebuf, parabuf);

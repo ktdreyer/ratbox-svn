@@ -1045,15 +1045,17 @@ sendto_ll_channel_remote(struct Channel *chptr,
  */
 
 void
-sendto_match_cap_servs(struct Channel *chptr, struct Client *from, int cap, 
-                       const char *pattern, ...)
+sendto_match_cap_servs(struct Channel *chptr, struct Client *source_p,
+                       int cap,  const char *pattern, ...)
 {
   int len;
   char sendbuf[IRCD_BUFSIZE*2];
   va_list args;
   struct Client *client_p;
+  struct Client *from;
   dlink_node *ptr;
-
+  
+  from = source_p->from;
   if (chptr)
     {
       if (*chptr->chname == '&')
@@ -1079,6 +1081,9 @@ sendto_match_cap_servs(struct Channel *chptr, struct Client *from, int cap,
           if( !(RootChan(chptr)->lazyLinkChannelExists &
                 client_p->localClient->serverMask) )
             continue;
+          if (!(source_p->lazyLinkClientExists &
+                client_p->localClient->serverMask))
+           continue;
         }
       
       send_message (client_p, (char *)sendbuf, len);
@@ -1177,15 +1182,16 @@ sendto_match_vacap_servs(struct Channel *chptr, struct Client *from, ...)
  */
 
 void
-sendto_match_cap_servs_nocap(struct Channel *chptr, struct Client *from,
+sendto_match_cap_servs_nocap(struct Channel *chptr, struct Client *source_p,
                              int cap, int nocap, const char *pattern, ...)
 {
   int len;
   char sendbuf[IRCD_BUFSIZE*2];
   va_list args;
-  struct Client *client_p;
+  struct Client *client_p, *from;
   dlink_node *ptr;
 
+  from = source_p->from;
   if (chptr)
     {
       if (*chptr->chname == '&')
@@ -1211,6 +1217,9 @@ sendto_match_cap_servs_nocap(struct Channel *chptr, struct Client *from,
           if( !(RootChan(chptr)->lazyLinkChannelExists &
                 client_p->localClient->serverMask) )
             continue;
+          if (!(source_p->lazyLinkClientExists &
+                client_p->localClient->serverMask))
+           continue;
         }
       
       send_message (client_p, (char *)sendbuf, len);
