@@ -11,12 +11,19 @@ VERSION=7.0
 AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
 
-if test "x$CFLAGS" = "x"; then
-	CFLAGS="-g -O2 -Wunused -Wall -ggdb -Wshadow -Wmissing-declarations"
-fi
 
 dnl Checks for programs.
 AC_PROG_CC
+
+if test "x$CFLAGS" = "x"; then
+	if test "x$GCC" = "xyes"; then
+	  CFLAGS="-g -O2 -Wunused -Wall -ggdb -Wshadow -Wmissing-declarations"
+	else
+	  CFLAGS="-g"
+	fi
+fi
+
+
 AC_ISC_POSIX
 AC_PROG_MAKE_SET
 AC_PATH_PROG(RM, rm)
@@ -28,6 +35,7 @@ AC_PATH_PROG(AR, ar)
 AC_PROG_INSTALL
 AC_PROG_LEX
 AC_PROG_RANLIB
+
 
 dnl use directory structure of cached as default (hack)
 if test "$libexecdir" = '${exec_prefix}/libexec' &&
