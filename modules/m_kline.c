@@ -133,11 +133,11 @@ static void mo_kline(struct Client *client_p,
   time_t tkline_time=0;
 
   if (!IsSetOperK(source_p))
-  {
-   sendto_one(source_p,":%s NOTICE %s :You have no K flag",
-              me.name,source_p->name);
-   return;
-  }
+    {
+      sendto_one(source_p,":%s NOTICE %s :You have no K flag",
+		 me.name,source_p->name);
+      return;
+    }
 
   parv++;
   parc--;
@@ -147,17 +147,17 @@ static void mo_kline(struct Client *client_p,
   if (tkline_time == -1)
    return;
   else if( tkline_time > 0 )
-  {
-   parv++;
-   parc--;
-  }
+    {
+      parv++;
+      parc--;
+    }
 
   if (parc == 0)
-  {
-   sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-              me.name, source_p->name, "KLINE");
-   return;
-  }
+    {
+      sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+		 me.name, source_p->name, "KLINE");
+      return;
+    }
 
   if ( find_user_host(source_p,*parv,user,host) == 0 )
    return;
@@ -663,52 +663,28 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
   else
     reason = "No reason";
 
-<<<<<<< m_kline.c
+
   if(IsSetOperAdmin(source_p))
     {
-      if(bits < 8)
-        {
-          sendto_one(source_p,
-            ":%s NOTICE %s :For safety, bitmasks less than 8 require conf access.",
-            me.name, parv[0]);
-          return;
-        }
+      if (bits < 8)
+	{
+	  sendto_one(source_p,
+	":%s NOTICE %s :For safety, bitmasks less than 8 require conf access.",
+		     me.name, parv[0]);
+	  return;
+	}
     }
   else
     {
       if (bits < 24)
-        {
-          sendto_one(source_p,
-                     ":%s NOTICE %s :Can't use a mask less than 24 with dline.",
-                     me.name, parv[0]);
-          return;
-        }
+	{
+	  sendto_one(source_p,
+	     ":%s NOTICE %s :Dline bitmasks less than 24 are for admins only.",
+		     me.name, parv[0]);
+	  return;
+	}
     }
 
-=======
-
-  if(IsSetOperAdmin(source_p))
-  {
-    if (bits < 8)
-    {
-      sendto_one(source_p,
-        ":%s NOTICE %s :For safety, bitmasks less than 8 require conf access.",
-        me.name, parv[0]);
-      return;
-    }
-  }
-  else
-  {
-    if (bits < 24)
-    {
-      sendto_one(source_p,
-        ":%s NOTICE %s :Dline bitmasks less than 24 are for admins only.",
-        me.name, parv[0]);
-      return;
-    }
-  }
-
->>>>>>> 1.72
 #ifdef IPV6
   if (t == HM_IPV6)
    t = AF_INET6;
