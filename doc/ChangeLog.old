@@ -1,3 +1,15 @@
+androsyn    2002/06/26 20:01:30 EDT	(20020627_1)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Those should be source_p not client_p
+  
+  Revision  Changes    Path
+  7.283     +4 -4      ircd-hybrid-7/src/client.c
+
+
+
 leeh        2002/06/26 19:38:59 EDT	(20020627_0)
 
   Modified files:
