@@ -30,26 +30,28 @@ int number_fd = 0;
 static void
 fdlist_update_biggest(int fd, int opening)
 { 
-    if (fd < highest_fd)
-        return;
-    assert(fd < MAXCONNECTIONS);
-    if (fd > highest_fd) {
-        /*  
-         * assert that we are not closing a FD bigger than
-         * our known biggest FD
-         */
-        assert(opening);
-        highest_fd = fd;
-        return;
+  if (fd < highest_fd)
+    return;
+  assert(fd < MAXCONNECTIONS);
+
+  if (fd > highest_fd)
+    {
+      /*  
+       * assert that we are not closing a FD bigger than
+       * our known biggest FD
+       */
+      assert(opening);
+      highest_fd = fd;
+      return;
     }
-    /* if we are here, then fd == Biggest_FD */
-    /*
-     * assert that we are closing the biggest FD; we can't be
-     * re-opening it
-     */
-    assert(!opening);
-    while (highest_fd >= 0 && !fd_table[highest_fd].flags.open)
-        highest_fd--;
+  /* if we are here, then fd == Biggest_FD */
+  /*
+   * assert that we are closing the biggest FD; we can't be
+   * re-opening it
+   */
+  assert(!opening);
+  while (highest_fd >= 0 && !fd_table[highest_fd].flags.open)
+    highest_fd--;
 }
 
 
@@ -57,44 +59,48 @@ void fdlist_init(void)
 {
   static int initialized = 0;
   assert(0 == initialized);
-  if (!initialized) {
-    /* Since we're doing this once .. */
-    fd_table = MyMalloc((MAXCONNECTIONS + 1) * sizeof(fde_t));
-    memset(fd_table, 0, sizeof(fde_t) * (MAXCONNECTIONS+1));
-    initialized = 1;
-  }
+
+  if (!initialized)
+    {
+      /* Since we're doing this once .. */
+      fd_table = MyMalloc((MAXCONNECTIONS + 1) * sizeof(fde_t));
+      memset(fd_table, 0, sizeof(fde_t) * (MAXCONNECTIONS+1));
+      initialized = 1;
+    }
 }
 
 /* Called to open a given filedescriptor */
 void
 fd_open(int fd, unsigned int type, const char *desc)
 {
-    fde_t *F = &fd_table[fd];
-    assert(fd >= 0);
-    if (F->flags.open) {
+  fde_t *F = &fd_table[fd];
+  assert(fd >= 0);
+
+  if (F->flags.open)
+    {
 #ifdef NOTYET
-        debug(51, 1) ("WARNING: Closing open FD %4d\n", fd);
+      debug(51, 1) ("WARNING: Closing open FD %4d\n", fd);
 #endif
-        fd_close(fd);
+      fd_close(fd);
     }
-    assert(!F->flags.open);
+  assert(!F->flags.open);
 #ifdef NOTYET
-    debug(51, 3) ("fd_open FD %d %s\n", fd, desc);
+  debug(51, 3) ("fd_open FD %d %s\n", fd, desc);
 #endif
-    F->fd = fd;
-    F->type = type;
-    F->flags.open = 1;
+  F->fd = fd;
+  F->type = type;
+  F->flags.open = 1;
 #ifdef NOTYET
-    F->defer.until = 0;
-    F->defer.n = 0;
-    F->defer.handler = NULL;
+  F->defer.until = 0;
+  F->defer.n = 0;
+  F->defer.handler = NULL;
 #endif
-    fdlist_update_biggest(fd, 1);
-    F->comm_index = -1;
-    F->list = FDLIST_NONE;
-    if (desc)
-        strncpy(F->desc, desc, FD_DESC_SZ);
-    number_fd++;
+  fdlist_update_biggest(fd, 1);
+  F->comm_index = -1;
+  F->list = FDLIST_NONE;
+  if (desc)
+    strncpy(F->desc, desc, FD_DESC_SZ);
+  number_fd++;
 }
 
 
@@ -102,26 +108,29 @@ fd_open(int fd, unsigned int type, const char *desc)
 void
 fd_close(int fd)
 {
-    fde_t *F = &fd_table[fd];
-    assert(F->flags.open);
-    /* All disk fd's MUST go through file_close() ! */
-    assert(F->type != FD_FILE);
-    if (F->type == FD_FILE) {
-        assert(F->read_handler == NULL);
-        assert(F->write_handler == NULL);
+  fde_t *F = &fd_table[fd];
+  assert(F->flags.open);
+
+  /* All disk fd's MUST go through file_close() ! */
+  assert(F->type != FD_FILE);
+  if (F->type == FD_FILE)
+    {
+      assert(F->read_handler == NULL);
+      assert(F->write_handler == NULL);
     }
 #ifdef NOTYET
-    debug(51, 3) ("fd_close FD %d %s\n", fd, F->desc);
+  debug(51, 3) ("fd_close FD %d %s\n", fd, F->desc);
 #endif
-    comm_setselect(fd, FDLIST_NONE, COMM_SELECT_WRITE|COMM_SELECT_READ,
-      NULL, NULL, 0);
-    F->flags.open = 0;
-    fdlist_update_biggest(fd, 0);
-    number_fd--;
-    memset(F, '\0', sizeof(fde_t));
-    F->timeout = 0;
-    /* Unlike squid, we're actually closing the FD here! -- adrian */
-    close(fd);
+  comm_setselect(fd, FDLIST_NONE, COMM_SELECT_WRITE|COMM_SELECT_READ,
+		 NULL, NULL, 0);
+
+  F->flags.open = 0;
+  fdlist_update_biggest(fd, 0);
+  number_fd--;
+  memset(F, '\0', sizeof(fde_t));
+  F->timeout = 0;
+  /* Unlike squid, we're actually closing the FD here! -- adrian */
+  close(fd);
 }
 
 
@@ -131,18 +140,18 @@ fd_close(int fd)
 void
 fd_dump(struct Client *source_p)
 {
-    int i;
+  int i;
 
-    for (i = 0; i <= highest_fd; i++) {
-        if (!fd_table[i].flags.open)
-            continue;
+  for (i = 0; i <= highest_fd; i++)
+    {
+      if (!fd_table[i].flags.open)
+	continue;
 
-        sendto_one(source_p, ":%s NOTICE %s :*** fd %d, desc '%s'", me.name,
-          source_p->name, i, fd_table[i].desc);
+      sendto_one(source_p, ":%s NOTICE %s :*** fd %d, desc '%s'", me.name,
+		 source_p->name, i, fd_table[i].desc);
     }
-    sendto_one(source_p, ":%s NOTICE %s :*** Finished", me.name, source_p->name);
+  sendto_one(source_p, ":%s NOTICE %s :*** Finished", me.name, source_p->name);
 }
-
 
 /*
  * fd_note() - set the fd note
@@ -153,17 +162,19 @@ fd_dump(struct Client *source_p)
 void
 fd_note(int fd, const char *format, ...)
 {
-    va_list args;
-    int len;
+  va_list args;
+  int len;
   
-    if (format)
+  if (format)
     {
-        va_start(args, format);
-        len = vsprintf_irc(fd_table[fd].desc, format, args);
-        assert(len < FD_DESC_SZ); /* + '\0' */
-        va_end(args);
+      va_start(args, format);
+      len = vsprintf_irc(fd_table[fd].desc, format, args);
+      assert(len < FD_DESC_SZ); /* + '\0' */
+      va_end(args);
     }
-    else
-        fd_table[fd].desc[0] = '\0';
+  else
+    fd_table[fd].desc[0] = '\0';
 }
+
+
 

@@ -105,7 +105,6 @@ static void stats_connect(struct Client *);
 static void stats_deny(struct Client *);
 static void stats_exempt(struct Client *);
 static void stats_events(struct Client *);
-static void stats_fd(struct Client *);
 static void stats_glines(struct Client *);
 static void stats_hubleaf(struct Client *);
 static void stats_auth(struct Client *);
@@ -142,8 +141,8 @@ static struct StatsStruct stats_cmd_table[] =
   { 'D',	stats_deny,		1,	0,	},
   { 'e', 	stats_exempt,		1,	0,	},
   { 'E',	stats_events,		1,	1,	},
-  { 'f',	stats_fd,		1,	1,	},
-  { 'F',	stats_fd,		1,	1,	},
+  { 'f',	fd_dump,		1,	1,	},
+  { 'F',	fd_dump,		1,	1,	},
   { 'g',	stats_glines,		1,	0,	},
   { 'G',	stats_glines,		1,	0,	},
   { 'h',	stats_hubleaf,		1,	0,	},

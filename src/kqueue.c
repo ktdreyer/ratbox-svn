@@ -73,6 +73,19 @@
 
 #define KE_LENGTH	128
 
+/* jlemon goofed up and didn't add EV_SET until fbsd 4.3 */
+
+#ifndef EV_SET
+#define EV_SET(kevp, a, b, c, d, e, f) do {     \
+        (kevp)->ident = (a);                    \
+        (kevp)->filter = (b);                   \
+        (kevp)->flags = (c);                    \
+        (kevp)->fflags = (d);                   \
+        (kevp)->data = (e);                     \
+        (kevp)->udata = (f);                    \
+} while(0)
+#endif
+
 static void kq_update_events(int, short, PF *);
 static int kq;
 static struct timespec zero_timespec;
@@ -88,67 +101,73 @@ static int kqoff;		/* offset into the buffer */
 void
 kq_update_events(int fd, short filter, PF * handler)
 {
-    PF *cur_handler;
+  PF *cur_handler;
+  int kep_flags;
+
 #if 0
-    int retval;
+  int retval;
 #endif
 
-    switch (filter) {
+  switch (filter)
+    {
     case EVFILT_READ:
-        cur_handler = fd_table[fd].read_handler;
-        break;
+      cur_handler = fd_table[fd].read_handler;
+      break;
     case EVFILT_WRITE:
-        cur_handler = fd_table[fd].write_handler;
-        break;
+      cur_handler = fd_table[fd].write_handler;
+      break;
     default:
-        /* XXX bad! -- adrian */
-        return;
-        break;
+      /* XXX bad! -- adrian */
+      return;
+      break;
     }
 
-    if ((cur_handler == NULL && handler != NULL)
-        ||
-       (cur_handler != NULL && handler == NULL)) {
-        struct kevent *kep;
+  if ((cur_handler == NULL && handler != NULL)
+      ||
+      (cur_handler != NULL && handler == NULL))
+    {
+      struct kevent *kep;
+    
+      kep = kqlst + kqoff;
 
-	kep = kqlst + kqoff;
-
-        kep->ident = (u_long) fd;
-        kep->filter = filter;
-
-	/* jlemon didn't define this in fbsd 4.2 argh! -db */
-#ifdef NOTE_LOWAT
-	kep->fflags = NOTE_LOWAT;
-	kep->data = 1;
-#endif
-
-        if (handler != NULL) {
-		if (filter == EVFILT_WRITE)
-			kep->flags = (EV_ADD | EV_ONESHOT);
-		else
-			kep->flags = EV_ADD;
-	} else {
-		kep->flags = EV_DELETE;
+      if (handler != NULL)
+	{
+	  if (filter == EVFILT_WRITE)
+	    kep_flags = (EV_ADD | EV_ONESHOT);
+	  else
+	    kep_flags = EV_ADD;
 	}
-	if (kqoff == kqmax) {
-		int ret;
-		ret = kevent(kq, kqlst, kqoff, NULL, 0, &zero_timespec);
-		/* jdc -- someone needs to do error checking... */
-		if (ret == -1)
-		{
-		  perror("kq_update_events(): kevent()");
-		  return;
-		}
-		kqoff = 0;
-	} else {
-		kqoff++;
+      else
+	{
+	  kep_flags = EV_DELETE;
+	}
+
+      EV_SET(kep, (uintptr_t) fd, filter, kep_flags, 0, 0, 0);
+
+      if (kqoff == kqmax)
+	{
+	  int ret;
+
+	  ret = kevent(kq, kqlst, kqoff, NULL, 0, &zero_timespec);
+	  /* jdc -- someone needs to do error checking... */
+	  if (ret == -1)
+	    {
+	      perror("kq_update_events(): kevent()");
+	      return;
+	    }
+	  kqoff = 0;
+	}
+      else
+	{
+	  kqoff++;
 	}
 #if 0
-        if (retval < 0)
-            /* Error! */
-        if (ke.flags & EV_ERROR) {
-            errno = ke.data;
-        }
+      if (retval < 0)
+	/* Error! */
+	if (ke.flags & EV_ERROR)
+	  {
+	    errno = ke.data;
+	  }
 #endif
     }
 }
@@ -167,15 +186,16 @@ kq_update_events(int fd, short filter, PF * handler)
  */
 void init_netio(void)
 {
-    kq = kqueue();
-    if (kq < 0) {
-        ilog(L_CRIT, "init_netio: Couldn't open kqueue fd!\n");
-        exit(115); /* Whee! */
+  kq = kqueue();
+  if (kq < 0)
+    {
+      ilog(L_CRIT, "init_netio: Couldn't open kqueue fd!\n");
+      exit(115); /* Whee! */
     }
-    kqmax = getdtablesize();
-    kqlst = MyMalloc(sizeof(*kqlst) * kqmax);
-    zero_timespec.tv_sec = 0;
-    zero_timespec.tv_nsec = 0;
+  kqmax = getdtablesize();
+  kqlst = MyMalloc(sizeof(*kqlst) * kqmax);
+  zero_timespec.tv_sec = 0;
+  zero_timespec.tv_nsec = 0;
 }
 
 /*
@@ -188,25 +208,27 @@ void
 comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
     void *client_data, time_t timeout)
 {  
-    fde_t *F = &fd_table[fd];
-    assert(fd >= 0);
-    assert(F->flags.open);
+  fde_t *F = &fd_table[fd];
+  assert(fd >= 0);
+  assert(F->flags.open);
 
-    /* Update the list, even though we're not using it .. */
-    F->list = list;
+  /* Update the list, even though we're not using it .. */
+  F->list = list;
 
-    if (type & COMM_SELECT_READ) {
-        kq_update_events(fd, EVFILT_READ, handler);
-        F->read_handler = handler;
-        F->read_data = client_data;
+  if (type & COMM_SELECT_READ)
+    {
+      kq_update_events(fd, EVFILT_READ, handler);
+      F->read_handler = handler;
+      F->read_data = client_data;
     }
-    if (type & COMM_SELECT_WRITE) {
-        kq_update_events(fd, EVFILT_WRITE, handler);
-        F->write_handler = handler;
-        F->write_data = client_data;
+  if (type & COMM_SELECT_WRITE)
+    {
+      kq_update_events(fd, EVFILT_WRITE, handler);
+      F->write_handler = handler;
+      F->write_data = client_data;
     }
-    if (timeout)
-        F->timeout = CurrentTime + (timeout / 1000);
+  if (timeout)
+    F->timeout = CurrentTime + (timeout / 1000);
 
 }
  
@@ -228,64 +250,70 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
 int
 comm_select(unsigned long delay)
 {
-    int num, i;
-    static struct kevent ke[KE_LENGTH];
-    struct timespec poll_time;
+  int num, i;
+  static struct kevent ke[KE_LENGTH];
+  struct timespec poll_time;
+  
+  do {
+    /*
+     * remember we are doing NANOseconds here, not micro/milli. God knows
+     * why jlemon used a timespec, but hey, he wrote the interface, not I
+     *   -- Adrian
+     */
+    poll_time.tv_sec = 0;
+    poll_time.tv_nsec = delay * 1000000;
+    for (;;)
+      {
+	num = kevent(kq, kqlst, kqoff, ke,  KE_LENGTH, &poll_time);
+	kqoff = 0;
+	if (num >= 0)
+	  break;
+	if (ignoreErrno(errno))
+	  break;
+	set_time();
+	return COMM_ERROR;
+	/* NOTREACHED */
+      }
 
-    do {
-        /*
-         * remember we are doing NANOseconds here, not micro/milli. God knows
-         * why jlemon used a timespec, but hey, he wrote the interface, not I
-         *   -- Adrian
-         */
-        poll_time.tv_sec = 0;
-        poll_time.tv_nsec = delay * 1000000;
-        for (;;) {
-            num = kevent(kq, kqlst, kqoff, ke,  KE_LENGTH, &poll_time);
-	    kqoff = 0;
-            if (num >= 0)
-                break;
-            if (ignoreErrno(errno))
-                break;
-            set_time();
-            return COMM_ERROR;
-            /* NOTREACHED */
-        }
-
-        set_time();
-        if (num == 0)
-            continue;
-        callbacks_called += num;
+    set_time();
+    if (num == 0)
+      continue;
+    callbacks_called += num;
         
-        for (i = 0; i < num; i++) {
-            int fd = (int) ke[i].ident;
-            PF *hdl = NULL;
-            fde_t *F = &fd_table[fd];
-            if (ke[i].flags & EV_ERROR) {
-                errno = ke[i].data;
-                /* XXX error == bad! -- adrian */
-                continue; /* XXX! */
-            }
-            switch (ke[i].filter) {
-            case EVFILT_READ:
-                if ((hdl = F->read_handler) != NULL) {
-                    F->read_handler = NULL;
-                    hdl(fd, F->read_data);
-                }
-            case EVFILT_WRITE:
-                if ((hdl = F->write_handler) != NULL) {
-                    F->write_handler = NULL;
-                    hdl(fd, F->write_data);
-                }
-            default:
-                /* Bad! -- adrian */
-                break;
-            }
-        }
-        return COMM_OK;
-    } while (0); /* XXX should rip this out! -- adrian */
-    /* XXX Get here, we broke! */
-    return 0;
+    for (i = 0; i < num; i++)
+      {
+	int fd = (int) ke[i].ident;
+	PF *hdl = NULL;
+	fde_t *F = &fd_table[fd];
+
+	if (ke[i].flags & EV_ERROR)
+	  {
+	    errno = ke[i].data;
+	    /* XXX error == bad! -- adrian */
+	    continue; /* XXX! */
+	  }
+
+	switch (ke[i].filter)
+	  {
+	  case EVFILT_READ:
+	    if ((hdl = F->read_handler) != NULL) {
+	      F->read_handler = NULL;
+	      hdl(fd, F->read_data);
+	    }
+	  case EVFILT_WRITE:
+	    if ((hdl = F->write_handler) != NULL) {
+	      F->write_handler = NULL;
+	      hdl(fd, F->write_data);
+	    }
+	  default:
+	    /* Bad! -- adrian */
+	    break;
+	  }
+      }
+    return COMM_OK;
+  } while (0); /* XXX should rip this out! -- adrian */
+  /* XXX Get here, we broke! */
+  return 0;
 }
 
 #endif /* USE_KQUEUE */
