@@ -1,3 +1,9 @@
+*** 20001220_26 by db
+- removed prototype for quote_setchide
+- cleaned up formatting in channel.c
+
+
+
 *** 20001220_25 by ryan
 !ptr && ptr->bleah?
 wtf?.. don't think so.. try || :)
