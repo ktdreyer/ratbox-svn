@@ -1,3 +1,7 @@
+*** 20010111_3 by a1kmm
+- Fixed some memory leaks and some potential buffer overflows and some compiletime warnings.
+
+
 *** 20010111_2 by a1kmm
 Cleaned up some of the memory leaks - nothing seems to leak from the parser or the lexer, but there still
 are leaks on rehash.
