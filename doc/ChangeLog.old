@@ -1,3 +1,26 @@
+a1kmm       2001/12/15 00:34:27 EST	(20011215_8)
+
+  Modified files:
+    modules              Makefile.in 
+    src                  Makefile.in 
+  Added files:
+    modules              .depend 
+    src                  .depend 
+  Log:
+  - Fixed .depend system to work properly with CVS, so we don't always end
+    up committing .depend. .depend changes should now be rare.
+    Please do not commit after make depend from a non-gcc box unless you are
+    sure that your compiler is not including system headers. Other than that
+    .depend should be universal so we shouldn't experience any problems.
+  
+  Revision  Changes    Path
+  1.1       +709 -0    ircd-hybrid-7/modules/.depend (new)
+  1.58      +3 -1      ircd-hybrid-7/modules/Makefile.in
+  7.1       +498 -0    ircd-hybrid-7/src/.depend (new)
+  7.106     +3 -1      ircd-hybrid-7/src/Makefile.in
+
+
+
 wcampbel    2001/12/15 00:21:24 EST	(20011215_7)
 
   Modified files:
