@@ -95,7 +95,7 @@ static void mo_restart(struct Client *client_p,
 	  }
   }
   
-  log(L_WARN, "Server RESTART by %s\n", get_client_name(source_p, SHOW_IP));
+  ilog(L_WARN, "Server RESTART by %s\n", get_client_name(source_p, SHOW_IP));
   ircsprintf(buf, "Server RESTART by %s", get_client_name(source_p, SHOW_IP));
   restart(buf);
 }
