@@ -63,7 +63,7 @@ COMMAND         - USAGE and DESCRIPTION
                     L - Shows IP and generic info about [nick]
                     l - Shows hostname and generic info about [nick]
                   * m - Shows commands and their usage
-                    o - Shows O/o lines
+                  ^ o - Shows O/o lines
                   * P - Shows configured ports
                     p - Shows opers connected and their idle times
                   * q - Shows quaranteened nicks (Old Q: lines)
