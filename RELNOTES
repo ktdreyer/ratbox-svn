@@ -1,3 +1,10 @@
+
+This is the current beta release version of the 'devel' tree of ircd-ratbox.
+
+NOTE: THIS IS BETA CODE.  It is run at your own risk.  By running this
+      code you assume FULL responsibility for any problems it may cause.  We
+      do NOT recommend this code is run on production servers.
+
 -- ircd-ratbox-2.0 RELNOTES 
 
 -- ircd-ratbox-2.0beta2 
@@ -28,13 +35,6 @@
 - fix a bug that caused ziplinks to fail at random
 
 --------------------------------------------------------------------------------
-
-This is the current beta release version of ircd-ratbox.
-
-NOTE: This is still BETA code.  Run it at your own risk.  By running this
- code you assume FULL responsibility for any problems it may cause.  We do
- NOT recommend that you run BETA code on production IRC networks such
- as EFnet.
 
 BUGS: Major bugs in this release are listed in BUGS
 
