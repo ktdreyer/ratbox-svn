@@ -181,7 +181,7 @@ static struct squit_parms *find_squit(struct Client *cptr,
   */
   while ((*server == '*') && IsServer(cptr))
     {
-      aconf = cptr->serv->nline;
+      aconf = cptr->serv->sconf;
       if (!aconf)
 	break;
 

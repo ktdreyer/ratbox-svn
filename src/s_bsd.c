@@ -236,7 +236,7 @@ void close_connection(struct Client *cptr)
        * a 'quick' reconnect, else reset the next-connect cycle.
        */
       if ((aconf = find_conf_exact(cptr->name, cptr->username,
-                                   cptr->host, CONF_CONNECT_SERVER)))
+                                   cptr->host, CONF_SERVER)))
         {
           /*
            * Reschedule a faster reconnect, if this was a automatically

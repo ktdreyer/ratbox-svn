@@ -365,7 +365,7 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
       if (bcptr == cptr)
 	continue;
-      if (!(aconf = bcptr->serv->nline))
+      if (!(aconf = bcptr->serv->sconf))
 	{
 	  sendto_realops_flags(FLAGS_ALL,"Lost N-line for %s on %s. Closing",
 			       get_client_name(cptr, TRUE), host);

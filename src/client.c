@@ -1249,7 +1249,7 @@ static void remove_dependents(struct Client* cptr,
        * comstud, since m_squit already does the notification.
        */
 
-      if ((aconf = to->serv->nline))
+      if ((aconf = to->serv->sconf))
         strncpy_irc(myname, my_name_for_link(me.name, aconf), HOSTLEN);
       else
         strncpy_irc(myname, me.name, HOSTLEN);

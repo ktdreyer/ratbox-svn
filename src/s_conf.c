@@ -197,9 +197,9 @@ void free_conf(struct ConfItem* aconf)
   if (aconf->passwd)
     memset(aconf->passwd, 0, strlen(aconf->passwd));
   MyFree(aconf->passwd);
-  MyFree(aconf->user);
   MyFree(aconf->name);
   MyFree(aconf->className);
+  MyFree(aconf->user);
   MyFree((char*) aconf);
 }
 
@@ -228,8 +228,7 @@ static struct LinkReport {
   int rpl_stats;
   int conf_char;
 } report_array[] = {
-  { CONF_CONNECT_SERVER,   RPL_STATSCLINE, 'C'},
-  { CONF_NOCONNECT_SERVER, RPL_STATSNLINE, 'N'},
+  { CONF_SERVER,   RPL_STATSCLINE, 'C'},
   { CONF_LEAF,             RPL_STATSLLINE, 'L'},
   { CONF_OPERATOR,         RPL_STATSOLINE, 'O'},
   { CONF_HUB,              RPL_STATSHLINE, 'H'},
@@ -266,13 +265,13 @@ void report_configured_links(struct Client* sptr, int mask)
 
         get_printable_conf(tmp, &name, &host, &pass, &user, &port,&classname);
 
-        if(mask & (CONF_CONNECT_SERVER|CONF_NOCONNECT_SERVER))
+        if(mask & CONF_SERVER)
           {
             char c;
 
             c = p->conf_char;
             if(tmp->flags & CONF_FLAGS_LAZY_LINK)
-              c = 'n';
+              c = 'c';
 
             /* Allow admins to see actual ips */
             if(IsAdmin(sptr))
@@ -1024,71 +1023,26 @@ int attach_confs(struct Client* cptr, const char* name, int statmask)
  * attach_cn_lines - find C/N lines and attach them to connecting client
  * NOTE: this requires an exact match between the name on the C:line and
  * the name on the N:line
+ * C/N lines are completely gone now, the name exists only for historical
+ * reasons - A1kmm.
  */
 int attach_cn_lines(struct Client *cptr, const char* name, const char* host)
 {
   struct ConfItem* ptr;
-  int              found_cline = 0;
-  int              found_nline = 0; 
 
   assert(0 != cptr);
   assert(0 != host);
 
   for (ptr = ConfigItemList; ptr; ptr = ptr->next)
     {
-      if (!IsIllegal(ptr))
-	{
-	  /*
-	   * look for matching C:line
-	   *
-	   * "busy if" - find a conf line thats for a server:
-	   * have I found a cline yet? 
-	   * is it a C line?
-	   * then make sure it has a non null name,
-	   * finally see if that name matches the one being looked for.
-	   * oh but hang on, this name might have multiple ip's or hostnames..
-	   */
-
-	  if (!found_cline
-	      &&
-	      CONF_CONNECT_SERVER == ptr->status
-	      && 
-	      ptr->name
-	      &&
-	      0 == irccmp(ptr->name, name))
-	    {
-	      if ( 0 == irccmp(ptr->host, host) )
-		{
-		  attach_conf(cptr, ptr);
-		  if (found_nline)
-		    return 1;
-		  found_cline = 1;
-		}
-	      continue;
-	    }
-	  
-	  /*
-	   * look for matching N:line
-	   */
-	  
-	  if (!found_nline
-	      &&
-	      CONF_NOCONNECT_SERVER == ptr->status
-	      &&
-	      ptr->name
-	      &&
-	      0 == irccmp(ptr->name, name))
-	    {
-	      if ( 0 == irccmp(ptr->host, host) )
-		{
-		  attach_conf(cptr, ptr);
-		  if (found_cline)
-		    return 1;
-		  found_nline = 1;
-		}
-	      continue;
-	    }
-	}
+     if (IsIllegal(ptr))
+       continue;
+     if (ptr->status != CONF_SERVER)
+       continue;
+     if (irccmp(name, ptr->name)/* || irccmp(host, ptr->host)*/)
+       continue;
+     attach_conf(cptr, ptr);
+     return -1;
     }
   return 0;
 }
@@ -1441,12 +1395,11 @@ int rehash(struct Client *cptr,struct Client *sptr, int sig)
 
 /* bleh. unfortunately, these have to become globals as well */
 
-int              ccount = 0;
-int              ncount = 0;
+int              scount = 0;
 
 static void read_conf(FBFILE* file)
 {
-  ccount = ncount = lineno = 0;
+  scount = lineno = 0;
 
   class0 = find_class("default");       /* which one is the default class ? */
   yyparse(); /* wheee! */
@@ -1490,7 +1443,7 @@ static void read_kd_lines(FBFILE* file)
   char*            p;
   struct ConfItem* aconf;
 
-  ccount = ncount = 0;
+  scount = 0;
 
   class0 = find_class("default");       /* which one is the default class ? */
   aconf = NULL;
@@ -1509,7 +1462,7 @@ static void read_kd_lines(FBFILE* file)
 
       /* Could we test if it's conf line at all?        -Vesa */
       if (quotedLine[1] == ':')
-        oldParseOneLine(quotedLine,aconf,&ccount,&ncount);
+        oldParseOneLine(quotedLine,aconf);
     }
 
 }
@@ -2651,13 +2604,11 @@ void conf_delist_old_conf(struct ConfItem *aconf)
  * output       - NONE
  * side effects - Add a C or N line
  */
-struct ConfItem *conf_add_server(struct ConfItem *aconf,
-                                        int lncount, int lccount )
+struct ConfItem *conf_add_server(struct ConfItem *aconf, int lcount)
 {
   conf_add_class_to_conf(aconf);
 
-  if (lncount > MAXCONFLINKS || lccount > MAXCONFLINKS ||
-      !aconf->host || !aconf->user)
+  if (lcount > MAXCONFLINKS || !aconf->host || !aconf->user)
     {
       sendto_realops_flags(FLAGS_ALL,"Bad C/N line");
       free_conf(aconf);

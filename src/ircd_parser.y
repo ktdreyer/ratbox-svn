@@ -41,8 +41,6 @@ extern char *ip_string;
 int yyparse();
         
 static struct ConfItem *yy_aconf;
-static struct ConfItem *yy_cconf;
-static struct ConfItem *yy_nconf;
 static struct ConfItem *yy_hconf;
 static struct ConfItem *yy_lconf;
 
@@ -894,16 +892,10 @@ connect_entry:  CONNECT
     hub_confs = (struct ConfItem *)NULL;
     leaf_confs = (struct ConfItem *)NULL;
 
-    if(yy_cconf)
+    if(yy_aconf)
       {
-        free_conf(yy_cconf);
-        yy_cconf = (struct ConfItem *)NULL;
-      }
-
-    if(yy_nconf)
-      {
-        free_conf(yy_nconf);
-        yy_nconf = (struct ConfItem *)NULL;
+        free_conf(yy_aconf);
+        yy_aconf = (struct ConfItem *)NULL;
       }
 
     if(yy_hconf)
@@ -918,74 +910,60 @@ connect_entry:  CONNECT
 	yy_lconf = (struct ConfItem *)NULL;
       }
 
-    yy_cconf=make_conf();
-    yy_cconf->status = CONF_CONNECT_SERVER;
-    yy_cconf->flags |= CONF_FLAGS_ALLOW_AUTO_CONN;
-
-    yy_nconf=make_conf();
-    yy_nconf->status = CONF_NOCONNECT_SERVER;
+    yy_aconf=make_conf();
+    /* Finally we can do this -A1kmm. */
+    yy_aconf->status = CONF_SERVER;
   }
   '{' connect_items '}' ';'
   {
-    if(yy_cconf->host && yy_cconf->passwd && yy_cconf->user)
+    if(yy_aconf->host && yy_aconf->passwd
+       && yy_aconf->spasswd)
       {
-        ++ccount;
-        conf_add_server(yy_cconf,ncount,ccount);
-        conf_add_conf(yy_cconf);
+        ++scount;
+        conf_add_server(yy_aconf, scount);
+        conf_add_conf(yy_aconf);
       }
     else
       {
-        free_conf(yy_cconf);
+        free_conf(yy_aconf);
       }
 
-    if(yy_nconf->host && yy_nconf->passwd && yy_nconf->user)
+    for(yy_hconf=hub_confs;yy_hconf;yy_hconf=yy_aconf_next)
       {
-        ++ncount;
-        conf_add_server(yy_nconf,ncount,ccount);
-        conf_add_conf(yy_nconf);
-      }
-    else
-      {
-        free_conf(yy_nconf);
-      }
+	yy_aconf_next = yy_hconf->next;
 
-    for(yy_aconf=hub_confs;yy_aconf;yy_aconf=yy_aconf_next)
-      {
-	yy_aconf_next = yy_aconf->next;
-
-	if(yy_cconf->host != NULL)
+	if(yy_aconf->host != NULL)
 	  {
-	    DupString(yy_aconf->user,yy_cconf->name);
- 	    conf_add_hub_or_leaf(yy_aconf);
-	    conf_add_conf(yy_aconf);
+	    DupString(yy_hconf->user, yy_aconf->host);
+ 	   conf_add_hub_or_leaf(yy_hconf);
+	    conf_add_conf(yy_hconf);
 	  }
 	else
 	  {
-	    free_conf(yy_aconf);
+	    free_conf(yy_hconf);
  	  }
       }
 
-    for(yy_aconf=leaf_confs;yy_aconf;yy_aconf=yy_aconf_next)
+    for(yy_lconf=leaf_confs;yy_lconf;yy_lconf=yy_aconf_next)
       {
-	yy_aconf_next = yy_aconf->next;
+	yy_aconf_next = yy_lconf->next;
 
-	if(yy_cconf->host != NULL)
+	if(yy_aconf->host != NULL)
 	  {
-	    DupString(yy_aconf->user,yy_cconf->name);
- 	    conf_add_hub_or_leaf(yy_aconf);
-	    conf_add_conf(yy_aconf);
+	    DupString(yy_lconf->user, yy_aconf->host);
+ 	   conf_add_hub_or_leaf(yy_lconf);
+	    conf_add_conf(yy_lconf);
 	  }
 	else
 	  {
-	    free_conf(yy_aconf);
+	    free_conf(yy_lconf);
  	  }
       }
 
     hub_confs = (struct ConfItem*)NULL;
     leaf_confs = (struct ConfItem*)NULL;
 
-    yy_cconf = (struct ConfItem *)NULL;
-    yy_nconf = (struct ConfItem *)NULL;
+    yy_aconf = (struct ConfItem *)NULL;
     yy_hconf = (struct ConfItem *)NULL;
   };
 
@@ -1000,24 +978,14 @@ connect_item:   connect_name | connect_host | connect_send_password |
 
 connect_name:   NAME '=' QSTRING ';'
   {
-    if(yy_cconf->user)
-      {
-	sendto_realops_flags(FLAGS_ALL,"*** Multiple connect entry");
-      }
-    else
-      {
-        if(yylval.string != NULL)
-	  DupString(yy_cconf->user,yylval.string);
-      }
-
-    if(yy_nconf->user)
+    if(yy_aconf->user)
       {
 	sendto_realops_flags(FLAGS_ALL,"*** Multiple connect accept entry");
       }
     else
       {
         if(yylval.string != NULL)
-	  DupString(yy_nconf->user,yylval.string);
+	  DupString(yy_aconf->user,yylval.string);
       }
 
     MyFree(yylval.string);
@@ -1027,43 +995,42 @@ connect_host:   HOST '=' QSTRING ';'
   {
     if(yylval.string != NULL)
       {
-	DupString(yy_cconf->host,yylval.string);
-	DupString(yy_nconf->host,yylval.string);
+	DupString(yy_aconf->host,yylval.string);
       }
   };
  
 connect_send_password:  SEND_PASSWORD '=' QSTRING ';'
   {
     if(yylval.string != NULL)
-      DupString(yy_cconf->passwd,yylval.string);
+      DupString(yy_aconf->spasswd,yylval.string);
   };
 
 connect_accept_password: ACCEPT_PASSWORD '=' QSTRING ';'
   {
     if(yylval.string != NULL)
-      DupString(yy_nconf->passwd,yylval.string);
+      DupString(yy_aconf->passwd,yylval.string);
   };
 
-connect_port:   PORT '=' NUMBER ';' { yy_cconf->port = yylval.number; };
+connect_port:   PORT '=' NUMBER ';' { yy_aconf->port = yylval.number; };
 
 connect_lazylink:       LAZYLINK '=' TYES ';'
   {
-    yy_nconf->flags |= CONF_FLAGS_LAZY_LINK;
+    yy_aconf->flags |= CONF_FLAGS_LAZY_LINK;
   }
                         |
                         LAZYLINK '=' TNO ';'
   {
-    yy_nconf->flags &= ~CONF_FLAGS_LAZY_LINK;
+    yy_aconf->flags &= ~CONF_FLAGS_LAZY_LINK;
   };
 
 connect_auto:           AUTOCONN '=' TYES ';'
   {
-    yy_cconf->flags |= CONF_FLAGS_ALLOW_AUTO_CONN;
+    yy_aconf->flags |= CONF_FLAGS_ALLOW_AUTO_CONN;
   }
                         |
                         AUTOCONN '=' TNO ';'
   {
-    yy_cconf->flags &= ~CONF_FLAGS_ALLOW_AUTO_CONN;
+    yy_aconf->flags &= ~CONF_FLAGS_ALLOW_AUTO_CONN;
   };
 
 connect_hub_mask:       HUB_MASK '=' QSTRING ';' 
@@ -1112,8 +1079,7 @@ connect_class:  CLASS '=' QSTRING ';'
   {
     if(yylval.string != NULL)
       {
-	DupString(yy_cconf->className,yylval.string);
-	DupString(yy_nconf->className,yylval.string);
+	DupString(yy_aconf->className,yylval.string);
       }
   };
 

@@ -52,8 +52,7 @@ static char *getfield(char *newline);
  *
  */
 
-void oldParseOneLine(char* line,struct ConfItem* aconf,
-                            int* pccount,int* pncount)
+void oldParseOneLine(char* line,struct ConfItem* aconf)
 {
   char conf_letter;
   char* tmp;

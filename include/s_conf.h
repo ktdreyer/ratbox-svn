@@ -69,6 +69,7 @@ struct ConfItem
   char*            name;     /* IRC name, nick, server name, or original u@h */
   char*            host;     /* host part of user@host */
   char*            passwd;
+  char*            spasswd;  /* Password to send. */
   char*            user;     /* user part of user@host */
   int              port;
   time_t           hold;     /* Hold action until this time (calendar time) */
@@ -87,14 +88,14 @@ typedef struct QlineItem {
 #define CONF_MATCH              0x40000000
 #define CONF_QUARANTINED_NICK   0x0001
 #define CONF_CLIENT             0x0002
-#define CONF_CONNECT_SERVER     0x0004
-#define CONF_NOCONNECT_SERVER   0x0008
-#define CONF_LOCOP              0x0010
-#define CONF_OPERATOR           0x0020
-#define CONF_ME                 0x0040
-#define CONF_KILL               0x0080
-#define CONF_ADMIN              0x0100
-#define CONF_GENERAL            0x0200
+#define CONF_SERVER             0x0004
+#define CONF_LOCOP              0x0008
+#define CONF_OPERATOR           0x0010
+#define CONF_ME                 0x0020
+#define CONF_KILL               0x0040
+#define CONF_ADMIN              0x0080
+#define CONF_GENERAL            0x0100
+
 /*
  * R_LINES are no more
  * -wnder
@@ -115,27 +116,31 @@ typedef struct QlineItem {
 
 
 #define CONF_OPS                (CONF_OPERATOR | CONF_LOCOP)
-#define CONF_SERVER_MASK        (CONF_CONNECT_SERVER | CONF_NOCONNECT_SERVER)
+#define CONF_SERVER_MASK        CONF_SERVER
 #define CONF_CLIENT_MASK        (CONF_CLIENT | CONF_OPS | CONF_SERVER_MASK)
 
 #define IsIllegal(x)    ((x)->status & CONF_ILLEGAL)
 
 /* aConfItem->flags */
+/* We can recycle flags as long as the same flag is not used twice for
+ * the same type of config entry. */
 
-#define CONF_FLAGS_LIMIT_IP             0x0001
-#define CONF_FLAGS_NO_TILDE             0x0002
-#define CONF_FLAGS_NEED_IDENTD          0x0004
-#define CONF_FLAGS_PASS_IDENTD          0x0008
-#define CONF_FLAGS_NOMATCH_IP           0x0010
-#define CONF_FLAGS_E_LINED              0x0020
+/* Generic flags... */
+/* access flags... */
+#define CONF_FLAGS_DO_IDENTD            0x0001
+#define CONF_FLAGS_LIMIT_IP             0x0002
+#define CONF_FLAGS_NO_TILDE             0x0004
+#define CONF_FLAGS_NEED_IDENTD          0x0008
+#define CONF_FLAGS_PASS_IDENTD          0x0010
+#define CONF_FLAGS_NOMATCH_IP           0x0020
+#define CONF_FLAGS_E_LINED              0x0040
 #define CONF_FLAGS_F_LINED              0x0080
 #define CONF_FLAGS_IDLE_LINED           0x0100
-#define CONF_FLAGS_DO_IDENTD            0x0200
-#define CONF_FLAGS_ALLOW_AUTO_CONN      0x0400
-#define CONF_FLAGS_SPOOF_IP             0x1000
-#define CONF_FLAGS_LAZY_LINK            0x2000
-#define CONF_FLAGS_REDIR                0x4000
-
+#define CONF_FLAGS_SPOOF_IP             0x0200
+/* server flags */
+#define CONF_FLAGS_ALLOW_AUTO_CONN      0x0001
+#define CONF_FLAGS_LAZY_LINK            0x0002
+#define CONF_FLAGS_REDIR                0x0004
 
 /* Macros for aConfItem */
 
@@ -152,15 +157,15 @@ typedef struct QlineItem {
 
 /* port definitions for Opers */
 
-#define CONF_OPER_GLOBAL_KILL 1
-#define CONF_OPER_REMOTE      2
-#define CONF_OPER_UNKLINE     4
-#define CONF_OPER_GLINE       8
-#define CONF_OPER_N          16
-#define CONF_OPER_K          32
-#define CONF_OPER_REHASH     64
-#define CONF_OPER_DIE       128
-#define CONF_OPER_ADMIN     256
+#define CONF_OPER_GLOBAL_KILL   0x0001
+#define CONF_OPER_REMOTE        0x0002
+#define CONF_OPER_UNKLINE       0x0004
+#define CONF_OPER_GLINE         0x0008
+#define CONF_OPER_N             0x0010
+#define CONF_OPER_K             0x0020
+#define CONF_OPER_REHASH        0x0040
+#define CONF_OPER_DIE           0x0080
+#define CONF_OPER_ADMIN         0x0100
 
 typedef struct
 {
@@ -226,8 +231,7 @@ typedef struct
 } ConfigFileEntryType;
 
 /* bleh. have to become global. */
-extern int ccount;
-extern int ncount;
+extern int scount;
 
 /* struct ConfItems */
 /* conf uline link list root */
@@ -325,7 +329,7 @@ extern  const   char *get_conf_name(KlineType);
 extern  int     is_address(char *,unsigned long *,unsigned long *); 
 extern  int     rehash (struct Client *, struct Client *, int);
 
-extern struct ConfItem* conf_add_server(struct ConfItem *,int ,int );
+extern struct ConfItem* conf_add_server(struct ConfItem *,int);
 extern void conf_add_port(struct ConfItem *);
 extern void conf_add_class_to_conf(struct ConfItem *);
 extern void conf_delist_old_conf(struct ConfItem *);
@@ -339,7 +343,7 @@ extern void conf_add_u_conf(struct ConfItem *);
 extern void conf_add_q_conf(struct ConfItem *);
 extern void conf_add_fields(struct ConfItem*, char*, char *, char*, char *,char *);
 extern void conf_add_conf(struct ConfItem *);
-extern void oldParseOneLine(char* ,struct ConfItem*,int*,int*);
+extern void oldParseOneLine(char* ,struct ConfItem*);
 
 extern unsigned long cidr_to_bitmask[];
 

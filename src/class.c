@@ -120,8 +120,7 @@ int     get_client_ping(struct Client *acptr)
       for(link = acptr->localClient->confs.head; link; link = link->next)
 	{
 	  aconf = link->data;
-	  if (aconf->status & (CONF_CLIENT|CONF_CONNECT_SERVER|
-			       CONF_NOCONNECT_SERVER))
+	  if (aconf->status & (CONF_CLIENT|CONF_SERVER))
 	    {
 	      ping2 = get_conf_ping(aconf);
 	      if ((ping2 != BAD_PING) && ((ping > ping2) || !ping))

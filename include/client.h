@@ -92,7 +92,7 @@ struct Server
   struct User*     user;        /* who activated this connection */
   const char*      up;          /* Pointer to scache name */
   char             by[NICKLEN + 1];
-  struct ConfItem* nline;       /* N-line pointer for this server */
+  struct ConfItem* sconf;       /* connect{} pointer for this server */
   struct Client*   servers;     /* Servers on this server */
   struct Client*   users;       /* Users on this server */
 };

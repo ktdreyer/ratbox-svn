@@ -114,9 +114,9 @@ static int mo_connect(struct Client* cptr, struct Client* sptr,
   /*
    * try to find the name, then host, if both fail notify ops and bail
    */
-  if (!(aconf = find_conf_by_name(parv[1], CONF_CONNECT_SERVER)))
+  if (!(aconf = find_conf_by_name(parv[1], CONF_SERVER)))
     {
-      if (!(aconf = find_conf_by_host(parv[1], CONF_CONNECT_SERVER)))
+      if (!(aconf = find_conf_by_host(parv[1], CONF_SERVER)))
 	{
 	  sendto_one(sptr,
 		     "NOTICE %s :Connect: Host %s not listed in ircd.conf",
@@ -225,8 +225,8 @@ static int ms_connect(struct Client* cptr, struct Client* sptr,
   /*
    * try to find the name, then host, if both fail notify ops and bail
    */
-  if (!(aconf = find_conf_by_name(parv[1], CONF_CONNECT_SERVER))) {
-    if (!(aconf = find_conf_by_host(parv[1], CONF_CONNECT_SERVER))) {
+  if (!(aconf = find_conf_by_name(parv[1], CONF_SERVER))) {
+    if (!(aconf = find_conf_by_host(parv[1], CONF_SERVER))) {
       sendto_one(sptr,
                  ":%s NOTICE %s :Connect: Host %s not listed in ircd.conf",
                  me.name, parv[0], parv[1]);

@@ -259,7 +259,8 @@ try_connections(void *unused)
       /*
        * Also when already connecting! (update holdtimes) --SRB 
        */
-      if (!(aconf->status & CONF_CONNECT_SERVER) || aconf->port <= 0)
+      if (!(aconf->status & CONF_SERVER) || aconf->port <= 0 ||
+          !(aconf->flags & CONF_FLAGS_ALLOW_AUTO_CONN))
         continue;
       cltmp = ClassPtr(aconf);
       /*
@@ -346,15 +347,14 @@ finish:
 
 int check_server(const char *name, struct Client* cptr)
 {
-  struct ConfItem *aconf, *cline=NULL, *nline=NULL;
+  struct ConfItem *aconf;
   int i = -1, h = 0;
   assert(0 != cptr);
   if (!(cptr->localClient->passwd))
     return -2;
   for (aconf = ConfigItemList; aconf; aconf = aconf->next)
     {
-     if (!(aconf->status & CONF_CONNECT_SERVER ||
-           aconf->status & CONF_NOCONNECT_SERVER ||
+     if (!(aconf->status & CONF_SERVER ||
            aconf->status & CONF_HUB ||
            aconf->status & CONF_LEAF)
         )
@@ -373,32 +373,24 @@ int check_server(const char *name, struct Client* cptr)
          cptr->localClient->ip.s_addr == aconf->ipnum.s_addr))
        continue;
 #ifdef CRYPT_LINK_PASSWORD
-     if (aconf->status & CONF_NOCONNECT_SERVER &&
-         strcmp(aconf->passwd, crypt(cptr->localClient->passwd,
+     if (strcmp(aconf->passwd, crypt(cptr->localClient->passwd,
                 aconf->passwd)))
        return -2;
 #else
-     if (aconf->status & CONF_NOCONNECT_SERVER &&
-         strcmp(aconf->passwd, cptr->localClient->passwd))
+     if (strcmp(aconf->passwd, cptr->localClient->passwd))
        return -2;
 #endif
-     if (aconf->status & CONF_CONNECT_SERVER)
-       cline = aconf;
-     if (aconf->status & CONF_NOCONNECT_SERVER)
-       nline = aconf;
-     if (cline && nline)
-       break;
+     break;
     }
-  if (!cline || !nline)
+  if (!aconf)
     return i;
-  attach_conf(cptr, cline);
-  attach_conf(cptr, nline);
-  if (!(nline->flags & CONF_FLAGS_LAZY_LINK))
+  attach_conf(cptr, aconf);
+  if (!(aconf->flags & CONF_FLAGS_LAZY_LINK))
     ClearCap(cptr, CAP_LL);
   if (!h)
     ClearCap(cptr, CAP_HUB);
-  if (cline->ipnum.s_addr == INADDR_NONE)
-    cline->ipnum.s_addr = cptr->localClient->ip.s_addr;
+  if (aconf->ipnum.s_addr == INADDR_NONE)
+    aconf->ipnum.s_addr = cptr->localClient->ip.s_addr;
   return 0;
 }
 
@@ -689,14 +681,14 @@ const char* show_capabilities(struct Client* acptr)
 int server_estab(struct Client *cptr)
 {
   struct Client*    acptr;
-  struct ConfItem*  n_conf;
-  struct ConfItem*  c_conf;
+  struct ConfItem*  aconf;
   const char*       inpath;
   static char       inpath_ip[HOSTLEN * 2 + USERLEN + 5];
   char 		    serv_desc[HOSTLEN + 15];
   char*             host;
+#if 0
   char*             encr;
-  int               split;
+#endif
   dlink_node        *m;
   dlink_node        *ptr;
 
@@ -705,31 +697,19 @@ int server_estab(struct Client *cptr)
 
   strcpy(inpath_ip, get_client_name(cptr, SHOW_IP));
   inpath = get_client_name(cptr, MASK_IP); /* "refresh" inpath with host */
-  split = irccmp(cptr->name, cptr->host);
   host = cptr->name;
 
-  if (!(n_conf = find_conf_name(&cptr->localClient->confs,
-				host, CONF_NOCONNECT_SERVER)))
+  if (!(aconf = find_conf_name(&cptr->localClient->confs, host,
+                               CONF_SERVER)))
     {
-      ServerStats->is_ref++;
-       sendto_one(cptr,
-                 "ERROR :Access denied. No N line for server %s", inpath_ip);
-      sendto_realops_flags(FLAGS_ALL,
-			   "Access denied. No N line for server %s", inpath);
-      log(L_NOTICE, "Access denied. No N line for server %s", inpath_ip);
-      return exit_client(cptr, cptr, cptr, "No N line for server");
+     /* This shouldn't happen, better tell the ops... -A1kmm */
+     sendto_realops_flags(FLAGS_ALL, "Warning: Lost connect{} block "
+       "for server %s(this shouldn't happen)!", host);
+     return exit_client(cptr, cptr, cptr, "Lost connect{} block!");
     }
-  if (!(c_conf = find_conf_name(&cptr->localClient->confs,
-				host, CONF_CONNECT_SERVER )))
-    {
-      ServerStats->is_ref++;
-      sendto_one(cptr, "ERROR :Only N (no C) field for server %s", inpath);
-      sendto_realops_flags(FLAGS_ALL,
-			   "Only N (no C) field for server %s",inpath);
-      log(L_NOTICE, "Only N (no C) field for server %s", inpath_ip);
-      return exit_client(cptr, cptr, cptr, "No C line for server");
-    }
-
+  /* We shouldn't have to check this, it should already done before
+   * server_estab is called. -A1kmm */
+#if 0
 #ifdef CRYPT_LINK_PASSWORD
   /* use first two chars of the password they send in as salt */
 
@@ -754,6 +734,7 @@ int server_estab(struct Client *cptr)
       log(L_NOTICE, "Access denied (passwd mismatch) %s", inpath_ip);
       return exit_client(cptr, cptr, cptr, "Bad Password");
     }
+#endif
   memset((void *)cptr->localClient->passwd, 0,sizeof(cptr->localClient->passwd));
 
   /* Its got identd , since its a server */
@@ -764,18 +745,18 @@ int server_estab(struct Client *cptr)
    */
   if(!ConfigFileEntry.hub && serv_list.head)   
     {
-      if(cptr != serv_list.head->data)
-	{
-	  ServerStats->is_ref++;
-	  sendto_one(cptr, "ERROR :I'm a leaf not a hub");
-	  return exit_client(cptr, cptr, cptr, "I'm a leaf");
-	}
+      if (cptr != serv_list.head->data || serv_list.head->next)
+        {
+         ServerStats->is_ref++;
+         sendto_one(cptr, "ERROR :I'm a leaf not a hub");
+         return exit_client(cptr, cptr, cptr, "I'm a leaf");
+        }
     }
 
   if (IsUnknown(cptr))
     {
-      if (c_conf->passwd[0])
-        sendto_one(cptr,"PASS %s :TS", c_conf->passwd);
+      if (aconf->passwd[0])
+        sendto_one(cptr,"PASS %s :TS", aconf->spasswd);
       /*
        * Pass my info to the new server
        *
@@ -785,27 +766,27 @@ int server_estab(struct Client *cptr)
 
       send_capabilities(cptr,CAP_MASK
 			|
-			((n_conf->flags & CONF_FLAGS_LAZY_LINK) ? CAP_LL : 0)
+			((aconf->flags & CONF_FLAGS_LAZY_LINK) ? CAP_LL : 0)
 			|
 			(ConfigFileEntry.hub ? CAP_HUB : 0) );
 
       sendto_one(cptr, "SERVER %s 1 :%s",
-                 my_name_for_link(me.name, n_conf), 
+                 my_name_for_link(me.name, aconf), 
                  (me.info[0]) ? (me.info) : "IRCers United");
     }
   else
     {
       Debug((DEBUG_INFO, "Check Usernames [%s]vs[%s]",
-             n_conf->user, cptr->username));
-      if (!match(n_conf->user, cptr->username))
+             aconf->user, cptr->username));
+      if (!match(aconf->user, cptr->username))
         {
           ServerStats->is_ref++;
           sendto_realops_flags(FLAGS_ALL,
 			       "Username mismatch [%s]v[%s] : %s",
-			       n_conf->user, cptr->username,
+			       aconf->user, cptr->username,
 			       get_client_name(cptr, TRUE));
           log(L_NOTICE, "Username mismatch [%s]v[%s] : %s",
-              n_conf->user, cptr->username,
+              aconf->user, cptr->username,
               get_client_name(cptr, TRUE));
           sendto_one(cptr, "ERROR :No Username Match");
           return exit_client(cptr, cptr, cptr, "Bad User");
@@ -814,7 +795,7 @@ int server_estab(struct Client *cptr)
 
   sendto_one(cptr,"SVINFO %d %d 0 :%lu", TS_CURRENT, TS_MIN, CurrentTime);
   
-  det_confs_butmask(cptr, CONF_LEAF|CONF_HUB|CONF_NOCONNECT_SERVER);
+  det_confs_butmask(cptr, CONF_LEAF|CONF_HUB|CONF_SERVER);
   release_client_dns_reply(cptr);
   /*
   ** *WARNING*
@@ -864,7 +845,7 @@ int server_estab(struct Client *cptr)
   /* add it to scache */
   find_or_add(cptr->name);
   
-  cptr->serv->nline = n_conf;
+  cptr->serv->sconf = aconf;
   cptr->flags2 |= FLAGS2_CBURST;
 
   ircsprintf(serv_desc, "Server: %s", cptr->name);
@@ -883,22 +864,11 @@ int server_estab(struct Client *cptr)
       if (acptr == cptr)
         continue;
 
-      if ((n_conf = acptr->serv->nline) &&
-          match(my_name_for_link(me.name, n_conf), cptr->name))
+      if ((aconf = acptr->serv->sconf) &&
+          match(my_name_for_link(me.name, aconf), cptr->name))
         continue;
-      if (split)
-        {
-          /* DON'T give away the IP of the server here
-           * if its a hub especially.
-           */
-
-          sendto_one(acptr,":%s SERVER %s 2 :%s",
-                   me.name, cptr->name,
-                   cptr->info);
-        }
-      else
-        sendto_one(acptr,":%s SERVER %s 2 :%s",
-                   me.name, cptr->name, cptr->info);
+      sendto_one(acptr,":%s SERVER %s 2 :%s", me.name, cptr->name,
+                 cptr->info);
     }
 
   /*
@@ -920,7 +890,7 @@ int server_estab(struct Client *cptr)
   **    is destroyed...)
   */
 
-  n_conf = cptr->serv->nline;
+  aconf = cptr->serv->sconf;
   for (acptr = &me; acptr; acptr = acptr->prev)
     {
       /* acptr->from == acptr for acptr == cptr */
@@ -928,24 +898,10 @@ int server_estab(struct Client *cptr)
         continue;
       if (IsServer(acptr))
         {
-          if (match(my_name_for_link(me.name, n_conf), acptr->name))
+          if (match(my_name_for_link(me.name, aconf), acptr->name))
             continue;
-          split = (MyConnect(acptr) &&
-                   irccmp(acptr->name, acptr->host));
-
-          /* DON'T give away the IP of the server here
-           * if its a hub especially.
-           */
-
-          if (split)
-            sendto_one(cptr, ":%s SERVER %s %d :%s",
-                       acptr->serv->up, acptr->name,
-                       acptr->hopcount+1,
-                       acptr->info);
-          else
-            sendto_one(cptr, ":%s SERVER %s %d :%s",
-                       acptr->serv->up, acptr->name,
-                       acptr->hopcount+1, acptr->info);
+          sendto_one(cptr, ":%s SERVER %s %d :%s", acptr->serv->up,
+                     acptr->name, acptr->hopcount+1, acptr->info);
         }
     }
   
@@ -1329,7 +1285,7 @@ void set_autoconn(struct Client *sptr,char *parv0,char *name,int newval)
 {
   struct ConfItem *aconf;
 
-  if(name && (aconf= find_conf_by_name(name, CONF_CONNECT_SERVER)))
+  if(name && (aconf= find_conf_by_name(name, CONF_SERVER)))
     {
       if (newval)
         aconf->flags |= CONF_FLAGS_ALLOW_AUTO_CONN;
@@ -1592,8 +1548,7 @@ static void
 serv_connect_callback(int fd, int status, void *data)
 {
     struct Client *cptr = data;
-    struct ConfItem *c_conf;
-    struct ConfItem *n_conf;
+    struct ConfItem *aconf;
 
     /* First, make sure its a real client! */
     assert(cptr != NULL);
@@ -1621,29 +1576,20 @@ serv_connect_callback(int fd, int status, void *data)
 
     /* COMM_OK, so continue the connection procedure */
     /* Get the C/N lines */
-    c_conf = find_conf_name(&cptr->localClient->confs,
-			    cptr->name, CONF_CONNECT_SERVER); 
-    if (!c_conf)
+    aconf = find_conf_name(&cptr->localClient->confs,
+			    cptr->name, CONF_SERVER); 
+    if (!aconf)
       { 
         sendto_realops_flags(FLAGS_ALL,
 		     "Lost C-Line for %s", get_client_name(cptr,FALSE));
         exit_client(cptr, cptr, &me, "Lost C-line");
         return;
       }
-    n_conf = find_conf_name(&cptr->localClient->confs,
-			    cptr->name, CONF_NOCONNECT_SERVER);
-    if (!n_conf)
-      { 
-        sendto_realops_flags(FLAGS_ALL,
-		     "Lost N-Line for %s", get_client_name(cptr,FALSE));
-        exit_client(cptr, cptr, &me, "Lost N-Line");
-      }
-
     /* Next, send the initial handshake */
     SetHandshake(cptr);
 
-    if (!EmptyString(c_conf->passwd))
-        sendto_one(cptr, "PASS %s :TS", c_conf->passwd);
+    if (!EmptyString(aconf->passwd))
+        sendto_one(cptr, "PASS %s :TS", aconf->passwd);
 
     /*
      * Pass my info to the new server
@@ -1654,12 +1600,12 @@ serv_connect_callback(int fd, int status, void *data)
 
     send_capabilities(cptr,CAP_MASK
 		      |
-		      ((n_conf->flags & CONF_FLAGS_LAZY_LINK) ? CAP_LL : 0)
+		      ((aconf->flags & CONF_FLAGS_LAZY_LINK) ? CAP_LL : 0)
 		      |
 		      (ConfigFileEntry.hub ? CAP_HUB : 0) );
 
     sendto_one(cptr, "SERVER %s 1 :%s",
-      my_name_for_link(me.name, n_conf), me.info);
+      my_name_for_link(me.name, aconf), me.info);
 
     /* 
      * If we've been marked dead because a send failed, just exit

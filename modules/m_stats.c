@@ -386,7 +386,7 @@ static void do_priv_stats(struct Client *sptr, char *name, char *target,
  switch (statchar)
     {
     case 'C' : case 'c' :
-      report_configured_links(sptr, CONF_CONNECT_SERVER|CONF_NOCONNECT_SERVER);
+      report_configured_links(sptr, CONF_SERVER);
       stats_spy(sptr,statchar);
       break;
  
