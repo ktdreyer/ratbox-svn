@@ -1,3 +1,8 @@
+*** 20011011_4 by wcampbel
+Completed repo move/cleanup.  It will now build again, you MAY have to do
+a clean checkout after this...
+
+
 *** 20011011_3 by db
 - updated with current EFNet requirements, note that HOPS (half ops)
   is not presently accepted on EFNet.
