@@ -361,7 +361,6 @@ check_htm(void)
 static void
 io_loop(void)
 {
-	unsigned long empty_cycles = 0, st = 0;
 	time_t delay;
 #ifndef __vms
 	while (ServerRunning)
