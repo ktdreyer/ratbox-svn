@@ -312,16 +312,17 @@ send_oper_motd(struct Client *source_p)
 	if(oper_motd == NULL || dlink_list_length(&oper_motd->contents) == 0)
 		return;
 
-	sendto_one(source_p, ":%s NOTICE %s :Start of OPER MOTD",
+	sendto_one(source_p, form_str(RPL_OMOTDSTART), 
 		   me.name, source_p->name);
 
 	DLINK_FOREACH(ptr, oper_motd->contents.head)
 	{
 		lineptr = ptr->data;
-		sendto_one(source_p, ":%s NOTICE %s :%s",
+		sendto_one(source_p, form_str(RPL_OMOTD),
 			   me.name, source_p->name, lineptr->data);
 	}
 
-	sendto_one(source_p, ":%s NOTICE %s :End", me.name, source_p->name);
+	sendto_one(source_p, form_str(RPL_ENDOFOMOTD), 
+		   me.name, source_p->name);
 }
 

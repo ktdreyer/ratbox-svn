@@ -308,6 +308,10 @@ extern const char *form_str(int);
 #define RPL_TARGNOTIFY       717
 #define RPL_UMODEGMSG        718
 
+#define RPL_OMOTDSTART	     720
+#define RPL_OMOTD	     721
+#define RPL_ENDOFOMOTD       722
+
 #define ERR_LAST_ERR_MSG     999
 
 #endif /* INCLUDED_numeric_h */
