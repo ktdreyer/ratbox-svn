@@ -242,8 +242,8 @@ static int ms_sjoin(struct Client *cptr,
 
   if (newts < 800000000)
     {
-      sendto_realops_flags(FLAGS_ALL,"*** Bogus TS %lu from %s ignored",
-			   newts, cptr->name);
+      sendto_realops_flags(FLAGS_ALL,"*** Bogus TS %lu on %s ignored from %s",
+			   newts, chptr->chname, cptr->name);
       newts = oldts;
     }
 
