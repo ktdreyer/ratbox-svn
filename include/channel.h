@@ -189,8 +189,6 @@ extern void    channel_member_list(struct Client *sptr,
 #define MODE_HIDEOPS    0x4000
 #define MODE_LIMIT      0x8000  /* was 0x8000 */
 
-#define MODE_FLAGS      0x8fff  /* was 0x8fff */
-
 /*
  * mode flags which take another parameter (With PARAmeterS)
  */

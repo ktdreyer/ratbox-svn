@@ -501,6 +501,16 @@ void set_final_mode(struct Mode *mode,struct Mode *oldmode)
   char numeric[16];
   char *s;
 
+  if ((MODE_HIDEOPS & mode->mode) && !(MODE_HIDEOPS & oldmode->mode))
+  {
+	  if (what != 1)
+	  {
+		  *mbuf++ = '+';
+		  what = 1;
+	  }
+	  *mbuf++ = 'z';
+  }
+  
   if((MODE_PRIVATE    & mode->mode) && !(MODE_PRIVATE    & oldmode->mode))
     {
       if (what != 1)
@@ -574,6 +584,16 @@ void set_final_mode(struct Mode *mode,struct Mode *oldmode)
         }
       *mbuf++ = 's';
     }
+  if ((MODE_HIDEOPS & oldmode->mode) && !(MODE_HIDEOPS & mode->mode))
+  {
+	  if (what != -1)
+	  {
+		  *mbuf++ = '-';
+		  what = -1;
+	  }
+	  *mbuf++ = 'z';
+  }
+  
   if((MODE_MODERATED  & oldmode->mode) && !(MODE_MODERATED  & mode->mode))
     {
       if (what != -1)
