@@ -1,3 +1,10 @@
+*** 19990913_1 by wnder
+IAuth updates:
+ * added a new mtree module - handles I: and K: lines. Please
+   throw all sorts of odd combinations at it to give it a good
+   run - highly experimental :-)
+
+
 *** 19990912_2 by wnder
 IAuth updates:
  * got "I line is full" check working
