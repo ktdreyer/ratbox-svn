@@ -1,3 +1,8 @@
+*** 20010411_1 by a1kmm
+- oops, forgot a DupString in parsing deny blocks in the parser. This fixes
+  it.
+
+
 *** 20010410_3 by kreator
 Made .include for lexer.
 
