@@ -1,3 +1,9 @@
+*** 20010129_6 by jdc
+Changed all get_client_name() references, respectively, from
+TRUE/FALSE to SHOW_IP/HIDE_IP.  Also changed HIDEME to MASK_IP.
+
+
+
 *** 20010129_5 by db
 - simplified sendto_realops_flags(FLAGS_ALL... case
 
