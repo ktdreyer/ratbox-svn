@@ -1,3 +1,9 @@
+*** 20010118_4 by ejb
+- fix typoes in README.VMS
+- now, src/* should compile fine on VMS with DECC compiler (with the exception
+  of res.c and s_bsd_select.c)
+
+
 *** 20010118_3 by ejb
 - some more fixes for VMS CC.
 
