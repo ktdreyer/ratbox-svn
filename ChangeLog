@@ -1,3 +1,16 @@
+leeh        2004/08/01 20:55:45 EDT	(20040802_0)
+
+  Modified files:
+    modules/core         m_join.c 
+  Log:
+  - fix sjoin to output nick, not uid in mode string it builds for voiced
+    users
+  
+  Revision  Changes    Path
+  1.159     +3 -3      ircd-ratbox/modules/core/m_join.c
+
+
+
 leeh        2004/07/31 21:16:09 EDT	(20040801_2)
 
   Modified files:
