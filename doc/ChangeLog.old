@@ -1,3 +1,15 @@
+androsyn    2002/05/24 21:35:11 EDT	(20020525_6)
+
+  Modified files:
+    src                  md5.c 
+  Log:
+  Seed with something a bit more useful than pids
+  
+  Revision  Changes    Path
+  1.14      +2 -2      ircd-hybrid-7/src/md5.c
+
+
+
 androsyn    2002/05/24 21:24:53 EDT	(20020525_5)
 
   Modified files:
