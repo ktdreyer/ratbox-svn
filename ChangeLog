@@ -1,3 +1,21 @@
+leeh        2005/02/19 08:48:05 EST	(20050219_1)
+
+  Modified files:
+    include              client.h 
+    modules              m_cap.c m_who.c 
+    src                  channel.c 
+  Log:
+  - implemented multi-prefix client capability, which allows stacking of @+ in
+    names and who
+  
+  Revision  Changes    Path
+  7.265     +1 -1      ircd-ratbox/include/client.h
+  1.6       +6 -15     ircd-ratbox/modules/m_cap.c
+  1.115     +4 -3      ircd-ratbox/modules/m_who.c
+  7.433     +4 -6      ircd-ratbox/src/channel.c
+
+
+
 leeh        2005/02/19 06:27:58 EST	(20050219_0)
 
   Modified files:
