@@ -1,3 +1,15 @@
+leeh        2003/09/03 12:51:57 EDT	(20030903_5)
+
+  Modified files:
+    src                  parse.c 
+  Log:
+  - verify min_para exists in the encap parsing too. ;)
+  
+  Revision  Changes    Path
+  7.172     +2 -1      ircd-ratbox/src/parse.c
+
+
+
 leeh        2003/09/03 12:50:31 EDT	(20030903_4)
 
   Modified files:
