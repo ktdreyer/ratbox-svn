@@ -904,7 +904,7 @@ static int valid_comment(struct Client *source_p, char *comment)
     {
       if(!IsServer(source_p))
 	sendto_one(source_p,
-		   ":%s NOTICE %s :Invalid character '"' in comment",
+		   ":%s NOTICE %s :Invalid character '\"' in comment",
 		   me.name, source_p->name);
       return 0;
     }
