@@ -1,3 +1,15 @@
+leeh        2002/09/19 18:32:38 UTC	(20020919_2)
+
+  Modified files:
+    modules              m_connect.c 
+  Log:
+  - as pointed out by bill, this should be HIDE_SERVERS_IPS
+  
+  Revision  Changes    Path
+  1.43      +2 -2      ircd-ratbox/modules/m_connect.c
+
+
+
 leeh        2002/09/19 11:08:50 UTC	(20020919_1)
 
   Modified files:
