@@ -1,3 +1,71 @@
+leeh        2003/08/16 09:57:47 EDT	(20030816_0)
+
+  Modified files:
+    adns                 setup.c 
+    modules              m_accept.c m_admin.c m_away.c 
+                         m_challenge.c m_connect.c m_gline.c 
+                         m_help.c m_info.c m_invite.c m_join.c 
+                         m_knock.c m_list.c m_locops.c m_lusers.c 
+                         m_names.c m_oper.c m_operwall.c m_pass.c 
+                         m_ping.c m_pong.c m_restart.c m_stats.c 
+                         m_topic.c m_user.c m_version.c 
+                         m_wallops.c m_whois.c m_whowas.c 
+    modules/core         m_kick.c m_kill.c m_message.c m_mode.c 
+                         m_nick.c m_part.c m_sjoin.c m_squit.c 
+    src                  cache.c client.c messages.tab modules.c 
+                         parse.c s_serv.c s_user.c send.c 
+  Log:
+  - finished the numeric cleanup for TS6
+  
+  Revision  Changes    Path
+  1.30      +2 -2      ircd-ratbox/adns/setup.c
+  1.71      +15 -9     ircd-ratbox/modules/core/m_kick.c
+  1.87      +7 -11     ircd-ratbox/modules/core/m_kill.c
+  1.139     +17 -19    ircd-ratbox/modules/core/m_message.c
+  1.88      +25 -22    ircd-ratbox/modules/core/m_mode.c
+  1.127     +18 -14    ircd-ratbox/modules/core/m_nick.c
+  1.85      +8 -4      ircd-ratbox/modules/core/m_part.c
+  1.182     +1 -5      ircd-ratbox/modules/core/m_sjoin.c
+  1.70      +5 -3      ircd-ratbox/modules/core/m_squit.c
+  1.52      +10 -10    ircd-ratbox/modules/m_accept.c
+  1.52      +13 -10    ircd-ratbox/modules/m_admin.c
+  1.51      +2 -2      ircd-ratbox/modules/m_away.c
+  1.61      +5 -4      ircd-ratbox/modules/m_challenge.c
+  1.59      +8 -4      ircd-ratbox/modules/m_connect.c
+  1.126     +2 -2      ircd-ratbox/modules/m_gline.c
+  1.63      +2 -2      ircd-ratbox/modules/m_help.c
+  1.93      +20 -20    ircd-ratbox/modules/m_info.c
+  1.74      +19 -15    ircd-ratbox/modules/m_invite.c
+  1.137     +14 -9     ircd-ratbox/modules/m_join.c
+  1.83      +10 -10    ircd-ratbox/modules/m_knock.c
+  1.72      +6 -4      ircd-ratbox/modules/m_list.c
+  1.43      +3 -2      ircd-ratbox/modules/m_locops.c
+  1.39      +2 -2      ircd-ratbox/modules/m_lusers.c
+  1.75      +4 -3      ircd-ratbox/modules/m_names.c
+  1.75      +3 -2      ircd-ratbox/modules/m_oper.c
+  1.48      +3 -2      ircd-ratbox/modules/m_operwall.c
+  1.40      +4 -2      ircd-ratbox/modules/m_pass.c
+  1.47      +1 -4      ircd-ratbox/modules/m_ping.c
+  1.45      +5 -8      ircd-ratbox/modules/m_pong.c
+  1.38      +1 -7      ircd-ratbox/modules/m_restart.c
+  1.176     +8 -8      ircd-ratbox/modules/m_stats.c
+  1.81      +11 -10    ircd-ratbox/modules/m_topic.c
+  1.38      +4 -2      ircd-ratbox/modules/m_user.c
+  1.59      +2 -2      ircd-ratbox/modules/m_version.c
+  1.47      +6 -3      ircd-ratbox/modules/m_wallops.c
+  1.126     +10 -8     ircd-ratbox/modules/m_whois.c
+  1.44      +6 -5      ircd-ratbox/modules/m_whowas.c
+  1.7       +6 -6      ircd-ratbox/src/cache.c
+  7.401     +2 -1      ircd-ratbox/src/client.c
+  7.95      +28 -30    ircd-ratbox/src/messages.tab
+  7.129     +6 -5      ircd-ratbox/src/modules.c
+  7.165     +9 -8      ircd-ratbox/src/parse.c
+  7.350     +8 -10     ircd-ratbox/src/s_serv.c
+  7.288     +10 -9     ircd-ratbox/src/s_user.c
+  7.254     +2 -6      ircd-ratbox/src/send.c
+
+
+
 leeh        2003/08/15 17:55:16 EDT	(20030815_0)
 
   Modified files:
