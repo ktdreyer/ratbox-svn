@@ -1,3 +1,17 @@
+androsyn    2003/06/17 17:16:25 UTC	(20030617_1)
+
+  Modified files:
+    include              channel.h 
+    src                  parse.c 
+  Log:
+  Remove an unneeded macro and INTENSIVE_DEBUG as its doesn't do anything
+  
+  Revision  Changes    Path
+  7.136     +0 -7      ircd-ratbox/include/channel.h
+  7.160     +0 -3      ircd-ratbox/src/parse.c
+
+
+
 androsyn    2003/06/17 15:59:10 UTC	(20030617_0)
 
   Modified files:
