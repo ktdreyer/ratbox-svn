@@ -514,6 +514,8 @@ void	newconf_init()
 			conf_set_general_use_global_limits);
 	add_conf_item("general", "use_help", CF_YESNO,
 			conf_set_general_use_help);
+        add_conf_item("general", "use_whois_actually", CF_YESNO,
+                        conf_set_general_use_whois_actually);
 	add_conf_item("general", "default_cipher_preference", CF_QSTRING,
 			conf_set_general_default_cipher_preference);
 	add_conf_item("general", "compression_level", CF_INT,
@@ -2510,6 +2512,11 @@ void	conf_set_general_use_global_limits(void *data)
 void	conf_set_general_use_help(void *data)
 {
 	ConfigFileEntry.use_help = *(unsigned int*)data;
+}
+
+void    conf_set_general_use_whois_actually(void *data)
+{
+        ConfigFileEntry.use_whois_actually = *(unsigned int*)data;
 }
 
 void	conf_set_general_throttle_time(void *data)

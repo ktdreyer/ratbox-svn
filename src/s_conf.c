@@ -1462,6 +1462,7 @@ set_default_conf(void)
   ConfigFileEntry.max_targets = MAX_TARGETS_DEFAULT;
   DupString(ConfigFileEntry.servlink_path, SLPATH);
   ConfigFileEntry.egdpool_path = NULL;
+  ConfigFileEntry.use_whois_actually = YES;
 
 #ifdef HAVE_LIBCRYPTO
   /* jdc -- This is our default value for a cipher.  According to the

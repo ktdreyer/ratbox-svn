@@ -273,6 +273,7 @@ extern 	char *		conf_cur_block_name;
 	void	conf_set_general_disable_auth			(void *data);
 	void	conf_set_general_use_global_limits		(void *data);
 	void	conf_set_general_use_help			(void *data);
+        void    conf_set_general_use_whois_actually             (void *data);
 	void	conf_set_general_throttle_time			(void *data);
 	void	conf_set_general_oper_umodes			(void *data);
 	void	conf_set_general_oper_only_umodes		(void *data);

@@ -427,8 +427,8 @@ sub1_from_channel(struct Channel *chptr)
     chptr->users = 0;           /* if chptr->users < 0, make sure it sticks at 0
                                  * It should never happen but...
                                  */
-    /* persistent channel */
-    if ((chptr->channelts + ConfigChannel.persist_time) > CurrentTime)
+    /* persistent channel - must be 12h old */
+    if ((chptr->channelts + (60*60*12)) > CurrentTime)
     {
       destroy_channel(chptr);
       return 1;

@@ -228,6 +228,7 @@ struct config_file_entry
   int		ping_cookie;
   int           use_global_limits;
   int           use_help;
+  int           use_whois_actually;
   int		disable_auth;
   int		connect_timeout;
 #ifdef HAVE_LIBCRYPTO
