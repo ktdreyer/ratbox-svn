@@ -1381,7 +1381,7 @@ int fork_server(struct Client *server)
       }
       else
       {
-#ifdef VMS || __CYGWIN__
+#if defined(VMS) || defined(__CYGWIN__)
         if (i > 2) /* don't close std* */
 #endif
           close(i);
