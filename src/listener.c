@@ -356,7 +356,8 @@ static void accept_connection(int pfd, void *data)
   static time_t      last_oper_notice = 0;
 
   struct irc_inaddr addr;
-  socklen_t addrlen = sizeof(struct irc_inaddr);
+  struct sockaddr sai;
+  socklen_t addrlen = sizeof(struct sockaddr);
   int                fd;
   struct Listener *  listener = data;
 
@@ -375,7 +376,24 @@ static void accept_connection(int pfd, void *data)
    * be accepted until some old is closed first.
    */
 
-  fd = comm_accept(listener->fd, (struct sockaddr *)&addr, &addrlen);
+  fd = comm_accept(listener->fd, &sai, &addrlen);
+  if (sai.sa_family == AF_INET)
+    {
+     addr.sins.sin = ((struct sockaddr_in*)&sai)->sin_addr;
+    }
+#ifdef IPV6
+  else if (sai.sa_family == AF_INET6)
+    {
+     addr.sins.sin6 = ((struct sockaddr_in6*)&sai)->in6_addr;
+    }
+#endif
+  else
+    {
+     /* Re-register a new IO request for the next accept .. */
+     comm_setselect(listener->fd, FDLIST_SERVICE, COMM_SELECT_READ,
+                    accept_connection, listener, 0);
+     return;
+    }
   if (fd < 0)
     {
 #if 0
@@ -391,6 +409,9 @@ static void accept_connection(int pfd, void *data)
 		       listener->name, errno);
 	  last_oper_notice = CurrentTime;
 	}
+      /* Re-register a new IO request for the next accept .. */
+      comm_setselect(listener->fd, FDLIST_SERVICE, COMM_SELECT_READ,
+                     accept_connection, listener, 0);
       return;
     }
   /*
@@ -410,6 +431,9 @@ static void accept_connection(int pfd, void *data)
 	}
       send(fd, "ERROR :All connections in use\r\n", 32, 0);
       fd_close(fd);
+      /* Re-register a new IO request for the next accept .. */
+      comm_setselect(listener->fd, FDLIST_SERVICE, COMM_SELECT_READ,
+                     accept_connection, listener, 0);
       return;
     }
   /*
@@ -420,6 +444,9 @@ static void accept_connection(int pfd, void *data)
       ServerStats->is_ref++;
       send(fd, "NOTICE DLINE :*** You have been D-lined\r\n", 41, 0);
       fd_close(fd);
+      /* Re-register a new IO request for the next accept .. */
+      comm_setselect(listener->fd, FDLIST_SERVICE, COMM_SELECT_READ,
+                     accept_connection, listener, 0);
       return;
     }
   ServerStats->is_ac++;
