@@ -413,9 +413,9 @@ diff -urN --exclude=CVS ircd-hybrid-7/include/supported.h ircd-hybrid-7+lmh/incl
  #include "ircd_defs.h"
  
 +#ifndef USE_ASCII_CASEMAP
-+#define CHARSET "rfc1459"
++#define CASEMAP "rfc1459"
 +#else
-+#define CHARSET "ascii"
++#define CASEMAP "ascii"
 +#endif
 +
  #define FEATURES "WALLCHOPS"\
@@ -434,7 +434,7 @@ diff -urN --exclude=CVS ircd-hybrid-7/include/supported.h ircd-hybrid-7+lmh/incl
                          "(ohv)@%+", "beI,k,l,imnpsta", \
 -			ServerInfo.network_name
 -                          
-+			ServerInfo.network_name, CHARSET
++			ServerInfo.network_name, CASEMAP
 +
  /*
   * - from mirc's versions.txt
