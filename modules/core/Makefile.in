@@ -87,9 +87,9 @@ install: all
 .SUFFIXES: .so
 
 .c.so:
-	${CC} -DPIC -fPIC -shared ${CFLAGS} $(CPPFLAGS) -c ${.IMPSRC} -o ${.TARGET}
-	$(CC) -fPIC -shared ${.TARGET} -o ${.TARGET}.tmp
-	mv ${.TARGET}.tmp ${.TARGET}
+	${CC} -DPIC -fPIC -shared ${CFLAGS} $(CPPFLAGS) -c $< -o $@
+	$(CC) -fPIC -shared $@ -o $@.tmp
+	mv $@.tmp $@
 
 .PHONY: depend clean distclean
 depend:
