@@ -1,3 +1,15 @@
+leeh        2004/05/27 09:15:23 EDT	(20040527_0)
+
+  Modified files:
+    src                  s_newconf.c 
+  Log:
+  - add operspy/hidden_oper to the shown operprivs
+  
+  Revision  Changes    Path
+  7.42      +2 -0      ircd-ratbox/src/s_newconf.c
+
+
+
 leeh        2004/05/25 13:19:57 EDT	(20040525_5)
 
   Modified files:
