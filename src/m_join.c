@@ -177,6 +177,13 @@ int     m_join(struct Client *cptr,
           continue;
         }
 
+      if (strlen(name) > CHANNELLEN-15)
+        {
+          sendto_one(sptr, form_str(ERR_BADCHANNAME),me.name, parv[0], name);
+          continue;
+        }
+
+
 #ifdef NO_JOIN_ON_SPLIT_SIMPLE
       if (server_was_split && MyClient(sptr) && (*name != '&'))
         {
