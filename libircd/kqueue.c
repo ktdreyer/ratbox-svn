@@ -111,6 +111,8 @@ kq_update_events(int fd, short filter, PF * handler)
 
         ke.ident = (u_long) fd;
         ke.filter = filter;
+	ke.fflags = NOTE_LOWAT;
+	ke.data = 1;
         ke.flags = handler ? (EV_ADD | EV_ONESHOT) : EV_DELETE;
 
         retval = kevent(kq, &ke, 1, NULL, 0, &zero_timespec);
