@@ -14,6 +14,7 @@
  MODUSER     - {150} Modifies a users level on the access list
  OP          - { 50} Makes services op yourself
  REGISTER    - {  -} Registers the given channel under your current username
+ SET         - {190} Sets various channel options:
  SUSPEND     - {100} Suspends given user at given level
  UNBAN       - { 10} Unbans yourself from a channel
  UNSUSPEND   - {100} Unsuspends usernames access
