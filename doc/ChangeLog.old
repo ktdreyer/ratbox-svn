@@ -1,3 +1,7 @@
+*** 20010525_15 by davidt
+- Fix netjoins for the loc* stuff, move to locpeons, not peons.. ahem..
+
+
 *** 20010525_14 by ejb
 - added generation support to version.com.
 
