@@ -53,6 +53,9 @@ dlink_node *make_dlink_node(void);
 void free_dlink_node(dlink_node * lp);
 void init_dlink_nodes(void);
 
+int base64_block(char **out, const char *in, int len);
+int unbase64_block(char **out, const char *data, int len);
+
 
 #ifndef NDEBUG
 void mem_frob(void *data, int len);

@@ -42,7 +42,6 @@
 #include "sprintf_irc.h"
 #include "s_gline.h"
 #include "handlers.h"
-#include "md5.h"
 #include "msg.h"		/* msgtab */
 #include "hostmask.h"
 #include "numeric.h"
@@ -667,7 +666,6 @@ main(int argc, char *argv[])
 	newconf_init();
 	linebuf_init();		/* set up some linebuf stuff to control paging */
 	init_hash();
-	id_init();
 	clear_scache_hash_table();	/* server cache name table */
 	init_host_hash();
 	clear_hash_parse();

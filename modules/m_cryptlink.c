@@ -53,7 +53,6 @@
 #include "common.h"		/* TRUE bleah */
 #include "event.h"
 #include "hash.h"		/* add_to_client_hash */
-#include "md5.h"
 #include "s_conf.h"		/* struct ConfItem */
 
 #include "s_log.h"		/* log level defines */

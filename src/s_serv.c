@@ -39,7 +39,6 @@
 #include "event.h"
 #include "fdlist.h"
 #include "hash.h"
-#include "md5.h"
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "ircd.h"

@@ -77,7 +77,6 @@ BASE_SRCS =                     \
   listener.c                    \
   m_error.c                     \
   match.c                       \
-  md5.c                         \
   memory.c                      \
   modules.c                     \
   newconf.c			\

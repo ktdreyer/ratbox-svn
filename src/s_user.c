@@ -50,7 +50,6 @@
 #include "send.h"
 #include "supported.h"
 #include "whowas.h"
-#include "md5.h"
 #include "memory.h"
 #include "packet.h"
 #include "reject.h"
