@@ -1,3 +1,8 @@
+*** 20010606_7 by leeh
+- added an example module to the cvs, detailing how to build them, and
+  what individual bits mean.. 
+
+
 *** 20010606_6 by jdc
 * Round 3 of the OpenSSL madness.  This *SHOULD* take care of everything
   (isn't that what I said last time?).  Someone might want to examine
