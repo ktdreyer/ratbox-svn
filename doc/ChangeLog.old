@@ -1,3 +1,10 @@
+*** 20010313_5 by davidt
+- Allow multiple user="..."; lines per auth{} block...
+  (oper{}, etc. blocks can probably be changed to work the same way
+   quite easily, I'll look at it tomorrow, to see what would actually
+   benefit from it)
+
+
 *** 20010313_4 by ejb
 - don't build m_error.c as a module, it has to be static for now. 
 
