@@ -1,15 +1,10 @@
--- ircd-hybrid-7beta18 RELNOTES
+-- ircd-hybrid-7rc1 RELNOTES
 
-o) fixed cores with lazylinks
-o) fixed lazylinks for remote PING
-o) fixed a problem exiting the wrong server when one with the same name
-   was introduced
-o) ircd.log will now close and reopen itself on SIGHUP/rehash
-o) fixed multi-message problems
-o) fixed issue of invisible users being shown in /who #channel
-o) fixed jupe module
-o) fixed bug allowing multiple dlines on same IP to be set
-o) fixed a vchannel issue with a misplaced ;
+o) Made topiclen configurable with autoconf
+o) Autoconf fixes for Forte C
+o) Bugfixes for m_jupe.c in contrib/
+o) Fixed bug where we would give away spoofed IPs
+
 
 --------------------------------------------------------------------------------
 
