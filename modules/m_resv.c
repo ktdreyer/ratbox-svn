@@ -436,18 +436,19 @@ remove_temp_resv(struct Client *source_p, const char *name)
 
 		del_from_resv_hash(name, aconf);
 		free_conf(aconf);
-		return 1;
 	}
+	else
+	{
+		if((aconf = find_nick_resv(name)) == NULL)
+			return 0;
 
-	if((aconf = find_nick_resv(name)) == NULL)
-		return 0;
+		/* permanent, remove_resv() needs to do it properly */
+		if(!aconf->hold)
+			return 0;
 
-	/* permanent, remove_resv() needs to do it properly */
-	if(!aconf->hold)
-		return 0;
-
-	dlinkFindDestroy(&resv_conf_list, aconf);
-	free_conf(aconf);
+		dlinkFindDestroy(&resv_conf_list, aconf);
+		free_conf(aconf);
+	}
 
 	sendto_one_notice(source_p, ":RESV for [%s] is removed", name);
 	sendto_realops_flags(UMODE_ALL, L_ALL,
