@@ -73,7 +73,7 @@ struct Channel
 	int num_mask;		/* number of bans+exceptions+invite exceptions */
 	unsigned long bants;
 	time_t channelts;
-	char chname[CHANNELLEN + 1];
+	char *chname;
 };
 
 struct membership
@@ -170,7 +170,7 @@ struct ChCapCombo
 extern dlink_list global_channel_list;
 void init_channels(void);
 
-struct Channel *allocate_channel(void);
+struct Channel *allocate_channel(const char *chname);
 void free_channel(struct Channel *chptr);
 struct Ban *allocate_ban(void);
 void free_ban(struct Ban *bptr);

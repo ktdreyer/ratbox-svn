@@ -718,8 +718,7 @@ get_or_create_channel(struct Client *client_p, const char *chname, int *isnew)
 	if(isnew != NULL)
 		*isnew = 1;
 
-	chptr = allocate_channel();
-	strlcpy(chptr->chname, s, sizeof(chptr->chname));
+	chptr = allocate_channel(s);
 
 	dlinkAdd(chptr, &chptr->node, &global_channel_list);
 

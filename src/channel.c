@@ -79,16 +79,18 @@ init_channels(void)
  * allocate_channel - Allocates a channel
  */
 struct Channel *
-allocate_channel(void)
+allocate_channel(const char *chname)
 {
 	struct Channel *chptr;
 	chptr = BlockHeapAlloc(channel_heap);
+	DupNString(chptr->chname, chname, CHANNELLEN);
 	return(chptr);
 }
 
 void
 free_channel(struct Channel *chptr)
 {
+	MyFree(chptr->chname);
 	BlockHeapFree(channel_heap, chptr);
 }
 
