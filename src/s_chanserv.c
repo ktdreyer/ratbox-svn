@@ -47,33 +47,33 @@ static void u_chan_chandrop(struct client *, struct lconn *, const char **, int)
 static void u_chan_chansuspend(struct client *, struct lconn *, const char **, int);
 static void u_chan_chanunsuspend(struct client *, struct lconn *, const char **, int);
 
-static int s_chan_chanregister(struct client *, const char **, int);
-static int s_chan_chandrop(struct client *, const char **, int);
-static int s_chan_chansuspend(struct client *, const char **, int);
-static int s_chan_chanunsuspend(struct client *, const char **, int);
-static int s_chan_register(struct client *, const char **, int);
-static int s_chan_set(struct client *, const char **, int);
-static int s_chan_adduser(struct client *, const char **, int);
-static int s_chan_deluser(struct client *, const char **, int);
-static int s_chan_moduser(struct client *, const char **, int);
-static int s_chan_modauto(struct client *, const char **, int);
-static int s_chan_listusers(struct client *, const char **, int);
-static int s_chan_suspend(struct client *, const char **, int);
-static int s_chan_unsuspend(struct client *, const char **, int);
-static int s_chan_clearmodes(struct client *, const char **, int);
-static int s_chan_clearops(struct client *, const char **, int);
-static int s_chan_clearallops(struct client *, const char **, int);
-static int s_chan_clearbans(struct client *, const char **, int);
-static int s_chan_invite(struct client *, const char **, int);
-static int s_chan_getkey(struct client *, const char **, int);
-static int s_chan_op(struct client *, const char **, int);
-static int s_chan_voice(struct client *, const char **, int);
-static int s_chan_addban(struct client *, const char **, int);
-static int s_chan_delban(struct client *, const char **, int);
-static int s_chan_modban(struct client *, const char **, int);
-static int s_chan_listbans(struct client *, const char **, int);
-static int s_chan_unban(struct client *, const char **, int);
-static int s_chan_info(struct client *, const char **, int);
+static int s_chan_chanregister(struct client *, struct lconn *, const char **, int);
+static int s_chan_chandrop(struct client *, struct lconn *, const char **, int);
+static int s_chan_chansuspend(struct client *, struct lconn *, const char **, int);
+static int s_chan_chanunsuspend(struct client *, struct lconn *, const char **, int);
+static int s_chan_register(struct client *, struct lconn *, const char **, int);
+static int s_chan_set(struct client *, struct lconn *, const char **, int);
+static int s_chan_adduser(struct client *, struct lconn *, const char **, int);
+static int s_chan_deluser(struct client *, struct lconn *, const char **, int);
+static int s_chan_moduser(struct client *, struct lconn *, const char **, int);
+static int s_chan_modauto(struct client *, struct lconn *, const char **, int);
+static int s_chan_listusers(struct client *, struct lconn *, const char **, int);
+static int s_chan_suspend(struct client *, struct lconn *, const char **, int);
+static int s_chan_unsuspend(struct client *, struct lconn *, const char **, int);
+static int s_chan_clearmodes(struct client *, struct lconn *, const char **, int);
+static int s_chan_clearops(struct client *, struct lconn *, const char **, int);
+static int s_chan_clearallops(struct client *, struct lconn *, const char **, int);
+static int s_chan_clearbans(struct client *, struct lconn *, const char **, int);
+static int s_chan_invite(struct client *, struct lconn *, const char **, int);
+static int s_chan_getkey(struct client *, struct lconn *, const char **, int);
+static int s_chan_op(struct client *, struct lconn *, const char **, int);
+static int s_chan_voice(struct client *, struct lconn *, const char **, int);
+static int s_chan_addban(struct client *, struct lconn *, const char **, int);
+static int s_chan_delban(struct client *, struct lconn *, const char **, int);
+static int s_chan_modban(struct client *, struct lconn *, const char **, int);
+static int s_chan_listbans(struct client *, struct lconn *, const char **, int);
+static int s_chan_unban(struct client *, struct lconn *, const char **, int);
+static int s_chan_info(struct client *, struct lconn *, const char **, int);
 
 static struct service_command chanserv_command[] =
 {
@@ -1255,7 +1255,7 @@ u_chan_chanunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 }
 
 static int
-s_chan_chanregister(struct client *client_p, const char *parv[], int parc)
+s_chan_chanregister(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct chan_reg *reg_p;
 	struct user_reg *ureg_p;
@@ -1286,7 +1286,7 @@ s_chan_chanregister(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_chan_chandrop(struct client *client_p, const char *parv[], int parc)
+s_chan_chandrop(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct chan_reg *reg_p;
 
@@ -1305,7 +1305,7 @@ s_chan_chandrop(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_chan_chansuspend(struct client *client_p, const char *parv[], int parc)
+s_chan_chansuspend(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct chan_reg *reg_p;
 
@@ -1333,7 +1333,7 @@ s_chan_chansuspend(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_chan_chanunsuspend(struct client *client_p, const char *parv[], int parc)
+s_chan_chanunsuspend(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct chan_reg *reg_p;
 
@@ -1362,7 +1362,7 @@ s_chan_chanunsuspend(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_chan_register(struct client *client_p, const char *parv[], int parc)
+s_chan_register(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
 	struct chmember *mptr;
@@ -1453,7 +1453,7 @@ s_chan_register(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_chan_adduser(struct client *client_p, const char *parv[], int parc)
+s_chan_adduser(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *ureg_p;
 	struct member_reg *mreg_p;
@@ -1495,7 +1495,7 @@ s_chan_adduser(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_chan_deluser(struct client *client_p, const char *parv[], int parc)
+s_chan_deluser(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct chan_reg *chreg_p;
 	struct user_reg *ureg_p;
@@ -1540,7 +1540,7 @@ s_chan_deluser(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_chan_moduser(struct client *client_p, const char *parv[], int parc)
+s_chan_moduser(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *ureg_p;
 	struct member_reg *mreg_p;
@@ -1598,7 +1598,7 @@ s_chan_moduser(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_chan_modauto(struct client *client_p, const char *parv[], int parc)
+s_chan_modauto(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *ureg_p;
 	struct member_reg *mreg_p;
@@ -1666,7 +1666,7 @@ s_chan_modauto(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_chan_listusers(struct client *client_p, const char *parv[], int parc)
+s_chan_listusers(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct member_reg *mreg_p;
 	struct member_reg *mreg_tp;
@@ -1696,7 +1696,7 @@ s_chan_listusers(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_chan_suspend(struct client *client_p, const char *parv[], int parc)
+s_chan_suspend(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *ureg_p;
 	struct member_reg *mreg_p;
@@ -1759,7 +1759,7 @@ s_chan_suspend(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_chan_unsuspend(struct client *client_p, const char *parv[], int parc)
+s_chan_unsuspend(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *ureg_p;
 	struct member_reg *mreg_p;
@@ -1808,7 +1808,7 @@ s_chan_unsuspend(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_chan_clearmodes(struct client *client_p, const char *parv[], int parc)
+s_chan_clearmodes(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct member_reg *mreg_p;
 	struct channel *chptr;
@@ -1875,7 +1875,7 @@ s_chan_clearops_loc(struct channel *chptr, struct chan_reg *chreg_p,
 }
 
 static int
-s_chan_clearops(struct client *client_p, const char *parv[], int parc)
+s_chan_clearops(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct member_reg *mreg_p;
 	struct channel *chptr;
@@ -1895,7 +1895,7 @@ s_chan_clearops(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_chan_clearallops(struct client *client_p, const char *parv[], int parc)
+s_chan_clearallops(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct member_reg *mreg_p;
 	struct channel *chptr;
@@ -1915,7 +1915,7 @@ s_chan_clearallops(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_chan_clearbans(struct client *client_p, const char *parv[], int parc)
+s_chan_clearbans(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
 	struct member_reg *mreg_p;
@@ -1964,7 +1964,7 @@ s_chan_clearbans(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_chan_set(struct client *client_p, const char *parv[], int parc)
+s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct chan_reg *chreg_p;
 	struct member_reg *mreg_p;
@@ -2301,7 +2301,7 @@ s_chan_set(struct client *client_p, const char *parv[], int parc)
 #if 0
 /* This will only work if chanserv is on the channel itself.. */
 static int
-s_chan_topic(struct client *client_p, const char *parv[], int parc)
+s_chan_topic(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	static char buf[BUFSIZE];
 	struct member_reg *reg_p;
@@ -2332,7 +2332,7 @@ s_chan_topic(struct client *client_p, const char *parv[], int parc)
 #endif
 
 static int
-s_chan_op(struct client *client_p, const char *parv[], int parc)
+s_chan_op(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct member_reg *reg_p;
 	struct channel *chptr;
@@ -2374,7 +2374,7 @@ s_chan_op(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_chan_voice(struct client *client_p, const char *parv[], int parc)
+s_chan_voice(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct member_reg *reg_p;
 	struct channel *chptr;
@@ -2407,7 +2407,7 @@ s_chan_voice(struct client *client_p, const char *parv[], int parc)
 
 
 static int
-s_chan_invite(struct client *client_p, const char *parv[], int parc)
+s_chan_invite(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct member_reg *reg_p;
 	struct channel *chptr;
@@ -2444,7 +2444,7 @@ s_chan_invite(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_chan_getkey(struct client *client_p, const char *parv[], int parc)
+s_chan_getkey(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct member_reg *mreg_p;
 	struct channel *chptr;
@@ -2483,7 +2483,7 @@ s_chan_getkey(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_chan_addban(struct client *client_p, const char *parv[], int parc)
+s_chan_addban(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	static char reason[BUFSIZE];
 	struct channel *chptr;
@@ -2653,7 +2653,7 @@ s_chan_addban(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_chan_delban(struct client *client_p, const char *parv[], int parc)
+s_chan_delban(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
 	struct member_reg *mreg_p;
@@ -2719,7 +2719,7 @@ s_chan_delban(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_chan_modban(struct client *client_p, const char *parv[], int parc)
+s_chan_modban(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct member_reg *mreg_p;
 	struct ban_reg *banreg_p;
@@ -2772,7 +2772,7 @@ s_chan_modban(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_chan_listbans(struct client *client_p, const char *parv[], int parc)
+s_chan_listbans(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct member_reg *mreg_p;
 	struct ban_reg *banreg_p;
@@ -2811,7 +2811,7 @@ s_chan_listbans(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_chan_unban(struct client *client_p, const char *parv[], int parc)
+s_chan_unban(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
 	struct member_reg *mreg_p;
@@ -2867,7 +2867,7 @@ s_chan_unban(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_chan_info(struct client *client_p, const char *parv[], int parc)
+s_chan_info(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct chan_reg *reg_p;
 	struct member_reg *mreg_p;

@@ -25,10 +25,10 @@ static struct client *operbot_p;
 static void u_operbot_objoin(struct client *, struct lconn *, const char **, int);
 static void u_operbot_obpart(struct client *, struct lconn *, const char **, int);
 
-static int s_operbot_objoin(struct client *, const char **, int);
-static int s_operbot_obpart(struct client *, const char **, int);
-static int s_operbot_invite(struct client *, const char **, int);
-static int s_operbot_op(struct client *, const char **, int);
+static int s_operbot_objoin(struct client *, struct lconn *, const char **, int);
+static int s_operbot_obpart(struct client *, struct lconn *, const char **, int);
+static int s_operbot_invite(struct client *, struct lconn *, const char **, int);
+static int s_operbot_op(struct client *, struct lconn *, const char **, int);
 
 static struct service_command operbot_command[] =
 {
@@ -105,7 +105,7 @@ u_operbot_obpart(struct client *client_p, struct lconn *conn_p, const char *parv
 }
 
 static int
-s_operbot_objoin(struct client *client_p, const char *parv[], int parc)
+s_operbot_objoin(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
 
@@ -130,7 +130,7 @@ s_operbot_objoin(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_operbot_obpart(struct client *client_p, const char *parv[], int parc)
+s_operbot_obpart(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	if(part_service(operbot_p, parv[0]))
 	{
@@ -150,7 +150,7 @@ s_operbot_obpart(struct client *client_p, const char *parv[], int parc)
 
 
 static int
-s_operbot_invite(struct client *client_p, const char *parv[], int parc)
+s_operbot_invite(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
 
@@ -175,7 +175,7 @@ s_operbot_invite(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_operbot_op(struct client *client_p, const char *parv[], int parc)
+s_operbot_op(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
 	struct chmember *mptr;

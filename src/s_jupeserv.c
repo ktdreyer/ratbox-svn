@@ -41,11 +41,11 @@ static struct client *jupeserv_p;
 static void u_jupeserv_jupe(struct client *, struct lconn *, const char **, int);
 static void u_jupeserv_unjupe(struct client *, struct lconn *, const char **, int);
 
-static int s_jupeserv_jupe(struct client *, const char **, int);
-static int s_jupeserv_unjupe(struct client *, const char **, int);
-static int s_jupeserv_calljupe(struct client *, const char **, int);
-static int s_jupeserv_callunjupe(struct client *, const char **, int);
-static int s_jupeserv_pending(struct client *, const char **, int);
+static int s_jupeserv_jupe(struct client *, struct lconn *, const char **, int);
+static int s_jupeserv_unjupe(struct client *, struct lconn *, const char **, int);
+static int s_jupeserv_calljupe(struct client *, struct lconn *, const char **, int);
+static int s_jupeserv_callunjupe(struct client *, struct lconn *, const char **, int);
+static int s_jupeserv_pending(struct client *, struct lconn *, const char **, int);
 
 static struct service_command jupeserv_command[] =
 {
@@ -307,7 +307,7 @@ u_jupeserv_unjupe(struct client *client_p, struct lconn *conn_p, const char *par
 }
 
 static int
-s_jupeserv_jupe(struct client *client_p, const char *parv[], int parc)
+s_jupeserv_jupe(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct server_jupe *jupe_p;
 	char *reason;
@@ -363,7 +363,7 @@ s_jupeserv_jupe(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_jupeserv_unjupe(struct client *client_p, const char *parv[], int parc)
+s_jupeserv_unjupe(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct server_jupe *ajupe_p, *jupe_p;
 
@@ -398,7 +398,7 @@ s_jupeserv_unjupe(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_jupeserv_calljupe(struct client *client_p, const char *parv[], int parc)
+s_jupeserv_calljupe(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct server_jupe *jupe_p;
 	dlink_node *ptr;
@@ -484,7 +484,7 @@ s_jupeserv_calljupe(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_jupeserv_callunjupe(struct client *client_p, const char *parv[], int parc)
+s_jupeserv_callunjupe(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct server_jupe *ajupe_p, *jupe_p;
 
@@ -542,7 +542,7 @@ s_jupeserv_callunjupe(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_jupeserv_pending(struct client *client_p, const char *parv[], int parc)
+s_jupeserv_pending(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct server_jupe *jupe_p;
 	dlink_node *ptr;

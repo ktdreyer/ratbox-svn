@@ -27,10 +27,10 @@ static void u_oper_osjoin(struct client *, struct lconn *, const char **, int);
 static void u_oper_ospart(struct client *, struct lconn *, const char **, int);
 static void u_oper_omode(struct client *, struct lconn *, const char **, int);
 
-static int s_oper_takeover(struct client *, const char **, int);
-static int s_oper_osjoin(struct client *, const char **, int);
-static int s_oper_ospart(struct client *, const char **, int);
-static int s_oper_omode(struct client *, const char **, int);
+static int s_oper_takeover(struct client *, struct lconn *, const char **, int);
+static int s_oper_osjoin(struct client *, struct lconn *, const char **, int);
+static int s_oper_ospart(struct client *, struct lconn *, const char **, int);
+static int s_oper_omode(struct client *, struct lconn *, const char **, int);
 
 static struct service_command operserv_command[] =
 {
@@ -196,7 +196,7 @@ u_oper_takeover(struct client *client_p, struct lconn *conn_p, const char *parv[
 }
 
 static int
-s_oper_takeover(struct client *client_p, const char *parv[], int parc)
+s_oper_takeover(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
 
@@ -283,7 +283,7 @@ u_oper_ospart(struct client *client_p, struct lconn *conn_p, const char *parv[],
 }
 
 static int
-s_oper_osjoin(struct client *client_p, const char *parv[], int parc)
+s_oper_osjoin(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
 
@@ -309,7 +309,7 @@ s_oper_osjoin(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_oper_ospart(struct client *client_p, const char *parv[], int parc)
+s_oper_ospart(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	if(part_service(operserv_p, parv[0]))
 	{
@@ -345,7 +345,7 @@ u_oper_omode(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 }
 
 static int
-s_oper_omode(struct client *client_p, const char *parv[], int parc)
+s_oper_omode(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
 

@@ -34,15 +34,15 @@ static void u_user_userdrop(struct client *, struct lconn *, const char **, int)
 static void u_user_usersuspend(struct client *, struct lconn *, const char **, int);
 static void u_user_userunsuspend(struct client *, struct lconn *, const char **, int);
 
-static int s_user_userregister(struct client *, const char **, int);
-static int s_user_userdrop(struct client *, const char **, int);
-static int s_user_usersuspend(struct client *, const char **, int);
-static int s_user_userunsuspend(struct client *, const char **, int);
-static int s_user_register(struct client *, const char **, int);
-static int s_user_login(struct client *, const char **, int);
-static int s_user_logout(struct client *, const char **, int);
-static int s_user_set(struct client *, const char **, int);
-static int s_user_info(struct client *, const char **, int);
+static int s_user_userregister(struct client *, struct lconn *, const char **, int);
+static int s_user_userdrop(struct client *, struct lconn *, const char **, int);
+static int s_user_usersuspend(struct client *, struct lconn *, const char **, int);
+static int s_user_userunsuspend(struct client *, struct lconn *, const char **, int);
+static int s_user_register(struct client *, struct lconn *, const char **, int);
+static int s_user_login(struct client *, struct lconn *, const char **, int);
+static int s_user_logout(struct client *, struct lconn *, const char **, int);
+static int s_user_set(struct client *, struct lconn *, const char **, int);
+static int s_user_info(struct client *, struct lconn *, const char **, int);
 
 static struct service_command userserv_command[] =
 {
@@ -413,7 +413,7 @@ u_user_userunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 }
 
 static int
-s_user_userregister(struct client *client_p, const char *parv[], int parc)
+s_user_userregister(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *reg_p;
 	const char *password;
@@ -460,7 +460,7 @@ s_user_userregister(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_user_userdrop(struct client *client_p, const char *parv[], int parc)
+s_user_userdrop(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *ureg_p;
 
@@ -480,7 +480,7 @@ s_user_userdrop(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_user_usersuspend(struct client *client_p, const char *parv[], int parc)
+s_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *reg_p;
 
@@ -512,7 +512,7 @@ s_user_usersuspend(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_user_userunsuspend(struct client *client_p, const char *parv[], int parc)
+s_user_userunsuspend(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *reg_p;
 
@@ -567,7 +567,7 @@ valid_email(const char *email)
 }
 
 static int
-s_user_register(struct client *client_p, const char *parv[], int parc)
+s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *reg_p;
 	const char *password;
@@ -711,7 +711,7 @@ s_user_register(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_user_login(struct client *client_p, const char *parv[], int parc)
+s_user_login(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *reg_p;
 	const char *password;
@@ -766,7 +766,7 @@ s_user_login(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_user_logout(struct client *client_p, const char *parv[], int parc)
+s_user_logout(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	dlink_find_destroy(client_p, &client_p->user->user_reg->users);
 	client_p->user->user_reg = NULL;
@@ -778,7 +778,7 @@ s_user_logout(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_user_set(struct client *client_p, const char *parv[], int parc)
+s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *ureg_p;
 	const char *arg;
@@ -898,7 +898,7 @@ s_user_set(struct client *client_p, const char *parv[], int parc)
 }
 
 static int
-s_user_info(struct client *client_p, const char *parv[], int parc)
+s_user_info(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *ureg_p;
 
