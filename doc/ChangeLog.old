@@ -1,3 +1,7 @@
+*** 20010111_11 by a1kmm
+- We now support %nu and %0nu (sort of, they are equivalent) in sprintf_irc.
+
+
 *** 20010111_10 by davidt
 report errors freeing localClient too
 
