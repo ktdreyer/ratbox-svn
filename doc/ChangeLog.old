@@ -1,3 +1,19 @@
+leeh        2002/04/29 19:05:08 EDT	(20020430_0)
+
+  Modified files:
+    doc                  example.conf example.conf.efnet 
+  Log:
+  - added a warning that example.conf is not for efnet.
+  - added a warning that example.conf.efnet is not for people other than
+    efnet.
+  - removed efnet references in example.conf
+  
+  Revision  Changes    Path
+  7.155     +17 -10    ircd-hybrid-7/doc/example.conf
+  7.8       +8 -2      ircd-hybrid-7/doc/example.conf.efnet
+
+
+
 leeh        2002/04/29 18:30:25 EDT	(20020429_3)
 
   Modified files:
