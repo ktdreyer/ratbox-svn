@@ -1,3 +1,24 @@
+leeh        2003/06/30 16:57:10 EDT	(20030630_7)
+
+  Modified files:
+    include              channel.h 
+    modules              m_knock.c 
+    modules/core         m_message.c m_sjoin.c 
+    src                  channel.c s_serv.c 
+  Log:
+  - cleanups to channel.{h|c}, made some things static, removed some
+    functions, merged some functions.
+  
+  Revision  Changes    Path
+  7.143     +71 -103   ircd-ratbox/include/channel.h
+  1.134     +4 -4      ircd-ratbox/modules/core/m_message.c
+  1.178     +8 -8      ircd-ratbox/modules/core/m_sjoin.c
+  1.78      +2 -2      ircd-ratbox/modules/m_knock.c
+  7.384     +234 -254  ircd-ratbox/src/channel.c
+  7.336     +1 -1      ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2003/06/30 15:18:58 EDT	(20030630_6)
 
   Modified files:
