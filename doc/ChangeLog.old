@@ -1,3 +1,9 @@
+*** 19990914_1 by wnder
+IAuth updates:
+ * mtree.c is (hopefully) approaching it's final stages - much
+   more bulletproof now.
+
+
 *** 19990913_1 by wnder
 IAuth updates:
  * added a new mtree module - handles I: and K: lines. Please
