@@ -1,3 +1,23 @@
+leeh        2005/02/12 21:17:52 EST	(20050213_0)
+
+  Modified files:
+    include              patricia.h s_newconf.h 
+    modules/core         m_message.c 
+    src                  patricia.c s_newconf.c s_user.c 
+  Log:
+  - add in the patricia for tracking who fills up targets, give them a reduced
+    count on connect
+  
+  Revision  Changes    Path
+  7.20      +1 -1      ircd-ratbox/include/patricia.h
+  7.45      +17 -0     ircd-ratbox/include/s_newconf.h
+  1.160     +43 -4     ircd-ratbox/modules/core/m_message.c
+  7.29      +1 -1      ircd-ratbox/src/patricia.c
+  7.65      +36 -0     ircd-ratbox/src/s_newconf.c
+  7.340     +4 -0      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2005/02/12 18:35:10 EST	(20050212_0)
 
   Modified files:
