@@ -1,3 +1,8 @@
+*** 20011111_10 by ejb
+- added help/ directory; added a few sample help files, this will need
+  to be completed before release.
+
+
 *** 20011111_9 by ejb
 Directory /cvsroot/ircd-hybrid-7/help/users added to the repository
 
