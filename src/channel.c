@@ -701,6 +701,11 @@ void channel_modes(struct Channel *chptr, struct Client *cptr,
  * 		- char flag flagging type of mode i.e. 'b' 'e' etc.
  * output	- NONE
  * side effects - only used to send +b and +e now, +d/+a/+I too.
+ *
+ * WARNING	- if MAXMODEPARAMS is increased over 4, this code
+ *		  breaks due to hard coded 4 para's HOWEVER
+ *		  the RFC constrains us to a max of 4 anyway, due
+ *		  to max buffer size of 512 bytes.
  */
 static  void    send_mode_list(struct Client *cptr,
                                char *chname,
@@ -717,7 +722,7 @@ static  void    send_mode_list(struct Client *cptr,
   *cp++ = '+';
   *cp   = '\0';
 
-  para[0] = para[1] = para[2] = para[3] = "";
+  para[0] = para[1] = para[2] = "";
 
   for (lp = top; lp; lp = lp->next)
     {
@@ -727,21 +732,21 @@ static  void    send_mode_list(struct Client *cptr,
 
       if (count >= MAXMODEPARAMS)
         {
-          sendto_one(cptr, ":%s MODE %s %s %s %s %s %s",
+          sendto_one(cptr, ":%s MODE %s %s %s %s %s",
                      me.name, chname, modebuf,
-		     para[0], para[1], para[2], para[3]);
+		     para[0], para[1], para[2]);
           cp = modebuf;
           *cp++ = '+';
           *cp = '\0';
-	  para[0] = para[1] = para[2] = para[3] = "";
+	  para[0] = para[1] = para[2] = "";
 	  count = 0;
         }
     }
 
   if(count != 0)
-    sendto_one(cptr, ":%s MODE %s %s %s %s %s %s",
+    sendto_one(cptr, ":%s MODE %s %s %s %s %s",
 	       me.name, chname, modebuf,
-	       para[0], para[1], para[2], para[3]);
+	       para[0], para[1], para[2]);
 }
 
 /*

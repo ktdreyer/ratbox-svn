@@ -621,14 +621,24 @@ void remove_our_modes( int hide_or_not,
 		       struct Channel *chptr, struct Channel *top_chptr,
 		       struct Client *sptr)
 {
-  int what;
-  int pargs;
+  int count;
   struct SLink *l;
-  char *para[4];
+  char *para[MAXMODEPARAMS];
+  char modebuf[MODEBUFLEN];
+  char *chname;
 
-  para[0] = para[1] = para[2] = para[3] = "";
+  para[0] = para[1] = para[2] = "";
 
-  pargs = what = 0;
+  count = 0;
+
+  mbuf = modebuf;
+  *mbuf++ = '-';
+  *mbuf   = '\0';
+
+  if(IsVchan(chptr) && top_chptr)
+    chname = top_chptr->chname;
+  else
+    chname = chptr->chname;
 
   for (l = chptr->members; l && l->value.cptr; l = l->next)
     {
@@ -636,102 +646,64 @@ void remove_our_modes( int hide_or_not,
 	{
 	  if( chptr->opcount )
 	    chptr->opcount--;
-	  
-	  if (what != -1)
-	    {
-	      *mbuf++ = '-';
-	      what = -1;
-	    }
 
+	  para[count++] = l->value.cptr->name;
 	  *mbuf++ = 'o';
-	  para[pargs] = l->value.cptr->name;
+	  *mbuf   = '\0';
 
-	  pargs++;
-	  if (pargs >= MAXMODEPARAMS)
+	  if (count >= MAXMODEPARAMS)
 	    {
 	      *mbuf = '\0';
-	      if(IsVchan(chptr) && top_chptr)
-		{
-		  sendto_channel_butserv(hide_or_not, chptr, sptr,
-					 ":%s MODE %s %s %s %s %s %s",
-					 sptr->name,
-					 top_chptr->chname,
-					 modebuf,
-					 para[0], para[1], para[2], para[3]);
-		}
-	      else
-		{
-		  sendto_channel_butserv(hide_or_not, chptr, sptr,
-					 ":%s MODE %s %s %s %s %s %s",
-					 sptr->name,
-					 chptr->chname, modebuf,
-					 para[0], para[1], para[2], para[3]);
-		}
+	      sendto_channel_butserv(hide_or_not, chptr, sptr,
+				     ":%s MODE %s %s %s %s %s",
+				     sptr->name,
+				     chname,
+				     modebuf,
+				     para[0], para[1], para[2]);
 	      mbuf = modebuf;
-	      *mbuf = '\0';
-	      para[0] = para[1] = para[2] = para[3] = "";
-	      pargs = what = 0;
+	      *mbuf++ = '-';
+	      *mbuf   = '\0';
+	      para[0] = para[1] = para[2] = "";
+	      count = 0;
 	    }
 	  l->flags &= ~MODE_CHANOP;
 	}
 
+      mbuf = modebuf;
+      *mbuf++ = '-';
+      *mbuf = '\0';
+
       if (l->flags & MODE_VOICE)
 	{
-	  if (what != -1)
-	    {
-	      *mbuf++ = '-';
-	      what = -1;
-	    }
+	  para[count++] = l->value.cptr->name;
 	  *mbuf++ = 'v';
-	  para[pargs] = l->value.cptr->name;
-	  pargs++;
-	  if (pargs >= MAXMODEPARAMS)
+	  *mbuf = '\0';
+
+	  if (count >= MAXMODEPARAMS)
 	    {
-	      *mbuf = '\0';
-	      if(IsVchan(chptr) && top_chptr)
-		{
-		  sendto_channel_butserv(hide_or_not, chptr, sptr,
-					 ":%s MODE %s %s %s %s %s %s",
-					 sptr->name,
-					 top_chptr->chname,
-					 modebuf,
-					 para[0], para[1], para[2], para[3]);
-		}
-	      else
-		{
-		  sendto_channel_butserv(hide_or_not, chptr, sptr,
-					 ":%s MODE %s %s %s %s %s %s",
-					 sptr->name,
-					 chptr->chname, modebuf,
-					 para[0], para[1], para[2], para[3]);
-		}
+	      sendto_channel_butserv(hide_or_not, chptr, sptr,
+				     ":%s MODE %s %s %s %s %s",
+				     sptr->name,
+				     chname,
+				     modebuf,
+				     para[0], para[1], para[2]);
 	      mbuf = modebuf;
-	      *mbuf = '\0';
-	      para[0] = para[1] = para[2] = para[3] = "";
-	      pargs = what = 0;
+	      *mbuf++ = '-';
+	      *mbuf   = '\0';
+	      para[0] = para[1] = para[2] = "";
+	      count = 0;
 	    }
 	  l->flags &= ~MODE_VOICE;
 	}
     }
 
-  if (mbuf != modebuf)
+  if(count != 0)
     {
-      *mbuf = '\0';
-      if(IsVchan(chptr) && top_chptr)
-	{
-	  sendto_channel_butserv(hide_or_not, chptr, sptr,
-				 ":%s MODE %s %s %s %s %s %s",
-				 sptr->name,
-				 top_chptr->chname, modebuf,
-				 para[0], para[1], para[2], para[3] );
-	}
-      else
-	{
-	  sendto_channel_butserv(hide_or_not, chptr, sptr,
-				 ":%s MODE %s %s %s %s %s %s",
-				 sptr->name,
-				 chptr->chname, modebuf,
-				 para[0], para[1], para[2], para[3] );
-	}
+      sendto_channel_butserv(hide_or_not, chptr, sptr,
+			     ":%s MODE %s %s %s %s %s",
+			     sptr->name,
+			     chname,
+			     modebuf,
+			     para[0], para[1], para[2]);
     }
 }

@@ -90,7 +90,55 @@ void cleanup_channels(void *);
 #define ChannelExists(n)        (hash_find_channel(n, NullChn) != NullChn)
 
 /* Maximum mode changes allowed per client, per server is different */
-#define MAXMODEPARAMS   4
+/*
+  arghhh ONE MORE TIME explaining this, read carefully...
+
+From rfc1459.txt
+
+   IRC messages are always lines of characters terminated with a CR-LF
+   (Carriage Return - Line Feed) pair, and these messages shall not
+   exceed 512 characters in length, counting all characters including
+   the trailing CR-LF. Thus, there are 510 characters maximum allowed
+   for the command and its parameters.  There is no provision for
+   continuation message lines.  See section 7 for more details about
+   current implementations.
+
+   Now, from ircd_defs.h
+
+#define USERLEN         10
+#define HOSTLEN         63
+#define NICKLEN         9
+#define CHANNELLEN      200
+
+so
+:nick #channel_name +bbb ban1 ban2 ban3 ban4
+
+Where nick == 10 chars
+channel_name == 200
+each ban is of form "nick!user@host"
+thats 10 + 10 + 63 folks
+
+thats a total of 10 + 200 + (4 * 73)
+10 + 200 + 292
+Thats 502
+
+Now add "+bbbb" Thats 5 chars
+now thats 507 
+
+add 6 spaces
+thats 513
+
+  We could walk over the end of the buffer..... It would probably take
+a kiddie trying to core the server to do it, but still ;)
+
+  Yes, its keen having +4 but it slows us down to strlen() to check
+that the buffer isn't being overflowed. I'd rather be comfortable at
+3, and gain CPU speed at the expensive of more mode sends.
+
+-db
+*/
+
+#define MAXMODEPARAMS   3
 
 extern struct SLink    *find_user_link (struct SLink *, struct Client *);
 extern struct SLink*   find_channel_link(struct SLink *,
