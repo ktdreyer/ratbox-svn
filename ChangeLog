@@ -1,3 +1,15 @@
+androsyn    2002/08/20 23:41:23 EDT	(20020821_9)
+
+  Modified files:
+    src                  channel.c 
+  Log:
+  Fix another typo
+  
+  Revision  Changes    Path
+  7.342     +1 -1      ircd-ratbox/src/channel.c
+
+
+
 androsyn    2002/08/20 23:40:33 EDT	(20020821_8)
 
   Modified files:
