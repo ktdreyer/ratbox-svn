@@ -519,7 +519,7 @@ static int init_finish(adns_state ads) {
   return 0;
 
  x_closeudp:
-  close(ads->udpsocket);
+  comm_close(ads->udpsocket);
  x_free:
   free(ads);
   return r;
@@ -606,8 +606,8 @@ void adns_finish(adns_state ads) {
     else if (ads->output.head) adns_cancel(ads->output.head);
     else break;
   }
-  close(ads->udpsocket);
-  if (ads->tcpsocket >= 0) close(ads->tcpsocket);
+  comm_close(ads->udpsocket);
+  if (ads->tcpsocket >= 0) comm_close(ads->tcpsocket);
   adns__vbuf_free(&ads->tcpsend);
   adns__vbuf_free(&ads->tcprecv);
   freesearchlist(ads);
