@@ -1,3 +1,23 @@
+ejb         2002/08/26 14:59:37 EDT	(20020826_7)
+
+  Modified files:        (Branch: parser-devel)
+    .                    configure 
+    autoconf             configure.in 
+    include              newconf.h 
+    src                  ircd_lexer.l ircd_parser.y 
+  Log:
+  - support variables in parser (start of new parser.)
+    seems to work mostly.
+  
+  Revision   Changes      Path
+  7.150.2.1  +2 -2        ircd-ratbox/autoconf/configure.in
+  7.154.2.1  +3088 -7085  ircd-ratbox/configure
+  7.12.2.1   +2 -0        ircd-ratbox/include/newconf.h
+  1.151.2.1  +6 -0        ircd-ratbox/src/ircd_lexer.l
+  1.264.2.1  +130 -3      ircd-ratbox/src/ircd_parser.y
+
+
+
 androsyn    2002/08/25 22:18:02 EDT	(20020826_6)
 
   Modified files:
