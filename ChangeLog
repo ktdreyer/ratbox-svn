@@ -1,3 +1,32 @@
+leeh        2005/01/04 13:43:24 EST	(20050104_3)
+
+  Modified files:
+    doc                  example.conf 
+    include              conf.h 
+    src                  conf.c newconf.c rserv.c s_chanserv.c 
+                         s_jupeserv.c s_operbot.c s_userserv.c 
+  Added files:
+    doc                  operguide.txt 
+  Log:
+  - update some comments in example.conf
+  - rename the operator flags so that theyre more intuitive
+  - rename oper {}; to operator {}; to be consistent with ircd-ratbox
+  - stop rebuild_params() cutting at REASONLEN
+  
+  Revision  Changes    Path
+  1.22      +24 -17    rserv/doc/example.conf
+  1.1       +21 -0     rserv/doc/operguide.txt (new)
+  1.29      +15 -17    rserv/include/conf.h
+  1.31      +7 -6      rserv/src/conf.c
+  1.32      +10 -9     rserv/src/newconf.c
+  1.41      +2 -7      rserv/src/rserv.c
+  1.27      +8 -8      rserv/src/s_chanserv.c
+  1.18      +16 -7     rserv/src/s_jupeserv.c
+  1.19      +4 -4      rserv/src/s_operbot.c
+  1.22      +8 -8      rserv/src/s_userserv.c
+
+
+
 leeh        2005/01/04 13:36:54 EST	(20050104_2)
 
   Modified files:
