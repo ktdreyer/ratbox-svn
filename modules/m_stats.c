@@ -70,7 +70,7 @@ mapi_hlist_av1 stats_hlist[] = {
 
 DECLARE_MODULE_AV1(stats, NULL, NULL, stats_clist, stats_hlist, NULL, "$Revision$");
 
-const char *Lformat = ":%s %d %s %s %u %u %u %u %u :%u %u %s";
+const char *Lformat = "%s %u %u %u %u %u :%u %u %s";
 
 static const char *parse_stats_args (int, const char **, int *, int *);
 
