@@ -1,3 +1,8 @@
+*** 20011010_1 by davidt
+- Slightly modified version of poptix's patch, just check len > 3 before
+  testing [len-3], and cache the result of strlen.
+
+
 *** 20011009_1 by androsyn
 Gee..I broke another beta.  I forgot to remove the rest of the strtok_r()
 crap. oops
