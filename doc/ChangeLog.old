@@ -1,3 +1,7 @@
+*** 20010117_13 by fl_
+- shouldnt really leave debug code in when I commit stuff..
+
+
 *** 20010117_12 by fl_
 - removed the last occurences of sendto_local_opers, replaced with
   sendto_realops_flags_opers().. ta hwy ;)
