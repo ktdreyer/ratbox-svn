@@ -1,3 +1,15 @@
+db          2001/12/26 21:36:33 EST	(20011227_0)
+
+  Modified files:
+    src                  ircd_parser.y 
+  Log:
+  - If there is no crypt, don't look for crypt variables..
+  
+  Revision  Changes    Path
+  1.228     +4 -0      ircd-hybrid-7/src/ircd_parser.y
+
+
+
 androsyn    2001/12/25 01:53:44 EST	(20011225_2)
 
   Modified files:
