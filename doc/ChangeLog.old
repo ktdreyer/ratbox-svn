@@ -1,3 +1,7 @@
+*** 20010109_7 by toot
+removed old NULL_POINTER_NOT_ZERO #defines
+
+
 *** 20010109_6 by db
 - removed unneeded space in parse.c, do_numeric() this caused
   remote numerics to show up with an obvious extra space.
