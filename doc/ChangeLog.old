@@ -1,3 +1,9 @@
+*** 20000102_4 by db
+- First working Lazy Links implementation
+  still needs debugging/testing etc.
+
+
+
 *** 20000102_3 by db
 - bug reported by Colten Edwards in m_userhost.c
 
