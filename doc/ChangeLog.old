@@ -1,3 +1,8 @@
+*** 20001209_17 by db
+- oops, the missing .depend files
+
+
+
 *** 20001209_16 by db
 - rewrote sendto_realops in doing so I decided to combine sendto_realops_flags
   and sendto_realops()... I could have macro'ed sendto_realops() to
