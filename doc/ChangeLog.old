@@ -1,3 +1,8 @@
+*** 20010608_5 by db
+- renamed KParseFile to parse_k_file DParseFile to parse_d_file
+
+
+
 *** 20010608_4 by db
 - valid_comment() should only toss away " for now... could escape it in future
 
