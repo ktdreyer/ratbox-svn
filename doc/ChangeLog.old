@@ -1,3 +1,9 @@
+*** 20010126_14 by db
+- rewrote m_kill.c to use kill_client() in send.c noticed I had
+  the tests backwards in kill_client()
+
+
+
 *** 20010126_13 by wcampbel
 Document the requirements
 Update the TODO list
