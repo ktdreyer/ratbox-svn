@@ -1,3 +1,9 @@
+*** 20010406_1 by a1kmm
+- Started the long process of reviewing and tidying up/documenting the adns code. Unfortunately, there is still
+  much more to do. By doing this, hopefully we will make it easier to find and fix some of those adns cores
+  that keep happening.
+
+
 *** 20010405_2 by androsyn
 Added a few asserts to check for NULL callbacks. I'm still not sure why this
 is happening though.
