@@ -684,14 +684,11 @@ int main(int argc, char *argv[])
 
   log(L_NOTICE, "Server Ready");
 
-/* LazyLinks */
-  if(!ConfigFileEntry.hub)
-    eventAdd("cleanup_channels", cleanup_channels, NULL,
-      CLEANUP_CHANNELS_TIME, 0 );
+  eventAdd("cleanup_channels", cleanup_channels, NULL,
+	   CLEANUP_CHANNELS_TIME, 0 );
 
   /* Setup the timeout check. I'll shift it later :)  -- adrian */
   eventAdd("comm_checktimeouts", comm_checktimeouts, NULL, 1, 0);
-
 
   ServerRunning = 1;
   while (ServerRunning)

@@ -410,7 +410,6 @@ struct LocalUser
  */
 #define IsPerson(x)             (IsClient(x) && (x)->user)
 #define DoAccess(x)             ((x)->flags & FLAGS_CHKACCESS)
-#define IsLocal(x)              ((x)->flags & FLAGS_LOCAL)
 #define IsDead(x)               ((x)->flags & FLAGS_DEADSOCKET)
 #define SetAccess(x)            ((x)->flags |= FLAGS_CHKACCESS)
 #define NoNewLine(x)            ((x)->flags & FLAGS_NONL)

@@ -18,8 +18,6 @@
 
 Adrian's TODO list
 
-* MAKE SURE DIANE KILLS THE REFCOUNT IN THE DLINK CODE!!!!
-
 * PLEASE redo all dlink_list management with the stuff in src/tools.c
 
 * In the server outbound connection code, make the sendto_realops()
@@ -54,6 +52,8 @@ Adrian's TODO list
   connect. If people don't like this, they can (should!) be running
   a namecache locally!
 
+db-->>ummm aconf->ipnum is used for IP based klines only, not for DNS
+
 * make the reserved FD limit run-time tuneable, esp from comm_open()
 
 * What the _FUCK_ is IsLocal() and FLAGS_LOCAL and why the *smeg* is it
@@ -79,6 +79,11 @@ thats INADDR_NONE. Find, fix.
   each channel a user is on, a flag needs to be set tracking which list
   they're on so we don't have to search the lists when we want to change
   their status. This could become a slow-CPU sticking point.
+
+db-->> Actually, the old code was just as slow at doing that, since
+    it was a link list of SLink's with a flag denoting whether client
+    on channel was an op or not... With a channel of 100 clients and 
+    thats 100 link SLink's
 
 Done things:
 

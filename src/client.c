@@ -104,8 +104,10 @@ void init_client_heap(void)
 
   /*
    * start off the check ping event ..  -- adrian
+   *
+   * Every 30 seconds is plenty -- db
    */
-  eventAdd("check_pings", check_pings, NULL, 1, 0);
+  eventAdd("check_pings", check_pings, NULL, 30, 0);
 }
 
 /*
@@ -401,7 +403,7 @@ check_pings(void *notused)
   exit_marked_for_death_clients(dying_clients);
 
   /* Reschedule a new address */
-  eventAdd("check_pings", check_pings, NULL, 1, 0);
+  eventAdd("check_pings", check_pings, NULL, 30, 0);
 }
 
 

@@ -1569,14 +1569,14 @@ static void initconf(FBFILE* file)
       if ((p = strchr(line, '\n')))
         *p = '\0';
 
-      if ((p = strchr(line, '\r')))
-        *p = '\0';
-
       if (!*line || line[0] == '#')
         continue;
 
       if(line[1] != ':')
 	{
+	  if(p == NULL)
+	    p = strchr(line, '\0');
+
 	  while (p != line)
 	    {
 	      fbungetc(*p,file);
@@ -1624,6 +1624,7 @@ static void initconf(FBFILE* file)
 	      else
 		{
 		  initconf(includeFile);
+		  fbclose(includeFile);
 		  continue;
 		}
 	    }
