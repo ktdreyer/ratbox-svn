@@ -108,14 +108,17 @@ esac
 
 if test "$ac_cv_c_compiler_gnu" = yes; then
 	AC_MSG_CHECKING(if $CC is Apple GCC)
-	
-	if expr "`$CC -v 2>&1 | tail -1`" : Apple >/dev/null; then
-		AppleGCC=yes
-	else
-		AppleGCC=no
-	fi
 
-	AC_MSG_RESULT($AppleGCC)
+	case `$CC -v 2>&1 | tail -1` in
+	*Apple*)
+		AC_MSG_RESULT(yes)
+		AppleGCC=yes
+	;;
+	*)
+		AC_MSG_RESULT(no)
+		AppleGCC=no
+	;;
+	esac
 
 	IRC_CFLAGS="$IRC_CFLAGS -O0 -Wall"
 fi

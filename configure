@@ -2376,14 +2376,18 @@ if test "$ac_cv_c_compiler_gnu" = yes; then
 	echo "$as_me:$LINENO: checking if $CC is Apple GCC" >&5
 echo $ECHO_N "checking if $CC is Apple GCC... $ECHO_C" >&6
 
-	if expr "`$CC -v 2>&1 | tail -1`" : Apple >/dev/null; then
+	case `$CC -v 2>&1 | tail -1` in
+	*Apple*)
+		echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
 		AppleGCC=yes
-	else
+	;;
+	*)
+		echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
 		AppleGCC=no
-	fi
-
-	echo "$as_me:$LINENO: result: $AppleGCC" >&5
-echo "${ECHO_T}$AppleGCC" >&6
+	;;
+	esac
 
 	IRC_CFLAGS="$IRC_CFLAGS -O0 -Wall"
 fi
