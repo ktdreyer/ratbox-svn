@@ -1,3 +1,25 @@
+leeh        2002/05/23 18:20:17 EDT	(20020523_1)
+
+  Modified files:
+    .                    Hybrid-team 
+    include              packet.h 
+    modules              descrip.mms m_cjoin.c m_kline.c 
+    src                  descrip.mms modules.c 
+  Log:
+  - larnes vms fixes
+  - made flood prot a little less anal
+  
+  Revision  Changes    Path
+  7.50      +1 -0      ircd-hybrid-7/Hybrid-team
+  7.15      +2 -2      ircd-hybrid-7/include/packet.h
+  1.6       +6 -1      ircd-hybrid-7/modules/descrip.mms
+  1.51      +7 -1      ircd-hybrid-7/modules/m_cjoin.c
+  1.101     +2 -4      ircd-hybrid-7/modules/m_kline.c
+  7.10      +3 -2      ircd-hybrid-7/src/descrip.mms
+  7.100     +2 -0      ircd-hybrid-7/src/modules.c
+
+
+
 leeh        2002/05/23 12:52:21 EDT	(20020523_0)
 
   Modified files:
