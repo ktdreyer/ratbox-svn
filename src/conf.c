@@ -55,6 +55,8 @@ set_default_conf(void)
 	config_file.jupe_score = 15;
 	config_file.unjupe_score = 15;
 	config_file.pending_time = 1800;
+
+	config_file.max_matches = 60;
 }
 
 static void
@@ -80,6 +82,11 @@ validate_conf(void)
 
 	if(config_file.pending_time <= 0)
 		config_file.pending_time = 1800;
+
+	if(config_file.max_matches >= 250)
+		config_file.max_matches = 250;
+	else if(config_file.max_matches <= 0)
+		config_file.max_matches = 50;
 }
 
 static void

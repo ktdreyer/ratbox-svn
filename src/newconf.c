@@ -795,6 +795,12 @@ static struct ConfEntry conf_jupeserv_table[] =
 	{ "\0", 0, NULL, 0, NULL }
 };
 
+static struct ConfEntry conf_alis_table[] =
+{
+	{ "max_matches",	CF_INT, NULL, 0, &config_file.max_matches	},
+	{ "\0", 0, NULL, 0, NULL }
+};
+
 void
 newconf_init()
 {
@@ -807,4 +813,5 @@ newconf_init()
 	add_conf_extension("service", "userserv", conf_userserv_table);
 	add_conf_extension("service", "chanserv", conf_chanserv_table);
 	add_conf_extension("service", "jupeserv", conf_jupeserv_table);
+	add_conf_extension("service", "alis", conf_alis_table);
 }

@@ -45,6 +45,9 @@ struct _config_file
 	int jupe_score;
 	int unjupe_score;
 	int pending_time;
+
+	/* alis */
+	int max_matches;
 };
 
 struct conf_server

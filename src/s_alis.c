@@ -17,7 +17,6 @@
 #include "log.h"
 #include "conf.h"
 
-#define ALIS_MAX_MATCH	60
 #define ALIS_MAX_PARC	10
 
 #define DIR_UNSET	0
@@ -302,7 +301,7 @@ s_alis_list(struct client *client_p, char *parv[], int parc)
 	struct channel *chptr;
 	struct alis_query query;
 	dlink_node *ptr;
-	int maxmatch = ALIS_MAX_MATCH;
+	int maxmatch = config_file.max_matches;
 
 	memset(&query, 0, sizeof(struct alis_query));
 
@@ -318,7 +317,7 @@ s_alis_list(struct client *client_p, char *parv[], int parc)
 
         service_error(alis_p, client_p, 
 		"Returning maximum of %d channel names matching '%s'",
-		ALIS_MAX_MATCH, query.mask);
+		config_file.max_matches, query.mask);
 
         /* hunting for one channel.. */
         if(strchr(query.mask, '*') == NULL)
