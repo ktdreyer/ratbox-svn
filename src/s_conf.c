@@ -1011,6 +1011,9 @@ attach_conf(struct Client *client_p,struct ConfItem *aconf)
         }
     }
 
+  if(aconf->status & FLAGS2_RESTRICTED)
+    SetRestricted(client_p);
+
   lp = make_dlink_node();
 
   dlinkAdd(aconf, lp, &client_p->localClient->confs);

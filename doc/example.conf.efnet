@@ -15,7 +15,7 @@
  * that matches a user will be used.  So place spoofs first, then specials,
  * then general access, then restricted.
  *
- * Both shell style (#) and C style commands are supported.
+ * Both shell style (#) and C style comments are supported.
  *
  * Files may be included by either:
  *        .include "filename"
@@ -108,7 +108,7 @@ logging {
 
 /* class {}: contain information about classes for users (OLD Y:) */
 class {
-	/* name: the name of the class.  may be text or a number */
+	/* name: the name of the class.  classes are text now */
 	name = "users";
 
 	/* ping time: how often a client must reply to a PING from the
@@ -165,7 +165,7 @@ listen {
 	/* port: the specific port to listen on.  if no host is specified
 	 * before, it will listen on all available IPs.
 	 *
-	 * ports are seperated via ',', and a range may be specified using ".."
+	 * ports are seperated via a comma, a range may be specified using ".."
 	 */
 	
 	/* port: listen on all available IPs, ports 6665 to 6669 */
@@ -314,7 +314,7 @@ connect {
 	accept_password = "anotherpassword";
 
 	/* encrypted: controls whether the accept_password above has been
-	 * encrypted.  (OLD CRYPT_LINK_PASSWORD now optional per connect
+	 * encrypted.  (OLD CRYPT_LINK_PASSWORD now optional per connect)
 	 */
 	encrypted = no;
 
@@ -610,7 +610,7 @@ serverhide {
 	disable_remote_commands = no;
 
 	/* disable local channels: prevent users from joining &channels.
-	 * This is extreme, but its still a flaw in serverhide.  It will
+	 * This is extreme, but it is still a flaw in serverhide.  It will
 	 * however remove far more from users than it will give back in
 	 * security.
 	 */
@@ -757,7 +757,7 @@ general {
 	 */
 	maximum_links = 1;
 
-	/* REMOVE ME.  The following line checks youve been reading. */
+	/* REMOVE ME.  The following line checks you've been reading. */
 	havent_read_conf = 1;
 	
 	/* logfiles: the logfiles to use for user connects, /oper uses,

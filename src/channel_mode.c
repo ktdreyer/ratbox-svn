@@ -1320,6 +1320,17 @@ chm_op(struct Client *client_p, struct Client *source_p,
   if ((dir == MODE_QUERY) || (parc <= *parn))
     return;
 
+  if(IsRestricted(source_p) && (dir == MODE_ADD))
+  {
+    if(!(*errors & SM_ERR_RESTRICTED))
+      sendto_one(source_p, 
+                ":%s NOTICE %s :*** Notice -- You are restricted and cannot chanop others",
+		me.name, source_p->name);
+    
+    *errors |= SM_ERR_RESTRICTED;
+    return;
+  }
+
   opnick = parv[(*parn)++];
 
   if ((targ_p = find_client(opnick)) == NULL)
