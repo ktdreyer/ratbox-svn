@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "common.h"		/* FALSE */
 #include "ircd.h"
@@ -35,9 +34,12 @@
 #include "memory.h"
 #include "s_log.h"
 
+static int m_error(struct Client *, struct Client *, int, const char **);
+static int ms_error(struct Client *, struct Client *, int, const char **);
+
 struct Message error_msgtab = {
-	"ERROR", 0, 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0,
-	{m_error, m_ignore, ms_error, m_ignore}
+	"ERROR", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
+	{{m_error, 0}, mg_ignore, mg_ignore, {ms_error, 0}, mg_ignore}
 };
 
 /*
@@ -88,7 +90,7 @@ m_error(struct Client *client_p, struct Client *source_p, int parc, const char *
 	return 0;
 }
 
-int
+static int
 ms_error(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	const char *para;

@@ -189,7 +189,7 @@ install_hpux_shared: install-mkdirs
 .c.o:
 	${CC} ${CPPFLAGS} ${CFLAGS} -DMODNAME=`basename $< .c`_mheader -c $< -o $@
 
-.o.so:
+.c.so:
 	${CC} ${PICFLAGS} ${CPPFLAGS} ${CFLAGS} $< -o $@
 
 .so.sl:
@@ -197,11 +197,13 @@ install_hpux_shared: install-mkdirs
 
 .PHONY: depend clean distclean
 depend:
-	@rm -f .depend
-	@for file in $(ALL_SRCS); do \
-		$(MKDEP) $(CPPFLAGS) $(INCLUDES) $$file >> .depend; \
-	done
-	
+	@$(RM) -f .depend
+	${MKDEP} ${CPPFLAGS} ${ALL_SRCS} > .depend
+	@$(SED) -e '${SEDOBJ}' < .depend > .depend.tmp-1
+	@$(SED) -e 's/^m_\(die\|kick\|kill\|message\|mode\|nick\|part\|quit\|server\|sjoin\|squit\)/core\/m_\1/' .depend.tmp-1 > .depend.tmp
+	@$(MV) -f .depend.tmp .depend
+	@$(RM) -f .depend.tmp-1
+
 clean:
 	${RM} -f *.so *.sl *~ *.o *.a
 	${RM} -f core/*.so core/*.sl core/*~ core/*.o

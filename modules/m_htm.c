@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "irc_string.h"
 #include "ircd.h"
@@ -38,13 +37,13 @@
 #include "s_serv.h"
 #include "packet.h"
 
-
 static int m_htm(struct Client *, struct Client *, int, const char **);
 
 struct Message htm_msgtab = {
-	"HTM", 0, 0, 0, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_ignore, m_ignore, m_htm}
+	"HTM", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_ignore, mg_ignore, mg_ignore, {m_htm, 0}}
 };
+
 mapi_clist_av1 htm_clist[] = { &htm_msgtab, NULL };
 DECLARE_MODULE_AV1(htm, NULL, NULL, htm_clist, NULL, NULL, "$Revision$");
 

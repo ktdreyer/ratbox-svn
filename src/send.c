@@ -33,7 +33,6 @@
 #include "common.h"
 #include "irc_string.h"
 #include "ircd.h"
-#include "handlers.h"
 #include "numeric.h"
 #include "fdlist.h"
 #include "s_bsd.h"

@@ -26,7 +26,6 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "handlers.h"
 #include "channel.h"
 #include "client.h"
 #include "common.h"
@@ -47,8 +46,8 @@ static int m_join(struct Client *, struct Client *, int, const char **);
 static int ms_join(struct Client *, struct Client *, int, const char **);
 
 struct Message join_msgtab = {
-	"JOIN", 0, 0, 2, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_join, ms_join, m_join}
+	"JOIN", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_join, 2}, {ms_join, 2}, mg_ignore, {m_join, 2}}
 };
 
 mapi_clist_av1 join_clist[] = { &join_msgtab, NULL };
@@ -82,13 +81,6 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	char *chanlist;
 	char *mykey;
 	int successful_join_count = 0;	/* Number of channels successfully joined */
-
-	if(EmptyString(parv[1]))
-	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), 
-			   me.name, source_p->name, "JOIN");
-		return 0;
-	}
 
 	jbuf[0] = '\0';
 
@@ -330,9 +322,6 @@ ms_join(struct Client *client_p, struct Client *source_p, int parc, const char *
 	int args = 0;
 	int keep_our_modes = YES;
 	int keep_new_modes = YES;
-
-	if(!IsClient(source_p))
-		return 0;
 
 	/* special case for join 0 */
 	if((parv[1][0] == '0') && (parv[1][1] == '\0') && parc == 2)

@@ -26,7 +26,6 @@
 #include "stdinc.h"
 #include "tools.h"
 #include "common.h"
-#include "handlers.h"
 #include "client.h"
 #include "channel.h"
 #include "hash.h"
@@ -45,8 +44,8 @@
 static int m_who(struct Client *, struct Client *, int, const char **);
 
 struct Message who_msgtab = {
-	"WHO", 0, 0, 2, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_who, m_ignore, m_who}
+	"WHO", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_who, 2}, mg_ignore, mg_ignore, {m_who, 2}}
 };
 
 mapi_clist_av1 who_clist[] = { &who_msgtab, NULL };
@@ -79,50 +78,12 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 	int server_oper = parc > 2 ? (*parv[2] == 'o') : 0;	/* Show OPERS only */
 	int member;
 
-	if (parc > 1)
-		mask = LOCAL_COPY(parv[1]);
-	else
-		mask = NULL;
+	mask = LOCAL_COPY(parv[1]);
 
-	/* See if mask is there, collapse it or return if not there */
-	if(mask != NULL)
-	{
-		(void) collapse(mask);
-
-		if(*mask == '\0')
-		{
-			sendto_one(source_p, form_str(RPL_ENDOFWHO), 
-				   me.name, source_p->name, "*");
-			return 0;
-		}
-	}
-	else
-	{
-		if(!IsFloodDone(source_p))
-			flood_endgrace(source_p);
-
-		if(!IsOper(source_p))
-		{
-			if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
-			{
-				sendto_one(source_p, form_str(RPL_LOAD2HI),
-						me.name, source_p->name, "WHO");
-				return 0;
-			}
-			else
-				last_used = CurrentTime;
-		}
-
-		who_global(source_p, mask, server_oper);
-		sendto_one(source_p, form_str(RPL_ENDOFWHO),
-			   me.name, source_p->name, "*");
-		return 0;
-	}
-
-	/* mask isn't NULL at this point. repeat after me... -db */
+	(void) collapse(mask);
 
 	/* '/who *' */
-	if((*(mask + 1) == (char) 0) && (*mask == '*'))
+	if((*(mask + 1) == '\0') && (*mask == '*'))
 	{
 		if(source_p->user == NULL)
 			return 0;
@@ -207,13 +168,15 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 			last_used = CurrentTime;
 	}
 
-	/* '/who 0' */
+	/* '/who 0' for a global list.  this forces clients to actually
+	 * request a full list.  I presume its because of too many typos
+	 * with "/who" ;) --fl
+	 */
 	if((*(mask + 1) == '\0') && (*mask == '0'))
 		who_global(source_p, NULL, server_oper);
 	else
 		who_global(source_p, mask, server_oper);
 
-	/* Wasn't a nick, wasn't a channel, wasn't a '*' so ... */
 	sendto_one(source_p, form_str(RPL_ENDOFWHO),
 		   me.name, source_p->name, mask);
 

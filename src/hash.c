@@ -40,7 +40,6 @@
 #include "fileio.h"
 #include "memory.h"
 #include "msg.h"
-#include "handlers.h"
 #include "s_newconf.h"
 #include "cache.h"
 

@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"		/* m_pass prototype */
 #include "client.h"		/* client struct */
 #include "irc_string.h"
 #include "send.h"		/* sendto_one */
@@ -41,8 +40,8 @@
 static int mr_pass(struct Client *, struct Client *, int, const char **);
 
 struct Message pass_msgtab = {
-	"PASS", 0, 0, 2, 0, MFLG_SLOW | MFLG_UNREG, 0,
-	{mr_pass, m_registered, m_ignore, m_registered}
+	"PASS", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
+	{{mr_pass, 2}, mg_reg, mg_ignore, mg_ignore, mg_reg}
 };
 
 mapi_clist_av1 pass_clist[] = { &pass_msgtab, NULL };
@@ -61,18 +60,8 @@ DECLARE_MODULE_AV1(pass, NULL, NULL, pass_clist, NULL, NULL, "$Revision$");
 static int
 mr_pass(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	const char *password = parv[1];
-
-	if(EmptyString(password))
-	{
-		sendto_one(client_p, form_str(ERR_NEEDMOREPARAMS),
-			   me.name, 
-			   EmptyString(source_p->name) ? "*" : source_p->name, 
-			   "PASS");
-		return 0;
-	}
-
-	strlcpy(client_p->localClient->passwd, password, sizeof(client_p->localClient->passwd));
+	strlcpy(client_p->localClient->passwd, parv[1], 
+		sizeof(client_p->localClient->passwd));
 
 	if(parc > 2)
 	{
@@ -84,7 +73,7 @@ mr_pass(struct Client *client_p, struct Client *source_p, int parc, const char *
 		 * safely assume if there is a ":TS" then its a TS server
 		 * -Dianora
 		 */
-		if(0 == irccmp(parv[2], "TS") && client_p->tsinfo == 0)
+		if(irccmp(parv[2], "TS") == 0 && client_p->tsinfo == 0)
 			client_p->tsinfo = TS_DOESTS;
 
 		/* kludge, if we're not using ts6, dont ever mark a server

@@ -26,7 +26,6 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "handlers.h"		/* m_server prototype */
 #include "client.h"		/* client struct */
 #include "common.h"		/* TRUE bleah */
 #include "event.h"
@@ -52,12 +51,12 @@ static int ms_server(struct Client *, struct Client *, int, const char **);
 static int ms_sid(struct Client *, struct Client *, int, const char **);
 
 struct Message server_msgtab = {
-	"SERVER", 0, 0, 4, 0, MFLG_SLOW | MFLG_UNREG, 0,
-	{mr_server, m_registered, ms_server, m_registered}
+	"SERVER", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
+	{{mr_server, 4}, mg_reg, mg_ignore, {ms_server, 4}, mg_reg}
 };
 struct Message sid_msgtab = {
-	"SID", 0, 0, 5, 0, MFLG_SLOW, 0,
-	{m_ignore, m_registered, ms_sid, m_registered}
+	"SID", 0, 0, 0, MFLG_SLOW,
+	{mg_ignore, mg_reg, mg_ignore, {ms_sid, 5}, mg_reg}
 };
 
 mapi_clist_av1 server_clist[] = { &server_msgtab, &sid_msgtab, NULL };
@@ -87,13 +86,6 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 	const char *name;
 	struct Client *target_p;
 	int hop;
-
-	if(parc < 4)
-	{
-		sendto_one(client_p, "ERROR :No servername");
-		exit_client(client_p, client_p, client_p, "Wrong number of args");
-		return 0;
-	}
 
 	name = parv[1];
 	hop = atoi(parv[2]);
@@ -270,16 +262,6 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 	int hlined = 0;
 	int llined = 0;
 	dlink_node *ptr;
-
-	/* Just to be sure -A1kmm. */
-	if(!IsServer(source_p))
-		return 0;
-
-	if(parc < 4)
-	{
-		sendto_one(client_p, "ERROR :No servername");
-		return 0;
-	}
 
 	name = parv[1];
 	hop = atoi(parv[2]);
@@ -571,20 +553,6 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 				     "Link %s cancelled, SID %s invalid",
 				     client_p->name, parv[3]);
 		exit_client(NULL, client_p, &me, "Bogus SID");
-		return 0;
-	}
-
-	if(EmptyString(parv[4]))
-	{
-		sendto_one(client_p, "ERROR :No server info specified for %s", 
-			   parv[1]);
-		sendto_realops_flags(UMODE_ALL, L_ADMIN,
-				     "Link %s cancelled, serverinfo invalid",
-				     get_client_name(client_p, SHOW_IP));
-		sendto_realops_flags(UMODE_ALL, L_OPER,
-				      "Link %s cancelled, serverinfo invalid",
-				      client_p->name);
-		exit_client(NULL, client_p, &me, "Bogus server name");
 		return 0;
 	}
 

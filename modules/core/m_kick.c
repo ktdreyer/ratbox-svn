@@ -26,7 +26,6 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "handlers.h"
 #include "channel.h"
 #include "client.h"
 #include "irc_string.h"
@@ -41,11 +40,11 @@
 #include "s_serv.h"
 
 static int m_kick(struct Client *, struct Client *, int, const char **);
-static int ms_kick(struct Client *, struct Client *, int, const char **);
+#define mg_kick { m_kick, 3 }
 
 struct Message kick_msgtab = {
-	"KICK", 0, 0, 3, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_kick, ms_kick, m_kick}
+	"KICK", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_kick, mg_kick, mg_kick, mg_kick}
 };
 
 mapi_clist_av1 kick_clist[] = { &kick_msgtab, NULL };
@@ -71,13 +70,6 @@ m_kick(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	const char *user;
 	static char buf[BUFSIZE];
 
-	if(EmptyString(parv[2]))
-	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), 
-			   me.name, source_p->name, "KICK");
-		return 0;
-	}
-
 	if(MyClient(source_p) && !IsFloodDone(source_p))
 		flood_endgrace(source_p);
 
@@ -92,7 +84,7 @@ m_kick(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	name = parv[1];
 
 	chptr = find_channel(name);
-	if(!chptr)
+	if(chptr == NULL)
 	{
 		sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
 				   form_str(ERR_NOSUCHCHANNEL), name);
@@ -199,16 +191,3 @@ m_kick(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	return 0;
 }
 
-static int
-ms_kick(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
-{
-	if(*parv[2] == '\0')
-	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), 
-			   get_id(&me, source_p),
-			   get_id(source_p, source_p), "KICK");
-		return 0;
-	}
-
-	return m_kick(client_p, source_p, parc, parv);
-}

@@ -35,7 +35,6 @@
 #ifndef INCLUDED_newconf_h
 #define INCLUDED_newconf_h
 
-#include "handlers.h"
 #include "tools.h"
 
 #define CONF_RESV	0x0001

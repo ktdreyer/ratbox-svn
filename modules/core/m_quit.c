@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -41,8 +40,8 @@ static int m_quit(struct Client *, struct Client *, int, const char **);
 static int ms_quit(struct Client *, struct Client *, int, const char **);
 
 struct Message quit_msgtab = {
-	"QUIT", 0, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
-	{m_quit, m_quit, ms_quit, m_quit}
+	"QUIT", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
+	{{m_quit, 0}, {m_quit, 0}, {ms_quit, 0}, {ms_quit, 0}, {m_quit, 0}}
 };
 
 mapi_clist_av1 quit_clist[] = { &quit_msgtab, NULL };

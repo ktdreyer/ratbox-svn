@@ -34,7 +34,6 @@
 #endif
 
 #include "ircd_defs.h"
-#include "handlers.h"
 #include "linebuf.h"
 #include "channel.h"
 #include "res.h"
@@ -275,6 +274,8 @@ struct exit_client_hook
 #define SetClient(x)            {(x)->status = STAT_CLIENT; \
 				 (x)->handler = IsOper((x)) ? \
 					OPER_HANDLER : CLIENT_HANDLER; }
+#define SetRemoteClient(x)	{(x)->status = STAT_CLIENT; \
+				 (x)->handler = RCLIENT_HANDLER; }
 
 #define STAT_CLIENT_PARSE (STAT_UNKNOWN | STAT_CLIENT)
 #define STAT_SERVER_PARSE (STAT_CONNECTING | STAT_HANDSHAKE | STAT_SERVER)

@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "ircd.h"
 #include "msg.h"
@@ -44,18 +43,15 @@ static int mo_uhelp(struct Client *, struct Client *, int, const char **);
 static void dohelp(struct Client *, int, const char *);
 
 struct Message help_msgtab = {
-	"HELP", 0, 0, 0, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_help, m_ignore, mo_help}
+	"HELP", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_help, 0}, mg_ignore, mg_ignore, {mo_help, 0}}
 };
-
 struct Message uhelp_msgtab = {
-	"UHELP", 0, 0, 0, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_help, m_ignore, mo_uhelp}
+	"UHELP", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_help, 0}, mg_ignore, mg_ignore, {mo_uhelp, 0}}
 };
 
-mapi_clist_av1 help_clist[] = { 
-	&help_msgtab, &uhelp_msgtab, NULL 
-};
+mapi_clist_av1 help_clist[] = { &help_msgtab, &uhelp_msgtab, NULL };
 DECLARE_MODULE_AV1(help, NULL, NULL, help_clist, NULL, NULL, "$Revision$");
 
 /*

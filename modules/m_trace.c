@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "class.h"
 #include "hook.h"
 #include "client.h"
@@ -49,8 +48,8 @@ static int m_trace(struct Client *, struct Client *, int, const char **);
 static void trace_spy(struct Client *);
 
 struct Message trace_msgtab = {
-	"TRACE", 0, 0, 0, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_trace, m_trace, m_trace}
+	"TRACE", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_trace, 0}, {m_trace, 0}, mg_ignore, {m_trace, 0}}
 };
 
 int doing_trace_hook;
@@ -81,21 +80,19 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 	int cnt = 0, wilds, dow;
 	dlink_node *ptr;
 
-	if(!IsClient(source_p))
-		return 0;
-
 	if(parc > 1)
+	{
 		tname = parv[1];
+
+		if(parc > 2)
+		{
+			if(hunt_server(client_p, source_p, ":%s TRACE %s :%s", 2, parc, parv) !=
+					HUNTED_ISME)
+				return 0;
+		}
+	}
 	else
 		tname = me.name;
-
-	if(parc > 2)
-	{
-		if(hunt_server(client_p, source_p, ":%s TRACE %s :%s", 2, parc, parv) !=
-		   HUNTED_ISME)
-			return 0;
-	}
-
 
 	switch (hunt_server(client_p, source_p, ":%s TRACE :%s", 1, parc, parv))
 	{
@@ -120,6 +117,7 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 						ac2ptr = NULL;
 				}
 			}
+
 			/* giving this out with flattened links defeats the
 			 * object --fl
 			 */

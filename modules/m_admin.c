@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -45,8 +44,8 @@ static void do_admin(struct Client *source_p);
 static void admin_spy(struct Client *);
 
 struct Message admin_msgtab = {
-	"ADMIN", 0, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
-	{mr_admin, m_admin, ms_admin, ms_admin}
+	"ADMIN", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
+	{{mr_admin, 0}, {m_admin, 0}, {ms_admin, 0}, mg_ignore, {ms_admin, 0}}
 };
 
 int doing_admin_hook;

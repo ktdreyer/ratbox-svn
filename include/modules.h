@@ -40,7 +40,6 @@
 #include <dlfcn.h>
 #endif
 
-#include "handlers.h"
 #include "msg.h"
 #include "memory.h"
 #include "hook.h"

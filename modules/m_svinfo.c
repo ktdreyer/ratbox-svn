@@ -24,7 +24,6 @@
  *  $Id$
  */
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "common.h"		/* TRUE bleah */
 #include "irc_string.h"
@@ -40,8 +39,8 @@
 static int ms_svinfo(struct Client *, struct Client *, int, const char **);
 
 struct Message svinfo_msgtab = {
-	"SVINFO", 0, 0, 4, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_ignore, ms_svinfo, m_ignore}
+	"SVINFO", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_ignore, mg_ignore, {ms_svinfo, 5}, mg_ignore}
 };
 
 mapi_clist_av1 svinfo_clist[] = { &svinfo_msgtab, NULL };

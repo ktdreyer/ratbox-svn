@@ -55,6 +55,7 @@
 #include "listener.h"
 #include "hook.h"
 #include "s_newconf.h"
+#include "msg.h"
 
 static void check_pings_list(dlink_list * list);
 static void check_unknowns_list(dlink_list * list);

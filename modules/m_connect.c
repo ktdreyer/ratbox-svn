@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "ircd.h"
 #include "irc_string.h"
@@ -41,13 +40,12 @@
 #include "hash.h"
 #include "modules.h"
 
-
 static int mo_connect(struct Client *, struct Client *, int, const char **);
 static int ms_connect(struct Client *, struct Client *, int, const char **);
 
 struct Message connect_msgtab = {
-	"CONNECT", 0, 0, 2, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_not_oper, ms_connect, mo_connect}
+	"CONNECT", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, {ms_connect, 4}, {ms_connect, 4}, {mo_connect, 2}}
 };
 
 mapi_clist_av1 connect_clist[] = { &connect_msgtab, NULL };
@@ -82,16 +80,7 @@ mo_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 	}
 
 	if(hunt_server(client_p, source_p, ":%s CONNECT %s %s :%s", 3, parc, parv) != HUNTED_ISME)
-	{
 		return 0;
-	}
-
-	if(EmptyString(parv[1]))
-	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), 
-			   me.name, source_p->name, "CONNECT");
-		return 0;
-	}
 
 	if((target_p = find_server(parv[1])))
 	{
@@ -113,7 +102,7 @@ mo_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 			return 0;
 		}
 	}
-	s_assert(0 != aconf);
+
 	/*
 	 * Get port number from user, if given. If not specified,
 	 * use the default form configuration structure. If missing
@@ -138,7 +127,7 @@ mo_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 	 * Notify all operators about remote connect requests
 	 */
 
-	ilog(L_TRACE, "CONNECT From %s : %s %s", parv[0], parv[1], parv[2] ? parv[2] : "");
+	ilog(L_TRACE, "CONNECT From %s : %s %s", parv[0], parv[1], parc > 2 ? parv[2] : "");
 
 	aconf->port = port;
 	/*
@@ -193,14 +182,6 @@ ms_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 	if(hunt_server(client_p, source_p, ":%s CONNECT %s %s :%s", 3, parc, parv) != HUNTED_ISME)
 		return 0;
 
-	if(EmptyString(parv[1]))
-	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), 
-			   get_id(&me, source_p),
-			   get_id(source_p, source_p), "CONNECT");
-		return 0;
-	}
-
 	if((target_p = find_server(parv[1])))
 	{
 		sendto_one_notice(source_p, ":Connect: Server %s already exists from %s.",
@@ -220,36 +201,31 @@ ms_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 			return 0;
 		}
 	}
-	s_assert(0 != aconf);
+
 	/*
 	 * Get port number from user, if given. If not specified,
 	 * use the default form configuration structure. If missing
 	 * from there, then use the precompiled default.
 	 */
-	tmpport = port = aconf->port;
-	if(parc > 2 && !EmptyString(parv[2]))
-	{
-		port = atoi(parv[2]);
+	tmpport = aconf->port;
 
-		/* if someone sends port 0, and we have a config port.. use it */
-		if(port == 0 && aconf->port)
-			port = aconf->port;
-		else if(port <= 0)
-		{
-			sendto_one_notice(source_p, ":Connect: Illegal port number");
-			return 0;
-		}
-	}
-	else if(port <= 0 && (port = PORTNUM) <= 0)
+	port = atoi(parv[2]);
+
+	/* if someone sends port 0, and we have a config port.. use it */
+	if(port == 0 && aconf->port)
+		port = aconf->port;
+	else if(port <= 0)
 	{
-		sendto_one_notice(source_p, ":Connect: missing port number");
+		sendto_one_notice(source_p, ":Connect: Illegal port number");
 		return 0;
 	}
+
 	/*
 	 * Notify all operators about remote connect requests
 	 */
 	sendto_wallops_flags(UMODE_WALLOP, &me,
-			     "Remote CONNECT %s %d from %s", parv[1], port, source_p->name);
+			     "Remote CONNECT %s %d from %s", 
+			     parv[1], port, source_p->name);
 	sendto_server(NULL, NULL, CAP_TS6, NOCAPS,
 		      ":%s WALLOPS :Remote CONNECT %s %d from %s",
 		      me.id, parv[1], port, source_p->name);

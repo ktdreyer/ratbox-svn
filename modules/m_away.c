@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "irc_string.h"
 #include "ircd.h"
@@ -42,8 +41,8 @@
 static int m_away(struct Client *, struct Client *, int, const char **);
 
 struct Message away_msgtab = {
-	"AWAY", 0, 0, 0, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_away, m_away, m_away}
+	"AWAY", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_away, 0}, {m_away, 0}, mg_ignore, {m_away, 0}}
 };
 
 mapi_clist_av1 away_clist[] = { &away_msgtab, NULL };

@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "channel.h"
 #include "common.h"
@@ -48,8 +47,8 @@
 static int mo_rehash(struct Client *, struct Client *, int, const char **);
 
 struct Message rehash_msgtab = {
-	"REHASH", 0, 0, 0, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_not_oper, m_ignore, mo_rehash}
+	"REHASH", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, {mo_rehash, 0}}
 };
 
 mapi_clist_av1 rehash_clist[] = { &rehash_msgtab, NULL };

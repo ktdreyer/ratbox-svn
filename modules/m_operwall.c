@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "ircd.h"
 #include "irc_string.h"
@@ -41,8 +40,8 @@ static int mo_operwall(struct Client *, struct Client *, int, const char **);
 static int ms_operwall(struct Client *, struct Client *, int, const char **);
 
 struct Message operwall_msgtab = {
-	"OPERWALL", 0, 0, 2, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_not_oper, ms_operwall, mo_operwall}
+	"OPERWALL", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, {ms_operwall, 2}, mg_ignore, {mo_operwall, 2}}
 };
 
 mapi_clist_av1 operwall_clist[] = { &operwall_msgtab, NULL };
@@ -54,30 +53,21 @@ DECLARE_MODULE_AV1(operwall, NULL, NULL, operwall_clist, NULL, NULL, "$Revision$
  *      parv[0] = sender prefix
  *      parv[1] = message text
  */
-
 static int
 mo_operwall(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	const char *message = parv[1];
-
 	if(!IsOperOperwall(source_p))
 	{
 		sendto_one(source_p, ":%s NOTICE %s :You need operwall = yes;",
 			   me.name, source_p->name);
 		return 0;
 	}
-	if(EmptyString(message))
-	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), 
-			   me.name, source_p->name, "OPERWALL");
-		return 0;
-	}
 
 	sendto_server(NULL, NULL, CAP_TS6, NOCAPS, ":%s OPERWALL :%s",
-		      use_id(source_p), message);
+		      use_id(source_p), parv[1]);
 	sendto_server(NULL, NULL, NOCAPS, CAP_TS6, ":%s OPERWALL :%s",
-		      source_p->name, message);
-	sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", message);
+		      source_p->name, parv[1]);
+	sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", parv[1]);
 
 	return 0;
 }
@@ -91,16 +81,11 @@ mo_operwall(struct Client *client_p, struct Client *source_p, int parc, const ch
 static int
 ms_operwall(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	const char *message = parv[1];
-
-	if(EmptyString(message))
-		return 0;
-
 	sendto_server(client_p, NULL, CAP_TS6, NOCAPS, ":%s OPERWALL :%s",
-		      use_id(source_p), message);
+		      use_id(source_p), parv[1]);
 	sendto_server(client_p, NULL, NOCAPS, CAP_TS6, ":%s OPERWALL :%s",
-		      source_p->name, message);
-	sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", message);
+		      source_p->name, parv[1]);
+	sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", parv[1]);
 
 	return 0;
 }

@@ -31,7 +31,6 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "handlers.h"
 #include "send.h"
 #include "channel.h"
 #include "client.h"
@@ -54,12 +53,12 @@ static int ms_operspy(struct Client *client_p, struct Client *source_p,
 		      int parc, const char *parv[]);
 
 struct Message encap_msgtab = {
-	"ENCAP", 0, 0, 3, 0, MFLG_SLOW, 0,
-	{m_ignore, m_ignore, ms_encap, m_ignore}
+	"ENCAP", 0, 0, 0, MFLG_SLOW,
+	{mg_ignore, mg_ignore, {ms_encap, 3}, {ms_encap, 3}, mg_ignore}
 };
 struct Message operspy_msgtab = {
-	"OPERSPY", 0, 0, 2, 0, MFLG_ENCAP|MFLG_ENCAPONLY, 0,
-	{m_ignore, m_ignore, ms_operspy, m_ignore}
+	"OPERSPY", 0, 0, 0, MFLG_ENCAP|MFLG_ENCAPONLY,
+	{mg_ignore, mg_ignore, {ms_operspy, 2}, {ms_operspy, 2}, mg_ignore}
 };
 
 mapi_clist_av1 encap_clist[] = { &encap_msgtab, &operspy_msgtab, NULL };

@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "hash.h"
 #include "ircd.h"
@@ -45,8 +44,8 @@ static void add_accept(struct Client *, struct Client *);
 static void list_accepts(struct Client *);
 
 struct Message accept_msgtab = {
-	"ACCEPT", 0, 0, 2, 0, MFLG_SLOW | MFLG_UNREG, 0,
-	{m_unregistered, m_accept, m_ignore, m_accept}
+	"ACCEPT", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
+	{mg_unreg, {m_accept, 2}, mg_ignore, mg_ignore, {m_accept, 2}}
 };
 
 mapi_clist_av1 accept_clist[] = {
@@ -68,13 +67,6 @@ m_accept(struct Client *client_p, struct Client *source_p, int parc, const char 
 	static char delbuf[BUFSIZE];
 	struct Client *target_p;
 	int accept_num;
-
-	if(EmptyString(parv[1]))
-	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-			   me.name, source_p->name, "ACCEPT");
-		return 0;
-	}
 
 	if(*parv[1] == '*')
 	{

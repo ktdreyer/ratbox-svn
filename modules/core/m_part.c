@@ -26,7 +26,6 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "handlers.h"
 #include "channel.h"
 #include "client.h"
 #include "common.h"
@@ -46,8 +45,8 @@ static int m_part(struct Client *, struct Client *, int, const char **);
 void check_spambot_warning(struct Client *source_p, const char *name);
 
 struct Message part_msgtab = {
-	"PART", 0, 0, 2, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_part, m_part, m_part}
+	"PART", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_part, 2}, {m_part, 2}, mg_ignore, {m_part, 2}}
 };
 
 mapi_clist_av1 part_clist[] = { &part_msgtab, NULL };
@@ -69,14 +68,6 @@ m_part(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	char *p, *name;
 	char reason[TOPICLEN + 1];
 	char *s = LOCAL_COPY(parv[1]);
-
-	if(EmptyString(parv[1]))
-	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), 
-			   get_id(&me, source_p),
-			   get_id(source_p, source_p), "PART");
-		return 0;
-	}
 
 	reason[0] = '\0';
 

@@ -24,7 +24,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "channel.h"
 #include "ircd.h"
@@ -46,25 +45,22 @@ static int ms_resv(struct Client *, struct Client *, int, const char **);
 static int mo_unresv(struct Client *, struct Client *, int, const char **);
 static int ms_unresv(struct Client *, struct Client *, int, const char **);
 
+struct Message resv_msgtab = {
+	"RESV", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
+	{mg_ignore, mg_not_oper, {ms_resv, 4}, {ms_resv, 4}, {mo_resv, 3}}
+};
+struct Message unresv_msgtab = {
+	"UNRESV", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
+	{mg_ignore, mg_not_oper, {ms_unresv, 3}, {ms_unresv, 3}, {mo_unresv, 2}}
+};
+
+mapi_clist_av1 resv_clist[] = {	&resv_msgtab, &unresv_msgtab, NULL };
+DECLARE_MODULE_AV1(resv, NULL, NULL, resv_clist, NULL, NULL, "$Revision$");
+
 static void parse_resv(struct Client *source_p, const char *name,
 			const char *reason, int cluster);
 static void remove_resv(struct Client *source_p, const char *name,
 			int cluster);
-
-struct Message resv_msgtab = {
-	"RESV", 0, 0, 3, 0, MFLG_SLOW | MFLG_UNREG, 0,
-	{m_ignore, m_not_oper, ms_resv, mo_resv}
-};
-
-struct Message unresv_msgtab = {
-	"UNRESV", 0, 0, 2, 0, MFLG_SLOW | MFLG_UNREG, 0,
-	{m_ignore, m_not_oper, ms_unresv, mo_unresv}
-};
-
-mapi_clist_av1 resv_clist[] = {
-	&resv_msgtab, &unresv_msgtab, NULL
-};
-DECLARE_MODULE_AV1(resv, NULL, NULL, resv_clist, NULL, NULL, "$Revision$");
 
 /*
  * mo_resv()
@@ -78,16 +74,18 @@ mo_resv(struct Client *client_p, struct Client *source_p, int parc, const char *
 	const char *reason;
 
 	if(parc == 5)
+	{
 		reason = parv[4];
+		if(EmptyString(reason))
+		{
+			sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+				   me.name, source_p->name, "RESV");
+			return 0;
+		}
+	}
+	/* verified as non empty by parse(). */
 	else
 		reason = parv[2];
-
-	if(EmptyString(parv[1]) || EmptyString(reason))
-	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-			   me.name, source_p->name, "RESV");
-		return 0;
-	}
 
 	/* remote resv.. */
 	if((parc == 5) && (irccmp(parv[2], "ON") == 0))
@@ -120,9 +118,6 @@ static int
 ms_resv(struct Client *client_p, struct Client *source_p,
 	int parc, const char *parv[])
 {
-	if((parc != 4) || EmptyString(parv[3]))
-		return 0;
-
 	/* parv[0]  parv[1]        parv[2]  parv[3]
 	 * oper     target server  resv     reason
 	 */
@@ -239,13 +234,6 @@ parse_resv(struct Client *source_p, const char *name,
 static int
 mo_unresv(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	if(EmptyString(parv[1]))
-	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-			   me.name, source_p->name, "RESV");
-		return 0;
-	}
-
 	if((parc == 4) && (irccmp(parv[2], "ON") == 0))
 	{
 		sendto_match_servs(source_p, parv[3], CAP_CLUSTER,
@@ -272,9 +260,6 @@ mo_unresv(struct Client *client_p, struct Client *source_p, int parc, const char
 static int
 ms_unresv(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	if((parc != 3) || EmptyString(parv[2]))
-		return 0;
-
 	/* parv[0]  parv[1]        parv[2]
 	 * oper     target server  resv to remove
 	 */

@@ -26,7 +26,6 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "handlers.h"
 #include "channel.h"
 #include "client.h"
 #include "hash.h"
@@ -45,8 +44,8 @@ static int m_list(struct Client *, struct Client *, int, const char **);
 static int mo_list(struct Client *, struct Client *, int, const char **);
 
 struct Message list_msgtab = {
-	"LIST", 0, 0, 0, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_list, m_ignore, mo_list}
+	"LIST", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_list, 0}, mg_ignore, mg_ignore, {mo_list, 0}}
 };
 
 mapi_clist_av1 list_clist[] = { &list_msgtab, NULL };
@@ -73,7 +72,6 @@ m_list(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	}
 	else
 		last_used = CurrentTime;
-
 
 	/* If no arg, do all channels *whee*, else just one channel */
 	if(parc < 2 || EmptyString(parv[1]))

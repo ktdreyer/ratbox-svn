@@ -27,7 +27,6 @@
 #include "stdinc.h"
 #include "sprintf_irc.h"
 #include "tools.h"
-#include "handlers.h"
 #include "channel.h"
 #include "client.h"
 #include "common.h"
@@ -42,18 +41,17 @@
 #include "parse.h"
 #include "modules.h"
 
-
-static void names_global(struct Client *source_p);
-
 static int m_names(struct Client *, struct Client *, int, const char **);
 
 struct Message names_msgtab = {
-	"NAMES", 0, 0, 0, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_names, m_ignore, m_names}
+	"NAMES", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_names, 0}, mg_ignore, mg_ignore, {m_names, 0}}
 };
 
 mapi_clist_av1 names_clist[] = { &names_msgtab, NULL };
 DECLARE_MODULE_AV1(names, NULL, NULL, names_clist, NULL, NULL, "$Revision$");
+
+static void names_global(struct Client *source_p);
 
 /************************************************************************
  * m_names() - Added by Jto 27 Apr 1989
@@ -70,11 +68,10 @@ m_names(struct Client *client_p, struct Client *source_p, int parc, const char *
 	static time_t last_used = 0;
 	struct Channel *chptr = NULL;
 	char *s;
-	const char *para = parc > 1 ? parv[1] : NULL;
 
-	if(!EmptyString(para))
+	if(parc > 1 && !EmptyString(parv[1]))
 	{
-		char *p = LOCAL_COPY(para);
+		char *p = LOCAL_COPY(parv[1]);
 		if((s = strchr(p, ',')))
 			*s = '\0';
 
@@ -86,7 +83,7 @@ m_names(struct Client *client_p, struct Client *source_p, int parc, const char *
 			return 0;
 		}
 
-		if((chptr = find_channel(para)) != NULL)
+		if((chptr = find_channel(p)) != NULL)
 			channel_member_names(chptr, source_p, 1);
 		else
 			sendto_one(source_p, form_str(RPL_ENDOFNAMES), 

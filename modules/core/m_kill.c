@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "hash.h"		/* for find_client() */
 #include "ircd.h"
@@ -49,8 +48,8 @@ static void relay_kill(struct Client *, struct Client *, struct Client *,
 		       const char *, const char *);
 
 struct Message kill_msgtab = {
-	"KILL", 0, 0, 2, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_not_oper, ms_kill, mo_kill}
+	"KILL", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, {ms_kill, 2}, {ms_kill, 2}, {mo_kill, 2}}
 };
 
 mapi_clist_av1 kill_clist[] = { &kill_msgtab, NULL };

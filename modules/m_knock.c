@@ -26,7 +26,6 @@
 #include "stdinc.h"
 #include "sprintf_irc.h"
 #include "tools.h"
-#include "handlers.h"
 #include "channel.h"
 #include "client.h"
 #include "hash.h"
@@ -41,17 +40,14 @@
 #include "s_serv.h"
 
 static int m_knock(struct Client *, struct Client *, int, const char **);
-static int ms_knock(struct Client *, struct Client *, int, const char **);
 
 struct Message knock_msgtab = {
-	"KNOCK", 0, 0, 2, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_knock, ms_knock, m_knock}
+	"KNOCK", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_knock, 2}, {m_knock, 2}, mg_ignore, {m_knock, 2}}
 };
 
 mapi_clist_av1 knock_clist[] = { &knock_msgtab, NULL };
 DECLARE_MODULE_AV1(knock, NULL, NULL, knock_clist, NULL, NULL, "$Revision$");
-
-static void parse_knock(struct Client *, struct Client *, const char *);
 
 /* m_knock
  *    parv[0] = sender prefix
@@ -70,57 +66,17 @@ static void parse_knock(struct Client *, struct Client *, const char *);
 static int
 m_knock(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	if(EmptyString(parv[1]))
-	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-			   me.name, source_p->name, "KNOCK");
-		return 0;
-	}
+	struct Channel *chptr;
+	char *p, *name;
 
-	if(ConfigChannel.use_knock == 0)
+	if(MyClient(source_p) && ConfigChannel.use_knock == 0)
 	{
 		sendto_one(source_p, form_str(ERR_KNOCKDISABLED),
 			   me.name, source_p->name);
 		return 0;
 	}
 
-
-	parse_knock(client_p, source_p, parv[1]);
-
-	return 0;
-}
-
-/* 
- * ms_knock()
- *	parv[0] = sender prefix
- *	parv[1] = channel
- */
-static int
-ms_knock(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
-{
-	if(EmptyString(parv[1]) || !IsClient(source_p))
-		return 0;
-
-	parse_knock(client_p, source_p, parv[1]);
-
-	return 0;
-}
-
-
-/* parse_knock()
- *
- * input        - client/source issuing knock, channel knocking to
- * output       -
- * side effects - sends knock if possible, else errors
- */
-static void
-parse_knock(struct Client *client_p, struct Client *source_p,
-	    const char *channame)
-{
-	struct Channel *chptr;
-	char *p, *name;
-
-	name = LOCAL_COPY(channame);
+	name = LOCAL_COPY(parv[1]);
 
 	/* dont allow one knock to multiple chans */
 	if((p = strchr(name, ',')))
@@ -130,14 +86,14 @@ parse_knock(struct Client *client_p, struct Client *source_p,
 	{
 		sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
 				   form_str(ERR_NOSUCHCHANNEL), name);
-		return;
+		return 0;
 	}
 
 	if((chptr = find_channel(name)) == NULL)
 	{
 		sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
 				   form_str(ERR_NOSUCHCHANNEL), name);
-		return;
+		return 0;
 	}
 
 	if(IsMember(source_p, chptr))
@@ -145,7 +101,7 @@ parse_knock(struct Client *client_p, struct Client *source_p,
 		if(MyClient(source_p))
 			sendto_one(source_p, form_str(ERR_KNOCKONCHAN),
 				   me.name, source_p->name, name);
-		return;
+		return 0;
 	}
 
 	if(!((chptr->mode.mode & MODE_INVITEONLY) || (*chptr->mode.key) || 
@@ -154,7 +110,7 @@ parse_knock(struct Client *client_p, struct Client *source_p,
 	{
 		sendto_one_numeric(source_p, ERR_CHANOPEN,
 				   form_str(ERR_CHANOPEN), name);
-		return;
+		return 0;
 	}
 
 	/* cant knock to a +p channel */
@@ -162,7 +118,7 @@ parse_knock(struct Client *client_p, struct Client *source_p,
 	{
 		sendto_one_numeric(source_p, ERR_CANNOTSENDTOCHAN,
 				   form_str(ERR_CANNOTSENDTOCHAN), name);
-		return;
+		return 0;
 	}
 
 	
@@ -173,7 +129,7 @@ parse_knock(struct Client *client_p, struct Client *source_p,
 		{
 			sendto_one_numeric(source_p, ERR_CANNOTSENDTOCHAN,
 					   form_str(ERR_CANNOTSENDTOCHAN), name);
-			return;
+			return 0;
 		}
 
 		/* local flood protection:
@@ -185,13 +141,13 @@ parse_knock(struct Client *client_p, struct Client *source_p,
 		{
 			sendto_one(source_p, form_str(ERR_TOOMANYKNOCK),
 					me.name, source_p->name, name, "user");
-			return;
+			return 0;
 		}
 		else if((chptr->last_knock + ConfigChannel.knock_delay_channel) > CurrentTime)
 		{
 			sendto_one(source_p, form_str(ERR_TOOMANYKNOCK),
 					me.name, source_p->name, name, "channel");
-			return;
+			return 0;
 		}
 
 		/* ok, we actually can send the knock, tell client */
@@ -212,6 +168,6 @@ parse_knock(struct Client *client_p, struct Client *source_p,
 		      ":%s KNOCK %s", use_id(source_p), name);
 	sendto_server(client_p, chptr, CAP_KNOCK, CAP_TS6,
 		      ":%s KNOCK %s", source_p->name, name);
-	return;
+	return 0;
 }
 

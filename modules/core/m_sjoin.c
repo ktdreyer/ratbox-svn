@@ -26,7 +26,6 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "handlers.h"
 #include "channel.h"
 #include "client.h"
 #include "hash.h"
@@ -45,8 +44,8 @@
 static int ms_sjoin(struct Client *, struct Client *, int, const char **);
 
 struct Message sjoin_msgtab = {
-	"SJOIN", 0, 0, 5, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_ignore, ms_sjoin, m_ignore}
+	"SJOIN", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_ignore, mg_ignore, {ms_sjoin, 0}, mg_ignore}
 };
 
 mapi_clist_av1 sjoin_clist[] = { &sjoin_msgtab, NULL };
@@ -103,7 +102,10 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	dlink_node *m;
 	static char empty[] = "";
 
-	if(IsClient(source_p) || EmptyString(parv[4]))
+	/* I dont trust servers *not* to end up sending us a blank sjoin, so
+	 * its better not to make a big deal about it. --fl
+	 */
+	if(parc < 5 || EmptyString(parv[4]))
 		return 0;
 
 	if(!IsChannelName(parv[2]) || !check_channel_name(parv[2]))

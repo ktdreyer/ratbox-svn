@@ -42,7 +42,6 @@
 #include "s_log.h"
 #include "send.h"
 #include "hash.h"
-#include "handlers.h"
 #include "s_serv.h"
 #include "msg.h"
 #include "parse.h"
@@ -56,13 +55,13 @@ static int mo_unkline(struct Client *, struct Client *, int, const char **);
 static int ms_unkline(struct Client *, struct Client *, int, const char **);
 
 struct Message kline_msgtab = {
-	"KLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_not_oper, ms_kline, mo_kline}
+	"KLINE", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, {ms_kline, 6}, {ms_kline, 6}, {mo_kline, 2}}
 };
 
 struct Message unkline_msgtab = {
-	"UNKLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_not_oper, ms_unkline, mo_unkline}
+	"UNKLINE", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, {ms_unkline, 4}, {ms_unkline, 4}, {mo_unkline, 2}}
 };
 
 mapi_clist_av1 kline_clist[] = { &kline_msgtab, &unkline_msgtab, NULL };
@@ -270,9 +269,6 @@ ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	char *kreason;
 	char *oper_reason;
 
-	if(parc != 6)
-		return 0;
-
 	sendto_match_servs(source_p, parv[1], CAP_KLN,
 			   "KLINE %s %s %s %s :%s", parv[1], parv[2], parv[3], parv[4], parv[5]);
 
@@ -410,13 +406,6 @@ mo_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 		return 0;
 	}
 
-	if(parc < 2 || EmptyString(parv[1]))
-	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-			   me.name, source_p->name, "UNKLINE");
-		return 0;
-	}
-
 	if((host = strchr(h, '@')) || *h == '*')
 	{
 		/* Explicit user@host mask given */
@@ -480,9 +469,6 @@ ms_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 {
 	const char *kuser;
 	const char *khost;
-
-	if(parc != 4)
-		return 0;
 
 	/* parv[0]  parv[1]        parv[2]  parv[3]
 	 * oper     target server  user     host    */

@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -39,13 +38,15 @@
 #include "sprintf_irc.h"
 
 static int m_time(struct Client *, struct Client *, int, const char **);
-static int mo_time(struct Client *, struct Client *, int, const char **);
 static char *date(void);
 
 struct Message time_msgtab = {
-	"TIME", 0, 0, 0, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_time, mo_time, mo_time}
+	"TIME", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_time, 0}, {m_time, 2}, mg_ignore, {m_time, 0}}
 };
+
+mapi_clist_av1 time_clist[] = { &time_msgtab, NULL };
+DECLARE_MODULE_AV1(time, NULL, NULL, time_clist, NULL, NULL, "$Revision$");
 
 static const char *months[] = {
 	"January", "February", "March", "April",
@@ -57,9 +58,6 @@ static const char *weekdays[] = {
 	"Sunday", "Monday", "Tuesday", "Wednesday",
 	"Thursday", "Friday", "Saturday"
 };
-
-mapi_clist_av1 time_clist[] = { &time_msgtab, NULL };
-DECLARE_MODULE_AV1(time, NULL, NULL, time_clist, NULL, NULL, "$Revision$");
 
 /*
  * m_time
@@ -73,23 +71,6 @@ m_time(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	if(MyClient(source_p) && !IsFloodDone(source_p))
 		flood_endgrace(source_p);
 
-	if(hunt_server(client_p, source_p, ":%s TIME :%s", 1, parc, parv) != HUNTED_ISME)
-		return 0;
-
-	sendto_one_numeric(source_p, RPL_TIME, form_str(RPL_TIME), 
-			   me.name, date());
-
-	return 0;
-}
-
-/*
- * mo_time
- *      parv[0] = sender prefix
- *      parv[1] = servername
- */
-static int
-mo_time(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
-{
 	if(hunt_server(client_p, source_p, ":%s TIME :%s", 1, parc, parv) == HUNTED_ISME)
 		sendto_one_numeric(source_p, RPL_TIME, form_str(RPL_TIME),
 				   me.name, date());

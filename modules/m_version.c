@@ -25,7 +25,6 @@
  */
 
 #include <stdinc.h>
-#include "handlers.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -40,12 +39,11 @@
 static char *confopts(struct Client *source_p);
 
 static int m_version(struct Client *, struct Client *, int, const char **);
-static int ms_version(struct Client *, struct Client *, int, const char **);
 static int mo_version(struct Client *, struct Client *, int, const char **);
 
 struct Message version_msgtab = {
-	"VERSION", 0, 0, 0, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_version, ms_version, mo_version}
+	"VERSION", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_version, 0}, {mo_version, 0}, mg_ignore, {mo_version, 0}}
 };
 
 mapi_clist_av1 version_clist[] = { &version_msgtab, NULL };
@@ -71,9 +69,7 @@ m_version(struct Client *client_p, struct Client *source_p, int parc, const char
 			return 0;
 		}
 		else
-		{
 			last_used = CurrentTime;
-		}
 
 		if(hunt_server(client_p, source_p, ":%s VERSION :%s", 1, parc, parv) != HUNTED_ISME)
 			return 0;
@@ -96,30 +92,10 @@ m_version(struct Client *client_p, struct Client *source_p, int parc, const char
 static int
 mo_version(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	if(hunt_server(client_p, source_p, ":%s VERSION :%s", 1, parc, parv) != HUNTED_ISME)
-		return 0;
-
-	sendto_one_numeric(source_p, RPL_VERSION, form_str(RPL_VERSION),
-			   ircd_version, serno, 
-			   me.name, confopts(source_p), TS_CURRENT);
-
-	show_isupport(source_p);
-
-	return 0;
-}
-
-/*
- * ms_version - VERSION command handler
- *      parv[0] = sender prefix
- *      parv[1] = remote server
- */
-static int
-ms_version(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
-{
 	if(hunt_server(client_p, source_p, ":%s VERSION :%s", 1, parc, parv) == HUNTED_ISME)
 	{
 		sendto_one_numeric(source_p, RPL_VERSION, form_str(RPL_VERSION),
-				   ircd_version, serno,
+				   ircd_version, serno, 
 				   me.name, confopts(source_p), TS_CURRENT);
 		show_isupport(source_p);
 	}

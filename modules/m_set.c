@@ -27,7 +27,6 @@
 /* rewritten by jdc */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "event.h"
 #include "irc_string.h"
@@ -46,12 +45,11 @@
 #include "parse.h"
 #include "modules.h"
 
-
 static int mo_set(struct Client *, struct Client *, int, const char **);
 
 struct Message set_msgtab = {
-	"SET", 0, 0, 0, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_not_oper, m_error, mo_set}
+	"SET", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, {mo_set, 0}}
 };
 
 mapi_clist_av1 set_clist[] = { &set_msgtab, NULL };

@@ -26,7 +26,6 @@
 
 #include "stdinc.h"
 #include "whowas.h"
-#include "handlers.h"
 #include "client.h"
 #include "common.h"
 #include "hash.h"
@@ -42,20 +41,15 @@
 #include "parse.h"
 #include "modules.h"
 
-
 static int m_whowas(struct Client *, struct Client *, int, const char **);
-static int mo_whowas(struct Client *, struct Client *, int, const char **);
 
 struct Message whowas_msgtab = {
-	"WHOWAS", 0, 0, 0, 0, MFLG_SLOW, 0L,
-	{m_unregistered, m_whowas, m_ignore, mo_whowas}
+	"WHOWAS", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_whowas, 2}, mg_ignore, mg_ignore, {m_whowas, 2}}
 };
 
 mapi_clist_av1 whowas_clist[] = { &whowas_msgtab, NULL };
 DECLARE_MODULE_AV1(whowas, NULL, NULL, whowas_clist, NULL, NULL, "$Revision$");
-
-static int whowas_do(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
-
 
 /*
 ** m_whowas
@@ -64,65 +58,36 @@ static int whowas_do(struct Client *client_p, struct Client *source_p, int parc,
 */
 static int
 m_whowas(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
-{
-	static time_t last_used = 0L;
-
-	if(parc < 2 || EmptyString(parv[1]))
-	{
-		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, source_p->name);
-		return 0;
-	}
-
-	if((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
-	{
-		sendto_one(source_p, form_str(RPL_LOAD2HI),
-			   me.name, source_p->name, "WHOWAS");
-		return 0;
-	}
-	else
-	{
-		last_used = CurrentTime;
-	}
-
-	whowas_do(client_p, source_p, parc, parv);
-
-	return 0;
-}
-
-static int
-mo_whowas(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
-{
-	if(parc < 2)
-	{
-		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, source_p->name);
-		return 0;
-	}
-
-	whowas_do(client_p, source_p, parc, parv);
-
-	return 0;
-}
-
-static int
-whowas_do(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
-{
+{	
 	struct Whowas *temp;
 	int cur = 0;
 	int max = -1, found = 0;
 	char *p;
 	const char *nick;
 
-	if(parc < 2 || EmptyString(parv[1]))
+	static time_t last_used = 0L;
+
+	if(!IsOper(source_p))
 	{
-		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, source_p->name);
-		return 0;
+		if((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
+		{
+			sendto_one(source_p, form_str(RPL_LOAD2HI),
+				   me.name, source_p->name, "WHOWAS");
+			return 0;
+		}
+		else
+			last_used = CurrentTime;
 	}
+
+
 	if(parc > 2)
 		max = atoi(parv[2]);
+
+#if 0
 	if(parc > 3)
 		if(hunt_server(client_p, source_p, ":%s WHOWAS %s %s :%s", 3, parc, parv))
 			return 0;
-
+#endif
 
 	if((p = strchr(parv[1], ',')))
 		*p = '\0';
@@ -149,6 +114,7 @@ whowas_do(struct Client *client_p, struct Client *source_p, int parc, const char
 		if(max > 0 && cur >= max)
 			break;
 	}
+
 	if(!found)
 		sendto_one(source_p, form_str(ERR_WASNOSUCHNICK), 
 			   me.name, source_p->name, nick);

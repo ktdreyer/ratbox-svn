@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "irc_string.h"
 #include "ircd.h"
@@ -41,11 +40,10 @@
 
 static int m_links(struct Client *, struct Client *, int, const char **);
 static int mo_links(struct Client *, struct Client *, int, const char **);
-static int ms_links(struct Client *, struct Client *, int, const char **);
 
 struct Message links_msgtab = {
-	"LINKS", 0, 0, 0, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_links, ms_links, mo_links}
+	"LINKS", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_links, 0}, {mo_links, 0}, mg_ignore, {mo_links, 0}}
 };
 
 int doing_links_hook;
@@ -102,8 +100,6 @@ mo_links(struct Client *client_p, struct Client *source_p, int parc, const char 
 	else if(parc == 2)
 		mask = parv[1];
 
-	s_assert(0 != mask);
-
 	if(*mask)		/* only necessary if there is a mask */
 		mask = collapse(clean_string
 				(clean_mask, (const unsigned char *) mask, 2 * HOSTLEN));
@@ -143,27 +139,6 @@ mo_links(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	sendto_one_numeric(source_p, RPL_ENDOFLINKS, form_str(RPL_ENDOFLINKS),
 			   EmptyString(mask) ? "*" : mask);
-
-	return 0;
-}
-
-/*
- * ms_links - LINKS message handler
- *      parv[0] = sender prefix
- *      parv[1] = servername mask
- * or
- *      parv[0] = sender prefix
- *      parv[1] = server to query 
- *      parv[2] = servername mask
- */
-static int
-ms_links(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
-{
-	if(hunt_server(client_p, source_p, ":%s LINKS %s :%s", 1, parc, parv) != HUNTED_ISME)
-		return 0;
-
-	if(IsClient(source_p))
-		m_links(client_p, source_p, parc, parv);
 
 	return 0;
 }

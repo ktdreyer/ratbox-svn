@@ -26,7 +26,6 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "handlers.h"
 #include "client.h"
 #include "common.h"
 #include "fdlist.h"
@@ -45,23 +44,20 @@
 #include "packet.h"
 #include "cache.h"
 
-static struct ConfItem *find_password_aconf(const char *name, struct Client *source_p);
-static int match_oper_password(const char *password, struct ConfItem *aconf);
-
-extern char *crypt();
-
 static int m_oper(struct Client *, struct Client *, int, const char **);
-static int ms_oper(struct Client *, struct Client *, int, const char **);
-static int mo_oper(struct Client *, struct Client *, int, const char **);
-
 
 struct Message oper_msgtab = {
-	"OPER", 0, 0, 3, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_oper, ms_oper, mo_oper}
+	"OPER", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_oper, 3}, mg_ignore, mg_ignore, {m_oper, 3}}
 };
 
 mapi_clist_av1 oper_clist[] = { &oper_msgtab, NULL };
 DECLARE_MODULE_AV1(oper, NULL, NULL, oper_clist, NULL, NULL, "$Revision$");
+
+static struct ConfItem *find_password_aconf(const char *name, struct Client *source_p);
+static int match_oper_password(const char *password, struct ConfItem *aconf);
+
+extern char *crypt();
 
 /*
  * m_oper
@@ -80,9 +76,10 @@ m_oper(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	name = parv[1];
 	password = parv[2];
 
-	if(EmptyString(password))
+	if(IsOper(source_p))
 	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, source_p->name, "OPER");
+		sendto_one(source_p, form_str(RPL_YOUREOPER), me.name, source_p->name);
+		send_oper_motd(source_p);
 		return 0;
 	}
 
@@ -143,43 +140,6 @@ m_oper(struct Client *client_p, struct Client *source_p, int parc, const char *p
 					     "Failed OPER attempt by %s (%s@%s)",
 					     source_p->name, source_p->username, source_p->host);
 		}
-	}
-
-	return 0;
-}
-
-/*
-** mo_oper
-**      parv[0] = sender prefix
-**      parv[1] = oper name
-**      parv[2] = oper password
-*/
-static int
-mo_oper(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
-{
-	sendto_one(source_p, form_str(RPL_YOUREOPER), me.name, source_p->name);
-	send_oper_motd(source_p);
-	return 0;
-}
-
-/*
-** ms_oper
-**      parv[0] = sender prefix
-**      parv[1] = oper name
-**      parv[2] = oper password
-*/
-static int
-ms_oper(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
-{
-	/* if message arrived from server, trust it, and set to oper */
-
-	if(!IsOper(source_p))
-	{
-		if(source_p->status == STAT_CLIENT)
-			source_p->handler = OPER_HANDLER;
-		source_p->umodes |= UMODE_OPER;
-		Count.oper++;
-		sendto_server(client_p, NULL, NOCAPS, NOCAPS, ":%s MODE %s :+o", parv[0], parv[0]);
 	}
 
 	return 0;

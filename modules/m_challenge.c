@@ -36,7 +36,6 @@
 #include <openssl/err.h>
 #endif
 
-#include "handlers.h"
 #include "memory.h"
 #include "client.h"
 #include "ircd.h"
@@ -73,8 +72,8 @@ static int m_challenge(struct Client *, struct Client *, int, const char **);
 
 /* We have openssl support, so include /CHALLENGE */
 struct Message challenge_msgtab = {
-	"CHALLENGE", 0, 0, 2, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_challenge, m_ignore, m_challenge}
+	"CHALLENGE", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_challenge, 2}, mg_ignore, mg_ignore, {m_challenge, 2}}
 };
 
 mapi_clist_av1 challenge_clist[] = { &challenge_msgtab, NULL };
@@ -93,8 +92,6 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 {
 	char *challenge;
 	struct ConfItem *aconf, *oconf;
-	if(!(source_p->user) || !source_p->localClient)
-		return 0;
 
 	/* if theyre an oper, reprint oper motd and ignore */
 	if(IsOper(source_p))

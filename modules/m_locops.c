@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "ircd.h"
 #include "irc_string.h"
@@ -44,8 +43,8 @@ static int m_locops(struct Client *, struct Client *, int, const char **);
 static int ms_locops(struct Client *, struct Client *, int, const char **);
 
 struct Message locops_msgtab = {
-	"LOCOPS", 0, 0, 2, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_not_oper, ms_locops, m_locops}
+	"LOCOPS", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, {ms_locops, 3}, mg_ignore, {m_locops, 2}}
 };
 
 mapi_clist_av1 locops_clist[] = { &locops_msgtab, NULL };
@@ -60,13 +59,6 @@ DECLARE_MODULE_AV1(locops, NULL, NULL, locops_clist, NULL, NULL, "$Revision$");
 static int
 m_locops(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	if(EmptyString(parv[1]))
-	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), 
-			   me.name, source_p->name, "LOCOPS");
-		return 0;
-	}
-
 	sendto_wallops_flags(UMODE_LOCOPS, source_p, "LOCOPS - %s", parv[1]);
 
 	if(dlink_list_length(&cluster_list) > 0)
@@ -78,18 +70,12 @@ m_locops(struct Client *client_p, struct Client *source_p, int parc, const char 
 static int
 ms_locops(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	if(parc != 3 || EmptyString(parv[2]))
-		return 0;
-
 	/* parv[0]  parv[1]      parv[2]
 	 * oper     target serv  message
 	 */
 	sendto_match_servs(client_p, parv[1], CAP_CLUSTER, "LOCOPS %s :%s", parv[1], parv[2]);
 
 	if(!match(parv[1], me.name))
-		return 0;
-
-	if(!IsPerson(source_p))
 		return 0;
 
 	if(find_cluster(source_p->user->server, CLUSTER_LOCOPS))

@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -43,6 +42,21 @@
 #include "packet.h"
 #include "send.h"
 
+static int m_message(int, const char *, struct Client *, struct Client *, int, const char **);
+static int m_privmsg(struct Client *, struct Client *, int, const char **);
+static int m_notice(struct Client *, struct Client *, int, const char **);
+
+struct Message privmsg_msgtab = {
+	"PRIVMSG", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
+	{mg_unreg, {m_privmsg, 0}, {m_privmsg, 0}, mg_ignore, {m_privmsg, 0}}
+};
+struct Message notice_msgtab = {
+	"NOTICE", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_notice, 0}, {m_notice, 0}, {m_notice, 0}, {m_notice, 0}}
+};
+
+mapi_clist_av1 message_clist[] = { &privmsg_msgtab, &notice_msgtab, NULL };
+DECLARE_MODULE_AV1(message, NULL, NULL, message_clist, NULL, NULL, "$Revision$");
 
 struct entity
 {
@@ -70,11 +84,6 @@ static int ntargets = 0;
 
 static int duplicate_ptr(void *);
 
-static int m_message(int, const char *, struct Client *, struct Client *, int, const char **);
-
-static int m_privmsg(struct Client *, struct Client *, int, const char **);
-static int m_notice(struct Client *, struct Client *, int, const char **);
-
 static void msg_channel(int p_or_n, const char *command,
 			struct Client *client_p,
 			struct Client *source_p, struct Channel *chptr, const char *text);
@@ -89,21 +98,6 @@ static void msg_client(int p_or_n, const char *command,
 
 static void handle_special(int p_or_n, const char *command,
 			 struct Client *client_p, struct Client *source_p, const char *nick, const char *text);
-
-struct Message privmsg_msgtab = {
-	"PRIVMSG", 0, 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0L,
-	{m_unregistered, m_privmsg, m_privmsg, m_privmsg}
-};
-
-struct Message notice_msgtab = {
-	"NOTICE", 0, 0, 1, 0, MFLG_SLOW, 0L,
-	{m_unregistered, m_notice, m_notice, m_notice}
-};
-
-mapi_clist_av1 message_clist[] = {
-	&privmsg_msgtab, &notice_msgtab, NULL
-};
-DECLARE_MODULE_AV1(message, NULL, NULL, message_clist, NULL, NULL, "$Revision$");
 
 /*
 ** m_privmsg
@@ -130,12 +124,6 @@ DECLARE_MODULE_AV1(message, NULL, NULL, message_clist, NULL, NULL, "$Revision$")
 static int
 m_privmsg(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	/* servers have no reason to send privmsgs, yet sometimes there is cause
-	 * for a notice.. (for example remote kline replies) --fl_
-	 */
-	if(!IsPerson(source_p))
-		return 0;
-
 	return m_message(PRIVMSG, "PRIVMSG", client_p, source_p, parc, parv);
 }
 

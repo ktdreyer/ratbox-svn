@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "hash.h"
 #include "fdlist.h"
@@ -54,17 +53,15 @@ static int ms_nick(struct Client *, struct Client *, int, const char **);
 static int ms_uid(struct Client *, struct Client *, int, const char **);
 
 struct Message nick_msgtab = {
-	"NICK", 0, 0, 1, 0, MFLG_SLOW, 0,
-	{mr_nick, m_nick, ms_nick, m_nick}
+	"NICK", 0, 0, 0, MFLG_SLOW,
+	{{mr_nick, 0}, {m_nick, 0}, {ms_nick, 0}, {ms_nick, 0}, {m_nick, 0}}
 };
 struct Message uid_msgtab = {
-	"UID", 0, 0, 10, 0, MFLG_SLOW, 0,
-	{m_ignore, m_ignore, ms_uid, m_ignore}
+	"UID", 0, 0, 0, MFLG_SLOW,
+	{mg_ignore, mg_ignore, mg_ignore, {ms_uid, 10}, mg_ignore}
 };
 
-mapi_clist_av1 nick_clist[] = {
-	&nick_msgtab, &uid_msgtab, NULL
-};
+mapi_clist_av1 nick_clist[] = { &nick_msgtab, &uid_msgtab, NULL };
 DECLARE_MODULE_AV1(nick, NULL, NULL, nick_clist, NULL, NULL, "$Revision$");
 
 static int nick_from_server(struct Client *, struct Client *, int, const char **, time_t, const char *);
@@ -849,7 +846,7 @@ register_client(struct Client *client_p, struct Client *server,
 		m++;
 	}
 
-	SetClient(source_p);
+	SetRemoteClient(source_p);
 
 	if(++Count.total > Count.max_tot)
 		Count.max_tot = Count.total;

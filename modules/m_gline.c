@@ -26,7 +26,6 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "handlers.h"
 #include "s_gline.h"
 #include "channel.h"
 #include "client.h"
@@ -50,19 +49,18 @@
 #include "modules.h"
 #include "s_log.h"
 
-static int ms_gline(struct Client *, struct Client *, int, const char **);
 static int mo_gline(struct Client *, struct Client *, int, const char **);
-
+static int mc_gline(struct Client *, struct Client *, int, const char **);
+static int ms_gline(struct Client *, struct Client *, int, const char **);
 static int mo_ungline(struct Client *, struct Client *, int, const char **);
 
-struct Message ungline_msgtab = {
-	"UNGLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_not_oper, m_error, mo_ungline}
-};
-
 struct Message gline_msgtab = {
-	"GLINE", 0, 0, 3, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_not_oper, ms_gline, mo_gline}
+	"GLINE", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, {mc_gline, 4}, {ms_gline, 8}, {mo_gline, 3}}
+};
+struct Message ungline_msgtab = {
+	"UNGLINE", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, {mo_ungline, 2}}
 };
 
 mapi_clist_av1 gline_clist[] = { &gline_msgtab, &ungline_msgtab, NULL };
@@ -99,23 +97,17 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	char *reason = NULL;	/* reason for "victims" demise */
 	char splat[] = "*";
 
-	if(EmptyString(parv[2]))
-	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-			   me.name, source_p->name, "GLINE");
-		return 0;
-	}
-
 	if(!ConfigFileEntry.glines)
 	{
-		sendto_one(source_p, ":%s NOTICE %s :GLINE disabled", me.name, parv[0]);
+		sendto_one(source_p, ":%s NOTICE %s :GLINE disabled",
+			   me.name, source_p->name);
 		return 0;
 	}
 
 	if(!IsOperGline(source_p))
 	{
-		sendto_one(source_p, ":%s NOTICE %s :You need gline = yes;", me.name,
-				parv[0]);
+		sendto_one(source_p, ":%s NOTICE %s :You need gline = yes;", 
+			   me.name, source_p->name);
 		return 0;
 	}
 
@@ -157,9 +149,10 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		if(MyClient(source_p))
 			sendto_one(source_p,
-					":%s NOTICE %s :Please include at least %d non-wildcard "
-					"characters with the user@host",
-					me.name, parv[0], ConfigFileEntry.min_nonwildcard);
+				   ":%s NOTICE %s :Please include at least %d non-wildcard "
+				   "characters with the user@host",
+				   me.name, source_p->name, 
+				   ConfigFileEntry.min_nonwildcard);
 		return 0;
 	}
 
@@ -184,18 +177,75 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 			source_p->name, user, host, reason);
 
 	/* 8 param for hyb-6 */
-	sendto_server(NULL, NULL, CAP_TS6, CAP_GLN,
-			":%s GLINE %s %s %s %s %s %s :%s",
-			me.name, use_id(source_p), source_p->username,
-			source_p->host, source_p->user->server,
-			user, host, reason);
-	sendto_server(NULL, NULL, NOCAPS, CAP_GLN | CAP_TS6,
+	sendto_server(NULL, NULL, NOCAPS, CAP_GLN,
 			":%s GLINE %s %s %s %s %s %s :%s",
 			me.name, source_p->name, source_p->username,
 			source_p->host, source_p->user->server, 
 			user, host, reason);
 	return 0;
 }
+
+/* mc_gline()
+ */
+static int
+mc_gline(struct Client *client_p, struct Client *source_p,
+	 int parc, const char *parv[])
+{
+	struct Client *acptr;
+	const char *user;
+	const char *host;
+	const char *reason;
+
+	acptr = source_p;
+
+	user = parv[1];
+	host = parv[2];
+	reason = parv[3];
+
+	if(invalid_gline(acptr, user, host, (char *) reason))
+		return 0;
+
+	sendto_server(client_p, NULL, CAP_GLN|CAP_TS6, NOCAPS,
+		      ":%s GLINE %s %s :%s",
+		      use_id(acptr), user, host, reason);
+	sendto_server(client_p, NULL, CAP_GLN, CAP_TS6,
+		      ":%s GLINE %s %s :%s",
+		      acptr->name, user, host, reason);
+	sendto_server(client_p, NULL, NOCAPS, CAP_GLN,
+		      ":%s GLINE %s %s %s %s %s %s :%s",
+		      acptr->user->server, acptr->name, 
+		      acptr->username, acptr->host,
+		      acptr->user->server, user, host, reason);
+
+	if(!ConfigFileEntry.glines)
+		return 0;
+
+	/* check theres enough non-wildcard chars */
+	if(check_wild_gline(user, host))
+	{
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+				"%s!%s@%s on %s is requesting a gline without "
+				"%d non-wildcard characters for [%s@%s] [%s]",
+				acptr->name, acptr->username, 
+				acptr->host, acptr->user->server,
+				ConfigFileEntry.min_nonwildcard,
+				user, host, reason);
+		return 0;
+	}
+
+	log_gline_request(acptr, user, host, reason);
+
+	sendto_realops_flags(UMODE_ALL, L_ALL,
+			"%s!%s@%s on %s is requesting gline for [%s@%s] [%s]",
+			acptr->name, acptr->username, acptr->host,
+			acptr->user->server, user, host, reason);
+
+	/* If at least 3 opers agree this user should be G lined then do it */
+	majority_gline(acptr, user, host, reason);
+
+	return 0;
+}
+
 
 /* ms_gline()
  *
@@ -211,35 +261,19 @@ ms_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	const char *host;
 	const char *reason;
 
-	/* new style gline */
-	if(parc == 4 && IsPerson(source_p))
-	{
-		acptr = source_p;
-
-		user = parv[1];
-		host = parv[2];
-		reason = parv[3];
-	}
-	/* or it's a hyb-6 style */
-	else if(parc == 8 && IsServer(source_p))
-	{
-		/* client doesnt exist.. someones messing */
-		if((acptr = find_client(parv[1])) == NULL)
-			return 0;
-
-		/* client that sent the gline, isnt on the server that sent
-		 * the gline out.  somethings fucked.
-		 */
-		if(acptr->servptr != source_p)
-			return 0;
-
-		user = parv[5];
-		host = parv[6];
-		reason = parv[7];
-	}
-	/* none of the above */
-	else
+	/* client doesnt exist.. someones messing */
+	if((acptr = find_client(parv[1])) == NULL)
 		return 0;
+
+	/* client that sent the gline, isnt on the server that sent
+	 * the gline out.  somethings fucked.
+	 */
+	if(acptr->servptr != source_p)
+		return 0;
+
+	user = parv[5];
+	host = parv[6];
+	reason = parv[7];
 
 	if(invalid_gline(acptr, user, host, (char *) reason))
 		return 0;

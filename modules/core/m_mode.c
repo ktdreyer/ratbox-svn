@@ -27,7 +27,6 @@
 #include "stdinc.h"
 #include "tools.h"
 #include "balloc.h"
-#include "handlers.h"
 #include "channel.h"
 #include "client.h"
 #include "hash.h"
@@ -50,16 +49,16 @@ static int ms_tmode(struct Client *, struct Client *, int, const char **);
 static int ms_bmask(struct Client *, struct Client *, int, const char **);
 
 struct Message mode_msgtab = {
-	"MODE", 0, 0, 2, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_mode, ms_mode, m_mode}
+	"MODE", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_mode, 2}, {ms_mode, 3}, {ms_mode, 3}, {m_mode, 2}}
 };
 struct Message tmode_msgtab = {
-	"TMODE", 0, 0, 4, 0, MFLG_SLOW, 0,
-	{m_ignore, m_ignore, ms_tmode, m_ignore}
+	"TMODE", 0, 0, 0, MFLG_SLOW,
+	{mg_ignore, mg_ignore, {ms_tmode, 4}, {ms_tmode, 4}, mg_ignore}
 };
 struct Message bmask_msgtab = {
-	"BMASK", 0, 0, 5, 0, MFLG_SLOW, 0,
-	{m_ignore, m_ignore, ms_bmask, m_ignore}
+	"BMASK", 0, 0, 0, MFLG_SLOW,
+	{mg_ignore, mg_ignore, mg_ignore, {ms_bmask, 5}, mg_ignore}
 };
 
 mapi_clist_av1 mode_clist[] = { &mode_msgtab, &tmode_msgtab, &bmask_msgtab, NULL };
@@ -105,13 +104,6 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	static char modebuf[BUFSIZE];
 	static char parabuf[BUFSIZE];
 	int n = 2;
-
-	if(EmptyString(parv[1]))
-	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-			   me.name, source_p->name, "MODE");
-		return 0;
-	}
 
 	/* Now, try to find the channel in question */
 	if(!IsChanPrefix(parv[1][0]))
@@ -175,9 +167,6 @@ ms_mode(struct Client *client_p, struct Client *source_p, int parc, const char *
 	struct Channel *chptr;
 	struct membership *msptr;
 
-	if(parc < 3 || EmptyString(parv[2]))
-		return 0;
-
 	chptr = find_channel(parv[1]);
 
 	if(chptr == NULL)
@@ -211,13 +200,6 @@ ms_tmode(struct Client *client_p, struct Client *source_p, int parc, const char 
 {
 	struct Channel *chptr = NULL;
 	struct membership *msptr;
-
-	if(EmptyString(parv[3]))
-	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-			   me.id, source_p->id, "TMODE");
-		return 0;
-	}
 
 	/* Now, try to find the channel in question */
 	if(!IsChanPrefix(parv[2][0]) || !check_channel_name(parv[2]))
@@ -278,9 +260,6 @@ ms_bmask(struct Client *client_p, struct Client *source_p, int parc, const char 
 	int tlen;
 	int modecount = 0;
 	int needcap = NOCAPS;
-
-	if(!IsServer(source_p) || EmptyString(parv[4]))
-		return 0;
 
 	if(!IsChanPrefix(parv[2][0]) || !check_channel_name(parv[2]))
 		return 0;

@@ -28,38 +28,49 @@
 #define INCLUDED_msg_h
 
 #include "config.h"
-#include "handlers.h"
 
 struct Client;
 
-/* 
- * Message table structure 
+/* MessageHandler */
+typedef enum HandlerType
+{
+	UNREGISTERED_HANDLER,
+	CLIENT_HANDLER,
+	RCLIENT_HANDLER,
+	SERVER_HANDLER,
+	OPER_HANDLER,
+	LAST_HANDLER_TYPE
+}
+HandlerType;
+
+/* struct Client* client_p   - connection message originated from
+ * struct Client* source_p   - source of message, may be different from client_p
+ * int            parc   - parameter count
+ * char*          parv[] - parameter vector
  */
+typedef int (*MessageHandler) (struct Client *, struct Client *, int, const char *[]);
+
+struct MessageEntry
+{
+	MessageHandler handler;
+	int min_para;
+};
+
+/* Message table structure */
 struct Message
 {
 	const char *cmd;
 	unsigned int count;	/* number of times command used */
 	unsigned int rcount;	/* number of times command used by server */
-	unsigned int parameters;	/* at least this many args must be passed
-					 * or an error will be sent to the user 
-					 * before the m_func is even called 
-					 */
-	unsigned int maxpara;	/* maximum permitted parameters */
+	unsigned long bytes;	/* bytes received for this message */
 	unsigned int flags;	/* bit 0 set means that this command is allowed
 				 * to be used only on the average of once per 2
 				 * seconds -SRB
 				 */
-	unsigned long bytes;	/* bytes received for this message */
-	/*
-	 * client_p = Connected client ptr
-	 * source_p = Source client ptr
-	 * parc = parameter count
-	 * parv = parameter variable array
-	 */
 	/* handlers:
-	 * UNREGISTERED, CLIENT, SERVER, OPER, LAST
+	 * UNREGISTERED, CLIENT, RCLIENT, SERVER, OPER, LAST
 	 */
-	MessageHandler handlers[LAST_HANDLER_TYPE];
+	struct MessageEntry handlers[LAST_HANDLER_TYPE];
 };
 
 #define MFLG_SLOW	0x01	/* executed roughly once per 2s */
@@ -68,5 +79,75 @@ struct Message
 #define MFLG_ENCAPONLY	0x08	/* only available as an encap command */
 
 #define MAXPARA    15
+
+/* generic handlers */
+extern int m_ignore(struct Client *, struct Client *, int, const char **);
+extern int m_not_oper(struct Client *, struct Client *, int, const char **);
+extern int m_registered(struct Client *, struct Client *, int, const char **);
+extern int m_unregistered(struct Client *, struct Client *, int, const char **);
+
+#define mg_ignore { m_ignore, 0 }
+#define mg_not_oper { m_not_oper, 0 }
+#define mg_reg { m_registered, 0 }
+#define mg_unreg { m_unregistered, 0 }
+
+/*
+ * m_functions execute protocol messages on this server:
+ * int m_func(struct Client* client_p, struct Client* source_p, int parc, char* parv[]);
+ *
+ *    client_p    is always NON-NULL, pointing to a *LOCAL* client
+ *            structure (with an open socket connected!). This
+ *            identifies the physical socket where the message
+ *            originated (or which caused the m_function to be
+ *            executed--some m_functions may call others...).
+ *
+ *    source_p    is the source of the message, defined by the
+ *            prefix part of the message if present. If not
+ *            or prefix not found, then source_p==client_p.
+ *
+ *            (!IsServer(client_p)) => (client_p == source_p), because
+ *            prefixes are taken *only* from servers...
+ *
+ *            (IsServer(client_p))
+ *                    (source_p == client_p) => the message didn't
+ *                    have the prefix.
+ *
+ *                    (source_p != client_p && IsServer(source_p) means
+ *                    the prefix specified servername. (?)
+ *
+ *                    (source_p != client_p && !IsServer(source_p) means
+ *                    that message originated from a remote
+ *                    user (not local).
+ *
+ *
+ *            combining
+ *
+ *            (!IsServer(source_p)) means that, source_p can safely
+ *            taken as defining the target structure of the
+ *            message in this server.
+ *
+ *    *Always* true (if 'parse' and others are working correct):
+ *
+ *    1)      source_p->from == client_p  (note: client_p->from == client_p)
+ *
+ *    2)      MyConnect(source_p) <=> source_p == client_p (e.g. source_p
+ *            *cannot* be a local connection, unless it's
+ *            actually client_p!). [MyConnect(x) should probably
+ *            be defined as (x == x->from) --msa ]
+ *
+ *    parc    number of variable parameter strings (if zero,
+ *            parv is allowed to be NULL)
+ *
+ *    parv    a NULL terminated list of parameter pointers,
+ *
+ *                    parv[0], sender (prefix string), if not present
+ *                            this points to an empty string.
+ *                    parv[1]...parv[parc-1]
+ *                            pointers to additional parameters
+ *                    parv[parc] == NULL, *always*
+ *
+ *            note:   it is guaranteed that parv[0]..parv[parc-1] are all
+ *                    non-NULL pointers.
+ */
 
 #endif /* INCLUDED_msg_h */

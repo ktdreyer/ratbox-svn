@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -43,8 +42,8 @@ static char buf[BUFSIZE];
 static int m_userhost(struct Client *, struct Client *, int, const char **);
 
 struct Message userhost_msgtab = {
-	"USERHOST", 0, 0, 1, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_userhost, m_ignore, m_userhost}
+	"USERHOST", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_userhost, 2}, mg_ignore, mg_ignore, {m_userhost, 2}}
 };
 
 mapi_clist_av1 userhost_clist[] = { &userhost_msgtab, NULL };
@@ -68,12 +67,12 @@ m_userhost(struct Client *client_p, struct Client *source_p, int parc, const cha
 	cur_len = ircsprintf(buf, form_str(RPL_USERHOST), me.name, parv[0], "");
 	t = buf + cur_len;
 
-	for (i = 0; i < 5; i++)
+	for (i = 1; i < 5; i++)
 	{
-		if(parv[i + 1] == NULL)
+		if(parc < i + 1)
 			break;
 
-		if((target_p = find_person(parv[i + 1])) != NULL)
+		if((target_p = find_person(parv[i])) != NULL)
 		{
 			/*
 			 * Show real IP for USERHOST on yourself.

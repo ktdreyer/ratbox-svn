@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -41,8 +40,8 @@ static int m_lusers(struct Client *, struct Client *, int, const char **);
 static int ms_lusers(struct Client *, struct Client *, int, const char **);
 
 struct Message lusers_msgtab = {
-	"LUSERS", 0, 0, 0, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_lusers, ms_lusers, ms_lusers}
+	"LUSERS", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_lusers, 0}, {ms_lusers, 0}, mg_ignore, {ms_lusers, 0}}
 };
 
 mapi_clist_av1 lusers_clist[] = { &lusers_msgtab, NULL };
@@ -100,13 +99,10 @@ ms_lusers(struct Client *client_p, struct Client *source_p, int parc, const char
 	{
 		if(hunt_server(client_p, source_p, ":%s LUSERS %s :%s", 2, parc, parv)
 		   != HUNTED_ISME)
-		{
 			return 0;
-		}
 	}
 
-	if(IsClient(source_p))
-		show_lusers(source_p);
+	show_lusers(source_p);
 
 	return 0;
 }

@@ -27,7 +27,6 @@
 #include "stdinc.h"
 #include "tools.h"
 #include "common.h"
-#include "handlers.h"
 #include "client.h"
 #include "hash.h"
 #include "channel.h"
@@ -50,11 +49,10 @@ static void single_whois(struct Client *source_p, struct Client *target_p);
 
 static int m_whois(struct Client *, struct Client *, int, const char **);
 static int ms_whois(struct Client *, struct Client *, int, const char **);
-static int mo_whois(struct Client *, struct Client *, int, const char **);
 
 struct Message whois_msgtab = {
-	"WHOIS", 0, 0, 0, 0, MFLG_SLOW, 0L,
-	{m_unregistered, m_whois, ms_whois, mo_whois}
+	"WHOIS", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_whois, 2}, {ms_whois, 3}, mg_ignore, {m_whois, 2}}
 };
 
 int doing_whois_local_hook;
@@ -79,61 +77,28 @@ m_whois(struct Client *client_p, struct Client *source_p, int parc, const char *
 {
 	static time_t last_used = 0;
 
-	if(parc < 2 || EmptyString(parv[1]))
-	{
-		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, source_p->name);
-		return 0;
-	}
-
 	if(parc > 2)
 	{
-		/* seeing as this is going across servers, we should limit it */
-		if((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
+		if(!IsOper(source_p))
 		{
-			sendto_one(source_p, form_str(RPL_LOAD2HI),
-				   me.name, source_p->name, "WHOIS");
-			return 0;
+			/* seeing as this is going across servers, we should limit it */
+			if((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
+			{
+				sendto_one(source_p, form_str(RPL_LOAD2HI),
+					   me.name, source_p->name, "WHOIS");
+				return 0;
+			}
+			else
+				last_used = CurrentTime;
 		}
-		else
-			last_used = CurrentTime;
 
 		if(hunt_server(client_p, source_p, ":%s WHOIS %s :%s", 1, parc, parv) !=
 		   HUNTED_ISME)
-		{
 			return 0;
-		}
+
 		parv[1] = parv[2];
 
 	}
-	do_whois(client_p, source_p, parc, parv);
-
-	return 0;
-}
-
-/*
- * mo_whois
- *      parv[0] = sender prefix
- *      parv[1] = nickname masklist
- */
-static int
-mo_whois(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
-{
-	if(parc < 2 || EmptyString(parv[1]))
-	{
-		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, source_p->name);
-		return 0;
-	}
-
-	if(parc > 2)
-	{
-		if(hunt_server(client_p, source_p, ":%s WHOIS %s :%s", 1, parc, parv) !=
-		   HUNTED_ISME)
-		{
-			return 0;
-		}
-		parv[1] = parv[2];
-	}
-
 	do_whois(client_p, source_p, parc, parv);
 
 	return 0;
@@ -149,16 +114,6 @@ static int
 ms_whois(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
-
-	if(parc < 3 || EmptyString(parv[2]))
-	{
-		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), 
-			   get_id(&me, source_p), get_id(source_p, source_p));
-		return 0;
-	}
-
-	if(!IsClient(source_p))
-		return 0;
 
 	/* check if parv[1] exists */
 	if((target_p = find_client(parv[1])) == NULL)

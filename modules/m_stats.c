@@ -26,7 +26,6 @@
 
 #include "stdinc.h"
 #include "tools.h"		/* dlink_node/dlink_list */
-#include "handlers.h"		/* m_pass prototype */
 #include "class.h"		/* report_classes */
 #include "client.h"		/* Client */
 #include "common.h"		/* TRUE/FALSE */
@@ -54,12 +53,10 @@
 #include "hash.h"
 
 static int m_stats (struct Client *, struct Client *, int, const char **);
-static int mo_stats (struct Client *, struct Client *, int, const char **);
-static int ms_stats (struct Client *, struct Client *, int, const char **);
 
 struct Message stats_msgtab = {
-	"STATS", 0, 0, 2, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_stats, ms_stats, mo_stats}
+	"STATS", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_stats, 2}, {m_stats, 3}, mg_ignore, {m_stats, 2}}
 };
 
 int doing_stats_hook;
@@ -184,94 +181,30 @@ static struct StatsStruct stats_cmd_table[] = {
  * m_stats by fl_
  *      parv[0] = sender prefix
  *      parv[1] = stat letter/command
- *      parv[2] = (if present) server/mask in stats L
- * 
- * This will search the tables for the appropriate stats letter/command,
- * if found execute it.  
- */
-static int
-m_stats(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
-{
-	int i;
-	char statchar;
-	static time_t last_used = 0;
-
-	if(EmptyString(parv[1]))
-	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-			   me.name, source_p->name, "STATS");
-		return 0;
-	}
-
-	/* Check the user is actually allowed to do /stats, and isnt flooding */
-	if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
-	{
-		/* safe enough to give this on a local connect only */
-		sendto_one(source_p, form_str (RPL_LOAD2HI),
-			   me.name, source_p->name, "STATS");
-		return 0;
-	}
-	else
-		last_used = CurrentTime;
-
-	/* Is the stats meant for us? */
-	if(hunt_server (client_p, source_p, ":%s STATS %s :%s", 2, parc, parv) !=
-	   HUNTED_ISME)
-		return 0;
-
-	statchar = parv[1][0];
-
-	for (i = 0; stats_cmd_table[i].handler; i++)
-	{
-		if(stats_cmd_table[i].letter == statchar)
-		{
-			/* The stats table says what privs are needed, so check --fl_ */
-			if(stats_cmd_table[i].need_oper || stats_cmd_table[i].need_admin)
-			{
-				sendto_one_numeric(source_p, ERR_NOPRIVILEGES,
-						   form_str (ERR_NOPRIVILEGES));
-				break;
-			}
-
-			/* Blah, stats L needs the parameters, none of the others do.. */
-			if(statchar == 'L' || statchar == 'l')
-				stats_cmd_table[i].handler (source_p, parc, parv);
-			else
-				stats_cmd_table[i].handler (source_p);
-		}
-	}
-
-	/* Send the end of stats notice, and the stats_spy */
-	sendto_one_numeric(source_p, RPL_ENDOFSTATS, 
-			   form_str(RPL_ENDOFSTATS), statchar);
-
-	if((statchar != 'L') && (statchar != 'l'))
-		stats_spy (source_p, statchar);
-
-	return 0;
-}
-
-/*
- * mo_stats by fl_
- *      parv[0] = sender prefix
- *      parv[1] = stat letter/command
  *      parv[2] = (if present) server/mask in stats L, or target
  *
  * This will search the tables for the appropriate stats letter,
  * if found execute it.  
  */
 static int
-mo_stats(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+m_stats(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
+	static time_t last_used = 0;
 	int i;
 	char statchar;
 
-	if(EmptyString(parv[1]))
+	if(MyClient(source_p) && !IsOper(source_p))
 	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-			   get_id(&me, source_p), 
-			   get_id(source_p, source_p), "STATS");
-		return 0;
+		/* Check the user is actually allowed to do /stats, and isnt flooding */
+		if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
+		{
+			/* safe enough to give this on a local connect only */
+			sendto_one(source_p, form_str (RPL_LOAD2HI),
+				   me.name, source_p->name, "STATS");
+			return 0;
+		}
+		else
+			last_used = CurrentTime;
 	}
 
 	if(hunt_server (client_p, source_p, ":%s STATS %s :%s", 2, parc, parv) != HUNTED_ISME)
@@ -309,24 +242,6 @@ mo_stats(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if((statchar != 'L') && (statchar != 'l'))
 		stats_spy (source_p, statchar);
-
-	return 0;
-}
-
-/*
- * ms_stats - STATS message handler
- *      parv[0] = sender prefix
- *      parv[1] = statistics selector (defaults to Message frequency)
- *      parv[2] = server name (current server defaulted, if omitted)
- */
-static int
-ms_stats(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
-{
-	if(hunt_server (client_p, source_p, ":%s STATS %s :%s", 2, parc, parv) != HUNTED_ISME)
-		return 0;
-
-	if(IsClient (source_p))
-		mo_stats (client_p, source_p, parc, parv);
 
 	return 0;
 }

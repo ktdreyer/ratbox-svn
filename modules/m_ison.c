@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "irc_string.h"
 #include "sprintf_irc.h"
@@ -44,8 +43,8 @@
 static int m_ison(struct Client *, struct Client *, int, const char **);
 
 struct Message ison_msgtab = {
-	"ISON", 0, 0, 1, 1, MFLG_SLOW, 0,
-	{m_unregistered, m_ison, m_ignore, m_ison}
+	"ISON", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_ison, 2}, mg_ignore, mg_ignore, {m_ison, 2}}
 };
 
 mapi_clist_av1 ison_clist[] = { &ison_msgtab, NULL };

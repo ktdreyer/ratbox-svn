@@ -32,7 +32,6 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "handlers.h"
 #include "send.h"
 #include "channel.h"
 #include "client.h"
@@ -60,25 +59,23 @@ static int ms_xline(struct Client *client_p, struct Client *source_p, int parc, 
 static int mo_unxline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
 static int ms_unxline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
 
+struct Message xline_msgtab = {
+	"XLINE", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, {ms_xline, 5}, {ms_xline, 5}, {mo_xline, 3}}
+};
+struct Message unxline_msgtab = {
+	"UNXLINE", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, {ms_unxline, 3}, {ms_unxline, 3}, {mo_unxline, 2}}
+};
+
+mapi_clist_av1 xline_clist[] =  { &xline_msgtab, &unxline_msgtab, NULL };
+DECLARE_MODULE_AV1(xline, NULL, NULL, xline_clist, NULL, NULL, "$Revision$");
+
 static int valid_xline(struct Client *, const char *, const char *, int warn);
 static void write_xline(struct Client *source_p, const char *gecos, 
 			const char *reason, int xtype);
 static void remove_xline(struct Client *source_p, const char *gecos, int warn);
 
-struct Message xline_msgtab = {
-	"XLINE", 0, 0, 3, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_not_oper, ms_xline, mo_xline}
-};
-
-struct Message unxline_msgtab = {
-	"UNXLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_not_oper, ms_unxline, mo_unxline}
-};
-
-mapi_clist_av1 xline_clist[] =  {
-	&xline_msgtab, &unxline_msgtab, NULL
-};
-DECLARE_MODULE_AV1(xline, NULL, NULL, xline_clist, NULL, NULL, "$Revision$");
 
 /* m_xline()
  *
@@ -177,18 +174,16 @@ ms_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 {
 	struct rxconf *xconf;
 
-	if(parc != 5 || EmptyString(parv[4]))
-		return 0;
-
-	if(!IsPerson(source_p))
-		return 0;
-
 	/* parv[0]  parv[1]      parv[2]  parv[3]  parv[4]
 	 * oper     target serv  xline    type     reason
 	 */
 	sendto_match_servs(source_p, parv[1], CAP_CLUSTER,
 			   "XLINE %s %s %s :%s",
 			   parv[1], parv[2], parv[3], parv[4]);
+
+
+	if(!IsPerson(source_p))
+		return 0;
 
 	/* destined for me? */
 	if(!match(parv[1], me.name))
@@ -333,13 +328,6 @@ mo_unxline(struct Client *client_p, struct Client *source_p, int parc, const cha
 		return 0;
 	}
 
-	if(EmptyString(parv[1]))
-	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-			   me.name, source_p->name, "UNXLINE");
-		return 0;
-	}
-
 	remove_xline(source_p, parv[1], 1);
 
 	return 0;
@@ -352,12 +340,6 @@ mo_unxline(struct Client *client_p, struct Client *source_p, int parc, const cha
 static int
 ms_unxline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	if(parc != 3)
-		return 0;
-
-	if(EmptyString(parv[2]))
-		return 0;
-
 	/* parv[0]  parv[1]        parv[2]
 	 * oper     target server  gecos
 	 */

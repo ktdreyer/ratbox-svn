@@ -41,7 +41,6 @@
 #include "s_log.h"
 #include "send.h"
 #include "hash.h"
-#include "handlers.h"
 #include "s_serv.h"
 #include "msg.h"
 #include "parse.h"
@@ -51,13 +50,12 @@ static int mo_dline(struct Client *, struct Client *, int, const char **);
 static int mo_undline(struct Client *, struct Client *, int, const char **);
 
 struct Message dline_msgtab = {
-	"DLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_not_oper, m_error, mo_dline}
+	"DLINE", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, {mo_dline, 2}}
 };
-
 struct Message undline_msgtab = {
-	"UNDLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_not_oper, m_error, mo_undline}
+	"UNDLINE", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, {mo_undline, 2}}
 };
 
 mapi_clist_av1 dline_clist[] = { &dline_msgtab, &undline_msgtab, NULL };
@@ -100,9 +98,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 
 	tdline_time = valid_tkline(source_p, parv[loc]);
 
-	if(tdline_time == -1)
-		return 0;
-	else if(tdline_time)
+	if(tdline_time)
 		loc++;
 
 	if(parc < loc + 1)

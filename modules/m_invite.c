@@ -26,7 +26,6 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "handlers.h"
 #include "common.h"
 #include "channel.h"
 #include "client.h"
@@ -45,8 +44,8 @@
 static int m_invite(struct Client *, struct Client *, int, const char **);
 
 struct Message invite_msgtab = {
-	"INVITE", 0, 0, 3, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_invite, m_invite, m_invite}
+	"INVITE", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_invite, 3}, {m_invite, 3}, mg_ignore, {m_invite, 3}}
 };
 mapi_clist_av1 invite_clist[] = { &invite_msgtab, NULL };
 DECLARE_MODULE_AV1(invite, NULL, NULL, invite_clist, NULL, NULL, "$Revision$");
@@ -65,17 +64,6 @@ m_invite(struct Client *client_p, struct Client *source_p, int parc, const char 
 	struct Channel *chptr;
 	struct membership *msptr;
 	int store_invite = 0;
-
-	if(EmptyString(parv[2]))
-	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), 
-			   get_id(&me, source_p), get_id(source_p, source_p),
-			   "INVITE");
-		return 0;
-	}
-
-	if(!IsClient(source_p))
-		return 0;
 
 	if(MyClient(source_p) && !IsFloodDone(source_p))
 		flood_endgrace(source_p);

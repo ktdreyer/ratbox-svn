@@ -30,7 +30,6 @@
 #include "ircd.h"
 #include "send.h"
 #include "numeric.h"
-#include "handlers.h"
 #include "hook.h"
 #include "msg.h"
 #include "s_serv.h"		/* hunt_server */
@@ -43,11 +42,9 @@ static int mr_motd(struct Client *, struct Client *, int, const char **);
 static int m_motd(struct Client *, struct Client *, int, const char **);
 static int mo_motd(struct Client *, struct Client *, int, const char **);
 
-static void motd_spy(struct Client *);
-
 struct Message motd_msgtab = {
-	"MOTD", 0, 0, 0, 1, MFLG_SLOW, 0,
-	{mr_motd, m_motd, mo_motd, mo_motd}
+	"MOTD", 0, 0, 0, MFLG_SLOW,
+	{{mr_motd, 0}, {m_motd, 0}, {mo_motd, 0}, mg_ignore, {mo_motd, 0}}
 };
 
 int doing_motd_hook;
@@ -59,6 +56,8 @@ mapi_hlist_av1 motd_hlist[] = {
 };
 
 DECLARE_MODULE_AV1(motd, NULL, NULL, motd_clist, NULL, NULL, "$Revision$");
+
+static void motd_spy(struct Client *);
 
 /* mr_motd()
  *
@@ -111,9 +110,6 @@ m_motd(struct Client *client_p, struct Client *source_p, int parc, const char *p
 static int
 mo_motd(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	if(!IsClient(source_p))
-		return 0;
-
 	if(hunt_server(client_p, source_p, ":%s MOTD :%s", 1, parc, parv) != HUNTED_ISME)
 		return 0;
 

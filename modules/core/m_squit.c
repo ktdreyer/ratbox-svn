@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "common.h"		/* FALSE bleah */
 #include "irc_string.h"
@@ -43,8 +42,8 @@ static int ms_squit(struct Client *, struct Client *, int, const char **);
 static int mo_squit(struct Client *, struct Client *, int, const char **);
 
 struct Message squit_msgtab = {
-	"SQUIT", 0, 0, 1, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_not_oper, ms_squit, mo_squit}
+	"SQUIT", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, {ms_squit, 0}, {ms_squit, 0}, {mo_squit, 2}}
 };
 
 mapi_clist_av1 squit_clist[] = { &squit_msgtab, NULL };
@@ -75,13 +74,6 @@ mo_squit(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(!IsOperRemote(source_p))
 	{
 		sendto_one(source_p, ":%s NOTICE %s :You need remote = yes;", me.name, parv[0]);
-		return 0;
-	}
-
-	if(parc < 2 || EmptyString(parv[1]))
-	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), 
-			   me.name, source_p->name, "SQUIT");
 		return 0;
 	}
 

@@ -3880,7 +3880,7 @@ if test "$ac_cv_shared_modules" = "no"; then
 	MODULES_DEFINE=""
 	MOD_TARGET="libmodules.a"
 	MODULES_LIBS="../modules/libmodules.a"
-	SEDOBJ="-e s/.so:/.o:/"
+	SEDOBJ="s/.so:/.o:/"
 	cat >> confdefs.h <<\EOF
 #define STATIC_MODULES 1
 EOF
@@ -3890,7 +3890,7 @@ else
 	MODULES_DEFINE=""
 	MODULES_LIBS=""
 	MOD_TARGET="shared_modules"
-	SEDOBJ="-e s/.o:/.so:/"
+	SEDOBJ="s/.o:/.so:/"
         
         echo $ac_n "checking for shl_load""... $ac_c" 1>&6
 echo "configure:3897: checking for shl_load" >&5

@@ -56,6 +56,7 @@
 #include "memory.h"
 #include "channel.h"		/* chcap_usage_counts stuff... */
 #include "hook.h"
+#include "msg.h"
 
 #define MIN_CONN_FREQ 300
 

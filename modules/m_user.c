@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "irc_string.h"
 #include "ircd.h"
@@ -37,14 +36,13 @@
 #include "parse.h"
 #include "modules.h"
 
-
 #define UFLAGS  (FLAGS_INVISIBLE|FLAGS_WALLOP|FLAGS_SERVNOTICE)
 
 static int mr_user(struct Client *, struct Client *, int, const char **);
 
 struct Message user_msgtab = {
-	"USER", 0, 0, 5, 0, MFLG_SLOW, 0L,
-	{mr_user, m_registered, m_ignore, m_registered}
+	"USER", 0, 0, 0, MFLG_SLOW,
+	{{mr_user, 5}, mg_reg, mg_ignore, mg_ignore, mg_reg}
 };
 
 mapi_clist_av1 user_clist[] = { &user_msgtab, NULL };
@@ -66,15 +64,6 @@ mr_user(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 	if((p = strchr(parv[1], '@')))
 		*p = '\0';
-
-	if(EmptyString(parv[4]))
-	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-			   me.name, 
-			   EmptyString(source_p->name) ? "*" : source_p->name, 
-			   "USER");
-		return 0;
-	}
 
 	do_local_user(client_p, source_p, parv[1], parv[4]);
 	return 0;

@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "common.h"
 #include "irc_string.h"
@@ -43,8 +42,8 @@
 static int mo_restart(struct Client *, struct Client *, int, const char **);
 
 struct Message restart_msgtab = {
-	"RESTART", 0, 0, 0, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_not_oper, m_ignore, mo_restart}
+	"RESTART", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, {mo_restart, 2}}
 };
 
 mapi_clist_av1 restart_clist[] = { &restart_msgtab, NULL };
@@ -67,20 +66,11 @@ mo_restart(struct Client *client_p, struct Client *source_p, int parc, const cha
 		return 0;
 	}
 
-	if(parc < 2)
+	if(irccmp(parv[1], me.name))
 	{
-		sendto_one(source_p, ":%s NOTICE %s :Need server name /restart %s",
+		sendto_one(source_p, ":%s NOTICE %s :Mismatch on /restart %s",
 			   me.name, source_p->name, me.name);
 		return 0;
-	}
-	else
-	{
-		if(irccmp(parv[1], me.name))
-		{
-			sendto_one(source_p, ":%s NOTICE %s :Mismatch on /restart %s",
-				   me.name, source_p->name, me.name);
-			return 0;
-		}
 	}
 
 	DLINK_FOREACH(ptr, lclient_list.head)

@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "irc_string.h"
 #include "s_serv.h"
@@ -37,8 +36,8 @@
 static int mr_capab(struct Client *, struct Client *, int, const char **);
 
 struct Message capab_msgtab = {
-	"CAPAB", 0, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
-	{mr_capab, m_ignore, m_ignore, m_ignore}
+	"CAPAB", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
+	{{mr_capab, 0}, mg_ignore, mg_ignore, mg_ignore, mg_ignore}
 };
 
 mapi_clist_av1 capab_clist[] = { &capab_msgtab, NULL };

@@ -26,7 +26,6 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "handlers.h"
 #include "client.h"
 #include "ircd.h"
 #include "irc_string.h"
@@ -43,8 +42,8 @@
 static int mo_die(struct Client *, struct Client *, int, const char **);
 
 static struct Message die_msgtab = {
-	"DIE", 0, 0, 1, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_not_oper, m_ignore, mo_die}
+	"DIE", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg,  mg_not_oper, mg_ignore, mg_ignore, {mo_die, 0}}
 };
 
 mapi_clist_av1 die_clist[] = { &die_msgtab, NULL };

@@ -777,14 +777,14 @@ if test "$ac_cv_shared_modules" = "no"; then
 	MOD_TARGET="libmodules.a"
 	MODULES_LIBS="../modules/libmodules.a"
 dnl This is a kludge, but it should work...
-	SEDOBJ="-e s/.so:/.o:/"
+	SEDOBJ="s/.so:/.o:/"
 	AC_DEFINE(STATIC_MODULES)
 else
 	echo "Checking for shared module support"
 	MODULES_DEFINE=""
 	MODULES_LIBS=""
 	MOD_TARGET="shared_modules"
-	SEDOBJ="-e s/.o:/.so:/"
+	SEDOBJ="s/.o:/.so:/"
         CHECK_DLOPEN_LD
         if test "$ac_cv_have_shl_load" = "no"; then
             AC_CHECK_HEADER([mach-o/dyld.h],, [CHECK_DLOPEN_DL])

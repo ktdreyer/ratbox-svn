@@ -33,7 +33,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "class.h"
 #include "hook.h"
 #include "client.h"
@@ -55,8 +54,8 @@
 static int m_etrace(struct Client *, struct Client *, int, const char **);
 
 struct Message etrace_msgtab = {
-	"ETRACE", 0, 0, 0, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_not_oper, m_ignore, m_etrace}
+	"ETRACE", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, {m_etrace, 0}}
 };
 
 mapi_clist_av1 etrace_clist[] =  { &etrace_msgtab, NULL };
@@ -74,9 +73,6 @@ m_etrace(struct Client *client_p, struct Client *source_p, int parc, const char 
 	dlink_node *ptr;
 	char ip[HOSTIPLEN];
 	const char *ip_ptr;
-
-	if(!IsClient(source_p))
-		return 0;
 
 	/* report all direct connections */
 	DLINK_FOREACH(ptr, lclient_list.head)

@@ -26,7 +26,6 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "handlers.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -40,8 +39,8 @@
 static int mo_close(struct Client *, struct Client *, int, const char **);
 
 struct Message close_msgtab = {
-	"CLOSE", 0, 0, 0, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_not_oper, m_ignore, mo_close}
+	"CLOSE", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, {mo_close, 0}}
 };
 
 mapi_clist_av1 close_clist[] = { &close_msgtab, NULL };
@@ -59,7 +58,6 @@ mo_close(struct Client *client_p, struct Client *source_p, int parc, const char 
 	dlink_node *ptr_next;
 	int closed = 0;
 
-
 	DLINK_FOREACH_SAFE(ptr, ptr_next, unknown_list.head)
 	{
 		target_p = ptr->data;
@@ -70,6 +68,7 @@ mo_close(struct Client *client_p, struct Client *source_p, int parc, const char 
 		(void) exit_client(target_p, target_p, target_p, "Oper Closing");
 		closed++;
 	}
+
 	sendto_one(source_p, form_str(RPL_CLOSEEND), me.name, source_p->name, closed);
 	return 0;
 }

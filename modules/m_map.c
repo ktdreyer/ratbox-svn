@@ -25,7 +25,6 @@
 #include "stdinc.h"
 #include "client.h"
 #include "modules.h"
-#include "handlers.h"
 #include "numeric.h"
 #include "send.h"
 #include "s_conf.h"
@@ -35,15 +34,16 @@
 
 static int m_map(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
 static int mo_map(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
-static void dump_map(struct Client *client_p, struct Client *root, char *pbuf);
 
 struct Message map_msgtab = {
-	"MAP", 0, 0, 0, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_map, m_ignore, mo_map}
+	"MAP", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_map, 0}, mg_ignore, mg_ignore, {mo_map, 0}}
 };
 
 mapi_clist_av1 map_clist[] = { &map_msgtab, NULL };
 DECLARE_MODULE_AV1(map, NULL, NULL, map_clist, NULL, NULL, "$Revision$");
+
+static void dump_map(struct Client *client_p, struct Client *root, char *pbuf);
 
 static char buf[BUFSIZE];
 

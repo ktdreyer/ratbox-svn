@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -40,8 +39,8 @@
 static int ms_eob(struct Client *, struct Client *, int, const char **);
 
 struct Message eob_msgtab = {
-	"EOB", 0, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
-	{m_unregistered, m_ignore, ms_eob, m_ignore}
+	"EOB", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
+	{mg_unreg, mg_ignore, mg_ignore, {ms_eob, 0}, mg_ignore}
 };
 mapi_clist_av1 eob_clist[] = { &eob_msgtab, NULL };
 DECLARE_MODULE_AV1(eob, NULL, NULL, eob_clist, NULL, NULL, "$Revision$");
@@ -54,10 +53,14 @@ DECLARE_MODULE_AV1(eob, NULL, NULL, eob_clist, NULL, NULL, "$Revision$");
 static int
 ms_eob(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	sendto_realops_flags(UMODE_ALL, L_ALL,
-			     "End of burst from %s (%d seconds)",
-			     source_p->name, (signed int) (CurrentTime - source_p->firsttime));
+	if(!HasSentEob(client_p))
+	{
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+				     "End of burst from %s (%d seconds)",
+				     source_p->name, 
+				     (int) (CurrentTime - source_p->firsttime));
+		SetEob(client_p);
+	}
 
-	SetEob(client_p);
 	return 0;
 }

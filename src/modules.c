@@ -33,7 +33,6 @@
 #include "client.h"
 #include "send.h"
 #include "s_conf.h"
-#include "handlers.h"
 #include "numeric.h"
 #include "parse.h"
 #include "ircd_defs.h"
@@ -86,35 +85,31 @@ static int mo_modunload(struct Client *, struct Client *, int, const char **);
 static int mo_modrestart(struct Client *, struct Client *, int, const char **);
 
 struct Message modload_msgtab = {
-	"MODLOAD", 0, 0, 2, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_not_oper, m_ignore, mo_modload}
+	"MODLOAD", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, {mo_modload, 2}}
 };
 
 struct Message modunload_msgtab = {
-	"MODUNLOAD", 0, 0, 2, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_not_oper, m_ignore, mo_modunload}
+	"MODUNLOAD", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, {mo_modunload, 2}}
 };
 
 struct Message modreload_msgtab = {
-	"MODRELOAD", 0, 0, 2, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_not_oper, m_ignore, mo_modreload}
+	"MODRELOAD", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, {mo_modreload, 2}}
 };
 
 struct Message modlist_msgtab = {
-	"MODLIST", 0, 0, 0, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_not_oper, m_ignore, mo_modlist}
+	"MODLIST", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, {mo_modlist, 0}}
 };
 
 struct Message modrestart_msgtab = {
-	"MODRESTART", 0, 0, 0, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_not_oper, m_ignore, mo_modrestart}
+	"MODRESTART", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, {mo_modrestart, 0}}
 };
 
 extern struct Message error_msgtab;
-
-#ifdef FL_DEBUG
-extern struct Message hash_msgtab;
-#endif
 
 void
 modules_init(void)
@@ -125,9 +120,6 @@ modules_init(void)
 	mod_add_cmd(&modlist_msgtab);
 	mod_add_cmd(&modrestart_msgtab);
 	mod_add_cmd(&error_msgtab);
-#ifdef FL_DEBUG
-	mod_add_cmd(&hash_msgtab);
-#endif
 }
 
 /* mod_find_path()

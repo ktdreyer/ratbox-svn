@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -42,8 +41,8 @@ static int m_ping(struct Client *, struct Client *, int, const char **);
 static int ms_ping(struct Client *, struct Client *, int, const char **);
 
 struct Message ping_msgtab = {
-	"PING", 0, 0, 1, 0, MFLG_SLOW, 0,
-	{m_unregistered, m_ping, ms_ping, m_ping}
+	"PING", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_ping, 2}, {ms_ping, 2}, {ms_ping, 2}, {m_ping, 2}}
 };
 
 mapi_clist_av1 ping_clist[] = { &ping_msgtab, NULL };
@@ -60,12 +59,6 @@ m_ping(struct Client *client_p, struct Client *source_p, int parc, const char *p
 {
 	struct Client *target_p;
 	const char *origin, *destination;
-
-	if(parc < 2 || EmptyString(parv[1]))
-	{
-		sendto_one(source_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
-		return 0;
-	}
 
 	origin = parv[1];
 	destination = parv[2];	/* Will get NULL or pointer (parc >= 2!!) */
@@ -102,9 +95,6 @@ ms_ping(struct Client *client_p, struct Client *source_p, int parc, const char *
 {
 	struct Client *target_p;
 	const char *destination;
-
-	if(parc < 2 || EmptyString(parv[1]))
-		return 0;
 
 	destination = parv[2];	/* Will get NULL or pointer (parc >= 2!!) */
 

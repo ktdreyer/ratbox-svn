@@ -28,7 +28,6 @@
 #include "parse.h"
 #include "client.h"
 #include "channel.h"
-#include "handlers.h"
 #include "common.h"
 #include "hash.h"
 #include "irc_string.h"
@@ -126,7 +125,6 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 	char *s;
 	char *end;
 	int i = 1;
-	int paramcount, mpara = 0;
 	char *numeric = 0;
 	struct Message *mptr;
 
@@ -205,7 +203,6 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 	{
 		mptr = NULL;
 		numeric = ch;
-		paramcount = MAXPARA;
 		ServerStats->is_num++;
 		s = ch + 3;	/* I know this is ' ' from above if */
 		*s++ = '\0';	/* blow away the ' ', and point s to next part */
@@ -242,9 +239,6 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 			ServerStats->is_unco++;
 			return;
 		}
-
-		paramcount = mptr->parameters;
-		mpara = mptr->maxpara;
 
 		ii = bufend - ((s) ? s : ch);
 		mptr->bytes += ii;
@@ -308,6 +302,7 @@ static int
 handle_command(struct Message *mptr, struct Client *client_p,
 	       struct Client *from, int i, const char* hpara[MAXPARA])
 {
+	struct MessageEntry entry_handler;
 	MessageHandler handler = 0;
 
 	if(IsDeadorAborted(client_p))
@@ -331,10 +326,11 @@ handle_command(struct Message *mptr, struct Client *client_p,
 			return (1);
 	}
 
-	handler = mptr->handlers[client_p->handler];
+	entry_handler = mptr->handlers[client_p->handler];
+	handler = entry_handler.handler;
 
 	/* check right amount of params is passed... --is */
-	if(i < (int)mptr->parameters)
+	if(i < entry_handler.min_para)
 	{
 		if(!IsServer(client_p))
 		{
@@ -351,7 +347,7 @@ handle_command(struct Message *mptr, struct Client *client_p,
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Dropping server %s due to (invalid) command '%s'"
 				     "with only %d arguments (expecting %d).",
-				     client_p->name, mptr->cmd, i, mptr->parameters);
+				     client_p->name, mptr->cmd, i, entry_handler.min_para);
 		ilog(L_CRIT,
 		     "Insufficient parameters (%d) for command '%s' from %s.",
 		     i, mptr->cmd, client_p->name);
@@ -370,6 +366,7 @@ handle_encap(struct Client *client_p, struct Client *source_p,
 	     const char *command, int parc, const char *parv[])
 {
 	struct Message *mptr;
+	struct MessageEntry ehandler;
 	MessageHandler handler = 0;
 
 	parv[0] = source_p->name;
@@ -380,9 +377,10 @@ handle_encap(struct Client *client_p, struct Client *source_p,
 	   (mptr->flags & MFLG_ENCAP) == 0)
 		return;
 
-	handler = mptr->handlers[client_p->handler];
+	ehandler = mptr->handlers[client_p->handler];
+	handler = ehandler.handler;
 
-	if(parc < (int) mptr->parameters)
+	if(parc < ehandler.min_para)
 		return;
 
 	(*handler) (client_p, source_p, parc, parv);
@@ -744,12 +742,6 @@ do_numeric(char numeric[], struct Client *client_p, struct Client *source_p, int
 }
 
 
-/* 
- * m_not_oper
- * inputs	- 
- * output	-
- * side effects	- just returns a nastyogram to given user
- */
 int
 m_not_oper(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
@@ -765,7 +757,6 @@ m_unregistered(struct Client *client_p, struct Client *source_p, int parc, const
 	 * number_of_nick_changes is only really valid after the client
 	 * is fully registered..
 	 */
-
 	if(client_p->localClient->number_of_nick_changes == 0)
 	{
 		sendto_one(client_p, form_str(ERR_NOTREGISTERED), me.name);

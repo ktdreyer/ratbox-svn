@@ -26,7 +26,6 @@
 
 #include "stdinc.h"
 #include "ircd.h"
-#include "handlers.h"
 #include "s_user.h"
 #include "client.h"
 #include "hash.h"		/* for find_client() */
@@ -44,8 +43,8 @@ static int mr_pong(struct Client *, struct Client *, int, const char **);
 static int ms_pong(struct Client *, struct Client *, int, const char **);
 
 struct Message pong_msgtab = {
-	"PONG", 0, 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0,
-	{mr_pong, m_ignore, ms_pong, m_ignore}
+	"PONG", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
+	{{mr_pong, 0}, mg_ignore, mg_ignore, {ms_pong, 2}, mg_ignore}
 };
 
 mapi_clist_av1 pong_clist[] = { &pong_msgtab, NULL };
@@ -56,9 +55,6 @@ ms_pong(struct Client *client_p, struct Client *source_p, int parc, const char *
 {
 	struct Client *target_p;
 	const char *destination;
-
-	if(parc < 2 || EmptyString(parv[1]))
-		return 0;
 
 	destination = parv[2];
 	source_p->flags &= ~FLAGS_PINGSENT;
