@@ -356,7 +356,8 @@ esac
 dnl Checks for library functions.
 AC_PROG_GCC_TRADITIONAL
 
-AC_CHECK_TYPE(u_int32_t, unsigned long)
+
+AC_CHECK_TYPE(u_int32_t, unsigned int)
 
 rm -f conftest conftest.f
 dnl check for poll() call
