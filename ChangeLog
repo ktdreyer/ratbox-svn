@@ -1,3 +1,15 @@
+androsyn    2002/08/13 13:53:19 EDT	(20020813_11)
+
+  Modified files:
+    src                  b_sprintf.c 
+  Log:
+  Its nice if we actually print zeros out :P
+  
+  Revision  Changes    Path
+  7.2       +4 -0      ircd-ratbox/src/b_sprintf.c
+
+
+
 androsyn    2002/08/13 13:14:46 EDT	(20020813_10)
 
   Modified files:
