@@ -1,3 +1,36 @@
+androsyn    2004/06/17 06:44:20 EDT	(20040617_4)
+
+  Modified files:
+    .                    Makefile.in configure configure.ac 
+    contrib              Makefile.in 
+    doc                  Makefile.in 
+    help                 Makefile.in 
+    include              config.h setup.h.in 
+    modules              Makefile.in 
+    servlink             Makefile.in 
+    src                  Makefile.in ircd.c 
+    tools                Makefile.in 
+  Log:
+  Revert autoconf patch.  I didn't realize the original patch directly hacked
+  up the generated configured and had not been run through autoconf
+  
+  Revision  Changes    Path
+  7.48      +10 -18    ircd-ratbox/Makefile.in
+  7.226     +2 -77     ircd-ratbox/configure
+  7.40      +0 -51     ircd-ratbox/configure.ac
+  1.43      +2 -2      ircd-ratbox/contrib/Makefile.in
+  7.25      +18 -18    ircd-ratbox/doc/Makefile.in
+  1.21      +13 -14    ircd-ratbox/help/Makefile.in
+  7.174     +7 -7      ircd-ratbox/include/config.h
+  7.88      +0 -12     ircd-ratbox/include/setup.h.in
+  1.97      +14 -14    ircd-ratbox/modules/Makefile.in
+  1.20      +3 -3      ircd-ratbox/servlink/Makefile.in
+  7.147     +10 -10    ircd-ratbox/src/Makefile.in
+  7.342     +2 -3      ircd-ratbox/src/ircd.c
+  7.38      +14 -14    ircd-ratbox/tools/Makefile.in
+
+
+
 androsyn    2004/06/16 23:26:33 EDT	(20040617_3)
 
   Modified files:
