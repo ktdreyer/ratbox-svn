@@ -1,3 +1,7 @@
+*** 20010104_37 by a1kmm
+Added check that parc is not too small for m_client.
+
+
 *** 20010104_36 by davidt
 Fix sjoin for +a channels, again
 
