@@ -1,3 +1,7 @@
+*** 20010526_11 by davidt
+- Fix mode for dlink_list *loc*;
+
+
 *** 20010526_10 by davidt
 - oops, most people probably don't want debugging enabled...
 
