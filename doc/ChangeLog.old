@@ -1,3 +1,15 @@
+androsyn    2002/07/12 15:42:29 EDT	(20020712_12)
+
+  Modified files:
+    contrib              lmh.diff 
+  Log:
+  Updated lmh.diff to apply cleanly
+  
+  Revision  Changes    Path
+  1.8       +137 -124  ircd-hybrid-7/contrib/lmh.diff
+
+
+
 androsyn    2002/07/12 12:33:11 EDT	(20020712_11)
 
   Modified files:
