@@ -1,3 +1,6 @@
+*** 20010602_6 by davidt
+make STATIC_MODULES compile again
+
 *** 20010602_5 by jdc
 * --enable-openssl has changed quite dramatically.  See below.
     ! <non-existant>        : Try auto-finding OpenSSL.
