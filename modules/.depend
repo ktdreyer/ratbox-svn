@@ -165,7 +165,7 @@ m_challenge.o: m_challenge.c ../include/stdinc.h ../include/config.h \
  ../include/modules.h ../include/parse.h ../include/msg.h \
  ../include/numeric.h ../include/send.h ../include/s_conf.h \
  ../include/motd.h ../include/class.h ../include/common.h \
- ../include/s_log.h
+ ../include/s_log.h ../include/s_user.h
 m_close.o: m_close.c ../include/stdinc.h ../include/config.h \
  ../include/setup.h ../include/defaults.h ../include/tools.h \
  ../include/handlers.h ../include/client.h ../include/ircd_defs.h \
@@ -231,6 +231,16 @@ m_help.o: m_help.c ../include/stdinc.h ../include/config.h \
  ../include/send.h ../include/s_conf.h ../include/class.h \
  ../include/common.h ../include/s_log.h ../include/parse.h \
  ../include/modules.h
+m_htm.o: m_htm.c ../include/stdinc.h ../include/config.h \
+ ../include/setup.h ../include/defaults.h ../include/handlers.h \
+ ../include/client.h ../include/ircd_defs.h ../include/ircd_handler.h \
+ ../include/linebuf.h ../include/tools.h ../include/channel.h \
+ ../include/res.h ../include/fileio.h ../adns/adns.h ../include/ircd.h \
+ ../include/memory.h ../include/balloc.h ../include/irc_string.h \
+ ../include/numeric.h ../include/send.h ../include/msg.h \
+ ../include/parse.h ../include/modules.h ../include/s_conf.h \
+ ../include/motd.h ../include/class.h ../include/common.h \
+ ../include/s_serv.h ../include/packet.h ../include/fdlist.h
 m_info.o: m_info.c ../include/stdinc.h ../include/config.h \
  ../include/setup.h ../include/defaults.h ../include/tools.h \
  ../include/m_info.h ../include/channel.h ../include/ircd_defs.h \
@@ -339,6 +349,16 @@ m_lusers.o: m_lusers.c ../include/stdinc.h ../include/config.h \
  ../include/send.h ../include/s_conf.h ../include/motd.h \
  ../include/class.h ../include/common.h ../include/msg.h \
  ../include/parse.h ../include/modules.h
+m_map.o: m_map.c ../include/stdinc.h ../include/config.h \
+ ../include/setup.h ../include/defaults.h ../include/client.h \
+ ../include/ircd_defs.h ../include/ircd_handler.h ../include/linebuf.h \
+ ../include/tools.h ../include/channel.h ../include/res.h \
+ ../include/fileio.h ../adns/adns.h ../include/ircd.h \
+ ../include/memory.h ../include/balloc.h ../include/irc_string.h \
+ ../include/modules.h ../include/parse.h ../include/msg.h \
+ ../include/handlers.h ../include/numeric.h ../include/send.h \
+ ../include/s_conf.h ../include/motd.h ../include/class.h \
+ ../include/common.h
 m_motd.o: m_motd.c ../include/stdinc.h ../include/config.h \
  ../include/setup.h ../include/defaults.h ../include/client.h \
  ../include/ircd_defs.h ../include/ircd_handler.h ../include/linebuf.h \
