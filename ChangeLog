@@ -1,3 +1,15 @@
+androsyn    2002/09/07 06:24:13 UTC	(20020907_1)
+
+  Modified files:
+    doc                  example.efnet.conf 
+  Log:
+  Make that a need_identd..
+  
+  Revision  Changes    Path
+  7.16      +1 -1      ircd-ratbox/doc/example.efnet.conf
+
+
+
 androsyn    2002/09/07 06:08:13 UTC	(20020907_0)
 
   Modified files:
