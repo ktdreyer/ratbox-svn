@@ -60,7 +60,7 @@ struct Message oper_msgtab = {
 };
 
 mapi_clist_av1 oper_clist[] = { &oper_msgtab, NULL };
-DECLARE_MODULE_AV1(oper, NULL, NULL, oper_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(oper, NULL, NULL, oper_clist, NULL, NULL, NULL, "$Revision$");
 
 /*
  * m_oper

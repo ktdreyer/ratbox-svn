@@ -54,7 +54,7 @@ struct Message ungline_msgtab = {
 };
 
 mapi_clist_av1 ungline_clist[] = { &ungline_msgtab, NULL };
-DECLARE_MODULE_AV1(ungline, NULL, NULL, ungline_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(ungline, NULL, NULL, ungline_clist, NULL, NULL, NULL, "$Revision$");
 
 /* m_ungline()
  *

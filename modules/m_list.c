@@ -55,7 +55,7 @@ struct Message list_msgtab = {
 };
 
 mapi_clist_av1 list_clist[] = { &list_msgtab, NULL };
-DECLARE_MODULE_AV1(list, NULL, NULL, list_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(list, NULL, NULL, list_clist, NULL, NULL, NULL, "$Revision$");
 
 static int list_all_channels(struct Client *source_p);
 static int list_named_channel(struct Client *source_p, const char *name);

@@ -45,7 +45,7 @@ struct Message operwall_msgtab = {
 };
 
 mapi_clist_av1 operwall_clist[] = { &operwall_msgtab, NULL };
-DECLARE_MODULE_AV1(operwall, NULL, NULL, operwall_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(operwall, NULL, NULL, operwall_clist, NULL, NULL, NULL, "$Revision$");
 
 /*
  * mo_operwall - OPERWALL message handler

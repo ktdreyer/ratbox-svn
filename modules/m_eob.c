@@ -44,7 +44,7 @@ struct Message eob_msgtab = {
 	{m_unregistered, m_ignore, ms_eob, m_ignore}
 };
 mapi_clist_av1 eob_clist[] = { &eob_msgtab, NULL };
-DECLARE_MODULE_AV1(eob, NULL, NULL, eob_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(eob, NULL, NULL, eob_clist, NULL, NULL, NULL, "$Revision$");
 
 /*
  * ms_eob - EOB command handler

@@ -52,7 +52,7 @@ struct Message whowas_msgtab = {
 };
 
 mapi_clist_av1 whowas_clist[] = { &whowas_msgtab, NULL };
-DECLARE_MODULE_AV1(whowas, NULL, NULL, whowas_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(whowas, NULL, NULL, whowas_clist, NULL, NULL, NULL, "$Revision$");
 
 static int whowas_do(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
 

@@ -62,7 +62,7 @@ struct shared
 
 struct encap
 {
-	char *name;
+	const char *name;
 	MessageHandler handler;
 	int flags;
 };
@@ -86,8 +86,8 @@ extern int find_shared(const char *username, const char *host,
 			const char *servername, int type);
 
 extern dlink_list encap_list;
-extern int add_encap(const char *name, void *handler, int flags);
-extern int del_encap(const char *name);
+extern int add_encap(struct encap *enptr);
+extern int del_encap(struct encap *enptr);
 extern struct encap *find_encap(const char *name);
 
 #endif

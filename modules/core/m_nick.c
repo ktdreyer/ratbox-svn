@@ -83,7 +83,7 @@ struct Message client_msgtab = {
 mapi_clist_av1 nick_clist[] = {
 	&nick_msgtab, &client_msgtab, NULL
 };
-DECLARE_MODULE_AV1(nick, NULL, NULL, nick_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(nick, NULL, NULL, nick_clist, NULL, NULL, NULL, "$Revision$");
 
 /*
  * mr_nick()

@@ -313,18 +313,13 @@ find_shared(const char *username, const char *host, const char *servername, int 
  * side effects - adds an encap entry for the token to the list
  */
 int
-add_encap(const char *name, void *handler, int flags)
+add_encap(struct encap *enptr)
 {
-	struct encap *enptr;
-
-	if(find_encap(name) != NULL)
+	if(enptr == NULL)
 		return 0;
 
-	enptr = (struct encap *) MyMalloc(sizeof(struct encap));
-
-	DupString(enptr->name, name);
-	enptr->handler = handler;
-	enptr->flags = flags;
+	if(find_encap(enptr->name) != NULL)
+		return 0;
 
 	dlinkAddAlloc(enptr, &encap_list);
 	return 1;
@@ -337,29 +332,15 @@ add_encap(const char *name, void *handler, int flags)
  * side effects - remove the given entry from the encap list
  */
 int
-del_encap(const char *name)
+del_encap(struct encap *enptr)
 {
-	struct encap *enptr;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
+	if(enptr == NULL)
+		return 0;
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, encap_list.head)
-	{
-		enptr = ptr->data;
+	if(enptr->flags & ENCAP_PERM)
+		return 0;
 
-		if(irccmp(enptr->name, name) == 0)
-		{
-			if(enptr->flags & ENCAP_PERM)
-				return 0;
-
-			MyFree(enptr->name);
-			MyFree(enptr);
-			dlinkDestroy(ptr, &encap_list);
-			return 1;
-		}
-	}
-
-	return 0;
+	return dlinkFindDestroy(&encap_list, enptr);
 }
 
 /* find_encap()

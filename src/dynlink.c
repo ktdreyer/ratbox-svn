@@ -232,6 +232,14 @@ unload_one_module(const char *name, int warn)
 			for (m = mheader->mapi_command_list; *m; ++m)
 				mod_del_cmd(*m);
 		}
+
+		if(mheader->mapi_encap_list)
+		{
+			struct encap **m;
+			for(m = mheader->mapi_encap_list; *m; ++m)
+				del_encap(*m);
+		}
+
 		if (mheader->mapi_unregister)
 			mheader->mapi_unregister();
 		break;
@@ -335,6 +343,13 @@ load_a_module(const char *path, int warn, int core)
 			struct Message **m;
 			for (m = mheader->mapi_command_list; *m; ++m)
 				mod_add_cmd(*m);
+		}
+
+		if(mheader->mapi_encap_list)
+		{
+			struct encap **m;
+			for(m = mheader->mapi_encap_list; *m; ++m)
+				add_encap(*m);
 		}
 
 		if (mheader->mapi_hook_list)

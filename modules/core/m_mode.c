@@ -51,7 +51,7 @@ struct Message mode_msgtab = {
 };
 
 mapi_clist_av1 mode_clist[] = { &mode_msgtab, NULL };
-DECLARE_MODULE_AV1(mode, NULL, NULL, mode_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(mode, NULL, NULL, mode_clist, NULL, NULL, NULL, "$Revision$");
 
 /*
  * m_mode - MODE command handler

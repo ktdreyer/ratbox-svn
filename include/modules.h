@@ -29,6 +29,7 @@
 #include "config.h"
 #include "setup.h"
 #include "parse.h"
+#include "s_newconf.h"
 
 #define MAPI_RATBOX 1
 
@@ -67,6 +68,7 @@ struct module_path
 #define MAPI_VERSION(x)	((x) & 0x0000ffff)
 
 typedef struct Message* mapi_clist_av1;
+typedef struct encap*	mapi_elist_av1;
 
 typedef struct
 {
@@ -89,15 +91,16 @@ struct mapi_mheader_av1
 	mapi_clist_av1	* mapi_command_list;			/* List of commands to add.	*/
 	mapi_hlist_av1	* mapi_hook_list;			/* List of hooks to add.	*/
 	mapi_hfn_list_av1 *mapi_hfn_list;			/* List of hook_add_hook's to do */
+	mapi_elist_av1	* mapi_encap_list;			/* list of encaps to add	*/
 	const char *	  mapi_module_version;			/* Module's version (freeform)	*/
 };
 
 #ifndef STATIC_MODULES
-# define DECLARE_MODULE_AV1(name,reg,unreg,cl,hl,hfnlist, v) \
-	struct mapi_mheader_av1 _mheader = { MAPI_V1, reg, unreg, cl, hl, hfnlist, v}
+# define DECLARE_MODULE_AV1(name,reg,unreg,cl,hl,hfnlist,el, v) \
+	struct mapi_mheader_av1 _mheader = { MAPI_V1, reg, unreg, cl, hl, hfnlist, el, v}
 #else
-# define DECLARE_MODULE_AV1(name,reg,unreg,cl,hl,hfnlist, v) \
-	struct mapi_mheader_av1 name ## _mheader = { MAPI_V1, reg, unreg, cl, hl, hfnlist, v}
+# define DECLARE_MODULE_AV1(name,reg,unreg,cl,hl,hfnlist,el, v) \
+	struct mapi_mheader_av1 name ## _mheader = { MAPI_V1, reg, unreg, cl, hl, hfnlist, el, v}
 void load_static_modules();
 #endif
 

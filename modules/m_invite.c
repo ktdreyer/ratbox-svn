@@ -50,7 +50,7 @@ struct Message invite_msgtab = {
 	{m_unregistered, m_invite, m_invite, m_invite}
 };
 mapi_clist_av1 invite_clist[] = { &invite_msgtab, NULL };
-DECLARE_MODULE_AV1(invite, NULL, NULL, invite_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(invite, NULL, NULL, invite_clist, NULL, NULL, NULL, "$Revision$");
 
 /*
 ** m_invite

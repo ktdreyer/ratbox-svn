@@ -52,7 +52,7 @@ struct Message topic_msgtab = {
 };
 
 mapi_clist_av1 topic_clist[] = { &topic_msgtab, NULL };
-DECLARE_MODULE_AV1(topic, NULL, NULL, topic_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(topic, NULL, NULL, topic_clist, NULL, NULL, NULL, "$Revision$");
 
 /*
  * m_topic
