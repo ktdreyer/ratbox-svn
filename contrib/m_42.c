@@ -1,5 +1,5 @@
-/************************************************************************
- *   Does this need a copyright? 
+/*
+ *   Copyright (C) infinity-infinity God <God@Heaven>
  *
  *   $Id$
  */
