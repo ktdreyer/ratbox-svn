@@ -87,7 +87,7 @@ sync_logfiles(void)
 		log_main = fbopen(LPATH, "a");
 
 	/* log_main is handled above, so just do the rest */
-	for(i = 1; log_table[i].name != NULL; i++)
+	for(i = 1; i < LAST_LOGFILE; i++)
 	{
 		/* unspecified and open, close it */
 		if(log_table[i].name[0] == '\0')
