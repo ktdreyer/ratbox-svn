@@ -1,3 +1,7 @@
+*** 20001019_4 by toot
+cleaned m_list slightly..
+
+
 *** 20001019_3 by toot
 . /join just skips over a subchan you're already in, instead of giving an error.
 . /list shows vchans as #chan<!key> if there's subchans for it..
