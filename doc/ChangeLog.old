@@ -1,3 +1,9 @@
+*** 20010714_2 by leeh
+- dont exit clients on capab either, people will just make newbies abuse
+  it (hey! /capab will make you a god!)
+- m_registered for cryptlink!? :)  lets just ignore it ;)
+
+
 *** 20010714_1 by leeh
 - call m_ignore instead of m_error when issued by client/oper
   (noticed by jv)
