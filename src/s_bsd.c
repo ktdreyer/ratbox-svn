@@ -330,6 +330,19 @@ void close_connection(struct Client *client_p)
       client_p->fd = -1;
     }
 
+  if(HasServlink(client_p))
+    {
+      fd_close(client_p->localClient->ctrlfd);
+#ifndef HAVE_SOCKETPAIR
+      fd_close(client_p->localClient->ctrlfd_r);
+      fd_close(client_p->fd_r);
+      client_p->localClient->ctrlfd_r = -1;
+      client_p->localClient->fd_r = -1;
+#endif
+      client_p->localClient->ctrlfd = -1;
+
+    }
+  
   linebuf_donebuf(&client_p->localClient->buf_sendq);
   linebuf_donebuf(&client_p->localClient->buf_recvq);
   memset(client_p->localClient->passwd, 0, sizeof(client_p->localClient->passwd));
