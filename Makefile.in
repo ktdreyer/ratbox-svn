@@ -44,11 +44,12 @@ SUBDIRS=src tools modules doc gnats messages include
 
 MAKE = make ${MFLAGS} 
 
-all:	configure build
+all:	build
 
-configure: autoconf/configure.in
+
+autoconf: autoconf/configure.in
 	autoconf autoconf/configure.in >configure
-	sh configure $(CONFIGURE_ARGS)
+	autoheader -l autoconf autoconf/configure.in > include/setup.h.in
 
 build:
 	-@if [ ! -f include/setup.h ] ; then \

@@ -25,8 +25,15 @@
 #include <sys/types.h>
 #define INCLUDED_sys_types_h
 #endif
+#ifndef INCLUDED_config_h
+#include "config.h"       /* HAVE_SOCKLEN_T */
+#endif
 
 #include "fdlist.h"
+
+#ifndef HAVE_SOCKLEN_T
+typedef unsigned int socklen_t;
+#endif
 
 #define READBUF_SIZE    16384   /* used in s_bsd *AND* s_zip.c ! */
 

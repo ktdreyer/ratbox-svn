@@ -47,3 +47,7 @@
 
 /* Define if we are going to use /dev/poll for network IO */
 #undef HAVE_DEVPOLL
+
+/* Define if we have socklen_t */
+#undef HAVE_SOCKLEN_T
+
