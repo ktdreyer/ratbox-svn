@@ -522,7 +522,7 @@ struct mode_letter
 	char letter;
 };
 
-struct mode_letter flags[] = {
+static struct mode_letter flags[] = {
 	{MODE_NOPRIVMSGS,	'n'},
 	{MODE_TOPICLIMIT,	't'},
 	{MODE_SECRET,		's'},
