@@ -1,3 +1,16 @@
+androsyn    2004/08/10 12:17:29 EDT	(20040810_2)
+
+  Modified files:
+    modules/core         registration.c 
+  Log:
+  The ::1 sockhosts cleanups *shouldn't* need to be done in introduce_client()
+  as the inetntop code *should* be doing this already.
+  
+  Revision  Changes    Path
+  1.11      +2 -11     ircd-ratbox/modules/core/registration.c
+
+
+
 androsyn    2004/08/10 11:34:49 EDT	(20040810_1)
 
   Modified files:
