@@ -48,8 +48,10 @@
 #define PEL 1
 #define BDL 2
 #define PDL 3
+#define NIL 4
+#define NOL 5
 
-extern FILE *logs[4];
+extern FILE *logs[6];
 #define LOG_IO(log, data, len)  assert(fwrite(data, 1, len, logs[log]) == len);
 #else
 #define LOG_IO(log, data, len)

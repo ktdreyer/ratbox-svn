@@ -104,7 +104,7 @@ void process_recvq(unsigned char *data, unsigned int datalen)
   buf = data;
   blen = datalen;
 
-  assert((datalen > 0) && (datalen <= READLEN));
+  assert(datalen <= READLEN);
 #ifdef HAVE_LIBCRYPTO
   if (in_state.crypt)
   {
@@ -284,6 +284,11 @@ void read_data(void)
       assert(out_state.zip_state.z_stream.avail_in == 0);
       blen = BUFLEN - out_state.zip_state.z_stream.avail_out;
       assert(blen);
+
+#if defined(HAVE_LIBZ) || defined(HAVE_LIBCRYPTO)
+     if (out_state.zip || out_state.crypt)
+       buf = tmp_buf;
+#endif
     }
 #endif
 
@@ -303,7 +308,7 @@ void read_data(void)
     
     assert(blen);
     ret = checkError(write(REMOTE_FD_W, out_state.buf, blen));
-
+    LOG_IO(NOL, out_state.buf, ret);
     if (ret < blen)
     {
       /* write incomplete, register write cb */
@@ -329,6 +334,7 @@ void write_net(void)
                                out_state.len))))
     return; /* no data waiting */
 
+  LOG_IO(NOL,(out_state.buf+out_state.ofs),ret);
   out_state.len -= ret;
 
   if (!out_state.len)
@@ -360,6 +366,7 @@ void read_net(void)
 
   while ((ret = checkError(read(REMOTE_FD_R, buf, READLEN))))
   {
+    LOG_IO(NIL,buf,ret);
     blen = ret;
 #ifdef HAVE_LIBCRYPTO
     if (in_state.crypt)
@@ -376,6 +383,11 @@ void read_net(void)
                                tmp_buf, ret));
       assert(blen == ret);
       LOG_IO(PDL,buf,blen);
+
+#if defined(HAVE_LIBCRYPTO) || defined(HAVE_LIBZ)
+      if (in_state.crypt || in_state.zip)
+        buf = tmp_buf;
+#endif
     }
 #endif
     
