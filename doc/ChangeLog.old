@@ -1,3 +1,9 @@
+*** 20010419_9 by jdc
+* Added kqueue bug.
+* Added LL server channel existence bug.
+
+
+
 *** 20010419_8 by a1kmm
 - Fixed the warning about setting the clock back.
 - Attempt to recover from a set back clock by moving the scheduled events
