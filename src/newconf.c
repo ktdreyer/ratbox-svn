@@ -386,6 +386,7 @@ static struct mode_table shared_table[] =
 	{ "unresv",	SHARED_UNRESV	},
 	{ "locops",	SHARED_LOCOPS	},
 	{ "all",	SHARED_ALL	},
+	{ "none",	0		},
 	{NULL, 0}
 };
 /* *INDENT-ON* */
@@ -401,7 +402,7 @@ find_umode(struct mode_table *tab, const char *name)
 			return tab[i].mode;
 	}
 
-	return 0;
+	return -1;
 }
 
 static void
@@ -429,16 +430,21 @@ set_modes_from_table(int *modes, const char *whatis, struct mode_table *tab, con
 
 		mode = find_umode(tab, umode);
 
-		if(!mode)
+		if(mode == -1)
 		{
 			conf_report_error("Warning -- unknown %s %s.", whatis, args->v.string);
 			continue;
 		}
 
-		if(dir)
-			*modes |= mode;
+		if(mode)
+		{
+			if(dir)
+				*modes |= mode;
+			else
+				*modes &= ~mode;
+		}
 		else
-			*modes &= ~mode;
+			*modes = 0;
 	}
 }
 
@@ -1111,30 +1117,57 @@ conf_end_shared(struct TopConf *tc)
 }
 
 static void
-conf_set_shared_name(void *data)
+conf_set_shared_oper(void *data)
 {
-	MyFree(yy_shared->server);
-	DupString(yy_shared->server, data);
-}
-
-static void
-conf_set_shared_user(void *data)
-{
+	static char splat[] = "*";
+	conf_parm_t *args = data;
+	const char *username;
+	const char *host;
 	char *p;
 
-	if((p = strchr(data, '@')))
+	if(args->next != NULL)
 	{
-		*p++ = '\0';
-		MyFree(yy_shared->username);
-		DupString(yy_shared->username, data);
+		if((args->type & CF_MTYPE) != CF_QSTRING)
+		{
+			conf_report_error("Ignoring shared::oper -- server is not a qstring");
+			return;
+		}
 
-		MyFree(yy_shared->host);
-		DupString(yy_shared->host, p);
+		MyFree(yy_shared->server);
+		DupString(yy_shared->server, args->v.string);
+		args = args->next;
 	}
+
+	if((args->type & CF_MTYPE) != CF_QSTRING)
+	{
+		conf_report_error("Ignoring shared::oper -- oper is not a qstring");
+		return;
+	}
+
+	if((p = strchr(args->v.string, '@')) == NULL)
+	{
+		conf_report_error("Ignoring shard::oper -- oper is not a user@host");
+		return;
+	}
+
+	username = args->v.string;
+	*p++ = '\0';
+	host = p;
+
+	if(EmptyString(host))
+		host = splat;
+
+	if(EmptyString(username))
+		username = splat;
+
+	MyFree(yy_shared->username);
+	MyFree(yy_shared->host);
+	DupString(yy_shared->username, username);
+	DupString(yy_shared->host, host);
 }
 
 static void
-conf_set_shared_type(void *data)
+conf_set_shared_flags(void *data)
 {
 	conf_parm_t *args = data;
 
@@ -2105,9 +2138,8 @@ newconf_init()
 	add_conf_item("resv", "nick", CF_QSTRING, conf_set_resv_nick);
 
 	add_top_conf("shared", conf_begin_shared, conf_end_shared, NULL);
-	add_conf_item("shared", "name", CF_QSTRING, conf_set_shared_name);
-	add_conf_item("shared", "user", CF_QSTRING, conf_set_shared_user);
-	add_conf_item("shared", "type", CF_STRING | CF_FLIST, conf_set_shared_type);
+	add_conf_item("shared", "oper", CF_QSTRING|CF_FLIST, conf_set_shared_oper);
+	add_conf_item("shared", "flags", CF_STRING | CF_FLIST, conf_set_shared_flags);
 
 	add_top_conf("connect", conf_begin_connect, conf_end_connect, conf_connect_table);
 
