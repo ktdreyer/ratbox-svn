@@ -192,6 +192,7 @@ Little things to be done given enough time and initiative -Hwy
 .  The syntax error in conf line number is 1 less than it actually is.
    Notice -- 77: syntax error on line:         e_lines_oper_only=yes;
    When e_lines_oper_only=yes; is on line 78. (fixed...)
+.  <Riedel> walter : have you implemented the motd= thing in the auth block ?
 
 -- Rodder's list
 .  Add scalable database-based authentication.  Probably part of Iauth.

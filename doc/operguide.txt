@@ -1,6 +1,6 @@
 
 EFnet Oper Guide
-12-29-2000,
+Last update : 01-25-2001
 Written and maintained by Riedel
 E-Mail : vink@vuurwerk.nl
 
@@ -230,6 +230,14 @@ Example topology :
   opers have multiple o-lines and are not watching all sessions. If you can't
   find an active oper on a server, you can /quote operwall a request for opers
   from that server.
+
+  Ghost KILLs are another story, an often misunderstood one.
+  When you see a /KILL from an oper with the reason 'ghosted' they usually
+  KILL a client that's about to ping timeout. That is not what a ghost is!
+  To quote Dianora : "a ghost happens because a client misses being killed when
+  it should be. Its a race condition due to nick chasing". In other words,
+  Server X thinks client A has been KILLed, while server Y missed the KILL
+  for that client.
 
 
 6. Kill and K-Line requests
