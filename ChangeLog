@@ -1,3 +1,16 @@
+leeh        2002/10/31 19:45:33 UTC	(20021031_1)
+
+  Modified files:
+    src                  packet.c 
+  Log:
+  - cleanup to the flood exempt stuff, treat users like servers, thus
+    speeding up the parsing
+  
+  Revision  Changes    Path
+  7.101     +2 -7      ircd-ratbox/src/packet.c
+
+
+
 androsyn    2002/10/31 00:15:38 UTC	(20021031_0)
 
   Modified files:
