@@ -1,3 +1,8 @@
+*** 20001113_3 by db
+- fix to s_conf.c *sigh*
+
+
+
 *** 20001113_2 by db
 - use more common functions whenever possible. grrr 
 
