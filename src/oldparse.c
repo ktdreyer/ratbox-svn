@@ -104,14 +104,14 @@ void oldParseOneLine(char* line,struct ConfItem* aconf,
       aconf->flags = CONF_FLAGS_E_LINED;
       conf_add_fields(aconf,host_field,pass_field,user_field,
 		      port_field,class_field);
-      conf_add_d_line(aconf);
+      conf_add_d_conf(aconf);
       break;
 
     case 'D': /* Deny lines (immediate refusal) */
       aconf->status = CONF_DLINE;
       conf_add_fields(aconf,host_field,pass_field,user_field,
 		      port_field,class_field);
-      conf_add_d_line(aconf);
+      conf_add_d_conf(aconf);
       break;
 
     case 'K': /* Kill user line on irc.conf           */
@@ -119,7 +119,7 @@ void oldParseOneLine(char* line,struct ConfItem* aconf,
       aconf->status = CONF_KILL;
       conf_add_fields(aconf,host_field,pass_field,user_field,
 		      port_field,class_field);
-      conf_add_k_line(aconf);
+      conf_add_k_conf(aconf);
       break;
       
     default:

@@ -92,10 +92,7 @@ extern char yytext[];
 static struct   Class* class0;
 
 static  int     attach_iline(struct Client *, struct ConfItem *);
-struct ConfItem *find_special_conf(char *, int );
 
-static void add_q_line(struct ConfItem *);
-static void clear_q_lines(void);
 static void clear_special_conf(struct ConfItem **);
 
 /* usually, with hash tables, you use a prime number...
@@ -123,11 +120,8 @@ struct ConfItem* ConfigItemList = NULL;
 /* conf xline link list root */
 struct ConfItem        *x_conf = ((struct ConfItem *)NULL);
 
-
-static void makeQlineEntry(aQlineItem *, struct ConfItem *, char *);
-
 /* conf qline link list root */
-aQlineItem         *q_conf = ((aQlineItem *)NULL);
+struct ConfItem        *q_conf = ((struct ConfItem*)NULL);
 
 /* conf uline link list root */
 struct ConfItem        *u_conf = ((struct ConfItem *)NULL);
@@ -1352,65 +1346,19 @@ int find_u_conf(char *server,char *user,char *host)
  */
 int find_q_conf(char *nickToFind,char *user,char *host)
 {
-  aQlineItem *qp;
   struct ConfItem *aconf;
 
-  for (qp = q_conf; qp; qp = qp->next)
+  for (aconf = q_conf; aconf; aconf = aconf->next)
     {
-      if (BadPtr(qp->name))
+      if (BadPtr(aconf->name))
           continue;
 
-      if(match(qp->name,nickToFind))
+      if(match(aconf->name,nickToFind))
         {
-          if(qp->confList)
-            {
-              for(aconf=qp->confList;aconf;aconf=aconf->next)
-                {
-                  if(match(aconf->user,user) && match(aconf->host,host))
-                    return NO;
-                }
-            }
           return YES;
         }
     }
   return NO;
-}
-
-/*
- * clear_q_lines
- *
- * inputs       - none
- * output       - none
- * side effects - clear out the q lines
- */
-static void clear_q_lines()
-{
-  aQlineItem *qp;
-  aQlineItem *qp_next;
-  struct ConfItem *aconf;
-  struct ConfItem *next_aconf;
-
-  for (qp = q_conf; qp; qp = qp_next)
-    {
-      qp_next = qp->next;
-
-      if(qp->name)
-        {
-          MyFree(qp->name);
-          qp->name = (char *)NULL;
-        }
-
-      if (qp->confList)
-        {
-          for (aconf = qp->confList; aconf; aconf = next_aconf)
-            {
-              next_aconf = aconf->next;
-              free_conf(aconf);
-            }
-        }
-      MyFree(qp);
-    }
-  q_conf = (aQlineItem *)NULL;
 }
 
 /*
@@ -1423,137 +1371,21 @@ static void clear_q_lines()
 
 void report_qlines(struct Client *sptr)
 {
-  aQlineItem *qp;
   struct ConfItem *aconf;
   char *host;
   char *user;
   char *pass;
   char *name;
   char *classname;
-  int port;
+  int  port;
 
-  for (qp = q_conf; qp; qp = qp->next)
+  for (aconf = q_conf; aconf; aconf = aconf->next)
     {
-      if(!qp->name)
-        {
-          continue;
-        }
-
-      for (aconf=qp->confList;aconf;aconf = aconf->next)
-        {
-          get_printable_conf(aconf, &name, &host, &pass, &user, &port,&classname);
+      get_printable_conf(aconf, &name, &host, &pass, &user, &port,&classname);
           
-          sendto_one(sptr, form_str(RPL_STATSQLINE),
-                     me.name, sptr->name, name, pass, user, host);
-        }
+      sendto_one(sptr, form_str(RPL_STATSQLINE),
+		 me.name, sptr->name, name, pass, user, host);
     }
-}
-
-/*
- * add_q_line
- *
- * inputs       - pointer to aconf to add
- * output       - none
- * side effects - given Q line is added to q line list 
- */
-
-static void add_q_line(struct ConfItem *aconf)
-{
-  char *pc;
-  aQlineItem *qp, *newqp;
-  char *uath;
-
-  if(!aconf->user)
-    DupString(aconf->user, "-");
-
-  for (qp = q_conf; qp; qp = qp->next)
-    {
-      if(!qp->name)
-        {
-          continue;
-        }
-
-      if(!irccmp(aconf->name,qp->name))
-        {
-          if (qp->confList)
-            {
-              /* 
-               * - Slowaris
-               */
-              
-              uath = strtoken(&pc, aconf->user, ",");
-              if(!uath)
-                {
-                  uath = aconf->user;
-                  makeQlineEntry(qp, aconf, uath);
-                }
-              else
-                {
-                  for( ; uath; uath = strtoken(&pc,NULL,","))
-                    {
-                      makeQlineEntry(qp, aconf, uath);
-                    }
-                }
-            }
-          free_conf(aconf);
-          return;
-        }
-    }
-
-  newqp = (aQlineItem *)MyMalloc(sizeof(aQlineItem));
-  newqp->confList = (struct ConfItem *)NULL;
-  DupString(newqp->name,aconf->name);
-  newqp->next = q_conf;
-  q_conf = newqp;
-
-  /* 
-   * - Slowaris
-   */
-
-  uath = strtoken(&pc, aconf->user, ",");
-  if(!uath)
-    {
-      uath = aconf->user;
-      makeQlineEntry(newqp, aconf, uath);
-    }
-  else
-    {
-      for ( ;uath; uath = strtoken(&pc,(char *)NULL,","))
-        {
-          makeQlineEntry(newqp, aconf, uath);
-        }
-    }
-
-  free_conf(aconf);
-}
-
-static void makeQlineEntry(aQlineItem *qp, struct ConfItem *aconf, char *uath)
-{
-  char *p,*comu,*comh;
-  struct ConfItem *bconf;
-
-  p = strchr(uath, '@');
-  if(!p)
-    {
-      DupString(comu,"-");
-      DupString(comh,"-");
-    }
-  else
-    {
-      *p = '\0';
-      DupString(comu,uath);
-      p++;
-      DupString(comh,p);
-    }
-                  
-  bconf = make_conf();
-  DupString(bconf->name, aconf->name);
-  if(aconf->passwd)
-    DupString(bconf->passwd,aconf->passwd);
-  bconf->user = comu;
-  bconf->host = comh;
-  bconf->next = qp->confList;
-  qp->confList = bconf;
 }
 
 /*
@@ -2493,7 +2325,7 @@ static void clear_out_old_conf(void)
     zap_Dlines();
     clear_special_conf(&x_conf);
     clear_special_conf(&u_conf);
-    clear_q_lines();
+    clear_special_conf(&q_conf);
 }
 
 /*
@@ -2897,13 +2729,13 @@ void conf_add_me(struct ConfItem *aconf)
 }
 
 /*
- * conf_add_k_line
+ * conf_add_k_conf
  * inputs       - pointer to config item
  * output       - NONE
  * side effects - Add a K line
  */
 
-void conf_add_k_line(struct ConfItem *aconf)
+void conf_add_k_conf(struct ConfItem *aconf)
 {
   unsigned long    ip;
   unsigned long    ip_mask;
@@ -2927,13 +2759,13 @@ void conf_add_k_line(struct ConfItem *aconf)
 }
 
 /*
- * conf_add_d_line
+ * conf_add_d_conf
  * inputs       - pointer to config item
  * output       - NONE
  * side effects - Add a d/D line
  */
 
-void conf_add_d_line(struct ConfItem *aconf)
+void conf_add_d_conf(struct ConfItem *aconf)
 {
   unsigned long    ip;
   unsigned long    ip_mask;
@@ -2954,13 +2786,13 @@ void conf_add_d_line(struct ConfItem *aconf)
 }
 
 /*
- * conf_add_x_line
+ * conf_add_x_conf
  * inputs       - pointer to config item
  * output       - NONE
  * side effects - Add a X line
  */
 
-void conf_add_x_line(struct ConfItem *aconf)
+void conf_add_x_conf(struct ConfItem *aconf)
 {
   MyFree(aconf->user);
   aconf->user = NULL;
@@ -2971,34 +2803,32 @@ void conf_add_x_line(struct ConfItem *aconf)
 }
 
 /*
- * conf_add_x_line
+ * conf_add_x_conf
  * inputs       - pointer to config item
  * output       - NONE
  * side effects - Add an U line
  */
 
-void conf_add_u_line(struct ConfItem *aconf)
+void conf_add_u_conf(struct ConfItem *aconf)
 {
   aconf->next = u_conf;
   u_conf = aconf;
 }
 
 /*
- * conf_add_q_line
+ * conf_add_q_conf
  * inputs       - pointer to config item
  * output       - NONE
  * side effects - Add a Q line
  */
 
-void conf_add_q_line(struct ConfItem *aconf)
+void conf_add_q_conf(struct ConfItem *aconf)
 {
-  aconf->name = aconf->host;
-  DupString(aconf->host, "*");
+  if(aconf->user == NULL)
+    DupString(aconf->user, "-");
 
-  /* host, password, name, port, class */
-  /* nick, reason, user@host */
-          
-  add_q_line(aconf);
+  aconf->next = q_conf;
+  q_conf = aconf;
 }
 
 /*

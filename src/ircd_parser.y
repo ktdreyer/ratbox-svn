@@ -199,7 +199,7 @@ int   class_redirport_var;
 %token  LINKS_NOTICE
 %token  LINKS_DELAY
 
-%type   <ip_entry> IP_TYPE
+%type   <ip_value> IP_TYPE
 %type   <string>   QSTRING
 %type   <number>   NUMBER
 
@@ -795,7 +795,7 @@ quarantine_entry:       QUARANTINE
   }
  '{' quarantine_items '}' ';'
   {
-    conf_add_q_line(yy_aconf);
+    conf_add_q_conf(yy_aconf);
     yy_aconf = (struct ConfItem *)NULL;
   }; 
 
@@ -806,7 +806,7 @@ quarantine_item:        quarantine_name | quarantine_reason | error
 
 quarantine_name:        NAME '=' QSTRING ';'
   {
-    DupString(yy_aconf->host,yylval.string);
+    DupString(yy_aconf->name,yylval.string);
   };
 
 quarantine_reason:      REASON '=' QSTRING ';' 
@@ -833,7 +833,7 @@ shared_entry:		SHARED
   }
   '{' shared_items '}' ';'
   {
-    conf_add_u_line(yy_aconf);
+    conf_add_u_conf(yy_aconf);
     yy_aconf = (struct ConfItem *)NULL;
   };
 
@@ -1091,7 +1091,7 @@ kill_entry:     KILL
   {
     if(yy_aconf->user && yy_aconf->passwd && yy_aconf->host)
       {
-        conf_add_k_line(yy_aconf);
+        conf_add_k_conf(yy_aconf);
       }
     else
       {
@@ -1206,7 +1206,7 @@ gecos_entry:     GECOS
 	  {
 	    DupString(yy_aconf->passwd,"Something about your name");
 	  }
-        conf_add_x_line(yy_aconf);
+        conf_add_x_conf(yy_aconf);
       }
     else
       {
