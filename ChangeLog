@@ -1,3 +1,17 @@
+androsyn    2002/08/25 12:17:17 EDT	(20020825_0)
+
+  Modified files:
+    adns                 query.c 
+  Log:
+  Fix a stupid bug that could have potentially overflowed the heap.  This
+  never could have happened though, because the zone we are checking is always
+  ip6.int.
+  
+  Revision  Changes    Path
+  1.14      +1 -1      ircd-ratbox/adns/query.c
+
+
+
 leeh        2002/08/24 19:27:41 EDT	(20020824_6)
 
   Modified files:
