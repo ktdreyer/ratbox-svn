@@ -1,3 +1,22 @@
+leeh        2002/02/06 10:02:35 EST	(20020206_1)
+
+  Modified files:
+    include              s_serv.h 
+    modules              m_invite.c 
+    src                  adns.c s_serv.c 
+  Log:
+  - cleaned up K&R/single space indenting in adns.c
+  - added CAP_PARA
+  - if channel is +p, broadcast invite to CAP_PARA servers
+  
+  Revision  Changes    Path
+  7.62      +2 -1      ircd-hybrid-7/include/s_serv.h
+  1.41      +22 -21    ircd-hybrid-7/modules/m_invite.c
+  7.37      +104 -87   ircd-hybrid-7/src/adns.c
+  7.238     +1 -0      ircd-hybrid-7/src/s_serv.c
+
+
+
 ejb         2002/02/05 22:37:53 EST	(20020206_0)
 
   Added files:
