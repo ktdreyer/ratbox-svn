@@ -1,3 +1,16 @@
+leeh        2005/02/23 18:42:59 EST	(20050223_0)
+
+  Modified files:
+    include              hash.h 
+  Log:
+  - double the size of the client and channel hashtables (64k -> 128k and
+    32k -> 64k).  The improvements are quite significant..
+  
+  Revision  Changes    Path
+  7.54      +4 -4      ircd-ratbox/include/hash.h
+
+
+
 leeh        2005/02/22 14:55:56 EST	(20050222_1)
 
   Modified files:
