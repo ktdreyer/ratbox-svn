@@ -1611,8 +1611,6 @@ static int
 s_chan_listusers(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct member_reg *mreg_p;
-	struct member_reg *mreg_tp;
-	dlink_node *ptr;
 
 	if((mreg_p = verify_member_reg_name(client_p, NULL, parv[0], S_C_SUSPEND)) == NULL)
 		return 1;
@@ -1620,17 +1618,7 @@ s_chan_listusers(struct client *client_p, struct lconn *conn_p, const char *parv
 	slog(chanserv_p, 3, "%s %s LISTUSERS %s",
 		client_p->user->mask, client_p->user->user_reg->name, parv[0]);
 
-	service_error(chanserv_p, client_p, "Channel %s access list:",
-			mreg_p->channel_reg->name);
-
-	DLINK_FOREACH(ptr, mreg_p->channel_reg->users.head)
-	{
-		mreg_tp = ptr->data;
-
-		service_error(chanserv_p, client_p, "  %-10s %3d (%d) [mod: %s]",
-				mreg_tp->user_reg->name, mreg_tp->level,
-				mreg_tp->suspend, mreg_tp->lastmod);
-	}
+	dump_info_accesslist(client_p, NULL, mreg_p->channel_reg);
 
 	service_error(chanserv_p, client_p, "End of access list");
 
@@ -2793,6 +2781,7 @@ dump_info_accesslist(struct client *client_p, struct lconn *conn_p,
 {
 	struct member_reg *mreg_p;
 	dlink_node *ptr;
+	char buf[30];
 
 	service_send(chanserv_p, client_p, conn_p,
 			"[%s] Access list:", chreg_p->name);
@@ -2800,11 +2789,14 @@ dump_info_accesslist(struct client *client_p, struct lconn *conn_p,
 	DLINK_FOREACH(ptr, chreg_p->users.head)
 	{
 		mreg_p = ptr->data;
+		snprintf(buf, sizeof(buf), "(susp %d) ", mreg_p->suspend);
 
-		service_send(chanserv_p, client_p, conn_p,
-				"     %-10s %3d (%d) [mod: %s]",
+		service_send(chanserv_p, client_p, conn_p, 
+				"  %-10s %3d%s %s[mod: %s]",
 				mreg_p->user_reg->name, mreg_p->level,
-				mreg_p->suspend, mreg_p->lastmod);
+				(mreg_p->flags & (CS_MEMBER_AUTOOP|CS_MEMBER_AUTOVOICE)) ?
+				 ((mreg_p->flags & CS_MEMBER_AUTOOP) ? ":AOP" : ":AVOICE") : "",
+				mreg_p->suspend ? buf : "", mreg_p->lastmod);
 	}
 }
 
