@@ -49,6 +49,8 @@ extern dlink_node *_make_dlink_node (void);
 #define make_dlink_node() _make_dlink_node();
 #endif
 extern void _free_dlink_node(dlink_node *lp);
+extern void init_dlink_nodes();
+
 extern struct User     *make_user (struct Client *);
 extern struct Server   *make_server (struct Client *);
 
