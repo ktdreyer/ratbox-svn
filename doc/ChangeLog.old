@@ -1,3 +1,7 @@
+*** 20010427_3 by habeeb
+Switched channel_chanop_or_voice() around to return half ops before voice.
+
+
 *** 20010427_2 by habeeb
 Fix for WHOIS buffer overflow in listing channels pointed out by pasky.
 
