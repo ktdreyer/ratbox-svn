@@ -1,3 +1,7 @@
+*** 20001223_23 by madmax
+Fixes for operwall/locops (flame)
+
+
 *** 20001223_22 by ejb
 - fix a stupid core in parse.c.
 
