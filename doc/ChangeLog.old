@@ -1,3 +1,7 @@
+*** 20001230_2 by lusky
+- more cleanups, /src now compiles without warnings on fbsd3.4
+
+
 *** 20001230_1 by lusky
 more massive cleanups of compiler warnings
 
