@@ -1,3 +1,16 @@
+androsyn    2004/01/12 19:06:48 EST	(20040113_0)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Its of great use to actually send QUITs out when you receive them from
+  remote servers
+  
+  Revision  Changes    Path
+  7.419     +8 -0      ircd-ratbox/src/client.c
+
+
+
 androsyn    2004/01/12 16:31:13 EST	(20040112_0)
 
   Modified files:
