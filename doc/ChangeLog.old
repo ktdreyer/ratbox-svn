@@ -1,3 +1,9 @@
+*** 20001227_37 by wcampbel
+1. Updated my part of the TODO list
+2. Synchronized Hybrid-team and version.c.SH (einride in one, flame in the 
+   other, and Wohali's email address changed)
+
+
 *** 20001227_36 by ejb
 - make ocnifugre should run conifgure as well as building it
 - make /restart require server name
