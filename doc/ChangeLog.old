@@ -1,3 +1,9 @@
+*** 20001223_35 by madmax
+All server modes now show as coming from the current server.
+This is now whether you are shiding or not - CS has always done it that way 
+apparently, so nothing should break.
+
+
 *** 20001223_34 by ejb
 - add cap_hops, doesn't do anything yet.
 
