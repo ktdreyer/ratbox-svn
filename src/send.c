@@ -1031,6 +1031,51 @@ sendto_match_butone(struct Client *one, struct Client *from,
 
 } /* sendto_match_butone() */
 
+/* sendto_match_servs()
+ *
+ * inputs       - source client
+ *              - mask to send to
+ *              - capab needed
+ *              - data
+ * outputs      - data sent to servers matching with capab
+ * side effects -
+ */
+void
+sendto_match_servs(struct Client *source_p, const char *mask, int cap,
+                   const char *pattern, ...)
+{
+  va_list args;
+  dlink_node *ptr;
+  struct Client *target_p;
+  buf_head_t linebuf_ptr;
+
+  linebuf_newbuf(&linebuf_ptr);
+
+  va_start(args, pattern);
+  linebuf_putmsg(&linebuf_ptr, pattern, &args, ":%s ", source_p->name);
+  va_end(args);
+
+  current_serial++;
+
+  DLINK_FOREACH(ptr, global_serv_list.head)
+  {
+    target_p = ptr->data;
+
+    if(target_p->from->serial == current_serial)
+      continue;
+
+    if(!IsCapable(target_p->from, cap))
+      continue;
+
+    if(match(mask, target_p->name))
+    {
+      send_linebuf(target_p->from, &linebuf_ptr);
+      target_p->from->serial = current_serial;
+    }
+  }
+
+  linebuf_donebuf(&linebuf_ptr);
+}
 
 /*
  * sendto_anywhere

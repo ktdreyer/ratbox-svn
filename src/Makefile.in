@@ -60,6 +60,7 @@ BASE_SRCS =                     \
   channel_mode.c		\
   class.c                       \
   client.c                      \
+  cluster.c			\
   dynlink.c			\
   event.c                       \
   fdlist.c                      \

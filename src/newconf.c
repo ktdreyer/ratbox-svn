@@ -26,6 +26,7 @@
 #include "s_serv.h"
 #include "event.h"
 #include "hash.h"
+#include "cluster.h"
 
 #define CF_TYPE(x) ((x) & CF_MTYPE)
 
@@ -392,6 +393,7 @@ struct Class *yy_class = NULL;
 
 static struct xline *yy_xconf = NULL;
 static struct shared *yy_uconf = NULL;
+static struct cluster *yy_cconf = NULL;
 
 char *resv_reason;
 
@@ -452,6 +454,11 @@ static struct mode_table auth_table[] = {
 	{NULL}
 };
 
+static struct mode_table cluster_table[] = {
+        {"kline",               CLUSTER_KLINE},
+        {"unkline",             CLUSTER_UNKLINE},
+        {"locops",              CLUSTER_LOCOPS},
+};
 
 static
 int	find_umode(struct mode_table* tab, char *name)
@@ -1806,6 +1813,40 @@ static void	conf_set_gecos_action(void *data)
 		conf_report_error("Warning -- invalid gecos::action.");
 }
 
+static int      conf_begin_cluster(struct TopConf *tc)
+{
+        yy_cconf = make_cluster();
+        return 0;
+}
+
+static int      conf_end_cluster(struct TopConf *tc)
+{
+        if(!BadPtr(yy_cconf->name))
+        {
+                dlinkAddAlloc(yy_cconf, &cluster_list);
+        }
+        else
+        {
+                conf_report_error("Ignoring cluster -- invalid cluster::server");
+                free_cluster(yy_cconf);
+        }
+
+        yy_cconf = NULL;
+        return 0;
+}
+
+static void     conf_set_cluster_name(void *data)
+{
+        MyFree(yy_cconf->name);
+        DupString(yy_cconf->name, data);
+}
+
+static void     conf_set_cluster_type(void *data)
+{
+        conf_parm_t *args = data;
+
+        set_modes_from_table(&yy_cconf->type, "flag", cluster_table, args);
+}
 
 static void	conf_set_general_failed_oper_notice(void *data)
 {
@@ -2576,7 +2617,12 @@ void	newconf_init()
 	add_conf_item("gecos", "name", CF_QSTRING, conf_set_gecos_name);
 	add_conf_item("gecos", "reason", CF_QSTRING, conf_set_gecos_reason);
 	add_conf_item("gecos", "action", CF_STRING, conf_set_gecos_action);
-	
+
+        add_top_conf("cluster", conf_begin_cluster, conf_end_cluster);
+        add_conf_item("cluster", "name", CF_QSTRING, conf_set_cluster_name);
+        add_conf_item("cluster", "type", CF_STRING | CF_FLIST,
+                      conf_set_cluster_type);
+
 	add_top_conf("general", NULL, NULL);
 	add_conf_item("general", "failed_oper_notice", CF_YESNO,
 			conf_set_general_failed_oper_notice);

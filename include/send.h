@@ -85,6 +85,9 @@ extern  void sendto_match_butone(struct Client *, struct Client *,
                                  char *, int, const char *, ...)
                                  AFP(5, 6);
 
+extern void sendto_match_servs(struct Client *source_p, const char *mask, 
+                               int capab, const char *, ...) AFP(4, 5);
+
 extern  void sendto_realops_flags(int, int, const char *, ...) AFP(3, 4);
 
 extern  void sendto_wallops_flags(int, struct Client *, const char *, ...)

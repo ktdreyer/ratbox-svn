@@ -197,12 +197,10 @@ mo_kline(struct Client *client_p, struct Client *source_p,
 
   if (target_server != NULL)
     {
-      sendto_server(NULL, NULL, CAP_KLN, NOCAPS, 
-                    ":%s KLINE %s %lu %s %s :%s",
-                    source_p->name,
-                    target_server,
-                    (unsigned long) tkline_time,
-                    user, host, reason);
+      sendto_match_servs(source_p, target_server, CAP_KLN,
+                         "KLINE %s %lu %s %s :%s",
+                         target_server, (unsigned long) tkline_time,
+                         user, host, reason);
 
       /* If we are sending it somewhere that doesnt include us, stop */
       if(!match(target_server, me.name))
@@ -269,20 +267,19 @@ ms_kline(struct Client *client_p, struct Client *source_p,
 
   /* parv[0]  parv[1]        parv[2]      parv[3]  parv[4]  parv[5] */
   /* oper     target_server  tkline_time  user     host     reason */
-  sendto_server(client_p, NULL, CAP_KLN, NOCAPS, 
-                ":%s KLINE %s %s %s %s :%s",
-                parv[0], parv[1], parv[2], parv[3], parv[4], parv[5]);
+  sendto_match_servs(client_p, parv[1], CAP_KLN, 
+                     "KLINE %s %s %s %s :%s",
+                     parv[1], parv[2], parv[3], parv[4], parv[5]);
 
-
-  kuser = parv[3];
-  khost = parv[4];
-  kreason = parv[5];
-
-  if (!match(parv[1],me.name))
+  if (!match(parv[1], me.name))
     return;
 
   if (!IsPerson(source_p))
     return;
+
+  kuser = parv[3];
+  khost = parv[4];
+  kreason = parv[5];
 
   if (find_shared(source_p->username, source_p->host,
                   source_p->user->server, OPER_K))
