@@ -1,3 +1,7 @@
+*** 20010516_4 by leeh
+- let halfops see and set +eI
+
+
 *** 20010516_3 by leeh
 - check parc == 5, because if we trust hyb6 glines.. we'll gline the
   oper instead of the target..
