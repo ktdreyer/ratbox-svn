@@ -32,7 +32,7 @@ localstatedir	= @localstatedir@
 moduledir	= @prefix@/modules
 automoduledir	= @prefix@/modules/autoload
 
-PROGS		= viconf mkpasswd fixklines convertconf convertklines encspeed
+PROGS		= viconf mkpasswd convertconf convertklines encspeed
 
 mkpasswd_SOURCES = mkpasswd.c
 mkpasswd_OBJECTS = mkpasswd.o
