@@ -1,3 +1,11 @@
+*** 20010718_5 by leeh
+- missed a 'fi' in the makefile
+- fixed two stupid bugs:
+  i) if a client has an id.. hes already regged, so calling 
+       client_from_server == core.
+  ii) fixed the logic for people changing nick case       
+
+
 *** 20010718_4 by leeh
 - IRCD_CFLAGS -> IRC_CFLAGS (or whatever it was ;p)
 - removed an ugly hack in m_jupe.c I added when not thinking
