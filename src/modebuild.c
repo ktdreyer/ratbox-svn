@@ -49,7 +49,7 @@ modebuild_add(int dir, const char *mode, const char *arg)
 {
 	int len;
 
-	len = strlen(arg);
+	len = arg != NULL ? strlen(arg) : 0;
 
 	if((cur_len + plen + len + 4) > (BUFSIZE - 3) ||
 	   modecount >= MAX_MODES)
@@ -70,12 +70,15 @@ modebuild_add(int dir, const char *mode, const char *arg)
 	}
 
 	strcat(modebuf, mode);
-	strcat(parabuf, arg);
-	strcat(parabuf, " ");
+	if (arg != NULL)
+	{
+		strcat(parabuf, arg);
+		strcat(parabuf, " ");
+		modecount++;
+		plen += (len + 1);
+	}
 
 	cur_len++;
-	plen += (len + 1);
-	modecount++;
 }
 
 void
