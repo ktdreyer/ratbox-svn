@@ -1,3 +1,32 @@
+joant       2002/07/11 23:30:09 EDT	(20020712_8)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    include              tools.h 
+    modules              m_kline.c 
+    modules/core         m_server.c 
+    servlink             servlink.c 
+    src                  channel_mode.c motd.c s_serv.c 
+    tools                encspeed.c 
+  Log:
+  - Code cleanup thanks to Forte C v7 warnings.
+  - Order of CFLAGS changed in configure to fix Forte problem.
+  
+  Revision  Changes    Path
+  7.144     +5 -5      ircd-hybrid-7/autoconf/configure.in
+  7.147     +5 -5      ircd-hybrid-7/configure
+  1.13      +7 -7      ircd-hybrid-7/include/tools.h
+  1.85      +5 -1      ircd-hybrid-7/modules/core/m_server.c
+  1.106     +2 -2      ircd-hybrid-7/modules/m_kline.c
+  1.24      +2 -2      ircd-hybrid-7/servlink/servlink.c
+  7.43      +2 -2      ircd-hybrid-7/src/channel_mode.c
+  7.25      +1 -1      ircd-hybrid-7/src/motd.c
+  7.266     +1 -1      ircd-hybrid-7/src/s_serv.c
+  7.5       +2 -2      ircd-hybrid-7/tools/encspeed.c
+
+
+
 joant       2002/07/11 21:24:05 EDT	(20020712_7)
 
   Modified files:
