@@ -1,3 +1,8 @@
+*** 20010307_8 by db
+- We had forgotten to send RPL_LISTSTART
+
+
+
 *** 20010307_7 by androsyn
 More incremental progress on ziplinks.  It will send out CAPAB ZIP if 
 compressed = YES in the config file.
