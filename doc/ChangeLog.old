@@ -1,3 +1,15 @@
+androsyn    2002/05/13 00:04:18 EDT	(20020513_0)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Added SetDead() to exit_one_client() maybe this will fix this goofy thing
+  
+  Revision  Changes    Path
+  7.254     +1 -1      ircd-hybrid-7/src/client.c
+
+
+
 leeh        2002/05/12 17:37:10 EDT	(20020512_4)
 
   Modified files:
