@@ -26,8 +26,6 @@
 #ifndef INCLUDED_whowas_h
 #define INCLUDED_whowas_h
 
-#include "client.h"
-
 /*
  * Whowas hash table size
  *

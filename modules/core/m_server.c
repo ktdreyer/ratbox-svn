@@ -26,6 +26,7 @@
 
 #include "stdinc.h"
 #include "tools.h"
+#include "linebuf.h"
 #include "client.h"		/* client struct */
 #include "event.h"
 #include "hash.h"		/* add_to_client_hash */
@@ -41,6 +42,7 @@
 #include "send.h"		/* sendto_one */
 #include "msg.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
 
 static int mr_server(struct Client *, struct Client *, int, const char **);

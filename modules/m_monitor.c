@@ -32,13 +32,19 @@
 
 #include "stdinc.h"
 #include "tools.h"
+#include "linebuf.h"
 #include "client.h"
 #include "msg.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
+#include "balloc.h"
 #include "monitor.h"
 #include "numeric.h"
 #include "s_conf.h"
+#include "ircd.h"
+#include "irc_string.h"
+#include "send.h"
 
 static int m_monitor(struct Client *, struct Client *, int, const char **);
 

@@ -32,6 +32,7 @@
 
 #include "stdinc.h"
 #include "tools.h"
+#include "linebuf.h"
 #include "send.h"
 #include "channel.h"
 #include "client.h"
@@ -47,6 +48,7 @@
 #include "hash.h"
 #include "msg.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
 #include "s_conf.h"
 #include "s_newconf.h"

@@ -26,6 +26,7 @@
 
 #include "stdinc.h"
 #include "tools.h"		/* dlink_node/dlink_list */
+#include "linebuf.h"
 #include "class.h"		/* report_classes */
 #include "client.h"		/* Client */
 #include "irc_string.h"
@@ -45,10 +46,12 @@
 #include "event.h"		/* events */
 #include "linebuf.h"
 #include "parse.h"
-#include "modules.h"
 #include "hook.h"
+#include "modules.h"
 #include "s_newconf.h"
 #include "hash.h"
+#include "adns.h"
+#include "res.h"
 
 static int m_stats (struct Client *, struct Client *, int, const char **);
 

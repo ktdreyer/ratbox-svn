@@ -25,12 +25,15 @@
  */
 
 #include "stdinc.h"
+#include "tools.h"
+#include "linebuf.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
 #include "msg.h"
 #include "memory.h"
+#include "hook.h"
 #include "modules.h"
 #include "s_log.h"
 #include "s_conf.h"

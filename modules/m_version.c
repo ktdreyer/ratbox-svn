@@ -24,7 +24,9 @@
  *  $Id$
  */
 
-#include <stdinc.h>
+#include "stdinc.h"
+#include "tools.h"
+#include "linebuf.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -34,6 +36,7 @@
 #include "send.h"
 #include "msg.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
 
 static char *confopts(struct Client *source_p);

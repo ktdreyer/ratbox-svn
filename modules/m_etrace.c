@@ -33,6 +33,8 @@
  */
 
 #include "stdinc.h"
+#include "tools.h"
+#include "linebuf.h"
 #include "class.h"
 #include "hook.h"
 #include "client.h"

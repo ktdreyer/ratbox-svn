@@ -35,6 +35,8 @@
 
 /* List of ircd includes from ../include/ */
 #include "stdinc.h"
+#include "tools.h"
+#include "linebuf.h"
 #include "client.h"
 #include "ircd.h"
 #include "irc_string.h"
@@ -45,6 +47,7 @@
 #include "send.h"
 #include "msg.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
 
 static int mo_testmask(struct Client *client_p, struct Client *source_p,

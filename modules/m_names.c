@@ -27,6 +27,7 @@
 #include "stdinc.h"
 #include "sprintf_irc.h"
 #include "tools.h"
+#include "linebuf.h"
 #include "channel.h"
 #include "client.h"
 #include "hash.h"
@@ -38,6 +39,7 @@
 #include "s_conf.h"
 #include "msg.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
 
 static int m_names(struct Client *, struct Client *, int, const char **);

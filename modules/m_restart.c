@@ -25,6 +25,8 @@
  */
 
 #include "stdinc.h"
+#include "tools.h"
+#include "linebuf.h"
 #include "client.h"
 #include "irc_string.h"
 #include "sprintf_irc.h"
@@ -37,6 +39,7 @@
 #include "send.h"
 #include "msg.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
 
 static int mo_restart(struct Client *, struct Client *, int, const char **);

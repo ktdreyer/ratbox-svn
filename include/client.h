@@ -31,9 +31,6 @@
 #error Incorrect config.h for this revision of ircd.
 #endif
 
-#include "linebuf.h"
-#include "channel.h"
-#include "res.h"
 #ifdef IPV6
 #define HOSTIPLEN	53	/* sizeof("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255.ipv6") */
 #else

@@ -25,6 +25,7 @@
  */
 #include "stdinc.h"
 #include "tools.h"
+#include "linebuf.h"
 #include "client.h"
 #include "channel.h"
 #include "hash.h"
@@ -38,6 +39,7 @@
 #include "s_log.h"
 #include "msg.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
 #include "s_newconf.h"
 

@@ -35,8 +35,6 @@
 #ifndef INCLUDED_s_newconf_h
 #define INCLUDED_s_newconf_h
 
-#include "tools.h"
-
 #ifdef HAVE_LIBCRYPTO
 #include <openssl/rsa.h>
 #endif
@@ -65,7 +63,7 @@ typedef struct
 {
 	char *ip;
 	time_t expiry;
-	patricia_node_t *pnode;
+	struct _patricia_node_t *pnode;
 	dlink_node node;
 } tgchange;
 

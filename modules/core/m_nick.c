@@ -25,6 +25,8 @@
  */
 
 #include "stdinc.h"
+#include "tools.h"
+#include "linebuf.h"
 #include "client.h"
 #include "hash.h"
 #include "irc_string.h"
@@ -41,10 +43,13 @@
 #include "s_log.h"
 #include "msg.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
 #include "scache.h"
 #include "s_newconf.h"
+#include "balloc.h"
 #include "monitor.h"
+#include "commio.h"
 
 static int mr_nick(struct Client *, struct Client *, int, const char **);
 static int m_nick(struct Client *, struct Client *, int, const char **);

@@ -26,6 +26,7 @@
 
 #include "stdinc.h"
 #include "tools.h"
+#include "linebuf.h"
 #include "client.h"
 #include "hash.h"
 #include "channel.h"
@@ -41,8 +42,8 @@
 #include "s_log.h"
 #include "msg.h"
 #include "parse.h"
-#include "modules.h"
 #include "hook.h"
+#include "modules.h"
 #include "s_newconf.h"
 
 static void do_whois(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);

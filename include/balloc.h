@@ -27,9 +27,6 @@
 #ifndef INCLUDED_blalloc_h
 #define INCLUDED_blalloc_h
 
-#include "tools.h"
-#include "memory.h"
-
 #define CACHEFILE_HEAP_SIZE	32
 #define CACHELINE_HEAP_SIZE	64
 

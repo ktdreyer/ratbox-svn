@@ -26,6 +26,7 @@
 
 #include "stdinc.h"
 #include "tools.h"
+#include "linebuf.h"
 #include "channel.h"
 #include "client.h"
 #include "hash.h"
@@ -37,6 +38,7 @@
 #include "s_serv.h"
 #include "msg.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
 
 static int m_invite(struct Client *, struct Client *, int, const char **);

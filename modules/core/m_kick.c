@@ -26,6 +26,7 @@
 
 #include "stdinc.h"
 #include "tools.h"
+#include "linebuf.h"
 #include "channel.h"
 #include "client.h"
 #include "irc_string.h"
@@ -33,6 +34,7 @@
 #include "numeric.h"
 #include "send.h"
 #include "msg.h"
+#include "hook.h"
 #include "modules.h"
 #include "parse.h"
 #include "hash.h"

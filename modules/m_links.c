@@ -25,6 +25,8 @@
  */
 
 #include "stdinc.h"
+#include "tools.h"
+#include "linebuf.h"
 #include "client.h"
 #include "irc_string.h"
 #include "ircd.h"
@@ -34,8 +36,8 @@
 #include "s_conf.h"
 #include "msg.h"
 #include "parse.h"
-#include "modules.h"
 #include "hook.h"
+#include "modules.h"
 #include "cache.h"
 
 static int m_links(struct Client *, struct Client *, int, const char **);

@@ -25,6 +25,8 @@
  */
 
 #include "stdinc.h"
+#include "tools.h"
+#include "linebuf.h"
 #include "ircd.h"
 #include "s_user.h"
 #include "client.h"
@@ -37,6 +39,7 @@
 #include "msg.h"
 #include "parse.h"
 #include "hash.h"
+#include "hook.h"
 #include "modules.h"
 
 static int mr_pong(struct Client *, struct Client *, int, const char **);

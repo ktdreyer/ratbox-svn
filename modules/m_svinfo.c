@@ -24,6 +24,8 @@
  *  $Id$
  */
 #include "stdinc.h"
+#include "tools.h"
+#include "linebuf.h"
 #include "client.h"
 #include "irc_string.h"
 #include "ircd.h"
@@ -33,6 +35,7 @@
 #include "s_log.h"
 #include "msg.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
 
 static int ms_svinfo(struct Client *, struct Client *, int, const char **);

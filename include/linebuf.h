@@ -27,8 +27,6 @@
 #ifndef __LINEBUF_H__
 #define __LINEBUF_H__
 
-#include "tools.h"
-
 /* How big we want a buffer - 510 data bytes, plus space for a '\0' */
 #define BUF_DATA_SIZE		511
 
@@ -36,6 +34,8 @@
 #define LINEBUF_PARTIAL         1
 #define LINEBUF_PARSED          0
 #define LINEBUF_RAW             1
+
+struct Client;
 
 struct _buf_line;
 struct _buf_head;

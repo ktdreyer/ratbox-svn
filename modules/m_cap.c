@@ -32,6 +32,7 @@
 
 #include "stdinc.h"
 #include "tools.h"
+#include "linebuf.h"
 #include "class.h"
 #include "client.h"
 #include "irc_string.h"
@@ -39,9 +40,12 @@
 #include "numeric.h"
 #include "msg.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
 #include "s_serv.h"
 #include "s_user.h"
+#include "sprintf_irc.h"
+#include "send.h"
 
 typedef int (*bqcmp)(const void *, const void *);
 

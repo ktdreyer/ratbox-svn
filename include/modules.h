@@ -26,7 +26,6 @@
 
 #ifndef INCLUDED_modules_h
 #define INCLUDED_modules_h
-#include "parse.h"
 
 #define MAPI_RATBOX 1
 
@@ -36,10 +35,6 @@
 #if !defined(STATIC_MODULES) && defined(HAVE_DLFCN_H)
 #include <dlfcn.h>
 #endif
-
-#include "msg.h"
-#include "memory.h"
-#include "hook.h"
 
 struct module
 {

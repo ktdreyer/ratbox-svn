@@ -31,8 +31,10 @@
  */
 #include "stdinc.h"
 #include "tools.h"
+#include "linebuf.h"
 #include "send.h"
 #include "client.h"
+#include "hook.h"
 #include "modules.h"
 #include "msg.h"
 #include "hostmask.h"
@@ -40,6 +42,8 @@
 #include "s_conf.h"
 #include "s_newconf.h"
 #include "sprintf_irc.h"
+#include "irc_string.h"
+#include "ircd.h"
 
 static int mo_testline(struct Client *, struct Client *, int, const char **);
 static int mo_testgecos(struct Client *, struct Client *, int, const char **);

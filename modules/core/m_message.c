@@ -25,6 +25,8 @@
  */
 
 #include "stdinc.h"
+#include "tools.h"
+#include "linebuf.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -32,6 +34,7 @@
 #include "s_serv.h"
 #include "msg.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
 #include "channel.h"
 #include "irc_string.h"
@@ -42,6 +45,7 @@
 #include "event.h"
 #include "patricia.h"
 #include "s_newconf.h"
+#include "memory.h"
 
 static int m_message(int, const char *, struct Client *, struct Client *, int, const char **);
 static int m_privmsg(struct Client *, struct Client *, int, const char **);

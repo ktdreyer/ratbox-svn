@@ -32,10 +32,6 @@
 #include <openssl/rsa.h>
 #endif
 
-#include "class.h"
-#include "client.h"
-#include "patricia.h"
-
 struct Client;
 struct DNSReply;
 struct hostent;
@@ -69,7 +65,7 @@ struct ConfItem
 	time_t hold;		/* Hold action until this time (calendar time) */
 	char *className;	/* Name of class */
 	struct Class *c_class;	/* Class of connection */
-	patricia_node_t *pnode;	/* Our patricia node */
+	struct _patricia_node_t *pnode;	/* Our patricia node */
 };
 
 #define CONF_ILLEGAL            0x80000000

@@ -26,6 +26,7 @@
 
 #include "stdinc.h"
 #include "tools.h"
+#include "linebuf.h"
 #include "m_info.h"
 #include "channel.h"
 #include "client.h"

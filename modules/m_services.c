@@ -33,6 +33,7 @@
 
 #ifdef ENABLE_SERVICES
 #include "tools.h"
+#include "linebuf.h"
 #include "send.h"
 #include "channel.h"
 #include "client.h"
@@ -44,8 +45,10 @@
 #include "hash.h"
 #include "msg.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
 #include "sprintf_irc.h"
+#include "irc_string.h"
 
 static int me_su(struct Client *, struct Client *, int, const char **);
 static int me_login(struct Client *, struct Client *, int, const char **);

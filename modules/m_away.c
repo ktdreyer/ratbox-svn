@@ -25,6 +25,8 @@
  */
 
 #include "stdinc.h"
+#include "tools.h"
+#include "linebuf.h"
 #include "client.h"
 #include "irc_string.h"
 #include "ircd.h"
@@ -32,9 +34,11 @@
 #include "send.h"
 #include "msg.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
 #include "s_conf.h"
 #include "s_serv.h"
+#include "memory.h"
 
 static int m_away(struct Client *, struct Client *, int, const char **);
 

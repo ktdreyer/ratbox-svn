@@ -27,8 +27,6 @@
 #ifndef INCLUDED_supported_h
 #define INCLUDED_supported_h
 
-#include "channel.h"
-
 #define FEATURES "CHANTYPES=&#"		\
 		"%s%s"			\
 		" CHANMODES=%s%sb,k,l,imnpst"	\

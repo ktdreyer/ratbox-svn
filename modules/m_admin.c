@@ -25,6 +25,8 @@
  */
 
 #include "stdinc.h"
+#include "tools.h"
+#include "linebuf.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -35,6 +37,7 @@
 #include "parse.h"
 #include "hook.h"
 #include "modules.h"
+#include "irc_string.h"
 
 static int m_admin(struct Client *, struct Client *, int, const char **);
 static int mr_admin(struct Client *, struct Client *, int, const char **);

@@ -26,6 +26,7 @@
 
 #include "stdinc.h"
 #include "tools.h"
+#include "linebuf.h"
 #include "balloc.h"
 #include "channel.h"
 #include "client.h"
@@ -40,6 +41,7 @@
 #include "send.h"
 #include "msg.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
 #include "sprintf_irc.h"
 #include "s_newconf.h"

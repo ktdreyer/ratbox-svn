@@ -26,6 +26,7 @@
 
 #include "stdinc.h"
 #include "tools.h"
+#include "linebuf.h"
 #include "channel.h"
 #include "client.h"
 #include "hash.h"
@@ -37,8 +38,10 @@
 #include "send.h"
 #include "msg.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
 #include "linebuf.h"
+#include "class.h"
 
 static int m_list(struct Client *, struct Client *, int, const char **);
 static int mo_list(struct Client *, struct Client *, int, const char **);

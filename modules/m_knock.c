@@ -24,6 +24,8 @@
  */
 
 #include "stdinc.h"
+#include "tools.h"
+#include "linebuf.h"
 #include "sprintf_irc.h"
 #include "tools.h"
 #include "channel.h"
@@ -36,6 +38,7 @@
 #include "s_conf.h"
 #include "msg.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
 #include "s_serv.h"
 

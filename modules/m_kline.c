@@ -26,6 +26,7 @@
 
 #include "stdinc.h"
 #include "tools.h"
+#include "linebuf.h"
 #include "channel.h"
 #include "class.h"
 #include "client.h"
@@ -43,8 +44,10 @@
 #include "s_serv.h"
 #include "msg.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
 #include "event.h"
+#include "memory.h"
 
 static int mo_kline(struct Client *, struct Client *, int, const char **);
 static int ms_kline(struct Client *, struct Client *, int, const char **);

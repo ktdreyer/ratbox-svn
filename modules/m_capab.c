@@ -25,13 +25,17 @@
  */
 
 #include "stdinc.h"
+#include "tools.h"
+#include "linebuf.h"
 #include "client.h"
 #include "irc_string.h"
 #include "s_serv.h"
 #include "s_conf.h"
 #include "msg.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
+#include "memory.h"
 
 static int mr_capab(struct Client *, struct Client *, int, const char **);
 static int me_gcap(struct Client *, struct Client *, int, const char **);

@@ -25,6 +25,8 @@
  */
 
 #include "stdinc.h"
+#include "tools.h"
+#include "linebuf.h"
 #include "client.h"		/* client struct */
 #include "irc_string.h"
 #include "send.h"		/* sendto_one */
@@ -32,10 +34,12 @@
 #include "ircd.h"		/* me */
 #include "msg.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
 #include "s_serv.h"
 #include "hash.h"
 #include "s_conf.h"
+#include "memory.h"
 
 static int mr_pass(struct Client *, struct Client *, int, const char **);
 

@@ -27,6 +27,8 @@
 /* rewritten by jdc */
 
 #include "stdinc.h"
+#include "tools.h"
+#include "linebuf.h"
 #include "client.h"
 #include "event.h"
 #include "irc_string.h"
@@ -41,6 +43,7 @@
 #include "s_newconf.h"
 #include "msg.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
 
 static int mo_set(struct Client *, struct Client *, int, const char **);

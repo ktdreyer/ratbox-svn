@@ -25,12 +25,15 @@
  */
 
 #include "stdinc.h"
+#include "tools.h"
+#include "linebuf.h"
 #include "client.h"
 #include "channel.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "s_gline.h"
 #include "numeric.h"
+#include "adns.h"
 #include "res.h"
 #include "s_conf.h"
 #include "s_newconf.h"
@@ -38,11 +41,13 @@
 #include "send.h"
 #include "msg.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
 #include "hostmask.h"
 #include "reject.h"
 #include "hash.h"
 #include "cache.h"
+#include "memory.h"
 
 static int mo_rehash(struct Client *, struct Client *, int, const char **);
 

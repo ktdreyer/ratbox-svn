@@ -25,6 +25,8 @@
  */
 
 #include "stdinc.h"
+#include "tools.h"
+#include "linebuf.h"
 #include "client.h"
 #include "ircd.h"
 #include "msg.h"
@@ -33,9 +35,11 @@
 #include "s_conf.h"
 #include "s_log.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
 #include "hash.h"
 #include "cache.h"
+#include "irc_string.h"
 
 static int m_help(struct Client *, struct Client *, int, const char **);
 static int mo_help(struct Client *, struct Client *, int, const char **);

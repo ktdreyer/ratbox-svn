@@ -25,6 +25,8 @@
  */
 
 #include "stdinc.h"
+#include "tools.h"
+#include "linebuf.h"
 #include "client.h"
 #include "hash.h"
 #include "ircd.h"
@@ -35,7 +37,9 @@
 #include "msg.h"
 #include "parse.h"
 #include "sprintf_irc.h"
+#include "hook.h"
 #include "modules.h"
+#include "irc_string.h"
 
 static int m_accept(struct Client *, struct Client *, int, const char **);
 static void build_nicklist(struct Client *, char *, char *, const char *);

@@ -27,9 +27,6 @@
 #ifndef INCLUDED_ircd_h
 #define INCLUDED_ircd_h
 
-#include "tools.h"
-#include "memory.h"
-
 struct Client;
 struct dlink_list;
 

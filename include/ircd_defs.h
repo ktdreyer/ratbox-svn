@@ -45,10 +45,6 @@
 #define AFP(a,b)
 #endif
 
-
-#include "s_log.h"
-#include "send.h"
-
 #ifdef SOFT_ASSERT
 #ifdef __GNUC__
 #define s_assert(expr)	do								\

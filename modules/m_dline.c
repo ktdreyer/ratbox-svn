@@ -26,6 +26,7 @@
 
 #include "stdinc.h"
 #include "tools.h"
+#include "linebuf.h"
 #include "channel.h"
 #include "class.h"
 #include "client.h"
@@ -43,7 +44,9 @@
 #include "s_serv.h"
 #include "msg.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
+#include "memory.h"
 
 static int mo_dline(struct Client *, struct Client *, int, const char **);
 static int mo_undline(struct Client *, struct Client *, int, const char **);

@@ -25,6 +25,8 @@
  */
 
 #include "stdinc.h"
+#include "tools.h"
+#include "linebuf.h"
 #include "client.h"
 #include "irc_string.h"
 #include "sprintf_irc.h"
@@ -33,6 +35,7 @@
 #include "send.h"
 #include "msg.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
 #include "s_conf.h"		/* ConfigFileEntry */
 #include "s_serv.h"		/* uplink/IsCapable */

@@ -26,6 +26,7 @@
 
 #include "stdinc.h"
 #include "tools.h"
+#include "linebuf.h"
 #include "s_gline.h"
 #include "channel.h"
 #include "client.h"
@@ -43,8 +44,10 @@
 #include "s_serv.h"
 #include "hash.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
 #include "s_log.h"
+#include "memory.h"
 
 static int mo_gline(struct Client *, struct Client *, int, const char **);
 static int mc_gline(struct Client *, struct Client *, int, const char **);

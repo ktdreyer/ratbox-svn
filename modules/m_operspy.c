@@ -31,6 +31,7 @@
 
 #include "stdinc.h"
 #include "tools.h"
+#include "linebuf.h"
 #include "send.h"
 #include "channel.h"
 #include "client.h"
@@ -41,8 +42,10 @@
 #include "hash.h"
 #include "msg.h"
 #include "parse.h"
+#include "hook.h"
 #include "modules.h"
 #include "sprintf_irc.h"
+#include "s_log.h"
 
 static int ms_operspy(struct Client *client_p, struct Client *source_p,
 		      int parc, const char *parv[]);

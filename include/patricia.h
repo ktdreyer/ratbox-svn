@@ -20,16 +20,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <assert.h>
-#ifndef TESTING
-#include "class.h"
-#include "client.h"
-#include "irc_string.h"
-#include "ircd.h"
-#include "numeric.h"
-#include "send.h"
-#include "memory.h"
-#endif
-
 
 #ifndef FALSE
 #define FALSE 0

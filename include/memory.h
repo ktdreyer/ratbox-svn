@@ -27,8 +27,6 @@
 #ifndef _I_MEMORY_H
 #define _I_MEMORY_H
 
-#include "balloc.h"
-
 /* Needed to use uintptr_t for some pointer manipulation. */
 #ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
