@@ -44,6 +44,15 @@ static int client_from_server(struct Client *, struct Client *, int, char **,
                               time_t, char *);
 
 static int check_clean_nick(struct Client *, struct Client *, char *, char *);
+static int check_clean_user(struct Client *, struct Client *, 
+                            char *, char *);
+static int check_clean_host(struct Client *, struct Client *,
+                            char *, char *);
+
+static int clean_nick_name(char *);
+static int clean_user_name(char *);
+static int clean_host_name(char *);
+
 static int perform_nick_collides(struct Client *, struct Client *,
                                  struct Client *, int, char **, time_t, char *);
                             
@@ -302,24 +311,12 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
   strncpy_irc(nick, parv[1], NICKLEN);
   nick[NICKLEN] = '\0';
 
-  if(check_clean_nick(client_p, source_p, nick, parv[1]))
+  if(check_clean_nick(client_p, source_p, nick, parv[1]) ||
+     check_clean_user(client_p, source_p, nick, parv[5]) ||
+     check_clean_host(client_p, source_p, nick, parv[6]))
     return;
 
-  /* check the length of username hostname and realname */
-  if(parc > 8 && strlen(parv[5]) > USERLEN)
-  {
-    sendto_realops_flags(FLAGS_ALL, L_ALL, "Long username from server %s for %s",
-                         parv[0], parv[1]);
-    parv[5][USERLEN] = '\0';
-  }
-
-  if(parc > 8 && strlen(parv[6]) > HOSTLEN)
-  {
-    sendto_realops_flags(FLAGS_ALL, L_ALL, "Long hostname from server %s for %s",
-                         parv[0], parv[1]);
-    parv[6][HOSTLEN] = '\0'; 
-  }
-
+  /* check the length of the clients gecos */
   if(parc > 8 && strlen(parv[8]) > REALLEN)
   {
     sendto_realops_flags(FLAGS_ALL, L_ALL, "Long realname from server %s for %s",
@@ -385,24 +382,13 @@ static void ms_client(struct Client *client_p, struct Client *source_p,
   strncpy_irc(nick, parv[1], NICKLEN);
   nick[NICKLEN] = '\0';
 
-  if(check_clean_nick(client_p, source_p, nick, parv[1]))
+  /* check the nicknames, usernames and hostnames are ok */
+  if(check_clean_nick(client_p, source_p, nick, parv[1]) ||
+     check_clean_user(client_p, source_p, nick, parv[5]) ||
+     check_clean_host(client_p, source_p, nick, parv[6]))
     return;
 
-  /* chop username, host and realname if we need to */
-  if (strlen(parv[5]) > USERLEN)
-  {
-    sendto_realops_flags(FLAGS_ALL, L_ALL, "Long username from server %s for %s",
-                         parv[0], parv[1]);
-    parv[5][USERLEN] = '\0';			 
-  }
-
-  if (strlen(parv[6]) > HOSTLEN)
-  {
-    sendto_realops_flags(FLAGS_ALL, L_ALL, "Long hostname from server %s for %s",
-                         parv[0], parv[1]);
-    parv[6][HOSTLEN] = '\0';			 
-  }
-
+  /* check length of clients gecos */
   if (strlen(name) > REALLEN)
   {
     sendto_realops_flags(FLAGS_ALL, L_ALL, "Long realname from server %s for %s",
@@ -429,7 +415,18 @@ static void ms_client(struct Client *client_p, struct Client *source_p,
   perform_nick_collides(source_p, client_p, target_p,
                         parc, parv, newts, nick);
 }			  
-  
+
+
+/* check_clean_nick()
+ * 
+ * input	- pointer to source
+ *		- pointer to client sending us data
+ *		- nickname
+ *		- truncated nickname
+ * output	- none
+ * side effects - if nickname is erroneous, or a different length to
+ *                truncated nickname, return 1
+ */
 static int check_clean_nick(struct Client *client_p, struct Client *source_p, 
                             char *nick, char *newnick)
 {
@@ -461,6 +458,122 @@ static int check_clean_nick(struct Client *client_p, struct Client *source_p,
   }
 
   return 0;
+}
+
+/* check_clean_user()
+ * 
+ * input	- pointer to source
+ * 		- pointer to client sending us data
+ *              - nickname
+ *              - username to check
+ * output	- none
+ * side effects - if username is erroneous, return 1
+ */
+static int check_clean_user(struct Client *client_p, struct Client *source_p,
+                            char *nick, char *user)
+{
+  if((strlen(user) > USERLEN) || !clean_user_name(user))
+  {
+    ServerStats->is_kill++;
+    sendto_realops_flags(FLAGS_DEBUG, L_ALL,
+                         "Bad Username: %s(%s) From: %s %s",
+			 user, nick, source_p->name, client_p->name);
+
+    sendto_one(client_p, ":%s KILL %s :%s (Bad Username)",
+               me.name, nick, me.name);
+  
+    return 1;
+  }
+
+  return 0;
+}
+
+/* check_clean_host()
+ * 
+ * input	- pointer to source
+ *              - pointer to client sending us data
+ *              - nickname
+ *              - hostname to check
+ * output	- none
+ * side effects - if hostname is erroneous, return 1
+ */
+static int check_clean_host(struct Client *client_p, struct Client *source_p,
+                           char *nick, char *host)
+{
+  if((strlen(host) > HOSTLEN) || !clean_host_name(host))
+  {
+    ServerStats->is_kill++;
+    sendto_realops_flags(FLAGS_DEBUG, L_ALL,
+                         "Bad Hostname: %s(%s) From: %s %s",
+			 host, nick, source_p->name, client_p->name);
+
+    sendto_one(client_p, ":%s KILL %s :%s (Bad Hostname)",
+               me.name, nick, me.name);
+
+    return 1;
+  }
+
+  return 0;
+}
+
+/* clean_nick_name()
+ *
+ * input	- nickname
+ * output	- none
+ * side effects - walks through the nickname, returning 0 if erroneous
+ */
+static int clean_nick_name(char *nick)
+{
+  assert(nick);
+
+  /* nicks cant start with a digit or - */
+  if (*nick == '-' || IsDigit(*nick))
+    return 0;
+
+  for(; *nick; nick++)
+  {
+    if(!IsNickChar(*nick))
+      return 0;
+  }
+
+  return 1;
+}
+
+/* clean_user_name()
+ *
+ * input	- username
+ * output	- none
+ * side effects - walks through the username, returning 0 if erroneous
+ */
+static int clean_user_name(char *user)
+{
+  assert(user);
+
+  for(; *user; user++)
+  {
+    if(!IsUserChar(*user))
+      return 0;
+  }
+
+  return 1;
+}
+
+/* clean_host_name()
+ * input	- hostname
+ * output	- none
+ * side effects - walks through the hostname, returning 0 if erroneous
+ */
+static int clean_host_name(char *host)
+{
+  assert(host);
+
+  for(; *host; host++)
+  {
+    if(!IsHostChar(*host))
+      return 0;
+  }
+
+  return 1;
 }
 
 

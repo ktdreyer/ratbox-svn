@@ -612,7 +612,6 @@ extern int set_initial_nick(struct Client *client_p, struct Client *source_p,
                             char *nick);
 extern int change_local_nick(struct Client *client_p, struct Client *source_p,
                              char *nick);
-extern int clean_nick_name(char* nick);
 
 #endif /* INCLUDED_client_h */
 
