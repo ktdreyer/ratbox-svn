@@ -1,3 +1,18 @@
+leeh        2004/03/08 10:00:36 EST	(20040308_6)
+
+  Modified files:
+    .                    configure configure.ac 
+    include              setup.h.in 
+  Log:
+  - remove writev() checks from configure
+  
+  Revision  Changes    Path
+  7.213     +3 -4      ircd-ratbox/configure
+  7.26      +3 -3      ircd-ratbox/configure.ac
+  7.80      +0 -3      ircd-ratbox/include/setup.h.in
+
+
+
 leeh        2004/03/08 09:42:52 EST	(20040308_5)
 
   Modified files:
