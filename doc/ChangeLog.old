@@ -1,3 +1,15 @@
+leeh        2002/07/14 18:11:57 EDT	(20020714_5)
+
+  Modified files:
+    contrib              m_opme.c 
+  Log:
+  - revert the accidental commit of m_opme done earlier..
+  
+  Revision  Changes    Path
+  1.27      +5 -5      ircd-hybrid-7/contrib/m_opme.c
+
+
+
 db          2002/07/14 18:00:46 EDT	(20020714_4)
 
   Modified files:
