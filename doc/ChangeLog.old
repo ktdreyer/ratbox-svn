@@ -1,3 +1,7 @@
+*** 20010813_8 by jdc
+- modules/m_cryptlink.c: Call verify_private_key() before MyMalloc().
+
+
 *** 20010813_7 by androsyn
 It is useful to set a fd_note() on a non cryptlink server.
 
