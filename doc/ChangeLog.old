@@ -1,3 +1,7 @@
+*** 20010525_11 by ejb
+- added auto version.c support for VMS (thanks to robert byer).
+
+
 *** 20010525_10 by leeh
 - dont show ips of servers/admins in /trace for non-admins
 - dont show ips of servers/admins in /stats L for non-admins ;p
