@@ -1,3 +1,16 @@
+androsyn    2002/11/24 08:40:41 UTC	(20021124_6)
+
+  Modified files:
+    src                  s_bsd_epoll.c 
+  Log:
+  Its possible for the read handler to close the fd on us..if that is the
+  case..go on to more useful things
+  
+  Revision  Changes    Path
+  1.6       +6 -0      ircd-ratbox/src/s_bsd_epoll.c
+
+
+
 androsyn    2002/11/24 08:24:00 UTC	(20021124_5)
 
   Modified files:
