@@ -1,3 +1,7 @@
+*** 19990802_6 by tomh
+removed unused data member from client struct
+
+
 *** 19990802_5 by tomh
 changed 2 headed function calls, removed unused data member in client struct
 
