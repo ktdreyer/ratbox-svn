@@ -31,6 +31,7 @@ SRCS =                          \
   m_mkpasswd.c                  \
   m_flags.c                     \
   m_jupe.c			\
+  m_tburst.c			\
   spy_admin_notice.c		\
   spy_info_notice.c		\
   spy_links_notice.c		\
