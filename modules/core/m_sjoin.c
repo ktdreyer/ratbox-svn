@@ -403,7 +403,7 @@ int     ms_sjoin(struct Client *cptr,
           lcptr = m->data;
 
           /* Hopefully, the server knows about it's own clients. */
-          if (acptr == cptr->from)
+          if (cptr == lcptr)
             continue;
 
           /* Ignore non lazylinks */
@@ -416,7 +416,7 @@ int     ms_sjoin(struct Client *cptr,
             continue;
 
           /* Ignore servers that already know acptr */
-          if( !(cptr->lazyLinkClientExists &
+          if( !(acptr->lazyLinkClientExists &
                 lcptr->localClient->serverMask) )
           {
             /* Tell LazyLink Leaf about cptr,
