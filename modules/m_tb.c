@@ -89,6 +89,13 @@ ms_tb(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 
 	if(chptr->topic == NULL || chptr->topic_time > newtopicts)
 	{
+		/* its possible the topicts is a few seconds out on some
+		 * servers, due to lag when propagating it, so if theyre the
+		 * same topic just drop the message --fl
+		 */
+		if(chptr->topic != NULL && strcmp(chptr->topic, newtopic) == 0)
+			return 0;
+
 		set_channel_topic(chptr, newtopic, newtopicwho, newtopicts);
 		sendto_channel_local(ALL_MEMBERS, chptr, ":%s TOPIC %s :%s",
 				     source_p->name, chptr->chname, newtopic);

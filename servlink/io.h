@@ -38,7 +38,6 @@ extern void read_data(void);
 extern void write_ctrl(void);
 extern void read_ctrl(void);
 extern void write_net(void);
-extern int read_flush(int fd);
 
 extern void read_net(void);
 extern void send_error(const char *, ...);

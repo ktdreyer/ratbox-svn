@@ -1330,10 +1330,8 @@ fork_server(struct Client *server)
 	 * [x][0][z] - child | [x][1][z] - parent
 	 * [x][y][0] - read  | [x][y][1] - write
 	 */
-	int flush_fd[2];
-
 	char fd_str[6][6];	/* store 5x '6' '5' '5' '3' '5' '7' '\0' */
-	char *kid_argv[8];
+	char *kid_argv[7];
 	char slink[] = "-slink";
 
 
@@ -1356,11 +1354,6 @@ fork_server(struct Client *server)
 	slink_fds[1][0][1] = fd_temp[0];
 	slink_fds[1][1][0] = fd_temp[1];
 
-	/* linebuf flush */
-	if(socketpair(AF_UNIX, SOCK_STREAM, 0, flush_fd) < 0)
-		goto fork_error;
-
-
 #ifdef __CYGWIN__
 	if((ret = vfork()) < 0)
 #else
@@ -1377,9 +1370,7 @@ fork_server(struct Client *server)
 			   || (i == slink_fds[0][0][1])
 			   || (i == slink_fds[0][0][0])
 			   || (i == slink_fds[1][0][1]) 
-			   || (i == server->localClient->fd)
-			   || (i == flush_fd[0])
-			   )
+			   || (i == server->localClient->fd))
 			{
 				set_non_blocking(i);
 #ifdef USE_SIGIO		/* the servlink process doesn't need O_ASYNC */
@@ -1405,14 +1396,12 @@ fork_server(struct Client *server)
 		sprintf(fd_str[2], "%d", slink_fds[1][0][0]);	/* data read */
 		sprintf(fd_str[3], "%d", slink_fds[1][0][1]);	/* data write */
 		sprintf(fd_str[4], "%d", server->localClient->fd);	/* network read/write */
-		sprintf(fd_str[5], "%d", flush_fd[0]); /* flush out pending linebuf data */ 
 		kid_argv[0] = slink;
 		kid_argv[1] = fd_str[0];
 		kid_argv[2] = fd_str[1];
 		kid_argv[3] = fd_str[2];
 		kid_argv[4] = fd_str[3];
 		kid_argv[5] = fd_str[4];
-		kid_argv[6] = fd_str[5];
 		kid_argv[7] = NULL;
 
 		/* exec servlink program */
@@ -1430,20 +1419,10 @@ fork_server(struct Client *server)
 		close(slink_fds[0][0][1]);
 		close(slink_fds[1][0][0]);
 		close(slink_fds[1][0][1]);
-		close(flush_fd[0]);
 		
 		s_assert(server->localClient);
 		server->localClient->ctrlfd = slink_fds[0][1][1];
 		server->localClient->fd = slink_fds[1][1][1];
-
-		while(1)
-		{
-			ret = linebuf_flush(flush_fd[1], &server->localClient->buf_recvq);
-			if(ret == 0 || (ret < 0 && !ignoreErrno(errno)))
-				goto fork_error;
-		}
-		close(flush_fd[1]);
-		
 
 		if(!set_non_blocking(server->localClient->fd))
 		{
@@ -1491,8 +1470,6 @@ fork_server(struct Client *server)
 	close(slink_fds[1][0][1]);
 	close(slink_fds[1][1][0]);
 	close(slink_fds[1][1][1]);
-	close(flush_fd[0]);
-	close(flush_fd[1]);
 	return -1;
 }
 #endif
