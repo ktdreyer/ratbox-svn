@@ -33,6 +33,10 @@
       Other versions are untested, and some are known to be
       incompatable.
 
+7.  When linking servers, you may see warnings about servers being sent
+    403 numerics.  This is caused by the NOTICE AUTH :*** ... messages,
+    and is normal.
+
 For more information see http://bugs.efnow.net
 
 BUG REPORTS: If you run this code and encounter problems, you must report
