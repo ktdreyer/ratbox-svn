@@ -201,11 +201,14 @@ _send_message(struct Client *to, char *msg, int len)
      * later.
      *     -- adrian
      * So I took adrian's comments to heart..whether it works or not remains
-     * to been seen...
+     * to been seen...This seems to be a bad idea as other connections die
+     * of starvation..
      * -- Aaron
      */
-    send_queued_write(to->fd, to);	
 #if 0
+    send_queued_write(to->fd, to);	
+#endif
+#if 1
     comm_setselect(to->fd, FDLIST_IDLECLIENT, COMM_SELECT_WRITE,
       send_queued_write, to, 0);
 #endif
