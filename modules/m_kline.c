@@ -89,8 +89,8 @@ int find_user_host(struct Client *sptr,
 int valid_comment(struct Client *sptr, char *comment);
 int valid_user_host(struct Client *sptr, char *user, char *host);
 int valid_wild_card(struct Client *sptr, char *user, char *host);
-int already_placed_kline( struct Client *sptr, char *user, char *host,
-			  unsigned long ip);
+int already_placed_kline(struct Client *sptr, char *user, char *host,
+                         time_t tkline_time, unsigned long ip);
 
 int is_ip_kline(char *host,unsigned long *ip, unsigned long *ip_mask);
 void apply_kline(struct Client *sptr, struct ConfItem *aconf,
@@ -202,7 +202,7 @@ int mo_kline(struct Client *cptr,
 
   ip_kline = is_ip_kline(host,&ip,&ip_mask);
 
-  if ( already_placed_kline(sptr, user, host, ip) )
+  if ( already_placed_kline(sptr, user, host, tkline_time, ip) )
     return 0;
 
   current_date = smalldate((time_t) 0);
@@ -366,12 +366,11 @@ void apply_tkline(struct Client *sptr, struct ConfItem *aconf,
   aconf->hold = CurrentTime + tkline_time;
   add_temp_kline(aconf);
   sendto_realops_flags(FLAGS_ALL,
-		       "%s added temporary %d min. K-Line for [%s@%s] [%s]",
-		       sptr->name,
-		       tkline_time/60,
-		       aconf->user,
-		       aconf->host,
-		       aconf->passwd);
+                       "%s added temporary %d min. K-Line for [%s@%s] [%s]",
+                       sptr->name, tkline_time, aconf->user, aconf->host,
+                       aconf->passwd);
+  log(L_TRACE, "%s added temporary %d min. K-Line for [%s@%s] [%s]",
+      sptr->name, tkline_time, aconf->user, aconf->host, aconf->passwd);
   check_klines();
 }
 
@@ -411,9 +410,7 @@ time_t valid_tkline(struct Client *sptr, char *p)
   if(result > (24*60))
     result = (24*60); /* Max it at 24 hours */
 
-  result = (time_t)result * (time_t)60;  /* turn it into minutes */
-
-  return(result);
+  return((time_t)result);
 }
 
 /*
@@ -935,32 +932,41 @@ int valid_comment(struct Client *sptr, char *comment)
  * inputs	- pointer to client placing kline
  *		- user
  *		- host
+ *              - tkline_time
  *		- ip 
  * output	- 1 if already placed, 0 if not
  * side effects - NONE
  */
-int already_placed_kline( struct Client *sptr, char *user, char *host,
-			  unsigned long ip)
+int already_placed_kline(struct Client *sptr, char *user, char *host,
+                         time_t tkline_time, unsigned long ip)
 {
   char *reason;
   struct ConfItem *aconf;
 
-  if( ConfigFileEntry.non_redundant_klines && 
-      (aconf = find_matching_mtrie_conf(host,user,ip)) )
-     {
-       if( aconf->status & CONF_KILL )
-         {
-           reason = aconf->passwd ? aconf->passwd : "<No Reason>";
-           if(!IsServer(sptr))
-             sendto_one(sptr,
-                        ":%s NOTICE %s :[%s@%s] already K-lined by [%s@%s] - %s",
-                        me.name,
-                        sptr->name,
-                        user,host,
-                        aconf->user,aconf->host,reason);
-           return 1;
-         }
-     }
+  if(ConfigFileEntry.non_redundant_klines) 
+    {
+      if ((aconf = find_matching_mtrie_conf(host,user,ip)) && 
+         (aconf->status & CONF_KILL))
+        {
+          reason = aconf->passwd ? aconf->passwd : "<No Reason>";
+          if(!IsServer(sptr))
+            sendto_one(sptr,
+                       ":%s NOTICE %s :[%s@%s] already K-lined by [%s@%s] - %s",
+                       me.name, sptr->name, user, host, aconf->user,
+                       aconf->host, reason);
+          return 1;
+        }
+
+      if (tkline_time && (aconf = find_tkline(host,user,(unsigned long)ip)))
+        {
+          reason = aconf->passwd ? aconf->passwd : "<No Reason>";
+          sendto_one(sptr,
+                    ":%s NOTICE %s :[%s@%s] already temp K-lined by [%s@%s] - %s",
+                     me.name, sptr->name, user, host, aconf->user,
+                     aconf->host, reason);
+          return 1;
+        }
+    }
 
   return 0;
 }

@@ -32,6 +32,7 @@
 #include "list.h"        /* make_server */
 #include "numeric.h"     /* ERR_xxx */
 #include "s_conf.h"      /* struct ConfItem */
+#include "s_log.h"       /* log level defines */
 #include "s_serv.h"      /* server_estab, check_server, my_name_for_link */
 #include "s_stats.h"     /* ServerStats */
 #include "scache.h"      /* find_or_add */
@@ -128,6 +129,8 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         sendto_realops_flags(FLAGS_ALL,
 			     "Link %s cancelled, server %s already exists",
 			     get_client_name(bcptr, TRUE), host);
+        log(L_NOTICE, "Link %s cancelled, server %s already exists",
+            get_client_name(bcptr, TRUE), host);
         return exit_client(bcptr, bcptr, &me, "Server Exists");
       }
       /*
@@ -144,6 +147,8 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       sendto_realops_flags(FLAGS_ALL,
 			   "Link %s cancelled, server %s reintroduced by %s",
 			   nbuf, host, get_client_name(cptr, TRUE));
+      log(L_NOTICE, "Link %s cancelled, server %s reintroduced by %s",
+          nbuf, host, get_client_name(cptr, TRUE));
       exit_client(bcptr, bcptr, &me, "Server Exists");
     }
 
@@ -158,6 +163,8 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       sendto_realops_flags(FLAGS_ALL,
 			   "Link %s cancelled: Server/nick collision on %s",
 			   get_client_name(cptr,FALSE), host);
+      log(L_NOTICE, "Link %s cancelled: Server/nick collision on %s",
+          get_client_name(cptr,FALSE), host);
       return exit_client(cptr, cptr, cptr, "Nick as Server");
     }
 

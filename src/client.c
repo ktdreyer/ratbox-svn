@@ -343,6 +343,8 @@ check_pings_list(dlink_list *list)
                   sendto_realops_flags(FLAGS_ALL,
 				       "No response from %s, closing link",
 				       get_client_name(cptr, FALSE));
+                  log(L_NOTICE, "No response from %s, closing link",
+                      get_client_name(cptr, FALSE));
                 }
 
               cptr->flags2 |= FLAGS2_PING_TIMEOUT;
@@ -1327,15 +1329,14 @@ const char* comment         /* Reason for the exit */
 	  else
 	    uplink = NULL;
         }
+
       sptr->flags |= FLAGS_CLOSING;
+
       if (IsPerson(sptr))
-        {
-          sendto_realops_flags(FLAGS_CCONN,
-                               "Client exiting: %s (%s@%s) [%s] [%s]",
-                               sptr->name, sptr->username, sptr->host,
-               (sptr->flags & FLAGS_NORMALEX) ?  "Client Quit" : comment,
-                               sptr->localClient->sockhost);
-        }
+        sendto_realops_flags(FLAGS_CCONN,
+                             "Client exiting: %s (%s@%s) [%s] [%s]",
+                             sptr->name, sptr->username, sptr->host,
+                             comment, sptr->localClient->sockhost);
 
       log_user_exit(sptr);
 

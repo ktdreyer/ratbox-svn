@@ -690,6 +690,7 @@ int server_estab(struct Client *cptr)
                  inpath);
       sendto_realops_flags(FLAGS_ALL,
 			   "Access denied (passwd mismatch) %s", inpath);
+      log(L_NOTICE, "Access denied (passwd mismatch) %s", inpath_ip);
       return exit_client(cptr, cptr, cptr, "Bad Password");
     }
   memset((void *)cptr->localClient->passwd, 0,sizeof(cptr->localClient->passwd));
@@ -735,6 +736,9 @@ int server_estab(struct Client *cptr)
 			       "Username mismatch [%s]v[%s] : %s",
 			       n_conf->user, cptr->username,
 			       get_client_name(cptr, TRUE));
+          log(L_NOTICE, "Username mismatch [%s]v[%s] : %s",
+              n_conf->user, cptr->username,
+              get_client_name(cptr, TRUE));
           sendto_one(cptr, "ERROR :No Username Match");
           return exit_client(cptr, cptr, cptr, "Bad User");
         }

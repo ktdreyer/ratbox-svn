@@ -392,8 +392,12 @@ void error_exit_client(struct Client* cptr, int error)
       int connected = CurrentTime - cptr->firsttime;
       
       if (0 == error)
-        sendto_realops_flags(FLAGS_ALL,"Server %s closed the connection",
-			     get_client_name(cptr, FALSE));
+        {
+          sendto_realops_flags(FLAGS_ALL,"Server %s closed the connection",
+  			     get_client_name(cptr, FALSE));
+          log(L_NOTICE, "Server %s closed the connection",
+              get_client_name(cptr, FALSE));
+        }
       else
         report_error("Lost connection to %s:%s", 
                      get_client_name(cptr, TRUE), current_error);

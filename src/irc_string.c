@@ -21,6 +21,7 @@
 #include "tools.h"
 #include "irc_string.h"
 #include "list.h"
+
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
@@ -112,7 +113,8 @@ void _MyFree(void *x, char * file, int line)
 void _MyFree(void *x)
 #endif
 {
-  free(x);
+  if ((x))
+    free((x));
 #ifdef DEBUGMEM
   DbgMemFree(file, line, DBGMEM_MALLOC, x);
 #endif

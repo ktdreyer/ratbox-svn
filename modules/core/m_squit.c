@@ -100,6 +100,8 @@ int mo_squit(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 			       "Received SQUIT %s from %s (%s)",
 			       found_squit->acptr->name,
 			       get_client_name(sptr,FALSE), comment);
+          log(L_NOTICE, "Received SQUIT %s from %s (%s)",
+              found_squit->acptr->name, get_client_name(sptr,FALSE), comment);
 	}
       return exit_client(cptr, found_squit->acptr, sptr, comment);
     }
