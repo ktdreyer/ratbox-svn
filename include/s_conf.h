@@ -80,7 +80,7 @@ struct ConfItem
   int              dns_pending; /* 1 if dns query pending, 0 otherwise */
 #ifdef HAVE_LIBCRYPTO
   RSA*             rsa_public_key;
-  struct EncCapability *ciphertab; /* cipher_preference storage space */
+  struct EncPreference *ciphertab; /* cipher_preference storage space */
 #endif
 };
 

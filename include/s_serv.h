@@ -90,7 +90,13 @@ struct EncCapability
   unsigned int  cap;      /* mask value */
   int           keylen;   /* keylength (bytes) */
   int           cipherid; /* cipher id */
-  int           priority; /* 0=disabled, 1=highest, n=lowest */
+  int           default_priority; /* 0=disabled, 1=highest, n=lowest */
+};
+
+struct EncPreference
+{
+  struct EncCapability  *ecap;
+  int           priority;
 };
 
 /* Ciphers */

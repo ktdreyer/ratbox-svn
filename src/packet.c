@@ -186,7 +186,7 @@ read_ctrl_packet(int fd, void *data)
 
     if (length <= 0)
     {
-      if(ignoreErrno(errno))
+      if((length == -1) && ignoreErrno(errno))
         goto nodata;
       error_exit_client(server, length);
       return;
@@ -211,7 +211,7 @@ read_ctrl_packet(int fd, void *data)
     length = read(fd, len, (2 - reply->gotdatalen));
     if (length <= 0)
     {
-      if(ignoreErrno(errno))
+      if((length == -1) && ignoreErrno(errno))
         goto nodata;
       error_exit_client(server, length);
       return;
@@ -239,7 +239,7 @@ read_ctrl_packet(int fd, void *data)
                   (reply->datalen - reply->readdata));
     if (length <= 0)
     {
-      if(ignoreErrno(errno))
+      if((length == -1) && ignoreErrno(errno))
         goto nodata;
       error_exit_client(server, length);
       return;

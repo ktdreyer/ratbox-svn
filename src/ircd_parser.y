@@ -425,7 +425,7 @@ modules_module:  MODULE '=' QSTRING ';'
   /* I suppose we should just ignore it if it is already loaded(since
    * otherwise we would flood the opers on rehash) -A1kmm. */
   if (findmodule_byname(m_bn) != -1)
-    return;
+    break;
 
   load_one_module (yylval.string);
 
@@ -1606,36 +1606,40 @@ connect_cipher_preference: CIPHER_PREFERENCE '=' QSTRING ';'
   {
 #ifdef HAVE_LIBCRYPTO
     struct EncCapability *ecap;
+    struct EncPreference *epref;
     char *s, *p;
     int cipher_count = 0;
-    int found;
+    int found = 0;
+    int i = 0;
 
     for(ecap = enccaptab; ecap->name; ecap++)
     {
       cipher_count++;
     }
+    cipher_count++; /* for blank cap at end */
 
     MyFree(yy_aconf->ciphertab);
-    yy_aconf->ciphertab = MyMalloc(sizeof(struct EncCapability)
-                                   * (cipher_count+1));
+    yy_aconf->ciphertab = MyMalloc(sizeof(struct EncPreference)
+                                   * (cipher_count));
 
-    memcpy(yy_aconf->ciphertab, enccaptab, 
-           sizeof(struct EncCapability) * (cipher_count+1));
-
-    for(ecap = yy_aconf->ciphertab; ecap->name; ecap++)
+    for(i = 0; i < cipher_count; i++)
     {
-      ecap->priority = 0;
+      yy_aconf->ciphertab[i].ecap = &enccaptab[i];
+      yy_aconf->ciphertab[i].priority = 0; /* disabled by default */
     }
+
+    /* set marker for end of array */
+    yy_aconf->ciphertab[cipher_count-1].ecap = NULL;
 
     cipher_count = 0;
     for (s = strtoken(&p, yylval.string, ", "); s; s = strtoken(&p, NULL, ", "))
     {
       found = 0;
-      for(ecap = yy_aconf->ciphertab; ecap->name; ecap++)
+      for(epref = yy_aconf->ciphertab; (ecap = epref->ecap); epref++)
       {
         if (!strcmp(s, ecap->name))
         {
-          ecap->priority = ++cipher_count;
+          epref->priority = ++cipher_count;
           found = 1;
         }
       }
@@ -1756,7 +1760,6 @@ deny_item:      deny_ip | deny_reason | error
 
 deny_ip:        IP '=' QSTRING ';'
   {
-    char *p;
     DupString(yy_aconf->host, yylval.string);
   };
 
@@ -1801,7 +1804,6 @@ exempt_item:      exempt_ip | error
 
 exempt_ip:        IP '=' QSTRING ';'
   {
-    char *p;
     DupString(yy_aconf->host, yylval.string);
   };
 
@@ -2179,7 +2181,7 @@ general_default_cipher_preference: DEFAULT_CIPHER_PREFERENCE '=' QSTRING ';'
 
     for(ecap = enccaptab; ecap->name; ecap++)
     {
-	    ecap->priority = 0;
+	    ecap->default_priority = 0;
     }
 
     for (s = strtoken(&p, yylval.string, ", "); s; s = strtoken(&p, NULL, ", "))
@@ -2189,7 +2191,7 @@ general_default_cipher_preference: DEFAULT_CIPHER_PREFERENCE '=' QSTRING ';'
       {
         if (!strcmp(s, ecap->name))
         {
-          ecap->priority = ++cipher_count;
+          ecap->default_priority = ++cipher_count;
           found = 1;
         }
       }

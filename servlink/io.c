@@ -162,7 +162,7 @@ void process_recvq(struct ctrl_command *cmd)
     {
       if ((ret = inflate(&in_state.zip_state.z_stream,
                          Z_NO_FLUSH)) != Z_OK)
-        send_error("Inflate failed: %d");
+        send_error("Inflate failed: %d", ret);
 
       blen = BUFLEN - in_state.zip_state.z_stream.avail_out;
 
@@ -249,7 +249,8 @@ void send_error(unsigned char *message, ...)
   static int sending_error = 0;
   struct linger linger_opt = { 1, 30 }; /* wait 30 seconds */                     int len;
 
-  assert(!sending_error);
+  if (sending_error)
+    exit(1); /* we did _try_ */
 
   sending_error = 1;
 
@@ -267,7 +268,7 @@ void send_error(unsigned char *message, ...)
   len = vsprintf(in_state.buf+3, message, args);
   va_end(args);
 
-  in_state.buf[len++] = '\0';
+  in_state.buf[3+len++] = '\0';
   in_state.buf[1] = len >> 8;
   in_state.buf[2] = len & 0xFF;
   len+=3;
@@ -557,7 +558,7 @@ void read_net(void)
         {
           if (blen)
           {
-            send_data_blocking(LOCAL_FD_W, in_state.buf, BUFLEN);
+            send_data_blocking(LOCAL_FD_W, in_state.buf, blen);
             blen = 0;
           }
 
@@ -622,7 +623,10 @@ int check_error(int ret, int io, int fd)
   if (ret > 0) /* no error */
     return ret;
   if (ret == 0) /* EOF */
-    exit(1);
+  {
+    send_error("%s failed on %s: EOF", IO_TYPE(io), FD_NAME(fd));
+    exit(1); /* NOTREACHED */
+  }
   
   /* ret == -1.. */
   switch (errno) {
@@ -645,6 +649,5 @@ int check_error(int ret, int io, int fd)
              IO_TYPE(io),
              FD_NAME(fd),
              strerror(errno));
-  /* NOTREACHED */
-  exit(1);
+  exit(1); /* NOTREACHED */
 }

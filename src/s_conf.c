@@ -1407,15 +1407,15 @@ static void read_conf(FBFILE* file)
 
 #ifdef HAVE_LIBCRYPTO
   /* reset default cipher priority */ 
-  enccaptab[0].priority = 2;
-  enccaptab[1].priority = 1;
-  enccaptab[2].priority = 3;
-  enccaptab[3].priority = 9;
-  enccaptab[4].priority = 8;
-  enccaptab[5].priority = 4;
-  enccaptab[6].priority = 7;
-  enccaptab[7].priority = 6;
-  enccaptab[8].priority = 5;
+  enccaptab[0].default_priority = 2;
+  enccaptab[1].default_priority = 1;
+  enccaptab[2].default_priority = 3;
+  enccaptab[3].default_priority = 9;
+  enccaptab[4].default_priority = 8;
+  enccaptab[5].default_priority = 4;
+  enccaptab[6].default_priority = 7;
+  enccaptab[7].default_priority = 6;
+  enccaptab[8].default_priority = 5;
 #endif
   
   yyparse(); /* wheee! */

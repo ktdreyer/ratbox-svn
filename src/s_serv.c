@@ -238,25 +238,38 @@ struct EncCapability* select_cipher(struct Client *client_p,
 {
   struct EncCapability *cipher = NULL;
   struct EncCapability *ecap;
+  struct EncPreference *epref;
   int priority = -1;
 
   /* Find the lowest (>0) priority cipher available */
 
-  /* use connect{} specific info if available, else use defaults */
+  /* use connect{} specific info if available */
   if (aconf->ciphertab)
-    ecap = aconf->ciphertab;
-  else
-    ecap = enccaptab;
-
-  for (; ecap->name; ecap++)
   {
-    if ((ecap->priority > 0) &&         /* enabled */
-        IsCapableEnc(client_p, ecap->cap) && /* supported */
-        ((ecap->priority < priority) || (priority < 0)))
+    for (epref = aconf->ciphertab; (ecap = epref->ecap); epref++)
     {
-      /* new best match */
-      cipher = ecap;
-      priority = ecap->priority;
+      if ((epref->priority > 0) &&         /* enabled */
+          IsCapableEnc(client_p, ecap->cap) && /* supported */
+          ((epref->priority < priority) || (priority < 0)))
+      {
+        /* new best match */
+        cipher = ecap;
+        priority = epref->priority;
+      }
+    }
+  }
+  else
+  { /* use defaults */
+    for (ecap = enccaptab; ecap->name; ecap++)
+    {
+      if ((ecap->default_priority > 0) &&         /* enabled */
+          IsCapableEnc(client_p, ecap->cap) && /* supported */
+          ((ecap->default_priority < priority) || (priority < 0)))
+      {
+        /* new best match */
+        cipher = ecap;
+        priority = ecap->default_priority;
+      }
     }
   }
 
@@ -272,7 +285,7 @@ struct EncCapability* select_cipher(struct Client *client_p,
 const char* my_name_for_link(const char* name, struct ConfItem* aconf)
 {
   if(aconf->fakename)
-  	return(aconf->fakename);
+    return(aconf->fakename);
   else
 	return(name);
 }
@@ -753,6 +766,7 @@ void send_capabilities(struct Client *client_p, struct ConfItem *aconf,
 
 #ifdef HAVE_LIBCRYPTO
   struct EncCapability *ecap;
+  struct EncPreference *epref;
   char  *capend;
   int    sent_cipher = 0;
 #endif
@@ -776,18 +790,30 @@ void send_capabilities(struct Client *client_p, struct ConfItem *aconf,
     t += 4;
 
     if (aconf->ciphertab)
-      ecap = aconf->ciphertab;
-    else
-      ecap = enccaptab;
-
-    for (; ecap->name; ++ecap)
     {
-      if ((ecap->cap & enc_can_send) &&
-          (ecap->priority > 0))
+      /* use connect{} specific info */
+      for (epref = aconf->ciphertab; (ecap = epref->ecap); epref++)
       {
-        tl = ircsprintf(t, "%s,", ecap->name);
-        t += tl;
-        sent_cipher = 1;
+        if ((ecap->cap & enc_can_send) &&
+            (epref->priority > 0))
+        {
+          tl = ircsprintf(t, "%s,", ecap->name);
+          t += tl;
+          sent_cipher = 1;
+        }
+      }
+    }
+    else
+    {
+      for (ecap = enccaptab; ecap->name; ++ecap)
+      {
+        if ((ecap->cap & enc_can_send) &&
+            (ecap->default_priority > 0))
+        {
+          tl = ircsprintf(t, "%s,", ecap->name);
+          t += tl;
+          sent_cipher = 1;
+        }
       }
     }
 
@@ -1313,6 +1339,7 @@ int fork_server(struct Client *server)
   char *kid_argv[] = { "-slink", NULL };
   
 
+  /* XXX XXX - on error, close successfully opened fds */
 #ifdef HAVE_SOCKETPAIR
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, ctrl_pipe) < 0)
     return -1;
@@ -1328,7 +1355,7 @@ int fork_server(struct Client *server)
   if (pipe(data_pipe2) < 0)
     return -1;
 #endif
-  
+
   if ((ret = vfork()) < 0)
     return -1;
   else if (ret == 0)
