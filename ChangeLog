@@ -1,3 +1,15 @@
+androsyn    2004/08/30 14:27:18 EDT	(20040830_0)
+
+  Modified files:
+    src                  s_auth.c 
+  Log:
+  Fix the dns leak in HEAD
+  
+  Revision  Changes    Path
+  7.176     +2 -1      ircd-ratbox/src/s_auth.c
+
+
+
 leeh        2004/08/28 11:13:29 EDT	(20040828_0)
 
   Modified files:
