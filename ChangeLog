@@ -1,3 +1,18 @@
+androsyn    2002/08/08 04:29:19 EDT	(20020808_5)
+
+  Modified files:
+    modules              Makefile.in m_join.c 
+    modules/core         m_sjoin.c 
+  Log:
+  Okay..make it compile now..
+  
+  Revision  Changes    Path
+  1.71      +0 -1      ircd-ratbox/modules/Makefile.in
+  1.142     +9 -9      ircd-ratbox/modules/core/m_sjoin.c
+  1.92      +2 -3      ircd-ratbox/modules/m_join.c
+
+
+
 androsyn    2002/08/08 04:22:58 EDT	(20020808_4)
 
   Added files:
