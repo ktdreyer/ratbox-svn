@@ -1279,7 +1279,6 @@ exit_remote_client(struct Client *client_p, struct Client *source_p, struct Clie
 	if(source_p->servptr && source_p->servptr->serv)
 	{
 		dlinkDelete(&source_p->lnode, &source_p->servptr->serv->users);
-		source_p->servptr->serv->usercnt--;
 	}
 
 	exit_generic_client(client_p, source_p, from, comment);

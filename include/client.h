@@ -87,7 +87,6 @@ struct Server
 	struct ConfItem *sconf;	/* connect{} pointer for this server */
 	dlink_list servers;
 	dlink_list users;
-	unsigned int usercnt;
 };
 
 struct SlinkRpl
