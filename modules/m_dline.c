@@ -154,10 +154,10 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 	if(ConfigFileEntry.non_redundant_klines)
 	{
 		const char *creason;
-		int t = AF_INET;
-		(void) parse_netmask(dlhost, &daddr, NULL);
+		int t = AF_INET, tx;
+		tx = parse_netmask(dlhost, &daddr, NULL);
 #ifdef IPV6
-        	if(t == HM_IPV6)
+        	if(tx == HM_IPV6)
                 	t = AF_INET6;
                 else
 #endif
