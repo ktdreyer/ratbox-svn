@@ -22,6 +22,7 @@
  *
  *   $Id$
  */
+#include "tools.h"
 #include "handlers.h"
 #include "client.h"
 #include "ircd.h"
@@ -56,17 +57,22 @@ char *_version = "20001122";
  */
 int mo_close(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  struct Client* acptr;
-  int            i;
+  struct Client  *acptr;
+  dlink_node     *ptr;
   int            closed = 0;
 
-  for (i = highest_fd; i; i--)
+
+
+  for (ptr = unknown_list.head; ptr; ptr = ptr->next)
     {
-      if (!(acptr = local[i]))
-        continue;
+      acptr = ptr->data;
+
+  /* Which list would connecting servers be found in? serv_list ? */
+#if 0
       if (!IsUnknown(acptr) && !IsConnecting(acptr) &&
           !IsHandshake(acptr))
         continue;
+#endif
       sendto_one(sptr, form_str(RPL_CLOSING), me.name, parv[0],
                  get_client_name(acptr, SHOW_IP), acptr->status);
       (void)exit_client(acptr, acptr, acptr, "Oper Closing");
