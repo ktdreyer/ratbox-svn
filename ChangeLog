@@ -1,3 +1,15 @@
+androsyn    2002/12/16 08:43:03 UTC	(20021216_18)
+
+  Modified files:
+    src                  balloc.c 
+  Log:
+  Make the block heap be a little more aggressive about garbage collection
+  
+  Revision  Changes    Path
+  7.53      +1 -1      ircd-ratbox/src/balloc.c
+
+
+
 androsyn    2002/12/16 08:36:50 UTC	(20021216_17)
 
   Modified files:
