@@ -87,6 +87,12 @@
  *
  */
 
+/*
+ * Do NOT change these paths!  They wont actually affect where ircd
+ * is installed, and itll just error when you try to run it.  -- fl_
+ * 
+ * Use: ./configure --prefix="/home/dir"
+ */
 #define DPATH   IRCD_PREFIX
 #define MODPATH IRCD_PREFIX "/modules/autoload/"
 #define MSGPATH IRCD_PREFIX "/messages/"
