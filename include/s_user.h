@@ -30,18 +30,22 @@
 #include "config.h"
 
 struct Client;
-struct User;
-struct oper_conf;
-extern time_t LastUsedWallops;
+
+struct flag_item
+{
+	int mode;
+	char letter;
+};
+
+extern struct flag_item user_modes[];
+extern int user_modes_from_c_to_bitmask[];
 
 extern int valid_hostname(const char *hostname);
 extern int valid_username(const char *username);
 
-extern int user_mode(struct Client *, struct Client *, int, const char **);
 extern void send_umode(struct Client *, struct Client *, int, int, char *);
 extern void send_umode_out(struct Client *, struct Client *, int);
 extern int show_lusers(struct Client *source_p);
-extern int user_modes_from_c_to_bitmask[];
 extern void show_isupport(struct Client *);
 
 
