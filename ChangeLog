@@ -1,3 +1,15 @@
+androsyn    2002/12/16 08:30:55 UTC	(20021216_16)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Move this QUIT send up
+  
+  Revision  Changes    Path
+  7.355     +7 -6      ircd-ratbox/src/client.c
+
+
+
 androsyn    2002/12/16 08:14:44 UTC	(20021216_15)
 
   Modified files:
