@@ -2529,7 +2529,7 @@ void cleanup_channels(void *unused)
      eventAdd("cleanup_channels", cleanup_channels, NULL,
        CLEANUP_CHANNELS_TIME, 0 );
 
-   sendto_ops_flags(FLAGS_DEBUG, "*** Cleaning up local channels...");
+   sendto_realops_flags(FLAGS_DEBUG, "*** Cleaning up local channels...");
    
    next_chptr = NULL;
 

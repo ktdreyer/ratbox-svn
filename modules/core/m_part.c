@@ -87,10 +87,10 @@ int     m_part(struct Client *cptr,
       if(GlobalSetOptions.spam_num &&
 	 (sptr->join_leave_count >= GlobalSetOptions.spam_num))
 	{
-	  sendto_ops_flags(FLAGS_BOTS,
-			   "User %s (%s@%s) is a possible spambot",
-			   sptr->name,
-			   sptr->username, sptr->host);
+	  sendto_realops_flags(FLAGS_BOTS,
+			       "User %s (%s@%s) is a possible spambot",
+			       sptr->name,
+			       sptr->username, sptr->host);
 	  sptr->oper_warn_count_down = OPER_SPAM_COUNTDOWN;
 	}
       else

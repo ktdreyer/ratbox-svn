@@ -93,6 +93,10 @@ void WriteDline(const char *, struct Client *,
 
 char *_version = "20001122";
 
+char buffer[IRCD_BUFSIZE];
+char user[USERLEN+2];
+char host[HOSTLEN+2];
+
 /*
  * mo_kline
  *
@@ -109,10 +113,7 @@ int mo_kline(struct Client *cptr,
                 int parc,
                 char *parv[])
 {
-  char buffer[IRCD_BUFSIZE];
   char *p;
-  char user[USERLEN+2];
-  char host[HOSTLEN+2];
   char *reason = NULL;
   const char* current_date;
   int  ip_kline = NO;
@@ -178,10 +179,18 @@ int mo_kline(struct Client *cptr,
 
   ip_kline = is_ip_kline(host,&ip,&ip_mask);
 
+/* ZZZ */
+sendto_realops("ip_kline %d host %s\n", ip_kline,host);
+
   if ( already_placed(sptr, user, host, ip) )
     return 0;
 
+/* ZZZ */
+sendto_realops("About to call smalldate\n");
+
   current_date = smalldate((time_t) 0);
+
+sendto_realops("current_date %s\n",current_date);
 
   aconf = make_conf();
   aconf->status = CONF_KILL;

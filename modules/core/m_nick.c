@@ -130,8 +130,8 @@ int mr_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if(find_q_line(nick, sptr->username, sptr->host)) 
     {
       sendto_realops_flags(FLAGS_REJ,
-                         "Quarantined nick [%s] from user %s",
-                         nick,get_client_name(cptr, HIDE_IP));
+			   "Quarantined nick [%s] from user %s",
+			   nick,get_client_name(cptr, HIDE_IP));
       sendto_one(sptr, form_str(ERR_ERRONEUSNICKNAME),
 		 me.name, parv[0], parv[1]);
       return 0;
@@ -216,8 +216,8 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (!IsAnyOper(sptr) && find_q_line(nick, sptr->username, sptr->host))
     {
       sendto_realops_flags(FLAGS_REJ,
-                         "Quarantined nick [%s] from user %s",
-                         nick,get_client_name(cptr, HIDE_IP));
+			   "Quarantined nick [%s] from user %s",
+			   nick,get_client_name(cptr, HIDE_IP));
       sendto_one(sptr, form_str(ERR_ERRONEUSNICKNAME),
 		 me.name, parv[0], parv[1]);
       return 0;
@@ -407,8 +407,8 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         {
           ServerStats->is_kill++;
           sendto_realops_flags(FLAGS_DEBUG, "Bad Nick: %s From: %s %s",
-                             parv[1], parv[0],
-                             get_client_name(cptr, HIDE_IP));
+			       parv[1], parv[0],
+			       get_client_name(cptr, HIDE_IP));
           sendto_one(cptr, ":%s KILL %s :%s (%s <- %s[%s])",
                      me.name, parv[1], me.name, parv[1],
                      nick, cptr->name);
@@ -443,9 +443,9 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       ** there is no danger of the server being disconnected.
       ** Ultimate way to jupiter a nick ? >;-). -avalon
       */
-      sendto_ops("Nick collision on %s(%s <- %s)",
-                 sptr->name, acptr->from->name,
-                 get_client_name(cptr, HIDE_IP));
+      sendto_realops("Nick collision on %s(%s <- %s)",
+		     sptr->name, acptr->from->name,
+		     get_client_name(cptr, HIDE_IP));
       ServerStats->is_kill++;
       sendto_one(cptr, ":%s KILL %s :%s (%s <- %s)",
                  me.name, sptr->name, me.name, acptr->from->name,
@@ -510,7 +510,7 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       {
         if (fromTS && !(acptr->user))
           {
-            sendto_ops("Nick Collision on %s(%s(NOUSER) <- %s!%s@%s)(TS:%s)",
+            sendto_realops("Nick Collision on %s(%s(NOUSER) <- %s!%s@%s)(TS:%s)",
                    acptr->name, acptr->from->name, parv[1], parv[5], parv[6],
                    cptr->name);
 
@@ -576,9 +576,9 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       if (!newts || !acptr->tsinfo
           || (newts == acptr->tsinfo))
         {
-          sendto_ops("Nick collision on %s(%s <- %s)(both killed)",
-                     acptr->name, acptr->from->name,
-                     get_client_name(cptr, HIDE_IP));
+          sendto_realops("Nick collision on %s(%s <- %s)(both killed)",
+			 acptr->name, acptr->from->name,
+			 get_client_name(cptr, HIDE_IP));
 
 #ifndef LOCAL_NICK_COLLIDE
 	  sendto_serv_butone(NULL, /* all servers */
@@ -609,13 +609,13 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           else
             {
               if (sameuser)
-                sendto_ops("Nick collision on %s(%s <- %s)(older killed)",
-                           acptr->name, acptr->from->name,
-                           get_client_name(cptr, HIDE_IP));
+                sendto_realops("Nick collision on %s(%s <- %s)(older killed)",
+			       acptr->name, acptr->from->name,
+			       get_client_name(cptr, HIDE_IP));
               else
-                sendto_ops("Nick collision on %s(%s <- %s)(newer killed)",
-                           acptr->name, acptr->from->name,
-                           get_client_name(cptr, HIDE_IP));
+                sendto_realops("Nick collision on %s(%s <- %s)(newer killed)",
+			       acptr->name, acptr->from->name,
+			       get_client_name(cptr, HIDE_IP));
               
               ServerStats->is_kill++;
               sendto_one(acptr, form_str(ERR_NICKCOLLISION),
@@ -645,9 +645,9 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if ( !newts || !acptr->tsinfo || (newts == acptr->tsinfo) ||
       !sptr->user)
     {
-      sendto_ops("Nick change collision from %s to %s(%s <- %s)(both killed)",
-                 sptr->name, acptr->name, acptr->from->name,
-                 get_client_name(cptr, HIDE_IP));
+      sendto_realops("Nick change collision from %s to %s(%s <- %s)(both killed)",
+		     sptr->name, acptr->name, acptr->from->name,
+		     get_client_name(cptr, HIDE_IP));
       ServerStats->is_kill++;
       sendto_one(acptr, form_str(ERR_NICKCOLLISION),
                  me.name, acptr->name, acptr->name);
@@ -681,13 +681,13 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           (!sameuser && newts > acptr->tsinfo))
         {
           if (sameuser)
-            sendto_ops("Nick change collision from %s to %s(%s <- %s)(older killed)",
-                       sptr->name, acptr->name, acptr->from->name,
-                       get_client_name(cptr, HIDE_IP));
+            sendto_realops("Nick change collision from %s to %s(%s <- %s)(older killed)",
+			   sptr->name, acptr->name, acptr->from->name,
+			   get_client_name(cptr, HIDE_IP));
           else
-            sendto_ops("Nick change collision from %s to %s(%s <- %s)(newer killed)",
-                       sptr->name, acptr->name, acptr->from->name,
-                       get_client_name(cptr, HIDE_IP));
+            sendto_realops("Nick change collision from %s to %s(%s <- %s)(newer killed)",
+			   sptr->name, acptr->name, acptr->from->name,
+			   get_client_name(cptr, HIDE_IP));
 
           ServerStats->is_kill++;
 
@@ -707,13 +707,13 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       else
         {
           if (sameuser)
-            sendto_ops("Nick collision on %s(%s <- %s)(older killed)",
-                       acptr->name, acptr->from->name,
-                       get_client_name(cptr, HIDE_IP));
+            sendto_realops("Nick collision on %s(%s <- %s)(older killed)",
+			   acptr->name, acptr->from->name,
+			   get_client_name(cptr, HIDE_IP));
           else
-            sendto_ops("Nick collision on %s(%s <- %s)(newer killed)",
-                       acptr->name, acptr->from->name,
-                       get_client_name(cptr, HIDE_IP));
+            sendto_realops("Nick collision on %s(%s <- %s)(newer killed)",
+			   acptr->name, acptr->from->name,
+			   get_client_name(cptr, HIDE_IP));
           
 #ifndef LOCAL_NICK_COLLIDE
 	  sendto_serv_butone(sptr, /* all servers but sptr */

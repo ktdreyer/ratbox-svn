@@ -191,7 +191,7 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        * contain real IP addresses.  But we do want opers to see them.
        * The choices are currently to do two sends, or just not show kills
        * to non opers.  I'm chosing the latter for now.  --Rodder
-         sendto_ops("Received KILL message for %s. From %s!%s@%s Path:supressed.!%s",
+         sendto_realops("Received KILL message for %s. From %s!%s@%s Path:supressed.!%s",
                     acptr->name, sptr->name, sptr->username, sptr->host,
                     reason);
        */
@@ -406,15 +406,16 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (IsAnyOper(sptr)) /* send it normally */
     {
       sendto_realops("Received KILL message for %s. From %s Path: %s!%s", 
-               acptr->name, parv[0], inpath, path);
+		     acptr->name, parv[0], inpath, path);
       /*
-       * dilema here: we don't want non opers to see pathes which
+       * XXX 
+       * dilemna here: we don't want non opers to see paths which
        * contain real IP addresses.  But we do want opers to see them.
        * The choices are currently to do two sends, or just not show kills
        * to non opers.  I'm chosing the latter for now.  --Rodder
-         sendto_ops("Received KILL message for %s. From %s!%s@%s Path:supressed.!%s",
-                    acptr->name, sptr->name, sptr->username, sptr->host,
-                    reason);
+         sendto_realops("Received KILL message for %s. From %s!%s@%s Path:supressed.!%s",
+	 acptr->name, sptr->name, sptr->username, sptr->host,
+	 reason);
        */
     }
   else

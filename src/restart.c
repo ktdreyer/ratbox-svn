@@ -34,7 +34,7 @@ void server_reboot(void)
 {
   int i;
   
-  sendto_ops("Aieeeee!!!  Restarting server... memory: %d", get_maxrss());
+  sendto_realops("Aieeeee!!!  Restarting server... memory: %d", get_maxrss());
 
   log(L_NOTICE, "Restarting server...");
   /*

@@ -86,7 +86,7 @@ dead_link(struct Client *to, char *notice)
   DBufClear(&to->recvQ);
   DBufClear(&to->sendQ);
   if (!IsPerson(to) && !IsUnknown(to) && !(to->flags & FLAGS_CLOSING))
-    sendto_ops(notice, get_client_name(to, FALSE));
+    sendto_realops(notice, get_client_name(to, FALSE));
   
   Debug((DEBUG_ERROR, notice, get_client_name(to, FALSE)));
 
@@ -123,9 +123,9 @@ send_message(struct Client *to, char *msg, int len)
   if (DBufLength(&to->sendQ) > get_sendq(to))
     {
       if (IsServer(to))
-        sendto_ops("Max SendQ limit exceeded for %s: %d > %d",
-          get_client_name(to, FALSE),
-          DBufLength(&to->sendQ), get_sendq(to));
+        sendto_realops("Max SendQ limit exceeded for %s: %d > %d",
+		       get_client_name(to, FALSE),
+		       DBufLength(&to->sendQ), get_sendq(to));
 
       if (IsClient(to))
         to->flags |= FLAGS_SENDQEX;
@@ -260,7 +260,7 @@ vsendto_one(struct Client *to, const char *pattern, va_list args)
     }
   else if (IsMe(to))
     {
-      sendto_ops("Trying to send [%s] to myself!", sendbuf);
+      sendto_realops("Trying to send [%s] to myself!", sendbuf);
       return;
     }
 
@@ -739,91 +739,6 @@ sendto_match_butone(struct Client *one, struct Client *from, char *mask,
 } /* sendto_match_butone() */
 
 /*
- * sendto_ops_flags
- *
- *    Send to *local* ops only at a certain level...
- */
-
-void
-sendto_ops_flags(int flags, const char *pattern, ...)
-
-{
-  va_list args;
-  register struct Client *cptr;
-  char nbuf[1024];
-
-  va_start(args, pattern);
-
-  if( flags & FLAGS_SKILL)
-    {
-      for(cptr = LocalClientList; cptr; cptr = cptr->next_local_client)
-        {
-          if(cptr->umodes & FLAGS_SKILL)
-            {
-              (void)ircsprintf(nbuf, ":%s NOTICE %s :*** Notice -- ",
-                               me.name, cptr->name);
-      
-              (void)strncat(nbuf, pattern, sizeof(nbuf) - strlen(nbuf));
-      
-              vsendto_one(cptr, nbuf, args);
-            }
-        } /* for(cptr = LocalClientList; cptr; cptr = cptr->next_local_client) */
-    }
-
-
-  flags &= ~FLAGS_SKILL;
-
-  if(flags)
-    {
-      for(cptr = oper_cptr_list; cptr; cptr = cptr->next_oper_client)
-        {
-          if(cptr->umodes & flags)
-            {
-              (void)ircsprintf(nbuf, ":%s NOTICE %s :*** Notice -- ",
-                               me.name, cptr->name);
-              
-              (void)strncat(nbuf, pattern, sizeof(nbuf) - strlen(nbuf));
-              
-              vsendto_one(cptr, nbuf, args);
-            }
-        } /* for(cptr = oper_cptr_list; cptr; cptr = cptr->next_oper_client) */
-    }
-  va_end(args);
-}  /* sendto_ops_flags */
-
-/*
- * sendto_ops
- *
- *      Send to *local* ops only.
- */
-
-void
-sendto_ops(const char *pattern, ...)
-
-{
-  va_list args;
-  register struct Client *cptr;
-  char nbuf[1024];
-
-  va_start(args, pattern);
-  
-  for (cptr = LocalClientList; cptr; cptr = cptr->next_local_client)
-    {
-      if (SendServNotice(cptr))
-        {
-          (void)ircsprintf(nbuf, ":%s NOTICE %s :*** Notice -- ",
-                           me.name, cptr->name);
-          (void)strncat(nbuf, pattern, sizeof(nbuf) - strlen(nbuf));
-          
-          vsendto_one(cptr, nbuf, args);
-        }
-    }
-
-  va_end(args);
-} /* sendto_ops() */
-
-
-/*
 ** sendto_ops_butone
 **      Send message to all operators.
 ** one - client not to send message to
@@ -1016,16 +931,16 @@ vsendto_prefix_one(register struct Client *to, register struct Client *from,
         {
           vsprintf_irc(sendbuf, pattern, args);
           
-          sendto_ops(
+          sendto_realops(
                      "Send message (%s) to %s[%s] dropped from %s(Fake Dir)",
                      sendbuf, to->name, to->from->name, from->name);
           return;
         }
 
-      sendto_ops("Ghosted: %s[%s@%s] from %s[%s@%s] (%s)",
-                 to->name, to->username, to->host,
-                 from->name, from->username, from->host,
-                 to->from->name);
+      sendto_realops("Ghosted: %s[%s@%s] from %s[%s@%s] (%s)",
+		     to->name, to->username, to->host,
+		     from->name, from->username, from->host,
+		     to->from->name);
       
       sendto_serv_butone(NULL, ":%s KILL %s :%s (%s[%s@%s] Ghosted %s)",
                          me.name, to->name, me.name, to->name,
@@ -1185,7 +1100,7 @@ sendto_realops_flags(int flags, const char *pattern, ...)
 
 /*
 ** ts_warn
-**      Call sendto_ops, with some flood checking (at most 5 warnings
+**      Call sendto_realops, with some flood checking (at most 5 warnings
 **      every 5 seconds)
 */
  

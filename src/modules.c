@@ -60,7 +60,10 @@ load_all_modules(void)
   if (chdir(system_module_dir_name) == -1) {
     log(L_WARN, "Could not load modules from %s: %s",
 	system_module_dir_name, strerror(errno));
-    exit(0);
+    /* DONT EXIT!!! admin/oper can still recover from this, just Log it.
+     * patch suggested by bysin
+     */
+    return;
   }
 
   system_module_dir = opendir(".");

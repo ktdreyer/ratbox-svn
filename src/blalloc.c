@@ -17,7 +17,7 @@
 #include <stdlib.h>
 
 #ifdef DEBUG_BLOCK_ALLOCATOR
-#include "send.h"           /* sendto_ops */
+#include "send.h"           /* sendto_realops */
 
 const char* BH_CurrentFile = 0;   /* GLOBAL used for BlockHeap debugging */
 int         BH_CurrentLine = 0;   /* GLOBAL used for BlockHeap debugging */
@@ -280,11 +280,11 @@ int BlockHeapFree(BlockHeap *bh, void *ptr)
 #ifdef DEBUG_BLOCK_ALLOCATOR
       log(L_WARN, "blalloc.c bit already clear in map caller %s %d",
           BH_CurrentFile, BH_CurrentLine);
-      sendto_ops("blalloc.c bit already clear in map elemSize %d caller %s %d",
+      sendto_realops("blalloc.c bit already clear in map elemSize %d caller %s %d",
                          bh->elemSize,
                          BH_CurrentFile,
                          BH_CurrentLine);
-              sendto_ops("Please report to the hybrid team! ircd-hybrid@the-project.org");
+              sendto_realops("Please report to the hybrid team! ircd-hybrid@the-project.org");
 #endif /* DEBUG_BLOCK_ALLOCATOR */
             }
           else

@@ -220,7 +220,7 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        *
        *
        * get_client_name() can return ptr to static buffer...can't use
-       * 2 times in same sendto_ops(), so we have to strcpy one =(
+       * 2 times in same sendto_realops(), so we have to strcpy one =(
        *  - comstud
        */
       strcpy(nbuf, get_client_name(bcptr, TRUE));
@@ -245,7 +245,7 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        * for a while and servers to send stuff to the wrong place.
        */
       sendto_one(cptr,"ERROR :Nickname %s already exists!", host);
-      sendto_ops("Link %s cancelled: Server/nick collision on %s",
+      sendto_realops("Link %s cancelled: Server/nick collision on %s",
                  /* inpath */ get_client_name(cptr,FALSE), host);
       return exit_client(cptr, cptr, cptr, "Nick as Server");
     }
@@ -363,7 +363,7 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     return server_estab(cptr);
 
   ++ServerStats->is_ref;
-  sendto_ops("Received unauthorized connection from %s.",
+  sendto_realops("Received unauthorized connection from %s.",
               get_client_host(cptr));
   return exit_client(cptr, cptr, cptr, "No C/N conf lines");
 }
@@ -537,7 +537,7 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        *
        *
        * get_client_name() can return ptr to static buffer...can't use
-       * 2 times in same sendto_ops(), so we have to strcpy one =(
+       * 2 times in same sendto_realops(), so we have to strcpy one =(
        *  - comstud
        */
       strcpy(nbuf, get_client_name(bcptr, TRUE));
@@ -562,7 +562,7 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        * for a while and servers to send stuff to the wrong place.
        */
       sendto_one(cptr,"ERROR :Nickname %s already exists!", host);
-      sendto_ops("Link %s cancelled: Server/nick collision on %s",
+      sendto_realops("Link %s cancelled: Server/nick collision on %s",
                  /* inpath */ get_client_name(cptr,FALSE), host);
       return exit_client(cptr, cptr, cptr, "Nick as Server");
     }
@@ -680,8 +680,8 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     return server_estab(cptr);
 
   ++ServerStats->is_ref;
-  sendto_ops("Received unauthorized connection from %s.",
-              get_client_host(cptr));
+  sendto_realops("Received unauthorized connection from %s.",
+		 get_client_host(cptr));
   return exit_client(cptr, cptr, cptr, "No C/N conf lines");
 }
 

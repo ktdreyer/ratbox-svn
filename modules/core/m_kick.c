@@ -187,13 +187,6 @@ int     ms_kick(struct Client *cptr,
       return 0;
     }
 
-  /* local server is very unlikely to kick...
-   */
-
-  if (IsServer(sptr))
-    sendto_ops("KICK from %s for %s %s",
-               parv[0], parv[1], parv[2]);
-
   return (m_kick(cptr, sptr, parc, parv));
 
   /* NOT REACHED */

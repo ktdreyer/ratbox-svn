@@ -219,11 +219,11 @@ void _free_client(struct Client* cptr)
     {
       /* 
        * Looks "unprofessional" maybe, but I am going to leave this 
-       * sendto_ops in it should never happen, and if it does, the 
+       * sendto_realops in it should never happen, and if it does, the 
        * hybrid team wants to hear about it
        */
-      sendto_ops(BH_FREE_ERROR_MESSAGE, cptr);
-      sendto_ops("Please report to the hybrid team! " \
+      sendto_realops(BH_FREE_ERROR_MESSAGE, cptr);
+      sendto_realops("Please report to the hybrid team! " \
                  "ircd-hybrid@the-project.org");
 
       log(L_WARN, BH_FREE_ERROR_MESSAGE, cptr);
@@ -385,8 +385,8 @@ check_pings(void *notused)
               if (IsServer(cptr) || IsConnecting(cptr) ||
                   IsHandshake(cptr))
                 {
-                  sendto_ops("No response from %s, closing link",
-                             get_client_name(cptr, FALSE));
+                  sendto_realops("No response from %s, closing link",
+				 get_client_name(cptr, FALSE));
                 }
 
               cptr->flags2 |= FLAGS2_PING_TIMEOUT;
@@ -1242,7 +1242,7 @@ static void exit_one_client(struct Client *cptr, struct Client *sptr, struct Cli
   */
   if (IsMe(sptr))
     {
-      sendto_ops("ERROR: tried to exit me! : %s", comment);
+      sendto_realops("ERROR: tried to exit me! : %s", comment);
       return;        /* ...must *never* exit self!! */
     }
   else if (IsServer(sptr))
@@ -1677,7 +1677,7 @@ const char* comment         /* Reason for the exit */
 
       if (sptr->servptr == &me)
         {
-          sendto_ops("%s was connected for %d seconds.  %d/%d sendK/recvK.",
+          sendto_realops("%s was connected for %d seconds.  %d/%d sendK/recvK.",
                      sptr->name, CurrentTime - sptr->firsttime,
                      sptr->sendK, sptr->receiveK);
           log(L_NOTICE, "%s was connected for %d seconds.  %d/%d sendK/recvK.",

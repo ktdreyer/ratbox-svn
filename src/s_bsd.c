@@ -612,16 +612,16 @@ void error_exit_client(struct Client* cptr, int error)
       int connected = CurrentTime - cptr->firsttime;
       
       if (0 == error)
-        sendto_ops("Server %s closed the connection",
-                   get_client_name(cptr, FALSE));
+        sendto_realops("Server %s closed the connection",
+		       get_client_name(cptr, FALSE));
       else
         report_error("Lost connection to %s:%s", 
                      get_client_name(cptr, TRUE), current_error);
-      sendto_ops("%s had been connected for %d day%s, %2d:%02d:%02d",
-                 cptr->name, connected/86400,
-                 (connected/86400 == 1) ? "" : "s",
-                 (connected % 86400) / 3600, (connected % 3600) / 60,
-                 connected % 60);
+      sendto_realops("%s had been connected for %d day%s, %2d:%02d:%02d",
+		     cptr->name, connected/86400,
+		     (connected/86400 == 1) ? "" : "s",
+		     (connected % 86400) / 3600, (connected % 3600) / 60,
+		     connected % 60);
     }
   if (0 == error)
     strcpy(errmsg, "Remote closed the connection");

@@ -540,11 +540,11 @@ int drone_attack(struct Client *sptr,struct Client *acptr)
 	    {
 	      if(acptr->drone_noticed == 0) /* tiny FSM */
 		{
-		  sendto_ops_flags(FLAGS_BOTS,
-		   "Possible Drone Flooder %s [%s@%s] on %s target: %s",
-				   sptr->name, sptr->username,
-				   sptr->host,
-				   sptr->user->server, acptr->name);
+		  sendto_realops_flags(FLAGS_BOTS,
+		       "Possible Drone Flooder %s [%s@%s] on %s target: %s",
+				       sptr->name, sptr->username,
+				       sptr->host,
+				       sptr->user->server, acptr->name);
 		  acptr->drone_noticed = 1;
 		}
 	      /* heuristic here, if target has been getting a lot
@@ -558,9 +558,9 @@ int drone_attack(struct Client *sptr,struct Client *acptr)
 		{
 		  if(acptr->drone_noticed == 1) /* tiny FSM */
 		    {
-		      sendto_ops_flags(FLAGS_BOTS,
+		      sendto_realops_flags(FLAGS_BOTS,
 		       "anti_drone_flood SendQ protection activated for %s",
-				       acptr->name);
+					   acptr->name);
 
 		      sendto_one(acptr,     
  ":%s NOTICE %s :*** Notice -- Server drone flood protection activated for %s",

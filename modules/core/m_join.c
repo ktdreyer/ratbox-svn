@@ -472,12 +472,12 @@ void check_spambot_warning( struct Client *sptr, char *name )
 	  else
 	    sptr->oper_warn_count_down = 0;
 
-	  sendto_ops_flags(FLAGS_BOTS,
-		   "User %s (%s@%s) trying to join %s is a possible spambot",
-			   sptr->name,
-			   sptr->username,
-			   sptr->host,
-			   name);     
+	  sendto_realops_flags(FLAGS_BOTS,
+	       "User %s (%s@%s) trying to join %s is a possible spambot",
+			       sptr->name,
+			       sptr->username,
+			       sptr->host,
+			       name);     
 	  sptr->oper_warn_count_down = OPER_SPAM_COUNTDOWN;
 	}
     }

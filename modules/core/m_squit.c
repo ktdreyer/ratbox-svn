@@ -177,13 +177,13 @@ int ms_squit(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   */
   if (MyConnect(acptr) && !IsAnyOper(cptr))
     {
-      sendto_ops_butone(NULL, &me,
+      sendto_realops_butone(NULL, &me,
                         ":%s WALLOPS :Received SQUIT %s from %s (%s)",
                         me.name, server, get_client_name(sptr,FALSE), comment);
       log(L_TRACE, "SQUIT From %s : %s (%s)", parv[0], server, comment);
     }
   else if (MyConnect(acptr))
-    sendto_ops("Received SQUIT %s from %s (%s)",
+    sendto_realops("Received SQUIT %s from %s (%s)",
                acptr->name, get_client_name(sptr,FALSE), comment);
   
   return exit_client(cptr, acptr, sptr, comment);
@@ -318,13 +318,13 @@ int mo_squit(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (MyConnect(acptr) && !IsAnyOper(cptr))
     {
       sendto_ops_butone(NULL, &me,
-                        ":%s WALLOPS :Received SQUIT %s from %s (%s)",
-                        me.name, server, get_client_name(sptr,FALSE), comment);
+			    ":%s WALLOPS :Received SQUIT %s from %s (%s)",
+			    me.name, server, get_client_name(sptr,FALSE), comment);
       log(L_TRACE, "SQUIT From %s : %s (%s)", parv[0], server, comment);
     }
   else if (MyConnect(acptr))
-    sendto_ops("Received SQUIT %s from %s (%s)",
-               acptr->name, get_client_name(sptr,FALSE), comment);
+    sendto_realops("Received SQUIT %s from %s (%s)",
+		   acptr->name, get_client_name(sptr,FALSE), comment);
   
   return exit_client(cptr, acptr, sptr, comment);
 }

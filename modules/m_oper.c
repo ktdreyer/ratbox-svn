@@ -319,13 +319,13 @@ int oper_up( struct Client *sptr, struct ConfItem *aconf )
     operprivs = "";
 
 #ifdef CUSTOM_ERR
-  sendto_ops("%s (%s@%s) has just acquired the personality of a petty megalomaniacal tyrant [IRC(%c)p]", sptr->name,
-	     sptr->username, sptr->host,
-	     IsGlobalOper(sptr) ? 'O' : 'o');
+  sendto_realops("%s (%s@%s) has just acquired the personality of a petty megalomaniacal tyrant [IRC(%c)p]", sptr->name,
+		 sptr->username, sptr->host,
+		 IsGlobalOper(sptr) ? 'O' : 'o');
 #else
-  sendto_ops("%s (%s@%s) is now operator (%c)", sptr->name,
-	     sptr->username, sptr->host,
-	     IsGlobalOper(sptr) ? 'O' : 'o');
+  sendto_realops("%s (%s@%s) is now operator (%c)", sptr->name,
+		 sptr->username, sptr->host,
+		 IsGlobalOper(sptr) ? 'O' : 'o');
 #endif /* CUSTOM_ERR */
 
   send_umode_out(sptr, sptr, old);

@@ -279,9 +279,9 @@ time_t try_connections(time_t currenttime)
        * auto connects disabled, send message to ops and bail
        */
       if (connecting)
-        sendto_ops("Connection to %s[%s] not activated.",
-                 con_conf->name, con_conf->host);
-      sendto_ops("WARNING AUTOCONN is 0, autoconns are disabled");
+        sendto_realops("Connection to %s[%s] not activated.",
+		       con_conf->name, con_conf->host);
+      sendto_realops("WARNING AUTOCONN is 0, autoconns are disabled");
       Debug((DEBUG_NOTICE,"Next connection check : %s", myctime(next)));
       return next;
     }
@@ -304,9 +304,9 @@ time_t try_connections(time_t currenttime)
 
       if (!(con_conf->flags & CONF_FLAGS_ALLOW_AUTO_CONN))
         {
-          sendto_ops("Connection to %s[%s] not activated, autoconn is off.",
+          sendto_realops("Connection to %s[%s] not activated, autoconn is off.",
                      con_conf->name, con_conf->host);
-          sendto_ops("WARNING AUTOCONN on %s[%s] is disabled",
+          sendto_realops("WARNING AUTOCONN on %s[%s] is disabled",
                      con_conf->name, con_conf->host);
         }
       else
@@ -320,7 +320,7 @@ time_t try_connections(time_t currenttime)
            * error afterwards if it fails.
            *   -- adrian
            */
-          sendto_ops("Connection to %s[%s] activated.",
+          sendto_realops("Connection to %s[%s] activated.",
                      con_conf->name, con_conf->host);
           serv_connect(con_conf, 0);
         }
@@ -579,7 +579,7 @@ int server_estab(struct Client *cptr)
       ServerStats->is_ref++;
        sendto_one(cptr,
                  "ERROR :Access denied. No N line for server %s", inpath_ip);
-      sendto_ops("Access denied. No N line for server %s", inpath);
+      sendto_realops("Access denied. No N line for server %s", inpath);
       log(L_NOTICE, "Access denied. No N line for server %s", inpath_ip);
       return exit_client(cptr, cptr, cptr, "No N line for server");
     }
@@ -587,7 +587,7 @@ int server_estab(struct Client *cptr)
     {
       ServerStats->is_ref++;
       sendto_one(cptr, "ERROR :Only N (no C) field for server %s", inpath);
-      sendto_ops("Only N (no C) field for server %s",inpath);
+      sendto_realops("Only N (no C) field for server %s",inpath);
       log(L_NOTICE, "Only N (no C) field for server %s", inpath_ip);
       return exit_client(cptr, cptr, cptr, "No C line for server");
     }
@@ -611,7 +611,7 @@ int server_estab(struct Client *cptr)
       ServerStats->is_ref++;
       sendto_one(cptr, "ERROR :No Access (passwd mismatch) %s",
                  inpath);
-      sendto_ops("Access denied (passwd mismatch) %s", inpath);
+      sendto_realops("Access denied (passwd mismatch) %s", inpath);
       return exit_client(cptr, cptr, cptr, "Bad Password");
     }
   memset((void *)cptr->passwd, 0,sizeof(cptr->passwd));
@@ -698,7 +698,7 @@ int server_estab(struct Client *cptr)
   serv_cptr_list = cptr;
   
   /* ircd-hybrid-6 can do TS links, and  zipped links*/
-  sendto_ops("Link with %s established: (%s) link",
+  sendto_realops("Link with %s established: (%s) link",
              inpath,show_capabilities(cptr));
   log(L_NOTICE, "Link with %s established: (%s) link",
       inpath_ip, show_capabilities(cptr));
@@ -951,7 +951,7 @@ void set_autoconn(struct Client *sptr,char *parv0,char *name,int newval)
       else
         aconf->flags &= ~CONF_FLAGS_ALLOW_AUTO_CONN;
 
-      sendto_ops(
+      sendto_realops(
                  "%s has changed AUTOCONN for %s to %i",
                  parv0, name, newval);
       sendto_one(sptr,
@@ -1132,7 +1132,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
      * serv_connect_callback(). This to avoid null pointer references.
      */
     if (!attach_cn_lines(cptr, aconf->host)) {
-        sendto_ops("Host %s is not enabled for connecting:no C/N-line",
+        sendto_realops("Host %s is not enabled for connecting:no C/N-line",
           aconf->host);
         if (by && IsPerson(by) && !MyClient(by))  
             sendto_one(by, ":%s NOTICE %s :Connect to host %s failed.",
