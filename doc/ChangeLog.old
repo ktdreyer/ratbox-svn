@@ -1,3 +1,9 @@
+*** 20010104_10 by davidt
+Mass move of m_* prototypes from includes/handlers.h into the individual
+m_*.c file.  There's no reason for them to be in a header file, since
+they can't be used by anything other than the module.....
+
+
 *** 20010104_9 by adrian
 
 
