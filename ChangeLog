@@ -1,3 +1,31 @@
+androsyn    2003/09/10 10:53:11 EDT	(20030910_0)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    src                  .depend Makefile.in 
+  Removed files:
+    src                  s_bsd_devpoll.c s_bsd_epoll.c 
+                         s_bsd_kqueue.c s_bsd_poll.c s_bsd_qio.c 
+                         s_bsd_select.c s_bsd_sigio.c 
+  Log:
+  Updated Makefiles for the s_bsd_* renames
+  
+  Revision  Changes    Path
+  7.179     +1 -1      ircd-ratbox/autoconf/configure.in
+  7.186     +1 -1      ircd-ratbox/configure
+  7.35      +11 -29    ircd-ratbox/src/.depend
+  7.139     +2 -8      ircd-ratbox/src/Makefile.in
+  7.28      +0 -317    ircd-ratbox/src/s_bsd_devpoll.c (dead)
+  1.15      +0 -206    ircd-ratbox/src/s_bsd_epoll.c (dead)
+  1.41      +0 -289    ircd-ratbox/src/s_bsd_kqueue.c (dead)
+  7.71      +0 -267    ircd-ratbox/src/s_bsd_poll.c (dead)
+  7.3       +0 -222    ircd-ratbox/src/s_bsd_qio.c (dead)
+  7.38      +0 -226    ircd-ratbox/src/s_bsd_select.c (dead)
+  7.41      +0 -354    ircd-ratbox/src/s_bsd_sigio.c (dead)
+
+
+
 leeh        2003/09/09 18:41:41 EDT	(20030909_7)
 
   Modified files:
