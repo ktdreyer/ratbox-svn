@@ -40,8 +40,7 @@ void server_reboot(void)
   int i;
 
   sendto_realops_flags(FLAGS_ALL, L_ALL,
-                       "Aieeeee!!!  Restarting server... memory: %lx",
-                       get_maxrss());
+                       Restarting server...");
 
   ilog(L_NOTICE, "Restarting server...");
   /*
