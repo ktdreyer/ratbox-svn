@@ -834,26 +834,37 @@ remove_one_ip(struct irc_inaddr *ip_in)
  * side effects - hopefully, none
  */
 
+#ifndef IPV6
 static int 
 hash_ip(struct irc_inaddr *addr)
 {
-#ifndef IPV6
   int hash;
   u_int32_t ip;
 
   ip = ntohl(PIN_ADDR(addr));
   hash = ((ip >> 12) + ip) & (IP_HASH_SIZE-1);
   return(hash);
-#else
-  int hash;
-  u_int32_t *ip = (u_int32_t *) &PIN_ADDR(addr);
-  hash = ip[0];
-  hash ^= ip[2] ^ ip[4];
-  hash ^= hash >> 16;
-  hash ^= hash >> 8;   
-  return(hash & (IP_HASH_SIZE - 1));
-#endif
 }
+#else /* IPV6 */
+static int
+hash_ip(struct irc_inaddr *addr)
+{
+  int hash;
+  unsigned long *ip = (unsigned long *)&PIN_ADDR(addr); 
+
+  if(IN6_IS_ADDR_V4MAPPED(ip))
+  {
+     hash = ((ip[3] >> 12) + ip[3]) & (IP_HASH_SIZE-1);
+     return(hash);
+  } 
+  
+  hash = ip[0] ^ ip[3];
+  hash ^= hash >> 16;
+  hash ^= hash >> 8;
+  hash = hash & (IP_HASH_SIZE - 1);
+  return(hash);
+}
+#endif /* IPV6 */
 
 /*
  * count_ip_hash
