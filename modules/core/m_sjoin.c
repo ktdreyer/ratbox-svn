@@ -136,6 +136,7 @@ int     ms_sjoin(struct Client *cptr,
     return 0;
 
   mbuf = modebuf;
+  *mbuf = '\0';
   pargs = 0;
   newts = atol(parv[1]);
   memset(&mode, 0, sizeof(mode));
@@ -292,16 +293,19 @@ int     ms_sjoin(struct Client *cptr,
     }
 
   /* XXX */
-  if(top_chptr != NULL)
-    sendto_channel_local(ALL_MEMBERS,
-			 chptr, ":%s MODE %s %s %s",
-			 me.name,
-			 top_chptr->chname, modebuf, parabuf);
-  else
-    sendto_channel_local(ALL_MEMBERS,
-			 chptr, ":%s MODE %s %s %s",
-			 me.name,
-			 chptr->chname, modebuf, parabuf);
+  if(*mbuf != '\0')
+    {
+      if(top_chptr != NULL)
+	sendto_channel_local(ALL_MEMBERS,
+			     chptr, ":%s MODE %s %s %s",
+			     me.name,
+			     top_chptr->chname, modebuf, parabuf);
+      else
+	sendto_channel_local(ALL_MEMBERS,
+			     chptr, ":%s MODE %s %s %s",
+			     me.name,
+			     chptr->chname, modebuf, parabuf);
+    }
 
   *modebuf = *parabuf = '\0';
   if (parv[3][0] != '0' && keep_new_modes)

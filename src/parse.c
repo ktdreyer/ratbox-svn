@@ -73,7 +73,7 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
   char*           ch;
   char*           s;
   int             i;
-  int             paramcount;
+  int             paramcount, mpara;
   int             handle_idx = -1;	/* Handler index */
   char*           numeric = 0;
   struct Message* mptr;
@@ -221,6 +221,8 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
         }
 
       paramcount = mptr->parameters;
+	  mpara = mptr->maxpara;
+	  
       i = bufend - ((s) ? s : ch);
       mptr->bytes += i;
     }
@@ -241,43 +243,48 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
   i = 1;
 
   if (s)   /* redone by is, aug 2000 */
-    {
+  {
       if (paramcount > MAXPARA)
-        paramcount = MAXPARA;
+		  paramcount = MAXPARA;
       
       {
-	char *longarg = NULL;
-	char *ap;
-	
-	longarg = s;
-	
-	if(strsep(&longarg,":")) /* Tear off short args */
-	  
-	  if(longarg)
-	    *(longarg-2) = '\0';
-	
-	while((ap = strsep(&s, " ")) != NULL) 
-	  {
-	    if(*ap != '\0') 
-	      {
-		para[i] = ap;
-		if(i < MAXPARA)
-		  ++i;
-		else
-		  break;
-	      }
-	  }
-	
-	if(longarg) 
-	  {
-	    para[i] = longarg;
-	    i++;
-	  }
+		  char *longarg = NULL;
+		  char *ap;
+		  
+		  longarg = s;
+		  
+		  if(strsep(&longarg,":")) /* Tear off short args */
+			  if(longarg)
+				  *(longarg-2) = '\0';
+		  
+		  while((ap = strsep(&s, " ")) != NULL) 
+		  {
+			  if(*ap != '\0') 
+			  {
+				  para[i] = ap;
+				  if ((mpara > 0) && (i >= mpara)) {
+					  ap [ strlen (ap) ] = ' '; /* XXX */
+					  longarg = ap;
+					  break;
+				  }
+				  
+				  if(i < MAXPARA)
+					  ++i;
+				  else
+					  break;
+			  }
+		  }
+		  
+		  if(longarg) 
+		  {
+			  para[i] = longarg;
+			  i++;
+		  }
       }
-    }
+  }
   
   para[i] = NULL;
-
+  
   if (mptr == (struct Message *)NULL)
     return (do_numeric(numeric, cptr, from, i, para));
 
