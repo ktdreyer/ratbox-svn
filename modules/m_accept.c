@@ -112,6 +112,14 @@ static void m_accept(struct Client *cptr, struct Client *sptr,
     }
   else if(add == -1)
     {
+		if (!accept_message(source, sptr)) 
+		{
+			/* not on list */
+			sendto_one(sptr, ":%s NOTICE %s :%s is not on your accept list",
+					   me.name, parv[0], source->name);
+			return;
+		}
+		
       del_from_accept(source,sptr);
       sendto_one(sptr, ":%s NOTICE %s :Now removed %s from allow list", 
 		 me.name, parv[0], source->name);
