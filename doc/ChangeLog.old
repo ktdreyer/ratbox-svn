@@ -1,3 +1,9 @@
+*** 20001129_9 by db
+- fixed persistent channels
+- fixed IsSetCallerId typo
+
+
+
 *** 20001129_8 by db
 - pile of cleanups mostly in comments
 - added persistent channels tentatively for now, finesse it later
