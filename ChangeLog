@@ -1,3 +1,30 @@
+leeh        2004/04/05 16:01:28 EDT	(20040405_4)
+
+  Modified files:
+    help/opers           index 
+    help/users           index 
+    include              numeric.h 
+    modules              Makefile.in 
+    src                  messages.tab 
+  Added files:
+    help/opers           testmask 
+    modules              m_testmask.c 
+  Log:
+  - added m_testmask.c, given a user@host mask, gives anonymous stats on how
+    many local/remote clients match the mask:
+    <- :stable.lan 724 anfl *@*.goat 1 0 :Local/remote clients match
+  
+  Revision  Changes    Path
+  1.7       +5 -5      ircd-ratbox/help/opers/index
+  1.2       +4 -0      ircd-ratbox/help/opers/testmask (new)
+  1.6       +9 -10     ircd-ratbox/help/users/index
+  7.44      +2 -0      ircd-ratbox/include/numeric.h
+  1.94      +1 -0      ircd-ratbox/modules/Makefile.in
+  1.2       +106 -0    ircd-ratbox/modules/m_testmask.c (new)
+  7.110     +1 -1      ircd-ratbox/src/messages.tab
+
+
+
 leeh        2004/04/05 15:46:24 EDT	(20040405_3)
 
   Modified files:
