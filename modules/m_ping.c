@@ -77,7 +77,7 @@ static void m_ping(struct Client *client_p,
     }
   origin = parv[1];
   destination = parv[2]; /* Will get NULL or pointer (parc >= 2!!) */
-  if (ConfigFileEntry.hide_server && !IsOper(source_p))
+  if (GlobalSetOptions.hide_server && !IsOper(source_p))
   {
    sendto_one(source_p,":%s PONG %s :%s", me.name,
               (destination) ? destination : me.name, origin);
