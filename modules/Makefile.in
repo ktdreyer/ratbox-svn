@@ -36,7 +36,7 @@ INCLUDES	= -I../include -I../adns $(SSL_INCLUDES)
 CPPFLAGS	= ${INCLUDES} @CPPFLAGS@
 
 CORE_SRCS = \
-  core/register.c \
+  core/registration.c \
   core/m_die.c \
   core/m_error.c \
   core/m_join.c \
