@@ -1,3 +1,7 @@
+*** 20010220_1 by toot
+use find_bchan instead of map_bchan.  it's much quicker.
+
+
 *** 20010219_1 by wcampbel
 Cleaned up an unclear sentence in example.conf, and updated the messages
 file.  Someone want to write user docs on the messages stuff?
