@@ -81,6 +81,7 @@ fi
 
 AC_MSG_CHECKING([uname -s for Cygwin, Solaris or HPUX])
 OSNAME=`uname -s`
+OSVER=`uname -r`
 case "$OSNAME" in
         HP-UX*)
 	dnl only do this if we haven't already detected the newer one
@@ -277,14 +278,16 @@ dnl
 dnl                      sizeof(time_t)   printf() format
 dnl ----------------------------------------------------------
 dnl Cygwin 32-bit            4            %ld
-dnl FreeBSD 4.x 32-bit       4            %lu
-dnl FreeBSD 5.x 32-bit       4            %u
-dnl FreeBSD 5.x 64-bit       8            %lu
+dnl FreeBSD 4.x 32-bit       4            %ld
+dnl FreeBSD 5.x 32-bit       4            %d
+dnl FreeBSD 5.x 64-bit       8            %ld
+dnl OpenBSD                  4            %d
 dnl Linux 2.4 i386           4            %ld
 dnl Linux 2.6 Sparc 32-bit   4            %ld
 dnl Linux 2.6 Sparc 64-bit   8            %ld
 dnl Solaris 2.9 32-bit       4            %ld
 dnl Solaris 2.9 64-bit       8            %ld
+dnl Darwin                   4            %ld
 dnl Other                  assume 4       assume %ld
 dnl ----------------------------------------------------------
 AC_CHECK_SIZEOF(time_t)
@@ -296,19 +299,34 @@ case "$OSNAME" in
       AC_MSG_RESULT([%ld])
     ;;
     FreeBSD*)
-      if test "$ac_cv_sizeof_time_t" = "4"; then
-        AC_DEFINE(IRCD_TIME_FMT, ["%u"], [Formatting for time_t strings])
-        AC_MSG_RESULT([%u])
-      elif test "$ac_cv_sizeof_time_t" = "8"; then
-        AC_DEFINE(IRCD_TIME_FMT, ["%lu"], [Formatting for time_t strings])
-        AC_MSG_RESULT([%llu])
-      fi
+        case "$OSVER" in
+	    5*)
+              if test "$ac_cv_sizeof_time_t" = "4"; then
+                AC_DEFINE(IRCD_TIME_FMT, ["%d"], [Formatting for time_t strings])
+                AC_MSG_RESULT([%u])
+              elif test "$ac_cv_sizeof_time_t" = "8"; then
+                AC_DEFINE(IRCD_TIME_FMT, ["%ld"], [Formatting for time_t strings])
+                AC_MSG_RESULT([%llu])
+              fi
+            *)
+              AC_DEFINE(IRCD_TIME_FMT, ["%ld"], [Formatting for time_t strings])
+              AC_MSG_RESULT([%ld])
+            ;;
+        esac
+    ;;
+    OpenBSD*)
+      AC_DEFINE(IRCD_TIME_FMT, ["%d"], [Formatting for time_t strings])
+      AC_MSG_RESULT([%d])
     ;;
     Linux*)
       AC_DEFINE(IRCD_TIME_FMT, ["%ld"], [Formatting for time_t strings])
       AC_MSG_RESULT([%ld])
     ;;
     Solaris*)
+      AC_DEFINE(IRCD_TIME_FMT, ["%ld"], [Formatting for time_t strings])
+      AC_MSG_RESULT([%ld])
+    ;;
+    Darwin*)
       AC_DEFINE(IRCD_TIME_FMT, ["%ld"], [Formatting for time_t strings])
       AC_MSG_RESULT([%ld])
     ;;

@@ -2340,6 +2340,7 @@ fi
 echo "$as_me:$LINENO: checking uname -s for Cygwin, Solaris or HPUX" >&5
 echo $ECHO_N "checking uname -s for Cygwin, Solaris or HPUX... $ECHO_C" >&6
 OSNAME=`uname -s`
+OSVER=`uname -r`
 case "$OSNAME" in
         HP-UX*)
 
@@ -5119,23 +5120,44 @@ _ACEOF
 echo "${ECHO_T}%ld" >&6
     ;;
     FreeBSD*)
-      if test "$ac_cv_sizeof_time_t" = "4"; then
+        case "$OSVER" in
+	    5*)
+              if test "$ac_cv_sizeof_time_t" = "4"; then
 
 cat >>confdefs.h <<\_ACEOF
-#define IRCD_TIME_FMT "%u"
+#define IRCD_TIME_FMT "%d"
 _ACEOF
 
-        echo "$as_me:$LINENO: result: %u" >&5
+                echo "$as_me:$LINENO: result: %u" >&5
 echo "${ECHO_T}%u" >&6
-      elif test "$ac_cv_sizeof_time_t" = "8"; then
+              elif test "$ac_cv_sizeof_time_t" = "8"; then
 
 cat >>confdefs.h <<\_ACEOF
-#define IRCD_TIME_FMT "%lu"
+#define IRCD_TIME_FMT "%ld"
 _ACEOF
 
-        echo "$as_me:$LINENO: result: %llu" >&5
+                echo "$as_me:$LINENO: result: %llu" >&5
 echo "${ECHO_T}%llu" >&6
-      fi
+              fi
+            *)
+
+cat >>confdefs.h <<\_ACEOF
+#define IRCD_TIME_FMT "%ld"
+_ACEOF
+
+              echo "$as_me:$LINENO: result: %ld" >&5
+echo "${ECHO_T}%ld" >&6
+            ;;
+        esac
+    ;;
+    OpenBSD*)
+
+cat >>confdefs.h <<\_ACEOF
+#define IRCD_TIME_FMT "%d"
+_ACEOF
+
+      echo "$as_me:$LINENO: result: %d" >&5
+echo "${ECHO_T}%d" >&6
     ;;
     Linux*)
 
@@ -5147,6 +5169,15 @@ _ACEOF
 echo "${ECHO_T}%ld" >&6
     ;;
     Solaris*)
+
+cat >>confdefs.h <<\_ACEOF
+#define IRCD_TIME_FMT "%ld"
+_ACEOF
+
+      echo "$as_me:$LINENO: result: %ld" >&5
+echo "${ECHO_T}%ld" >&6
+    ;;
+    Darwin*)
 
 cat >>confdefs.h <<\_ACEOF
 #define IRCD_TIME_FMT "%ld"
