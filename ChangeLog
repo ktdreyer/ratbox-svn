@@ -1,3 +1,15 @@
+leeh        2005/03/22 22:29:07 UTC	(20050322_6)
+
+  Added files:
+    include              struct.h 
+  Log:
+  - add back struct.h
+  
+  Revision  Changes    Path
+  7.4       +264 -0    ircd-ratbox/include/struct.h (new)
+
+
+
 androsyn    2005/03/22 22:25:47 UTC	(20050322_5)
 
   Modified files:
