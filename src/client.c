@@ -248,7 +248,7 @@ string_to_umode(const char *p, int current_umode)
 				break;
 		}
 
-		*p++;
+		p++;
 	}
 
 	return umode;
