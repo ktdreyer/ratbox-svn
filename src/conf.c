@@ -44,12 +44,14 @@ set_default_conf(void)
 	config_file.uregister_time = 60;
 	config_file.uregister_amount = 10;
 	config_file.uregister_email = 1;
+	config_file.uexpire_time = 2419200;	/* 4 weeks */
 	config_file.allow_setpass = 1;
 	config_file.allow_setemail = 1;
 
 	config_file.disable_cregister = 0;
 	config_file.cregister_time = 60;
 	config_file.cregister_amount = 5;
+	config_file.cexpire_time = 2419200; 	/* 4 weeks */
 
 	config_file.oper_score = 3;
 	config_file.jupe_score = 15;

@@ -22,6 +22,7 @@
 #include "ucommand.h"
 #include "cache.h"
 #include "channel.h"
+#include "s_userserv.h"
 
 dlink_list service_list;
 
@@ -508,11 +509,17 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
                         }
 
 #ifdef ENABLE_USERSERV
-			if(cmd_table[i].userreg && client_p->user->user_reg == NULL)
+			if(cmd_table[i].userreg)
 			{
-				service_error(service_p, client_p, "You must be logged in for %s::%s",
+				if(client_p->user->user_reg == NULL)
+				{
+					service_error(service_p, client_p, 
+						"You must be logged in for %s::%s",
 						service_p->name, cmd_table[i].cmd);
-				return;
+					return;
+				}
+				else
+					client_p->user->user_reg->last_time = CURRENT_TIME;
 			}
 #endif
 

@@ -773,6 +773,7 @@ static struct ConfEntry conf_userserv_table[] =
 	{ "register_time",	CF_TIME,  NULL, 0, &config_file.uregister_time		},
 	{ "register_amount",	CF_INT,   NULL, 0, &config_file.uregister_amount	},
 	{ "register_email",	CF_YESNO, NULL, 0, &config_file.uregister_email		},
+	{ "expire_time",	CF_TIME,  NULL, 0, &config_file.uexpire_time		},
 	{ "allow_setpass",	CF_YESNO, NULL, 0, &config_file.allow_setpass		},
 	{ "allow_setemail",	CF_YESNO, NULL, 0, &config_file.allow_setemail		},
 	{ "\0", 0, NULL, 0, NULL }
@@ -783,6 +784,7 @@ static struct ConfEntry conf_chanserv_table[] =
 	{ "disable_register",	CF_YESNO, NULL, 0, &config_file.disable_cregister	},
 	{ "register_time",	CF_TIME,  NULL, 0, &config_file.cregister_time		},
 	{ "register_amount",	CF_INT,   NULL, 0, &config_file.cregister_amount	},
+	{ "expire_time",	CF_TIME,  NULL, 0, &config_file.cexpire_time		},
 	{ "\0", 0, NULL, 0, NULL }
 };
 

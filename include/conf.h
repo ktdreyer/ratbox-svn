@@ -32,6 +32,7 @@ struct _config_file
 	int uregister_time;
 	int uregister_amount;
 	int uregister_email;
+	int uexpire_time;
 	int allow_setpass;
 	int allow_setemail;
 
@@ -39,6 +40,7 @@ struct _config_file
 	int disable_cregister;
 	int cregister_time;
 	int cregister_amount;
+	int cexpire_time;
 
 	/* jupeserv */
 	int oper_score;

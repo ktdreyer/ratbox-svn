@@ -114,6 +114,10 @@ int dlink_find_destroy(void *data, dlink_list *list);
 #define dlink_add_tail_alloc(data, list) dlink_add_tail(data, make_dlink_node(), list)
 #define dlink_destroy(node, list) do { dlink_delete(node, list); free_dlink_node(node); } while(0)
 
+#define HASH_WALK(i, max, ptr, table) for (i = 0; i < max; i++) { DLINK_FOREACH(ptr, table[i].head)
+#define HASH_WALK_SAFE(i, max, ptr, nptr, table) for (i = 0; i < max; i++) { DLINK_FOREACH_SAFE(ptr, nptr, table[i].head)
+#define HASH_WALK_END }
+
 #ifndef HARD_ASSERT
 #ifdef __GNUC__
 #define s_assert(expr)	do						\

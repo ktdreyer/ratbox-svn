@@ -21,6 +21,7 @@
 #include "balloc.h"
 #include "conf.h"
 #include "io.h"
+#include "event.h"
 
 static struct client *userserv_p;
 static BlockHeap *user_reg_heap;
@@ -71,6 +72,7 @@ static struct service_handler userserv_service = {
 };
 
 static int user_db_callback(void *db, int argc, char **argv, char **colnames);
+static void e_user_expire(void *unused);
 
 void
 init_s_userserv(void)
@@ -80,6 +82,8 @@ init_s_userserv(void)
 	userserv_p = add_service(&userserv_service);
 
 	loc_sqlite_exec(user_db_callback, "SELECT * FROM users");
+
+	eventAdd("userserv_expire", e_user_expire, NULL, 43200);
 }
 
 static void
@@ -92,8 +96,28 @@ add_user_reg(struct user_reg *reg_p)
 static void
 free_user_reg(struct user_reg *ureg_p)
 {
+	struct member_reg *mreg_p;
+	dlink_node *ptr, *next_ptr;
 	unsigned int hashv = hash_name(ureg_p->name);
+
 	dlink_delete(&ureg_p->node, &user_reg_table[hashv]);
+
+	loc_sqlite_exec(NULL, "DELETE FROM members WHERE username = %Q",
+			ureg_p->name);
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, ureg_p->channels.head)
+	{
+		mreg_p = ptr->data;
+
+		/* only member of this channel, so drop the channel too */
+		if(dlink_list_length(&mreg_p->channel_reg->users) == 1)
+			free_channel_reg(mreg_p->channel_reg);
+		else
+			free_member_reg(mreg_p);
+	}
+
+	loc_sqlite_exec(NULL, "DELETE FROM users WHERE username = %Q",
+			ureg_p->name);
 
 	my_free(ureg_p->password);
 	BlockHeapFree(user_reg_heap, ureg_p);
@@ -211,6 +235,32 @@ logout_user_reg(struct user_reg *ureg_p)
 }
 
 static void
+e_user_expire(void *unused)
+{
+	struct user_reg *ureg_p;
+	dlink_node *ptr, *next_ptr;
+	int i;
+
+	HASH_WALK_SAFE(i, MAX_USER_REG_HASH, ptr, next_ptr, user_reg_table)
+	{
+		ureg_p = ptr->data;
+
+		if((ureg_p->last_time + config_file.uexpire_time) > CURRENT_TIME)
+			continue;
+
+		/* if theyre logged in, reset the expiry */
+		if(ureg_p->refcount)
+		{
+			ureg_p->last_time = CURRENT_TIME;
+			continue;
+		}
+
+		free_user_reg(ureg_p);
+	}
+	HASH_WALK_END
+}
+
+static void
 u_user_userregister(struct connection_entry *conn_p, char *parv[], int parc)
 {
 	struct user_reg *reg_p;
@@ -259,8 +309,6 @@ static void
 u_user_userdrop(struct connection_entry *conn_p, char *parv[], int parc)
 {
 	struct user_reg *ureg_p;
-	struct member_reg *mreg_p;
-	dlink_node *ptr, *next_ptr;
 
 	if((ureg_p = find_user_reg(NULL, parv[1])) == NULL)
 	{
@@ -271,24 +319,7 @@ u_user_userdrop(struct connection_entry *conn_p, char *parv[], int parc)
 
 	slog(userserv_p, 1, "%s - USERDROP %s", conn_p->name, ureg_p->name);
 
-	loc_sqlite_exec(NULL, "DELETE FROM members WHERE username = %Q",
-			ureg_p->name);
-
 	logout_user_reg(ureg_p);
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, ureg_p->channels.head)
-	{
-		mreg_p = ptr->data;
-
-		/* only member of this channel, so drop the channel too */
-		if(dlink_list_length(&mreg_p->channel_reg->users) == 1)
-			free_channel_reg(mreg_p->channel_reg);
-		else
-			free_member_reg(mreg_p);
-	}
-
-	loc_sqlite_exec(NULL, "DELETE FROM users WHERE username = %Q",
-			ureg_p->name);
 
 	sendto_one(conn_p, "Username %s registration dropped",
 			ureg_p->name);
@@ -404,8 +435,6 @@ static int
 s_user_userdrop(struct client *client_p, char *parv[], int parc)
 {
 	struct user_reg *ureg_p;
-	struct member_reg *mreg_p;
-	dlink_node *ptr, *next_ptr;
 
 	if((ureg_p = find_user_reg(client_p, parv[0])) == NULL)
 		return 1;
@@ -413,24 +442,7 @@ s_user_userdrop(struct client *client_p, char *parv[], int parc)
 	slog(userserv_p, 1, "%s - USERDROP %s", 
 		client_p->user->oper->name, ureg_p->name);
 
-	loc_sqlite_exec(NULL, "DELETE FROM members WHERE username = %Q",
-			ureg_p->name);
-
 	logout_user_reg(ureg_p);
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, ureg_p->channels.head)
-	{
-		mreg_p = ptr->data;
-
-		/* only member of this channel, so drop the channel too */
-		if(dlink_list_length(&mreg_p->channel_reg->users) == 1)
-			free_channel_reg(mreg_p->channel_reg);
-		else
-			free_member_reg(mreg_p);
-	}
-
-	loc_sqlite_exec(NULL, "DELETE FROM users WHERE username = %Q",
-			ureg_p->name);
 
 	service_error(userserv_p, client_p, "Username %s registration dropped",
 			ureg_p->name);
