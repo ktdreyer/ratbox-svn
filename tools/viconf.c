@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 
   if(LockedFile(filename))
     {
-      fprintf(stderr,"Cant' lock %s\n", filename);
+      fprintf(stderr,"Can't lock %s\n", filename);
       exit(errno);
     }
 
