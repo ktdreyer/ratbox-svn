@@ -26,7 +26,7 @@
 #include "ircd_defs.h"
 
 #define FEATURES "KNOCK"\
-                " VCHANS" \
+                "%s" \
                 " WALLCHOPS" \
                 " MODES=%i" \
                 " MAXCHANNELS=%i" \
@@ -39,7 +39,8 @@
                 " PREFIX=%s" \
                 " CHANMODES=%s"
                  
-#define FEATURESVALUES MAXMODEPARAMS,MAXCHANNELSPERUSER,MAXBANS, \
+#define FEATURESVALUES ConfigFileEntry.disable_vchans ? "" : " VCHANS", \
+        MAXMODEPARAMS,MAXCHANNELSPERUSER,MAXBANS, \
         ConfigFileEntry.max_targets,NICKLEN,TOPICLEN,TOPICLEN,"#&","(ohv)@%+", \
         "beI,,kl,imnpsta"
 

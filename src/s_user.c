@@ -294,15 +294,14 @@ int show_lusers(struct Client *source_p)
  * output	- 
  * side effects	- display to client what we support (for them)
  */
-int show_isupport(struct Client *source_p) 
+void show_isupport(struct Client *source_p) 
 {
   char isupportbuffer[512];
-  
+
   ircsprintf(isupportbuffer,FEATURES,FEATURESVALUES);
   sendto_one(source_p, form_str(RPL_ISUPPORT), me.name, source_p->name, 
   	     isupportbuffer);
-  	     
-  return 0;	     
+  return;
 }
 
 
