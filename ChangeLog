@@ -1,3 +1,39 @@
+leeh        2004/01/23 18:36:18 EST	(20040123_1)
+
+  Modified files:
+    include              s_chanserv.h s_userserv.h service.h 
+    src                  s_alis.c s_hoststat.c s_operbot.c 
+                         service.c 
+    src/s_chanserv       Makefile.in s_c_db.c s_chanserv.c 
+    src/s_userserv       s_userserv.c 
+  Added files:
+    src/s_chanserv       s_c_admin.c s_c_local.h 
+  Log:
+  - adding a 'userreg' param to service commands, used to check user is
+    logged in when user service is enabled
+  - moved some stuff from s_chanserv.h -> s_c_local.h
+  - split "REGISTER" chanserv function into s_c_admin.c, added "ADDUSER" and
+    "DELUSER"
+  - added verify_member_access() to verify client has access level to channel
+  - added find_user_reg_nick() which accepts '=nick'
+  
+  Revision  Changes    Path
+  1.5       +0 -11     rserv/include/s_chanserv.h
+  1.5       +3 -0      rserv/include/s_userserv.h
+  1.10      +1 -0      rserv/include/service.h
+  1.19      +2 -2      rserv/src/s_alis.c
+  1.2       +2 -1      rserv/src/s_chanserv/Makefile.in
+  1.1       +172 -0    rserv/src/s_chanserv/s_c_admin.c (new)
+  1.2       +1 -0      rserv/src/s_chanserv/s_c_db.c
+  1.1       +31 -0     rserv/src/s_chanserv/s_c_local.h (new)
+  1.4       +42 -47    rserv/src/s_chanserv/s_chanserv.c
+  1.6       +4 -4      rserv/src/s_hoststat.c
+  1.5       +3 -3      rserv/src/s_operbot.c
+  1.5       +19 -9     rserv/src/s_userserv/s_userserv.c
+  1.16      +10 -0     rserv/src/service.c
+
+
+
 leeh        2004/01/23 13:55:50 EST	(20040123_0)
 
   Modified files:
