@@ -1,3 +1,9 @@
+*** 20011004_15 by db
+- three eventAdds() completely missing in latest... oops
+  missing cleanup_channels, cleanup_glines and cleanup_tklines
+
+
+
 *** 20011004_14 by androsyn
 contrib/ is all happy too
 
