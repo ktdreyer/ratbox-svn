@@ -1,3 +1,20 @@
+leeh        2005/03/25 15:12:33 UTC	(20050325_1)
+
+  Modified files:
+    include              client.h s_conf.h 
+    src                  hostmask.c s_conf.c s_user.c 
+  Log:
+  - remove some unused defines
+  
+  Revision  Changes    Path
+  7.276     +0 -6      ircd-ratbox/include/client.h
+  7.322     +0 -22     ircd-ratbox/include/s_conf.h
+  7.113     +0 -8      ircd-ratbox/src/hostmask.c
+  7.519     +0 -6      ircd-ratbox/src/s_conf.c
+  7.352     +0 -9      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2005/03/25 14:18:18 UTC	(20050325_0)
 
   Modified files:
