@@ -1,3 +1,19 @@
+leeh        2004/06/13 22:09:21 EDT	(20040614_1)
+
+  Modified files:
+    modules              m_resv.c 
+    src                  s_newconf.c 
+  Log:
+  - make removing temp resvs do irccmp() rather than match(), so only exact
+    matches are removed
+  - make nick resvs use match_esc(), allowing '#' and '@' chars.
+  
+  Revision  Changes    Path
+  1.61      +17 -4     ircd-ratbox/modules/m_resv.c
+  7.43      +1 -1      ircd-ratbox/src/s_newconf.c
+
+
+
 leeh        2004/06/13 21:58:53 EDT	(20040614_0)
 
   Modified files:
