@@ -1,3 +1,33 @@
+leeh        2004/03/05 12:33:51 EST	(20040305_4)
+
+  Modified files:
+    contrib              spy_admin_notice.c spy_info_notice.c 
+                         spy_links_notice.c spy_motd_notice.c 
+                         spy_stats_notice.c spy_stats_p_notice.c 
+                         spy_trace_notice.c spy_whois_notice.c 
+                         spy_whois_notice_global.c 
+    modules              m_info.c m_stats.c m_whois.c 
+  Log:
+  - fix the spy stuff in contrib/
+  - remove stats_l_spy(), it can use stats_spy()
+  - info didnt have the right hook in it
+  
+  Revision  Changes    Path
+  1.10      +12 -18    ircd-ratbox/contrib/spy_admin_notice.c
+  1.10      +12 -18    ircd-ratbox/contrib/spy_info_notice.c
+  1.15      +11 -19    ircd-ratbox/contrib/spy_links_notice.c
+  1.10      +12 -18    ircd-ratbox/contrib/spy_motd_notice.c
+  1.16      +34 -43    ircd-ratbox/contrib/spy_stats_notice.c
+  1.8       +11 -19    ircd-ratbox/contrib/spy_stats_p_notice.c
+  1.10      +12 -30    ircd-ratbox/contrib/spy_trace_notice.c
+  1.16      +16 -26    ircd-ratbox/contrib/spy_whois_notice.c
+  1.5       +16 -26    ircd-ratbox/contrib/spy_whois_notice_global.c
+  1.104     +2 -2      ircd-ratbox/modules/m_info.c
+  1.203     +5 -30     ircd-ratbox/modules/m_stats.c
+  1.136     +3 -3      ircd-ratbox/modules/m_whois.c
+
+
+
 leeh        2004/03/05 12:08:10 EST	(20040305_3)
 
   Modified files:
