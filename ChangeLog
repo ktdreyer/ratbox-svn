@@ -1,3 +1,15 @@
+leeh        2002/08/31 09:34:24 EDT	(20020831_2)
+
+  Modified files:
+    modules              m_stats.c 
+  Log:
+  - made stats k just walk the dlink lists of temp klines
+  
+  Revision  Changes    Path
+  1.119     +32 -2     ircd-ratbox/modules/m_stats.c
+
+
+
 leeh        2002/08/31 09:24:05 EDT	(20020831_1)
 
   Modified files:
