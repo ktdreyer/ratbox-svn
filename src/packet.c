@@ -371,8 +371,6 @@ read_packet(int fd, void *data)
 
 	if(client_p->lasttime < CurrentTime)
 		client_p->lasttime = CurrentTime;
-	if(client_p->lasttime > client_p->since)
-		client_p->since = CurrentTime;
 	client_p->flags &= ~FLAGS_PINGSENT;
 
 	/*

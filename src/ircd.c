@@ -659,7 +659,7 @@ main(int argc, char *argv[])
 	SetMe(&me);
 	make_server(&me);
 	me.serv->up = me.name;
-	me.lasttime = me.since = me.firsttime = CurrentTime;
+	me.lasttime = me.firsttime = CurrentTime;
 	add_to_client_hash(me.name, &me);
 	add_to_id_hash(me.id, &me);
 

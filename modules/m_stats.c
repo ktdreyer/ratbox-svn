@@ -880,7 +880,7 @@ stats_usage (struct Client *source_p)
 	if(0 == secs)
 		secs = 1;
 
-	rup = (CurrentTime - me.since) * hzz;
+	rup = (CurrentTime - me.lasttime) * hzz;
 	if(0 == rup)
 		rup = 1;
   
@@ -1013,7 +1013,7 @@ stats_uptime (struct Client *source_p)
 {
 	time_t now;
 
-	now = CurrentTime - me.since;
+	now = CurrentTime - me.lasttime;
 	sendto_one_numeric(source_p, RPL_STATSUPTIME, 
 			   form_str (RPL_STATSUPTIME),
 			   now / 86400, (now / 3600) % 24, 
@@ -1494,7 +1494,7 @@ stats_servlinks (struct Client *source_p)
 			(int) target_p->localClient->receiveM,
 			(int) target_p->localClient->receiveK,
 			CurrentTime - target_p->firsttime,
-			(CurrentTime > target_p->since) ? (CurrentTime - target_p->since) : 0,
+			(CurrentTime > target_p->lasttime) ? (CurrentTime - target_p->lasttime) : 0,
 			IsOper (source_p) ? show_capabilities (target_p) : "TS");
 	}
 
@@ -1508,7 +1508,7 @@ stats_servlinks (struct Client *source_p)
 			   "? :Recv total : %7.2f %s",
 			   _GMKv (receiveK), _GMKs (receiveK));
 
-	uptime = (CurrentTime - me.since);
+	uptime = (CurrentTime - me.lasttime);
 
 	sendto_one_numeric(source_p, RPL_STATSDEBUG,
 			   "? :Server send: %7.2f %s (%4.1f K/s)",
@@ -1620,7 +1620,7 @@ stats_l_client(struct Client *source_p, struct Client *target_p,
 				(int) target_p->localClient->receiveM,
 				(int) target_p->localClient->receiveK,
 				CurrentTime - target_p->firsttime,
-				(CurrentTime > target_p->since) ? (CurrentTime - target_p->since) : 0,
+				(CurrentTime > target_p->lasttime) ? (CurrentTime - target_p->lasttime) : 0,
 				IsOper(source_p) ? show_capabilities(target_p) : "-");
 	}
 
@@ -1641,7 +1641,7 @@ stats_l_client(struct Client *source_p, struct Client *target_p,
 				    (int) target_p->localClient->receiveK,
 				    CurrentTime - target_p->firsttime,
 				    (CurrentTime >
-				     target_p->since) ? (CurrentTime - target_p->since) : 0,
+				     target_p->lasttime) ? (CurrentTime - target_p->lasttime) : 0,
 				    "-");
 	}
 
@@ -1658,7 +1658,7 @@ stats_l_client(struct Client *source_p, struct Client *target_p,
 				   (int) target_p->localClient->receiveK,
 				   CurrentTime - target_p->firsttime,
 				   (CurrentTime >
-				    target_p->since) ? (CurrentTime - target_p->since) : 0,
+				    target_p->lasttime) ? (CurrentTime - target_p->lasttime) : 0,
 				   "-");
 	}
 }

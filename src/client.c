@@ -133,7 +133,7 @@ make_client(struct Client *from)
 	if(from == NULL)
 	{
 		client_p->from = client_p;	/* 'from' of local client is self! */
-		client_p->since = client_p->lasttime = client_p->firsttime = CurrentTime;
+		client_p->lasttime = client_p->firsttime = CurrentTime;
 
 		localClient = (struct LocalUser *) BlockHeapAlloc(lclient_heap);
 		SetMyConnect(client_p);
@@ -2027,7 +2027,7 @@ close_connection(struct Client *client_p)
 			 */
 			server_p->hold = time(NULL);
 			server_p->hold +=
-				(server_p->hold - client_p->since >
+				(server_p->hold - client_p->lasttime >
 				 HANGONGOODLINK) ? HANGONRETRYDELAY : ConFreq(server_p->class);
 			if(nextconnect > server_p->hold)
 				nextconnect = server_p->hold;

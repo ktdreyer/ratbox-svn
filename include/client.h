@@ -117,7 +117,6 @@ struct Client
 	struct Whowas *whowas;	/* Pointers to whowas structs */
 	time_t lasttime;	/* ...should be only LOCAL clients? --msa */
 	time_t firsttime;	/* time client was created */
-	time_t since;		/* last time we parsed something */
 	time_t tsinfo;		/* TS on the nick, SVINFO on server */
 	unsigned int umodes;	/* opers, normal users subset */
 	unsigned int flags;	/* client flags */
