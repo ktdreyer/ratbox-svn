@@ -87,6 +87,13 @@ options that were in config.h, to be changed with a /rehash.
 - A new drone warning mode has been added... +e.  Setting +e will show the
   gecos ("Real Name") field in a notice similar to the +c connection notice.
 
+- The server can now differentiate between admins and opers.  This helps
+  to hide the IPs of servers, by only showing them to admins:
+     (indicated by umode +a and admin=yes; in oper block)
+
+  It also limits certain stats commands to admin only, and certain special
+  contrib/ modules (such as opme).
+  
 - Remote K-Lines are supported.  These allow you to permit operators on 
   remote servers to place klines on your server.  The shared block in the
   config specifices what server to allow remote klines from, and what
@@ -116,9 +123,9 @@ options that were in config.h, to be changed with a /rehash.
   configurable option in ircd.conf.  See the comments in example.conf for
   more details.
 
-- STATS e now shows events.
+- STATS e now shows events. (admin only)
 
-- STATS f now shows active file descriptors.
+- STATS f now shows active file descriptors. (admin only)
 
 - LOCOPS have been moved away from the traditional +z usermode (operwall)
   and into their own usermode: +l.  This allows oper to ignore operwall,
@@ -205,7 +212,6 @@ options that were in config.h, to be changed with a /rehash.
     IE      - Invite Exceptions - +I on channels - All nick!user@hosts listed in
               a +I are exempt from having to be invited to the channel before
               JOINing
-    VCHAN   - Support Virtual Channels, and the bursting of persistant channels.
     EOB     - End of Burst - Servers with this enabled cannot issue burst
               commands after it sends and receives an EOB command, thereby
               preventing op hacking
