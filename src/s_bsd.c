@@ -75,8 +75,6 @@ const char* const NONB_ERROR_MSG   = "set_non_blocking failed for %s:%s";
 const char* const OPT_ERROR_MSG    = "disable_sock_options failed for %s:%s";
 const char* const SETBUF_ERROR_MSG = "set_sock_buffers failed for server %s:%s";
 
-struct Client* local[MAXCONNECTIONS];
-
 static const char *comm_err_str[] = { "Comm OK", "Error during bind()",
   "Error during DNS lookup", "connect timeout", "Error during connect()",
   "Comm Error" };
