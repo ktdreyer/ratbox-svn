@@ -1,3 +1,8 @@
+*** 20011114_3 by bill
+
+pro is dead, billy-jon took his place
+
+
 *** 20011114_2 by androsyn
 Cleaned up the poll() loop so that it is really only using a single list
 now.  Also modified the timeout parameters for ADNS.  Added a flag to
