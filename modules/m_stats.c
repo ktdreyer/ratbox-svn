@@ -105,6 +105,7 @@ struct StatsStruct
 
 static void stats_adns_servers(struct Client *);
 static void stats_connect(struct Client *);
+static void stats_tdeny(struct Client *);
 static void stats_deny(struct Client *);
 static void stats_exempt(struct Client *);
 static void stats_events(struct Client *);
@@ -143,7 +144,7 @@ static struct StatsStruct stats_cmd_table[] =
   { 'A',	stats_adns_servers,	1,	1,	},
   { 'c',	stats_connect,		1,	0,	},
   { 'C',	stats_connect,		1,	0,	},
-  { 'd',	stats_deny,		1,	0,	},
+  { 'd',	stats_tdeny,		1,	0,	},
   { 'D',	stats_deny,		1,	0,	},
   { 'e', 	stats_exempt,		1,	0,	},
   { 'E',	stats_events,		1,	1,	},
@@ -312,6 +313,39 @@ static void stats_connect(struct Client *source_p)
   report_configured_links(source_p, CONF_SERVER);
 }
 
+/* stats_tdeny()
+ *
+ * input	- client to report to
+ * output	- none
+ * side effects - client is given temp dline list.
+ */
+static void stats_tdeny(struct Client *source_p)
+{
+  char *name, *host, *pass, *user, *classname;
+  struct AddressRec *arec;
+  struct ConfItem *aconf;
+  int i, port;
+
+  for (i=0; i < ATABLE_SIZE; i++)
+  {
+    for (arec = atable[i]; arec; arec=arec->next)
+    {
+      if (arec->type == CONF_DLINE)
+      {
+        aconf = arec->aconf;
+
+        if(!(aconf->flags & CONF_FLAGS_TEMPORARY))
+          continue;
+
+	get_printable_conf(aconf, &name, &host, &pass, &user, &port,
+	                  &classname);
+			  
+	sendto_one(source_p, form_str(RPL_STATSDLINE), me.name,
+	           source_p->name, 'D', host, pass);
+      }
+    }
+  }
+}
 /* stats_deny()
  *
  * input	- client to report to
@@ -332,6 +366,10 @@ static void stats_deny(struct Client *source_p)
       if (arec->type == CONF_DLINE)
       {
         aconf = arec->aconf;
+
+        if(aconf->flags & CONF_FLAGS_TEMPORARY)
+          continue;
+
 	get_printable_conf(aconf, &name, &host, &pass, &user, &port,
 	                  &classname);
 			  
