@@ -157,7 +157,7 @@ static void mo_unresv(struct Client *client_p, struct Client *source_p,
   else
     return;
 							    
-  if(!ResvList || !(resv_p = hash_find_resv(parv[1], (struct Resv *)NULL, type)))
+  if(!ResvList || !(resv_p = (struct Resv *)hash_find_resv(parv[1], (struct Resv *)NULL, type)))
   {
     sendto_one(source_p, 
                ":%s NOTICE %s :A RESV does not exist for %s: %s",
