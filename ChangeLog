@@ -1,3 +1,20 @@
+leeh        2005/02/09 10:08:17 EST	(20050209_0)
+
+  Modified files:
+    include              s_chanserv.h 
+    src                  s_chanserv.c 
+  Log:
+  - via jilles:
+    - fix chanserv expiry to properly update the db
+    - fix expiration checks somewhat
+    - dont autoop/autovoice users when they login and are suspended
+  
+  Revision  Changes    Path
+  1.25      +9 -5      rserv/include/s_chanserv.h
+  1.63      +73 -13    rserv/src/s_chanserv.c
+
+
+
 leeh        2005/02/08 11:56:27 EST	(20050208_0)
 
   Modified files:
