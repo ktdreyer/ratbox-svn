@@ -1,3 +1,19 @@
+leeh        2004/10/29 14:57:22 EDT	(20041029_0)
+
+  Modified files:
+    src                  Makefile.in 
+    autoconf             configure.in 
+    .                    configure 
+  Log:
+  - patch via rakaur to properly check for sqlite
+  
+  Revision  Changes    Path
+  1.14      +45 -0     rserv/autoconf/configure.in
+  1.14      +162 -70   rserv/configure
+  1.28      +3 -3      rserv/src/Makefile.in
+
+
+
 leeh        2004/10/27 15:22:47 EDT	(20041027_5)
 
   Modified files:
