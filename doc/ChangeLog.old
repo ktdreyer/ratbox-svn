@@ -1,3 +1,8 @@
+*** 20010314_7 by fl_
+- added a config file option for disabling vchans.. added by request but
+  I dont like it :|
+
+
 *** 20010314_6 by androsyn
 I forgot a ; on the strlcpy prototype.
 
