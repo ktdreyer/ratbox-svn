@@ -1,3 +1,9 @@
+*** 19990801_18 by lusky
+ChangeLog should be automated now.  Also the serial number should
+no longer jump more than one because of a commit of multiple subdirs.
+Please be descriptive and unique in your commit comments.
+
+
 19990801_17 by lusky
 I think it's working this time.
 
