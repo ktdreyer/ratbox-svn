@@ -1,3 +1,19 @@
+androsyn    2004/07/30 13:26:46 EDT	(20040730_7)
+
+  Modified files:
+    include              s_serv.h 
+    modules/core         m_server.c 
+    src                  s_serv.c 
+  Log:
+  Move fork_server and start_io into m_server
+  
+  Revision  Changes    Path
+  7.96      +0 -3      ircd-ratbox/include/s_serv.h
+  1.135     +266 -1    ircd-ratbox/modules/core/m_server.c
+  7.408     +0 -258    ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2004/07/30 13:12:02 EDT	(20040730_6)
 
   Modified files:
