@@ -1,3 +1,9 @@
+*** 20001221_10 by db
+- added redirserv redirport to auth {} block 
+  I've been wanting this one a long time, finally epic supports it. yay.
+
+
+
 *** 20001221_9 by wcampbel
 Updated the dependencies
 
