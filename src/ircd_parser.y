@@ -188,7 +188,7 @@ serverinfo_entry:       SERVERINFO
     if(yy_aconf)
       {
         free_conf(yy_aconf);
-        yy_aconf = NULL;
+        yy_aconf = (struct ConfItem *)NULL;
       }
     yy_aconf=make_conf();
     yy_aconf->status = CONF_ME;
@@ -202,7 +202,7 @@ serverinfo_entry:       SERVERINFO
       }
     else
       free_conf(yy_aconf);
-    yy_aconf = NULL;
+    yy_aconf = (struct ConfItem *)NULL;
   } ;
 
 
@@ -214,12 +214,13 @@ serverinfo_item:        serverinfo_name | serverinfo_vhost |
 
 serverinfo_name:        NAME '=' QSTRING ';' 
   {
-    DupString(yy_aconf->host,yylval.string);
+    yy_aconf->host = yylval.string;
+    yylval.string = (char *)NULL;
   };
 
 serverinfo_description: DESCRIPTION '=' QSTRING ';'
   {
-    DupString(yy_aconf->user,yylval.string);
+    yy_aconf->user = yylval.string;
   };
 
 serverinfo_vhost:       VHOST '=' IP_TYPE ';'
@@ -246,7 +247,7 @@ admin_entry: ADMIN
     if(yy_aconf)
       {
         free_conf(yy_aconf);
-        yy_aconf = NULL;
+        yy_aconf = (struct ConfItem *)NULL;
       }
     yy_aconf=make_conf();
     yy_aconf->status = CONF_ADMIN;
@@ -254,7 +255,7 @@ admin_entry: ADMIN
  '{' admin_items '}' ';' 
   {
     conf_add_conf(yy_aconf);
-    yy_aconf = NULL;
+    yy_aconf = (struct ConfItem *)NULL;
   }; 
 
 admin_items:    admin_items admin_item |
@@ -265,17 +266,17 @@ admin_item:     admin_name | admin_description |
 
 admin_name:     NAME '=' QSTRING ';' 
   {
-    DupString(yy_aconf->passwd,yylval.string);
+    yy_aconf->passwd = yylval.string;
   };
 
 admin_email:    EMAIL '=' QSTRING ';'
   {
-    DupString(yy_aconf->user,yylval.string);
+    yy_aconf->user = yylval.string;
   };
 
 admin_description:      DESCRIPTION '=' QSTRING ';'
   {
-    DupString(yy_aconf->host,yylval.string);
+    yy_aconf->host = yylval.string;
   };
 
 /***************************************************************************
@@ -291,8 +292,23 @@ logging_item:           logging_path | logging_oper_log |
                         logging_gline_log | logging_log_level
 
 logging_path:           LOGPATH '=' QSTRING ';' 
+                        {
+                          MyFree(yylval.string);
+                          yylval.string = (char *)NULL;
+                        };
+
 logging_oper_log:	OPER_LOG '=' QSTRING ';'
+                        {
+                          MyFree(yylval.string);
+                          yylval.string = (char *)NULL;
+                        };
+
 logging_gline_log:	GLINE_LOG '=' QSTRING ';'
+                        {
+                          MyFree(yylval.string);
+                          yylval.string = (char *)NULL;
+                        };
+
 logging_log_level:	LOG_LEVEL 
                           T_L_CRIT { set_log_level(L_CRIT); };
                         | T_L_ERROR { set_log_level(L_ERROR); };
@@ -311,7 +327,7 @@ oper_entry:     OPERATOR
     if(yy_aconf)
       {
         free_conf(yy_aconf);
-        yy_aconf = NULL;
+        yy_aconf = (struct ConfItem *)NULL;
       }
     yy_aconf=make_conf();
     yy_aconf->status = CONF_LOCOP;
@@ -327,7 +343,7 @@ oper_entry:     OPERATOR
       {
         free_conf(yy_aconf);
       }
-    yy_aconf = NULL;
+    yy_aconf = (struct ConfItem *)NULL;
   }; 
 
 oper_items:     oper_items oper_item |
@@ -340,7 +356,7 @@ oper_item:      oper_name  | oper_user | oper_password |
 
 oper_name:      NAME '=' QSTRING ';'
   {
-    DupString(yy_aconf->name,yylval.string);
+    yy_aconf->name = yylval.string;
   };
 
 oper_user:      USER '='  QSTRING ';'
@@ -353,22 +369,28 @@ oper_user:      USER '='  QSTRING ';'
 	DupString(yy_aconf->user,yylval.string);
 	p++;
 	DupString(yy_aconf->host,p);
+        MyFree(yylval.string);
+        yylval.string = (char *)NULL;
       }
     else
       {
-	DupString(yy_aconf->host,yylval.string);
-	DupString(yy_aconf->user,"*");
+	yy_aconf->host = yylval.string;
+        yylval.string = (char *)NULL;
+	yy_aconf->user[0] = '*';
+        yy_aconf->user[1] = '\0';
       }
   };
 
 oper_password:  PASSWORD '=' QSTRING ';'
   {
-    DupString(yy_aconf->passwd,yylval.string);
+    yy_aconf->passwd = yylval.string;
+    yylval.string = (char *)NULL;
   };
 
 oper_class:     CLASS '=' QSTRING ';'
   {
-    DupString(yy_aconf->className,yylval.string);
+    yy_aconf->className = yylval.string;
+    yylval.string = (char *)NULL;
   };
 
 oper_global:    GLOBAL '=' TYES ';' {yy_aconf->status = CONF_OPERATOR;} |
@@ -449,7 +471,8 @@ class_item:     class_name |
 
 class_name:     NAME '=' QSTRING ';' 
   {
-    DupString(class_name_var,yylval.string);
+    class_name_var = yylval.string;
+    yylval.string = (char *)NULL;
   };
 
 class_ping_time:        PING_TIME '=' NUMBER ';'
@@ -481,7 +504,7 @@ listen_entry:   LISTEN
     if(yy_aconf)
       {
         free_conf(yy_aconf);
-        yy_aconf = NULL;
+        yy_aconf = (struct ConfItem *)NULL;
       }
     yy_aconf=make_conf();
     yy_aconf->status = CONF_LISTEN_PORT;
@@ -491,7 +514,7 @@ listen_entry:   LISTEN
   {
     conf_add_port(yy_aconf);
     free_conf(yy_aconf);
-    yy_aconf = NULL;
+    yy_aconf = (struct ConfItem *)NULL;
   }; 
 
 listen_items:   listen_items listen_item |
@@ -501,7 +524,8 @@ listen_item:    listen_name | listen_port | listen_address
 
 listen_name:    NAME '=' QSTRING ';' 
   {
-    DupString(yy_aconf->host,yylval.string) ; 
+    yy_aconf->host = yylval.string;
+    yylval.string = (char *)NULL;
   };
 
 listen_port:    PORT '=' NUMBER ';'
@@ -511,7 +535,8 @@ listen_port:    PORT '=' NUMBER ';'
 
 listen_address: IP '=' QSTRING ';'
   {
-    DupString(yy_aconf->passwd,yylval.string);
+    yy_aconf->passwd = yylval.string;
+    yylval.string = (char *)NULL;
   };
 
 /***************************************************************************
@@ -523,7 +548,7 @@ auth_entry:   AUTH
     if(yy_aconf)
       {
         free_conf(yy_aconf);
-        yy_aconf = NULL;
+        yy_aconf = (struct ConfItem *)NULL;
       }
     yy_aconf=make_conf();
     yy_aconf->status = CONF_CLIENT;
@@ -554,7 +579,7 @@ auth_entry:   AUTH
       {
         add_mtrie_conf_entry(yy_aconf,CONF_CLIENT);
       }
-    yy_aconf = NULL;
+    yy_aconf = (struct ConfItem *)NULL;
   }; 
 
 auth_items:     auth_items auth_item |
@@ -574,11 +599,15 @@ auth_user:   USER '=' QSTRING ';'
 	DupString(yy_aconf->user,yylval.string);
 	p++;
 	DupString(yy_aconf->host,p);
+        MyFree(yylval.string);
+        yylval.string = (char *)NULL;
       }
     else
       {
-	DupString(yy_aconf->host,yylval.string);
-	DupString(yy_aconf->user,"*");
+	yy_aconf->host = yylval.string;
+        yylval.string = (char *)NULL;
+	yy_aconf->user[0] = '*';
+        yy_aconf->user[1] = '\0';
       }
   };
              |
@@ -590,12 +619,14 @@ auth_user:   USER '=' QSTRING ';'
 
 auth_passwd:  PASSWORD '=' QSTRING ';' 
   {
-    DupString(yy_aconf->passwd,yylval.string);
+    yy_aconf->passwd = yylval.string;
+    yylval.string = (char *)NULL;
   };
 
 auth_spoof:   SPOOF '=' QSTRING ';' 
   {
-    DupString(yy_aconf->name, yylval.string);
+    yy_aconf->name = yylval.string;
+    yylval.string = (char *)NULL;
     yy_aconf->flags |= CONF_FLAGS_SPOOF_IP;
   };
 
@@ -641,7 +672,8 @@ auth_no_tilde:        NO_TILDE ';'
 
 auth_class:   CLASS '=' QSTRING ';'
   {
-    DupString(yy_aconf->className,yylval.string);
+    yy_aconf->className = yylval.string;
+    yylval.string = (char *)NULL;
   };
 
 /***************************************************************************
@@ -653,7 +685,7 @@ quarantine_entry:       QUARANTINE
     if(yy_aconf)
       {
         free_conf(yy_aconf);
-        yy_aconf = NULL;
+        yy_aconf = (struct ConfItem *)NULL;
       }
     yy_aconf=make_conf();
     yy_aconf->status = CONF_QUARANTINED_NICK;
@@ -661,7 +693,7 @@ quarantine_entry:       QUARANTINE
  '{' quarantine_items '}' ';'
   {
     conf_add_q_line(yy_aconf);
-    yy_aconf = NULL;
+    yy_aconf = (struct ConfItem *)NULL;
   }; 
 
 quarantine_items:       quarantine_items quarantine_item |
@@ -671,12 +703,14 @@ quarantine_item:        quarantine_name | quarantine_reason
 
 quarantine_name:        NAME '=' QSTRING ';'
   {
-    DupString(yy_aconf->host,yylval.string);
+    yy_aconf->host = yylval.string;
+    yylval.string = (char *)NULL;
   };
 
 quarantine_reason:      REASON '=' QSTRING ';' 
   {
-    DupString(yy_aconf->passwd,yylval.string);
+    yy_aconf->passwd = yylval.string;
+    yylval.string = (char *)NULL;
   };
 
 /***************************************************************************
@@ -691,25 +725,25 @@ connect_entry:  CONNECT
     if(yy_cconf)
       {
         free_conf(yy_cconf);
-        yy_cconf = NULL;
+        yy_cconf = (struct ConfItem *)NULL;
       }
 
     if(yy_nconf)
       {
         free_conf(yy_nconf);
-        yy_nconf = NULL;
+        yy_nconf = (struct ConfItem *)NULL;
       }
 
     if(yy_hconf)
       {
         free_conf(yy_hconf);
-        yy_hconf = NULL;
+        yy_hconf = (struct ConfItem *)NULL;
       }
 
     if(yy_lconf)
       {
 	free_conf(yy_lconf);
-	yy_lconf = NULL;
+	yy_lconf = (struct ConfItem *)NULL;
       }
 
     yy_cconf=make_conf();
@@ -797,32 +831,45 @@ connect_name:   NAME '=' QSTRING ';'
     if(yy_cconf->user)
       {
 	sendto_realops("*** Multiple connect entry");
+        MyFree(yylval.string);
+        yylval.string = (char *)NULL;
       }
     else
-      DupString(yy_cconf->user,yylval.string);
+      {
+        yy_cconf->user = yylval.string;
+        yylval.string = (char *)NULL;
+      }
 
     if(yy_nconf->user)
       {
 	sendto_realops("*** Multiple connect accept entry");
+        MyFree(yylval.string);
+        yylval.string = (char *)NULL;
       }
     else
-      DupString(yy_nconf->user,yylval.string); 
+      {
+        yy_nconf->user = yylval.string;
+        yylval.string = (char *)NULL;
+      }
   };
 
 connect_host:   HOST '=' QSTRING ';' 
   {
-    DupString(yy_cconf->host,yylval.string);
+    yy_cconf->host = yylval.string;
     DupString(yy_nconf->host,yylval.string);
+    yylval.string = (char *)NULL;
   };
  
 connect_send_password:  SEND_PASSWORD '=' QSTRING ';'
   {
-    DupString(yy_cconf->passwd,yylval.string);
+    yy_cconf->passwd = yylval.string;
+    yylval.string = (char *)NULL;
   };
 
 connect_accept_password: ACCEPT_PASSWORD '=' QSTRING ';'
   {
-    DupString(yy_nconf->passwd,yylval.string);
+    yy_nconf->passwd = yylval.string;
+    yylval.string = (char *)NULL;
   };
 
 connect_port:   PORT '=' NUMBER ';' { yy_cconf->port = yylval.number; };
@@ -863,13 +910,15 @@ connect_hub_mask:       HUB_MASK '=' QSTRING ';'
       {
 	hub_confs = make_conf();
 	hub_confs->status = CONF_HUB;
-	DupString(hub_confs->host,yylval.string);
+	hub_confs->host = yylval.string;
+        yylval.string = (char *)NULL;
       }
     else
       {
 	yy_hconf = make_conf();
 	yy_hconf->status = CONF_HUB;
-	DupString(yy_hconf->host,yylval.string);
+	yy_hconf->host = yylval.string;
+        yylval.string = (char *)NULL;
 	yy_hconf->next = hub_confs;
 	hub_confs = yy_hconf;
       }
@@ -881,13 +930,15 @@ connect_leaf_mask:       LEAF_MASK '=' QSTRING ';'
       {
 	leaf_confs = make_conf();
 	leaf_confs->status = CONF_LEAF;
-	DupString(leaf_confs->host,yylval.string);
+	leaf_confs->host = yylval.string;
+        yylval.string = (char *)NULL;
       }
     else
       {
 	yy_lconf = make_conf();
 	yy_lconf->status = CONF_LEAF;
-	DupString(yy_lconf->host,yylval.string);
+	yy_lconf->host = yylval.string;
+        yylval.string = (char *)NULL;
 	yy_lconf->next = leaf_confs;
 	leaf_confs = yy_lconf;
       }
@@ -895,8 +946,9 @@ connect_leaf_mask:       LEAF_MASK '=' QSTRING ';'
  
 connect_class:  CLASS '=' QSTRING ';'
   {
-    DupString(yy_cconf->className,yylval.string);
+    yy_cconf->className = yylval.string;
     DupString(yy_nconf->className,yylval.string);
+    yylval.string = (char *)NULL;
   };
 
 
@@ -909,7 +961,7 @@ kill_entry:     KILL
     if(yy_aconf)
       {
         free_conf(yy_aconf);
-        yy_aconf = NULL;
+        yy_aconf = (struct ConfItem *)NULL;
       }
     yy_aconf=make_conf();
     yy_aconf->status = CONF_KILL;
@@ -924,7 +976,7 @@ kill_entry:     KILL
       {
         free_conf(yy_aconf);
       }
-    yy_aconf = NULL;
+    yy_aconf = (struct ConfItem *)NULL;
   }; 
 
 kill_items:     kill_items kill_item |
@@ -943,17 +995,22 @@ kill_user:      USER '=' QSTRING ';'
 	DupString(yy_aconf->user,yylval.string);
 	p++;
 	DupString(yy_aconf->host,p);
+        MyFree(yylval.string);
+        yylval.string = (char *)NULL;
       }
     else
       {
-	DupString(yy_aconf->host,yylval.string);
-	DupString(yy_aconf->user,"*");
+	yy_aconf->host = yylval.string;
+        yylval.string = (char *)NULL;
+	yy_aconf->user[0] = '*';
+	yy_aconf->user[1] = '\0';
       }
   };
 
 kill_reason:    REASON '=' QSTRING ';' 
   {
-    DupString(yy_aconf->passwd,yylval.string);
+    yy_aconf->passwd = yylval.string; 
+    yylval.string = (char *)NULL;
   };
 
 /***************************************************************************
@@ -965,7 +1022,7 @@ deny_entry:     DENY
     if(yy_aconf)
       {
         free_conf(yy_aconf);
-        yy_aconf = NULL;
+        yy_aconf = (struct ConfItem *)NULL;
       }
     yy_aconf=make_conf();
     yy_aconf->status = CONF_DLINE;
@@ -984,7 +1041,7 @@ deny_entry:     DENY
       {
         free_conf(yy_aconf);
       }
-    yy_aconf = NULL;
+    yy_aconf = (struct ConfItem *)NULL;
   }; 
 
 deny_items:     deny_items deny_item |
@@ -1001,7 +1058,8 @@ deny_ip:        IP '=' IP_TYPE ';'
 
 deny_reason:    REASON '=' QSTRING ';' 
   {
-    DupString(yy_aconf->passwd,yylval.string);
+    yy_aconf->passwd = yylval.string;
+    yylval.string = (char *)NULL;
   };
 
 /***************************************************************************
@@ -1013,7 +1071,7 @@ gecos_entry:     GECOS
     if(yy_aconf)
       {
         free_conf(yy_aconf);
-        yy_aconf = NULL;
+        yy_aconf = (struct ConfItem *)NULL;
       }
     yy_aconf=make_conf();
     yy_aconf->status = CONF_XLINE;
@@ -1032,7 +1090,7 @@ gecos_entry:     GECOS
       {
         free_conf(yy_aconf);
       }
-    yy_aconf = NULL;
+    yy_aconf = (struct ConfItem *)NULL;
   }; 
 
 gecos_items:     gecos_items gecos_item |
@@ -1043,12 +1101,14 @@ gecos_item:      gecos_name | gecos_reason | gecos_action
 
 gecos_name:    NAME '=' QSTRING ';' 
   {
-    DupString(yy_aconf->name,yylval.string);
+    yy_aconf->name = yylval.string; 
+    yylval.string = (char *)NULL;
   };
 
 gecos_reason:    REASON '=' QSTRING ';' 
   {
-    DupString(yy_aconf->passwd,yylval.string);
+    yy_aconf->passwd = yylval.string;
+    yylval.string = (char *)NULL;
   };
 
 gecos_action:    ACTION '='

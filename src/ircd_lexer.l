@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <string.h>
 #include <ctype.h>
+#include "irc_string.h"
 #include "common.h"
 #include "s_conf.h"
 #include "y.tab.h"
@@ -62,7 +63,7 @@ qstring		\"[^\"\n]*[\"\n]
 	  return( IP_TYPE );
 	 }
 
-{qstring}	{ yylval.string = strdup(yytext+1);
+{qstring}	{ DupString(yylval.string,strdup(yytext+1));
 		  if(yylval.string[yyleng-2] != '"')
 		    fprintf(stderr,"Unterminated character string\n");
 		  else
