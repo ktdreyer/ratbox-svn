@@ -475,80 +475,82 @@ int check_client(struct Client *client_p, struct Client *source_p, char *usernam
  */
 int attach_Iline(struct Client* client_p, const char* username)
 {
- struct ConfItem* aconf;
- struct ConfItem* gkill_conf;
- char       non_ident[USERLEN + 1];
- if (IsGotId(client_p))
- {
-  aconf = find_address_conf(client_p->host,client_p->username,
-                            &client_p->localClient->ip,
-                            client_p->localClient->aftype);
- } else
- {
-  non_ident[0] = '~';
-  strncpy_irc(&non_ident[1],username, USERLEN - 1);
-  non_ident[USERLEN] = '\0';
-  aconf = find_address_conf(client_p->host,non_ident,
-                            &client_p->localClient->ip,
-                            client_p->localClient->aftype);
- }
- if (aconf != NULL)
- {
-  if (aconf->status & CONF_CLIENT)
-  {
-   if (aconf->flags & CONF_FLAGS_REDIR)
-   {
-    sendto_one(client_p, form_str(RPL_REDIR), me.name, client_p->name,
-               aconf->name ? aconf->name : "", aconf->port);
-    return(NOT_AUTHORIZED);
-   }
-   if (ConfigFileEntry.glines)
-   {
-    if (!IsConfExemptKline(aconf))
+  struct ConfItem* aconf;
+  struct ConfItem* gkill_conf;
+  char       non_ident[USERLEN + 1];
+  if (IsGotId(client_p))
     {
-     if (IsGotId(client_p))
-      gkill_conf = find_gkill(client_p, client_p->username);
-     else
-      gkill_conf = find_gkill(client_p, non_ident);
-     if (gkill_conf)
-     {
-      sendto_one(client_p, ":%s NOTICE %s :*** G-lined", me.name,
-                 client_p->name);
-      sendto_one(client_p, ":%s NOTICE %s :*** Banned %s",
-                 me.name, client_p->name, gkill_conf->passwd);
-      return(BANNED_CLIENT);
-     }
+      aconf = find_address_conf(client_p->host,client_p->username,
+				&client_p->localClient->ip,
+				client_p->localClient->aftype);
     }
-   }
-   if (IsConfDoIdentd(aconf))
-    SetNeedId(client_p);
-   if (IsConfRestricted(aconf))
-    SetRestricted(client_p);
-   /* Thanks for spoof idea amm */
-   if (IsConfDoSpoofIp(aconf))
-   {
-    if (IsConfSpoofNotice(aconf))
+  else
     {
-     sendto_realops_flags(FLAGS_ADMIN,
-                          "%s spoofing: %s as %s", client_p->name,
-                          client_p->host, aconf->name);
+      non_ident[0] = '~';
+      strncpy_irc(&non_ident[1],username, USERLEN - 1);
+      non_ident[USERLEN] = '\0';
+      aconf = find_address_conf(client_p->host,non_ident,
+				&client_p->localClient->ip,
+				client_p->localClient->aftype);
     }
-    strncpy_irc(client_p->host, aconf->name, HOSTLEN);
-    SetIPSpoof(client_p);
-    SetIPHidden(client_p);
-   }
-   return(attach_iline(client_p, aconf));
-  } else
-  if (aconf->status & CONF_KILL)
-  {
-   if (ConfigFileEntry.kline_with_reason)
-   {
-    sendto_one(client_p, ":%s NOTICE %s :*** Banned %s",
-               me.name,client_p->name,aconf->passwd);
-   }
-   return(BANNED_CLIENT);
-  }
- }
+
+  if (aconf != NULL)
+    {
+      if (aconf->status & CONF_CLIENT)
+	{
+	  if (aconf->flags & CONF_FLAGS_REDIR)
+	    {
+	      sendto_one(client_p, form_str(RPL_REDIR), me.name, client_p->name,
+			 aconf->name ? aconf->name : "", aconf->port);
+	      return(NOT_AUTHORIZED);
+	    }
+	  if (ConfigFileEntry.glines)
+	    {
+	      if (!IsConfExemptKline(aconf))
+		{
+		  if (IsGotId(client_p))
+		    gkill_conf = find_gkill(client_p, client_p->username);
+		  else
+		    gkill_conf = find_gkill(client_p, non_ident);
+		  if (gkill_conf)
+		    {
+		      sendto_one(client_p, ":%s NOTICE %s :*** G-lined", me.name,
+				 client_p->name);
+		      sendto_one(client_p, ":%s NOTICE %s :*** Banned %s",
+				 me.name, client_p->name, gkill_conf->passwd);
+		      return(BANNED_CLIENT);
+		    }
+		}
+	    }
+	  if (IsConfDoIdentd(aconf))
+	    SetNeedId(client_p);
+	  if (IsConfRestricted(aconf))
+	    SetRestricted(client_p);
+	  /* Thanks for spoof idea amm */
+	  if (IsConfDoSpoofIp(aconf))
+	    {
+	      if (IsConfSpoofNotice(aconf))
+		{
+		  sendto_realops_flags(FLAGS_ADMIN,
+				       "%s spoofing: %s as %s", client_p->name,
+				       client_p->host, aconf->name);
+		}
+	      strncpy_irc(client_p->host, aconf->name, HOSTLEN);
+	      SetIPSpoof(client_p);
+	      SetIPHidden(client_p);
+	    }
+	  return(attach_iline(client_p, aconf));
+	}
+      else if (aconf->status & CONF_KILL)
+	{
+	  if (ConfigFileEntry.kline_with_reason)
+	    {
+	      sendto_one(client_p, ":%s NOTICE %s :*** Banned %s",
+			 me.name,client_p->name,aconf->passwd);
+	    }
+	  return(BANNED_CLIENT);
+	}
+    }
  return(NOT_AUTHORIZED);
 }
 
@@ -1564,14 +1566,16 @@ int conf_connect_allowed(struct irc_inaddr *addr, int aftype)
  */
 struct ConfItem *find_kill(struct Client* client_p)
 {
- struct ConfItem *aconf;
- assert(0 != client_p);
- aconf = find_address_conf(client_p->host, client_p->username,
-                           &client_p->localClient->ip,
-                           client_p->localClient->aftype);
- if (aconf->status & CONF_KILL)
-  return aconf;
- return NULL;
+  struct ConfItem *aconf;
+  assert(0 != client_p);
+  aconf = find_address_conf(client_p->host, client_p->username,
+			    &client_p->localClient->ip,
+			    client_p->localClient->aftype);
+  if (aconf == NULL)
+    return aconf;
+  if(aconf->status & CONF_KILL)
+    return aconf;
+  return NULL;
 }
 
 /* add_temp_kline
@@ -1585,11 +1589,11 @@ struct ConfItem *find_kill(struct Client* client_p)
 void
 add_temp_kline(struct ConfItem *aconf)
 {
- dlink_node *kill_node;
- kill_node = make_dlink_node();
- dlinkAdd(aconf, kill_node, &temporary_klines);
- aconf->flags |= CONF_FLAGS_TEMPORARY;
- add_conf_by_address(aconf->host, CONF_KILL, aconf->user, aconf);
+  dlink_node *kill_node;
+  kill_node = make_dlink_node();
+  dlinkAdd(aconf, kill_node, &temporary_klines);
+  aconf->flags |= CONF_FLAGS_TEMPORARY;
+  add_conf_by_address(aconf->host, CONF_KILL, aconf->user, aconf);
 }
 
 /*
@@ -1619,21 +1623,21 @@ cleanup_tklines(void *notused)
 static void
 expire_tklines(dlink_list *tklist)
 {
- dlink_node *kill_node;
- dlink_node *next_node;
- struct ConfItem *kill_ptr;
- for (kill_node = tklist->head; kill_node; kill_node = next_node)
- {
-  kill_ptr = kill_node->data;
-  next_node = kill_node->next;
+  dlink_node *kill_node;
+  dlink_node *next_node;
+  struct ConfItem *kill_ptr;
+  for (kill_node = tklist->head; kill_node; kill_node = next_node)
+    {
+      kill_ptr = kill_node->data;
+      next_node = kill_node->next;
 
-  if (kill_ptr->hold <= CurrentTime)
-  {
-   delete_one_address_conf(kill_ptr->host, kill_ptr);
-   dlinkDelete(kill_node, tklist);
-   free_dlink_node(kill_node);
-  }
- }
+      if (kill_ptr->hold <= CurrentTime)
+	{
+	  delete_one_address_conf(kill_ptr->host, kill_ptr);
+	  dlinkDelete(kill_node, tklist);
+	  free_dlink_node(kill_node);
+	}
+    }
 }
 
 /*
