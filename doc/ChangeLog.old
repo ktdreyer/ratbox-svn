@@ -1,3 +1,19 @@
+leeh        2001/12/15 17:20:09 EST	(20011215_11)
+
+  Modified files:
+    modules              .depend 
+    src                  .depend client.c 
+  Log:
+  - you cant compile an id string, commented it out in .depend
+  - check for splitmode everytime a client/server leaves (ugh)
+  
+  Revision  Changes    Path
+  1.2       +1 -1      ircd-hybrid-7/modules/.depend
+  7.2       +1 -1      ircd-hybrid-7/src/.depend
+  7.212     +4 -0      ircd-hybrid-7/src/client.c
+
+
+
 leeh        2001/12/15 15:35:23 EST	(20011215_10)
 
   Modified files:
