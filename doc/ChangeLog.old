@@ -1,3 +1,9 @@
+*** 20010109_1 by wcampbel
+Sending PING :<any text> should return 
+:<server> PONG <server> :<same text sent in> NOT
+:<server> PONG <server> :cptr->name
+
+
 *** 20010108_16 by wcampbel
 Fixed the .depend's...We'll get a couple error messages when we run
 make depend now, but at least system libs (rsa.h) in /usr/local/lib
