@@ -1,3 +1,8 @@
+*** 20010104_30 by fl_
+- added the unfinished m_jupe.c to contrib/
+- contrib/ stuff goes to path/modules, and isnt autoloaded 
+
+
 *** 20010104_29 by davidt
 Fix ISON for lazylinks.  cosmetic fix for LLNICK.
 
