@@ -1,3 +1,24 @@
+leeh        2004/11/17 17:22:53 EST	(20041117_2)
+
+  Modified files:
+    .                    Makefile.in configure 
+    autoconf             configure.in 
+    include              config.h 
+    src                  Makefile.in 
+  Log:
+  - fixed the autoconf code to check properly for sqlite.h and sqlite lib
+  - renamed the conf, pid and db file to services.(???)
+  - renamed the binary to ratbox-services
+  
+  Revision  Changes    Path
+  1.6       +1 -1      rserv/Makefile.in
+  1.15      +30 -42    rserv/autoconf/configure.in
+  1.15      +81 -53    rserv/configure
+  1.22      +3 -3      rserv/include/config.h
+  1.29      +2 -2      rserv/src/Makefile.in
+
+
+
 leeh        2004/11/17 16:31:15 EST	(20041117_1)
 
   Modified files:
