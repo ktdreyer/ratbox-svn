@@ -1641,6 +1641,9 @@ static void read_conf(FBFILE* file)
   if (!ConfigFileEntry.maximum_links)
     ConfigFileEntry.maximum_links = MAXIMUM_LINKS_DEFAULT;
 
+  if (!ConfigFileEntry.max_targets)
+	  ConfigFileEntry.max_targets = MAX_TARGETS_DEFAULT;
+  
   GlobalSetOptions.idletime = (ConfigFileEntry.idletime * 60);
   GlobalSetOptions.hide_server = ConfigFileEntry.hide_server;
 

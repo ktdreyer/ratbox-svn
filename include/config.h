@@ -257,6 +257,8 @@
 
 /* You shouldn't change anything below this line, unless absolutely needed. */
 
+#define MAX_TARGETS_DEFAULT 4
+
 /* INITIAL_DBUFS - how many dbufs to preallocate
  */
 #define INITIAL_DBUFS 1000 /* preallocate 4 megs of dbufs */ 
