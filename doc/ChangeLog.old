@@ -1,3 +1,15 @@
+leeh        2002/01/23 13:14:09 EST	(20020123_1)
+
+  Modified files:
+    src                  s_user.c 
+  Log:
+  - fixed the invisible stuff reported by andro..
+  
+  Revision  Changes    Path
+  7.184     +6 -9      ircd-hybrid-7/src/s_user.c
+
+
+
 leeh        2002/01/23 12:59:27 EST	(20020123_0)
 
   Modified files:
