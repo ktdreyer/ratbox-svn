@@ -1,3 +1,10 @@
+*** 20010528_4 by jdc
+* Typecasted time_t references to their appropriate types (%ld being
+  signed long, %lu being unsigned long).  Yes, there are some %lds,
+  believe it or not.
+
+
+
 *** 20010528_3 by jdc
 * Removed time_t long check.  I'll just typecast the bastards to be
   longs...
