@@ -27,6 +27,7 @@ AC_PATH_PROG(YACC, yacc)
 AC_PATH_PROG(AR, ar)
 AC_PROG_INSTALL
 AC_PROG_LEX
+AC_PROG_RANLIB
 
 dnl use directory structure of cached as default (hack)
 if test "$libexecdir" = '${exec_prefix}/libexec' &&
