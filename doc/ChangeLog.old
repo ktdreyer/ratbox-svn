@@ -1,3 +1,8 @@
+*** 20001221_18 by wcampbel
+Brought convertconf up to date.  It now produces a valid -7 conf.
+Anyone mind if I add some more test lines to the test ircd.conf in tools?
+
+
 *** 20001221_17 by db
 - non opers should not be able to do /stats ?
 
