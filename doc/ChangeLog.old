@@ -1,3 +1,15 @@
+androsyn    2002/05/16 06:18:09 EDT	(20020516_3)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Oops..had the logic backwards...
+  
+  Revision  Changes    Path
+  7.257     +1 -1      ircd-hybrid-7/src/client.c
+
+
+
 androsyn    2002/05/16 06:15:47 EDT	(20020516_2)
 
   Modified files:
