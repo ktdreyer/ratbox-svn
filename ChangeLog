@@ -1,3 +1,15 @@
+androsyn    2003/05/28 10:45:27 UTC	(20030528_0)
+
+  Modified files:
+    src                  ircd.c 
+  Log:
+  Remove two unused variables
+  
+  Revision  Changes    Path
+  7.289     +0 -1      ircd-ratbox/src/ircd.c
+
+
+
 ejb         2003/05/27 03:23:57 UTC	(20030527_0)
 
   Modified files:
