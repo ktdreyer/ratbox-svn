@@ -1,8 +1,8 @@
 /*
  *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  spy_trace_notice.c: Sends a notice when someone uses TRACE.
+ *  spy_trace_notice.c: Sends a notice when someone uses TRACE or LTRACE
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (C) 2002 Hybrid Development Team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,28 +29,39 @@
 #include "send.h"
 
 int show_trace(struct hook_spy_data *);
+int show_ltrace(struct hook_spy_data *);
 
 void
 _modinit(void)
 {
   hook_add_hook("doing_trace", (hookfn *)show_trace);
+  hook_add_hook("doing_ltrace", (hookfn *)show_ltrace);
 }
 
 void
 _moddeinit(void)
 {
   hook_del_hook("doing_trace", (hookfn *)show_trace);
+  hook_del_hook("doing_ltrace", (hookfn *)show_ltrace);
 }
 
 const char *_version = "$Revision$";
 
 int show_trace(struct hook_spy_data *data)
 {
-  if(MyConnect(data->source_p))
-    sendto_realops_flags(FLAGS_SPY, L_ALL,
+  sendto_realops_flags(FLAGS_SPY, L_ALL,
                          "trace requested by %s (%s@%s) [%s]",
                          data->source_p->name, data->source_p->username,
                          data->source_p->host, data->source_p->user->server);
 
+  return 0;
+}
+
+int show_ltrace(struct hook_spy_data *data)
+{
+  sendto_realops_flags(FLAGS_SPY, L_ALL,
+		       "ltrace requested by %s (%s@%s) [%s]",
+		       data->source_p->name, data->source_p->username,
+		       data->source_p->host, data->source_p->user->server);
   return 0;
 }
