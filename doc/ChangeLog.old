@@ -1,3 +1,8 @@
+*** 20011129_4 by db
+- Added einride to core, moved from contributor
+
+
+
 *** 20011129_3 by leeh
 - added first half of knock stuff.. the remote propagation doesnt exist yet,
   and the numerics needadding to messages/*
