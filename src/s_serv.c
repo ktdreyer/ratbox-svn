@@ -1318,7 +1318,6 @@ void show_servers(struct Client *cptr)
 {
   struct Client *cptr2;
   int j=0;                /* used to count servers */
-  dlink_node *ptr;
 
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
@@ -1542,7 +1541,6 @@ serv_connect_callback(int fd, int status, void *data)
     struct Client *cptr = data;
     struct ConfItem *c_conf;
     struct ConfItem *n_conf;
-    dlink_node *m;
 
     /* First, make sure its a real client! */
     assert(cptr != NULL);
