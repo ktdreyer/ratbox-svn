@@ -85,6 +85,9 @@ int   class_redirport_var;
 %token  DOTS_IN_IDENT
 %token  EMAIL
 %token  EXCEED_LIMIT
+%token  FNAME_USERLOG
+%token  FNAME_OPERLOG
+%token  FNAME_FOPERLOG
 %token  GECOS
 %token  GLINE
 %token  GLINES
@@ -1224,24 +1227,26 @@ general_items:      general_items general_item |
 
 general_item:       general_failed_oper_notice | general_show_failed_oper_id |
                     general_anti_nick_flood | general_max_nick_time |
- 		    general_max_nick_changes |
+                    general_max_nick_changes |
                     general_ts_warn_delta | general_ts_max_delta |
-		    general_kline_with_reason |
+                    general_kline_with_reason |
                     general_kline_with_connection_closed |
-	            general_warn_no_nline |
+                    general_warn_no_nline |
                     general_non_redundant_klines | general_dots_in_ident |
                     general_e_lines_oper_only | general_f_lines_oper_only |
-	            general_stats_notice | general_pace_wait |
-	            general_whois_wait | 
+                    general_stats_notice | general_pace_wait |
+                    general_whois_wait | 
                     general_knock_delay |
                     general_short_motd | general_no_oper_flood |
-	            general_iauth_server |
+                    general_iauth_server |
                     general_iauth_port | general_stats_p_notice |
                     general_glines | general_gline_time |
-		    general_idletime |
-		    general_hide_server | general_maximum_links |
+                    general_idletime |
+                    general_hide_server | general_maximum_links |
                     general_message_locale | general_client_exit |
-		    error
+                    general_fname_userlog | general_fname_operlog |
+                    general_fname_foperlog |
+                    error
 
 
 general_failed_oper_notice:   FAILED_OPER_NOTICE '=' TYES ';'
@@ -1417,6 +1422,21 @@ general_iauth_port: IAUTH_PORT '=' NUMBER ';'
 {
 	iAuth.port = yylval.number;
 } ;
+
+general_fname_userlog: FNAME_USERLOG '=' QSTRING ';'
+{
+	strcpy(ConfigFileEntry.fname_userlog, yylval.string);
+} ;
+
+general_fname_foperlog: FNAME_FOPERLOG '=' QSTRING ';'
+{
+	strcpy(ConfigFileEntry.fname_foperlog, yylval.string);
+};
+
+general_fname_operlog: FNAME_OPERLOG '=' QSTRING ';'
+{
+	strcpy(ConfigFileEntry.fname_operlog, yylval.string);
+};
 
 general_stats_p_notice: STATS_P_NOTICE '=' TYES ';'
 {

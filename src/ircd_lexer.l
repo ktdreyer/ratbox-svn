@@ -97,6 +97,9 @@ die		{ return DIE; }
 dots_in_ident   { return DOTS_IN_IDENT; }
 email		{ return EMAIL; }
 exceed_limit    { return EXCEED_LIMIT; }
+fname_userlog   { return FNAME_USERLOG; }
+fname_operlog   { return FNAME_OPERLOG; }
+fname_foperlog  { return FNAME_FOPERLOG; }
 gecos		{ return GECOS; }
 general		{ return GENERAL; }
 gline		{ return GLINE; }

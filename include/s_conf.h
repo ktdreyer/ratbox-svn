@@ -176,6 +176,10 @@ typedef struct
   char* network_name;
   char* network_desc;
 
+	char *fname_operlog;
+	char *fname_userlog;
+	char *fname_foperlog;
+	
   MessageFile helpfile;
   MessageFile motd;
   MessageFile opermotd;

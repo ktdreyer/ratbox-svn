@@ -29,7 +29,7 @@
 #include "ircd.h"
 #include "s_misc.h"
 #include "event.h"	/* Needed for EVH etc. */
-#include "config.h"     /* Needed for FNAME_USERLOG, INIT_LOG_LEVEL */
+#include "s_conf.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -217,10 +217,11 @@ void log_user_exit(struct Client *sptr)
       {
 	if (user_log_fb == NULL)
 	  {
-	    if( (user_log_fb = fbopen(FNAME_USERLOG, "r")) != NULL )
+		  if( ConfigFileEntry.fname_userlog && 
+			  (user_log_fb = fbopen(ConfigFileEntry.fname_userlog, "r")) != NULL )
 	      {
-		fbclose(user_log_fb);
-		user_log_fb = fbopen(FNAME_USERLOG, "a");
+			  fbclose(user_log_fb);
+			  user_log_fb = fbopen(ConfigFileEntry.fname_userlog, "a");
 	      }
 	  }
 
@@ -276,16 +277,18 @@ user_log_resync(void *notused)
 
 void log_oper( struct Client *sptr, char *name )
 {
-#ifdef FNAME_OPERLOG
   FBFILE *oper_fb;
   char linebuf[BUFSIZE];
 
+  if (!ConfigFileEntry.fname_operlog)
+	  return;
+  
   if (IsPerson(sptr))
     {
-      if( (oper_fb = fbopen(FNAME_OPERLOG, "r")) != NULL )
+      if( (oper_fb = fbopen(ConfigFileEntry.fname_operlog, "r")) != NULL )
 	{
 	  fbclose(oper_fb);
-	  oper_fb = fbopen(FNAME_OPERLOG, "a");
+	  oper_fb = fbopen(ConfigFileEntry.fname_operlog, "a");
 	}
 
       if(oper_fb != NULL)
@@ -299,5 +302,4 @@ void log_oper( struct Client *sptr, char *name )
 	  fbclose(oper_fb);
 	}
     }
-#endif
 }
