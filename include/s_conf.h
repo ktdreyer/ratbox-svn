@@ -77,7 +77,6 @@ struct ConfItem
   struct Class *   c_class;     /* Class of connection */
   struct DNSQuery* dns_query;
   int              aftype;
-  int              dns_pending; /* 1 if dns query pending, 0 otherwise */
 #ifdef HAVE_LIBCRYPTO
   char *           rsa_public_key_file;
   RSA *            rsa_public_key;

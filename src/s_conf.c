@@ -172,17 +172,16 @@ conf_dns_callback(void* vptr, adns_answer *reply)
 /*
  * conf_dns_lookup - do a nameserver lookup of the conf host
  * if the conf entry is currently doing a ns lookup do nothing, otherwise
- * set the conf_dns_pending flag
+ * allocate a dns_query and start ns lookup.
  */
 void conf_dns_lookup(struct ConfItem* aconf)
 {
-  if (!aconf->dns_pending)
+  if (aconf->dns_query == NULL)
     {
       aconf->dns_query = MyMalloc(sizeof(struct DNSQuery));
       aconf->dns_query->ptr = aconf;
       aconf->dns_query->callback = conf_dns_callback;
       adns_gethost(aconf->host, aconf->aftype, aconf->dns_query);
-      aconf->dns_pending = 1;
     }
 }
 
