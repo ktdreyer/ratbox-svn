@@ -1,3 +1,21 @@
+leeh        2002/08/08 05:58:54 EDT	(20020808_11)
+
+  Modified files:
+    modules              m_knock.c 
+  Removed files:
+    contrib              README.LMH README.disable_identd lmh.diff 
+  Log:
+  - added cidr ban stuff to knock
+  - removed now defunct patches
+  
+  Revision  Changes    Path
+  1.4       +0 -168    ircd-ratbox/contrib/README.LMH (dead)
+  1.2       +0 -17     ircd-ratbox/contrib/README.disable_identd (dead)
+  1.13      +0 -2580   ircd-ratbox/contrib/lmh.diff (dead)
+  1.54      +5 -3      ircd-ratbox/modules/m_knock.c
+
+
+
 leeh        2002/08/08 05:54:23 EDT	(20020808_10)
 
   Modified files:
