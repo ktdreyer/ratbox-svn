@@ -1,3 +1,7 @@
+*** 20010524_5 by kreator
+- fix self-referencing in README.FIRST :-)
+
+
 *** 20010524_4 by toot
 fixes a couple of small compile warnings in adns
 
