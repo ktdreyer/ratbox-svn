@@ -63,6 +63,7 @@
 
 static void check_pings_list(dlink_list *list);
 static void check_unknowns_list(dlink_list *list);
+static void free_exited_clients(void *unused);
 
 static EVH check_pings;
 
@@ -72,6 +73,8 @@ static int local_client_count=0;
 static BlockHeap *client_heap = NULL;
 static BlockHeap *lclient_heap = NULL;
 
+static dlink_list dead_list;
+static dlink_list abort_list;
 /*
  * client_heap_gc
  *
@@ -105,6 +108,7 @@ void init_client(void)
   client_heap = BlockHeapCreate(sizeof(struct Client), CLIENT_HEAP_SIZE);
   lclient_heap = BlockHeapCreate(sizeof(struct LocalUser), LCLIENT_HEAP_SIZE); 
   eventAddIsh("check_pings", check_pings, NULL, 30);
+  eventAddIsh("free_exited_clients", &free_exited_clients, NULL, 4);
   eventAddIsh("client_heap_gc", client_heap_gc, NULL, 30);
 }
 
@@ -909,6 +913,30 @@ get_client_name(struct Client* client, int showip)
   return client->name;
 }
 
+static void
+free_exited_clients(void *unused)
+{
+  dlink_node *ptr, *next;
+  struct Client *target_p;
+  
+  for(ptr = dead_list.head; ptr; ptr = next)
+    {
+      target_p = ptr->data;
+      next = ptr->next;
+      if (ptr->data == NULL)
+        {
+          sendto_realops_flags(FLAGS_ALL, L_ALL,
+                        "Warning: null client on dead_list!");
+          dlinkDelete(ptr, &dead_list);
+          free_dlink_node(ptr);
+          continue;
+        }
+      release_client_state(target_p);
+      free_client(target_p);
+      dlinkDelete(ptr, &dead_list);
+      free_dlink_node(ptr);
+    }
+}
 
 /*
 ** Exit one client, local or remote. Assuming all dependents have
@@ -1043,9 +1071,13 @@ static void exit_one_client(struct Client *client_p,
 
   /* remove from global client list */
   remove_client_from_list(source_p);
-  release_client_state(source_p);
-  free_client(source_p);
 
+  /* Check to see if the client isn't already on the dead list */
+  assert(dlinkFind(&dead_list, source_p) == NULL);
+  /* add to dead client dlist */
+  lp = make_dlink_node();
+  SetDead(source_p);
+  dlinkAdd(source_p, lp, &dead_list);
 }
 
 /*
@@ -1265,7 +1297,6 @@ int exit_client(
         return 0;
 
       SetClosing(source_p);
-      
       /* Attempt to flush any queued data */
       if (source_p->localClient->fd > -1 && !IsDead(source_p))
         send_queued_write(source_p->localClient->fd, source_p);
