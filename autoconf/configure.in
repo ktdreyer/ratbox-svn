@@ -164,10 +164,8 @@ dnl          <no argument>         (cf_enable_openssl='auto')
 dnl          --enable-openssl      (cf_enable_openssl='yes')
 dnl          --enable-openssl=DIR  (cf_enable_openssl='DIR')
 dnl          --disable-openssl     (cf_enable_openssl='no')
-AC_MSG_CHECKING(for OpenSSL include directory)
-
-dnl If --enable-openssl=DIR is specified...
 if test "X$cf_enable_openssl" != "Xno"; then
+  AC_MSG_CHECKING(for OpenSSL include directory)
   if test "X$cf_enable_openssl" != "Xauto" &&
      test "X$cf_enable_openssl" != "Xyes"; then
         CPPFLAGS="$CPPFLAGS -I${cf_enable_openssl}/include"
@@ -194,8 +192,8 @@ if test "X$cf_enable_openssl" != "Xno"; then
       CPPFLAGS="$CPPFLAGS -I$cf_openssl_incl"
     fi
   fi
+  AC_MSG_RESULT($cf_openssl_incl)
 fi
-AC_MSG_RESULT($cf_openssl_incl)
 
 if test "X$cf_enable_openssl" != "Xno"; then
     dnl Check OpenSSL version (must be 0.9.6 or above!)
