@@ -1,3 +1,8 @@
+*** 20010703_1 by wcampbel
+Added the .cvsignore files, this helps coders more easily see if something
+is in the tree and shouldn't be, or should be cvs add'ed
+
+
 *** 20010702_10 by jdc
 - modules/m_capab.c
   modules/m_challenge.c
