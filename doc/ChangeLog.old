@@ -1,3 +1,7 @@
+*** 20010225_22 by androsyn
+Documented listen {} host=".." fix.
+
+
 *** 20010225_21 by androsyn
 Fixed host="ipaddress" in listen {} blocks for IPv6.  
 
