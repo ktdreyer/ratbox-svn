@@ -60,7 +60,6 @@ time_t LastUsedWallops = 0;
 static int valid_hostname(const char* hostname);
 static int valid_username(const char* username);
 static void report_and_set_user_flags( struct Client *, struct ConfItem * );
-static int tell_user_off(struct Client *,char **);
 static void user_welcome(struct Client *sptr);
 
 /* table of ascii char letters to corresponding bitmask */
@@ -278,8 +277,8 @@ int register_user(struct Client *cptr, struct Client *sptr,
   char*       parv[3];
   static char ubuf[12];
   struct User*     user = sptr->user;
-  char*       reason;
   char        tmpstr2[IRCD_BUFSIZE];
+  int  status;
 
   assert(0 != sptr);
   assert(sptr->username != username);
@@ -292,93 +291,10 @@ int register_user(struct Client *cptr, struct Client *sptr,
   if(strlen(username) > USERLEN)
     username[USERLEN] = '\0';
 
-  reason = NULL;
-
   if (MyConnect(sptr))
     {
-#ifndef USE_IAUTH
-      switch( check_client(sptr,username,&reason))
-        {
-        case SOCKET_ERROR:
-          return exit_client(cptr, sptr, &me, "Socket Error");
-          break;
-
-        case I_LINE_FULL:
-        case I_LINE_FULL2:
-          sendto_realops_flags(FLAGS_FULL, "%s for %s.",
-                               "I-line is full", get_client_host(sptr));
-          log(L_INFO,"Too many connections from %s.", get_client_host(sptr));
-          ServerStats->is_ref++;
-          return exit_client(cptr, sptr, &me, 
-                 "No more connections allowed in your connection class" );
-          break;
-
-        case NOT_AUTHORIZED:
-
-#ifdef REJECT_HOLD
-
-          /* Slow down the reconnectors who are rejected */
-          if( (reject_held_fds != REJECT_HELD_MAX ) )
-            {
-              SetRejectHold(cptr);
-              reject_held_fds++;
-              release_client_dns_reply(cptr);
-              return 0;
-            }
-          else
-#endif
-            {
-              ServerStats->is_ref++;
-	/* jdc - lists server name & port connections are on */
-	/*       a purely cosmetical change */
-              sendto_realops_flags(FLAGS_CCONN,
-				 "%s from %s [%s] on [%s/%u].",
-                                 "Unauthorized client connection",
-                                 get_client_host(sptr),
-                                 inetntoa((char *)&sptr->ip),
-				 sptr->listener->name,
-				 sptr->listener->port
-				 );
-              log(L_INFO,
-		  "Unauthorized client connection from %s on [%s/%u].",
-                  get_client_host(sptr),
-		  sptr->listener->name,
-		  sptr->listener->port
-		  );
-
-              return exit_client(cptr, sptr, &me,
-                                 "You are not authorized to use this server");
-            }
-          break;
-
-        case BANNED_CLIENT:
-          {
-            if (!IsGotId(sptr))
-              {
-                if (IsNeedId(sptr))
-                  {
-                    *sptr->username = '~';
-                    strncpy_irc(&sptr->username[1], username, USERLEN - 1);
-                  }
-                else
-                  strncpy_irc(sptr->username, username, USERLEN);
-                sptr->username[USERLEN] = '\0';
-              }
-
-            if ( tell_user_off( sptr, &reason ))
-              {
-                ServerStats->is_ref++;
-                return exit_client(cptr, sptr, &me, "Banned" );
-              }
-            else
-              return 0;
-
-            break;
-          }
-        default:
-          release_client_dns_reply(cptr);
-          break;
-        }
+      if( ( status = check_client(cptr, sptr, username )) < 0 )
+	return status;
 
       if(!valid_hostname(sptr->host))
         {
@@ -391,6 +307,7 @@ int register_user(struct Client *cptr, struct Client *sptr,
       aconf = sptr->confs->value.aconf;
       if (!aconf)
         return exit_client(cptr, sptr, &me, "*** Not Authorized");
+
       if (!IsGotId(sptr))
         {
           if (IsNeedIdentd(aconf))
@@ -492,7 +409,6 @@ int register_user(struct Client *cptr, struct Client *sptr,
                                    get_client_name(cptr, FALSE));
             }
         }
-#endif /* USE_IAUTH */
 
       sendto_realops_flags(FLAGS_CCONN,
                          "Client connecting: %s (%s@%s) [%s] {%s}",
@@ -672,59 +588,6 @@ static int valid_username(const char* username)
       else if (!IsUserChar(*p))
         return NO;
     }
-  return YES;
-}
-
-/* 
- * tell_user_off
- *
- * inputs       - client pointer of user to tell off
- *              - pointer to reason user is getting told off
- * output       - drop connection now YES or NO (for reject hold)
- * side effects -
- */
-
-static int
-tell_user_off(struct Client *cptr, char **preason )
-{
-  char* p = 0;
-
-  /* Ok... if using REJECT_HOLD, I'm not going to dump
-   * the client immediately, but just mark the client for exit
-   * at some future time, .. this marking also disables reads/
-   * writes from the client. i.e. the client is "hanging" onto
-   * an fd without actually being able to do anything with it
-   * I still send the usual messages about the k line, but its
-   * not exited immediately.
-   * - Dianora
-   */
-            
-#ifdef REJECT_HOLD
-  if( (reject_held_fds != REJECT_HELD_MAX ) )
-    {
-      SetRejectHold(cptr);
-      reject_held_fds++;
-#endif
-
-      if(ConfigFileEntry.kline_with_reason && *preason)
-        {
-          if(( p = strchr(*preason, '|')) )
-            *p = '\0';
-
-          sendto_one(cptr, ":%s NOTICE %s :*** Banned: %s",
-                     me.name,cptr->name,*preason);
-           
-          if(p)
-            *p = '|';
-        }
-        else
-        sendto_one(cptr, ":%s NOTICE %s :*** Banned: No Reason",
-                   me.name,cptr->name);
-#ifdef REJECT_HOLD
-      return NO;
-    }
-#endif
-
   return YES;
 }
 

@@ -24,6 +24,15 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.29  2000/11/29 21:00:54  db
+ * - reworked register_user
+ *   moved all check for conf/kline notification etc. back into s_conf.c
+ *   where I think maybe it belongs, in any case, this cleans up register_user
+ *   no more **char preason. *ugh*
+ * - removed the kludge '|' handling in reasons. *ugh*
+ *
+ *   Who knows what evil lies in ircd code...
+ *
  * Revision 7.28  2000/11/29 07:57:52  db
  * - I removed isbot tests. those are quite obsolete and were BLOAT
  * - I added skeleton for server side ignore new user mode +u
@@ -567,9 +576,10 @@ extern int              attach_confs(struct Client* client,
                                      const char* name, int statmask);
 extern int              attach_cn_lines(struct Client* client, 
                                         const char* host);
-extern int              check_client(struct Client*, char *,char **);
-extern int              attach_Iline(struct Client* client, 
-                                     const char* username, char** reason);
+extern int              check_client(struct Client* cptr, struct Client *sptr,
+				     char *);
+extern int              attach_Iline(struct Client* client,
+				     const char* username);
 extern struct ConfItem* find_me(void);
 extern struct ConfItem* find_admin(void);
 extern struct ConfItem* find_first_nline(struct SLink* lp);
@@ -648,6 +658,12 @@ extern void conf_add_conf(struct ConfItem *);
 extern void oldParseOneLine(char* ,struct ConfItem*,int*,int*);
 
 extern unsigned long cidr_to_bitmask[];
+
+#define NOT_AUTHORIZED  (-1)
+#define SOCKET_ERROR    (-2)
+#define I_LINE_FULL     (-3)
+#define I_LINE_FULL2    (-4)
+#define BANNED_CLIENT   (-5)
 
 #endif /* INCLUDED_s_conf_h */
 

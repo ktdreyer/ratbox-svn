@@ -48,10 +48,5 @@ extern int   do_user(char* ,struct Client* ,struct Client*,
 
 extern int   user_modes_from_c_to_bitmask[];
 
-#define NOT_AUTHORIZED  (-1)
-#define SOCKET_ERROR    (-2)
-#define I_LINE_FULL     (-3)
-#define I_LINE_FULL2    (-4)
-#define BANNED_CLIENT   (-5)
 
 #endif

@@ -22,6 +22,7 @@
  *  $Id$
  */
 #include "s_conf.h"
+#include "s_stats.h"
 #include "channel.h"
 #include "class.h"
 #include "client.h"
@@ -241,9 +242,6 @@ void det_confs_butmask(struct Client* cptr, int mask)
     }
 }
 
-/*
- * rewrote to use a struct -Dianora
- */
 static struct LinkReport {
   int conf_type;
   int rpl_stats;
@@ -373,44 +371,104 @@ void report_specials(struct Client* sptr, int flags, int numeric)
 }
 
 /*
- * Ordinary client access check. Look for conf lines which have the same
- * status as the flags passed.
+ * check_client
+ *
+ * inputs	- pointer to client
+ * output	-   0 = Success
+ * 		   -1 = Access denied (no I line match)
+ * 		   -2 = Bad socket.
+ * 		   -3 = I-line is full
+ *		   -4 = Too many connections from hostname
+ * 		   -5 = K-lined
+ * side effects - Ordinary client access check.
+ *		  Look for conf lines which have the same
+ * 		  status as the flags passed.
  *
  * outputs
- *  0 = Success
- * -1 = Access denied (no I line match)
- * -2 = Bad socket.
- * -3 = I-line is full
- * -4 = Too many connections from hostname
- * -5 = K-lined
- * also updates reason if a K-line
  *
  */
-int check_client(struct Client *cptr,char *username,char **reason)
+int check_client(struct Client *cptr, struct Client *sptr, char *username)
 {
   static char     sockname[HOSTLEN + 1];
   int             i;
  
-  ClearAccess(cptr);
+  ClearAccess(sptr);
 
-  if ((i = attach_Iline(cptr, username, reason)))
+  if ((i = attach_Iline(sptr, username)))
     {
-      log(L_INFO, "Access denied: %s[%s]", cptr->name, sockname);
-      return i;
+      log(L_INFO, "Access denied: %s[%s]", sptr->name, sockname);
     }
 
+  switch( i )
+    {
+    case SOCKET_ERROR:
+      return exit_client(cptr, sptr, &me, "Socket Error");
+      break;
+
+    case I_LINE_FULL:
+    case I_LINE_FULL2:
+      sendto_realops_flags(FLAGS_FULL, "%s for %s.",
+			   "I-line is full", get_client_host(sptr));
+      log(L_INFO,"Too many connections from %s.", get_client_host(sptr));
+      ServerStats->is_ref++;
+      return exit_client(cptr, sptr, &me, 
+		 "No more connections allowed in your connection class" );
+      break;
+
+    case NOT_AUTHORIZED:
+
+#ifdef REJECT_HOLD
+      /* Slow down the reconnectors who are rejected */
+      if( (reject_held_fds != REJECT_HELD_MAX ) )
+	{
+	  SetRejectHold(cptr);
+	  reject_held_fds++;
+	  release_client_dns_reply(cptr);
+	  return 0;
+	}
+      else
+#endif
+	{
+	  ServerStats->is_ref++;
+	  /* jdc - lists server name & port connections are on */
+	  /*       a purely cosmetical change */
+	  sendto_realops_flags(FLAGS_CCONN,
+			       "%s from %s [%s] on [%s/%u].",
+			       "Unauthorized client connection",
+			       get_client_host(sptr),
+			       inetntoa((char *)&sptr->ip),
+			       sptr->listener->name,
+			       sptr->listener->port
+			       );
+	  log(L_INFO,
+	      "Unauthorized client connection from %s on [%s/%u].",
+	      get_client_host(sptr),
+	      sptr->listener->name,
+	      sptr->listener->port
+	      );
+	  
+	  return exit_client(cptr, sptr, &me,
+			     "You are not authorized to use this server");
+	}
+      break;
+
+    case BANNED_CLIENT:
+	return exit_client(cptr, sptr, &me, "Banned" );
+	break;
+    default:
+      release_client_dns_reply(sptr);
+      break;
+    }
   return 0;
 }
 
 /*
- * find the first (best) I line to attach.
+ * attach_Iline
+ * inputs	-
+ * output	-
+ * side effect	- find the first (best) I line to attach.
  */
-/*
- *  cleanup aug 3 1997 - Dianora
- *  Cleaned up again Sept 7 1998 - Dianora
- */
-
-int attach_Iline(struct Client* cptr, const char* username, char **preason)
+int attach_Iline(struct Client* cptr, const char* username)
 {
   struct ConfItem* aconf;
   struct ConfItem* gkill_conf;
@@ -423,7 +481,9 @@ int attach_Iline(struct Client* cptr, const char* username, char **preason)
                                        ntohl(cptr->ip.s_addr));
       if(aconf && !IsConfElined(aconf))
         {
-          if( (tkline_conf = find_tkline(cptr->host, cptr->username, ntohl(cptr->ip.s_addr))) )
+          if( (tkline_conf = find_tkline(cptr->host,
+					 cptr->username,
+					 ntohl(cptr->ip.s_addr))) )
             aconf = tkline_conf;
         }
     }
@@ -436,12 +496,14 @@ int attach_Iline(struct Client* cptr, const char* username, char **preason)
                                        ntohl(cptr->ip.s_addr));
       if(aconf && !IsConfElined(aconf))
         {
-          if( (tkline_conf = find_tkline(cptr->host, non_ident, ntohl(cptr->ip.s_addr))) )
+          if( (tkline_conf = find_tkline(cptr->host,
+					 non_ident,
+					 ntohl(cptr->ip.s_addr))) )
             aconf = tkline_conf;
         }
     }
 
-  if(aconf)
+  if(aconf != NULL)
     {
       if (aconf->status & CONF_CLIENT)
         {
@@ -454,57 +516,55 @@ int attach_Iline(struct Client* cptr, const char* username, char **preason)
 		gkill_conf = find_gkill(cptr, non_ident);
 	      if (gkill_conf)
 		{
-		  *preason = gkill_conf->passwd;
-		  sendto_one(cptr, "%s NOTICE %s :*** G-lined", me.name,
+		  sendto_one(cptr, ":%s NOTICE %s :*** G-lined", me.name,
 			     cptr->name);
+		  sendto_one(cptr, ":%s NOTICE %s :*** Banned %s",
+			     me.name, cptr->name,
+			     gkill_conf->passwd);
 		  return -5;
 		}
-            }
+	    }
 	}
-          if(IsConfDoIdentd(aconf))
-            SetNeedId(cptr);
 
-          /* Thanks for spoof idea amm */
-          if(IsConfDoSpoofIp(aconf))
-            {
-              /* abuse it, lose it. */
-#ifdef SPOOF_FREEFORM
-              sendto_realops("%s spoofing: %s as %s", cptr->name,
-                             cptr->host, aconf->name);
-              strncpy_irc(cptr->host, aconf->name, HOSTLEN);
-#else
-              /* default to oper.server.name.tld */
-              sendto_realops("%s spoofing: %s(%s) as oper.%s", cptr->name, 
-                             cptr->host, inetntoa((char*) &cptr->ip), me.name);
-              strcpy(cptr->host, "oper.");
-              strncpy_irc(&cptr->host[5], me.name, HOSTLEN - 5);
-#endif
-              SetIPSpoof(cptr);
-              SetIPHidden(cptr);
-            }
+	if(IsConfDoIdentd(aconf))
+	  SetNeedId(cptr);
+
+	  /* Thanks for spoof idea amm */
+	  if(IsConfDoSpoofIp(aconf))
+	  {
+	    /* abuse it, lose it. */
+	    sendto_realops("%s spoofing: %s as %s", cptr->name,
+			   cptr->host, aconf->name);
+	    strncpy_irc(cptr->host, aconf->name, HOSTLEN);
+	    SetIPSpoof(cptr);
+	    SetIPHidden(cptr);
+	  }
 
 #ifdef LIMIT_UH
-          return(attach_iline(cptr, aconf, username));
+	return(attach_iline(cptr, aconf, username));
 #else
-          return(attach_iline(cptr, aconf));
+	return(attach_iline(cptr, aconf));
 #endif
 
         }
       else if(aconf->status & CONF_KILL)
         {
-          *preason = aconf->passwd;
+	  if(ConfigFileEntry.kline_with_reason)
+	    {
+	      sendto_one(cptr, ":%s NOTICE %s :*** Banned %s",
+			 me.name,cptr->name,aconf->passwd);
+	      (void)exit_client(cptr, cptr, &me, "*** Banned");
+	    }
+
+	  (void)exit_client(cptr,cptr, &me, "*** Banned ");
+
+	  ServerStats->is_ref++;
           return(-5);
         }
     }
 
   return -1;        /* -1 on no match *bleh* */
 }
-
-/*
- *  rewrote to remove the "ONE" lamity *BLEH* I agree with comstud
- *  on this one. 
- * - Dianora
- */
 
 #ifdef LIMIT_UH
 static int attach_iline(struct Client *cptr, struct ConfItem *aconf, const char *username)
@@ -577,13 +637,6 @@ void clear_ip_hash_table()
   IP_ENTRY *last_IP_ENTRY;        /* last IP_ENTRY in chain */
   int size;
   int n_left_to_allocate = MAXCONNECTIONS;
-
-  /* ok. if the sizeof the struct isn't aligned with that of the
-   * smallest guaranteed valid pointer (void *), then align it
-   * ya. you could just turn 'size' into a #define. do it. :-)
-   *
-   * -Dianora
-   */
 
   size = sizeof(IP_ENTRY) + (sizeof(IP_ENTRY) & (sizeof(void*) - 1) );
 
@@ -838,7 +891,6 @@ static int hash_ip(unsigned long ip)
   return(hash);
 }
 
-/* Added so s_debug could check memory usage in here -Dianora */
 /*
  * count_ip_hash
  *
@@ -1015,26 +1067,10 @@ int attach_conf(struct Client *cptr,struct ConfItem *aconf)
     {
       return -1;
     }
-  /*
-   * By using "ConfLinks(aconf) >= ConfMaxLinks(aconf)....
-   * the client limit is set by the Y line, connection class, not
-   * by the individual client count in each I line conf.
-   *
-   * -Dianora
-   *
-   */
-
-  /* If the requested change, is to turn them into an OPER, then
-   * they are already attached to a fd there is no need to check for
-   * max in a class now is there?
-   *
-   * -Dianora
-   */
 
   /* If OLD_Y_LIMIT is defined the code goes back to the old way
    * I lines used to work, i.e. number of clients per I line
    * not total in Y
-   * -Dianora
    */
 #ifdef OLD_Y_LIMIT
   if ((aconf->status & (CONF_LOCOP | CONF_OPERATOR | CONF_CLIENT)) &&
@@ -1096,9 +1132,7 @@ struct ConfItem *find_me()
   exit (-1);
 
   assert(0);
-  return NULL;        /* oh oh... is there code to handle
-                                   this case ? - Dianora */
-                                /* There is now... -Dianora */
+  return NULL;
 }
 
 /*
@@ -1952,11 +1986,10 @@ int conf_connect_allowed(struct in_addr addr)
 
 /*
  * find_kill
- *
- * See if this user is klined already, and if so, return struct ConfItem pointer
- * to the entry for this kline. This wildly changes the way find_kill works
- * -Dianora
- *
+ * inputs	- pointer to client structure
+ * output	- pointer to struct ConfItem if found
+ * side effects	- See if this user is klined already,
+ *		  and if so, return struct ConfItem pointer
  */
 struct ConfItem *find_kill(struct Client* cptr)
 {
@@ -1978,7 +2011,7 @@ struct ConfItem *find_kill(struct Client* cptr)
  * side effects        -
  *
  * WARNING, no sanity checking on length of name,host etc.
- * thats expected to be done by caller.... *sigh* -Dianora
+ * thats expected to be done by caller.... 
  */
 
 struct ConfItem* find_tkline(const char* host, const char* user, unsigned long ip)
@@ -2035,7 +2068,7 @@ struct ConfItem* find_tkline(const char* host, const char* user, unsigned long i
  * side effects        -
  *
  * WARNING, no sanity checking on length of name,host etc.
- * thats expected to be done by caller.... *sigh* -Dianora
+ * thats expected to be done by caller.... 
  */
 
 struct ConfItem *find_is_klined(const char* host, const char* name, unsigned long ip)
@@ -2061,8 +2094,6 @@ struct ConfItem *find_is_klined(const char* host, const char* name, unsigned lon
  * inputs        - pointer to struct ConfItem
  * output        - none
  * Side effects        - links in given struct ConfItem into temporary kline link list
- * 
- * -Dianora
  */
 
 void add_temp_kline(struct ConfItem *aconf)
@@ -2184,20 +2215,8 @@ show_temp_klines(struct Client *sptr, struct ConfItem *tklist)
 	  else
 	    reason = "No Reason";
 
-	  if (!IsAnyOper(sptr))
-	    {
-	      if ((p = strchr(reason, '|')))
-		*p = '\0';
-
-
-            sendto_one(sptr, form_str(RPL_STATSKLINE), me.name,
-		       sptr->name, 'k', host, user, reason);
-	    if(p)
-	      *p = '|';
-	    }
-	  else
-	    sendto_one(sptr, form_str(RPL_STATSKLINE), me.name,
-		       sptr->name, 'k', host, user, reason);
+	  sendto_one(sptr, form_str(RPL_STATSKLINE), me.name,
+		     sptr->name, 'k', host, user, reason);
 
 	  last_list_ptr = kill_list_ptr;
 	  kill_list_ptr = kill_list_ptr->next;
@@ -2315,7 +2334,6 @@ char *oper_privs_as_string(struct Client *cptr,int port)
  * output        - oper flags as as string
  * side effects -
  *
- * -Dianora
  */
 
 char *oper_flags_as_string(int flags)
@@ -2964,11 +2982,6 @@ void conf_delist_old_conf(struct ConfItem *aconf)
 	  ConfLinks(bconf) -= bconf->clients;
 	  ClassPtr(bconf) = ClassPtr(aconf);
 	  ConfLinks(bconf) += bconf->clients;
-	  /*
-	   * still... I've munged the flags possibly
-	   * so update the found struct ConfItem for now 
-	   * -Dianora
-	   */
 	  bconf->flags = aconf->flags;
 	  if(bconf->flags & (CONF_LOCOP|CONF_OPERATOR))
 	    bconf->port = aconf->port;
@@ -3347,7 +3360,7 @@ struct ConfItem *find_gkill(struct Client* cptr, char* username)
  * output       - pointer to struct ConfItem if user@host glined
  * side effects -
  *  WARNING, no sanity checking on length of name,host etc.
- * thats expected to be done by caller.... *sigh* -Dianora
+ * thats expected to be done by caller....
  */
 
 struct ConfItem* find_is_glined(const char* host, const char* name)
@@ -3355,12 +3368,6 @@ struct ConfItem* find_is_glined(const char* host, const char* name)
   struct ConfItem *kill_list_ptr;     /* used for the link list only */
   struct ConfItem *last_list_ptr;
   struct ConfItem *tmp_list_ptr;
-
-  /* gline handling... exactly like temporary klines 
-   * I expect this list to be very tiny. (crosses fingers) so CPU
-   * time in this, should be minimum.
-   * -Dianora
-  */
 
   if(glines)
     {
