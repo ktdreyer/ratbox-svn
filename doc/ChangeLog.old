@@ -1,3 +1,7 @@
+*** 20001229_23 by lusky
+- don't recurse into messages if we don't have gettext
+
+
 *** 20001229_22 by wcampbel
 Document problem with old openssl installed in /usr/local/lib failing
 to link the RSA stuff used in Hybrid
