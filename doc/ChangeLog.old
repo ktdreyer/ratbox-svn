@@ -1,3 +1,9 @@
+*** 19991230_9 by db
+- oopsies in opcount code spotted by Perly.. flag has to be used
+  before set...
+
+
+
 *** 19991230_8 by db
 - more missed updates local_cptr_list -> LocalClientList
 
