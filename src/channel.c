@@ -1370,7 +1370,7 @@ void set_channel_mode(struct Client *cptr,
             strcpy(pbuf2w, who->name);
             pbuf2w += strlen(pbuf2w);
             *pbuf2w++ = ' ';
-			strcpy(pbuf2w_id, who->user->id);
+			strcpy(pbuf2w_id, HasID(who) ? who->user->id : who->name);
 			pbuf2w_id += strlen(pbuf2w_id);
 			*pbuf2w_id++ = ' ';
 		  }
@@ -2340,7 +2340,7 @@ void set_channel_mode(struct Client *cptr,
 			       modebuf, parabuf);
 	  
       sendto_match_cap_servs(chptr, cptr, CAP_UID, ":%s MODE %s %s %s",
-			     IsServer(sptr) ? sptr->name : sptr->user->id,
+			     HasID(sptr) ? sptr->user->id : sptr->name,
 			     chptr->chname,
 			     modebuf, parabuf);
     }
@@ -2374,7 +2374,7 @@ void set_channel_mode(struct Client *cptr,
                               modebuf2, parabuf2);
 
 	sendto_match_cap_servs(chptr, cptr, CAP_UID, ":%s MODE %s %s %s",
-			       IsServer(sptr) ? sptr->name : sptr->user->id,
+			       HasID(sptr) ? sptr->user->id : sptr->name, 
 			       chptr->chname,
 			       modebuf2, parabuf2_id);
     }
@@ -2412,7 +2412,7 @@ void set_channel_mode(struct Client *cptr,
 
       sendto_match_cap_servs(chptr, cptr, CAP_EX | CAP_UID,
 			     ":%s MODE %s %s %s",
-			     IsServer(sptr) ? sptr->name : sptr->user->id,
+			     HasID(sptr) ? sptr->user->id : sptr->name,
 			     chptr->chname,
 			     modebuf_ex, parabuf_ex);
     }
@@ -2457,7 +2457,7 @@ void set_channel_mode(struct Client *cptr,
 	  
       sendto_match_cap_servs(chptr, cptr, CAP_DE | CAP_UID,
 			     ":%s MODE %s %s %s",
-                             IsServer(sptr) ? sptr->name : sptr->user->id,
+                             HasID(sptr) ? sptr->user->id : sptr->name,
 			     chptr->chname,
                              modebuf_de, parabuf_de);
     }
@@ -2491,7 +2491,7 @@ void set_channel_mode(struct Client *cptr,
 				   modebuf_invex, parabuf_invex);
       sendto_match_cap_servs(chptr, cptr, CAP_IE | CAP_UID,
 			     ":%s MODE %s %s %s",
-			     IsServer(sptr) ? sptr->name : sptr->user->id,
+			     HasID(sptr) ? sptr->user->id : sptr->name,
 			     chptr->chname,
 			     modebuf_invex, parabuf_invex);
     }	
@@ -2526,7 +2526,7 @@ void set_channel_mode(struct Client *cptr,
 	  
       sendto_match_cap_servs(chptr, cptr, CAP_HOPS | CAP_UID,
 			     ":%s MODE %s %s %s",
-			     IsServer(sptr) ? sptr->name : sptr->user->id,
+			     HasID(sptr) ? sptr->user->id : sptr->name,
 			     chptr->chname,
 			     modebuf_hops, parabuf_hops_id);
     }	
@@ -2571,7 +2571,7 @@ void set_channel_mode(struct Client *cptr,
 
       sendto_match_cap_servs(chptr, cptr, CAP_AOPS | CAP_UID,
                              ":%s MODE %s %s",
-                             IsServer(sptr) ? sptr->name : sptr->user->id,
+                             HasID(sptr) ? sptr->user->id : sptr->name,
 			     chptr->chname,
                              modebuf_aops);
     }

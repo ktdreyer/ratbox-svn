@@ -272,7 +272,7 @@ struct LocalUser
 #define STAT_CLIENT     0x20   /* 1  */
 
 
-#define HasID(x) ((x)->user->id[0] != '\0')
+#define HasID(x) (!IsServer(x) && (x)->user->id[0] != '\0')
 #define ID_or_name(x,cptr) (IsCapable(cptr,CAP_UID)?(x)->user->id:(x)->name)
 
 #define IsRegisteredUser(x)     ((x)->status == STAT_CLIENT)
