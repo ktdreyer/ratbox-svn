@@ -357,13 +357,21 @@ static void ms_kline(struct Client *cptr,
  */
 static void apply_kline(struct Client *sptr, struct ConfItem *aconf,
                         const char *reason, const char *current_date,
-                        int ip_kline, struct irc_inaddr *ip, unsigned long ip_mask)
+                        int ip_kline, struct irc_inaddr *ip,
+			unsigned long ip_mask)
 {
   if(ip_kline)
     {
       aconf->ip = (unsigned long) PIN_ADDR(ip);
       aconf->ip_mask = ip_mask;
-      add_ip_Kline(aconf);
+      if(add_ip_Kline(aconf) != 0)
+	{
+	  sendto_one(sptr,":%s NOTICE %s :Invalid IP Kline not placed",
+		     me.name,
+		     sptr->name);
+	  free_conf(aconf);
+	  return;
+	}
     }
   else
     add_conf(aconf);
@@ -602,20 +610,12 @@ static void mo_dline(struct Client *cptr, struct Client *sptr,
 
   if((p = strchr(cidr_form_host,'*')))
     {
-      /* Toss if its not the last '*' */
-      if(p[1] == '\0')
-	{
-	  *p++ = '0';
-	  *p++ = '/';
-	  *p++ = '2';
-	  *p++ = '4';
-	  *p++ = '\0';
-	  dlhost = cidr_form_host;
-	}
-      else
-	{
-	  return;
-	}
+      *p++ = '0';
+      *p++ = '/';
+      *p++ = '2';
+      *p++ = '4';
+      *p++ = '\0';
+      dlhost = cidr_form_host;
     }
 
   if(!is_address(dlhost,&ip_host,&ip_mask))
@@ -746,19 +746,27 @@ static void mo_dline(struct Client *cptr, struct Client *sptr,
   aconf->ip = ip_host;
   aconf->ip_mask = ip_mask;
 
-  add_Dline(aconf);
+  if(add_Dline(aconf) == 0)
+    {
+      /*
+       * Write dline to configuration file
+       */
+      WriteKlineOrDline(DLINE_TYPE,
+			sptr,
+			NULL,
+			dlhost,
+			reason,
+			current_date);
 
-  /*
-   * Write dline to configuration file
-   */
-  WriteKlineOrDline(DLINE_TYPE,
-		    sptr,
-		    NULL,
-		    dlhost,
-		    reason,
-		    current_date);
-
-  check_klines();
+      check_klines();
+    }
+  else
+    {
+      sendto_one(sptr, ":%s NOTICE %s :Invalid Dline not placed",
+		 me.name,
+		 parv[0]);
+      free_conf(aconf);
+    }
 #endif
 } /* m_dline() */
 

@@ -1,4 +1,4 @@
-/* dline_conf.h  -- lets muse over dlines, shall we?
+/* dline_conf.h  -- lets do dlines right shall we?
  *
  * $Id$ 
  */
@@ -15,11 +15,11 @@ struct ConfItem;
 
 extern void clear_Dline_table();
 extern void zap_Dlines();
-extern void add_Dline(struct ConfItem *conf_ptr);
-extern void add_ip_Kline(struct ConfItem *conf_ptr);
-extern void add_ip_Iline(struct ConfItem *conf_ptr);
+extern int add_Dline(struct ConfItem *conf_ptr);
+extern int add_ip_Kline(struct ConfItem *conf_ptr);
+extern int add_ip_Iline(struct ConfItem *conf_ptr);
 
-extern void add_Eline(struct ConfItem *conf_ptr);
+extern int add_Eline(struct ConfItem *conf_ptr);
 
 extern struct ConfItem *match_Dline(struct irc_inaddr *ip);
 extern struct ConfItem* match_ip_Kline(struct irc_inaddr *ip, const char* name);

@@ -2096,7 +2096,16 @@ int        is_ipv6_address(char *host,
 			   unsigned char *ip_ptr,
 			   unsigned char *ip_mask_ptr)
 {
-  /* lie */
+  char *p;
+  int mask_value;
+
+  if((p = strchr(host,'/')))
+    {
+      *p = '\0';
+      mask_value = atoi(p+1);
+    }
+
+  /* XXX finish later, lie for now ... */
   return 1;
 }
 
@@ -2577,7 +2586,11 @@ void conf_add_k_conf(struct ConfItem *aconf)
 	  ip &= ip_mask;
 	  aconf->ip = ip;
 	  aconf->ip_mask = ip_mask;
-	  add_ip_Kline(aconf);
+	  if(add_ip_Kline(aconf) < 0)
+	    {
+	      log(L_ERROR,"Invalid IP K line %s ignored",aconf->host);
+	      free_conf(aconf);
+	    }
 	}
       else
 	{
@@ -2609,9 +2622,21 @@ void conf_add_d_conf(struct ConfItem *aconf)
       aconf->ip_mask = ip_mask;
 
       if(aconf->flags & CONF_FLAGS_E_LINED)
-	add_Eline(aconf);
+	{
+	  if(add_Eline(aconf) < 0)
+	    {
+	      log(L_WARN,"Invalid Eline %s ignored",aconf->host);
+	      free_conf(aconf);
+	    }
+	}
       else
-	add_Dline(aconf);
+	{
+	  if(add_Dline(aconf) < 0)
+	    {
+	      log(L_WARN,"Invalid Dline %s ignored",aconf->host);
+	      free_conf(aconf);
+	    }
+	}
     }
 }
 
