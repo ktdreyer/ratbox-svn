@@ -8,6 +8,15 @@
  */
 #include "stdinc.h"
 #include "rserv.h"
+#include "balloc.h"
+
+static BlockHeap *dlinknode_heap;
+
+void
+init_tools(void)
+{
+	dlinknode_heap = BlockHeapCreate(sizeof(dlink_node), HEAP_DLINKNODE);
+}
 
 /* my_calloc()
  *   wrapper for calloc() to detect out of memory
@@ -255,6 +264,20 @@ strlcpy(char *dst, const char *src, size_t siz)
  * which is mine.
  *   -- adrian
  */
+dlink_node *
+make_dlink_node(void)
+{
+	dlink_node *lp = BlockHeapAlloc(dlinknode_heap);
+	lp->next = lp->prev = NULL;
+	return lp;
+}
+
+void
+free_dlink_node(dlink_node *lp)
+{
+	BlockHeapFree(dlinknode_heap, lp);
+}
+
 void
 dlink_add(void *data, dlink_node * m, dlink_list * list)
 {
@@ -384,7 +407,7 @@ dlink_find_destroy(dlink_list * list, void *data)
 	void *ptr = dlink_find_delete(list, data);
 	if(ptr != NULL)
 	{
-		my_free(ptr);
+		free_dlink_node(ptr);
 		return 1;
 	}
 	return 0;
@@ -417,11 +440,4 @@ dlink_move_node(dlink_node * m, dlink_list * oldlist, dlink_list * newlist)
 
 	oldlist->length--;
 	newlist->length++;
-}
-
-dlink_node *
-make_dlink_node(void)
-{
-	dlink_node *lp = my_calloc(1, sizeof(dlink_node));
-	return lp;
 }

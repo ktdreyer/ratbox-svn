@@ -155,8 +155,9 @@ main(int argc, char *argv[])
 		}
 	}
 
-	/* time must be set before logs */
 	set_time();
+
+	/* log requires time is set */
 	init_log();
 
 #ifdef __CYGWIN__
@@ -199,11 +200,18 @@ main(int argc, char *argv[])
 	slog("ratbox-services started");
 
 	init_events();
+
+	/* balloc requires events */
         init_balloc();
+
+	/* tools requires balloc */
+	init_tools();
+
+	/* conf requires log is opened */
         newconf_init();
 
-        /* must be done before loading commands. */
-        init_cache();
+	/* commands require cache */
+	init_cache();
 	init_scommand();
 	init_ucommand();
 	init_client();

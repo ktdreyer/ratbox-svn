@@ -55,12 +55,14 @@
 #define HEAP_CLIENT     128
 #define HEAP_USER       128
 #define HEAP_SERVER     16
+#define HEAP_DLINKNODE	128
 #else
 #define HEAP_CHANNEL    1024
 #define HEAP_CHMEMBER   1024
 #define HEAP_CLIENT     1024
 #define HEAP_USER       1024
 #define HEAP_SERVER     32
+#define HEAP_DLINKNODE	1024
 #endif
 
 #define HEAP_CACHEFILE  16

@@ -6,6 +6,8 @@
 
 #define EmptyString(x) (!(x) || (*(x) == '\0'))
 
+extern void init_tools(void);
+
 #define my_malloc(x) (my_calloc(1, x))
 extern void *my_calloc(int, size_t);
 extern void my_free(void *);
@@ -105,7 +107,7 @@ extern int dlink_find_destroy(dlink_list *, void *data);
 
 #define dlink_add_alloc(data, list) dlink_add(data, make_dlink_node(), list)
 #define dlink_add_tail_alloc(data, list) dlink_add_tail(data, make_dlink_node(), list)
-#define dlink_destroy(node, list) do { dlink_delete(node, list); my_free(node); } while(0)
+#define dlink_destroy(node, list) do { dlink_delete(node, list); free_dlink_node(node); } while(0)
 
 #ifndef HARD_ASSERT
 #ifdef __GNUC__
