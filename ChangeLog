@@ -1,3 +1,33 @@
+leeh        2003/06/20 16:35:00 UTC	(20030620_7)
+
+  Modified files:
+    modules              m_admin.c m_away.c m_help.c m_info.c 
+                         m_list.c m_lusers.c m_motd.c m_names.c 
+                         m_stats.c m_version.c m_who.c m_whois.c 
+                         m_whowas.c 
+    src                  messages.tab 
+  Log:
+  - put global who/names under pace_wait limiting
+  - made RPL_LOAD2HI also include which command is paced.
+  
+  Revision  Changes    Path
+  1.50      +4 -3      ircd-ratbox/modules/m_admin.c
+  1.47      +3 -2      ircd-ratbox/modules/m_away.c
+  1.56      +3 -2      ircd-ratbox/modules/m_help.c
+  1.88      +3 -2      ircd-ratbox/modules/m_info.c
+  1.65      +3 -2      ircd-ratbox/modules/m_list.c
+  1.37      +3 -2      ircd-ratbox/modules/m_lusers.c
+  1.44      +3 -2      ircd-ratbox/modules/m_motd.c
+  1.70      +11 -1     ircd-ratbox/modules/m_names.c
+  1.168     +3 -5      ircd-ratbox/modules/m_stats.c
+  1.55      +3 -2      ircd-ratbox/modules/m_version.c
+  1.93      +33 -1     ircd-ratbox/modules/m_who.c
+  1.120     +3 -4      ircd-ratbox/modules/m_whois.c
+  1.41      +3 -2      ircd-ratbox/modules/m_whowas.c
+  7.90      +1 -1      ircd-ratbox/src/messages.tab
+
+
+
 leeh        2003/06/20 16:13:19 UTC	(20030620_6)
 
   Modified files:
