@@ -23,12 +23,9 @@ Known problems on VMS:
     for VMS.
   - If IRCD.EXE exits immediately after startup, make sure that [.ETC]IRCD.PID
     doesn't exist.
-  - IRCD *must* be run with -foreground. The suggested way to start it is:
 
-    $ IRCD :== DISK$STUFF:[IRCD.BIN]IRCD.EXE
-    $ IRCD -foreground
-
-    Replace DISK$STUFF:[IRCD] with whereever you set IRCD_PREFIX to.
+It should work fine when started with RUN/DETACH, but doesn't yet
+set a process name for itself, so it'll appear empty in show sys.
 
 So far, IRCD is known to work on OpenVMS 7.2/Alpha systems.
 

@@ -149,13 +149,6 @@
  */
 #define WANT_GETTEXT    1
  
-/* CMDLINE_CONFIG - allow conf-file to be specified on command line
- * NOTE: defining CMDLINE_CONFIG and installing ircd SUID or SGID is a MAJOR
- * security problem - they can use the "-f" option to read any files
- * that the 'new' access lets them.
- */
-#define CMDLINE_CONFIG
-
 /* USE_LOGFILE - log errors and such to LPATH
  * If you wish to have the server send 'vital' messages about server
  * to a logfile, define USE_LOGFILE.
