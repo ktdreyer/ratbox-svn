@@ -130,9 +130,10 @@ dlink_list persist_list;        /* Persisting(i.e. no open fd) clients. */
 dlink_list lazylink_channels;   /* known about lazylink channels on HUB */
 dlink_list lazylink_nicks;	/* known about lazylink nicks on HUB */
 
-static size_t      initialVMTop = 0;   /* top of virtual memory at init */
-static const char* logFileName = LPATH;
-static int         noDetach  = 0;
+static size_t       initialVMTop = 0;   /* top of virtual memory at init */
+static const char * logFileName = LPATH;
+static const char * pidFileName = PPATH;
+static int          noDetach  = 0;
 
 char**  myargv;
 int     dorehash   = 0;
@@ -256,6 +257,8 @@ struct lgetopt myopts[] = {
    STRING, "File to use for klines.conf"},
   {"logfile",    &logFileName, 
    STRING, "File to use for ircd.log"},
+  {"pidfile",    &pidFileName,
+   STRING, "File to use for process ID"},
   {"foreground", &noDetach, 
    YESNO, "Run in foreground (don't detach)"},
   {"version",    &printVersion, 
@@ -366,49 +369,49 @@ static void initialize_message_files(void)
 /*
  * write_pidfile
  *
- * inputs       - none
+ * inputs       - filename+path of pid file
  * output       - none
- * side effects - write the pid of the ircd to PPATH
+ * side effects - write the pid of the ircd to filename
  */
-static void write_pidfile(void)
+static void write_pidfile(const char *filename)
 {
   FBFILE* fd;
   char buff[20];
-  if ((fd = fbopen(PPATH, "w")))
+  if ((fd = fbopen(filename, "w")))
     {
       ircsprintf(buff,"%d\n", (int)getpid());
       if ((fbputs(buff, fd) == -1))
-        log(L_ERROR,"Error writing to pid file %s (%s)", PPATH,
+        log(L_ERROR,"Error writing to pid file %s (%s)", filename,
 		    strerror(errno));
       fbclose(fd);
       return;
     }
   else
-    log(L_ERROR, "Error opening pid file %s", PPATH);
+    log(L_ERROR, "Error opening pid file %s", filename);
 }
 
 /*
  * check_pidfile
  *
- * inputs       - none
+ * inputs       - filename+path of pid file
  * output       - none
  * side effects - reads pid from pidfile and checks if ircd is in process
  *                list. if it is, gracefully exits
  * -kre
  */
-static void check_pidfile(void)
+static void check_pidfile(const char *filename)
 {
   FBFILE* fd;
   char buff[20];
   pid_t pidfromfile;
 
   /* Don't do logging here, since we don't have log() initialised */
-  if ((fd = fbopen(PPATH, "r")))
+  if ((fd = fbopen(filename, "r")))
   {
     if (fbgets(buff, 20, fd) == NULL)
     {
       /*
-      log(L_ERROR, "Error reading from pid file %s (%s)", PPATH,
+      log(L_ERROR, "Error reading from pid file %s (%s)", filename,
           strerror(errno));
        */
     }
@@ -426,7 +429,7 @@ static void check_pidfile(void)
   }
   else
   {
-    /* log(L_ERROR, "Error opening pid file %s", PPATH); */
+    /* log(L_ERROR, "Error opening pid file %s", filename); */
   }
 }
 
@@ -509,7 +512,7 @@ int main(int argc, char *argv[])
   fdlist_init();
 
   /* Check if there is pidfile and daemon already running */
-  check_pidfile();
+  check_pidfile(pidFileName);
 
   /* Init the event subsystem */
   eventInit();
@@ -604,7 +607,7 @@ int main(int argc, char *argv[])
   add_to_client_hash_table(me.name, &me);
 
   check_class();
-  write_pidfile();
+  write_pidfile(pidFileName);
 
   log(L_NOTICE, "Server Ready");
 
