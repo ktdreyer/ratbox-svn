@@ -1,3 +1,21 @@
+androsyn    2003/09/10 11:17:28 EDT	(20030910_2)
+
+  Modified files:
+    src                  epoll.c kqueue.c poll.c qio.c select.c 
+                         sigio.c 
+  Log:
+  Update the headers on these files
+  
+  Revision  Changes    Path
+  1.15      +1 -1      ircd-ratbox/src/epoll.c
+  1.41      +1 -1      ircd-ratbox/src/kqueue.c
+  7.71      +1 -1      ircd-ratbox/src/poll.c
+  7.3       +1 -1      ircd-ratbox/src/qio.c
+  7.38      +1 -1      ircd-ratbox/src/select.c
+  7.41      +1 -1      ircd-ratbox/src/sigio.c
+
+
+
 androsyn    2003/09/10 11:14:50 EDT	(20030910_1)
 
   Modified files:
