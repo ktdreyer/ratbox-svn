@@ -1,3 +1,12 @@
+*** 20010302_4 by fl_
+- added some TS rules to permanent channels..
+  if a remote server sends users to a perm channel, we drop our modes,
+  and use theirs, else we are really going to break things..
+
+  if they are bursting a perm channel, and we have one, use whoevers
+  TS is older..
+
+
 *** 20010302_3 by fl_
 - dont pass received sjoins on for persistant chans, to those not using
   CAP_VCHAN.. do we need another cap?
