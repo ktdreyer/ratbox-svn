@@ -171,14 +171,14 @@ static EVH user_log_resync;
 #endif
 
 /*
- * log_user_connect
+ * log_user_exit
  *
  * inputs	- pointer to connecting client
  * output	- NONE
- * side effects - Current connecting client is logged to
+ * side effects - Current exiting client is logged to
  *		  either SYSLOG or to file.
  */
-void log_user_connect(struct Client *sptr)
+void log_user_exit(struct Client *sptr)
 {
   time_t        on_for;
 

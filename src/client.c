@@ -1512,8 +1512,7 @@ const char* comment         /* Reason for the exit */
                                sptr->sockhost);
         }
 
-      /* Log user connect */
-      log_user_connect(sptr);
+      log_user_exit(sptr);
 
       if (sptr->fd >= 0)
 	{

@@ -60,6 +60,7 @@ time_t LastUsedWallops = 0;
 static int valid_hostname(const char* hostname);
 static int valid_username(const char* username);
 static void report_and_set_user_flags( struct Client *, struct ConfItem * );
+static int check_X_line(struct Client *cptr, struct Client *sptr);
 static void user_welcome(struct Client *sptr);
 
 /* table of ascii char letters to corresponding bitmask */
@@ -377,38 +378,8 @@ int register_user(struct Client *cptr, struct Client *sptr,
         }
       /* end of valid user name check */
 
-      if(!IsAnyOper(sptr))
-        {
-          char *reason;
-
-          if ( (aconf = find_special_conf(sptr->info,CONF_XLINE)))
-            {
-              if(aconf->passwd)
-                reason = aconf->passwd;
-              else
-                reason = "NONE";
-              
-              if(aconf->port)
-                {
-                  if (aconf->port == 1)
-                    {
-                      sendto_realops_flags(FLAGS_REJ,
-                                           "X-line Rejecting [%s] [%s], user %s",
-                                           sptr->info,
-                                           reason,
-                                           get_client_name(cptr, FALSE));
-                    }
-                  ServerStats->is_ref++;      
-                  return exit_client(cptr, sptr, &me, "Bad user info");
-                }
-              else
-                sendto_realops_flags(FLAGS_REJ,
-                                   "X-line Warning [%s] [%s], user %s",
-                                   sptr->info,
-                                   reason,
-                                   get_client_name(cptr, FALSE));
-            }
-        }
+      if( (status = check_X_line(cptr,sptr)) < 0 )
+	return status;
 
       sendto_realops_flags(FLAGS_CCONN,
                          "Client connecting: %s (%s@%s) [%s] {%s}",
@@ -1044,4 +1015,50 @@ static void user_welcome(struct Client *sptr)
       sendto_one(sptr,"NOTICE %s :*** Notice -- You can not chanop others",
 		 sptr->name);
     }
+}
+
+/*
+ * check_X_line
+ * inputs	- pointer to client to test
+ * outupt	- -1 if exiting 0 if ok
+ * side effects	-
+ */
+static int check_X_line(struct Client *cptr, struct Client *sptr)
+{
+  struct ConfItem *aconf;
+  char *reason;
+
+  if(IsAnyOper(sptr))
+    return 0;
+
+  if ((aconf = find_special_conf(sptr->info,CONF_XLINE)))
+    {
+      if(aconf->passwd)
+	reason = aconf->passwd;
+      else
+	reason = "NONE";
+              
+      if(aconf->port)
+	{
+	  if (aconf->port == 1)
+	    {
+	      sendto_realops_flags(FLAGS_REJ,
+				   "X-line Rejecting [%s] [%s], user %s",
+				   sptr->info,
+				   reason,
+				   get_client_name(cptr, FALSE));
+	    }
+	  ServerStats->is_ref++;      
+	  (void)exit_client(cptr, sptr, &me, "Bad user info");
+	  return -1;
+	}
+      else
+	sendto_realops_flags(FLAGS_REJ,
+			     "X-line Warning [%s] [%s], user %s",
+			     sptr->info,
+			     reason,
+			     get_client_name(cptr, FALSE));
+    }
+
+  return 0;
 }
