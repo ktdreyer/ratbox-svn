@@ -2584,9 +2584,21 @@ void WriteKlineOrDline( KlineType type,
     }
 
   if(type==KLINE_TYPE)
-    ircsprintf(buffer, "#%s!%s@%s K'd: %s@%s:%s\n",
-	       sptr->name, sptr->username, sptr->host,
-	       user, host, reason);
+    {
+      if (MyClient(sptr))
+	{
+	  ircsprintf(buffer, "#%s!%s@%s K'd: %s@%s:%s\n",
+		     sptr->name, sptr->username, sptr->host,
+		     user, host, reason);
+	}
+      else
+	{
+	  ircsprintf(buffer, "#%s!%s@%s on %s K'd: %s@%s:%s\n",
+		     sptr->name, sptr->username, sptr->host,
+		     sptr->servptr?sptr->servptr->name:"<Unknown>",
+		     user, host, reason);
+	}
+    }
   else
     ircsprintf(buffer, "#%s!%s@%s D'd: %s:%s\n",
 	       sptr->name, sptr->username, sptr->host,

@@ -101,6 +101,8 @@ char buffer[IRCD_BUFSIZE];
 char user[USERLEN+2];
 char host[HOSTLEN+2];
 
+#define MAX_EXT_REASON 100
+
 /*
  * mo_kline
  *
@@ -269,14 +271,25 @@ int ms_kline(struct Client *cptr,
     }
   else
     {
-      sendto_realops("*** Received kline from %s", sptr->name);
+      /* These should never happen but... */
+      if( rcptr->name == NULL )
+	return 0;
+      if( rcptr->user == NULL )
+	return 0;
+      if( rcptr->host == NULL )
+	return 0;
+
+      sendto_realops("*** Received kline from %s!%s@%s on %s",
+		     rcptr->name,
+		     rcptr->user,
+		     rcptr->host,
+		     sptr->name);
       aconf = make_conf();
 
       aconf->status = CONF_KILL;
       DupString(aconf->user, parv[2]);
       DupString(aconf->host, parv[3]);
       DupString(aconf->passwd, parv[4]);
-
       current_date = smalldate((time_t) 0);
       apply_kline(rcptr, aconf, current_date, 0, 0, 0);
     }
