@@ -1,3 +1,7 @@
+*** 20010210_7 by wcampbel
+Document the permissions bug on /etc/resolv.conf
+
+
 *** 20010210_6 by fl_
 - sendto_realops_flags_oper became sendto_wallops_flags() :)
 
