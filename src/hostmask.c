@@ -366,7 +366,8 @@ void clear_conf(void)
  * output       - pointer to static string with prefixes listed in ascii form
  * side effects - NONE
  */
-char *show_iline_prefix(struct Client *sptr,struct ConfItem *aconf,char *name)
+char *
+show_iline_prefix(struct Client *sptr,struct ConfItem *aconf,char *name)
 {
   static char prefix_of_host[MAXPREFIX];
   char *prefix_ptr;
@@ -386,22 +387,22 @@ char *show_iline_prefix(struct Client *sptr,struct ConfItem *aconf,char *name)
   if (IsConfDoSpoofIp(aconf))
     *prefix_ptr++ = '=';
 
-  if(IsOper(sptr))
+  if (IsOper(sptr))
     if (IsConfElined(aconf))
       *prefix_ptr++ = '^';
 
-  if(IsOper(sptr))
+  if (IsOper(sptr))
     if (IsConfFlined(aconf))
       *prefix_ptr++ = '>';
 
-  if(IsOper(sptr)) 
+  if (IsOper(sptr)) 
     if (IsConfIdlelined(aconf))
       *prefix_ptr++ = '<';
 
   *prefix_ptr = '\0';
 
-  strncat(prefix_of_host,name,MAXPREFIX);
-  return(prefix_of_host);
+  strncat(prefix_of_host, name, MAXPREFIX + prefix_ptr - prefix_of_host);
+  return prefix_of_host;
 }
 
 /* void report_hostmask_conf_links(struct Client *sptr, int flags)
