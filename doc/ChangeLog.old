@@ -1,3 +1,9 @@
+*** 20010419_8 by a1kmm
+- Fixed the warning about setting the clock back.
+- Attempt to recover from a set back clock by moving the scheduled events
+  back in time by the amount the clock was set back.
+
+
 *** 20010419_7 by fl_
 - its amazing the difference < and > make.. (ta habeeb)
 
