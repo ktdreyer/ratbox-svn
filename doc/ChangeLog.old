@@ -1,3 +1,8 @@
+*** 20001029_4 by db
+- viconf.c modified to match hybrid-6 patch, added vimotd check
+
+
+
 *** 20001029_3 by lusky
 fix for mIRC NAT+spoofedI DCC send problem (userhost now returns sockhost
 for acptr==sptr).
