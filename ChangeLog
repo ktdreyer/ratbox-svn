@@ -1,3 +1,15 @@
+androsyn    2002/10/30 21:43:17 UTC	(20021030_11)
+
+  Modified files:
+    src                  s_user.c 
+  Log:
+  Fix the USER/PING Cookie bug properly :)
+  
+  Revision  Changes    Path
+  7.232     +11 -6     ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2002/10/30 21:22:28 UTC	(20021030_10)
 
   Modified files:
