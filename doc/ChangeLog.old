@@ -1,3 +1,16 @@
+*** 20010104_17 by db
+- split register_user() into register_local_user() and register_remote_user()
+  also split do_user() into do_local_user() and do_remote_user()
+
+- modified modules that used these functions
+
+- resolved a silly conflict
+
+- someone care to review this change?
+     
+
+
+
 *** 20010104_16 by a1kmm
 - Fixed CRYPT_LINK_PASSWORD to work again in check_server
 
