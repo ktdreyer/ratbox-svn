@@ -1,3 +1,13 @@
+*** 20001113_1 by db
+- cleaned up m_whois.c a bit more
+- moved find_user_link from list.c into channel.c thats the only place it
+  was being used anyway.
+- removed no longer used #ifdef from config.h
+- redid the semantics for channel_chanop_or_voice to work on channel mode
+  flags rather than Link
+
+
+
 *** 20001111_6 by db
 - more cleanup on m_kline.c
   with iauth, kline file locking etc. will be handled by iauthd anyway..
