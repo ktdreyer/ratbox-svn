@@ -1,3 +1,7 @@
+*** 20010322_2 by androsyn
+Forgot an argument to inetntop()
+
+
 *** 20010322_1 by androsyn
 This should fix /trace for the IPv6 case..
 
