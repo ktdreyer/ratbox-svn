@@ -1,3 +1,9 @@
+*** 20010610_4 by db
+- I should not commit code when tired. 
+  anyway, this fixes a NULL pointer.
+
+
+
 *** 20010610_3 by db
 - don't check that assert unless uplink is NON NULL dork 
 
