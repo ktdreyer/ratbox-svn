@@ -338,7 +338,7 @@ struct server_conf *
 make_server_conf(void)
 {
 	struct server_conf *server_p = MyMalloc(sizeof(struct server_conf));
-	server_p->aftype = AF_INET;
+	server_p->ipnum.ss_family = server_p->aftype = AF_INET;
 	return server_p;
 }
 
