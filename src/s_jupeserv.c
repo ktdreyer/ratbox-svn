@@ -53,8 +53,7 @@ static struct service_command jupeserv_command[] =
 	{ "UNJUPE",	&s_jupeserv_unjupe,	1, NULL, 1, 0L, 0, 0, CONF_OPER_JUPESERV, 0 },
 	{ "CALLJUPE",	&s_jupeserv_calljupe,	1, NULL, 1, 0L, 0, 1, 0, UMODE_JUPES },
 	{ "CALLUNJUPE",	&s_jupeserv_callunjupe,	1, NULL, 1, 0L, 0, 1, 0, UMODE_JUPES },
-	{ "PENDING",	&s_jupeserv_pending,	0, NULL, 1, 0L, 0, 1, 0, UMODE_JUPES },
-	{ "\0",		NULL,			0, NULL, 0, 0L, 0, 1, 0, 0 }
+	{ "PENDING",	&s_jupeserv_pending,	0, NULL, 1, 0L, 0, 1, 0, UMODE_JUPES }
 };
 
 static struct ucommand_handler jupeserv_ucommand[] =
@@ -67,7 +66,7 @@ static struct ucommand_handler jupeserv_ucommand[] =
 static struct service_handler jupe_service = {
 	"JUPESERV", "jupeserv", "jupeserv", "services.int",
 	"Jupe Services", 60, 80,
-	jupeserv_command, jupeserv_ucommand, NULL
+	jupeserv_command, sizeof(jupeserv_command), jupeserv_ucommand, NULL
 };
 
 static int jupe_db_callback(void *db, int argc, char **argv, char **colnames);

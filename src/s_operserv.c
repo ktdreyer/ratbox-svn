@@ -37,8 +37,7 @@ static struct service_command operserv_command[] =
 	{ "OSJOIN",	&s_oper_osjoin,		1, NULL, 1, 0L, 0, 0, CONF_OPER_OPERSERV, 0 },
 	{ "OSPART",	&s_oper_ospart,		1, NULL, 1, 0L, 0, 0, CONF_OPER_OPERSERV, 0 },
 	{ "TAKEOVER",	&s_oper_takeover,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OPERSERV, 0 },
-	{ "OMODE",	&s_oper_omode,		2, NULL, 1, 0L, 0, 0, CONF_OPER_OPERSERV, 0 },
-	{ "\0", NULL, 0, NULL, 0, 0L, 0, 0, 0, 0 }
+	{ "OMODE",	&s_oper_omode,		2, NULL, 1, 0L, 0, 0, CONF_OPER_OPERSERV, 0 }
 };
 
 static struct ucommand_handler operserv_ucommand[] =
@@ -52,7 +51,7 @@ static struct ucommand_handler operserv_ucommand[] =
 
 static struct service_handler operserv_service = {
 	"OPERSERV", "OPERSERV", "operserv", "services.int", "Oper Services",
-	60, 80, operserv_command, operserv_ucommand, NULL
+	60, 80, operserv_command, sizeof(operserv_command), operserv_ucommand, NULL
 };
 
 static int operserv_db_callback(void *db, int, char **, char **);

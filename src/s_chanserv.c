@@ -103,8 +103,7 @@ static struct service_command chanserv_command[] =
 	{ "MODBAN",	&s_chan_modban,		3, NULL, 1, 0L, 1, 0, 0, 0 },
 	{ "LISTBANS",	&s_chan_listbans,	1, NULL, 1, 0L, 1, 0, 0, 0 },
 	{ "UNBAN",	&s_chan_unban,		1, NULL, 1, 0L, 1, 0, 0, 0 },
-	{ "INFO",	&s_chan_info,		1, NULL, 1, 0L, 0, 0, 0, 0 },
-	{ "\0",		NULL,			0, NULL, 0, 0L, 0, 0, 0, 0 }
+	{ "INFO",	&s_chan_info,		1, NULL, 1, 0L, 0, 0, 0, 0 }
 };
 
 static struct ucommand_handler chanserv_ucommand[] =
@@ -118,7 +117,7 @@ static struct ucommand_handler chanserv_ucommand[] =
 
 static struct service_handler chanserv_service = {
 	"CHANSERV", "CHANSERV", "chanserv", "services.int", "Channel Service",
-	30, 50, chanserv_command, chanserv_ucommand, NULL
+	30, 50, chanserv_command, sizeof(chanserv_command), chanserv_ucommand, NULL
 };
 
 static void load_channel_db(void);

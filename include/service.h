@@ -7,6 +7,10 @@ struct connection_entry;
 struct ucommand_handler;
 struct cachefile;
 
+#define SCMD_WALK(i, svc) do { int m = svc->service->command_size / sizeof(struct service_command); \
+				for(i = 0; i < m; i++)
+#define SCMD_END		} while(0)
+
 struct service_command
 {
         const char *cmd;
@@ -33,6 +37,7 @@ struct service_handler
         int flood_max_ignore;
 
 	struct service_command *command;
+	unsigned long command_size;
         struct ucommand_handler *ucommand;
 
         void (*stats)(struct connection_entry *, char *parv[], int parc);

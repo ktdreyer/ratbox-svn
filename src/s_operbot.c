@@ -35,8 +35,7 @@ static struct service_command operbot_command[] =
 	{ "OBJOIN",	&s_operbot_objoin,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OPERBOT, 0 },
 	{ "OBPART",	&s_operbot_obpart,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OPERBOT, 0 },
 	{ "INVITE",	&s_operbot_invite,	1, NULL, 1, 0L, 0, 1, 0, 0 },
-	{ "OP",		&s_operbot_op,		0, NULL, 1, 0L, 0, 1, 0, 0 },
-	{ "\0",		NULL,			0, NULL, 0, 0L, 0, 0, 0, 0 }
+	{ "OP",		&s_operbot_op,		0, NULL, 1, 0L, 0, 1, 0, 0 }
 };
 
 static struct ucommand_handler operbot_ucommand[] =
@@ -49,7 +48,7 @@ static struct ucommand_handler operbot_ucommand[] =
 static struct service_handler operbot_service = {
 	"OPERBOT", "operbot", "operbot", "services.int",
 	"Oper invitation/op services", 60, 80, 
-	operbot_command, operbot_ucommand, NULL
+	operbot_command, sizeof(operbot_command), operbot_ucommand, NULL
 };
 
 static int operbot_db_callback(void *db, int, char **, char **);

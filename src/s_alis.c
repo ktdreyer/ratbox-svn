@@ -29,13 +29,12 @@ static int s_alis_list(struct client *, char *parv[], int parc);
 
 static struct service_command alis_command[] =
 {
-	{ "LIST",	&s_alis_list,	1, NULL, 1, 0L, 0, 0, 0, UMODE_ALIS },
-        { "\0",		NULL,		0, NULL, 0, 0L, 0, 0, 0, 0 }
+	{ "LIST",	&s_alis_list,	1, NULL, 1, 0L, 0, 0, 0, UMODE_ALIS }
 };
 
 static struct service_handler alis_service = {
 	"ALIS", "ALIS", "alis", "services.int", "Advanced List Service",
-        60, 80, alis_command, NULL, NULL
+        60, 80, alis_command, sizeof(alis_command), NULL, NULL
 };
 
 void

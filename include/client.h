@@ -83,6 +83,7 @@ struct service
 	int loglevel;
 
 	struct service_command *command;
+	unsigned long command_size;
         struct ucommand_handler *ucommand;
 
         unsigned long help_count;

@@ -54,8 +54,7 @@ static struct service_command userserv_command[] =
 	{ "LOGIN",	&s_user_login,		2, NULL, 1, 0L, 0, 0, 0, 0 },
 	{ "LOGOUT",	&s_user_logout,		0, NULL, 1, 0L, 1, 0, 0, 0 },
 	{ "SET",	&s_user_set,		1, NULL, 1, 0L, 1, 0, 0, 0 },
-	{ "INFO",	&s_user_info,		1, NULL, 1, 0L, 1, 0, 0, 0 },
-	{ "\0",		NULL,			0, NULL, 0, 0L, 0, 0, 0, 0 }
+	{ "INFO",	&s_user_info,		1, NULL, 1, 0L, 1, 0, 0, 0 }
 };
 
 static struct ucommand_handler userserv_ucommand[] =
@@ -69,7 +68,7 @@ static struct ucommand_handler userserv_ucommand[] =
 
 static struct service_handler userserv_service = {
 	"USERSERV", "USERSERV", "userserv", "services.int", "User Auth Services",
-	30, 50, userserv_command, userserv_ucommand, NULL
+	30, 50, userserv_command, sizeof(userserv_command), userserv_ucommand, NULL
 };
 
 static int user_db_callback(void *db, int argc, char **argv, char **colnames);

@@ -26,10 +26,24 @@
 
 dlink_list service_list;
 
+typedef int (*bqcmp)(const void *, const void *);
+static int
+scmd_sort(struct service_command *one, struct service_command *two)
+{
+	return strcasecmp(one->cmd, two->cmd);
+}
+
+static int
+scmd_compare(const char *name, struct service_command *cmd)
+{
+	return strcasecmp(name, cmd->cmd);
+}
+
 struct client *
 add_service(struct service_handler *service)
 {
 	struct client *client_p;
+	int maxlen = service->command_size / sizeof(struct service_command);
 
 	if(strchr(service->name, '.') != NULL)
 	{
@@ -59,6 +73,11 @@ add_service(struct service_handler *service)
 		}
 	}
 
+	/* now we need to sort the command array */
+	if(service->command)
+		qsort(service->command, maxlen,
+			sizeof(struct service_command), (bqcmp) scmd_sort);
+
 	client_p = my_malloc(sizeof(struct client));
 	client_p->service = my_malloc(sizeof(struct service));
 
@@ -70,6 +89,7 @@ add_service(struct service_handler *service)
 	strlcpy(client_p->info, service->info, sizeof(client_p->info));
 	strlcpy(client_p->service->id, service->id, sizeof(client_p->service->id));
 	client_p->service->command = service->command;
+	client_p->service->command_size = service->command_size;
         client_p->service->ucommand = service->ucommand;
         client_p->service->stats = service->stats;
 
@@ -97,7 +117,7 @@ add_service(struct service_handler *service)
 
 		client_p->service->helpadmin = cache_file(filename, "index-admin");
 
-                for(i = 0; scommand[i].cmd[0] != '\0'; i++)
+                for(i = 0; i < maxlen; i++)
                 {
                         snprintf(filename, sizeof(filename), "%s%s/",
                                  HELP_PATH, lcase(service->id));
@@ -229,23 +249,136 @@ update_service_floodcount(void *unused)
 	}
 }
 
+static void
+handle_service_help_index(struct client *service_p, struct client *client_p)
+{
+	struct cachefile *fileptr;
+	struct cacheline *lineptr;
+	dlink_node *ptr;
+	int i;
+
+	/* if this service has short help enabled, or there is no index 
+	 * file and theyre either unopered (so cant see admin file), 
+	 * or theres no admin file.
+	 */
+	if(ServiceShortHelp(service_p) ||
+	   (!service_p->service->help &&
+	    (!client_p->user->oper || !service_p->service->helpadmin)))
+	{
+		char buf[BUFSIZE];
+		struct service_command *cmd_table;
+
+		buf[0] = '\0';
+		cmd_table = service_p->service->command;
+
+		SCMD_WALK(i, service_p)
+		{
+			if((cmd_table[i].operonly && !is_oper(client_p)) ||
+			   (cmd_table[i].operflags && 
+			    (!client_p->user->oper || 
+			     (client_p->user->oper->flags & cmd_table[i].operflags) == 0)))
+				continue;
+
+			strlcat(buf, cmd_table[i].cmd, sizeof(buf));
+			strlcat(buf, " ", sizeof(buf));
+		}
+		SCMD_END;
+
+		if(buf[0] != '\0')
+		{
+			service_error(service_p, client_p,
+				"%s Help Index. Use HELP <command> for more information",
+				service_p->name);
+			service_error(service_p, client_p, "Topics: %s", buf);
+		}
+		else
+			service_error(service_p, client_p, "No help is available for this service.");
+
+		service_p->service->help_count++;
+		return;
+	}
+
+	service_p->service->flood++;
+	fileptr = service_p->service->help;
+
+	if(fileptr)
+	{
+		/* dump them the index file */
+		service_error(service_p, client_p, "Available commands:");
+
+		DLINK_FOREACH(ptr, fileptr->contents.head)
+		{
+			lineptr = ptr->data;
+			service_error(service_p, client_p, "%s",
+					lineptr->data);
+		}
+	}
+
+	fileptr = service_p->service->helpadmin;
+
+	if(client_p->user->oper && fileptr)
+	{
+		service_error(service_p, client_p, "Administrator commands:");
+
+		DLINK_FOREACH(ptr, fileptr->contents.head)
+		{
+			lineptr = ptr->data;
+			service_error(service_p, client_p, "%s",
+					lineptr->data);
+		}
+	}
+}
+
+static void
+handle_service_help(struct client *service_p, struct client *client_p, const char *arg)
+{
+	struct service_command *cmd_entry;
+
+	if((cmd_entry = bsearch(arg, service_p->service->command,
+				service_p->service->command_size / sizeof(struct service_command),
+				sizeof(struct service_command), (bqcmp) scmd_compare)))
+	{
+		struct cachefile *fileptr;
+		struct cacheline *lineptr;
+		dlink_node *ptr;
+
+		if(cmd_entry->helpfile == NULL ||
+		   (cmd_entry->operonly && !is_oper(client_p)))
+		{
+			service_error(service_p, client_p,
+					"No help available on %s", arg);
+			return;
+		}
+
+		fileptr = cmd_entry->helpfile;
+
+		DLINK_FOREACH(ptr, fileptr->contents.head)
+		{
+			lineptr = ptr->data;
+			service_error(service_p, client_p, "%s", lineptr->data);
+		}
+
+		service_p->service->flood += cmd_entry->help_penalty;
+		service_p->service->ehelp_count++;
+	}
+	else
+		service_error(service_p, client_p, "Unknown topic '%s'", arg);
+}
+
 void
 handle_service(struct client *service_p, struct client *client_p, char *text)
 {
-        struct service_command *cmd_table;
+	struct service_command *cmd_entry;
         char *parv[MAXPARA+1];
         char *p;
         int parc;
         int retval;
-        int i;
 
         if(!IsUser(client_p))
                 return;
 
-        cmd_table = service_p->service->command;
-
         /* this service doesnt handle commands via privmsg */
-        if(cmd_table == NULL)
+        if(service_p->service->command == NULL)
                 return;
 
         if(service_p->service->flood > service_p->service->flood_max_ignore)
@@ -276,118 +409,11 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
                 service_p->service->flood++;
 
                 if(parc < 1 || EmptyString(parv[0]))
-                {
-			struct cachefile *fileptr;
-			struct cacheline *lineptr;
-			dlink_node *ptr;
+			handle_service_help_index(service_p, client_p);
+		else
+			handle_service_help(service_p, client_p, parv[0]);
 
-			/* if this service has short help enabled, or there
-			 * is no index file and theyre either unopered (so
-			 * cant see admin file), or theres no admin file.
-			 */
-			if(ServiceShortHelp(service_p) ||
-			   (!service_p->service->help &&
-			    (!client_p->user->oper || !service_p->service->helpadmin)))
-			{	
-	                        char buf[BUFSIZE];
-
-	                        buf[0] = '\0';
-
-        	                for(i = 0; cmd_table[i].cmd[0] != '\0'; i++)
-                	        {
-
-	                        	if((cmd_table[i].operonly && !is_oper(client_p)) ||
-					   (cmd_table[i].operflags && 
-					    (!client_p->user->oper || 
-					     (client_p->user->oper->flags & cmd_table[i].operflags) == 0)))
-                                	        continue;
-
-	                                strlcat(buf, cmd_table[i].cmd, sizeof(buf));
-        	                        strlcat(buf, " ", sizeof(buf));
-                	        }
-
-				if(buf[0] != '\0')
-				{
-					service_error(service_p, client_p, "%s Help Index. "
-							"Use HELP <command> for more information",
-							service_p->name);
-					service_error(service_p, client_p, "Topics: %s", buf);
-				}
-				else
-					service_error(service_p, client_p, "No help is available for this service.");
-
-	                        service_p->service->help_count++;
-        	                return;
-			}
-
-	                service_p->service->flood++;
-
-			fileptr = service_p->service->help;
-
-			if(fileptr)
-			{
-				/* dump them the index file */
-				service_error(service_p, client_p, "Available commands:");
-
-				DLINK_FOREACH(ptr, fileptr->contents.head)
-				{
-					lineptr = ptr->data;
-					service_error(service_p, client_p, "%s",
-							lineptr->data);
-				}
-			}
-
-			fileptr = service_p->service->helpadmin;
-
-			if(client_p->user->oper && fileptr)
-			{
-				service_error(service_p, client_p, "Administrator commands:");
-
-				DLINK_FOREACH(ptr, fileptr->contents.head)
-				{
-					lineptr = ptr->data;
-					service_error(service_p, client_p, "%s",
-							lineptr->data);
-				}
-			}
-
-			return;
-                }
-
-                for(i = 0; cmd_table[i].cmd[0] != '\0'; i++)
-                {
-                        if(!strcasecmp(parv[0], cmd_table[i].cmd))
-                        {
-                                struct cachefile *fileptr;
-                                struct cacheline *lineptr;
-                                dlink_node *ptr;
-
-                                if(cmd_table[i].helpfile == NULL ||
-                                   (cmd_table[i].operonly && !is_oper(client_p)))
-                                {
-                                        service_error(service_p, client_p,
-						"No help available on %s", p);
-                                        return;
-                                }
-
-                                fileptr = cmd_table[i].helpfile;
-
-                                DLINK_FOREACH(ptr, fileptr->contents.head)
-                                {
-                                        lineptr = ptr->data;
-					service_error(service_p, client_p, "%s",
-							lineptr->data);
-                                }
-
-                                service_p->service->flood += cmd_table[i].help_penalty;
-                                service_p->service->ehelp_count++;
-
-                                return;
-                        }
-                }
-
-		service_error(service_p, client_p, "Unknown topic '%s'", p);
-                return;
+		return;
         }
 	else if(!strcasecmp(text, "OPERLOGIN") || !strcasecmp(text, "OLOGIN"))
 	{
@@ -466,63 +492,61 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 	if(ServiceStealth(service_p) && !client_p->user->oper)
 		return;
 
-        for(i = 0; cmd_table[i].cmd[0] != '\0'; i++)
-        {
-                if(!strcasecmp(text, cmd_table[i].cmd))
-                {
-                        if((cmd_table[i].operonly && !is_oper(client_p)) ||
-			   (cmd_table[i].operflags && 
-			    (!client_p->user->oper || 
-			     (client_p->user->oper->flags & cmd_table[i].operflags) == 0)))
-                        {
-				service_error(service_p, client_p, "No access to %s::%s",
-						service_p->name, cmd_table[i].cmd);
-                                service_p->service->flood++;
-                                return;
-                        }
+	if((cmd_entry = bsearch(text, service_p->service->command, 
+				service_p->service->command_size / sizeof(struct service_command),
+				sizeof(struct service_command), (bqcmp) scmd_compare)))
+	{
+		if((cmd_entry->operonly && !is_oper(client_p)) ||
+		   (cmd_entry->operflags && 
+		    (!client_p->user->oper || 
+		     (client_p->user->oper->flags & cmd_entry->operflags) == 0)))
+		{
+			service_error(service_p, client_p, "No access to %s::%s",
+					service_p->name, cmd_entry->cmd);
+			service_p->service->flood++;
+			return;
+		}
 
 #ifdef ENABLE_USERSERV
-			if(cmd_table[i].userreg)
+		if(cmd_entry->userreg)
+		{
+			if(client_p->user->user_reg == NULL)
 			{
-				if(client_p->user->user_reg == NULL)
-				{
-					service_error(service_p, client_p, 
+				service_error(service_p, client_p, 
 						"You must be logged in for %s::%s",
-						service_p->name, cmd_table[i].cmd);
-					return;
-				}
-				else
-					client_p->user->user_reg->last_time = CURRENT_TIME;
-			}
-#endif
-
-			if(parc < cmd_table[i].minparc)
-			{
-				service_error(service_p, client_p, "Insufficient parameters to %s::%s",
-						service_p->name, cmd_table[i].cmd);
-				service_p->service->flood++;
+						service_p->name, cmd_entry->cmd);
 				return;
 			}
+			else
+				client_p->user->user_reg->last_time = CURRENT_TIME;
+		}
+#endif
 
-			if(cmd_table[i].operflags)
-				sendto_all(UMODE_SPY, "#%s:%s# %s %s",
+		if(parc < cmd_entry->minparc)
+		{
+			service_error(service_p, client_p, "Insufficient parameters to %s::%s",
+					service_p->name, cmd_entry->cmd);
+			service_p->service->flood++;
+			return;
+		}
+
+		if(cmd_entry->operflags)
+			sendto_all(UMODE_SPY, "#%s:%s# %s %s",
 					client_p->user->oper->name, client_p->name,
-					cmd_table[i].cmd, rebuild_params((const char **) parv, parc, 0));
-			else if(cmd_table[i].spyflags)
-				sendto_all(cmd_table[i].spyflags, "#%s:%s!%s@%s# %s %s",
+					cmd_entry->cmd, rebuild_params((const char **) parv, parc, 0));
+		else if(cmd_entry->spyflags)
+			sendto_all(cmd_entry->spyflags, "#%s:%s!%s@%s# %s %s",
 					client_p->user->user_reg ? 
-					 client_p->user->user_reg->name : "",
+					client_p->user->user_reg->name : "",
 					client_p->name, client_p->user->username,
-					client_p->user->host, cmd_table[i].cmd,
+					client_p->user->host, cmd_entry->cmd,
 					rebuild_params((const char **) parv, parc, 0));
 
-                        retval = (cmd_table[i].func)(client_p, parv, parc);
+		retval = (cmd_entry->func)(client_p, parv, parc);
 
-                        service_p->service->flood += retval;
-                        cmd_table[i].cmd_use++;
-
-                        return;
-                }
+		service_p->service->flood += retval;
+		cmd_entry->cmd_use++;
+		return;
         }
 
         service_error(service_p, client_p, "Unknown command.");
@@ -583,7 +607,7 @@ service_stats(struct client *service_p, struct connection_entry *conn_p)
 
         sprintf(buf, " Command usage: ");
 
-        for(i = 0; cmd_table[i].cmd[0] != '\0'; i++)
+	SCMD_WALK(i, service_p)
         {
                 snprintf(buf2, sizeof(buf2), "%s:%lu ",
                          cmd_table[i].cmd, cmd_table[i].cmd_use);
@@ -598,6 +622,7 @@ service_stats(struct client *service_p, struct connection_entry *conn_p)
                         j = 0;
                 }
         }
+	SCMD_END;
 
         if(j)
                 sendto_one(conn_p, "%s", buf);

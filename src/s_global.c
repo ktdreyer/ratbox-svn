@@ -25,8 +25,7 @@ static int s_global_netmsg(struct client *, char *parv[], int parc);
 
 static struct service_command global_command[] =
 {
-	{ "NETMSG",	&s_global_netmsg, 1, NULL, 1, 0L, 0, 0, CONF_OPER_GLOBAL, 0 },
-	{ "\0",		NULL,		  0, NULL, 0, 0L, 0, 0, 0, 0 }
+	{ "NETMSG",	&s_global_netmsg, 1, NULL, 1, 0L, 0, 0, CONF_OPER_GLOBAL, 0 }
 };
 
 static struct ucommand_handler global_ucommand[] =
@@ -38,7 +37,7 @@ static struct ucommand_handler global_ucommand[] =
 static struct service_handler global_service = {
 	"GLOBAL", "GLOBAL", "global", "services.int",
 	"Network Message Service", 60, 80, 
-	global_command, global_ucommand, NULL
+	global_command, sizeof(global_command), global_ucommand, NULL
 };
 
 void
