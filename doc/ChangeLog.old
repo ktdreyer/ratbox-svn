@@ -1,3 +1,7 @@
+*** 20011007_1 by leeh
+- updated README to cover whats actually in contrib/
+
+
 *** 20011006_5 by leeh
 - we need to set the time on gline2, not gline1..
 
