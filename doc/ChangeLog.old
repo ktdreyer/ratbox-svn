@@ -1,3 +1,7 @@
+*** 20010530_4 by leeh
+- check for spoofed glines coming in from hyb6 servers
+
+
 *** 20010530_3 by leeh
 - fix two compile warnings
 
