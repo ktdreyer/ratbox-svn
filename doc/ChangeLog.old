@@ -1,3 +1,9 @@
+*** 20001129_3 by db
+- cleaned up user and oper file logging. use fbopen etc.
+  use eventAdd to close user log for resync
+
+
+
 *** 20001129_2 by db
 - removed more #define's
 - cleaned up client.c/client.h some more
