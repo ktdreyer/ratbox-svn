@@ -99,7 +99,6 @@ struct ConfItem *find_special_conf(char *, int );
 static void add_q_line(struct ConfItem *);
 static void clear_q_lines(void);
 static void clear_special_conf(struct ConfItem **);
-static struct ConfItem* find_tkline(const char*, const char*, unsigned long);
 
 struct ConfItem *temporary_klines = NULL;
 struct ConfItem *temporary_ip_klines = NULL;
@@ -1982,7 +1981,7 @@ struct ConfItem *find_kill(struct Client* cptr)
  * thats expected to be done by caller.... *sigh* -Dianora
  */
 
-static struct ConfItem* find_tkline(const char* host, const char* user, unsigned long ip)
+struct ConfItem* find_tkline(const char* host, const char* user, unsigned long ip)
 {
   struct ConfItem *kill_list_ptr;        /* used for the link list only */
   struct ConfItem *last_list_ptr;
@@ -2477,120 +2476,6 @@ int        is_address(char *host,
 
   return( 1 );
 }
-
-/*
- * mo_testline
- *
- * inputs       - pointer to physical connection request is coming from
- *              - pointer to source connection request is comming from
- *              - parc arg count
- *              - parv actual arguments
- *
- * output       - always 0
- * side effects - command to test I/K lines on server
- *
- * i.e. /quote testline user@host,ip
- *
- */
-
-int mo_testline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
-{
-  struct ConfItem *aconf;
-  unsigned long ip;
-  unsigned long host_mask;
-  char *host, *pass, *user, *name, *classname, *given_host, *given_name, *p;
-  int port;
-
-  if (!MyClient(sptr) || !IsAnyOper(sptr))
-    {
-      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-      return 0;
-    }
-
-  if (parc > 1)
-    {
-      given_name = parv[1];
-      if(!(p = strchr(given_name,'@')))
-        {
-          ip = 0L;
-          if(is_address(given_name,&ip,&host_mask))
-            {
-              aconf = match_Dline(ip);
-              if( aconf )
-                {
-                  get_printable_conf(aconf, &name, &host, &pass, &user, &port,&classname);
-                  sendto_one(sptr, 
-                         ":%s NOTICE %s :D-line host [%s] pass [%s]",
-                         me.name, parv[0], 
-                         host,
-                         pass);
-                }
-              else
-                sendto_one(sptr, ":%s NOTICE %s :No aconf found",
-                         me.name, parv[0]);
-            }
-          else	  
-          sendto_one(sptr, ":%s NOTICE %s :usage: user@host|ip",
-                     me.name, parv[0]);
-
-          return 0;
-        }
-
-      *p = '\0';
-      p++;
-      given_host = p;
-      ip = 0L;
-      (void)is_address(given_host,&ip,&host_mask);
-
-      aconf = find_matching_mtrie_conf(given_host,given_name,(unsigned long)ip);
-
-      if(aconf)
-        {
-          get_printable_conf(aconf, &name, &host, &pass, &user, &port,&classname);
-      
-          if(aconf->status & CONF_KILL) 
-            {
-              sendto_one(sptr, 
-                         ":%s NOTICE %s :K-line name [%s] host [%s] pass [%s]",
-                         me.name, parv[0], 
-                         user,
-                         host,
-                         pass);
-            }
-          else if(aconf->status & CONF_CLIENT)
-            {
-              sendto_one(sptr,
-":%s NOTICE %s :I-line mask [%s] prefix [%s] name [%s] host [%s] port [%d] class [%d]",
-                         me.name, parv[0], 
-                         name,
-                         show_iline_prefix(sptr,aconf,user),
-                         user,
-                         host,
-                         port,
-                         classname);
-
-              aconf = find_tkline(given_host, given_name, 0);
-              if(aconf)
-                {
-                  sendto_one(sptr, 
-                     ":%s NOTICE %s :k-line name [%s] host [%s] pass [%s]",
-                             me.name, parv[0], 
-                             aconf->user,
-                             aconf->host,
-                             aconf->passwd);
-                }
-            }
-        }
-      else
-        sendto_one(sptr, ":%s NOTICE %s :No aconf found",
-                   me.name, parv[0]);
-    }
-  else
-    sendto_one(sptr, ":%s NOTICE %s :usage: user@host|ip",
-               me.name, parv[0]);
-  return 0;
-}
-
 
 /*
  * get_printable_conf

@@ -98,6 +98,7 @@ have_ident	{ return HAVE_IDENT; }
 host		{ return HOST; }
 hub		{ return HUB; }
 hub_mask	{ return HUB_MASK; }
+idletime        { return IDLETIME; }
 include		{ return INCLUDE; }
 ip		{ return IP; }
 kill		{ return KILL; }

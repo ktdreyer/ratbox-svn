@@ -24,6 +24,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.26  2000/11/25 17:40:56  toot
+ * . moved mo_testline into a module
+ * . added idletime setting for use in ircd.conf
+ *
  * Revision 7.25  2000/11/21 05:03:06  db
  * - general cleanups continue, just a few this time
  * - ltrace removed for now, it can go back in later
@@ -512,6 +516,7 @@ typedef struct
   int         glines;
   int         topic_uh;
   int         gline_time;
+  int         idletime;
   int	      hide_server;
 } ConfigFileEntryType;
 
@@ -581,6 +586,7 @@ extern struct ConfItem* find_special_conf(char *,int );
 extern struct ConfItem* find_is_klined(const char* host, 
                                        const char* name,
                                        unsigned long ip);
+extern struct ConfItem* find_tkline(const char*, const char*, unsigned long); 
 extern char* show_iline_prefix(struct Client *,struct ConfItem *,char *);
 extern void get_printable_conf(struct ConfItem *,
                                     char **, char **, char **,

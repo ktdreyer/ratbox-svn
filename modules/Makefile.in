@@ -62,6 +62,7 @@ SRCS =                          \
   m_squit.c \
   m_stats.c \
   m_svinfo.c \
+  m_testline.c \
   m_time.c \
   m_topic.c \
   m_trace.c \

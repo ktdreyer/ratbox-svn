@@ -324,9 +324,7 @@ check_pings(void *notused)
         {
           if( !IsElined(cptr) &&
               GlobalSetOptions.idletime && 
-#ifdef OPER_IDLE
               !IsAnyOper(cptr) &&
-#endif /* OPER_IDLE */
               !IsIdlelined(cptr) && 
               ((CurrentTime - cptr->user->last) > GlobalSetOptions.idletime))
             {
@@ -654,9 +652,7 @@ void check_klines(void)
         {
           if( !IsElined(cptr) &&
               GlobalSetOptions.idletime && 
-#ifdef OPER_IDLE
               !IsAnyOper(cptr) &&
-#endif /* OPER_IDLE */
               !IsIdlelined(cptr) && 
               ((CurrentTime - cptr->user->last) > GlobalSetOptions.idletime))
             {

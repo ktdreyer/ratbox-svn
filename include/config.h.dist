@@ -378,13 +378,6 @@
  */
 #undef LIMIT_UH
 
-/*
- * OPER_IDLE allows operators to remain idle when they idle
- * beyond the idle limit
- */
-#define IDLE_TIME 60
-#define OPER_IDLE
-
 /* SEND_FAKE_KILL_TO_CLIENT - make the client think it's being /KILL'ed
  * 
  * This was originally intended to prevent clients from reconnecting to the
@@ -702,8 +695,6 @@ void    free_fludees();
 
 #define MIN_SPAM_NUM 5
 #define MIN_SPAM_TIME 60
-
-#define MIN_IDLETIME 1800
 
 /* tuck this here for now, it will go away eventually...
  * but meanwhile, at least it will compile a server that works -db

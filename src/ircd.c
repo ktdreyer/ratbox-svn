@@ -402,8 +402,6 @@ static void initialize_global_set_options(void)
   GlobalSetOptions.fludtime = FLUD_TIME;
   GlobalSetOptions.fludblock = FLUD_BLOCK;
 
-  GlobalSetOptions.idletime = MIN_IDLETIME;
-
   GlobalSetOptions.spam_time = MIN_JOIN_LEAVE_TIME;
   GlobalSetOptions.spam_num = MAX_JOIN_LEAVE_COUNT;
 
