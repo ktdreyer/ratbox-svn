@@ -95,7 +95,7 @@ m_invite(struct Client *client_p,
     return;
   }
 
-  if (check_channel_name(parv[2]) == NULL)
+  if(check_channel_name(parv[2]) == 0)
   {
     sendto_one(source_p, form_str(ERR_BADCHANNAME),
                me.name, parv[0], (unsigned char *)parv[2]);
