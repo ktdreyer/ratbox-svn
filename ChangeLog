@@ -1,3 +1,23 @@
+androsyn    2003/09/23 09:33:43 EDT	(20030923_3)
+
+  Modified files:
+    modules              Makefile.in 
+    src                  Makefile.in 
+  Added files:
+    modules/core         m_error.c 
+  Removed files:
+    src                  m_error.c 
+  Log:
+  Move m_error.c to modules/core/
+  
+  Revision  Changes    Path
+  1.88      +1 -0      ircd-ratbox/modules/Makefile.in
+  1.1       +122 -0    ircd-ratbox/modules/core/m_error.c (new)
+  7.142     +0 -1      ircd-ratbox/src/Makefile.in
+  7.39      +0 -122    ircd-ratbox/src/m_error.c (dead)
+
+
+
 androsyn    2003/09/22 23:54:44 EDT	(20030923_2)
 
   Modified files:
