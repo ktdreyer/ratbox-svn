@@ -200,7 +200,6 @@ struct Client
   dlink_list	allow_list;	/* clients I'll allow to talk to me */
   dlink_list	on_allow_list;	/* clients that have =me= on their allow list*/
   
-  unsigned long random_ping;
   
   struct LocalUser *localClient;
 
@@ -309,6 +308,8 @@ struct LocalUser
   int actually_read;    /* how many we've actually read in this second */
   int sent_parsed;      /* how many messages we've parsed in this second */
   time_t last_knock;    /* time of last knock */
+  unsigned long random_ping;
+
 };
 
 /*
