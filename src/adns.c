@@ -28,21 +28,11 @@ void delete_adns_queries(struct DNSQuery *q)
 			adns_cancel(q->query);
 		}
 	}
-	q->query = 0xf00dbeef;
 }              	        
 
 void restart_resolver(void)
 {
-	int err;
-	adns_state new_state;
-	if(!(err = adns_init(&new_state, adns_if_noautosys, 0))) {
-		adns_finish(dns_state);	
-		dns_state = new_state;
-	} else {
-		log(L_NOTICE, "Error rehashing DNS %s...using old settings", strerror(err));		
-		sendto_realops_flags(FLAGS_ADMIN, "Error rehashing DNS %s...using old setting", strerror(err));
-	}
-	dns_select();
+	adns__rereadconfig(dns_state);
 }
 void init_resolver(void)
 {
