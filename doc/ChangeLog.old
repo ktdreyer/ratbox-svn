@@ -1,3 +1,7 @@
+*** 20011113_8 by leeh
+- parv[1] might not actually exist, so check parc before blindly passing it
+
+
 *** 20011113_7 by kreator
 - fix broken build for --disable-openssl
 
