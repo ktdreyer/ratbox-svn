@@ -149,7 +149,7 @@ static int user_modes_from_c_to_bitmask[] =
   FLAGS_INVISIBLE, /* i */
   0,            /* j */
   FLAGS_SKILL,  /* k */
-  FLAGS_LOCOPS, /* l */
+  0,            /* l */
   0,            /* m */
   FLAGS_NCHANGE, /* n */
   FLAGS_OPER,   /* o */
@@ -972,14 +972,15 @@ static int valid_hostname(const char* hostname)
   if ('.' == *p)
     return NO;
 
-  while (*p) {
-    if (!IsHostChar(*p))
-      return NO;
-    if ('.' == *p++)
-      ++dots;
-    else
-      ++chars;
-  }
+  while (*p)
+    {
+      if (!IsHostChar(*p))
+        return NO;
+      if ('.' == *p++)
+        ++dots;
+      else
+        ++chars;
+    }
   return (0 == dots || chars < dots) ? NO : YES;
 }
 
@@ -990,11 +991,14 @@ static int valid_hostname(const char* hostname)
  * Output       - YES if valid, NO if not
  * Side effects - NONE
  * 
- * Absolutely always reject any '*' '!' '?' '@' '.' in an user name
+ * Absolutely always reject any '*' '!' '?' '@' in an user name
  * reject any odd control characters names.
+ * Allow ONE '.' in username to allow for "first.last"
+ * style of username
  */
 static int valid_username(const char* username)
 {
+  int dots = 0;
   const char *p = username;
   assert(0 != p);
 
@@ -1010,10 +1014,19 @@ static int valid_username(const char* username)
   if (!IsAlNum(*p))
     return NO;
 
-  while (*++p) {
-    if (!IsUserChar(*p))
-      return NO;
-  }
+  while (*++p)
+    {
+      if(*p == '.')
+        {
+          dots++;
+          if(dots > 1)
+            return NO;
+          if(!IsUserChar(p[1]))
+            return NO;
+        }
+      else if (!IsUserChar(*p))
+        return NO;
+    }
   return YES;
 }
 

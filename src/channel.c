@@ -690,7 +690,7 @@ static  void    change_chan_flag(struct Channel *chptr,struct Client *cptr, int 
    }
 }
 
-static  void    set_deopped(struct Client *cptr, struct Channel *chptr,int flag)
+static  void   set_deopped(struct Client *cptr, struct Channel *chptr,int flag)
 {
   struct SLink  *tmp;
 
