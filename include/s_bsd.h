@@ -26,6 +26,8 @@
 #define INCLUDED_sys_types_h
 #endif
 
+#include "fdlist.h"
+
 #define READBUF_SIZE    16384   /* used in s_bsd *AND* s_zip.c ! */
 
 /* Type of IO */

@@ -53,6 +53,7 @@
 #include <fcntl.h>
 #include <assert.h>
 
+struct ConfItem *glines = NULL;
 
 extern int yyparse(); /* defined in yy.tab.c */
 extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */
@@ -3604,4 +3605,73 @@ int conf_yy_fatal_error(char *msg)
   sendto_realops("lexer barfed. lets leave it at that for now");
 #endif
   return 0;
+}
+
+struct ConfItem *find_gkill(struct Client* cptr, char* username)
+{
+  assert(0 != cptr);
+  return (IsElined(cptr)) ? 0 : find_is_glined(cptr->host, username);
+}
+
+/*
+ * find_is_glined
+ * inputs       - hostname
+ *              - username
+ * output       - pointer to struct ConfItem if user@host glined
+ * side effects -
+ *  WARNING, no sanity checking on length of name,host etc.
+ * thats expected to be done by caller.... *sigh* -Dianora
+ */
+
+struct ConfItem* find_is_glined(const char* host, const char* name)
+{
+  struct ConfItem *kill_list_ptr;     /* used for the link list only */
+  struct ConfItem *last_list_ptr;
+  struct ConfItem *tmp_list_ptr;
+
+  /* gline handling... exactly like temporary klines 
+   * I expect this list to be very tiny. (crosses fingers) so CPU
+   * time in this, should be minimum.
+   * -Dianora
+  */
+
+  if(glines)
+    {
+      kill_list_ptr = last_list_ptr = glines;
+
+      while(kill_list_ptr)
+        {
+          if(kill_list_ptr->hold <= CurrentTime)  /* a gline has expired */
+            {
+              if(glines == kill_list_ptr)
+                {
+                  /* Its pointing to first one in link list*/
+                  /* so, bypass this one, remember bad things can happen
+                     if you try to use an already freed pointer.. */
+
+                  glines = last_list_ptr = tmp_list_ptr =
+                    kill_list_ptr->next;
+                }
+              else
+                {
+                  /* its in the middle of the list, so link around it */
+                  tmp_list_ptr = last_list_ptr->next = kill_list_ptr->next;
+                }
+
+              free_conf(kill_list_ptr);
+              kill_list_ptr = tmp_list_ptr;
+            }
+          else
+            {
+              if( (kill_list_ptr->name && (!name || match(kill_list_ptr->name,
+                 name))) && (kill_list_ptr->host &&
+                   (!host || match(kill_list_ptr->host,host))))
+                return(kill_list_ptr);
+              last_list_ptr = kill_list_ptr;
+              kill_list_ptr = kill_list_ptr->next;
+            }
+        }
+    }
+
+  return((struct ConfItem *)NULL);
 }

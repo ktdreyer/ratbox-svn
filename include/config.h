@@ -79,6 +79,7 @@
  *
  * DPATH = directory,
  * SPATH = server executable,
+ * MODPATH = directory of module to load automatically,
  * CPATH = conf file,
  * MPATH = MOTD
  * KPATH = kline conf file
@@ -99,6 +100,7 @@
 
 #define DPATH   "/usr/ejb/ircd/"
 #define SPATH   "/usr/ejb/ircd/ircd"
+#define MODPATH "/usr/ejb/ircd/modules/autoload/"
 #define CPATH   "ircd.conf"
 #define KPATH   "kline.conf"
 #define DLPATH  "kline.conf"

@@ -52,7 +52,7 @@
 extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */
 
 /* internal variables */
-static  struct ConfItem *glines = (struct ConfItem *)NULL;
+extern struct ConfItem *glines;
 static GLINE_PENDING *pending_glines;
 
 /* internal functions */

@@ -29,9 +29,6 @@
 struct Message;
 struct Client;
 
-extern struct Message **msgtab;
-extern int num_msgs;
-
 extern  int     parse (struct Client *, char *, char *);
 extern  void    init_tree_parse (struct Message **);
 #endif /* INCLUDED_parse_h_h */

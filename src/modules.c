@@ -23,9 +23,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <dirent.h>
+#include <limits.h>
+#include <unistd.h>
 
 #include "modules.h"
 #include "s_log.h"
+#include "config.h"
 
 struct module **modlist = NULL;
 int num_mods = 0;
@@ -43,6 +47,45 @@ find_module(char *name)
   return NULL;
 }
 
+/* load all modules from MPATH */
+void
+load_all_modules(void)
+{
+  char           *system_module_dir_name = MODPATH;
+  DIR            *system_module_dir = NULL;
+  struct dirent  *ldirent = NULL;
+  char           *old_dir = getcwd(NULL, 0);
+  char            module_fq_name[PATH_MAX + 1];
+
+  if (chdir(system_module_dir_name) == -1) {
+    log(L_WARN, "Could not load modules from %s: %s",
+	system_module_dir_name, strerror(errno));
+    exit(0);
+  }
+
+  system_module_dir = opendir(".");
+  if (system_module_dir == NULL) {
+    log(L_WARN, "Could not load modules from %s: %s",
+	system_module_dir_name, strerror(errno));
+    return;
+  }
+
+  while ((ldirent = readdir(system_module_dir)) != NULL) {
+    if (ldirent->d_name[strlen(ldirent->d_name) - 3] == '.' &&
+        ldirent->d_name[strlen(ldirent->d_name) - 2] == 's' &&
+        ldirent->d_name[strlen(ldirent->d_name) - 1] == 'o') {
+      snprintf(module_fq_name, sizeof(module_fq_name),
+        "%s/%s",  system_module_dir_name,
+        ldirent->d_name);
+      load_module(module_fq_name);
+    }
+  }
+
+  closedir(system_module_dir);
+  chdir(old_dir);
+  free(old_dir);
+}
+  
 void
 load_module(char *path)
 {
@@ -62,9 +105,10 @@ load_module(char *path)
   tmpptr = dlopen(path, RTLD_LAZY);
 
   if (tmpptr == NULL) {
-    char *err = dlerror();
+    const char *err = dlerror();
     sendto_realops("Error loading module %s: %s", path, err);
     log(L_WARN, "Error loading module %s: %s", path, err);
+    free(mod_basename);
     return;
   }
 
@@ -72,6 +116,8 @@ load_module(char *path)
   if (!initfunc) {
     sendto_realops("Module %s has no _init() function", mod_basename);
     log(L_WARN, "Module %s has no _init() function", mod_basename);
+    dlclose(tmpptr);
+    free(mod_basename);
     return;
   }
 
@@ -83,7 +129,8 @@ load_module(char *path)
   num_mods++;
 
   initfunc();
-  sendto_realops("Module %s loaded at %x", mod_basename, tmpptr);
-  log(L_WARN, "Module %s loaded at %x", mod_basename, tmpptr);
+
+  sendto_realops("Module %s loaded at 0x%x", mod_basename, tmpptr);
+  log(L_WARN, "Module %s loaded at 0x%x", mod_basename, tmpptr);
   free(mod_basename);
 }

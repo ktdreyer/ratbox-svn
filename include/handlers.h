@@ -90,6 +90,9 @@ extern int mr_pong(struct Client*, struct Client*, int, char**);
 extern int mr_server(struct Client*, struct Client*, int, char**);
 
 /* registered local clients */
+extern int m_users(struct Client *, struct Client *, int, char **);
+extern int m_svinfo(struct Client *, struct Client *, int, char **);
+extern int m_ltrace(struct Client*, struct Client*, int, char**);
 extern int m_admin(struct Client*, struct Client*, int, char**);
 extern int m_away(struct Client*, struct Client*, int, char**);
 extern int m_dline(struct Client *,struct Client *,int,char **);

@@ -53,6 +53,7 @@
 #include "send.h"
 #include "setup.h"
 #include "whowas.h"
+#include "modules.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -642,8 +643,10 @@ int main(int argc, char *argv[])
   msgtab = malloc (sizeof (struct Message *));
   msgtab[0] = malloc (sizeof (struct Message));
   msgtab[0]->cmd = NULL;
-
+ 
   init_tree_parse(msgtab);      /* tree parse code (orabidoo) */
+
+  load_all_modules();
 
   initServerMask();
 

@@ -135,6 +135,9 @@ typedef struct MessageTree MESSAGE_TREE;
 #define MSG_OPERWALL "OPERWALL" /* OPERWALL */
 #define MSG_UNDLINE  "UNDLINE"  /* UNDLINE */
 #define MSG_UNGLINE  "UNGLINE"  /* UNGLINE */
+#define MSG_LOCOPS   "LOCOPS"   /* LOCOPS */
+#define MSG_LTRACE   "LTRACE"   /* LTRACE */
+#define MSG_SVINFO   "SVINFO"   /* SVINFO */
 
 /*
  * Constants
@@ -150,6 +153,7 @@ typedef struct MessageTree MESSAGE_TREE;
 #define MSG_TESTLINE "TESTLINE"
 
 extern struct Message **msgtab;
+extern int num_msgs;
 
 #endif /* INCLUDED_msg_h */
 

@@ -59,10 +59,10 @@ static struct Message *tree_parse(char *);
 
 static char buffer[1024];  /* ZZZ must this be so big? must it be here? */
 
-struct MessageTree* msg_tree_root;
+struct MessageTree* msg_tree_root = NULL;
 
-struct Message **msgtab = NULL;
-int num_msgs = 1;
+struct Message **msgtab = NULL; 
+int num_msgs = 0;
 
 /*
  * parse a buffer.
@@ -186,11 +186,12 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
       *s++ = '\0';      /* blow away the ' ', and point s to next part */
     }
   else
-    {
+    { 
+      int i = 0;
+
       s = strchr(ch, ' ');      /* moved from above,now need it here */
       if (s)
         *s++ = '\0';
-
       mptr = tree_parse(ch);
 
       if (!mptr || !mptr->cmd)
@@ -379,9 +380,9 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
 }
 
 /* for qsort'ing the msgtab in place -orabidoo */
-static int mcmp(struct Message *m1, struct Message *m2)
+static int mcmp(struct Message **m1, struct Message **m2)
 {
-  return strcmp(m1->cmd, m2->cmd);
+  return strcmp((*m1)->cmd, (*m2)->cmd);
 }
 
 /*
@@ -399,9 +400,13 @@ static int mcmp(struct Message *m1, struct Message *m2)
 void init_tree_parse(struct Message **mptr)
 {
   struct Message *mpt = *mptr;
+  int i;
 
-  qsort((void *)mptr, num_msgs - 1, sizeof(struct Message), 
+  for (i=0; mpt[i].cmd; i++);
+
+  qsort((void *)mptr[0], i, sizeof(struct Message*), 
                 (int (*)(const void *, const void *)) mcmp);
+
   msg_tree_root = (MESSAGE_TREE *)MyMalloc(sizeof(MESSAGE_TREE));
   mpt = do_msg_tree(msg_tree_root, "", *mptr);
 
@@ -497,8 +502,7 @@ mod_add_cmd(char *cmd, struct Message *msg)
   }
 
   /* we always keep a spare NULL entry at the end .. */
-  msgtab = realloc(msgtab, num_msgs + 1);
-  free(msgtab[num_msgs]);
+  msgtab = realloc(msgtab, sizeof(struct Message *) * (num_msgs + 2));
   msgtab[num_msgs] = msg;
   num_msgs++;
   msgtab[num_msgs] = malloc(sizeof (struct Message));
@@ -506,276 +510,6 @@ mod_add_cmd(char *cmd, struct Message *msg)
 
   init_tree_parse(msgtab);
 }
-
-#if 0
-struct Message msgtab[] = {
-  {MSG_PRIVMSG, 0, 1, MFLG_SLOW | MFLG_UNREG, 0L,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_privmsg, ms_privmsg, mo_privmsg }
-  },
-  {MSG_NOTICE, 0, 1, MFLG_SLOW | MFLG_UNREG, 0L,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_notice, ms_notice, mo_notice }
-  },
-  {MSG_CBURST, 0, 1, MFLG_SLOW | MFLG_UNREG, 0L,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_error, ms_cburst, m_error }
-  },
-  {MSG_DROP, 0, 2, MFLG_SLOW | MFLG_UNREG, 0L,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_error, ms_drop, m_error }
-  },
-  {MSG_LLJOIN, 0, 3, MFLG_SLOW | MFLG_UNREG, 0L,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_error, ms_lljoin, m_error }
-  },
-  {MSG_JOIN, 0, 1, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_join, ms_join, m_join }
-  },
-  {MSG_CJOIN, 0, 1, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_cjoin, m_error, m_cjoin }
-  },
-  {MSG_MODE, 0, 1, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_mode, ms_mode, m_mode }
-  },
-  {MSG_QUIT, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_quit, m_quit, ms_quit, mo_quit }
-  },
-  {MSG_PART, 1, 1, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_part, ms_part, mo_part }
-  },
-  {MSG_KNOCK, 0, 1, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-   /* can knock be recvd from a server? i think not --is */
-    { m_unregistered, m_knock, m_ignore, mo_knock }
-  },
-  {MSG_TOPIC, 0, 1, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_topic, ms_topic, m_topic}
-  },
-  {MSG_INVITE, 0, 2, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_invite, ms_invite, m_invite }
-  },
-  {MSG_KICK, 0, 2, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_kick, ms_kick, m_kick }
-  },
-  {MSG_WALLOPS, 0, 1, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_not_oper, ms_wallops, mo_wallops }
-  },
-  {MSG_PING, 0, 1, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_ping, ms_ping, m_ping }
-  },
-  {MSG_PONG, 0, 1, MFLG_SLOW | MFLG_UNREG, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { mr_pong, m_ignore, ms_pong, m_ignore }
-  },
-  {MSG_ERROR, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { mr_error, m_ignore, ms_error, m_ignore }
-  },
-  {MSG_KILL, 0, 2, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_not_oper, ms_kill, mo_kill }
-  },
-  {MSG_USER, 0, 4, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_user, m_registered, m_ignore, m_registered }
-  },
-  {MSG_NICK, 0, 1, MFLG_SLOW, 0,
-    { mr_nick, m_nick, ms_nick, m_nick }
-  },
-  {MSG_AWAY, 0, 0, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_away, m_away, m_away }
-  },
-  {MSG_ISON, 0, 1, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_ison, m_ignore, m_ison }
-  },
-  {MSG_SERVER, 0, 3, MFLG_SLOW | MFLG_UNREG, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { mr_server, m_registered, ms_server, m_registered }
-  },
-  {MSG_SQUIT, 0, 1, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_not_oper, ms_squit, mo_squit }
-  },
-  {MSG_WHOIS, 0, 1, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_whois, ms_whois, m_whois }
-  },
-  {MSG_WHO, 0, 1, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_who, ms_who, m_who }
-  },
-  {MSG_WHOWAS, 0, 1, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_whowas, m_whowas, m_whowas }
-  },
-  {MSG_LIST, 0, 0, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_list, m_ignore, m_list }
-  },
-  {MSG_NAMES, 0, 0, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_names, ms_names, m_names }
-  },
-  {MSG_USERHOST, 0, 1, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_userhost, m_ignore, m_userhost }
-  },
-#if 0
-  {MSG_USERIP, 0, 1, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_userip, m_ignore, m_userip }
-  },
-#endif
-  {MSG_TRACE, 0, 0, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_trace, ms_trace, mo_trace }
-  },
-  {MSG_PASS, 0, 1, MFLG_SLOW | MFLG_UNREG, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_pass, m_registered, m_ignore, m_registered }
-  },
-  {MSG_LUSERS, 0, 0, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_lusers, ms_lusers, m_lusers }
-  },
-  {MSG_TIME, 0, 0, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_time, m_time, m_time }
-  },
-#ifdef OPENSSL
-  {MSG_CHALLENGE, 0, 0, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_challenge, m_ignore, m_challenge }
-  },
-#endif /* OPENSSL */
-  {MSG_OPER, 0, 2, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_oper, ms_oper, mo_oper }
-  },
-  {MSG_CONNECT, 0, 1, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_not_oper, ms_connect, mo_connect }
-  },
-  {MSG_VERSION, 0, 0, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-        /* why allow version command from unreg'd users? no point --is */
-    { m_unregistered, m_version, ms_version, m_version }
-  },
-  {MSG_STATS, 0, 1, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_stats, ms_stats, mo_stats }
-  },
-  {MSG_LINKS, 0, 0, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_links, ms_links, m_links }
-  },
-  {MSG_ADMIN, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_admin, ms_admin, ms_admin }
-  },
-  {MSG_HELP, 0, 0, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_help, m_ignore, m_help }
-  },
-  {MSG_INFO, 0, 0, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_info, ms_info, mo_info }
-  },
-  {MSG_MOTD, 0, 0, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_motd, m_motd, m_motd }
-  },
-  {MSG_SJOIN, 0, 0, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-   /* there's absolutely no reason for a user to send sjoin, ignore it --is
-    *  */
-    { m_unregistered, m_ignore, ms_sjoin, m_ignore }
-  },
-  {MSG_CAPAB, 0, 0, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-   /* ditto */
-    { m_unregistered, m_error, ms_capab, m_error }
-  },
-  {MSG_OPERWALL, 0, 1, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_not_oper, ms_operwall, mo_operwall }
-  },
-  {MSG_CLOSE, 0, MAXPARA, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_not_oper, m_ignore, mo_close }
-  },
-  {MSG_KLINE, 0, 1, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_not_oper, ms_kline, mo_kline }
-  },
-  {MSG_UNKLINE, 0, 1, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_not_oper, m_error, mo_unkline }
-  },
-  {MSG_UNDLINE, 0, 1, MFLG_SLOW, 0,
-   /* UNREG, CLIENT, SERVER, OPER */
-   { m_unregistered, m_not_oper, m_error, mo_undline }
-  },
-  {MSG_UNGLINE, 0, 1, MFLG_SLOW, 0,
-   /* UNREG, CLIENT, SERVER, OPER */
-   { m_unregistered, m_not_oper, m_error, mo_ungline }
-  },
-  {MSG_DLINE, 0, 1, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_not_oper, m_error, mo_dline }
-  },
-  {MSG_GLINE, 0, 2, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_not_oper, ms_gline, mo_gline }
-  },
-  {MSG_HASH, 0, 1, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_not_oper, m_hash, m_hash }
-  },
-  {MSG_DNS, 0, 0, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_dns, m_dns, m_dns }
-  },
-  {MSG_REHASH, 0, 0, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_not_oper, m_ignore, mo_rehash }
-  },
-  {MSG_RESTART, 0, 0, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_not_oper, m_ignore, mo_restart }
-  },
-  {MSG_DIE, 0, 1, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_not_oper, m_ignore, mo_die }
-  },
-  {MSG_HTM, 0, 0, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_not_oper, m_ignore, mo_htm }
-  },
-  {MSG_SET, 0, 0, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_not_oper, m_error, mo_set }
-  },
-  {MSG_TESTLINE, 0, 1, MFLG_SLOW, 0,
-    /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_not_oper, m_error, mo_testline }
-  },
-  { 0 }
-}; 
-#endif
 
 /*
  * tree_parse()

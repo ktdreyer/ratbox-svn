@@ -31,11 +31,25 @@
 #include "send.h"
 #include "vchannel.h"
 #include "list.h"
+#include "msg.h"
 
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 
+#if 0
+struct Message list_msgtab = {
+  MSG_LIST, 0, 0, MFLG_SLOW, 0,
+  {m_unregistered, m_list, m_ignore, m_list}
+};
+
+void
+_modinit(void)
+{
+  mod_add_cmd(MSG_LIST, &list_msgtab);
+}
+
+#endif
 /*
 ** m_list
 **      parv[0] = sender prefix

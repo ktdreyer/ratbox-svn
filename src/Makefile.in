@@ -49,6 +49,8 @@ SRCS =                          \
   ircd_signal.c                 \
   list.c                        \
   listener.c                    \
+  m_error.c                     \
+  m_list.c                      \
   match.c                       \
   modules.c                     \
   motd.c                        \

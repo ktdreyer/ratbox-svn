@@ -2716,3 +2716,23 @@ static void destroy_channel(struct Channel *chptr)
   /* Wheee */
 }
 
+void del_invite(struct Channel *chptr, struct Client *who)
+{
+  struct SLink  **inv, *tmp;
+
+  for (inv = &(chptr->invites); (tmp = *inv); inv = &tmp->next)
+    if (tmp->value.cptr == who)
+      {
+        *inv = tmp->next;
+        free_link(tmp);
+        break;
+      }
+
+  for (inv = &(who->user->invited); (tmp = *inv); inv = &tmp->next)
+    if (tmp->value.chptr == chptr)
+      {
+        *inv = tmp->next;
+        free_link(tmp);
+        break;
+      }
+}

@@ -61,7 +61,7 @@ struct Message nick_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_NICK, nick_msgtab);
+  mod_add_cmd(MSG_NICK, &nick_msgtab);
 }
 
 /*
