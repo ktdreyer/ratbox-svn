@@ -1,3 +1,21 @@
+androsyn    2002/06/10 21:39:43 EDT	(20020611_4)
+
+  Modified files:
+    contrib              m_tburst.c 
+    include              channel.h 
+    modules              m_topic.c 
+    src                  channel.c 
+  Log:
+  More of the topic changes
+  
+  Revision  Changes    Path
+  1.9       +2 -5      ircd-hybrid-7/contrib/m_tburst.c
+  7.116     +1 -3      ircd-hybrid-7/include/channel.h
+  1.54      +13 -45    ircd-hybrid-7/modules/m_topic.c
+  7.319     +25 -3     ircd-hybrid-7/src/channel.c
+
+
+
 androsyn    2002/06/10 21:02:33 EDT	(20020611_3)
 
   Modified files:
