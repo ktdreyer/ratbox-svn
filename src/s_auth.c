@@ -638,6 +638,7 @@ void
 delete_identd_queries(struct Client *target_p)
 {
 	struct AuthRequest *auth = target_p->localClient->auth_request;
+
 	if(auth == NULL)
 		return;
 
