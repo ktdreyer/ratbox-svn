@@ -133,8 +133,6 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 	if(IsDeadorAborted(client_p))
 		return;
 
-	s_assert((bufend - pbuffer) < 512);
-
 	for (ch = pbuffer; *ch == ' '; ch++)	/* skip spaces */
 		/* null statement */ ;
 
