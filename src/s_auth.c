@@ -214,6 +214,7 @@ auth_dns_callback(void *vptr, adns_answer * reply)
 			{
 				SetDNSPending(auth);
 			}
+			sendheader(auth->client, REPORT_FAIL_DNS);
 			return;
 		}
 #endif
