@@ -1,3 +1,8 @@
+*** 20001023_5 by toot
+fixed channel.c/remove_empty_channels() so it compiled with 
+PRESERVE_CHANNELS #defined
+
+
 *** 20001023_4 by adrian
 
 
