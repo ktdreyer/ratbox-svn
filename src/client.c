@@ -1080,8 +1080,10 @@ static void exit_one_client(struct Client *client_p, struct
 
   /* remove from global client list */
   remove_client_from_list(source_p);
-
   SetDead(source_p);
+
+  /* Check to see if the client isn't already on the dead list */
+  assert(dlinkFind(&dead_list, source_p) == NULL);
   /* add to dead client dlist */
   lp = make_dlink_node();
   dlinkAdd(source_p, lp, &dead_list);
