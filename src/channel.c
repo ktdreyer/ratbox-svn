@@ -2521,7 +2521,7 @@ void set_channel_mode(struct Client *cptr,
                                modebuf_aops);
       }
 
-      sendto_match_cap_servs(chptr, cptr, CAP_ANONOPS,
+      sendto_match_cap_servs(chptr, cptr, CAP_AOPS,
                              ":%s MODE %s %s",
                              sptr->name, chptr->chname,
                              modebuf_aops);
