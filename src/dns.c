@@ -51,7 +51,7 @@ struct dnsreq
 
 static struct dnsreq querytable[IDTABLE];
 
-static u_int16_t id;
+static u_int16_t id = 1;
 static int dns_fd;
 static int ctrl_fd;
 
@@ -226,6 +226,7 @@ void
 read_dns(int fd, void *unused)
 {
 	char buf[512];
+	char *p;
 	char *parv[MAXPARA];
 	int parc;
 	int res;
@@ -247,14 +248,19 @@ read_dns(int fd, void *unused)
 			fork_resolver();
 			return;
 		}
+	 	p = memchr(buf, '\n', sizeof(buf));	
+		if(p != NULL)
+			*p = '\0';	
 		/* we should get a full packet here */
 		parc = string_to_array(buf, parv); /* we shouldn't be using this here, but oh well */
-		if(parc != 5)
+#if 0
+		if(parc != 4)
 		{
 			ilog(L_MAIN, "Resolver sent a result with wrong number of arguments");
 			fork_resolver();
 			return;
 		}
+#endif
 		results_callback(parv[1], parv[2], parv[3], parv[4]);
 	}
 }

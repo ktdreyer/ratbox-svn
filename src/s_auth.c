@@ -196,7 +196,8 @@ auth_error(struct AuthRequest *auth)
 {
 	++ServerStats.is_abad;
 
-	comm_close(auth->fd);
+	if(auth->fd >= 0)
+		comm_close(auth->fd);
 	auth->fd = -1;
 
 	ClearAuth(auth);
@@ -355,8 +356,8 @@ start_auth(struct Client *client)
 
 	if(ConfigFileEntry.disable_auth == 0)
 		start_auth_query(auth);
-
-	dlinkAdd(auth, &auth->node, &auth_poll_list);
+	if(IsDNSPending(auth) || IsAuthPending(auth))
+		dlinkAdd(auth, &auth->node, &auth_poll_list);
 }
 
 /*

@@ -587,13 +587,13 @@ int main(int argc, char **argv)
 		exit(0);
 	fd = atoi(tfd);
 	cfd = atoi(tcfd);
-
+#if 0
 	while(x++ < 65535)
 	{
 		if(x != fd && x != cfd)
 			close(x);
 	}
-
+#endif
 
 	if(fd > 255)
 	{
