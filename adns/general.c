@@ -40,11 +40,9 @@
 
 #define LOG_BUFSIZE 2000
 
-#if 0
 void adns__vdiag(adns_state ads, const char *pfx, adns_initflags prevent,
 		 int serv, adns_query qu, const char *fmt, va_list al)
 {
-
 /* Fix this to log to the ircd log interface */
 #if 0
   const char *bef, *aft;
@@ -75,8 +73,8 @@ void adns__vdiag(adns_state ads, const char *pfx, adns_initflags prevent,
 
   fputs(aft,ads->diagfile);
 #endif
+  return;
 }
-#endif
 
 void adns__debug(adns_state ads, int serv, adns_query qu, const char *fmt, ...) {
   char    buf[LOG_BUFSIZE];
@@ -84,15 +82,9 @@ void adns__debug(adns_state ads, int serv, adns_query qu, const char *fmt, ...) 
 
   va_start(al,fmt);
   vsprintf(buf, fmt, al);
-#if 0
   adns__vdiag(ads," debug",0,serv,qu,fmt,al);
-#endif
   va_end(al);
 
-  /* redundant calls to vsprintf() but what can you do,
-   * when you live in a shoe?
-   */
-  ilog(L_DEBUG, "%s", buf);
 }
 
 void adns__warn(adns_state ads, int serv, adns_query qu, const char *fmt, ...) {
@@ -101,12 +93,9 @@ void adns__warn(adns_state ads, int serv, adns_query qu, const char *fmt, ...) {
 
   va_start(al,fmt);
   vsprintf(buf, fmt, al);
-#if 0
   adns__vdiag(ads," warning",adns_if_noerrprint|adns_if_noserverwarn,serv,qu,fmt,al);
-#endif
   va_end(al);
 
-  ilog(L_WARN, "%s", buf);
 }
 
 void adns__diag(adns_state ads, int serv, adns_query qu, const char *fmt, ...) {
@@ -115,12 +104,9 @@ void adns__diag(adns_state ads, int serv, adns_query qu, const char *fmt, ...) {
 
   va_start(al,fmt);
   vsprintf(buf, fmt, al);
-#if 0
   adns__vdiag(ads,"",adns_if_noerrprint,serv,qu,fmt,al);
-#endif
   va_end(al);
 
-  ilog(L_DEBUG, "%s", buf);
 }
 
 /* vbuf functions */
