@@ -1,3 +1,7 @@
+*** 20010111_5 by a1kmm
+fixed a minor bug in the block free debugging code.
+
+
 *** 20010111_4 by a1kmm
 - Added block allocator memory debugging.
 - Fixed MyRealloc()
