@@ -740,15 +740,13 @@ static void stats_servers(struct Client *source_p)
     seconds %= 60;
     
     sendto_one(source_p, ":%s %d %s :%s (%s!%s@%s) Idle: %d SendQ: %d "
-                         "Connected: %dday%s %dhour%s %dmin%s %ldsec%s",
+                         "Connected: %d day%s, %d:%02d:%02ld",
                me.name, RPL_STATSDEBUG, source_p->name,
 	       target_p->name,
 	       (target_p->serv->by[0] ? target_p->serv->by : "Remote."),
 	       "*", "*", (int)(CurrentTime - target_p->lasttime),
                (int)linebuf_len(&target_p->localClient->buf_sendq),
-               days, (days == 1) ? "" : "s", hours, (hours == 1) ? "" : "s", 
-               minutes, (minutes == 1) ? "" : "s", 
-               seconds, (seconds == 1) ? "" : "s");
+               days, (days == 1) ? "" : "s", hours, minutes, seconds);
   }
 
   sendto_one(source_p, ":%s %d %s :%d Server(s)", me.name, RPL_STATSDEBUG,

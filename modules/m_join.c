@@ -447,7 +447,7 @@ burst_mode_list(char *chname, dlink_list *banlist, char flag, int cap)
     if(tlen > MODEBUFLEN)
       continue;
 
-    if((count >= MAXMODEPARAMS) || ((mlen + cur_len + tlen) > BUFSIZE))
+    if((count >= MAXMODEPARAMS) || ((mlen + cur_len + tlen) > (BUFSIZE - 3)))
     {
       sendto_server(NULL, cap, NOCAPS, "%s%s %s", buf, mbuf, pbuf);
 

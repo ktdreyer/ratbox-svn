@@ -363,7 +363,7 @@ send_mode_list(struct Client *client_p, char *chname,
     if(tlen > MODEBUFLEN)
       continue;
 
-    if ((count >= MAXMODEPARAMS) || ((cur_len + tlen + 2) > BUFSIZE))
+    if ((count >= MAXMODEPARAMS) || ((cur_len + tlen + 2) > (BUFSIZE - 3)))
     {
       sendto_one(client_p, "%s%s %s", buf, mbuf, pbuf);
 
