@@ -280,12 +280,12 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
   {
   	while(*bufch == '\r' || *bufch == '\n')
   	{
-		bufline->len--;
   		*bufch = '\0';
   		bufch--;
   	}
   	bufline->terminated = 1;
   }
+  bufhead->len += bufline->len;
   return cpylen;
 }
 
