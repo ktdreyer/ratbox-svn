@@ -186,7 +186,6 @@ struct adns__query {
   struct { allocnode *head, *tail; } allocations;
   int interim_allocd, preserved_allocd;
   void *final_allocspace;
-  int cname_recurse_count;
   const typeinfo *typei;
   byte *query_dgram;
   int query_dglen;
