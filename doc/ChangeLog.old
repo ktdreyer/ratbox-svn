@@ -1,3 +1,20 @@
+leeh        2001/12/20 15:23:14 EST	(20011220_5)
+
+  Modified files:
+    doc                  example.conf example.conf.efnet 
+    src                  ircd_parser.y 
+  Log:
+  - ripped host=""; from shared {}; and made it use user="user@host"; like the
+    rest of the config does..
+  - this MAY cause issues with older confs
+  
+  Revision  Changes    Path
+  7.146     +1 -2      ircd-hybrid-7/doc/example.conf
+  7.2       +1 -2      ircd-hybrid-7/doc/example.conf.efnet
+  1.227     +16 -8     ircd-hybrid-7/src/ircd_parser.y
+
+
+
 androsyn    2001/12/20 14:31:52 EST	(20011220_4)
 
   Modified files:
