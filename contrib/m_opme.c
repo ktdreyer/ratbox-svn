@@ -137,19 +137,19 @@ static void mo_opme(struct Client *client_p, struct Client *source_p,
     }
 
   if((locptr = find_user_link(&chptr->locpeons, source_p)))
-    dlinkDelete(ptr, &chptr->locpeons);
+    dlinkDelete(locptr, &chptr->locpeons);
   else if((locptr = find_user_link(&chptr->locvoiced, source_p)))
-    dlinkDelete(ptr, &chptr->locvoiced);
+    dlinkDelete(locptr, &chptr->locvoiced);
 #ifdef HALFOPS
   else if((locptr = find_user_link(&chptr->lochalfops, source_p)))
-    dlinkDelete(ptr, &chptr->lochalfops);
+    dlinkDelete(locptr, &chptr->lochalfops);
 #endif
   else if((locptr = find_user_link(&chptr->locchanops, source_p)))
-    dlinkDelete(ptr, &chptr->locchanops);
+    dlinkDelete(locptr, &chptr->locchanops);
   
 #ifdef REQUIRE_OANDV
   else if((locptr = find_user_link(&chptr->locchanops_voiced, source_p)))
-    dlinkDelete(ptr, &chptr->locchanops_voiced);
+    dlinkDelete(locptr, &chptr->locchanops_voiced);
 #endif
 
   else
