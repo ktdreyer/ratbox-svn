@@ -8579,9 +8579,17 @@ fi
 # Check whether --with-nicklen or --without-nicklen was given.
 if test "${with_nicklen+set}" = set; then
   withval="$with_nicklen"
-  NICKLEN="$withval"
+
+  if test $withval -ge 50; then
+  	NICKLEN=50
+	{ echo "$as_me:$LINENO: WARNING: NICKLEN has a hard limit of 50. Setting NICKLEN=50" >&5
+echo "$as_me: WARNING: NICKLEN has a hard limit of 50. Setting NICKLEN=50" >&2;}
+  else
+	NICKLEN="$withval"
+  fi
+
 else
-  NICKLEN="9"
+  NICKLEN=9
 fi;
 
 

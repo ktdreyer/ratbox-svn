@@ -891,7 +891,14 @@ fi
 
 AC_ARG_WITH(nicklen,
 AC_HELP_STRING([--with-nicklen=LENGTH],[Set the nick length to LENGTH (default 9)]),
-	NICKLEN="$withval", NICKLEN="9")
+[
+  if test $withval -ge 50; then
+  	NICKLEN=50
+	AC_MSG_WARN([NICKLEN has a hard limit of 50. Setting NICKLEN=50])
+  else
+	NICKLEN="$withval"
+  fi
+], [NICKLEN=9])
 
 AC_ARG_WITH(topiclen,           
 AC_HELP_STRING([--with-topiclen=NUMBER],[Set the max topic length to NUMBER (default 120, max 390)]),
