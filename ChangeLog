@@ -1,3 +1,32 @@
+leeh        2005/02/23 21:20:10 EST	(20050224_2)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              s_conf.h supported.h 
+    modules              Makefile.in 
+    src                  client.c newconf.c s_conf.c 
+  Added files:
+    modules              m_monitor.c 
+  Log:
+  - add the max_monitor config option
+  - advertise MONITOR=%d in 005
+  - clear a local clients monitor list on exit
+  - add the framework for the MONITOR command
+  - bed.
+  
+  Revision  Changes    Path
+  7.261     +5 -0      ircd-ratbox/doc/example.conf
+  7.89      +5 -0      ircd-ratbox/doc/example.efnet.conf
+  7.315     +1 -0      ircd-ratbox/include/s_conf.h
+  7.4       +4 -2      ircd-ratbox/include/supported.h
+  1.119     +1 -0      ircd-ratbox/modules/Makefile.in
+  1.1       +95 -0     ircd-ratbox/modules/m_monitor.c (new)
+  7.492     +1 -0      ircd-ratbox/src/client.c
+  7.202     +1 -0      ircd-ratbox/src/newconf.c
+  7.511     +1 -0      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2005/02/23 20:57:51 EST	(20050224_1)
 
   Modified files:
