@@ -1,3 +1,15 @@
+leeh        2004/04/12 11:01:48 EDT	(20040412_6)
+
+  Modified files:
+    src                  s_serv.c 
+  Log:
+  - we shouldnt be using errno in the "Error connecting to ..." notice.
+  
+  Revision  Changes    Path
+  7.400     +4 -5      ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2004/04/12 09:56:54 EDT	(20040412_5)
 
   Modified files:
