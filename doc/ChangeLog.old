@@ -1,3 +1,7 @@
+*** 20010523_1 by toot
+fixed a format error, and a couple of compile warnings
+
+
 *** 20010522_7 by ejb
 - better  make depend, no longer uses .depend;
 
