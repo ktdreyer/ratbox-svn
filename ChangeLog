@@ -1,3 +1,21 @@
+leeh        2002/08/26 19:38:45 EDT	(20020826_12)
+
+  Modified files:
+    .                    RELNOTES configure 
+    modules              m_whois.c 
+    src                  channel_mode.c 
+  Log:
+  - removed a duplicated MyClient() check from whois spy call
+  - removed redundant mode stuff for +/-beI
+  
+  Revision  Changes    Path
+  1.45      +1 -0      ircd-ratbox/RELNOTES
+  7.156     +2 -2      ircd-ratbox/configure
+  1.92      +2 -3      ircd-ratbox/modules/m_whois.c
+  7.74      +12 -27    ircd-ratbox/src/channel_mode.c
+
+
+
 androsyn    2002/08/26 18:04:26 EDT	(20020826_10)
 
   Modified files:
