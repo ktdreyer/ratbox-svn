@@ -227,7 +227,7 @@ inetport(struct Listener *listener)
 	 * else assume it is already open and try get something from it.
 	 */
 
-	if(bind(fd, (struct sockaddr *) &listener->addr, sizeof(struct sockaddr_storage)))
+	if(bind(fd, (struct sockaddr *) &listener->addr, GET_SS_LEN(listener->addr)))
 	{
 		report_error(L_ALL, "binding listener socket %s:%s",
 			     get_listener_name(listener), errno);

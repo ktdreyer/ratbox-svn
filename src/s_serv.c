@@ -1846,7 +1846,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 	comm_connect_tcp(client_p->localClient->fd, aconf->host,
 			 aconf->port,
 			 (struct sockaddr *) &myipnum,
-			 sizeof(struct sockaddr_storage),
+			 GET_SS_LEN(myipnum),
 			 serv_connect_callback, client_p,
 			 myipnum.ss_family, ConfigFileEntry.connect_timeout);
 
