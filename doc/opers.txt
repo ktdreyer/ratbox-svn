@@ -7,13 +7,12 @@ Usermodes: (* designates that the umode is oper only)
 
      USERMODE     DESCRIPTION
 -----------------------------------------------------------------
-         +O     - Designates this client is a local IRC Operator.
-                  Use the /oper command to attain this.
          +o     - Designates this client is a global IRC Operator.
                   Use the /oper command to attain this.
          +i     - Designates this client 'invisible'.
        * +w     - Can see server wallops.
        * +z     - Can see oper wallops.
+       * +l     - Can see oper locops (local wallops).
        * +s     - Can see generic server messages and oper kills.
        * +c     - Can see client connections and exits.
        * +u     - Can see unauthorized client connections.
@@ -93,18 +92,18 @@ COMMAND         - USAGE and DESCRIPTION
 
 + WALLOPS       - WALLOPS :<message>
                   Sends a WALLOPS message of <message> to all opers
-                  who are umode +w and +z (see above)
+                  who are umode +z (see above)
 
                   Server sent wallops go to all users who are umode
                   +w, oper or not.
 
 + OPERWALL      - OPERWALL :<message>
                   Sends an OPERWALL message of <message> to all
-                  opers who are umode +w and +z
+                  opers who are umode +z
 
 + LOCOPS        - LOCOPS :<message>
-                  Sends an LOCOPS message of <message. o to all
-                  opers on local server who are umode +w and +z
+                  Sends an LOCOPS message of <message> to all
+                  opers on local server who are umode +l
 
   TRACE         - TRACE [server|nick]
                   TRACE shows client info about [server|nick] or about

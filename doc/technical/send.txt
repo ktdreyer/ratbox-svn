@@ -219,9 +219,20 @@ sendto_realops_flags()
                                                const char *pattern, ... );
 
                   e.g.
-                  sendto_realops(FLAGS_ALL,
+                  sendto_realops_flags(FLAGS_ALL,
                                  "Don't eat the yellow snow");
 
+sendto_realops_flags_opers()
+                - sends specified message to opers locally only
+                  depending on flags.  used for messages that need
+                  to know who was sending the message.
+
+                  usage - sendto_realops_flags_opers(int flags,
+                                    struct Client *, const char *patterm ...);
+
+                  e.g.
+                  sendto_realops_flags_opers(FLAGS_LOCOPS,
+                                      sptr, "Message");
 
 ts_warn()       - Only used to send warning messages to all opers
                   without flooding them with warnings.
