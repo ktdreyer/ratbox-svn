@@ -812,13 +812,16 @@ int main(int argc, char *argv[])
     strncpy_irc(me.name, aconf->host, HOSTLEN);
   strncpy_irc(me.host, aconf->host, HOSTLEN);
 
-  me.fd = -1;
-  me.from = &me;
-  me.servptr = &me;
   SetMe(&me);
   make_server(&me);
-  me.serv->up = me.name;
-  me.lasttime = me.since = me.firsttime = CurrentTime;
+
+  me.fd         = -1;
+  me.local_flag = 1;
+  me.from       = &me;
+  me.servptr    = &me;
+  me.serv->up   = me.name;
+  me.lasttime   = me.since = me.firsttime = CurrentTime;
+
   add_to_client_hash_table(me.name, &me);
 
   check_class();

@@ -86,6 +86,21 @@ const char* get_listener_name(const struct Listener* listener)
 }
 
 /*
+ * count_listener_memory - count memory and listeners
+ */
+void count_listener_memory(int* count_out, size_t* size_out)
+{
+  struct Listener* l;
+  int              count = 0;
+  assert(0 != count_out);
+  assert(0 != size_out);
+  for (l = ListenerPollList; l; l = l->next)
+    ++count;
+  *count_out = count;
+  *size_out  = count * sizeof(struct Listener);
+}
+  
+/*
  * show_ports - send port listing to a client
  * inputs       - pointer to client to show ports to
  * output       - none

@@ -1651,14 +1651,6 @@ unsigned long cres_mem(struct Client* sptr)
     cache_mem += calc_hostent_buffer_size(&entry->he.h); 
     ++cache_count;
   }
-  if (cachedCount != cache_count) {
-    sendto_one(sptr, 
-               ":%s %d %s :Resolver cache count mismatch: %d != %d",
-               me.name, RPL_STATSDEBUG, sptr->name, cachedCount, cache_count);
-    assert(cachedCount == cache_count);
-  }
-  sendto_one(sptr, ":%s %d %s :Resolver: cache %d(%d)",
-             me.name, RPL_STATSDEBUG, sptr->name, cache_count, cache_mem);
   for (request = requestListHead; request; request = request->next) {
     request_mem += sizeof(struct ResRequest);
     if (request->name)
@@ -1667,8 +1659,15 @@ unsigned long cres_mem(struct Client* sptr)
       request_mem += MAXGETHOSTLEN + 1;
     ++request_count;
   }
-  sendto_one(sptr, ":%s %d %s :Resolver: requests %d(%d)",
-             me.name, RPL_STATSDEBUG, sptr->name, request_count, request_mem);
+  if (cachedCount != cache_count) {
+    sendto_one(sptr, 
+               ":%s %d %s :Resolver: cache count mismatch: %d != %d",
+               me.name, RPL_STATSDEBUG, sptr->name, cachedCount, cache_count);
+    assert(cachedCount == cache_count);
+  }
+  sendto_one(sptr, ":%s %d %s :Resolver: cache %d(%d) requests %d(%d)",
+             me.name, RPL_STATSDEBUG, sptr->name, cache_count, cache_mem,
+             request_count, request_mem);
   return cache_mem + request_mem;
 }
 
