@@ -26,4 +26,6 @@ extern void write_net(void);
 extern void read_net(void);
 extern void process_recvq(unsigned char *, unsigned int);
 extern void process_sendq(unsigned char *, unsigned int);
+extern void send_zipstats(void);
+extern void send_error(unsigned char *, ...);
 extern void send_data_blocking(int fd, unsigned char *data, int datalen);

@@ -100,6 +100,25 @@ struct Server
   struct Client*   users;       /* Users on this server */
 };
 
+struct SlinkRpl
+{
+  int command;
+  int datalen;
+  int gotdatalen;
+  int readdata;
+  unsigned char *data;
+};
+
+struct ZipStats
+{
+  unsigned long in;
+  unsigned long in_wire;
+  unsigned long out;
+  unsigned long out_wire;
+  double in_ratio;
+  double out_ratio;
+};
+
 /* entry for base_chan pointer and the corresponding vchan
  * client is actually on
  */
@@ -274,9 +293,12 @@ struct LocalUser
   int              ctrlfd_r;    /* control fd for reading */
 #endif
 
+  struct SlinkRpl  slinkrpl;    /* slink reply being parsed */
   unsigned char    *slinkq;     /* sendq for control data */
   int              slinkq_ofs;  /* ofset into slinkq */
   int              slinkq_len;  /* length remaining after slinkq_ofs */
+
+  struct ZipStats  zipstats;
 
   /*
    * Anti-flood stuff. We track how many messages were parsed and how
@@ -368,6 +390,7 @@ struct LocalUser
 #define FLAGS_CRYPTIN      0x2000 /* incoming data must be decrypted */
 #define FLAGS_CRYPTOUT     0x4000 /* outgoing data must be encrypted */
 #define FLAGS_WAITAUTH     0x8000 /* waiting for CRYPTAUTH command */
+#define FLAGS_SERVLINK     0x10000 /* servlink has servlink process */
 
 /* umodes, settable flags */
 
@@ -389,7 +412,7 @@ struct LocalUser
 #define FLAGS_DRONE        0x10000 /* show drone connects */
 #define FLAGS_LOCOPS       0x20000 /* show locops */
 #define FLAGS_PERSISTANT   0x100000 /* persist on close. */
-
+                                       
 /* user information flags, only settable by remote mode or local oper */
 #define FLAGS_OPER         0x40000 /* Operator */
 #define FLAGS_ADMIN        0x80000 /* Admin on server */
@@ -462,6 +485,8 @@ struct LocalUser
 #define IsWaitAuth(x)           ((x)->flags &  FLAGS_WAITAUTH)
 #define SetWaitAuth(x)          ((x)->flags |= FLAGS_WAITAUTH)
 #define ClearWaitAuth(x)        ((x)->flags &= ~FLAGS_WAITAUTH)
+#define HasServlink(x)          ((x)->flags &  FLAGS_SERVLINK)
+#define SetServlink(x)          ((x)->flags |= FLAGS_SERVLINK)
 #define MyConnect(x)            ((x)->localClient != NULL)
 #define MyClient(x)             (MyConnect(x) && IsClient(x))
 

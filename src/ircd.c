@@ -618,6 +618,9 @@ int main(int argc, char *argv[])
  eventAdd("try_connections", try_connections, NULL,
           STARTUP_CONNECTIONS_TIME, 0);
 
+ eventAdd("collect_zipstats", collect_zipstats, NULL,
+          ZIPSTATS_TIME, 0);
+
  /* Setup the timeout check. I'll shift it later :)  -- adrian */
  eventAdd("comm_checktimeouts", comm_checktimeouts, NULL, 1, 0);
  

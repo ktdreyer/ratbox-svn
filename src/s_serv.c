@@ -87,10 +87,9 @@ struct Client *uplink=NULL;
 static void        start_io(struct Client *server);
 static void        burst_members(struct Client *client_p, dlink_list *list);
 static void        burst_ll_members(struct Client *client_p, dlink_list *list);
-#if 0 /* broken */
-static void        cryptlink_regen_key_link(struct Client *client_p);
-#endif /* HAVE_LIBCRYPTO */
  
+static SlinkRplHnd slink_error;
+static SlinkRplHnd slink_zipstats;
 /*
  * list of recognized server capabilities.  "TS" is not on the list
  * because all servers that we talk to already do TS, and the kludged
@@ -131,6 +130,12 @@ struct EncCapability enccaptab[] = {
 };
 #endif
 
+struct SlinkRplDef slinkrpltab[] = {
+  {    SLINKRPL_ERROR,    slink_error, SLINKRPL_FLAG_DATA },
+  { SLINKRPL_ZIPSTATS, slink_zipstats, SLINKRPL_FLAG_DATA },
+  {                 0,              0,                  0 },
+};
+
 unsigned long nextFreeMask();
 static unsigned long freeMask;
 static void server_burst(struct Client *client_p);
@@ -142,6 +147,90 @@ static void cjoin_all(struct Client *client_p);
 
 static CNCB serv_connect_callback;
 
+
+void slink_error(unsigned int rpl, unsigned int len, unsigned char *data,
+                 struct Client *server_p)
+{
+  assert(rpl == SLINKRPL_ERROR);
+
+  assert(len < 256);
+  data[len-1] = '\0';
+
+  sendto_realops_flags(FLAGS_ALL, "SlinkError for %s: %s",
+                       server_p->name, data);
+  exit_client(server_p, server_p, &me, "servlink error -- terminating link");
+}
+
+void slink_zipstats(unsigned int rpl, unsigned int len, unsigned char *data,
+                    struct Client *server_p)
+{
+  unsigned long in = 0, in_wire = 0, out = 0, out_wire = 0;
+  double in_ratio = 0, out_ratio = 0;
+  int i = 0;
+  
+  assert(rpl == SLINKRPL_ZIPSTATS);
+  assert(len == 16);
+  assert(IsCapable(server_p, CAP_ZIP));
+
+  in |= (data[i++] << 24);
+  in |= (data[i++] << 16);
+  in |= (data[i++] <<  8);
+  in |= (data[i++]      );
+
+  in_wire |= (data[i++] << 24);
+  in_wire |= (data[i++] << 16);
+  in_wire |= (data[i++] <<  8);
+  in_wire |= (data[i++]      );
+
+  out |= (data[i++] << 24);
+  out |= (data[i++] << 16);
+  out |= (data[i++] <<  8);
+  out |= (data[i++]      );
+
+  out_wire |= (data[i++] << 24);
+  out_wire |= (data[i++] << 16);
+  out_wire |= (data[i++] <<  8);
+  out_wire |= (data[i++]      );
+
+  in_ratio = (((double)in_wire / (double)in) * 100.00);
+  out_ratio = (((double)out_wire/(double)out) * 100.00);
+
+  server_p->localClient->zipstats.in = in;
+  server_p->localClient->zipstats.out = out;
+  server_p->localClient->zipstats.in_wire = in_wire;
+  server_p->localClient->zipstats.out_wire = out_wire;
+  server_p->localClient->zipstats.in_ratio = in_ratio;
+  server_p->localClient->zipstats.out_ratio = out_ratio;
+}
+
+void collect_zipstats(void *unused)
+{
+  dlink_node *ptr;
+  struct Client *target_p;
+
+  for(ptr = serv_list.head; ptr; ptr = ptr->next)
+  {
+    target_p = ptr->data;
+    if (IsCapable(target_p, CAP_ZIP))
+    {
+      /* only bother if we haven't already got something queued... */
+      if (!target_p->localClient->slinkq)
+      {
+        target_p->localClient->slinkq = MyMalloc(1); /* sigh.. */
+        target_p->localClient->slinkq[0] = SLINKCMD_ZIPSTATS;
+        target_p->localClient->slinkq_ofs = 0;
+        target_p->localClient->slinkq_len = 1;
+
+        /* schedule a write */
+        comm_setselect(target_p->localClient->ctrlfd, FDLIST_IDLECLIENT,
+                       COMM_SELECT_WRITE, send_queued_slink_write,
+                       target_p, 0);
+      }
+    }
+  }
+  eventAdd("collect_zipstats", collect_zipstats, NULL,
+      ZIPSTATS_TIME, 0);
+}
 
 #ifdef HAVE_LIBCRYPTO
 struct EncCapability* select_cipher(struct Client *client_p)
@@ -822,7 +911,6 @@ int server_estab(struct Client *client_p)
   struct ConfItem*  aconf;
   const char*       inpath;
   static char       inpath_ip[HOSTLEN * 2 + USERLEN + 5];
-  char 		    serv_desc[FD_DESC_SZ];
   char*             host;
   dlink_node        *m;
   dlink_node        *ptr;
@@ -929,8 +1017,15 @@ int server_estab(struct Client *client_p)
   if (IsCapable(client_p, CAP_ENC) || IsCapable(client_p, CAP_ZIP))
     {
       if (fork_server(client_p) < 0 )
+      {
+        sendto_realops_flags(FLAGS_ALL, "Warning: fork failed for server "
+          "%s -- check servlink_path (%s)",
+           get_client_name(client_p, HIDE_IP),
+           ConfigFileEntry.servlink_path);
         return exit_client(client_p, client_p, client_p, "Fork failed");
+      }
       start_io(client_p);
+      SetServlink(client_p);
     }
 #endif
   sendto_one(client_p,"SVINFO %d %d 0 :%lu", TS_CURRENT, TS_MIN, CurrentTime);
@@ -987,28 +1082,22 @@ int server_estab(struct Client *client_p)
   client_p->serv->sconf = aconf;
   client_p->flags2 |= FLAGS2_CBURST;
 
-  if (IsCapable(client_p, CAP_ENC) || IsCapable(client_p, CAP_ZIP))
+  if (HasServlink(client_p))
     {
+      /* we won't overflow FD_DESC_SZ here, as it can hold
+       * client_p->name + 64
+       */
 #ifndef MISSING_SOCKPAIR
-      ircsprintf(serv_desc, "slink data: %s", client_p->name);
-      serv_desc[FD_DESC_SZ-1] = '\0';
-      fd_note (client_p->fd, serv_desc);
-      ircsprintf(serv_desc, "slink ctrl: %s", client_p->name);
-      serv_desc[FD_DESC_SZ-1] = '\0';
-      fd_note (client_p->localClient->ctrlfd, serv_desc);
+      fd_note(client_p->fd, "slink data: %s", client_p->name);
+      fd_note(client_p->localClient->ctrlfd, "slink ctrl: %s",
+              client_p->name);
 #else
-      ircsprintf(serv_desc, "slink data (out): %s", client_p->name);
-      serv_desc[FD_DESC_SZ-1] = '\0';
-      fd_note (client_p->fd, serv_desc);
-      ircsprintf(serv_desc, "slink ctrl (out): %s", client_p->name);
-      serv_desc[FD_DESC_SZ-1] = '\0';
-      fd_note (client_p->localClient->ctrlfd, serv_desc);
-      ircsprintf(serv_desc, "slink data  (in): %s", client_p->name);
-      serv_desc[FD_DESC_SZ-1] = '\0';
-      fd_note (client_p->fd_r, serv_desc);
-      ircsprintf(serv_desc, "slink ctrl  (in): %s", client_p->name);
-      serv_desc[FD_DESC_SZ-1] = '\0';
-      fd_note (client_p->localClient->ctrlfd_r, serv_desc);
+      fd_note(client_p->fd, "slink data (out): %s", client_p->name);
+      fd_note(client_p->localClient->ctrlfd, "slink ctrl (out): %s",
+              client_p->name);
+      fd_note(client_p->fd_r, "slink data  (in): %s", client_p->name);
+      fd_note(client_p->localClient->ctrlfd_r, "slink ctrl  (in): %s",
+              client_p->name);
 #endif
     }
   /*
@@ -1198,6 +1287,8 @@ int fork_server(struct Client *server)
   int ctrl_pipe2[2];
   int data_pipe2[2];
 #endif
+  int ctrlfd;
+  int datafd;
   char *kid_argv[] = { "-slink", NULL };
   
 
@@ -1256,14 +1347,14 @@ int fork_server(struct Client *server)
     close( data_pipe[0] );
 
     assert(server->localClient);
-    server->localClient->ctrlfd = ctrl_pipe[1];
-    server->fd = data_pipe[1];
+    ctrlfd = server->localClient->ctrlfd = ctrl_pipe[1];
+    datafd = server->fd = data_pipe[1];
 
 #ifdef MISSING_SOCKPAIR
     close(ctrl_pipe2[1]);
     close(data_pipe2[1]);
-    server->localClient->ctrlfd_r = ctrl_pipe2[0];
-    server->fd_r = data_pipe2[0];
+    ctrlfd = server->localClient->ctrlfd_r = ctrl_pipe2[0];
+    datafd = server->fd_r = data_pipe2[0];
 #endif
 
     if (!set_non_blocking(server->fd))
@@ -1278,22 +1369,19 @@ int fork_server(struct Client *server)
 #endif
 
 #ifndef MISSING_SOCKPAIR
-    fd_open(server->localClient->ctrlfd, FD_SOCKET, "slink ctrl socket");
-    fd_open(server->fd, FD_SOCKET, "slink data socket");
+    fd_open(server->localClient->ctrlfd, FD_SOCKET, NULL);
+    fd_open(server->fd, FD_SOCKET, NULL);
 #else
-    fd_open(server->localClient->ctrlfd, FD_SOCKET, "slink ctrl (out)");
-    fd_open(server->fd, FD_SOCKET, "slink data (out)");
-    fd_open(server->localClient->ctrlfd_r, FD_SOCKET, "slink ctrl (in)");
-    fd_open(server->fd_r, FD_SOCKET, "slink data (in)");
+    fd_open(server->localClient->ctrlfd, FD_PIPE, NULL);
+    fd_open(server->fd, FD_PIPE, NULL);
+    fd_open(server->localClient->ctrlfd_r, FD_PIPE, NULL);
+    fd_open(server->fd_r, FD_PIPE, NULL);
 #endif
 
-#ifndef MISSING_SOCKPAIR
-    comm_setselect(server->fd, FDLIST_SERVER, COMM_SELECT_READ, read_packet,
+    comm_setselect(datafd, FDLIST_SERVER, COMM_SELECT_READ, read_packet,
                    server, 0);
-#else
-    comm_setselect(server->fd_r, FDLIST_SERVER, COMM_SELECT_READ, read_packet,
+    comm_setselect(ctrlfd, FDLIST_SERVER, COMM_SELECT_READ, read_ctrl_packet,
                    server, 0);
-#endif
     return 0;
   }
 }
@@ -1807,7 +1895,6 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 {
     struct Client *client_p;
     int fd;
-    char serv_desc[FD_DESC_SZ];
     char buf[HOSTIPLEN];
     /* Make sure aconf is useful */
     assert(aconf != NULL);
@@ -1833,17 +1920,16 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
         return 0;
       }
 
-    /* servernames are always guaranteed under HOSTLEN chars */
-    ircsprintf(serv_desc, "Server: %s", aconf->name);
-    serv_desc[FD_DESC_SZ-1] = '\0';
-
     /* create a socket for the server connection */ 
-    if ((fd = comm_open(DEF_FAM, SOCK_STREAM, 0, serv_desc)) < 0)
+    if ((fd = comm_open(DEF_FAM, SOCK_STREAM, 0, NULL)) < 0)
       {
         /* Eek, failure to create the socket */
         report_error("opening stream socket to %s: %s", aconf->name, errno);
         return 0;
       }
+
+    /* servernames are always guaranteed under HOSTLEN chars */
+    fd_note(fd, "Server: %s", aconf->name);
 
     /* Create a local client */
     client_p = make_client(NULL);
@@ -2133,116 +2219,6 @@ void cryptlink_init(struct Client *client_p,
     comm_setselect(fd, FDLIST_SERVER, COMM_SELECT_READ, read_packet,
                    client_p, 0);
 }
-
-/* If we ever support CAP_DK... fix this */
-#if 0
-void cryptlink_regen_key(void *unused)
-{
-  dlink_node *ptr;
-  struct Client *target_p;
-
-  for(ptr = serv_list.head; ptr; ptr = ptr->next)
-  {
-    target_p = ptr->data;
-    /* only regen links that support key regen */
-    if (IsCryptOut(target_p) && MyConnect(target_p) &&
-        IsCapable(target_p, CAP_DK))
-      cryptlink_regen_key_link(target_p);
-  }
-  eventAdd("cryptlink_regen_key", cryptlink_regen_key, NULL,
-      CRYPTLINK_REGEN_TIME, 0);
-}
-
-static void cryptlink_regen_key_link(struct Client *client_p)
-{
-  char newkey[CIPHERKEYLEN];
-  char *key_to_send, *encrypted;
-  int enc_len;
-  struct ConfItem *aconf;
-
-  if (!(IsCryptOut(client_p) && MyConnect(client_p) &&
-        IsCapable(client_p, CAP_ENC) && IsCapable(client_p, CAP_DK)))
-    return;
-
-  aconf = find_conf_name(&client_p->localClient->confs,
-                         client_p->name, CONF_SERVER);
-  if (!aconf)
-  {
-    sendto_realops_flags(FLAGS_ALL,
-                 "WARNING: couldn't regen key for %s - lost C-line",
-                 get_client_name(client_p, HIDE_IP));
-    return;
-  }
-
-  /* generate a new key */
-  if (!aconf->rsa_public_key)
-  {
-    sendto_realops_flags(FLAGS_ALL,
-                "WARNING: couldn't regen key for %s - lost public key",
-                 get_client_name(client_p, HIDE_IP));
-    return;
-  }
-
-  if (RAND_bytes(newkey, CIPHERKEYLEN) != 1)
-  {
-    sendto_realops_flags(FLAGS_ALL,
-           "WARNING: couldn't regen key for %s - couldn't generate secret",
-           get_client_name(client_p, HIDE_IP));
-    return;
-  }
-
-  encrypted = MyMalloc(RSA_size(ServerInfo.rsa_private_key));
-
-  enc_len = RSA_public_encrypt(CIPHERKEYLEN,
-                               newkey,
-                               encrypted,
-                               aconf->rsa_public_key,
-                               RSA_PKCS1_OAEP_PADDING);
-
-  if (enc_len <= 0)
-  {
-    MyFree(encrypted);
-    sendto_realops_flags(FLAGS_ALL,
-                 "WARNING: couldn't regen key for %s - couldn't encrypt key",
-                 get_client_name(client_p, HIDE_IP));
-    return;
-  }
-
-  if (!(base64_block(&key_to_send, encrypted, enc_len)))
-  {
-    MyFree(encrypted);
-    sendto_realops_flags(FLAGS_ALL,
-                 "WARNING: couldn't regen key for %s - couldn't base64 key",
-                 get_client_name(client_p, HIDE_IP));
-      return;
-    }
-
-  {
-    char *ik, *ok;
-
-    base64_block( &ik, client_p->localClient->in_key, CIPHERKEYLEN );
-    ik[22] = '\0';
-    base64_block( &ok, client_p->localClient->out_key, CIPHERKEYLEN );
-    ok[22] = '\0';
-    sendto_realops_flags(FLAGS_ALL,
-          "New encryption key generated! Keys are "
-          "Encrypt: %s -- Decrypt: %s for %s", ok, ik,
-          client_p->name);
-    MyFree(ik);
-    MyFree(ok);
-  }
-
-  sendto_realops_flags(FLAGS_ALL,
-        "New encryption key generated for %s!",
-        client_p->name);
-  
-  sendto_one(client_p, ":%s CRYPTKEY %s", 
-             me.name, key_to_send);
-
-  /* Change keys */
-  memcpy(client_p->localClient->out_key, newkey, CIPHERKEYLEN);
-}
-#endif /* ^ CAP_DK stuff (broken) */
 
 void cryptlink_error(struct Client *client_p, char *reason)
 {

@@ -13,6 +13,7 @@
 #include "config.h"  /* option settings */
 #include "send.h"
 #include "memory.h"
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -147,12 +148,23 @@ fd_dump(struct Client *source_p)
 
 /*
  * fd_note() - set the fd note
+ *
+ * Note: must be careful not to overflow fd_table[fd].desc when
+ *       calling.
  */
 void
-fd_note(int fd, const char *desc)
+fd_note(int fd, const char *format, ...)
 {
-    if (desc)
-        strncpy(fd_table[fd].desc, desc, FD_DESC_SZ);
+    va_list args;
+    int len;
+  
+    if (format)
+    {
+        va_start(args, format);
+        len = vsprintf_irc(fd_table[fd].desc, format, args);
+        assert(len < FD_DESC_SZ); /* + '\0' */
+        va_end(args);
+    }
     else
         fd_table[fd].desc[0] = '\0';
 }

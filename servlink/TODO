@@ -5,8 +5,3 @@ Deal with avail_out = 0, then reduce the size of the buffer.
 	We won't usually hit 6x compression, but I just went over that..
 	We should deal gracefully with running out of output space...
 
-Implement read handler for control fd in hybrid.
-	This would allow commands like CMD_ZIPLINK_STATS to check
-	performance of the ziplink code, which could then send
-	RPL_ZIPLINK_STATS,0,4,out data,out wire,in wire,in data
-	back to the ircd.

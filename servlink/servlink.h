@@ -37,8 +37,16 @@
 #define NUM_FDS                 3       /* nfds for select */
 #endif
 
+#define IO_READ                 0
+#define IO_WRITE                1
+#define IO_SELECT               2
 
-//#define SERVLINK_DEBUG
+#define IO_TYPE(io)     (((io==2)?"select":((io==1)?"write":"read")))
+
+#define FD_NAME(fd)     (fd_name[fd])
+extern char *fd_name[NUM_FDS];
+
+/* #define SERVLINK_DEBUG */
 
 #define READLEN                  2048
 
@@ -101,7 +109,7 @@ struct slink_state
 };
 
 
-extern int checkError(int);
+extern int checkError(int, int, int);
 
 typedef void (io_callback)(void);
 

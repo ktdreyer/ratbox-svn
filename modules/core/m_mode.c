@@ -77,7 +77,7 @@ static void m_mode(struct Client *client_p, struct Client *source_p,
   static char     modebuf[MODEBUFLEN];
   static char     parabuf[MODEBUFLEN];
   int n = 2;
-
+  
   /* Now, try to find the channel in question */
   if( !IsChanPrefix(parv[1][0]) )
     {

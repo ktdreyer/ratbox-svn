@@ -1704,7 +1704,6 @@ set_initial_nick(struct Client *client_p, struct Client *source_p,
                  char *nick)
 {
  char buf[USERLEN + 1];
- char nickbuf[NICKLEN + 10];
  /* Client setting NICK the first time */
   
  /* This had to be copied here to avoid problems.. */
@@ -1713,13 +1712,8 @@ set_initial_nick(struct Client *client_p, struct Client *source_p,
   del_from_client_hash_table(source_p->name, source_p);
  strcpy(source_p->name, nick);
  add_to_client_hash_table(nick, source_p);
- /*
-  * .. and update the new nick in the fd note.
-  */
- strcpy(nickbuf, "Nick: ");
- /* nick better be the right length! -- adrian */
- strncat(nickbuf, nick, NICKLEN);
- fd_note(client_p->fd, nickbuf);
+ /* fd_desc is long enough */
+ fd_note(client_p->fd, "Nick: %s", nick);
   
  /* They have the nick they want now.. */
  *client_p->llname = '\0';
@@ -1760,8 +1754,6 @@ set_initial_nick(struct Client *client_p, struct Client *source_p,
 int change_local_nick(struct Client *client_p, struct Client *source_p,
                       char *nick)
 {
-  char nickbuf[NICKLEN + 10];
-
   /*
   ** Client just changing his/her nick. If he/she is
   ** on a channel, send note of change to all clients
@@ -1822,13 +1814,8 @@ int change_local_nick(struct Client *client_p, struct Client *source_p,
 
   del_all_accepts(source_p);
 
-  /*
-   * .. and update the new nick in the fd note.
-   */
-  strcpy(nickbuf, "Nick: ");
-  /* nick better be the right length! -- adrian */
-  strncat(nickbuf, nick, NICKLEN);
-  fd_note(client_p->fd, nickbuf);
+  /* fd_desc is long enough */
+  fd_note(client_p->fd, "Nick: %s", nick);
 
   return 1;
 }

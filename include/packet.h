@@ -43,6 +43,7 @@
 /* And the initial rate of flooding after registration... -A1kmm. */
 #define MAX_FLOOD_PER_SEC_I            24
 
+extern PF  read_ctrl_packet;
 extern PF  read_packet;
 extern PF  flood_recalc;
 

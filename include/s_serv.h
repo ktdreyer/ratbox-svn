@@ -36,8 +36,8 @@
  */
 #define TRY_CONNECTIONS_TIME	60
 
-/* generate a new key every hour */
-#define CRYPTLINK_REGEN_TIME    3600
+/* collect ziplinks compression ratios/etc every 5 minutes */
+#define ZIPSTATS_TIME           300
 
 /*
  * number of seconds to wait after server starts up, before
@@ -206,12 +206,31 @@ struct EncCapability
 #define SLINKCMD_INJECT_RECVQ                14
 #define SLINKCMD_INJECT_SENDQ                15
 #define SLINKCMD_INIT                        16
+#define SLINKCMD_ZIPSTATS                    17
 
 #ifdef MISSING_SOCKPAIR
 #define LAST_SLINK_FD   4
 #else
 #define LAST_SLINK_FD   2
 #endif
+
+#define SLINKRPL_FLAG_DATA      0x0001  /* reply has data following */
+#define SLINKRPL_ERROR          1
+#define SLINKRPL_ZIPSTATS       2
+
+#define MAX_SLINKRPL            2
+
+typedef void SlinkRplHnd(unsigned int, unsigned int, unsigned char *,
+                         struct Client *);
+struct SlinkRplDef
+{
+  unsigned int  replyid;
+  SlinkRplHnd   *handler;
+  unsigned int  flags;
+};
+
+extern struct SlinkRplDef slinkrpltab[];
+
 /*
  * Globals
  *
@@ -249,6 +268,7 @@ extern void        set_autoconn(struct Client *,char *,char *,int);
 extern const char* show_capabilities(struct Client* client);
 extern void        show_servers(struct Client *);
 extern void        try_connections(void *unused);
+extern void        collect_zipstats(void *unused);
   
 extern void        initServerMask(void);
 extern void        burst_channel(struct Client *client_p, struct Channel *chptr);

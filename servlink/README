@@ -107,3 +107,8 @@ Commands:
 	As above, but sent to remote server without processing.
 
 016 - INIT
+
+017 - ZIPSTATS
+	data: u32 in/u32 in_wire/u32 out/u32 out_wire
+
+	ziplinks statistics.

@@ -34,6 +34,10 @@
 #define CMD_INJECT_RECVQ                14      /* data */
 #define CMD_INJECT_SENDQ                15      /* data */
 #define CMD_INIT                        16
+#define CMD_ZIPSTATS                    17      /* data */
+
+#define RPL_ERROR                       1       /* data */
+#define RPL_ZIPSTATS                    2       /* data */
 
 struct ctrl_command
 {

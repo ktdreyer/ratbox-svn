@@ -28,6 +28,7 @@
 #include "tools.h"
 #include "s_bsd.h"
 #include "s_conf.h"
+#include "s_serv.h"
 #include "client.h"
 #include "common.h"
 #include "ircd.h"
@@ -149,6 +150,117 @@ flood_recalc(int fd, void *data)
 }
 
 /*
+ * read_ctrl_packet - Read a 'packet' of data from a servlink control
+ *                    link and process it.
+ */
+void
+read_ctrl_packet(int fd, void *data)
+{
+  struct Client *server = data;
+  struct LocalUser *lserver = server->localClient;
+  struct SlinkRpl *reply;
+  int length = 0;
+  unsigned char tmp[2];
+  unsigned char *len = tmp;
+  struct SlinkRplDef *replydef;
+
+  assert(lserver != NULL);
+
+  reply = &server->localClient->slinkrpl;
+
+  if(IsDead(server))
+    return;
+
+  if (!reply->command)
+  {
+    reply->gotdatalen = 0;
+    reply->readdata = 0;
+    reply->data = NULL;
+
+    length = read(fd, &reply->command, 1);
+
+    if (length <= 0)
+    {
+      if(ignoreErrno(errno))
+        goto nodata;
+      error_exit_client(server, length);
+      return;
+    }
+  }
+
+  for (replydef = slinkrpltab; replydef->handler; replydef++)
+  {
+    if (replydef->replyid == reply->command)
+      break;
+  }
+
+  /* we should be able to trust a local slink process...
+   * and if it sends an invalid command, that's a bug.. */
+  assert(replydef->handler);
+
+  if ((replydef->flags & SLINKRPL_FLAG_DATA) && (reply->gotdatalen < 2))
+  {
+    /* we need a datalen u16 which we don't have yet... */
+    length = read(fd, len, (2 - reply->gotdatalen));
+    if (length <= 0)
+    {
+      if(ignoreErrno(errno))
+        goto nodata;
+      error_exit_client(server, length);
+      return;
+    }
+
+    if (reply->gotdatalen == 0)
+    {
+      reply->datalen = *len << 8;
+      reply->gotdatalen++;
+      length--;
+      len++;
+    }
+    if (length && (reply->gotdatalen == 1))
+    {
+      reply->datalen |= *len;
+      reply->gotdatalen++;
+      if (reply->datalen > 0)
+        reply->data = MyMalloc(reply->datalen);
+    }
+  }
+
+  if (reply->readdata < reply->datalen) /* try to get any remaining data */
+  {
+    length = read(fd, (reply->data + reply->readdata),
+                  (reply->datalen - reply->readdata));
+    if (length <= 0)
+    {
+      if(ignoreErrno(errno))
+        goto nodata;
+      error_exit_client(server, length);
+      return;
+    }
+
+    reply->readdata += length;
+    if (reply->readdata < reply->datalen)
+      return; /* wait for more data */
+  }
+
+  /* we now have the command and any data, pass it off to the handler */
+  (*replydef->handler)(reply->command, reply->datalen, reply->data, server);
+
+  /* reset SlinkRpl */                      
+  if (reply->datalen > 0)
+    MyFree(reply->data);
+  reply->command = 0;
+
+  if (IsDead(server))
+    return;
+
+nodata:
+  /* If we get here, we need to register for another COMM_SELECT_READ */
+  comm_setselect(fd, FDLIST_SERVER, COMM_SELECT_READ,
+                 read_ctrl_packet, server, 0);
+}
+  
+/*
  * read_packet - Read a 'packet' of data from a connection and process it.
  */
 void
@@ -161,7 +273,7 @@ read_packet(int fd, void *data)
   int fd_r = client_p->fd;
 
 #ifdef MISSING_SOCKPAIR
-  if (IsServer(client_p))
+  if (HasServlink(client_p))
   {
     assert(client_p->fd_r > -1);
     fd_r = client_p->fd_r;
@@ -232,7 +344,7 @@ read_packet(int fd, void *data)
   /* server fd may have changed */
   fd_r = client_p->fd;
 #ifdef MISSING_SOCKPAIR
-  if (IsServer(client_p))
+  if (HasServlink(client_p))
   {
     assert(client_p->fd_r > -1);
     fd_r = client_p->fd_r;

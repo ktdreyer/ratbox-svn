@@ -125,13 +125,14 @@ static void stats_class(struct Client *);
 static void stats_memory(struct Client *);
 static void stats_servlinks(struct Client *);
 static void stats_ltrace(struct Client *, int, char**);
+static void stats_ziplinks(struct Client *);
 
 /* This table contains the possible stats items, in order:
  * /stats name,  function to call, operonly? adminonly? /stats letter
  * case only matters in the stats letter column.. -- fl_ */
 static struct StatsStruct stats_cmd_table[] =
 {
-  /* function  	need_oper need_admin  letter	*/
+  /* letter     function            need_oper need_admin */
   { 'a',	stats_adns_servers,	1,	1,	},
   { 'A',	stats_adns_servers,	1,	1,	},
   { 'c',	stats_connect,		1,	0,	},
@@ -173,7 +174,7 @@ static struct StatsStruct stats_cmd_table[] =
   { 'y',	stats_class,		1,	0,	},
   { 'Y',	stats_class,		1,	0,	},
   { 'z',	stats_memory,		1,	0,	},
-  { 'Z',	stats_memory,		1,	0,	},
+  { 'Z',	stats_ziplinks,		1,	0,	},
   { '?',	stats_servlinks,	1,	0,	},
   { (char) 0, 	(void (*)()) 0,		0,	0,	}
 };
@@ -426,6 +427,35 @@ static void stats_class(struct Client *client_p)
 static void stats_memory(struct Client *client_p)
 {
   count_memory(client_p);
+}
+
+static void stats_ziplinks(struct Client *client_p)
+{
+  dlink_node *ptr;
+  struct Client *target_p;
+  int sent_data = 0;
+  char buf[256];
+
+  for(ptr = serv_list.head; ptr; ptr = ptr->next)
+  {
+    target_p = ptr->data;
+    if (IsCapable(target_p, CAP_ZIP))
+    {
+      sendto_one(client_p, ":%s %d %s :ZipLinks stats for %s for the past %d minutes send[%lu bytes data/%lu bytes wire/%.2f%% ratio] recv[%lu bytes data/%lu bytes wire/%.2f%% ratio]",
+                 me.name, RPL_STATSDEBUG, client_p->name, target_p->name,
+                 (ZIPSTATS_TIME / 60),
+                 target_p->localClient->zipstats.out,
+                 target_p->localClient->zipstats.out_wire,
+                 target_p->localClient->zipstats.out_ratio,
+                 target_p->localClient->zipstats.in,
+                 target_p->localClient->zipstats.in_wire,
+                 target_p->localClient->zipstats.in_ratio);
+      sent_data++;
+    }
+  }
+  sendto_one(client_p, ":%s %d %s :%u ziplink%s",
+             me.name, RPL_STATSDEBUG, client_p->name, sent_data,
+             (sent_data==1)?"":"s");
 }
 
 static void stats_servlinks(struct Client *client_p)
