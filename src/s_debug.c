@@ -258,6 +258,10 @@ void count_memory(struct Client *source_p)
         channel_users++;
       for (dlink = chptr->chanops.head; dlink; dlink = dlink->next)
         channel_users++;
+#ifdef REQUIRE_OANDV
+      for (dlink = chptr->chanops_voiced.head; dlink; dlink = dlink->next)
+        channel_users++;
+#endif
       for (dlink = chptr->voiced.head; dlink; dlink = dlink->next)
         channel_users++;
       for (dlink = chptr->halfops.head; dlink; dlink = dlink->next)

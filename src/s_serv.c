@@ -1564,6 +1564,9 @@ burst_all(struct Client *client_p)
       if(chptr->users != 0)
         {
           burst_members(client_p,&chptr->chanops);
+#ifdef REQUIRE_OANDV
+          burst_members(client_p,&chptr->chanops_voiced);
+#endif
           burst_members(client_p,&chptr->voiced);
           burst_members(client_p,&chptr->halfops);
           burst_members(client_p,&chptr->peons);
@@ -1582,6 +1585,9 @@ burst_all(struct Client *client_p)
               if(vchan->users != 0)
                 {
                   burst_members(client_p,&vchan->chanops);
+#ifdef REQUIRE_OANDV
+                  burst_members(client_p,&vchan->chanops_voiced);
+#endif
                   burst_members(client_p,&vchan->voiced);
                   burst_members(client_p,&vchan->halfops);
                   burst_members(client_p,&vchan->peons);
@@ -1653,6 +1659,9 @@ burst_channel(struct Client *client_p, struct Channel *chptr)
   struct Channel*   vchan;
 
   burst_ll_members(client_p,&chptr->chanops);
+#ifdef REQUIRE_OANDV
+  burst_ll_members(client_p, &chptr->chanops_voiced);
+#endif
   burst_ll_members(client_p,&chptr->voiced);
   burst_ll_members(client_p,&chptr->halfops);
   burst_ll_members(client_p,&chptr->peons);
@@ -1675,6 +1684,9 @@ burst_channel(struct Client *client_p, struct Channel *chptr)
 	{
 	  vchan = ptr->data;
 	  burst_ll_members(client_p,&vchan->chanops);
+#ifdef REQUIRE_OANDV
+	  burst_ll_members(client_p,&vchan->chanops_voiced);
+#endif
 	  burst_ll_members(client_p,&vchan->voiced);
 	  burst_ll_members(client_p,&vchan->halfops);
 	  burst_ll_members(client_p,&vchan->peons);

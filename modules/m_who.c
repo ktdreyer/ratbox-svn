@@ -69,6 +69,9 @@ static void do_who_on_channel(struct Client *source_p,
 
 static void do_who_list(struct Client *source_p, struct Channel *chptr,
                         dlink_list *peons_list, dlink_list *chanops_list,
+#ifdef REQUIRE_OANDV
+                        dlink_list *chanops_voiced_list,
+#endif
                         dlink_list *halfops_list, dlink_list *voiced_list,
                         char *chanop_flag, char *halfop_flag, char *voiced_flag,
                         char *chname);
@@ -101,15 +104,6 @@ static void m_who(struct Client *client_p,
   char  flags[MAX_SUBLISTS][2];
   int   server_oper = parc > 2 ? (*parv[2] == 'o' ): 0; /* Show OPERS only */
   int   member;
-
-  /*
-  **  Following code is some ugly hacking to preserve the
-  **  functions of the old implementation. (Also, people
-  **  will complain when they try to use masks like "12tes*"
-  **  and get people on channel 12 ;) --msa
-  */
-
-  /* You people code like its supposed to be hard to read *why?* -db */
 
   /* See if mask is there, collapse it or return if not there */
 
@@ -335,6 +329,7 @@ static void who_global(struct Client *source_p,char *mask, int server_oper)
   {
      chptr = lp->data;
      who_common_channel(source_p,chptr->chanops,mask,server_oper,&maxmatches);
+     who_common_channel(source_p,chptr->chanops_voiced,mask,server_oper,&maxmatches);
      who_common_channel(source_p,chptr->halfops,mask,server_oper,&maxmatches);
      who_common_channel(source_p,chptr->voiced,mask,server_oper,&maxmatches);
      who_common_channel(source_p,chptr->peons,mask,server_oper,&maxmatches);
@@ -400,6 +395,9 @@ static void do_who_on_channel(struct Client *source_p,
   do_who_list(source_p, chptr,
               &chptr->peons,
               &chptr->chanops,
+#ifdef REQUIRE_OANDV
+              &chptr->chanops_voiced,
+#endif
               &chptr->halfops,
               &chptr->voiced,
               flags[0],
@@ -411,7 +409,10 @@ static void do_who_on_channel(struct Client *source_p,
 
 static void do_who_list(struct Client *source_p, struct Channel *chptr,
 			dlink_list *peons_list,
-                        dlink_list *chanops_list, 
+                        dlink_list *chanops_list,
+#ifdef REQUIRE_OANDV
+            dlink_list *chanops_voiced_list,
+#endif
 			dlink_list *halfops_list,
 			dlink_list *voiced_list,
 			char *chanop_flag,
@@ -423,6 +424,9 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
   dlink_node *peons_ptr;
   dlink_node *halfops_ptr;
   dlink_node *voiced_ptr;
+#ifdef REQUIRE_OANDV
+  dlink_node *chanops_voiced_ptr;
+#endif
   struct Client *target_p;
   int done=0;
 
@@ -430,8 +434,17 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
   chanops_ptr = chanops_list->head;
   halfops_ptr = halfops_list->head;
   voiced_ptr  = voiced_list->head;
+#ifdef REQUIRE_OANDV
+  chanops_voiced_ptr = chanops_voiced_list->head;
+#endif
 
-  while (done != 4)
+#ifdef REQUIRE_OANDV
+#define NUMLISTS 5
+#else
+#define NUMLISTS 4
+#endif
+
+  while (done != NUMLISTS)
     {
       done = 0;
 
@@ -470,6 +483,15 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
           else
             do_who(source_p, target_p, chname, voiced_flag);
           voiced_ptr = voiced_ptr->next;
+        }
+      else
+        done++;
+
+      if(chanops_voiced_ptr != NULL)
+        {
+          target_p = chanops_voiced_ptr->data;
+          do_who(source_p, target_p, chname, chanop_flag);
+          chanops_voiced_ptr = chanops_voiced_ptr->next;
         }
       else
         done++;

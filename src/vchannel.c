@@ -467,6 +467,15 @@ pick_vchan_id(struct Channel *chptr)
         return target_p->name;
       }
 
+#ifdef REQUIRE_OANDV
+  for (lp = chptr->chanops_voiced.head; lp; lp = lp->next)
+    if (!lp->next)
+      {
+        target_p = lp->data;
+        return target_p->name;
+      }
+#endif
+
   for (lp = chptr->halfops.head; lp; lp = lp->next)
     if (!lp->next)
       {

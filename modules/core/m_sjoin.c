@@ -770,15 +770,21 @@ static void remove_our_modes( int hide_or_not,
   remove_a_mode(hide_or_not, chptr, top_chptr, source_p, &chptr->chanops, 'o');
   remove_a_mode(hide_or_not, chptr, top_chptr, source_p, &chptr->halfops, 'h');
   remove_a_mode(hide_or_not, chptr, top_chptr, source_p, &chptr->voiced, 'v');
+  remove_a_mode(hide_or_not, chptr, top_chptr, source_p,
+                &chptr->chanops_voiced, 'o');
+  remove_a_mode(hide_or_not, chptr, top_chptr, source_p,
+                &chptr->chanops_voiced, 'v');    
 
   /* Move all voice/ops etc. to non opped list */
   dlinkMoveList(&chptr->chanops, &chptr->peons);
   dlinkMoveList(&chptr->halfops, &chptr->peons);
   dlinkMoveList(&chptr->voiced, &chptr->peons);
+  dlinkMoveList(&chptr->chanops_voiced, &chptr->peons);
 
   dlinkMoveList(&chptr->locchanops, &chptr->locpeons);
   dlinkMoveList(&chptr->lochalfops, &chptr->locpeons);
   dlinkMoveList(&chptr->locvoiced, &chptr->locpeons);
+  dlinkMoveList(&chptr->locchanops_voiced, &chptr->peons);
 }
 
 
