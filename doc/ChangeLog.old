@@ -1,3 +1,12 @@
+*** 20001206_3 by db
+- added mr_capab to handlers.h 
+- changed m_capab to use mr_capab, remember capabilities are sent
+  while client is still unregistered
+- fixed another parser bug pointed out by Walter Campbell
+- added sanity test to del_all_accepts
+
+
+
 *** 20001206_2 by db
 - reworked anti channel flooding to allow chanops/voice to flood
   their own channel with impunity. This will allow them to at least
