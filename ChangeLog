@@ -1,3 +1,32 @@
+leeh        2002/08/26 20:10:09 EDT	(20020827_1)
+
+  Modified files:
+    contrib              m_clearchan.c m_opme.c m_owho.c 
+    include              channel.h 
+    modules              m_who.c 
+    modules/core         m_sjoin.c 
+    src                  channel.c channel_mode.c s_debug.c 
+                         s_serv.c send.c 
+  Log:
+  - got rid of #ifdef REQUIRE_OANDV's, dont see why this needs to be
+    turned off.
+  - got rid of the last of the redundant mode crap
+  
+  Revision  Changes    Path
+  1.38      +1 -9      ircd-ratbox/contrib/m_clearchan.c
+  1.36      +1 -7      ircd-ratbox/contrib/m_opme.c
+  1.6       +1 -17     ircd-ratbox/contrib/m_owho.c
+  7.126     +1 -11     ircd-ratbox/include/channel.h
+  1.151     +7 -12     ircd-ratbox/modules/core/m_sjoin.c
+  1.70      +1 -17     ircd-ratbox/modules/m_who.c
+  7.352     +2 -28     ircd-ratbox/src/channel.c
+  7.75      +5 -98     ircd-ratbox/src/channel_mode.c
+  7.79      +0 -2      ircd-ratbox/src/s_debug.c
+  7.295     +0 -2      ircd-ratbox/src/s_serv.c
+  7.220     +0 -8      ircd-ratbox/src/send.c
+
+
+
 ejb         2002/08/26 20:08:47 EDT	(20020827_0)
 
   Modified files:        (Branch: parser-devel)
