@@ -1,3 +1,8 @@
+*** 20001023_1 by db
+- oopsies in fix_key
+
+
+
 *** 20001022_6 by db
 - committed desrt's patches to add magic voodoo to invite on vchan
   /invite to vchan puts you on right vchan without the !nick key being
