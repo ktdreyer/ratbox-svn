@@ -1,3 +1,35 @@
+leeh        2003/08/10 20:25:19 EDT	(20030811_0)
+
+  Modified files:
+    include              client.h config.h config.h.dist s_serv.h 
+                         send.h 
+    modules              m_join.c m_svinfo.c 
+    modules/core         m_kill.c m_message.c m_nick.c 
+    src                  client.c hash.c parse.c s_serv.c send.c 
+  Log:
+  - made a start on TS6, by start I mean I changed the ts version and
+    fixed the id hash.. thats about it ;).
+  - rewrote send.c
+  
+  Revision  Changes    Path
+  7.210     +27 -18    ircd-ratbox/include/client.h
+  7.165     +16 -6     ircd-ratbox/include/config.h
+  7.69      +16 -6     ircd-ratbox/include/config.h.dist
+  7.83      +17 -19    ircd-ratbox/include/s_serv.h
+  7.73      +7 -18     ircd-ratbox/include/send.h
+  1.85      +4 -17     ircd-ratbox/modules/core/m_kill.c
+  1.136     +13 -33    ircd-ratbox/modules/core/m_message.c
+  1.124     +2 -2      ircd-ratbox/modules/core/m_nick.c
+  1.134     +2 -3      ircd-ratbox/modules/m_join.c
+  1.49      +11 -14    ircd-ratbox/modules/m_svinfo.c
+  7.395     +2 -2      ircd-ratbox/src/client.c
+  7.82      +96 -67    ircd-ratbox/src/hash.c
+  7.163     +47 -140   ircd-ratbox/src/parse.c
+  7.342     +0 -1      ircd-ratbox/src/s_serv.c
+  7.248     +292 -596  ircd-ratbox/src/send.c
+
+
+
 leeh        2003/08/09 12:05:42 EDT	(20030809_5)
 
   Modified files:
