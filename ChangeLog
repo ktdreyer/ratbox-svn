@@ -1,3 +1,16 @@
+androsyn    2002/11/24 08:24:00 UTC	(20021124_5)
+
+  Modified files:
+    src                  s_bsd_epoll.c 
+  Log:
+  Update epoll interface to what should be the final one..still waiting for
+  this to end up in glibc at some point.. :P
+  
+  Revision  Changes    Path
+  1.5       +46 -26    ircd-ratbox/src/s_bsd_epoll.c
+
+
+
 leeh        2002/11/24 02:24:04 UTC	(20021124_4)
 
   Modified files:
