@@ -1,3 +1,16 @@
+*** 20001028_1 by adrian
+
+
+move check_pings() into an event, and tidy up a random comment.
+check_pings() is now called once a second to make sure we catch all
+pings that should be pong'ed, since nextping isn't reset anywhere
+in the code anymore. This isn't entirely optimal, but it will do
+until I've tidied up the rest of the network code. When this is
+done, I'll optimise check_pings() so it doesn't have to do so much
+work to decide whether a client/server should have responded.
+
+
+
 *** 20001027_1 by toot
 made vchan notices into numeric replies.  276-278 don't seem to be used for anything in
 any ircd i checked, so went for them
