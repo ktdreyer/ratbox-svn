@@ -1,3 +1,7 @@
+*** 20001220_19 by ejb
+ -made +z work properly
+
+
 *** 20001220_18 by ejb
 - fixed ircd_lexer (oops)
 
