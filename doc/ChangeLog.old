@@ -1,3 +1,15 @@
+leeh        2001/12/20 13:38:07 EST	(20011220_3)
+
+  Modified files:
+    modules              m_quit.c 
+  Log:
+  - m_quit() can never be called by a server or a foreign client
+  
+  Revision  Changes    Path
+  1.21      +2 -2      ircd-hybrid-7/modules/m_quit.c
+
+
+
 leeh        2001/12/20 13:34:06 EST	(20011220_2)
 
   Modified files:
