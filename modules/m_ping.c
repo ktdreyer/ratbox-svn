@@ -111,10 +111,7 @@ ms_ping(struct Client *client_p, struct Client *source_p, int parc, const char *
 	const char *origin, *destination;
 
 	if(parc < 2 || EmptyString(parv[1]))
-	{
-		sendto_one(source_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
 		return 0;
-	}
 
 /* origin == source_p->name, lets not even both wasting effort on it --fl_ */
 	origin = source_p->name;

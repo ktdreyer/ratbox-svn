@@ -133,7 +133,8 @@ m_oper(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	}
 	else
 	{
-		sendto_one(source_p, form_str(ERR_PASSWDMISMATCH), me.name, parv[0]);
+		sendto_one(source_p, form_str(ERR_PASSWDMISMATCH),
+			   me.name, source_p->name);
 		log_foper(source_p, name);
 
 		if(ConfigFileEntry.failed_oper_notice)

@@ -511,7 +511,7 @@ m_info(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	{
 		/* safe enough to give this on a local connect only */
 		sendto_one(source_p, form_str(RPL_LOAD2HI),
-			   me.name, parv[0], "INFO");
+			   me.name, source_p->name, "INFO");
 		return 0;
 	}
 	else
@@ -618,12 +618,12 @@ static void
 send_birthdate_online_time(struct Client *source_p)
 {
 	sendto_one(source_p, ":%s %d %s :Birth Date: %s, compile # %s",
-		   get_uid(&me, source_p), RPL_INFO, 
-		   get_uid(source_p, source_p), creation, generation);
+		   get_id(&me, source_p), RPL_INFO, 
+		   get_id(source_p, source_p), creation, generation);
 
 	sendto_one(source_p, ":%s %d %s :On-line since %s",
-		   get_uid(&me, source_p), RPL_INFO, 
-		   get_uid(source_p, source_p), myctime(me.firsttime));
+		   get_id(&me, source_p), RPL_INFO, 
+		   get_id(source_p, source_p), myctime(me.firsttime));
 }
 
 /*
@@ -648,16 +648,16 @@ send_conf_options(struct Client *source_p)
 		if(infoptr->intvalue)
 		{
 			sendto_one(source_p, ":%s %d %s :%-30s %-5d [%-30s]",
-				   get_uid(&me, source_p), RPL_INFO,
-				   get_uid(source_p, source_p),
+				   get_id(&me, source_p), RPL_INFO,
+				   get_id(source_p, source_p),
 				   infoptr->name, infoptr->intvalue, 
 				   infoptr->desc);
 		}
 		else
 		{
 			sendto_one(source_p, ":%s %d %s :%-30s %-5s [%-30s]",
-				   get_uid(&me, source_p), RPL_INFO,
-				   get_uid(source_p, source_p),
+				   get_id(&me, source_p), RPL_INFO,
+				   get_id(source_p, source_p),
 				   infoptr->name, infoptr->strvalue, 
 				   infoptr->desc);
 		}
@@ -678,8 +678,8 @@ send_conf_options(struct Client *source_p)
 				char *option = *((char **) info_table[i].option);
 
 				sendto_one(source_p, ":%s %d %s :%-30s %-5s [%-30s]",
-					   get_uid(&me, source_p), RPL_INFO,
-					   get_uid(source_p, source_p),
+					   get_id(&me, source_p), RPL_INFO,
+					   get_id(source_p, source_p),
 					   info_table[i].name,
 					   option ? option : "NONE",
 					   info_table[i].desc ? info_table[i].desc : "<none>");
@@ -694,8 +694,8 @@ send_conf_options(struct Client *source_p)
 				char *option = (char *) info_table[i].option;
 
 				sendto_one(source_p, ":%s %d %s :%-30s %-5s [%-30s]",
-					   get_uid(&me, source_p), RPL_INFO,
-					   get_uid(source_p, source_p),
+					   get_id(&me, source_p), RPL_INFO,
+					   get_id(source_p, source_p),
 					   info_table[i].name,
 					   option ? option : "NONE",
 					   info_table[i].desc ? info_table[i].desc : "<none>");
@@ -710,8 +710,8 @@ send_conf_options(struct Client *source_p)
 				int option = *((int *) info_table[i].option);
 
 				sendto_one(source_p, ":%s %d %s :%-30s %-5d [%-30s]",
-					   get_uid(&me, source_p), RPL_INFO,
-					   get_uid(source_p, source_p),
+					   get_id(&me, source_p), RPL_INFO,
+					   get_id(source_p, source_p),
 					   info_table[i].name,
 					   option,
 					   info_table[i].desc ? info_table[i].desc : "<none>");
@@ -727,8 +727,8 @@ send_conf_options(struct Client *source_p)
 				int option = *((int *) info_table[i].option);
 
 				sendto_one(source_p, ":%s %d %s :%-30s %-5s [%-30s]",
-					   get_uid(&me, source_p), RPL_INFO,
-					   get_uid(source_p, source_p),
+					   get_id(&me, source_p), RPL_INFO,
+					   get_id(source_p, source_p),
 					   info_table[i].name,
 					   option ? "ON" : "OFF",
 					   info_table[i].desc ? info_table[i].desc : "<none>");
@@ -743,8 +743,8 @@ send_conf_options(struct Client *source_p)
 				int option = *((int *) info_table[i].option);
 
 				sendto_one(source_p, ":%s %d %s :%-30s %-5s [%-30s]",
-					   get_uid(&me, source_p), RPL_INFO,
-					   get_uid(source_p, source_p),
+					   get_id(&me, source_p), RPL_INFO,
+					   get_id(source_p, source_p),
 					   info_table[i].name,
 					   option ? "YES" : "NO",
 					   info_table[i].desc ? info_table[i].desc : "<none>");

@@ -73,7 +73,7 @@ m_knock(struct Client *client_p, struct Client *source_p, int parc, const char *
 	if(EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-			   me.name, parv[0], "KNOCK");
+			   me.name, source_p->name, "KNOCK");
 		return 0;
 	}
 
@@ -128,15 +128,15 @@ parse_knock(struct Client *client_p, struct Client *source_p,
 
 	if(!IsChannelName(name))
 	{
-		sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
-			   me.name, source_p->name, name);
+		sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
+				   form_str(ERR_NOSUCHCHANNEL), name);
 		return;
 	}
 
 	if((chptr = find_channel(name)) == NULL)
 	{
-		sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
-			   me.name, source_p->name, name);
+		sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
+				   form_str(ERR_NOSUCHCHANNEL), name);
 		return;
 	}
 
@@ -159,8 +159,8 @@ parse_knock(struct Client *client_p, struct Client *source_p,
 	/* cant knock to a +p channel */
 	if(HiddenChannel(chptr))
 	{
-		sendto_one(source_p, form_str(ERR_CANNOTSENDTOCHAN),
-			   me.name, source_p->name, name);
+		sendto_one_numeric(source_p, ERR_CANNOTSENDTOCHAN,
+				   form_str(ERR_CANNOTSENDTOCHAN), name);
 		return;
 	}
 
@@ -170,8 +170,8 @@ parse_knock(struct Client *client_p, struct Client *source_p,
 		/* don't allow a knock if the user is banned */
 		if(is_banned(chptr, source_p, NULL, NULL, NULL))
 		{
-			sendto_one(source_p, form_str(ERR_CANNOTSENDTOCHAN),
-				   me.name, source_p->name, name);
+			sendto_one_numeric(source_p, ERR_CANNOTSENDTOCHAN,
+					   form_str(ERR_CANNOTSENDTOCHAN), name);
 			return;
 		}
 

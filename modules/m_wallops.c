@@ -62,7 +62,8 @@ mo_wallops(struct Client *client_p, struct Client *source_p, int parc, const cha
 
 	if(EmptyString(message))
 	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "WALLOPS");
+		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), 
+			   me.name, source_p->name, "WALLOPS");
 		return 0;
 	}
 
@@ -86,7 +87,9 @@ ms_wallops(struct Client *client_p, struct Client *source_p, int parc, const cha
 
 	if(EmptyString(message))
 	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "WALLOPS");
+		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), 
+			   get_id(&me, source_p), get_id(source_p, source_p),
+			   "WALLOPS");
 		return 0;
 	}
 

@@ -61,12 +61,6 @@ mo_restart(struct Client *client_p, struct Client *source_p, int parc, const cha
 	dlink_node *ptr;
 	struct Client *target_p;
 
-	if(!MyClient(source_p) || !IsOper(source_p))
-	{
-		sendto_one(source_p, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-		return 0;
-	}
-
 	if(!IsOperDie(source_p))
 	{
 		sendto_one(source_p, ":%s NOTICE %s :You have no D flag", me.name, parv[0]);

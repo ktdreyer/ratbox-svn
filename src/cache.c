@@ -277,24 +277,24 @@ send_user_motd(struct Client *source_p)
 {
 	struct cacheline *lineptr;
 	dlink_node *ptr;
-	const char *nick = EmptyString(source_p->name) ? "*" : source_p->name;
+	const char *myname = get_id(&me, source_p);
+	const char *nick = EmptyString(source_p->name) ? "*" : get_id(source_p, source_p);
 
 	if(user_motd == NULL || dlink_list_length(&user_motd->contents) == 0)
 	{
-		sendto_one(source_p, form_str(ERR_NOMOTD), me.name, nick);
+		sendto_one(source_p, form_str(ERR_NOMOTD), myname, nick);
 		return;
 	}
 
-	sendto_one_numeric(source_p, RPL_MOTDSTART, form_str(RPL_MOTDSTART), me.name);
+	sendto_one(source_p, form_str(RPL_MOTDSTART), myname, nick, me.name);
 
 	DLINK_FOREACH(ptr, user_motd->contents.head)
 	{
 		lineptr = ptr->data;
-		sendto_one_numeric(source_p, RPL_MOTD, form_str(RPL_MOTD),
-				   lineptr->data);
+		sendto_one(source_p, form_str(RPL_MOTD), myname, nick, lineptr->data);
 	}
 
-	sendto_one_numeric(source_p, RPL_ENDOFMOTD, form_str(RPL_ENDOFMOTD));
+	sendto_one(source_p, form_str(RPL_ENDOFMOTD), myname, nick);
 }
 
 /* send_oper_motd()

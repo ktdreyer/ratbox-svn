@@ -822,15 +822,15 @@ user_mode(struct Client *client_p, struct Client *source_p, int parc, const char
 
 	if(parc < 2)
 	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "MODE");
+		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, source_p->name, "MODE");
 		return 0;
 	}
 
 	if((target_p = find_person(parv[1])) == NULL)
 	{
 		if(MyConnect(source_p))
-			sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
-				   me.name, parv[0], parv[1]);
+			sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
+					   form_str(ERR_NOSUCHCHANNEL), parv[1]);
 		return 0;
 	}
 
@@ -847,7 +847,7 @@ user_mode(struct Client *client_p, struct Client *source_p, int parc, const char
 
 	if(source_p != target_p || target_p->from != source_p->from)
 	{
-		sendto_one(source_p, form_str(ERR_USERSDONTMATCH), me.name, parv[0]);
+		sendto_one(source_p, form_str(ERR_USERSDONTMATCH), me.name, source_p->name);
 		return 0;
 	}
 
@@ -954,7 +954,7 @@ user_mode(struct Client *client_p, struct Client *source_p, int parc, const char
 			}
 
 	if(badflag)
-		sendto_one(source_p, form_str(ERR_UMODEUNKNOWNFLAG), me.name, parv[0]);
+		sendto_one(source_p, form_str(ERR_UMODEUNKNOWNFLAG), me.name, source_p->name);
 
 	if((source_p->umodes & UMODE_NCHANGE) && !IsOperN(source_p))
 	{
@@ -1103,12 +1103,13 @@ user_welcome(struct Client *source_p)
 			   "NOTICE %s :*** Notice -- Please read the motd if you haven't read it",
 			   source_p->name);
 
-		sendto_one_numeric(source_p, RPL_MOTDSTART, form_str(RPL_MOTDSTART), me.name);
+		sendto_one(source_p, form_str(RPL_MOTDSTART), 
+			   me.name, source_p->name, me.name);
 
-		sendto_one_numeric(source_p, RPL_MOTD, form_str(RPL_MOTD),
-				   "*** This is the short motd ***");
+		sendto_one(source_p, form_str(RPL_MOTD),
+			   me.name, source_p->name, "*** This is the short motd ***");
 
-		sendto_one_numeric(source_p, RPL_ENDOFMOTD, form_str(RPL_ENDOFMOTD));
+		sendto_one(source_p, form_str(RPL_ENDOFMOTD), me.name, source_p->name);
 	}
 	else
 		send_user_motd(source_p);

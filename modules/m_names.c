@@ -80,8 +80,9 @@ m_names(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 		if(!check_channel_name(p))
 		{
-			sendto_one(source_p, form_str(ERR_BADCHANNAME),
-				   me.name, parv[0], (unsigned char *) p);
+			sendto_one_numeric(source_p, ERR_BADCHANNAME,
+					   form_str(ERR_BADCHANNAME),
+					   (unsigned char *) p);
 			return 0;
 		}
 

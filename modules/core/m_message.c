@@ -273,10 +273,8 @@ build_target_list(int p_or_n, const char *command, struct Client *client_p,
 
 			/* non existant channel */
 			else if(p_or_n != NOTICE)
-			{
-				sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name,
-					   source_p->name, nick);
-			}
+				sendto_one_numeric(source_p, ERR_NOSUCHNICK,
+						   form_str(ERR_NOSUCHNICK), nick);
 
 			continue;
 		}
@@ -357,8 +355,8 @@ build_target_list(int p_or_n, const char *command, struct Client *client_p,
 			}
 			else if(p_or_n != NOTICE)
 			{
-				sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name,
-					   source_p->name, nick);
+				sendto_one_numeric(source_p, ERR_NOSUCHNICK,
+						   form_str(ERR_NOSUCHNICK), nick);
 			}
 
 			continue;
@@ -373,8 +371,8 @@ build_target_list(int p_or_n, const char *command, struct Client *client_p,
 		/* no matching anything found - error if not NOTICE */
 		if(p_or_n != NOTICE)
 		{
-			sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name,
-				   source_p->name, nick);
+			sendto_one_numeric(source_p, ERR_NOSUCHNICK,
+					   form_str(ERR_NOSUCHNICK), nick);
 		}
 
 	}
@@ -439,8 +437,8 @@ msg_channel(int p_or_n, const char *command,
 	else
 	{
 		if(p_or_n != NOTICE)
-			sendto_one(source_p, form_str(ERR_CANNOTSENDTOCHAN),
-				   me.name, source_p->name, chptr->chname);
+			sendto_one_numeric(source_p, ERR_CANNOTSENDTOCHAN,
+					   form_str(ERR_CANNOTSENDTOCHAN), chptr->chname);
 	}
 }
 
@@ -720,8 +718,8 @@ handle_special(int p_or_n, const char *command, struct Client *client_p,
 	{
 		if((target_p = find_server(server + 1)) == NULL)
 		{
-			sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
-				   me.name, source_p->name, server + 1);
+			sendto_one_numeric(source_p, ERR_NOSUCHSERVER, 
+					   form_str(ERR_NOSUCHSERVER), server + 1);
 			return;
 		}
 
@@ -731,8 +729,8 @@ handle_special(int p_or_n, const char *command, struct Client *client_p,
 		{
 			if(strchr(nick, '%') || (strncmp(nick, "opers", 5) == 0))
 			{
-				sendto_one(source_p, form_str(ERR_NOSUCHNICK),
-					   me.name, source_p->name, nick);
+				sendto_one_numeric(source_p, ERR_NOSUCHNICK, 
+						   form_str(ERR_NOSUCHNICK), nick);
 				return;
 			}
 		}
@@ -800,8 +798,8 @@ handle_special(int p_or_n, const char *command, struct Client *client_p,
 
 		if((s = strrchr(nick, '.')) == NULL)
 		{
-			sendto_one(source_p, form_str(ERR_NOTOPLEVEL),
-				   me.name, source_p->name, nick);
+			sendto_one_numeric(source_p, ERR_NOTOPLEVEL,
+					   form_str(ERR_NOTOPLEVEL), nick);
 			return;
 		}
 		while (*++s)
@@ -809,8 +807,8 @@ handle_special(int p_or_n, const char *command, struct Client *client_p,
 				break;
 		if(*s == '*' || *s == '?')
 		{
-			sendto_one(source_p, form_str(ERR_WILDTOPLEVEL),
-				   me.name, source_p->name, nick);
+			sendto_one_numeric(source_p, ERR_WILDTOPLEVEL,
+					   form_str(ERR_WILDTOPLEVEL), nick);
 			return;
 		}
 

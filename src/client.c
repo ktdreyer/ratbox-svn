@@ -852,7 +852,8 @@ find_chasing(struct Client *source_p, const char *user, int *chasing)
 		return who;
 	if(!(who = get_history(user, (long) KILLCHASETIMELIMIT)))
 	{
-		sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name, source_p->name, user);
+		sendto_one_numeric(source_p, ERR_NOSUCHNICK,
+				   form_str(ERR_NOSUCHNICK), user);
 		return (NULL);
 	}
 	if(chasing)

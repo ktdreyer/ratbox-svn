@@ -72,7 +72,9 @@ m_part(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 	if(EmptyString(parv[1]))
 	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "PART");
+		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), 
+			   get_id(&me, source_p),
+			   get_id(source_p, source_p), "PART");
 		return 0;
 	}
 
@@ -112,14 +114,16 @@ part_one_client(struct Client *client_p, struct Client *source_p, char *name, ch
 
 	if((chptr = find_channel(name)) == NULL)
 	{
-		sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL), me.name, source_p->name, name);
+		sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
+				   form_str(ERR_NOSUCHCHANNEL), name);
 		return;
 	}
 
 	msptr = find_channel_membership(chptr, source_p);
 	if(msptr == NULL)
 	{
-		sendto_one(source_p, form_str(ERR_NOTONCHANNEL), me.name, source_p->name, name);
+		sendto_one_numeric(source_p, ERR_NOTONCHANNEL,
+				   form_str(ERR_NOTONCHANNEL), name);
 		return;
 	}
 

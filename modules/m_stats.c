@@ -199,7 +199,7 @@ m_stats(struct Client *client_p, struct Client *source_p, int parc, const char *
 	if(EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-			   me.name, parv[0], "STATS");
+			   me.name, source_p->name, "STATS");
 		return 0;
 	}
 
@@ -208,7 +208,7 @@ m_stats(struct Client *client_p, struct Client *source_p, int parc, const char *
 	{
 		/* safe enough to give this on a local connect only */
 		sendto_one(source_p, form_str (RPL_LOAD2HI),
-			   me.name, parv[0], "STATS");
+			   me.name, source_p->name, "STATS");
 		return 0;
 	}
 	else
@@ -231,8 +231,8 @@ m_stats(struct Client *client_p, struct Client *source_p, int parc, const char *
 			/* The stats table says what privs are needed, so check --fl_ */
 			if(stats_cmd_table[i].need_oper || stats_cmd_table[i].need_admin)
 			{
-				sendto_one (source_p, form_str (ERR_NOPRIVILEGES), me.name,
-					    source_p->name);
+				sendto_one(source_p, form_str (ERR_NOPRIVILEGES), 
+					   me.name, source_p->name);
 				break;
 			}
 
@@ -272,7 +272,7 @@ mo_stats(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-			   me.name, parv[0], "STATS");
+			   me.name, source_p->name, "STATS");
 		return 0;
 	}
 
@@ -292,8 +292,8 @@ mo_stats(struct Client *client_p, struct Client *source_p, int parc, const char 
 			if((stats_cmd_table[i].need_admin && !IsOperAdmin (source_p)) ||
 			   (stats_cmd_table[i].need_oper && !IsOper (source_p)))
 			{
-				sendto_one (source_p, form_str (ERR_NOPRIVILEGES), me.name,
-					    source_p->name);
+				sendto_one(source_p, form_str (ERR_NOPRIVILEGES),
+					   me.name, source_p->name);
 				break;
 			}
 

@@ -105,7 +105,7 @@ m_away(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	   (CurrentTime - source_p->user->last_away) < ConfigFileEntry.pace_wait)
 	{
 		sendto_one(source_p, form_str(RPL_LOAD2HI), 
-			   me.name, parv[0], "AWAY");
+			   me.name, source_p->name, "AWAY");
 		return 0;
 	}
 

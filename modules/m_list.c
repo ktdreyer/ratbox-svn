@@ -68,7 +68,7 @@ m_list(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	if(((last_used + ConfigFileEntry.pace_wait) > CurrentTime))
 	{
 		sendto_one(source_p, form_str(RPL_LOAD2HI),
-			   me.name, parv[0], "LIST");
+			   me.name, source_p->name, "LIST");
 		return 0;
 	}
 	else
@@ -165,7 +165,8 @@ list_named_channel(struct Client *source_p, const char *name)
 
 	if(*n == '\0')
 	{
-		sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name, source_p->name, name);
+		sendto_one_numeric(source_p, ERR_NOSUCHNICK, 
+				   form_str(ERR_NOSUCHNICK), name);
 		sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
 		return;
 	}
@@ -174,7 +175,8 @@ list_named_channel(struct Client *source_p, const char *name)
 
 	if(chptr == NULL)
 	{
-		sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name, source_p->name, n);
+		sendto_one_numeric(source_p, ERR_NOSUCHNICK,
+				   form_str(ERR_NOSUCHNICK), n);
 		sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
 		return;
 	}

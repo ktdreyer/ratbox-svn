@@ -81,7 +81,7 @@ m_whois(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 	if(parc < 2 || EmptyString(parv[1]))
 	{
-		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
+		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, source_p->name);
 		return 0;
 	}
 
@@ -127,7 +127,7 @@ mo_whois(struct Client *client_p, struct Client *source_p, int parc, const char 
 {
 	if(parc < 2 || EmptyString(parv[1]))
 	{
-		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
+		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, source_p->name);
 		return 0;
 	}
 
@@ -159,7 +159,8 @@ ms_whois(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if(parc < 3 || EmptyString(parv[2]))
 	{
-		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
+		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), 
+			   get_id(&me, source_p), get_id(source_p, source_p));
 		return 0;
 	}
 
@@ -169,7 +170,8 @@ ms_whois(struct Client *client_p, struct Client *source_p, int parc, const char 
 	/* check if parv[1] exists */
 	if((target_p = find_client(parv[1])) == NULL)
 	{
-		sendto_one(source_p, form_str(ERR_NOSUCHSERVER), me.name, parv[0], parv[1]);
+		sendto_one_numeric(source_p, ERR_NOSUCHSERVER,
+				   form_str(ERR_NOSUCHSERVER), parv[1]);
 		return 0;
 	}
 
@@ -228,8 +230,8 @@ do_whois(struct Client *client_p, struct Client *source_p, int parc, const char 
 		single_whois(source_p, target_p, glob);
 	}
 	else
-		sendto_one(source_p, form_str(ERR_NOSUCHNICK),
-			   me.name, parv[0], nick);
+		sendto_one_numeric(source_p, ERR_NOSUCHNICK,
+				   form_str(ERR_NOSUCHNICK), nick);
 
 	sendto_one_numeric(source_p, RPL_ENDOFWHOIS, 
 			   form_str(RPL_ENDOFWHOIS), parv[1]);
@@ -279,7 +281,7 @@ single_whois(struct Client *source_p, struct Client *target_p, int glob)
 			   target_p->host, target_p->info);
 
 	cur_len = mlen = ircsprintf(buf, form_str(RPL_WHOISCHANNELS), 
-				    get_uid(&me, source_p), get_uid(source_p, source_p), 
+				    get_id(&me, source_p), get_id(source_p, source_p), 
 				    target_p->name);
 
 	t = buf + mlen;

@@ -69,7 +69,7 @@ m_topic(struct Client *client_p, struct Client *source_p, int parc, const char *
 	if(EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-			   me.name, parv[0], "TOPIC");
+			   me.name, source_p->name, "TOPIC");
 		return 0;
 	}
 
@@ -85,8 +85,8 @@ m_topic(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 		if(chptr == NULL)
 		{
-			sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
-				   me.name, parv[0], parv[1]);
+			sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
+					   form_str(ERR_NOSUCHCHANNEL), parv[1]);
 			return 0;
 		}
 
@@ -97,8 +97,8 @@ m_topic(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 			if(msptr == NULL)
 			{
-				sendto_one(source_p, form_str(ERR_NOTONCHANNEL), me.name, parv[0],
-					   parv[1]);
+				sendto_one_numeric(source_p, ERR_NOTONCHANNEL,
+						   form_str(ERR_NOTONCHANNEL), parv[1]);
 				return 0;
 			}
 
@@ -121,14 +121,14 @@ m_topic(struct Client *client_p, struct Client *source_p, int parc, const char *
 			}
 			else
 				sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
-					   me.name, parv[0], parv[1]);
+					   me.name, source_p->name, parv[1]);
 		}
 		else if(MyClient(source_p))
 		{
 			if(!IsMember(source_p, chptr) && SecretChannel(chptr))
 			{
-				sendto_one(source_p, form_str(ERR_NOTONCHANNEL), me.name, parv[0],
-					   parv[1]);
+				sendto_one_numeric(source_p, ERR_NOTONCHANNEL,
+						   form_str(ERR_NOTONCHANNEL), parv[1]);
 				return 0;
 			}
 			if(chptr->topic == NULL)
@@ -147,7 +147,8 @@ m_topic(struct Client *client_p, struct Client *source_p, int parc, const char *
 	}
 	else
 	{
-		sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL), me.name, parv[0], parv[1]);
+		sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
+				   form_str(ERR_NOSUCHCHANNEL), parv[1]);
 	}
 
 	return 0;

@@ -85,7 +85,8 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 	if(EmptyString(parv[1]))
 	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "JOIN");
+		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), 
+			   me.name, source_p->name, "JOIN");
 		return 0;
 	}
 
@@ -102,8 +103,9 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		/* check the length and name of channel is ok */
 		if(!check_channel_name(name) || (strlen(name) > CHANNELLEN))
 		{
-			sendto_one(source_p, form_str(ERR_BADCHANNAME),
-				   me.name, source_p->name, (unsigned char *) name);
+			sendto_one_numeric(source_p, ERR_BADCHANNAME,
+					   form_str(ERR_BADCHANNAME),
+					   (unsigned char *) name);
 			continue;
 		}
 
@@ -118,8 +120,8 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		else if(!IsChannelName(name) ||
 			(ConfigServerHide.disable_local_channels && (*name == '&')))
 		{
-			sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
-				   me.name, source_p->name, name);
+			sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
+					   form_str(ERR_NOSUCHCHANNEL), name);
 			continue;
 		}
 
@@ -198,7 +200,8 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		    (dlink_list_length(&source_p->user->channel) >=
 				 ConfigChannel.max_chans_per_user * 3)))
 		{
-			sendto_one(source_p, form_str(ERR_TOOMANYCHANNELS), me.name, parv[0], name);
+			sendto_one(source_p, form_str(ERR_TOOMANYCHANNELS),
+				   me.name, source_p->name, name);
 			if(successful_join_count)
 				source_p->localClient->last_join_time = CurrentTime;
 			return 0;
@@ -213,7 +216,8 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 			if(chptr == NULL)
 			{
-				sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE), me.name, parv[0], name);
+				sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
+					   me.name, source_p->name, name);
 				if(successful_join_count > 0)
 					successful_join_count--;
 				continue;
@@ -226,7 +230,8 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		/* can_join checks for +i key, bans etc */
 		if((i = can_join(source_p, chptr, key)))
 		{
-			sendto_one(source_p, form_str(i), me.name, parv[0], name);
+			sendto_one(source_p, form_str(i),
+				   me.name, source_p->name, name);
 			if(successful_join_count > 0)
 				successful_join_count--;
 			continue;

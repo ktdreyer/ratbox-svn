@@ -335,10 +335,9 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 		{
 			if(!(target_p = find_server(parv[server])))
 			{
-				sendto_one(source_p,
-					   form_str(ERR_NOSUCHSERVER),
-					   get_id(&me, source_p), 
-					   get_id(source_p, source_p), parv[server]);
+				sendto_one_numeric(source_p, ERR_NOSUCHSERVER,
+						   form_str(ERR_NOSUCHSERVER),
+						   parv[server]);
 				return (HUNTED_NOSUCH);
 			}
 		}
@@ -361,9 +360,9 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 	{
 		if(!IsRegistered(target_p))
 		{
-			sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
-				   get_id(&me, source_p), 
-				   get_id(source_p, source_p), parv[server]);
+			sendto_one_numeric(source_p, ERR_NOSUCHSERVER,
+					   form_str(ERR_NOSUCHSERVER),
+					   parv[server]);
 			return HUNTED_NOSUCH;
 		}
 
@@ -382,9 +381,8 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 		return (HUNTED_PASS);
 	}
 
-	sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
-		   get_id(&me, source_p), 
-		   get_id(source_p, source_p), parv[server]);
+	sendto_one_numeric(source_p, ERR_NOSUCHSERVER,
+			   form_str(ERR_NOSUCHSERVER), parv[server]);
 	return (HUNTED_NOSUCH);
 }
 

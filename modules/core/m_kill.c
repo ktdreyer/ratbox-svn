@@ -98,7 +98,8 @@ mo_kill(struct Client *client_p, struct Client *source_p, int parc, const char *
 		 */
 		if((target_p = get_history(user, (long) KILLCHASETIMELIMIT)) == NULL)
 		{
-			sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name, parv[0], user);
+			sendto_one_numeric(source_p, ERR_NOSUCHNICK, 
+					   form_str(ERR_NOSUCHNICK), user);
 			return 0;
 		}
 		sendto_one(source_p, ":%s NOTICE %s :KILL changed from %s to %s",
@@ -106,7 +107,7 @@ mo_kill(struct Client *client_p, struct Client *source_p, int parc, const char *
 	}
 	if(IsServer(target_p) || IsMe(target_p))
 	{
-		sendto_one(source_p, form_str(ERR_CANTKILLSERVER), me.name, parv[0]);
+		sendto_one_numeric(source_p, ERR_CANTKILLSERVER, form_str(ERR_CANTKILLSERVER));
 		return 0;
 	}
 
@@ -173,12 +174,6 @@ ms_kill(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 	*buf = '\0';
 
-	if(*parv[1] == '\0')
-	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "KILL");
-		return 0;
-	}
-
 	user = parv[1];
 
 	if(EmptyString(parv[2]))
@@ -214,7 +209,8 @@ ms_kill(struct Client *client_p, struct Client *source_p, int parc, const char *
 		 */
 		if((*user == '.') || (!(target_p = get_history(user, (long) KILLCHASETIMELIMIT))))
 		{
-			sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name, parv[0], user);
+			sendto_one_numeric(source_p, ERR_NOSUCHNICK, 
+					   form_str(ERR_NOSUCHNICK), user);
 			return 0;
 		}
 		sendto_one(source_p, ":%s NOTICE %s :KILL changed from %s to %s",
@@ -224,7 +220,7 @@ ms_kill(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 	if(IsServer(target_p) || IsMe(target_p))
 	{
-		sendto_one(source_p, form_str(ERR_CANTKILLSERVER), me.name, parv[0]);
+		sendto_one_numeric(source_p, ERR_CANTKILLSERVER, form_str(ERR_CANTKILLSERVER));
 		return 0;
 	}
 

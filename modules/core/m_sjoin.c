@@ -293,11 +293,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 		/* if the client doesnt exist or is fake direction, skip. */
 		if(!(target_p = find_client(s)) ||
 		   (target_p->from != client_p) || !IsPerson(target_p))
-		{
-			sendto_one(source_p, form_str(ERR_NOSUCHNICK),
-				   me.name, source_p->name, s);
 			goto nextnick;
-		}
 
 		if(keep_new_modes)
 		{

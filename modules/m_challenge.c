@@ -115,7 +115,8 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 
 		if((aconf = find_conf_by_name(source_p->user->auth_oper, CONF_OPERATOR)) == NULL)
 		{
-			sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, parv[0]);
+			sendto_one(source_p, form_str(ERR_NOOPERHOST), 
+				   me.name, source_p->name);
 			log_foper(source_p, source_p->user->auth_oper);
 
 			if(ConfigFileEntry.failed_oper_notice)
@@ -165,7 +166,7 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 	   !(aconf = find_conf_exact(parv[1], source_p->username,
 				     source_p->sockhost, CONF_OPERATOR)))
 	{
-		sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, parv[0]);
+		sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
 		log_foper(source_p, parv[1]);
 
 		if(ConfigFileEntry.failed_oper_notice)

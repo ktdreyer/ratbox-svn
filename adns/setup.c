@@ -173,13 +173,13 @@ static void ccf_sortlist(adns_state ads, const char *fn, int lno, const char *bu
   const char *word;
   char tbuf[200], *slash, *ep;
   struct in_addr base, mask;
-  size_t l;
+  int l;
   unsigned long initial, baselocal;
 
   if (!buf) return;
   
   ads->nsortlist= 0;
-  while (nextword(&buf,&word,(int*)&l)) {
+  while (nextword(&buf,&word,&l)) {
     if (ads->nsortlist >= MAXSORTLIST) {
       adns__diag(ads,-1,0,"too many sortlist entries, ignoring %.*s onwards",l,word);
       return;

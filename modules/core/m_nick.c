@@ -95,7 +95,8 @@ mr_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 	if(parc < 2 || EmptyString(parv[1]) || (parv[1][0] == '~'))
 	{
 		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
-			   me.name, EmptyString(parv[0]) ? "*" : parv[0]);
+			   me.name, 
+			   EmptyString(source_p->name) ? "*" : source_p->name);
 		return 0;
 	}
 
@@ -121,7 +122,7 @@ mr_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 	if(find_nick_resv(nick))
 	{
 		sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
-			   me.name, EmptyString(parv[0]) ? "*" : parv[0], nick);
+			   me.name, EmptyString(source_p->name) ? "*" : source_p->name, nick);
 		return 0;
 	}
 
@@ -149,7 +150,7 @@ m_nick(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	if(parc < 2 || EmptyString(parv[1]) || (parv[1][0] == '~'))
 	{
 		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
-			   me.name, parv[0]);
+			   me.name, source_p->name);
 		return 0;
 	}
 
@@ -178,7 +179,7 @@ m_nick(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	if(find_nick_resv(nick))
 	{
 		sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
-			   me.name, parv[0], nick);
+			   me.name, source_p->name, nick);
 		return 0;
 	}
 
@@ -238,7 +239,8 @@ ms_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 	if(parc < 2 || EmptyString(parv[1]))
 	{
-		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
+		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), 
+			   get_id(&me, source_p), get_id(source_p, source_p));
 		return 0;
 	}
 
@@ -559,11 +561,11 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
 					     "Nick collision on %s(%s <- %s)(both killed)",
 					     target_p->name, target_p->from->name, client_p->name);
 
+			sendto_one_numeric(target_p, ERR_NICKCOLLISION,
+					   form_str(ERR_NICKCOLLISION), target_p->name);
 			kill_client_serv_butone(NULL, target_p,
 						"%s (Nick collision (new))", me.name);
 			ServerStats->is_kill++;
-			sendto_one(target_p, form_str(ERR_NICKCOLLISION),
-				   me.name, target_p->name, target_p->name);
 
 			target_p->flags |= FLAGS_KILLED;
 			exit_client(client_p, target_p, &me, "Nick collision (new)");
@@ -598,8 +600,8 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
 							     client_p->name);
 
 				ServerStats->is_kill++;
-				sendto_one(target_p, form_str(ERR_NICKCOLLISION),
-					   me.name, target_p->name, target_p->name);
+				sendto_one_numeric(target_p, ERR_NICKCOLLISION,
+						   form_str(ERR_NICKCOLLISION), target_p->name);
 
 				/* if it came from a LL server, itd have been source_p,
 				 * so we dont need to mark target_p as known
@@ -633,8 +635,8 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
 				     client_p->name);
 
 		ServerStats->is_kill++;
-		sendto_one(target_p, form_str(ERR_NICKCOLLISION),
-			   me.name, target_p->name, target_p->name);
+		sendto_one_numeric(target_p, ERR_NICKCOLLISION,
+				   form_str(ERR_NICKCOLLISION), target_p->name);
 
 		/* if we got the message from a LL, it knows about source_p */
 		kill_client_serv_butone(NULL, source_p, "%s (Nick change collision)", me.name);
@@ -670,6 +672,8 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
 
 			ServerStats->is_kill++;
 
+			sendto_one_numeric(target_p, ERR_NICKCOLLISION,
+					   form_str(ERR_NICKCOLLISION), target_p->name);
 			/* this won't go back to the incoming link, so LL doesnt matter */
 			kill_client_serv_butone(client_p, source_p,
 						"%s (Nick change collision)", me.name);
@@ -695,11 +699,11 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
 						     target_p->name, target_p->from->name,
 						     client_p->name);
 
+			sendto_one_numeric(target_p, ERR_NICKCOLLISION,
+					   form_str(ERR_NICKCOLLISION), target_p->name);
 			kill_client_serv_butone(source_p, target_p, "%s (Nick collision)", me.name);
 
 			ServerStats->is_kill++;
-			sendto_one(target_p, form_str(ERR_NICKCOLLISION),
-				   me.name, target_p->name, target_p->name);
 
 			target_p->flags |= FLAGS_KILLED;
 			(void) exit_client(client_p, target_p, &me, "Nick collision");

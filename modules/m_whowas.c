@@ -69,7 +69,7 @@ m_whowas(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if(parc < 2 || EmptyString(parv[1]))
 	{
-		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
+		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, source_p->name);
 		return 0;
 	}
 
@@ -94,7 +94,7 @@ mo_whowas(struct Client *client_p, struct Client *source_p, int parc, const char
 {
 	if(parc < 2)
 	{
-		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
+		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, source_p->name);
 		return 0;
 	}
 
@@ -114,7 +114,7 @@ whowas_do(struct Client *client_p, struct Client *source_p, int parc, const char
 
 	if(parc < 2 || EmptyString(parv[1]))
 	{
-		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
+		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, source_p->name);
 		return 0;
 	}
 	if(parc > 2)
@@ -158,7 +158,8 @@ whowas_do(struct Client *client_p, struct Client *source_p, int parc, const char
 			break;
 	}
 	if(!found)
-		sendto_one(source_p, form_str(ERR_WASNOSUCHNICK), me.name, parv[0], nick);
+		sendto_one(source_p, form_str(ERR_WASNOSUCHNICK), 
+			   me.name, source_p->name, nick);
 
 	sendto_one(source_p, form_str(RPL_ENDOFWHOWAS), 
 		   me.name, source_p->name, parv[1]);

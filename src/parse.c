@@ -236,9 +236,9 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 			if(pbuffer[0] != '\0')
 			{
 				if(IsPerson(from))
-					sendto_one(from,
-						   ":%s %d %s %s :Unknown command",
-						   me.name, ERR_UNKNOWNCOMMAND, from->name, ch);
+					sendto_one(from, form_str(ERR_UNKNOWNCOMMAND),
+						   me.name, ERR_UNKNOWNCOMMAND, 
+						   from->name, ch);
 			}
 			ServerStats->is_unco++;
 			return;
@@ -340,7 +340,9 @@ handle_command(struct Message *mptr, struct Client *client_p,
 		if(!IsServer(client_p))
 		{
 			sendto_one(client_p, form_str(ERR_NEEDMOREPARAMS),
-				   me.name, EmptyString(hpara[0]) ? "*" : hpara[0], mptr->cmd);
+				   me.name, 
+				   EmptyString(client_p->name) ? "*" : client_p->name, 
+				   mptr->cmd);
 			if(MyClient(client_p))
 				return (1);
 			else
@@ -774,7 +776,7 @@ do_numeric(char numeric[], struct Client *client_p, struct Client *source_p, int
 int
 m_not_oper(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	sendto_one(source_p, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
+	sendto_one(source_p, form_str(ERR_NOPRIVILEGES), me.name, source_p->name);
 	return 0;
 }
 
@@ -789,8 +791,7 @@ m_unregistered(struct Client *client_p, struct Client *source_p, int parc, const
 
 	if(client_p->localClient->number_of_nick_changes == 0)
 	{
-		sendto_one(client_p, ":%s %d * %s :Register first.",
-			   me.name, ERR_NOTREGISTERED, parv[0]);
+		sendto_one(client_p, form_str(ERR_NOTREGISTERED), me.name);
 		client_p->localClient->number_of_nick_changes++;
 	}
 
@@ -800,7 +801,7 @@ m_unregistered(struct Client *client_p, struct Client *source_p, int parc, const
 int
 m_registered(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	sendto_one(client_p, form_str(ERR_ALREADYREGISTRED), me.name, parv[0]);
+	sendto_one(client_p, form_str(ERR_ALREADYREGISTRED), me.name, source_p->name);
 	return 0;
 }
 

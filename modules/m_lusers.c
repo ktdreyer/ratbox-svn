@@ -68,7 +68,7 @@ m_lusers(struct Client *client_p, struct Client *source_p, int parc, const char 
 		{
 			/* safe enough to give this on a local connect only */
 			sendto_one(source_p, form_str(RPL_LOAD2HI),
-				   me.name, parv[0], "LUSERS");
+				   me.name, source_p->name, "LUSERS");
 			return 0;
 		}
 		else

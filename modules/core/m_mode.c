@@ -109,7 +109,7 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	if(EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-			   me.name, parv[0], "MODE");
+			   me.name, source_p->name, "MODE");
 		return 0;
 	}
 
@@ -123,8 +123,9 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 	if(!check_channel_name(parv[1]))
 	{
-		sendto_one(source_p, form_str(ERR_BADCHANNAME),
-			   me.name, parv[0], (unsigned char *) parv[1]);
+		sendto_one_numeric(source_p, ERR_BADCHANNAME,
+				   form_str(ERR_BADCHANNAME),
+				   (unsigned char *) parv[1]);
 		return 0;
 	}
 
@@ -132,7 +133,8 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 	if(chptr == NULL)
 	{
-		sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL), me.name, parv[0], parv[1]);
+		sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
+				   form_str(ERR_NOSUCHCHANNEL), parv[1]);
 		return 0;
 	}
 
@@ -180,15 +182,15 @@ ms_mode(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 	if(chptr == NULL)
 	{
-		sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL), 
-			   me.name, source_p->name, parv[1]);
+		sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
+				   form_str(ERR_NOSUCHCHANNEL), parv[1]);
 		return 0;
 	}
 
 	if(IsServer(source_p))
 	{
 		set_channel_mode(client_p, source_p, chptr, NULL,
-				 parc - n, parv + n);
+				 parc - 2, parv + 2);
 	}
 	else
 	{
@@ -198,7 +200,7 @@ ms_mode(struct Client *client_p, struct Client *source_p, int parc, const char *
 			return 0;
 
 		set_channel_mode(client_p, source_p, chptr, msptr,
-				 parc - n, parv + n);
+				 parc - 2, parv + 2);
 	}
 
 	return 0;
@@ -213,15 +215,16 @@ ms_tmode(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(EmptyString(parv[3]))
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-			   me.name, source_p->id, "TMODE");
+			   me.id, source_p->id, "TMODE");
 		return 0;
 	}
 
 	/* Now, try to find the channel in question */
 	if(!IsChanPrefix(parv[2][0]) || !check_channel_name(parv[2]))
 	{
-		sendto_one(source_p, form_str(ERR_BADCHANNAME),
-			   me.name, source_p->id, (unsigned char *) parv[2]);
+		sendto_one_numeric(source_p, ERR_BADCHANNAME,
+				   form_str(ERR_BADCHANNAME), 
+				   (unsigned char *) parv[2]);
 		return 0;
 	}
 
@@ -229,8 +232,8 @@ ms_tmode(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if(chptr == NULL)
 	{
-		sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
-			   me.name, source_p->id, parv[2]);
+		sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
+				   form_str(ERR_NOSUCHCHANNEL), parv[2]);
 		return 0;
 	}
 
@@ -926,8 +929,8 @@ chm_op(struct Client *source_p, struct Channel *chptr,
 	/* empty nick */
 	if(EmptyString(opnick))
 	{
-		sendto_one(source_p, form_str(ERR_NOSUCHNICK),
-			   me.name, source_p->name, "*");
+		sendto_one_numeric(source_p, ERR_NOSUCHNICK,
+				   form_str(ERR_NOSUCHNICK), "*");
 		return;
 	}
 
@@ -941,8 +944,8 @@ chm_op(struct Client *source_p, struct Channel *chptr,
 	if(mstptr == NULL)
 	{
 		if(!(*errors & SM_ERR_NOTONCHANNEL))
-			sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL),
-				   me.name, source_p->name, opnick, chptr->chname);
+			sendto_one_numeric(source_p, ERR_USERNOTINCHANNEL,
+					   form_str(ERR_USERNOTINCHANNEL), opnick, chptr->chname);
 		*errors |= SM_ERR_NOTONCHANNEL;
 		return;
 	}
@@ -1009,8 +1012,8 @@ chm_voice(struct Client *source_p, struct Channel *chptr,
 	/* empty nick */
 	if(EmptyString(opnick))
 	{
-		sendto_one(source_p, form_str(ERR_NOSUCHNICK),
-			   me.name, source_p->name, "*");
+		sendto_one_numeric(source_p, ERR_NOSUCHNICK, 
+				   form_str(ERR_NOSUCHNICK), "*");
 		return;
 	}
 
@@ -1024,8 +1027,8 @@ chm_voice(struct Client *source_p, struct Channel *chptr,
 	if(mstptr == NULL)
 	{
 		if(!(*errors & SM_ERR_NOTONCHANNEL))
-			sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL),
-				   me.name, source_p->name, opnick, chptr->chname);
+			sendto_one_numeric(source_p, ERR_USERNOTINCHANNEL,
+					   form_str(ERR_USERNOTINCHANNEL), opnick, chptr->chname);
 		*errors |= SM_ERR_NOTONCHANNEL;
 		return;
 	}

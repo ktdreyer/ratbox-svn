@@ -491,22 +491,23 @@ mo_modlist(struct Client *client_p, struct Client *source_p, int parc, const cha
 			if(match(parv[1], modlist[i]->name))
 			{
 				sendto_one(source_p, form_str(RPL_MODLIST),
-					   me.name, parv[0],
+					   me.name, source_p->name,
 					   modlist[i]->name,
 					   modlist[i]->address,
-					   modlist[i]->version, modlist[i]->core ? "(core)" : "");
+					   modlist[i]->version, 
+					   modlist[i]->core ? "(core)" : "");
 			}
 		}
 		else
 		{
-			sendto_one(source_p, form_str(RPL_MODLIST), me.name,
-				   parv[0], modlist[i]->name,
+			sendto_one(source_p, form_str(RPL_MODLIST), 
+				   me.name, source_p->name, modlist[i]->name,
 				   modlist[i]->address, modlist[i]->version,
 				   modlist[i]->core ? "(core)" : "");
 		}
 	}
 
-	sendto_one(source_p, form_str(RPL_ENDOFMODLIST), me.name, parv[0]);
+	sendto_one(source_p, form_str(RPL_ENDOFMODLIST), me.name, source_p->name);
 	return 0;
 }
 

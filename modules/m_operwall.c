@@ -67,7 +67,8 @@ mo_operwall(struct Client *client_p, struct Client *source_p, int parc, const ch
 	}
 	if(EmptyString(message))
 	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "OPERWALL");
+		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), 
+			   me.name, source_p->name, "OPERWALL");
 		return 0;
 	}
 

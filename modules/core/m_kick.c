@@ -73,7 +73,8 @@ m_kick(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 	if(EmptyString(parv[2]))
 	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "KICK");
+		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), 
+			   me.name, source_p->name, "KICK");
 		return 0;
 	}
 
@@ -93,7 +94,8 @@ m_kick(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	chptr = find_channel(name);
 	if(!chptr)
 	{
-		sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL), me.name, parv[0], name);
+		sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
+				   form_str(ERR_NOSUCHCHANNEL), name);
 		return 0;
 	}
 
@@ -103,8 +105,8 @@ m_kick(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 		if((msptr == NULL) && MyConnect(source_p))
 		{
-			sendto_one(source_p, form_str(ERR_NOTONCHANNEL),
-				   me.name, source_p->name, name);
+			sendto_one_numeric(source_p, ERR_NOTONCHANNEL,
+					   form_str(ERR_NOTONCHANNEL), name);
 			return 0;
 		}
 
@@ -113,7 +115,7 @@ m_kick(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			if(MyConnect(source_p))
 			{
 				sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
-					   me.name, parv[0], name);
+					   me.name, source_p->name, name);
 				return 0;
 			}
 
@@ -121,7 +123,8 @@ m_kick(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			if(chptr->channelts == 0)
 			{
 				sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
-					   me.name, parv[0], name);
+					   get_id(&me, source_p), 
+					   get_id(source_p, source_p), name);
 				return 0;
 			}
 		}
@@ -185,7 +188,8 @@ m_kick(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		remove_user_from_channel(msptr);
 	}
 	else
-		sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL), me.name, parv[0], user, name);
+		sendto_one_numeric(source_p, ERR_USERNOTINCHANNEL,
+				   form_str(ERR_USERNOTINCHANNEL), user, name);
 
 	return 0;
 }
@@ -195,7 +199,9 @@ ms_kick(struct Client *client_p, struct Client *source_p, int parc, const char *
 {
 	if(*parv[2] == '\0')
 	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "KICK");
+		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), 
+			   get_id(&me, source_p),
+			   get_id(source_p, source_p), "KICK");
 		return 0;
 	}
 

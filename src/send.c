@@ -150,10 +150,6 @@ send_linebuf_remote(struct Client *to, struct Client *from, buf_head_t *linebuf)
 
 		to->flags |= FLAGS_KILLED;
 
-		if(IsPerson(from))
-			sendto_one(from, form_str(ERR_GHOSTEDCLIENT),
-				   me.name, from->name, to->name, to->username, to->host, to->from);
-
 		exit_client(NULL, to, &me, "Ghosted client");
 		return;
 	}
@@ -761,8 +757,8 @@ sendto_match_servs(struct Client *source_p, const char *mask, int cap, const cha
 	 */
 	if(found == 0 && IsClient(source_p) &&
 	  (match(mask, me.name) == 0))
-		sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
-			   me.name, source_p->name, mask);
+		sendto_one_numeric(source_p, ERR_NOSUCHSERVER,
+				   form_str(ERR_NOSUCHSERVER), mask);
 }
 
 /* sendto_anywhere()
