@@ -1,3 +1,13 @@
+*** 20001213_3 by db
+- halfops wasn't being propogated by sjoin, so added quick change
+  to pass the halfop along
+- however... also added code to send halfops along as normal peons for now
+  they still will have their halfops respected on their server, just
+  no one else will notice. There should be a CAP_HALFOP added...
+- tidied up and added more comments to m_stats.c
+
+
+
 *** 20001213_2 by db
 - urgh stupid typo sorry ! sorry sorry sorry!
 
