@@ -1,3 +1,8 @@
+*** 20010408_2 by fl_
+- moved the bogus TS message to FLAGS_DEBUG
+- updated opers.txt
+
+
 *** 20010408_1 by fl_
 - fixed a small bug
 
