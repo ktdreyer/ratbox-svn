@@ -1,3 +1,17 @@
+androsyn    2004/03/01 15:24:34 EST	(20040301_14)
+
+  Modified files:
+    include              ircd_defs.h 
+    src                  irc_string.c 
+  Log:
+  Missed some commits
+  
+  Revision  Changes    Path
+  7.47      +1 -1      ircd-ratbox/include/ircd_defs.h
+  7.69      +2 -2      ircd-ratbox/src/irc_string.c
+
+
+
 androsyn    2004/03/01 15:20:56 EST	(20040301_13)
 
   Modified files:
