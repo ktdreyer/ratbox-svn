@@ -1,3 +1,15 @@
+androsyn    2002/09/10 19:21:10 UTC	(20020910_3)
+
+  Modified files:
+    src                  newconf.c 
+  Log:
+  Fix a type mismatch warning on forte c
+  
+  Revision  Changes    Path
+  7.37      +1 -1      ircd-ratbox/src/newconf.c
+
+
+
 androsyn    2002/09/10 19:15:34 UTC	(20020910_2)
 
   Modified files:
