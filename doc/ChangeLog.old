@@ -1,3 +1,7 @@
+*** 20010323_5 by toot
+couple of fixes for fussy compilers
+
+
 *** 20010323_4 by ejb
 - add support for '1 minute 30 seconds' and suchlike in the parser.
 
