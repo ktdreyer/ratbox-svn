@@ -735,14 +735,14 @@ void add_connection(struct Listener* listener, int fd)
 
 #ifdef USE_IAUTH
   if (iAuth.socket == NOSOCK)
-    {
-      send(fd,
-        "NOTICE AUTH :*** Ircd AUthentication Server is temporarily down, please connect later\r\n",
-        87,
-        0);
-      close(fd);
-      return;
-    }
+  {
+    send(fd,
+      "NOTICE AUTH :*** Ircd Authentication Server is temporarily down, please connect later\r\n",
+      87,
+      0);
+    close(fd);
+    return;
+  }
 #endif
 
   /* 
@@ -976,10 +976,15 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
       FD_ZERO(read_set);
       FD_ZERO(write_set);
 
-#ifdef USE_IAUTH
-  if (iAuth.socket != NOSOCK)
-    FD_SET(iAuth.socket, read_set);
-#endif
+		#ifdef USE_IAUTH
+      if (iAuth.socket != NOSOCK)
+      {
+      	if (IsIAuthConnect(iAuth))
+      		FD_SET(iAuth.socket, write_set);
+      	else
+        	FD_SET(iAuth.socket, read_set);
+      }
+    #endif
 
       for (auth = AuthPollList; auth; auth = auth->next) {
         assert(-1 < auth->fd);
@@ -1078,6 +1083,39 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
     if (FD_ISSET(listener->fd, read_set))
       accept_connection(listener);
   }
+
+#ifdef USE_IAUTH
+  /*
+   * Check IAuth
+   */
+  if (iAuth.socket != NOSOCK)
+  {
+  	if (IsIAuthConnect(iAuth) && FD_ISSET(iAuth.socket, write_set))
+  	{
+  		/*FD_CLR(iAuth.socket, write_set);*/
+
+  		/*
+  		 * Complete the connection to the IAuth server
+  		 */
+  		if (!CompleteIAuthConnection())
+  		{
+  			close(iAuth.socket);
+  			iAuth.socket = NOSOCK;
+  		}
+  	}
+  	else if (FD_ISSET(iAuth.socket, read_set))
+    {
+      if (!ParseIAuth())
+      {
+        /*
+         * IAuth server closed the connection
+         */
+        close(iAuth.socket);
+        iAuth.socket = NOSOCK;
+      }
+    }
+  }
+#endif
 
   for (i = 0; i <= highest_fd; i++) {
     if (!(GlobalFDList[i] & mask) || !(cptr = local[i]))

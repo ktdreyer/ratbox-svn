@@ -935,11 +935,11 @@ static int register_user(struct Client *cptr, struct Client *sptr,
 
   if (MyConnect(sptr))
     {
-      if(local_cptr_list)
-        local_cptr_list->previous_local_client = sptr;
+      if(LocalClientList)
+        LocalClientList->previous_local_client = sptr;
       sptr->previous_local_client = (struct Client *)NULL;
-      sptr->next_local_client = local_cptr_list;
-      local_cptr_list = sptr;
+      sptr->next_local_client = LocalClientList;
+      LocalClientList = sptr;
     }
   
   sendto_serv_butone(cptr, "NICK %s %d %lu %s %s %s %s :%s",

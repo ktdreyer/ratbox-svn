@@ -831,6 +831,21 @@ int main(int argc, char *argv[])
     strncpy_irc(me.name, aconf->host, HOSTLEN);
   strncpy_irc(me.host, aconf->host, HOSTLEN);
 
+#ifdef USE_IAUTH
+	/* bingo - hardcoded for now - will be changed later */
+	strcpy(iAuth.hostname, "127.0.0.1");
+	iAuth.port = 4444;
+	iAuth.flags = 0;
+
+	ConnectToIAuth();
+
+	if (iAuth.socket == NOSOCK)
+	{
+		fprintf(stderr, "Unable to connect to IAuth server\n");
+		exit (-1);
+	}
+#endif
+
   me.fd = -1;
   me.from = &me;
   me.servptr = &me;
