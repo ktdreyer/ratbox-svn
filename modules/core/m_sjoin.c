@@ -369,90 +369,95 @@ static void ms_sjoin(struct Client *client_p,
   *mbuf++ = '+';
 
   sh = sjbuf_nh;
-  for (s = s0 = strtoken(&p, parv[args+4], " "); s;
-       				s = s0 = strtoken(&p, (char *)NULL, " "))
+  s = s0 = parv[args+4];
+  if ((p = strchr(s, ' ')) != NULL)
+    {
+      *p++ = '\0';
+    }
+
+  while (s)
     {
       fl = 0;
 
       for (i = 0; i < 2; i++)
-      {
-        if (*s == '@')
 	{
-	  fl |= MODE_CHANOP;
-          if (keep_new_modes)
-            *sh++ = *s;
-	  s++;
+	  if (*s == '@')
+	    {
+	      fl |= MODE_CHANOP;
+	      if (keep_new_modes)
+		*sh++ = *s;
+	      s++;
+	    }
+	  else if (*s == '+')
+	    {
+	      fl |= MODE_VOICE;
+	      if (keep_new_modes)
+		*sh++ = *s;
+	      s++;
+	    }
+	  else if (*s == '%')
+	    {
+	      fl |= MODE_HALFOP;
+	      if (keep_new_modes)
+		*sh++ = '@';
+	      s++;
+	    }
 	}
-        else if (*s == '+')
-	{
-	  fl |= MODE_VOICE;
-          if (keep_new_modes)
-            *sh++ = *s;
-	  s++;
-	}
-        else if (*s == '%')
-        {
-          fl |= MODE_HALFOP;
-          if (keep_new_modes)
-            *sh++ = '@';
-          s++;
-        }
-      }
 
       sh += ircsprintf(sh, "%s ", s); /* Copy over the nick */
 
       if (!keep_new_modes)
-       {
-        if (fl & MODE_CHANOP)
-          {
-            fl = MODE_DEOPPED;
-          }
-        else
-          {
-            fl = 0;
-          }
-       }
+	{
+	  if (fl & MODE_CHANOP)
+	    {
+	      fl = MODE_DEOPPED;
+	    }
+	  else
+	    {
+	      fl = 0;
+	    }
+	}
 
       if (!(target_p = find_chasing(source_p, s, NULL)))
-        continue;
+        goto lazy;
       if (target_p->from != client_p)
-        continue;
+        goto lazy;
       if (!IsPerson(target_p))
-        continue;
+        goto lazy;
       
       people++;
 
       /* LazyLinks - Introduce unknown clients before sending the sjoin */
       if (ServerInfo.hub)
-      {
-        for (m = serv_list.head; m; m = m->next)
-        {
-          lclient_p = m->data;
+	{
+	  for (m = serv_list.head; m; m = m->next)
+	    {
+	      lclient_p = m->data;
+	      
+	      /* Hopefully, the server knows about it's own clients. */
+	      if (client_p == lclient_p)
+		continue;
 
-          /* Hopefully, the server knows about it's own clients. */
-          if (client_p == lclient_p)
-            continue;
+	      /* Ignore non lazylinks */
+	      if (!IsCapable(lclient_p,CAP_LL))
+		continue;
 
-          /* Ignore non lazylinks */
-          if (!IsCapable(lclient_p,CAP_LL))
-            continue;
+	      /* Ignore servers we won't tell anyway */
+	      if( !(RootChan(chptr)->lazyLinkChannelExists &
+		    lclient_p->localClient->serverMask) )
+		continue;
 
-          /* Ignore servers we won't tell anyway */
-          if( !(RootChan(chptr)->lazyLinkChannelExists &
-                lclient_p->localClient->serverMask) )
-            continue;
-
-          /* Ignore servers that already know target_p */
-          if( !(target_p->lazyLinkClientExists &
-                lclient_p->localClient->serverMask) )
-          {
-            /* Tell LazyLink Leaf about client_p,
-             * as the leaf is about to get a SJOIN */
-            sendnick_TS( lclient_p, target_p );
-            add_lazylinkclient(lclient_p,target_p);
-          }
-        }
-      }
+	      /* Ignore servers that already know target_p */
+	      if( !(target_p->lazyLinkClientExists &
+		    lclient_p->localClient->serverMask) )
+		{
+		  /* Tell LazyLink Leaf about client_p,
+		   * as the leaf is about to get a SJOIN */
+		  sendnick_TS( lclient_p, target_p );
+		  add_lazylinkclient(lclient_p,target_p);
+		}
+	    }
+	}
       
       if (!IsMember(target_p, chptr))
         {
@@ -476,7 +481,7 @@ static void ms_sjoin(struct Client *client_p,
 				   target_p->host,
 				   parv[2]);
 	    }
-        }
+	}
 
       /* XXX if (server_nick_count >= MAXMODEPARAMS) ... 
        *  if this is ever a possibility...
@@ -518,6 +523,17 @@ static void ms_sjoin(struct Client *client_p,
           para[0] = para[1] = para[2] = para[3] = "";
           pargs = 0;
         }
+
+lazy:
+      if ((p = strchr(s, ' ')) != NULL)
+	{
+	  *p++ = '\0';
+	  s = s0 = p;
+	}
+      else
+	{
+	  s = s0 = NULL;
+	}
     }
   
   *mbuf = '\0';

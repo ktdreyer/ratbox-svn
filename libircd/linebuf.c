@@ -149,27 +149,25 @@ linebuf_done_line(buf_head_t *bufhead, buf_line_t *bufline,
 static inline int
 linebuf_skip_crlf(char *ch, int len)
 {
-  register int cpylen = 0;
+  register int orig_len = len;
   
   /* First, skip until the first non-CRLF */
-  while (len && (*ch != '\n') && (*ch != '\r'))
+  for(; len; len--, ch++)
     {
-      ch++;
-      assert(len > 0);
-      len--;
-      cpylen++;
+      if (*ch == '\r')
+	break;
+      else if(*ch == '\n')
+        break;
     }
 
   /* Then, skip until the last CRLF */
-  while (len && ((*ch == '\n') || (*ch == '\r')))
+  for(; len; len--, ch++)
     {
-      ch++;
-      assert(len > 0);
-      len--;
-      cpylen++;
+      if ((*ch != '\r') && (*ch != '\n'))
+        break;
     }
-     
-  return cpylen;
+  assert(orig_len > len);
+  return(orig_len - len);
 }
 
 
