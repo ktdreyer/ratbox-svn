@@ -1,3 +1,8 @@
+*** 20010928_1 by davidt
+- Change 'int zero_fd' to 'static int zero_fd' to cut down on unneeded
+  globals.  Approved by Diane on IRC.
+
+
 *** 20010927_2 by wcampbel
 Updated BUGS, INSTALL, and Riedel's operguide.txt.
 Updated numerics.txt slightly.
