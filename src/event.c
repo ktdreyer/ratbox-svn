@@ -247,16 +247,15 @@ mo_events( struct Client *cptr,
 		 last_event_ran);
 
     sendto_one(sptr,
-       ":%s NOTICE %s :*** Operation\tNext Execution\tWeight\tCallback Valid?",
+       ":%s NOTICE %s :*** Operation\tNext Execution\tWeight",
        me.name,sptr->name);
 
     while (e != NULL)
       {
 	sendto_one(sptr,
-		   ":%s NOTICE %s :*** %s\tt%d seconds\t%d\t%s",
+		   ":%s NOTICE %s :*** %s\t%d seconds\t%d",
 		   me.name,sptr->name,
-		   e->name, e->when - CurrentTime, e->weight,
-		   e->arg ? "yes" : "no" );
+		   e->name, e->when - CurrentTime, e->weight);
 	e = e->next;
       }
   sendto_one(sptr,":%s NOTICE %s :*** Finished",me.name,sptr->name);
