@@ -25,16 +25,25 @@
  */
 
 #include "stdinc.h"
+
+#ifdef HAVE_LIBCRYPTO
+#include <openssl/pem.h>
+#include <openssl/rand.h>
+#include <openssl/rsa.h>
+#include <openssl/md5.h>
+#include <openssl/bn.h>
+#include <openssl/evp.h>
+#include <openssl/err.h>
+#endif
+
 #include "handlers.h"
+#include "memory.h"
 #include "client.h"
 #include "ircd.h"
 #include "modules.h"
 #include "numeric.h"
 #include "send.h"
 #include "s_conf.h"
-#ifdef HAVE_LIBCRYPTO
-#include "rsa.h"
-#endif
 #include "msg.h"
 #include "parse.h"
 #include "irc_string.h"
@@ -61,7 +70,6 @@ DECLARE_MODULE_AV1(challenge, challenge_load, NULL, NULL, NULL, NULL, "$Revision
 #else
 
 static int m_challenge(struct Client *, struct Client *, int, const char **);
-void binary_to_hex(unsigned char *bin, char *hex, int length);
 
 /* We have openssl support, so include /CHALLENGE */
 struct Message challenge_msgtab = {
@@ -71,6 +79,8 @@ struct Message challenge_msgtab = {
 
 mapi_clist_av1 challenge_clist[] = { &challenge_msgtab, NULL };
 DECLARE_MODULE_AV1(challenge, NULL, NULL, challenge_clist, NULL, NULL, "$Revision$");
+
+static int generate_challenge(char **r_challenge, char **r_response, RSA * key);
 
 /*
  * m_challenge - generate RSA challenge for wouldbe oper
@@ -192,6 +202,74 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 	DupString(source_p->user->auth_oper, aconf->name);
 	MyFree(challenge);
 	return 0;
+}
+
+static void
+binary_to_hex(unsigned char *bin, char *hex, int length)
+{
+	static const char trans[] = "0123456789ABCDEF";
+	int i;
+
+	for (i = 0; i < length; i++)
+	{
+		hex[i << 1] = trans[bin[i] >> 4];
+		hex[(i << 1) + 1] = trans[bin[i] & 0xf];
+	}
+	hex[i << 1] = '\0';
+}
+
+static int
+get_randomness(unsigned char *buf, int length)
+{
+	/* Seed OpenSSL PRNG with EGD enthropy pool -kre */
+	if(ConfigFileEntry.use_egd && (ConfigFileEntry.egdpool_path != NULL))
+	{
+		if(RAND_egd(ConfigFileEntry.egdpool_path) == -1)
+			return -1;
+	}
+
+	if(RAND_status())
+		return RAND_bytes(buf, length);
+	else			/* XXX - abort? */
+		return RAND_pseudo_bytes(buf, length);
+}
+
+int
+generate_challenge(char **r_challenge, char **r_response, RSA * rsa)
+{
+	unsigned char secret[32], *tmp;
+	unsigned long length, ret;
+
+	if(!rsa)
+		return -1;
+	get_randomness(secret, 32);
+	*r_response = MyMalloc(65);
+	binary_to_hex(secret, *r_response, 32);
+
+	length = RSA_size(rsa);
+	tmp = MyMalloc(length);
+	ret = RSA_public_encrypt(32, secret, tmp, rsa, RSA_PKCS1_PADDING);
+
+	*r_challenge = MyMalloc((length << 1) + 1);
+	binary_to_hex(tmp, *r_challenge, length);
+	(*r_challenge)[length << 1] = 0;
+	MyFree(tmp);
+
+	if(ret < 0)
+	{	
+		unsigned long e = 0;
+		unsigned long cnt = 0;
+
+		ERR_load_crypto_strings();
+		while ((cnt < 100) && (e = ERR_get_error()))
+		{
+			ilog(L_CRIT, "SSL error: %s", ERR_error_string(e, 0));
+			cnt++;
+		}
+
+		return (-1);
+	}
+	return (0);
 }
 
 #endif /* HAVE_LIBCRYPTO */

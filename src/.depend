@@ -271,15 +271,6 @@ patricia.o: patricia.c ../include/stdinc.h ../include/config.h \
   ../include/res.h ../include/fileio.h ../adns/adns.h ../include/ircd.h \
   ../include/memory.h ../include/balloc.h ../include/irc_string.h \
   ../include/common.h ../include/numeric.h
-rsa.o: rsa.c ../include/stdinc.h ../include/config.h ../include/setup.h \
-  ../include/defaults.h ../include/memory.h ../include/ircd_defs.h \
-  ../include/s_log.h ../include/send.h ../include/balloc.h \
-  ../include/tools.h ../include/rsa.h ../include/s_conf.h \
-  ../include/fileio.h ../include/class.h ../include/client.h \
-  ../include/handlers.h ../include/linebuf.h ../include/channel.h \
-  ../include/res.h ../adns/adns.h ../include/ircd.h \
-  ../include/irc_string.h ../include/common.h ../include/patricia.h \
-  ../include/numeric.h
 reject.o: reject.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/patricia.h \
   ../include/class.h ../include/tools.h ../include/client.h \
@@ -288,7 +279,7 @@ reject.o: reject.c ../include/stdinc.h ../include/config.h \
   ../include/res.h ../include/fileio.h ../adns/adns.h ../include/ircd.h \
   ../include/memory.h ../include/balloc.h ../include/irc_string.h \
   ../include/common.h ../include/numeric.h ../include/s_conf.h \
-  ../include/event.h ../include/reject.h
+  ../include/event.h ../include/reject.h ../include/s_stats.h
 restart.o: restart.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/tools.h \
   ../include/restart.h ../include/common.h ../include/fdlist.h \
@@ -388,18 +379,17 @@ s_log.o: s_log.c ../include/stdinc.h ../include/config.h \
   ../include/common.h ../include/patricia.h ../include/numeric.h \
   ../include/s_serv.h
 s_serv.o: s_serv.c ../include/stdinc.h ../include/config.h \
-  ../include/setup.h ../include/defaults.h ../include/rsa.h \
-  ../include/tools.h ../include/s_serv.h ../include/class.h \
-  ../include/client.h ../include/ircd_defs.h ../include/s_log.h \
-  ../include/send.h ../include/handlers.h ../include/linebuf.h \
-  ../include/channel.h ../include/res.h ../include/fileio.h \
-  ../adns/adns.h ../include/ircd.h ../include/memory.h \
-  ../include/balloc.h ../include/irc_string.h ../include/common.h \
-  ../include/event.h ../include/fdlist.h ../include/hash.h \
-  ../include/sprintf_irc.h ../include/numeric.h ../include/packet.h \
-  ../include/s_bsd.h ../include/s_conf.h ../include/patricia.h \
-  ../include/s_stats.h ../include/s_user.h ../include/scache.h \
-  ../include/hook.h
+  ../include/setup.h ../include/defaults.h ../include/tools.h \
+  ../include/s_serv.h ../include/class.h ../include/client.h \
+  ../include/ircd_defs.h ../include/s_log.h ../include/send.h \
+  ../include/handlers.h ../include/linebuf.h ../include/channel.h \
+  ../include/res.h ../include/fileio.h ../adns/adns.h ../include/ircd.h \
+  ../include/memory.h ../include/balloc.h ../include/irc_string.h \
+  ../include/common.h ../include/event.h ../include/fdlist.h \
+  ../include/hash.h ../include/sprintf_irc.h ../include/numeric.h \
+  ../include/packet.h ../include/s_bsd.h ../include/s_conf.h \
+  ../include/patricia.h ../include/s_stats.h ../include/s_user.h \
+  ../include/scache.h ../include/hook.h
 s_stats.o: s_stats.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/s_stats.h \
   ../include/client.h ../include/ircd_defs.h ../include/s_log.h \

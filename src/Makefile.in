@@ -84,7 +84,6 @@ BASE_SRCS =                     \
   packet.c                      \
   parse.c                       \
   patricia.c			\
-  rsa.c                         \
   reject.c			\
   restart.c                     \
   s_auth.c                      \

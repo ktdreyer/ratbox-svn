@@ -28,7 +28,6 @@
 
 #ifdef HAVE_LIBCRYPTO
 #include <openssl/rsa.h>
-#include "rsa.h"
 #endif
 
 #include "tools.h"
