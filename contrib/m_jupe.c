@@ -52,13 +52,12 @@
 #include "scache.h"
 #include <string.h>
 
-#define MSG_JUPE "JUPE"
 
 int mo_jupe(struct Client *cptr, struct Client *sptr,
 		 int parc, char *parv[]);
 
 struct Message jupe_msgtab = {
-  MSG_JUPE, 0, 2, 0, MFLG_SLOW, 0,
+  "JUPE", 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, mo_jupe, mo_jupe}
 };
 
@@ -84,8 +83,8 @@ char *_version = "20010104";
 */
 int mo_jupe(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  struct Client* acptr;
-  char              serv_desc[HOSTLEN + 15];
+  struct Client *acptr;
+  struct Client *ajupe;
 
 
   if( parc < 3 )
@@ -112,14 +111,15 @@ int mo_jupe(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 			&me, parv[1], sptr->name, parv[2]);
 
   acptr= find_server(parv[1]);
-    if(acptr)
-      {
-        if(MyConnect(acptr))
-          exit_client(cptr, acptr, &me, parv[2]);
-        else
-          sendto_serv_butone(&me, ":%s SQUIT %s :[juped] %s",
-                             me.name, parv[1], parv[2]);          
-      }
+
+  if(acptr)
+    {
+      if(MyConnect(acptr))
+	exit_client(cptr, acptr, &me, parv[2]);
+      else
+	sendto_serv_butone(&me, ":%s SQUIT %s :[juped] %s",
+			   me.name, parv[1], parv[2]);          
+    }
 
   sendto_serv_butone(&me, ":%s SERVER %s 1 :[Juped server] %s",
 		     me.name, parv[1], parv[2]);
@@ -128,14 +128,22 @@ int mo_jupe(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                        "Link with %s established: (JUPED) link",
 		       parv[1]);
 
+  ajupe = make_client(NULL);
+  make_server(ajupe);
+  ajupe->hopcount = 1;
+  strncpy_irc(ajupe->name,parv[1],HOSTLEN);
+  strncpy_irc(ajupe->info, "(JUPED)", REALLEN);
+  ajupe->serv->up = me.name;
+  ajupe->servptr = &me;
+  SetServer(ajupe);
+
   Count.server++;
   Count.myserver++;
 
-/* We possibly need some of the stuff in src/s_serv.c server_estab() here
- * but we shouldnt be sending ping's to the jupe.. 
- * A dlink list for the juped servers, so we can modify m_squit.c to watch
- * for someone squit'ing the jupe?
- */
+  /* Some day, all these lists will be consolidated *sigh* */
+  add_client_to_list(ajupe);
+  add_client_to_llist(&(me.serv->servers), ajupe);
+  add_to_client_hash_table(ajupe->name, ajupe);
 
   return 0;
 }
