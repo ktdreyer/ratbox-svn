@@ -1,3 +1,9 @@
+*** 20001223_11 by ejb
+- move fname_* into ircd.conf.
+- added fname_foperlog, not used yet.
+
+
+
 *** 20001223_10 by madmax
 Changed split reason when hidden to : "<servername> net.split" 
 
