@@ -1,3 +1,7 @@
+*** 20010728_1 by a1kmm
+- Fixed the table mode code.
+
+
 *** 20010727_7 by leeh
 - #undef'd USE_TABLE_CODE
   this is *fucked*.
