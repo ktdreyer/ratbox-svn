@@ -247,6 +247,7 @@ options that were in config.h, to be changed with a /rehash.
     UID     - Unique user-ID support
     ZIP     - Ziplink (Link is compressed with zlib compression)
     TBURST  - Not currently used
+    PARA    - Controls propogation of INVITE notices for +p (paranoid) channels
     ENC:a   - Encrypted link, where 'a' is the cipher being used
 
 # $Id$
