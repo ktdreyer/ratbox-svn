@@ -134,7 +134,8 @@
  * OPER_UMODES - set these to be the initial umodes when OPER'ing
  * These can be over-ridden in the ircd.conf file.
  */
-#define OPER_UMODES   (FLAGS_OPER|FLAGS_WALLOP|FLAGS_SERVNOTICE|FLAGS_OPERWALL|FLAGS_LOCOPS)
+#define OPER_UMODES   (FLAGS_OPER|FLAGS_WALLOP|FLAGS_SERVNOTICE|\
+                       FLAGS_OPERWALL|FLAGS_LOCOPS)
 
 /* MAXIMUM LINKS - max links for class 0 if no Y: line configured
  *
