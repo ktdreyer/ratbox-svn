@@ -53,8 +53,6 @@
 #include "cache.h"
 #include "hook.h"
 
-extern char *crypt();
-
 /* table of ascii char letters to corresponding bitmask */
 
 /* *INDENT-OFF* */

@@ -57,8 +57,6 @@
 #include "hook.h"
 #include "msg.h"
 
-extern char *crypt();
-
 #define MIN_CONN_FREQ 300
 
 #ifndef INADDR_NONE
