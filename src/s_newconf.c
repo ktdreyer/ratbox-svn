@@ -431,7 +431,6 @@ add_server_conf(struct server_conf *server_p)
 
 		MyFree(server_p->class_name);
 		DupString(server_p->class_name, "default");
-		return;
 	}
 
 	if(strchr(server_p->host, '*') || strchr(server_p->host, '?'))
