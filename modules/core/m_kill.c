@@ -132,8 +132,7 @@ static void mo_kill(struct Client *client_p, struct Client *source_p,
 	     inpath, client_p->username, reason);
 #endif
 
-  if(MyOper(target_p))
-      sendto_one(target_p, ":%s KILL %s :%s", parv[0], target_p->name, reason);
+  sendto_one(target_p, ":%s KILL %s :%s", parv[0], target_p->name, reason);
 
   /* Do not change the format of this message.  There's no point in changing messages
    * that have been around for ever, for no reason.. */
