@@ -290,10 +290,7 @@ char* pick_vchan_id(struct Channel *chptr)
 
   /* all else failed, must be an empty channel, 
    * so we use the vchan_id */
-  if (chptr->vchan_id)
-    ircsprintf(vchan_id, "%s", chptr->vchan_id);
-  else
-    ircsprintf(vchan_id, "-ERROR-");
+  ircsprintf(vchan_id, "%s", chptr->vchan_id);
 
   return(vchan_id);
 }
