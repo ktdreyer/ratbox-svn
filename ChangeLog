@@ -1,3 +1,15 @@
+androsyn    2002/12/10 10:11:24 UTC	(20021210_8)
+
+  Modified files:
+    src                  patricia.c 
+  Log:
+  Disable patricia.c's debugging code
+  
+  Revision  Changes    Path
+  7.14      +0 -3      ircd-ratbox/src/patricia.c
+
+
+
 androsyn    2002/12/10 10:10:18 UTC	(20021210_7)
 
   Modified files:
