@@ -3047,12 +3047,21 @@ int     m_cburst(struct Client *cptr,
           return 0;
         }
 
-      if((*chptr->mode.key && key) || irccmp(chptr->mode.key, key))
-
+      if(*chptr->mode.key)
         {
-          sendto_one(cptr,":%s LLJOIN %s %s :K",
-                          me.name, name, nick);
-          return 0;
+          if(!key)
+            {
+              sendto_one(cptr,":%s LLJOIN %s %s :K",
+                               me.name, name, nick);
+              return 0;
+	    }
+
+          if(irccmp(chptr->mode.key, key))
+            {
+              sendto_one(cptr,":%s LLJOIN %s %s :K",
+                               me.name, name, nick);
+              return 0;
+	    }
         }
 
       if (chptr->mode.limit && chptr->users >= chptr->mode.limit)
