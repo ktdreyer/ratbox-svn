@@ -192,7 +192,6 @@ typedef struct config_file_entry
   int         hub;
   int         dots_in_ident;
   int         failed_oper_notice;
-  int         show_failed_oper_id;
   int         anti_nick_flood;
   int         anti_spam_exit_message_time;
   int         max_accept;

@@ -302,15 +302,7 @@ static void send_conf_options(struct Client *source_p)
               source_p->name,
               "failed_oper_notice",
               ConfigFileEntry.failed_oper_notice ? "ON" : "OFF",
-              "Show opers a notice if someone uses oper with the wrong password");
-   sendto_one(source_p,
-              ":%s %d %s :%-30s %-5s [%-30s]",
-              me.name,
-              RPL_INFO,
-              source_p->name,
-              "show_failed_oper_id",
-              ConfigFileEntry.show_failed_oper_id ? "ON" : "OFF",
-              "Also show a notice if the oper has the wrong user@host");
+              "Show opers a notice if someone uses oper with the wrong password or id");
    sendto_one(source_p,
               ":%s %d %s :%-30s %-5d [%-30s]",
               me.name,

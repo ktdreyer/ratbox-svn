@@ -65,17 +65,18 @@ struct Message oper_msgtab = {
 void
 _modinit(void)
 {
-	mod_add_cmd(&oper_msgtab);
+  mod_add_cmd(&oper_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-	mod_del_cmd(&oper_msgtab);
+  mod_del_cmd(&oper_msgtab);
 }
 
-char *_version = "20001122";
+char *_version = "20010507";
 #endif
+
 /*
 ** m_oper
 **      parv[0] = sender prefix
@@ -96,54 +97,53 @@ static void m_oper(struct Client *client_p, struct Client *source_p,
   if (EmptyString(password))
     {
       sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-		 me.name, source_p->name, "OPER");
+                 me.name, source_p->name, "OPER");
       return;
     }
 
   if( (aconf = find_password_aconf(name,source_p)) == NULL)
     {
       sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
-      if (ConfigFileEntry.failed_oper_notice &&
-	  ConfigFileEntry.show_failed_oper_id)
-	{
-	  sendto_realops_flags(FLAGS_ALL,
-			       "Failed OPER attempt - host mismatch by %s (%s@%s)",
-			       source_p->name, source_p->username, source_p->host);
-	}
+      if (ConfigFileEntry.failed_oper_notice)
+        {
+          sendto_realops_flags(FLAGS_ALL,
+                               "Failed OPER attempt - host mismatch by %s (%s@%s)",
+                               source_p->name, source_p->username, source_p->host);
+        }
       return;
     }
 
   if ( match_oper_password(password,aconf) )
     {
       /*
-	20001216:
-	detach old iline
-	-einride
+        20001216:
+        detach old iline
+        -einride
       */
       ptr = source_p->localClient->confs.head;
       oconf = ptr->data;
       detach_conf(source_p,oconf);
       
       if( attach_conf(source_p, aconf) != 0 )
-	{
-	  sendto_one(source_p,":%s NOTICE %s :Can't attach conf!",
-		     me.name,source_p->name);
-	  sendto_realops_flags(FLAGS_ALL,
-			       "Failed OPER attempt by %s (%s@%s) can't attach conf!",
-			       source_p->name, source_p->username, source_p->host);
-	  /* 
-	     20001216:
-	     Reattach old iline
-	     -einride
-	  */
-	  attach_conf(source_p, oconf);
-	  return;
-	}
+        {
+          sendto_one(source_p,":%s NOTICE %s :Can't attach conf!",
+                     me.name,source_p->name);
+          sendto_realops_flags(FLAGS_ALL,
+                               "Failed OPER attempt by %s (%s@%s) can't attach conf!",
+                               source_p->name, source_p->username, source_p->host);
+          /* 
+             20001216:
+             Reattach old iline
+             -einride
+          */
+          attach_conf(source_p, oconf);
+          return;
+        }
 
       oper_up( source_p, aconf );
       
       log(L_TRACE, "OPER %s by %s!%s@%s",
-	  name, source_p->name, source_p->username, source_p->host);
+          name, source_p->name, source_p->username, source_p->host);
       log_oper(source_p, name);
       return;
     }
@@ -151,11 +151,11 @@ static void m_oper(struct Client *client_p, struct Client *source_p,
     {
       sendto_one(source_p,form_str(ERR_PASSWDMISMATCH),me.name, parv[0]);
       if (ConfigFileEntry.failed_oper_notice)
-	{
-	  sendto_realops_flags(FLAGS_ALL,
-			       "Failed OPER attempt by %s (%s@%s)",
-			       source_p->name, source_p->username, source_p->host);
-	}
+        {
+          sendto_realops_flags(FLAGS_ALL,
+                               "Failed OPER attempt by %s (%s@%s)",
+                               source_p->name, source_p->username, source_p->host);
+        }
     }
 }
 
@@ -168,9 +168,9 @@ static void m_oper(struct Client *client_p, struct Client *source_p,
 static void mo_oper(struct Client *client_p, struct Client *source_p,
                    int parc, char *parv[])
 {
-	sendto_one(source_p, form_str(RPL_YOUREOPER), me.name, parv[0]);
-	SendMessageFile(source_p, &ConfigFileEntry.opermotd);
-	return;
+  sendto_one(source_p, form_str(RPL_YOUREOPER), me.name, parv[0]);
+  SendMessageFile(source_p, &ConfigFileEntry.opermotd);
+  return;
 }
 
 /*
@@ -187,7 +187,7 @@ static void ms_oper(struct Client *client_p, struct Client *source_p,
   if (!IsOper(source_p))
     {
       if (source_p->status == STAT_CLIENT)
-	source_p->handler = OPER_HANDLER;
+        source_p->handler = OPER_HANDLER;
       
       source_p->flags |= FLAGS_OPER;
       Count.oper++;
@@ -199,8 +199,8 @@ static void ms_oper(struct Client *client_p, struct Client *source_p,
 /*
  * find_password_aconf
  *
- * inputs	-
- * output	-
+ * inputs       -
+ * output       -
  */
 
 struct ConfItem *find_password_aconf(char *name, struct Client *source_p)
@@ -208,10 +208,10 @@ struct ConfItem *find_password_aconf(char *name, struct Client *source_p)
   struct ConfItem *aconf;
 
   if (!(aconf = find_conf_exact(name, source_p->username, source_p->host,
-				CONF_OPERATOR)) &&
+                                CONF_OPERATOR)) &&
       !(aconf = find_conf_exact(name, source_p->username,
-				inetntoa((char *)&source_p->localClient->ip),
-				CONF_OPERATOR)))
+                                inetntoa((char *)&source_p->localClient->ip),
+                                CONF_OPERATOR)))
     {
       return 0;
     }
@@ -221,10 +221,10 @@ struct ConfItem *find_password_aconf(char *name, struct Client *source_p)
 /*
  * match_oper_password
  *
- * inputs	- pointer to given password
- * 		- pointer to Conf 
- * output	- YES or NO if match
- * side effects	- none
+ * inputs       - pointer to given password
+ *              - pointer to Conf 
+ * output       - YES or NO if match
+ * side effects - none
  */
 
 static int match_oper_password(char *password,

@@ -209,7 +209,6 @@ warn		{ return WARN; }
 yes		{ return TYES; }
 
 failed_oper_notice      { return FAILED_OPER_NOTICE; }
-show_failed_oper_id     { return SHOW_FAILED_OPER_ID; }
 max_accept              { return MAX_ACCEPT; }
 max_nick_changes        { return MAX_NICK_CHANGES; }
 max_nick_time           { return MAX_NICK_TIME; }
