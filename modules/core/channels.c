@@ -1528,7 +1528,7 @@ remove_ban_list(struct Channel *chptr, struct Client *source_p,
  * side effects - user is added to channel
  */
 static void
-add_user_to_channel(struct Channel *chptr, struct Client *client_p, int flags)
+add_user_to_channel(struct Channel *chptr, struct Client *client_p, int xflags)
 {
 	struct membership *msptr;
 
@@ -1540,7 +1540,7 @@ add_user_to_channel(struct Channel *chptr, struct Client *client_p, int flags)
 
 	msptr->chptr = chptr;
 	msptr->client_p = client_p;
-	msptr->flags = flags;
+	msptr->flags = xflags;
 
 	dlinkAdd(msptr, &msptr->usernode, &client_p->user->channel);
 	dlinkAdd(msptr, &msptr->channode, &chptr->members);
