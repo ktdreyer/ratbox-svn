@@ -80,7 +80,9 @@ static void collapse_signs(char *);
 static int errsent(int,int *);
 
 static int change_channel_membership(struct Channel *chptr,
-				     dlink_list *to_list, struct Client *who);
+				     dlink_list *to_list,
+                                     dlink_list *loc_to_list,
+                                     struct Client *who);
 
 /*
  * some buffers for rebuilding channel/nick lists with ,'s
@@ -546,6 +548,7 @@ dlink_node *find_user_link(dlink_list *list, struct Client *who)
  *
  * inputs	- pointer to channel
  *		- pointer to membership list of given channel to modify
+ *		- pointer to membership list for local clients to modify 
  *		- pointer to client struct being modified
  * output	- int success 1 or 0 if failure
  * side effects - change given user "who" from whichever membership list
@@ -553,51 +556,88 @@ dlink_node *find_user_link(dlink_list *list, struct Client *who)
  *		  
  */
 static int change_channel_membership(struct Channel *chptr,
-				     dlink_list *to_list, struct Client *who)
+				     dlink_list *to_list,
+                                     dlink_list *loc_to_list,
+                                     struct Client *who)
 {
   dlink_node *ptr;
+  int ok = 1;
 
-  if ( (ptr = find_user_link(&chptr->peons, who)) )
+  /* local clients need to be moved from local list too */
+  if (MyClient(who))
+  {
+    if ((ptr = find_user_link(&chptr->locpeons, who)))
     {
-      if (to_list != &chptr->peons)
-	{
-	  dlinkDelete(ptr, &chptr->peons);
-	  dlinkAdd(who, ptr, to_list);
-	  return(1);
-	}
+      if (to_list != &chptr->locpeons)
+      {
+        dlinkDelete(ptr, &chptr->locpeons);
+        dlinkAdd(who, ptr, loc_to_list);
+      }
     }
-
-  if ( (ptr = find_user_link(&chptr->voiced, who)) )
+    else if ((ptr = find_user_link(&chptr->locvoiced, who)))
     {
-      if (to_list != &chptr->voiced)
-	{
-	  dlinkDelete(ptr, &chptr->voiced);
-	  dlinkAdd(who, ptr, to_list);
-	  return(1);
-	}
+      if (to_list != &chptr->locvoiced)
+      {
+        dlinkDelete(ptr, &chptr->locvoiced);
+        dlinkAdd(who, ptr, loc_to_list);
+      }
     }
-
-  if ( (ptr = find_user_link(&chptr->halfops, who)) )
+    else if ((ptr = find_user_link(&chptr->lochalfops, who)))
     {
-      if (to_list != &chptr->halfops)
-	{
-	  dlinkDelete(ptr, &chptr->halfops);
-	  dlinkAdd(who, ptr, to_list);
-	  return(1);
-	}
+      if (to_list != &chptr->lochalfops)
+      {
+        dlinkDelete(ptr, &chptr->lochalfops);
+        dlinkAdd(who, ptr, loc_to_list);
+      }
     }
-
-  if ( (ptr = find_user_link(&chptr->chanops, who)) )
+    else if ((ptr = find_user_link(&chptr->locchanops, who)))
     {
-      if (to_list != &chptr->chanops)
-	{
-	  dlinkDelete(ptr, &chptr->chanops);
-	  dlinkAdd(who, ptr, to_list);
-	  return(1);
-	}
+      if (to_list != &chptr->locchanops)
+      {
+        dlinkDelete(ptr, &chptr->locchanops);
+        dlinkAdd(who, ptr, loc_to_list);
+      }
     }
+    else
+      ok = 0;
+  }
 
-  return 0;
+  if ((ptr = find_user_link(&chptr->peons, who)))
+  {
+    if (to_list != &chptr->peons)
+    {
+      dlinkDelete(ptr, &chptr->peons);
+      dlinkAdd(who, ptr, to_list);
+    }
+  }
+  else if ((ptr = find_user_link(&chptr->voiced, who)))
+  {
+    if (to_list != &chptr->voiced)
+    {
+      dlinkDelete(ptr, &chptr->voiced);
+      dlinkAdd(who, ptr, to_list);
+    }
+  }
+  else if ((ptr = find_user_link(&chptr->halfops, who)))
+  {
+    if (to_list != &chptr->halfops)
+    {
+      dlinkDelete(ptr, &chptr->halfops);
+      dlinkAdd(who, ptr, to_list);
+    }
+  }
+  else if ((ptr = find_user_link(&chptr->chanops, who)))
+  {
+    if (to_list != &chptr->chanops)
+    {
+      dlinkDelete(ptr, &chptr->chanops);
+      dlinkAdd(who, ptr, to_list);
+    }
+  }
+  else
+    ok = 0;
+
+  return ok;
 }
 
 /* small series of "helper" functions */
@@ -1176,6 +1216,7 @@ void set_channel_mode(struct Client *client_p,
 
   dlink_node *ptr;
   dlink_list *to_list=NULL;
+  dlink_list *loc_to_list=NULL;
   struct Ban *banptr;
 
   chan_op = is_chan_op(chptr,source_p);
@@ -1318,6 +1359,7 @@ void set_channel_mode(struct Client *client_p,
                 the_mode = MODE_CHANOP;
               
 	      to_list = &chptr->chanops;
+              loc_to_list = &chptr->locchanops;
 	    }
           else if (c == 'v')
 	    {
@@ -1326,6 +1368,7 @@ void set_channel_mode(struct Client *client_p,
 		break;
 	      the_mode = MODE_VOICE;
 	      to_list = &chptr->voiced;
+              loc_to_list = &chptr->locvoiced;
 	    }
 	  else if (c == 'h')
 	    {
@@ -1336,13 +1379,18 @@ void set_channel_mode(struct Client *client_p,
                 break;
 	      the_mode = MODE_HALFOP;
 	      to_list = &chptr->halfops;
+              loc_to_list = &chptr->lochalfops;
 	    }
 
 	  if(whatt == MODE_DEL)
+          {
 	    to_list = &chptr->peons;
+            loc_to_list = &chptr->locpeons;
+          }
 
           if (isdeop && (c == 'o') && whatt == MODE_ADD)
-            change_channel_membership(chptr,&chptr->peons, who);
+            change_channel_membership(chptr,&chptr->peons,
+                                      &chptr->locpeons,who);
 
           /* Allow users to -h themselves */
           if ((whatt == MODE_DEL) && target_was_hop && (c == 'h') &&
@@ -1403,7 +1451,7 @@ void set_channel_mode(struct Client *client_p,
           len += tmp + 1;
           opcnt++;
 
-          if(change_channel_membership(chptr,to_list, who))
+          if(change_channel_membership(chptr,to_list, loc_to_list, who))
           {
 	    if((to_list == &chptr->chanops) && (whatt == MODE_ADD))
             {
