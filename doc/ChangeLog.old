@@ -1,3 +1,7 @@
+*** 20011111_4 by leeh
+- added RPL_HELPSTART, RPL_HELPTXT, RPL_ENDOFHELP, ERR_HELPNOTFOUND
+
+
 *** 20011111_3 by leeh
 - removed the start notice from modlist
 - changed a strstr() in modules-dld -> match, as per modules.c
