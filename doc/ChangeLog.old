@@ -1,3 +1,16 @@
+leeh        2002/07/21 17:06:21 EDT	(20020721_7)
+
+  Modified files:
+    src                  packet.c 
+  Log:
+  - parse the data first then check for excess flood, else the whole grace
+    period becomes useless.
+  
+  Revision  Changes    Path
+  7.88      +10 -4     ircd-hybrid-7/src/packet.c
+
+
+
 leeh        2002/07/21 15:22:10 EDT	(20020721_6)
 
   Modified files:
