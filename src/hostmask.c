@@ -208,7 +208,7 @@ try_parse_v4_netmask(const char *text, struct irc_inaddr *addr, int *b)
   /* Set unused bits to 0... -A1kmm */
   if (bits < 32 && bits % 8)
     addb[bits / 8] &= ~((1 << (8 - bits % 8)) - 1);
-  for (n = bits / 8 + (bits % 8 ? 1 : 0); n < 8; n++)
+  for (n = bits / 8 + (bits % 8 ? 1 : 0); n < 4; n++)
     addb[n] = 0;
   if (addr)
     addr->sins.sin.s_addr =
@@ -354,11 +354,11 @@ get_mask_hash(const char *text)
 {
   const char *hp = "", *p;
 
-  for (p = text + strlen(text); p >= text; p--)
-    if (*p == '*' || *p == '?')
+  for (p = text + strlen(text) + 1; p > text; p--)
+    if (*(p - 1) == '*' || *(p - 1) == '?')
       return hash_text(hp);
-    else if (*p == '.')
-      hp = p + 1;
+    else if (*(p - 1) == '.')
+      hp = p; /* + 1; */
   return hash_text(text);
 }
 
@@ -427,7 +427,8 @@ find_conf_by_address(const char *name, struct irc_inaddr *addr, int type,
   if (name != NULL)
   {
     const char *p;
-    for (p = name; p != (char *)1; p = strchr(p, '.') + 1)
+    for (p = name; p != NULL; p = strchr(p, '.')) {
+      p++;
       for (arec = atable[hash_text(p)]; arec; arec = arec->next)
         if ((arec->type == (type & ~0x1)) &&
             (arec->masktype == HM_HOST) &&
@@ -438,6 +439,7 @@ find_conf_by_address(const char *name, struct irc_inaddr *addr, int type,
           hprecv = arec->precedence;
           hprec = arec->aconf;
         }
+    }
     for (arec = atable[0]; arec; arec = arec->next)
       if (arec->type == (type & ~0x1) &&
           arec->masktype == HM_HOST &&

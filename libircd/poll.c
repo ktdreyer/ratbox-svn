@@ -149,7 +149,7 @@ poll_update_pollfds(int fd, fdlist_t list, short event, PF * handler)
 
         /* update maxindex here */
         if (comm_index == pf->maxindex)
-            while( pf->pollfds[pf->maxindex].fd == -1 && pf->maxindex >= 0 )
+            while (pf->maxindex >= 0 && pf->pollfds[pf->maxindex].fd == -1)
               pf->maxindex--;
 
         if (ncomm_index > npf->maxindex)
@@ -184,8 +184,8 @@ poll_update_pollfds(int fd, fdlist_t list, short event, PF * handler)
 
 		/* update pf->maxindex here */
 		if (comm_index == pf->maxindex)
-		  while( pf->pollfds[pf->maxindex].fd == -1 && 
-			 pf->maxindex >= 0 )
+		  while (pf->maxindex >= 0 &&
+		  	pf->pollfds[pf->maxindex].fd == -1)
                     pf->maxindex--;
 	      }
 	  }
