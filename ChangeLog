@@ -1,3 +1,25 @@
+leeh        2004/07/30 14:09:42 EDT	(20040730_9)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              s_conf.h 
+    modules              m_info.c 
+    src                  ircd.c newconf.c s_conf.c 
+  Log:
+  - removed links_delay, now hardcoded to 5 mins
+  - removed a couple of unused parts of a struct
+  
+  Revision  Changes    Path
+  7.245     +0 -5      ircd-ratbox/doc/example.conf
+  7.77      +0 -5      ircd-ratbox/doc/example.efnet.conf
+  7.283     +0 -6      ircd-ratbox/include/s_conf.h
+  1.111     +1 -7      ircd-ratbox/modules/m_info.c
+  7.349     +1 -5      ircd-ratbox/src/ircd.c
+  7.162     +2 -3      ircd-ratbox/src/newconf.c
+  7.477                ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2004/07/30 13:42:08 EDT	(20040730_8)
 
   Modified files:
