@@ -1,3 +1,7 @@
+*** 20010420_9 by a1kmm
+- Fixed K-line exemptions on oper spoofed users on rehash.
+
+
 *** 20010420_8 by jdc
 * Added dns_query_host and dns_query_port options to TODO list.
   These would be fantastic; some of us always wish to query on
