@@ -214,7 +214,7 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			}
 		}
 
-		if(!IsOper(source_p))
+		if(!IsOper(source_p) && !IsExemptSpambot(source_p))
 			check_spambot_warning(source_p, name);
 
 		/* can_join checks for +i key, bans etc */
@@ -372,7 +372,8 @@ do_join_0(struct Client *client_p, struct Client *source_p)
 
 	sendto_server(client_p, NULL, NOCAPS, NOCAPS, ":%s JOIN 0", source_p->name);
 
-	if(source_p->user->channel.head && MyConnect(source_p) && !IsOper(source_p))
+	if(source_p->user->channel.head && MyConnect(source_p) && 
+	   !IsOper(source_p) && !IsExemptSpambot(source_p))
 		check_spambot_warning(source_p, NULL);
 
 	while ((ptr = source_p->user->channel.head))

@@ -493,6 +493,7 @@ static struct mode_table auth_table[] = {
 	{"kline_exempt",	CONF_FLAGS_EXEMPTKLINE	},
 	{"gline_exempt",	CONF_FLAGS_EXEMPTGLINE	},
 	{"flood_exempt",	CONF_FLAGS_EXEMPTFLOOD	},
+	{"spambot_exempt",	CONF_FLAGS_EXEMPTSPAMBOT },
 	{"no_tilde",		CONF_FLAGS_NO_TILDE	},
 	{"restricted",		CONF_FLAGS_RESTRICTED	},
 	{"need_ident",		CONF_FLAGS_NEED_IDENTD	},

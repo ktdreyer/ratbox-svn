@@ -421,6 +421,7 @@ struct exit_client_hook
 #define FLAGS2_PING_COOKIE      0x100000
 #define FLAGS2_IP_SPOOFING      0x200000
 #define FLAGS2_FLOODDONE        0x400000
+#define FLAGS2_EXEMPTSPAMBOT	0x800000
 
 #define SEND_UMODES  (UMODE_INVISIBLE | UMODE_OPER | UMODE_WALLOP | \
                       UMODE_ADMIN)
@@ -520,8 +521,10 @@ struct exit_client_hook
 #define SetExemptGline(x)       ((x)->flags2 |= FLAGS2_EXEMPTGLINE)
 #define IsExemptFlood(x)        ((x)->flags2 & FLAGS2_EXEMPTFLOOD)
 #define SetExemptFlood(x)       ((x)->flags2 |= FLAGS2_EXEMPTFLOOD)
-#define SetIPSpoof(x)           ((x)->flags2 |= FLAGS2_IP_SPOOFING)
+#define IsExemptSpambot(x)	((x)->flags2 & FLAGS2_EXEMPTSPAMBOT)
+#define SetExemptSpambot(x)	((x)->flags2 |= FLAGS2_EXEMPTSPAMBOT)
 #define IsIPSpoof(x)            ((x)->flags2 & FLAGS2_IP_SPOOFING)
+#define SetIPSpoof(x)           ((x)->flags2 |= FLAGS2_IP_SPOOFING)
 
 #define SetIdlelined(x)         ((x)->flags2 |= FLAGS2_IDLE_LINED)
 #define IsIdlelined(x)          ((x)->flags2 & FLAGS2_IDLE_LINED)

@@ -819,6 +819,14 @@ report_and_set_user_flags(struct Client *source_p, struct ConfItem *aconf)
 			   ":%s NOTICE %s :*** You are exempt from flood limits.",
 			   me.name, source_p->name);
 	}
+
+	if(IsConfExemptSpambot(aconf))
+	{
+		SetExemptSpambot(source_p);
+		sendto_one(source_p,
+			   ":%s NOTICE %s :*** You are exempt from spambot checks.",
+			   me.name, source_p->name);
+	}
 }
 
 
