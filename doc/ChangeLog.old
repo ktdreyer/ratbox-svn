@@ -1,3 +1,17 @@
+leeh        2002/07/27 09:27:15 EDT	(20020727_0)
+
+  Modified files:
+    modules/core         m_kill.c 
+  Log:
+  - we were testing IsOperGlobalKill instead of IsOperK in m_kill.c which
+    prevented "Ko" opers being able to kill local users.  reported
+    by kenny <kenny@psdnetworks.co.uk>
+  
+  Revision  Changes    Path
+  1.66      +3 -3      ircd-hybrid-7/modules/core/m_kill.c
+
+
+
 leeh        2002/07/26 12:37:15 EDT	(20020726_1)
 
   Modified files:
