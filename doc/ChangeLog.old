@@ -1,3 +1,16 @@
+a1kmm       2002/01/05 23:46:02 EST	(20020106_0)
+
+  Modified files:
+    modules              m_invite.c 
+  Log:
+  - Don't send invite back to the source even if they are the target of the
+    invite.
+  
+  Revision  Changes    Path
+  1.37      +3 -2      ircd-hybrid-7/modules/m_invite.c
+
+
+
 a1kmm       2002/01/05 04:15:36 EST	(20020105_2)
 
   Modified files:
