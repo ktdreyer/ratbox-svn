@@ -67,7 +67,7 @@ DECLARE_MODULE_AV1(nick, NULL, NULL, nick_clist, NULL, NULL, "$Revision$");
 
 static int change_remote_nick(struct Client *, struct Client *, int, const char **, time_t, const char *);
 
-static int clean_nick(const char *);
+static int clean_nick(const char *, int local);
 static int clean_username(const char *);
 static int clean_host(const char *);
 
@@ -112,7 +112,7 @@ mr_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 	strlcpy(nick, parv[1], sizeof(nick));
 
 	/* check the nickname is ok */
-	if(!clean_nick(nick))
+	if(!clean_nick(nick, 1))
 	{
 		sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME),
 			   me.name, EmptyString(parv[0]) ? "*" : parv[0], parv[1]);
@@ -179,7 +179,7 @@ m_nick(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	strlcpy(nick, parv[1], sizeof(nick));
 
 	/* check the nickname is ok */
-	if(!clean_nick(nick))
+	if(!clean_nick(nick, 1))
 	{
 		sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME),
 			   me.name, parv[0], nick);
@@ -257,7 +257,7 @@ mc_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 	time_t newts = 0;
 
 	/* if nicks erroneous, or too long, kill */
-	if(!clean_nick(parv[1]))
+	if(!clean_nick(parv[1], 0))
 	{
 		ServerStats->is_kill++;
 		sendto_realops_flags(UMODE_DEBUG, L_ALL,
@@ -311,7 +311,7 @@ ms_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 	time_t newts = 0;
 
 	/* if nicks empty, erroneous, or too long, kill */
-	if(!clean_nick(parv[1]))
+	if(!clean_nick(parv[1], 0))
 	{
 		ServerStats->is_kill++;
 		sendto_realops_flags(UMODE_DEBUG, L_ALL,
@@ -401,7 +401,7 @@ ms_uid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	newts = atol(parv[3]);
 
 	/* if nicks erroneous, or too long, kill */
-	if(!clean_nick(parv[1]))
+	if(!clean_nick(parv[1], 0))
 	{
 		ServerStats->is_kill++;
 		sendto_realops_flags(UMODE_DEBUG, L_ALL,
@@ -459,12 +459,15 @@ ms_uid(struct Client *client_p, struct Client *source_p, int parc, const char *p
  * side effects - 
  */
 static int
-clean_nick(const char *nick)
+clean_nick(const char *nick, int local)
 {
 	int len = 0;
 
 	/* nicks cant start with a digit or -, and must have a length */
-	if(*nick == '-' || IsDigit(*nick) || *nick == '\0')
+	if(*nick == '-' || *nick == '\0')
+		return 0;
+
+	if(local && IsDigit(*nick))
 		return 0;
 
 	for (; *nick; nick++)
