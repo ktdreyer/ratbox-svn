@@ -232,7 +232,7 @@ try_parse_v4_netmask(const char *text, struct irc_inaddr *addr, int *b)
 int
 parse_netmask(const char *text, struct irc_inaddr *addr, int *b)
 {
-  /* If they pass us crap..
+  /* If they pass us crap.. */
   if(text == NULL || addr == NULL || b == NULL)
     return HM_HOST;
 #ifdef IPV6
