@@ -1,3 +1,11 @@
+*** 20010116_3 by db
+- reverted sprintf_irc.c
+  The entire point of sprintf_irc is to be much faster than sprintf
+  not to be a complete replacement for it. Treat it as another function
+  entirely that has a similar name.
+
+
+
 *** 20010116_2 by wcampbel
 Updated .depend's
 
