@@ -1,3 +1,60 @@
+leeh        2004/02/19 15:13:30 EST	(20040219_1)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              client.h modules.h s_conf.h s_newconf.h 
+                         s_user.h 
+    modules              .depend m_challenge.c m_connect.c 
+                         m_dline.c m_gline.c m_kline.c m_locops.c 
+                         m_oper.c m_rehash.c m_restart.c m_resv.c 
+                         m_set.c m_stats.c m_trace.c m_wallops.c 
+                         m_xline.c 
+    modules/core         m_die.c m_kill.c m_squit.c 
+    src                  .depend listener.c modules.c newconf.c 
+                         s_conf.c s_newconf.c s_user.c send.c 
+  Log:
+  - you can no longer specify name="foo"; in operator {};, it now HAS to
+    be operator "foo" {
+  - moved O: into its own struct, redid all the functions for it.
+  
+  Revision  Changes    Path
+  7.231     +1 -2      ircd-ratbox/doc/example.conf
+  7.66      +1 -0      ircd-ratbox/doc/example.efnet.conf
+  7.231     +12 -52    ircd-ratbox/include/client.h
+  7.59      +0 -1      ircd-ratbox/include/modules.h
+  7.263     +1 -3      ircd-ratbox/include/s_conf.h
+  7.17      +78 -2     ircd-ratbox/include/s_newconf.h
+  7.28      +2 -2      ircd-ratbox/include/s_user.h
+  1.37      +116 -127  ircd-ratbox/modules/.depend
+  1.43      +2 -1      ircd-ratbox/modules/core/m_die.c
+  1.96      +2 -1      ircd-ratbox/modules/core/m_kill.c
+  1.75      +2 -1      ircd-ratbox/modules/core/m_squit.c
+  1.67      +17 -13    ircd-ratbox/modules/m_challenge.c
+  1.64      +2 -1      ircd-ratbox/modules/m_connect.c
+  1.29      +2 -1      ircd-ratbox/modules/m_dline.c
+  1.136     +2 -1      ircd-ratbox/modules/m_gline.c
+  1.171     +3 -3      ircd-ratbox/modules/m_kline.c
+  1.46      +3 -2      ircd-ratbox/modules/m_locops.c
+  1.80      +16 -41    ircd-ratbox/modules/m_oper.c
+  1.76      +2 -1      ircd-ratbox/modules/m_rehash.c
+  1.41      +2 -1      ircd-ratbox/modules/m_restart.c
+  1.47      +3 -3      ircd-ratbox/modules/m_resv.c
+  1.71      +2 -1      ircd-ratbox/modules/m_set.c
+  1.190     +23 -7     ircd-ratbox/modules/m_stats.c
+  1.91      +2 -1      ircd-ratbox/modules/m_trace.c
+  1.53      +2 -1      ircd-ratbox/modules/m_wallops.c
+  1.38      +2 -2      ircd-ratbox/modules/m_xline.c
+  7.39      +33 -24    ircd-ratbox/src/.depend
+  7.101     +1 -0      ircd-ratbox/src/listener.c
+  7.138     +1 -0      ircd-ratbox/src/modules.c
+  7.126     +142 -161  ircd-ratbox/src/newconf.c
+  7.443     +20 -127   ircd-ratbox/src/s_conf.c
+  7.17      +134 -10   ircd-ratbox/src/s_newconf.c
+  7.303     +5 -4      ircd-ratbox/src/s_user.c
+  7.270     +1 -0      ircd-ratbox/src/send.c
+
+
+
 leeh        2004/02/19 09:24:03 EST	(20040219_0)
 
   Added files:
