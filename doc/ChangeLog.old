@@ -1,3 +1,21 @@
+db          2001/12/14 21:07:36 EST	(20011215_0)
+
+  Modified files:
+    include              s_conf.h 
+    modules              m_kline.c 
+    src                  s_conf.c 
+  Log:
+  - Cleaned up oper_reason code. Only the admins need to see the oper reason.
+    So only write the oper reason to the kline/dline conf file. Never
+    need to read it back in.
+  
+  Revision  Changes    Path
+  7.168     +1 -0      ircd-hybrid-7/include/s_conf.h
+  1.92      +39 -17    ircd-hybrid-7/modules/m_kline.c
+  7.283     +27 -37    ircd-hybrid-7/src/s_conf.c
+
+
+
 androsyn    2001/12/14 11:47:56 EST	(20011214_10)
 
   Modified files:
