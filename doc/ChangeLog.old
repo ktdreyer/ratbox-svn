@@ -1,3 +1,7 @@
+*** 20010420_4 by androsyn
+Added a new at the end of the file to make Sun's cc happy.   
+
+
 *** 20010420_3 by androsyn
 Fixed signedness warnings with Sun's cc
 
