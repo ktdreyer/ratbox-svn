@@ -43,6 +43,7 @@ struct SetOptions
   int idletime;
 
   int floodcount;	/* Number of messages in 1 second */
+  int ident_timeout;     /* timeout for identd lookups */
 
   int spam_num;
   int spam_time;

@@ -68,6 +68,8 @@ error HARD_FDLIMIT_ undefined
 
 #define INIT_LOG_LEVEL L_NOTICE         /* default for log_level */
 
+#define IDENT_TIMEOUT 10
+
 #define MIN_JOIN_LEAVE_TIME  60
 #define MAX_JOIN_LEAVE_COUNT  25
 #define OPER_SPAM_COUNTDOWN   5 

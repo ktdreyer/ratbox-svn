@@ -407,6 +407,8 @@ static void initialize_global_set_options(void)
     splitchecking = 1;
   }
 
+  GlobalSetOptions.ident_timeout = IDENT_TIMEOUT;
+
   /* memset( &ConfigChannel, 0, sizeof(ConfigChannel)); */
 
  /* End of global set options */
