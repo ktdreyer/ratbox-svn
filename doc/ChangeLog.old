@@ -1,3 +1,15 @@
+androsyn    2001/12/29 03:23:12 EST	(20011229_1)
+
+  Modified files:
+    modules              m_pong.c 
+  Log:
+  Fixed header order..
+  
+  Revision  Changes    Path
+  1.23      +3 -3      ircd-hybrid-7/modules/m_pong.c
+
+
+
 androsyn    2001/12/29 03:07:28 EST	(20011229_0)
 
   Modified files:
