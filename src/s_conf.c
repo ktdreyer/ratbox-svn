@@ -857,7 +857,7 @@ find_conf_exact(const char *name, const char *user, const char *host, int statma
 			continue;
 
 		strlcpy(addr, tmp->host, sizeof(addr));
-		if(parse_netmask(addr, &ip, &bits) == parse_netmask(host, &cip, &cbits))
+		if(parse_netmask(addr, &ip, &bits) != HM_HOST &&  parse_netmask(host, &cip, &cbits) != HM_HOST)
 		{
 			if(ip.ss_family != cip.ss_family)
 				continue;
