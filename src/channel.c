@@ -59,7 +59,6 @@ static int channel_capabs[] = { CAP_EX, CAP_IE, CAP_TS6 };
 
 static struct ChCapCombo chcap_combos[NCHCAP_COMBOS];
 
-static void destroy_channel(struct Channel *);
 static void free_topic(struct Channel *chptr);
 
 /* init_channels()
@@ -320,7 +319,7 @@ free_channel_list(dlink_list *list)
  * output	-
  * side effects - channel is obliterated
  */
-static void
+void
 destroy_channel(struct Channel *chptr)
 {
 	dlink_node *ptr, *next_ptr;

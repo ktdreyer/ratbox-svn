@@ -173,7 +173,7 @@ struct Ban *allocate_ban(void);
 void free_ban(struct Ban *bptr);
 
 
-
+extern void destroy_channel(struct Channel *);
 
 extern int can_send(struct Channel *chptr, struct Client *who, 
 		    struct membership *);
