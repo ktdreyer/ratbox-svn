@@ -1,3 +1,8 @@
+*** 20001205_7 by db
+- redid m_set.c precalculate newval etc.
+
+
+
 *** 20001205_6 by db
 - committed Jeremy Chadwicks (best.net) m_set table driven code
 - sprinkled some asserts into linebuf.c
