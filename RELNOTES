@@ -1,5 +1,15 @@
 -- ircd-ratbox-1.0 RELNOTES 
 
+-- ircd-ratbox-1.0-rc7
+- fix for the temp kline/dline problems
+- stats d will now list temp dlines
+  stats D will now list perm dlines
+- kill -USR1 pidofircd will now cause ircd.motd to be reread
+- added some rudimentary checking to a /list output to prevent users
+  flooding off
+- fixed a possible whois core
+- fixed &channels to stop propagating
+
 -- ircd-ratbox-1.0-rc6
 - changed error message on failed /challenge attempt to say failed 
   CHALLENGE and not failed OPER
