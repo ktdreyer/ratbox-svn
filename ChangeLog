@@ -1,3 +1,15 @@
+leeh        2004/02/29 18:55:35 EST	(20040229_6)
+
+  Modified files:
+    src                  s_serv.c 
+  Log:
+  - fix an inverted if() causing a core in hunt_server().
+  
+  Revision  Changes    Path
+  7.376     +1 -1      ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2004/02/29 18:40:35 EST	(20040229_5)
 
   Modified files:
