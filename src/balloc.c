@@ -97,7 +97,7 @@ static int zero_fd = -1;
 static void
 _blockheap_fail(const char *reason, const char *file, int line)
 {
-	ilog(L_CRIT, "Blockheap failure: %s (%s:%d)", file, line);
+	ilog(L_CRIT, "Blockheap failure: %s (%s:%d)", reason, file, line);
 	abort();
 }
                 
