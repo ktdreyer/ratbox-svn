@@ -177,7 +177,7 @@ read_ctrl_packet(int fd, void *data)
     reply->readdata = 0;
     reply->data = NULL;
 
-    length = read(fd, &reply->command, 1);
+    length = read(fd, tmp, 1);
 
     if (length <= 0)
     {
@@ -186,6 +186,8 @@ read_ctrl_packet(int fd, void *data)
       error_exit_client(server, length);
       return;
     }
+
+    reply->command = tmp[0];
   }
 
   for (replydef = slinkrpltab; replydef->handler; replydef++)
