@@ -1,3 +1,15 @@
+leeh        2002/07/22 17:37:25 EDT	(20020722_2)
+
+  Modified files:
+    contrib              lmh.diff 
+  Log:
+  - made my patch work.
+  
+  Revision  Changes    Path
+  1.12      +110 -90   ircd-hybrid-7/contrib/lmh.diff
+
+
+
 db          2002/07/22 01:08:04 EDT	(20020722_1)
 
   Modified files:
