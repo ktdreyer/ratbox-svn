@@ -1,3 +1,15 @@
+androsyn    2004/08/18 10:27:11 EDT	(20040818_0)
+
+  Modified files:
+    modules/core         m_server.c 
+  Log:
+  Hack job to set target_p->name to name for while in mr_server
+  
+  Revision  Changes    Path
+  1.144     +2 -1      ircd-ratbox/modules/core/m_server.c
+
+
+
 androsyn    2004/08/17 18:16:52 EDT	(20040817_0)
 
   Modified files:
