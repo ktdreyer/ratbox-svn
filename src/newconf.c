@@ -148,66 +148,6 @@ remove_top_conf(char *name)
 }
 #endif
 
-
-
-static void
-conf_set_serverinfo_rsa_private_key_file(void *data)
-{
-#ifdef HAVE_LIBCRYPTO
-	BIO *file;
-
-	if(ServerInfo.rsa_private_key)
-	{
-		RSA_free(ServerInfo.rsa_private_key);
-		ServerInfo.rsa_private_key = NULL;
-	}
-
-	if(ServerInfo.rsa_private_key_file)
-	{
-		MyFree(ServerInfo.rsa_private_key_file);
-		ServerInfo.rsa_private_key_file = NULL;
-	}
-
-	DupString(ServerInfo.rsa_private_key_file, (char *) data);
-
-	file = BIO_new_file((char *) data, "r");
-
-	if(file == NULL)
-	{
-		conf_report_error
-			("Ignoring config file entry rsa_private_key -- file open failed"
-			 " (%s)", (char *) data);
-		return;
-	}
-
-	ServerInfo.rsa_private_key = (RSA *) PEM_read_bio_RSAPrivateKey(file, NULL, 0, NULL);
-	if(ServerInfo.rsa_private_key == NULL)
-	{
-		conf_report_error
-			("Ignoring config file entry rsa_private_key -- couldn't extract key");
-		return;
-	}
-
-	if(!RSA_check_key(ServerInfo.rsa_private_key))
-	{
-		conf_report_error("Ignoring config file entry rsa_private_key -- invalid key");
-		return;
-	}
-
-	/* require 2048 bit (256 byte) key */
-	if(RSA_size(ServerInfo.rsa_private_key) != 256)
-	{
-		conf_report_error("Ignoring config file entry rsa_private_key -- not 2048 bit");
-		return;
-	}
-
-	BIO_set_close(file, BIO_CLOSE);
-	BIO_free(file);
-#else
-	conf_report_error("Ignoring serverinfo::rsa_private_key -- SSL support not available.");
-#endif
-}
-
 static void
 conf_set_serverinfo_name(void *data)
 {
@@ -1361,13 +1301,7 @@ conf_end_connect(struct TopConf *tc)
 		MyFree(yy_aconf->name);
 		DupString(yy_aconf->name, conf_cur_block_name);
 	}
-#ifdef HAVE_LIBCRYPTO
-	if(yy_aconf->host &&
-	   ((yy_aconf->passwd && yy_aconf->spasswd) ||
-	    (yy_aconf->rsa_public_key && IsConfCryptLink(yy_aconf))))
-#else /* !HAVE_LIBCRYPTO */
-	if(yy_aconf->host && !IsConfCryptLink(yy_aconf) && yy_aconf->passwd && yy_aconf->spasswd)
-#endif /* !HAVE_LIBCRYPTO */
+	if(yy_aconf->host && yy_aconf->passwd && yy_aconf->spasswd)
 	{
 		if(conf_add_server(yy_aconf, scount) >= 0)
 		{
@@ -1384,23 +1318,11 @@ conf_end_connect(struct TopConf *tc)
 	{
 		if(yy_aconf->name)
 		{
-#ifndef HAVE_LIBCRYPTO
-			if(IsConfCryptLink(yy_aconf))
-				conf_report_error
-					("Ignoring connect block for %s -- OpenSSL support is not available.",
-					 yy_aconf->name);
-#else
-			if(IsConfCryptLink(yy_aconf) && !yy_aconf->rsa_public_key)
-				conf_report_error
-					("Ignoring connect block for %s -- missing key.",
-					 yy_aconf->name);
-#endif
 			if(!yy_aconf->host)
 				conf_report_error
 					("Ignoring connect block for %s -- missing host.",
 					 yy_aconf->name);
-			else if(!IsConfCryptLink(yy_aconf)
-				&& (!yy_aconf->passwd || !yy_aconf->spasswd))
+			else if(!yy_aconf->passwd || !yy_aconf->spasswd)
 				conf_report_error
 					("Ignoring connect block for %s -- missing password.",
 					 yy_aconf->name);
@@ -1584,17 +1506,6 @@ conf_set_connect_rsa_public_key_file(void *data)
 }
 
 static void
-conf_set_connect_cryptlink(void *data)
-{
-	int yesno = *(unsigned int *) data;
-
-	if(yesno)
-		yy_aconf->flags |= CONF_FLAGS_CRYPTLINK;
-	else
-		yy_aconf->flags &= ~CONF_FLAGS_CRYPTLINK;
-}
-
-static void
 conf_set_connect_compressed(void *data)
 {
 #ifdef HAVE_LIBZ
@@ -1667,36 +1578,6 @@ conf_set_connect_class(void *data)
 {
 	MyFree(yy_aconf->className);
 	DupString(yy_aconf->className, data);
-}
-
-static void
-conf_set_connect_cipher_preference(void *data)
-{
-#ifdef HAVE_LIBCRYPTO
-	struct EncCapability *ecap;
-	char *cipher_name;
-	int found = 0;
-
-	yy_aconf->cipher_preference = NULL;
-
-	cipher_name = data;
-
-	for (ecap = CipherTable; ecap->name; ecap++)
-	{
-		if((!irccmp(ecap->name, cipher_name)) && (ecap->cap & CAP_ENC_MASK))
-		{
-			yy_aconf->cipher_preference = ecap;
-			found = 1;
-		}
-	}
-
-	if(!found)
-	{
-		conf_report_error("Invalid cipher '%s'.", cipher_name);
-	}
-#else
-	conf_report_error("Ignoring connect::cipher_preference -- OpenSSL support not available.");
-#endif
 }
 
 static int
@@ -2244,33 +2125,6 @@ conf_set_general_servlink_path(void *data)
 }
 
 static void
-conf_set_general_default_cipher_preference(void *data)
-{
-#ifdef HAVE_LIBCRYPTO
-	struct EncCapability *ecap;
-	char *cipher_name;
-
-	ConfigFileEntry.default_cipher_preference = NULL;
-
-	cipher_name = data;
-
-	for (ecap = CipherTable; ecap->name; ecap++)
-	{
-		if((!irccmp(ecap->name, cipher_name)) && (ecap->cap & CAP_ENC_MASK))
-		{
-			ConfigFileEntry.default_cipher_preference = ecap;
-			return;
-		}
-	}
-
-	conf_report_error("Invalid general::default_cipher_preference '%s'.", cipher_name);
-#else
-	conf_report_error
-		("Ignoring general::default_cipher_preference -- OpenSSL support not available.");
-#endif
-}
-
-static void
 conf_set_general_compression_level(void *data)
 {
 #ifdef HAVE_LIBZ
@@ -2710,8 +2564,6 @@ newconf_init()
 	add_conf_item("modules", "module", CF_QSTRING, conf_set_modules_module);
 
 	add_top_conf("serverinfo", NULL, NULL);
-	add_conf_item("serverinfo", "rsa_private_key_file", CF_QSTRING,
-		      conf_set_serverinfo_rsa_private_key_file);
 	add_conf_item("serverinfo", "name", CF_QSTRING, conf_set_serverinfo_name);
 	add_conf_item("serverinfo", "sid", CF_QSTRING, conf_set_serverinfo_sid);
 	add_conf_item("serverinfo", "description", CF_QSTRING, conf_set_serverinfo_description);
@@ -2802,11 +2654,8 @@ newconf_init()
 	add_conf_item("connect", "autoconn", CF_YESNO, conf_set_connect_auto);
 	add_conf_item("connect", "encrypted", CF_YESNO, conf_set_connect_encrypted);
 	add_conf_item("connect", "compressed", CF_YESNO, conf_set_connect_compressed);
-	add_conf_item("connect", "cryptlink", CF_YESNO, conf_set_connect_cryptlink);
 	add_conf_item("connect", "rsa_public_key_file", CF_QSTRING,
 		      conf_set_connect_rsa_public_key_file);
-	add_conf_item("connect", "cipher_preference", CF_QSTRING,
-		      conf_set_connect_cipher_preference);
 
 	add_top_conf("kill", conf_begin_kill, conf_end_kill);
 	add_conf_item("kill", "user", CF_QSTRING, conf_set_kill_user);
@@ -2887,8 +2736,6 @@ newconf_init()
 		      conf_set_general_tkline_expire_notices);
 	add_conf_item("general", "use_whois_actually", CF_YESNO,
 		      conf_set_general_use_whois_actually);
-	add_conf_item("general", "default_cipher_preference", CF_QSTRING,
-		      conf_set_general_default_cipher_preference);
 	add_conf_item("general", "compression_level", CF_INT, conf_set_general_compression_level);
 	add_conf_item("general", "client_flood", CF_INT, conf_set_general_client_flood);
 	add_conf_item("general", "havent_read_conf", CF_YESNO, conf_set_general_havent_read_conf);

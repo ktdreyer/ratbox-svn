@@ -98,34 +98,6 @@ struct Capability captab[] = {
 	{0, 0}
 };
 
-#ifdef HAVE_LIBCRYPTO
-struct EncCapability CipherTable[] = {
-#ifdef HAVE_EVP_BF_CFB
-	{"BF/256", CAP_ENC_BF_256, 32, CIPHER_BF},
-	{"BF/128", CAP_ENC_BF_128, 16, CIPHER_BF},
-#endif
-#ifdef HAVE_EVP_CAST5_CFB
-	{"CAST/128", CAP_ENC_CAST_128, 16, CIPHER_CAST},
-#endif
-#ifdef HAVE_EVP_IDEA_CFB
-	{"IDEA/128", CAP_ENC_IDEA_128, 16, CIPHER_IDEA},
-#endif
-#ifdef HAVE_EVP_RC5_32_12_16_CFB
-	{"RC5.16/128", CAP_ENC_RC5_16_128, 16, CIPHER_RC5_16},
-	{"RC5.12/128", CAP_ENC_RC5_12_128, 16, CIPHER_RC5_12},
-	{"RC5.8/128", CAP_ENC_RC5_8_128, 16, CIPHER_RC5_8},
-#endif
-#ifdef HAVE_EVP_DES_EDE3_CFB
-	{"3DES/168", CAP_ENC_3DES_168, 24, CIPHER_3DES},
-#endif
-#ifdef HAVE_EVP_DES_CFB
-	{"DES/56", CAP_ENC_DES_56, 8, CIPHER_DES},
-#endif
-
-	{0, 0, 0, 0}
-};
-#endif
-
 struct SlinkRplDef slinkrpltab[] = {
 	{SLINKRPL_ERROR, slink_error, SLINKRPL_FLAG_DATA},
 	{SLINKRPL_ZIPSTATS, slink_zipstats, SLINKRPL_FLAG_DATA},
@@ -246,30 +218,6 @@ collect_zipstats(void *unused)
 		}
 	}
 }
-
-
-#ifdef HAVE_LIBCRYPTO
-struct EncCapability *
-check_cipher(struct Client *client_p, struct ConfItem *aconf)
-{
-	struct EncCapability *epref;
-
-	/* Use connect{} specific info if available */
-	if(aconf->cipher_preference)
-		epref = aconf->cipher_preference;
-	else
-		epref = ConfigFileEntry.default_cipher_preference;
-
-	/*
-	 * If the server supports the capability in hand, return the matching
-	 * conf struct.  Otherwise, return NULL (an error).
-	 */
-	if(IsCapableEnc(client_p, epref->cap))
-		return (epref);
-
-	return (NULL);
-}
-#endif /* HAVE_LIBCRYPTO */
 
 /*
  * hunt_server - Do the basic thing in delivering the message (command)
@@ -493,7 +441,7 @@ try_connections(void *unused)
 }
 
 int
-check_server(const char *name, struct Client *client_p, int cryptlink)
+check_server(const char *name, struct Client *client_p)
 {
 	struct ConfItem *aconf = NULL;
 	struct ConfItem *server_aconf = NULL;
@@ -529,28 +477,18 @@ check_server(const char *name, struct Client *client_p, int cryptlink)
 		{
 			error = -2;
 
-#ifdef HAVE_LIBCRYPTO
-			if(cryptlink && IsConfCryptLink(aconf))
+			if(IsConfEncrypted(aconf))
 			{
-				if(aconf->rsa_public_key)
+				if(strcmp(aconf->passwd,
+					  crypt(client_p->
+						localClient->passwd, aconf->passwd)) == 0)
 					server_aconf = aconf;
 			}
-			else if(!(cryptlink || IsConfCryptLink(aconf)))
-#endif /* HAVE_LIBCRYPTO */
+			else
 			{
-				if(IsConfEncrypted(aconf))
-				{
-					if(strcmp(aconf->passwd,
-						  crypt(client_p->
-							localClient->passwd, aconf->passwd)) == 0)
-						server_aconf = aconf;
-				}
-				else
-				{
-					if(strcmp
-					   (aconf->passwd, client_p->localClient->passwd) == 0)
-						server_aconf = aconf;
-				}
+				if(strcmp
+				   (aconf->passwd, client_p->localClient->passwd) == 0)
+					server_aconf = aconf;
 			}
 		}
 	}
@@ -566,8 +504,6 @@ check_server(const char *name, struct Client *client_p, int cryptlink)
 	if(!(server_aconf->flags & CONF_FLAGS_COMPRESSED))
 #endif
 		ClearCap(client_p, CAP_ZIP);
-	if(!(server_aconf->flags & CONF_FLAGS_CRYPTLINK))
-		ClearCap(client_p, CAP_ENC);
 
 	if(aconf != NULL)
 	{
@@ -605,18 +541,12 @@ check_server(const char *name, struct Client *client_p, int cryptlink)
  */
 void
 send_capabilities(struct Client *client_p, struct ConfItem *aconf,
-		  int cap_can_send, int enc_can_send)
+		  int cap_can_send)
 {
 	struct Capability *cap;
 	char msgbuf[BUFSIZE];
 	char *t;
 	int tl;
-
-#ifdef HAVE_LIBCRYPTO
-	struct EncCapability *epref;
-	char *capend;
-	int sent_cipher = 0;
-#endif
 
 	t = msgbuf;
 
@@ -628,32 +558,6 @@ send_capabilities(struct Client *client_p, struct ConfItem *aconf,
 			t += tl;
 		}
 	}
-
-#ifdef HAVE_LIBCRYPTO
-	if(enc_can_send)
-	{
-		capend = t;
-		strcpy(t, "ENC:");
-		t += 4;
-
-		/* use connect{} specific info if available */
-		if(aconf->cipher_preference)
-			epref = aconf->cipher_preference;
-		else
-			epref = ConfigFileEntry.default_cipher_preference;
-
-		if((epref->cap & enc_can_send))
-		{
-			/* Leave the space -- it is removed later. */
-			tl = ircsprintf(t, "%s ", epref->name);
-			t += tl;
-			sent_cipher = 1;
-		}
-
-		if(!sent_cipher)
-			t = capend;	/* truncate string before ENC:, below */
-	}
-#endif
 
 	t--;
 	*t = '\0';
@@ -1050,15 +954,6 @@ show_capabilities(struct Client *target_p)
 		}
 	}
 
-#ifdef HAVE_LIBCRYPTO
-	if(IsCapable(target_p, CAP_ENC) &&
-	   target_p->localClient->in_cipher && target_p->localClient->out_cipher)
-	{
-		tl = ircsprintf(t, "ENC:%s ", target_p->localClient->in_cipher->name);
-		t += tl;
-	}
-#endif
-
 	t--;
 	*t = '\0';
 
@@ -1124,7 +1019,7 @@ server_estab(struct Client *client_p)
 		}
 	}
 
-	if(IsUnknown(client_p) && !IsConfCryptLink(aconf))
+	if(IsUnknown(client_p))
 	{
 		/*
 		 * jdc -- 1.  Use EmptyString(), not [0] index reference.
@@ -1150,7 +1045,7 @@ server_estab(struct Client *client_p)
 
 		send_capabilities(client_p, aconf, default_server_capabs
 				  | ((aconf->flags & CONF_FLAGS_COMPRESSED) ?
-				     CAP_ZIP_SUPPORTED : 0), 0);
+				     CAP_ZIP_SUPPORTED : 0));
 
 		sendto_one(client_p, "SERVER %s 1 :%s%s",
 			   me.name,
@@ -1167,7 +1062,7 @@ server_estab(struct Client *client_p)
 	/* Hand the server off to servlink now */
 
 #ifndef __VMS
-	if(IsCapable(client_p, CAP_ENC) || IsCapable(client_p, CAP_ZIP))
+	if(IsCapable(client_p, CAP_ZIP))
 	{
 		if(fork_server(client_p) < 0)
 		{
@@ -1341,35 +1236,6 @@ start_io(struct Client *server)
 		iobuf[c++] = SLINKCMD_START_ZIP_IN;
 		iobuf[c++] = SLINKCMD_START_ZIP_OUT;
 	}
-#ifdef HAVE_LIBCRYPTO
-	if(IsCapable(server, CAP_ENC))
-	{
-		/* Decryption settings */
-		iobuf[c++] = SLINKCMD_SET_CRYPT_IN_CIPHER;
-		iobuf[c++] = 0;	/* /                     (upper 8-bits of len) */
-		iobuf[c++] = 1;	/* \ cipher id is 1 byte (lower 8-bits of len) */
-		iobuf[c++] = server->localClient->in_cipher->cipherid;
-		iobuf[c++] = SLINKCMD_SET_CRYPT_IN_KEY;
-		iobuf[c++] = 0;	/* keylen < 256 */
-		iobuf[c++] = server->localClient->in_cipher->keylen;
-		memcpy((iobuf + c), server->localClient->in_key,
-		       server->localClient->in_cipher->keylen);
-		c += server->localClient->in_cipher->keylen;
-		/* Encryption settings */
-		iobuf[c++] = SLINKCMD_SET_CRYPT_OUT_CIPHER;
-		iobuf[c++] = 0;	/* /                     (upper 8-bits of len) */
-		iobuf[c++] = 1;	/* \ cipher id is 1 byte (lower 8-bits of len) */
-		iobuf[c++] = server->localClient->out_cipher->cipherid;
-		iobuf[c++] = SLINKCMD_SET_CRYPT_OUT_KEY;
-		iobuf[c++] = 0;	/* keylen < 256 */
-		iobuf[c++] = server->localClient->out_cipher->keylen;
-		memcpy((iobuf + c), server->localClient->out_key,
-		       server->localClient->out_cipher->keylen);
-		c += server->localClient->out_cipher->keylen;
-		iobuf[c++] = SLINKCMD_START_CRYPT_IN;
-		iobuf[c++] = SLINKCMD_START_CRYPT_OUT;
-	}
-#endif
 
 	while (MyConnect(server))
 	{
@@ -1952,15 +1818,6 @@ serv_connect_callback(int fd, int status, void *data)
 	/* Next, send the initial handshake */
 	SetHandshake(client_p);
 
-#ifdef HAVE_LIBCRYPTO
-	/* Handle all CRYPTLINK links in cryptlink_init */
-	if(IsConfCryptLink(aconf))
-	{
-		cryptlink_init(client_p, aconf, fd);
-		return;
-	}
-#endif
-
 	/*
 	 * jdc -- Check and send spasswd, not passwd.
 	 */
@@ -1983,7 +1840,7 @@ serv_connect_callback(int fd, int status, void *data)
 	 */
 
 	send_capabilities(client_p, aconf, default_server_capabs
-			  | ((aconf->flags & CONF_FLAGS_COMPRESSED) ? CAP_ZIP_SUPPORTED : 0), 0);
+			  | ((aconf->flags & CONF_FLAGS_COMPRESSED) ? CAP_ZIP_SUPPORTED : 0));
 
 	sendto_one(client_p, "SERVER %s 1 :%s%s",
 		   me.name,
@@ -2010,123 +1867,3 @@ serv_connect_callback(int fd, int status, void *data)
 	comm_setselect(fd, FDLIST_SERVER, COMM_SELECT_READ, read_packet, client_p, 0);
 }
 
-#ifdef HAVE_LIBCRYPTO
-/*
- * sends a CRYPTLINK SERV command.
- */
-void
-cryptlink_init(struct Client *client_p, struct ConfItem *aconf, int fd)
-{
-	char *encrypted;
-	char *key_to_send;
-	char randkey[CIPHERKEYLEN];
-	int enc_len;
-
-	/* get key */
-	if((!ServerInfo.rsa_private_key) || (!RSA_check_key(ServerInfo.rsa_private_key)))
-	{
-		cryptlink_error(client_p, "SERV", "Invalid RSA private key",
-				"Invalid RSA private key");
-		return;
-	}
-
-	if(!aconf->rsa_public_key)
-	{
-		cryptlink_error(client_p, "SERV", "Invalid RSA public key",
-				"Invalid RSA public key");
-		return;
-	}
-
-	if(get_randomness((unsigned char *) randkey, CIPHERKEYLEN) != 1)
-	{
-		cryptlink_error(client_p, "SERV",
-				"Couldn't generate keyphrase", "Couldn't generate keyphrase");
-		return;
-	}
-
-	encrypted = MyMalloc(RSA_size(ServerInfo.rsa_private_key));
-
-	enc_len = RSA_public_encrypt(CIPHERKEYLEN,
-				     (unsigned char *) randkey,
-				     (unsigned char *) encrypted,
-				     aconf->rsa_public_key, RSA_PKCS1_PADDING);
-
-	memcpy(client_p->localClient->in_key, randkey, CIPHERKEYLEN);
-
-	if(enc_len <= 0)
-	{
-		report_crypto_errors();
-		MyFree(encrypted);
-		cryptlink_error(client_p, "SERV", "Couldn't encrypt data", "Couldn't encrypt data");
-		return;
-	}
-
-	if(!(base64_block(&key_to_send, encrypted, enc_len)))
-	{
-		MyFree(encrypted);
-		cryptlink_error(client_p, "SERV",
-				"Couldn't base64 encode key", "Couldn't base64 encode key");
-		return;
-	}
-
-
-	send_capabilities(client_p, aconf, default_server_capabs
-			  | ((aconf->flags & CONF_FLAGS_COMPRESSED) ?
-			     CAP_ZIP_SUPPORTED : 0), CAP_ENC_MASK);
-
-	sendto_one(client_p, "CRYPTLINK SERV %s %s :%s%s",
-		   me.name, key_to_send,
-		   ConfigServerHide.hidden ? "(H) " : "", me.info);
-
-	SetHandshake(client_p);
-	SetWaitAuth(client_p);
-
-	MyFree(encrypted);
-	MyFree(key_to_send);
-
-	/*
-	 * If we've been marked dead because a send failed, just exit
-	 * here now and save everyone the trouble of us ever existing.
-	 */
-	if(IsDeadorAborted(client_p))
-	{
-		cryptlink_error(client_p, "SERV",
-				"Went dead during handshake", "Went dead during handshake");
-		return;
-	}
-
-	/* If we get here, we're ok, so lets start reading some data */
-	if(fd > -1)
-	{
-		comm_setselect(fd, FDLIST_SERVER, COMM_SELECT_READ, read_packet, client_p, 0);
-	}
-}
-
-void
-cryptlink_error(struct Client *client_p, const char *type,
-		const char *reason, const char *client_reason)
-{
-	sendto_realops_flags(UMODE_ALL, L_ADMIN, "%s: CRYPTLINK %s error - %s",
-#ifdef HIDE_SERVERS_IPS
-			     get_client_name(client_p, MASK_IP),
-#else
-			     get_client_name(client_p, SHOW_IP),
-#endif
-			     type, reason);
-	sendto_realops_flags(UMODE_ALL, L_OPER,
-			     "%s: CRYPTLINK %s error - %s",
-			     get_client_name(client_p, MASK_IP), type, reason);
-	ilog(L_ERROR, "%s: CRYPTLINK %s error - %s",
-	     log_client_name(client_p, SHOW_IP), type, reason);
-	/*
-	 * If client_reason isn't NULL, then exit the client with the message
-	 * defined in the call.
-	 */
-	if(client_reason != NULL)
-	{
-		exit_client(client_p, client_p, &me, client_reason);
-	}
-	return;
-}
-
-#endif /* HAVE_LIBCRYPTO */

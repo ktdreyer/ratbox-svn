@@ -56,7 +56,6 @@ SRCS =                          \
   m_challenge.c \
   m_close.c \
   m_connect.c \
-  m_cryptlink.c \
   m_dline.c \
   m_encap.c \
   m_eob.c \

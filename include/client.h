@@ -217,16 +217,6 @@ struct LocalUser
 	 */
 	char passwd[PASSWDLEN + 1];
 	int caps;		/* capabilities bit-field */
-	int enc_caps;		/* cipher capabilities bit-field */
-
-#ifdef HAVE_LIBCRYPTO
-	struct EncCapability *in_cipher;
-	struct EncCapability *out_cipher;
-
-	char in_key[CIPHERKEYLEN];
-	char out_key[CIPHERKEYLEN];
-#endif
-
 	int fd;			/* >= 0, for local clients */
 
 	int ctrlfd;		/* For servers:
@@ -345,9 +335,6 @@ struct exit_client_hook
 #define FLAGS_NEEDID       0x0100	/* I-lines say must use ident return */
 #define FLAGS_NORMALEX     0x0400	/* Client exited normally */
 #define FLAGS_SENDQEX      0x0800	/* Sendq exceeded */
-#define FLAGS_CRYPTIN      0x2000	/* incoming data must be decrypted */
-#define FLAGS_CRYPTOUT     0x4000	/* outgoing data must be encrypted */
-#define FLAGS_WAITAUTH     0x8000	/* waiting for CRYPTLINK AUTH command */
 #define FLAGS_SERVLINK     0x10000	/* servlink has servlink process */
 #define FLAGS_MARK	   0x20000	/* marked client */
 #define FLAGS_HIDDEN       0x40000	/* hidden server */
@@ -433,13 +420,6 @@ struct exit_client_hook
 #define DoAccess(x)             ((x)->flags & FLAGS_CHKACCESS)
 #define SetAccess(x)            ((x)->flags |= FLAGS_CHKACCESS)
 #define ClearAccess(x)          ((x)->flags &= ~FLAGS_CHKACCESS)
-#define IsCryptIn(x)            ((x)->flags &  FLAGS_CRYPTIN)
-#define SetCryptIn(x)           ((x)->flags |= FLAGS_CRYPTIN)
-#define IsCryptOut(x)           ((x)->flags &  FLAGS_CRYPTOUT)
-#define SetCryptOut(x)          ((x)->flags |= FLAGS_CRYPTOUT)
-#define IsWaitAuth(x)           ((x)->flags &  FLAGS_WAITAUTH)
-#define SetWaitAuth(x)          ((x)->flags |= FLAGS_WAITAUTH)
-#define ClearWaitAuth(x)        ((x)->flags &= ~FLAGS_WAITAUTH)
 #define HasServlink(x)          ((x)->flags &  FLAGS_SERVLINK)
 #define SetServlink(x)          ((x)->flags |= FLAGS_SERVLINK)
 #define MyConnect(x)		((x)->flags & FLAGS_MYCONNECT)

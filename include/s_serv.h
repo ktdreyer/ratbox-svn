@@ -65,7 +65,6 @@ struct Capability
 #define CAP_KLN	        0x00040	/* Can do KLINE message */
 #define CAP_GLN	        0x00080	/* Can do GLINE message */
 #define CAP_ZIP         0x00100	/* Can do ZIPlinks */
-#define CAP_ENC         0x00200	/* Can do ENCrypted links */
 #define CAP_KNOCK	0x00400	/* supports KNOCK */
 #define CAP_TBURST	0x00800	/* supports TBURST */
 #define CAP_UNKLN       0x01000	/* supports remote unkline */
@@ -76,8 +75,7 @@ struct Capability
 #define CAP_MASK        (CAP_QS  | CAP_EX   | CAP_CHW  | \
                          CAP_IE  | CAP_EOB  | CAP_KLN  | \
                          CAP_GLN | CAP_CLUSTER | CAP_ENCAP | \
-                         CAP_ZIP  | CAP_ENC | \
-                         CAP_KNOCK  | CAP_UNKLN)
+                         CAP_ZIP  | CAP_KNOCK  | CAP_UNKLN)
 
 #ifdef HAVE_LIBZ
 #define CAP_ZIP_SUPPORTED       CAP_ZIP
@@ -85,111 +83,7 @@ struct Capability
 #define CAP_ZIP_SUPPORTED       0
 #endif
 
-#ifdef HAVE_LIBCRYPTO
-struct EncCapability
-{
-	const char *name;	/* name of capability (cipher name) */
-	unsigned int cap;	/* mask value */
-	int keylen;		/* keylength (bytes) */
-	int cipherid;		/* ID number of cipher type (BF, IDEA, etc.) */
-};
-
-/*
- * Cipher ID numbers
- *   - DO NOT CHANGE THESE!  Otherwise you break backwards compatibility
- *     If you wish to add a new cipher, append it to the list.  Do not
- *     have it's value replace another.
- */
-#define CIPHER_BF       1
-#define CIPHER_CAST     2
-#define CIPHER_DES      3
-#define CIPHER_3DES     4
-#define CIPHER_IDEA     5
-#define CIPHER_RC5_8    6
-#define CIPHER_RC5_12   7
-#define CIPHER_RC5_16   8
-
-/* Cipher Capabilities */
-#define CAP_ENC_BF_128          0x00000001
-#define CAP_ENC_BF_256          0x00000002
-#define CAP_ENC_CAST_128        0x00000004
-#define CAP_ENC_DES_56          0x00000008
-#define CAP_ENC_3DES_168        0x00000010
-#define CAP_ENC_IDEA_128        0x00000020
-#define CAP_ENC_RC5_8_128       0x00000040
-#define CAP_ENC_RC5_12_128      0x00000080
-#define CAP_ENC_RC5_16_128      0x00000100
-
-#define CAP_ENC_ALL             0xFFFFFFFF
-
-
-/* */
-#ifdef HAVE_EVP_BF_CFB
-#define USE_CIPHER_BF       1
-/* Check for bug handling variable length blowfish keys */
-#if OPENSSL_VERSION_NUMBER >= 0x00000000L
-#define USE_CIPHER_BF_V     1
-#else
-#define USE_CIPHER_BF_V     0
-#endif
-#else
-#define USE_CIPHER_BF_V     0
-#define USE_CIPHER_BF       0
-#endif
-/* Cast */
-#ifdef HAVE_EVP_CAST5_CFB
-#define USE_CIPHER_CAST     1
-#else
-#define USE_CIPHER_CAST     0
-#endif
-/* DES */
-#ifdef HAVE_EVP_DES_CFB
-#define USE_CIPHER_DES      1
-#else
-#define USE_CIPHER_DES      0
-#endif
-/* 3DES */
-#ifdef HAVE_EVP_DES_EDE3_CFB
-#define USE_CIPHER_3DES     1
-#else
-#define USE_CIPHER_3DES     0
-#endif
-/* IDEA */
-#ifdef HAVE_EVP_IDEA_CFB
-#define USE_CIPHER_IDEA     1
-#else
-#define USE_CIPHER_IDEA     0
-#endif
-/* RC5 */
-#ifdef HAVE_EVP_RC5_32_12_16_CFB
-#define USE_CIPHER_RC5      1
-#else
-#define USE_CIPHER_RC5      0
-#endif
-
-
-/* Only enable ciphers supported by available version of OpenSSL */
-#define CAP_ENC_MASK    \
-             (((USE_CIPHER_BF   * CAP_ENC_ALL) & CAP_ENC_BF_128)         | \
-              ((USE_CIPHER_BF_V * CAP_ENC_ALL) & CAP_ENC_BF_256)         | \
-              ((USE_CIPHER_CAST * CAP_ENC_ALL) & CAP_ENC_CAST_128)       | \
-              ((USE_CIPHER_DES  * CAP_ENC_ALL) & CAP_ENC_DES_56)         | \
-              ((USE_CIPHER_3DES * CAP_ENC_ALL) & CAP_ENC_3DES_168)       | \
-              ((USE_CIPHER_IDEA * CAP_ENC_ALL) & CAP_ENC_IDEA_128)       | \
-              ((USE_CIPHER_RC5  * CAP_ENC_ALL) & CAP_ENC_RC5_8_128)      | \
-              ((USE_CIPHER_RC5  * CAP_ENC_ALL) & CAP_ENC_RC5_12_128)     | \
-              ((USE_CIPHER_RC5  * CAP_ENC_ALL) & CAP_ENC_RC5_16_128))
-
-#define IsCapableEnc(x, cap)    ((x)->localClient->enc_caps &   (cap))
-#define SetCapableEnc(x, cap)   ((x)->localClient->enc_caps |=  (cap))
-#define ClearCapEnc(x, cap)     ((x)->localClient->enc_caps &= ~(cap))
-
-#endif /* HAVE_LIBCRYPTO */
-
 #define DoesCAP(x)      ((x)->caps)
-
-#define CHECK_SERVER_CRYPTLINK    1
-#define CHECK_SERVER_NOCRYPTLINK  0
 
 /*
  * Capability macros.
@@ -244,9 +138,6 @@ extern struct SlinkRplDef slinkrpltab[];
  * extra argument to "PASS" takes care of checking that.  -orabidoo
  */
 extern struct Capability captab[];
-#ifdef HAVE_LIBCRYPTO
-extern struct EncCapability CipherTable[];
-#endif
 
 extern int MaxClientCount;	/* GLOBAL - highest number of clients */
 extern int MaxConnectionCount;	/* GLOBAL - highest number of connections */
@@ -261,11 +152,11 @@ extern int refresh_user_links;
 #define HUNTED_PASS     1	/* if message passed onwards successfully */
 
 
-extern int check_server(const char *name, struct Client *server, int cryptlink);
+extern int check_server(const char *name, struct Client *server);
 extern int hunt_server(struct Client *client_pt,
 		       struct Client *source_pt,
 		       const char *command, int server, int parc, const char **parv);
-extern void send_capabilities(struct Client *, struct ConfItem *conf, int, int);
+extern void send_capabilities(struct Client *, struct ConfItem *conf, int);
 extern void write_links_file(void *);
 extern int server_estab(struct Client *client_p);
 extern void set_autoconn(struct Client *, char *, char *, int);
@@ -277,11 +168,5 @@ extern void collect_zipstats(void *unused);
 extern void initServerMask(void);
 extern int serv_connect(struct ConfItem *, struct Client *);
 extern unsigned long nextFreeMask(void);
-extern void cryptlink_init(struct Client *client_p, struct ConfItem *aconf, int fd);
-extern void cryptlink_regen_key(void *);
-extern void cryptlink_error(struct Client *client_p, const char *type,
-			    const char *reason, const char *client_reason);
-
-struct EncCapability *check_cipher(struct Client *client_p, struct ConfItem *aconf);
 
 #endif /* INCLUDED_s_serv_h */

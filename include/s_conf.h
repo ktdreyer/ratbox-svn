@@ -83,7 +83,6 @@ struct ConfItem
 #ifdef HAVE_LIBCRYPTO
 	char *rsa_public_key_file;
 	RSA *rsa_public_key;
-	struct EncCapability *cipher_preference;
 #endif
 };
 
@@ -136,7 +135,6 @@ struct ConfItem
 #define CONF_FLAGS_ENCRYPTED            0x00100000
 #define CONF_FLAGS_COMPRESSED           0x00200000
 #define CONF_FLAGS_TEMPORARY            0x00400000
-#define CONF_FLAGS_CRYPTLINK            0x00800000
 #define CONF_FLAGS_VHOSTED		0x01000000
 
 
@@ -159,7 +157,6 @@ struct ConfItem
 #define IsConfRestricted(x)     ((x)->flags & CONF_FLAGS_RESTRICTED)
 #define IsConfEncrypted(x)      ((x)->flags & CONF_FLAGS_ENCRYPTED)
 #define IsConfCompressed(x)     ((x)->flags & CONF_FLAGS_COMPRESSED)
-#define IsConfCryptLink(x)      ((x)->flags & CONF_FLAGS_CRYPTLINK)
 #define IsConfVhosted(x)	((x)->flags & CONF_FLAGS_VHOSTED)
 
 /* flag definitions for opers now in client.h */
@@ -249,9 +246,6 @@ struct config_file_entry
 #ifdef IPV6
 	int fallback_to_ip6_int;
 #endif
-#ifdef HAVE_LIBCRYPTO
-	struct EncCapability *default_cipher_preference;
-#endif
 };
 
 struct config_channel_entry
@@ -288,10 +282,6 @@ struct server_info
 	char *description;
 	char *network_name;
 	char *network_desc;
-#ifdef HAVE_LIBCRYPTO
-	char *rsa_private_key_file;
-	RSA *rsa_private_key;
-#endif
 	int hub;
 	int use_ts6;
 	struct sockaddr_in ip;

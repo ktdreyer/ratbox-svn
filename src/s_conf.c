@@ -279,8 +279,6 @@ report_configured_links(struct Client *source_p, int mask)
 				{
 					if(tmp->flags & CONF_FLAGS_ALLOW_AUTO_CONN)
 						*s++ = 'A';
-					if(tmp->flags & CONF_FLAGS_CRYPTLINK)
-						*s++ = 'C';
 					if(tmp->flags & CONF_FLAGS_COMPRESSED)
 						*s++ = 'Z';
 				}
@@ -968,11 +966,6 @@ rehash(int sig)
 static void
 set_default_conf(void)
 {
-#ifdef HAVE_LIBCRYPTO
-	ServerInfo.rsa_private_key = NULL;
-	ServerInfo.rsa_private_key_file = NULL;
-#endif
-
 	/* ServerInfo.name is not rehashable */
 	/* ServerInfo.name = ServerInfo.name; */
 	ServerInfo.description = NULL;
@@ -1047,17 +1040,6 @@ set_default_conf(void)
 	ConfigFileEntry.htm_trigger = 40;
 	ConfigFileEntry.htm_interval = 5;
 
-#ifdef HAVE_LIBCRYPTO
-	/* jdc -- This is our default value for a cipher.  According to the
-	 *        CRYPTLINK document (doc/cryptlink.txt), BF/128 must be supported
-	 *        under all circumstances if cryptlinks are enabled.  So,
-	 *        this will be our default.
-	 *
-	 *        NOTE: I apologise for the hard-coded value of "1" (BF/128).
-	 *              This should be moved into a find_cipher() routine.
-	 */
-	ConfigFileEntry.default_cipher_preference = &CipherTable[1];
-#endif
 #ifdef HAVE_LIBZ
 	ConfigFileEntry.compression_level = 0;
 #endif
@@ -1867,18 +1849,6 @@ clear_out_old_conf(void)
 	ServerInfo.network_name = NULL;
 	MyFree(ServerInfo.network_desc);
 	ServerInfo.network_desc = NULL;
-#ifdef HAVE_LIBCRYPTO
-	if(ServerInfo.rsa_private_key != NULL)
-	{
-		RSA_free(ServerInfo.rsa_private_key);
-		ServerInfo.rsa_private_key = NULL;
-	}
-	if(ServerInfo.rsa_private_key_file != NULL)
-	{
-		MyFree(ServerInfo.rsa_private_key_file);
-		ServerInfo.rsa_private_key_file = NULL;
-	}
-#endif
 
 	/* clean out AdminInfo */
 	MyFree(AdminInfo.name);
@@ -1899,9 +1869,6 @@ clear_out_old_conf(void)
 	/* clean out general */
 	MyFree(ConfigFileEntry.servlink_path);
 	ConfigFileEntry.servlink_path = NULL;
-#ifdef HAVE_LIBCRYPTO
-	ConfigFileEntry.default_cipher_preference = NULL;
-#endif /* HAVE_LIBCRYPTO */
 
 	/* OK, that should be everything... */
 }
@@ -2156,7 +2123,7 @@ conf_add_server(struct ConfItem *aconf, int lcount)
 		return (-1);
 	}
 
-	if(EmptyString(aconf->passwd) && !(aconf->flags & CONF_FLAGS_CRYPTLINK))
+	if(EmptyString(aconf->passwd))
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL, "Bad connect block, name %s", aconf->name);
 		ilog(L_WARN, "Bad connect block, host %s", aconf->name);
