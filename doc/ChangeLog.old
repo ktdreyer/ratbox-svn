@@ -1,3 +1,8 @@
+*** 20010908_2 by androsyn
+Resolved the stupid ::1 issue. So we are doing 0::1 now. This is ugly..but
+it works and is still a legal IPv6 address.
+
+
 *** 20010908_1 by androsyn
 Adds a dot_in_ip6_addr option in general {}
 
