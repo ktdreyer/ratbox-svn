@@ -24,6 +24,12 @@
   There is also a simple arithmatic parser, which understands
   +, -, *, / and () precedence rules. */
 
+/* This config file contains default values for EFNet.
+ *
+ * It is recommended other networks do NOT base their ircd configuration
+ * on this file as it disables just about everything in the ircd. --fl_
+ */
+
 # serverinfo replaces the old M: line
 serverinfo {
 	name = "hades.arpa";
@@ -587,7 +593,7 @@ gecos {
 
 /* The channel block contains options pertaining to channels
  * The defaults shown here, are the ones approved for EFNet usage
- * as of October 11 2001
+ * as of April 2002
  */
 channel {
 	/* allow the use of +I as a channel mode. This mode (from
@@ -721,7 +727,7 @@ serverhide {
 
 	/* Allow servers to hide themselves from the flattened /links output.
 	 */
-	allow_hidden = yes;
+	allow_hidden = no;
 
 	/* Hide the server a user is on in /whois etc, and make it use
 	 * network_name and network_desc instead
