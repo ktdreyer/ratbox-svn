@@ -1,3 +1,9 @@
+*** 20001223_12 by wcampbel
+1. Add the broken $$target and $#target to the TODO list
+2. Channel Mode +z became +a, update whats-new.txt
+3. Brought README.FIRST up to date
+
+
 *** 20001223_11 by ejb
 - move fname_* into ircd.conf.
 - added fname_foperlog, not used yet.
