@@ -192,9 +192,6 @@ static  int     add_id(struct Client *cptr, struct Channel *chptr,
     case CHFL_EXCEPTION:
       list = &chptr->exceptlist;
       break;
-    case CHFL_DENY:
-      list = &chptr->denylist;
-      break;
     case CHFL_INVEX:
       list = &chptr->invexlist;
       break;
@@ -245,7 +242,7 @@ static  int     add_id(struct Client *cptr, struct Channel *chptr,
  *
  * from orabidoo
  * modified 8/9/00 by is: now we handle add ban types here
- * (invex/excemp/deny/etc)
+ * (invex/excemp/etc)
  */
 static int del_id(struct Channel *chptr, char *banid, int type)
 {
@@ -263,9 +260,6 @@ static int del_id(struct Channel *chptr, char *banid, int type)
       break;
     case CHFL_EXCEPTION:
       list = &chptr->exceptlist;
-      break;
-    case CHFL_DENY:
-      list = &chptr->denylist;
       break;
     case CHFL_INVEX:
       list = &chptr->invexlist;
@@ -359,19 +353,6 @@ static int check_banned(struct Channel *chptr, struct Client *who,
 	break;
       else
 	actualBan = NULL;
-    }
-
-  if (actualBan == NULL)
-    {
-      /* check +d list */
-      for (ban = chptr->denylist.head; ban; ban = ban->next)
-	{
-	  actualBan = ban->data;
-	  if (match(actualBan->banstr, who->info))
-	    break;
-	  else
-	    actualBan = NULL;
-	}
     }
 
   if (actualBan != NULL)
@@ -894,9 +875,6 @@ void send_channel_modes(struct Client *cptr, struct Channel *chptr)
   if(IsCapable(cptr, CAP_EX))
     send_mode_list(cptr, chptr->chname, &chptr->exceptlist, 'e', 0);
 
-  if(IsCapable(cptr, CAP_DE))
-    send_mode_list(cptr, chptr->chname, &chptr->denylist, 'd', 0);
-  
   if (IsCapable(cptr, CAP_IE))
     send_mode_list(cptr, chptr->chname, &chptr->invexlist, 'I', 0);
 }
@@ -1756,85 +1734,6 @@ void set_channel_mode(struct Client *cptr,
           strcpy(pbufw_ex, arg);
           pbufw_ex += strlen(pbufw_ex);
           *pbufw_ex++ = ' ';
-
-          break;
-
-        case 'd':
-          if (whatt == MODE_QUERY || parc-- <= 0)
-            {
-              if (!MyClient(sptr))
-                break;
-              if (errsent(SM_ERR_RPL_D, &errors_sent))
-                break;
-
-	      if(!(chptr->mode.mode & MODE_HIDEOPS) || isok_c)
-		{
-                  for (ptr = chptr->denylist.head; ptr; ptr = ptr->next)
-		    {
-		      banptr = ptr->data;
-		      sendto_one(cptr, form_str(RPL_BANLIST),
-				 me.name, cptr->name,
-				 chname,
-				 banptr->banstr,
-				 banptr->who,
-				 banptr->when);
-		    }
-		}
-	      else
-		{
-		  for (ptr = chptr->denylist.head; ptr; ptr = ptr->next)
-		    {
-		      banptr = ptr->data;
-		      sendto_one(cptr, form_str(RPL_BANLIST),
-				 me.name, cptr->name,
-				 chname,
-				 banptr->banstr,
-				 me.name,
-				 banptr->when);
-		    }
-		}
-          sendto_one(sptr, form_str(RPL_ENDOFBANLIST),
-                     me.name, sptr->name, 
-                     chname);
-          break;
-            }
-          arg = check_string(*parv++);
-
-          if (MyClient(sptr) && opcnt >= MAXMODEPARAMS)
-            break;
-
-          if (!isok)
-            {
-              if (!errsent(SM_ERR_NOOPS, &errors_sent) && MyClient(sptr))
-                sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED),
-                           me.name, sptr->name, 
-                           chname);
-              break;
-            }
-          
-          if(*arg == ':')
-            {
-              parc--;
-              parv++;
-              break;
-            }
-
-          tmp = strlen(arg);
-          if (len + tmp + 2 >= MODEBUFLEN)
-            break;
-
-          if (!(((whatt & MODE_ADD) && !add_id(sptr, chptr, arg, CHFL_DENY)) ||
-                ((whatt & MODE_DEL) && !del_id(chptr, arg, CHFL_DENY))))
-           break;
-
-          len += tmp + 1;
-          opcnt++;
-
-          *mbufw_de++ = plus;
-          *mbufw_de++ = 'd';
-          strcpy(pbufw_de, arg);
-          pbufw_de += strlen(pbufw_de);
-          *pbufw_de++ = ' ';
 
           break;
 
@@ -2825,15 +2724,14 @@ static void destroy_channel(struct Channel *chptr)
   /* free all bans/exceptions/denies */
   free_channel_list(&chptr->banlist);
   free_channel_list(&chptr->exceptlist);
-  free_channel_list(&chptr->denylist);
   free_channel_list(&chptr->invexlist);
 
   /* This should be redundant at this point but JIC */
   chptr->banlist.head = chptr->exceptlist.head =
-    chptr->denylist.head = chptr->invexlist.head = NULL;
+    chptr->invexlist.head = NULL;
 
   chptr->banlist.tail = chptr->exceptlist.tail =
-    chptr->denylist.tail = chptr->invexlist.tail = NULL;
+    chptr->invexlist.tail = NULL;
 
   if (chptr->prevch)
     chptr->prevch->nextch = chptr->nextch;

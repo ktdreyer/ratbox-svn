@@ -71,7 +71,6 @@ struct Channel
   dlink_list      invites;
   dlink_list      banlist;
   dlink_list      exceptlist;
-  dlink_list      denylist;
   dlink_list      invexlist;
 
   time_t          first_received_message_time; /* channel flood control */
@@ -162,7 +161,6 @@ extern void sync_oplists(struct Channel *, struct Client *, int, char *);
 #define CHFL_HALFOP     0x0008 /* Channel half op */
 #define CHFL_BAN        0x0010 /* ban channel flag */
 #define CHFL_EXCEPTION  0x0020 /* exception to ban channel flag */
-#define CHFL_DENY       0x0040 /* regular expression deny flag */
 #define CHFL_INVEX      0x0080
 
 /* Channel Visibility macros */
@@ -183,7 +181,6 @@ extern void sync_oplists(struct Channel *, struct Client *, int, char *);
 #define MODE_KEY        0x0200
 #define MODE_BAN        0x0400
 #define MODE_EXCEPTION  0x0800
-#define MODE_DENY       0x1000
 #define MODE_INVEX	0x2000
 #define MODE_HIDEOPS    0x4000
 #define MODE_LIMIT      0x8000  /* was 0x8000 */
@@ -192,7 +189,7 @@ extern void sync_oplists(struct Channel *, struct Client *, int, char *);
  * mode flags which take another parameter (With PARAmeterS)
  */
 #define MODE_WPARAS (MODE_CHANOP|MODE_VOICE|MODE_BAN|\
-                     MODE_EXCEPTION|MODE_DENY|MODE_KEY|MODE_LIMIT|MODE_INVEX)
+                     MODE_EXCEPTION|MODE_KEY|MODE_LIMIT|MODE_INVEX)
 
 /*
  * Undefined here, these are used in conjunction with the above modes in

@@ -89,7 +89,6 @@ struct Capability captab[] = {
   { "QS",       CAP_QS },
   { "EX",       CAP_EX },
   { "CHW",      CAP_CHW },
-  { "DE",       CAP_DE },
   { "LL",       CAP_LL },
   { "IE",       CAP_IE },
   { "VCHAN",    CAP_VCHAN },
