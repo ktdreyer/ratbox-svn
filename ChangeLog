@@ -1,3 +1,19 @@
+leeh        2002/11/24 22:42:36 UTC	(20021124_20)
+
+  Modified files:
+    include              config.h s_conf.h 
+    src                  ircd.c s_conf.c 
+  Log:
+  - moved xlines/shared to a blockheap
+  
+  Revision  Changes    Path
+  7.154     +4 -0      ircd-ratbox/include/config.h
+  7.212     +2 -0      ircd-ratbox/include/s_conf.h
+  7.262     +1 -0      ircd-ratbox/src/ircd.c
+  7.368     +35 -4     ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2002/11/24 21:49:36 UTC	(20021124_19)
 
   Modified files:
