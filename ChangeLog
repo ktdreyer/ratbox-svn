@@ -1,3 +1,16 @@
+leeh        2005/01/11 18:29:21 EST	(20050111_2)
+
+  Modified files:
+    src                  s_userserv.c scommand.c 
+  Log:
+  - fix a few compile errors
+  
+  Revision  Changes    Path
+  1.32      +4 -1      rserv/src/s_userserv.c
+  1.26      +2 -1      rserv/src/scommand.c
+
+
+
 leeh        2005/01/11 17:50:25 EST	(20050111_1)
 
   Modified files:
