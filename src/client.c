@@ -55,6 +55,7 @@
 #include "hostmask.h"
 #include "balloc.h"
 #include "listener.h"
+#include "hook.h"
 
 static void check_pings_list(dlink_list * list);
 static void check_unknowns_list(dlink_list * list);
@@ -120,8 +121,8 @@ init_client(void)
 	eventAddIsh("check_pings", check_pings, NULL, 30);
 	eventAddIsh("free_exited_clients", &free_exited_clients, NULL, 4);
 	eventAddIsh("client_heap_gc", client_heap_gc, NULL, 30);
-	hook_add_hook("local_exit_client", &h_local_exit_client);
-	hook_add_hook("unknown_exit_client", &h_unknown_exit_client);
+	hook_add_event("local_exit_client", &h_local_exit_client);
+	hook_add_event("unknown_exit_client", &h_unknown_exit_client);
 }
 
 
@@ -1073,8 +1074,8 @@ call_local_exit_hook(struct Client *client_p, const char *comment)
 {
 	struct exit_client_hook e_hook;
 	e_hook.client_p = client_p;
-	strlcpy(e_hook.comment, comment, sizeof(e_hook.comment));
-	hook_call_event(&h_local_exit_client, &e_hook);
+	strlcpy(e_hook.exit_message, comment, sizeof(e_hook.exit_message));
+	hook_call_event(h_local_exit_client, &e_hook);
 }
 
 static inline void
@@ -1082,8 +1083,8 @@ call_unknown_exit_hook(struct Client *client_p, const char *comment)
 {
 	struct exit_client_hook e_hook;
 	e_hook.client_p = client_p;
-	strlcpy(e_hook.comment, comment, sizeof(e_hook.comment));
-	hook_call_event(&h_unknown_exit_client, &e_hook);
+	strlcpy(e_hook.exit_message, comment, sizeof(e_hook.exit_message));
+	hook_call_event(h_unknown_exit_client, &e_hook);
 }
 
 
@@ -1188,7 +1189,7 @@ exit_unknown_client(struct Client *client_p, struct Client *source_p, struct Cli
 	log_user_exit(source_p);
 	if(source_p->localClient->fd >= 0)
 		sendto_one(source_p, "ERROR :Closing Link: %s (%s)", source_p->host, comment);
-	call_unknown_exit_local(source_p, comment);
+	call_unknown_exit_hook(source_p, comment);
 	
 	close_connection(source_p);
 
