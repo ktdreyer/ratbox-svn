@@ -20,8 +20,6 @@ Necessary Requirements:
 
 - A working dynamic load library
 
-- A working resolver library
-
 - A working getopt() function
 
 - A working lex.  Solaris /usr/ccs/bin/lex
