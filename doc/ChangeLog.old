@@ -1,3 +1,7 @@
+*** 20010106_1 by ejb
+- fix IDs being set to random shit.
+
+
 *** 20010105_53 by db
 - added m_nickinfo, /quote nickinfo nick
   will give back its ID and tsinfo for developers
