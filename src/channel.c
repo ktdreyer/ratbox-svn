@@ -694,68 +694,54 @@ void channel_modes(struct Channel *chptr, struct Client *cptr,
 }
 
 /*
-
- * 
- */
-
-/*
  * send_mode_list
- * inputs	- client
+ * inputs	- client pointer to server
  * 		- pointer to channel
- *		- pointer
- * 		- 
- * output	- 
- * side effects -
- * only used to send +b and +e now, +d/+a too.
+ *		- pointer to top of mode link list to send
+ * 		- char flag flagging type of mode i.e. 'b' 'e' etc.
+ * output	- NONE
+ * side effects - only used to send +b and +e now, +d/+a/+I too.
  */
 static  void    send_mode_list(struct Client *cptr,
                                char *chname,
                                struct SLink *top,
-                               int mask,
                                char flag)
 {
   struct SLink  *lp;
-  char  *cp, *name;
-  int   count = 0, send = 0;
-  
-  cp = modebuf + strlen(modebuf);
-  if (*parabuf) /* mode +l or +k xx */
-    count = 1;
+  char  *cp;
+  int   count = 0;
+  char *para[MAXMODEPARAMS];
+  char modebuf[MODEBUFLEN];
+
+  cp = modebuf;
+  *cp++ = '+';
+  *cp   = '\0';
+
+  para[0] = para[1] = para[2] = para[3] = "";
+
   for (lp = top; lp; lp = lp->next)
     {
-      if (!(lp->flags & mask))
-        continue;
-      name = BANSTR(lp);
-        
-      if (strlen(parabuf) + strlen(name) + 10 < (size_t) MODEBUFLEN)
+      para[count++] = BANSTR(lp);
+      *cp++ = flag;
+      *cp = '\0';
+
+      if (count >= MAXMODEPARAMS)
         {
-          (void)strcat(parabuf, " ");
-          (void)strcat(parabuf, name);
-          count++;
-          *cp++ = flag;
-          *cp = '\0';
-        }
-      else if (*parabuf)
-        send = 1;
-      if (count == MAXMODEPARAMS)
-        send = 1;
-      if (send)
-        {
-          sendto_one(cptr, ":%s MODE %s %s %s",
-                     me.name, chname, modebuf, parabuf);
-          send = 0;
-          *parabuf = '\0';
+          sendto_one(cptr, ":%s MODE %s %s %s %s %s %s",
+                     me.name, chname, modebuf,
+		     para[0], para[1], para[2], para[3]);
           cp = modebuf;
           *cp++ = '+';
-          if (count != MAXMODEPARAMS)
-            {
-              (void)strcpy(parabuf, name);
-              *cp++ = flag;
-            }
-          count = 0;
           *cp = '\0';
+	  para[0] = para[1] = para[2] = para[3] = "";
+	  count = 0;
         }
     }
+
+  if(count != 0)
+    sendto_one(cptr, ":%s MODE %s %s %s %s %s %s",
+	       me.name, chname, modebuf,
+	       para[0], para[1], para[2], para[3]);
 }
 
 /*
@@ -838,48 +824,23 @@ void send_channel_modes(struct Client *cptr, struct Channel *chptr)
       if (t[-1] == ' ') t[-1] = '\0';
       sendto_one(cptr, "%s", buf);
     }
-  *parabuf = '\0';
-  *modebuf = '+';
-  modebuf[1] = '\0';
-  send_mode_list(cptr, chptr->chname, chptr->banlist, CHFL_BAN,'b');
 
-  if (modebuf[1] || *parabuf)
-    sendto_one(cptr, ":%s MODE %s %s %s",
-               me.name, chptr->chname, modebuf, parabuf);
+  send_mode_list(cptr, chptr->chname, chptr->banlist, 'b');
 
   if(!IsCapable(cptr,CAP_EX))
     return;
 
-  *parabuf = '\0';
-  *modebuf = '+';
-  modebuf[1] = '\0';
-  send_mode_list(cptr, chptr->chname, chptr->exceptlist, CHFL_EXCEPTION,'e');
-
-  if (modebuf[1] || *parabuf)
-    sendto_one(cptr, ":%s MODE %s %s %s",
-               me.name, chptr->chname, modebuf, parabuf);
+  send_mode_list(cptr, chptr->chname, chptr->exceptlist, 'e');
 
   if(!IsCapable(cptr,CAP_DE))
       return;
-  *parabuf = '\0';
-  *modebuf = '+';
-  modebuf[1] = '\0';
-  send_mode_list(cptr, chptr->chname, chptr->denylist, CHFL_DENY,'d');
+
+  send_mode_list(cptr, chptr->chname, chptr->denylist, 'd');
   
-  if (modebuf[1] || *parabuf)
-    sendto_one(cptr, ":%s MODE %s %s %s",
-               me.name, chptr->chname, modebuf, parabuf);
-
   if (!IsCapable(cptr,CAP_IE))
-		return;
-	*parabuf = '\0';
-	*modebuf = '+';
-	modebuf[1] = '\0';
-	send_mode_list(cptr, chptr->chname, chptr->invexlist, CHFL_INVEX, 'I');
-
-  if (modebuf[1] || *parabuf)
-    sendto_one(cptr, ":%s MODE %s %s %s",
-               me.name, chptr->chname, modebuf, parabuf);
+    return;
+  
+  send_mode_list(cptr, chptr->chname, chptr->invexlist, 'I');
 }
 
 /*
