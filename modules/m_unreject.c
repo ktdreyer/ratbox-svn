@@ -26,6 +26,7 @@
 #include "stdinc.h"
 #include "client.h"
 #include "s_conf.h"
+#include "hostmask.h"
 #include "reject.h"
 #include "msg.h"
 #include "modules.h"
