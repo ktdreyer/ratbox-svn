@@ -1502,9 +1502,7 @@ burst_all(struct Client *client_p)
       if(chptr->users != 0)
         {
           burst_members(client_p,&chptr->chanops);
-#ifdef REQUIRE_OANDV
           burst_members(client_p,&chptr->chanops_voiced);
-#endif
           burst_members(client_p,&chptr->voiced);
           burst_members(client_p,&chptr->peons);
           send_channel_modes(client_p, chptr);

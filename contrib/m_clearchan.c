@@ -224,25 +224,17 @@ static void remove_our_modes( int hide_or_not,
                               struct Client *source_p)
 {
   remove_a_mode(hide_or_not, chptr, top_chptr, source_p, &chptr->chanops, 'o');
-#ifdef REQUIRE_OANDV
   remove_a_mode(hide_or_not, chptr, top_chptr, source_p, &chptr->chanops_voiced, 'o');
-#endif
   remove_a_mode(hide_or_not, chptr, top_chptr, source_p, &chptr->voiced, 'v');
-#ifdef REQUIRE_OANDV
   remove_a_mode(hide_or_not, chptr, top_chptr, source_p, &chptr->chanops_voiced, 'v');
-#endif
 
   /* Move all voice/ops etc. to non opped list */
   dlinkMoveList(&chptr->chanops, &chptr->peons);
   dlinkMoveList(&chptr->voiced, &chptr->peons);
-#ifdef REQUIRE_OANDV
   dlinkMoveList(&chptr->chanops_voiced, &chptr->peons);
-#endif
   dlinkMoveList(&chptr->locchanops, &chptr->locpeons);
   dlinkMoveList(&chptr->locvoiced, &chptr->locpeons);
-#ifdef REQUIRE_OANDV
   dlinkMoveList(&chptr->locchanops_voiced, &chptr->locpeons);
-#endif
 
   /* Clear all +beI modes */
   free_channel_list(&chptr->banlist);

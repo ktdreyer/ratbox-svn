@@ -110,10 +110,8 @@ static void mo_opme(struct Client *client_p, struct Client *source_p,
 	  dlinkDelete(ptr, &chptr->voiced);
   else if ((ptr = find_user_link(&chptr->chanops, source_p)))
 	  dlinkDelete(ptr, &chptr->chanops);
-#ifdef REQUIRE_OANDV
   else if((ptr = find_user_link(&chptr->chanops_voiced, source_p)))
     dlinkDelete(ptr, &chptr->chanops_voiced);
-#endif
   else
     {
        /* Theyre not even on the channel, bail. */
@@ -126,12 +124,8 @@ static void mo_opme(struct Client *client_p, struct Client *source_p,
     dlinkDelete(locptr, &chptr->locvoiced);
   else if((locptr = find_user_link(&chptr->locchanops, source_p)))
     dlinkDelete(locptr, &chptr->locchanops);
-  
-#ifdef REQUIRE_OANDV
   else if((locptr = find_user_link(&chptr->locchanops_voiced, source_p)))
     dlinkDelete(locptr, &chptr->locchanops_voiced);
-#endif
-
   else
     return;
 

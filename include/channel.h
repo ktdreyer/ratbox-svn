@@ -27,9 +27,6 @@
 #include "config.h"           /* config settings */
 #include "ircd_defs.h"        /* buffer sizes */
 
-/* Efnet wanted this... Maybe we should do this from configure? */
-#define REQUIRE_OANDV
-
 /* #define INTENSIVE_DEBUG */
 
 struct Client;
@@ -58,17 +55,13 @@ struct Channel
   time_t          last_knock;           /* don't allow knock to flood */
 
   dlink_list      chanops;		/* lists of chanops etc. */
-#ifdef REQUIRE_OANDV
   dlink_list	  chanops_voiced;	/* UGH I'm sorry */
-#endif
   dlink_list      voiced;
   dlink_list      peons;                /* non ops, just members */
   dlink_list	  deopped;              /* users deopped on sjoin */
 
   dlink_list      locchanops;           /* local versions of the above */
-#ifdef REQUIRE_OANDV
   dlink_list	  locchanops_voiced;	/* UGH I'm sorry */
-#endif
   dlink_list      locvoiced;
   dlink_list      locpeons;             /* ... */
   
@@ -148,12 +141,9 @@ struct Ban          /* also used for exceptions -orabidoo */
 };
 
 #define CLEANUP_CHANNELS_TIME (30*60)
+
 /* Number of chanops, peon, voiced sublists */
-#ifdef REQUIRE_OANDV
 #define NUMLISTS 4
-#else
-#define NUMLISTS 3
-#endif
 
 #ifdef INTENSIVE_DEBUG
 void do_channel_integrity_check(void);

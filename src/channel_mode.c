@@ -105,6 +105,8 @@ static void chm_hideops(struct Client *, struct Client *, struct Channel *,
 
 static void send_oplist(const char *, struct Client *, dlink_list *,
                         char *, int);
+static void mode_get_status(struct Channel *, struct Client *, 
+                            int *, int *, int);
 #endif
 
 static void send_cap_mode_changes(struct Client *, struct Client *,
@@ -112,9 +114,6 @@ static void send_cap_mode_changes(struct Client *, struct Client *,
 
 static void send_mode_changes(struct Client *, struct Client *,
                               struct Channel *, char *chname);
-
-static void mode_get_status(struct Channel *, struct Client *, 
-                            int *, int *, int);
 
 static void update_channel_info(struct Channel *);
 
@@ -332,9 +331,7 @@ change_channel_membership(struct Channel *chptr,
   	&chptr->locpeons,
   	&chptr->locvoiced,
   	&chptr->locchanops,
-#ifdef REQUIRE_OANDV
   	&chptr->locchanops_voiced,
-#endif
 	NULL  
   };
 
@@ -342,9 +339,7 @@ change_channel_membership(struct Channel *chptr,
   	&chptr->peons,
   	&chptr->voiced,
   	&chptr->chanops,
-#ifdef REQUIRE_OANDV
   	&chptr->chanops_voiced,
-#endif
   	NULL
   };
   /* local clients need to be moved from local list too */
@@ -1123,19 +1118,6 @@ chm_op(struct Client *client_p, struct Client *source_p,
        char **parv, int *errors, int alev, int dir, char c, void *d,
        const char *chname)
 {
-  int i;
-
-  /* Note on was_opped etc...
-   * The was_opped variable is set to 1 if they were set -o in this mode,
-   * was implies that previously they were +o, so we should not send a
-   * +o out. wasnt_opped is set to 1 if they were +o in this mode, which
-   * implies they were previously -o so we don't send -o out. Note that
-   * was_voiced is along with is_voiced to decide if we need to -v first
-   * to support servers/clients that allow more than one +v/+o at a time.
-   * -A1kmm.
-   */
-
-  int wasnt_voiced = 0, t_op, t_voice;
   char *opnick;
   struct Client *targ_p;
 
@@ -1178,52 +1160,11 @@ chm_op(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  mode_get_status(chptr, targ_p, &t_op, &t_voice, 1);
-
-  if (((dir == MODE_ADD) && t_op) || ((dir == MODE_DEL) && !t_op))
-    return;
-
   if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
     return;
 
-  /* Cancel mode changes... */
-
-  for (i = 0; i < mode_count; i++)
-    if (mode_changes[i].dir == MODE_ADD && 
-        (mode_changes[i].letter == 'o'
-#ifndef REQUIRE_OANDV
-         || mode_changes[i].letter == 'v'
-#endif
-       )
-        && mode_changes[i].client == targ_p)
-    {
-      if (mode_changes[i].letter == 'o')
-      {
-        mode_changes[i].letter = 0;
-        return;
-      }
-      else if (mode_changes[i].letter == 'v')
-        wasnt_voiced = 1;
-      mode_changes[i].letter = 0;
-    }
-
   if (dir == MODE_ADD)
   {
-
-#ifndef REQUIRE_OANDV
-    if (!wasnt_voiced && t_voice)
-    {
-      mode_changes[mode_count].letter = 'v';
-      mode_changes[mode_count].dir = MODE_DEL;
-      mode_changes[mode_count].caps = 0;
-      mode_changes[mode_count].nocaps = 0;
-      mode_changes[mode_count].mems = ONLY_CHANOPS;
-      mode_changes[mode_count].id = targ_p->user->id;
-      mode_changes[mode_count].arg = targ_p->name;
-      mode_changes[mode_count++].client = targ_p;
-    }
-#endif
-
     mode_changes[mode_count].letter = c;
     mode_changes[mode_count].dir = MODE_ADD;
     mode_changes[mode_count].caps = 0;
@@ -1252,7 +1193,6 @@ chm_voice(struct Client *client_p, struct Client *source_p,
           char **parv, int *errors, int alev, int dir, char c, void *d,
           const char *chname)
 {
-  int i, t_op, t_voice;
   char *opnick;
   struct Client *targ_p;
 
@@ -1284,17 +1224,7 @@ chm_voice(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  mode_get_status(chptr, targ_p, &t_op, &t_voice, 1);
-
   if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
-    return;
-
-  if (
-#ifndef REQUIRE_OANDV
-      t_op ||
-#endif
-      (dir == MODE_ADD && t_voice) ||
-      (dir == MODE_DEL && !t_voice))
     return;
 
   if (dir == MODE_ADD)
@@ -1310,16 +1240,6 @@ chm_voice(struct Client *client_p, struct Client *source_p,
   }
   else
   {
-    for (i = 0; i < mode_count; i++)
-    {
-      if (mode_changes[i].dir == MODE_ADD && mode_changes[i].letter == 'v'
-          && mode_changes[i].client == targ_p)
-      {
-        mode_changes[i].letter = 0;
-        return;
-      }
-    }
-
     mode_changes[mode_count].letter = 'v';
     mode_changes[mode_count].dir = MODE_DEL;
     mode_changes[mode_count].caps = 0;
@@ -1922,9 +1842,7 @@ set_channel_mode_flags(char flags_ptr[NUMLISTS][2], struct Channel *chptr,
     flags_ptr[0][0] = '\0';
     flags_ptr[1][0] = '\0';
     flags_ptr[2][0] = '\0';
-#ifdef REQUIRE_OANDV
     flags_ptr[3][0] = '\0';
-#endif
   }
   else
 #endif
@@ -1932,15 +1850,11 @@ set_channel_mode_flags(char flags_ptr[NUMLISTS][2], struct Channel *chptr,
     flags_ptr[0][0] = '@';
     flags_ptr[1][0] = '+';
     flags_ptr[2][0] = '\0';
-#ifdef REQUIRE_OANDV
     flags_ptr[3][0] = '@';
-#endif
 
     flags_ptr[0][1] = '\0';
     flags_ptr[1][1] = '\0';
-#ifdef REQUIRE_OANDV
     flags_ptr[3][1] = '\0';
-#endif
   }
 }
 
@@ -1960,13 +1874,9 @@ sync_oplists(struct Channel *chptr, struct Client *target_p,
              int dir, const char *name)
 {
   send_oplist(name, target_p, &chptr->chanops, "o", dir);
-#ifdef REQUIRE_OANDV
   send_oplist(name, target_p, &chptr->chanops_voiced, "o", dir);
-#endif
   send_oplist(name, target_p, &chptr->voiced, "v", dir);
-#ifdef REQUIRE_OANDV
   send_oplist(name, target_p, &chptr->chanops_voiced, "v", dir);
-#endif
 }
 
 static void
@@ -2045,6 +1955,7 @@ sync_channel_oplists(struct Channel *chptr, int dir)
  * Since member status is now changed *after* processing all
  * modes, we need a special tool to keep track of who is opped, voiced etc.
  */
+#ifdef ANONOPS
 static void mode_get_status(struct Channel *chptr, struct Client *target_p,
                             int *t_op, int *t_voice, int need_check)
 {
@@ -2071,6 +1982,7 @@ static void mode_get_status(struct Channel *chptr, struct Client *target_p,
     }
   }
 }
+#endif
 
 static void update_channel_info(struct Channel *chptr)
 {
@@ -2101,14 +2013,13 @@ static void update_channel_info(struct Channel *chptr)
           sync_oplists(chptr, ptr->data, MODE_DEL, chptr->chname);
       }
 
-#ifdef REQUIRE_OANDV
       DLINK_FOREACH(ptr, chptr->locchanops_voiced.head)
       {
         mode_get_status(chptr, ptr->data, &t_op, &t_voice, 1);
         if(!t_op)
           sync_oplists(chptr, ptr->data, MODE_DEL, chptr->chname);
       }
-#endif
+
       DLINK_FOREACH(ptr, chptr->locchanops.head)
       {
         mode_get_status(chptr, ptr->data, &t_op, &t_voice, 1);
@@ -2185,7 +2096,6 @@ static void update_channel_info(struct Channel *chptr)
   {
     if (mode_changes[i].letter == 'o')
     {
-#ifdef REQUIRE_OANDV
       if (is_voiced(chptr, mode_changes[i].client))
       {
         if(mode_changes[i].dir == MODE_DEL)
@@ -2201,7 +2111,6 @@ static void update_channel_info(struct Channel *chptr)
         }
       }
       else
-#endif
       {
         if(mode_changes[i].dir == MODE_DEL)
         {
@@ -2217,7 +2126,6 @@ static void update_channel_info(struct Channel *chptr)
     }
     else if (mode_changes[i].letter == 'v')
     {
-#ifdef REQUIRE_OANDV
       if (is_chan_op(chptr, mode_changes[i].client))
       {
         if(mode_changes[i].dir == MODE_DEL)
@@ -2233,7 +2141,6 @@ static void update_channel_info(struct Channel *chptr)
         }
       }
       else
-#endif
       {
         if(mode_changes[i].dir == MODE_DEL)
         {

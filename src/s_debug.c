@@ -229,9 +229,7 @@ void count_memory(struct Client *source_p)
 
       channel_users += dlink_list_length(&chptr->peons);
       channel_users += dlink_list_length(&chptr->chanops);
-#ifdef REQUIRE_OANDV
       channel_users += dlink_list_length(&chptr->chanops_voiced);
-#endif
       channel_users += dlink_list_length(&chptr->voiced);
       channel_invites += dlink_list_length(&chptr->invites);
 

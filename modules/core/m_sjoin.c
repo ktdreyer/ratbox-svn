@@ -445,7 +445,6 @@ static void ms_sjoin(struct Client *client_p,
           *mbuf++ = 'o';
 	  para[pargs++] = s;
 
-#ifdef REQUIRE_OANDV
           /* a +ov user.. bleh */
 	  if(fl & MODE_VOICE)
 	  {
@@ -469,7 +468,6 @@ static void ms_sjoin(struct Client *client_p,
 	    *mbuf++ = 'v';
 	    para[pargs++] = s;
 	  }
-#endif
         }
       else if (fl & MODE_VOICE)
         {
@@ -666,22 +664,19 @@ static void remove_our_modes( int hide_or_not,
 {
   remove_a_mode(hide_or_not, chptr, top_chptr, source_p, &chptr->chanops, 'o');
   remove_a_mode(hide_or_not, chptr, top_chptr, source_p, &chptr->voiced, 'v');
-
-  /* Move all voice/ops etc. to non opped list */
-  dlinkMoveList(&chptr->chanops, &chptr->peons);
-  dlinkMoveList(&chptr->voiced, &chptr->peons);
-  
-  dlinkMoveList(&chptr->locchanops, &chptr->locpeons);
-  dlinkMoveList(&chptr->locvoiced, &chptr->locpeons);
-
-#ifdef REQUIRE_OANDV
   remove_a_mode(hide_or_not, chptr, top_chptr, source_p,
                 &chptr->chanops_voiced, 'o');
   remove_a_mode(hide_or_not, chptr, top_chptr, source_p,
                 &chptr->chanops_voiced, 'v');    
+
+  /* Move all voice/ops etc. to non opped list */
   dlinkMoveList(&chptr->chanops_voiced, &chptr->peons);
+  dlinkMoveList(&chptr->chanops, &chptr->peons);
+  dlinkMoveList(&chptr->voiced, &chptr->peons);
+  
+  dlinkMoveList(&chptr->locchanops, &chptr->locpeons);
   dlinkMoveList(&chptr->locchanops_voiced, &chptr->locpeons);
-#endif
+  dlinkMoveList(&chptr->locvoiced, &chptr->locpeons);
 }
 
 

@@ -111,9 +111,7 @@ add_user_to_channel(struct Channel *chptr, struct Client *who, int flags)
      { MODE_PEON, &chptr->peons },
      { MODE_CHANOP, &chptr->chanops },
      { MODE_VOICE, &chptr->voiced },
-#ifdef REQUIRE_OANDV
      { MODE_CHANOP|MODE_VOICE, &chptr->chanops_voiced },
-#endif
      { 0, NULL }  
   };  
 
@@ -122,9 +120,7 @@ add_user_to_channel(struct Channel *chptr, struct Client *who, int flags)
      { MODE_PEON, &chptr->locpeons },
      { MODE_CHANOP, &chptr->locchanops },
      { MODE_VOICE, &chptr->locvoiced },
-#ifdef REQUIRE_OANDV
      { MODE_CHANOP|MODE_VOICE, &chptr->locchanops_voiced },
-#endif
      { 0, NULL }  
   };  
   
@@ -192,9 +188,7 @@ remove_user_from_channel(struct Channel *chptr, struct Client *who)
         &chptr->locpeons,   
         &chptr->locvoiced,  
         &chptr->locchanops, 
-#ifdef REQUIRE_OANDV
         &chptr->locchanops_voiced,
-#endif
         NULL
   };
 
@@ -202,9 +196,7 @@ remove_user_from_channel(struct Channel *chptr, struct Client *who)
         &chptr->peons,   
         &chptr->voiced,  
         &chptr->chanops,
-#ifdef REQUIRE_OANDV
         &chptr->chanops_voiced,
-#endif
         NULL
   };
   
@@ -306,11 +298,7 @@ send_channel_modes(struct Client *client_p, struct Channel *chptr)
   channel_modes(chptr, client_p, modebuf, parabuf);
 
   send_members(client_p, modebuf, parabuf, chptr, &chptr->chanops, "@");
-
-#ifdef REQUIRE_OANDV
   send_members(client_p, modebuf, parabuf, chptr, &chptr->chanops_voiced, "@+");
-#endif
-
   send_members(client_p, modebuf, parabuf, chptr, &chptr->voiced, "+");
   send_members(client_p, modebuf, parabuf, chptr, &chptr->peons, "");
 
@@ -507,16 +495,12 @@ destroy_channel(struct Channel *chptr)
    */
 
   delete_members(chptr, &chptr->chanops);
-#ifdef REQUIRE_OANDV
   delete_members(chptr, &chptr->chanops_voiced);
-#endif
   delete_members(chptr, &chptr->voiced);
   delete_members(chptr, &chptr->peons);
 
   delete_members(chptr, &chptr->locchanops);
-#ifdef REQUIRE_OANDV
   delete_members(chptr, &chptr->locchanops_voiced);
-#endif
   delete_members(chptr, &chptr->locvoiced);
   delete_members(chptr, &chptr->locpeons);
 
@@ -614,9 +598,8 @@ channel_member_names(struct Client *source_p,
     members_ptr[0] = chptr->chanops.head;
     members_ptr[1] = chptr->voiced.head;
     members_ptr[2] = chptr->peons.head;
-#ifdef REQUIRE_OANDV
     members_ptr[3] = chptr->chanops_voiced.head;
-#endif
+
     is_member = IsMember(source_p, chptr);
 
     /* Note: This code will show one chanop followed by one voiced followed
@@ -642,9 +625,7 @@ channel_member_names(struct Client *source_p,
           reply_to_send = YES;
 
           if (who == source_p && is_voiced(chptr, who)
-#ifdef REQUIRE_OANDV
 	      && !is_chan_op(chptr, who)
-#endif
               && chptr->mode.mode & MODE_HIDEOPS)
             ircsprintf(t, "+%s ", who->name);
           else 
@@ -697,9 +678,7 @@ channel_member_names(struct Client *source_p,
     ptr_list[0] = chptr->chanops.head;
     ptr_list[1] = chptr->voiced.head;
     ptr_list[2] = chptr->peons.head;
-#ifdef REQUIRE_OANDV
     ptr_list[3] = chptr->chanops_voiced.head;
-#endif
 
     set_channel_mode_flags(ptr_flags, chptr, source_p);
 
@@ -836,10 +815,8 @@ channel_chanop_or_voice(struct Channel *chptr, struct Client *target_p)
     return ("@");
   else if (find_user_link(&chptr->voiced, target_p))
     return ("+");
-#ifdef REQUIRE_OANDV
   else if (find_user_link(&chptr->chanops_voiced, target_p))
     return ("@+");
-#endif
   return ("");
 }
 
@@ -999,10 +976,9 @@ is_chan_op(struct Channel *chptr, struct Client *who)
   {
     if (find_user_link(&chptr->chanops, who) != NULL)
       return 1;
-#ifdef REQUIRE_OANDV
+
     if (find_user_link(&chptr->chanops_voiced, who) != NULL)
       return 1;
-#endif
   }
   return 0;
 }
@@ -1022,10 +998,8 @@ is_voiced(struct Channel *chptr, struct Client *who)
   {
     if (find_user_link(&chptr->voiced, who) != NULL)
       return 1;
-#ifdef REQUIRE_OANDV
     if (find_user_link(&chptr->chanops_voiced, who) != NULL)
       return 1;
-#endif
   }
   return 0;
 }

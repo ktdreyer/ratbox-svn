@@ -67,9 +67,7 @@ static void do_who_on_channel(struct Client *source_p,
 
 static void do_who_list(struct Client *source_p, struct Channel *chptr,
                         dlink_list *peons_list, dlink_list *chanops_list,
-#ifdef REQUIRE_OANDV
                         dlink_list *chanops_voiced_list,
-#endif
 			dlink_list *voiced_list,
                         char *chanop_flag,
 			char *voiced_flag,
@@ -293,9 +291,7 @@ static void who_global(struct Client *source_p,char *mask, int server_oper)
   {
      chptr = lp->data;
      who_common_channel(source_p,chptr->chanops,mask,server_oper,&maxmatches);
-#ifdef REQUIRE_OANDV
      who_common_channel(source_p,chptr->chanops_voiced,mask,server_oper,&maxmatches);
-#endif
      who_common_channel(source_p,chptr->voiced,mask,server_oper,&maxmatches);
      who_common_channel(source_p,chptr->peons,mask,server_oper,&maxmatches);
   }
@@ -361,9 +357,7 @@ static void do_who_on_channel(struct Client *source_p,
   do_who_list(source_p, chptr,
               &chptr->peons,
               &chptr->chanops,
-#ifdef REQUIRE_OANDV
               &chptr->chanops_voiced,
-#endif
               &chptr->voiced,
               flags[0],
               flags[1],
@@ -374,9 +368,7 @@ static void do_who_on_channel(struct Client *source_p,
 static void do_who_list(struct Client *source_p, struct Channel *chptr,
 			dlink_list *peons_list,
                         dlink_list *chanops_list,
-#ifdef REQUIRE_OANDV
                         dlink_list *chanops_voiced_list,
-#endif
 			dlink_list *voiced_list,
 			char *chanop_flag,
 			char *voiced_flag,
@@ -388,17 +380,13 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
   dlink_node *chanops_ptr;
   dlink_node *peons_ptr;
   dlink_node *voiced_ptr;
-#ifdef REQUIRE_OANDV
   dlink_node *chanops_voiced_ptr;
-#endif
   int done=0;
 
   peons_ptr   = peons_list->head;
   chanops_ptr = chanops_list->head;
   voiced_ptr  = voiced_list->head;
-#ifdef REQUIRE_OANDV
   chanops_voiced_ptr = chanops_voiced_list->head;
-#endif
 
   while (done != NUMLISTS)
     {
@@ -443,7 +431,6 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
       else
         done++;
 
-#ifdef REQUIRE_OANDV
       if(chanops_voiced_ptr != NULL)
         {
           target_p = chanops_voiced_ptr->data;
@@ -454,7 +441,6 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
         }
       else
         done++;
-#endif
     }
 #else /* ANONOPS */
     dlink_node *ptr;
@@ -475,7 +461,6 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
         do_who(source_p, target_p, chname, voiced_flag);
     }
 
-#ifdef REQUIRE_OANDV
     DLINK_FOREACH(ptr, chanops_voiced_list->head)
     {
       target_p = ptr->data;
@@ -483,7 +468,6 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
       if(member || !IsInvisible(target_p))
         do_who(source_p, target_p, chname, chanop_flag);
     }
-#endif
 
     DLINK_FOREACH(ptr, chanops_list->head)
     {
