@@ -1,3 +1,19 @@
+a1kmm       2001/12/10 22:42:48 EST	(20011211_5)
+
+  Modified files:
+    modules              .depend Makefile.in 
+    src                  .depend Makefile.in 
+  Log:
+  - Fixed $Id$ tags echoed from Makefile.in into .depend
+  
+  Revision  Changes    Path
+  1.39      +0 -0      ircd-hybrid-7/modules/.depend
+  1.56      +4 -2      ircd-hybrid-7/modules/Makefile.in
+  7.60      +0 -0      ircd-hybrid-7/src/.depend
+  7.103     +4 -2      ircd-hybrid-7/src/Makefile.in
+
+
+
 db          2001/12/10 22:35:16 EST	(20011211_4)
 
   Modified files:
