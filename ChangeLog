@@ -1,3 +1,19 @@
+leeh        2005/01/04 16:02:46 EST	(20050104_18)
+
+  Modified files:
+    src                  c_mode.c s_chanserv.c s_userserv.c 
+  Log:
+  - handle +l properly in mode parser
+  - tidy up CHANSERV::INFO
+  - disallow usernames starting with a digit or '-'
+  
+  Revision  Changes    Path
+  1.24      +24 -4     rserv/src/c_mode.c
+  1.37      +16 -11    rserv/src/s_chanserv.c
+  1.29      +3 -0      rserv/src/s_userserv.c
+
+
+
 leeh        2005/01/04 16:01:17 EST	(20050104_17)
 
   Modified files:
