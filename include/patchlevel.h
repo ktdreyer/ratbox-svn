@@ -24,6 +24,6 @@
 
 #ifndef PATCHLEVEL
 #define VERSION      "hybrid-7beta12"
-#define RELNAME      "-FLS-GOAT-RELEASE"
+#define RELNAME      "-FLS-DEAD-CHICKEN-RELEASE"
 #define PATCHLEVEL   VERSION RELNAME
 #endif
