@@ -1,3 +1,15 @@
+androsyn    2004/03/29 15:15:58 EST	(20040329_6)
+
+  Modified files:
+    src                  match.c 
+  Log:
+  pointers..not..values
+  
+  Revision  Changes    Path
+  7.37      +1 -1      ircd-ratbox/src/match.c
+
+
+
 androsyn    2004/03/29 14:15:53 EST	(20040329_5)
 
   Modified files:
