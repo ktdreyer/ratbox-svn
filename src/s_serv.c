@@ -89,6 +89,7 @@ struct Capability captab[] = {
   { "EOB",      CAP_EOB },
   { "KLN",      CAP_KLN },
   { "GLN",      CAP_GLN },
+  { "HOPS",     CAP_HOPS },
   { 0,   0 }
 };
 
