@@ -1,3 +1,16 @@
+leeh        2002/07/30 07:12:43 EDT	(20020730_3)
+
+  Modified files:
+    src                  parse.c 
+  Log:
+  - return -1 on error from client, -2 on error from server so we dont log
+    everytime a client sends a command with invalid parms.
+  
+  Revision  Changes    Path
+  7.136     +4 -3      ircd-hybrid-7/src/parse.c
+
+
+
 db          2002/07/29 21:43:45 EDT	(20020730_2)
 
   Modified files:
