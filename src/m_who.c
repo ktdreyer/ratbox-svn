@@ -210,7 +210,12 @@ int     m_who(struct Client *cptr,
 	      if ( vchan != 0 )
 		do_who_on_channel(sptr,vchan,chptr->chname,NO,YES);
 	      else
-		do_who_on_channel(sptr,chptr,chptr->chname,NO,NO);
+		{
+		  if ( IsMember(sptr, chptr) )
+		    do_who_on_channel(sptr,chptr,chptr->chname,NO,YES);
+		  else if(!SecretChannel(chptr))
+		    do_who_on_channel(sptr,chptr,chptr->chname,NO,NO);
+		}
 	    }
 	  else
 	    {
