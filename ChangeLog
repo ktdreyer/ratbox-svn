@@ -1,3 +1,15 @@
+androsyn    2004/09/20 14:58:26 EDT	(20040920_2)
+
+  Modified files:
+    src                  adns.c 
+  Log:
+  move assert to after the assignment not before
+  
+  Revision  Changes    Path
+  7.73      +1 -1      ircd-ratbox/src/adns.c
+
+
+
 androsyn    2004/09/20 14:43:57 EDT	(20040920_1)
 
   Modified files:
