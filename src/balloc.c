@@ -353,23 +353,21 @@ void *_BlockHeapAlloc(BlockHeap * bh)
         return ((void *) NULL);
 
     if (bh->freeElems == 0)
-      {   /* Allocate new block and assign */
+      {   
+        /* Allocate new block and assign */
         /* newblock returns 1 if unsuccessful, 0 if not */
 
         if (newblock(bh))
 	  {
-            return ((void *) NULL);
+            /* That didn't work..try to garbage collect */
+            BlockHeapGarbageCollect(bh);  
+            if(bh->freeElems == 0)
+              {
+                 outofmemory(); /* Well that didn't work either...bail */
+              }
 	  }
-        walker = bh->base;
-        walker->freeElems--;
-        bh->freeElems--;
-        new_node = walker->free_list.head;
-        dlinkDelete(new_node, &walker->free_list);
-        dlinkAdd(new_node->data, new_node, &walker->used_list);
-        assert(new_node->data != NULL);
-        return (new_node->data);
-      }
-
+       }
+      
     for (walker = bh->base; walker != NULL; walker = walker->next)
       {
         if (walker->freeElems > 0)
