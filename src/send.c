@@ -1100,7 +1100,9 @@ vsendto_prefix_one(register struct Client *to, register struct Client *from,
 {
   static char sender[HOSTLEN + NICKLEN + USERLEN + 5];
   char* par = 0;
-  static char temp[1024];
+  register int parlen;
+  register int len;
+  static char sendbuf[1024];
 
   assert(0 != to);
   assert(0 != from);
@@ -1110,11 +1112,11 @@ vsendto_prefix_one(register struct Client *to, register struct Client *from,
     {
       if (IsServer(from))
         {
-          vsprintf_irc(temp, pattern, args);
+          vsprintf_irc(sendbuf, pattern, args);
           
           sendto_ops(
                      "Send message (%s) to %s[%s] dropped from %s(Fake Dir)",
-                     temp, to->name, to->from->name, from->name);
+                     sendbuf, to->name, to->from->name, from->name);
           return;
         }
 
@@ -1159,20 +1161,49 @@ vsendto_prefix_one(register struct Client *to, register struct Client *from,
       par = sender;
     } /* if (user) */
 
+#if 0
   /*
    * Assume pattern is of the form: ":%s COMMAND ...",
    * so jump past the ":%s " after we insert our new
    * prefix
    */
-  sprintf(temp, ":%s %s", par, &pattern[4]);
+  sprintf(sendbuf, ":%s %s", par, &pattern[4]);
 
   /*
-   * temp[] is now a modified version of pattern - pattern
+   * sendbuf[] is now a modified version of pattern - pattern
    * used to be: ":%s COMMAND ..."
-   * temp is now: ":nick!user@host COMMAND ..."
+   * sendbuf is now: ":nick!user@host COMMAND ..."
    */
 
-  vsendto_one(to, temp, args);
+  vsendto_one(to, sendbuf, args);
+#endif
+
+  *sendbuf = ':';
+  strncpy(sendbuf + 1, par, sizeof(sendbuf) - 1);
+
+  parlen = strlen(par) + 1;
+  sendbuf[parlen++] = ' ';
+
+  len = parlen;
+  len += vsprintf_irc(sendbuf + parlen, &pattern[4], args);
+
+  if (len > 510)
+  {
+    sendbuf[IRCD_BUFSIZE-2] = '\r';
+    sendbuf[IRCD_BUFSIZE-1] = '\n';
+    sendbuf[IRCD_BUFSIZE] = '\0';
+    len = IRCD_BUFSIZE;
+  }
+  else
+  {
+    sendbuf[len++] = '\r';
+    sendbuf[len++] = '\n';
+    sendbuf[len] = '\0';
+  }
+
+  Debug((DEBUG_SEND,"Sending [%s] to %s",sendbuf,to->name));
+
+  send_message(to, sendbuf, len);
 } /* vsendto_prefix_one() */
 
 /*
