@@ -49,7 +49,7 @@ _moddeinit(void)
   mod_del_cmd(MSG_TIME);
 }
 
-char *_version = "20001122";
+char *_version = "20001202";
 
 /*
  * m_time
@@ -58,12 +58,13 @@ char *_version = "20001122";
  */
 int m_time(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  sendto_one(sptr, ":%s NOTICE %s :*** Use your watch",me.name,sptr->name);
+  sendto_one(sptr, form_str(RPL_TIME), me.name,
+             parv[0], me.name, date(0));
   return 0;
 }
 
 /*
- * m_time
+ * mo_time
  *      parv[0] = sender prefix
  *      parv[1] = servername
  */
