@@ -334,7 +334,7 @@ admin_entry: ADMIN
       }
     yy_aconf=make_conf();
     yy_aconf->status = CONF_ADMIN;
-  };
+  }
  '{' admin_items '}' ';' 
   {
     conf_add_conf(yy_aconf);
@@ -421,7 +421,7 @@ oper_entry:     OPERATOR
       }
     yy_aconf=make_conf();
     yy_aconf->status = CONF_OPERATOR;
-  };
+  }
  '{' oper_items '}' ';'
   {
     if(yy_aconf->name && yy_aconf->passwd && yy_aconf->host)
@@ -533,7 +533,7 @@ class_entry:    CLASS
     class_number_per_ip_var = 0;
     class_max_number_var = 0;
     class_sendq_var = 0;
-  };
+  }
   '{' class_items '}' ';'
   {
 
@@ -601,7 +601,7 @@ listen_entry:   LISTEN
     yy_aconf=make_conf();
     yy_aconf->status = CONF_LISTEN_PORT;
     DupString(yy_aconf->passwd,"*");
-  };
+  }
  '{' listen_items '}' ';'
   {
     conf_add_port(yy_aconf);
@@ -642,7 +642,7 @@ auth_entry:   AUTH
       }
     yy_aconf=make_conf();
     yy_aconf->status = CONF_CLIENT;
-  };
+  }
  '{' auth_items '}' ';' 
   {
     if(!yy_aconf->name)
@@ -792,7 +792,7 @@ quarantine_entry:       QUARANTINE
       }
     yy_aconf=make_conf();
     yy_aconf->status = CONF_QUARANTINED_NICK;
-  };
+  }
  '{' quarantine_items '}' ';'
   {
     conf_add_q_line(yy_aconf);
@@ -830,7 +830,7 @@ shared_entry:		SHARED
     yy_aconf->name = NULL;
     yy_aconf->user = NULL;
     yy_aconf->host = NULL;
-  };
+  }
   '{' shared_items '}' ';'
   {
     conf_add_u_line(yy_aconf);
@@ -896,7 +896,7 @@ connect_entry:  CONNECT
 
     yy_nconf=make_conf();
     yy_nconf->status = CONF_NOCONNECT_SERVER;
-  };
+  }
   '{' connect_items '}' ';'
   {
     if(yy_cconf->host && yy_cconf->passwd && yy_cconf->user)
@@ -1086,7 +1086,7 @@ kill_entry:     KILL
       }
     yy_aconf=make_conf();
     yy_aconf->status = CONF_KILL;
-  };
+  }
  '{' kill_items '}' ';'
   {
     if(yy_aconf->user && yy_aconf->passwd && yy_aconf->host)
@@ -1144,7 +1144,7 @@ deny_entry:     DENY
       }
     yy_aconf=make_conf();
     yy_aconf->status = CONF_DLINE;
-  };
+  }
 '{' deny_items '}' ';'
   {
     if(yy_aconf->ip)
@@ -1197,7 +1197,7 @@ gecos_entry:     GECOS
       }
     yy_aconf=make_conf();
     yy_aconf->status = CONF_XLINE;
-  };
+  }
  '{' gecos_items '}' ';'
   {
     if(yy_aconf->host)
