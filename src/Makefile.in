@@ -4,6 +4,9 @@ CC=@CC@
 RM=@RM@
 MV=@MV@
 INSTALL=@INSTALL@
+LEX=@LEX@
+LEXLIB=@LEXLIB@
+YACC=@YACC@
 PREFIX=@prefix@
 BIN=rserv@EXEEXT@
 INCLUDES=-I ../include/
@@ -24,11 +27,13 @@ SRCS = 			\
 	conf.c		\
 	event.c		\
 	fileio.c	\
+	io.c		\
 	log.c		\
 	match.c		\
-	io.c		\
+        newconf.c       \
 	rserv.c		\
 	s_alis.c	\
+	s_hoststat.c	\
 	scommand.c	\
 	service.c	\
 	tools.c		\
@@ -39,16 +44,28 @@ OBJS=$(SRCS:.c=.o)
 
 all: $(BIN)
 
-$(BIN): $(OBJS)
-	${CC} ${CFLAGS} ${LDFLAGS} -o $@ ${OBJS} $(LIBS)
+$(BIN): $(OBJS) y.tab.o lex.yy.o
+	${CC} ${CFLAGS} ${LDFLAGS} -o $@ ${OBJS} y.tab.o lex.yy.o $(LIBS) $(LEXLIB)
 
 .c.o:
 	${CC} $(INCLUDES) ${CFLAGS} -c $<
 
+y.tab.o:	y.tab.c parser.y
+	$(CC) $(INCLUDES) -I. $(CFLAGS) -c y.tab.c
+
+y.tab.c:	parser.y
+	$(YACC) -d parser.y
+
+lex.yy.o:	lex.yy.c lexer.l
+	$(CC) $(INCLUDES) -I. $(CFLAGS) -c lex.yy.c
+
+lex.yy.c:	lexer.l
+	$(LEX) lexer.l
+
 build: $(BIN)
 
 clean:
-	$(RM) -f $(BIN) *.o
+	$(RM) -f $(BIN) *.o y.tab.* lex.yy.c
 
 distclean: clean
 	$(RM) Makefile

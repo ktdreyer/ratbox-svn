@@ -39,7 +39,8 @@ fd_set readfds;
 fd_set writefds;
 
 static int signon_server(struct connection_entry *conn_p);
-static int signon_client(struct connection_entry *conn_p);
+static void signon_client_in(struct connection_entry *conn_p);
+static int signon_client_out(struct connection_entry *conn_p);
 static void read_server(struct connection_entry *conn_p);
 static void read_client(struct connection_entry *conn_p);
 static int write_sendq(struct connection_entry *conn_p);
@@ -144,132 +145,184 @@ read_io(void)
 
 	while(1)
 	{
-		FD_ZERO(&readfds);
-		FD_ZERO(&writefds);
+	FD_ZERO(&readfds);
+	FD_ZERO(&writefds);
 
-		read_time_out.tv_sec = 1L;
-		read_time_out.tv_usec = 0L;
+	read_time_out.tv_sec = 1L;
+	read_time_out.tv_usec = 0L;
 
-		if(server_p != NULL)
+	if(server_p != NULL)
+	{
+		/* socket isnt dead.. */
+		if(!ConnDead(server_p))
 		{
-			/* socket isnt dead.. */
-			if((server_p->flags & CONN_DEAD) == 0)
+			/* client struct is.  im not sure how this
+			 * could happen, but..
+			 */
+			if(server_p->client_p != NULL && 
+				IsDead(server_p->client_p))
 			{
-				/* client struct is.  im not sure how this
-				 * could happen, but..
-				 */
-				if(server_p->client_p != NULL && 
-				   IsDead(server_p->client_p))
-				{
-					slog("Connection to server %s lost: "
-                                             "(Server exited)",
-                                             server_p->name);
-					sendto_all(UMODE_SERVER,
-                                                   "Connection to server %s "
-                                                   "lost: (Server exited)",
-                                                   server_p->name);
-					(server_p->io_close)(server_p);
-				}
-
-				/* connection timed out.. */
-				else if((server_p->flags & CONN_CONNECTING) &&
-					((server_p->first_time + 30) <= CURRENT_TIME))
-				{
-					slog("Connection to server %s timed out",
-			                     server_p->name);
-					sendto_all(UMODE_SERVER,
-                                                   "Connection to server %s timed out",
-                                                   server_p->name);
-					(server_p->io_close)(server_p);
-				}
-
-                                /* authentication timed out.. */
-                                else if((server_p->flags & CONN_HANDSHAKE) &&
-                                        ((server_p->first_time + 60) <=
-                                                CURRENT_TIME))
-                                {
-					slog("Connection to server %s timed out",
-			                     server_p->name);
-					sendto_all(UMODE_SERVER,
-                                                   "Connection to server %s timed out",
-                                                   server_p->name);
-					(server_p->io_close)(server_p);
-				}
-
-                                /* pinged out */
-                                else if((server_p->flags & CONN_SENTPING) &&
-                                        ((server_p->last_time + PING_TIME*2) <=
-                                                        CURRENT_TIME))
-                                {
-                                        slog("Connection to server %s "
-                                             "lost: (Ping timeout)",
-                                             server_p->name);
-                                        sendto_all(UMODE_SERVER,
-                                                   "Connection to server %s "
-                                                   "lost: (Ping timeout)",
-                                                   server_p->name);
-                                        (server_p->io_close)(server_p);
-                                }
-
-                                /* no data for a while.. send ping */
-                                else if(!(server_p->flags & CONN_SENTPING) &&
-                                        ((server_p->last_time + PING_TIME) <=
-                                                        CURRENT_TIME))
-                                {
-                                        sendto_server("PING :%s", MYNAME);
-                                        server_p->flags |= CONN_SENTPING;
-                                }
+				slog("Connection to server %s lost: "
+					"(Server exited)",
+					server_p->name);
+				sendto_all(UMODE_SERVER,
+					"Connection to server %s lost: "
+					"(Server exited)",
+					server_p->name);
+				(server_p->io_close)(server_p);
 			}
-
-			if(server_p->flags & CONN_DEAD)
-			{
-				/* connection is dead, uplinks still here. byebye */
-				if(server_p->client_p != NULL && !IsDead(server_p->client_p))
-					exit_client(server_p->client_p);
-
-				my_free(server_p->name);
-				my_free(server_p);
-				server_p = NULL;
-			}
-		}
-
-		/* remove any timed out/dead connections */
-		DLINK_FOREACH_SAFE(ptr, next_ptr, connection_list.head)
-		{
-			conn_p = ptr->data;
 
 			/* connection timed out.. */
-			if(conn_p->flags & CONN_CONNECTING &&
-			   ((conn_p->first_time + 30) <= CURRENT_TIME))
-				(conn_p->io_close)(conn_p);
-
-			if(conn_p->flags & CONN_DEAD)
+			else if(ConnConnecting(server_p) &&
+					((server_p->first_time + 30) <= CURRENT_TIME))
 			{
-				my_free(conn_p->name);
-				my_free(conn_p);
-				dlink_delete(ptr, &connection_list);
+				slog("Connection to server %s timed out",
+					server_p->name);
+				sendto_all(UMODE_SERVER,
+					"Connection to server %s timed out",
+					server_p->name);
+				(server_p->io_close)(server_p);
+			}
+
+			/* authentication timed out.. */
+			else if(ConnHandshake(server_p) &&
+					((server_p->first_time + 60) <=
+					 CURRENT_TIME))
+			{
+				slog("Connection to server %s timed out",
+					server_p->name);
+				sendto_all(UMODE_SERVER,
+					"Connection to server %s timed out",
+					server_p->name);
+				(server_p->io_close)(server_p);
+			}
+
+			/* pinged out */
+			else if(ConnSentPing(server_p) &&
+				((server_p->last_time + config_file.ping_time*2)
+				<= CURRENT_TIME))
+			{
+				slog("Connection to server %s "
+					"lost: (Ping timeout)",
+					server_p->name);
+				sendto_all(UMODE_SERVER,
+					"Connection to server %s "
+					"lost: (Ping timeout)",
+					server_p->name);
+				(server_p->io_close)(server_p);
+			}
+
+			/* no data for a while.. send ping */
+			else if(!ConnSentPing(server_p) &&
+				((server_p->last_time + config_file.ping_time) 
+				<= CURRENT_TIME))
+			{
+				sendto_server("PING :%s", MYNAME);
+				SetConnSentPing(server_p);
 			}
 		}
 
-		/* we can safely exit anything thats dead at this point */
-		DLINK_FOREACH_SAFE(ptr, next_ptr, exited_list.head)
+		if(ConnDead(server_p))
 		{
-			free_client(ptr->data);
-		}
-		exited_list.head = exited_list.tail = NULL;
-		exited_list.length = 0;
+			/* connection is dead, uplinks still here. byebye */
+			if(server_p->client_p != NULL && 
+			   !IsDead(server_p->client_p))
+				exit_client(server_p->client_p);
 
-		if(server_p != NULL)
+			my_free(server_p->name);
+			my_free(server_p);
+			server_p = NULL;
+		}
+	}
+
+	/* remove any timed out/dead connections */
+	DLINK_FOREACH_SAFE(ptr, next_ptr, connection_list.head)
+	{
+		conn_p = ptr->data;
+
+		/* connection timed out.. */
+		if(ConnConnecting(conn_p) &&
+		   ((conn_p->first_time + 30) <= CURRENT_TIME))
+			(conn_p->io_close)(conn_p);
+
+		if(ConnDead(conn_p))
 		{
-			if(server_p->flags & CONN_CONNECTING)
-			{
+			my_free(conn_p->name);
+			my_free(conn_p);
+			dlink_delete(ptr, &connection_list);
+		}
+	}
+
+	/* we can safely exit anything thats dead at this point */
+	DLINK_FOREACH_SAFE(ptr, next_ptr, exited_list.head)
+	{
+		free_client(ptr->data);
+	}
+	exited_list.head = exited_list.tail = NULL;
+	exited_list.length = 0;
+
+	if(server_p != NULL)
+	{
+		if(ConnConnecting(server_p))
+		{
+			FD_SET(server_p->fd, &writefds);
+		}
+		else
+		{
+			if(dlink_list_length(&server_p->sendq) > 0)
 				FD_SET(server_p->fd, &writefds);
-			}
+			FD_SET(server_p->fd, &readfds);
+		}
+	}
+
+	DLINK_FOREACH(ptr, connection_list.head)
+	{
+		conn_p = ptr->data;
+
+		if(ConnConnecting(conn_p))
+		{
+			if(ConnDccIn(conn_p))
+				FD_SET(conn_p->fd, &readfds);
 			else
+				FD_SET(conn_p->fd, &writefds);
+		}
+		else
+		{
+			if(dlink_list_length(&conn_p->sendq) > 0)
+				FD_SET(conn_p->fd, &writefds);
+			FD_SET(conn_p->fd, &readfds);
+		}
+	}
+
+	set_time();
+	eventRun();
+
+	select_result = select(FD_SETSIZE, &readfds, &writefds, NULL,
+			&read_time_out);
+
+	if(select_result == 0)
+		continue;
+
+	/* have data to parse */
+	if(select_result > 0)
+	{
+		if(server_p != NULL && !ConnDead(server_p))
+		{
+			/* data from server to read */
+			if(FD_ISSET(server_p->fd, &readfds) &&
+					server_p->io_read != NULL)
 			{
-				if(dlink_list_length(&server_p->sendq) > 0)
-					FD_SET(server_p->fd, &writefds);
-				FD_SET(server_p->fd, &readfds);
+				server_p->last_time = CURRENT_TIME;
+				ClearConnSentPing(server_p);
+				(server_p->io_read)(server_p);
+			}
+
+			/* couldve died during read.. */
+			if(!ConnDead(server_p) &&
+			   FD_ISSET(server_p->fd, &writefds) &&
+			   server_p->io_write != NULL)
+			{
+				(server_p->io_write)(server_p);
 			}
 		}
 
@@ -277,72 +330,24 @@ read_io(void)
 		{
 			conn_p = ptr->data;
 
-			if(conn_p->flags & CONN_CONNECTING)
+			if(ConnDead(conn_p))
+				continue;
+
+			if(FD_ISSET(conn_p->fd, &readfds) &&
+					conn_p->io_read != NULL)
 			{
-				FD_SET(conn_p->fd, &writefds);
-			}
-			else
-			{
-				if(dlink_list_length(&conn_p->sendq) > 0)
-					FD_SET(conn_p->fd, &writefds);
-				FD_SET(conn_p->fd, &readfds);
-			}
-		}
-
-		set_time();
-		eventRun();
-
-		select_result = select(FD_SETSIZE, &readfds, &writefds, NULL,
-				       &read_time_out);
-
-		if(select_result == 0)
-			continue;
-
-		/* have data to parse */
-		if(select_result > 0)
-		{
-			if(server_p != NULL && (server_p->flags & CONN_DEAD) == 0)
-			{
-				/* data from server to read */
-				if(FD_ISSET(server_p->fd, &readfds) &&
-				   server_p->io_read != NULL)
-				{
-					server_p->last_time = CURRENT_TIME;
-                                        server_p->flags &= ~CONN_SENTPING;
-					(server_p->io_read)(server_p);
-				}
-
-				/* couldve died during read.. */
-				if((server_p->flags & CONN_DEAD) == 0 &&
-				   FD_ISSET(server_p->fd, &writefds) &&
-				   server_p->io_write != NULL)
-				{
-					(server_p->io_write)(server_p);
-				}
+				conn_p->last_time = CURRENT_TIME;
+				(conn_p->io_read)(conn_p);
 			}
 
-			DLINK_FOREACH(ptr, connection_list.head)
+			if(!ConnDead(conn_p) && 
+			   FD_ISSET(conn_p->fd, &writefds) &&
+			   conn_p->io_write != NULL)
 			{
-				conn_p = ptr->data;
-
-				if(conn_p->flags & CONN_DEAD)
-					continue;
-
-				if(FD_ISSET(conn_p->fd, &readfds) &&
-				   conn_p->io_read != NULL)
-				{
-					conn_p->last_time = CURRENT_TIME;
-					(conn_p->io_read)(conn_p);
-				}
-
-				if((conn_p->flags & CONN_DEAD) == 0 &&
-				   FD_ISSET(conn_p->fd, &writefds) &&
-				   conn_p->io_write != NULL)
-				{
-					(conn_p->io_write)(conn_p);
-				}
+				(conn_p->io_write)(conn_p);
 			}
 		}
+	}
 	}
 }
 
@@ -367,7 +372,7 @@ next_autoconn(void)
                 tmp_p = ptr->data;
 
                 /* negative port == no autoconn */
-                if(tmp_p->defport <= 0)
+                if(!ConfServerAutoconn(tmp_p))
                         continue;
 
                 if(conf_p == NULL || tmp_p->last_connect < conf_p->last_connect)
@@ -423,13 +428,14 @@ connect_to_server(void *target_server)
 	conn_p = my_malloc(sizeof(struct connection_entry));
 	conn_p->name = my_strdup(conf_p->name);
 	conn_p->fd = serv_fd;
-	conn_p->flags = CONN_CONNECTING;
 	conn_p->first_time = conn_p->last_time = CURRENT_TIME;
         conn_p->pass = my_strdup(conf_p->pass);
 
 	conn_p->io_read = NULL;
 	conn_p->io_write = signon_server;
 	conn_p->io_close = sock_close;
+
+	SetConnConnecting(conn_p);
 
 	server_p = conn_p;
 }
@@ -446,7 +452,7 @@ connect_to_client(struct client *client_p, const char *host, int port)
 	struct connection_entry *conn_p;
 	int client_fd;
 
-	client_fd = sock_open(host, port, config_file.vhost, IO_IP);
+	client_fd = sock_open(host, port, config_file.dcc_vhost, IO_IP);
 
 	if(client_fd < 0)
 		return;
@@ -457,14 +463,88 @@ connect_to_client(struct client *client_p, const char *host, int port)
         conn_p->host = my_strdup(client_p->user->host);
 
 	conn_p->fd = client_fd;
-	conn_p->flags = CONN_CONNECTING;
 	conn_p->first_time = conn_p->last_time = CURRENT_TIME;
 
 	conn_p->io_read = NULL;
-	conn_p->io_write = signon_client;
+	conn_p->io_write = signon_client_out;
 	conn_p->io_close = sock_close;
 
+	SetConnConnecting(conn_p);
+	SetConnDccOut(conn_p);
+
 	dlink_add_alloc(conn_p, &connection_list);
+}
+
+void
+connect_from_client(struct client *client_p, const char *servicenick)
+{
+	struct connection_entry *conn_p;
+	struct sockaddr_in addr;
+	struct hostent *local_addr;
+	unsigned long local_ip;
+	int client_fd;
+	int port;
+	int res;
+
+	client_fd = sock_create();
+
+	if(config_file.dcc_vhost == NULL ||
+	   (local_addr = gethostbyname(config_file.dcc_vhost)) == NULL)
+		return;
+
+	/* XXX ERROR */
+	if(client_fd < 0)
+		return;
+
+	for(port = config_file.dcc_low_port; port < config_file.dcc_high_port; 
+	    port++)
+	{
+		memset(&addr, 0, sizeof(struct sockaddr_in));
+		memcpy(&addr.sin_addr, local_addr->h_addr,
+			local_addr->h_length);
+		addr.sin_family = AF_INET;
+		addr.sin_port = htons(port);
+
+		res = bind(client_fd, (struct sockaddr *) &addr,
+			sizeof(struct sockaddr_in));
+
+		if(res >= 0)
+			break;
+	}
+
+	if(res < 0)
+	{
+		close(client_fd);
+		return;
+	}
+
+	if(listen(client_fd, 1) < 0)
+	{
+		close(client_fd);
+		return;
+	}
+
+	conn_p = my_malloc(sizeof(struct connection_entry));
+	conn_p->name = my_strdup(client_p->name);
+        conn_p->username = my_strdup(client_p->user->username);
+        conn_p->host = my_strdup(client_p->user->host);
+
+	conn_p->fd = client_fd;
+	conn_p->first_time = conn_p->last_time = CURRENT_TIME;
+
+	conn_p->io_read = signon_client_in;
+	conn_p->io_close = sock_close;
+
+	SetConnConnecting(conn_p);
+	SetConnDccIn(conn_p);
+
+	dlink_add_alloc(conn_p, &connection_list);
+
+	memcpy(&local_ip, local_addr->h_addr, local_addr->h_length);
+	local_ip = htonl(local_ip);
+
+	sendto_server(":%s PRIVMSG %s :\001DCC CHAT chat %lu %d\001",
+		      servicenick, client_p->name, local_ip, port);
 }
 
 /* signon_server()
@@ -476,8 +556,8 @@ connect_to_client(struct client *client_p, const char *host, int port)
 static int
 signon_server(struct connection_entry *conn_p)
 {
-        conn_p->flags &= ~CONN_CONNECTING;
-        conn_p->flags |= CONN_HANDSHAKE;
+        ClearConnConnecting(conn_p);
+        SetConnHandshake(conn_p);
 
 	conn_p->io_read = read_server;
 	conn_p->io_write = write_sendq;
@@ -486,7 +566,7 @@ signon_server(struct connection_entry *conn_p)
 	sendto_server("PASS %s TS", conn_p->pass);
 
 	/* ..so we need to return. */
-	if(conn_p->flags & CONN_DEAD)
+	if(ConnDead(conn_p))
 		return -1;
 
 	slog("Connection to server %s established", conn_p->name);
@@ -494,7 +574,7 @@ signon_server(struct connection_entry *conn_p)
                    conn_p->name);
 
 	sendto_server("CAPAB :QS TB");
-	sendto_server("SERVER %s 1 :%s", MYNAME, config_file.my_gecos);
+	sendto_server("SERVER %s 1 :%s", MYNAME, config_file.gecos);
 
 	introduce_services();
 
@@ -503,16 +583,60 @@ signon_server(struct connection_entry *conn_p)
 	return 1;
 }
 
-/* signon_client()
+static void
+signon_client_in(struct connection_entry *conn_p)
+{
+	struct sockaddr_in addr;
+	int sock;
+	int addrlen = sizeof(struct sockaddr);
+
+	memset(&addr, 0, sizeof(struct sockaddr_in));
+
+	if((sock = accept(conn_p->fd, (struct sockaddr *) &addr,
+			  (socklen_t *) &addrlen)) < 0)
+	{
+		if(ignore_errno(errno))
+			return;
+
+		/* XXX FAILED NOTICE */
+		shutdown(conn_p->fd, SHUT_RDWR);
+
+		(conn_p->io_close)(conn_p);
+		return;
+		
+	}
+
+	ClearConnConnecting(conn_p);
+	conn_p->io_read = read_client;
+	conn_p->io_write = write_sendq;
+
+	shutdown(conn_p->fd, SHUT_RDWR);
+	close(conn_p->fd);
+
+	conn_p->fd = sock;
+
+	sendto_one(conn_p, "Welcome to %s, version ratbox-services-%s",
+		   MYNAME, RSERV_VERSION);
+
+	if(ConnDead(conn_p))
+		return;
+
+        sendto_one(conn_p, "Please login via .login <username> <password>");
+
+	return;
+
+}
+
+/* signon_client_out()
  *   sends the initial connection info to a new client of ours
  *
  * inputs       - connection entry to send to
  * outputs      - 1 on success, -1 on failure
  */
 static int
-signon_client(struct connection_entry *conn_p)
+signon_client_out(struct connection_entry *conn_p)
 {
-	conn_p->flags &= ~CONN_CONNECTING;
+	ClearConnConnecting(conn_p);
 	conn_p->io_read = read_client;
 	conn_p->io_write = write_sendq;
 
@@ -520,7 +644,7 @@ signon_client(struct connection_entry *conn_p)
 	sendto_one(conn_p, "Welcome to %s, version ratbox-services-%s",
 		   MYNAME, RSERV_VERSION);
 
-	if(conn_p->flags & CONN_DEAD)
+	if(ConnDead(conn_p))
 		return -1;
 
         sendto_one(conn_p, "Please login via .login <username> <password>");
@@ -804,7 +928,7 @@ sendto_server(const char *format, ...)
 	char buf[BUFSIZE];
 	va_list args;
 	
-	if(server_p == NULL || server_p->flags & CONN_DEAD)
+	if(server_p == NULL || ConnDead(server_p))
 		return;
 
 	va_start(args, format);
@@ -836,7 +960,7 @@ sendto_one(struct connection_entry *conn_p, const char *format, ...)
 	char buf[BUFSIZE];
 	va_list args;
 
-	if(conn_p == NULL || conn_p->flags & CONN_DEAD)
+	if(conn_p == NULL || ConnDead(conn_p))
 		return;
 
 	va_start(args, format);
@@ -1003,6 +1127,27 @@ sendq_add(struct connection_entry *conn_p, const char *buf, int len, int offset)
 	dlink_add_tail_alloc(sendq, &conn_p->sendq);
 }
 
+int
+sock_create(void)
+{
+	int fd = -1;
+	int optval = 1;
+	int flags;
+
+	if((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+		return -1;
+
+	setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
+
+	flags= fcntl(fd, F_GETFL, 0);
+	flags |= O_NONBLOCK;
+
+	if(fcntl(fd, F_SETFL, flags) == -1)
+		return -1;
+
+	return fd;
+}
+	
 /* sock_open()
  *   attempts to open a connection
  *
@@ -1015,32 +1160,15 @@ sock_open(const char *host, int port, const char *vhost, int type)
 	struct sockaddr_in raddr;
 	struct hostent *host_addr;
 	int fd = -1;
-	int flags;
-	int optval = 1;
 
-	fd = socket(AF_INET, SOCK_STREAM, 0);
+	fd = sock_create();
 
 	if(fd < 0)
 	{
-		slog("Connection to %s/%d failed: (socket(): %s)",
+		slog("Connection to %s/%d failed: (socket()/fcntl(): %s)",
 		     host, port, strerror(errno));
 		sendto_all(UMODE_SERVER,
-                           "Connection to %s/%d failed: (socket(): %s)",
-			   host, port, strerror(errno));
-		return -1;
-	}
-
-	setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
-
-	flags = fcntl(fd, F_GETFL, 0);
-	flags |= O_NONBLOCK;
-
-	if(fcntl(fd, F_SETFL, flags) == -1)
-	{
-		slog("Connection to %s/%d failed: (fcntl(): %s)",
-		     host, port, strerror(errno));
-		sendto_all(UMODE_SERVER,
-                           "Connection to %s/%d failed: (fcntl(): %s)",
+                           "Connection to %s/%d failed: (socket()/fcntl(): %s)",
 			   host, port, strerror(errno));
 		return -1;
 	}
@@ -1061,7 +1189,7 @@ sock_open(const char *host, int port, const char *vhost, int type)
 			addr.sin_family = AF_INET;
 			addr.sin_port = 0;
 
-			if(bind(fd, (struct sockaddr *)&addr, sizeof(struct sockaddr)) < 0)
+			if(bind(fd, (struct sockaddr *)&addr, sizeof(struct sockaddr_in)) < 0)
 			{
 				slog("Connection to %s/%d failed: "
                                      "(unable to bind to %s: %s)",
@@ -1101,7 +1229,7 @@ sock_open(const char *host, int port, const char *vhost, int type)
 		raddr.sin_addr.s_addr = htonl(hl);
 	}
 
-	connect(fd, (struct sockaddr *)&raddr, sizeof(struct sockaddr_in));
+	connect(fd, (struct sockaddr *) &raddr, sizeof(struct sockaddr_in));
 	return fd;
 }
 
@@ -1153,12 +1281,13 @@ sock_write(struct connection_entry *conn_p, const char *buf, int len)
 void
 sock_close(struct connection_entry *conn_p)
 {
-	if(conn_p->flags & CONN_DEAD)
+	if(ConnDead(conn_p))
 		return;
 
 	if(conn_p == server_p)
 	{
-		eventAddOnce("connect_to_server", connect_to_server, NULL, RECONNECT_DELAY);
+		eventAddOnce("connect_to_server", connect_to_server, NULL, 
+				config_file.reconnect_time);
 
 		if(server_p->client_p != NULL)
 			exit_client(server_p->client_p);
@@ -1169,6 +1298,6 @@ sock_close(struct connection_entry *conn_p)
 	close(conn_p->fd);
 	conn_p->fd = -1;
 
-	conn_p->flags = CONN_DEAD;
+	SetConnDead(conn_p);
 }
 

@@ -10,7 +10,7 @@ struct cachefile;
 struct service_command
 {
         const char *cmd;
-        int (*func)(struct client *, char *text);
+        int (*func)(struct client *, char *parv[], int parc);
         struct cachefile *helpfile;
         int operonly;
         int help_penalty;

@@ -17,6 +17,7 @@
 #include "balloc.h"
 
 static dlink_list name_table[MAX_NAME_HASH];
+dlink_list host_table[MAX_NAME_HASH];
 
 dlink_list user_list;
 dlink_list server_list;
@@ -25,6 +26,8 @@ dlink_list exited_list;
 static BlockHeap *client_heap;
 static BlockHeap *user_heap;
 static BlockHeap *server_heap;
+static BlockHeap *host_heap;
+static BlockHeap *uhost_heap;
 
 static void c_kill(struct client *, char *parv[], int parc);
 static void c_nick(struct client *, char *parv[], int parc);
@@ -47,6 +50,8 @@ init_client(void)
         client_heap = BlockHeapCreate(sizeof(struct client), HEAP_CLIENT);
         user_heap = BlockHeapCreate(sizeof(struct user), HEAP_USER);
         server_heap = BlockHeapCreate(sizeof(struct server), HEAP_SERVER);
+	host_heap = BlockHeapCreate(sizeof(struct host_entry), HEAP_CLIENT);
+	uhost_heap = BlockHeapCreate(sizeof(struct uhost_entry), HEAP_CLIENT);
 
 	add_scommand_handler(&kill_command);
 	add_scommand_handler(&nick_command);
@@ -98,6 +103,129 @@ del_client(struct client *target_p)
 {
 	unsigned int hashv = hash_nick(target_p->name);
 	dlink_delete(&target_p->nameptr, &name_table[hashv]);
+}
+
+static void
+add_host(struct client *target_p)
+{
+	struct host_entry *hptr;
+	struct uhost_entry *uhost_p;
+	unsigned int hashv = hash_nick(target_p->user->host);
+	dlink_node *ptr;
+	int found = 0;
+
+	DLINK_FOREACH(ptr, host_table[hashv].head)
+	{
+		hptr = ptr->data;
+
+		if(!strcasecmp(hptr->host, target_p->user->host))
+		{
+			found = 1;
+			break;
+		}
+	}
+
+	if(!found)
+	{
+		hptr = BlockHeapAlloc(host_heap);
+
+		hptr->host = target_p->user->host;
+		dlink_add(hptr, &hptr->hashptr, &host_table[hashv]);
+	}
+
+	dlink_add(target_p, &target_p->user->hostptr, &hptr->users);
+
+	found = 0;
+
+	DLINK_FOREACH(ptr, hptr->uhosts.head)
+	{
+		uhost_p = ptr->data;
+
+		if(!strcasecmp(uhost_p->username, target_p->user->username))
+		{
+			found = 1;
+			break;
+		}
+	}
+
+	if(!found)
+	{
+		uhost_p = BlockHeapAlloc(uhost_heap);
+
+		uhost_p->username = target_p->user->username;
+		dlink_add(uhost_p, &uhost_p->node, &hptr->uhosts);
+	}
+
+	dlink_add(target_p, &target_p->user->uhostptr, &uhost_p->users);
+}
+
+static void
+del_host(struct client *target_p)
+{
+	struct host_entry *hptr;
+	struct uhost_entry *uhost_p;
+	unsigned int hashv = hash_nick(target_p->user->host);
+	dlink_node *ptr;
+	dlink_node *uptr;
+
+	DLINK_FOREACH(ptr, host_table[hashv].head)
+	{
+		hptr = ptr->data;
+
+		if(strcasecmp(hptr->host, target_p->user->host))
+			continue;
+
+		DLINK_FOREACH(uptr, hptr->uhosts.head)
+		{
+			uhost_p = ptr->data;
+
+			if(strcasecmp(uhost_p->username, target_p->user->username))
+				continue;
+
+			dlink_delete(&target_p->user->uhostptr,
+					&uhost_p->users);
+
+			if(dlink_list_length(&uhost_p->users))
+			{
+				struct client *client_p;
+
+				client_p = ((dlink_node *)(uhost_p->users.head))->data;
+				uhost_p->username = client_p->user->username;
+			}
+			else
+				BlockHeapFree(uhost_heap, uhost_p);
+		}
+
+		dlink_delete(&target_p->user->hostptr, &hptr->users);
+
+		if(dlink_list_length(&hptr->users))
+		{
+			struct client *client_p;
+
+			client_p = ((dlink_node *)(hptr->users.head))->data;
+			hptr->host = client_p->user->host;
+		}
+		else
+			BlockHeapFree(host_heap, hptr);
+	}
+}
+
+struct host_entry *
+find_host(const char *host)
+{
+	struct host_entry *host_p;
+	unsigned int hashv = hash_nick(host);
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, host_table[hashv].head)
+	{
+		host_p = ptr->data;
+
+		if(!strcasecmp(host_p->host, host))
+			return host_p;
+	}
+
+	return NULL;
 }
 
 /* find_client()
@@ -191,6 +319,8 @@ exit_user(struct client *target_p)
 		return;
 
 	SetDead(target_p);
+
+	del_host(target_p);
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, target_p->user->channels.head)
 	{
@@ -432,6 +562,7 @@ c_nick(struct client *client_p, char *parv[], int parc)
 		target_p->user->umode = string_to_umode(parv[4], 0);
 
 		add_client(target_p);
+		add_host(target_p);
 		dlink_add(target_p, &target_p->listnode, &user_list);
 		dlink_add(target_p, &target_p->upnode, &uplink_p->server->users);
 	}

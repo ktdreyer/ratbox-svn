@@ -60,6 +60,8 @@ extern const unsigned int CharAttrs[];
 extern int match(const char *mask, const char *name);
 extern int irccmp(const char *s1, const char *s2);
 
+extern char *strip_tabs(char *dest, const unsigned char *src, size_t len);
+
 typedef struct _dlink_node dlink_node;
 typedef struct _dlink_list dlink_list;
 

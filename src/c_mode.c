@@ -55,6 +55,37 @@ change_chmember_status(struct channel *chptr, const char *nick,
 	}
 }
 
+static void
+add_ban(const char *banstr, dlink_list *list)
+{
+	char *ban;
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, list->head)
+	{
+		if(match((const char *) ptr->data, banstr))
+			return;
+	}
+	
+	dlink_add_alloc(ban, list);
+}
+
+static void
+del_ban(const char *banstr, dlink_list *list)
+{
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, list->head)
+	{
+		if(!irccmp(banstr, (const char *) ptr->data))
+		{
+			my_free(ptr->data);
+			dlink_destroy(ptr, list);
+			return;
+		}
+	}
+}
+
 /* c_mode()
  *   the MODE handler
  */
@@ -182,10 +213,37 @@ c_mode(struct client *client_p, char *parv[], int parc)
 
 			/* we dont need to parse these at this point */
 			case 'b':
+				if(EmptyString(parv[3+args]))
+					return;
+
+				if(dir)
+					add_ban(parv[3+args], &chptr->bans);
+				else
+					del_ban(parv[3+args], &chptr->bans);
+
+				args++;
+				break;
+	
 			case 'e':
+				if(EmptyString(parv[3+args]))
+					return;
+
+				if(dir)
+					add_ban(parv[3+args], &chptr->excepts);
+				else
+					del_ban(parv[3+args], &chptr->excepts);
+
+				args++;
+				break;
+
 			case 'I':
 				if(EmptyString(parv[3+args]))
 					return;
+
+				if(dir)
+					add_ban(parv[3+args], &chptr->invites);
+				else
+					del_ban(parv[3+args], &chptr->invites);
 
 				args++;
 				break;

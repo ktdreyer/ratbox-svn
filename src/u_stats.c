@@ -72,7 +72,7 @@ stats_uptime(struct connection_entry *conn_p)
 {
         sendto_one(conn_p, "%s up %s",
                    MYNAME,
-                   get_duration(CURRENT_TIME - config_file.first_time));
+                   get_duration(CURRENT_TIME - first_time));
 }
 
 static struct _stats_table stats_table[] =

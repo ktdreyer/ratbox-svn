@@ -153,11 +153,55 @@ update_service_floodcount(void *unused)
 	}
 }
 
+static inline int
+string_to_array(char *string, char *parv[])
+{
+        char *p, *buf = string;
+        int x = 0;
+
+        parv[x] = NULL;
+
+        if(EmptyString(string))
+                return x;
+
+        while(*buf == ' ')
+                *buf++;
+
+        if(*buf == '\0')
+                return x;
+
+        do
+        {
+                parv[x++] = buf;
+                parv[x] = NULL;
+
+                if((p = strchr(buf, ' ')) != NULL)
+                {
+                        *p++ = '\0';
+                        buf = p;
+                }
+                else
+                        return x;
+
+                while(*buf == ' ')
+                        *buf++;
+                if(*buf == '\0')
+                        return x;
+        }
+        while(x < MAXPARA - 1);
+
+        parv[x++] = p;
+        parv[x] = NULL;
+        return x;
+}
+
 void
 handle_service(struct client *service_p, struct client *client_p, char *text)
 {
         struct service_command *cmd_table;
+        char *parv[MAXPARA];
         char *p;
+        int parc;
         int retval;
         int i;
 
@@ -259,6 +303,8 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
                 return;
         }
 
+        parc = string_to_array(p, parv);
+
         for(i = 0; cmd_table[i].cmd[0] != '\0'; i++)
         {
                 if(!strcasecmp(text, cmd_table[i].cmd))
@@ -271,7 +317,7 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
                                 return;
                         }
 
-                        retval = (cmd_table[i].func)(client_p, p);
+                        retval = (cmd_table[i].func)(client_p, parv, parc);
 
                         service_p->service->flood += retval;
                         cmd_table[i].cmd_use++;

@@ -22,10 +22,37 @@ struct scommand_handler privmsg_command = { "PRIVMSG", c_message, 0 };
 static void
 c_message(struct client *client_p, char *parv[], int parc)
 {
-	struct client *target_p;
+	struct client *target_p = NULL;
+	struct client *tmp_p;
 	char *p;
 
 	if(parc < 3 || EmptyString(parv[2]))
+		return;
+
+	/* username@server messaged? */
+	if((p = strchr(parv[1], '@')) != NULL)
+	{
+		dlink_node *ptr;
+
+		*p = '\0';
+
+		/* walk list manually hunting for this username.. */
+		DLINK_FOREACH(ptr, service_list.head)
+		{
+			tmp_p = ptr->data;
+
+			if(!irccmp(parv[1], tmp_p->service->username))
+			{
+				target_p = tmp_p;
+				break;
+			}
+		}
+	}
+	/* hunt for the nick.. */
+	else
+		target_p = find_service(parv[1]);
+
+	if(target_p == NULL)
 		return;
 
 	/* ctcp.. doesnt matter who its addressed to. */
@@ -34,8 +61,15 @@ c_message(struct client *client_p, char *parv[], int parc)
 		if(!is_conf_oper(client_p->user->username, client_p->user->host))
 			return;
 
+		/* request for us to dcc them.. */
+		if(!strncasecmp(parv[2], "\001CHAT\001", 6))
+		{
+			connect_from_client(client_p, target_p->name);
+			return;
+		}
+
 		/* dcc request.. \001DCC CHAT chat <HOST> <IP>\001 */
-		if(!strncasecmp(parv[2], "\001DCC CHAT ", 10))
+		else if(!strncasecmp(parv[2], "\001DCC CHAT ", 10))
 		{
 			/* skip the first bit.. */
 			char *host;
@@ -94,30 +128,6 @@ c_message(struct client *client_p, char *parv[], int parc)
 		return;
 	}
 
-	/* username@server messaged? */
-	if((p = strchr(parv[1], '@')) != NULL)
-	{
-		dlink_node *ptr;
-
-		*p = '\0';
-
-		/* walk list manually hunting for this username.. */
-		DLINK_FOREACH(ptr, service_list.head)
-		{
-			target_p = ptr->data;
-
-			if(!irccmp(parv[1], target_p->service->username))
-			{
-                                handle_service(target_p, client_p, parv[2]);
-				break;
-			}
-		}
-
-		return;
-	}
-
-	/* hunt for the nick.. */
-	if((target_p = find_service(parv[1])) != NULL)
-                handle_service(target_p, client_p, parv[2]);
+	handle_service(target_p, client_p, parv[2]);
 }
 

@@ -36,6 +36,7 @@
 #include "fileio.h"
 #include "balloc.h"
 #include "cache.h"
+#include "newconf.h"
 #include "serno.h"
 
 struct timeval system_time;
@@ -199,6 +200,7 @@ main(int argc, char *argv[])
 
 	init_events();
         init_balloc();
+        newconf_init();
 
         /* must be done before loading commands. */
         init_cache();
@@ -216,8 +218,9 @@ main(int argc, char *argv[])
 
 	/* load our services.. */
 	init_s_alis();
+	init_s_hoststat();
 
-	config_file.first_time = CURRENT_TIME;
+	first_time = CURRENT_TIME;
 
 	/* must be done after adding services. */
 	conf_parse();

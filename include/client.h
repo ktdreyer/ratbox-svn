@@ -9,6 +9,8 @@
 
 #define MAX_NAME_HASH 65536
 
+extern dlink_list host_table[MAX_NAME_HASH];
+
 extern dlink_list user_list;
 extern dlink_list server_list;
 extern dlink_list exited_list;
@@ -46,6 +48,8 @@ struct user
 	dlink_list channels;
 
 	dlink_node servptr;
+	dlink_node hostptr;
+	dlink_node uhostptr;
 };
 
 struct server
@@ -79,6 +83,22 @@ struct service
         void (*stats)(struct connection_entry *, char *parv[], int parc);
 };
 
+struct uhost_entry
+{
+	char *username;
+	dlink_node node;
+	dlink_list users;
+};
+
+struct host_entry
+{
+	char *host;
+	dlink_node hashptr;
+	dlink_list users;
+
+	dlink_list uhosts;
+};
+
 #define IsServer(x) ((x)->server != NULL)
 #define IsUser(x) ((x)->user != NULL)
 #define IsService(x) ((x)->service != NULL)
@@ -105,6 +125,8 @@ extern struct client *find_client(const char *name);
 extern struct client *find_user(const char *name);
 extern struct client *find_server(const char *name);
 extern struct client *find_service(const char *name);
+
+extern struct host_entry *find_host(const char *host);
 
 extern void exit_client(struct client *target_p);
 extern void free_client(struct client *target_p);

@@ -262,7 +262,7 @@ c_whois(struct client *client_p, char *parv[], int parc)
                               target_p->service->host, target_p->info);
                 sendto_server(":%s 312 %s %s %s :%s",
                               MYNAME, parv[0], target_p->name, MYNAME,
-                              config_file.my_gecos);
+                              config_file.gecos);
 
                 if(target_p->service->opered)
                         sendto_server(":%s 313 %s %s :is an IRC Operator",
@@ -325,7 +325,7 @@ c_stats(struct client *client_p, char *parv[], int parc)
 			sendto_server(":%s 242 %s :Server Up %s",
 				      MYNAME, parv[0],
                                       get_duration(CURRENT_TIME -
-                                                   config_file.first_time));
+                                                   first_time));
 			break;
 
 		case 'v': case 'V':

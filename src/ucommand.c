@@ -160,9 +160,7 @@ static void
 u_login(struct connection_entry *conn_p, char *parv[], int parc)
 {
         struct conf_oper *oper_p;
-#ifdef CRYPT_PASSWORDS
         char *crpass;
-#endif
 
         if(parc < 3 || EmptyString(parv[2]))
         {
@@ -176,12 +174,12 @@ u_login(struct connection_entry *conn_p, char *parv[], int parc)
                 return;
         }
 
-#ifdef CRYPT_PASSWORDS
-        crpass = crypt(parv[2], oper_p->pass);
+        if(ConfOperEncrypted(oper_p))
+                crpass = crypt(parv[2], oper_p->pass);
+        else
+                crpass = oper_p->pass;
+
         if(strcmp(oper_p->pass, crpass))
-#else
-        if(strcmp(oper_p->pass, parv[2]))
-#endif
         {
                 sendto_one(conn_p, "Invalid password");
                 return;
@@ -317,7 +315,7 @@ u_status(struct connection_entry *conn_p, char *parv[], int parc)
 {
         sendto_one(conn_p, "%s, version ratbox-services-%s(%s), up %s",
                    MYNAME, RSERV_VERSION, SERIALNUM,
-                   get_duration(CURRENT_TIME - config_file.first_time));
+                   get_duration(CURRENT_TIME - first_time));
 
         if(server_p != NULL)
                 sendto_one(conn_p, "Currently connected to %s", server_p->name);

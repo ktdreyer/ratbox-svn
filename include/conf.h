@@ -3,23 +3,29 @@
 #define INCLUDED_conf_h
 
 struct connection_entry;
+struct FileBuf;
 
-#define MYNAME config_file.my_name
+#define MYNAME config_file.name
 
 extern void conf_parse(void);
+extern time_t first_time;
 
 struct _config_file
 {
-	char *my_name;
-	char *my_gecos;
+	char *name;
+	char *gecos;
 	char *vhost;
-	int server_port;
+
+	char *dcc_vhost;
+	int dcc_low_port;
+	int dcc_high_port;
+
+	int reconnect_time;
+	int ping_time;
 
 	char *admin1;
 	char *admin2;
 	char *admin3;
-
-	time_t first_time;
 };
 
 struct conf_server
@@ -30,6 +36,7 @@ struct conf_server
 	char *vhost;
 	int port;
         int defport;
+	int flags;
         time_t last_connect;
 };
 
@@ -39,11 +46,25 @@ struct conf_oper
         char *username;
         char *host;
         char *pass;
+        int flags;
 };
+
+#define CONF_OPER_ENCRYPTED     0x0001
+
+#define ConfOperEncrypted(x)	((x)->flags & CONF_OPER_ENCRYPTED)
+
+#define CONF_SERVER_AUTOCONN	0x0001
+
+#define ConfServerAutoconn(x)	((x)->flags & CONF_SERVER_AUTOCONN)
 
 extern struct _config_file config_file;
 extern dlink_list conf_server_list;
 extern dlink_list conf_oper_list;
+extern struct FileBuf *conf_fbfile_in;
+
+extern int lineno;
+extern void yyerror(const char *msg);
+extern int conf_fbgets(char *lbuf, int max_size);
 
 extern struct conf_server *find_conf_server(const char *name);
 

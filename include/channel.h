@@ -26,6 +26,9 @@ struct channel
 	time_t tsinfo;
 
 	dlink_list users;		/* users in this channel */
+	dlink_list bans;		/* +b */
+	dlink_list excepts;		/* +e */
+	dlink_list invites;		/* +I */
 
 	struct chmode mode;
 

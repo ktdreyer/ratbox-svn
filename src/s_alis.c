@@ -31,7 +31,7 @@
 
 static struct client *alis_p;
 
-static int s_alis_list(struct client *, char *text);
+static int s_alis_list(struct client *, char *parv[], int parc);
 
 static struct service_command alis_command[] =
 {
@@ -123,87 +123,70 @@ struct alis_query
 };
 
 static int
-parse_alis(struct client *client_p, struct alis_query *query, char *text)
+parse_alis(struct client *client_p, struct alis_query *query,
+	   char *parv[], int parc)
 {
-	char *option;
-	char *param;
-	char *p;
+	int i = 1;
+	int param = 2;
 
-	while(*text == ' ')
-		text++;
-	if(*text == '\0')
-		return 0;
-
-	while(1)
+	while(i < parc)
 	{
-		option = text;
-		param = NULL;
-
-		if((p = strchr(text, ' ')) != NULL)
-		{
-			*p++ = '\0';
-			param = p;
-
-			if((p = strchr(param, ' ')) != NULL)
-				*p++ = '\0';
-		}
-
-		if(EmptyString(param))
+		if(param >= parc || EmptyString(parv[param]))
 		{
 			service_error(alis_p, client_p, ALIS_ERR_PARAM);
 			return 0;
 		}
 
-		if(!strcasecmp(option, "-min"))
+		if(!strcasecmp(parv[i], "-min"))
 		{
-			if((query->min = atoi(param)) < 1)
+			if((query->min = atoi(parv[param])) < 1)
 			{
 				service_error(alis_p, client_p, ALIS_ERR_MIN);
 				return 0;
 			}
 		}
-		else if(!strcasecmp(option, "-max"))
+		else if(!strcasecmp(parv[i], "-max"))
 		{
-			if((query->max = atoi(param)) < 1)
+			if((query->max = atoi(parv[param])) < 1)
 			{
 				service_error(alis_p, client_p, ALIS_ERR_MAX);
 				return 0;
 			}
 		}
-		else if(!strcasecmp(option, "-skip"))
+		else if(!strcasecmp(parv[i], "-skip"))
 		{
-			if((query->skip = atoi(param)) < 1)
+			if((query->skip = atoi(parv[param])) < 1)
 			{
 				service_error(alis_p, client_p, ALIS_ERR_SKIP);
 				return 0;
 			}
 		}
-		else if(!strcasecmp(option, "-topic"))
+		else if(!strcasecmp(parv[i], "-topic"))
 		{
-			query->topic = param;
+			query->topic = parv[param];
 		}
-		else if(!strcasecmp(option, "-show"))
+		else if(!strcasecmp(parv[i], "-show"))
 		{
-			if(param[0] == 'm')
+			if(parv[param][0] == 'm')
 			{
 				query->show_mode = 1;
 
-				if(param[1] == 't')
+				if(parv[param][1] == 't')
 					query->show_topicwho = 1;
 			}
-			else if(param[0] == 't')
+			else if(parv[param][0] == 't')
 			{
 				query->show_topicwho = 1;
 
-				if(param[1] == 'm')
+				if(parv[param][1] == 'm')
 					query->show_mode = 1;
 			}
 		}
-		else if(!strcasecmp(option, "-mode"))
+		else if(!strcasecmp(parv[i], "-mode"))
 		{
 			const char *modestring;
 
-			modestring = param;
+			modestring = parv[param];
 
 			switch(*modestring)
 			{
@@ -237,13 +220,8 @@ parse_alis(struct client *client_p, struct alis_query *query, char *text)
 			return 0;
 		}
 
-		if(p == NULL)
-			return 1;
-
-		while(*text == ' ')
-			text++;
-		if(*text == '\0')
-			return 1;
+		i += 2;
+		param += 2;
 	}
 
 	return 1;
@@ -339,33 +317,27 @@ show_channel(struct channel *chptr, struct alis_query *query)
  * outputs	-
  */
 static int
-s_alis_list(struct client *client_p, char *text)
+s_alis_list(struct client *client_p, char *parv[], int parc)
 {
 	struct channel *chptr;
 	struct alis_query query;
 	dlink_node *ptr;
-	char *p;
 	int maxmatch = ALIS_MAX_MATCH;
 
 	memset(&query, 0, sizeof(struct alis_query));
 
-        query.mask = text;
-
-        if(EmptyString(query.mask))
+        if(parc < 1 || EmptyString(parv[0]))
         {
                 service_error(alis_p, client_p, ALIS_ERR_PARAM);
                 return 1;
         }
 
-        if((p = strchr(query.mask, ' ')) != NULL)
-        {
-                *p++ = '\0';
+        query.mask = parv[0];
 
-                if(!EmptyString(p))
-                {
-                        if(!parse_alis(client_p, &query, p))
-                                return 1;
-                }
+        if(parc > 1)
+        {
+                if(!parse_alis(client_p, &query, parv, parc))
+                        return 1;
         }
 
         sendto_server(":%s NOTICE %s :Returning maximum of %d channel names "

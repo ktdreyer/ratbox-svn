@@ -14,6 +14,9 @@ extern struct scommand_handler mode_command;
 /* s_alis.c */
 extern void init_s_alis(void);
 
+/* s_hoststat.c */
+extern void init_s_hoststat(void);
+
 /* u_stats.c */
 extern struct ucommand_handler stats_ucommand;
 

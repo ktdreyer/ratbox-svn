@@ -11,29 +11,10 @@
 #define LOG_PATH	PREFIX "/zlogfile"
 #define HELP_PATH       PREFIX "/help/"
 
-
-/* CRYPT_PASSWORDS
- * Controls whether passwords in O: in conf file are encrypted
- */
-#define CRYPT_PASSWORDS
- 
-/* RECONNECT_DELAY
- * The duration (in seconds) between reconnections to servers
- */
-#define RECONNECT_DELAY 30
-
-/* PING_TIME
- * The duration (in seconds) a server can be idle before being pinged.
- * An idle duration of double this causes a server to be exited.
- */
-#define PING_TIME       300
-
 /* SMALL_NETWORK
  * If your network is fairly small, enable this to save some memory.
  */
 #define SMALL_NETWORK
-
-
 
 /*              ---------------------------             */
 /*              END OF CONFIGURABLE OPTIONS             */
