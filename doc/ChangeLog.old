@@ -1,3 +1,15 @@
+jmallett    2002/02/12 09:13:36 EST	(20020212_3)
+
+  Modified files:
+    src                  modules.c 
+  Log:
+  Be sure to return NULL from dlerror() if we have no error to speak of.
+  
+  Revision  Changes    Path
+  7.92      +1 -1      ircd-hybrid-7/src/modules.c
+
+
+
 jmallett    2002/02/12 09:06:09 EST	(20020212_2)
 
   Modified files:
