@@ -76,12 +76,12 @@ void check_spambot_warning(struct Client *source_p, const char *name);
 
 
 /*
-** m_join
-**      parv[0] = sender prefix
-**      parv[1] = channel
-**      parv[2] = channel password (key) (or vkey for vchans)
-**      parv[3] = vkey
-*/
+ * m_join
+ *      parv[0] = sender prefix
+ *      parv[1] = channel
+ *      parv[2] = channel password (key) (or vkey for vchans)
+ *      parv[3] = vkey
+ */
 static void m_join(struct Client *client_p,
                   struct Client *source_p,
                   int parc,
@@ -147,11 +147,11 @@ static void m_join(struct Client *client_p,
 	}
 	
       if(find_channel_resv(name))
-      {
-        sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
-	           me.name, source_p->name, name);
-        continue;
-      }
+	{
+	  sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
+		     me.name, source_p->name, name);
+	  continue;
+	}
 
 
       if( (chptr = hash_find_channel(name, NullChn)) != NULL )
@@ -211,10 +211,10 @@ static void m_join(struct Client *client_p,
 	successful_join_count++;
 
       if(!chptr)        /* If I already have a chptr, no point doing this */
-      {
-	chptr = get_channel(source_p, name, CREATE);
-        root_chptr = chptr;
-      }
+	{
+	  chptr = get_channel(source_p, name, CREATE);
+	  root_chptr = chptr;
+	}
       
       if(chptr)
 	{
@@ -227,8 +227,9 @@ static void m_join(struct Client *client_p,
 		     me.name, parv[0], name);
 	  if(successful_join_count > 0)
 	    successful_join_count--;
-     continue;
-    }
+	  continue;
+	}
+
     if (!IsOper(source_p))
      check_spambot_warning(source_p, name);
       
@@ -369,58 +370,74 @@ static void m_join(struct Client *client_p,
     }
 }
 
+/*
+ * ms_join
+ *
+ * inputs	-
+ * output	- none
+ * side effects	- handles remote JOIN's sent by servers. In TSora
+ *		  remote clients are joined using SJOIN, hence a 
+ *		  JOIN sent by a server on behalf of a client is an error.
+ *		  here, the initial code is in to take an extra parameter
+ *		  and use it for the TimeStamp on a new channel.
+ */
+
 static void ms_join(struct Client *client_p,
                    struct Client *source_p,
                    int parc,
                    char *parv[])
 {
   char *name;
-  
+  int new_ts;
+
   if (!(source_p->user))
     return;
   
   name = parv[1];
 
-  /*
-  ** complain for remote JOINs to existing channels
-  ** (they should be SJOINs) -orabidoo
-  */
   if ((name[0] == '0') && (name[1] == '\0'))
     {
       do_join_0(client_p, source_p);
     }
   else
     {
-      ts_warn("User on %s remotely JOINing new channel", 
-	      source_p->user->server);
+      if(parc > 2)
+	{
+	  new_ts = atoi(parv[2]);
+	}
+      else
+	{
+	  ts_warn("User on %s remotely JOINing new channel with no TS", 
+		  source_p->user->server);
+	}
     }
-
-  /* AND ignore it finally. */
 }
 
 /*
  * build_list_of_channels
  *
  * inputs	- pointer to client joining
- *		- pointer to scratch buffer
- *		- pointer to list of channel names
+ *		- pointer buffer for new list of channel names
+ *		- pointer to list of channel names coming in
  * output	- NONE
- * side effects - jbuf is modified to contain valid list of channel names
+ * side effects - jbuf is modified to contain valid list of channel names,
+ *		  with all bogus or overlong names removed as seen
+ *		  in given_names string.
+ *		  note that "JOIN 0" short circuits everything.
  */
 static void build_list_of_channels( struct Client *source_p,
 				    char *jbuf, char *given_names)
 {
   char *name;
   char *p;
-  int i;
+  char *jptr;
+  int len_name = 0;
+  int cur_len = 0;
 
   *jbuf = '\0';
+  jptr = jbuf;
 
-  /*
-  ** Rebuild list of channels joined to be the actual result of the
-  ** JOIN.  Note that "JOIN 0" is the destructive problem.
-  */
-  for (i = 0, name = strtoken(&p, given_names, ","); name;
+  for (name = strtoken(&p, given_names, ","); name;
        name = strtoken(&p, (char *)NULL, ","))
     {
       if (!check_channel_name(name))
@@ -432,7 +449,7 @@ static void build_list_of_channels( struct Client *source_p,
       if (*name == '0' && (atoi(name) == 0))
 	{
 	  strcpy(jbuf,"0");
-	  continue;
+	  return;
 	}
       else if (!IsChannelName(name))
         {
@@ -441,16 +458,26 @@ static void build_list_of_channels( struct Client *source_p,
           continue;
         }
 
-      if (strlen(name) > CHANNELLEN)
+      if ((len_name = strlen(name)) > CHANNELLEN)
         {
-          sendto_one(source_p, form_str(ERR_BADCHANNAME),me.name,source_p->name,name);
+          sendto_one(source_p, form_str(ERR_BADCHANNAME),
+		     me.name,source_p->name,name);
           continue;
         }
 
+      if ((len_name + cur_len) > (BUFSIZE-5))
+	return;
+
       if (*jbuf)
-        (void)strcat(jbuf, ",");
-      (void)strncat(jbuf, name, BUFSIZE - i - 1);
-      i += strlen(name)+1;
+	{
+	  jptr += ircsprintf(jptr,",%s",name);
+	  cur_len += (len_name + 1);
+	}
+      else
+	{
+	  jptr += ircsprintf(jptr,"%s",name);
+	  cur_len += len_name;
+	}
     }
 }
 
