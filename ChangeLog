@@ -1,3 +1,17 @@
+androsyn    2002/12/03 21:07:42 UTC	(20021203_3)
+
+  Modified files:
+    src                  s_bsd.c 
+  Log:
+  On OSes with IPV6_V6ONLY defined and IPv6 support enabled, we need to
+  disable the IPV6_V6ONLY option.  Our IPv6 code relies on getting mapped
+  IPv4 connections.
+  
+  Revision  Changes    Path
+  7.183     +19 -0     ircd-ratbox/src/s_bsd.c
+
+
+
 androsyn    2002/12/03 20:46:02 UTC	(20021203_2)
 
   Modified files:
