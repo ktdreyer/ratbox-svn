@@ -1,3 +1,15 @@
+androsyn    2002/08/15 20:05:07 EDT	(20020816_0)
+
+  Modified files:
+    doc                  whats-new.txt 
+  Log:
+  Update whats-new.txt to reflect ircd-ratbox things
+  
+  Revision  Changes    Path
+  7.37      +11 -33    ircd-ratbox/doc/whats-new.txt
+
+
+
 androsyn    2002/08/15 19:37:51 EDT	(20020815_11)
 
   Modified files:
