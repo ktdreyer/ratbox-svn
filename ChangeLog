@@ -1,3 +1,20 @@
+leeh        2003/01/20 23:23:27 UTC	(20030120_7)
+
+  Modified files:
+    contrib              spy_whois_notice.c 
+                         spy_whois_notice_global.c 
+    src                  send.c 
+  Log:
+  - add source servernames to whois notices
+  - fix an issue with the cluster send code
+  
+  Revision  Changes    Path
+  1.15      +3 -3      ircd-ratbox/contrib/spy_whois_notice.c
+  1.4       +3 -3      ircd-ratbox/contrib/spy_whois_notice_global.c
+  7.234     +4 -0      ircd-ratbox/src/send.c
+
+
+
 androsyn    2003/01/20 23:18:55 UTC	(20030120_6)
 
   Modified files:
