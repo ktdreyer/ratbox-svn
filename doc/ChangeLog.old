@@ -1,3 +1,8 @@
+*** 20010210_8 by db
+- /rehash should check_klines() !
+
+
+
 *** 20010210_7 by wcampbel
 Document the permissions bug on /etc/resolv.conf
 
