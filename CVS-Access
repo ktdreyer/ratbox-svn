@@ -8,7 +8,11 @@ cvs -d :pserver:cvs@cvs.ratbox.org:/cvsroot login
 
 Type enter when prompted for a password.
 
-From there you can checkout the tree as follows:
+From there you can checkout the stable tree as follows:
+
+cvs -z3 -d :pserver:cvs@cvs.ratbox.org:/cvsroot co ircd-ratbox-1
+
+Or if you prefer the bleeding edge stuff:
 
 cvs -z3 -d :pserver:cvs@cvs.ratbox.org:/cvsroot co ircd-ratbox
 
