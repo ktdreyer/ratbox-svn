@@ -268,7 +268,7 @@ mk6addrstr(struct in6_addr *addr)
         {
                 if (dest2[j] == ':') 
                 {
-                        dest[2++] = dest2[j++];
+                        dest[k++] = dest2[j++];
                         while(dest2[j] == '0')
                                 j++;
                         continue;

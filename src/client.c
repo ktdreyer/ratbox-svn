@@ -184,7 +184,6 @@ struct Client* make_client(struct Client* from)
   cptr->next    = NULL;
   cptr->prev    = NULL;
   cptr->hnext   = NULL;
-  cptr->idhnext = NULL;
   cptr->lnext   = NULL;
   cptr->lprev   = NULL;
   cptr->user    = NULL;
@@ -497,8 +496,8 @@ void check_klines(void)
 	  dlinkAdd(dying_ptr,m,&dying_list);
 
 	  continue; /* and go examine next fd/cptr */
-#endif /* ifndef IPV6 */
 	}
+#endif /* ifndef IPV6 */
 
       if(IsPerson(cptr))
 	{
@@ -1386,7 +1385,7 @@ const char* comment         /* Reason for the exit */
     {
       if(sptr->flags & FLAGS_IPHASH)
 #ifdef IPV6
-        remove_one_ip(sptr->localClient->ip6.s6_addr);
+      remove_one_ip(sptr->localClient->ip6.s6_addr);
 #else
       remove_one_ip(sptr->localClient->ip.s_addr);
 #endif
