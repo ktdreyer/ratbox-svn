@@ -1,6 +1,7 @@
 $ WRITE SYS$OUTPUT "Commencing build of ircd-hybrid-7 for VMS..."
 $ WRITE SYS$OUTPUT "Examining source directory..."
 $
+$! $Id$
 $! Don't have to do this any more - we now depend on
 $! bison/flex to build.
 $! FILE_SIZE = "NOSUCHFILE"

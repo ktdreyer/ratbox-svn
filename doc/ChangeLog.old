@@ -3,7 +3,7 @@ davidt      2001/12/06 17:53:00 EST	(20011206_8)
   Modified files:
     .                    TODO 
   Log:
-  - Add $Id$ line.
+  - Add #Id#
   
   Revision  Changes    Path
   7.59      +2 -0      ircd-hybrid-7/TODO
@@ -18033,3 +18033,4 @@ version hybrid-7-current 1999-08-01 to present
 * Restarted changelog
 -Rodder
 
+$Id$
