@@ -33,8 +33,10 @@
 #define ADNS_INTERNAL_H_INCLUDED
 
 #include "config.h"
-#ifndef __GNUC__
-#define inline
+#ifdef __GNUC__
+#define INLINE __inline__
+#else
+#define INLINE
 #endif
 typedef unsigned char byte;
 
@@ -684,17 +686,17 @@ void adns__consistency(adns_state ads, adns_query qu, consistency_checks cc);
 
 /* Useful static inline functions: */
 
-static inline int ctype_whitespace(int c) { return c==' ' || c=='\n' || c=='\t'; }
-static inline int ctype_digit(int c) { return c>='0' && c<='9'; }
-static inline int ctype_alpha(int c) {
+static INLINE int ctype_whitespace(int c) { return c==' ' || c=='\n' || c=='\t'; }
+static INLINE int ctype_digit(int c) { return c>='0' && c<='9'; }
+static INLINE int ctype_alpha(int c) {
   return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 }
-static inline int ctype_822special(int c) { return strchr("()<>@,;:\\\".[]",c) != 0; }
-static inline int ctype_domainunquoted(int c) {
+static INLINE int ctype_822special(int c) { return strchr("()<>@,;:\\\".[]",c) != 0; }
+static INLINE int ctype_domainunquoted(int c) {
   return ctype_alpha(c) || ctype_digit(c) || (strchr("-_/+",c) != 0);
 }
 
-static inline int errno_resources(int e) { return e==ENOMEM || e==ENOBUFS; }
+static INLINE int errno_resources(int e) { return e==ENOMEM || e==ENOBUFS; }
 
 /* Useful macros */
 

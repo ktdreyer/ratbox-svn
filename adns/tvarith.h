@@ -30,7 +30,7 @@
 #ifndef ADNS_TVARITH_H_INCLUDED
 #define ADNS_TVARITH_H_INCLUDED
 
-static inline void timevaladd(struct timeval *tv_io, long ms) {
+static INLINE void timevaladd(struct timeval *tv_io, long ms) {
   struct timeval tmp;
   assert(ms>=0);
   tmp= *tv_io;
