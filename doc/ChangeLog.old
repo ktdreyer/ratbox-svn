@@ -1,3 +1,9 @@
+*** 20011130_3 by leeh
+- propagate knock remotely.. 
+
+  there still needs to be LL stuff in here
+
+
 *** 20011130_2 by a1kmm
 - Removed extraneous argument in a kill_client.
 
