@@ -1,3 +1,22 @@
+leeh        2001/12/07 05:59:38 EST	(20011207_0)
+
+  Modified files:
+    doc                  example.conf 
+    include              s_conf.h 
+    modules              m_join.c 
+    src                  ircd_lexer.l ircd_parser.y 
+  Log:
+  - added configserverhide.disable_local_chanels
+  
+  Revision  Changes    Path
+  7.142     +9 -1      ircd-hybrid-7/doc/example.conf
+  7.166     +2 -1      ircd-hybrid-7/include/s_conf.h
+  1.78      +9 -1      ircd-hybrid-7/modules/m_join.c
+  1.129     +2 -1      ircd-hybrid-7/src/ircd_lexer.l
+  1.224     +14 -2     ircd-hybrid-7/src/ircd_parser.y
+
+
+
 davidt      2001/12/06 18:34:09 EST	(20011206_9)
 
   Modified files:
