@@ -195,7 +195,7 @@ static int m_invite(struct Client *cptr,
     add_invite(chptr, acptr);
 
   
-  if(!MyConnect(acptr) && ConfigFileEntry.hub &&
+  if(!MyConnect(acptr) && ServerInfo.hub &&
      IsCapable(acptr->from, CAP_LL))
   {
     /* acptr is connected to a LL leaf, connected to us */

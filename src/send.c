@@ -201,7 +201,7 @@ send_message_remote(struct Client *to, struct Client *from,
   if(to->from)
     to = to->from;
 
-  if(ConfigFileEntry.hub && IsCapable(to, CAP_LL))
+  if(ServerInfo.hub && IsCapable(to, CAP_LL))
     {
       if(((from->lazyLinkClientExists &
            to->localClient->serverMask) == 0))
@@ -642,7 +642,7 @@ sendto_ll_serv_butone(struct Client *one, struct Client *sptr, int add,
       if (one && (cptr == one->from))
         continue;
       
-      if (IsCapable(cptr,CAP_LL) && ConfigFileEntry.hub)
+      if (IsCapable(cptr,CAP_LL) && ServerInfo.hub)
 	{
 	  if( ( sptr->lazyLinkClientExists &
 		cptr->localClient->serverMask) == 0)
@@ -907,7 +907,7 @@ sendto_channel_remote(struct Channel *chptr,
       if (cptr == from)
         continue;
 
-      if (ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
+      if (ServerInfo.hub && IsCapable(cptr,CAP_LL))
 	{
 	  if( !(RootChan(chptr)->lazyLinkChannelExists &
 		cptr->localClient->serverMask) )
@@ -966,7 +966,7 @@ sendto_channel_remote_prefix(struct Channel *chptr,
       if (cptr == from)
         continue;
 
-      if (ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
+      if (ServerInfo.hub && IsCapable(cptr,CAP_LL))
 	{
 	  if( !(RootChan(chptr)->lazyLinkChannelExists &
 		cptr->localClient->serverMask) )
@@ -1024,7 +1024,7 @@ sendto_ll_channel_remote(struct Channel *chptr,
 
       if (IsCapable(cptr,CAP_LL))
 	{
-	  if(ConfigFileEntry.hub)
+	  if(ServerInfo.hub)
 	    {
               /* Only tell leafs that already know about the channel */
               if ((RootChan(chptr)->lazyLinkChannelExists &
@@ -1089,7 +1089,7 @@ sendto_match_cap_servs(struct Channel *chptr, struct Client *from, int cap,
       if(!IsCapable(cptr, cap))
         continue;
 
-      if (ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
+      if (ServerInfo.hub && IsCapable(cptr,CAP_LL))
         {
           if( !(RootChan(chptr)->lazyLinkChannelExists &
                 cptr->localClient->serverMask) )
@@ -1142,7 +1142,7 @@ sendto_match_cap_servs_nocap(struct Channel *chptr, struct Client *from,
       if(!IsCapable(cptr, cap) || IsCapable(cptr, nocap))
         continue;
 
-      if (ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
+      if (ServerInfo.hub && IsCapable(cptr,CAP_LL))
         {
           if( !(RootChan(chptr)->lazyLinkChannelExists &
                 cptr->localClient->serverMask) )
@@ -1183,7 +1183,7 @@ sendto_match_nocap_servs(struct Channel *chptr, struct Client *from, int cap,
       if(IsCapable(cptr, cap))
         continue;
 
-      if (ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
+      if (ServerInfo.hub && IsCapable(cptr,CAP_LL))
         {
           if( !(RootChan(chptr)->lazyLinkChannelExists &
                 cptr->localClient->serverMask) )

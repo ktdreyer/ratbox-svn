@@ -165,7 +165,7 @@ static int ms_list(struct Client *cptr,
 {
   /* Only allow remote list if LazyLink request */
 
-  if( ConfigFileEntry.hub )
+  if( ServerInfo.hub )
     {
       if(!IsCapable(cptr->from,CAP_LL) && !MyConnect(sptr))
 	return 0;

@@ -136,7 +136,7 @@ static char* confopts(struct Client *sptr)
     strcat(result, "G");
 
   /* might wanna hide this :P */
-  if (ConfigFileEntry.hub && 
+  if (ServerInfo.hub && 
       (!GlobalSetOptions.hide_server || IsOper(sptr)) )
     {
       strcat(result, "H");

@@ -292,7 +292,7 @@ static void send_conf_options(struct Client *sptr)
               RPL_INFO,
               sptr->name,
               "hub",
-              ConfigFileEntry.hub ? "ON" : "OFF",
+              ServerInfo.hub ? "ON" : "OFF",
               "Server can connect to more than one server");
    sendto_one(sptr,
               ":%s %d %s :%-30s %-5s [%-30s]",

@@ -403,7 +403,7 @@ static int ms_sjoin(struct Client *cptr,
       /* XXX LazyLinks
        * I think we have to do this, but if we didn't it'd be nice
        */
-      if (ConfigFileEntry.hub)
+      if (ServerInfo.hub)
       {
         for(m = serv_list.head; m; m = m->next)
         {
@@ -562,7 +562,7 @@ static int ms_sjoin(struct Client *cptr,
       if (acptr == cptr->from)
         continue;
 
-      if (ConfigFileEntry.hub && IsCapable(acptr,CAP_LL))
+      if (ServerInfo.hub && IsCapable(acptr,CAP_LL))
       {
         if( !(RootChan(chptr)->lazyLinkChannelExists &
               acptr->localClient->serverMask) )

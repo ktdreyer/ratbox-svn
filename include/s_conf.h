@@ -80,19 +80,10 @@ struct ConfItem
 #define CONF_SERVER             0x0004
 #define CONF_LOCOP              0x0008
 #define CONF_OPERATOR           0x0010
-#define CONF_ME                 0x0020
 #define CONF_KILL               0x0040
 #define CONF_ADMIN              0x0080
 #define CONF_GENERAL            0x0100
 
-/*
- * R_LINES are no more
- * -wnder
- *
- * #ifdef  R_LINES
- * #define CONF_RESTRICT           0x0200
- * #endif
- */
 #define CONF_CLASS              0x0400
 #define CONF_LEAF               0x0800
 #define CONF_LISTEN_PORT        0x1000
@@ -154,7 +145,7 @@ struct ConfItem
 #define CONF_OPER_DIE           0x0080
 #define CONF_OPER_ADMIN         0x0100
 
-typedef struct
+typedef struct config_file_entry
 {
   char *dpath;          /* DPATH if set from command line */
   char *configfile;
@@ -211,6 +202,17 @@ typedef struct
   int         quiet_on_ban;
 } ConfigFileEntryType;
 
+struct server_info
+{
+  char        *name;
+  char        *description;
+  char        *network_name;
+  char        *network_desc;
+  int         hub;
+  /* XXX a no no in the IPV6 world */
+  unsigned long ip;
+};
+
 /* bleh. have to become global. */
 extern int scount;
 
@@ -224,7 +226,8 @@ extern struct ConfItem *q_conf;
 
 extern struct ConfItem* ConfigItemList;        /* GLOBAL - conf list head */
 extern int              specific_virtual_host; /* GLOBAL - used in s_bsd.c */
-extern ConfigFileEntryType ConfigFileEntry;    /* GLOBAL - defined in ircd.c */
+extern struct config_file_entry ConfigFileEntry;/* GLOBAL - defined in ircd.c*/
+extern struct server_info ServerInfo;	       /* GLOBAL - defined in ircd.c */
 
 dlink_list temporary_klines;
 dlink_list temporary_ip_klines;
@@ -251,7 +254,6 @@ extern int              check_client(struct Client* cptr, struct Client *sptr,
 				     char *);
 extern int              attach_Iline(struct Client* client,
 				     const char* username);
-extern struct ConfItem* find_me(void);
 extern struct ConfItem* find_admin(void);
 extern void             det_confs_butmask (struct Client *, int);
 extern int              detach_conf (struct Client *, struct ConfItem *);

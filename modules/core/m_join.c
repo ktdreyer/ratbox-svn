@@ -172,7 +172,7 @@ static int m_join(struct Client *cptr,
       else
 	{
 	  flags = CHFL_CHANOP;
-	  if(!ConfigFileEntry.hub)
+	  if(!ServerInfo.hub)
 	    {
 	      /* LazyLinks */
 	      if( (*name != '&') && uplink

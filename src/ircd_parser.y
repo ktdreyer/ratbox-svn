@@ -268,24 +268,7 @@ modules_path: PATH '=' QSTRING ';'
  ***************************************************************************/
 
 serverinfo_entry:       SERVERINFO
-  {
-    if (yy_aconf)
-      free_conf(yy_aconf);
-    yy_aconf=make_conf();
-    yy_aconf->status = CONF_ME;
-  }
   '{' serverinfo_items '}' ';'
-  {
-    if(yy_aconf->host && yy_aconf->user)
-      {
-        conf_add_me(yy_aconf);
-        conf_add_conf(yy_aconf);
-      }
-    else
-      free_conf(yy_aconf);
-    yy_aconf = (struct ConfItem *)NULL;
-  } ;
-
 
 serverinfo_items:       serverinfo_items serverinfo_item |
                         serverinfo_item 
@@ -297,60 +280,52 @@ serverinfo_item:        serverinfo_name | serverinfo_vhost |
 
 serverinfo_name:        NAME '=' QSTRING ';' 
   {
-    if (yy_aconf->host)
-      MyFree(yy_aconf->host);
-    if(yylval.string != NULL)
-      DupString(yy_aconf->host, yylval.string);
+    if(ServerInfo.name == NULL)
+      DupString(ServerInfo.name,yylval.string);
   };
 
 serverinfo_description: DESCRIPTION '=' QSTRING ';'
   {
-    if (yy_aconf->user)
-      MyFree(yy_aconf->user);
-    if (yylval.string != NULL)
-      DupString(yy_aconf->user, yylval.string);
+    MyFree(ServerInfo.description);
+    DupString(ServerInfo.description,yylval.string);
   };
 
 serverinfo_network_name: NETWORK_NAME '=' QSTRING ';'
   {
-    if (ConfigFileEntry.network_name)
-      MyFree(ConfigFileEntry.network_name);
-    if (yylval.string != NULL)
-      DupString(ConfigFileEntry.network_name, yylval.string);
+    MyFree(ServerInfo.network_name);
+    DupString(ServerInfo.network_name,yylval.string);
   };
 
 serverinfo_network_desc: NETWORK_DESC '=' QSTRING ';'
   {
-    if (ConfigFileEntry.network_desc)
-      MyFree(ConfigFileEntry.network_desc);
-    if (yylval.string != NULL)
-      DupString(ConfigFileEntry.network_desc, yylval.string);
+    MyFree(ServerInfo.network_desc);
+    DupString(ServerInfo.network_desc,yylval.string);
   };
 
 serverinfo_vhost:       VHOST '=' IP_TYPE ';'
   {
-    yy_aconf->ip = yylval.ip_entry.ip;
+    ServerInfo.ip = yylval.ip_entry.ip;
   };
 
 serverinfo_hub:         HUB '=' TYES ';' 
   {
     /* Don't become a hub if we have a lazylink active. */
-    if (!ConfigFileEntry.hub && uplink && IsCapable(uplink, CAP_LL))
+    if (!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
     {
       sendto_realops_flags(FLAGS_ALL,
         "Ignoring config file line hub = yes; due to active LazyLink (%s)",
         uplink->name);
     }
     else
-      ConfigFileEntry.hub = 1;
+      ServerInfo.hub = 1;
   }
                         |
                         HUB '=' TNO ';'
   {
     /* Don't become a leaf if we have a lazylink active. */
-    if (ConfigFileEntry.hub)
+    if (ServerInfo.hub)
     {
-      ConfigFileEntry.hub = 0;
+      ServerInfo.hub = 0;
       for(node = serv_list.head; node; node = node->next)
       {
         if(MyConnect((struct Client *)node->data) &&
@@ -359,12 +334,12 @@ serverinfo_hub:         HUB '=' TYES ';'
           sendto_realops_flags(FLAGS_ALL,
             "Ignoring config file line hub = no; due to active LazyLink (%s)",
             ((struct Client *)node->data)->name);
-          ConfigFileEntry.hub = 1;
+          ServerInfo.hub = 1;
         }
       }
     }
     else
-      ConfigFileEntry.hub = 0;
+      ServerInfo.hub = 0;
   } ;
 
 /***************************************************************************

@@ -133,7 +133,7 @@ static int mr_nick(struct Client *cptr, struct Client *sptr, int parc,
     }
 
   if ( (acptr = find_client(nick, NULL)) == NULL )
-    if (!ConfigFileEntry.hub && uplink && IsCapable(uplink, CAP_LL))
+    if (!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
     {
       /* We don't know anyone called nick, but our hub might */
       for( ptr = unknown_list.head; ptr; ptr = ptr->next )
@@ -277,7 +277,7 @@ static int m_nick(struct Client *cptr, struct Client *sptr,
     }
   else
     {
-      if (!ConfigFileEntry.hub && uplink && IsCapable(uplink, CAP_LL))
+      if (!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
       {
         /* The uplink might know someone by this name already. */
         sendto_one(uplink, ":%s NBURST %s %s %s", me.name, nick,
@@ -452,7 +452,7 @@ static int ms_nick(struct Client *cptr, struct Client *sptr,
 
 #ifndef LOCAL_NICK_COLLIDE
             /* If we got the message from a LL, ensure it gets the kill */
-            if (ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
+            if (ServerInfo.hub && IsCapable(cptr,CAP_LL))
               add_lazylinkclient(cptr, acptr);
             
 	    sendto_ll_serv_butone(NULL, acptr, 0, /* all servers */
@@ -516,7 +516,7 @@ static int ms_nick(struct Client *cptr, struct Client *sptr,
 
 #ifndef LOCAL_NICK_COLLIDE
           /* If we got the message from a LL, ensure it gets the kill */
-          if (ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
+          if (ServerInfo.hub && IsCapable(cptr,CAP_LL))
             add_lazylinkclient(cptr, acptr);
 
           sendto_ll_serv_butone(NULL, acptr, 0,/* all servers */
@@ -612,7 +612,7 @@ static int ms_nick(struct Client *cptr, struct Client *sptr,
 
 #ifndef LOCAL_NICK_COLLIDE
       /* If we got the message from a LL, ensure it gets the kill */
-      if (ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
+      if (ServerInfo.hub && IsCapable(cptr,CAP_LL))
         add_lazylinkclient(cptr, acptr);
 
       sendto_ll_serv_butone(NULL, acptr, 0, /* Kill new from incoming link */

@@ -198,7 +198,7 @@ static int do_whois(struct Client *cptr, struct Client *sptr,
         }
       else
 	{
-	  if (!ConfigFileEntry.hub && uplink && IsCapable(uplink,CAP_LL))
+	  if (!ServerInfo.hub && uplink && IsCapable(uplink,CAP_LL))
 	    {
 	      if(glob == 1)
    	        sendto_one(uplink,":%s WHOIS %s :%s",
@@ -214,7 +214,7 @@ static int do_whois(struct Client *cptr, struct Client *sptr,
     {
       /* disallow wild card whois on lazylink leafs for now */
 
-      if (!ConfigFileEntry.hub && uplink && IsCapable(uplink,CAP_LL))
+      if (!ServerInfo.hub && uplink && IsCapable(uplink,CAP_LL))
 	{
 	  return 0;
 	}

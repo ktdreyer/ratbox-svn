@@ -96,7 +96,7 @@ static int ms_nburst(struct Client *cptr,
   if( parc > 3 )
     nick_old = parv[3];
 
-  if (!ConfigFileEntry.hub && IsCapable(cptr, CAP_LL))
+  if (!ServerInfo.hub && IsCapable(cptr, CAP_LL))
     return 0;
 
 #ifdef DEBUGLL

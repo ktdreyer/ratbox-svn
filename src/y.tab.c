@@ -1435,23 +1435,23 @@ case 44:
 #line 336 "ircd_parser.y"
 {
     /* Don't become a hub if we have a lazylink active. */
-    if (!ConfigFileEntry.hub && uplink && IsCapable(uplink, CAP_LL))
+    if (!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
     {
       sendto_realops_flags(FLAGS_ALL,
         "Ignoring config file line hub = yes; due to active LazyLink (%s)",
         uplink->name);
     }
     else
-      ConfigFileEntry.hub = 1;
+      ServerInfo.hub = 1;
   }
 break;
 case 45:
 #line 349 "ircd_parser.y"
 {
     /* Don't become a leaf if we have a lazylink active. */
-    if (ConfigFileEntry.hub)
+    if (ServerInfo.hub)
     {
-      ConfigFileEntry.hub = 0;
+      ServerInfo.hub = 0;
       for(node = serv_list.head; node; node = node->next)
       {
         if(MyConnect((struct Client *)node->data) &&
@@ -1460,12 +1460,12 @@ case 45:
           sendto_realops_flags(FLAGS_ALL,
             "Ignoring config file line hub = no; due to active LazyLink (%s)",
             ((struct Client *)node->data)->name);
-          ConfigFileEntry.hub = 1;
+          ServerInfo.hub = 1;
         }
       }
     }
     else
-      ConfigFileEntry.hub = 0;
+      ServerInfo.hub = 0;
   }
 break;
 case 46:

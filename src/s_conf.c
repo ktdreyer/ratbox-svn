@@ -964,21 +964,6 @@ struct ConfItem *find_admin()
   return (aconf);
 }
 
-struct ConfItem *find_me()
-{
-  struct ConfItem *aconf;
-  for (aconf = ConfigItemList; aconf; aconf = aconf->next) {
-    if (aconf->status & CONF_ME)
-      return(aconf);
-  }
-
-  log(L_CRIT, "Server has no M: line");
-  exit (-1);
-
-  assert(0);
-  return NULL;
-}
-
 /*
  * attach_confs - Attach all possible CONF lines to a client
  * if the name passed matches that for the conf file (for non-C/N lines) 
@@ -1376,6 +1361,12 @@ int rehash(struct Client *cptr,struct Client *sptr, int sig)
 
   close_listeners();
   read_conf_files(NO);
+
+  if (ServerInfo.description != NULL)
+    {
+      strncpy_irc(me.info, ServerInfo.description, REALLEN);
+    }
+
   flush_deleted_I_P();
   return 0;
 }
@@ -1412,11 +1403,11 @@ static void read_conf(FBFILE* file)
   if(ConfigFileEntry.ts_max_delta < TS_MAX_DELTA_MIN)
     ConfigFileEntry.ts_max_delta = TS_MAX_DELTA_DEFAULT;
 
-  if(!ConfigFileEntry.network_name)
-    ConfigFileEntry.network_name = NETWORK_NAME_DEFAULT;
+  if(ServerInfo.network_name == NULL)
+    DupString(ServerInfo.network_name,NETWORK_NAME_DEFAULT);
 
-  if(!ConfigFileEntry.network_desc)
-    ConfigFileEntry.network_desc = NETWORK_DESC_DEFAULT;
+  if(ServerInfo.network_desc == NULL)
+    DupString(ServerInfo.network_desc,NETWORK_DESC_DEFAULT);
 
   if (!ConfigFileEntry.maximum_links)
     ConfigFileEntry.maximum_links = MAXIMUM_LINKS_DEFAULT;
@@ -1428,15 +1419,10 @@ static void read_conf(FBFILE* file)
     ConfigFileEntry.knock_delay = 300;
   
   GlobalSetOptions.idletime = (ConfigFileEntry.idletime * 60);
+
   if (!ConfigFileEntry.links_delay)
         ConfigFileEntry.links_delay = LINKS_DELAY_DEFAULT;
   GlobalSetOptions.hide_server = ConfigFileEntry.hide_server;
-
-  if(me.name[0] == '\0')
-    {
-      log(L_CRIT, "Server has no M:/serverinfo line");
-      exit(-1);
-    }
 }
 
 static void read_kd_lines(FBFILE* file)

@@ -300,7 +300,7 @@ static int build_target_list(int p_or_n,
   char *target_list;
 
   /* Sigh, we can't mutilate parv[1] incase we need it to send to a hub */
-  if(!ConfigFileEntry.hub && uplink && IsCapable(uplink, CAP_LL))
+  if(!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
   {
     strncpy(ncbuf, nicks_channels, BUFSIZE);
     target_list = ncbuf;
@@ -336,7 +336,7 @@ static int build_target_list(int p_or_n,
 	    }
 	  else
 	    {
-              if(!ConfigFileEntry.hub && uplink && IsCapable(uplink, CAP_LL))
+              if(!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
               {
                 target_table_size = i;
                 free_target_table();
@@ -405,7 +405,7 @@ static int build_target_list(int p_or_n,
 	    }
 	  else
 	    {
-              if(!ConfigFileEntry.hub && uplink && IsCapable(uplink, CAP_LL))
+              if(!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
               {
                 target_table_size = i;
                 free_target_table();
@@ -444,7 +444,7 @@ static int build_target_list(int p_or_n,
 	}
       else
 	{
-          if(!ConfigFileEntry.hub && uplink && IsCapable(uplink, CAP_LL))
+          if(!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
             return -1;
           else if(p_or_n != NOTICE)
 	    sendto_one(sptr, form_str(ERR_NOSUCHNICK), me.name,

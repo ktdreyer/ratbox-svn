@@ -78,7 +78,7 @@ static int m_ison(struct Client *cptr, struct Client *sptr,
 {
   struct Client *up = NULL;
 
-  if (!ConfigFileEntry.hub && uplink && IsCapable(uplink, CAP_LL))
+  if (!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
     up = uplink;
 
   return(do_ison(up, sptr, parc, parv));
@@ -95,7 +95,7 @@ static int m_ison(struct Client *cptr, struct Client *sptr,
 static int ms_ison(struct Client *cptr, struct Client *sptr,
                    int parc, char *parv[])
 {
-  if (ConfigFileEntry.hub && IsCapable(cptr, CAP_LL))
+  if (ServerInfo.hub && IsCapable(cptr, CAP_LL))
     return(do_ison(NULL, sptr, parc, parv));
 
   /* XXX - bad, this server isn't a lazylink, it shouldn't send

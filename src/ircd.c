@@ -129,6 +129,8 @@ struct SetOptions GlobalSetOptions;
 
 /* config.h config file paths etc */
 ConfigFileEntryType ConfigFileEntry; 
+/* server info */
+struct server_info ServerInfo;
 
 struct  Counter Count;
 
@@ -448,7 +450,6 @@ static void write_pidfile(void)
 int main(int argc, char *argv[])
 {
   time_t      delay = 0;
-  struct ConfItem*  aconf;
 
   /*
    * save server boot time right away, so getrusage works correctly
@@ -485,6 +486,8 @@ int main(int argc, char *argv[])
 
   memset(&Count, 0, sizeof(Count));
   Count.server = 1;     /* us */
+
+  memset(&ServerInfo, 0, sizeof(ServerInfo));
 
   initialize_global_set_options();
 
@@ -545,10 +548,18 @@ int main(int argc, char *argv[])
 
   read_conf_files(YES);         /* cold start init conf files */
 
-  aconf = find_me();
-  if (EmptyString(me.name))
-    strncpy_irc(me.name, aconf->host, HOSTLEN);
-  strncpy_irc(me.host, aconf->host, HOSTLEN);
+  if (ServerInfo.name == NULL)
+    {
+      log(L_CRIT,"You need a server name to run.");
+      exit(-1);
+    }
+
+  strncpy_irc(me.name, ServerInfo.name, HOSTLEN);
+
+  if(ServerInfo.description != NULL)
+    {
+      strncpy_irc(me.info, ServerInfo.description, REALLEN);
+    }
 
 #ifdef USE_GETTEXT
   /*

@@ -520,7 +520,7 @@ int check_server(struct Client* cptr)
   if( !(n_conf->flags & CONF_FLAGS_LAZY_LINK) )
     ClearCap(cptr,CAP_LL);
 
-  if(ConfigFileEntry.hub)
+  if(ServerInfo.hub)
     {
       if( n_conf->flags & CONF_FLAGS_LAZY_LINK )
         {
@@ -637,7 +637,7 @@ void sendnick_TS(struct Client *cptr, struct Client *acptr)
  */
 void client_burst_if_needed(struct Client *cptr, struct Client *acptr)
 {
-  if (!ConfigFileEntry.hub) return;
+  if (!ServerInfo.hub) return;
   if (!MyConnect(cptr)) return;
   if (!IsCapable(cptr,CAP_LL)) return;
 
@@ -761,7 +761,7 @@ int server_estab(struct Client *cptr)
   /* If there is something in the serv_list, it might be this
    * connecting server..
    */
-  if(!ConfigFileEntry.hub && serv_list.head)   
+  if(!ServerInfo.hub && serv_list.head)   
     {
       if (cptr != serv_list.head->data || serv_list.head->next)
         {
@@ -786,7 +786,7 @@ int server_estab(struct Client *cptr)
 			|
 			((aconf->flags & CONF_FLAGS_LAZY_LINK) ? CAP_LL : 0)
 			|
-			(ConfigFileEntry.hub ? CAP_HUB : 0) );
+			(ServerInfo.hub ? CAP_HUB : 0) );
 
       sendto_one(cptr, "SERVER %s 1 :%s",
                  my_name_for_link(me.name, aconf), 
@@ -923,7 +923,7 @@ int server_estab(struct Client *cptr)
         }
     }
   
-  if(!ConfigFileEntry.hub)
+  if(!ServerInfo.hub)
     {
       uplink = cptr;
     }
@@ -962,7 +962,7 @@ static void server_burst(struct Client *cptr)
    */
   if( IsCapable(cptr, CAP_LL) )
     {
-      if(!ConfigFileEntry.hub)
+      if(!ServerInfo.hub)
 	{
 	  /* burst all our info */
 	  burst_all(cptr);
@@ -1620,7 +1620,7 @@ serv_connect_callback(int fd, int status, void *data)
 		      |
 		      ((aconf->flags & CONF_FLAGS_LAZY_LINK) ? CAP_LL : 0)
 		      |
-		      (ConfigFileEntry.hub ? CAP_HUB : 0) );
+		      (ServerInfo.hub ? CAP_HUB : 0) );
 
     sendto_one(cptr, "SERVER %s 1 :%s",
       my_name_for_link(me.name, aconf), me.info);

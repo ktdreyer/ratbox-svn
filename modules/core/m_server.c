@@ -174,7 +174,7 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return exit_client(cptr, cptr, cptr, "Server Exists");
     }
 
-  if(ConfigFileEntry.hub && IsCapable(cptr, CAP_LL))
+  if(ServerInfo.hub && IsCapable(cptr, CAP_LL))
     {
       if(IsCapable(cptr, CAP_HUB))
         {

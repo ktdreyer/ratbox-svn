@@ -104,7 +104,7 @@ static int m_mode(struct Client *cptr, struct Client *sptr,
       /* only send a mode upstream if a local client sent this request
        * -davidt
        */
-      if ( MyClient(sptr) && !ConfigFileEntry.hub && uplink &&
+      if ( MyClient(sptr) && !ServerInfo.hub && uplink &&
 	   IsCapable(uplink, CAP_LL))
 	{
 	  /* cache the channel if it exists on uplink

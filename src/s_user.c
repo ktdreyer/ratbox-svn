@@ -615,7 +615,7 @@ introduce_client(struct Client *cptr, struct Client *sptr,
    * rewritten to cope with UIDs .. eww eww eww --is
    */
   
-  if (!ConfigFileEntry.hub && uplink && IsCapable(uplink,CAP_LL)
+  if (!ServerInfo.hub && uplink && IsCapable(uplink,CAP_LL)
       && cptr != uplink) 
     {
       if (IsCapable(uplink, CAP_UID) && HasID(sptr))
@@ -1172,7 +1172,7 @@ void send_umode_out(struct Client *cptr,
 
       if((acptr != cptr) && (acptr != sptr) && (*buf))
         {
-          if((!(ConfigFileEntry.hub && IsCapable(acptr, CAP_LL)))
+          if((!(ServerInfo.hub && IsCapable(acptr, CAP_LL)))
              || (acptr->localClient->serverMask &
                  sptr->lazyLinkClientExists))
             sendto_one(acptr, ":%s MODE %s :%s",

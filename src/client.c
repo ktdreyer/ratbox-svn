@@ -1376,7 +1376,7 @@ const char* comment         /* Reason for the exit */
         {
           Count.myserver--;
 
-	  if(ConfigFileEntry.hub)
+	  if(ServerInfo.hub)
 	    remove_lazylink_flags(sptr->localClient->serverMask);
 	  else
 	    uplink = NULL;

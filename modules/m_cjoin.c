@@ -142,7 +142,7 @@ static int m_cjoin(struct Client *cptr,
       /* if chptr isn't found locally, it =could= exist
        * on the uplink. So ask.
        */
-      if ( !ConfigFileEntry.hub && uplink &&
+      if ( !ServerInfo.hub && uplink &&
            IsCapable(uplink, CAP_LL))
         {
           /* cache the channel if it exists on uplink

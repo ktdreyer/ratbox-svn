@@ -720,7 +720,7 @@ GreetUser(struct Client *client)
 		     client->info);
 #endif
 
-  if (!ConfigFileEntry.hub && uplink && IsCapable(uplink,CAP_LL))
+  if (!ServerInfo.hub && uplink && IsCapable(uplink,CAP_LL))
     sendto_one(uplink, "NICK %s %d %lu %s %s %s %s :%s",
                client->name, client->hopcount+1, client->tsinfo,
                ubuf, client->username, client->host, client->user->server,

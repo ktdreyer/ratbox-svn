@@ -95,7 +95,7 @@ static int m_topic(struct Client *cptr,
         /* this was segfaulting if we had no servers linked.
          *  -pro
          */
-        if ( !ConfigFileEntry.hub && uplink &&
+        if ( !ServerInfo.hub && uplink &&
            IsCapable(uplink, CAP_LL) )
         {
           /* cache the channel if it exists on uplink
