@@ -100,8 +100,4 @@ extern int     fbstat(struct stat* sb, FBFILE* fb);
  */
 extern FBFILE *fbpopen(const char *, const char *);
 
-/* file_open / file_close -- adrian */
-extern int     file_open(const char *filename, int mode, int fmode);
-extern void    file_close(int fd);
-
 #endif /* INCLUDED_fileio_h */
