@@ -34,7 +34,7 @@ main(int argc, char **argv)
  int a=0, l;
  FILE *kfile;
  /* genkey publicfile privatefile */
- if (argc < 2)
+ if (argc < 3)
    {
     puts("Usage: genkey publicfile privatefile");
     return -1;
