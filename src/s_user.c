@@ -345,7 +345,10 @@ int register_local_user(struct Client *cptr, struct Client *sptr,
   aconf = ptr->data;
 
   if (aconf == NULL)
-    return exit_client(cptr, sptr, &me, "*** Not Authorized");
+    {
+      (void)exit_client(cptr, sptr, &me, "*** Not Authorized");
+      return(CLIENT_EXITED);
+    }
 
   if (!IsGotId(sptr))
     {
@@ -355,7 +358,8 @@ int register_local_user(struct Client *cptr, struct Client *sptr,
 	  sendto_one(sptr,
 		     ":%s NOTICE %s :*** Notice -- You need to install identd to use this server",
 		     me.name, cptr->name);
-	  return exit_client(cptr, sptr, &me, "Install identd");
+	  (void)exit_client(cptr, sptr, &me, "Install identd");
+	  return(CLIENT_EXITED);
 	}
       else
 	strncpy_irc(sptr->username, username, USERLEN);
@@ -379,7 +383,8 @@ int register_local_user(struct Client *cptr, struct Client *sptr,
       ServerStats->is_ref++;
       sendto_one(sptr, form_str(ERR_PASSWDMISMATCH),
 		 me.name, sptr->name);
-      return exit_client(cptr, sptr, &me, "Bad Password");
+      (void)exit_client(cptr, sptr, &me, "Bad Password");
+      return(CLIENT_EXITED);
     }
   memset(sptr->localClient->passwd,0, sizeof(sptr->localClient->passwd));
 
@@ -405,8 +410,9 @@ int register_local_user(struct Client *cptr, struct Client *sptr,
 			   "Too many clients, rejecting %s[%s].",
 			   nick, sptr->host);
       ServerStats->is_ref++;
-      return exit_client(cptr, sptr, &me,
-			 "Sorry, server is full - try later");
+      (void)exit_client(cptr, sptr, &me,
+			"Sorry, server is full - try later");
+      return(CLIENT_EXITED);
     }
 
   /* valid user name check */
@@ -417,20 +423,19 @@ int register_local_user(struct Client *cptr, struct Client *sptr,
 			   nick, sptr->username, sptr->host);
       ServerStats->is_ref++;
       ircsprintf(tmpstr2, "Invalid username [%s]", sptr->username);
-      return exit_client(cptr, sptr, &me, tmpstr2);
+      (void)exit_client(cptr, sptr, &me, tmpstr2);
+      return(CLIENT_EXITED);
     }
 
   /* end of valid user name check */
   
   if( (status = check_X_line(cptr,sptr)) < 0 )
-    return status;
+    return(status);
 
-/* Put this in #ifdef now, and make sure that we are using openssl or
- * it breaks the build. */
   if (sptr->user->id[0] == '\0') 
     {
       do {
-		  id = id_get();
+	id = id_get();
       } while (hash_find_id(id, NULL));
       
       strcpy(sptr->user->id, id);
@@ -479,6 +484,14 @@ int register_local_user(struct Client *cptr, struct Client *sptr,
   return (introduce_client(cptr, sptr, user, nick));
 }
 
+/*
+ * register_remote_user
+ *
+ * inputs
+ * output
+ * side effects	- This function is called when a remote client
+ *		  is introduced by a server.
+ */
 int register_remote_user(struct Client *cptr, struct Client *sptr, 
 			 char *nick, char *username)
 {
@@ -558,7 +571,9 @@ int register_remote_user(struct Client *cptr, struct Client *sptr,
  *
  * inputs	-
  * output	-
- * side effects -
+ * side effects - This common function introduces a client to the rest
+ *		  of the net, either from a local client connect or
+ *		  from a remote connect.
  */
 static int
 introduce_client(struct Client *cptr, struct Client *sptr,
@@ -778,6 +793,7 @@ report_and_set_user_flags(struct Client *sptr,struct ConfItem *aconf)
  *
  * inputs	-
  * output	-
+ * side effects -
  */
 int do_local_user(char* nick, struct Client* cptr, struct Client* sptr,
 		  char* username, char *host, char *server, char *realname)
@@ -830,6 +846,7 @@ int do_local_user(char* nick, struct Client* cptr, struct Client* sptr,
  *
  * inputs	-
  * output	-
+ * side effects -
  */
 int do_remote_user(char* nick, struct Client* cptr, struct Client* sptr,
 		   char* username, char *host, char *server, char *realname,
@@ -1127,9 +1144,6 @@ void send_umode(struct Client *cptr, struct Client *sptr, int old,
 }
 
 /*
- * added Sat Jul 25 07:30:42 EST 1992
- */
-/*
  * send_umode_out
  *
  * inputs	-
@@ -1253,7 +1267,7 @@ static int check_X_line(struct Client *cptr, struct Client *sptr)
 	    }
 	  ServerStats->is_ref++;      
 	  (void)exit_client(cptr, sptr, &me, "Bad user info");
-	  return -1;
+	  return (CLIENT_EXITED);
 	}
       else
 	sendto_realops_flags(FLAGS_REJ,
