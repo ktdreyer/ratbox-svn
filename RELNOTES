@@ -9,7 +9,7 @@ o) You may now disable the help system for users, by setting
 
 --------------------------------------------------------------------------------
 
-This is the current beta version of ircd-hybrid-7.
+This is the current release candidate version of ircd-hybrid-7.
 
 NOTE: This is still BETA code.  Run it at your own risk.  By running this
  code you assume FULL responsibility for any problems it may cause.  We do
