@@ -1,3 +1,17 @@
+androsyn    2005/03/28 13:42:26 UTC	(20050328_6)
+
+  Modified files:
+    src                  dns.c ircd_signal.c s_conf.c 
+  Log:
+  fix a minor IPV6 goof up and add a few includes back
+  
+  Revision  Changes    Path
+  7.4       +3 -1      ircd-ratbox/src/dns.c
+  7.33      +1 -1      ircd-ratbox/src/ircd_signal.c
+  7.521     +1 -0      ircd-ratbox/src/s_conf.c
+
+
+
 androsyn    2005/03/28 03:44:07 UTC	(20050328_5)
 
   Modified files:
