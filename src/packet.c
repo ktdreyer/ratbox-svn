@@ -213,7 +213,7 @@ read_packet(int fd, void *data)
 
   /* Check to make sure we're not flooding */
   if (IsPerson(cptr) &&
-     (linebuf_len(&cptr->localClient->buf_recvq) > CLIENT_FLOOD)) {
+     (linebuf_alloclen(&cptr->localClient->buf_recvq) > CLIENT_FLOOD)) {
       if (!(ConfigFileEntry.no_oper_flood && IsAnyOper(cptr))) {
         exit_client(cptr, cptr, cptr, "Excess Flood");
         return;
