@@ -1,3 +1,96 @@
+androsyn    2003/02/04 19:58:17 UTC	(20030204_14)
+
+  Modified files:
+    modules              m_accept.c m_admin.c m_away.c m_capab.c 
+                         m_challenge.c m_close.c m_connect.c 
+                         m_cryptlink.c m_dline.c m_eob.c m_gline.c 
+                         m_help.c m_htm.c m_info.c m_invite.c 
+                         m_ison.c m_join.c m_kline.c m_knock.c 
+                         m_links.c m_list.c m_locops.c m_lusers.c 
+                         m_map.c m_motd.c m_names.c m_oper.c 
+                         m_operwall.c m_pass.c m_ping.c m_pong.c 
+                         m_post.c m_rehash.c m_restart.c m_resv.c 
+                         m_set.c m_stats.c m_svinfo.c m_testline.c 
+                         m_time.c m_topic.c m_trace.c m_undline.c 
+                         m_ungline.c m_unkline.c m_user.c 
+                         m_userhost.c m_users.c m_version.c 
+                         m_wallops.c m_who.c m_whois.c m_whowas.c 
+                         m_xline.c 
+    modules/core         m_die.c m_kick.c m_kill.c m_message.c 
+                         m_mode.c m_nick.c m_part.c m_quit.c 
+                         m_server.c m_sjoin.c m_squit.c 
+  Log:
+  sed is your friend. Updated the module calls with the additonal argument
+  
+  Revision  Changes    Path
+  1.30      +1 -1      ircd-ratbox/modules/core/m_die.c
+  1.59      +1 -1      ircd-ratbox/modules/core/m_kick.c
+  1.77      +1 -1      ircd-ratbox/modules/core/m_kill.c
+  1.120     +1 -1      ircd-ratbox/modules/core/m_message.c
+  1.64      +1 -1      ircd-ratbox/modules/core/m_mode.c
+  1.111     +1 -1      ircd-ratbox/modules/core/m_nick.c
+  1.71      +1 -1      ircd-ratbox/modules/core/m_part.c
+  1.34      +1 -1      ircd-ratbox/modules/core/m_quit.c
+  1.103     +1 -1      ircd-ratbox/modules/core/m_server.c
+  1.163     +1 -1      ircd-ratbox/modules/core/m_sjoin.c
+  1.61      +1 -1      ircd-ratbox/modules/core/m_squit.c
+  1.43      +1 -1      ircd-ratbox/modules/m_accept.c
+  1.44      +1 -1      ircd-ratbox/modules/m_admin.c
+  1.40      +1 -1      ircd-ratbox/modules/m_away.c
+  1.34      +1 -1      ircd-ratbox/modules/m_capab.c
+  1.49      +2 -2      ircd-ratbox/modules/m_challenge.c
+  1.31      +1 -1      ircd-ratbox/modules/m_close.c
+  1.50      +1 -1      ircd-ratbox/modules/m_connect.c
+  1.47      +2 -2      ircd-ratbox/modules/m_cryptlink.c
+  1.11      +1 -1      ircd-ratbox/modules/m_dline.c
+  1.38      +1 -1      ircd-ratbox/modules/m_eob.c
+  1.107     +1 -1      ircd-ratbox/modules/m_gline.c
+  1.43      +1 -1      ircd-ratbox/modules/m_help.c
+  1.10      +1 -1      ircd-ratbox/modules/m_htm.c
+  1.77      +1 -1      ircd-ratbox/modules/m_info.c
+  1.58      +1 -1      ircd-ratbox/modules/m_invite.c
+  1.39      +1 -1      ircd-ratbox/modules/m_ison.c
+  1.115     +1 -1      ircd-ratbox/modules/m_join.c
+  1.149     +1 -1      ircd-ratbox/modules/m_kline.c
+  1.68      +1 -1      ircd-ratbox/modules/m_knock.c
+  1.46      +1 -1      ircd-ratbox/modules/m_links.c
+  1.58      +1 -1      ircd-ratbox/modules/m_list.c
+  1.36      +1 -1      ircd-ratbox/modules/m_locops.c
+  1.31      +1 -1      ircd-ratbox/modules/m_lusers.c
+  1.21      +1 -1      ircd-ratbox/modules/m_map.c
+  1.38      +1 -1      ircd-ratbox/modules/m_motd.c
+  1.60      +1 -1      ircd-ratbox/modules/m_names.c
+  1.65      +1 -1      ircd-ratbox/modules/m_oper.c
+  1.41      +1 -1      ircd-ratbox/modules/m_operwall.c
+  1.31      +1 -1      ircd-ratbox/modules/m_pass.c
+  1.38      +1 -1      ircd-ratbox/modules/m_ping.c
+  1.36      +1 -1      ircd-ratbox/modules/m_pong.c
+  1.19      +1 -1      ircd-ratbox/modules/m_post.c
+  1.58      +1 -1      ircd-ratbox/modules/m_rehash.c
+  1.31      +1 -1      ircd-ratbox/modules/m_restart.c
+  1.29      +1 -1      ircd-ratbox/modules/m_resv.c
+  1.55      +1 -1      ircd-ratbox/modules/m_set.c
+  1.147     +1 -1      ircd-ratbox/modules/m_stats.c
+  1.42      +1 -1      ircd-ratbox/modules/m_svinfo.c
+  1.36      +1 -1      ircd-ratbox/modules/m_testline.c
+  1.34      +1 -1      ircd-ratbox/modules/m_time.c
+  1.69      +1 -1      ircd-ratbox/modules/m_topic.c
+  1.70      +1 -1      ircd-ratbox/modules/m_trace.c
+  1.9       +1 -1      ircd-ratbox/modules/m_undline.c
+  1.9       +1 -1      ircd-ratbox/modules/m_ungline.c
+  1.81      +1 -1      ircd-ratbox/modules/m_unkline.c
+  1.30      +1 -1      ircd-ratbox/modules/m_user.c
+  1.45      +1 -1      ircd-ratbox/modules/m_userhost.c
+  1.31      +1 -1      ircd-ratbox/modules/m_users.c
+  1.49      +1 -1      ircd-ratbox/modules/m_version.c
+  1.40      +1 -1      ircd-ratbox/modules/m_wallops.c
+  1.80      +1 -1      ircd-ratbox/modules/m_who.c
+  1.106     +1 -1      ircd-ratbox/modules/m_whois.c
+  1.35      +1 -1      ircd-ratbox/modules/m_whowas.c
+  1.18      +1 -1      ircd-ratbox/modules/m_xline.c
+
+
+
 androsyn    2003/02/04 19:39:25 UTC	(20030204_13)
 
   Modified files:
