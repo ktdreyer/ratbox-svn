@@ -1,3 +1,9 @@
+*** 20001209_15 by db
+- removed little used function... will have to replace functionality
+  for remote send of KNOCK and msg @#channel code...
+
+
+
 *** 20001209_14 by db
 - I was using ->user instead of ->username in prefix. *DUH*
 - removed pretty much identical function in send.c (MORE BLOAT GONE!)
