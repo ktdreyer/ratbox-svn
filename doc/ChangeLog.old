@@ -1,3 +1,8 @@
+*** 20010205_7 by wcampbel
+Print a U or X when printing out gecos {} or shared {} entries
+Fix a couple mistakes in the .po
+
+
 *** 20010205_6 by a1kmm
 - Finally got the code to only hash the new parts of the hostname when we try each token. Thanks to
 Dianora for the idea.
