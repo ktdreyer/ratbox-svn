@@ -1,3 +1,9 @@
+*** 20010429_2 by fl_
+- massive rewrite of m_stats.c to use a table based lookup for stats..
+  this means we can now support /stats auth etc.. dont attempt it yet tho,
+  the table hasnt been filled with the things ;)
+
+
 *** 20010429_1 by androsyn
 Fixed to make solaris 8 compile properly for IPv6
 
