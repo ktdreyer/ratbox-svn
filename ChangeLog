@@ -1,3 +1,20 @@
+leeh        2004/03/30 06:29:20 EST	(20040330_7)
+
+  Modified files:
+    .                    RELNOTES 
+    modules/core         m_mode.c 
+    src                  channel.c 
+  Log:
+  - im silly, we need to ircsprintf() onto a pointer to parabuf that moves as
+    we add stuff, not parabuf itself.
+  
+  Revision  Changes    Path
+  1.93      +6 -0      ircd-ratbox/RELNOTES
+  1.102     +6 -2      ircd-ratbox/modules/core/m_mode.c
+  7.406     +5 -1      ircd-ratbox/src/channel.c
+
+
+
 leeh        2004/03/30 06:20:37 EST	(20040330_6)
 
   Modified files:
