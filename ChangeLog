@@ -1,3 +1,15 @@
+androsyn    2002/08/11 05:05:31 EDT	(20020811_5)
+
+  Modified files:
+    src                  hostmask.c 
+  Log:
+  Fix a broken test
+  
+  Revision  Changes    Path
+  7.73      +0 -3      ircd-ratbox/src/hostmask.c
+
+
+
 androsyn    2002/08/11 04:55:15 EDT	(20020811_4)
 
   Modified files:
