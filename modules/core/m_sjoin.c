@@ -402,6 +402,10 @@ int     ms_sjoin(struct Client *cptr,
         {
           lcptr = m->data;
 
+          /* Hopefully, the server knows about it's own clients. */
+          if (acptr == cptr->from)
+            continue;
+
           /* Ignore non lazylinks */
           if (!IsCapable(lcptr,CAP_LL))
             continue;
