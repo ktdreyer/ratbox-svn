@@ -1,3 +1,15 @@
+androsyn    2002/08/24 16:19:01 EDT	(20020824_4)
+
+  Modified files:
+    src                  send.c 
+  Log:
+  Clean up another silly if else case
+  
+  Revision  Changes    Path
+  7.219     +2 -5      ircd-ratbox/src/send.c
+
+
+
 androsyn    2002/08/24 16:16:08 EDT	(20020824_3)
 
   Modified files:
