@@ -1,3 +1,8 @@
+*** 20011113_2 by leeh
+- sending nothing in reply to a trace is bad, send RPL_ENDOFTRACE, I dont
+  see why we cant actually send a limited trace (servers/opers) 
+
+
 *** 20011113_1 by leeh
 - added a copyright for US to version.c.SH
 - made the topic help use <> and []
