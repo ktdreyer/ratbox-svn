@@ -1,3 +1,6 @@
+*** 20010104_39 by davidt
+where'd this little irc_strncpy go....
+
 *** 20010104_38 by davidt
 oops, the rest of the sjoin fixes, along with a fix for not updating the
 global client count.
