@@ -1,3 +1,21 @@
+leeh        2005/01/04 13:47:40 EST	(20050104_4)
+
+  Modified files:
+    autoconf             configure.in 
+    include              s_chanserv.h 
+    src                  c_mode.c s_chanserv.c 
+  Log:
+  - added CHANSERV::SET:NOOPS, to disable anyone being opped.
+  - added some info text when configure finishes
+  
+  Revision  Changes    Path
+  1.19      +12 -0     rserv/autoconf/configure.in
+  1.17      +2 -0      rserv/include/s_chanserv.h
+  1.18      +1 -1      rserv/src/c_mode.c
+  1.28      +147 -10   rserv/src/s_chanserv.c
+
+
+
 leeh        2005/01/04 13:43:24 EST	(20050104_3)
 
   Modified files:
