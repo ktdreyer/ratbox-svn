@@ -27,6 +27,10 @@
 
 #include "messages.tab"
 
+#ifdef USE_GETTEXT
+#include <libintl.h>
+#endif
+
 /*
  * form_str
  *

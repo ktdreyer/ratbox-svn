@@ -55,7 +55,7 @@ static  void    remove_unknown (struct Client *, char *, char *);
 static int do_numeric (char [], struct Client *,
                          struct Client *, int, char **);
 
-static int handle_command(struct Message *mptr, struct Client *cptr, struct Client *from, int i, char *para[MAXPARA]);
+static int handle_command(struct Message *, struct Client *, struct Client *, int, char **);
 
 static int hash(char *p);
 static struct Message *hash_parse(char *);
@@ -127,26 +127,23 @@ string_to_array(char *string, int mpara, int paramcount, char *end, int *parc, c
  *
  * NOTE: parse() should not be called recusively by any other functions!
  */
-int parse(struct Client *cptr, char *buffer, char *bufend)
+int parse(struct Client *cptr, char *pbuffer, char *bufend)
 {
   struct Client*  from = cptr;
   char*           ch;
   char*           s;
   char*           end;
   int             i;
-  int             paramcount, mpara;
-  int             handle_idx = -1;	/* Handler index */
+  int             paramcount, mpara=0;
   char*           numeric = 0;
-  char*           ap;
   struct Message* mptr;
-  MessageHandler  handler = 0;
 
-  Debug((DEBUG_DEBUG, "Parsing %s:", buffer));
+  Debug((DEBUG_DEBUG, "Parsing %s:", pbuffer));
 
   if (IsDead(cptr))
     return -1;
   
-  for (ch = buffer; *ch == ' '; ch++)   /* skip spaces */
+  for (ch = pbuffer; *ch == ' '; ch++)   /* skip spaces */
     /* null statement */ ;
 
   para[0] = from->name;
@@ -187,10 +184,10 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
           if (!from)
             {
               Debug((DEBUG_ERROR, "Unknown prefix (%s)(%s) from (%s)",
-                     sender, buffer, cptr->name));
+                     sender, pbuffer, cptr->name));
               ServerStats->is_unpf++;
 
-              remove_unknown(cptr, sender, buffer);
+              remove_unknown(cptr, sender, pbuffer);
 
               return -1;
             }
@@ -198,9 +195,9 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
             {
               ServerStats->is_wrdi++;
               Debug((DEBUG_ERROR, "Message (%s) coming from (%s)",
-                     buffer, cptr->name));
+                     pbuffer, cptr->name));
 
-              return cancel_clients(cptr, from, buffer);
+              return cancel_clients(cptr, from, pbuffer);
             }
         }
       while (*ch == ' ')
@@ -237,7 +234,7 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
     }
   else
     { 
-      int i = 0;
+      int ii = 0;
 
       s = strchr(ch, ' ');      /* moved from above,now need it here */
       if (s)
@@ -257,7 +254,7 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
           ** Hm, when is the buffer empty -- if a command
           ** code has been found ?? -Armin
           */
-          if (buffer[0] != '\0')
+          if (pbuffer[0] != '\0')
             {
               if (IsPerson(from))
                 sendto_one(from,
@@ -274,8 +271,8 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
       paramcount = mptr->parameters;
 	  mpara = mptr->maxpara;
 	  
-      i = bufend - ((s) ? s : ch);
-      mptr->bytes += i;
+      ii = bufend - ((s) ? s : ch);
+      mptr->bytes += ii;
     }
 
   end = bufend - 1;
@@ -296,7 +293,7 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
 }
 
 static int
-handle_command(struct Message *mptr, struct Client *cptr, struct Client *from, int i, char *para[MAXPARA])
+handle_command(struct Message *mptr, struct Client *cptr, struct Client *from, int i, char *hpara[MAXPARA])
 {
   MessageHandler handler = 0;
 	
@@ -323,10 +320,10 @@ handle_command(struct Message *mptr, struct Client *cptr, struct Client *from, i
   if (i < mptr->parameters)
     {
       sendto_one(cptr, form_str(ERR_NEEDMOREPARAMS),
-		 me.name, para[0], mptr->cmd);
+		 me.name, hpara[0], mptr->cmd);
       return 0;
     }
-  return (*handler)(cptr, from, i, para);
+  return (*handler)(cptr, from, i, hpara);
 }
 
 
@@ -359,13 +356,13 @@ mod_add_cmd(struct Message *msg)
   struct MessageHash *ptr;
   struct MessageHash *last_ptr = NULL;
   struct MessageHash *new_ptr;
-  int    index;
+  int    msgindex;
 
   assert(msg != NULL);
 
-  index = hash(msg->cmd);
+  msgindex = hash(msg->cmd);
 
-  for(ptr = msg_hash_table[index]; ptr; ptr = ptr->next )
+  for(ptr = msg_hash_table[msgindex]; ptr; ptr = ptr->next )
     {
       if (strcasecmp(msg->cmd,ptr->cmd) == 0)
 	return;				/* Its already added */
@@ -382,7 +379,7 @@ mod_add_cmd(struct Message *msg)
   msg->bytes = 0;
 
   if(last_ptr == NULL)
-    msg_hash_table[index] = new_ptr;
+    msg_hash_table[msgindex] = new_ptr;
   else
     last_ptr->next = new_ptr;
 }
@@ -393,17 +390,17 @@ mod_add_cmd(struct Message *msg)
  * output	- none
  * side effects - unload this one command name
  */
-int mod_del_cmd(struct Message *msg)
+void mod_del_cmd(struct Message *msg)
 {
   struct MessageHash *ptr;
   struct MessageHash *last_ptr = NULL;
-  int    index;
+  int    msgindex;
 
   assert(msg != NULL);
 
-  index = hash(msg->cmd);
+  msgindex = hash(msg->cmd);
 
-  for(ptr = msg_hash_table[index]; ptr; ptr = ptr->next )
+  for(ptr = msg_hash_table[msgindex]; ptr; ptr = ptr->next )
     {
       if(strcasecmp(msg->cmd,ptr->cmd) == 0)
 	{
@@ -411,7 +408,7 @@ int mod_del_cmd(struct Message *msg)
 	  if(last_ptr != NULL)
 	    last_ptr->next = ptr->next;
 	  else
-	    msg_hash_table[index] = ptr->next;
+	    msg_hash_table[msgindex] = ptr->next;
 	  MyFree(ptr);
 	  return;
 	}
@@ -427,11 +424,11 @@ int mod_del_cmd(struct Message *msg)
 struct Message *hash_parse(char *cmd)
 {
   struct MessageHash *ptr;
-  int    index;
+  int    msgindex;
 
-  index = hash(cmd);
+  msgindex = hash(cmd);
 
-  for(ptr = msg_hash_table[index]; ptr; ptr = ptr->next )
+  for(ptr = msg_hash_table[msgindex]; ptr; ptr = ptr->next )
     {
       if(strcasecmp(cmd,ptr->cmd) == 0)
 	{
@@ -579,8 +576,8 @@ static  int     cancel_clients(struct Client *cptr,
  * side effects	- 
  */
 static  void    remove_unknown(struct Client *cptr,
-                               char *sender,
-                               char *buffer)
+                               char *lsender,
+                               char *lbuffer)
 {
   if (!IsRegistered(cptr))
     return;
@@ -589,8 +586,8 @@ static  void    remove_unknown(struct Client *cptr,
     {
       sendto_realops_flags(FLAGS_DEBUG,
                  "Weirdness: Unknown client prefix (%s) from %s, Ignoring %s",
-                         buffer,
-                         get_client_name(cptr, FALSE), sender);
+                         lbuffer,
+                         get_client_name(cptr, FALSE), lsender);
       return;
     }
 
@@ -604,16 +601,17 @@ static  void    remove_unknown(struct Client *cptr,
    * user on the other server which needs to be removed. -avalon
    * Tell opers about this. -Taner
    */
-  if (!strchr(sender, '.'))
+  if (!strchr(lsender, '.'))
     sendto_one(cptr, ":%s KILL %s :%s (%s(?) <- %s)",
-               me.name, sender, me.name, sender,
+               me.name, lsender, me.name, lsender,
                get_client_name(cptr, FALSE));
   else
     {
       sendto_realops_flags(FLAGS_DEBUG,
-        "Unknown prefix (%s) from %s, Squitting %s", buffer, get_client_name(cptr, FALSE), sender);
+                           "Unknown prefix (%s) from %s, Squitting %s",
+                           lbuffer, get_client_name(cptr, FALSE), lsender);
       sendto_one(cptr, ":%s SQUIT %s :(Unknown prefix (%s) from %s)",
-                 me.name, sender, buffer, get_client_name(cptr, FALSE));
+                 me.name, lsender, lbuffer, get_client_name(cptr, FALSE));
     }
 }
 

@@ -49,8 +49,10 @@ if test "$ac_cv_func_gettext" = "no" -a "$ac_cv_lib_intl_gettext" = "no"; then
         AC_MSG_CHECKING(in /usr/local/lib )
 	unset ac_cv_lib_intl_gettext
         SAVEDLDFLAGS=$LDFLAGS
+        SAVEDCFLAGS=$CFLAGS
 	LDFLAGS="$LDFLAGS -L/usr/local/lib"
-	AC_CHECK_LIB(intl, gettext,,LDFLAGS=$SAVEDLDFLAGS)
+	CFLAGS="$CFLAGS -I/usr/local/include"
+	AC_CHECK_LIB(intl, gettext,,LDFLAGS=$SAVEDLDFLAGS; CFLAG=$SAVEDCFLAGS)
 fi
 
 dnl Checks for header files.

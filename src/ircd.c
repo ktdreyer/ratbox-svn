@@ -72,6 +72,10 @@
 #include <getopt.h>
 #endif /* HAVE_GETOPT_H */
 
+#ifdef USE_GETTEXT
+#include <libintl.h>
+#endif
+
 #include "memdebug.h"
 
 
