@@ -410,22 +410,36 @@ mo_modlist (struct Client *cptr, struct Client *sptr, int parc, char **parv)
   int i;
 
   if (!IsSetOperAdmin (sptr))
-    {
+  {
       sendto_one (sptr, ":%s NOTICE %s :You have no A flag",
 		  me.name, parv[0]);
       return 0;
-    }
+  }
+
+  if (parc>1)
+  {
+    sendto_one(sptr, ":%s NOTICE %s :Listing modules matching string '%s'...", me.name, parv[0], parv[1]);
+  }
+  else {
+    sendto_one(sptr, ":%s NOTICE %s :Listing all modules...", me.name, parv[0]);
+  }
 
   for(i = 0; i < num_mods; i++ )
+  {
+    if(parc>1)
     {
-		sendto_one(sptr, form_str(RPL_MODLIST), me.name, parv[0],
-				   modlist[i]->name,
-				   modlist[i]->address,
-				   modlist[i]->version);
+      if(strstr(modlist[i]->name,parv[1]))
+      {
+  	sendto_one(sptr, form_str(RPL_MODLIST), me.name, parv[0],
+                 modlist[i]->name, modlist[i]->address, modlist[i]->version);
+      }
     }
+    else {
+      sendto_one(sptr, form_str(RPL_MODLIST), me.name, parv[0],
+                 modlist[i]->name, modlist[i]->address, modlist[i]->version);
+    }
+  }
+  sendto_one(sptr, ":%s NOTICE %s :Done.", me.name, parv[0]);
+
   return 0;
 }
-
-
-
-
