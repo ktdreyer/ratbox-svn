@@ -2263,7 +2263,6 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 
     modebuf[mbl++] = mode_changes_minus[i].letter;
     modebuf[mbl] = 0;
-    mc++;
     nc++;
 
     if (arg != NULL)
@@ -2271,6 +2270,7 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
       pbl = strlcat(parabuf, arg, MODEBUFLEN);
       parabuf[pbl++] = ' ';
       parabuf[pbl] = '\0';
+      mc++;
     }
   }
 
@@ -2324,7 +2324,6 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 
     modebuf[mbl++] = mode_changes_plus[i].letter;
     modebuf[mbl] = 0;
-    mc++;
     nc++;
 
     if (mode_changes_plus[i].arg != NULL)
@@ -2332,6 +2331,7 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
       pbl = strlcat(parabuf, mode_changes_plus[i].arg, MODEBUFLEN);
       parabuf[pbl++] = ' ';
       parabuf[pbl] = '\0';
+      mc++;
     }
   }
 
@@ -2442,11 +2442,11 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
 
     modebuf[mbl++] = mode_changes_minus[i].letter;
     modebuf[mbl] = '\0';
-    mc++;
     nc++;
 
     if (mode_changes_minus[i].arg != NULL)
     {
+      mc++;
       pbl = strlen(strcat(parabuf, mode_changes_minus[i].arg));
       parabuf[pbl++] = ' ';
       parabuf[pbl] = '\0';
@@ -2493,11 +2493,11 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
 
     modebuf[mbl++] = mode_changes_plus[i].letter;
     modebuf[mbl] = '\0';
-    mc++;
     nc++;
 
     if (mode_changes_plus[i].arg != NULL)
     {
+      mc++;
       pbl = strlen(strcat(parabuf, mode_changes_plus[i].arg));
       parabuf[pbl++] = ' ';
       parabuf[pbl] = '\0';
@@ -2534,8 +2534,6 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
           mode_changes_minus[i].mems == ONLY_SERVERS)
         continue;
 
-      nc++;
-
       if (mode_changes_minus[i].arg != NULL &&
           ((mc == MAXMODEPARAMS) ||
            ((strlen(mode_changes_minus[i].arg) + mbl + pbl + 2) > BUFSIZE)))
@@ -2556,10 +2554,11 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
 
       modebuf[mbl++] = mode_changes_minus[i].letter;
       modebuf[mbl] = '\0';
-      mc++;
+      nc++;
 
       if (mode_changes_minus[i].arg != NULL)
       {
+        mc++;
         pbl = strlen(strcat(parabuf, mode_changes_minus[i].arg));
         parabuf[pbl++] = ' ';
         parabuf[pbl] = '\0';
@@ -2583,8 +2582,6 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
           mode_changes_plus[i].mems == ONLY_SERVERS)
         continue;
 
-      nc++;
-
       if (mode_changes_plus[i].arg != NULL &&
           ((mc == MAXMODEPARAMS) ||
            ((strlen(mode_changes_plus[i].arg) + mbl + pbl + 2) > BUFSIZE)))
@@ -2604,10 +2601,11 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
 
       modebuf[mbl++] = mode_changes_plus[i].letter;
       modebuf[mbl] = '\0';
-      mc++;
+      nc++;
 
       if (mode_changes_plus[i].arg != NULL)
       {
+        mc++;
         pbl = strlen(strcat(parabuf, mode_changes_plus[i].arg));
         parabuf[pbl++] = ' ';
         parabuf[pbl] = '\0';
@@ -2638,7 +2636,6 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
     if (mode_bounces[i].letter == 0)
       continue;
 
-    nc++;
     if (mode_bounces[i].arg != NULL &&
         ((mc == MAXMODEPARAMS)  || 
         ((strlen(mode_bounces[i].arg) + mbl + pbl + 2) > BUFSIZE)))
@@ -2662,10 +2659,11 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
     }
     modebuf[mbl++] = mode_bounces[i].letter;
     modebuf[mbl] = '\0';
-    mc++;
+    nc++;
 
     if (mode_bounces[i].arg != NULL)
     {
+      mc++;
       pbl = strlen(strcat(parabuf, mode_bounces[i].arg));
       parabuf[pbl++] = ' ';
       parabuf[pbl] = '\0';
