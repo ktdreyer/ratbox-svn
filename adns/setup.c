@@ -83,8 +83,9 @@ static void saveerr(adns_state ads, int en)
 static void configparseerr(adns_state ads, const char *fn, int lno,
 			   const char *fmt, ...)
 {
+#if 0
   va_list al;
-
+#endif
   saveerr(ads,EINVAL);
   if (!ads->diagfile || (ads->iflags & adns_if_noerrprint)) return;
 
@@ -556,7 +557,7 @@ int adns_init(adns_state *ads_r, adns_initflags flags, FBFILE *diagfile) {
   const char *res_options, *adns_res_options;
   int r;
   
-  r= init_begin(&ads, flags, diagfile ? diagfile : stderr);
+  r= init_begin(&ads, flags, diagfile);
   if (r) return r;
   
   res_options= instrum_getenv(ads,"RES_OPTIONS");

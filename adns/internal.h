@@ -495,7 +495,7 @@ void adns__reset_preserved(adns_query qu);
  */
 
 void adns__query_done(adns_query qu);
-void adns__query_fail(adns_query qu, adns_status stat);
+void adns__query_fail(adns_query qu, adns_status);
 
 /* From reply.c: */
 
