@@ -1,3 +1,25 @@
+ejb         2002/02/05 16:34:02 EST	(20020205_6)
+
+  Modified files:
+    .                    README.VMS 
+    adns                 setup.c 
+    include              config.h 
+    tools                descrip.mms 
+  Log:
+  - a few more VMS changes:
+     use logical names, not hardcoded paths;
+     fixed tools to compile mkpasswd properly;
+     use IRCD$CONFDIR:RESOLV.CONF, not []RESOLV.CONF;
+     brought README.VMS up to date.
+  
+  Revision  Changes    Path
+  1.11      +22 -15    ircd-hybrid-7/README.VMS
+  1.25      +2 -2      ircd-hybrid-7/adns/setup.c
+  7.128     +21 -19    ircd-hybrid-7/include/config.h
+  7.5       +4 -0      ircd-hybrid-7/tools/descrip.mms
+
+
+
 leeh        2002/02/05 15:16:59 EST	(20020205_5)
 
   Modified files:
