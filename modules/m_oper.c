@@ -269,14 +269,14 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 	if(*parv[1] == '+')
 	{
 		/* Ignore it if we aren't expecting this... -A1kmm */
-		if(!source_p->user->response)
+		if(!source_p->localClient->response)
 			return 0;
 
-		if(irccmp(source_p->user->response, ++parv[1]))
+		if(irccmp(source_p->localClient->response, ++parv[1]))
 		{
 			sendto_one(source_p, form_str(ERR_PASSWDMISMATCH), me.name, source_p->name);
 			ilog(L_FOPER, "FAILED OPER (%s) by (%s!%s@%s)",
-			     source_p->user->auth_oper, source_p->name,
+			     source_p->localClient->auth_oper, source_p->name,
 			     source_p->username, source_p->host);
 
 			if(ConfigFileEntry.failed_oper_notice)
@@ -289,14 +289,14 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 
 		oper_p = find_oper_conf(source_p->username, source_p->host, 
 					source_p->sockhost, 
-					source_p->user->auth_oper);
+					source_p->localClient->auth_oper);
 
 		if(oper_p == NULL)
 		{
 			sendto_one(source_p, form_str(ERR_NOOPERHOST), 
 				   me.name, source_p->name);
 			ilog(L_FOPER, "FAILED OPER (%s) by (%s!%s@%s)",
-			     source_p->user->auth_oper, source_p->name,
+			     source_p->localClient->auth_oper, source_p->name,
 			     source_p->username, source_p->host);
 
 			if(ConfigFileEntry.failed_oper_notice)
@@ -310,20 +310,20 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 		oper_up(source_p, oper_p);
 
 		ilog(L_OPERED, "OPER %s by %s!%s@%s",
-		     source_p->user->auth_oper, source_p->name, 
+		     source_p->localClient->auth_oper, source_p->name, 
 		     source_p->username, source_p->host);
 
-		MyFree(source_p->user->response);
-		MyFree(source_p->user->auth_oper);
-		source_p->user->response = NULL;
-		source_p->user->auth_oper = NULL;
+		MyFree(source_p->localClient->response);
+		MyFree(source_p->localClient->auth_oper);
+		source_p->localClient->response = NULL;
+		source_p->localClient->auth_oper = NULL;
 		return 0;
 	}
 
-	MyFree(source_p->user->response);
-	MyFree(source_p->user->auth_oper);
-	source_p->user->response = NULL;
-	source_p->user->auth_oper = NULL;
+	MyFree(source_p->localClient->response);
+	MyFree(source_p->localClient->auth_oper);
+	source_p->localClient->response = NULL;
+	source_p->localClient->auth_oper = NULL;
 
 	oper_p = find_oper_conf(source_p->username, source_p->host, 
 				source_p->sockhost, parv[1]);
@@ -349,13 +349,13 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 		return 0;
 	}
 
-	if(!generate_challenge(&challenge, &(source_p->user->response), oper_p->rsa_pubkey))
+	if(!generate_challenge(&challenge, &(source_p->localClient->response), oper_p->rsa_pubkey))
 	{
 		sendto_one(source_p, form_str(RPL_RSACHALLENGE), 
 			   me.name, source_p->name, challenge);
 	}
 
-	DupString(source_p->user->auth_oper, oper_p->name);
+	DupString(source_p->localClient->auth_oper, oper_p->name);
 	MyFree(challenge);
 	return 0;
 }

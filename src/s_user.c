@@ -301,7 +301,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 	}
 
 
-	user->last = CurrentTime;
+	client_p->localClient->last = CurrentTime;
 	/* Straight up the maximum rate of flooding... */
 	source_p->localClient->allow_read = MAX_FLOOD_BURST;
 

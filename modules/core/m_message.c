@@ -412,8 +412,8 @@ msg_channel(int p_or_n, const char *command,
 	if(MyClient(source_p))
 	{
 		/* idle time shouldnt be reset by notices --fl */
-		if((p_or_n != NOTICE) && source_p->user)
-			source_p->user->last = CurrentTime;
+		if(p_or_n != NOTICE)
+			source_p->localClient->last = CurrentTime;
 	}
 
 	/* chanops and voiced can flood their own channel with impunity */
@@ -470,8 +470,8 @@ msg_channel_flags(int p_or_n, const char *command, struct Client *client_p,
 	if(MyClient(source_p))
 	{
 		/* idletime shouldnt be reset by notice --fl */
-		if((p_or_n != NOTICE) && source_p->user)
-			source_p->user->last = CurrentTime;
+		if(p_or_n != NOTICE)
+			source_p->localClient->last = CurrentTime;
 	}
 
 	sendto_channel_flags(client_p, type, source_p, chptr, "%s %c%s :%s",
@@ -498,8 +498,8 @@ msg_client(int p_or_n, const char *command,
 	{
 		/* reset idle time for message only if its not to self 
 		 * and its not a notice */
-		if((p_or_n != NOTICE) && source_p->user)
-			source_p->user->last = CurrentTime;
+		if(p_or_n != NOTICE)
+			source_p->localClient->last = CurrentTime;
 	}
 	else if(source_p->from == target_p->from)
 	{

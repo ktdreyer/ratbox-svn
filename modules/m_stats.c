@@ -754,7 +754,6 @@ static void
 stats_operedup (struct Client *source_p)
 {
 	struct Client *target_p;
-	struct ConfItem *aconf;
 	dlink_node *oper_ptr;
 
 	DLINK_FOREACH (oper_ptr, oper_list.head)
@@ -766,14 +765,12 @@ stats_operedup (struct Client *source_p)
 
 		if(MyClient (source_p) && IsOper (source_p))
 		{
-			aconf = target_p->localClient->att_conf;
-
 			sendto_one_numeric(source_p, RPL_STATSDEBUG,
 					   "p :[%c][%s] %s (%s@%s) Idle: %d",
 					   IsAdmin (target_p) ? 'A' : 'O',
 					   get_oper_privs(target_p->flags2),
 					   target_p->name, target_p->username, target_p->host,
-					   (int) (CurrentTime - target_p->user->last));
+					   (int) (CurrentTime - target_p->localClient->last));
 		}
 		else
 		{
@@ -781,7 +778,7 @@ stats_operedup (struct Client *source_p)
 					   "p :[%c] %s (%s@%s) Idle: %d",
 					   IsAdmin (target_p) ? 'A' : 'O',
 					   target_p->name, target_p->username, target_p->host,
-					   (int) (CurrentTime - target_p->user->last));
+					   (int) (CurrentTime - target_p->localClient->last));
 		}
 	}
 

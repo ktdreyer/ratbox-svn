@@ -66,12 +66,8 @@ struct User
 	dlink_list channel;	/* chain of channel pointer blocks */
 	dlink_list invited;	/* chain of invite pointer blocks */
 	char *away;		/* pointer to away message */
-	time_t last_away;	/* Away since... */
-	time_t last;
 	int refcnt;		/* Number of times this block is referenced */
 	const char *server;	/* pointer to scached server name */
-	char *response;		/* expected response from client */
-	char *auth_oper;	/* Operator to become if they supply the response. */
 };
 
 struct Server
@@ -237,6 +233,13 @@ struct LocalUser
 	int slinkq_len;		/* length remaining after slinkq_ofs */
 
 	struct ZipStats zipstats;
+
+	time_t last_away;	/* Away since... */
+	time_t last;		/* last time they sent a PRIVMSG */
+
+	/* challenge stuff */
+	char *response;
+	char *auth_oper;
 
 	/*
 	 * Anti-flood stuff. We track how many messages were parsed and how

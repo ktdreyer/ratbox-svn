@@ -897,7 +897,6 @@ register_client(struct Client *client_p, struct Client *server,
 
 	source_p->hopcount = atoi(parv[2]);
 	source_p->tsinfo = newts;
-	user->last = CurrentTime;
 
 	strcpy(source_p->name, nick);
 	strlcpy(source_p->username, parv[5], sizeof(source_p->username));

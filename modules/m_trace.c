@@ -392,8 +392,7 @@ report_this_status(struct Client *source_p, struct Client *target_p,
 #endif
 						   (IsIPSpoof(target_p) ? "255.255.255.255" : ip),
 						   CurrentTime - target_p->lasttime,
-						   (target_p->user) ? 
-						    (CurrentTime - target_p->user->last) : 0);
+						   CurrentTime - target_p->localClient->last);
 
 			else
 				sendto_one_numeric(source_p, RPL_TRACEUSER, 
@@ -404,8 +403,7 @@ report_this_status(struct Client *source_p, struct Client *target_p,
 #endif
 						   (IsIPSpoof(target_p) ? "255.255.255.255" : ip),
 						   CurrentTime - target_p->lasttime,
-						   (target_p->user) ? 
-						    (CurrentTime - target_p->user->last) : 0);
+						   CurrentTime - target_p->localClient->last);
 			cnt++;
 		}
 		break;
