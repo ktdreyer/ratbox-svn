@@ -2311,37 +2311,6 @@ write_confitem(KlineType type, struct Client *source_p, char *user, char *host,
 
   filename = get_conf_name(type);
 
-  if(type == KLINE_TYPE)
-    {
-      sendto_realops_flags(UMODE_ALL, L_ALL,
-			   "%s added K-Line for [%s@%s] [%s]",
-			   get_oper_name(source_p), user, host, reason);
-      sendto_one(source_p, ":%s NOTICE %s :Added K-Line [%s@%s]",
-		 me.name, source_p->name, user, host);
-    }
-  else if(type == DLINE_TYPE)
-    {
-      sendto_realops_flags(UMODE_ALL, L_ALL,
-			   "%s added D-Line for [%s] [%s]",
-			   get_oper_name(source_p), host, reason);
-      sendto_one(source_p, ":%s NOTICE %s :Added D-Line [%s] to %s",
-		 me.name, source_p->name, host, filename);
-
-    }
-  else if(type == XLINE_TYPE)
-  {
-    sendto_realops_flags(UMODE_ALL, L_ALL,  "%s added X-line for [%s] [%s]",
-                         get_oper_name(source_p), host, reason);
-    sendto_one(source_p, ":%s NOTICE %s :Added X-line for [%s] [%s]",
-               me.name, source_p->name, host, reason);
-  }
-  else if(type == RESV_TYPE)
-  {
-    sendto_realops_flags(UMODE_ALL, L_ALL, "%s added RESV for [%s] [%s]",
-                         get_oper_name(source_p), host, reason);
-    sendto_one(source_p, ":%s NOTICE %s :Added RESV for [%s] [%s]",
-               me.name, source_p->name, host, reason);
-  }
 
   if ((out = fbopen(filename, "a")) == NULL)
   {
@@ -2386,24 +2355,71 @@ write_confitem(KlineType type, struct Client *source_p, char *user, char *host,
   fbclose(out);
 
   if(type == KLINE_TYPE)
-  {
-    ilog(L_TRACE, "%s added K-Line for [%s@%s] [%s]",
-         source_p->name, user, host, reason);
-  }
+    {
+      if(BadPtr(oper_reason))
+      {
+        sendto_realops_flags(UMODE_ALL, L_ALL,
+			     "%s added K-Line for [%s@%s] [%s]",
+			     get_oper_name(source_p), user, host, reason);
+        ilog(L_TRACE, "%s added K-Line for [%s@%s] [%s]",
+             source_p->name, user, host, reason);
+      }
+      else
+      {
+        sendto_realops_flags(UMODE_ALL, L_ALL,
+			     "%s added K-Line for [%s@%s] [%s|%s]",
+			     get_oper_name(source_p), user, host,
+                             reason, oper_reason);
+        ilog(L_TRACE, "%s added K-Line for [%s@%s] [%s|%s]",
+             source_p->name, user, host, reason, oper_reason);
+      }
+
+      sendto_one(source_p, ":%s NOTICE %s :Added K-Line [%s@%s]",
+		 me.name, source_p->name, user, host);
+    }
   else if(type == DLINE_TYPE)
-  {
-    ilog(L_TRACE, "%s added D-Line for [%s] [%s]",
-         get_oper_name(source_p), host, reason);
-  }
+    {
+      if(BadPtr(oper_reason))
+      {
+        sendto_realops_flags(UMODE_ALL, L_ALL,
+  			     "%s added D-Line for [%s] [%s]",
+			     get_oper_name(source_p), host, reason);
+        ilog(L_TRACE, "%s added D-Line for [%s] [%s]",
+             get_oper_name(source_p), host, reason);
+      }
+      else
+      {
+        sendto_realops_flags(UMODE_ALL, L_ALL,
+  			     "%s added D-Line for [%s] [%s|%s]",
+			     get_oper_name(source_p), host,
+                             reason, oper_reason);
+        ilog(L_TRACE, "%s added D-Line for [%s] [%s|%s]",
+             get_oper_name(source_p), host, reason, oper_reason);
+      }
+
+      sendto_one(source_p, ":%s NOTICE %s :Added D-Line [%s] to %s",
+		 me.name, source_p->name, host, filename);
+
+    }
   else if(type == XLINE_TYPE)
   {
+    sendto_realops_flags(UMODE_ALL, L_ALL,  "%s added X-line for [%s] [%s]",
+                         get_oper_name(source_p), host, reason);
     ilog(L_TRACE, "%s added X-line for [%s] [%s]",
          source_p->name, host, reason);
+
+    sendto_one(source_p, ":%s NOTICE %s :Added X-line for [%s] [%s]",
+               me.name, source_p->name, host, reason);
   }
   else if(type == RESV_TYPE)
   {
+    sendto_realops_flags(UMODE_ALL, L_ALL, "%s added RESV for [%s] [%s]",
+                         get_oper_name(source_p), host, reason);
     ilog(L_TRACE, "%s added RESV for [%s] [%s]",
          source_p->name, host, reason);
+
+    sendto_one(source_p, ":%s NOTICE %s :Added RESV for [%s] [%s]",
+               me.name, source_p->name, host, reason);
   }
 }
 
