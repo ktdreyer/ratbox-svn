@@ -1,3 +1,19 @@
+*** 20001106_9 by adrian
+
+
+I hate doing it, but here it is. One blind commit to rip out ziplinks
+from hybrid-7, as they will be re-implemented later on as an external
+process rather than be in the code.
+
+the actual zip files haven't been removed, since I'm probably going to
+reuse them very soon now.
+
+This hasn't been tested. It compiles. I will do more testing this evening,
+and probably do some much needed tidyups to the client/server send and
+receive code.
+
+
+
 *** 20001106_8 by adrian
 
 
