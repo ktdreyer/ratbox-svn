@@ -1,3 +1,16 @@
+androsyn    2002/09/21 22:11:28 UTC	(20020921_1)
+
+  Modified files:
+    modules              m_ison.c 
+  Log:
+  Allow for Opers to do a server ISON if server hide is disabled.  This
+  violates the RFC but oh well..
+  
+  Revision  Changes    Path
+  1.31      +8 -2      ircd-ratbox/modules/m_ison.c
+
+
+
 leeh        2002/09/21 09:59:29 UTC	(20020921_0)
 
   Modified files:
