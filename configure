@@ -2441,7 +2441,7 @@ if test "X$cf_enable_openssl" != "Xno" ; then
     if test "X$cf_openssl_basedir" != "X" ; then
     if test -f "${cf_openssl_basedir}/include/openssl/opensslv.h" ; then
       SSL_INCLUDES="-I${cf_openssl_basedir}/include"
-      SSL_LIBS="-L${cf_openssl_basedir}/lib -R${cf_openssl_basedir}/lib"
+      SSL_LIBS="-L${cf_openssl_basedir}/lib"
     else
                   cf_openssl_basedir=""
     fi
