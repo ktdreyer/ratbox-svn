@@ -1,3 +1,7 @@
+*** 20010831_1 by leeh
+- gave serverhide its own config block :P
+
+
 *** 20010830_2 by davidt
 - Attempt to flush sendq of exiting clients
 - When flushing a sendq, attempt to flush as many lines as possible, instead
