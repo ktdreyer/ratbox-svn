@@ -1,3 +1,25 @@
+leeh        2001/12/13 15:10:04 EST	(20011213_7)
+
+  Modified files:
+    include              channel.h 
+    modules              m_die.c m_restart.c m_set.c 
+    src                  channel.c ircd.c 
+  Log:
+  - added a restart notice for servers/users
+  - fixed a dupe die notice
+  - when we're in splitmode, add an event for check_splitmode() every 60s to
+    pull us out of it, delete this when its deactivated
+  
+  Revision  Changes    Path
+  7.95      +3 -1      ircd-hybrid-7/include/channel.h
+  1.20      +4 -13     ircd-hybrid-7/modules/m_die.c
+  1.18      +32 -10    ircd-hybrid-7/modules/m_restart.c
+  1.38      +8 -3      ircd-hybrid-7/modules/m_set.c
+  7.286     +27 -0     ircd-hybrid-7/src/channel.c
+  7.205     +3 -0      ircd-hybrid-7/src/ircd.c
+
+
+
 leeh        2001/12/13 14:27:25 EST	(20011213_6)
 
   Modified files:
