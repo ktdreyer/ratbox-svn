@@ -1,3 +1,8 @@
+*** 20010616_1 by jdc
+* Small typos and the like.
+
+
+
 *** 20010615_4 by a1kmm
 - 1 microsecond != 1 millisecond. Changed the delay stuff so ircd doesn't hang
   for too long.
