@@ -1,3 +1,9 @@
+*** 20010205_2 by db
+- removed unused variable
+- added prototype for now for is_ipv6_address
+
+
+
 *** 20010205_1 by androsyn
 Fixed bug for IPv6 when displaying the IP address of the incoming
 connection.
