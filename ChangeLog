@@ -1,3 +1,18 @@
+androsyn    2004/07/29 14:21:48 EDT	(20040729_7)
+
+  Modified files:
+    include              commio.h 
+    src                  cache.c commio.c 
+  Log:
+  Clean up the remainder of the fbopen type stuff
+  
+  Revision  Changes    Path
+  1.7       +0 -35     ircd-ratbox/include/commio.h
+  1.17      +1 -1      ircd-ratbox/src/cache.c
+  1.10      +0 -270    ircd-ratbox/src/commio.c
+
+
+
 androsyn    2004/07/29 14:10:54 EDT	(20040729_6)
 
   Modified files:
