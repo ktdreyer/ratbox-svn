@@ -1,3 +1,8 @@
+*** 20011113_1 by leeh
+- added a copyright for US to version.c.SH
+- made the topic help use <> and []
+
+
 *** 20011112_5 by kreator
 - another small fix for hostmask.c and find_conf_by_address()
 
