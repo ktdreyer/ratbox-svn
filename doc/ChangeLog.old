@@ -1,3 +1,11 @@
+*** 20011023_4 by db
+- get_channel() was being called with a NULL always. silly. ditto
+  with get_resv() second argument always a NULL. 
+  replaced get_channel(... CREATE) with get_or_create_channel()
+  if channel does not exist, its created. Simplifies interface.
+
+
+
 *** 20011023_3 by androsyn
 Updated the example config to reflect the change with challenge.
 
