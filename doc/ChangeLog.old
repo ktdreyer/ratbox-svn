@@ -1,3 +1,10 @@
+*** 20001129_8 by db
+- pile of cleanups mostly in comments
+- added persistent channels tentatively for now, finesse it later
+- redid s_user.c code to clean that up
+
+
+
 *** 20001129_7 by davidt
 Directory /cvsroot/ircd-hybrid-7/messages added to the repository
 
