@@ -1,3 +1,8 @@
+*** 20010213_1 by androsyn
+Made server hostmasking work again.  Well, at least in theory. 
+Added a fakename= option to the connect block for this.
+
+
 *** 20010212_9 by androsyn
 This fixes it properly this time :P
 
