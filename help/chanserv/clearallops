@@ -1,0 +1,3 @@
+CLEARALLOPS <channel>
+ACCESS:140 Clears all ops with status less than your own
+  <channel>: Channel to clear ops on

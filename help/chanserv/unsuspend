@@ -1,0 +1,4 @@
+UNSUSPEND <channel> <username>
+ACCESS:100 Unsuspends usernames access
+  <channel> : Channel to unsuspend username on
+  <username>: Username to unsuspend

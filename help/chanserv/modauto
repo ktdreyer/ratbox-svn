@@ -1,5 +1,0 @@
-MODAUTO <#channel> <username> <status>
-ACCESS:150 Modifies a users automatic op/voice level on join
-  <#channel>: Channel to modify user in
-  <username>: Username to modify
-  <status>  : Status to change to: either "op", "voice" or "none"

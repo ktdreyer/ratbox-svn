@@ -1,3 +1,3 @@
-JOIN <#channel>
-ACCESS:200 Makes services sit temporarily in your channel
-  <#channel>: Registered channel for services to join
+JOIN <channel>
+ACCESS:190 Makes services sit temporarily in your channel
+  <channel>: Registered channel for services to join

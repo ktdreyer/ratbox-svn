@@ -1,0 +1,3 @@
+UNBAN <channel>
+ACCESS:10 Unbans yourself from a channel
+  <channel>: Channel to unban yourself on

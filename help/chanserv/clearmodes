@@ -1,0 +1,3 @@
+CLEARMODES <channel>
+ACCESS:140 Clears simple modes (+smintlk)
+  <channel>: Channel to clear modes on

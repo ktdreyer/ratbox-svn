@@ -1,0 +1,8 @@
+ADDBAN <channel> [duration] <mask> <level> <reason>
+ACCESS:10 Adds a ban to chanserv
+  <channel> : Channel to add ban to
+  [duration]: Duration in minutes to keep ban for.
+              0/Nonexistant for permanent ban
+  <mask>    : nick!user@host mask to ban
+  <level>   : Access level to place ban at
+  <reason>  : Reason for ban

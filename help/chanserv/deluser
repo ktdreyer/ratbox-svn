@@ -1,4 +1,4 @@
-DELUSER <#channel> <username>
+DELUSER <channel> <username>
 ACCESS:150 Removes a user from a channels access list
-  <#channel>: Channel to remove user from
+  <channel>: Channel to remove user from
   <username>: Username to remove access for

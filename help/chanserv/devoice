@@ -1,5 +1,0 @@
-DEVOICE <#channel> [nicks]
-ACCESS:20 Makes services devoice yourself/users
-  <#channel>: Registered channel to perform devoices in
-  [nicks]   : Nicknames of people to devoice.  If this is not specified
-              it will devoice yourself.

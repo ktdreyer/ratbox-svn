@@ -1,5 +1,15 @@
-MODUSER <#channel> <username> <level>
+MODUSER <channel> <username> <level>
 ACCESS:150 Modifies a users level on the access list
-  <#channel>: Channel to modify user in
+  <channel>: Channel to modify user in
   <username>: Username to modify
   <level>   : Level of access to change to
+
+Available levels:
+200 - Founder
+190 - Admin
+150 - Userlist Admin (ADDUSER/MODUSER/DELUSER)
+140 - Clear (CLEARMODES/CLEARBANS/CLEAROPS/CLEARALLOPS/CLEARUSERS)
+100 - Userlist Op (SUSPEND/UNSUSPEND/LISTUSERS)
+50  - Op (OP)
+10  - Regular (ADDBAN/DELBAN/LISTBANS/UNBAN)
+1   - User (INVITE/VOICE)
