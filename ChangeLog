@@ -1,3 +1,19 @@
+leeh        2004/03/02 16:32:15 EST	(20040302_17)
+
+  Modified files:
+    .                    RELNOTES 
+  Added files:
+    doc                  whats-new.txt 
+  Log:
+  - added a whats-new.txt file
+  - updated RELNOTES in preparation for b1
+  
+  Revision  Changes    Path
+  1.79      +8 -19     ircd-ratbox/RELNOTES
+  7.41      +76 -0     ircd-ratbox/doc/whats-new.txt (new)
+
+
+
 androsyn    2004/03/02 16:26:54 EST	(20040302_16)
 
   Modified files:
