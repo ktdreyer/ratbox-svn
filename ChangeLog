@@ -1,3 +1,15 @@
+androsyn    2004/12/02 10:43:19 EST	(20041202_0)
+
+  Modified files:
+    src                  s_auth.c 
+  Log:
+  double frees are bad
+  
+  Revision  Changes    Path
+  7.189     +3 -3      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2004/11/30 16:26:21 EST	(20041130_0)
 
   Modified files:
