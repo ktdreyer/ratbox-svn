@@ -1,3 +1,20 @@
+leeh        2004/10/19 18:45:42 EDT	(20041019_1)
+
+  Modified files:
+    include              conf.h 
+    src                  newconf.c s_jupeserv.c 
+  Log:
+  - remove admin_score from jupes config
+  - disable oper jupes if the appropriate vars are 0
+  - add jupe/unjupe over dcc
+  
+  Revision  Changes    Path
+  1.20      +0 -1      rserv/include/conf.h
+  1.17      +0 -1      rserv/src/newconf.c
+  1.7       +97 -1     rserv/src/s_jupeserv.c
+
+
+
 leeh        2004/10/19 18:20:13 EDT	(20041019_0)
 
   Modified files:
