@@ -1,3 +1,15 @@
+androsyn    2002/02/04 02:03:54 EST	(20020204_5)
+
+  Modified files:
+    src                  s_bsd_sigio.c 
+  Log:
+  This should keep us from calling fcntl() on every read or write.
+  
+  Revision  Changes    Path
+  7.18      +0 -32     ircd-hybrid-7/src/s_bsd_sigio.c
+
+
+
 androsyn    2002/02/04 01:12:01 EST	(20020204_4)
 
   Modified files:
