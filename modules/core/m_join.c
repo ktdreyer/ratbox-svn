@@ -111,13 +111,6 @@ static void m_join(struct Client *client_p,
       return;
     }
 
-  if(is_resv(parv[1]))
-  {
-    sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
-               me.name, source_p->name, parv[1]);
-    return;
-  }
-
   build_list_of_channels( source_p, jbuf , parv[1] );
 
   if (parc > 3)
@@ -151,6 +144,13 @@ static void m_join(struct Client *client_p,
 	  do_join_0(&me,source_p);
 	  continue;
 	}
+
+      if(is_resv(name))
+      {
+        sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
+	           me.name, source_p->name, name);
+        continue;
+      }
 
       if( (chptr = hash_find_channel(name, NullChn)) != NULL )
 	{
