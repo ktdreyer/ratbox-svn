@@ -9,6 +9,7 @@ struct user_reg;
 struct chan_reg
 {
 	char *name;
+	char *topic;
 
 	time_t reg_time;
 	time_t last_used;
