@@ -2437,7 +2437,7 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
       modebuf[mbl] = 0;
 
       if (mode_changes_minus[i].arg != NULL)
-        pbl = strlen(strcat(parabuf, mode_changes_minus[i].arg));
+        pbl = strlcat(parabuf, mode_changes_minus[i].arg, MODEBUFLEN);
 
       parabuf[pbl++] = ' ';
       parabuf[pbl] = 0;
@@ -2483,7 +2483,7 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
       modebuf[mbl] = 0;
 
       if (mode_changes_plus[i].arg != NULL)
-        pbl = strlen(strcat(parabuf, mode_changes_plus[i].arg));
+        pbl = strlcat(parabuf, mode_changes_plus[i].arg, MODEBUFLEN);
 
       parabuf[pbl++] = ' ';
       parabuf[pbl] = 0;
