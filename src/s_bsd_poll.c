@@ -71,11 +71,6 @@ static void poll_update_pollfds(int, short, PF *);
 /* Private functions */
 
 /*
- * find a spare slot in the fd list. We can optimise this out later!
- *   -- adrian
- */
-
-/*
  * set and clear entries in the pollfds[] array.
  */ 
 static void
