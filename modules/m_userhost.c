@@ -92,7 +92,14 @@ static int m_userhost(struct Client *cptr,
 	   * lookup (USERHOST) to figure out what the clients' local IP
 	   * is.  Useful for things like NAT, and dynamic dial-up users.
 	   */
-	  if (acptr == sptr)
+          /*
+           * If a lazyleaf relayed us this request, we don't know
+           * the clients real IP.
+           * So, if you're on a lazyleaf, and you send a userhost
+           * including your nick and the nick of someone not known to
+           * the leaf, you'll get your spoofed IP.  tough.
+           */
+	  if (MyClient(acptr) && (acptr == sptr))
 	  {
             rl = ircsprintf(response, "%s%s=%c%s@%s ",
 			    acptr->name,
@@ -127,7 +134,7 @@ static int m_userhost(struct Client *cptr,
           {
             if( parv[n+1] )
             {
-              rl = ircsprintf(t, "%s", parv[n+1]);
+              rl = ircsprintf(t, "%s ", parv[n+1]);
               t += rl;
             }
             else
