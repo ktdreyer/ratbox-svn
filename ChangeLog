@@ -1,3 +1,33 @@
+leeh        2004/03/22 12:23:29 EST	(20040322_0)
+
+  Modified files:
+    .                    CREDITS 
+    doc                  whats-new.txt 
+    include              client.h 
+    src                  client.c packet.c parse.c s_auth.c 
+                         s_serv.c s_user.c send.c 
+  Added files:
+    doc/technical        ts6.txt 
+  Log:
+  - add IsClosing()/SetClosing() on a read error instead of closing the fd
+  - add IsAnyDead() to test IsClosing || IsDead() || IsAborted(), and made
+    various places test this instead
+  
+  Revision  Changes    Path
+  1.11      +7 -4      ircd-ratbox/CREDITS
+  1.1       +269 -0    ircd-ratbox/doc/technical/ts6.txt (new)
+  7.47      +14 -3     ircd-ratbox/doc/whats-new.txt
+  7.238     +4 -2      ircd-ratbox/include/client.h
+  7.442     +9 -8      ircd-ratbox/src/client.c
+  7.126     +8 -8      ircd-ratbox/src/packet.c
+  7.178     +2 -2      ircd-ratbox/src/parse.c
+  7.165     +1 -1      ircd-ratbox/src/s_auth.c
+  7.392     +2 -2      ircd-ratbox/src/s_serv.c
+  7.312     +3 -3      ircd-ratbox/src/s_user.c
+  7.276     +10 -10    ircd-ratbox/src/send.c
+
+
+
 androsyn    2004/03/21 06:32:45 EST	(20040321_2)
 
   Modified files:
