@@ -89,7 +89,7 @@ static int ms_svinfo(struct Client *cptr, struct Client *sptr,
        */
       sendto_realops_flags(FLAGS_ALL,
 	         "Link %s dropped, wrong TS protocol version (%s,%s)",
-                 get_client_name(sptr, TRUE), parv[1], parv[2]);
+                 get_client_name(sptr, SHOW_IP), parv[1], parv[2]);
       return exit_client(sptr, sptr, sptr, "Incompatible TS version");
     }
 
@@ -104,10 +104,13 @@ static int ms_svinfo(struct Client *cptr, struct Client *sptr,
     {
       sendto_realops_flags(FLAGS_ALL,
        "Link %s dropped, excessive TS delta (my TS=%lu, their TS=%lu, delta=%lu)",
-                 get_client_name(sptr, TRUE), CurrentTime, theirtime,deltat);
+                 get_client_name(sptr, SHOW_IP),
+                 CurrentTime, theirtime,deltat);
+
       log(L_NOTICE,
        "Link %s dropped, excessive TS delta (my TS=%lu, their TS=%lu, delta=%lu)",
-                 get_client_name(sptr, TRUE), CurrentTime, theirtime,deltat);
+                 get_client_name(sptr, SHOW_IP),
+                 CurrentTime, theirtime,deltat);
       return exit_client(sptr, sptr, sptr, "Excessive TS delta");
     }
 

@@ -78,10 +78,10 @@ int m_error(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     return 0;
   if (cptr == sptr)
     sendto_realops_flags(FLAGS_ALL,"ERROR :from %s -- %s",
-			 get_client_name(cptr, FALSE), para);
+			 get_client_name(cptr, HIDE_IP), para);
   else
     sendto_realops_flags(FLAGS_ALL,"ERROR :from %s via %s -- %s", sptr->name,
-			 get_client_name(cptr,FALSE), para);
+			 get_client_name(cptr, HIDE_IP), para);
   return 0;
 }
 
@@ -103,10 +103,10 @@ int mr_error(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     return 0;
   if (cptr == sptr)
     sendto_realops_flags(FLAGS_ALL,"ERROR :from %s -- %s",
-			 get_client_name(cptr, FALSE), para);
+			 get_client_name(cptr, HIDE_IP), para);
   else
     sendto_realops_flags(FLAGS_ALL,"ERROR :from %s via %s -- %s", sptr->name,
-			 get_client_name(cptr,FALSE), para);
+			 get_client_name(cptr, HIDE_IP), para);
   return 0;
 }
 
@@ -128,10 +128,10 @@ int ms_error(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     return 0;
   if (cptr == sptr)
     sendto_realops_flags(FLAGS_ALL,"ERROR :from %s -- %s",
-			 get_client_name(cptr, FALSE), para);
+			 get_client_name(cptr, HIDE_IP), para);
   else
     sendto_realops_flags(FLAGS_ALL,"ERROR :from %s via %s -- %s", sptr->name,
-			 get_client_name(cptr,FALSE), para);
+			 get_client_name(cptr, HIDE_IP), para);
   return 0;
 }
 

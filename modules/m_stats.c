@@ -522,8 +522,8 @@ static void stats_L_list(struct Client *sptr,char *name, int doall, int wilds,
 	  sendto_one(sptr, Lformat, me.name,
                      RPL_STATSLINKINFO, sptr->name,
                      (IsUpper(statchar)) ?
-                     get_client_name(acptr, TRUE) :
-                     get_client_name(acptr, FALSE),
+                     get_client_name(acptr, SHOW_IP) :
+                     get_client_name(acptr, HIDE_IP),
                      (int)linebuf_len(&acptr->localClient->buf_sendq),
                      (int)acptr->localClient->sendM,
 		     (int)acptr->localClient->sendK,
@@ -538,7 +538,7 @@ static void stats_L_list(struct Client *sptr,char *name, int doall, int wilds,
 	  if(IsIPHidden(acptr) || IsServer(acptr))
 	    sendto_one(sptr, Lformat, me.name,
 		       RPL_STATSLINKINFO, sptr->name,
-		       get_client_name(acptr, HIDEME),
+		       get_client_name(acptr, MASK_IP),
 		       (int)linebuf_len(&acptr->localClient->buf_sendq),
 		       (int)acptr->localClient->sendM,
 		       (int)acptr->localClient->sendK,
@@ -551,8 +551,8 @@ static void stats_L_list(struct Client *sptr,char *name, int doall, int wilds,
 	    sendto_one(sptr, Lformat, me.name,
 		       RPL_STATSLINKINFO, sptr->name,
 		       (IsUpper(statchar)) ?
-		       get_client_name(acptr, TRUE) :
-		       get_client_name(acptr, FALSE),
+		       get_client_name(acptr, SHOW_IP) :
+		       get_client_name(acptr, HIDE_IP),
 		       (int)linebuf_len(&acptr->localClient->buf_sendq),
 		       (int)acptr->localClient->sendM,
 		       (int)acptr->localClient->sendK,

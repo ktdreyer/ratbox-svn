@@ -102,9 +102,10 @@ static int mo_squit(struct Client *cptr, struct Client *sptr,
 	  sendto_realops_flags(FLAGS_ALL,
 			       "Received SQUIT %s from %s (%s)",
 			       found_squit->acptr->name,
-			       get_client_name(sptr,FALSE), comment);
+			       get_client_name(sptr, HIDE_IP), comment);
           log(L_NOTICE, "Received SQUIT %s from %s (%s)",
-              found_squit->acptr->name, get_client_name(sptr,FALSE), comment);
+              found_squit->acptr->name, get_client_name(sptr, HIDE_IP),
+              comment);
 	}
       return exit_client(cptr, found_squit->acptr, sptr, comment);
     }
@@ -138,12 +139,12 @@ static int ms_squit(struct Client *cptr, struct Client *sptr,
 	  sendto_realops_flags_opers(FLAGS_WALLOP, &me,
 				 "Remote SQUIT %s from %s (%s)",
 				 found_squit->server_name,
-				 get_client_name(sptr,FALSE), comment);
+				 get_client_name(sptr, HIDE_IP), comment);
 
           sendto_serv_butone(&me,
 			     ":%s WALLOPS :Remote SQUIT %s from %s (%s)",
 			     me.name, found_squit->server_name,
-			     get_client_name(sptr,FALSE),comment);
+			     get_client_name(sptr, HIDE_IP),comment);
 
 	  log(L_TRACE, "SQUIT From %s : %s (%s)", parv[0],
 	      found_squit->server_name, comment);

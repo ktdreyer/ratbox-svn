@@ -98,7 +98,7 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (!DoesTS(cptr))
     {
       sendto_realops_flags(FLAGS_ADMIN,"Link %s dropped, non-TS server",
-			   get_client_name(cptr, FALSE));
+			   get_client_name(cptr, HIDE_IP));
       sendto_realops_flags(FLAGS_ALL,"Link %s dropped, non-TS server",
 			   get_client_name(cptr, MASK_IP));
       return exit_client(cptr, cptr, cptr, "Non-TS server");
@@ -116,7 +116,7 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         {
          sendto_realops_flags(FLAGS_ADMIN,
            "Unauthorized server connection attempt from %s: No entry for "
-           "servername %s", get_client_name(cptr, FALSE), name);
+           "servername %s", get_client_name(cptr, HIDE_IP), name);
 
          sendto_realops_flags(FLAGS_ALL,
            "Unauthorized server connection attempt from %s: No entry for "
@@ -127,7 +127,7 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
      case -2:
       sendto_realops_flags(FLAGS_ADMIN,
         "Unauthorized server connection attempt from %s: Bad password "
-        "for server %s", get_client_name(cptr, FALSE), name);
+        "for server %s", get_client_name(cptr, HIDE_IP), name);
 
       sendto_realops_flags(FLAGS_ALL,
         "Unauthorized server connection attempt from %s: Bad password "
@@ -139,7 +139,7 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
      case -3:
       sendto_realops_flags(FLAGS_ADMIN,
         "Unauthorized server connection attempt from %s: Invalid host "
-        "for server %s", get_client_name(cptr, FALSE), name);
+        "for server %s", get_client_name(cptr, HIDE_IP), name);
 
       sendto_realops_flags(FLAGS_ALL,
         "Unauthorized server connection attempt from %s: Invalid host "
@@ -164,7 +164,7 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        */
       sendto_realops_flags(FLAGS_ADMIN,
          "Attempt to re-introduce server %s from %s", name,
-         get_client_name(cptr, FALSE));
+         get_client_name(cptr, HIDE_IP));
 
       sendto_realops_flags(FLAGS_ALL,
          "Attempt to re-introduce server %s from %s", name,
@@ -281,7 +281,8 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       sendto_one(cptr,"ERROR :Nickname %s already exists!", name);
       sendto_realops_flags(FLAGS_ALL,
 			   "Link %s cancelled: Server/nick collision on %s",
-			   /* inpath */ get_client_name(cptr,FALSE), name);
+		/* inpath */ get_client_name(cptr, HIDE_IP),
+				name);
       return exit_client(cptr, cptr, cptr, "Nick as Server");
     }
 
@@ -351,7 +352,7 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     {
       /* OOOPs nope can't HUB */
       sendto_realops_flags(FLAGS_ALL,"Non-Hub link %s introduced %s.",
-                get_client_name(cptr,  FALSE), name);
+                get_client_name(cptr, HIDE_IP), name);
       /* If it is new, we are probably misconfigured, so split the
        * non-hub server introducing this. Otherwise, split the new
        * server. -A1kmm. */
@@ -370,7 +371,7 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     {
       /* OOOPs nope can't HUB this leaf */
       sendto_realops_flags(FLAGS_ALL,"link %s introduced leafed %s.",
-                get_client_name(cptr,  FALSE), name);
+                get_client_name(cptr, HIDE_IP), name);
       /* If it is new, we are probably misconfigured, so split the
        * non-hub server introducing this. Otherwise, split the new
        * server. -A1kmm. */
@@ -415,7 +416,7 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       if (!(aconf = bcptr->serv->sconf))
 	{
 	  sendto_realops_flags(FLAGS_ALL,"Lost N-line for %s on %s. Closing",
-			       get_client_name(cptr, FALSE), name);
+			       get_client_name(cptr, HIDE_IP), name);
 	  return exit_client(cptr, cptr, cptr, "Lost N line");
 	}
       if (match(my_name_for_link(me.name, aconf), acptr->name))
