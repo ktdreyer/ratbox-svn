@@ -125,20 +125,24 @@ _moddeinit(void)
 
 char *_version = "20001122";
 
-/* free_target_table -
-   free the target_table
-*/
+/* 
+ * free_target_table -
+ *
+ * inputs	- NONE
+ * output	- NONE
+ * side effects	- free the target_table
+ */
 
 static void
 free_target_table(void)
 {
-	int i;
+  int i;
+  
+  for (i = 0; i < target_table_size; i++) 
+    MyFree (target_table[i]);
 	
-	for (i = 0; i < target_table_size; i++) 
-		MyFree (target_table[i]);
-	
-	MyFree(target_table);
-	target_table = NULL;
+  MyFree(target_table);
+  target_table = NULL;
 }
 
 /*
@@ -224,15 +228,15 @@ static void m_message(int p_or_n,
   target_table_size = ntargets;
  
   if(ntargets < 0)
-  {
-    /* Sigh.  We need to relay this command to the hub */
-    sendto_one(uplink, ":%s %s %s :%s",
-               sptr->name,
-               command,
-               parv[1],
-               parv[2]);
-    return;
-  }
+    {
+      /* Sigh.  We need to relay this command to the hub */
+      sendto_one(uplink, ":%s %s %s :%s",
+		 sptr->name,
+		 command,
+		 parv[1],
+		 parv[2]);
+      return;
+    }
 
   for(i = 0; i < ntargets ; i++)
     {
@@ -301,10 +305,10 @@ static int build_target_list(int p_or_n,
 
   /* Sigh, we can't mutilate parv[1] incase we need it to send to a hub */
   if(!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
-  {
-    strncpy(ncbuf, nicks_channels, BUFSIZE);
-    target_list = ncbuf;
-  }
+    {
+      strncpy(ncbuf, nicks_channels, BUFSIZE);
+      target_list = ncbuf;
+    }
   else
     target_list = nicks_channels; /* skip strcpy for non-lazyleafs */
   
@@ -333,6 +337,11 @@ static int build_target_list(int p_or_n,
 		    return(i);
 		  continue;
 		}
+	    }
+	  else if(IsOper(sptr))
+	    {
+	      handle_opers(p_or_n,command, cptr, sptr, nick, text);
+	      continue;
 	    }
 	  else
 	    {
@@ -425,11 +434,11 @@ static int build_target_list(int p_or_n,
               handle_opers(p_or_n, command, cptr,sptr,nick,text);
               continue;
             }
-          if(strchr(nick, '@'))
-            {
+	  if(strchr(nick,'@'))
+	    {
               handle_opers(p_or_n, command, cptr,sptr,nick,text);
               continue;
-            }
+	    }
 	}
 
       /* At this point, its likely its another client */
@@ -438,8 +447,8 @@ static int build_target_list(int p_or_n,
 	{
 	  if( !duplicate_ptr(acptr, *targets, i) )
 	    {
-			*targets = MyRealloc(*targets, sizeof(struct entity *) * (i + 1));
-			(*targets)[i] = MyMalloc (sizeof (struct entity));
+	      *targets = MyRealloc(*targets, sizeof(struct entity *) * (i + 1));
+	      (*targets)[i] = MyMalloc (sizeof (struct entity));
 
 	      (*targets)[i]->ptr = (void *)acptr;
 	      (*targets)[i]->type = ENTITY_CLIENT;
@@ -901,8 +910,11 @@ static void handle_opers(int p_or_n,
       /* Check if someones msg'ing opers@our.server */
       if (!strcmp(nick,"opers"))
         {
+#if 0
           sendto_realops_flags(FLAGS_ALL, "To opers: From: %s!%s@%s: %s", 
                                sptr->name, sptr->username, sptr->host, text);      
+#endif
+	  sendto_wallops_flags(FLAGS_LOCOPS, sptr, "%s", text);
           return;
         }
 
