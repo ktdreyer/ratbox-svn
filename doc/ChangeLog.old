@@ -1,3 +1,16 @@
+db          2001/12/14 23:24:18 EST	(20011215_4)
+
+  Modified files:
+    modules              m_trace.c 
+  Log:
+  - fixed m_trace bug for unopered clients, we didn't check that parv[1]
+    was valid before blindly using it.
+  
+  Revision  Changes    Path
+  1.38      +9 -6      ircd-hybrid-7/modules/m_trace.c
+
+
+
 a1kmm       2001/12/14 23:04:58 EST	(20011215_3)
 
   Modified files:
