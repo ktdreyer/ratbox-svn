@@ -1,3 +1,7 @@
+*** 20010816_10 by androsyn
+Oops..an off by one error..
+
+
 *** 20010816_9 by androsyn
 Its helpful if you update the length of the bufhead as well as the bufline
 
