@@ -1,3 +1,8 @@
+*** 19990925_1 by db
+- simpler mode letter to bit mask table lookup, safer
+
+
+
 *** 19990924_2 by db
 - yet another ->name instead of ->user this one in report_tklines
 
