@@ -1,3 +1,13 @@
+*** 20010805_3 by leeh
+- undef'd use_table_mode.
+
+  Do NOT redefine this without first talking to diane.  Ill email my
+  backtrace to the list when it comes back online, we will probably beta
+  tonight, and the table code has cores.
+
+  Do not reenable this, the rest of the coders are in agreement about this
+
+
 *** 20010805_2 by leeh
 - made hybrid7 TS5
 
