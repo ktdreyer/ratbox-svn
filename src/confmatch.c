@@ -229,7 +229,8 @@ find_conf_by_address (const char *hostname,
 			DLINK_FOREACH(ptr, list->head)
 			{
 				aconf = ptr->data;
-				if(match(aconf->user, username) && match(aconf->host, hostname))
+				if(match(aconf->user, username) && match(aconf->host, hostname) &&
+					aconf->status & type)
 					return(aconf);
 			}	
 
@@ -247,7 +248,8 @@ find_conf_by_address (const char *hostname,
 			DLINK_FOREACH(ptr, list->head)
 			{
 				aconf = ptr->data;
-				if(match(aconf->user, username) && match(aconf->host, hostname))
+				if(match(aconf->user, username) && match(aconf->host, hostname) &&
+					aconf->status & type)
 					return(aconf);
 			}
 		}
@@ -258,7 +260,7 @@ find_conf_by_address (const char *hostname,
 		aconf = find_generic_line(type, addr);
 		if(aconf != NULL)
 		{
-			if(match(aconf->user, username))
+			if(match(aconf->user, username) && aconf->status & type)
 				return aconf;
 		}
 	}
@@ -405,4 +407,89 @@ show_iline_prefix(struct Client *sptr, struct ConfItem *aconf, char *name)
   *prefix_ptr = '\0';   
   strncpy(prefix_ptr, name, USERLEN);
   return (prefix_of_host);
+}
+
+void
+report_klines(struct Client *source_p)
+{
+	dlink_list *list;
+	dlink_node *ptr;
+	int x, port;
+	char *host, *pass, *user, *classname, *name;
+	struct ConfItem *aconf;
+	
+	for(x = 0; x < ATABLE_SIZE; x++)
+	{
+		list = &hostconf[x];
+		DLINK_FOREACH(ptr, list->head)
+		{
+	         	aconf = ptr->data;
+  		 	
+			if(aconf->flags & CONF_FLAGS_TEMPORARY)
+         		        continue;
+   	 	        if(!(aconf->status & CONF_KILL))
+				continue;
+		 	get_printable_conf (aconf, &name, &host, &pass, &user, &port, &classname);
+        	        sendto_one(source_p, form_str(RPL_STATSKLINE), me.name,
+                	        source_p->name, 'K', host, user, pass);
+		
+		}
+	}
+}
+
+void
+report_glines(struct Client *source_p)
+{
+	dlink_list *list;
+	dlink_node *ptr;
+	int x, port;
+	char *host, *pass, *user, *classname, *name;
+	struct ConfItem *aconf;
+	for(x = 0; x < ATABLE_SIZE; x++)
+	{
+		list = &hostconf[x];
+		DLINK_FOREACH(ptr, list->head)
+		{
+	         	aconf = ptr->data;
+  		 	if(aconf->flags & CONF_FLAGS_TEMPORARY)
+         		        continue;
+   	 	        
+   	 	        if(!(aconf->status & CONF_GLINE))
+   	 	        	continue;
+   	 	        
+		 	get_printable_conf (aconf, &name, &host, &pass, &user, &port, &classname);
+        	        sendto_one(source_p, form_str(RPL_STATSKLINE), me.name,
+                	        source_p->name, 'G', host, user, pass);
+		
+		}
+	}
+}
+
+void
+report_ilines(struct Client *source_p)
+{
+	dlink_list *list;
+	dlink_node *ptr;
+	int x, port;
+	char *host, *pass, *user, *classname, *name;
+	struct ConfItem *aconf;
+	
+	for(x = 0; x < ATABLE_SIZE; x++)
+	{
+		list = &hostconf[x];
+		DLINK_FOREACH(ptr, list->head)
+		{
+	         	aconf = ptr->data;
+  		 	if(aconf->flags & CONF_FLAGS_TEMPORARY)
+         		        continue;
+   	 	        
+   	 	        if(!(aconf->status & CONF_CLIENT))
+   	 	        	continue;
+   	 	        
+		 	get_printable_conf (aconf, &name, &host, &pass, &user, &port, &classname);
+        	        sendto_one(source_p, form_str(RPL_STATSILINE), me.name,
+                	        source_p->name, 'I', host, user, pass);
+		
+		}
+	}
 }

@@ -120,6 +120,7 @@ add_ipline(struct ConfItem *aconf, int type, struct irc_inaddr *addr, int cidr)
 	
 	if(ourtype == -1)
 		return 0;	
+	fprintf(stderr, "adding: %s\n", aconf->host);
 	pnode = add_line(aconf, ourtype, addr, cidr);
 	if(pnode == NULL)
 		return 0;
