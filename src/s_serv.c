@@ -1106,7 +1106,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
             sendto_one(by, ":%s NOTICE %s :Server %s already present from %s",
               me.name, by->name, aconf->name,
               get_client_name(cptr, TRUE));
-      return 0;
+        return 0;
     }
 
     /* XXX we should make sure we're not already connected! */
@@ -1148,57 +1148,49 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
     if (!set_sock_buffers(cptr->fd, READBUF_SIZE))
         report_error(SETBUF_ERROR_MSG, get_client_name(cptr, TRUE), errno);
 
-  /*
-   * NOTE: if we're here we have a valid C:Line and the client should
-   * have started the connection and stored the remote address/port and
-   * ip address name in itself
-   *
-   * Attach config entries to client here rather than in
-   * completed_connection. This to avoid null pointer references
-   */
-  if (!attach_cn_lines(cptr, aconf->host))
-    {
-      sendto_ops("Host %s is not enabled for connecting:no C/N-line",
-                 aconf->host);
-      if (by && IsPerson(by) && !MyClient(by))  
-        sendto_one(by, ":%s NOTICE %s :Connect to host %s failed.",
-                   me.name, by->name, cptr);
-      det_confs_butmask(cptr, 0);
-      
-      free_client(cptr);
-      return 0;
+    /*
+     * NOTE: if we're here we have a valid C:Line and the client should
+     * have started the connection and stored the remote address/port and
+     * ip address name in itself
+     *
+     * Attach config entries to client here rather than in
+     * serv_connect_callback(). This to avoid null pointer references.
+     */
+    if (!attach_cn_lines(cptr, aconf->host)) {
+        sendto_ops("Host %s is not enabled for connecting:no C/N-line",
+          aconf->host);
+        if (by && IsPerson(by) && !MyClient(by))  
+            sendto_one(by, ":%s NOTICE %s :Connect to host %s failed.",
+              me.name, by->name, cptr);
+        det_confs_butmask(cptr, 0);
+        free_client(cptr);
+        return 0;
     }
-  /*
-   * at this point we have a connection in progress and C/N lines
-   * attached to the client, the socket info should be saved in the
-   * client and it should either be resolved or have a valid address.
-   *
-   * The socket has been connected or connect is in progress.
-   */
-  make_server(cptr);
-  if (by && IsPerson(by))
-    {
-      strcpy(cptr->serv->by, by->name);
-      if (cptr->serv->user)
-        free_user(cptr->serv->user, NULL);
-      cptr->serv->user = by->user;
-      by->user->refcnt++;
+    /*
+     * at this point we have a connection in progress and C/N lines
+     * attached to the client, the socket info should be saved in the
+     * client and it should either be resolved or have a valid address.
+     *
+     * The socket has been connected or connect is in progress.
+     */
+    make_server(cptr);
+    if (by && IsPerson(by)) {
+        strcpy(cptr->serv->by, by->name);
+        if (cptr->serv->user)
+            free_user(cptr->serv->user, NULL);
+        cptr->serv->user = by->user;
+        by->user->refcnt++;
+    } else {
+        strcpy(cptr->serv->by, "AutoConn.");
+        if (cptr->serv->user)
+            free_user(cptr->serv->user, NULL);
+        cptr->serv->user = NULL;
     }
-  else
-    {
-      strcpy(cptr->serv->by, "AutoConn.");
-      if (cptr->serv->user)
-        free_user(cptr->serv->user, NULL);
-      cptr->serv->user = NULL;
-    }
-  cptr->serv->up = me.name;
-
-  local[cptr->fd] = cptr;
-
-  SetConnecting(cptr);
-
-  add_client_to_list(cptr);
-  fdlist_add(cptr->fd, FDL_DEFAULT);
+    cptr->serv->up = me.name;
+    local[cptr->fd] = cptr;
+    SetConnecting(cptr);
+    add_client_to_list(cptr);
+    fdlist_add(cptr->fd, FDL_DEFAULT);
 
     /* Now, initiate the connection */
     comm_connect_tcp(cptr->fd, aconf->host, aconf->port, NULL, 0, 
