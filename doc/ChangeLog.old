@@ -1,3 +1,6 @@
+*** 20010205_8 by davidt
+m_* functions no longer need a return value.. and everything was using it in different ways (returning 0/1/-1 on various different conditions), so it was just a mess..  If we do decide to actually use the return value for something useful, it'd need to change everything anyway, so since that probably won't happen (soon anyway)....
+
 *** 20010205_7 by wcampbel
 Print a U or X when printing out gecos {} or shared {} entries
 Fix a couple mistakes in the .po
