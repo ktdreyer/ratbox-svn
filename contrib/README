@@ -91,4 +91,5 @@ You must then run 'make' and 'make install' again, and restart your ircd.
 The following patches are included:
 
 remote-unkline.diff: This patch adds support for remote unklines.
-temp-dline.diff:     This patch adds support for temporary dlines.
+temp-dline.diff:     This patch adds support for temporary dlines and
+                     attempts to make both more efficient.
