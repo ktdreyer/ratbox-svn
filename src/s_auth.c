@@ -462,7 +462,7 @@ timeout_auth_queries_event(void *notused)
 	    sendheader(auth->client, REPORT_FAIL_ID);
 	  if (IsDNSPending(auth))
 	    {
-	      adns_cancel(auth->client->localClient->dns_query.query);	
+	      delete_adns_queries(&auth->client->localClient->dns_query);
 	      auth->client->localClient->dns_query.query = NULL;
 	      sendheader(auth->client, REPORT_FAIL_DNS);
 	    }

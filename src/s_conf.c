@@ -205,8 +205,7 @@ void free_conf(struct ConfItem* aconf)
   assert(0 != aconf);
   assert(!(aconf->status & CONF_CLIENT) ||
          strcmp(aconf->host, "NOMATCH") || (aconf->clients == -1));
-  if (aconf->dns_pending && (aconf->dns_query.query != NULL))
-    adns_cancel(aconf->dns_query.query);
+  delete_adns_queries(&aconf->dns_query);
   MyFree(aconf->host);
   if (aconf->passwd)
     memset(aconf->passwd, 0, strlen(aconf->passwd));
@@ -459,9 +458,6 @@ int check_client(struct Client *cptr, struct Client *sptr, char *username)
 
     case 0:
     default:
-#if 0
-      release_client_dns_reply(sptr);
-#endif
       break;
     }
   return(i);

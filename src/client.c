@@ -1323,8 +1323,7 @@ const char* comment         /* Reason for the exit */
       if (sptr->flags & FLAGS_IPHASH)
         remove_one_ip(&sptr->localClient->ip);
       
-      if(sptr->localClient->dns_query.query != NULL)
-	      adns_cancel(sptr->localClient->dns_query.query);
+      delete_adns_queries(sptr);
       delete_identd_queries(sptr);
 
       client_flush_input(sptr);

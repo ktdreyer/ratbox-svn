@@ -30,5 +30,5 @@ void dns_do_callbacks(void);
 void dns_select (void);
 void adns_gethost (const char *name , int aftype , struct DNSQuery *req );
 void adns_getaddr (struct irc_inaddr *addr , int aftype , struct DNSQuery *req );
-
+void delete_adns_queries(struct DNSQuery *q);
 #endif
