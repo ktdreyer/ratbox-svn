@@ -1,3 +1,7 @@
+*** 19990819_2 by tomh
+split out m_join.c
+
+
 *** 19990819_1 by tomh
 add new m_command (m_join), sort msg strings
 
