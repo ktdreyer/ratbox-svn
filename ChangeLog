@@ -1,3 +1,19 @@
+leeh        2004/01/15 14:10:38 EST	(20040115_7)
+
+  Modified files:
+    .                    configure 
+  Log:
+  - added checks for ranlib/ar to configure
+  - added the initial user registration service, just stored in memory atm
+  - added the Makefile stuff for the service directories
+  - hash_nick() -> global hash_name()
+  - I need to stop just doing "*buf++;" :P
+  
+  Revision  Changes    Path
+  1.8       +122 -53   rserv/configure
+
+
+
 leeh        2004/01/15 10:48:34 EST	(20040115_6)
 
   rserv/src/s_userserv - New directory
