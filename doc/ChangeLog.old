@@ -1,3 +1,15 @@
+davidt      2001/12/12 18:22:49 EST	(20011212_4)
+
+  Modified files:
+    .                    ChangeLog 
+  Log:
+  - Do not use #Id# tags in commit logs, k plz thnx.
+  
+  Revision  Changes    Path
+  7.3152    +3 -3      ircd-hybrid-7/ChangeLog
+
+
+
 db          2001/12/12 13:23:48 EST	(20011212_3)
 
   Modified files:
