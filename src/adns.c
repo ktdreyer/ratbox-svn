@@ -73,10 +73,7 @@ void delete_adns_queries(struct DNSQuery *q)
  */
 void restart_resolver(void)
 {
-  dns_cancel_all();
-  adns_finish(dns_state);
-  eventDelete(timeout_adns, NULL);
-  init_resolver();
+   adns__rereadconfig(dns_state);
 }
 
 /* void init_resolver(void)
