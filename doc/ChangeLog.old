@@ -1,3 +1,9 @@
+*** 20000402_9 by db
+- more cleanups to parser
+- make sure 'O' is converted to global=yes in convertconf
+
+
+
 *** 20000402_8 by db
 - clean: in Makefile remove .c files for parser
 - cleaned up serverinfo code
