@@ -127,9 +127,6 @@ free_conf(struct ConfItem *aconf)
 	if(aconf == NULL)
 		return;
 
-	s_assert(!(aconf->status & CONF_CLIENT) ||
-	       (aconf->host && strcmp(aconf->host, "NOMATCH")) || (aconf->clients == -1));
-
 	/* security.. */
 	if(aconf->passwd)
 		memset(aconf->passwd, 0, strlen(aconf->passwd));
