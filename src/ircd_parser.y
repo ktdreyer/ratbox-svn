@@ -330,6 +330,7 @@ serverinfo_vhost:       VHOST '=' IP_TYPE ';'
 #ifndef IPV6
 /* XXX: Broken for IPv6 */
     IN_ADDR(ServerInfo.ip) = yylval.ip_entry.ip;
+    ServerInfo.specific_virtual_host = 1;
 #endif
   };
 

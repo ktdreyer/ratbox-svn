@@ -214,6 +214,7 @@ struct server_info
   struct      irc_inaddr ip;
   int         max_clients;
   int         no_hack_ops;
+  int	      specific_virtual_host;
 };
 
 struct admin_info
