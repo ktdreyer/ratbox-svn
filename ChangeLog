@@ -1,3 +1,15 @@
+leeh        2003/09/05 19:31:44 EDT	(20030905_2)
+
+  Modified files:
+    src                  s_serv.c 
+  Log:
+  - dont try and burst a topic if we dont have one :P
+  
+  Revision  Changes    Path
+  7.364     +2 -2      ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2003/09/05 17:55:52 EDT	(20030905_1)
 
   Modified files:
