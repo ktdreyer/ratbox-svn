@@ -68,9 +68,9 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
   struct Client *from = cptr;
   char  *ch;
   char  *s;
-  int   i;
+  size_t  i;
   char* numeric = 0;
-  int   paramcount;
+  size_t paramcount;
   struct Message *mptr;
 
   Debug((DEBUG_DEBUG, "Parsing %s: %s",
