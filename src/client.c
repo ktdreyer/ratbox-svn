@@ -167,34 +167,43 @@ make_client (struct Client *from)
 	return client_p;
 }
 
+static void
+free_local_client(struct Client *client_p)
+{
+	assert(NULL != client_p);
+	assert(&me != client_p);
+	
+	if(!MyConnect(client_p))
+		return;
+	
+
+	/*
+	 * clean up extra sockets from P-lines which have been discarded.
+	 */
+	if(client_p->localClient->listener)
+	{
+		assert (0 < client_p->localClient->listener->ref_count);
+		if(0 == --client_p->localClient->listener->ref_count
+			&& !client_p->localClient->listener->active)
+		free_listener (client_p->localClient->listener);
+		client_p->localClient->listener = 0;
+	}
+
+	if(client_p->localClient->fd >= 0)
+		fd_close (client_p->localClient->fd);
+	
+	BlockHeapFree (lclient_heap, client_p->localClient);
+	client_p->localClient = NULL;
+}
+
 void
 free_client (struct Client *client_p)
 {
 	assert (NULL != client_p);
 	assert (&me != client_p);
 
-	if(MyConnect (client_p))
-	{
-		assert (IsClosing (client_p) && IsDead (client_p));
-
-		/*
-		 * clean up extra sockets from P-lines which have been discarded.
-		 */
-		if(client_p->localClient->listener)
-		{
-			assert (0 < client_p->localClient->listener->ref_count);
-			if(0 == --client_p->localClient->listener->ref_count
-			   && !client_p->localClient->listener->active)
-				free_listener (client_p->localClient->listener);
-			client_p->localClient->listener = 0;
-		}
-
-		if(client_p->localClient->fd >= 0)
-			fd_close (client_p->localClient->fd);
-
-		BlockHeapFree (lclient_heap, client_p->localClient);
-	}
-
+	assert (IsClosing (client_p) && IsDead (client_p));
+	free_local_client(client_p);
 	BlockHeapFree (client_heap, client_p);
 }
 
@@ -1044,14 +1053,6 @@ exit_one_client (struct Client *client_p,
 	/* remove from global client list */
 	remove_client_from_list (source_p);
 
-
-	/* Flush their sendq once and for all */
-	if(MyConnect (source_p))
-	{
-		linebuf_donebuf (&source_p->localClient->buf_recvq);
-		linebuf_donebuf (&source_p->localClient->buf_sendq);
-	}
-
 	/* Check to see if the client isn't already on the dead list */
 	assert (dlinkFind (&dead_list, source_p) == NULL);
 
@@ -1433,8 +1434,12 @@ exit_client (struct Client *client_p,	/* The local client originating the
 		 ** (The following *must* make MyConnect(source_p) == FALSE!).
 		 ** It also makes source_p->from == NULL, thus it's unnecessary
 		 ** to test whether "source_p != target_p" in the following loops.
+		 **
+		 ** Okay..close_connection() doesn't set MyConnect(source_p) == FALSE
+		 ** But free_local_client does
 		 */
 		close_connection (source_p);
+		free_local_client (source_p);
 	}
 
 	if(IsServer (source_p))

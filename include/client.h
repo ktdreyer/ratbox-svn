@@ -584,5 +584,4 @@ extern void free_user (struct User *, struct Client *);
 extern struct User *make_user (struct Client *);
 extern struct Server *make_server (struct Client *);
 
-
 #endif /* INCLUDED_client_h */
