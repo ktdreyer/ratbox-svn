@@ -1,3 +1,12 @@
+*** 20001016_1 by db
+- fixed stupid bug with vchan == chptr i.e. top level chptr == vchan
+  that would result in it never being removed, since vchan == chptr (top chan)
+  would never result in a match ... this led to rework of privmsg to channel
+
+- kick appears to work now on vchan
+
+
+
 *** 20001015_5 by db
 - m_who.c what a MESS
 
