@@ -1,3 +1,17 @@
+leeh        2002/07/08 08:23:35 EDT	(20020708_1)
+
+  Modified files:
+    .                    Hybrid-team 
+    contrib              README 
+  Log:
+  - updated my nick and the README to include andros patch.
+  
+  Revision  Changes    Path
+  7.51      +1 -1      ircd-hybrid-7/Hybrid-team
+  1.21      +3 -0      ircd-hybrid-7/contrib/README
+
+
+
 androsyn    2002/07/07 20:10:33 EDT	(20020708_0)
 
   Added files:
