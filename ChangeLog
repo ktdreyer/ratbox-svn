@@ -1,3 +1,19 @@
+leeh        2002/08/16 16:34:17 EDT	(20020816_9)
+
+  Modified files:
+    modules              m_join.c 
+    src                  channel_mode.c match.c 
+  Log:
+  - upped the len in match_cidr()
+  - fixed it so a persistent channels modes and +beI will be burst
+  
+  Revision  Changes    Path
+  1.99      +72 -5     ircd-ratbox/modules/m_join.c
+  7.65      +1 -1      ircd-ratbox/src/channel_mode.c
+  7.22      +6 -1      ircd-ratbox/src/match.c
+
+
+
 leeh        2002/08/16 13:42:38 EDT	(20020816_8)
 
   Modified files:
