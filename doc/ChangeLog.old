@@ -1,3 +1,10 @@
+*** 20010105_15 by toot
+. took out -pedantic compile flag
+. put conf_add_hub_or_leaf() back in for now, cause ircd_parser.y needs it
+. use parse() to check param counts for m_client! :)
+. added /modreload, (modunload and modload in one)
+
+
 *** 20010105_14 by a1kmm
 - Fixed H and L lines.
 
