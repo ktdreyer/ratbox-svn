@@ -170,13 +170,13 @@ count_memory(struct Client *source_p)
 	int channel_except = 0;
 	int channel_invex = 0;
 
-	int wwu = 0;		/* whowas users */
+	size_t wwu = 0;		/* whowas users */
 	int class_count = 0;	/* classes */
 	int conf_count = 0;	/* conf lines */
 	int users_invited_count = 0;	/* users invited */
 	int user_channels = 0;	/* users in channels */
 	int aways_counted = 0;
-	int number_servers_cached;	/* number of servers cached by scache */
+	size_t number_servers_cached;	/* number of servers cached by scache */
 
 	size_t channel_memory = 0;
 	size_t channel_ban_memory = 0;
@@ -196,10 +196,10 @@ count_memory(struct Client *source_p)
 	size_t total_channel_memory = 0;
 	size_t totww = 0;
 
-	int local_client_count = 0;
+	size_t local_client_count = 0;
 	size_t local_client_memory_used = 0;
 
-	int remote_client_count = 0;
+	size_t remote_client_count = 0;
 	size_t remote_client_memory_used = 0;
 
 	size_t total_memory = 0;
@@ -331,9 +331,9 @@ count_memory(struct Client *source_p)
 		channel_ban_memory +
 		channel_users * sizeof(dlink_node) + channel_invites * sizeof(dlink_node);
 
-	sendto_one(source_p, ":%s %d %s z :Whowas users %u(%lu)",
+	sendto_one(source_p, ":%s %d %s z :Whowas users %ld(%ld)",
 		   me.name, RPL_STATSDEBUG, source_p->name,
-		   wwu, (unsigned long) wwu * sizeof(struct User));
+		   (long)wwu, (long) (wwu * sizeof(struct User)));
 
 	sendto_one(source_p, ":%s %d %s z :Whowas array %u(%d)",
 		   me.name, RPL_STATSDEBUG, source_p->name, NICKNAMEHISTORYLENGTH, (int) wwm);
@@ -343,23 +343,23 @@ count_memory(struct Client *source_p)
 	client_hash_table_size = hash_get_client_table_size();
 	channel_hash_table_size = hash_get_channel_table_size();
 
-	sendto_one(source_p, ":%s %d %s z :Hash: client %u(%u) chan %u(%u)",
+	sendto_one(source_p, ":%s %d %s z :Hash: client %u(%ld) chan %u(%ld)",
 		   me.name, RPL_STATSDEBUG, source_p->name,
-		   U_MAX, client_hash_table_size, CH_MAX, channel_hash_table_size);
+		   U_MAX, (long)client_hash_table_size, CH_MAX, (long)channel_hash_table_size);
 
-	sendto_one(source_p, ":%s %d %s z :linebuf %d(%d)",
+	sendto_one(source_p, ":%s %d %s z :linebuf %ld(%ld)",
 		   me.name, RPL_STATSDEBUG, source_p->name,
-		   linebuf_count, (int) linebuf_memory_used);
+		   (long)linebuf_count, (long)linebuf_memory_used);
 
 	count_scache(&number_servers_cached, &mem_servers_cached);
 
-	sendto_one(source_p, ":%s %d %s z :scache %u(%d)",
+	sendto_one(source_p, ":%s %d %s z :scache %ld(%ld)",
 		   me.name, RPL_STATSDEBUG, source_p->name,
-		   number_servers_cached, (int) mem_servers_cached);
+		   (long)number_servers_cached, (long)mem_servers_cached);
 
-	sendto_one(source_p, ":%s %d %s z :hostname hash %d(%u)",
+	sendto_one(source_p, ":%s %d %s z :hostname hash %d(%ld)",
 		   me.name, RPL_STATSDEBUG, source_p->name,
-		   HOST_MAX, HOST_MAX * sizeof(struct HashEntry));
+		   HOST_MAX, (long)HOST_MAX * sizeof(struct HashEntry));
 
 	total_memory = totww + total_channel_memory + conf_memory +
 		class_count * sizeof(struct Class);
@@ -372,19 +372,19 @@ count_memory(struct Client *source_p)
 		   RPL_STATSDEBUG, source_p->name, (int) totww,
 		   (int) total_channel_memory, (int) conf_memory);
 
-	count_local_client_memory(&local_client_count, (int *) &local_client_memory_used);
+	count_local_client_memory(&local_client_count, &local_client_memory_used);
 	total_memory += local_client_memory_used;
-	sendto_one(source_p, ":%s %d %s z :Local client Memory in use: %d(%d)",
+	sendto_one(source_p, ":%s %d %s z :Local client Memory in use: %ld(%ld)",
 		   me.name, RPL_STATSDEBUG, source_p->name,
-		   local_client_count, (int) local_client_memory_used);
+		   (long)local_client_count, (long)local_client_memory_used);
 
 
-	count_remote_client_memory(&remote_client_count, (int *) &remote_client_memory_used);
+	count_remote_client_memory(&remote_client_count, &remote_client_memory_used);
 	total_memory += remote_client_memory_used;
 	sendto_one(source_p,
-		   ":%s %d %s z :Remote client Memory in use: %d(%d)", me.name,
-		   RPL_STATSDEBUG, source_p->name, remote_client_count,
-		   (int) remote_client_memory_used);
+		   ":%s %d %s z :Remote client Memory in use: %ld(%ld)", me.name,
+		   RPL_STATSDEBUG, source_p->name, (long)remote_client_count,
+		   (long)remote_client_memory_used);
 
 	sendto_one(source_p,
 		   ":%s %d %s z :TOTAL: %d Available:  Current max RSS: %lu",
