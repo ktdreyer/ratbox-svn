@@ -1,3 +1,32 @@
+leeh        2003/09/05 16:29:02 EDT	(20030905_0)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              s_conf.h s_serv.h 
+    src                  newconf.c s_conf.c s_serv.c 
+  Added files:
+    modules              m_tb.c 
+  Removed files:
+    contrib              m_tburst.c 
+  Log:
+  - removed the old tburst module.
+  - first revision of the new topic bursting stuff, adds the options:
+    burst_topicwho = yes|no; to channel {};
+    topicburst = yes|no; to connect {};
+  
+  Revision  Changes    Path
+  1.17      +0 -162    ircd-ratbox/contrib/m_tburst.c (dead)
+  7.225     +8 -0      ircd-ratbox/doc/example.conf
+  7.61      +10 -0     ircd-ratbox/doc/example.efnet.conf
+  7.255     +3 -0      ircd-ratbox/include/s_conf.h
+  7.88      +1 -1      ircd-ratbox/include/s_serv.h
+  1.1       +108 -0    ircd-ratbox/modules/m_tb.c (new)
+  7.112     +19 -0     ircd-ratbox/src/newconf.c
+  7.433     +1 -0      ircd-ratbox/src/s_conf.c
+  7.363     +25 -4     ircd-ratbox/src/s_serv.c
+
+
+
 androsyn    2003/09/03 16:17:38 EDT	(20030903_7)
 
   Modified files:
