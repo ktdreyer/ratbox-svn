@@ -166,15 +166,10 @@ eventDelete(EVH * func, void *arg)
 void
 eventAddIsh(const char *name, EVH * func, void *arg, time_t delta_ish)
 {
-	if(delta_ish >= 3.0)
-	{
-		const time_t two_third = (2 * delta_ish) / 3;
-		delta_ish = two_third + ((rand() % 1000) * two_third) / 1000;
-		/*
-		 * XXX I hate the above magic, I don't even know if its right.
-		 * Grr. -- adrian
-		 */
-	}
+	if(delta_ish >= 3)
+		delta_ish -= (time_t)((delta_ish/3.00)*rand()/(RAND_MAX+1.0));
+	else if(delta_ish >= 60)
+		delta_ish -= (time_t)((delta_ish/10.00)*rand()/(RAND_MAX+1.0));
 	eventAdd(name, func, arg, delta_ish);
 }
 
