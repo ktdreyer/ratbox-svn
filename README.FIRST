@@ -8,16 +8,16 @@ be installed into bin/ along with the rest of ircd.
 See the INSTALL document for info on configuring and compiling
 ircd-hybrid.
 
-IMPORTANT. if you are used to using "ONE" in the password field
-of I lines to limit clients to one per ip, hybrid-5 no longer does it
-that way. It now does it the same way CSr does it. The limit is set
-by the normally unused (for clients) confreq field in the corresponding
-Y line.
+Reading INSTALL is now a must, as the old DPATH is now specified when
+configure is run.
 
-TRANSLATION: You *MUST* fix your I and Y lines to be hybrid-5
-compatible before running hybrid-5.
+*** IMPORTANT ***
+Old Hybrid 5/6 configuration files are no longer supported.  All conf
+files will have to be converted to the Hybrid 7 format.  A convertconf
+utility is provided and installed into bin/.
 
-LOTS OF THINGS HAVE CHANGED IN CONFIG.H.  PLEASE READ THROUGH IT.
+Many things that were once in config.h are now specified in the general
+block of ircd.conf.
 
 NEW DEBUGGING MODE: if you run ircd with the -s flag, it will send
 errors that are normally syslogged to stderr.  This is very useful
@@ -32,7 +32,7 @@ egcs ONLY on 64-bit Solaris7.  gcc-2.95 and SunPro C on 64bit should
 work fine, and any gcc or SunPro compiled on 32bit.
 
 SUPPORTED PLATFORMS: this code should compile without any warnings
-on FreeBSD 3.x, RedHAt 6.2 and Solaris 7/sparc.  Please let us know
+on FreeBSD 3.x/4.x, RedHat 6.2 and Solaris 7/sparc.  Please let us know
 if you find otherwise.  It probably does not compile on AIX, IRIX
 or libc5 Linux.
 

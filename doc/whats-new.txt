@@ -28,7 +28,7 @@ of this is that channel CTCP's will be throttled for non ops.
 Half ops are included.  Setting a user +h in a channel will give them half-op
 privilages.  Half ops can kick regular users but not full ops.
 
-Channel Op Hiding is included as a channel mode.  By setting a channel +z, 
+Channel Op Hiding is included as a channel mode.  By setting a channel +a, 
 the ops are hidden to non-ops.  Once a user receives ops or halfops, they
 may have to issue a NAMES command to resync their userlist.
 
@@ -115,6 +115,11 @@ Autoconnects are far more customizable now.
 
 A number of new options are in the general {} block of ircd.conf.  Look at
 example.conf for more information
+
+Remote K-lines are supported.  The shared block in the conf file is what
+gives remote servers (and optionally restricted to specific user@host's)
+permission to send their k-lines to your server.  Look at kline.txt for more 
+details.  Below is a brief overview of the oper protocol to remote K-lines.
 
 kline directed at a specific server
   /quote kline user@host ON server :reason
