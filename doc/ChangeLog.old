@@ -1,3 +1,8 @@
+*** 20001111_2 by db
+- interim checkin of m_kline.c, first pass of clean up
+
+
+
 *** 20001111_1 by db
 - initial rewrite of m_list.c moved some code into channel.c for the moment.
   is- can do a better job on this later (HI!)
