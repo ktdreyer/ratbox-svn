@@ -1,3 +1,7 @@
+*** 20010101_55 by a1kmm
+Fixed links so that when SHIDE=0 it works as before.
+
+
 *** 20010101_54 by davidt
 Refix the core bug so it catches both possible problems, Doh.
 
