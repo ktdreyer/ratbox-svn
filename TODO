@@ -71,11 +71,6 @@ Adrian's TODO list
 * In the server outbound connection code, make the sendto_realops()
   logging more sane. Ie, if there's an error, also log the errno string.
 
-* look at timeout_resolver() and the actual work function, remove needing
-  to track the time for the next dns timeout, see if we can make them
-  simpler.
-    -- Nah, don't worry about this one. leave the DNS resolver alone..
-
 * look at the old Listener code in s_bsd.c before I chopped it. Notice
   the anti-flood code in there. Make sure the same load-checking stuff
   is in listener.c
@@ -124,6 +119,11 @@ db-->> Actually, the old code was just as slow at doing that, since
     on channel was an op or not... With a channel of 100 clients and 
     thats 100 link SLink's
 
+* Look at removing the whole dns ref_count evilness now that the cache
+  has gone away. We should be *copying* the returned result, not just
+  storing a pointer to it. This will make a lot of the code much simpler.
+  (Hopefully.)
+
 Done things:
 
 * in read_packet(), there is a bit where a rejected client is being
@@ -149,6 +149,11 @@ Done things:
 * ok, this sucks. search for cptr->since, and esp in src/parse.c .
   All this flood protection has to come out and reappear in *one* place!
   (Adrian rewrote the line buffering code and client flood code..)
+
+* look at timeout_resolver() and the actual work function, remove needing
+  to track the time for the next dns timeout, see if we can make them
+  simpler.
+    -- Nah, don't worry about this one. leave the DNS resolver alone..
 
 
 ------------------------------------------------------------------------------
