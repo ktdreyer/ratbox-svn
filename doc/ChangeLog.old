@@ -1,3 +1,7 @@
+*** 20010212_3 by a1kmm
+- Re-added that code to stop malloc() etc... getting in.
+
+
 *** 20010212_2 by androsyn
 adns using stat as a local variable seems to be a dumb idea...
 
