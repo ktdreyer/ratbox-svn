@@ -287,7 +287,7 @@ static int start_auth_query(struct AuthRequest* auth)
 {
   struct sockaddr_in sock;
   struct sockaddr_in localaddr;
-  socklen_t          locallen = sizeof(struct sockaddr_in);
+  unsigned int          locallen = sizeof(struct sockaddr_in);
   int                fd;
 
   if ((fd = comm_open(AF_INET, SOCK_STREAM, 0, "ident")) == -1)
@@ -520,8 +520,8 @@ void auth_connect_callback(int fd, int error, void *data)
   struct sockaddr_in us;
   struct sockaddr_in them;
   char            authbuf[32];
-  socklen_t       ulen = sizeof(struct sockaddr_in);
-  socklen_t       tlen = sizeof(struct sockaddr_in);
+  unsigned int       ulen = sizeof(struct sockaddr_in);
+  unsigned int       tlen = sizeof(struct sockaddr_in);
 
   /* Check the error */
   if (error != COMM_OK)

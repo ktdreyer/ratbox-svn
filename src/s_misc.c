@@ -40,7 +40,9 @@
 #include <fcntl.h>
 #include <netdb.h>
 #include <sys/stat.h>
+#ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
+#endif
 #include <time.h>
 #include <unistd.h>
 

@@ -15,6 +15,8 @@
 #include "memory.h"
 
 #include <unistd.h>
+#include <stdlib.h>
+
 
 /* external var */
 extern char** myargv;

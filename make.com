@@ -11,6 +11,8 @@ $   WRITE SYS$OUTPUT "ircd-hybrid-7 on VMS."
 $   EXIT
 $ ENDIF
 $
+$ ON ERROR THEN GOTO ERREXIT
+$
 $ WRITE SYS$OUTPUT "Building in src..."
 $ SET DEF [.SRC]
 $ MMK
@@ -34,3 +36,7 @@ $ SET DEF [.TOOLS]
 $ MMK
 $ WRITE SYS$OUTPUT "Leaving directory tools..."
 $ WRITE SYS$OUTPUT "Build of ircd-hybrid-7 for VMS complete!"
+$
+$ ERREXIT:
+$ WRITE SYS$OUTPUT "Build aborted due to error"
+$ SET DEF [-]

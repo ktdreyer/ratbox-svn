@@ -757,7 +757,7 @@ comm_open(int family, int sock_type, int proto, const char *note)
  * comm_open() does.
  */
 int
-comm_accept(int fd, struct sockaddr *pn, socklen_t *addrlen)
+comm_accept(int fd, struct sockaddr *pn, unsigned int *addrlen)
 {
     int new;
 

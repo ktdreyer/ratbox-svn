@@ -1709,7 +1709,7 @@ show_temp_klines(struct Client *sptr, dlink_list *tklist)
   char *user;
   char *reason;
 
-  for (kill_node = tklist->head; kill_node; kill_node = kill_node = kill_node->next)
+  for (kill_node = tklist->head; kill_node; kill_node = kill_node->next)
     {
       kill_list_ptr = kill_node->data;
 
