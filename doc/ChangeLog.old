@@ -1,3 +1,8 @@
+*** 20001223_52 by ejb
+- make ISUPPORT numeric support max_targets dynamically
+- cleaned up gnats/Makefile.in a bit.
+
+
 *** 20001223_51 by ejb
 - some more paramcount fixes
 - make +h's propagate (oops)
