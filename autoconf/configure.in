@@ -258,7 +258,7 @@ dnl Check for stdarg.h - if we can't find it, halt configure
 AC_CHECK_HEADER(stdarg.h, , AC_MSG_ERROR(** stdarg.h could not be found - ircd-ratbox will not compile without it **))
 
 dnl check for various library functions
-AC_CHECK_FUNCS(strlcat strlcpy socketpair strdup mmap)
+AC_CHECK_FUNCS(strlcat strlcpy socketpair strdup mmap lstat)
 
 
 AC_FUNC_ALLOCA

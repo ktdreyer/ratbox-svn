@@ -1,4 +1,4 @@
-/* include/setup.h.in.  Generated automatically from autoconf/configure.in by autoheader 2.13.  */
+/* include/setup.h.in.  Generated automatically from configure.in by autoheader 2.13.  */
 
 /* Define if using alloca.c.  */
 #undef C_ALLOCA
@@ -137,6 +137,9 @@
 
 /* Define if you have the kevent function.  */
 #undef HAVE_KEVENT
+
+/* Define if you have the lstat function.  */
+#undef HAVE_LSTAT
 
 /* Define if you have the mmap function.  */
 #undef HAVE_MMAP

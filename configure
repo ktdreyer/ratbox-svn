@@ -2111,7 +2111,7 @@ else
 fi
 
 
-for ac_func in strlcat strlcpy socketpair strdup mmap
+for ac_func in strlcat strlcpy socketpair strdup mmap lstat
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 echo "configure:2118: checking for $ac_func" >&5

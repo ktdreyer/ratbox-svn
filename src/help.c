@@ -111,7 +111,7 @@ load_help(void)
 	DIR *helpfile_dir = NULL;
 	struct dirent *ldirent= NULL;
 	char filename[MAXPATHLEN];
-#ifdef S_ISLNK
+#if defined(S_ISLNK) && defined(HAVE_LSTAT)
 	struct stat sb;
 #endif
 
@@ -136,7 +136,7 @@ load_help(void)
 	{
 		snprintf(filename, sizeof(filename), "%s/%s", UHPATH, ldirent->d_name);
 
-#ifdef S_ISLNK
+#if defined(S_ISLNK) && defined(HAVE_LSTAT)
 		if(lstat(filename, &sb) < 0)
 			continue;
 
