@@ -1,3 +1,19 @@
+leeh        2004/10/12 19:51:30 EDT	(20041012_0)
+
+  Modified files:
+    include              s_chanserv.h 
+    src                  s_chanserv.c s_userserv.c 
+  Log:
+  - implemented udrop for dropping registered usernames
+  - added free_member_reg() to handle removing memberships
+  
+  Revision  Changes    Path
+  1.11      +4 -2      rserv/include/s_chanserv.h
+  1.10      +26 -28    rserv/src/s_chanserv.c
+  1.7       +97 -1     rserv/src/s_userserv.c
+
+
+
 leeh        2004/10/10 11:35:58 EDT	(20041010_1)
 
   Modified files:
