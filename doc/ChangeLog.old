@@ -1,3 +1,9 @@
+*** 20001207_7 by db
+- m_message.c would core if the channel was +m and you tried to
+  message it. duh
+
+
+
 *** 20001207_6 by db
 - missing parc test in m_knock.c caused it to core on knock with 
   no args. spotted by poptix...
