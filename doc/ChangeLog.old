@@ -1,3 +1,10 @@
+*** 20010523_4 by davidt
+- Fix for an encrypted/compressed recvq overflowing the linebuf that
+  it is stuffed into until we can hand it off to servlink to be decrypted
+  into something that we _can_ parse into lines, since it may very well not
+  include any \r\n chars....
+
+
 *** 20010523_3 by davidt
 - Remove extra 'depend:' line
 - Tidy up servlink code slighty
