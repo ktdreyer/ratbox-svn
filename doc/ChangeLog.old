@@ -1,3 +1,11 @@
+*** 20010123_3 by db
+- removed the loop unrolling ... made it hard to read, also hid a bug
+  and loop unrolling is for the compiler to do.
+- added no_hack_ops in serverinfo block, once set it will not
+  allow anyone to hack ops from your server. no way, no how.
+  
+
+
 *** 20010123_2 by ejb
 - remove some remanants of splitcode
 
