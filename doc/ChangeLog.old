@@ -1,3 +1,14 @@
+*** 20001224_5 by adrian
+
+
+Create a LOGPATH which contains the logfile directory, and then
+stick ircd.log in there instead of ETCPATH.
+
+What *really* should happen is that these paths and filenames should
+be defined in the configuration file, but... :-)
+
+
+
 *** 20001224_4 by isomer
 * rewrote do_numeric(), it nolonger accepts multiple targets (can't happen)
 and hopefully has bugs removed. on the other hand tho, it's only been tested
