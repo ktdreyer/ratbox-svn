@@ -1,3 +1,20 @@
+androsyn    2002/11/28 20:48:37 UTC	(20021128_3)
+
+  Modified files:
+    tools                convertconf.c convertilines.c 
+                         convertklines.c encspeed.c viconf.c 
+  Log:
+  Change a bunch of things to const char
+  
+  Revision  Changes    Path
+  1.40      +9 -9      ircd-ratbox/tools/convertconf.c
+  7.4       +6 -6      ircd-ratbox/tools/convertilines.c
+  7.6       +4 -4      ircd-ratbox/tools/convertklines.c
+  7.6       +1 -1      ircd-ratbox/tools/encspeed.c
+  7.5       +4 -4      ircd-ratbox/tools/viconf.c
+
+
+
 leeh        2002/11/28 20:47:15 UTC	(20021128_2)
 
   Modified files:
