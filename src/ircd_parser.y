@@ -352,12 +352,12 @@ admin_name:     NAME '=' QSTRING ';'
 
 admin_email:    EMAIL '=' QSTRING ';'
   {
-    yy_aconf->user = yylval.string;
+    DupString(yy_aconf->user,yylval.string);
   };
 
 admin_description:      DESCRIPTION '=' QSTRING ';'
   {
-    yy_aconf->host = yylval.string;
+    DupString(yy_aconf->host,yylval.string);
   };
 
 /***************************************************************************
@@ -444,7 +444,7 @@ oper_item:      oper_name  | oper_user | oper_password |
 
 oper_name:      NAME '=' QSTRING ';'
   {
-    yy_aconf->name = yylval.string;
+    DupString(yy_aconf->name,yylval.string);
   };
 
 oper_user:      USER '='  QSTRING ';'
@@ -467,12 +467,12 @@ oper_user:      USER '='  QSTRING ';'
 
 oper_password:  PASSWORD '=' QSTRING ';'
   {
-    yy_aconf->passwd = yylval.string;
+    DupString(yy_aconf->passwd,yylval.string);
   };
 
 oper_class:     CLASS '=' QSTRING ';'
   {
-    yy_aconf->className = yylval.string;
+    DupString(yy_aconf->className,yylval.string);
   };
 
 oper_global_kill: GLOBAL_KILL '=' TYES ';'
@@ -556,7 +556,7 @@ class_item:     class_name |
 
 class_name:     NAME '=' QSTRING ';' 
   {
-    class_name_var = yylval.string;
+    DupString(class_name_var,yylval.string);
   };
 
 class_ping_time:        PING_TIME '=' NUMBER ';'
@@ -614,7 +614,7 @@ listen_item:    listen_name | listen_port | listen_address | error
 
 listen_name:    NAME '=' QSTRING ';' 
   {
-    yy_aconf->host = yylval.string;
+    DupString(yy_aconf->host,yylval.string);
   };
 
 listen_port:    PORT '=' NUMBER ';'
@@ -624,7 +624,7 @@ listen_port:    PORT '=' NUMBER ';'
 
 listen_address: IP '=' QSTRING ';'
   {
-    yy_aconf->passwd = yylval.string;
+    DupString(yy_aconf->passwd,yylval.string);
   };
 
 /***************************************************************************
@@ -697,7 +697,7 @@ auth_user:   USER '=' QSTRING ';'
       }
   };
              |
-             IP '=' IP_TYPE ';'
+        IP '=' IP_TYPE ';'
   {
     char *p;
 
@@ -710,12 +710,12 @@ auth_user:   USER '=' QSTRING ';'
 
 auth_passwd:  PASSWORD '=' QSTRING ';' 
   {
-    yy_aconf->passwd = yylval.string;
+    DupString(yy_aconf->passwd,yylval.string);
   };
 
 auth_spoof:   SPOOF '=' QSTRING ';' 
   {
-    yy_aconf->name = yylval.string;
+    DupString(yy_aconf->name,yylval.string);
     yy_aconf->flags |= CONF_FLAGS_SPOOF_IP;
   };
 
@@ -773,7 +773,8 @@ auth_redir_port:    REDIRPORT '=' NUMBER ';'
 
 auth_class:   CLASS '=' QSTRING ';'
   {
-    yy_aconf->className = yylval.string;
+    if(yy_aconf->name == NULL)
+      DupString(yy_aconf->className,yylval.string);
   };
 
 /***************************************************************************
@@ -803,12 +804,12 @@ quarantine_item:        quarantine_name | quarantine_reason | error
 
 quarantine_name:        NAME '=' QSTRING ';'
   {
-    yy_aconf->host = yylval.string;
+    DupString(yy_aconf->host,yylval.string);
   };
 
 quarantine_reason:      REASON '=' QSTRING ';' 
   {
-    yy_aconf->passwd = yylval.string;
+    DupString(yy_aconf->passwd,yylval.string);
   };
 
 /***************************************************************************
@@ -998,12 +999,12 @@ connect_host:   HOST '=' QSTRING ';'
  
 connect_send_password:  SEND_PASSWORD '=' QSTRING ';'
   {
-    yy_cconf->passwd = yylval.string;
+    DupString(yy_cconf->passwd,yylval.string);
   };
 
 connect_accept_password: ACCEPT_PASSWORD '=' QSTRING ';'
   {
-    yy_nconf->passwd = yylval.string;
+    DupString(yy_nconf->passwd,yylval.string);
   };
 
 connect_port:   PORT '=' NUMBER ';' { yy_cconf->port = yylval.number; };
@@ -1034,13 +1035,13 @@ connect_hub_mask:       HUB_MASK '=' QSTRING ';'
       {
 	hub_confs = make_conf();
 	hub_confs->status = CONF_HUB;
-	hub_confs->host = yylval.string;
+	DupString(hub_confs->host,yylval.string);
       }
     else
       {
 	yy_hconf = make_conf();
 	yy_hconf->status = CONF_HUB;
-	yy_hconf->host = yylval.string;
+	DupString(yy_hconf->host,yylval.string);
 	yy_hconf->next = hub_confs;
 	hub_confs = yy_hconf;
       }
@@ -1052,13 +1053,12 @@ connect_leaf_mask:       LEAF_MASK '=' QSTRING ';'
       {
 	leaf_confs = make_conf();
 	leaf_confs->status = CONF_LEAF;
-        yylval.string = (char *)NULL;
       }
     else
       {
 	yy_lconf = make_conf();
 	yy_lconf->status = CONF_LEAF;
-	yy_lconf->host = yylval.string;
+	DupString(yy_lconf->host,yylval.string);
 	yy_lconf->next = leaf_confs;
 	leaf_confs = yy_lconf;
       }
@@ -1066,7 +1066,6 @@ connect_leaf_mask:       LEAF_MASK '=' QSTRING ';'
  
 connect_class:  CLASS '=' QSTRING ';'
   {
-    yy_cconf->className = yylval.string;
     DupString(yy_nconf->className,yylval.string);
   };
 
@@ -1126,7 +1125,7 @@ kill_user:      USER '=' QSTRING ';'
 
 kill_reason:    REASON '=' QSTRING ';' 
   {
-    yy_aconf->passwd = yylval.string; 
+    DupString(yy_aconf->passwd,yylval.string); 
   };
 
 /***************************************************************************
@@ -1179,7 +1178,7 @@ deny_ip:        IP '=' IP_TYPE ';'
 
 deny_reason:    REASON '=' QSTRING ';' 
   {
-    yy_aconf->passwd = yylval.string;
+    DupString(yy_aconf->passwd,yylval.string);
   };
 
 /***************************************************************************
@@ -1221,12 +1220,12 @@ gecos_item:      gecos_name | gecos_reason | gecos_action | error
 
 gecos_name:    NAME '=' QSTRING ';' 
   {
-    yy_aconf->host = yylval.string; 
+    DupString(yy_aconf->host,yylval.string); 
   };
 
 gecos_reason:    REASON '=' QSTRING ';' 
   {
-    yy_aconf->passwd = yylval.string;
+    DupString(yy_aconf->passwd,yylval.string);
   };
 
 gecos_action:    ACTION '=' TREJECT ';'
