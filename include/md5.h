@@ -36,6 +36,8 @@
 void id_init(void);
 void save_random(void);
 void md5_block (u_int32_t *, u_int32_t *, u_int32_t *);
+int base64_block(char **out, char *in, int len);
+int unbase64_block(char **out, char *data, int len);
 void id_reseed(char *, int);
 char *id_get(void);
 char *cookie_get(void);

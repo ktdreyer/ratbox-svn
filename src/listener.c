@@ -32,6 +32,10 @@
 #include "send.h"
 #include "memory.h"
 
+#ifdef OPENSSL
+#include <openssl/bio.h>
+#endif
+
 #include <assert.h>
 #include <string.h>
 #include <errno.h>
@@ -353,6 +357,7 @@ static void accept_connection(int pfd, void *data)
    */
 
   fd = comm_accept(listener->fd, &sai);
+
   copy_s_addr(IN_ADDR(addr), S_ADDR(sai));  
   if (fd < 0)
     {

@@ -75,7 +75,7 @@ static void mo_close(struct Client *client_p, struct Client *source_p,
   /* Which list would connecting servers be found in? serv_list ? */
 #if 0
       if (!IsUnknown(target_p) && !IsConnecting(target_p) &&
-          !IsHandshake(target_p))
+          !IsHandshake(target_p) && !IsDoingKauth(target_p))
         continue;
 #endif
       sendto_one(source_p, form_str(RPL_CLOSING), me.name, parv[0],

@@ -32,6 +32,10 @@
 # endif
 #endif
 
+#ifdef OPENSSL
+#include <openssl/rsa.h>
+#endif
+
 #include "config.h"
 
 #if !defined(CONFIG_H_LEVEL_7)
@@ -49,6 +53,7 @@
 #define HOSTIPLEN       16      /* Length of dotted quad form of IP        */
 #endif
 #define PASSWDLEN       20
+#define CIPHERKEYLEN    16      /* 128bit */
 
 #define IDLEN           12      /* this is the maximum length, not the actual
                                    generated length; DO NOT CHANGE! */
@@ -257,6 +262,13 @@ struct LocalUser
   char              passwd[PASSWDLEN + 1];
   int               caps;       /* capabilities bit-field */
 
+#ifdef OPENSSL
+  /* int            ciphertype; */
+  unsigned char     in_key[CIPHERKEYLEN];
+  unsigned char     out_key[CIPHERKEYLEN];
+  unsigned char     auth_secret[CIPHERKEYLEN];                                  
+#endif
+
   /*
    * Anti-flood stuff. We track how many messages were parsed and how
    * many we were allowed in the current second, and apply a simple decay
@@ -271,13 +283,12 @@ struct LocalUser
 /*
  * status macros.
  */
-#define STAT_CONNECTING 0x01   /* -4 */
-#define STAT_HANDSHAKE  0x02   /* -3 */
-#define STAT_ME         0x04   /* -2 */
-#define STAT_UNKNOWN    0x08   /* -1 */
-#define STAT_SERVER     0x10   /* 0  */
-#define STAT_CLIENT     0x20   /* 1  */
-
+#define STAT_CONNECTING         0x01
+#define STAT_HANDSHAKE          0x02
+#define STAT_ME                 0x04
+#define STAT_UNKNOWN            0x08
+#define STAT_SERVER             0x10
+#define STAT_CLIENT             0x20
 
 #define HasID(x) (!IsServer(x) && (x)->user->id[0] != '\0')
 #define ID(source_p) (HasID(source_p) ? source_p->user->id : source_p->name)
@@ -292,6 +303,7 @@ struct LocalUser
 #define IsUnknown(x)            ((x)->status == STAT_UNKNOWN)
 #define IsServer(x)             ((x)->status == STAT_SERVER)
 #define IsClient(x)             ((x)->status == STAT_CLIENT)
+
 #define IsOper(x)		((x)->umodes & FLAGS_OPER)
 #define IsAdmin(x)		((x)->umodes & FLAGS_ADMIN)
 
@@ -344,6 +356,9 @@ struct LocalUser
 #define FLAGS_NORMALEX     0x0400 /* Client exited normally */
 #define FLAGS_SENDQEX      0x0800 /* Sendq exceeded */
 #define FLAGS_IPHASH       0x1000 /* iphashed this client */
+#define FLAGS_CRYPTIN      0x2000 /* incoming data must be decrypted */
+#define FLAGS_CRYPTOUT     0x4000 /* outgoing data must be encrypted */
+#define FLAGS_WAITAUTH     0x8000 /* waiting for CRYPTAUTH command */
 
 /* umodes, settable flags */
 
@@ -428,6 +443,13 @@ struct LocalUser
 #define SetDead(x)              ((x)->flags |= FLAGS_DEADSOCKET)
 #define SetAccess(x)            ((x)->flags |= FLAGS_CHKACCESS)
 #define ClearAccess(x)          ((x)->flags &= ~FLAGS_CHKACCESS)
+#define IsCryptIn(x)            ((x)->flags &  FLAGS_CRYPTIN)
+#define SetCryptIn(x)           ((x)->flags |= FLAGS_CRYPTIN)
+#define IsCryptOut(x)           ((x)->flags &  FLAGS_CRYPTOUT)
+#define SetCryptOut(x)          ((x)->flags |= FLAGS_CRYPTOUT)
+#define IsWaitAuth(x)           ((x)->flags &  FLAGS_WAITAUTH)
+#define SetWaitAuth(x)          ((x)->flags |= FLAGS_WAITAUTH)
+#define ClearWaitAuth(x)        ((x)->flags &= ~FLAGS_WAITAUTH)
 #define MyConnect(x)            ((x)->localClient != NULL)
 #define MyClient(x)             (MyConnect(x) && IsClient(x))
 

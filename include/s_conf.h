@@ -29,6 +29,10 @@
 #include <sys/param.h>
 #endif
 
+#ifdef OPENSSL
+#include <openssl/rsa.h>
+#endif
+
 #include "config.h"             /* defines */
 #include "fileio.h"             /* FBFILE */
 #include "ircd_defs.h"
@@ -74,6 +78,9 @@ struct ConfItem
   struct DNSQuery  *dns_query;
   int		   aftype;
   int              dns_pending; /* 1 if dns query pending, 0 otherwise */
+#ifdef OPENSSL
+  RSA*             rsa_public_key;
+#endif
 };
 
 #define CONF_ILLEGAL            0x80000000
@@ -103,28 +110,28 @@ struct ConfItem
 
 /* Generic flags... */
 /* access flags... */
-#define CONF_FLAGS_DO_IDENTD            0x00001
-#define CONF_FLAGS_LIMIT_IP             0x00002
-#define CONF_FLAGS_NO_TILDE             0x00004
-#define CONF_FLAGS_NEED_IDENTD          0x00008
-#define CONF_FLAGS_PASS_IDENTD          0x00010
-#define CONF_FLAGS_NOMATCH_IP           0x00020
-#define CONF_FLAGS_E_LINED              0x00040
-#define CONF_FLAGS_F_LINED              0x00080
-#define CONF_FLAGS_IDLE_LINED           0x00100
-#define CONF_FLAGS_SPOOF_IP             0x00200
-#define CONF_FLAGS_SPOOF_NOTICE         0x00400
-#define CONF_FLAGS_REDIR                0x00800
-#define CONF_FLAGS_EXEMPTGLINE          0x01000
-#define CONF_FLAGS_RESTRICTED           0x02000
+#define CONF_FLAGS_DO_IDENTD            0x00000001
+#define CONF_FLAGS_LIMIT_IP             0x00000002
+#define CONF_FLAGS_NO_TILDE             0x00000004
+#define CONF_FLAGS_NEED_IDENTD          0x00000008
+#define CONF_FLAGS_PASS_IDENTD          0x00000010
+#define CONF_FLAGS_NOMATCH_IP           0x00000020
+#define CONF_FLAGS_E_LINED              0x00000040
+#define CONF_FLAGS_F_LINED              0x00000080
+#define CONF_FLAGS_IDLE_LINED           0x00000100
+#define CONF_FLAGS_SPOOF_IP             0x00000200
+#define CONF_FLAGS_SPOOF_NOTICE         0x00000400
+#define CONF_FLAGS_REDIR                0x00000800
+#define CONF_FLAGS_EXEMPTGLINE          0x00001000
+#define CONF_FLAGS_RESTRICTED           0x00002000
 /* server flags */
-#define CONF_FLAGS_ALLOW_AUTO_CONN      0x04000
-#define CONF_FLAGS_LAZY_LINK            0x08000
-#define CONF_FLAGS_ENCRYPTED            0x10000
-#define CONF_FLAGS_COMPRESSED		0x20000
-#define CONF_FLAGS_PERSISTANT		0x40000
-#define CONF_FLAGS_TEMPORARY		0x80000
-
+#define CONF_FLAGS_ALLOW_AUTO_CONN      0x00004000
+#define CONF_FLAGS_LAZY_LINK            0x00008000
+#define CONF_FLAGS_ENCRYPTED            0x00010000
+#define CONF_FLAGS_COMPRESSED           0x00020000
+#define CONF_FLAGS_PERSISTANT           0x00040000
+#define CONF_FLAGS_TEMPORARY            0x00080000
+#define CONF_FLAGS_CRYPTLINK            0x00100000
 /* Macros for struct ConfItem */
 
 #define IsLimitIp(x)            ((x)->flags & CONF_FLAGS_LIMIT_IP)
@@ -143,6 +150,7 @@ struct ConfItem
 #define IsConfRestricted(x)     ((x)->flags & CONF_FLAGS_RESTRICTED)
 #define IsConfEncrypted(x)      ((x)->flags & CONF_FLAGS_ENCRYPTED)
 #define IsConfCompressed(x)	((x)->flags & CONF_FLAGS_COMPRESSED)
+#define IsConfCryptLink(x)      ((x)->flags & CONF_FLAGS_CRYPTLINK)
 
 /* port definitions for Opers */
 
@@ -226,6 +234,9 @@ struct server_info
   char        *description;
   char        *network_name;
   char        *network_desc;
+#ifdef OPENSSL
+  RSA         *rsa_private_key;
+#endif
   int         hub;
   struct      irc_inaddr ip;
   int         max_clients;

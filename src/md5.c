@@ -23,6 +23,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#include "memory.h"
 #include "s_log.h"
 #include "client.h"
 #include "md5.h"
@@ -99,6 +100,29 @@ static	char printable7[] =
  
 static	char printable6[] = 
 	"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789[]{}";
+
+static  char base64_chars[] =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+static  char base64_values[] =
+            {
+/* 00-15   */ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+/* 16-31   */ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+/* 32-47   */ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63,
+/* 48-63   */ 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1,  0, -1, -1,
+/* 64-79   */ -1,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14,
+/* 80-95   */ 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1,
+/* 96-111  */ -1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+/* 112-127 */ 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1,
+/* 128-143 */ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+/* 144-159 */ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+/* 160-175 */ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+/* 186-191 */ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+/* 192-207 */ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+/* 208-223 */ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+/* 224-239 */ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+/* 240-255 */ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+            };
 
 void	id_init()
 {
@@ -203,6 +227,106 @@ void	md5_block(u_int32_t *in, u_int32_t *out, u_int32_t *x)
   out[3] = d;
 }
 
+/*
+ * base64_block will allocate and return a new block of memory
+ * using MyMalloc().  It should be freed after use.
+ */
+int base64_block(char **output, char *data, int len)
+{
+  unsigned char *out;
+  unsigned char *in = data;
+  unsigned long int q_in;
+  int i;
+  int count = 0;
+
+  out = MyMalloc(((((len + 2) - ((len + 2) % 3)) / 3) * 4) + 1);
+
+  /* process 24 bits at a time */
+  for( i = 0; i < len; i += 3)
+  {
+    q_in = 0;
+
+    if ( i + 2 < len )
+    {
+      q_in  = (in[i+2] & 0xc0) << 2;
+      q_in |=  in[i+2];
+    }
+
+    if ( i + 1 < len )
+    {
+      q_in |= (in[i+1] & 0x0f) << 10;
+      q_in |= (in[i+1] & 0xf0) << 12;
+    }
+
+    q_in |= (in[i]   & 0x03) << 20;
+    q_in |=  in[i]           << 22;
+
+    q_in &= 0x3f3f3f3f;
+
+    out[count++] = base64_chars[((q_in >> 24)       )];
+    out[count++] = base64_chars[((q_in >> 16) & 0xff)];
+    out[count++] = base64_chars[((q_in >>  8) & 0xff)];
+    out[count++] = base64_chars[((q_in      ) & 0xff)];
+  }
+  if ( (i - len) > 0 )
+  {
+    out[count-1] = '=';
+    if ( (i - len) > 1 )
+      out[count-2] = '=';
+  }
+
+  out[count] = '\0';
+  *output = out;
+  return count;
+}
+
+int unbase64_block(char **output, char *data, int len)
+{
+  unsigned char *out;
+  unsigned char *in = data;
+  unsigned long int q_in;
+  int i;
+  int count = 0;
+
+  if ( ( len % 4 ) != 0 )
+    return NULL;
+
+  out = MyMalloc(((len / 4) * 3) + 1);
+
+  /* process 32 bits at a time */
+  for( i = 0; (i + 3) < len; i+=4)
+  {
+    /* compress input (chars a, b, c and d) as follows:
+     * (after converting ascii -> base64 value)
+     *
+     * |00000000aaaaaabbbbbbccccccdddddd|
+     * |  765432  107654  321076  543210|
+     */
+
+    q_in = 0;
+
+    if (base64_values[in[i+3]] > -1)
+      q_in |= base64_values[in[i+3]]      ;
+    if (base64_values[in[i+2]] > -1)
+      q_in |= base64_values[in[i+2]] <<  6;
+    if (base64_values[in[i+1]] > -1)
+      q_in |= base64_values[in[i+1]] << 12;
+    if (base64_values[in[i  ]] > -1)
+      q_in |= base64_values[in[i  ]] << 18;
+
+    out[count++] = (q_in >> 16) & 0xff;
+    out[count++] = (q_in >>  8) & 0xff;
+    out[count++] = (q_in      ) & 0xff;
+  }
+
+  if (in[i-1] == '=') count--;
+  if (in[i-2] == '=') count--;
+
+  out[count] = '\0';
+  *output = out;
+  return count;
+}
+
 void	id_reseed(char *in, int len)
 {
   int i;
@@ -241,4 +365,3 @@ char	*cookie_get()
   cookie[COOKIELEN] = '\0';
   return cookie;
 }
-

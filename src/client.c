@@ -1349,7 +1349,8 @@ const char* comment         /* Reason for the exit */
        * it has to be put on the serv_list, or SJOIN's to this new server
        * from the connect burst will not be seen.
        */
-      if (IsServer(source_p) || IsConnecting(source_p) || IsHandshake(source_p))
+      if (IsServer(source_p) || IsConnecting(source_p) ||
+          IsHandshake(source_p))
 	{
 	  m = dlinkFind(&serv_list,source_p);
 	  if( m != NULL )

@@ -22,15 +22,18 @@
  * $Id$
  */
 
+#include <assert.h>
 #include <string.h>
 #include "memory.h"
-
+#include "rsa.h"
+#include "client.h" /* CIPHERKEYLEN .. eww */
 #ifdef OPENSSL
 
 #include <openssl/rand.h>
 #include <openssl/rsa.h>
 #include <openssl/md5.h>
 #include <openssl/bn.h>
+#include <openssl/evp.h>
 
 static void binary_to_hex( unsigned char * bin, char * hex, int length );
 static void get_randomness( unsigned char * buf, int length );
@@ -50,10 +53,12 @@ static void binary_to_hex( unsigned char * bin, char * hex, int length )
   hex[i<<1] = '\0';
 }
 
-/* XXX get a better source */
 static void get_randomness( unsigned char * buf, int length )
 {
-  RAND_pseudo_bytes( buf, length );
+  if ( RAND_status() )
+    RAND_bytes( buf, length );
+  else /* XXX - abort? */
+    RAND_pseudo_bytes( buf, length );
 }
 
 static int absorb( char ** str, char lowest, char highest )
@@ -131,6 +136,81 @@ int generate_challenge( char ** r_challenge, char ** r_response, char * key )
   (*r_challenge)[length<<1] = 0;
   MyFree(tmp);
   return (ret<0)?-1:0;
+}
+
+/* return length of encrypted data */
+int crypt_data(char **out, char *in, int len, char *key)
+{
+  int ret;
+  int outl;
+
+  EVP_CIPHER_CTX ctx;
+
+  *out = MyMalloc( len + 15 );
+
+  if (!EVP_CipherInit(&ctx, EVP_bf_cbc(), NULL, NULL, 1))
+    goto fail;
+  if (!EVP_CIPHER_CTX_set_key_length(&ctx, CIPHERKEYLEN))
+    goto fail;
+  if (!EVP_CipherInit(&ctx, NULL, key, key, -1))
+    goto fail;
+
+  outl = len + 15;
+
+  if (!EVP_CipherUpdate(&ctx, *out, &outl, in, len))
+    goto fail;
+  ret = outl;
+
+  outl = len + 15 - ret;
+
+  if (!EVP_CipherFinal(&ctx, *out + ret, &outl))
+    goto fail;
+  ret += outl;
+
+  EVP_CIPHER_CTX_cleanup(&ctx);
+
+  return ret;
+
+fail:
+  MyFree(*out);
+  return -1;
+}
+
+/* return length of encrypted data */
+int decrypt_data(char **out, char *in, int len, char *key)
+{
+  int ret;
+  int outl;
+
+  EVP_CIPHER_CTX ctx;
+
+  *out = MyMalloc( len + 16 );
+
+  if (!EVP_CipherInit( &ctx, EVP_bf_cbc(), NULL, NULL, 0 ))
+    goto fail;
+  if (!EVP_CIPHER_CTX_set_key_length( &ctx, CIPHERKEYLEN ))
+    goto fail;
+  if (!EVP_CipherInit( &ctx, NULL, key, key, -1 ))
+    goto fail;
+
+  outl = len + 16;
+  if (!EVP_CipherUpdate(&ctx, *out, &outl, in, len))
+    goto fail;
+  ret = outl;
+
+  outl = len + 16 - ret;
+
+  if (!EVP_CipherFinal(&ctx, *out + ret, &outl))
+    goto fail;
+  ret += outl;
+
+  EVP_CIPHER_CTX_cleanup(&ctx);
+
+  return ret;
+
+fail:
+  MyFree(*out);
+  return -1;
 }
 
 #endif /* OPENSSL */

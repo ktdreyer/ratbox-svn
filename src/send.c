@@ -55,7 +55,9 @@
 #define LOG_BUFSIZE 2048
 
 static  int
-send_message (struct Client *, char *, int);
+_send_message (struct Client *, char *, int);
+
+#define send_message(a,b,c) _send_message((a->from?a->from:a),b,c)
 
 static void
 send_message_remote(struct Client *to, struct Client *from,
@@ -141,14 +143,11 @@ dead_link(struct Client *to, char *notice)
 **      if msg is a null pointer, we are flushing connection
 */
 static int
-send_message(struct Client *to, char *msg, int len)
+_send_message(struct Client *to, char *msg, int len)
 {
-  /* XXX send_message could become send_message_local
-   * to->from shouldn't be non NULL in that case
-   */
-  if (to->from)
-    to = to->from; /* shouldn't be necessary */
-
+  int linebuf_flags = 0;
+  char *linebuf_key = NULL;
+  
 #ifdef INVARIANTS
   if (IsMe(to))
     {
@@ -177,8 +176,15 @@ send_message(struct Client *to, char *msg, int len)
     }
   else
     {
+      if (IsCryptOut(to))
+      {
+        linebuf_flags |= LINEBUF_CRYPT;
+        linebuf_key = to->localClient->out_key;
+      }
+      /* XXX - ziplinks */
       if (len)
-          linebuf_put(&to->localClient->buf_sendq, msg, len);
+          linebuf_put(&to->localClient->buf_sendq, msg, len,
+                      linebuf_flags, linebuf_key);
     }
     /*
     ** Update statistics. The following is slightly incorrect
@@ -254,52 +260,8 @@ send_message_remote(struct Client *to, struct Client *from,
   
   deprintf("send", "Sending [%s] to %s", lsendbuf, to->name);
 
-  /* XXX This stuff below should(?) be a common function
-   * called by send_message() and send_message_remote()
-   * lets think about it, its late...
-   */
-  if (to->fd < 0)
-    return; /* Thou shalt not write to closed descriptors */
-
-  if (IsDead(to))
-    return; /* This socket has already been marked as dead */
-
-  if (linebuf_len(&to->localClient->buf_sendq) > get_sendq(to))
-    {
-      if (IsServer(to))
-        sendto_realops_flags(FLAGS_ALL,
-			     "Max SendQ limit exceeded for %s: %u > %lu",
-			     get_client_name(to, HIDE_IP),
-          linebuf_len(&to->localClient->buf_sendq), get_sendq(to));
-      if (IsClient(to))
-	{
-	  to->flags |= FLAGS_SENDQEX;
-	  dead_link(to, "Max Sendq exceeded");
-	}
-      return;
-    }
-  else
-    {
-      if (len)
-          linebuf_put(&to->localClient->buf_sendq, (char *)lsendbuf, len);
-    }
-    /*
-    ** Update statistics. The following is slightly incorrect
-    ** because it counts messages even if queued, but bytes
-    ** only really sent. Queued bytes get updated in SendQueued.
-    */
-    to->localClient->sendM += 1;
-    me.localClient->sendM += 1;
-
-    /*
-     * Now we register a write callback. We *could* try to write some
-     * data to the FD, it'd be an optimisation, and we can deal with it
-     * later.
-     *     -- adrian
-     */
-    comm_setselect(to->fd, FDLIST_IDLECLIENT, COMM_SELECT_WRITE,
-      send_queued_write, to, 0);
-    return;
+  _send_message(to, (char *)lsendbuf, len);
+  return;
 } /* send_message_remote() */
 
 /*
@@ -401,7 +363,7 @@ sendto_one(struct Client *to, const char *pattern, ...)
   len = send_format(sendbuf, pattern, args);
   va_end(args);
 
-  (void)send_message(to, (char *)sendbuf, len);
+  send_message(to, (char *)sendbuf, len);
   deprintf("send", "Sending [%s] to %s", sendbuf, to->name);
 } /* sendto_one() */
 

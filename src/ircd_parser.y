@@ -30,6 +30,12 @@
 #include <sys/types.h>
 #include <string.h>
 
+#ifdef OPENSSL
+#include <openssl/rsa.h>
+#include <openssl/bio.h>
+#include <openssl/pem.h>
+#endif
+
 /* XXX */
 #define  WE_ARE_MEMORY_C
 
@@ -68,6 +74,11 @@ int   class_ping_time_var;
 int   class_number_per_ip_var;
 int   class_max_number_var;
 int   class_sendq_var;
+
+#ifdef OPENSSL
+int   rsa_keylen = 0;
+char* rsa_pub_ascii = NULL;
+#endif
 
 static char  *listener_address;
 
@@ -120,6 +131,7 @@ int   class_redirport_var;
 %token  KILL
 %token  KLINE
 %token  KLINE_EXEMPT
+%token  CRYPTLINK
 %token  LAZYLINK
 %token  LEAF_MASK
 %token  LISTEN
@@ -153,6 +165,8 @@ int   class_redirport_var;
 %token  REHASH
 %token  REMOTE
 %token  RESTRICTED
+%token  RSA_PUBLIC_KEY
+%token  RSA_PRIVATE_KEY
 %token  SENDQ
 %token  SEND_PASSWORD
 %token  SERVERINFO
@@ -429,7 +443,47 @@ serverinfo_item:        serverinfo_name | serverinfo_vhost |
                         serverinfo_hub | serverinfo_description |
                         serverinfo_network_name | serverinfo_network_desc |
                         serverinfo_max_clients | serverinfo_no_hack_ops |
+                        serverinfo_rsa_private_key |
 			error
+
+serverinfo_rsa_private_key: RSA_PRIVATE_KEY '=' QSTRING ';'
+  {
+#ifdef OPENSSL
+  BIO *file;
+
+  file = BIO_new_file( yylval.string, "r" );
+
+  if (!file)
+  {
+    sendto_realops_flags(FLAGS_ALL,
+      "Ignoring config file entry rsa_private_key -- file open failed"
+      " (%s)", yylval.string);
+    break;
+  }
+
+  PEM_read_bio_RSAPrivateKey( file, &ServerInfo.rsa_private_key,
+                              NULL, NULL );
+  if (!ServerInfo.rsa_private_key)
+  {
+    sendto_realops_flags(FLAGS_ALL,
+      "Ignoring config file entry rsa_private_key -- couldn't extract key");
+    break;
+  }
+
+  if (!RSA_check_key( ServerInfo.rsa_private_key ))
+  {
+    sendto_realops_flags(FLAGS_ALL,
+      "Ignoring config file entry rsa_private_key -- invalid key");
+    break;
+  }
+
+  BIO_set_close(file, BIO_CLOSE);
+  BIO_free(file);
+#else
+  sendto_realops_flags(FLAGS_ALL,
+      "Ignoring config file entry rsa_private_key -- no OpenSSL support");
+#endif
+  }
 
 serverinfo_no_hack_ops: NO_HACK_OPS '=' TYES ';'
   {
@@ -1203,8 +1257,14 @@ connect_entry:  CONNECT
   }
   '{' connect_items '}' ';'
   {
-    if(yy_aconf->host && yy_aconf->passwd
-       && yy_aconf->spasswd)
+#ifdef OPENSSL
+    if(yy_aconf->host &&
+       ((yy_aconf->passwd && yy_aconf->spasswd) ||
+        (yy_aconf->rsa_public_key && IsConfCryptLink(yy_aconf))))
+#else /* !OPENSSL */
+    if(yy_aconf->host && !IsConfCryptLink(yy_aconf) && 
+       yy_aconf->passwd && yy_aconf->spasswd)
+#endif /* !OPENSSL */
       {
         if( conf_add_server(yy_aconf, scount) >= 0 )
 	  {
@@ -1219,6 +1279,12 @@ connect_entry:  CONNECT
       }
     else
       {
+#ifndef OPENSSL
+        if (IsConfCryptLink(yy_aconf) && yy_aconf->name)
+          sendto_realops_flags(FLAGS_ALL,
+            "Ignoring connect block for %s -- no OpenSSL support",
+            yy_aconf->name);
+ #endif        
         free_conf(yy_aconf);
         yy_aconf = NULL;
       }
@@ -1276,7 +1342,8 @@ connect_item:   connect_name | connect_host | connect_send_password |
                 connect_accept_password | connect_port | connect_aftype | 
  		connect_fakename | connect_lazylink | connect_hub_mask | 
 		connect_leaf_mask | connect_class | connect_auto | 
-		connect_encrypted | connect_compressed |
+		connect_encrypted | connect_compressed | connect_cryptlink |
+		connect_pubkey |
                 error
 
 connect_name:   NAME '=' QSTRING ';'
@@ -1348,6 +1415,80 @@ connect_encrypted:       ENCRYPTED '=' TYES ';'
                         ENCRYPTED '=' TNO ';'
   {
     yy_aconf->flags &= ~CONF_FLAGS_ENCRYPTED;
+  };
+
+connect_pubkey:
+  {
+#ifdef OPENSSL
+    rsa_keylen = 0;
+    if (rsa_pub_ascii)
+      MyFree(rsa_pub_ascii);
+    rsa_pub_ascii = 0;
+#endif
+  }
+		RSA_PUBLIC_KEY '=' '{' connect_pubkey_lines '}' ';'
+  {
+#ifdef OPENSSL
+    BIO *mem;
+
+    mem = BIO_new_mem_buf( rsa_pub_ascii, rsa_keylen +5 );
+
+    if (!mem)
+    {
+      sendto_realops_flags(FLAGS_ALL,
+        "Ignoring config file entry rsa_public_key -- BIO open failed");
+      break;
+    }
+
+    yy_aconf->rsa_public_key = PEM_read_bio_RSA_PUBKEY( mem, NULL, NULL, NULL );
+
+    if (!yy_aconf->rsa_public_key)
+    {
+      sendto_realops_flags(FLAGS_ALL,
+        "Ignoring config file entry rsa_public_key -- couldn't extract key");
+      break;
+    }
+
+    BIO_set_close(mem, BIO_CLOSE);
+    BIO_free(mem);
+
+    rsa_keylen = 0;
+    MyFree(rsa_pub_ascii);
+    rsa_pub_ascii = 0;
+#endif /* OPENSSL */
+  };
+
+connect_pubkey_lines:	connect_pubkey_line connect_pubkey_lines |
+			connect_pubkey_line | error ;
+
+connect_pubkey_line:	QSTRING
+  {
+#ifdef OPENSSL
+    if (rsa_keylen == 0)
+    {
+      rsa_keylen += strlen(yylval.string) + 2; /* '\0' */
+      rsa_pub_ascii = MyMalloc(rsa_keylen);
+      strcpy(rsa_pub_ascii, yylval.string);
+      strcat(rsa_pub_ascii, "\n");                                    
+    }
+    else
+    {
+      rsa_keylen += strlen(yylval.string) + 1;
+      rsa_pub_ascii = MyRealloc(rsa_pub_ascii, rsa_keylen);
+      strcat(rsa_pub_ascii, yylval.string);
+      strcat(rsa_pub_ascii, "\n");
+    }
+#endif
+  };
+
+connect_cryptlink:	CRYPTLINK '=' TYES ';'
+  {
+    yy_aconf->flags |= CONF_FLAGS_CRYPTLINK;
+  }
+			|
+			CRYPTLINK '=' TNO ';'
+  {
+    yy_aconf->flags &= ~CONF_FLAGS_CRYPTLINK;
   };
 
 connect_compressed:       COMPRESSED '=' TYES ';'

@@ -36,6 +36,9 @@
  */
 #define TRY_CONNECTIONS_TIME	60
 
+/* generate a new key every hour */
+#define CRYPTLINK_REGEN_TIME    3600
+
 /*
  * number of seconds to wait after server starts up, before
  * starting try_connections()
@@ -68,11 +71,16 @@ struct Capability
 #define CAP_AOPS        0x00002000      /* Can do anon ops (+a) */
 #define CAP_UID         0x00004000      /* Can do UIDs */
 #define CAP_ZIP		0x00008000	/* Can do ZIPlinks */
+#define CAP_CRYPT       0x00010000      /* Can do CRYPTlinks */
+
 #define CAP_MASK        CAP_QS|CAP_EX|CAP_CHW|\
                         CAP_IE|CAP_VCHAN|CAP_EOB|CAP_KLN|CAP_GLN|\
                         CAP_HOPS|CAP_AOPS|CAP_UID
 
 #define DoesCAP(x)      ((x)->caps)
+
+#define CHECK_SERVER_CRYPTLINK    1
+#define CHECK_SERVER_NOCRYPTLINK  0
 
 /*
  * Capability macros.
@@ -102,8 +110,10 @@ extern int MaxConnectionCount; /* GLOBAL - highest number of connections */
 #define HUNTED_PASS     1       /* if message passed onwards successfully */
 
 
-extern int         check_server(const char* name, struct Client* server);
-extern int         hunt_server(struct Client* client_pt, struct Client* source_pt,
+extern int         check_server(const char* name, struct Client* server,
+                                int cryptlink);
+extern int         hunt_server(struct Client* client_pt,
+                               struct Client* source_pt,
                                char* command, int server, 
                                int parc, char** parv);
 extern const char* my_name_for_link(const char* name, struct ConfItem* conf);
@@ -113,12 +123,16 @@ extern void        set_autoconn(struct Client *,char *,char *,int);
 extern const char* show_capabilities(struct Client* client);
 extern void        show_servers(struct Client *);
 extern void        try_connections(void *unused);
-
+  
 extern void        initServerMask(void);
 extern void        burst_channel(struct Client *client_p, struct Channel *chptr);
 extern void	   sendnick_TS(struct Client*, struct Client* );
 extern int         serv_connect(struct ConfItem *, struct Client *);
 extern unsigned long nextFreeMask(void);
+extern void        cryptlink_init(struct Client *client_p,
+                                  struct ConfItem *aconf, int fd);
+extern void        cryptlink_regen_key(void *);
+extern void        cryptlink_error( struct Client *client_p, char *reason );    
 
 extern struct Client *uplink; /* NON NULL if leaf and is this servers uplink */
 

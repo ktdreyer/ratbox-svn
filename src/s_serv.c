@@ -32,6 +32,13 @@
 #include <time.h>
 #include <netdb.h>
 
+#ifdef OPENSSL
+#include <openssl/rsa.h>
+#include <openssl/bio.h>
+#include <openssl/evp.h>
+#include <openssl/rand.h>
+#endif
+
 #include "config.h"
 #include "tools.h"
 #include "s_serv.h"
@@ -43,6 +50,7 @@
 #include "event.h"
 #include "fdlist.h"
 #include "hash.h"
+#include "md5.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "ircd_defs.h"
@@ -76,7 +84,10 @@ struct Client *uplink=NULL;
 
 static void        burst_members(struct Client *client_p, dlink_list *list);
 static void        burst_ll_members(struct Client *client_p, dlink_list *list);
-
+#ifdef OPENSSL
+static void        cryptlink_regen_key_link(struct Client *client_p);
+#endif /* OPENSSL */
+ 
 /*
  * list of recognized server capabilities.  "TS" is not on the list
  * because all servers that we talk to already do TS, and the kludged
@@ -98,6 +109,7 @@ struct Capability captab[] = {
   { "AOPS",     CAP_AOPS },
   { "UID",      CAP_UID },
   { "ZIP",	CAP_ZIP },
+  { "CRYPT",    CAP_CRYPT },
 
   { 0,   0 }
 };
@@ -335,7 +347,7 @@ finish:
       TRY_CONNECTIONS_TIME, 0);
 }
 
-int check_server(const char *name, struct Client* client_p)
+int check_server(const char *name, struct Client* client_p, int cryptlink)
 {
   struct ConfItem *aconf=NULL;
   struct ConfItem *server_aconf=NULL;
@@ -364,22 +376,28 @@ int check_server(const char *name, struct Client* client_p)
 	  match(aconf->host, client_p->localClient->sockhost) )
        {
 	 error = -2;
-	   
-	 if (IsConfEncrypted(aconf))
-	   {
-	     if (strcmp(aconf->passwd, 
-		   crypt(client_p->localClient->passwd, aconf->passwd)) == 0)
-	       {
-		 server_aconf = aconf;
-	       }
-	   }
-	 else
-	   {
-	     if (strcmp(aconf->passwd, client_p->localClient->passwd) == 0)
-	       {
-		 server_aconf = aconf;
-	       }
-	   }
+
+#ifdef OPENSSL
+         if (cryptlink && IsConfCryptLink(aconf))
+           {
+             if (aconf->rsa_public_key)
+               server_aconf = aconf;
+           }
+         else if (!(cryptlink || IsConfCryptLink(aconf)))
+#endif /* OPENSSL */
+           {
+             if (IsConfEncrypted(aconf))
+               {
+                 if (strcmp(aconf->passwd, 
+                      crypt(client_p->localClient->passwd, aconf->passwd)) == 0)
+                   server_aconf = aconf;
+               }
+             else
+               {
+                 if (strcmp(aconf->passwd, client_p->localClient->passwd) == 0)
+                   server_aconf = aconf;
+               }
+           }
        }
     }
 
@@ -402,6 +420,8 @@ int check_server(const char *name, struct Client* client_p)
 
   if( !(server_aconf->flags & CONF_FLAGS_LAZY_LINK) )
     ClearCap(client_p,CAP_LL);
+  if( !(server_aconf->flags & CONF_FLAGS_CRYPTLINK) )
+    ClearCap(client_p,CAP_CRYPT);
 
   /*
    * Don't unset CAP_HUB here even if the server isn't a hub,
@@ -777,7 +797,7 @@ int server_estab(struct Client *client_p)
         }
     }
 
-  if (IsUnknown(client_p))
+  if (IsUnknown(client_p) && !IsConfCryptLink(aconf))
     {
       /*
        * jdc -- 1.  Use EmptyString(), not [0] index reference.
@@ -1632,14 +1652,23 @@ serv_connect_callback(int fd, int status, void *data)
     /* Next, send the initial handshake */
     SetHandshake(client_p);
 
+#ifdef OPENSSL
+    /* Handle all CRYPTLINK links in cryptlink_init */
+    if (IsConfCryptLink(aconf))
+    {
+      cryptlink_init(client_p, aconf, fd);
+      return;
+    }
+#endif
+    
     /*
-     * jdc -- Check and sending spasswd, not passwd.
+     * jdc -- Check and send spasswd, not passwd.
      */
     if (!EmptyString(aconf->spasswd))
     {
         sendto_one(client_p, "PASS %s :TS", aconf->spasswd);
     }
-
+    
     /*
      * Pass my info to the new server
      *
@@ -1662,9 +1691,10 @@ serv_connect_callback(int fd, int status, void *data)
      */
     if (IsDead(client_p)) {
         sendto_realops_flags(FLAGS_ADMIN,
-			     "%s[%s] went dead during handshake", client_p->name,
+			     "%s[%s] went dead during handshake",
+                             client_p->name,
 			     client_p->host);
-        sendto_realops_flags(FLAGS_ADMIN,
+        sendto_realops_flags(FLAGS_OPER,
 			     "%s went dead during handshake", client_p->name);
         exit_client(client_p, client_p, &me, "Went dead during handshake");
         return;
@@ -1673,5 +1703,219 @@ serv_connect_callback(int fd, int status, void *data)
     /* don't move to serv_list yet -- we haven't sent a burst! */
 
     /* If we get here, we're ok, so lets start reading some data */
-    comm_setselect(fd, FDLIST_SERVER, COMM_SELECT_READ, read_packet, client_p, 0);
+    comm_setselect(fd, FDLIST_SERVER, COMM_SELECT_READ, read_packet,
+                   client_p, 0);
 }
+
+#ifdef OPENSSL
+/*
+ * sends a CRYPTSERV command.
+ */
+void cryptlink_init(struct Client *client_p,
+                    struct ConfItem *aconf,
+                    int fd)
+{
+  char *encrypted;
+  char *key_to_send;
+  char randkey[CIPHERKEYLEN*2];
+  int enc_len;
+
+  /* get key */
+  if (!ServerInfo.rsa_private_key ||
+      !RSA_check_key(ServerInfo.rsa_private_key) ||
+      !aconf->rsa_public_key)
+    {
+      cryptlink_error(client_p,
+                      "%s[%s]: CRYPTLINK failed - invalid RSA key(s)");
+      return;
+    }
+
+  if (RAND_bytes(randkey, (CIPHERKEYLEN * 2)) != 1)
+    {
+      cryptlink_error(client_p,
+                      "%s[%s]: CRYPTLINK failed - couldn't generate secret");
+      return;
+    }
+
+  encrypted = MyMalloc(RSA_size(ServerInfo.rsa_private_key));
+
+  enc_len = RSA_public_encrypt((CIPHERKEYLEN * 2),
+                               randkey,
+                               encrypted,
+                               aconf->rsa_public_key,
+                               RSA_PKCS1_OAEP_PADDING);
+
+  memcpy(client_p->localClient->auth_secret, randkey, CIPHERKEYLEN);
+  memcpy(client_p->localClient->out_key, randkey + CIPHERKEYLEN, CIPHERKEYLEN);
+
+  if (enc_len <= 0)
+    {
+      MyFree(encrypted);
+      cryptlink_error(client_p,
+                      "%s[%s]: CRYPTLINK failed - couldn't encrypt data");
+      return;
+    }
+
+  if (!(base64_block(&key_to_send, encrypted, enc_len)))
+    {
+      MyFree(encrypted);
+      cryptlink_error(client_p,
+                      "%s[%s]: CRYPTLINK failed - couldn't base64 key");
+      return;
+    }
+
+
+  send_capabilities(client_p,CAP_MASK
+                    | CAP_CRYPT
+                    | ((aconf->flags & CONF_FLAGS_LAZY_LINK) ? CAP_LL : 0)
+                    | ((aconf->flags & CONF_FLAGS_COMPRESSED) ? CAP_ZIP : 0)
+                    | (ServerInfo.hub ? CAP_HUB : 0));
+
+  sendto_one(client_p, "CRYPTSERV %s %s :%s",
+             my_name_for_link(me.name, aconf), key_to_send, me.info);
+
+  SetHandshake(client_p);
+  SetWaitAuth(client_p);
+
+  MyFree(encrypted);
+  MyFree(key_to_send);
+
+  /*
+   * If we've been marked dead because a send failed, just exit
+   * here now and save everyone the trouble of us ever existing.
+   */
+  if (IsDead(client_p))
+   {
+     cryptlink_error(client_p,
+                     "%s[%s] went dead during handshake");
+     return;
+   }
+
+  /* If we get here, we're ok, so lets start reading some data */
+  if (fd > -1)
+    comm_setselect(fd, FDLIST_SERVER, COMM_SELECT_READ, read_packet,
+                   client_p, 0);
+}
+
+void cryptlink_regen_key(void *unused)
+{
+  dlink_node *ptr;
+  struct Client *target_p;
+
+  for(ptr = serv_list.head; ptr; ptr = ptr->next)
+  {
+    target_p = ptr->data;
+    if (IsCryptOut(target_p) && MyConnect(target_p) &&
+        IsCapable(target_p, CAP_CRYPT))
+      cryptlink_regen_key_link(target_p);
+  }
+  eventAdd("cryptlink_regen_key", cryptlink_regen_key, NULL,
+      CRYPTLINK_REGEN_TIME, 0);
+}
+
+static void cryptlink_regen_key_link(struct Client *client_p)
+{
+  char newkey[CIPHERKEYLEN];
+  char *key_to_send, *encrypted;
+  int enc_len;
+  struct ConfItem *aconf;
+
+  if (!(IsCryptOut(client_p) && MyConnect(client_p) &&
+        IsCapable(client_p, CAP_CRYPT)))
+    return;
+
+  aconf = find_conf_name(&client_p->localClient->confs,
+                         client_p->name, CONF_SERVER);
+  if (!aconf)
+  {
+    sendto_realops_flags(FLAGS_ALL,
+                 "WARNING: couldn't regen key for %s - lost C-line",
+                 get_client_name(client_p, HIDE_IP));
+    return;
+  }
+
+  /* generate a new key */
+  if (!aconf->rsa_public_key)
+  {
+    sendto_realops_flags(FLAGS_ALL,
+                "WARNING: couldn't regen key for %s - lost public key",
+                 get_client_name(client_p, HIDE_IP));
+    return;
+  }
+
+  if (RAND_bytes(newkey, CIPHERKEYLEN) != 1)
+  {
+    sendto_realops_flags(FLAGS_ALL,
+           "WARNING: couldn't regen key for %s - couldn't generate secret",
+           get_client_name(client_p, HIDE_IP));
+    return;
+  }
+
+  encrypted = MyMalloc(RSA_size(ServerInfo.rsa_private_key));
+
+  enc_len = RSA_public_encrypt(CIPHERKEYLEN,
+                               newkey,
+                               encrypted,
+                               aconf->rsa_public_key,
+                               RSA_PKCS1_OAEP_PADDING);
+
+  if (enc_len <= 0)
+  {
+    MyFree(encrypted);
+    sendto_realops_flags(FLAGS_ALL,
+                 "WARNING: couldn't regen key for %s - couldn't encrypt key",
+                 get_client_name(client_p, HIDE_IP));
+    return;
+  }
+
+  if (!(base64_block(&key_to_send, encrypted, enc_len)))
+  {
+    MyFree(encrypted);
+    sendto_realops_flags(FLAGS_ALL,
+                 "WARNING: couldn't regen key for %s - couldn't base64 key",
+                 get_client_name(client_p, HIDE_IP));
+      return;
+    }
+
+#if 0
+  {
+    char *ik, *ok;
+
+    base64_block( &ik, client_p->localClient->in_key, CIPHERKEYLEN );
+    ik[22] = '\0';
+    base64_block( &ok, client_p->localClient->out_key, CIPHERKEYLEN );
+    ok[22] = '\0';
+    sendto_realops_flags(FLAGS_ALL,
+          "New encryption key generated! Keys are "
+          "Encrypt: %s -- Decrypt: %s for %s", ok, ik,
+          client_p->name);
+    MyFree(ik);
+    MyFree(ok);
+  }
+#else
+  sendto_realops_flags(FLAGS_ALL,
+        "New encryption key generated for %s!",
+        client_p->name);
+#endif
+  
+  sendto_one(client_p, ":%s CRYPTKEY %s", 
+             me.name, key_to_send);
+
+  /* Change keys */
+  memcpy(client_p->localClient->out_key, newkey, CIPHERKEYLEN);
+}
+
+void cryptlink_error(struct Client *client_p, char *reason)
+{
+    sendto_realops_flags(FLAGS_ADMIN,
+                         reason,
+                         client_p->name,
+                         client_p->host);
+    sendto_realops_flags(FLAGS_OPER,
+                         reason,
+                         client_p->name,
+                         "user@255.255.255.255");
+    exit_client(client_p, client_p, &me, "Unable to use CRYPTLINK auth!");
+}
+
+#endif /* OPENSSL */

@@ -138,6 +138,7 @@ static void m_challenge( struct Client *client_p, struct Client *source_p,
      sendto_one (source_p, form_str(ERR_NOOPERHOST), me.name, parv[0]);
      return;
     }
+  /* XXX this should be a config flag.. */
   if (!strchr(aconf->passwd, ' '))
     {
      sendto_one (source_p, ":%s NOTICE %s :I'm sorry, PK authentication "

@@ -41,7 +41,7 @@ CPPFLAGS	= ${INCLUDES} @SSL_DEFINE@ @CPPFLAGS@
 default:	all
 
 y.tab.o:	y.tab.c ircd_parser.y
-	${CC} -g -I ../include -I. -c y.tab.c
+	${CC} ${CPPFLAGS} -g -I ../include -I. -c y.tab.c
 
 # Note GNU bison uses <file>.tab.c not y.tab.c
 y.tab.c:	ircd_parser.y

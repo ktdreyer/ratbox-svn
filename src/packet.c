@@ -48,6 +48,7 @@ static
 void parse_client_queued(struct Client *client_p)
 { 
     int dolen  = 0;
+
 #if 0
     struct LocalUser *lclient_p = client_p->localClient;
     int checkflood = 1; /* Whether we're checking or not */
@@ -62,7 +63,7 @@ void parse_client_queued(struct Client *client_p)
         {
           if (!IsDead(client_p))
 	        client_dopacket(client_p, readBuf, dolen);
-	      if (IsDead(client_p))
+          if (IsDead(client_p))
     	    {
     	     if (client_p->localClient)
     	       {
@@ -173,9 +174,19 @@ read_packet(int fd, void *data)
   struct Client *client_p = data;
   struct LocalUser *lclient_p = client_p->localClient;
   int length = 0;
+  int lbuf_len;
+  int linebuf_flags = 0;
+  char *linebuf_key = NULL;
 
   assert(lclient_p != NULL);
   assert(lclient_p->allow_read <= MAX_FLOOD_PER_SEC);
+
+  if (IsCryptIn(client_p))
+  {
+    linebuf_flags |= LINEBUF_CRYPT;
+    linebuf_key = lclient_p->in_key;
+  }
+  /* XXX - ziplinks */
 
   /*
    * Read some data. We *used to* do anti-flood protection here, but
@@ -212,9 +223,17 @@ read_packet(int fd, void *data)
    * it on the end of the receive queue and do it when its
    * turn comes around.
    */
-  lclient_p->actually_read += linebuf_parse(&client_p->localClient->buf_recvq,
-      readBuf, length);
+  lbuf_len = linebuf_parse(&client_p->localClient->buf_recvq,
+      readBuf, length, linebuf_flags, linebuf_key);
 
+  if (lbuf_len < 0)
+  {
+    error_exit_client(client_p, 0);
+    return;
+  }
+
+  lclient_p->actually_read += lbuf_len;
+  
   /* Check to make sure we're not flooding */
   if (IsPerson(client_p) &&
      (linebuf_alloclen(&client_p->localClient->buf_recvq) > CLIENT_FLOOD)) {

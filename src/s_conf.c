@@ -206,7 +206,8 @@ void free_conf(struct ConfItem* aconf)
 {
   assert(0 != aconf);
   assert(!(aconf->status & CONF_CLIENT) ||
-         strcmp(aconf->host, "NOMATCH") || (aconf->clients == -1));
+         (aconf->host && strcmp(aconf->host, "NOMATCH")) ||
+         (aconf->clients == -1));
   delete_adns_queries(aconf->dns_query);
   MyFree(aconf->host);
   if (aconf->passwd)
