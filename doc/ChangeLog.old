@@ -1,3 +1,9 @@
+*** 20010626_5 by jdc
+- tools/mkkeypair
+    * Someone wanted this awhile back.  I think it was you, greg.  ;-)
+
+
+
 *** 20010626_4 by jdc
 - doc/cryptlink.txt
     * Minor changes (cosmetical, grammatical, typos).
