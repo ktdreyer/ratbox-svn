@@ -1,3 +1,15 @@
+androsyn    2002/05/26 03:16:01 EDT	(20020526_5)
+
+  Modified files:        (Branch: WIN32_WIP)
+    src                  send.c 
+  Log:
+  Merge changes from mainline
+  
+  Revision   Changes    Path
+  7.197.2.2  +1 -9      ircd-hybrid-7/src/send.c
+
+
+
 androsyn    2002/05/26 03:11:16 EDT	(20020526_4)
 
   Modified files:
