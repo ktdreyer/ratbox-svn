@@ -46,7 +46,7 @@ struct Message help_msgtab = {
 };
 
 struct Message uhelp_msgtab = {
-  "UHELP", 0, 0, 0, MFLG_SLOW, 0,
+  "UHELP", 0, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_help, m_ignore, mo_uhelp}
 };
 #ifndef STATIC_MODULES

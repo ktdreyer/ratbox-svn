@@ -95,8 +95,8 @@ msgstr	":%s 209 %s Clase %s %d"
 
 #: ../../src/messages.tab:235
 #, c-format
-msgid	":%s 212 %s %s %u %u"
-msgstr	":%s 212 %s %s %u %u"
+msgid	":%s 212 %s %s %u %u :%u"
+msgstr	":%s 212 %s %s %u %u :%u"
 
 #: ../../src/messages.tab:236
 #, c-format

@@ -46,7 +46,7 @@ static void m_topic(struct Client*, struct Client*, int, char**);
 static void ms_topic(struct Client*, struct Client*, int, char**);
 
 struct Message topic_msgtab = {
-  "TOPIC", 0, 2, 0, MFLG_SLOW, 0,
+  "TOPIC", 0, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_topic, ms_topic, m_topic}
 };
 

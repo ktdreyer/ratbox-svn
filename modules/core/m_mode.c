@@ -44,7 +44,7 @@
 static void m_mode(struct Client*, struct Client*, int, char**);
 
 struct Message mode_msgtab = {
-  "MODE", 0, 2, 0, MFLG_SLOW, 0,
+  "MODE", 0, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_mode, m_mode, m_mode}
 };
 #ifndef STATIC_MODULES

@@ -105,7 +105,7 @@ static void ms_gline(struct Client*, struct Client*, int, char**);
 static void mo_gline(struct Client*, struct Client*, int, char**);
 
 struct Message gline_msgtab = {
-    "GLINE", 0, 3, 0, MFLG_SLOW, 0,
+    "GLINE", 0, 0, 3, 0, MFLG_SLOW, 0,
       {m_unregistered, m_not_oper, ms_gline, mo_gline}
 };
 

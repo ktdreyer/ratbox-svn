@@ -42,7 +42,7 @@
 static void ms_llnick(struct Client*, struct Client*, int, char**);
 
 struct Message llnick_msgtab = {
-  "LLNICK", 0, 3, 0, MFLG_SLOW | MFLG_UNREG, 0L,
+  "LLNICK", 0, 0, 3, 0, MFLG_SLOW | MFLG_UNREG, 0L,
   {m_unregistered, m_ignore, ms_llnick, m_ignore}
 };
 #ifndef STATIC_MODULES

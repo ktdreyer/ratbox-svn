@@ -39,7 +39,7 @@
 static void m_away(struct Client*, struct Client*, int, char**);
 
 struct Message away_msgtab = {
-  "AWAY", 0, 0, 0, MFLG_SLOW, 0,
+  "AWAY", 0, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_away, m_away, m_away}
 };
 #ifndef STATIC_MODULES

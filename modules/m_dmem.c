@@ -42,7 +42,7 @@
 static void mo_dmem(struct Client*, struct Client*, int, char**);
 
 struct Message dmem_msgtab = {
-  "DMEM", 0, 0, 0, MFLG_SLOW, 0,
+  "DMEM", 0, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, m_ignore, mo_dmem}
 };
 #ifndef STATIC_MODULES

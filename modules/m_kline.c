@@ -58,12 +58,12 @@ static void ms_kline(struct Client *,struct Client *,int,char **);
 static void mo_dline(struct Client *,struct Client *,int,char **);
 
 struct Message kline_msgtab = {
-  "KLINE", 0, 2, 0, MFLG_SLOW, 0,
+  "KLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, ms_kline, mo_kline}
 };
 
 struct Message dline_msgtab = {
-  "DLINE", 0, 2, 0, MFLG_SLOW, 0,
+  "DLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, m_error, mo_dline}
 };
 

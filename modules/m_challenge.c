@@ -63,7 +63,7 @@ void binary_to_hex( unsigned char * bin, char * hex, int length );
 
 /* We have openssl support, so include /CHALLENGE */
 struct Message challenge_msgtab = {
-  "CHALLENGE", 0, 2, 0, MFLG_SLOW, 0,
+  "CHALLENGE", 0, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_challenge, m_ignore, m_challenge}
 };
 #ifndef STATIC_MODULES

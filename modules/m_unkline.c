@@ -53,11 +53,11 @@ static void mo_undline(struct Client*, struct Client*, int, char**);
 static void mo_ungline(struct Client*, struct Client*, int, char**);
 
 struct Message msgtabs[] = {
-  {"UNKLINE", 0, 2, 0, MFLG_SLOW, 0,
+  {"UNKLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
    {m_unregistered, m_not_oper, m_error, mo_unkline}},
-  {"UNDLINE", 0, 2, 0, MFLG_SLOW, 0,
+  {"UNDLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
    {m_unregistered, m_not_oper, m_error, mo_undline}}, 
-  {"UNGLINE", 0, 2, 0, MFLG_SLOW, 0,
+  {"UNGLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
    {m_unregistered, m_not_oper, m_error, mo_ungline}}
 };
 

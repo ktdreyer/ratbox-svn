@@ -43,7 +43,7 @@ static void m_kick(struct Client*, struct Client*, int, char**);
 static void ms_kick(struct Client*, struct Client*, int, char**);
 
 struct Message kick_msgtab = {
-  "KICK", 0, 3, 0, MFLG_SLOW, 0,
+  "KICK", 0, 0, 3, 0, MFLG_SLOW, 0,
   {m_unregistered, m_kick, ms_kick, m_kick}
 };
 #ifndef STATIC_MODULES

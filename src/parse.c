@@ -314,6 +314,9 @@ handle_command(struct Message *mptr, struct Client *client_p,
 {
   MessageHandler handler = 0;
 	
+  if(IsServer(client_p))
+    mptr->rcount++;
+
   mptr->count++;
 	
   /* New patch to avoid server flooding from unregistered connects
@@ -399,6 +402,7 @@ mod_add_cmd(struct Message *msg)
   new_ptr->msg = msg;
 
   msg->count = 0;
+  msg->rcount = 0;
   msg->bytes = 0;
 
   if(last_ptr == NULL)
@@ -506,7 +510,8 @@ void report_messages(struct Client *source_p)
 	  
 	  sendto_one(source_p, form_str(RPL_STATSCOMMANDS),
 		     me.name, source_p->name, ptr->cmd,
-		     ptr->msg->count, ptr->msg->bytes);
+		     ptr->msg->count, ptr->msg->bytes,
+		     ptr->msg->rcount);
 	}
     }
 }

@@ -44,7 +44,7 @@
 static void ms_nburst(struct Client*, struct Client*, int, char**);
 
 struct Message nburst_msgtab = {
-  "NBURST", 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0L,
+  "NBURST", 0, 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0L,
   {m_unregistered, m_ignore, ms_nburst, m_ignore}
 };
 #ifndef STATIC_MODULES

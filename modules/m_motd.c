@@ -47,7 +47,7 @@ static void mo_motd(struct Client*, struct Client*, int, char**);
 static void motd_spy(struct Client *);
 
 struct Message motd_msgtab = {
-  "MOTD", 0, 0, 1, MFLG_SLOW, 0,
+  "MOTD", 0, 0, 0, 1, MFLG_SLOW, 0,
   {mr_motd, m_motd, mo_motd, mo_motd}
 };
 #ifndef STATIC_MODULES

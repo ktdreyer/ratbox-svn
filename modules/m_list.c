@@ -48,7 +48,7 @@ static int list_all_channels(struct Client *);
 static void list_one_channel(struct Client *,struct Channel *);
 
 struct Message list_msgtab = {
-  "LIST", 0, 0, 0, MFLG_SLOW, 0,
+  "LIST", 0, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_list, ms_list, mo_list}
 };
 #ifndef STATIC_MODULES

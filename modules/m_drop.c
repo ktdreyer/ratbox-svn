@@ -42,7 +42,7 @@
 static void ms_drop(struct Client *,struct Client *,int,char **);
 
 struct Message drop_msgtab = {
-  "DROP", 0, 2, 0, MFLG_SLOW | MFLG_UNREG, 0L,
+  "DROP", 0, 0, 2, 0, MFLG_SLOW | MFLG_UNREG, 0L,
   {m_unregistered, m_ignore, ms_drop, m_ignore}
 };
 #ifndef STATIC_MODULES

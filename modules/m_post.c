@@ -36,7 +36,7 @@
 static void mr_post(struct Client*, struct Client*, int, char**);
 
 struct Message post_msgtab = {
-  "POST", 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
+  "POST", 0, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
   {mr_post, m_ignore, m_ignore, m_ignore}
 };
 

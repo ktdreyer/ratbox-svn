@@ -44,7 +44,7 @@
 static void m_invite(struct Client*, struct Client*, int, char**);
 
 struct Message invite_msgtab = {
-  "INVITE", 0, 3, 0, MFLG_SLOW, 0,
+  "INVITE", 0, 0, 3, 0, MFLG_SLOW, 0,
   {m_unregistered, m_invite, m_invite, m_invite}
 };
 #ifndef STATIC_MODULES

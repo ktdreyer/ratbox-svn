@@ -52,7 +52,7 @@ static void m_names(struct Client*, struct Client*, int, char**);
 static void ms_names(struct Client*, struct Client*, int, char**);
 
 struct Message names_msgtab = {
-  "NAMES", 0, 0, 0, MFLG_SLOW, 0,
+  "NAMES", 0, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_names, ms_names, m_names}
 };
 #ifndef STATIC_MODULES

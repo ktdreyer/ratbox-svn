@@ -95,7 +95,7 @@ msgstr	""
 
 #: ../src/messages.tab:235
 #, c-format
-msgid	":%s 212 %s %s %u %u"
+msgid	":%s 212 %s %s %u %u :%u"
 msgstr	""
 
 #: ../src/messages.tab:236

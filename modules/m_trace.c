@@ -50,7 +50,7 @@ static void mo_trace(struct Client*, struct Client*, int, char**);
 static void trace_spy(struct Client *);
 
 struct Message trace_msgtab = {
-  "TRACE", 0, 0, 0, MFLG_SLOW, 0,
+  "TRACE", 0, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_trace, ms_trace, mo_trace}
 };
 
