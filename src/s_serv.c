@@ -1191,7 +1191,7 @@ server_estab(struct Client *client_p)
 			sendto_one(client_p, ":%s SID %s %d %s :%s%s",
 				   target_p->serv->upid, target_p->name,
 				   target_p->hopcount + 1, target_p->id,
-				   IsHidden(client_p) ? "(H) " : "", client_p->info);
+				   IsHidden(target_p) ? "(H) " : "", target_p->info);
 		else
 			sendto_one(client_p, ":%s SERVER %s %d :%s%s",
 				   target_p->serv->up,
