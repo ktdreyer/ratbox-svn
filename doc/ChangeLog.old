@@ -1,3 +1,7 @@
+*** 20010602_2 by ejb
+- VMS compile fix.
+
+
 *** 20010602_1 by ejb
 - removed last traces of CMDLINE_CONFIG.
 
