@@ -1784,10 +1784,7 @@ conf_set_general_max_accept(void *data)
 static void
 conf_set_general_nick_delay(void *data)
 {
-	int nick_delay = *(unsigned int *) data;
-
-	if(nick_delay >= 0)
-		ConfigFileEntry.nick_delay = nick_delay;
+	ConfigFileEntry.nick_delay = *(unsigned int *) data;
 }
 
 static void
@@ -2632,7 +2629,7 @@ newconf_init()
 	add_conf_item("general", "kline_delay", CF_TIME,
 		      conf_set_general_kline_delay);
 	add_conf_item("general", "warn_no_nline", CF_YESNO, conf_set_general_warn_no_nline);
-	add_conf_item("general", "nick_delay", CF_INT,
+	add_conf_item("general", "nick_delay", CF_TIME,
 			conf_set_general_nick_delay);
 	add_conf_item("general", "non_redundant_klines", CF_YESNO,
 		      conf_set_general_non_redundant_klines);

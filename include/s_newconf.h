@@ -231,6 +231,7 @@ struct nd_entry
 };
 
 extern void add_nd_entry(const char *name);
+extern void free_nd_entry(struct nd_entry *);
 extern void expire_nd_entries(void *unused);
 
 #endif

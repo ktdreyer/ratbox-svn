@@ -127,6 +127,15 @@ mr_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 		return 0;
 	}
 
+	if(hash_find_nd(nick))
+	{
+		sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
+			me.name, 
+			EmptyString(source_p->name) ? "*" : source_p->name,
+			nick);
+		return 0;
+	}
+
 	if((target_p = find_client(nick)) == NULL)
 		set_initial_nick(client_p, source_p, nick);
 	else if(source_p == target_p)
@@ -181,6 +190,15 @@ m_nick(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	{
 		sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME),
 			   me.name, source_p->name, nick);
+		return 0;
+	}
+
+	if(hash_find_nd(nick))
+	{
+		sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
+			me.name, 
+			EmptyString(source_p->name) ? "*" : source_p->name,
+			nick);
 		return 0;
 	}
 
@@ -610,6 +628,8 @@ static int
 change_remote_nick(struct Client *client_p, struct Client *source_p, int parc,
 		 const char *parv[], time_t newts, const char *nick)
 {
+	struct nd_entry *nd;
+
 	/* client changing their nick */
 	if(irccmp(parv[0], nick))
 		source_p->tsinfo = newts ? newts : CurrentTime;
@@ -627,6 +647,10 @@ change_remote_nick(struct Client *client_p, struct Client *source_p, int parc,
 	}
 
 	del_from_client_hash(source_p->name, source_p);
+
+	/* invalidate nick delay when a remote client uses the nick.. */
+	if((nd = hash_find_nd(nick)))
+		free_nd_entry(nd);
 
 	strcpy(source_p->name, nick);
 	add_to_client_hash(nick, source_p);
@@ -811,6 +835,7 @@ register_client(struct Client *client_p, struct Client *server,
 {
 	struct Client *source_p;
 	struct User *user;
+	struct nd_entry *nd;
 	const char *m;
 	int flag;
 
@@ -839,6 +864,10 @@ register_client(struct Client *client_p, struct Client *server,
 		user->server = find_or_add(parv[7]);
 		strlcpy(source_p->info, parv[8], sizeof(source_p->info));
 	}
+
+	/* remove any nd entries for this nick */
+	if((nd = hash_find_nd(nick)))
+		free_nd_entry(nd);
 
 	add_to_client_hash(nick, source_p);
 	add_to_hostname_hash(source_p->host, source_p);

@@ -294,6 +294,12 @@ static struct InfoStruct info_table[] = {
 		"Network description"
 	},
 	{
+		"nick_delay",
+		OUTPUT_DECIMAL,
+		&ConfigFileEntry.nick_delay,
+		"Delay nicks are locked for on split",
+	},
+	{
 		"no_oper_flood",
 		OUTPUT_BOOLEAN,
 		&ConfigFileEntry.no_oper_flood,

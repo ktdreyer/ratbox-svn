@@ -664,6 +664,14 @@ add_nd_entry(const char *name)
 }
 
 void
+free_nd_entry(struct nd_entry *nd)
+{
+	dlinkDelete(&nd->lnode, &nd_list);
+	dlinkDelete(&nd->hnode, &ndTable[nd->hashv]);
+	BlockHeapFree(nd_heap, nd);
+}
+
+void
 expire_nd_entries(void *unused)
 {
 	struct nd_entry *nd;
@@ -680,9 +688,7 @@ expire_nd_entries(void *unused)
 		if(nd->expire > CurrentTime)
 			return;
 
-		dlinkDelete(&nd->lnode, &nd_list);
-		dlinkDelete(&nd->hnode, &ndTable[nd->hashv]);
-		BlockHeapFree(nd_heap, nd);
+		free_nd_entry(nd);
 	}
 }
 
