@@ -1,3 +1,15 @@
+androsyn    2004/07/17 10:46:03 EDT	(20040717_0)
+
+  Modified files:
+    src                  reject.c 
+  Log:
+  Fix a little issue with the reject cache expiration
+  
+  Revision  Changes    Path
+  1.22      +1 -1      ircd-ratbox/src/reject.c
+
+
+
 androsyn    2004/07/16 12:27:18 EDT	(20040716_0)
 
   Modified files:
