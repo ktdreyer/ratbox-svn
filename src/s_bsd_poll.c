@@ -84,7 +84,6 @@
 
 extern struct sockaddr_in vserv;               /* defined in s_conf.c */
 
-struct Client* local[MAXCONNECTIONS];
 static struct pollfd pollfds[MAXCONNECTIONS];
 
 static void poll_update_pollfds(int, short, PF *);

@@ -74,8 +74,6 @@
 
 extern struct sockaddr_in vserv;               /* defined in s_conf.c */
 
-struct Client* local[MAXCONNECTIONS];
-
 static void kq_update_events(int, short, PF *);
 static int kq;
 static struct timespec zero_timespec;
