@@ -1,3 +1,17 @@
+leeh        2003/06/18 09:57:34 UTC	(20030618_1)
+
+  Modified files:
+    modules              m_stats.c 
+    src                  messages.tab 
+  Log:
+  - added back code for listing resvs
+  
+  Revision  Changes    Path
+  1.167     +19 -3     ircd-ratbox/modules/m_stats.c
+  7.87      +1 -1      ircd-ratbox/src/messages.tab
+
+
+
 leeh        2003/06/18 09:53:08 UTC	(20030618_0)
 
   Modified files:
