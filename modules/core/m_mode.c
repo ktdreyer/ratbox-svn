@@ -40,7 +40,7 @@
 #include "modules.h"
 
 struct Message mode_msgtab = {
-  MSG_MODE, 0, 1, 0, MFLG_SLOW, 0,
+  MSG_MODE, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_mode, m_mode, m_mode}
 };
 

@@ -41,7 +41,7 @@
 #include <stdlib.h>
 
 struct Message topic_msgtab = {
-  MSG_TOPIC, 0, 1, 0, MFLG_SLOW, 0,
+  MSG_TOPIC, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_topic, ms_topic, m_topic}
 };
 
@@ -163,7 +163,7 @@ int     m_topic(struct Client *cptr,
 	      sendto_one(sptr, form_str(ERR_NOTONCHANNEL), me.name, parv[0],
 			 parv[1]);
 	      return 0;
-	    }
+p	    }
           if (chptr->topic[0] == '\0')
 	    sendto_one(sptr, form_str(RPL_NOTOPIC),
 		       me.name, parv[0], parv[1]);
