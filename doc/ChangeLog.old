@@ -1,3 +1,8 @@
+*** 19991230_1 by db
+resync with current ircd-hybrid-6 tree
+
+
+
 *** 19991217_1 by db
 1) folded in d line fix from -6
 2) folded in res.c core bug fix from -6
