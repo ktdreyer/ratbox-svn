@@ -1,3 +1,8 @@
+*** 20010929_8 by db
+- We have no more /rehash GC, so removed that from help
+
+
+
 *** 20010929_7 by a1kmm
 - Fixed linebuf code so that it sets the length correctly. It now works
   entirely with jv's converted IRCnet burst.
