@@ -1,3 +1,7 @@
+*** 20010723_1 by androsyn
+Changed "Remote closed the connection" to "Remote host closed the connection"
+
+
 *** 20010722_1 by leeh
 - only show +eI modes to chanops/halfops
 
