@@ -169,3 +169,15 @@ AC_OUTPUT(			\
         help/Makefile   	\
 	src/Makefile		\
 )
+
+echo
+echo Compiling ratbox-services
+echo Installing into: $prefix
+echo
+echo User Services ............ $cf_enable_userserv
+echo Channel Services ......... $cf_enable_chanserv
+echo Jupe Services ............ $cf_enable_jupe
+echo Oper invite/op bot ....... $cf_enable_operbot
+echo Global Message Service ... $cf_enable_global
+echo List Service ............. $cf_enable_alis
+echo

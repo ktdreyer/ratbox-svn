@@ -278,7 +278,7 @@ c_mode(struct client *client_p, const char *parv[], int parc)
 	}
 
 	if(dlink_list_length(&opped_list))
-		hook_call(HOOK_MODE_OP, &opped_list, NULL);
+		hook_call(HOOK_MODE_OP, chptr, &opped_list);
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, opped_list.head)
 	{

@@ -6,6 +6,8 @@ struct user_reg;
 struct chmode;
 
 #define CS_FLAGS_SUSPENDED	0x001
+#define CS_FLAGS_NOOPS		0x002
+#define CS_FLAGS_AUTOJOIN	0x004
 
 #define CS_MEMBER_AUTOOP	0x001
 #define CS_MEMBER_AUTOVOICE	0x002

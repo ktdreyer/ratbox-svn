@@ -51,6 +51,7 @@ static int s_chan_chandrop(struct client *, char *parv[], int parc);
 static int s_chan_chansuspend(struct client *, char *parv[], int parc);
 static int s_chan_chanunsuspend(struct client *, char *parv[], int parc);
 static int s_chan_register(struct client *, char *parv[], int parc);
+static int s_chan_set(struct client *, char *parv[], int parc);
 static int s_chan_adduser(struct client *, char *parv[], int parc);
 static int s_chan_deluser(struct client *, char *parv[], int parc);
 static int s_chan_moduser(struct client *, char *parv[], int parc);
@@ -78,6 +79,7 @@ static struct service_command chanserv_command[] =
 	{ "CHANSUSPEND",	&s_chan_chansuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CHANSERV, 0 },
 	{ "CHANUNSUSPEND",	&s_chan_chanunsuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CHANSERV, 0 },
 	{ "REGISTER",	&s_chan_register,	1, NULL, 1, 0L, 1, 0, 0, UMODE_REGISTER	},
+	{ "SET",	&s_chan_set,		2, NULL, 1, 0L, 1, 0, 0, 0 },
 	{ "ADDUSER",	&s_chan_adduser,	3, NULL, 1, 0L, 1, 0, 0, 0 },
 	{ "DELUSER",	&s_chan_deluser,	2, NULL, 1, 0L, 1, 0, 0, 0 },
 	{ "MODUSER",	&s_chan_moduser,	3, NULL, 1, 0L, 1, 0, 0, 0 },
@@ -118,6 +120,7 @@ static void load_channel_db(void);
 static void free_ban_reg(struct chan_reg *chreg_p, struct ban_reg *banreg_p);
 
 static int h_chanserv_join(void *members, void *unused);
+static int h_chanserv_mode_op(void *members, void *unused);
 
 void
 init_s_chanserv(void)
@@ -130,6 +133,7 @@ init_s_chanserv(void)
 	load_channel_db();
 
 	hook_add(h_chanserv_join, HOOK_JOIN_CHANNEL);
+	hook_add(h_chanserv_mode_op, HOOK_MODE_OP);
 }
 
 void
@@ -515,6 +519,42 @@ find_owner(struct chan_reg *chreg_p)
 }
 
 static int
+h_chanserv_mode_op(void *v_chptr, void *v_members)
+{
+	struct channel *chptr = v_chptr;
+	struct chmember *member_p;
+	struct chan_reg *chreg_p;
+	dlink_list *members = v_members;
+	dlink_node *ptr, *next_ptr;
+
+	if(!dlink_list_length(members))
+		return 0;
+
+	if((chreg_p = find_channel_reg(NULL, chptr->name)) == NULL)
+		return 0;
+
+	if(chreg_p->flags & CS_FLAGS_SUSPENDED)
+		return 0;
+
+	/* only thing we're testing here.. */
+	if(!(chreg_p->flags & CS_FLAGS_NOOPS))
+		return 0;
+
+	modebuild_start(chanserv_p, chptr);
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, members->head)
+	{
+		member_p = ptr->data;
+
+		modebuild_add(DIR_DEL, "o", member_p->client_p->name);
+	}
+
+	modebuild_finish();
+
+	return 0;
+}
+
+static int
 h_chanserv_join(void *v_chptr, void *v_members)
 {
 	struct chan_reg *chreg_p;
@@ -574,7 +614,17 @@ h_chanserv_join(void *v_chptr, void *v_members)
 		}
 
 		if(is_opped(member_p))
+		{
+			if(chreg_p->flags & CS_FLAGS_NOOPS)
+			{
+				sendto_server(":%s MODE %s -o %s",
+					chanserv_p->name, chptr->name,
+					member_p->client_p->name);
+				member_p->flags &= ~MODE_OPPED;
+			}
+
 			return 0;
+		}
 
 		if((mreg_p = find_member_reg(member_p->client_p->user->user_reg,
 					chreg_p)))
@@ -639,8 +689,20 @@ h_chanserv_join(void *v_chptr, void *v_members)
 			}
 		}
 
-		if(hit || is_opped(member_p))
+		if(hit)
 			continue;
+
+		if(is_opped(member_p))
+		{
+			if(chreg_p->flags & CS_FLAGS_NOOPS)
+			{
+				modebuild_add(DIR_DEL, "o", 
+						member_p->client_p->name);
+				member_p->flags &= ~MODE_OPPED;
+			}
+
+			continue;
+		}
 
 		if((mreg_p = find_member_reg(member_p->client_p->user->user_reg,
 					chreg_p)))
@@ -1357,10 +1419,11 @@ s_chan_clearmodes(struct client *client_p, char *parv[], int parc)
 }
 
 static void
-s_chan_clearops_loc(struct client *client_p, struct channel *chptr,
-			struct member_reg *mreg_p, int level)
+s_chan_clearops_loc(struct channel *chptr, struct chan_reg *chreg_p, 
+			int level)
 {
 	struct member_reg *mreg_tp;
+	struct user_reg *ureg_p;
 	struct chmember *msptr;
 	dlink_node *ptr;
 
@@ -1373,10 +1436,11 @@ s_chan_clearops_loc(struct client *client_p, struct channel *chptr,
 		if(!is_opped(msptr))
 			continue;
 
-		if(msptr->client_p->user->user_reg &&
-		   (mreg_tp = find_member_reg(msptr->client_p->user->user_reg, mreg_p->channel_reg)))
+		ureg_p = msptr->client_p->user->user_reg;
+
+		if(ureg_p && (mreg_tp = find_member_reg(ureg_p, chreg_p)))
 		{
-			if(mreg_tp->level >= level || mreg_tp->suspend)
+			if(mreg_tp->level >= level && !mreg_tp->suspend)
 				continue;
 		}
 
@@ -1385,8 +1449,6 @@ s_chan_clearops_loc(struct client *client_p, struct channel *chptr,
 	}
 
 	modebuild_finish();
-
-	service_error(chanserv_p, client_p, "Channel %s ops cleared", chptr->name);
 }
 
 static int
@@ -1402,7 +1464,10 @@ s_chan_clearops(struct client *client_p, char *parv[], int parc)
 		client_p->user->mask, client_p->user->user_reg->name,
 		parv[0]);
 
-	s_chan_clearops_loc(client_p, chptr, mreg_p, 0);
+	s_chan_clearops_loc(chptr, mreg_p->channel_reg, 0);
+
+	service_error(chanserv_p, client_p, "Channel %s ops cleared", 
+			chptr->name);
 	return 3;
 }
 
@@ -1419,7 +1484,10 @@ s_chan_clearallops(struct client *client_p, char *parv[], int parc)
 		client_p->user->mask, client_p->user->user_reg->name,
 		parv[0]);
 
-	s_chan_clearops_loc(client_p, chptr, mreg_p, mreg_p->level);
+	s_chan_clearops_loc(chptr, mreg_p->channel_reg, mreg_p->level);
+
+	service_error(chanserv_p, client_p, "Channel %s ops cleared", 
+			chptr->name);
 	return 3;
 }
 
@@ -1472,6 +1540,66 @@ s_chan_clearbans(struct client *client_p, char *parv[], int parc)
 	return 3;
 }
 
+static int
+s_chan_set(struct client *client_p, char *parv[], int parc)
+{
+	struct chan_reg *chreg_p;
+	struct member_reg *mreg_p;
+	static const char dummy[] = "\0";
+	const char *arg;
+
+	if((mreg_p = verify_member_reg_name(client_p, NULL, parv[0], S_C_MANAGER)) == NULL)
+		return 1;
+
+	chreg_p = mreg_p->channel_reg;
+
+	/* we need to strcasecmp() this, could be NULL.. */
+	arg = EmptyString(parv[2]) ? dummy : parv[2];
+
+	if(!strcasecmp(parv[1], "NOOPS"))
+	{
+		if(!strcasecmp(arg, "ON"))
+		{
+			struct channel *chptr;
+
+			chreg_p->flags |= CS_FLAGS_NOOPS;
+
+			if(!(chptr = find_channel(chreg_p->name)))
+				return  1;
+
+			/* hack! noone can match level S_C_OWNER+1 :) */
+			s_chan_clearops_loc(chptr, chreg_p, S_C_OWNER+1);
+		}
+		else if(!strcasecmp(arg, "OFF"))
+		{
+			chreg_p->flags &= ~CS_FLAGS_NOOPS;
+		}
+		else
+			service_error(chanserv_p, client_p,
+					"Channel %s NOOPS is %s",
+					chreg_p->name,
+					(chreg_p->flags & CS_FLAGS_NOOPS) ?
+					 "ON" : "OFF");
+
+		return 1;
+	}
+	else if(!strcasecmp(parv[1], "AUTOJOIN"))
+	{
+		if(!strcasecmp(parv[2], "ON"))
+		{
+		}
+		else
+		{
+		}
+
+		return 1;
+	}
+
+	service_error(chanserv_p, client_p, "Set option invalid");
+	return 1;
+}
+
+
 #if 0
 /* This will only work if chanserv is on the channel itself.. */
 static int
@@ -1514,6 +1642,15 @@ s_chan_op(struct client *client_p, char *parv[], int parc)
 
 	if((reg_p = verify_member_reg_name(client_p, &chptr, parv[0], S_C_OP)) == NULL)
 		return 1;
+
+	/* noone is allowed to be opped.. */
+	if(reg_p->channel_reg->flags & CS_FLAGS_NOOPS)
+	{
+		service_error(chanserv_p, client_p,
+			"Channel %s is set NOOPS",
+			reg_p->channel_reg->name);
+		return 1;
+	}
 
 	if((msptr = find_chmember(chptr, client_p)) == NULL)
 	{
