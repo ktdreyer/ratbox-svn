@@ -1,3 +1,15 @@
+androsyn    2002/12/16 09:01:33 UTC	(20021216_22)
+
+  Modified files:
+    src                  modules.c 
+  Log:
+  fix the static build some more :)
+  
+  Revision  Changes    Path
+  7.121     +0 -3      ircd-ratbox/src/modules.c
+
+
+
 androsyn    2002/12/16 08:58:27 UTC	(20021216_21)
 
   Modified files:
