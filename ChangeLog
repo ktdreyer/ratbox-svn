@@ -1,3 +1,15 @@
+androsyn    2003/10/08 10:27:27 EDT	(20031008_0)
+
+  Modified files:
+    include              irc_string.h 
+  Log:
+  Remove a needless declaration
+  
+  Revision  Changes    Path
+  7.54      +0 -8      ircd-ratbox/include/irc_string.h
+
+
+
 androsyn    2003/10/07 12:01:58 EDT	(20031007_0)
 
   Modified files:
