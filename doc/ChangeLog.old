@@ -1,3 +1,17 @@
+androsyn    2002/04/03 11:10:24 EST	(20020403_4)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+  Log:
+  Fixed minor issue with configure and nicklen
+  
+  Revision  Changes    Path
+  7.129     +4 -1      ircd-hybrid-7/autoconf/configure.in
+  7.132     +54 -51    ircd-hybrid-7/configure
+
+
+
 androsyn    2002/04/03 08:10:31 EST	(20020403_3)
 
   Modified files:
