@@ -1,3 +1,15 @@
+leeh        2003/05/20 12:43:23 UTC	(20030520_1)
+
+  Modified files:
+    include              modules.h 
+  Log:
+  - #define MAPI_RATBOX 1 - to indicate which modules api we're using.
+  
+  Revision  Changes    Path
+  7.51      +1 -0      ircd-ratbox/include/modules.h
+
+
+
 leeh        2003/05/20 10:39:27 UTC	(20030520_0)
 
   Modified files:
