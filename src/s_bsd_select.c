@@ -189,7 +189,7 @@ comm_select(time_t delay)
     bcopy(&select_writefds, &tmpwritefds, sizeof(fd_set));
 
     for (;;) {
-        to.tv_sec = 1;
+        to.tv_sec = delay;
         to.tv_usec = 0;
         num = select(highest_fd + 1, &tmpreadfds, &tmpwritefds, NULL, &to);
         if (num >= 0)
