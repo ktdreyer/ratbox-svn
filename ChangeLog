@@ -1,3 +1,16 @@
+leeh        2005/01/24 16:00:30 EST	(20050124_4)
+
+  Modified files:
+    modules              m_cap.c 
+  Log:
+  - have cap end call register_local_user() with its own copy of
+    source_p->username so its safe for unidented users..
+  
+  Revision  Changes    Path
+  1.4       +6 -2      ircd-ratbox/modules/m_cap.c
+
+
+
 leeh        2005/01/24 15:48:09 EST	(20050124_3)
 
   Modified files:
