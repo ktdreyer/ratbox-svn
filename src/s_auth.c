@@ -447,7 +447,7 @@ timeout_auth_queries_event(void *notused)
 				sendheader(auth->client, REPORT_FAIL_DNS);
 			}
 
-			auth->client->lasttime = CurrentTime;
+			auth->client->localClient->lasttime = CurrentTime;
 			dlinkDelete(ptr, &auth_poll_list);
 			release_auth_client(auth);
 		}

@@ -133,11 +133,12 @@ make_client(struct Client *from)
 	if(from == NULL)
 	{
 		client_p->from = client_p;	/* 'from' of local client is self! */
-		client_p->lasttime = client_p->firsttime = CurrentTime;
 
 		localClient = (struct LocalUser *) BlockHeapAlloc(lclient_heap);
 		SetMyConnect(client_p);
 		client_p->localClient = localClient;
+
+		client_p->localClient->lasttime = client_p->localClient->firsttime = CurrentTime;
 
 		client_p->localClient->fd = -1;
 		client_p->localClient->ctrlfd = -1;
@@ -301,13 +302,13 @@ check_pings_list(dlink_list * list)
 		else
 			ping = get_client_ping(client_p);
 
-		if(ping < (CurrentTime - client_p->lasttime))
+		if(ping < (CurrentTime - client_p->localClient->lasttime))
 		{
 			/*
 			 * If the client/server hasnt talked to us in 2*ping seconds
 			 * and it has a ping time, then close its connection.
 			 */
-			if(((CurrentTime - client_p->lasttime) >= (2 * ping)
+			if(((CurrentTime - client_p->localClient->lasttime) >= (2 * ping)
 			    && (client_p->flags & FLAGS_PINGSENT)))
 			{
 				if(IsAnyServer(client_p))
@@ -321,7 +322,7 @@ check_pings_list(dlink_list * list)
 				}
 				(void) ircsnprintf(scratch, sizeof(scratch),
 						  "Ping timeout: %d seconds",
-						  (int) (CurrentTime - client_p->lasttime));
+						  (int) (CurrentTime - client_p->localClient->lasttime));
 
 				exit_client(client_p, client_p, &me, scratch);
 				continue;
@@ -335,7 +336,7 @@ check_pings_list(dlink_list * list)
 				 */
 				client_p->flags |= FLAGS_PINGSENT;
 				/* not nice but does the job */
-				client_p->lasttime = CurrentTime - ping;
+				client_p->localClient->lasttime = CurrentTime - ping;
 				sendto_one(client_p, "PING :%s", me.name);
 			}
 		}
@@ -369,7 +370,7 @@ check_unknowns_list(dlink_list * list)
 		 * for > 30s, close them.
 		 */
 
-		if(client_p->firsttime ? ((CurrentTime - client_p->firsttime) > 30) : 0)
+		if(CurrentTime - client_p->localClient->firsttime > 30)
 			exit_client(client_p, client_p, &me, "Connection timed out");
 	}
 }
@@ -1454,10 +1455,10 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 
 	sendto_realops_flags(UMODE_ALL, L_ALL, "%s was connected"
 			     " for %ld seconds.  %d/%d sendK/recvK.",
-			     source_p->name, CurrentTime - source_p->firsttime, sendk, recvk);
+			     source_p->name, CurrentTime - source_p->localClient->firsttime, sendk, recvk);
 
 	ilog(L_SERVER, "%s was connected for %ld seconds.  %d/%d sendK/recvK.",
-	     source_p->name, CurrentTime - source_p->firsttime, sendk, recvk);
+	     source_p->name, CurrentTime - source_p->localClient->firsttime, sendk, recvk);
         
 	if(has_id(source_p))
 		del_from_id_hash(source_p->id, source_p);
@@ -1497,7 +1498,7 @@ exit_local_client(struct Client *client_p, struct Client *source_p, struct Clien
 #endif
 			     source_p->sockhost);
 
-	on_for = CurrentTime - source_p->firsttime;
+	on_for = CurrentTime - source_p->localClient->firsttime;
 
 	ilog(L_USER, "%s (%3lu:%02lu:%02lu): %s!%s@%s %d/%d",
 		myctime(CurrentTime), on_for / 3600,
@@ -2002,7 +2003,7 @@ close_connection(struct Client *client_p)
 		ServerStats.is_sbr += client_p->localClient->receiveB;
 		ServerStats.is_sks += client_p->localClient->sendK;
 		ServerStats.is_skr += client_p->localClient->receiveK;
-		ServerStats.is_sti += CurrentTime - client_p->firsttime;
+		ServerStats.is_sti += CurrentTime - client_p->localClient->firsttime;
 		if(ServerStats.is_sbs > 2047)
 		{
 			ServerStats.is_sks += (ServerStats.is_sbs >> 10);
@@ -2028,7 +2029,7 @@ close_connection(struct Client *client_p)
 			 */
 			server_p->hold = time(NULL);
 			server_p->hold +=
-				(server_p->hold - client_p->lasttime >
+				(server_p->hold - client_p->localClient->lasttime >
 				 HANGONGOODLINK) ? HANGONRETRYDELAY : ConFreq(server_p->class);
 			if(nextconnect > server_p->hold)
 				nextconnect = server_p->hold;
@@ -2042,7 +2043,7 @@ close_connection(struct Client *client_p)
 		ServerStats.is_cbr += client_p->localClient->receiveB;
 		ServerStats.is_cks += client_p->localClient->sendK;
 		ServerStats.is_ckr += client_p->localClient->receiveK;
-		ServerStats.is_cti += CurrentTime - client_p->firsttime;
+		ServerStats.is_cti += CurrentTime - client_p->localClient->firsttime;
 		if(ServerStats.is_cbs > 2047)
 		{
 			ServerStats.is_cks += (ServerStats.is_cbs >> 10);
@@ -2109,7 +2110,7 @@ error_exit_client(struct Client *client_p, int error)
 
 	if(IsServer(client_p) || IsHandshake(client_p))
 	{
-		int connected = CurrentTime - client_p->firsttime;
+		int connected = CurrentTime - client_p->localClient->firsttime;
 
 		if(error == 0)
 		{

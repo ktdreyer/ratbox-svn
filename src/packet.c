@@ -369,8 +369,8 @@ read_packet(int fd, void *data)
 	hook_call_event(h_iorecv_id, &hdata);
 #endif
 
-	if(client_p->lasttime < CurrentTime)
-		client_p->lasttime = CurrentTime;
+	if(client_p->localClient->lasttime < CurrentTime)
+		client_p->localClient->lasttime = CurrentTime;
 	client_p->flags &= ~FLAGS_PINGSENT;
 
 	/*

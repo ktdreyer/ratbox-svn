@@ -663,7 +663,7 @@ send_birthdate_online_time(struct Client *source_p)
 
 	sendto_one(source_p, ":%s %d %s :On-line since %s",
 		   get_id(&me, source_p), RPL_INFO, 
-		   get_id(source_p, source_p), myctime(me.firsttime));
+		   get_id(source_p, source_p), myctime(startup_time));
 }
 
 /*

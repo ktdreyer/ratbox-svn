@@ -113,6 +113,8 @@ int server_state_foreground = 0;
 
 int testing_conf = 0;
 
+time_t startup_time;
+
 /* Set to zero because it should be initialized later using
  * initialize_server_capabs
  */
@@ -659,7 +661,7 @@ main(int argc, char *argv[])
 	SetMe(&me);
 	make_server(&me);
 	me.serv->up = me.name;
-	me.lasttime = me.firsttime = CurrentTime;
+	startup_time = CurrentTime;
 	add_to_client_hash(me.name, &me);
 	add_to_id_hash(me.id, &me);
 

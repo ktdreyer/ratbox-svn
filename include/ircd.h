@@ -121,6 +121,8 @@ extern struct timeval SystemTime;
 extern time_t nextconnect;
 extern int default_server_capabs;
 
+extern time_t startup_time;
+
 extern int splitmode;
 extern int splitchecking;
 extern int split_users;

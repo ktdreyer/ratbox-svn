@@ -115,8 +115,6 @@ struct Client
 	struct Client *from;	/* == self, if Local Client, *NEVER* NULL! */
 
 	struct Whowas *whowas;	/* Pointers to whowas structs */
-	time_t lasttime;	/* ...should be only LOCAL clients? --msa */
-	time_t firsttime;	/* time client was created */
 	time_t tsinfo;		/* TS on the nick, SVINFO on server */
 	unsigned int umodes;	/* opers, normal users subset */
 	unsigned int flags;	/* client flags */
@@ -178,6 +176,9 @@ struct LocalUser
 	time_t first_received_message_time;
 	int received_number_of_privmsgs;
 	int flood_noticed;
+
+	time_t lasttime;	/* last time they sent data */
+	time_t firsttime;	/* time client was created */
 
 	/* Send and receive linebuf queues .. */
 	buf_head_t buf_sendq;

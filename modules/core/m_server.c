@@ -924,7 +924,7 @@ server_estab(struct Client *client_p)
 
 	/* add it to scache */
 	find_or_add(client_p->name);
-	client_p->firsttime = CurrentTime;
+	client_p->localClient->firsttime = CurrentTime;
 	/* fixing eob timings.. -gnp */
 
 	/* Show the real host/IP to admins */
