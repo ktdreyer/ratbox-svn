@@ -27,10 +27,10 @@
 #ifndef INCLUDED_class_h
 #define INCLUDED_class_h
 
+#include "tools.h"
+
 struct ConfItem;
 struct Client;
-
-
 struct _patricia_tree_t;
 
 struct Class
@@ -51,7 +51,8 @@ struct Class
 
 };
 
-extern struct Class *ClassList;
+extern dlink_list class_list;
+extern struct Class *default_class;
 
 #define ClassName(x)	((x)->class_name)
 #define ConFreq(x)      ((x)->con_freq)

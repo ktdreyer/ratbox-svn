@@ -97,9 +97,6 @@ static void expire_tdline(dlink_list *, int);
 FBFILE *conf_fbfile_in;
 extern char yytext[];
 
-/* address of class 0 conf */
-static struct Class *class0;
-
 static int verify_access(struct Client *client_p, const char *username);
 static int attach_iline(struct Client *, struct ConfItem *);
 
@@ -982,8 +979,6 @@ rehash(int sig)
 static void
 set_default_conf(void)
 {
-	class0 = find_class("default");	/* which one is the default class ? */
-
 #ifdef HAVE_LIBCRYPTO
 	ServerInfo.rsa_private_key = NULL;
 	ServerInfo.rsa_private_key_file = NULL;
@@ -1804,6 +1799,7 @@ clear_out_old_conf(void)
 	struct ConfItem **tmp = &ConfigItemList;
 	struct ConfItem *tmp2;
 	struct Class *cltmp;
+	dlink_node *ptr;
 
 	/*
 	 * We only need to free anything allocated by yyparse() here.
@@ -1839,10 +1835,11 @@ clear_out_old_conf(void)
 	 * don't delete the class table, rather mark all entries
 	 * for deletion. The table is cleaned up by check_class. - avalon
 	 */
-	s_assert(ClassList != NULL);
-
-	for (cltmp = ClassList->next; cltmp; cltmp = cltmp->next)
+	DLINK_FOREACH(ptr, class_list.head)
+	{
+		cltmp = ptr->data;
 		MaxUsers(cltmp) = -1;
+	}
 
 	clear_out_address_conf();
 	clear_xlines();
@@ -2098,13 +2095,13 @@ conf_add_class_to_conf(struct ConfItem *aconf)
 	if(aconf->className == NULL)
 	{
 		DupString(aconf->className, "default");
-		ClassPtr(aconf) = class0;
+		ClassPtr(aconf) = default_class;
 		return;
 	}
 
 	ClassPtr(aconf) = find_class(aconf->className);
 
-	if(ClassPtr(aconf) == class0)
+	if(ClassPtr(aconf) == default_class)
 	{
 		if(aconf->status == CONF_CLIENT)
 		{
@@ -2128,7 +2125,7 @@ conf_add_class_to_conf(struct ConfItem *aconf)
 
 	if(ConfMaxUsers(aconf) < 0)
 	{
-		ClassPtr(aconf) = find_class(0);
+		ClassPtr(aconf) = default_class;
 		MyFree(aconf->className);
 		DupString(aconf->className, "default");
 		return;

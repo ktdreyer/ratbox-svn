@@ -281,11 +281,17 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 		return 0;
 	}
 
-	for (cltmp = ClassList; doall && cltmp; cltmp = cltmp->next)
+	if(doall)
 	{
-		if(CurrUsers(cltmp) > 0)
-			sendto_one(source_p, form_str(RPL_TRACECLASS), me.name,
-				   parv[0], ClassName(cltmp), CurrUsers(cltmp));
+		DLINK_FOREACH(ptr, class_list.head)
+		{
+			cltmp = ptr->data;
+
+			if(CurrUsers(cltmp) > 0)
+				sendto_one(source_p, form_str(RPL_TRACECLASS), 
+					   me.name, parv[0], 
+					   ClassName(cltmp), CurrUsers(cltmp));
+		}
 	}
 
 	sendto_one(source_p, form_str(RPL_ENDOFTRACE), me.name, parv[0], tname);

@@ -56,7 +56,6 @@ lex.yy.c:	ircd_lexer.l
 BASE_SRCS =                     \
   adns.c                        \
   balloc.c			\
-  hostmask.c			\
   channel.c                     \
   channel_mode.c		\
   class.c                       \
@@ -69,6 +68,7 @@ BASE_SRCS =                     \
   getopt.c                      \
   hash.c                        \
   hook.c                        \
+  hostmask.c			\
   irc_string.c                  \
   ircd.c                        \
   ircd_signal.c                 \

@@ -159,7 +159,6 @@ count_memory(struct Client *source_p)
 	struct Channel *chptr;
 	struct ConfItem *aconf;
 	struct Ban *actualBan;
-	struct Class *cltmp;
 	dlink_node *dlink;
 	dlink_node *ptr;
 	int channel_count = 0;
@@ -280,8 +279,7 @@ count_memory(struct Client *source_p)
 
 	/* count up all classes */
 
-	for (cltmp = ClassList; cltmp; cltmp = cltmp->next)
-		class_count++;
+	class_count = dlink_list_length(&class_list) + 1;
 
 	count_linebuf_memory(&linebuf_count, &linebuf_memory_used);
 

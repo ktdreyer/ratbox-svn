@@ -44,7 +44,8 @@
 #define BAD_PING                -2
 #define BAD_CLIENT_CLASS        -3
 
-struct Class *ClassList;
+dlink_list class_list;
+struct Class *default_class;
 
 struct Class *
 make_class(void)
@@ -52,7 +53,12 @@ make_class(void)
 	struct Class *tmp;
 
 	tmp = (struct Class *) MyMalloc(sizeof(struct Class));
-	memset(tmp, 0, sizeof(struct Class));
+
+	ConFreq(tmp) = DEFAULT_CONNECTFREQUENCY;
+	PingFreq(tmp) = DEFAULT_PINGFREQUENCY;
+	MaxUsers(tmp) = 1;
+	MaxSendq(tmp) = DEFAULT_SENDQ;
+
 #ifdef IPV6
 	tmp->ip_limits = New_Patricia(128);
 #else
@@ -165,7 +171,7 @@ get_con_freq(struct Class *clptr)
  *
  * input	- class to add
  * output	-
- * side effects - class is added to ClassList if new, else old class
+ * side effects - class is added to class_list if new, else old class
  *                is updated with new values.
  */
 void
@@ -175,10 +181,9 @@ add_class(struct Class *classptr)
 
 	tmpptr = find_class(classptr->class_name);
 
-	if(tmpptr == ClassList)
+	if(tmpptr == default_class)
 	{
-		classptr->next = tmpptr->next;
-		tmpptr->next = classptr;
+		dlinkAddAlloc(classptr, &class_list);
 		CurrUsers(classptr) = 0;
 	}
 	else
@@ -207,16 +212,20 @@ struct Class *
 find_class(const char *classname)
 {
 	struct Class *cltmp;
+	dlink_node *ptr;
 
 	if(classname == NULL)
-	{
-		return (ClassList);	/* return class 0 */
-	}
+		return default_class;
 
-	for (cltmp = ClassList; cltmp; cltmp = cltmp->next)
+	DLINK_FOREACH(ptr, class_list.head)
+	{
+		cltmp = ptr->data;
+
 		if(!strcmp(ClassName(cltmp), classname))
 			return cltmp;
-	return ClassList;
+	}
+
+	return default_class;
 }
 
 /*
@@ -229,20 +238,22 @@ find_class(const char *classname)
 void
 check_class()
 {
-	struct Class *cltmp, *cltmp2;
+	struct Class *cltmp;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
 
 	Debug((DEBUG_DEBUG, "Class check:"));
 
-	for (cltmp2 = cltmp = ClassList; cltmp; cltmp = cltmp2->next)
+	DLINK_FOREACH_SAFE(ptr, next_ptr, class_list.head)
 	{
+		cltmp = ptr->data;
+
 		if(MaxUsers(cltmp) < 0)
 		{
-			cltmp2->next = cltmp->next;
+			dlinkDestroy(ptr, &class_list);
 			if(CurrUsers(cltmp) <= 0)
 				free_class(cltmp);
 		}
-		else
-			cltmp2 = cltmp;
 	}
 }
 
@@ -256,13 +267,8 @@ check_class()
 void
 initclass()
 {
-	ClassList = make_class();
-
-	DupString(ClassName(ClassList), "default");
-	ConFreq(ClassList) = DEFAULT_CONNECTFREQUENCY;
-	PingFreq(ClassList) = DEFAULT_PINGFREQUENCY;
-	MaxUsers(ClassList) = 1;
-	MaxSendq(ClassList) = DEFAULT_SENDQ;
+	default_class = make_class();
+	DupString(ClassName(default_class), "default");
 }
 
 /*
@@ -276,13 +282,26 @@ void
 report_classes(struct Client *source_p)
 {
 	struct Class *cltmp;
+	dlink_node *ptr;
 
-	for (cltmp = ClassList; cltmp; cltmp = cltmp->next)
+	DLINK_FOREACH(ptr, class_list.head)
+	{
+		cltmp = ptr->data;
+
 		sendto_one(source_p, form_str(RPL_STATSYLINE), me.name,
 			   source_p->name, 'Y', ClassName(cltmp),
 			   PingFreq(cltmp), ConFreq(cltmp),
 			   MaxUsers(cltmp), MaxSendq(cltmp),
 			   MaxLocal(cltmp), MaxIdent(cltmp), MaxGlobal(cltmp), MaxIdent(cltmp));
+	}
+
+	/* also output the default class */
+	sendto_one(source_p, form_str(RPL_STATSYLINE),
+		   me.name, source_p->name, 'Y', ClassName(default_class),
+		   PingFreq(default_class), ConFreq(default_class),
+		   MaxUsers(default_class), MaxSendq(default_class),
+		   MaxLocal(default_class), MaxIdent(default_class),
+		   MaxGlobal(default_class), MaxIdent(default_class));
 }
 
 /*
