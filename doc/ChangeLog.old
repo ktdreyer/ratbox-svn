@@ -1,3 +1,8 @@
+*** 19991017_1 by db
+- removed (+) cruft as this was a Tanerism
+
+
+
 *** 19991013_10 by tomh
 Removed CONNECTFAST garbage, it was causing production boxes to load up on
 SYNs on the primary port and killing poll performance.
