@@ -66,6 +66,10 @@ extern char *crypt();
 #define INADDR_NONE ((unsigned int) 0xffffffff)
 #endif
 
+#ifndef HAVE_SOCKETPAIR
+static int inet_socketpair(int d, int type, int protocol, int sv[2]);
+#endif
+
 int MaxConnectionCount = 1;
 int MaxClientCount = 1;
 int refresh_user_links = 0;
@@ -1335,7 +1339,11 @@ fork_server(struct Client *server)
 
 
 	/* ctrl */
+#ifdef HAVE_SOCKETPAIR
 	if(socketpair(AF_UNIX, SOCK_STREAM, 0, fd_temp) < 0)
+#else
+	if(inet_socketpair(AF_INET,SOCK_STREAM, 0, fd_temp) < 0)
+#endif
 		goto fork_error;
 
 	slink_fds[0][0][0] = fd_temp[0];
@@ -1344,7 +1352,11 @@ fork_server(struct Client *server)
 	slink_fds[0][1][0] = fd_temp[1];
 
 	/* data */
+#ifdef HAVE_SOCKETPAIR
 	if(socketpair(AF_UNIX, SOCK_STREAM, 0, fd_temp) < 0)
+#else
+	if(inet_socketpair(AF_INET,SOCK_STREAM, 0, fd_temp) < 0)
+#endif
 		goto fork_error;
 
 
@@ -1828,3 +1840,59 @@ serv_connect_callback(int fd, int status, void *data)
 	comm_setselect(fd, FDLIST_SERVER, COMM_SELECT_READ, read_packet, client_p, 0);
 }
 
+#ifndef HAVE_SOCKETPAIR
+static int
+inet_socketpair(int d, int type, int protocol, int sv[2])
+{
+	struct sockaddr_in addr1, addr2, addr3;
+	int addr3_len = sizeof(addr3);
+	int fd, rc;
+	int port_no = 20000;
+	
+	if(d != AF_INET || type != SOCK_STREAM || protocol)
+	{
+		errno = EAFNOSUPPORT;
+		return -1;
+	}
+	if(((sv[0] = socket(AF_INET, SOCK_STREAM, 0)) < 0) || ((sv[1] = socket(AF_INET, SOCK_STREAM, 0)) < 0))
+		return -1;
+	
+	addr1.sin_port = htons(port_no);
+	addr1.sin_family = AF_INET;
+	addr1.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+	while ((rc = bind (sv[0], (struct sockaddr *) &addr1, sizeof (addr1))) < 0 && errno == EADDRINUSE)
+		addr1.sin_port = htons(++port_no);
+	
+	if(rc < 0)
+		return -1;
+	
+	if(listen(sv[0], 1) < 0)
+	{
+		close(sv[0]);
+		close(sv[1]);
+		return -1;
+	}
+	
+	addr2.sin_port = htons(port_no);
+	addr2.sin_family = AF_INET;
+	addr2.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+	if(connect (sv[1], (struct sockaddr *) &addr2, sizeof (addr2)) < 0) 
+	{
+		close(sv[0]);
+		close(sv[1]);
+		return -1;
+	}
+	
+	if((fd = accept(sv[1], (struct sockaddr *) &addr3, &addr3_len)) < 0)
+	{
+		close(sv[0]);
+		close(sv[1]);
+		return -1;
+	}
+	close(sv[0]);
+	sv[0] = fd;
+	
+	return(0);
+
+}
+#endif
