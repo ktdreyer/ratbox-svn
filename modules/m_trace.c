@@ -186,12 +186,13 @@ static void m_trace(struct Client *client_p, struct Client *source_p,
     }
   }
 
-  /* give non-opers a limited trace output of themselves, opers and
-   * servers (if no shide) --fl
+  /* give non-opers a limited trace output of themselves (if local), 
+   * opers and servers (if no shide) --fl
    */
   if(!IsOper(source_p))
   {
-    report_this_status(source_p, source_p, 0, 0, 0);
+    if(MyClient(source_p))
+      report_this_status(source_p, source_p, 0, 0, 0);
 
     DLINK_FOREACH(ptr, oper_list.head)
     {
@@ -311,6 +312,10 @@ static int report_this_status(struct Client *source_p, struct Client *target_p,
   const char* class_name;
   char  ip[HOSTIPLEN];
   int cnt=0;
+
+  /* sanity check - should never happen */
+  if(!MyConnect(target_p))
+    return;
 
   inetntop(target_p->localClient->aftype, &IN_ADDR(target_p->localClient->ip), ip, HOSTIPLEN);
   name = get_client_name(target_p, HIDE_IP);
