@@ -1,3 +1,9 @@
+*** 20001221_19 by db
+- stats v should not be shown to users
+- neither should stats h
+
+
+
 *** 20001221_18 by wcampbel
 Brought convertconf up to date.  It now produces a valid -7 conf.
 Anyone mind if I add some more test lines to the test ircd.conf in tools?
