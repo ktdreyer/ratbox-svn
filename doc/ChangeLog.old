@@ -1,3 +1,8 @@
+*** 20001201_6 by db
+- fixed m_names.c missing reply_to_send = 1
+
+
+
 *** 20001201_5 by db
 - tidy up LITTLE_I_LINE code remove #ifdef's
 
