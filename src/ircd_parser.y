@@ -328,7 +328,7 @@ serverinfo_vhost:       VHOST '=' IP_TYPE ';'
   {
 #ifndef IPV6
 /* XXX: Broken for IPv6 */
-    ServerInfo.ip.s_addr = yylval.ip_entry.ip;
+    IN_ADDR(ServerInfo.ip) = yylval.ip_entry.ip;
 #endif
   };
 
