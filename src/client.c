@@ -1000,6 +1000,9 @@ static void exit_one_client(struct Client *client_p,
 
 	if (HasID(source_p))
 	  del_from_id_hash_table(source_p->user->id, source_p);
+
+	if(ConfigFileEntry.use_global_limits)
+	  del_from_hostname_hash_table(source_p->host, source_p);
   
         /* again, this is all that is needed */
     }

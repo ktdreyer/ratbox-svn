@@ -74,7 +74,8 @@ static void     validate_conf(void);
 static void     read_conf(FBFILE*);
 static void     clear_out_old_conf(void);
 static void     flush_deleted_I_P(void);
-static void     expire_tklines(dlink_list *);
+static void	add_temp_line(struct ConfItem *);
+static void     expire_temps(dlink_list *, int);
 static int 	is_attached(struct Client *client_p, struct ConfItem *aconf);
 
 FBFILE* conf_fbfile_in;
@@ -438,18 +439,40 @@ check_client(struct Client *client_p, struct Client *source_p, char *username)
       (void)exit_client(client_p, source_p, &me, "Socket Error");
       break;
 
-    case TOO_MANY:
+    case TOO_MANY_LOCAL:
       sendto_realops_flags(FLAGS_FULL, L_ALL, 
-                           "Too many on IP for %s (%s).",
-			   get_client_name(source_p, SHOW_IP),
-			   source_p->localClient->sockhost);
+                           "Too many local connections for %s",
+			   get_client_name(source_p, SHOW_IP));
 			   
-      ilog(L_INFO,"Too many connections on IP from %s.",
-	   get_client_name(source_p, SHOW_IP));
+      ilog(L_INFO,"Too many local connections from %s",
+           get_client_name(source_p, SHOW_IP));
       
       ServerStats->is_ref++;
-      (void)exit_client(client_p, source_p, &me, 
-			"No more connections allowed on that IP" );
+      exit_client(client_p, source_p, &me, "Too many host connections (local)");
+      break;
+
+    case TOO_MANY_GLOBAL:
+      sendto_realops_flags(FLAGS_FULL, L_ALL,
+		           "Too many global connections for %s",
+			   get_client_name(source_p, SHOW_IP));
+      ilog(L_INFO, "Too many global connections from %s",
+           get_client_name(source_p, SHOW_IP));
+
+      ServerStats->is_ref++;
+      exit_client(client_p, source_p, &me,
+		  "Too many host connections (global)");
+      break;
+
+    case TOO_MANY_IDENT:
+      sendto_realops_flags(FLAGS_FULL, L_ALL,
+		           "Too many user connections for %s",
+			   get_client_name(source_p, SHOW_IP));
+      ilog(L_INFO, "Too many user connections from %s",
+           get_client_name(source_p, SHOW_IP));
+
+      ServerStats->is_ref++;
+      exit_client(client_p, source_p, &me,
+                  "Too many user connections (global)");
       break;
 
     case I_LINE_FULL:
@@ -612,12 +635,55 @@ int attach_iline(struct Client *client_p, struct ConfItem *aconf)
   SetIpHash(client_p);
   ip_found->count++;
 
-  /* only check it if its non zero */
-  if ( aconf->c_class /* This should never non NULL *grin* */ &&
-       ConfConFreq(aconf) && ip_found->count > ConfConFreq(aconf))
+  if(ConfigFileEntry.use_global_limits)
+  {
+    struct Client *target_p;
+    int local_count = 0;
+    int global_count = 0;
+    int ident_count = 0;
+    int unidented = 0;
+
+    if(IsConfExemptLimits(aconf))
+      return(attach_conf(client_p, aconf));
+
+    if(*client_p->username == '~')
+      unidented = 1;
+
+    for(target_p = find_hostname(client_p->host); target_p;
+        target_p = target_p->hostnext)
+    {
+      if(irccmp(client_p->host, target_p->host) != 0)
+        continue;
+
+      if(MyConnect(target_p))
+        local_count++;
+
+      global_count++;
+
+      if(unidented)
+      {
+	if(*target_p->username == '~')
+          ident_count++;
+      }
+      else if(irccmp(target_p->username, client_p->username) == 0)
+        ident_count++;
+
+      if(ConfMaxLocal(aconf) && local_count >= ConfMaxLocal(aconf))
+        return(TOO_MANY_LOCAL);
+      else if(ConfMaxGlobal(aconf) && global_count >= ConfMaxGlobal(aconf))
+        return(TOO_MANY_GLOBAL);
+      else if(ConfMaxIdent(aconf) && ident_count >= ConfMaxIdent(aconf))
+        return(TOO_MANY_IDENT);
+    }
+  }
+  else
+  {
+    /* only check it if its non zero */
+    if(aconf->c_class &&
+       ConfMaxLocal(aconf) && ip_found->count > ConfMaxLocal(aconf))
     {
       if(!IsConfExemptLimits(aconf))
-        return(TOO_MANY); /* Already at maximum allowed ip#'s */
+        return(TOO_MANY_LOCAL); /* Already at maximum allowed ip#'s */
       else
         {
           sendto_one(client_p,
@@ -625,6 +691,7 @@ int attach_iline(struct Client *client_p, struct ConfItem *aconf)
                      me.name,client_p->name);
         }
     }
+  }
 
   return(attach_conf(client_p, aconf));
 }
@@ -694,14 +761,15 @@ find_or_add_ip(struct irc_inaddr *ip_in)
   for(ptr = ip_hash_table[hash_index = hash_ip(ip_in)]; ptr;
       ptr = ptr->next)
   {
-   if(!memcmp(&ptr->ip, ip_in, sizeof(struct irc_inaddr)))
-   {
-    return(ptr);
-   }
-  }
-  if ((ptr = ip_hash_table[hash_index]) != (IP_ENTRY *)NULL)
+    if(memcmp(&ptr->ip, ip_in, sizeof(struct irc_inaddr)) == 0)
     {
-      if( free_ip_entries == (IP_ENTRY *)NULL)
+      return(ptr);
+    }
+  }
+
+  if ((ptr = ip_hash_table[hash_index]) != NULL)
+    {
+      if(free_ip_entries == NULL)
 	outofmemory();
 
       newptr = ip_hash_table[hash_index] = free_ip_entries;
@@ -909,10 +977,10 @@ detach_conf(struct Client* client_p,struct ConfItem* aconf)
             {
               if (aconf->status & CONF_CLIENT_MASK)
                 {
-                  if (ConfLinks(aconf) > 0)
-                    --ConfLinks(aconf);
+                  if (ConfCurrUsers(aconf) > 0)
+                    --ConfCurrUsers(aconf);
                 }
-              if (ConfMaxLinks(aconf) == -1 && ConfLinks(aconf) == 0)
+              if (ConfMaxUsers(aconf) == -1 && ConfCurrUsers(aconf) == 0)
                 {
                   free_class(ClassPtr(aconf));
                   ClassPtr(aconf) = NULL;
@@ -978,7 +1046,7 @@ attach_conf(struct Client *client_p,struct ConfItem *aconf)
   if ((aconf->status & CONF_OPERATOR) == 0)
     {
       if ((aconf->status & CONF_CLIENT) &&
-          ConfLinks(aconf) >= ConfMaxLinks(aconf) && ConfMaxLinks(aconf) > 0)
+          ConfCurrUsers(aconf) >= ConfMaxUsers(aconf) && ConfMaxUsers(aconf) > 0)
         {
           if (!IsConfExemptLimits(aconf))
             {
@@ -1004,7 +1072,7 @@ attach_conf(struct Client *client_p,struct ConfItem *aconf)
 
   aconf->clients++;
   if (aconf->status & CONF_CLIENT_MASK)
-    ConfLinks(aconf)++;
+    ConfCurrUsers(aconf)++;
   return(0);
 }
 
@@ -1109,7 +1177,7 @@ find_conf_exact(const char* name, const char* user,
         continue;
       if (tmp->status & CONF_OPERATOR)
         {
-          if (tmp->clients < ConfMaxLinks(tmp))
+          if (tmp->clients < ConfMaxUsers(tmp))
             return(tmp);
           else
             continue;
@@ -1163,14 +1231,15 @@ find_conf_by_name(const char* name, int status)
   struct ConfItem* conf;
   assert(name != NULL);
   if(name == NULL)
-    return NULL;
+    return(NULL);
+
   for (conf = ConfigItemList; conf; conf = conf->next)
     {
       if (conf->status == status && conf->name &&
           match(name, conf->name))
-        return conf;
+        return(conf);
     }
-  return NULL;
+  return(NULL);
 }
 
 /*
@@ -1233,7 +1302,7 @@ find_x_conf(char *to_find)
  * side effects - looks for a matches on all fields
  */
 int 
-find_u_conf(char *server,char *user,char *host)
+find_u_conf(char *server,char *user,char *host, int flag)
 {
   struct ConfItem *aconf;
 
@@ -1245,8 +1314,15 @@ find_u_conf(char *server,char *user,char *host)
       if (match(aconf->name,server))
 	{
 	  if (BadPtr(aconf->user) || BadPtr(aconf->host))
-	    return(YES);
-	  if(match(aconf->user,user) && match(aconf->host,host))
+	  {
+            if(aconf->port & flag)
+  	      return(YES);
+	    else
+              return(NO);
+	  }
+
+	  if(match(aconf->user,user) && match(aconf->host,host) &&
+             aconf->port & flag)
 	    return(YES);
 
 	}
@@ -1391,7 +1467,7 @@ set_default_conf(void)
   ConfigFileEntry.max_targets = MAX_TARGETS_DEFAULT;
   DupString(ConfigFileEntry.servlink_path, SLPATH);
   ConfigFileEntry.egdpool_path = NULL;
-  
+
 #ifdef HAVE_LIBCRYPTO
   /* jdc -- This is our default value for a cipher.  According to the
    *        CRYPTLINK document (doc/cryptlink.txt), BF/128 must be supported
@@ -1505,6 +1581,9 @@ validate_conf(void)
   if(ConfigChannel.use_anonops == -1)
     ConfigChannel.use_anonops = 0;
 
+  if(ConfigFileEntry.use_global_limits == -1)
+    ConfigFileEntry.use_global_limits = 1;
+
   GlobalSetOptions.idletime = (ConfigFileEntry.idletime * 60);
 }
 
@@ -1519,14 +1598,6 @@ conf_add_conf(struct ConfItem *aconf)
 {
   (void)collapse(aconf->host);
   (void)collapse(aconf->user);
-  Debug((DEBUG_NOTICE,
-	 "Read Init: (%d) (%s) (%s) (%s) (%d) (%d)",
-	 aconf->status, 
-	 aconf->host ? aconf->host : "<NULL>",
-	 aconf->passwd ? aconf->passwd : "<NULL>",
-	 aconf->user ? aconf->user : "<NULL>",
-	 aconf->port,
-	 aconf->c_class ? ConfClassType(aconf): 0 ));
 
   aconf->next = ConfigItemList;
   ConfigItemList = aconf;
@@ -1639,14 +1710,15 @@ find_kill(struct Client* client_p)
   struct ConfItem *aconf;
   assert(client_p != NULL);
   if(client_p == NULL)
-    return NULL;
+    return(NULL);
+
   aconf = find_address_conf(client_p->host, client_p->username,
 			    &client_p->localClient->ip,
 			    client_p->localClient->aftype);
   if (aconf == NULL)
-    return aconf;
+    return(aconf);
   if(aconf->status & CONF_KILL)
-    return aconf;
+    return(aconf);
   return(NULL);
 }
 
@@ -1660,40 +1732,80 @@ find_kill(struct Client* client_p)
 void
 add_temp_kline(struct ConfItem *aconf)
 {
-  dlink_node *kill_node;
-  kill_node = make_dlink_node();
-  dlinkAdd(aconf, kill_node, &temporary_klines);
+  add_temp_line(aconf);
   aconf->flags |= CONF_FLAGS_TEMPORARY;
   add_conf_by_address(aconf->host, CONF_KILL, aconf->user, aconf);
 }
 
-/*
- * cleanup_tklines
+/* add_temp_dline
  *
- * inputs       - NONE
- * output       - NONE
- * side effects - call function to expire tklines
- *                This is an event started off in ircd.c
+ * input	- pointer to struct ConfItem
+ * output	- none
+ * side effects - added to tkline link list and address hash
  */
-void
-cleanup_tklines(void *notused)
+void add_temp_dline(struct ConfItem *aconf)
 {
-  expire_tklines(&temporary_klines);
+  add_temp_line(aconf);
+  aconf->flags |= CONF_FLAGS_TEMPORARY;
+  add_conf_by_address(aconf->host, CONF_DLINE, aconf->user, aconf);
+}
+
+void
+cleanup_temps_min(void *notused)
+{
+  expire_temps(&temporary_min, TEMP_MIN);
+}
+
+void
+cleanup_temps_hour(void *notused)
+{
+  expire_temps(&temporary_hour, TEMP_HOUR);
+}
+
+void
+cleanup_temps_day(void *notused)
+{
+  expire_temps(&temporary_day, TEMP_DAY);
+}
+
+void
+cleanup_temps_week(void *notused)
+{
+  expire_temps(&temporary_week, TEMP_WEEK);
+}
+
+static void
+add_temp_line(struct ConfItem *aconf)
+{
+  dlink_node *m;
+
+  m = make_dlink_node();
+  
+  if(aconf->hold > CurrentTime + (10080*60))
+    dlinkAdd(aconf, m, &temporary_week);
+  else if(aconf->hold > CurrentTime + (1440*60))
+    dlinkAdd(aconf, m, &temporary_day);
+  else if(aconf->hold > CurrentTime + (60*60))
+    dlinkAdd(aconf, m, &temporary_hour);
+  else
+    dlinkAdd(aconf, m, &temporary_min);
 }
 
 /*
- * expire_tklines
+ * expire_temps
  *
- * inputs       - tkline list pointer
+ * inputs       - list pointer
+ * 		- type
  * output       - NONE
  * side effects - expire tklines
  */
 static void
-expire_tklines(dlink_list *tklist)
+expire_temps(dlink_list *tklist, int type)
 {
   dlink_node *kill_node;
   dlink_node *next_node;
   struct ConfItem *kill_ptr;
+
   for (kill_node = tklist->head; kill_node; kill_node = next_node)
     {
       kill_ptr = kill_node->data;
@@ -1702,15 +1814,48 @@ expire_tklines(dlink_list *tklist)
       if (kill_ptr->hold <= CurrentTime)
 	{
           /* Alert opers that a TKline expired - Hwy */
-          sendto_realops_flags(FLAGS_ALL, L_ALL,
+          if(kill_ptr->status & CONF_KILL)
+            sendto_realops_flags(FLAGS_ALL, L_ALL,
 			       "Temporary K-line for [%s@%s] expired",
 			       (kill_ptr->user) ? kill_ptr->user : "*",
 			       (kill_ptr->host) ? kill_ptr->host : "*");
+
+	  /* temp dline */
+	  else
+            sendto_realops_flags(FLAGS_ALL, L_ALL,
+			       "Temporary D-line for [%s] expired",
+			       kill_ptr->host);
 
 	  delete_one_address_conf(kill_ptr->host, kill_ptr);
 	  dlinkDelete(kill_node, tklist);
 	  free_dlink_node(kill_node);
 	}
+      
+      else if((type == TEMP_WEEK && kill_ptr->hold < CurrentTime + 10080) ||
+              (type == TEMP_DAY && kill_ptr->hold < CurrentTime + 1440) ||
+	      (type == TEMP_HOUR && kill_ptr->hold < CurrentTime + 60))
+      {
+        /* expires within the hour.. */
+        if(kill_ptr->hold < CurrentTime + (60*60))
+	{
+          dlinkDelete(kill_node, tklist);
+	  dlinkAdd(kill_ptr, kill_node, &temporary_min);
+	}
+
+	/* expires within the day */
+	else if(kill_ptr->hold < CurrentTime + (1440*60))
+	{
+          dlinkDelete(kill_node, tklist);
+	  dlinkAdd(kill_ptr, kill_node, &temporary_hour);
+	}
+
+	/* expires within the week */
+	else if(kill_ptr->hold < CurrentTime + (10080*60))
+	{
+          dlinkDelete(kill_node, tklist);
+	  dlinkAdd(kill_ptr, kill_node, &temporary_day);
+	}
+      }
     }
 }
 
@@ -1750,6 +1895,15 @@ oper_privs_as_string(struct Client *client_p,int port)
     }
   else
     *privs_ptr++ = 'k';
+
+  if(port & CONF_OPER_XLINE)
+  {
+    if(client_p)
+      SetOperXline(client_p);
+    *privs_ptr++ = 'X';
+  }
+  else
+    *privs_ptr++ = 'x';
 
   if(port & CONF_OPER_N)
     {
@@ -1811,7 +1965,13 @@ oper_privs_as_string(struct Client *client_p,int port)
     }
   else
     *privs_ptr++ = 'a';
-  
+
+  if(port & CONF_OPER_FLOOD_EXEMPT)
+    {
+      if(client_p)
+        SetOperFloodExempt(client_p);
+    }
+
   *privs_ptr = '\0';
 
   return(privs_out);
@@ -1951,6 +2111,7 @@ read_conf_files(int cold)
 {
   FBFILE *file;
   const char *filename, *kfilename, *dfilename; /* kline or conf filename */
+  const char *xfilename;
 
   conf_fbfile_in = NULL;
 
@@ -1985,6 +2146,7 @@ read_conf_files(int cold)
     /* set to 'undefined' */
     ConfigChannel.use_halfops = -1;
     ConfigChannel.use_anonops = -1;
+    ConfigFileEntry.use_global_limits = -1;
   }
   else
   {
@@ -2031,6 +2193,25 @@ read_conf_files(int cold)
 	  fbclose(file);
 	}
     }
+
+  xfilename = ConfigFileEntry.xlinefile;
+  if(irccmp(filename, xfilename) && irccmp(kfilename, xfilename))
+  {
+    if((file = fbopen(xfilename, "r")) == NULL)
+    {
+      if(cold)
+        ilog(L_ERROR, "Failed reading xline file %s", xfilename);
+      else
+        sendto_realops_flags(FLAGS_ALL, L_ALL,
+			     "Can't open %s file xlines could be missing!",
+			     xfilename);
+    }
+    else
+    {
+      parse_x_file(file);
+      fbclose(file);
+    }
+  }
 }
 
 /*
@@ -2084,7 +2265,7 @@ void clear_out_old_conf(void)
   assert(ClassList != NULL);
   
   for (cltmp = ClassList->next; cltmp; cltmp = cltmp->next)
-    MaxLinks(cltmp) = -1;
+    MaxUsers(cltmp) = -1;
 
   clear_out_address_conf();
   clear_special_conf(&x_conf);
@@ -2324,7 +2505,7 @@ conf_add_class_to_conf(struct ConfItem *aconf)
       return;
     }
 
-  if (ConfMaxLinks(aconf) < 0)
+  if (ConfMaxUsers(aconf) < 0)
     {
       ClassPtr(aconf) = find_class(0);
       MyFree(aconf->className);

@@ -161,6 +161,8 @@ struct ConfItem
 #define CONF_OPER_REHASH        0x0040
 #define CONF_OPER_DIE           0x0080
 #define CONF_OPER_ADMIN         0x0100
+#define CONF_OPER_XLINE		0x0200
+#define CONF_OPER_FLOOD_EXEMPT	0x0400
 
 struct config_file_entry
 {
@@ -168,6 +170,7 @@ struct config_file_entry
   char *configfile;
   char *klinefile;
   char *dlinefile;
+  char *xlinefile;
 
   char *glinefile;
 
@@ -230,6 +233,7 @@ struct config_file_entry
   int           throttle_time;
   int           use_egd;
   int		ping_cookie;
+  int           use_global_limits;
   int           use_help;
 #ifdef HAVE_LIBCRYPTO
   struct EncCapability *default_cipher_preference;
@@ -317,8 +321,15 @@ extern struct server_info ServerInfo;       /* defined in ircd.c */
 extern struct admin_info  AdminInfo;        /* defined in ircd.c */
 /* End GLOBAL section */
 
-dlink_list temporary_klines;
-dlink_list temporary_ip_klines;
+#define TEMP_MIN	1
+#define TEMP_HOUR	2
+#define TEMP_DAY	3
+#define TEMP_WEEK	4
+
+dlink_list temporary_min;
+dlink_list temporary_hour;
+dlink_list temporary_day;
+dlink_list temporary_week;
 
 extern void clear_ip_hash_table(void);
 extern void iphash_stats(struct Client *,struct Client *,int,char **,FBFILE*);
@@ -352,7 +363,7 @@ extern int conf_connect_allowed(struct irc_inaddr *addr, int aftype);
 extern char *oper_flags_as_string(int);
 extern char *oper_privs_as_string(struct Client *, int);
 
-extern int find_u_conf(char*, char*, char *);
+extern int find_u_conf(char*, char*, char *, int);
 extern struct ConfItem *find_x_conf(char*);
 
 extern struct ConfItem* find_tkline(const char*, const char*, struct irc_inaddr *);
@@ -378,9 +389,15 @@ extern void WriteKlineOrDline( KlineType, struct Client *,
 			       const char *oper_reason,
 			       const char *current_date, time_t cur_time );
 extern  void    add_temp_kline(struct ConfItem *);
+extern void	add_temp_dline(struct ConfItem *);
 extern  void    report_temp_klines(struct Client *);
 extern  void    show_temp_klines(struct Client *, dlink_list *);
-extern  void    cleanup_tklines(void *notused);
+
+extern void cleanup_temps_min(void *);
+extern void cleanup_temps_hour(void *);
+extern void cleanup_temps_day(void *);
+extern void cleanup_temps_week(void *);
+
 
 extern  const   char *get_conf_name(KlineType);
 extern  int     rehash (int);
@@ -399,6 +416,7 @@ extern void flush_expired_ips(void *);
 /* XXX consider moving these into kdparse.h */
 extern void parse_k_file(FBFILE *fb);
 extern void parse_d_file(FBFILE *fb);
+extern void parse_x_file(FBFILE *fb);
 extern char *getfield(char *newline);
 
 extern char *get_oper_name(struct Client *client_p);
@@ -410,11 +428,11 @@ extern unsigned long cidr_to_bitmask[];
 #define NOT_AUTHORIZED  (-1)
 #define SOCKET_ERROR    (-2)
 #define I_LINE_FULL     (-3)
-#define TOO_MANY        (-4)
-#define BANNED_CLIENT   (-5)
-#define TOO_FAST        (-6)
-
-#define CLEANUP_TKLINES_TIME 60
+#define BANNED_CLIENT   (-4)
+#define TOO_FAST        (-5)
+#define TOO_MANY_LOCAL	(-6)
+#define TOO_MANY_GLOBAL (-7)
+#define TOO_MANY_IDENT	(-8)
 
 #endif /* INCLUDED_s_conf_h */
 

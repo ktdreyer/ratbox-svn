@@ -45,19 +45,19 @@
 
 struct Class* ClassList;
 
-static struct Class *make_class()
+struct Class *
+make_class(void)
 {
   struct Class        *tmp;
 
   tmp = (struct Class *)MyMalloc(sizeof(struct Class));
-  tmp->className = NULL;
-  tmp->servname = NULL;
+  memset(tmp, 0, sizeof(struct Class));
   return tmp;
 }
 
 void free_class(struct Class *tmp)
 {
-  MyFree(tmp->className);
+  MyFree(tmp->class_name);
   MyFree((char *)tmp);
 }
 
@@ -161,56 +161,39 @@ int     get_con_freq(struct Class *clptr)
   return (DEFAULT_CONNECTFREQUENCY);
 }
 
-/*
- * add_class
+/* add_class()
  *
- * inputs	- classname to use
- * 		- ping frequency
- *		- connection frequency
- * 		- maximum links
- *		- max sendq
- * output	- NONE
- * side effects -
- * When adding a class, check to see if it is already present first.
- * if so, then update the information for that class, rather than create
- * a new entry for it and later delete the old entry.
- * if no present entry is found, then create a new one and add it in
- * immediately after the first one (class 0).
+ * input	- class to add
+ * output	-
+ * side effects - class is added to ClassList if new, else old class
+ *                is updated with new values.
  */
-void    add_class(char *classname,
-                  int ping,
-                  int confreq,
-                  int maxli,
-                  long sendq)
+void
+add_class(struct Class *classptr)
 {
-  struct Class *t, *p;
+  struct Class *tmpptr;
 
-  if(!classname)
-    return;
+  tmpptr = find_class(classptr->class_name);
 
-  t = find_class(classname);
-  if (t == ClassList)
-    {
-      p = make_class();
-      p->next = t->next;
-      t->next = p;
-    }
+  if(tmpptr == ClassList)
+  {
+    classptr->next = tmpptr->next;
+    tmpptr->next = classptr;
+    CurrUsers(classptr) = 0;
+  }
   else
-    p = t;
-  Debug((DEBUG_DEBUG,
-         "Add Class %s: p %x t %x - cf: %d pf: %d ml: %d sq: %l",
-         classname, p, t, confreq, ping, maxli, sendq));
-
-  /* classname already known to be non NULL */
-  MyFree(ClassName(p));
-  DupString(ClassName(p),classname);
-  ConFreq(p) = confreq;
-  PingFreq(p) = ping;
-  MaxLinks(p) = maxli;
-  MaxSendq(p) = (sendq > 0) ? sendq : DEFAULT_SENDQ;
-  if (p != t)
-    Links(p) = 0;
+  {
+    MaxUsers(tmpptr) = MaxUsers(classptr);
+    MaxLocal(tmpptr) = MaxLocal(classptr);
+    MaxGlobal(tmpptr) = MaxGlobal(classptr);
+    MaxIdent(tmpptr) = MaxIdent(classptr);
+    PingFreq(tmpptr) = PingFreq(classptr);
+    MaxSendq(tmpptr) = MaxSendq(classptr);
+    
+    free_class(classptr);
+  }
 }
+
 
 /*
  * find_class
@@ -249,14 +232,10 @@ void    check_class()
 
   for (cltmp2 = cltmp = ClassList; cltmp; cltmp = cltmp2->next)
     {
-      Debug((DEBUG_DEBUG,
-             "ClassName %s Class %d : CF: %d PF: %d ML: %d LI: %d SQ: %ld",
-             ClassName(cltmp),ClassType(cltmp), ConFreq(cltmp), PingFreq(cltmp),
-             MaxLinks(cltmp), Links(cltmp), MaxSendq(cltmp)));
-      if (MaxLinks(cltmp) < 0)
+      if (MaxUsers(cltmp) < 0)
         {
           cltmp2->next = cltmp->next;
-          if (Links(cltmp) <= 0)
+          if (CurrUsers(cltmp) <= 0)
             free_class(cltmp);
         }
       else
@@ -275,14 +254,11 @@ void    initclass()
 {
   ClassList = make_class();
 
-  ClassType(ClassList) = 0;
   DupString(ClassName(ClassList),"default");
   ConFreq(ClassList) = DEFAULT_CONNECTFREQUENCY;
   PingFreq(ClassList) = DEFAULT_PINGFREQUENCY;
-  MaxLinks(ClassList) = ConfigFileEntry.maximum_links;
+  MaxUsers(ClassList) = 1;
   MaxSendq(ClassList) = DEFAULT_SENDQ;
-  Links(ClassList) = 0;
-  ClassList->next = NULL;
 }
 
 /*
@@ -299,7 +275,8 @@ void    report_classes(struct Client *source_p)
   for (cltmp = ClassList; cltmp; cltmp = cltmp->next)
     sendto_one(source_p, form_str(RPL_STATSYLINE), me.name, source_p->name,
                'Y', ClassName(cltmp), PingFreq(cltmp), ConFreq(cltmp),
-               MaxLinks(cltmp), MaxSendq(cltmp));
+               MaxUsers(cltmp), MaxSendq(cltmp),
+	       MaxLocal(cltmp), MaxIdent(cltmp), MaxGlobal(cltmp), MaxIdent(cltmp));
 }
 
 /*
@@ -311,7 +288,7 @@ void    report_classes(struct Client *source_p)
  */
 long    get_sendq(struct Client *client_p)
 {
-  int   sendq = DEFAULT_SENDQ, retc = BAD_CLIENT_CLASS;
+  int   sendq = DEFAULT_SENDQ;
   dlink_node      *ptr;
   struct Class    *cl;
   struct ConfItem *aconf;
@@ -326,7 +303,7 @@ long    get_sendq(struct Client *client_p)
         if ( !(cl = aconf->c_class))
           continue;
 
-        if (ClassType(cl) > retc)
+	if(ClassName(cl))
           sendq = MaxSendq(cl);
       }
   return sendq;

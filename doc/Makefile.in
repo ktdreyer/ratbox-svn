@@ -30,7 +30,7 @@ mandir          = @prefix@/man8
 MANPAGES        = ircd.8
 
 CONFS		= example.conf example.efnet.conf
-DEFAULTCONFS	= ircd.motd kline.conf dline.conf
+DEFAULTCONFS	= ircd.motd kline.conf dline.conf xline.conf
 
 SSL_LIBS	= @SSL_LIBS@
 SSL_INCLUDES	= @SSL_INCLUDES@
@@ -62,6 +62,9 @@ install: install-mkdirs build
 	done
 
 	@for i in $(DEFAULTCONFS); do \
+		if test ! -f $$i; then \
+			touch $$i; \
+		fi; \
 		if test ! -f $(sysconfdir)/$$i; then \
 			echo $(INSTALL_DATA) $$i $(sysconfdir); \
 			$(INSTALL_DATA) $$i $(sysconfdir); \

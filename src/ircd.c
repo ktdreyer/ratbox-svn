@@ -261,6 +261,8 @@ struct lgetopt myopts[] = {
    STRING, "File to use for ircd.conf"},
   {"klinefile",  &ConfigFileEntry.klinefile, 
    STRING, "File to use for klines.conf"},
+  {"xlinefile",  &ConfigFileEntry.xlinefile,
+   STRING, "File to use for xlines.conf"},
   {"logfile",    &logFileName, 
    STRING, "File to use for ircd.log"},
   {"pidfile",    &pidFileName,
@@ -568,10 +570,12 @@ int main(int argc, char *argv[])
   memset(&oper_list, 0, sizeof(oper_list));
   memset(&lazylink_channels, 0, sizeof(lazylink_channels));
 
+#if 0
   lclient_list.head = lclient_list.tail = NULL;
   oper_list.head = oper_list.tail = NULL;
   serv_list.head = serv_list.tail = NULL;
   global_serv_list.head = global_serv_list.tail = NULL;
+#endif
 
   GlobalClientList = &me;       /* Pointer to beginning of Client list */
 
@@ -590,6 +594,7 @@ int main(int argc, char *argv[])
   ConfigFileEntry.klinefile = KPATH;    /* Server kline file */
   ConfigFileEntry.dlinefile = DLPATH;   /* dline file */
   ConfigFileEntry.glinefile = GPATH;    /* gline log file */
+  ConfigFileEntry.xlinefile = XPATH;
 
   myargv = argv;
   umask(077);                /* better safe than sorry --SRB */
@@ -740,7 +745,10 @@ int main(int argc, char *argv[])
 
   eventAddIsh("cleanup_glines", cleanup_glines, NULL, CLEANUP_GLINES_TIME);
 
-  eventAddIsh("cleanup_tklines", cleanup_tklines, NULL, CLEANUP_TKLINES_TIME);
+  eventAddIsh("cleanup_temps_min", cleanup_temps_min, NULL, 60);
+  eventAddIsh("cleanup_temps_hour", cleanup_temps_hour, NULL, 3600);
+  eventAddIsh("cleanup_temps_day", cleanup_temps_day, NULL, 86400);
+  eventAddIsh("cleanup_temps_week", cleanup_temps_week, NULL, 604800);
 
   /* We want try_connections to be called as soon as possible now! -- adrian */
   /* No, 'cause after a restart it would cause all sorts of nick collides */

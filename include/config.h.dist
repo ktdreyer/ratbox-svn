@@ -187,6 +187,18 @@
  */
 #undef HIDE_SPOOF_IPS
 
+/* USE_ASCII_CASEMAP
+ *
+ * Under rfc1459, the characters {}|~ are the lowercase of []\^ so a
+ * nick of [foo] is the same as {foo} and a channel #[] is the same as
+ * #{}.  If this is defined they will no longer be treated as lowercase
+ * of each other, so [foo] and {foo} could be two seperate people.
+ *
+ * Note: this must be the same network wide or you will have problems.
+ *       Your locale(1) must also be set to "C".
+ */
+#undef USE_ASCII_CASEMAP
+
 /* USE_LOGFILE - log errors and such to LPATH
  * If you wish to have the server send 'vital' messages about server
  * to a logfile, define USE_LOGFILE.

@@ -127,6 +127,7 @@ struct Client
   struct Client*    prev;
   struct Client*    hnext;
   struct Client*    idhnext;
+  struct Client*    hostnext;
 	
   struct Client*    lnext;      /* Used for Server->servers/users */
   struct Client*    lprev;      /* Used for Server->servers/users */
@@ -438,6 +439,8 @@ struct LocalUser
 #define FLAGS2_OPER_DIE         0x0800  /* oper can die */
 #define FLAGS2_OPER_REHASH      0x1000  /* oper can rehash */
 #define FLAGS2_OPER_ADMIN       0x2000  /* oper can set umode +a */
+#define FLAGS2_OPER_XLINE       0x4000  /* oper can xline */
+#define FLAGS2_OPER_FLOOD_EXEMPT	0x8000	/* oper can flood freely */
 #define FLAGS2_OPER_FLAGS       (FLAGS2_OPER_GLOBAL_KILL | \
                                  FLAGS2_OPER_REMOTE | \
                                  FLAGS2_OPER_UNKLINE | \
@@ -446,6 +449,8 @@ struct LocalUser
                                  FLAGS2_OPER_K | \
                                  FLAGS2_OPER_DIE | \
                                  FLAGS2_OPER_REHASH| \
+				 FLAGS2_OPER_XLINE | \
+				 FLAGS2_OPER_FLOOD_EXEMPT | \
                                  FLAGS2_OPER_ADMIN)
 
 #define FLAGS2_CBURST		0x10000  /* connection burst being sent */
@@ -563,12 +568,16 @@ struct LocalUser
 #define SetOperN(x)             ((x)->flags2 |= FLAGS2_OPER_N)
 #define IsOperK(x)              ((x)->flags2 & FLAGS2_OPER_K)
 #define SetOperK(x)             ((x)->flags2 |= FLAGS2_OPER_K)
+#define IsOperXline(x)          ((x)->flags2 & FLAGS2_OPER_XLINE)
+#define SetOperXline(x)         ((x)->flags2 |= FLAGS2_OPER_XLINE)
 #define IsOperDie(x)            ((x)->flags2 & FLAGS2_OPER_DIE)
 #define SetOperDie(x)           ((x)->flags2 |= FLAGS2_OPER_DIE)
 #define IsOperRehash(x)         ((x)->flags2 & FLAGS2_OPER_REHASH)
 #define SetOperRehash(x)        ((x)->flags2 |= FLAGS2_OPER_REHASH)
 #define IsOperAdmin(x)          ((x)->flags2 & FLAGS2_OPER_ADMIN)
 #define SetOperAdmin(x)         ((x)->flags2 |= FLAGS2_OPER_ADMIN)
+#define IsOperFloodExempt(x)	((x)->flags2 & FLAGS2_OPER_FLOOD_EXEMPT)
+#define SetOperFloodExempt(x)	((x)->flags2 |= FLAGS2_OPER_FLOOD_EXEMPT)
 
 #define IsFloodDone(x)          ((x)->flags2 & FLAGS2_FLOODDONE)
 #define SetFloodDone(x)         ((x)->flags2 |= FLAGS2_FLOODDONE)

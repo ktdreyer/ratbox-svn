@@ -104,6 +104,7 @@ struct Capability captab[] = {
   { "ZIP",   CAP_ZIP },
   { "TBURST", CAP_TBURST },
   { "PARA",  CAP_PARA },
+  { "UNKLN", CAP_UNKLN },
   { 0,           0 }
 };
 
@@ -549,7 +550,6 @@ try_connections(void *unused)
   time_t             next = 0;
   struct Class*      cltmp;
   struct ConfItem*   con_conf = NULL;
-  int                con_class = 0;
 
   Debug((DEBUG_NOTICE,"Connection check at: %s", myctime(CurrentTime)));
 
@@ -586,10 +586,8 @@ try_connections(void *unused)
        */
       client_p = find_server(aconf->name);
       
-      if (!client_p && (Links(cltmp) < MaxLinks(cltmp)) &&
-          (!connecting || (ClassType(cltmp) > con_class)))
+      if (!client_p && (CurrUsers(cltmp) < MaxUsers(cltmp)) && !connecting)
         {
-          con_class = ClassType(cltmp);
           con_conf = aconf;
           /* We connect only one at time... */
           connecting = TRUE;

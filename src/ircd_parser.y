@@ -37,6 +37,7 @@
 #include "event.h"
 #include "s_log.h"
 #include "client.h"	/* for FLAGS_ALL only */
+#include "class.h"
 #include "irc_string.h"
 #include "ircdauth.h"
 #include "memory.h"
@@ -57,6 +58,8 @@ extern char *ip_string;
 
 int yyparse();
 
+static struct Class *yy_class = NULL;
+
 static struct ConfItem *yy_achead = NULL;
 static struct ConfItem *yy_aconf = NULL;
 static struct ConfItem *yy_aprev = NULL;
@@ -69,12 +72,6 @@ static struct ConfItem *leaf_confs;
 static struct ConfItem *yy_aconf_next;
 
 static dlink_node *node;
-
-char  *class_name_var;
-int   class_ping_time_var;
-int   class_number_per_ip_var;
-int   class_max_number_var;
-int   class_sendq_var;
 
 static char  *listener_address;
 
@@ -130,6 +127,7 @@ int   class_redirport_var;
 %token  FAILED_OPER_NOTICE
 %token  FAKENAME
 %token  FLATTEN_LINKS
+%token	FLOOD_EXEMPT
 %token  FNAME_FOPERLOG
 %token  FNAME_OPERLOG
 %token  FNAME_USERLOG
@@ -188,7 +186,9 @@ int   class_redirport_var;
 %token  NO_OPER_FLOOD
 %token  NO_TILDE
 %token  NUMBER
+%token  NUMBER_PER_IDENT
 %token  NUMBER_PER_IP
+%token  NUMBER_PER_IP_GLOBAL
 %token  OPERATOR
 %token  OPER_LOG
 %token  OPER_ONLY_UMODES
@@ -270,6 +270,7 @@ int   class_redirport_var;
 %token	USE_ANONOPS
 %token  USE_EGD
 %token  USE_EXCEPT
+%token	USE_GLOBAL_LIMITS
 %token  USE_HALFOPS
 %token  USE_HELP
 %token  USE_INVEX
@@ -280,6 +281,7 @@ int   class_redirport_var;
 %token  VHOST6
 %token  WARN
 %token  WARN_NO_NLINE
+%token	XLINE
 
 %type   <string>   QSTRING
 %type   <number>   NUMBER
@@ -749,8 +751,8 @@ oper_entry:     OPERATOR
 oper_items:     oper_items oper_item |
                 oper_item;
 
-oper_item:      oper_name  | oper_user | oper_password |
-                oper_class | oper_global_kill | oper_remote |
+oper_item:      oper_name  | oper_user | oper_password | oper_flood_exempt |
+                oper_class | oper_global_kill | oper_remote | oper_xline |
                 oper_kline | oper_unkline | oper_gline | oper_nick_changes |
                 oper_die | oper_rehash | oper_admin | oper_rsa_public_key_file | error;
 
@@ -875,6 +877,10 @@ oper_unkline: UNKLINE '=' TYES ';' { yy_achead->port |= CONF_OPER_UNKLINE;}
               |
               UNKLINE '=' TNO ';' { yy_achead->port &= ~CONF_OPER_UNKLINE; } ;
 
+oper_xline: XLINE '=' TYES ';' { yy_achead->port |= CONF_OPER_XLINE; }
+            |
+            XLINE '=' TNO ';' { yy_achead->port &= ~CONF_OPER_XLINE; };
+
 oper_gline: GLINE '=' TYES ';' { yy_achead->port |= CONF_OPER_GLINE;}
             |
             GLINE '=' TNO ';' { yy_achead->port &= ~CONF_OPER_GLINE; };
@@ -895,28 +901,24 @@ oper_admin: ADMIN '=' TYES ';' { yy_achead->port |= CONF_OPER_ADMIN;}
             |
             ADMIN '=' TNO ';' { yy_achead->port &= ~CONF_OPER_ADMIN;} ;
 
+oper_flood_exempt: FLOOD_EXEMPT '=' TYES ';' { yy_achead->port |= CONF_OPER_FLOOD_EXEMPT; }
+                   |
+		   FLOOD_EXEMPT '=' TNO ';' { yy_achead->port &= ~CONF_OPER_FLOOD_EXEMPT; };
+
 /***************************************************************************
  *  section class
  ***************************************************************************/
 
 class_entry:    CLASS 
   {
-    MyFree(class_name_var);
-    class_name_var = NULL;
-    class_ping_time_var = 0;
-    class_number_per_ip_var = 0;
-    class_max_number_var = 0;
-    class_sendq_var = 0;
+    yy_class = make_class();
   }
   '{' class_items '}' ';'
   {
-
-    add_class(class_name_var,class_ping_time_var,
-              class_number_per_ip_var, class_max_number_var,
-              class_sendq_var );
-
-    MyFree(class_name_var);
-    class_name_var = NULL;
+    if(yy_class->class_name)
+      add_class(yy_class);
+    else
+      free_class(yy_class);
   };
 
 class_items:    class_items class_item |
@@ -925,6 +927,8 @@ class_items:    class_items class_item |
 class_item:     class_name |
                 class_ping_time |
                 class_number_per_ip |
+		class_number_per_ip_global |
+		class_number_per_ident |
                 class_connectfreq |
                 class_max_number |
                 class_sendq |
@@ -932,33 +936,42 @@ class_item:     class_name |
 
 class_name:     NAME '=' QSTRING ';' 
   {
-    MyFree(class_name_var);
-    DupString(class_name_var, yylval.string);
+    DupString(yy_class->class_name, yylval.string);
   };
 
 class_ping_time:        PING_TIME '=' timespec ';'
   {
-    class_ping_time_var = $3;
+    yy_class->ping_freq = $3;
   };
 
 class_number_per_ip:    NUMBER_PER_IP '=' NUMBER ';'
   {
-    class_number_per_ip_var = $3;
+    yy_class->max_local = $3;
+  };
+
+class_number_per_ip_global: NUMBER_PER_IP_GLOBAL '=' NUMBER ';'
+  {
+    yy_class->max_global = $3;
+  };
+
+class_number_per_ident: NUMBER_PER_IDENT '=' NUMBER ';'
+  {
+    yy_class->max_ident = $3;
   };
 
 class_connectfreq:     CONNECTFREQ '=' timespec ';'
   {
-    class_number_per_ip_var = $3;
+    yy_class->con_freq = $3;
   };
 
 class_max_number:       MAX_NUMBER '=' NUMBER ';'
   {
-    class_max_number_var = $3;
+    yy_class->max_total = $3;
   };
 
 class_sendq:    SENDQ '=' sizespec ';'
   {
-    class_sendq_var = $3;
+    yy_class->max_sendq = $3;
   };
 
 
@@ -1303,6 +1316,7 @@ shared_entry:		T_SHARED
     yy_aconf->name = NULL;
     yy_aconf->user = NULL;
     yy_aconf->host = NULL;
+    yy_aconf->port = CONF_OPER_K;
   }
   '{' shared_items '}' ';'
   {
@@ -1313,7 +1327,8 @@ shared_entry:		T_SHARED
 shared_items:		shared_items shared_item |
 			shared_item;
 
-shared_item:		shared_name | shared_user | error;
+shared_item:		shared_name | shared_user | shared_kline |
+                        shared_unkline | error;
 
 shared_name:		NAME '=' QSTRING ';'
   {
@@ -1340,6 +1355,14 @@ shared_user:		USER '=' QSTRING ';'
       yy_aconf->host = new_host;
     }
   };
+
+shared_kline:  KLINE '=' TYES ';' { yy_aconf->port |= CONF_OPER_K; };
+               |
+	       KLINE '=' TNO ';' { yy_aconf->port &= ~CONF_OPER_K; };
+
+shared_unkline: UNKLINE '=' TYES ';' { yy_aconf->port |= CONF_OPER_UNKLINE; };
+                |
+		UNKLINE '=' TNO ';' { yy_aconf->port &= ~CONF_OPER_UNKLINE; };
 
 /***************************************************************************
  *  section connect
@@ -1970,7 +1993,7 @@ general_item:       general_failed_oper_notice |
                     general_oper_umodes |
                     general_caller_id_wait | general_default_floodcount |
                     general_min_nonwildcard |
-                    general_servlink_path | general_use_help |
+                    general_servlink_path | general_use_global_limits | general_use_help |
                     general_default_cipher_preference |
                     general_compression_level | general_client_flood |
                     general_throttle_time | general_havent_read_conf |
@@ -2332,6 +2355,23 @@ general_ping_cookie: PING_COOKIE '=' TYES ';'
   {
     ConfigFileEntry.ping_cookie = 0;
   } ;
+
+general_use_global_limits: USE_GLOBAL_LIMITS '=' TYES ';'
+  {
+    if(ConfigFileEntry.use_global_limits == 0)
+      ilog(L_ERROR, "Ignoring config file entry 'use_global_limits = yes' "
+                    "-- can only be changed on boot");
+    else
+      ConfigFileEntry.use_global_limits = 1;
+  }
+    | USE_GLOBAL_LIMITS '=' TNO ';'
+  {
+    if(ConfigFileEntry.use_global_limits == 1)
+      ilog(L_ERROR, "Ignoring config file entry 'use_global_limits = no' "
+                    "-- can only be changed on boot");
+    else
+      ConfigFileEntry.use_global_limits = 0;
+  };
 
 general_use_help: USE_HELP '=' TYES ';'
   {

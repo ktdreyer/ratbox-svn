@@ -278,9 +278,9 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
     }
     
   for (cltmp = ClassList; doall && cltmp; cltmp = cltmp->next)
-    if (Links(cltmp) > 0)
+    if (CurrUsers(cltmp) > 0)
       sendto_one(source_p, form_str(RPL_TRACECLASS), me.name,
-                 parv[0], ClassName(cltmp), Links(cltmp));
+                 parv[0], ClassName(cltmp), CurrUsers(cltmp));
 		 
   sendto_one(source_p, form_str(RPL_ENDOFTRACE),me.name, parv[0],tname);
 }

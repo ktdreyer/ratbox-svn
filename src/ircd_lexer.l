@@ -167,6 +167,7 @@ exceed_limit    { return EXCEED_LIMIT; }
 exempt		{ return EXEMPT; }
 fakename	{ return FAKENAME; }
 flatten_links	{ return FLATTEN_LINKS; }
+flood_exempt	{ return FLOOD_EXEMPT; }
 fname_foperlog  { return FNAME_FOPERLOG; }
 fname_operlog   { return FNAME_OPERLOG; }
 fname_userlog   { return FNAME_USERLOG; }
@@ -221,7 +222,9 @@ no_create_on_split { return NO_CREATE_ON_SPLIT; }
 no_join_on_split   { return NO_JOIN_ON_SPLIT; }
 no_oper_flood   { return NO_OPER_FLOOD; }
 no_tilde	{ return NO_TILDE; }
-number_per_ip	{ return NUMBER_PER_IP; }
+number_per_ident	{ return NUMBER_PER_IDENT; }
+number_per_ip		{ return NUMBER_PER_IP; }
+number_per_ip_global	{ return NUMBER_PER_IP_GLOBAL; }
 oper		{ return OPERATOR; }
 oper_log        { return OPER_LOG; }
 operator	{ return OPERATOR; }
@@ -256,6 +259,7 @@ unkline		{ return UNKLINE; }
 use_anonops	{ return USE_ANONOPS; }
 use_egd 	{ return USE_EGD; }
 use_except	{ return USE_EXCEPT; }
+use_global_limits	{ return USE_GLOBAL_LIMITS; }
 use_halfops     { return USE_HALFOPS; }
 use_help        { return USE_HELP; }
 use_invex	{ return USE_INVEX; }
@@ -267,6 +271,7 @@ vchans_oper_only { return VCHANS_OPER_ONLY; }
 vhost	{ return VHOST; }
 vhost6	{ return VHOST6; }
 warn		{ return WARN; }
+xline		{ return XLINE; }
 yes		{ return TYES; }
 
 failed_oper_notice      { return FAILED_OPER_NOTICE; }

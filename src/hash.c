@@ -39,6 +39,8 @@
 #include "fdlist.h"
 #include "fileio.h"
 #include "memory.h"
+#include "msg.h"
+#include "handlers.h"
 
 /* New hash code */
 /*
@@ -47,11 +49,19 @@
 
 static unsigned int hash_channel_name(const char* name);
 
+#ifdef FL_DEBUG
+struct Message hash_msgtab = {
+  "HASH", 0, 0, 1, 0, MFLG_SLOW, 0,
+  {m_ignore, m_ignore, m_ignore, mo_hash}
+};
+#endif
+
 #ifdef DEBUGMODE
 static struct HashEntry* clientTable = NULL;
 static struct HashEntry* channelTable = NULL;
 static struct HashEntry* idTable = NULL;
 static struct HashEntry* resvTable = NULL;
+static struct HashEntry *hostTable = NULL;
 static int clhits;
 static int clmiss;
 static int chhits;
@@ -64,6 +74,7 @@ static struct HashEntry clientTable[U_MAX];
 static struct HashEntry channelTable[CH_MAX];
 static struct HashEntry idTable[U_MAX];
 static struct HashEntry resvTable[R_MAX];
+static struct HashEntry hostTable[HOST_MAX];
 
 #endif
 
@@ -93,7 +104,6 @@ size_t hash_get_resv_table_size(void)
 }
 
 /*
- *
  * look in whowas.c for the missing ...[WW_MAX]; entry
  */
 
@@ -175,6 +185,17 @@ int hash_channel_name(const char* name)
   return (h & (CH_MAX - 1));
 }
 
+static unsigned int
+hash_hostname(const char *name)
+{
+  int i = 30;
+  unsigned int h = 0;
+
+  while(*name && --i)
+    h = (h << 4) - (h + (unsigned char)ToLower(*name++));
+
+  return (h & (HOST_MAX - 1));
+}
 
 /*
  * hash_resv_channel()
@@ -232,7 +253,7 @@ static void clear_id_hash_table()
 }
 
 static void
-clear_channel_hash_table()
+clear_channel_hash_table(void)
 {
 #ifdef DEBUGMODE
   chmiss = 0;
@@ -242,6 +263,16 @@ clear_channel_hash_table()
                                                 sizeof(struct HashEntry));
 #endif
   memset(channelTable, 0, sizeof(struct HashEntry) * CH_MAX);
+}
+
+static void
+clear_hostname_hash_table(void)
+{
+#ifdef DEBUGMODE
+  if(!hostTable)
+    hostTable = (struct HashEntry *)MyMalloc(HOST_MAX * sizeof(struct HashEntry));
+#endif
+  memset(hostTable, 0, sizeof(struct HashEntry) * HOST_MAX);
 }
 
 static void
@@ -263,6 +294,7 @@ init_hash(void)
   clear_client_hash_table();
   clear_channel_hash_table();
   clear_id_hash_table();
+  clear_hostname_hash_table();
   clear_resv_hash_table();
 }
 
@@ -299,6 +331,24 @@ add_to_client_hash_table(const char* name, struct Client* client_p)
   clientTable[hashv].list = (void*) client_p;
   ++clientTable[hashv].links;
   ++clientTable[hashv].hits;
+}
+
+void
+add_to_hostname_hash_table(const char *hostname, struct Client *client_p)
+{
+  unsigned int hashv;
+
+  assert(hostname != NULL);
+  assert(client_p != NULL);
+
+  if(hostname == NULL || client_p == NULL)
+    return;
+
+  hashv = hash_hostname(hostname);
+  client_p->hostnext = (struct Client *)hostTable[hashv].list;
+  hostTable[hashv].list = (void *)client_p;
+  hostTable[hashv].links++;
+  hostTable[hashv].hits++;
 }
 
 /*
@@ -445,6 +495,37 @@ del_from_channel_hash_table(const char* name, struct Channel* chptr)
     }
 }
 
+void
+del_from_hostname_hash_table(const char *hostname, struct Client *client_p)
+{
+  struct Client *target_p;
+  struct Client *last_p = NULL;
+  unsigned int hashv;
+
+  if(hostname == NULL || client_p == NULL)
+    return;
+
+  hashv = hash_hostname(hostname);
+  for(target_p = (struct Client *)hostTable[hashv].list; target_p;
+      target_p = target_p->hostnext)
+  {
+    if(target_p == client_p)
+    {
+      if(last_p)
+        last_p->hostnext = client_p->hostnext;
+      else
+        hostTable[hashv].list = (void *)client_p->hostnext;
+
+      if(hostTable[hashv].links > 0)
+        hostTable[hashv].links--;
+
+      return;
+    }
+
+    last_p = target_p;
+  }
+}
+  
 /*
  * del_from_resv_hash_table()
  */
@@ -552,6 +633,25 @@ find_client(const char* name)
   return (NULL);
 }
 
+struct Client *
+find_hostname(const char *hostname)
+{
+  struct Client *target_p;
+  unsigned int hashv;
+
+  if(hostname == NULL)
+    return NULL;
+
+  hashv = hash_hostname(hostname);
+  for(target_p = (struct Client *)hostTable[hashv].list; target_p;
+      target_p = target_p->hostnext)
+  {
+    if(irccmp(target_p->host, hostname) == 0)
+      return target_p;
+  }
+
+  return NULL;
+}
 
 /*
  * Whats happening in this next loop ? Well, it takes a name like
@@ -784,8 +884,72 @@ hash_find_resv(const char *name)
   return(NULL);
 }  
 
+#ifdef FL_DEBUG
+void
+mo_hash(struct Client *source_p, struct Client *client_p, 
+        int argc,char *argv[])
+{
+  int i;
+  struct Client *target_p;
+  u_long used_count;
+  int deepest_link;
+  u_long average_link;
+  int this_link;
+  int node[11];
 
+  for(i = 0; i < 11; i++)
+    node[i] = 0;
 
+  deepest_link = used_count = this_link = average_link = 0;
 
+  sendto_one(source_p, ":%s %d %s :Hostname hash statistics",
+               me.name, RPL_STATSDEBUG, source_p->name);
+  
+  for(i = 0; i < HOST_MAX; i++)
+  {
+    this_link = 0;
 
+    for(target_p = hostTable[i].list; target_p; target_p = target_p->hostnext)
+    {
+      used_count++;
+      this_link++;
+    }
 
+    if(this_link > deepest_link)
+      deepest_link = this_link;
+
+    if(this_link >= 10)
+    {
+      int j = 0;
+      for(target_p = hostTable[i].list; target_p; target_p = target_p->hostnext) 
+      {
+        sendto_one(source_p, ":%s %d %s :Node[%d][%d] %s",
+                   me.name, RPL_STATSDEBUG, source_p->name, i, j,
+		   target_p->host);
+	j++;
+      }
+
+      this_link = 10;
+    }
+
+    node[this_link]++;
+  }
+
+  for(i = 1; i < 11; i++)
+    average_link += node[i] * i;
+    
+  sendto_one(source_p, ":%s %d %s :Hash Size: %d - Used %lu %f%% - Free %lu %f%%",
+             me.name, RPL_STATSDEBUG, source_p->name, HOST_MAX,
+	     used_count, (float)((used_count / HOST_MAX) * 100), 
+	     HOST_MAX - used_count, 
+	     (float)((float)((float)(HOST_MAX - used_count) / HOST_MAX) * 100));
+  
+  sendto_one(source_p, ":%s %d %s :Deepest Link: %d - Average  %f",
+             me.name, RPL_STATSDEBUG, source_p->name, deepest_link,
+	     (float)(average_link / used_count));
+
+  for(i = 0; i < 11; i++)
+    sendto_one(source_p, ":%s %d %s :Nodes with %d entries: %d",
+               me.name, RPL_STATSDEBUG, source_p->name, i, node[i]);
+}
+#endif

@@ -28,38 +28,47 @@
 struct ConfItem;
 struct Client;
 
-struct Class {
-  struct Class* next;     /* list node pointer */
-  char*		className;
-  int           type;
-  int           conFreq;
-  int           pingFreq;
-  int           maxLinks;
-  long          maxSendq;
-  char*         servname;
-  int           servport;
-  int           links;
+struct Class
+{
+  struct Class *next;
+  char *class_name;
+  int max_total;
+  int max_local;
+  int max_global;
+  int max_ident;
+  int max_sendq;
+  int con_freq;
+  int ping_freq;
+  int total;
 };
 
+struct Class *ClassList;
 
-#define ClassName(x)	((x)->className)
-#define ClassType(x)    ((x)->type)
-#define ConFreq(x)      ((x)->conFreq)
-#define PingFreq(x)     ((x)->pingFreq)
-#define MaxLinks(x)     ((x)->maxLinks)
-#define MaxSendq(x)     ((x)->maxSendq)
-#define Links(x)        ((x)->links)
+#define ClassName(x)	((x)->class_name)
+#define ConFreq(x)      ((x)->con_freq)
+#define MaxLocal(x)	((x)->max_local)
+#define MaxGlobal(x)	((x)->max_global)
+#define MaxIdent(x)	((x)->max_ident)
+#define MaxUsers(x)	((x)->max_total)
+#define PingFreq(x)     ((x)->ping_freq)
+#define MaxSendq(x)     ((x)->max_sendq)
+#define CurrUsers(x)    ((x)->total)
 
 #define ClassPtr(x)      ((x)->c_class)
-#define ConfLinks(x)     (ClassPtr(x)->links)
-#define ConfMaxLinks(x)  (ClassPtr(x)->maxLinks)
-#define ConfClassName(x) (ClassPtr(x)->class_name)
-#define ConfClassType(x) (ClassPtr(x)->type)
-#define ConfConFreq(x)   (ClassPtr(x)->conFreq)
-#define ConfPingFreq(x)  (ClassPtr(x)->pingFreq)
-#define ConfSendq(x)     (ClassPtr(x)->maxSendq)
 
-extern struct Class* ClassList;  /* GLOBAL - class list */
+#define ConfClassName(x) (ClassPtr(x)->class_name)
+#define ConfConFreq(x)   (ClassPtr(x)->con_freq)
+#define ConfMaxLocal(x)  (ClassPtr(x)->max_local)
+#define ConfMaxGlobal(x) (ClassPtr(x)->max_global)
+#define ConfMaxIdent(x)  (ClassPtr(x)->max_ident)
+#define ConfMaxUsers(x)  (ClassPtr(x)->max_total)
+#define ConfPingFreq(x)  (ClassPtr(x)->ping_freq)
+#define ConfMaxSendq(x)  (ClassPtr(x)->max_sendq)
+#define ConfCurrUsers(x) (ClassPtr(x)->total)
+
+void add_class(struct Class *);
+
+struct Class *make_class(void);
 
 extern  long    get_sendq(struct Client *);
 extern  int     get_con_freq(struct Class* );
@@ -69,7 +78,6 @@ extern  int     get_client_ping (struct Client *);
 extern  void    check_class(void);
 extern  void    initclass(void);
 extern  void    free_class(struct Class* );
-extern  void    add_class (char *, int, int, int, long);
 extern  void    fix_class (struct ConfItem *, struct ConfItem *);
 extern  void    report_classes (struct Client *);
 

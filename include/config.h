@@ -102,6 +102,7 @@
 #define CPATH   ETCPATH "IRCD.CONF"             /* config file */
 #define KPATH   ETCPATH "KLINE.CONF"            /* kline file */
 #define DLPATH  ETCPATH "DLINE.CONF"            /* dline file */
+#define XPATH	ETCPATH "XLINE.CONF"		/* xline file */
 #define GPATH   LOGPATH "GLINE.LOG"             /* gline logfile */
 #define RPATH   ETCPATH "IRCD.RSA"              /* RSA private key file */
 #define MPATH   ETCPATH "IRCD.MOTD"             /* MOTD filename */
@@ -148,6 +149,7 @@
 #define CPATH   ETCPATH "/ircd.conf"            /* ircd.conf file */
 #define KPATH   ETCPATH "/kline.conf"           /* kline file */
 #define DLPATH  ETCPATH "/dline.conf"           /* dline file */
+#define XPATH	ETCPATH "/xline.conf"		/* xline file */
 #define GPATH   LOGPATH "/gline.log"            /* gline logfile */
 #define RPATH   ETCPATH "/ircd.rsa"             /* ircd rsa private keyfile */
 #define MPATH   ETCPATH "/ircd.motd"            /* MOTD file */
@@ -196,6 +198,18 @@
  * (hyb5, hyb6.0, +CSr) or hybserv you should NOT define this.
  */
 #undef TS5_ONLY
+
+/* USE_ASCII_CASEMAP
+ *
+ * Under rfc1459, the characters {}|~ are the lowercase of []\^ so a
+ * nick of [foo] is the same as {foo} and a channel #[] is the same as
+ * #{}.  If this is defined they will no longer be treated as lowercase
+ * of each other, so [foo] and {foo} could be two seperate people.
+ *
+ * Note: this must be the same network wide or you will have problems.
+ *       Your locale(1) must also be set to "C".
+ */
+#undef USE_ASCII_CASEMAP
 
 /* USE_LOGFILE - log errors and such to LPATH
  * If you wish to have the server send 'vital' messages about server

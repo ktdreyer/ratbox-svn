@@ -103,7 +103,8 @@ SRCS =                          \
   m_wallops.c \
   m_who.c \
   m_whois.c \
-  m_whowas.c 
+  m_whowas.c \
+  m_xline.c
 
 ALL_SRCS = $(CORE_SRCS) \
            $(SRCS)

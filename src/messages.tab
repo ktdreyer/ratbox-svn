@@ -238,7 +238,7 @@ static  char *  replies[] = {
 /* 215 RPL_STATSILINE, */       ":%s 215 %s %c %s * %s@%s %d %s",
 /* 216 RPL_STATSKLINE, */       ":%s 216 %s %c %s * %s :%s",
 /* 217 RPL_STATSQLINE, */       ":%s 217 %s %c %s :%s",
-/* 218 RPL_STATSYLINE, */       ":%s 218 %s %c %s %d %d %d %lu",
+/* 218 RPL_STATSYLINE, */       ":%s 218 %s %c %s %d %d %d %lu %d.%d %d.%d",
 /* 219 RPL_ENDOFSTATS, */       ":%s 219 %s %s :End of /STATS report",
 /* 220 RPL_STATSPLINE, */       ":%s 220 %s %c %d %s %d :%s",
 /* 221 RPL_UMODEIS, */          ":%s 221 %s %s",

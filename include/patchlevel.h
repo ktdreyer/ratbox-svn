@@ -23,5 +23,5 @@
  */
 
 #ifndef PATCHLEVEL
-#define PATCHLEVEL   "hybrid-7rc1"
+#define PATCHLEVEL   "ircd-ratbox"
 #endif

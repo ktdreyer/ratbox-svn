@@ -115,11 +115,16 @@ char*       strtoken(char** save, char* str, char* fs);
 /*
  * character macros
  */
+#ifndef USE_ASCII_CASEMAP
 extern const unsigned char ToLowerTab[];
 #define ToLower(c) (ToLowerTab[(unsigned char)(c)])
 
 extern const unsigned char ToUpperTab[];
 #define ToUpper(c) (ToUpperTab[(unsigned char)(c)])
+#else
+#define ToLower(c) tolower(c)
+#define ToUpper(c) toupper(c)
+#endif
 
 extern const unsigned int CharAttrs[];
 

@@ -44,7 +44,6 @@
 #include "linebuf.h"
 #include "memory.h"
 
-
 /*
  * Option string.  Must be before #ifdef DEBUGMODE.
  */
@@ -393,11 +392,20 @@ void count_memory(struct Client *source_p)
              number_servers_cached,
              (int)mem_servers_cached);
 
-  count_ip_hash(&number_ips_stored,&mem_ips_stored);
-  sendto_one(source_p, ":%s %d %s :iphash %u(%d)",
-             me.name, RPL_STATSDEBUG, source_p->name,
-             number_ips_stored,
-             (int)mem_ips_stored);
+  if(ConfigFileEntry.use_global_limits)
+  {
+    sendto_one(source_p, ":%s %d %s :hostname hash %d(%u)",
+	       me.name, RPL_STATSDEBUG, source_p->name,
+	       HOST_MAX, HOST_MAX * sizeof(struct HashEntry));
+  }
+  else
+  {
+    count_ip_hash(&number_ips_stored,&mem_ips_stored);
+    sendto_one(source_p, ":%s %d %s :iphash %u(%d)",
+               me.name, RPL_STATSDEBUG, source_p->name,
+               number_ips_stored,
+               (int)mem_ips_stored);
+  }
 
   total_memory = totww + total_channel_memory + conf_memory +
     class_count * sizeof(struct Class);

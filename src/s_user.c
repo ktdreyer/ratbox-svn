@@ -452,6 +452,9 @@ register_local_user(struct Client *client_p, struct Client *source_p,
   if (IsDead(source_p))
     return CLIENT_EXITED;
   
+  if(ConfigFileEntry.use_global_limits)
+    add_to_hostname_hash_table(source_p->host, source_p);
+
   source_p->umodes |= FLAGS_INVISIBLE;
 
   Count.invisi++;
@@ -526,6 +529,9 @@ register_remote_user(struct Client *client_p, struct Client *source_p,
   /* Increment our total user count here */
   if (++Count.total > Count.max_tot)
     Count.max_tot = Count.total;
+
+  if(ConfigFileEntry.use_global_limits)
+    add_to_hostname_hash_table(source_p->host, source_p);
 
   source_p->servptr = find_server(user->server);
 

@@ -108,7 +108,8 @@ parse_client_queued(struct Client *client_p)
   else if(IsClient(client_p)) 
   {
 
-    if (ConfigFileEntry.no_oper_flood && IsOper(client_p))
+    if(IsOper(client_p) && (ConfigFileEntry.no_oper_flood ||
+        IsOperFloodExempt(client_p)))
       checkflood = 0;
     /*
      * Handle flood protection here - if we exceed our flood limit on
@@ -135,6 +136,10 @@ parse_client_queued(struct Client *client_p)
         if(lclient_p->sent_parsed >= lclient_p->allow_read)
           break;
       }
+
+      /* can flood as much as they want until they sendq off. */
+      else if(IsOperFloodExempt(client_p))
+        ;
       
       /* allow opers 4 times the amount of messages as users. why 4?
        * why not. :) --fl_

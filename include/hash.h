@@ -39,6 +39,9 @@
  */
 #define CH_MAX 16384
 
+/* hostname hash table size */
+#define HOST_MAX 131072
+
 /*
  * RESV hash table size
  *
@@ -79,6 +82,10 @@ extern struct Channel* hash_find_channel(const char* name);
 extern struct Client* find_client(const char* name);
 extern struct Client* find_server(const char* name);
 extern struct Client* hash_find_server(const char* name);
+
+struct Client *find_hostname(const char *);
+void del_from_hostname_hash_table(const char *, struct Client *);
+void add_to_hostname_hash_table(const char *, struct Client *);
 
 extern void add_to_resv_hash_table(const char *name,
                                    struct ResvChannel *resv_p);

@@ -110,6 +110,40 @@ void parse_d_file(FBFILE *file)
     }
 }
 
+void
+parse_x_file(FBFILE *file)
+{
+  struct ConfItem *aconf;
+  char *reason_field = NULL;
+  char *host_field = NULL;
+  char *port_field = NULL;
+  char line[BUFSIZE];
+  char *p;
+
+  while(fbgets(line, sizeof(line), file))
+  {
+    if((p = strchr(line, '\n')))
+      *p = '\0';
+
+    if((*line == '\0') || (line[0] == '#'))
+      continue;
+
+    if((host_field = getfield(line)) == NULL)
+      continue;
+
+    if((port_field = getfield(NULL)) == NULL)
+      continue;
+
+    if((reason_field = getfield(NULL)) == NULL)
+      continue;
+
+    aconf = make_conf();
+    aconf->status = CONF_XLINE;
+    conf_add_fields(aconf, host_field, reason_field, "", port_field, NULL);
+    conf_add_x_conf(aconf);
+  }
+}
+
 /*
  * getfield
  *

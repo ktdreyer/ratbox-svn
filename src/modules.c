@@ -110,6 +110,10 @@ struct Message modrestart_msgtab = {
 
 extern struct Message error_msgtab;
 
+#ifdef FL_DEBUG
+extern struct Message hash_msgtab;
+#endif
+
 void
 modules_init(void)
 {
@@ -119,6 +123,9 @@ modules_init(void)
 	mod_add_cmd(&modlist_msgtab);
 	mod_add_cmd(&modrestart_msgtab);
 	mod_add_cmd(&error_msgtab);
+#ifdef FL_DEBUG
+	mod_add_cmd(&hash_msgtab);
+#endif
 }
 
 /* mod_find_path()
