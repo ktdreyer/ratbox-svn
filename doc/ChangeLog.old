@@ -1,3 +1,7 @@
+*** 19990802_7 by tomh
+remove struct.h includes, new .depend
+
+
 *** 19990802_6 by tomh
 removed unused data member from client struct
 
