@@ -84,7 +84,7 @@ mo_resv(struct Client *client_p, struct Client *source_p, int parc, const char *
 	name = parv[loc];
 	loc++;
 
-	if((parc >= loc+2) && (irccmp(parv[2], "ON") == 0))
+	if((parc >= loc+2) && (irccmp(parv[loc], "ON") == 0))
 	{
 		target_server = parv[loc+1];
 		loc += 2;

@@ -102,7 +102,12 @@ clear_s_newconf(void)
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, xline_conf_list.head)
 	{
-		free_conf(ptr->data);
+		aconf = ptr->data;
+
+		if(aconf->hold)
+			continue;
+
+		free_conf(aconf);
 		dlinkDestroy(ptr, &xline_conf_list);
 	}
 

@@ -267,7 +267,7 @@ static  const char *  replies[] = {
 /* 244 RPL_STATSHLINE, */       "H %s * %s 0 -1", 
 /* 245 RPL_STATSSLINE, */       NULL,
 /* 246 */       NULL,
-/* 247 RPL_STATSXLINE, */	"X 2 %s :%s",
+/* 247 RPL_STATSXLINE, */	"%c 2 %s :%s",
 
 /* 248 RPL_STATSULINE, */       "U %s %s@%s %s",
 /* 249 RPL_STATSDEBUG */       NULL,
