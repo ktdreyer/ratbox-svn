@@ -1,3 +1,10 @@
+*** 20000102_5 by db
+- added LazyLinks.txt document outlining original Lazy Links protocol
+  its been modified for -7
+- ensure serverMask of 0 just causes restoreUnusedServerMask to return
+
+
+
 *** 20000102_4 by db
 - First working Lazy Links implementation
   still needs debugging/testing etc.
