@@ -1,3 +1,8 @@
+*** 20001128_4 by db
+- oopsies in modules.c should be max_mods not num_mods
+
+
+
 *** 20001128_3 by db
 - removed more bloat bloat bloat
 
