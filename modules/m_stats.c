@@ -392,9 +392,6 @@ static void stats_glines(struct Client *source_p)
     struct ConfItem *kill_ptr;
     char timebuffer[MAX_DATE_STRING];
     struct tm *tmptr;
-    char *host;
-    char *name;
-    char *reason;
 
     if (dlink_list_length(&pending_glines) > 0)
       sendto_one(source_p, ":%s NOTICE %s :Pending G-lines",
@@ -435,23 +432,11 @@ static void stats_glines(struct Client *source_p)
     {
       kill_ptr = gline_node->data;
 
-      if(kill_ptr->host)
-        host = kill_ptr->host;
-      else
-        host = "*";
-
-      if(kill_ptr->name)
-        name = kill_ptr->name;
-      else
-        name = "*";
-
-      if(kill_ptr->passwd)
-        reason = kill_ptr->passwd;
-      else
-        reason = "No Reason";
-
       sendto_one(source_p, form_str(RPL_STATSKLINE), me.name,
-                 source_p->name, 'G', host, name, reason);
+                 source_p->name, 'G', 
+                 kill_ptr->host ? kill_ptr->host : "*", 
+                 kill_ptr->user ? kill_ptr->user : "*", 
+                 kill_ptr->passwd ? kill_ptr->passwd : "No Reason");
     }
   }
   else
