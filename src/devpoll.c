@@ -27,6 +27,8 @@
 
 #ifdef USE_DEVPOLL
 #include "stdinc.h"
+#include <sys/devpoll.h>
+
 #include "config.h"
 #include "fdlist.h"
 #include "s_bsd.h"
