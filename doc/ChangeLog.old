@@ -1,3 +1,7 @@
+*** 20011001_2 by androsyn
+Fixed compile for when mmap() is not there..
+
+
 *** 20011001_1 by davidt
 - Fix evil core that killed half the testnet, we now need to check the
   length of remote channel names, since we use the block allocator,
