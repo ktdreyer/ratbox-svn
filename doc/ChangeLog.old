@@ -1,3 +1,8 @@
+*** 20010530_6 by jdc
+* Forgot to add HAVE_LIBZ to /INFO output.  Oops.
+
+
+
 *** 20010530_5 by jdc
 * m_info.c information is now in table form.  Hooray.  There are still
   some remaining entries (particularly in m_info.h) which should be
