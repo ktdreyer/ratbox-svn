@@ -1,3 +1,8 @@
+*** 20010526_9 by davidt
+- oops, commit regened configure. (strange cvs conflict must've deleted
+  the copy i was testing.. weird..)
+
+
 *** 20010526_8 by davidt
 - Improve configure.in detection of gettext, openssl and zlib
 - Fix problem with creating module installation dirs
