@@ -287,9 +287,8 @@ s_user.o: s_user.c ../include/stdinc.h ../include/config.h \
   ../include/hash.h ../include/sprintf_irc.h ../include/listener.h \
   ../include/msg.h ../include/numeric.h ../include/s_conf.h \
   ../include/patricia.h ../include/s_newconf.h ../include/s_serv.h \
-  ../include/scache.h ../include/supported.h ../include/whowas.h \
-  ../include/packet.h ../include/reject.h ../include/cache.h \
-  ../include/hook.h
+  ../include/scache.h ../include/whowas.h ../include/packet.h \
+  ../include/reject.h ../include/cache.h ../include/hook.h
 scache.o: scache.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/client.h \
   ../include/ircd_defs.h ../include/s_log.h ../include/send.h \

@@ -64,6 +64,7 @@ static int ms_pong(struct Client *, struct Client *, int, const char **);
 static int m_ping(struct Client *, struct Client *, int, const char **);
 static int ms_ping(struct Client *, struct Client *, int, const char **);
 static int mr_pass(struct Client *, struct Client *, int, const char **);
+static int m_version(struct Client *, struct Client *, int, const char **);
 
 struct Message nick_msgtab = {
 	"NICK", 0, 0, 0, MFLG_SLOW,
@@ -73,30 +74,29 @@ struct Message uid_msgtab = {
 	"UID", 0, 0, 0, MFLG_SLOW,
 	{mg_ignore, mg_ignore, mg_ignore, {ms_uid, 9}, mg_ignore}
 };
-
 struct Message user_msgtab = {
 	"USER", 0, 0, 0, MFLG_SLOW,
 	{{mr_user, 5}, mg_reg, mg_ignore, mg_ignore, mg_ignore, mg_reg}
 };
-
 struct Message pong_msgtab = {
 	"PONG", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
 	{{mr_pong, 0}, mg_ignore, mg_ignore, {ms_pong, 2}, mg_ignore, mg_ignore}
 };
-
 struct Message ping_msgtab = {
 	"PING", 0, 0, 0, MFLG_SLOW,
 	{mg_unreg, {m_ping, 2}, {ms_ping, 2}, {ms_ping, 2}, mg_ignore, {m_ping, 2}}
 };
-
 struct Message pass_msgtab = {
 	"PASS", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
 	{{mr_pass, 2}, mg_reg, mg_ignore, mg_ignore, mg_ignore, mg_reg}
 };
-
+struct Message version_msgtab = {
+	"VERSION", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_version, 0}, {m_version, 0}, {m_version, 0}, mg_ignore, {m_version, 0}}
+};
 
 mapi_clist_av1 users_clist[] = { &nick_msgtab, &uid_msgtab, &user_msgtab, &pong_msgtab, &ping_msgtab, 
-				 &pass_msgtab, 
+				 &pass_msgtab, &version_msgtab,
 				 NULL };
 
 DECLARE_MODULE_AV1(users, NULL, NULL, users_clist, NULL, NULL, "$Revision$");
@@ -119,6 +119,9 @@ static int perform_nick_collides(struct Client *, struct Client *,
 static int perform_nickchange_collides(struct Client *, struct Client *,
 				       struct Client *, int, const char **, 
 				       time_t, const char *);
+
+static void show_isupport(struct Client *source_p);
+static char *confopts(struct Client *source_p);
 
 /* mr_nick()
  *       parv[0] = sender prefix
@@ -765,6 +768,146 @@ mr_pass(struct Client *client_p, struct Client *source_p, int parc, const char *
 	return 0;
 }
 
+/*
+ * m_version - VERSION command handler
+ *      parv[0] = sender prefix
+ *      parv[1] = remote server
+ */
+static int
+m_version(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	static time_t last_used = 0L;
+
+	if(parc > 1)
+	{
+		if(IsOper(source_p) || !MyClient(source_p))
+		{
+			if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
+			{
+				/* safe enough to give this on a local connect only */
+				sendto_one(source_p, form_str(RPL_LOAD2HI),
+					   me.name, source_p->name, "VERSION");
+				return 0;
+			}
+			else
+				last_used = CurrentTime;
+		}
+
+		if(hunt_server(client_p, source_p, ":%s VERSION :%s", 1, parc, parv) != HUNTED_ISME)
+			return 0;
+	}
+
+	sendto_one_numeric(source_p, RPL_VERSION, form_str(RPL_VERSION),
+			   ircd_version, serno,
+			   me.name, confopts(source_p), TS_CURRENT);
+
+	show_isupport(source_p);
+
+	return 0;
+}
+
+#define FEATURES "STD=i-d"		\
+		" STATUSMSG=@+"		\
+                "%s%s%s"		\
+                " MODES=%i"		\
+                " MAXCHANNELS=%i"	\
+                " MAXBANS=%i"		\
+                " MAXTARGETS=%i"	\
+                " NICKLEN=%i"		\
+                " TOPICLEN=%i"		\
+                " KICKLEN=%i"		\
+		" AWAYLEN=%i"
+
+#define FEATURESVALUES ConfigChannel.use_knock ? " KNOCK" : "", \
+        ConfigChannel.use_except ? " EXCEPTS" : "", \
+        ConfigChannel.use_invex ? " INVEX" : "", \
+        MAXMODEPARAMS,ConfigChannel.max_chans_per_user, \
+        ConfigChannel.max_bans, \
+        ConfigFileEntry.max_targets,NICKLEN-1,TOPICLEN,REASONLEN,AWAYLEN
+
+#define FEATURES2 "CHANNELLEN=%i"	\
+		" CHANTYPES=#&"		\
+		" PREFIX=(ov)@+" 	\
+		" CHANMODES=%s%sb,k,l,imnpst"	\
+		" NETWORK=%s"		\
+		" CASEMAPPING=rfc1459"	\
+		" CHARSET=ascii"	\
+		" CALLERID"		\
+		" WALLCHOPS"		\
+		" ETRACE"		\
+		" SAFELIST"		\
+		" ELIST=U"
+
+#define FEATURES2VALUES LOC_CHANNELLEN, \
+			ConfigChannel.use_except ? "e" : "", \
+                        ConfigChannel.use_invex ? "I" : "", \
+                        ServerInfo.network_name
+
+/*
+ * show_isupport
+ *
+ * inputs	- pointer to client
+ * output	- 
+ * side effects	- display to client what we support (for them)
+ */
+static void
+show_isupport(struct Client *source_p)
+{
+	char isupportbuffer[512];
+
+	ircsprintf(isupportbuffer, FEATURES, FEATURESVALUES);
+	sendto_one_numeric(source_p, RPL_ISUPPORT, form_str(RPL_ISUPPORT), isupportbuffer);
+
+	ircsprintf(isupportbuffer, FEATURES2, FEATURES2VALUES);
+	sendto_one_numeric(source_p, RPL_ISUPPORT, form_str(RPL_ISUPPORT), isupportbuffer);
+
+	return;
+}
+
+/* confopts()
+ * input  - client pointer
+ * output - ircd.conf option string
+ * side effects - none
+ */
+static char *
+confopts(struct Client *source_p)
+{
+	static char result[15];
+	char *p;
+
+	result[0] = '\0';
+	p = result;
+
+	if(ConfigChannel.use_except)
+		*p++ = 'e';
+
+	if(ConfigFileEntry.glines)
+		*p++ = 'g';
+	*p++ = 'G';
+
+	/* might wanna hide this :P */
+	if(ServerInfo.hub)
+		*p++ = 'H';
+
+	if(ConfigChannel.use_invex)
+		*p++ = 'I';
+
+	if(ConfigChannel.use_knock)
+		*p++ = 'K';
+
+	*p++ = 'M';
+	*p++ = 'p';
+#ifdef HAVE_LIBZ
+	*p++ = 'Z';
+#endif
+#ifdef IPV6
+	*p++ = '6';
+#endif
+
+	*p = '\0';
+
+	return result;
+}
 
 
 /* report_and_set_user_flags

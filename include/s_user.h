@@ -46,7 +46,5 @@ extern int valid_username(const char *username);
 extern void send_umode(struct Client *, struct Client *, int, int, char *);
 extern void send_umode_out(struct Client *, struct Client *, int);
 extern int show_lusers(struct Client *source_p);
-extern void show_isupport(struct Client *);
-
 
 #endif

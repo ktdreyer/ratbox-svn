@@ -44,7 +44,6 @@
 #include "s_serv.h"
 #include "scache.h"
 #include "send.h"
-#include "supported.h"
 #include "whowas.h"
 #include "memory.h"
 #include "packet.h"
@@ -205,29 +204,6 @@ show_lusers(struct Client *source_p)
 
 	return 0;
 }
-
-/*
- * show_isupport
- *
- * inputs	- pointer to client
- * output	- 
- * side effects	- display to client what we support (for them)
- */
-void
-show_isupport(struct Client *source_p)
-{
-	char isupportbuffer[512];
-
-	ircsprintf(isupportbuffer, FEATURES, FEATURESVALUES);
-	sendto_one_numeric(source_p, RPL_ISUPPORT, form_str(RPL_ISUPPORT), isupportbuffer);
-
-	ircsprintf(isupportbuffer, FEATURES2, FEATURES2VALUES);
-	sendto_one_numeric(source_p, RPL_ISUPPORT, form_str(RPL_ISUPPORT), isupportbuffer);
-
-	return;
-}
-
-
 
 /* 
  * valid_hostname - check hostname for validity

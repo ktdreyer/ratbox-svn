@@ -453,16 +453,6 @@ m_userhost.so: m_userhost.c ../include/stdinc.h ../include/config.h \
   ../include/msg.h ../include/parse.h ../include/modules.h \
   ../include/hook.h ../include/s_conf.h ../include/class.h \
   ../include/patricia.h
-m_version.so: m_version.c ../include/stdinc.h ../include/config.h \
-  ../include/setup.h ../include/defaults.h ../include/client.h \
-  ../include/ircd_defs.h ../include/s_log.h ../include/send.h \
-  ../include/linebuf.h ../include/tools.h ../include/channel.h \
-  ../include/res.h ../adns/adns.h ../include/commio.h ../include/ircd.h \
-  ../include/memory.h ../include/balloc.h ../include/irc_string.h \
-  ../include/numeric.h ../include/s_conf.h ../include/class.h \
-  ../include/patricia.h ../include/s_serv.h ../include/s_user.h \
-  ../include/msg.h ../include/parse.h ../include/modules.h \
-  ../include/hook.h
 m_wallops.so: m_wallops.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/client.h \
   ../include/ircd_defs.h ../include/s_log.h ../include/send.h \
