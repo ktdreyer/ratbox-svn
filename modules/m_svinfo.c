@@ -91,9 +91,12 @@ static void ms_svinfo(struct Client *client_p, struct Client *source_p,
        * TS_ONLY we can't fall back to the non-TS protocol so
        * we drop the link  -orabidoo
        */
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ADMIN,
+            "Link %s dropped, wrong TS protocol version (%s,%s)",
+	    get_client_name(source_p, SHOW_IP), parv[1], parv[2]);
+      sendto_realops_flags(FLAGS_NOTADMIN,
 	         "Link %s dropped, wrong TS protocol version (%s,%s)",
-                 get_client_name(source_p, SHOW_IP), parv[1], parv[2]);
+                 get_client_name(source_p, MASK_IP), parv[1], parv[2]);
       exit_client(source_p, source_p, source_p, "Incompatible TS version");
       return;
     }
@@ -107,9 +110,15 @@ static void ms_svinfo(struct Client *client_p, struct Client *source_p,
 
   if (deltat > ConfigFileEntry.ts_max_delta)
     {
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ADMIN,
+          "Link %s dropped, excessive TS delta (my TS=%lu, their TS=%lu,delta=%d)",
+	  get_client_name(source_p, SHOW_IP),
+	  (unsigned long) CurrentTime,
+	  (unsigned long) theirtime,
+	  (int) deltat);
+      sendto_realops_flags(FLAGS_NOTADMIN,
        "Link %s dropped, excessive TS delta (my TS=%lu, their TS=%lu, delta=%d)",
-		 get_client_name(source_p, SHOW_IP),
+		 get_client_name(source_p, MASK_IP),
 		 (unsigned long) CurrentTime,
 		 (unsigned long) theirtime,
 		 (int) deltat);

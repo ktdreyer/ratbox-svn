@@ -143,7 +143,7 @@ static void ms_squit(struct Client *client_p, struct Client *source_p,
           sendto_server(NULL, NULL, NULL, NOCAPS, NOCAPS, NOFLAGS,
                         ":%s WALLOPS :Remote SQUIT %s from %s (%s)",
                         me.name, found_squit->server_name,
-                        get_client_name(source_p, HIDE_IP),comment);
+                        source_p->name, comment);
 
 	  ilog(L_TRACE, "SQUIT From %s : %s (%s)", parv[0],
 	       found_squit->server_name, comment);
