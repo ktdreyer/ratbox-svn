@@ -1,3 +1,11 @@
+*** 20001031_8 by adrian
+
+
+Add some more code to implement comm_connect_tcp(). Its not functional
+yet, but its getting there.
+
+
+
 *** 20001031_7 by db
 - preliminary cleanup of m_whois.c
   I messed up previous commit. YES I tested, but missed the duplicate
