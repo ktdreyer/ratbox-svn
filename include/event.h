@@ -25,7 +25,7 @@ extern void eventInit(void);
 extern void eventFreeMemory(void);
 extern int eventFind(EVH *, void *);
 
-extern int mo_events( struct Client *cptr,
+extern int show_events( struct Client *cptr,
 		      struct Client *sptr,
 		      int parc,
 		      char *parv[]);

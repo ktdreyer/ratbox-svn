@@ -235,7 +235,7 @@ eventFind(EVH * func, void *arg)
 
 #ifndef SQUID
 int
-mo_events( struct Client *cptr,
+show_events( struct Client *cptr,
 	   struct Client *sptr,
 	   int parc,
 	   char *parv[])

@@ -45,7 +45,7 @@
 #include "s_serv.h"      /* hunt_server, show_servers */
 #include "s_stats.h"     /* tstats */
 #include "s_user.h"      /* show_opers */
-
+#include "event.h"	 /* events */
 #include <string.h>
 
 /*
@@ -400,7 +400,7 @@ int mo_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       break;
 
     case 'E' : case 'e' :
-      sendto_one(sptr,":%s NOTICE %s :Use stats I instead", me.name, parv[0]);
+      show_events(cptr,sptr,parc,parv);
       break;
 
     case 'F' : case 'f' :
