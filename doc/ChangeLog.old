@@ -1,3 +1,8 @@
+*** 20010211_2 by a1kmm
+- Put deleted hostmask confs on a list so we can free them later. Still leaves some memory leaks somewhere
+  in the config(but why?) but it is partway there...
+
+
 *** 20010211_1 by a1kmm
 - Fixed adns to use My* memory functions.
 
