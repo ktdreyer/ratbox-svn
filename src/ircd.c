@@ -361,9 +361,6 @@ static void initialize_global_set_options(void)
   else
     GlobalSetOptions.floodcount = 10;
 
-  /* Disable +I for now */
-  GlobalSetOptions.use_invex = 0;
-
  /* End of global set options */
 
 }

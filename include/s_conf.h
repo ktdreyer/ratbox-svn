@@ -235,6 +235,7 @@ typedef struct config_file_entry
   int           default_floodcount;
   int           client_flood;
   int		use_invex;
+  int           use_except;
 #ifdef HAVE_LIBCRYPTO
   struct EncPreference *default_cipher_preference;
 #endif

@@ -1470,6 +1470,8 @@ static void set_default_conf(void)
     FLAGS_DRONE | FLAGS_LOCOPS | FLAGS_UNAUTH;
   ConfigFileEntry.vchans_oper_only = NO;
   ConfigFileEntry.disable_vchans = NO;
+  ConfigFileEntry.use_invex = NO;
+  ConfigFileEntry.use_except= YES;
   ConfigFileEntry.persist_expire = 30 * 60;
   ConfigFileEntry.min_nonwildcard = 4;
   ConfigFileEntry.default_floodcount = 8;
