@@ -855,7 +855,6 @@ static char* ClientFlags(FILE *out, char* spoof, char *tmp)
 	  fprintf(out,"\t\tkline_exempt=yes;\n");	  
           break;
         case '&':        /* can run a bot */
-	  fprintf(out,"\t\tallow_bots=yes;\n");	  
           break;
         case '>':        /* can exceed max connects */
 	  fprintf(out,"\t\texceed_limit=yes;\n");	  

@@ -61,7 +61,6 @@
 	auth {
 		passwd="";
 		kline_exempt=yes;
-		allow_bots=yes;
 		have_ident;
 		no_tilde;
 		user="db@*db.net";
