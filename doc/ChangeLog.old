@@ -1,3 +1,7 @@
+*** 19990909_19 by tomh
+remove (char*)NULL casts, pointless
+
+
 *** 19990909_18 by tomh
 remove non-ansi prototype for crypt
 
