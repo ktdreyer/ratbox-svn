@@ -133,6 +133,10 @@ struct Client
   unsigned int      flags;      /* client flags */
   unsigned int      flags2;     /* ugh. overflow */
   int               fd;         /* >= 0, for local clients */
+#ifdef MISSING_SOCKPAIR
+  int               fd_r;       /* fd for reading */
+#endif
+
   int               slink_pid;  /* pid of servlink process if any */
   int               hopcount;   /* number of servers to this 0 = local */
   unsigned short    status;     /* Client type */
@@ -266,6 +270,10 @@ struct LocalUser
   int               ctrlfd;     /* For servers:
                                    control fd used for sending commands
                                    to servlink */
+#ifdef MISSING_SOCKPAIR
+  int              ctrlfd_r;    /* control fd for reading */
+#endif
+
   unsigned char    *slinkq;     /* sendq for control data */
   int              slinkq_ofs;  /* ofset into slinkq */
   int              slinkq_len;  /* length remaining after slinkq_ofs */

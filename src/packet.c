@@ -158,7 +158,15 @@ read_packet(int fd, void *data)
   struct LocalUser *lclient_p = client_p->localClient;
   int length = 0;
   int lbuf_len;
-  
+  int fd_r = client_p->fd;
+
+#ifdef MISSING_SOCKPAIR
+  if (IsServer(client_p))
+  {
+    assert(client_p->fd_r > -1);
+    fd_r = client_p->fd_r;
+  }
+#endif
   assert(lclient_p != NULL);
 
   /*
@@ -166,7 +174,7 @@ read_packet(int fd, void *data)
    * I personally think it makes the code too hairy to make sane.
    *     -- adrian
    */
-  length = read(client_p->fd, readBuf, READBUF_SIZE);
+  length = read(fd_r, readBuf, READBUF_SIZE);
 
   /* XXX If the client is actually dead, read the buffer but throw it out
    * a suggested more optimum fix will be to mark the fd as -1 and close it in 
@@ -178,7 +186,7 @@ read_packet(int fd, void *data)
 
   if (length <= 0) {
     if(errno == EAGAIN) {
-      comm_setselect(client_p->fd, FDLIST_IDLECLIENT, COMM_SELECT_READ,
+      comm_setselect(fd_r, FDLIST_IDLECLIENT, COMM_SELECT_READ,
       		read_packet, client_p, 0);
       return;
     }  	
@@ -221,14 +229,24 @@ read_packet(int fd, void *data)
   /* Attempt to parse what we have */
   parse_client_queued(client_p);
 
+  /* server fd may have changed */
+  fd_r = client_p->fd;
+#ifdef MISSING_SOCKPAIR
+  if (IsServer(client_p))
+  {
+    assert(client_p->fd_r > -1);
+    fd_r = client_p->fd_r;
+  }
+#endif
+
   if (!IsDead(client_p))
   {
     /* If we get here, we need to register for another COMM_SELECT_READ */
     if (PARSE_AS_SERVER(client_p)) {
-      comm_setselect(client_p->fd, FDLIST_SERVER, COMM_SELECT_READ,
+      comm_setselect(fd_r, FDLIST_SERVER, COMM_SELECT_READ,
         read_packet, client_p, 0);
     } else {
-      comm_setselect(client_p->fd, FDLIST_IDLECLIENT, COMM_SELECT_READ,
+      comm_setselect(fd_r, FDLIST_IDLECLIENT, COMM_SELECT_READ,
         read_packet, client_p, 0);
     }
   }

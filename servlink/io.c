@@ -24,8 +24,11 @@
 #include <errno.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdlib.h>
 
+#ifdef HAVE_LIBCRYPTO
 #include <openssl/evp.h>
+#endif
 #ifdef HAVE_LIBZ
 #include <zlib.h>
 #endif
@@ -99,7 +102,7 @@ void process_sendq(unsigned char *data, int datalen)
   /* we can 'block' here, as we don't have to listen
    * to any other fds anyway
    */
-  send_data_blocking(REMOTE_FD, data, datalen);
+  send_data_blocking(REMOTE_FD_W, data, datalen);
 }
 
 /*
@@ -149,7 +152,7 @@ void process_recvq(unsigned char *data, int datalen)
   }
 #endif
   
-  send_data_blocking(LOCAL_FD, buf, blen);
+  send_data_blocking(LOCAL_FD_W, buf, blen);
 }
 
 /* read_ctrl
@@ -169,7 +172,7 @@ void read_ctrl(void)
       cmd.data = NULL;
 
       /* read the command */
-      ret = read(CONTROL_FD, &cmd.command, 1);
+      ret = read(CONTROL_FD_R, &cmd.command, 1);
       if (ret == -1 && errno == EAGAIN)
         return;
       else if (ret <= 0)
@@ -192,7 +195,7 @@ void read_ctrl(void)
       case CMD_INJECT_SENDQ:
         if (cmd.gotdatalen == 0)
         {
-          ret = read(CONTROL_FD, &tmp, 1);
+          ret = read(CONTROL_FD_R, &tmp, 1);
           if (ret == -1 && errno == EAGAIN)
             return;
           else if (ret <= 0)
@@ -203,7 +206,7 @@ void read_ctrl(void)
         }
         if (cmd.gotdatalen == 1)
         {
-          ret = read(CONTROL_FD, &tmp, 1);
+          ret = read(CONTROL_FD_R, &tmp, 1);
           if (ret == -1 && errno == EAGAIN)
             return;
           else if (ret <= 0)
@@ -241,7 +244,7 @@ void read_ctrl(void)
 
     if (cmd.readdata < cmd.datalen) /* try to get any remaining data */
     {
-      ret = read(CONTROL_FD, (cmd.data + cmd.readdata),
+      ret = read(CONTROL_FD_R, (cmd.data + cmd.readdata),
                  cmd.datalen - cmd.readdata);
 
       if (ret == 0 || (ret == -1 && errno != EAGAIN))
@@ -278,7 +281,7 @@ void read_data(void)
     buf = tmp_buf;
 #endif
     
-  while ((ret = read(LOCAL_FD, buf, BUFLEN)) > 0)
+  while ((ret = read(LOCAL_FD_R, buf, BUFLEN)) > 0)
   {
     blen = ret;
 #ifdef HAVE_LIBZ
@@ -314,7 +317,7 @@ void read_data(void)
     }
 #endif
     
-    ret = write(REMOTE_FD, out_buf, blen);
+    ret = write(REMOTE_FD_W, out_buf, blen);
     if (ret <= 0)
     {
       if (ret == -1 && errno == EAGAIN)
@@ -326,9 +329,9 @@ void read_data(void)
     if (ret < blen)
     {
       /* write incomplete, register write cb */
-      fds[REMOTE_FD].write_cb = write_net;
+      fds[REMOTE_FD_W].write_cb = write_net;
       /*  deregister read_cb */
-      fds[LOCAL_FD].read_cb = NULL;
+      fds[LOCAL_FD_R].read_cb = NULL;
       out_ofs = ret;
       out_len = blen - ret;
       return;
@@ -347,7 +350,7 @@ void write_net(void)
   if (!out_len)
     exit(1);
 
-  ret = write(REMOTE_FD, out_buf+out_ofs, out_len);
+  ret = write(REMOTE_FD_W, out_buf+out_ofs, out_len);
 
   if (ret == -1 && errno == EAGAIN)
     return;
@@ -359,9 +362,9 @@ void write_net(void)
   if (!out_len)
   {
     /* write completed, de-register write cb */
-    fds[REMOTE_FD].write_cb = NULL;
+    fds[REMOTE_FD_W].write_cb = NULL;
     /* reregister read_cb */
-    fds[LOCAL_FD].read_cb = read_data;
+    fds[LOCAL_FD_R].read_cb = read_data;
     out_ofs = 0;
   }
   else
@@ -383,7 +386,7 @@ void read_net(void)
     buf = tmp_buf;
 #endif
 
-  while ((ret = read(REMOTE_FD, buf, BUFLEN)) > 0)
+  while ((ret = read(REMOTE_FD_R, buf, BUFLEN)) > 0)
   {
     blen = ret;
 #ifdef HAVE_LIBCRYPTO
@@ -419,7 +422,7 @@ void read_net(void)
     }
 #endif
 
-    ret = write(LOCAL_FD, in_buf, blen);
+    ret = write(LOCAL_FD_W, in_buf, blen);
     if (ret <= 0)
     {
       if (ret == -1 && errno == EAGAIN)
@@ -433,9 +436,9 @@ void read_net(void)
       in_ofs = ret;
       in_len = blen - ret;
       /* write incomplete, register write cb */
-      fds[LOCAL_FD].write_cb = write_data;
+      fds[LOCAL_FD_W].write_cb = write_data;
       /* deregister read_cb */
-      fds[REMOTE_FD].read_cb = NULL;
+      fds[REMOTE_FD_R].read_cb = NULL;
       return;
     }
   }
@@ -451,7 +454,7 @@ void write_data(void)
   if (!in_len)
     exit(1);
 
-  ret = write(LOCAL_FD, in_buf+in_ofs, in_len);
+  ret = write(LOCAL_FD_W, in_buf+in_ofs, in_len);
 
   if (ret == -1 && errno == EAGAIN)
     return;
@@ -463,9 +466,9 @@ void write_data(void)
   if (!in_len)
   {
     /* write completed, de-register write cb */
-    fds[LOCAL_FD].write_cb = NULL;
+    fds[LOCAL_FD_W].write_cb = NULL;
     /* reregister read_cb */
-    fds[REMOTE_FD].read_cb = read_net;
+    fds[REMOTE_FD_R].read_cb = read_net;
     in_ofs = 0;
   }
   else

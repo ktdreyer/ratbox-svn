@@ -113,7 +113,10 @@ struct Client* make_client(struct Client* from)
       localClient = (struct LocalUser *)MyMalloc(sizeof(struct LocalUser));
       client_p->localClient = localClient;
 
-      client_p->localClient->ctrlfd = -1;                                                        
+      client_p->localClient->ctrlfd = -1;
+#ifdef MISSING_SOCKPAIR
+      client_p->localClient->ctrlfd_r = -1;
+#endif      
       /* as good a place as any... */
       m = make_dlink_node();
       dlinkAdd(client_p, m, &unknown_list);
@@ -127,6 +130,9 @@ struct Client* make_client(struct Client* from)
 
   client_p->status = STAT_UNKNOWN;
   client_p->fd = -1;
+#ifdef MISSING_SOCKPAIR
+  client_p->fd_r = -1;
+#endif
   strcpy(client_p->username, "unknown");
 
 #if 0

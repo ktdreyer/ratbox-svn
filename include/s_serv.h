@@ -207,6 +207,11 @@ struct EncCapability
 #define SLINKCMD_INJECT_SENDQ                15
 #define SLINKCMD_INIT                        16
 
+#ifdef MISSING_SOCKPAIR
+#define LAST_SLINK_FD   4
+#else
+#define LAST_SLINK_FD   2
+#endif
 /*
  * Globals
  *

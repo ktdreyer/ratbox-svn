@@ -46,10 +46,14 @@ static void usage(void);
 struct slink_state       in_state;
 struct slink_state       out_state;
 
-struct fd_table          fds[3] =
+struct fd_table          fds[NUM_FDS] =
         {
           { read_ctrl, NULL },
           {      NULL, NULL },
+#ifdef MISSING_SOCKPAIR
+          {      NULL, NULL },
+          {      NULL, NULL },
+#endif
           {      NULL, NULL }
         };
 
@@ -106,14 +110,24 @@ int main(int argc, char *argv[])
     {
       if (fds[i].read_cb)
         FD_SET(i, &rfds);
+#ifndef MISSING_SOCKPAIR
+      if (fds[i].write_cb)
+        FD_SET(i, &wfds);
+#endif
+    }
+
+#ifdef MISSING_SOCKPAIR
+    for (i = 3; i < 6; i++)
+    {
       if (fds[i].write_cb)
         FD_SET(i, &wfds);
     }
+#endif
       
-    /* we only have 3 fds ever, so I don't think select is too painful */
-    if (select(3, &rfds, &wfds, NULL, NULL))
+    /* we have <=6 fds ever, so I don't think select is too painful */
+    if (select(NUM_FDS, &rfds, &wfds, NULL, NULL))
     {
-      for (i = 0; i < 3; i++)
+      for (i = 0; i < NUM_FDS; i++)
       {
         if (FD_ISSET(i, &rfds) && fds[i].read_cb)
           (*fds[i].read_cb)();
@@ -396,12 +410,12 @@ void process_command(struct ctrl_command *cmd)
       assert(!(in_state.active || out_state.active));
       in_state.active = 1;
       out_state.active = 1;
-      fds[CONTROL_FD].read_cb = read_ctrl;
-      fds[CONTROL_FD].write_cb = NULL;
-      fds[LOCAL_FD].read_cb = read_data;
-      fds[LOCAL_FD].write_cb = NULL;
-      fds[REMOTE_FD].read_cb = read_net;
-      fds[REMOTE_FD].write_cb = NULL;
+      fds[CONTROL_FD_R].read_cb = read_ctrl;
+      fds[CONTROL_FD_W].write_cb = NULL;
+      fds[LOCAL_FD_R].read_cb = read_data;
+      fds[LOCAL_FD_W].write_cb = NULL;
+      fds[REMOTE_FD_R].read_cb = read_net;
+      fds[REMOTE_FD_W].write_cb = NULL;
       break;
     default:
       /* invalid command */

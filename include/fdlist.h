@@ -18,7 +18,7 @@
 #include "config.h"
 #include "ircd_defs.h"
 #include "res.h"
-#define FD_DESC_SZ 32
+#define FD_DESC_SZ 128  /* hostlen + comment */
 
 /*
  * priority values used in fdlist code

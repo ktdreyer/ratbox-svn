@@ -981,17 +981,27 @@ int server_estab(struct Client *client_p)
   client_p->serv->sconf = aconf;
   client_p->flags2 |= FLAGS2_CBURST;
 
-  ircsprintf(serv_desc, "ServLink Data: %s", client_p->name);
+#ifndef MISSING_SOCKPAIR
+  ircsprintf(serv_desc, "slink data: %s", client_p->name);
   serv_desc[FD_DESC_SZ-1] = '\0';
   fd_note (client_p->fd, serv_desc);
-
-  if (client_p->localClient->ctrlfd > -1)
-  {
-    ircsprintf(serv_desc, "ServLink Control: %s", client_p->name);
-    serv_desc[FD_DESC_SZ-1] = '\0';
-    fd_note (client_p->fd, serv_desc);
-  }
-
+  ircsprintf(serv_desc, "slink ctrl: %s", client_p->name);
+  serv_desc[FD_DESC_SZ-1] = '\0';
+  fd_note (client_p->fd, serv_desc);
+#else
+  ircsprintf(serv_desc, "slink data (out): %s", client_p->name);
+  serv_desc[FD_DESC_SZ-1] = '\0';
+  fd_note (client_p->fd, serv_desc);
+  ircsprintf(serv_desc, "slink ctrl (out): %s", client_p->name);
+  serv_desc[FD_DESC_SZ-1] = '\0';
+  fd_note (client_p->fd, serv_desc);
+  ircsprintf(serv_desc, "slink data  (in): %s", client_p->name);
+  serv_desc[FD_DESC_SZ-1] = '\0';
+  fd_note (client_p->fd, serv_desc);
+  ircsprintf(serv_desc, "slink ctrl  (in): %s", client_p->name);
+  serv_desc[FD_DESC_SZ-1] = '\0';
+  fd_note (client_p->fd, serv_desc);
+#endif
   /*
   ** Old sendto_serv_but_one() call removed because we now
   ** need to send different names to different servers
@@ -1174,31 +1184,48 @@ int fork_server(struct Client *server)
   int i;
   int ctrl_pipe[2];
   int data_pipe[2];
+#ifdef MISSING_SOCKPAIR
+  int ctrl_pipe2[2];
+  int data_pipe2[2];
+#endif
   char *kid_argv[] = { "-slink", NULL };
   
 
+#ifndef MISSING_SOCKPAIR
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, ctrl_pipe) < 0)
     return -1;
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, data_pipe) < 0)
     return -1;
-
+#else
+  if (pipe(ctrl_pipe) < 0)
+    return -1;
+  if (pipe(data_pipe) < 0)
+    return -1;
+  if (pipe(ctrl_pipe2) < 0)
+    return -1;
+  if (pipe(data_pipe2) < 0)
+    return -1;
+#endif
+  
   if ((ret = vfork()) < 0)
     return -1;
   else if (ret == 0)
   {
     /* Child - use dup2 to override 0/1/2, then close everything else */
     dup2(ctrl_pipe[0], 0);
-    dup2(data_pipe[1], 1);
+    dup2(data_pipe[0], 1);
     dup2(server->fd, 2);
+#ifdef MISSING_SOCKPAIR
+    /* only uni-directional pipes, so use 3/4 for writing */
+    dup2(ctrl_pipe2[1], 3);
+    dup2(data_pipe2[1], 4);
+#endif
 
-    if (!set_non_blocking(0))
-      exit(1);
-    if (!set_non_blocking(1))
-      exit(1);
-    if (!set_non_blocking(2))
-      exit(1);
-
-    for(i = 3; i < MAXCONNECTIONS; i++)
+    for(i = 0; i <= LAST_SLINK_FD; i++)
+      if(!set_non_blocking(i))
+        exit(1);
+    
+    for(i = (LAST_SLINK_FD + 1); i < MAXCONNECTIONS; i++)
       close(i);
 
     /* exec servlink program */
@@ -1212,22 +1239,47 @@ int fork_server(struct Client *server)
   {
     fd_close( server->fd );
     close( ctrl_pipe[0] );
-    close( data_pipe[1] );
+    close( data_pipe[0] );
 
     assert(server->localClient);
     server->localClient->ctrlfd = ctrl_pipe[1];
-    server->fd = data_pipe[0];
+    server->fd = data_pipe[1];
+
+#ifdef MISSING_SOCKPAIR
+    close(ctrl_pipe2[1]);
+    close(data_pipe2[1]);
+    server->localClient->ctrlfd_r = ctrl_pipe2[0];
+    server->fd_r = data_pipe2[0];
+#endif
 
     if (!set_non_blocking(server->fd))
         report_error(NONB_ERROR_MSG, get_client_name(server, SHOW_IP), errno);
     if (!set_non_blocking(server->localClient->ctrlfd))
         report_error(NONB_ERROR_MSG, get_client_name(server, SHOW_IP), errno);
+#ifdef MISSING_SOCKPAIR
+    if (!set_non_blocking(server->fd_r))
+        report_error(NONB_ERROR_MSG, get_client_name(server, SHOW_IP), errno);
+    if (!set_non_blocking(server->localClient->ctrlfd_r))
+        report_error(NONB_ERROR_MSG, get_client_name(server, SHOW_IP), errno);
+#endif
 
-    fd_open(server->localClient->ctrlfd, FD_SOCKET, "Server control socket");
-    fd_open(server->fd, FD_SOCKET, "Server data socket");
+#ifndef MISSING_SOCKPAIR
+    fd_open(server->localClient->ctrlfd, FD_SOCKET, "slink ctrl socket");
+    fd_open(server->fd, FD_SOCKET, "slink data socket");
+#else
+    fd_open(server->localClient->ctrlfd, FD_SOCKET, "slink ctrl (out)");
+    fd_open(server->fd, FD_SOCKET, "slink data (out)");
+    fd_open(server->localClient->ctrlfd_r, FD_SOCKET, "slink ctrl (in)");
+    fd_open(server->fd_r, FD_SOCKET, "slink data (in)");
+#endif
 
+#ifndef MISSING_SOCKPAIR
     comm_setselect(server->fd, FDLIST_SERVER, COMM_SELECT_READ, read_packet,
                    server, 0);
+#else
+    comm_setselect(server->fd_r, FDLIST_SERVER, COMM_SELECT_READ, read_packet,
+                   server, 0);
+#endif
     return 0;
   }
 }
