@@ -31,26 +31,26 @@
 #include "channel.h"
 #include "ircd_defs.h"
 
-#define FEATURES "STD=i-d"	\
-		" STATUSMSG=@+"	\
-                "%s%s%s" 	\
-                " MODES=%i" 	\
-                " MAXCHANNELS=%i" \
-                " MAXBANS=%i" 	\
-                " MAXTARGETS=%i" \
-                " NICKLEN=%i" 	\
-                " TOPICLEN=%i" 	\
-                " KICKLEN=%i"
+#define FEATURES "STD=i-d"		\
+		" STATUSMSG=@+"		\
+                "%s%s%s"		\
+                " MODES=%i"		\
+                " MAXCHANNELS=%i"	\
+                " MAXBANS=%i"		\
+                " MAXTARGETS=%i"	\
+                " NICKLEN=%i"		\
+                " TOPICLEN=%i"		\
+                " KICKLEN=%i"		\
+		" AWAYLEN=%i"
 
 #define FEATURESVALUES ConfigChannel.use_knock ? " KNOCK" : "", \
         ConfigChannel.use_except ? " EXCEPTS" : "", \
         ConfigChannel.use_invex ? " INVEX" : "", \
         MAXMODEPARAMS,ConfigChannel.max_chans_per_user, \
         ConfigChannel.max_bans, \
-        ConfigFileEntry.max_targets,NICKLEN-1,TOPICLEN,REASONLEN
+        ConfigFileEntry.max_targets,NICKLEN-1,TOPICLEN,REASONLEN,AWAYLEN
 
 #define FEATURES2 "CHANNELLEN=%i"	\
-		" AWAYLEN=%i"		\
 		" CHANTYPES=#&"		\
 		" PREFIX=(ov)@+" 	\
 		" CHANMODES=%s%sb,k,l,imnpst"	\
@@ -59,9 +59,10 @@
 		" CHARSET=ascii"	\
 		" CALLERID"		\
 		" WALLCHOPS"		\
-		" ETRACE"
+		" ETRACE"		\
+		" SAFELIST"
 
-#define FEATURES2VALUES LOC_CHANNELLEN, AWAYLEN, \
+#define FEATURES2VALUES LOC_CHANNELLEN, \
 			ConfigChannel.use_except ? "e" : "", \
                         ConfigChannel.use_invex ? "I" : "", \
                         ServerInfo.network_name
