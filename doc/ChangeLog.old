@@ -1,3 +1,8 @@
+*** 20010219_1 by wcampbel
+Cleaned up an unclear sentence in example.conf, and updated the messages
+file.  Someone want to write user docs on the messages stuff?
+
+
 *** 20010218_2 by wcampbel
 ip="..."; in listen {} is inconsistent, like a connect {} host entry, it
 can accept both IP's and hostnames, so it should be host="...";
