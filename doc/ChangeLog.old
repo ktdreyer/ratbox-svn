@@ -1,3 +1,9 @@
+*** 20010225_1 by androsyn
+First half of the dns rehash fixes. Also fixed for a case where
+a nameserver is 0.0.0.0. We alter the address to be 127.0.0.1 in that
+case.
+
+
 *** 20010224_8 by jdc
 Typo a la Riedel (gewijgerd --> geweigerd).
 
