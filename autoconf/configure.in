@@ -433,28 +433,6 @@ AC_ARG_ENABLE(profile,
 AC_MSG_RESULT($ac_cv_profile)
 
 
-dnl Check if we want to use efence
-AC_MSG_CHECKING(if you want ElectricFence)
-AC_ARG_ENABLE(efence,
-[  --enable-efence              Enable ElectricFence(memory debugger).
-  --disable-efence             Disable ElectricFence(default).],
-[
-  case "$enableval" in
-  yes)
-    ac_cv_efence="yes"
-    ;;
-  no)
-    ac_cv_efence="no"
-    ;;
-  *)
-    LIBS="$LIBS -L$enableval"
-    ac_cv_efence="yes"
-    ;;
-  esac
-])
-AC_MSG_RESULT($ac_cv_efence)
-
-
 dnl check for netio plugin stuff
 dnl Enable poll()
 AC_ARG_ENABLE(poll,
@@ -914,12 +892,6 @@ EOF
 		])
 		AC_DEFINE_UNQUOTED(SYMBOL_PREFIX, "${symbol_underscores}")
 	fi
-fi
-
-
-dnl This needs to be near the end for it to work right...
-if test "$ac_cv_efence" = "yes"; then
-	AC_CHECK_LIB(efence,malloc)
 fi
 
 
