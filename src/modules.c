@@ -62,6 +62,7 @@ static dlink_list mod_paths;
 
 static int mo_modload(struct Client*, struct Client*, int, char**);
 static int mo_modlist(struct Client*, struct Client*, int, char**);
+static int mo_modreload(struct Client*, struct Client*, int, char**);
 static int mo_modunload(struct Client*, struct Client*, int, char**);
 
 struct Message modload_msgtab = {
@@ -74,6 +75,11 @@ struct Message modunload_msgtab = {
   {m_unregistered, m_not_oper, m_ignore, mo_modunload}
 };
 
+struct Message modreload_msgtab = {
+  "MODRELOAD", 0, 2, 0, MFLG_SLOW, 0,
+  {m_unregistered, m_not_oper, m_ignore, mo_modreload}
+};
+
 struct Message modlist_msgtab = {
  "MODLIST", 0, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, m_ignore, mo_modlist}
@@ -84,6 +90,7 @@ modules_init(void)
 {
 	mod_add_cmd(&modload_msgtab);
 	mod_add_cmd(&modunload_msgtab);
+        mod_add_cmd(&modreload_msgtab);
 	mod_add_cmd(&modlist_msgtab);
 }
 
@@ -404,6 +411,43 @@ mo_modunload (struct Client *cptr, struct Client *sptr, int parc, char **parv)
                 me.name, sptr->name, m_bn);
   }
   MyFree (m_bn);
+  return 0;
+}
+
+/* unload and load in one! */
+static int
+mo_modreload (struct Client *cptr, struct Client *sptr, int parc, char **parv)
+{
+  char *m_bn;
+
+  if (!IsSetOperAdmin (sptr))
+    {
+      sendto_one (sptr, ":%s NOTICE %s :You have no A flag",
+                  me.name, parv[0]);
+      return 0;
+    }
+
+  m_bn = irc_basename (parv[1]);
+
+  if (findmodule_byname (m_bn) == -1)
+    {
+      sendto_one (sptr, ":%s NOTICE %s :Module %s is not loaded",
+                  me.name, sptr->name, m_bn);
+      MyFree (m_bn);
+      return 0;
+    }
+
+  if( unload_one_module (m_bn) == -1 )
+    {
+      sendto_one (sptr, ":%s NOTICE %s :Module %s is not loaded",
+                  me.name, sptr->name, m_bn);
+      MyFree (m_bn);
+      return 0;
+    }
+
+  (void)load_one_module (parv[1]);
+
+  MyFree(m_bn);
   return 0;
 }
 

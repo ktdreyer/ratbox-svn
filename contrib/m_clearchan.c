@@ -80,10 +80,9 @@ int mo_clearchan(struct Client *cptr, struct Client *sptr, int parc, char *parv[
   int on_vchan = 0;
 
   /* admins only */
-  if (!IsAdmin(sptr))
+  if (!IsSetOperAdmin(sptr))
     {
-      sendto_one(sptr, ":%s NOTICE %s :You must be an admin to use this command",
-                 me.name, parv[0]);
+      sendto_one(sptr, ":%s NOTICE %s :You have no A flag", me.name, parv[0]);
       return 0;
     }
 

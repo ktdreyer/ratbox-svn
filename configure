@@ -563,7 +563,7 @@ VERSION=7.0
 
 
 if test "x$CFLAGS" = "x"; then
-	CFLAGS="-g -O2 -Wunused -Wall -ggdb -pedantic -Wshadow -Wmissing-declarations"
+	CFLAGS="-g -O2 -Wunused -Wall -ggdb -Wshadow -Wmissing-declarations"
 fi
 
 # Extract the first word of "gcc", so it can be a program name with args.

@@ -328,6 +328,7 @@ extern void conf_add_port(struct ConfItem *);
 extern void conf_add_class_to_conf(struct ConfItem *);
 extern void conf_delist_old_conf(struct ConfItem *);
 extern void conf_add_me(struct ConfItem *);
+extern void conf_add_hub_or_leaf(struct ConfItem *);
 extern void conf_add_class(struct ConfItem *,int );
 extern void conf_add_k_conf(struct ConfItem *);
 extern void conf_add_d_conf(struct ConfItem *);
