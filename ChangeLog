@@ -1,3 +1,19 @@
+leeh        2004/03/29 19:53:58 EST	(20040330_2)
+
+  Modified files:
+    contrib              example_module.c 
+    modules              m_away.c 
+  Log:
+  - fix the comment on hfnlist in example_module.c
+  - m_away() was attempting to LOCAL_COPY() a null pointer, which isnt a good
+    idea
+  
+  Revision  Changes    Path
+  1.10      +1 -1      ircd-ratbox/contrib/example_module.c
+  1.57      +4 -4      ircd-ratbox/modules/m_away.c
+
+
+
 leeh        2004/03/29 19:35:28 EST	(20040330_1)
 
   Modified files:
