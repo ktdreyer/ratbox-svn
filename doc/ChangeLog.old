@@ -1,3 +1,10 @@
+*** 20010126_8 by jdc
+TYES/TNO flipped to make default value for spoof_notice 'yes'.  This
+keeps us "compatible" with hybrid-6.
+doc/example.conf changed to contain spoof_notice example.
+
+
+
 *** 20010126_7 by wcampbel
 Update yacc/lex files (is- please remove!)
 Do NOT enable IPV6 by default!
