@@ -6,6 +6,7 @@ o) Added an option --efnet to configure for to disable things not
 o) Fixed a bug that would cause channel membership lists to get corrupted
 
 
+
 --------------------------------------------------------------------------------
 
 This is the current beta version of ircd-hybrid-7.
