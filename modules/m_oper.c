@@ -86,7 +86,8 @@ char *_version = "20010507";
 static void m_oper(struct Client *client_p, struct Client *source_p,
                   int parc, char *parv[])
 {
-  struct ConfItem *aconf, *oconf;
+  struct ConfItem *aconf;
+  struct ConfItem *oconf = NULL;
   char  *name;
   char  *password;
   dlink_node *ptr;
@@ -123,6 +124,7 @@ static void m_oper(struct Client *client_p, struct Client *source_p,
       ptr = source_p->localClient->confs.head;
       if (ptr)
       {
+       
         oconf = ptr->data;
         detach_conf(source_p,oconf);
       }

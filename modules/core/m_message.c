@@ -803,6 +803,13 @@ handle_opers(int p_or_n,
   {
     if((*(nick+1) == '$' || *(nick+1) == '#'))
       nick++;
+    else if(MyOper(source_p))
+    {
+      sendto_one(source_p, 
+                 ":%s NOTICE %s :The command %s %s is no longer supported, please use $%s",
+		 me.name, source_p->name, command, nick, nick);
+      return;
+    }
       
     if (!(s = (char *)strrchr(nick, '.')))
     {
