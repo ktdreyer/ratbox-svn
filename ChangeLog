@@ -1,3 +1,19 @@
+leeh        2005/03/21 20:42:58 UTC	(20050321_4)
+
+  Modified files:
+    include              s_serv.h 
+    modules/core         m_server.c 
+    src                  s_serv.c 
+  Log:
+  - move some code from s_serv.c -> m_server.c
+  
+  Revision  Changes    Path
+  7.100     +0 -1      ircd-ratbox/include/s_serv.h
+  1.159     +854 -1    ircd-ratbox/modules/core/m_server.c
+  7.433     +0 -840    ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2005/03/21 20:24:39 UTC	(20050321_3)
 
   Modified files:
