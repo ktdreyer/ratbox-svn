@@ -1,3 +1,8 @@
+*** 20001213_16 by db
+- HUB info does not belong in m_admin.c
+
+
+
 *** 20001213_15 by db
 - fixed typo spotted by Walter Campbel in oper_admin
 
