@@ -155,10 +155,10 @@ Little things to be done given enough time and initiative
    Hwy-7!wcampbel@bee-90-245.bee.net (DONE -- except for LL bugs)
 .  Have a few more things /quote SET'table
 .  Have a command (maybe a STATS or in INFO) to show all ircd.conf derived
-   options
+   options (Partially done in INFO)
 .  More documentation on the gettext stuff, enough for a layman to use
 .  Extra \r\n sent to the log file by ts_warn needs to go
-.  Hyb7-ize Riedel's great oper document
+.  Hyb7-ize Riedel's great oper document (Done, Riedel updated it)
 .  Get rid of the old useless test stuff, save about 100k untarred
 .  Fix tools/fixklines.c and tools/klineParse.c for the new kline.conf
    format.
