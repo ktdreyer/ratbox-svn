@@ -36,6 +36,8 @@ it is important you read this file before upgrading.
 - "SAFELIST" added to 005
 - rewrote testline to be somewhat more useful
 - added testgecos to test a gecos against xlines
+- fix a core on an external privmsg to a -n channel
+- check for empty sjoins more thoroughly
 
 -- ircd-ratbox-2.0rc1
 - fix servlink errors with high fds

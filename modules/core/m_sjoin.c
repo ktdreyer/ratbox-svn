@@ -121,6 +121,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	s = parv[3];
 	while (*s)
+	{
 		switch (*(s++))
 		{
 		case 'i':
@@ -154,6 +155,16 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 				return 0;
 			break;
 		}
+	}
+
+	s = parv[args + 4];
+
+	/* remove any leading spaces */
+	while (*s == ' ')
+		s++;
+
+	if(EmptyString(s))
+		return 0;
 
 	if((chptr = get_or_create_channel(source_p, parv[2], &isnew)) == NULL)
 		return 0;		/* channel name too long? */
@@ -257,14 +268,6 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	pargs = 0;
 
 	*mbuf++ = '+';
-
-	s = parv[args + 4];
-
-	/* remove any leading spaces */
-	while (*s == ' ')
-	{
-		s++;
-	}
 
 	/* if theres a space, theres going to be more than one nick, change the
 	 * first space to \0, so s is just the first nick, and point p to the
