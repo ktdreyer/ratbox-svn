@@ -168,7 +168,7 @@ static int irc_sleep(unsigned long useconds)
 	struct timeval t;
 	t.tv_sec = 0;
 	t.tv_usec = useconds;
-	select(0, NULL, NULL, NULL, &t);
+	return select(0, NULL, NULL, NULL, &t);
 #endif
 }
 
