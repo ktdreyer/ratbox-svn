@@ -101,6 +101,9 @@ int unload_one_module (char *name)
   memcpy( &modlist[index], &modlist[index+1],
 	  sizeof(struct module) * ((num_mods-1) - index) );
 
+  if(num_mods != 0)
+    num_mods--;
+
   log (L_INFO, "Module %s unloaded", name);
   sendto_realops ("Module %s unloaded", name);
   return 0;
@@ -206,7 +209,7 @@ load_one_module (char *path)
       return -1;
     }
 
-  if (!(ver = (char *)dlsym (tmpptr, "_modver")))
+  if (!(ver = (char *)dlsym (tmpptr, "_version")))
     ver = unknown_ver;
 
   increase_modlist();
@@ -323,3 +326,7 @@ mo_modunload (struct Client *cptr, struct Client *sptr, int parc, char **parv)
     }
   free (m_bn);
 }
+
+
+
+
