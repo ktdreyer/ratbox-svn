@@ -1,3 +1,15 @@
+androsyn    2002/02/22 10:24:15 EST	(20020222_0)
+
+  Modified files:
+    src                  s_serv.c 
+  Log:
+  It seems cygwin really does need that damned vfork()
+  
+  Revision  Changes    Path
+  7.245     +4 -1      ircd-hybrid-7/src/s_serv.c
+
+
+
 androsyn    2002/02/21 08:47:45 EST	(20020221_1)
 
   Modified files:
