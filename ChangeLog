@@ -1,3 +1,20 @@
+leeh        2003/12/18 19:29:58 EST	(20031219_0)
+
+  Modified files:
+    src                  c_message.c conf.c io.c 
+  Log:
+  - send errors to client on invalid dcc requests
+  - made conf parser add connects to tail, so theyre tried in order of conf
+  - kludged support for multiple servers, atm it takes the head element,
+    tries it then moves it to the tail.
+  
+  Revision  Changes    Path
+  1.5       +21 -0     rserv/src/c_message.c
+  1.6       +1 -1      rserv/src/conf.c
+  1.10      +11 -1     rserv/src/io.c
+
+
+
 leeh        2003/12/18 15:39:38 EST	(20031218_3)
 
   Modified files:
