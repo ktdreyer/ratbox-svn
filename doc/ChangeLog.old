@@ -1,3 +1,8 @@
+*** 20010120_2 by db
+- updated new lex.yy.c y.tab.c y.tab.h
+
+
+
 *** 20010120_1 by db
 - changed ConfigFileEntry.hub to ServerInfo.hub
 - removed CONF_ME (ick) no more ConfItem for "me" its all in 
