@@ -55,16 +55,18 @@
 
 static int mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
 static int ms_xline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
+static int me_xline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
 static int mo_unxline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
 static int ms_unxline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
+static int me_unxline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
 
 struct Message xline_msgtab = {
 	"XLINE", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, {ms_xline, 5}, {ms_xline, 5}, mg_ignore, {mo_xline, 3}}
+	{mg_unreg, mg_not_oper, {ms_xline, 5}, {ms_xline, 5}, {me_xline, 4}, {mo_xline, 3}}
 };
 struct Message unxline_msgtab = {
 	"UNXLINE", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, {ms_unxline, 3}, {ms_unxline, 3}, mg_ignore, {mo_unxline, 2}}
+	{mg_unreg, mg_not_oper, {ms_unxline, 3}, {ms_unxline, 3}, {me_unxline, 2}, {mo_unxline, 2}}
 };
 
 mapi_clist_av1 xline_clist[] =  { &xline_msgtab, &unxline_msgtab, NULL };
@@ -78,6 +80,10 @@ static void propagate_xline(struct Client *source_p, const char *target,
 			int temp_time, const char *name, const char *reason);
 static void cluster_xline(struct Client *source_p, int temp_time,
 			const char *name, const char *reason);
+
+static void handle_remote_xline(struct Client *source_p, int temp_time,
+				const char *name, const char *reason);
+static void handle_remote_unxline(struct Client *source_p, const char *name);
 
 static int remove_temp_xline(struct Client *source_p, const char *name);
 static void remove_xline(struct Client *source_p, const char *gecos);
@@ -164,8 +170,6 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 static int
 ms_xline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	struct ConfItem *aconf;
-
 	/* parv[0]  parv[1]      parv[2]  parv[3]  parv[4]
 	 * oper     target serv  xline    type     reason
 	 */
@@ -178,25 +182,46 @@ ms_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(!match(parv[1], me.name))
 		return 0;
 
+	handle_remote_xline(source_p, 0, parv[2], parv[4]);
+	return 0;
+}
+
+static int
+me_xline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	/* time name :reason */
+	if(!IsPerson(source_p))
+		return 0;
+
+	handle_remote_xline(source_p, atoi(parv[1]), parv[2], parv[3]);
+	return 0;
+}
+
+static void
+handle_remote_xline(struct Client *source_p, int temp_time,
+			const char *name, const char *reason)
+{
+	struct ConfItem *aconf;
+
 	if(find_shared_conf(source_p->username, source_p->host,
 				source_p->user->server, SHARED_XLINE))
 	{
-		if(!valid_xline(source_p, parv[2], parv[4]))
-			return 0;
+		if(!valid_xline(source_p, name, reason))
+			return;
 
 		/* already xlined */
-		if((aconf = find_xline(parv[2])) != NULL)
+		if((aconf = find_xline(name)) != NULL)
 		{
 			sendto_one(source_p, ":%s NOTICE %s :[%s] already X-Lined by [%s] - %s",
-				   me.name, source_p->name, parv[1], 
+				   me.name, source_p->name, name, 
 				   aconf->name, aconf->passwd);
-			return 0;
+			return;
 		}
 
-		apply_xline(source_p, parv[2], parv[4], 0);
+		apply_xline(source_p, name, reason, temp_time);
 	}
 
-	return 0;
+	return;
 }
 
 /* valid_xline()
@@ -422,16 +447,34 @@ ms_unxline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	if(!IsPerson(source_p))
 		return 0;
 
+	handle_remote_unxline(source_p, parv[2]);
+	return 0;
+}
+
+static int
+me_unxline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	/* name */
+	if(!IsPerson(source_p))
+		return 0;
+
+	handle_remote_unxline(source_p, parv[1]);
+	return 0;
+}
+
+static void
+handle_remote_unxline(struct Client *source_p, const char *name)
+{
 	if(find_shared_conf(source_p->username, source_p->host,
 				source_p->user->server, SHARED_UNXLINE))
 	{
-		if(remove_temp_xline(source_p, parv[1]))
-			return 0;
+		if(remove_temp_xline(source_p, name))
+			return;
 
-		remove_xline(source_p, parv[2]);
+		remove_xline(source_p, name);
 	}
 
-	return 0;
+	return;
 }
 
 static int

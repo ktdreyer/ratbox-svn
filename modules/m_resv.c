@@ -41,16 +41,18 @@
 
 static int mo_resv(struct Client *, struct Client *, int, const char **);
 static int ms_resv(struct Client *, struct Client *, int, const char **);
+static int me_resv(struct Client *, struct Client *, int, const char **);
 static int mo_unresv(struct Client *, struct Client *, int, const char **);
 static int ms_unresv(struct Client *, struct Client *, int, const char **);
+static int me_unresv(struct Client *, struct Client *, int, const char **);
 
 struct Message resv_msgtab = {
 	"RESV", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
-	{mg_ignore, mg_not_oper, {ms_resv, 4}, {ms_resv, 4}, mg_ignore, {mo_resv, 3}}
+	{mg_ignore, mg_not_oper, {ms_resv, 4}, {ms_resv, 4}, {me_resv, 5}, {mo_resv, 3}}
 };
 struct Message unresv_msgtab = {
 	"UNRESV", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
-	{mg_ignore, mg_not_oper, {ms_unresv, 3}, {ms_unresv, 3}, mg_ignore, {mo_unresv, 2}}
+	{mg_ignore, mg_not_oper, {ms_unresv, 3}, {ms_unresv, 3}, {me_unresv, 3}, {mo_unresv, 2}}
 };
 
 mapi_clist_av1 resv_clist[] = {	&resv_msgtab, &unresv_msgtab, NULL };
@@ -63,6 +65,7 @@ static void propagate_resv(struct Client *source_p, const char *target,
 static void cluster_resv(struct Client *source_p, int temp_time, 
 			const char *name, const char *reason);
 
+static void handle_remote_unresv(struct Client *source_p, const char *name);
 static void remove_resv(struct Client *source_p, const char *name);
 static int remove_temp_resv(struct Client *source_p, const char *name);
 
@@ -148,6 +151,23 @@ ms_resv(struct Client *client_p, struct Client *source_p,
 				source_p->user->server, SHARED_RESV))
 	{
 		parse_resv(source_p, parv[2], parv[3], 0);
+	}
+
+	return 0;
+}
+
+static int
+me_resv(struct Client *client_p, struct Client *source_p,
+	int parc, const char *parv[])
+{
+	/* time name 0 :reason */
+	if(!IsPerson(source_p))
+		return 0;
+
+	if(find_shared_conf(source_p->username, source_p->host,
+			source_p->user->server, SHARED_RESV))
+	{
+		parse_resv(source_p, parv[2], parv[4], atoi(parv[1]));
 	}
 
 	return 0;
@@ -378,24 +398,42 @@ ms_unresv(struct Client *client_p, struct Client *source_p, int parc, const char
 	if(!IsPerson(source_p))
 		return 0;
 
+	handle_remote_unresv(source_p, parv[2]);
+	return 0;
+}
+
+static int
+me_unresv(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	/* name */
+	if(!IsPerson(source_p))
+		return 0;
+
+	handle_remote_unresv(source_p, parv[1]);
+	return 0;
+}
+
+static void
+handle_remote_unresv(struct Client *source_p, const char *name)
+{
 	if(find_shared_conf(source_p->username, source_p->host,
 				source_p->user->server, SHARED_UNRESV))
 	{
-		if(remove_temp_resv(source_p, parv[1]))
+		if(remove_temp_resv(source_p, name))
 		{
-			sendto_one_notice(source_p, ":RESV for [%s] is removed", parv[1]);
+			sendto_one_notice(source_p, ":RESV for [%s] is removed", name);
 			sendto_realops_flags(UMODE_ALL, L_ALL,
 					"%s has removed the RESV for: [%s]", 
-					get_oper_name(source_p), parv[1]);
+					get_oper_name(source_p), name);
 			ilog(L_KLINE, "%s has removed the RESV for [%s]", 
-					get_oper_name(source_p), parv[1]);
-			return 0;
+					get_oper_name(source_p), name);
+			return;
 		}
 
-		remove_resv(source_p, parv[2]);
+		remove_resv(source_p, name);
 	}
 
-	return 0;
+	return;
 }
 
 static int
