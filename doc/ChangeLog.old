@@ -1,3 +1,15 @@
+androsyn    2002/08/06 20:26:35 EDT	(20020807_1)
+
+  Modified files:
+    src                  linebuf.c 
+  Log:
+  I thought it was broken because of my stupidity..
+  
+  Revision  Changes    Path
+  7.92      +37 -41    ircd-hybrid-7/src/linebuf.c
+
+
+
 androsyn    2002/08/06 20:24:12 EDT	(20020807_0)
 
   Modified files:
