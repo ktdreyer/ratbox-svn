@@ -1146,6 +1146,8 @@ can_send(struct Channel *chptr, struct Client *source_p)
     return CAN_SEND_OPV;
   if (is_voiced(chptr, source_p))
     return CAN_SEND_OPV;
+  if (IsServer(source_p))
+    return CAN_SEND_OPV;
 
   if (chptr->mode.mode & MODE_MODERATED)
     return CAN_SEND_NO;
