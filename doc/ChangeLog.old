@@ -1,3 +1,9 @@
+*** 19990907_1 by lusky
+killpath is now opers only
++k/-k compatiblity issues
+Makefile distclean cleanup for iauth
+
+
 *** 19990906_4 by tomh
 little logic fix
 
