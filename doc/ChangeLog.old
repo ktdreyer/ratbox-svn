@@ -1,3 +1,15 @@
+leeh        2002/01/13 18:50:00 EST	(20020113_13)
+
+  Modified files:
+    src                  s_user.c 
+  Log:
+  - removing it is better than a debug #if 0
+  
+  Revision  Changes    Path
+  7.181     +1 -4      ircd-hybrid-7/src/s_user.c
+
+
+
 leeh        2002/01/13 18:47:22 EST	(20020113_12)
 
   Modified files:
