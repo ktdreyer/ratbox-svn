@@ -19,17 +19,22 @@ Necessary Requirements:
 
 - A supported platform (look below)
 
-- A working lex/flex and yacc/bison
-
-- A working dynamic load library
+- A working dynamic load library, unless
+  compiling as static, without module
+  support.
 
 - A working lex.  Solaris /usr/ccs/bin/lex
   appears to be broken, on this system flex
   should be used.
 
+- A working bison or byacc.  FreeBSD and BSD/OS
+  byacc are currently broken, and will dump core
+  when building the ircd_parser.y.
+
 Feature Specific Requirements:
 
-- For the SSL Challenge controlled OPER feature, a working OpenSSL library
+- For the SSL Challenge controlled OPER feature and encrypted server links,
+  a working OpenSSL library
 
 - For dynamic message locale support, a working gettext (intl) library
 
@@ -38,9 +43,7 @@ Feature Specific Requirements:
 
 *******************************************************************************
 
-- To report bugs in hybrid, use the `send-pr' script that should
-  be installed into bin/ along with the rest of ircd, OR send the
-  bug report to ircd-hybrid@the-project.org
+- To report bugs in hybrid, send the bug report to ircd-hybrid@the-project.org
 
 - Known bugs are listed in the BUGS file
 
@@ -80,7 +83,6 @@ Feature Specific Requirements:
   NetBSD 1.4
 
 - CYGWIN USERS: Unfortunately, cygwin support has been removed
-  because there is no way to support dynamic modules under cygwin.
 
 - Please read doc/whats-new.txt for information about what is in this release
 

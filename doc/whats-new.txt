@@ -80,6 +80,12 @@ options that were in config.h, to be changed with a /rehash.
   been removed. (/msg nick1,nick2,nick3 message) and is configurable in the
   config file.
 
+- LINKS for non-opers uses a file, links.txt, in the etc directory.  This file
+  is automatically updated by the server every links_delay seconds.  There
+  are two reasons for doing this.  One is efficiency, the other is helping
+  to hide transient splits.  LINKS lookers are basically of no value with
+  this option set to a reasonable time.
+
 
 ------------------
  Operator Changes:
@@ -129,7 +135,7 @@ options that were in config.h, to be changed with a /rehash.
 
 - LOCOPS have been moved away from the traditional +z usermode (operwall)
   and into their own usermode: +l.  This allows oper to ignore operwall,
-  but still listen to locops.
+  but still listen to locops.  +l is set when /oper is sucessful
 
 - Implemented local RESV.  This replaces:
      /mode #channel +j and Q: lines in hybrid-6.
@@ -181,7 +187,7 @@ options that were in config.h, to be changed with a /rehash.
 
 - Classes (Y: lines) can now have names instead of numbers.
 
-- Hybrid now supports IRCnet like redirection.  The redirserv and redirport
+- Hybrid now supports IRCnet-like redirection.  The redirserv and redirport
   options in an auth {} block will allow an admin to specify other servers
   to forward user connections to.  The client must support the 010 numeric
   for this to work (EPIC supports it).  Note that there must always be a class

@@ -13,8 +13,6 @@ BUGS: Major bugs in this release are listed in BUGS
 BUG REPORTS: If you run this code and encounter problems, you must report
  the bug in one of the following ways:
   a) By EMAIL to ircd-hybrid@the-project.org.  
-  b) By GNATS - use the `send-pr' script that should be installed into bin/ 
-     along with the rest of ircd.
  Please include a gdb backtrace and a copy of your config.h and ircd.conf 
  with any report  (with passwords and other sensitive information masked).
 

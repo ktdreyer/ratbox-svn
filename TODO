@@ -3,7 +3,6 @@
 - ircd -s doesn't work through a restart
 - re-implement first param in m_lusers()
 - trie' channel name list
-- SSL support
 - finish RFC'ing m_message.c
 - add dns_query_host and dns_query_port options to serverinfo {} block;
   dns_query_port would be similar to query-port in BIND-8.
@@ -93,24 +92,15 @@ Little things to be done given enough time and initiative -Hwy
    user="wcampbel@144.26.0.0/16"; # Does not work
 .  The 3 logging path settings are NOOP in the conf (logpath, oper_log, 
    gline_log)
-.  More documentation on the gettext stuff, enough for a layman to use
-   --> started, I will do more soon
 .  Fix tools/fixklines.c and tools/klineParse.c for the new kline.conf
    format.
-.  Update tools/mkconf as well.
 .  Fix convertconf more
-.  Do we still need start_ircd.c and ircd_start.c?
-.  Look to see what other STATS commands can be made optionally oper-only
 .  2 pass conf parser (grab classes before anything that uses them)
-.  m_mkpasswd.so in contrib
-   --> whee, added, DES and MD5 support, none yet for specifying a salt
 .  Re-add the ability to set usermodes from the conf (oldconf field after the
    O: line class)
 .  <Riedel> walter : have you implemented the motd= thing in the auth block ?
 .  Fix topic bursting to LL servers (broke lately for some reason)
    --> Unknown status
-.  Other places that the number formats were replaced with that damn %lu
-   --> I think these were covered
 .  Unconfirmed reports of DNS lookups failing on the first connection to
    a server, while working fine on subsequent connections.
    --> I haven't see this happen for a while
@@ -123,9 +113,9 @@ Little things to be done given enough time and initiative -Hwy
    --> Still a disgrace
 .  chkconf
    --> SCARY!!!
-.  Clean up the manpage (ircd.8)
-   --> Larne did this
 .  More translations!
+.  Provide a way (stats?) to show the contents of a modules block from the
+   conf.
 
 
 -- Rodder's list

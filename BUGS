@@ -59,6 +59,9 @@
     The only time you are likely to hit the TCP resolver is for queries
     over 512 bytes.
 
+9.  MODRESTART only reloads modules in modules/autoload, it does not load
+    anything in a modules block in the conf.
+
 
 BUG REPORTS: If you run this code and encounter problems, you must report
  the bug in one of the following ways:
