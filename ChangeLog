@@ -1,3 +1,15 @@
+androsyn    2003/01/27 18:03:21 UTC	(20030127_0)
+
+  Modified files:
+    src                  packet.c 
+  Log:
+  From hybrid: remove NULL character check that choked ziplinks
+  
+  Revision  Changes    Path
+  7.113     +0 -11     ircd-ratbox/src/packet.c
+
+
+
 androsyn    2003/01/26 22:48:36 UTC	(20030126_3)
 
   Modified files:
