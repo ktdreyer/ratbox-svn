@@ -1,3 +1,9 @@
+*** 20010524_22 by davidt
+- Ugh. revert the last commit, we don't have the capab from the remote
+  server until it recognises the CRYPTSERV command, so we can't do that
+  must get more sleep....
+
+
 *** 20010524_21 by davidt
 - test for ENC capab before trying to create an encrypted link, else
   the remote server doesn't respond to CRYPTSERV, and we sit there for
