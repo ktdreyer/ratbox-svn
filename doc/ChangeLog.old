@@ -1,3 +1,19 @@
+db          2002/01/07 00:50:54 EST	(20020107_0)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    modules              m_invite.c 
+  Log:
+  - folded in jmallets changes for OSX loadable modules
+  
+  Revision  Changes    Path
+  7.106     +15 -11    ircd-hybrid-7/autoconf/configure.in
+  7.109     +43 -39    ircd-hybrid-7/configure
+  1.38      +2 -2      ircd-hybrid-7/modules/m_invite.c
+
+
+
 leeh        2002/01/06 16:09:44 EST	(20020106_4)
 
   Modified files:
