@@ -1,3 +1,15 @@
+leeh        2002/04/13 20:11:49 EDT	(20020414_0)
+
+  Modified files:
+    .                    RELNOTES 
+  Log:
+  - brought RELNOTES into sync, cleared b13 notes.
+  
+  Revision  Changes    Path
+  1.20      +4 -11     ircd-hybrid-7/RELNOTES
+
+
+
 leeh        2002/04/13 17:12:48 EDT	(20020413_7)
 
   Modified files:
