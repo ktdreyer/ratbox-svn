@@ -1,3 +1,16 @@
+leeh        2002/07/19 08:31:49 EDT	(20020719_3)
+
+  Modified files:
+    src                  ircd.c 
+  Log:
+  - helps if I set split_users to the users splitcount and servers to the
+    servers splitcount, not the other way round..
+  
+  Revision  Changes    Path
+  7.239     +2 -2      ircd-hybrid-7/src/ircd.c
+
+
+
 leeh        2002/07/19 06:56:03 EDT	(20020719_2)
 
   Modified files:
