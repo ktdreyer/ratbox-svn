@@ -1,3 +1,30 @@
+leeh        2004/09/03 20:56:56 EDT	(20040904_1)
+
+  Modified files:
+    include              banconf.h config.h config.h.dist m_info.h 
+                         s_conf.h 
+    modules              m_xline.c 
+    src                  banconf.c ircd.c s_conf.c 
+  Log:
+  - removed ircd startup options of klinefile, dlinefile, xlinefile and
+    resvfile
+  - used the defined paths for kline file etc as they cant ever change now,
+    renamed them to be more sensible (KLINEPATH over KPATH)
+  - add support for reading kline.conf.perm etc
+  
+  Revision  Changes    Path
+  7.2       +4 -4      ircd-ratbox/include/banconf.h
+  7.178     +16 -12    ircd-ratbox/include/config.h
+  7.75      +16 -12    ircd-ratbox/include/config.h.dist
+  7.54      +8 -8      ircd-ratbox/include/m_info.h
+  7.294     +0 -4      ircd-ratbox/include/s_conf.h
+  1.60      +2 -2      ircd-ratbox/modules/m_xline.c
+  7.2       +35 -20    ircd-ratbox/src/banconf.c
+  7.361     +0 -12     ircd-ratbox/src/ircd.c
+  7.488     +11 -7     ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2004/09/03 20:27:19 EDT	(20040904_0)
 
   Modified files:
