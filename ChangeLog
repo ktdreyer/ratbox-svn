@@ -1,3 +1,16 @@
+leeh        2004/07/29 22:07:12 EDT	(20040730_0)
+
+  Modified files:
+    .                    configure configure.ac 
+  Log:
+  - fix the msg result on --enable-profile
+  
+  Revision  Changes    Path
+  7.230     +4 -4      ircd-ratbox/configure
+  7.44      +3 -3      ircd-ratbox/configure.ac
+
+
+
 androsyn    2004/07/29 14:21:48 EDT	(20040729_7)
 
   Modified files:
