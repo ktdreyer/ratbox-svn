@@ -171,7 +171,6 @@ parse_server(char *buf, int len)
 
 int main(int argc, char *argv[])
 {
-#if 0
 	switch (fork())
 	{
 		case -1:
@@ -188,7 +187,7 @@ int main(int argc, char *argv[])
 			printf("daemonized.\n");
 			return 0;
 	}
-#endif
+
 	init_events();
 	init_command();
 	init_client();

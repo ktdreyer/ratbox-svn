@@ -24,6 +24,9 @@
 #define ERROR_PARAM		0
 #define ERROR_MODE		1
 #define ERROR_UNKNOWNOPTION	2
+#define ERROR_MIN		3
+#define ERROR_MAX		4
+#define ERROR_SKIP		5
 
 static void s_alis(struct client *, char *text);
 
@@ -38,8 +41,10 @@ static const char *help_list[] =
 	":%s NOTICE %s :  [options]:",
 	":%s NOTICE %s :    -min <n>: minimum users in channel",
 	":%s NOTICE %s :    -max <n>: maximum users in channel",
-	":%s NOTICE %s :    -mode <+|-|=><iklmnt>: modes set/unset/equal on channel",
+	":%s NOTICE %s :    -skip <n>: skip first n matches",
 	":%s NOTICE %s :    -show [m][t]: show modes/topicwho",
+	":%s NOTICE %s :    -mode <+|-|=><iklmnt>: modes set/unset/equal on channel",
+	":%s NOTICE %s :    -topic <string>: require topic to contain string",
 	NULL
 };
 
@@ -62,6 +67,24 @@ alis_error(struct client *client_p, int type)
 
 		case ERROR_UNKNOWNOPTION:
 			sendto_server(":%s NOTICE %s :Unknown option. "
+					"Please see: HELP LIST",
+					MYNAME, client_p->name);
+			break;
+
+		case ERROR_MIN:
+			sendto_server(":%s NOTICE %s :Invalid -min option. "
+					"Please see: HELP LIST",
+					MYNAME, client_p->name);
+			break;
+
+		case ERROR_MAX:
+			sendto_server(":%s NOTICE %s :Invalid -max option. "
+					"Please see: HELP LIST",
+					MYNAME, client_p->name);
+			break;
+
+		case ERROR_SKIP:
+			sendto_server(":%s NOTICE %s :Invalid -skip option. "
 					"Please see: HELP LIST",
 					MYNAME, client_p->name);
 			break;
@@ -170,6 +193,7 @@ s_alis(struct client *client_p, char *text)
 	int maxmatch = ALIS_MAX_MATCH;
 	int aparc = 0;
 	int x = 0;
+	const char *s_topic = NULL;
 	int s_min = 0;
 	int s_max = 0;
 	int s_show_mode = 0;
@@ -178,6 +202,7 @@ s_alis(struct client *client_p, char *text)
 	int s_mode_dir;
 	int s_mode_key = 0;
 	int s_mode_limit = 0;
+	int s_skip = 0;
 
 	if(!IsUser(client_p))
 		return;
@@ -244,7 +269,11 @@ s_alis(struct client *client_p, char *text)
 						return;
 					}
 
-					s_min = atoi(aparv[x]);
+					if((s_min = atoi(aparv[x])) < 1)
+					{
+						alis_error(client_p, ERROR_MIN);
+						return;
+					}
 				}
 				else if(!strcasecmp(aparv[x], "-max"))
 				{
@@ -254,7 +283,35 @@ s_alis(struct client *client_p, char *text)
 						return;
 					}
 
-					s_max = atoi(aparv[x]);
+					if((s_max = atoi(aparv[x])) < 1)
+					{
+						alis_error(client_p, ERROR_MAX);
+						return;
+					}
+				}
+				else if(!strcasecmp(aparv[x], "-skip"))
+				{
+					if(++x >= aparc)
+					{
+						alis_error(client_p, ERROR_PARAM);
+						return;
+					}
+
+					if((s_skip = atoi(aparv[x])) < 1)
+					{
+						alis_error(client_p, ERROR_SKIP);
+						return;
+					}
+				}
+				else if(!strcasecmp(aparv[x], "-topic"))
+				{
+					if(++x >= aparc)
+					{
+						alis_error(client_p, ERROR_PARAM);
+						return;
+					}
+
+					s_topic = aparv[x];
 				}
 				else if(!strcasecmp(aparv[x], "-show"))
 				{
@@ -376,6 +433,15 @@ s_alis(struct client *client_p, char *text)
 
 			if(!match(mask, chptr->name))
 				continue;
+
+			if(s_topic != NULL && !match(s_topic, chptr->topic))
+				continue;
+
+			if(s_skip)
+			{
+				s_skip--;
+				continue;
+			}
 
 			if(s_show_mode && s_show_topicwho)
 				sendto_server(":%s NOTICE %s :%-50s %-8s %3d :%s (%s)",
