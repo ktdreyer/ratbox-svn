@@ -1,3 +1,6 @@
+*** 20010121_5 by davidt
+updated depend, removed unused 'serverMask' from struct Channel (lazyLinksChannelExists is what everything should (and does) use....
+
 *** 20010121_4 by toot
 changed the default kick msg to the nickname of who's
 getting kicked, rather than the kicker's..
