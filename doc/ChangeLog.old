@@ -1,3 +1,8 @@
+*** 20001223_19 by ejb
+- noted in whats-news.txt that the old ocnfig format is no longer
+  supported.
+
+
 *** 20001223_18 by madmax
 Opers can now see idle times and servernames in whois when shide is on
 
