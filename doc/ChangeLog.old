@@ -1,3 +1,8 @@
+*** 20001104_10 by db
+- fixed m_who.c to be completely vchan aware
+
+
+
 *** 20001104_9 by ryan
 
 RSA implimented.  /quote CHALLENGE (with --enable-openssl)
