@@ -1,3 +1,9 @@
+*** 20000330_1 by db
+- large resync , folding in a number of changes contributed by is
+  This moves some config.h items into the conf file
+
+
+
 *** 20000319_1 by lusky
 Changed my email address, this is a test commit (jrl)
 
