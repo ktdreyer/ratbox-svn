@@ -1014,7 +1014,7 @@ comm_connect_tcp(int fd, const char *host, u_short port, CNCB *callback,
     struct DNSQuery query;
 
     /* First, attempt to bind */
-        /* Failure, call the callback with COMM_ERROR */
+        /* Failure, call the callback with COMM_ERR_BIND */
         /* ... and quit */
 
     /* Next, send the DNS request, for the next level */
@@ -1073,10 +1073,22 @@ comm_connect_dns_callback(void *vptr, struct DNSReply *reply)
     fde_t *F = vptr;
 
     /* Error ? */
+    if (reply == NULL) {
         /* Yes, callback + return */
+        comm_connect_callback(F->fd, COMM_ERR_DNS);
+        return;
+    }
 
     /* No error, set a 10 second timeout */
     comm_settimeout(F->fd, 30, comm_connect_timeout, NULL);
+
+    /* Copy over the DNS reply info so we can use it in the connect() */
+    /*
+     * Note we don't fudge the refcount here, because we aren't keeping
+     * the DNS record around, and the DNS cache is gone anyway.. 
+     *     -- adrian
+     */
+    memcpy(&F->connect.hostaddr, reply->hp->h_addr, sizeof(struct in_addr));
 
     /* Now, call the tryconnect() routine to try a connect() */
     comm_connect_tryconnect(F->fd, NULL);
@@ -1092,6 +1104,29 @@ comm_connect_dns_callback(void *vptr, struct DNSReply *reply)
 static void
 comm_connect_tryconnect(int fd, void *notused)
 {
+    int retval;
+    struct sockaddr_in sin;
 
+    /* We *COULD* cache this in the fd_table for extra speed .. --adrian */
+    sin.sin_addr.s_addr = fd_table[fd].connect.hostaddr.s_addr;
+    sin.sin_port = htons(fd_table[fd].connect.port);
+    sin.sin_family = AF_INET;
 
+    /* Try the connect() */
+    retval = connect(fd, (struct sockaddr *)&sin, sizeof(sin));
+
+    /* Error? */
+    if (retval < 0) {
+        if (ignoreErrno(errno))
+            /* Ignore error? Reschedule */
+            comm_setselect(fd, COMM_SELECT_WRITE, comm_connect_tryconnect,
+              NULL, 0);
+        else
+            /* Error? Fail with COMM_ERR_CONNECT */
+            comm_connect_callback(fd, COMM_ERR_CONNECT);
+        return;
+    }
+
+    /* If we get here, we've suceeded, so call with COMM_OK */
+    comm_connect_callback(fd, COMM_OK);
 }

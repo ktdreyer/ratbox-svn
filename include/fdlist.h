@@ -39,8 +39,10 @@ enum {
 
 enum {
     COMM_OK,
+    COMM_ERR_BIND,
     COMM_ERR_DNS,
     COMM_ERR_TIMEOUT,
+    COMM_ERR_CONNECT,
     COMM_ERROR
 };
 
@@ -84,8 +86,8 @@ struct _fde {
     } flags;
     struct {
         /* We don't need the host here ? */
-        struct sockaddr_in S;
-        struct in_addr in_addr;
+        struct sockaddr_in S;		/* What we're bound to */
+        struct in_addr hostaddr;	/* Where we are connecting to */
         u_short port;
         CNCB *callback;
         void *data;
