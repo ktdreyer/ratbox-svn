@@ -40,12 +40,6 @@ Info;
 
 Info MyInformation[] = {
 
-#ifdef CLIENT_FLOOD
-	{"CLIENT_FLOOD", "", CLIENT_FLOOD, "Client Excess Flood Threshold"},
-#else
-	{"CLIENT_FLOOD", "OFF", 0, "Client Excess Flood Threshold"},
-#endif /* CLIENT_FLOOD */
-
 #ifdef CMDLINE_CONFIG
 	{"CMDLINE_CONFIG", "ON", 0,
 	 "Allow Command Line Specification of Config File"},

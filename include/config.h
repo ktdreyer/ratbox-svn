@@ -97,18 +97,6 @@
  */
 #undef TS6_ONLY
 
-/* USE_LOGFILE - log errors and such to LPATH
- * If you wish to have the server send 'vital' messages about server
- * to a logfile, define USE_LOGFILE.
- */
-#define USE_LOGFILE
-
-/* CLIENT_FLOOD - client excess flood threshold(in messages)
- * The number of messages that we can receive before we disconnect the
- * remote client...
- */
-#define CLIENT_FLOOD 20
-
 /* HANGONGOODLINK and HANGONGOODLINK
  * Often net breaks for a short time and it's useful to try to
  * establishing the same connection again faster than CONNECTFREQUENCY
