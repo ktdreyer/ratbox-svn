@@ -3,6 +3,7 @@
 
 CC = @CC@
 CFLAGS = @CFLAGS@
+RM = @RM@
 
 # Debugging CFLAGS
 #CFLAGS = -g -Wall
@@ -15,10 +16,8 @@ build: all
 clean:
 	@cd source ; $(MAKE) clean
 
-distclean: clean
-	rm -f Makefile source/Makefile
-
-depend:
-	@cd source ; $(MAKE) depend
+distclean:
+	@cd source ; $(MAKE) distclean
+	${RM} -f Makefile
 
 # End of Makefile
