@@ -1,3 +1,8 @@
+*** 20010923_5 by a1kmm
+- Fixed a possible NULL deref I did ages ago in the debug version of
+  MyRealloc
+
+
 *** 20010923_4 by davidt
 - erp, un break compile
 
