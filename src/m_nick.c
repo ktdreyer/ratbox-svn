@@ -403,9 +403,8 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                      get_client_name(cptr, HIDE_IP));
 
 #ifndef LLVER1
-          if(ConfigFileEntry.hub &&
-	     IsCapable(sptr,CAP_LL) ) /* && MyConnect(sptr)) */
-          /* CAP_LL will never be seen *unless* MyConnect(sptr) ! */
+          /* LazyLinks */
+          if(ConfigFileEntry.hub && IsCapable(cptr,CAP_LL) )
 	    {
 	      sendto_one(cptr, ":%s KILL %s :%s (%s <- %s)",
 			 me.name, acptr->name, me.name,
@@ -445,8 +444,8 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                          me.name, acptr->name, acptr->name);
 
 #ifndef LLVER1
-	      if(ConfigFileEntry.hub &&
-                 IsCapable(sptr,CAP_LL)) /* && MyConnect(sptr)) */
+              /* LazyLinks */
+	      if(ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
 		{
 		  sendto_one(cptr, ":%s KILL %s :%s (%s <- %s)",
 			     me.name, acptr->name, me.name,
@@ -478,8 +477,25 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       sendto_one(acptr, form_str(ERR_NICKCOLLISION),
                  me.name, acptr->name, acptr->name);
 
-      ServerStats->is_kill++;
+#ifndef LLVER1
+          /* LazyLinks */
+          /* On a lazy link, should only need to send one KILL */
 
+          if(ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
+	    {
+	      sendto_one(cptr, ":%s KILL %s :%s (%s <- %s)",
+			 me.name, sptr->name, me.name,
+			 sptr->from->name,
+			 get_client_name(cptr, HIDE_IP));
+
+	      sendto_one(cptr, ":%s KILL %s :%s (%s <- %s)",
+			 me.name, acptr->name, me.name,
+			 acptr->from->name,
+			 get_client_name(cptr, HIDE_IP));
+	    }
+#endif
+
+      ServerStats->is_kill++;
       acptr->flags |= FLAGS_KILLED;
       (void)exit_client(NULL, acptr, &me, "Nick collision(new)");
       sptr->flags |= FLAGS_KILLED;
@@ -500,6 +516,17 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
             sendto_ops("Nick change collision from %s to %s(%s <- %s)(newer killed)",
                        sptr->name, acptr->name, acptr->from->name,
                        get_client_name(cptr, HIDE_IP));
+
+#ifndef LLVER1
+          /* LazyLinks */
+          if(ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
+	    {
+	      sendto_one(cptr, ":%s KILL %s :%s (%s <- %s)",
+			 me.name, sptr->name, me.name,
+			 sptr->from->name,
+			 get_client_name(cptr, HIDE_IP));
+	    }
+#endif
           ServerStats->is_kill++;
           sptr->flags |= FLAGS_KILLED;
           if (sameuser)
@@ -518,6 +545,16 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                        acptr->name, acptr->from->name,
                        get_client_name(cptr, HIDE_IP));
           
+#ifndef LLVER1
+          /* LazyLinks */
+          if(ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
+	    {
+	      sendto_one(cptr, ":%s KILL %s :%s (%s <- %s)",
+			 me.name, acptr->name, me.name,
+			 acptr->from->name,
+			 get_client_name(cptr, HIDE_IP));
+	    }
+#endif
           ServerStats->is_kill++;
           sendto_one(acptr, form_str(ERR_NICKCOLLISION),
                      me.name, acptr->name, acptr->name);
