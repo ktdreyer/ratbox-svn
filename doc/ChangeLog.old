@@ -1,3 +1,17 @@
+leeh        2002/06/20 14:00:42 EDT	(20020620_0)
+
+  Modified files:
+    include              config.h 
+    src                  s_conf.c 
+  Log:
+  - dont allow spoof notices if HIDE_SPOOF_IPS.
+  
+  Revision  Changes    Path
+  7.137     +2 -2      ircd-hybrid-7/include/config.h
+  7.307     +2 -0      ircd-hybrid-7/src/s_conf.c
+
+
+
 leeh        2002/06/19 16:49:56 EDT	(20020619_3)
 
   Modified files:
