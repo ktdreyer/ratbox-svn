@@ -1,3 +1,7 @@
+*** 20010826_5 by androsyn
+localtime and strftime need time.h
+
+
 *** 20010826_4 by kreator
 - misc formatting fixes for example.conf
 - check if ServerInfo.max_clients is bigger than MAX_CLIENTS which would
