@@ -187,6 +187,9 @@ Little things to be done given enough time and initiative
 .  m_map.so in contrib
 .  m_mkpasswd.so in contrib
 .  Do we still need ircd_start.c and start_ircd.c?
+.  Re-add the ability to set usermodes from the conf (oldconf field after the
+   O: line class)
+.  What does the name field in the listen block do?  (oldconf P:name:ip::port)
 
 -- Rodder's list
 .  Add scaleable database-based authentication.  Probably part of Iauth.
