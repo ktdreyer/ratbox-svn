@@ -17,23 +17,46 @@ AC_PROG_CC
 dnl Make sure autoconf doesnt interfere with cflags -jmallett
 CFLAGS="$OLD_CFLAGS"
 
-dnl Portable non-GCC compiler checks. Widely ported commercial
-dnl toolchains should be checked for here, too. -jmallett
+dnl Check for various compilers. -jmallett
+SGS=no
 AC_MSG_CHECKING(if we are using TenDRA or MIPSpro)
 case `$CC -version 2>&1` in
   *TenDRA*)
     AC_MSG_RESULT(success! We will be using TenDRA.)
     TenDRA=yes
+    SGS=yes
     ;;
   *MIPSpro*)
     AC_MSG_RESULT(success! We will be using MIPSpro.)
     MIPSpro=yes
+    SGS=yes
     ;;
   *)
     AC_MSG_RESULT(no)
     TenDRA=no
+    MIPSpro=no
     ;;
 esac
+AC_MSG_CHECKING(if we are using Sun WorkShop)
+case `$CC -V 2>&1` in
+  *Sun*WorkShop*)
+    AC_MSG_RESULT(success! We are using Sun WorkShop.)
+    SunWorkShop=yes
+    SGS=yes
+    ;;
+  *)
+    AC_MSG_RESULT(no)
+    SunWorkShop=no
+    ;;
+esac
+
+dnl SVR4 SGS based on what we know about the compiler -jmallett
+AC_MSG_CHECKING(if your compiler supports the SVR4 Software Generation System interfaces)
+if test "$SGS" = "yes"; then
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+fi
 
 dnl XXX This could be consecutive 'if' statements, and then check
 dnl for a zero "$IRC_CFLAGS" (but what should we use for TenDRA??)
@@ -60,21 +83,13 @@ else
 fi
 
 AC_MSG_CHECKING(how to generate dependancy info)
-
-if test "x$GCC" = "xyes"; then
-  MKDEP="$CC -MM"
-else
-   case `uname -s` in
-    SunOS*)
-	AC_MSG_RESULT(SunOS - Assuming $CC -xM to make dependancies)
-	MKDEP="$CC -xM"
-    ;;
-    *)
-	AC_MSG_RESULT(Assuming your compiler can take $CC -MM to make dependancies)
-        MKDEP="$CC -MM"	
-    ;;
-   esac
-   
+if test "$SunWorkShop" = "yes"; then
+  AC_MSG_RESULT(Sun WorkShop using $CC -xM)
+  MKDEP="$CC -xM"
+fi
+if test "x$MKDEP" = "x"; then
+  AC_MSG_RESULT(assuming $CC -MM)
+  MKDEP="$CC -MM"	
 fi
 
 AC_SUBST(MKDEP)
@@ -681,20 +696,15 @@ else
 	dnl set the system compiler values for PIC shared modules if we have
 	dnl not already set PICFLAGS some other way (checks for odd compilers
 	dnl can thus be thrown before the OS checks making this very moduluar)
+	dnl We now check for compilers supporting the SVR4 Software Generation
+	dnl System interfaces, and set up generic PICFLAGS for those.
 	dnl -jmallett
 	if test "$ac_cv_prog_gcc" = "yes"; then
 		AC_MSG_RESULT(gcc: -fPIC -DPIC -shared)
 		PICFLAGS="-fPIC -DPIC -shared"
 	fi
-	if test "$TenDRA" = "yes"; then
-		AC_MSG_RESULT(TenDRA: -KPIC -DPIC -G)
-		PICFLAGS="-KPIC -DPIC -G"
-	fi
-	dnl This is what the ABI compiler manpage dictates on IRIX 6.5
-	dnl however MIPSpro itself is smart and will play nice with
-	dnl -shared... Which is more correct I do not know. -jmallett
-	if test "$MIPSpro" = "yes"; then
-		AC_MSG_RESULT(MIPSpro: -KPIC -DPIC -G)
+	if test "$SGS" = "yes"; then
+		AC_MSG_RESULT(SVR4 Software Generation System interfaces: -KPIC -DPIC -G)
 		PICFLAGS="-KPIC -DPIC -G"
 	fi
 	case `uname -s` in
@@ -702,12 +712,6 @@ else
 		if test "$ac_cv_prog_gcc" = "yes"; then
 			AC_MSG_RESULT(Darwin or Mac OS X - Assuming you want to make Mach-O bundles: -fno-common -bundle -flat_namespace -undefined suppress)
 			PICFLAGS="-fno-common -bundle -flat_namespace -undefined suppress"
-		fi
-		;;
-	SunOS*)
-		if test -z "$PICFLAGS"; then
-			AC_MSG_RESULT(SunOS - Assuming Sun Workshop compiler: -KPIC -DPIC -G)
-			PICFLAGS="-KPIC -DPIC -G"
 		fi
 		;;
 	esac
