@@ -1,3 +1,11 @@
+*** 20011014_1 by db
+- Wrong flag was being tested in m_kill.c, never noticed since
+  usually kline = yes; is set.
+- The error messages were obsolete, make it easier to know what to change
+  in the ircd.conf
+
+
+
 *** 20011013_1 by a1kmm
 - Oops forgot to change > back to >= from Rain's patch.
 - Fixed a K&R style { after an if, found by fl.
