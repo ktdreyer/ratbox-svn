@@ -24,6 +24,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.17  2000/10/30 04:56:28  db
+ * - finally moved check_client from s_bsd.c, where it really never seemed
+ *   to me to belong, moved into s_conf.c
+ *
  * Revision 7.16  2000/09/29 17:16:55  ejb
  * merged toot's patch to resync with -6rc4
  *
@@ -502,6 +506,7 @@ extern int              attach_confs(struct Client* client,
                                      const char* name, int statmask);
 extern int              attach_cn_lines(struct Client* client, 
                                         const char* host);
+extern int              check_client(struct Client*, char *,char **);
 extern int              attach_Iline(struct Client* client, 
                                      const char* username, char** reason);
 extern struct ConfItem* find_me(void);
