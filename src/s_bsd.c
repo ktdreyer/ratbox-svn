@@ -728,7 +728,6 @@ void
 comm_connect_tcp(int fd, const char *host, u_short port, 
     struct sockaddr *local, int socklen, CNCB *callback, void *data)
 {
-    struct DNSReply *reply;
     struct DNSQuery query;
 
     fd_table[fd].flags.called_connect = 1;
@@ -760,8 +759,7 @@ comm_connect_tcp(int fd, const char *host, u_short port,
         /* Send the DNS request, for the next level */
         query.vptr = &fd_table[fd];
         query.callback = comm_connect_dns_callback;
-        reply = gethost_byname(host, &query);
-        assert(reply == NULL);	/* We don't have a DNS cache now -- adrian */
+        gethost_byname(host, &query);
     } else {
         /* We have a valid IP, so we just call tryconnect */
         /* Make sure we actually set the timeout here .. */

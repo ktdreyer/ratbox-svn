@@ -582,30 +582,27 @@ static ResRQ* find_id(int id)
 /*
  * gethost_byname - get host address from name
  */
-struct DNSReply* gethost_byname(const char* name, 
-                               const struct DNSQuery* query)
+void gethost_byname(const char* name, const struct DNSQuery* query)
 {
   assert(0 != name);
 
   ++reinfo.re_na_look;
 
   do_query_name(query, name, NULL);
-  return NULL;
 }
 
 /*
  * gethost_byaddr - get host name from address
  */
-struct DNSReply* gethost_byaddr(const char* addr,
-                                const struct DNSQuery* query)
+void gethost_byaddr(const char* addr, const struct DNSQuery* query)
 {
   assert(0 != addr);
 
   ++reinfo.re_nu_look;
 
   do_query_number(query, (const struct in_addr*) addr, NULL);
-  return NULL;
 }
+
 /*
  * do_query_name - nameserver lookup name
  */
@@ -1062,22 +1059,17 @@ res_readreply(int fd, void *data)
 	   * Lookup the 'authoritive' name that we were given for the
 	   * ip#. 
 	   */
-	  reply = gethost_byname(request->he.h.h_name, &request->query);
-	  if (0 == reply)
-	    {
-	      /*
-	       * If name wasn't found, a request has been queued and it will
-	       * be the last one queued.  This is rather nasty way to keep
-	       * a host alias with the query. -avalon
-	       */
-	      MyFree(requestListTail->he.buf);
-	      requestListTail->he.buf = request->he.buf;
-	      request->he.buf = 0;
-	      memcpy(&requestListTail->he.h, &request->he.h, sizeof(struct hostent));
-	    }
-	  else
-	    (*request->query.callback)(request->query.vptr, reply);
-	  rem_request(request);
+          /* Assume no DNS cache now, guys! -- adrian */
+	  gethost_byname(request->he.h.h_name, &request->query);
+	  /*
+	   * If name wasn't found, a request has been queued and it will
+	   * be the last one queued.  This is rather nasty way to keep
+	   * a host alias with the query. -avalon
+	   */
+	  MyFree(requestListTail->he.buf);
+	  requestListTail->he.buf = request->he.buf;
+	  request->he.buf = 0;
+	  memcpy(&requestListTail->he.h, &request->he.h, sizeof(struct hostent));
 	}
       else
 	{

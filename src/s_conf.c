@@ -163,19 +163,17 @@ static void conf_dns_callback(void* vptr, struct DNSReply* reply)
 /*
  * conf_dns_lookup - do a nameserver lookup of the conf host
  * if the conf entry is currently doing a ns lookup do nothing, otherwise
- * if the lookup returns a null pointer, set the conf dns_pending flag
+ * set the conf_dns_pending flag
  */
-struct DNSReply* conf_dns_lookup(struct ConfItem* aconf)
+void conf_dns_lookup(struct ConfItem* aconf)
 {
-  struct DNSReply* dns_reply = 0;
   if (!aconf->dns_pending) {
     struct DNSQuery query;
     query.vptr     = aconf;
     query.callback = conf_dns_callback;
-    if (0 == (dns_reply = gethost_byname(aconf->host, &query)))
-      aconf->dns_pending = 1;
+    gethost_byname(aconf->host, &query);
+    aconf->dns_pending = 1;
   }
-  return dns_reply;
 }
 
 /*
@@ -2028,7 +2026,6 @@ static int SplitUserHost(struct ConfItem *aconf)
  */
 static void lookup_confhost(struct ConfItem* aconf)
 {
-  struct DNSReply* dns_reply;
   unsigned long    ip;
   unsigned long    mask;
 
@@ -2047,9 +2044,8 @@ static void lookup_confhost(struct ConfItem* aconf)
     {
       aconf->ipnum.s_addr = htonl(ip);
     }
-  else if (0 != (dns_reply = conf_dns_lookup(aconf)))
-    memcpy(&aconf->ipnum, dns_reply->hp->h_addr, sizeof(struct in_addr));
-  
+  else 
+    conf_dns_lookup(aconf);
 }
 
 /*

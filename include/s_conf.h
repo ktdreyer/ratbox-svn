@@ -24,6 +24,19 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.21  2000/11/06 13:48:14  adrian
+ * Finally kill the DNS cache code altogether from the API. gethost_byname()
+ * and gethost_byaddr() now are void functions, rather than struct DNSReply *
+ * functions. If we want to implement a DNS cache, we can do it later with
+ * some callback trickery without having to always check the result and do
+ * trickery in all the client code. (Which makes things hard to follow :-)
+ *
+ * The users of gethost_ were converted to assume the callback will be made
+ * at some future time. Note that we can't simply call the callback inside
+ * gethost_ because it'd break things. (What you'd do is have a function
+ * called res_callbackhits() before comm_select() is invoked to do the DNS
+ * callbacks for any cache hits..)
+ *
  * Revision 7.20  2000/11/05 18:56:40  db
  * - clean ups to m_join.c
  * - resolved conflict in s_conf.h
@@ -505,7 +518,7 @@ extern void             free_conf(struct ConfItem*);
 
 extern void             read_conf_files(int cold);
 
-extern struct DNSReply* conf_dns_lookup(struct ConfItem* aconf);
+extern void             conf_dns_lookup(struct ConfItem* aconf);
 extern int              attach_conf(struct Client*, struct ConfItem *);
 extern int              attach_confs(struct Client* client, 
                                      const char* name, int statmask);
