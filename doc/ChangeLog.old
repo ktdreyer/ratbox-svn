@@ -1,3 +1,7 @@
+*** 20010821_8 by androsyn
+This has a hopefully faster version of string_to_array()
+
+
 *** 20010821_7 by leeh
 - drop defaults down low so it will run first time
 
