@@ -97,7 +97,6 @@ TS      - Support the TS protocol
 QS      - Remove the QUIT storm on splits
 EX      - Support +e exceptions in channels
 CHW     - Support PRIVMSG/NOTICE @#channel messages
-DE      - Support channel mode +d - block based on the realname field
 LL      - LazyLink server
 IE      - Invite Exceptions - +I on channels - All nick!user@hosts listed in 
           a +I are exempt from having to be invited to the channel before 
