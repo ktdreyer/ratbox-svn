@@ -1,3 +1,27 @@
+leeh        2002/04/27 13:59:37 EDT	(20020427_2)
+
+  Modified files:
+    include              packet.h 
+    modules              m_away.c m_topic.c 
+    modules/core         m_message.c m_mode.c m_nick.c m_part.c 
+    src                  packet.c s_auth.c s_user.c 
+  Log:
+  - flood code.
+  
+  Revision  Changes    Path
+  7.14      +10 -4     ircd-hybrid-7/include/packet.h
+  1.89      +3 -2      ircd-hybrid-7/modules/core/m_message.c
+  1.51      +3 -2      ircd-hybrid-7/modules/core/m_mode.c
+  1.89      +4 -2      ircd-hybrid-7/modules/core/m_nick.c
+  1.54      +3 -3      ircd-hybrid-7/modules/core/m_part.c
+  1.29      +5 -1      ircd-hybrid-7/modules/m_away.c
+  1.50      +5 -1      ircd-hybrid-7/modules/m_topic.c
+  7.74      +48 -12    ircd-hybrid-7/src/packet.c
+  7.92      +1 -1      ircd-hybrid-7/src/s_auth.c
+  7.192     +2 -2      ircd-hybrid-7/src/s_user.c
+
+
+
 leeh        2002/04/27 08:20:38 EDT	(20020427_1)
 
   Modified files:
