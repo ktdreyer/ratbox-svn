@@ -196,10 +196,10 @@ auth_dns_callback(void *vptr, adns_answer * reply)
 		}
 	} else
 #endif
+	{
 		sendheader(auth->client, REPORT_FAIL_DNS);
-
-	MyFree(reply);
-	
+		MyFree(reply);
+	}
 	release_auth_client(auth);
 }
 
