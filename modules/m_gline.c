@@ -86,6 +86,12 @@ _modinit(void)
     mod_add_cmd(MSG_GLINE, &gline_msgtab);
 }
 
+void
+_moddeinit(void)
+{
+  mod_del_cmd(MSG_GLINE);
+}
+
 char *_version = "20001122";
 
 /*

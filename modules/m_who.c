@@ -50,6 +50,12 @@ _modinit(void)
   mod_add_cmd(MSG_WHO, &who_msgtab);
 }
 
+void
+_moddeinit(void)
+{
+  mod_del_cmd(MSG_WHO);
+}
+
 void do_who_on_channel(struct Client *sptr,
 			      struct Channel *chptr, char *real_name,
 			      int oper, int member);

@@ -50,6 +50,12 @@ _modinit(void)
   mod_add_cmd(MSG_TRACE, &trace_msgtab);
 }
 
+void
+_moddeinit(void)
+{
+  mod_del_cmd(MSG_TRACE);
+}
+
 int report_this_status(struct Client *sptr, struct Client *acptr,int dow,
 		       int link_u_p, int link_u_s);
 

@@ -41,6 +41,12 @@ _modinit(void)
   mod_add_cmd(MSG_PASS, &pass_msgtab);
 }
 
+void
+_moddeinit(void)
+{
+  mod_del_cmd(MSG_PASS);
+}
+
 char *_version = "20001122";
 
 /*

@@ -58,6 +58,13 @@ _modinit(void)
   mod_add_cmd(MSG_UNDLINE, &msgtabs[1]);
 }
 
+void
+_moddeinit(void)
+{
+  mod_del_cmd(MSG_UNKLINE);
+  mod_del_cmd(MSG_UNDLINE);
+}
+
 extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */
 
 static int flush_write(struct Client *, FBFILE* , char *, char *);

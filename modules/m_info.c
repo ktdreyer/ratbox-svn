@@ -33,6 +33,12 @@ _modinit(void)
   mod_add_cmd(MSG_INFO, &info_msgtab);
 }
 
+void
+_moddeinit(void)
+{
+  mod_del_cmd(MSG_INFO);
+}
+
 void send_info_text(struct Client *sptr);
 void send_birthdate_online_time(struct Client *sptr);
 void send_conf_options(struct Client *sptr);

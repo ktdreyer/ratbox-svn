@@ -66,6 +66,13 @@ _modinit(void)
   mod_add_cmd(MSG_DLINE, &dline_msgtab);
 }
 
+void
+_moddeinit(void)
+{
+  mod_del_cmd(MSG_KLINE);
+  mod_del_cmd(MSG_DLINE);
+}
+
 extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */
 
 /* Local function prototypes */

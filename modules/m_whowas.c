@@ -48,6 +48,12 @@ _modinit(void)
   mod_add_cmd(MSG_WHOWAS, &whowas_msgtab);
 }
 
+void
+_moddeinit(void)
+{
+  mod_del_cmd(MSG_WHOWAS);
+}
+
 int whowas_do(struct Client *cptr, struct Client *sptr,
 	      int parc, char *parv[]);
 

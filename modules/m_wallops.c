@@ -42,6 +42,12 @@ _modinit(void)
 {
   mod_add_cmd(MSG_WALLOPS, &wallops_msgtab);
 }
+
+void
+_moddeinit(void)
+{
+  mod_del_cmd(MSG_WALLOPS);
+}
  
 char *_version = "20001122";
 

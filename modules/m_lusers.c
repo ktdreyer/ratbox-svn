@@ -43,6 +43,12 @@ _modinit(void)
   mod_add_cmd(MSG_LUSERS, &lusers_msgtab);
 }
 
+void
+_moddeinit(void)
+{
+  mod_del_cmd(MSG_LUSERS);
+}
+
 char *_version = "20001122";
 
 /*

@@ -44,6 +44,12 @@ _modinit(void)
   mod_add_cmd(MSG_LOCOPS, &locops_msgtab);
 }
 
+void
+_moddeinit(void)
+{
+  mod_del_cmd(MSG_LOCOPS);
+}
+
 char *_version = "20001122";
 
 /*

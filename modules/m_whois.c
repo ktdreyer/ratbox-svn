@@ -56,12 +56,22 @@ _modinit(void)
   mod_add_cmd(MSG_WHOIS, &whois_msgtab);
 }
 
+<<<<<<< m_whois.c
 void
 _moddeinit(void)
 {
   mod_del_cmd(MSG_WHOIS);
 }
 
+
+=======
+void
+_moddeinit(void)
+{
+  mod_del_cmd(MSG_WHOIS);
+}
+
+>>>>>>> 1.7
 char *_version = "20001126";
 
 /*

@@ -44,6 +44,12 @@ _modinit(void)
   mod_add_cmd(MSG_RESTART, &restart_msgtab);
 }
 
+void
+_moddeinit(void)
+{
+  mod_del_cmd(MSG_RESTART);
+}
+
 char *_version = "20001122";
 
 /*
