@@ -707,6 +707,8 @@ static void stats_servers(struct Client *source_p)
 {
   struct Client *target_p;
   dlink_node *ptr;
+  time_t seconds;
+  int days, hours, minutes;
   int j=0;
   
   DLINK_FOREACH(ptr, serv_list.head)
@@ -714,12 +716,25 @@ static void stats_servers(struct Client *source_p)
     target_p = ptr->data;
 
     j++;
+    seconds = CurrentTime - target_p->firsttime;
 
-    sendto_one(source_p, ":%s %d %s :%s (%s!%s@%s) Idle: %d",
+    days = (int)(seconds / 86400);
+    seconds %= 86400;
+    hours = (int)(seconds / 3600);
+    seconds %= 3600;
+    minutes = (int)(seconds / 60);
+    seconds %= 60;
+    
+    sendto_one(source_p, ":%s %d %s :%s (%s!%s@%s) Idle: %d SendQ: %d "
+                         "Connected: %dday%s %dhour%s %dmin%s %ldsec%s",
                me.name, RPL_STATSDEBUG, source_p->name,
 	       target_p->name,
 	       (target_p->serv->by[0] ? target_p->serv->by : "Remote."),
-	       "*", "*", (int)(CurrentTime - target_p->lasttime));
+	       "*", "*", (int)(CurrentTime - target_p->lasttime),
+               (int)linebuf_len(&target_p->localClient->buf_sendq),
+               days, (days == 1) ? "" : "s", hours, (hours == 1) ? "" : "s", 
+               minutes, (minutes == 1) ? "" : "s", 
+               seconds, (seconds == 1) ? "" : "s");
   }
 
   sendto_one(source_p, ":%s %d %s :%d Server(s)", me.name, RPL_STATSDEBUG,
@@ -924,7 +939,7 @@ static void stats_L_list(struct Client *source_p,char *name, int doall, int wild
 #ifdef HIDE_SERVERS_IPS
          !IsServer(target_p) && 
 #endif
-         (IsOperAdmin(source_p) || (!IsServer(target_p) && !IsAdmin(target_p)
+         (IsOperAdmin(source_p) || (!IsServer(target_p) && !IsAdmin(target_p) &&
          !IsHandshake(target_p) && !IsConnecting(target_p))))
 	{
 	  sendto_one(source_p, Lformat, me.name,
