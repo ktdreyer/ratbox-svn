@@ -1,3 +1,15 @@
+androsyn    2003/11/25 10:22:37 EST	(20031125_3)
+
+  Modified files:
+    src                  sigio.c 
+  Log:
+  Remove a debugging fprintf
+  
+  Revision  Changes    Path
+  7.47      +0 -2      ircd-ratbox/src/sigio.c
+
+
+
 androsyn    2003/11/25 09:48:05 EST	(20031125_2)
 
   Modified files:
