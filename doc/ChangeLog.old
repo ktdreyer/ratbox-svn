@@ -1,3 +1,7 @@
+*** 20001223_33 by ejb
+- move oper_only_umodes into ircd.conf.
+
+
 *** 20001223_32 by toot
 disable SYSLOG by default
 updated .depends
