@@ -1,3 +1,9 @@
+*** 20001209_4 by db
+- removed unused extra parameter in sendto_channel_local
+  I think I got them, all ;) if not it will just core mysteriously.. ;)
+
+
+
 *** 20001209_3 by db
 - removed obsolete #ifdef's in m_info.h
 - removed obsolete comments in m_unkline.c
