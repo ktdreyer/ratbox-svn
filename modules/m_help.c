@@ -37,9 +37,11 @@
 static void m_help(struct Client*, struct Client*, int, char**);
 static void mo_help(struct Client*, struct Client*, int, char**);
 static void mo_uhelp(struct Client*, struct Client*, int, char**);
+static void dohelp(struct Client *, char *, char *, char *);
+static void sendhelpfile(struct Client *, char *, char *, char *);
 
 struct Message help_msgtab = {
-  "HELP", 0, 0, 0, MFLG_SLOW, 0,
+  "HELP", 1, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_help, m_ignore, mo_help}
 };
 
@@ -86,7 +88,7 @@ static void m_help(struct Client *client_p, struct Client *source_p,
       last_used = CurrentTime;
     }
 
-  SendMessageFile(source_p, &ConfigFileEntry.uhelpfile);
+  dohelp(source_p, UHPATH, parv[1], parv[0]);
 }
 
 /*
@@ -96,7 +98,7 @@ static void m_help(struct Client *client_p, struct Client *source_p,
 static void mo_help(struct Client *client_p, struct Client *source_p,
                    int parc, char *parv[])
 {
-  SendMessageFile(source_p, &ConfigFileEntry.helpfile);
+  dohelp(source_p, HPATH, parv[1], parv[0]);
 }
 
 /*
@@ -108,5 +110,73 @@ static void mo_help(struct Client *client_p, struct Client *source_p,
 static void mo_uhelp(struct Client *client_p, struct Client *source_p,
                    int parc, char *parv[])
 {
-  SendMessageFile(source_p, &ConfigFileEntry.uhelpfile);
+  dohelp(source_p, UHPATH, parv[1], parv[0]);
 }
+
+static void dohelp(source_p, hpath, topic, nick)
+	 struct Client *source_p;
+	 char *hpath, *topic, *nick;
+{
+  char path[MAXPATHLEN + 1];
+  struct stat sb;
+
+  if (strchr(topic, '/'))
+	{
+	  sendto_one(source_p, form_str(ERR_HELPNOTFOUND), me.name, nick, topic);
+	  return;
+	}
+
+  if (strlen(hpath) + strlen(topic) + 1 > MAXPATHLEN)
+	{
+	  sendto_one(source_p, form_str(ERR_HELPNOTFOUND), me.name, nick, topic);
+	  return;
+	}
+
+  sprintf(path, "%s/%s", hpath, topic);
+
+  if (stat(path, &sb) < 0)
+	{
+	  sendto_one(source_p, form_str(ERR_HELPNOTFOUND), me.name, nick, topic);
+	  return;
+	}
+
+  if (!S_ISREG(sb.st_mode))
+	{
+	  sendto_one(source_p, form_str(ERR_HELPNOTFOUND), me.name, nick, topic);
+	  return;
+	}
+    
+  sendhelpfile(source_p, path, topic, nick);
+  return;
+}
+
+static void sendhelpfile(source_p, path, topic, nick)
+	 struct Client *source_p;
+	 char *path, *topic, *nick;
+{
+  FILE *file;
+  char line[HELPLEN];
+
+  if ((file = fopen(path, "r")) == NULL)
+	{
+	  sendto_one(source_p, form_str(ERR_HELPNOTFOUND), me.name, nick, topic);
+	  return;
+	}
+
+  if (fgets(line, sizeof(line), file) == NULL)
+	{
+	  sendto_one(source_p, form_str(ERR_HELPNOTFOUND), me.name, nick, topic);
+	  return;
+	}
+
+  sendto_one(source_p, form_str(RPL_HELPSTART), me.name, nick, topic, line);
+
+  while (fgets(line, sizeof(line), file))
+	{
+	  sendto_one(source_p, form_str(RPL_HELPTXT), me.name, nick, topic, line);
+	}
+
+  sendto_one(source_p, form_str(RPL_ENDOFHELP), me.name, nick, topic);
+  return;
+}
+

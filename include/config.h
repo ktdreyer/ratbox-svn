@@ -128,6 +128,8 @@
 #define MSGPATH IRCD_PREFIX "/messages/"
 #define ETCPATH IRCD_PREFIX "/etc"
 #define LOGPATH IRCD_PREFIX "/logs"
+#define HPATH   IRCD_PREFIX "/help/users"
+#define UHPATH  IRCD_PREFIX "/help/opers"
 
 /* files */
 #define SPATH   BINPATH "/ircd"                 /* ircd executable */
@@ -140,8 +142,6 @@
 #define MPATH   ETCPATH "/ircd.motd"            /* MOTD file */
 #define LPATH   LOGPATH "/ircd.log"             /* ircd logfile */
 #define PPATH   ETCPATH "/ircd.pid"             /* pid file */
-#define HPATH   ETCPATH "/opers.txt"            /* oper help file */
-#define UHPATH  ETCPATH "/users.txt"            /* user help file */
 #define OPATH   ETCPATH "/opers.motd"           /* oper MOTD file */
 #define LIPATH  ETCPATH "/links.txt"            /* cached links file */
 #endif /* !VMS */
