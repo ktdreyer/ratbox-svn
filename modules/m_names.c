@@ -189,7 +189,6 @@ static void names_non_public_non_secret(struct Client *source_p)
 	     me.name,source_p->name," * * :");
 
   mlen = strlen(buf);
-
   cur_len = mlen;
   t = buf + mlen;
 
@@ -221,6 +220,13 @@ static void names_non_public_non_secret(struct Client *source_p)
       if(lp == NULL)	/* Nothing to do. yay */
 	continue;
 
+      if ( (cur_len + NICKLEN + 2)  > (BUFSIZE - 3))
+        {
+          sendto_one(source_p, "%s", buf);
+          cur_len = mlen;
+          t = buf + mlen;
+        }
+
       if(ch3ptr->mode.mode & MODE_HIDEOPS)
 	ircsprintf(t," %s ", c2ptr->name);
       else
@@ -233,13 +239,6 @@ static void names_non_public_non_secret(struct Client *source_p)
 
       reply_to_send = YES;
 
-      if ( (cur_len + NICKLEN)  > (BUFSIZE - 3))
-        {
-          sendto_one(source_p, "%s", buf);
-          reply_to_send = NO;
-	  cur_len = mlen;
-	  t = buf + mlen;
-        }
     }
 
   if (reply_to_send)
@@ -264,5 +263,4 @@ static void ms_names( struct Client *client_p,
 
   m_names(client_p,source_p,parc,parv);
 }
-
 
