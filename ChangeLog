@@ -1,3 +1,19 @@
+leeh        2004/11/19 17:55:40 EST	(20041119_7)
+
+  Modified files:
+    include              client.h 
+    src                  s_userserv.c 
+  Log:
+  - only allow USERSERV::REGISTER once per client
+  - check the username passed to USERSERV::REGISTER is valid, uses same
+    characters as a NICK can.
+  
+  Revision  Changes    Path
+  1.29      +4 -0      rserv/include/client.h
+  1.13      +24 -1     rserv/src/s_userserv.c
+
+
+
 leeh        2004/11/19 17:39:32 EST	(20041119_6)
 
   Modified files:
