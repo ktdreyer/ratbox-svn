@@ -850,12 +850,18 @@ int server_estab(struct Client *cptr)
    * XXX - this should be in s_bsd
    */
   if (!set_sock_buffers(cptr->fd, READBUF_SIZE))
-    report_error(SETBUF_ERROR_MSG, get_client_name(cptr, TRUE), errno);
+    report_error(SETBUF_ERROR_MSG, get_client_name(cptr, SHOW_IP), errno);
 
-  
+  /* Show the real host/IP to admins */
+  sendto_realops_flags(FLAGS_ADMIN,
+			"Link with %s established: (%s) link",
+			inpath_ip,show_capabilities(cptr));
+
+  /* Now show the masked hostname/IP to opers */
   sendto_realops_flags(FLAGS_ALL,
-		       "Link with %s established: (%s) link",
-		       inpath,show_capabilities(cptr));
+			"Link with %s established: (%s) link",
+			inpath,show_capabilities(cptr));
+
   log(L_NOTICE, "Link with %s established: (%s) link",
       inpath_ip, show_capabilities(cptr));
 
@@ -1451,11 +1457,11 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
       { 
         sendto_realops_flags(FLAGS_ALL,
 			     "Server %s already present from %s",
-			     aconf->name, get_client_name(cptr, TRUE));
+			     aconf->name, get_client_name(cptr, SHOW_IP));
         if (by && IsPerson(by) && !MyClient(by))
 	  sendto_one(by, ":%s NOTICE %s :Server %s already present from %s",
 		     me.name, by->name, aconf->name,
-		     get_client_name(cptr, TRUE));
+		     get_client_name(cptr, SHOW_IP));
         return 0;
       }
 
@@ -1488,10 +1494,10 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
      */
 
     if (!set_non_blocking(cptr->fd))
-        report_error(NONB_ERROR_MSG, get_client_name(cptr, TRUE), errno);
+        report_error(NONB_ERROR_MSG, get_client_name(cptr, SHOW_IP), errno);
 
     if (!set_sock_buffers(cptr->fd, READBUF_SIZE))
-        report_error(SETBUF_ERROR_MSG, get_client_name(cptr, TRUE), errno);
+        report_error(SETBUF_ERROR_MSG, get_client_name(cptr, SHOW_IP), errno);
 
     /*
      * NOTE: if we're here we have a valid C:Line and the client should
@@ -1610,7 +1616,7 @@ serv_connect_callback(int fd, int status, void *data)
     if (!aconf)
       { 
         sendto_realops_flags(FLAGS_ALL,
-		     "Lost C-Line for %s", get_client_name(cptr,FALSE));
+		     "Lost C-Line for %s", get_client_name(cptr, HIDE_IP));
         exit_client(cptr, cptr, &me, "Lost C-line");
         return;
       }

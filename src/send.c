@@ -114,9 +114,9 @@ dead_link(struct Client *to, char *notice)
   linebuf_donebuf(&to->localClient->buf_sendq);
   if (!IsPerson(to) && !IsUnknown(to) && !(to->flags & FLAGS_CLOSING))
     sendto_realops_flags(FLAGS_ALL,
-			 notice, get_client_name(to, FALSE));
+			 notice, get_client_name(to, HIDE_IP));
   
-  Debug((DEBUG_ERROR, notice, get_client_name(to, FALSE)));
+  Debug((DEBUG_ERROR, notice, get_client_name(to, HIDE_IP)));
 
   return (-1);
 } /* dead_link() */
@@ -159,7 +159,7 @@ send_message(struct Client *to, char *msg, int len)
       if (IsServer(to))
         sendto_realops_flags(FLAGS_ALL,
 			     "Max SendQ limit exceeded for %s: %u > %lu",
-			     get_client_name(to, FALSE),
+			     get_client_name(to, HIDE_IP),
           linebuf_len(&to->localClient->buf_sendq), get_sendq(to));
       if (IsClient(to))
         to->flags |= FLAGS_SENDQEX;
@@ -259,7 +259,7 @@ send_message_remote(struct Client *to, struct Client *from,
       if (IsServer(to))
         sendto_realops_flags(FLAGS_ALL,
 			     "Max SendQ limit exceeded for %s: %u > %lu",
-			     get_client_name(to, FALSE),
+			     get_client_name(to, HIDE_IP),
           linebuf_len(&to->localClient->buf_sendq), get_sendq(to));
       if (IsClient(to))
 	{

@@ -164,7 +164,7 @@ void serv_info(struct Client *cptr)
        */
       if(IsOper(cptr))
         sendto_one(cptr, Lformat, me.name, RPL_STATSLINKINFO,
-                   cptr->name, get_client_name(acptr, TRUE),
+                   cptr->name, get_client_name(acptr, SHOW_IP),
                    (int)linebuf_len(&acptr->localClient->buf_sendq),
                    (int)acptr->localClient->sendM,
 		   (int)acptr->localClient->sendK,
@@ -176,7 +176,7 @@ void serv_info(struct Client *cptr)
       else
         {
           sendto_one(cptr, Lformat, me.name, RPL_STATSLINKINFO,
-                     cptr->name, get_client_name(acptr, HIDEME),
+                     cptr->name, get_client_name(acptr, MASK_IP),
                      (int)linebuf_len(&acptr->localClient->buf_sendq),
                      (int)acptr->localClient->sendM,
 		     (int)acptr->localClient->sendK,

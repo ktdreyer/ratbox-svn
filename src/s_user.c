@@ -955,7 +955,7 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         sendto_ops_butone(NULL, &me,
 			      ":%s WALLOPS :MODE for User %s From %s!%s",
 			      me.name, parv[1],
-			      get_client_name(cptr, FALSE), sptr->name);
+			      get_client_name(cptr, HIDE_IP), sptr->name);
       else
         sendto_one(sptr, form_str(ERR_USERSDONTMATCH),
                    me.name, parv[0]);
@@ -1294,7 +1294,7 @@ static int check_X_line(struct Client *cptr, struct Client *sptr)
 				   "X-line Rejecting [%s] [%s], user %s",
 				   sptr->info,
 				   reason,
-				   get_client_name(cptr, FALSE));
+				   get_client_name(cptr, HIDE_IP));
 	    }
 	  ServerStats->is_ref++;      
 	  (void)exit_client(cptr, sptr, &me, "Bad user info");
@@ -1305,7 +1305,7 @@ static int check_X_line(struct Client *cptr, struct Client *sptr)
 			     "X-line Warning [%s] [%s], user %s",
 			     sptr->info,
 			     reason,
-			     get_client_name(cptr, FALSE));
+			     get_client_name(cptr, HIDE_IP));
     }
 
   return 0;

@@ -330,7 +330,7 @@ check_pings_list(dlink_list *list)
               add_temp_kline(aconf);
               sendto_realops_flags(FLAGS_ALL,
 			   "Idle time limit exceeded for %s - temp k-lining",
-				   get_client_name(cptr,FALSE));
+				   get_client_name(cptr, HIDE_IP));
 
 
 	      (void)exit_client(cptr, cptr, &me, aconf->passwd);
@@ -357,9 +357,9 @@ check_pings_list(dlink_list *list)
                 {
                   sendto_realops_flags(FLAGS_ALL,
 				       "No response from %s, closing link",
-				       get_client_name(cptr, FALSE));
+				       get_client_name(cptr, HIDE_IP));
                   log(L_NOTICE, "No response from %s, closing link",
-                      get_client_name(cptr, FALSE));
+                      get_client_name(cptr, HIDE_IP));
                 }
 	      (void)ircsprintf(scratch,
 			       "Ping timeout: %d seconds",
@@ -452,11 +452,11 @@ check_klines(void)
 	    {
 	      sendto_realops_flags(FLAGS_ALL,
 			   "DLINE over-ruled for %s, client is kline_exempt",
-				   get_client_name(cptr, FALSE));
+				   get_client_name(cptr, HIDE_IP));
 	      continue;
 	    }
 	  sendto_realops_flags(FLAGS_ALL,"DLINE active for %s",
-			 get_client_name(cptr, FALSE));
+			 get_client_name(cptr, HIDE_IP));
 	      
 	  if(ConfigFileEntry.kline_with_connection_closed)
 	    reason = "Connection closed";
@@ -487,7 +487,7 @@ check_klines(void)
 		{
 		  sendto_realops_flags(FLAGS_ALL,
 		       "GLINE over-ruled for %s, client is kline_exempt",
-				       get_client_name(cptr,FALSE));
+				       get_client_name(cptr, HIDE_IP));
 		  continue;
 		}
 	      
@@ -495,13 +495,13 @@ check_klines(void)
 		{
 		  sendto_realops_flags(FLAGS_ALL,
 		       "GLINE over-ruled for %s, client is gline_exempt",
-				       get_client_name(cptr,FALSE));
+				       get_client_name(cptr, HIDE_IP));
 		  continue;
 		}
 
 	      sendto_realops_flags(FLAGS_ALL,
 				   "GLINE active for %s",
-				   get_client_name(cptr, FALSE));
+				   get_client_name(cptr, HIDE_IP));
 		  
 	      if (ConfigFileEntry.kline_with_connection_closed)
 		{
@@ -535,13 +535,13 @@ check_klines(void)
 		  {
 		    sendto_realops_flags(FLAGS_ALL,
 			 "KLINE over-ruled for %s, client is kline_exmpt",
-					 get_client_name(cptr,FALSE));
+					 get_client_name(cptr, HIDE_IP));
 		    continue;
 		  }
 		    
 		sendto_realops_flags(FLAGS_ALL,
 				     "KLINE active for %s",
-				     get_client_name(cptr, FALSE));
+				     get_client_name(cptr, HIDE_IP));
 
 		if (ConfigFileEntry.kline_with_connection_closed)
 		  reason = "Connection closed";
@@ -1002,7 +1002,7 @@ const char* get_client_host(struct Client* client)
   if (!MyConnect(client))
     return client->name;
   if (!client->localClient->dns_reply)
-    return get_client_name(client, FALSE);
+    return get_client_name(client, HIDE_IP);
   else
     {
       ircsprintf(nbuf, "%s[%-.*s@%-.*s]",

@@ -363,9 +363,9 @@ void add_connection(struct Listener* listener, int fd)
   ++listener->ref_count;
 
   if (!set_non_blocking(new_client->fd))
-    report_error(NONB_ERROR_MSG, get_client_name(new_client, TRUE), errno);
+    report_error(NONB_ERROR_MSG, get_client_name(new_client, SHOW_IP), errno);
   if (!disable_sock_options(new_client->fd))
-    report_error(OPT_ERROR_MSG, get_client_name(new_client, TRUE), errno);
+    report_error(OPT_ERROR_MSG, get_client_name(new_client, SHOW_IP), errno);
   start_auth(new_client);
 }
 
@@ -390,16 +390,27 @@ void error_exit_client(struct Client* cptr, int error)
     {
       int connected = CurrentTime - cptr->firsttime;
       
-      if (0 == error)
+      if (error == 0)
         {
-          sendto_realops_flags(FLAGS_ALL,"Server %s closed the connection",
-  			     get_client_name(cptr, FALSE));
-          log(L_NOTICE, "Server %s closed the connection",
-              get_client_name(cptr, FALSE));
+	  /* Admins get the real IP */
+	  sendto_realops_flags(FLAGS_ADMINS,
+				"Server %s closed the connection",
+				get_client_name(cptr, SHOW_IP));
+
+	  /* Opers get a masked IP */
+	  sendto_realops_flags(FLAGS_ALL,
+				"Server %s closed the connection",
+				get_client_name(cptr, MASK_IP));
+
+	  log(L_NOTICE, "Server %s closed the connection",
+		get_client_name(cptr, SHOW_IP));
         }
       else
-        report_error("Lost connection to %s:%s", 
-                     get_client_name(cptr, TRUE), current_error);
+	{
+          report_error("Lost connection to %s:%s", 
+		get_client_name(cptr, SHOW_IP), current_error);
+	}
+
       sendto_realops_flags(FLAGS_ALL,
 			   "%s had been connected for %d day%s, %2d:%02d:%02d",
 			   cptr->name, connected/86400,
@@ -407,11 +418,16 @@ void error_exit_client(struct Client* cptr, int error)
 			   (connected % 86400) / 3600, (connected % 3600) / 60,
 			   connected % 60);
     }
-  if (0 == error)
+  if (error == 0)
+  {
     strcpy(errmsg, "Remote closed the connection");
+  }
   else
+  {
     ircsprintf(errmsg, "Read error: %d (%s)", 
                current_error, strerror(current_error));
+  }
+
   exit_client(cptr, cptr, &me, errmsg);
 }
 
