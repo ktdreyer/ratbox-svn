@@ -1,3 +1,15 @@
+leeh        2004/07/28 19:34:43 EDT	(20040728_5)
+
+  Modified files:
+    src                  newconf.c 
+  Log:
+  - adding stacking of ips in exempt {}; blocks
+  
+  Revision  Changes    Path
+  7.158     +12 -33    ircd-ratbox/src/newconf.c
+
+
+
 leeh        2004/07/28 19:23:27 EDT	(20040728_4)
 
   Modified files:
