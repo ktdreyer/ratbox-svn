@@ -1,3 +1,41 @@
+*** 20001211_10 by db
+- simple re-work to m_ison.c, rfc1489 is ambigious about how this should
+  be handled...
+
+The ISON command was implemented to provide  a  quick  and  efficient
+   means  to get a response about whether a given nickname was currently
+   on IRC. ISON only takes one (1) parameter: a space-separated list of
+   nicks.  For  each  nickname in the list that is present, the server
+   adds that to its reply string.  Thus the reply string may return
+   empty (none  of  the given  nicks are present), an exact copy of the
+   parameter string (all of them present) or as any other subset of the
+   set of nicks  given  in  the parameter.  The only limit on the number
+   of nicks that may be checked is that the combined length must not be
+   too large as to cause the server to chop it off so it fits in 512
+   characters.
+...
+   Examples:
+
+   ISON phone trillian WiZ jarlek Avalon Angel Monstah
+                                   ; Sample ISON request for 7 nicks.
+
+...
+  But the parser will break those up into parv[1] ......
+
+  And the parser only presently handles 8 .. so Monstah wouldn't be parsed...
+oops.
+
+  Mirc apparently sends them "ISON nick1 nick2 nick3"
+  But other clients must be sending them with a ':' to force parsing
+of space separated nicks into one parv[1] (?)
+
+  It appears that thats how hybrid-5 expects it. It has to come in as
+"ISON : nick1 nick2 nick3" to force "nick1 nick2 nick3" into parv[1] !
+
+  In any case, this code =should= handle both interpretations.  
+
+
+
 *** 20001211_9 by db
 - removed the last remnant of local[], was one hidden in s_serv.c
   the definition for it was hiding in s_bsd.c
