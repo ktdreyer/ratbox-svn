@@ -1,3 +1,7 @@
+*** 20001223_16 by ejb
+- applied flame's gline/kline diffs.
+
+
 *** 20001223_15 by toot
 empty (ie, persistant) vchans use the last person in the channel as
 the ID, prefixed with an extra ! ..
