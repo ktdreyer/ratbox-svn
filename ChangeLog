@@ -1,3 +1,21 @@
+leeh        2005/02/15 19:26:49 EST	(20050216_0)
+
+  Modified files:
+    help/userserv        index-admin 
+    src                  s_userserv.c 
+  Added files:
+    help/userserv        u-usersetpass usersetpass 
+  Log:
+  - add US::USERSETPASS, to change a users password.
+  
+  Revision  Changes    Path
+  1.5       +1 -0      rserv/help/userserv/index-admin
+  1.1       +4 -0      rserv/help/userserv/u-usersetpass (new)
+  1.1       +4 -0      rserv/help/userserv/usersetpass (new)
+  1.53      +31 -0     rserv/src/s_userserv.c
+
+
+
 leeh        2005/02/14 12:50:48 EST	(20050214_2)
 
   Modified files:
