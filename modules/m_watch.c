@@ -51,7 +51,7 @@ struct Message watch_msgtab = {
 
 mapi_clist_av1 watch_clist[] = { &watch_msgtab, NULL };
 
-DECLARE_MODULE_AV1(who, NULL, NULL, watch_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(watch, NULL, NULL, watch_clist, NULL, NULL, "$Revision$");
 
 
 /*
