@@ -1,3 +1,15 @@
+androsyn    2002/11/13 04:31:09 UTC	(20021113_1)
+
+  Modified files:
+    .                    RELNOTES 
+  Log:
+  Update RELNOTES regarding epoll
+  
+  Revision  Changes    Path
+  1.66      +4 -0      ircd-ratbox/RELNOTES
+
+
+
 androsyn    2002/11/13 04:29:32 UTC	(20021113_0)
 
   Modified files:
