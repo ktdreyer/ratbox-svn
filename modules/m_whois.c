@@ -55,12 +55,12 @@ struct Message whois_msgtab = {
 	{mg_unreg, {m_whois, 2}, {ms_whois, 3}, mg_ignore, mg_ignore, {m_whois, 2}}
 };
 
-int doing_whois_local_hook;
+int doing_whois_hook;
 int doing_whois_global_hook;
 
 mapi_clist_av1 whois_clist[] = { &whois_msgtab, NULL };
 mapi_hlist_av1 whois_hlist[] = {
-	{ "doing_whois_local",	&doing_whois_local_hook },
+	{ "doing_whois",	&doing_whois_hook },
 	{ "doing_whois_global",	&doing_whois_global_hook },
 	{ NULL, NULL }
 };

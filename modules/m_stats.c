@@ -60,13 +60,11 @@ struct Message stats_msgtab = {
 
 int doing_stats_hook;
 int doing_stats_p_hook;
-int doing_stats_L_hook;
 
 mapi_clist_av1 stats_clist[] = { &stats_msgtab, NULL };
 mapi_hlist_av1 stats_hlist[] = {
 	{ "doing_stats",	&doing_stats_hook },
 	{ "doing_stats_p",	&doing_stats_p_hook },
-	{ "doing_stats_L",	&doing_stats_L_hook },
 	{ NULL, NULL }
 };
 
@@ -82,7 +80,6 @@ static void stats_l_client(struct Client *source_p, struct Client *target_p,
 
 static void stats_spy(struct Client *, char);
 static void stats_p_spy(struct Client *);
-static void stats_L_spy(struct Client *, char, const char *);
 
 /* Heres our struct for the stats table */
 struct StatsStruct
@@ -244,7 +241,7 @@ m_stats(struct Client *client_p, struct Client *source_p, int parc, const char *
 			   form_str(RPL_ENDOFSTATS), statchar);
 
 	if((statchar != 'L') && (statchar != 'l'))
-		stats_spy (source_p, statchar);
+		stats_spy(source_p, statchar, NULL);
 
 	return 0;
 }
@@ -1185,7 +1182,7 @@ stats_ltrace(struct Client *source_p, int parc, const char *parv[])
 	{
 		statchar = parv[1][0];
 
-		stats_L_spy(source_p, statchar, name);
+		stats_spy(source_p, statchar, name);
 
 		/* on a single client, this is simple */
 		if(!doall && !wilds)
@@ -1324,13 +1321,13 @@ stats_l_client(struct Client *source_p, struct Client *target_p,
  * -Dianora
  */
 static void
-stats_spy (struct Client *source_p, char statchar)
+stats_spy(struct Client *source_p, char statchar, const char *name)
 {
 	struct hook_stats_data data;
 
 	data.source_p = source_p;
 	data.statchar = statchar;
-	data.name = NULL;
+	data.name = name;
 
 	hook_call_event (doing_stats_hook, &data);
 }
@@ -1351,28 +1348,6 @@ stats_p_spy (struct Client *source_p)
 	data.statchar = 'p';
 
 	hook_call_event (doing_stats_p_hook, &data);
-}
-
-/* 
- * stats_L_spy
- * 
- * inputs	- pointer to source_p, client doing stats L
- *		- stat that they are doing 'L' 'l'
- * 		- any name argument they have given
- * output	- NONE
- * side effects	- a notice is sent to opers, IF spy mode is configured
- * 		  in the conf file.
- */
-static void
-stats_L_spy (struct Client *source_p, char statchar, const char *name)
-{
-	struct hook_stats_data data;
-
-	data.source_p = source_p;
-	data.statchar = statchar;
-	data.name = name;
-
-	hook_call_event (doing_stats_L_hook, &data);
 }
 
 /*

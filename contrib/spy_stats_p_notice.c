@@ -28,29 +28,21 @@
 #include "ircd.h"
 #include "send.h"
 
-int
-show_stats_p(struct hook_stats_data *);
+int show_stats_p(struct hook_stats_data *);
 
-void
-_modinit(void)
-{
-  hook_add_hook("doing_stats_p", (hookfn *)show_stats_p);
-}
+mapi_hfn_list_av1 stats_p_hfnlist[] = { 
+	{ "doing_stats_p", (hookfn) show_stats_p },
+	{ NULL, NULL }
+};
 
-void
-_moddeinit(void)
-{
-  hook_del_hook("doing_stats_p", (hookfn *)show_stats_p);
-}
-
-const char *_version = "$Revision$";
+DECLARE_MODULE_AV1(stats_p_spy, NULL, NULL, NULL, NULL, stats_p_hfnlist, "$Revision$");
 
 int show_stats_p(struct hook_stats_data *data)
 {
-  sendto_realops_flags(UMODE_SPY, L_ALL,
-                       "STATS p requested by %s (%s@%s) [%s]",
-  	               data->source_p->name, data->source_p->username,
-		       data->source_p->host, data->source_p->user->server);
+	sendto_realops_flags(UMODE_SPY, L_ALL,
+			"STATS p requested by %s (%s@%s) [%s]",
+			data->source_p->name, data->source_p->username,
+			data->source_p->host, data->source_p->user->server);
 
-  return 0;
+	return 0;
 }

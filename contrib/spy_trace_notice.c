@@ -29,39 +29,21 @@
 #include "send.h"
 
 int show_trace(struct hook_spy_data *);
-int show_ltrace(struct hook_spy_data *);
 
-void
-_modinit(void)
+mapi_hfn_list_av1 trace_hfnlist[] = { 
+	{ "doing_trace", (hookfn) show_trace },
+	{ NULL, NULL }
+};
+
+DECLARE_MODULE_AV1(trace_spy, NULL, NULL, NULL, NULL, trace_hfnlist, "$Revision$");
+
+int
+show_trace(struct hook_spy_data *data)
 {
-  hook_add_hook("doing_trace", (hookfn *)show_trace);
-  hook_add_hook("doing_ltrace", (hookfn *)show_ltrace);
-}
+	sendto_realops_flags(UMODE_SPY, L_ALL,
+			"trace requested by %s (%s@%s) [%s]",
+			data->source_p->name, data->source_p->username,
+			data->source_p->host, data->source_p->user->server);
 
-void
-_moddeinit(void)
-{
-  hook_del_hook("doing_trace", (hookfn *)show_trace);
-  hook_del_hook("doing_ltrace", (hookfn *)show_ltrace);
-}
-
-const char *_version = "$Revision$";
-
-int show_trace(struct hook_spy_data *data)
-{
-  sendto_realops_flags(UMODE_SPY, L_ALL,
-                         "trace requested by %s (%s@%s) [%s]",
-                         data->source_p->name, data->source_p->username,
-                         data->source_p->host, data->source_p->user->server);
-
-  return 0;
-}
-
-int show_ltrace(struct hook_spy_data *data)
-{
-  sendto_realops_flags(UMODE_SPY, L_ALL,
-		       "ltrace requested by %s (%s@%s) [%s]",
-		       data->source_p->name, data->source_p->username,
-		       data->source_p->host, data->source_p->user->server);
-  return 0;
+	return 0;
 }

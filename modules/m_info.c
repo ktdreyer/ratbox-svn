@@ -59,7 +59,7 @@ int doing_info_hook;
 
 mapi_clist_av1 info_clist[] = { &info_msgtab, NULL };
 mapi_hlist_av1 info_hlist[] = {
-	{ "doing_hook",		&doing_info_hook },
+	{ "doing_info",		&doing_info_hook },
 	{ NULL, NULL }
 };
 

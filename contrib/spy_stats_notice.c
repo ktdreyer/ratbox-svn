@@ -28,54 +28,45 @@
 #include "ircd.h"
 #include "send.h"
 
-int
-show_stats(struct hook_stats_data *);
+int show_stats(struct hook_stats_data *);
 
-void
-_modinit(void)
-{
-	hook_add_hook("doing_stats", (hookfn *)show_stats);
-}
+mapi_hfn_list_av1 stats_hfnlist[] = { 
+	{ "doing_stats", (hookfn) show_stats },
+	{ NULL, NULL }
+};
 
-void
-_moddeinit(void)
-{
-	hook_del_hook("doing_stats", (hookfn *)show_stats);
-}
+DECLARE_MODULE_AV1(stats_spy, NULL, NULL, NULL, NULL, stats_hfnlist, "$Revision$");
 
-const char *_version = "$Revision$";
-
-/* show a stats request */
 int
 show_stats(struct hook_stats_data *data)
 {
-  if((data->statchar == 'L') || (data->statchar == 'l'))
-    {
-      if(data->name != NULL)
-	sendto_realops_flags(UMODE_SPY, L_ALL,
-			     "STATS %c requested by %s (%s@%s) [%s] on %s",
-			     data->statchar,
-			     data->source_p->name,
-			     data->source_p->username,
-			     data->source_p->host,
-			     data->source_p->user->server,
-			     data->name);
-      else
-	sendto_realops_flags(UMODE_SPY, L_ALL,
-			     "STATS %c requested by %s (%s@%s) [%s]",
-			     data->statchar,
-			     data->source_p->name,
-			     data->source_p->username,
-			     data->source_p->host,
-			     data->source_p->user->server);
-    }
-  else
-    {
-      sendto_realops_flags(UMODE_SPY, L_ALL,
-                           "STATS %c requested by %s (%s@%s) [%s]",
-			   data->statchar, data->source_p->name, data->source_p->username,
-			   data->source_p->host, data->source_p->user->server);
-    }
+	if((data->statchar == 'L') || (data->statchar == 'l'))
+	{
+		if(data->name != NULL)
+			sendto_realops_flags(UMODE_SPY, L_ALL,
+					"STATS %c requested by %s (%s@%s) [%s] on %s",
+					data->statchar,
+					data->source_p->name,
+					data->source_p->username,
+					data->source_p->host,
+					data->source_p->user->server,
+					data->name);
+		else
+			sendto_realops_flags(UMODE_SPY, L_ALL,
+					"STATS %c requested by %s (%s@%s) [%s]",
+					data->statchar,
+					data->source_p->name,
+					data->source_p->username,
+					data->source_p->host,
+					data->source_p->user->server);
+	}
+	else
+	{
+		sendto_realops_flags(UMODE_SPY, L_ALL,
+				"STATS %c requested by %s (%s@%s) [%s]",
+				data->statchar, data->source_p->name, data->source_p->username,
+				data->source_p->host, data->source_p->user->server);
+	}
 
-  return 0;
+	return 0;
 }
