@@ -6,8 +6,8 @@ If you don't read this first, we won't help you.
 - To report bugs in hybrid, use the `send-pr' script that should
   be installed into bin/ along with the rest of ircd.
 
-- Known bugs are listed at http://bugs.efnow.net
-  You may also report bugs here.
+- Known bugs are listed in the BUGS file and at http://bugs.efnow.net 
+  You may also report bugs on that site.
 
 - See the INSTALL document for info on configuring and compiling
   ircd-hybrid.
