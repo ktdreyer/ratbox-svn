@@ -1,3 +1,8 @@
+*** 20010420_10 by a1kmm
+- Fixed a deadlock when non-opped users request names on a +a channel. Fixed
+  the code to work correctly too.
+
+
 *** 20010420_9 by a1kmm
 - Fixed K-line exemptions on oper spoofed users on rehash.
 
