@@ -1,3 +1,63 @@
+leeh        2005/01/04 14:58:51 EST	(20050104_12)
+
+  Modified files:
+    autoconf             configure.in 
+    doc                  example.conf schema.txt 
+    help                 genindex.sh 
+    help/chanserv        index 
+    help/operbot         index-admin 
+    include              c_init.h channel.h conf.h setup.h.in 
+    src                  Makefile.in c_mode.c channel.c conf.c 
+                         newconf.c rserv.c s_global.c s_operbot.c 
+  Added files:
+    help/operbot         objoin obpart u-objoin u-obpart 
+    help/operserv        index-admin osjoin ospart takeover 
+                         u-osjoin u-ospart u-takeover 
+    src                  s_operserv.c 
+  Removed files:
+    help/operbot         ojoin opart u-ojoin u-opart 
+  Log:
+  - rename ojoin/opart to objoin/obpart
+  - added operserv service, with initial commands osjoin/ospart/takeover
+  
+  Revision  Changes    Path
+  1.20      +17 -0     rserv/autoconf/configure.in
+  1.27      +19 -0     rserv/doc/example.conf
+  1.13      +5 -0      rserv/doc/schema.txt
+  1.2       +2 -0      rserv/help/chanserv/index
+  1.4       +2 -2      rserv/help/genindex.sh
+  1.3       +2 -2      rserv/help/operbot/index-admin
+  1.1       +3 -0      rserv/help/operbot/objoin (new)
+  1.1       +3 -0      rserv/help/operbot/obpart (new)
+  1.2       +0 -3      rserv/help/operbot/ojoin (dead)
+  1.2       +0 -3      rserv/help/operbot/opart (dead)
+  1.1       +3 -0      rserv/help/operbot/u-objoin (new)
+  1.1       +3 -0      rserv/help/operbot/u-obpart (new)
+  1.2       +0 -3      rserv/help/operbot/u-ojoin (dead)
+  1.2       +0 -3      rserv/help/operbot/u-opart (dead)
+  1.1       +3 -0      rserv/help/operserv/index-admin (new)
+  1.1       +3 -0      rserv/help/operserv/osjoin (new)
+  1.1       +3 -0      rserv/help/operserv/ospart (new)
+  1.1       +4 -0      rserv/help/operserv/takeover (new)
+  1.1       +3 -0      rserv/help/operserv/u-osjoin (new)
+  1.1       +3 -0      rserv/help/operserv/u-ospart (new)
+  1.1       +4 -0      rserv/help/operserv/u-takeover (new)
+  1.17      +1 -0      rserv/include/c_init.h
+  1.19      +2 -0      rserv/include/channel.h
+  1.33      +3 -2      rserv/include/conf.h
+  1.8       +3 -0      rserv/include/setup.h.in
+  1.31      +2 -2      rserv/src/Makefile.in
+  1.21      +1 -2      rserv/src/c_mode.c
+  1.34      +1 -1      rserv/src/channel.c
+  1.35      +2 -1      rserv/src/conf.c
+  1.37      +1 -0      rserv/src/newconf.c
+  1.43      +3 -0      rserv/src/rserv.c
+  1.3       +3 -0      rserv/src/s_global.c
+  1.22      +18 -21    rserv/src/s_operbot.c
+  1.1       +256 -0    rserv/src/s_operserv.c (new)
+
+
+
 leeh        2005/01/04 14:55:28 EST	(20050104_11)
 
   rserv/help/operserv - New directory
