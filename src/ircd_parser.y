@@ -141,7 +141,6 @@ int   class_sendq_var;
 %token  VHOST
 %token  WARN
 %token  GENERAL
-%token  QUIET_ON_BAN
 %token  MODERATE_NICKCHANGE
 %token  FAILED_OPER_NOTICE
 %token  SHOW_FAILED_OPER_ID
@@ -155,7 +154,6 @@ int   class_sendq_var;
 %token  WARN_NO_NLINE
 %token  NON_REDUNDANT_KLINES
 %token  E_LINES_OPER_ONLY
-%token  B_LINES_OPER_ONLY
 %token  F_LINES_OPER_ONLY
 %token  WHOIS_NOTICE
 %token  STATS_NOTICE
@@ -1173,7 +1171,7 @@ general_entry:      GENERAL
 general_items:      general_items general_item |
                     general_item
 
-general_item:       general_quiet_on_ban | general_moderate_nickchange |
+general_item:       general_moderate_nickchange |
                     general_failed_oper_notice | general_show_failed_oper_id |
                     general_anti_nick_flood | general_max_nick_time |
  		    general_max_nick_changes |
@@ -1181,7 +1179,7 @@ general_item:       general_quiet_on_ban | general_moderate_nickchange |
 		    general_kline_with_reason |
                     general_kline_with_connection_closed |
 	            general_warn_no_nline |
-                    general_non_redundant_klines | general_b_lines_oper_only |
+                    general_non_redundant_klines |
                     general_e_lines_oper_only | general_f_lines_oper_only |
 	            general_stats_notice |
                     general_whois_notice | general_pace_wait |
@@ -1194,16 +1192,6 @@ general_item:       general_quiet_on_ban | general_moderate_nickchange |
 		    general_idletime |
 		    general_hide_server | general_hide_chanops |
                     general_message_locale
-
-general_quiet_on_ban:   QUIET_ON_BAN '=' TYES ';'
-  {
-    ConfigFileEntry.quiet_on_ban = 1;
-  }
-                        |
-                        QUIET_ON_BAN '=' TNO ';'
-  {
-    ConfigFileEntry.quiet_on_ban = 0;
-  } ;
 
 general_moderate_nickchange:   MODERATE_NICKCHANGE '=' TYES ';'
   {
@@ -1303,16 +1291,6 @@ general_non_redundant_klines: NON_REDUNDANT_KLINES '=' TYES ';'
     NON_REDUNDANT_KLINES '=' TNO ';'
   {
     ConfigFileEntry.non_redundant_klines = 0;
-  } ;
-
-general_b_lines_oper_only: B_LINES_OPER_ONLY '=' TYES ';'
-  {
-    ConfigFileEntry.b_lines_oper_only = 1;
-  }
-    |
-    B_LINES_OPER_ONLY '=' TNO ';'
-  {
-    ConfigFileEntry.b_lines_oper_only = 0;
   } ;
 
 general_e_lines_oper_only: E_LINES_OPER_ONLY '=' TYES ';'

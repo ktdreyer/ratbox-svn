@@ -24,6 +24,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.39  2000/12/14 19:59:11  db
+ * - removed a bunch of useless B line stuff
+ * - put sanity test into m_gline.c so it wont' core on a NULL glinefile
+ *
  * Revision 7.38  2000/12/13 16:08:57  db
  * - I had changed RTLD_LAZY to RTLD_NOW in modules.c thus insisting
  *   on all names being resolved before loading. oops. should have done this
@@ -494,7 +498,6 @@ typedef struct QlineItem {
 #define CONF_HUB                0x2000
 #define CONF_ELINE              0x4000
 #define CONF_FLINE              0x8000
-#define CONF_BLINE              0x10000
 #define CONF_DLINE              0x20000
 #define CONF_XLINE              0x40000
 #define CONF_ULINE              0x80000

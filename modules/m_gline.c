@@ -489,6 +489,12 @@ log_gline_request(
   struct tm*  tmptr;
   int         out;
 
+  if(ConfigFileEntry.glinefile == NULL)
+    {
+      sendto_realops_flags(FLAGS_ALL,"*** Problem opening glinefile");
+      return;
+    }
+
   ircsprintf(filenamebuf, "%s.%s", 
              ConfigFileEntry.glinefile, small_file_date((time_t)0));
   if ((out = file_open(filenamebuf, O_RDWR|O_APPEND|O_CREAT,0644))==-1)
