@@ -18,7 +18,7 @@
 #include "ircd_defs.h"		/* DEBUG_BLOCK_ALLOCATOR */
 #include "ircd.h"
 #include "memory.h"
-#include "blalloc.h"
+#include "balloc.h"
 #include "irc_string.h"
 #include "tools.h"
 #include "s_log.h"
