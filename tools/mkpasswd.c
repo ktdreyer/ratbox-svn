@@ -74,15 +74,16 @@ char *argv[];
     else
       salt = make_md5_salt();
   } else {
-    if (flag & FLAG_SALT)
-      if ((strlen(saltpara) == 2))
+    if (flag & FLAG_SALT) {
+      if ((strlen(saltpara) == 2)) {
         salt = saltpara;
-      else {
+      } else {
         printf("Invalid salt, please enter 2 alphanumeric characters\n");
         exit(1);
       }
-    else
+    } else {
       salt = make_des_salt();
+    }
   }
 
   if (flag & FLAG_PASS) {
