@@ -1,3 +1,16 @@
+wcampbel    2001/12/15 00:21:24 EST	(20011215_7)
+
+  Modified files:
+    .                    INSTALL 
+  Log:
+  Lee edited the INSTALL file without editing the SGML source, merged
+  back his changes.
+  
+  Revision  Changes    Path
+  7.20      +0 -0      ircd-hybrid-7/INSTALL
+
+
+
 wcampbel    2001/12/15 00:10:43 EST	(20011215_6)
 
   Modified files:
