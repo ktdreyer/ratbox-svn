@@ -97,7 +97,7 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (!(acptr = find_client(user, NULL)))
     {
       /*
-      ** If the user has recently changed nick, we automaticly
+      ** If the user has recently changed nick, automatically
       ** rewrite the KILL for this new nickname--this keeps
       ** servers in synch when nick change and kill collide
       */
@@ -187,7 +187,7 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (!(acptr = find_client(user, NULL)))
     {
       /*
-      ** If the user has recently changed nick, we automaticly
+      ** If the user has recently changed nick, automatically
       ** rewrite the KILL for this new nickname--this keeps
       ** servers in synch when nick change and kill collide
       */
