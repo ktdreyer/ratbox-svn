@@ -1,3 +1,20 @@
+jmallett    2002/02/05 09:37:55 EST	(20020205_4)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+  Log:
+  Add support for MIPSpro based on what the SGI ABI compiler manpage dictates,
+  though MIPSpro will probably play nice with a different set of options... This
+  needs tested, but I can't test it, so I'm going to commit it as it doesn't
+  break anything that wouldn't already be broken, and hope someone can test it.
+  
+  Revision  Changes    Path
+  7.117     +24 -4     ircd-hybrid-7/autoconf/configure.in
+  7.120     +198 -186  ircd-hybrid-7/configure
+
+
+
 leeh        2002/02/05 06:42:25 EST	(20020205_3)
 
   Modified files:
