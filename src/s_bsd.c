@@ -346,18 +346,6 @@ void close_connection(struct Client *client_p)
   linebuf_donebuf(&client_p->localClient->buf_sendq);
   linebuf_donebuf(&client_p->localClient->buf_recvq);
   memset(client_p->localClient->passwd, 0, sizeof(client_p->localClient->passwd));
-  /*
-   * clean up extra sockets from P-lines which have been discarded.
-   */
-  if (client_p->localClient->listener)
-    {
-      assert(0 < client_p->localClient->listener->ref_count);
-      if (0 == --client_p->localClient->listener->ref_count &&
-	  !client_p->localClient->listener->active) 
-	free_listener(client_p->localClient->listener);
-      client_p->localClient->listener = 0;
-    }
-
   det_confs_butmask(client_p, 0);
   client_p->from = NULL; /* ...this should catch them! >:) --msa */
 }
