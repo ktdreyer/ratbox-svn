@@ -1,3 +1,21 @@
+leeh        2004/03/28 14:24:01 EST	(20040328_3)
+
+  Modified files:
+    include              hash.h 
+    modules              m_stats.c 
+    src                  hash.c s_conf.c 
+  Log:
+  - fixed a couple of gcc warnings in s_conf.c
+  - added hash statistics via stats B
+  
+  Revision  Changes    Path
+  7.49      +2 -0      ircd-ratbox/include/hash.h
+  1.211     +9 -1      ircd-ratbox/modules/m_stats.c
+  7.104     +69 -0     ircd-ratbox/src/hash.c
+  7.457     +3 -2      ircd-ratbox/src/s_conf.c
+
+
+
 androsyn    2004/03/28 13:53:54 EST	(20040328_1)
 
   Modified files:
