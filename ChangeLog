@@ -1,3 +1,15 @@
+leeh        2003/11/05 16:13:57 EST	(20031105_1)
+
+  Modified files:
+    modules/core         m_kill.c 
+  Log:
+  - helps if I put the buffer param in ;)
+  
+  Revision  Changes    Path
+  1.94      +2 -2      ircd-ratbox/modules/core/m_kill.c
+
+
+
 leeh        2003/11/05 15:33:09 EST	(20031105_0)
 
   Modified files:
