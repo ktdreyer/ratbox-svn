@@ -1,3 +1,24 @@
+db          2001/12/09 21:59:49 EST	(20011210_0)
+
+  Modified files:
+    include              sprintf_irc.h 
+    src                  hash.c hostmask.c irc_string.c ircdauth.c 
+                         linebuf.c sprintf_irc.c 
+  Log:
+  - register keyword is SOOO obsolete its not even funny.
+    DIE DIE DIE DIE DIE DIE
+  
+  Revision  Changes    Path
+  7.5       +4 -6      ircd-hybrid-7/include/sprintf_irc.h
+  7.36      +3 -3      ircd-hybrid-7/src/hash.c
+  7.58      +3 -3      ircd-hybrid-7/src/hostmask.c
+  7.42      +7 -7      ircd-hybrid-7/src/irc_string.c
+  7.43      +5 -5      ircd-hybrid-7/src/ircdauth.c
+  7.74      +7 -7      ircd-hybrid-7/src/linebuf.c
+  7.10      +17 -18    ircd-hybrid-7/src/sprintf_irc.c
+
+
+
 jdc         2001/12/08 19:57:44 EST	(20011209_0)
 
   Modified files:
