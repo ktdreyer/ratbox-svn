@@ -1,3 +1,22 @@
+leeh        2003/07/01 11:45:35 EDT	(20030701_4)
+
+  Modified files:
+    include              s_serv.h 
+    modules/core         m_server.c 
+    src                  client.c ircd.c s_serv.c 
+  Log:
+  - remove add_server_to_list/remove_server_from_list, theyre one line
+    functions
+  
+  Revision  Changes    Path
+  7.82      +0 -3      ircd-ratbox/include/s_serv.h
+  1.115     +2 -2      ircd-ratbox/modules/core/m_server.c
+  7.391     +2 -2      ircd-ratbox/src/client.c
+  7.299     +1 -1      ircd-ratbox/src/ircd.c
+  7.339     +1 -26     ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2003/07/01 11:36:52 EDT	(20030701_3)
 
   Modified files:
