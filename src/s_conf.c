@@ -2246,14 +2246,14 @@ void WriteKlineOrDline( KlineType type,
                reason,
 	       current_date,
 	       get_oper_name(source_p),
-               cur_time);
+               (long) cur_time);
   else
     ircsprintf(buffer, "\"%s\",\"%s %s\",\"%s\",%ld\n",
                host,
                reason,
 	       current_date,
 	       get_oper_name(source_p),
-               cur_time);
+               (long) cur_time);
 
 
   if (fbputs(buffer,out) == -1)
