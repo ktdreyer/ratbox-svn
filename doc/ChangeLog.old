@@ -1,3 +1,36 @@
+jmallett    2002/01/12 13:38:45 EST	(20020112_0)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    include              setup.h.in 
+    src                  hook.c ircd.c modules.c 
+  Log:
+  Add still more fixups for using TenDRA out of the box with Hybrid7.
+  
+  - configure magic to stop autoconf from slamming '-g' into CFLAGS
+    just because it doesn't explicitly break compiling NULL files
+    Thanks to: Andrew Clausen for helping me think around this
+  - configure magic to make autoconf pick up the right types and
+    includes on the host system, since autoconf uses CPPFLAGS to
+    check for includes and types, and TenDRA does standards checking
+    even when acting as a plain preprocessor, or whatever autoconf
+    is making it do
+  - configure magic to check for <sys/resource.h>, use accordingly.
+  - we can't _really_ convert directly between data type pointers to
+    function pointers, so convert to a faceless intermediary type first,
+    namely uintptr_t (as defined by ISO -- should always exist?).
+  
+  Revision  Changes    Path
+  7.111     +8 -2      ircd-hybrid-7/autoconf/configure.in
+  7.114     +195 -192  ircd-hybrid-7/configure
+  7.42      +3 -0      ircd-hybrid-7/include/setup.h.in
+  7.12      +1 -1      ircd-hybrid-7/src/hook.c
+  7.215     +5 -2      ircd-hybrid-7/src/ircd.c
+  7.88      +4 -4      ircd-hybrid-7/src/modules.c
+
+
+
 wcampbel    2002/01/10 23:00:04 EST	(20020111_0)
 
   Modified files:
