@@ -1,3 +1,16 @@
+db          2002/07/14 19:41:01 EDT	(20020715_0)
+
+  Modified files:
+    src                  linebuf.c 
+  Log:
+  - somehow some pre-increments got turned into post-increments
+  - size of a \r\n buffer is 2. (apparently)
+  
+  Revision  Changes    Path
+  7.85      +7 -5      ircd-hybrid-7/src/linebuf.c
+
+
+
 leeh        2002/07/14 18:11:57 EDT	(20020714_5)
 
   Modified files:
