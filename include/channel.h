@@ -57,7 +57,8 @@ struct Channel
   char            topic_nick[NICKLEN + 1];
   time_t          topic_time;
 #endif
-  int             users;
+  int             users;    /* user count */
+  int             opcount;  /* number of chanops */
   struct SLink*   members;
   struct SLink*   invites;
   struct SLink*   banlist;

@@ -65,7 +65,7 @@ int     m_sjoin(struct Client *cptr,
   time_t        tstosend;
   static        struct Mode mode, *oldmode;
   struct SLink  *l;
-  int   args = 0, haveops = 0, keep_our_modes = 1, keep_new_modes = 1;
+  int   args = 0, keep_our_modes = 1, keep_new_modes = 1;
   int   doesop = 0, what = 0, pargs = 0, fl, people = 0, isnew;
   /* loop unrolled this is now redundant */
   /*  int ip; */
@@ -194,12 +194,14 @@ int     m_sjoin(struct Client *cptr,
 
   doesop = (parv[4+args][0] == '@' || parv[4+args][1] == '@');
 
+#if 0
   for (l = chptr->members; l && l->value.cptr; l = l->next)
     if (l->flags & MODE_CHANOP)
       {
         haveops++;
         break;
       }
+#endif
 
   oldmode = &chptr->mode;
 
@@ -216,7 +218,7 @@ int     m_sjoin(struct Client *cptr,
 
       clear_bans_exceptions_denies(sptr,chptr);
 
-      if (haveops && !doesop)
+      if (chptr->opcount && !doesop)
         {
           tstosend = oldts;
           /* Only warn of Hacked ops if the ops are hacked
@@ -233,9 +235,9 @@ int     m_sjoin(struct Client *cptr,
     {
       chptr->keep_their_modes = NO;
 
-      if (haveops)
+      if (chptr->opcount)
         keep_new_modes = NO;
-      if (doesop && !haveops)
+      if (doesop && !chptr->opcount)
         {
           chptr->channelts = tstosend = newts;
 #if 0
@@ -266,21 +268,6 @@ int     m_sjoin(struct Client *cptr,
       if (strcmp(mode.key, oldmode->key) < 0)
         strcpy(mode.key, oldmode->key);
     }
-
-  /* This loop unrolled below for speed
-   */
-  /*
-  for (ip = 0; flags[ip].mode; ip++)
-    if ((flags[ip].mode & mode.mode) && !(flags[ip].mode & oldmode->mode))
-      {
-        if (what != 1)
-          {
-            *mbuf++ = '+';
-            what = 1;
-          }
-        *mbuf++ = flags[ip].letter;
-      }
-      */
 
   if((MODE_PRIVATE    & mode.mode) && !(MODE_PRIVATE    & oldmode->mode))
     {
@@ -337,20 +324,6 @@ int     m_sjoin(struct Client *cptr,
       *mbuf++ = 'i';
     }
 
-  /* This loop unrolled below for speed
-   */
-  /*
-  for (ip = 0; flags[ip].mode; ip++)
-    if ((flags[ip].mode & oldmode->mode) && !(flags[ip].mode & mode.mode))
-      {
-        if (what != -1)
-          {
-            *mbuf++ = '-';
-            what = -1;
-          }
-        *mbuf++ = flags[ip].letter;
-      }
-      */
   if((MODE_PRIVATE    & oldmode->mode) && !(MODE_PRIVATE    & mode.mode))
     {
       if (what != -1)
@@ -543,10 +516,12 @@ int     m_sjoin(struct Client *cptr,
        s = s0 = strtoken(&p, (char *)NULL, " "))
     {
       fl = 0;
+
       if (*s == '@' || s[1] == '@')
         fl |= MODE_CHANOP;
       if (*s == '+' || s[1] == '+')
         fl |= MODE_VOICE;
+
       if (!keep_new_modes)
        {
         if (fl & MODE_CHANOP)

@@ -61,6 +61,9 @@ extern int m_list(struct Client *,struct Client *,int, char **);
 extern int m_motd(struct Client *,struct Client *,int,char **);
 extern int m_who(struct Client *,struct Client *,int,char **);
 extern int m_whois(struct Client *,struct Client *,int,char **);
+#ifdef DBOP
+extern int m_dbop(struct Client *,struct Client *,int,char **);
+#endif
 extern int m_server(struct Client *,struct Client *,int,char **);
 extern int m_user(struct Client *,struct Client *,int, char **);
 extern int m_links(struct Client *,struct Client *,int,char **);

@@ -650,9 +650,9 @@ void    add_user_to_channel(struct Channel *chptr, struct Client *who, int flags
       ptr->value.cptr = who;
       ptr->next = chptr->members;
       chptr->members = ptr;
-
       chptr->users++;
-
+      if(flags & MODE_CHANOP)
+        chptr->opcount++;
       ptr = make_link();
       ptr->value.chptr = chptr;
       ptr->next = who->user->channel;
@@ -669,6 +669,9 @@ void    remove_user_from_channel(struct Client *sptr,struct Channel *chptr,int w
   for (curr = &chptr->members; (tmp = *curr); curr = &tmp->next)
     if (tmp->value.cptr == sptr)
       {
+        if((tmp->flags & MODE_CHANOP) && chptr->opcount)
+          chptr->opcount--;
+
         /* User was kicked, but had an exception.
          * so, to reduce chatter I'll remove any
          * matching exception now.
@@ -704,10 +707,23 @@ static  void    change_chan_flag(struct Channel *chptr,struct Client *cptr, int 
       {
         tmp->flags |= flag & MODE_FLAGS;
         if (flag & MODE_CHANOP)
-          tmp->flags &= ~MODE_DEOPPED;
+          {
+            tmp->flags &= ~MODE_DEOPPED;
+            if( !(tmp->flags & MODE_CHANOP) )
+              {
+                chptr->opcount++;
+              }
+          }
       }
     else
       {
+        if ((tmp->flags & MODE_CHANOP) && (flag & MODE_CHANOP))
+          {
+            if( chptr->opcount )
+              {
+                chptr->opcount--;
+              }
+          }
         tmp->flags &= ~flag & MODE_FLAGS;
       }
    }

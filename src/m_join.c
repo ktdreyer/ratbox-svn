@@ -514,3 +514,35 @@ int     m_join(struct Client *cptr,
   return 0;
 }
 
+#ifdef DBOP
+/* ZZZZZZZZZZZZ Q&D debug function */
+int     m_dbop(struct Client *cptr,
+               struct Client *sptr,
+               int parc,
+               char *parv[])
+{
+  int counted_ops=0;
+  struct SLink  *l;
+  char *name;
+  struct Channel *chptr;
+
+  name = parv[1];
+
+  if(!(chptr=hash_find_channel(name, NullChn)))
+    {
+      sendto_one(sptr,
+      ":%s NOTICE %s :*** Notice %s does not exist",
+        me.name, sptr->name,  name );
+      return -1;
+    }
+
+  for (l = chptr->members; l && l->value.cptr; l = l->next)
+    if (l->flags & MODE_CHANOP)
+      {
+        counted_ops++;
+      }
+
+  sendto_one(sptr,":%s NOTICE %s :*** Notice %s chptr->opcount %d counted %d",
+    me.name, sptr->name, name, chptr->opcount, counted_ops);
+}
+#endif
