@@ -292,7 +292,9 @@ report_classes(struct Client *source_p)
 				   PingFreq(cltmp), ConFreq(cltmp),
 				   MaxUsers(cltmp), MaxSendq(cltmp),
 				   MaxLocal(cltmp), MaxIdent(cltmp),
-				   MaxGlobal(cltmp), MaxIdent(cltmp));
+				   MaxGlobal(cltmp), MaxIdent(cltmp),
+				   CurrUsers(cltmp)
+				   );
 	}
 
 	/* also output the default class */
@@ -301,7 +303,9 @@ report_classes(struct Client *source_p)
 			   PingFreq(default_class), ConFreq(default_class),
 			   MaxUsers(default_class), MaxSendq(default_class),
 			   MaxLocal(default_class), MaxIdent(default_class),
-			   MaxGlobal(default_class), MaxIdent(default_class));
+			   MaxGlobal(default_class), MaxIdent(default_class),
+			   CurrUsers(default_class)
+			   );
 }
 
 /*
