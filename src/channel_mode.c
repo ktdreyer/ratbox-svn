@@ -1844,7 +1844,7 @@ chm_voice(struct Client *client_p, struct Client *source_p,
     else
 #endif
       change_channel_membership(chptr, &chptr->voiced,
-                                &chptr->voiced, targ_p);
+                                &chptr->locvoiced, targ_p);
     if (was_voiced == 0)
     {
       mode_changes_plus[mode_count_plus].letter = c;
