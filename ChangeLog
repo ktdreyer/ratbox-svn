@@ -1,3 +1,15 @@
+androsyn    2002/12/10 20:59:27 UTC	(20021210_23)
+
+  Modified files:
+    src                  confmatch.c 
+  Log:
+  Keep parse_netmask() from destroying the string
+  
+  Revision  Changes    Path
+  7.14      +3 -2      ircd-ratbox/src/confmatch.c
+
+
+
 androsyn    2002/12/10 20:43:01 UTC	(20021210_22)
 
   Modified files:
