@@ -1,3 +1,16 @@
+androsyn    2002/12/10 14:46:11 UTC	(20021210_19)
+
+  Modified files:
+    src                  confmatch.c s_conf.c 
+  Log:
+  Minor cleanup of cidr operblocks
+  
+  Revision  Changes    Path
+  7.12      +1 -2      ircd-ratbox/src/confmatch.c
+  7.384     +5 -2      ircd-ratbox/src/s_conf.c
+
+
+
 androsyn    2002/12/10 14:21:45 UTC	(20021210_18)
 
   Modified files:
