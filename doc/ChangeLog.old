@@ -1,3 +1,12 @@
+*** 20001130_5 by adrian
+
+
+bzero() the memory we get from malloc() before returning. This is a good
+thing(tm), and it means we can possibly start removing bzero/memset's
+from around the code.
+
+
+
 *** 20001130_4 by db
 - fixed kick so nonops see user kicking themselves in chanop hide mode
 - don't show uplink on links and hopcount if in server hide mode
