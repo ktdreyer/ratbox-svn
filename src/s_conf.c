@@ -669,6 +669,7 @@ set_default_conf(void)
 	ConfigFileEntry.max_nick_time = 20;
 	ConfigFileEntry.max_nick_changes = 5;
 	ConfigFileEntry.max_accept = 20;
+	ConfigFileEntry.nick_delay = 900;	/* 15 minutes */
 	ConfigFileEntry.anti_spam_exit_message_time = 0;
 	ConfigFileEntry.ts_warn_delta = TS_WARN_DELTA_DEFAULT;
 	ConfigFileEntry.ts_max_delta = TS_MAX_DELTA_DEFAULT;

@@ -1070,7 +1070,7 @@ recurse_remove_clients(struct Client *source_p, const char *comment)
 
 		target_p->flags |= FLAGS_KILLED;
 
-		/* ADD ND ENTRY */
+		add_nd_entry(target_p->name);
 		exit_remote_client(NULL, target_p, &me, comment);		
 	}
 

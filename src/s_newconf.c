@@ -45,6 +45,8 @@
 #include "hostmask.h"
 #include "newconf.h"
 #include "hash.h"
+#include "balloc.h"
+#include "event.h"
 
 dlink_list shared_conf_list;
 dlink_list cluster_conf_list;
@@ -53,6 +55,16 @@ dlink_list hubleaf_conf_list;
 dlink_list server_conf_list;
 dlink_list xline_conf_list;
 dlink_list resv_conf_list;	/* nicks only! */
+static dlink_list nd_list;	/* nick delay */
+
+static BlockHeap *nd_heap = NULL;
+
+void
+init_s_newconf(void)
+{
+	nd_heap = BlockHeapCreate(sizeof(struct nd_entry), ND_HEAP_SIZE);
+	eventAddIsh("expire_nd_entries", expire_nd_entries, NULL, 30);
+}
 
 void
 clear_s_newconf(void)
@@ -631,5 +643,46 @@ expire_temp_rxlines(void *unused)
 		}
 	}
 	HASH_WALK_END
+}
+
+void
+add_nd_entry(const char *name)
+{
+	struct nd_entry *nd;
+
+	if(hash_find_nd(name) != NULL)
+		return;
+
+	nd = BlockHeapAlloc(nd_heap);
+
+	strlcpy(nd->name, name, sizeof(nd->name));
+	nd->expire = CurrentTime + ConfigFileEntry.nick_delay;
+
+	/* this list is ordered */
+	dlinkAddTail(nd, &nd->lnode, &nd_list);
+	add_to_nd_hash(name, nd);
+}
+
+void
+expire_nd_entries(void *unused)
+{
+	struct nd_entry *nd;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, nd_list.head)
+	{
+		nd = ptr->data;
+
+		/* this list is ordered - we can stop when we hit the first
+		 * entry that doesnt expire..
+		 */
+		if(nd->expire > CurrentTime)
+			return;
+
+		dlinkDelete(&nd->lnode, &nd_list);
+		dlinkDelete(&nd->hnode, &ndTable[nd->hashv]);
+		BlockHeapFree(nd_heap, nd);
+	}
 }
 

@@ -192,6 +192,9 @@
 /* Define this to disable debugging support. */
 #undef NDEBUG
 
+/* Size of the nick delay heap. */
+#undef ND_HEAP_SIZE
+
 /* Nickname length */
 #undef NICKLEN
 
@@ -234,9 +237,9 @@
 /* If using the C implementation of alloca, define if you know the
    direction of stack growth for your system; otherwise it will be
    automatically deduced at run-time.
-        STACK_DIRECTION > 0 => grows toward higher addresses
-        STACK_DIRECTION < 0 => grows toward lower addresses
-        STACK_DIRECTION = 0 => direction of growth unknown */
+	STACK_DIRECTION > 0 => grows toward higher addresses
+	STACK_DIRECTION < 0 => grows toward lower addresses
+	STACK_DIRECTION = 0 => direction of growth unknown */
 #undef STACK_DIRECTION
 
 /* Define to 1 if dynamic modules can't be used. */
@@ -280,9 +283,11 @@
 /* If system does not define in_port_t, define it to what it should be. */
 #undef in_port_t
 
-/* Define as `__inline' if that's what the C compiler calls it, or to nothing
-   if it is not supported. */
+/* Define to `__inline__' or `__inline' if that's what the C compiler
+   calls it, or to nothing if 'inline' is not supported under any name.  */
+#ifndef __cplusplus
 #undef inline
+#endif
 
 /* If system does not define sa_family_t, define it here. */
 #undef sa_family_t

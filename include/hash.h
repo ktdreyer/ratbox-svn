@@ -30,6 +30,7 @@
 #include "tools.h"
 
 extern dlink_list *resvTable;
+extern dlink_list *ndTable;
 
 /* Client hash table size, used in hash.c/s_debug.c */
 #define U_MAX 65536
@@ -51,6 +52,7 @@ struct Client;
 struct Channel;
 struct ConfItem;
 struct cachefile;
+struct nd_entry;
 
 extern void init_hash(void);
 
@@ -82,5 +84,8 @@ extern void clear_resv_hash(void);
 extern void add_to_help_hash(const char *name, struct cachefile *hptr);
 extern void clear_help_hash(void);
 extern struct cachefile *hash_find_help(const char *name, int flags);
+
+extern void add_to_nd_hash(const char *name, struct nd_entry *nd);
+extern struct nd_entry *hash_find_nd(const char *name);
 
 #endif /* INCLUDED_hash_h */

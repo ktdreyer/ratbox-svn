@@ -198,6 +198,7 @@ struct config_file_entry
 	int kline_with_connection_closed;
 	int kline_delay;
 	int warn_no_nline;
+	int nick_delay;
 	int non_redundant_klines;
 	int stats_e_disabled;
 	int stats_c_oper_only;

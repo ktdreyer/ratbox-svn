@@ -52,6 +52,7 @@ extern dlink_list server_conf_list;
 extern dlink_list xline_conf_list;
 extern dlink_list resv_conf_list;
 
+extern void init_s_newconf(void);
 extern void clear_s_newconf(void);
 
 /* shared/cluster/hub/leaf confs */
@@ -218,6 +219,19 @@ extern int clean_resv_nick(const char *);
 time_t valid_temp_time(const char *p);
 
 extern void expire_temp_rxlines(void *unused);
+
+struct nd_entry
+{
+	char name[NICKLEN+1];
+	time_t expire;
+	unsigned int hashv;
+
+	dlink_node hnode;	/* node in hash */
+	dlink_node lnode;	/* node in ll */
+};
+
+extern void add_nd_entry(const char *name);
+extern void expire_nd_entries(void *unused);
 
 #endif
 

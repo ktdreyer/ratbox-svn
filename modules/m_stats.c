@@ -94,6 +94,7 @@ struct StatsStruct
 };
 
 static void stats_adns_servers (struct Client *);
+static void stats_delay(struct Client *);
 static void stats_connect (struct Client *);
 static void stats_tdeny (struct Client *);
 static void stats_deny (struct Client *);
@@ -132,6 +133,7 @@ static struct StatsStruct stats_cmd_table[] = {
     /* letter     function        need_oper need_admin */
 	{'a', stats_adns_servers,	1, 1, },
 	{'A', stats_adns_servers,	1, 1, },
+	{'b', stats_delay,		1, 1, },
 	{'c', stats_connect,		0, 0, },
 	{'C', stats_connect,		0, 0, },
 	{'d', stats_tdeny,		1, 0, },
@@ -251,6 +253,22 @@ static void
 stats_adns_servers (struct Client *source_p)
 {
 	report_adns_servers (source_p);
+}
+
+static void
+stats_delay(struct Client *source_p)
+{
+	struct nd_entry *nd;
+	dlink_node *ptr;
+	int i;
+
+	HASH_WALK(i, U_MAX, ptr, ndTable)
+	{
+		nd = ptr->data;
+		sendto_one_notice(source_p, "Delaying: %s for %lu",
+				nd->name, nd->expire);
+	}
+	HASH_WALK_END
 }
 
 static void

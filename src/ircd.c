@@ -663,6 +663,7 @@ main(int argc, char *argv[])
 	init_dlink_nodes();
 	init_patricia();
 	newconf_init();
+	init_s_newconf();
 	linebuf_init();		/* set up some linebuf stuff to control paging */
 	init_hash();
 	clear_scache_hash_table();	/* server cache name table */
