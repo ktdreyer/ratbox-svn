@@ -192,6 +192,7 @@ int   class_redirport_var;
 %token  PACE_WAIT
 %token  PASSWORD
 %token  PATH
+%token  PERSIST_TIME
 %token  PING_TIME
 %token  PORT
 %token  QSTRING
@@ -2476,6 +2477,7 @@ channel_item:       channel_use_invex |
                     channel_knock_delay |
                     channel_max_chans_per_user |
                     channel_quiet_on_ban |
+		    channel_persist_time |
                     error
 
 channel_use_invex:   USE_INVEX '=' TYES ';'
@@ -2552,3 +2554,9 @@ channel_maxbans: MAXBANS '=' expr ';'
    {
       ConfigChannel.maxbans = $3;
    } ;
+
+channel_persist_time: PERSIST_TIME '=' timespec ';'
+  {
+    ConfigChannel.persist_time = $3;
+  } ;
+

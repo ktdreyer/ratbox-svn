@@ -4333,12 +4333,7 @@ sub1_from_channel(struct Channel *chptr, int perm)
                                  * It should never happen but...
                                  */
     /* persistent channel */
-
-    /* XXX hard coded 30 minute limit here for now */
-    /* channel has to exist for at least 30 minutes before 
-     * being made persistent 
-     */
-    if (perm == 0 || (chptr->channelts + (30 * 60)) > CurrentTime)
+    if (perm == 0 || (chptr->channelts + ConfigChannel.persist_time) > CurrentTime)
       destroy_channel(chptr);
   }
 }
@@ -4427,23 +4422,31 @@ cleanup_channels(void *unused)
     }
     else
     {
-      if ((CurrentTime - chptr->users_last >= CLEANUP_CHANNELS_TIME))
+      if(chptr->users == 0)
       {
-        if (chptr->users == 0)
+        if((chptr->channelts + ConfigChannel.persist_time) > CurrentTime)
+	{
+	  if(uplink && IsCapable(uplink, CAP_LL))
+	    sendto_one(uplink, ":%s DROP %s", me.name, chptr->chname);
+	  destroy_channel(chptr);
+	}
+      }
+      else
+      {
+        if ((CurrentTime - chptr->users_last >= CLEANUP_CHANNELS_TIME))
         {
-          destroy_channel(chptr);
-        }
-        else if (uplink
+          if (uplink
                  && IsCapable(uplink, CAP_LL) && (chptr->locusers == 0))
-        {
-          sendto_one(uplink, ":%s DROP %s", me.name, chptr->chname);
-          destroy_channel(chptr);
+          {
+            sendto_one(uplink, ":%s DROP %s", me.name, chptr->chname);
+            destroy_channel(chptr);
+          }
+          else
+            chptr->users_last = CurrentTime;
         }
         else
           chptr->users_last = CurrentTime;
       }
-      else
-        chptr->users_last = CurrentTime;
     }
   }
 }

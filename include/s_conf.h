@@ -251,6 +251,7 @@ struct config_channel_entry
   int           maxbans;
   int           max_chans_per_user;
   int           quiet_on_ban;
+  int		persist_time;
 };
 
 struct server_info

@@ -1355,16 +1355,19 @@ static void set_default_conf(void)
   ServerInfo.rsa_private_key = NULL;
   ServerInfo.rsa_private_key_file = NULL;
 #endif
+
   ServerInfo.no_hack_ops = YES;
   /* ServerInfo.name is not rehashable */
   /* ServerInfo.name = ServerInfo.name; */
   ServerInfo.description = NULL;
   DupString(ServerInfo.network_name, NETWORK_NAME_DEFAULT);
   DupString(ServerInfo.network_desc, NETWORK_DESC_DEFAULT);
+  
   memset(&ServerInfo.ip, 0, sizeof(ServerInfo.ip));
   ServerInfo.specific_ipv4_vhost = 0;
   memset(&ServerInfo.ip6, 0, sizeof(ServerInfo.ip6));
   ServerInfo.specific_ipv6_vhost = 0;
+  
   ServerInfo.max_clients = MAX_CLIENTS;  /* XXX - these don't seem to */
   ServerInfo.max_buffer = MAX_BUFFER;    /*       actually do anything! */
   /* Don't reset hub, as that will break lazylinks */
@@ -1412,6 +1415,7 @@ static void set_default_conf(void)
   ConfigFileEntry.max_targets = MAX_TARGETS_DEFAULT;
   DupString(ConfigFileEntry.servlink_path, SLPATH);
   ConfigFileEntry.egdpool_path = NULL;
+  
 #ifdef HAVE_LIBCRYPTO
   /* jdc -- This is our default value for a cipher.  According to the
    *        CRYPTLINK document (doc/cryptlink.txt), BF/128 must be supported
@@ -1429,10 +1433,8 @@ static void set_default_conf(void)
 
   ConfigFileEntry.oper_umodes = FLAGS_LOCOPS | FLAGS_SERVNOTICE |
     FLAGS_OPERWALL | FLAGS_WALLOP;
-  ConfigFileEntry.oper_only_umodes = FLAGS_BOTS | FLAGS_CCONN |
-    FLAGS_DEBUG | FLAGS_FULL | FLAGS_SKILL | FLAGS_NCHANGE |
-    FLAGS_REJ | FLAGS_SPY | FLAGS_EXTERNAL | FLAGS_OPERWALL |
-    FLAGS_DRONE | FLAGS_LOCOPS | FLAGS_UNAUTH;
+  ConfigFileEntry.oper_only_umodes = FLAGS_DEBUG;
+  ConfigFileEntry.throttle_time = 10;
 
   ConfigChannel.vchans_oper_only = NO;
   ConfigChannel.disable_vchans = NO;
@@ -1443,6 +1445,9 @@ static void set_default_conf(void)
   ConfigChannel.knock_delay = 300;
   ConfigChannel.max_chans_per_user = 15;
   ConfigChannel.maxbans = 25;
+
+  /* 60 * 30 = 1800 = 30 minutes */
+  ConfigChannel.persist_time = 1800;
 
   ConfigFileEntry.min_nonwildcard = 4;
   ConfigFileEntry.default_floodcount = 8;
