@@ -1,3 +1,7 @@
+*** 20010105_27 by ejb
+- fixed IDs (removed USE_IDS, why was this added?)
+
+
 *** 20010105_26 by toot
 set a default knock_delay if its nto in ircd.conf
 
