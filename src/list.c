@@ -154,7 +154,10 @@ void _free_user(struct User* user, struct Client* client_p)
 			     (unsigned long)user->invited.head,
 			     (unsigned long)user->channel.head, user->joined,
 			     user->refcnt);
-        assert(0);
+        assert(!user->joined);
+        assert(!user->refcount);
+        assert(!user->invited.head);
+        assert(!user->channel.head);
       }
 
       BlockHeapFree(user_heap, user);
