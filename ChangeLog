@@ -1,3 +1,28 @@
+leeh        2003/08/13 21:24:11 EDT	(20030814_1)
+
+  Modified files:
+    include              send.h 
+    modules              m_stats.c m_trace.c 
+    src                  class.c hostmask.c listener.c 
+                         messages.tab parse.c s_user.c send.c 
+  Log:
+  - made a start on making numerics use sendto_one_numeric() so theyre id
+    capable.  this is so friggin annoying and monotonous! :P
+  
+  Revision  Changes    Path
+  7.76      +2 -2      ircd-ratbox/include/send.h
+  1.174     +34 -31    ircd-ratbox/modules/m_stats.c
+  1.83      +49 -61    ircd-ratbox/modules/m_trace.c
+  7.53      +13 -11    ircd-ratbox/src/class.c
+  7.89      +11 -9     ircd-ratbox/src/hostmask.c
+  7.93      +2 -4      ircd-ratbox/src/listener.c
+  7.93      +17 -17    ircd-ratbox/src/messages.tab
+  7.164     +4 -3      ircd-ratbox/src/parse.c
+  7.286     +2 -2      ircd-ratbox/src/s_user.c
+  7.253     +3 -4      ircd-ratbox/src/send.c
+
+
+
 leeh        2003/08/13 20:24:30 EDT	(20030814_0)
 
   Modified files:
