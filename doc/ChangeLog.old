@@ -1,3 +1,8 @@
+*** 20001128_10 by db
+- removed unused FLUD code
+
+
+
 *** 20001128_9 by db
 - ripped out FLUD, right idea, wrong approach.
 
