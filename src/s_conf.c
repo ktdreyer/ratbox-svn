@@ -152,7 +152,7 @@ conf_dns_callback(void* vptr, adns_answer *reply)
 {
   struct ConfItem *aconf = (struct ConfItem *) vptr;
 
-  if (reply->status == adns_s_ok)
+  if (reply && reply->status == adns_s_ok)
   {
 #ifdef IPV6
     copy_s_addr(IN_ADDR(aconf->ipnum),
