@@ -1,3 +1,12 @@
+*** 20010120_1 by db
+- changed ConfigFileEntry.hub to ServerInfo.hub
+- removed CONF_ME (ick) no more ConfItem for "me" its all in 
+  one ServerInfo struct now.
+- modified parser to use ServerInfo struct
+- I couldn't stand it any more. sorry.
+
+
+
 *** 20010119_9 by adrian
 
 
