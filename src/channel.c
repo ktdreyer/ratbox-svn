@@ -386,7 +386,7 @@ static int check_banned(struct Channel *chptr, struct Client *who,
 void add_user_to_channel(struct Channel *chptr, struct Client *who, int flags)
 {
   dlink_node *ptr;
-  dlink_node *lptr;
+  dlink_node *lptr = NULL;
 
   if (who->user)
     {

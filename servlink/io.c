@@ -28,6 +28,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <stdio.h>
 #include <unistd.h>
 
 #ifdef HAVE_LIBCRYPTO

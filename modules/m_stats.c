@@ -434,7 +434,6 @@ static void stats_ziplinks(struct Client *client_p)
   dlink_node *ptr;
   struct Client *target_p;
   int sent_data = 0;
-  char buf[256];
 
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
   {
