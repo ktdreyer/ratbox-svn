@@ -63,7 +63,7 @@ static int ctrl_fd;
 static u_int16_t 
 assign_id(void)
 {
-	if(id < IDTABLE)
+	if(id < IDTABLE-1)
 		id++;
 	else
 		id = 1;
@@ -188,6 +188,7 @@ fork_resolver(void)
 	int fdx[2];
 	int cfdx[2];
 	pid_t pid;
+	int i;
 	char fx[5];
 	char fy[5];
 
@@ -228,6 +229,14 @@ fork_resolver(void)
 		setenv("CFD", fy, 1);	
 		close(fdx[0]);
 		close(cfdx[0]);
+		/* set our fds as non blocking and close everything else */
+		for (i = 0; i < HARD_FDLIMIT; i++)
+		{
+                        if((i == fdx[1]) || (i == cfdx[1]))
+                                comm_set_nb(i);
+			else
+				close(i);
+		}
 		execl(BINPATH "/resolver", "-resolver", NULL);
 	} else
 	if(pid == -1)
