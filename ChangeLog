@@ -1,3 +1,66 @@
+leeh        2002/11/24 01:55:11 UTC	(20021124_2)
+
+  Modified files:
+    .                    BUGS Makefile.in README.FIRST configure 
+    autoconf             configure.in 
+    doc                  example.conf example.efnet.conf index.txt 
+    doc/technical        index.txt 
+    include              config.h defaults.h m_info.h newconf.h 
+                         setup.h.in stdinc.h 
+    modules              m_set.c 
+    src                  ircd.c newconf.c numeric.c s_conf.c 
+  Removed files:
+    messages             .cvsignore Makefile.in ayb.po build_one 
+                         create_po custom.po 
+    messages/translations .cvsignore Makefile.in README 
+                          ircd-croatian.po ircd-danish.po 
+                          ircd-dutch.po ircd-german.po 
+                          ircd-norwegian.po ircd-spanish.po 
+                          ircd-swedish.po 
+  Log:
+  - patch via hwy to get rid of gettext
+  - removed the message translations - gettext sucks.
+  
+  Revision  Changes    Path
+  7.61      +0 -20     ircd-ratbox/BUGS
+  7.41      +1 -1      ircd-ratbox/Makefile.in
+  7.38      +0 -4      ircd-ratbox/README.FIRST
+  7.159     +0 -42     ircd-ratbox/autoconf/configure.in
+  7.166     +221 -492  ircd-ratbox/configure
+  7.190     +0 -7      ircd-ratbox/doc/example.conf
+  7.28      +0 -7      ircd-ratbox/doc/example.efnet.conf
+  1.18      +0 -2      ircd-ratbox/doc/index.txt
+  1.4       +0 -2      ircd-ratbox/doc/technical/index.txt
+  7.153     +0 -9      ircd-ratbox/include/config.h
+  7.9       +0 -8      ircd-ratbox/include/defaults.h
+  7.45      +0 -6      ircd-ratbox/include/m_info.h
+  7.22      +0 -1      ircd-ratbox/include/newconf.h
+  7.61      +0 -6      ircd-ratbox/include/setup.h.in
+  1.3       +0 -3      ircd-ratbox/include/stdinc.h
+  1.2       +0 -2      ircd-ratbox/messages/.cvsignore (dead)
+  1.12      +0 -75     ircd-ratbox/messages/Makefile.in (dead)
+  1.15      +0 -903    ircd-ratbox/messages/ayb.po (dead)
+  1.3       +0 -26     ircd-ratbox/messages/build_one (dead)
+  1.2       +0 -17     ircd-ratbox/messages/create_po (dead)
+  1.34      +0 -900    ircd-ratbox/messages/custom.po (dead)
+  1.2       +0 -2      ircd-ratbox/messages/translations/.cvsignore (dead)
+  1.9       +0 -77     ircd-ratbox/messages/translations/Makefile.in (dead)
+  1.9       +0 -40     ircd-ratbox/messages/translations/README (dead)
+  1.15      +0 -895    ircd-ratbox/messages/translations/ircd-croatian.po (dead)
+  1.13      +0 -897    ircd-ratbox/messages/translations/ircd-danish.po (dead)
+  1.14      +0 -899    ircd-ratbox/messages/translations/ircd-dutch.po (dead)
+  1.15      +0 -909    ircd-ratbox/messages/translations/ircd-german.po (dead)
+  1.14      +0 -901    ircd-ratbox/messages/translations/ircd-norwegian.po (dead)
+  1.13      +0 -897    ircd-ratbox/messages/translations/ircd-spanish.po (dead)
+  1.16      +0 -904    ircd-ratbox/messages/translations/ircd-swedish.po (dead)
+  1.49      +1 -29     ircd-ratbox/modules/m_set.c
+  7.259     +0 -17     ircd-ratbox/src/ircd.c
+  7.51      +0 -13     ircd-ratbox/src/newconf.c
+  7.22      +1 -1      ircd-ratbox/src/numeric.c
+  7.363     +0 -1      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2002/11/24 01:18:12 UTC	(20021124_1)
 
   Modified files:
