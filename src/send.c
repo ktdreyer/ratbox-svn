@@ -1159,6 +1159,10 @@ sendto_wallops_flags(int flags, struct Client *source_p,
   {
     client_p = ptr->data;
 
+    /* dont allow people without operwall privs to see operwalls */
+    if((flags == UMODE_OPERWALL) && !IsOperOperwall(client_p))
+      continue;
+
     if(client_p->umodes & flags)
       send_linebuf(client_p, &linebuf);
   }

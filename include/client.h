@@ -532,7 +532,7 @@ struct LocalUser
 #define IsOperHiddenAdmin(x)    ((x)->flags2 & OPER_HIDDENADMIN)
 #define IsOperAdmin(x)          (((x)->flags2 & OPER_ADMIN) || \
                                  ((x)->flags2 & OPER_HIDDENADMIN))
-#define IsOperOperWall(x)	((x)->flags2 & OPER_OPERWALL)
+#define IsOperOperwall(x)	((x)->flags2 & OPER_OPERWALL)
 
 #define IsFloodDone(x)          ((x)->flags2 & FLAGS2_FLOODDONE)
 #define SetFloodDone(x)         ((x)->flags2 |= FLAGS2_FLOODDONE)

@@ -69,7 +69,7 @@ static void mo_operwall(struct Client *client_p, struct Client *source_p,
 {
   char *message = parv[1];
 
-  if(!IsOperOperWall(source_p))
+  if(!IsOperOperwall(source_p))
    {
        sendto_one(source_p, ":%s NOTICE %s :You need operwall = yes;",
  		  me.name, source_p->name);
