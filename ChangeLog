@@ -1,3 +1,15 @@
+leeh        2003/09/07 09:01:14 EDT	(20030907_1)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  - missing ':' before the quit message in exit_local_client()
+  
+  Revision  Changes    Path
+  7.414     +2 -2      ircd-ratbox/src/client.c
+
+
+
 leeh        2003/09/07 08:52:14 EDT	(20030907_0)
 
   Modified files:
