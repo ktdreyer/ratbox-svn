@@ -1,3 +1,15 @@
+leeh        2003/07/01 10:56:36 EDT	(20030701_1)
+
+  Modified files:
+    src                  channel.c 
+  Log:
+  - use DLINK_FOREACH_SAFE
+  
+  Revision  Changes    Path
+  7.387     +2 -1      ircd-ratbox/src/channel.c
+
+
+
 leeh        2003/07/01 08:52:57 EDT	(20030701_0)
 
   Modified files:
