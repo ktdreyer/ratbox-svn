@@ -1,3 +1,15 @@
+androsyn    2002/10/30 01:04:06 UTC	(20021030_5)
+
+  Modified files:
+    src                  adns.c 
+  Log:
+  Remove an unused variable
+  
+  Revision  Changes    Path
+  7.50      +0 -3      ircd-ratbox/src/adns.c
+
+
+
 androsyn    2002/10/30 01:02:36 UTC	(20021030_4)
 
   Modified files:
