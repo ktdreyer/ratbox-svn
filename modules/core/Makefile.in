@@ -130,6 +130,11 @@ install-mkdirs:
                 echo "mkdir $(automoduledir)"; \
                 mkdir $(automoduledir); \
         fi
+	# beta7 had m_client.c, post beta7 it was integrated
+	# into m_nick.c, so we need to remove it if it exists
+	-@if test -f $(automoduledir)/m_client.so; then \
+	        echo "rm $(automoduledir)/m_client.so"; \
+		rm $(automoduledir)/m_client.so; \
 
 install: install_@MOD_TARGET@
 
