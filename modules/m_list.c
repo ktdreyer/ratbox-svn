@@ -23,6 +23,7 @@
  */
 
 #include "stdinc.h"
+#include "sprintf_irc.h"
 #include "tools.h"
 #include "handlers.h"
 #include "channel.h"
