@@ -1,3 +1,6 @@
+*** 20010101_22 by davidt
+Missed a change to cburst..
+
 *** 20010101_21 by davidt
 Massive attempt to cleanup vchans, and some problems with vchan+LL.
 - change cjoin on LL to ask the hub
