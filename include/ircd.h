@@ -94,6 +94,10 @@ extern struct timeval SystemTime;
 extern time_t         nextconnect;
 extern int            default_server_capabs;
 
+extern int splitmode;
+extern int split_users;
+extern int split_servers;
+
 extern dlink_list unknown_list;
 extern dlink_list lclient_list;
 extern dlink_list serv_list;

@@ -35,6 +35,7 @@
 #include "common.h"   /* for NO */
 #include "channel.h"  /* for server_was_split */
 #include "s_log.h"
+#include "s_conf.h"
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
@@ -85,6 +86,9 @@ static void quote_max(struct Client *, int);
 static void quote_msglocale(struct Client *, char *);
 static void quote_spamnum(struct Client *, int);
 static void quote_spamtime(struct Client *, int);
+static void quote_splitmode(struct Client *, int);
+static void quote_splitnum(struct Client *, int);
+static void quote_splitusers(struct Client *, int);
 static void list_quote_commands(struct Client *);
 
 
@@ -109,6 +113,9 @@ static struct SetStruct set_cmd_table[] =
   { "MSGLOCALE",	quote_msglocale,	1,	0 },
   { "SPAMNUM",		quote_spamnum,		0,	1 },
   { "SPAMTIME",		quote_spamtime,		0,	1 },
+  { "SPLITMODE",	quote_splitmode,	0,	1 },
+  { "SPLITNUM",		quote_splitnum,		0,	1 },
+  { "SPLITUSERS",	quote_splitusers,	0,	1 },
   /* -------------------------------------------------------- */
   { (char *) 0,		(void (*)()) 0,		0,	0 }
 };
@@ -368,6 +375,65 @@ static void quote_spamtime( struct Client *source_p, int newval )
 		me.name,
 		source_p->name, GlobalSetOptions.spam_time);
   }
+}
+
+/* SET SPLITMODE */
+static void quote_splitmode(struct Client *source_p, int newval)
+{
+  if(newval >= 0)
+  {
+    if((newval > 0) && !splitmode)
+    {
+      sendto_realops_flags(FLAGS_ALL, L_ALL, 
+                           "%s is manually activating splitmode",
+                           get_oper_name(source_p));
+      sendto_one(source_p, ":%s NOTICE %s :splitmode has been activated",
+                 me.name, source_p->name);
+      splitmode = 1;
+    }
+    else if((newval == 0) && splitmode)
+    {
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
+                           "%s is manually deactivating splitmode",
+			   get_oper_name(source_p));
+      sendto_one(source_p, ":%s NOTICE %s :splitmode has been deactivated",
+                 me.name, source_p->name);
+      splitmode = 0;
+    }
+  }
+  else
+    sendto_one(source_p, ":%s NOTICE %s :SPLITMODE is currently %i", 
+               me.name, source_p->name, splitmode);
+}
+
+/* SET SPLITNUM */
+static void quote_splitnum(struct Client *source_p, int newval)
+{
+  if(newval >= 0)
+  {
+    sendto_realops_flags(FLAGS_ALL, L_ALL,
+                         "%s has changed SPLITNUM to %i", 
+			 source_p->name, newval);
+    split_servers = newval;
+  }
+  else
+    sendto_one(source_p, ":%s NOTICE %s :SPLITNUM is currently %i", 
+               me.name, source_p->name, split_servers);
+}
+
+/* SET SPLITUSERS */
+static void quote_splitusers(struct Client *source_p, int newval)
+{
+  if(newval >= 0)
+  {
+    sendto_realops_flags(FLAGS_ALL, L_ALL,
+                         "%s has changed SPLITUSERS to %i", 
+			 source_p->name, newval);
+    split_users = newval;
+  }
+  else
+    sendto_one(source_p, ":%s NOTICE %s :SPLITUSERS is currently %i", 
+               me.name, source_p->name, split_users);
 }
 
 /*

@@ -1202,3 +1202,12 @@ check_spambot_warning(struct Client *source_p, const char *name)
       source_p->localClient->last_leave_time = CurrentTime;
   }
 }
+
+/* check_splitmode()
+ *
+ * input	-
+ * output	-
+ * side effects - compares usercount and servercount against their split
+ *                values and adjusts splitmode accordingly
+ */
+

@@ -181,6 +181,13 @@ m_join(struct Client *client_p,
       /* look for the channel */
       if((chptr = hash_find_channel(name)) != NULL)
 	{
+	  if(splitmode && (*name != '&') && ConfigChannel.no_join_on_split)
+	  {
+	    sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
+                       me.name, source_p->name, name);
+	    continue;
+	  }
+
           /* Check if they want to join a subchan or something */
 	  vchan_chptr = select_vchan(chptr, source_p, vkey, name);
           
@@ -206,6 +213,14 @@ m_join(struct Client *client_p,
 	}
       else
 	{
+	  if(splitmode && (*name != '&') && 
+            (ConfigChannel.no_create_on_split || ConfigChannel.no_join_on_split))
+	  {
+	    sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
+	               me.name, source_p->name, name);
+	    continue;
+	  }
+	  
 	  flags = CHFL_CHANOP;
 	  if(!ServerInfo.hub)
 	    {

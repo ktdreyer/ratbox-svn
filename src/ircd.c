@@ -152,6 +152,9 @@ time_t  nextconnect = 1;        /* time for next try_connections call */
  */
 int     default_server_capabs = 0x00000000;
 
+int splitmode;
+int split_users;
+int split_servers;
 
 /*
  * get_vm_top - get the operating systems notion of the resident set size
@@ -373,6 +376,12 @@ static void initialize_global_set_options(void)
     GlobalSetOptions.floodcount = ConfigFileEntry.default_floodcount;
   else
     GlobalSetOptions.floodcount = 10;
+
+  split_users = ConfigChannel.split_server_count;
+  split_servers = ConfigChannel.split_user_count;
+
+  if(split_users && split_servers)
+    splitmode = 1;
 
   /* memset( &ConfigChannel, 0, sizeof(ConfigChannel)); */
 

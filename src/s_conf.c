@@ -1568,6 +1568,11 @@ set_default_conf(void)
   /* 60 * 30 = 1800 = 30 minutes */
   ConfigChannel.persist_time = 1800;
 
+  ConfigChannel.split_user_count = 0;
+  ConfigChannel.split_server_count = 0;
+  ConfigChannel.no_join_on_split = NO;
+  ConfigChannel.no_create_on_split = NO;
+
   ConfigServerHide.flatten_links = 0;
   ConfigServerHide.hide_servers = 0;
   ConfigServerHide.disable_remote = 0;
