@@ -133,8 +133,8 @@ static_modules.c: static_modules.c.SH
 	
 libmodules.a: $(S_OBJS) static_modules.o
 	$(RM) -f $@
-	$(AR) cqv $@ $(S_OBJS) 
-	$(RANLIB) $@
+	$(AR) cqv $@ $(S_OBJS) static_modules.o
+	$(RANLIB) $@ 
 
 
 install-mkdirs:
