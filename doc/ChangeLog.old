@@ -1,3 +1,11 @@
+*** 20001114_4 by db
+- small change to parse.c, this makes more sense to me
+- added configure change suggested by David-T, this still needs to
+  be made into the configure script by someone who knows how to do
+  such things...
+
+
+
 *** 20001114_3 by db
 - seriously, why was this struct sitting around not doing anything useful?
   was it to entertain me?
