@@ -245,9 +245,6 @@ void adns_getaddr(struct irc_inaddr *addr, int aftype,
                   struct DNSQuery *req, int arpa_type)
 {
   struct irc_sockaddr ipn;
-#ifdef IPV6
-  char *domain;
-#endif
 
   memset(&ipn, 0, sizeof(struct irc_sockaddr));
   assert(dns_state->nservers > 0);
