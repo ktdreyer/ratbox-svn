@@ -1,3 +1,15 @@
+leeh        2004/01/08 07:45:48 EST	(20040108_0)
+
+  Added files:
+    help                 Makefile.in 
+  Log:
+  - actually add the help Makefile.in
+  
+  Revision  Changes    Path
+  1.1       +36 -0     rserv/help/Makefile.in (new)
+
+
+
 leeh        2004/01/07 18:19:03 EST	(20040107_0)
 
   Modified files:
