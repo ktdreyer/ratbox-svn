@@ -36,6 +36,7 @@
 #include "irc_string.h"
 #include "memory.h"
 #include "hook.h"
+#include "send.h"
 
 static char               readBuf[READBUF_SIZE];
 static void client_dopacket(struct Client *client_p, char *buffer, size_t length);
@@ -51,7 +52,44 @@ parse_client_queued(struct Client *client_p)
   int checkflood = 1;
   struct LocalUser *lclient_p = client_p->localClient;
 
-  if (IsServer(client_p) || !IsRegistered(client_p))
+  if(IsUnknown(client_p))
+  {
+    int i = 0;
+
+    for(;;)
+    {
+      /* rate unknown clients at MAX_FLOOD per loop */
+      if(i >= MAX_FLOOD)
+        break;
+
+      dolen = linebuf_get(&client_p->localClient->buf_recvq, readBuf,
+                          READBUF_SIZE, LINEBUF_COMPLETE, LINEBUF_PARSED);
+
+      if(dolen <= 0)
+        break;
+                          
+      if(!IsDead(client_p))
+      {
+        client_dopacket(client_p, readBuf, dolen);
+        i++;
+
+        /* if theyve dropped out of the unknown state, break and move
+         * to the parsing for their appropriate status.  --fl
+         */
+        if(!IsUnknown(client_p))
+          break;
+
+      }
+      else if(MyConnect(client_p))
+      {
+        linebuf_donebuf(&client_p->localClient->buf_recvq);
+        linebuf_donebuf(&client_p->localClient->buf_sendq);
+        return;
+      }
+    }
+  }
+
+  if (IsServer(client_p) || IsConnecting(client_p) || IsHandshake(client_p))
   {
     while ((dolen = linebuf_get(&client_p->localClient->buf_recvq,
                               readBuf, READBUF_SIZE, LINEBUF_COMPLETE,
@@ -59,19 +97,15 @@ parse_client_queued(struct Client *client_p)
     {
       if (!IsDead(client_p))
         client_dopacket(client_p, readBuf, dolen);
-      else
+      else if(MyConnect(client_p))
       {
-        if (MyClient(client_p))
-        {
-          linebuf_donebuf(&client_p->localClient->buf_recvq);
-          linebuf_donebuf(&client_p->localClient->buf_sendq);
-        }
-	
+        linebuf_donebuf(&client_p->localClient->buf_recvq);
+        linebuf_donebuf(&client_p->localClient->buf_sendq);
         return;
       }
     }
   } 
-  else 
+  else if(IsClient(client_p)) 
   {
 
     if (ConfigFileEntry.no_oper_flood && IsOper(client_p))
