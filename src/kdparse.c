@@ -59,13 +59,16 @@ parse_k_file(FBFILE *file)
       if ((*line == '\0') || (*line == '#'))
         continue;
 
-      if ((user_field = getfield(line)) == NULL)
+      user_field = getfield(line);
+      if(BadPtr(user_field))
 	continue;
 
-      if ((host_field = getfield(NULL)) == NULL)
+      host_field = getfield(NULL);
+      if(BadPtr(host_field))
 	continue;
 
-      if ((reason_field = getfield(NULL)) == NULL)
+      reason_field = getfield(NULL);
+      if(BadPtr(reason_field))
 	continue;
 	  
       aconf = make_conf();
@@ -100,10 +103,12 @@ void parse_d_file(FBFILE *file)
       if ((*line == '\0') || (line[0] == '#'))
         continue;
 
-      if ((host_field = getfield(line)) == NULL)
+      host_field = getfield(line);
+      if(BadPtr(host_field))
 	continue;
 
-      if ((reason_field = getfield(NULL)) == NULL)
+      reason_field = getfield(NULL);
+      if(BadPtr(reason_field))
 	continue;
 	  
       aconf = make_conf();
@@ -131,15 +136,18 @@ parse_x_file(FBFILE *file)
     if((*line == '\0') || (line[0] == '#'))
       continue;
 
-    if((host_field = getfield(line)) == NULL)
+    host_field = getfield(line);
+    if(BadPtr(host_field))
       continue;
 
-    if((port_field = getfield(NULL)) == NULL)
+    port_field = getfield(NULL);
+    if(BadPtr(port_field))
       continue;
 
-    if((reason_field = getfield(NULL)) == NULL)
+    reason_field = getfield(NULL);
+    if(BadPtr(reason_field))
       continue;
-
+	  
     xconf = make_xline(host_field, reason_field, atoi(port_field));
     dlinkAddAlloc(xconf, &xline_list);
   }
@@ -161,10 +169,12 @@ parse_resv_file(FBFILE *file)
     if((*line == '\0') || (line[0] == '#'))
       continue;
 
-    if((host_field = getfield(line)) == NULL)
+    host_field = getfield(line);
+    if(BadPtr(host_field))
       continue;
 
-    if((reason_field = getfield(NULL)) == NULL)
+    reason_field = getfield(NULL);
+    if(BadPtr(reason_field))
       continue;
 
     if(IsChannelName(host_field))

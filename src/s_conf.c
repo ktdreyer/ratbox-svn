@@ -395,12 +395,10 @@ find_shared(const char *username, const char *host,
     if((uconf->flags & flags) == 0)
       continue;
 
-    if(BadPtr(uconf->servername) || match(uconf->servername, servername))
-    {
-      if((BadPtr(uconf->username) || match(uconf->username, username)) &&
-         (BadPtr(uconf->host) || match(uconf->host, host)))
-        return YES;
-    }
+    if((BadPtr(uconf->servername) || match(uconf->servername, servername)) &&
+       (BadPtr(uconf->username) || match(uconf->username, username)) &&
+       (BadPtr(uconf->host) || match(uconf->host, host)))
+      return YES;
   }
 
   return NO;

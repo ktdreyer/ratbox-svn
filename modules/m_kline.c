@@ -90,7 +90,7 @@ static int find_user_host(struct Client *source_p,
 static int valid_comment(struct Client *source_p, char *comment);
 static int valid_user_host(struct Client *source_p, char *user, char *host);
 static int valid_wild_card(char *user, char *host);
-static int already_placed_kline(struct Client*, char*, char*);
+static int already_placed_kline(struct Client*, char*, char*, int);
 
 static void apply_kline(struct Client *source_p, struct ConfItem *aconf,
                         const char *reason, const char *oper_reason,
@@ -209,7 +209,7 @@ mo_kline(struct Client *client_p, struct Client *source_p,
         return;
     }
 
-  if (already_placed_kline(source_p, user, host))
+  if (already_placed_kline(source_p, user, host, tkline_time))
     return;
 
   set_time();
@@ -319,7 +319,7 @@ ms_kline(struct Client *client_p, struct Client *source_p,
     /* We check if the kline already exists after we've announced its 
      * arrived, to avoid confusing opers - fl
      */
-    if (already_placed_kline(source_p, kuser, khost))
+    if (already_placed_kline(source_p, kuser, khost, tkline_time))
       return;
 
     aconf = make_conf();
@@ -1009,16 +1009,20 @@ valid_comment(struct Client *source_p, char *comment)
   return 1;
 }
 
-/* static int already_placed_kline(source_p, luser, lhost)
- * Input: user to complain to, username & host to check for.
- * Output: returns 1 on existing K-line, 0 if doesn't exist.
- * Side-effects: Notifies source_p if the K-line already exists.
- * Note: This currently works if the new K-line is a special case of an
+/* already_placed_kline()
+ *
+ * inputs       - source to notify, user@host to check, tkline time
+ * outputs      - 1 if a perm kline or a tkline when a tkline is being
+ *                set exists, else 0
+ * side effects - notifies source_p kline exists
+ */
+/* Note: This currently works if the new K-line is a special case of an
  *       existing K-line, but not the other way round. To do that we would
  *       have to walk the hash and check every existing K-line. -A1kmm.
  */
 static int
-already_placed_kline(struct Client *source_p, char *luser, char *lhost)
+already_placed_kline(struct Client *source_p, char *luser,
+                     char *lhost, int tkline)
 {
   char *reason;
   struct irc_inaddr iphost, *piphost;
@@ -1027,7 +1031,7 @@ already_placed_kline(struct Client *source_p, char *luser, char *lhost)
 
   if (ConfigFileEntry.non_redundant_klines) 
   {
-    if ((t=parse_netmask(lhost, &iphost, &t)) != HM_HOST)
+    if ((t = parse_netmask(lhost, &iphost, &t)) != HM_HOST)
     {
 #ifdef IPV6
       if (t == HM_IPV6)
@@ -1046,15 +1050,20 @@ already_placed_kline(struct Client *source_p, char *luser, char *lhost)
 
     if ((aconf = find_conf_by_address(lhost, piphost, CONF_KILL, t, luser)))
     {
-      reason = aconf->passwd ? aconf->passwd : "<No Reason>";
+      /* setting a tkline, or existing one is perm */
+      if(tkline || ((aconf->flags & CONF_FLAGS_TEMPORARY) == 0))
+      {
+        reason = aconf->passwd ? aconf->passwd : "<No Reason>";
 
-      sendto_one(source_p,
-                 ":%s NOTICE %s :[%s@%s] already K-Lined by [%s@%s] - %s",
-                 me.name, source_p->name, luser, lhost, aconf->user,
-                 aconf->host, reason);
-      return 1;
+        sendto_one(source_p,
+                   ":%s NOTICE %s :[%s@%s] already K-Lined by [%s@%s] - %s",
+                   me.name, source_p->name, luser, lhost, aconf->user,
+                   aconf->host, reason);
+        return 1;
+      }
     }
   }
 
- return 0;
+  return 0;
 }
+
