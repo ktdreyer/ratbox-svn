@@ -1,3 +1,8 @@
+*** 20011024_7 by db
+- make_nick_user_host was just too stupid for words
+
+
+
 *** 20011024_6 by db
 - removed a pile of extra parameters that were not really used
   in find_client()
