@@ -29,10 +29,14 @@ install:
 		mkdir $(prefix)/help/opers; \
 	fi
 	@for help in opers/*; do \
+	if [ -f $$help ]; then \
 		${INSTALL_DATA} $$help $(ohelpdir); \
+	fi \
 	done
 	@for help in users/*; do \
+	if [ -f $$help ]; then \
 		$(INSTALL_DATA) $$help $(uhelpdir); \
+	fi \
 	done
 	@for link in $(SYMLINKS); do \
 		rm -f $(uhelpdir)/$$link; \
