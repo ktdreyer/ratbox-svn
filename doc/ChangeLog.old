@@ -1,3 +1,7 @@
+*** 20010215_5 by androsyn
+Fixed a few bugs with dline handling...
+
+
 *** 20010215_4 by db
 - stop nnn.nnn.*.* type dlines at the pass...
 
