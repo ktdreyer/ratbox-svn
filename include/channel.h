@@ -85,6 +85,11 @@ extern  dlink_list global_channel_list;
 void init_channels(void);
 void cleanup_channels(void *);
 
+/* Number of chanops, peon, voiced sublists */
+#define NUMLISTS 4
+
+/* the table of flags, chanops, chanops_voiced, voiced, peons */
+extern const char *channel_flags[NUMLISTS];
 
 extern int     can_send (struct Channel *chptr, struct Client *who);
 extern int     is_banned (struct Channel *chptr, struct Client *who);
@@ -146,9 +151,6 @@ struct Ban          /* also used for exceptions -orabidoo */
 };
 
 #define CLEANUP_CHANNELS_TIME (30*60)
-
-/* Number of chanops, peon, voiced sublists */
-#define NUMLISTS 4
 
 #ifdef INTENSIVE_DEBUG
 void do_channel_integrity_check(void);

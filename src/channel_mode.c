@@ -1660,31 +1660,6 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
   send_mode_changes(client_p, source_p, chptr, chname);
 }
 
-/*
- * set_channel_mode_flags
- *
- * inputs       - pointer to array of strings for chanops, voiced,
- *                peons
- *              - pointer to channel
- *              - pointer to source
- * output       - none
- * side effects -
- */
-void
-set_channel_mode_flags(char flags_ptr[NUMLISTS][2], struct Channel *chptr,
-                       struct Client *source_p)
-{
-  flags_ptr[0][0] = '@';
-  flags_ptr[1][0] = '+';
-  flags_ptr[2][0] = '\0';
-  flags_ptr[3][0] = '@';
-
-  flags_ptr[0][1] = '\0';
-  flags_ptr[1][1] = '\0';
-  flags_ptr[3][1] = '\0';
-}
-
-
 static void update_channel_info(struct Channel *chptr)
 {
   int i;

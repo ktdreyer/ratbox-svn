@@ -67,6 +67,9 @@ static int check_banned(struct Channel *chptr, struct Client *who,
 static char buf[BUFSIZE];
 static char modebuf[MODEBUFLEN], parabuf[MODEBUFLEN];
 
+/* chanops, chanops_voiced, voiced, peons */
+const char *channel_flags[NUMLISTS] = { "@", "@", "+", "\0" };
+
 /* 
  * init_channels
  *
@@ -631,7 +634,6 @@ channel_member_names(struct Client *source_p,
   struct Client *target_p;
   dlink_node *ptr_list[NUMLISTS];
   dlink_node *ptr;
-  char ptr_flags[NUMLISTS][2];
   char lbuf[BUFSIZE];
   char *t;
   int mlen;
@@ -647,8 +649,6 @@ channel_member_names(struct Client *source_p,
     ptr_list[1] = chptr->chanops_voiced.head;
     ptr_list[2] = chptr->voiced.head;
     ptr_list[3] = chptr->peons.head;
-
-    set_channel_mode_flags(ptr_flags, chptr, source_p);
 
     is_member = IsMember(source_p, chptr);
 
@@ -673,7 +673,7 @@ channel_member_names(struct Client *source_p,
 
         reply_to_send = YES;
 
-        ircsprintf(t, "%s%s ", ptr_flags[i], target_p->name);
+        ircsprintf(t, "%s%s ", channel_flags[i], target_p->name);
 
         tlen = strlen(t);
         cur_len += tlen;

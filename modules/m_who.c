@@ -67,14 +67,6 @@ static void do_who_on_channel(struct Client *source_p,
 			      struct Channel *chptr, const char *real_name,
 			      int server_oper, int member);
 
-static void do_who_list(struct Client *source_p, struct Channel *chptr,
-                        dlink_list *peons_list, dlink_list *chanops_list,
-                        dlink_list *chanops_voiced_list,
-			dlink_list *voiced_list,
-                        const char *chanop_flag,
-			const char *voiced_flag,
-                        const char *chname, int member);
-
 static void who_global(struct Client *source_p, const char *mask, int server_oper);
 
 static void do_who(struct Client *source_p,
@@ -99,7 +91,6 @@ static void m_who(struct Client *client_p,
   dlink_node *lp;
   struct Channel *chptr=NULL;
   struct Channel *mychannel = NULL;
-  char  flags[NUMLISTS][2];
   int   server_oper = parc > 2 ? (*parv[2] == 'o' ): 0; /* Show OPERS only */
   int   member;
 
@@ -193,14 +184,10 @@ static void m_who(struct Client *client_p,
 
       if (chptr != NULL)
 	{
-	  /* XXX globalize this inside m_who.c ? */
-	  /* jdc -- Check is_any_op() for +o > +h > +v priorities */
-	  set_channel_mode_flags( flags, chptr, source_p );
-
 	  if (is_chan_op(chptr,target_p))
-	    do_who(source_p, target_p, chname, flags[0]);
+	    do_who(source_p, target_p, chname, channel_flags[0]);
 	  else if(is_voiced(chptr,target_p))
-	    do_who(source_p, target_p, chname, flags[2]);
+	    do_who(source_p, target_p, chname, channel_flags[2]);
 	  else
 	    do_who(source_p, target_p, chname, "");
 	}
@@ -350,70 +337,42 @@ static void who_global(struct Client *source_p,const char *mask, int server_oper
  * side effects - do a who on given channel
  */
 
-static void do_who_on_channel(struct Client *source_p,
-			      struct Channel *chptr,
-			      const char *chname,
-			      int server_oper, int member)
-{
-  char flags[NUMLISTS][2];
-
-  /* jdc -- Check is_any_op() for +o > +h > +v priorities */
-  set_channel_mode_flags( flags, chptr, source_p );
-
-  do_who_list(source_p, chptr,
-              &chptr->peons,
-              &chptr->chanops,
-              &chptr->chanops_voiced,
-              &chptr->voiced,
-              flags[0],
-              flags[1],
-              chname, member);
-
-}
-
-static void do_who_list(struct Client *source_p, struct Channel *chptr,
-			dlink_list *peons_list,
-                        dlink_list *chanops_list,
-                        dlink_list *chanops_voiced_list,
-			dlink_list *voiced_list,
-			const char *chanop_flag,
-			const char *voiced_flag,
-			const char *chname, int member)
+static void do_who_on_channel(struct Client *source_p, struct Channel *chptr,
+			      const char *chname, int server_oper, int member)
 {
   struct Client *target_p;
-
   dlink_node *ptr;
 
-  DLINK_FOREACH(ptr, peons_list->head)
+  DLINK_FOREACH(ptr, chptr->peons.head)
   {
     target_p = ptr->data;
 
     if(member || !IsInvisible(target_p))
-      do_who(source_p, target_p, chname, "");
+      do_who(source_p, target_p, chname, channel_flags[3]);
   }
 
-  DLINK_FOREACH(ptr, voiced_list->head)
+  DLINK_FOREACH(ptr, chptr->voiced.head)
   {
     target_p = ptr->data;
       
     if(member || !IsInvisible(target_p))
-      do_who(source_p, target_p, chname, voiced_flag);
+      do_who(source_p, target_p, chname, channel_flags[2]);
   }
 
-  DLINK_FOREACH(ptr, chanops_voiced_list->head)
+  DLINK_FOREACH(ptr, chptr->chanops_voiced.head)
   {
     target_p = ptr->data;
 
     if(member || !IsInvisible(target_p))
-      do_who(source_p, target_p, chname, chanop_flag);
+      do_who(source_p, target_p, chname, channel_flags[1]);
   }
 
-  DLINK_FOREACH(ptr, chanops_list->head)
+  DLINK_FOREACH(ptr, chptr->chanops.head)
   {
     target_p = ptr->data;
 
     if(member || !IsInvisible(target_p))
-      do_who(source_p, target_p, chname, chanop_flag);
+      do_who(source_p, target_p, chname, channel_flags[0]);
   }
 }
 
