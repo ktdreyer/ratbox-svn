@@ -43,18 +43,6 @@ typedef unsigned long uintptr_t;
 #endif
 
 extern void outofmemory(void);
-#ifndef WE_ARE_MEMORY_C
-#undef strdup
-#undef malloc
-#undef realloc
-#undef calloc
-#undef free
-#define malloc do_not_call_old_memory_functions!call_My*functions
-#define calloc do_not_call_old_memory_functions!call_My*functions
-#define realloc do_not_call_old_memory_functions!call_My*functions
-#define strdup do_not_call_old_memory_functions!call_My*functions
-#define free do_not_call_old_memory_functions!call_My*functions
-#endif
 
 #ifdef MEMDEBUG
 void *memlog(void *m, int s, char *f, int l);
@@ -93,6 +81,11 @@ typedef struct _MemEntry
 extern MemoryEntry *first_mem_entry;
 
 #else /* MEMDEBUG */
+
+extern void *_MyMalloc(size_t size);
+extern void *_MyRealloc(void *x, size_t y);
+extern void _MyFree(void *x);
+extern void _DupString(char **x, const char *y);
 
 
 extern inline void * _MyMalloc(size_t size)
@@ -143,6 +136,20 @@ extern void *	  _BlockHeapAlloc(BlockHeap *bh);
 #define BlockHeapAlloc(x) MyMalloc((int)x)
 #define BlockHeapFree(x,y) MyFree(y)
 #endif
+
+#ifndef WE_ARE_MEMORY_C
+#undef strdup
+#undef malloc
+#undef realloc
+#undef calloc
+#undef free
+#define malloc do_not_call_old_memory_functions!call_My*functions
+#define calloc do_not_call_old_memory_functions!call_My*functions
+#define realloc do_not_call_old_memory_functions!call_My*functions
+#define strdup do_not_call_old_memory_functions!call_My*functions
+#define free do_not_call_old_memory_functions!call_My*functions
+#endif
+
 
 #endif /* _I_MEMORY_H */
 
