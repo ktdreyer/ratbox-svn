@@ -325,8 +325,8 @@ void	newconf_init()
 	add_conf_item("auth", "spoof", CF_QSTRING, conf_set_auth_spoof);
 	add_conf_item("auth", "spoof_notice", CF_YESNO, conf_set_auth_spoof_notice);
 	add_conf_item("auth", "flood_exempt", CF_YESNO, conf_set_auth_flood_exempt);
-	add_conf_item("auth", "redirserv", CF_YESNO, conf_set_auth_redir_serv);
-	add_conf_item("auth", "redirport", CF_YESNO, conf_set_auth_redir_port);
+	add_conf_item("auth", "redirserv", CF_QSTRING, conf_set_auth_redir_serv);
+	add_conf_item("auth", "redirport", CF_INT, conf_set_auth_redir_port);
 	
 	add_top_conf("resv", conf_begin_resv, conf_end_resv);
 	add_conf_item("resv", "reason", CF_QSTRING, conf_set_resv_reason);
