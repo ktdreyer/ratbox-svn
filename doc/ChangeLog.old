@@ -1,3 +1,10 @@
+*** 20010103_8 by madmax
+I've tried to highlight the fact that you need to read INSTALL,
+and to ./configure --prefix as much as humanly possible.  
+From the number of people the changes have confused, i envision us
+being told by a lot of people 'it compiles okay but wont run!'..
+
+
 *** 20010103_7 by madmax
 I was going to wait until we were ready to change the patch level.. but 
 thought i'd commit these now before they got lost.
