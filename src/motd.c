@@ -37,6 +37,7 @@
 #include "numeric.h"
 #include "client.h"
 #include "irc_string.h"
+#include "sprintf_irc.h"
 #include "memory.h"
 
 /*

@@ -31,6 +31,7 @@
 #include "common.h"
 #include "event.h"
 #include "irc_string.h"
+#include "sprintf_irc.h"
 #include "ircdauth.h"
 #include "ircd.h"
 #include "linebuf.h"

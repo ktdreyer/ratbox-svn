@@ -33,6 +33,7 @@
 #include "fdlist.h"
 #include "hash.h"
 #include "irc_string.h"
+#include "sprintf_irc.h"
 #include "ircd.h"
 #include "list.h"
 #include "listener.h"

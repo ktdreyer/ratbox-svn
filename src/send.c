@@ -134,11 +134,7 @@ send_trim(char *lsendbuf,int len)
 static inline int
 send_format(char *lsendbuf, const char *pattern, va_list args)
 {
-  int len; /* used for the length of the current message */
-
-  len = vsprintf_irc(lsendbuf, pattern, args);
-
-  return (send_trim(lsendbuf,len));
+  return(irc_vsprintf(NULL, lsendbuf, pattern, args));
 }
 
 

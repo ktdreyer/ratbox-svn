@@ -33,7 +33,7 @@
 #include "memory.h"
 #include "fileio.h"
 #include "internal.h"
-
+#include "sprintf_irc.h"
 static adns_query query_alloc(adns_state ads, const typeinfo *typei,
 			      adns_queryflags flags, struct timeval now) {
   /* Allocate a virgin query and return it. */

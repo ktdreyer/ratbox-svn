@@ -42,6 +42,7 @@
 #include "event.h"
 #include "fdlist.h"              /* fdlist_add */
 #include "irc_string.h"
+#include "sprintf_irc.h"
 #include "ircd.h"
 #include "ircdauth.h"
 #include "numeric.h"

@@ -29,6 +29,7 @@
 
 #include "stdinc.h"
 #include "fileio.h"
+#include "sprintf_irc.h"
 #include "internal.h"
 
 int vbuf__append_quoted1035(vbuf *vb, const byte *buf, int len) {

@@ -32,6 +32,7 @@
 #include "s_log.h"
 #include "fileio.h"
 #include "irc_string.h"
+#include "sprintf_irc.h"
 #include "ircd.h"
 #include "s_misc.h"
 #include "event.h"	/* Needed for EVH etc. */

@@ -30,6 +30,7 @@
 #include "stdinc.h"
 #include "fileio.h"
 #include "irc_string.h"
+#include "sprintf_irc.h"
 #include "internal.h"
 
 #define R_NOMEM           return adns_s_nomemory

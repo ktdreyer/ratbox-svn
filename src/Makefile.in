@@ -56,6 +56,7 @@ lex.yy.c:	ircd_lexer.l
 BASE_SRCS =                     \
   adns.c                        \
   balloc.c			\
+  b_sprintf.c			\
   channel.c                     \
   channel_mode.c		\
   class.c                       \
@@ -105,7 +106,6 @@ BASE_SRCS =                     \
   s_user.c                      \
   scache.c                      \
   send.c                        \
-  sprintf_irc.c                 \
   @SNPRINTF_C@			\
   tools.c                       \
   whowas.c
