@@ -1294,33 +1294,6 @@ int find_q_conf(char *nickToFind,char *user,char *host)
 }
 
 /*
- * report_qlines
- *
- * inputs       - pointer to client to report to
- * output       - none
- * side effects - all Q lines are listed to client 
- */
-
-void report_qlines(struct Client *source_p)
-{
-  struct ConfItem *aconf;
-  char *host;
-  char *user;
-  char *pass;
-  char *name;
-  char *classname;
-  int  port;
-
-  for (aconf = q_conf; aconf; aconf = aconf->next)
-    {
-      get_printable_conf(aconf, &name, &host, &pass, &user, &port,&classname);
-          
-      sendto_one(source_p, form_str(RPL_STATSQLINE),
-		 me.name, source_p->name, name, pass, "*", "*");
-    }
-}
-
-/*
  * clear_special_conf
  * 
  * inputs       - pointer to pointer of root of special conf link list

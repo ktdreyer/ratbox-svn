@@ -1,5 +1,6 @@
 /*
  * resv.c
+ * Copyright (C) 2001 Hybrid Development Team
  *
  * $Id$
  */
@@ -10,6 +11,7 @@
 #include "ircd.h"
 #include "send.h"
 #include "s_debug.h"
+#include "numeric.h"
 #include "s_log.h"
 #include "client.h"   
 #include "memory.h"
@@ -114,3 +116,14 @@ int find_resv(char *name, int type)
 
   return 1;
 }
+
+void report_resv(struct Client *source_p)
+{
+  struct Resv *resv_p;
+
+  for(resv_p = ResvList; resv_p; resv_p = resv_p->next)
+    sendto_one(source_p, form_str(RPL_STATSQLINE),
+               me.name, source_p->name,
+	       resv_p->name, resv_p->reason, "*", "*");
+	      
+}	      

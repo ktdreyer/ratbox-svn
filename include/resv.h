@@ -46,6 +46,7 @@ extern struct Resv *create_resv(char *, char *, int, int);
 extern int delete_resv(struct Resv *);
 extern int clear_conf_resv();
 extern int find_resv(char *name, int type);
+extern void report_resv(struct Client *);
 
 #endif  /* INCLUDED_hash_h */
 

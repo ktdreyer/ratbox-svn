@@ -50,6 +50,7 @@
 #include "parse.h"
 #include "modules.h"
 #include "hook.h"
+#include "resv.h"  /* report_resv */
 
 #include <string.h>
 
@@ -114,7 +115,7 @@ static void stats_messages(struct Client *);
 static void stats_oper(struct Client *);
 static void stats_operedup(struct Client *);
 static void stats_ports(struct Client *);
-static void stats_quarantine(struct Client *);
+static void stats_resv(struct Client *);
 static void stats_usage(struct Client *);
 static void stats_tstats(struct Client *);
 static void stats_uptime(struct Client *);
@@ -159,8 +160,8 @@ static struct StatsStruct stats_cmd_table[] =
   { 'O',	stats_oper,		0,	0,	},
   { 'p',	stats_operedup,		0,	0,	},
   { 'P',	stats_ports,		1,	0,	},
-  { 'q',	stats_quarantine,	1,	0,	},
-  { 'Q',	stats_quarantine,	1,	0,	},
+  { 'q',	stats_resv,		1,	0,	},
+  { 'Q',	stats_resv,		1,	0,	},
   { 'r',	stats_usage,		1,	0,	},
   { 'R',	stats_usage,		1,	0,	},
   { 't',	stats_tstats,		1,	0,	},
@@ -186,8 +187,7 @@ static struct StatsStruct stats_cmd_table[] =
  *      parv[2] = (if present) server/mask in stats L
  * 
  * This will search the tables for the appropriate stats letter/command,
- * if found execute it.  One function, for opers and users, although it 
- * could possibly be split up..
+ * if found execute it.  
  */
 
 static void m_stats(struct Client *client_p, struct Client *source_p,
@@ -407,9 +407,9 @@ static void stats_ports(struct Client *client_p)
   show_ports(client_p);
 }
 
-static void stats_quarantine(struct Client *client_p)
+static void stats_resv(struct Client *client_p)
 {
-  report_qlines(client_p);
+  report_resv(client_p);
 }
 
 static void stats_usage(struct Client *client_p)
