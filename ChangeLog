@@ -1,3 +1,21 @@
+leeh        2003/08/11 20:10:54 EDT	(20030812_0)
+
+  Modified files:
+    include              s_user.h 
+    modules/core         m_nick.c m_server.c 
+    src                  s_user.c 
+  Log:
+  - heres the code for handling SID/UID commands.
+    register_client() is kinda umm.. horrible :P
+  
+  Revision  Changes    Path
+  7.26      +3 -3      ircd-ratbox/include/s_user.h
+  1.125     +310 -415  ircd-ratbox/modules/core/m_nick.c
+  1.118     +172 -4    ircd-ratbox/modules/core/m_server.c
+  7.281     +1 -121    ircd-ratbox/src/s_user.c
+
+
+
 leeh        2003/08/11 16:51:58 EDT	(20030811_9)
 
   Modified files:
