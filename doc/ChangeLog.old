@@ -1,3 +1,11 @@
+*** 20010119_1 by db
+- committed androsyn' fix for m_message.c non ops should not be able to
+  message @#
+
+- cleaned up m_kill.c a bit I hope... users should see just kill reasons.
+
+
+
 *** 20010118_20 by db
 - fixed warped logic in m_stats.c, didn't allow stats L of anything
 
