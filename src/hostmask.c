@@ -707,8 +707,11 @@ report_auth(struct Client *client_p)
       {
         aconf = arec->aconf;
 
-        if (!(MyConnect(client_p) && IsOper(client_p)) &&
-            IsConfDoSpoofIp(aconf))
+#ifndef HIDE_SPOOF_IPS
+        if (!IsOperAdmin(client_p) && IsConfDoSpoofIp(aconf))
+#else
+        if(IsConfDoSpoofIp(aconf))
+#endif
           continue;
 
         get_printable_conf(aconf, &name, &host, &pass, &user, &port,
