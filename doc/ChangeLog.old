@@ -1,3 +1,6 @@
+*** 20001227_35 by davidt
+Oops, do not use sendto_ll_.. for sjoin
+
 *** 20001227_34 by davidt
 I remember fixing this... wtf
 
