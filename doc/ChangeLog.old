@@ -1,3 +1,15 @@
+androsyn    2002/05/24 21:38:11 EDT	(20020525_7)
+
+  Modified files:
+    include              modules.h 
+  Log:
+  Added missing prototypes..
+  
+  Revision  Changes    Path
+  7.31      +2 -1      ircd-hybrid-7/include/modules.h
+
+
+
 androsyn    2002/05/24 21:35:11 EDT	(20020525_6)
 
   Modified files:
