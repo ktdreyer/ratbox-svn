@@ -1,3 +1,15 @@
+leeh        2002/06/17 08:32:59 EDT	(20020617_2)
+
+  Modified files:
+    src                  tools.c 
+  Log:
+  - aaaaaand in tools.c
+  
+  Revision  Changes    Path
+  7.22      +0 -1      ircd-hybrid-7/src/tools.c
+
+
+
 db          2002/06/16 22:57:03 EDT	(20020617_1)
 
   Modified files:
