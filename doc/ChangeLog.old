@@ -1,3 +1,7 @@
+*** 20001230_19 by lusky
+- check for strings.h for bzero() on solaris
+
+
 *** 20001230_18 by lusky
 - have autoconf detect whether -export-dynamic is needed for ld
 
