@@ -1,3 +1,8 @@
+*** 20001014_4 by db
+- moved show_vchans and find_vchan into vchannel.c
+
+
+
 *** 20001014_3 by db
 - mod Makefile.in to  add new vchannel.c
 - added new vchannel.c for vchan support
