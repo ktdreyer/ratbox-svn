@@ -31,6 +31,9 @@
 #define ADNS_INTERNAL_H_INCLUDED
 
 #include "config.h"
+#ifndef __GNUC__
+#define inline
+#endif
 typedef unsigned char byte;
 
 #include <stdarg.h>
