@@ -1,3 +1,16 @@
+wcampbel    2001/12/21 22:09:54 EST	(20011222_0)
+
+  Modified files:
+    doc                  ircd.8 
+  Log:
+  Update to the manpage, HTML version available:
+  http://kabel.pp.ru/sgml/ircd.8.html
+  
+  Revision  Changes    Path
+  1.5       +0 -3      ircd-hybrid-7/doc/ircd.8
+
+
+
 wcampbel    2001/12/20 23:57:46 EST	(20011221_1)
 
   Modified files:
