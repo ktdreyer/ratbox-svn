@@ -300,7 +300,7 @@ void count_memory(struct Client *cptr,char *nick)
   for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
     {
       ch++;
-      chm += (strlen(chptr->chname) + sizeof(aChannel));
+      chm += (strlen(chptr->chname) + sizeof(struct Channel));
       for (link = chptr->members; link; link = link->next)
         chu++;
       for (link = chptr->invites; link; link = link->next)

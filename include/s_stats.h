@@ -62,9 +62,7 @@ struct  ServerStatistics {
   unsigned int    is_abad; /* bad auth requests */
   unsigned int    is_udp; /* packets recv'd on udp port */
   unsigned int    is_loc; /* local connections made */
-#ifdef FLUD
   unsigned int    is_flud;        /* users/channels flood protected */
-#endif /* FLUD */
 };
 
 extern struct ServerStatistics* ServerStats;

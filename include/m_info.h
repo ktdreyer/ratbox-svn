@@ -39,17 +39,8 @@ typedef struct Information
 
 Info MyInformation[] = {
 
-#ifdef ANTI_DRONE_FLOOD
   { "ANTI_DRONE_FLOOD", "ON", 0, "Anti Flood for Drones" },
-#else
-  { "ANTI_DRONE_FLOOD", "OFF", 0, "Anti Flood for Drones" },
-#endif /* ANTI_DRONE_FLOOD */
-
-#ifdef ANTI_SPAMBOT
   { "ANTI_SPAMBOT", "ON", 0, "Spam Bot Detection" },
-#else
-  { "ANTI_SPAMBOT", "OFF", 0, "Spam Bot Detection" },
-#endif /* ANTI_SPAMBOT */
 
 #ifdef ANTI_SPAMBOT_WARN_ONLY
   { "ANTI_SPAMBOT_WARN_ONLY", "ON", 0, "Warn Operators of Possible Spam Bots" },
@@ -119,12 +110,6 @@ Info MyInformation[] = {
   { "DEBUGMODE", "OFF", 0, "Debugging Mode" },
 #endif /* DEBUGMODE */
 
-#ifdef DEFAULT_SERVER_SPLIT_RECOVERY_TIME
-  { "DEFAULT_SERVER_SPLIT_RECOVERY_TIME", "", DEFAULT_SERVER_SPLIT_RECOVERY_TIME, "Time to Delay Split Status After Resynch" },
-#else
-  { "DEFAULT_SERVER_SPLIT_RECOVERY_TIME", "NONE", 0, "Time to Delay Split Status After Resynch" },
-#endif /* DEFAULT_SERVER_SPLIT_RECOVERY_TIME */
-
 #ifdef DNS_DEBUG
   { "DNS_DEBUG", "ON", 0, "Dns Debugging" },
 #else
@@ -149,29 +134,13 @@ Info MyInformation[] = {
   { "DLPATH", "NONE", 0, "Path to D-line File" },
 #endif /* DLPATH */
 
-#ifdef FLUD
   { "FLUD", "ON", 0, "CTCP Flood Detection and Protection" },
-#else
-  { "FLUD", "OFF", 0, "CTCP Flood Detection and Protection" },
-#endif /* FLUD */
 
-#ifdef FLUD_NUM
   { "FLUD_NUM", "", FLUD_NUM, "Number of Messages to Trip Alarm" },
-#else
-  { "FLUD_NUM", "NONE", 0, "Number of Messages to Trip Alarm" },
-#endif /* FLUD_NUM */
 
-#ifdef FLUD_TIME
   { "FLUD_TIME", "", FLUD_TIME, "Time Window in which a Flud occurs" },
-#else
-  { "FLUD_TIME", "NONE", 0, "Time Window in which a Flud occurs" },
-#endif /* FLUD_TIME */
 
-#ifdef FLUD_BLOCK
   { "FLUD_BLOCK", "", FLUD_BLOCK, "Seconds to Block Fluds" },
-#else
-  { "FLUD_BLOCK", "NONE", 0, "Seconds to Block Fluds" },
-#endif /* FLUD_BLOCK */
 
 #ifdef GLINE_TIME
   { "GLINE_TIME", "", GLINE_TIME, "Expire Time for Glines" },
@@ -199,17 +168,8 @@ Info MyInformation[] = {
   { "HYBRID_SOMAXCONN", "", HYBRID_SOMAXCONN, "Maximum Queue Length of Pending Connections" },
 #endif /* SOMAXCONN */
 
-#ifdef IDLE_CHECK
   { "IDLE_CHECK", "ON", 0, "Check Clients for Excessive Idleness" },
-#else
-  { "IDLE_CHECK", "OFF", 0, "Check Clients for Excessive Idleness" },
-#endif /* IDLE_CHECK */
-
-#ifdef IDLE_TIME
   { "IDLE_TIME", "", IDLE_TIME, "Delay (in minutes) before a client is considered idle" },
-#else
-  { "IDLE_TIME", "OFF", 0, "Delay (in minutes) before a client is considered idle" },
-#endif /* IDLE_TIME */
 
 #ifdef IDLE_FROM_MSG
   { "IDLE_FROM_MSG", "ON", 0, "Reset idle time after a PRIVMSG" },
@@ -220,15 +180,7 @@ Info MyInformation[] = {
   { "INIT_MAXCLIENTS", "", INIT_MAXCLIENTS, "Maximum Clients" },
   { "INITIAL_DBUFS", "", INITIAL_DBUFS, "Number of Dbufs to PreAllocate" },
 
-#ifdef ANTI_SPAMBOT
   { "JOIN_LEAVE_COUNT_EXPIRE_TIME", "", JOIN_LEAVE_COUNT_EXPIRE_TIME, "Anti SpamBot Parameter" },
-#endif /* ANTI_SPAMBOT */
-
-#ifdef JUPE_CHANNEL
-  { "JUPE_CHANNEL", "ON", 0, "Locally jupe channels" },
-#else
-  { "JUPE_CHANNEL", "OFF", 0, "Locally jupe channels" },
-#endif /* JUPE_CHANNEL */
 
   { "KILLCHASETIMELIMIT", "", KILLCHASETIMELIMIT, "Nick Change Tracker for KILL" },
 
@@ -244,23 +196,13 @@ Info MyInformation[] = {
   { "LIMIT_UH", "OFF", 0, "Make Y: lines limit username instead of hostname" },
 #endif /* LIMIT_UH */
 
-#ifdef LITTLE_I_LINES
   { "LITTLE_I_LINES", "ON", 0, "\"i\" lines prevent matching clients from channel opping" },
-#else
-  { "LITTLE_I_LINES", "OFF", 0, "\"i\" lines prevent matching clients from channel opping" },
-#endif /* LITTLE_I_LINES */
 
 #ifdef LPATH
   { "LPATH", LPATH, 0, "Path to Log File" },
 #else
   { "LPATH", "NONE", 0, "Path to Log File" },
 #endif /* LPATH */
-
-#ifdef LTRACE
-  { "LTRACE", "ON", 0, "Limited Trace Output" },
-#else
-  { "LTRACE", "OFF", 0, "Limited Trace Output" },
-#endif /* LTRACE */
 
 #ifdef LWALLOPS
   { "LWALLOPS", "ON", 0, "Local Wallops Support" },
@@ -270,16 +212,12 @@ Info MyInformation[] = {
 
   { "MAX_BUFFER", "", MAX_BUFFER, "Maximum Buffer Connections Allowed" },
 
-#ifdef ANTI_SPAMBOT
   { "MAX_JOIN_LEAVE_COUNT", "", MAX_JOIN_LEAVE_COUNT, "Anti SpamBot Parameter" },
-#endif /* ANTI_SPAMBOT */
 
   { "MAXCHANNELSPERUSER", "", MAXCHANNELSPERUSER, "Maximum Channels per User" },
   { "MAXIMUM_LINKS", "", MAXIMUM_LINKS, "Maximum Links for Class 0" },
 
-#ifdef ANTI_SPAMBOT
   { "MIN_JOIN_LEAVE_TIME", "", MIN_JOIN_LEAVE_TIME, "Anti SpamBot Parameter" },
-#endif /* ANTI_SPAMBOT */
 
 #ifdef MPATH
   { "MPATH", MPATH, 0, "Path to MOTD File" },
@@ -289,29 +227,11 @@ Info MyInformation[] = {
 
   { "NICKNAMEHISTORYLENGTH", "", NICKNAMEHISTORYLENGTH, "Size of WHOWAS Array" },
 
-#ifdef NO_CHANOPS_WHEN_SPLIT
-  { "NO_CHANOPS_WHEN_SPLIT", "ON", 0, "Do not Allow Channel Ops During a NetSplit" },
-#else
-  { "NO_CHANOPS_WHEN_SPLIT", "OFF", 0, "Do not Allow Channel Ops During a NetSplit" },
-#endif /* NO_CHANOPS_WHEN_SPLIT */
-
 #ifdef NO_DEFAULT_INVISIBLE
   { "NO_DEFAULT_INVISIBLE", "ON", 0, "Do not Give Clients +i Mode Upon Connection" },
 #else
   { "NO_DEFAULT_INVISIBLE", "OFF", 0, "Do not Give Clients +i Mode Upon Connection" },
 #endif /* NO_DEFAULT_INVISIBLE */
-
-#ifdef NO_JOIN_ON_SPLIT
-  { "NO_JOIN_ON_SPLIT", "ON", 0, "Users Cannot Join Channels Present before a NetSplit" },
-#else
-  { "NO_JOIN_ON_SPLIT", "OFF", 0, "Users Cannot Join Channels Present before a NetSplit" },
-#endif /* NO_JOIN_ON_SPLIT */
-
-#ifdef NO_JOIN_ON_SPLIT_SIMPLE
-  { "NO_JOIN_ON_SPLIT_SIMPLE", "ON", 0, "Users Cannot Join Channels During a NetSplit" },
-#else
-  { "NO_JOIN_ON_SPLIT_SIMPLE", "OFF", 0, "Users Cannot Join Channels During a NetSplit" },
-#endif /* NO_JOIN_ON_SPLIT_SIMPLE */
 
 #ifdef NO_OPER_FLOOD
   { "NO_OPER_FLOOD", "ON", 0, "Disable Flood Control for Operators" },
@@ -343,21 +263,13 @@ Info MyInformation[] = {
   { "OPER_IDLE", "OFF", 0, "Allow Operators to remain idle" },
 #endif /* OPER_IDLE */
 
-#ifdef ANTI_SPAMBOT
   { "OPER_SPAM_COUNTDOWN", "", OPER_SPAM_COUNTDOWN, "Anti SpamBot Parameter" },
-#endif /* ANTI_SPAMBOT */
 
 #ifdef PPATH
   { "PPATH", PPATH, 0, "Path to Pid File" },
 #else
   { "PPATH", "NONE", 0, "Path to Pid File" },
 #endif /* PPATH */
-
-#ifdef PRESERVE_CHANNEL_ON_SPLIT
-  { "PRESERVE_CHANNEL_ON_SPLIT", "ON", 0, "Preserve Channel Modes During a NetSplit" },
-#else
-  { "PRESERVE_CHANNEL_ON_SPLIT", "OFF", 0, "Preserve Channel Modes During a NetSplit" },
-#endif /* PRESERVE_CHANNEL_ON_SPLIT */
 
 #ifdef REJECT_HOLD
   { "REJECT_HOLD", "ON", 0, "Do not Dump a K-lined Client immediately" },
@@ -413,20 +325,6 @@ Info MyInformation[] = {
   { "SPATH", "NONE", 0, "Path to Server Executable" },
 #endif /* SPATH */
 
-#ifdef SPLIT_PONG
-  { "SPLIT_PONG", "ON", 0, "Send a Special PING to Determine end of a NetSplit" },
-#else
-  { "SPLIT_PONG", "OFF", 0, "Send a Special PING to Determine end of a NetSplit" },
-#endif /* SPLIT_PONG */
-
-#ifdef SPLIT_SMALLNET_SIZE
-  { "SPLIT_SMALLNET_SIZE", "", SPLIT_SMALLNET_SIZE, "Minimum Servers that Constitutes a NetSplit" },
-#endif /* SPLIT_SMALLNET_SIZE */
-
-#ifdef SPLIT_SMALLNET_USER_SIZE
-  { "SPLIT_SMALLNET_USER_SIZE", "", SPLIT_SMALLNET_USER_SIZE, "Normal amount of Users" },
-#endif /* SPLIT_SMALLNET_USER_SIZE */
-
 #ifdef STATS_NOTICE
   { "STATS_NOTICE", "ON", 0, "Show Operators when a Client uses STATS" },
 #else
@@ -439,12 +337,6 @@ Info MyInformation[] = {
 
   { "TS_MAX_DELTA_DEFAULT", "", TS_MAX_DELTA_DEFAULT, "Maximum Allowed TS Delta from another Server" },
   { "TS_WARN_DELTA_DEFAULT", "", TS_WARN_DELTA_DEFAULT, "Maximum TS Delta before Sending Warning" },
-
-#ifdef USE_IP_I_LINE_FIRST
-  { "USE_IP_I_LINE_FIRST", "ON", 0, "Search IP Ilines First" },
-#else
-  { "USE_IP_I_LINE_FIRST", "OFF", 0, "Search IP Ilines First" },
-#endif /* USE_IP_I_LINE_FIRST */
 
 #ifdef USE_RCS
   { "USE_RCS", "ON", 0, "Use \"ci\" to Keep RCS Control" },

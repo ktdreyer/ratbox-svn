@@ -84,11 +84,9 @@ extern int         BH_CurrentLine;
                           BH_CurrentLine = __LINE__;\
                           _free_user((x), (y)); }
 
-#ifdef FLUD
 #define free_fludbot(x) { BH_CurrentFile = __FILE__;\
                           BH_CurrentLine = __LINE__;\
                           BlockHeapFree(free_fludbots, (x)); }
-#endif
 
 #else
 #define free_client(x) _free_client((x))
