@@ -254,10 +254,62 @@ static void m_who(struct Client *client_p,
       sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], mask );
       return;
     }
-
+  /* '/who 0' */
+  if ((*(mask + 1) == '\0') && (*mask == '0'))
+  {
+    mask = NULL;
+  }
   /* Wasn't a nick, wasn't a channel, wasn't a '*' so ... */
   who_global(source_p, mask, server_oper);
   sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], mask );
+}
+
+/* who_common_channel
+ * inputs	- pointer to client requesting who
+ * 		- pointer to channel member chain.
+ *		- char * mask to match
+ *		- int if oper on a server or not
+ *		- pointer to int maxmatches
+ * output	- NONE
+ * side effects - lists matching clients on specified channel,
+ * 		  marks matched clients.
+ *
+ */
+static void who_common_channel(struct Client *source_p,dlink_list chain,
+		char *mask,int server_oper, int *maxmatches)
+{
+  dlink_node *clp;
+ struct Client *target_p;
+
+  for (clp = chain.head; clp; clp = clp->next)
+   {
+     target_p = clp->data;
+
+     if (!IsInvisible(target_p) || IsMarked(target_p))
+       continue;
+
+     if (server_oper && !IsOper(target_p))
+       continue;
+
+     SetMark(target_p);
+
+     if (!mask ||
+          match(mask, target_p->name) || match(mask, target_p->username) ||
+          match(mask, target_p->host) || match(mask, target_p->user->server) ||
+	  match(mask, target_p->info))
+     {
+		
+       do_who(source_p, target_p, NULL, "");
+
+       if (*maxmatches > 0)
+       {
+         --(*maxmatches);
+         if(*maxmatches == 0)
+            return;
+       }
+
+     }
+   }
 }
 
 /*
@@ -274,92 +326,52 @@ static void m_who(struct Client *client_p,
 static void who_global(struct Client *source_p,char *mask, int server_oper)
 {
   struct Channel *chptr=NULL;
-  struct Channel *bchan;
   struct Client *target_p;
   dlink_node  *lp;
-  char  *chname=NULL;
-  int   showperson;
-  int   member;
-  int   isinvis;
   int   maxmatches = 500;
-  char  flags[MAX_SUBLISTS][2];
 
+  /* first, list all matching INvisible clients on common channels */
+  for (lp = source_p->user->channel.head; lp; lp = lp->next)
+  {
+     chptr = lp->data;
+     who_common_channel(source_p,chptr->chanops,mask,server_oper,&maxmatches);
+     who_common_channel(source_p,chptr->halfops,mask,server_oper,&maxmatches);
+     who_common_channel(source_p,chptr->voiced,mask,server_oper,&maxmatches);
+     who_common_channel(source_p,chptr->peons,mask,server_oper,&maxmatches);
+  }
+
+  /* second, list all matching visible clients */
   for (target_p = GlobalClientList; target_p; target_p = target_p->next)
+  {
+    if (!IsPerson(target_p))
+      continue;
+
+    if (IsInvisible(target_p))
     {
-      if (!IsPerson(target_p))
-        continue;
-      if (server_oper && !IsOper(target_p))
-        continue;
-      
-      showperson = NO;
-      /*
-       * Show user if they are on the same channel, or not
-       * invisible and on a non secret channel (if any).
-       * Do this before brute force match on all relevant fields
-       * since these are less cpu intensive (I hope :-) and should
-       * provide better/more shortcuts - avalon
-       */
-      isinvis = IsInvisible(target_p);
-      for (lp = target_p->user->channel.head; lp; lp = lp->next)
-        {
-          chptr = lp->data;
-	  chname = chptr->chname;
-          member = IsMember(source_p, chptr);
-          if (isinvis && !member)
-            continue;
-          if (member || (!isinvis && PubChannel(chptr)))
-            {
-              showperson = YES;
-              break;
-            }
-          if (HiddenChannel(chptr) && !SecretChannel(chptr) &&
-              !isinvis)
-            showperson = YES;
-        }
-
-      if ((target_p->user->channel.head == NULL) && !isinvis)
-	showperson = YES;
-
-      if (showperson &&
-	  (!mask ||
-	   match(mask, target_p->name) ||
-	   match(mask, target_p->username) ||
-	   match(mask, target_p->host) ||
-	   match(mask, target_p->user->server) ||
-	   match(mask, target_p->info)))
-	{
-	  if (chptr != NULL)
-	    {
-	      if (IsVchan(chptr))
-		{
-		  bchan = find_bchan (chptr);
-		  if (bchan != NULL)
-		    chname = bchan->chname;
-		}
-
-	      /* jdc -- Check is_any_op() for +o > +h > +v priorities */
-	      set_channel_mode_flags( flags, chptr, source_p );
-
-	      if (is_chan_op(chptr,target_p))
-		do_who(source_p, target_p, chname, flags[0]);
-	      else if(is_half_op(chptr,target_p))
-		do_who(source_p, target_p, chname, flags[1]);
-	      else if(is_voiced(chptr,target_p))
-		do_who(source_p, target_p, chname, flags[2]);
-	      else 
-		do_who(source_p, target_p, chname, "");
-	    }
-	  else
-	    do_who(source_p, target_p, NULL, "");
-
-	  if (maxmatches > 0)
-	    {
-	      --maxmatches;
-	      if( maxmatches == 0 )
-		return;
-	    }
-	}
+      ClearMark(target_p);
+      continue;
     }
+
+    if (server_oper && !IsOper(target_p))
+      continue;
+
+    if (!mask ||
+        match(mask, target_p->name) || match(mask, target_p->username) ||
+	match(mask, target_p->host) || match(mask, target_p->user->server) ||
+	match(mask, target_p->info))
+    {
+		
+      do_who(source_p, target_p, NULL, "");
+      if (maxmatches > 0)
+      {
+        --maxmatches;
+        if( maxmatches == 0 )
+  	  return;
+      }
+
+    }
+
+  }
 }
 
 
