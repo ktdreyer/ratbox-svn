@@ -250,19 +250,19 @@ static void ms_lljoin(struct Client *client_p,
         }
 
       sendto_one(uplink,
-		 ":%s SJOIN %u %s + :@%s", me.name,
+		 ":%s SJOIN %lu %s + :@%s", me.name,
 		 chptr->channelts, chptr->chname, nick);
     }
   else if ((flags == CHFL_HALFOP) && (IsCapable(uplink, CAP_HOPS)))
     {
       sendto_one(uplink,
-		 ":%s SJOIN %u %s + :%%%s", me.name,
+		 ":%s SJOIN %lu %s + :%%%s", me.name,
 		 chptr->channelts, chptr->chname, nick);      
     }
   else
     {
       sendto_one(uplink,
-		 ":%s SJOIN %u %s + :%s", me.name,
+		 ":%s SJOIN %lu %s + :%s", me.name,
 		 chptr->channelts, chptr->chname, nick);
     }
 

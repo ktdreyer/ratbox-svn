@@ -284,7 +284,7 @@ static void m_join(struct Client *client_p,
             }
                   
 	  sendto_ll_channel_remote(chptr, client_p, source_p,
-				   ":%s SJOIN %u %s + :@%s",
+				   ":%s SJOIN %lu %s + :@%s",
 				   me.name,
 				   chptr->channelts,
 				   chptr->chname,
@@ -316,7 +316,7 @@ static void m_join(struct Client *client_p,
       else
 	{
 	  sendto_ll_channel_remote(chptr, client_p, source_p,
-				   ":%s SJOIN %u %s + :%s",
+				   ":%s SJOIN %lu %s + :%s",
 				   me.name,
 				   chptr->channelts,
 				   chptr->chname,
