@@ -1,3 +1,7 @@
+*** 20010911_6 by habeeb
+for previous commit..
+
+
 *** 20010911_5 by habeeb
 This changes event to a static table.  It is not complete so please finish:
 *Add eventDelete code that will basically set the active flag to 0
