@@ -1,3 +1,15 @@
+androsyn    2004/09/27 14:44:41 EDT	(20040927_1)
+
+  Modified files:
+    tools                mkpasswd.c 
+  Log:
+  have mkpasswd ask for the password to be repeated
+  
+  Revision  Changes    Path
+  7.15      +30 -2     ircd-ratbox/tools/mkpasswd.c
+
+
+
 androsyn    2004/09/27 10:16:53 EDT	(20040927_0)
 
   Modified files:
