@@ -1,3 +1,8 @@
+*** 20000105_15 by db
+- yet another hidden HUB in .h
+
+
+
 *** 20000105_14 by db
 - removed more pesky #ifdef HUB hidden in .h files
 
