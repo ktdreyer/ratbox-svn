@@ -1,3 +1,10 @@
+*** 20010301_13 by db
+- missing #ifdef USE_SYSLOG on #include
+  replaced this for now  /* XXX #ifdef HAVE_SYSLOG_H */
+  Should this be in configure?
+
+
+
 *** 20010301_12 by lusky
 - revved patchlevel to beta2
 
