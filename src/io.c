@@ -160,8 +160,13 @@ read_io(void)
 				if(server_p->client_p != NULL && 
 				   IsDead(server_p->client_p))
 				{
-					slog_send("Connection to server %s lost: (Server exited)",
-						server_p->name);
+					slog("Connection to server %s lost: "
+                                             "(Server exited)",
+                                             server_p->name);
+					sendto_all(UMODE_SERVER,
+                                                   "Connection to server %s "
+                                                   "lost: (Server exited)",
+                                                   server_p->name);
 					(server_p->io_close)(server_p);
 				}
 
@@ -169,8 +174,11 @@ read_io(void)
 				else if((server_p->flags & CONN_CONNECTING) &&
 					((server_p->first_time + 30) <= CURRENT_TIME))
 				{
-					slog_send("Connection to server %s timed out",
-						server_p->name);
+					slog("Connection to server %s timed out",
+			                     server_p->name);
+					sendto_all(UMODE_SERVER,
+                                                   "Connection to server %s timed out",
+                                                   server_p->name);
 					(server_p->io_close)(server_p);
 				}
 
@@ -179,9 +187,13 @@ read_io(void)
                                         ((server_p->last_time + PING_TIME*2) <=
                                                         CURRENT_TIME))
                                 {
-                                        slog_send("Connection to server %s "
-                                                  "lost: (Ping timeout)",
-                                                  server_p->name);
+                                        slog("Connection to server %s "
+                                             "lost: (Ping timeout)",
+                                             server_p->name);
+                                        sendto_all(UMODE_SERVER,
+                                                   "Connection to server %s "
+                                                   "lost: (Ping timeout)",
+                                                   server_p->name);
                                         (server_p->io_close)(server_p);
                                 }
 
@@ -377,8 +389,10 @@ connect_to_server(void *target_server)
         else
                 conf_p = target_server;
 
-	slog_send("Connection to server %s/%d activated",
-                  conf_p->name, conf_p->port);
+	slog("Connection to server %s/%d activated", 
+             conf_p->name, conf_p->port);
+	sendto_all(UMODE_SERVER, "Connection to server %s/%d activated",
+                   conf_p->name, conf_p->port);
 
 	serv_fd = sock_open(conf_p->host, conf_p->port, conf_p->vhost, IO_HOST);
 
@@ -440,7 +454,9 @@ signon_server(struct connection_entry *conn_p)
 	if(conn_p->flags & CONN_DEAD)
 		return -1;
 
-	slog_send("Connection to server %s completed", conn_p->name);
+	slog("Connection to server %s completed", conn_p->name);
+	sendto_all(UMODE_SERVER, "Connection to server %s completed",
+                   conn_p->name);
 
 	sendto_server("CAPAB :QS TB");
 	sendto_server("SERVER %s 1 :%s", MYNAME, config_file.my_gecos);
@@ -457,13 +473,13 @@ signon_client(struct connection_entry *conn_p)
 	conn_p->io_write = write_sendq;
 
 	/* ok, if connect() failed, this will cause an error.. */
-	sendto_connection(conn_p, "Welcome to %s, version ratbox-services-%s",
-			  MYNAME, RSERV_VERSION);
+	sendto_one(conn_p, "Welcome to %s, version ratbox-services-%s",
+		   MYNAME, RSERV_VERSION);
 
 	if(conn_p->flags & CONN_DEAD)
 		return -1;
 
-        sendto_connection(conn_p, "Please login via .login <username> <password>");
+        sendto_one(conn_p, "Please login via .login <username> <password>");
 
 	return 1;
 }
@@ -481,11 +497,23 @@ read_server(struct connection_entry *conn_p)
 		if(conn_p == server_p)
 		{
 			if(ignore_errno(errno))
-				slog_send("Connection to server %s lost",
-					conn_p->name);
+                        {
+				slog("Connection to server %s lost",
+                                     conn_p->name);
+				sendto_all(UMODE_SERVER,
+                                           "Connection to server %s lost",
+				  	   conn_p->name);
+                        }
 			else
-				slog_send("Connection to server %s lost: (Read error: %s)",
-					conn_p->name, strerror(errno));
+                        {
+				slog("Connection to server %s lost: "
+                                     "(Read error: %s)",
+				     conn_p->name, strerror(errno));
+				sendto_all(UMODE_SERVER,
+                                           "Connection to server %s lost: "
+                                           "(Read error: %s)",
+					   conn_p->name, strerror(errno));
+                        }
 		}
 
 		(conn_p->io_close)(conn_p);
@@ -658,7 +686,23 @@ parse_client(struct connection_entry *conn_p, char *buf, int len)
 	parv[0] = conn_p->name;
 
 	if(*ch != '.')
+        {
+                if(conn_p->oper == NULL)
+                {
+                        sendto_one(conn_p, "You must .login first");
+                        return;
+                }
+
+                if(!IsUmodeChat(conn_p))
+                {
+                        sendto_one(conn_p, "You must '.flags +chat' first.");
+                        return;
+                }
+
+                sendto_all_butone(conn_p, UMODE_CHAT, "<%s> %s", 
+                                  conn_p->name, ch);
                 return;
+        }
 
         ch++;
 
@@ -708,14 +752,17 @@ sendto_server(const char *format, ...)
 
 	if(sock_write(server_p, buf, strlen(buf)) < 0)
 	{
-		slog_send("Connection to server %s lost: (Write error: %s)",
-			server_p->name, strerror(errno));
+		slog("Connection to server %s lost: (Write error: %s)",
+		     server_p->name, strerror(errno));
+		sendto_all(UMODE_SERVER,
+                           "Connection to server %s lost: (Write error: %s)",
+			   server_p->name, strerror(errno));
 		(server_p->io_close)(server_p);
 	}
 }
 
 void
-sendto_connection(struct connection_entry *conn_p, const char *format, ...)
+sendto_one(struct connection_entry *conn_p, const char *format, ...)
 {
 	char buf[BUFSIZE];
 	va_list args;
@@ -734,7 +781,7 @@ sendto_connection(struct connection_entry *conn_p, const char *format, ...)
 }
 
 void
-sendto_connections(const char *format, ...)
+sendto_all(int umode, const char *format, ...)
 {
         struct connection_entry *conn_p;
         char buf[BUFSIZE];
@@ -752,7 +799,40 @@ sendto_connections(const char *format, ...)
                 if(conn_p->oper == NULL)
                         continue;
 
-                sendto_connection(conn_p, "%s", buf);
+                if(umode && !(conn_p->flags & umode))
+                        continue;
+
+                sendto_one(conn_p, "%s", buf);
+        }
+}
+
+void
+sendto_all_butone(struct connection_entry *one, int umode,
+                  const char *format, ...)
+{
+        struct connection_entry *conn_p;
+        char buf[BUFSIZE];
+        dlink_node *ptr;
+        va_list args;
+
+        va_start(args, format);
+        vsnprintf(buf, sizeof(buf)-3, format, args);
+        va_end(args);
+
+        DLINK_FOREACH(ptr, connection_list.head)
+        {
+                conn_p = ptr->data;
+
+                if(conn_p->oper == NULL)
+                        continue;
+
+                if(conn_p == one)
+                        continue;
+
+                if(umode && !(conn_p->flags & umode))
+                        continue;
+
+                sendto_one(conn_p, "%s", buf);
         }
 }
 
@@ -854,8 +934,11 @@ sock_open(const char *host, int port, const char *vhost, int type)
 
 	if(fd < 0)
 	{
-		slog_send("Connection to %s/%d failed: (socket(): %s)",
-			host, port, strerror(errno));
+		slog("Connection to %s/%d failed: (socket(): %s)",
+		     host, port, strerror(errno));
+		sendto_all(UMODE_SERVER,
+                           "Connection to %s/%d failed: (socket(): %s)",
+			   host, port, strerror(errno));
 		return -1;
 	}
 
@@ -866,8 +949,11 @@ sock_open(const char *host, int port, const char *vhost, int type)
 
 	if(fcntl(fd, F_SETFL, flags) == -1)
 	{
-		slog_send("Connection to %s/%d failed: (fcntl(): %s)",
-			host, port, strerror(errno));
+		slog("Connection to %s/%d failed: (fcntl(): %s)",
+		     host, port, strerror(errno));
+		sendto_all(UMODE_SERVER,
+                           "Connection to %s/%d failed: (fcntl(): %s)",
+			   host, port, strerror(errno));
 		return -1;
 	}
 
@@ -889,8 +975,13 @@ sock_open(const char *host, int port, const char *vhost, int type)
 
 			if(bind(fd, (struct sockaddr *)&addr, sizeof(struct sockaddr)) < 0)
 			{
-				slog_send("Connection to %s/%d failed: (unable to bind to %s: %s)",
-					host, port, vhost, strerror(errno));
+				slog("Connection to %s/%d failed: "
+                                     "(unable to bind to %s: %s)",
+				     host, port, vhost, strerror(errno));
+				sendto_all(UMODE_SERVER,
+                                           "Connection to %s/%d failed: "
+                                           "(unable to bind to %s: %s)",
+				           host, port, vhost, strerror(errno));
 				return -1;
 			}
 		}
@@ -904,8 +995,13 @@ sock_open(const char *host, int port, const char *vhost, int type)
 	{
 		if((host_addr = gethostbyname(host)) == NULL)
 		{
-			slog_send("Connection to %s/%d failed: (unable to resolve: %s)",
-				host, port, host);
+			slog("Connection to %s/%d failed: "
+                             "(unable to resolve: %s)",
+			     host, port, host);
+			sendto_all(UMODE_SERVER,
+                                   "Connection to %s/%d failed: "
+                                   "(unable to resolve: %s)",
+				   host, port, host);
 			return -1;
 		}
 
@@ -979,6 +1075,8 @@ sock_close(struct connection_entry *conn_p)
 		if(server_p->client_p != NULL)
 			exit_client(server_p->client_p);
 	}
+        else if(conn_p->oper != NULL)
+                sendto_all(UMODE_AUTH, "%s has disconnected", conn_p->name);
 
 	close(conn_p->fd);
 	conn_p->fd = -1;

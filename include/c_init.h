@@ -14,10 +14,13 @@ extern struct scommand_handler mode_command;
 /* s_alis.c */
 extern void init_s_alis(void);
 
+/* u_flags.c */
+extern struct ucommand_handler flags_ucommand;
+
 /* u_help.c */
 extern struct ucommand_handler help_ucommand;
 
-/* stats.c */
+/* u_stats.c */
 extern struct ucommand_handler stats_ucommand;
 
 #endif

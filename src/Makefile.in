@@ -8,6 +8,7 @@ PREFIX=@prefix@
 BIN=rserv@EXEEXT@
 INCLUDES=-I ../include/
 LDFLAGS=
+LIBS=@LIBS@
 CFLAGS=-g -O0 -Wall -Werror -DPREFIX=\"$(PREFIX)\"
 
 MAKE = make
@@ -38,10 +39,10 @@ OBJS=$(SRCS:.c=.o)
 all: $(BIN)
 
 $(BIN): $(OBJS)
-	${CC} ${CFLAGS} ${LDFLAGS} -o $@ ${OBJS}
+	${CC} ${CFLAGS} ${LDFLAGS} -o $@ ${OBJS} $(LIBS)
 
 .c.o:
-	${CC} ${CFLAGS} $(INCLUDES) -c $<
+	${CC} $(INCLUDES) ${CFLAGS} -c $<
 
 build: $(BIN)
 
@@ -52,6 +53,6 @@ distclean: clean
 	$(RM) Makefile
 
 depend:
-	$(CC) -MM $(CFLAGS) $(INCLUDES) $(SRCS) > .depend
+	$(CC) -MM $(INCLUDES) $(CFLAGS) $(SRCS) > .depend
 
 include .depend

@@ -236,15 +236,15 @@ event_show(struct connection_entry *conn_p)
 {
         int i;
 
-        sendto_connection(conn_p, "Events: Function                    Next");
+        sendto_one(conn_p, "Events: Function                    Next");
         
         for(i = 0; i < MAX_EVENTS; i++)
         {
                 if(!event_table[i].active)
                         continue;
 
-                sendto_connection(conn_p, "        %-27s %-4d seconds",
-                                  event_table[i].name,
-                                  (event_table[i].when - CURRENT_TIME));
+                sendto_one(conn_p, "        %-27s %-4d seconds",
+                           event_table[i].name,
+                           (event_table[i].when - CURRENT_TIME));
         }
 }

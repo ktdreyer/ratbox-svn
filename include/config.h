@@ -22,6 +22,11 @@
 #define LOG_PATH	PREFIX "/zlogfile"
 
 
+/* CRYPT_PASSWORDS
+ * Controls whether passwords in O: in conf file are encrypted
+ */
+#define CRYPT_PASSWORDS
+ 
 /* RECONNECT_DELAY
  * The duration (in seconds) between reconnections to servers
  */

@@ -25,9 +25,8 @@ stats_opers(struct connection_entry *conn_p)
         {
                 conf_p = ptr->data;
 
-                sendto_connection(conn_p, "Oper %s %s@%s",
-                                  conf_p->name, conf_p->username,
-                                  conf_p->host);
+                sendto_one(conn_p, "Oper %s %s@%s",
+                           conf_p->name, conf_p->username, conf_p->host);
         }
 }
 
@@ -41,9 +40,9 @@ stats_servers(struct connection_entry *conn_p)
         {
                 conf_p = ptr->data;
 
-                sendto_connection(conn_p, "Server %s/%d %s",
-                                  conf_p->name, abs(conf_p->defport),
-                                  (conf_p->defport > 0) ? "A" : "");
+                sendto_one(conn_p, "Server %s/%d %s",
+                           conf_p->name, abs(conf_p->defport),
+                           (conf_p->defport > 0) ? "A" : "");
         }
 }
 
@@ -51,23 +50,22 @@ static void
 stats_uplink(struct connection_entry *conn_p)
 {
         if(server_p != NULL)
-                sendto_connection(conn_p, "Currently connected to %s Idle: %d "
-                                  "SendQ: %d Connected: %s",
-                                  server_p->name,
-                                  (CURRENT_TIME - server_p->last_time),
-                                  get_sendq(server_p),
-                                  get_duration(CURRENT_TIME -
-                                               server_p->first_time));
+                sendto_one(conn_p, "Currently connected to %s Idle: %d "
+                           "SendQ: %d Connected: %s",
+                           server_p->name,
+                           (CURRENT_TIME - server_p->last_time), 
+                           get_sendq(server_p),
+                           get_duration(CURRENT_TIME - server_p->first_time));
         else
-                sendto_connection(conn_p, "Currently disconnected");
+                sendto_one(conn_p, "Currently disconnected");
 }
 
 static void
 stats_uptime(struct connection_entry *conn_p)
 {
-        sendto_connection(conn_p, "%s up %s",
-                          MYNAME,
-                          get_duration(CURRENT_TIME - config_file.first_time));
+        sendto_one(conn_p, "%s up %s",
+                   MYNAME,
+                   get_duration(CURRENT_TIME - config_file.first_time));
 }
 
 static struct _stats_table stats_table[] =
@@ -86,7 +84,7 @@ u_stats(struct connection_entry *conn_p, char *parv[], int parc)
 
         if(parc < 2 || EmptyString(parv[1]))
         {
-                sendto_connection(conn_p, "Usage: .stats <type>");
+                sendto_one(conn_p, "Usage: .stats <type>");
                 return;
         }
 
@@ -99,6 +97,6 @@ u_stats(struct connection_entry *conn_p, char *parv[], int parc)
                 }
         }
 
-        sendto_connection(conn_p, "Unknown stats type: %s", parv[1]);
+        sendto_one(conn_p, "Unknown stats type: %s", parv[1]);
 };
         

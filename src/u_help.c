@@ -25,6 +25,14 @@ static const char *events_help[] = {
         "       Lists scheduled events",
         NULL
 };
+static const char *flags_help[] = {
+        "Usage: .flags [[+|-]flag]",
+        "       Lists current flags, or alters flag status:",
+        "       chat    - 'partyline' messages",
+        "       auth    - Oper connections/disconnections from services",
+        "       server  - Server connections/disconnections",
+        NULL
+};
 static const char *help_help[] = {
         "Usage: .help [topic]",
         "       Gives command list, or information on a specific command",
@@ -66,6 +74,7 @@ static struct _help_table help_table[] =
         { "connect",    connect_help    },
         { "die",        die_help        },
         { "events",     events_help     },
+        { "flags",      flags_help      },
         { "help",       help_help       },
         { "quit",       quit_help       },
         { "service",    service_help    },
@@ -81,7 +90,7 @@ print_help(struct connection_entry *conn_p, const char **help)
 
         while(help[x] != NULL)
         {
-                sendto_connection(conn_p, "%s", help[x]);
+                sendto_one(conn_p, "%s", help[x]);
                 x++;
         }
 }
@@ -96,7 +105,7 @@ u_help(struct connection_entry *conn_p, char *parv[], int parc)
                 const char *hparv[MAX_HELP_ROW];
                 int j = 0;
 
-                sendto_connection(conn_p, "Available commands:");
+                sendto_one(conn_p, "Available commands:");
 
                 for(i = 0; help_table[i].name[0] != '\0'; i++)
                 {
@@ -105,12 +114,12 @@ u_help(struct connection_entry *conn_p, char *parv[], int parc)
 
                         if(j >= MAX_HELP_ROW)
                         {
-                                sendto_connection(conn_p,
-                                                  "   %-8s %-8s %-8s %-8s "
-                                                  "%-8s %-8s %-8s %-8s",
-                                                  hparv[0], hparv[1], hparv[2],
-                                                  hparv[3], hparv[4], hparv[5],
-                                                  hparv[6], hparv[7]);
+                                sendto_one(conn_p,
+                                           "   %-8s %-8s %-8s %-8s "
+                                           "%-8s %-8s %-8s %-8s",
+                                           hparv[0], hparv[1], hparv[2],
+                                           hparv[3], hparv[4], hparv[5],
+                                           hparv[6], hparv[7]);
                                 j = 0;
                         }
                 }
@@ -125,11 +134,10 @@ u_help(struct connection_entry *conn_p, char *parv[], int parc)
                                 p += sprintf(p, "%-8s ", hparv[i]);
                         }
 
-                        sendto_connection(conn_p, "   %s", buf);
+                        sendto_one(conn_p, "   %s", buf);
                 }
 
-                sendto_connection(conn_p, "For more information see "
-                                  ".help <command>");
+                sendto_one(conn_p, "For more information see .help <command>");
                 return;
         }
 
@@ -142,5 +150,5 @@ u_help(struct connection_entry *conn_p, char *parv[], int parc)
                 }
         }
 
-        sendto_connection(conn_p, "Unknown help topic: %s", parv[2]);
+        sendto_one(conn_p, "Unknown help topic: %s", parv[2]);
 }      

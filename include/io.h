@@ -37,10 +37,19 @@ struct connection_entry
 extern struct connection_entry *server_p;
 extern dlink_list connection_list;
 
-#define CONN_CONNECTING		0x001
-#define CONN_DEAD		0x002
-#define CONN_SENTPING           0x004
-#define FLAGS_UNTERMINATED	0x010
+#define CONN_CONNECTING		0x0001
+#define CONN_DEAD		0x0002
+#define CONN_SENTPING           0x0004
+#define FLAGS_UNTERMINATED	0x0010
+
+#define UMODE_CHAT              0x1000
+#define UMODE_AUTH              0x2000
+#define UMODE_SERVER            0x4000
+
+#define UMODE_ALL               (UMODE_CHAT|UMODE_AUTH|UMODE_SERVER)
+#define UMODE_DEFAULT           UMODE_ALL
+
+#define IsUmodeChat(x)          ((x)->flags & UMODE_CHAT)
 
 extern void read_io(void);
 
@@ -48,8 +57,10 @@ extern void connect_to_server(void *unused);
 extern void connect_to_client(struct client *client_p, const char *host, int port);
 
 extern void sendto_server(const char *format, ...);
-extern void sendto_connection(struct connection_entry *, const char *format, ...);
-extern void sendto_connections(const char *format, ...);
+extern void sendto_one(struct connection_entry *, const char *format, ...);
+extern void sendto_all(int umode, const char *format, ...);
+extern void sendto_all_butone(struct connection_entry *, int umode, 
+                              const char *format, ...);
 
 extern int sock_open(const char *host, int port, const char *vhost, int type);
 extern void sock_close(struct connection_entry *conn_p);

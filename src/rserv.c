@@ -199,6 +199,7 @@ main(int argc, char *argv[])
 	add_scommand_handler(&mode_command);
 	add_scommand_handler(&privmsg_command);
 
+        add_ucommand_handler(&flags_ucommand);
         add_ucommand_handler(&help_ucommand);
         add_ucommand_handler(&stats_ucommand);
 
