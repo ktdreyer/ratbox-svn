@@ -1,3 +1,11 @@
+*** 20001028_7 by adrian
+
+
+Neatening up the formatting a little bit. There's no concept of 'valid
+callback' here in this codebase.
+
+
+
 *** 20001028_6 by db
 - typo in s_serv.c in vchan handling
   oopsies
