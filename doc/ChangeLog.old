@@ -1,3 +1,8 @@
+*** 20001223_3 by db
+- client that is notice'ed should not reply with an away.. noticed by Rodder
+
+
+
 *** 20001223_2 by db
 - fixed stupid bug in m_sjoin.c, lost a sendto_local_channel in the
   rewrite, which meant no MODE's were being sent... I "fixed" it previously
