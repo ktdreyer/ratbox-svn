@@ -1,3 +1,15 @@
+androsyn    2002/11/28 01:23:06 UTC	(20021128_0)
+
+  Modified files:
+    src                  balloc.c 
+  Log:
+  Remove that pointless if() statement
+  
+  Revision  Changes    Path
+  7.45      +1 -4      ircd-ratbox/src/balloc.c
+
+
+
 androsyn    2002/11/27 23:57:31 UTC	(20021127_9)
 
   Modified files:
