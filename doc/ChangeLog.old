@@ -1,3 +1,14 @@
+*** 20001224_9 by adrian
+
+
+* move try_connections() into an event, where it should have been a long
+  time ago. Its called every TRY_CONNECTIONS_TIME seconds, which right
+  now is defined as 60 seconds
+
+* Make most of ioloop() redundant. MMmmmm.. ioloop() looks sexy-slim now..
+
+
+
 *** 20001224_8 by toot
 . tkline expiry kept crashing.. redid it so it won't
 . added VCHANS to 005 numeric
