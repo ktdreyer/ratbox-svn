@@ -64,10 +64,9 @@ int mr_capab(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   char* p;
   char* s;
 
-#if 0
-  if ((!IsUnknown(cptr) && !IsHandshake(cptr)) || parc < 2)
+  /* ummm, this shouldn't happen. Could argue this should be logged etc. */
+  if (cptr->localClient == NULL)
     return 0;
-#endif
 
   if (cptr->localClient->caps)
     return exit_client(cptr, cptr, cptr, "CAPAB received twice");
