@@ -1,3 +1,16 @@
+leeh        2002/08/22 10:41:52 EDT	(20020822_6)
+
+  Modified files:
+    src                  channel.c 
+  Log:
+  - removed two erroneous break;'s
+  - dont add remote users to local channel lists
+  
+  Revision  Changes    Path
+  7.346     +7 -6      ircd-ratbox/src/channel.c
+
+
+
 leeh        2002/08/22 08:28:27 EDT	(20020822_5)
 
   Modified files:
