@@ -145,7 +145,8 @@ static int fbfill(FBFILE* fb)
   if (fb->flags)
     return -1;
   n = read(fb->fd, fb->buf, BUFSIZ);
-  if (0 < n) {
+  if (0 < n)
+  {
     fb->ptr  = fb->buf;
     fb->endp = fb->buf + n;
   }
@@ -160,11 +161,11 @@ int fbgetc(FBFILE* fb)
 {
   assert(fb);
   if(fb->pbptr)
-    {
-      if( (fb->pbptr == (fb->pbuf+BUFSIZ)) ||
-	  (!*fb->pbptr) )
-	fb->pbptr = NULL;
-    }
+  {
+    if( (fb->pbptr == (fb->pbuf+BUFSIZ)) ||
+	(!*fb->pbptr) )
+      fb->pbptr = NULL;
+  }
 
   if (fb->ptr < fb->endp || fbfill(fb) > 0)
     return *fb->ptr++;
@@ -176,15 +177,15 @@ void fbungetc(char c, FBFILE* fb)
   assert(fb);
 
   if(!fb->pbptr)
-    {
-      fb->pbptr = fb->pbuf+BUFSIZ;
-    }
+  {
+    fb->pbptr = fb->pbuf+BUFSIZ;
+  }
 
   if(fb->pbptr != fb->pbuf)
-    {
-       fb->pbptr--;
-      *fb->pbptr = c;
-    }
+  {
+    fb->pbptr--;
+    *fb->pbptr = c;
+  }
 }
 
 char* fbgets(char* buf, size_t len, FBFILE* fb)
@@ -195,26 +196,30 @@ char* fbgets(char* buf, size_t len, FBFILE* fb)
   assert(0 < len);
 
   if(fb->pbptr)
-    {
-      strncpy_irc(buf,fb->pbptr,len);
-      fb->pbptr = NULL;
-      return(buf);
-    }
+  {
+    strncpy_irc(buf,fb->pbptr,len);
+    fb->pbptr = NULL;
+    return(buf);
+  }
 
   if (fb->ptr == fb->endp && fbfill(fb) < 1)
     return 0;
   --len; 
-  while (len--) {
+  while (len--)
+  {
     *p = *fb->ptr++;
-    if ('\n' == *p) {
+    if ('\n' == *p)
+    {
       ++p;
       break;
     }
     /*
      * deal with CR's
      */
-    else if ('\r' == *p) {
-      if (fb->ptr < fb->endp || fbfill(fb) > 0) {
+    else if ('\r' == *p)
+    {
+      if (fb->ptr < fb->endp || fbfill(fb) > 0)
+      {
         if ('\n' == *fb->ptr)
           ++fb->ptr;
       }
@@ -235,7 +240,8 @@ int fbputs(const char* str, FBFILE* fb)
   assert(str);
   assert(fb);
 
-  if (0 == fb->flags) {
+  if (0 == fb->flags)
+  {
     n = write(fb->fd, str, strlen(str));
     if (-1 == n)
       fb->flags |= FB_FAIL;
