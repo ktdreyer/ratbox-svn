@@ -279,7 +279,7 @@ conf_set_modules_path(void *data)
 #ifndef STATIC_MODULES
 	mod_add_path((char *) data);
 #else
-	conf_report_error("Ignoring modules::path -- loadable module support net present.");
+	conf_report_error("Ignoring modules::path -- loadable module support not present.");
 #endif
 }
 
