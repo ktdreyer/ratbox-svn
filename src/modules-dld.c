@@ -196,7 +196,7 @@ findmodule_byname (char *name)
  * output	- 0 if successful, -1 if error
  * side effects	- module is unloaded
  */
-int unload_one_module (char *name, int check)
+int unload_one_module (char *name, int warn)
 {
   int modindex;
   void (*deinitfunc)(void) = NULL;
@@ -219,7 +219,7 @@ int unload_one_module (char *name, int check)
   if(num_mods != 0)
     num_mods--;
 
-  if(check == 1)
+  if(warn == 1)
     {
       ilog (L_INFO, "Module %s unloaded", name);
       sendto_realops_flags(FLAGS_ALL, L_ALL,"Module %s unloaded", name);
@@ -230,7 +230,7 @@ int unload_one_module (char *name, int check)
 
 /* load all modules from MPATH */
 void
-load_all_modules (int check)
+load_all_modules (int warn)
 {
   DIR            *system_module_dir = NULL;
   struct dirent  *ldirent = NULL;
@@ -260,7 +260,7 @@ load_all_modules (int check)
     {
       (void)sprintf (module_fq_name, "%s/%s",  AUTOMODPATH,
                       ldirent->d_name);
-      (void)load_a_module (module_fq_name, check);
+      (void)load_a_module (module_fq_name, warn, 0);
     }
   }
 
@@ -268,7 +268,7 @@ load_all_modules (int check)
 }
 
 void
-load_core_modules(int check)
+load_core_modules(int warn)
 {
   char module_name[MAXPATHLEN];
   int i;
@@ -278,7 +278,7 @@ load_core_modules(int check)
     sprintf(module_name, "%s/%s",
             MODPATH, core_module_table[i]);
 
-    if(load_a_module(module_name, check) == -1)
+    if(load_a_module(module_name, warn, 1) == -1)
     {
       ilog(L_CRIT, "Error loading core module %s: terminating ircd",
            core_module_table[i]);
@@ -297,7 +297,7 @@ load_one_module (char *path)
 	struct stat statbuf;
 
 	if (strchr(path, '/')) /* absolute path, try it */
-		return load_a_module(path, 1);
+		return load_a_module(path, 1, 0);
 
 	for (pathst = mod_paths.head; pathst; pathst = pathst->next)
 	{
@@ -305,7 +305,7 @@ load_one_module (char *path)
 		
 		sprintf(modpath, "%s/%s", mpath->path, path);
 		if (stat(modpath, &statbuf) == 0)
-			return load_a_module(modpath, 1);
+			return load_a_module(modpath, 1, 0);
 	}
 	
 	sendto_realops_flags (FLAGS_ALL, "Cannot locate module %s", path);
@@ -322,7 +322,7 @@ load_one_module (char *path)
  * side effects - loads a module if successful
  */
 int
-load_a_module (char *path, int check)
+load_a_module (char *path, int warn, int core)
 {
   void *tmpptr = NULL;
   char *mod_basename;
@@ -376,12 +376,13 @@ load_a_module (char *path, int check)
   modlist [num_mods] = MyMalloc (sizeof (struct module));
   modlist [num_mods]->address = tmpptr;
   modlist [num_mods]->version = ver;
+  modlist[num_mods]->core = core;
   DupString(modlist [num_mods]->name, mod_basename );
   num_mods++;
 
   initfunc ();
 
-  if(check == 1)
+  if(warn == 1)
     {
       sendto_realops_flags (FLAGS_ALL, "Module %s [version: %s] loaded at 0x%lx",
                         mod_basename, ver, (unsigned long)tmpptr);
@@ -448,6 +449,7 @@ static void
 mo_modunload (struct Client *client_p, struct Client *source_p, int parc, char **parv)
 {
   char *m_bn;
+  int modindex;
 
   if (!IsOperAdmin (source_p))
   {
@@ -458,11 +460,21 @@ mo_modunload (struct Client *client_p, struct Client *source_p, int parc, char *
 
   m_bn = irc_basename (parv[1]);
 
-  if (findmodule_byname (m_bn) == -1)
+  if((modindex = findmodule_byname (m_bn)) == -1)
   {
     sendto_one (source_p, ":%s NOTICE %s :Module %s is not loaded",
                 me.name, source_p->name, m_bn);
     MyFree (m_bn);
+    return;
+  }
+
+  if(modlist[modindex]->core == 1)
+  {
+    sendto_one(source_p,
+               ":%s NOTICE %s :Module %s is a core module and may not be unloaded",
+	       me.name, source_p->name, m_bn);
+
+    MyFree(m_bn);
     return;
   }
 
@@ -479,6 +491,8 @@ static void
 mo_modreload (struct Client *client_p, struct Client *source_p, int parc, char **parv)
 {
   char *m_bn;
+  int modindex;
+  int check_core;
 
   if (!IsOperAdmin (source_p))
     {
@@ -489,7 +503,7 @@ mo_modreload (struct Client *client_p, struct Client *source_p, int parc, char *
 
   m_bn = irc_basename (parv[1]);
 
-  if (findmodule_byname (m_bn) == -1)
+  if((modindex = findmodule_byname (m_bn)) == -1)
     {
       sendto_one (source_p, ":%s NOTICE %s :Module %s is not loaded",
                   me.name, source_p->name, m_bn);
@@ -497,6 +511,8 @@ mo_modreload (struct Client *client_p, struct Client *source_p, int parc, char *
       return;
     }
 
+  check_core = modlist[modindex]->core;
+  
   if( unload_one_module (m_bn, 1) == -1 )
     {
       sendto_one (source_p, ":%s NOTICE %s :Module %s is not loaded",
@@ -505,7 +521,14 @@ mo_modreload (struct Client *client_p, struct Client *source_p, int parc, char *
       return;
     }
 
-  (void)load_one_module (parv[1]);
+  if((load_one_module(parv[1]) == -1) && check_core)
+  {
+    sendto_realops_flags(FLAGS_ALL, L_ALL,
+                         "Error reloading core module: %s: terminating ircd",
+			 parv[1]);
+    ilog(L_CRIT, "Error loading core module %s: terminating ircd", parv[1]);
+    exit(0);
+  }
 
   MyFree(m_bn);
 }
