@@ -1,3 +1,15 @@
+androsyn    2002/09/04 22:13:32 EDT	(20020905_1)
+
+  Modified files:
+    modules              m_trace.c 
+  Log:
+  report_this_status should return a 0 even in a failure case.
+  
+  Revision  Changes    Path
+  1.60      +2 -2      ircd-ratbox/modules/m_trace.c
+
+
+
 androsyn    2002/09/04 22:11:47 EDT	(20020905_0)
 
   Modified files:
