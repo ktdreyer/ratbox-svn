@@ -1,3 +1,21 @@
+leeh        2002/09/08 12:51:36 UTC	(20020908_0)
+
+  Modified files:
+    include              numeric.h s_user.h 
+    modules              m_version.c 
+    src                  messages.tab s_user.c 
+  Log:
+  - changed it back to 005.
+  
+  Revision  Changes    Path
+  7.32      +0 -1      ircd-ratbox/include/numeric.h
+  7.18      +1 -1      ircd-ratbox/include/s_user.h
+  1.41      +4 -4      ircd-ratbox/modules/m_version.c
+  7.76      +1 -2      ircd-ratbox/src/messages.tab
+  7.226     +4 -4      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2002/09/07 23:00:27 UTC	(20020907_4)
 
   Modified files:
