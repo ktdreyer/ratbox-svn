@@ -1,3 +1,15 @@
+androsyn    2004/09/27 10:16:53 EDT	(20040927_0)
+
+  Modified files:
+    src                  irc_string.c 
+  Log:
+  shut up gcc
+  
+  Revision  Changes    Path
+  7.75      +2 -2      ircd-ratbox/src/irc_string.c
+
+
+
 androsyn    2004/09/24 10:04:53 EDT	(20040924_0)
 
   Modified files:
