@@ -1,3 +1,22 @@
+leeh        2003/06/20 14:26:06 UTC	(20030620_4)
+
+  Modified files:
+    modules              m_join.c m_names.c m_who.c m_whois.c 
+    src                  messages.tab send.c 
+  Log:
+  - more membership fix stuff, it compiles now
+  - rewrote various stupid things in names/who/whois
+  
+  Revision  Changes    Path
+  1.128     +2 -2      ircd-ratbox/modules/m_join.c
+  1.68      +40 -67    ircd-ratbox/modules/m_names.c
+  1.90      +16 -31    ircd-ratbox/modules/m_who.c
+  1.119     +50 -66    ircd-ratbox/modules/m_whois.c
+  7.89      +1 -1      ircd-ratbox/src/messages.tab
+  7.244     +103 -228  ircd-ratbox/src/send.c
+
+
+
 leeh        2003/06/20 12:11:21 UTC	(20030620_3)
 
   Modified files:
