@@ -693,13 +693,13 @@ static int     do_numeric(
     {
       if (IsMe(acptr)) 
         {
-/*         We're gunna get these as a consequence of lazylinks.. might
- *         as well just ignore them 
- *
- *         sendto_realops_flags(FLAGS_ALL,
- *			       "*** %s(via %s) sent a %s numeric to me?!?",
- *			       sptr->name, cptr->name, numeric);
- */
+          /*
+           * We shouldn't get numerics sent to us,
+           * any numerics we do get indicate a bug somewhere..
+           */
+          sendto_realops_flags(FLAGS_ALL,
+                               "*** %s(via %s) sent a %s numeric to me?!?",
+                               sptr->name, cptr->name, numeric);
           return 0;
         }
       else if (acptr->from == cptr) 
