@@ -1,3 +1,15 @@
+androsyn    2003/01/21 00:28:37 UTC	(20030121_2)
+
+  Modified files:
+    src                  hostmask.c 
+  Log:
+  Run hostmask.c through indent
+  
+  Revision  Changes    Path
+  7.84      +486 -481  ircd-ratbox/src/hostmask.c
+
+
+
 androsyn    2003/01/21 00:27:27 UTC	(20030121_1)
 
   Modified files:
