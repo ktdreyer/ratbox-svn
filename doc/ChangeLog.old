@@ -1,3 +1,6 @@
+*** 20010309_2 by davidt
+- oops, apparantly I forgot to commit my multiple-ports-per-listen{} patch.  Note: host= lines must now come before port= lines
+
 *** 20010309_1 by a1kmm
 - Some basic support for persistant clients(usermode +p) as well as a few general fixes here and there.
   It is late here so please forgive my bugs which are most probably there.
