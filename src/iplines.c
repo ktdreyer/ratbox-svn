@@ -240,7 +240,7 @@ report_ipKlines(struct Client *source_p)
 	struct ConfItem *aconf;
 	char *name, *host, *pass, *user, *classname;
 	int port;
-	PATRICIA_WALK(iplines[elines]->head, pnode)
+	PATRICIA_WALK(iplines[klines]->head, pnode)
 	{
 		aconf = pnode->data;
 		if(aconf->flags & CONF_FLAGS_TEMPORARY)
@@ -261,7 +261,7 @@ report_ipGlines(struct Client *source_p)
 	struct ConfItem *aconf;
 	char *name, *host, *pass, *user, *classname;
 	int port;
-	PATRICIA_WALK(iplines[elines]->head, pnode)
+	PATRICIA_WALK(iplines[glines]->head, pnode)
 	{
 		aconf = pnode->data;
 		if(aconf->flags & CONF_FLAGS_TEMPORARY)

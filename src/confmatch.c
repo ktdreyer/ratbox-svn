@@ -34,13 +34,13 @@
 #include "confmatch.h"
 #include "tools.h"
 
-static dlink_list hostconf[ATABLE_SIZE];
-
+#define HOSTCONF_SIZE 	0x1000
+static dlink_list hostconf[HOSTCONF_SIZE];
 
 void
 init_confmatch (void)
 {
-	memset (hostconf, 0, sizeof (hostconf));
+	memset(&hostconf, 0, sizeof(hostconf));
 }
 
 static int
@@ -91,7 +91,7 @@ wildcard_to_cidr (const char *host, struct irc_inaddr *in, int *cidr)
 	return 0;
 }
 
-static int
+static  int
 hash_text (const char *start)
 {
 	const char *p = start;
@@ -101,7 +101,7 @@ hash_text (const char *start)
 	{
 		h = (h << 4) - (h + (unsigned char) ToLower (*p++));
 	}
-	return (h & (ATABLE_SIZE - 1));
+	return (h & (HOSTCONF_SIZE - 1));
 }
 
 /* unsigned long get_hash_mask(const char *)
@@ -241,7 +241,7 @@ find_conf_by_address (const char *hostname, struct irc_inaddr *addr, int type, c
 		}
 
 		/* Life is miserable..we go to a linear scan now */
-		for (x = 0; x < ATABLE_SIZE; x++)
+		for (x = 0; x < HOSTCONF_SIZE; x++)
 		{
 			list = &hostconf[x];
 			DLINK_FOREACH (ptr, list->head)
@@ -362,7 +362,7 @@ clear_out_address_conf (void)
 	dlink_list *list;
 	dlink_node *ptr, *tmp;
 	struct ConfItem *aconf;
-	for (x = 0; x < ATABLE_SIZE; x++)
+	for (x = 0; x < HOSTCONF_SIZE; x++)
 	{
 		list = &hostconf[x];
 		DLINK_FOREACH_SAFE (ptr, tmp, list->head)
@@ -416,7 +416,7 @@ report_klines (struct Client *source_p)
 	char *host, *pass, *user, *classname, *name;
 	struct ConfItem *aconf;
 
-	for (x = 0; x < ATABLE_SIZE; x++)
+	for (x = 0; x < HOSTCONF_SIZE; x++)
 	{
 		list = &hostconf[x];
 		DLINK_FOREACH (ptr, list->head)
@@ -443,7 +443,7 @@ report_glines (struct Client *source_p)
 	int x, port;
 	char *host, *pass, *user, *classname, *name;
 	struct ConfItem *aconf;
-	for (x = 0; x < ATABLE_SIZE; x++)
+	for (x = 0; x < HOSTCONF_SIZE; x++)
 	{
 		list = &hostconf[x];
 		DLINK_FOREACH (ptr, list->head)
@@ -472,7 +472,7 @@ report_ilines (struct Client *source_p)
 	char *host, *pass, *user, *classname, *name;
 	struct ConfItem *aconf;
 
-	for (x = 0; x < ATABLE_SIZE; x++)
+	for (x = 0; x < HOSTCONF_SIZE; x++)
 	{
 		list = &hostconf[x];
 		DLINK_FOREACH (ptr, list->head)
