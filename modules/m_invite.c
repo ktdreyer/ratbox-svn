@@ -64,7 +64,6 @@ m_invite(struct Client *client_p, struct Client *source_p, int parc, const char 
 	struct Client *target_p;
 	struct Channel *chptr;
 	struct membership *msptr;
-	dlink_node *ptr;
 	int store_invite = 0;
 
 	if(EmptyString(parv[2]))
@@ -189,11 +188,13 @@ m_invite(struct Client *client_p, struct Client *source_p, int parc, const char 
 static void
 add_invite(struct Channel *chptr, struct Client *who)
 {
+	dlink_node *ptr;
+
 	/* already invited? */
 	DLINK_FOREACH(ptr, who->user->invited.head)
 	{
 		if(ptr->data == chptr)
-			return 0;
+			return;
 	}
 
 	/* ok, if their invite list is too long, remove the tail */
