@@ -1,3 +1,15 @@
+*** 20010830_1 by leeh
+- allow unregged clients to see the motd, but then drop them.
+
+  this doesnt actually work atm:
+      MOTD
+      :mafia.leeh.co.uk 375 * :- mafia.leeh.co.uk Message of the Day -
+      Connection closed by foreign host.
+
+  we disconnect the client before we send them the full motd, we should dump
+  a users queue to them, then boot them
+
+
 *** 20010829_3 by wcampbel
 Added more info to the numeric document.  I don't know when the next time
 I will be able to work on this is.
