@@ -67,6 +67,7 @@ static int exit_remote_server(struct Client *, struct Client *, struct Client *,
 static int exit_local_client(struct Client *, struct Client *, struct Client *,const char *);
 static int exit_unknown_client(struct Client *, struct Client *, struct Client *,const char *);
 static int exit_local_server(struct Client *, struct Client *, struct Client *,const char *);
+static int qs_server(struct Client *, struct Client *, struct Client *, const char *comment);
 
 static int h_local_exit_client;
 static int h_unknown_exit_client;
@@ -1058,7 +1059,8 @@ recurse_remove_clients(struct Client *source_p, const char *comment)
 {
 	struct Client *target_p;
 	dlink_node *ptr, *ptr_next;
-	if(IsMe(source_p))
+
+	if(IsMe(source_p) || IsDead(source_p))
 		return;
 
 	if(source_p->serv == NULL)	/* oooops. uh this is actually a major bug */
@@ -1089,8 +1091,7 @@ recurse_remove_clients(struct Client *source_p, const char *comment)
 	{
 		target_p = ptr->data;
 		recurse_remove_clients(target_p, comment);
-		target_p->flags |= FLAGS_KILLED;
-		exit_remote_server(NULL, target_p, &me, comment);
+		qs_server(NULL, target_p, &me, comment);
 	}
 }
 
@@ -1354,6 +1355,33 @@ exit_remote_server(struct Client *client_p, struct Client *source_p, struct Clie
 			   comment);
 	}
 
+	if(has_id(source_p))
+		del_from_id_hash(source_p->id, source_p);
+
+	del_from_client_hash(source_p->name, source_p);
+	remove_client_from_list(source_p);  
+	s_assert(dlinkFind(&dead_list, source_p) == NULL);
+	s_assert(dlinkFind(&abort_list, source_p) == NULL);
+	
+	SetDead(source_p);
+	dlinkAddAlloc(source_p, &dead_list);	
+	return 0;
+}
+
+static int
+qs_server(struct Client *client_p, struct Client *source_p, struct Client *from, 
+		  const char *comment)
+{
+	struct Client *target_p;
+
+	if(source_p->servptr && source_p->servptr->serv)
+		dlinkDelete(&source_p->lnode, &source_p->servptr->serv->servers);
+	else
+		s_assert(0);
+
+	dlinkFindDestroy(&global_serv_list, source_p);
+	target_p = source_p->from;
+	
 	if(has_id(source_p))
 		del_from_id_hash(source_p->id, source_p);
 
