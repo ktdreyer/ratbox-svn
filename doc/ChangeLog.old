@@ -1,3 +1,11 @@
+*** 20001216_3 by adrian
+
+
+Add a blank line after the distclean: tag, so make knows its a blank
+target.
+
+
+
 *** 20001216_2 by db
 - ask for MODE on channel if LL
 
