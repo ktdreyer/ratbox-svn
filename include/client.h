@@ -1,5 +1,4 @@
 /* $Id$ */
-#define NICKLEN 9
 #define USERLEN 10
 #define HOSTLEN 63
 #define REALLEN 50

@@ -3,7 +3,6 @@
 #define INCLUDED_channel_h
 
 #define CHANNELLEN	200
-#define TOPICLEN	120
 #define KEYLEN		24
 
 #define MAX_MODES	10
