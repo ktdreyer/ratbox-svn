@@ -545,7 +545,7 @@ accept_connection(int pfd, void *data)
 			last_oper_notice = CurrentTime;
 		}
 
-		write(fd, "ERROR :All connections in use\r\n", 32);
+		send(fd, "ERROR :All connections in use\r\n", 32, 0);
 		comm_close(fd);
 		/* Re-register a new IO request for the next accept .. */
 		comm_setselect(listener->fd, FDLIST_SERVICE,
@@ -559,7 +559,7 @@ accept_connection(int pfd, void *data)
 	{
 		ServerStats.is_ref++;
 
-		write(fd, DLINE_WARNING, sizeof(DLINE_WARNING) - 1);
+		send(fd, DLINE_WARNING, sizeof(DLINE_WARNING) - 1, 0);
 		comm_close(fd);
 
 		/* Re-register a new IO request for the next accept .. */

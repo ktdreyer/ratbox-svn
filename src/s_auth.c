@@ -493,7 +493,7 @@ auth_connect_callback(int fd, int error, void *data)
 	ircsnprintf(authbuf, sizeof(authbuf), "%u , %u\r\n",
 		   (unsigned int) ntohs(them.sin_port), (unsigned int) ntohs(us.sin_port));
 
-	if(write(auth->fd, authbuf, strlen(authbuf)) == -1)
+	if(send(auth->fd, authbuf, strlen(authbuf), 0) == -1)
 	{
 		auth_error(auth);
 		return;
@@ -522,7 +522,7 @@ read_auth_reply(int fd, void *data)
 	int count;
 	char buf[AUTH_BUFSIZ + 1];	/* buffer to read auth reply into */
 
-	len = read(auth->fd, buf, AUTH_BUFSIZ);
+	len = recv(auth->fd, buf, AUTH_BUFSIZ, 0);
 
 	if(len < 0 && ignoreErrno(errno))
 	{
