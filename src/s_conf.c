@@ -1594,7 +1594,7 @@ get_oper_name(struct Client *client_p)
 		s_assert(0);
 	}
 
-	ircsnprintf(buffer, "%s!%s@%s{%s}", sizeof(buffer),
+	ircsnprintf(buffer, sizeof(buffer), "%s!%s@%s{%s}",
 		   client_p->name, client_p->username, client_p->host, client_p->servptr->name);
 	return buffer;
 }
