@@ -1858,7 +1858,7 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           what = MODE_DEL;
           break;        
 
-        case 'o':
+        case 'O': case 'o':
           if(what == MODE_ADD)
             {
               if(IsServer(cptr) && !IsOper(sptr))
