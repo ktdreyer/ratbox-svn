@@ -824,7 +824,7 @@ int server_estab(struct Client *cptr)
   if (ConfigFileEntry.hub && IsCapable(cptr, CAP_LL))
     {
      /* LazyLinks version 2, don't send nicks! */
-#if LLVER1
+#ifdef LLVER1
       for (acptr = &me; acptr; acptr = acptr->prev)
         if (acptr->from != cptr)
           sendnick_TS(cptr, acptr);

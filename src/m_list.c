@@ -24,6 +24,8 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
+#include "s_conf.h"
+#include "s_serv.h"
 #include "send.h"
 
 #include <assert.h>
@@ -42,19 +44,26 @@ int     m_list(struct Client *cptr,
 {
   struct Channel *chptr;
   char  *name, *p = NULL;
-  /* anti flooding code,
-   * I did have this in parse.c with a table lookup
-   * but I think this will be less inefficient doing it in each
-   * function that absolutely needs it
-   *
-   * -Dianora
-   */
   static time_t last_used=0L;
   int i,j;
 
-  /* throw away non local list requests that do get here -Dianora */
-  if(!MyConnect(sptr))
-    return 0;
+  /* If its a LazyLinks connection, allow a list on its behalf */
+  if( ConfigFileEntry.hub )
+    {
+      if(!IsCapable(sptr->from,CAP_LL) && !MyConnect(sptr))
+	return 0;
+    }
+  else
+    {
+       if( serv_cptr_list && IsCapable( serv_cptr_list, CAP_LL) )
+	 {
+	   if(parc < 2)
+	     sendto_one( serv_cptr_list, ":%s LIST", sptr->name );
+	   else
+	     sendto_one( serv_cptr_list, ":%s LIST %s", sptr->name, parv[1] );
+	   return 0;
+	 }
+    }
 
   if(!IsAnOper(sptr))
     {
@@ -142,13 +151,6 @@ int     m_list(struct Client *cptr,
       return 0;
     }   
           
-
-  /* Don't route list, no need for it - Dianora */
-  /*
-    if (hunt_server(cptr, sptr, ":%s LIST %s %s", 2, parc, parv))
-      return 0;
-      */
-
   p = strchr(parv[1],',');
   if(p)
     *p = '\0';

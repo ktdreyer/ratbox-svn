@@ -381,6 +381,7 @@ static time_t io_loop(time_t delay)
       restart("Clock Failure");
     }
 
+  /* LazyLinks */
   if(!ConfigFileEntry.hub)
     {
       if(CurrentTime - lastCleanup >= CLEANUP_CHANNELS_TIME)
