@@ -54,7 +54,6 @@ typedef struct Block Block;
 struct MemBlock {
 	dlink_node self;		
 	Block *block;				/* Which block we belong to */
-	void *data;				/* Maybe pointless? :P */
 };
 typedef struct MemBlock MemBlock;
 
