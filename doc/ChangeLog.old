@@ -1,3 +1,9 @@
+*** 20010726_1 by leeh
+- added GlobalServerList
+  this will allow a better way to loop for servers, than looping
+  50k clients to do a /links list :P
+
+
 *** 20010725_1 by leeh
 - an unregged client should never get a remote ping.. therefore
   it should never need to be routed
