@@ -174,7 +174,7 @@ void process_recvq(struct ctrl_command *cmd)
 {
   int ret;
   unsigned char *buf;
-  unsigned int   blen;
+  int   blen;
   unsigned char *data = cmd->data;
   unsigned int   datalen = cmd->datalen;
 
@@ -291,7 +291,7 @@ void send_zipstats(struct ctrl_command *unused)
  *     flush the control fd sendq, then (blocking) send an
  *     error message over the control fd.
  */
-void send_error(unsigned char *message, ...)
+void send_error(char *message, ...)
 {
   va_list args;
   static int sending_error = 0;
@@ -313,7 +313,7 @@ void send_error(unsigned char *message, ...)
   in_state.buf[2] = 0;
 
   va_start(args, message);
-  len = vsprintf(in_state.buf+3, message, args);
+  len = vsprintf((char *)in_state.buf+3, message, args);
   va_end(args);
 
   in_state.buf[3+len++] = '\0';
