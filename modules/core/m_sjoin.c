@@ -381,6 +381,9 @@ int     ms_sjoin(struct Client *cptr,
         continue;
       if (acptr->from != cptr)
         continue;
+      if (!IsPerson(acptr))
+        continue;
+      
       people++;
       if (!IsMember(acptr, chptr))
         {
