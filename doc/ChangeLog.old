@@ -1,3 +1,7 @@
+*** 19990831_4 by tomh
+break out m_user
+
+
 *** 19990831_3 by tomh
 use development CFLAGS, change for release
 
