@@ -60,10 +60,7 @@ struct Listener* make_listener(int port, struct in_addr addr)
   listener->port        = port;
   listener->addr.s_addr = addr.s_addr;
 
-#ifdef NULL_POINTER_NOT_ZERO
   listener->next = NULL;
-  listener->conf = NULL;
-#endif
   return listener;
 }
 

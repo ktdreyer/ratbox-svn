@@ -439,13 +439,11 @@ static struct ResRequest* make_request(const struct DNSQuery* query)
   request->query.vptr       = query->vptr;
   request->query.callback   = query->callback;
 
-#if defined(NULL_POINTER_NOT_ZERO)
   request->next             = NULL;
   request->he.buf           = NULL;
   request->he.h.h_name      = NULL;
   request->he.h.h_aliases   = NULL;
   request->he.h.h_addr_list = NULL;
-#endif
   add_request(request);
   return request;
 }
