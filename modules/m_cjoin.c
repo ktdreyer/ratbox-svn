@@ -207,14 +207,18 @@ int     m_cjoin(struct Client *cptr,
   */
   
   vchan_chptr->channelts = CurrentTime;
-  sendto_match_servs(vchan_chptr, cptr,
-		     ":%s SJOIN %lu %s + :@%s", me.name,
-		     vchan_chptr->channelts, vchan_chptr->chname, parv[0]);
+  sendto_channel_remote(vchan_chptr, cptr,
+			":%s SJOIN %lu %s + :@%s", me.name,
+			vchan_chptr->channelts,
+			vchan_chptr->chname,
+			parv[0]);
   /*
   ** notify all other users on the new channel
   */
-  sendto_channel_local(ALL_MEMBERS, vchan_chptr, ":%s JOIN :%s",
-			 parv[0], chptr->chname);
+  sendto_channel_local(ALL_MEMBERS,
+		       vchan_chptr,
+		       ":%s JOIN :%s",
+		       parv[0], chptr->chname);
 
 
   vchan_chptr->mode.mode |= MODE_TOPICLIMIT;
@@ -224,9 +228,10 @@ int     m_cjoin(struct Client *cptr,
 			 ":%s MODE %s +nt",
 			 me.name, chptr->chname);
 
-  sendto_match_servs(vchan_chptr, sptr, 
-		     ":%s MODE %s +nt",
-		     me.name, vchan_chptr->chname);
+  sendto_channel_remote(vchan_chptr, sptr, 
+			":%s MODE %s +nt",
+			me.name,
+			vchan_chptr->chname);
 
   del_invite(vchan_chptr, sptr);
   (void)channel_member_names(sptr, vchan_chptr, chptr->chname);

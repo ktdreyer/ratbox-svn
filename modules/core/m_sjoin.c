@@ -352,12 +352,12 @@ int     ms_sjoin(struct Client *cptr,
 	    {
 	      add_vchan_to_client_cache(acptr,top_chptr, chptr);
 	      sendto_channel_local(ALL_MEMBERS,chptr, ":%s JOIN :%s",
-				     s, top_chptr->chname);
+				   s, top_chptr->chname);
 	    }
 	  else
 	    {
 	      sendto_channel_local(ALL_MEMBERS,chptr, ":%s JOIN :%s",
-				     s, parv[2]);
+				   s, parv[2]);
 	    }
         }
 
@@ -381,20 +381,20 @@ int     ms_sjoin(struct Client *cptr,
 	      if(IsVchan(chptr) && top_chptr)
 		{
 		  sendto_channel_local(hide_or_not, chptr,
-					 ":%s MODE %s %s %s %s %s %s",
-					 parv[0],
-					 top_chptr->chname,
-					 modebuf,
-					 para[0],para[1],para[2],para[3]);
+				       ":%s MODE %s %s %s %s %s %s",
+				       parv[0],
+				       top_chptr->chname,
+				       modebuf,
+				       para[0],para[1],para[2],para[3]);
 		}
 	      else
 		{
 		  sendto_channel_local(hide_or_not, chptr,
-					 ":%s MODE %s %s %s %s %s %s",
-					 parv[0],
-					 chptr->chname,
-					 modebuf,
-					 para[0],para[1],para[2],para[3]);
+				       ":%s MODE %s %s %s %s %s %s",
+				       parv[0],
+				       chptr->chname,
+				       modebuf,
+				       para[0],para[1],para[2],para[3]);
 		}
               mbuf = modebuf;
               *mbuf++ = '+';
@@ -412,20 +412,20 @@ int     ms_sjoin(struct Client *cptr,
 	      if(IsVchan(chptr) && top_chptr)
 		{
 		  sendto_channel_local(hide_or_not, chptr,
-					 ":%s MODE %s %s %s %s %s %s",
-					 parv[0],
-					 top_chptr->chname,
-					 modebuf,
-					 para[0],para[1],para[2],para[3]);
+				       ":%s MODE %s %s %s %s %s %s",
+				       parv[0],
+				       top_chptr->chname,
+				       modebuf,
+				       para[0],para[1],para[2],para[3]);
 		}
 	      else
 		{
 		  sendto_channel_local(hide_or_not, chptr,
-					 ":%s MODE %s %s %s %s %s %s",
-					 parv[0],
-					 chptr->chname,
-					 modebuf,
-					 para[0],para[1],para[2],para[3]);
+				       ":%s MODE %s %s %s %s %s %s",
+				       parv[0],
+				       chptr->chname,
+				       modebuf,
+				       para[0],para[1],para[2],para[3]);
 		}
               mbuf = modebuf;
               *mbuf++ = '+';
@@ -441,25 +441,25 @@ int     ms_sjoin(struct Client *cptr,
       if(IsVchan(chptr) && top_chptr)
 	{
 	  sendto_channel_local(hide_or_not, chptr,
-				 ":%s MODE %s %s %s %s %s %s",
-				 parv[0],
-				 top_chptr->chname,
-				 modebuf,
-				 para[0], para[1], para[2], para[3]);
+			       ":%s MODE %s %s %s %s %s %s",
+			       parv[0],
+			       top_chptr->chname,
+			       modebuf,
+			       para[0], para[1], para[2], para[3]);
 	}
       else
 	{
 	  sendto_channel_local(hide_or_not, chptr,
-				 ":%s MODE %s %s %s %s %s %s",
-				 parv[0],
-				 chptr->chname,
-				 modebuf,
-				 para[0], para[1], para[2], para[3]);
+			       ":%s MODE %s %s %s %s %s %s",
+			       parv[0],
+			       chptr->chname,
+			       modebuf,
+			       para[0], para[1], para[2], para[3]);
 	}
     }
 
   if (people)
-    sendto_match_servs(chptr, cptr, "%s %s", buf, sjbuf);
+    sendto_channel_remote(chptr, cptr, "%s %s", buf, sjbuf);
 
   return 0;
 }
@@ -710,11 +710,11 @@ void remove_a_mode( int hide_or_not,
 	{
 	  *mbuf   = '\0';
 	  sendto_channel_local(hide_or_not, chptr,
-				 ":%s MODE %s %s %s %s %s %s",
-				 sptr->name,
-				 chname,
-				 modebuf,
-				 para[0], para[1], para[2], para[3] );
+			       ":%s MODE %s %s %s %s %s %s",
+			       sptr->name,
+			       chname,
+			       modebuf,
+			       para[0], para[1], para[2], para[3] );
 
 	  mbuf = modebuf;
 	  *mbuf++ = '-';
@@ -727,11 +727,11 @@ void remove_a_mode( int hide_or_not,
     {
       *mbuf   = '\0';
       sendto_channel_local(hide_or_not, chptr,
-			     ":%s MODE %s %s %s %s %s %s",
-			     sptr->name,
-			     chname,
-			     modebuf,
-			     para[0], para[1], para[2], para[3] );
+			   ":%s MODE %s %s %s %s %s %s",
+			   sptr->name,
+			   chname,
+			   modebuf,
+			   para[0], para[1], para[2], para[3] );
 
     }
 }

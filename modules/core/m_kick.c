@@ -177,25 +177,25 @@ int     m_kick(struct Client *cptr,
       if(GlobalSetOptions.hide_chanops)
 	{
 	  sendto_channel_local(NON_CHANOPS, chptr,
-				 ":%s KICK %s %s :%s", 
-				 who->name,
-				 name, who->name, comment);
+			       ":%s KICK %s %s :%s", 
+			       who->name,
+			       name, who->name, comment);
 
 	  sendto_channel_local(ONLY_CHANOPS, chptr,
-				 ":%s KICK %s %s :%s", parv[0],
-				 name, who->name, comment);
+			       ":%s KICK %s %s :%s", parv[0],
+			       name, who->name, comment);
 	}
       else
 	{
 	  sendto_channel_local(ONLY_CHANOPS, chptr,
-				 ":%s KICK %s %s :%s", parv[0],
-				 name, who->name, comment);
+			       ":%s KICK %s %s :%s", parv[0],
+			       name, who->name, comment);
 	}
 
-      sendto_match_servs(chptr, cptr,
-                         ":%s KICK %s %s :%s",
-                         parv[0], chptr->chname,
-                         who->name, comment);
+      sendto_channel_remote(chptr, cptr,
+			    ":%s KICK %s %s :%s",
+			    parv[0], chptr->chname,
+			    who->name, comment);
       remove_user_from_channel(chptr, who);
     }
   else

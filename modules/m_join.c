@@ -295,24 +295,30 @@ int     m_join(struct Client *cptr,
 	  if (joining_vchan)
 	    add_vchan_to_client_cache(sptr,root_chptr,chptr);
 	  chptr->channelts = CurrentTime;
-	  sendto_match_servs(chptr, cptr,
-			     ":%s SJOIN %lu %s + :@%s", me.name,
-			     chptr->channelts, chptr->chname, parv[0]);
+	  sendto_channel_remote(chptr, cptr,
+				":%s SJOIN %lu %s + :@%s",
+				me.name,
+				chptr->channelts,
+				chptr->chname,
+				parv[0]);
 	}
       else 
 	{
 	  if (joining_vchan)
 	    add_vchan_to_client_cache(sptr,root_chptr,chptr);
-	  sendto_match_servs(chptr, cptr,
-			     ":%s SJOIN %lu %s + :%s", me.name,
-			     chptr->channelts, chptr->chname, parv[0]);
+	  sendto_channel_remote(chptr, cptr,
+				":%s SJOIN %lu %s + :%s",
+				me.name,
+				chptr->channelts,
+				chptr->chname,
+				parv[0]);
 	}
 
       /*
       ** notify all other users on the new channel
       */
       sendto_channel_local(ALL_MEMBERS,chptr, ":%s JOIN :%s",
-			     parv[0], name);
+			   parv[0], name);
       
       if( flags & CHFL_CHANOP )
 	{
@@ -320,12 +326,13 @@ int     m_join(struct Client *cptr,
 	  chptr->mode.mode |= MODE_NOPRIVMSGS;
 
 	  sendto_channel_local(ONLY_CHANOPS,chptr,
-				 ":%s MODE %s +nt",
-				 me.name, chptr->chname);
+			       ":%s MODE %s +nt",
+			       me.name, chptr->chname);
 	  
-	  sendto_match_servs(chptr, sptr, 
-			     ":%s MODE %s +nt",
-			     me.name, chptr->chname);
+	  sendto_channel_remote(chptr, sptr, 
+				":%s MODE %s +nt",
+				me.name,
+				chptr->chname);
 	}
 
       del_invite(chptr, sptr);
@@ -454,13 +461,13 @@ void do_join_0(struct Client *cptr, struct Client *sptr)
   struct Channel *chptr=NULL;
   dlink_node   *lp;
 
-  sendto_match_servs(NULL, cptr, ":%s JOIN 0", sptr->name);
+  sendto_channel_remote(NULL, cptr, ":%s JOIN 0", sptr->name);
 
   while ((lp = sptr->user->channel.head))
     {
       chptr = lp->data;
       sendto_channel_local(ALL_MEMBERS,chptr, ":%s PART %s",
-			     sptr->name, chptr->chname);
+			   sptr->name, chptr->chname);
       remove_user_from_channel(chptr, sptr);
     }
 }

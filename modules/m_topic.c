@@ -133,7 +133,7 @@ int     m_topic(struct Client *cptr,
 
 	      chptr->topic_time = CurrentTime;
 	      
-	      sendto_match_servs(chptr, cptr,":%s TOPIC %s :%s",
+	      sendto_channel_remote(chptr, cptr,":%s TOPIC %s :%s",
 				 parv[0], name,
 				 chptr->topic);
 	      if(GlobalSetOptions.hide_chanops)
