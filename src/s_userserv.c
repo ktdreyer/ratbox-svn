@@ -121,7 +121,7 @@ user_db_callback(void *db, int argc, char **argv, char **colnames)
 {
 	struct user_reg *reg_p;
 
-	if(argc < 6)
+	if(argc < 7)
 		return 0;
 
 	if(EmptyString(argv[0]))
@@ -134,9 +134,12 @@ user_db_callback(void *db, int argc, char **argv, char **colnames)
 	if(!EmptyString(argv[2]))
 		reg_p->email = my_strdup(argv[2]);
 
-	reg_p->reg_time = atol(argv[3]);
-	reg_p->last_time = atol(argv[4]);
-	reg_p->flags = atoi(argv[5]);
+	if(!EmptyString(argv[3]))
+		reg_p->suspender = my_strdup(argv[3]);
+
+	reg_p->reg_time = atol(argv[4]);
+	reg_p->last_time = atol(argv[5]);
+	reg_p->flags = atoi(argv[6]);
 
 	add_user_reg(reg_p);
 
@@ -288,7 +291,8 @@ u_user_userregister(struct connection_entry *conn_p, char *parv[], int parc)
 
 	add_user_reg(reg_p);
 
-	loc_sqlite_exec(NULL, "INSERT INTO users VALUES(%Q, %Q, %Q, %lu, %lu, %u)",
+	loc_sqlite_exec(NULL, "INSERT INTO users (username, password, email, reg_time, last_time, flags) "
+			"VALUES(%Q, %Q, %Q, %lu, %lu, %u)",
 			reg_p->name, reg_p->password, 
 			EmptyString(reg_p->email) ? "" : reg_p->email, 
 			reg_p->reg_time, reg_p->last_time, reg_p->flags);
@@ -343,9 +347,10 @@ u_user_usersuspend(struct connection_entry *conn_p, char *parv[], int parc)
 	logout_user_reg(reg_p);
 
 	reg_p->flags |= US_FLAGS_SUSPENDED;
+	reg_p->suspender = my_strdup(conn_p->name);
 
-	loc_sqlite_exec(NULL, "UPDATE users SET flags = %d WHERE username = %Q",
-			reg_p->flags, reg_p->name);
+	loc_sqlite_exec(NULL, "UPDATE users SET flags=%d, suspender=%Q WHERE username=%Q",
+			reg_p->flags, conn_p->name, reg_p->name);
 
 	sendto_one(conn_p, "Username %s suspended", reg_p->name);
 }
@@ -371,8 +376,10 @@ u_user_userunsuspend(struct connection_entry *conn_p, char *parv[], int parc)
 	slog(userserv_p, 1, "%s - USERUNSUSPEND %s", conn_p->name, reg_p->name);
 
 	reg_p->flags &= ~US_FLAGS_SUSPENDED;
+	my_free(reg_p->suspender);
+	reg_p->suspender = NULL;
 
-	loc_sqlite_exec(NULL, "UPDATE users SET flags = %d WHERE username = %Q",
+	loc_sqlite_exec(NULL, "UPDATE users SET flags=%d, suspender=NULL WHERE username=%Q",
 			reg_p->flags, reg_p->name);
 
 	sendto_one(conn_p, "Username %s unsuspended", reg_p->name);
@@ -414,7 +421,8 @@ s_user_userregister(struct client *client_p, char *parv[], int parc)
 
 	add_user_reg(reg_p);
 
-	loc_sqlite_exec(NULL, "INSERT INTO users VALUES(%Q, %Q, %Q, %lu, %lu, %u)",
+	loc_sqlite_exec(NULL, "INSERT INTO users (username, password, email, reg_time, last_time, flags) "
+			"VALUES(%Q, %Q, %Q, %lu, %lu, %u)",
 			reg_p->name, reg_p->password, 
 			EmptyString(reg_p->email) ? "" : reg_p->email, 
 			reg_p->reg_time, reg_p->last_time, reg_p->flags);
@@ -465,9 +473,10 @@ s_user_usersuspend(struct client *client_p, char *parv[], int parc)
 	logout_user_reg(reg_p);
 
 	reg_p->flags |= US_FLAGS_SUSPENDED;
+	reg_p->suspender = my_strdup(client_p->user->oper->name);
 
-	loc_sqlite_exec(NULL, "UPDATE users SET flags = %d WHERE username = %Q",
-			reg_p->flags, reg_p->name);
+	loc_sqlite_exec(NULL, "UPDATE users SET flags=%d, suspender=%Q WHERE username=%Q",
+			reg_p->flags, reg_p->suspender, reg_p->name);
 
 	service_error(userserv_p, client_p,
 			"Username %s suspended", reg_p->name);
@@ -494,8 +503,10 @@ s_user_userunsuspend(struct client *client_p, char *parv[], int parc)
 		client_p->user->oper->name, reg_p->name);
 
 	reg_p->flags &= ~US_FLAGS_SUSPENDED;
+	my_free(reg_p->suspender);
+	reg_p->suspender = NULL;
 
-	loc_sqlite_exec(NULL, "UPDATE users SET flags = %d WHERE username = %Q",
+	loc_sqlite_exec(NULL, "UPDATE users SET flags=%d, suspender=NULL WHERE username=%Q",
 			reg_p->flags, reg_p->name);
 
 	service_error(userserv_p, client_p,
@@ -597,7 +608,8 @@ s_user_register(struct client *client_p, char *parv[], int parc)
 
 	SetClientRegister(client_p);
 
-	loc_sqlite_exec(NULL, "INSERT INTO users VALUES(%Q, %Q, %Q, %lu, %lu, %u)",
+	loc_sqlite_exec(NULL, "INSERT INTO users (username, password, email, reg_time, last_time, flags) "
+			"VALUES(%Q, %Q, %Q, %lu, %lu, %u)",
 			reg_p->name, reg_p->password, 
 			EmptyString(reg_p->email) ? "" : reg_p->email, 
 			reg_p->reg_time, reg_p->last_time, reg_p->flags);
