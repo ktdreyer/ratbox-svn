@@ -26,6 +26,11 @@ struct _config_file
 	int ping_time;
 	int ratbox;
 
+	unsigned int client_flood_time;
+	unsigned int client_flood_ignore_time;
+	unsigned int client_flood_max;
+	unsigned int client_flood_max_ignore;
+
 	char *admin1;
 	char *admin2;
 	char *admin3;

@@ -882,7 +882,10 @@ s_user_info(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 			get_duration((time_t) (CURRENT_TIME - ureg_p->reg_time)));
 
 	if(ureg_p == client_p->user->user_reg)
+	{
 		dump_user_info(client_p, NULL, ureg_p);
+		return 3;
+	}
 
 	return 1;
 }

@@ -46,6 +46,9 @@ struct user
 	int umode;			/* usermodes this client has */
 	time_t tsinfo;
 
+	unsigned int flood_count;
+	time_t flood_time;
+
 	struct user_reg *user_reg;
 	struct conf_oper *oper;
 

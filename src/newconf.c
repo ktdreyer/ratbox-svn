@@ -784,6 +784,10 @@ conf_set_chanserv_enforcetopic(void *data)
 
 static struct ConfEntry conf_serverinfo_table[] =
 {
+	{ "client_flood_max",		CF_INT,  NULL, 0, &config_file.client_flood_max	},
+	{ "client_flood_max_ignore",	CF_INT,	 NULL, 0, &config_file.client_flood_max_ignore },
+	{ "client_flood_ignore_time",	CF_TIME, NULL, 0, &config_file.client_flood_ignore_time },
+	{ "client_flood_time",		CF_TIME, NULL, 0, &config_file.client_flood_time },
 	{ "description",	CF_QSTRING, NULL, 0, &config_file.gecos		},
 	{ "vhost",		CF_QSTRING, NULL, 0, &config_file.vhost		},
 	{ "dcc_vhost",		CF_QSTRING, NULL, 0, &config_file.dcc_vhost	},

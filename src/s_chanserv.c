@@ -2539,7 +2539,7 @@ s_chan_addban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 		kickbuild_finish(chanserv_p, chptr);
 	}
 
-	return 1;
+	return 2;
 }
 
 static int
@@ -2605,7 +2605,7 @@ s_chan_delban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 		}
 	}
 
-	return 1;
+	return 2;
 }
 
 static int
@@ -2827,7 +2827,10 @@ s_chan_info(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 				reg_p->name);
 	else if((mreg_p = find_member_reg(client_p->user->user_reg, reg_p)) &&
 		!mreg_p->suspend)
+	{
 		dump_info_extended(client_p, NULL, reg_p);
+		return 3;
+	}
 
 	return 1;
 }

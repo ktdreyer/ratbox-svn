@@ -382,20 +382,34 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
         if(service_p->service->command == NULL)
                 return;
 
-        if(service_p->service->flood > service_p->service->flood_max_ignore)
-        {
-                service_p->service->ignored_count++;
-                return;
-        }
+	/* do flood limiting */
+	if(!client_p->user->oper)
+	{
+		if((client_p->user->flood_time + config_file.client_flood_time) < CURRENT_TIME)
+		{
+			client_p->user->flood_time = CURRENT_TIME;
+			client_p->user->flood_count = 0;
+		}
 
-        if(service_p->service->flood > service_p->service->flood_max)
-        {
-		service_error(service_p, client_p, 
-			"Temporarily unable to answer query. Please try again shortly.");
-                service_p->service->flood++;
-                service_p->service->paced_count++;
-                return;
-        }
+		if(service_p->service->flood > service_p->service->flood_max_ignore ||
+		   client_p->user->flood_count > config_file.client_flood_max_ignore)
+		{
+			client_p->user->flood_count++;
+			service_p->service->ignored_count++;
+			return;
+		}
+
+		if(service_p->service->flood > service_p->service->flood_max ||
+		   client_p->user->flood_count > config_file.client_flood_max)
+		{
+			service_error(service_p, client_p, 
+					"Temporarily unable to answer query. Please try again shortly.");
+			client_p->user->flood_count++;
+			service_p->service->flood++;
+			service_p->service->paced_count++;
+			return;
+		}
+	}
 
         if((p = strchr(text, ' ')) != NULL)
                 *p++ = '\0';
@@ -418,7 +432,8 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 		}
 #endif
 
-                service_p->service->flood++;
+		client_p->user->flood_count += 2;
+                service_p->service->flood += 2;
 
                 if(parc < 1 || EmptyString(parv[0]))
 			handle_service_help_index(service_p, client_p);
@@ -443,7 +458,7 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 		{
 			sendto_server(":%s NOTICE %s :Insufficient parameters to %s::OLOGIN",
 					MYNAME, client_p->name, service_p->name);
-			service_p->service->flood++;
+			client_p->user->flood_count++;
 			return;
 		}
 
@@ -452,7 +467,7 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 		{
 			sendto_server(":%s NOTICE %s :No access to %s::OLOGIN",
 					MYNAME, client_p->name, ucase(service_p->name));
-			service_p->service->flood++;
+			client_p->user->flood_count++;
 			return;
 		}
 
@@ -485,7 +500,7 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 		{
 			sendto_server(":%s NOTICE %s :You are not logged in as an oper",
 					MYNAME, client_p->name);
-			service_p->service->flood++;
+			client_p->user->flood_count++;
 			return;
 		}
 
@@ -515,6 +530,7 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 		{
 			service_error(service_p, client_p, "No access to %s::%s",
 					service_p->name, cmd_entry->cmd);
+			client_p->user->flood_count++;
 			service_p->service->flood++;
 			return;
 		}
@@ -527,6 +543,8 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 				service_error(service_p, client_p, 
 						"You must be logged in for %s::%s",
 						service_p->name, cmd_entry->cmd);
+				client_p->user->flood_count++;
+				service_p->service->flood++;
 				return;
 			}
 			else
@@ -538,6 +556,7 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 		{
 			service_error(service_p, client_p, "Insufficient parameters to %s::%s",
 					service_p->name, cmd_entry->cmd);
+			client_p->user->flood_count++;
 			service_p->service->flood++;
 			return;
 		}
@@ -556,6 +575,7 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 
 		retval = (cmd_entry->func)(client_p, NULL, (const char **) parv, parc);
 
+		client_p->user->flood_count += retval;
 		service_p->service->flood += retval;
 		cmd_entry->cmd_use++;
 		return;
@@ -563,6 +583,7 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 
         service_error(service_p, client_p, "Unknown command.");
         service_p->service->flood++;
+	client_p->user->flood_count++;
 }
 
 void
