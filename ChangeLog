@@ -1,3 +1,28 @@
+leeh        2004/04/29 07:47:50 EDT	(20040429_0)
+
+  Modified files:
+    include              client.h 
+    src                  client.c 
+  Log:
+  - add FLAGS_ABORTED to mean a client is on the abort_list.
+    We can call dead_link() on a client, leave it on the abort list, and then
+    elsewhere call exit_client() on it, meaning you have an already dead
+    client left on the abort_list..
+  
+    dead_link() now marks a client as aborted, and exit_aborted_clients()
+    unmarks it before calling exit_client().  if exit_client() sees an
+    aborted client, itll walk the abort list and remove the client from it.
+  
+    I dont particularily want to go back to marking aborted clients as
+    FLAGS_DEAD, as I think that has other connotations.  This *may* fix the
+    wierd lclient_list bug..
+  
+  Revision  Changes    Path
+  7.242     +4 -0      ircd-ratbox/include/client.h
+  7.455     +22 -0     ircd-ratbox/src/client.c
+
+
+
 leeh        2004/04/27 17:00:41 EDT	(20040427_2)
 
   Modified files:
