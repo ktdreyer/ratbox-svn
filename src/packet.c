@@ -436,8 +436,7 @@ read_packet(int fd, void *data)
   /* Check to make sure we're not flooding */
   if (IsPerson(client_p) &&
      (linebuf_alloclen(&client_p->localClient->buf_recvq) >
-      ConfigFileEntry.client_flood) && 
-      !(CurrentTime - client_p->firsttime <= ConfigFileEntry.client_flood_grace))
+      ConfigFileEntry.client_flood))
   {
       if (!(ConfigFileEntry.no_oper_flood && IsOper(client_p)))
       {

@@ -512,8 +512,6 @@ void	newconf_init()
 			conf_set_general_compression_level);
 	add_conf_item("general", "client_flood", CF_INT,
 			conf_set_general_client_flood);
-	add_conf_item("general", "client_flood_grace", CF_TIME,
-			conf_set_general_client_flood_grace);
 	add_conf_item("general", "throttle_time", CF_TIME,
 			conf_set_general_throttle_time);
 	add_conf_item("general", "havent_read_conf", CF_YESNO,
@@ -2541,11 +2539,6 @@ void	conf_set_general_default_floodcount(void *data)
 void	conf_set_general_client_flood(void *data)
 {
 	ConfigFileEntry.client_flood = *(unsigned int*)data;
-}
-
-void	conf_set_general_client_flood_grace(void *data)
-{
-	ConfigFileEntry.client_flood_grace = *(unsigned int*)data;
 }
 
 void	conf_set_general_dot_in_ip6_addr(void *data)

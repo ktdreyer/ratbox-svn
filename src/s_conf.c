@@ -1470,7 +1470,6 @@ set_default_conf(void)
   ConfigFileEntry.min_nonwildcard = 4;
   ConfigFileEntry.default_floodcount = 8;
   ConfigFileEntry.client_flood = CLIENT_FLOOD_DEFAULT;
-  ConfigFileEntry.client_flood_grace = 10;
   ConfigFileEntry.use_help = 0;
   ConfigFileEntry.tkline_expire_notices = 0;
 }
