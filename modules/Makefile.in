@@ -19,6 +19,7 @@ INSTALL_DATA	= @INSTALL_DATA@
 INSTALL_SUID    = @INSTALL_PROGRAM@ -o root -m 4755
 SEDOBJ		= @SEDOBJ@
 SHELL		= /bin/sh
+MV		= @MV@
 
 SSL_LIBS	= @SSL_LIBS@
 SSL_INCLUDES	= @SSL_INCLUDES@
@@ -165,7 +166,8 @@ install_shared_modules: install-mkdirs
 
 .PHONY: depend clean distclean
 depend:
-	echo "# \${DOLLAR}Id: ${DOLLAR}" > .depend
+	grep "Id:" .depend > .depend.out
+	${MV} .depend.out .depend
 	${MKDEP} ${CPPFLAGS} ${SRCS} >> .depend
 
 clean:

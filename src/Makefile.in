@@ -165,7 +165,9 @@ version.c: version.c.SH
 
 .PHONY: depend clean distclean
 depend:
-	echo "# \${DOLLAR}Id: ${DOLLAR}" > .depend
+	grep "Id:" .depend >.depend.out
+	${RM} -f .depend
+	${MV} .depend.out .depend
 	${MKDEP} ${CPPFLAGS} ${BASE_SRCS} ${EXTRA_SRCS} >> .depend
 
 clean:
