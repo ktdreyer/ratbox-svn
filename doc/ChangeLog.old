@@ -1,3 +1,9 @@
+*** 20010719_1 by a1kmm
+- Re-enabled the #ifdef PACE_CONNECTs
+- Added a configuration option throttle_time = <seconds>; Set to 0 to
+  disable throttling.
+
+
 *** 20010718_13 by bill
 
 - PACE_CONNECT now off by default
