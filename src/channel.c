@@ -456,7 +456,9 @@ int
 check_channel_name(const char *name)
 {
   assert(name != NULL);
-
+  if(name == NULL)
+    return 0;
+    
   for (; *name; ++name)
   {
     if (!IsChanChar(*name))
