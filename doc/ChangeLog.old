@@ -1,3 +1,16 @@
+leeh        2002/06/19 16:26:39 EDT	(20020619_1)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  - I think ive got this right, hide the IP for servers always if defined
+    hide it for spoofs only if SHOW_IP (HIDE_IP would give the spoofed host)
+  
+  Revision  Changes    Path
+  7.278     +1 -2      ircd-hybrid-7/src/client.c
+
+
+
 leeh        2002/06/19 16:17:49 EDT	(20020619_0)
 
   Modified files:
