@@ -1,3 +1,7 @@
+*** 20010718_6 by androsyn
+Fixed compile warning on 64bit platforms
+
+
 *** 20010718_5 by leeh
 - missed a 'fi' in the makefile
 - fixed two stupid bugs:
