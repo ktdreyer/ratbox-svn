@@ -27,7 +27,7 @@
 /* data fd from ircd */
 int fd;
 /* control fd from ircd */
-int cfd; /* control fd is blocking from our end */
+int cfd; 
 
 #define MAXPARA 10
 #define REQIDLEN 10
@@ -321,8 +321,9 @@ read_io(void)
 		FD_ZERO(&writefds);
 		FD_ZERO(&exceptfds);
 
-		// FD_SET(cfd, &readfds);
 		FD_SET(fd, &readfds);
+		FD_SET(cfd, &exceptfds);
+		FD_SET(cfd, &readfds);
 		
 		if(fd > cfd)
 			maxfd = fd+1;
@@ -334,7 +335,6 @@ read_io(void)
 		tvx.tv_sec = 1;
 		tvx.tv_usec = 0;
 		select_result = select(maxfd, &readfds, &writefds, &exceptfds, &tvx);
-		gettimeofday(&now, NULL);
 		adns_afterselect(dns_state, maxfd, &readfds,&writefds,&exceptfds, &now);
 		process_adns_incoming();
 
@@ -348,6 +348,11 @@ read_io(void)
 			{
 				process_request();
 				/* incoming requests */
+			}
+			if(FD_ISSET(cfd, &exceptfds) || FD_ISSET(cfd, &readfds))
+			{
+				/* its dead cap'n */
+				exit(1);
 			}
 		}
 		
@@ -573,7 +578,7 @@ int main(int argc, char **argv)
 	char *tfd;
 	char *tcfd;
 	int res;
-	int x = 2;
+	int x = 2, i;
 	
 	tfd = getenv("FD");
 	tcfd = getenv("CFD");
@@ -588,6 +593,38 @@ int main(int argc, char **argv)
 		if(x != fd && x != cfd)
 			close(x);
 	}
+
+
+	if(fd > 255)
+	{
+		for(i = 3; i < 255; i++)
+		{
+			if(i != cfd) 
+			{
+				if(dup2(fd, i) < 0)
+					exit(1);
+				close(fd);
+				fd = i;
+				break;
+			}
+		}
+	}
+
+	if(cfd > 255)
+	{
+		for(i = 3; i < 255; i++)
+		{
+			if(i != fd) 
+			{
+				if(dup2(cfd, i) < 0)
+					exit(1);
+				close(cfd);
+				cfd = i;
+				break;
+			}
+		}
+	}
+	
 	res = fcntl(fd, F_GETFL, 0);
 	fcntl(fd, F_SETFL, res | O_NONBLOCK);
 
