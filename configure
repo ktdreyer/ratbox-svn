@@ -1998,13 +1998,13 @@ if test "$ac_test_CFLAGS" = set; then
   CFLAGS=$ac_save_CFLAGS
 elif test $ac_cv_prog_cc_g = yes; then
   if test "$GCC" = yes; then
-    CFLAGS="-g -O2"
+    CFLAGS="-g -O0"
   else
     CFLAGS="-g"
   fi
 else
   if test "$GCC" = yes; then
-    CFLAGS="-O2"
+    CFLAGS="-O0"
   else
     CFLAGS=
   fi
@@ -2320,7 +2320,7 @@ echo "${ECHO_T}Sun Workshop/Forte" >&6
 *Tru64*)
 	echo "$as_me:$LINENO: result: Tru64 cc" >&5
 echo "${ECHO_T}Tru64 cc" >&6
-	IRC_CFLAGS="-O2"
+	IRC_CFLAGS="-O0"
 	CPPFLAGS="-I/usr/local/include"
 	Tru=yes
 ;;
@@ -2386,7 +2386,7 @@ echo $ECHO_N "checking if $CC is Apple GCC... $ECHO_C" >&6
 	echo "$as_me:$LINENO: result: $AppleGCC" >&5
 echo "${ECHO_T}$AppleGCC" >&6
 
-	IRC_CFLAGS="$IRC_CFLAGS -O2 -Wall"
+	IRC_CFLAGS="$IRC_CFLAGS -O0 -Wall"
 fi
 
 if test "$ac_cv_prog_cc_g" = yes; then

@@ -167,7 +167,6 @@ struct server_conf
 	char *passwd;
 	char *spasswd;
 	int port;
-	int aftype;
 	int flags;
 	int servers;
 	time_t hold;

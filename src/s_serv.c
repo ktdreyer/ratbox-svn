@@ -1571,7 +1571,7 @@ serv_connect(struct server_conf *server_p, struct Client *by)
 		myipnum.ss_family = server_p->my_ipnum.ss_family;
 				
 	}
-	else if(server_p->aftype == AF_INET && ServerInfo.specific_ipv4_vhost)
+	else if(server_p->ipnum.ss_family == AF_INET && ServerInfo.specific_ipv4_vhost)
 	{
 		memcpy(&myipnum, &ServerInfo.ip, sizeof(myipnum));
 		((struct sockaddr_in *)&myipnum)->sin_port = 0;
@@ -1580,7 +1580,7 @@ serv_connect(struct server_conf *server_p, struct Client *by)
 	}
 	
 #ifdef IPV6
-	else if((server_p->aftype == AF_INET6) && ServerInfo.specific_ipv6_vhost)
+	else if((server_p->ipnum.ss_family == AF_INET6) && ServerInfo.specific_ipv6_vhost)
 	{
 		memcpy(&myipnum, &ServerInfo.ip6, sizeof(myipnum));
 		((struct sockaddr_in6 *)&myipnum)->sin6_port = 0;
@@ -1592,7 +1592,7 @@ serv_connect(struct server_conf *server_p, struct Client *by)
 	{
 		comm_connect_tcp(client_p->localClient->fd, server_p->host,
 				 server_p->port, NULL, 0, serv_connect_callback, 
-				 client_p, server_p->aftype, 
+				 client_p, server_p->ipnum.ss_family, 
 				 ConfigFileEntry.connect_timeout);
 		 return 1;
 	}

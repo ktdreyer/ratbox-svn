@@ -338,7 +338,7 @@ struct server_conf *
 make_server_conf(void)
 {
 	struct server_conf *server_p = MyMalloc(sizeof(struct server_conf));
-	server_p->ipnum.ss_family = server_p->aftype = AF_INET;
+	server_p->ipnum.ss_family = AF_INET;
 	return server_p;
 }
 
@@ -442,7 +442,7 @@ add_server_conf(struct server_conf *server_p)
 	server_p->dns_query = MyMalloc(sizeof(struct DNSQuery));
 	server_p->dns_query->ptr = server_p;
 	server_p->dns_query->callback = conf_dns_callback;
-	adns_gethost(server_p->host, server_p->aftype, server_p->dns_query);
+	adns_gethost(server_p->host, server_p->ipnum.ss_family, server_p->dns_query);
 }
 
 struct server_conf *
