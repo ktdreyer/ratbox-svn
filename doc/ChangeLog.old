@@ -1,3 +1,7 @@
+*** 20010620_1 by kreator
+- small openssl documentation updates: prngd, sunwski, andirand.
+
+
 *** 20010619_4 by leeh
 - when we send glines to hyb6 servers, they need to come from the opers
   server, not the opers nick..
