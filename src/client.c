@@ -184,10 +184,9 @@ void _free_client(struct Client* client_p)
   assert(NULL == client_p->prev);
   assert(NULL == client_p->next);
 
-  /* If localClient is non NULL, its a local client */
-  if (client_p->localClient != NULL)
+  if (MyConnect(client_p))
     {
-      if (-1 < client_p->fd)
+      if (client_p->fd >= 0)
 	fd_close(client_p->fd);
 
 #ifndef NDEBUG
