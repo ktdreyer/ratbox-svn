@@ -1,3 +1,8 @@
+*** 20010906_1 by leeh
+- added oper/admin flags to report_error()
+  untested as im not sure how to get one of these to trigger ;p
+
+
 *** 20010905_4 by davidt
 - Fix linebuf.c/linebuf_putmsg to correctly "\r\n\0" terminate extra-long
   lines, instead of "\0\r\n\0" terminating them, which tickles yet another
