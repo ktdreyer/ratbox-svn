@@ -1360,8 +1360,11 @@ int fork_server(struct Client *server)
   slink_fds[1][1][0] = fd_temp[0];
   slink_fds[1][0][1] = fd_temp[1];
 #endif
-
+#ifdef __CYGWIN__
+  if ((ret = vfork()) < 0)
+#else
   if ((ret = fork()) < 0)
+#endif
     goto fork_error;
   else if (ret == 0)
   {
