@@ -1,3 +1,8 @@
+*** 20010210_10 by fl_
+- added extra logging for numerics sent to servers.. this should
+  be removed once we fix the causes of it (admin only for now)
+
+
 *** 20010210_9 by a1kmm
 - Fixed DLINES - an irc_inaddr is not the same as a sockaddr
 - We cannot return from accept_connection without re-selecting the listener or the listener won't work
