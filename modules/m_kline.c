@@ -284,8 +284,8 @@ ms_kline(struct Client *client_p, struct Client *source_p,
   if (!IsPerson(source_p))
     return;
 
-  if (find_u_conf((char *)source_p->user->server,
-		  source_p->username, source_p->host, OPER_K))
+  if (find_shared(source_p->username, source_p->host,
+                  source_p->user->server, OPER_K))
   {
     if (valid_user_host(source_p, kuser, khost))
     {

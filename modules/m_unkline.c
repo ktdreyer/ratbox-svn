@@ -199,8 +199,8 @@ static void ms_unkline(struct Client *client_p, struct Client *source_p,
   if(!IsPerson(source_p))
     return;
 
-  if(find_u_conf((char *)source_p->user->server, source_p->username,
-                 source_p->host, OPER_UNKLINE))
+  if(find_shared(source_p->username, source_p->host, 
+                 source_p->user->server, OPER_UNKLINE))
   {
     if(remove_temp_kline(kuser, khost))
     {

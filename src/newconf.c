@@ -391,6 +391,7 @@ struct ConfItem *yy_aconf_next;
 struct Class *yy_class = NULL;
 
 static struct xline *yy_xconf = NULL;
+static struct shared *yy_uconf = NULL;
 
 char *resv_reason;
 
@@ -1213,47 +1214,36 @@ static void	conf_set_resv_nick(void *data)
 
 static int	conf_begin_shared(struct TopConf *tc)
 {
-	if(yy_aconf != NULL)
-	{
-		free_conf(yy_aconf);
-		yy_aconf = NULL;
-	}
-	yy_aconf=make_conf();
-	yy_aconf->status = CONF_ULINE;
-	yy_aconf->port = OPER_K;
+	yy_uconf = make_shared();
+	yy_uconf->flags = OPER_K;
 	return 0;
 }
 
 static int	conf_end_shared(struct TopConf *tc)
 {
-	conf_add_u_conf(yy_aconf);
-	yy_aconf = (struct ConfItem *)NULL;
+	dlinkAddAlloc(yy_uconf, &shared_list);
+	yy_uconf = NULL;
 	return 0;
 }
 
 static void	conf_set_shared_name(void *data)
 {
-	MyFree(yy_aconf->name);
-	DupString(yy_aconf->name, data);
+	MyFree(yy_uconf->servername);
+	DupString(yy_uconf->servername, data);
 }
 
 static void	conf_set_shared_user(void *data)
 {
 	char *p;
-	char *new_user;
-	char *new_host;
 
 	if((p = strchr(data, '@')))
 	{
-		*p = '\0';
-		DupString(new_user, data);
-		MyFree(yy_aconf->user);
-		yy_aconf->user = new_user;
+		*p++ = '\0';
+		MyFree(yy_uconf->username);
+		DupString(yy_uconf->username, data);
 		
-		p++;
-		DupString(new_host, p);
-		MyFree(yy_aconf->host);
-		yy_aconf->host = new_host;
+		MyFree(yy_uconf->host);
+		DupString(yy_uconf->host, p);
 	}
 }
 
@@ -1262,9 +1252,9 @@ static void	conf_set_shared_kline(void *data)
 	int yesno = *(unsigned int*) data;
 
 	if (yesno)
-		yy_aconf->port |= OPER_K; 
+		yy_uconf->flags |= OPER_K; 
 	else
-		yy_aconf->port &= ~OPER_K; 
+		yy_uconf->flags &= ~OPER_K; 
 }
 
 static void	conf_set_shared_unkline(void *data)
@@ -1272,9 +1262,9 @@ static void	conf_set_shared_unkline(void *data)
 	int yesno = *(unsigned int*) data;
 
 	if (yesno)
-		yy_aconf->port |= OPER_UNKLINE; 
+		yy_uconf->flags |= OPER_UNKLINE; 
 	else
-		yy_aconf->port &= ~OPER_UNKLINE;
+		yy_uconf->flags &= ~OPER_UNKLINE;
 }
 
 static int	conf_begin_connect(struct TopConf *tc)

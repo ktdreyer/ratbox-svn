@@ -760,35 +760,34 @@ static void stats_uptime(struct Client *source_p)
 
 static void stats_shared(struct Client *source_p)
 {
-  struct ConfItem *aconf;
-  char *name, *host, *pass, *user, *classname;
-  int port;
+  struct shared *uconf;
+  dlink_node *ptr;
+  char buf[3];
+  char *p;
 
-  for(aconf = u_conf; aconf != NULL; aconf = aconf->next)
+  DLINK_FOREACH(ptr, shared_list.head)
   {
-    if(aconf->status & CONF_ULINE)
-    {
-      char buf[3];
-      char *p = buf;
+    uconf = ptr->data;
 
-      get_printable_conf(aconf, &name, &host, &pass,
-                         &user, &port, &classname);
+    p = buf;
 
-      if(port & OPER_K)
-        *p++ = 'K';
-      else
-        *p++ = 'k';
+    if(uconf->flags & OPER_K)
+      *p++ = 'K';
+    else
+      *p++ = 'k';
 
-      if(port & OPER_UNKLINE)
-        *p++ = 'U';
-      else
-        *p++ = 'u';
+    if(uconf->flags & OPER_UNKLINE)
+      *p++ = 'U';
+    else
+      *p++ = 'u';
 
-      *p++ = '\0';
+    *p++ = '\0';
 
-      sendto_one(source_p, form_str(RPL_STATSULINE), me.name,
-                 source_p->name, name, user, host, buf);
-    }
+    sendto_one(source_p, form_str(RPL_STATSULINE),
+               me.name, source_p->name, 
+               BadPtr(uconf->servername) ? "*" : uconf->servername,
+               BadPtr(uconf->username) ? "*" : uconf->username,
+               BadPtr(uconf->host) ? "*" : uconf->host, buf);
   }
 }
 

@@ -93,6 +93,14 @@ struct xline
   int type;
 };
 
+struct shared
+{
+  char *username;
+  char *host;
+  char *servername;
+  int flags;
+};
+
 #define CONF_ILLEGAL            0x80000000
 #define CONF_QUARANTINED_NICK   0x0001
 #define CONF_CLIENT             0x0002
@@ -108,7 +116,6 @@ struct xline
 #define CONF_NOLIMIT            0x8000
 #define CONF_GLINE             0x10000
 #define CONF_DLINE             0x20000
-#define CONF_ULINE             0x80000
 #define CONF_EXEMPTDLINE      0x100000
 
 #define CONF_SERVER_MASK       CONF_SERVER
@@ -309,10 +316,6 @@ struct admin_info
 /* bleh. have to become global. */
 extern int scount;
 
-/* struct ConfItems */
-/* conf uline link list root */
-extern struct ConfItem *u_conf;
-
 /* All variables are GLOBAL */
 extern struct ConfItem* ConfigItemList;      /* conf list head */
 extern int              specific_ipv4_vhost; /* used in s_bsd.c */
@@ -353,6 +356,12 @@ extern struct xline *make_xline(const char *, const char *, int);
 extern void free_xline(struct xline *);
 extern struct xline *find_xline(char *);
 
+dlink_list shared_list;
+extern struct shared *make_shared(void);
+extern void free_shared(struct shared *);
+extern int find_shared(const char *username, const char *host,
+                       const char *servername, int type);
+
 extern void             read_conf_files(int cold);
 
 extern int              attach_conf(struct Client*, struct ConfItem *);
@@ -375,8 +384,6 @@ extern struct ConfItem* find_kill (struct Client *);
 extern int conf_connect_allowed(struct irc_inaddr *addr, int aftype);
 extern char *oper_flags_as_string(int);
 extern char *oper_privs_as_string(struct Client *, int);
-
-extern int find_u_conf(char*, char*, char *, int);
 
 extern struct ConfItem* find_tkline(const char*, const char*, struct irc_inaddr *);
 extern char* show_iline_prefix(struct Client *,struct ConfItem *,char *);
@@ -417,7 +424,6 @@ extern void conf_add_class_to_conf(struct ConfItem *);
 extern void conf_add_me(struct ConfItem *);
 extern void conf_add_class(struct ConfItem *,int );
 extern void conf_add_d_conf(struct ConfItem *);
-extern void conf_add_u_conf(struct ConfItem *);
 extern void conf_add_fields(struct ConfItem*, char*, char *, char*, char *,char *);
 extern void conf_add_conf(struct ConfItem *);
 extern void flush_expired_ips(void *);

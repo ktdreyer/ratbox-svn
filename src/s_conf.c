@@ -90,8 +90,8 @@ static struct   Class* class0;
 static  int     verify_access(struct Client *client_p, const char *username);
 static  int     attach_iline(struct Client *, struct ConfItem *);
 
-static void clear_special_conf(struct ConfItem **);
 static void clear_xlines(void);
+static void clear_shared(void);
 
 /* usually, with hash tables, you use a prime number...
  * but in this case I am dealing with ip addresses, not ascii strings.
@@ -119,9 +119,6 @@ static IP_ENTRY *find_or_add_ip(struct irc_inaddr*);
 
 /* general conf items link list root */
 struct ConfItem* ConfigItemList = NULL;
-
-/* conf uline link list root */
-struct ConfItem        *u_conf = ((struct ConfItem *)NULL);
 
 /*
  * conf_dns_callback
@@ -188,6 +185,48 @@ make_conf()
   aconf->status       = CONF_ILLEGAL;
   aconf->aftype       = AF_INET;
   return(aconf);
+}
+
+/*
+ * free_conf
+ *
+ * inputs	- pointer to conf to free
+ * output	- none
+ * side effects	- crucial password fields are zeroed, conf is freed
+ */
+void 
+free_conf(struct ConfItem* aconf)
+{
+  assert(aconf != NULL);
+  if(aconf == NULL)
+    return;
+
+  assert(!(aconf->status & CONF_CLIENT) ||
+         (aconf->host && strcmp(aconf->host, "NOMATCH")) ||
+         (aconf->clients == -1));
+
+  delete_adns_queries(aconf->dns_query);
+
+  /* security.. */
+  if (aconf->passwd)
+    memset(aconf->passwd, 0, strlen(aconf->passwd));
+  if (aconf->spasswd)
+    memset(aconf->spasswd, 0, strlen(aconf->spasswd));
+
+  MyFree(aconf->passwd);
+  MyFree(aconf->spasswd);
+  MyFree(aconf->name);
+  MyFree(aconf->className);
+  MyFree(aconf->user);
+  MyFree(aconf->host);
+
+#ifdef HAVE_LIBCRYPTO
+  if(aconf->rsa_public_key)
+    RSA_free(aconf->rsa_public_key);
+
+  MyFree(aconf->rsa_public_key_file);
+#endif
+  MyFree((char*) aconf);
 }
 
 /* make_xline()
@@ -278,46 +317,93 @@ find_xline(char *gecos)
   return NULL;
 }
 
-/*
- * free_conf
+/* make_shared()
  *
- * inputs	- pointer to conf to free
- * output	- none
- * side effects	- crucial password fields are zeroed, conf is freed
+ * inputs       -
+ * outputs      -
+ * side effects - creates a shared block
  */
-void 
-free_conf(struct ConfItem* aconf)
+struct shared *
+make_shared(void)
 {
-  assert(aconf != NULL);
-  if(aconf == NULL)
+  struct shared *uconf;
+
+  uconf = (struct shared *) MyMalloc(sizeof(struct shared));
+  memset(uconf, 0, sizeof(struct shared));
+
+  return uconf;
+}
+
+/* free_shared()
+ *
+ * inputs       - shared block to free
+ * outputs      -
+ * side effects - shared block is freed.
+ */
+void
+free_shared(struct shared *uconf)
+{
+  assert(uconf != NULL);
+  if(uconf == NULL)
     return;
 
-  assert(!(aconf->status & CONF_CLIENT) ||
-         (aconf->host && strcmp(aconf->host, "NOMATCH")) ||
-         (aconf->clients == -1));
+  MyFree(uconf->username);
+  MyFree(uconf->host);
+  MyFree(uconf->servername);
+  MyFree((char *) uconf);
+}
 
-  delete_adns_queries(aconf->dns_query);
+/* clear_shared()
+ *
+ * inputs       -
+ * outputs      -
+ * side effects - shared blocks are nuked
+ */
+static void
+clear_shared(void)
+{
+  struct shared *uconf;
+  dlink_node *ptr;
+  dlink_node *next_ptr;
 
-  /* security.. */
-  if (aconf->passwd)
-    memset(aconf->passwd, 0, strlen(aconf->passwd));
-  if (aconf->spasswd)
-    memset(aconf->spasswd, 0, strlen(aconf->spasswd));
+  DLINK_FOREACH_SAFE(ptr, next_ptr, shared_list.head)
+  {
+    uconf = ptr->data;
 
-  MyFree(aconf->passwd);
-  MyFree(aconf->spasswd);
-  MyFree(aconf->name);
-  MyFree(aconf->className);
-  MyFree(aconf->user);
-  MyFree(aconf->host);
+    free_shared(uconf);
+    dlinkDestroy(ptr, &shared_list);
+  }
+}
 
-#ifdef HAVE_LIBCRYPTO
-  if(aconf->rsa_public_key)
-    RSA_free(aconf->rsa_public_key);
+/* find_shared()
+ *
+ * inputs       - username, hostname, servername, type to find shared for
+ * outputs      - YES if one found, else NO
+ * side effects -
+ */
+int
+find_shared(const char *username, const char *host, 
+            const char *servername, int flags)
+{
+  struct shared *uconf;
+  dlink_node *ptr;
 
-  MyFree(aconf->rsa_public_key_file);
-#endif
-  MyFree((char*) aconf);
+  DLINK_FOREACH(ptr, shared_list.head)
+  {
+    uconf = ptr->data;
+
+    if((uconf->flags & flags) == 0)
+      continue;
+
+    if(BadPtr(uconf->servername) || match(uconf->servername, servername))
+    {
+      if((BadPtr(uconf->username) || match(uconf->username, username)) &&
+         (BadPtr(uconf->host) || match(uconf->host, host)))
+        return YES;
+    }
+  }
+
+  return NO;
 }
 
 /*
@@ -1321,68 +1407,6 @@ find_conf_by_host(const char* host, int status)
   return(NULL);
 }
 
-
-/*
- * find_u_conf
- *
- * inputs       - pointer to servername
- *		- pointer to user of oper
- *		- pointer to host of oper
- * output       - NULL or pointer to found struct ConfItem
- * side effects - looks for a matches on all fields
- */
-int 
-find_u_conf(char *server,char *user,char *host, int flag)
-{
-  struct ConfItem *aconf;
-
-  for (aconf = u_conf; aconf; aconf = aconf->next)
-    {
-      if (BadPtr(aconf->name))
-          continue;
-
-      if (match(aconf->name,server))
-	{
-	  if (BadPtr(aconf->user) || BadPtr(aconf->host))
-	  {
-            if(aconf->port & flag)
-  	      return(YES);
-	    else
-              return(NO);
-	  }
-
-	  if(match(aconf->user,user) && match(aconf->host,host) &&
-             aconf->port & flag)
-	    return(YES);
-
-	}
-    }
-  return(NO);
-}
-
-
-/*
- * clear_special_conf
- * 
- * inputs       - pointer to pointer of root of special conf link list
- * output       - none
- * side effects - clears given special conf lines
- */
-static void 
-clear_special_conf(struct ConfItem **this_conf)
-{
-  struct ConfItem *aconf;
-  struct ConfItem *next_aconf;
-
-  for (aconf = *this_conf; aconf; aconf = next_aconf)
-    {
-      next_aconf = aconf->next;
-      free_conf(aconf);
-    }
-  *this_conf = (struct ConfItem *)NULL;
-  return;
-}
-
 /*
  * rehash
  *
@@ -2300,7 +2324,7 @@ void clear_out_old_conf(void)
 
   clear_out_address_conf();
   clear_xlines();
-  clear_special_conf(&u_conf);
+  clear_shared();
 
   /* clean out module paths */
 #ifndef STATIC_MODULES
@@ -2652,20 +2676,6 @@ conf_add_d_conf(struct ConfItem *aconf)
       add_conf_by_address(aconf->host, CONF_DLINE, NULL, aconf);
     }
 }
-
-/* conf_add_u_conf()
- * 
- * inputs       - pointer to config item
- * output       - NONE
- * side effects - Add an U line
- */
-void 
-conf_add_u_conf(struct ConfItem *aconf)
-{
-  aconf->next = u_conf;
-  u_conf = aconf;
-}
-
 
 /*
  * conf_add_fields
