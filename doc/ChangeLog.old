@@ -1,3 +1,10 @@
+*** 20001208_16 by db
+- added m_eob to modules, this means changes to handlers.h, msg.h, Makefile.in
+- also had to modify s_serv.c to send EOB message
+- fixed stupid typo in m_admin.c, it was claiming to be m_version.c
+
+
+
 *** 20001208_15 by db
 - sped up local op code...
 
