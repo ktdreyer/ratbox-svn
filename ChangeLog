@@ -1,3 +1,19 @@
+leeh        2005/03/21 14:38:16 UTC	(20050321_1)
+
+  Modified files:
+    include              channel.h 
+    modules/core         m_join.c 
+    src                  channel.c 
+  Log:
+  - move can_join() -> m_join.c
+  
+  Revision  Changes    Path
+  7.167     +0 -1      ircd-ratbox/include/channel.h
+  1.172     +69 -5     ircd-ratbox/modules/core/m_join.c
+  7.441     +0 -64     ircd-ratbox/src/channel.c
+
+
+
 leeh        2005/03/21 14:30:43 UTC	(20050321_0)
 
   Modified files:
