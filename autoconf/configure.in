@@ -736,7 +736,7 @@ AC_ARG_ENABLE(small-net,
   esac
 ])
 
-ac_cv_nicklen="9+1"
+ac_cv_nicklen="9"
 ac_cv_maxclients="200"
 
 dnl Nicklen
@@ -746,13 +746,13 @@ AC_ARG_WITH(nicklen,
 [
 	echo $withval
   if test "$withval" = "no"; then
-	ac_cv_nicklen="9+1"
+	ac_cv_nicklen="9"
   else
-	ac_cv_nicklen="$withval+1"
+	ac_cv_nicklen="$withval"
   fi
 ])
 AC_MSG_RESULT("Setting NICKLEN to $ac_cv_nicklen")
-AC_DEFINE_UNQUOTED(NICKLEN, ${ac_cv_nicklen})
+AC_DEFINE_UNQUOTED(NICKLEN, ${ac_cv_nicklen}+1)
 
 dnl Max support clients
 AC_ARG_WITH(maxclients,

@@ -3978,7 +3978,7 @@ if test "${enable_small_net+set}" = set; then
 fi
 
 
-ac_cv_nicklen="9+1"
+ac_cv_nicklen="9"
 ac_cv_maxclients="200"
 
 # Check whether --with-nicklen or --without-nicklen was given.
@@ -3987,16 +3987,16 @@ if test "${with_nicklen+set}" = set; then
   
 	echo $withval
   if test "$withval" = "no"; then
-	ac_cv_nicklen="9+1"
+	ac_cv_nicklen="9"
   else
-	ac_cv_nicklen="$withval+1"
+	ac_cv_nicklen="$withval"
   fi
 
 fi
 
 echo "$ac_t"""Setting NICKLEN to $ac_cv_nicklen"" 1>&6
 cat >> confdefs.h <<EOF
-#define NICKLEN ${ac_cv_nicklen}
+#define NICKLEN ${ac_cv_nicklen}+1
 EOF
 
 
