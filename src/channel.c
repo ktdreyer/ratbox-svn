@@ -157,8 +157,6 @@ add_user_to_channel(struct Channel *chptr, struct Client *who, int flags)
     if (MyClient(who))
       chptr->locusers++;
 
-    chptr->users_last = CurrentTime;
-
     ptr = make_dlink_node();
     dlinkAdd(chptr, ptr, &who->user->channel);
     who->user->joined++;
@@ -551,7 +549,7 @@ cleanup_channels(void *unused)
     {
       if(chptr->users == 0)
       {
-        if((chptr->channelts + ConfigChannel.persist_time) < CurrentTime)
+        if((chptr->users_last + ConfigChannel.persist_time) < CurrentTime)
 	{
 	  if(uplink && IsCapable(uplink, CAP_LL))
 	    sendto_one(uplink, ":%s DROP %s", me.name, chptr->chname);
@@ -568,11 +566,7 @@ cleanup_channels(void *unused)
             sendto_one(uplink, ":%s DROP %s", me.name, chptr->chname);
             destroy_channel(chptr);
           }
-          else
-            chptr->users_last = CurrentTime;
         }
-        else
-          chptr->users_last = CurrentTime;
       }
     }
   }

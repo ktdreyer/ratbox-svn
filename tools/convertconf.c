@@ -47,8 +47,6 @@ static struct ConnectPair* base_ptr=NULL;
 
 static void ConvertConf(FILE* file,FILE *out);
 static void AddLoggingBlock(FILE* out);
-static void AddGeneralBlock(FILE* out);
-static void AddModulesBlock(FILE* out);
 static void usage(void);
 static char *getfield(char *);
 static void ReplaceQuotes(char *out, char *in);
@@ -82,8 +80,6 @@ int main(int argc,char *argv[])
 
   puts("Adding the logging/general/modules blocks to your config..\n");
   AddLoggingBlock(out);
-  AddGeneralBlock(out);
-  AddModulesBlock(out);
 
   puts("The config file has been converted however you MUST rearrange the config:\n"
        "   o class blocks (Y:) must be before anything that uses then\n"
@@ -112,191 +108,6 @@ static void AddLoggingBlock(FILE *out)
   fprintf(out, "\t * by /quote SET LOG in the ircd)\n");
   fprintf(out, "\t * L_CRIT, L_ERROR, L_WARN, L_NOTICE, L_TRACE, L_INFO, L_DEBUG\n");
   fprintf(out, "\t */\n\tlog_level = L_INFO;\n};\n\n");
-}
-
-static void AddGeneralBlock(FILE *out)
-{
-  fprintf(out, "general {\n\n");
-
-  fprintf(out, "\t/* Specify the default setting of FLOODCOUNT at startup.\n");
-  fprintf(out, "\t * This is how many lines per second we allow before we throttle\n");
-  fprintf(out, "\t * users MSGs/Notices ONLY affects the startup value, otherwise\n");
-  fprintf(out, "\t * use: /quote set floodcount.\n\t */\n");
-  fprintf(out, "\tdefault_floodcount=10;\n\n");
-
-  fprintf(out, "\t/* Send a notice to all opers on the server when someone tries\n");
-  fprintf(out, "\t * to OPER and uses the wrong password.\n\t */\n");
-  fprintf(out, "\tfailed_oper_notice=yes;\n\n");
-
-  fprintf(out, "\t/* Define how many 'dot' characters are permitted in an ident reply\n");
-  fprintf(out, "\t * before rejecting the user.\n\t */\n");
-  fprintf(out, "\tdots_in_ident=2;\n\n");
-
-  fprintf(out, "\t/* Define how many non-wildcard (not: '.' '*' '?' '@') characters are\n");
-  fprintf(out, "\t * needed in klines for them to be placed.  Does not affect\n");
-  fprintf(out, "\t * klines hand-placed in kline.conf.  eg to disallow *@*.com.\n\t */\n");
-  fprintf(out, "\tmin_nonwildcard = 4;\n\n");
-
-  fprintf(out, "\t/* how many nicknames someone may /accept in +g umode */\n");
-  fprintf(out, "\tmax_accept = 20;\n\n");
-
-  fprintf(out, "\t/* Enable the nick flood control code. */\n\tanti_nick_flood = yes;\n");
-  fprintf(out, "\t/* These settings will allow 5 nick changes in 20 seconds. */\n");
-  fprintf(out, "\tmax_nick_time = 20 seconds;\n\tmax_nick_changes = 5;\n\n");
-
-
-  fprintf(out, "\t/* Do not allow the clients exit message to be\n");
-  fprintf(out, "\t * sent to a channel if the client has been on for less than\n\t * anti_spam_exit_message_time\n");
-  fprintf(out, "\t * The idea is, some spambots exit with their spam, thus advertising\n");
-  fprintf(out, "\t * this way. (idea due to ThaDragon, I just couldn't find =his= code).\n\t */\n");
-  fprintf(out, "\tanti_spam_exit_message_time = 5 minutes;\n\n");
-
-  fprintf(out, "\t/* Define the time delta permissible for a remote server connection.\n");
-  fprintf(out, "\t * If our timestamp and the remote server's timestamp are over\n");
-  fprintf(out, "\t * ts_max_delta different, the connection will be dropped.  If it\n");
-  fprintf(out, "\t * is less than ts_max_delta but more than ts_warn_delta, send\n");
-  fprintf(out, "\t * a notice to opers on the server, but still allow the connection.\n\t */\n");
-  fprintf(out, "\tts_warn_delta = 30 seconds;\n\tts_max_delta = 5 minutes;\n\n");
-
-  fprintf(out, "\t/* When a user QUITs, prepend their QUIT message with \"Client exit:\"\n");
-  fprintf(out, "\t * in order to help prevent against faking server error messages (eg.\n");
-  fprintf(out, "\t * ping timeout, connection reset by peer).\n\t */\n");
-  fprintf(out, "\tclient_exit = yes;\n\n");
-
-  fprintf(out, "\t/* Show the reason why the user was K-lined or D-lined to the \"victim\"\n");
-  fprintf(out, "\t * It's a neat feature except for one thing... If you use a tcm\n");
-  fprintf(out, "\t * and it shows the nick of the oper doing the kline (as it does by\n");
-  fprintf(out, "\t * default) Your opers can be hit with retaliation... Or if your\n");
-  fprintf(out, "\t * opers use scripts that stick an ID into the comment field. etc.\n\t */\n");
-  fprintf(out, "\tkline_with_reason = yes;\n\n");
-
-  fprintf(out, "\t/* Force the sign-off reason to be \"Connection closed\" when a user is\n");
-  fprintf(out, "\t * K-lined.  The user will still see the real reason.  This prevents\n");
-  fprintf(out, "\t * other users seeing the client disconnect from harassing the IRCops.\n\t */\n");
-  fprintf(out, "\tkline_with_connection_closed = no;\n\n");
-
-  fprintf(out, "\t/* Set to yes if you wish your server to flag and not apply redundant\n");
-  fprintf(out, "\t* K-lines.\n\t */\n\tnon_redundant_klines = yes;\n\n");
-
-  fprintf(out, "\t/* Enable this if you want opers to get noticed about \"things\" trying\n");
-  fprintf(out, "\t * to connect as servers that don't have N: lines.  Twits with\n");
-  fprintf(out, "\t * misconfigured servers can get really annoying with this enabled.\n\t */\n");
-  fprintf(out, "\twarn_no_nline = yes;\n\n");
-
-  fprintf(out, "\t/* Set STATS o to be oper only */\n\to_lines_oper_only=yes;\n\n");
-
-  fprintf(out, "\t/* We can either show users a full stats I list:\n");
-  fprintf(out, "\t *                                      stats_i_oper_only=no;\n");
-  fprintf(out, "\t * a list of auth blocks matching them: stats_i_oper_only=masked;\n");
-  fprintf(out, "\t * or make the list oper only:          stats_i_oper_only=yes;\n");
-  fprintf(out, "\t */\n\tstats_i_oper_only=masked;\n\n");
-
-  fprintf(out, "\t/* We can either show users a full stats k/K list:\n");
-  fprintf(out, "\t *                                 stats_k_oper_only=no;\n");
-  fprintf(out, "\t * a list of klines matching them: stats_k_oper_only=masked;\n");
-  fprintf(out, "\t * or make the list oper only:     stats_k_oper_only=yes;\n");
-  fprintf(out, "\t */\n\tstats_k_oper_only=masked;\n\n");
-
-  fprintf(out, "\t/* Links Delay determines the time between updates of the user LINKS\n");
-  fprintf(out, "\t * file.  The default updates it every 5 minutes.\n\t */\n\tlinks_delay = 5 minutes;\n\n");
-
-  fprintf(out, "\t/* time between notifications of ignored messages in +g mode */\n");
-  fprintf(out, "\tcaller_id_wait = 1 minute;\n\n");
-
-  fprintf(out, "\t/* time between uses (server wide) of /whois and /whowas */\n");
-  fprintf(out, "\twhois_wait = 5 second;\n\n");
-
-  fprintf(out, "\t/* There are clients ignoring the FORCE_MOTD numeric.  There is no\n");
-  fprintf(out, "\t * no point forcing MOTD on connecting clients IMO.  Give them a short\n");
-  fprintf(out, "\t * NOTICE telling them they should read the MOTD, and leave it at that.\n");
-  fprintf(out, "\t */\n\tshort_motd = no;\n\n");
-
-  fprintf(out, "\t/* Set to yes to disable flood control for opers. */\n\tno_oper_flood = yes;\n\n");
-
-  fprintf(out, "\t/* Enable G-lines */\n\tglines = yes;\n\n");
-
-  fprintf(out, "\t/* Set the time for how long G-lines will last.\n\tgline_time = 1 day;\n\n");
-
-  fprintf(out, "\t/* Define the maximum amount of time a user can idle before\n");
-  fprintf(out, "\t * disconnecting them.  Set to 0 to disable.\n\t */\n\tidletime = 0;\n\n");
-
-  fprintf(out, "\t/* Enable the server hiding feature.  This prevents users from\n");
-  fprintf(out, "\t * finding out what server users are on, and hides IP's.  Note\n");
-  fprintf(out, "\t * that some clients do not handle this well and may break.  Blame\n");
-  fprintf(out, "\t * the packet kiddies for making this option almost a necessity.\n\t */\n");
-  fprintf(out, "\thide_server = yes;\n\n");
-
-  fprintf(out, "\t/* How many servers to autoconnect to if theres no class\n");
-  fprintf(out, "\tmaximum_links = 1;\n\n");
-
-  fprintf(out, "\t/* This line will prevent the ircd from loading.  Remove it.  */\n");
-  fprintf(out, "\thavent_read_conf = 1;\n\n");
-
-  fprintf(out, "\t/* Define these to the log files you want to use for user connections\n");
-  fprintf(out, "\t * (userlog), successful use of /oper (operlog), and failed use of\n");
-  fprintf(out, "\t * /oper (foperlog).  Logging will stop if either these files do not\n");
-  fprintf(out, "\t * exist, or if they are not defined.\n\t */\n\tfname_userlog = \"logs/userlog\";\n");
-  fprintf(out, "\tfname_operlog = \"logs/operlog\";\n\tfname_foperlog = \"logs/foperlog\";\n\n");
-
-  fprintf(out, "\t/* max_targets\n\t * only max_target targets can be PRIVMSG'ed / NOTICE'd in a single\n");
-  fprintf(out, "\t * command. default is 4 if not defined here. setting to 0 will have\n");
-  fprintf(out, "\t * broken results (ie PRIVMSG/NOTICE won't work).\n\t */\n\tmax_targets = 4;\n\n");
-
-  fprintf(out, "\t/* client_flood\n");
-  fprintf(out, "\t * max number of _lines_ from a client that will be buffered\n");
-  fprintf(out, "\t * awaiting parsing, before dropping with 'Excess Flood'\n");
-  fprintf(out, "\t */\n\tclient_flood = 20;\n\n");
-
-  fprintf(out, "\t/* message_locale\n\t * default message locale to use if gettext() is enabled\n");
-  fprintf(out, "\t * Use \"custom\" for the (in)famous Hybrid custom messages.\n");
-  fprintf(out, "\t * Use \"standard\" for the compiled in defaults.\n\t */\n\tmessage_locale = \"custom\";\n\n");
-
-  fprintf(out, "\t/* List of user modes that only opers can set, see example.conf for a list. */\n");
-  fprintf(out, "\toper_only_umodes = bots, cconn, debug, full, skill, nchange,\n");
-  fprintf(out, "\t\t\trej, spy, external, operwall, locops, unauth;\n\n");
-
-  fprintf(out, "\t/* List of usermodes that get set when a user /oper's\n");
-  fprintf(out, "\t * Default: locops, wallop, operwall, servnotice.\n");
-  fprintf(out, "\t */\n\toper_umodes = locops, servnotice, operwall, wallop;\n\n");
-
-  fprintf(out, "\t/* servlink is used to perform encryption/compression of\n");
-  fprintf(out, "\tserver<->server links. */\n");
-  fprintf(out, "\tservlink_path = \"/usr/local/ircd/bin/servlink\";\n\n");
-
-  fprintf(out, "\t/* Determines the default cipher preference to use for a link,*/\n");
-  fprintf(out, "\t * if no cipher_preference line is set for that connect {} block.\n");
-  fprintf(out, "\t */\n\t# default_cipher_preference = \"BF/256\";\n\n");
-
-  fprintf(out, "\t/* Use EGD instead of *random devices */\n");
-  fprintf(out, "\t# use_egd = yes;\n\n");
-
-  fprintf(out, "\t/* Define location of EGD pool. Not necessary for OpenSSL >= 0.9.7\n");
-  fprintf(out, "\t# egdpool_path = \"/var/run/egd-pool\";\n\n");
-
-  fprintf(out, "\t/* Allows you to select desired trade off between speed/compression.\n");
-  fprintf(out, "\t * Available values are 1 (least compression, fastest)\n");
-  fprintf(out, "\t * through 9 (most compression, slowest). */\n");
-  fprintf(out, "\t# compression_level = 9;\n\n");
-
-  fprintf(out, "\t/* Allows you to set the minimum amount of time allowed between\n");
-  fprintf(out, "\t * connections from the same IP.\n");
-  fprintf(out, "\tthrottle_time = 30;\n\n");
-
-  fprintf(out, "};\n\n");
-}
-
-static void AddModulesBlock(FILE* out)
-{
-  fprintf(out, "modules {\n");
-  fprintf(out, "\t/* set paths for module.  these paths are searched both for\n");
-  fprintf(out, "\t * module=\"\" and /quote modload, when a relative pathname\n");
-  fprintf(out, "\t * is specified.\n\t*/\n");
-
-  fprintf(out, "\tpath = \"/usr/local/ircd/modules\";\n");
-  fprintf(out, "\tpath = \"/usr/local/ircd/modules/autoload\";\n\n");
-
-  fprintf(out, "\t/* load a module upon startup (or rehash) */\n");
-  fprintf(out, "\t#module = \"some_module.so\";\n};\n");
 }
 
 /*

@@ -117,7 +117,6 @@ ms_cburst(struct Client *client_p,
       chptr->channelts = (time_t)(-1); /* highest possible TS so its always
 					* over-ruled
                                         */
-      chptr->users_last = CurrentTime;
     }
     else if(nick && *nick=='!')
     {
