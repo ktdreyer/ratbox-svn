@@ -1,3 +1,9 @@
+*** 20010214_6 by fl_
+- fixes msg $irc.server.. the docs need updating..
+  $$irc.server has been reverted to $irc.server to keep compatability
+  I need to go shout at my isp so ill fix $# soon :)
+
+
 *** 20010214_5 by a1kmm
 - Made the special case of hostmasks with no wildcards work properly.
 
