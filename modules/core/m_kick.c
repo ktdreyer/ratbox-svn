@@ -177,14 +177,18 @@ static void m_kick(struct Client *client_p,
 
   if (IsMember(who, chptr))
     {
-      /* half ops cannot kick full chanops */
+      /* half ops cannot kick other halfops on private channels */
 #ifdef HALFOPS
-      if (is_half_op(chptr,source_p) && is_any_op(chptr,who))
+      if (is_half_op(chptr,source_p))
+      {
+	if (((chptr->mode.mode & MODE_PRIVATE) && is_any_op(chptr, who)) ||
+             is_chan_op(chptr, who))
 	{
           sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
                      me.name, parv[0], name);
 	  return;
 	}
+      }
 #endif
       /* jdc
        * - In the case of a server kicking a user (i.e. CLEARCHAN),
