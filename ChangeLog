@@ -1,3 +1,16 @@
+leeh        2004/03/17 10:20:28 EST	(20040317_2)
+
+  Modified files:
+    src                  s_serv.c 
+  Log:
+  - make the log for outbound connect show *[name] @host, rather than *[host]
+    @host
+  
+  Revision  Changes    Path
+  7.388     +1 -1      ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2004/03/17 10:15:53 EST	(20040317_1)
 
   Modified files:
