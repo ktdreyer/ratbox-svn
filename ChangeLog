@@ -1,3 +1,15 @@
+androsyn    2003/09/23 09:40:21 EDT	(20030923_6)
+
+  Modified files:
+    src                  modules.c 
+  Log:
+  don't need error_msgtab here..
+  
+  Revision  Changes    Path
+  7.136     +0 -1      ircd-ratbox/src/modules.c
+
+
+
 androsyn    2003/09/23 09:37:59 EDT	(20030923_5)
 
   Modified files:
