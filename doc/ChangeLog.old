@@ -1,3 +1,6 @@
+*** 20010102_21 by davidt
+Fix modunload core bug..
+
 *** 20010102_20 by davidt
 Another go at fixing netjoins on +a channels... *sigh*
 
