@@ -43,7 +43,7 @@
 #include "hostmask.h"
 #include "reject.h"
 #include "hash.h"
-#include "help.h"
+#include "cache.h"
 
 static int mo_rehash(struct Client *, struct Client *, int, const char **);
 

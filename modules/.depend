@@ -287,7 +287,7 @@ m_help.o: m_help.c ../include/stdinc.h ../include/config.h \
  ../include/msg.h ../include/numeric.h ../include/s_conf.h \
  ../include/class.h ../include/common.h ../include/patricia.h \
  ../include/parse.h ../include/modules.h ../include/s_newconf.h \
- ../include/hook.h ../include/hash.h ../include/help.h
+ ../include/hook.h ../include/hash.h ../include/cache.h
 m_htm.o: m_htm.c ../include/stdinc.h ../include/config.h \
  ../include/setup.h ../include/defaults.h ../include/handlers.h \
  ../include/client.h ../include/ircd_defs.h ../include/s_log.h \
@@ -528,7 +528,7 @@ m_rehash.o: m_rehash.c ../include/stdinc.h ../include/config.h \
  ../include/motd.h ../include/class.h ../include/patricia.h \
  ../include/msg.h ../include/parse.h ../include/modules.h \
  ../include/s_newconf.h ../include/hook.h ../include/hostmask.h \
- ../include/reject.h ../include/hash.h ../include/help.h
+ ../include/reject.h ../include/hash.h ../include/cache.h
 m_restart.o: m_restart.c ../include/stdinc.h ../include/config.h \
  ../include/setup.h ../include/defaults.h ../include/handlers.h \
  ../include/client.h ../include/ircd_defs.h ../include/s_log.h \

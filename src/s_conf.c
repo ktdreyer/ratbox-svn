@@ -56,7 +56,7 @@
 #include "patricia.h"
 #include "cluster.h"
 #include "reject.h"
-#include "help.h"
+#include "cache.h"
 
 struct config_server_hide ConfigServerHide;
 

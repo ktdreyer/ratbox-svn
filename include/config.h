@@ -314,8 +314,8 @@
 
 #define RXCONF_HEAP_SIZE        20
 #define SHARED_HEAP_SIZE        10
-#define HELPFILE_HEAP_SIZE	20
-#define HELPLINE_HEAP_SIZE	50
+#define CACHEFILE_HEAP_SIZE	20
+#define CACHELINE_HEAP_SIZE	50
 
 /* DEBUGMODE is used mostly for internal development, it is likely
  * to make your client server very sluggish.

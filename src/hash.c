@@ -43,7 +43,7 @@
 #include "msg.h"
 #include "handlers.h"
 #include "s_newconf.h"
-#include "help.h"
+#include "cache.h"
 
 /* New hash code */
 /*
@@ -336,7 +336,7 @@ add_to_xline_hash(const char *name, struct rxconf *xconf)
 };
 
 void
-add_to_help_hash(const char *name, struct helpfile *hptr)
+add_to_help_hash(const char *name, struct cachefile *hptr)
 {
 	unsigned int hashv;
 
@@ -557,7 +557,7 @@ clear_help_hash(void)
 	{
 		DLINK_FOREACH_SAFE(ptr, next_ptr, helpTable[i].head)
 		{
-			free_help(ptr->data);
+			free_cachefile(ptr->data);
 			free_dlink_node(ptr);
 		}
 
@@ -867,10 +867,10 @@ hash_find_xline(const char *name)
 	return NULL;
 }
 
-struct helpfile *
+struct cachefile *
 hash_find_help(const char *name, int flags)
 {
-	struct helpfile *hptr;
+	struct cachefile *hptr;
 	dlink_node *ptr;
 	unsigned int hashv;
 
@@ -883,7 +883,7 @@ hash_find_help(const char *name, int flags)
 	{
 		hptr = ptr->data;
 
-		if((irccmp(name, hptr->helpname) == 0) &&
+		if((irccmp(name, hptr->name) == 0) &&
 		   (hptr->flags & flags))
 			return hptr;
 	}

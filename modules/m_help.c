@@ -37,7 +37,7 @@
 #include "parse.h"
 #include "modules.h"
 #include "hash.h"
-#include "help.h"
+#include "cache.h"
 
 static int m_help(struct Client *, struct Client *, int, const char **);
 static int mo_help(struct Client *, struct Client *, int, const char **);
@@ -113,8 +113,8 @@ static void
 dohelp(struct Client *source_p, int flags, const char *topic)
 {
 	static const char ntopic[] = "index";
-	struct helpfile *hptr;
-	struct helpline *lineptr;
+	struct cachefile *hptr;
+	struct cacheline *lineptr;
 	dlink_node *ptr;
 	dlink_node *fptr;
 	const char *myline;
