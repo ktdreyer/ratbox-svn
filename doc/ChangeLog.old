@@ -1,3 +1,6 @@
+*** 20010104_34 by davidt
+Got rid of the insane list of MSG_* defines from msg.h
+
 *** 20010104_33 by toot
 added s_user.h in cleint.c to kill the compile warning
 
